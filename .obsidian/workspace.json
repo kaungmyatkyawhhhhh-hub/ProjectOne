@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "d30073991b250232",
+        "id": "7ae85d62be11fab5",
         "type": "tabs",
         "children": [
           {
-            "id": "84b5334e23ab8573",
+            "id": "d7b4200d91bc3cf1",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "00-START-HERE.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "00-START-HERE"
             }
           }
         ]
@@ -95,6 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "00-START-HERE.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,6 +118,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "00-START-HERE.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -155,6 +161,7 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "00-START-HERE.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -192,8 +199,16 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "84b5334e23ab8573",
+  "active": "d7b4200d91bc3cf1",
   "lastOpenFiles": [
+    "Projects/City Legends.md",
+    "Work.md",
+    "Projects",
+    "Preferences.md",
+    "Identity.md",
+    "CLAUDE.md",
+    "Active-Projects.md",
+    "00-START-HERE.md",
     "2026-10-09.md",
     "Untitled.canvas",
     "Welcome.md"
