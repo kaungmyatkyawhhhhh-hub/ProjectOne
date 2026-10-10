@@ -265,8 +265,12 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		local k = n:lower():gsub("[%s_%-]", "")
 		return k == "sw" or k:find("steeringwheel") ~= nil
 	end
+	-- some kits call it just "Wheel", inside Misc (road wheels live in "Wheels")
+	local function isMiscWheel(d: Instance): boolean
+		return d.Name:lower() == "wheel" and d.Parent ~= nil and d.Parent.Name:lower() == "misc"
+	end
 	for _, d in src:GetDescendants() do
-		if isSteerName(d.Name) then
+		if isSteerName(d.Name) or isMiscWheel(d) then
 			local nested = false
 			for _, r in steerRoots do
 				if d:IsDescendantOf(r) then
@@ -290,7 +294,10 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 					local rel = ds.CFrame:PointToObjectSpace(d.Position)
 					local sz = { d.Size.X, d.Size.Y, d.Size.Z }
 					table.sort(sz)
-					local round = sz[2] >= 0.8 and sz[3] <= 2.4 and sz[3] / sz[2] < 1.35 and sz[1] < sz[2] * 0.6
+					-- a flat disc, or a disc joined to its column (two sides equal, the third different)
+					local disc = sz[2] >= 0.8 and sz[3] <= 2.4 and sz[3] / sz[2] < 1.35 and sz[1] < sz[2] * 0.6
+					local onColumn = sz[1] >= 0.9 and sz[2] <= 2.0 and sz[2] / sz[1] < 1.15 and sz[3] <= 2.6 and sz[3] > sz[2] * 1.2
+					local round = disc or onColumn
 					if round and math.abs(rel.X) < 0.8 and rel.Y > 0.6 and rel.Y < 3.5 and rel.Z < -0.5 and rel.Z > -3.5 then
 						local score = math.abs(rel.X) + math.abs(rel.Z + 1.6) * 0.5
 						if score < bestScore then
@@ -451,9 +458,19 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 	if biggest then
 		local sz = biggest.Size
-		local axis = if sz.X <= sz.Y and sz.X <= sz.Z then biggest.CFrame.RightVector
-			elseif sz.Y <= sz.Z then biggest.CFrame.UpVector
-			else biggest.CFrame.LookVector
+		-- the turning axis is the side that differs most from the other two (thin disc, or long column)
+		local ex = { sz.X, sz.Y, sz.Z }
+		local vecs = { biggest.CFrame.RightVector, biggest.CFrame.UpVector, biggest.CFrame.LookVector }
+		local odd, oddScore = 1, -1
+		for i = 1, 3 do
+			local a2, b2 = ex[i % 3 + 1], ex[(i + 1) % 3 + 1]
+			local score = math.min(math.abs(ex[i] - a2), math.abs(ex[i] - b2))
+			if score > oddScore then
+				odd, oddScore = i, score
+			end
+		end
+		local axis = vecs[odd]
+		local discSize = math.max(ex[odd % 3 + 1], ex[(odd + 1) % 3 + 1])
 		if axis:Dot(f) < 0 then
 			axis = -axis
 		end
@@ -463,6 +480,10 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			b = b:Max(d.Position)
 		end
 		local center = (a + b) / 2
+		if ex[odd] > discSize and #steerParts == 1 then
+			-- wheel and column in one piece: the rim is at the driver's end
+			center -= axis * (ex[odd] / 2 - 0.2)
+		end
 		local mountWorld = CFrame.lookAt(center, center + axis)
 		local mountRel = frame:ToObjectSpace(mountWorld)
 		local mount = CFrame.new(mountRel.Position * scale) * mountRel.Rotation
@@ -472,9 +493,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			t.offset = mount:Inverse() * t.offset
 			table.insert(parts, t)
 		end
-		local dimsSorted = { sz.X, sz.Y, sz.Z }
-		table.sort(dimsSorted)
-		out.steer = { mount = mount, parts = parts, radius = dimsSorted[3] / 2 * scale * 0.9 }
+		out.steer = { mount = mount, parts = parts, radius = discSize / 2 * scale * 0.9 }
 	end
 
 	-- driver's eye: above the driver's seat, at 80% of the roof height there
