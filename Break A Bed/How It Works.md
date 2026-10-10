@@ -21,14 +21,14 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## Breaking a bed (or training)
 1. Walk up and press **E** (or tap the button on mobile). The server locks you in place in front of the bed.
 2. The camera zooms in from the side, the name tag hides, and the health panel, "Click to chop!" and **EXIT** appear.
-3. Each click or tap is a karate chop: the arm swings up and slams down. At most 4 chops a second (the server checks).
+3. Each click or tap is a karate chop: the arm swings up and slams down. At most about 8 chops a second (`GameConfig.ChopCooldown` = 0.12s; the server checks).
 4. The server lowers the bed's health by your damage and sends back the new health.
 5. At 0: you get the Cash, the bed is marked completed (saved), it splinters (only on your screen), cash pops out, and the COMPLETED ✅ sign appears. The bed respawns instantly at full health.
    - **First time you break that bed:** chopping stops, and after 1.4 seconds you're sent back to normal view (`GameConfig.FirstBreakExitDelay`).
    - **Bed already completed:** you stay in the break screen and keep breaking it for cash. The panel counts "Broken xN", and the hint says "Keep chopping for cash!".
 6. **EXIT** stops at any time.
 
-**Per player:** bed health is kept separately for each player on the server, and the splinter and respawn only happen on that player's screen. The real bed is never changed, so other players nearby always see a whole bed and break their own copy.
+**Per player / client-side:** bed health is kept separately for each player on the server. All break effects (flying pieces, wood chips, cash bills, the respawn blink, COMPLETED signs) are made by that player's own client in `Workspace.LocalFx`, which never reaches the server or other players. The real bed is never changed, so others always see a whole bed. Others only see your arm chopping. (Tested: right after a break the client had 31 pieces, the server had 0.)
 
 Training works the same way, except the item never breaks and every chop adds Strength.
 
