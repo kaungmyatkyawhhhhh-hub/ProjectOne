@@ -655,92 +655,54 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	end
 
 	if generic and imported then
-		-- the model's own steering wheel turns on our steering joint (or stays fixed without one)
-		local steerMotor = root:FindFirstChild("SteerMotor") :: Motor6D?
-		local hub = if steerMotor then steerMotor.Part1 else nil
+		-- the model's own steering wheel: welded still here; Driving turns it on the local player's car
 		local steer = imported.steer
+		local eyeRoot = if imported.eye then imported.eye - Vector3.new(0, height / 2, 0) else nil
 		if steer then
 			local mountRoot = root.CFrame:Inverse() * groundCF * steer.mount
-			if steerMotor and hub then
-				steerMotor.C0 = mountRoot
-				model:SetAttribute("SteerMount", mountRoot)
-				-- our driver's hands grip this wheel at 10 and 2; shoulders sit under the eye
-				local r = steer.radius
-				model:SetAttribute("ArmsFitted", true)
-				for side, ang in { L = math.rad(160), R = math.rad(20) } do
-					local gloveC0 = CFrame.new(r * math.cos(ang), r * math.sin(ang), 0.03) * CFrame.Angles(0, 0, ang)
-					for _, name in { "Glove" .. side, "Thumb" .. side } do
-						local g = model:FindFirstChild(name, true)
-						if g and g:IsA("BasePart") then
-							for _, c in g:GetChildren() do
-								if c:IsA("WeldConstraint") or c:IsA("Weld") then
-									c:Destroy()
-								end
-							end
-							local w = Instance.new("Weld")
-							w.Part0 = hub
-							w.Part1 = g
-							w.C0 = if name:sub(1, 5) == "Glove" then gloveC0 else gloveC0 * CFrame.new(0, if side == "L" then -0.18 else 0.18, 0.18)
-							w.Parent = g
-						end
-					end
-					model:SetAttribute("Grip" .. side, Vector3.new(r * 0.9 * math.cos(ang), r * 0.9 * math.sin(ang), 0.24))
-					if imported.eye then
-						local eyeRoot = imported.eye - Vector3.new(0, height / 2, 0)
-						local sx = if side == "L" then -1 else 1
-						local shoulder = eyeRoot + Vector3.new(sx * 0.62, -0.7, 0.43)
-						model:SetAttribute("Shoulder" .. side, shoulder)
-						-- arms long enough to reach this wheel
-						local grip = (mountRoot * CFrame.new(r * 0.9 * math.cos(ang), r * 0.9 * math.sin(ang), 0.24)).Position
-						local need = (grip - shoulder).Magnitude / 0.92
-						local u0 = (model:GetAttribute("UpperLen") :: number?) or 1.12
-						local f0 = (model:GetAttribute("ForeLen") :: number?) or 1.05
-						if need > u0 + f0 then
-							local k = need / (u0 + f0)
-							for _, seg in { "UpperArm", "ForeArm" } do
-								local part = model:FindFirstChild(seg .. side, true)
-								if part and part:IsA("BasePart") then
-									part.Size = Vector3.new(part.Size.X, part.Size.Y, (part.Size.Z - 0.12) * k + 0.12)
-								end
-							end
-							if side == "R" then
-								model:SetAttribute("UpperLen", u0 * k)
-								model:SetAttribute("ForeLen", f0 * k)
-							end
-						end
-					end
-				end
-			end
+			model:SetAttribute("SteerMount", mountRoot)
 			for i, t in steer.parts do
 				local p = t.part:Clone()
 				p.Name = "SkinSteer" .. i
 				p.CFrame = groundCF * steer.mount * t.offset
+				p:SetAttribute("SteerOffset", t.offset)
 				p.Parent = skin
 				local w = Instance.new("Weld")
-				w.Part0 = if hub then hub else root
+				w.Part0 = root
 				w.Part1 = p
-				w.C0 = if hub then t.offset else mountRoot * t.offset
+				w.C0 = mountRoot * t.offset
 				w.Parent = p
 			end
+			-- where Driving's arms grip (10 and 2) and where the shoulders sit
+			if eyeRoot then
+				local r = steer.radius
+				model:SetAttribute("SteerRadius", r)
+				for side, ang in { L = math.rad(160), R = math.rad(20) } do
+					local sx = if side == "L" then -1 else 1
+					model:SetAttribute("Grip" .. side, Vector3.new(r * 0.9 * math.cos(ang), r * 0.9 * math.sin(ang), 0.24))
+					model:SetAttribute("Shoulder" .. side, eyeRoot + Vector3.new(sx * 0.62, -0.7, 0.43))
+				end
+				model:SetAttribute("ArmsFitted", true)
+			end
 		end
-		-- live instrument cluster just past the wheel rim, facing the driver (Driving draws it)
-		if steer and not liteMode then
-			local r = steer.radius
+		-- live instrument cluster in the dash, just over the wheel rim, facing the driver (Driving draws it)
+		if eyeRoot and not liteMode then
+			local eyeW = root.CFrame * eyeRoot
+			local fwd = root.CFrame.LookVector
+			local r = if steer then steer.radius else 0.5
+			local wheelW = if steer then (groundCF * steer.mount).Position else eyeW + fwd * 1.9 - Vector3.yAxis * 0.9
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
-			cluster.Size = Vector3.new(r * 2.3, r * 0.85, 0.02)
+			cluster.Size = Vector3.new(r * 1.9, r * 0.68, 0.02)
 			cluster.Transparency = 1
 			cluster.CanCollide = false
 			cluster.CanQuery = false
 			cluster.CanTouch = false
 			cluster.Massless = true
 			cluster.CastShadow = false
-			local mountWorld = groundCF * steer.mount
-			-- level with the driver's view, above the rim and a little further into the dash
-			local pos = (mountWorld * CFrame.new(0, r * 1.05 + cluster.Size.Y / 2, -0.45)).Position
-			local towardDriver = -mountWorld.LookVector
-			towardDriver = Vector3.new(towardDriver.X, towardDriver.Y * 0.4, towardDriver.Z).Unit
-			cluster.CFrame = CFrame.lookAt(pos, pos - towardDriver) -- back face looks at the driver
+			-- seen just over the top of the rim: a bit past the wheel, at rim height
+			local pos = wheelW + fwd * 0.55 + Vector3.yAxis * (r * 0.95)
+			cluster.CFrame = CFrame.lookAt(pos, pos + (pos - eyeW).Unit) -- back face looks at the eye
 			cluster.Parent = skin
 			local w = Instance.new("WeldConstraint")
 			w.Part0 = root
@@ -877,9 +839,6 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		end
 		if not (d:GetAttribute("Ext") or ownInterior) then
 			return
-		end
-		if ownInterior and (d.Name:find("Arm[LR]$") or d.Name:find("^Glove") or d.Name:find("^Thumb")) and model:GetAttribute("ArmsFitted") then
-			return -- the driver's arms stay, gripping the model's own wheel
 		end
 		if ownInterior then
 			-- screens drawn on our hidden dash (old cluster, infotainment) go too

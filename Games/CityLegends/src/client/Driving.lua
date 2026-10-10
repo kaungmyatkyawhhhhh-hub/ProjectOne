@@ -76,6 +76,9 @@ type State = {
 	gaugeGear: TextLabel?,
 	gaugeBar: Frame?,
 	dashUpdate: ((number, string, number) -> ())?,
+	-- imported cars: their steering wheel and our arms, posed every frame on this client
+	localSteer: { { part: BasePart, offset: CFrame } },
+	localArms: { { upper: BasePart, fore: BasePart, glove: BasePart, shoulder: Vector3, grip: Vector3, pole: Vector3, upperLen: number, foreLen: number } },
 	camPos: Vector3,
 	camLook: Vector3,
 	fov: number,
@@ -431,6 +434,60 @@ function Driving.attach(model: Model)
 	cabinLight.Parent = root
 
 	local gSpeed, gGear, gBar = buildGauges(model)
+	-- imported cars: pose their steering wheel and our arms ourselves (anchored, local only)
+	local localSteer = {}
+	local localArms = {}
+	local made: { Instance } = {}
+	for _, d in model:GetDescendants() do
+		local off = d:GetAttribute("SteerOffset")
+		if d:IsA("BasePart") and typeof(off) == "CFrame" then
+			for _, w in d:GetChildren() do
+				if w:IsA("Weld") or w:IsA("WeldConstraint") then
+					w:Destroy()
+				end
+			end
+			d.Anchored = true
+			table.insert(localSteer, { part = d, offset = off })
+		end
+	end
+	if model:GetAttribute("ArmsFitted") then
+		local skin = model:FindFirstChild("Skin") or model
+		local mount = model:GetAttribute("SteerMount") :: CFrame
+		local function armPart(name: string, size: Vector3, color: Color3, material: Enum.Material): BasePart
+			local p = Instance.new("Part")
+			p.Name = name
+			p.Size = size
+			p.Color = color
+			p.Material = material
+			p.Anchored = true
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.CastShadow = false
+			p.Parent = skin
+			table.insert(made, p)
+			return p
+		end
+		for _, side in { "L", "R" } do
+			local shoulder = model:GetAttribute("Shoulder" .. side) :: Vector3
+			local grip = model:GetAttribute("Grip" .. side) :: Vector3
+			-- long enough to reach the wheel with a slight bend
+			local reach = (shoulder - (mount * CFrame.new(grip)).Position).Magnitude
+			local k = math.max(1, reach / (0.9 * 2.17))
+			local upperLen, foreLen = 1.12 * k, 1.05 * k
+			local jacket = Color3.fromRGB(34, 34, 40)
+			table.insert(localArms, {
+				upper = armPart("LocalUpperArm" .. side, Vector3.new(0.36, 0.36, upperLen + 0.12), jacket, Enum.Material.Fabric),
+				fore = armPart("LocalForeArm" .. side, Vector3.new(0.32, 0.32, foreLen + 0.12), jacket, Enum.Material.Fabric),
+				glove = armPart("LocalGlove" .. side, Vector3.new(0.3, 0.34, 0.42), Color3.fromRGB(16, 16, 18), Enum.Material.Leather),
+				shoulder = shoulder,
+				grip = grip,
+				pole = Vector3.new(if side == "L" then -0.8 else 0.8, -1, 0.2),
+				upperLen = upperLen,
+				foreLen = foreLen,
+			})
+		end
+	end
 	-- imported cars: the live cluster behind their own wheel
 	local dashPanel = model:FindFirstChild("DashCluster", true)
 	local dashUpdate = if dashPanel and dashPanel:IsA("BasePart") then DashGauges.build(dashPanel) else nil
@@ -473,6 +530,8 @@ function Driving.attach(model: Model)
 		gaugeGear = gGear,
 		gaugeBar = gBar,
 		dashUpdate = dashUpdate,
+		localSteer = localSteer,
+		localArms = localArms,
 		camPos = root.Position + Vector3.new(0, 8, 20),
 		camLook = root.Position,
 		fov = Config.Camera.ChaseFov,
@@ -738,6 +797,22 @@ function Driving.render(dt: number)
 	local rot = -s.steer * s.steerMaxRot
 	if s.steerMotor then
 		s.steerMotor.Transform = CFrame.Angles(0, 0, rot)
+	end
+	if s.steerMount and #s.localSteer > 0 then
+		local wheelWorld = root.CFrame * s.steerMount * CFrame.Angles(0, 0, rot)
+		for _, ls in s.localSteer do
+			ls.part.CFrame = wheelWorld * ls.offset
+		end
+	end
+	if s.steerMount and #s.localArms > 0 then
+		local wheelCF = s.steerMount * CFrame.Angles(0, 0, rot)
+		for _, arm in s.localArms do
+			local handCF = wheelCF * CFrame.new(arm.grip)
+			local upperCF, foreCF = CarBuilder.solveArm(arm.shoulder, handCF.Position, arm.upperLen, arm.foreLen, arm.pole)
+			arm.upper.CFrame = root.CFrame * upperCF
+			arm.fore.CFrame = root.CFrame * foreCF
+			arm.glove.CFrame = root.CFrame * handCF
+		end
 	end
 	if s.steerMount then
 		local wheelCF = s.steerMount * CFrame.Angles(0, 0, rot)
