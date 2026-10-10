@@ -5,6 +5,7 @@
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## Current
+- **2026-10-10: The map is real models saved in the place** (owner's request), in Workspace folders Path, Beds, TrainingArea, Upgrades, Signs (plus Scenery). Scripts load them instead of building them. One template per bed in ServerStorage brings a bed back if it's ever missing. Breaking stays per player (only on your screen), so templates are a safety net. COMPLETED signs are real models too; each player sees only their own. Sign numbers still come from `GameConfig`.
 - **2026-10-10: Cartoon style pass.** Kept the FredokaOne font (bold, rounded, the usual simulator look) and added thick dark outlines to all text. Short numbers use Qa/Qi and show in Roblox's player list too. Punches alternate arms. Bed breaks got more cash, sparkles and confetti. Saving got retries and quicker saves. The HUD shrinks on phones.
 - **2026-10-10: Robux shop** on the left of the screen: +1 / +3 / +9 Level packs (suggested R$19 / R$49 / R$129) and a permanent x2 Strength game pass (suggested R$199). A level pack sets Strength to exactly what the new Level needs. Prices are suggestions; the real ones come from Roblox once the products exist.
 - **2026-10-10: Critical hits.** 1 in 10 chops is a CRITICAL!: 3× damage and bonus Cash on the spot (10% of that bed's break reward, at least $1), with orange text and a harder hit.
@@ -24,7 +25,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-10: Beds respawn instantly** (no delay). The first break of a bed sends you back to normal view. After that, entering it keeps you in the break screen so you can break it over and over for cash until EXIT. (Replaces the earlier 5-second respawn.)
 - **2026-10-10: Faster chopping.** Cooldown cut from 0.25s to 0.12s (about 8 chops a second); the arm swing was sped up to match.
 - **2026-10-10: Damage = 1 + Strength ÷ 10.** Still needs balancing in real play.
-- **2026-10-10: Everything is built from code.** No hand-built models or animation assets. The karate chop is animated in code.
+- **2026-10-10: Everything is built from code.** No hand-built models or animation assets. The karate chop is animated in code. *(Later the same day the map was baked into real models; see above. Effects and animations are still code.)*
 - **2026-10-10: The game lives in the Studio place "Break A Bed"** (placeId `116443177548785`). Claude puts scripts in through the Roblox Studio MCP.
 - **2026-10-10: Notes go in this vault** (`ProjectOne`), folder `Break A Bed` only. City Legends notes stay in `City Legends`.
 
