@@ -421,9 +421,9 @@ function Driving.attach(model: Model)
 	end
 
 	local cabinLight = Instance.new("PointLight")
-	cabinLight.Color = Color3.fromRGB(150, 110, 255)
-	cabinLight.Brightness = 0.7
-	cabinLight.Range = 7
+	cabinLight.Color = Color3.fromRGB(255, 244, 228) -- warm dome light so the cabin is readable at night
+	cabinLight.Brightness = 1.6
+	cabinLight.Range = 9
 	cabinLight.Shadows = false
 	cabinLight.Enabled = false
 	cabinLight.Parent = root

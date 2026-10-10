@@ -245,14 +245,14 @@ function CityBuilder.setupLighting()
 		(Lighting :: any).PrioritizeLightingQuality = true
 	end)
 	Lighting.ClockTime = 0
-	Lighting.Brightness = 2
+	Lighting.Brightness = 2.5
 	Lighting.GlobalShadows = true
 	Lighting.ShadowSoftness = 0.25
-	Lighting.Ambient = Color3.fromRGB(34, 36, 52)
-	Lighting.OutdoorAmbient = Color3.fromRGB(78, 84, 118)
-	Lighting.EnvironmentDiffuseScale = 0.45
+	Lighting.Ambient = Color3.fromRGB(96, 100, 118) -- lifts shadowed and covered spots, like car cabins
+	Lighting.OutdoorAmbient = Color3.fromRGB(132, 138, 168)
+	Lighting.EnvironmentDiffuseScale = 0.8
 	Lighting.EnvironmentSpecularScale = 0.9
-	Lighting.ExposureCompensation = 0
+	Lighting.ExposureCompensation = 0.45
 	Lighting.ColorShift_Top = Color3.fromRGB(110, 120, 170)
 	Lighting.ColorShift_Bottom = Color3.fromRGB(10, 10, 20)
 
@@ -286,7 +286,7 @@ function CityBuilder.setupLighting()
 	bloom.Parent = Lighting
 
 	local cc = Instance.new("ColorCorrectionEffect")
-	cc.Brightness = 0
+	cc.Brightness = 0.04
 	cc.Contrast = 0.1
 	cc.Saturation = 0.06
 	cc.TintColor = Color3.fromRGB(242, 244, 255)
