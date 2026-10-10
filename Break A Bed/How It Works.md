@@ -35,7 +35,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## Breaking a bed (or training)
 1. Walk up and press **E** (or tap the button on mobile). The server locks you in place in front of the bed.
 2. The camera zooms in from the side, the name tag hides, and the health panel, "Click to chop!" and **EXIT** appear.
-3. Each click or tap is a karate chop: the arm swings up and slams down. At most about 8 chops a second (`GameConfig.ChopCooldown` = 0.12s; the server checks).
+3. Each click or tap is the next punch of the combo: **left hook → right hook → uppercut**, then repeat. Hooks swing in from the side with the body twisting; the uppercut dips low and drives up with a little hop, hits harder and throws debris upward. The bed's shake and the damage number appear the moment the fist lands. At most about 8 punches a second (`GameConfig.ChopCooldown` = 0.12s; the server checks).
 4. The server lowers the bed's health by your damage and sends back the new health.
 5. At 0: you get the Cash, the bed is marked completed (saved), it splinters (only on your screen), cash pops out, and the COMPLETED ✅ sign appears. The bed respawns instantly at full health.
    - **First time you break that bed:** chopping stops, and after 1.4 seconds you're sent back to normal view (`GameConfig.FirstBreakExitDelay`).
@@ -85,7 +85,10 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## Look, numbers and phones
 - **Text:** the bold, rounded FredokaOne font everywhere, with a thick dark outline that grows with the text size (big numbers get big outlines).
 - **Short numbers:** 1.14M, 1.9T, 392Qa (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc). Roblox's own player list shows them short too: the real numbers live in a hidden `Stats` folder, and `leaderstats` only shows the short text.
-- **Punching:** a one-two combo. Punches alternate left and right arms, and the upper body twists into each one.
+- **Punching:** the left hook → right hook → uppercut combo, on beds and training posts alike.
+- **UI style:** chunky buttons (coloured top on a darker bottom edge, bounce on hover, squish when pressed), navy panels, one bold font with thick outlines, and drawn icons for cash (green note), strength (yellow dumbbell), lock and gift. No emoji anywhere, in the HUD or on world signs. Green = cash, yellow = strength, red = exit/errors.
+- **SPAWN button:** only shows on the bed path. An invisible part, `Workspace.Path.BedPathZone`, covers the path (move or resize it in Studio to change the area). The button fades in when you walk onto the path, fades out when you leave, and hides in the break screen.
+- **No lag when breaking fast:** all effects are only on your screen. Debris chunks, bills and coins are reused from capped pools (36 / 24 / 12), never collide with each other and vanish in about a second. When beds break several times in 2 seconds, effects automatically get smaller (fewer pieces and bills, no sparkles/flash). At most 10 floating numbers show at once.
 - **Bed breaks:** 18 flying cash bills in three shades of green, spinning gold coins, gold sparkles, party confetti, dust, a white flash and the "+$X" pop-up.
 - **Phones:** tap to chop or punch, and prompts show a tap button. The HUD (stats, SPAWN, shop, gift button, break-mode panel) shrinks on short screens, down to 65%, so it stays clear of the thumbstick and jump button.
 

@@ -24,9 +24,10 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **🏆 TOP Total Damage Dealt** sign on the right of the spawn plaza: top 10 across all servers, refreshed every 3 minutes, with your own total.
 - **🎁 Group Reward** button on the right of the screen: join the group, claim +10% Strength from punching forever. Needs the group id (`GameConfig.GroupId`).
 - **Robux shop** on the left of the screen: +1 / +3 / +9 Level packs and a permanent x2 Strength game pass. Needs the product and pass ids.
-- **SPAWN button** at the top: teleports you back to spawn from anywhere, even mid-break.
-- **Cartoon style:** bold rounded text with thick outlines; short numbers everywhere (1.14M, 1.9T, 392Qa), including Roblox's player list.
-- **Punching:** left-right combo with a body twist. **Bed breaks:** flying cash bills, coins, gold sparkles, confetti.
+- **SPAWN button** at the top: only on the bed path (fades in/out), hidden in the break screen; teleports you back to spawn.
+- **Look:** chunky buttons with depth, navy panels, one bold font with thick outlines, drawn icons (cash, strength, lock, gift), no emoji; short numbers everywhere (1.14M, 1.9T, 392Qa), including Roblox's player list.
+- **Punching:** left hook → right hook → uppercut combo. **Bed breaks:** chunks, cash bills, coins, sparkles, confetti, all pooled and capped so fast breaking doesn't lag.
+- **Scripts added:** `Icons` (ReplicatedStorage), `UIKit`, `Fx`, `Combo` (StarterPlayerScripts).
 - **Mobile:** tap controls; the HUD shrinks on phone screens.
 - **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (🔊 mute button), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.
