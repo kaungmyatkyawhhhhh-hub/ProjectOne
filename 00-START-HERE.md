@@ -10,6 +10,7 @@ This vault is my personal context for Claude: who I am, what I'm working on and 
 
 ## Other notes
 - [[Projects/City Legends]]: my Roblox driving game
+- [[Tools/Token-Saving-Plugins]]: token-saving plugins (what is installed, what was skipped)
 
 ## Rules for Claude
 - Read the four notes above before replying to anything. Read any other note that's relevant.
