@@ -5,13 +5,13 @@ A Roblox night-city driving game. The code is in GitHub repo `ClaudeOne`; its `C
 ## Features so far
 - **City:** a big night city with traffic that stops at red lights, and a tunnel intro cutscene ("CITY LEGENDS").
 - **Driving and money:** you earn money by driving and by cutting up traffic, with combos. You buy cars in the garage.
-- **Cars:** 15 cars across the sedan, coupe, SUV, supercar and hypercar classes, with fictional names.
+- **Cars:** 55 cars in 3 tiers (Starter, Mid, High), remade 2026-10-10 from the owner's list of real cars. Names are close look-alikes (e.g. "BNW M3 F80", "Toyoka Land Cruzer 200", "Lambrini Urus"). Free starter: Suzaki Swiff (`suzaki_swift`).
 - **HUD:** a Highway Legends-style HUD with level/XP bar, rev counter, cash, side buttons and a daily gift.
 - **Weather:** a rain cycle with wet roads, plus blue exhaust flames.
 - **Sounds and lighting:** a full soundscape and night lighting.
 
 ## Decisions
-- Car names stay fictional (no real brands or badges).
+- Car names stay fictional but close enough to recognise (no real brands or badges).
 - The cars Claude generated from code didn't look good enough. Plan: use real car models from the Creator Store, inserted by hand in Studio. Delete their scripts and put them in `ReplicatedStorage/CarModels`, named after the car id.
 - No automatic downloading of Creator Store models by the game.
 - Money can be set from the server console: `game.Players.NAME:SetAttribute("SetCash", amount)` (or `"AddCash"`). Use the Studio command bar in Server mode, or the F9 server console.
