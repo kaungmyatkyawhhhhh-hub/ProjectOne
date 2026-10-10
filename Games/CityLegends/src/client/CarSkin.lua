@@ -523,6 +523,49 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 	end
 
+	-- no separate steering wheel in the model (fused into one interior mesh, or none at all):
+	-- build our own round wheel where a real one sits, a short reach in front of the driver
+	if not out.steer and out.eye then
+		local R, tube = 0.56, 0.14 -- real wheel: ~37 cm across, ~4.5 cm thick grip
+		local center = out.eye + Vector3.new(0, -1.05, -1.75)
+		local tilt = math.rad(24)
+		local mount = CFrame.lookAt(center, center + Vector3.new(0, -math.sin(tilt), -math.cos(tilt)))
+		local function piece(shape: Enum.PartType, size: Vector3, color: Color3, material: Enum.Material): Part
+			local p = Instance.new("Part")
+			p.Shape = shape
+			p.Size = size
+			p.Color = color
+			p.Material = material
+			p.Anchored = false
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.Massless = true
+			p.CastShadow = false
+			return p
+		end
+		local leather = Color3.fromRGB(24, 24, 27)
+		local parts: { Template } = {}
+		local segs = 28
+		for i = 0, segs - 1 do
+			local ang = i / segs * math.pi * 2
+			local seg = piece(Enum.PartType.Cylinder, Vector3.new(2 * math.pi * R / segs * 1.18, tube, tube), leather, Enum.Material.Leather)
+			table.insert(parts, { part = seg :: any, offset = CFrame.new(R * math.cos(ang), R * math.sin(ang), 0) * CFrame.Angles(0, 0, ang + math.pi / 2) })
+		end
+		-- three spokes (left, right, bottom) and a round airbag hub
+		for _, ang in { 0, math.pi, -math.pi / 2 } do
+			local spoke = piece(Enum.PartType.Block, Vector3.new(R * 0.9, 0.13, 0.07), Color3.fromRGB(46, 46, 52), Enum.Material.SmoothPlastic)
+			table.insert(parts, { part = spoke :: any, offset = CFrame.Angles(0, 0, ang) * CFrame.new(R * 0.5, 0, 0.03) })
+		end
+		local hub = piece(Enum.PartType.Cylinder, Vector3.new(0.16, R * 0.78, R * 0.78), Color3.fromRGB(20, 20, 22), Enum.Material.SmoothPlastic)
+		table.insert(parts, { part = hub :: any, offset = CFrame.new(0, 0, 0.06) * CFrame.Angles(0, math.pi / 2, 0) })
+		local badge = piece(Enum.PartType.Cylinder, Vector3.new(0.02, R * 0.22, R * 0.22), Color3.fromRGB(196, 200, 208), Enum.Material.Metal)
+		table.insert(parts, { part = badge :: any, offset = CFrame.new(0, 0, 0.15) * CFrame.Angles(0, math.pi / 2, 0) })
+		local column = piece(Enum.PartType.Cylinder, Vector3.new(0.9, 0.26, 0.26), leather, Enum.Material.SmoothPlastic)
+		table.insert(parts, { part = column :: any, offset = CFrame.new(0, 0, -0.5) * CFrame.Angles(0, math.pi / 2, 0) })
+		out.steer = { mount = mount, parts = parts, radius = R * 0.95 }
+	end
+
 	-- gauges: look from the eye through the top half of the wheel and stop at the first
 	-- dash surface past it (that's where the car's own instrument cluster is)
 	if out.eye then
