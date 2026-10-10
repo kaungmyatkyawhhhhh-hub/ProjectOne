@@ -498,8 +498,24 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 
 	-- driver's eye: above the driver's seat, at 80% of the roof height there
 	local seatPart = seat or src:FindFirstChildWhichIsA("Seat", true)
-	if seatPart then
-		local sp = frame:PointToObjectSpace(seatPart.Position)
+	local sp: Vector3? = if seatPart then frame:PointToObjectSpace(seatPart.Position) else nil
+	if not sp then
+		-- no seat in the model: put the driver where a real one sits, left of centre
+		-- (left-hand drive) and a little behind the front axle (sports coupe: ~1.35 m)
+		local m = 3 / scale -- model studs per metre (game is 3 studs per metre)
+		local axleZ, n = 0, 0
+		for _, g in groups do
+			local c = frame:PointToObjectSpace(g.center)
+			if c.Z < 0 then
+				axleZ += c.Z
+				n += 1
+			end
+		end
+		if n > 0 then
+			sp = Vector3.new(-0.37 * m, 0.35 * m, axleZ / n + 1.35 * m)
+		end
+	end
+	if sp then
 		local roof = 0
 		for _, d in visible do
 			if inWheel[d] then
