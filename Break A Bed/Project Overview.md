@@ -20,6 +20,9 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
   - **First time:** you go back to normal view automatically.
   - **Already completed:** you stay in the break screen and can keep breaking it for cash until **EXIT**.
 - **Upgrade boards** on the left of the spawn plaza: ⚡ **Training Speed** (multiplies the Strength from every punch, x1.00 → x1.15 → …) and 👟 **Walk Speed** (16 → 18 → …). Each board shows your current → next value and the price (red when you can't afford it). Step on the green pad in front to buy a level; click while standing on it to buy more. Not enough cash shows "Not enough money" in red.
+- **Critical hits:** 1 in 10 chops is a **CRITICAL!** (orange text, 3× damage, bonus Cash).
+- **🏆 TOP Total Damage Dealt** sign on the right of the spawn plaza: top 10 across all servers, refreshed every 3 minutes, with your own total.
+- **🎁 Group Reward** button on the right of the screen: join the group, claim +10% Strength from punching forever. Needs the group id (`GameConfig.GroupId`).
 - **SPAWN button** at the top: teleports you back to spawn from anywhere, even mid-break.
 - **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (🔊 mute button), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.
