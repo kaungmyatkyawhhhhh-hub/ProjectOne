@@ -505,7 +505,6 @@ function Driving.attach(model: Model)
 		end
 	end
 	if model:GetAttribute("ArmsFitted") then
-		local skin = model:FindFirstChild("Skin") or model
 		local mount = model:GetAttribute("SteerMount") :: CFrame
 		local sides = {}
 		for _, side in { "L", "R" } do
@@ -544,10 +543,9 @@ function Driving.attach(model: Model)
 				local p = rig:FindFirstChild(n)
 				return if p and p:IsA("BasePart") then p.Size.Y else 1
 			end
-			local armLen = len("LeftUpperArm") + len("LeftLowerArm") + len("LeftHand") * 0.5
-			local reach = math.max(sides[1].reach, sides[2].reach)
+			-- real arm size: upper arm ~30 cm = 0.9 studs (3 studs per metre)
 			pcall(function()
-				rig:ScaleTo(math.clamp(reach / (0.92 * armLen), 0.6, 1.8))
+				rig:ScaleTo(math.clamp(0.9 / len("LeftUpperArm"), 0.4, 1.2))
 			end)
 			local keep = { LeftUpperArm = true, LeftLowerArm = true, LeftHand = true, RightUpperArm = true, RightLowerArm = true, RightHand = true }
 			for _, d in rig:GetDescendants() do
@@ -564,12 +562,21 @@ function Driving.attach(model: Model)
 					d.Transparency = 1
 				end
 			end
-			rig.Parent = skin
+			-- kept out of the car model (and out of physics and raycasts): only this client sees it
+			rig.Parent = workspace.CurrentCamera
 			local cur = state
 			if not (cur and cur.model == model) then
 				rig:Destroy()
 				return
 			end
+			model.Destroying:Connect(function()
+				rig:Destroy()
+			end)
+			table.insert(cur.connections, model.AncestryChanged:Connect(function()
+				if not model:IsDescendantOf(workspace) then
+					rig:Destroy()
+				end
+			end))
 			for _, sd in sides do
 				local pre = if sd.side == "L" then "Left" else "Right"
 				local upper = rig:FindFirstChild(pre .. "UpperArm") :: BasePart

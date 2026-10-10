@@ -681,10 +681,30 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 					local pv = frame:PointToObjectSpace(pivotPos) * scale
 					local eyeG = out.eye :: Vector3
 					local pivot = CFrame.lookAt(pv, pv + (pv - eyeG).Unit) -- +Z looks at the driver
-					local t = tmpl(d, Vector3.zero)
-					t.offset = pivot:Inverse() * t.offset
+					-- a slim red needle from the hub, pointing where the model's needle rests
+					local tip = pivot:PointToObjectSpace(frame:PointToObjectSpace(d.Position) * scale)
+					local rest = Vector3.new(tip.X, tip.Y, 0)
+					local len: number
+					if rest.Magnitude > 0.02 then
+						len = rest.Magnitude * 2
+						rest = rest.Unit
+					else
+						len = math.max(d.Size.X, d.Size.Y, d.Size.Z) * scale
+						rest = Vector3.new(-0.7, -0.7, 0).Unit -- needle at rest: about 7 o'clock
+					end
+					len = math.clamp(len, 0.12, 0.6)
+					local needle = Instance.new("Part")
+					needle.Size = Vector3.new(0.025, 0.025, len)
+					needle.Color = Color3.fromRGB(255, 50, 40)
+					needle.Material = Enum.Material.Neon
+					needle.CanCollide = false
+					needle.CanQuery = false
+					needle.CanTouch = false
+					needle.Massless = true
+					needle.CastShadow = false
+					local offset = CFrame.lookAt(rest * len / 2 + Vector3.new(0, 0, 0.01), rest * len + Vector3.new(0, 0, 0.01))
 					gaugeOf[d] = true
-					table.insert(gauges, { kind = kind, pivot = pivot, parts = { t } })
+					table.insert(gauges, { kind = kind, pivot = pivot, parts = { { part = needle, offset = offset } } })
 				end
 			end
 		end
