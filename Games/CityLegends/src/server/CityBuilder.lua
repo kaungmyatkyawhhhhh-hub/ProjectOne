@@ -187,8 +187,9 @@ end
 ---------------------------------------------------------------------
 local WET = Config.Graphics.WetRoads
 -- wet roads: dark, smooth and slightly reflective so street lights leave glossy highlights
-local ASPHALT = if WET then Color3.fromRGB(20, 20, 24) else Color3.fromRGB(30, 30, 34)
-local ROAD_MAT = if WET then Enum.Material.SmoothPlastic else Enum.Material.Asphalt
+-- real asphalt texture either way; wet roads are a touch darker and glossier
+local ASPHALT = if WET then Color3.fromRGB(38, 38, 42) else Color3.fromRGB(48, 48, 52)
+local ROAD_MAT = Enum.Material.Asphalt
 local ROAD_OPTS = { reflectance = if WET then 0.05 else 0 }
 local SIDEWALK = Color3.fromRGB(78, 78, 84)
 local CURB_COLOR = Color3.fromRGB(110, 110, 116)

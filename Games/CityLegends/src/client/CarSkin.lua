@@ -41,7 +41,7 @@ type Imported = {
 	-- their own look and each corner's wheel parts ride on our wheel
 	generic: { [string]: GenericWheel }?,
 	-- the model's own steering wheel (turns with the steering) and driver's eye, in ground space
-	steer: { mount: CFrame, parts: { Template } }?,
+	steer: { mount: CFrame, parts: { Template }, radius: number }?,
 	eye: Vector3?,
 }
 type Look = { material: Enum.Material, color: Color3?, reflectance: number, transparency: number, shadow: boolean }
@@ -276,6 +276,31 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			end
 		end
 	end
+	-- nothing named: the round, thin part right in front of the driver's seat
+	if #steerRoots == 0 then
+		local ds = src:FindFirstChild("DriveSeat", true)
+		if ds and ds:IsA("BasePart") then
+			local best: BasePart? = nil
+			local bestScore = math.huge
+			for _, d in src:GetDescendants() do
+				if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
+					local rel = ds.CFrame:PointToObjectSpace(d.Position)
+					local sz = { d.Size.X, d.Size.Y, d.Size.Z }
+					table.sort(sz)
+					local round = sz[2] >= 0.8 and sz[3] <= 2.4 and sz[3] / sz[2] < 1.35 and sz[1] < sz[2] * 0.6
+					if round and math.abs(rel.X) < 0.8 and rel.Y > 0.6 and rel.Y < 3.5 and rel.Z < -0.5 and rel.Z > -3.5 then
+						local score = math.abs(rel.X) + math.abs(rel.Z + 1.6) * 0.5
+						if score < bestScore then
+							best, bestScore = d, score
+						end
+					end
+				end
+			end
+			if best then
+				table.insert(steerRoots, best)
+			end
+		end
+	end
 	local function inSteer(d: Instance): boolean
 		for _, r in steerRoots do
 			if d == r or d:IsDescendantOf(r) then
@@ -444,7 +469,9 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			t.offset = mount:Inverse() * t.offset
 			table.insert(parts, t)
 		end
-		out.steer = { mount = mount, parts = parts }
+		local dimsSorted = { sz.X, sz.Y, sz.Z }
+		table.sort(dimsSorted)
+		out.steer = { mount = mount, parts = parts, radius = dimsSorted[3] / 2 * scale * 0.9 }
 	end
 
 	-- driver's eye: above the driver's seat, at 80% of the roof height there
@@ -637,6 +664,52 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			if steerMotor and hub then
 				steerMotor.C0 = mountRoot
 				model:SetAttribute("SteerMount", mountRoot)
+				-- our driver's hands grip this wheel at 10 and 2; shoulders sit under the eye
+				local r = steer.radius
+				model:SetAttribute("ArmsFitted", true)
+				for side, ang in { L = math.rad(160), R = math.rad(20) } do
+					local gloveC0 = CFrame.new(r * math.cos(ang), r * math.sin(ang), 0.03) * CFrame.Angles(0, 0, ang)
+					for _, name in { "Glove" .. side, "Thumb" .. side } do
+						local g = model:FindFirstChild(name, true)
+						if g and g:IsA("BasePart") then
+							for _, c in g:GetChildren() do
+								if c:IsA("WeldConstraint") or c:IsA("Weld") then
+									c:Destroy()
+								end
+							end
+							local w = Instance.new("Weld")
+							w.Part0 = hub
+							w.Part1 = g
+							w.C0 = if name:sub(1, 5) == "Glove" then gloveC0 else gloveC0 * CFrame.new(0, if side == "L" then -0.18 else 0.18, 0.18)
+							w.Parent = g
+						end
+					end
+					model:SetAttribute("Grip" .. side, Vector3.new(r * 0.9 * math.cos(ang), r * 0.9 * math.sin(ang), 0.24))
+					if imported.eye then
+						local eyeRoot = imported.eye - Vector3.new(0, height / 2, 0)
+						local sx = if side == "L" then -1 else 1
+						local shoulder = eyeRoot + Vector3.new(sx * 0.62, -0.7, 0.43)
+						model:SetAttribute("Shoulder" .. side, shoulder)
+						-- arms long enough to reach this wheel
+						local grip = (mountRoot * CFrame.new(r * 0.9 * math.cos(ang), r * 0.9 * math.sin(ang), 0.24)).Position
+						local need = (grip - shoulder).Magnitude / 0.92
+						local u0 = (model:GetAttribute("UpperLen") :: number?) or 1.12
+						local f0 = (model:GetAttribute("ForeLen") :: number?) or 1.05
+						if need > u0 + f0 then
+							local k = need / (u0 + f0)
+							for _, seg in { "UpperArm", "ForeArm" } do
+								local part = model:FindFirstChild(seg .. side, true)
+								if part and part:IsA("BasePart") then
+									part.Size = Vector3.new(part.Size.X, part.Size.Y, (part.Size.Z - 0.12) * k + 0.12)
+								end
+							end
+							if side == "R" then
+								model:SetAttribute("UpperLen", u0 * k)
+								model:SetAttribute("ForeLen", f0 * k)
+							end
+						end
+					end
+				end
 			end
 			for i, t in steer.parts do
 				local p = t.part:Clone()
@@ -779,6 +852,9 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		end
 		if not (d:GetAttribute("Ext") or ownInterior) then
 			return
+		end
+		if ownInterior and (d.Name:find("Arm[LR]$") or d.Name:find("^Glove") or d.Name:find("^Thumb")) and model:GetAttribute("ArmsFitted") then
+			return -- the driver's arms stay, gripping the model's own wheel
 		end
 		local isWheel = d.Name:sub(1, 5) == "Wheel" and d.Parent == model
 		if destroyReplaced and d:GetAttribute("Ext") and not isWheel and not d:FindFirstChildWhichIsA("Light") then
