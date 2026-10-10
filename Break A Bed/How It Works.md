@@ -12,6 +12,12 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Spawn is at the middle. The path runs away from spawn and the training area is off to the side.
 - You stand on the right-hand side of a bed to chop it. The COMPLETED sign goes on its left.
 
+## Look and feel
+- `Environment` sets up the lighting (afternoon sun, haze, bloom, sun rays, a slightly warm color grade, clouds), a grass field with trees and bushes, and the brick spawn plaza. The spawn pad is made invisible and flush with the plaza, with no force-field bubble.
+- Plain dirt (not grass) goes under the path, plaza and training floor, because Roblox's 3D grass blades poke through thin floors.
+- Sounds: real chop, wood-break, cash, level-up and click sounds from the Creator Store, plus background music. The 🔊 button next to SPAWN mutes the music. Sound ids are in `GameConfig.Sounds`.
+- Every hit: the bed jolts and wobbles, dust puffs, the camera kicks. Every break: big splinters, dust cloud, white screen flash, flying cash and gold coins.
+
 ## Strength, Level and Cash
 - **Strength** goes up by the training item's amount on every chop.
 - **Level** is worked out from Strength. Each level needs about 35% more Strength than the last (Level 2 at 4, Level 10 at 139, Level 20 at 3K, Level 50 at 24M), so levels keep coming all the way into the trillions. A "LEVEL UP!" banner shows when it goes up.

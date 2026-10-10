@@ -20,6 +20,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
   - **First time:** you go back to normal view automatically.
   - **Already completed:** you stay in the break screen and can keep breaking it for cash until **EXIT**.
 - **SPAWN button** at the top: teleports you back to spawn from anywhere, even mid-break.
+- **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (🔊 mute button), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.
 
 ## Scripts (where they are in Studio)
@@ -28,6 +29,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 |---|---|---|---|
 | `GameConfig` | ModuleScript | ReplicatedStorage | `src/shared/GameConfig.luau` |
 | `WorldBuilder` | ModuleScript | ServerScriptService | `src/server/WorldBuilder.luau` |
+| `Environment` | ModuleScript | ServerScriptService | `src/server/Environment.luau` |
 | `GameServer` | Script | ServerScriptService | `src/server/GameServer.server.luau` |
 | `GameClient` | LocalScript | StarterPlayer › StarterPlayerScripts | `src/client/GameClient.client.luau` |
 
