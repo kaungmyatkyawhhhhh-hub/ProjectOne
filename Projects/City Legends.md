@@ -1,6 +1,6 @@
 # City Legends
 
-A Roblox night-city driving game. The code is in GitHub repo `ClaudeOne`; its `CLAUDE.md` has the full technical notes.
+A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
 ## Features so far
 - **City:** a big night city with traffic that stops at red lights, and a tunnel intro cutscene ("CITY LEGENDS").
