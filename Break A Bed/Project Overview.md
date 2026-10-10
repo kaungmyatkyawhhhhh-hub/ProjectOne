@@ -11,7 +11,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 
 ## Features
 - **Two areas:** a training area next to spawn and a long fenced path of 25 beds.
-- **Training:** walk up to a training item, press **E** (or tap the button on mobile) to **Train**, then click. Every chop gives Strength. 12 items, from the free Pillow to the Black Hole Cube. Better items cost Cash and give more Strength per chop.
+- **Training:** 17 training posts, each on its own colored glowing pad. Stand on a pad and click to punch; each punch gives that post's Strength with "+70 💪" popping out. Locked posts show a 🔒 and their cash price; buying without enough cash shows "Not enough money" in red.
 - **Level:** comes from Strength. Shown top right with a progress bar, along with Strength (yellow 💪 icon) and Cash.
 - **Bed path:** each bed sits in the middle of its own colored floor tile, with white fences down both sides and lamps between tiles. Normal beds sit on cinder blocks. The Air Mattress and Sleeping Bag lie on the tile, and the Bunk Bed has two levels and a ladder.
 - **Harder the further you go:** each bed needs more Strength, has more health and pays more Cash, up to the Infinity Bed with 17 trillion health. Name tags show health and the 💪 needed. Until you're strong enough the prompt says "Need 💪 X".
@@ -35,22 +35,27 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 
 All numbers (beds, training items, damage, levels) are in `GameConfig`.
 
-## Training items
+## Training posts
 
-| Item | Strength per chop | Price |
-|---|---|---|
-| Pillow | +1 | free |
-| Wooden Plank | +4 | $500 |
-| Brick | +10 | $4.5K |
-| Cinder Block | +40 | $40K |
-| Steel Bar | +210 | $400K |
-| Titanium Slab | +2.2K | $3.6M |
-| Diamond Block | +25K | $32M |
-| Obsidian Block | +270K | $290M |
-| Meteor Rock | +2.9M | $2.6B |
-| Star Core | +31M | $23B |
-| Galaxy Orb | +330M | $200B |
-| Black Hole Cube | +3.8B | $1.9T |
+| # | Post | Strength per punch | Price |
+|---|---|---|---|
+| 1 | Straw Post | +1 | free |
+| 2 | Wooden Post | +4 | $50 |
+| 3 | Bamboo Post | +17 | $600 |
+| 4 | Brick Post | +70 | $5K |
+| 5 | Stone Post | +290 | $40K |
+| 6 | Iron Post | +1.2K | $250K |
+| 7 | Steel Post | +4.9K | $1.5M |
+| 8 | Gold Post | +20K | $6M |
+| 9 | Emerald Post | +84K | $25M |
+| 10 | Ruby Post | +350K | $100M |
+| 11 | Sapphire Post | +1.5M | $400M |
+| 12 | Diamond Post | +6.2M | $1.5B |
+| 13 | Lava Post | +26M | $6B |
+| 14 | Neon Post | +110M | $25B |
+| 15 | Galaxy Post | +460M | $100B |
+| 16 | Black Hole Post | +1.9B | $400B |
+| 17 | Infinity Post | +7.9B | $1.5T |
 
 ## Beds (in path order)
 

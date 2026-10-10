@@ -8,7 +8,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - When the server starts, `WorldBuilder` builds everything from `GameConfig` into `Workspace.BreakABedWorld`:
   - `Path`: white fences down both sides and across the far end, lamps where tiles meet, and the "BED PATH" arch
   - `Beds`: `Bed1`…`Bed25`. Each has its own colored floor tile with the bed in the middle, a floating name tag (name, health, 💪 needed) and a "Break" prompt
-  - `Training`: the training area, its sign, and the 12 training items on stands (4 × 3)
+  - `Training`: the training area, its sign, and 17 training posts on glowing pads (rows of five, cheapest nearest spawn)
 - Spawn is at the middle. The path runs away from spawn and the training area is off to the side.
 - You stand on the right-hand side of a bed to chop it. The COMPLETED sign goes on its left.
 
@@ -38,11 +38,11 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 **Per player / client-side:** bed health is kept separately for each player on the server. All break effects (flying pieces, wood chips, cash bills, the respawn blink, COMPLETED signs) are made by that player's own client in `Workspace.LocalFx`, which never reaches the server or other players. The real bed is never changed, so others always see a whole bed. Others only see your arm chopping. (Tested: right after a break the client had 31 pieces, the server had 0.)
 
-Training works the same way, except the item never breaks and every chop adds Strength.
-
-## Buying training items
-- Items you don't own show **Buy $X** instead of **Train**.
-- Press E with enough Cash to buy it. Without enough Cash you get "Need $X more Cash".
+## Training posts
+- Stand on a post's glowing pad. A hint at the bottom says "Click to punch! +70 💪" (or the price, if it's locked).
+- Each click is a straight punch: you turn to face the post, the post jolts, and "+70 💪" pops out. About 8 punches a second at most. The server checks that you own the post and are really standing on its pad.
+- Locked posts: a 🔒 and the cash price float above them, and their pad glow is gray. Press **E** at the post, or click while standing on its pad, to buy it. Without enough Cash you see "Not enough money" in red above the post.
+- Strength per punch: 1, 4, 17, 70, 290, 1.2K, 4.9K, 20K, 84K, 350K, then about ×4 each post up to 7.9B. Each post costs roughly what you earn from a handful of breaks of the bed you've just reached, so each one takes about 1–2 minutes to pay off.
 
 ## Saving
 - DataStore `BreakABed_v2` stores Cash, Strength, completed beds and owned items.
