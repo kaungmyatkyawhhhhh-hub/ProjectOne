@@ -45,6 +45,9 @@ type Imported = {
 	eye: Vector3?,
 	-- where the live gauges go: on the dash surface behind the wheel, facing the driver (ground space)
 	cluster: CFrame?,
+	-- the model's own gauge needles (parts), turned by Driving; ownGauges also counts on-screen needles
+	gauges: { { kind: string, pivot: CFrame, parts: { Template } } }?,
+	ownGauges: boolean?,
 	clusterSize: Vector2?,
 }
 type Look = { material: Enum.Material, color: Color3?, reflectance: number, transparency: number, shadow: boolean }
@@ -234,7 +237,7 @@ end
 	  * only visible parts are used, and only their looks are copied (mesh,
 	    colour, material, textures): scripts and everything else stay behind
 ]]
-local KEEP_CHILD = { SurfaceAppearance = true, SpecialMesh = true, Decal = true, Texture = true }
+local KEEP_CHILD = { SurfaceAppearance = true, SpecialMesh = true, Decal = true, Texture = true, SurfaceGui = true }
 local function visualClone(d: BasePart, scale: number): BasePart
 	local p = d:Clone()
 	for _, c in p:GetChildren() do
@@ -640,11 +643,69 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		out.clusterSize = Vector2.new(r * 1.7, r * 0.62)
 	end
 
+	-- the model's own gauge needles: turned live by Driving (speed / revs)
+	local gaugeOf: { [BasePart]: boolean } = {}
+	if out.eye then
+		local function kindOf(d: Instance): string?
+			local a: Instance? = d.Parent
+			while a and a ~= src do
+				local n = a.Name:lower()
+				if n == "spdn" or n == "tacn" then
+					return nil -- tick marks, not needles
+				end
+				if n:find("speed") or n:find("spd") then
+					return "speed"
+				end
+				if n:find("tach") or n:find("tac") or n:find("rpm") then
+					return "rpm"
+				end
+				a = a.Parent
+			end
+			local n = d.Name:lower()
+			return if n:find("speed") then "speed" elseif n:find("rpm") or n:find("tach") then "rpm" else nil
+		end
+		local gauges = {}
+		for _, d in visible do
+			local n = d.Name:lower()
+			if not inWheel[d] and not inSteer(d) and (n:find("needle") or n:find("arrow")) then
+				local kind = kindOf(d)
+				if kind then
+					-- turns about the small hub part next to it, else about itself
+					local pivotPos = d.Position
+					for _, sib in (d.Parent :: Instance):GetChildren() do
+						if sib ~= d and sib:IsA("BasePart") and not sib.Name:lower():find("needle") and (sib.Position - d.Position).Magnitude < 0.6 then
+							pivotPos = sib.Position
+							break
+						end
+					end
+					local pv = frame:PointToObjectSpace(pivotPos) * scale
+					local eyeG = out.eye :: Vector3
+					local pivot = CFrame.lookAt(pv, pv + (pv - eyeG).Unit) -- +Z looks at the driver
+					local t = tmpl(d, Vector3.zero)
+					t.offset = pivot:Inverse() * t.offset
+					gaugeOf[d] = true
+					table.insert(gauges, { kind = kind, pivot = pivot, parts = { t } })
+				end
+			end
+		end
+		out.gauges = gauges
+		out.ownGauges = #gauges > 0
+		for _, d in visible do
+			local gui = d:FindFirstChildWhichIsA("SurfaceGui")
+			if gui and gui:FindFirstChild("Needle", true) then
+				out.ownGauges = true
+				break
+			end
+		end
+	end
+
 	local k = 0
 	for _, d in visible do
-		if not inWheel[d] and not (out.steer and inSteer(d)) then
+		if not inWheel[d] and not (out.steer and inSteer(d)) and not gaugeOf[d] then
 			k += 1
-			out.body["Part" .. k] = tmpl(d, Vector3.zero)
+			local t = tmpl(d, Vector3.zero)
+			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
+			out.body["Part" .. k] = t
 		end
 	end
 	local generic = out.generic :: { [string]: GenericWheel }
@@ -824,8 +885,26 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				model:SetAttribute("ArmsFitted", true)
 			end
 		end
-		-- live instrument cluster on the car's own gauge spot (Driving draws it)
-		if imported.cluster and imported.clusterSize and not liteMode then
+		-- the model's own needles: welded still here; Driving turns them on the local player's car
+		for gi, gauge in imported.gauges or {} do
+			local pivotRoot = root.CFrame:Inverse() * groundCF * gauge.pivot
+			for i, t in gauge.parts do
+				local p = t.part:Clone()
+				p.Name = "SkinGauge" .. gi .. "_" .. i
+				p.CFrame = groundCF * gauge.pivot * t.offset
+				p:SetAttribute("GaugeKind", gauge.kind)
+				p:SetAttribute("GaugePivot", pivotRoot)
+				p:SetAttribute("GaugeOffset", t.offset)
+				p.Parent = skin
+				local w = Instance.new("Weld")
+				w.Part0 = root
+				w.Part1 = p
+				w.C0 = pivotRoot * t.offset
+				w.Parent = p
+			end
+		end
+		-- live instrument cluster on the car's own gauge spot, when it has no working gauges of its own
+		if imported.cluster and imported.clusterSize and not liteMode and not imported.ownGauges then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
 			cluster.Size = Vector3.new(imported.clusterSize.X, imported.clusterSize.Y, 0.02)

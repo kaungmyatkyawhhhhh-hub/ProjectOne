@@ -93,6 +93,11 @@ type State = {
 	-- imported cars: their steering wheel and our arms, posed every frame on this client
 	localSteer: { { part: BasePart, offset: CFrame } },
 	localArms: { LocalArm },
+	-- the model's own gauges: needle parts and on-screen needles (0..1 sweeps 240 degrees)
+	partNeedles: { { part: BasePart, kind: string, pivot: CFrame, offset: CFrame } },
+	guiNeedles: { { gui: GuiObject, kind: string, base: number } },
+	speedShown: number,
+	rpmShown: number,
 	camPos: Vector3,
 	camLook: Vector3,
 	fov: number,
@@ -463,6 +468,42 @@ function Driving.attach(model: Model)
 			table.insert(localSteer, { part = d, offset = off })
 		end
 	end
+	local partNeedles = {}
+	local guiNeedles = {}
+	for _, d in model:GetDescendants() do
+		local kind = d:GetAttribute("GaugeKind")
+		if d:IsA("BasePart") and type(kind) == "string" then
+			for _, w in d:GetChildren() do
+				if w:IsA("Weld") or w:IsA("WeldConstraint") then
+					w:Destroy()
+				end
+			end
+			d.Anchored = true
+			table.insert(partNeedles, { part = d, kind = kind, pivot = d:GetAttribute("GaugePivot") :: CFrame, offset = d:GetAttribute("GaugeOffset") :: CFrame })
+		elseif d:IsA("GuiObject") and d.Name == "Needle" and model:GetAttribute("OwnInterior") then
+			-- which dial: the nearest named ancestor (the screen part keeps its model name as SrcName)
+			local gk: string? = nil
+			local a: Instance? = d.Parent
+			while a and a ~= model do
+				local n = ((a:GetAttribute("SrcName") :: string?) or a.Name):lower()
+				if n == "spdn" or n == "tacn" then
+					gk = nil
+					break
+				end
+				if n:find("speed") or n:find("spd") then
+					gk = "speed"
+					break
+				elseif n:find("tach") or n:find("tac") or n:find("rpm") then
+					gk = "rpm"
+					break
+				end
+				a = a.Parent
+			end
+			if gk then
+				table.insert(guiNeedles, { gui = d, kind = gk, base = d.Rotation })
+			end
+		end
+	end
 	if model:GetAttribute("ArmsFitted") then
 		local skin = model:FindFirstChild("Skin") or model
 		local mount = model:GetAttribute("SteerMount") :: CFrame
@@ -593,6 +634,10 @@ function Driving.attach(model: Model)
 		dashUpdate = dashUpdate,
 		localSteer = localSteer,
 		localArms = localArms,
+		partNeedles = partNeedles,
+		guiNeedles = guiNeedles,
+		speedShown = 0,
+		rpmShown = 0,
 		camPos = root.Position + Vector3.new(0, 8, 20),
 		camLook = root.Position,
 		fov = Config.Camera.ChaseFov,
@@ -898,6 +943,18 @@ function Driving.render(dt: number)
 	end
 	if s.dashUpdate then
 		s.dashUpdate(mph, s.gear, s.rpm)
+	end
+	if #s.partNeedles > 0 or #s.guiNeedles > 0 then
+		local k = 1 - math.exp(-dt * 10) -- needles swing, they don't snap
+		s.speedShown += (math.clamp(mph / 160, 0, 1) - s.speedShown) * k
+		s.rpmShown += (math.clamp(s.rpm, 0, 1) - s.rpmShown) * k
+		for _, n in s.partNeedles do
+			local v = if n.kind == "speed" then s.speedShown else s.rpmShown
+			n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, -math.rad(v * 240)) * n.offset
+		end
+		for _, n in s.guiNeedles do
+			n.gui.Rotation = n.base + (if n.kind == "speed" then s.speedShown else s.rpmShown) * 240
+		end
 	end
 	UI.setSpeed(mph, speedFrac, s.gear, s.rpm)
 
