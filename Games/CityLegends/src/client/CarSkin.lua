@@ -783,7 +783,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		local isWheel = d.Name:sub(1, 5) == "Wheel" and d.Parent == model
 		if destroyReplaced and d:GetAttribute("Ext") and not isWheel and not d:FindFirstChildWhichIsA("Light") then
 			d:Destroy()
-		elseif destroyReplaced then
+		elseif destroyReplaced or ownInterior then
+			-- a local change: the server never touches these parts again, so it sticks
 			d.Transparency = 1
 		else
 			d.LocalTransparencyModifier = 1
