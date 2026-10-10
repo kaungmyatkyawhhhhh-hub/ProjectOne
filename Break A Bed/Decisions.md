@@ -5,6 +5,7 @@
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## Current
+- **2026-10-10: Upgrade boards with green buy pads** on the spawn plaza: Training Speed (+0.15× Strength per punch per level) and Walk Speed (+2 per level, 16 → 60). Boards show current → next and the price.
 - **2026-10-10: Training is punching posts on glowing pads.** 17 posts (Strength per punch 1, 4, 17, 70, 290, 1.2K… up to 7.9B). Stand on the pad and click to punch; no break screen for training. Locked posts show 🔒 + price; not enough cash shows "Not enough money". Replaces the 12 training items.
 - **2026-10-10: Quality pass.** Lighting and sky effects, grass terrain with trees and bushes, brick spawn plaza, real sounds and music, more bed detail (folded sheets, quilt stitching, headboard panels), tile borders and floor numbers, fence caps, and much more hit/break feedback.
 - **2026-10-10: Long fenced path of 25 beds on colored tiles.** Cardboard Bed → Air Mattress → Sleeping Bag → … → Infinity Bed (17 trillion health). Each bed needs more Strength (the prompt shows "Need 💪 X"), has more health and pays more Cash. Health grows ~3.3× per bed, requirement = health ÷ 3.
