@@ -52,8 +52,25 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Step on the green pad to buy one level. Click while standing on it to buy more. Not enough Cash shows "Not enough money" in red above the board.
 - Prices grow each level (Training Speed ×1.45, Walk Speed ×2), so x4.00 → x4.15 costs about $340K and 34 → 36 about $51K.
 
+## Critical hits
+- Each chop has a 1 in 10 chance to be a **CRITICAL!** hit (the server decides). It does 3× damage and pays bonus Cash right away: 10% of that bed's break reward (at least $1).
+- On screen: big orange "CRITICAL!", the damage in orange, "+$X" in green, a harder jolt, an orange flash and a bigger camera shake.
+- Settings: `GameConfig.CritChance`, `CritMultiplier`, `CritCashFraction`.
+
+## Leaderboard sign
+- The 🏆 **TOP Total Damage Dealt** sign stands on the right of the spawn plaza, next to the path arch, facing spawn.
+- Every chop's damage adds to your **total damage** (saved). The sign shows the top 10 players across all servers: rank (gold/silver/bronze for the top 3), avatar, name and total.
+- It refreshes every 3 minutes (`GameConfig.LeaderboardRefresh`). The bottom shows *your* total and "Refreshes in m:ss".
+- Players in the same server always count with their live totals, so the board works in Studio even when saving is off.
+- Behind the scenes the scores are stored on a log scale, because Roblox's leaderboard storage can't hold numbers past ~9 quintillion.
+
+## Group Reward
+- A pink 🎁 button on the right of the screen (under the stats), with a red "!" until claimed. It opens a panel with **JOIN GROUP** (Roblox's own join pop-up) and **CLAIM**.
+- Claiming checks you're in the group, then gives **+10% Strength from every punch, forever** (saved). Not in the group: "Join the group first, then claim!".
+- The group is set by `GameConfig.GroupId` (the number in the group's web link). While it's 0 the panel says "Coming soon".
+
 ## Saving
-- DataStore `BreakABed_v2` stores Cash, Strength, completed beds, owned training posts and upgrade levels.
+- DataStore `BreakABed_v2` stores Cash, Strength, completed beds, owned training posts, upgrade levels, total damage and whether the group reward was claimed. The leaderboard uses its own store, `BreakABed_TotalDamage_v1`.
 - Saves when you leave, every 2 minutes, and when the server shuts down.
 - If loading fails, that player isn't saved for the session, so a failed load can't wipe real progress.
 

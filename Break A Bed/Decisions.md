@@ -5,6 +5,9 @@
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## Current
+- **2026-10-10: Critical hits.** 1 in 10 chops is a CRITICAL!: 3× damage and bonus Cash on the spot (10% of that bed's break reward, at least $1), with orange text and a harder hit.
+- **2026-10-10: "TOP Total Damage Dealt" leaderboard sign** on the right of the spawn plaza: top 10 across all servers, refreshed every 3 minutes, shows your own total too.
+- **2026-10-10: Group Reward** 🎁 button on the right: join the Roblox group and claim **+10% Strength from every punch, forever** (Claude's pick; easy to change). Waiting for the owner's group id (`GameConfig.GroupId`); until then it says "Coming soon".
 - **2026-10-10: Upgrade boards with green buy pads** on the spawn plaza: Training Speed (+0.15× Strength per punch per level) and Walk Speed (+2 per level, 16 → 60). Boards show current → next and the price.
 - **2026-10-10: Training is punching posts on glowing pads.** 17 posts (Strength per punch 1, 4, 17, 70, 290, 1.2K… up to 7.9B). Stand on the pad and click to punch; no break screen for training. Locked posts show 🔒 + price; not enough cash shows "Not enough money". Replaces the 12 training items.
 - **2026-10-10: Quality pass.** Lighting and sky effects, grass terrain with trees and bushes, brick spawn plaza, real sounds and music, more bed detail (folded sheets, quilt stitching, headboard panels), tile borders and floor numbers, fence caps, and much more hit/break feedback.

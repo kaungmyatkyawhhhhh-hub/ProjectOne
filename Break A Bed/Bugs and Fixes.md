@@ -19,7 +19,10 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-10: "BUY" on the upgrade pads was sideways.** Fix: the pads are turned so their painted text reads upright when you walk toward the boards (the same trick now orients the floor numbers on the bed tiles).
 - **2026-10-10: Floor numbers used huge text canvases** (a whole tile each), which risks Roblox's budget for surface text. Fix: each number now sits on its own small patch.
 
+- **2026-10-10: Group Reward panel showed blank** (its text and buttons drew behind the dark background). The game's screen UI layers everything by one global ZIndex. Fix: everything inside the panel gets a higher ZIndex than the panel itself.
+
 ## Good to know
+- Studio screenshots taken through the MCP don't show floating text (damage numbers, CRITICAL!). That text is still there in the game; check it by playing.
 - "Future" lighting (`Lighting.Technology`) and 3D grass (`Terrain.Decoration`) can only be switched on by hand in Studio; scripts and the Studio MCP aren't allowed to.
 - The Studio MCP's `execute_luau` tool can't parse some newer Luau syntax (`..=`, `for _, x in tbl do`). Use `ipairs` and `x = x .. y` in snippets run that way. The game scripts themselves are fine.
 - The tool's mouse clicks only take screen coordinates for 3D objects, not part names.
