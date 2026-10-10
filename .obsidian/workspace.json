@@ -157,7 +157,6 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "00-START-HERE.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -198,6 +197,9 @@
   },
   "active": "d7b4200d91bc3cf1",
   "lastOpenFiles": [
+    "Break A Bed/2026-10-10.md",
+    "City Legends/City Legends.md",
+    "00-START-HERE.md",
     "Tools/Token-Saving-Plugins.md",
     "Tools",
     "Games/CityLegends/src/shared/FacadeTex.lua",
@@ -211,14 +213,11 @@
     "Games/CityLegends/src/server/CityPremium.lua",
     "Games/CityLegends/README.md",
     "Games/CityLegends/CLAUDE.md",
-    "City Legends/City Legends.md",
     "Break A Bed/Ideas.md",
     "Break A Bed/Project Overview.md",
     "Break A Bed/How It Works.md",
     "Break A Bed/Decisions.md",
     "Break A Bed/Bugs and Fixes.md",
-    "Break A Bed/2026-10-10.md",
-    "00-START-HERE.md",
     "Projects/City Legends.md",
     "Work.md",
     "Preferences.md",
