@@ -42,3 +42,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - First-person camera sits at the model's driver seat. To nudge one car's camera: select the model in `CarModels`, add a Number attribute `EyeHeight` (e.g. `0.3` up, `-0.3` down).
 - A model's steering wheel only turns if it's in a group named `SW` or has "steering wheel" in its name.
 - Imported cars are saved in the game code (`Games/CityLegends/assets/CarModels.rbxm`).
+
+## Later (owner will say when)
+- **Future Ford cars:** use this video as the reference for Ford dashboard and interior: https://www.youtube.com/watch?v=HMKEusrwO6w (Claude can't open YouTube; ask for screenshots when starting).
+- **Dash clusters (2026-10-10):** Lamborghini cars get a round rev-counter cluster, all others a Toyota-style screen with an analog speedometer.
