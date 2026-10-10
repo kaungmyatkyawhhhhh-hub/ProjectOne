@@ -15,7 +15,9 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Level:** comes from Strength. Shown top right with a progress bar, along with Strength (yellow 💪 icon) and Cash.
 - **Beds:** each sits on cinder blocks with its name (and health) floating above it.
 - **Break mode:** press **E** to **Break**. The camera zooms in, an **EXIT** button appears, and each click is a karate chop. The health bar shows e.g. 6 / 6. Damage per chop comes from Strength.
-- **When a bed breaks:** it splinters into flying pieces, cash pops out, and a **COMPLETED ✅** sign appears next to it. The bed comes back after 5 seconds so you can farm it again.
+- **When a bed breaks:** it splinters into flying pieces, cash pops out, and a **COMPLETED ✅** sign appears next to it. The bed respawns instantly.
+  - **First time:** you go back to normal view automatically.
+  - **Already completed:** you stay in the break screen and can keep breaking it for cash ("Broken x3") until you press **EXIT**.
 - **Personal progress:** each player breaks their own copy of a bed, and COMPLETED signs are personal. Everything saves (published game, or Studio API access turned on).
 
 ## Scripts (where they are in Studio)

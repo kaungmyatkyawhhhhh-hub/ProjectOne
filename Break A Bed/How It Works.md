@@ -23,8 +23,12 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 2. The camera zooms in from the side, the name tag hides, and the health panel, "Click to chop!" and **EXIT** appear.
 3. Each click or tap is a karate chop: the arm swings up and slams down. At most 4 chops a second (the server checks).
 4. The server lowers the bed's health by your damage and sends back the new health.
-5. At 0: you get the Cash, the bed is marked completed, it splinters (only on your screen), cash pops out, and the COMPLETED ✅ sign appears. After 1.4 seconds you're released. The bed is back for you after 5 seconds.
+5. At 0: you get the Cash, the bed is marked completed (saved), it splinters (only on your screen), cash pops out, and the COMPLETED ✅ sign appears. The bed respawns instantly at full health.
+   - **First time you break that bed:** chopping stops, and after 1.4 seconds you're sent back to normal view (`GameConfig.FirstBreakExitDelay`).
+   - **Bed already completed:** you stay in the break screen and keep breaking it for cash. The panel counts "Broken xN", and the hint says "Keep chopping for cash!".
 6. **EXIT** stops at any time.
+
+**Per player:** bed health is kept separately for each player on the server, and the splinter and respawn only happen on that player's screen. The real bed is never changed, so other players nearby always see a whole bed and break their own copy.
 
 Training works the same way, except the item never breaks and every chop adds Strength.
 
