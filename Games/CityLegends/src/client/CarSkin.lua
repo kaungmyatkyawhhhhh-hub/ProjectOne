@@ -654,17 +654,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		if imported.eye then
 			model:SetAttribute("Eye", imported.eye - Vector3.new(0, height / 2, 0))
 		end
-		-- the model has its own cabin: hide ours (dash, seats, wheel, driver, arms)
+		-- the model has its own cabin: ours (dash, seats, wheel, driver, arms) is hidden below
 		model:SetAttribute("OwnInterior", true)
-		for _, d in model:GetDescendants() do
-			if d:IsA("BasePart") and d ~= root and not d:GetAttribute("Ext") and not d:IsDescendantOf(skin) then
-				if destroyReplaced then
-					d.Transparency = 1
-				else
-					d.LocalTransparencyModifier = 1
-				end
-			end
-		end
 	end
 
 	-- licence plate text (the plate itself is part of the mesh)
@@ -780,19 +771,31 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		end
 	end
 
-	-- hide the part bodywork
-	for _, d in model:GetDescendants() do
-		if d:IsA("BasePart") and d:GetAttribute("Ext") and d.Name ~= "Underglow" then
-			local isWheel = d.Name:sub(1, 5) == "Wheel" and d.Parent == model
-			if destroyReplaced and not isWheel and not d:FindFirstChildWhichIsA("Light") then
-				d:Destroy()
-			elseif destroyReplaced then
-				d.Transparency = 1
-			else
-				d.LocalTransparencyModifier = 1
-			end
+	-- hide the part bodywork (and, under an imported model, our whole cabin)
+	local ownInterior = generic ~= nil
+	local function hide(d: Instance)
+		if not d:IsA("BasePart") or d == root or d:IsDescendantOf(skin) or d.Name == "Underglow" then
+			return
+		end
+		if not (d:GetAttribute("Ext") or ownInterior) then
+			return
+		end
+		local isWheel = d.Name:sub(1, 5) == "Wheel" and d.Parent == model
+		if destroyReplaced and d:GetAttribute("Ext") and not isWheel and not d:FindFirstChildWhichIsA("Light") then
+			d:Destroy()
+		elseif destroyReplaced then
+			d.Transparency = 1
+		else
+			d.LocalTransparencyModifier = 1
 		end
 	end
+	for _, d in model:GetDescendants() do
+		hide(d)
+	end
+	-- parts that replicate after the skin went on
+	model.DescendantAdded:Connect(function(d)
+		task.defer(hide, d)
+	end)
 	model:SetAttribute("Skinned", true)
 	return true
 end

@@ -408,6 +408,9 @@ function Driving.attach(model: Model)
 	for _, d in model:GetDescendants() do
 		if d:IsA("BasePart") then
 			if model:GetAttribute("OwnInterior") then
+				if d.Name == "Underglow" then
+					table.insert(hidden, d) -- shows through the floor in first person
+				end
 				continue -- imported model: our cabin and driver are hidden for good
 			elseif d.Name == "DriverHead" or d.Name == "DriverHair" or d.Name == "DriverNeck" then
 				table.insert(hidden, d)
