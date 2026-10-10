@@ -5,10 +5,16 @@
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## The map
-- When the server starts, `WorldBuilder` builds everything from `GameConfig` into `Workspace.BreakABedWorld`:
-  - `Path`: white fences down both sides and across the far end, lamps where tiles meet, and the "BED PATH" arch
-  - `Beds`: `Bed1`…`Bed25`. Each has its own colored floor tile with the bed in the middle, a floating name tag (name, health, 💪 needed) and a "Break" prompt
-  - `Training`: the training area, its sign, and 17 training posts on glowing pads (rows of five, cheapest nearest spawn)
+- Since 2026-10-10 the whole map is **saved in the place as real models**, so it shows (and can be edited) in Studio without pressing Play. Workspace folders:
+  - `Path`: `PathBase`, `Fences` (FenceLeft, FenceRight, FenceEnd), `Lamps`, `EntranceArch`
+  - `Beds`: `Bed1`…`Bed25`. Each has its colored floor tile, cinder blocks (`Base`), the bed (`Bed`), a floating name sign (name, health, 💪 needed), a "Break" prompt, and two invisible markers: `StandPoint` (where you stand to chop) and `TargetPoint` (where hits land)
+  - `TrainingArea`: floor, edges and `Posts` (17 posts on glowing pads, rows of five, cheapest nearest spawn)
+  - `Upgrades`: the two upgrade boards with their green pads
+  - `Signs`: `PathSign` ("BED PATH"), `TrainingSign`, `Leaderboard`, `CompletedSigns` (one COMPLETED ✅ sign per bed)
+  - `Scenery`: trees, bushes, the spawn plaza and its lamps. Terrain and lighting are saved too.
+- `ServerStorage.BedTemplates` has a copy of every bed. If a bed (or the bed part of it) goes missing, the game clones it back from there. Breaking itself happens only on each player's screen, so the real bed never actually disappears.
+- At game start the scripts **load** these models instead of building them. Names, health, Strength needed and prices on signs are filled in from `GameConfig`, so they're always right. COMPLETED signs are handed to each player, who sees only their own.
+- **Editing in Studio:** move or restyle anything. Move a bed as its whole `Bed<N>` model (the markers move with it), and move its `Completed<N>` sign along. Rebuilding the map from code (`WorldBuilder.build()`) would wipe hand edits, so Claude only does that if the owner asks.
 - Spawn is at the middle. The path runs away from spawn and the training area is off to the side.
 - You stand on the right-hand side of a bed to chop it. The COMPLETED sign goes on its left.
 
