@@ -40,9 +40,9 @@ Driving.cameraMode = "Chase" -- "Chase" | "Interior"
 Driving.inputEnabled = true
 
 type LocalArm = {
-	upper: BasePart,
-	fore: BasePart,
-	glove: BasePart,
+	upper: BasePart, -- the whole arm when fore is nil (R6)
+	fore: BasePart?,
+	glove: BasePart?,
 	shoulder: Vector3,
 	grip: Vector3,
 	pole: Vector3,
@@ -520,43 +520,33 @@ function Driving.attach(model: Model)
 					pole = Vector3.new(if side == "L" then -0.8 else 0.8, -1, 0.2),
 				})
 			end
-			-- the player's own avatar arms (clothes and skin), only the arms shown, posed every frame
+			-- the player's own avatar as R6 (clothes and skin): only its two arms are used, each one
+			-- straight from shoulder to hand, 30% of R6 thickness, posed every frame
 			task.spawn(function()
 				local ok, rig = pcall(function()
-					return Players:CreateHumanoidModelFromUserId(player.UserId)
+					local desc = Players:GetHumanoidDescriptionFromUserId(player.UserId)
+					return Players:CreateHumanoidModelFromDescription(desc, Enum.HumanoidRigType.R6)
 				end)
-				if not ok or not rig or not rig:FindFirstChild("LeftUpperArm") or not (state and state.model == model) then
-					if rig then
+				if not ok or not rig or not rig:FindFirstChild("Left Arm") or not (state and state.model == model) then
+					if not ok then
+						warn("[CityLegends] driver arms unavailable:", rig)
+					end
+					if ok and rig then
 						rig:Destroy()
 					end
 					return
 				end
 				for _, d in rig:GetDescendants() do
-					if d:IsA("Script") or d:IsA("LocalScript") then
+					if d:IsA("Script") or d:IsA("LocalScript") or d:IsA("Accessory") then
 						d:Destroy()
 					end
 				end
 				local hum = rig:FindFirstChildOfClass("Humanoid")
 				if hum then
 					hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+					hum.PlatformStand = true
 				end
-				-- size the avatar so its arms reach the wheel with a slight bend
-				local function len(n: string): number
-					local p = rig:FindFirstChild(n)
-					return if p and p:IsA("BasePart") then p.Size.Y else 1
-				end
-				-- real arm size (3 studs per metre): upper arm 30 cm long, 10 cm thick; forearm 27 cm, 8 cm; hand 19 cm
-				local real = { UpperArm = Vector3.new(0.33, 0.9, 0.33), LowerArm = Vector3.new(0.27, 0.8, 0.27), Hand = Vector3.new(0.24, 0.55, 0.12) }
-				for _, pre in { "Left", "Right" } do
-					for seg, size in real do
-						local p = rig:FindFirstChild(pre .. seg)
-						if p and p:IsA("BasePart") then
-							p.Size = size
-						end
-					end
-				end
-				local _ = len
-				local keep = { LeftUpperArm = true, LeftLowerArm = true, LeftHand = true, RightUpperArm = true, RightLowerArm = true, RightHand = true }
+				local keep = { ["Left Arm"] = true, ["Right Arm"] = true }
 				for _, d in rig:GetDescendants() do
 					if d:IsA("BasePart") then
 						d.Anchored = true
@@ -565,7 +555,10 @@ function Driving.attach(model: Model)
 						d.CanTouch = false
 						d.CastShadow = false
 						if not keep[d.Name] then
+							-- the rest of the body: invisible and far away. The Humanoid forces torso and
+							-- head to be solid, and an invisible wall near the car throws it about
 							d.Transparency = 1
+							d.CFrame = CFrame.new(0, 20000, 0)
 						end
 					elseif d:IsA("Decal") then
 						d.Transparency = 1
@@ -587,20 +580,16 @@ function Driving.attach(model: Model)
 					end
 				end))
 				for _, sd in sides do
-					local pre = if sd.side == "L" then "Left" else "Right"
-					local upper = rig:FindFirstChild(pre .. "UpperArm") :: BasePart
-					local fore = rig:FindFirstChild(pre .. "LowerArm") :: BasePart
-					local hand = rig:FindFirstChild(pre .. "Hand") :: BasePart
+					local arm = rig:FindFirstChild(if sd.side == "L" then "Left Arm" else "Right Arm") :: BasePart
+					arm.Size = Vector3.new(0.3, sd.reach, 0.3) -- an R6 arm is 1 stud thick: 70% thinner
 					table.insert(cur.localArms, {
-						upper = upper,
-						fore = fore,
-						glove = hand,
+						upper = arm,
 						shoulder = sd.shoulder,
 						grip = sd.grip,
 						pole = sd.pole,
-						upperLen = upper.Size.Y,
-						foreLen = fore.Size.Y,
-						handLen = hand.Size.Y,
+						upperLen = sd.reach,
+						foreLen = 0,
+						handLen = 0,
 						rot = CFrame.Angles(math.pi / 2, 0, 0),
 					})
 				end
@@ -939,10 +928,22 @@ function Driving.render(dt: number)
 			local wheelCF = s.steerMount * CFrame.Angles(0, 0, rot)
 			for _, arm in s.localArms do
 				local handPos = (wheelCF * CFrame.new(arm.grip)).Position
-				local upperCF, foreCF = CarBuilder.solveArm(arm.shoulder, handPos, arm.upperLen, arm.foreLen, arm.pole)
-				arm.upper.CFrame = root.CFrame * upperCF * arm.rot
-				arm.fore.CFrame = root.CFrame * foreCF * arm.rot
-				arm.glove.CFrame = root.CFrame * foreCF * CFrame.new(0, 0, -(arm.foreLen + arm.handLen) / 2) * arm.rot
+				local fore, glove = arm.fore, arm.glove
+				if fore then
+					local upperCF, foreCF = CarBuilder.solveArm(arm.shoulder, handPos, arm.upperLen, arm.foreLen, arm.pole)
+					arm.upper.CFrame = root.CFrame * upperCF * arm.rot
+					fore.CFrame = root.CFrame * foreCF * arm.rot
+					if glove then
+						glove.CFrame = root.CFrame * foreCF * CFrame.new(0, 0, -(arm.foreLen + arm.handLen) / 2) * arm.rot
+					end
+				else
+					-- one straight arm, shoulder to hand
+					local len = (handPos - arm.shoulder).Magnitude
+					if math.abs(arm.upper.Size.Y - len) > 0.02 then
+						arm.upper.Size = Vector3.new(arm.upper.Size.X, len, arm.upper.Size.Z)
+					end
+					arm.upper.CFrame = root.CFrame * CFrame.lookAt((arm.shoulder + handPos) / 2, handPos) * arm.rot
+				end
 			end
 		end
 	end)
