@@ -44,8 +44,16 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Locked posts: a 🔒 and the cash price float above them, and their pad glow is gray. Press **E** at the post, or click while standing on its pad, to buy it. Without enough Cash you see "Not enough money" in red above the post.
 - Strength per punch: 1, 4, 17, 70, 290, 1.2K, 4.9K, 20K, 84K, 350K, then about ×4 each post up to 7.9B. Each post costs roughly what you earn from a handful of breaks of the bed you've just reached, so each one takes about 1–2 minutes to pay off.
 
+## Upgrades
+- Two boards on the left of the spawn plaza, each with a green pad in front.
+- **⚡ Training Speed:** multiplies the Strength from every punch. x1.00 to start, +0.15 per level (… x4.00 → x4.15 …), up to x10.00.
+- **👟 Walk Speed:** 16 to start (Roblox's normal speed), +2 per level (… 34 → 36 …), up to 60.
+- Each board shows *your* current → next value and the price; the price is red when you can't afford it.
+- Step on the green pad to buy one level. Click while standing on it to buy more. Not enough Cash shows "Not enough money" in red above the board.
+- Prices grow each level (Training Speed ×1.45, Walk Speed ×2), so x4.00 → x4.15 costs about $340K and 34 → 36 about $51K.
+
 ## Saving
-- DataStore `BreakABed_v2` stores Cash, Strength, completed beds and owned items.
+- DataStore `BreakABed_v2` stores Cash, Strength, completed beds, owned training posts and upgrade levels.
 - Saves when you leave, every 2 minutes, and when the server shuts down.
 - If loading fails, that player isn't saved for the session, so a failed load can't wipe real progress.
 
