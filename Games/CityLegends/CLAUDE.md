@@ -58,7 +58,7 @@ Keep `luau-lsp analyze` free of errors. Nothing can be run in real Roblox from a
 2. **Runtime meshes:** `CarMesh.build` turned into EditableMesh parts. This needs Game Settings → Security → "Allow Mesh / Image APIs".
 3. **Fallback:** the old part-built body.
 
-- `assets/CarModels.rbxm` holds the owner's imported cars (exported from their place with Lune; Rojo puts it in `ReplicatedStorage.CarModels`). When they send a new place, re-export it: Lune can't read new Studio files directly, so first strip the `Tags` PROP chunks (bad type) from the binary.
+- `assets/CarModels.rbxm` holds the owner's imported cars (exported from their place with Lune; Rojo puts it in `ReplicatedStorage.CarModels`). When they send a new place, re-export it: Lune can't read new Studio files directly, so first strip the `Tags` PROP chunks (bad type) from the binary. Build with Rojo 7.6.1 or newer: older Rojo drops the new MeshContent/TextureContent values and every car turns into a plain cube.
 - Real size: `CarBuilder.REAL_WB` holds each car's real wheelbase in metres, at `STUDS_PER_METRE = 3`. An imported model is scaled to that wheelbase and its own wheel radius becomes the physics wheel radius.
 - Imported models bring their own cabin, so ours (dash, seats, wheel, driver, arms) is hidden (`OwnInterior` attribute). Their steering wheel (an `SW` group or anything named "steering wheel") turns on our `SteerMotor`. The first-person eye sits above their `DriveSeat` at 80% of the roof height; an `EyeHeight` number attribute on the model nudges it in studs.
 
