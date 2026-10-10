@@ -29,6 +29,7 @@ local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local Traffic = require(script.Parent:WaitForChild("Traffic"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
+local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
 
 local camera = workspace.CurrentCamera
 
@@ -74,6 +75,7 @@ type State = {
 	gaugeSpeed: TextLabel?,
 	gaugeGear: TextLabel?,
 	gaugeBar: Frame?,
+	dashUpdate: ((number, string, number) -> ())?,
 	camPos: Vector3,
 	camLook: Vector3,
 	fov: number,
@@ -429,6 +431,9 @@ function Driving.attach(model: Model)
 	cabinLight.Parent = root
 
 	local gSpeed, gGear, gBar = buildGauges(model)
+	-- imported cars: the live cluster behind their own wheel
+	local dashPanel = model:FindFirstChild("DashCluster", true)
+	local dashUpdate = if dashPanel and dashPanel:IsA("BasePart") then DashGauges.build(dashPanel) else nil
 	local flames, flameParts, flameLight = buildFlames(model, root, spec)
 
 	local s: State = {
@@ -467,6 +472,7 @@ function Driving.attach(model: Model)
 		gaugeSpeed = gSpeed,
 		gaugeGear = gGear,
 		gaugeBar = gBar,
+		dashUpdate = dashUpdate,
 		camPos = root.Position + Vector3.new(0, 8, 20),
 		camLook = root.Position,
 		fov = Config.Camera.ChaseFov,
@@ -753,6 +759,9 @@ function Driving.render(dt: number)
 	end
 	if s.gaugeBar then
 		s.gaugeBar.Size = UDim2.fromScale(s.rpm, 1)
+	end
+	if s.dashUpdate then
+		s.dashUpdate(mph, s.gear, s.rpm)
 	end
 	UI.setSpeed(mph, speedFrac, s.gear, s.rpm)
 

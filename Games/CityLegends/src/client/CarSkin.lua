@@ -723,6 +723,31 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				w.Parent = p
 			end
 		end
+		-- live instrument cluster just past the wheel rim, facing the driver (Driving draws it)
+		if steer and not liteMode then
+			local r = steer.radius
+			local cluster = Instance.new("Part")
+			cluster.Name = "DashCluster"
+			cluster.Size = Vector3.new(r * 2.3, r * 0.85, 0.02)
+			cluster.Transparency = 1
+			cluster.CanCollide = false
+			cluster.CanQuery = false
+			cluster.CanTouch = false
+			cluster.Massless = true
+			cluster.CastShadow = false
+			local mountWorld = groundCF * steer.mount
+			-- level with the driver's view, above the rim and a little further into the dash
+			local pos = (mountWorld * CFrame.new(0, r * 1.05 + cluster.Size.Y / 2, -0.45)).Position
+			local towardDriver = -mountWorld.LookVector
+			towardDriver = Vector3.new(towardDriver.X, towardDriver.Y * 0.4, towardDriver.Z).Unit
+			cluster.CFrame = CFrame.lookAt(pos, pos - towardDriver) -- back face looks at the driver
+			cluster.Parent = skin
+			local w = Instance.new("WeldConstraint")
+			w.Part0 = root
+			w.Part1 = cluster
+			w.Parent = cluster
+			cluster:SetAttribute("Style", if id:sub(1, 8) == "lambrini" then "Lambo" else "Modern")
+		end
 		-- the camera sits at the model's own driver's seat
 		if imported.eye then
 			model:SetAttribute("Eye", imported.eye - Vector3.new(0, height / 2, 0))
@@ -856,6 +881,14 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		if ownInterior and (d.Name:find("Arm[LR]$") or d.Name:find("^Glove") or d.Name:find("^Thumb")) and model:GetAttribute("ArmsFitted") then
 			return -- the driver's arms stay, gripping the model's own wheel
 		end
+		if ownInterior then
+			-- screens drawn on our hidden dash (old cluster, infotainment) go too
+			for _, g in d:GetChildren() do
+				if g:IsA("SurfaceGui") then
+					g.Enabled = false
+				end
+			end
+		end
 		local isWheel = d.Name:sub(1, 5) == "Wheel" and d.Parent == model
 		if destroyReplaced and d:GetAttribute("Ext") and not isWheel and not d:FindFirstChildWhichIsA("Light") then
 			d:Destroy()
@@ -871,7 +904,13 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	end
 	-- parts that replicate after the skin went on
 	model.DescendantAdded:Connect(function(d)
-		task.defer(hide, d)
+		task.defer(function()
+			if d:IsA("SurfaceGui") and d.Parent and d.Parent:IsA("BasePart") and not d:IsDescendantOf(skin) then
+				hide(d.Parent)
+			else
+				hide(d)
+			end
+		end)
 	end)
 	model:SetAttribute("Skinned", true)
 	return true
