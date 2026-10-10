@@ -14,14 +14,13 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-10: Bed health panel covered the stats** on small screens. Fix: moved it to the bottom above the EXIT button, and aimed the camera a little lower.
 - **2026-10-10: The floating name tag blocked the view** in break mode. Fix: it hides while you're chopping.
 - **2026-10-10: Level could get out of sync** if Strength was changed directly (e.g. from the command bar). Fix: the server always works Level out from Strength.
-
 - **2026-10-10: Terrain covered the floors.** Roblox draws terrain about 2 studs above where it's filled, so the dirt hid the plaza and path tiles. Fix: all terrain fills are sunk 2 studs.
 
 ## Good to know
 - "Future" lighting (`Lighting.Technology`) and 3D grass (`Terrain.Decoration`) can only be switched on by hand in Studio; scripts and the Studio MCP aren't allowed to.
 - The Studio MCP's `execute_luau` tool can't parse some newer Luau syntax (`..=`, `for _, x in tbl do`). Use `ipairs` and `x = x .. y` in snippets run that way. The game scripts themselves are fine.
 - The tool's mouse clicks only take screen coordinates for 3D objects, not part names.
-- The green bubble around you at the start is Roblox's spawn shield (ForceField). It fades after a few seconds.
+- The spawn shield bubble (ForceField) is switched off by `Environment` (SpawnLocation.Duration = 0).
 
 ## Open
 - None right now. (The old built-in sounds were replaced with Creator Store sounds, all checked loading.)
