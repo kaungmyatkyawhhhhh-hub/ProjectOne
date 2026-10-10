@@ -177,11 +177,12 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -197,10 +198,29 @@
   },
   "active": "d7b4200d91bc3cf1",
   "lastOpenFiles": [
+    "Tools/Token-Saving-Plugins.md",
+    "Tools",
+    "Games/CityLegends/src/shared/FacadeTex.lua",
+    "Games/CityLegends/src/shared/Config.lua",
+    "Games/CityLegends/src/shared/CityLayout.lua",
+    "Games/CityLegends/src/shared/Cars.lua",
+    "Games/CityLegends/src/shared/CarMesh.lua",
+    "Games/CityLegends/src/shared/CarBuilder.lua",
+    "Games/CityLegends/src/server/PlayerData.lua",
+    "Games/CityLegends/src/server/Main.server.lua",
+    "Games/CityLegends/src/server/CityPremium.lua",
+    "Games/CityLegends/README.md",
+    "Games/CityLegends/CLAUDE.md",
+    "City Legends/City Legends.md",
+    "Break A Bed/Ideas.md",
+    "Break A Bed/Project Overview.md",
+    "Break A Bed/How It Works.md",
+    "Break A Bed/Decisions.md",
+    "Break A Bed/Bugs and Fixes.md",
+    "Break A Bed/2026-10-10.md",
     "00-START-HERE.md",
     "Projects/City Legends.md",
     "Work.md",
-    "Projects",
     "Preferences.md",
     "Identity.md",
     "CLAUDE.md",
