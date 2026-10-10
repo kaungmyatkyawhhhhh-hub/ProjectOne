@@ -76,11 +76,19 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - A "THANK YOU!" banner and confetti show after a purchase.
 - Ids go in `GameConfig.LevelPacks` (ProductId) and `GameConfig.DoubleStrengthPassId`. While an id is 0 the button says "Coming soon". Buttons show Roblox's real price once the product exists.
 
+## Look, numbers and phones
+- **Text:** the bold, rounded FredokaOne font everywhere, with a thick dark outline that grows with the text size (big numbers get big outlines).
+- **Short numbers:** 1.14M, 1.9T, 392Qa (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc). Roblox's own player list shows them short too: the real numbers live in a hidden `Stats` folder, and `leaderstats` only shows the short text.
+- **Punching:** a one-two combo. Punches alternate left and right arms, and the upper body twists into each one.
+- **Bed breaks:** 18 flying cash bills in three shades of green, spinning gold coins, gold sparkles, party confetti, dust, a white flash and the "+$X" pop-up.
+- **Phones:** tap to chop or punch, and prompts show a tap button. The HUD (stats, SPAWN, shop, gift button, break-mode panel) shrinks on short screens, down to 65%, so it stays clear of the thumbstick and jump button.
+
 ## Saving
-- DataStore `BreakABed_v2` stores Cash, Strength, completed beds, owned training posts, upgrade levels, total damage and whether the group reward was claimed. The leaderboard uses its own store, `BreakABed_TotalDamage_v1`.
-- Saves when you leave, every 2 minutes, and when the server shuts down.
-- If loading fails, that player isn't saved for the session, so a failed load can't wipe real progress.
+- DataStore `BreakABed_v2` stores Cash, Strength, completed beds, owned training posts, upgrade levels, total damage, whether the group reward was claimed and recent Robux purchases. The leaderboard uses its own store, `BreakABed_TotalDamage_v1`.
+- Saves every minute, about 6 seconds after big moments (first break of a bed, buying a post or upgrade, claiming the group reward), right away after a Robux purchase, when you leave, and when a server closes (it waits for every save to finish).
+- Each save and load is tried up to 3 times, so a short Roblox hiccup doesn't lose progress.
+- If loading still fails, that player isn't saved for the session, so a failed load can't wipe real progress.
 
 ## Testing tips
 - Turn on **Game Settings → Security → Enable Studio Access to API Services** to test saving in Studio.
-- Give yourself Strength or Cash during a playtest: Studio command bar in **Server** mode → `game.Players.YOURNAME.leaderstats.Strength.Value = 1000` (Level updates by itself).
+- Give yourself Strength or Cash during a playtest: Studio command bar in **Server** mode → `game.Players.YOURNAME.Stats.Strength.Value = 1000` (Level updates by itself). Use `Stats`, not `leaderstats`, which only holds the short text.
