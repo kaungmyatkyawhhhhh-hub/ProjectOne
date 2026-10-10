@@ -19,6 +19,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -37,6 +39,18 @@ local Driving = {}
 Driving.cameraMode = "Chase" -- "Chase" | "Interior"
 Driving.inputEnabled = true
 
+type LocalArm = {
+	upper: BasePart,
+	fore: BasePart,
+	glove: BasePart,
+	shoulder: Vector3,
+	grip: Vector3,
+	pole: Vector3,
+	upperLen: number,
+	foreLen: number,
+	handLen: number,
+	rot: CFrame, -- part space -> bone space (avatar limbs run along Y, our bones along Z)
+}
 type ArmRig = { upper: Motor6D, fore: Motor6D, shoulder: Vector3, grip: Vector3, pole: Vector3 }
 
 type State = {
@@ -78,7 +92,7 @@ type State = {
 	dashUpdate: ((number, string, number) -> ())?,
 	-- imported cars: their steering wheel and our arms, posed every frame on this client
 	localSteer: { { part: BasePart, offset: CFrame } },
-	localArms: { { upper: BasePart, fore: BasePart, glove: BasePart, shoulder: Vector3, grip: Vector3, pole: Vector3, upperLen: number, foreLen: number } },
+	localArms: { LocalArm },
 	camPos: Vector3,
 	camLook: Vector3,
 	fov: number,
@@ -437,7 +451,6 @@ function Driving.attach(model: Model)
 	-- imported cars: pose their steering wheel and our arms ourselves (anchored, local only)
 	local localSteer = {}
 	local localArms = {}
-	local made: { Instance } = {}
 	for _, d in model:GetDescendants() do
 		local off = d:GetAttribute("SteerOffset")
 		if d:IsA("BasePart") and typeof(off) == "CFrame" then
@@ -453,40 +466,88 @@ function Driving.attach(model: Model)
 	if model:GetAttribute("ArmsFitted") then
 		local skin = model:FindFirstChild("Skin") or model
 		local mount = model:GetAttribute("SteerMount") :: CFrame
-		local function armPart(name: string, size: Vector3, color: Color3, material: Enum.Material): BasePart
-			local p = Instance.new("Part")
-			p.Name = name
-			p.Size = size
-			p.Color = color
-			p.Material = material
-			p.Anchored = true
-			p.CanCollide = false
-			p.CanQuery = false
-			p.CanTouch = false
-			p.CastShadow = false
-			p.Parent = skin
-			table.insert(made, p)
-			return p
-		end
+		local sides = {}
 		for _, side in { "L", "R" } do
 			local shoulder = model:GetAttribute("Shoulder" .. side) :: Vector3
 			local grip = model:GetAttribute("Grip" .. side) :: Vector3
-			-- long enough to reach the wheel with a slight bend
-			local reach = (shoulder - (mount * CFrame.new(grip)).Position).Magnitude
-			local k = math.max(1, reach / (0.9 * 2.17))
-			local upperLen, foreLen = 1.12 * k, 1.05 * k
-			local jacket = Color3.fromRGB(34, 34, 40)
-			table.insert(localArms, {
-				upper = armPart("LocalUpperArm" .. side, Vector3.new(0.36, 0.36, upperLen + 0.12), jacket, Enum.Material.Fabric),
-				fore = armPart("LocalForeArm" .. side, Vector3.new(0.32, 0.32, foreLen + 0.12), jacket, Enum.Material.Fabric),
-				glove = armPart("LocalGlove" .. side, Vector3.new(0.3, 0.34, 0.42), Color3.fromRGB(16, 16, 18), Enum.Material.Leather),
+			table.insert(sides, {
+				side = side,
 				shoulder = shoulder,
 				grip = grip,
+				reach = (shoulder - (mount * CFrame.new(grip)).Position).Magnitude,
 				pole = Vector3.new(if side == "L" then -0.8 else 0.8, -1, 0.2),
-				upperLen = upperLen,
-				foreLen = foreLen,
 			})
 		end
+		-- the player's own avatar arms (clothes and skin), only the arms shown, posed every frame
+		task.spawn(function()
+			local ok, rig = pcall(function()
+				return Players:CreateHumanoidModelFromUserId(player.UserId)
+			end)
+			if not ok or not rig or not rig:FindFirstChild("LeftUpperArm") or not (state and state.model == model) then
+				if rig then
+					rig:Destroy()
+				end
+				return
+			end
+			for _, d in rig:GetDescendants() do
+				if d:IsA("Script") or d:IsA("LocalScript") then
+					d:Destroy()
+				end
+			end
+			local hum = rig:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+			end
+			-- size the avatar so its arms reach the wheel with a slight bend
+			local function len(n: string): number
+				local p = rig:FindFirstChild(n)
+				return if p and p:IsA("BasePart") then p.Size.Y else 1
+			end
+			local armLen = len("LeftUpperArm") + len("LeftLowerArm") + len("LeftHand") * 0.5
+			local reach = math.max(sides[1].reach, sides[2].reach)
+			pcall(function()
+				rig:ScaleTo(math.clamp(reach / (0.92 * armLen), 0.6, 1.8))
+			end)
+			local keep = { LeftUpperArm = true, LeftLowerArm = true, LeftHand = true, RightUpperArm = true, RightLowerArm = true, RightHand = true }
+			for _, d in rig:GetDescendants() do
+				if d:IsA("BasePart") then
+					d.Anchored = true
+					d.CanCollide = false
+					d.CanQuery = false
+					d.CanTouch = false
+					d.CastShadow = false
+					if not keep[d.Name] then
+						d.Transparency = 1
+					end
+				elseif d:IsA("Decal") then
+					d.Transparency = 1
+				end
+			end
+			rig.Parent = skin
+			local cur = state
+			if not (cur and cur.model == model) then
+				rig:Destroy()
+				return
+			end
+			for _, sd in sides do
+				local pre = if sd.side == "L" then "Left" else "Right"
+				local upper = rig:FindFirstChild(pre .. "UpperArm") :: BasePart
+				local fore = rig:FindFirstChild(pre .. "LowerArm") :: BasePart
+				local hand = rig:FindFirstChild(pre .. "Hand") :: BasePart
+				table.insert(cur.localArms, {
+					upper = upper,
+					fore = fore,
+					glove = hand,
+					shoulder = sd.shoulder,
+					grip = sd.grip,
+					pole = sd.pole,
+					upperLen = upper.Size.Y,
+					foreLen = fore.Size.Y,
+					handLen = hand.Size.Y,
+					rot = CFrame.Angles(math.pi / 2, 0, 0),
+				})
+			end
+		end)
 	end
 	-- imported cars: the live cluster behind their own wheel
 	local dashPanel = model:FindFirstChild("DashCluster", true)
@@ -807,11 +868,11 @@ function Driving.render(dt: number)
 	if s.steerMount and #s.localArms > 0 then
 		local wheelCF = s.steerMount * CFrame.Angles(0, 0, rot)
 		for _, arm in s.localArms do
-			local handCF = wheelCF * CFrame.new(arm.grip)
-			local upperCF, foreCF = CarBuilder.solveArm(arm.shoulder, handCF.Position, arm.upperLen, arm.foreLen, arm.pole)
-			arm.upper.CFrame = root.CFrame * upperCF
-			arm.fore.CFrame = root.CFrame * foreCF
-			arm.glove.CFrame = root.CFrame * handCF
+			local handPos = (wheelCF * CFrame.new(arm.grip)).Position
+			local upperCF, foreCF = CarBuilder.solveArm(arm.shoulder, handPos, arm.upperLen, arm.foreLen, arm.pole)
+			arm.upper.CFrame = root.CFrame * upperCF * arm.rot
+			arm.fore.CFrame = root.CFrame * foreCF * arm.rot
+			arm.glove.CFrame = root.CFrame * foreCF * CFrame.new(0, 0, -(arm.foreLen + arm.handLen) / 2) * arm.rot
 		end
 	end
 	if s.steerMount then

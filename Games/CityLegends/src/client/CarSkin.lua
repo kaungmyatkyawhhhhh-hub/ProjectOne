@@ -43,6 +43,9 @@ type Imported = {
 	-- the model's own steering wheel (turns with the steering) and driver's eye, in ground space
 	steer: { mount: CFrame, parts: { Template }, radius: number }?,
 	eye: Vector3?,
+	-- where the live gauges go: on the dash surface behind the wheel, facing the driver (ground space)
+	cluster: CFrame?,
+	clusterSize: Vector2?,
 }
 type Look = { material: Enum.Material, color: Color3?, reflectance: number, transparency: number, shadow: boolean }
 
@@ -501,6 +504,64 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 	end
 
+	-- gauges: look from the eye through the top half of the wheel and stop at the first
+	-- dash surface past it (that's where the car's own instrument cluster is)
+	if out.eye then
+		local eyeW = frame:PointToWorldSpace(out.eye / scale)
+		local fwdW = frame.LookVector
+		local target: Vector3
+		local minDist: number
+		local rm: number -- wheel radius, model studs
+		if out.steer then
+			local mountW = frame * CFrame.new(out.steer.mount.Position / scale)
+			rm = out.steer.radius / scale
+			target = mountW.Position + Vector3.yAxis * rm * 0.35
+			minDist = (target - eyeW).Magnitude + 0.15 / scale
+		else
+			rm = 0.5 / scale
+			target = eyeW + fwdW * (2.2 / scale) - Vector3.yAxis * (0.75 / scale)
+			minDist = 1.2 / scale
+		end
+		local dir = (target - eyeW).Unit
+		local best = math.huge
+		for _, d in visible do
+			if inWheel[d] or inSteer(d) then
+				continue
+			end
+			local o = d.CFrame:PointToObjectSpace(eyeW)
+			local h = d.Size / 2
+			if math.abs(o.X) <= h.X and math.abs(o.Y) <= h.Y and math.abs(o.Z) <= h.Z then
+				continue -- a shell around the driver (whole-cabin mesh): not a dash surface
+			end
+			local v = d.CFrame:VectorToObjectSpace(dir)
+			local tmin, tmax = -math.huge, math.huge
+			local hit = true
+			for _, ax in { "X", "Y", "Z" } do
+				local oa, va, ha = (o :: any)[ax], (v :: any)[ax], (h :: any)[ax]
+				if math.abs(va) < 1e-6 then
+					if math.abs(oa) > ha then
+						hit = false
+						break
+					end
+				else
+					local t1, t2 = (-ha - oa) / va, (ha - oa) / va
+					tmin = math.max(tmin, math.min(t1, t2))
+					tmax = math.min(tmax, math.max(t1, t2))
+				end
+			end
+			if hit and tmax >= tmin and tmin > minDist and tmin < best then
+				best = tmin
+			end
+		end
+		local t = if best < 4 / scale * 3 then best - 0.03 / scale else (target - eyeW).Magnitude + 0.4 / scale
+		local posW = eyeW + dir * t
+		local pos = frame:PointToObjectSpace(posW) * scale
+		local eyeG = out.eye
+		out.cluster = CFrame.lookAt(pos, pos + (pos - eyeG).Unit) -- back face looks at the driver
+		local r = rm * scale
+		out.clusterSize = Vector2.new(r * 1.7, r * 0.62)
+	end
+
 	local k = 0
 	for _, d in visible do
 		if not inWheel[d] and not (out.steer and inSteer(d)) then
@@ -685,24 +746,18 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				model:SetAttribute("ArmsFitted", true)
 			end
 		end
-		-- live instrument cluster in the dash, just over the wheel rim, facing the driver (Driving draws it)
-		if eyeRoot and not liteMode then
-			local eyeW = root.CFrame * eyeRoot
-			local fwd = root.CFrame.LookVector
-			local r = if steer then steer.radius else 0.5
-			local wheelW = if steer then (groundCF * steer.mount).Position else eyeW + fwd * 1.9 - Vector3.yAxis * 0.9
+		-- live instrument cluster on the car's own gauge spot (Driving draws it)
+		if imported.cluster and imported.clusterSize and not liteMode then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
-			cluster.Size = Vector3.new(r * 1.9, r * 0.68, 0.02)
+			cluster.Size = Vector3.new(imported.clusterSize.X, imported.clusterSize.Y, 0.02)
 			cluster.Transparency = 1
 			cluster.CanCollide = false
 			cluster.CanQuery = false
 			cluster.CanTouch = false
 			cluster.Massless = true
 			cluster.CastShadow = false
-			-- seen just over the top of the rim: a bit past the wheel, at rim height
-			local pos = wheelW + fwd * 0.55 + Vector3.yAxis * (r * 0.95)
-			cluster.CFrame = CFrame.lookAt(pos, pos + (pos - eyeW).Unit) -- back face looks at the eye
+			cluster.CFrame = groundCF * imported.cluster
 			cluster.Parent = skin
 			local w = Instance.new("WeldConstraint")
 			w.Part0 = root
