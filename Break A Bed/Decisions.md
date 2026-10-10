@@ -5,6 +5,7 @@
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## Current
+- **2026-10-10: Robux shop** on the left of the screen: +1 / +3 / +9 Level packs (suggested R$19 / R$49 / R$129) and a permanent x2 Strength game pass (suggested R$199). A level pack sets Strength to exactly what the new Level needs. Prices are suggestions; the real ones come from Roblox once the products exist.
 - **2026-10-10: Critical hits.** 1 in 10 chops is a CRITICAL!: 3× damage and bonus Cash on the spot (10% of that bed's break reward, at least $1), with orange text and a harder hit.
 - **2026-10-10: "TOP Total Damage Dealt" leaderboard sign** on the right of the spawn plaza: top 10 across all servers, refreshed every 3 minutes, shows your own total too.
 - **2026-10-10: Group Reward** 🎁 button on the right: join the Roblox group and claim **+10% Strength from every punch, forever** (Claude's pick; easy to change). Waiting for the owner's group id (`GameConfig.GroupId`); until then it says "Coming soon".
