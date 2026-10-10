@@ -19,6 +19,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **When a bed breaks:** it splinters, cash pops out, and a **COMPLETED ✅** sign appears next to it. The bed respawns instantly.
   - **First time:** you go back to normal view automatically.
   - **Already completed:** you stay in the break screen and can keep breaking it for cash until **EXIT**.
+- **Upgrade boards** on the left of the spawn plaza: ⚡ **Training Speed** (multiplies the Strength from every punch, x1.00 → x1.15 → …) and 👟 **Walk Speed** (16 → 18 → …). Each board shows your current → next value and the price (red when you can't afford it). Step on the green pad in front to buy a level; click while standing on it to buy more. Not enough cash shows "Not enough money" in red.
 - **SPAWN button** at the top: teleports you back to spawn from anywhere, even mid-break.
 - **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (🔊 mute button), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.
@@ -56,6 +57,13 @@ All numbers (beds, training items, damage, levels) are in `GameConfig`.
 | 15 | Galaxy Post | +460M | $100B |
 | 16 | Black Hole Post | +1.9B | $400B |
 | 17 | Infinity Post | +7.9B | $1.5T |
+
+## Upgrades
+
+| Upgrade | Each level | Range | First price | Price growth |
+|---|---|---|---|---|
+| ⚡ Training Speed | +0.15× Strength per punch | x1.00 → x10.00 (60 levels) | $200 | ×1.45 per level (x4.00 → x4.15 costs ~$340K) |
+| 👟 Walk Speed | +2 walk speed | 16 → 60 (22 levels) | $100 | ×2 per level (34 → 36 costs ~$51K) |
 
 ## Beds (in path order)
 
