@@ -8,7 +8,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 
 
 - **Not a programmer.** They work in Roblox Studio and often use a phone, so give short, plain steps ("open X, click Y").
-- **Deliverable is a place file.** Rebuild `CityLegends.rbxlx` after changes and send it to them.
+- **Deliverable is a place file.** Build `CityLegends.rbxl` (binary, gitignored; `rojo build default.project.json -o CityLegends.rbxl`) after changes and send it to them. The place is not committed: the car models make it ~45 MB.
 - **Target look is "Highway Legends"** (another Roblox game): realistic cars, a Highway Legends-style HUD, a rainy night city.
 - **Never ask for or accept their Roblox / alt account logins or cookies.** They offered once; it was declined.
 - **Fictional names only.** Cars use fictional names and no real badges. Car looks can be inspired by real cars.
@@ -17,7 +17,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 
 - `src/shared`: modules used by both sides.
   - `Config`: all tuning: economy, progression, daily gift, traffic, sounds, theme.
-  - `Cars`: the roster of 15 cars, ids like `brute_srx`.
+  - `Cars`: the roster of 55 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`.
   - `CarBuilder`: part-built car, physics hitbox, interior, driver arms. `getDims(class, id)` gives per-car proportions through `DIM_OVERRIDES`.
   - `CarMesh`: procedural lofted car meshes, with a `DESIGNS` table per car.
   - `CityLayout`, `FacadeTex`.
@@ -57,6 +57,10 @@ Keep `luau-lsp analyze` free of errors. Nothing can be run in real Roblox from a
    - Otherwise it is any model (Toolbox, Creator Store, bought). The generic adapter finds which way it faces from its VehicleSeat or PrimaryPart, finds the wheels from a `Wheels` folder with FL/FR/RL/RR or from wheel-like names, scales it to our wheelbase, and copies only the looks of visible parts. A `Reverse` attribute flips a model that comes in backwards.
 2. **Runtime meshes:** `CarMesh.build` turned into EditableMesh parts. This needs Game Settings → Security → "Allow Mesh / Image APIs".
 3. **Fallback:** the old part-built body.
+
+- `assets/CarModels.rbxm` holds the owner's imported cars (exported from their place with Lune; Rojo puts it in `ReplicatedStorage.CarModels`). When they send a new place, re-export it: Lune can't read new Studio files directly, so first strip the `Tags` PROP chunks (bad type) from the binary.
+- Real size: `CarBuilder.REAL_WB` holds each car's real wheelbase in metres, at `STUDS_PER_METRE = 3`. An imported model is scaled to that wheelbase and its own wheel radius becomes the physics wheel radius.
+- Imported models bring their own cabin, so ours (dash, seats, wheel, driver, arms) is hidden (`OwnInterior` attribute). Their steering wheel (an `SW` group or anything named "steering wheel") turns on our `SteerMotor`. The first-person eye sits above their `DriveSeat` at 80% of the roof height; an `EyeHeight` number attribute on the model nudges it in studs.
 
 Traffic uses the "lite" runtime meshes first. The owner thinks the procedural cars look bad. Their plan is to insert real Creator Store car models in Studio themselves, delete the scripts inside, and put them in `ReplicatedStorage/CarModels` named after car ids.
 

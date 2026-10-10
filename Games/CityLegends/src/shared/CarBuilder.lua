@@ -62,25 +62,98 @@ local DIM_OVERRIDES: { [string]: { [string]: number } } = {
 	outlaw_69 = { L = 15.6, W = 6.6, H = 4.0, clr = 0.42, belt = 2.72, wheelR = 1.12, wheelW = 1.05, wb = 9.6, hood = 5.5, ws = 2.1, roof = 2.6, rear = 2.4 },
 	velluto_p7 = { L = 15.2, H = 3.4, hood = 3.8, ws = 2.7, roof = 1.9, rear = 3.6, wb = 9.0 },
 }
+-- Real wheelbases in metres. Each car is built at real size: its wheelbase
+-- sets the length, and an imported model's own wheels set the wheel size.
+CarBuilder.STUDS_PER_METRE = 3.0
+local REAL_WB: { [string]: number } = {
+	suzaki_swift = 2.45, toyoka_belta = 2.55, dongfang_nami = 2.66, neto_v = 2.42, byt_atto3 = 2.72,
+	toyoka_camri = 2.825, toyoka_crown = 2.85, toyoka_alfard = 3.0, toyoka_lc200 = 2.85, nisun_350z = 2.65,
+	bnw_530i = 2.975, bnw_540i = 2.975, bentz_e200_w212 = 2.874, bentz_e300_w212 = 2.874, bentz_e400_w212 = 2.874,
+	bentz_e200_w213 = 2.939, bentz_e300_w213 = 2.939, bentz_e400_w213 = 2.939, bnw_330i_g20 = 2.851,
+	bnw_m3_e92 = 2.761, bnw_m3_f80 = 2.812, bnw_m5_e60 = 2.889, bnw_m6_v10 = 2.78, bentz_cla45 = 2.699,
+	bentz_cls550 = 2.874, bentz_cls55 = 2.854, bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
+	dodger_challenger = 2.946, bnw_x6 = 2.933, toyoka_lc300 = 2.85, lexis_lx570 = 2.85, bentz_g63 = 2.89,
+	porsha_panamera = 2.95, nisun_gtr = 2.78, astin_db9 = 2.74, astin_vantage = 2.6, ferrara_f430 = 2.6,
+	lambrini_lp560 = 2.56, lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
+	ferrara_458 = 2.65, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,
+	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_phantom = 3.57,
+	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lambrini_lp750 = 2.7,
+}
+
+-- An imported model's wheelbase and wheel radius (its own studs), from its Wheels folder
+local function partsBounds(inst: Instance): (Vector3?, Vector3?)
+	local list = inst:GetDescendants()
+	table.insert(list, inst)
+	local mn, mx = nil, nil
+	for _, d in list do
+		if d:IsA("BasePart") and d.Transparency < 0.98 then
+			local lo, hi = d.Position - d.Size / 2, d.Position + d.Size / 2
+			mn = if mn then mn:Min(lo) else lo
+			mx = if mx then mx:Max(hi) else hi
+		end
+	end
+	return mn, mx
+end
+function CarBuilder.modelWheels(id: string): (number?, number?)
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local folder = ReplicatedStorage:FindFirstChild("CarModels", true)
+	local src = if folder then folder:FindFirstChild(id) else nil
+	local wheels = if src then src:FindFirstChild("Wheels", true) else nil
+	if not wheels then
+		return nil, nil
+	end
+	local c: { [string]: Vector3 } = {}
+	local radius = 0
+	for _, k in wheels:GetChildren() do
+		local mn, mx = partsBounds(k)
+		if mn and mx then
+			c[k.Name:upper()] = (mn + mx) / 2
+			local e = mx - mn
+			radius = math.max(radius, e.Y / 2)
+		end
+	end
+	if not (c.FL and c.RL and c.FR and c.RR) or radius <= 0 then
+		return nil, nil
+	end
+	local wb = ((c.FL + c.FR) / 2 - (c.RL + c.RR) / 2).Magnitude
+	return wb, radius
+end
+
 local mergedDims: { [string]: Dims } = {}
 
 function CarBuilder.getDims(class: string, id: string?): Dims
 	local base = DIMS[class] or DIMS.Sedan
-	local over = if id then DIM_OVERRIDES[id] else nil
-	if not over or not id then
+	if not id then
 		return base
 	end
 	local key = class .. "/" .. id
 	local cached = mergedDims[key]
-	if not cached then
-		local d = table.clone(base)
+	if cached then
+		return cached
+	end
+	local d = table.clone(base)
+	local over = DIM_OVERRIDES[id]
+	if over then
 		for k, v in over do
 			(d :: any)[k] = v
 		end
-		cached = d
+	end
+	local real = REAL_WB[id]
+	if real then
+		local wb = real * CarBuilder.STUDS_PER_METRE
+		d.L *= wb / d.wb
+		d.wb = wb
+	end
+	-- an imported model's wheels at the real scale (its body is sized to the same wheelbase)
+	local mwb, mr = CarBuilder.modelWheels(id)
+	if mwb and mr and mwb > 0 then
+		d.wheelR = math.clamp(mr * d.wb / mwb, 0.7, 1.8)
+	end
+	-- don't cache before the car models have loaded
+	if game:GetService("ReplicatedStorage"):FindFirstChild("CarModels", true) or not real then
 		mergedDims[key] = d
 	end
-	return cached
+	return d
 end
 
 ---------------------------------------------------------------------

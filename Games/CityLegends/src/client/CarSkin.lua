@@ -40,6 +40,9 @@ type Imported = {
 	-- set for any other car model (Creator Store, bought, hand-made): parts keep
 	-- their own look and each corner's wheel parts ride on our wheel
 	generic: { [string]: GenericWheel }?,
+	-- the model's own steering wheel (turns with the steering) and driver's eye, in ground space
+	steer: { mount: CFrame, parts: { Template } }?,
+	eye: Vector3?,
 }
 type Look = { material: Enum.Material, color: Color3?, reflectance: number, transparency: number, shadow: boolean }
 
@@ -253,6 +256,35 @@ local function visualClone(d: BasePart, scale: number): BasePart
 end
 
 function readGeneric(src: Instance, dims: { [string]: number }): Imported
+	-- the model's steering wheel: an "SW" group (A-Chassis) or anything named steering wheel
+	local steerRoots: { Instance } = {}
+	local function isSteerName(n: string): boolean
+		local k = n:lower():gsub("[%s_%-]", "")
+		return k == "sw" or k:find("steeringwheel") ~= nil
+	end
+	for _, d in src:GetDescendants() do
+		if isSteerName(d.Name) then
+			local nested = false
+			for _, r in steerRoots do
+				if d:IsDescendantOf(r) then
+					nested = true
+					break
+				end
+			end
+			if not nested then
+				table.insert(steerRoots, d)
+			end
+		end
+	end
+	local function inSteer(d: Instance): boolean
+		for _, r in steerRoots do
+			if d == r or d:IsDescendantOf(r) then
+				return true
+			end
+		end
+		return false
+	end
+
 	local visible: { BasePart } = {}
 	for _, d in src:GetDescendants() do
 		if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
@@ -268,7 +300,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		maxV = maxV:Max(d.Position)
 	end
 	-- forward direction
-	local seat = src:FindFirstChildWhichIsA("VehicleSeat", true)
+	local driveSeat = src:FindFirstChild("DriveSeat", true)
+	local seat = if driveSeat and driveSeat:IsA("VehicleSeat") then driveSeat else src:FindFirstChildWhichIsA("VehicleSeat", true)
 	local primary = if src:IsA("Model") then src.PrimaryPart else nil
 	local f: Vector3
 	if seat then
@@ -320,7 +353,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		local cand: { BasePart } = {}
 		for _, d in visible do
 			local n = d.Name:lower()
-			if n:find("wheel") or n:find("tire") or n:find("tyre") or n:find("rim") then
+			if (n:find("wheel") or n:find("tire") or n:find("tyre") or n:find("rim")) and not n:find("steer") and not inSteer(d) then
 				table.insert(cand, d)
 			end
 		end
@@ -366,17 +399,84 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 	local wheelbase = (frontZ - rearZ) / 2
 	local scale = math.clamp(dims.wb / math.max(wheelbase, 1e-3), 0.02, 50)
+	-- wheel radius in the model's own studs (dims.wheelR is the same wheel at our scale)
+	local modelR = dims.wheelR / scale
 	-- ground frame: its wheel centres land at our wheel height
-	local origin = Vector3.new(mid.X, mid.Y - dims.wheelR / scale, mid.Z)
+	local origin = Vector3.new(mid.X, mid.Y - modelR, mid.Z)
 	local frame = CFrame.lookAt(origin, origin + f)
 	local function tmpl(d: BasePart, about: Vector3): Template
 		local rel = frame:ToObjectSpace(d.CFrame)
 		return { part = visualClone(d, scale) :: any, offset = CFrame.new(rel.Position * scale - about) * rel.Rotation }
 	end
 	local out: Imported = { body = {}, wheel = {}, exhausts = {}, generic = {} }
+
+	-- steering wheel: turns about its own thinnest axis, pointing into the dash
+	local steerParts: { BasePart } = {}
+	local biggest: BasePart? = nil
+	for _, d in visible do
+		if not inWheel[d] and inSteer(d) then
+			table.insert(steerParts, d)
+			if not biggest or d.Size.Magnitude > biggest.Size.Magnitude then
+				biggest = d
+			end
+		end
+	end
+	if biggest then
+		local sz = biggest.Size
+		local axis = if sz.X <= sz.Y and sz.X <= sz.Z then biggest.CFrame.RightVector
+			elseif sz.Y <= sz.Z then biggest.CFrame.UpVector
+			else biggest.CFrame.LookVector
+		if axis:Dot(f) < 0 then
+			axis = -axis
+		end
+		local a, b = Vector3.one * math.huge, -Vector3.one * math.huge
+		for _, d in steerParts do
+			a = a:Min(d.Position)
+			b = b:Max(d.Position)
+		end
+		local center = (a + b) / 2
+		local mountWorld = CFrame.lookAt(center, center + axis)
+		local mountRel = frame:ToObjectSpace(mountWorld)
+		local mount = CFrame.new(mountRel.Position * scale) * mountRel.Rotation
+		local parts = {}
+		for _, d in steerParts do
+			local t = tmpl(d, Vector3.zero)
+			t.offset = mount:Inverse() * t.offset
+			table.insert(parts, t)
+		end
+		out.steer = { mount = mount, parts = parts }
+	end
+
+	-- driver's eye: above the driver's seat, at 80% of the roof height there
+	local seatPart = seat or src:FindFirstChildWhichIsA("Seat", true)
+	if seatPart then
+		local sp = frame:PointToObjectSpace(seatPart.Position)
+		local roof = 0
+		for _, d in visible do
+			if inWheel[d] then
+				continue
+			end
+			local rel = frame:ToObjectSpace(d.CFrame)
+			local h = d.Size / 2
+			local lo, hi = Vector3.one * math.huge, -Vector3.one * math.huge
+			for _, c in { Vector3.new(1, 1, 1), Vector3.new(1, 1, -1), Vector3.new(1, -1, 1), Vector3.new(1, -1, -1), Vector3.new(-1, 1, 1), Vector3.new(-1, 1, -1), Vector3.new(-1, -1, 1), Vector3.new(-1, -1, -1) } do
+				local q = rel * (h * c)
+				lo = lo:Min(q)
+				hi = hi:Max(q)
+			end
+			if sp.X >= lo.X and sp.X <= hi.X and sp.Z >= lo.Z and sp.Z <= hi.Z then
+				roof = math.max(roof, hi.Y)
+			end
+		end
+		if roof > 0 then
+			local lift = (src:GetAttribute("EyeHeight") :: number?) or 0 -- per-car tweak, in studs
+			out.eye = Vector3.new(sp.X * scale, roof * scale * 0.8 + lift, sp.Z * scale + 0.3)
+		end
+	end
+
 	local k = 0
 	for _, d in visible do
-		if not inWheel[d] then
+		if not inWheel[d] and not (out.steer and inSteer(d)) then
 			k += 1
 			out.body["Part" .. k] = tmpl(d, Vector3.zero)
 		end
@@ -524,6 +624,46 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		local p = place(t, "Skin" .. name, look, color, groundCF, root, skin)
 		if base == "Tail" then
 			p:SetAttribute("TailLight", true)
+		end
+	end
+
+	if generic and imported then
+		-- the model's own steering wheel turns on our steering joint (or stays fixed without one)
+		local steerMotor = root:FindFirstChild("SteerMotor") :: Motor6D?
+		local hub = if steerMotor then steerMotor.Part1 else nil
+		local steer = imported.steer
+		if steer then
+			local mountRoot = root.CFrame:Inverse() * groundCF * steer.mount
+			if steerMotor and hub then
+				steerMotor.C0 = mountRoot
+				model:SetAttribute("SteerMount", mountRoot)
+			end
+			for i, t in steer.parts do
+				local p = t.part:Clone()
+				p.Name = "SkinSteer" .. i
+				p.CFrame = groundCF * steer.mount * t.offset
+				p.Parent = skin
+				local w = Instance.new("Weld")
+				w.Part0 = if hub then hub else root
+				w.Part1 = p
+				w.C0 = if hub then t.offset else mountRoot * t.offset
+				w.Parent = p
+			end
+		end
+		-- the camera sits at the model's own driver's seat
+		if imported.eye then
+			model:SetAttribute("Eye", imported.eye - Vector3.new(0, height / 2, 0))
+		end
+		-- the model has its own cabin: hide ours (dash, seats, wheel, driver, arms)
+		model:SetAttribute("OwnInterior", true)
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") and d ~= root and not d:GetAttribute("Ext") and not d:IsDescendantOf(skin) then
+				if destroyReplaced then
+					d.Transparency = 1
+				else
+					d.LocalTransparencyModifier = 1
+				end
+			end
 		end
 	end
 

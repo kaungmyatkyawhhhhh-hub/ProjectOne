@@ -407,7 +407,9 @@ function Driving.attach(model: Model)
 	local glass = {}
 	for _, d in model:GetDescendants() do
 		if d:IsA("BasePart") then
-			if d.Name == "DriverHead" or d.Name == "DriverHair" or d.Name == "DriverNeck" then
+			if model:GetAttribute("OwnInterior") then
+				continue -- imported model: our cabin and driver are hidden for good
+			elseif d.Name == "DriverHead" or d.Name == "DriverHair" or d.Name == "DriverNeck" then
 				table.insert(hidden, d)
 			elseif d.Name == "SkinGlass" or (not model:GetAttribute("Skinned") and (d.Name == "Windshield" or d.Name == "SideGlassL" or d.Name == "SideGlassR")) then
 				table.insert(glass, d)

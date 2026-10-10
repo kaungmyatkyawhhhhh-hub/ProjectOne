@@ -35,3 +35,10 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - Sound quality upgrade (paused: Claude asks before resuming).
 - Find a real rain sound.
 - Balance the XP and reward numbers.
+
+## Car fixes (2026-10-10)
+- Cars are now real-world size (real wheelbase, 1 m = 3 studs).
+- Imported cars use their own interior and steering wheel; the script's dash, wheel and driver are hidden.
+- First-person camera sits at the model's driver seat. To nudge one car's camera: select the model in `CarModels`, add a Number attribute `EyeHeight` (e.g. `0.3` up, `-0.3` down).
+- A model's steering wheel only turns if it's in a group named `SW` or has "steering wheel" in its name.
+- Imported cars are saved in the game code (`Games/CityLegends/assets/CarModels.rbxm`).
