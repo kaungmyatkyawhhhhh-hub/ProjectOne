@@ -4,7 +4,7 @@ A Roblox night-city driving game. Players earn money driving and "cutting up" tr
 
 ## About the owner
 
-The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/ProjectOne`, folder `Games/CityLegends`). Follow the vault's root `CLAUDE.md`. That means reading its start notes before replying, never announcing it, and saving new decisions to the vault.
+The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/ProjectOne`, folder `Games/CityLegends`). Follow the vault's root `CLAUDE.md`. That means reading its start notes before replying, never announcing it, and saving new decisions to the vault. City Legends notes go only in the vault's `City Legends` folder (main note: `City Legends/City Legends.md`). Never mix them with another game's notes.
 
 
 - **Not a programmer.** They work in Roblox Studio and often use a phone, so give short, plain steps ("open X, click Y").
