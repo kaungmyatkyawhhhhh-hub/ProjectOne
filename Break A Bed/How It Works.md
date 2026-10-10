@@ -6,17 +6,19 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## The map
 - When the server starts, `WorldBuilder` builds everything from `GameConfig` into `Workspace.BreakABedWorld`:
-  - `Path`: the path, borders, lamp posts and the "BED PATH" arch
-  - `Beds`: `Bed1`…`Bed15`, each on cinder blocks with a rug, a floating name tag and a "Break" prompt
-  - `Training`: the training area, its sign, and the six training items on stands
+  - `Path`: white fences down both sides and across the far end, lamps where tiles meet, and the "BED PATH" arch
+  - `Beds`: `Bed1`…`Bed25`. Each has its own colored floor tile with the bed in the middle, a floating name tag (name, health, 💪 needed) and a "Break" prompt
+  - `Training`: the training area, its sign, and the 12 training items on stands (4 × 3)
 - Spawn is at the middle. The path runs away from spawn and the training area is off to the side.
-- Beds alternate left and right of the path.
+- You stand on the right-hand side of a bed to chop it. The COMPLETED sign goes on its left.
 
 ## Strength, Level and Cash
 - **Strength** goes up by the training item's amount on every chop.
-- **Level** is worked out from Strength: Level L needs 5 × (L − 1)² Strength (Level 2 at 5, Level 5 at 80, Level 10 at 405). A "LEVEL UP!" banner shows when it goes up.
+- **Level** is worked out from Strength. Each level needs about 35% more Strength than the last (Level 2 at 4, Level 10 at 139, Level 20 at 3K, Level 50 at 24M), so levels keep coming all the way into the trillions. A "LEVEL UP!" banner shows when it goes up.
 - **Damage per chop** on a bed = 1 + Strength ÷ 10 (rounded down).
 - **Cash** comes from breaking beds and buys better training items.
+- **Strength requirement:** each bed needs a minimum Strength before you can break it. Until then the prompt says "Need 💪 X" and the server refuses. At the requirement it takes about 30 chops (4 seconds).
+- **How the numbers grow:** each bed has about 3.3× the health of the one before, needs health ÷ 3 Strength, and pays about 3× more Cash. Each training item is affordable around a certain bed and takes 1 to 3 minutes of training to reach the next couple of beds.
 
 ## Breaking a bed (or training)
 1. Walk up and press **E** (or tap the button on mobile). The server locks you in place in front of the bed.
@@ -26,7 +28,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 5. At 0: you get the Cash, the bed is marked completed (saved), it splinters (only on your screen), cash pops out, and the COMPLETED ✅ sign appears. The bed respawns instantly at full health.
    - **First time you break that bed:** chopping stops, and after 1.4 seconds you're sent back to normal view (`GameConfig.FirstBreakExitDelay`).
    - **Bed already completed:** you stay in the break screen and keep breaking it for cash. The panel counts "Broken xN", and the hint says "Keep chopping for cash!".
-6. **EXIT** stops at any time.
+6. **EXIT** stops at any time. The **SPAWN** button (top of the screen) also ends it and teleports you back to spawn.
 
 **Per player / client-side:** bed health is kept separately for each player on the server. All break effects (flying pieces, wood chips, cash bills, the respawn blink, COMPLETED signs) are made by that player's own client in `Workspace.LocalFx`, which never reaches the server or other players. The real bed is never changed, so others always see a whole bed. Others only see your arm chopping. (Tested: right after a break the client had 31 pieces, the server had 0.)
 
