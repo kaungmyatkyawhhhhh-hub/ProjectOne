@@ -6,6 +6,7 @@ Tools that make Claude use fewer tokens. Set up 2026-10-10 for cloud sessions on
 - **Caveman** ([JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)): makes Claude's replies shorter.
   - `/caveman`: on. `/ultracave`: even shorter. `/caveman off` or "stop caveman": back to normal.
   - Only shortens chat text. Code is written in full.
+  - **Problem (2026-10-10):** in a new cloud session `/caveman` didn't work. The plugin is listed in settings but didn't actually install. RTK and Codebase Memory did load. Until fixed, just say "talk caveman" and Claude will copy the style by hand.
 - **Claude Mem** ([thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)): memory across sessions. Note: it saves memory on the machine it runs on, and cloud sessions are wiped, so it may not remember between sessions.
 - **RTK** ([rtk-ai/rtk](https://github.com/rtk-ai/rtk), version 0.51.0): shortens long command output (like `git status`) before Claude reads it. Installs itself at the start of each cloud session.
 - **Codebase Memory MCP** ([DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp), version 0.11.0): builds a map of a codebase so Claude reads fewer files. Most useful on code repos, less on this vault.
