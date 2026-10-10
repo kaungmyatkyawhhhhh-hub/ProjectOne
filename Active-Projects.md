@@ -11,7 +11,7 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 Game based on Chop A Brick: train to gain Strength and Level, then karate-chop beds along a path for Cash.
 - **Details:** [[Break A Bed/Project Overview]] (all Break A Bed notes go in the `Break A Bed` folder)
 - **Code:** `C:\Users\USER\Documents\Cashgrab`. Studio place "Break A Bed" (placeId 116443177548785).
-- **Now:** 25-bed fenced path, 17 training posts, upgrade boards, critical hits, a Total Damage leaderboard and a Group Reward button. Lives in the Studio place "Break a bed test version". Next: set the group id, publish and play-test the balance.
+- **Now:** 25-bed fenced path, 17 training posts, upgrade boards, critical hits, a Total Damage leaderboard, a Group Reward button and a Robux shop. Lives in the Studio place "Break a bed test version". Next: publish, create the Robux products and pass, set the group id, play-test the balance.
 - **Last updated:** 2026-10-10
 
 ## Obsidian + Claude setup: active

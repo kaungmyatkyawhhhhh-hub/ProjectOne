@@ -69,6 +69,13 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Claiming checks you're in the group, then gives **+10% Strength from every punch, forever** (saved). Not in the group: "Join the group first, then claim!".
 - The group is set by `GameConfig.GroupId` (the number in the group's web link). While it's 0 the panel says "Coming soon".
 
+## Robux shop
+- Four buttons on the left of the screen (smaller on phones): 💪 **+1 Level**, **+3 Levels**, **+9 Levels**, and a gold **x2 💪 Strength** pass with a red PERMANENT ribbon.
+- **Level packs** are developer products (buy as often as you like). Buying one sets your Strength to exactly what Level + 1/3/9 needs; your Level follows. Each purchase is remembered (saved), so Roblox retrying a purchase never gives it twice. Purchases wait until your saved progress has loaded.
+- **x2 Strength** is a game pass: every punch gives double Strength, forever. It stacks with Training Speed and the Group Reward. Once owned, the button says "OWNED ✅".
+- A "THANK YOU!" banner and confetti show after a purchase.
+- Ids go in `GameConfig.LevelPacks` (ProductId) and `GameConfig.DoubleStrengthPassId`. While an id is 0 the button says "Coming soon". Buttons show Roblox's real price once the product exists.
+
 ## Saving
 - DataStore `BreakABed_v2` stores Cash, Strength, completed beds, owned training posts, upgrade levels, total damage and whether the group reward was claimed. The leaderboard uses its own store, `BreakABed_TotalDamage_v1`.
 - Saves when you leave, every 2 minutes, and when the server shuts down.

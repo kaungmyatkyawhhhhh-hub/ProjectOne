@@ -23,6 +23,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Critical hits:** 1 in 10 chops is a **CRITICAL!** (orange text, 3× damage, bonus Cash).
 - **🏆 TOP Total Damage Dealt** sign on the right of the spawn plaza: top 10 across all servers, refreshed every 3 minutes, with your own total.
 - **🎁 Group Reward** button on the right of the screen: join the group, claim +10% Strength from punching forever. Needs the group id (`GameConfig.GroupId`).
+- **Robux shop** on the left of the screen: +1 / +3 / +9 Level packs and a permanent x2 Strength game pass. Needs the product and pass ids.
 - **SPAWN button** at the top: teleports you back to spawn from anywhere, even mid-break.
 - **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (🔊 mute button), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.
