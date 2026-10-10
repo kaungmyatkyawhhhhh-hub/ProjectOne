@@ -202,6 +202,8 @@
   },
   "active": "d7b4200d91bc3cf1",
   "lastOpenFiles": [
+    "Games/CityLegends/assets/CarModels.rbxm",
+    "Games/CityLegends/assets",
     "Break A Bed/2026-10-10.md",
     "City Legends/City Legends.md",
     "Preferences.md",
@@ -221,7 +223,6 @@
     "Games/CityLegends/src/shared/CarBuilder.lua",
     "Games/CityLegends/src/server/PlayerData.lua",
     "Games/CityLegends/src/server/Main.server.lua",
-    "Games/CityLegends/src/server/CityPremium.lua",
     "Break A Bed/Ideas.md",
     "Break A Bed/Project Overview.md",
     "Break A Bed/How It Works.md",
