@@ -8,10 +8,10 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **Last updated:** 2026-10-10
 
 ## Break A Bed (Roblox game): active
-Clicker game like Chop A Brick: hit beds to break them for coins, rebirth to unlock better beds.
+Game based on Chop A Brick: train to gain Strength and Level, then karate-chop beds along a path for Cash.
 - **Details:** [[Break A Bed/Project Overview]] (all Break A Bed notes go in the `Break A Bed` folder)
 - **Code:** `C:\Users\USER\Documents\Cashgrab`. Studio place "Break A Bed" (placeId 116443177548785).
-- **Now:** game works in Studio. Next: publish, balance rebirth numbers, add an upgrade shop.
+- **Now:** rebuilt to the new spec and tested in a test copy. Next: install it in the real place, publish, tune the numbers.
 - **Last updated:** 2026-10-10
 
 ## Obsidian + Claude setup: active
