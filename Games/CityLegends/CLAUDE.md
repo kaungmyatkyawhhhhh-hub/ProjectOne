@@ -8,7 +8,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 
 
 - **Not a programmer.** They work in Roblox Studio and often use a phone, so give short, plain steps ("open X, click Y").
-- **Deliverable is a place file.** Build `CityLegends.rbxl` (binary, gitignored; `rojo build default.project.json -o CityLegends.rbxl`, then `python3 tools/fix_rbxl.py CityLegends.rbxl`, which Studio needs: Rojo can compress the big SSTR chunk larger than raw and Studio then refuses the file) after changes and send it to them. The place is not committed: the car models make it ~45 MB.
+- **Deliverable is a place file.** Build `CityLegends.rbxl` (binary, gitignored; `rojo build default.project.json -o CityLegends.rbxl`, then `python3 tools/fix_rbxl.py CityLegends.rbxl`, which Studio needs: Rojo can compress the big SSTR chunk larger than raw and Studio then refuses the file) after changes. Chat downloads of big files get cut off (Studio then shows a readData error), so the built `CityLegends.rbxl` is committed and pushed (owner chose this 2026-10-11): it reaches their PC through Obsidian Git, or from github.com. Mention the GitHub path when sending.
 - **Target look is "Highway Legends"** (another Roblox game): realistic cars, a Highway Legends-style HUD, a rainy night city.
 - **Never ask for or accept their Roblox / alt account logins or cookies.** They offered once; it was declined.
 - **Fictional names only.** Cars use fictional names and no real badges. Car looks can be inspired by real cars.
