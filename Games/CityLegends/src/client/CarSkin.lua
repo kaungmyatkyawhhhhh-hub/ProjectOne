@@ -677,7 +677,9 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			end
 		end
 		local ownDesign = src.Name:sub(1, 7) == "ferrara" or src.Name == "lambrini_lp700"
-		local t = if best < 4 / scale * 3 and not ownDesign then best - 0.03 / scale else (target - eyeW).Magnitude + 0.45 / scale
+		-- how far past the wheel the car's real cluster sits (studs); the Aventador's is deep in its hood
+		local depth = if src.Name == "lambrini_lp700" then 1.0 else 0.45
+		local t = if best < 4 / scale * 3 and not ownDesign then best - 0.03 / scale else (target - eyeW).Magnitude + depth / scale
 		local posW = eyeW + dir * t
 		local pos = frame:PointToObjectSpace(posW) * scale
 		local eyeG = out.eye
@@ -980,7 +982,13 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			cluster.CanTouch = false
 			cluster.Massless = true
 			cluster.CastShadow = false
-			cluster.CFrame = groundCF * imported.cluster
+			-- per-car nudges set in Studio on the model: ClusterUp / ClusterForward (studs), ClusterSize (x)
+			local src = (ReplicatedStorage:FindFirstChild("CarModels", true) :: Instance):FindFirstChild(id, true)
+			local up = if src then (src:GetAttribute("ClusterUp") :: number?) or 0 else 0
+			local fwd = if src then (src:GetAttribute("ClusterForward") :: number?) or 0 else 0
+			local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
+			cluster.Size = Vector3.new(cluster.Size.X * k, cluster.Size.Y * k, cluster.Size.Z)
+			cluster.CFrame = groundCF * imported.cluster * CFrame.new(0, up, -fwd)
 			cluster.Parent = skin
 			local w = Instance.new("WeldConstraint")
 			w.Part0 = root

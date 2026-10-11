@@ -98,6 +98,7 @@ type State = {
 	partNeedles: { { part: BasePart, kind: string, pivot: CFrame, offset: CFrame } },
 	guiNeedles: { { gui: GuiObject, kind: string, base: number } },
 	speedShown: number,
+	smoke: { { emitter: ParticleEmitter, rear: boolean } },
 	-- body lean (radians): roll in turns, pitch on braking / accelerating
 	roll: number,
 	pitch: number,
@@ -627,6 +628,33 @@ function Driving.attach(model: Model)
 		dashUpdate = if okDash then upd else nil
 	end
 	local flames, flameParts, flameLight = buildFlames(model, root, spec)
+	-- tyre smoke at each wheel's contact patch; strength follows the squeal
+	local smoke: { { emitter: ParticleEmitter, rear: boolean } } = {}
+	for _, j in root:GetChildren() do
+		if j:IsA("Motor6D") and j.Name:sub(1, 6) == "Wheel_" then
+			local r = (j:GetAttribute("Radius") :: number?) or 1
+			local att = Instance.new("Attachment")
+			att.Name = "TyreSmoke"
+			att.Position = j.C0.Position - Vector3.new(0, r * 0.85, 0)
+			att.Parent = root
+			table.insert(flameParts, att)
+			local e = Instance.new("ParticleEmitter")
+			e.Rate = 0
+			e.Lifetime = NumberRange.new(0.9, 1.6)
+			e.Speed = NumberRange.new(2, 5)
+			e.SpreadAngle = Vector2.new(40, 40)
+			e.Acceleration = Vector3.new(0, 4, 0)
+			e.Drag = 2
+			e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.8), NumberSequenceKeypoint.new(1, 4.5) })
+			e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(1, 1) })
+			e.Color = ColorSequence.new(Color3.fromRGB(215, 215, 220))
+			e.LightInfluence = 0.8
+			e.Rotation = NumberRange.new(0, 360)
+			e.RotSpeed = NumberRange.new(-40, 40)
+			e.Parent = att
+			table.insert(smoke, { emitter = e, rear = j:GetAttribute("Front") ~= true })
+		end
+	end
 
 	local s: State = {
 		model = model,
@@ -670,6 +698,7 @@ function Driving.attach(model: Model)
 		partNeedles = partNeedles,
 		guiNeedles = guiNeedles,
 		speedShown = 0,
+		smoke = smoke,
 		roll = 0,
 		pitch = 0,
 		rpmShown = 0,
@@ -857,6 +886,17 @@ function Driving.step(dt: number)
 		end
 		latSpeed *= math.exp(-grip * dt)
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
+		-- tyres squeal: flooring it from low speed, braking hard at speed, turning hard when fast
+		local sf = math.abs(fwdSpeed) / s.topSpeed
+		if throttle > 0.7 and fwdSpeed >= -1 and sf < 0.35 then
+			s.slip += 34 * throttle * (1 - sf / 0.35)
+		end
+		if brake > 0.6 and fwdSpeed > 40 then
+			s.slip += 36 * brake
+		end
+		if math.abs(s.steer) > 0.35 and sf > 0.4 then
+			s.slip += 60 * math.abs(s.steer) * (sf - 0.4)
+		end
 
 		-- body lean: outward in turns, nose down when braking, squat when accelerating
 		local latG = math.clamp(fwdSpeed * yawRate / 196.2, -1.5, 1.5)
@@ -1023,6 +1063,11 @@ function Driving.render(dt: number)
 
 	-- engine / wind / tyre audio
 	s.engine:update(s.rpm, s.throttle, speedFrac, s.slip)
+	-- smoke with the squeal (same curve as the sound); launches smoke the rear tyres most
+	local squeal = math.clamp((s.slip - 8) / 40, 0, 1)
+	for _, sm in s.smoke do
+		sm.emitter.Rate = if squeal > 0.05 then squeal * (if sm.rear then 70 else 35) else 0
+	end
 
 	-- exhaust crackle + flame glow
 	if s.pops > 0 then
