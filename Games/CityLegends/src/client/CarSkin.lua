@@ -924,7 +924,9 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			end
 		end
 		-- live instrument cluster on the car's own gauge spot, when it has no working gauges of its own
-		if imported.cluster and imported.clusterSize and not liteMode and not imported.ownGauges then
+		-- (cars with their own design here, like the Ferrari, always get it)
+		local ownDesign = id:sub(1, 7) == "ferrara"
+		if imported.cluster and imported.clusterSize and not liteMode and (ownDesign or not imported.ownGauges) then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
 			cluster.Size = Vector3.new(imported.clusterSize.X, imported.clusterSize.Y, 0.02)
@@ -940,7 +942,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			w.Part0 = root
 			w.Part1 = cluster
 			w.Parent = cluster
-			cluster:SetAttribute("Style", if id:sub(1, 8) == "lambrini" then "Lambo" else "Modern")
+			cluster:SetAttribute("Style", if id:sub(1, 8) == "lambrini" then "Lambo" elseif id:sub(1, 7) == "ferrara" then "Ferrari" else "Modern")
 		end
 		-- the camera sits at the model's own driver's seat
 		if imported.eye then

@@ -219,6 +219,125 @@ local function modern(gui: SurfaceGui): Update
 	end
 end
 
+-- Ferrari 458: big yellow rev counter in the middle (0-10, red from 9, gear in a dark
+-- wedge), left screen with outside temperature and a fuel bar, right screen with speed and clock
+local FERRARI_YELLOW = Color3.fromRGB(246, 196, 0)
+local function ferrari(gui: SurfaceGui): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(8, 8, 10), BorderSizePixel = 0 }, gui)
+	-- side screens
+	local function screen(x: number): Frame
+		local f = new("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(x, 0.58),
+			Size = UDim2.fromScale(0.27, 0.62),
+			BackgroundColor3 = Color3.fromRGB(26, 30, 38),
+			BorderSizePixel = 0,
+		}, bg)
+		new("UICorner", { CornerRadius = UDim.new(0.08, 0) }, f)
+		new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(70, 78, 92), Color3.fromRGB(20, 22, 28)), Rotation = 90 }, f)
+		return f
+	end
+	local left = screen(0.15)
+	text(left, "Ambient Temperature", UDim2.fromScale(0.42, 0.16), UDim2.fromScale(0.7, 0.1), DIM, Enum.Font.Gotham)
+	text(left, "21.6°C", UDim2.fromScale(0.4, 0.38), UDim2.fromScale(0.65, 0.26), WHITE, Enum.Font.GothamMedium)
+	text(left, "1/2", UDim2.fromScale(0.5, 0.62), UDim2.fromScale(0.12, 0.08), DIM, Enum.Font.Gotham)
+	text(left, "1", UDim2.fromScale(0.9, 0.62), UDim2.fromScale(0.06, 0.08), DIM, Enum.Font.Gotham)
+	for i = 0, 9 do
+		new("Frame", {
+			Position = UDim2.fromScale(0.1 + i * 0.081, 0.72),
+			Size = UDim2.fromScale(0.065, 0.16),
+			BackgroundColor3 = Color3.fromRGB(255, 92, 20),
+			BorderSizePixel = 0,
+		}, left)
+	end
+	local right = screen(0.85)
+	local speed = text(right, "0", UDim2.fromScale(0.45, 0.42), UDim2.fromScale(0.5, 0.36), WHITE, Enum.Font.GothamMedium)
+	text(right, "mph", UDim2.fromScale(0.85, 0.48), UDim2.fromScale(0.16, 0.1), DIM, Enum.Font.Gotham)
+	new("Frame", { Position = UDim2.fromScale(0.08, 0.64), Size = UDim2.fromScale(0.84, 0.012), BackgroundColor3 = DIM, BorderSizePixel = 0 }, right)
+	local pill = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.82),
+		Size = UDim2.fromScale(0.42, 0.16),
+		BackgroundColor3 = Color3.fromRGB(90, 96, 108),
+		BorderSizePixel = 0,
+	}, right)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, pill)
+	local clockText = text(pill, clock(), UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.8, 0.8), WHITE, Enum.Font.Gotham)
+	-- the yellow rev counter
+	local box = new("Frame", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(1, 1),
+	}, bg)
+	new("UIAspectRatioConstraint", { AspectRatio = 1, DominantAxis = Enum.DominantAxis.Height }, box)
+	local rim = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(40, 40, 44), BorderSizePixel = 0 }, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, rim)
+	local face = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.94, 0.94),
+		BackgroundColor3 = FERRARI_YELLOW,
+		BorderSizePixel = 0,
+	}, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, face)
+	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(255, 220, 60), Color3.fromRGB(214, 160, 0)), Rotation = 60 }, face)
+	-- 0..10 from 7 o'clock round to 4 o'clock
+	local a0, a1 = -150, 110
+	for i = 0, 10 do
+		local ang = math.rad(a0 + (a1 - a0) * i / 10)
+		text(box, tostring(i), UDim2.fromScale(0.5 + math.sin(ang) * 0.36, 0.5 - math.cos(ang) * 0.36), UDim2.fromScale(0.12, 0.11), if i >= 9 then Color3.fromRGB(220, 20, 20) else WHITE, Enum.Font.GothamBold)
+	end
+	text(box, "RPM", UDim2.fromScale(0.66, 0.53), UDim2.fromScale(0.12, 0.06), Color3.fromRGB(60, 50, 20), Enum.Font.GothamBold)
+	text(box, "x1000", UDim2.fromScale(0.66, 0.59), UDim2.fromScale(0.1, 0.045), Color3.fromRGB(60, 50, 20), Enum.Font.Gotham)
+	-- gear in a dark wedge, lower right
+	local wedge = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.66, 0.74),
+		Size = UDim2.fromScale(0.26, 0.24),
+		BackgroundColor3 = Color3.fromRGB(28, 20, 10),
+		BorderSizePixel = 0,
+		Rotation = 8,
+	}, box)
+	new("UICorner", { CornerRadius = UDim.new(0.15, 0) }, wedge)
+	local gear = text(wedge, "N", UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.6, 0.8), Color3.fromRGB(255, 120, 0), Enum.Font.GothamBold)
+	-- needle (dark red) with a black hub
+	local needle = new("Frame", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(1, 1),
+		Rotation = a0,
+		ZIndex = 3,
+	}, box)
+	new("Frame", {
+		BorderSizePixel = 0,
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.fromScale(0.5, 0.1),
+		Size = UDim2.fromScale(0.014, 0.42),
+		BackgroundColor3 = Color3.fromRGB(150, 20, 24),
+		ZIndex = 3,
+	}, needle)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.09, 0.09),
+		BackgroundColor3 = Color3.fromRGB(12, 12, 14),
+		ZIndex = 4,
+	}, box))
+	local shown, last = 0, 0
+	return function(mph: number, g: string, rpm: number)
+		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+		needle.Rotation = a0 + (a1 - a0) * shown
+		speed.Text = tostring(math.floor(mph + 0.5))
+		gear.Text = g
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
 function DashGauges.build(panel: BasePart): Update
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "Gauges"
@@ -228,10 +347,22 @@ function DashGauges.build(panel: BasePart): Update
 	gui.Brightness = 1.4
 	gui.MaxDistance = 60
 	gui.Parent = panel
-	if panel:GetAttribute("Style") == "Lambo" then
-		return lambo(gui)
+	local style = panel:GetAttribute("Style")
+	local update = if style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) else modern(gui)
+	-- start-up: the screens fade up and the needles sweep to the end and back, like a real car
+	local started = os.clock()
+	local SWEEP = 1.6
+	return function(mph: number, g: string, rpm: number)
+		local t = os.clock() - started
+		if t < SWEEP then
+			gui.Brightness = 1.4 * math.clamp(t / 0.5, 0, 1)
+			local sweep = math.sin(math.clamp(t / SWEEP, 0, 1) * math.pi)
+			update(math.max(mph, sweep * 180), g, math.max(rpm, sweep))
+		else
+			gui.Brightness = 1.4
+			update(mph, g, rpm)
+		end
 	end
-	return modern(gui)
 end
 
 return DashGauges
