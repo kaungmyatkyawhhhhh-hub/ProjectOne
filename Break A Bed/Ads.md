@@ -8,7 +8,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 Roblox Ads Manager, experience "[🎉 RELEASE] Break a Bed".
 - **Goal:** Plays. **Audience:** All players (370M–450M).
 - **Budget:** 16 Ad Credit a day, 3 days. Ad Credit balance was 0, so credit has to be bought before it runs.
-- Claude's advice: buy the credit, run 7 days instead of 3 so Roblox has time to learn, leave Auto-Reload off, set the start time to a time that hasn't passed yet.
+- Claude's advice: buy the credit, run 7 days instead of 3 so Roblox has time to learn, leave Auto-Reload off (the 9:00 AM Chicago start = 8:30 PM the owner's time, which is fine; ads spread over the whole day anyway).
 
 ## Pictures (made by Claude)
 Cartoon style, in `Break A Bed/Ad Assets/`:
