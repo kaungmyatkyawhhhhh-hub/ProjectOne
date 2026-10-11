@@ -830,34 +830,20 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 	end
 
-	-- cabin trim gets a real material: Alcantara-style suede in sports cars, leather in the rest.
-	-- Only plain dark pieces inside the cabin (not baked textures, glass, lights or chrome)
-	local cabinMaterial: ((BasePart, BasePart) -> ())? = nil
-	if out.eye then
-		local id = src.Name
-		local sport = id:sub(1, 8) == "lambrini" or id:sub(1, 7) == "ferrara" or id:sub(1, 7) == "mclaran"
-			or id:sub(1, 6) == "porsha" or id == "nisun_gtr" or id == "toyoka_supra_mk4" or id:find("^bnw_m%d") ~= nil
-			or id == "bentz_cla45" or id == "bentz_cls63s" or id == "bentz_sls" or id:sub(1, 5) == "astin" or id == "audy_r8"
-		local eyeG = out.eye :: Vector3
-		cabinMaterial = function(d: BasePart, p: BasePart)
-			local rel = frame:PointToObjectSpace(d.Position) * scale
-			local big = math.max(d.Size.X, d.Size.Y, d.Size.Z) * scale
-			local inside = math.abs(rel.X) <= 2.1 and rel.Z >= eyeG.Z - 2.8 and rel.Z <= eyeG.Z + 1.4 and rel.Y >= 0.3 and rel.Y <= eyeG.Y + 0.5
-			if not inside or big > 3.5 or d.Transparency > 0.05 then
-				return
-			end
-			if d.Material == Enum.Material.Glass or d.Material == Enum.Material.Neon or d:FindFirstChildOfClass("SurfaceAppearance") then
-				return
-			end
-			if d:IsA("MeshPart") and d.TextureID ~= "" then
-				return -- a baked texture: its look comes from the picture
-			end
-			local c = d.Color
-			if 0.3 * c.R + 0.59 * c.G + 0.11 * c.B > 0.45 then
-				return -- light trim, chrome, screens
-			end
-			p.Material = if sport then Enum.Material.Fabric else Enum.Material.Leather
-			p.Reflectance = 0
+	-- every rough surface becomes smooth: Roblox's Sand / Fabric / Leather / Concrete etc. carry a
+	-- bumpy pattern that makes interiors look grainy up close
+	local ROUGH = {
+		[Enum.Material.Sand] = true, [Enum.Material.Fabric] = true, [Enum.Material.Leather] = true,
+		[Enum.Material.Concrete] = true, [Enum.Material.Granite] = true, [Enum.Material.Slate] = true,
+		[Enum.Material.Cobblestone] = true, [Enum.Material.Pebble] = true, [Enum.Material.Brick] = true,
+		[Enum.Material.Wood] = true, [Enum.Material.WoodPlanks] = true, [Enum.Material.Marble] = true,
+		[Enum.Material.CorrodedMetal] = true, [Enum.Material.DiamondPlate] = true, [Enum.Material.Foil] = true,
+		[Enum.Material.Plastic] = true, [Enum.Material.Rubber] = true, [Enum.Material.Asphalt] = true,
+		[Enum.Material.Basalt] = true, [Enum.Material.Rock] = true, [Enum.Material.Ground] = true,
+	}
+	local function cabinMaterial(d: BasePart, p: BasePart)
+		if ROUGH[d.Material] then
+			p.Material = Enum.Material.SmoothPlastic
 		end
 	end
 
@@ -867,9 +853,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			k += 1
 			local t = tmpl(d, Vector3.zero)
 			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
-			if cabinMaterial then
-				cabinMaterial(d, t.part)
-			end
+			cabinMaterial(d, t.part)
 			out.body["Part" .. k] = t
 		end
 	end

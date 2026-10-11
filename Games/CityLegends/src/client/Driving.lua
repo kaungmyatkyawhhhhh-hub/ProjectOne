@@ -638,13 +638,13 @@ function Driving.attach(model: Model)
 	local eyeAttr = model:GetAttribute("Eye")
 	-- panel size per design, in wheel radii (wide clusters show partly through the rim, like real)
 	local CLUSTER_SIZE = {
-		Aventador = { 1.6, 0.64, 0.8 },
+		Aventador = { 0.7, 0.7, 0.8 }, -- just the round dial, over the model's own
 		Ferrari = { 1.6, 0.6 },
 		BMWLive = { 1.8, 0.62 },
 		BMWClassic = { 1.6, 0.6 },
 		AMG = { 1.7, 0.62 },
 		SupraTRD = { 1.9, 0.62 },
-		Toyota = { 1.7, 0.62, 0.8 },
+		Toyota = { 1.7, 0.62, 1.0 },
 	}
 	local sizeFor = if type(style) == "string" then CLUSTER_SIZE[style] else nil
 	if dashPanel and dashPanel:IsA("BasePart") and sizeFor
