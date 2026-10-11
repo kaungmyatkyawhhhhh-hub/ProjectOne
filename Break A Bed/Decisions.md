@@ -46,3 +46,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: punch and break sounds are now different: punches only make a punch thump; breaking a bed plays a big wooden crash ("Wooden Gate Crash 1") plus a short crack. #break-a-bed
 
 - 2026-10-11: the top Strength tier pass is now x15 instead of x12 (still R$100). #break-a-bed
+
+- 2026-10-11: punch and break sounds are client-sided: each player only hears their own punches and bed breaks (other players still see your punch animation). #break-a-bed
