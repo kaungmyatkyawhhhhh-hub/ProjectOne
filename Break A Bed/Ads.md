@@ -11,9 +11,10 @@ Roblox Ads Manager, experience "[🎉 RELEASE] Break a Bed".
 - Claude's advice: buy the credit, run 7 days instead of 3 so Roblox has time to learn, leave Auto-Reload off (the 9:00 AM Chicago start = 8:30 PM the owner's time, which is fine; ads spread over the whole day anyway).
 
 ## Pictures (made by Claude)
-Cartoon style, in `Break A Bed/Ad Assets/`:
-- `thumbnail-1-break-a-bed.png` (1920x1080): "BREAK A BED!", fist punching a bed, cash, CRITICAL!
-- `thumbnail-2-can-you-break-it.png` (1920x1080): "CAN YOU BREAK IT?", blue version
+Roblox style (2026-10-11 v2): a muscular bacon-hair Roblox character punching a bed in half, 3D cartoon render. In `Break A Bed/Ad Assets/`:
+- `thumbnail-1-break-a-bed.png` (1920x1080): "BREAK A BED!", blue sky, CRITICAL!
+- `thumbnail-2-can-you-break-it.png` (1920x1080): "CAN YOU BREAK IT?", orange sky, +1.2K
 - `icon-512.png` (512x512): game icon
+The first, flat-cartoon versions are in git history.
 
 Next idea: real screenshots from the game with the title on top usually do better than drawn art.
