@@ -48,3 +48,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: the top Strength tier pass is now x15 instead of x12 (still R$100). #break-a-bed
 
 - 2026-10-11: punch and break sounds are client-sided: each player only hears their own punches and bed breaks (other players still see your punch animation). #break-a-bed
+
+- 2026-10-11: the training platform floor is now dark grey tiles in a neat grid with thin dark grout lines. #break-a-bed
+
+- 2026-10-11: walking into the VIP door without VIP opens the VIP game pass purchase window. #break-a-bed
