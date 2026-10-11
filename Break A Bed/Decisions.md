@@ -34,3 +34,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - ~~Coins split by damage, rebirths (+1 damage, +50% coins, cost 500 × 2.5ⁿ), locked tier row Cardboard → Cosmic, "Canopy Bed"~~: dropped in the rebuild.
 
 - 2026-10-11: HUD moved to the top (SPAWN + music center, stats top right, gift under them) inside the safe area; light-mode white panels; custom styled proximity prompt instead of Roblox's gray one. #break-a-bed
+
+- 2026-10-11: on phones the Robux shop is one SHOP button (top-left) that opens a panel, so the thumbstick area stays clear. #break-a-bed
