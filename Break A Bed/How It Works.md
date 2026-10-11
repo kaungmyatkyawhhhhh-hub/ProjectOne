@@ -101,3 +101,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## Testing tips
 - Turn on **Game Settings → Security → Enable Studio Access to API Services** to test saving in Studio.
 - Give yourself Strength or Cash during a playtest: Studio command bar in **Server** mode → `game.Players.YOURNAME.Stats.Strength.Value = 1000` (Level updates by itself). Use `Stats`, not `leaderstats`, which only holds the short text.
+
+## HUD layout and prompts (2026-10-11)
+- The HUD respects Roblox's safe area (below the top bar, inside phone notches) and shrinks on short screens.
+- All "Break" / "Buy" prompts use a custom style drawn by `GameClient` (key button, name, action) so they match the UI.
