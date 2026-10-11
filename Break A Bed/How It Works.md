@@ -105,3 +105,9 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## HUD layout and prompts (2026-10-11)
 - The HUD respects Roblox's safe area (below the top bar, inside phone notches) and shrinks on short screens.
 - All "Break" / "Buy" prompts use a custom style drawn by `GameClient` (key button, name, action) so they match the UI.
+
+## Map zones, screen effects, sounds (2026-10-11)
+- **Decor** (server module, run once in Edit mode, safe to re-run): lighting, the 5 zones (colours, gates, props, particles), the hub title and signpost, hills, pond, flowers. It only recolours the path/beds, never rebuilds them, so hand edits stay.
+- **Ambient** (on each player's screen): makes floating things bob and spin, and flies butterflies around the flowers.
+- **ScreenFx** (on each player's screen): edge glow, speed lines, break pulse, flying cash/strength icons, combo text.
+- **Sounds** play on your own screen; nearby players hear a quieter version.
