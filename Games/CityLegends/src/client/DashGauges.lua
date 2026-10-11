@@ -338,6 +338,136 @@ local function ferrari(gui: SurfaceGui): Update
 	end
 end
 
+-- Aventador LP700-4 (Strada mode), like the real TFT: silver bezel; round rev counter 0-9 with
+-- red from 7 and a blue inner ring; digital speed and yellow gear in the middle; fuel and water
+-- arcs on the left, oil pressure and oil temperature arcs on the right; radio and clock far left,
+-- warning lights and the shield far right
+local function arc(parent: Instance, center: UDim2, size: number, a0: number, a1: number, color: Color3, labels: { string }, title: string, value: number)
+	local box = new("Frame", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = center,
+		Size = UDim2.fromScale(size, size),
+	}, parent)
+	new("UIAspectRatioConstraint", { AspectRatio = 1, DominantAxis = Enum.DominantAxis.Height }, box)
+	local n = 14
+	for i = 0, n do
+		local f = i / n
+		local holder = new("Frame", {
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(1, 1),
+			Rotation = a0 + (a1 - a0) * f,
+		}, box)
+		new("Frame", {
+			BorderSizePixel = 0,
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0.02),
+			Size = UDim2.fromScale(0.05, 0.1),
+			BackgroundColor3 = if f <= value then color else Color3.fromRGB(40, 44, 56),
+		}, holder)
+	end
+	for i, l in labels do
+		local f = (i - 1) / math.max(#labels - 1, 1)
+		local ang = math.rad(a0 + (a1 - a0) * f)
+		text(box, l, UDim2.fromScale(0.5 + math.sin(ang) * 0.3, 0.5 - math.cos(ang) * 0.3), UDim2.fromScale(0.18, 0.09), DIM, Enum.Font.Gotham)
+	end
+	text(box, title, UDim2.fromScale(0.5 + math.sin(math.rad((a0 + a1) / 2)) * 0.12, 0.5), UDim2.fromScale(0.3, 0.07), DIM, Enum.Font.Gotham)
+end
+
+local function aventador(gui: SurfaceGui): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(3, 4, 7), BorderSizePixel = 0 }, gui)
+	-- silver bezel round the whole screen
+	local bezel = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.985, 0.95),
+		BackgroundTransparency = 1,
+	}, bg)
+	new("UICorner", { CornerRadius = UDim.new(0.18, 0) }, bezel)
+	new("UIStroke", { Color = Color3.fromRGB(150, 156, 166), Thickness = 5, Transparency = 0.1 }, bezel)
+	-- far left: radio, clock, date, outside temperature
+	text(bg, "FM 97.9", UDim2.fromScale(0.09, 0.3), UDim2.fromScale(0.09, 0.07), DIM, Enum.Font.Gotham)
+	local clockText = text(bg, clock(), UDim2.fromScale(0.09, 0.44), UDim2.fromScale(0.12, 0.13), WHITE, Enum.Font.GothamBold)
+	text(bg, os.date("%m.%d.%Y") :: string, UDim2.fromScale(0.09, 0.56), UDim2.fromScale(0.1, 0.06), DIM, Enum.Font.Gotham)
+	text(bg, "74.5 °F", UDim2.fromScale(0.09, 0.7), UDim2.fromScale(0.08, 0.07), WHITE, Enum.Font.Gotham)
+	-- fuel + water temperature (left), oil pressure + oil temperature (right)
+	arc(bg, UDim2.fromScale(0.3, 0.5), 0.9, -160, -20, BLUE, { "0", "50", "100" }, "Benzina", 0.8)
+	arc(bg, UDim2.fromScale(0.3, 0.5), 0.6, -160, -20, Color3.fromRGB(230, 230, 236), { "50", "90", "130" }, "Temp. Acqua", 0.5)
+	arc(bg, UDim2.fromScale(0.7, 0.5), 0.9, 20, 160, Color3.fromRGB(230, 230, 236), { "10", "5", "0" }, "Press. Olio", 0.45)
+	arc(bg, UDim2.fromScale(0.7, 0.5), 0.6, 20, 160, Color3.fromRGB(230, 230, 236), { "130", "90", "50" }, "Temp. Olio", 0.5)
+	-- far right: warning lights and the shield
+	text(bg, "◉", UDim2.fromScale(0.88, 0.32), UDim2.fromScale(0.05, 0.1), Color3.fromRGB(60, 210, 90), Enum.Font.GothamBold)
+	local shield = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.9, 0.6),
+		Size = UDim2.fromScale(0.07, 0.3),
+		BackgroundColor3 = Color3.fromRGB(20, 18, 8),
+		BorderSizePixel = 0,
+	}, bg)
+	new("UICorner", { CornerRadius = UDim.new(0.3, 0) }, shield)
+	new("UIStroke", { Color = AMBER, Thickness = 2 }, shield)
+	text(shield, "L", UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.7, 0.6), AMBER, Enum.Font.GothamBlack)
+	-- the rev counter: dark face, silver ring, blue inner ring, 0-9 (red from 7)
+	local box = new("Frame", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.98, 0.98),
+	}, bg)
+	new("UIAspectRatioConstraint", { AspectRatio = 1, DominantAxis = Enum.DominantAxis.Height }, box)
+	local ring = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(160, 166, 176), BorderSizePixel = 0 }, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, ring)
+	local face = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.94, 0.94),
+		BackgroundColor3 = Color3.fromRGB(8, 10, 16),
+		BorderSizePixel = 0,
+	}, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, face)
+	local inner = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.5, 0.5),
+		BackgroundTransparency = 1,
+	}, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, inner)
+	new("UIStroke", { Color = Color3.fromRGB(40, 120, 255), Thickness = 4, Transparency = 0.15 }, inner)
+	local setRpm = dial(box, UDim2.fromScale(0.5, 0.5), 0.9, { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" }, 7 / 9, Color3.fromRGB(255, 40, 50), -140, 140)
+	text(box, "Giri / min x 1000", UDim2.fromScale(0.5, 0.33), UDim2.fromScale(0.3, 0.045), DIM, Enum.Font.Gotham)
+	-- digital speed in a box, gear in yellow, mode and odometer underneath
+	local spdBox = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.62, 0.62),
+		Size = UDim2.fromScale(0.26, 0.12),
+		BackgroundColor3 = Color3.fromRGB(230, 232, 236),
+		BorderSizePixel = 0,
+		ZIndex = 5,
+	}, box)
+	local speed = text(spdBox, "0", UDim2.fromScale(0.42, 0.5), UDim2.fromScale(0.7, 0.9), Color3.fromRGB(10, 10, 14), Enum.Font.GothamBlack)
+	speed.ZIndex = 6
+	local unit = text(spdBox, "mph", UDim2.fromScale(0.88, 0.62), UDim2.fromScale(0.22, 0.5), Color3.fromRGB(60, 60, 70), Enum.Font.Gotham)
+	unit.ZIndex = 6
+	local gear = text(box, "N", UDim2.fromScale(0.4, 0.62), UDim2.fromScale(0.1, 0.14), AMBER, Enum.Font.GothamBlack)
+	gear.ZIndex = 5
+	local mode = text(box, "STRADA", UDim2.fromScale(0.5, 0.75), UDim2.fromScale(0.2, 0.06), AMBER, Enum.Font.GothamBold)
+	mode.ZIndex = 5
+	local odo = text(box, "000705 mi", UDim2.fromScale(0.5, 0.82), UDim2.fromScale(0.2, 0.05), WHITE, Enum.Font.Gotham)
+	odo.ZIndex = 5
+	local last = 0
+	return function(mph: number, g: string, rpm: number)
+		setRpm(rpm)
+		speed.Text = tostring(math.floor(mph + 0.5))
+		gear.Text = g
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
 function DashGauges.build(panel: BasePart): Update
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "Gauges"
@@ -348,7 +478,7 @@ function DashGauges.build(panel: BasePart): Update
 	gui.MaxDistance = 60
 	gui.Parent = panel
 	local style = panel:GetAttribute("Style")
-	local update = if style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) else modern(gui)
+	local update = if style == "Aventador" then aventador(gui) elseif style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) else modern(gui)
 	-- start-up: the screens fade up and the needles sweep to the end and back, like a real car
 	local started = os.clock()
 	local SWEEP = 1.6
