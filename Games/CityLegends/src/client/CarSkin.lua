@@ -878,7 +878,8 @@ local function importedFor(id: string): Imported?
 		return if cached then cached else nil
 	end
 	local folder = ReplicatedStorage:FindFirstChild("CarModels", true) -- anywhere in ReplicatedStorage
-	local src = if folder then folder:FindFirstChild(id, true) else nil
+	local alias = CarBuilder.MODEL_ALIAS[id]
+	local src = if folder then folder:FindFirstChild(id, true) or (if alias then folder:FindFirstChild(alias, true) else nil) else nil
 	local result: Imported? = nil
 	if src then
 		local ok, res = pcall(readImported, src)

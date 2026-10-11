@@ -75,9 +75,14 @@ local REAL_WB: { [string]: number } = {
 	porsha_panamera = 2.95, nisun_gtr = 2.78, astin_db9 = 2.74, astin_vantage = 2.6, ferrara_f430 = 2.6,
 	lambrini_lp560 = 2.56, lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
 	ferrara_458 = 2.65, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,
-	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_phantom = 3.57,
+	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.295,
 	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lambrini_lp750 = 2.7,
 }
+
+-- cars that share another car's imported model (same body and interior) until they get their own
+CarBuilder.MODEL_ALIAS = {
+	lambrini_lp570 = "lambrini_lp560",
+} :: { [string]: string }
 
 -- An imported model's wheelbase and wheel radius (its own studs), from its Wheels folder
 local function partsBounds(inst: Instance): (Vector3?, Vector3?)
@@ -96,7 +101,7 @@ end
 function CarBuilder.modelWheels(id: string): (number?, number?)
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local folder = ReplicatedStorage:FindFirstChild("CarModels", true)
-	local src = if folder then folder:FindFirstChild(id) else nil
+	local src = if folder then folder:FindFirstChild(id) or folder:FindFirstChild(CarBuilder.MODEL_ALIAS[id] or "") else nil
 	local wheels = if src then src:FindFirstChild("Wheels", true) else nil
 	if not wheels then
 		return nil, nil
