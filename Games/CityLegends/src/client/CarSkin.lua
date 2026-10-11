@@ -211,7 +211,6 @@ local function readImported(src: Instance): Imported
 		part.CanQuery = false
 		part.CanTouch = false
 		part.Massless = true
-		part.RenderFidelity = Enum.RenderFidelity.Automatic
 		local pos = rel.Position * scale - (if isWheel then hub else Vector3.zero)
 		local t = { part = part, offset = CFrame.new(pos) * rel.Rotation }
 		if isWheel then
@@ -272,9 +271,6 @@ local function visualClone(d: BasePart, scale: number): BasePart
 	p.CanQuery = false
 	p.CanTouch = false
 	p.Massless = true
-	if p:IsA("MeshPart") then
-		p.RenderFidelity = Enum.RenderFidelity.Precise -- full detail: the cabin is seen up close
-	end
 	return p
 end
 
@@ -878,7 +874,9 @@ end
 
 -- Build the meshes ahead of time (loading screen): every traffic design plus the given full ones
 function CarSkin.preload(fullIds: { string }?)
-	for _, spec in Cars.List do
+	-- lite meshes only for the cars traffic uses (all 55 would exceed the mesh memory budget)
+	for _, id in CarBuilder.TRAFFIC_POOL do
+		local spec = Cars.get(id)
 		bodyFor(spec.Id, spec.Class, true)
 		task.wait()
 	end

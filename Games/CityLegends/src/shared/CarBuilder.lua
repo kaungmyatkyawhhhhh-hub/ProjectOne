@@ -14,7 +14,6 @@
 ]]
 
 local Cars = require(script.Parent.Cars)
-local Config = require(script.Parent.Config)
 
 local CarBuilder = {}
 
@@ -873,30 +872,17 @@ function CarBuilder.build(spec: Cars.CarSpec, options: BuildOptions?): Model
 	return model
 end
 
--- Mass-produce a car spec for NPC traffic with a random realistic paint
+-- City traffic draws from a small pool of everyday cars: every design traffic shows needs its own
+-- runtime meshes, and building them for all 55 cars runs out of Roblox's mesh memory budget
+CarBuilder.TRAFFIC_POOL = {
+	"toyoka_camri", "toyoka_crown", "toyoka_belta", "suzaki_swift", "toyoka_alfard",
+	"toyoka_lc200", "bnw_530i", "bentz_e300_w213", "byt_atto3", "nisun_350z",
+}
+
+-- A car spec for NPC traffic (the paint is randomised by the caller)
 function CarBuilder.randomTrafficSpec(rng: Random): Cars.CarSpec
-	local weights = Config.Traffic.ClassWeights
-	local total = 0
-	for _, w in weights do
-		total += w
-	end
-	local pick = rng:NextNumber() * total
-	local chosenClass = "Sedan"
-	for _, class in Cars.Classes do
-		local w = weights[class] or 0
-		if pick <= w then
-			chosenClass = class
-			break
-		end
-		pick -= w
-	end
-	local candidates = {}
-	for _, spec in Cars.List do
-		if spec.Class == chosenClass then
-			table.insert(candidates, spec)
-		end
-	end
-	return candidates[rng:NextInteger(1, #candidates)]
+	local pool = CarBuilder.TRAFFIC_POOL
+	return Cars.get(pool[rng:NextInteger(1, #pool)])
 end
 
 return CarBuilder
