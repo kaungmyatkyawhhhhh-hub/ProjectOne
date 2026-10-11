@@ -21,6 +21,7 @@ local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
+local avatarDesc: HumanoidDescription? = nil -- for the driver's arms
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -472,39 +473,45 @@ function Driving.attach(model: Model)
 				table.insert(localSteer, { part = d, offset = off })
 			end
 		end
-		for _, d in model:GetDescendants() do
-			local kind = d:GetAttribute("GaugeKind")
-			if d:IsA("BasePart") and type(kind) == "string" then
-				for _, w in d:GetChildren() do
-					if w:IsA("Weld") or w:IsA("WeldConstraint") then
-						w:Destroy()
+		-- the model's own gauges (own pcall: a fault here must not cost the driver's hands)
+		local okG, errG = pcall(function()
+			for _, d in model:GetDescendants() do
+				local kind = d:GetAttribute("GaugeKind")
+				if d:IsA("BasePart") and type(kind) == "string" then
+					for _, w in d:GetChildren() do
+						if w:IsA("Weld") or w:IsA("WeldConstraint") then
+							w:Destroy()
+						end
 					end
-				end
-				d.Anchored = true
-				table.insert(partNeedles, { part = d, kind = kind, pivot = d:GetAttribute("GaugePivot") :: CFrame, offset = d:GetAttribute("GaugeOffset") :: CFrame })
-			elseif d:IsA("GuiObject") and d.Name == "Needle" and model:GetAttribute("OwnInterior") then
-				-- which dial: the nearest named ancestor (the screen part keeps its model name as SrcName)
-				local gk: string? = nil
-				local a: Instance? = d.Parent
-				while a and a ~= model do
-					local n = ((a:GetAttribute("SrcName") :: string?) or a.Name):lower()
-					if n == "spdn" or n == "tacn" then
-						gk = nil
-						break
+					d.Anchored = true
+					table.insert(partNeedles, { part = d, kind = kind, pivot = d:GetAttribute("GaugePivot") :: CFrame, offset = d:GetAttribute("GaugeOffset") :: CFrame })
+				elseif d:IsA("GuiObject") and d.Name == "Needle" and model:GetAttribute("OwnInterior") then
+					-- which dial: the nearest named ancestor (the screen part keeps its model name as SrcName)
+					local gk: string? = nil
+					local a: Instance? = d.Parent
+					while a and a ~= model do
+						local n = ((a:GetAttribute("SrcName") :: string?) or a.Name):lower()
+						if n == "spdn" or n == "tacn" then
+							gk = nil
+							break
+						end
+						if n:find("speed") or n:find("spd") then
+							gk = "speed"
+							break
+						elseif n:find("tach") or n:find("tac") or n:find("rpm") then
+							gk = "rpm"
+							break
+						end
+						a = a.Parent
 					end
-					if n:find("speed") or n:find("spd") then
-						gk = "speed"
-						break
-					elseif n:find("tach") or n:find("tac") or n:find("rpm") then
-						gk = "rpm"
-						break
+					if gk then
+						table.insert(guiNeedles, { gui = d, kind = gk, base = d.Rotation })
 					end
-					a = a.Parent
-				end
-				if gk then
-					table.insert(guiNeedles, { gui = d, kind = gk, base = d.Rotation })
 				end
 			end
+		end)
+		if not okG then
+			warn("[CityLegends] gauge needles failed:", errG)
 		end
 		if model:GetAttribute("ArmsFitted") then
 			local mount = model:GetAttribute("SteerMount") :: CFrame
@@ -523,10 +530,20 @@ function Driving.attach(model: Model)
 			-- the player's own avatar as R6 (clothes and skin): only its two arms are used, each one
 			-- straight from shoulder to hand, 30% of R6 thickness, posed every frame
 			task.spawn(function()
-				local ok, rig = pcall(function()
-					local desc = Players:GetHumanoidDescriptionFromUserId(player.UserId)
-					return Players:CreateHumanoidModelFromDescription(desc, Enum.HumanoidRigType.R6)
-				end)
+				-- the avatar look is fetched once per session; a slow or failed fetch is retried
+				local ok, rig = false, nil :: any
+				for attempt = 1, 3 do
+					ok, rig = pcall(function()
+						if not avatarDesc then
+							avatarDesc = Players:GetHumanoidDescriptionFromUserId(player.UserId)
+						end
+						return Players:CreateHumanoidModelFromDescription(avatarDesc :: HumanoidDescription, Enum.HumanoidRigType.R6)
+					end)
+					if ok then
+						break
+					end
+					task.wait(attempt)
+				end
 				if not ok or not rig or not rig:FindFirstChild("Left Arm") or not (state and state.model == model) then
 					if not ok then
 						warn("[CityLegends] driver arms unavailable:", rig)
