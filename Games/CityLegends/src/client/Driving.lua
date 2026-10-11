@@ -638,10 +638,10 @@ function Driving.attach(model: Model)
 	local eyeAttr = model:GetAttribute("Eye")
 	-- panel size per design, in wheel radii (wide clusters show partly through the rim, like real)
 	local CLUSTER_SIZE = {
-		Aventador = { 0.7, 0.7, 0.8 }, -- just the round dial, over the model's own
+		Aventador = { 0.7, 0.7, 0.8, -0.2 }, -- just the round dial, over the model's own
 		Ferrari = { 1.6, 0.6 },
 		BMWLive = { 1.8, 0.62 },
-		BMWClassic = { 1.6, 0.6 },
+		BMWClassic = { 1.6, 0.6, 0.85 },
 		AMG = { 1.7, 0.62 },
 		SupraTRD = { 1.9, 0.62 },
 		Toyota = { 1.7, 0.62, 1.0 },
@@ -652,7 +652,8 @@ function Driving.attach(model: Model)
 		-- sit where the car's own cluster is: seen through the top half of the wheel, just behind
 		-- the rim, facing the driver's eye (the same eye the first-person camera uses)
 		local r = radiusAttr
-		-- third number: how high through the wheel it sits (in radii; default 0.6)
+		-- third number: how high through the wheel it sits (in radii; default 0.6); fourth: a fine
+		-- up/down nudge in studs
 		local target = mountAttr.Position + mountAttr.UpVector * r * (sizeFor[3] or 0.6)
 		local dir = (target - eyeAttr).Unit
 		local pos = target + dir * 0.3
@@ -662,7 +663,7 @@ function Driving.attach(model: Model)
 		local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
 		local w = r * sizeFor[1]
 		local h = r * sizeFor[2]
-		local cf = root.CFrame * CFrame.lookAt(pos, pos + dir) * CFrame.new(0, up, -fwd)
+		local cf = root.CFrame * CFrame.lookAt(pos, pos + dir) * CFrame.new(0, up + (sizeFor[4] or 0), -fwd)
 		local weld = dashPanel:FindFirstChildOfClass("WeldConstraint")
 		if weld then
 			weld.Enabled = false
@@ -1104,7 +1105,7 @@ function Driving.render(dt: number)
 			s.rpmShown += (math.clamp(s.rpm, 0, 1) - s.rpmShown) * k
 			for _, n in s.partNeedles do
 				local v = if n.kind == "speed" then s.speedShown else s.rpmShown
-				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, -math.rad(v * 240)) * n.offset
+				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, math.rad(v * 240)) * n.offset
 			end
 			for _, tl in s.guiTexts do
 				tl.label.Text = if tl.kind == "Speed" then tostring(math.floor(mph + 0.5)) elseif tl.kind == "RPM" then tostring(math.floor(s.rpm * 80) * 100) else s.gear
