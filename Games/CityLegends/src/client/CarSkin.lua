@@ -311,6 +311,16 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			end
 			if best then
 				table.insert(steerRoots, best)
+				-- the other pieces of the same wheel (spokes, centre, buttons) sit right around it
+				local bigSide = math.max(best.Size.X, best.Size.Y, best.Size.Z)
+				for _, d in src:GetDescendants() do
+					if d ~= best and d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
+						local close = (d.Position - best.Position).Magnitude < bigSide * 0.35
+						if close and math.max(d.Size.X, d.Size.Y, d.Size.Z) <= bigSide * 1.1 then
+							table.insert(steerRoots, d)
+						end
+					end
+				end
 			end
 		end
 	end
