@@ -38,3 +38,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: on phones the Robux shop is one SHOP button (top-left) that opens a panel, so the thumbstick area stays clear. #break-a-bed
 
 - 2026-10-11: map split into 5 themed zones (5 beds each) with gates; screen effects (edge glow, speed lines, flying cash, combo counter); sounds stay per player with a quieter version for nearby players. StreamingEnabled stays off (map ~4k parts). #break-a-bed
+
+- 2026-10-11: back to Roblox's default proximity prompt (the custom one showed empty white boxes). HUD moved right up to the top edge (inside phone notches). Trees/hills/pond outside the play area replaced by a city backdrop with three landmarks (Bed Mart, Mattress Factory, Grand Sleep Hotel). Map now ~7.25k parts; StreamingEnabled still off. #break-a-bed

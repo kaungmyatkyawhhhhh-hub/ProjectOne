@@ -103,11 +103,15 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Give yourself Strength or Cash during a playtest: Studio command bar in **Server** mode → `game.Players.YOURNAME.Stats.Strength.Value = 1000` (Level updates by itself). Use `Stats`, not `leaderstats`, which only holds the short text.
 
 ## HUD layout and prompts (2026-10-11)
-- The HUD respects Roblox's safe area (below the top bar, inside phone notches) and shrinks on short screens.
-- All "Break" / "Buy" prompts use a custom style drawn by `GameClient` (key button, name, action) so they match the UI.
+- The HUD goes right up to the top edge (10 px gap) but stays inside phone notches and rounded corners (`DeviceSafeInsets`). Only the top-left corner is kept for Roblox's menu/chat/mic buttons (the phone SHOP button sits below them). It shrinks on short screens.
+- All "Break" / "Buy" prompts are Roblox's default style again (E key, "Break", bed name). The custom one was removed.
 
 ## Map zones, screen effects, sounds (2026-10-11)
 - **Decor** (server module, run once in Edit mode, safe to re-run): lighting, the 5 zones (colours, gates, props, particles), the hub title and signpost, hills, pond, flowers. It only recolours the path/beds, never rebuilds them, so hand edits stay.
 - **Ambient** (on each player's screen): makes floating things bob and spin, and flies butterflies around the flowers.
 - **ScreenFx** (on each player's screen): edge glow, speed lines, break pulse, flying cash/strength icons, combo text.
 - **Sounds** play on your own screen; nearby players hear a quieter version.
+
+## City backdrop (2026-10-11)
+- **City** (server module, run once in Edit mode, safe to re-run): removed the trees, bushes, hills and pond outside the play area, flattened and widened the grass, then built a city around the map in `Workspace.City`: roads with sidewalks, lamps and parked cars; houses and shops (with signs) in front, apartments and hotels behind, glass towers further back; and three landmarks: **BED MART** (east of spawn, giant bed on the roof), **MATTRESS FACTORY** (west, halfway down the path, smoking chimneys) and the **GRAND SLEEP HOTEL** (past the end of the path).
+- Nothing is built inside the play area (path, plaza, upgrades, training). About 4,450 parts, anchored, no collisions, only the main building blocks cast shadows.

@@ -40,3 +40,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## Pond had no water, trails looked blotchy (2026-10-11) #bugs
 - **Cause:** Roblox's terrain "fill" can't put water where there's already sand or dirt, and diagonal trails only partly covered each 4-stud ground block, so the grass stayed.
 - **Fix:** the pond is now written block by block (exact water, sloping sandy shore). Dirt trails were swapped for stepping stones, which look neater.
+
+## Custom prompt showed two empty white boxes (2026-10-11) #bugs #done
+- The custom-styled "Break" prompt drew only two blank white boxes in the real game (no key, no text). Fixed by removing it: every prompt is Roblox's default style again (E, "Break", bed name).
