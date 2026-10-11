@@ -623,6 +623,35 @@ function Driving.attach(model: Model)
 	-- imported cars: the live cluster behind their own wheel
 	local dashPanel = model:FindFirstChild("DashCluster", true)
 	local dashUpdate: ((number, string, number) -> ())? = nil
+	local style = if dashPanel then dashPanel:GetAttribute("Style") else nil
+	local mountAttr = model:GetAttribute("SteerMount")
+	local radiusAttr = model:GetAttribute("SteerRadius")
+	local eyeAttr = model:GetAttribute("Eye")
+	if dashPanel and dashPanel:IsA("BasePart") and (style == "Aventador" or style == "Ferrari")
+		and typeof(mountAttr) == "CFrame" and type(radiusAttr) == "number" and typeof(eyeAttr) == "Vector3" then
+		-- sit where the car's own cluster is: seen through the top half of the wheel, just behind
+		-- the rim, facing the driver's eye (the same eye the first-person camera uses)
+		local r = radiusAttr
+		local target = mountAttr.Position + mountAttr.UpVector * r * 0.6
+		local dir = (target - eyeAttr).Unit
+		local pos = target + dir * 0.3
+		local src = (ReplicatedStorage:FindFirstChild("CarModels", true) :: Instance):FindFirstChild(spec.Id, true)
+		local up = if src then (src:GetAttribute("ClusterUp") :: number?) or 0 else 0
+		local fwd = if src then (src:GetAttribute("ClusterForward") :: number?) or 0 else 0
+		local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
+		local w = if style == "Aventador" then r * 1.3 else r * 1.6
+		local h = if style == "Aventador" then r * 0.52 else r * 0.6
+		local cf = root.CFrame * CFrame.lookAt(pos, pos + dir) * CFrame.new(0, up, -fwd)
+		local weld = dashPanel:FindFirstChildOfClass("WeldConstraint")
+		if weld then
+			weld.Enabled = false
+		end
+		dashPanel.Size = Vector3.new(w * k, h * k, 0.02)
+		dashPanel.CFrame = cf
+		if weld then
+			weld.Enabled = true
+		end
+	end
 	if dashPanel and dashPanel:IsA("BasePart") then
 		local okDash, upd = pcall(DashGauges.build, dashPanel)
 		dashUpdate = if okDash then upd else nil
@@ -640,15 +669,16 @@ function Driving.attach(model: Model)
 			table.insert(flameParts, att)
 			local e = Instance.new("ParticleEmitter")
 			e.Rate = 0
-			e.Lifetime = NumberRange.new(0.9, 1.6)
-			e.Speed = NumberRange.new(2, 5)
-			e.SpreadAngle = Vector2.new(40, 40)
-			e.Acceleration = Vector3.new(0, 4, 0)
-			e.Drag = 2
-			e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.8), NumberSequenceKeypoint.new(1, 4.5) })
-			e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(1, 1) })
-			e.Color = ColorSequence.new(Color3.fromRGB(215, 215, 220))
-			e.LightInfluence = 0.8
+			e.Texture = "rbxasset://textures/particles/smoke_main.dds" -- built-in smoke puff
+			e.Lifetime = NumberRange.new(1.2, 2.2)
+			e.Speed = NumberRange.new(1, 3)
+			e.SpreadAngle = Vector2.new(25, 25)
+			e.Acceleration = Vector3.new(0, 2.5, 0)
+			e.Drag = 1.5
+			e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.2), NumberSequenceKeypoint.new(0.4, 3.5), NumberSequenceKeypoint.new(1, 7) })
+			e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.7), NumberSequenceKeypoint.new(0.3, 0.6), NumberSequenceKeypoint.new(1, 1) })
+			e.Color = ColorSequence.new(Color3.fromRGB(196, 196, 198), Color3.fromRGB(150, 150, 154))
+			e.LightInfluence = 0.25 -- neutral grey, not tinted purple by the neon
 			e.Rotation = NumberRange.new(0, 360)
 			e.RotSpeed = NumberRange.new(-40, 40)
 			e.Parent = att
