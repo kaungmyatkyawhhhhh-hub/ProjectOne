@@ -638,7 +638,7 @@ function Driving.attach(model: Model)
 	local eyeAttr = model:GetAttribute("Eye")
 	-- panel size per design, in wheel radii (wide clusters show partly through the rim, like real)
 	local CLUSTER_SIZE = {
-		Aventador = { 0.7, 0.7, 0.8, -0.2 }, -- just the round dial, over the model's own
+		Aventador = { 0.82, 0.82, 0.8, -0.06 }, -- just the round dial, over the model's own
 		Ferrari = { 1.6, 0.6 },
 		BMWLive = { 1.8, 0.62 },
 		BMWClassic = { 1.6, 0.6, 0.85 },
