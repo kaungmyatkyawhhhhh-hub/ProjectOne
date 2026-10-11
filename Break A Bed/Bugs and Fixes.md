@@ -43,3 +43,12 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## Custom prompt showed two empty white boxes (2026-10-11) #bugs #done
 - The custom-styled "Break" prompt drew only two blank white boxes in the real game (no key, no text). Fixed by removing it: every prompt is Roblox's default style again (E, "Break", bed name).
+
+## 2026-10-11: VIP post did nothing #bugs #done
+- **Cause:** the VIP lounge was moved and made bigger in Studio, but the post still remembered its old spot, so the game thought you were never standing on its pad.
+- **Fix:** the server now measures the post and the lounge from the real parts every time the game starts, so moving it again keeps working.
+
+## 2026-10-11: VIP door didn't open the VIP pass #bugs #done
+- **Cause:** touching a solid wall doesn't always count as a "touch" in Roblox. Also, Roblox never shows the window to someone who already owns VIP (like the owner), so it can only be seen on a non-VIP account.
+- **Fix:** the game checks every 0.1 s if a non-VIP is standing at the door and opens the VIP pass window (at most once every 5 s).
+
