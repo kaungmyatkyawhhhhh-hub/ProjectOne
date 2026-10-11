@@ -338,129 +338,206 @@ local function ferrari(gui: SurfaceGui): Update
 	end
 end
 
--- Aventador LP700-4 (Strada mode), like the real TFT: silver bezel; round rev counter 0-9 with
--- red from 7 and a blue inner ring; digital speed and yellow gear in the middle; fuel and water
--- arcs on the left, oil pressure and oil temperature arcs on the right; radio and clock far left,
--- warning lights and the shield far right
-local function arc(parent: Instance, center: UDim2, size: number, a0: number, a1: number, color: Color3, labels: { string }, title: string, value: number)
+local function aventador(gui: SurfaceGui): Update
+	-- matches the real Aventador LP700-4 cluster in Sport mode (owner's Forza reference)
+	local NAVY = Color3.fromRGB(12, 18, 30)
+	local YELLOW = Color3.fromRGB(240, 210, 40)
+	local SEG_OFF = Color3.fromRGB(34, 46, 66)
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(6, 9, 15), BorderSizePixel = 0 }, gui)
+	-- blue-grey frame with screws
+	local frame = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.98, 0.92),
+		BackgroundTransparency = 1,
+	}, bg)
+	new("UICorner", { CornerRadius = UDim.new(0.22, 0) }, frame)
+	new("UIStroke", { Color = Color3.fromRGB(118, 136, 160), Thickness = 6 }, frame)
+	for _, xy in { { 0.03, 0.5 }, { 0.2, 0.1 }, { 0.8, 0.1 }, { 0.97, 0.5 }, { 0.2, 0.9 }, { 0.8, 0.9 } } do
+		local sc = new("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(xy[1], xy[2]),
+			Size = UDim2.fromScale(0.012, 0.035),
+			BackgroundColor3 = Color3.fromRGB(20, 24, 30),
+		}, bg)
+		new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, sc)
+	end
+
+	-- far left: clock and outside temperature between thin yellow lines
+	for _, y in { 0.36, 0.5, 0.64 } do
+		new("Frame", { Position = UDim2.fromScale(0.05, y), Size = UDim2.fromScale(0.13, 0.006), BackgroundColor3 = Color3.fromRGB(150, 128, 40), BorderSizePixel = 0 }, bg)
+	end
+	local clockText = text(bg, clock(), UDim2.fromScale(0.115, 0.43), UDim2.fromScale(0.09, 0.11), WHITE, Enum.Font.GothamMedium)
+	text(bg, "15.7 °C", UDim2.fromScale(0.115, 0.57), UDim2.fromScale(0.08, 0.08), Color3.fromRGB(200, 206, 216), Enum.Font.Gotham)
+
+	-- a side gauge: a short column of slanted segments (yellow, red at the end), its scale,
+	-- name and a red needle at the current value
+	local function side(x: number, y: number, flip: boolean, labels: { string }, name: string, value: number, redTop: boolean)
+		local holder = new("Frame", {
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(x, y),
+			Size = UDim2.fromScale(0.09, 0.34),
+		}, bg)
+		local n = 8
+		for i = 1, n do
+			local f = (i - 1) / (n - 1)
+			local red = if redTop then i >= n - 1 else i <= 2
+			new("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(if flip then 0.32 + f * 0.12 else 0.68 - f * 0.12, 0.95 - f * 0.88),
+				Size = UDim2.fromScale(0.16, 0.085),
+				Rotation = if flip then -20 else 20,
+				BackgroundColor3 = if red then Color3.fromRGB(220, 40, 40) else YELLOW,
+				BorderSizePixel = 0,
+			}, holder)
+		end
+		for i, l in labels do
+			local f = (i - 1) / math.max(#labels - 1, 1)
+			text(holder, l, UDim2.fromScale(if flip then 0.72 - f * 0.1 else 0.28 + f * 0.1, 0.1 + f * 0.8), UDim2.fromScale(0.36, 0.13), WHITE, Enum.Font.GothamBold)
+		end
+		text(holder, name, UDim2.fromScale(0.5, if redTop then -0.08 else 1.1), UDim2.fromScale(0.9, 0.11), Color3.fromRGB(200, 206, 216), Enum.Font.Gotham)
+		new("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.95 - value * 0.88),
+			Size = UDim2.fromScale(0.75, 0.025),
+			Rotation = if flip then 12 else -12,
+			BackgroundColor3 = Color3.fromRGB(230, 30, 40),
+			BorderSizePixel = 0,
+		}, holder)
+	end
+	side(0.29, 0.3, false, { "100", "50", "0" }, "Benzina", 0.85, true)
+	side(0.29, 0.7, false, { "130", "90", "50" }, "Temp. Acqua", 0.5, true)
+	side(0.71, 0.3, true, { "10", "5", "0" }, "Press. Olio", 0.55, true)
+	side(0.71, 0.7, true, { "170", "130", "50" }, "Temp. Olio", 0.5, true)
+
+	-- far right: thin yellow line and the gold shield
+	new("Frame", { Position = UDim2.fromScale(0.82, 0.36), Size = UDim2.fromScale(0.13, 0.006), BackgroundColor3 = Color3.fromRGB(150, 128, 40), BorderSizePixel = 0 }, bg)
+	local shield = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.885, 0.56),
+		Size = UDim2.fromScale(0.045, 0.24),
+		BackgroundColor3 = Color3.fromRGB(30, 26, 12),
+		BorderSizePixel = 0,
+	}, bg)
+	new("UICorner", { CornerRadius = UDim.new(0.35, 0) }, shield)
+	new("UIStroke", { Color = Color3.fromRGB(214, 176, 70), Thickness = 2 }, shield)
+	text(shield, "L", UDim2.fromScale(0.5, 0.55), UDim2.fromScale(0.7, 0.55), Color3.fromRGB(214, 176, 70), Enum.Font.GothamBlack)
+
+	-- the rev counter
 	local box = new("Frame", {
 		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = center,
-		Size = UDim2.fromScale(size, size),
-	}, parent)
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(1, 1),
+	}, bg)
 	new("UIAspectRatioConstraint", { AspectRatio = 1, DominantAxis = Enum.DominantAxis.Height }, box)
-	local n = 14
-	for i = 0, n do
-		local f = i / n
-		local holder = new("Frame", {
+	local silver = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(176, 182, 192), BorderSizePixel = 0 }, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, silver)
+	local face = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.95, 0.95),
+		BackgroundColor3 = NAVY,
+		BorderSizePixel = 0,
+	}, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, face)
+	-- 0 at the bottom, 6 at the top, 9 at about 3 o'clock
+	local a0, a1 = -165, 105
+	local segs: { Frame } = {}
+	local SEGS = 54
+	for i = 0, SEGS - 1 do
+		local f = i / (SEGS - 1)
+		local h = new("Frame", {
 			BackgroundTransparency = 1,
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
 			Size = UDim2.fromScale(1, 1),
 			Rotation = a0 + (a1 - a0) * f,
 		}, box)
-		new("Frame", {
+		table.insert(segs, new("Frame", {
 			BorderSizePixel = 0,
 			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.fromScale(0.5, 0.02),
-			Size = UDim2.fromScale(0.05, 0.1),
-			BackgroundColor3 = if f <= value then color else Color3.fromRGB(40, 44, 56),
-		}, holder)
+			Position = UDim2.fromScale(0.5, 0.035),
+			Size = UDim2.fromScale(0.03, 0.06),
+			BackgroundColor3 = SEG_OFF,
+		}, h))
 	end
-	for i, l in labels do
-		local f = (i - 1) / math.max(#labels - 1, 1)
-		local ang = math.rad(a0 + (a1 - a0) * f)
-		text(box, l, UDim2.fromScale(0.5 + math.sin(ang) * 0.3, 0.5 - math.cos(ang) * 0.3), UDim2.fromScale(0.18, 0.09), DIM, Enum.Font.Gotham)
+	for i = 0, 9 do
+		local ang = math.rad(a0 + (a1 - a0) * i / 9)
+		text(box, tostring(i), UDim2.fromScale(0.5 + math.sin(ang) * 0.33, 0.5 - math.cos(ang) * 0.33), UDim2.fromScale(0.12, 0.13), if i == 9 then Color3.fromRGB(230, 30, 40) else WHITE, Enum.Font.GothamBlack)
 	end
-	text(box, title, UDim2.fromScale(0.5 + math.sin(math.rad((a0 + a1) / 2)) * 0.12, 0.5), UDim2.fromScale(0.3, 0.07), DIM, Enum.Font.Gotham)
-end
-
-local function aventador(gui: SurfaceGui): Update
-	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(3, 4, 7), BorderSizePixel = 0 }, gui)
-	-- silver bezel round the whole screen
-	local bezel = new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.985, 0.95),
-		BackgroundTransparency = 1,
-	}, bg)
-	new("UICorner", { CornerRadius = UDim.new(0.18, 0) }, bezel)
-	new("UIStroke", { Color = Color3.fromRGB(150, 156, 166), Thickness = 5, Transparency = 0.1 }, bezel)
-	-- far left: radio, clock, date, outside temperature
-	text(bg, "FM 97.9", UDim2.fromScale(0.09, 0.3), UDim2.fromScale(0.09, 0.07), DIM, Enum.Font.Gotham)
-	local clockText = text(bg, clock(), UDim2.fromScale(0.09, 0.44), UDim2.fromScale(0.12, 0.13), WHITE, Enum.Font.GothamBold)
-	text(bg, os.date("%m.%d.%Y") :: string, UDim2.fromScale(0.09, 0.56), UDim2.fromScale(0.1, 0.06), DIM, Enum.Font.Gotham)
-	text(bg, "74.5 °F", UDim2.fromScale(0.09, 0.7), UDim2.fromScale(0.08, 0.07), WHITE, Enum.Font.Gotham)
-	-- fuel + water temperature (left), oil pressure + oil temperature (right)
-	arc(bg, UDim2.fromScale(0.3, 0.5), 0.9, -160, -20, BLUE, { "0", "50", "100" }, "Benzina", 0.8)
-	arc(bg, UDim2.fromScale(0.3, 0.5), 0.6, -160, -20, Color3.fromRGB(230, 230, 236), { "50", "90", "130" }, "Temp. Acqua", 0.5)
-	arc(bg, UDim2.fromScale(0.7, 0.5), 0.9, 20, 160, Color3.fromRGB(230, 230, 236), { "10", "5", "0" }, "Press. Olio", 0.45)
-	arc(bg, UDim2.fromScale(0.7, 0.5), 0.6, 20, 160, Color3.fromRGB(230, 230, 236), { "130", "90", "50" }, "Temp. Olio", 0.5)
-	-- far right: warning lights and the shield
-	text(bg, "◉", UDim2.fromScale(0.88, 0.32), UDim2.fromScale(0.05, 0.1), Color3.fromRGB(60, 210, 90), Enum.Font.GothamBold)
-	local shield = new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.9, 0.6),
-		Size = UDim2.fromScale(0.07, 0.3),
-		BackgroundColor3 = Color3.fromRGB(20, 18, 8),
-		BorderSizePixel = 0,
-	}, bg)
-	new("UICorner", { CornerRadius = UDim.new(0.3, 0) }, shield)
-	new("UIStroke", { Color = AMBER, Thickness = 2 }, shield)
-	text(shield, "L", UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.7, 0.6), AMBER, Enum.Font.GothamBlack)
-	-- the rev counter: dark face, silver ring, blue inner ring, 0-9 (red from 7)
-	local box = new("Frame", {
-		BackgroundTransparency = 1,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.98, 0.98),
-	}, bg)
-	new("UIAspectRatioConstraint", { AspectRatio = 1, DominantAxis = Enum.DominantAxis.Height }, box)
-	local ring = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(160, 166, 176), BorderSizePixel = 0 }, box)
-	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, ring)
-	local face = new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.94, 0.94),
-		BackgroundColor3 = Color3.fromRGB(8, 10, 16),
-		BorderSizePixel = 0,
-	}, box)
-	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, face)
-	local inner = new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.5, 0.5),
-		BackgroundTransparency = 1,
-	}, box)
-	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, inner)
-	new("UIStroke", { Color = Color3.fromRGB(40, 120, 255), Thickness = 4, Transparency = 0.15 }, inner)
-	local setRpm = dial(box, UDim2.fromScale(0.5, 0.5), 0.9, { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" }, 7 / 9, Color3.fromRGB(255, 40, 50), -140, 140)
-	text(box, "Giri / min x 1000", UDim2.fromScale(0.5, 0.33), UDim2.fromScale(0.3, 0.045), DIM, Enum.Font.Gotham)
-	-- digital speed in a box, gear in yellow, mode and odometer underneath
+	-- inner blue ring, shown on the lower half only, and a thin yellow ring inside it
+	local blue = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.56, 0.56), BackgroundTransparency = 1 }, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, blue)
+	local blueStroke = new("UIStroke", { Color = Color3.fromRGB(50, 130, 220), Thickness = 7 }, blue)
+	new("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.4, 1), NumberSequenceKeypoint.new(0.55, 0), NumberSequenceKeypoint.new(1, 0) }) }, blueStroke)
+	local ylw = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.44, 0.44), BackgroundTransparency = 1 }, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, ylw)
+	new("UIStroke", { Color = YELLOW, Thickness = 1.5, Transparency = 0.2 }, ylw)
+	text(box, "ESC", UDim2.fromScale(0.52, 0.33), UDim2.fromScale(0.08, 0.05), YELLOW, Enum.Font.GothamBold)
+	text(box, "SPORT", UDim2.fromScale(0.52, 0.38), UDim2.fromScale(0.12, 0.05), YELLOW, Enum.Font.GothamBold)
+	text(box, "/min x 1000", UDim2.fromScale(0.5, 0.43), UDim2.fromScale(0.16, 0.035), WHITE, Enum.Font.Gotham)
+	-- digital speed (km/h) in a white box
 	local spdBox = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.62, 0.62),
-		Size = UDim2.fromScale(0.26, 0.12),
-		BackgroundColor3 = Color3.fromRGB(230, 232, 236),
+		Position = UDim2.fromScale(0.66, 0.6),
+		Size = UDim2.fromScale(0.26, 0.1),
+		BackgroundColor3 = Color3.fromRGB(226, 230, 236),
+		BorderSizePixel = 0,
+		Rotation = -3,
+		ZIndex = 5,
+	}, box)
+	local speed = text(spdBox, "0", UDim2.fromScale(0.72, 0.5), UDim2.fromScale(0.5, 1), Color3.fromRGB(14, 16, 22), Enum.Font.GothamBlack)
+	speed.ZIndex = 6
+	speed.TextXAlignment = Enum.TextXAlignment.Right
+	local unit = text(box, "km/h", UDim2.fromScale(0.73, 0.68), UDim2.fromScale(0.08, 0.035), WHITE, Enum.Font.Gotham)
+	unit.ZIndex = 5
+	-- gear strip: R N 1-7, the current one lit yellow
+	local gears = { "R", "N", "1", "2", "3", "4", "5", "6", "7" }
+	local gearLabels: { [string]: TextLabel } = {}
+	local strip = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.56, 0.76),
+		Size = UDim2.fromScale(0.42, 0.06),
+		BackgroundColor3 = Color3.fromRGB(40, 90, 150),
 		BorderSizePixel = 0,
 		ZIndex = 5,
 	}, box)
-	local speed = text(spdBox, "0", UDim2.fromScale(0.42, 0.5), UDim2.fromScale(0.7, 0.9), Color3.fromRGB(10, 10, 14), Enum.Font.GothamBlack)
-	speed.ZIndex = 6
-	local unit = text(spdBox, "mph", UDim2.fromScale(0.88, 0.62), UDim2.fromScale(0.22, 0.5), Color3.fromRGB(60, 60, 70), Enum.Font.Gotham)
-	unit.ZIndex = 6
-	local gear = text(box, "N", UDim2.fromScale(0.4, 0.62), UDim2.fromScale(0.1, 0.14), AMBER, Enum.Font.GothamBlack)
-	gear.ZIndex = 5
-	local mode = text(box, "STRADA", UDim2.fromScale(0.5, 0.75), UDim2.fromScale(0.2, 0.06), AMBER, Enum.Font.GothamBold)
+	for i, gname in gears do
+		local l = text(strip, gname, UDim2.fromScale((i - 0.5) / #gears, 0.5), UDim2.fromScale(1 / #gears, 0.9), Color3.fromRGB(200, 210, 226), Enum.Font.GothamBold)
+		l.ZIndex = 6
+		gearLabels[gname] = l
+	end
+	local mode = text(box, "SPORT", UDim2.fromScale(0.58, 0.84), UDim2.fromScale(0.14, 0.05), YELLOW, Enum.Font.GothamBold)
 	mode.ZIndex = 5
-	local odo = text(box, "000705 mi", UDim2.fromScale(0.5, 0.82), UDim2.fromScale(0.2, 0.05), WHITE, Enum.Font.Gotham)
+	local odo = text(box, "001126.3 km", UDim2.fromScale(0.58, 0.9), UDim2.fromScale(0.18, 0.04), WHITE, Enum.Font.Gotham)
 	odo.ZIndex = 5
-	local last = 0
+	-- red needle, silver hub
+	local needle = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1, 1), Rotation = a0, ZIndex = 7 }, box)
+	new("Frame", { BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromScale(0.5, 0.12), Size = UDim2.fromScale(0.012, 0.4), BackgroundColor3 = Color3.fromRGB(230, 30, 40), ZIndex = 7 }, needle)
+	local hub = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.07, 0.07), BackgroundColor3 = NAVY, ZIndex = 8 }, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, hub)
+	new("UIStroke", { Color = Color3.fromRGB(190, 196, 206), Thickness = 3 }, hub)
+
+	local shown, last, lastGear = 0, 0, ""
 	return function(mph: number, g: string, rpm: number)
-		setRpm(rpm)
-		speed.Text = tostring(math.floor(mph + 0.5))
-		gear.Text = g
+		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+		needle.Rotation = a0 + (a1 - a0) * shown
+		local lit = math.floor(shown * SEGS + 0.5)
+		for i, seg in segs do
+			seg.BackgroundColor3 = if i <= lit then YELLOW else SEG_OFF
+		end
+		speed.Text = tostring(math.floor(mph * 1.609 + 0.5))
+		if g ~= lastGear then
+			if gearLabels[lastGear] then
+				gearLabels[lastGear].TextColor3 = Color3.fromRGB(200, 210, 226)
+			end
+			if gearLabels[g] then
+				gearLabels[g].TextColor3 = YELLOW
+			end
+			lastGear = g
+		end
 		if os.clock() - last > 5 then
 			last = os.clock()
 			clockText.Text = clock()
