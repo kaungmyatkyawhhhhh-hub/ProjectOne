@@ -97,6 +97,7 @@ type State = {
 	-- the model's own gauges: needle parts and on-screen needles (0..1 sweeps 240 degrees)
 	partNeedles: { { part: BasePart, kind: string, pivot: CFrame, offset: CFrame } },
 	guiNeedles: { { gui: GuiObject, kind: string, base: number } },
+	guiTexts: { { label: TextLabel, kind: string } }, -- on-screen "Speed" / "RPM" / "Gear" read-outs
 	speedShown: number,
 	smoke: { { emitter: ParticleEmitter, rear: boolean } },
 	-- body lean (radians): roll in turns, pitch on braking / accelerating
@@ -462,6 +463,7 @@ function Driving.attach(model: Model)
 	local localArms = {}
 	local partNeedles = {}
 	local guiNeedles = {}
+	local guiTexts = {}
 	-- extras for imported cars; a fault here must never stop the car from driving
 	local okExtras, errExtras = pcall(function()
 		-- imported cars: pose their steering wheel and our arms ourselves (anchored, local only)
@@ -489,6 +491,8 @@ function Driving.attach(model: Model)
 					end
 					d.Anchored = true
 					table.insert(partNeedles, { part = d, kind = kind, pivot = d:GetAttribute("GaugePivot") :: CFrame, offset = d:GetAttribute("GaugeOffset") :: CFrame })
+				elseif d:IsA("TextLabel") and model:GetAttribute("OwnInterior") and (d.Name == "Speed" or d.Name == "RPM" or d.Name == "Gear") then
+					table.insert(guiTexts, { label = d, kind = d.Name })
 				elseif d:IsA("GuiObject") and d.Name == "Needle" and model:GetAttribute("OwnInterior") then
 					-- which dial: the nearest named ancestor (the screen part keeps its model name as SrcName)
 					local gk: string? = nil
@@ -510,6 +514,11 @@ function Driving.attach(model: Model)
 					end
 					if gk then
 						table.insert(guiNeedles, { gui = d, kind = gk, base = d.Rotation })
+						-- the car's own start-up script used to switch these screens on
+						local sg = d:FindFirstAncestorWhichIsA("SurfaceGui")
+						if sg then
+							sg.Enabled = true
+						end
 					end
 				end
 			end
@@ -727,6 +736,7 @@ function Driving.attach(model: Model)
 		localArms = localArms,
 		partNeedles = partNeedles,
 		guiNeedles = guiNeedles,
+		guiTexts = guiTexts,
 		speedShown = 0,
 		smoke = smoke,
 		roll = 0,
@@ -1076,13 +1086,16 @@ function Driving.render(dt: number)
 		pcall(s.dashUpdate, mph, s.gear, s.rpm)
 	end
 	pcall(function()
-		if #s.partNeedles > 0 or #s.guiNeedles > 0 then
+		if #s.partNeedles > 0 or #s.guiNeedles > 0 or #s.guiTexts > 0 then
 			local k = 1 - math.exp(-dt * 10) -- needles swing, they don't snap
 			s.speedShown += (math.clamp(mph / 160, 0, 1) - s.speedShown) * k
 			s.rpmShown += (math.clamp(s.rpm, 0, 1) - s.rpmShown) * k
 			for _, n in s.partNeedles do
 				local v = if n.kind == "speed" then s.speedShown else s.rpmShown
 				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, -math.rad(v * 240)) * n.offset
+			end
+			for _, tl in s.guiTexts do
+				tl.label.Text = if tl.kind == "Speed" then tostring(math.floor(mph + 0.5)) elseif tl.kind == "RPM" then tostring(math.floor(s.rpm * 80) * 100) else s.gear
 			end
 			for _, n in s.guiNeedles do
 				n.gui.Rotation = n.base + (if n.kind == "speed" then s.speedShown else s.rpmShown) * 240

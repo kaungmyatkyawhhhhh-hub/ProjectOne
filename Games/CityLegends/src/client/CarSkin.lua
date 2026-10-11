@@ -258,6 +258,9 @@ local function visualClone(d: BasePart, scale: number): BasePart
 	p.CanQuery = false
 	p.CanTouch = false
 	p.Massless = true
+	if p:IsA("MeshPart") then
+		p.RenderFidelity = Enum.RenderFidelity.Precise -- full detail: the cabin is seen up close
+	end
 	return p
 end
 
@@ -644,6 +647,15 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		out.steer = { mount = mount, parts = parts, radius = R * 0.95 }
 	end
 
+	-- the driver sits a real reach behind the wheel (~60 cm): some models' seats put the eye too close
+	if out.steer and out.eye then
+		local wz = out.steer.mount.Position.Z
+		local eye = out.eye :: Vector3
+		if eye.Z - wz < 1.8 then
+			out.eye = Vector3.new(eye.X, eye.Y, wz + 1.8)
+		end
+	end
+
 	-- gauges: look from the eye through the top half of the wheel and stop at the first
 	-- dash surface past it (that's where the car's own instrument cluster is)
 	if out.eye then
@@ -728,11 +740,23 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			return if n:find("speed") then "speed" elseif n:find("rpm") or n:find("tach") then "rpm" else nil
 		end
 		local gauges = {}
+		local pivots: { { pos: Vector3, kind: string } } = {}
 		for _, d in visible do
 			local n = d.Name:lower()
-			if not inWheel[d] and not inSteer(d) and (n:find("needle") or n:find("arrow")) then
+			if not inWheel[d] and not inSteer(d) and (n:find("needle") or n:find("arrow")) and not n:find("blinker") then
 				local kind = kindOf(d)
+				-- one needle per dial: a second piece of the same dial only hides
+				local dup = false
 				if kind then
+					for _, pv in pivots do
+						if pv.kind == kind and (pv.pos - d.Position).Magnitude < 0.5 then
+							dup = true
+						end
+					end
+				end
+				if dup then
+					gaugeOf[d] = true
+				elseif kind then
 					-- turns about the small hub part next to it, else about itself
 					local pivotPos = d.Position
 					for _, sib in (d.Parent :: Instance):GetChildren() do
@@ -741,6 +765,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 							break
 						end
 					end
+					table.insert(pivots, { pos = pivotPos, kind = kind })
 					local pv = frame:PointToObjectSpace(pivotPos) * scale
 					local eyeG = out.eye :: Vector3
 					local pivot = CFrame.lookAt(pv, pv + (pv - eyeG).Unit) -- +Z looks at the driver
@@ -755,11 +780,12 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 						len = math.max(d.Size.X, d.Size.Y, d.Size.Z) * scale
 						rest = Vector3.new(-0.7, -0.7, 0).Unit -- needle at rest: about 7 o'clock
 					end
-					len = math.clamp(len, 0.12, 0.6)
+					len = math.clamp(len, 0.2, 0.6)
+					-- a thin red line (no neon glow: it made the needle look thick)
 					local needle = Instance.new("Part")
-					needle.Size = Vector3.new(0.025, 0.025, len)
-					needle.Color = Color3.fromRGB(255, 50, 40)
-					needle.Material = Enum.Material.Neon
+					needle.Size = Vector3.new(0.016, 0.016, len)
+					needle.Color = Color3.fromRGB(235, 30, 30)
+					needle.Material = Enum.Material.SmoothPlastic
 					needle.CanCollide = false
 					needle.CanQuery = false
 					needle.CanTouch = false
@@ -768,6 +794,18 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 					local offset = CFrame.lookAt(rest * len / 2 + Vector3.new(0, 0, 0.01), rest * len + Vector3.new(0, 0, 0.01))
 					gaugeOf[d] = true
 					table.insert(gauges, { kind = kind, pivot = pivot, parts = { { part = needle, offset = offset } } })
+				end
+			end
+		end
+		-- the model's own static needles next to a dial we drive (e.g. "Gauge Arrows") are hidden
+		for _, d in visible do
+			local n = d.Name:lower()
+			if not gaugeOf[d] and (n:find("needle") or n:find("arrow")) and not n:find("blinker") then
+				for _, pv in pivots do
+					if (pv.pos - d.Position).Magnitude < 0.6 then
+						gaugeOf[d] = true
+						break
+					end
 				end
 			end
 		end
