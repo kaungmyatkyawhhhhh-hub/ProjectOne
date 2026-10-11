@@ -36,3 +36,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: HUD moved to the top (SPAWN + music center, stats top right, gift under them) inside the safe area; light-mode white panels; custom styled proximity prompt instead of Roblox's gray one. #break-a-bed
 
 - 2026-10-11: on phones the Robux shop is one SHOP button (top-left) that opens a panel, so the thumbstick area stays clear. #break-a-bed
+
+- 2026-10-11: map split into 5 themed zones (5 beds each) with gates; screen effects (edge glow, speed lines, flying cash, combo counter); sounds stay per player with a quieter version for nearby players. StreamingEnabled stays off (map ~4k parts). #break-a-bed

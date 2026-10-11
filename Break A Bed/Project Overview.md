@@ -29,6 +29,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Look:** chunky buttons with depth, navy panels, one bold font with thick outlines, drawn icons (cash, strength, lock, gift), no emoji; short numbers everywhere (1.14M, 1.9T, 392Qa), including Roblox's player list.
 - **Punching:** left hook → right hook → uppercut combo. **Bed breaks:** chunks, cash bills, coins, sparkles, confetti, all pooled and capped so fast breaking doesn't lag.
 - **Scripts added:** `Icons` (ReplicatedStorage), `UIKit`, `Fx`, `Combo` (StarterPlayerScripts).
+- **Scripts added 2026-10-11:** `ScreenFx`, `Ambient` (StarterPlayerScripts, screen effects and moving map pieces), `Decor` (ServerScriptService, map zones/hub/nature, run once in Edit mode). Map: 5 themed zones with gates, title sign on the entrance arch, pond west of spawn, hills around the field.
 - **Mobile:** tap controls; the HUD shrinks on phone screens.
 - **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (🔊 mute button), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.

@@ -36,3 +36,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **Cause:** during the short "blink" and the hit shake, the game remembered the bed's original look and position in a kind of list Roblox is allowed to clear by itself (a weak table). Under spam it got cleared mid-blink, so the bed was never un-hidden, and the next break saved "invisible" as its normal look.
 - **Fix:** hiding no longer needs to remember anything (it uses a see-through switch that's just turned off again). Everything else is kept in normal lists. Safety checks: every second the game makes sure a bed that isn't blinking is visible and in place, and the server replaces a missing bed right away and re-checks every 5 seconds.
 - **Tested:** 220 breaks in a row, never stuck. A deleted bed came back in under half a second.
+
+## Pond had no water, trails looked blotchy (2026-10-11) #bugs
+- **Cause:** Roblox's terrain "fill" can't put water where there's already sand or dirt, and diagonal trails only partly covered each 4-stud ground block, so the grass stayed.
+- **Fix:** the pond is now written block by block (exact water, sloping sandy shore). Dirt trails were swapped for stepping stones, which look neater.
