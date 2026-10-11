@@ -75,12 +75,15 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Claiming checks you're in the group, then gives **+10% Strength from every punch, forever** (saved). Not in the group: "Join the group first, then claim!".
 - The group is set by `GameConfig.GroupId` (the number in the group's web link). While it's 0 the panel says "Coming soon".
 
-## Robux shop
-- Four buttons on the left of the screen (smaller on phones): 💪 **+1 Level**, **+3 Levels**, **+9 Levels**, and a gold **x2 💪 Strength** pass with a red PERMANENT ribbon.
-- **Level packs** are developer products (buy as often as you like). Buying one sets your Strength to exactly what Level + 1/3/9 needs; your Level follows. Each purchase is remembered (saved), so Roblox retrying a purchase never gives it twice. Purchases wait until your saved progress has loaded.
-- **x2 Strength** is a game pass: every punch gives double Strength, forever. It stacks with Training Speed and the Group Reward. Once owned, the button says "OWNED ✅".
-- A "THANK YOU!" banner and confetti show after a purchase.
-- Ids go in `GameConfig.LevelPacks` (ProductId) and `GameConfig.DoubleStrengthPassId`. While an id is 0 the button says "Coming soon". Buttons show Roblox's real price once the product exists.
+## Robux shop and free rewards (2026-10-11)
+- **All ids are in `GameConfig`** (the "Robux shop" section). 0 = the button says "Coming soon". Buttons show Roblox's real price once the item exists.
+- **Strength tier button:** one gold button always offers the next multiplier pass: x2 (R$8) → x3 (12) → x5 (20) → x7 (50) → x10 (75) → x12 (100). Each is its own game pass. Only your highest one counts (they don't add up). When you own all of them it says "MAX x12". The old x2 pass is tier 1.
+- **Passes:** Auto Punch (punches for you at beds and training posts, with an AUTO ON/OFF button), x2 Cash, VIP (+20% Strength and Cash, gold [VIP] chat tag, the VIP lounge), Fast Walk (+12 speed), Break Spam (punch almost twice as fast).
+- **Developer products:** +1/+3/+9 Levels, x2 Strength and x2 Cash boosts (15 minutes, timer under the top bar, buying again adds time, saved and only counting down while playing), +3/+10 spins, and three Cash packs that grow with your progress (30/120/400 breaks of the best bed you've completed).
+- **Safety:** products are only given after Roblox confirms the purchase, only once your save has loaded, and each purchase only once (saved). Passes are checked when you join and right after buying.
+- **Free rewards:** daily reward (7-day streak, missing a day starts again at day 1, pops up when you join), a playtime gift every 5 minutes (every 3rd one adds a spin), and a spin wheel (a free spin every 4 hours, plus spins from rewards and the shop; the server picks the prize).
+- **Screen:** PC has SHOP, the tier button, SPIN, GIFT and AUTO on the left. Phones only have SHOP and the tier button (top-left); a red "!" on SHOP means something free is ready. The SHOP panel has tabs: PASSES, BOOSTS, CASH, FREE.
+- **VIP lounge:** a glass room with a gold door behind-left of spawn. Only VIPs can walk through the door (anyone else who gets in is put back outside). Inside: the VIP post (2x your best training post), sofas, lamps.
 
 ## Look, numbers and phones
 - **Text:** the bold, rounded FredokaOne font everywhere, with a thick dark outline that grows with the text size (big numbers get big outlines).
