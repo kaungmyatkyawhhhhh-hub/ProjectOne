@@ -1504,25 +1504,28 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local msgText = label({ Text = "", TextSize = 14, TextColor3 = Theme.Danger, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -24, 1, -88), Size = UDim2.new(0.4, 0, 0, 18), ZIndex = 62, Parent = detail })
 
 	local previewModel: Model? = nil
+	local previewLen = 14
 	local spin = 0
 	local function setPreview(spec: Cars.CarSpec)
 		if previewModel then
 			previewModel:Destroy()
 		end
-		local m = CarBuilder.build(spec, { anchored = true, interior = true })
+		-- no cabin: it's hidden under imported cars anyway, and every part costs frames
+		local m = CarBuilder.build(spec, { anchored = true, interior = false })
 		CarSkin.apply(m, true)
 		m:PivotTo(CFrame.new(0, (m:GetAttribute("Height") :: number) / 2, 0))
 		local floor = new("Part", { Anchored = true, Size = Vector3.new(60, 0.2, 60), CFrame = CFrame.new(0, -0.1, 0), Color = Color3.fromRGB(26, 26, 34), Material = Enum.Material.SmoothPlastic, Reflectance = 0.2 })
 		floor.Parent = m
 		m.Parent = viewport
 		previewModel = m
-		local len = m:GetAttribute("Length") :: number
-		vpCam.CFrame = CFrame.lookAt(Vector3.new(len * 1.15, len * 0.42, len * 1.15), Vector3.new(0, 1.6, 0))
+		previewLen = m:GetAttribute("Length") :: number
 	end
+	-- the camera circles the car (moving hundreds of car parts every frame is what lagged)
 	previewConn = RunService.RenderStepped:Connect(function(dt)
 		spin += dt * 0.45
 		if previewModel then
-			previewModel:PivotTo(CFrame.new(0, (previewModel:GetAttribute("Height") :: number) / 2, 0) * CFrame.Angles(0, spin, 0))
+			local d = previewLen * 1.63
+			vpCam.CFrame = CFrame.lookAt(Vector3.new(math.cos(spin) * d, previewLen * 0.42, math.sin(spin) * d), Vector3.new(0, 1.6, 0))
 		end
 	end)
 

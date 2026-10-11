@@ -450,6 +450,23 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	local scale = math.clamp(dims.wb / math.max(wheelbase, 1e-3), 0.02, 50)
 	-- wheel radius in the model's own studs (dims.wheelR is the same wheel at our scale)
 	local modelR = dims.wheelR / scale
+	-- stray props shipped with some models (stands, spare parts beside the car): anything whose
+	-- centre is well outside the body around the wheels is left out
+	do
+		local track = 0
+		for _, g in groups do
+			track = math.max(track, math.abs((g.center - mid):Dot(right)))
+		end
+		local kept: { BasePart } = {}
+		for _, d in visible do
+			local rel = d.Position - mid
+			local along, side, up = math.abs(rel:Dot(f)), math.abs(rel:Dot(right)), rel.Y
+			if inWheel[d] or (along <= wheelbase * 1.0 and side <= track + wheelbase * 0.25 and up <= wheelbase * 0.8 and up >= -wheelbase * 0.3) then
+				table.insert(kept, d)
+			end
+		end
+		visible = kept
+	end
 	-- ground frame: its wheel centres land at our wheel height
 	local origin = Vector3.new(mid.X, mid.Y - modelR, mid.Z)
 	local frame = CFrame.lookAt(origin, origin + f)
@@ -813,6 +830,13 @@ function CarSkin.preload(fullIds: { string }?)
 		bodyFor(spec.Id, spec.Class, true)
 		task.wait()
 	end
+	-- read every imported model in the background, so opening one in the garage doesn't hitch
+	task.spawn(function()
+		for _, spec in Cars.List do
+			importedFor(spec.Id)
+			task.wait(0.05)
+		end
+	end)
 	local full: { string } = fullIds or {}
 	for _, id in full do
 		local spec = Cars.get(id)
