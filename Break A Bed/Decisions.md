@@ -54,3 +54,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: walking into the VIP door without VIP opens the VIP game pass purchase window. #break-a-bed
 
 - 2026-10-11: training numbers (post signs, the "click to punch" hint, VIP post hint) now include all Strength boosts: x2–x15 passes, the 15-min boost, VIP, group reward and Training Speed. #break-a-bed
+
+- 2026-10-11: four leaderboards in a row by the training area: Top Total Damage and Top Total Money (all players, every 3 min), Server Top Damage and Server Top Money (players in this server, live). "Total money" = all Cash ever earned (spending doesn't lower it). #break-a-bed
+
+- 2026-10-11: bed signs show the Cash a break pays you, including x2 Cash, the Cash boost and VIP. #break-a-bed
