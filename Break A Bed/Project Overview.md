@@ -15,7 +15,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Training:** 17 training posts, each on its own colored glowing pad. Stand on a pad and click to punch; each punch gives that post's Strength with "+70 💪" popping out. Locked posts show a 🔒 and their cash price; buying without enough cash shows "Not enough money" in red.
 - **Level:** comes from Strength. Shown top right with a progress bar, along with Strength (yellow 💪 icon) and Cash.
 - **Bed path:** each bed sits in the middle of its own colored floor tile, with white fences down both sides and lamps between tiles. Normal beds sit on cinder blocks. The Air Mattress and Sleeping Bag lie on the tile, and the Bunk Bed has two levels and a ladder.
-- **Harder the further you go:** each bed needs more Strength, has more health and pays more Cash, up to the Infinity Bed with 17 trillion health. Name tags show health and the 💪 needed. Until you're strong enough the prompt says "Need 💪 X".
+- **Harder the further you go:** each bed needs more Strength, has more health and pays more Cash, up to the Infinity Bed with 17 trillion health. Name tags show health and the 💪 needed. Until you're strong enough the prompt says "Need X Strength".
 - **Break mode:** press **E** to **Break**. The camera zooms in, an **EXIT** button appears, and each click is a karate chop (about 8 a second). Damage per chop comes from Strength.
 - **When a bed breaks:** it splinters, cash pops out, and a **COMPLETED ✅** sign appears next to it. The bed respawns instantly.
   - **First time:** you go back to normal view automatically.
@@ -29,7 +29,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Look:** chunky buttons with depth, navy panels, one bold font with thick outlines, drawn icons (cash, strength, lock, gift), no emoji; short numbers everywhere (1.14M, 1.9T, 392Qa), including Roblox's player list.
 - **Punching:** left hook → right hook → uppercut combo. **Bed breaks:** chunks, cash bills, coins, sparkles, confetti, all pooled and capped so fast breaking doesn't lag.
 - **Scripts added:** `Icons` (ReplicatedStorage), `UIKit`, `Fx`, `Combo` (StarterPlayerScripts).
-- **Scripts added 2026-10-11:** `ScreenFx`, `Ambient` (StarterPlayerScripts, screen effects and moving map pieces), `Decor` (ServerScriptService, map zones/hub/nature, run once in Edit mode). Map: 5 themed zones with gates, title sign on the entrance arch, pond west of spawn, hills around the field.
+- **Scripts added 2026-10-11:** `ScreenFx`, `Ambient` (StarterPlayerScripts, screen effects and moving map pieces), `Decor` (ServerScriptService, map zones/hub/nature, run once in Edit mode). Map: 5 themed zones with gates, title sign on the entrance arch. `City` (ServerScriptService, run once in Edit mode): the city backdrop in `Workspace.City` (roads, houses, shops, apartments, towers, Bed Mart, Mattress Factory, Grand Sleep Hotel); it replaced the trees, hills and pond.
 - **Mobile:** tap controls; the HUD shrinks on phone screens.
 - **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (🔊 mute button), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.
