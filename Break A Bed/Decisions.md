@@ -52,3 +52,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: the training platform floor is now dark grey tiles in a neat grid with thin dark grout lines. #break-a-bed
 
 - 2026-10-11: walking into the VIP door without VIP opens the VIP game pass purchase window. #break-a-bed
+
+- 2026-10-11: training numbers (post signs, the "click to punch" hint, VIP post hint) now include all Strength boosts: x2–x15 passes, the 15-min boost, VIP, group reward and Training Speed. #break-a-bed
