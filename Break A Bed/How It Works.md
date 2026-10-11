@@ -77,7 +77,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## Robux shop and free rewards (2026-10-11)
 - **All ids are in `GameConfig`** (the "Robux shop" section). 0 = the button says "Coming soon". Buttons show Roblox's real price once the item exists.
-- **Strength tier button:** one gold button always offers the next multiplier pass: x2 (R$8) → x3 (12) → x5 (20) → x7 (50) → x10 (75) → x12 (100). Each is its own game pass. Only your highest one counts (they don't add up). When you own all of them it says "MAX x12". The old x2 pass is tier 1.
+- **Strength tier button:** one gold button always offers the next multiplier pass: x2 (R$8) → x3 (12) → x5 (20) → x7 (50) → x10 (75) → x15 (100). Each is its own game pass. Only your highest one counts (they don't add up). When you own all of them it says "MAX x15". The old x2 pass is tier 1.
 - **Passes:** Auto Punch (punches for you at beds and training posts, with an AUTO ON/OFF button), x2 Cash, VIP (+20% Strength and Cash, gold [VIP] chat tag, the VIP lounge), Fast Walk (+12 speed), Break Spam (punch almost twice as fast).
 - **Developer products:** +1/+3/+9 Levels, x2 Strength and x2 Cash boosts (15 minutes, timer under the top bar, buying again adds time, saved and only counting down while playing), +3/+10 spins, and three Cash packs that grow with your progress (30/120/400 breaks of the best bed you've completed).
 - **Safety:** products are only given after Roblox confirms the purchase, only once your save has loaded, and each purchase only once (saved). Passes are checked when you join and right after buying.

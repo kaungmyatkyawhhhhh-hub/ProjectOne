@@ -44,3 +44,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: more monetization: one Strength tier button (x2 → x12 passes, highest counts), passes Auto Punch / x2 Cash / VIP / Fast Walk / Break Spam, products for 15-min boosts, spins and progress-scaled Cash packs, plus free daily reward, playtime gifts and a spin wheel. Tabbed SHOP panel; phones only show SHOP + the tier button. #break-a-bed
 
 - 2026-10-11: punch and break sounds are now different: punches only make a punch thump; breaking a bed plays a big wooden crash ("Wooden Gate Crash 1") plus a short crack. #break-a-bed
+
+- 2026-10-11: the top Strength tier pass is now x15 instead of x12 (still R$100). #break-a-bed
