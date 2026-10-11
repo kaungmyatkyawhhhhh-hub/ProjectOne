@@ -516,7 +516,7 @@ function Driving.attach(model: Model)
 						table.insert(guiNeedles, { gui = d, kind = gk, base = d.Rotation })
 						-- the car's own start-up script used to switch these screens on
 						local sg = d:FindFirstAncestorWhichIsA("SurfaceGui")
-						if sg then
+						if sg and not model:GetAttribute("OwnCluster") then
 							sg.Enabled = true
 						end
 					end
@@ -636,7 +636,18 @@ function Driving.attach(model: Model)
 	local mountAttr = model:GetAttribute("SteerMount")
 	local radiusAttr = model:GetAttribute("SteerRadius")
 	local eyeAttr = model:GetAttribute("Eye")
-	if dashPanel and dashPanel:IsA("BasePart") and (style == "Aventador" or style == "Ferrari")
+	-- panel size per design, in wheel radii (wide clusters show partly through the rim, like real)
+	local CLUSTER_SIZE = {
+		Aventador = { 1.3, 0.52 },
+		Ferrari = { 1.6, 0.6 },
+		BMWLive = { 1.8, 0.62 },
+		BMWClassic = { 1.6, 0.6 },
+		AMG = { 1.7, 0.62 },
+		SupraTRD = { 1.9, 0.62 },
+		Toyota = { 1.7, 0.62 },
+	}
+	local sizeFor = if type(style) == "string" then CLUSTER_SIZE[style] else nil
+	if dashPanel and dashPanel:IsA("BasePart") and sizeFor
 		and typeof(mountAttr) == "CFrame" and type(radiusAttr) == "number" and typeof(eyeAttr) == "Vector3" then
 		-- sit where the car's own cluster is: seen through the top half of the wheel, just behind
 		-- the rim, facing the driver's eye (the same eye the first-person camera uses)
@@ -648,8 +659,8 @@ function Driving.attach(model: Model)
 		local up = if src then (src:GetAttribute("ClusterUp") :: number?) or 0 else 0
 		local fwd = if src then (src:GetAttribute("ClusterForward") :: number?) or 0 else 0
 		local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
-		local w = if style == "Aventador" then r * 1.3 else r * 1.6
-		local h = if style == "Aventador" then r * 0.52 else r * 0.6
+		local w = r * sizeFor[1]
+		local h = r * sizeFor[2]
 		local cf = root.CFrame * CFrame.lookAt(pos, pos + dir) * CFrame.new(0, up, -fwd)
 		local weld = dashPanel:FindFirstChildOfClass("WeldConstraint")
 		if weld then

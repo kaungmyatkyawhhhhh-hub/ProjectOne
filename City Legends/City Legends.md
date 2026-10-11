@@ -54,3 +54,4 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - Steering a little slower than before.
 - Less grip, closer to real life; slightly slippery on hard launches.
 - Outside camera shakes a little; first-person view stays steady (only crashes jolt it).
+- **Dashboards built (2026-10-11):** LP700 Aventador (Sport screen), Ferrari 458, 330i (BMW digital Live Cockpit), M3 E92 (classic BMW like M5/M6), CLA 45 (AMG twin dials + PRNDM screen), Supra MK4 (TRD triple), Toyota (Camry, Crown, Land Cruiser, Alphard: power meter + km/h speedo). Other cars use their own needles or the generic dashboard.

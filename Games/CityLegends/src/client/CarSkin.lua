@@ -30,6 +30,20 @@ local Cars = require(Shared:WaitForChild("Cars"))
 
 local CarSkin = {}
 
+-- cars with their own dashboard design (DashGauges styles), built from the owner's reference photos
+CarSkin.CLUSTER_STYLE = {
+	lambrini_lp700 = "Aventador",
+	ferrara_458 = "Ferrari",
+	bnw_330i_g20 = "BMWLive",
+	bnw_m3_e92 = "BMWClassic",
+	bentz_cla45 = "AMG",
+	toyoka_supra_mk4 = "SupraTRD",
+	toyoka_camri = "Toyota",
+	toyoka_crown = "Toyota",
+	toyoka_lc200 = "Toyota",
+	toyoka_alfard = "Toyota",
+} :: { [string]: string }
+
 type Template = { part: MeshPart, offset: CFrame }
 type GenericWheel = { x: number, parts: { Template } }
 type Imported = {
@@ -705,7 +719,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				best = tmin
 			end
 		end
-		local ownDesign = src.Name:sub(1, 7) == "ferrara" or src.Name == "lambrini_lp700"
+		local ownDesign = CarSkin.CLUSTER_STYLE[src.Name] ~= nil
 		-- how far past the wheel the car's real cluster sits (studs); the Aventador's is deep in its hood
 		local depth = if src.Name == "lambrini_lp700" then 1.0 else 0.45
 		local t = if best < 4 / scale * 3 and not ownDesign then best - 0.03 / scale else (target - eyeW).Magnitude + depth / scale
@@ -754,7 +768,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 						end
 					end
 				end
-				if dup then
+				if dup or (kind and CarSkin.CLUSTER_STYLE[src.Name]) then
 					gaugeOf[d] = true
 				elseif kind then
 					-- turns about the small hub part next to it, else about itself
@@ -1033,7 +1047,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		end
 		-- live instrument cluster on the car's own gauge spot, when it has no working gauges of its own
 		-- (cars with their own design here, like the Ferrari, always get it)
-		local ownDesign = id:sub(1, 7) == "ferrara" or id == "lambrini_lp700"
+		local ownDesign = CarSkin.CLUSTER_STYLE[id] ~= nil
 		if imported.cluster and imported.clusterSize and not liteMode and (ownDesign or not imported.ownGauges) then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
@@ -1056,7 +1070,10 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			w.Part0 = root
 			w.Part1 = cluster
 			w.Parent = cluster
-			cluster:SetAttribute("Style", if id == "lambrini_lp700" then "Aventador" elseif id:sub(1, 8) == "lambrini" then "Lambo" elseif id:sub(1, 7) == "ferrara" then "Ferrari" else "Modern")
+			cluster:SetAttribute("Style", CarSkin.CLUSTER_STYLE[id] or (if id:sub(1, 8) == "lambrini" then "Lambo" else "Modern"))
+			if ownDesign then
+				model:SetAttribute("OwnCluster", true) -- the model's own gauge screens stay off
+			end
 		end
 		-- the camera sits at the model's own driver's seat
 		if imported.eye then
