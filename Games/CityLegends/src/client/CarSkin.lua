@@ -554,7 +554,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				return { part = p, offset = CFrame.new(0, 0, z) * CFrame.Angles(0, math.pi / 2, 0) }
 			end
 			table.insert(parts, hubPiece(Vector3.new(0.18, radius * 0.95, radius * 0.95), Color3.fromRGB(16, 16, 18), Enum.Material.SmoothPlastic, 0.02))
-			table.insert(parts, hubPiece(Vector3.new(0.04, radius * 0.42, radius * 0.42), Color3.fromRGB(250, 205, 20), Enum.Material.Neon, 0.12))
+			table.insert(parts, hubPiece(Vector3.new(0.04, radius * 0.2, radius * 0.2), Color3.fromRGB(235, 190, 20), Enum.Material.SmoothPlastic, 0.12)) -- small yellow dot, no glow
 			for _, ang in { 0, math.pi } do
 				local spoke = Instance.new("Part")
 				spoke.Size = Vector3.new(radius * 0.75, 0.16, 0.08)
@@ -661,8 +661,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	if out.steer and out.eye then
 		local wz = out.steer.mount.Position.Z
 		local eye = out.eye :: Vector3
-		if eye.Z - wz < 1.8 then
-			out.eye = Vector3.new(eye.X, eye.Y, wz + 1.8)
+		if eye.Z - wz < 1.4 then
+			out.eye = Vector3.new(eye.X, eye.Y, math.min(wz + 1.4, eye.Z + 0.3))
 		end
 	end
 
@@ -830,12 +830,46 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 	end
 
+	-- cabin trim gets a real material: Alcantara-style suede in sports cars, leather in the rest.
+	-- Only plain dark pieces inside the cabin (not baked textures, glass, lights or chrome)
+	local cabinMaterial: ((BasePart, BasePart) -> ())? = nil
+	if out.eye then
+		local id = src.Name
+		local sport = id:sub(1, 8) == "lambrini" or id:sub(1, 7) == "ferrara" or id:sub(1, 7) == "mclaran"
+			or id:sub(1, 6) == "porsha" or id == "nisun_gtr" or id == "toyoka_supra_mk4" or id:find("^bnw_m%d") ~= nil
+			or id == "bentz_cla45" or id == "bentz_cls63s" or id == "bentz_sls" or id:sub(1, 5) == "astin" or id == "audy_r8"
+		local eyeG = out.eye :: Vector3
+		cabinMaterial = function(d: BasePart, p: BasePart)
+			local rel = frame:PointToObjectSpace(d.Position) * scale
+			local big = math.max(d.Size.X, d.Size.Y, d.Size.Z) * scale
+			local inside = math.abs(rel.X) <= 2.1 and rel.Z >= eyeG.Z - 2.8 and rel.Z <= eyeG.Z + 1.4 and rel.Y >= 0.3 and rel.Y <= eyeG.Y + 0.5
+			if not inside or big > 3.5 or d.Transparency > 0.05 then
+				return
+			end
+			if d.Material == Enum.Material.Glass or d.Material == Enum.Material.Neon or d:FindFirstChildOfClass("SurfaceAppearance") then
+				return
+			end
+			if d:IsA("MeshPart") and d.TextureID ~= "" then
+				return -- a baked texture: its look comes from the picture
+			end
+			local c = d.Color
+			if 0.3 * c.R + 0.59 * c.G + 0.11 * c.B > 0.45 then
+				return -- light trim, chrome, screens
+			end
+			p.Material = if sport then Enum.Material.Fabric else Enum.Material.Leather
+			p.Reflectance = 0
+		end
+	end
+
 	local k = 0
 	for _, d in visible do
 		if not inWheel[d] and not (out.steer and inSteer(d)) and not gaugeOf[d] then
 			k += 1
 			local t = tmpl(d, Vector3.zero)
 			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
+			if cabinMaterial then
+				cabinMaterial(d, t.part)
+			end
 			out.body["Part" .. k] = t
 		end
 	end

@@ -638,13 +638,13 @@ function Driving.attach(model: Model)
 	local eyeAttr = model:GetAttribute("Eye")
 	-- panel size per design, in wheel radii (wide clusters show partly through the rim, like real)
 	local CLUSTER_SIZE = {
-		Aventador = { 1.3, 0.52 },
+		Aventador = { 1.6, 0.64, 0.8 },
 		Ferrari = { 1.6, 0.6 },
 		BMWLive = { 1.8, 0.62 },
 		BMWClassic = { 1.6, 0.6 },
 		AMG = { 1.7, 0.62 },
 		SupraTRD = { 1.9, 0.62 },
-		Toyota = { 1.7, 0.62 },
+		Toyota = { 1.7, 0.62, 0.8 },
 	}
 	local sizeFor = if type(style) == "string" then CLUSTER_SIZE[style] else nil
 	if dashPanel and dashPanel:IsA("BasePart") and sizeFor
@@ -652,7 +652,8 @@ function Driving.attach(model: Model)
 		-- sit where the car's own cluster is: seen through the top half of the wheel, just behind
 		-- the rim, facing the driver's eye (the same eye the first-person camera uses)
 		local r = radiusAttr
-		local target = mountAttr.Position + mountAttr.UpVector * r * 0.6
+		-- third number: how high through the wheel it sits (in radii; default 0.6)
+		local target = mountAttr.Position + mountAttr.UpVector * r * (sizeFor[3] or 0.6)
 		local dir = (target - eyeAttr).Unit
 		local pos = target + dir * 0.3
 		local src = (ReplicatedStorage:FindFirstChild("CarModels", true) :: Instance):FindFirstChild(spec.Id, true)

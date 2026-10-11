@@ -222,7 +222,7 @@ end
 
 -- Ferrari 458: big yellow rev counter in the middle (0-10, red from 9, gear in a dark
 -- wedge), left screen with outside temperature and a fuel bar, right screen with speed and clock
-local FERRARI_YELLOW = Color3.fromRGB(246, 196, 0)
+local FERRARI_YELLOW = Color3.fromRGB(196, 146, 0) -- deep yellow, not glaring at night
 local function ferrari(gui: SurfaceGui): Update
 	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(8, 8, 10), BorderSizePixel = 0 }, gui)
 	-- side screens
@@ -282,12 +282,14 @@ local function ferrari(gui: SurfaceGui): Update
 		BorderSizePixel = 0,
 	}, box)
 	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, face)
-	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(255, 220, 60), Color3.fromRGB(214, 160, 0)), Rotation = 60 }, face)
+	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(210, 160, 10), Color3.fromRGB(160, 112, 0)), Rotation = 60 }, face)
 	-- 0..10 from 7 o'clock round to 4 o'clock
 	local a0, a1 = -150, 110
 	for i = 0, 10 do
 		local ang = math.rad(a0 + (a1 - a0) * i / 10)
-		text(box, tostring(i), UDim2.fromScale(0.5 + math.sin(ang) * 0.36, 0.5 - math.cos(ang) * 0.36), UDim2.fromScale(0.12, 0.11), if i >= 9 then Color3.fromRGB(220, 20, 20) else WHITE, Enum.Font.GothamBold)
+		local num = text(box, tostring(i), UDim2.fromScale(0.5 + math.sin(ang) * 0.36, 0.5 - math.cos(ang) * 0.36), UDim2.fromScale(0.13, 0.12), if i >= 9 then Color3.fromRGB(230, 20, 20) else WHITE, Enum.Font.GothamBlack)
+		num.TextStrokeColor3 = Color3.fromRGB(20, 14, 0) -- outlined so they read on the yellow
+		num.TextStrokeTransparency = 0.1
 	end
 	text(box, "RPM", UDim2.fromScale(0.66, 0.53), UDim2.fromScale(0.12, 0.06), Color3.fromRGB(60, 50, 20), Enum.Font.GothamBold)
 	text(box, "x1000", UDim2.fromScale(0.66, 0.59), UDim2.fromScale(0.1, 0.045), Color3.fromRGB(60, 50, 20), Enum.Font.Gotham)
