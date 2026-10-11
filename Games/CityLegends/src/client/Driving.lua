@@ -675,7 +675,7 @@ function Driving.attach(model: Model)
 		gear = "N",
 		rpm = 0,
 		cabinLight = cabinLight,
-		engine = Audio.engine(spec.Class, nil),
+		engine = Audio.engine(spec.Class, nil, spec.Id),
 		throttle = 0,
 		slip = 0,
 		flames = flames,
