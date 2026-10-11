@@ -335,7 +335,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 
 	local visible: { BasePart } = {}
 	for _, d in src:GetDescendants() do
-		if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
+		-- HideInGame: a piece we replace ourselves (e.g. a wheel centre fused with the gauge pod)
+		if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") and not d:GetAttribute("HideInGame") then
 			table.insert(visible, d)
 		end
 	end
@@ -506,7 +507,38 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			t.offset = mount:Inverse() * t.offset
 			table.insert(parts, t)
 		end
-		out.steer = { mount = mount, parts = parts, radius = discSize / 2 * scale * 0.9 }
+		local radius = discSize / 2 * scale * 0.9
+		if src:GetAttribute("AddSteerHub") then
+			-- the model's wheel centre is fused with something else and hidden: build one
+			local function hubPiece(size: Vector3, color: Color3, material: Enum.Material, z: number): Template
+				local p = Instance.new("Part")
+				p.Shape = Enum.PartType.Cylinder
+				p.Size = size
+				p.Color = color
+				p.Material = material
+				p.CanCollide = false
+				p.CanQuery = false
+				p.CanTouch = false
+				p.Massless = true
+				p.CastShadow = false
+				return { part = p, offset = CFrame.new(0, 0, z) * CFrame.Angles(0, math.pi / 2, 0) }
+			end
+			table.insert(parts, hubPiece(Vector3.new(0.18, radius * 0.95, radius * 0.95), Color3.fromRGB(16, 16, 18), Enum.Material.SmoothPlastic, 0.02))
+			table.insert(parts, hubPiece(Vector3.new(0.04, radius * 0.42, radius * 0.42), Color3.fromRGB(250, 205, 20), Enum.Material.Neon, 0.12))
+			for _, ang in { 0, math.pi } do
+				local spoke = Instance.new("Part")
+				spoke.Size = Vector3.new(radius * 0.75, 0.16, 0.08)
+				spoke.Color = Color3.fromRGB(232, 232, 236)
+				spoke.Material = Enum.Material.SmoothPlastic
+				spoke.CanCollide = false
+				spoke.CanQuery = false
+				spoke.CanTouch = false
+				spoke.Massless = true
+				spoke.CastShadow = false
+				table.insert(parts, { part = spoke, offset = CFrame.Angles(0, 0, ang) * CFrame.new(radius * 0.55, -0.04, 0) })
+			end
+		end
+		out.steer = { mount = mount, parts = parts, radius = radius }
 	end
 
 	-- driver's eye: above the driver's seat, at 80% of the roof height there
@@ -644,13 +676,15 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				best = tmin
 			end
 		end
-		local t = if best < 4 / scale * 3 then best - 0.03 / scale else (target - eyeW).Magnitude + 0.4 / scale
+		local ownDesign = src.Name:sub(1, 7) == "ferrara" or src.Name == "lambrini_lp700"
+		local t = if best < 4 / scale * 3 and not ownDesign then best - 0.03 / scale else (target - eyeW).Magnitude + 0.45 / scale
 		local posW = eyeW + dir * t
 		local pos = frame:PointToObjectSpace(posW) * scale
 		local eyeG = out.eye
 		out.cluster = CFrame.lookAt(pos, pos + (pos - eyeG).Unit) -- back face looks at the driver
 		local r = rm * scale
-		out.clusterSize = Vector2.new(r * 1.7, r * 0.62)
+		-- full-width clusters (rev counter + two side screens) are about as wide as the wheel
+		out.clusterSize = if ownDesign then Vector2.new(r * 2.3, r * 0.85) else Vector2.new(r * 1.7, r * 0.62)
 	end
 
 	-- the model's own gauge needles: turned live by Driving (speed / revs)
