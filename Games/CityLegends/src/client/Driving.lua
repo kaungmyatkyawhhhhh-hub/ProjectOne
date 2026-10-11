@@ -98,6 +98,9 @@ type State = {
 	partNeedles: { { part: BasePart, kind: string, pivot: CFrame, offset: CFrame } },
 	guiNeedles: { { gui: GuiObject, kind: string, base: number } },
 	speedShown: number,
+	-- body lean (radians): roll in turns, pitch on braking / accelerating
+	roll: number,
+	pitch: number,
 	rpmShown: number,
 	camPos: Vector3,
 	camLook: Vector3,
@@ -667,6 +670,8 @@ function Driving.attach(model: Model)
 		partNeedles = partNeedles,
 		guiNeedles = guiNeedles,
 		speedShown = 0,
+		roll = 0,
+		pitch = 0,
 		rpmShown = 0,
 		camPos = root.Position + Vector3.new(0, 8, 20),
 		camLook = root.Position,
@@ -830,13 +835,13 @@ function Driving.step(dt: number)
 		fwdSpeed += a * dt
 
 		-- steering: speed-sensitive wheel angle, capped by lateral grip
-		local steerRate = if math.abs(steerIn) > math.abs(s.steer) then 5 else 8
+		local steerRate = if math.abs(steerIn) > math.abs(s.steer) then 4.2 else 7
 		s.steer += (steerIn - s.steer) * math.min(1, dt * steerRate)
 		local speedAbs = math.abs(fwdSpeed)
 		local maxAngle = math.rad(36) / (1 + (speedAbs / 70) ^ 1.3)
 		local angle = s.steer * maxAngle
 		local yawRate = fwdSpeed * math.tan(angle) / s.wheelbase
-		local gripG = 2.6 + 2.4 * handling
+		local gripG = 2.2 + 2.0 * handling -- real-life grip, not glued to the road
 		local cap = gripG * 28 / math.max(speedAbs, 1)
 		if handbrake then
 			cap *= 1.7
@@ -845,9 +850,21 @@ function Driving.step(dt: number)
 		s.yaw -= yawRate * dt
 
 		-- lateral grip (low with handbrake -> drift)
-		local grip = if handbrake then 1.4 else 7 + 7 * handling
+		local grip = if handbrake then 1.4 else 4.5 + 5 * handling
+		-- hard launch: the rear steps out a little while the tyres find grip
+		if throttle > 0.6 and not handbrake then
+			grip *= 1 - 0.35 * throttle * math.clamp(1 - math.abs(speedFrac) * 2.5, 0, 1)
+		end
 		latSpeed *= math.exp(-grip * dt)
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
+
+		-- body lean: outward in turns, nose down when braking, squat when accelerating
+		local latG = math.clamp(fwdSpeed * yawRate / 196.2, -1.5, 1.5)
+		local lonG = math.clamp(a / 196.2, -1.5, 1.5)
+		local rollTarget = math.rad(3.2) * latG
+		local pitchTarget = math.rad(2.2) * lonG
+		s.roll += (rollTarget - s.roll) * math.min(1, dt * 6)
+		s.pitch += (pitchTarget - s.pitch) * math.min(1, dt * 6)
 
 		local newFwd = forwardFromYaw(s.yaw)
 		local newRight = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
@@ -865,7 +882,7 @@ function Driving.step(dt: number)
 	end
 
 	s.lv.PlaneVelocity = Vector2.new(s.vel.X, s.vel.Z)
-	s.ao.CFrame = CFrame.Angles(0, s.yaw, 0)
+	s.ao.CFrame = CFrame.Angles(0, s.yaw, 0) * CFrame.Angles(s.pitch, 0, s.roll)
 	s.lastCommand = s.vel
 
 	-- gears / rpm (cosmetic)
@@ -1029,7 +1046,7 @@ function Driving.render(dt: number)
 	local C = Config.Camera
 	s.shake = math.max(0, s.shake - dt * 2.5)
 	local t = os.clock()
-	local speedShake = math.max(0, speedFrac - 0.55) * 0.12
+	local speedShake = 0.012 * math.min(speedFrac * 6, 1) + math.max(0, speedFrac - 0.3) * 0.16
 	local shakeAmt = speedShake + s.shake * 0.5
 	local shakeOffset = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * shakeAmt
 
@@ -1045,7 +1062,9 @@ function Driving.render(dt: number)
 		end
 		local lookInto = -s.steer * math.rad(9)
 		local eyeCF = rootCF * CFrame.new(s.eye) * CFrame.Angles(0, lookInto + mouseLook, 0) * CFrame.Angles(math.rad(-4), 0, 0)
-		camera.CFrame = eyeCF * CFrame.new(shakeOffset * 0.3)
+		-- inside the cabin the view stays steady; only a crash jolts it
+		local jolt = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * s.shake * 0.15
+		camera.CFrame = eyeCF * CFrame.new(jolt)
 		s.camPos = camera.CFrame.Position
 		if blur then
 			blur.Size = 0

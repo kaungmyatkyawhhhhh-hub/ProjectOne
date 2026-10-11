@@ -48,3 +48,9 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - **Dash clusters (2026-10-10):** Lamborghini cars get a round rev-counter cluster, all others a Toyota-style screen with an analog speedometer.
 - **Unique dashboards (2026-10-11):** every car should get its own dashboard, like a real one: working needles, screens, glowing colours, and a start-up sweep when the car starts. First one: Ferrari 458 (`ferrara_458`), built from the owner's reference (yellow rev counter, temperature + fuel screen left, speed + clock screen right). The owner will add the 458 model and describe the other dashboards later.
 - **Aventador LP700-4 (`lambrini_lp700`) reference:** https://www.youtube.com/watch?v=F-UK1tSbwvg ("Lamborghini Aventador LP700-4 SPRINT 0 - 353 km/h TOP SPEED", real car). Claude can't watch videos; ask for dashboard screenshots. In-game top speed is already 217 mph (~350 km/h).
+
+## Driving feel (2026-10-11, to match Highway Legends)
+- Body leans outward in turns, nose dips on braking, squats on acceleration.
+- Steering a little slower than before.
+- Less grip, closer to real life; slightly slippery on hard launches.
+- Outside camera shakes a little; first-person view stays steady (only crashes jolt it).
