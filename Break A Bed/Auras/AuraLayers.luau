@@ -20,7 +20,8 @@ AuraLayers.Textures = {
 	Star = "rbxassetid://0", -- fx-star4.png
 	Smoke = "rbxassetid://0", -- fx-smoke.png
 	Beam = "rbxassetid://0", -- fx-beam.png
-	Flame = "rbxassetid://0", -- a flipbook flame sheet (Grid4x4), optional
+	Flame = "rbxassetid://0", -- fx-flame-flipbook.png (4x4 flipbook, in the Effects folder)
+	SmokeSheet = "rbxassetid://0", -- fx-smoke-flipbook.png (4x4 flipbook)
 }
 
 type Def = {
@@ -177,6 +178,35 @@ function AuraLayers.Apply(character: Model, auraName: string, isLocalPlayer: boo
 			p.Shape = Enum.ParticleEmitterShape.Disc
 			p.ShapeStyle = Enum.ParticleEmitterShapeStyle.Surface
 			p.Parent = att
+			-- Animated flames (flipbook) and soft smoke rising from the ring.
+			local fl = Instance.new("ParticleEmitter")
+			fl.Texture = AuraLayers.Textures.Flame
+			fl.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
+			fl.FlipbookMode = Enum.ParticleFlipbookMode.Loop
+			fl.FlipbookFramerate = NumberRange.new(16, 20)
+			fl.Color = seq(def.A, def.B)
+			fl.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.9), NumberSequenceKeypoint.new(0.5, 1.2), NumberSequenceKeypoint.new(1, 0.2) })
+			fl.Transparency = fade(0.6 + lighter, 0.25 + lighter, 1)
+			fl.LightEmission = 0.9
+			fl.Lifetime = NumberRange.new(0.6, 0.9)
+			fl.Rate = 7 * rateMul
+			fl.Speed = NumberRange.new(1.5, 2.5)
+			fl.EmissionDirection = Enum.NormalId.Top
+			fl.Shape = Enum.ParticleEmitterShape.Disc
+			fl.ShapeStyle = Enum.ParticleEmitterShapeStyle.Surface
+			fl.Parent = att
+			local sm = Instance.new("ParticleEmitter")
+			sm.Texture = AuraLayers.Textures.SmokeSheet
+			sm.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
+			sm.FlipbookMode = Enum.ParticleFlipbookMode.OneShot
+			sm.Color = ColorSequence.new(def.B)
+			sm.Size = NumberSequence.new(1.2, 2.2)
+			sm.Transparency = fade(0.85, 0.7 + lighter, 1)
+			sm.Lifetime = NumberRange.new(1.2, 1.6)
+			sm.Rate = 2 * rateMul
+			sm.Speed = NumberRange.new(0.8, 1.2)
+			sm.EmissionDirection = Enum.NormalId.Top
+			sm.Parent = att
 		end
 	end
 
@@ -352,6 +382,66 @@ function AuraLayers.Apply(character: Model, auraName: string, isLocalPlayer: boo
 	}
 	character.Destroying:Connect(function()
 		AuraLayers.Remove(character)
+	end)
+end
+
+-- Reveal when equipping or rolling: a flash ring + a spiral of light; rare ones tint the screen.
+function AuraLayers.Reveal(character: Model, auraName: string, rare: boolean)
+	local def = AuraLayers.Defs[auraName]
+	local root = character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not def or not root then
+		return
+	end
+	local TweenService = game:GetService("TweenService")
+	local fx = Instance.new("Folder")
+	fx.Name = "AuraReveal"
+	fx.Parent = Workspace
+	-- Flash ring on the ground, growing and fading.
+	local ring = effectPart("RevealRing", Vector3.new(2, 0.05, 2), fx)
+	ring.CFrame = root.CFrame * CFrame.new(0, -2.9, 0)
+	local d = Instance.new("Decal")
+	d.Face = Enum.NormalId.Top
+	d.Texture = AuraLayers.Textures.Ring
+	d.Color3 = def.A
+	d.Transparency = 0
+	d.Parent = ring
+	TweenService:Create(ring, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = Vector3.new(16, 0.05, 16) }):Play()
+	TweenService:Create(d, TweenInfo.new(0.5), { Transparency = 1 }):Play()
+	-- Spiral of light rising around the body.
+	local att = Instance.new("Attachment")
+	att.Parent = root
+	local sp = Instance.new("ParticleEmitter")
+	sp.Texture = AuraLayers.Textures.Star
+	sp.Color = seq(def.A, def.B)
+	sp.LightEmission = 1
+	sp.Size = NumberSequence.new(0.6, 0)
+	sp.Lifetime = NumberRange.new(0.6)
+	sp.Speed = NumberRange.new(0)
+	sp.Rate = 0
+	sp.Parent = att
+	task.spawn(function()
+		for i = 0, 30 do
+			local a = i * 0.45
+			att.Position = Vector3.new(math.cos(a) * 1.8, -2.8 + i * 0.18, math.sin(a) * 1.8)
+			sp:Emit(2)
+			task.wait(0.02)
+		end
+		task.wait(0.7)
+		att:Destroy()
+	end)
+	-- Rare: tint the whole screen in the aura color for half a second (local player only).
+	if rare and character == (game:GetService("Players").LocalPlayer.Character) then
+		local cc = Instance.new("ColorCorrectionEffect")
+		cc.TintColor = def.A:Lerp(WHITE, 0.4)
+		cc.Brightness = 0.1
+		cc.Parent = game:GetService("Lighting")
+		TweenService:Create(cc, TweenInfo.new(0.6), { TintColor = WHITE, Brightness = 0 }):Play()
+		task.delay(0.65, function()
+			cc:Destroy()
+		end)
+	end
+	task.delay(1.6, function()
+		fx:Destroy()
 	end)
 end
 
