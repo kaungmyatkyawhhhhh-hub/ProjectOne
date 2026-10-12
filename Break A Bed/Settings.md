@@ -42,6 +42,26 @@ The menu was built with ON/OFF toggles for Music and Sound Effects. Replace thos
 - **The 🔊 mute button on the HUD** (if it's still there): tapping it mutes the music (slider to 0) and tapping again puts back the last value.
 - **Saved:** save the numbers (0–100) with the player's data, only when the player lets go of the knob (not every frame). Old saves that have ON/OFF: ON = the default, OFF = 0.
 
+
+## VFX and icons for the whole Settings window (owner 2026-10-12: "put more VFX in there, it looks bad")
+The picture above (`preview-settings-sliders.png`) is the target. Keep the layout. Add:
+- **Row icons:** each row gets a small colored studded square icon on the left (`set-music.png` green ♪, `set-sound.png` cyan speaker, `set-graphics.png` purple sparkle, `set-players.png` orange people, `set-damage.png` red "99", `set-shake.png` pink phone shake, `set-hud.png` blue eye; all in `UI Kit/images`, 128 × 128, shown at about 46 px). A soft glow in the same color sits behind each icon (`fx-glow`, Transparency 0.6).
+- **Window glow:** a soft **cyan glow** around the whole window (`fx-glow` image 9-sliced or a big blurred frame behind it, Transparency 0.5), and the game behind the window is **dimmed** (a black frame, Transparency 0.55) so the glow shows.
+- **Title bar:** the white diagonal shine stripes, a soft light-cyan glow behind the gear, and 3–4 twinkles (`fx-star4`) around the title. The gear turns slowly (one turn every 8 s).
+- **Sliders:**
+  - The fill has a glow in its color (green / cyan) around it, brightest at the knob end.
+  - A white diagonal shine on the fill and the knob.
+  - A gold glow behind the yellow knob and 2–3 small twinkles around it.
+  - Faint tick lines on the empty part of the track (every 10%).
+  - A soft yellow glow behind the "60%" text.
+  - **While dragging:** the glow gets brighter, small sparkles fall off the knob, and the value text pops (1.15 → 1) at each 10%.
+- **ON buttons** have a soft green glow and a shine. **OFF buttons** are a little darker, with no glow, so ON stands out. Flipping a toggle: a quick pop (0.9 → 1.1 → 1), a small `fx-ring` burst in the new color and the bubble pop sound.
+- **CODES row:** a gold glow around it, a shine stripe sweeping across every 3 s, twinkles at the corners, and a green glow on REDEEM. A good code: a green flash, a sparkle burst and the reward toast. A bad code: the box shakes and flashes red.
+- **Every button** (X, REDEEM, Replay Tutorial, toggles): a white diagonal shine, and on hover it grows to 1.05 and the shine slides across.
+- **Rows:** a faint light line along the top edge of each row (Transparency 0.93) so they look like raised blocks.
+- **Opening:** the window pops in (Back Out), then the rows slide in one after another (0.03 s apart).
+- Low Graphics: keep the icons and glows, turn off the twinkles and the shine sweeps.
+
 ## Codes
 Codes are a cheap way to get players to join the group, like the game and come back for new codes.
 
