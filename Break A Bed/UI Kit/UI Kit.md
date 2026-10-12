@@ -6,15 +6,60 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 A new UI style made 2026-10-12 to replace the look that seemed AI-made. It's based on the owner's reference pictures, and the owner asked for it **sharp**: nearly square corners, a light bevel inside a thick dark outline, a lighter top half, a small square "stud" pattern, a darker 3D bottom edge, and heavy white Montserrat text with a thick dark outline. Big menus have a dark slate window with a cyan title bar, a yellow featured card and cyan item cards.
 
-![[preview-shop.png]]
-
 ![[preview-gifts.png]]
 
 ![[preview-settings.png]]
 
-![[preview-tutorial.png]]
+![[preview-hud.png]]
 
 The preview is a mockup. The prices and the Rebirth button are only examples.
+
+## ⭐ FINAL STYLE (2026-10-12): the owner's favourite simulator look. Use this over everything below
+The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark studded shop with a green shiny title bar, floating stats) and said **"these types of designs are the best"**. Everything on screen follows this. Older sections below are only kept for the shared parts (rainbow-free headers now, animations, sounds).
+
+![[preview-hud.png]]
+
+![[preview-shop.png]]
+
+![[preview-shop-passes.png]]
+
+### Buttons and boxes
+- **Solid bright color** with a gentle top-to-bottom shade, a faint **square stud pattern**, a **light inner rim**, and an outline in a **dark shade of the same color** (dark green on green, dark navy on cyan; not black). Corners are small (about 6–7%).
+- Images: `sim-btn-<color>.png` (wide), `sim-square-<color>.png` (square), colors green, cyan, red, purple, yellow, orange, pink, blue.
+- **Icons on buttons are white glyphs with a dark outline** (`glyph-cart.png`, `glyph-dumbbell.png`, `glyph-wheel.png`, `glyph-gift.png`, `glyph-gear.png`). Square buttons can use the colored 3D icons instead.
+- **Text:** white **Montserrat Heavy**, thick dark stroke `#141420` plus a dark shadow. Important words are **green** `#5AE628` (for example "**x2** harder!", "**DOUBLE** Your STRENGTH", "**+$15K** CASH").
+
+### Main screen
+- **Left:** wide buttons **Shop** (green, cart) and **Boosts** (cyan, dumbbell), then an **on/off switch** with a white label (Auto Punch). Buttons are about 196 × 76.
+- **Right:** a column of **square buttons** for the free stuff (owner: nobody looks inside the shop for it): **Daily** reward (yellow, star), **Spin** wheel (orange, wheel), **Gifts** = Free Gifts (red, gift), then **Settings** (blue, gear). Each has a white label under it. Gifts shows its countdown instead ("0:10", yellow) and the label turns into "Ready!" when a gift can be claimed. A red badge in the top-left corner shows "!" (daily ready) or a number (free spins, gifts ready). Ready buttons do the "Ready" pulse.
+- **Stats float in the bottom-left with no panel:** a big 3D icon and a huge **italic** number (Montserrat Heavy Italic, thick dark stroke): Strength **yellow** `#FFEB1E`, Cash **green** `#5AEB3C`. Under them, white italic "Group Bonus: +10%".
+- **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
+
+### Big menus (Shop, Free Gifts, Settings, Index…)
+- **Window:** solid dark grey `#3E4048` with a dark stud pattern and a near-black outline (`sim-window.png`). It's **not** see-through.
+- **Title bar:** bright green (`sim-header-green.png`) or cyan with **diagonal white shine stripes**. The title is white on the left, and a red square X sits on the right.
+- **One scrolling page** with section titles like **-- STRENGTH --** (cyan), **-- CASH --** (green), **-- PASSES --** (yellow), in big text with the dark stroke.
+- **Category buttons outside the window on the right:** a big 3D icon with a white label (Passes, Strength, Cash). There's **no FREE tab**: Daily, Spin and Free Gifts open from their own buttons on the main screen. Clicking one scrolls to its section.
+- **Item cards:** colored by section (Cash green, Strength cyan, passes rainbow or yellow), a white glow behind a big 3D icon that may poke out of the top, the amount in white with the number in green, then a small **purple gift button** (buy it for a friend) plus a wide **green price button** with the Robux icon.
+- **Strength tier card:** "**DOUBLE** Your STRENGTH", a big **x5 ▶ x7** (white then yellow, italic) with soft light rays behind, and the price on the right.
+
+### Shop polish (2026-10-12, after comparing with the other game)
+- **No light rays behind open menus** (owner: the white "circus" rays are annoying). Only a very soft sunburst **inside** item cards, behind the icon.
+- **Pattern = the reference's "L" marks**, not boxy studs: each cell has a short dark line down its left and along its bottom (about 12% opacity). The window body is dark `#2C2D36` with darker embossed squares (`sim-window.png`).
+- **Cards** (`card-green.png`, `card-cyan2.png`, `card-yellow2.png`): a thin near-black outline `#181820` (4 px), a diagonal gradient (darker top-left → lighter bottom-right), the L pattern and a soft sunburst. There's **no 3D bottom edge** on cards.
+- **Price button** (`price-lime.png`): a bright lime gradient `#96F528 → #46C814` with a dark green outline, a **white Robux icon** with a dark outline (`icon-robux-white.png`) and big white numbers. The gift button is a purple gradient square (`gift-purple.png`) with the white gift glyph.
+- Card text: "**+$15K** CASH" with the amount in green, a big heavy font, a dark stroke.
+- **The biggest difference is the item art.** The other game uses really well-drawn **2D pictures** (not 3D models): thick dark outlines, shaded sides, shine and depth. Ours should match that quality.
+  - **Money art (2026-10-12, matches the other game):** front-facing tilted bill bundles with a $ circle, a yellow band, stacked edges, a shine and thick black outlines: `money-small.png` (1 bundle), `money-medium.png` (3), `money-big.png` (pile), `money-bag.png`, `money-safe.png` (open safe full of cash). **Use these everywhere money shows**: Cash shop cards, the Cash stat icon, the ad board, the Free Gift popup, the Group Reward, daily/gift rewards, Cash products, and the shop's Cash category icon. (`icon-cash.png` and `art-cash-*.png` were replaced with the same art.)
+  - Still to make at this quality: Strength (dumbbells), boosts, spins, gifts and beds.
+
+### Effects (the owner: "the effects in this game are crazy")
+- **Server announcements:** a big line at the top center for everyone, white with a dark stroke and the important part colored: "**Rong** broke the **INFINITY BED!**", "**Rong** bought **SERVER x2 STRENGTH!**". It slides in, stays 4 s and fades.
+- **Big center text** for events ("SERVER x2 STRENGTH!", "WEEKEND EVENT!", "NEW BED UNLOCKED!") with a glow and a pop-in.
+- **Bed breaks look huge:** a bright flash, a burst of glowing particles in the bed's tier color, light beams, flying cash, screen shake. Later beds get bigger, neon effects.
+- **Glowing auras and trails:** the player gets an aura/trail that gets fancier with Level or Rebirths. VIP gets a gold one.
+- **Floating numbers:** big italic damage numbers and "+$" pop out of every hit.
+- **Glowing neon details** on the later zones and beds.
 
 ## Images (`UI Kit/images/`)
 None of the images have text in them. Text stays as Roblox TextLabels so numbers can change.
@@ -35,7 +80,12 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `fx-rays.png` | 1024 × 1024 | White light rays behind open menus |
 | `fx-sparkle.png` | 128 × 128 | White 4-point twinkle around items |
 | `fx-glow.png` | 256 × 256 | Soft white glow behind item icons |
-| `icon-check.png`, `icon-dumbbell.png`, `icon-gear.png` | 256 × 256 | Claimed check, Strength packs, Settings button |
+| `icon-check.png`, `icon-dumbbell.png`, `icon-gear.png`, `icon-basket.png` | 256 × 256 | Claimed check, Strength packs, Settings button, SHOP button |
+| `text-<label>.png` | various | Chunky pixel text for fixed labels (Shop, Boost, Spin, Gifts, Settings, SKIP, LVL) |
+| `pixel-btn-<color>.png` | 472 × 176 | Main-screen side buttons (rounded, short) |
+| `pixel-panel-light.png`, `pixel-badge-yellow.png`, `pixel-bar-track.png`, `pixel-bar-green.png` | various | Light stat panels, LVL badge, progress bars |
+| `fx-arrow-chevron.png` | 256 × 256 | Arrow texture for the ground path `Beam` |
+| `sim-btn-<color>.png`, `sim-square-<color>.png`, `sim-header-green.png`, `sim-header-cyan.png`, `sim-window.png`, `glyph-<name>.png` | various | **FINAL STYLE** images (see the section above) |
 
 Colors: pink, purple, cyan, blue, orange, green, red, yellow, slate.
 
@@ -61,13 +111,46 @@ Matched to the owner's reference picture on 2026-10-12. Use these exact values s
 Base colors: cyan `#1CC8F2`, blue `#247ADE`, pink `#EC22CD`, purple `#9648E8`, orange `#FF9416`, green `#54CA34`, red `#E2363C`, yellow `#FFE20C`, slate `#3E4454`.
 
 **Effects (same as the reference):**
-- **Light rays:** `fx-rays.png` behind every open menu, about 1.9× the window width, centered on it, ImageTransparency 0.25, spinning slowly (one full turn every 40 s). Fade in with the menu.
+- ~~Light rays behind open menus~~: **removed** (owner found them annoying).
 - **Glow:** `fx-glow.png` behind every item icon, about 1.3× the icon size, ImageTransparency 0.4.
 - **Featured slot:** the big item on the yellow card sits in a lighter yellow rounded panel (`#FFF078`, 6 px `#FFFABE` border, UICorner 46 px) with the glow behind it.
 - **Sparkles:** 3–4 `fx-sparkle.png` around each item icon at different sizes (16–40 px). They twinkle: grow from 0 to full size and fade out over about 1.2 s, each starting at a random time, looping.
 - Effects are images only (no `UIGradient` shine or blur on the window).
 
 **Big menu layout:** see-through dark window → cyan title bar along the top with the title on the left, red X square at the top-right corner → yellow featured card full width → a row of cyan item cards, each with a title at the top, an icon with a white glow in the middle and a green price button at the bottom. Gaps between cards are 14 px and show the dark window. Tabs sit above the window, each tilted 2–4°.
+
+## Main screen (HUD) and tutorial: rounded gradient buttons with pixel text (final, 2026-10-12)
+The owner tried a square copy of the "Shop" reference and preferred this **rounded** version (it's what the tutorial looked like in-game). **Side buttons are short** (owner: the long ones were too long). Keep the old layout: buttons down the left, stats top right, tutorial top center. Stats and the tutorial are **light**. Big menus keep the dark see-through window and the rainbow title.
+
+![[preview-hud.png]]
+
+**Button design:**
+| Part | Value |
+|---|---|
+| Size | About **236 × 88** on PC (short, ratio about 2.7 : 1); images `pixel-btn-<color>.png` are 472 × 176 |
+| Corners | Rounded, `UICorner` about 12% of the height (about 10 px) |
+| Outline | Dark `#161822`, about 6% of the height |
+| Inner border | A thin light line just inside the outline (the top color mixed 55% with white), about 4.5% of the height |
+| Face | Vertical gradient, strong color at the top to a lighter color at the bottom |
+| Pattern | Faint white diamonds (about 13% opacity) |
+| Gloss | A soft white shine on the top 40% |
+| Icon | Big shiny 3D icon on the left, about 75% of the height (`icon-basket.png` for Shop) |
+| Text | Chunky pixel text (below), shrinks to fit after the icon |
+
+Gradient colors (top → bottom): red `#EC1E34 → #FF7884`, orange `#FA780A → #FFBE5A`, purple `#8C32E1 → #CD8CFF`, pink `#E11EAF → #FF82DC`, green `#28AF28 → #82EB64`, blue `#196EE1 → #6EB9FF`, yellow `#FAB900 → #FFEB6E`, light `#EBEEF6 → #FFFFFF` (stats and tutorial, with grey diamonds).
+
+**Pixel text** (white, chunky, a thin hard-edged black outline that follows the pixels, a grey bottom edge on each letter):
+- **Fixed labels** use the images `text-shop.png`, `text-boost.png`, `text-spin.png`, `text-gifts.png`, `text-settings.png`, `text-skip.png`, `text-lvl.png` (ImageLabel, `ScaleType = Fit`, `ResampleMode = Pixelated`).
+- **Changing text** (numbers, timers, tutorial steps) uses two stacked TextLabels with `Font.new("rbxasset://fonts/families/PressStart2P.json")`: the back one is `#161822` with a same-color `UIStroke` (Thickness ≈ 14% of the text size, `LineJoinMode = Miter`); the front one is white (or the stat color) with a `UIStroke` in its own text color (Thickness ≈ 6%, `LineJoinMode = Miter`). Colors: Strength purple `#B46EFF`, Cash green `#50D23C`, tutorial title orange `#FF9614`.
+
+**Layout:**
+- **Left buttons:** Shop (red, basket), Boost (orange, dumbbell, with a small green "R$19" tag under its right end), Spin (purple, wheel), Gifts (pink, gift).
+- **Stats:** `pixel-panel-light.png` with the icon sticking out on the left and the value right-aligned. Level is a yellow LVL badge (`pixel-badge-yellow.png`) with a bar (`pixel-bar-track.png` + `pixel-bar-green.png`).
+- **Tutorial:** a light card with an orange title, a bolt icon and a progress bar. SKIP is a small red rounded button under the card's right end.
+
+**Ground path = moving arrows:** a `Beam` from the player to the target with `Texture = fx-arrow-chevron.png`, `TextureMode = Wrap`, `TextureLength = 3`, `TextureSpeed = 1.5`, `Color` cyan `#46DCFF`, `LightEmission = 1`, `Width0/Width1 = 2.5`, `FaceCamera = false`, laid flat just above the floor.
+
+**No idle animation** on these buttons. Only hover, press and "Ready" badges animate.
 
 ## Rainbow title bar (owner's request 2026-10-12)
 The title bar of the big menus (SHOP!, FREE GIFTS, SETTINGS) is an **animated rainbow** that slowly flows sideways. The X button stays red and the title stays white.

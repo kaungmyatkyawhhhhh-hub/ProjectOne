@@ -46,7 +46,7 @@ CarSkin.CLUSTER_STYLE = {
 	toyoka_alfard = "Toyota",
 	bnw_x6 = "BMWClassic", -- same cabin as the M5
 	bentz_cls63s = "AMGBiturbo",
-	bentz_g63 = "AMGBiturbo",
+	bentz_g63 = "G63",
 	bentz_e200 = "W212",
 	bentz_e300 = "W212",
 	bentz_e400 = "W213",
@@ -415,9 +415,10 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	elseif primary then
 		f = primary.CFrame.LookVector
 	else
-		-- chassis corner parts (FL / FR / RL / RR) tell the front from the back
+		-- chassis corner parts (FL / FR / RL / RR, on their own or in "Wheels") tell the front from the back
+		local wheelsGroup = src:FindFirstChild("Wheels", true)
 		local function corner(n: string): Vector3?
-			local p = src:FindFirstChild(n)
+			local p = src:FindFirstChild(n) or (if wheelsGroup then wheelsGroup:FindFirstChild(n) else nil)
 			return if p and p:IsA("BasePart") then p.Position else nil
 		end
 		local fl, fr, rl, rr = corner("FL"), corner("FR"), corner("RL"), corner("RR")
@@ -610,6 +611,17 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			local score = math.min(math.abs(ex[i] - a2), math.abs(ex[i] - b2))
 			if score > oddScore then
 				odd, oddScore = i, score
+			end
+		end
+		-- a steering wheel turns about an axis running down the car: a side that points sideways or
+		-- up can't be it (a tilted wheel whose part isn't turned with it), so take the most forward one
+		if math.abs(vecs[odd]:Dot(f)) < 0.5 then
+			local bestDot = -1
+			for i = 1, 3 do
+				local dot = math.abs(vecs[i]:Dot(f))
+				if dot > bestDot then
+					odd, bestDot = i, dot
+				end
 			end
 		end
 		local axis = vecs[odd]
@@ -976,6 +988,10 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			local t = tmpl(d, Vector3.zero)
 			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
 			cabinMaterial(d, t.part)
+			if d.Name:sub(1, 10) == "SeeThrough" then
+				-- windows of a converted Sketchfab model: an import can make the glass solid
+				t.part.Transparency = math.max(t.part.Transparency, 0.6)
+			end
 			out.body["Part" .. k] = t
 		end
 	end

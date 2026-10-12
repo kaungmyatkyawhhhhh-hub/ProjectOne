@@ -123,6 +123,9 @@ All numbers (beds, training items, damage, levels) are in `GameConfig`.
 - [[Break A Bed/Bugs and Fixes|Bugs and Fixes]]
 - [[Break A Bed/Ideas|Ideas]]
 - [[Break A Bed/UI Kit/UI Kit|UI Kit]]: the new button and shop style (images + how to use them)
+- [[Break A Bed/Free Rewards/Free Rewards|Free Rewards]]: free chest, watch-ad board, Free Gift popup (like/favorite/join)
+- [[Break A Bed/Auras/Limited Auras|Limited Auras]]: weekly aura crates that boost Strength and Walk Speed
+- [[Break A Bed/Effects/Effects|Effects]]: bed breaks, auras, glow, announcements (with particle images)
 - [[Break A Bed/Settings|Settings]]: settings menu (volume, low graphics, hide HUD…) and codes
 - [[Break A Bed/Retention Plan|Retention Plan]]: AFK zone, daily quests, boost inventory, OP day 7, rebirths, events
 - [[Break A Bed/New Player Guide|New Player Guide]]: first-minute guide to fix 0% retention

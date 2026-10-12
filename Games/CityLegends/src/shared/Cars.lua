@@ -68,7 +68,7 @@ local list: { CarSpec } = {
 	{ Id = "bnw_x6", Name = "BNW X6 M Sport", Class = "SUV", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.2, Handling = 0.6, Price = 130000, Color = Color3.fromRGB(20, 21, 24), Order = 28 },
 	{ Id = "toyoka_lc300", Name = "Toyoka Land Cruzer 300", Class = "SUV", Tier = "Mid", TopSpeed = 130, ZeroToSixty = 6.5, Handling = 0.5, Price = 150000, Color = Color3.fromRGB(235, 236, 238), Order = 29 },
 	{ Id = "lexis_lx570", Name = "Lexis LX570 Kuro", Class = "SUV", Tier = "Mid", TopSpeed = 137, ZeroToSixty = 7.0, Handling = 0.48, Price = 170000, Color = Color3.fromRGB(12, 12, 14), Order = 30 },
-	{ Id = "bentz_g63", Name = "Mercer G63 2019", Class = "SUV", Tier = "Mid", TopSpeed = 149, ZeroToSixty = 4.4, Handling = 0.52, Price = 260000, Color = Color3.fromRGB(20, 21, 24), Order = 31 },
+	{ Id = "bentz_g63", Name = "Mercer G63", Class = "SUV", Tier = "Mid", TopSpeed = 149, ZeroToSixty = 4.4, Handling = 0.52, Price = 260000, Color = Color3.fromRGB(20, 21, 24), Order = 31 },
 	{ Id = "porsha_panamera", Name = "Porsha Panamera Turbo S", Class = "Sedan", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 3.0, Handling = 0.8, Price = 300000, Color = Color3.fromRGB(88, 92, 98), Order = 32 },
 	{ Id = "chevo_camaro", Name = "Chevo Camaro SS", Class = "Coupe", Tier = "Mid", TopSpeed = 165, ZeroToSixty = 4.0, Handling = 0.74, Price = 62000, Color = Color3.fromRGB(230, 180, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 33 },
 	{ Id = "chevo_c6", Name = "Chevo Corvette C6", Class = "Coupe", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 4.2, Handling = 0.8, Price = 78000, Color = Color3.fromRGB(26, 44, 82), Order = 34 },

@@ -85,3 +85,13 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: PC side buttons are SHOP, the Strength tier button, then SPIN and AUTO squares. The Free Gifts button is on the right under the group reward. #break-a-bed
 
 - 2026-10-12: no idle animation on main-screen buttons (too much movement). Idle effects only inside open menus. The "Ready" pulse/wiggle stays. #break-a-bed
+
+- 2026-10-12: no idle animation on main-screen buttons (too much movement). Idle effects only inside open menus. The "Ready" pulse/wiggle stays. #break-a-bed
+- 2026-10-12: main screen + tutorial go **light and icon-first** (square shiny icon buttons, light stat panels, colored numbers). Ground guide = moving arrow Beam. Big menus stay dark with the rainbow title. #break-a-bed
+- 2026-10-12: square icon HUD rejected. Main screen keeps the old wide-button layout in the owner's "Shop" reference design (gradient, diamond pattern, light inner border, 3D icon, Press Start 2P pixel text). Stats + tutorial light. #break-a-bed
+- 2026-10-12: owner preferred the rounded gradient version over the square "identical" copy. Side buttons made **short** (about 236 × 88). #break-a-bed
+- 2026-10-12: **FINAL UI direction**: the owner's favourite simulator look (solid studded buttons with same-color dark outlines, white glyph icons, Montserrat Heavy, dark studded shop with a shiny green title bar, scrolling sections, floating italic stats, square right-side buttons) plus big effects (server announcements, flashy bed breaks, auras). Earlier styles replaced. #break-a-bed
+- 2026-10-12: Daily reward, Spin wheel and Free Gifts moved out of the shop's FREE tab to their own square buttons on the right of the main screen (with badges and the gift countdown). #break-a-bed
+- 2026-10-12: light rays behind open menus removed ("circus" look). Shop restyled closer to the other game (L pattern, thin outlines, lime price buttons). Item pictures should be real 3D (ViewportFrames or 3D icon images), not flat drawings. #break-a-bed
+- 2026-10-12: limited Aura Crates added to the plan (weekly crate, 6 auras boosting Strength + Walk Speed, R$49 / R$129 / R$399, pity at 50). #break-a-bed
+

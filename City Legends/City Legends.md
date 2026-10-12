@@ -67,3 +67,11 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - **More clusters (2026-10-12):** needle clusters replace the digital one on the DB9 and Vantage (Aston: speedometer clockwise, rev counter counter-clockwise), the SLS (AMG twin dials, 220 mph) and the C6 (speedo, rev counter, four small gauges). New: Urus (built from the owner's real-Urus photo: round rev counter, STRADA, big gear letter), Murciélago LP640 (rev counter left, speedo right, four small gauges), C7 (Sport-theme screen with a round rev counter, analog speedo left, fuel and temperature right).
   - Urus hands fix: its steering wheel was read as small and sideways, so the hands gripped near the centre.
   - The SLS interior is part of its low-quality body mesh, so it needs a donor. The Lexus LFA will be replaced with a better store model. Candidates go into ServerStorage › InteriorDonors with the same Command Bar insert as the W212 and G63 ones.
+- **Sketchfab models (2026-10-12):** the owner pushes the downloaded `.glb` into `Games/CityLegends/imports`. Claude shrinks it with Blender (running on Claude's side, `tools/shrink_model.py`) and pushes back a `_roblox.fbx` for Studio's Import 3D. A small model after import is fine: the game scales cars to real size.
+- **G63 cluster (2026-10-12, owner's photo of the real 2015 G63):** speedometer left, rev counter right (red from 6, AMG), small fuel and temperature dials inside them, thin needles (white speed, red revs), P R N D + green C strip, trip screen, clock and outside temperature.
+- **New G63 model (2026-10-12):** shown in game as "Mercer G63" (the "2019" was removed from its name). the owner sent a Sketchfab GLB of a 2017 G 63 AMG (the old W463 body and interior, the same as 2015). Claude converted it to `imports/2015_g63_roblox.fbx`:
+  - 24 parts, about 94,000 triangles;
+  - the steering wheel cut out of the interior so it turns;
+  - the wheels as FL/FR/RL/RR in a "Wheels" group;
+  - windows named `SeeThrough_*` so the game keeps them see-through.
+  - The GLB was tiny in Studio because of a stray sphere in it. It replaces the whole `bentz_g63` once the owner imports it in Studio.

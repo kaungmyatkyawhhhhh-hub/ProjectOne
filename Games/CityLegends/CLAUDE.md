@@ -35,6 +35,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `Audio`, `Cutscene`, `WorldFx`, `BuildingSkin`.
 - `tools/`:
   - `export_models.luau` (run with Lune) plus `make_glb.py`: export every car as a `.glb` for Studio's 3D Importer into `build/models` (gitignored).
+  - `shrink_model.py`: makes a downloaded model (Sketchfab `.glb`, `.fbx`, `.obj`) fit Studio's 3D Importer. Each mesh gets at most 18,000 triangles, textures at most 1024 px, and the result is one `.fbx` with the textures inside. Run it with Blender's Python module: `pip install bpy` in a venv, then `python tools/shrink_model.py imports/car.glb`. The owner sends models by pushing them into `Games/CityLegends/imports` (GitHub takes files under 100 MB).
 
 ## Build and check
 
