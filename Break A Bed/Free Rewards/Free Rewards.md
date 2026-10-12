@@ -52,6 +52,14 @@ The owner renamed the Group Chest to **EXCLUSIVE CHEST** and wants it to look un
 - **Place it** on open ground with space around it (not touching the VIP lounge), facing spawn.
 - Keep the floating, bobbing, title and opening effect as written above.
 
+**Floating VFX under the chest (owner 2026-10-12):** in the gap between the floating chest and the ground there's a magic "levitation" effect that holds the chest up:
+- **A glowing swirl disc** right under the chest: a flat round part (or an Attachment) with `fx-swirl.png` as a ParticleEmitter, `Orientation = VelocityPerpendicular`, Speed 0, Size 4–5 studs, LightEmission 1, purple → pink, slowly spinning (`RotSpeed` 60). It looks like a magic portal holding the chest.
+- **Rising energy streaks:** `fx-spark.png` going **up** from the ground circle to the chest bottom (Speed 3–5, Lifetime 1, Rate 8, `Orientation = VelocityParallel`, purple/gold, fading out at the top).
+- **Floating orbs:** small `fx-glow.png` orbs (Size 0.4–0.8) drifting slowly upward and swirling in the gap (Rate 4, Lifetime 2, a little random sideways speed).
+- **A soft cone of light** from the disc up to the chest: two crossed `Beam`s with `fx-beam.png`, Transparency 0.7, purple, `LightEmission` 1.
+- **Under the disc on the ground:** a faint purple shadow glow (a decal with `fx-glow.png`, Transparency 0.6) that grows and shrinks slightly as the chest bobs.
+- Keep it **soft** (no thick neon blocks), and turn it down on Low Graphics.
+
 **Claiming (member):** the chest shakes, the lid flies open with a big white flash, a `fx-ring` shockwave, a purple + gold sparkle fountain and a beam of light, then `money-big.png` cash bursts out and flies to the counter. Play a magical "chime + whoosh" sound.
 
 **Not a member:** a small bounce, and the Exclusive Chest screen opens (same 3-step design as the Free Gift popup, but with a purple title bar "Exclusive Chest!" and `exclusive-chest.png` as the big picture) with the "I joined!" button.
