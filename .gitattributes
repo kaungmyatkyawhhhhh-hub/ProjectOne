@@ -1,0 +1,2 @@
+# Notes are mostly lists: when two PCs change the same note, keep both sides instead of a conflict.
+*.md merge=union
