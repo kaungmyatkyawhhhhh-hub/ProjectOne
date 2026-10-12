@@ -76,3 +76,9 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: product prices raised to R$9–R$49 (owner wants each above R$5–6). x2 boosts R$9, x3 R$15, x5 R$25, x10 R$49; packs R$9/15/30/49; Starter Pack R$19; Instant Break R$9. #break-a-bed
 
 - 2026-10-12: all 15 new developer products created on Roblox (ids in [[Break A Bed/Shop Plan|Shop Plan]]). #break-a-bed
+
+- 2026-10-12: built the New Player Guide, the UI Kit, Free Gifts and the Shop Plan in that order (owner's order), testing each in Studio before the next. Details in [[Break A Bed/2026-10-12|2026-10-12]]. #break-a-bed
+- 2026-10-12: the old CASH PILE / BAG / VAULT products are reused as Medium / Big / Huge Cash (40 / 150 / 500 breaks), as the Shop Plan says. #break-a-bed
+- 2026-10-12: Free Gifts' timer starts when a new player finishes (or skips) the guide, so nothing pops up during it. Players who already finished it start the timer on join. #break-a-bed
+- 2026-10-12: the Starter Pack pop-up waits until you leave break mode and no other window is open, so it never interrupts breaking. #break-a-bed
+- 2026-10-12: PC side buttons are SHOP, the Strength tier button, then SPIN and AUTO squares. The Free Gifts button is on the right under the group reward. #break-a-bed

@@ -11,9 +11,9 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 Game based on Chop A Brick: train to gain Strength and Level, then karate-chop beds along a path for Cash.
 - **Details:** [[Break A Bed/Project Overview]] (all Break A Bed notes go in the `Break A Bed` folder)
 - **Code:** `C:\Users\USER\Documents\Cashgrab` on one PC, folder `BAB` on the other. Studio place "Break A Bed" (placeId 116443177548785).
-- **Now:** 25-bed fenced path, 17 training posts, upgrade boards, critical hits, Total Damage leaderboard, Group Reward (group set) and Robux shop (products set). Light HUD at the very top of the screen, Roblox default prompts, 5 themed map zones, screen effects, city backdrop with landmarks, full shop (Strength tiers, passes, boosts, spins, daily reward, VIP lounge). Lives in the Studio place "[🎉RELEASE] Break a Bed". Next: save, publish, play-test the balance.
+- **Now:** New Player Guide, UI Kit style (with animations and sounds), Free Gifts and all 25 cheap products are built and tested in the Studio place "[🎉RELEASE] Break a Bed" ([[Break A Bed/2026-10-12|2026-10-12]]). Next: save and publish, check the guide's arrow on a fresh account, then watch Day 1 retention and sales.
 - **Ads:** released as "[🎉 RELEASE] Break a Bed". 12K Robux spent on ads; earning about 500 Robux a day ([[Break A Bed/Ads|Ads]]).
-- **Next:** put the new UI style into the game ([[Break A Bed/UI Kit/UI Kit|UI Kit]]); add the cheap products ([[Break A Bed/Shop Plan|Shop Plan]]) and Free Gifts ([[Break A Bed/Playtime Rewards|Playtime Rewards]]); add the new-player guide ([[Break A Bed/New Player Guide|New Player Guide]], Day 1 retention showed 0%). Group setup (images, products, payouts) is done. After that: [[Break A Bed/Retention Plan|Retention Plan]].
+- **Next:** save + publish, then [[Break A Bed/Retention Plan|Retention Plan]].
 - **Last updated:** 2026-10-12
 
 ## Obsidian + Claude setup: active

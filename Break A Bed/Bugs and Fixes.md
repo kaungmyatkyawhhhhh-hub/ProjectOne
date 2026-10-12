@@ -21,8 +21,15 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 - **2026-10-10: Group Reward panel showed blank** (its text and buttons drew behind the dark background). The game's screen UI layers everything by one global ZIndex. Fix: everything inside the panel gets a higher ZIndex than the panel itself.
 
+- **2026-10-12: The spin wheel turned square** with the new UI. Outlines used sharp corners everywhere, which also drew the round wheel as a square. Fix: outlines use round joins again; corners stay sharp because they're 3 px.
+- **2026-10-12: Windows were taller than a laptop screen** (the shop and spin wheel went off the top and bottom). Fix: every window shrinks to fit the screen when it opens.
+- **2026-10-12: Free Gifts button sat on top of the group reward button.** Its position used a screen-fit scale that hadn't updated yet. Fix: both buttons use the same scale.
+- **2026-10-12: "Maximum event re-entrancy depth" warnings** from the new text shadows. The shadow copied the label's size every time a layout moved it. Fix: it only copies when something real changed.
+
 ## Good to know
-- Studio screenshots taken through the MCP don't show floating text (damage numbers, CRITICAL!). That text is still there in the game; check it by playing.
+- Studio screenshots taken through the MCP don't show floating text (damage numbers, CRITICAL!) or the guide's yellow arrow. They're still there in the game; check them by playing.
+- In the phone emulator, the MCP's mouse clicks miss buttons near the top (it doesn't count the phone's notch). Test phone buttons by hand.
+- Test purchases in Studio: `ServerStorage.StudioTestReceipt` (made only in Studio) runs a fake purchase through the real purchase code.
 - "Future" lighting (`Lighting.Technology`) and 3D grass (`Terrain.Decoration`): current Studio removed both settings (checked 2026-10-11), so there is nothing to switch on.
 - The Studio MCP's `execute_luau` tool can't parse some newer Luau syntax (`..=`, `for _, x in tbl do`). Use `ipairs` and `x = x .. y` in snippets run that way. The game scripts themselves are fine.
 - The tool's mouse clicks only take screen coordinates for 3D objects, not part names.
