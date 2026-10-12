@@ -20,6 +20,7 @@ The first, flat-cartoon versions are in git history.
 **Real-screenshot versions (2026-10-12, owner: "simple like my original, professional, not AI made"):** posed in Studio by the owner (Wooden Bed cracked, character mid-punch), title and light color grade added by Claude. Raw shots in `Ad Assets/raw/`.
 - `icon-512-real.png` (512x512): game icon, "BREAK A BED!" on top
 - `thumbnail-3-real.png` (1920x1080): "BREAK A BED!", "TRAIN · PUNCH · BREAK", "CRITICAL!"
+- **GFX versions (2026-10-12, matched to the top trending Simulation icons):** `icon-512-gfx.png` (no title text, like trending icons; excited open-mouth face, clean sky and grass, rim light, "+1K"/"+500" damage pops) and `thumbnail-4-gfx.png` (same look + title, "+1K", "CRITICAL!"). Use these first.
 - Upload the icon and add the thumbnail as the first one, keeping the old ones after it so Roblox can compare them.
 
 ## Results (2026-10-12)
