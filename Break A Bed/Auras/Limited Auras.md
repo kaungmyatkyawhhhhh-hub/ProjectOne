@@ -36,6 +36,24 @@ The first limited crate is **Halloween** instead of Galaxy. It's on sale until *
 - **No animation on this card:** no rotating bursts, no bobbing, no cycling rainbow border, no pulsing. Everything is still (the countdown still ticks). The rainbow border on the Reaper slot stays as a still gradient.
 - It must also **never scale up/down** when the shop opens or scrolls (the 4th screenshot showed it shrinking).
 
+## Fix (owner 2026-10-12): auras block the view, ground effects only show when jumping, low quality
+**Rules for every aura (and the level/VIP auras in [[Break A Bed/Effects/Effects|Effects]]):**
+1. **Never block your own view.**
+   - Effects stay **around the body and below the head**, never in front of the face or above the head where the camera looks through.
+   - **Your own aura is lighter on your screen:** on the local player's client, multiply particle Rate by 0.4 and add +0.3 Transparency to your own aura. Others see it fully.
+   - Max particle size 1.5 studs near the body; no big glow balls on the torso.
+   - Add a Settings toggle **"Show my aura"** (default ON) and keep "Other players' effects".
+2. **Ground effects sit on the ground, always visible.**
+   - Don't parent ground rings to the leg or the HumanoidRootPart center. Put them on an Attachment at **`RootPart.CFrame * (0, -(HipHeight + RootPart.Size.Y/2) + 0.1, 0)`**, flat (rotated 90°), and update it every frame with a **downward raycast** so it sits on the floor even while walking.
+   - Use `Orientation = VelocityPerpendicular` or a flat `Decal`/`ImageLabel` on a SurfaceGui for rings, `LightEmission` 0.6, slightly transparent, `ZOffset` -1. They must show while standing still, not only when jumping.
+3. **Quality:** fewer, cleaner particles look better than many messy ones.
+   - Each aura = **1 ground ring + 1 body effect + 1 small detail**, max about 25 particles alive at once.
+   - Smooth curves: Size and Transparency use NumberSequences that fade in and out (never pop), and colors use 2–3 keypoints.
+   - Use the aura's own picture style: ghosts are small, cute and translucent (Transparency 0.3) and orbit at waist height; bats are small and circle around the shoulders, not the face; the web is a flat glowing ring on the ground; pumpkin is a soft orange flame trail behind the feet plus a small pumpkin floating at the hip; cursed is green flames rising from the ground ring; the Reaper is a dark mist ring on the ground, a small scythe floating behind the back and a faint red glow.
+   - A `Trail` (thin, fading) from the feet looks clean and doesn't block anything.
+   - Optional upgrade: a good **aura pack from the Creator Store** (made by known VFX creators) recolored to our themes usually looks much better than code-made particles.
+4. Test in first person and third person, while standing, walking and jumping, on PC and on a phone, with the camera zoomed in close.
+
 ## The Galaxy Aura Crate (later crate)
 It's on sale for **7 days**. After that it's gone and a new themed crate replaces it (Lava, Ice, Candy…). Auras you already own stay forever.
 
