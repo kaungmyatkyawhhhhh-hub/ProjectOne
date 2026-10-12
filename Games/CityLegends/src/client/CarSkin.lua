@@ -415,9 +415,10 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	elseif primary then
 		f = primary.CFrame.LookVector
 	else
-		-- chassis corner parts (FL / FR / RL / RR) tell the front from the back
+		-- chassis corner parts (FL / FR / RL / RR, on their own or in "Wheels") tell the front from the back
+		local wheelsGroup = src:FindFirstChild("Wheels", true)
 		local function corner(n: string): Vector3?
-			local p = src:FindFirstChild(n)
+			local p = src:FindFirstChild(n) or (if wheelsGroup then wheelsGroup:FindFirstChild(n) else nil)
 			return if p and p:IsA("BasePart") then p.Position else nil
 		end
 		local fl, fr, rl, rr = corner("FL"), corner("FR"), corner("RL"), corner("RR")
@@ -976,6 +977,10 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			local t = tmpl(d, Vector3.zero)
 			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
 			cabinMaterial(d, t.part)
+			if d.Name:sub(1, 10) == "SeeThrough" then
+				-- windows of a converted Sketchfab model: an import can make the glass solid
+				t.part.Transparency = math.max(t.part.Transparency, 0.6)
+			end
 			out.body["Part" .. k] = t
 		end
 	end
