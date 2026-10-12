@@ -101,6 +101,20 @@ Every shop card should look rich, like the reference game. Static effects (no mo
 - **DOUBLE Your STRENGTH:** a 3D dumbbell with a glow, and a light burst behind "x2" in yellow.
 - Item card icons may overlap the card's top edge a little (like the reference) for depth.
 
+### Make shop cards look different from each other (owner 2026-10-12: "they all look the same if you blur your eyes")
+Every card was blue with the same grey dumbbell. Each card needs its own **color, picture and size**, so you can tell them apart at a glance:
+- **Card color by tier (cheap → expensive):** R$9 = blue, R$10–15 = green, R$25 = purple, R$30 = orange, R$49 = gold/red. Bigger packs = warmer, brighter colors.
+- **Pictures that grow:** use the product pictures already made (`Product Icons/*.png`), or the same art:
+  - Boosts x2 / x3 / x5 / x10: the red 3D dumbbell with the multiplier, getting bigger and adding effects as the number goes up (x5 gets purple sparkles, x10 a lightning bolt and a gold glow).
+  - Strength packs Small / Medium / Big: **1 dumbbell → 2 dumbbells → a pile of dumbbells**, not the same single grey dumbbell.
+  - Fast Punch: a **fist with speed lines** (orange), not a dumbbell.
+  - Levels: a **star** (+1), 3 stars (+3), a big glowing gold star (+9).
+  - Spins: the wheel (+1), the wheel with sparkles (+3), the wheel with "+10" and a glow (+10).
+  - Cash: `money-small` → `money-medium` → `money-big` → `money-bag` → `money-safe`.
+- **Never use the flat grey dumbbell glyph** on shop cards.
+- **Size:** the best / biggest item in each section gets a wider card (2 columns) with a glow edge.
+- Tags stay ("POPULAR", "BEST VALUE"), and the active boost shows "Active: 12:09" in green.
+
 ### Sound variety (owner 2026-10-12)
 - **Keep the bubbly "pop" on button presses**: the owner finds it satisfying. Give it a small random pitch (0.92–1.1) so it never sounds exactly the same.
 - **The "whoosh" was annoying because it played on every button.** Use it **only when a big window opens** (Shop, Auras, Free Gifts, Daily, Settings), not on normal buttons, tabs, hover or close. Don't play it again if the same window was opened in the last 2 seconds.
