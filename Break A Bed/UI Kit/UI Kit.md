@@ -39,7 +39,8 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
   - **Strength:** the red **3D dumbbell** (`icon-dumbbell-3d.png`, not the flat dark glyph), then a big **italic** number in a yellow → orange gradient with a thick dark stroke and shadow.
   - **Cash:** `money-small.png`, then a big italic number in a light green → dark green gradient.
   - Use **one font everywhere** (Montserrat Heavy / Heavy Italic). Line them up in a neat column with the icons the same size (about 100 px on PC).
-  - "Join group: +10% Strength!" in yellow italic under them (members don't see it).
+  - **Order, top to bottom (owner 2026-10-12):** Strength → Cash → **Level** → "Group Bonus: +10%" (or "Join group: +10% Strength!" in yellow for non-members).
+  - **Bug to fix:** the level bar's green fill must show the progress (for 9.74Qa / 13.1Qa it should be about 74% full; it was showing empty).
 - **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
 
 ### Big menus (Shop, Free Gifts, Settings, Index…)
