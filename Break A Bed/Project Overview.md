@@ -33,7 +33,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Boosts:** each level has its own timer; only the highest active Strength and Cash boost counts, and they multiply with passes. Timers show at the top center.
 - **Impulse buys:** "Need more Strength?" at a bed you can't break yet (x3 boost or Instant Break), "Buy again" when a boost runs out, and a one-time Starter Pack pop-up after the first bed break.
 - **Free Rewards** ([[Break A Bed/Free Rewards/Free Rewards|Free Rewards]]): an EXCLUSIVE CHEST near spawn (`Workspace.ExclusiveChest`, floating purple-and-gold with effects; Myanmar Builders Club members only, Cash = 40 breaks of the best bed (at least $1,000) every 15 min, saved; non-members get a Like / Favorite / Join screen with "I joined!"), a "Watch Ad To Collect" board (rewarded video ads; **on hold**, switched off by `GameConfig.AdBoardEnabled = false` and not on the map) and the Free Gift popup (join the group → Cash + x2 Strength 15 min + Group Reward, once). Script `FreeRewards`.
-- **Free Gifts** ([[Break A Bed/Playtime Rewards|Playtime Rewards]]): 12 gifts from 1 to 90 minutes each session, the red Gifts square on the right (countdown, badge), SKIP ALL. Script `FreeGifts`.
+- **Free Gifts** ([[Break A Bed/Playtime Rewards|Playtime Rewards]]): 12 gifts from 1 to 90 minutes each session, the red Gifts square on the right (countdown, badge), SKIP ALL. Script `FreeGifts`; its effects (glows, halos, shines, twinkles, bar fill, claim burst) are in `GiftsVfx`.
 - **New Player Guide** ([[Break A Bed/New Player Guide|New Player Guide]]): beam + arrow through punching, the first bed and the Wooden Post, then a "Next bed" bar. Script `Tutorial`.
 - **UI Kit style** ([[Break A Bed/UI Kit/UI Kit|UI Kit]]): sharp image buttons and windows, Montserrat text with shadows, animations and UI sounds everywhere. Scripts `UIKit` and `UIAssets` (image ids).
 - **SPAWN button** at the top: only on the bed path (fades in/out), hidden in the break screen; teleports you back to spawn.
@@ -59,6 +59,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 | `UIAssets` | ModuleScript | ReplicatedStorage | UI Kit image ids (2026-10-12) |
 | `Tutorial` | ModuleScript | StarterPlayer › StarterPlayerScripts | New Player Guide (2026-10-12) |
 | `FreeGifts` | ModuleScript | StarterPlayer › StarterPlayerScripts | Free Gifts menu (2026-10-12) |
+| `GiftsVfx` | ModuleScript | StarterPlayer › StarterPlayerScripts | Free Gifts window effects (2026-10-12) |
 
 The Studio place has the newest scripts; the `src` files are older.
 

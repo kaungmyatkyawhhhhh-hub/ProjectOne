@@ -27,6 +27,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-12: "Maximum event re-entrancy depth" warnings** from the new text shadows. The shadow copied the label's size every time a layout moved it. Fix: it only copies when something real changed.
 - **2026-10-12: The new shop covered the side buttons on small screens.** With the category icons outside it, it was wider than the gap between the left and right buttons. Fix: every window also shrinks to fit the screen's width (leaving room for the side buttons).
 - **2026-10-12: Boosts / category icons scrolled to the wrong place.** The scroll was worked out while the window was still growing. Fix: it scrolls after the window opens, using on-screen pixels.
+- **2026-10-12: Gift card glows didn't show.** The `fx-glow` picture is too soft to show past a card's edge, and the Free Gift! glow drew on top of the button. Fix: outer glows are three soft outlines around the card / bar / button, placed under the button.
 - **2026-10-12: Aura ground ring floated at the feet mid-jump.** The floor check only looked 6 studs below the hips. Fix: a longer check, and the ring hides if no floor is found.
 - **2026-10-12: "Out of local registers" in GameClient** (Luau allows 200 locals in one scope). Fix: the Settings block is in its own `do ... end`. Put new top-level code in blocks or modules.
 - **2026-10-12: Aura Walk Speed was one star behind** (it was applied before the star count updated). Fix: the stars are set first, then Walk Speed is re-applied.
