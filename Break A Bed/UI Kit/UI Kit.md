@@ -6,8 +6,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 A new UI style made 2026-10-12 to replace the look that seemed AI-made. It's based on the owner's reference pictures, and the owner asked for it **sharp**: nearly square corners, a light bevel inside a thick dark outline, a lighter top half, a small square "stud" pattern, a darker 3D bottom edge, and heavy white Montserrat text with a thick dark outline. Big menus have a dark slate window with a cyan title bar, a yellow featured card and cyan item cards.
 
-![[preview-shop.png]]
-
 ![[preview-gifts.png]]
 
 ![[preview-settings.png]]
@@ -15,6 +13,43 @@ A new UI style made 2026-10-12 to replace the look that seemed AI-made. It's bas
 ![[preview-hud.png]]
 
 The preview is a mockup. The prices and the Rebirth button are only examples.
+
+## ⭐ FINAL STYLE (2026-10-12): the owner's favourite simulator look. Use this over everything below
+The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark studded shop with a green shiny title bar, floating stats) and said **"these types of designs are the best"**. Everything on screen follows this. Older sections below are only kept for the shared parts (rainbow-free headers now, animations, sounds).
+
+![[preview-hud.png]]
+
+![[preview-shop.png]]
+
+![[preview-shop-passes.png]]
+
+### Buttons and boxes
+- **Solid bright color** with a gentle top-to-bottom shade, a faint **square stud pattern**, a **light inner rim**, and an outline in a **dark shade of the same color** (dark green on green, dark navy on cyan; not black). Corners are small (about 6–7%).
+- Images: `sim-btn-<color>.png` (wide), `sim-square-<color>.png` (square), colors green, cyan, red, purple, yellow, orange, pink, blue.
+- **Icons on buttons are white glyphs with a dark outline** (`glyph-cart.png`, `glyph-dumbbell.png`, `glyph-wheel.png`, `glyph-gift.png`, `glyph-gear.png`). Square buttons can use the colored 3D icons instead.
+- **Text:** white **Montserrat Heavy**, thick dark stroke `#141420` plus a dark shadow. Important words are **green** `#5AE628` (for example "**x2** harder!", "**DOUBLE** Your STRENGTH", "**+$15K** CASH").
+
+### Main screen
+- **Left:** wide buttons **Shop** (green, cart) and **Boosts** (cyan, dumbbell), then an **on/off switch** with a white label (Auto Punch). Buttons are about 196 × 76.
+- **Right:** a column of **square buttons**: Gifts (red), Spin (orange), Rewards (yellow, star), Settings (blue, gear).
+- **Stats float in the bottom-left with no panel:** a big 3D icon and a huge **italic** number (Montserrat Heavy Italic, thick dark stroke): Strength **yellow** `#FFEB1E`, Cash **green** `#5AEB3C`. Under them, white italic "Group Bonus: +10%".
+- **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
+
+### Big menus (Shop, Free Gifts, Settings, Index…)
+- **Window:** solid dark grey `#3E4048` with a dark stud pattern and a near-black outline (`sim-window.png`). It's **not** see-through.
+- **Title bar:** bright green (`sim-header-green.png`) or cyan with **diagonal white shine stripes**. The title is white on the left, and a red square X sits on the right.
+- **One scrolling page** with section titles like **-- STRENGTH --** (cyan), **-- CASH --** (green), **-- PASSES --** (yellow), in big text with the dark stroke.
+- **Category buttons outside the window on the right:** a big 3D icon with a white label (Passes, Strength, Cash, Free). Clicking one scrolls to its section.
+- **Item cards:** colored by section (Cash green, Strength cyan, passes rainbow or yellow), a white glow behind a big 3D icon that may poke out of the top, the amount in white with the number in green, then a small **purple gift button** (buy it for a friend) plus a wide **green price button** with the Robux icon.
+- **Strength tier card:** "**DOUBLE** Your STRENGTH", a big **x5 ▶ x7** (white then yellow, italic) with soft light rays behind, and the price on the right.
+
+### Effects (the owner: "the effects in this game are crazy")
+- **Server announcements:** a big line at the top center for everyone, white with a dark stroke and the important part colored: "**Rong** broke the **INFINITY BED!**", "**Rong** bought **SERVER x2 STRENGTH!**". It slides in, stays 4 s and fades.
+- **Big center text** for events ("SERVER x2 STRENGTH!", "WEEKEND EVENT!", "NEW BED UNLOCKED!") with a glow and a pop-in.
+- **Bed breaks look huge:** a bright flash, a burst of glowing particles in the bed's tier color, light beams, flying cash, screen shake. Later beds get bigger, neon effects.
+- **Glowing auras and trails:** the player gets an aura/trail that gets fancier with Level or Rebirths. VIP gets a gold one.
+- **Floating numbers:** big italic damage numbers and "+$" pop out of every hit.
+- **Glowing neon details** on the later zones and beds.
 
 ## Images (`UI Kit/images/`)
 None of the images have text in them. Text stays as Roblox TextLabels so numbers can change.
@@ -40,6 +75,7 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `pixel-btn-<color>.png` | 472 × 176 | Main-screen side buttons (rounded, short) |
 | `pixel-panel-light.png`, `pixel-badge-yellow.png`, `pixel-bar-track.png`, `pixel-bar-green.png` | various | Light stat panels, LVL badge, progress bars |
 | `fx-arrow-chevron.png` | 256 × 256 | Arrow texture for the ground path `Beam` |
+| `sim-btn-<color>.png`, `sim-square-<color>.png`, `sim-header-green.png`, `sim-header-cyan.png`, `sim-window.png`, `glyph-<name>.png` | various | **FINAL STYLE** images (see the section above) |
 
 Colors: pink, purple, cyan, blue, orange, green, red, yellow, slate.
 
