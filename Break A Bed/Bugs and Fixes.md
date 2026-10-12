@@ -27,6 +27,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-12: "Maximum event re-entrancy depth" warnings** from the new text shadows. The shadow copied the label's size every time a layout moved it. Fix: it only copies when something real changed.
 - **2026-10-12: The new shop covered the side buttons on small screens.** With the category icons outside it, it was wider than the gap between the left and right buttons. Fix: every window also shrinks to fit the screen's width (leaving room for the side buttons).
 - **2026-10-12: Boosts / category icons scrolled to the wrong place.** The scroll was worked out while the window was still growing. Fix: it scrolls after the window opens, using on-screen pixels.
+- **2026-10-13: Toasts hid behind open windows** (e.g. a CODES result in Settings). Fix: the toast layer draws in front of windows.
 - **2026-10-13: Shop / Boosts far above the stats on tall screens.** The buttons were placed from the top and the stats from the bottom, so the gap grew with the screen. Fix: one LeftColumn holds both.
 - **2026-10-13: Right squares covered the jump button on phones.** Fix: they stop 20 px above it and use 2 columns when needed.
 - **2026-10-12: AUTO switch showed while training.** The shop refreshes it for every pass owner. Fix: while training, the break panel keeps it hidden (the pass is for beds only).
