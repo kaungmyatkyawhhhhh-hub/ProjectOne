@@ -28,20 +28,20 @@ def dcard(w, h, day, art, amount, state, gold=False):
     if state == 'today' or gold:
         c.alpha_composite(A.tint(kit.rays(w * 2, 14, 70).crop((w // 2, h // 3, w // 2 + w, h // 3 + h)), (255, 255, 255), .6))
     A.stroke_text(c, (w / 2, 30), f'DAY {day}', 26, (255, 255, 255), (230, 230, 235), anchor='mm')
-    s = int(w * .74)
-    c.alpha_composite(A.tint(kit.soft_glow(s, 160), (255, 255, 255), .5), ((w - s) // 2, 82))
-    c.alpha_composite(art.resize((s, s), Image.LANCZOS), ((w - s) // 2, 82))
+    s = int(min(w * .74, h - 112))
+    c.alpha_composite(A.tint(kit.soft_glow(s, 160), (255, 255, 255), .5), ((w - s) // 2, 62))
+    c.alpha_composite(art.resize((s, s), Image.LANCZOS), ((w - s) // 2, 62))
     A.stroke_text(c, (w / 2, h - 30), amount, 24, (140, 255, 90) if '$' in amount else (255, 255, 255), (40, 190, 30) if '$' in amount else (225, 225, 235), anchor='mm')
     if state == 'claimed':
         dim = Image.new('RGBA', (w, h), (0, 0, 0, 0)); dim.putalpha(c.getchannel('A').point(lambda v: v * 70 // 255)); c.alpha_composite(dim)
-        ck = check(int(w * .55)); c.alpha_composite(ck, ((w - ck.width) // 2, 100))
+        ck = check(int(w * .55)); c.alpha_composite(ck, ((w - ck.width) // 2, 74))
     return c
 
 def main(bgpath, out):
-    Wd, Hd = 1600, 620
+    Wd, Hd = 1600, 540
     bg = Image.open(bgpath).convert('RGBA').resize((Wd, Hd)).filter(ImageFilter.GaussianBlur(10))
     img = Image.blend(bg, Image.new('RGBA', (Wd, Hd), (30, 40, 30, 255)), 0.2)
-    x0, y0, ww, wh = 70, 30, 1460, 560
+    x0, y0, ww, wh = 70, 30, 1460, 480
     img.alpha_composite(shop3.window(ww, wh), (x0, y0))
     hd = sim.header(ww - 110, 100, 'green', ''); hd.alpha_composite(gloss(icon('gift', 80)), (16, 8))
     A.stroke_text(hd, (110, 48), 'DAILY REWARD', 50, (255, 255, 255), (230, 230, 235))
@@ -51,7 +51,7 @@ def main(bgpath, out):
     days = [(1, combo([cash], 200), '$28T', 'claimed'), (2, combo([pile], 200), '$56T', 'claimed'),
             (3, combo([pile, spin], 200), '$56T +1', 'today'), (4, boost_icon(256), '10 MIN', 'locked'),
             (5, combo([money.cash3(256)], 200), '$140T', 'locked'), (6, combo([spin], 200), '+2 SPINS', 'locked')]
-    cw, ch = 176, 330
+    cw, ch = 176, 250
     for i, (d, art, amt, st) in enumerate(days):
         img.alpha_composite(dcard(cw, ch, d, art, amt, st), (x0 + 24 + i * (cw + 14), y0 + 130))
     # day 7: big gold OP card

@@ -63,13 +63,20 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 
 ### Daily Reward window (2026-10-12: icons, not text)
 ![[preview-daily.png]]
-- Each day card shows a **big picture of the reward** with a soft glow, placed in the middle of the card (30 px lower than the first build, so it doesn't crowd the DAY title), and only a **short amount** at the bottom ("$28T", "+2 SPINS", "10 MIN"). No sentences.
+- Each day card shows a **big picture of the reward** with a soft glow, placed in the middle of the card. **Cards are short** (about 176 × 250 on PC; Day 7 about 316 × 290), with the picture between the DAY title and the amount, and only a **short amount** at the bottom ("$28T", "+2 SPINS", "10 MIN"). No sentences.
   - Cash: `money-small.png` / `money-medium.png` / `money-big.png` (bigger amounts get bigger piles).
   - Spins: `icon-wheel.png`. Strength boost: `icon-boost-x2.png` (a dumbbell with "x2"). Levels: `icon-star.png`.
   - Two rewards: the main icon big, the second smaller in the bottom-right corner.
 - **States:** claimed = green, dimmed, with a big green check; today = cyan with soft rays (the one to claim); later days = grey.
 - **Day 7 is a bigger gold card** with a red "MEGA!" tag and `money-safe.png` + a star, so players see the big reward coming.
 - A yellow line at the bottom: "Come back tomorrow for Day X!"
+
+### Spin wheel (fix 2026-10-12: slices and lines were not lined up)
+![[preview-wheel.png]]
+- Use **one image for the slices, lines, rim and hub together**: `wheel-base.png` (8 slices, 45° each). Because they're one picture, the lines can never drift off the colors.
+- Slice order clockwise from the top: CASH (blue), x2 STR (pink), +1 SPIN (yellow), BIG CASH (green), x2 CASH (purple), +1 LEVEL (orange), MEGA CASH (cyan), JACKPOT (red). Slice 1 is **centered** under the pointer at rotation 0.
+- **Labels:** put each label in a Frame that rotates with the wheel, at angle `i * 45°` from the top, about 28% of the wheel size out from the center, reading outward along the middle of its slice (like `preview-wheel.png`).
+- **Landing:** to stop on prize `i` (0–7), the final rotation is `-(i * 45) + 360 * spins + random(-15, 15)` degrees. The random part stays inside the slice, so the pointer always lands on the slice the server picked.
 
 ### Sound variety (owner 2026-10-12)
 - **Keep the bubbly "pop" on button presses**: the owner finds it satisfying. Give it a small random pitch (0.92–1.1) so it never sounds exactly the same.
