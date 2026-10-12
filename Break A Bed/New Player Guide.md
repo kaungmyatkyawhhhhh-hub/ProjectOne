@@ -14,7 +14,7 @@ Why: Day 1 retention showed 0% on 2026-10-12. New players spawn with nothing tel
 5. **Reward:** a big popup, "FIRST BED! +$50", with rays and confetti. The Cash flies to the counter.
 6. **"Buy the Wooden Post!"** The beam points to the Wooden Post ($50, so they can afford it right away). Buying it ends the guide with "You're a pro! Keep breaking beds!"
 
-The whole guide should take about 45–60 seconds.
+The whole guide should take about 45–60 seconds. **Show, don't tell:** use beams, arrows, glowing targets and effects, with only 2–4 words of text per step.
 
 ## Rules
 - The beam is a `Beam` from the player's character to the target, plus a bouncing arrow `BillboardGui` above the target. Only the player sees them (made on the client).
