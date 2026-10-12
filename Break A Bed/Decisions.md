@@ -110,3 +110,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: GROUP CHEST reward raised to 40 breaks of the best bed, at least $1,000 (was 20 / $500). The Group Chest screen adds "(grows as you level up!)". #break-a-bed
 - 2026-10-12: the first limited crate is HALLOWEEN AURAS (Ghost, Bats, Web, Pumpkin, Cursed, Reaper) until Nov 1. Galaxy moves to later. #break-a-bed
 - 2026-10-12: Group Chest renamed to EXCLUSIVE CHEST, with a unique purple/gold floating chest, rune circle, light pillar and particles. Claim = like + favorite + join (only the join is checked). #break-a-bed
+- 2026-10-12: EXCLUSIVE CHEST built (replaces the Group Chest, same spot left of the VIP lounge): a floating purple-and-gold chest with a rune circle, light pillar, sparkles and rays. The Group Chest model was removed. #break-a-bed
+- 2026-10-12: Daily Reward pictures: Cash days use bigger money piles for bigger rewards; Day 3 (Cash + 1 Spin) shows the money with a small wheel; the boost day uses `icon-boost-x2`. Today's card is clicked (or Claim!) to claim. #break-a-bed
+- 2026-10-12: the whoosh plays only for big windows (Shop, Free Gifts, Daily, Settings), at most once every 2 s per window; closing a window is a lower pop instead of its own sound. #break-a-bed
