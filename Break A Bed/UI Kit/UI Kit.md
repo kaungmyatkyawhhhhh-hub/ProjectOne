@@ -43,6 +43,16 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 - **Item cards:** colored by section (Cash green, Strength cyan, passes rainbow or yellow), a white glow behind a big 3D icon that may poke out of the top, the amount in white with the number in green, then a small **purple gift button** (buy it for a friend) plus a wide **green price button** with the Robux icon.
 - **Strength tier card:** "**DOUBLE** Your STRENGTH", a big **x5 ▶ x7** (white then yellow, italic) with soft light rays behind, and the price on the right.
 
+### Shop polish (2026-10-12, after comparing with the other game)
+- **No light rays behind open menus** (owner: the white "circus" rays are annoying). Only a very soft sunburst **inside** item cards, behind the icon.
+- **Pattern = the reference's "L" marks**, not boxy studs: each cell has a short dark line down its left and along its bottom (about 12% opacity). The window body is dark `#2C2D36` with darker embossed squares (`sim-window.png`).
+- **Cards** (`card-green.png`, `card-cyan2.png`, `card-yellow2.png`): a thin near-black outline `#181820` (4 px), a diagonal gradient (darker top-left → lighter bottom-right), the L pattern and a soft sunburst. There's **no 3D bottom edge** on cards.
+- **Price button** (`price-lime.png`): a bright lime gradient `#96F528 → #46C814` with a dark green outline, a **white Robux icon** with a dark outline (`icon-robux-white.png`) and big white numbers. The gift button is a purple gradient square (`gift-purple.png`) with the white gift glyph.
+- Card text: "**+$15K** CASH" with the amount in green, a big heavy font, a dark stroke.
+- **The biggest difference is the item art.** The other game uses real 3D-rendered pictures (shoe piles, cash stacks, chests). Flat drawn icons will never look that good. Use real 3D instead:
+  1. **ViewportFrames** showing 3D models (free cash stacks, money bags, chests, dumbbells and beds from the Creator Store, or the game's own beds), slowly turning. This is how top simulators show pets and items.
+  2. Or ready-made **3D icon images** from the Creator Store (search "simulator icons", "cash icon 3D") or bought icon packs.
+
 ### Effects (the owner: "the effects in this game are crazy")
 - **Server announcements:** a big line at the top center for everyone, white with a dark stroke and the important part colored: "**Rong** broke the **INFINITY BED!**", "**Rong** bought **SERVER x2 STRENGTH!**". It slides in, stays 4 s and fades.
 - **Big center text** for events ("SERVER x2 STRENGTH!", "WEEKEND EVENT!", "NEW BED UNLOCKED!") with a glow and a pop-in.
@@ -101,7 +111,7 @@ Matched to the owner's reference picture on 2026-10-12. Use these exact values s
 Base colors: cyan `#1CC8F2`, blue `#247ADE`, pink `#EC22CD`, purple `#9648E8`, orange `#FF9416`, green `#54CA34`, red `#E2363C`, yellow `#FFE20C`, slate `#3E4454`.
 
 **Effects (same as the reference):**
-- **Light rays:** `fx-rays.png` behind every open menu, about 1.9× the window width, centered on it, ImageTransparency 0.25, spinning slowly (one full turn every 40 s). Fade in with the menu.
+- ~~Light rays behind open menus~~: **removed** (owner found them annoying).
 - **Glow:** `fx-glow.png` behind every item icon, about 1.3× the icon size, ImageTransparency 0.4.
 - **Featured slot:** the big item on the yellow card sits in a lighter yellow rounded panel (`#FFF078`, 6 px `#FFFABE` border, UICorner 46 px) with the glow behind it.
 - **Sparkles:** 3–4 `fx-sparkle.png` around each item icon at different sizes (16–40 px). They twinkle: grow from 0 to full size and fade out over about 1.2 s, each starting at a random time, looping.
