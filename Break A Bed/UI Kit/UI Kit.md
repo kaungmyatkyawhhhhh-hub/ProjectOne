@@ -19,8 +19,6 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 
 ![[preview-hud.png]]
 
-![[preview-stats-light.png]]
-
 ![[preview-shop.png]]
 
 ![[preview-shop-passes.png]]
@@ -34,11 +32,7 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 ### Main screen
 - **Left:** wide buttons **Shop** (green, cart) and **Boosts** (cyan, dumbbell), then an **on/off switch** with a white label (Auto Punch). Buttons are about 196 × 76.
 - **Right:** a column of **square buttons** for the free stuff (owner: nobody looks inside the shop for it): **Daily** reward (yellow, star), **Spin** wheel (orange, wheel), **Gifts** = Free Gifts (red, gift), then **Settings** (blue, gear). Each has a white label under it. Gifts shows its countdown instead ("0:10", yellow) and the label turns into "Ready!" when a gift can be claimed. A red badge in the top-left corner shows "!" (daily ready) or a number (free spins, gifts ready). Ready buttons do the "Ready" pulse.
-- **Stats (top right), changed 2026-10-12: the owner wants the old stacked stat bars back, in light mode.** See `preview-stats-light.png`:
-  - **Level row:** a yellow studded **LVL** badge (`stats-lvl-badge.png`) with white "LVL" + the level number, then a light panel with a progress bar: a light grey studded track (`stats-track-light.png`) and a green studded fill (`stats-fill-green.png`), with white "7.22Qa / 9.74Qa" in the middle.
-  - **Strength row:** a light panel (`stats-panel-light.png`, `#E8ECF4` with faint grey studs and a dark outline) with the dumbbell icon sticking out on the left and a big **yellow** value right-aligned (`#FFEB28` → `#FFBE14` gradient, thick dark stroke).
-  - **Cash row:** the same panel with `money-small.png` sticking out on the left and a big **green** value (`#82F55A` → `#32BE28`).
-  - These replace the floating italic stats.
+- **Stats float in the bottom-left with no panel** (kept as it is now; the owner decided against bringing back the light stat bars on 2026-10-12): a big 3D icon and a huge **italic** number (Montserrat Heavy Italic, thick dark stroke): Strength **yellow** `#FFEB1E`, Cash **green** `#5AEB3C`. Under them, white italic "Group Bonus: +10%".
 - **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
 
 ### Big menus (Shop, Free Gifts, Settings, Index…)
