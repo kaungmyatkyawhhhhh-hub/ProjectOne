@@ -29,12 +29,12 @@ def dcard(w, h, day, art, amount, state, gold=False):
         c.alpha_composite(A.tint(kit.rays(w * 2, 14, 70).crop((w // 2, h // 3, w // 2 + w, h // 3 + h)), (255, 255, 255), .6))
     A.stroke_text(c, (w / 2, 30), f'DAY {day}', 26, (255, 255, 255), (230, 230, 235), anchor='mm')
     s = int(w * .74)
-    c.alpha_composite(A.tint(kit.soft_glow(s, 160), (255, 255, 255), .5), ((w - s) // 2, 52))
-    c.alpha_composite(art.resize((s, s), Image.LANCZOS), ((w - s) // 2, 52))
+    c.alpha_composite(A.tint(kit.soft_glow(s, 160), (255, 255, 255), .5), ((w - s) // 2, 82))
+    c.alpha_composite(art.resize((s, s), Image.LANCZOS), ((w - s) // 2, 82))
     A.stroke_text(c, (w / 2, h - 30), amount, 24, (140, 255, 90) if '$' in amount else (255, 255, 255), (40, 190, 30) if '$' in amount else (225, 225, 235), anchor='mm')
     if state == 'claimed':
         dim = Image.new('RGBA', (w, h), (0, 0, 0, 0)); dim.putalpha(c.getchannel('A').point(lambda v: v * 70 // 255)); c.alpha_composite(dim)
-        ck = check(int(w * .55)); c.alpha_composite(ck, ((w - ck.width) // 2, 70))
+        ck = check(int(w * .55)); c.alpha_composite(ck, ((w - ck.width) // 2, 100))
     return c
 
 def main(bgpath, out):
@@ -56,7 +56,7 @@ def main(bgpath, out):
         img.alpha_composite(dcard(cw, ch, d, art, amt, st), (x0 + 24 + i * (cw + 14), y0 + 130))
     # day 7: big gold OP card
     g = dcard(cw + 140, ch + 40, 7, combo([money.safe(256), star], 260), '+2 LVL +3 SPINS', 'locked', gold=True)
-    A.stroke_text(g, (g.width / 2, 64), 'MEGA!', 28, (255, 80, 80), (200, 20, 20), anchor='mm')
+    A.stroke_text(g, (g.width / 2, 64), "MEGA!", 28, (255, 80, 80), (200, 20, 20), anchor='mm')
     img.alpha_composite(g, (x0 + 24 + 6 * (cw + 14), y0 + 112))
     A.stroke_text(img, (x0 + ww / 2, y0 + wh - 36), 'Come back tomorrow for Day 4!', 30, (255, 230, 80), (255, 170, 20), anchor='mm')
     img.convert('RGB').save(out, quality=92)

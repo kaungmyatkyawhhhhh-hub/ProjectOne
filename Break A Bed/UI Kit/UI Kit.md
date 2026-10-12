@@ -63,13 +63,19 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 
 ### Daily Reward window (2026-10-12: icons, not text)
 ![[preview-daily.png]]
-- Each day card shows a **big picture of the reward** with a soft glow, and only a **short amount** at the bottom ("$28T", "+2 SPINS", "10 MIN"). No sentences.
+- Each day card shows a **big picture of the reward** with a soft glow, placed in the middle of the card (30 px lower than the first build, so it doesn't crowd the DAY title), and only a **short amount** at the bottom ("$28T", "+2 SPINS", "10 MIN"). No sentences.
   - Cash: `money-small.png` / `money-medium.png` / `money-big.png` (bigger amounts get bigger piles).
   - Spins: `icon-wheel.png`. Strength boost: `icon-boost-x2.png` (a dumbbell with "x2"). Levels: `icon-star.png`.
   - Two rewards: the main icon big, the second smaller in the bottom-right corner.
 - **States:** claimed = green, dimmed, with a big green check; today = cyan with soft rays (the one to claim); later days = grey.
 - **Day 7 is a bigger gold card** with a red "MEGA!" tag and `money-safe.png` + a star, so players see the big reward coming.
 - A yellow line at the bottom: "Come back tomorrow for Day X!"
+
+### Sound variety (owner 2026-10-12)
+- **Keep the bubbly "pop" on button presses**: the owner finds it satisfying. Give it a small random pitch (0.92–1.1) so it never sounds exactly the same.
+- **The "whoosh" was annoying because it played on every button.** Use it **only when a big window opens** (Shop, Auras, Free Gifts, Daily, Settings), not on normal buttons, tabs, hover or close. Don't play it again if the same window was opened in the last 2 seconds.
+- Give each action its own sound so things don't blend together: press = pop, tab = soft click, close = lower pop (pitch 0.85), claim = coin + chime, buy = fanfare, error = soft buzz, hover = quiet tick.
+- Have 2–3 variations of the most frequent sounds (pop, coin) and pick one at random each time.
 
 ### Effects (the owner: "the effects in this game are crazy")
 - **Server announcements:** a big line at the top center for everyone, white with a dark stroke and the important part colored: "**Rong** broke the **INFINITY BED!**", "**Rong** bought **SERVER x2 STRENGTH!**". It slides in, stays 4 s and fades.
