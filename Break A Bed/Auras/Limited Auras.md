@@ -6,9 +6,29 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 Owner's request (2026-10-12): **limited-time auras** that boost **Strength and Walk Speed**, sold like the "Featured" egg in the simulator the owner likes. Auras come from an **Aura Crate** with a timer, chances shown on screen, and 1 / 3 / 10 buy buttons.
 
-![[preview-aura-crate.png]]
+![[preview-aura-crate-halloween.png]]
 
-## The Galaxy Aura Crate (first limited crate)
+## 🎃 First crate = HALLOWEEN AURAS (changed 2026-10-12, owner's request)
+The first limited crate is **Halloween** instead of Galaxy. It's on sale until **Nov 1** (end of Halloween), then it's gone. Galaxy can be a later crate.
+
+![[preview-aura-crate-halloween.png]]
+
+| Aura | Chance | Strength | Walk Speed | Look on the player |
+|---|---|---|---|---|
+| Ghost | 40% | x1.2 | +2 | little white ghosts floating around you |
+| Bats | 30% | x1.5 | +4 | a swarm of bats circling with an orange glow |
+| Web | 18% | x2 | +6 | a glowing spider web ring at your feet and a small spider on your back |
+| Pumpkin | 9% | x3 | +8 | a glowing jack-o'-lantern head flame and orange fire trail |
+| Cursed | 2.9% | x5 | +12 | green ghost-fire rising with a floating skull |
+| **Reaper** | **0.1%** | **x10** | **+20** | a dark hooded aura with red eyes, a floating scythe and a red/purple glow; server announcement |
+
+- Pictures (this folder): `aura-ghost.png`, `aura-bats.png`, `aura-web.png`, `aura-pumpkin.png`, `aura-cursed.png`, `aura-reaper.png`. Background: `bg-halloween.png` (night sky, big moon, bats, graveyard).
+- **Card look:** an orange gradient border, the title "HALLOWEEN AURAS" in a yellow → orange gradient, "Limited Time! Ends Nov 1", a countdown to Nov 1, a big glowing pumpkin as the hero, the Reaper in the rainbow-bordered slot, and the **10-pack button is orange** instead of red.
+- **During Halloween the shop title bar is orange** instead of green.
+- Prices, pity, dust and the products are unchanged (AURA CRATE x1 R$49, x3 R$129, x10 R$399). Pity: guaranteed **Cursed** every 50 crates.
+- The tables and pictures below describe the Galaxy crate, kept for later.
+
+## The Galaxy Aura Crate (later crate)
 It's on sale for **7 days**. After that it's gone and a new themed crate replaces it (Lava, Ice, Candy…). Auras you already own stay forever.
 
 | Aura | Chance | Strength boost | Walk Speed boost | Look (see [[Break A Bed/Effects/Effects|Effects]]) |
