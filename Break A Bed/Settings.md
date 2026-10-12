@@ -82,6 +82,13 @@ Codes are a cheap way to get players to join the group, like the game and come b
   - `1KLIKES`: Big Cash + x2 Cash 15 min, added when the game reaches 1,000 likes
 - Post new codes in the game description and the group, and add a new one with every update ("New code every update!" in the description).
 
+## Codes: ready-made scripts (2026-10-12)
+Claude wrote the codes system so Claude Code only has to plug it in: [[Break A Bed/Codes/CodesServer.luau|CodesServer.luau]] (server: code list, checks, saving, group-only code, anti-spam) and [[Break A Bed/Codes/CodesRow.luau|CodesRow.luau]] (client: the CODES row in Settings).
+- Codes are typed in any case and spaces are ignored. Each one works **once per player** (saved in `RedeemedCodes`).
+- Wrong or expired code: "Invalid code" in red and the box shakes. Already used: "Already redeemed!". MYANMAR for non-members: "Join the group to use this code!".
+- `1KLIKES` is in the list but **switched off** (`Active = false`); turn it on at 1,000 likes.
+- **To add a new code** later: add one entry to `Codes.List` in `CodesServer`, publish, and put it in the game description.
+
 ## For Claude Code (in the code folder: `Cashgrab` or `BAB`)
 1. Build the menu with the UI Kit images, style values, animations and sounds.
 2. Hook each setting into the existing systems (music, sounds, effects pooling, damage pop-ups, camera shake, HUD).
