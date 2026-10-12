@@ -82,6 +82,13 @@ The owner renamed the Group Chest to **EXCLUSIVE CHEST** and wants it to look un
 ## Ads: on hold (2026-10-12)
 The game isn't eligible for Roblox rewarded video ads yet (not enough players). **Remove the "Watch Ad To Collect" board from the map for now** (keep its code, turned off by a `GameConfig` switch `AdBoardEnabled = false`), so there's no empty board. Turn it back on when Roblox allows ads: create the AD REWARD CASH product, set `AdBoardEnabled = true` and turn on Rewarded Video in Monetization → Ads.
 
+## Change (owner 2026-10-13): no favorite step on the Free Gift or the Exclusive Chest
+Roblox's rules don't allow rewards for favoriting, so **remove the favorite completely** from both reward screens:
+- Remove the favorite check on Claim (the `PromptAllowInventoryReadAccess` / `GetFavorite` check and the "Favorite the game first!" / "Press Allow…" messages), on the client and the server.
+- Remove the "Favorite it!" step card and its Favorite button. The screens now have **2 steps: 1. Like the game! 2. Join the group!** (make the 2 cards a bit wider so the row stays full).
+- **Like** stays as a friendly ask (it can't be checked). **Join the group** stays checked on the server with `IsInGroupAsync`; that's the only thing that unlocks the claim.
+- The separate "Enjoying it? ⭐ Favorite to find it again!" popup after a new bed break **stays**: it gives no reward, which is allowed.
+
 ## 2. Free Gift popup (Like, Favorite, Join the group)
 
 ![[preview-free-gift.png]]

@@ -135,3 +135,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: game title on Roblox is "[🎃HALLOWEEN] Break A Bed" until Nov 1. #break-a-bed
 - 2026-10-13: Onboarding funnel only for new players, each step once per player (saved). Like goal number is set by hand (GameConfig.LikeGoal.Current). Favorite popup appears after the first new bed outside the guide, once ever, never rewarded. #break-a-bed
 - 2026-10-13: owner chose to really check favorites on the Free Gift (Roblox permission window + GetFavorite), knowing Roblox's rules don't allow rewarding favorites. Like goal is automatic via RoProxy; LikeGoal gets an adapter onto GameConfig.Codes instead of a separate CodesServer. #break-a-bed
+- 2026-10-13: favorite step removed from the Free Gift and Exclusive Chest (Roblox rule: no rewards for favorites). Screens ask Like (not checked) + Join group (checked). The no-reward favorite popup stays. #break-a-bed
