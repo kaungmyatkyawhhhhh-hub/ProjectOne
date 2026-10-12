@@ -54,6 +54,22 @@ The first limited crate is **Halloween** instead of Galaxy. It's on sale until *
    - Optional upgrade: a good **aura pack from the Creator Store** (made by known VFX creators) recolored to our themes usually looks much better than code-made particles.
 4. Test in first person and third person, while standing, walking and jumping, on PC and on a phone, with the camera zoomed in close.
 
+## Target quality: like Sol's RNG auras (owner 2026-10-12)
+The owner wants auras at the level of **Sol's RNG** (made in its style, never copying its assets). What makes those look high quality:
+- **Layers, not particle spam:** each aura is 4–6 clean layers built around the body, every layer with one job:
+  1. **Ground piece:** a flat glowing ring or rune decal on the floor (rules above), slowly turning.
+  2. **Body outline:** a `Highlight` on the character (FillTransparency 0.9, OutlineTransparency 0.2, the aura color) so the player glows softly without anything covering them.
+  3. **Orbiting pieces:** small **mesh parts** (crystals, bats, ghost shapes, flames, skulls) orbiting at waist/shoulder height on a ring of Attachments, smooth tweened rotation, Neon or glass material, a little `PointLight`.
+  4. **Beams:** curved `Beam`s (CurveSize0/1) from the feet spiraling up the body, a flowing texture (`TextureSpeed` 1–2), fading at the ends. These give the "energy flowing" look.
+  5. **Trails:** thin fading `Trail`s from the hands or feet, which only show when moving.
+  6. **One detail:** wings, a halo, a scythe or a crown, attached behind or above the body (never in front of the face).
+- **Flipbook textures:** use ParticleEmitter `FlipbookLayout` (Grid4x4/8x8) for flames, smoke and electricity, so they animate like real fire instead of static blobs.
+- **Color discipline:** each aura uses **2 main colors + white highlights** only, with smooth ColorSequence gradients.
+- **Rarity = more layers:** Ghost (common) has 2 layers; Bats 3; Web 3; Pumpkin 4; Cursed 5; Reaper 6 plus a camera-safe pulse when equipped.
+- **Equip moment:** a short reveal on equip/roll (a flash ring on the ground + a quick spiral beam), like Sol's roll reveal. Rare ones get a full-screen tint for 0.5 s and a sound.
+- **Performance:** parts are `CanCollide`/`CanQuery`/`CanTouch` false and Massless; the effects for other players are only built within 60 studs; Low Graphics removes beams and halves the particles.
+- **Honest note:** Sol's RNG auras are made by professional VFX artists with custom textures and meshes. Claude Code can get close by building the layers above. To truly match them, buy or commission a few good VFX packs (Creator Store VFX by known creators, or a VFX artist on a dev Discord/Talent Hub) and recolor them into our themes.
+
 ## The Galaxy Aura Crate (later crate)
 It's on sale for **7 days**. After that it's gone and a new themed crate replaces it (Lava, Ice, Candy…). Auras you already own stay forever.
 
