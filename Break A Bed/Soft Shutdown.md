@@ -39,7 +39,7 @@ Resume = {
 - If `Resume` exists and is **less than 3 minutes old**: spawn the player at the saved position (if it's not inside a wall or below the map; otherwise at spawn), restore the Free Gifts timer and claimed gifts, and if `activity` was train/bed, put them right in front of that post or bed. Then **clear `Resume`** so it's only used once.
 - If it's older than 3 minutes (they really left), ignore it and clear it: normal spawn, gifts reset.
 - Read all of this from the **saved data on the server**, never from teleport data, so nobody can fake their position or gift progress.
-- Skip the New Player Guide and the daily-reward popup delay logic as usual; the daily reward only pops up if it wasn't already claimed today.
+- Don't show the join pop-ups again after a resume (the daily reward only pops up if it wasn't claimed today, as usual).
 
 **4. Welcome-back gift:** "Thanks for waiting!" toast + x2 Strength for 5 minutes into the boost list (once per update, not every server hop). It makes updates feel good instead of annoying.
 
