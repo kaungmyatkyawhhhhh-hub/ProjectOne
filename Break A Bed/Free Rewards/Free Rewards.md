@@ -28,6 +28,28 @@ The owner wants the chest to be **for players who like the game, favorite it and
 - **Members:** the lid opens and Cash flies to the counter, every 15 minutes, with the timer saved. **Reward raised (2026-10-12): 40 breaks of the player's best bed, at least $1,000.** It grows with progress. The screen shows the player's own amount and adds "(grows as you level up!)" so new players know it gets bigger.
 - The Free Gift popup and the chest share the same group check, so a player who joins gets both.
 
+## ⭐ EXCLUSIVE CHEST (2026-10-12, replaces the Group Chest)
+The owner renamed the Group Chest to **EXCLUSIVE CHEST** and wants it to look unique and full of effects.
+
+![[preview-exclusive-chest.png]]
+
+**To claim it:** like the game, favorite it and join the group. The screen shows all 3 steps. Only the **group join** can be checked (Roblox has no way to check likes, and favorites can only be prompted), so the claim unlocks when the player is in **Myanmar Builders Club**. Likes and favorites are asked, not checked, and not rewarded on their own (Roblox rule).
+
+**Look (unique, nothing else in the game looks like this):**
+- **The chest:** a royal **purple-and-gold** chest (`exclusive-chest.png` look) with a gold crown on the lid, a pink gem lock, cyan side gems and glowing runes. Build it as a model (purple + gold parts, Neon gems) or take a chest from the Creator Store and recolor it.
+- It **floats** about 3 studs above the ground, slowly bobbing (2 studs, 3 s loop) and turning (one turn every 8 s).
+- **A rune circle** on the ground: 3 glowing rings (purple, gold, cyan), Neon parts or a `Decal` with `LightEmission`, the outer one slowly turning one way and the inner one the other way, with small gold diamonds around the edge.
+- **A light pillar:** a tall purple `Beam` going up from the circle (`fx-beam.png`, Width 10, LightEmission 1, Transparency 0.6), visible from far away so players find it.
+- **Particles:** `fx-star4` sparkles orbiting the chest (purple, gold, white), `fx-glow` orbs rising slowly, and a purple `PointLight` (Brightness 3, Range 18) pulsing.
+- **Rays** (`fx-rays`) behind the chest on a BillboardGui, slowly turning, purple.
+- **Title** above it on a BillboardGui: "EXCLUSIVE CHEST" in a gold gradient with a thick dark stroke, and under it "Like • Favorite • Join" in light purple. For members it shows "OPEN!" (bouncing), or the "Next chest in 14:59" timer.
+
+**Claiming (member):** the chest shakes, the lid flies open with a big white flash, a `fx-ring` shockwave, a purple + gold sparkle fountain and a beam of light, then `money-big.png` cash bursts out and flies to the counter. Play a magical "chime + whoosh" sound.
+
+**Not a member:** a small bounce, and the Exclusive Chest screen opens (same 3-step design as the Free Gift popup, but with a purple title bar "Exclusive Chest!" and `exclusive-chest.png` as the big picture) with the "I joined!" button.
+
+**Reward:** 40 breaks of your best bed, at least $1,000, every 15 minutes (the timer is saved).
+
 ## Ads: on hold (2026-10-12)
 The game isn't eligible for Roblox rewarded video ads yet (not enough players). **Remove the "Watch Ad To Collect" board from the map for now** (keep its code, turned off by a `GameConfig` switch `AdBoardEnabled = false`), so there's no empty board. Turn it back on when Roblox allows ads: create the AD REWARD CASH product, set `AdBoardEnabled = true` and turn on Rewarded Video in Monetization → Ads.
 

@@ -109,3 +109,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: stats rebuilt to match `preview-stats.png` (star level badge, studded bar, 3D dumbbell, money-small, italic gradient numbers, one font). Phones get smaller stat icons so the stats stay above the thumbstick. #break-a-bed
 - 2026-10-12: GROUP CHEST reward raised to 40 breaks of the best bed, at least $1,000 (was 20 / $500). The Group Chest screen adds "(grows as you level up!)". #break-a-bed
 - 2026-10-12: the first limited crate is HALLOWEEN AURAS (Ghost, Bats, Web, Pumpkin, Cursed, Reaper) until Nov 1. Galaxy moves to later. #break-a-bed
+- 2026-10-12: Group Chest renamed to EXCLUSIVE CHEST, with a unique purple/gold floating chest, rune circle, light pillar and particles. Claim = like + favorite + join (only the join is checked). #break-a-bed
