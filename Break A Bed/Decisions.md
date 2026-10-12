@@ -62,3 +62,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: the UI will be designed in **Figma** (owner's choice) and brought into Roblox as uploaded images, replacing the shape-drawn icons and panels. #break-a-bed
 
 - 2026-10-12: new UI style because the old one looked AI-made: bright gradient buttons with a stud pattern, thick dark outlines, a 3D bottom edge and white Montserrat text with a dark outline, sharp corners (owner wants it sharp, not rounded). Images and rules in [[Break A Bed/UI Kit/UI Kit|UI Kit]]. #break-a-bed
+
+- 2026-10-12: game pass prices stay as they are. Add lots of cheap developer products: timed x2/x3/x5/x10 Strength and Cash boosts, Cash/Strength/Level/Spin packs from R$5, a server boost, Instant Break, and a one-time R$19 Starter Pack. See [[Break A Bed/Shop Plan|Shop Plan]]. #break-a-bed
+- 2026-10-12: UI matched exactly to the owner's reference: see-through dark window (transparency 0.41), stroke `#161822`, 3 px corners, Montserrat Heavy text with stroke + shadow. #break-a-bed
