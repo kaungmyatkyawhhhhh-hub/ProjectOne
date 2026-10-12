@@ -62,6 +62,14 @@ The picture above (`preview-settings-sliders.png`) is the target. Keep the layou
 - **Opening:** the window pops in (Back Out), then the rows slide in one after another (0.03 s apart).
 - Low Graphics: keep the icons and glows, turn off the twinkles and the shine sweeps.
 
+**Glow toned down (owner 2026-10-12: "too much glow").** The picture above is updated. Glow is now only:
+- a **faint** cyan edge around the window (Transparency 0.85),
+- a faint light behind the gear (Transparency 0.8),
+- a thin glow on the slider fills (Transparency 0.75) and a small one behind the yellow knob (Transparency 0.8),
+- a faint gold edge on the CODES row (Transparency 0.8).
+
+**No glow** behind the row icons, the ON/OFF buttons, REDEEM, X, the title bar or the "60%" text. Keep the shines, twinkles, icons and animations. On drag, the slider glow only goes up a little (to Transparency 0.6).
+
 ## Codes
 Codes are a cheap way to get players to join the group, like the game and come back for new codes.
 
