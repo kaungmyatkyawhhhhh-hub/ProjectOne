@@ -18,8 +18,8 @@ def popup(bgpath, out):
     hero.alpha_composite(A.burst(360, (255, 230, 120), 14, 70))
     hero.alpha_composite(art.cash_pile(320, 5), (20, 10))
     img.alpha_composite(hero, (x0 + 40, y0 + 110))  # step cards are drawn after this, so they sit on top of the pile
-    A.stroke_text(img, (x0 + 730, y0 + 228), '~ LIMITED TIME! ~', 60, (255, 120, 120), (230, 40, 40), anchor='mm')
-    A.stroke_text(img, (x0 + 730, y0 + 325), '+$50K CASH!', 86, (120, 255, 90), (40, 190, 40), anchor='mm')
+    A.stroke_text(img, (x0 + 730, y0 + 218), '~ LIMITED TIME! ~', 60, (255, 120, 120), (230, 40, 40), anchor='mm')
+    A.stroke_text(img, (x0 + 730, y0 + 315), '+$50K CASH!', 86, (120, 255, 90), (40, 190, 40), anchor='mm')
     steps = [('1. Like the game!', 'thumb'), ('2. Favorite it!', 'star'), ('3. Join the group!', 'group')]
     cw = (ww - 4 * 22) // 3
     for i, (t, k) in enumerate(steps):
