@@ -4,7 +4,7 @@
 
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
-**Status (2026-10-12): built and tested** (see [[Break A Bed/2026-10-12|2026-10-12]]). The ad board stays hidden until the ad-reward developer product exists (`GameConfig.AdReward.ProductId`) and Rewarded Video is turned on in the Creator Dashboard.
+**Status (2026-10-12): built and tested** (see [[Break A Bed/2026-10-12|2026-10-12]]). The chest is now the GROUP CHEST (the "Change" section below). The ad board is on hold: removed from the map, code kept behind `GameConfig.AdBoardEnabled = false`.
 
 Owner's request (2026-10-12): copy two things from the simulator the owner likes: a **FREE chest** in the world with a **"Watch Ad To Collect"** board, and a **Free Gift popup** (Like, Favorite, Join the group, then Claim).
 
@@ -25,7 +25,7 @@ The owner wants the chest to be **for players who like the game, favorite it and
 - So the chest **unlocks when the player is in Myanmar Builders Club** (checked on the server). Like and Favorite are asked on the same screen but never checked.
 - **Chest label:** "GROUP CHEST" above it (instead of "FREE!"), with a small "Like • Favorite • Join to open!" line under it until the player is a member. For members it shows "OPEN!" or the "Next chest in 14:59" timer.
 - **Walking onto the pad as a non-member:** don't give anything. Open the same 3-step screen as the Free Gift popup (1. Like the game! 2. Favorite it! with the Favorite button, 3. Join the group! with the Join button). Its button says **"I joined!"**, which checks the group again.
-- **Members:** same as before: the lid opens and Cash (20 breaks of the best bed, at least $500) flies to the counter, every 15 minutes, with the timer saved.
+- **Members:** the lid opens and Cash flies to the counter, every 15 minutes, with the timer saved. **Reward raised (2026-10-12): 40 breaks of the player's best bed, at least $1,000.** It grows with progress. The screen shows the player's own amount and adds "(grows as you level up!)" so new players know it gets bigger.
 - The Free Gift popup and the chest share the same group check, so a player who joins gets both.
 
 ## Ads: on hold (2026-10-12)
