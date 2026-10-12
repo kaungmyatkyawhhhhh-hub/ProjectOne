@@ -90,7 +90,7 @@ def glow(n, col):
     return g.filter(ImageFilter.GaussianBlur(n*0.12))
 
 def price_btn(w, h, amount):
-    b = box(w, h, 'green', cell=22)
+    b = box(w, h, 'green', cell=12)
     isz = int(h*0.5); fs = int(h*0.44)
     tw = font(fs).getlength(amount); gap = h*0.12
     x0 = w/2 - (isz + gap + tw)/2
@@ -101,52 +101,51 @@ def price_btn(w, h, amount):
 def main(bgpath, out):
     W, H = 1600, 900
     bg = Image.open(bgpath).convert('RGBA').resize((W, H)).filter(ImageFilter.GaussianBlur(14))
-    bg = Image.blend(bg, Image.new('RGBA', (W, H), (10, 15, 35, 255)), 0.35)
-    img = bg
+    img = Image.blend(bg, Image.new('RGBA', (W, H), (10, 15, 35, 255)), 0.35)
 
-    # left side menu (like the reference)
+    # left side menu
     for i, (label, col) in enumerate([('Shop', 'pink'), ('x2 Power', 'orange'), ('Rewards', 'cyan'), ('Rebirth', 'blue')]):
-        b = box(250, 68, col, cell=24)
-        text(b, (125, 30), label, 34)
-        paste(img, b, (165, 250 + i*84))
+        b = box(250, 66, col)
+        text(b, (125, 30), label, 30)
+        paste(img, b, (165, 250 + i*80))
     for i, (label, col, ic) in enumerate([('SPIN', 'purple', 'wheel'), ('GIFT', 'green', 'gift'), ('AUTO', 'blue', 'bolt')]):
-        b = box(100, 100, col, radius=24, cell=24)
+        b = box(100, 100, col)
         b.alpha_composite(icon(ic, 66), (17, 10))
         x = 90 + i*112
-        paste(img, b, (x, 640))
-        text(img, (x, 686), label, 26)
+        paste(img, b, (x, 630))
+        text(img, (x, 676), label, 24)
 
-    # shop window
-    cx = 930
-    tabs = [('Passes', 'orange', -3), ('Boosts', 'cyan', 2), ('Cash', 'green', -2), ('Free', 'pink', 3)]
+    cx, wy = 935, 495
+    tabs = [('Passes', 'red', -4), ('Boosts', 'green', -2), ('Cash', 'blue', 2), ('Free', 'pink', 4)]
     for i, (t, col, r) in enumerate(tabs):
-        b = box(170, 62, col, cell=22); text(b, (85, 27), t, 30)
-        paste(img, b, (cx - 285 + i*190, 118), rot=r)
-    win = box(780, 620, 'blue', radius=36, outline=8, lip=14, cell=30)
-    paste(img, win, (cx, 480))
-    hdr = box(560, 92, 'cyan', radius=26, outline=7, lip=9, cell=28)
-    text(hdr, (150, 41), 'SHOP!', 54)
-    paste(img, hdr, (cx - 100, 196), rot=2)
-    paste(img, x_mark(box(84, 84, 'red', radius=20, cell=22)), (cx + 360, 188), rot=-4)
+        b = box(176, 60, col); text(b, (88, 27), t, 28)
+        paste(img, b, (cx - 285 + i*190, 112), rot=r)
+    win = box(780, 640, 'slate', radius=10, outline=7, lip=8, cell=16)
+    paste(img, win, (cx, wy))
+    hdr = box(780, 96, 'cyan', radius=8, outline=7, lip=7, cell=14)
+    text(hdr, (40, 44), 'SHOP!', 48, anchor='lm')
+    paste(img, hdr, (cx, wy - 320 + 48))
+    paste(img, x_mark(box(86, 86, 'red')), (cx + 345, wy - 272))
 
-    feat = box(700, 250, 'yellow', radius=30, outline=7, lip=11, cell=30)
-    fx, fy = 0, 0
-    feat.alpha_composite(glow(260, (255, 255, 255)), (440, -15))
-    feat.alpha_composite(icon('star', 170), (485, 35))
-    text(feat, (40, 48), 'VIP', 62, fill=(255, 230, 60), anchor='lm')
-    text(feat, (42, 100), '• x2 Cash forever', 26, anchor='lm')
-    text(feat, (42, 132), '• VIP lounge + VIP post', 26, anchor='lm')
-    feat.alpha_composite(price_btn(230, 62, '199'), (36, 160))
-    paste(img, feat, (cx, 385))
+    feat = box(730, 250, 'yellow', radius=8, outline=6, lip=7, cell=14)
+    slot = box(250, 210, ((255, 236, 120), (255, 205, 40)), radius=8, outline=0, lip=0, cell=14)
+    feat.alpha_composite(slot, (462, 14))
+    feat.alpha_composite(glow(240, (255, 255, 255)), (465, -2))
+    feat.alpha_composite(icon('star', 170), (502, 30))
+    text(feat, (36, 50), 'VIP PACK', 50, fill=(255, 226, 40), anchor='lm')
+    text(feat, (40, 100), '• x2 Cash forever', 22, anchor='lm')
+    text(feat, (40, 130), '• VIP lounge + VIP post', 22, anchor='lm')
+    feat.alpha_composite(price_btn(240, 66, '199'), (34, 160))
+    paste(img, feat, (cx, wy - 104))
 
     cards = [('+3 Spins', 'wheel', '49'), ('x2 Strength', 'bolt', '79'), ('Cash Pack', 'cash', '99')]
     for i, (t, ic, p) in enumerate(cards):
-        c = box(220, 262, 'cyan', radius=26, outline=6, lip=10, cell=26)
-        c.alpha_composite(glow(170, (255, 255, 255)), (25, 30))
-        c.alpha_composite(icon(ic, 130), (45, 52))
-        text(c, (110, 32), t, 30)
-        c.alpha_composite(price_btn(180, 54, p), (20, 190))
-        paste(img, c, (cx - 238 + i*238, 660))
+        c = box(234, 262, 'cyan', radius=8, outline=6, lip=7, cell=14)
+        c.alpha_composite(glow(170, (255, 255, 255)), (32, 34))
+        c.alpha_composite(icon(ic, 130), (52, 54))
+        text(c, (117, 30), t, 26)
+        c.alpha_composite(price_btn(194, 54, p), (20, 194))
+        paste(img, c, (cx - 248 + i*248, wy + 168))
 
     img.convert('RGB').save(out, quality=92)
 
