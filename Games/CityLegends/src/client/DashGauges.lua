@@ -1159,19 +1159,24 @@ local function g63(gui: SurfaceGui): Update
 	end
 end
 
--- Ferrari 599 GTO (owner's photo of the real cluster): carbon surround, a plain dark screen on the
--- left, the big yellow rev counter in the middle (0 at the bottom round to 10, red from 9, white
+-- Ferrari 599 GTO (owner's photo of the real cluster): carbon surround, a screen on the left with
+-- the speed in big digits (owner's wish), the big yellow rev counter in the middle (0 at the bottom round to 10, red from 9, white
 -- hub, small gear window), a black speedometer on the right (20-220 mph, white numbers), both with
--- thin red needles and no digital readouts
+-- thin red needles
 local function ferrari599(gui: SurfaceGui): Update
 	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(26, 26, 28), BorderSizePixel = 0 }, gui)
 	new("UICorner", { CornerRadius = UDim.new(0.18, 0) }, bg)
 	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(46, 46, 50), Color3.fromRGB(16, 16, 18)), Rotation = 35 }, bg)
 	local RED = Color3.fromRGB(225, 25, 25)
-	-- left: the screen, dark and plain
+	-- left: the screen, showing how fast you're going
 	local screen = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.16, 0.58), Size = UDim2.fromScale(0.25, 0.6), BackgroundColor3 = Color3.fromRGB(8, 9, 11), BorderSizePixel = 0 }, bg)
 	new("UICorner", { CornerRadius = UDim.new(0.05, 0) }, screen)
 	new("UIStroke", { Color = Color3.fromRGB(60, 60, 64), Thickness = 3 }, screen)
+	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(40, 44, 54), Color3.fromRGB(10, 11, 14)), Rotation = 90 }, screen)
+	local digital = text(screen, "0", UDim2.fromScale(0.45, 0.45), UDim2.fromScale(0.7, 0.5), WHITE, Enum.Font.GothamBold)
+	text(screen, "mph", UDim2.fromScale(0.86, 0.55), UDim2.fromScale(0.2, 0.14), DIM, Enum.Font.Gotham)
+	new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.78), Size = UDim2.fromScale(0.84, 0.012), BackgroundColor3 = Color3.fromRGB(90, 94, 104), BorderSizePixel = 0 }, screen)
+	local kmh = text(screen, "0 km/h", UDim2.fromScale(0.5, 0.89), UDim2.fromScale(0.6, 0.14), DIM, Enum.Font.Gotham)
 	-- middle: the yellow rev counter
 	local box = squareBox(bg, UDim2.fromScale(0.5, 0.5), 0.98)
 	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(20, 20, 22), BorderSizePixel = 0 }, box))
@@ -1206,6 +1211,8 @@ local function ferrari599(gui: SurfaceGui): Update
 		revNeedle.Rotation = a0 + (a1 - a0) * shown
 		setSpeed(mph / 220)
 		gear.Text = g
+		digital.Text = tostring(math.floor(mph + 0.5))
+		kmh.Text = tostring(math.floor(mph * 1.609 + 0.5)) .. " km/h"
 	end
 end
 

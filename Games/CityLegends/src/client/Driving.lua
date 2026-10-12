@@ -1167,7 +1167,7 @@ function Driving.render(dt: number)
 	local targetFov
 	local rootCF = root.CFrame
 	if Driving.cameraMode == "Interior" then
-		targetFov = C.InteriorFov + C.MaxFovBoost * 0.8 * speedFrac ^ 1.5
+		targetFov = C.InteriorFov + C.MaxFovBoost * C.InteriorFovBoost * speedFrac ^ 1.5
 		local mouseLook = 0
 		if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
 			local vp = camera.ViewportSize

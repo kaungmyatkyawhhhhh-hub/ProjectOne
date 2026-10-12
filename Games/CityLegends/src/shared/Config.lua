@@ -154,7 +154,8 @@ end
 ---------------------------------------------------------------------
 Config.Camera = {
 	ChaseFov = 70,
-	InteriorFov = 74,
+	InteriorFov = 64, -- from the driver's seat: 74 + the speed boost made the cabin look stretched (fish-eye)
+	InteriorFovBoost = 0.3, -- share of MaxFovBoost used in the cockpit at top speed
 	MaxFovBoost = 32,
 	ChaseDistance = 17,
 	ChaseHeight = 5.2,
