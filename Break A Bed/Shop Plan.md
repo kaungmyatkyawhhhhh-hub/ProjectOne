@@ -7,7 +7,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 Owner's decision (2026-10-12): **keep game pass prices as they are now** and add **lots of cheap developer products**, like timed x2, x3 and x5 Strength boosts. Cheap buys (R$9–R$49) get many more players to pay at least once, and players who buy once usually buy again.
 
 ## Game passes: no price change
-- Strength tiers stay the same: x2 R$8 → x3 R$12 → x5 R$20 → x7 R$50 → x10 R$75 → x15 R$100.
+- Strength tiers stay the same: x2 R$19 → x3 R$39 → x5 R$79 → x7 R$149 → x10 R$249 → x15 R$399.
 - Auto Punch, x2 Cash, VIP, Fast Walk and Break Spam keep their current prices.
 
 ## New and changed developer products
@@ -70,27 +70,45 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 
 **Why these prices:** Roblox keeps 30% and rounds the owner's share down (R$1 earns 0). The lowest price is R$9 (earns 6). Prices like R$10, R$15, R$20, R$30 and R$40 waste the least in rounding.
 
-## Creator Dashboard checklist (2026-10-12)
-**Game passes:** nothing new, no price changes (11 passes: Strength x2, x3, x5, x7, x10, x15, Auto Punch, x2 Cash, VIP, Fast Walk, Break Spam).
+## Creator Dashboard checklist (updated 2026-10-12 from the owner's screenshots)
+Everything below is in the group **Myanmar Builders Club**. "Managed pricing" (Roblox picking prices by itself) was **on** for all of them.
 
-**Change these 10 existing developer products:**
-| Old product | New name | New price |
+### Game passes on Roblox now (keep prices)
+| Pass | Id | Price |
 |---|---|---|
-| +1 Level | +1 Level | R$9 |
-| +3 Levels | +3 Levels | R$20 |
-| +9 Levels | +9 Levels | R$49 |
-| x2 Strength boost (15 min) | x2 Strength (10 min) | R$9 |
-| x2 Cash boost (15 min) | x2 Cash (10 min) | R$9 |
-| +3 Spins | +3 Spins | R$15 |
-| +10 Spins | +10 Spins | R$39 |
-| Cash pack 1 (30 breaks) | Medium Cash | R$15 |
-| Cash pack 2 (120 breaks) | Big Cash | R$30 |
-| Cash pack 3 (400 breaks) | Huge Cash | R$49 |
+| 2x Strength | 2025698622 | R$19 |
+| 3x Strength | 2026640792 | R$39 |
+| 5x Strength | 2025938789 | R$79 |
+| 7x Strength | 2026100810 | R$149 |
+| 10x Strength | 2026352775 | R$249 |
+| 15x Strength | 2026046797 | R$399 |
+| VIP | 2026130800 | R$199 |
+| Fast Walk | 2025878796 | R$49 |
+| Break Spam | 2026844790 | R$79 |
+| x2 Cash | 2026892819 | R$99 |
+| Auto Punch | 2027108793 | R$149 |
+| ~~3x Strength (old)~~ | 2025644838 | offsale, not used. `GameConfig` must use 2026640792 |
 
-**Create these 15 new developer products:**
+### Developer products on Roblox now → new price (keep their names and ids)
+| Product | Id | Now | New |
+|---|---|---|---|
+| +1 Level | 3717759760 | R$8 | R$9 |
+| +3 Levels | 3717759985 | R$19 | R$20 |
+| +9 Levels | 3717760165 | R$49 | R$49 (no change) |
+| x2 STRENGTH (becomes 10 min) | 3717919099 | R$29 | R$9 |
+| x2 CASH (becomes 10 min) | 3717918907 | R$29 | R$9 |
+| +3 SPINS | 3717918726 | R$25 | R$15 |
+| +10 SPINS | 3717918786 | R$69 | R$39 |
+| CASH PILE (= Medium Cash, 40 breaks) | 3717917664 | R$19 | R$15 |
+| CASH BAG (= Big Cash, 150 breaks) | 3717918038 | R$49 | R$30 |
+| CASH VAULT (= Huge Cash, 500 breaks) | 3717918420 | R$129 | R$49 |
+
+To set these prices, turn **Managed pricing off** for each product, or Roblox may change them back.
+
+### Create these 15 new developer products
 x3 Strength R$15 · x5 Strength R$25 · x10 Strength R$49 · x3 Cash R$15 · x5 Cash R$25 · Fast Punch R$10 · Server x2 Strength R$49 · Small Cash R$9 · Small Strength R$9 · Medium Strength R$15 · Big Strength R$30 · +1 Spin R$9 · Instant Break R$9 · Starter Pack R$19 · Skip All Gifts R$49
 
-Total after this: **25 developer products + 11 game passes**. The reused products keep their ids, but Claude Code must change what they give (10-minute boosts, Cash packs = 40/150/500 breaks).
+Total after this: **25 developer products + 11 game passes**. Claude Code must change what the reused products give (10-minute boosts, Cash packs = 40/150/500 breaks).
 
 ## Steps for the owner
 1. Paste to Claude Code: *"Read my vault note Break A Bed/Shop Plan.md and add all of it to the game."*
