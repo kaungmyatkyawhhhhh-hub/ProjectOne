@@ -25,6 +25,9 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `card-cyan.png` | 320 × 360 | Normal shop item card |
 | `icon-<name>.png` | 256 × 256 | star, bolt, cash, wheel, gift, robux |
 | `pattern-studs.png` | 56 × 56 | Stud pattern for frames of any size |
+| `fx-rays.png` | 1024 × 1024 | White light rays behind open menus |
+| `fx-sparkle.png` | 128 × 128 | White 4-point twinkle around items |
+| `fx-glow.png` | 256 × 256 | Soft white glow behind item icons |
 
 Colors: pink, purple, cyan, blue, orange, green, red, yellow, slate.
 
@@ -48,6 +51,14 @@ Matched to the owner's reference picture on 2026-10-12. Use these exact values s
 | Glow behind item icons | white, soft, about 40% opacity |
 
 Base colors: cyan `#1CC8F2`, blue `#247ADE`, pink `#EC22CD`, purple `#9648E8`, orange `#FF9416`, green `#54CA34`, red `#E2363C`, yellow `#FFE20C`, slate `#3E4454`.
+
+**Effects (same as the reference):**
+- **Light rays:** `fx-rays.png` behind every open menu, about 1.9× the window width, centered on it, ImageTransparency 0.25, spinning slowly (one full turn every 40 s). Fade in with the menu.
+- **Glow:** `fx-glow.png` behind every item icon, about 1.3× the icon size, ImageTransparency 0.4.
+- **Featured slot:** the big item on the yellow card sits in a lighter yellow rounded panel (`#FFF078`, 6 px `#FFFABE` border, UICorner 46 px) with the glow behind it.
+- **Sparkles:** 3–4 `fx-sparkle.png` around each item icon at different sizes (16–40 px). They twinkle: grow from 0 to full size and fade out over about 1.2 s, each starting at a random time, looping.
+- **Opening a menu:** it pops in from 85% to 100% size with a small overshoot (Back easing, 0.25 s). Buttons shrink to 94% while pressed and bounce back.
+- Effects are images only (no `UIGradient` shine or blur on the window).
 
 **Big menu layout:** see-through dark window → cyan title bar along the top with the title on the left, red X square at the top-right corner → yellow featured card full width → a row of cyan item cards, each with a title at the top, an icon with a white glow in the middle and a green price button at the bottom. Gaps between cards are 14 px and show the dark window. Tabs sit above the window, each tilted 2–4°.
 
