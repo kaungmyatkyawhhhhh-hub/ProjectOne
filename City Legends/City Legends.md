@@ -75,3 +75,9 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - the wheels as FL/FR/RL/RR in a "Wheels" group;
   - windows named `SeeThrough_*` so the game keeps them see-through.
   - The GLB was tiny in Studio because of a stray sphere in it. It replaces the whole `bentz_g63` once the owner imports it in Studio.
+- **Ferrari 599 GTO (2026-10-12):** the owner sent a Sketchfab GLB. It is converted to `imports/2010_ferrari_599_roblox.fbx`:
+  - colours kept (red with a black roof);
+  - the steering wheel turns;
+  - 23 parts.
+  - The cluster is "Ferrari599": yellow rev counter in the middle with a needle, analog speedometer with a needle on the left, gear/speed/clock screen on the right.
+  - Cars with no seat in the model now put the driver's eye about 63 cm behind their own steering wheel.

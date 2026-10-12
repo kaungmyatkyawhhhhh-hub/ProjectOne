@@ -136,6 +136,27 @@ local function clock(): string
 	return string.format("%02d:%02d", t.hour, t.min)
 end
 
+-- a round bezel (chrome or coloured ring) to sit a dial in
+local function bezel(parent: Instance, center: UDim2, size: number, ringColor: Color3, thickness: number?)
+	local box = new("Frame", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = center,
+		Size = UDim2.fromScale(size, size),
+	}, parent)
+	new("UIAspectRatioConstraint", { AspectRatio = 1, DominantAxis = Enum.DominantAxis.Height }, box)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, box)
+	new("UIStroke", { Color = ringColor, Thickness = thickness or 5 }, box)
+end
+
+local function numbers(from: number, to: number, step: number): { string }
+	local out = {}
+	for v = from, to, step do
+		table.insert(out, tostring(v))
+	end
+	return out
+end
+
 local function lambo(gui: SurfaceGui): Update
 	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(4, 5, 8), BorderSizePixel = 0 }, gui)
 	-- side panels
@@ -224,7 +245,9 @@ end
 -- Ferrari 458: big yellow rev counter in the middle (0-10, red from 9, gear in a dark
 -- wedge), left screen with outside temperature and a fuel bar, right screen with speed and clock
 local FERRARI_YELLOW = Color3.fromRGB(196, 146, 0) -- deep yellow, not glaring at night
-local function ferrari(gui: SurfaceGui): Update
+-- speedDial (599 GTO): an analog speedometer with its own needle on the left instead of the
+-- temperature screen
+local function ferrari(gui: SurfaceGui, speedDial: boolean?): Update
 	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(8, 8, 10), BorderSizePixel = 0 }, gui)
 	-- side screens
 	local function screen(x: number): Frame
@@ -239,18 +262,25 @@ local function ferrari(gui: SurfaceGui): Update
 		new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(70, 78, 92), Color3.fromRGB(20, 22, 28)), Rotation = 90 }, f)
 		return f
 	end
-	local left = screen(0.15)
-	text(left, "Ambient Temperature", UDim2.fromScale(0.42, 0.16), UDim2.fromScale(0.7, 0.1), DIM, Enum.Font.Gotham)
-	text(left, "21.6°C", UDim2.fromScale(0.4, 0.38), UDim2.fromScale(0.65, 0.26), WHITE, Enum.Font.GothamMedium)
-	text(left, "1/2", UDim2.fromScale(0.5, 0.62), UDim2.fromScale(0.12, 0.08), DIM, Enum.Font.Gotham)
-	text(left, "1", UDim2.fromScale(0.9, 0.62), UDim2.fromScale(0.06, 0.08), DIM, Enum.Font.Gotham)
-	for i = 0, 9 do
-		new("Frame", {
-			Position = UDim2.fromScale(0.1 + i * 0.081, 0.72),
-			Size = UDim2.fromScale(0.065, 0.16),
-			BackgroundColor3 = Color3.fromRGB(255, 92, 20),
-			BorderSizePixel = 0,
-		}, left)
+	local setSpeedDial: ((number) -> ())? = nil
+	if speedDial then
+		bezel(bg, UDim2.fromScale(0.165, 0.55), 0.8, Color3.fromRGB(150, 150, 156), 4)
+		setSpeedDial = dial(bg, UDim2.fromScale(0.165, 0.55), 0.76, numbers(0, 220, 20), nil, Color3.fromRGB(230, 30, 30), -135, 135, Color3.fromRGB(14, 14, 16), nil, 0.012)
+		text(bg, "MPH", UDim2.fromScale(0.165, 0.72), UDim2.fromScale(0.03, 0.045), DIM, Enum.Font.Gotham)
+	else
+		local left = screen(0.15)
+		text(left, "Ambient Temperature", UDim2.fromScale(0.42, 0.16), UDim2.fromScale(0.7, 0.1), DIM, Enum.Font.Gotham)
+		text(left, "21.6°C", UDim2.fromScale(0.4, 0.38), UDim2.fromScale(0.65, 0.26), WHITE, Enum.Font.GothamMedium)
+		text(left, "1/2", UDim2.fromScale(0.5, 0.62), UDim2.fromScale(0.12, 0.08), DIM, Enum.Font.Gotham)
+		text(left, "1", UDim2.fromScale(0.9, 0.62), UDim2.fromScale(0.06, 0.08), DIM, Enum.Font.Gotham)
+		for i = 0, 9 do
+			new("Frame", {
+				Position = UDim2.fromScale(0.1 + i * 0.081, 0.72),
+				Size = UDim2.fromScale(0.065, 0.16),
+				BackgroundColor3 = Color3.fromRGB(255, 92, 20),
+				BorderSizePixel = 0,
+			}, left)
+		end
 	end
 	local right = screen(0.85)
 	local speed = text(right, "0", UDim2.fromScale(0.45, 0.42), UDim2.fromScale(0.5, 0.36), WHITE, Enum.Font.GothamMedium)
@@ -333,6 +363,9 @@ local function ferrari(gui: SurfaceGui): Update
 	return function(mph: number, g: string, rpm: number)
 		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
 		needle.Rotation = a0 + (a1 - a0) * shown
+		if setSpeedDial then
+			setSpeedDial(mph / 220)
+		end
 		speed.Text = tostring(math.floor(mph + 0.5))
 		gear.Text = g
 		if os.clock() - last > 5 then
@@ -555,27 +588,6 @@ local function aventador(gui: SurfaceGui, dialOnly: boolean?): Update
 	end
 end
 
-
--- a round bezel (chrome or coloured ring) to sit a dial in
-local function bezel(parent: Instance, center: UDim2, size: number, ringColor: Color3, thickness: number?)
-	local box = new("Frame", {
-		BackgroundTransparency = 1,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = center,
-		Size = UDim2.fromScale(size, size),
-	}, parent)
-	new("UIAspectRatioConstraint", { AspectRatio = 1, DominantAxis = Enum.DominantAxis.Height }, box)
-	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, box)
-	new("UIStroke", { Color = ringColor, Thickness = thickness or 5 }, box)
-end
-
-local function numbers(from: number, to: number, step: number): { string }
-	local out = {}
-	for v = from, to, step do
-		table.insert(out, tostring(v))
-	end
-	return out
-end
 
 -- BMW G20 330i "Live Cockpit": open arcs, speedometer left (clockwise from the bottom),
 -- rev counter right (anticlockwise), big digital speed in the middle, a strip along the bottom
@@ -1157,7 +1169,7 @@ function DashGauges.build(panel: BasePart): Update
 	gui.MaxDistance = 60
 	gui.Parent = panel
 	local style = panel:GetAttribute("Style")
-	local update = if style == "BMWLive" then bmwLive(gui) elseif style == "BMWClassic" then bmwClassic(gui) elseif style == "AMG" then amg(gui) elseif style == "AMGBiturbo" then amg(gui, true) elseif style == "G63" then g63(gui) elseif style == "AMGSls" then amg(gui, false, 220) elseif style == "Aston" then aston(gui) elseif style == "Urus" then urus(gui) elseif style == "Murcielago" then twinWithSmalls(gui, true, 9, 8, Color3.fromRGB(255, 90, 20), Color3.fromRGB(176, 182, 192), { { "OIL °C", "50", "150" }, { "OIL bar", "0", "10" }, { "FUEL", "0", "1" }, { "°C", "50", "130" } }) elseif style == "C6" then twinWithSmalls(gui, false, 7, 6.5, Color3.fromRGB(255, 110, 30), Color3.fromRGB(150, 156, 166), { { "FUEL", "E", "F" }, { "OIL", "0", "80" }, { "TEMP", "100", "280" }, { "VOLTS", "8", "18" } }) elseif style == "C7" then c7(gui) elseif style == "W212" then w212(gui) elseif style == "W213" then w213(gui) elseif style == "Gallardo" then gallardo(gui) elseif style == "SupraTRD" then supraTrd(gui) elseif style == "Toyota" then toyota(gui) elseif style == "Aventador" then aventador(gui, true) elseif style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) else modern(gui)
+	local update = if style == "BMWLive" then bmwLive(gui) elseif style == "BMWClassic" then bmwClassic(gui) elseif style == "AMG" then amg(gui) elseif style == "AMGBiturbo" then amg(gui, true) elseif style == "G63" then g63(gui) elseif style == "AMGSls" then amg(gui, false, 220) elseif style == "Aston" then aston(gui) elseif style == "Urus" then urus(gui) elseif style == "Murcielago" then twinWithSmalls(gui, true, 9, 8, Color3.fromRGB(255, 90, 20), Color3.fromRGB(176, 182, 192), { { "OIL °C", "50", "150" }, { "OIL bar", "0", "10" }, { "FUEL", "0", "1" }, { "°C", "50", "130" } }) elseif style == "C6" then twinWithSmalls(gui, false, 7, 6.5, Color3.fromRGB(255, 110, 30), Color3.fromRGB(150, 156, 166), { { "FUEL", "E", "F" }, { "OIL", "0", "80" }, { "TEMP", "100", "280" }, { "VOLTS", "8", "18" } }) elseif style == "C7" then c7(gui) elseif style == "W212" then w212(gui) elseif style == "W213" then w213(gui) elseif style == "Gallardo" then gallardo(gui) elseif style == "SupraTRD" then supraTrd(gui) elseif style == "Toyota" then toyota(gui) elseif style == "Aventador" then aventador(gui, true) elseif style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) elseif style == "Ferrari599" then ferrari(gui, true) else modern(gui)
 	-- start-up: the screens fade up and the needles sweep to the end and back, like a real car
 	local started = os.clock()
 	local SWEEP = 1.6

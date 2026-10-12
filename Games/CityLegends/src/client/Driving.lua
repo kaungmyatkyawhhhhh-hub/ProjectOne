@@ -640,6 +640,7 @@ function Driving.attach(model: Model)
 	local CLUSTER_SIZE = {
 		Aventador = { 0.82, 0.82, 0.8, -0.06 }, -- just the round dial, over the model's own
 		Ferrari = { 1.6, 0.6 },
+		Ferrari599 = { 1.7, 0.6 },
 		BMWLive = { 1.8, 0.62, 0.85 },
 		BMWClassic = { 1.6, 0.6, 0.85 },
 		AMG = { 1.7, 0.62 },

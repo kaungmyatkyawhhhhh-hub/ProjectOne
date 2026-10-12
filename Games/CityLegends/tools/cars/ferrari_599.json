@@ -1,0 +1,10 @@
+{
+  "scale": 100,
+  "remove": ["Icosphere"],
+  "forward": [0, -1, 0],
+  "steering": { "x": 0.397, "z": 0.72, "radius": 0.215, "y": [-0.2, 0.15] },
+  "corners": { "FL": [0.85, -1.38, 0.2], "FR": [-0.85, -1.38, 0.2], "RL": [0.85, 1.37, 0.2], "RR": [-0.85, 1.37, 0.2] },
+  "wheel_meshes": ["M_Rim_High", "M_Tire_High", "M_BrakeDisc_High"],
+  "wheel_reach": 0.6,
+  "glass": ["M_Glass_Window_High"]
+}

@@ -34,6 +34,7 @@ local CarSkin = {}
 CarSkin.CLUSTER_STYLE = {
 	lambrini_lp700 = "Aventador",
 	ferrara_458 = "Ferrari",
+	ferrara_599 = "Ferrari599",
 	bnw_330i_g20 = "BMWLive",
 	bnw_m3_e92 = "BMWClassic",
 	bnw_m5_e60 = "BMWClassic",
@@ -699,6 +700,12 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 		if n > 0 then
 			sp = Vector3.new(-0.37 * m, 0.35 * m, axleZ / n + 1.35 * m)
+		end
+		-- with the model's own steering wheel found, the driver sits a real reach behind it
+		-- (~63 cm), in line with it
+		if out.steer and sp then
+			local w = out.steer.mount.Position / scale
+			sp = Vector3.new(w.X, sp.Y, w.Z + 0.53 * m) -- (the eye goes 0.1 m further back below)
 		end
 	end
 	if sp then
