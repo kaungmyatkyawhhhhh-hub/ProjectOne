@@ -17,4 +17,9 @@ Roblox style (2026-10-11 v2): a muscular bacon-hair Roblox character punching a 
 - `icon-512.png` (512x512): game icon
 The first, flat-cartoon versions are in git history.
 
+## Results (2026-10-12)
+- The owner spent **12K Robux** on ads.
+- The game earns about **500 Robux a day** so far.
+- Day 1 retention showed **0%** on 2026-10-12. The game had only been out about 2 days, so the number may not be ready yet.
+
 Next idea: real screenshots from the game with the title on top usually do better than drawn art.

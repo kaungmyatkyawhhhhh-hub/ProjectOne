@@ -22,7 +22,8 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
   - **Already completed:** you stay in the break screen and can keep breaking it for cash until **EXIT**.
 - **Upgrade boards** on the left of the spawn plaza: ⚡ **Training Speed** (multiplies the Strength from every punch, x1.00 → x1.15 → …) and 👟 **Walk Speed** (16 → 18 → …). Each board shows your current → next value and the price (red when you can't afford it). Step on the green pad in front to buy a level; click while standing on it to buy more. Not enough cash shows "Not enough money" in red.
 - **Critical hits:** 1 in 10 chops is a **CRITICAL!** (orange text, 3× damage, bonus Cash).
-- **🏆 TOP Total Damage Dealt** sign on the right of the spawn plaza: top 10 across all servers, refreshed every 3 minutes, with your own total.
+- **Leaderboards:** four boards in a row by the training area (`Workspace.Signs`): TOP TOTAL DAMAGE and TOP TOTAL MONEY (top 10 across all servers, every 3 minutes), SERVER TOP DAMAGE and SERVER TOP MONEY (players in this server, live). Each shows your own total. Total money = all Cash ever earned.
+- **Bed signs** show the bed name, the Strength needed and the Cash a break pays you (with your boosts).
 - **🎁 Group Reward** button on the right of the screen: join the group, claim +10% Strength from punching forever. Needs the group id (`GameConfig.GroupId`).
 - **Robux shop and free rewards:** upgrading Strength tier button (x2 → x15), passes (Auto Punch, x2 Cash, VIP, Fast Walk, Break Spam), boosts, spins, Cash packs, Level packs, daily reward, playtime gifts, spin wheel, VIP lounge (walking into its door without VIP opens the VIP pass purchase window). Script `Shop` (StarterPlayerScripts) draws it; `VipLounge` (ServerScriptService, run once in Edit mode) built `Workspace.VipArea`. All pass and product ids are set in `GameConfig`.
 - **SPAWN button** at the top: only on the bed path (fades in/out), hidden in the break screen; teleports you back to spawn.
@@ -110,4 +111,7 @@ All numbers (beds, training items, damage, levels) are in `GameConfig`.
 - [[Break A Bed/Decisions|Decisions]]
 - [[Break A Bed/Bugs and Fixes|Bugs and Fixes]]
 - [[Break A Bed/Ideas|Ideas]]
+- [[Break A Bed/UI Kit/UI Kit|UI Kit]]: the new button and shop style (images + how to use them)
+- [[Break A Bed/Playtime Rewards|Playtime Rewards]]: Free Gifts menu, 12 gifts that unlock the longer you play
+- [[Break A Bed/Shop Plan|Shop Plan]]: lots of cheap products (x2/x3/x5/x10 boosts, packs, impulse buys)
 - Sessions: [[Break A Bed/2026-10-10|2026-10-10]]

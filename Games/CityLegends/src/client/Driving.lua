@@ -640,11 +640,16 @@ function Driving.attach(model: Model)
 	local CLUSTER_SIZE = {
 		Aventador = { 0.82, 0.82, 0.8, -0.06 }, -- just the round dial, over the model's own
 		Ferrari = { 1.6, 0.6 },
-		BMWLive = { 1.8, 0.62 },
+		BMWLive = { 1.8, 0.62, 0.85 },
 		BMWClassic = { 1.6, 0.6, 0.85 },
 		AMG = { 1.7, 0.62 },
 		SupraTRD = { 1.9, 0.62 },
 		Toyota = { 1.7, 0.62, 1.0 },
+		AMGBiturbo = { 1.7, 0.62 },
+		W212 = { 2.1, 0.62 },
+		W213 = { 2.0, 0.72 },
+		Gallardo = { 1.8, 0.66 },
+		EV6 = { 1.7, 0.62, 0.95 },
 	}
 	local sizeFor = if type(style) == "string" then CLUSTER_SIZE[style] else nil
 	if dashPanel and dashPanel:IsA("BasePart") and sizeFor
