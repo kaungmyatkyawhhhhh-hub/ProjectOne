@@ -16,7 +16,10 @@ Why: Day 1 retention showed 0% on 2026-10-12. New players spawn with nothing tel
 
 The whole guide should take about 45–60 seconds. **Show, don't tell:** use beams, arrows, glowing targets and effects, with only 2–4 words of text per step.
 
-## Look (UI Kit style), fixed 2026-10-12
+## Look: light style (changed 2026-10-12)
+**Updated:** the owner wants the tutorial card **light, not dark**, and the ground path as **moving arrows**. Follow the "Main screen (HUD) and tutorial" section of the [[Break A Bed/UI Kit/UI Kit|UI Kit]] and `preview-hud.png`. The older dark version below is replaced where they differ.
+
+### Older dark version (replaced)
 The first build used plain dark panels that didn't match the [[Break A Bed/UI Kit/UI Kit|UI Kit]]. It should look like this:
 
 ![[UI Kit/preview-tutorial.png]]
