@@ -42,7 +42,7 @@ local function text(parent: Instance, t: string, pos: UDim2, size: UDim2, color:
 end
 
 -- A round dial in a square frame: ticks, numbers and a needle. Returns a setter (0..1).
-local function dial(parent: Instance, center: UDim2, size: number, labels: { string }, redFrom: number?, needleColor: Color3, a0: number, a1: number, face: Color3?, faceless: boolean?): (number) -> ()
+local function dial(parent: Instance, center: UDim2, size: number, labels: { string }, redFrom: number?, needleColor: Color3, a0: number, a1: number, face: Color3?, faceless: boolean?, needleWidth: number?): (number) -> ()
 	local box = new("Frame", {
 		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -94,7 +94,7 @@ local function dial(parent: Instance, center: UDim2, size: number, labels: { str
 		BorderSizePixel = 0,
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.fromScale(0.5, 0.08),
-		Size = UDim2.fromScale(0.018, 0.44),
+		Size = UDim2.fromScale(needleWidth or 0.018, 0.44),
 		BackgroundColor3 = needleColor,
 		ZIndex = 3,
 	}, needle)
@@ -1091,6 +1091,62 @@ local function c7(gui: SurfaceGui): Update
 	end
 end
 
+-- Mercedes-AMG G 63 (W463, 2012-2018, owner's photo): speedometer left with a small fuel dial in
+-- it, rev counter right (red from 6) with a small temperature dial in it,
+-- dark faces in silver rings, big white numbers, thin needles (white speed, red revs); between
+-- them the P R N D + C (Comfort, green) strip, a trip / odometer screen and the clock + outside
+-- temperature line
+local function g63(gui: SurfaceGui): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(6, 6, 8), BorderSizePixel = 0 }, gui)
+	local silver = Color3.fromRGB(196, 200, 210)
+	local face = Color3.fromRGB(20, 21, 25)
+	local white = Color3.fromRGB(246, 246, 250)
+	local red = Color3.fromRGB(235, 40, 50)
+	bezel(bg, UDim2.fromScale(0.21, 0.5), 1, silver, 6)
+	bezel(bg, UDim2.fromScale(0.79, 0.5), 1, silver, 6)
+	local setSpeed = dial(bg, UDim2.fromScale(0.21, 0.5), 0.96, numbers(0, 160, 20), nil, white, -135, 135, face, nil, 0.011)
+	local setRpm = dial(bg, UDim2.fromScale(0.79, 0.5), 0.96, numbers(0, 7, 1), 6 / 7, red, -135, 135, face, nil, 0.011)
+	text(bg, "mph", UDim2.fromScale(0.21, 0.33), UDim2.fromScale(0.03, 0.045), DIM, Enum.Font.Gotham)
+	text(bg, "AMG", UDim2.fromScale(0.79, 0.32), UDim2.fromScale(0.045, 0.06), WHITE, Enum.Font.GothamBlack)
+	text(bg, "1/min x1000", UDim2.fromScale(0.79, 0.4), UDim2.fromScale(0.05, 0.035), DIM, Enum.Font.Gotham)
+	-- small dials inside the big ones
+	dial(bg, UDim2.fromScale(0.21, 0.8), 0.22, { "0", "", "1" }, nil, white, -90, 90, face, nil, 0.02)(0.7)
+	dial(bg, UDim2.fromScale(0.79, 0.8), 0.22, { "40", "", "120" }, 0.85, white, -90, 90, face, nil, 0.02)(0.45)
+	-- middle
+	local strip = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.13), Size = UDim2.fromScale(0.15, 0.13), BackgroundColor3 = Color3.fromRGB(10, 10, 12), BorderSizePixel = 0 }, bg)
+	new("UIStroke", { Color = silver, Thickness = 2 }, strip)
+	local letters: { [string]: TextLabel } = {}
+	for i, l in { "P", "R", "N", "D", "C" } do
+		letters[l] = text(strip, l, UDim2.fromScale(0.1 + (i - 1) * 0.2, 0.5), UDim2.fromScale(0.17, 0.75), if l == "C" then Color3.fromRGB(60, 220, 90) else DIM, Enum.Font.GothamBold)
+	end
+	local screen = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.48), Size = UDim2.fromScale(0.09, 0.36), BackgroundColor3 = Color3.fromRGB(14, 15, 18), BorderSizePixel = 0 }, bg)
+	new("UIStroke", { Color = Color3.fromRGB(90, 94, 102), Thickness = 2 }, screen)
+	local speed = text(screen, "0", UDim2.fromScale(0.5, 0.3), UDim2.fromScale(0.8, 0.3), WHITE, Enum.Font.GothamBold)
+	text(screen, "mph", UDim2.fromScale(0.5, 0.52), UDim2.fromScale(0.4, 0.12), DIM, Enum.Font.Gotham)
+	text(screen, "52918 mi", UDim2.fromScale(0.5, 0.8), UDim2.fromScale(0.85, 0.16), WHITE, Enum.Font.Gotham)
+	new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.74), Size = UDim2.fromScale(0.2, 0.004), BackgroundColor3 = Color3.fromRGB(110, 90, 40), BorderSizePixel = 0 }, bg)
+	local clockText = text(bg, clock(), UDim2.fromScale(0.45, 0.82), UDim2.fromScale(0.05, 0.08), WHITE, Enum.Font.Gotham)
+	text(bg, "85°F", UDim2.fromScale(0.56, 0.82), UDim2.fromScale(0.04, 0.07), WHITE, Enum.Font.Gotham)
+	local last, lastLetter = 0, ""
+	return function(mph: number, g: string, rpm: number)
+		setSpeed(mph / 160)
+		setRpm(rpm)
+		speed.Text = tostring(math.floor(mph + 0.5))
+		local letter = if g == "R" then "R" elseif g == "N" then "N" else "D"
+		if letter ~= lastLetter then
+			if letters[lastLetter] then
+				letters[lastLetter].TextColor3 = DIM
+			end
+			letters[letter].TextColor3 = WHITE
+			lastLetter = letter
+		end
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
 function DashGauges.build(panel: BasePart): Update
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "Gauges"
@@ -1101,7 +1157,7 @@ function DashGauges.build(panel: BasePart): Update
 	gui.MaxDistance = 60
 	gui.Parent = panel
 	local style = panel:GetAttribute("Style")
-	local update = if style == "BMWLive" then bmwLive(gui) elseif style == "BMWClassic" then bmwClassic(gui) elseif style == "AMG" then amg(gui) elseif style == "AMGBiturbo" then amg(gui, true) elseif style == "AMGSls" then amg(gui, false, 220) elseif style == "Aston" then aston(gui) elseif style == "Urus" then urus(gui) elseif style == "Murcielago" then twinWithSmalls(gui, true, 9, 8, Color3.fromRGB(255, 90, 20), Color3.fromRGB(176, 182, 192), { { "OIL °C", "50", "150" }, { "OIL bar", "0", "10" }, { "FUEL", "0", "1" }, { "°C", "50", "130" } }) elseif style == "C6" then twinWithSmalls(gui, false, 7, 6.5, Color3.fromRGB(255, 110, 30), Color3.fromRGB(150, 156, 166), { { "FUEL", "E", "F" }, { "OIL", "0", "80" }, { "TEMP", "100", "280" }, { "VOLTS", "8", "18" } }) elseif style == "C7" then c7(gui) elseif style == "W212" then w212(gui) elseif style == "W213" then w213(gui) elseif style == "Gallardo" then gallardo(gui) elseif style == "SupraTRD" then supraTrd(gui) elseif style == "Toyota" then toyota(gui) elseif style == "Aventador" then aventador(gui, true) elseif style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) else modern(gui)
+	local update = if style == "BMWLive" then bmwLive(gui) elseif style == "BMWClassic" then bmwClassic(gui) elseif style == "AMG" then amg(gui) elseif style == "AMGBiturbo" then amg(gui, true) elseif style == "G63" then g63(gui) elseif style == "AMGSls" then amg(gui, false, 220) elseif style == "Aston" then aston(gui) elseif style == "Urus" then urus(gui) elseif style == "Murcielago" then twinWithSmalls(gui, true, 9, 8, Color3.fromRGB(255, 90, 20), Color3.fromRGB(176, 182, 192), { { "OIL °C", "50", "150" }, { "OIL bar", "0", "10" }, { "FUEL", "0", "1" }, { "°C", "50", "130" } }) elseif style == "C6" then twinWithSmalls(gui, false, 7, 6.5, Color3.fromRGB(255, 110, 30), Color3.fromRGB(150, 156, 166), { { "FUEL", "E", "F" }, { "OIL", "0", "80" }, { "TEMP", "100", "280" }, { "VOLTS", "8", "18" } }) elseif style == "C7" then c7(gui) elseif style == "W212" then w212(gui) elseif style == "W213" then w213(gui) elseif style == "Gallardo" then gallardo(gui) elseif style == "SupraTRD" then supraTrd(gui) elseif style == "Toyota" then toyota(gui) elseif style == "Aventador" then aventador(gui, true) elseif style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) else modern(gui)
 	-- start-up: the screens fade up and the needles sweep to the end and back, like a real car
 	local started = os.clock()
 	local SWEEP = 1.6

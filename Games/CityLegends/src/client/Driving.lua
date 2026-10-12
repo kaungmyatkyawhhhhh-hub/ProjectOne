@@ -646,6 +646,7 @@ function Driving.attach(model: Model)
 		SupraTRD = { 1.9, 0.62 },
 		Toyota = { 1.7, 0.62, 1.0 },
 		AMGBiturbo = { 1.7, 0.62 },
+		G63 = { 1.8, 0.62 },
 		W212 = { 2.1, 0.62 },
 		W213 = { 2.0, 0.72 },
 		Gallardo = { 1.8, 0.66 },
