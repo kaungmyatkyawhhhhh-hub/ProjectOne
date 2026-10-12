@@ -89,3 +89,4 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - **BMW clusters (2026-10-12):**
   - The M5, M6 and X6 cluster panel is grey instead of black (style `BMWClassicGrey`); the M3 stays black.
   - The M5 cluster is 25% bigger.
+- **Don't save over CityLegends.rbxl (2026-10-12):** the owner saved their place over it, and that undid a new build (older scripts). Their imported 599 is now in `assets/CarModels.rbxm`, so it is in every build. Their own places go in as `CityLegendsCars.rbxl` (or any other name), and Claude copies new cars from there.
