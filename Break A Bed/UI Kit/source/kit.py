@@ -1,22 +1,37 @@
-import math, os, sys
-from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
+"""Break A Bed UI kit: chunky square-cornered Roblox simulator style (matches the owner's reference)."""
+import os, sys
+from PIL import Image, ImageDraw, ImageFont, ImageChops
 
 S = 4  # supersample
-OUTLINE = (26, 20, 40)
+OUTLINE = (22, 24, 34)          # stroke colour on everything  #161822
 FONT = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'Montserrat-Black.ttf')
 
-# (top, bottom) face colours
+# base colour of each element
 COLORS = {
-    'pink':   ((255, 105, 250), (205, 30, 215)),
-    'purple': ((185, 120, 255), (120, 55, 230)),
-    'cyan':   ((110, 235, 255), (25, 175, 245)),
-    'blue':   ((90, 190, 255),  (25, 120, 235)),
-    'orange': ((255, 200, 60),  (255, 125, 15)),
-    'green':  ((140, 240, 80),  (40, 175, 40)),
-    'red':    ((255, 110, 100), (215, 35, 45)),
-    'yellow': ((255, 240, 90),  (255, 195, 10)),
-    'slate':  ((92, 104, 128),  (58, 66, 86)),
+    'cyan':   (28, 200, 242),
+    'blue':   (36, 122, 222),
+    'pink':   (236, 34, 205),
+    'purple': (150, 72, 232),
+    'orange': (255, 148, 22),
+    'green':  (84, 202, 52),
+    'red':    (226, 54, 60),
+    'yellow': (255, 226, 12),
+    'slate':  (62, 68, 84),
 }
+STYLE = dict(
+    radius=0.035,       # corner radius, fraction of the short side (nearly square)
+    outline=0.045,      # dark stroke, fraction of the short side
+    rim=0.032,          # light inner rim
+    rim_mix=0.45,       # rim = base mixed with white
+    lip=0.065,          # darker 3D bottom edge
+    lip_mix=0.30,       # lip = base mixed with black
+    top_mix=0.16,       # face top = base mixed with white
+    bot_mix=0.06,       # face bottom = base mixed with black
+    stud_cell=14,       # pattern cell in px
+    stud_light=24,      # pattern alpha (0-255): very faint
+    stud_dark=26,
+)
+WINDOW = dict(color=(36, 40, 52), alpha=150, outline=OUTLINE)  # see-through dark window body
 
 def mix(a, b, t):
     return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
@@ -34,14 +49,13 @@ def vgrad(size, top, bottom, y0, y1):
         g.putpixel((0, y), mix(top, bottom, t))
     return g.resize((w, h))
 
-def studs(size, cell, light=28, dark=26):
-    """Small square studs: a lighter square with a darker bottom/right edge."""
+def studs(size, cell, light, dark):
     lay = Image.new('RGBA', size, (0, 0, 0, 0))
     d = ImageDraw.Draw(lay)
     w, h = size
-    s = cell * 0.56
+    s = cell * 0.58
     off = (cell - s) / 2
-    e = max(1, cell * 0.09)
+    e = max(1, cell * 0.08)
     for gy in range(-1, h // cell + 2):
         for gx in range(-1, w // cell + 2):
             x, y = gx * cell + off, gy * cell + off
@@ -49,53 +63,68 @@ def studs(size, cell, light=28, dark=26):
             d.rectangle((x, y, x + s, y + s), fill=(255, 255, 255, light))
     return lay
 
-def box(w, h, col, radius=None, outline=None, lip=None, pattern=True, cell=None, split=True):
-    """Sharp chunky box: dark outline, light bevel, darker bottom lip, gradient face, square studs."""
-    top, bot = COLORS[col] if isinstance(col, str) else col
+def box(w, h, col, pattern=True, **kw):
+    st = dict(STYLE, **kw)
+    base = COLORS[col] if isinstance(col, str) else col
     W, H = w * S, h * S
-    radius = (radius if radius is not None else max(4, min(w, h) * 0.07)) * S
-    ow = (outline if outline is not None else max(3, round(min(w, h) * 0.045))) * S
-    lp = (lip if lip is not None else max(4, round(min(w, h) * 0.07))) * S
-    cell = (cell or 16) * S
-    bev = max(S * 2, int(ow * 0.6))
+    m = min(w, h)
+    rad = max(2, m * st['radius']) * S
+    ow = max(3, round(m * st['outline'])) * S
+    rim = max(2, round(m * st['rim'])) * S
+    lp = max(3, round(m * st['lip'])) * S
     img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    img.paste(OUTLINE + (255,), (0, 0, W, H), mask_rr((W, H), (0, 0, W - 1, H - 1), radius))
+    img.paste(OUTLINE + (255,), (0, 0, W, H), mask_rr((W, H), (0, 0, W - 1, H - 1), rad))
+    ir = max(1, rad - ow)
     inner = (ow, ow, W - 1 - ow, H - 1 - ow)
-    ir = max(1, radius - ow)
-    img.paste(mix(bot, (0, 0, 0), 0.35) + (255,), (0, 0, W, H), mask_rr((W, H), inner, ir))
-    # light bevel ring around the face
-    face_o = (ow, ow, W - 1 - ow, H - 1 - ow - lp)
-    img.paste(mix(top, (255, 255, 255), 0.45) + (255,), (0, 0, W, H), mask_rr((W, H), face_o, ir))
-    face = (face_o[0] + bev, face_o[1] + bev, face_o[2] - bev, face_o[3] - bev)
-    fr = max(1, ir - bev)
-    fm = mask_rr((W, H), face, fr)
-    img.paste(vgrad((W, H), top, bot, face[1], face[3]), (0, 0), fm)
-    if split:  # lighter top half, the classic simulator two-tone
-        sp = Image.new('L', (W, H), 0)
-        ImageDraw.Draw(sp).rectangle((0, 0, W, face[1] + (face[3] - face[1]) * 0.46), fill=34)
-        sp = ImageChops.multiply(sp, fm)
-        img.alpha_composite(Image.merge('RGBA', [Image.new('L', (W, H), 255)] * 3 + [sp]))
+    img.paste(mix(base, (0, 0, 0), st['lip_mix']) + (255,), (0, 0, W, H), mask_rr((W, H), inner, ir))
+    rimbox = (ow, ow, W - 1 - ow, H - 1 - ow - lp)
+    img.paste(mix(base, (255, 255, 255), st['rim_mix']) + (255,), (0, 0, W, H), mask_rr((W, H), rimbox, ir))
+    face = (rimbox[0] + rim, rimbox[1] + rim, rimbox[2] - rim, rimbox[3] - rim)
+    fm = mask_rr((W, H), face, max(1, ir - rim))
+    img.paste(vgrad((W, H), mix(base, (255, 255, 255), st['top_mix']), mix(base, (0, 0, 0), st['bot_mix']), face[1], face[3]), (0, 0), fm)
     if pattern:
-        st = studs((W, H), cell)
-        st.putalpha(ImageChops.multiply(st.getchannel('A'), fm))
-        img.alpha_composite(st)
+        p = studs((W, H), st['stud_cell'] * S, st['stud_light'], st['stud_dark'])
+        p.putalpha(ImageChops.multiply(p.getchannel('A'), fm))
+        img.alpha_composite(p)
     return img.resize((w, h), Image.LANCZOS)
 
-def x_mark(img, color=(255, 255, 255)):
-    w, h = img.size
+def window(w, h):
+    """See-through dark window body with the dark stroke."""
     W, H = w * S, h * S
-    lay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    d = ImageDraw.Draw(lay)
-    f = ImageFont.truetype(FONT, int(H * 0.62))
-    c = (W / 2, H * 0.45)
-    sw = int(H * 0.07)
-    d.text((c[0], c[1] + H * 0.04), 'X', font=f, anchor='mm', fill=OUTLINE, stroke_width=sw, stroke_fill=OUTLINE)
-    d.text(c, 'X', font=f, anchor='mm', fill=color, stroke_width=sw, stroke_fill=OUTLINE)
-    img.alpha_composite(lay.resize((w, h), Image.LANCZOS))
+    ow = max(3, round(min(w, h) * 0.008)) * S
+    rad = 3 * S
+    img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    img.paste(WINDOW['outline'] + (255,), (0, 0, W, H), mask_rr((W, H), (0, 0, W - 1, H - 1), rad))
+    hole = mask_rr((W, H), (ow, ow, W - 1 - ow, H - 1 - ow), rad)
+    body = Image.new('RGBA', (W, H), WINDOW['color'] + (WINDOW['alpha'],))
+    img.paste((0, 0, 0, 0), (0, 0, W, H), hole)
+    img.paste(body, (0, 0), hole)
+    return img.resize((w, h), Image.LANCZOS)
+
+def label(img, c, s, size, fill=(255, 255, 255), anchor='mm', rot=0):
+    """Heavy white text, dark stroke and a dark drop shadow (as in the reference)."""
+    f = ImageFont.truetype(FONT, size * S)
+    sw = max(2, round(size * 0.12)) * S
+    sh = max(2, round(size * 0.07)) * S
+    tmp = Image.new('RGBA', (int(len(s) * size * 1.1 * S + 60 * S), size * 2 * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(tmp)
+    cx, cy = tmp.width / 2, tmp.height / 2
+    d.text((cx, cy + sh), s, font=f, anchor='mm', fill=OUTLINE, stroke_width=sw, stroke_fill=OUTLINE)
+    d.text((cx, cy), s, font=f, anchor='mm', fill=fill, stroke_width=sw, stroke_fill=OUTLINE)
+    t = tmp.resize((tmp.width // S, tmp.height // S), Image.LANCZOS)
+    if rot: t = t.rotate(rot, Image.BICUBIC, expand=True)
+    x, y = c[0] - t.width / 2, c[1] - t.height / 2
+    if anchor == 'lm':
+        x += (f.getlength(s) + 2 * sw) / S / 2
+    img.alpha_composite(t, (int(x), int(y)))
+
+def x_mark(img):
+    w, h = img.size
+    label(img, (w / 2, h * 0.44), 'X', int(h * 0.56))
     return img
 
-def stud_tile(n=64):
-    t = studs((n * S, n * S), n * S // 4, 70, 60)
+def stud_tile(n=56):
+    t = studs((n * S, n * S), n * S // 4, 60, 60)
     return t.resize((n, n), Image.LANCZOS)
 
 if __name__ == '__main__':
@@ -106,9 +135,9 @@ if __name__ == '__main__':
         box(160, 160, c).save(f'{out}/btn-square-{c}.png')
     box(320, 86, 'green').save(f'{out}/price-green.png')
     x_mark(box(120, 120, 'red')).save(f'{out}/close-red.png')
-    box(1100, 760, 'slate', radius=10, outline=8, lip=10, cell=20).save(f'{out}/panel-window.png')
-    box(1100, 130, 'cyan', radius=8, outline=7, lip=8, cell=18).save(f'{out}/panel-header.png')
-    box(960, 300, 'yellow', radius=8, outline=6, lip=8, cell=18).save(f'{out}/card-yellow.png')
-    box(300, 330, 'cyan', radius=8, outline=6, lip=8, cell=18).save(f'{out}/card-cyan.png')
+    window(1100, 780).save(f'{out}/panel-window.png')
+    box(1100, 130, 'cyan').save(f'{out}/panel-header.png')
+    box(1040, 320, 'yellow').save(f'{out}/card-yellow.png')
+    box(320, 360, 'cyan').save(f'{out}/card-cyan.png')
     stud_tile().save(f'{out}/pattern-studs.png')
     print('done')
