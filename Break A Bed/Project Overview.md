@@ -141,6 +141,7 @@ All numbers (beds, training items, damage, levels) are in `GameConfig`.
 - [[Break A Bed/Retention Plan|Retention Plan]]: AFK zone, daily quests, boost inventory, OP day 7, rebirths, events
 - [[Break A Bed/New Player Guide|New Player Guide]]: first-minute guide to fix 0% retention
 - [[Break A Bed/Playtime Rewards|Playtime Rewards]]: Free Gifts menu, 12 gifts that unlock the longer you play
+- [[Break A Bed/Charts Plan|Charts Plan]]: what the Roblox charts measure and the steps to get on them
 - [[Break A Bed/Soft Shutdown|Soft Shutdown]]: updates don't kick players; they come back in the same place
 - [[Break A Bed/Shop Plan|Shop Plan]]: lots of cheap products (x2/x3/x5/x10 boosts, packs, impulse buys)
 - Sessions: [[Break A Bed/2026-10-10|2026-10-10]], [[Break A Bed/2026-10-11|2026-10-11]], [[Break A Bed/2026-10-12|2026-10-12]]
