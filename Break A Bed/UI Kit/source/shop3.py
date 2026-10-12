@@ -96,7 +96,7 @@ def giftbtn(s):
 
 def item(w, h, a, b, ic, amt, word, cost, amt_col=(110, 240, 40)):
     c = card(w, h, a, b)
-    c.alpha_composite(ic, ((w - ic.width) // 2, 6))
+    c.alpha_composite(ic, ((w - ic.width) // 2, -8))
     sim.wtext(c, (w / 2, h - 96), amt + ' ' + word, 30, anchor='mm', hl=amt) if amt_col == (110, 240, 40) else None
     gs = 56
     c.alpha_composite(giftbtn(gs), (14, h - gs - 14))
@@ -117,10 +117,8 @@ def main(bgpath, out):
     cw, ch, gap = (ww - 48 - 2 * 18) // 3, 280, 18
     packs = [('+$15K', '9', 1), ('+$60K', '15', 2), ('+$250K', '30', 3), ('+$1M', '49', 4)]
     for i, (amt, cost, n) in enumerate(packs[:3]):
-        ic = Image.new('RGBA', (220, 170), (0, 0, 0, 0))
-        for k in range(n):
-            ci = gloss(icon('cash', 150 - 10 * (n - 1)))
-            ic.alpha_composite(ci, (int(110 - ci.width / 2 + (k - (n - 1) / 2) * 30), int(14 + (n - 1 - k) * 0 - k * 12 + (n - 1) * 12)))
+        import art
+        ic = art.cash_pile(200, {1: 1, 2: 3, 3: 5}[n])
         c = item(cw, ch, (40, 170, 20), (120, 230, 60), ic, amt, 'CASH', cost)
         img.alpha_composite(c, (x0 + 24 + i * (cw + gap), y0 + 190))
     sim.wtext(img, (x0 + ww / 2, y0 + 520), '-- STRENGTH --', 44, fill=(40, 210, 255), anchor='mm')
