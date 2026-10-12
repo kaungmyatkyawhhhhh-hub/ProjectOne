@@ -26,11 +26,16 @@ Owner's request (2026-10-12): a Settings menu in the [[Break A Bed/UI Kit/UI Kit
 
 ## Fix (owner 2026-10-12): Music and Sound Effects must be sliders, not ON/OFF
 
-![[UI Kit/images/preview-volume-sliders.png]]
+![[UI Kit/images/preview-settings-sliders.png]]
 
 The menu was built with ON/OFF toggles for Music and Sound Effects. Replace those two toggles with **volume sliders** (all the other settings stay ON/OFF).
-- **Look:** a slate row with the name on the left and the value in yellow on the right ("60%"). Under it, a dark rounded track with a dark stroke, a colored fill (Music **green**, Sound Effects **cyan**) with a lighter shine line on top, and a round white knob with a dark outline and a colored dot in the middle.
-- **Use:** drag the knob, or click/tap anywhere on the track to jump there. It must work with the mouse and touch (`InputBegan`/`InputChanged`/`InputEnded`, use the input position, clamp 0–100). Steps of 5%. The knob grows to 1.15 while you hold it.
+- **Look (updated 2026-10-12, owner: "make them fit the settings UI"):** see `preview-settings-sliders.png` above. The sliders are built from the **same studded FINAL STYLE pieces as the rest of the window** (`sim-btn-*` / `sim-square-*` look: studs, light inner rim, dark same-color outline). No round knobs or plain flat bars.
+  - **The row:** the same dark studded row as the ON/OFF rows, same height, name on the left in the same white heavy font with the dark stroke.
+  - **Track:** a dark studded box (`#1C1E24`, outline near-black), about 250 × 34 px, sitting where the ON/OFF buttons sit.
+  - **Fill:** a studded **green** box (Music) or **cyan** box (Sound Effects), the same green/cyan as the buttons, from the left edge to the value. Use a 9-slice `sim-btn-green` / `sim-btn-cyan` (`ScaleType = Slice`) so the studs and corners don't stretch.
+  - **Knob:** a small **yellow studded block** (`sim-square-yellow`, about 42 × 52), taller than the track, centered on the end of the fill.
+  - **Value box:** a small dark studded box on the far right with the value in **yellow** (`#FFE20C`) with the dark stroke: "60%". At 0% it says "OFF" in grey.
+- **Use:** drag the knob, or click/tap anywhere on the track to jump there. It must work with the mouse and touch (`InputBegan`/`InputChanged`/`InputEnded`, use the input position, clamp 0–100). Steps of 5%. The knob grows to 1.1 and gets a white outline while you hold it.
 - **Live:** the volume changes while dragging. Sound Effects plays a short bubble pop every 10% while dragging, so players hear the level.
 - **0% = off.** At 0% the value text shows "OFF" in grey. Defaults: Music 60%, Sound Effects 85%.
 - **How the volume works:** put all music in a `SoundGroup` "Music" and all other sounds in a `SoundGroup` "SFX" (set `Sound.SoundGroup`), and set `SoundGroup.Volume = slider / 100`. Keep each sound's own volume as it is.
