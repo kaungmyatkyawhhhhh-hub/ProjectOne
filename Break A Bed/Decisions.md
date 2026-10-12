@@ -76,3 +76,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: product prices raised to R$9–R$49 (owner wants each above R$5–6). x2 boosts R$9, x3 R$15, x5 R$25, x10 R$49; packs R$9/15/30/49; Starter Pack R$19; Instant Break R$9. #break-a-bed
 
 - 2026-10-12: all 15 new developer products created on Roblox (ids in [[Break A Bed/Shop Plan|Shop Plan]]). #break-a-bed
+- 2026-10-12: no idle animation on main-screen buttons (too much movement). Idle effects only inside open menus. The "Ready" pulse/wiggle stays. #break-a-bed

@@ -101,7 +101,7 @@ Use `TweenService`. Every menu works the same way.
 | **Closing** | The window shrinks to 85% and fades out (Quad In, 0.15 s). The rays fade out. Cards don't animate on close. |
 | **Hovering** (PC) | The button grows to 106% and tilts 2° (0.12 s, Quad Out), and goes back when the mouse leaves. Cards also lift 4 px. |
 | **Pressing** | Down to 92% (0.06 s), then back to 100% with a bounce (Back Out, 0.18 s). |
-| **Idle** (always) | Side buttons gently bob up and down 2 px (2.4 s sine loop, each one out of step with the others). Item icons float 3 px and sway ±4°. The featured item slowly breathes between 100% and 104%. Sparkles twinkle. The rays keep turning (one turn every 40 s). |
+| **Idle** | **No idle animation on the main screen buttons** (owner 2026-10-12: it overstimulates players). Main-screen buttons stay still until hovered, pressed or "Ready". Inside an open menu only: item icons float 3 px and sway ±4°, the featured item slowly breathes between 100% and 104%, sparkles twinkle and the rays turn (one turn every 40 s). |
 | **Ready** (something to claim or free) | The card or button pulses between 100% and 106% every 0.9 s. A red badge bounces in. The HUD gift button wiggles ±8° for 0.4 s every 3 s. |
 | **Ending** (timer hits 0 or a claim) | The card flashes white (a white overlay going from 0.3 to 1 transparency over 0.25 s) and bursts 6–8 sparkles outward. The reward icon flies to its HUD counter (Cash, Strength or Spins) in 0.5 s, and the counter pops to 115% and counts up. The check "stamps" in from 160% to 100% (Back Out). |
 | **Purchase done** | A big center popup ("+x3 STRENGTH!") pops in with rays and confetti, stays 1.2 s, then floats up and fades. |
