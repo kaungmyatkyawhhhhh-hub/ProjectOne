@@ -43,6 +43,16 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
   - **Bug to fix:** the level bar's green fill must show the progress (for 9.74Qa / 13.1Qa it should be about 74% full; it was showing empty).
 - **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
 
+### Left side: buttons and stats must stay together (bug, owner 2026-10-12)
+In Roblox (real game, tall window or phone) the **Shop / Boosts buttons are far above the stats**, with a big empty gap, but in Studio they look close. Cause: the buttons are anchored to the **top** of the screen and the stats to the **bottom**, so on a taller screen the gap grows.
+- **Fix:** put the Shop button, the Boosts button, the Auto Punch switch and the stats (Strength, Cash, Level, Group Bonus) in **one** frame `LeftColumn`:
+  - `AnchorPoint = (0, 0.5)`, `Position = UDim2.new(0, 16, 0.5, 0)` (left edge, vertically centered), `AutomaticSize = Y`.
+  - A `UIListLayout` (vertical, `Padding` 10 px; 18 px between the buttons and the stats).
+  - So they always sit together in the middle-left, whatever the screen size.
+- **Scale with the screen:** a `UIScale` on `LeftColumn` = `math.clamp(screenHeight / 900, 0.6, 1.2)`, updated when the screen size changes, so it's not tiny on a big monitor or huge on a phone. Never use offset positions measured from the top for one part and from the bottom for the other.
+- Keep it clear of Roblox's own top bar and chat (use `ScreenGui.ScreenInsets = CoreUISafeInsets`), so the buttons don't sit under Roblox's grey notification pills.
+- **Test** with the Studio Device Emulator on: 1920×1080, a tall window (1080×1920 / phone portrait), iPhone landscape and iPad, and in the real game after publishing.
+
 ### Big menus (Shop, Free Gifts, Settings, Index…)
 - **Window:** solid dark grey `#3E4048` with a dark stud pattern and a near-black outline (`sim-window.png`). It's **not** see-through.
 - **Title bar:** bright green (`sim-header-green.png`) or cyan with **diagonal white shine stripes**. The title is white on the left, and a red square X sits on the right.
