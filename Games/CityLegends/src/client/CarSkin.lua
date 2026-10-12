@@ -35,6 +35,7 @@ CarSkin.CLUSTER_STYLE = {
 	lambrini_lp700 = "Aventador",
 	ferrara_458 = "Ferrari",
 	ferrara_599 = "Ferrari599",
+	ferrara_f430 = "Ferrari599", -- owner: same cluster as the 599
 	bnw_330i_g20 = "BMWLive",
 	bnw_m3_e92 = "BMWClassic",
 	bnw_m5_e60 = "BMWClassic",
@@ -70,6 +71,11 @@ CarSkin.INTERIOR_DONOR = {
 	bnw_x6 = { from = "bnw_m5_e60", rear = 3.6 },
 	lambrini_lp560 = { from = "lambrini_lp570", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
+
+-- cars that take only another model's steering wheel, put where their own one sits
+CarSkin.STEER_DONOR = {
+	ferrara_599 = "ferrara_f430", -- owner: the F430's wheel in the 599
+} :: { [string]: string }
 
 type Template = { part: MeshPart, offset: CFrame }
 type GenericWheel = { x: number, parts: { Template } }
@@ -228,6 +234,23 @@ local function readImported(src: Instance): Imported
 			end)
 			if not ok then
 				warn("[CityLegends] interior from " .. swap.from .. " could not be used:", err)
+			end
+		end
+		local steerFrom = CarSkin.STEER_DONOR[src.Name]
+		local steerSrc = if steerFrom and folder then folder:FindFirstChild(steerFrom, true) else nil
+		if steerFrom and steerSrc and out.steer then
+			local dspec = Cars.ById[steerFrom]
+			local ok, err = pcall(function()
+				local donorDims = if dspec then CarBuilder.getDims(dspec.Class, dspec.Id) :: any else dims
+				local donor = readGeneric(steerSrc :: Instance, donorDims)
+				local own = out.steer
+				if donor.steer and own then
+					-- same spot and tilt as the car's own wheel, the donor's rim, spokes and size
+					out.steer = { mount = own.mount, parts = donor.steer.parts, radius = donor.steer.radius }
+				end
+			end)
+			if not ok then
+				warn("[CityLegends] steering wheel from " .. steerFrom .. " could not be used:", err)
 			end
 		end
 		return out

@@ -671,9 +671,16 @@ function Driving.attach(model: Model)
 		local dir = (target - eyeAttr).Unit
 		local pos = target + dir * 0.3
 		local src = (ReplicatedStorage:FindFirstChild("CarModels", true) :: Instance):FindFirstChild(spec.Id, true)
-		local up = if src then (src:GetAttribute("ClusterUp") :: number?) or 0 else 0
-		local fwd = if src then (src:GetAttribute("ClusterForward") :: number?) or 0 else 0
-		local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
+		-- per-car line-up over the car's own cluster: { up (studs), forward (studs), size (x) };
+		-- ClusterUp / ClusterForward / ClusterSize attributes on the model still win
+		local CLUSTER_NUDGE = {
+			ferrara_599 = { -0.3, 0, 1 }, -- owner's screenshot: sat one panel-height above the car's own
+			ferrara_f430 = { -0.22, 0, 1.1 }, -- over the F430's own 1.1 x 0.5 gauge face
+		}
+		local nudge = CLUSTER_NUDGE[spec.Id] or { 0, 0, 1 }
+		local up = (if src then src:GetAttribute("ClusterUp") :: number? else nil) or nudge[1]
+		local fwd = (if src then src:GetAttribute("ClusterForward") :: number? else nil) or nudge[2]
+		local k = (if src then src:GetAttribute("ClusterSize") :: number? else nil) or nudge[3]
 		local w = r * sizeFor[1]
 		local h = r * sizeFor[2]
 		local cf = root.CFrame * CFrame.lookAt(pos, pos + dir) * CFrame.new(0, up + (sizeFor[4] or 0), -fwd)

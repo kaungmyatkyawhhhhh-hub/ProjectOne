@@ -82,3 +82,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - The cluster is "Ferrari599", from the owner's photo of the real one: a screen on the left with the speed in big digits (mph, km/h under it), the big yellow rev counter in the middle, the black 20–220 mph speedometer on the right, thin red needles, carbon surround.
   - Cars with no seat in the model now put the driver's eye about 63 cm behind their own steering wheel.
 - **Cockpit FOV (2026-10-12):** the owner asked to fix the FOV. The interior view is now 64 (it was 74), and it only widens a little with speed, so the cabin no longer looks stretched. The chase camera is unchanged.
+- **599 and F430 (2026-10-12):**
+  - The F430 gets the same 599 cluster.
+  - Both clusters are moved down over the car's own cluster: per-car `CLUSTER_NUDGE` in Driving. The 599 value is from the owner's screenshot; the F430 value is estimated from its gauge face and not yet checked.
+  - The 599 uses the F430's steering wheel (`CarSkin.STEER_DONOR`).
