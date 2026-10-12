@@ -643,6 +643,7 @@ function Driving.attach(model: Model)
 		Ferrari599 = { 1.7, 0.6 },
 		BMWLive = { 1.8, 0.62, 0.85 },
 		BMWClassic = { 1.6, 0.6, 0.85 },
+		BMWClassicGrey = { 1.6, 0.6, 0.85 },
 		AMG = { 1.7, 0.62 },
 		SupraTRD = { 1.9, 0.62 },
 		Toyota = { 1.7, 0.62, 1.0 },
@@ -676,6 +677,7 @@ function Driving.attach(model: Model)
 		local CLUSTER_NUDGE = {
 			ferrara_599 = { -0.3, 0, 1 }, -- owner's screenshot: sat one panel-height above the car's own
 			ferrara_f430 = { -0.22, 0, 1.1 }, -- over the F430's own 1.1 x 0.5 gauge face
+			bnw_m5_e60 = { 0, 0, 1.25 }, -- owner: bigger
 		}
 		local nudge = CLUSTER_NUDGE[spec.Id] or { 0, 0, 1 }
 		local up = (if src then src:GetAttribute("ClusterUp") :: number? else nil) or nudge[1]

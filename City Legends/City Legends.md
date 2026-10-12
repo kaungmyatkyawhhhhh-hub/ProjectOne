@@ -86,3 +86,6 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - The F430 gets the same 599 cluster.
   - Both clusters are moved down over the car's own cluster: per-car `CLUSTER_NUDGE` in Driving. The 599 value is from the owner's screenshot; the F430 value is estimated from its gauge face and not yet checked.
   - The 599 uses the F430's steering wheel (`CarSkin.STEER_DONOR`).
+- **BMW clusters (2026-10-12):**
+  - The M5, M6 and X6 cluster panel is grey instead of black (style `BMWClassicGrey`); the M3 stays black.
+  - The M5 cluster is 25% bigger.
