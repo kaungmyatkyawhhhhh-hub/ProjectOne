@@ -58,12 +58,12 @@ def pbtn(w, h, col, radius=0.12, pat=True, dark_pat=False):
 
 import pixtext
 def ptext(img, xy, s, size, fill=(255, 255, 255), anchor='lm'):
-    pixtext.put(img, (xy[0], xy[1]), s, size * 1.7, fill=fill, anchor=anchor)
+    pixtext.put(img, (xy[0], xy[1]), s, size * 1.35, fill=fill, anchor=anchor)
 
-def wide(col, ic, text, w=320, h=92, tsize=26):
+def wide(col, ic, text, w=236, h=88, tsize=26):
     b = pbtn(w, h, col)
     b.alpha_composite(ic, (8, (h - ic.height) // 2 - 3))
-    while pixtext.render(text, max(1, round(tsize * 1.7 / 20))).width > w - ic.width - 34 and tsize > 8: tsize -= 2
+    while pixtext.render(text, height=tsize * 1.35).width > w - ic.width - 34 and tsize > 8: tsize -= 1
     ptext(b, (ic.width + 20, h / 2 - 3), text, tsize)
     return b
 
@@ -84,12 +84,13 @@ def main(bgpath, out):
     W, H = 1600, 900
     bg = Image.open(bgpath).convert('RGBA').resize((W, H)).filter(ImageFilter.GaussianBlur(8))
     img = Image.blend(bg, Image.new('RGBA', (W, H), (30, 40, 60, 255)), 0.1)
-    rows = [('red', basket(78), 'Shop'), ('orange', gloss(dumbbell(78)), 'Boost'),
-            ('purple', gloss(icon('wheel', 72)), 'Spin'), ('pink', gloss(icon('gift', 72)), 'Gifts')]
+    import refbtn
+    rows = [('red', refbtn.basket(70), 'Shop'), ('orange', gloss(dumbbell(70)), 'Boost'),
+            ('purple', gloss(icon('wheel', 64)), 'Spin'), ('pink', gloss(icon('gift', 64)), 'Gifts')]
     for i, (c, ic, t) in enumerate(rows):
-        img.alpha_composite(wide(c, ic, t), (28, 240 + i * 106))
+        img.alpha_composite(wide(c, ic, t), (28, 240 + i * 104))
     tag = pbtn(110, 40, 'green', radius=0.25); ptext(tag, (55, 19), 'R$19', 14, anchor='mm')
-    img.alpha_composite(tag, (228, 240 + 106 + 66))
+    img.alpha_composite(tag, (150, 240 + 104 + 62))
     # stats (light)
     lv = Image.new('RGBA', (400, 110), (0, 0, 0, 0))
     lp = pbtn(330, 72, 'light', dark_pat=True); lv.alpha_composite(lp, (50, 18))

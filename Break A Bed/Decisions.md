@@ -79,3 +79,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: no idle animation on main-screen buttons (too much movement). Idle effects only inside open menus. The "Ready" pulse/wiggle stays. #break-a-bed
 - 2026-10-12: main screen + tutorial go **light and icon-first** (square shiny icon buttons, light stat panels, colored numbers). Ground guide = moving arrow Beam. Big menus stay dark with the rainbow title. #break-a-bed
 - 2026-10-12: square icon HUD rejected. Main screen keeps the old wide-button layout in the owner's "Shop" reference design (gradient, diamond pattern, light inner border, 3D icon, Press Start 2P pixel text). Stats + tutorial light. #break-a-bed
+- 2026-10-12: owner preferred the rounded gradient version over the square "identical" copy. Side buttons made **short** (about 236 × 88). #break-a-bed
