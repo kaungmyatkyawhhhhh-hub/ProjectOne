@@ -81,4 +81,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: the old CASH PILE / BAG / VAULT products are reused as Medium / Big / Huge Cash (40 / 150 / 500 breaks), as the Shop Plan says. #break-a-bed
 - 2026-10-12: Free Gifts' timer starts when a new player finishes (or skips) the guide, so nothing pops up during it. Players who already finished it start the timer on join. #break-a-bed
 - 2026-10-12: the Starter Pack pop-up waits until you leave break mode and no other window is open, so it never interrupts breaking. #break-a-bed
+- 2026-10-12: main-screen buttons don't bob or move when idle (they only animate on hover, press or "Ready"). #break-a-bed
 - 2026-10-12: PC side buttons are SHOP, the Strength tier button, then SPIN and AUTO squares. The Free Gifts button is on the right under the group reward. #break-a-bed
+
+- 2026-10-12: no idle animation on main-screen buttons (too much movement). Idle effects only inside open menus. The "Ready" pulse/wiggle stays. #break-a-bed

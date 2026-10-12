@@ -27,6 +27,7 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `close-red.png` | 120 × 120 | Close button (X is part of the image) |
 | `panel-window.png` | 1100 × 780 | See-through dark window body (or build it as a Frame with the values below) |
 | `panel-header.png` | 1100 × 130 | Window title bar ("SHOP!"), full window width |
+| `panel-header-white.png` | 1100 × 130 | White title bar for the **animated rainbow** (tinted by a `UIGradient`) |
 | `card-yellow.png` | 1040 × 320 | Featured offer card (VIP, bundles) |
 | `card-cyan.png` | 320 × 360 | Normal shop item card |
 | `icon-<name>.png` | 256 × 256 | star, bolt, cash, wheel, gift, robux |
@@ -68,6 +69,29 @@ Base colors: cyan `#1CC8F2`, blue `#247ADE`, pink `#EC22CD`, purple `#9648E8`, o
 
 **Big menu layout:** see-through dark window → cyan title bar along the top with the title on the left, red X square at the top-right corner → yellow featured card full width → a row of cyan item cards, each with a title at the top, an icon with a white glow in the middle and a green price button at the bottom. Gaps between cards are 14 px and show the dark window. Tabs sit above the window, each tilted 2–4°.
 
+## Rainbow title bar (owner's request 2026-10-12)
+The title bar of the big menus (SHOP!, FREE GIFTS, SETTINGS) is an **animated rainbow** that slowly flows sideways. The X button stays red and the title stays white.
+
+![[preview-rainbow-header.gif]]
+
+- Use `panel-header-white.png` (it keeps the studs, light rim and 3D edge in grey shades) with a `UIGradient` inside it. The gradient's colors tint the white, so the studs and edges still show.
+- Animate it on the client while the menu is open (stop it when it's closed):
+
+```lua
+local RunService = game:GetService("RunService")
+local grad = header:FindFirstChildOfClass("UIGradient")
+local conn = RunService.RenderStepped:Connect(function()
+	local t = (os.clock() * 0.25) % 1 -- speed: one full cycle every 4 s
+	local kps = {}
+	for i = 0, 8 do
+		local a = i / 8
+		kps[#kps + 1] = ColorSequenceKeypoint.new(a, Color3.fromHSV((a * 0.9 - t) % 1, 0.72, 1))
+	end
+	grad.Color = ColorSequence.new(kps)
+end)
+-- on close: conn:Disconnect()
+```
+
 ## Animations (every menu and button)
 Use `TweenService`. Every menu works the same way.
 
@@ -77,7 +101,7 @@ Use `TweenService`. Every menu works the same way.
 | **Closing** | The window shrinks to 85% and fades out (Quad In, 0.15 s). The rays fade out. Cards don't animate on close. |
 | **Hovering** (PC) | The button grows to 106% and tilts 2° (0.12 s, Quad Out), and goes back when the mouse leaves. Cards also lift 4 px. |
 | **Pressing** | Down to 92% (0.06 s), then back to 100% with a bounce (Back Out, 0.18 s). |
-| **Idle** (always) | Side buttons gently bob up and down 2 px (2.4 s sine loop, each one out of step with the others). Item icons float 3 px and sway ±4°. The featured item slowly breathes between 100% and 104%. Sparkles twinkle. The rays keep turning (one turn every 40 s). |
+| **Idle** | **No idle animation on the main screen buttons** (owner 2026-10-12: it overstimulates players). Main-screen buttons stay still until hovered, pressed or "Ready". Inside an open menu only: item icons float 3 px and sway ±4°, the featured item slowly breathes between 100% and 104%, sparkles twinkle and the rays turn (one turn every 40 s). |
 | **Ready** (something to claim or free) | The card or button pulses between 100% and 106% every 0.9 s. A red badge bounces in. The HUD gift button wiggles ±8° for 0.4 s every 3 s. |
 | **Ending** (timer hits 0 or a claim) | The card flashes white (a white overlay going from 0.3 to 1 transparency over 0.25 s) and bursts 6–8 sparkles outward. The reward icon flies to its HUD counter (Cash, Strength or Spins) in 0.5 s, and the counter pops to 115% and counts up. The check "stamps" in from 160% to 100% (Back Out). |
 | **Purchase done** | A big center popup ("+x3 STRENGTH!") pops in with rays and confetti, stays 1.2 s, then floats up and fades. |
