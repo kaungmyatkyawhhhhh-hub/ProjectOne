@@ -21,7 +21,7 @@ It's on sale for **7 days**. After that it's gone and a new themed crate replace
 | **Infinity** | **0.1%** | **x10** | **+20** | rainbow swirl, wings, glow; a server announcement when someone gets it |
 
 - **One aura equipped at a time.** Its boost multiplies with passes and boosts (x15 pass × Galaxy x5 = x75).
-- Pictures for the crate menu and inventory: `aura-spark.png`, `aura-frost.png`, `aura-blaze.png`, `aura-angel.png`, `aura-galaxy.png`, `aura-infinity.png` (this folder).
+- Pictures (redrawn 2026-10-12 with glow): `aura-spark.png`, `aura-frost.png`, `aura-blaze.png`, `aura-angel.png`, `aura-galaxy.png`, `aura-infinity.png` (this folder).
 - **Pity:** every 50 crates without Galaxy or better gives a guaranteed Galaxy (it shows "Galaxy in 37 crates"). This is fair and makes people buy more.
 - Duplicates turn into **Aura Dust**. 10 dust = upgrade an aura to ★ (+10% of its boost), up to ★★★.
 
@@ -35,6 +35,17 @@ It's on sale for **7 days**. After that it's gone and a new themed crate replace
 The purple gift button next to each one buys it for another player in the server.
 
 **Free ways to get crates** (so free players care too): 1 crate on day 7 of the daily reward, a 0.5% chance from the spin wheel, and the MEGA Free Gift.
+
+## How the Featured card must look (match `preview-aura-crate.png` closely)
+- **Painted background**, not a flat color: `bg-galaxy.png` (deep purple space, nebula clouds, stars, a faint galaxy on the right). Each new crate gets its own scene.
+- **Gold-orange gradient border** (6 px) around the card.
+- **Hero aura** big on the left (about 40% of the card height), sticking out past the left edge, with a soft colored light burst behind it. It turns slowly.
+- **Title** "GALAXY AURAS": yellow → orange gradient text with a thick dark stroke and shadow. "Limited Time!" in white under it, the countdown in white on the right, and a red "New!" tag.
+- **Slots get bigger with rarity**, bottom-aligned in a row. Each has a dark border, a rarity-colored radial background (grey, blue, orange, gold, purple, pink) and a light burst behind the aura (`burst-<rarity>.png`). The chance % is big **italic** text bottom-right (white for common to epic, gold for legendary and up).
+- **The rarest slot** is the biggest, has an **animated rainbow border** and an italic gold "INFINITY" label on top.
+- **Buy row:** purple gift button + green price button for 1 and 3. The **10-pack is red** with a rainbow strip, and the old price is crossed out above it ("490").
+- **Glow:** the card uses a light bloom (Roblox `Bloom` + `LightEmission` on the burst images), **not** big white blobs. Keep the aura shapes readable.
+- Animate: bursts rotate slowly (one turn every 20 s), the rainbow border cycles, auras bob 3 px, and the stars twinkle.
 
 ## Where it shows up
 - **Shop:** the **-- FEATURED --** section at the top, with a big card showing a "New!" tag, the crate name, "Limited Time!", a live countdown, the best aura big on the left, all auras with chances (the rarest in a rainbow-bordered slot), and the 3 buy buttons.
