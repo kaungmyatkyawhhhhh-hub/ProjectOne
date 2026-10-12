@@ -6,10 +6,10 @@
 
 ## Businesses / income
 - Break A Bed earns Robux from game passes and products: about 500 Robux a day (2026-10-12), after 12K Robux spent on ads.
-- Figma for UI design (from 2026-10-12)
 
 ## Tools
 - Roblox Studio
 - GitHub (my code and this vault)
 - Claude Code (cloud sessions) and the Claude app
 - Obsidian, synced to GitHub with the Obsidian Git plugin
+- Figma (UI design, from 2026-10-12)
