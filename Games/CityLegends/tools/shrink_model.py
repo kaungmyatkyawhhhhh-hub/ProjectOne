@@ -1,6 +1,7 @@
 """Shrink a downloaded car model (Sketchfab .glb / .gltf / .fbx / .obj) so Roblox Studio's
-3D Importer takes it: every mesh at most MAX_TRIS triangles, textures at most 1024 px, saved as
-one .fbx with the textures inside.
+3D Importer takes it: every mesh at most MAX_TRIS triangles, textures at most 1024 px, plain
+colours turned into tiny textures (the importer drops them otherwise), saved as one .fbx with the
+textures inside.
 
 Runs with Blender's Python module (pip install bpy), no Blender window needed:
     python tools/shrink_model.py imports/car.glb [imports/car_roblox.fbx]
@@ -46,6 +47,34 @@ def main() -> None:
             m.ratio = max(MAX_TRIS / n * 0.95, 0.02)
             bpy.ops.object.modifier_apply(modifier="shrink")
     after = sum(tris(o) for o in meshes)
+
+    # colours: Studio's importer only brings in textures, so a plain-coloured material would
+    # arrive grey. Each one gets a tiny texture of its own colour; a texture behind a mix node is
+    # wired straight in. Meshes without a UV map get one (a texture needs it).
+    def to_srgb(c: float) -> float:
+        return 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055
+
+    for m in bpy.data.materials:
+        if not (m.use_nodes and "Principled BSDF" in m.node_tree.nodes):
+            continue
+        nt = m.node_tree
+        inp = nt.nodes["Principled BSDF"].inputs["Base Color"]
+        if inp.is_linked:
+            if inp.links[0].from_node.type != "TEX_IMAGE":
+                found = [n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image]
+                if found:
+                    nt.links.new(found[0].outputs["Color"], inp)
+            continue
+        r, g, b, _ = inp.default_value
+        img = bpy.data.images.new("col_" + m.name[:20], 8, 8)
+        img.pixels = [to_srgb(r), to_srgb(g), to_srgb(b), 1.0] * 64
+        img.pack()
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = img
+        nt.links.new(tex.outputs["Color"], inp)
+    for o in meshes:
+        if not o.data.uv_layers:
+            o.data.uv_layers.new(name="UVMap")
 
     # textures down to 1024 px on their longest side
     for img in bpy.data.images:
