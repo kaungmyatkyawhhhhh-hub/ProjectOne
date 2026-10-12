@@ -94,4 +94,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: Daily reward, Spin wheel and Free Gifts moved out of the shop's FREE tab to their own square buttons on the right of the main screen (with badges and the gift countdown). #break-a-bed
 - 2026-10-12: light rays behind open menus removed ("circus" look). Shop restyled closer to the other game (L pattern, thin outlines, lime price buttons). Item pictures should be real 3D (ViewportFrames or 3D icon images), not flat drawings. #break-a-bed
 - 2026-10-12: limited Aura Crates added to the plan (weekly crate, 6 auras boosting Strength + Walk Speed, R$49 / R$129 / R$399, pity at 50). #break-a-bed
-
+- 2026-10-12: stats go back to the stacked LVL / Strength / Cash bars, but in light mode (light studded panels, yellow LVL badge, green bar, yellow and green numbers). #break-a-bed
