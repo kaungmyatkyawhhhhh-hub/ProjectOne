@@ -11,4 +11,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **Pets** that chop beds for you.
 - **Boss bed:** a giant shared bed that the whole server breaks together for a big payout.
 - **Gamepasses:** 2× Strength, 2× Cash, auto-chop.
-- **Leaderboard** of the highest Level / most beds completed.
+- **More leaderboards** (highest Level, most beds completed) next to the Total Damage one (done 2026-10-10).

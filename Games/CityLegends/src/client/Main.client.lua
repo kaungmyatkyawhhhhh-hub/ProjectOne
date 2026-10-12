@@ -184,7 +184,10 @@ local function skinPlayerCar(model: Instance)
 	if model:IsA("Model") then
 		model:WaitForChild("Chassis", 5)
 		task.wait() -- let the whole car replicate
-		CarSkin.apply(model, false)
+		local okSkin, errSkin = pcall(CarSkin.apply, model, false)
+		if not okSkin then
+			warn("[CityLegends] car skin failed:", errSkin)
+		end
 	end
 end
 for _, existing in playerCars:GetChildren() do
@@ -201,7 +204,10 @@ local function tryAttach(model: Instance)
 		pendingAttach = false
 		model:WaitForChild("Chassis", 5)
 		task.wait() -- let the car + its constraints replicate
-		CarSkin.apply(model, false)
+		local okSkin, errSkin = pcall(CarSkin.apply, model, false)
+		if not okSkin then
+			warn("[CityLegends] car skin failed:", errSkin)
+		end
 		stopOrbit()
 		Traffic.clearAround(model:GetPivot().Position, 35)
 		Driving.attach(model)

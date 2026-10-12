@@ -187,8 +187,9 @@ end
 ---------------------------------------------------------------------
 local WET = Config.Graphics.WetRoads
 -- wet roads: dark, smooth and slightly reflective so street lights leave glossy highlights
-local ASPHALT = if WET then Color3.fromRGB(20, 20, 24) else Color3.fromRGB(30, 30, 34)
-local ROAD_MAT = if WET then Enum.Material.SmoothPlastic else Enum.Material.Asphalt
+-- real asphalt texture either way; wet roads are a touch darker and glossier
+local ASPHALT = if WET then Color3.fromRGB(38, 38, 42) else Color3.fromRGB(48, 48, 52)
+local ROAD_MAT = Enum.Material.Asphalt
 local ROAD_OPTS = { reflectance = if WET then 0.05 else 0 }
 local SIDEWALK = Color3.fromRGB(78, 78, 84)
 local CURB_COLOR = Color3.fromRGB(110, 110, 116)
@@ -245,14 +246,14 @@ function CityBuilder.setupLighting()
 		(Lighting :: any).PrioritizeLightingQuality = true
 	end)
 	Lighting.ClockTime = 0
-	Lighting.Brightness = 2
+	Lighting.Brightness = 2.5
 	Lighting.GlobalShadows = true
 	Lighting.ShadowSoftness = 0.25
-	Lighting.Ambient = Color3.fromRGB(34, 36, 52)
-	Lighting.OutdoorAmbient = Color3.fromRGB(78, 84, 118)
-	Lighting.EnvironmentDiffuseScale = 0.45
+	Lighting.Ambient = Color3.fromRGB(96, 100, 118) -- lifts shadowed and covered spots, like car cabins
+	Lighting.OutdoorAmbient = Color3.fromRGB(132, 138, 168)
+	Lighting.EnvironmentDiffuseScale = 0.8
 	Lighting.EnvironmentSpecularScale = 0.9
-	Lighting.ExposureCompensation = 0
+	Lighting.ExposureCompensation = 0.45
 	Lighting.ColorShift_Top = Color3.fromRGB(110, 120, 170)
 	Lighting.ColorShift_Bottom = Color3.fromRGB(10, 10, 20)
 
@@ -286,7 +287,7 @@ function CityBuilder.setupLighting()
 	bloom.Parent = Lighting
 
 	local cc = Instance.new("ColorCorrectionEffect")
-	cc.Brightness = 0
+	cc.Brightness = 0.04
 	cc.Contrast = 0.1
 	cc.Saturation = 0.06
 	cc.TintColor = Color3.fromRGB(242, 244, 255)

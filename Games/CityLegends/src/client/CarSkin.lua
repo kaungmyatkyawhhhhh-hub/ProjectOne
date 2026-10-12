@@ -30,6 +30,22 @@ local Cars = require(Shared:WaitForChild("Cars"))
 
 local CarSkin = {}
 
+-- cars with their own dashboard design (DashGauges styles), built from the owner's reference photos
+CarSkin.CLUSTER_STYLE = {
+	lambrini_lp700 = "Aventador",
+	ferrara_458 = "Ferrari",
+	bnw_330i_g20 = "BMWLive",
+	bnw_m3_e92 = "BMWClassic",
+	bnw_m5_e60 = "BMWClassic",
+	bnw_m6_v10 = "BMWClassic",
+	bentz_cla45 = "AMG",
+	toyoka_supra_mk4 = "SupraTRD",
+	toyoka_camri = "Toyota",
+	toyoka_crown = "Toyota",
+	toyoka_lc200 = "Toyota",
+	toyoka_alfard = "Toyota",
+} :: { [string]: string }
+
 type Template = { part: MeshPart, offset: CFrame }
 type GenericWheel = { x: number, parts: { Template } }
 type Imported = {
@@ -41,8 +57,14 @@ type Imported = {
 	-- their own look and each corner's wheel parts ride on our wheel
 	generic: { [string]: GenericWheel }?,
 	-- the model's own steering wheel (turns with the steering) and driver's eye, in ground space
-	steer: { mount: CFrame, parts: { Template } }?,
+	steer: { mount: CFrame, parts: { Template }, radius: number }?,
 	eye: Vector3?,
+	-- where the live gauges go: on the dash surface behind the wheel, facing the driver (ground space)
+	cluster: CFrame?,
+	-- the model's own gauge needles (parts), turned by Driving; ownGauges also counts on-screen needles
+	gauges: { { kind: string, pivot: CFrame, parts: { Template } } }?,
+	ownGauges: boolean?,
+	clusterSize: Vector2?,
 }
 type Look = { material: Enum.Material, color: Color3?, reflectance: number, transparency: number, shadow: boolean }
 
@@ -191,7 +213,6 @@ local function readImported(src: Instance): Imported
 		part.CanQuery = false
 		part.CanTouch = false
 		part.Massless = true
-		part.RenderFidelity = Enum.RenderFidelity.Automatic
 		local pos = rel.Position * scale - (if isWheel then hub else Vector3.zero)
 		local t = { part = part, offset = CFrame.new(pos) * rel.Rotation }
 		if isWheel then
@@ -231,7 +252,7 @@ end
 	  * only visible parts are used, and only their looks are copied (mesh,
 	    colour, material, textures): scripts and everything else stay behind
 ]]
-local KEEP_CHILD = { SurfaceAppearance = true, SpecialMesh = true, Decal = true, Texture = true }
+local KEEP_CHILD = { SurfaceAppearance = true, SpecialMesh = true, Decal = true, Texture = true, SurfaceGui = true }
 local function visualClone(d: BasePart, scale: number): BasePart
 	local p = d:Clone()
 	for _, c in p:GetChildren() do
@@ -262,8 +283,12 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		local k = n:lower():gsub("[%s_%-]", "")
 		return k == "sw" or k:find("steeringwheel") ~= nil
 	end
+	-- some kits call it just "Wheel", inside Misc (road wheels live in "Wheels")
+	local function isMiscWheel(d: Instance): boolean
+		return d.Name:lower() == "wheel" and d.Parent ~= nil and d.Parent.Name:lower() == "misc"
+	end
 	for _, d in src:GetDescendants() do
-		if isSteerName(d.Name) then
+		if isSteerName(d.Name) or isMiscWheel(d) then
 			local nested = false
 			for _, r in steerRoots do
 				if d:IsDescendantOf(r) then
@@ -273,6 +298,44 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			end
 			if not nested then
 				table.insert(steerRoots, d)
+			end
+		end
+	end
+	-- nothing named: the round, thin part right in front of the driver's seat
+	if #steerRoots == 0 then
+		local ds = src:FindFirstChild("DriveSeat", true)
+		if ds and ds:IsA("BasePart") then
+			local best: BasePart? = nil
+			local bestScore = math.huge
+			for _, d in src:GetDescendants() do
+				if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
+					local rel = ds.CFrame:PointToObjectSpace(d.Position)
+					local sz = { d.Size.X, d.Size.Y, d.Size.Z }
+					table.sort(sz)
+					-- a flat disc, or a disc joined to its column (two sides equal, the third different)
+					local disc = sz[2] >= 0.8 and sz[3] <= 2.4 and sz[3] / sz[2] < 1.35 and sz[1] < sz[2] * 0.6
+					local onColumn = sz[1] >= 0.9 and sz[2] <= 2.0 and sz[2] / sz[1] < 1.15 and sz[3] <= 2.6 and sz[3] > sz[2] * 1.2
+					local round = disc or onColumn
+					if round and math.abs(rel.X) < 0.8 and rel.Y > 0.6 and rel.Y < 3.5 and rel.Z < -0.5 and rel.Z > -3.5 then
+						local score = math.abs(rel.X) + math.abs(rel.Z + 1.6) * 0.5
+						if score < bestScore then
+							best, bestScore = d, score
+						end
+					end
+				end
+			end
+			if best then
+				table.insert(steerRoots, best)
+				-- the other pieces of the same wheel (spokes, centre, buttons) sit right around it
+				local bigSide = math.max(best.Size.X, best.Size.Y, best.Size.Z)
+				for _, d in src:GetDescendants() do
+					if d ~= best and d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
+						local close = (d.Position - best.Position).Magnitude < bigSide * 0.35
+						if close and math.max(d.Size.X, d.Size.Y, d.Size.Z) <= bigSide * 1.1 then
+							table.insert(steerRoots, d)
+						end
+					end
+				end
 			end
 		end
 	end
@@ -287,7 +350,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 
 	local visible: { BasePart } = {}
 	for _, d in src:GetDescendants() do
-		if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
+		-- HideInGame: a piece we replace ourselves (e.g. a wheel centre fused with the gauge pod)
+		if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") and not d:GetAttribute("HideInGame") then
 			table.insert(visible, d)
 		end
 	end
@@ -401,6 +465,23 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	local scale = math.clamp(dims.wb / math.max(wheelbase, 1e-3), 0.02, 50)
 	-- wheel radius in the model's own studs (dims.wheelR is the same wheel at our scale)
 	local modelR = dims.wheelR / scale
+	-- stray props shipped with some models (stands, spare parts beside the car): anything whose
+	-- centre is well outside the body around the wheels is left out
+	do
+		local track = 0
+		for _, g in groups do
+			track = math.max(track, math.abs((g.center - mid):Dot(right)))
+		end
+		local kept: { BasePart } = {}
+		for _, d in visible do
+			local rel = d.Position - mid
+			local along, side, up = math.abs(rel:Dot(f)), math.abs(rel:Dot(right)), rel.Y
+			if inWheel[d] or (along <= wheelbase * 1.0 and side <= track + wheelbase * 0.25 and up <= wheelbase * 0.8 and up >= -wheelbase * 0.3) then
+				table.insert(kept, d)
+			end
+		end
+		visible = kept
+	end
 	-- ground frame: its wheel centres land at our wheel height
 	local origin = Vector3.new(mid.X, mid.Y - modelR, mid.Z)
 	local frame = CFrame.lookAt(origin, origin + f)
@@ -423,9 +504,19 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 	if biggest then
 		local sz = biggest.Size
-		local axis = if sz.X <= sz.Y and sz.X <= sz.Z then biggest.CFrame.RightVector
-			elseif sz.Y <= sz.Z then biggest.CFrame.UpVector
-			else biggest.CFrame.LookVector
+		-- the turning axis is the side that differs most from the other two (thin disc, or long column)
+		local ex = { sz.X, sz.Y, sz.Z }
+		local vecs = { biggest.CFrame.RightVector, biggest.CFrame.UpVector, biggest.CFrame.LookVector }
+		local odd, oddScore = 1, -1
+		for i = 1, 3 do
+			local a2, b2 = ex[i % 3 + 1], ex[(i + 1) % 3 + 1]
+			local score = math.min(math.abs(ex[i] - a2), math.abs(ex[i] - b2))
+			if score > oddScore then
+				odd, oddScore = i, score
+			end
+		end
+		local axis = vecs[odd]
+		local discSize = math.max(ex[odd % 3 + 1], ex[(odd + 1) % 3 + 1])
 		if axis:Dot(f) < 0 then
 			axis = -axis
 		end
@@ -435,6 +526,10 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			b = b:Max(d.Position)
 		end
 		local center = (a + b) / 2
+		if ex[odd] > discSize and #steerParts == 1 then
+			-- wheel and column in one piece: the rim is at the driver's end
+			center -= axis * (ex[odd] / 2 - 0.2)
+		end
 		local mountWorld = CFrame.lookAt(center, center + axis)
 		local mountRel = frame:ToObjectSpace(mountWorld)
 		local mount = CFrame.new(mountRel.Position * scale) * mountRel.Rotation
@@ -444,13 +539,60 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			t.offset = mount:Inverse() * t.offset
 			table.insert(parts, t)
 		end
-		out.steer = { mount = mount, parts = parts }
+		local radius = discSize / 2 * scale * 0.9
+		if src:GetAttribute("AddSteerHub") then
+			-- the model's wheel centre is fused with something else and hidden: build one
+			local function hubPiece(size: Vector3, color: Color3, material: Enum.Material, z: number): Template
+				local p = Instance.new("Part")
+				p.Shape = Enum.PartType.Cylinder
+				p.Size = size
+				p.Color = color
+				p.Material = material
+				p.CanCollide = false
+				p.CanQuery = false
+				p.CanTouch = false
+				p.Massless = true
+				p.CastShadow = false
+				return { part = p, offset = CFrame.new(0, 0, z) * CFrame.Angles(0, math.pi / 2, 0) }
+			end
+			table.insert(parts, hubPiece(Vector3.new(0.18, radius * 0.95, radius * 0.95), Color3.fromRGB(16, 16, 18), Enum.Material.SmoothPlastic, 0.02))
+			table.insert(parts, hubPiece(Vector3.new(0.04, radius * 0.2, radius * 0.2), Color3.fromRGB(235, 190, 20), Enum.Material.SmoothPlastic, 0.12)) -- small yellow dot, no glow
+			for _, ang in { 0, math.pi } do
+				local spoke = Instance.new("Part")
+				spoke.Size = Vector3.new(radius * 0.75, 0.16, 0.08)
+				spoke.Color = Color3.fromRGB(232, 232, 236)
+				spoke.Material = Enum.Material.SmoothPlastic
+				spoke.CanCollide = false
+				spoke.CanQuery = false
+				spoke.CanTouch = false
+				spoke.Massless = true
+				spoke.CastShadow = false
+				table.insert(parts, { part = spoke, offset = CFrame.Angles(0, 0, ang) * CFrame.new(radius * 0.55, -0.04, 0) })
+			end
+		end
+		out.steer = { mount = mount, parts = parts, radius = radius }
 	end
 
 	-- driver's eye: above the driver's seat, at 80% of the roof height there
 	local seatPart = seat or src:FindFirstChildWhichIsA("Seat", true)
-	if seatPart then
-		local sp = frame:PointToObjectSpace(seatPart.Position)
+	local sp: Vector3? = if seatPart then frame:PointToObjectSpace(seatPart.Position) else nil
+	if not sp then
+		-- no seat in the model: put the driver where a real one sits, left of centre
+		-- (left-hand drive) and a little behind the front axle (sports coupe: ~1.35 m)
+		local m = 3 / scale -- model studs per metre (game is 3 studs per metre)
+		local axleZ, n = 0, 0
+		for _, g in groups do
+			local c = frame:PointToObjectSpace(g.center)
+			if c.Z < 0 then
+				axleZ += c.Z
+				n += 1
+			end
+		end
+		if n > 0 then
+			sp = Vector3.new(-0.37 * m, 0.35 * m, axleZ / n + 1.35 * m)
+		end
+	end
+	if sp then
 		local roof = 0
 		for _, d in visible do
 			if inWheel[d] then
@@ -474,11 +616,247 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 	end
 
+	-- no separate steering wheel in the model (fused into one interior mesh, or none at all):
+	-- build our own round wheel where a real one sits, a short reach in front of the driver
+	if not out.steer and out.eye then
+		local R, tube = 0.56, 0.14 -- real wheel: ~37 cm across, ~4.5 cm thick grip
+		local center = out.eye + Vector3.new(0, -1.05, -1.75)
+		local tilt = math.rad(24)
+		local mount = CFrame.lookAt(center, center + Vector3.new(0, -math.sin(tilt), -math.cos(tilt)))
+		local function piece(shape: Enum.PartType, size: Vector3, color: Color3, material: Enum.Material): Part
+			local p = Instance.new("Part")
+			p.Shape = shape
+			p.Size = size
+			p.Color = color
+			p.Material = material
+			p.Anchored = false
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.Massless = true
+			p.CastShadow = false
+			return p
+		end
+		local leather = Color3.fromRGB(24, 24, 27)
+		local parts: { Template } = {}
+		local segs = 28
+		for i = 0, segs - 1 do
+			local ang = i / segs * math.pi * 2
+			local seg = piece(Enum.PartType.Cylinder, Vector3.new(2 * math.pi * R / segs * 1.18, tube, tube), leather, Enum.Material.Leather)
+			table.insert(parts, { part = seg :: any, offset = CFrame.new(R * math.cos(ang), R * math.sin(ang), 0) * CFrame.Angles(0, 0, ang + math.pi / 2) })
+		end
+		-- three spokes (left, right, bottom) and a round airbag hub
+		for _, ang in { 0, math.pi, -math.pi / 2 } do
+			local spoke = piece(Enum.PartType.Block, Vector3.new(R * 0.9, 0.13, 0.07), Color3.fromRGB(46, 46, 52), Enum.Material.SmoothPlastic)
+			table.insert(parts, { part = spoke :: any, offset = CFrame.Angles(0, 0, ang) * CFrame.new(R * 0.5, 0, 0.03) })
+		end
+		local hub = piece(Enum.PartType.Cylinder, Vector3.new(0.16, R * 0.78, R * 0.78), Color3.fromRGB(20, 20, 22), Enum.Material.SmoothPlastic)
+		table.insert(parts, { part = hub :: any, offset = CFrame.new(0, 0, 0.06) * CFrame.Angles(0, math.pi / 2, 0) })
+		local badge = piece(Enum.PartType.Cylinder, Vector3.new(0.02, R * 0.22, R * 0.22), Color3.fromRGB(196, 200, 208), Enum.Material.Metal)
+		table.insert(parts, { part = badge :: any, offset = CFrame.new(0, 0, 0.15) * CFrame.Angles(0, math.pi / 2, 0) })
+		local column = piece(Enum.PartType.Cylinder, Vector3.new(0.9, 0.26, 0.26), leather, Enum.Material.SmoothPlastic)
+		table.insert(parts, { part = column :: any, offset = CFrame.new(0, 0, -0.5) * CFrame.Angles(0, math.pi / 2, 0) })
+		out.steer = { mount = mount, parts = parts, radius = R * 0.95 }
+	end
+
+	-- the driver sits a real reach behind the wheel (~60 cm): some models' seats put the eye too close
+	if out.steer and out.eye then
+		local wz = out.steer.mount.Position.Z
+		local eye = out.eye :: Vector3
+		if eye.Z - wz < 1.4 then
+			out.eye = Vector3.new(eye.X, eye.Y, math.min(wz + 1.4, eye.Z + 0.3))
+		end
+	end
+
+	-- gauges: look from the eye through the top half of the wheel and stop at the first
+	-- dash surface past it (that's where the car's own instrument cluster is)
+	if out.eye then
+		local eyeW = frame:PointToWorldSpace(out.eye / scale)
+		local fwdW = frame.LookVector
+		local target: Vector3
+		local minDist: number
+		local rm: number -- wheel radius, model studs
+		if out.steer then
+			local mountW = frame * CFrame.new(out.steer.mount.Position / scale)
+			rm = out.steer.radius / scale
+			target = mountW.Position + Vector3.yAxis * rm * 0.35
+			minDist = (target - eyeW).Magnitude + 0.15 / scale
+		else
+			rm = 0.5 / scale
+			target = eyeW + fwdW * (2.2 / scale) - Vector3.yAxis * (0.75 / scale)
+			minDist = 1.2 / scale
+		end
+		local dir = (target - eyeW).Unit
+		local best = math.huge
+		for _, d in visible do
+			if inWheel[d] or inSteer(d) then
+				continue
+			end
+			local o = d.CFrame:PointToObjectSpace(eyeW)
+			local h = d.Size / 2
+			if math.abs(o.X) <= h.X and math.abs(o.Y) <= h.Y and math.abs(o.Z) <= h.Z then
+				continue -- a shell around the driver (whole-cabin mesh): not a dash surface
+			end
+			local v = d.CFrame:VectorToObjectSpace(dir)
+			local tmin, tmax = -math.huge, math.huge
+			local hit = true
+			for _, ax in { "X", "Y", "Z" } do
+				local oa, va, ha = (o :: any)[ax], (v :: any)[ax], (h :: any)[ax]
+				if math.abs(va) < 1e-6 then
+					if math.abs(oa) > ha then
+						hit = false
+						break
+					end
+				else
+					local t1, t2 = (-ha - oa) / va, (ha - oa) / va
+					tmin = math.max(tmin, math.min(t1, t2))
+					tmax = math.min(tmax, math.max(t1, t2))
+				end
+			end
+			if hit and tmax >= tmin and tmin > minDist and tmin < best then
+				best = tmin
+			end
+		end
+		local ownDesign = CarSkin.CLUSTER_STYLE[src.Name] ~= nil
+		-- how far past the wheel the car's real cluster sits (studs); the Aventador's is deep in its hood
+		local depth = if src.Name == "lambrini_lp700" then 1.0 else 0.45
+		local t = if best < 4 / scale * 3 and not ownDesign then best - 0.03 / scale else (target - eyeW).Magnitude + depth / scale
+		local posW = eyeW + dir * t
+		local pos = frame:PointToObjectSpace(posW) * scale
+		local eyeG = out.eye
+		out.cluster = CFrame.lookAt(pos, pos + (pos - eyeG).Unit) -- back face looks at the driver
+		local r = rm * scale
+		-- full-width clusters (rev counter + two side screens) are about as wide as the wheel
+		out.clusterSize = if ownDesign then Vector2.new(r * 2.3, r * 0.85) else Vector2.new(r * 1.7, r * 0.62)
+	end
+
+	-- the model's own gauge needles: turned live by Driving (speed / revs)
+	local gaugeOf: { [BasePart]: boolean } = {}
+	if out.eye then
+		local function kindOf(d: Instance): string?
+			local a: Instance? = d.Parent
+			while a and a ~= src do
+				local n = a.Name:lower()
+				if n == "spdn" or n == "tacn" then
+					return nil -- tick marks, not needles
+				end
+				if n:find("speed") or n:find("spd") then
+					return "speed"
+				end
+				if n:find("tach") or n:find("tac") or n:find("rpm") then
+					return "rpm"
+				end
+				a = a.Parent
+			end
+			local n = d.Name:lower()
+			return if n:find("speed") then "speed" elseif n:find("rpm") or n:find("tach") then "rpm" else nil
+		end
+		local gauges = {}
+		local pivots: { { pos: Vector3, kind: string } } = {}
+		for _, d in visible do
+			local n = d.Name:lower()
+			if not inWheel[d] and not inSteer(d) and (n:find("needle") or n:find("arrow")) and not n:find("blinker") then
+				local kind = kindOf(d)
+				-- one needle per dial: a second piece of the same dial only hides
+				local dup = false
+				if kind then
+					for _, pv in pivots do
+						if pv.kind == kind and (pv.pos - d.Position).Magnitude < 0.5 then
+							dup = true
+						end
+					end
+				end
+				if dup or (kind and CarSkin.CLUSTER_STYLE[src.Name]) then
+					gaugeOf[d] = true
+				elseif kind then
+					-- turns about the small hub part next to it, else about itself
+					local pivotPos = d.Position
+					for _, sib in (d.Parent :: Instance):GetChildren() do
+						if sib ~= d and sib:IsA("BasePart") and not sib.Name:lower():find("needle") and (sib.Position - d.Position).Magnitude < 0.6 then
+							pivotPos = sib.Position
+							break
+						end
+					end
+					table.insert(pivots, { pos = pivotPos, kind = kind })
+					local pv = frame:PointToObjectSpace(pivotPos) * scale
+					local eyeG = out.eye :: Vector3
+					local pivot = CFrame.lookAt(pv, pv + (pv - eyeG).Unit) -- +Z looks at the driver
+					-- a slim red needle from the hub, pointing where the model's needle rests
+					local tip = pivot:PointToObjectSpace(frame:PointToObjectSpace(d.Position) * scale)
+					local rest = Vector3.new(tip.X, tip.Y, 0)
+					local len: number
+					if rest.Magnitude > 0.02 then
+						len = rest.Magnitude * 2
+						rest = rest.Unit
+					else
+						len = math.max(d.Size.X, d.Size.Y, d.Size.Z) * scale
+						rest = Vector3.new(-0.7, -0.7, 0).Unit -- needle at rest: about 7 o'clock
+					end
+					len = math.clamp(len, 0.2, 0.6)
+					-- a thin red line (no neon glow: it made the needle look thick)
+					local needle = Instance.new("Part")
+					needle.Size = Vector3.new(0.016, 0.016, len)
+					needle.Color = Color3.fromRGB(235, 30, 30)
+					needle.Material = Enum.Material.SmoothPlastic
+					needle.CanCollide = false
+					needle.CanQuery = false
+					needle.CanTouch = false
+					needle.Massless = true
+					needle.CastShadow = false
+					local offset = CFrame.lookAt(rest * len / 2 + Vector3.new(0, 0, 0.01), rest * len + Vector3.new(0, 0, 0.01))
+					gaugeOf[d] = true
+					table.insert(gauges, { kind = kind, pivot = pivot, parts = { { part = needle, offset = offset } } })
+				end
+			end
+		end
+		-- the model's own static needles next to a dial we drive (e.g. "Gauge Arrows") are hidden
+		for _, d in visible do
+			local n = d.Name:lower()
+			if not gaugeOf[d] and (n:find("needle") or n:find("arrow")) and not n:find("blinker") then
+				for _, pv in pivots do
+					if (pv.pos - d.Position).Magnitude < 0.6 then
+						gaugeOf[d] = true
+						break
+					end
+				end
+			end
+		end
+		out.gauges = gauges
+		out.ownGauges = #gauges > 0
+		for _, d in visible do
+			local gui = d:FindFirstChildWhichIsA("SurfaceGui")
+			if gui and gui:FindFirstChild("Needle", true) then
+				out.ownGauges = true
+				break
+			end
+		end
+	end
+
+	-- every rough surface becomes smooth: Roblox's Sand / Fabric / Leather / Concrete etc. carry a
+	-- bumpy pattern that makes interiors look grainy up close
+	local ROUGH = {
+		[Enum.Material.Sand] = true, [Enum.Material.Fabric] = true, [Enum.Material.Leather] = true,
+		[Enum.Material.Concrete] = true, [Enum.Material.Granite] = true, [Enum.Material.Slate] = true,
+		[Enum.Material.Cobblestone] = true, [Enum.Material.Pebble] = true, [Enum.Material.Brick] = true,
+		[Enum.Material.Wood] = true, [Enum.Material.WoodPlanks] = true, [Enum.Material.Marble] = true,
+		[Enum.Material.CorrodedMetal] = true, [Enum.Material.DiamondPlate] = true, [Enum.Material.Foil] = true,
+		[Enum.Material.Plastic] = true, [Enum.Material.Rubber] = true, [Enum.Material.Asphalt] = true,
+		[Enum.Material.Basalt] = true, [Enum.Material.Rock] = true, [Enum.Material.Ground] = true,
+	}
+	local function cabinMaterial(d: BasePart, p: BasePart)
+		if ROUGH[d.Material] then
+			p.Material = Enum.Material.SmoothPlastic
+		end
+	end
+
 	local k = 0
 	for _, d in visible do
-		if not inWheel[d] and not (out.steer and inSteer(d)) then
+		if not inWheel[d] and not (out.steer and inSteer(d)) and not gaugeOf[d] then
 			k += 1
-			out.body["Part" .. k] = tmpl(d, Vector3.zero)
+			local t = tmpl(d, Vector3.zero)
+			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
+			cabinMaterial(d, t.part)
+			out.body["Part" .. k] = t
 		end
 	end
 	local generic = out.generic :: { [string]: GenericWheel }
@@ -500,7 +878,8 @@ local function importedFor(id: string): Imported?
 		return if cached then cached else nil
 	end
 	local folder = ReplicatedStorage:FindFirstChild("CarModels", true) -- anywhere in ReplicatedStorage
-	local src = if folder then folder:FindFirstChild(id, true) else nil
+	local alias = CarBuilder.MODEL_ALIAS[id]
+	local src = if folder then folder:FindFirstChild(id, true) or (if alias then folder:FindFirstChild(alias, true) else nil) else nil
 	local result: Imported? = nil
 	if src then
 		local ok, res = pcall(readImported, src)
@@ -516,10 +895,19 @@ end
 
 -- Build the meshes ahead of time (loading screen): every traffic design plus the given full ones
 function CarSkin.preload(fullIds: { string }?)
-	for _, spec in Cars.List do
+	-- lite meshes only for the cars traffic uses (all 55 would exceed the mesh memory budget)
+	for _, id in CarBuilder.TRAFFIC_POOL do
+		local spec = Cars.get(id)
 		bodyFor(spec.Id, spec.Class, true)
 		task.wait()
 	end
+	-- read every imported model in the background, so opening one in the garage doesn't hitch
+	task.spawn(function()
+		for _, spec in Cars.List do
+			importedFor(spec.Id)
+			task.wait(0.05)
+		end
+	end)
 	local full: { string } = fullIds or {}
 	for _, id in full do
 		local spec = Cars.get(id)
@@ -628,43 +1016,90 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	end
 
 	if generic and imported then
-		-- the model's own steering wheel turns on our steering joint (or stays fixed without one)
-		local steerMotor = root:FindFirstChild("SteerMotor") :: Motor6D?
-		local hub = if steerMotor then steerMotor.Part1 else nil
+		-- the model's own steering wheel: welded still here; Driving turns it on the local player's car
 		local steer = imported.steer
+		local eyeRoot = if imported.eye then imported.eye - Vector3.new(0, height / 2, 0) else nil
 		if steer then
 			local mountRoot = root.CFrame:Inverse() * groundCF * steer.mount
-			if steerMotor and hub then
-				steerMotor.C0 = mountRoot
-				model:SetAttribute("SteerMount", mountRoot)
-			end
+			model:SetAttribute("SteerMount", mountRoot)
 			for i, t in steer.parts do
 				local p = t.part:Clone()
 				p.Name = "SkinSteer" .. i
 				p.CFrame = groundCF * steer.mount * t.offset
+				p:SetAttribute("SteerOffset", t.offset)
 				p.Parent = skin
 				local w = Instance.new("Weld")
-				w.Part0 = if hub then hub else root
+				w.Part0 = root
 				w.Part1 = p
-				w.C0 = if hub then t.offset else mountRoot * t.offset
+				w.C0 = mountRoot * t.offset
 				w.Parent = p
+			end
+			-- where Driving's arms grip (10 and 2) and where the shoulders sit
+			if eyeRoot then
+				local r = steer.radius
+				model:SetAttribute("SteerRadius", r)
+				for side, ang in { L = math.rad(160), R = math.rad(20) } do
+					local sx = if side == "L" then -1 else 1
+					model:SetAttribute("Grip" .. side, Vector3.new(r * 0.9 * math.cos(ang), r * 0.9 * math.sin(ang), 0.24))
+					model:SetAttribute("Shoulder" .. side, eyeRoot + Vector3.new(sx * 0.62, -0.7, 0.43))
+				end
+				model:SetAttribute("ArmsFitted", true)
+			end
+		end
+		-- the model's own needles: welded still here; Driving turns them on the local player's car
+		for gi, gauge in imported.gauges or {} do
+			local pivotRoot = root.CFrame:Inverse() * groundCF * gauge.pivot
+			for i, t in gauge.parts do
+				local p = t.part:Clone()
+				p.Name = "SkinGauge" .. gi .. "_" .. i
+				p.CFrame = groundCF * gauge.pivot * t.offset
+				p:SetAttribute("GaugeKind", gauge.kind)
+				p:SetAttribute("GaugePivot", pivotRoot)
+				p:SetAttribute("GaugeOffset", t.offset)
+				p.Parent = skin
+				local w = Instance.new("Weld")
+				w.Part0 = root
+				w.Part1 = p
+				w.C0 = pivotRoot * t.offset
+				w.Parent = p
+			end
+		end
+		-- live instrument cluster on the car's own gauge spot, when it has no working gauges of its own
+		-- (cars with their own design here, like the Ferrari, always get it)
+		local ownDesign = CarSkin.CLUSTER_STYLE[id] ~= nil
+		if imported.cluster and imported.clusterSize and not liteMode and (ownDesign or not imported.ownGauges) then
+			local cluster = Instance.new("Part")
+			cluster.Name = "DashCluster"
+			cluster.Size = Vector3.new(imported.clusterSize.X, imported.clusterSize.Y, 0.02)
+			cluster.Transparency = 1
+			cluster.CanCollide = false
+			cluster.CanQuery = false
+			cluster.CanTouch = false
+			cluster.Massless = true
+			cluster.CastShadow = false
+			-- per-car nudges set in Studio on the model: ClusterUp / ClusterForward (studs), ClusterSize (x)
+			local src = (ReplicatedStorage:FindFirstChild("CarModels", true) :: Instance):FindFirstChild(id, true)
+			local up = if src then (src:GetAttribute("ClusterUp") :: number?) or 0 else 0
+			local fwd = if src then (src:GetAttribute("ClusterForward") :: number?) or 0 else 0
+			local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
+			cluster.Size = Vector3.new(cluster.Size.X * k, cluster.Size.Y * k, cluster.Size.Z)
+			cluster.CFrame = groundCF * imported.cluster * CFrame.new(0, up, -fwd)
+			cluster.Parent = skin
+			local w = Instance.new("WeldConstraint")
+			w.Part0 = root
+			w.Part1 = cluster
+			w.Parent = cluster
+			cluster:SetAttribute("Style", CarSkin.CLUSTER_STYLE[id] or (if id:sub(1, 8) == "lambrini" then "Lambo" else "Modern"))
+			if ownDesign then
+				model:SetAttribute("OwnCluster", true) -- the model's own gauge screens stay off
 			end
 		end
 		-- the camera sits at the model's own driver's seat
 		if imported.eye then
 			model:SetAttribute("Eye", imported.eye - Vector3.new(0, height / 2, 0))
 		end
-		-- the model has its own cabin: hide ours (dash, seats, wheel, driver, arms)
+		-- the model has its own cabin: ours (dash, seats, wheel, driver, arms) is hidden below
 		model:SetAttribute("OwnInterior", true)
-		for _, d in model:GetDescendants() do
-			if d:IsA("BasePart") and d ~= root and not d:GetAttribute("Ext") and not d:IsDescendantOf(skin) then
-				if destroyReplaced then
-					d.Transparency = 1
-				else
-					d.LocalTransparencyModifier = 1
-				end
-			end
-		end
 	end
 
 	-- licence plate text (the plate itself is part of the mesh)
@@ -780,19 +1215,46 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		end
 	end
 
-	-- hide the part bodywork
-	for _, d in model:GetDescendants() do
-		if d:IsA("BasePart") and d:GetAttribute("Ext") and d.Name ~= "Underglow" then
-			local isWheel = d.Name:sub(1, 5) == "Wheel" and d.Parent == model
-			if destroyReplaced and not isWheel and not d:FindFirstChildWhichIsA("Light") then
-				d:Destroy()
-			elseif destroyReplaced then
-				d.Transparency = 1
-			else
-				d.LocalTransparencyModifier = 1
+	-- hide the part bodywork (and, under an imported model, our whole cabin)
+	local ownInterior = generic ~= nil
+	local function hide(d: Instance)
+		if not d:IsA("BasePart") or d == root or d:IsDescendantOf(skin) or d.Name == "Underglow" then
+			return
+		end
+		if not (d:GetAttribute("Ext") or ownInterior) then
+			return
+		end
+		if ownInterior then
+			-- screens drawn on our hidden dash (old cluster, infotainment) go too
+			for _, g in d:GetChildren() do
+				if g:IsA("SurfaceGui") then
+					g.Enabled = false
+				end
 			end
 		end
+		local isWheel = d.Name:sub(1, 5) == "Wheel" and d.Parent == model
+		if destroyReplaced and d:GetAttribute("Ext") and not isWheel and not d:FindFirstChildWhichIsA("Light") then
+			d:Destroy()
+		elseif destroyReplaced or ownInterior then
+			-- a local change: the server never touches these parts again, so it sticks
+			d.Transparency = 1
+		else
+			d.LocalTransparencyModifier = 1
+		end
 	end
+	for _, d in model:GetDescendants() do
+		hide(d)
+	end
+	-- parts that replicate after the skin went on
+	model.DescendantAdded:Connect(function(d)
+		task.defer(function()
+			if d:IsA("SurfaceGui") and d.Parent and d.Parent:IsA("BasePart") and not d:IsDescendantOf(skin) then
+				hide(d.Parent)
+			else
+				hide(d)
+			end
+		end)
+	end)
 	model:SetAttribute("Skinned", true)
 	return true
 end

@@ -8,7 +8,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 
 
 - **Not a programmer.** They work in Roblox Studio and often use a phone, so give short, plain steps ("open X, click Y").
-- **Deliverable is a place file.** Build `CityLegends.rbxl` (binary, gitignored; `rojo build default.project.json -o CityLegends.rbxl`) after changes and send it to them. The place is not committed: the car models make it ~45 MB.
+- **Deliverable is a place file.** Build `CityLegends.rbxl` (binary, gitignored; `rojo build default.project.json -o CityLegends.rbxl`, then `python3 tools/fix_rbxl.py CityLegends.rbxl`, which Studio needs: Rojo can compress the big SSTR chunk larger than raw and Studio then refuses the file) after changes. Chat downloads of big files get cut off (Studio then shows a readData error), so the built `CityLegends.rbxl` is committed and pushed (owner chose this 2026-10-11): it reaches their PC through Obsidian Git, or from github.com. Mention the GitHub path when sending.
 - **Target look is "Highway Legends"** (another Roblox game): realistic cars, a Highway Legends-style HUD, a rainy night city.
 - **Never ask for or accept their Roblox / alt account logins or cookies.** They offered once; it was declined.
 - **Fictional names only.** Cars use fictional names and no real badges. Car looks can be inspired by real cars.
@@ -58,7 +58,7 @@ Keep `luau-lsp analyze` free of errors. Nothing can be run in real Roblox from a
 2. **Runtime meshes:** `CarMesh.build` turned into EditableMesh parts. This needs Game Settings → Security → "Allow Mesh / Image APIs".
 3. **Fallback:** the old part-built body.
 
-- `assets/CarModels.rbxm` holds the owner's imported cars (exported from their place with Lune; Rojo puts it in `ReplicatedStorage.CarModels`). When they send a new place, re-export it: Lune can't read new Studio files directly, so first strip the `Tags` PROP chunks (bad type) from the binary.
+- `assets/CarModels.rbxm` holds the owner's imported cars (exported from their place with Lune; Rojo puts it in `ReplicatedStorage.CarModels`). When they send a new place, re-export it: Lune can't read new Studio files directly, so first strip the `Tags` PROP chunks (bad type) from the binary. Build with Rojo 7.6.1 or newer: older Rojo drops the new MeshContent/TextureContent values and every car turns into a plain cube.
 - Real size: `CarBuilder.REAL_WB` holds each car's real wheelbase in metres, at `STUDS_PER_METRE = 3`. An imported model is scaled to that wheelbase and its own wheel radius becomes the physics wheel radius.
 - Imported models bring their own cabin, so ours (dash, seats, wheel, driver, arms) is hidden (`OwnInterior` attribute). Their steering wheel (an `SW` group or anything named "steering wheel") turns on our `SteerMotor`. The first-person eye sits above their `DriveSeat` at 80% of the roof height; an `EyeHeight` number attribute on the model nudges it in studs.
 
@@ -67,7 +67,7 @@ Traffic uses the "lite" runtime meshes first. The owner thinks the procedural ca
 ## Rules and decisions
 
 - **No auto-loading of Creator Store models.** Do not make the game download Creator Store assets at runtime (InsertService with hard-coded asset ids). It was blocked as integrating unvetted third-party content. Models go in by hand, after the owner has checked them.
-- **Assets can't be downloaded from here.** `assetdelivery.roblox.com` needs a login, and the thumbnail CDN (`tr.rbxcdn.com`) is blocked from the cloud sandbox. The Creator Store search and details API (`apis.roblox.com/toolbox-service`) works.
+- **Assets can't be downloaded from here.** `assetdelivery.roblox.com` needs a login (never use the owner's). The owner allowed `apis.roblox.com` in the environment (2026-10-10): search with `toolbox-service/v1/marketplace/10?keyword=...` and details with `toolbox-service/v1/items/details?assetIds=...`, then give the owner ids to insert by hand.
 - **Money from the console:** `game.Players.NAME:SetAttribute("SetCash", n)` or `"AddCash"` on the server side (Studio command bar in Server mode, or the F9 server console).
 - **Saving:** needs "Enable Studio Access to API Services" or a published place.
 - **Git:** commit and push to `master` of ProjectOne (the vault syncs from it). Run all commands from `Games/CityLegends`. The old `ClaudeOne` repo is retired for this game (moved 2026-10-10). No pull requests unless asked.

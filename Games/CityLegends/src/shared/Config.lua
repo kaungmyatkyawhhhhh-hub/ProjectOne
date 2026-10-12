@@ -173,6 +173,8 @@ Config.Sounds = {
 	-- engine set by the verified "Roblox Resources" group (public domain)
 	Engine = "rbxassetid://80317022777602", -- Car-Engine-Loop (pitch follows RPM)
 	EngineStart = "rbxassetid://78270463799678", -- Engine-Start
+	-- per-car engines (verified creators); a car without one uses Engine above
+	Engine_ferrara_458 = "rbxassetid://130398079560929", -- "Ferrari Engine", Roblox Sim Racing League
 	-- ProSoundEffects (Roblox's official SFX partner, public domain)
 	Crash = { "rbxassetid://9116546593", "rbxassetid://9116546326" }, -- Metal Crash 4 / 2
 	TyreSqueal = "rbxassetid://9120399077", -- Vehicle Skids Long Heavy Tire Squeal 3

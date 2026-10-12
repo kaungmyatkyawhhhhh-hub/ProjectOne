@@ -310,12 +310,17 @@ local CLASS_PITCH = { Sedan = 0.9, SUV = 0.82, Coupe = 1.0, Supercar = 1.08, Hyp
 	parent: a BasePart for positional (3D) sound, or nil for 2D (the local
 	player's own car always plays 2D so it sounds the same in every camera).
 ]]
-function Audio.engine(class: string, parent: Instance?): Engine
+function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	local holder = parent or SoundService
 	local base = CLASS_PITCH[class] or 1
 	local positional = parent ~= nil and parent:IsA("BasePart")
 
-	local engineId = pickCustom("Engine")
+	-- a car's own engine (Config.Sounds["Engine_<car id>"]) when it loaded, else the shared one
+	local own = if carId then pickCustom("Engine_" .. carId) else nil
+	if own then
+		base = 1
+	end
+	local engineId = own or pickCustom("Engine")
 	local squealId = pickCustom("TyreSqueal")
 	local rumble = newSound(engineId or BUILTIN.wind, holder, 0, true)
 	rumble.Name = "EngineRumble"

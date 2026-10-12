@@ -19,6 +19,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local avatarDesc: HumanoidDescription? = nil -- for the driver's arms
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -29,6 +32,7 @@ local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local Traffic = require(script.Parent:WaitForChild("Traffic"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
+local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
 
 local camera = workspace.CurrentCamera
 
@@ -36,6 +40,18 @@ local Driving = {}
 Driving.cameraMode = "Chase" -- "Chase" | "Interior"
 Driving.inputEnabled = true
 
+type LocalArm = {
+	upper: BasePart, -- the whole arm when fore is nil (R6)
+	fore: BasePart?,
+	glove: BasePart?,
+	shoulder: Vector3,
+	grip: Vector3,
+	pole: Vector3,
+	upperLen: number,
+	foreLen: number,
+	handLen: number,
+	rot: CFrame, -- part space -> bone space (avatar limbs run along Y, our bones along Z)
+}
 type ArmRig = { upper: Motor6D, fore: Motor6D, shoulder: Vector3, grip: Vector3, pole: Vector3 }
 
 type State = {
@@ -74,6 +90,20 @@ type State = {
 	gaugeSpeed: TextLabel?,
 	gaugeGear: TextLabel?,
 	gaugeBar: Frame?,
+	dashUpdate: ((number, string, number) -> ())?,
+	-- imported cars: their steering wheel and our arms, posed every frame on this client
+	localSteer: { { part: BasePart, offset: CFrame } },
+	localArms: { LocalArm },
+	-- the model's own gauges: needle parts and on-screen needles (0..1 sweeps 240 degrees)
+	partNeedles: { { part: BasePart, kind: string, pivot: CFrame, offset: CFrame } },
+	guiNeedles: { { gui: GuiObject, kind: string, base: number } },
+	guiTexts: { { label: TextLabel, kind: string } }, -- on-screen "Speed" / "RPM" / "Gear" read-outs
+	speedShown: number,
+	smoke: { { emitter: ParticleEmitter, rear: boolean } },
+	-- body lean (radians): roll in turns, pitch on braking / accelerating
+	roll: number,
+	pitch: number,
+	rpmShown: number,
 	camPos: Vector3,
 	camLook: Vector3,
 	fov: number,
@@ -408,6 +438,9 @@ function Driving.attach(model: Model)
 	for _, d in model:GetDescendants() do
 		if d:IsA("BasePart") then
 			if model:GetAttribute("OwnInterior") then
+				if d.Name == "Underglow" then
+					table.insert(hidden, d) -- shows through the floor in first person
+				end
 				continue -- imported model: our cabin and driver are hidden for good
 			elseif d.Name == "DriverHead" or d.Name == "DriverHair" or d.Name == "DriverNeck" then
 				table.insert(hidden, d)
@@ -418,15 +451,262 @@ function Driving.attach(model: Model)
 	end
 
 	local cabinLight = Instance.new("PointLight")
-	cabinLight.Color = Color3.fromRGB(150, 110, 255)
-	cabinLight.Brightness = 0.7
-	cabinLight.Range = 7
+	cabinLight.Color = Color3.fromRGB(255, 244, 228) -- warm dome light so the cabin is readable at night
+	cabinLight.Brightness = 1.6
+	cabinLight.Range = 9
 	cabinLight.Shadows = false
 	cabinLight.Enabled = false
 	cabinLight.Parent = root
 
 	local gSpeed, gGear, gBar = buildGauges(model)
+	local localSteer = {}
+	local localArms = {}
+	local partNeedles = {}
+	local guiNeedles = {}
+	local guiTexts = {}
+	-- extras for imported cars; a fault here must never stop the car from driving
+	local okExtras, errExtras = pcall(function()
+		-- imported cars: pose their steering wheel and our arms ourselves (anchored, local only)
+		for _, d in model:GetDescendants() do
+			local off = d:GetAttribute("SteerOffset")
+			if d:IsA("BasePart") and typeof(off) == "CFrame" then
+				for _, w in d:GetChildren() do
+					if w:IsA("Weld") or w:IsA("WeldConstraint") then
+						w:Destroy()
+					end
+				end
+				d.Anchored = true
+				table.insert(localSteer, { part = d, offset = off })
+			end
+		end
+		-- the model's own gauges (own pcall: a fault here must not cost the driver's hands)
+		local okG, errG = pcall(function()
+			for _, d in model:GetDescendants() do
+				local kind = d:GetAttribute("GaugeKind")
+				if d:IsA("BasePart") and type(kind) == "string" then
+					for _, w in d:GetChildren() do
+						if w:IsA("Weld") or w:IsA("WeldConstraint") then
+							w:Destroy()
+						end
+					end
+					d.Anchored = true
+					table.insert(partNeedles, { part = d, kind = kind, pivot = d:GetAttribute("GaugePivot") :: CFrame, offset = d:GetAttribute("GaugeOffset") :: CFrame })
+				elseif d:IsA("TextLabel") and model:GetAttribute("OwnInterior") and (d.Name == "Speed" or d.Name == "RPM" or d.Name == "Gear") then
+					table.insert(guiTexts, { label = d, kind = d.Name })
+				elseif d:IsA("GuiObject") and d.Name == "Needle" and model:GetAttribute("OwnInterior") then
+					-- which dial: the nearest named ancestor (the screen part keeps its model name as SrcName)
+					local gk: string? = nil
+					local a: Instance? = d.Parent
+					while a and a ~= model do
+						local n = ((a:GetAttribute("SrcName") :: string?) or a.Name):lower()
+						if n == "spdn" or n == "tacn" then
+							gk = nil
+							break
+						end
+						if n:find("speed") or n:find("spd") then
+							gk = "speed"
+							break
+						elseif n:find("tach") or n:find("tac") or n:find("rpm") then
+							gk = "rpm"
+							break
+						end
+						a = a.Parent
+					end
+					if gk then
+						table.insert(guiNeedles, { gui = d, kind = gk, base = d.Rotation })
+						-- the car's own start-up script used to switch these screens on
+						local sg = d:FindFirstAncestorWhichIsA("SurfaceGui")
+						if sg and not model:GetAttribute("OwnCluster") then
+							sg.Enabled = true
+						end
+					end
+				end
+			end
+		end)
+		if not okG then
+			warn("[CityLegends] gauge needles failed:", errG)
+		end
+		if model:GetAttribute("ArmsFitted") then
+			local mount = model:GetAttribute("SteerMount") :: CFrame
+			local sides = {}
+			for _, side in { "L", "R" } do
+				local shoulder = model:GetAttribute("Shoulder" .. side) :: Vector3
+				local grip = model:GetAttribute("Grip" .. side) :: Vector3
+				table.insert(sides, {
+					side = side,
+					shoulder = shoulder,
+					grip = grip,
+					reach = (shoulder - (mount * CFrame.new(grip)).Position).Magnitude,
+					pole = Vector3.new(if side == "L" then -0.8 else 0.8, -1, 0.2),
+				})
+			end
+			-- the player's own avatar as R6 (clothes and skin): only its two arms are used, each one
+			-- straight from shoulder to hand, 30% of R6 thickness, posed every frame
+			task.spawn(function()
+				-- the avatar look is fetched once per session; a slow or failed fetch is retried
+				local ok, rig = false, nil :: any
+				for attempt = 1, 3 do
+					ok, rig = pcall(function()
+						if not avatarDesc then
+							avatarDesc = Players:GetHumanoidDescriptionFromUserId(player.UserId)
+						end
+						return Players:CreateHumanoidModelFromDescription(avatarDesc :: HumanoidDescription, Enum.HumanoidRigType.R6)
+					end)
+					if ok then
+						break
+					end
+					task.wait(attempt)
+				end
+				if not ok or not rig or not rig:FindFirstChild("Left Arm") or not (state and state.model == model) then
+					if not ok then
+						warn("[CityLegends] driver arms unavailable:", rig)
+					end
+					if ok and rig then
+						rig:Destroy()
+					end
+					return
+				end
+				for _, d in rig:GetDescendants() do
+					if d:IsA("Script") or d:IsA("LocalScript") or d:IsA("Accessory") then
+						d:Destroy()
+					end
+				end
+				local hum = rig:FindFirstChildOfClass("Humanoid")
+				if hum then
+					hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+					hum.PlatformStand = true
+				end
+				local keep = { ["Left Arm"] = true, ["Right Arm"] = true }
+				for _, d in rig:GetDescendants() do
+					if d:IsA("BasePart") then
+						d.Anchored = true
+						d.CanCollide = false
+						d.CanQuery = false
+						d.CanTouch = false
+						d.CastShadow = false
+						if not keep[d.Name] then
+							-- the rest of the body: invisible and far away. The Humanoid forces torso and
+							-- head to be solid, and an invisible wall near the car throws it about
+							d.Transparency = 1
+							d.CFrame = CFrame.new(0, 20000, 0)
+						end
+					elseif d:IsA("Decal") then
+						d.Transparency = 1
+					end
+				end
+				-- kept out of the car model (and out of physics and raycasts): only this client sees it
+				rig.Parent = workspace.CurrentCamera
+				local cur = state
+				if not (cur and cur.model == model) then
+					rig:Destroy()
+					return
+				end
+				model.Destroying:Connect(function()
+					rig:Destroy()
+				end)
+				table.insert(cur.connections, model.AncestryChanged:Connect(function()
+					if not model:IsDescendantOf(workspace) then
+						rig:Destroy()
+					end
+				end))
+				for _, sd in sides do
+					local arm = rig:FindFirstChild(if sd.side == "L" then "Left Arm" else "Right Arm") :: BasePart
+					arm.Size = Vector3.new(0.3, sd.reach, 0.3) -- an R6 arm is 1 stud thick: 70% thinner
+					table.insert(cur.localArms, {
+						upper = arm,
+						shoulder = sd.shoulder,
+						grip = sd.grip,
+						pole = sd.pole,
+						upperLen = sd.reach,
+						foreLen = 0,
+						handLen = 0,
+						rot = CFrame.Angles(math.pi / 2, 0, 0),
+					})
+				end
+			end)
+		end
+	end)
+	if not okExtras then
+		warn("[CityLegends] cabin extras failed:", errExtras)
+	end
+	-- imported cars: the live cluster behind their own wheel
+	local dashPanel = model:FindFirstChild("DashCluster", true)
+	local dashUpdate: ((number, string, number) -> ())? = nil
+	local style = if dashPanel then dashPanel:GetAttribute("Style") else nil
+	local mountAttr = model:GetAttribute("SteerMount")
+	local radiusAttr = model:GetAttribute("SteerRadius")
+	local eyeAttr = model:GetAttribute("Eye")
+	-- panel size per design, in wheel radii (wide clusters show partly through the rim, like real)
+	local CLUSTER_SIZE = {
+		Aventador = { 0.82, 0.82, 0.8, -0.06 }, -- just the round dial, over the model's own
+		Ferrari = { 1.6, 0.6 },
+		BMWLive = { 1.8, 0.62 },
+		BMWClassic = { 1.6, 0.6, 0.85 },
+		AMG = { 1.7, 0.62 },
+		SupraTRD = { 1.9, 0.62 },
+		Toyota = { 1.7, 0.62, 1.0 },
+	}
+	local sizeFor = if type(style) == "string" then CLUSTER_SIZE[style] else nil
+	if dashPanel and dashPanel:IsA("BasePart") and sizeFor
+		and typeof(mountAttr) == "CFrame" and type(radiusAttr) == "number" and typeof(eyeAttr) == "Vector3" then
+		-- sit where the car's own cluster is: seen through the top half of the wheel, just behind
+		-- the rim, facing the driver's eye (the same eye the first-person camera uses)
+		local r = radiusAttr
+		-- third number: how high through the wheel it sits (in radii; default 0.6); fourth: a fine
+		-- up/down nudge in studs
+		local target = mountAttr.Position + mountAttr.UpVector * r * (sizeFor[3] or 0.6)
+		local dir = (target - eyeAttr).Unit
+		local pos = target + dir * 0.3
+		local src = (ReplicatedStorage:FindFirstChild("CarModels", true) :: Instance):FindFirstChild(spec.Id, true)
+		local up = if src then (src:GetAttribute("ClusterUp") :: number?) or 0 else 0
+		local fwd = if src then (src:GetAttribute("ClusterForward") :: number?) or 0 else 0
+		local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
+		local w = r * sizeFor[1]
+		local h = r * sizeFor[2]
+		local cf = root.CFrame * CFrame.lookAt(pos, pos + dir) * CFrame.new(0, up + (sizeFor[4] or 0), -fwd)
+		local weld = dashPanel:FindFirstChildOfClass("WeldConstraint")
+		if weld then
+			weld.Enabled = false
+		end
+		dashPanel.Size = Vector3.new(w * k, h * k, 0.02)
+		dashPanel.CFrame = cf
+		if weld then
+			weld.Enabled = true
+		end
+	end
+	if dashPanel and dashPanel:IsA("BasePart") then
+		local okDash, upd = pcall(DashGauges.build, dashPanel)
+		dashUpdate = if okDash then upd else nil
+	end
 	local flames, flameParts, flameLight = buildFlames(model, root, spec)
+	-- tyre smoke at each wheel's contact patch; strength follows the squeal
+	local smoke: { { emitter: ParticleEmitter, rear: boolean } } = {}
+	for _, j in root:GetChildren() do
+		if j:IsA("Motor6D") and j.Name:sub(1, 6) == "Wheel_" then
+			local r = (j:GetAttribute("Radius") :: number?) or 1
+			local att = Instance.new("Attachment")
+			att.Name = "TyreSmoke"
+			att.Position = j.C0.Position - Vector3.new(0, r * 0.85, 0)
+			att.Parent = root
+			table.insert(flameParts, att)
+			local e = Instance.new("ParticleEmitter")
+			e.Rate = 0
+			e.Texture = "rbxasset://textures/particles/smoke_main.dds" -- built-in smoke puff
+			e.Lifetime = NumberRange.new(1.2, 2.2)
+			e.Speed = NumberRange.new(1, 3)
+			e.SpreadAngle = Vector2.new(25, 25)
+			e.Acceleration = Vector3.new(0, 2.5, 0)
+			e.Drag = 1.5
+			e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.2), NumberSequenceKeypoint.new(0.4, 3.5), NumberSequenceKeypoint.new(1, 7) })
+			e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.7), NumberSequenceKeypoint.new(0.3, 0.6), NumberSequenceKeypoint.new(1, 1) })
+			e.Color = ColorSequence.new(Color3.fromRGB(196, 196, 198), Color3.fromRGB(150, 150, 154))
+			e.LightInfluence = 0.25 -- neutral grey, not tinted purple by the neon
+			e.Rotation = NumberRange.new(0, 360)
+			e.RotSpeed = NumberRange.new(-40, 40)
+			e.Parent = att
+			table.insert(smoke, { emitter = e, rear = j:GetAttribute("Front") ~= true })
+		end
+	end
 
 	local s: State = {
 		model = model,
@@ -464,6 +744,17 @@ function Driving.attach(model: Model)
 		gaugeSpeed = gSpeed,
 		gaugeGear = gGear,
 		gaugeBar = gBar,
+		dashUpdate = dashUpdate,
+		localSteer = localSteer,
+		localArms = localArms,
+		partNeedles = partNeedles,
+		guiNeedles = guiNeedles,
+		guiTexts = guiTexts,
+		speedShown = 0,
+		smoke = smoke,
+		roll = 0,
+		pitch = 0,
+		rpmShown = 0,
 		camPos = root.Position + Vector3.new(0, 8, 20),
 		camLook = root.Position,
 		fov = Config.Camera.ChaseFov,
@@ -471,7 +762,7 @@ function Driving.attach(model: Model)
 		gear = "N",
 		rpm = 0,
 		cabinLight = cabinLight,
-		engine = Audio.engine(spec.Class, nil),
+		engine = Audio.engine(spec.Class, nil, spec.Id),
 		throttle = 0,
 		slip = 0,
 		flames = flames,
@@ -626,13 +917,13 @@ function Driving.step(dt: number)
 		fwdSpeed += a * dt
 
 		-- steering: speed-sensitive wheel angle, capped by lateral grip
-		local steerRate = if math.abs(steerIn) > math.abs(s.steer) then 5 else 8
+		local steerRate = if math.abs(steerIn) > math.abs(s.steer) then 4.2 else 7
 		s.steer += (steerIn - s.steer) * math.min(1, dt * steerRate)
 		local speedAbs = math.abs(fwdSpeed)
 		local maxAngle = math.rad(36) / (1 + (speedAbs / 70) ^ 1.3)
 		local angle = s.steer * maxAngle
 		local yawRate = fwdSpeed * math.tan(angle) / s.wheelbase
-		local gripG = 2.6 + 2.4 * handling
+		local gripG = 2.2 + 2.0 * handling -- real-life grip, not glued to the road
 		local cap = gripG * 28 / math.max(speedAbs, 1)
 		if handbrake then
 			cap *= 1.7
@@ -641,9 +932,32 @@ function Driving.step(dt: number)
 		s.yaw -= yawRate * dt
 
 		-- lateral grip (low with handbrake -> drift)
-		local grip = if handbrake then 1.4 else 7 + 7 * handling
+		local grip = if handbrake then 1.4 else 4.5 + 5 * handling
+		-- hard launch: the rear steps out a little while the tyres find grip
+		if throttle > 0.6 and not handbrake then
+			grip *= 1 - 0.35 * throttle * math.clamp(1 - math.abs(speedFrac) * 2.5, 0, 1)
+		end
 		latSpeed *= math.exp(-grip * dt)
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
+		-- tyres squeal: flooring it from low speed, braking hard at speed, turning hard when fast
+		local sf = math.abs(fwdSpeed) / s.topSpeed
+		if throttle > 0.7 and fwdSpeed >= -1 and sf < 0.35 then
+			s.slip += 34 * throttle * (1 - sf / 0.35)
+		end
+		if brake > 0.6 and fwdSpeed > 40 then
+			s.slip += 36 * brake
+		end
+		if math.abs(s.steer) > 0.35 and sf > 0.4 then
+			s.slip += 60 * math.abs(s.steer) * (sf - 0.4)
+		end
+
+		-- body lean: outward in turns, nose down when braking, squat when accelerating
+		local latG = math.clamp(fwdSpeed * yawRate / 196.2, -1.5, 1.5)
+		local lonG = math.clamp(a / 196.2, -1.5, 1.5)
+		local rollTarget = math.rad(3.2) * latG
+		local pitchTarget = math.rad(2.2) * lonG
+		s.roll += (rollTarget - s.roll) * math.min(1, dt * 6)
+		s.pitch += (pitchTarget - s.pitch) * math.min(1, dt * 6)
 
 		local newFwd = forwardFromYaw(s.yaw)
 		local newRight = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
@@ -661,7 +975,7 @@ function Driving.step(dt: number)
 	end
 
 	s.lv.PlaneVelocity = Vector2.new(s.vel.X, s.vel.Z)
-	s.ao.CFrame = CFrame.Angles(0, s.yaw, 0)
+	s.ao.CFrame = CFrame.Angles(0, s.yaw, 0) * CFrame.Angles(s.pitch, 0, s.roll)
 	s.lastCommand = s.vel
 
 	-- gears / rpm (cosmetic)
@@ -730,6 +1044,36 @@ function Driving.render(dt: number)
 	if s.steerMotor then
 		s.steerMotor.Transform = CFrame.Angles(0, 0, rot)
 	end
+	pcall(function()
+		if s.steerMount and #s.localSteer > 0 then
+			local wheelWorld = root.CFrame * s.steerMount * CFrame.Angles(0, 0, rot)
+			for _, ls in s.localSteer do
+				ls.part.CFrame = wheelWorld * ls.offset
+			end
+		end
+		if s.steerMount and #s.localArms > 0 then
+			local wheelCF = s.steerMount * CFrame.Angles(0, 0, rot)
+			for _, arm in s.localArms do
+				local handPos = (wheelCF * CFrame.new(arm.grip)).Position
+				local fore, glove = arm.fore, arm.glove
+				if fore then
+					local upperCF, foreCF = CarBuilder.solveArm(arm.shoulder, handPos, arm.upperLen, arm.foreLen, arm.pole)
+					arm.upper.CFrame = root.CFrame * upperCF * arm.rot
+					fore.CFrame = root.CFrame * foreCF * arm.rot
+					if glove then
+						glove.CFrame = root.CFrame * foreCF * CFrame.new(0, 0, -(arm.foreLen + arm.handLen) / 2) * arm.rot
+					end
+				else
+					-- one straight arm, shoulder to hand
+					local len = (handPos - arm.shoulder).Magnitude
+					if math.abs(arm.upper.Size.Y - len) > 0.02 then
+						arm.upper.Size = Vector3.new(arm.upper.Size.X, len, arm.upper.Size.Z)
+					end
+					arm.upper.CFrame = root.CFrame * CFrame.lookAt((arm.shoulder + handPos) / 2, handPos) * arm.rot
+				end
+			end
+		end
+	end)
 	if s.steerMount then
 		local wheelCF = s.steerMount * CFrame.Angles(0, 0, rot)
 		for _, arm in s.arms do
@@ -751,10 +1095,35 @@ function Driving.render(dt: number)
 	if s.gaugeBar then
 		s.gaugeBar.Size = UDim2.fromScale(s.rpm, 1)
 	end
+	if s.dashUpdate then
+		pcall(s.dashUpdate, mph, s.gear, s.rpm)
+	end
+	pcall(function()
+		if #s.partNeedles > 0 or #s.guiNeedles > 0 or #s.guiTexts > 0 then
+			local k = 1 - math.exp(-dt * 10) -- needles swing, they don't snap
+			s.speedShown += (math.clamp(mph / 160, 0, 1) - s.speedShown) * k
+			s.rpmShown += (math.clamp(s.rpm, 0, 1) - s.rpmShown) * k
+			for _, n in s.partNeedles do
+				local v = if n.kind == "speed" then s.speedShown else s.rpmShown
+				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, math.rad(v * 240)) * n.offset
+			end
+			for _, tl in s.guiTexts do
+				tl.label.Text = if tl.kind == "Speed" then tostring(math.floor(mph + 0.5)) elseif tl.kind == "RPM" then tostring(math.floor(s.rpm * 80) * 100) else s.gear
+			end
+			for _, n in s.guiNeedles do
+				n.gui.Rotation = n.base + (if n.kind == "speed" then s.speedShown else s.rpmShown) * 240
+			end
+		end
+	end)
 	UI.setSpeed(mph, speedFrac, s.gear, s.rpm)
 
 	-- engine / wind / tyre audio
 	s.engine:update(s.rpm, s.throttle, speedFrac, s.slip)
+	-- smoke with the squeal (same curve as the sound); launches smoke the rear tyres most
+	local squeal = math.clamp((s.slip - 8) / 40, 0, 1)
+	for _, sm in s.smoke do
+		sm.emitter.Rate = if squeal > 0.05 then squeal * (if sm.rear then 70 else 35) else 0
+	end
 
 	-- exhaust crackle + flame glow
 	if s.pops > 0 then
@@ -778,7 +1147,7 @@ function Driving.render(dt: number)
 	local C = Config.Camera
 	s.shake = math.max(0, s.shake - dt * 2.5)
 	local t = os.clock()
-	local speedShake = math.max(0, speedFrac - 0.55) * 0.12
+	local speedShake = 0.012 * math.min(speedFrac * 6, 1) + math.max(0, speedFrac - 0.3) * 0.16
 	local shakeAmt = speedShake + s.shake * 0.5
 	local shakeOffset = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * shakeAmt
 
@@ -794,7 +1163,9 @@ function Driving.render(dt: number)
 		end
 		local lookInto = -s.steer * math.rad(9)
 		local eyeCF = rootCF * CFrame.new(s.eye) * CFrame.Angles(0, lookInto + mouseLook, 0) * CFrame.Angles(math.rad(-4), 0, 0)
-		camera.CFrame = eyeCF * CFrame.new(shakeOffset * 0.3)
+		-- inside the cabin the view stays steady; only a crash jolts it
+		local jolt = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * s.shake * 0.15
+		camera.CFrame = eyeCF * CFrame.new(jolt)
 		s.camPos = camera.CFrame.Position
 		if blur then
 			blur.Size = 0

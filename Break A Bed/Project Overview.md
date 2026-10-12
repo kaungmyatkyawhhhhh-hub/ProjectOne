@@ -6,21 +6,31 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 
 - **Status:** 25-bed path, 12 training items and SPAWN button done and play-tested on 2026-10-10 in the Studio place **"Break a bed test version"**. Needs saving / publishing there. See [[Break A Bed/2026-10-10|latest session]].
 - **Studio places:** "Break a bed test version" (placeId `92195183145806`) has the current game. "Break A Bed" (placeId `116443177548785`) still has the old first version.
+- **Ads:** first campaign and ad pictures in [[Break A Bed/Ads|Ads]].
 - **Code folder:** `C:\Users\USER\Documents\Cashgrab` (its `CLAUDE.md` has the technical notes)
-- **Place file:** `Cashgrab\BreakABed.rbxlx` (includes a baseplate and spawn point)
+- **Place file:** `Cashgrab\BreakABed.rbxlx` is out of date (scripts only, no map). The map is saved in the Studio place as real models: Workspace folders `Path`, `Beds`, `TrainingArea`, `Upgrades`, `Signs`, `Scenery` (see [[Break A Bed/How It Works|How It Works]]).
 
 ## Features
 - **Two areas:** a training area next to spawn and a long fenced path of 25 beds.
-- **Training:** 17 training posts, each on its own colored glowing pad. Stand on a pad and click to punch; each punch gives that post's Strength with "+70 💪" popping out. Locked posts show a 🔒 and their cash price; buying without enough cash shows "Not enough money" in red.
+- **Training:** 17 training posts, each on its own colored glowing pad. Stand on a pad and click to punch; each punch gives that post's Strength with "+70 💪" popping out. Locked posts show a 🔒 and their cash price; buying without enough cash shows "Not enough money" in red. The platform floor is dark grey tiles in a grid (`TrainingArea.FloorTiles`).
 - **Level:** comes from Strength. Shown top right with a progress bar, along with Strength (yellow 💪 icon) and Cash.
 - **Bed path:** each bed sits in the middle of its own colored floor tile, with white fences down both sides and lamps between tiles. Normal beds sit on cinder blocks. The Air Mattress and Sleeping Bag lie on the tile, and the Bunk Bed has two levels and a ladder.
-- **Harder the further you go:** each bed needs more Strength, has more health and pays more Cash, up to the Infinity Bed with 17 trillion health. Name tags show health and the 💪 needed. Until you're strong enough the prompt says "Need 💪 X".
+- **Harder the further you go:** each bed needs more Strength, has more health and pays more Cash, up to the Infinity Bed with 17 trillion health. Name tags show health and the 💪 needed. Until you're strong enough the prompt says "Need X Strength".
 - **Break mode:** press **E** to **Break**. The camera zooms in, an **EXIT** button appears, and each click is a karate chop (about 8 a second). Damage per chop comes from Strength.
 - **When a bed breaks:** it splinters, cash pops out, and a **COMPLETED ✅** sign appears next to it. The bed respawns instantly.
   - **First time:** you go back to normal view automatically.
   - **Already completed:** you stay in the break screen and can keep breaking it for cash until **EXIT**.
 - **Upgrade boards** on the left of the spawn plaza: ⚡ **Training Speed** (multiplies the Strength from every punch, x1.00 → x1.15 → …) and 👟 **Walk Speed** (16 → 18 → …). Each board shows your current → next value and the price (red when you can't afford it). Step on the green pad in front to buy a level; click while standing on it to buy more. Not enough cash shows "Not enough money" in red.
-- **SPAWN button** at the top: teleports you back to spawn from anywhere, even mid-break.
+- **Critical hits:** 1 in 10 chops is a **CRITICAL!** (orange text, 3× damage, bonus Cash).
+- **🏆 TOP Total Damage Dealt** sign on the right of the spawn plaza: top 10 across all servers, refreshed every 3 minutes, with your own total.
+- **🎁 Group Reward** button on the right of the screen: join the group, claim +10% Strength from punching forever. Needs the group id (`GameConfig.GroupId`).
+- **Robux shop and free rewards:** upgrading Strength tier button (x2 → x15), passes (Auto Punch, x2 Cash, VIP, Fast Walk, Break Spam), boosts, spins, Cash packs, Level packs, daily reward, playtime gifts, spin wheel, VIP lounge (walking into its door without VIP opens the VIP pass purchase window). Script `Shop` (StarterPlayerScripts) draws it; `VipLounge` (ServerScriptService, run once in Edit mode) built `Workspace.VipArea`. All pass and product ids are set in `GameConfig`.
+- **SPAWN button** at the top: only on the bed path (fades in/out), hidden in the break screen; teleports you back to spawn.
+- **Look:** chunky buttons with depth, navy panels, one bold font with thick outlines, drawn icons (cash, strength, lock, gift), no emoji; short numbers everywhere (1.14M, 1.9T, 392Qa), including Roblox's player list.
+- **Punching:** left hook → right hook → uppercut combo. **Bed breaks:** chunks, cash bills, coins, sparkles, confetti, all pooled and capped so fast breaking doesn't lag.
+- **Scripts added:** `Icons` (ReplicatedStorage), `UIKit`, `Fx`, `Combo` (StarterPlayerScripts).
+- **Scripts added 2026-10-11:** `ScreenFx`, `Ambient` (StarterPlayerScripts, screen effects and moving map pieces), `Decor` (ServerScriptService, map zones/hub/nature, run once in Edit mode). Map: 5 themed zones with gates, title sign on the entrance arch. `City` (ServerScriptService, run once in Edit mode): the city backdrop in `Workspace.City` (roads, houses, shops, apartments, towers, Bed Mart, Mattress Factory, Grand Sleep Hotel); it replaced the trees, hills and pond.
+- **Mobile:** tap controls; the HUD shrinks on phone screens.
 - **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (🔊 mute button), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.
 
