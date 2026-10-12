@@ -68,3 +68,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 - 2026-10-12: Free Gifts playtime rewards (12 gifts from 1 to 90 min, reset when you leave, SKIP ALL R$99) replace the 5-minute playtime gift. See [[Break A Bed/Playtime Rewards|Playtime Rewards]]. #break-a-bed
 - 2026-10-12: every menu and button gets animations (open, close, hover, press, idle, ready, ending) and satisfying sounds from Roblox's free Creator Store sounds. See [[Break A Bed/UI Kit/UI Kit|UI Kit]]. #break-a-bed
+
+- 2026-10-12: all developer products lowered to R$1–R$49 (owner thought they were too expensive; products had only made R$36 vs R$501 from passes). Starter Pack R$9, Instant Break R$2, Skip All gifts R$49. Game passes unchanged. #break-a-bed

@@ -34,7 +34,7 @@ Cash and Strength grow with progress, so the gifts are useful at any point.
   - **Ready:** the bar turns bright green and says **CLAIM!**, and the card pulses and sparkles.
   - **Claimed:** the card is dimmed with a green check, and the bar says **CLAIMED**.
 - Red text at the bottom says **"Leaving resets gifts!"** Gifts reset when the player leaves, because the timer is per session. That's what keeps players in the game longer.
-- **SKIP ALL (R$99, developer product):** unlocks every gift right away for this session.
+- **SKIP ALL (R$49, developer product):** unlocks every gift right away for this session.
 - **HUD button:** the green gift button on the right shows the time until the next gift. A red number badge shows how many gifts are ready to claim. It wiggles when one is ready.
 - The server keeps the timer and checks the claims, so they can't be cheated. Claimed gifts are kept until the player leaves.
 - The first time a gift becomes ready, a small toast says "Free gift ready!".

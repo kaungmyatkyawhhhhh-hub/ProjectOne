@@ -4,26 +4,27 @@
 
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
-Owner's decision (2026-10-12): **keep game pass prices as they are now** and add **lots of cheap developer products**, like timed x2, x3 and x5 Strength boosts. Cheap buys (R$5–R$39) get many more players to pay at least once, and players who buy once usually buy again.
+Owner's decision (2026-10-12): **keep game pass prices as they are now** and add **lots of cheap developer products**, like timed x2, x3 and x5 Strength boosts. Cheap buys (R$1–R$49) get many more players to pay at least once, and players who buy once usually buy again.
 
 ## Game passes: no price change
 - Strength tiers stay the same: x2 R$8 → x3 R$12 → x5 R$20 → x7 R$50 → x10 R$75 → x15 R$100.
 - Auto Punch, x2 Cash, VIP, Fast Walk and Break Spam keep their current prices.
 
 ## New and changed developer products
+**Prices lowered again on 2026-10-12** (owner: "products are too expensive"). Sales data so far: R$537 total, R$501 from passes and only R$36 from products. Everything is now **R$1–R$49**, so buying is an easy impulse. Players buy more often, and the boosts stack up.
 
 ### Timed boosts (10 minutes; buying again adds 10 more minutes)
 | Product | Price |
 |---|---|
-| x2 Strength | R$9 |
-| x3 Strength | R$19 |
-| x5 Strength | R$39 |
-| x10 Strength | R$79 |
-| x2 Cash | R$9 |
-| x3 Cash | R$19 |
-| x5 Cash | R$39 |
-| Fast Punch (punches 1.5x faster) | R$15 |
-| **Server x2 Strength** (whole server, 15 min, buyer's name announced in chat) | R$99 |
+| x2 Strength | R$3 |
+| x3 Strength | R$7 |
+| x5 Strength | R$15 |
+| x10 Strength | R$29 |
+| x2 Cash | R$3 |
+| x3 Cash | R$7 |
+| x5 Cash | R$15 |
+| Fast Punch (punches 1.5x faster) | R$5 |
+| **Server x2 Strength** (whole server, 15 min, buyer's name announced in chat) | R$49 |
 
 - Only the highest active Strength boost counts, and the same goes for Cash. Boosts multiply with passes, so a x15 pass player with a x5 boost gets x75.
 - The existing 15-minute x2 Strength / x2 Cash products become the new x2 ones.
@@ -32,26 +33,29 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 ### Instant packs
 | Product | Price |
 |---|---|
-| Small Cash (10 breaks of your best bed) | R$5 |
-| Medium Cash (40 breaks) | R$15 |
-| Big Cash (150 breaks) | R$39 |
-| Huge Cash (500 breaks) | R$99 |
-| Small Strength (1 minute of your best post at full speed) | R$5 |
-| Medium Strength (5 minutes) | R$15 |
-| Big Strength (20 minutes) | R$39 |
-| +1 Level | R$9 (was R$19) |
-| +3 Levels | R$25 (was R$49) |
-| +9 Levels | R$59 (was R$129) |
-| +1 Spin | R$5 |
-| +3 Spins | R$12 |
-| +10 Spins | R$35 |
+| Tiny Cash (3 breaks of your best bed) | R$1 |
+| Small Cash (10 breaks) | R$3 |
+| Medium Cash (40 breaks) | R$9 |
+| Big Cash (150 breaks) | R$25 |
+| Huge Cash (500 breaks) | R$49 |
+| Tiny Strength (20 s of your best post at full speed) | R$1 |
+| Small Strength (1 minute) | R$3 |
+| Medium Strength (5 minutes) | R$9 |
+| Big Strength (20 minutes) | R$25 |
+| +1 Level | R$5 |
+| +3 Levels | R$12 |
+| +9 Levels | R$29 |
+| +1 Spin | R$2 |
+| +3 Spins | R$5 |
+| +10 Spins | R$15 |
 
-Cash and Strength packs grow with your progress, so they're worth buying at any point.
+- Cash and Strength packs grow with your progress, so they're worth buying at any point.
+- Show a **"BEST VALUE"** tag on the biggest pack of each row and a **"POPULAR"** tag on the middle one.
 
 ### Impulse buys (shown at the right moment)
-- **"Need more Strength?"** When the bed prompt says "Need X Strength", show a small button: *x3 Strength 10 min, R$19*.
-- **Instant Break: R$5.** Breaks the bed you're stuck on once, paying its Cash and marking it completed. It's shown on the same "Need X Strength" prompt.
-- **Starter Pack: R$19, one time only.** x3 Strength 30 min + Medium Cash + 3 Spins. It pops up once, after the player's first bed break (not on join), with a "70% OFF" tag.
+- **"Need more Strength?"** When the bed prompt says "Need X Strength", show a small button: *x3 Strength 10 min, R$7*.
+- **Instant Break: R$2.** Breaks the bed you're stuck on once, paying its Cash and marking it completed. It's shown on the same "Need X Strength" prompt.
+- **Starter Pack: R$9, one time only.** x3 Strength 30 min + Medium Cash + 3 Spins. It pops up once, after the player's first bed break (not on join), with a "70% OFF" tag.
 - **Boost ran out:** when a boost ends, a small toast offers "Buy again, R$X".
 
 ## Where it goes in the shop
