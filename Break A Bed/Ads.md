@@ -21,6 +21,7 @@ The first, flat-cartoon versions are in git history.
 - `icon-512-real.png` (512x512): game icon, "BREAK A BED!" on top
 - `thumbnail-3-real.png` (1920x1080): "BREAK A BED!", "TRAIN · PUNCH · BREAK", "CRITICAL!"
 - **GFX versions (2026-10-12, matched to the top trending Simulation icons):** `icon-512-gfx.png` (no title text, like trending icons; excited open-mouth face, clean sky and grass, rim light, "+1K"/"+500" damage pops) and `thumbnail-4-gfx.png` (same look + title, "+1K", "CRITICAL!"). Use these first.
+- **Halloween versions (until Nov 1):** `icon-512-halloween.png` and `thumbnail-5-halloween.png`: purple-to-orange evening sky, moon, bats, glowing pumpkins, purple "HALLOWEEN EVENT" tag. Use these while the title is "[🎃HALLOWEEN] Break A Bed"; switch back to the `-gfx` ones after Nov 1.
 - Upload the icon and add the thumbnail as the first one, keeping the old ones after it so Roblox can compare them.
 
 ## Results (2026-10-12)
