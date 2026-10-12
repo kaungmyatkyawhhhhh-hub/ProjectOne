@@ -143,7 +143,28 @@ Pictures for each (512 × 512) are in `Break A Bed/Product Icons/`, named after 
 
 x3 Strength R$15 · x5 Strength R$25 · x10 Strength R$49 · x3 Cash R$15 · x5 Cash R$25 · Fast Punch R$10 · Server x2 Strength R$49 · Small Cash R$9 · Small Strength R$9 · Medium Strength R$15 · Big Strength R$30 · +1 Spin R$9 · Instant Break R$9 · Starter Pack R$19 · Skip All Gifts R$49
 
-Total after this: **25 developer products + 11 game passes**. Claude Code must change what the reused products give (10-minute boosts, Cash packs = 40/150/500 breaks).
+### New products created 2026-10-12 (ids for `GameConfig`)
+| Product | Id | Price |
+|---|---|---|
+| x3 STRENGTH (10 MIN) | 3718126209 | R$15 |
+| x5 STRENGTH (10 MIN) | 3718127986 | R$25 |
+| x10 STRENGTH (10 MIN) | 3718128123 | R$49 |
+| x3 CASH (10 MIN) | 3718128189 | R$15 |
+| x5 CASH (10 MIN) | 3718128239 | R$25 |
+| FAST PUNCH | 3718128314 | R$10 |
+| SERVER 2X STRENGTH | 3718128462 | R$49 |
+| SMALL CASH | 3718128538 | R$9 |
+| SMALL STRENGTH | 3718128570 | R$9 |
+| MEDIUM STRENGTH | 3718128608 | R$15 |
+| BIG STRENGTH | 3718128650 | R$30 |
+| +1 SPIN | 3718128744 | R$9 |
+| INSTANT BREAK | 3718128950 | R$9 |
+| STARTER PACK | 3718129340 | R$19 |
+| SKIP ALL GIFTS | 3718129407 | R$49 |
+
+Renamed/repriced on Roblox the same day: x2 STRENGTH (10 MIN) 3717919099 R$9, x2 CASH (10 MIN) 3717918907 R$9, +10 SPINS 3717918786 R$39.
+
+Total: **25 developer products + 11 game passes**, all created. Claude Code must change what the reused products give (10-minute boosts, Cash packs = 40/150/500 breaks).
 
 ## Steps for the owner
 1. Paste to Claude Code: *"Read my vault note Break A Bed/Shop Plan.md and add all of it to the game."*
