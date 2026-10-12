@@ -46,3 +46,27 @@ Roblox's discovery ranks games on **engagement**, not on art or ad spend alone. 
 
 ## Check every Monday
 Click-through, Day 1 / Day 7 retention, session length, the funnel's biggest drop, like ratio, and Robux per player. Write the numbers in the session note so we can see if each change helped.
+
+## Game description (2026-10-12, Halloween version, 732 of 1,000 characters)
+Only list codes once the CODES row in Settings is live. After Nov 1, replace the first line with the latest update.
+```
+🎃 HALLOWEEN EVENT! Open the limited Halloween Aura Crate before Nov 1 and get the 0.1% REAPER aura! 💀
+
+👊 Punch, get stronger and BREAK EVERY BED!
+
+💪 Train on punching posts to get stronger (it punches by itself!)
+🛏️ Break beds for Cash — from a Cardboard Bed to the INFINITY BED
+💥 Land CRITICAL hits for huge damage
+💰 Buy better posts and unlock harder beds
+🎁 Free Gifts, Daily Rewards and a Spin Wheel
+🏆 Climb the Total Damage leaderboard
+
+🎟️ CODES (Settings ⚙️ → Codes):
+RELEASE • BREAKABED • MYANMAR (group members)
+
+👍 Like the game! New code at 1,000 likes!
+⭐ Favorite to get notified of updates!
+👥 Join Myanmar Builders Club for +10% Strength!
+
+🔄 New update every week!
+```
