@@ -613,6 +613,17 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				odd, oddScore = i, score
 			end
 		end
+		-- a steering wheel turns about an axis running down the car: a side that points sideways or
+		-- up can't be it (a tilted wheel whose part isn't turned with it), so take the most forward one
+		if math.abs(vecs[odd]:Dot(f)) < 0.5 then
+			local bestDot = -1
+			for i = 1, 3 do
+				local dot = math.abs(vecs[i]:Dot(f))
+				if dot > bestDot then
+					odd, bestDot = i, dot
+				end
+			end
+		end
 		local axis = vecs[odd]
 		local discSize = math.max(ex[odd % 3 + 1], ex[(odd + 1) % 3 + 1])
 		if axis:Dot(f) < 0 then
