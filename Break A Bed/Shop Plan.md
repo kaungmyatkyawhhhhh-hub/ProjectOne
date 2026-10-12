@@ -70,6 +70,28 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 2. Follow the existing purchase safety: give the item only after Roblox confirms the purchase and the save has loaded, give each purchase once, and save active boost time.
 3. Make a list of the product names and prices for the owner to create on the Creator Dashboard, then put the ids in `GameConfig`.
 
+## Creator Dashboard checklist (2026-10-12)
+**Game passes:** nothing new, no price changes (11 passes: Strength x2, x3, x5, x7, x10, x15, Auto Punch, x2 Cash, VIP, Fast Walk, Break Spam).
+
+**Change these 10 existing developer products:**
+| Old product | New name | New price |
+|---|---|---|
+| +1 Level | +1 Level | R$5 |
+| +3 Levels | +3 Levels | R$12 |
+| +9 Levels | +9 Levels | R$29 |
+| x2 Strength boost (15 min) | x2 Strength (10 min) | R$3 |
+| x2 Cash boost (15 min) | x2 Cash (10 min) | R$3 |
+| +3 Spins | +3 Spins | R$5 |
+| +10 Spins | +10 Spins | R$15 |
+| Cash pack 1 (30 breaks) | Medium Cash | R$9 |
+| Cash pack 2 (120 breaks) | Big Cash | R$25 |
+| Cash pack 3 (400 breaks) | Huge Cash | R$49 |
+
+**Create these 17 new developer products:**
+x3 Strength R$7 · x5 Strength R$15 · x10 Strength R$29 · x3 Cash R$7 · x5 Cash R$15 · Fast Punch R$5 · Server x2 Strength R$49 · Tiny Cash R$1 · Small Cash R$3 · Tiny Strength R$1 · Small Strength R$3 · Medium Strength R$9 · Big Strength R$25 · +1 Spin R$2 · Instant Break R$2 · Starter Pack R$9 · Skip All Gifts R$49
+
+Total after this: **27 developer products + 11 game passes**. The reused products keep their ids, but Claude Code must change what they give (10-minute boosts, Cash packs = 40/150/500 breaks).
+
 ## Steps for the owner
 1. Paste to Claude Code: *"Read my vault note Break A Bed/Shop Plan.md and add all of it to the game."*
 2. Go to **create.roblox.com → Break a Bed → Monetization → Developer Products** and create each product with its name and price.
