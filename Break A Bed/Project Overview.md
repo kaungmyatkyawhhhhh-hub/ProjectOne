@@ -111,4 +111,5 @@ All numbers (beds, training items, damage, levels) are in `GameConfig`.
 - [[Break A Bed/Decisions|Decisions]]
 - [[Break A Bed/Bugs and Fixes|Bugs and Fixes]]
 - [[Break A Bed/Ideas|Ideas]]
+- [[Break A Bed/UI Kit/UI Kit|UI Kit]]: the new button and shop style (images + how to use them)
 - Sessions: [[Break A Bed/2026-10-10|2026-10-10]]

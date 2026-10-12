@@ -60,3 +60,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: bed signs show the Cash a break pays you, including x2 Cash, the Cash boost and VIP. #break-a-bed
 
 - 2026-10-12: the UI will be designed in **Figma** (owner's choice) and brought into Roblox as uploaded images, replacing the shape-drawn icons and panels. #break-a-bed
+
+- 2026-10-12: new UI style because the old one looked AI-made: bright gradient buttons with a stud pattern, thick dark outlines, a 3D bottom edge and white Fredoka One text with a dark outline. Images and rules in [[Break A Bed/UI Kit/UI Kit|UI Kit]]. #break-a-bed
