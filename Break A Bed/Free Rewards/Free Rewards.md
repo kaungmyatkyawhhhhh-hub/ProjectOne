@@ -17,6 +17,15 @@ Owner's request (2026-10-12): copy two things from the simulator the owner likes
   - It uses Roblox's **rewarded video ads** (`AdService`). Roblox only shows these to some players (age, country, device), so the board must check if an ad is available. If not, hide the board or show "Come back later!". **Claude Code: check Roblox's current AdService docs for rewarded video ads; the API is new and may need the experience to be eligible on the Creator Dashboard (Monetization → Ads / rewarded video).**
   - Limit: one ad reward every 10 minutes.
 
+## Change (2026-10-12): the chest is no longer free for everyone
+The owner wants the chest to be **for players who like the game, favorite it and join the group**.
+- Roblox only lets the game **check the group join**. Likes can't be checked at all, and favorites can only be prompted. Roblox's rules also don't allow rewards just for liking or favoriting.
+- So the chest **unlocks when the player is in Myanmar Builders Club** (checked on the server). Like and Favorite are asked on the same screen but never checked.
+- **Chest label:** "GROUP CHEST" above it (instead of "FREE!"), with a small "Like • Favorite • Join to open!" line under it until the player is a member. For members it shows "OPEN!" or the "Next chest in 14:59" timer.
+- **Walking onto the pad as a non-member:** don't give anything. Open the same 3-step screen as the Free Gift popup (1. Like the game! 2. Favorite it! with the Favorite button, 3. Join the group! with the Join button). Its button says **"I joined!"**, which checks the group again.
+- **Members:** same as before: the lid opens and Cash (20 breaks of the best bed, at least $500) flies to the counter, every 15 minutes, with the timer saved.
+- The Free Gift popup and the chest share the same group check, so a player who joins gets both.
+
 ## 2. Free Gift popup (Like, Favorite, Join the group)
 
 ![[preview-free-gift.png]]

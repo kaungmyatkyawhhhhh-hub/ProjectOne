@@ -96,3 +96,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: limited Aura Crates added to the plan (weekly crate, 6 auras boosting Strength + Walk Speed, R$49 / R$129 / R$399, pity at 50). #break-a-bed
 - 2026-10-12: stats go back to the stacked LVL / Strength / Cash bars, but in light mode (light studded panels, yellow LVL badge, green bar, yellow and green numbers). #break-a-bed
 - 2026-10-12: changed mind: keep the current stats as they are (no light stat bars). #break-a-bed
+- 2026-10-12: the chest is no longer free for everyone. It's a GROUP CHEST: it opens only for Myanmar Builders Club members (checked); like and favorite are asked but can't be checked. #break-a-bed
