@@ -134,3 +134,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: thumbnail scene lives in ServerStorage (never published) with a ThumbnailMode helper that saves and restores the game's lighting; the camera is placed from the far side of the bed so the character's face shows. #break-a-bed
 - 2026-10-12: game title on Roblox is "[🎃HALLOWEEN] Break A Bed" until Nov 1. #break-a-bed
 - 2026-10-13: Onboarding funnel only for new players, each step once per player (saved). Like goal number is set by hand (GameConfig.LikeGoal.Current). Favorite popup appears after the first new bed outside the guide, once ever, never rewarded. #break-a-bed
+- 2026-10-13: owner chose to really check favorites on the Free Gift (Roblox permission window + GetFavorite), knowing Roblox's rules don't allow rewarding favorites. Like goal is automatic via RoProxy; LikeGoal gets an adapter onto GameConfig.Codes instead of a separate CodesServer. #break-a-bed
