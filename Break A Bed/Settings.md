@@ -87,6 +87,9 @@ Claude wrote the codes system so Claude Code only has to plug it in: [[Break A B
 - Codes are typed in any case and spaces are ignored. Each one works **once per player** (saved in `RedeemedCodes`).
 - Wrong or expired code: "Invalid code" in red and the box shakes. Already used: "Already redeemed!". MYANMAR for non-members: "Join the group to use this code!".
 - `1KLIKES` is in the list but **switched off** (`Active = false`); turn it on at 1,000 likes.
+- **Automatic like goal (owner 2026-10-12: "can it not be automatic"):** [[Break A Bed/Codes/LikeGoal.luau|LikeGoal.luau]] reads the real like count every 5 minutes through **RoProxy** (`games.roproxy.com`, a free public relay; Roblox doesn't let games call roblox.com directly). It isn't an official Roblox service, so if it's down the board keeps the last number (or `LikeGoal.Fallback`). Needs **Game Settings → Security → Allow HTTP Requests** ON.
+  - When likes pass a goal, its code **switches on by itself** and the board moves to the next goal: 1K → 2.5K → 5K → 10K (codes `1KLIKES`, `2500LIKES`, `5KLIKES`, `10KLIKES`). The later codes still need entries (rewards) in `CodesServer`; until then they don't work.
+  - The board reads `ReplicatedStorage.LikeGoal` attributes `Likes`, `Goal`, `Code` and updates live ("640 / 1,000").
 - **To add a new code** later: add one entry to `Codes.List` in `CodesServer`, publish, and put it in the game description.
 
 ## For Claude Code (in the code folder: `Cashgrab` or `BAB`)
