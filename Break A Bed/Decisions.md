@@ -105,3 +105,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: changed mind: keep the current stats as they are (no light stat bars). #break-a-bed
 - 2026-10-12: the chest is no longer free for everyone. It's a GROUP CHEST: it opens only for Myanmar Builders Club members (checked); like and favorite are asked but can't be checked. #break-a-bed
 - 2026-10-12: rewarded video ads on hold (the game isn't eligible yet). The ad board is switched off (`AdBoardEnabled = false`) until it is. #break-a-bed
+- 2026-10-12: GROUP CHEST built. Non-members who step on the pad get a "Group Chest!" screen ("~ MEMBERS ONLY! ~", the chest's Cash, the same 3 steps as the Free Gift, an "I joined!" button). The group check is shared (`InGroup`, checked on join, on "I joined!" and on the Free Gift's Claim!). The ad board part was removed from the map; its code makes a board above the chest by itself when `AdBoardEnabled` is turned back on. #break-a-bed
