@@ -36,6 +36,7 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `fx-sparkle.png` | 128 × 128 | White 4-point twinkle around items |
 | `fx-glow.png` | 256 × 256 | Soft white glow behind item icons |
 | `icon-check.png`, `icon-dumbbell.png`, `icon-gear.png`, `icon-basket.png` | 256 × 256 | Claimed check, Strength packs, Settings button, SHOP button |
+| `text-<label>.png` | various | Chunky pixel text for fixed labels (Shop, Boost, Spin, Gifts, Settings, SKIP, LVL) |
 | `pixel-btn-<color>.png` | 400 × 116 | Main-screen wide buttons (gradient, diamonds, light inner border) |
 | `pixel-panel-light.png`, `pixel-badge-yellow.png`, `pixel-bar-track.png`, `pixel-bar-green.png` | various | Light stat panels, LVL badge, progress bars |
 | `fx-arrow-chevron.png` | 256 × 256 | Arrow texture for the ground path `Beam` |
@@ -77,8 +78,10 @@ Keep the **old layout**: wide buttons down the left side, stat bars at the top r
 
 ![[preview-hud.png]]
 
-- **Wide buttons** (`pixel-btn-<color>.png`, 400 × 116, shown at about 320 × 92): the icon fills the left 25% (`icon-basket.png` for Shop, `icon-dumbbell.png`, `icon-wheel.png`, `icon-gift.png`), and the label sits right after it. Colors: Shop red, x2 Power orange (with a small green price tag "R$19" hanging off its bottom-right), Spin purple, Gifts pink. Corners `UICorner` about 12%.
-- **Font:** `Font.new("rbxasset://fonts/families/PressStart2P.json")` (Roblox's pixel font, also `Enum.Font.Arcade`). White, `UIStroke` `#161822`, Thickness about 26% of the text size, plus a dark shadow copy 16% lower. Big menus keep Montserrat Heavy.
+- **Wide buttons** (`pixel-btn-<color>.png`, 400 × 116, shown at about 320 × 92): the icon fills the left 25% (`icon-basket.png` for Shop, `icon-dumbbell.png`, `icon-wheel.png`, `icon-gift.png`), and the label sits right after it. Colors: Shop red, Boost orange (the x2 Strength button, with a small green price tag "R$19" hanging off its bottom-right), Spin purple, Gifts pink. Corners `UICorner` about 12%.
+- **Pixel text exactly like the owner's "Shop" reference:** chunky (thicker than plain Press Start 2P), white, a **hard-edged** black outline that follows the pixels (square corners, not round), and a light grey bottom edge inside each letter.
+  - **Fixed button labels** use the ready-made images `text-shop.png`, `text-boost.png`, `text-spin.png`, `text-gifts.png`, `text-settings.png`, `text-skip.png`, `text-lvl.png` (ImageLabel, `ScaleType = Fit`, `ResampleMode = Pixelated` so they stay crisp).
+  - **Changing text** (numbers, timers, tutorial steps) uses two stacked TextLabels with `Font.new("rbxasset://fonts/families/PressStart2P.json")`: the **back** one is dark `#161822` with a `UIStroke` (dark, Thickness ≈ 18% of the text size, `LineJoinMode = Miter`) and is moved 2 px down; the **front** one is white (or the stat color) with a `UIStroke` in the **same color as the text** (Thickness ≈ 8% of the text size, `LineJoinMode = Miter`). The front stroke makes the letters chunky, and the back stroke is the black outline. Big menus keep Montserrat Heavy.
 - **Gradient colors (top → bottom):** red `#EC1E34 → #FF7884`, orange `#FA780A → #FFBE5A`, purple `#8C32E1 → #CD8CFF`, pink `#E11EAF → #FF82DC`, green `#28AF28 → #82EB64`, blue `#196EE1 → #6EB9FF`, yellow `#FAB900 → #FFEB6E`. The light inner border is the top color mixed 55% with white.
 - **Stats (top right):** light panels (`pixel-panel-light.png`: `#EBEEF6 → #FFFFFF`, faint grey diamonds, dark outline). The icon sticks out on the left, and the value is right-aligned in the pixel font, colored: Strength purple `#B46EFF`, Cash green `#50D23C`. Level has a yellow badge (`pixel-badge-yellow.png`, "LVL" + number) and a progress bar (`pixel-bar-track.png` + `pixel-bar-green.png`).
 - **Tutorial card:** a light panel with an orange pixel-font title `#FF9614`, a bolt icon and the light track + green fill bar. SKIP is a small red pixel button.

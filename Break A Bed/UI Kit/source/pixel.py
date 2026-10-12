@@ -56,22 +56,14 @@ def pbtn(w, h, col, radius=0.12, pat=True, dark_pat=False):
     img.alpha_composite(Image.merge('RGBA', [Image.new('L', (W, H), 255)] * 3 + [gl]))
     return img.resize((w, h), Image.LANCZOS)
 
+import pixtext
 def ptext(img, xy, s, size, fill=(255, 255, 255), anchor='lm'):
-    f = ImageFont.truetype(PFONT, size * S)
-    sw = max(2, round(size * 0.26)) * S
-    tw = int(f.getlength(s)) + 4 * sw
-    tmp = Image.new('RGBA', (tw, int(size * 2.2 * S)), (0, 0, 0, 0)); d = ImageDraw.Draw(tmp)
-    c = (tmp.width / 2, tmp.height / 2)
-    d.text((c[0], c[1] + size * 0.16 * S), s, font=f, anchor='mm', fill=OUTLINE, stroke_width=sw, stroke_fill=OUTLINE)
-    d.text(c, s, font=f, anchor='mm', fill=fill, stroke_width=sw, stroke_fill=OUTLINE)
-    t = tmp.resize((tmp.width // S, tmp.height // S), Image.LANCZOS)
-    x = xy[0] - (t.width / 2 if anchor == 'mm' else (t.width if anchor == 'rm' else 4 * sw / S / 2))
-    img.alpha_composite(t, (int(x), int(xy[1] - t.height / 2)))
+    pixtext.put(img, (xy[0], xy[1]), s, size * 1.7, fill=fill, anchor=anchor)
 
 def wide(col, ic, text, w=320, h=92, tsize=26):
     b = pbtn(w, h, col)
     b.alpha_composite(ic, (8, (h - ic.height) // 2 - 3))
-    while ImageFont.truetype(PFONT, tsize).getlength(text) + tsize * 0.6 > w - ic.width - 34: tsize -= 1
+    while pixtext.render(text, max(1, round(tsize * 1.7 / 20))).width > w - ic.width - 34 and tsize > 8: tsize -= 2
     ptext(b, (ic.width + 20, h / 2 - 3), text, tsize)
     return b
 
@@ -92,7 +84,7 @@ def main(bgpath, out):
     W, H = 1600, 900
     bg = Image.open(bgpath).convert('RGBA').resize((W, H)).filter(ImageFilter.GaussianBlur(8))
     img = Image.blend(bg, Image.new('RGBA', (W, H), (30, 40, 60, 255)), 0.1)
-    rows = [('red', basket(78), 'Shop'), ('orange', gloss(dumbbell(78)), 'x2 Power'),
+    rows = [('red', basket(78), 'Shop'), ('orange', gloss(dumbbell(78)), 'Boost'),
             ('purple', gloss(icon('wheel', 72)), 'Spin'), ('pink', gloss(icon('gift', 72)), 'Gifts')]
     for i, (c, ic, t) in enumerate(rows):
         img.alpha_composite(wide(c, ic, t), (28, 240 + i * 106))
@@ -101,7 +93,7 @@ def main(bgpath, out):
     # stats (light)
     lv = Image.new('RGBA', (400, 110), (0, 0, 0, 0))
     lp = pbtn(330, 72, 'light', dark_pat=True); lv.alpha_composite(lp, (50, 18))
-    b = bar(230, 34, 0.25, 'green'); ptext(b, (115, 16), '1/4', 14, anchor='mm'); lv.alpha_composite(b, (130, 37))
+    b = bar(230, 34, 0.25, 'green'); ptext(b, (115, 16), '1/4', 15, anchor='mm'); lv.alpha_composite(b, (130, 37))
     badge = pbtn(92, 92, 'yellow'); ptext(badge, (46, 30), 'LVL', 14, anchor='mm'); ptext(badge, (46, 60), '1', 26, anchor='mm')
     lv.alpha_composite(badge, (8, 8))
     img.alpha_composite(lv, (W - 420, 18))
@@ -111,7 +103,7 @@ def main(bgpath, out):
     tc = pbtn(560, 136, 'light', dark_pat=True)
     ptext(tc, (280, 40), 'PUNCH 10 TIMES!', 22, fill=(255, 150, 20), anchor='mm')
     tc.alpha_composite(gloss(icon('bolt', 60)), (22, 62))
-    tb = bar(430, 42, 0.3, 'green'); ptext(tb, (215, 20), '3 / 10', 16, anchor='mm'); tc.alpha_composite(tb, (100, 72))
+    tb = bar(430, 42, 0.3, 'green'); ptext(tb, (215, 20), '3/10', 17, anchor='mm'); tc.alpha_composite(tb, (100, 72))
     img.alpha_composite(tc, (int(W / 2 - 280), 24))
     sk = pbtn(120, 46, 'red', radius=0.25); ptext(sk, (60, 22), 'SKIP', 14, anchor='mm')
     img.alpha_composite(sk, (int(W / 2 + 280 - 120), 168))
