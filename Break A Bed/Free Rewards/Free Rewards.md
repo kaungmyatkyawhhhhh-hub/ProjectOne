@@ -4,7 +4,7 @@
 
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
-**Status (2026-10-12): built and tested** (see [[Break A Bed/2026-10-12|2026-10-12]]). The chest is now the EXCLUSIVE CHEST (`Workspace.ExclusiveChest`, the section below). The ad board is on hold: removed from the map, code kept behind `GameConfig.AdBoardEnabled = false`.
+**Status (2026-10-12): built and tested** (see [[Break A Bed/2026-10-12|2026-10-12]]). The chest is now the EXCLUSIVE CHEST (`Workspace.ExclusiveChest`, the section below), rebuilt per the "Fix" from the Toolbox treasure chest, on the grass left of the bed path past the entrance arch. The ad board is on hold: removed from the map, code kept behind `GameConfig.AdBoardEnabled = false`.
 
 Owner's request (2026-10-12): copy two things from the simulator the owner likes: a **FREE chest** in the world with a **"Watch Ad To Collect"** board, and a **Free Gift popup** (Like, Favorite, Join the group, then Claim).
 
