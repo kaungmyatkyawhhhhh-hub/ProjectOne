@@ -60,6 +60,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 | `Tutorial` | ModuleScript | StarterPlayer › StarterPlayerScripts | New Player Guide (2026-10-12) |
 | `FreeGifts` | ModuleScript | StarterPlayer › StarterPlayerScripts | Free Gifts menu (2026-10-12) |
 | `GiftsVfx` | ModuleScript | StarterPlayer › StarterPlayerScripts | Free Gifts window effects (2026-10-12) |
+| `SettingsMenu` | ModuleScript | StarterPlayer › StarterPlayerScripts | Settings window: volume sliders, switches, effects; saved (2026-10-12) |
 
 The Studio place has the newest scripts; the `src` files are older.
 
