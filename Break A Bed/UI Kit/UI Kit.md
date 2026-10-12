@@ -61,6 +61,16 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
   - **Money art (2026-10-12, matches the other game):** front-facing tilted bill bundles with a $ circle, a yellow band, stacked edges, a shine and thick black outlines: `money-small.png` (1 bundle), `money-medium.png` (3), `money-big.png` (pile), `money-bag.png`, `money-safe.png` (open safe full of cash). **Use these everywhere money shows**: Cash shop cards, the Cash stat icon, the ad board, the Free Gift popup, the Group Reward, daily/gift rewards, Cash products, and the shop's Cash category icon. (`icon-cash.png` and `art-cash-*.png` were replaced with the same art.)
   - Still to make at this quality: Strength (dumbbells), boosts, spins, gifts and beds.
 
+### Daily Reward window (2026-10-12: icons, not text)
+![[preview-daily.png]]
+- Each day card shows a **big picture of the reward** with a soft glow, and only a **short amount** at the bottom ("$28T", "+2 SPINS", "10 MIN"). No sentences.
+  - Cash: `money-small.png` / `money-medium.png` / `money-big.png` (bigger amounts get bigger piles).
+  - Spins: `icon-wheel.png`. Strength boost: `icon-boost-x2.png` (a dumbbell with "x2"). Levels: `icon-star.png`.
+  - Two rewards: the main icon big, the second smaller in the bottom-right corner.
+- **States:** claimed = green, dimmed, with a big green check; today = cyan with soft rays (the one to claim); later days = grey.
+- **Day 7 is a bigger gold card** with a red "MEGA!" tag and `money-safe.png` + a star, so players see the big reward coming.
+- A yellow line at the bottom: "Come back tomorrow for Day X!"
+
 ### Effects (the owner: "the effects in this game are crazy")
 - **Server announcements:** a big line at the top center for everyone, white with a dark stroke and the important part colored: "**Rong** broke the **INFINITY BED!**", "**Rong** bought **SERVER x2 STRENGTH!**". It slides in, stays 4 s and fades.
 - **Big center text** for events ("SERVER x2 STRENGTH!", "WEEKEND EVENT!", "NEW BED UNLOCKED!") with a glow and a pop-in.
