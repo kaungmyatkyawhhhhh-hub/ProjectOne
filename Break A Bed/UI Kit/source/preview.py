@@ -1,6 +1,6 @@
 import math, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from kit import box, window, label, x_mark, OUTLINE, FONT, S, mix, mask_rr
+from kit import sparkle, soft_glow, rays, box, window, label, x_mark, OUTLINE, FONT, S, mix, mask_rr
 
 def font(sz): return ImageFont.truetype(FONT, sz)
 
@@ -91,6 +91,7 @@ def main(bgpath, out):
         b = box(176, 58, col); label(b, (88, 26), t, 26)
         paste(img, b, (cx - 285 + i*190, 112), rot=r)
     ww, wh = 790, 650
+    paste(img, rays(1500, 14, 170), (cx, cy))
     paste(img, window(ww, wh), (cx, cy))
     top = cy - wh/2
     hdr = box(ww - 90, 92, 'cyan'); label(hdr, (36, 42), 'SHOP!', 46, anchor='lm')
@@ -104,6 +105,8 @@ def main(bgpath, out):
     feat.alpha_composite(slot, (fw - 262, 12))
     feat.alpha_composite(glow(230, (255, 255, 255)), (fw - 257, 4))
     feat.alpha_composite(icon('star', 165), (fw - 224, 34))
+    for sx, sy, sz in ((fw - 236, 30, 40), (fw - 70, 150, 30), (fw - 60, 40, 22), (fw - 230, 175, 24)):
+        feat.alpha_composite(sparkle(sz), (sx - sz//2, sy - sz//2))
     label(feat, (30, 48), 'VIP PACK', 48, fill=(255, 226, 12), anchor='lm')
     label(feat, (34, 98), '• x2 Cash forever', 20, anchor='lm')
     label(feat, (34, 126), '• VIP lounge + VIP post', 20, anchor='lm')
@@ -115,6 +118,8 @@ def main(bgpath, out):
         c = box(cw, 262, 'cyan')
         c.alpha_composite(glow(170, (255, 255, 255)), (cw//2 - 85, 34))
         c.alpha_composite(icon(ic, 130), (cw//2 - 65, 54))
+        for sx, sy, sz in ((cw//2 - 62, 66, 30), (cw//2 + 66, 150, 24), (cw//2 + 58, 62, 16)):
+            c.alpha_composite(sparkle(sz), (sx - sz//2, sy - sz//2))
         label(c, (cw/2, 30), t, 24)
         c.alpha_composite(price_btn(cw - 36, 56, p), (18, 190))
         paste(img, c, (cx - ww/2 + 22 + cw/2 + i*(cw + 14), top + 92 + 14 + 250 + 14 + 131))

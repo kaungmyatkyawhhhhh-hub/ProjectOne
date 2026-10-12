@@ -141,3 +141,54 @@ if __name__ == '__main__':
     box(320, 360, 'cyan').save(f'{out}/card-cyan.png')
     stud_tile().save(f'{out}/pattern-studs.png')
     print('done')
+
+# ---- effects (as in the reference): sparkles, soft glow, light rays ----
+from PIL import ImageFilter
+import math
+
+def sparkle(n=128):
+    """White 4-point twinkle star with a soft halo."""
+    W = n * S
+    im = Image.new('RGBA', (W, W), (0, 0, 0, 0))
+    halo = Image.new('L', (W, W), 0)
+    ImageDraw.Draw(halo).ellipse((W*0.3, W*0.3, W*0.7, W*0.7), fill=160)
+    halo = halo.filter(ImageFilter.GaussianBlur(W * 0.08))
+    im.paste((255, 255, 255, 255), (0, 0), halo)
+    c, r, k = W / 2, W * 0.48, W * 0.07
+    pts = []
+    for i in range(8):
+        a = -math.pi / 2 + i * math.pi / 4
+        rr = r if i % 2 == 0 else k
+        pts.append((c + rr * math.cos(a), c + rr * math.sin(a)))
+    ImageDraw.Draw(im).polygon(pts, fill=(255, 255, 255, 255))
+    return im.resize((n, n), Image.LANCZOS)
+
+def soft_glow(n=256, alpha=255):
+    g = Image.new('L', (n, n), 0)
+    ImageDraw.Draw(g).ellipse((n*0.18, n*0.18, n*0.82, n*0.82), fill=alpha)
+    g = g.filter(ImageFilter.GaussianBlur(n * 0.12))
+    im = Image.new('RGBA', (n, n), (255, 255, 255, 0)); im.putalpha(g)
+    return im
+
+def rays(n=1024, count=12, alpha=150):
+    """White light beams from the centre, fading out (spin slowly behind menus)."""
+    W = n * 2
+    m = Image.new('L', (W, W), 0)
+    d = ImageDraw.Draw(m)
+    c = W / 2
+    for i in range(count):
+        a0 = math.radians(i * 360 / count)
+        a1 = a0 + math.radians(360 / count * 0.42)
+        d.polygon([(c, c), (c + W * math.cos(a0), c + W * math.sin(a0)), (c + W * math.cos(a1), c + W * math.sin(a1))], fill=alpha)
+    fade = Image.new('L', (W, W), 0)
+    fd = ImageDraw.Draw(fade)
+    for r in range(int(c), 0, -4):
+        fd.ellipse((c - r, c - r, c + r, c + r), fill=int(255 * min(1, 1.6 * (1 - r / c)) ** 0.8))
+    m = ImageChops.multiply(m, fade).filter(ImageFilter.GaussianBlur(W * 0.006))
+    im = Image.new('RGBA', (W, W), (255, 255, 255, 0)); im.putalpha(m)
+    return im.resize((n, n), Image.LANCZOS)
+
+if __name__ == '__main__':
+    sparkle().save(f'{out}/fx-sparkle.png')
+    soft_glow().save(f'{out}/fx-glow.png')
+    rays().save(f'{out}/fx-rays.png')
