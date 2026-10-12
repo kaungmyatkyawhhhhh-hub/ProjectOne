@@ -83,6 +83,13 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 - Same style as the other buttons: orange studded box, dark outline, white text with the dark stroke, and the timer in yellow.
 - Several boosts stack under each other, each in its own pill, with the same width (the widest one).
 
+### Level bar fill (bug, still not working 2026-10-12)
+The bar shows "9.74Qa / 13.1Qa" but stays empty. It must fill with green as Strength grows.
+- Inside the dark track, add a **Fill** frame (`stats-bar-fill.png`, green studded, same corner radius), anchored on the left, with `Size = UDim2.new(progress, 0, 1, 0)` and `ClipsDescendants` on the track so the rounded end looks right. The text label sits **on top** of the fill (higher ZIndex).
+- **progress** = (Strength − Strength needed for the current level) ÷ (Strength needed for the next level − Strength needed for the current level), clamped 0–1. Don't use Strength ÷ next level directly. With huge numbers, do the math with plain numbers (not the formatted "9.74Qa" strings).
+- Update it every time Strength changes, with a short smooth tween (0.2 s). On level up: fill to 100%, flash white, reset to the new progress, and play the level-up effect.
+- Test: at 9.74Qa / 13.1Qa (if the previous level needed about 7.2Qa) the bar should be about 43% full. Check it on a fresh save as well: it should visibly grow while punching.
+
 ### Sound variety (owner 2026-10-12)
 - **Keep the bubbly "pop" on button presses**: the owner finds it satisfying. Give it a small random pitch (0.92–1.1) so it never sounds exactly the same.
 - **The "whoosh" was annoying because it played on every button.** Use it **only when a big window opens** (Shop, Auras, Free Gifts, Daily, Settings), not on normal buttons, tabs, hover or close. Don't play it again if the same window was opened in the last 2 seconds.
