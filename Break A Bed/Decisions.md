@@ -72,3 +72,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: all developer products lowered to R$1–R$49 (owner thought they were too expensive; products had only made R$36 vs R$501 from passes). Starter Pack R$9, Instant Break R$2, Skip All gifts R$49. Game passes unchanged. #break-a-bed
 
 - 2026-10-12: no product under R$3 (Roblox keeps 30% and rounds down, so R$1 earns 0). Tiny packs dropped; +1 Spin and Instant Break R$3; x3 boosts R$6. 25 products + 11 passes in total. #break-a-bed
+
+- 2026-10-12: product prices raised to R$9–R$49 (owner wants each above R$5–6). x2 boosts R$9, x3 R$15, x5 R$25, x10 R$49; packs R$9/15/30/49; Starter Pack R$19; Instant Break R$9. #break-a-bed
