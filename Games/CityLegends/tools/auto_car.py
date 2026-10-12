@@ -687,12 +687,6 @@ def main():
                     nt.links.new(found[0].outputs["Color"], inp)
             continue
         r, g, b, _ = inp.default_value
-        # Studio keeps only the colour: a metal's look comes mostly from what it reflects, so
-        # dark metallic paint would turn out black. Mix in a mid grey for that
-        met = bsdf.inputs["Metallic"]
-        if not met.is_linked and met.default_value > 0.1:
-            k = met.default_value
-            r, g, b = (x * (1 - k) + 0.18 * k for x in (r, g, b))
         img = bpy.data.images.new("col_" + m.name[:20], 8, 8)
         img.pixels = [to_srgb(r), to_srgb(g), to_srgb(b), 1.0] * 64
         img.pack()
