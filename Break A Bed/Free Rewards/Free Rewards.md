@@ -4,6 +4,8 @@
 
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
+**Status (2026-10-12): built and tested** (see [[Break A Bed/2026-10-12|2026-10-12]]). The ad board stays hidden until the ad-reward developer product exists (`GameConfig.AdReward.ProductId`) and Rewarded Video is turned on in the Creator Dashboard.
+
 Owner's request (2026-10-12): copy two things from the simulator the owner likes: a **FREE chest** in the world with a **"Watch Ad To Collect"** board, and a **Free Gift popup** (Like, Favorite, Join the group, then Claim).
 
 ## 1. Free chest + ad board (in the world, near spawn)

@@ -32,6 +32,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## Good to know
 - Studio screenshots taken through the MCP don't show floating text (damage numbers, CRITICAL!) or the guide's yellow arrow. They're still there in the game; check them by playing.
 - In the phone emulator, the MCP's mouse clicks miss buttons near the top (it doesn't count the phone's notch). Test phone buttons by hand.
+- Changing a script's text from the MCP's `execute_luau` (`.Source = ...`) doesn't reach Play mode if that script is open in a Studio editor tab (the tab's text wins). Use the MCP's edit tool for open scripts. (Found 2026-10-12 when `StudioFreshSave` didn't switch on.)
 - Test purchases in Studio: `ServerStorage.StudioTestReceipt` (made only in Studio) runs a fake purchase through the real purchase code.
 - "Future" lighting (`Lighting.Technology`) and 3D grass (`Terrain.Decoration`): current Studio removed both settings (checked 2026-10-11), so there is nothing to switch on.
 - The Studio MCP's `execute_luau` tool can't parse some newer Luau syntax (`..=`, `for _, x in tbl do`). Use `ipairs` and `x = x .. y` in snippets run that way. The game scripts themselves are fine.
