@@ -44,6 +44,14 @@ The owner renamed the Group Chest to **EXCLUSIVE CHEST** and wants it to look un
 - **Rays** (`fx-rays`) behind the chest on a BillboardGui, slowly turning, purple.
 - **Title** above it on a BillboardGui: "EXCLUSIVE CHEST" in a gold gradient with a thick dark stroke, and under it "Like • Favorite • Join" in light purple. For members it shows "OPEN!" (bouncing), or the "Next chest in 14:59" timer.
 
+**Fix (2026-10-12, owner: "it looks bad"):** the first build was made of plain blocks: too big, flat bright yellow, the neon rings too thick and bright, and it was right against the VIP lounge.
+- **Use a real chest model**, not blocks: the owner picks a good mesh chest in Toolbox → Models (search "treasure chest", a smooth mesh with curved lid, metal bands and a lock), and Claude Code recolors it: dark royal purple wood (`#4A1F7A`), gold bands with a slight metal look (Material Metal or Foil, `#E8B33A`), a pink Neon gem on the lock. No flat yellow faces.
+- **Size:** about the height of a player (5–6 studs), not bigger.
+- **Rune circle:** **one** thin ring (0.3 studs) plus a faint inner glow decal, Transparency about 0.4, a soft purple/gold, slowly turning. No thick bright cyan/pink/yellow rings.
+- **Glow:** a soft purple `PointLight` and a few slow sparkles (Rate 3–4). The chest itself shouldn't be Neon. Light pillar Transparency 0.75.
+- **Place it** on open ground with space around it (not touching the VIP lounge), facing spawn.
+- Keep the floating, bobbing, title and opening effect as written above.
+
 **Claiming (member):** the chest shakes, the lid flies open with a big white flash, a `fx-ring` shockwave, a purple + gold sparkle fountain and a beam of light, then `money-big.png` cash bursts out and flies to the counter. Play a magical "chime + whoosh" sound.
 
 **Not a member:** a small bounce, and the Exclusive Chest screen opens (same 3-step design as the Free Gift popup, but with a purple title bar "Exclusive Chest!" and `exclusive-chest.png` as the big picture) with the "I joined!" button.
