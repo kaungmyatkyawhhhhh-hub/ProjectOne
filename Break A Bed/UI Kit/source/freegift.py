@@ -14,10 +14,10 @@ def popup(bgpath, out):
     img.alpha_composite(shop3.window(ww, wh), (x0, y0))
     img.alpha_composite(sim.header(ww - 12, 100, 'cyan', 'Free Gift!'), (x0 + 6, y0 + 6))
     img.alpha_composite(kit.x_mark(sim.sbox(84, 84, 'red', radius=0.04, cell=40, stud=(0, 0))), (x0 + ww - 100, y0 + 14))
-    hero = Image.new('RGBA', (270, 270), (0, 0, 0, 0))
-    hero.alpha_composite(A.burst(270, (255, 230, 120), 14, 60))
-    hero.alpha_composite(art.cash_pile(240, 5), (15, 8))
-    img.alpha_composite(hero, (x0 + 85, y0 + 150))
+    hero = Image.new('RGBA', (360, 360), (0, 0, 0, 0))
+    hero.alpha_composite(A.burst(360, (255, 230, 120), 14, 70))
+    hero.alpha_composite(art.cash_pile(320, 5), (20, 10))
+    img.alpha_composite(hero, (x0 + 40, y0 + 110))  # step cards are drawn after this, so they sit on top of the pile
     A.stroke_text(img, (x0 + 760, y0 + 240), '~ LIMITED TIME! ~', 48, (255, 120, 120), (230, 40, 40), anchor='mm')
     A.stroke_text(img, (x0 + 760, y0 + 320), '+$50K CASH!', 70, (120, 255, 90), (40, 190, 40), anchor='mm')
     steps = [('1. Like the game!', 'thumb'), ('2. Favorite it!', 'star'), ('3. Join the group!', 'group')]
