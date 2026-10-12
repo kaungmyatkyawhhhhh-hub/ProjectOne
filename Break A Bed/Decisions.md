@@ -118,3 +118,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: Exclusive Chest doesn't turn any more; its pad is the hitbox and got a fancy look (purple stone, gold rim + studs, glow, runes). The owner moved it into the plaza at (−28, 28). #break-a-bed
 - 2026-10-12: Exclusive Chest floating effect built. The swirl is a spinning decal disc instead of a flat particle (flat particles with no speed didn't render reliably). #break-a-bed
 - 2026-10-12: Halloween Aura Crate built. A newly rolled better aura is equipped automatically. Gifting = pick a player, then the next crate purchase within 2 min goes to them. Aura star = +10% of the boost (x3 → x3.2). The right side now has 5 squares (Daily, Spin, Gifts, Auras, Settings), slightly smaller. Crate product ids still to add. #break-a-bed
+- 2026-10-12: the Exclusive Chest opens from an invisible Trigger under the chest (not the pad); its popup has a big purple "+EXCLUSIVE CHEST!". #break-a-bed
