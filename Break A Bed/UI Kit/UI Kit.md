@@ -19,6 +19,8 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 
 ![[preview-hud.png]]
 
+![[preview-stats.png]]
+
 ![[preview-shop.png]]
 
 ![[preview-shop-passes.png]]
@@ -32,7 +34,12 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 ### Main screen
 - **Left:** wide buttons **Shop** (green, cart) and **Boosts** (cyan, dumbbell), then an **on/off switch** with a white label (Auto Punch). Buttons are about 196 × 76.
 - **Right:** a column of **square buttons** for the free stuff (owner: nobody looks inside the shop for it): **Daily** reward (yellow, star), **Spin** wheel (orange, wheel), **Gifts** = Free Gifts (red, gift), then **Settings** (blue, gear). Each has a white label under it. Gifts shows its countdown instead ("0:10", yellow) and the label turns into "Ready!" when a gift can be claimed. A red badge in the top-left corner shows "!" (daily ready) or a number (free spins, gifts ready). Ready buttons do the "Ready" pulse.
-- **Stats float in the bottom-left with no panel** (kept as it is now; the owner decided against bringing back the light stat bars on 2026-10-12): a big 3D icon and a huge **italic** number (Montserrat Heavy Italic, thick dark stroke): Strength **yellow** `#FFEB1E`, Cash **green** `#5AEB3C`. Under them, white italic "Group Bonus: +10%".
+- **Stats float with no panel, polished (2026-10-12; the owner found the first build ugly).** Match `preview-stats.png`:
+  - **Level:** a shiny 3D **star** (`icon-star-level.png`) with the level number on it (white, dark stroke), then a dark studded bar (`stats-bar-track.png`) with a green studded fill (`stats-bar-fill.png`) and "0 / 4" in the middle. A small yellow "LEVEL" label goes under the bar. No plain dark pill, and no "Level 1" text.
+  - **Strength:** the red **3D dumbbell** (`icon-dumbbell-3d.png`, not the flat dark glyph), then a big **italic** number in a yellow → orange gradient with a thick dark stroke and shadow.
+  - **Cash:** `money-small.png`, then a big italic number in a light green → dark green gradient.
+  - Use **one font everywhere** (Montserrat Heavy / Heavy Italic). Line them up in a neat column with the icons the same size (about 100 px on PC).
+  - "Join group: +10% Strength!" in yellow italic under them (members don't see it).
 - **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
 
 ### Big menus (Shop, Free Gifts, Settings, Index…)
