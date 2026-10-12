@@ -64,7 +64,6 @@ On a phone (landscape) the five squares (Settings, Auras, Gifts, Spin, Daily) we
 - **Nothing in the top middle** on phones: that's where the player looks. Keep it empty.
 - Keep the small "⚡ boost" icon next to the squares only if it fits in the column; otherwise put it under the Boosts button.
 - On PC keep the current sizes (the 1080p look stays as it is).
-- **Bug (owner 2026-10-12): the big row shows first, and the phone layout only appears after a few seconds.** Pick the layout **before** the HUD is shown: keep the HUD hidden (`Enabled = false`) until the screen size is known (`workspace.CurrentCamera.ViewportSize` is not 1×1) and the phone/PC layout is applied, then show it. Re-apply only when the screen size changes (rotating, resizing), with no visible jump.
 - **A bit smaller still:** in the owner's test the squares were about 15% of the screen height. Aim for 11–12%.
 - **Test** in the Device Emulator with iPhone SE, iPhone 14 Pro Max and a Galaxy phone in landscape. Take a screenshot of each for the session log.
 
