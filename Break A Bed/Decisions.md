@@ -128,3 +128,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: Sound Effects default lowered from 85% to 40%; old saves still at 85 are moved to 40 once. #break-a-bed
 - 2026-10-12: HUD: only Shop/Boosts move to the vertical middle of the left edge; the stats go back to where they were (the LeftColumn / stats-at-top change is reverted). #break-a-bed
 - 2026-10-12: phones: HUD sized from screen height (squares ~11%, Shop/Boosts ~10%); squares in a column on the right edge, never a row across the top. #break-a-bed
+- 2026-10-13: Sound Effects default is 40% (old saves at exactly 85 move to 40 once, flag SfxDefaultV2). Left side is one LeftColumn; on phones it sits top-left above the thumbstick zone (bottom 45%), Shop/Boosts go side by side on short phones, Group Bonus hidden, right squares go to 2 columns above the jump button, and the break screen moves to the top. #break-a-bed
