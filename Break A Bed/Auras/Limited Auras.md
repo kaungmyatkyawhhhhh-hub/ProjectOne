@@ -30,6 +30,12 @@ The first limited crate is **Halloween** instead of Galaxy. It's on sale until *
 - Prices, pity, dust and the products are unchanged (AURA CRATE x1 R$49, x3 R$129, x10 R$399). Pity: guaranteed **Cursed** every 50 crates.
 - The tables and pictures below describe the Galaxy crate, kept for later.
 
+## Fix (owner 2026-10-12): Halloween card too big, and no animation
+- **Shorter:** the Featured card was taking the whole shop tab. Make it about **45% of the shop window's height** (about 300 px tall at a 1000 px wide window), full width, so the next section (Starter Pack) is already visible under it.
+  - Compact layout: title row ("HALLOWEEN AURAS", "Ends Nov 1", countdown) at the top; the **pumpkin hero smaller** (about 60% of the card height) on the left; the 6 aura slots in one row (the Reaper slot only a little bigger); the buy row at the bottom. No empty space.
+- **No animation on this card:** no rotating bursts, no bobbing, no cycling rainbow border, no pulsing. Everything is still (the countdown still ticks). The rainbow border on the Reaper slot stays as a still gradient.
+- It must also **never scale up/down** when the shop opens or scrolls (the 4th screenshot showed it shrinking).
+
 ## The Galaxy Aura Crate (later crate)
 It's on sale for **7 days**. After that it's gone and a new themed crate replaces it (Lava, Ice, Candy…). Auras you already own stay forever.
 

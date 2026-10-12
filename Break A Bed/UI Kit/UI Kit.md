@@ -90,6 +90,17 @@ The bar shows "9.74Qa / 13.1Qa" but stays empty. It must fill with green as Stre
 - Update it every time Strength changes, with a short smooth tween (0.2 s). On level up: fill to 100%, flash white, reset to the new progress, and play the level-up effect.
 - Test: at 9.74Qa / 13.1Qa (if the previous level needed about 7.2Qa) the bar should be about 43% full. Check it on a fresh save as well: it should visibly grow while punching.
 
+### More VFX on shop cards (owner 2026-10-12: "doesn't look appetizing")
+Every shop card should look rich, like the reference game. Static effects (no movement needed):
+- **Use the 3D icons, not flat glyphs:** Strength upgrade = the red 3D dumbbell (`icon-dumbbell-3d.png`), Server boost = the 3D bolt (`icon-bolt.png`), Starter Pack = the 3D gift, Cash = `money-*.png`. The flat grey dumbbell and the flat bolt look cheap.
+- **Behind every big icon:** a soft white glow (`fx-glow.png`, ImageTransparency 0.35, 1.4× the icon) plus a light burst in the card's color (`fx-rays.png` or `burst-*.png`, ImageTransparency 0.5).
+- **Sparkles:** 3–4 `fx-sparkle.png` / `fx-star4.png` around each icon, different sizes (they may twinkle slowly; that's the only movement).
+- **Card background:** a diagonal gradient + soft sunburst (as in `preview-shop.png`), not a flat color.
+- **Starter Pack:** a gold glow edge and a soft shine stripe across the card; the "70% OFF" ribbon stays.
+- **Server x2 Strength:** a big 3D bolt with a cyan glow, and small bolt sparks around it.
+- **DOUBLE Your STRENGTH:** a 3D dumbbell with a glow, and a light burst behind "x2" in yellow.
+- Item card icons may overlap the card's top edge a little (like the reference) for depth.
+
 ### Sound variety (owner 2026-10-12)
 - **Keep the bubbly "pop" on button presses**: the owner finds it satisfying. Give it a small random pitch (0.92–1.1) so it never sounds exactly the same.
 - **The "whoosh" was annoying because it played on every button.** Use it **only when a big window opens** (Shop, Auras, Free Gifts, Daily, Settings), not on normal buttons, tabs, hover or close. Don't play it again if the same window was opened in the last 2 seconds.
