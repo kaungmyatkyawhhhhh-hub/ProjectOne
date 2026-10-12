@@ -110,7 +110,7 @@ The trick to "satisfying": short sounds (under 0.4 s), a little random pitch on 
 
 ## Steps for the owner
 1. On the PC, the images are in the vault folder `Break A Bed/UI Kit/images`.
-2. In Studio: **View → Asset Manager → Bulk Import** (the icon with the up arrow) and pick all the images.
+2. In Studio, with the Break A Bed place open (it belongs to the group **Myanmar Builders Club**): **View → Asset Manager → Bulk Import** (the icon with the up arrow) and pick all the images.
 3. Paste this to Claude Code (in the `Cashgrab` folder): *"Read my vault note Break A Bed/UI Kit/UI Kit.md. I uploaded the images in Studio. Swap the shop, side buttons and HUD to this style, using the image ids from my Asset Manager."* If it can't see the ids, right-click each image in Asset Manager → **Copy Asset ID** and paste them in a list.
 
 ## Remaking the images

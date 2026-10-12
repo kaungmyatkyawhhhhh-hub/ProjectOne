@@ -6,6 +6,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 
 - **Status:** 25-bed path, 12 training items and SPAWN button done and play-tested on 2026-10-10 in the Studio place **"Break a bed test version"**. Needs saving / publishing there. See [[Break A Bed/2026-10-10|latest session]].
 - **Studio places:** "Break a bed test version" (placeId `92195183145806`) has the current game. "Break A Bed" (placeId `116443177548785`) still has the old first version.
+- **Owner:** the game is in the owner's Roblox group **Myanmar Builders Club**. Images, sounds and products for it are uploaded/created under the group. Robux from sales go to the group's funds.
 - **Ads:** first campaign and ad pictures in [[Break A Bed/Ads|Ads]].
 - **Code folder:** `C:\Users\USER\Documents\Cashgrab` (its `CLAUDE.md` has the technical notes)
 - **Place file:** `Cashgrab\BreakABed.rbxlx` is out of date (scripts only, no map). The map is saved in the Studio place as real models: Workspace folders `Path`, `Beds`, `TrainingArea`, `Upgrades`, `Signs`, `Scenery` (see [[Break A Bed/How It Works|How It Works]]).
