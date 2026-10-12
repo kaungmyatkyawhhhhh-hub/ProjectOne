@@ -26,6 +26,9 @@ The owner wants the chest to be **for players who like the game, favorite it and
 - **Members:** same as before: the lid opens and Cash (20 breaks of the best bed, at least $500) flies to the counter, every 15 minutes, with the timer saved.
 - The Free Gift popup and the chest share the same group check, so a player who joins gets both.
 
+## Ads: on hold (2026-10-12)
+The game isn't eligible for Roblox rewarded video ads yet (not enough players). **Remove the "Watch Ad To Collect" board from the map for now** (keep its code, turned off by a `GameConfig` switch `AdBoardEnabled = false`), so there's no empty board. Turn it back on when Roblox allows ads: create the AD REWARD CASH product, set `AdBoardEnabled = true` and turn on Rewarded Video in Monetization → Ads.
+
 ## 2. Free Gift popup (Like, Favorite, Join the group)
 
 ![[preview-free-gift.png]]

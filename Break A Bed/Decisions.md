@@ -97,3 +97,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: stats go back to the stacked LVL / Strength / Cash bars, but in light mode (light studded panels, yellow LVL badge, green bar, yellow and green numbers). #break-a-bed
 - 2026-10-12: changed mind: keep the current stats as they are (no light stat bars). #break-a-bed
 - 2026-10-12: the chest is no longer free for everyone. It's a GROUP CHEST: it opens only for Myanmar Builders Club members (checked); like and favorite are asked but can't be checked. #break-a-bed
+- 2026-10-12: rewarded video ads on hold (the game isn't eligible yet). The ad board is switched off (`AdBoardEnabled = false`) until it is. #break-a-bed
