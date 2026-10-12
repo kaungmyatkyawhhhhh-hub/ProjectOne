@@ -46,6 +46,10 @@ It's on sale for **7 days**. After that it's gone and a new themed crate replace
 - Duplicates turn into **Aura Dust**. 10 dust = upgrade an aura to ★ (+10% of its boost), up to ★★★.
 
 ## Prices (developer products, create them under Myanmar Builders Club)
+Product pictures (Halloween): `Product Icons/aura-crate-x1.png`, `aura-crate-x3.png`, `aura-crate-x10.png`.
+
+![[Product Icons/_aura-crates.png]]
+
 | Product | Price |
 |---|---|
 | AURA CRATE x1 | R$49 |
