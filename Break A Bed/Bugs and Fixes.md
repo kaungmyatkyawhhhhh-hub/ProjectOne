@@ -27,6 +27,8 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-12: "Maximum event re-entrancy depth" warnings** from the new text shadows. The shadow copied the label's size every time a layout moved it. Fix: it only copies when something real changed.
 - **2026-10-12: The new shop covered the side buttons on small screens.** With the category icons outside it, it was wider than the gap between the left and right buttons. Fix: every window also shrinks to fit the screen's width (leaving room for the side buttons).
 - **2026-10-12: Boosts / category icons scrolled to the wrong place.** The scroll was worked out while the window was still growing. Fix: it scrolls after the window opens, using on-screen pixels.
+- **2026-10-12: Bloom washed out the white floors** with the note's Threshold 0.92. Fix: Threshold 1.5, so only neon and lights glow.
+- **2026-10-12: Big centre texts stacked** when beds broke quickly. Fix: a new one replaces the one on screen.
 - **2026-10-12: Spin wheel slices and lines didn't line up.** They were drawn from many separate frames. Fix: one picture (`wheel-base.png`) for slices, lines, rim and hub; the landing angle is worked out from the same 45° slices, so it always stops on the server's prize.
 - **2026-10-12: Boost timer text went outside its box.** Fix: the pill grows to fit its text (AutomaticSize + a list layout + padding).
 - **2026-10-12: "Level bar stays empty".** The fill code worked, but the owner had just reached Level 116, so progress through that level was about 0%. The bar now always shows a sliver once there's any progress, and fills / flashes on level up.
