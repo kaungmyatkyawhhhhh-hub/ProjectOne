@@ -53,6 +53,19 @@ The owner **didn't** want the stats moved. **Revert the stats** to exactly where
 - **Phones:** keep the buttons at the middle-left too. Only if they would touch the thumbstick (read `PlayerGui.TouchGui.TouchControlFrame.ThumbstickFrame`) move them up just enough to clear it, with a 20 px gap. Nothing else changes on phones.
 - **Test** in the Device Emulator: 1920×1080, a tall window, iPhone SE, iPhone 14 Pro Max and iPad, landscape. The buttons should sit at the middle of the left edge, and the stats exactly where they were before.
 
+### Phone sizes (bug, owner 2026-10-12: "it's so bad on phone, make the buttons smaller")
+On a phone (landscape) the five squares (Settings, Auras, Gifts, Spin, Daily) were huge and lined up in a **row across the top middle of the screen**, covering the view. Fix:
+- **Size everything from the screen height**, not fixed pixels. On phones (touch, screen height under 500 px after Roblox's scaling):
+  - **Squares:** about **11% of the screen height** each (about 34 px on a 308 px tall screen, never more than 48 px), label text about 3.5% of the height.
+  - **Shop / Boosts:** about **10% of the screen height** tall (about 30 px), same width ratio as now.
+  - **Stats:** icons about 7% of the height, numbers to match.
+  - Badges ("!", "1") scale with the square (about 40% of its size).
+- **Squares go in a column on the right edge**, vertically centered (`AnchorPoint (1, 0.5)`, `Position (1, -12, 0.5, 0)`), never in a row across the top. If 5 don't fit above the jump button, use 2 columns side by side.
+- **Nothing in the top middle** on phones: that's where the player looks. Keep it empty.
+- Keep the small "⚡ boost" icon next to the squares only if it fits in the column; otherwise put it under the Boosts button.
+- On PC keep the current sizes (the 1080p look stays as it is).
+- **Test** in the Device Emulator with iPhone SE, iPhone 14 Pro Max and a Galaxy phone in landscape. Take a screenshot of each for the session log.
+
 ### Big menus (Shop, Free Gifts, Settings, Index…)
 - **Window:** solid dark grey `#3E4048` with a dark stud pattern and a near-black outline (`sim-window.png`). It's **not** see-through.
 - **Title bar:** bright green (`sim-header-green.png`) or cyan with **diagonal white shine stripes**. The title is white on the left, and a red square X sits on the right.
