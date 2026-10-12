@@ -26,9 +26,14 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Leaderboards:** four boards in a row by the training area (`Workspace.Signs`): TOP TOTAL DAMAGE and TOP TOTAL MONEY (top 10 across all servers, every 3 minutes), SERVER TOP DAMAGE and SERVER TOP MONEY (players in this server, live). Each shows your own total. Total money = all Cash ever earned.
 - **Bed signs** show the bed name, the Strength needed and the Cash a break pays you (with your boosts).
 - **🎁 Group Reward** button on the right of the screen: join the group, claim +10% Strength from punching forever. Needs the group id (`GameConfig.GroupId`).
-- **Robux shop and free rewards:** upgrading Strength tier button (x2 → x15), passes (Auto Punch, x2 Cash, VIP, Fast Walk, Break Spam), boosts, spins, Cash packs, Level packs, daily reward, playtime gifts, spin wheel, VIP lounge (walking into its door without VIP opens the VIP pass purchase window). Script `Shop` (StarterPlayerScripts) draws it; `VipLounge` (ServerScriptService, run once in Edit mode) built `Workspace.VipArea`. All pass and product ids are set in `GameConfig`.
+- **Robux shop and free rewards:** upgrading Strength tier button (x2 → x15), passes (Auto Punch, x2 Cash, VIP, Fast Walk, Break Spam), 25 cheap developer products ([[Break A Bed/Shop Plan|Shop Plan]]: x2/x3/x5/x10 boosts, Fast Punch, Server x2 Strength, Cash/Strength/Level/Spin packs, Instant Break, Starter Pack), daily reward, spin wheel, VIP lounge (walking into its door without VIP opens the VIP pass purchase window). Script `Shop` (StarterPlayerScripts) draws it; `VipLounge` (ServerScriptService, run once in Edit mode) built `Workspace.VipArea`. All pass and product ids are set in `GameConfig`.
+- **Boosts:** each level has its own timer; only the highest active Strength and Cash boost counts, and they multiply with passes. Timers show at the top center.
+- **Impulse buys:** "Need more Strength?" at a bed you can't break yet (x3 boost or Instant Break), "Buy again" when a boost runs out, and a one-time Starter Pack pop-up after the first bed break.
+- **Free Gifts** ([[Break A Bed/Playtime Rewards|Playtime Rewards]]): 12 gifts from 1 to 90 minutes each session, a green gift button on the right, SKIP ALL. Script `FreeGifts`.
+- **New Player Guide** ([[Break A Bed/New Player Guide|New Player Guide]]): beam + arrow through punching, the first bed and the Wooden Post, then a "Next bed" bar. Script `Tutorial`.
+- **UI Kit style** ([[Break A Bed/UI Kit/UI Kit|UI Kit]]): sharp image buttons and windows, Montserrat text with shadows, animations and UI sounds everywhere. Scripts `UIKit` and `UIAssets` (image ids).
 - **SPAWN button** at the top: only on the bed path (fades in/out), hidden in the break screen; teleports you back to spawn.
-- **Look:** chunky buttons with depth, navy panels, one bold font with thick outlines, drawn icons (cash, strength, lock, gift), no emoji; short numbers everywhere (1.14M, 1.9T, 392Qa), including Roblox's player list.
+- **Look:** the UI Kit (since 2026-10-12): sharp studded buttons with a 3D edge, see-through dark windows, Montserrat Heavy text with outlines and shadows, kit icons, no emoji; short numbers everywhere (1.14M, 1.9T, 392Qa), including Roblox's player list.
 - **Punching:** left hook → right hook → uppercut combo. **Bed breaks:** chunks, cash bills, coins, sparkles, confetti, all pooled and capped so fast breaking doesn't lag.
 - **Scripts added:** `Icons` (ReplicatedStorage), `UIKit`, `Fx`, `Combo` (StarterPlayerScripts).
 - **Scripts added 2026-10-11:** `ScreenFx`, `Ambient` (StarterPlayerScripts, screen effects and moving map pieces), `Decor` (ServerScriptService, map zones/hub/nature, run once in Edit mode). Map: 5 themed zones with gates, title sign on the entrance arch. `City` (ServerScriptService, run once in Edit mode): the city backdrop in `Workspace.City` (roads, houses, shops, apartments, towers, Bed Mart, Mattress Factory, Grand Sleep Hotel); it replaced the trees, hills and pond.
@@ -45,6 +50,11 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 | `Environment` | ModuleScript | ServerScriptService | `src/server/Environment.luau` |
 | `GameServer` | Script | ServerScriptService | `src/server/GameServer.server.luau` |
 | `GameClient` | LocalScript | StarterPlayer › StarterPlayerScripts | `src/client/GameClient.client.luau` |
+| `UIAssets` | ModuleScript | ReplicatedStorage | UI Kit image ids (2026-10-12) |
+| `Tutorial` | ModuleScript | StarterPlayer › StarterPlayerScripts | New Player Guide (2026-10-12) |
+| `FreeGifts` | ModuleScript | StarterPlayer › StarterPlayerScripts | Free Gifts menu (2026-10-12) |
+
+The Studio place has the newest scripts; the `src` files are older.
 
 All numbers (beds, training items, damage, levels) are in `GameConfig`.
 
@@ -118,4 +128,4 @@ All numbers (beds, training items, damage, levels) are in `GameConfig`.
 - [[Break A Bed/New Player Guide|New Player Guide]]: first-minute guide to fix 0% retention
 - [[Break A Bed/Playtime Rewards|Playtime Rewards]]: Free Gifts menu, 12 gifts that unlock the longer you play
 - [[Break A Bed/Shop Plan|Shop Plan]]: lots of cheap products (x2/x3/x5/x10 boosts, packs, impulse buys)
-- Sessions: [[Break A Bed/2026-10-10|2026-10-10]]
+- Sessions: [[Break A Bed/2026-10-10|2026-10-10]], [[Break A Bed/2026-10-11|2026-10-11]], [[Break A Bed/2026-10-12|2026-10-12]]
