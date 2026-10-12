@@ -17,6 +17,11 @@ Roblox style (2026-10-11 v2): a muscular bacon-hair Roblox character punching a 
 - `icon-512.png` (512x512): game icon
 The first, flat-cartoon versions are in git history.
 
+**Real-screenshot versions (2026-10-12, owner: "simple like my original, professional, not AI made"):** posed in Studio by the owner (Wooden Bed cracked, character mid-punch), title and light color grade added by Claude. Raw shots in `Ad Assets/raw/`.
+- `icon-512-real.png` (512x512): game icon, "BREAK A BED!" on top
+- `thumbnail-3-real.png` (1920x1080): "BREAK A BED!", "TRAIN · PUNCH · BREAK", "CRITICAL!"
+- Upload the icon and add the thumbnail as the first one, keeping the old ones after it so Roblox can compare them.
+
 ## Results (2026-10-12)
 - The owner spent **12K Robux** on ads.
 - The game earns about **500 Robux a day** so far.
