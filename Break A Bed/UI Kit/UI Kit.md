@@ -31,7 +31,7 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 
 ### Main screen
 - **Left:** wide buttons **Shop** (green, cart) and **Boosts** (cyan, dumbbell), then an **on/off switch** with a white label (Auto Punch). Buttons are about 196 × 76.
-- **Right:** a column of **square buttons**: Gifts (red), Spin (orange), Rewards (yellow, star), Settings (blue, gear).
+- **Right:** a column of **square buttons** for the free stuff (owner: nobody looks inside the shop for it): **Daily** reward (yellow, star), **Spin** wheel (orange, wheel), **Gifts** = Free Gifts (red, gift), then **Settings** (blue, gear). Each has a white label under it. Gifts shows its countdown instead ("0:10", yellow) and the label turns into "Ready!" when a gift can be claimed. A red badge in the top-left corner shows "!" (daily ready) or a number (free spins, gifts ready). Ready buttons do the "Ready" pulse.
 - **Stats float in the bottom-left with no panel:** a big 3D icon and a huge **italic** number (Montserrat Heavy Italic, thick dark stroke): Strength **yellow** `#FFEB1E`, Cash **green** `#5AEB3C`. Under them, white italic "Group Bonus: +10%".
 - **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
 
@@ -39,7 +39,7 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 - **Window:** solid dark grey `#3E4048` with a dark stud pattern and a near-black outline (`sim-window.png`). It's **not** see-through.
 - **Title bar:** bright green (`sim-header-green.png`) or cyan with **diagonal white shine stripes**. The title is white on the left, and a red square X sits on the right.
 - **One scrolling page** with section titles like **-- STRENGTH --** (cyan), **-- CASH --** (green), **-- PASSES --** (yellow), in big text with the dark stroke.
-- **Category buttons outside the window on the right:** a big 3D icon with a white label (Passes, Strength, Cash, Free). Clicking one scrolls to its section.
+- **Category buttons outside the window on the right:** a big 3D icon with a white label (Passes, Strength, Cash). There's **no FREE tab**: Daily, Spin and Free Gifts open from their own buttons on the main screen. Clicking one scrolls to its section.
 - **Item cards:** colored by section (Cash green, Strength cyan, passes rainbow or yellow), a white glow behind a big 3D icon that may poke out of the top, the amount in white with the number in green, then a small **purple gift button** (buy it for a friend) plus a wide **green price button** with the Robux icon.
 - **Strength tier card:** "**DOUBLE** Your STRENGTH", a big **x5 ▶ x7** (white then yellow, italic) with soft light rays behind, and the price on the right.
 

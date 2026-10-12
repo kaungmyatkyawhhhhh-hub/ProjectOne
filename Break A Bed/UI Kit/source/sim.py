@@ -199,9 +199,16 @@ def hud_main(bgpath, out):
     img.alpha_composite(hud_btn('green', 'cart', 'Shop', w=196, h=76), (18, 330))
     img.alpha_composite(hud_btn('cyan', 'dumbbell', 'Boosts', w=196, h=76), (18, 418))
     tg = toggle(False); img.alpha_composite(tg, (18, 510)); label(img, (154, 534), 'Auto Punch', 24)
-    # right square buttons
-    for i, (col, ic) in enumerate([('red', gloss(icon('gift', 64))), ('orange', gloss(icon('wheel', 62))), ('yellow', gloss(icon('star', 62))), ('blue', glyph('gear', 58))]):
-        img.alpha_composite(square_btn(col, ic), (Wd - 108, 290 + i * 100))
+    # right square buttons: the free stuff lives here, not in the shop
+    items = [('yellow', gloss(icon('star', 62)), 'Daily', '!', None), ('orange', gloss(icon('wheel', 62)), 'Spin', '2', None),
+             ('red', gloss(icon('gift', 64)), 'Gifts', None, '0:10'), ('blue', glyph('gear', 58), 'Settings', None, None)]
+    for i, (col, ic, t, badge, timer) in enumerate(items):
+        x, y = Wd - 112, 250 + i * 128
+        img.alpha_composite(square_btn(col, ic, 90), (x, y))
+        label(img, (x + 45, y + 104), timer or t, 24, fill=(255, 235, 30) if timer else (255, 255, 255), anchor='mm')
+        if badge:
+            bd = sbox(40, 40, 'red', radius=0.2, cell=8); label(bd, (20, 18), badge, 24, anchor='mm')
+            img.alpha_composite(bd, (x - 12, y - 12))
     # floating stats bottom-left
     img.alpha_composite(gloss(dumbbell(84)), (14, 690))
     itext(img, (104, 730), '122.1B', 50, (255, 235, 30))

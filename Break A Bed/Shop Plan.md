@@ -60,7 +60,7 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 - **BOOSTS tab:** all timed boosts, with the Server boost as the yellow featured card.
 - **CASH tab:** Cash, Strength and Level packs, with the Starter Pack as the featured card until it's bought.
 - **PASSES tab:** unchanged.
-- **FREE tab:** daily reward, spin wheel and the new Free Gifts ([[Break A Bed/Playtime Rewards|Playtime Rewards]]).
+- **No FREE tab** (changed 2026-10-12): the daily reward, spin wheel and Free Gifts ([[Break A Bed/Playtime Rewards|Playtime Rewards]]) each have their own square button on the right side of the main screen, because nobody looked for them inside the shop.
 - Everything uses the [[Break A Bed/UI Kit/UI Kit|UI Kit]] style.
 
 ## For Claude Code (in the code folder: `Cashgrab` or `BAB`)
