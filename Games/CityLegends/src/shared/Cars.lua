@@ -77,7 +77,7 @@ local list: { CarSpec } = {
 	{ Id = "chevo_c6", Name = "Chevo Corvette C6", Class = "Coupe", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 4.2, Handling = 0.8, Price = 78000, Color = Color3.fromRGB(26, 44, 82), Order = 37 },
 	{ Id = "porsha_boxster", Name = "Porsha Boxster 718", Class = "Coupe", Tier = "Mid", TopSpeed = 177, ZeroToSixty = 4.2, Handling = 0.9, Price = 92000, Color = Color3.fromRGB(200, 200, 206), Order = 38 },
 	{ Id = "chevo_c7", Name = "Chevo Corvette C7", Class = "Coupe", Tier = "Mid", TopSpeed = 180, ZeroToSixty = 3.8, Handling = 0.84, Price = 112000, Color = Color3.fromRGB(200, 10, 20), Order = 39 },
-	{ Id = "bentz_s63", Name = "Mercer S63 W222", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 3.9, Handling = 0.7, Price = 280000, Color = Color3.fromRGB(20, 21, 24), Order = 40 },
+	{ Id = "bentz_s63", Name = "Mercer S65 W222", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 3.9, Handling = 0.7, Price = 280000, Color = Color3.fromRGB(20, 21, 24), Order = 40 },
 	{ Id = "bentz_gt63s", Name = "Mercer GT63 S", Class = "Sedan", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 3.1, Handling = 0.8, Price = 320000, Color = Color3.fromRGB(88, 92, 98), Order = 41 },
 
 	-- High tier

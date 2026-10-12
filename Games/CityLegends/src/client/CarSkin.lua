@@ -650,6 +650,20 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		if axis:Dot(f) < 0 then
 			axis = -axis
 		end
+		-- our converted cars carry the wheel's tilt in its name ("SteeringWheel_t21"): Studio's
+		-- importer flattens the part's own turn, so the tilt can't be read from the part
+		local tiltTag = tonumber(biggest.Name:match("^SteeringWheel_t(%d+)") or "")
+		if tiltTag then
+			local t = math.rad(tiltTag)
+			axis = (f * math.cos(t) - Vector3.yAxis * math.sin(t)).Unit
+		elseif biggest.Name:match("^SteeringWheel") then
+			-- the importer keeps the part's own turn in its pivot: its look is the turning axis
+			local look = (biggest.CFrame * biggest.PivotOffset).LookVector
+			local along = look:Dot(f)
+			if math.abs(along) > 0.6 and math.abs(along) < 0.9999 then
+				axis = if along > 0 then look else -look
+			end
+		end
 		local a, b = Vector3.one * math.huge, -Vector3.one * math.huge
 		for _, d in steerParts do
 			a = a:Min(d.Position)

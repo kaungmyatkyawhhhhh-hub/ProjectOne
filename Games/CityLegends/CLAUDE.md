@@ -42,6 +42,12 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
     - It makes the road wheels into FL/FR/RL/RR parts in a `Wheels` group.
     - It names windows `SeeThrough_*` and bakes plain colours into tiny textures.
     - To find the layout numbers, render the cabin with Blender (Cycles, CPU) from the driver's eye and highlight the picked pieces.
+  - `auto_car.py`: the same conversion with no layout file (`python tools/auto_car.py car.glb <real wheelbase m> out.blend ['{"front": -1, "tilt": 20}']`).
+    - It finds the wheels, the steering wheel, the front and the steering tilt by shape.
+    - It writes a `.blend` plus a JSON report. Always render each car from outside and from the driver's seat (steering wheel highlighted) before sending: a wrong pick turns the car back to front.
+    - Meshes that get thinned out are welded at their seams first; otherwise glossy paint comes out crumpled.
+  - `pack_cars.py out.fbx id=car.blend ...`: several converted cars in one FBX, one group per car id, for a single Import 3D.
+  - `take_cars.luau <place> <ids...>` (Lune, from `Games/CityLegends`): copies imported cars from the owner's saved place into `assets/CarModels.rbxm`. It takes off Blender's `.001` name endings and makes the windows two-sided.
 
 ## Build and check
 

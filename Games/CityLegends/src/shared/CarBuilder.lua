@@ -71,7 +71,7 @@ local REAL_WB: { [string]: number } = {
 	 bnw_330i_g20 = 2.851,
 	bnw_m3_e92 = 2.761, bnw_m3_f80 = 2.812, bnw_m5_e60 = 2.889, bnw_m6_v10 = 2.78, bentz_cla45 = 2.699,
 	bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
-	dodger_challenger = 2.946, bnw_x6 = 2.933, toyoka_lc300 = 2.85, lexis_lx700 = 2.85, bentz_gle53 = 2.995, byt_u8 = 3.05, bentz_g63 = 2.89,
+	dodger_challenger = 2.946, bnw_x6 = 2.975, toyoka_lc300 = 2.85, lexis_lx700 = 2.85, bentz_gle53 = 2.915, byt_u8 = 3.05, bentz_g63 = 2.89,
 	porsha_panamera = 2.95, nisun_gtr = 2.78, astin_db9 = 2.74, astin_vantage = 2.6, ferrara_f430 = 2.6,
 	lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
 	ferrara_458 = 2.65, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,

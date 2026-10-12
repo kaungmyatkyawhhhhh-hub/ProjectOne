@@ -113,3 +113,15 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - The Maybach S680 became the Maybech 57S. Same id `bentz_maybach`, so owners keep it; the S680 model was removed.
   - Removed: LX570 and its model.
   - The new cars have no imported models yet and use the generated bodies. The owner can send Sketchfab GLBs to `imports`.
+- **Sketchfab batch (2026-10-12):** the owner sent 24 GLBs. `tools/auto_car.py` converts them without a hand-made layout file. It finds the wheels, the steering wheel (a ring about 37 cm across with no twin across the car, dashboard just ahead and empty space behind), the front, and the steering tilt. Renders of each car are checked from outside and from the driver's seat.
+  - Which file goes to which car:
+    - Maybach 57S → `bentz_maybach`; GLE 63 Coupe (2016) → `bentz_gle53`; S65 W222 → `bentz_s63`, renamed "Mercer S65 W222"; Brabus G700 → `brabos_g63` (owner: "the new g63 is for brabus");
+    - SLS and CLS 63 → their cars; LFA, Aventador (LP700), LP750 SV and Urus replace the old models;
+    - BMW 330i, 530i (G30), 540i (M5 CS file), M3 (F80 slot), M8 Gran Coupe, X6 (2020) and X7 go to their cars;
+    - 718 Cayman → `porsha_boxster`;
+    - LX700, U8, SU7, RX-8 (right-hand drive) and GT-R (2013 Black Edition) go to their cars.
+  - Not added: BYD Sealion 7 (owner: "dont add sealion"). Not used: the second GT-R file.
+  - `tools/pack_cars.py` puts several cars in one FBX (one group per car id) for one Import 3D. `tools/take_cars.luau` copies them from the owner's saved place into `assets/CarModels.rbxm`: Blender's ".001" name endings come off and windows are made two-sided.
+  - Steering tilt: Studio's importer keeps a part's own turn in its pivot, so CarSkin turns a `SteeringWheel` about its pivot's axis. That fixes the 599 and G63 too. New cars also carry it in the name (`SteeringWheel_t21`).
+  - Wheelbases match the files: GLE coupe 2.915 m, X6 (G06) 2.975 m.
+  - Open: cluster designs for the new cars (owner asked to be asked how each cluster looks); whether the new X6 keeps the M5 interior.
