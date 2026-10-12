@@ -51,6 +51,15 @@ In Roblox (real game, tall window or phone) the **Shop / Boosts buttons are far 
   - So they always sit together in the middle-left, whatever the screen size.
 - **Scale with the screen:** a `UIScale` on `LeftColumn` = `math.clamp(screenHeight / 900, 0.6, 1.2)`, updated when the screen size changes, so it's not tiny on a big monitor or huge on a phone. Never use offset positions measured from the top for one part and from the bottom for the other.
 - Keep it clear of Roblox's own top bar and chat (use `ScreenGui.ScreenInsets = CoreUISafeInsets`), so the buttons don't sit under Roblox's grey notification pills.
+- **Phones (owner 2026-10-12: "the UI might cover the joystick and annoy players"):** on touch screens (`UserInputService.TouchEnabled` and no keyboard), use a phone layout:
+  - **Keep these zones empty:** the **bottom-left** (about 40% of the screen width × 45% of the height), where the thumbstick is, and the **bottom-right** around the **jump button**. Read the real spots from `PlayerGui.TouchGui.TouchControlFrame` (`ThumbstickFrame`, `JumpButton`) `AbsolutePosition`/`AbsoluteSize` and keep 20 px away from them. Nothing goes there: no buttons, stats, toasts, timers or tutorial cards.
+  - **Left column on phones:** anchored to the **top-left** under Roblox's top bar (`AnchorPoint (0,0)`, `Position (0, 12, 0, 8)` inside the safe insets), not centered, so it stays above the thumbstick. If it would reach the thumbstick zone, shrink it (UIScale down to 0.6) instead of overlapping.
+  - **Compact stats on phones:** smaller icons (about 60%), and Group Bonus is hidden (it shows in the Shop instead).
+  - **Right squares** (Daily, Spin, Gifts, Auras, Settings): top-right, above the jump button, smaller (about 70 px). If they don't fit, make them 2 columns.
+  - **Stats are not clickable:** the stats frame and its labels use `Active = false` and no buttons, so a touch there still moves the character (Roblox's dynamic thumbstick starts wherever the left side is touched).
+  - **Break / training screen:** the health panel goes at the top center and **EXIT** at the top right. No "Click to chop!" hint over the thumbstick.
+  - **Pop-ups and toasts:** at the top center or the middle, never the bottom corners. Big windows (Shop, Gifts, Settings) cover the screen and that's fine, because the player isn't walking then; when they close, nothing stays behind.
+  - **Test:** in the Device Emulator on iPhone SE (small), iPhone 14 Pro Max, a Samsung Galaxy phone and iPad, landscape, and walk around with the thumbstick and press jump with every menu closed. Also on a real phone after publishing.
 - **Test** with the Studio Device Emulator on: 1920×1080, a tall window (1080×1920 / phone portrait), iPhone landscape and iPad, and in the real game after publishing.
 
 ### Big menus (Shop, Free Gifts, Settings, Index…)
