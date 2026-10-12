@@ -61,7 +61,7 @@ Cash and Strength packs grow with your progress, so they're worth buying at any 
 - **FREE tab:** daily reward, spin wheel and the new Free Gifts ([[Break A Bed/Playtime Rewards|Playtime Rewards]]).
 - Everything uses the [[Break A Bed/UI Kit/UI Kit|UI Kit]] style.
 
-## For Claude Code (in `Cashgrab`)
+## For Claude Code (in the code folder: `Cashgrab` or `BAB`)
 1. Add every product above to `GameConfig` (ids start at 0, so they show "Coming soon").
 2. Follow the existing purchase safety: give the item only after Roblox confirms the purchase and the save has loaded, give each purchase once, and save active boost time.
 3. Make a list of the product names and prices for the owner to create on the Creator Dashboard, then put the ids in `GameConfig`.

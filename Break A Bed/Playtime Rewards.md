@@ -39,7 +39,7 @@ Cash and Strength grow with progress, so the gifts are useful at any point.
 - The server keeps the timer and checks the claims, so they can't be cheated. Claimed gifts are kept until the player leaves.
 - The first time a gift becomes ready, a small toast says "Free gift ready!".
 
-## For Claude Code (in `Cashgrab`)
+## For Claude Code (in the code folder: `Cashgrab` or `BAB`)
 1. Replace the old 5-minute playtime gift with this (keep the daily reward and spin wheel).
 2. Put the gift list in `GameConfig` so the times and rewards are easy to change.
 3. Add the SKIP ALL product to `GameConfig` (id 0 = "Coming soon"), with the usual purchase safety.

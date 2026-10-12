@@ -111,7 +111,7 @@ The trick to "satisfying": short sounds (under 0.4 s), a little random pitch on 
 ## Steps for the owner
 1. On the PC, the images are in the vault folder `Break A Bed/UI Kit/images`.
 2. In Studio, with the Break A Bed place open (it belongs to the group **Myanmar Builders Club**): **View → Asset Manager → Bulk Import** (the icon with the up arrow) and pick all the images.
-3. Paste this to Claude Code (in the `Cashgrab` folder): *"Read my vault note Break A Bed/UI Kit/UI Kit.md. I uploaded the images in Studio. Swap the shop, side buttons and HUD to this style, using the image ids from my Asset Manager."* If it can't see the ids, right-click each image in Asset Manager → **Copy Asset ID** and paste them in a list.
+3. Paste this to Claude Code (in the code folder: `Cashgrab` or `BAB`, depending on the PC): *"Read my vault note Break A Bed/UI Kit/UI Kit.md. I uploaded the images in Studio. Swap the shop, side buttons and HUD to this style, using the image ids from my Asset Manager."* If it can't see the ids, right-click each image in Asset Manager → **Copy Asset ID** and paste them in a list.
 
 ## Remaking the images
 `source/kit.py` makes the images and `source/preview.py` makes the preview, using Python with Pillow. They need the Montserrat Black font as `fonts/Montserrat-Black.ttf` next to `source` (from the npm package `@fontsource/montserrat`). Colors are in `COLORS` at the top of `kit.py`.

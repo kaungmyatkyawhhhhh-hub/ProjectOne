@@ -27,7 +27,7 @@ The whole guide should take about 45–60 seconds.
 - **Next goal hint:** after the guide, a small top-center line always shows the next goal, for example "Next bed: Air Mattress — need 7 💪", with a progress bar. Tapping it points the beam at that goal for 5 seconds.
 - **Phones first:** check that the hint bubble, SKIP and the progress bar don't cover the thumbstick or the jump button.
 
-## For Claude Code (in `Cashgrab`)
+## For Claude Code (in the code folder: `Cashgrab` or `BAB`)
 1. Build this as a new client module (`Tutorial`) plus the `TutorialDone` save field on the server.
 2. Hold back the other pop-ups until the guide is done.
 3. Test it with a fresh save in Studio, on the PC layout and the phone emulator.
