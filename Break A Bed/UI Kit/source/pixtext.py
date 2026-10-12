@@ -5,16 +5,16 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 PFONT = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'PressStart2P.ttf')
 OUT = (22, 24, 34)
 
-def render(s, unit=4, fill=(255, 255, 255), shade=None):
+def render(s, unit=4, fill=(255, 255, 255), shade=None, height=None):
     f = ImageFont.truetype(PFONT, 16)             # 16 px = 2 px per font pixel
     w = int(f.getlength(s)) + 12
     m = Image.new('L', (w, 26), 0)
     ImageDraw.Draw(m).text((6, 5), s, font=f, fill=255)
     m = m.point(lambda v: 255 if v > 100 else 0)
     bold = Image.new('L', m.size, 0)            # thicken right and down by one font pixel
-    for dx, dy in ((0, 0), (1, 0)):
+    for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
         bold = ImageChops.lighter(bold, ImageChops.offset(m, dx, dy))
-    outline = bold.filter(ImageFilter.MaxFilter(5))
+    outline = bold.filter(ImageFilter.MaxFilter(3))
     shade_m = ImageChops.subtract(bold, ImageChops.offset(bold, 0, -1))   # bottom row of each stroke
     shade = shade or tuple(int(c * 0.82) for c in fill)
     im = Image.new('RGBA', m.size, (0, 0, 0, 0))
@@ -23,11 +23,16 @@ def render(s, unit=4, fill=(255, 255, 255), shade=None):
     im.paste(shade + (255,), (0, 0), shade_m)
     bb = im.getbbox()
     im = im.crop(bb)
+    if height:
+        sc = height / im.height
+        if sc < 2:  # small text: smooth downscale reads better than uneven blocky pixels
+            big = im.resize((im.width * 4, im.height * 4), Image.NEAREST)
+            return big.resize((round(im.width * sc), round(height)), Image.LANCZOS)
+        return im.resize((round(im.width * sc), round(height)), Image.NEAREST)
     return im.resize((im.width * unit, im.height * unit), Image.NEAREST)
 
 def put(img, xy, s, height, fill=(255, 255, 255), anchor='lm'):
-    unit = max(1, round(height / 20))
-    t = render(s, unit, fill)
+    t = render(s, fill=fill, height=height)
     x, y = xy
     if anchor == 'mm': x -= t.width / 2
     elif anchor == 'rm': x -= t.width
