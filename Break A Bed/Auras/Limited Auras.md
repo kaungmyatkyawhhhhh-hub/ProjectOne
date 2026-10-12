@@ -24,7 +24,7 @@ The first limited crate is **Halloween** instead of Galaxy. It's on sale until *
 | Cursed | 2.9% | x5 | +12 | green ghost-fire rising with a floating skull |
 | **Reaper** | **0.1%** | **x10** | **+20** | a dark hooded aura with red eyes, a floating scythe and a red/purple glow; server announcement |
 
-- Pictures (this folder): `aura-ghost.png`, `aura-bats.png`, `aura-web.png`, `aura-pumpkin.png`, `aura-cursed.png`, `aura-reaper.png`. Background: `bg-halloween.png` (night sky, big moon, bats, graveyard).
+- Pictures (this folder, **redrawn 2026-10-12 at higher quality**: thick outlines, shading, shine, glow; see `_halloween-icons.png`): `aura-ghost.png`, `aura-bats.png`, `aura-web.png`, `aura-pumpkin.png`, `aura-cursed.png`, `aura-reaper.png`. Background: `bg-halloween.png` (night sky, big moon, bats, graveyard).
 - **Card look:** an orange gradient border, the title "HALLOWEEN AURAS" in a yellow → orange gradient, "Limited Time! Ends Nov 1", a countdown to Nov 1, a big glowing pumpkin as the hero, the Reaper in the rainbow-bordered slot, and the **10-pack button is orange** instead of red.
 - **During Halloween the shop title bar is orange** instead of green.
 - Prices, pity, dust and the products are unchanged (AURA CRATE x1 R$49, x3 R$129, x10 R$399). Pity: guaranteed **Cursed** every 50 crates.
