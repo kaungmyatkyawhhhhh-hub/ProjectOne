@@ -27,6 +27,7 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `close-red.png` | 120 × 120 | Close button (X is part of the image) |
 | `panel-window.png` | 1100 × 780 | See-through dark window body (or build it as a Frame with the values below) |
 | `panel-header.png` | 1100 × 130 | Window title bar ("SHOP!"), full window width |
+| `panel-header-white.png` | 1100 × 130 | White title bar for the **animated rainbow** (tinted by a `UIGradient`) |
 | `card-yellow.png` | 1040 × 320 | Featured offer card (VIP, bundles) |
 | `card-cyan.png` | 320 × 360 | Normal shop item card |
 | `icon-<name>.png` | 256 × 256 | star, bolt, cash, wheel, gift, robux |
@@ -67,6 +68,29 @@ Base colors: cyan `#1CC8F2`, blue `#247ADE`, pink `#EC22CD`, purple `#9648E8`, o
 - Effects are images only (no `UIGradient` shine or blur on the window).
 
 **Big menu layout:** see-through dark window → cyan title bar along the top with the title on the left, red X square at the top-right corner → yellow featured card full width → a row of cyan item cards, each with a title at the top, an icon with a white glow in the middle and a green price button at the bottom. Gaps between cards are 14 px and show the dark window. Tabs sit above the window, each tilted 2–4°.
+
+## Rainbow title bar (owner's request 2026-10-12)
+The title bar of the big menus (SHOP!, FREE GIFTS, SETTINGS) is an **animated rainbow** that slowly flows sideways. The X button stays red and the title stays white.
+
+![[preview-rainbow-header.gif]]
+
+- Use `panel-header-white.png` (it keeps the studs, light rim and 3D edge in grey shades) with a `UIGradient` inside it. The gradient's colors tint the white, so the studs and edges still show.
+- Animate it on the client while the menu is open (stop it when it's closed):
+
+```lua
+local RunService = game:GetService("RunService")
+local grad = header:FindFirstChildOfClass("UIGradient")
+local conn = RunService.RenderStepped:Connect(function()
+	local t = (os.clock() * 0.25) % 1 -- speed: one full cycle every 4 s
+	local kps = {}
+	for i = 0, 8 do
+		local a = i / 8
+		kps[#kps + 1] = ColorSequenceKeypoint.new(a, Color3.fromHSV((a * 0.9 - t) % 1, 0.72, 1))
+	end
+	grad.Color = ColorSequence.new(kps)
+end)
+-- on close: conn:Disconnect()
+```
 
 ## Animations (every menu and button)
 Use `TweenService`. Every menu works the same way.
