@@ -86,7 +86,7 @@ Everything below is in the group **Myanmar Builders Club**. "Managed pricing" (R
 | Fast Walk | 2025878796 | R$49 |
 | Break Spam | 2026844790 | R$79 |
 | x2 Cash | 2026892819 | R$99 |
-| Auto Punch | 2027108793 | R$149 |
+| Auto Punch | 2027108793 | R$149 (beds only from 2026-10-12; training auto-punches for free) |
 | ~~3x Strength (old)~~ | 2025644838 | offsale, not used. `GameConfig` must use 2026640792 |
 
 ### Developer products on Roblox now → new price (keep their names and ids)

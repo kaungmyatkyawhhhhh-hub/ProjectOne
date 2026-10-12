@@ -50,6 +50,28 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Locked posts: a 🔒 and the cash price float above them, and their pad glow is gray. Press **E** at the post, or click while standing on its pad, to buy it. Without enough Cash you see "Not enough money" in red above the post.
 - Strength per punch: 1, 4, 17, 70, 290, 1.2K, 4.9K, 20K, 84K, 350K, then about ×4 each post up to 7.9B. Each post costs roughly what you earn from a handful of breaks of the bed you've just reached, so each one takes about 1–2 minutes to pay off.
 
+## Change to build (owner 2026-10-12): training works like beds, auto training is free, Auto Punch is for beds only
+**Training posts use a ProximityPrompt, like beds:**
+- Each training post gets a `ProximityPrompt` like the beds (same style, `HoldDuration` 0, `MaxActivationDistance` the same as the beds, key **E**, and a tap button on mobile).
+  - Owned post: ActionText **"Train"**, ObjectText the post name and "+70 💪" (the real amount with passes and boosts).
+  - Locked post: ActionText **"Buy"**, ObjectText the price ("$1.2K"). Pressing it buys the post (same "Not enough money" message), and the prompt turns into "Train".
+- Pressing **Train** works like pressing E at a bed: the server locks you in place facing the post, the camera moves to the side view, the name tag hides, and a small panel shows the post name, "+70 💪 per punch" and an **EXIT** button. SPAWN also ends it.
+- Remove the old "stand on the pad and click" training and its bottom hint. The pads stay only as decoration (keep their glow and lock color).
+
+**Auto training is free for everyone:**
+- Once you press Train, your character **punches by itself** (the left hook → right hook → uppercut combo) at the normal Auto Punch speed. Nobody needs a pass to train hands-free.
+- Clicking or tapping still punches, so active players can go faster (up to the normal limit, `ChopCooldown` 0.12 s; the server checks). Break Spam still makes it faster.
+- Training continues until the player presses EXIT or SPAWN, moves away (jump or walk input ends it, the same as beds) or leaves.
+- The server gives the Strength per punch (owned-post check stays), so it can't be cheated.
+
+**Auto Punch pass (R$149, id 2027108793) = beds only:**
+- The pass now only auto-punches **beds**. It no longer does anything at training posts, because training auto-punches for everyone.
+- The Auto Punch ON/OFF switch on the main screen only shows for owners and only matters at beds.
+- Update the pass text everywhere (shop card and the Roblox pass description): **"AUTO PUNCH: breaks beds for you!"**
+- Non-owners at a bed see a small hint in the break panel: "Auto break beds with **AUTO PUNCH**" with a buy button (once per session, never during the tutorial).
+
+**Tutorial:** step 1 ("Punch to get stronger!") now says **"Press E to train!"** at the Straw Post. Step 2 finishes after 10 punches (auto punches count).
+
 ## Upgrades
 - Two boards on the left of the spawn plaza, each with a green pad in front.
 - **⚡ Training Speed:** multiplies the Strength from every punch. x1.00 to start, +0.15 per level (… x4.00 → x4.15 …), up to x10.00.
@@ -78,7 +100,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## Robux shop and free rewards (2026-10-11)
 - **All ids are in `GameConfig`** (the "Robux shop" section). 0 = the button says "Coming soon". Buttons show Roblox's real price once the item exists.
 - **Strength tier button:** one gold button always offers the next multiplier pass: x2 (R$19) → x3 (39) → x5 (79) → x7 (149) → x10 (249) → x15 (399) (real prices on Roblox, 2026-10-12). Each is its own game pass. Only your highest one counts (they don't add up). When you own all of them it says "MAX x15". The old x2 pass is tier 1.
-- **Passes:** Auto Punch (punches for you at beds and training posts, with an AUTO ON/OFF button), x2 Cash, VIP (+20% Strength and Cash, gold [VIP] chat tag, the VIP lounge), Fast Walk (+12 speed), Break Spam (punch almost twice as fast).
+- **Passes:** Auto Punch (punches for you at beds, with an AUTO ON/OFF button; from 2026-10-12 training auto-punches for free, see "Change to build" above), x2 Cash, VIP (+20% Strength and Cash, gold [VIP] chat tag, the VIP lounge), Fast Walk (+12 speed), Break Spam (punch almost twice as fast).
 - **Developer products:** +1/+3/+9 Levels, x2 Strength and x2 Cash boosts (15 minutes, timer under the top bar, buying again adds time, saved and only counting down while playing), +3/+10 spins, and three Cash packs that grow with your progress (30/120/400 breaks of the best bed you've completed).
 - **Safety:** products are only given after Roblox confirms the purchase, only once your save has loaded, and each purchase only once (saved). Passes are checked when you join and right after buying.
 - **Free rewards:** daily reward (7-day streak, missing a day starts again at day 1, pops up when you join), a playtime gift every 5 minutes (every 3rd one adds a spin), and a spin wheel (a free spin every 4 hours, plus spins from rewards and the shop; the server picks the prize).
