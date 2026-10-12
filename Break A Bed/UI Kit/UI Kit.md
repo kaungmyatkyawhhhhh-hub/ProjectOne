@@ -50,7 +50,7 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 - **Price button** (`price-lime.png`): a bright lime gradient `#96F528 → #46C814` with a dark green outline, a **white Robux icon** with a dark outline (`icon-robux-white.png`) and big white numbers. The gift button is a purple gradient square (`gift-purple.png`) with the white gift glyph.
 - Card text: "**+$15K** CASH" with the amount in green, a big heavy font, a dark stroke.
 - **The biggest difference is the item art.** The other game uses really well-drawn **2D pictures** (not 3D models): thick dark outlines, shaded sides, shine and depth. Ours should match that quality.
-  - Started: `art-cash-small.png`, `art-cash-medium.png`, `art-cash-big.png` (shaded isometric cash bundles with a yellow band, shine and a thick outline). Use these for the Cash packs.
+  - **Money art (2026-10-12, matches the other game):** front-facing tilted bill bundles with a $ circle, a yellow band, stacked edges, a shine and thick black outlines: `money-small.png` (1 bundle), `money-medium.png` (3), `money-big.png` (pile), `money-bag.png`, `money-safe.png` (open safe full of cash). **Use these everywhere money shows**: Cash shop cards, the Cash stat icon, the ad board, the Free Gift popup, the Group Reward, daily/gift rewards, Cash products, and the shop's Cash category icon. (`icon-cash.png` and `art-cash-*.png` were replaced with the same art.)
   - Still to make at this quality: Strength (dumbbells), boosts, spins, gifts and beds.
 
 ### Effects (the owner: "the effects in this game are crazy")
