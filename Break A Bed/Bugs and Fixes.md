@@ -27,6 +27,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-12: "Maximum event re-entrancy depth" warnings** from the new text shadows. The shadow copied the label's size every time a layout moved it. Fix: it only copies when something real changed.
 - **2026-10-12: The new shop covered the side buttons on small screens.** With the category icons outside it, it was wider than the gap between the left and right buttons. Fix: every window also shrinks to fit the screen's width (leaving room for the side buttons).
 - **2026-10-12: Boosts / category icons scrolled to the wrong place.** The scroll was worked out while the window was still growing. Fix: it scrolls after the window opens, using on-screen pixels.
+- **2026-10-13: Exclusive Chest screen said "+$0 Cash every 15 min!"** on a new save. The amount was only set when opened through one function. Fix: it's set on build, on every open and on each new bed (40 breaks, at least $1,000, same as the payout).
 - **2026-10-13: Right squares taller than a short PC window** (6 squares with Quests). Fix: the column shrinks to fit the screen height.
 - **2026-10-13: Banners hid behind open windows.** Fix: the banner layer draws in front, like toasts.
 - **2026-10-13: Favorite popup never appeared.** An always-visible empty HUD frame named "Offer" counted as an open window. Fix: only real windows ("...Panel", "...Popup") count.
