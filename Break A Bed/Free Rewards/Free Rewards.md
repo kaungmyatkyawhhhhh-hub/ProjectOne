@@ -95,6 +95,7 @@ The owner changed their mind: **put the favorite step back** on the Free Gift an
 - Claim checks the favorite again (`PromptAllowInventoryReadAccess` once, then `AvatarEditorService:GetFavorite`; the "Favorite the game first! ⭐" and "Press Allow so we can check your favorite!" messages) plus the group on the server.
 - The owner knows Roblox's rules don't allow rewards for favorites and accepts the risk.
 - The no-reward favorite popup after a new bed stays.
+- **Done (2026-10-13):** put back and tested in Studio ([[Break A Bed/2026-10-13|2026-10-13]]). The favorite check is on the Free Gift's Claim; the chest screen asks for it, and only the group unlocks the chest, as before.
 
 ## 2. Free Gift popup (Like, Favorite, Join the group)
 
