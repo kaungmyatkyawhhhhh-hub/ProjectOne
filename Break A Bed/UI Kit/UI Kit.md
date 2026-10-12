@@ -10,6 +10,8 @@ A new UI style made 2026-10-12 to replace the look that seemed AI-made. It's bas
 
 ![[preview-gifts.png]]
 
+![[preview-settings.png]]
+
 The preview is a mockup. The prices and the Rebirth button are only examples.
 
 ## Images (`UI Kit/images/`)
@@ -30,7 +32,7 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `fx-rays.png` | 1024 × 1024 | White light rays behind open menus |
 | `fx-sparkle.png` | 128 × 128 | White 4-point twinkle around items |
 | `fx-glow.png` | 256 × 256 | Soft white glow behind item icons |
-| `icon-check.png`, `icon-dumbbell.png` | 256 × 256 | Claimed check, Strength packs |
+| `icon-check.png`, `icon-dumbbell.png`, `icon-gear.png` | 256 × 256 | Claimed check, Strength packs, Settings button |
 
 Colors: pink, purple, cyan, blue, orange, green, red, yellow, slate.
 

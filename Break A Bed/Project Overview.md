@@ -113,6 +113,7 @@ All numbers (beds, training items, damage, levels) are in `GameConfig`.
 - [[Break A Bed/Bugs and Fixes|Bugs and Fixes]]
 - [[Break A Bed/Ideas|Ideas]]
 - [[Break A Bed/UI Kit/UI Kit|UI Kit]]: the new button and shop style (images + how to use them)
+- [[Break A Bed/Settings|Settings]]: settings menu (volume, low graphics, hide HUD…) and codes
 - [[Break A Bed/Retention Plan|Retention Plan]]: AFK zone, daily quests, boost inventory, OP day 7, rebirths, events
 - [[Break A Bed/New Player Guide|New Player Guide]]: first-minute guide to fix 0% retention
 - [[Break A Bed/Playtime Rewards|Playtime Rewards]]: Free Gifts menu, 12 gifts that unlock the longer you play
