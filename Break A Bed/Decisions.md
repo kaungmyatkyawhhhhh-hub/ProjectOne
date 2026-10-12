@@ -94,4 +94,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: Daily reward, Spin wheel and Free Gifts moved out of the shop's FREE tab to their own square buttons on the right of the main screen (with badges and the gift countdown). #break-a-bed
 - 2026-10-12: light rays behind open menus removed ("circus" look). Shop restyled closer to the other game (L pattern, thin outlines, lime price buttons). Item pictures should be real 3D (ViewportFrames or 3D icon images), not flat drawings. #break-a-bed
 - 2026-10-12: limited Aura Crates added to the plan (weekly crate, 6 auras boosting Strength + Walk Speed, R$49 / R$129 / R$399, pity at 50). #break-a-bed
+- 2026-10-12: FINAL STYLE built in the game. The Strength tier button left the main screen: the "DOUBLE Your STRENGTH x1 ▶ x2" card at the top of the shop's Strength section replaces it. Boosts opens the shop at Strength. #break-a-bed
+- 2026-10-12: the pink group reward button is gone; the "Group Bonus: +10%" line under the stats opens it (yellow "Join group: +10% Strength!" until claimed). Music moved from the top bar into Settings (Music and Sounds on/off). The rainbow title bar is dropped for the green one. #break-a-bed
+- 2026-10-12: no purple "gift to a friend" button on shop cards yet: it needs real gifting code (pick a player, give it to them). #break-a-bed
 

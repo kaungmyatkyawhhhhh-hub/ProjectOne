@@ -25,6 +25,9 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-12: Windows were taller than a laptop screen** (the shop and spin wheel went off the top and bottom). Fix: every window shrinks to fit the screen when it opens.
 - **2026-10-12: Free Gifts button sat on top of the group reward button.** Its position used a screen-fit scale that hadn't updated yet. Fix: both buttons use the same scale.
 - **2026-10-12: "Maximum event re-entrancy depth" warnings** from the new text shadows. The shadow copied the label's size every time a layout moved it. Fix: it only copies when something real changed.
+- **2026-10-12: The new shop covered the side buttons on small screens.** With the category icons outside it, it was wider than the gap between the left and right buttons. Fix: every window also shrinks to fit the screen's width (leaving room for the side buttons).
+- **2026-10-12: Boosts / category icons scrolled to the wrong place.** The scroll was worked out while the window was still growing. Fix: it scrolls after the window opens, using on-screen pixels.
+- **2026-10-12: Green text drew a green shadow.** Text with a coloured word ("**x2** STRENGTH") copied the colour into its drop shadow. Fix: those labels use only the dark outline.
 
 ## Good to know
 - Studio screenshots taken through the MCP don't show floating text (damage numbers, CRITICAL!) or the guide's yellow arrow. They're still there in the game; check them by playing.
