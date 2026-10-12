@@ -104,3 +104,12 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - The hidden part-built body's red `TailGlow` light is turned off under imported models. It lit the cabins red (pink mirrors and wheels), and is the likely cause of the G63's red screen.
   - The windows of converted Sketchfab cars (`SeeThrough_*`) are two-sided (MeshPart.DoubleSided set in CarModels.rbxm), so the windscreen shows from inside.
   - The F430 cluster is 1.8x bigger to cover the gap down to the hub.
+- **Roster update (2026-10-12):** 63 cars.
+  - Added:
+    - Mazdo RX-8 (Starter);
+    - BNW M8 Gran Coupe, BNW X7, Xiaomo SU7 (Mid);
+    - Lexis LX700 and Mercer GLE 53, in the G63's grade (Mid, about $245–250k next to the G63);
+    - BYT Yangwong U8 (Mid, next to them).
+  - The Maybach S680 became the Maybech 57S. Same id `bentz_maybach`, so owners keep it; the S680 model was removed.
+  - Removed: LX570 and its model.
+  - The new cars have no imported models yet and use the generated bodies. The owner can send Sketchfab GLBs to `imports`.
