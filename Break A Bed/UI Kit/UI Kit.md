@@ -43,24 +43,15 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
   - **Bug to fix:** the level bar's green fill must show the progress (for 9.74Qa / 13.1Qa it should be about 74% full; it was showing empty).
 - **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
 
-### Left side: buttons and stats must stay together (bug, owner 2026-10-12)
-In Roblox (real game, tall window or phone) the **Shop / Boosts buttons are far above the stats**, with a big empty gap, but in Studio they look close. Cause: the buttons are anchored to the **top** of the screen and the stats to the **bottom**, so on a taller screen the gap grows.
-- **Fix:** put the Shop button, the Boosts button, the Auto Punch switch and the stats (Strength, Cash, Level, Group Bonus) in **one** frame `LeftColumn`:
-  - `AnchorPoint = (0, 0.5)`, `Position = UDim2.new(0, 16, 0.5, 0)` (left edge, vertically centered), `AutomaticSize = Y`.
-  - A `UIListLayout` (vertical, `Padding` 10 px; 18 px between the buttons and the stats).
-  - So they always sit together in the middle-left, whatever the screen size.
-- **Scale with the screen:** a `UIScale` on `LeftColumn` = `math.clamp(screenHeight / 900, 0.6, 1.2)`, updated when the screen size changes, so it's not tiny on a big monitor or huge on a phone. Never use offset positions measured from the top for one part and from the bottom for the other.
-- Keep it clear of Roblox's own top bar and chat (use `ScreenGui.ScreenInsets = CoreUISafeInsets`), so the buttons don't sit under Roblox's grey notification pills.
-- **Phones (owner 2026-10-12: "the UI might cover the joystick and annoy players"):** on touch screens (`UserInputService.TouchEnabled` and no keyboard), use a phone layout:
-  - **Keep these zones empty:** the **bottom-left** (about 40% of the screen width × 45% of the height), where the thumbstick is, and the **bottom-right** around the **jump button**. Read the real spots from `PlayerGui.TouchGui.TouchControlFrame` (`ThumbstickFrame`, `JumpButton`) `AbsolutePosition`/`AbsoluteSize` and keep 20 px away from them. Nothing goes there: no buttons, stats, toasts, timers or tutorial cards.
-  - **Left column on phones:** anchored to the **top-left** under Roblox's top bar (`AnchorPoint (0,0)`, `Position (0, 12, 0, 8)` inside the safe insets), not centered, so it stays above the thumbstick. If it would reach the thumbstick zone, shrink it (UIScale down to 0.6) instead of overlapping.
-  - **Compact stats on phones:** smaller icons (about 60%), and Group Bonus is hidden (it shows in the Shop instead).
-  - **Right squares** (Daily, Spin, Gifts, Auras, Settings): top-right, above the jump button, smaller (about 70 px). If they don't fit, make them 2 columns.
-  - **Stats are not clickable:** the stats frame and its labels use `Active = false` and no buttons, so a touch there still moves the character (Roblox's dynamic thumbstick starts wherever the left side is touched).
-  - **Break / training screen:** the health panel goes at the top center and **EXIT** at the top right. No "Click to chop!" hint over the thumbstick.
-  - **Pop-ups and toasts:** at the top center or the middle, never the bottom corners. Big windows (Shop, Gifts, Settings) cover the screen and that's fine, because the player isn't walking then; when they close, nothing stays behind.
-  - **Test:** in the Device Emulator on iPhone SE (small), iPhone 14 Pro Max, a Samsung Galaxy phone and iPad, landscape, and walk around with the thumbstick and press jump with every menu closed. Also on a real phone after publishing.
-- **Test** with the Studio Device Emulator on: 1920×1080, a tall window (1080×1920 / phone portrait), iPhone landscape and iPad, and in the real game after publishing.
+### Left side: Shop and Boosts in the middle of the left edge (owner 2026-10-12, replaces the "LeftColumn" version)
+The owner **didn't** want the stats moved. **Revert the stats** to exactly where and how they were before the LeftColumn change (same position, size and anchoring, on PC and on phones). Only the buttons move.
+- **Shop and Boosts** (and the Auto Punch switch under them, when shown) go in a small frame `LeftButtons`:
+  - `AnchorPoint = (0, 0.5)`, `Position = UDim2.new(0, 16, 0.5, 0)`: the **vertical middle of the left side** of the screen, on every screen size.
+  - A vertical `UIListLayout`, `Padding` 10 px, `AutomaticSize = Y`.
+  - A `UIScale` = `math.clamp(screenHeight / 900, 0.6, 1.2)`, updated when the screen size changes.
+- Inside the safe area (`ScreenGui.ScreenInsets = CoreUISafeInsets`).
+- **Phones:** keep the buttons at the middle-left too. Only if they would touch the thumbstick (read `PlayerGui.TouchGui.TouchControlFrame.ThumbstickFrame`) move them up just enough to clear it, with a 20 px gap. Nothing else changes on phones.
+- **Test** in the Device Emulator: 1920×1080, a tall window, iPhone SE, iPhone 14 Pro Max and iPad, landscape. The buttons should sit at the middle of the left edge, and the stats exactly where they were before.
 
 ### Big menus (Shop, Free Gifts, Settings, Index…)
 - **Window:** solid dark grey `#3E4048` with a dark stud pattern and a near-black outline (`sim-window.png`). It's **not** see-through.

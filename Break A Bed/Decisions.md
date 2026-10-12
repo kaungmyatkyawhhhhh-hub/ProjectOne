@@ -126,3 +126,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: free auto training punches every 0.25 s (4/s), so clicking (up to 8/s) is worth it; Auto Punch pass speed at beds is unchanged. Walking or jumping now ends bed breaking too (the note said "the same as beds", so both work the same). The guide ends training by itself after the 10 punches. The VIP post got a Train / "Get VIP" prompt. #break-a-bed
 - 2026-10-12: soft shutdown: on server close, save a short-lived Resume (position, activity, Free Gifts progress) and move players to new servers (Roblox "restart for updates" + reserved-server backup); applied on join if < 3 min old. #break-a-bed
 - 2026-10-12: Sound Effects default lowered from 85% to 40%; old saves still at 85 are moved to 40 once. #break-a-bed
+- 2026-10-12: HUD: only Shop/Boosts move to the vertical middle of the left edge; the stats go back to where they were (the LeftColumn / stats-at-top change is reverted). #break-a-bed
