@@ -53,6 +53,13 @@ CarSkin.CLUSTER_STYLE = {
 	lambrini_lp560 = "Gallardo",
 	lambrini_lp570 = "Gallardo",
 	kio_ev6 = "EV6",
+	astin_db9 = "Aston",
+	astin_vantage = "Aston",
+	bentz_sls = "AMGSls",
+	lambrini_urus = "Urus",
+	lambrini_lp640 = "Murcielago",
+	chevo_c6 = "C6",
+	chevo_c7 = "C7",
 } :: { [string]: string }
 
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
@@ -582,7 +589,18 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 	end
 	if biggest then
-		local sz = biggest.Size
+		-- the whole wheel's extent along the biggest piece's own sides (one piece can be just part
+		-- of the rim, e.g. the Urus's flat-bottomed wheel)
+		local lo, hi = Vector3.one * math.huge, -Vector3.one * math.huge
+		for _, d in steerParts do
+			local h = d.Size / 2
+			for _, c in { Vector3.new(1, 1, 1), Vector3.new(1, 1, -1), Vector3.new(1, -1, 1), Vector3.new(1, -1, -1), Vector3.new(-1, 1, 1), Vector3.new(-1, 1, -1), Vector3.new(-1, -1, 1), Vector3.new(-1, -1, -1) } do
+				local q = biggest.CFrame:PointToObjectSpace(d.CFrame:PointToWorldSpace(h * c))
+				lo = lo:Min(q)
+				hi = hi:Max(q)
+			end
+		end
+		local sz = hi - lo
 		-- the turning axis is the side that differs most from the other two (thin disc, or long column)
 		local ex = { sz.X, sz.Y, sz.Z }
 		local vecs = { biggest.CFrame.RightVector, biggest.CFrame.UpVector, biggest.CFrame.LookVector }

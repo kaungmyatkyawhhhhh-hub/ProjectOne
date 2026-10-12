@@ -650,6 +650,12 @@ function Driving.attach(model: Model)
 		W213 = { 2.0, 0.72 },
 		Gallardo = { 1.8, 0.66 },
 		EV6 = { 1.7, 0.62, 0.95 },
+		Aston = { 1.8, 0.62 },
+		AMGSls = { 1.7, 0.62 },
+		Urus = { 2.0, 0.72 },
+		Murcielago = { 1.9, 0.66 },
+		C6 = { 1.9, 0.66 },
+		C7 = { 2.0, 0.66 },
 	}
 	local sizeFor = if type(style) == "string" then CLUSTER_SIZE[style] else nil
 	if dashPanel and dashPanel:IsA("BasePart") and sizeFor
