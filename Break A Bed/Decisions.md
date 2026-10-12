@@ -65,3 +65,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 - 2026-10-12: game pass prices stay as they are. Add lots of cheap developer products: timed x2/x3/x5/x10 Strength and Cash boosts, Cash/Strength/Level/Spin packs from R$5, a server boost, Instant Break, and a one-time R$19 Starter Pack. See [[Break A Bed/Shop Plan|Shop Plan]]. #break-a-bed
 - 2026-10-12: UI matched exactly to the owner's reference: see-through dark window (transparency 0.41), stroke `#161822`, 3 px corners, Montserrat Heavy text with stroke + shadow. #break-a-bed
+
+- 2026-10-12: Free Gifts playtime rewards (12 gifts from 1 to 90 min, reset when you leave, SKIP ALL R$99) replace the 5-minute playtime gift. See [[Break A Bed/Playtime Rewards|Playtime Rewards]]. #break-a-bed
+- 2026-10-12: every menu and button gets animations (open, close, hover, press, idle, ready, ending) and satisfying sounds from Roblox's free Creator Store sounds. See [[Break A Bed/UI Kit/UI Kit|UI Kit]]. #break-a-bed
