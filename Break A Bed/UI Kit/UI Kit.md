@@ -78,6 +78,11 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 - **Labels:** put each label in a Frame that rotates with the wheel, at angle `i * 45°` from the top, about 28% of the wheel size out from the center, reading outward along the middle of its slice (like `preview-wheel.png`).
 - **Landing:** to stop on prize `i` (0–7), the final rotation is `-(i * 45) + 360 * spins + random(-15, 15)` degrees. The random part stays inside the slice, so the pointer always lands on the slice the server picked.
 
+### Active boost timer pill (fix 2026-10-12: text went outside the border)
+- The pill must **grow to fit its text**: use `AutomaticSize = X` on the frame, a `UIListLayout` (horizontal, centered, Padding 8 px) and a `UIPadding` of 12 px left/right. The icon, "x2 STRENGTH" and "10:29" are separate labels inside it, each with `AutomaticSize = X` and `TextScaled = false` (fixed text size, about 20 px).
+- Same style as the other buttons: orange studded box, dark outline, white text with the dark stroke, and the timer in yellow.
+- Several boosts stack under each other, each in its own pill, with the same width (the widest one).
+
 ### Sound variety (owner 2026-10-12)
 - **Keep the bubbly "pop" on button presses**: the owner finds it satisfying. Give it a small random pitch (0.92–1.1) so it never sounds exactly the same.
 - **The "whoosh" was annoying because it played on every button.** Use it **only when a big window opens** (Shop, Auras, Free Gifts, Daily, Settings), not on normal buttons, tabs, hover or close. Don't play it again if the same window was opened in the last 2 seconds.
