@@ -20,6 +20,7 @@ Based on tips from a developer whose game peaks at 1K players (TikTok, shared by
 | Trailer + thumbnails that show the game | Drawn ad art | Real gameplay thumbnails + a short trailer |
 
 ## New features
+**Built 2026-10-13:** Daily Quests, Boost Inventory and OP Day 7 (see [[Break A Bed/2026-10-13|2026-10-13]]). Next: AFK Zone.
 
 ### AFK Zone
 - A glowing pad area near spawn: stand in it and every 60 s you get Strength (your best post × 20) and a little Cash. A timer above your head shows the next payout.

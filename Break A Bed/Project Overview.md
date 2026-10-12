@@ -66,6 +66,8 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 | `OnboardingFunnel` | ModuleScript | ServerScriptService | "Onboarding" analytics funnel, 9 steps (2026-10-13) |
 | `LikeGoalBoard` | Script | ServerScriptService | The like goal board at spawn, live from ReplicatedStorage.LikeGoal (2026-10-13) |
 | `LikeGoal` | ModuleScript | ServerScriptService | Reads the real like count (RoProxy), switches on like-goal codes (2026-10-13) |
+| `Retention` | ModuleScript | ServerScriptService | Daily Quests + Boost Inventory (2026-10-13) |
+| `QuestsUI` | ModuleScript | StarterPlayer › StarterPlayerScripts | Quests window + square, MY BOOSTS window + badge (2026-10-13) |
 | `FavoritePrompt` | ModuleScript | StarterPlayer › StarterPlayerScripts | "Favorite to find it again!" popup, once (2026-10-13) |
 | `SoftShutdownScreen` | LocalScript | StarterPlayer › StarterPlayerScripts | "UPDATING THE GAME..." screen (2026-10-13) |
 
