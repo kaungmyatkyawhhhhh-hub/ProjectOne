@@ -8,6 +8,8 @@ A new UI style made 2026-10-12 to replace the look that seemed AI-made. It's bas
 
 ![[preview-shop.png]]
 
+![[preview-gifts.png]]
+
 The preview is a mockup. The prices and the Rebirth button are only examples.
 
 ## Images (`UI Kit/images/`)
@@ -28,6 +30,7 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `fx-rays.png` | 1024 × 1024 | White light rays behind open menus |
 | `fx-sparkle.png` | 128 × 128 | White 4-point twinkle around items |
 | `fx-glow.png` | 256 × 256 | Soft white glow behind item icons |
+| `icon-check.png`, `icon-dumbbell.png` | 256 × 256 | Claimed check, Strength packs |
 
 Colors: pink, purple, cyan, blue, orange, green, red, yellow, slate.
 
@@ -57,10 +60,46 @@ Base colors: cyan `#1CC8F2`, blue `#247ADE`, pink `#EC22CD`, purple `#9648E8`, o
 - **Glow:** `fx-glow.png` behind every item icon, about 1.3× the icon size, ImageTransparency 0.4.
 - **Featured slot:** the big item on the yellow card sits in a lighter yellow rounded panel (`#FFF078`, 6 px `#FFFABE` border, UICorner 46 px) with the glow behind it.
 - **Sparkles:** 3–4 `fx-sparkle.png` around each item icon at different sizes (16–40 px). They twinkle: grow from 0 to full size and fade out over about 1.2 s, each starting at a random time, looping.
-- **Opening a menu:** it pops in from 85% to 100% size with a small overshoot (Back easing, 0.25 s). Buttons shrink to 94% while pressed and bounce back.
 - Effects are images only (no `UIGradient` shine or blur on the window).
 
 **Big menu layout:** see-through dark window → cyan title bar along the top with the title on the left, red X square at the top-right corner → yellow featured card full width → a row of cyan item cards, each with a title at the top, an icon with a white glow in the middle and a green price button at the bottom. Gaps between cards are 14 px and show the dark window. Tabs sit above the window, each tilted 2–4°.
+
+## Animations (every menu and button)
+Use `TweenService`. Every menu works the same way.
+
+| When | What happens |
+|---|---|
+| **Opening** a menu | The window grows from 80% to 100% size with a small overshoot (Back Out, 0.28 s) while fading in. The light rays fade in and start spinning. The title bar drops in from 20 px above (0.2 s). The cards pop in one after another (each 0.03 s later, from 60% size, Back Out 0.22 s). |
+| **Closing** | The window shrinks to 85% and fades out (Quad In, 0.15 s). The rays fade out. Cards don't animate on close. |
+| **Hovering** (PC) | The button grows to 106% and tilts 2° (0.12 s, Quad Out), and goes back when the mouse leaves. Cards also lift 4 px. |
+| **Pressing** | Down to 92% (0.06 s), then back to 100% with a bounce (Back Out, 0.18 s). |
+| **Idle** (always) | Side buttons gently bob up and down 2 px (2.4 s sine loop, each one out of step with the others). Item icons float 3 px and sway ±4°. The featured item slowly breathes between 100% and 104%. Sparkles twinkle. The rays keep turning (one turn every 40 s). |
+| **Ready** (something to claim or free) | The card or button pulses between 100% and 106% every 0.9 s. A red badge bounces in. The HUD gift button wiggles ±8° for 0.4 s every 3 s. |
+| **Ending** (timer hits 0 or a claim) | The card flashes white (a white overlay going from 0.3 to 1 transparency over 0.25 s) and bursts 6–8 sparkles outward. The reward icon flies to its HUD counter (Cash, Strength or Spins) in 0.5 s, and the counter pops to 115% and counts up. The check "stamps" in from 160% to 100% (Back Out). |
+| **Purchase done** | A big center popup ("+x3 STRENGTH!") pops in with rays and confetti, stays 1.2 s, then floats up and fades. |
+| **Not enough money** | The button shakes left and right 3 times (6 px, 0.25 s total) and flashes red. |
+| **Tabs** | The chosen tab rises 6 px and grows to 108%, and the others go back. The page content slides 30 px in the direction of the tab and fades in (0.18 s). |
+
+Keep it smooth on phones: tween only Size, Position, Rotation and transparency, and stop the idle loops while a menu is closed.
+
+## Sounds (satisfying, every action)
+Put them in `SoundService` under a `UI` folder. Use **Roblox's own free sounds from the Creator Store** (Toolbox → Audio, made by Roblox), not uploads, so they never get removed. Play UI sounds locally (only the player hears them), and follow the 🔊 mute button.
+
+| Action | Sound to find in the Creator Store | Volume | Pitch |
+|---|---|---|---|
+| Hover (PC) | short soft "tick" / "UI hover" | 0.15 | random 1.0–1.1 |
+| Button press | bubbly "pop" / "UI click" | 0.45 | random 0.95–1.05 |
+| Open a menu | soft "whoosh" + "pop" | 0.5 | 1.0 |
+| Close a menu | lower "pop" / "swipe" | 0.4 | 0.9 |
+| Tab switch | "swipe" / "page flip" | 0.35 | 1.1 |
+| Gift ready / timer ends | bright "ding" / "notification" | 0.5 | 1.0 |
+| Claim a reward | "coin" + "sparkle" chime, played together | 0.6 | 1.0 |
+| Cash counting up | tiny "coin tick" each step, with pitch rising as it counts | 0.2 | 1.0 → 1.5 |
+| Purchase done | short "fanfare" / "level up" / "success" | 0.6 | 1.0 |
+| Not enough money | soft "error" / "denied" buzz | 0.35 | 1.0 |
+| Level up | "level up" jingle | 0.6 | 1.0 |
+
+The trick to "satisfying": short sounds (under 0.4 s), a little random pitch on clicks so repeats never sound the same, and rising pitch when the same thing happens quickly in a row (like claiming several gifts or counting Cash).
 
 ## How to use them in Roblox (for Claude Code)
 - **Buttons, cards and panels:** use an ImageButton or ImageLabel with `ScaleType = Stretch` and `BackgroundTransparency = 1`. Add a `UIAspectRatioConstraint` with the image's width ÷ height so they never squash.

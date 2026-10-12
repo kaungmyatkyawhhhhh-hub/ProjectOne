@@ -58,7 +58,7 @@ Cash and Strength packs grow with your progress, so they're worth buying at any 
 - **BOOSTS tab:** all timed boosts, with the Server boost as the yellow featured card.
 - **CASH tab:** Cash, Strength and Level packs, with the Starter Pack as the featured card until it's bought.
 - **PASSES tab:** unchanged.
-- **FREE tab:** unchanged (daily, gift, spin).
+- **FREE tab:** daily reward, spin wheel and the new Free Gifts ([[Break A Bed/Playtime Rewards|Playtime Rewards]]).
 - Everything uses the [[Break A Bed/UI Kit/UI Kit|UI Kit]] style.
 
 ## For Claude Code (in `Cashgrab`)
