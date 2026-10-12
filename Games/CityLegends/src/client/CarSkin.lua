@@ -703,6 +703,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		out.steer = { mount = mount, parts = parts, radius = radius }
 	end
 
+	local roofTop: number? = nil
+	local generatedWheel = false
 	-- driver's eye: above the driver's seat, at 80% of the roof height there
 	local seatPart = seat or src:FindFirstChildWhichIsA("Seat", true)
 	local sp: Vector3? = if seatPart then frame:PointToObjectSpace(seatPart.Position) else nil
@@ -730,6 +732,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 	if sp then
 		local roof = 0
+		-- (roofTop below keeps the levelled eye under the roof)
 		for _, d in visible do
 			if inWheel[d] then
 				continue
@@ -749,6 +752,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		if roof > 0 then
 			local lift = (src:GetAttribute("EyeHeight") :: number?) or 0 -- per-car tweak, in studs
 			out.eye = Vector3.new(sp.X * scale, roof * scale * 0.8 + lift, sp.Z * scale + 0.3)
+			roofTop = roof * scale
 		end
 	end
 
@@ -818,6 +822,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		local column = piece(Enum.PartType.Cylinder, Vector3.new(0.9, 0.26, 0.26), leather, Enum.Material.SmoothPlastic)
 		table.insert(parts, { part = column :: any, offset = CFrame.new(0, 0, -0.5) * CFrame.Angles(0, math.pi / 2, 0) })
 		out.steer = { mount = mount, parts = parts, radius = R * 0.95 }
+		generatedWheel = true
 	end
 
 	-- the driver sits a real reach behind the wheel (~60 cm): some models' seats put the eye too close
@@ -827,6 +832,17 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		if eye.Z - wz < 1.4 then
 			out.eye = Vector3.new(eye.X, eye.Y, math.min(wz + 1.4, eye.Z + 0.3))
 		end
+	end
+	-- every car the same view (owner): the eye sits the same height above the steering wheel
+	-- (0.8 studs, ~27 cm), kept under the roof; an EyeHeight attribute still nudges it
+	if out.steer and out.eye and not generatedWheel then
+		local eye = out.eye :: Vector3
+		local lift = (src:GetAttribute("EyeHeight") :: number?) or 0
+		local y = out.steer.mount.Position.Y + 0.8 + lift
+		if roofTop then
+			y = math.min(y, roofTop - 0.35)
+		end
+		out.eye = Vector3.new(eye.X, y, eye.Z)
 	end
 
 	-- gauges: look from the eye through the top half of the wheel and stop at the first
@@ -1453,9 +1469,12 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			return
 		end
 		if ownInterior then
-			-- screens drawn on our hidden dash (old cluster, infotainment) go too
+			-- screens drawn on our hidden dash (old cluster, infotainment) go too, and the hidden
+			-- body's red tail glow: it shone into the model's cabin (pink mirrors, a red screen)
 			for _, g in d:GetChildren() do
 				if g:IsA("SurfaceGui") then
+					g.Enabled = false
+				elseif g:IsA("PointLight") and g.Name == "TailGlow" then
 					g.Enabled = false
 				end
 			end

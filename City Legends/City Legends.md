@@ -99,3 +99,8 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
     - F430: up 0.14 studs and 1.2x bigger;
     - LP570: up 0.15 studs and 1.25x bigger.
   - Open: the G63 shows a dark red screen in first person. Its model looks right from that eye position, so the cause is not found yet.
+- **Same camera height and fixes (2026-10-12):**
+  - Every car with its own steering wheel puts the first-person eye 0.8 studs above the wheel centre (owner: every car the same height).
+  - The hidden part-built body's red `TailGlow` light is turned off under imported models. It lit the cabins red (pink mirrors and wheels), and is the likely cause of the G63's red screen.
+  - The windows of converted Sketchfab cars (`SeeThrough_*`) are two-sided (MeshPart.DoubleSided set in CarModels.rbxm), so the windscreen shows from inside.
+  - The F430 cluster is 1.8x bigger to cover the gap down to the hub.
