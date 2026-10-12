@@ -155,7 +155,7 @@ end
 Config.Camera = {
 	ChaseFov = 70,
 	InteriorFov = 64, -- from the driver's seat: 74 + the speed boost made the cabin look stretched (fish-eye)
-	InteriorFovBoost = 0.3, -- share of MaxFovBoost used in the cockpit at top speed
+	InteriorFovBoost = 0, -- owner: the same view in every car at every speed (the outside camera still widens)
 	MaxFovBoost = 32,
 	ChaseDistance = 17,
 	ChaseHeight = 5.2,

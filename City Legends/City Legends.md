@@ -90,3 +90,12 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - The M5, M6 and X6 cluster panel is grey instead of black (style `BMWClassicGrey`); the M3 stays black.
   - The M5 cluster is 25% bigger.
 - **Don't save over CityLegends.rbxl (2026-10-12):** the owner saved their place over it, and that undid a new build (older scripts). Their imported 599 is now in `assets/CarModels.rbxm`, so it is in every build. Their own places go in as `CityLegendsCars.rbxl` (or any other name), and Claude copies new cars from there.
+- **Roster and clusters (2026-10-12):**
+  - Removed, at the owner's request: Gallardo LP560-4, CLS 550, CLS 55 and E200. That leaves 57 cars. Saved games simply drop them.
+  - The new 2015 G63 is in CarModels, from the owner's CityLegendsCars.
+  - Cockpit FOV is a fixed 64 in every car at every speed.
+  - Cluster line-ups:
+    - 599: on the eye line to its own cluster, from its 3D file;
+    - F430: up 0.14 studs and 1.2x bigger;
+    - LP570: up 0.15 studs and 1.25x bigger.
+  - Open: the G63 shows a dark red screen in first person. Its model looks right from that eye position, so the cause is not found yet.

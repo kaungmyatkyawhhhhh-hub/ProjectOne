@@ -49,10 +49,8 @@ CarSkin.CLUSTER_STYLE = {
 	bnw_x6 = "BMWClassicGrey", -- same cabin and cluster as the M5
 	bentz_cls63s = "AMGBiturbo",
 	bentz_g63 = "G63",
-	bentz_e200 = "W212",
 	bentz_e300 = "W212",
 	bentz_e400 = "W213",
-	lambrini_lp560 = "Gallardo",
 	lambrini_lp570 = "Gallardo",
 	kio_ev6 = "EV6",
 	astin_db9 = "Aston",
@@ -69,7 +67,6 @@ CarSkin.CLUSTER_STYLE = {
 CarSkin.INTERIOR_DONOR = {
 	porsha_gt3 = { from = "porsha_panamera", rear = 1.8 },
 	bnw_x6 = { from = "bnw_m5_e60", rear = 3.6 },
-	lambrini_lp560 = { from = "lambrini_lp570", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
 
 -- cars that take only another model's steering wheel, put where their own one sits

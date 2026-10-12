@@ -67,13 +67,13 @@ CarBuilder.STUDS_PER_METRE = 3.0
 local REAL_WB: { [string]: number } = {
 	suzaki_swift = 2.45, toyoka_belta = 2.55, byt_dolphin = 2.7, kio_ev6 = 2.9, byt_seal = 2.92,
 	toyoka_camri = 2.825, toyoka_crown = 2.85, toyoka_alfard = 3.0, toyoka_lc200 = 2.85, nisun_350z = 2.65,
-	bnw_530i = 2.975, bnw_540i = 2.975, bentz_e200 = 2.939, bentz_e300 = 2.939, bentz_e400 = 2.939,
+	bnw_530i = 2.975, bnw_540i = 2.975, bentz_e300 = 2.939, bentz_e400 = 2.939,
 	 bnw_330i_g20 = 2.851,
 	bnw_m3_e92 = 2.761, bnw_m3_f80 = 2.812, bnw_m5_e60 = 2.889, bnw_m6_v10 = 2.78, bentz_cla45 = 2.699,
-	bentz_cls550 = 2.874, bentz_cls55 = 2.854, bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
+	bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
 	dodger_challenger = 2.946, bnw_x6 = 2.933, toyoka_lc300 = 2.85, lexis_lx570 = 2.85, bentz_g63 = 2.89,
 	porsha_panamera = 2.95, nisun_gtr = 2.78, astin_db9 = 2.74, astin_vantage = 2.6, ferrara_f430 = 2.6,
-	lambrini_lp560 = 2.56, lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
+	lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
 	ferrara_458 = 2.65, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,
 	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.295,
 	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lambrini_lp750 = 2.7,
@@ -82,9 +82,7 @@ local REAL_WB: { [string]: number } = {
 }
 
 -- cars that share another car's imported model (same body and interior) until they get their own
-CarBuilder.MODEL_ALIAS = {
-	lambrini_lp570 = "lambrini_lp560",
-} :: { [string]: string }
+CarBuilder.MODEL_ALIAS = {} :: { [string]: string }
 
 -- An imported model's wheelbase and wheel radius (its own studs), from its Wheels folder
 local function partsBounds(inst: Instance): (Vector3?, Vector3?)

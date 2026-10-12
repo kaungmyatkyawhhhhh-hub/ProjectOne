@@ -675,8 +675,9 @@ function Driving.attach(model: Model)
 		-- per-car line-up over the car's own cluster: { up (studs), forward (studs), size (x) };
 		-- ClusterUp / ClusterForward / ClusterSize attributes on the model still win
 		local CLUSTER_NUDGE = {
-			ferrara_599 = { -0.3, 0, 1 }, -- owner's screenshot: sat one panel-height above the car's own
-			ferrara_f430 = { -0.22, 0, 1.1 }, -- over the F430's own 1.1 x 0.5 gauge face
+			ferrara_599 = { 0, 0, 1.03 }, -- on the line from the eye to the car's own cluster (from its 3D file)
+			ferrara_f430 = { 0.14, 0, 1.2 }, -- owner's screenshot: up over its own cluster, a little bigger
+			lambrini_lp570 = { 0.15, 0, 1.25 }, -- owner's screenshot: up above the wheel hub, bigger
 			bnw_m5_e60 = { 0, 0, 1.25 }, -- owner: bigger
 		}
 		local nudge = CLUSTER_NUDGE[spec.Id] or { 0, 0, 1 }
