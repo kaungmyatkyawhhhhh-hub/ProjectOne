@@ -79,5 +79,5 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - colours kept (red with a black roof);
   - the steering wheel turns;
   - 23 parts.
-  - The cluster is "Ferrari599": yellow rev counter in the middle with a needle, analog speedometer with a needle on the left, gear/speed/clock screen on the right.
+  - The cluster is "Ferrari599", from the owner's photo of the real one: a plain dark screen on the left (no digital readouts), the big yellow rev counter in the middle, the black 20–220 mph speedometer on the right, thin red needles, carbon surround.
   - Cars with no seat in the model now put the driver's eye about 63 cm behind their own steering wheel.
