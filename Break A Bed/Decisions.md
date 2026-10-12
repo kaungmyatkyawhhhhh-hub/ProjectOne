@@ -70,3 +70,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-12: every menu and button gets animations (open, close, hover, press, idle, ready, ending) and satisfying sounds from Roblox's free Creator Store sounds. See [[Break A Bed/UI Kit/UI Kit|UI Kit]]. #break-a-bed
 
 - 2026-10-12: all developer products lowered to R$1–R$49 (owner thought they were too expensive; products had only made R$36 vs R$501 from passes). Starter Pack R$9, Instant Break R$2, Skip All gifts R$49. Game passes unchanged. #break-a-bed
+
+- 2026-10-12: no product under R$3 (Roblox keeps 30% and rounds down, so R$1 earns 0). Tiny packs dropped; +1 Spin and Instant Break R$3; x3 boosts R$6. 25 products + 11 passes in total. #break-a-bed
