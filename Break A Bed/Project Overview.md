@@ -63,6 +63,9 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 | `GiftsVfx` | ModuleScript | StarterPlayer › StarterPlayerScripts | Free Gifts window effects (2026-10-12) |
 | `SettingsMenu` | ModuleScript | StarterPlayer › StarterPlayerScripts | Settings window: volume sliders, 5 switches, CODES, Replay Tutorial; saved (2026-10-12/13) |
 | `SoftShutdown` | Script | ServerScriptService | Moves players to a new server on an update (2026-10-13) |
+| `OnboardingFunnel` | ModuleScript | ServerScriptService | "Onboarding" analytics funnel, 9 steps (2026-10-13) |
+| `LikeGoalBoard` | Script | ServerScriptService | The like goal board at spawn (2026-10-13) |
+| `FavoritePrompt` | ModuleScript | StarterPlayer › StarterPlayerScripts | "Favorite to find it again!" popup, once (2026-10-13) |
 | `SoftShutdownScreen` | LocalScript | StarterPlayer › StarterPlayerScripts | "UPDATING THE GAME..." screen (2026-10-13) |
 
 The Studio place has the newest scripts; the `src` files are older.

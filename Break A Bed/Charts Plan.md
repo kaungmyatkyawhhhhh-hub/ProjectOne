@@ -21,6 +21,7 @@ Roblox's discovery ranks games on **engagement**, not on art or ad spend alone. 
 
 ## The plan, in order
 ### Week 1: measure + stop the leak
+**Built 2026-10-13:** item 1 (funnel), item 9 (like goal board) and item 10 (favorite popup), see [[Break A Bed/2026-10-13|2026-10-13]]. Items 2–4 are done by the owner on the Creator Dashboard.
 1. **Funnel tracking** (Claude Code): log each step with `AnalyticsService:LogFunnelStepEvent` ("onboarding" funnel): joined → first punch → 10 punches → first bed broken → bought Wooden Post → reached bed 3 → bed 5 → claimed first gift → stayed 10 min. Creator Hub → Analytics → Funnels then shows **exactly where players quit**. Fix the biggest drop first.
 2. **Publish the new icon + thumbnails** (`Ad Assets/icon-512-gfx.png`, `thumbnail-4-gfx.png`) and keep the old ones in the rotation. Check click-through after 3–4 days.
 3. **The title gets a tag**, like every trending game: **"[🎃HALLOWEEN] Break A Bed"** now (owner picked this, 2026-10-12; change it back or to "[UPD] Break A Bed" after Nov 1), then "[UPD]" or "[NEW BEDS]" with each update. Change it on the Creator Dashboard.

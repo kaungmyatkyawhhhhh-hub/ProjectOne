@@ -4,7 +4,7 @@
 Night-city driving game: earn money by driving and cutting up traffic, buy cars, level up.
 - **Details:** [[City Legends/City Legends]] (all City Legends notes go in the `City Legends` folder)
 - **Code:** this vault, folder `Games/CityLegends` (moved from `ClaudeOne` on 2026-10-10; ClaudeOne is no longer used for it)
-- **Now:** replacing the cars with real car models from the Creator Store (inserted by hand in Studio)
+- **Now:** Charts plan started: onboarding funnel, like goal board and favorite popup are in and tested, plus Soft Shutdown and the full Settings menu ([[Break A Bed/2026-10-13|2026-10-13]]). Next: save, publish, then check the Onboarding funnel in Creator Hub after a day and fix the biggest drop.
 - **Last updated:** 2026-10-10
 
 ## Break A Bed (Roblox game): active
