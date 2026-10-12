@@ -51,6 +51,8 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Strength per punch: 1, 4, 17, 70, 290, 1.2K, 4.9K, 20K, 84K, 350K, then about ×4 each post up to 7.9B. Each post costs roughly what you earn from a handful of breaks of the bed you've just reached, so each one takes about 1–2 minutes to pay off.
 
 ## Change to build (owner 2026-10-12): training works like beds, auto training is free, Auto Punch is for beds only
+**Built and tested 2026-10-12** (see [[Break A Bed/2026-10-12|2026-10-12]]). Auto training punches every 0.25 s (`GameConfig.AutoTrainInterval`), so clicking (up to 8/s) is faster. Walking/jumping now ends bed breaking too.
+
 **Training posts use a ProximityPrompt, like beds:**
 - Each training post gets a `ProximityPrompt` like the beds (same style, `HoldDuration` 0, `MaxActivationDistance` the same as the beds, key **E**, and a tap button on mobile).
   - Owned post: ActionText **"Train"**, ObjectText the post name and "+70 💪" (the real amount with passes and boosts).

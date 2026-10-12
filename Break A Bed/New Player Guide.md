@@ -7,7 +7,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 Why: Day 1 retention showed 0% on 2026-10-12. New players spawn with nothing telling them what to do, and most players who are lost in the first 30 seconds never come back. The guide makes a new player's first minute fun and clear. It uses the [[Break A Bed/UI Kit/UI Kit|UI Kit]] style, animations and sounds.
 
 ## The steps (only for players who have never broken a bed)
-1. **"Punch to get stronger!"** A glowing beam and a bouncing arrow lead from spawn to the Straw Post pad. A hint bubble appears above the pad. **(2026-10-12) Training now uses a prompt: the hint says "Press E to train!", and the 10 punches count auto punches too (training auto-punches for free).**
+1. **"Punch to get stronger!"** A glowing beam and a bouncing arrow lead from spawn to the Straw Post pad. A hint bubble appears above the pad. **(2026-10-12) Training now uses a prompt: the hint says "Press E to train!", and the 10 punches count auto punches too (training auto-punches for free).** **Built:** the step card says "PRESS E TO TRAIN!" (phones: "TAP TRAIN!"), then "PUNCH 10 TIMES!" with the bar once training; after 10 punches training ends by itself so the player can walk to the bed.
 2. **Punch 10 times.** A progress bar shows 0/10. Each punch pops "+1 💪" (already in the game). Done → sparkle burst + "Nice!" sound.
 3. **"Now break a bed!"** The beam moves to the Cardboard Bed. The bed prompt glows.
 4. **Break the Cardboard Bed.** It's easy on purpose (6 health). The normal break effects play.
