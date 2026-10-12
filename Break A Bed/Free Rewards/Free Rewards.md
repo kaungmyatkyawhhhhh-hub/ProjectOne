@@ -89,6 +89,13 @@ Roblox's rules don't allow rewards for favoriting, so **remove the favorite comp
 - **Like** stays as a friendly ask (it can't be checked). **Join the group** stays checked on the server with `IsInGroupAsync`; that's the only thing that unlocks the claim.
 - The separate "Enjoying it? ⭐ Favorite to find it again!" popup after a new bed break **stays**: it gives no reward, which is allowed.
 
+## Change back (owner 2026-10-13, later): favorites are back
+The owner changed their mind: **put the favorite step back** on the Free Gift and the Exclusive Chest, exactly as it was before the removal:
+- 3 step cards again: **1. Like the game! 2. Favorite it!** (with the Favorite button that opens Roblox's prompt) **3. Join the group!**
+- Claim checks the favorite again (`PromptAllowInventoryReadAccess` once, then `AvatarEditorService:GetFavorite`; the "Favorite the game first! ⭐" and "Press Allow so we can check your favorite!" messages) plus the group on the server.
+- The owner knows Roblox's rules don't allow rewards for favorites and accepts the risk.
+- The no-reward favorite popup after a new bed stays.
+
 ## 2. Free Gift popup (Like, Favorite, Join the group)
 
 ![[preview-free-gift.png]]
