@@ -105,6 +105,37 @@ Everything below is in the group **Myanmar Builders Club**. "Managed pricing" (R
 
 To set these prices, turn **Managed pricing off** for each product, or Roblox may change them back.
 
+### Names and pictures for the existing products and passes
+All names in capitals so the shop looks tidy. Renaming keeps the same id. Pictures are in `Break A Bed/Product Icons/`.
+
+| Type | Name | Picture |
+|---|---|---|
+| Product | +1 LEVEL | `plus1-level.png` |
+| Product | +3 LEVELS | `plus3-levels.png` |
+| Product | +9 LEVELS | `plus9-levels.png` |
+| Product | x2 STRENGTH (10 MIN) | `x2-strength-10min.png` |
+| Product | x2 CASH (10 MIN) | `x2-cash-10min.png` |
+| Product | +3 SPINS | `plus3-spins.png` |
+| Product | +10 SPINS | `plus10-spins.png` |
+| Product | CASH PILE | `cash-pile.png` |
+| Product | CASH BAG | `cash-bag.png` |
+| Product | CASH VAULT | `cash-vault.png` |
+| Pass | 2x STRENGTH | `pass-2x-strength.png` |
+| Pass | 3x STRENGTH | `pass-3x-strength.png` |
+| Pass | 5x STRENGTH | `pass-5x-strength.png` |
+| Pass | 7x STRENGTH | `pass-7x-strength.png` |
+| Pass | 10x STRENGTH | `pass-10x-strength.png` |
+| Pass | 15x STRENGTH | `pass-15x-strength.png` |
+| Pass | VIP | `pass-vip.png` |
+| Pass | FAST WALK | `pass-fast-walk.png` |
+| Pass | BREAK SPAM | `pass-break-spam.png` |
+| Pass | x2 CASH | `pass-x2-cash.png` |
+| Pass | AUTO PUNCH | `pass-auto-punch.png` |
+
+![[Product Icons/_old-products.png]]
+
+![[Product Icons/_game-passes.png]]
+
 ### Create these 15 new developer products
 Pictures for each (512 × 512) are in `Break A Bed/Product Icons/`, named after the product (for example `x3-strength-10min.png`).
 
