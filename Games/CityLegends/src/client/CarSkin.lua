@@ -44,7 +44,24 @@ CarSkin.CLUSTER_STYLE = {
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
 	toyoka_alfard = "Toyota",
+	bnw_x6 = "BMWClassic", -- same cabin as the M5
+	bentz_cls63s = "AMGBiturbo",
+	bentz_g63 = "AMGBiturbo",
+	bentz_e200 = "W212",
+	bentz_e300 = "W212",
+	bentz_e400 = "W213",
+	lambrini_lp560 = "Gallardo",
+	lambrini_lp570 = "Gallardo",
+	kio_ev6 = "EV6",
 } :: { [string]: string }
+
+-- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
+-- driver's eye; rear: how far behind the eye the swap reaches (studs: front seats only, or rear too)
+CarSkin.INTERIOR_DONOR = {
+	porsha_gt3 = { from = "porsha_panamera", rear = 1.8 },
+	bnw_x6 = { from = "bnw_m5_e60", rear = 3.6 },
+	lambrini_lp560 = { from = "lambrini_lp570", rear = 1.8 },
+} :: { [string]: { from: string, rear: number } }
 
 type Template = { part: MeshPart, offset: CFrame }
 type GenericWheel = { x: number, parts: { Template } }
@@ -179,6 +196,7 @@ end
 
 -- Imported model for a car (see header), read once
 local readGeneric: (src: Instance, dims: { [string]: number }) -> Imported -- defined below
+local transplantInterior: (out: Imported, donor: Imported, rear: number) -> () -- defined below
 local MARK_REF = 4 -- Mark_RefX / Mark_RefZ sit this many studs from Mark_Origin
 local function readImported(src: Instance): Imported
 	local function mark(name: string): Vector3?
@@ -188,7 +206,23 @@ local function readImported(src: Instance): Imported
 	local o, rx, rz = mark("Mark_Origin"), mark("Mark_RefX"), mark("Mark_RefZ")
 	if not (o and rx and rz) then
 		local spec = Cars.get((src:GetAttribute("CarId") :: string?) or src.Name)
-		return readGeneric(src, CarBuilder.getDims(spec.Class, spec.Id) :: any)
+		local dims = CarBuilder.getDims(spec.Class, spec.Id) :: any
+		local out = readGeneric(src, dims)
+		-- another model's cabin (dash, seats, wheel, gauges) swapped in: see INTERIOR_DONOR
+		local swap = CarSkin.INTERIOR_DONOR[src.Name]
+		local folder = ReplicatedStorage:FindFirstChild("CarModels", true)
+		local donorSrc = if swap and folder then folder:FindFirstChild(swap.from, true) else nil
+		if swap and donorSrc then
+			local dspec = Cars.ById[swap.from]
+			local ok, err = pcall(function()
+				local donorDims = if dspec then CarBuilder.getDims(dspec.Class, dspec.Id) :: any else dims
+				transplantInterior(out, readGeneric(donorSrc :: Instance, donorDims), swap.rear)
+			end)
+			if not ok then
+				warn("[CityLegends] interior from " .. swap.from .. " could not be used:", err)
+			end
+		end
+		return out
 	end
 	local ex, ez = rx - o, rz - o
 	local scale = MARK_REF / ex.Magnitude
@@ -280,8 +314,9 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	-- the model's steering wheel: an "SW" group (A-Chassis) or anything named steering wheel
 	local steerRoots: { Instance } = {}
 	local function isSteerName(n: string): boolean
-		local k = n:lower():gsub("[%s_%-]", "")
-		return k == "sw" or k:find("steeringwheel") ~= nil
+		-- importer names like "Meshes/sw9 (1)" count too
+		local k = n:lower():gsub("^meshes/", ""):gsub("%(%d+%)", ""):gsub("[%s_%-]", "")
+		return k:match("^sw%d*$") ~= nil or k:find("steeringwheel") ~= nil
 	end
 	-- some kits call it just "Wheel", inside Misc (road wheels live in "Wheels")
 	local function isMiscWheel(d: Instance): boolean
@@ -373,8 +408,18 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	elseif primary then
 		f = primary.CFrame.LookVector
 	else
-		local ext = maxV - minV
-		f = if ext.X > ext.Z then Vector3.xAxis else -Vector3.zAxis
+		-- chassis corner parts (FL / FR / RL / RR) tell the front from the back
+		local function corner(n: string): Vector3?
+			local p = src:FindFirstChild(n)
+			return if p and p:IsA("BasePart") then p.Position else nil
+		end
+		local fl, fr, rl, rr = corner("FL"), corner("FR"), corner("RL"), corner("RR")
+		if fl and fr and rl and rr then
+			f = (fl + fr - rl - rr) / 2
+		else
+			local ext = maxV - minV
+			f = if ext.X > ext.Z then Vector3.xAxis else -Vector3.zAxis
+		end
 	end
 	f = Vector3.new(f.X, 0, f.Z)
 	if f.Magnitude < 1e-3 then
@@ -416,7 +461,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		groups = {}
 		local cand: { BasePart } = {}
 		for _, d in visible do
-			local n = d.Name:lower()
+			local n = d.Name:lower():gsub("trim", "") -- "trims" is not a rim
 			if (n:find("wheel") or n:find("tire") or n:find("tyre") or n:find("rim")) and not n:find("steer") and not inSteer(d) then
 				table.insert(cand, d)
 			end
@@ -441,6 +486,40 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	for _, g in groups do
 		for _, d in g.parts do
 			inWheel[d] = true
+		end
+	end
+	-- the rest of each wheel: a tyre found by name often shares its own small group with the rim
+	-- and hub (named anything); those parts spin with it too
+	for _, g in groups do
+		local size = 0
+		for _, d in g.parts do
+			size = math.max(size, d.Size.X, d.Size.Y, d.Size.Z)
+		end
+		local seen: { [Instance]: boolean } = {}
+		for _, d in table.clone(g.parts) do
+			local holder = d.Parent
+			if not holder or holder == src or seen[holder] or not (holder:IsA("Model") or holder:IsA("Folder")) then
+				continue
+			end
+			seen[holder] = true
+			local all: { BasePart } = {}
+			local tight = true
+			for _, x in visible do
+				if x:IsDescendantOf(holder) then
+					table.insert(all, x)
+					if (x.Position - g.center).Magnitude > size * 0.75 then
+						tight = false
+					end
+				end
+			end
+			if tight and #all <= 16 then
+				for _, x in all do
+					if not inWheel[x] then
+						inWheel[x] = true
+						table.insert(g.parts, x)
+					end
+				end
+			end
 		end
 	end
 	local mid = Vector3.zero
@@ -638,22 +717,47 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			return p
 		end
 		local leather = Color3.fromRGB(24, 24, 27)
+		local silver = Color3.fromRGB(196, 200, 208)
+		-- Mercedes: AMG-style flat-bottomed rim, silver spokes and the three-pointed star
+		local merc = src.Name:sub(1, 6) == "bentz_" or src.Name:sub(1, 7) == "brabos_"
 		local parts: { Template } = {}
 		local segs = 28
 		for i = 0, segs - 1 do
 			local ang = i / segs * math.pi * 2
-			local seg = piece(Enum.PartType.Cylinder, Vector3.new(2 * math.pi * R / segs * 1.18, tube, tube), leather, Enum.Material.Leather)
+			if merc and math.abs(ang - math.pi * 1.5) < math.rad(32) then
+				continue -- the flat bottom goes here
+			end
+			local seg = piece(Enum.PartType.Cylinder, Vector3.new(2 * math.pi * R / segs * 1.18, tube, tube), leather, Enum.Material.SmoothPlastic)
 			table.insert(parts, { part = seg :: any, offset = CFrame.new(R * math.cos(ang), R * math.sin(ang), 0) * CFrame.Angles(0, 0, ang + math.pi / 2) })
+		end
+		if merc then
+			local half = R * math.sin(math.rad(36))
+			local flat = piece(Enum.PartType.Cylinder, Vector3.new(half * 2, tube, tube), leather, Enum.Material.SmoothPlastic)
+			table.insert(parts, { part = flat :: any, offset = CFrame.new(0, -R * math.cos(math.rad(36)), 0) })
 		end
 		-- three spokes (left, right, bottom) and a round airbag hub
 		for _, ang in { 0, math.pi, -math.pi / 2 } do
-			local spoke = piece(Enum.PartType.Block, Vector3.new(R * 0.9, 0.13, 0.07), Color3.fromRGB(46, 46, 52), Enum.Material.SmoothPlastic)
+			local spoke = piece(Enum.PartType.Block, Vector3.new(R * 0.9, 0.13, 0.07), if merc then silver else Color3.fromRGB(46, 46, 52), if merc then Enum.Material.Metal else Enum.Material.SmoothPlastic)
 			table.insert(parts, { part = spoke :: any, offset = CFrame.Angles(0, 0, ang) * CFrame.new(R * 0.5, 0, 0.03) })
 		end
 		local hub = piece(Enum.PartType.Cylinder, Vector3.new(0.16, R * 0.78, R * 0.78), Color3.fromRGB(20, 20, 22), Enum.Material.SmoothPlastic)
 		table.insert(parts, { part = hub :: any, offset = CFrame.new(0, 0, 0.06) * CFrame.Angles(0, math.pi / 2, 0) })
-		local badge = piece(Enum.PartType.Cylinder, Vector3.new(0.02, R * 0.22, R * 0.22), Color3.fromRGB(196, 200, 208), Enum.Material.Metal)
-		table.insert(parts, { part = badge :: any, offset = CFrame.new(0, 0, 0.15) * CFrame.Angles(0, math.pi / 2, 0) })
+		if merc then
+			-- the star: a thin silver ring with three points
+			local ring = R * 0.13
+			for i = 0, 15 do
+				local ang = i / 16 * math.pi * 2
+				local seg = piece(Enum.PartType.Block, Vector3.new(2 * math.pi * ring / 16 * 1.2, 0.012, 0.02), silver, Enum.Material.Metal)
+				table.insert(parts, { part = seg :: any, offset = CFrame.new(ring * math.cos(ang), ring * math.sin(ang), 0.15) * CFrame.Angles(0, 0, ang + math.pi / 2) })
+			end
+			for _, ang in { math.pi / 2, math.pi / 2 + math.pi * 2 / 3, math.pi / 2 - math.pi * 2 / 3 } do
+				local point = piece(Enum.PartType.Block, Vector3.new(ring, 0.014, 0.02), silver, Enum.Material.Metal)
+				table.insert(parts, { part = point :: any, offset = CFrame.Angles(0, 0, ang) * CFrame.new(ring / 2, 0, 0.15) })
+			end
+		else
+			local badge = piece(Enum.PartType.Cylinder, Vector3.new(0.02, R * 0.22, R * 0.22), silver, Enum.Material.Metal)
+			table.insert(parts, { part = badge :: any, offset = CFrame.new(0, 0, 0.15) * CFrame.Angles(0, math.pi / 2, 0) })
+		end
 		local column = piece(Enum.PartType.Cylinder, Vector3.new(0.9, 0.26, 0.26), leather, Enum.Material.SmoothPlastic)
 		table.insert(parts, { part = column :: any, offset = CFrame.new(0, 0, -0.5) * CFrame.Angles(0, math.pi / 2, 0) })
 		out.steer = { mount = mount, parts = parts, radius = R * 0.95 }
@@ -835,17 +939,15 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	-- every rough surface becomes smooth: Roblox's Sand / Fabric / Leather / Concrete etc. carry a
 	-- bumpy pattern that makes interiors look grainy up close
 	local ROUGH = {
-		[Enum.Material.Sand] = true, [Enum.Material.Fabric] = true, [Enum.Material.Leather] = true,
-		[Enum.Material.Concrete] = true, [Enum.Material.Granite] = true, [Enum.Material.Slate] = true,
-		[Enum.Material.Cobblestone] = true, [Enum.Material.Pebble] = true, [Enum.Material.Brick] = true,
-		[Enum.Material.Wood] = true, [Enum.Material.WoodPlanks] = true, [Enum.Material.Marble] = true,
-		[Enum.Material.CorrodedMetal] = true, [Enum.Material.DiamondPlate] = true, [Enum.Material.Foil] = true,
-		[Enum.Material.Plastic] = true, [Enum.Material.Rubber] = true, [Enum.Material.Asphalt] = true,
-		[Enum.Material.Basalt] = true, [Enum.Material.Rock] = true, [Enum.Material.Ground] = true,
+		Sand = true, Fabric = true, Leather = true, Concrete = true, Granite = true, Slate = true,
+		Cobblestone = true, Pebble = true, Brick = true, Wood = true, WoodPlanks = true, Marble = true,
+		CorrodedMetal = true, DiamondPlate = true, Foil = true, Plastic = true, Rubber = true, Asphalt = true,
+		Basalt = true, Rock = true, Ground = true,
 	}
 	local function cabinMaterial(d: BasePart, p: BasePart)
-		if ROUGH[d.Material] then
+		if ROUGH[d.Material.Name] then
 			p.Material = Enum.Material.SmoothPlastic
+			p:SetAttribute("Trim", true) -- upholstery-like: a cabin swap can take out bigger pieces of it
 		end
 	end
 
@@ -870,6 +972,71 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		generic[key] = { x = c.X, parts = parts }
 	end
 	return out
+end
+
+-- cabin parts: inside the body around the driver, not glass, and not a whole-body shell (big
+-- upholstered shells narrower than the body are the old cabin's lining and seats: they go too)
+local function inCabin(t: Template, eye: Vector3, halfW: number, rear: number): boolean
+	local p, s = t.offset.Position, t.part.Size
+	if t.part.Transparency >= 0.3 or t.part.Material == Enum.Material.Glass then
+		return false
+	end
+	if math.max(s.X, s.Y, s.Z) > 9 then
+		local cf = t.offset
+		local width = math.abs(cf.RightVector.X) * s.X + math.abs(cf.UpVector.X) * s.Y + math.abs(cf.LookVector.X) * s.Z
+		if not (t.part:GetAttribute("Trim") and width <= halfW * 2.64 and math.max(s.X, s.Y, s.Z) <= 12) then
+			return false
+		end
+	end
+	return math.abs(p.X) < halfW and p.Z > eye.Z - 3.4 and p.Z < eye.Z + rear and p.Y > 0.3 and p.Y < eye.Y + 0.4
+end
+
+local function cabinHalfWidth(out: Imported): number
+	local w = math.huge
+	local generic = out.generic
+	if generic then
+		for _, g in generic do
+			w = math.min(w, math.abs(g.x))
+		end
+	end
+	return if w < math.huge then w * 0.85 else 2
+end
+
+function transplantInterior(out: Imported, donor: Imported, rear: number)
+	local eye, deye = out.eye, donor.eye
+	if not (eye and deye) then
+		error("no driver's seat to line the cabins up on")
+	end
+	local halfW = math.min(cabinHalfWidth(out), cabinHalfWidth(donor))
+	-- lined up on the eye's height and seat position; sideways the donor's own layout is kept
+	-- (both are centred on the car), and the camera moves to its driver's seat
+	local shift = CFrame.new(0, eye.Y - deye.Y, eye.Z - deye.Z)
+	out.eye = Vector3.new(deye.X, eye.Y, eye.Z)
+	local body: { [string]: Template } = {}
+	for name, t in out.body do
+		if not inCabin(t, eye, halfW, rear) then
+			body[name] = t
+		end
+	end
+	local k = 0
+	for _, t in donor.body do
+		if inCabin(t, deye, halfW, rear) then
+			k += 1
+			body["Cabin" .. k] = { part = t.part, offset = shift * t.offset }
+		end
+	end
+	out.body = body
+	out.steer = if donor.steer then { mount = shift * donor.steer.mount, parts = donor.steer.parts, radius = donor.steer.radius } else nil
+	local gauges = {}
+	if donor.gauges then
+		for _, gauge in donor.gauges do
+			table.insert(gauges, { kind = gauge.kind, pivot = shift * gauge.pivot, parts = gauge.parts })
+		end
+	end
+	out.gauges = gauges
+	out.ownGauges = donor.ownGauges
+	out.cluster = if donor.cluster then shift * donor.cluster else nil
+	out.clusterSize = donor.clusterSize
 end
 
 local function importedFor(id: string): Imported?
