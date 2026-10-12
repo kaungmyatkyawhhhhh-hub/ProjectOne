@@ -12,6 +12,8 @@ A new UI style made 2026-10-12 to replace the look that seemed AI-made. It's bas
 
 ![[preview-settings.png]]
 
+![[preview-tutorial.png]]
+
 The preview is a mockup. The prices and the Rebirth button are only examples.
 
 ## Images (`UI Kit/images/`)

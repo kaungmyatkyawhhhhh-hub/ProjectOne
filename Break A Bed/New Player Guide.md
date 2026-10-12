@@ -16,6 +16,20 @@ Why: Day 1 retention showed 0% on 2026-10-12. New players spawn with nothing tel
 
 The whole guide should take about 45–60 seconds. **Show, don't tell:** use beams, arrows, glowing targets and effects, with only 2–4 words of text per step.
 
+## Look (UI Kit style), fixed 2026-10-12
+The first build used plain dark panels that didn't match the [[Break A Bed/UI Kit/UI Kit|UI Kit]]. It should look like this:
+
+![[UI Kit/preview-tutorial.png]]
+
+- **Step card** (top center, about 30% of the screen width, never wider): a slate UI Kit box (`btn-slate.png` look: `#3E4454`, studs, light rim, 3D bottom edge, stroke `#161822`, 3 px corners).
+  - The title is yellow `#FFE20C`, Montserrat Heavy, with the UI Kit text stroke and shadow. Keep it short: "PUNCH 10 TIMES!", "BREAK THE BED!", "BUY THE WOODEN POST!".
+  - On the left is an icon (`icon-bolt.png` for punching, `icon-cash.png` for buying), and next to it a **progress bar**: a dark track `#2A2F3D` with the stroke and a **green** UI Kit fill with studs. White "3 / 10" text sits in the middle of the bar.
+- **SKIP:** a small red UI Kit button under the right edge of the card. It must not overlap anything else.
+- **In the world:** a big yellow down-arrow with a dark outline (UI Kit look) bouncing above the target, with 2 twinkling sparkles, plus the beam on the ground. This does most of the "telling".
+- **Next goal bar** (only after the guide, never at the same time as the step card): a slimmer slate box (about 30% width) with `icon-bolt.png`, white text "Next bed: Air Mattress" and a **cyan** progress bar "4 / 7 Strength". Put it at the top center where the step card was, or just above the bottom buttons on phones.
+- **Animations:** the card drops in from above (Back Out). The bar fill slides smoothly. Each step done = the card flashes white, sparkles burst and a "ding" plays, then the next step's text pops in. The arrow bobs 10 px up and down.
+- Only one guide element at a time. Never stack two dark panels.
+
 ## Rules
 - The beam is a `Beam` from the player's character to the target, plus a bouncing arrow `BillboardGui` above the target. Only the player sees them (made on the client).
 - A small top-center bubble shows the current step (UI Kit style), and a **SKIP** text button sits under it.
