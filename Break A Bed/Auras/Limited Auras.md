@@ -4,6 +4,8 @@
 
 Back to [[Break A Bed/Project Overview|Project Overview]].
 
+**Status (2026-10-12): the Halloween crate is built and tested** (see [[Break A Bed/2026-10-12|2026-10-12]]). Still needed: the 3 product ids in `GameConfig.AuraCrate.Products`.
+
 Owner's request (2026-10-12): **limited-time auras** that boost **Strength and Walk Speed**, sold like the "Featured" egg in the simulator the owner likes. Auras come from an **Aura Crate** with a timer, chances shown on screen, and 1 / 3 / 10 buy buttons.
 
 ![[preview-aura-crate-halloween.png]]

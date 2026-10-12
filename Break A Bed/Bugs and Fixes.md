@@ -27,6 +27,8 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **2026-10-12: "Maximum event re-entrancy depth" warnings** from the new text shadows. The shadow copied the label's size every time a layout moved it. Fix: it only copies when something real changed.
 - **2026-10-12: The new shop covered the side buttons on small screens.** With the category icons outside it, it was wider than the gap between the left and right buttons. Fix: every window also shrinks to fit the screen's width (leaving room for the side buttons).
 - **2026-10-12: Boosts / category icons scrolled to the wrong place.** The scroll was worked out while the window was still growing. Fix: it scrolls after the window opens, using on-screen pixels.
+- **2026-10-12: "Out of local registers" in GameClient** (Luau allows 200 locals in one scope). Fix: the Settings block is in its own `do ... end`. Put new top-level code in blocks or modules.
+- **2026-10-12: Aura Walk Speed was one star behind** (it was applied before the star count updated). Fix: the stars are set first, then Walk Speed is re-applied.
 - **2026-10-12: Exclusive Chest light cone was invisible.** Beam attachments placed with WorldCFrame before they had a parent ended up twice as far away; and a vertical Beam's width runs along the attachments' Y axis, so it had no width. Fix: parent first, then turn the attachments so their Y axis is flat.
 - **2026-10-12: Bloom washed out the white floors** with the note's Threshold 0.92. Fix: Threshold 1.5, so only neon and lights glow.
 - **2026-10-12: Big centre texts stacked** when beds broke quickly. Fix: a new one replaces the one on screen.
