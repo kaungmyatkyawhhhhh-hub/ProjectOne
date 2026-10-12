@@ -22,7 +22,7 @@ Owner's request (2026-10-12): copy two things from the simulator the owner likes
 ![[preview-free-gift.png]]
 
 - It pops up **once**, after the [[Break A Bed/New Player Guide|New Player Guide]] (never during it), and can be reopened from the Gifts menu until claimed.
-- **Look:** the FINAL STYLE window with a cyan "Free Gift!" title bar, a big cash pile with a glow on the left, "~ LIMITED TIME! ~" in red and "+$50K CASH!" in green, then 3 dark step cards (1. Like the game! 2. Favorite it! 3. Join the group!), each with a small picture of where to click and a red arrow, then a big green **Claim!** button.
+- **Look:** the FINAL STYLE window with a cyan "Free Gift!" title bar, a big cash pile with a glow on the left, **big** "~ LIMITED TIME! ~" in red (about 60 px) and a **huge** "+$50K CASH!" in green (about 86 px), filling the space right of the pile without touching the window edge, then 3 dark step cards (1. Like the game! 2. Favorite it! 3. Join the group!), each with a small picture of where to click and a red arrow, then a big green **Claim!** button.
 - **What can be checked:** only the **group join** can be checked (`player:IsInGroupAsync(GroupId)` for **Myanmar Builders Club**). Roblox gives games no way to check likes, and favorites can only be prompted (`AvatarEditorService:PromptSetFavorite`), not checked.
   - So **Claim!** works when the player is in the group (otherwise: "Join the group first!"). Like and Favorite are just asked nicely.
   - Add a **Favorite** button on step 2 that opens Roblox's favorite prompt.
