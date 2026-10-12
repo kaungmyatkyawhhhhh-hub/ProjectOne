@@ -106,6 +106,10 @@ Everything below is in the group **Myanmar Builders Club**. "Managed pricing" (R
 To set these prices, turn **Managed pricing off** for each product, or Roblox may change them back.
 
 ### Create these 15 new developer products
+Pictures for each (512 × 512) are in `Break A Bed/Product Icons/`, named after the product (for example `x3-strength-10min.png`).
+
+![[Product Icons/_all-products.png]]
+
 x3 Strength R$15 · x5 Strength R$25 · x10 Strength R$49 · x3 Cash R$15 · x5 Cash R$25 · Fast Punch R$10 · Server x2 Strength R$49 · Small Cash R$9 · Small Strength R$9 · Medium Strength R$15 · Big Strength R$30 · +1 Spin R$9 · Instant Break R$9 · Starter Pack R$19 · Skip All Gifts R$49
 
 Total after this: **25 developer products + 11 game passes**. Claude Code must change what the reused products give (10-minute boosts, Cash packs = 40/150/500 breaks).
