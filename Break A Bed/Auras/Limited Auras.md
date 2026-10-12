@@ -56,6 +56,8 @@ Product pictures (Halloween): `Product Icons/aura-crate-x1.png`, `aura-crate-x3.
 | AURA CRATE x3 | R$129 |
 | AURA CRATE x10 | R$399 (red button, best value) |
 
+**Created 2026-10-12 (ids for `GameConfig`):** AURA CRATE x1 = `3718171240`, AURA CRATE x3 = `3718171318`, AURA CRATE x10 = `3718171374`.
+
 The purple gift button next to each one buys it for another player in the server.
 
 **Free ways to get crates** (so free players care too): 1 crate on day 7 of the daily reward, a 0.5% chance from the spin wheel, and the MEGA Free Gift.
