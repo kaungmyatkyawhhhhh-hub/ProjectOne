@@ -12,7 +12,7 @@ Owner's request (2026-10-12): a Settings menu in the [[Break A Bed/UI Kit/UI Kit
 | Setting | Type | Default | What it does |
 |---|---|---|---|
 | Music | slider 0–100% | 60% | Background music volume (replaces the 🔊 mute button, which can stay as a shortcut) |
-| Sound Effects | slider 0–100% | 85% | Punches, breaks and UI sounds |
+| Sound Effects | slider 0–100% | **40%** (lowered 2026-10-12, was 85%) | Punches, breaks and UI sounds |
 | Low Graphics | ON/OFF | OFF (ON by default on low-end phones) | Fewer particles, no confetti or light rays, fewer moving map pieces. Helps phones run smoothly |
 | Other Players' Effects | ON/OFF | ON | Shows or hides other players' punch and break effects (lag fix in busy servers) |
 | Damage Numbers | ON/OFF | ON | The "+70 💪" and damage pop-ups |
@@ -37,7 +37,7 @@ The menu was built with ON/OFF toggles for Music and Sound Effects. Replace thos
   - **Value box:** a small dark studded box on the far right with the value in **yellow** (`#FFE20C`) with the dark stroke: "60%". At 0% it says "OFF" in grey.
 - **Use:** drag the knob, or click/tap anywhere on the track to jump there. It must work with the mouse and touch (`InputBegan`/`InputChanged`/`InputEnded`, use the input position, clamp 0–100). Steps of 5%. The knob grows to 1.1 and gets a white outline while you hold it.
 - **Live:** the volume changes while dragging. Sound Effects plays a short bubble pop every 10% while dragging, so players hear the level.
-- **0% = off.** At 0% the value text shows "OFF" in grey. Defaults: Music 60%, Sound Effects 85%.
+- **0% = off.** At 0% the value text shows "OFF" in grey. Defaults: Music 60%, Sound Effects **40%** (owner 2026-10-12: "50% lower by default"; half of the old 85%, rounded to the 5% step). **Existing players:** if their saved Sound Effects value is still exactly 85 (the old default, so they never changed it), set it to 40 once and save a flag `SfxDefaultV2 = true` so it never happens again. Players who picked their own value keep it.
 - **How the volume works:** put all music in a `SoundGroup` "Music" and all other sounds in a `SoundGroup` "SFX" (set `Sound.SoundGroup`), and set `SoundGroup.Volume = slider / 100`. Keep each sound's own volume as it is.
 - **The 🔊 mute button on the HUD** (if it's still there): tapping it mutes the music (slider to 0) and tapping again puts back the last value.
 - **Saved:** save the numbers (0–100) with the player's data, only when the player lets go of the knob (not every frame). Old saves that have ON/OFF: ON = the default, OFF = 0.
