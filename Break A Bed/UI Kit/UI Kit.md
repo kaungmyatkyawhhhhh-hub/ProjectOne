@@ -36,8 +36,8 @@ None of the images have text in them. Text stays as Roblox TextLabels so numbers
 | `fx-sparkle.png` | 128 × 128 | White 4-point twinkle around items |
 | `fx-glow.png` | 256 × 256 | Soft white glow behind item icons |
 | `icon-check.png`, `icon-dumbbell.png`, `icon-gear.png`, `icon-basket.png` | 256 × 256 | Claimed check, Strength packs, Settings button, SHOP button |
-| `hud-btn-<color>.png` | 160 × 160 | Main-screen square icon buttons (rounder, brighter) |
-| `panel-light.png`, `btn-square-light.png` | 400 × 108, 160 × 160 | Light panels for stats and the tutorial |
+| `pixel-btn-<color>.png` | 400 × 116 | Main-screen wide buttons (gradient, diamonds, light inner border) |
+| `pixel-panel-light.png`, `pixel-badge-yellow.png`, `pixel-bar-track.png`, `pixel-bar-green.png` | various | Light stat panels, LVL badge, progress bars |
 | `fx-arrow-chevron.png` | 256 × 256 | Arrow texture for the ground path `Beam` |
 
 Colors: pink, purple, cyan, blue, orange, green, red, yellow, slate.
@@ -72,19 +72,18 @@ Base colors: cyan `#1CC8F2`, blue `#247ADE`, pink `#EC22CD`, purple `#9648E8`, o
 
 **Big menu layout:** see-through dark window → cyan title bar along the top with the title on the left, red X square at the top-right corner → yellow featured card full width → a row of cyan item cards, each with a title at the top, an icon with a white glow in the middle and a green price button at the bottom. Gaps between cards are 14 px and show the dark window. Tabs sit above the window, each tilted 2–4°.
 
-## Main screen (HUD) and tutorial: light, icon-first style (owner 2026-10-12)
-The owner didn't like the wide flat buttons and dark grey stat bars on the main screen. The main screen and tutorial should be **light** and **eye-catching**, like the owner's references: a rounded red square SHOP button with a big 3D basket icon and bold outlined text, and a "LUCK" badge with a big shiny icon. Big menus (Shop, Free Gifts, Settings) keep the dark see-through window with the rainbow title.
+## Main screen (HUD) and tutorial: wide gradient buttons with pixel text (owner 2026-10-12)
+Keep the **old layout**: wide buttons down the left side, stat bars at the top right and the tutorial card at the top center. Use the **design of the owner's "Shop" reference**: a vertical gradient (strong color at the top, lighter at the bottom), a faint white **diamond pattern**, a thin **light inner border** inside a thick dark outline, a soft gloss on the top 40%, a big shiny 3D icon on the left, and the label in a chunky **pixel font** (white, thick dark outline). Stats and the tutorial are **light** (near-white). Big menus keep the dark see-through window and the rainbow title.
 
 ![[preview-hud.png]]
 
-- **Side buttons = square icon buttons** (`hud-btn-<color>.png`, 160 × 160, shown at about 110–130 px). A big shiny icon fills the top 75%, and a short bold label (SHOP, BOOST, SPIN, GIFTS) sits on the bottom edge in white with the dark stroke. Corners are rounder here (`UICorner` about 16%). Two columns on PC, one column on phones. Use red for SHOP, orange for BOOST, purple for SPIN and pink for GIFTS.
-- **Icons look 3D:** each icon has a white shine on its top part (built into the icon images), and `icon-basket.png` is the SHOP icon. A red number or "!" badge shows when something is ready.
-- **Stats (top right) = light panels** (`panel-light.png`: near-white `#F6F7FC` with a faint grey stud pattern, light rim, grey 3D bottom edge, dark stroke `#161822`, rounder corners about 22%).
-  - The stat icon sits half outside the left end of the panel. The value is right-aligned in **colored** text with the dark stroke and shadow: Strength in purple `#BE78FF`, Cash in green `#5ADC46`.
-  - Level is a yellow **LVL** badge on the left with a light progress bar (green fill, "1 / 4").
-- **Tutorial card = light panel** too: an orange title `#FF9614` with the dark stroke, a 3D bolt icon, and a light grey bar track `#CDD2DE` with a green fill. SKIP is a small red rounded button.
-- **Ground path = moving arrows, not a plain beam:** use a `Beam` from the player to the target with `Texture = fx-arrow-chevron.png`, `TextureMode = Wrap`, `TextureLength = 3`, `TextureSpeed = 1.5` (the arrows slide toward the target), `Color` cyan `#46DCFF`, `LightEmission = 1`, `Width0/Width1 = 2.5`, `FaceCamera = false`, laid flat on the ground (attachments just above the floor). Fade it out near the target.
-- **No idle animation** on these buttons. Only hover, press and the "Ready" badge animate.
+- **Wide buttons** (`pixel-btn-<color>.png`, 400 × 116, shown at about 320 × 92): the icon fills the left 25% (`icon-basket.png` for Shop, `icon-dumbbell.png`, `icon-wheel.png`, `icon-gift.png`), and the label sits right after it. Colors: Shop red, x2 Power orange (with a small green price tag "R$19" hanging off its bottom-right), Spin purple, Gifts pink. Corners `UICorner` about 12%.
+- **Font:** `Font.new("rbxasset://fonts/families/PressStart2P.json")` (Roblox's pixel font, also `Enum.Font.Arcade`). White, `UIStroke` `#161822`, Thickness about 26% of the text size, plus a dark shadow copy 16% lower. Big menus keep Montserrat Heavy.
+- **Gradient colors (top → bottom):** red `#EC1E34 → #FF7884`, orange `#FA780A → #FFBE5A`, purple `#8C32E1 → #CD8CFF`, pink `#E11EAF → #FF82DC`, green `#28AF28 → #82EB64`, blue `#196EE1 → #6EB9FF`, yellow `#FAB900 → #FFEB6E`. The light inner border is the top color mixed 55% with white.
+- **Stats (top right):** light panels (`pixel-panel-light.png`: `#EBEEF6 → #FFFFFF`, faint grey diamonds, dark outline). The icon sticks out on the left, and the value is right-aligned in the pixel font, colored: Strength purple `#B46EFF`, Cash green `#50D23C`. Level has a yellow badge (`pixel-badge-yellow.png`, "LVL" + number) and a progress bar (`pixel-bar-track.png` + `pixel-bar-green.png`).
+- **Tutorial card:** a light panel with an orange pixel-font title `#FF9614`, a bolt icon and the light track + green fill bar. SKIP is a small red pixel button.
+- **Ground path = moving arrows:** a `Beam` from the player to the target with `Texture = fx-arrow-chevron.png`, `TextureMode = Wrap`, `TextureLength = 3`, `TextureSpeed = 1.5`, `Color` cyan `#46DCFF`, `LightEmission = 1`, `Width0/Width1 = 2.5`, `FaceCamera = false`, laid flat just above the floor. Fade it out near the target.
+- **No idle animation** on these buttons. Only hover, press and "Ready" badges animate.
 
 ## Rainbow title bar (owner's request 2026-10-12)
 The title bar of the big menus (SHOP!, FREE GIFTS, SETTINGS) is an **animated rainbow** that slowly flows sideways. The X button stays red and the title stays white.
