@@ -60,6 +60,19 @@ The owner renamed the Group Chest to **EXCLUSIVE CHEST** and wants it to look un
 - **Under the disc on the ground:** a faint purple shadow glow (a decal with `fx-glow.png`, Transparency 0.6) that grows and shrinks slightly as the chest bobs.
 - Keep it **soft** (no thick neon blocks), and turn it down on Low Graphics.
 
+**Popup + sensor update (owner 2026-10-12). ⚠️ Do NOT move, resize, recolor or rebuild the chest model, its effects or its placement — the owner placed it by hand. Only change the sensor and the popup.**
+
+![[preview-exclusive-popup.png]]
+
+- **Popup when a non-member steps on the sensor:** exactly the Free Gift popup layout, with these changes:
+  - Title bar **purple**: "Exclusive Chest!"
+  - Big picture on the left: the **exclusive chest logo** (`exclusive-chest.png`) with a soft purple glow, its bottom tucked behind the step cards.
+  - Red "~ MEMBERS ONLY! ~", then **"+EXCLUSIVE CHEST!" in purple** (light purple `#E1A0FF` → `#9638EB` gradient, thick dark stroke) instead of "+$50K CASH!".
+  - The same 3 step cards (Like / Favorite button / Join button) and a green **"I joined!"** button that re-checks the group.
+  - Opens at most once every 5 s and doesn't open while another window is open.
+- **Sensor (the current one is bad):** remove the visible pad/sensor block. Instead use an **invisible** trigger: a cylinder part, `Transparency = 1`, `CanCollide = false`, `CanQuery = false`, about 10 studs wide and 6 tall, centered under the chest **wherever it is now**. Detect players with `GetPartsInPart`/distance checks every 0.25 s on the server (not `.Touched`, which misses players). The ground ring the chest already has shows where to stand.
+- Members: the same claim as before (chest opens, cash, 15-minute timer).
+
 **Claiming (member):** the chest shakes, the lid flies open with a big white flash, a `fx-ring` shockwave, a purple + gold sparkle fountain and a beam of light, then `money-big.png` cash bursts out and flies to the counter. Play a magical "chime + whoosh" sound.
 
 **Not a member:** a small bounce, and the Exclusive Chest screen opens (same 3-step design as the Free Gift popup, but with a purple title bar "Exclusive Chest!" and `exclusive-chest.png` as the big picture) with the "I joined!" button.

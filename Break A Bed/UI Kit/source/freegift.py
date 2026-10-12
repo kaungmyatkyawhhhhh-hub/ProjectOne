@@ -99,3 +99,46 @@ def billboard(bgpath, out):
 if __name__ == '__main__':
     B = sys.argv[1]
     popup(B, 'free_popup.png'); billboard(B, 'free_chest.png')
+
+def popup_ex(bgpath, out):
+    Wd, Hd = 1600, 900
+    bg = Image.open(bgpath).convert('RGBA').resize((Wd, Hd)).filter(ImageFilter.GaussianBlur(10))
+    img = Image.blend(bg, Image.new('RGBA', (Wd, Hd), (40, 90, 30, 255)), 0.15)
+    x0, y0, ww, wh = 260, 90, 1080, 730
+    img.alpha_composite(shop3.window(ww, wh), (x0, y0))
+    img.alpha_composite(sim.header(ww - 12, 100, 'purple', 'Exclusive Chest!'), (x0 + 6, y0 + 6))
+    img.alpha_composite(kit.x_mark(sim.sbox(84, 84, 'red', radius=0.04, cell=40, stud=(0, 0))), (x0 + ww - 100, y0 + 14))
+    hero = Image.new('RGBA', (360, 360), (0, 0, 0, 0))
+    hero.alpha_composite(A.burst(360, (200, 120, 255), 14, 80))
+    import exclusive; hero.alpha_composite(exclusive.chest(320), (20, 20))
+    img.alpha_composite(hero, (x0 + 40, y0 + 110))  # step cards are drawn after this, so they sit on top of the pile
+    A.stroke_text(img, (x0 + 725, y0 + 218), '~ MEMBERS ONLY! ~', 56, (255, 120, 120), (230, 40, 40), anchor='mm')
+    A.stroke_text(img, (x0 + 725, y0 + 315), '+EXCLUSIVE CHEST!', 56, (225, 160, 255), (150, 60, 235), anchor='mm')
+    steps = [('1. Like the game!', 'thumb'), ('2. Favorite it!', 'star'), ('3. Join the group!', 'group')]
+    cw = (ww - 4 * 22) // 3
+    for i, (t, k) in enumerate(steps):
+        c = shop3.card(cw, 190, (50, 52, 64), (34, 35, 44), rays=False)
+        label(c, (cw / 2, 30), t, 26, anchor='mm')
+        sc = Image.new('RGBA', (cw - 30, 120), (30, 31, 40, 255)); d = ImageDraw.Draw(sc)
+        d.rectangle((0, 0, sc.width - 1, sc.height - 1), outline=(80, 82, 96), width=3)
+        if k == 'star':
+            ic = gloss(icon('star', 70))
+        elif k == 'thumb':
+            ic = Image.new('RGBA', (70, 70), (0, 0, 0, 0)); dd = ImageDraw.Draw(ic)
+            dd.rounded_rectangle((8, 30, 24, 64), 3, fill=(255, 255, 255)); dd.rounded_rectangle((28, 28, 62, 64), 8, fill=(255, 255, 255))
+            dd.polygon([(30, 30), (42, 6), (52, 10), (48, 30)], fill=(255, 255, 255))
+        else:
+            ic = Image.new('RGBA', (180, 60), (0, 0, 0, 0)); dd = ImageDraw.Draw(ic)
+            dd.rounded_rectangle((0, 6, 178, 54), 8, fill=(50, 110, 255)); label(ic, (89, 28), 'Join', 26, anchor='mm')
+        sc.alpha_composite(ic, ((sc.width - ic.width) // 2, (sc.height - ic.height) // 2))
+        ar = Image.new('RGBA', (90, 60), (0, 0, 0, 0)); ImageDraw.Draw(ar).line([(80, 8), (40, 26), (12, 48)], fill=(230, 30, 30), width=9)
+        ImageDraw.Draw(ar).polygon([(4, 56), (8, 34), (26, 50)], fill=(230, 30, 30))
+        sc.alpha_composite(ar, (sc.width // 2 + 30, 50))
+        c.alpha_composite(sc, (15, 55))
+        if k == 'group':
+            ok = sim.sbox(44, 44, 'green', radius=0.1, cell=40, stud=(0, 0)); label(ok, (22, 20), '✓' if False else 'OK', 18, anchor='mm')
+        img.alpha_composite(c, (x0 + 22 + i * (cw + 22), y0 + 420))
+    cb = shop3.lime(400, 96); label(cb, (200, 46), 'I joined!', 52, anchor='mm')
+    img.alpha_composite(cb, (x0 + ww // 2 - 200, y0 + wh - 120))
+    img.convert('RGB').save(out, quality=92)
+
