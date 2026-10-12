@@ -58,3 +58,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-11: four leaderboards in a row by the training area: Top Total Damage and Top Total Money (all players, every 3 min), Server Top Damage and Server Top Money (players in this server, live). "Total money" = all Cash ever earned (spending doesn't lower it). #break-a-bed
 
 - 2026-10-11: bed signs show the Cash a break pays you, including x2 Cash, the Cash boost and VIP. #break-a-bed
+
+- 2026-10-12: the UI will be designed in **Figma** (owner's choice) and brought into Roblox as uploaded images, replacing the shape-drawn icons and panels. #break-a-bed

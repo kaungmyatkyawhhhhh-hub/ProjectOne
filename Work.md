@@ -5,7 +5,8 @@
 - I'm not a programmer: I need plain, step-by-step instructions for anything technical.
 
 ## Businesses / income
-_(Fill in: any businesses, clients, or how your games make money.)_
+- Break A Bed earns Robux from game passes and products: about 500 Robux a day (2026-10-12), after 12K Robux spent on ads.
+- Figma for UI design (from 2026-10-12)
 
 ## Tools
 - Roblox Studio
