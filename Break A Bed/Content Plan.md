@@ -178,6 +178,15 @@ Three world boards stand side by side near spawn: **TOP TOTAL DAMAGE** (exists n
   - **Rebirths:** purple with a gold rebirth-arrows icon and a soft purple glow.
   - Each board has a small matching light on top.
 
+## 9. Map layout fixes (owner's screenshot, 2026-10-13)
+Seen from spawn, everything is squeezed into the back corner while the big paved plaza in front is empty.
+- **The Glove Shop is jammed** between the training floor and the VIP Lounge. Its "Glove Shop" title overlaps the "VIP POST / 2x your best post" sign. **Move it into the open plaza**, front-left of the training area, facing spawn, with about 8 studs of free space around its pad.
+- **The Invite Friend stand** has no figure yet (only small dumbbells on the ring). Build the rongstrix figure (section 7), and move the stand into the open plaza closer to spawn, front-right, so it's one of the first things players see.
+- **Stands in an arc:** the Glove Shop, Invite Friend and (later) a Rebirth stand stand in a loose arc around the front of the plaza, all facing spawn. The middle stays a clear walkway from spawn to the training area and the bed path arch.
+- **Training floor:** the 17 posts are packed so tight that their name/price signs overlap. Spread them out (a bigger floor or more space between rows) so each sign reads on its own from spawn.
+- **No overlapping signs** from the spawn view. Every big title (TRAINING, VIP POST, Glove Shop, INVITE FRIEND, the leaderboards) must be readable without another one in front of it.
+- Keep the like-goal board and the leaderboards where players see them on the way.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
