@@ -86,3 +86,23 @@ Likely fixes, depending on what the data shows:
 - **Nothing blocking at join:** no pop-ups before the first bed break (already the rule; double-check on phones).
 - **Load faster:** preload only what the first minute needs; stream in the rest.
 - **Performance on phones:** Low Graphics on by default for low-end devices; check FPS with many players.
+
+## Funnel results (data up to Oct 13, 6:30 AM; only 42 new players, so numbers are rough)
+| Step | Players | Left at this step | Still here |
+|---|---|---|---|
+| 1. Joined | 42 | – | 100% |
+| 2. First punch | 37 | 12% | 88% |
+| 3. 10 punches | 37 | 0% | 88% |
+| 4. First bed broken | 34 | 8% | 81% |
+| 5. Bought Wooden Post | 29 | 15% | 69% |
+| 6. Reached bed 3 | 26 | 10% | 62% |
+| 7. Reached bed 5 | 25 | 4% | 60% |
+| 8. Claimed first gift | 23 | 8% | 55% |
+| **9. Stayed 10 min** | **13** | **43%** | **31%** |
+
+**What it means:** the first minutes work (81% break a bed, 60% reach bed 5). The big leak is **between ~2 and 10 minutes**: after bed 5 and the first gift, almost half leave. That's when progress slows (each new post needs more grinding) and nothing new happens. The 1.4 min average session doesn't match this (31% staying 10+ min would give a higher average), so it's probably from older days or counts players who left while loading; recheck it with the date range after the update.
+
+**Fix: something new every ~60 s in minutes 2–10** (see the prompt in the chat / session note):
+- Re-tune beds 5–10 and posts 3–7 so a new bed or post comes every 45–75 s for a new player (no grind wall before 10 min).
+- Show the next goal clearly: "Next gift in 1:55" right after the first claim, and the next bed bar.
+- Daily Quests (now live) give goals in this window; the AFK Zone comes next.
