@@ -23,6 +23,8 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 
 - **Titles (mockup 08):** the Titles tile opens it; All / Owned tabs, a grid of cards with the rarity word in its color, EQUIP / EQUIPPED for owned titles, a lock for the rest (tap it to see how to earn it).
 
+- **Quests (mockup 05):** the Quests tile, the Quests pill, the Daily Reward pill and the Daily quests card all open it. Daily tab: today's 3 quests with CLAIM / GO / DONE, the Complete all 3 bonus and the 7-day Daily Reward grid. Rewards tab: the login streak. Achievements tab: the Coach's quest chain. GO closes the window and shows where to go in the top band.
+
 ## Where it lives (UI v2)
 - `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
 
@@ -79,3 +81,6 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_v2_02_machine_hud_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_10_settings_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_08_titles_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_05_quests_daily_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_05_quests_rewards_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_05_quests_achievements_phone.jpg]]

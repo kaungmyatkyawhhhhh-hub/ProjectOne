@@ -38,3 +38,7 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_10_settings_phone.jpg]]
 - Titles window (mockup 08) done: All / Owned tabs, rarity-colored cards, EQUIP / EQUIPPED, locks on titles you don't have yet.
 ![[GYM ARC/Screenshots/ui_compare_v2_08_titles_phone.jpg]]
+- Quests window (mockup 05) done: Daily (3 quests + bonus + 7-day reward grid), Rewards (login streak), Achievements (the Coach's quest chain). The old login calendar card is gone; the Daily Reward and Quests pills open this window.
+![[GYM ARC/Screenshots/ui_compare_v2_05_quests_daily_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_05_quests_rewards_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_05_quests_achievements_phone.jpg]]
