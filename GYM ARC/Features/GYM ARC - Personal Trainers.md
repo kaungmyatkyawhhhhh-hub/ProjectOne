@@ -44,3 +44,6 @@ A coach who follows you around, stands beside your machine and cheers you on. Bu
 - The trainers who follow you now look like their pictures: red cap and red shirt, white headband and green shirt, gold visor and yellow shirt, black headphones and purple shirt. Their name tags are gone.
 ![[GYM ARC/Screenshots/ui_compare_v2_06_trainers_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_06_trainer_follower_red_cap.jpg]]
+
+## Coaches window, final look (14 Oct)
+The window is now titled COACHES: gold frame and "COACHING" on the coach with you, EQUIP on owned ones, gray with a lock and price on the rest, and the gold 2nd slot button. See [[2026-10-14 GYM ARC Final UI Black and Gold]].

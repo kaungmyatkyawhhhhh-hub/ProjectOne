@@ -42,3 +42,15 @@ Mockup, then the game:
 ![[GYM ARC/Screenshots/ui_compare_final_05_quests_streak_pc.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_final_05_quests_goals_pc.jpg]]
 Commit 9dc1eb9.
+
+## 3. Coaches
+- The Trainers window is now called COACHES, with your coins in the header.
+- Each tile: the coach's picture in a dark box and the perk in big letters ("+5%" with a small "EXP").
+  - The coach who is with you: tile a bit bigger, gold frame with a soft glow, the perk in gold and "COACHING".
+  - Coaches you own: a dark EQUIP button.
+  - Coaches you don't own yet: picture grayed out, a lock in the corner and the price in a dark pill.
+- Bottom: "Tap a coach to hire or swap · 1 / 1 active" and the gold "R$ 99 · 2ND SLOT" button (it pulses gently).
+Mockup, then the game (a test save with two coaches hired, then your save with none):
+![[GYM ARC/Screenshots/ui_compare_final_06_coaches_mockup.png]]
+![[GYM ARC/Screenshots/ui_compare_final_06_coaches_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_final_06_coaches_locked_pc.jpg]]
