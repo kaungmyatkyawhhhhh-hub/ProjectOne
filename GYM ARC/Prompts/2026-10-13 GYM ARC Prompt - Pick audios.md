@@ -1,7 +1,7 @@
 ---
 date: 2026-10-13
 tags: [gymarc, prompt, sounds]
-status: in progress
+status: done
 ---
 # 2026-10-13 GYM ARC Prompt - Pick audios
 
