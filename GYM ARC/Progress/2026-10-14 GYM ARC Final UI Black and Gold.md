@@ -84,3 +84,12 @@ Mockup, then the game (your save is at max height, so it shows MAX HEIGHT):
 Mockup, then the game:
 ![[GYM ARC/Screenshots/ui_compare_final_02_lifting_mockup.png]]
 ![[GYM ARC/Screenshots/ui_compare_final_02_lifting_phone.jpg]]
+
+## 7. Title screen
+- One dark panel on the left: the GYM ARC logo (GYM white, ARC red), "Everyone starts tiny.", the big red PLAY (it gently pulses and a shine sweeps across once), a gold SHOP and a dark UPDATES (red dot while there is news).
+- Under a thin line: your avatar picture, your name, "Level 46 · 7'0"" and your coins.
+- Bottom right: a small gold NEW tag with the newest update's name. Tapping it opens the update notes.
+- The loading screen before it did not change.
+Mockup, then the game:
+![[GYM ARC/Screenshots/ui_compare_final_00_title_mockup.png]]
+![[GYM ARC/Screenshots/ui_compare_final_00_title_phone.jpg]]

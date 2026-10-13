@@ -56,3 +56,7 @@ Every player picture is the player's real Roblox avatar headshot in a plain dark
 The left menu tiles are vertically centered on the left side (never higher than the top bar), with the "<" button centered on their right edge. Checked on phone (844x390) and PC: no overlap with Roblox's buttons, the top bar or the stamina bar.
 ![[GYM ARC/Screenshots/ui_compare_v2_left_menu_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_left_menu_pc.jpg]]
+
+## Final look (14 Oct)
+The main menu is one dark panel on the left: logo, tagline, red PLAY, gold SHOP, dark UPDATES, then your picture, name, level, height and coins. A small NEW tag bottom right names the newest update. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
+![[GYM ARC/Screenshots/ui_compare_final_00_title_phone.jpg]]
