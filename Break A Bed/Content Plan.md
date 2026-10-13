@@ -47,6 +47,14 @@ Every post gets its own model, punch effect and sound, so each new post feels li
 - Each one **multiplies all Strength from punching** (x1.5, x2, x3… up to about x50). They're priced so each takes 3–8 minutes of play at that stage, and they're spread between the post prices so there's always something to buy.
 - The equipped glove shows on both hands and changes the punch effect color. Owned gloves are saved.
 
+- **Glove model fix (owner, 2026-10-13):** the first build was wrong. The owner's screenshot shows huge green blobs made of stacked balls, covering the arms and chest, with bright white glow dots on them. Rules for the glove model:
+  - **Shape:** a real boxing-glove shape built from a few parts: a rounded main fist (slightly egg-shaped, flatter on the palm side), a **thumb** bump on the inner side, a **cuff** (a short cylinder at the wrist in a darker or white trim color) and a thin lace/strap line. No clusters of spheres.
+  - **Size:** about **1.4× the hand** (around 1.1 × 1.0 × 1.3 studs on a normal R15 avatar). It never covers the forearm, chest or face. It scales with the avatar's hand size.
+  - **Fit:** welded (`WeldConstraint`/`Motor6D`) to `LeftHand`/`RightHand` (R15) or the bottom of `Left Arm`/`Right Arm` (R6), centered on the hand, knuckles facing forward, thumb up. It follows punches exactly, with no gap or offset. `CanCollide`, `CanTouch` and `CanQuery` off, `Massless` on.
+  - **Look:** SmoothPlastic, or a soft shine for higher tiers. Each glove has its own color (Boxing red, Wooden brown, Spiked black with silver spikes, Iron grey, Gold, Ice light blue, Fire orange with an ember trail, Thunder yellow with sparks, Emerald green, Galaxy purple with stars, Void black with a purple glow, Infinity rainbow).
+    - **Effects stay small.** No big neon balls or white dots. Higher gloves only get a soft `PointLight` or a light particle at the knuckles.
+  - Hide the player's normal hand under the glove (`LocalTransparencyModifier` or a cut-off), and keep hats, hair and accessories as they are.
+  - Check on R15 and R6, on a small and a big avatar, and in first person.
 - **Glove Shop stand (owner, 2026-10-13, from a reference picture of a "Pickaxe Shop" market stall):**
   - **No ProximityPrompt.** A glowing **blue circle pad** on the ground in front of the stall is a touch sensor. Stepping into it opens the Glove Shop window, and stepping out (or the X) closes it. A 1 s cooldown stops it reopening right after closing while still standing in it.
   - **Our own design (not a copy):** a chunky low-poly boxing-themed stall.
