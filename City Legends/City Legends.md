@@ -162,4 +162,8 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - Real gearbox spacing. Each gear reaches 30/45/58/69/79/89/100% of top speed (at 88% of the revs). Each higher gear pulls less, by its ratio, so acceleration falls off with speed like a real car. Checked in a simulation against the real LP750 SV: 0-124 mph 8.4 s (real 8.6). Every car reaches its full top speed in 7th at 88% of the revs, held there by a top speed limit.
   - Electric cars (`Electric = true` in Cars: Dolphin, EV6, Seal, SU7, U8): one gear "D", full pull up to about 35% of top speed then fading, no shifts, no engine sound (wind and tyres only), no exhaust pops. F switches them on silently. Q / E do nothing on them.
   - Reverse: up to a third of top speed (35 mph at most), with a brisker pull.
-  - Cars still without a real model: BYT Dolphin EV, BYT Seal EV, Toyoka Land Cruzer 300, Mercer GT63 S, Bentlee Continental GT, Bentlee Bentayga, Rolls Royal Cullinan.
+  - Cars still without a real model: BYT Seal EV, Toyoka Land Cruzer 300, Dodger SRT, Bentlee Continental GT, Bentlee Bentayga, Rolls Royal Phantom.
+- **Roster (2026-10-13):** 62 cars.
+  - BYT Dolphin EV removed; owners lose it from their saves.
+  - Mercer GT63 S renamed "Dodger SRT". It keeps the id `bentz_gt63s` so owners keep it, and takes Charger SRT Hellcat-like stats: 196 mph, 0-60 in 3.6 s, wheelbase 3.052 m.
+  - Rolls Royal Cullinan renamed "Rolls Royal Phantom". It keeps the id `rolls_cullinan`, becomes a Sedan, 0-60 in 5.1 s, wheelbase 3.552 m.

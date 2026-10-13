@@ -65,7 +65,7 @@ local DIM_OVERRIDES: { [string]: { [string]: number } } = {
 -- sets the length, and an imported model's own wheels set the wheel size.
 CarBuilder.STUDS_PER_METRE = 3.0
 local REAL_WB: { [string]: number } = {
-	suzaki_swift = 2.45, toyoka_belta = 2.55, byt_dolphin = 2.7, kio_ev6 = 2.9, byt_seal = 2.92,
+	suzaki_swift = 2.45, toyoka_belta = 2.55, kio_ev6 = 2.9, byt_seal = 2.92,
 	toyoka_camri = 2.825, toyoka_crown = 2.85, toyoka_alfard = 3.0, toyoka_lc200 = 2.85, nisun_350z = 2.65,
 	bnw_530i = 2.975, bnw_540i = 2.975, bentz_e300 = 2.939, bentz_e400 = 2.939,
 	 bnw_330i_g20 = 2.851,
@@ -75,10 +75,10 @@ local REAL_WB: { [string]: number } = {
 	porsha_panamera = 2.95, nisun_gtr = 2.78, astin_db9 = 2.74, astin_vantage = 2.6, ferrara_f430 = 2.6,
 	lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
 	ferrara_458 = 2.65, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,
-	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.295,
+	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.552,
 	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lambrini_lp750 = 2.7,
 	bentz_s63 = 3.165, bentz_maybach = 3.39, mazdo_rx8 = 2.7, bnw_m8gc = 3.023, bnw_x7 = 3.105, xiaomo_su7 = 3.0, porsha_boxster = 2.475, lambrini_lp640 = 2.665, mazdo_rx7 = 2.425,
-	bentz_gt63s = 2.951, chevo_c7 = 2.71, chevo_c6 = 2.686, chevo_camaro = 2.811,
+	bentz_gt63s = 3.052, chevo_c7 = 2.71, chevo_c6 = 2.686, chevo_camaro = 2.811,
 }
 
 -- cars that share another car's imported model (same body and interior) until they get their own
