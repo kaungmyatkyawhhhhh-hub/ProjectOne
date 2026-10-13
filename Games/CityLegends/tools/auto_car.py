@@ -124,23 +124,98 @@ def align_yaw(turn=None):
 
 def drop_props():
     """Floors, backdrops and stray objects: anything much bigger than the car or outside it (the
-    car's extent from the middle 90% of all points, so a big prop can't stretch it)."""
+    car's extent from the middle 90% of all points, so a big prop can't stretch it). Most points
+    sit low in a car (a dense cabin), so that height is short: the body and the roof reach well
+    above it, while nothing of the car reaches far below the ground."""
     allv = np.concatenate([verts_world(o) for o in meshes()])
     lo = np.percentile(allv, 5, axis=0)
     hi = np.percentile(allv, 95, axis=0)
     size = hi - lo
-    pad = size * 0.3
+    pad_lo = size * 0.3
+    pad_hi = size * np.array([0.3, 0.3, 0.7])
     dropped = []
     for o in list(meshes()):
         v = verts_world(o)
         a, b = v.min(axis=0), v.max(axis=0)
         c = (a + b) / 2
-        too_big = np.any((b - a) > size * 1.6)
-        outside = np.any(c < lo - pad) or np.any(c > hi + pad)
+        r = (b - a) / size
+        too_big = np.any(r[:2] > 1.6) or r[2] > 3 or a[2] < lo[2] - size[2] * 0.5
+        outside = np.any(c < lo - pad_lo) or np.any(c > hi + pad_hi)
         if too_big or outside:
             dropped.append(o.name)
             bpy.data.objects.remove(o, do_unlink=True)
     return dropped
+
+
+def split_vertex_colours():
+    """Some files colour their parts by vertex colour through a few shared materials, which
+    Studio's importer drops (the car comes in all white). Split such a mesh by colour, each piece
+    with its own copy of the material in that plain colour (baked like any plain colour later).
+    Returns how many coloured materials were made."""
+    copies = {}
+    for o in list(meshes()):
+        me = o.data
+        m = me.materials[0] if len(me.materials) == 1 else None
+        if not (m and m.use_nodes and "Principled BSDF" in m.node_tree.nodes and me.color_attributes and len(me.polygons)):
+            continue
+        inp = m.node_tree.nodes["Principled BSDF"].inputs["Base Color"]
+        if not (inp.is_linked and inp.links[0].from_node.type in ("VERTEX_COLOR", "ATTRIBUTE")):
+            continue
+        node = inp.links[0].from_node
+        layer = getattr(node, "layer_name", "") or getattr(node, "attribute_name", "")
+        ca = me.color_attributes.get(layer) or me.color_attributes.active_color or me.color_attributes[0]
+        col = np.empty(len(ca.data) * 4)
+        ca.data.foreach_get("color", col)
+        col = col.reshape(-1, 4)[:, :3]
+        if ca.domain == "POINT":
+            lv = np.empty(len(me.loops), dtype=np.int64)
+            me.loops.foreach_get("vertex_index", lv)
+            col = col[lv]
+        ls = np.empty(len(me.polygons), dtype=np.int64)
+        lt = np.empty(len(me.polygons), dtype=np.int64)
+        me.polygons.foreach_get("loop_start", ls)
+        me.polygons.foreach_get("loop_total", lt)
+        if np.any(np.diff(ls) <= 0):
+            continue
+        fc = np.add.reduceat(col, ls, axis=0) / lt[:, None]
+        for steps in (12, 6, 3):
+            keys, group = np.unique(np.round(np.clip(fc, 0, 1) ** (1 / 2.2) * steps).astype(int), axis=0, return_inverse=True)
+            if len(keys) <= 16:
+                break
+        group = group.ravel()
+        me.materials.clear()
+        for gi, key in enumerate(keys):
+            ck = (m.name, tuple(key), steps)
+            if ck not in copies:
+                c = fc[group == gi].mean(axis=0)
+                mc = m.copy()
+                mc.name = "c%d_%s" % (len(copies), m.name[:40])  # the number first: part names keep 24 letters
+                b = mc.node_tree.nodes["Principled BSDF"].inputs["Base Color"]
+                for link in list(b.links):
+                    mc.node_tree.links.remove(link)
+                b.default_value = (float(c[0]), float(c[1]), float(c[2]), 1.0)
+                copies[ck] = mc
+            me.materials.append(copies[ck])
+        me.polygons.foreach_set("material_index", group.astype(np.int32))
+        if len(keys) < 2:
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        bpy.context.view_layer.objects.active = o
+        o.select_set(True)
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.mesh.separate(type="MATERIAL")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        # each piece keeps only the one material it uses (later steps read the first slot)
+        for piece in list(bpy.context.selected_objects):
+            pm = piece.data
+            if not len(pm.polygons):
+                continue
+            used = pm.materials[pm.polygons[0].material_index]
+            pm.materials.clear()
+            pm.materials.append(used)
+            pm.polygons.foreach_set("material_index", np.zeros(len(pm.polygons), dtype=np.int32))
+    return len(copies)
 
 
 def smooth_normals(o):
@@ -295,8 +370,9 @@ def ring_fit(s, u):
     return best
 
 
-def find_steering(parts, scale, up, la, sa, centre, ground, wb):
-    """The steering wheel: {"centre" (model units), "radius" (m), "ratio", "names"} or None."""
+def find_steering(parts, scale, up, la, sa, centre, ground, wb, near=None):
+    """The steering wheel: {"centre" (model units), "radius" (m), "ratio", "names"} or None.
+    near: a rough [side, up, along] in metres (as the DEBUG candidates print) to pick among them."""
     # every part in metres: side off the middle, height off the ground, length off the middle
     P = []
     for i, (o, idx, a, b, co) in enumerate(parts):
@@ -390,7 +466,14 @@ def find_steering(parts, scale, up, la, sa, centre, ground, wb):
     if DEBUG:
         for f in sorted(found, key=lambda f: -f[0])[:12]:
             print("steer candidate score %.3f at side %.2f up %.2f along %.2f R %.3f parts %d" % (f[0], f[1][0], f[1][1], f[1][2], f[2], len(f[4])))
-    score, c, R, ratio, got, r0 = max(found, key=lambda f: f[0])
+    if near is not None:
+        # the candidate nearest the hint, at the hint's distance along the car (the rim's middle
+        # is easily put a little off when the wheel leans far back)
+        score, c, R, ratio, got, r0 = min(found, key=lambda f: np.linalg.norm(f[1] - np.array(near)))
+        c = np.array([c[0], c[1], near[2]])
+        score = max(score, 1e-3)
+    else:
+        score, c, R, ratio, got, r0 = max(found, key=lambda f: f[0])
     if score > 0:
         # true it up on the rim's outer edge: the farthest point in each of 24 directions (leaving
         # out ones much farther or nearer than the rest), and a circle through them
@@ -442,7 +525,7 @@ def main():
     args = sys.argv[1:]
     src, real_wb, out = args[0], float(args[1]), args[2]
     # hand-set help for a car the search gets wrong: {"front": 1 or -1 (along the model's length
-    # axis), "tilt": degrees}
+    # axis), "tilt": degrees, "steer": [side, up, along] in metres, near the right DEBUG candidate}
     hint = json.loads(args[3]) if len(args) > 3 else {}
     report = {"src": src, "hint": hint}
     # first pass, to find things: a quick thinning keeps the search fast
@@ -481,7 +564,7 @@ def main():
     # everything inside a circle around it, move the circle onto what was gathered, and repeat.
     # Only a real ring passes: points all the way round at nearly the same distance (a seat back
     # or a panel is square-ish or too big and fails)
-    best = find_steering(parts, scale, up, length_axis, side_axis, centre, ground, real_wb)
+    best = find_steering(parts, scale, up, length_axis, side_axis, centre, ground, real_wb, hint.get("steer"))
     if best is None:
         report["error"] = "steering wheel not found"
         json.dump(report, open(out + ".json", "w"), indent=1)
@@ -524,6 +607,7 @@ def main():
         o = bpy.data.objects.get(name)
         if o:
             bpy.data.objects.remove(o, do_unlink=True)
+    report["vertex_colours"] = split_vertex_colours()
     lo_c = np.array(sc, dtype=float)
     hi_c = np.array(sc, dtype=float)
     for ax, reach in ((side_axis, R), (up, R), (length_axis, 0.3 / scale)):
@@ -715,6 +799,14 @@ def main():
             o.data.uv_layers.new(name="UVMap")
         if tris(o) > MAX_TRIS:
             decimate(o, MAX_TRIS / tris(o) * 0.95, 1e-5)
+    # a car made of very many small pieces is still over budget (they are left alone above, as
+    # thinning each on its own breaks them up): thin the joined parts, which keeps their shapes
+    total = sum(tris(o) for o in meshes())
+    if total > BUDGET * 1.15:
+        k = BUDGET / total
+        for o in meshes():
+            if tris(o) > 2000 and not o.name.startswith("SteeringWheel"):
+                decimate(o, k, 1e-5)
     for img in bpy.data.images:
         w, h = img.size
         if max(w, h) > 1024:

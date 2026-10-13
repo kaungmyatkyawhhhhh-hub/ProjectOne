@@ -78,6 +78,16 @@ CarSkin.CLUSTER_STYLE = {
 	porsha_boxster = "Porsche718",
 	nisun_gtr = "GTR",
 	lambrini_lp750 = "AventadorSV", -- its own cluster (owner's photo)
+	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
+	bentz_gt63s = "Aston", -- Dodger SRT (Charger Hellcat): two big dials with a screen between
+	bentlee_bentayga = "Aston",
+	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
+	rolls_wraith = "Maybach57",
+	byt_seal = "U8", -- wide electric screen
+	toyoka_lc300 = "Toyota",
+	nisun_r34 = "GTR",
+	bentz_sl65bs = "AMGBiturbo",
+	bnw_m4_f82 = "BMWClassic",
 } :: { [string]: string }
 
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the

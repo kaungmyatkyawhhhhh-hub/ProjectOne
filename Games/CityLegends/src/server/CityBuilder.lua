@@ -195,7 +195,7 @@ local SIDEWALK = Color3.fromRGB(78, 78, 84)
 local CURB_COLOR = Color3.fromRGB(110, 110, 116)
 local LINE_WHITE = Color3.fromRGB(205, 205, 200)
 local LINE_YELLOW = Color3.fromRGB(230, 170, 30)
-local STREETLIGHT = Color3.fromRGB(255, 214, 172)
+local STREETLIGHT = Color3.fromRGB(255, 202, 146) -- warm sodium-white
 local METAL = Color3.fromRGB(38, 40, 44)
 
 local WINDOW_COLORS = {
@@ -233,8 +233,9 @@ end
 -- Lighting / atmosphere
 ---------------------------------------------------------------------
 function CityBuilder.setupLighting()
-	-- Moonlit night with an even base level across the whole map. Local lights
-	-- are accents on top of this, not the only thing you can see by.
+	-- Rainy neon night (Highway Legends look): a dim blue moonlit base so the street lamps, neon
+	-- and headlights carry the scene, wet glossy reflections, glow round every bright light and a
+	-- cool, contrasty grade. Weather.lua blends its rain mood from these values.
 	-- newer lighting properties may not exist on every engine version
 	pcall(function()
 		(Lighting :: any).Technology = Enum.Technology.Future
@@ -246,16 +247,17 @@ function CityBuilder.setupLighting()
 		(Lighting :: any).PrioritizeLightingQuality = true
 	end)
 	Lighting.ClockTime = 0
-	Lighting.Brightness = 2.5
+	Lighting.GeographicLatitude = 30 -- the moon a little off overhead: long soft building shadows
+	Lighting.Brightness = 1.8
 	Lighting.GlobalShadows = true
-	Lighting.ShadowSoftness = 0.25
-	Lighting.Ambient = Color3.fromRGB(96, 100, 118) -- lifts shadowed and covered spots, like car cabins
-	Lighting.OutdoorAmbient = Color3.fromRGB(132, 138, 168)
-	Lighting.EnvironmentDiffuseScale = 0.8
-	Lighting.EnvironmentSpecularScale = 0.9
-	Lighting.ExposureCompensation = 0.45
-	Lighting.ColorShift_Top = Color3.fromRGB(110, 120, 170)
-	Lighting.ColorShift_Bottom = Color3.fromRGB(10, 10, 20)
+	Lighting.ShadowSoftness = 0.12
+	Lighting.Ambient = Color3.fromRGB(80, 84, 104) -- lifts shadowed and covered spots, like car cabins
+	Lighting.OutdoorAmbient = Color3.fromRGB(98, 108, 148)
+	Lighting.EnvironmentDiffuseScale = 1
+	Lighting.EnvironmentSpecularScale = 1 -- glossy paint and wet roads mirror the city
+	Lighting.ExposureCompensation = 0.5
+	Lighting.ColorShift_Top = Color3.fromRGB(120, 140, 200)
+	Lighting.ColorShift_Bottom = Color3.fromRGB(8, 8, 18)
 
 	for _, child in Lighting:GetChildren() do
 		if child:IsA("PostEffect") or child:IsA("Atmosphere") or child:IsA("Sky") then
@@ -269,28 +271,35 @@ function CityBuilder.setupLighting()
 	sky.MoonAngularSize = 11
 	sky.Parent = Lighting
 
-	-- light, even city haze (no purple glow soup)
+	-- city haze: far blocks fade into a deep blue, near ones stay clear
 	local atmo = Instance.new("Atmosphere")
-	atmo.Density = 0.26
-	atmo.Offset = 0.05
-	atmo.Color = Color3.fromRGB(96, 104, 140)
-	atmo.Decay = Color3.fromRGB(52, 56, 90)
-	atmo.Glare = 0
-	atmo.Haze = 0.9
+	atmo.Density = 0.3
+	atmo.Offset = 0.12
+	atmo.Color = Color3.fromRGB(86, 100, 148)
+	atmo.Decay = Color3.fromRGB(40, 46, 84)
+	atmo.Glare = 0.25
+	atmo.Haze = 1.2
 	atmo.Parent = Lighting
 
-	-- only genuinely bright things (neon, lamps) bloom
+	-- a wide, soft glow round genuinely bright things (lamps, neon, lights), not round paint
 	local bloom = Instance.new("BloomEffect")
-	bloom.Intensity = 0.7
-	bloom.Size = 24
-	bloom.Threshold = 1.15
+	bloom.Intensity = 1
+	bloom.Size = 40
+	bloom.Threshold = 1.05
 	bloom.Parent = Lighting
 
+	-- faint shafts from the moon through the towers
+	local rays = Instance.new("SunRaysEffect")
+	rays.Intensity = 0.03
+	rays.Spread = 0.5
+	rays.Parent = Lighting
+
+	-- cool shadows, deep blacks, rich colour
 	local cc = Instance.new("ColorCorrectionEffect")
-	cc.Brightness = 0.04
-	cc.Contrast = 0.1
-	cc.Saturation = 0.06
-	cc.TintColor = Color3.fromRGB(242, 244, 255)
+	cc.Brightness = 0.02
+	cc.Contrast = 0.18
+	cc.Saturation = 0.14
+	cc.TintColor = Color3.fromRGB(236, 242, 255)
 	cc.Parent = Lighting
 end
 
@@ -371,7 +380,9 @@ local function streetLight(parent: Instance, base: Vector3, armDir: Vector3)
 	deco(parent, Vector3.new(0.4, 0.4, 7), CFrame.lookAt((base + Vector3.new(0, height, 0) + armEnd) / 2, armEnd), METAL, Enum.Material.Metal)
 	local head = deco(parent, Vector3.new(2.6, 0.5, 1.2), CFrame.lookAt(armEnd - Vector3.new(0, 0.3, 0), armEnd - Vector3.new(0, 0.3, 0) + armDir), METAL, Enum.Material.Metal)
 	local lamp = deco(parent, Vector3.new(2.2, 0.15, 1), head.CFrame * CFrame.new(0, -0.3, 0), STREETLIGHT, Enum.Material.Neon)
-	addLight("SpotLight", lamp, STREETLIGHT, 54, 1.15, Enum.NormalId.Bottom, 125)
+	-- a bright warm pool on the road; near the camera it also casts shadows (WorldFx)
+	local pool = addLight("SpotLight", lamp, STREETLIGHT, 62, 2.4, Enum.NormalId.Bottom, 130)
+	CollectionService:AddTag(pool, "ShadowLight")
 end
 
 local function trafficSignal(parent: Instance, i: number, j: number, k: number)

@@ -72,6 +72,9 @@ local function startLod(scale: number)
 	end
 	-- wide enough that lights never visibly pop on/off block by block
 	local lightRange = 900 * scale
+	-- street lamps near the camera cast shadows (poles, cars, people across the road); far ones
+	-- don't, and none do on low graphics or phones
+	local shadowRange = if scale >= 0.85 then 170 else 0
 	local camera = workspace.CurrentCamera
 
 	local cursor, lightCursor = 1, 1
@@ -100,9 +103,16 @@ local function startLod(scale: number)
 			lightCursor += 1
 			local part = l.Parent
 			if part and part:IsA("BasePart") then
-				local on = (part.Position - camPos).Magnitude < lightRange
+				local dist = (part.Position - camPos).Magnitude
+				local on = dist < lightRange
 				if l.Enabled ~= on then
 					l.Enabled = on
+				end
+				if shadowRange > 0 and l:HasTag("ShadowLight") then
+					local shade = dist < shadowRange
+					if l.Shadows ~= shade then
+						l.Shadows = shade
+					end
 				end
 			end
 		end

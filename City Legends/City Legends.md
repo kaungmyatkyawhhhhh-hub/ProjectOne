@@ -166,4 +166,27 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - **Roster (2026-10-13):** 62 cars.
   - BYT Dolphin EV removed; owners lose it from their saves.
   - Mercer GT63 S renamed "Dodger SRT". It keeps the id `bentz_gt63s` so owners keep it, and takes Charger SRT Hellcat-like stats: 196 mph, 0-60 in 3.6 s, wheelbase 3.052 m.
-  - Rolls Royal Cullinan renamed "Rolls Royal Phantom". It keeps the id `rolls_cullinan`, becomes a Sedan, 0-60 in 5.1 s, wheelbase 3.552 m.
+  - Rolls Royal Cullinan renamed "Rolls Royal Phantom". It keeps the id `rolls_cullinan`, becomes a Sedan, 0-60 in 5.1 s. Wheelbase 3.772 m, because the owner's model is the Phantom Extended.
+- **New cars (2026-10-13, owner: "New car SL65 amg and M4"):** 65 cars.
+  - Mercer SL65 Black Series (`bentz_sl65bs`, High, $700,000, 199 mph, 0-60 in 3.8 s) and BNW M4 F82 (`bnw_m4_f82`, Mid, $100,000, 174 mph, 4.1 s).
+  - Nisun Skyline R34 GT-R (`nisun_r34`, Mid, $180,000, 165 mph, 4.9 s): its model came in the same push, so it was added as a new car too.
+  - Real models for 6 more cars from the same push: Dodger SRT (a Charger Hellcat), Bentlee Bentayga, Rolls Royal Phantom, Rolls Royal Wraith, BYT Seal and Toyoka Land Cruzer 300. Still without a real model: Bentlee Continental GT.
+  - Cluster looks, taken from the real cars until the owner sends photos:
+
+    | Cluster style | Cars |
+    |---|---|
+    | AMG twin dials | SL65 |
+    | BMW classic | M4 |
+    | GT-R | R34 |
+    | Aston-style twin dials | SRT, Bentayga |
+    | Maybach chrome dials | Phantom, Wraith |
+    | U8 wide screen | Seal |
+    | Toyota | Land Cruzer |
+- **Lighting (2026-10-13, owner: "Make all of the game lighting way better"):** a rainy neon night look, like Highway Legends.
+  - The base light is now a dimmer, bluer moonlight, so street lamps, neon and headlights carry the scene. The moon sits a little off overhead, so buildings cast long, crisp shadows.
+  - Glossy paint and wet roads reflect the city more.
+  - Bright things get a wider glow (bloom): lamps, neon and lights, but not paint.
+  - The colour grade has more contrast and colour, with cool shadows. The far city fades into a deep blue haze, and faint moon rays shine through the towers.
+  - Street lamps are warmer and about twice as bright, with a wider pool of light on the road. Lamps within ~170 studs of the camera cast real shadows (poles, cars, players), but not on low graphics or on phones.
+  - Headlights reach further (80 studs) and are a little brighter.
+  - Rain still blends its darker, greyer mood on top of all this.
