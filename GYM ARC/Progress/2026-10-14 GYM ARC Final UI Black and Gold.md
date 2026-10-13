@@ -64,3 +64,13 @@ Mockup, then the game (a test save with two coaches hired, then your save with n
 Mockup, then the game (your save is maxed, so every bar is full):
 ![[GYM ARC/Screenshots/ui_compare_final_07_physique_mockup.png]]
 ![[GYM ARC/Screenshots/ui_compare_final_07_physique_phone.jpg]]
+
+## 5. HUD
+- Left menu: dark glass tiles with white line icons (the Shop's cart is gold), small slanted labels and plain red dots. The tile of the open window gets a gold border.
+- Top bar: bold slanted words (DAILY, QUESTS), and the level as "LVL 45" with a small gold bar toward the next level.
+- Right column: the quest cards have a plain teal bar ("TODAY'S QUEST 1/3").
+- The Growth Spurt button is now wide: gold "TAP TO GROW" with "GROWTH SPURT 2 READY" under it (it pulses) when you can grow, a quiet dark "GROWTH SPURT 2 · 62%" before that, and "MAX HEIGHT" at 7'0".
+- Bottom: the STAMINA panel: teal lightning icon, "250 / 250" and a fat teal bar (soft red when nearly empty).
+Mockup, then the game (your save is at max height, so it shows MAX HEIGHT):
+![[GYM ARC/Screenshots/ui_compare_final_01_hud_mockup.png]]
+![[GYM ARC/Screenshots/ui_compare_final_01_hud_phone.jpg]]
