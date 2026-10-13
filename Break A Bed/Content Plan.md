@@ -65,6 +65,10 @@ Beds you haven't broken yet are **black silhouettes**, so you want to keep playi
 - **Saved forever:** a separate `DiscoveredBeds` list that **isn't reset by Rebirth**, so beds stay revealed after rebirthing. Old saves: every completed bed counts as discovered.
 - The first bed (Cardboard) is always revealed, so the tutorial target is clear.
 - The bed path's colored tiles and the COMPLETED signs stay as they are.
+- **Training posts too (owner, 2026-10-13):** posts you don't own yet are black silhouettes in the same style. Their pad glow is grey and the name sign says "???", but the **price still shows** ("??? · $1.2K") so players know what to save for. The Straw Post (the first, free one) is always revealed.
+  - **On buying:** the black shell cracks off with the same reveal (shards, white flash, colors fade in over 0.5 s, "NEW POST UNLOCKED!" banner with the name and its "+X 💪 per punch").
+  - **Saved:** a `DiscoveredPosts` list that Rebirth doesn't reset (owned posts count as discovered in old saves). After a rebirth, a discovered but not-yet-rebought post shows in full color with its lock and price.
+  - The same applies to the new unique post models from section 1.
 
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
