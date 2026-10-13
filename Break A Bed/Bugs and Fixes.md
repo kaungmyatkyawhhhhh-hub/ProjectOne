@@ -142,3 +142,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: gloves upside down #bugs #done
 - The Toolbox mesh is modelled fist-up. Turning it over wasn't enough: placing the glove used the turned part as the pivot and turned it back. Fixed with `PivotOffset`, so the fist is at the hand and the cuff toward the arm.
+
+## 2026-10-13: glove cuff flickered at the top #bugs #done
+- The CuffCore and the top CuffBand had their top faces at the same height (z-fighting). The core is now shorter by one band, so it ends inside the top and bottom bands.

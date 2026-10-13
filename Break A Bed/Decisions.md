@@ -160,3 +160,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: shop order FEATURED → PASSES → DEALS (Starter Pack, Server x2, Spins) → STRENGTH → CASH. #break-a-bed
 - 2026-10-13: gloves use the owner's Toolbox "blocky boxing glove" mesh (no scripts), recoloured per tier. The Glove Shop pad copies the Exclusive Chest pad's style (owner). #break-a-bed
 - 2026-10-13: Glove Shop pad changed to a simple solid design (navy disc, white edge, one cyan glowing ring); the chest-style and see-through versions were dropped (owner). #break-a-bed
+- 2026-10-13: Glove Shop pad = a plain flat glowing disc like a typical simulator pad (owner), replacing the solid navy version. #break-a-bed
