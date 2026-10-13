@@ -25,6 +25,8 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 
 - **Quests (mockup 05):** the Quests tile, the Quests pill, the Daily Reward pill and the Daily quests card all open it. Daily tab: today's 3 quests with CLAIM / GO / DONE, the Complete all 3 bonus and the 7-day Daily Reward grid. Rewards tab: the login streak. Achievements tab: the Coach's quest chain. GO closes the window and shows where to go in the top band.
 
+- **Stats (mockup 07):** the Muscles tile, the GROW tile and the machine body map open it. Muscles tab: your body card with size and physique, 8 cards with the genetics grade and the % to the Growth Spurt goal, and the Growth Spurt row with GROW!. Lifts tab: your best weight on every machine. Genetics tab: grades, frame, body type, overall and a button to the genetics screen. LABELS ON / OFF shows the stat labels around you (same as the Stats tile).
+
 ## Where it lives (UI v2)
 - `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
 
@@ -84,3 +86,7 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_v2_05_quests_daily_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_05_quests_rewards_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_05_quests_achievements_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_07_stats_muscles_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_07_stats_lifts_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_07_stats_genetics_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_07_growth_spurt_moment_phone.jpg]]

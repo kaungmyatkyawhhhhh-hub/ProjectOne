@@ -42,3 +42,8 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_05_quests_daily_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_05_quests_rewards_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_05_quests_achievements_phone.jpg]]
+- Stats window (mockup 07) done: Muscles (body card + 8 grade cards + Growth Spurt row), Lifts, Genetics tabs. The GROW tile now opens it when not ready. The Growth Spurt moment is centered.
+![[GYM ARC/Screenshots/ui_compare_v2_07_stats_muscles_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_07_stats_lifts_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_07_stats_genetics_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_07_growth_spurt_moment_phone.jpg]]
