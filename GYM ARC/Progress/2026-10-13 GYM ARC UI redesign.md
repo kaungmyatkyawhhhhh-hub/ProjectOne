@@ -30,6 +30,7 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 - Images uploaded from Studio: the 3D menu icons (not used: the owner kept the old menu), the four trainer pictures and the main menu art.
 - New look built: text, buttons, panels, top bar, the old left menu kept (tidied), stamina bar with boost icons, GROW tile, hint band and toasts.
 - Bugs fixed: [[GYM ARC - Bug - Machine panel covered the player]], [[GYM ARC - Bug - Could not leave a machine]], [[GYM ARC - Bug - Too much floating text while lifting]], [[GYM ARC - Bug - Pro gym door teleport loop]]. Commit 8d268f5.
-- Next: the Wardrobe clothes bug, then every panel in the new style, trainers, main menu and loading screen.
+- Bug 5 fixed: [[GYM ARC - Bug - Wardrobe tops broken on the muscle body]] (three causes; commit 3039372). Still open and small: [[GYM ARC - Bug - Small skin spots on the lower back under tops]]. The Wardrobe stays hidden; tops are refunded once.
+- Next: every panel in the new style, trainers, main menu and loading screen.
 ![[GYM ARC/Screenshots/ui_compare_v2_01_main_hud_menu_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_02_machine_hud_phone.jpg]]

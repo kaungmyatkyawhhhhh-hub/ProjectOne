@@ -9,6 +9,10 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 Buy gym gear and outfits with coins at the clothing store in town, then wear them from the Wardrobe.
 
+
+## Switched off for now (13 Oct)
+`Config/Features.Wardrobe = false` (owner's call): the Wardrobe tile is hidden (no gap in the menu), the tops (gym fits) are off sale in the clothing store and can't be worn, and anyone who already owned tops got them removed and their coins refunded once (a small "Coins refunded" note). The other gear (belts, headbands, wraps, shakers, skate decks and wheels) still works. The cause of the broken tops is fixed: [[GYM ARC - Bug - Wardrobe tops broken on the muscle body]]. Turn the switch back on in `Config/Features` when you want the Wardrobe back.
+
 ## How it works
 - **Store:** the Gear and Fits clothing store in town; buy at the counter with coins.
 - **Gear slots and prices:**
