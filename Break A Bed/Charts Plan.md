@@ -106,3 +106,14 @@ Likely fixes, depending on what the data shows:
 - Re-tune beds 5–10 and posts 3–7 so a new bed or post comes every 45–75 s for a new player (no grind wall before 10 min).
 - Show the next goal clearly: "Next gift in 1:55" right after the first claim, and the next bed bar.
 - Daily Quests (now live) give goals in this window; the AFK Zone comes next.
+
+## Fix plan for minutes 2–10 (2026-10-13)
+Goal: "Stayed 10 min" from 31% to 45%+. Build in this order:
+1. **Pacing:** something new every 45–75 s until ~10 min: re-tune beds 5–10 and posts 3–7 (measure first, change only those).
+2. **Starter Quests (first session only):** a short chain of 6 tiny goals shown in one small card under the stats, one at a time, each with a quick reward and a ding:
+   1. Break the Air Mattress (bed 2) → $ · 2. Buy the 3rd post → $ · 3. Reach bed 5 → x2 Strength 3 min · 4. Claim 2 free gifts → +1 Spin · 5. Spin the wheel → $ · 6. Reach bed 7 → **FREE Halloween crate roll** (see 3).
+   After the last one the card turns into the Daily Quests button hint. Saved; never shown again.
+3. **A free Halloween aura roll at the end of the Starter Quests (~8–10 min):** opens the real crate animation once, for free, so every new player sees the aura system and owns an aura (most get Ghost). It's the strongest "wow" moment the game has, and it shows the crate for later purchases.
+4. **Always a visible next goal:** the next-bed bar ("Next: Water Bed · 💪 340 / 500") always on screen; when a new bed or post becomes affordable, a bouncing arrow + beam points to it (same style as the guide).
+5. **Make waiting active:** while auto-training, a small hint "Click to punch 2x faster!" (the first 3 sessions only) and a combo counter for fast clicks (x5, x10 COMBO with a small Strength bonus).
+6. **Exit hook:** when a player opens the Roblox menu/leave screen can't be detected, so instead show at ~8 min: "Come back tomorrow: Day 2 reward + new quests!" toast once.
