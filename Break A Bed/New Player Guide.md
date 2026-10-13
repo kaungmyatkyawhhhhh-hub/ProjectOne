@@ -42,6 +42,19 @@ The owner's screenshot: the step card is huge (about 60% of the screen width and
 - **Position:** top center, below Roblox's top bar, never covering the stats (top right) or the left buttons. On phones, keep it clear of the thumbstick and jump button.
 - Everything else (steps, arrow, beam, sounds) stays the same.
 
+## Changes (owner, 2026-10-13, later)
+**1. Quests and trackers can be hidden.** The Starter Quest pill ("Claim 2 free gifts 1/2 +1 SPIN") and the next-bed pill get a small grey "x" at their right end. Tapping it slides the pill away. The quest keeps counting in the background, and the hidden choice is saved.
+- **Bring it back:** open the **Quests** button (right column). The Starter Quests show at the top there with a green **TRACK** button that brings the pill back.
+- A finished quest still shows a short "+1 SPIN" toast even while hidden, so rewards are never missed.
+
+**2. The tutorial can't be skipped.** Remove the SKIP button. If a step could ever get stuck, the guide helps instead. For example, if the player can't afford the Wooden Post, the guide gives the missing cash. Replay Tutorial in Settings stays as it is (watch only, no rewards). Players who already finished it never see it again.
+
+**3. New last steps: To Bed, then SPAWN.** These come after "Buy the Wooden Post!":
+- **Step 7, To Bed:** the whole screen goes **50% darker** (a black overlay at 0.5 transparency over everything) **except a cut-out around the To Bed button**. The button gets a white glow outline that pulses gently, and a **white arrow** points at it and bounces in an idle loop (about 10 px, 0.6 s, Sine InOut). The pill says "TAP TO BED!". Only the To Bed button can be pressed. Tapping it teleports the player as normal.
+- **Step 8, SPAWN:** right after the teleport, the same dim, cut-out, glow and bouncing white arrow move to the **SPAWN** button. The pill says "TAP SPAWN!".
+- **After SPAWN:** the dim fades out (0.3 s), and the guide ends with "You're a pro! Keep breaking beds!", confetti and the finish sound.
+- **How to build it:** the dim is 4 black frames around the button's spot, updated every frame so it follows the button on any screen size. The arrow sits beside the button and points at it (on phones it must stay on screen). It must look right on PC and phones.
+
 ## Rules
 - The beam is a `Beam` from the player's character to the target, plus a bouncing arrow `BillboardGui` above the target. Only the player sees them (made on the client).
 - A small top-center bubble shows the current step (UI Kit style), and a **SKIP** text button sits under it.
