@@ -186,6 +186,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Skin pokes through gym fits at mass monster]]
 - [[GYM ARC - Bug - Small clipping on big bodies]]
 - [[GYM ARC - Bug - Small lip at the waistband]]
+- [[GYM ARC - Bug - Small skin spots on the lower back under tops]]
 - [[GYM ARC - Bug - Smoothie boost charged when already full]]
 - [[GYM ARC - Bug - Stage mesh downloads sometimes failed]]
 - [[GYM ARC - Bug - Stats coach line and panel overlapped]]
@@ -207,6 +208,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Tutorial path target nil]]
 - [[GYM ARC - Bug - Two title tags on one head]]
 - [[GYM ARC - Bug - Upper traps never grew]]
+- [[GYM ARC - Bug - Wardrobe tops broken on the muscle body]]
 - [[GYM ARC - Bug - Zigzag on the upper arm seam]]
 - [[GYM ARC - Bugs index]]
 

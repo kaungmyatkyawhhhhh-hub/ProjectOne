@@ -7,7 +7,7 @@ status: current
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
-101 bugs: 21 open or engine limits, 80 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
+103 bugs: 22 open or engine limits, 81 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
 
 ## Open
 
@@ -32,6 +32,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Traps outline edges visible|Traps outline edges visible]] - 2026-10-08
 - [[GYM ARC - Bug - Zigzag on the upper arm seam|Zigzag on the upper arm seam]] - 2026-10-08
 - [[GYM ARC - Bug - Small clipping on big bodies|Small clipping on big bodies]] - 2026-10-13
+- [[GYM ARC - Bug - Small skin spots on the lower back under tops|Small skin spots on the lower back under tops]] - 2026-10-13
 
 ## Fixed
 
@@ -115,3 +116,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Pro gym door teleport loop|Pro gym door teleport loop]] - 2026-10-13
 - [[GYM ARC - Bug - Machine panel covered the player|Machine panel covered the player]] - 2026-10-13
 - [[GYM ARC - Bug - Too much floating text while lifting|Too much floating text while lifting]] - 2026-10-13
+- [[GYM ARC - Bug - Wardrobe tops broken on the muscle body|Wardrobe tops broken on the muscle body]] - 2026-10-13
