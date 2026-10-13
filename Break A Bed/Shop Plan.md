@@ -60,13 +60,13 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
     | Gap | Price | Product |
     |---|---|---|
     | up to 2x | R$9 | INSTANT BREAK (existing, 3718128950) |
-    | 2x–5x | R$19 | INSTANT BREAK 2 (new) |
-    | 5x–20x | R$39 | INSTANT BREAK 3 (new) |
-    | 20x–100x | R$79 | INSTANT BREAK 4 (new) |
-    | over 100x | R$149 | INSTANT BREAK 5 (new) |
+    | 2x–5x | R$19 | INSTANT BREAK 2 (3718323231) |
+    | 5x–20x | R$39 | INSTANT BREAK 3 (3718323262) |
+    | 20x–100x | R$79 | INSTANT BREAK 4 (3718323276) |
+    | over 100x | R$149 | INSTANT BREAK 5 (3718323302) |
 
   - **The reward stays the same:** it breaks that bed once, pays its Cash and marks it completed. The server works out the tier again at purchase time, so the price can't be cheated.
-  - **The owner creates the 4 new products** in the Creator Dashboard (Monetization → Developer Products) and gives Claude Code the IDs.
+  - **Created by the owner (2026-10-13)** with Managed pricing on, so Roblox may change prices. The button must show the live price from `MarketplaceService:GetProductInfo` (cached), not a hard-coded number. INSTANT BREAK 2 still needs an icon.
 - **Starter Pack: R$19, one time only.** x3 Strength 30 min + Medium Cash + 3 Spins. It pops up once, after the player's first bed break (not on join), with a "70% OFF" tag.
 - **Boost ran out:** when a boost ends, a small toast offers "Buy again, R$X".
 
