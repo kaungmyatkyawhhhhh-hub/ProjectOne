@@ -83,3 +83,5 @@ The owner's screenshot: the step card is huge (about 60% of the screen width and
 1. Build this as a new client module (`Tutorial`) plus the `TutorialDone` save field on the server.
 2. Hold back the other pop-ups until the guide is done.
 3. Test it with a fresh save in Studio, on the PC layout and the phone emulator.
+
+**4. Glove step (owner, 2026-10-13):** after SPAWN the beam and arrow lead to the Glove Shop's pad ("VISIT THE GLOVE SHOP!"). The shop opens on the pad, the pill says "GLOVES = MORE STRENGTH!", and closing the shop ends the guide with "You're a pro!". No free glove is given. If they don't reach it in 45 s the guide ends anyway; Replay Tutorial skips it. Built 2026-10-13, not tested in play yet.
