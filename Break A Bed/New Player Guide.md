@@ -45,6 +45,8 @@ The owner's screenshot: the step card is huge (about 60% of the screen width and
 - Everything else (steps, arrow, beam, sounds) stays the same.
 
 ## Changes (owner, 2026-10-13, later)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+
 **1. Quests and trackers can be hidden.** The Starter Quest pill ("Claim 2 free gifts 1/2 +1 SPIN") and the next-bed pill get a small grey "x" at their right end. Tapping it slides the pill away. The quest keeps counting in the background, and the hidden choice is saved.
 - **Bring it back:** open the **Quests** button (right column). The Starter Quests show at the top there with a green **TRACK** button that brings the pill back.
 - A finished quest still shows a short "+1 SPIN" toast even while hidden, so rewards are never missed.

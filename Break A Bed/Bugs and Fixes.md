@@ -117,3 +117,13 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: GameClient over Luau's 200-locals limit #bugs #done
 - Adding To Bed next to SPAWN gave "Out of local registers ... exceeded limit 200": the whole client script failed, so there was no HUD. Locals in a top-level `do` block count too. Fix: To Bed's parts live in one table, and its wiring runs inside its own function. `GameClient` is right at the limit, so new HUD pieces should go in their own module or function.
+
+## 2026-10-13: saved place had the broken GameClient #bugs #done
+- Studio was reopened between rounds, and the saved copy was from the moment GameClient was over Luau's 200-locals limit (no HUD), with `StudioFreshSave = true` (Studio only). The fix was put back first. If that copy was published, the live game had no HUD until the next publish.
+
+## 2026-10-13: guide spotlight hairline + arrow over SPAWN #bugs #done
+- The 4 dim frames used fractional pixels, which left a 1 px bright line. They're rounded to whole pixels now.
+- On phones, walking onto the path during "TAP TO BED!" put the arrow on top of SPAWN. It now goes on To Bed's left in that case.
+
+## 2026-10-13: pill title wrapped onto two lines #bugs #done
+- With the new x, long goals ("Buy the Bamboo Post") wrapped. The title is one line and shrinks to fit.
