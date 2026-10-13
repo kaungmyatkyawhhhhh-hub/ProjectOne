@@ -19,6 +19,8 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 - **Hints and toasts:** one hint at a time in a band at the top, gone after 4 seconds (Tutorial Hints in Settings turns them off); toasts stack under the top bar.
 - **Machine HUD:** see [[GYM ARC - Machine HUD]]: the weight panel on the right, REP and PUMP bottom right, STOP TRAINING above the stamina bar.
 
+- **Settings (mockup 10):** the gear in the top bar opens it; two columns of rows with a gold icon, the name and an ON / OFF button. Others' Sounds mutes other players' lift sounds, Low Graphics turns off shadows and glow effects on your device, Tutorial Hints turns the hints in the top band on or off.
+
 ## Where it lives (UI v2)
 - `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
 
@@ -73,3 +75,4 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_02_machine_hud_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_01_main_hud_menu_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_02_machine_hud_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_10_settings_phone.jpg]]

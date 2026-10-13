@@ -34,3 +34,5 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 - Next: every panel in the new style, trainers, main menu and loading screen.
 ![[GYM ARC/Screenshots/ui_compare_v2_01_main_hud_menu_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_02_machine_hud_phone.jpg]]
+- Settings window (mockup 10) done: two columns of ON / OFF rows (Music, Sound Effects, Others' Sounds, Low Graphics, Tutorial Hints, Gain Numbers, Rep Flash, EXP Popups, Spot Requests). Commit d71c4a0.
+![[GYM ARC/Screenshots/ui_compare_v2_10_settings_phone.jpg]]
