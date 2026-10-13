@@ -116,4 +116,4 @@ Goal: "Stayed 10 min" from 31% to 45%+. Build in this order:
 3. **A free Halloween aura roll at the end of the Starter Quests (~8–10 min):** opens the real crate animation once, for free, so every new player sees the aura system and owns an aura (most get Ghost). It's the strongest "wow" moment the game has, and it shows the crate for later purchases.
 4. **Always a visible next goal:** the next-bed bar ("Next: Water Bed · 💪 340 / 500") always on screen; when a new bed or post becomes affordable, a bouncing arrow + beam points to it (same style as the guide).
 5. **Make waiting active:** while auto-training, a small hint "Click to punch 2x faster!" (the first 3 sessions only) and a combo counter for fast clicks (x5, x10 COMBO with a small Strength bonus).
-6. **Exit hook:** when a player opens the Roblox menu/leave screen can't be detected, so instead show at ~8 min: "Come back tomorrow: Day 2 reward + new quests!" toast once.
+6. **Come-back hook:** the game can't detect a player about to leave, so at ~8 min show once: "Come back tomorrow: Day 2 reward + new quests!" toast once.
