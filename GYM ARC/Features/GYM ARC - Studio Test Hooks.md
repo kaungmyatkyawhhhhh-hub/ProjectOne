@@ -30,3 +30,6 @@ Workspace attributes that change how the game behaves in a Studio play test, for
 
 ## Related
 [[GYM ARC - Player Data and Saving]], [[GYM ARC - Tutorial]], [[GYM ARC - Genetics]]
+
+## TestOpenPanel (14 Oct)
+Workspace attribute `TestOpenPanel` = "Physique" (set it during Play) opens the Physique window. Made because in the Device Emulator the test clicks can miss the left menu tiles.

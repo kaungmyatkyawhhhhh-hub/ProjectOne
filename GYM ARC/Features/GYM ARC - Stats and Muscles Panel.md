@@ -33,3 +33,13 @@ Three ways to see your stats: labels floating around your character, the full "Y
 ![[GYM ARC/Screenshots/stats_final_muscles-panel.png]]
 ![[GYM ARC/Screenshots/stats_final_on-machine_widget-and-labels.png]]
 ![[GYM ARC/Screenshots/v9_hover_highlight_chest.png]]
+
+## Physique fix (14 Oct)
+- Each group's %, its grade and its bar now come from the same number: how close that group's muscles are to the full look. Grades: S 90%+, A 75%+, B 55%+, C 35%+, D below. Bar colors: S red, A gold, B teal, C steel, D dark gray.
+- The big number on the body card is the average of the six groups.
+- The LABELS switch is now a small eye button in the corner of the body card (gold while the labels show).
+- The left menu slides away while the window is open, so it never covers it on a phone.
+See [[GYM ARC - Bug - Physique numbers did not match]].
+![[GYM ARC/Screenshots/declutter_physique_phone.jpg]]
+Small phone:
+![[GYM ARC/Screenshots/declutter_physique_small_phone.jpg]]

@@ -140,3 +140,7 @@ Small phone (667 x 375) and REP above the jump button:
 ## 11. Genetics screen for phones
 Owner's request ([[2026-10-14 GYM ARC Prompt - Loading screen, declutter HUD, Genetics mobile]]): the genetics screen was broken on phones ([[GYM ARC - Bug - Genetics screen broken on phones]]). It is now one centered panel that always fits. Tested: the first reveal, the "are you sure" question for a good roll, a reroll with UP / DOWN, the odds, and the small phone size. See [[GYM ARC - Genetics]].
 ![[GYM ARC/Screenshots/panel_genetics_phone.jpg]]
+
+## 12. Physique numbers and phones
+Owner's request ([[2026-10-14 GYM ARC Prompt - Lifting HUD, top bar, Physique, left menu on mobile]]): the Physique window's %, grades and total now all come from one number ([[GYM ARC - Bug - Physique numbers did not match]]), bars follow the grade color, the labels switch is an eye button on the body card, and the window fits small phones. See [[GYM ARC - Stats and Muscles Panel]].
+![[GYM ARC/Screenshots/declutter_physique_phone.jpg]]

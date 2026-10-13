@@ -167,6 +167,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Paused smoothie boosts wiped before the restore]]
 - [[GYM ARC - Bug - Photo mode froze without the player module]]
 - [[GYM ARC - Bug - Photo mode missed the mirror wall]]
+- [[GYM ARC - Bug - Physique numbers did not match]]
 - [[GYM ARC - Bug - Pins against an NPC never counted]]
 - [[GYM ARC - Bug - Place lost back to 7 Oct]]
 - [[GYM ARC - Bug - Pointed traps and triceps at mass monster]]
