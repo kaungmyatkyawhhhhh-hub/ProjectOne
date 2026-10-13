@@ -202,6 +202,12 @@ Seen from spawn, everything is squeezed into the back corner while the big paved
     3. Keep the VIP Lounge carpet and door clear.
     4. **If the plaza is too small** for everything with these gaps, make the paved plaza bigger (extend it to the front/left) instead of squeezing things together.
 
+- **Top-down check (owner's screenshot, 2026-10-13, latest):** better, with three things left:
+  1. **The training floor's bottom-left corner hangs over the bed path entrance** (the colored path rails), and the floor runs to the very edge of the plaza. There's empty paving to its right (above the VIP Lounge), so **move the floor right/up into that space**, keeping the 6-stud gap to the VIP Lounge and about 4 studs of paving around it.
+  2. **The TRAINING sign** stands along the floor's left side, facing away from spawn and sticking out past the plaza. Put it across the **front edge of the floor (the side facing spawn)**, centered.
+  3. **The Glove Shop's pad touches the spawn circle** and sits in the walkway. Move the shop into the space freed at the front-left of the training floor (between spawn and the bed path entrance, without blocking the entrance), with its pad facing spawn and at least 6 studs from the spawn circle.
+  - The Invite Friend stand's new spot (right side, by the VIP Lounge) is fine.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
