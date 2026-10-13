@@ -108,6 +108,8 @@ Likely fixes, depending on what the data shows:
 - Daily Quests (now live) give goals in this window; the AFK Zone comes next.
 
 ## Fix plan for minutes 2–10 (2026-10-13)
+**Built 2026-10-13** (items 1–6, plus the funnel's new Loaded and Played 3/5/7 Min steps in a new "Onboarding2" funnel), see [[Break A Bed/2026-10-13|2026-10-13]]. Check Onboarding2 in Creator Hub 1–2 days after publishing.
+
 Goal: "Stayed 10 min" from 31% to 45%+. Build in this order:
 1. **Pacing:** something new every 45–75 s until ~10 min: re-tune beds 5–10 and posts 3–7 (measure first, change only those).
 2. **Starter Quests (first session only):** a short chain of 6 tiny goals shown in one small card under the stats, one at a time, each with a quick reward and a ding:

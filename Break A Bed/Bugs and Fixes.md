@@ -82,3 +82,23 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **Cause:** touching a solid wall doesn't always count as a "touch" in Roblox. Also, Roblox never shows the window to someone who already owns VIP (like the owner), so it can only be seen on a non-VIP account.
 - **Fix:** the game checks every 0.1 s if a non-VIP is standing at the door and opens the VIP pass window (at most once every 5 s).
 
+
+## 2026-10-13: guide beam went through the path fence #bugs #done
+- **What happened:** after punching the Straw Post, the guide's beam pointed in a straight line to the Cardboard Bed, right through the path fence. A scripted new player walked into the fence and got stuck; on PC it slid along it for 9 s.
+- **Fix:** when you and the target are on different sides of the fence, the beam leads to just past the arch first, then to the target. The same goes for every arrow (next bed, newly affordable post, Starter Quests).
+
+## 2026-10-13: wall after bed 10 in the first 10 minutes #bugs #done
+- **What happened:** in the 12-minute test, nothing new came for 158 s after the Diamond Bed (bed 10). A player who doesn't grind beds for cash couldn't afford the Iron Post ($230K, then $140K) until bed 11, and bed 11 needed 310K Strength with the Stone Post.
+- **Cause:** the Starter Quest rewards (x2 Strength, cash, the aura) make players 2–3 minutes faster, which pulled this old wall into the first 10 minutes. With $140K it only just fitted (about $142K after bed 10), so a bit less crit luck missed it.
+- **Fix:** re-tuned with the quests in the model; Iron Post $100K. The final 12-minute run's longest wait was 56 s.
+
+## 2026-10-13: training combo counter hidden #bugs #done
+- **What happened:** the combo counter floated over the post, but on PC the training camera puts the post top right behind the next-bed bar, and screen UI always covers world labels.
+- **Fix:** the counter is in the HUD now, where the click hint was (just above the training panel; phones: bottom centre).
+
+## 2026-10-13: Starter Quest 5 paid too much #bugs #done
+- "Spin the wheel" paid 10 breaks of the best bed: $36K at the Hospital Bed, enough to buy the Brick and Stone posts at once. Now 2 breaks (at least $500).
+
+## 2026-10-13: (testing) MCP screenshots freeze the camera #bugs
+- Studio MCP's screen capture during a playtest leaves the camera on Scriptable. The view stops following the player, and prompts (Break / Train) stop showing, so a test bot "can't" press E. Not a game bug. After a screenshot, set `workspace.CurrentCamera.CameraType = Enum.CameraType.Custom` (only when not breaking or training).
+- Studio's "Stop" counts as a normal leave (no Soft Shutdown save). To test a Soft Shutdown rejoin, run `ServerStorage.StudioSoftShutdown:Invoke()` first.

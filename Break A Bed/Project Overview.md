@@ -36,6 +36,7 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Free Rewards** ([[Break A Bed/Free Rewards/Free Rewards|Free Rewards]]): an EXCLUSIVE CHEST near spawn (`Workspace.ExclusiveChest`, floating purple-and-gold with effects; Myanmar Builders Club members only, Cash = 40 breaks of the best bed (at least $1,000) every 15 min, saved; non-members get a Like / Favorite / Join screen with "I joined!"), a "Watch Ad To Collect" board (rewarded video ads; **on hold**, switched off by `GameConfig.AdBoardEnabled = false` and not on the map) and the Free Gift popup (Like / Favorite / Join; Claim checks the favorite on the device and the group on the server → Cash + x2 Strength 15 min + Group Reward, once). Script `FreeRewards`.
 - **Free Gifts** ([[Break A Bed/Playtime Rewards|Playtime Rewards]]): 12 gifts from 1 to 90 minutes each session, the red Gifts square on the right (countdown, badge), SKIP ALL. Script `FreeGifts`; its effects (glows, halos, shines, twinkles, bar fill, claim burst) are in `GiftsVfx`.
 - **New Player Guide** ([[Break A Bed/New Player Guide|New Player Guide]]): beam + arrow through punching, the first bed and the Wooden Post, then a "Next bed" bar. Script `Tutorial`.
+- **Minutes 2–10** (2026-10-13, [[Break A Bed/Charts Plan|Charts Plan]]): **Starter Quests** (6 goals in the first session, the last is a free Halloween aura roll; card under the next-bed bar; server `StarterQuests`, client `Onboarding`). The next-bed bar is always on screen, and newly affordable beds/posts get the arrow + beam (which goes through the arch, never through the fence). "Click to punch 2x faster!" while training (first 3 sessions) and a training **combo** (x5 / x10 / x25 = +10 / 20 / 30% Strength). "Come back tomorrow: Day 2 reward + new quests!" once a session at 8 min.
 - **UI Kit style** ([[Break A Bed/UI Kit/UI Kit|UI Kit]]): sharp image buttons and windows, Montserrat text with shadows, animations and UI sounds everywhere. Scripts `UIKit` and `UIAssets` (image ids).
 - **SPAWN button** at the top: only on the bed path (fades in/out), hidden in the break screen; teleports you back to spawn.
 - **Look:** the UI Kit's FINAL STYLE (2026-10-12): solid studded buttons with same-colour dark outlines and white glyphs, solid dark studded windows with a green shiny title bar and red X (no light rays), lime price buttons, money art for Cash, Montserrat Heavy text with outlines and shadows, no emoji; short numbers everywhere (1.14M, 1.9T, 392Qa), including Roblox's player list.
@@ -63,7 +64,9 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 | `GiftsVfx` | ModuleScript | StarterPlayer › StarterPlayerScripts | Free Gifts window effects (2026-10-12) |
 | `SettingsMenu` | ModuleScript | StarterPlayer › StarterPlayerScripts | Settings window: volume sliders, 5 switches, CODES, Replay Tutorial; saved (2026-10-12/13) |
 | `SoftShutdown` | Script | ServerScriptService | Moves players to a new server on an update (2026-10-13) |
-| `OnboardingFunnel` | ModuleScript | ServerScriptService | "Onboarding" analytics funnel, 9 steps (2026-10-13) |
+| `OnboardingFunnel` | ModuleScript | ServerScriptService | "Onboarding2" analytics funnel, 13 steps: Loaded … Played 3/5/7 Min, Stayed 10 Min (2026-10-13; the old 9-step "Onboarding" funnel keeps its data) |
+| `StarterQuests` | ModuleScript | ServerScriptService | Starter Quests chain, first session only, saved (2026-10-13) |
+| `Onboarding` | ModuleScript | StarterPlayer › StarterPlayerScripts | Starter Quest card, click hint + combo counter, come-back toast, "Joined" report (2026-10-13) |
 | `LikeGoalBoard` | Script | ServerScriptService | The like goal board at spawn, live from ReplicatedStorage.LikeGoal (2026-10-13) |
 | `LikeGoal` | ModuleScript | ServerScriptService | Reads the real like count (RoProxy), switches on like-goal codes (2026-10-13) |
 | `Retention` | ModuleScript | ServerScriptService | Daily Quests + Boost Inventory (2026-10-13) |
@@ -76,16 +79,18 @@ The Studio place has the newest scripts; the `src` files are older.
 All numbers (beds, training items, damage, levels) are in `GameConfig`.
 
 ## Training posts
+Posts 4–7 and beds 6–10 were re-tuned on 2026-10-13 so a new player gets something new at least every ~75 s in minutes 2–10 ([[Break A Bed/2026-10-13|2026-10-13]]).
+
 
 | # | Post | Strength per punch | Price |
 |---|---|---|---|
 | 1 | Straw Post | +1 | free |
 | 2 | Wooden Post | +4 | $50 |
 | 3 | Bamboo Post | +17 | $600 |
-| 4 | Brick Post | +70 | $5K |
-| 5 | Stone Post | +290 | $40K |
-| 6 | Iron Post | +1.2K | $250K |
-| 7 | Steel Post | +4.9K | $1.5M |
+| 4 | Brick Post | +70 | $4.3K (was $5K) |
+| 5 | Stone Post | +290 | $41K (was $40K) |
+| 6 | Iron Post | +1.2K | $100K (was $250K) |
+| 7 | Steel Post | +4.9K | $1.4M (was $1.5M) |
 | 8 | Gold Post | +20K | $6M |
 | 9 | Emerald Post | +84K | $25M |
 | 10 | Ruby Post | +350K | $100M |
@@ -113,11 +118,11 @@ All numbers (beds, training items, damage, levels) are in `GameConfig`.
 | 3 | Sleeping Bag | 22 | 65 | $45 |
 | 4 | Wooden Bed | 73 | 220 | $140 |
 | 5 | Bunk Bed | 240 | 710 | $400 |
-| 6 | Water Bed | 770 | 2.3K | $1.2K |
-| 7 | Hospital Bed | 2.6K | 7.7K | $3.6K |
-| 8 | Royal Bed | 8.7K | 26K | $11K |
-| 9 | Gold Bed | 28K | 84K | $33K |
-| 10 | Diamond Bed | 93K | 280K | $98K |
+| 6 | Water Bed | 2.4K (was 770) | 7.2K | $1.2K |
+| 7 | Hospital Bed | 5.1K (was 2.6K) | 15K | $3.6K |
+| 8 | Royal Bed | 12K (was 8.7K) | 36K | $11K |
+| 9 | Gold Bed | 22K (was 28K) | 66K | $33K |
+| 10 | Diamond Bed | 58K (was 93K) | 170K | $98K |
 | 11 | Emerald Bed | 310K | 920K | $300K |
 | 12 | Ruby Bed | 1M | 3M | $890K |
 | 13 | Ice Bed | 3.3M | 10M | $2.7M |
