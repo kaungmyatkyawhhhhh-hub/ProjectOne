@@ -54,3 +54,13 @@ Mockup, then the game (a test save with two coaches hired, then your save with n
 ![[GYM ARC/Screenshots/ui_compare_final_06_coaches_mockup.png]]
 ![[GYM ARC/Screenshots/ui_compare_final_06_coaches_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_final_06_coaches_locked_pc.jpg]]
+
+## 4. Physique
+- The Stats window is now called PHYSIQUE, with tabs MUSCLES / LIFTS / GENES and the LABELS ON/OFF switch next to the X.
+- Left: your body card on a dark red glow, with a big gold number (how grown your muscles look) and the physique word in gold (Beginner ... Aesthetic ... Mass Monster).
+- When a Growth Spurt is ready, a gold TAP TO GROW button takes the number's place (and pulses).
+- Right: the six muscle groups, best first: the genetics grade on a small gold plate, the name, a fat shiny bar in the grade's color (S red, A gold, B teal, C gray) and the % toward the Growth Spurt goal.
+- The separate Forearms and Calves cards are gone (the mockup shows the six groups).
+Mockup, then the game (your save is maxed, so every bar is full):
+![[GYM ARC/Screenshots/ui_compare_final_07_physique_mockup.png]]
+![[GYM ARC/Screenshots/ui_compare_final_07_physique_phone.jpg]]
