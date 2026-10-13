@@ -63,6 +63,7 @@ CarSkin.CLUSTER_STYLE = {
 	rolls_wraith = "Maybach57",
 	byt_seal = "U8", -- wide electric screen
 	bentz_s680 = "W213",
+	bentz_e400 = "W213", -- the E63 S W213 model: its wide glass screen
 	bentz_gls = "W213",
 	bnw_750li = "BMWClassic",
 } :: { [string]: string }
