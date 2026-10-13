@@ -39,6 +39,8 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 
 - **Posing competition (mockup 12):** the pose's name big in gold, the Judges panel with everyone's last score, and a TIMING bar over a big red POSE! button (tap when the marker reaches the green).
 
+- **Loading screen + main menu (mockups 00):** loading shows the art, logo, a tip and a red progress bar with the step (SKIP after 5 seconds). The menu has a green PLAY, a gold SHOP (after the tutorial), a blue UPDATES (update notes) and a coins / LVL / height pill.
+
 ## Where it lives (UI v2)
 - `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
 
@@ -114,3 +116,6 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_v2_13_arm_wrestle_pick_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_12_posing_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_12_posing_judges_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_00_loading_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_updates.jpg]]

@@ -28,3 +28,11 @@ A barbell loading screen from the first frame, then a slow cinematic tour of the
 ![[GYM ARC/Screenshots/menu_returning_main_street.jpg]]
 ![[GYM ARC/Screenshots/menu_pro_gym.jpg]]
 ![[GYM ARC/Screenshots/menu_play_glide.png]]
+
+## UI v2 (13 Oct): new loading screen and menu
+- Loading screen: the menu art on the right fading into black, the GYM ARC logo (GYM white, ARC red), "Everyone starts tiny.", a rotating tip, and a red progress bar with the step ("Loading muscles... 64%"). SKIP appears top right after 5 seconds. The old barbell, plates and chalk dust are gone.
+- Main menu: the same art, a big green PLAY, a gold SHOP (after the tutorial; opens the Gym Store), a blue UPDATES (what's new: the list is in `Config/UI`, Updates) and a small pill with your coins, level and height.
+- The live camera tour of the gyms, the old white PLAY button, the pointing hand, TITLES / SETTINGS and the chips are gone (Titles and Settings are in the game's menus).
+- After PLAY the camera sits behind your character at a distance that fits your height.
+![[GYM ARC/Screenshots/ui_compare_v2_00_loading_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_phone.jpg]]

@@ -65,3 +65,7 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 - Posing screen (mockup 12) done: pose name in gold, Judges panel with live scores, TIMING bar and a big red POSE! button.
 ![[GYM ARC/Screenshots/ui_compare_v2_12_posing_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_12_posing_judges_phone.jpg]]
+- Part 4 done: new loading screen (art, logo, tip, red progress bar with steps, SKIP after 5 s) and main menu (green PLAY, gold SHOP, blue UPDATES, coins / LVL / height pill); the live gym tour is gone.
+![[GYM ARC/Screenshots/ui_compare_v2_00_loading_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_updates.jpg]]
