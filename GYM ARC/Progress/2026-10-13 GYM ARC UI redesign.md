@@ -59,3 +59,6 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_11_tutorial_dialog_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_11_tutorial_skip_confirm.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_11_tutorial_skipped.jpg]]
+- Arm wrestling screen (mockup 13) done: names over a red / blue tug bar, gold timer, big round TAP! button, colored opponent buttons.
+![[GYM ARC/Screenshots/ui_compare_v2_13_arm_wrestle_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_13_arm_wrestle_pick_phone.jpg]]
