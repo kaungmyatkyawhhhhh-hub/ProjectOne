@@ -56,3 +56,4 @@ The owner's UI redesign (13 Oct): every screen rebuilt to the new mockups with i
 ![[GYM ARC/Screenshots/ui_compare_00_foundation_login_streak.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_01_main_hud_pc.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_01_main_hud_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_02_machine_hud_phone.jpg]]
