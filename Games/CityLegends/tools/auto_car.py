@@ -680,13 +680,30 @@ def main():
             for link in list(bsdf.inputs["Normal"].links):
                 nt.links.remove(link)
         inp = bsdf.inputs["Base Color"]
-        if inp.is_linked:
-            if inp.links[0].from_node.type != "TEX_IMAGE":
-                found = [x for x in nt.nodes if x.type == "TEX_IMAGE" and x.image and x.image.colorspace_settings.name != "Non-Color"]
-                if found:
-                    nt.links.new(found[0].outputs["Color"], inp)
-            continue
         r, g, b, _ = inp.default_value
+        if inp.is_linked:
+            if inp.links[0].from_node.type == "TEX_IMAGE":
+                continue
+            found = [x for x in nt.nodes if x.type == "TEX_IMAGE" and x.image and x.image.colorspace_settings.name != "Non-Color"]
+            if found:
+                nt.links.new(found[0].outputs["Color"], inp)
+                continue
+            # colour mixed from plain nodes (game files often tint by vertex colour): follow the
+            # colour inputs back to a plain colour, as Studio would otherwise show plain grey
+            node = inp.links[0].from_node
+            for _ in range(4):
+                if node.type == "RGB":
+                    r, g, b = node.outputs[0].default_value[:3]
+                    break
+                cols = [i for i in node.inputs if i.type == "RGBA"]
+                plain = [i for i in cols if not i.is_linked]
+                if plain:
+                    r, g, b = plain[-1].default_value[:3]
+                    break
+                linked = [i for i in cols if i.is_linked]
+                if not linked:
+                    break
+                node = linked[0].links[0].from_node
         img = bpy.data.images.new("col_" + m.name[:20], 8, 8)
         img.pixels = [to_srgb(r), to_srgb(g), to_srgb(b), 1.0] * 64
         img.pack()

@@ -130,3 +130,9 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
     - LP750 SV: its own cluster from the owner's photo (2026-10-13): yellow middle with a wide rev arc (2-10, red from 6), big gear letter, R 1234567 A strip, blue speed and rpm digits under it, STRADA and odometer, small yellow screens either side with bar gauges.
   - The new X6 uses its own modern cabin (owner, 2026-10-13); the M5 interior swap is gone.
   - The owner allowed deleting the original GLB files in `imports` once the cars are in the game.
+- **Sketchfab cars in the game (2026-10-13):** the owner imported the six FBX files and saved `CityLegendsCars.rbxl`. All 23 cars are now in `assets/CarModels.rbxm` (56 models).
+  - Cars packed several to a file came in with Blender's `.001` name endings, so the game said "couldn't find 4 wheels". The car reader now takes those endings off.
+  - Studio dropped 19 tinted colours (LFA paint parts, some Urus and 540i panels, Cayman calipers). `take_cars.luau --colours` put them back from the converted files, and `auto_car.py` now bakes such colours.
+  - A part named `SteeringWheel_t<tilt>` is the whole wheel. Other parts with "steering wheel" in their names (the column left in the dash on the S65, X6 and X7) stay put.
+  - Steering tilt set by hand: X6 23° (same wheel as the X7), LX700 20°.
+  - The original GLB files in `imports` were deleted (about 450 MB), as the owner allowed. The six `cars_*.fbx` files are kept.

@@ -389,6 +389,17 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			end
 		end
 	end
+	-- our converted cars name the wheel "SteeringWheel_t<tilt>": then that is the wheel, and other
+	-- names with "steering wheel" in them (the column left in the dash) stay put
+	local tagged: { Instance } = {}
+	for _, r in steerRoots do
+		if r.Name:match("^SteeringWheel_t%d+") then
+			table.insert(tagged, r)
+		end
+	end
+	if #tagged > 0 then
+		steerRoots = tagged
+	end
 	-- nothing named: the round, thin part right in front of the driver's seat
 	if #steerRoots == 0 then
 		local ds = src:FindFirstChild("DriveSeat", true)
