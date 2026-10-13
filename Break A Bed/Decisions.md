@@ -168,3 +168,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: map layout: stands in the front plaza (Glove Shop front-left, Invite front-right), training floor 76x88 with staggered posts. Music = a shuffled 3-song APM playlist. #break-a-bed
 - 2026-10-13: Invite Friend stand at (-18.5, 35) between the upgrade boards and the VIP Lounge; plaza items keep 10 studs clear in front of boards, pads, crate, VIP door, arch and leaderboards. #break-a-bed
 - 2026-10-13: training floor x 56..132 / z -6..42 with the TRAINING sign on its front edge; Glove Shop left of the spawn -> training route; leaderboards moved 8 studs back to make room. #break-a-bed
+- 2026-10-13: AFK training hop at 15 min idle (before Roblox's 20-min kick), same server first, any server if full; only while training. #break-a-bed

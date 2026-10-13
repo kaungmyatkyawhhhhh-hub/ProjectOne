@@ -148,6 +148,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Nothing is built inside the play area (path, plaza, upgrades, training). About 4,450 parts, anchored, no collisions, only the main building blocks cast shadows.
 
 ## AFK training (owner, 2026-10-13)
+**Built 2026-10-13** (client `AfkTraining`, GameServer `afkRejoin`), see [[Break A Bed/2026-10-13|2026-10-13]]. Live test still to do.
 - **The message:** when a player starts training, a green text "**AFK-friendly!**" with "**While training, you won't be kicked.**" under it shows in the lower middle of the screen. It's bold, with a thick dark outline (like the owner's screenshot). It fades in, stays **3 seconds** and fades out. It shows again at most once every **10 minutes** for that player (the cooldown resets when they rejoin).
 - **No AFK kick while training:** Roblox kicks players who are idle for 20 minutes. If a player has been idle for **15 minutes while training** (`LocalPlayer.Idled` gives the idle time), the game moves them before the kick:
   1. The server saves a Resume entry (the same idea as [[Break A Bed/Soft Shutdown|Soft Shutdown]]): "training at post X", plus their position.
