@@ -153,3 +153,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: one hide flag for the quest and next-bed pill (saved with Settings). The Quests window's top row shows the current Starter Quest or next bed, with TRACK / TRACKING. #break-a-bed
 - 2026-10-13: BREAK IT products by bed gap (1, 2, 3–4, 5–7, 8+ beds ahead of the best bed you can break). A product bought for a smaller gap breaks the furthest bed it covers, never more. Prices are always read live from Roblox. #break-a-bed
 - 2026-10-13: players finish all 25 beds in ~30 min. Plan: unique post models, Gloves, slower late game (beds 16–25), Rebirths with tokens, Bed Mastery, World 2. See [[Break A Bed/Content Plan|Content Plan]]. #break-a-bed
+- 2026-10-13: undiscovered beds are black silhouettes named "???" (client-side, saved DiscoveredBeds, kept after Rebirth). The first break cracks the shell off with a "NEW BED DISCOVERED!" reveal. #break-a-bed

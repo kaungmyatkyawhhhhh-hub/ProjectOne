@@ -56,6 +56,16 @@ Every post gets its own model, punch effect and sound, so each new post feels li
 - A second path of 15 beds past the Infinity Bed (a Halloween/haunted theme while October lasts, e.g. Coffin Bed, Haunted Bed, Pumpkin Bed…), unlocked at **Rebirth 1**.
 - It comes with 6 new posts and gloves. Announce it with a group shout and a new code.
 
+## 6. Undiscovered beds are black (owner, 2026-10-13)
+Beds you haven't broken yet are **black silhouettes**, so you want to keep playing to find out what they look like.
+- **Look:** every part of an undiscovered bed turns near-black (`#0E0E14`, SmoothPlastic). Textures and decals are hidden, and its glow, sparkles and particles are off. A faint dark-purple `Highlight` outline makes it look mysterious, not broken.
+- **Name:** the sign and prompt show **"???"** instead of the name. The Strength needed still shows ("??? · Need 1M Strength"). The next-bed pill says "Next: ???" and the Index shows "???" too.
+- **Discover moment:** the first time you break a bed, the black shell **cracks off**. Black shards fly out, then a white flash and the real colors fade in over 0.5 s, with a "NEW BED DISCOVERED!" banner, its name in big text and a reveal sound. Then the normal break effects play.
+- **Per player:** it's done on each player's own screen (client-side), so everyone sees their own progress. The server sends the list of discovered beds.
+- **Saved forever:** a separate `DiscoveredBeds` list that **isn't reset by Rebirth**, so beds stay revealed after rebirthing. Old saves: every completed bed counts as discovered.
+- The first bed (Cardboard) is always revealed, so the tutorial target is clear.
+- The bed path's colored tiles and the COMPLETED signs stay as they are.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
