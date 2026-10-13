@@ -126,6 +126,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - Wheelbases match the files: GLE coupe 2.915 m, X6 (G06) 2.975 m.
   - Clusters for the new cars (2026-10-13), from the real cars, until the owner corrects any:
     - new designs: Maybach 57 S (two chrome-ringed dials, screen between), SU7 and U8 (wide EV screen: big digital speed, P R N D, power bar, battery and range), RX-8 (big rev counter in the middle with digital speed, fuel and temperature either side), LFA (one big rev counter, 0-10, speed and gear inside), LX700 (the same Lexus look, 0-8), 718 Cayman (rev counter in the middle, speedometer left, round screen right), GT-R (rev counter in the middle, speedometer right, fuel and temperature left);
-    - existing designs: GLE 53 = AMG Biturbo; S65 and Brabus G700 = W213 wide screen; M8, X7, 530i, 540i, X6 = BMW Live; M3 = BMW Classic; LP750 = Aventador.
+    - existing designs: GLE 53 = AMG Biturbo; S65 and Brabus G700 = W213 wide screen; M8, X7, 530i, 540i, X6 = BMW Live; M3 = BMW Classic.
+    - LP750 SV: its own cluster from the owner's photo (2026-10-13): yellow middle with a wide rev arc (2-10, red from 6), big gear letter, R 1234567 A strip, blue speed and rpm digits under it, STRADA and odometer, small yellow screens either side with bar gauges.
   - The new X6 uses its own modern cabin (owner, 2026-10-13); the M5 interior swap is gone.
   - The owner allowed deleting the original GLB files in `imports` once the cars are in the game.

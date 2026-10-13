@@ -1432,6 +1432,132 @@ local function gtr(gui: SurfaceGui): Update
 	end
 end
 
+-- Lamborghini Aventador LP750-4 SV (owner's photo of the real cluster): a dark screen in a grey
+-- frame with a big yellow middle; on it a wide rev arc (2 to 10: grey-blue ticks, then red from 6,
+-- black / bright red as they light), a big gear letter and the R 1234567 A strip; under it the
+-- speed and the revs in big blue digits, STRADA and the odometer; small yellow screens either side
+-- (clock, date, temperature / fuel) with bar gauges under them
+local function aventadorSV(gui: SurfaceGui): Update
+	local YELLOW = Color3.fromRGB(246, 210, 36)
+	local INK = Color3.fromRGB(16, 16, 22)
+	local DARK = Color3.fromRGB(12, 13, 16)
+	local DIGIT = Color3.fromRGB(60, 170, 255)
+	local LAMBO_RED = Color3.fromRGB(226, 26, 30)
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = DARK, BorderSizePixel = 0 }, gui)
+	new("UICorner", { CornerRadius = UDim.new(0.16, 0) }, bg)
+	new("UIStroke", { Color = Color3.fromRGB(70, 72, 78), Thickness = 6 }, bg)
+	for _, xy in { { 0.04, 0.2 }, { 0.04, 0.8 }, { 0.96, 0.2 }, { 0.96, 0.8 } } do
+		new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(xy[1], xy[2]), Size = UDim2.fromScale(0.012, 0.035), BackgroundColor3 = Color3.fromRGB(46, 48, 54), BorderSizePixel = 0 }, bg))
+	end
+	-- the yellow middle, its lower corners cut off at an angle
+	local mid = new("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromScale(0.5, 0.05), Size = UDim2.fromScale(0.43, 0.72), BackgroundColor3 = YELLOW, BorderSizePixel = 0, ClipsDescendants = true }, bg)
+	new("UICorner", { CornerRadius = UDim.new(0.04, 0) }, mid)
+	for _, x in { 0, 1 } do
+		new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(x, 1), Size = UDim2.fromScale(0.24, 0.62), Rotation = if x == 0 then 40 else -40, BackgroundColor3 = DARK, BorderSizePixel = 0, ZIndex = 2 }, mid)
+	end
+	-- the rev arc: an oval from 2 (lower left) over the top to 10 (lower right)
+	local cx, cy, rx, ry = 0.5, 0.5, 0.165, 0.37
+	local a0, a1 = -120, 120
+	local segs: { { frame: Frame, at: number } } = {}
+	local n = 44
+	for i = 0, n - 1 do
+		local f = i / (n - 1)
+		local a = math.rad(a0 + (a1 - a0) * f)
+		local seg = new("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(cx + math.sin(a) * rx, cy - math.cos(a) * ry),
+			Size = UDim2.fromScale(0.006, 0.075),
+			Rotation = math.deg(a),
+			BorderSizePixel = 0,
+			ZIndex = 3,
+		}, bg)
+		table.insert(segs, { frame = seg, at = 2 + 8 * f })
+	end
+	for v = 2, 10 do
+		local a = math.rad(a0 + (a1 - a0) * (v - 2) / 8)
+		local l = text(bg, tostring(v), UDim2.fromScale(cx + math.sin(a) * rx * 0.8, cy - math.cos(a) * ry * 0.74), UDim2.fromScale(0.03, 0.1), if v >= 6 then LAMBO_RED else INK, Enum.Font.GothamBlack)
+		l.ZIndex = 4
+	end
+	local gear = text(bg, "N", UDim2.fromScale(0.5, 0.43), UDim2.fromScale(0.09, 0.34), INK, Enum.Font.GothamBlack)
+	gear.ZIndex = 4
+	-- R 1234567 A, the gear in use in red
+	local order = { "R", "1", "2", "3", "4", "5", "6", "7", "A" }
+	local gearLabels: { [string]: TextLabel } = {}
+	for i, gname in order do
+		local l = text(bg, gname, UDim2.fromScale(0.44 + (i - 1) * 0.015, 0.66), UDim2.fromScale(0.014, 0.065), INK, Enum.Font.GothamBold)
+		l.ZIndex = 4
+		gearLabels[gname] = l
+	end
+	local smallRed = text(bg, "mph", UDim2.fromScale(0.34, 0.72), UDim2.fromScale(0.03, 0.05), LAMBO_RED, Enum.Font.GothamBold)
+	smallRed.ZIndex = 4
+	local rpmTag = text(bg, "rpm", UDim2.fromScale(0.66, 0.72), UDim2.fromScale(0.03, 0.05), LAMBO_RED, Enum.Font.GothamBold)
+	rpmTag.ZIndex = 4
+	local strada = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.43, 0.775), Size = UDim2.fromScale(0.07, 0.05), BackgroundColor3 = Color3.fromRGB(20, 40, 80), BorderSizePixel = 0, ZIndex = 4 }, bg)
+	text(strada, "STRADA", UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.9, 0.85), WHITE, Enum.Font.GothamBold).ZIndex = 5
+	local odo = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.57, 0.775), Size = UDim2.fromScale(0.07, 0.05), BackgroundColor3 = INK, BorderSizePixel = 0, ZIndex = 4 }, bg)
+	text(odo, "006365", UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.9, 0.85), WHITE, Enum.Font.GothamBold).ZIndex = 5
+	-- the big blue digits under the yellow
+	local speed = text(bg, "0", UDim2.fromScale(0.33, 0.87), UDim2.fromScale(0.06, 0.15), DIGIT, Enum.Font.GothamBold)
+	speed.TextXAlignment = Enum.TextXAlignment.Right
+	text(bg, "mph", UDim2.fromScale(0.385, 0.9), UDim2.fromScale(0.025, 0.05), DIGIT, Enum.Font.Gotham)
+	local revs = text(bg, "900", UDim2.fromScale(0.65, 0.87), UDim2.fromScale(0.07, 0.15), DIGIT, Enum.Font.GothamBold)
+	revs.TextXAlignment = Enum.TextXAlignment.Right
+	text(bg, "SET", UDim2.fromScale(0.4, 0.96), UDim2.fromScale(0.025, 0.04), DIM, Enum.Font.Gotham)
+	text(bg, "0.0", UDim2.fromScale(0.6, 0.96), UDim2.fromScale(0.025, 0.04), DIM, Enum.Font.Gotham)
+	-- side screens: a yellow box, then two bar gauges (white, red at the top)
+	local function sideBox(x: number): Frame
+		local f = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(x, 0.3), Size = UDim2.fromScale(0.12, 0.24), BackgroundColor3 = YELLOW, BorderSizePixel = 0 }, bg)
+		new("UICorner", { CornerRadius = UDim.new(0.08, 0) }, f)
+		return f
+	end
+	local function barPair(x: number, values: { number })
+		for i, v in values do
+			local bx = x + (i - 1.5) * 0.04
+			local back = new("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.fromScale(bx, 0.86), Size = UDim2.fromScale(0.012, 0.34), BackgroundColor3 = Color3.fromRGB(40, 42, 48), BorderSizePixel = 0 }, bg)
+			new("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Size = UDim2.fromScale(1, v), BackgroundColor3 = WHITE, BorderSizePixel = 0 }, back)
+			new("Frame", { Size = UDim2.fromScale(1, 0.18), BackgroundColor3 = LAMBO_RED, BorderSizePixel = 0 }, back)
+			for k = 0, 4 do
+				new("Frame", { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.fromScale(bx - 0.009, 0.52 + k * 0.085), Size = UDim2.fromScale(0.008, 0.006), BackgroundColor3 = DIM, BorderSizePixel = 0 }, bg)
+			end
+		end
+	end
+	local left = sideBox(0.15)
+	local clockText = text(left, clock(), UDim2.fromScale(0.5, 0.22), UDim2.fromScale(0.8, 0.3), INK, Enum.Font.GothamBold)
+	text(left, os.date("%d.%m.%Y") :: string, UDim2.fromScale(0.5, 0.52), UDim2.fromScale(0.75, 0.2), INK, Enum.Font.GothamMedium)
+	text(left, "52.0 °F", UDim2.fromScale(0.5, 0.8), UDim2.fromScale(0.65, 0.2), INK, Enum.Font.GothamMedium)
+	barPair(0.15, { 0.55, 0.45 })
+	local right = sideBox(0.85)
+	new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.22, 0.5), Size = UDim2.fromScale(0.12, 0.36), BackgroundColor3 = INK, BorderSizePixel = 0 }, right)
+	text(right, "72 L", UDim2.fromScale(0.62, 0.5), UDim2.fromScale(0.6, 0.4), INK, Enum.Font.GothamBold)
+	barPair(0.85, { 0.6, 0.5 })
+	local shown, last, lastGear = 0, 0, ""
+	return function(mph: number, g: string, rpm: number)
+		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+		local v = shown * 10
+		for _, s in segs do
+			local high = s.at >= 6
+			s.frame.BackgroundColor3 = if s.at <= v then (if high then Color3.fromRGB(255, 24, 24) else INK) else (if high then Color3.fromRGB(122, 30, 30) else Color3.fromRGB(96, 108, 130))
+		end
+		gear.Text = g
+		speed.Text = tostring(math.floor(mph + 0.5))
+		revs.Text = tostring(math.max(900, math.floor(shown * 8500 / 50) * 50))
+		local key = if tonumber(g) then g elseif g == "R" then "R" else ""
+		if key ~= lastGear then
+			if gearLabels[lastGear] then
+				gearLabels[lastGear].TextColor3 = INK
+			end
+			if gearLabels[key] then
+				gearLabels[key].TextColor3 = LAMBO_RED
+			end
+			lastGear = key
+		end
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
 -- the styles by name (the DashCluster panel's Style attribute)
 local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	Maybach57 = maybach,
@@ -1450,6 +1576,7 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	end,
 	Porsche718 = porsche718,
 	GTR = gtr,
+	AventadorSV = aventadorSV,
 }
 
 function DashGauges.build(panel: BasePart): Update

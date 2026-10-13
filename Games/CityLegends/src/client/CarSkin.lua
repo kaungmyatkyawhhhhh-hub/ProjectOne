@@ -77,7 +77,7 @@ CarSkin.CLUSTER_STYLE = {
 	lexis_lx700 = "LexusLX",
 	porsha_boxster = "Porsche718",
 	nisun_gtr = "GTR",
-	lambrini_lp750 = "Aventador",
+	lambrini_lp750 = "AventadorSV", -- its own cluster (owner's photo)
 } :: { [string]: string }
 
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
