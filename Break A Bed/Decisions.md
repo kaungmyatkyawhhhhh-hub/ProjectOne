@@ -158,3 +158,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: Rebirth keeps Level (LevelFloor) and discovered beds/posts. Old saves that broke bed 15 or later have rebirth unlocked. Token upgrades: Head Start, Cheap Posts, Lucky Hits, Fast Hands, Daily Spins (1–3 tokens a level). The head tag uses 🔄 (the font has no ⟳). #break-a-bed
 - 2026-10-13: Glove Shop stand moved to the plaza between spawn and the training area (visible from spawn), pad instead of a prompt. Invite Friend stand on the left of the plaza. Friend bonus counts Roblox friends in the same server, +10% each, max +30%. #break-a-bed
 - 2026-10-13: shop order FEATURED → PASSES → DEALS (Starter Pack, Server x2, Spins) → STRENGTH → CASH. #break-a-bed
+- 2026-10-13: gloves use the owner's Toolbox "blocky boxing glove" mesh (no scripts), recoloured per tier. The Glove Shop pad copies the Exclusive Chest pad's style (owner). #break-a-bed

@@ -139,3 +139,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: pacing wall at bed 20 (open) #bugs
 - Test bot: 32 min between bed 19 and bed 20. Bed 20 (720B) is too far from what Lava Post + gloves give. To fix next.
+
+## 2026-10-13: gloves upside down #bugs #done
+- The Toolbox mesh is modelled fist-up. Turning it over wasn't enough: placing the glove used the turned part as the pivot and turned it back. Fixed with `PivotOffset`, so the fist is at the hand and the cuff toward the arm.

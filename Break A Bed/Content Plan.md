@@ -66,7 +66,7 @@ Every post gets its own model, punch effect and sound, so each new post feels li
     - **Thumb:** a small block on the inner side of the fist. Optional, and only if it doesn't stick out.
     - **Fit:** the block's center sits exactly on the hand's center and turns with it. There's no gap under the arm and nothing floating below the hand.
     - Colors and the small effects stay as described above.
-  - **Final look (owner, 2026-10-13, from 4 reference pictures of blocky Roblox boxing gloves):** this replaces the shape rules above.
+  - **Final look (owner, 2026-10-13, from 4 reference pictures of blocky Roblox boxing gloves):** **Built 2026-10-13** with the owner's Toolbox mesh, see [[Break A Bed/2026-10-13|2026-10-13]]. this replaces the shape rules above.
     - **Size and place:** the glove covers the **hand and the bottom ~40% of the arm** and is about **1.25× the arm's width and depth**. It's chunky and clearly bigger than the arm, like a real boxing glove on a blocky avatar. The top edge of the cuff is flat and straight.
     - **Shape:** a **cube-like fist with soft rounded edges and slightly puffy sides** (padded, not a sharp brick). There's a padded knuckle bump at the front and a **molded thumb bump on the inner side**, plus a **cuff band** at the top with 2–3 stitch/seam lines.
     - **How to make it:** a **MeshPart** looks best.
