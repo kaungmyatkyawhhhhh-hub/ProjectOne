@@ -216,6 +216,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-13 GYM ARC Prompt - New features run]]
 - [[2026-10-13 GYM ARC Prompt - Pick audios]]
 - [[2026-10-13 GYM ARC Prompt - Save everything to Obsidian]]
+- [[2026-10-13 GYM ARC Prompt - Task 5 answers and continue]]
 
 ### Config
 - [[GYM ARC - Config values]]
