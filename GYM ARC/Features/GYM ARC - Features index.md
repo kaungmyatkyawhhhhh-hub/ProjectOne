@@ -41,7 +41,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Crews]]: groups of up to 8 with tags (done)
 - [[GYM ARC - Poses and Posing Stage]]: bodybuilding poses, judges on the beach stage (done)
 - [[GYM ARC - Posing Competition]]: rounds every 12 min on the beach stage, judges, vote, podium, statue (done)
-- [[GYM ARC - Leaderboards and Statue]]: wall board and the strongest player's statue (done)
+- [[GYM ARC - Leaderboards and Statue]]: six leaderboard walls (gyms + plaza), the group board, the statue (done)
 - [[GYM ARC - Progress Mirror]]: live reflection and before / after card (done)
 
 ## World and characters

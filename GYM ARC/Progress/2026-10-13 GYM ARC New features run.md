@@ -41,5 +41,13 @@ Prompts: [[2026-10-13 GYM ARC Prompt - New features run]] and [[2026-10-13 GYM A
 ![[GYM ARC/Screenshots/armwrestle_vs_npc_live_bar.jpg]]
 ![[GYM ARC/Screenshots/armwrestle_win_screen.jpg]]
 
+## Task 4: Leaderboards (done)
+- Six boards (Biggest, Strongest, Tallest, Most reps today, Posing wins, Arm wrestling wins), top 10 with headshots and "Your rank", on walls in the starter gym and the pro gym and a stand in the town plaza. Details: [[GYM ARC - Leaderboards and Statue]].
+- Tested with example data on all three walls; the real read works (the new boards start empty). Not tested: real data from several servers (needs the published game).
+- Commit: a518a47
+
+![[GYM ARC/Screenshots/leaderboards_starter_gym.jpg]]
+![[GYM ARC/Screenshots/leaderboards_town_plaza.jpg]]
+
 ## Saved / published
 - Not saved to Roblox yet: File > Save to Roblox, then File > Download a Copy to `Documents\GymArc_backups\GymArc_2026-10-13.rbxl`.

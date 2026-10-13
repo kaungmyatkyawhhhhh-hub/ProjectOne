@@ -263,6 +263,19 @@ File: `Config/Quests.luau`. Coach Dex quests: a one-time chain of 12, then 6 rep
 | CoachName | "Coach Dex" | Quest giver |
 | Prompt distance | 10 studs | Talk prompt range |
 
+## Config/Leaderboards
+File: `src/ReplicatedStorage/Shared/Config/Leaderboards.luau` (new 13 Oct, [[GYM ARC - Leaderboards and Statue]])
+
+| Setting | Value | What it does |
+|---|---|---|
+| Refresh | 90 s | Time between saving values and reading the boards (60-120 keeps every server inside the DataStore limits) |
+| FirstRefresh | 12 s | First read after a server starts |
+| Top | 10 | Rows on a board |
+| FetchCount | 100 | Entries read per board ("Your rank" is exact inside these) |
+| StorePrefix | LB1_ | OrderedDataStore names (LB1_<board>, daily: LB1_RepsToday_<day>) |
+| Boards | Biggest, Strongest, Tallest, RepsToday (daily), PosingWins, ArmWins | The six boards, in wall order |
+| SizeScale | 100 | "Biggest" = average muscle look x this |
+
 ## Config/Legends
 File: `Config/Legends.luau`.
 
