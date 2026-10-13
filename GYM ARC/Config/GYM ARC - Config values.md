@@ -190,6 +190,18 @@ File: `src/ReplicatedStorage/Shared/Config/DailyQuests.luau` (new 13 Oct)
 | SwapsPerDay | 1 | Swaps a day (never into a quest that needs another player) |
 | Pool | 12 quests | Each: text, type, count, coins (chest/leg/back reps 50, shoulder/arm/core reps 40, 100 reps, 3 groups, 1 km run, 2 spots, a posing entry, an arm wrestle win; 50-80 coins) |
 
+## Config/Meals
+File: `src/ReplicatedStorage/Shared/Config/Meals.luau` (new 13 Oct, [[GYM ARC - Energy Shakes]])
+
+| Setting | Value | What it does |
+|---|---|---|
+| Items | Protein Shake 60 coins, gains x1.2, 300 s; Energy Smoothie 50, regen x1.5, 300 s; Chicken & Rice 90, gains x1.1 + regen x1.1, 600 s; Coconut Water 40, cardio x1.5, 300 s | Price, effect and time of each item (also its color and icon) |
+| MaxStack | 3 | A boost holds at most 3 drinks' worth of time |
+| Shops | SmoothieBar and StarterCart: Protein, Energy, Chicken & Rice; CoconutCart: Coconut Water, Energy Smoothie | What each stall sells |
+| PromptDistance | 8 studs | How close you must be to order |
+| DrinkSeconds | 2 s | How long the shaker stays in your hand |
+| SaveEvery | 5 s | How often the time left is saved (paused while away) |
+
 ## Config/MuscleOfTheDay
 File: `Config/MuscleOfTheDay.luau`.
 

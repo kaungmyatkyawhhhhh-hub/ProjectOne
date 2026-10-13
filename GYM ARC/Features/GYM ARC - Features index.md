@@ -14,7 +14,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Machines]]: starter / pro / beach machines, 12 weight tiers, MAX button, plates (done)
 - [[GYM ARC - Gains and EXP]]: the gains formula, 5x cap, PUMPED and BIG REP (done)
 - [[GYM ARC - Stamina and Treadmills]]: stamina, recovery stations, treadmills raise max stamina (done)
-- [[GYM ARC - Energy Shakes]]: shakes for stamina + bonus gains; smoothie bar shop planned (done)
+- [[GYM ARC - Energy Shakes]]: bag shakes and the smoothie bar's timed boosts (done)
 - [[GYM ARC - Genetics]]: grades, frame and body type, the 3D reveal and reroll (done)
 - [[GYM ARC - Growth Spurts]]: rebirth, taller and stronger, capped at 7'0" (done)
 

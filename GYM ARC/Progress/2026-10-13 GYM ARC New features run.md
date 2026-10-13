@@ -49,5 +49,14 @@ Prompts: [[2026-10-13 GYM ARC Prompt - New features run]] and [[2026-10-13 GYM A
 ![[GYM ARC/Screenshots/leaderboards_starter_gym.jpg]]
 ![[GYM ARC/Screenshots/leaderboards_town_plaza.jpg]]
 
+## Task 5: Smoothie bar (done)
+- Owner's answers: [[2026-10-13 GYM ARC Prompt - Task 5 answers and continue]].
+- Protein Shake, Energy Smoothie, Chicken & Rice and Coconut Water (beach only) as timed boosts at the pro gym's smoothie bar (new menu board), a starter gym cart and a beach coconut cart; HUD timers; boosts pause while away. Details: [[GYM ARC - Energy Shakes]].
+- Fixed in testing: [[GYM ARC - Bug - Smoothie boost charged when already full]], [[GYM ARC - Bug - Paused smoothie boosts wiped before the restore]].
+- Commit: 0815b75
+
+![[GYM ARC/Screenshots/meals_shop_panel_starter_cart.jpg]]
+![[GYM ARC/Screenshots/meals_drinking_shaker.jpg]]
+
 ## Saved / published
 - Not saved to Roblox yet: File > Save to Roblox, then File > Download a Copy to `Documents\GymArc_backups\GymArc_2026-10-13.rbxl`.

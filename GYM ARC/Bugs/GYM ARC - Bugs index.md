@@ -7,7 +7,7 @@ status: current
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
-89 bugs: 21 open or engine limits, 68 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
+91 bugs: 21 open or engine limits, 70 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
 
 ## Open
 
@@ -35,6 +35,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 ## Fixed
 
+- [[GYM ARC - Bug - Paused smoothie boosts wiped before the restore|Paused smoothie boosts wiped before the restore]] - 2026-10-13
+- [[GYM ARC - Bug - Smoothie boost charged when already full|Smoothie boost charged when already full]] - 2026-10-13
 - [[GYM ARC - Bug - Pins against an NPC never counted|Pins against an NPC never counted]] - 2026-10-13
 - [[GYM ARC - Bug - Faded labels came back invisible|Faded labels came back invisible]] - 2026-10-04
 - [[GYM ARC - Bug - Finished tutorial would restart on old saves|Finished tutorial would restart on old saves]] - 2026-10-04
