@@ -50,6 +50,9 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 - Cash and Strength packs grow with your progress, so they're worth buying at any point.
 - Show a **"BEST VALUE"** tag on the biggest pack of each row and a **"POPULAR"** tag on the middle one.
 
+### Shop order (owner, 2026-10-13)
+Top to bottom in the shop window: **1. FEATURED (Halloween Auras crate)** → **2. GAME PASSES** → then everything else (Starter Pack, boosts, packs…) in the current order.
+
 ### Impulse buys (shown at the right moment)
 - **"Need more Strength?"** When the bed prompt says "Need X Strength", show a small button: *x3 Strength 10 min, R$15*.
 - **Instant Break: R$9.** Breaks the bed you're stuck on once, paying its Cash and marking it completed. It's shown on the same "Need X Strength" prompt.

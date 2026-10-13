@@ -47,6 +47,16 @@ Every post gets its own model, punch effect and sound, so each new post feels li
 - Each one **multiplies all Strength from punching** (x1.5, x2, x3… up to about x50). They're priced so each takes 3–8 minutes of play at that stage, and they're spread between the post prices so there's always something to buy.
 - The equipped glove shows on both hands and changes the punch effect color. Owned gloves are saved.
 
+- **Glove Shop stand (owner, 2026-10-13, from a reference picture of a "Pickaxe Shop" market stall):**
+  - **No ProximityPrompt.** A glowing **blue circle pad** on the ground in front of the stall is a touch sensor. Stepping into it opens the Glove Shop window, and stepping out (or the X) closes it. A 1 s cooldown stops it reopening right after closing while still standing in it.
+  - **Our own design (not a copy):** a chunky low-poly boxing-themed stall.
+    - **Awning:** red-and-white striped, scalloped edge.
+    - **Counter:** dark wood, with a pair of giant red boxing gloves hanging from the front beam on a rope and slowly swinging.
+    - **Display:** 3–4 of the real gloves on hooks/stands on the counter, slowly spinning.
+    - **Pad:** a cyan glowing ring with a soft pulse and rising sparkles.
+    - **Title:** "Glove Shop" floating above in big rounded white text with a blue gradient and a thick dark outline (same style as the reference).
+  - It sits by the training area, visible from spawn.
+
 ## 4. Bed Mastery (a reason to re-break beds)
 - Each bed has **3 mastery stars**: break it 10 / 50 / 200 times.
 - Each star = **+5% Cash forever** from that bed, plus a one-time Cash reward. The stars show on the bed's sign and in an **Index** menu (all beds, stars, best time).
@@ -69,6 +79,12 @@ Beds you haven't broken yet are **black silhouettes**, so you want to keep playi
   - **On buying:** the black shell cracks off with the same reveal (shards, white flash, colors fade in over 0.5 s, "NEW POST UNLOCKED!" banner with the name and its "+X 💪 per punch").
   - **Saved:** a `DiscoveredPosts` list that Rebirth doesn't reset (owned posts count as discovered in old saves). After a rebirth, a discovered but not-yet-rebought post shows in full color with its lock and price.
   - The same applies to the new unique post models from section 1.
+
+## 7. Invite Friend stand (owner, 2026-10-13, from a reference picture)
+- **A figure** (an R15 rig wearing a cash/money outfit, with a cheerful idle and a wave every few seconds) stands on a **glowing yellow ring pad** near spawn. Cash bills and dumbbell icons float and swirl around them.
+- **Above it**, a floating title "**INVITE FRIEND**" in big yellow text with a thick dark outline and a 👥 icon on each side, and a green line under it: "**Each Friend = +10% Strength**".
+- **Stepping on the yellow ring** (a touch sensor, no prompt) opens Roblox's invite window (`SocialService:PromptGameInvite`), with a 5 s cooldown.
+- **The bonus:** +10% Strength for each friend in the same server, max +30%. It shows as a small chip on the HUD ("Friends +20%"). This is item 3 of "Next retention features" in [[Break A Bed/Retention Plan|Retention Plan]].
 
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
