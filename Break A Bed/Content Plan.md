@@ -193,6 +193,14 @@ Seen from spawn, everything is squeezed into the back corner while the big paved
   - Don't place anything on the main walkway from spawn.
   - Spawn should have a clear view of each stand, board and crate. Nothing stands in front of another.
   - Before moving anything, Claude Code makes a top-down list of every object on the plaza (name, position, size) and picks free spots from it. Then it takes a screenshot from spawn and one from above.
+- **Still wrong (owner's screenshot, 2026-10-13, later):**
+  - **The Glove Shop** stands half on the front edge of the training floor, wedged between training and the VIP Lounge carpet, with its pad in the walkway.
+  - **The training floor** got bigger when the posts were spread out. It now runs into the VIP Lounge on the right, and it's no longer centered under the TRAINING sign.
+  - **Fix:**
+    1. **Training floor:** shrink it or move it back/left so there's a gap of at least **6 studs** to the VIP Lounge. It must not touch any other building. Center the TRAINING sign over it again (widen the sign if needed), and keep the posts evenly spaced inside.
+    2. **Glove Shop:** fully off the training floor, in the open paved area **front-left of training**, facing spawn, with its cyan pad in front (toward spawn). It must not cover the like-goal board.
+    3. Keep the VIP Lounge carpet and door clear.
+    4. **If the plaza is too small** for everything with these gaps, make the paved plaza bigger (extend it to the front/left) instead of squeezing things together.
 
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
