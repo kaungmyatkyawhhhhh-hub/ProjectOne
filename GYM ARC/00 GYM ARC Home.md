@@ -216,6 +216,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-13 GYM ARC Height cap and soft shutdown]]
 - [[2026-10-13 GYM ARC New features run]]
 - [[2026-10-13 GYM ARC Obsidian vault setup]]
+- [[2026-10-13 GYM ARC UI redesign]]
 
 ### Prompts
 - [[2026-10-04 GYM ARC Prompt - Design brief]]
