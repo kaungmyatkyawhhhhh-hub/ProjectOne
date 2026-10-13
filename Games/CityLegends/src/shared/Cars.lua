@@ -75,7 +75,7 @@ local list: { CarSpec } = {
 	{ Id = "bentz_g63", Name = "Mercer G63", Class = "SUV", Tier = "Mid", TopSpeed = 149, ZeroToSixty = 4.4, Handling = 0.52, Price = 260000, Color = Color3.fromRGB(20, 21, 24), Order = 34 },
 	{ Id = "byt_u8", Name = "BYT Yangwong U8", Class = "SUV", Tier = "Mid", TopSpeed = 124, ZeroToSixty = 3.6, Handling = 0.55, Price = 290000, Color = Color3.fromRGB(20, 21, 24), Order = 35, Electric = true },
 	{ Id = "porsha_panamera", Name = "Porsha Panamera Turbo S", Class = "Sedan", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 3.0, Handling = 0.8, Price = 300000, Color = Color3.fromRGB(88, 92, 98), Order = 36 },
-	{ Id = "chevo_camaro", Name = "Chevo Camaro SS", Class = "Coupe", Tier = "Mid", TopSpeed = 165, ZeroToSixty = 4.0, Handling = 0.74, Price = 62000, Color = Color3.fromRGB(230, 180, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 37 },
+	{ Id = "chevo_camaro", Name = "Chevo Camaro ZL1", Class = "Coupe", Tier = "Mid", TopSpeed = 184, ZeroToSixty = 3.9, Handling = 0.74, Price = 62000, Color = Color3.fromRGB(230, 180, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 37 },
 	{ Id = "chevo_c6", Name = "Chevo Corvette C6", Class = "Coupe", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 4.2, Handling = 0.8, Price = 78000, Color = Color3.fromRGB(26, 44, 82), Order = 38 },
 	{ Id = "porsha_boxster", Name = "Porsha Boxster 718", Class = "Coupe", Tier = "Mid", TopSpeed = 177, ZeroToSixty = 4.2, Handling = 0.9, Price = 92000, Color = Color3.fromRGB(200, 200, 206), Order = 39 },
 	{ Id = "chevo_c7", Name = "Chevo Corvette C7", Class = "Coupe", Tier = "Mid", TopSpeed = 180, ZeroToSixty = 3.8, Handling = 0.84, Price = 112000, Color = Color3.fromRGB(200, 10, 20), Order = 40 },
@@ -84,7 +84,7 @@ local list: { CarSpec } = {
 
 	-- High tier
 	{ Id = "nisun_gtr", Name = "Nisun GT-R R35", Class = "Coupe", Tier = "High", TopSpeed = 196, ZeroToSixty = 2.9, Handling = 0.86, Price = 420000, Color = Color3.fromRGB(235, 236, 238), Order = 43 },
-	{ Id = "astin_db9", Name = "Astin Marlin DB9", Class = "Coupe", Tier = "High", TopSpeed = 183, ZeroToSixty = 4.6, Handling = 0.76, Price = 450000, Color = Color3.fromRGB(26, 44, 82), Order = 44 },
+	{ Id = "astin_db9", Name = "Astin Marlin Vanquish", Class = "Coupe", Tier = "High", TopSpeed = 201, ZeroToSixty = 3.8, Handling = 0.76, Price = 450000, Color = Color3.fromRGB(26, 44, 82), Order = 44 },
 	{ Id = "astin_vantage", Name = "Astin Marlin Vantage", Class = "Coupe", Tier = "High", TopSpeed = 195, ZeroToSixty = 3.5, Handling = 0.82, Price = 500000, Color = Color3.fromRGB(36, 70, 52), Order = 45 },
 	{ Id = "ferrara_f430", Name = "Ferrara F430", Class = "Supercar", Tier = "High", TopSpeed = 196, ZeroToSixty = 3.6, Handling = 0.86, Price = 600000, Color = Color3.fromRGB(200, 10, 20), Order = 46 },
 	{ Id = "bentz_sl65bs", Name = "Mercer SL65 Black Series", Class = "Coupe", Tier = "High", TopSpeed = 199, ZeroToSixty = 3.8, Handling = 0.82, Price = 700000, Color = Color3.fromRGB(18, 18, 20), Order = 47 },
@@ -106,6 +106,10 @@ local list: { CarSpec } = {
 	{ Id = "lambrini_lp750", Name = "Lambrini Aventador SV LP750-4", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.8, Handling = 0.92, Price = 3500000, Color = Color3.fromRGB(120, 200, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 63 },
 	{ Id = "lambrini_lp640", Name = "Lambrini Murcielago LP640", Class = "Supercar", Tier = "High", TopSpeed = 211, ZeroToSixty = 3.3, Handling = 0.86, Price = 1800000, Color = Color3.fromRGB(255, 140, 0), Order = 64 },
 	{ Id = "bentz_maybach", Name = "Mercer Maybech 57S", Class = "Sedan", Tier = "High", TopSpeed = 172, ZeroToSixty = 4.9, Handling = 0.62, Price = 1400000, Color = Color3.fromRGB(20, 21, 24), Accent = Color3.fromRGB(165, 168, 172), Order = 65 },
+	{ Id = "bnw_750li", Name = "BNW 750Li", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.8, Handling = 0.64, Price = 150000, Color = Color3.fromRGB(20, 21, 24), Order = 66 },
+	{ Id = "bentz_gls", Name = "Mercer GLS", Class = "SUV", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.3, Handling = 0.6, Price = 160000, Color = Color3.fromRGB(235, 235, 235), Order = 67 },
+	{ Id = "bentz_s680", Name = "Mercer Maybech S680", Class = "Sedan", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.62, Price = 1600000, Color = Color3.fromRGB(110, 20, 30), Accent = Color3.fromRGB(215, 200, 170), Order = 68 },
+	{ Id = "lambrini_countach", Name = "Lambrini Countach LP400S", Class = "Supercar", Tier = "High", TopSpeed = 179, ZeroToSixty = 5.6, Handling = 0.78, Price = 2500000, Color = Color3.fromRGB(235, 235, 235), Order = 69 },
 }
 
 Cars.List = list

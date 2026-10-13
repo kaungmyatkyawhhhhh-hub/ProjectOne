@@ -226,3 +226,19 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - **Where new cars go (2026-10-13, owner):** converted cars to bring in with Import 3D are pushed to `Games/CityLegends/imports/new_cars/`. The folder holds only what is still to be imported, and is emptied once those cars are in the game.
 - **DB9 slot gets a Vanquish (2026-10-13, owner):** the owner will send a Vanquish model for the DB9 (`astin_db9`). More new cars are coming too.
 - **E400 model (2026-10-13, owner: "No new E63 S, the E63 S will be E400"):** the E63 S W213 file is the model for the Mercer E400 (`bentz_e400`). No separate E63 S car.
+- **Third batch (2026-10-13):** 69 cars.
+  - DB9 renamed "Astin Marlin Vanquish" (Vanquish model, 201 mph).
+  - Camaro renamed "Chevo Camaro ZL1" (ZL1 model).
+  - The V12 Vantage model replaces the Vantage's model.
+  - The E63 S model is the E400's model.
+  - New cars:
+
+    | Car | Price |
+    |---|---|
+    | BNW 750Li | $150,000 |
+    | Mercer GLS | $160,000 |
+    | Mercer Maybech S680 | $1,600,000 |
+    | Lambrini Countach LP400S | $2,500,000 |
+  - Live needles on the Vanquish, Vantage (Aston rev counters turn counter-clockwise) and Countach.
+  - Packs: `imports/new_cars/cars_13_astin.fbx`, `cars_14_luxury.fbx`.
+  - Old, already-imported packs were deleted from `imports` (owner OK).

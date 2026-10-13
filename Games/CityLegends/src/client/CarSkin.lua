@@ -43,8 +43,6 @@ CarSkin.CLUSTER_STYLE = {
 	bnw_x6 = "BMWLive", -- the 2020 X6 file has its own modern cabin (owner, 2026-10-13)
 	lambrini_lp570 = "Gallardo",
 	kio_ev6 = "EV6",
-	astin_db9 = "Aston",
-	astin_vantage = "Aston",
 	lambrini_urus = "Urus",
 	chevo_c6 = "C6",
 	chevo_c7 = "C7",
@@ -63,6 +61,9 @@ CarSkin.CLUSTER_STYLE = {
 	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
 	rolls_wraith = "Maybach57",
 	byt_seal = "U8", -- wide electric screen
+	bentz_s680 = "W213",
+	bentz_gls = "W213",
+	bnw_750li = "BMWClassic",
 } :: { [string]: string }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the
@@ -75,6 +76,18 @@ CarSkin.CLUSTER_STYLE = {
 -- a fixed number. Measured from the converted files (needle ends, labels) by tools in the notes.
 export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string }
 CarSkin.DIAL_NEEDLES = {
+	lambrini_countach = { -- Countach
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0825, 0.0077, -0.2274), face = Vector3.new(0, 0.1961, 0.9806), length = 0.0309, scale = "20:-98.2,100:-51.7,180:3.1,320:114.9" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0911, 0.0056, -0.227), face = Vector3.new(-0, 0.1961, 0.9806), length = 0.0329, scale = "1000:-99.6,2000:-56.6,3000:-24.7,4000:0.7,5000:26.9" },
+	},
+	astin_vantage = { -- V12 Vantage
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0517, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:-14.9,200:245.1" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0591, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:15.0,8000:-245.0" },
+	},
+	astin_db9 = { -- Vanquish
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0582, 0.0319, -0.2625), face = Vector3.new(-0, 0.3132, 0.9497), length = 0.045, scale = "0:-28.2,200:231.8" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0492, 0.0319, -0.2625), face = Vector3.new(-0, 0.3132, 0.9497), length = 0.045, scale = "0:29.9,8000:-230.1" },
+	},
 	bentlee_bentayga = { -- Bentayga
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.1002, -0.0152, -0.263), face = Vector3.new(-0.012, 0.4411, 0.8974), length = 0.0394, scale = "0:-123.7,4000:6.8,7000:102.3,8000:133.7" },
 		{ kind = "speed", unit = "mph", at = Vector3.new(0.0965, -0.0163, -0.2622), face = Vector3.new(0.0126, 0.4677, 0.8838), length = 0.0474, scale = "0:-136.2,100:5.7,200:134.6" },
