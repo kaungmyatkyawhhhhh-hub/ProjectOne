@@ -19,6 +19,7 @@ Workspace attributes that change how the game behaves in a Studio play test, for
 - **Genetics:** `TestGenetics` / `TestRerollGenetics` ("C,B,A,S,S,D" or with a frame), `TestGeneticsHold` (freeze the reveal at plate n)
 - **Machines and feel:** `TestMachine` (puts you on a machine, for example "Beach/BicepCurl"), `TestPoseDepth` (freeze a rep at that depth), `TestPopupSlow`, `TestFlashSlow`, `TestSignCamera` (where the machine sign faces)
 - **Screens:** `TestOpenMirror`, `TestPhoneLayout` (phone layout on PC)
+- **New features run (13 Oct):** `TestMealRejoin` (act out leaving for n seconds, smoothie boosts pause), `TestRivalBeat` (a rival's id: wins his challenge)
 - **Other:** `ForceSeason` (for example "Halloween"), `TestSkateMove` (scripted skating), `TestBrokenStage` (fake a failed body stage download), `PoseDebug`, `SoftShutdown` (shows the update note and holding screen)
 
 ## Where it lives

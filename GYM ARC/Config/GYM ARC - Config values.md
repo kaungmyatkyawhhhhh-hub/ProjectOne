@@ -202,6 +202,21 @@ File: `src/ReplicatedStorage/Shared/Config/Meals.luau` (new 13 Oct, [[GYM ARC - 
 | DrinkSeconds | 2 s | How long the shaker stays in your hand |
 | SaveEvery | 5 s | How often the time left is saved (paused while away) |
 
+## Config/Rivals
+File: `src/ReplicatedStorage/Shared/Config/Rivals.luau` (new 13 Oct, [[GYM ARC - NPC Rivals]])
+
+| Setting | Value | What it does |
+|---|---|---|
+| Benny (starter) | Flat Bench, record 95 lb; 150 coins, Beat Benny | Beat him with a full set heavier than his record |
+| Coral (beach) | arm wrestling, strength 1.25, 8-9.5 taps a second; 300 coins, Beat Coral | Beat her in a match |
+| Dante (pro) | Squat Rack, record 315 lb; 600 coins, Beat Dante | Beat him with a full set heavier than his record |
+| SetReps | 10 | Reps in a row at one weight for a full set |
+| SetGap | 15 s | A longer pause between reps starts a new set |
+| LoseLineEvery | 30 s | The "come back stronger" line at most this often |
+| BubbleSeconds | 4.5 s | How long a rival's line shows over his head |
+| HoldSeconds | 10 s | How long a rival stops and faces you when you open his card |
+| PromptDistance | 8 studs | How close you must be to press Challenge |
+
 ## Config/MuscleOfTheDay
 File: `Config/MuscleOfTheDay.luau`.
 

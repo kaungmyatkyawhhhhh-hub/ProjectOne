@@ -19,6 +19,8 @@ A tapping duel at two tables (starter gym and pro gym). Bigger biceps and forear
 - **Animation:** both wrestlers lean in, elbows on the pads, hands locked; the arms swing with the bar and the winner slams the loser's hand down (a wooden thud), then pumps a fist.
 - **Phones:** a narrower panel and a smaller TAP button, so the wrestlers stay in view.
 
+- **Rival:** once you accept Coral's challenge ([[GYM ARC - NPC Rivals]]) she joins every table's opponent list as "Rival" (her own look and size). The picker builds its buttons from the server's list.
+
 ## Where it lives
 - `Config/Social` (ArmWrestle), `Server/ArmWrestleService`, `SocialClient` (panel), `ArmWrestleClient` (arms), `MachineSignsClient` (sign + OCCUPY)
 - Tables: `Workspace.ArmWrestleTable` and `Workspace.ProGym.Feature_ArmWrestle.ArmWrestleTablePro` (builder `tools/builders/ArmWrestleTable`)

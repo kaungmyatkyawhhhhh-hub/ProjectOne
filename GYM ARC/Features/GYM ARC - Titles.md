@@ -1,5 +1,5 @@
 ---
-date: 2026-10-04
+date: 2026-10-13
 tags: [gymarc, feature]
 status: done
 ---
@@ -36,7 +36,7 @@ Collectible titles earned by playing. You keep them forever and wear one above y
 - Badge ids for Aesthetics God, Skyscraper and Defied Genetics are not set yet (owner to create).
 
 ## Planned change
-- New features prompt adds titles: "Posing Champion" (done 13 Oct), "Dedicated" (7-day streak, done 13 Oct), "Arm Wrestling King" (done 13 Oct), rival titles like "Beat Dante".
+- New features prompt adds titles: "Posing Champion" (done 13 Oct), "Dedicated" (7-day streak, done 13 Oct), "Arm Wrestling King" (done 13 Oct), "Beat Benny", "Beat Coral" and "Beat Dante" (NPC rivals, done 13 Oct, [[GYM ARC - NPC Rivals]]).
 - Monetization prompt: a VIP title for the VIP pass.
 
 ## Related

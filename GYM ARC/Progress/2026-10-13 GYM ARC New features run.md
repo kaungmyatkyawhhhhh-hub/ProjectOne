@@ -58,5 +58,13 @@ Prompts: [[2026-10-13 GYM ARC Prompt - New features run]] and [[2026-10-13 GYM A
 ![[GYM ARC/Screenshots/meals_shop_panel_starter_cart.jpg]]
 ![[GYM ARC/Screenshots/meals_drinking_shaker.jpg]]
 
+## Task 6: NPC rivals (done)
+- Benny (starter gym, bench), Coral (beach gym, arm wrestling) and Dante (pro gym, squat), each with a challenge card, a title and coins. Rivals are an extra goal: gyms already open by Growth Spurt. Details: [[GYM ARC - NPC Rivals]].
+- Also fixed: [[GYM ARC - Bug - Tutorial path target nil]].
+- Commit: 01aa58d
+
+![[GYM ARC/Screenshots/rival_card_benny.jpg]]
+![[GYM ARC/Screenshots/rival_win_benny.jpg]]
+
 ## Saved / published
 - Not saved to Roblox yet: File > Save to Roblox, then File > Download a Copy to `Documents\GymArc_backups\GymArc_2026-10-13.rbxl`.

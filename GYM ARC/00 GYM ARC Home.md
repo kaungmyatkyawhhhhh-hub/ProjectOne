@@ -192,6 +192,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Torso poked through at the chest midline]]
 - [[GYM ARC - Bug - Traps outline edges visible]]
 - [[GYM ARC - Bug - Treadmills were only decoration]]
+- [[GYM ARC - Bug - Tutorial path target nil]]
 - [[GYM ARC - Bug - Two title tags on one head]]
 - [[GYM ARC - Bug - Upper traps never grew]]
 - [[GYM ARC - Bug - Zigzag on the upper arm seam]]

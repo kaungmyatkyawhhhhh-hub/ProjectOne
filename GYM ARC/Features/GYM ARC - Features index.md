@@ -51,7 +51,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Wardrobe and Gear and Fits Store]]: gear, fits, wardrobe; hiding planned (done)
 - [[GYM ARC - NPC Regulars and Gym Cat]]: regulars, Dante the 8'0" giant, Plates the cat; pets planned (done)
 - [[GYM ARC - Legend NPCs]]: visiting legends with one-time challenges (done)
-- [[GYM ARC - NPC Rivals]]: one rival per gym with a challenge (planned)
+- [[GYM ARC - NPC Rivals]]: Benny, Coral and Dante, one rival per gym with a challenge (done)
 
 ## Money, sound, tech
 - [[GYM ARC - Monetization]]: OFF today (framework only); turning ON is planned (in progress)
