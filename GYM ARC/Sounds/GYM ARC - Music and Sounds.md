@@ -106,7 +106,12 @@ Also: pull-ups and dips with no plates (bodyweight) no longer clank.
 ## Your own music (14 Oct)
 You replaced the music with your own tracks (in Studio: ReplicatedStorage > Shared > Config > Sounds).
 - Music (the fallback list): 118959016267248, 131532099124744, 139266399633943, 86451874359343, 113417603188158, 1840007392 (volume 0.7).
-- Starter gym: 86451874359343. Pro gym: 118959016267248. Beach: 1837324500. Town: 1840007392.
+- Every area now plays four songs in a row, then starts again (owner, 14 Oct: "multiple songs in each area"). Its own song first:
+  - Starter gym: 86451874359343, 131532099124744, 139266399633943, 113417603188158
+  - Pro gym: 118959016267248, 113417603188158, 139266399633943, 131532099124744
+  - Beach: 1837324500, 139266399633943, 131532099124744, 86451874359343
+  - Town: 1840007392, 113417603188158, 118959016267248, 131532099124744
+- Tested: the starter gym went through all four songs in order and back to the first.
 
 How to play several songs in one area: in `AreaMusic`, put more ids in that area's list, separated by commas, for example
 `Starter = { 86451874359343, 131532099124744, 139266399633943 },`

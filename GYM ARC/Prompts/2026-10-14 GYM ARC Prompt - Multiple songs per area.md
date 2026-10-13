@@ -12,3 +12,9 @@ Saved exactly as sent:
 ```text
 also i changed the music to my own custom one , how to put multiple songs in the same area
 ```
+
+Follow-up, saved exactly as sent:
+
+```text
+i want to put multiple songs in each area
+```
