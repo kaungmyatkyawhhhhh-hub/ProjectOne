@@ -157,3 +157,9 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: Invite Friend stand blocked the upgrade boards #bugs #done
 - The layout move put it right in front of WALK SPEED / TRAINING SPEED and their pads. Now placed from a plaza list with 10-stud keep-out zones checked by script; the Glove Shop was also nudged off the walkway to training.
+
+## 2026-10-13: training floor lost its tile lines #bugs #done
+- Resizing the floor rebuilt the tiles with no gaps, so the dark grid lines vanished. Rebuilt 10 x 10 with 0.16-stud gaps.
+
+## 2026-10-13: post labels overlapped from spawn #bugs #done
+- MaxDistance 70 and uneven heights. Now MaxDistance 40 and each label 2 studs above its own post.
