@@ -59,6 +59,15 @@ The owner's screenshot: the step card is huge (about 60% of the screen width and
 - **After SPAWN:** the dim fades out (0.3 s), and the guide ends with "You're a pro! Keep breaking beds!", confetti and the finish sound.
 - **How to build it:** the dim is 4 black frames around the button's spot, updated every frame so it follows the button on any screen size. The arrow sits beside the button and points at it (on phones it must stay on screen). It must look right on PC and phones.
 
+**4. New step: free gloves at the Glove Shop (owner, 2026-10-13).** It comes right after "Buy the Wooden Post!" and before the To Bed step:
+- The pill says "**GET FREE GLOVES!**". The beam and the bouncing arrow lead to the Glove Shop's cyan pad.
+- Stepping on the pad opens the Glove Shop as normal, with a new first glove, **Starter Gloves** (x1.25 Strength, price **FREE**, Common, plain red), already selected.
+  - The same 50% dim and cut-out as the To Bed step go around its big **FREE!** button, with the white glow and the bouncing white arrow. Only that button works.
+- Pressing it gives and equips the gloves. A sparkle burst plays on the hands, with "**GLOVES EQUIPPED! x1.25 Strength**".
+- Then the dim moves to the **X** (close) button. Closing the shop moves the guide on to the To Bed step.
+- **Starter Gloves** is a real glove in the shop for everyone: free, one time, saved. Players who skip past it (old saves) can still claim it in the shop. It makes the first real glove (Boxing, $91K) the next goal.
+- The guide gets about 10–15 s longer, which is fine.
+
 ## Rules
 - The beam is a `Beam` from the player's character to the target, plus a bouncing arrow `BillboardGui` above the target. Only the player sees them (made on the client).
 - A small top-center bubble shows the current step (UI Kit style), and a **SKIP** text button sits under it.
