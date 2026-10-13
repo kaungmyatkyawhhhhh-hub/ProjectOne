@@ -121,3 +121,5 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Stray character stopped the server|Stray character stopped the server]] - 2026-10-14
 - [[GYM ARC - Bug - Genetics screen broken on phones|Genetics screen broken on phones]] - 2026-10-14
 - [[GYM ARC - Bug - Physique numbers did not match|Physique numbers did not match]] - 2026-10-14
+- [[GYM ARC - Bug - World signs in your face|World signs in your face]] - 2026-10-14
+- [[GYM ARC - Bug - Stats lines pointed at the wrong places|Stats lines pointed at the wrong places]] - 2026-10-14

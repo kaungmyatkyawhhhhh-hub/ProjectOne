@@ -150,3 +150,16 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - Lifting HUD, top bar, Physique, l
 - REP ([[2026-10-14 GYM ARC Prompt - Fixed REP spot and 3D genetics back]]): REP now has ONE spot, right above Roblox's jump button (12 px gap, right edges lined up), worked out once and only again if the screen size changes. Found on the way: the first try measured the jump button before Roblox had placed it (REP ended up at the top), so a measurement only counts once the button is in the lower half of the screen.
 - Genetics: the 3D stage (the bar with the plates, the overall plate, the DNA helix) is back. Phones now see it framed exactly like a PC; nothing sits on top of the stage any more: the title and DNA tokens are on the top bar line, everything else is one panel along the bottom. (The set pieces had never been moved, so nothing needed moving back.)
 - Still to do: the side-by-side screenshots at 844x390, 667x375 and 1920x1080 (Studio's Play button got stuck waiting, see the session notes).
+
+## 14. Tests after Studio unstuck, world signs, stats lines
+- REP: the same spot on four sits (bench, squat rack, bench again, overhead press).
+![[GYM ARC/Screenshots/rep_fixed_overhead_press.jpg]]
+- Genetics 3D stage on the phone emulator: nothing covers the stage. (The 667x375 and 1920x1080 shots still need the emulator switched to those devices.)
+![[GYM ARC/Screenshots/genetics_camera_phone.jpg]]
+- World signs ([[2026-10-14 GYM ARC Prompt - World signs and stats overlay]], [[GYM ARC - Bug - World signs in your face]]): spawn view clear; the arm wrestling table has a small gold label.
+![[GYM ARC/Screenshots/world_signs_spawn_phone.jpg]]
+![[GYM ARC/Screenshots/world_signs_arm_table_phone.jpg]]
+- Stats lines ([[GYM ARC - Bug - Stats lines pointed at the wrong places]]): before, then standing still and walking.
+![[GYM ARC/Screenshots/stats_overlay_before.jpg]]
+![[GYM ARC/Screenshots/stats_overlay_phone_still.jpg]]
+![[GYM ARC/Screenshots/stats_overlay_phone_walking.jpg]]

@@ -46,3 +46,6 @@ Small phone:
 
 ## Taller frame note (14 Oct, later)
 Above the starting height a small gray line under the big %: "Taller frame - more muscle to fill". After every Growth Spurt a small message once: "You grew! Your muscles have more room to grow."
+
+## Stats labels lines (14 Oct)
+Each line ends exactly on its body part every frame, on the muscle's surface. Shoulders, Chest and Arms on the left; Back, Core and Legs on the right; a part on the far side of the body gets a faded line. Standing still with the labels open turns you to face the camera. See [[GYM ARC - Bug - Stats lines pointed at the wrong places]].

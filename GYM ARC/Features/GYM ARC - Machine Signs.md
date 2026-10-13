@@ -31,3 +31,6 @@ A floating glass diamond above the nearest machine that tells you what it trains
 ![[GYM ARC/Screenshots/sign_diamond_flat_bench_side.jpg]]
 ![[GYM ARC/Screenshots/sign_angle_below.jpg]]
 ![[GYM ARC/Screenshots/gym_middle_only_bangs.jpg]]
+
+## Signs rules (14 Oct)
+The diamond sign is only for machines, within 15 studs, and fades when you sit. The arm wrestling tables get a small gold name label instead. Every world sign: sized in studs, never through walls, hidden beyond 40 studs. See [[GYM ARC - Bug - World signs in your face]].

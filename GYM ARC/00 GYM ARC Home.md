@@ -193,6 +193,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Stage mesh downloads sometimes failed]]
 - [[GYM ARC - Bug - Stats coach line and panel overlapped]]
 - [[GYM ARC - Bug - Stats labels hidden behind walls]]
+- [[GYM ARC - Bug - Stats lines pointed at the wrong places]]
 - [[GYM ARC - Bug - Still saving from another server kick]]
 - [[GYM ARC - Bug - Stray character stopped the server]]
 - [[GYM ARC - Bug - Stray lines inside panels]]
@@ -213,6 +214,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Two title tags on one head]]
 - [[GYM ARC - Bug - Upper traps never grew]]
 - [[GYM ARC - Bug - Wardrobe tops broken on the muscle body]]
+- [[GYM ARC - Bug - World signs in your face]]
 - [[GYM ARC - Bug - Zigzag on the upper arm seam]]
 - [[GYM ARC - Bugs index]]
 

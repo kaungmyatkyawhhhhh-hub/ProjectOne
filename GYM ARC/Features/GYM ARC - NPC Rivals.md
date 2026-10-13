@@ -40,3 +40,6 @@ One named rival per gym, each with a challenge to beat. Built 13 Oct (new featur
 ![[GYM ARC/Screenshots/rival_card_dante.jpg]]
 ![[GYM ARC/Screenshots/rival_win_benny.jpg]]
 ![[GYM ARC/Screenshots/rival_card_phone_layout.jpg]]
+
+## RIVAL tag (14 Oct)
+The small RIVAL tag over a rival only shows while you have accepted his challenge.
