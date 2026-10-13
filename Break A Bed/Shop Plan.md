@@ -55,15 +55,15 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 - **Instant Break: R$9.** Breaks the bed you're stuck on once, paying its Cash and marking it completed. It's shown on the same "Need X Strength" prompt.
 - **Change (owner, 2026-10-13): BREAK IT only, priced by the gap.** The "Need more Strength?" box with the x3 boost is removed. It no longer pops up just from standing near a locked bed.
   - **When it shows:** only when the player **activates the bed's ProximityPrompt** (holds or presses E, or taps it on phones) on a bed they're too weak for. A single green **BREAK IT ⏣ X** button pops up above the bottom HUD, showing "Need 1M Strength" small above it. It hides after 5 s or when they walk away. The same bed shows it at most once every 20 s.
-  - **Price grows with the gap.** Gap = the bed's Strength need ÷ the player's Strength. Each tier is its own developer product, because a product's price is fixed on Roblox:
+  - **Price grows with the gap (owner, corrected).** Gap = **how many beds ahead** the bed is, compared with the best bed the player can break now. For example, if you can break bed 4 and you try bed 5, the gap is 1. Each tier is its own developer product, because a product's price is fixed on Roblox:
 
     | Gap | Price | Product |
     |---|---|---|
-    | up to 2x | R$9 | INSTANT BREAK (existing, 3718128950) |
-    | 2x–5x | R$19 | INSTANT BREAK 2 (3718323231) |
-    | 5x–20x | R$39 | INSTANT BREAK 3 (3718323262) |
-    | 20x–100x | R$79 | INSTANT BREAK 4 (3718323276) |
-    | over 100x | R$149 | INSTANT BREAK 5 (3718323302) |
+    | 1 bed ahead | R$9 | INSTANT BREAK (existing, 3718128950) |
+    | 2 beds ahead | R$19 | INSTANT BREAK 2 (3718323231) |
+    | 3–4 beds ahead | R$39 | INSTANT BREAK 3 (3718323262) |
+    | 5–7 beds ahead | R$79 | INSTANT BREAK 4 (3718323276) |
+    | 8+ beds ahead | R$149 | INSTANT BREAK 5 (3718323302) |
 
   - **The reward stays the same:** it breaks that bed once, pays its Cash and marks it completed. The server works out the tier again at purchase time, so the price can't be cheated.
   - **Created by the owner (2026-10-13)** with Managed pricing on, so Roblox may change prices. The button must show the live price from `MarketplaceService:GetProductInfo` (cached), not a hard-coded number. INSTANT BREAK 2 still needs an icon.
