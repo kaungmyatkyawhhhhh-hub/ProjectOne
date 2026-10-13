@@ -53,3 +53,5 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_06_trainers_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_06_trainers_following_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_06_trainer_follower_red_cap.jpg]]
+- Smoothie bar window (mockup 09) done: drink tiles with a colored icon, effect and time, green coin price; drinks not sold at that stall show where to get them.
+![[GYM ARC/Screenshots/ui_compare_v2_09_smoothie_bar_phone.jpg]]
