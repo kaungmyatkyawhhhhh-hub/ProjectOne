@@ -186,6 +186,11 @@ Seen from spawn, everything is squeezed into the back corner while the big paved
 - **Training floor:** the 17 posts are packed so tight that their name/price signs overlap. Spread them out (a bigger floor or more space between rows) so each sign reads on its own from spawn.
 - **No overlapping signs** from the spawn view. Every big title (TRAINING, VIP POST, Glove Shop, INVITE FRIEND, the leaderboards) must be readable without another one in front of it.
 - Keep the like-goal board and the leaderboards where players see them on the way.
+- **Problem after the move (owner's screenshot, 2026-10-13):** the Invite Friend stand was put right in front of the **WALK SPEED** and **TRAINING SPEED** upgrade boards and their green pads, blocking them. Rules for placing anything on the plaza:
+  - Keep **at least 10 studs clear** in front of every upgrade board and its pad, the aura crate, the VIP Lounge door, the bed path arch and the leaderboards.
+  - Don't place anything on the main walkway from spawn.
+  - Spawn should have a clear view of each stand, board and crate. Nothing stands in front of another.
+  - Before moving anything, Claude Code makes a top-down list of every object on the plaza (name, position, size) and picks free spots from it. Then it takes a screenshot from spawn and one from above.
 
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
