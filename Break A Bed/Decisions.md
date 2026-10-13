@@ -163,3 +163,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: Glove Shop pad = a plain flat glowing disc like a typical simulator pad (owner), replacing the solid navy version. #break-a-bed
 - 2026-10-13: stand pads = big see-through tinted circle with a thick glowing neon ring (SELL-stall look); cyan for Glove Shop, yellow for Invite Friend. Invite figure = rongstrix's avatar (userId 1834504124). #break-a-bed
 - 2026-10-13: game page showed "Ages 16+" → under-16 players can't join. Top priority: make the game all-ages (fix the questionnaire/age setting truthfully). #break-a-bed
+- 2026-10-13: the 16+ limit lifts after 250+ engaged players (Roblox rule for new games). Goal: reach 250 engaged players fast, then the ads can bring kids. #break-a-bed
