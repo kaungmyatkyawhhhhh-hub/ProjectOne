@@ -31,3 +31,22 @@ The first, flat-cartoon versions are in git history.
 - Day 1 retention showed **0%** on 2026-10-12. The game had only been out about 2 days, so the number may not be ready yet.
 
 Next idea: real screenshots from the game with the title on top usually do better than drawn art.
+
+## Ads Manager numbers (seen 2026-10-13, data only up to Oct 11 because of the 48 h delay)
+Campaign `BAB_Plays_AllPlayers_Oct`, still on and "Learning".
+- **Overall:** 13.92 Ad Credit spent, **102.9K impressions**, CTR **1.7%**, **1,771 clicks → 150 plays** (only **8.5%** of clicks became plays), 18.8 h of playtime (about **7.5 min per ad player**).
+- **Creatives:**
+
+  | Creative | Spent | Impressions | CTR |
+  |---|---|---|---|
+  | Halloween ("Break a bed!" + Halloween event) | 0.25 | 1,618 | 1.5% |
+  | "Train to Break!" | 7.32 | 46,844 | 1.8% |
+  | "Can you break it?" | 2.28 | 17,899 | **1.9%** |
+  | "Break a bed!" (blue) | 2.84 | 22,938 | 1.7% |
+
+- **Weak spot:** clicks to plays. 9 out of 10 people who click don't start playing. Things to check:
+  - Is the content maturity questionnaire done? Unrated games can be blocked for some players.
+  - Does the game page's first thumbnail match the ads?
+  - Some plays may still be "unvalidated" because of the delay.
+- Leave all creatives on while it's "Learning". Judge them again after Oct 15 with more data.
+
