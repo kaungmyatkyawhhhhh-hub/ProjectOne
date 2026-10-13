@@ -375,6 +375,37 @@ Beach Road, avenues, side streets, plaza, park, parking, sports court, smoothie 
 beach gym, posing stage, boardwalks, sea, and 4 lawns with tree/flower counts. Used by the Town builder and the skate
 rules.
 
+## Config/PosingComp
+File: `src/ReplicatedStorage/Shared/Config/PosingComp.luau` (new 13 Oct, [[GYM ARC - Posing Competition]])
+
+| Setting | Value | What it does |
+|---|---|---|
+| Interval | 720 s | Time from one round's start to the next |
+| FirstDelay | 180 s | Wait after a server starts before the first countdown |
+| Countdown | 60 s | "Starts in" countdown before a round |
+| MaxPlayers | 6 | Most contestants on the stage |
+| MinPlayers / NpcFillTo | 2 / 3 | Fewer contestants than 2: NPCs fill up to 3 |
+| StageMargin | 1 stud | Room around the stage that still counts as on it |
+| Poses | Front double biceps, Lat spread, Most muscular | The three poses of a round |
+| Intro | 4 s | Before the first pose |
+| CueTime | 2.4 s | How long the ring takes to close |
+| Perfect / Good | 0.2 s / 0.55 s | Tap windows either side of the ring closing |
+| LateLimit | 1.2 s | A tap later than this is "Missed" (auto pose) |
+| HoldTime | 3 s | From the ring closing to the judges' score |
+| ScoreShow / Gap | 2.5 s / 1.5 s | Cards up / pause before the next pose |
+| MaxPing | 0.3 s | Network delay forgiven on a tap |
+| Timing values | Perfect 1, Good 0.6, Late 0.15, Missed 0 | Timing part of the score |
+| HoldLost | 0.5 | Timing x this if the pose was let go early |
+| Weights | Size 0.55, Balance 0.25, Timing 0.2 | Score of one pose |
+| SizeFull | 1 | Average muscle look that counts as full size |
+| BalanceZero | 0.25 | Smallest group / biggest group at or under this = no balance |
+| VoteRange | 150 studs | Who gets the vote panel |
+| VotePoints / VoteMax | 0.5 / 2 | Points per vote / most points from votes |
+| PodiumTime | 10 s | Top 3 on the podium |
+| Coins | 150 / 90 / 50 | 1st / 2nd / 3rd |
+| EnterCoins | 10 | Everyone else who finished |
+| Npcs | 5 bodybuilders | Name, skin, shorts color, share (how grown), skill (timing range) |
+
 ## Planned (not built yet)
 From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM ARC Prompt - New features run]]:
 

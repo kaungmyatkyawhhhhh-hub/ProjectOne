@@ -14,8 +14,10 @@ Background music per area and satisfying weight sounds. The owner picks every so
 - **Music:** low chill background tracks that loop; area music for the starter gym and the pro gym (different tracks). Volume slider in Settings.
 - **Effects:** plate clank at lockout (pitch varies, deeper on heavy tiers), rep tick, soft breath on heavy reps, set chime, level up, title unlocked, tier unlocked, out of stamina, genetics reveal sounds, spotting sounds.
 - **Rules today:** no grunts or screams; sounds are played through sound groups (Gameplay, UI, Music) with balanced volumes.
-- **Placeholders:** many sounds reuse other clips until the owner picks ids (see "Every sound slot" below).
-- **Missing sounds:** skateboard rolling, grinding, sliding doors, store purchase, mirror opening. Area music only has Starter and Pro.
+- **Sound ids (13 Oct):** at the owner's request Claude picked every placeholder and new slot, only from Roblox's licensed library (ProSoundEffects for effects, APM Music for music). Each is listed below; swap any id in `Config/Sounds`.
+- **Area music:** Starter, Pro, Beach (APM "Happy Island") and Town (APM "Maypole Summer"); SettingsClient picks the area from where you stand.
+- **Listen to these first (weak fits):** CrowdOoh (a crowd surge; no licensed "ooh" exists), RivalLose, DoorSlide (an elevator door), SkateGrind (a grind on concrete, not a rail).
+- **Picked but not wired into the game yet:** SkateRoll, SkateGrind, DoorSlide, StorePurchase, MirrorOpen.
 
 ## Where it lives
 - `Config/Sounds`, `Shared/Audio`, `SettingsClient`
@@ -29,121 +31,68 @@ Background music per area and satisfying weight sounds. The owner picks every so
 
 ## Every sound slot
 
-**You pick every sound id.** All sounds live in one place: `ReplicatedStorage > Shared > Config > Sounds` (repo copy:
-`C:\Users\kaung\ClaudeOne\src\ReplicatedStorage\Shared\Config\Sounds.luau`). To change a sound, swap the number in its
-`ids` list (several ids = one picked at random each time). The clips in there now are from Roblox's own licensed
-library (Pro Sound Effects, APM Music), picked as stand-ins. Many slots reuse the same few clips at a different pitch
-until you choose real ones. No grunts anywhere.
+Generated from `Config/Sounds` on 2026-10-13. PSE = ProSoundEffects, APM = APM Music.
 
-The one sound outside Config: the loading screen's plate clank (`ReplicatedFirst > LoadingScreen`) uses the Clank id
-9116750726 directly. If you change Clank, change it there too.
-
-Volume mix (in `Shared/Audio`): Gameplay 0.9, UI 0.55, Music 0.22, times the player's music / effects settings.
-
-Status key:
-- **Filled** = has its own clip (still a stand-in you can replace).
-- **Placeholder** = reuses a clip from another slot (pitched up or down) until you pick a real one.
-- **Unused** = the slot exists but nothing plays it right now.
-
-### Lifting (3D, heard at the machine)
-
-| Slot | SoundId | Used for | Status |
-|---|---|---|---|
-| Clank | 9116750726, 9116751108 | Plates clank at lockout | Filled |
-| PlateKnock | 9116717455, 9116717780 | Plates jiggle on heavy reps | Filled |
-| BarRattle | 9113757391 | Bar picked up / set down | Filled |
-| PlateSlide | 9117681302 | Plates slide on/off when the weight changes | Filled |
-| FloorThud | 9113479635 | Rubber floor thud | Filled |
-| Breath | 9113585730, 9113586280 | Soft exhale on heavy tiers / low stamina only | Filled |
-
-### Training feedback
-
-| Slot | SoundId | Used for | Status |
-|---|---|---|---|
-| RepTick | 9114212934 | Soft tick on each rep | Placeholder (same clip as Click) |
-| SetComplete | 9116163687 | Chime every 10 reps | Filled |
-| GrowthSpurt | 9113421788 | Growth Spurt moment | Filled |
-| LevelUp | 9116163687 | A muscle levels up | Placeholder (SetComplete clip, higher) |
-| Maxed | 9113421788 | A muscle hits its cap | Placeholder (GrowthSpurt clip); Unused (no level cap now) |
-| TitleUnlocked | 9113421788 | New title | Placeholder (GrowthSpurt clip) |
-| TierUnlocked | 9116750726, 9116751108 | Heavier plates bought | Placeholder (Clank clip, lower) |
-| OutOfStamina | 9113585730, 9113586280 | Tapped with no stamina left | Placeholder (Breath clip) |
-| PumpFull | 9116163687 | PUMP meter full, PUMPED starts | Placeholder (SetComplete clip, high) |
-| BigRep | 9116750726, 9116751108 | A BIG REP | Placeholder (Clank clip, deep) |
-| PersonalRecord | 9113421788 | NEW PR banner | Placeholder (GrowthSpurt clip) |
-| Grew | 9119388384 | "You grew" moment | Placeholder (GeneticsThud clip) |
-| CrowdOoh | 9119388384 | Crowd "ooh" when a pose hits (3D) | Placeholder (GeneticsThud clip, higher) |
-
-### Spotting
-
-| Slot | SoundId | Used for | Status |
-|---|---|---|---|
-| SpotPush | 9114212934 | Every push (pitch climbs with the combo) | Placeholder (Click clip) |
-| SpotBoostOn | 9116163687 | You start counting as clicking | Placeholder (SetComplete clip) |
-| SpotCombo | 9116163687 | Combo 10 / 25 / 50 / 100 | Placeholder (SetComplete clip) |
-| SpotAssist | 9116717455, 9116717780 | Lifter's rep landed while you pushed | Placeholder (PlateKnock clip) |
-| SpotPayout | 9116163687 | Spotting coins paid | Placeholder (SetComplete clip) |
-
-### Interface
-
-| Slot | SoundId | Used for | Status |
-|---|---|---|---|
-| Click | 9114212934 | Every button press | Placeholder (listed in PROGRESS as yours to pick) |
-| Whoosh | 9125715121 | Menus and panels opening | Filled |
-
-### Genetics reveal
-
-| Slot | SoundId | Used for | Status |
-|---|---|---|---|
-| GeneticsClank | 9116750726 | Each plate slamming on | Placeholder (Clank clip) |
-| GeneticsThud | 9119388384 | Overall plate drops in | Filled |
-| GeneticsThudLow | 9113479635 | Low layer under the overall plate | Filled (FloorThud clip) |
-| GeneticsShimmer | 9116163687 | S plate shine | Placeholder (SetComplete clip) |
-| ChalkPuff | 9125964822 | S-grade chalk puff | Filled; Unused |
-| GeneticsSpin | 9125715121 | Old reveal: plate spins in | Placeholder; Unused |
-| GeneticsFlip | 9116717455, 9116717780 | Old reveal: plate flips | Placeholder; Unused |
-| GeneticsPop | 9114212934 | Old reveal: C / D pop | Placeholder; Unused |
-| GeneticsBurst | 9113421788 | Old reveal: A burst | Placeholder; Unused |
-| GeneticsDrumRoll | 9113757391 | Old reveal: S drum roll | Placeholder; Unused |
-| GeneticsExplode | 9119388384 | Old reveal: S explodes | Placeholder; Unused |
-| GeneticsBlessed | 9113421788 | Old reveal: BLESSED banner | Placeholder; Unused |
-
-### Music
-
-| Slot | SoundId | Used for | Status |
-|---|---|---|---|
-| Music | 9043990443, 9043990341 | Background playlist (APM "Lovely Sunrise" C and A) | Filled |
-| AreaMusic.Starter | 9043990443 | Starter gym | Filled |
-| AreaMusic.Pro | 9043990341 | Pro gym | Filled |
-| AreaMusic (Beach, Town) | none | No own track; uses the main playlist | Empty |
-
-### Totals
-- 41 slots: 38 sound effects, the Music playlist and 2 area music lists.
-- 15 filled with their own clip, 26 placeholders reusing another clip, 0 completely empty in Config.
-- 9 slots are unused right now (Maxed, ChalkPuff and the 7 old genetics reveal slots).
-- Only 17 different sound ids are used in the whole game (15 effects, 2 music tracks).
-
-### No sound yet (from PROGRESS "Waiting on you")
-These have no slot at all yet; tell Claude the id and it adds the slot:
-- Skateboard rolling
-- Grinding on a rail
-- Sliding doors
-- Store purchase
-- Mirror opening
-- Area music for the beach gym and the town
-
-### Planned new slots (not built yet)
-From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] (grunts and screams become allowed there) and
-[[2026-10-13 GYM ARC Prompt - New features run]]. Both prompts say to leave the SoundId fields empty for you to fill.
-
-| Planned slot | Used for |
-|---|---|
-| Config.Music.Tracks | Hardtekk playlist replacing the chill music (volume 0.35) |
-| Config.Music.Areas (Town, StarterGym, ProGym, BeachGym) | Per-area tracks, 1.5 s cross-fade |
-| Config.Screams.Normal | Lift screams on heavy reps / last rep of a set (3D, never the same twice in a row) |
-| Config.Screams.Big | Big screams on a new PR, arm wrestling or posing win |
-| Posing competition sounds | Countdown, judges, podium |
-| Arm wrestling sounds | Countdown, slam, win |
-| Smoothie bar sounds | Buying / drinking |
-| Daily quest / streak sounds | Claim |
-| Pets, day/night, photo mode | Any new effects |
+| Slot | SoundId | What it's for |
+|---|---|---|
+| Clank | 9116750726, 9116751108 | Metal Plate Impact, Manhole Hit 1/2: plates at lockout |
+| PlateKnock | 9116717455, 9116717780 | Metal Knocks on Metal Plate 1/4: plates jiggling on heavy reps |
+| BarRattle | 9113757391 | Chain Hit Metal, Light Sliding: bar picked up / set down |
+| PlateSlide | 9117681302 | Sliding Legs of Metal Tripod: plates on/off when the weight changes |
+| FloorThud | 9113479635 | Body Falls on Carpet, low thuddy: rubber floor thud |
+| Breath | 9113585730, 9113586280 | Breath Exhale 11/20: heavy tiers / low stamina only |
+| RepTick | 9114212934 | Button click: soft tick on each rep |
+| SetComplete | 9116163687 | Key Dings, light metal clinking: every 10 reps |
+| GrowthSpurt | 9113421788 | Bell Rings, resonant: Growth Spurt moment |
+| LevelUp | 9126073001 | PSE Synth Sparkle Bell Ding 4: a muscle levels up |
+| Maxed | 9126073302 | PSE Synth Sparkle Bell Ding 2, a bit higher: a muscle hits its level cap |
+| TitleUnlocked | 9116394876 | PSE Magic Glows Chiming Hits 2: a new title |
+| TierUnlocked | 9116684733 | PSE Metal Impacts 1: heavier plates bought |
+| OutOfStamina | 9117018751 | PSE Mouth Poof, burst of air: tapped with no stamina left (no voice) |
+| PumpFull | 9126073011 | PSE Synth Sparkle Bell Ding 3: the PUMP meter fills, PUMPED starts |
+| BigRep | 1837830196 | APM BOOM Deep Boom 02: a BIG REP |
+| PersonalRecord | 9039636793 | APM Stargazing (sting c): NEW PR banner |
+| Grew | 9125807054 | PSE Rising Whoosh Swooshing In 3: the 'you grew' moment |
+| CrowdOoh | 9120974378 | PSE Wrestling Crowd 3, a crowd surge (there is no licensed 'ooh'): a pose hits |
+| SpotPush | 9113885761 | PSE Computer Track Ball 57 click: every push; the pitch climbs with the combo |
+| SpotBoostOn | 9126072698 | PSE Synth Sparkle Bell Ding 2: you start counting as clicking |
+| SpotCombo | 9126073318 | PSE Synth Sparkle Bell Ding 1, higher: combo 10 / 25 / 50 / 100 |
+| SpotAssist | 9113912086 | PSE Cooking Pot 29, light metal knock: the lifter's rep landed while you pushed |
+| SpotPayout | 9119217702 | PSE Slot Machine 7, coins: spotting coins paid out |
+| Click | 9114212934 | Button click: every button press |
+| Whoosh | 9125715121 | Robe Swish, cloth flap: menus and panels opening |
+| GeneticsClank | 9116750726 | Metal Plate Impact, Manhole Hit 1: each plate slamming on |
+| GeneticsThud | 9119388384 | Distant Metal Booms, deep soft impact: overall plate |
+| GeneticsThudLow | 9113479635 | Body Falls on Carpet: low layer under the overall plate |
+| ChalkPuff | 9125964822 | Snow breaks into powder: S-grade chalk puff |
+| GeneticsSpin | 9126228629 | PSE Whoosh Fast Camera In And Out 1: a plate spins in |
+| GeneticsFlip | 9119239488 | PSE Small Pipe Wrench On Metal Pipe 7: the plate flips |
+| GeneticsPop | 9117183955 | PSE Comic Pops (Pacifier 3): C / D small pop |
+| GeneticsShimmer | 9116383749 | PSE Magical Wing Flutter 5: B gold shimmer |
+| GeneticsBurst | 9116394545 | PSE Magic Glows Chiming Hits 1: A blue burst |
+| GeneticsDrumRoll | 1840444182 | APM Drum Rolls (A): S build-up |
+| GeneticsExplode | 1837830667 | APM BOOM Mid Boom 07: S explodes |
+| GeneticsBlessed | 9039637427 | APM Full of Wonder (sting a): the BLESSED banner (2+ S) |
+| PosingStart | 9042409054 | APM Day Of The Election Sting 2, fanfare: the round's countdown starts (server-wide) |
+| PosingCue | 9113936601 | PSE Cordless Phone beep 8: the timing ring closes (tap now) |
+| PosingScore | 9125574158 | PSE Gavel Hit Wood 4: the judges raise their cards |
+| PosingWin | 9113137529 | PSE Applause Nightclub 1: the winner on the podium |
+| QuestComplete | 1841173364 | APM In Toytown (a): a daily quest is done |
+| QuestClaim | 9113849579 | PSE Coin Throws 1: quest reward claimed |
+| StreakClaim | 9039566006 | APM Neon Nights (sting f): daily streak claimed |
+| ArmCountdown | 9113939659 | PSE Cordless Phone beep 45: 3-2-1 |
+| ArmGo | 9117264449 | PSE Referee Whistle 3: GO |
+| ArmTap | 9113885617 | PSE Computer Track Ball 52 click: each tap |
+| ArmSlam | 9119912410 | PSE Wood Table Impact 2: the winner slams |
+| ShopBuy | 9113728049 | PSE Cash Register 2: bought at the smoothie bar |
+| DrinkShake | 9114889936 | PSE Juice Box sip 6: drinking a shake |
+| RivalWin | 1846248237 | APM Five Card Tricks 'Win': you beat a rival |
+| RivalLose | 101507156781402 | APM Glissando down: lost to a rival |
+| PetCheer | 9125994778 | PSE Squeaky Toy 12: your pet cheers a set |
+| CameraShutter | 9113678227 | PSE Camera Shutter 1: photo mode |
+| SkateRoll | 9125955674 | PSE Skateboard Constant Rolling 1 (a loop; not wired yet) |
+| SkateGrind | 9125956838 | PSE Skateboard Tail Grinds 9 (not wired yet) |
+| DoorSlide | 9114307558 | PSE Elevator Door, the closest licensed slide (not wired yet) |
+| StorePurchase | 9126072697 | PSE Synth Sparkle Bell Ding 1: store purchase (not wired yet) |
+| MirrorOpen | 9116395179 | PSE Magic Glows Chiming Hits 6: the mirror opens (not wired yet) |
+| Music | 9043990443, 9043990341 | APM "Lovely Sunrise" C (underscore) and A (vinyl chillhop) |

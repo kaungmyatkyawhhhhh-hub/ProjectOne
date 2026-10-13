@@ -1,31 +1,41 @@
 ---
 date: 2026-10-13
 tags: [gymarc, feature]
-status: planned
+status: done
 ---
 # GYM ARC - Posing Competition
 
 Back to [[00 GYM ARC Home|GYM ARC Home]].
 
-Planned (new features prompt, task 1): a server-wide posing contest every few minutes, with judges, an audience vote and a podium. Not built yet.
+A posing contest on the beach stage every 12 minutes: three poses, judges' cards, an audience vote, a podium, coins, a title and the statue for the winner. Built 13 Oct (new features run, task 1).
 
-## How it works (as the prompt asks)
-- **Stage:** a raised stage in the town plaza (or by the statue) with 3 marked spots, spotlights and a simple scoreboard sign. No logos.
-- **Timing:** a round every `Config.PosingComp.Interval` (default 12 min). Server-wide note and countdown: "Posing Competition starts in 60s! Go to the stage!" with a waypoint arrow.
-- **Joining:** walk onto the stage before the countdown ends. Max 6 players. Fewer than 2 = NPC bodybuilders fill in so solo players can play.
-- **Round:** 3 existing poses (for example Front Double Biceps, Lat Spread, Most Muscular). Tap the pose button on screen within a short window; good timing gives a small bonus.
-- **Score:** muscle size (total look) + balance between groups + timing bonus (weights in Config). NPC judges show a 1-10 score card above each player after each pose.
-- **Audience vote:** players not on stage tap a contestant's name during the last pose for a small bonus. No voting for yourself.
-- **Results:** 1st / 2nd / 3rd on podium spots, coins, and the winner gets the title "Posing Champion" and is shown on the town statue until the next round.
-- **Leaving mid-round:** out, no reward, no errors.
-- Server decides scores, votes and rewards; rate limits on every new remote.
-- Also planned: a "Posing Wins" leaderboard, an "Enter a posing competition" daily quest, and a scream on a win (monetization prompt).
+## How it works
+- **Countdown:** every 12 minutes the whole server gets a 60 s countdown: a small banner at the top of the right column, a marker over the stage (with the distance) and an arrow on the screen while the stage is out of view.
+- **Joining:** stand on the stage when the countdown ends. Up to 6 contestants (closest to the middle first). Nobody lifting or skating joins.
+- **NPC bodybuilders:** with fewer than 2 contestants, NPCs fill up to 3 (Marco Vance, Jade Rivers, Theo Banks, Kai Summers, Nina Cruz), so a solo player can still compete.
+- **The round:** contestants stand on the taped marks and get the crowd's view of the stage. Three poses: Front double biceps, Lat spread, Most muscular. A ring closes on a big POSE button: tap when it closes (Space or gamepad A work too). The server times every tap (Perfect, Good, Late, Early, Missed). A missed tap still poses, with no timing bonus.
+- **Judges:** after each pose a card from 1 to 10 goes up above every contestant. Score = 55% muscle size + 25% balance between the groups + 20% timing.
+- **Audience vote:** players within 150 studs who are not on the stage get a vote panel during the last pose. Each vote adds 0.5 points (max 2). Nobody can vote for themselves.
+- **Results:** the top 3 stand on the podium for 10 s. Coins: 150 / 90 / 50, and 10 for everyone else who finished. A winning player gets the title "Posing Champion" and becomes the marble statue in the entrance hall (with their own muscles, plaque "Posing champion: name") until the next round. If an NPC wins, the statue goes back to the strongest lifter.
+- **Dropping out:** leaving the stage, resetting or leaving the game = out of the round, no reward.
+- **Scoreboard:** a screen beside the stage shows the countdown, the pose and the running totals, then the last results.
 
 ## Where it lives
-- Not built. Would reuse `Server/ShowOffService` (poses, judges, statue) and a new `Config.PosingComp`.
+- `Config/PosingComp` (every number), `Server/PosingCompService`, `PosingCompClient`
+- Stage pieces: `Workspace.Town.PosingStage.Feature_PosingComp` (marks, podium, scoreboard), built by `tools/builders/PosingComp`
+- Stats `posingWins` and `posingEntries`; the title in `Config/Titles`
+- Studio test switches: `TestPosingComp` (start now), `TestPosingCountdown` (seconds), `TestPosingWatch` (NPCs only, so you can vote)
+- Numbers: [[GYM ARC - Config values]]; sounds: [[GYM ARC - Music and Sounds]]
+
+## Not tested yet
+- Two real players (spotting each other's votes, two contestants), and the phone emulator.
 
 ## Related
-[[GYM ARC - Poses and Posing Stage]], [[GYM ARC - Leaderboards and Statue]], [[GYM ARC - Titles]], [[GYM ARC - Quests and Muscle of the Day]]
+[[GYM ARC - Poses and Posing Stage]], [[GYM ARC - Leaderboards and Statue]], [[GYM ARC - Titles]], [[2026-10-13 GYM ARC New features run]]
 
 ## Screenshots
-![[GYM ARC/Screenshots/s3_posing-stage_after.png]]
+![[GYM ARC/Screenshots/posing_countdown_banner_arrow.jpg]]
+![[GYM ARC/Screenshots/posing_3_contestants_score_cards.jpg]]
+![[GYM ARC/Screenshots/posing_vote_panel.jpg]]
+![[GYM ARC/Screenshots/posing_podium.jpg]]
+![[GYM ARC/Screenshots/posing_statue_champion.jpg]]
