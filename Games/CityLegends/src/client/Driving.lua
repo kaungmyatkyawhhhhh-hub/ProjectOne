@@ -562,12 +562,20 @@ local function setLights(s: State, on: boolean)
 	end
 end
 
+-- the engine starting brings the dash (needle sweep) and the lights on; stopping it turns them off
+local function setCarPower(s: State, on: boolean)
+	setClusterPower(s, on)
+	setLights(s, on)
+	remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn })
+end
+
 -- F / Q / E / P / T / L / Z / X / C
 local function carKey(s: State, key: Enum.KeyCode)
 	if key == Enum.KeyCode.F then
 		if s.engineOn then
 			s.engineOn = false
 			s.engine:setRunning(false)
+			setCarPower(s, false)
 			UI.toast("Engine off")
 		elseif s.cranking <= 0 then
 			s.cranking = 0.8
@@ -1148,6 +1156,9 @@ function Driving.attach(model: Model)
 	if s.engineOn then
 		Audio.engineStart()
 	else
+		setClusterPower(s, false) -- dark dash and lights until the engine starts
+		setLights(s, false)
+		remote("CarSignals"):FireServer({ blinker = "", lights = false })
 		UI.toast("Press F to start the engine")
 	end
 	UI.setIndicators(indicatorState(s))
@@ -1237,6 +1248,7 @@ function Driving.step(dt: number)
 		if s.cranking <= 0 and s.ignition then
 			s.engineOn = true
 			s.engine:setRunning(true)
+			setCarPower(s, true)
 			UI.setIndicators(indicatorState(s))
 		end
 	end

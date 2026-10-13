@@ -157,3 +157,4 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - The brakes bite in over a moment. The body sits on springs (dives, squats, leans and settles). In the cockpit the driver's head moves with the g-forces.
   - Sound (owner): a loud tyre screech pulling away hard (first ~12% of top speed, quieter with traction control on), on a launch, and a short chirp when a hard 1st-3rd gear shift kicks in. It's sound only, with no smoke. Wind noise for your own car starts at walking pace and roars at speed.
   - Launch control (automatic): hold the brake and floor it at a stop, the revs hold at about 60%, then let go of the brake to launch.
+  - Starting the engine (F) switches on the dash (with its needle sweep) and the headlights. Stopping it switches them off. Before the first start, the dash and lights are dark. L still toggles the lights while running.
