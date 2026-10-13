@@ -83,6 +83,13 @@ Every post gets its own model, punch effect and sound, so each new post feels li
     - **Pad:** a cyan glowing ring with a soft pulse and rising sparkles.
     - **Title:** "Glove Shop" floating above in big rounded white text with a blue gradient and a thick dark outline (same style as the reference).
   - It sits by the training area, visible from spawn.
+  - **Pad look (owner, 2026-10-13, from a "SELL" stall reference):**
+    - **Shape:** a **big flat circle** on the ground, about 1.5× the stall's width, so the stall stands at its back edge and the player walks into it from the front.
+    - **Edge:** a **thick glowing neon ring**, about 0.8 stud wide, bright cyan, with a soft glow bleeding outward.
+    - **Inside:** **see-through** with a light cyan tint (about 80% transparent), so the ground shows through.
+    - **How:** a thin flat `Cylinder` (or a flat part with a `SurfaceGui`) for the tinted fill, plus the ring as a glowing circle-outline image (`ImageLabel`, `LightInfluence` 0, high `Brightness`) or a Neon ring mesh. It sits just above the ground so it never flickers.
+    - **Movement:** a slow gentle pulse of the ring's brightness. When a player stands in it, it gets a bit brighter.
+    - The whole circle is the touch sensor (as above).
 
 ## 4. Bed Mastery (a reason to re-break beds)
 - Each bed has **3 mastery stars**: break it 10 / 50 / 200 times.
