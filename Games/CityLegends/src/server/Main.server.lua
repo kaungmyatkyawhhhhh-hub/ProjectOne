@@ -42,6 +42,7 @@ local Crash: RemoteEvent = remote("RemoteEvent", "Crash")
 local Earned: RemoteEvent = remote("RemoteEvent", "Earned")
 local Progress: RemoteEvent = remote("RemoteEvent", "Progress") -- server -> client XP / level updates
 local ClaimDaily: RemoteFunction = remote("RemoteFunction", "ClaimDaily")
+local SaveSettings: RemoteEvent = remote("RemoteEvent", "SaveSettings") -- client -> server: speed units, gearbox
 remotes.Parent = ReplicatedStorage
 
 local playerCars = Instance.new("Folder")
@@ -243,6 +244,10 @@ SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)
 		return
 	end
 	spawnFor(player, carId)
+end)
+
+SaveSettings.OnServerEvent:Connect(function(player: Player, raw: any)
+	PlayerData.setSettings(player, raw) -- kept with the profile, saved with it
 end)
 
 DespawnCar.OnServerEvent:Connect(function(player: Player)

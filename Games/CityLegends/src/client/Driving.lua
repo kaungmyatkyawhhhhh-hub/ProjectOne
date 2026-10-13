@@ -13,6 +13,10 @@
 	  * drive the camera (interior cockpit or chase) with speed-based FOV,
 	    shake and blur
 	  * update the HUD + the live gauge cluster on the dashboard
+	Car controls (keyboard): J ignition, F start / stop the engine, Q / E shift down / up (the
+	gearbox turns manual on the first shift, or from Settings), Left Shift clutch, P handbrake,
+	T traction control, L lights, Z / X / C left blinker / hazards / right blinker, V camera.
+	Touch and gamepad players start with the engine running and an automatic gearbox.
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -39,6 +43,10 @@ local camera = workspace.CurrentCamera
 local Driving = {}
 Driving.cameraMode = "Chase" -- "Chase" | "Interior"
 Driving.inputEnabled = true
+Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings; Q / E switch to manual too)
+Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
+Driving.onGearboxChanged = nil :: ((string) -> ())?
+local GEARS = 7
 
 type LocalArm = {
 	upper: BasePart, -- the whole arm when fore is nil (R6)
@@ -121,6 +129,22 @@ type State = {
 	throttleIn: number,
 	pops: number,
 	popTimer: number,
+	-- car controls
+	ignition: boolean,
+	engineOn: boolean,
+	cranking: number, -- seconds left of the starter turning the engine over
+	manual: boolean,
+	mgear: number, -- manual gear: -1 reverse, 0 neutral, 1..GEARS
+	clutch: boolean,
+	freeRpm: number, -- revs while the clutch is in or in neutral
+	launch: number, -- seconds left of a clutch-drop launch
+	parkBrake: boolean,
+	tc: boolean,
+	lightsOn: boolean,
+	blinker: string, -- "" | "L" | "R" | "H"
+	blinkT: number,
+	blinkLights: { L: { PointLight }, R: { PointLight } },
+	dashPanel: BasePart?,
 }
 
 local state: State? = nil
@@ -136,13 +160,14 @@ end
 ---------------------------------------------------------------------
 -- Input
 ---------------------------------------------------------------------
-local function readInput(): (number, number, number, boolean)
+local function readInput(): (number, number, number, boolean, boolean)
 	if not Driving.inputEnabled or UI.isGarageOpen() then
-		return 0, 0, 0, false
+		return 0, 0, 0, false, false
 	end
 	local throttle, brake, steer = 0, 0, 0
-	local handbrake = false
+	local handbrake, clutch = false, false
 	if UserInputService:GetFocusedTextBox() == nil then
+		clutch = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
 		if UserInputService:IsKeyDown(Enum.KeyCode.W) or UserInputService:IsKeyDown(Enum.KeyCode.Up) then
 			throttle = 1
 		end
@@ -178,7 +203,7 @@ local function readInput(): (number, number, number, boolean)
 	brake = math.max(brake, UI.touch.brake)
 	steer += UI.touch.steer
 	handbrake = handbrake or UI.touch.handbrake
-	return throttle, brake, math.clamp(steer, -1, 1), handbrake
+	return throttle, brake, math.clamp(steer, -1, 1), handbrake, clutch
 end
 
 ---------------------------------------------------------------------
@@ -228,7 +253,7 @@ local function buildGauges(model: Model): (TextLabel?, TextLabel?, Frame?)
 	unit.Font = Enum.Font.GothamBold
 	unit.TextScaled = true
 	unit.TextColor3 = Config.Theme.SubText
-	unit.Text = "MPH"
+	unit.Text = if Driving.units == "kmh" then "KM/H" else "MPH"
 	unit.Parent = bg
 	local barBack = Instance.new("Frame")
 	barBack.Position = UDim2.fromScale(0.05, 0.84)
@@ -399,6 +424,107 @@ function Driving.reset()
 	s.yaw = yawFromLook(cf.LookVector)
 	s.vel = Vector3.zero
 	s.lastCommand = Vector3.zero
+end
+
+-- the live cluster on the dashboard: off with the ignition, and built again (needle sweep and all)
+-- when it comes on or the speed units change
+local function setClusterPower(s: State, on: boolean)
+	local panel = s.dashPanel
+	if not panel then
+		return
+	end
+	local old = panel:FindFirstChild("Gauges")
+	if old then
+		old:Destroy()
+	end
+	s.dashUpdate = nil
+	if on then
+		DashGauges.setUnits(Driving.units)
+		local ok, upd = pcall(DashGauges.build, panel)
+		s.dashUpdate = if ok then upd else nil
+	end
+end
+
+local function indicatorState(s: State): { [string]: any }
+	return {
+		ignition = s.ignition,
+		engine = s.engineOn,
+		manual = s.manual,
+		park = s.parkBrake,
+		tc = s.tc,
+		lights = s.lightsOn,
+		blinker = s.blinker,
+	}
+end
+
+local function setLights(s: State, on: boolean)
+	s.lightsOn = on
+	for _, d in s.model:GetDescendants() do
+		if d:IsA("SpotLight") or (d:IsA("SurfaceLight") and d.Parent and d.Parent.Name:lower():find("head")) then
+			d.Enabled = on
+		end
+	end
+end
+
+-- J / F / Q / E / P / T / L / Z / X / C
+local function carKey(s: State, key: Enum.KeyCode)
+	if key == Enum.KeyCode.J then
+		s.ignition = not s.ignition
+		if not s.ignition and s.engineOn then
+			s.engineOn = false
+			s.engine:setRunning(false)
+		end
+		s.cranking = 0
+		setClusterPower(s, s.ignition)
+		UI.toast(if s.ignition then "Ignition on" else "Ignition off")
+	elseif key == Enum.KeyCode.F then
+		if s.engineOn then
+			s.engineOn = false
+			s.engine:setRunning(false)
+			UI.toast("Engine off")
+		elseif not s.ignition then
+			UI.toast("Turn the ignition on first (J)", Config.Theme.Warning)
+		elseif s.cranking <= 0 then
+			s.cranking = 0.8
+			Audio.engineStart()
+		end
+	elseif key == Enum.KeyCode.E or key == Enum.KeyCode.Q then
+		if not s.manual then
+			s.manual = true
+			s.mgear = tonumber(s.gear) or (if s.gear == "R" then -1 else 0)
+			Driving.gearbox = "Manual"
+			if Driving.onGearboxChanged then
+				Driving.onGearboxChanged("Manual")
+			end
+		end
+		local fwdSpeed = s.vel:Dot(forwardFromYaw(s.yaw))
+		local before = s.mgear
+		if key == Enum.KeyCode.E then
+			s.mgear = math.min(s.mgear + 1, GEARS)
+		else
+			-- into reverse only when (nearly) stopped
+			s.mgear = math.max(s.mgear - 1, if fwdSpeed > 4 then 0 else -1)
+		end
+		if s.mgear ~= before and s.mgear <= 0 then
+			UI.toast(if s.mgear < 0 then "Reverse" else "Neutral")
+		end
+	elseif key == Enum.KeyCode.P then
+		s.parkBrake = not s.parkBrake
+		UI.toast(if s.parkBrake then "Handbrake on" else "Handbrake off")
+	elseif key == Enum.KeyCode.T then
+		s.tc = not s.tc
+		UI.toast(if s.tc then "Traction control on" else "Traction control off", if s.tc then nil else Config.Theme.Warning)
+	elseif key == Enum.KeyCode.L then
+		setLights(s, not s.lightsOn)
+		UI.toast(if s.lightsOn then "Lights on" else "Lights off")
+	elseif key == Enum.KeyCode.Z or key == Enum.KeyCode.X or key == Enum.KeyCode.C then
+		local want = if key == Enum.KeyCode.Z then "L" elseif key == Enum.KeyCode.C then "R" else "H"
+		s.blinker = if s.blinker == want then "" else want
+		s.blinkT = 0
+	else
+		return
+	end
+	UI.setIndicators(indicatorState(s))
 end
 
 function Driving.attach(model: Model)
@@ -731,6 +857,32 @@ function Driving.attach(model: Model)
 		end
 	end
 
+	-- keyboard players start the car themselves (J, then F); touch and gamepad start running
+	local autoStart = UI.isTouch or not UserInputService.KeyboardEnabled
+	-- blinker lights at the four corners (seen by this player only)
+	local blinkLights = { L = {} :: { PointLight }, R = {} :: { PointLight } }
+	do
+		local halfW = (model:GetAttribute("Width") :: number) / 2
+		local reach = dims.wb * 0.78
+		for _, side in { "L", "R" } do
+			for _, z in { -reach, reach } do
+				local att = Instance.new("Attachment")
+				att.Name = "Blinker"
+				att.Position = Vector3.new(if side == "L" then -halfW else halfW, 0, z)
+				att.Parent = root
+				table.insert(flameParts, att)
+				local light = Instance.new("PointLight")
+				light.Color = Color3.fromRGB(255, 150, 20)
+				light.Range = 7
+				light.Brightness = 3
+				light.Shadows = false
+				light.Enabled = false
+				light.Parent = att
+				table.insert(blinkLights[side], light)
+			end
+		end
+	end
+
 	local s: State = {
 		model = model,
 		root = root,
@@ -795,9 +947,31 @@ function Driving.attach(model: Model)
 		throttleIn = 0,
 		pops = 0,
 		popTimer = 0,
+		ignition = autoStart,
+		engineOn = autoStart,
+		cranking = 0,
+		manual = Driving.gearbox == "Manual",
+		mgear = 0,
+		clutch = false,
+		freeRpm = 0,
+		launch = 0,
+		parkBrake = false,
+		tc = true,
+		lightsOn = true,
+		blinker = "",
+		blinkT = 0,
+		blinkLights = blinkLights,
+		dashPanel = if dashPanel and dashPanel:IsA("BasePart") then dashPanel else nil,
 	}
 	state = s
-	Audio.engineStart()
+	s.engine:setRunning(s.engineOn)
+	if s.engineOn then
+		Audio.engineStart()
+	else
+		setClusterPower(s, false)
+		UI.toast("Press J for the ignition, then F to start the engine")
+	end
+	UI.setIndicators(indicatorState(s))
 	camera.CameraType = Enum.CameraType.Scriptable
 
 	-- apply current camera mode visibility
@@ -877,7 +1051,25 @@ function Driving.step(dt: number)
 	end
 	dt = math.min(dt, 1 / 20)
 	local root = s.root
-	local throttle, brake, steerIn, handbrake = readInput()
+	local throttleKey, brake, steerIn, handbrake, clutch = readInput()
+	-- the engine: the starter turns it over for a moment, then it runs; off, the pedal does nothing
+	if s.cranking > 0 then
+		s.cranking -= dt
+		if s.cranking <= 0 and s.ignition then
+			s.engineOn = true
+			s.engine:setRunning(true)
+			UI.setIndicators(indicatorState(s))
+		end
+	end
+	local throttle = if s.engineOn then throttleKey else 0
+	handbrake = handbrake or s.parkBrake
+	-- clutch (manual gearbox): dropping it at high revs from a standstill launches the car
+	local clutchWas = s.clutch
+	s.clutch = clutch and s.manual
+	if clutchWas and not s.clutch and s.freeRpm > 0.6 and s.mgear >= 1 and s.engineOn and Config.spsToMph(s.vel.Magnitude) < 20 then
+		s.launch = 0.8
+	end
+	s.launch = math.max(0, s.launch - dt)
 	s.throttle += (throttle - s.throttle) * math.min(1, dt * 10)
 	-- lifting off at high revs: a short crackle of pops + flames
 	if s.throttleIn > 0.7 and throttle < 0.2 and s.rpm > 0.6 and Config.spsToMph(s.vel.Magnitude) > 30 then
@@ -913,18 +1105,53 @@ function Driving.step(dt: number)
 		-- longitudinal
 		local a = 0
 		local speedFrac = fwdSpeed / s.topSpeed
-		if throttle > 0 then
-			if fwdSpeed < -2 then
-				a += 140 * throttle -- braking out of reverse
-			else
-				a += s.accel * 1.25 * throttle * math.max(0, 1 - math.max(speedFrac, 0) ^ 2.6)
+		if s.manual then
+			-- manual: the gear sets how hard the engine pulls; at the top of a gear it hits the limiter
+			local engaged = s.engineOn and not s.clutch
+			if engaged and s.mgear > 0 then
+				local hi = (s.mgear / GEARS) ^ (1 / 0.8)
+				local rev = math.max(speedFrac, 0) / hi
+				if throttle > 0 then
+					if fwdSpeed < -2 then
+						a += 140 * throttle
+					else
+						local torque = if rev >= 1 then 0 else math.clamp(0.4 + 0.9 * rev, 0.4, 1)
+						a += s.accel * 1.25 * throttle * torque * math.max(0, 1 - math.max(speedFrac, 0) ^ 2.6) * (if s.launch > 0 then 1.35 else 1)
+					end
+				elseif fwdSpeed > 2 then
+					a -= 6 -- engine braking
+				end
+				if rev > 1.02 then
+					a -= 30 * (rev - 1) -- shifted down too early: the engine holds the car back
+				end
+			elseif engaged and s.mgear < 0 and throttle > 0 then
+				if fwdSpeed > 2 then
+					a -= 140 * throttle
+				elseif fwdSpeed > -s.topSpeed * 0.22 then
+					a -= s.accel * 0.6 * throttle
+				end
 			end
-		end
-		if brake > 0 then
-			if fwdSpeed > 2 then
-				a -= 150 * brake
-			elseif fwdSpeed > -s.topSpeed * 0.22 then
-				a -= s.accel * 0.6 * brake
+			if brake > 0 then
+				if fwdSpeed > 2 then
+					a -= 150 * brake
+				elseif fwdSpeed < -2 then
+					a += 150 * brake
+				end
+			end
+		else
+			if throttle > 0 then
+				if fwdSpeed < -2 then
+					a += 140 * throttle -- braking out of reverse
+				else
+					a += s.accel * 1.25 * throttle * math.max(0, 1 - math.max(speedFrac, 0) ^ 2.6)
+				end
+			end
+			if brake > 0 then
+				if fwdSpeed > 2 then
+					a -= 150 * brake
+				elseif fwdSpeed > -s.topSpeed * 0.22 and s.engineOn then
+					a -= s.accel * 0.6 * brake
+				end
 			end
 		end
 		-- rolling resistance + aero drag
@@ -956,16 +1183,24 @@ function Driving.step(dt: number)
 
 		-- lateral grip (low with handbrake -> drift)
 		local grip = if handbrake then 1.4 else 4.5 + 5 * handling
-		-- hard launch: the rear steps out a little while the tyres find grip
-		if throttle > 0.6 and not handbrake then
-			grip *= 1 - 0.35 * throttle * math.clamp(1 - math.abs(speedFrac) * 2.5, 0, 1)
+		-- hard launch: the rear steps out a little while the tyres find grip; traction control
+		-- keeps it tidy, and with it off the rear lets go under power much longer
+		if (throttle > 0.6 or s.launch > 0) and not handbrake then
+			local loss = (if s.tc then 0.2 else 0.55) * throttle * math.clamp(1 - math.abs(speedFrac) * (if s.tc then 2.5 else 1.3), 0, 1)
+			if s.launch > 0 then
+				loss += 0.3
+			end
+			grip *= 1 - math.min(loss, 0.8)
 		end
 		latSpeed *= math.exp(-grip * dt)
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
 		-- tyres squeal: flooring it from low speed, braking hard at speed, turning hard when fast
 		local sf = math.abs(fwdSpeed) / s.topSpeed
 		if throttle > 0.7 and fwdSpeed >= -1 and sf < 0.35 then
-			s.slip += 34 * throttle * (1 - sf / 0.35)
+			s.slip += (if s.tc then 22 else 52) * throttle * (1 - sf / 0.35)
+		end
+		if s.launch > 0 then
+			s.slip += 40
 		end
 		if brake > 0.6 and fwdSpeed > 40 then
 			s.slip += 36 * brake
@@ -1005,14 +1240,34 @@ function Driving.step(dt: number)
 	local fs = s.vel:Dot(forwardFromYaw(s.yaw))
 	local frac = math.clamp(math.abs(fs) / s.topSpeed, 0, 1)
 	local prevGear = s.gear
-	if fs < -1 then
+	local function manualName(): string
+		return if s.mgear < 0 then "R" elseif s.mgear == 0 then "N" else tostring(s.mgear)
+	end
+	if not s.engineOn then
+		s.gear = if s.manual then manualName() else "N"
+		s.rpm = if s.cranking > 0 then 0.12 else 0
+		s.freeRpm = s.rpm
+	elseif s.manual then
+		s.gear = manualName()
+		s.freeRpm += (0.12 + 0.86 * throttle - s.freeRpm) * math.min(1, dt * 6)
+		if s.mgear == 0 or s.clutch then
+			s.rpm = s.freeRpm
+		elseif s.mgear < 0 then
+			s.rpm = math.clamp(0.12 + 0.8 * -fs / (s.topSpeed * 0.22), 0.12, 1)
+			s.freeRpm = s.rpm
+		else
+			local hi = (s.mgear / GEARS) ^ (1 / 0.8)
+			s.rpm = math.clamp(0.12 + 0.88 * frac / hi, 0.12, 1.05)
+			s.freeRpm = s.rpm
+		end
+	elseif fs < -1 then
 		s.gear = "R"
 		s.rpm = math.clamp(-fs / (s.topSpeed * 0.22), 0, 1)
 	elseif math.abs(fs) < 1 and throttle == 0 then
 		s.gear = "N"
 		s.rpm = 0.1
 	else
-		local gears = 7
+		local gears = GEARS
 		local g = math.clamp(math.floor(frac ^ 0.8 * gears) + 1, 1, gears)
 		s.gear = tostring(g)
 		local lo = ((g - 1) / gears) ^ (1 / 0.8)
@@ -1110,7 +1365,7 @@ function Driving.render(dt: number)
 	-- dashboard cluster + HUD
 	local mph = Config.spsToMph(math.abs(fwdSpeed))
 	if s.gaugeSpeed then
-		s.gaugeSpeed.Text = tostring(math.floor(mph + 0.5))
+		s.gaugeSpeed.Text = tostring(math.floor((if Driving.units == "kmh" then mph * 1.609 else mph) + 0.5))
 	end
 	if s.gaugeGear then
 		s.gaugeGear.Text = s.gear
@@ -1131,7 +1386,7 @@ function Driving.render(dt: number)
 				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, math.rad(v * 240)) * n.offset
 			end
 			for _, tl in s.guiTexts do
-				tl.label.Text = if tl.kind == "Speed" then tostring(math.floor(mph + 0.5)) elseif tl.kind == "RPM" then tostring(math.floor(s.rpm * 80) * 100) else s.gear
+				tl.label.Text = if tl.kind == "Speed" then tostring(math.floor((if Driving.units == "kmh" then mph * 1.609 else mph) + 0.5)) elseif tl.kind == "RPM" then tostring(math.floor(s.rpm * 80) * 100) else s.gear
 			end
 			for _, n in s.guiNeedles do
 				n.gui.Rotation = n.base + (if n.kind == "speed" then s.speedShown else s.rpmShown) * 240
@@ -1139,6 +1394,31 @@ function Driving.render(dt: number)
 		end
 	end)
 	UI.setSpeed(mph, speedFrac, s.gear, s.rpm)
+
+	-- blinkers: the corner lights and the HUD arrows flash together, with a soft tick
+	if s.blinker ~= "" then
+		local before = (s.blinkT % 0.8) < 0.4
+		s.blinkT += dt
+		local lit = (s.blinkT % 0.8) < 0.4
+		for side, lights in s.blinkLights do
+			local on = lit and (s.blinker == "H" or s.blinker == side)
+			for _, l in lights do
+				l.Enabled = on
+			end
+		end
+		UI.setBlink(lit and s.blinker ~= "R", lit and s.blinker ~= "L")
+		if lit ~= before then
+			Audio.tick(lit)
+		end
+	elseif s.blinkT ~= 0 then
+		s.blinkT = 0
+		for _, lights in s.blinkLights do
+			for _, l in lights do
+				l.Enabled = false
+			end
+		end
+		UI.setBlink(false, false)
+	end
 
 	-- engine / wind / tyre audio
 	s.engine:update(s.rpm, s.throttle, speedFrac, s.slip)
@@ -1222,6 +1502,28 @@ function Driving.render(dt: number)
 	camera.FieldOfView = s.fov
 end
 
+-- Settings: speed units for the HUD and the cluster ("mph" | "kmh")
+function Driving.setUnits(units: string)
+	Driving.units = if units == "kmh" then "kmh" else "mph"
+	DashGauges.setUnits(Driving.units)
+	UI.setUnits(Driving.units)
+	local s = state
+	if s and s.ignition then
+		setClusterPower(s, true)
+	end
+end
+
+-- Settings: "Auto" | "Manual" gearbox
+function Driving.setGearbox(mode: string)
+	Driving.gearbox = if mode == "Manual" then "Manual" else "Auto"
+	local s = state
+	if s then
+		s.manual = Driving.gearbox == "Manual"
+		s.mgear = if s.manual then (tonumber(s.gear) or 0) else 0
+		UI.setIndicators(indicatorState(s))
+	end
+end
+
 ---------------------------------------------------------------------
 -- One-time setup
 ---------------------------------------------------------------------
@@ -1235,10 +1537,12 @@ function Driving.init()
 		if processed or not state then
 			return
 		end
-		if input.KeyCode == Enum.KeyCode.C or input.KeyCode == Enum.KeyCode.ButtonY then
+		if input.KeyCode == Enum.KeyCode.V or input.KeyCode == Enum.KeyCode.ButtonY then
 			Driving.toggleCamera()
 		elseif input.KeyCode == Enum.KeyCode.R or input.KeyCode == Enum.KeyCode.ButtonSelect then
 			Driving.reset()
+		elseif Driving.inputEnabled and not UI.isGarageOpen() then
+			carKey(state, input.KeyCode)
 		end
 	end)
 
