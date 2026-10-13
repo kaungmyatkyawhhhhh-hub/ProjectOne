@@ -238,6 +238,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-13 GYM ARC Prompt - Save everything to Obsidian]]
 - [[2026-10-13 GYM ARC Prompt - Task 5 answers and continue]]
 - [[2026-10-13 GYM ARC Prompt - UI redesign with image pieces]]
+- [[2026-10-14 GYM ARC Prompt - Free machines and new main menu]]
+- [[2026-10-14 GYM ARC Prompt - Rep and pump bar and treadmill sounds]]
 
 ### Config
 - [[GYM ARC - Config values]]

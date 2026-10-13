@@ -72,3 +72,4 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 - Emotes and Crew windows in the new style (no mockup for these).
 ![[GYM ARC/Screenshots/ui_compare_v2_emotes_window_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_crew_window_phone.jpg]]
+- Run finished: docs updated (CLAUDE.md / DESIGN.md describe the v2 style), morning report at the top of PROGRESS.md, all 140 scripts in Studio byte-checked against src/, tests pass, test switches cleared.
