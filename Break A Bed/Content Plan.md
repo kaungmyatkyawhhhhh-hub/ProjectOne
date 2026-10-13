@@ -129,6 +129,25 @@ Beds you haven't broken yet are **black silhouettes**, so you want to keep playi
     - If loading fails, it falls back to a plain R15 rig, so the stand never looks empty.
   - **Cash and dumbbells** orbit the figure in a loose ring at different heights (6–8 items, small, slowly circling and bobbing). They aren't stacked in a column, and they never cover the figure's face.
 
+## 8. Leaderboards (owner, 2026-10-13)
+Three world boards stand side by side near spawn: **TOP TOTAL DAMAGE** (exists now), **TOP TOTAL MONEY** and **TOP TOTAL REBIRTHS**.
+- **GLOBAL / SERVER switch:** two tab buttons under each title. GLOBAL (the default) shows everyone, from an OrderedDataStore. SERVER shows only the players in this server, live, updating every few seconds. The chosen tab is per player and only changes their own view.
+- **Top 100, scrollable:** the list is a `ScrollingFrame` that holds 10 rows at a time, and players scroll with the mouse wheel, by dragging or by touch.
+  - **Important:** a SurfaceGui in Workspace can't be scrolled or clicked. The board GUIs go in each player's `PlayerGui` with `Adornee` set to the board part (`MaxDistance` about 60, so far-away boards don't take clicks).
+- **Rows:** rank, avatar headshot (`rbxthumb://type=AvatarHeadShot&id=…&w=48&h=48`), name and the short number (24.3Qi). #1/#2/#3 rows are gold/silver/bronze, and #1 gets a small crown. Your own row is highlighted if you're in the list.
+- **"YOU" bar** at the bottom: your value and your rank ("#523"). If you're not in the global top 100, it shows "100+".
+- **Data:**
+  - Global stores use `GetSortedAsync(false, 100)`, refreshed every 3 min with the "Refreshes in 2:22" countdown. Names are cached from `GetNameFromUserIdAsync`.
+  - Values above an OrderedDataStore's integer limit (about 9.2 quintillion) are saved log-scaled, for example `floor(log10(value + 1) × 10^13)`, and turned back for display.
+  - **Damage:** the existing `BreakABed_TotalDamage_v1`.
+  - **Money:** a new store for **total Cash earned all-time** (not the current balance, which drops when spending or rebirthing). It's added to the save as `TotalCashEarned`. Old saves start from their current Cash.
+  - **Rebirths:** a new store, filled once Rebirths are built.
+- **Designs (same layout, its own look each):** the same frame, row style and font for all three, so they read as one set. Each has its own color and icon:
+  - **Damage:** orange/red with a fist icon (like now).
+  - **Money:** green with a cash-stack icon and a gold coin trim.
+  - **Rebirths:** purple with a gold rebirth-arrows icon and a soft purple glow.
+  - Each board has a small matching light on top.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
