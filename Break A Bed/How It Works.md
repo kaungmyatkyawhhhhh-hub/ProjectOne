@@ -146,3 +146,13 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## City backdrop (2026-10-11)
 - **City** (server module, run once in Edit mode, safe to re-run): removed the trees, bushes, hills and pond outside the play area, flattened and widened the grass, then built a city around the map in `Workspace.City`: roads with sidewalks, lamps and parked cars; houses and shops (with signs) in front, apartments and hotels behind, glass towers further back; and three landmarks: **BED MART** (east of spawn, giant bed on the roof), **MATTRESS FACTORY** (west, halfway down the path, smoking chimneys) and the **GRAND SLEEP HOTEL** (past the end of the path).
 - Nothing is built inside the play area (path, plaza, upgrades, training). About 4,450 parts, anchored, no collisions, only the main building blocks cast shadows.
+
+## AFK training (owner, 2026-10-13)
+- **The message:** when a player starts training, a green text "**AFK-friendly!**" with "**While training, you won't be kicked.**" under it shows in the lower middle of the screen. It's bold, with a thick dark outline (like the owner's screenshot). It fades in, stays **3 seconds** and fades out. It shows again at most once every **10 minutes** for that player (the cooldown resets when they rejoin).
+- **No AFK kick while training:** Roblox kicks players who are idle for 20 minutes. If a player has been idle for **15 minutes while training** (`LocalPlayer.Idled` gives the idle time), the game moves them before the kick:
+  1. The server saves a Resume entry (the same idea as [[Break A Bed/Soft Shutdown|Soft Shutdown]]): "training at post X", plus their position.
+  2. It teleports them back into **the same server** (`TeleportToPlaceInstance` with this server's JobId), or into any server of the game if that one is full.
+  3. On arrival they're put straight back at the same post with **training running again** automatically, so the AFK earnings keep going. A small toast says "Still training! 💪".
+- This happens only while training. Players who are idle anywhere else get Roblox's normal kick.
+- A short fade to black hides the teleport. Saving happens before the teleport, so nothing is lost.
+
