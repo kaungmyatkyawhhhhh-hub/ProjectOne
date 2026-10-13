@@ -123,3 +123,11 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_updates.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_emotes_window_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_crew_window_phone.jpg]]
+
+## Final kit: BLACK + GOLD (14 Oct)
+Replaces every earlier look (grit, Gym League, premium). Layouts stay; only the materials change. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
+- Panels: graphite gradient (#252226 -> #18161A -> #0D0C0E), 1px light line on top, 14px corners. Cards #232023 -> #141215, 11px.
+- Font: Montserrat Black Italic for titles, names, buttons and numbers; Montserrat Medium (gray) for small text.
+- Gold gradient for the active tab, hero names, rewards, big numbers and rank plates. Red only for the main button. Teal only for progress / stamina.
+- Main buttons: shiny bevel, glow, a light streak that sweeps once, a gentle pulse. Other buttons quiet and dark; inactive tabs flat.
+- Windows: title + tabs in the header, coins + X on the right, 90% size, soft shade around them so the gym shows.
