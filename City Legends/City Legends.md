@@ -224,3 +224,4 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - No converted car's cluster renders upside down (all checked). Ask which car if the owner still sees one.
 - **M3 and M4 cabins (2026-10-13, owner: "Put the M3 E92 interior into the BMW M4 and M3"):** the M3 F80 and M4 F82 take the M3 E92's cabin, with its dash and needles (`INTERIOR_DONOR`).
 - **Where new cars go (2026-10-13, owner):** converted cars to bring in with Import 3D are pushed to `Games/CityLegends/imports/new_cars/`. The folder holds only what is still to be imported, and is emptied once those cars are in the game.
+- **DB9 slot gets a Vanquish (2026-10-13, owner):** the owner will send a Vanquish model for the DB9 (`astin_db9`). More new cars are coming too.
