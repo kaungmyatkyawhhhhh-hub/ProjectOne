@@ -33,6 +33,15 @@ The first build used plain dark panels that didn't match the [[Break A Bed/UI Ki
 - **Animations:** the card drops in from above (Back Out). The bar fill slides smoothly. Each step done = the card flashes white, sparkles burst and a "ding" plays, then the next step's text pops in. The arrow bobs 10 px up and down.
 - Only one guide element at a time. Never stack two dark panels.
 
+## Make it smaller (owner, 2026-10-13)
+The owner's screenshot: the step card is huge (about 60% of the screen width and a big chunk of the height) and covers the middle of the screen. It must be a small strip at the top center, with the world arrow and beam doing the telling.
+- **Size:** a slim pill **at most 24% of the screen width on PC** and 40% on phones, and about 6% of the screen height (around 40–48 px on PC). Use `UISizeConstraint` so it never grows on big screens.
+- **Inside, one row:** a small icon on the left (about 70% of the pill's height), then the step text in one line, with the text size scaling down to fit (`TextScaled` plus a `UITextSizeConstraint`, max around 22). Keep the light card style from the UI Kit.
+- **Progress:** a thin bar (about 6 px) along the bottom edge of the pill, only on steps that count (punches). There's no separate big bar.
+- **SKIP:** a small red "SKIP" chip right under the pill's right end, about 1/3 of the pill's height. It's never a big button.
+- **Position:** top center, below Roblox's top bar, never covering the stats (top right) or the left buttons. On phones, keep it clear of the thumbstick and jump button.
+- Everything else (steps, arrow, beam, sounds) stays the same.
+
 ## Rules
 - The beam is a `Beam` from the player's character to the target, plus a bouncing arrow `BillboardGui` above the target. Only the player sees them (made on the client).
 - A small top-center bubble shows the current step (UI Kit style), and a **SKIP** text button sits under it.
