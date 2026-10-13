@@ -55,3 +55,7 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_06_trainer_follower_red_cap.jpg]]
 - Smoothie bar window (mockup 09) done: drink tiles with a colored icon, effect and time, green coin price; drinks not sold at that stall show where to get them.
 ![[GYM ARC/Screenshots/ui_compare_v2_09_smoothie_bar_phone.jpg]]
+- Tutorial dialog (mockup 11) done: coach dialog with a live portrait and Tap to continue pages, green SKIP TUTORIAL (tap twice), 50 coins for finishing the tutorial.
+![[GYM ARC/Screenshots/ui_compare_v2_11_tutorial_dialog_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_11_tutorial_skip_confirm.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_11_tutorial_skipped.jpg]]

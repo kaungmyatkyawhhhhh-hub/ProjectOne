@@ -515,3 +515,7 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 ## Studio test switches (Workspace attributes)
 - TestStore = true: the Shop tile shows at once (no tutorial / 5 minute wait).
 - TestCoins = number: start with that many coins (temporary data).
+
+## Tutorial (13 Oct)
+- Finish reward: 50 coins (`Config/Onboarding`, FinishCoins). Not paid when skipped.
+- The Coach's words per step: `Config/Onboarding`, `coach` on each step.
