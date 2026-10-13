@@ -38,3 +38,6 @@ Coach Dex hands out quests at the front desk, and one muscle group trains at dou
 ![[GYM ARC/Screenshots/coach-talk_fixed.png]]
 ![[GYM ARC/Screenshots/s2_reception_after.png]]
 ![[GYM ARC/Screenshots/daily_quests_panel.jpg]]
+
+## Quests window, final look (14 Oct)
+Tabs DAILY / STREAK / GOALS. Ready quests glow gold with a red CLAIM, quests in progress show a "1 / 2" pill, claimed ones fade with a teal DONE. The ALL 3 BONUS card sits on the right. Claiming sends coins flying to your counter. See [[2026-10-14 GYM ARC Final UI Black and Gold]].

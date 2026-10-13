@@ -116,3 +116,6 @@ You replaced the music with your own tracks (in Studio: ReplicatedStorage > Shar
 How to play several songs in one area: in `AreaMusic`, put more ids in that area's list, separated by commas, for example
 `Starter = { 86451874359343, 131532099124744, 139266399633943 },`
 They play one after another in that order, then start again from the first. When you walk into another area, its list starts from its first song. Save the place afterwards.
+
+### Back to one song per area (14 Oct, your change in Studio)
+You set every area back to a single song: Starter 86451874359343, Pro 118959016267248, Beach 1837324500, Town 1840007392. The four-songs-per-area lists above are no longer used. The backup copy matches your version. To play several songs in an area again, add more ids to its list (comma separated).

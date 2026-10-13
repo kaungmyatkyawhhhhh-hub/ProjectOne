@@ -22,3 +22,23 @@ Mockup, then the game (phone, owned stamp, PC):
 ![[GYM ARC/Screenshots/ui_compare_final_04_store_owned_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_final_04_store_pc.jpg]]
 Commit 83261db.
+
+## 2. Quests
+- Tabs are now DAILY, STREAK and GOALS.
+- Each quest row: an icon tile, the quest in big slanted capitals, a teal progress bar and the coin reward in gold.
+  - Ready to claim: gold border with a soft glow, a gold icon tile and a red CLAIM button that pulses.
+  - Still going: a dark pill like "1 / 2" (tap it to be told where to go).
+  - Claimed: the row fades and shows DONE in teal.
+- The once-a-day swap button is now a small round badge on the corner of the icon tile.
+- On the right: the ALL 3 BONUS card with a big gold "1 / 3", a gold bar, the bonus coins, a CLAIM button when all three are claimed, and "Resets in 6h 47m".
+- Claiming: coins fly up toward your coin counter with a small gold sparkle burst.
+- The small 7-day calendar moved off the Daily tab; the Streak tab has the full one.
+- Tested with a real quest: did 50 chest reps on the bench, the row turned gold with CLAIM, claimed it, the coins flew and the row showed DONE.
+Mockup, then the game:
+![[GYM ARC/Screenshots/ui_compare_final_05_quests_mockup.png]]
+![[GYM ARC/Screenshots/ui_compare_final_05_quests_claim_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_final_05_quests_coin_burst_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_final_05_quests_pc.jpg]]
+![[GYM ARC/Screenshots/ui_compare_final_05_quests_streak_pc.jpg]]
+![[GYM ARC/Screenshots/ui_compare_final_05_quests_goals_pc.jpg]]
+Commit 9dc1eb9.
