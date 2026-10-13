@@ -158,6 +158,9 @@ type State = {
 	latG: number,
 	headPos: Vector3, -- the driver's head moving with the g-forces (cockpit camera)
 	headVel: Vector3,
+	screech: number, -- tyre cry on hard launches (sound only)
+	chirp: number, -- seconds left of a tyre chirp after a hard low-gear shift
+	launchReady: boolean, -- launch control: brake + throttle held at a stop
 }
 
 local state: State? = nil
@@ -1135,6 +1138,9 @@ function Driving.attach(model: Model)
 		latG = 0,
 		headPos = Vector3.zero,
 		headVel = Vector3.zero,
+		screech = 0,
+		chirp = 0,
+		launchReady = false,
 	}
 	state = s
 	s.powerK, s.dragC = powerFor(spec)
@@ -1243,6 +1249,17 @@ function Driving.step(dt: number)
 		s.launch = 0.8
 	end
 	s.launch = math.max(0, s.launch - dt)
+	-- launch control (automatic): hold the brake and floor it at a stop, the revs build; let go of
+	-- the brake and the car launches
+	local standing = math.abs(s.vel:Dot(forwardFromYaw(s.yaw))) < 1.5
+	local holding = not s.manual and s.engineOn and standing and brake > 0.5 and throttle > 0.5
+	if s.launchReady and not holding and throttle > 0.5 and brake < 0.5 then
+		s.launch = 0.8
+	end
+	if holding and not s.launchReady then
+		UI.toast("Launch control: let go of the brake")
+	end
+	s.launchReady = holding
 	s.throttle += (throttle - s.throttle) * math.min(1, dt * 10)
 	-- lifting off at high revs: a short crackle of pops + flames
 	if s.throttleIn > 0.7 and throttle < 0.2 and s.rpm > 0.6 and Config.spsToMph(s.vel.Magnitude) > 30 then
@@ -1321,8 +1338,11 @@ function Driving.step(dt: number)
 			end
 		elseif fwdSpeed > 2 then
 			a -= 150 * s.brakeIn
-		elseif brake > 0 and fwdSpeed > -s.topSpeed * 0.22 and s.engineOn then
+		elseif brake > 0 and fwdSpeed > -s.topSpeed * 0.22 and s.engineOn and not s.launchReady then
 			a -= s.accel * 0.6 * brake -- automatic: hold the brake at a stop to reverse
+		end
+		if s.launchReady then
+			a, fwdSpeed = 0, 0 -- launch control: the brakes hold the car while the revs build
 		end
 		-- rolling resistance + aero drag (each car's own, so it tops out at its real top speed)
 		local drag = 2 + s.dragC * fwdSpeed * fwdSpeed
@@ -1378,6 +1398,19 @@ function Driving.step(dt: number)
 		if math.abs(s.steer) > 0.35 and sf > 0.4 then
 			s.slip += 60 * math.abs(s.steer) * (sf - 0.4)
 		end
+		-- a loud tyre cry pulling away hard and on a launch (sound only: no smoke unless they slip)
+		local cry = 0
+		if engaged and gearNow > 0 and throttle > 0.8 and fwdSpeed >= -1 and sf < 0.12 then
+			cry = (1 - sf / 0.12) * (if s.tc then 0.75 else 1)
+		end
+		if s.launch > 0 then
+			cry = 1
+		end
+		s.chirp = math.max(0, s.chirp - dt)
+		if s.chirp > 0 then
+			cry = math.max(cry, 0.8)
+		end
+		s.screech = cry
 
 		-- body on its springs: leans out in turns, dives under braking, squats pulling away, and
 		-- rocks a little when a shift cuts and returns the drive
@@ -1424,6 +1457,10 @@ function Driving.step(dt: number)
 			end
 			s.pitchVel += math.rad(16) * throttle
 			s.headVel += Vector3.new(0, 0, 1.6 * throttle)
+			local g = if s.manual then s.mgear else s.agear
+			if throttle > 0.8 and g >= 1 and g <= 3 then
+				s.chirp = 0.25 -- the tyres chirp as the drive slams back in
+			end
 		end
 	end
 	if not s.engineOn then
@@ -1447,6 +1484,8 @@ function Driving.step(dt: number)
 			target = s.freeRpm
 		elseif fs < -1 or (s.manual and s.mgear < 0) then
 			target = math.clamp(0.12 + 0.8 * -fs / (s.topSpeed * 0.22), 0.12, 1)
+		elseif s.launchReady then
+			target = 0.62 -- launch control holds the revs
 		elseif s.gear == "N" then
 			target = 0.12
 		else
@@ -1611,7 +1650,7 @@ function Driving.render(dt: number)
 	end
 
 	-- engine / wind / tyre audio
-	s.engine:update(s.rpm, s.throttle, speedFrac, s.slip)
+	s.engine:update(s.rpm, s.throttle, speedFrac, s.slip, nil, s.screech)
 	-- smoke with the squeal (same curve as the sound); launches smoke the rear tyres most
 	local squeal = math.clamp((s.slip - 8) / 40, 0, 1)
 	for _, sm in s.smoke do
