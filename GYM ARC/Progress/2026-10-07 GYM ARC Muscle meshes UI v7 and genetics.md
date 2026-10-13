@@ -16,7 +16,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
   - Muscle v7: real EditableMesh muscles replace the blobs; v8: muscles wear your own Shirt/Pants, snatched waist, new calves, v8-1 smooth data.
   - Muscles load faster; red hover highlight and a rep flash with an On/Off setting; Crunch Bench trains Obliques.
   - Stats show EXP (50,000 for the first Growth Spurt), no "Max" text, no cap on stats, group EXP is the sum of its muscles, full look at 2x the goal and mass monster at 5x.
-  - See [[GYM ARC - Muscles and bodies]].
+  - See [[GYM ARC - Muscles and Bodies]].
 - **Genetics**
   - Reveal redesigned over many rounds: DNA bar, truly 3D plates, real shadows, competition-plate printing with M WEIGHTS, a real gym scene with depth of field, tunable camera, one shared label panel. See [[GYM ARC - Genetics]].
 - **World, poses, skating**

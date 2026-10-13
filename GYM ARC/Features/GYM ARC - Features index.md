@@ -1,0 +1,66 @@
+---
+date: 2026-10-13
+tags: [gymarc, feature, index]
+status: done
+---
+# GYM ARC - Features index
+
+Back to [[00 GYM ARC Home|GYM ARC Home]].
+
+Every game system, one note each. "planned" = from the owner's two new prompts (new features, monetization and hype), not built yet.
+
+## Core training
+- [[GYM ARC - Muscles and Bodies]]: 18 muscles, v9 live muscle meshes, body stages for others, skin stages (done)
+- [[GYM ARC - Machines]]: starter / pro / beach machines, 12 weight tiers, MAX button, plates (done)
+- [[GYM ARC - Gains and EXP]]: the gains formula, 5x cap, PUMPED and BIG REP (done)
+- [[GYM ARC - Stamina and Treadmills]]: stamina, recovery stations, treadmills raise max stamina (done)
+- [[GYM ARC - Energy Shakes]]: shakes for stamina + bonus gains; smoothie bar shop planned (done)
+- [[GYM ARC - Genetics]]: grades, frame and body type, the 3D reveal and reroll (done)
+- [[GYM ARC - Growth Spurts]]: rebirth, taller and stronger, capped at 7'0" (done)
+
+## Screens and feel
+- [[GYM ARC - Stats and Muscles Panel]]: world stat labels, "Your muscles" panel, body-map widget (done)
+- [[GYM ARC - Machine HUD]]: the panel while lifting (done)
+- [[GYM ARC - Machine Signs]]: glass diamond sign and Occupy prompt over the nearest machine (done)
+- [[GYM ARC - Game Feel]]: motion, popups, EXP popups, red training tint, pump (done)
+- [[GYM ARC - UI System]]: Theme, fonts, side menu tiles, top bar (done)
+- [[GYM ARC - Loading Screen and Menu]]: barbell loading screen and cinematic menu (done)
+- [[GYM ARC - Tutorial]]: the first 5 minutes (done)
+- [[GYM ARC - Settings]]: volumes, popups, rep flash, spot requests (done)
+
+## Progress and rewards
+- [[GYM ARC - Titles]]: collectible titles and the overhead title (done)
+- [[GYM ARC - Economy and Daily Rewards]]: coins, streak, offline coins, re-racking, rush hour (done)
+- [[GYM ARC - Quests and Muscle of the Day]]: Coach Dex quests and the daily 2x group (done)
+- [[GYM ARC - Daily Quests]]: 3 daily quests + 7-day login calendar (planned)
+- [[GYM ARC - Membership Card]]: Bronze to Diamond by lifetime reps (done)
+- [[GYM ARC - Seasons and Events]]: Halloween, Winter, Summer, rush hour (done)
+
+## Social and showing off
+- [[GYM ARC - Spotting]]: tap a lifter, click to push, boost and coins (done)
+- [[GYM ARC - Arm Wrestling]]: tapping duel with animation; bigger redo planned (done)
+- [[GYM ARC - Crews]]: groups of up to 8 with tags (done)
+- [[GYM ARC - Poses and Posing Stage]]: bodybuilding poses, judges on the beach stage (done)
+- [[GYM ARC - Posing Competition]]: timed contest with judges, votes and podium (planned)
+- [[GYM ARC - Leaderboards and Statue]]: wall board and the strongest player's statue (done)
+- [[GYM ARC - Progress Mirror]]: live reflection and before / after card (done)
+
+## World and characters
+- [[GYM ARC - Town and Gyms]]: town hub, starter, pro and beach gyms (done)
+- [[GYM ARC - Gym Lighting]]: pendant pools, wall washers, night lamps; day / night planned (done)
+- [[GYM ARC - Skateboard and Skate Park]]: riding, ollies, grinding, the big park (done)
+- [[GYM ARC - Wardrobe and Gear and Fits Store]]: gear, fits, wardrobe; hiding planned (done)
+- [[GYM ARC - NPC Regulars and Gym Cat]]: regulars, Dante the 8'0" giant, Plates the cat; pets planned (done)
+- [[GYM ARC - Legend NPCs]]: visiting legends with one-time challenges (done)
+- [[GYM ARC - NPC Rivals]]: one rival per gym with a challenge (planned)
+
+## Money, sound, tech
+- [[GYM ARC - Monetization]]: OFF today (framework only); turning ON is planned (in progress)
+- [[GYM ARC - Aura]]: layered lifting aura (planned)
+- [[GYM ARC - Music and Sounds]]: music and effects; hardtekk music and lift screams planned (done)
+- [[GYM ARC - Player Data and Saving]]: DataStore, session lock, release reset (done)
+- [[GYM ARC - Soft Shutdown]]: move players through a holding server on update (done)
+- [[GYM ARC - Studio Test Hooks]]: Workspace attributes for testing (done)
+
+## See also
+- [[GYM ARC - Config values]], [[GYM ARC - Sounds]], [[GYM ARC - Monetization products]]

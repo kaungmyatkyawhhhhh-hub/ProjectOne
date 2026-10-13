@@ -14,7 +14,7 @@ uploads belong to the group "Myanmar Builders Club" (owns the game). Sounds are 
 catalog items only. The world (gyms, town, machines, plates, props) is built from parts by builder scripts in Studio.
 
 ## Body (Robloxian 2.0, Roblox bundle 311)
-Everyone (players, NPCs, statue, mirror) wears these body parts. File: `Config/Body.luau`. See [[GYM ARC - Bodies and muscles]].
+Everyone (players, NPCs, statue, mirror) wears these body parts. File: `Config/Body.luau`. See [[GYM ARC - Muscles and Bodies]].
 
 | Asset | ID | Where used |
 |---|---|---|

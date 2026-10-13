@@ -16,7 +16,7 @@ Tip: after changing gains, tiers, stamina or Growth Spurt numbers, the pacing te
 the Growth Spurt goals still match the target play times.
 
 ## Config/Stamina
-File: `Config/Stamina.luau`. See also [[GYM ARC - Stamina]].
+File: `Config/Stamina.luau`. See also [[GYM ARC - Stamina and Treadmills]].
 
 | Setting | Value | What it does |
 |---|---|---|
@@ -310,7 +310,7 @@ File: `Config/Cosmetics.luau`. Bought with coins at Gear & Fits.
 | Gym fits | 6 tops x 4 colors = 24 shirts, 150-400 coins | Gym tee 150, Stringer 200, Pump cover 300, Sleeveless hoodie 300, Compression 350, Cropped hoodie 400 |
 
 ## Config/Body
-File: `Config/Body.luau`. See also [[GYM ARC - Bodies and muscles]].
+File: `Config/Body.luau`. See also [[GYM ARC - Muscles and Bodies]].
 
 | Setting | Value | What it does |
 |---|---|---|

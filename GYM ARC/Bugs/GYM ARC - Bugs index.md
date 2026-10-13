@@ -1,5 +1,7 @@
 ---
+date: 2026-10-13
 tags: [gymarc, bug, index]
+status: current
 ---
 # GYM ARC - Bugs index
 
