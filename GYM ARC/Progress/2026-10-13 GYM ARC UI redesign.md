@@ -62,3 +62,6 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 - Arm wrestling screen (mockup 13) done: names over a red / blue tug bar, gold timer, big round TAP! button, colored opponent buttons.
 ![[GYM ARC/Screenshots/ui_compare_v2_13_arm_wrestle_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_13_arm_wrestle_pick_phone.jpg]]
+- Posing screen (mockup 12) done: pose name in gold, Judges panel with live scores, TIMING bar and a big red POSE! button.
+![[GYM ARC/Screenshots/ui_compare_v2_12_posing_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_12_posing_judges_phone.jpg]]

@@ -37,6 +37,8 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 
 - **Arm wrestling (mockup 13):** YOU and the opponent over a red / blue tug bar, the gold timer, a big round TAP! button. At the table: Easy / Medium / Hard opponents as green / gold / red buttons, and STAND UP.
 
+- **Posing competition (mockup 12):** the pose's name big in gold, the Judges panel with everyone's last score, and a TIMING bar over a big red POSE! button (tap when the marker reaches the green).
+
 ## Where it lives (UI v2)
 - `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
 
@@ -110,3 +112,5 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_v2_11_tutorial_skipped.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_13_arm_wrestle_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_13_arm_wrestle_pick_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_12_posing_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_12_posing_judges_phone.jpg]]
