@@ -106,10 +106,15 @@ for dl in spec["dials"]:
     for val, theta in dl.get("end", []):
         pts.append((val, ang_of_tex(theta)))
     pts.sort()
-    # keep the sweep continuous (clockwise, increasing)
+    # keep the sweep continuous: clockwise (increasing), or counter-clockwise ("ccw": Aston rev
+    # counters)
+    ccw = dl.get("ccw", False)
     out = [pts[0]]
     for val, a in pts[1:]:
-        while a < out[-1][1] - 5: a += 360
+        if ccw:
+            while a > out[-1][1] + 5: a -= 360
+        else:
+            while a < out[-1][1] - 5: a += 360
         out.append((val, a))
     scale = ",".join("%g:%.1f" % (v, a) for v, a in out)
     length = float(np.linalg.norm(up_t)) * dl["len"]
