@@ -249,3 +249,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - Aston Vanquish and V12 Vantage: km/h round the outside and mph inside, and the Aston rev counter running backwards from the bottom, as on the real cars.
   - Numbers shrink to fit so they never overlap.
 - **Mercedes G63 (2015) blue first-person screen (2026-10-13):** reported by the owner. The model's cabin renders fine from the computed driver's eye in Blender (one-sided faces), and nothing blue is in the model. It is probably the same problem as the earlier black and red screens: the camera seeing open sky, which is now blue with the new lighting. Waiting for a screenshot.
+- **Third batch in the game (2026-10-13):** the owner imported `cars_13` and `cars_14`, and they are now in `CarModels` (60 models): Vanquish (DB9 slot), V12 Vantage, Camaro ZL1, Countach, E400 (E63 S model, W213 widescreen cluster), GLS, S680, 750Li. Their `.glb` files and the packs were removed from `imports`.
+  - The dial-only packs `cars_10` to `cars_12` were removed too: the drawn dials cover the old needles, so those re-imports aren't needed.
+  - Still to import: `cars_7_new`, `cars_8_luxury` and `cars_9_other` (SL65, M4, R34, Phantom, Wraith, Bentayga, SRT, Seal, Land Cruzer 300).
+- **G63 blue screen:** gone (owner, 2026-10-13), with the drawn-dial build.

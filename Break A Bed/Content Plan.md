@@ -61,6 +61,14 @@ Every post gets its own model, punch effect and sound, so each new post feels li
     - **Thumb:** a small block on the inner side of the fist. Optional, and only if it doesn't stick out.
     - **Fit:** the block's center sits exactly on the hand's center and turns with it. There's no gap under the arm and nothing floating below the hand.
     - Colors and the small effects stay as described above.
+  - **Final look (owner, 2026-10-13, from 4 reference pictures of blocky Roblox boxing gloves):** this replaces the shape rules above.
+    - **Size and place:** the glove covers the **hand and the bottom ~40% of the arm** and is about **1.25× the arm's width and depth**. It's chunky and clearly bigger than the arm, like a real boxing glove on a blocky avatar. The top edge of the cuff is flat and straight.
+    - **Shape:** a **cube-like fist with soft rounded edges and slightly puffy sides** (padded, not a sharp brick). There's a padded knuckle bump at the front and a **molded thumb bump on the inner side**, plus a **cuff band** at the top with 2–3 stitch/seam lines.
+    - **How to make it:** a **MeshPart** looks best.
+      - **Option A:** the owner inserts a free blocky boxing-glove mesh from the Toolbox (search "blocky boxing gloves"). Claude Code then recolors, resizes and welds it for every tier, with a left and a right version.
+      - **Option B:** if there's no good mesh, Claude Code builds it from parts: a main block with `SpecialMesh`/bevel or rounded Union, a padded front, a thumb wedge and a cuff block. It must still read as a padded glove, not a plain box.
+    - **Tier looks (like the references):** basic gloves are a plain color with a darker cuff. Mid tiers get trims, stripes or spikes, and some get **chains wrapped around the cuff**. Top tiers get **an energy aura on the gloves**: small crackling sparks or lightning (e.g. purple for Void, rainbow for Infinity), kept small so it doesn't hide the avatar.
+    - Welded to the hand/lower arm, it moves with every punch, with no gap and nothing hanging below. It works on R15 and R6.
 - **Glove Shop stand (owner, 2026-10-13, from a reference picture of a "Pickaxe Shop" market stall):**
   - **No ProximityPrompt.** A glowing **blue circle pad** on the ground in front of the stall is a touch sensor. Stepping into it opens the Glove Shop window, and stepping out (or the X) closes it. A 1 s cooldown stops it reopening right after closing while still standing in it.
   - **Our own design (not a copy):** a chunky low-poly boxing-themed stall.
