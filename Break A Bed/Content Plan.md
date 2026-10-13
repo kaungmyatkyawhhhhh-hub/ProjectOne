@@ -43,7 +43,17 @@ Every post gets its own model, punch effect and sound, so each new post feels li
 - **Gives, forever:** **+50% Strength and +25% Cash per rebirth** (stacking), plus **1 Rebirth Token** each time.
 - **Rebirth Token shop** (inside the rebirth menu): permanent upgrades, like start with $1K, +1 auto-punch speed, posts 10% cheaper, +5% crit chance and +1 free Spin a day. Each costs 1–3 tokens.
 - **Shows off:** the rebirth count on the leaderboard and over the head ("⟳ 3"), with a new name-tag color at 1/5/10/25.
-- **Menu:** UI Kit dark window, rainbow title "REBIRTH". It has a "You lose / You keep / You get" layout and a big gold REBIRTH button with a confirm step, then a white flash, rays and a fanfare.
+- **Menu (replaced by "Simpler menu" below):** UI Kit dark window, rainbow title "REBIRTH". It has a "You lose / You keep / You get" layout and a big gold REBIRTH button with a confirm step, then a white flash, rays and a fanfare.
+- **Simpler menu (owner, 2026-10-13):** the first build had too much text (three columns of "You lose / You keep / You get"), and even the owner needed 10 seconds to understand it. Kids must get it in **2 seconds, from pictures**. New layout, top to bottom:
+  1. **Title bar** "REBIRTH", same as now, with the REBIRTH / TOKEN SHOP tabs.
+  2. **The big picture (most of the window):** two big glowing cards with an arrow between them: **[dumbbell icon "x1.5"] ➜ [dumbbell icon "x2"]** (current Strength multiplier → after rebirth). The right card is bigger, gold-rimmed, and slowly breathes and sparkles.
+     - Under the arrow, two small reward chips: **[cash icon "x1.5"]** and **[token icon "+1"]**.
+  3. **One short line** in big text: **"Get stronger forever!"**
+  4. **The reset, as icons only:** a small grey row "**Resets:**" then the cash, dumbbell, bed and post icons, each with a small red ↺. No list of words.
+  5. **Progress bar** with a dumbbell icon: "0 / 1.35B".
+  6. **Big button:** grey "NEED 1.35B" with a lock when you can't afford it yet, gold pulsing **"REBIRTH!"** when you can. Pressing it shows one confirm pop-up with the same ↺ icons and "Are you sure?" plus YES / NO.
+  - **A small "?" button** in the corner opens the full details (the old lose/keep/get lists) for players who want them.
+  - Use drawn icons, no emoji (UI Kit rule). Text is at most 3–4 words per spot.
 - Rebirth also replays the bed path fast (the multiplier makes the early beds instant), so the second run takes about 15–20 min and the later ones get longer.
 
 ## 3. Gloves (a second thing to buy with Cash)
