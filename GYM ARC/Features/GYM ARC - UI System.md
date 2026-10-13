@@ -41,6 +41,8 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 
 - **Loading screen + main menu (mockups 00):** loading shows the art, logo, a tip and a red progress bar with the step (SKIP after 5 seconds). The menu has a green PLAY, a gold SHOP (after the tutorial), a blue UPDATES (update notes) and a coins / LVL / height pill.
 
+- **Emotes and Crew (no mockup):** the Poses tile opens an Emotes window with a grid of pose cards; Crew has My Crew / Top Crews tabs.
+
 ## Where it lives (UI v2)
 - `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
 
@@ -119,3 +121,5 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_v2_00_loading_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_updates.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_emotes_window_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_crew_window_phone.jpg]]

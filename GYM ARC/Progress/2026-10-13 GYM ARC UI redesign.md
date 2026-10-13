@@ -69,3 +69,6 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_00_loading_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_updates.jpg]]
+- Emotes and Crew windows in the new style (no mockup for these).
+![[GYM ARC/Screenshots/ui_compare_v2_emotes_window_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_crew_window_phone.jpg]]
