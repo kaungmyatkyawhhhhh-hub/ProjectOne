@@ -7,7 +7,7 @@ status: current
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
-103 bugs: 22 open or engine limits, 81 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
+104 bugs: 22 open or engine limits, 82 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
 
 ## Open
 
@@ -117,3 +117,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Machine panel covered the player|Machine panel covered the player]] - 2026-10-13
 - [[GYM ARC - Bug - Too much floating text while lifting|Too much floating text while lifting]] - 2026-10-13
 - [[GYM ARC - Bug - Wardrobe tops broken on the muscle body|Wardrobe tops broken on the muscle body]] - 2026-10-13
+- [[GYM ARC - Bug - Treadmill played the plate clank|Treadmill played the plate clank]] - 2026-10-14

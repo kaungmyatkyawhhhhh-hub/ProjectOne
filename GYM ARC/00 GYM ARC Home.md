@@ -204,6 +204,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Trainer hair fell off]]
 - [[GYM ARC - Bug - Trainer stood inside the next bench]]
 - [[GYM ARC - Bug - Traps outline edges visible]]
+- [[GYM ARC - Bug - Treadmill played the plate clank]]
 - [[GYM ARC - Bug - Treadmills were only decoration]]
 - [[GYM ARC - Bug - Tutorial path target nil]]
 - [[GYM ARC - Bug - Two title tags on one head]]
@@ -223,6 +224,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-13 GYM ARC New features run]]
 - [[2026-10-13 GYM ARC Obsidian vault setup]]
 - [[2026-10-13 GYM ARC UI redesign]]
+- [[2026-10-14 GYM ARC REP PUMP and menu fixes]]
 
 ### Prompts
 - [[2026-10-04 GYM ARC Prompt - Design brief]]

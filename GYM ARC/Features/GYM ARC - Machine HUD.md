@@ -40,3 +40,12 @@ What you see while you are on a machine. Rebuilt on 13 Oct to the owner's v2 moc
 ![[GYM ARC/Screenshots/max_button_above_plus.jpg]]
 ![[GYM ARC/Screenshots/s1_bench-hud_after.png]]
 ![[GYM ARC/Screenshots/full_lifting.png]]
+
+## REP button and PUMP bar (14 Oct)
+- REP is a normal red button at the bottom right again ("REP x13"), not the big circle.
+- PUMP is a bar again, right above REP: it fills with gold on every rep you tap.
+- When the bar is full it stays full, glows and says "TAP TO PUMP!". Tap it (or press Space) for PUMPED: double gains for a few seconds; the bar drains as the time runs out.
+- Space with a bar that isn't full still gets you off the machine. Auto Lift pumps by itself when the bar is full.
+- Nothing overlaps: the pump bar, REP, STOP TRAINING and the stamina bar each have their own space (phone and PC).
+![[GYM ARC/Screenshots/ui_compare_v2_machine_hud_pump_full_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_machine_hud_pump_pc.jpg]]

@@ -41,3 +41,6 @@ A tapping duel at two tables (starter gym and pro gym). Bigger biceps and forear
 ![[GYM ARC/Screenshots/armwrestle_win_screen.jpg]]
 ![[GYM ARC/Screenshots/armwrestle_vs_npc_phone_layout.jpg]]
 ![[GYM ARC/Screenshots/armwrestle_sign_occupy.jpg]]
+
+## Moved off the spawn (14 Oct)
+The starter gym's table was right inside the front door where you spawn. It now stands right of the center aisle, about 28 studs into the gym (Config/Social TableSpot 18, 0.1, -31).

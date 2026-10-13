@@ -96,3 +96,9 @@ Generated from `Config/Sounds` on 2026-10-13. PSE = ProSoundEffects, APM = APM M
 | StorePurchase | 9126072697 | PSE Synth Sparkle Bell Ding 1: store purchase (not wired yet) |
 | MirrorOpen | 9116395179 | PSE Magic Glows Chiming Hits 6: the mirror opens (not wired yet) |
 | Music | 9043990443, 9043990341 | APM "Lovely Sunrise" C (underscore) and A (vinyl chillhop) |
+
+## Treadmill sounds (14 Oct)
+The treadmill never plays the lifting sounds (no plate clank, bar rattle, floor thud or plate slide). Two new slots, EMPTY for you to pick (silent until you add an id):
+- TreadmillLoop: a quiet looping belt / running sound on the treadmill while someone runs; fades out in 0.3 s when they stop.
+- TreadmillStep: a soft footstep on every stride (faster when running faster).
+Also: pull-ups and dips with no plates (bodyweight) no longer clank.
