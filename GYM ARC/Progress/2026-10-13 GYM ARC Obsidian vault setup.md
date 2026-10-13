@@ -16,7 +16,7 @@ Prompt: [[2026-10-13 GYM ARC Prompt - Save everything to Obsidian]]
 - **Bugs:** 90 notes (69 fixed, 21 open or engine limits), listed in [[GYM ARC - Bugs index]].
 - **Progress:** one note per work day, 4-9 Oct and 13 Oct.
 - **Prompts:** 7 notes: the design brief, the 5 GYM_ARC prompt files and this rule.
-- **Config / Monetization / Sounds / Assets:** [[GYM ARC - Config values]], [[GYM ARC - Monetization products]], [[GYM ARC - Sounds]], [[GYM ARC - Assets]].
+- **Config / Monetization / Sounds / Assets:** [[GYM ARC - Config values]], [[GYM ARC - Monetization]], [[GYM ARC - Music and Sounds]], [[GYM ARC - Assets]].
 - **Screenshots:** all 575 copied with the same file names, including the `meshes` subfolder.
 - Added one line linking GYM ARC to `00-START-HERE.md`. Nothing else outside `GYM ARC` was changed.
 - Added the standing rule to the repo's `CLAUDE.md` (commit a6043c4).

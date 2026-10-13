@@ -24,7 +24,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ## Bugs fixed
 - [[GYM ARC - Bug - Machine sign mirrored the room|Machine sign mirrored the room]]
 - [[GYM ARC - Bug - Still saving from another server kick|Still saving from another server kick]]
-- [[GYM ARC - Bug - New players started at 7'0 test height|New players started at 7'0 test height]]
+- [[GYM ARC - Bug - New players started with test values|New players started at 7'0 test height]]
 - [[GYM ARC - Bug - Low FPS from shadow-casting gym lights|Low FPS from shadow-casting gym lights]]
 - [[GYM ARC - Bug - Upper traps never grew|Upper traps never grew]]
 - [[GYM ARC - Bug - NPC body shapes lost on players screens|NPC body shapes lost on players screens]]

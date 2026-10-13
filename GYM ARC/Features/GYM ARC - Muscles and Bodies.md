@@ -2,6 +2,7 @@
 date: 2026-10-13
 tags: [gymarc, feature]
 status: done
+aliases: ["GYM ARC - Bodies and muscles", "GYM ARC - Muscles and bodies"]
 ---
 # GYM ARC - Muscles and Bodies
 

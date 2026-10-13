@@ -25,7 +25,7 @@ Planned (new features prompt, task 1): a server-wide posing contest every few mi
 - Not built. Would reuse `Server/ShowOffService` (poses, judges, statue) and a new `Config.PosingComp`.
 
 ## Related
-[[GYM ARC - Poses and Posing Stage]], [[GYM ARC - Leaderboards and Statue]], [[GYM ARC - Titles]], [[GYM ARC - Daily Quests]]
+[[GYM ARC - Poses and Posing Stage]], [[GYM ARC - Leaderboards and Statue]], [[GYM ARC - Titles]], [[GYM ARC - Quests and Muscle of the Day]]
 
 ## Screenshots
 ![[GYM ARC/Screenshots/s3_posing-stage_after.png]]

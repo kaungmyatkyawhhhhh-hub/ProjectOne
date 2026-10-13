@@ -7,7 +7,7 @@ status: current
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
-90 bugs: 21 open or engine limits, 69 fixed. Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
+88 bugs: 21 open or engine limits, 67 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
 
 ## Open
 
@@ -47,7 +47,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Lifter saw their own Spot prompt|Lifter saw their own Spot prompt]] - 2026-10-05
 - [[GYM ARC - Bug - Machine camera hid the lifter|Machine camera hid the lifter]] - 2026-10-05
 - [[GYM ARC - Bug - Machines froze with streaming on|Machines froze with streaming on]] - 2026-10-05
-- [[GYM ARC - Bug - New players started with test values|New players started with test values]] - 2026-10-05
+- [[GYM ARC - Bug - New players started with test values|New players started with test values]] - 2026-10-05 (again on 9 Oct: 7'0 test height)
 - [[GYM ARC - Bug - Quest tracker contradicted the tutorial|Quest tracker contradicted the tutorial]] - 2026-10-05
 - [[GYM ARC - Bug - Roblox spawn pad in the menu shot|Roblox spawn pad in the menu shot]] - 2026-10-05
 - [[GYM ARC - Bug - Stats coach line and panel overlapped|Stats coach line and panel overlapped]] - 2026-10-05
@@ -98,9 +98,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Treadmills were only decoration|Treadmills were only decoration]] - 2026-10-08
 - [[GYM ARC - Bug - Low FPS from shadow-casting gym lights|Low FPS from shadow-casting gym lights]] - 2026-10-09
 - [[GYM ARC - Bug - Machine sign mirrored the room|Machine sign mirrored the room]] - 2026-10-09
-- [[GYM ARC - Bug - NPC body shapes lost on players screens|NPC body shapes lost on players screens]] - 2026-10-09
-- [[GYM ARC - Bug - New players started at 7'0 test height|New players started at 7'0 test height]] - 2026-10-09
+- [[GYM ARC - Bug - NPC body shapes lost on players screens|NPC body shapes lost on players screens]] - 2026-10-09 (Dante skinny / huge, fixed for good 13 Oct)
 - [[GYM ARC - Bug - Still saving from another server kick|Still saving from another server kick]] - 2026-10-09
 - [[GYM ARC - Bug - Upper traps never grew|Upper traps never grew]] - 2026-10-09
 - [[GYM ARC - Bug - 7'0 players did not fit some equipment|7'0 players did not fit some equipment]] - 2026-10-13
-- [[GYM ARC - Bug - Dante skinny then suddenly huge|Dante skinny then suddenly huge]] - 2026-10-13

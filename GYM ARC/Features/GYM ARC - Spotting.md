@@ -27,7 +27,7 @@ Help another player lift: stand by their machine and click to push. They get a g
 - `Config/Spotting`, spot types in `Config/Machines`
 - `Server/SpotService`, `SpotClient`, builder `tools/builders/SpotPoints`
 - Tests: `tests/spotting`
-- Sounds SpotPush, SpotBoostOn, SpotCombo, SpotAssist, SpotPayout are placeholders (see [[GYM ARC - Sounds]])
+- Sounds SpotPush, SpotBoostOn, SpotCombo, SpotAssist, SpotPayout are placeholders (see [[GYM ARC - Music and Sounds]])
 
 ## Known issues
 - Not yet tested with two real players (only solo with simulated messages).

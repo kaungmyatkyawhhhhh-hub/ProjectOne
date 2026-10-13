@@ -8,7 +8,7 @@ status: current
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 Every mesh, texture, image, clothing item and animation the game uses, with its id and where it is used. Our own
-uploads belong to the group "Myanmar Builders Club" (owns the game). Sounds are in [[GYM ARC - Sounds]].
+uploads belong to the group "Myanmar Builders Club" (owns the game). Sounds are in [[GYM ARC - Music and Sounds]].
 
 **Creator Store:** nothing has been inserted from the Creator Store / toolbox. NPC hair and clothes are Roblox-made
 catalog items only. The world (gyms, town, machines, plates, props) is built from parts by builder scripts in Studio.
