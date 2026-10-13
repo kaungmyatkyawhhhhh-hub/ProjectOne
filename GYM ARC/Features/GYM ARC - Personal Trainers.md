@@ -35,3 +35,12 @@ A coach who follows you around, stands beside your machine and cheers you on. Bu
 ![[GYM ARC/Screenshots/trainers_panel_hire.jpg]]
 ![[GYM ARC/Screenshots/trainer_following.jpg]]
 ![[GYM ARC/Screenshots/trainers_cheering_bench.jpg]]
+
+## UI v2 change (13 Oct)
+- The Trainers window now shows four picture tiles with NO names anywhere: just the perk (+5% EXP, +10% Stamina, +5% Coins, +25% Pump) and the coin price (300, 450, 600, 800).
+- Tap a tile to hire him (anywhere now; the Trainer Desk prompt opens the same window). Not enough coins: the tile shakes and a small "Not enough coins" note shows.
+- Hired: TAP TO EQUIP. Following: green outline and FOLLOWING; tap again to stop.
+- Bottom: "Following 1/1" and the gold 2ND SLOT button for the Extra Trainer pass (id 2032496303).
+- The trainers who follow you now look like their pictures: red cap and red shirt, white headband and green shirt, gold visor and yellow shirt, black headphones and purple shirt. Their name tags are gone.
+![[GYM ARC/Screenshots/ui_compare_v2_06_trainers_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_06_trainer_follower_red_cap.jpg]]

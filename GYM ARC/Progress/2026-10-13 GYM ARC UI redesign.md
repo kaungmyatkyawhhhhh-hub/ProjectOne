@@ -49,3 +49,7 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_07_growth_spurt_moment_phone.jpg]]
 - Shop window (mockup 04) done: Gym Store with pass cards, Robux prices from Roblox and a big detail panel with the buy button. Only items with ids show (today: Extra Trainer).
 ![[GYM ARC/Screenshots/ui_compare_v2_04_shop_phone.jpg]]
+- Part 3 Trainers (mockup 06) done: picture tiles with perk + price only, tap to hire / equip / unequip, Not enough coins shake, gold 2ND SLOT pass button; followers now look like their pictures and have no name tags.
+![[GYM ARC/Screenshots/ui_compare_v2_06_trainers_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_06_trainers_following_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_06_trainer_follower_red_cap.jpg]]

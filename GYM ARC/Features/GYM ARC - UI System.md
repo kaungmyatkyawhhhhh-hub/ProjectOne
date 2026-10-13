@@ -29,6 +29,8 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 
 - **Shop (mockup 04):** the gold Shop tile (after the tutorial + 5 minutes, only when something is for sale) opens the Gym Store: cards with art and Robux price, the picked item big on the right with the green buy button (the only thing that opens a purchase). Test switch in Studio: Workspace attribute TestStore = true.
 
+- **Trainers (mockup 06):** four picture tiles, no names: the perk and a coin price. Tap to hire (anywhere), TAP TO EQUIP once hired, green FOLLOWING when he follows you (tap again to stop). Not enough coins: the tile shakes. Bottom: Following 1/1 and the gold 2ND SLOT pass button.
+
 ## Where it lives (UI v2)
 - `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
 
@@ -93,3 +95,6 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_v2_07_stats_genetics_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_07_growth_spurt_moment_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_04_shop_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_06_trainers_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_06_trainers_following_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_06_trainer_follower_red_cap.jpg]]

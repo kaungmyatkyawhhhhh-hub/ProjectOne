@@ -506,3 +506,12 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 | Rivals | One per gym, record numbers per gym |
 | Pets | Bonus default 0 |
 | Config.DayNight | Length 20 min |
+
+## Trainers (UI v2, 13 Oct)
+- Prices: +5% EXP 300, +10% Stamina 450, +5% Coins 600, +25% Pump 800 coins (`Config/Trainers`, price).
+- Slots: 1, +1 with the Extra Trainer pass (id 2032496303).
+- Each trainer's look (shirt color, hat, hat color) is in `Config/Trainers` look.
+
+## Studio test switches (Workspace attributes)
+- TestStore = true: the Shop tile shows at once (no tutorial / 5 minute wait).
+- TestCoins = number: start with that many coins (temporary data).
