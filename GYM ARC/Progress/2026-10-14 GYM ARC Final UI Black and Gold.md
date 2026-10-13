@@ -99,3 +99,12 @@ A new Settings row, Reduce Motion (Off by default). On = the looping pulses and 
 
 ## Arm wrestling: one per stool
 Owner's request ([[2026-10-14 GYM ARC Prompt - Arm wrestling one per seat]]): only one person or NPC per arm wrestling stool. NPC opponents now lock their stool while they're on it; tested in Play (dropping a dummy onto the NPC's stool and forcing it to sit: it never stays on). Also fixed a small bug found while testing: the OCCUPY prompt could stay off after a match. See [[GYM ARC - Arm Wrestling]].
+
+## 8. Loading screen
+- The GYM ARC logo is now a picture (the white and red logo), with "Everyone starts tiny." in gray under it. The main menu uses the same picture.
+- The tip sits in a dark tile with a small gold TIP tag.
+- At the bottom: what is loading ("LOADING THE GYM") in bold italic, the percent in gold on the right, a thick shiny red bar, and small dots under it (the gold one is the current tip).
+- SKIP is a quiet dark button in the top right.
+Mockup, then the game:
+![[GYM ARC/Screenshots/ui_compare_final_00_loading_mockup.png]]
+![[GYM ARC/Screenshots/ui_compare_final_00_loading_game.jpg]]

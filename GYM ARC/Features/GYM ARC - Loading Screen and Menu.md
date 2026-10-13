@@ -60,3 +60,7 @@ The left menu tiles are vertically centered on the left side (never higher than 
 ## Final look (14 Oct)
 The main menu is one dark panel on the left: logo, tagline, red PLAY, gold SHOP, dark UPDATES, then your picture, name, level, height and coins. A small NEW tag bottom right names the newest update. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
 ![[GYM ARC/Screenshots/ui_compare_final_00_title_phone.jpg]]
+
+## Final loading screen (14 Oct)
+Logo picture, gray tagline, the tip in a dark tile with a gold TIP tag, a shiny red bar with the gold percent, small tip dots and a quiet SKIP. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
+![[GYM ARC/Screenshots/ui_compare_final_00_loading_game.jpg]]

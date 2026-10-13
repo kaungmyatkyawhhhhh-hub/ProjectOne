@@ -158,3 +158,6 @@ lift aura particles (5 colors), pets (3-4 new, simple, original), rival NPCs (2 
 stage with spotlights and scoreboard, arm wrestling tables in both gyms, smoothie bar counter and cart, 6 leaderboard
 boards with avatar headshots, day/night street lights. Any new art should be built in Studio or be Roblox-made, with
 nothing from the Creator Store unless it is made by Roblox or a trusted creator (all scripts removed).
+
+## Logo image (14 Oct)
+- GYM ARC logo (white GYM, red ARC): rbxassetid://84167052331251, from Downloads/gym_arc_ui_3d_icons/logo.png (1182 x 286). Used on the loading screen and the main menu (`Config/UI.Logo`).
