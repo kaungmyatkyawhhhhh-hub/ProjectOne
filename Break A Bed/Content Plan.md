@@ -212,6 +212,11 @@ Seen from spawn, everything is squeezed into the back corner while the big paved
   1. **The TRAINING sign is still at the back-left end**, facing away from spawn and past the plaza edge. It goes on the **front edge of the floor, the end nearest spawn and the Glove Shop**, centered and facing spawn.
   2. **The Glove Shop's pad is on the walking route** from spawn to training, so players would open the shop every time they walk past. Move the shop to the **left side of the route** (toward the bed path side, without blocking it), with its pad facing the route but **at least 4 studs off it**, and at least 6 studs from the spawn circle.
 
+- **View from spawn (2026-10-13, latest):** the layout works now (the TRAINING sign faces spawn and the posts are unique and spread out). One thing is left: **the post name labels overlap** ("Stone P…" behind "Wooden Post", "Bamboo Post" on top of another).
+  - Size the labels in **studs, not pixels** (BillboardGui `Size` in scale), so far-away labels shrink naturally. Set `AlwaysOnTop` off so a post in front hides the label behind it.
+  - Set `MaxDistance` to about 40 studs, so only nearby posts show labels.
+  - Put each label just above its own post, at the same small height for all.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
