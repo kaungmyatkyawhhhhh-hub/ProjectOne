@@ -20,6 +20,7 @@ export type CarSpec = {
 	Color: Color3,
 	Accent: Color3?,
 	Order: number,
+	Electric: boolean?, -- one gear, no engine sound
 }
 
 local Cars = {}
@@ -38,9 +39,9 @@ local list: { CarSpec } = {
 	-- Starter cars (beginner)
 	{ Id = "suzaki_swift", Name = "Suzaki Swiff", Class = "Sedan", Tier = "Starter", TopSpeed = 112, ZeroToSixty = 9.5, Handling = 0.62, Price = 0, Color = Color3.fromRGB(200, 30, 36), Order = 1 },
 	{ Id = "toyoka_belta", Name = "Toyoka Belto", Class = "Sedan", Tier = "Starter", TopSpeed = 112, ZeroToSixty = 10.5, Handling = 0.55, Price = 6000, Color = Color3.fromRGB(196, 199, 204), Order = 2 },
-	{ Id = "byt_dolphin", Name = "BYT Dolphin EV", Class = "Sedan", Tier = "Starter", TopSpeed = 100, ZeroToSixty = 8.0, Handling = 0.55, Price = 9000, Color = Color3.fromRGB(120, 190, 200), Order = 3 },
-	{ Id = "kio_ev6", Name = "Kio EV6", Class = "SUV", Tier = "Starter", TopSpeed = 93, ZeroToSixty = 9.5, Handling = 0.5, Price = 11000, Color = Color3.fromRGB(235, 236, 238), Order = 4 },
-	{ Id = "byt_seal", Name = "BYT Seal EV", Class = "Sedan", Tier = "Starter", TopSpeed = 100, ZeroToSixty = 7.3, Handling = 0.55, Price = 14000, Color = Color3.fromRGB(40, 90, 160), Order = 5 },
+	{ Id = "byt_dolphin", Name = "BYT Dolphin EV", Class = "Sedan", Tier = "Starter", TopSpeed = 100, ZeroToSixty = 8.0, Handling = 0.55, Price = 9000, Color = Color3.fromRGB(120, 190, 200), Order = 3, Electric = true },
+	{ Id = "kio_ev6", Name = "Kio EV6", Class = "SUV", Tier = "Starter", TopSpeed = 93, ZeroToSixty = 9.5, Handling = 0.5, Price = 11000, Color = Color3.fromRGB(235, 236, 238), Order = 4, Electric = true },
+	{ Id = "byt_seal", Name = "BYT Seal EV", Class = "Sedan", Tier = "Starter", TopSpeed = 100, ZeroToSixty = 7.3, Handling = 0.55, Price = 14000, Color = Color3.fromRGB(40, 90, 160), Order = 5, Electric = true },
 	{ Id = "toyoka_camri", Name = "Toyoka Camri", Class = "Sedan", Tier = "Starter", TopSpeed = 135, ZeroToSixty = 7.6, Handling = 0.58, Price = 16000, Color = Color3.fromRGB(20, 21, 24), Order = 6 },
 	{ Id = "toyoka_crown", Name = "Toyoka Crowne Athlete", Class = "Sedan", Tier = "Starter", TopSpeed = 143, ZeroToSixty = 6.9, Handling = 0.6, Price = 22000, Color = Color3.fromRGB(235, 236, 238), Order = 7 },
 	{ Id = "toyoka_alfard", Name = "Toyoka Alfard", Class = "SUV", Tier = "Starter", TopSpeed = 112, ZeroToSixty = 8.5, Handling = 0.45, Price = 28000, Color = Color3.fromRGB(20, 21, 24), Order = 8 },
@@ -64,14 +65,14 @@ local list: { CarSpec } = {
 	{ Id = "bentz_cls63s", Name = "Mercer CLS 63 S", Class = "Sedan", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 3.6, Handling = 0.72, Price = 160000, Color = Color3.fromRGB(20, 21, 24), Order = 24 },
 	{ Id = "toyoka_supra_mk4", Name = "Toyoka Supro MK4", Class = "Coupe", Tier = "Mid", TopSpeed = 180, ZeroToSixty = 4.6, Handling = 0.76, Price = 140000, Color = Color3.fromRGB(220, 100, 20), Order = 25 },
 	{ Id = "dodger_challenger", Name = "Dodger Challenjer", Class = "Coupe", Tier = "Mid", TopSpeed = 175, ZeroToSixty = 4.2, Handling = 0.66, Price = 115000, Color = Color3.fromRGB(176, 14, 18), Accent = Color3.fromRGB(16, 16, 18), Order = 26 },
-	{ Id = "xiaomo_su7", Name = "Xiaomo SU7", Class = "Sedan", Tier = "Mid", TopSpeed = 165, ZeroToSixty = 2.8, Handling = 0.78, Price = 120000, Color = Color3.fromRGB(40, 90, 160), Order = 27 },
+	{ Id = "xiaomo_su7", Name = "Xiaomo SU7", Class = "Sedan", Tier = "Mid", TopSpeed = 165, ZeroToSixty = 2.8, Handling = 0.78, Price = 120000, Color = Color3.fromRGB(40, 90, 160), Order = 27, Electric = true },
 	{ Id = "bnw_x6", Name = "BNW X6 M Sport", Class = "SUV", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.2, Handling = 0.6, Price = 130000, Color = Color3.fromRGB(20, 21, 24), Order = 28 },
 	{ Id = "bnw_x7", Name = "BNW X7", Class = "SUV", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.5, Handling = 0.56, Price = 175000, Color = Color3.fromRGB(235, 236, 238), Order = 29 },
 	{ Id = "toyoka_lc300", Name = "Toyoka Land Cruzer 300", Class = "SUV", Tier = "Mid", TopSpeed = 130, ZeroToSixty = 6.5, Handling = 0.5, Price = 150000, Color = Color3.fromRGB(235, 236, 238), Order = 30 },
 	{ Id = "lexis_lx700", Name = "Lexis LX700", Class = "SUV", Tier = "Mid", TopSpeed = 137, ZeroToSixty = 6.4, Handling = 0.5, Price = 245000, Color = Color3.fromRGB(12, 12, 14), Order = 31 },
 	{ Id = "bentz_gle53", Name = "Mercer GLE 53", Class = "SUV", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.0, Handling = 0.62, Price = 250000, Color = Color3.fromRGB(165, 168, 172), Order = 32 },
 	{ Id = "bentz_g63", Name = "Mercer G63", Class = "SUV", Tier = "Mid", TopSpeed = 149, ZeroToSixty = 4.4, Handling = 0.52, Price = 260000, Color = Color3.fromRGB(20, 21, 24), Order = 33 },
-	{ Id = "byt_u8", Name = "BYT Yangwong U8", Class = "SUV", Tier = "Mid", TopSpeed = 124, ZeroToSixty = 3.6, Handling = 0.55, Price = 290000, Color = Color3.fromRGB(20, 21, 24), Order = 34 },
+	{ Id = "byt_u8", Name = "BYT Yangwong U8", Class = "SUV", Tier = "Mid", TopSpeed = 124, ZeroToSixty = 3.6, Handling = 0.55, Price = 290000, Color = Color3.fromRGB(20, 21, 24), Order = 34, Electric = true },
 	{ Id = "porsha_panamera", Name = "Porsha Panamera Turbo S", Class = "Sedan", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 3.0, Handling = 0.8, Price = 300000, Color = Color3.fromRGB(88, 92, 98), Order = 35 },
 	{ Id = "chevo_camaro", Name = "Chevo Camaro SS", Class = "Coupe", Tier = "Mid", TopSpeed = 165, ZeroToSixty = 4.0, Handling = 0.74, Price = 62000, Color = Color3.fromRGB(230, 180, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 36 },
 	{ Id = "chevo_c6", Name = "Chevo Corvette C6", Class = "Coupe", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 4.2, Handling = 0.8, Price = 78000, Color = Color3.fromRGB(26, 44, 82), Order = 37 },

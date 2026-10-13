@@ -149,6 +149,7 @@ type State = {
 	agear: number, -- the automatic gearbox's gear (1..GEARS)
 	shiftT: number, -- seconds left of a shift: no drive while the gear changes
 	nextGear: number,
+	electric: boolean, -- one gear, silent motor
 	powerK: number, -- per car, so 0-60 mph matches its real time with gears and shifts
 	dragC: number, -- per car aero drag
 	brakeIn: number, -- the brakes bite in over a moment
@@ -445,15 +446,23 @@ end
 ---------------------------------------------------------------------
 -- Drivetrain: gears, torque, shifts
 ---------------------------------------------------------------------
--- the share of top speed each gear reaches at the rev limiter; top gear reaches top speed at
--- 88% of the revs, so the car tops out without hitting the limiter
+-- gear ratios as the share of top speed each gear reaches (at 88% of the revs); top gear reaches
+-- top speed at 88% of the revs, so the car tops out without hitting the limiter. Each higher
+-- gear pulls less (the ratio), so the revs climb slower in the upper gears, like a real gearbox
+local RATIOS = { 0.30, 0.45, 0.58, 0.69, 0.79, 0.89, 1.0 }
 local function gearHi(g: number): number
-	return (math.max(g, 1) / GEARS) ^ 1.25 / 0.88
+	return RATIOS[math.clamp(g, 1, GEARS)] / 0.88
 end
 
--- low gears pull harder
+-- pull at the wheels in a gear: engine torque times the gear ratio (1st gear = 1)
 local function gearMul(g: number): number
-	return 1 + 0.25 * (1 - (math.max(g, 1) - 1) / (GEARS - 1))
+	return gearHi(1) / gearHi(g)
+end
+
+-- an electric car's single gear: full pull up to 35% of top speed, then its power runs out with
+-- speed (no shifts, no limiter)
+local function evPull(frac: number): number
+	return math.min(1, 0.35 / math.max(frac, 1e-3))
 end
 
 -- engine torque over the rev range (rev 0..1 of the limiter): soft at the bottom, strongest in the
@@ -468,9 +477,11 @@ end
 local UPSHIFT_AT = 0.92 -- flat out the automatic shifts here
 local SHIFT_TIME = 0.2
 
--- air drag that exactly balances top gear's pull at top speed (at 88% of the revs)
-local function dragFor(accel: number, k: number, top: number): number
-	return math.max(accel * k * torqueCurve(0.88) * gearMul(GEARS) - 2, 0.5) / (top * top)
+-- air drag: at top speed it takes three quarters of the pull, the rest is held back by the
+-- top speed limit, so cars reach their real top speed in a sensible time
+local function dragFor(accel: number, k: number, top: number, electric: boolean): number
+	local topPull = accel * k * (if electric then evPull(1) else torqueCurve(0.88) * gearMul(GEARS))
+	return math.max(0.75 * topPull - 2, 0.5) / (top * top)
 end
 
 -- the power scale that gives a car its real 0-60 mph time once gears, shifts and drag are in
@@ -484,14 +495,17 @@ local function powerFor(spec: Cars.CarSpec): (number, number)
 		return cached[1], cached[2]
 	end
 	local target = Config.mphToSps(60)
+	local electric = spec.Electric == true
 	local function zeroToSixty(k: number): number
-		local c = dragFor(accel, k, top)
+		local c = dragFor(accel, k, top, electric)
 		local v, g, cut, t, dt = 0, 1, 0, 0, 1 / 60
 		while t < 40 do
 			local frac = v / top
 			local rev = frac / gearHi(g)
 			local a = 0
-			if cut > 0 then
+			if electric then
+				a = accel * k * evPull(frac)
+			elseif cut > 0 then
 				cut -= dt
 			else
 				a = accel * k * torqueCurve(math.max(rev, 0.3)) * gearMul(g)
@@ -509,8 +523,8 @@ local function powerFor(spec: Cars.CarSpec): (number, number)
 		end
 		return 40
 	end
-	local lo, hi = 0.3, 6
-	for _ = 1, 16 do
+	local lo, hi = 0.3, 8
+	for _ = 1, 18 do
 		local mid = (lo + hi) / 2
 		if zeroToSixty(mid) > spec.ZeroToSixty then
 			lo = mid
@@ -518,8 +532,8 @@ local function powerFor(spec: Cars.CarSpec): (number, number)
 			hi = mid
 		end
 	end
-	powerCache[spec.Id] = { hi, dragFor(accel, hi, top) }
-	return hi, dragFor(accel, hi, top)
+	powerCache[spec.Id] = { hi, dragFor(accel, hi, top, electric) }
+	return hi, dragFor(accel, hi, top, electric)
 end
 
 -- the live cluster on the dashboard: built again (needle sweep and all) when switched on or when
@@ -576,11 +590,17 @@ local function carKey(s: State, key: Enum.KeyCode)
 			s.engineOn = false
 			s.engine:setRunning(false)
 			setCarPower(s, false)
-			UI.toast("Engine off")
+			UI.toast(if s.electric then "Power off" else "Engine off")
 		elseif s.cranking <= 0 then
-			s.cranking = 0.8
-			Audio.engineStart()
+			if s.electric then
+				s.cranking = 0.3 -- an electric car is just ready, silently
+			else
+				s.cranking = 0.8
+				Audio.engineStart()
+			end
 		end
+	elseif (key == Enum.KeyCode.E or key == Enum.KeyCode.Q) and s.electric then
+		UI.toast("Electric: one gear, just drive")
 	elseif key == Enum.KeyCode.E or key == Enum.KeyCode.Q then
 		if not s.manual then
 			s.manual = true
@@ -1122,7 +1142,7 @@ function Driving.attach(model: Model)
 		ignition = true, -- no ignition key (owner): the dash is always on in the car
 		engineOn = autoStart,
 		cranking = 0,
-		manual = Driving.gearbox == "Manual",
+		manual = Driving.gearbox == "Manual" and spec.Electric ~= true,
 		mgear = 0,
 		clutch = false,
 		freeRpm = 0,
@@ -1137,6 +1157,7 @@ function Driving.attach(model: Model)
 		agear = 1,
 		shiftT = 0,
 		nextGear = 1,
+		electric = spec.Electric == true,
 		powerK = 1,
 		dragC = 0,
 		brakeIn = 0,
@@ -1152,8 +1173,8 @@ function Driving.attach(model: Model)
 	}
 	state = s
 	s.powerK, s.dragC = powerFor(spec)
-	s.engine:setRunning(s.engineOn)
-	if s.engineOn then
+	s.engine:setRunning(s.engineOn and not s.electric)
+	if s.engineOn and not s.electric then
 		Audio.engineStart()
 	else
 		setClusterPower(s, false) -- dark dash and lights until the engine starts
@@ -1247,7 +1268,7 @@ function Driving.step(dt: number)
 		s.cranking -= dt
 		if s.cranking <= 0 and s.ignition then
 			s.engineOn = true
-			s.engine:setRunning(true)
+			s.engine:setRunning(not s.electric)
 			setCarPower(s, true)
 			UI.setIndicators(indicatorState(s))
 		end
@@ -1274,7 +1295,7 @@ function Driving.step(dt: number)
 	s.launchReady = holding
 	s.throttle += (throttle - s.throttle) * math.min(1, dt * 10)
 	-- lifting off at high revs: a short crackle of pops + flames
-	if s.throttleIn > 0.7 and throttle < 0.2 and s.rpm > 0.6 and Config.spsToMph(s.vel.Magnitude) > 30 then
+	if s.throttleIn > 0.7 and throttle < 0.2 and s.rpm > 0.6 and Config.spsToMph(s.vel.Magnitude) > 30 and not s.electric then
 		s.pops = math.random(2, 4)
 		s.popTimer = 0.04
 	end
@@ -1310,7 +1331,7 @@ function Driving.step(dt: number)
 		s.brakeIn += (brake - s.brakeIn) * math.min(1, dt * 7)
 		-- the automatic picks its gear by revs and how hard you press: flat out it holds each gear
 		-- near the limiter, cruising it shifts early; pressing hard at low revs kicks down
-		if not s.manual and s.shiftT <= 0 then
+		if not s.manual and s.shiftT <= 0 and not s.electric then
 			if fwdSpeed > 1 and s.engineOn then
 				local rev = speedFrac / gearHi(s.agear)
 				if s.agear < GEARS and rev >= 0.5 + (UPSHIFT_AT - 0.5) * throttle then
@@ -1327,11 +1348,12 @@ function Driving.step(dt: number)
 		local gearNow = if s.manual then s.mgear else s.agear
 		local engaged = s.engineOn and not s.clutch and s.shiftT <= 0 and gearNow ~= 0
 		if engaged and gearNow > 0 and fwdSpeed > -2 then
-			local rev = math.max(speedFrac, 0) / gearHi(gearNow)
-			if throttle > 0 then
-				a += s.accel * s.powerK * throttle * torqueCurve(math.max(rev, 0.3)) * gearMul(gearNow) * (if s.launch > 0 then 1.15 else 1)
-			elseif fwdSpeed > 2 then
-				a -= 3 + 6 * math.min(rev, 1) -- engine braking, stronger at high revs
+			local rev = if s.electric then math.max(speedFrac, 0) else math.max(speedFrac, 0) / gearHi(gearNow)
+			if throttle > 0 and speedFrac < 1 then -- at top speed the limiter holds it there
+				local pull = if s.electric then evPull(math.max(speedFrac, 0)) else torqueCurve(math.max(rev, 0.3)) * gearMul(gearNow)
+				a += s.accel * s.powerK * throttle * pull * (if s.launch > 0 then 1.15 else 1)
+			elseif throttle == 0 and fwdSpeed > 2 then
+				a -= 3 + 6 * math.min(rev, 1) -- engine braking (regen on an electric car)
 			end
 			if rev > 1.02 then
 				a -= 30 * (rev - 1) -- shifted down too early: the engine holds the car back
@@ -1339,9 +1361,12 @@ function Driving.step(dt: number)
 		elseif throttle > 0 and fwdSpeed < -2 then
 			a += 140 * throttle -- braking out of reverse
 		end
+		-- reverse: up to a third of top speed (35 mph at most), pulling away briskly
+		local reverseTop = Config.mphToSps(math.min(35, s.spec.TopSpeed * 0.33))
+		local reversePull = math.max(s.accel * s.powerK * 0.8, 18)
 		if s.manual then
-			if engaged and gearNow < 0 and throttle > 0 and fwdSpeed > -s.topSpeed * 0.22 then
-				a -= if fwdSpeed > 2 then 140 * throttle else s.accel * 0.6 * throttle
+			if engaged and gearNow < 0 and throttle > 0 and fwdSpeed > -reverseTop then
+				a -= if fwdSpeed > 2 then 140 * throttle else reversePull * throttle
 			end
 			if fwdSpeed > 2 then
 				a -= 150 * s.brakeIn
@@ -1350,8 +1375,8 @@ function Driving.step(dt: number)
 			end
 		elseif fwdSpeed > 2 then
 			a -= 150 * s.brakeIn
-		elseif brake > 0 and fwdSpeed > -s.topSpeed * 0.22 and s.engineOn and not s.launchReady then
-			a -= s.accel * 0.6 * brake -- automatic: hold the brake at a stop to reverse
+		elseif brake > 0 and fwdSpeed > -reverseTop and s.engineOn and not s.launchReady then
+			a -= reversePull * brake -- automatic: hold the brake at a stop to reverse
 		end
 		if s.launchReady then
 			a, fwdSpeed = 0, 0 -- launch control: the brakes hold the car while the revs build
@@ -1488,14 +1513,16 @@ function Driving.step(dt: number)
 		elseif fs < -1 then
 			s.gear = "R"
 		elseif math.abs(fs) < 1 and throttle == 0 then
-			s.gear = "N"
+			s.gear = if s.electric then "D" else "N"
 		else
-			s.gear = tostring(s.agear)
+			s.gear = if s.electric then "D" else tostring(s.agear)
 		end
 		if free then
 			target = s.freeRpm
 		elseif fs < -1 or (s.manual and s.mgear < 0) then
-			target = math.clamp(0.12 + 0.8 * -fs / (s.topSpeed * 0.22), 0.12, 1)
+			target = math.clamp(0.12 + 0.8 * -fs / Config.mphToSps(math.min(35, s.spec.TopSpeed * 0.33)), 0.12, 1)
+		elseif s.electric then
+			target = 0.1 + 0.85 * frac -- the motor's speed: no gears, no limiter
 		elseif s.launchReady then
 			target = 0.62 -- launch control holds the revs
 		elseif s.gear == "N" then
@@ -1763,7 +1790,7 @@ function Driving.setGearbox(mode: string)
 	Driving.gearbox = if mode == "Manual" then "Manual" else "Auto"
 	local s = state
 	if s then
-		s.manual = Driving.gearbox == "Manual"
+		s.manual = Driving.gearbox == "Manual" and not s.electric
 		s.mgear = if s.manual then (tonumber(s.gear) or 0) else 0
 		UI.setIndicators(indicatorState(s))
 	end

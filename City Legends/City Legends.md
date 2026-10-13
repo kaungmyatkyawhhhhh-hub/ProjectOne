@@ -158,3 +158,8 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - Sound (owner): a loud tyre screech pulling away hard (first ~12% of top speed, quieter with traction control on), on a launch, and a short chirp when a hard 1st-3rd gear shift kicks in. It's sound only, with no smoke. Wind noise for your own car starts at walking pace and roars at speed.
   - Launch control (automatic): hold the brake and floor it at a stop, the revs hold at about 60%, then let go of the brake to launch.
   - Starting the engine (F) switches on the dash (with its needle sweep) and the headlights. Stopping it switches them off. Before the first start, the dash and lights are dark. L still toggles the lights while running.
+- **Gears, EVs, reverse (2026-10-13, owner: revs climbed too fast in 3rd-5th, EVs one gear and silent, reverse too slow):**
+  - Real gearbox spacing. Each gear reaches 30/45/58/69/79/89/100% of top speed (at 88% of the revs). Each higher gear pulls less, by its ratio, so acceleration falls off with speed like a real car. Checked in a simulation against the real LP750 SV: 0-124 mph 8.4 s (real 8.6). Every car reaches its full top speed in 7th at 88% of the revs, held there by a top speed limit.
+  - Electric cars (`Electric = true` in Cars: Dolphin, EV6, Seal, SU7, U8): one gear "D", full pull up to about 35% of top speed then fading, no shifts, no engine sound (wind and tyres only), no exhaust pops. F switches them on silently. Q / E do nothing on them.
+  - Reverse: up to a third of top speed (35 mph at most), with a brisker pull.
+  - Cars still without a real model: BYT Dolphin EV, BYT Seal EV, Toyoka Land Cruzer 300, Mercer GT63 S, Bentlee Continental GT, Bentlee Bentayga, Rolls Royal Cullinan.
