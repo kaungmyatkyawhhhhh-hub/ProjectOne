@@ -42,6 +42,7 @@ Every post gets its own model, punch effect and sound, so each new post feels li
 - **Resets:** Cash, Strength, beds completed, posts owned. **Keeps:** auras, passes, codes, gifts, Level, daily streak.
 - **Gives, forever:** **+50% Strength and +25% Cash per rebirth** (stacking), plus **1 Rebirth Token** each time.
 - **Rebirth Token shop** (inside the rebirth menu): permanent upgrades, like start with $1K, +1 auto-punch speed, posts 10% cheaper, +5% crit chance and +1 free Spin a day. Each costs 1–3 tokens.
+- **Discovered beds and posts go black again on every rebirth (owner, 2026-10-14);** Bed 1 and Post 1 stay discovered.
 - **Shows off:** the rebirth count on the leaderboard and over the head ("⟳ 3"), with a new name-tag color at 1/5/10/25.
 - **Menu (replaced by "Simpler menu" below):** UI Kit dark window, rainbow title "REBIRTH". It has a "You lose / You keep / You get" layout and a big gold REBIRTH button with a confirm step, then a white flash, rays and a fanfare.
 - **Simpler menu (owner, 2026-10-13):** the first build had too much text (three columns of "You lose / You keep / You get"), and even the owner needed 10 seconds to understand it. Kids must get it in **2 seconds, from pictures**. New layout, top to bottom:
