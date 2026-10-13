@@ -53,3 +53,12 @@ Based on tips from a developer whose game peaks at 1K players (TikTok, shared by
 ## Thumbnails and trailer
 - Take real screenshots in Studio of the coolest moments: a bed shattering with Cash flying, the long path of glowing beds, the leaderboards. Add the title on top.
 - A 15–30 s trailer: punch → bed breaks → huge numbers → the Infinity Bed. Record it with Roblox's video recording (Esc → Record) or OBS.
+
+## Next retention features (2026-10-13, after the funnel)
+Already in the game: daily reward with OP Day 7, Daily Quests, Boost Inventory, Free Gifts, codes, like goal, favorite popup, Halloween crate. These give reasons to come back; the ones below add the missing ones. Build in this order:
+1. **Offline earnings:** when a player comes back, a popup "While you were away you earned 💪 X and $Y!" with COLLECT (and "x2 with Robux" later). Based on time away (max 8 hours) × their best post / bed, at a low rate. Simulators rely on this: players come back to collect.
+2. **Experience notifications (opt-in):** ask players once (after the first daily reward claim) with `ExperienceNotificationService:PromptOptIn`, then send "🎁 Your daily reward is ready!" / "⚡ New quests are here!" / "🎃 Halloween crate ends tomorrow!". Sending goes through Roblox's Open Cloud notifications API; Claude Code checks the current docs for how (it may need a small outside server or Roblox's built-in triggers).
+3. **Play with friends:** an "Invite friends" button (`SocialService:PromptGameInvite`) and **+10% Strength per friend in the server** (max +30%) shown on the HUD. Players who play with friends come back far more often.
+4. **Rebirths:** the long-term goal (reset for a permanent Strength boost + a rebirth counter and title), unlocked around bed 12.
+5. **Event countdowns on screen:** "🎃 Halloween ends in 18d 4h" on the crate button and in the shop, so players know to come back before it's gone. Same for every future event.
+6. **Weekly updates + group shouts:** each update gets a group shout and a new code ("New code in the group!"), which brings old players back.
