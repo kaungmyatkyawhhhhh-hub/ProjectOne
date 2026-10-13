@@ -26,3 +26,6 @@ Small groups of friends with a name and a short tag above their heads.
 
 ## Related
 [[GYM ARC - Leaderboards and Statue]], [[GYM ARC - UI System]]
+
+## Avatar headshots (14 Oct)
+Player pictures here are the real Roblox avatar headshot in a plain dark circle (the same look everywhere, see [[GYM ARC - Loading Screen and Menu]]).

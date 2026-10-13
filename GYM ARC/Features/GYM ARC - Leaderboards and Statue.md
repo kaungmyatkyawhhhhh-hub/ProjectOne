@@ -42,3 +42,6 @@ A wall leaderboard in the starter gym and a marble statue of the strongest playe
 ![[GYM ARC/Screenshots/leaderboards_starter_gym.jpg]]
 ![[GYM ARC/Screenshots/leaderboards_pro_gym.jpg]]
 ![[GYM ARC/Screenshots/leaderboards_town_plaza.jpg]]
+
+## Avatar headshots (14 Oct)
+Player pictures here are the real Roblox avatar headshot in a plain dark circle (the same look everywhere, see [[GYM ARC - Loading Screen and Menu]]).

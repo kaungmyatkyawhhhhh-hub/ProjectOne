@@ -36,3 +36,23 @@ A barbell loading screen from the first frame, then a slow cinematic tour of the
 - After PLAY the camera sits behind your character at a distance that fits your height.
 ![[GYM ARC/Screenshots/ui_compare_v2_00_loading_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_00_main_menu_phone.jpg]]
+
+## New main menu (14 Oct)
+Rebuilt to match the new mockup: clean and dark, no thick black outlines, no glossy buttons.
+- Background: the menu art on the right fading into the dark, plus a soft dark copy over the whole screen. The art is loaded before the menu shows, so it is never just a dark screen.
+- Left column, vertically centered: SEASON 1 · NOW LIVE (gold), the GYM ARC logo (white + red, small drop shadow), a short red line + "Everyone starts tiny.", a red PLAY button with a play triangle, then SHOP (gold cart) and UPDATES (bell).
+- UPDATES shows a small red dot until you open the newest notes (remembered in your save).
+- Player card (returning players): your real Roblox avatar headshot, name, LEVEL and height, coins.
+- "v1.0 · Update 1" small at the bottom right.
+- New players see only PLAY and UPDATES. The loading screen is unchanged.
+![[GYM ARC/Screenshots/ui_compare_v2_main_menu_pc.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_main_menu_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_main_menu_new_player.jpg]]
+
+## Avatar headshots (14 Oct)
+Every player picture is the player's real Roblox avatar headshot in a plain dark circle (thin faint white border; no ring, glow or person icon). While it loads it is just the dark circle; if it can't load, the first letter of the name in light gray. Used on the menu card, the leaderboards, the posing vote, the spot request card and the crew list.
+
+## Left menu centered (14 Oct)
+The left menu tiles are vertically centered on the left side (never higher than the top bar), with the "<" button centered on their right edge. Checked on phone (844x390) and PC: no overlap with Roblox's buttons, the top bar or the stamina bar.
+![[GYM ARC/Screenshots/ui_compare_v2_left_menu_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_left_menu_pc.jpg]]

@@ -16,3 +16,9 @@ Prompts: [[2026-10-14 GYM ARC Prompt - Rep and pump bar and treadmill sounds]], 
 ![[GYM ARC/Screenshots/ui_compare_v2_machine_hud_pump_half_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_machine_hud_pumped_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_machine_hud_treadmill_phone.jpg]]
+- Machines are free (no coin price on any machine or weight): [[GYM ARC - Machines]].
+- New main menu matching the new mockup, real avatar headshots everywhere, left menu vertically centered: [[GYM ARC - Loading Screen and Menu]].
+![[GYM ARC/Screenshots/ui_compare_v2_main_menu_pc.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_main_menu_updates.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_left_menu_pc.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_free_weights_new_save.jpg]]

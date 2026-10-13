@@ -45,3 +45,12 @@ One reusable machine system: every machine is a config entry with the muscles it
 ![[GYM ARC/Screenshots/rebuild_machine_plates.jpg]]
 ![[GYM ARC/Screenshots/leg_press.png]]
 ![[GYM ARC/Screenshots/plate_mmbc_closeup.png]]
+
+## Machines are free (14 Oct)
+- Every machine and every weight is free. Your main muscle's level is the only thing a heavier weight needs (as before, again after each Growth Spurt).
+- No prices anywhere: the floating sign always says OCCUPY, the machine panel never shows an UNLOCK / coin button, the goal line says "135 lb is ready: press + on the panel".
+- BEST WEIGHT (the MAX button) jumps straight to the heaviest weight your level allows.
+- Coins already spent on weights are not refunded (owner's call).
+- Tested: a brand-new save went from 45 lb to 135 lb with 38 coins and no coins were taken.
+- Because heavier weights now come sooner, the Growth Spurt goals were re-tuned so each spurt still takes about the same play time (see [[GYM ARC - Config values]]).
+![[GYM ARC/Screenshots/ui_compare_v2_free_weights_new_save.jpg]]

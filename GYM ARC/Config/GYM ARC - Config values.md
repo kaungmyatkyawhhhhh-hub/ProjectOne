@@ -125,7 +125,7 @@ File: `Config/Machines.luau`. See also [[GYM ARC - Machines]].
 | Tiers per machine | 12 | Weight steps from empty bar to max |
 | Progression.gains | 1, 1.3, 1.65, 2.05, 2.5, 3, 3.6, 4.3, 5.1, 6, 7, 8.2 | Gains multiplier per tier |
 | Progression.unlockLevel | 0, 3, 7, 12, 18, 25, 33, 42, 52, 64, 78, 95 | Main muscle level needed per tier |
-| Progression.cost | 0, 5, 12, 25, 45, 70, 110, 160, 230, 320, 440, 600 | Coins to buy each tier (once) |
+| Progression.cost | all 0 | Machines and weights are free (14 Oct). Was 0, 5, 12 ... 600 coins |
 | Progression.coins | 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8, 9 | Coins per rep at each tier |
 | Plates | 55 red, 45 blue, 35 yellow, 25 green, 10 white, 5 steel | Plate colors and sizes |
 | PlateGap / SleeveRoom | 0.02 / 1.55 studs | Plate spacing and room on the sleeve |

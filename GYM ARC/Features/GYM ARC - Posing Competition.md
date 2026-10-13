@@ -39,3 +39,6 @@ A posing contest on the beach stage every 12 minutes: three poses, judges' cards
 ![[GYM ARC/Screenshots/posing_vote_panel.jpg]]
 ![[GYM ARC/Screenshots/posing_podium.jpg]]
 ![[GYM ARC/Screenshots/posing_statue_champion.jpg]]
+
+## Avatar headshots (14 Oct)
+Player pictures here are the real Roblox avatar headshot in a plain dark circle (the same look everywhere, see [[GYM ARC - Loading Screen and Menu]]).
