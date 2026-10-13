@@ -114,3 +114,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: Starter Quest showed the old goal for a second #bugs #done
 - When two goals finished less than 4 s apart (gift claim, then the spin), the first one's safety timer brought back "Spin the wheel 1/1" for a moment. Each finished goal now has its own timer. (The old card had the same bug.)
+
+## 2026-10-13: GameClient over Luau's 200-locals limit #bugs #done
+- Adding To Bed next to SPAWN gave "Out of local registers ... exceeded limit 200": the whole client script failed, so there was no HUD. Locals in a top-level `do` block count too. Fix: To Bed's parts live in one table, and its wiring runs inside its own function. `GameClient` is right at the limit, so new HUD pieces should go in their own module or function.

@@ -11,7 +11,7 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 Game based on Chop A Brick: train to gain Strength and Level, then karate-chop beds along a path for Cash.
 - **Details:** [[Break A Bed/Project Overview]] (all Break A Bed notes go in the `Break A Bed` folder)
 - **Code:** `C:\Users\USER\Documents\Cashgrab` on one PC, folder `BAB` on the other. Studio place "Break A Bed" (placeId 116443177548785).
-- **Now:** top centre is one slim tracker pill (tutorial step → Starter Quest → next bed), boost timers are chips by the stats, and a **To Bed** teleport button is in; tested on PC and the phone emulator ([[Break A Bed/2026-10-13|2026-10-13]]). Next: save + publish, then the owner's guide changes (hide x + TRACK, no SKIP, To Bed/SPAWN steps).
+- **Now:** top centre is one slim tracker pill (tutorial step → Starter Quest → next bed), boost timers are chips by the stats, and a **To Bed** teleport (next to SPAWN, fade + 3 s cooldown) is in; tested on PC and the phone emulator ([[Break A Bed/2026-10-13|2026-10-13]]). Next: save + publish, then the owner's guide changes (hide x + TRACK, no SKIP, To Bed/SPAWN steps).
 - **Ads:** released as "[🎉 RELEASE] Break a Bed". 12K Robux spent on ads; earning about 500 Robux a day ([[Break A Bed/Ads|Ads]]).
 - **Next:** save + publish, then [[Break A Bed/Retention Plan|Retention Plan]].
 - **Last updated:** 2026-10-13
