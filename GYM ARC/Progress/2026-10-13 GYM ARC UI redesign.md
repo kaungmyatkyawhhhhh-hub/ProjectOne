@@ -36,3 +36,5 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_02_machine_hud_phone.jpg]]
 - Settings window (mockup 10) done: two columns of ON / OFF rows (Music, Sound Effects, Others' Sounds, Low Graphics, Tutorial Hints, Gain Numbers, Rep Flash, EXP Popups, Spot Requests). Commit d71c4a0.
 ![[GYM ARC/Screenshots/ui_compare_v2_10_settings_phone.jpg]]
+- Titles window (mockup 08) done: All / Owned tabs, rarity-colored cards, EQUIP / EQUIPPED, locks on titles you don't have yet.
+![[GYM ARC/Screenshots/ui_compare_v2_08_titles_phone.jpg]]

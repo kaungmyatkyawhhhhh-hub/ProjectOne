@@ -21,6 +21,8 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 
 - **Settings (mockup 10):** the gear in the top bar opens it; two columns of rows with a gold icon, the name and an ON / OFF button. Others' Sounds mutes other players' lift sounds, Low Graphics turns off shadows and glow effects on your device, Tutorial Hints turns the hints in the top band on or off.
 
+- **Titles (mockup 08):** the Titles tile opens it; All / Owned tabs, a grid of cards with the rarity word in its color, EQUIP / EQUIPPED for owned titles, a lock for the rest (tap it to see how to earn it).
+
 ## Where it lives (UI v2)
 - `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
 
@@ -76,3 +78,4 @@ The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. 
 ![[GYM ARC/Screenshots/ui_compare_v2_01_main_hud_menu_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_02_machine_hud_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_10_settings_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_08_titles_phone.jpg]]
