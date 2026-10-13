@@ -93,3 +93,6 @@ Mockup, then the game:
 Mockup, then the game:
 ![[GYM ARC/Screenshots/ui_compare_final_00_title_mockup.png]]
 ![[GYM ARC/Screenshots/ui_compare_final_00_title_phone.jpg]]
+
+## Settings: Reduce Motion
+A new Settings row, Reduce Motion (Off by default). On = the looping pulses and shine sweeps on buttons stop.

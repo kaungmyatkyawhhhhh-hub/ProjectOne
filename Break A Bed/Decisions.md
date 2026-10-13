@@ -172,3 +172,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: no city backdrop. The owner removed it on purpose and wants a clean, simple map floating in the sky. #break-a-bed
 - 2026-10-13: the map stays clean on purpose: no city or backdrop around it (owner). Glove Shop kept about 4 studs from the VIP Lounge's glass corner. #break-a-bed
 - 2026-10-13: gloves in the tutorial = a last step that leads to the Glove Shop pad and opens it, with no free glove (the first costs $91K), to keep early pacing. #break-a-bed
+- 2026-10-14: Rebirth window = pictures (two cards, chips, icon row), 9 visible words; the lose/keep/get lists only behind "?". Tests that change Strength/Cash/Rebirths in Studio must be client-side (the real save is loaded and saved). #break-a-bed

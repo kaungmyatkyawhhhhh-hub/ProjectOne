@@ -163,3 +163,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: post labels overlapped from spawn #bugs #done
 - MaxDistance 70 and uneven heights. Now MaxDistance 40 and each label 2 studs above its own post.
+
+## 2026-10-14: a test overwrote the saved Strength (restored) #bugs #done
+- Setting Strength in Studio play on the real save got saved. Restored to 0 (the last seen value). See [[Break A Bed/2026-10-14|2026-10-14]].

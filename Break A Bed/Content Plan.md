@@ -54,7 +54,8 @@ Every post gets its own model, punch effect and sound, so each new post feels li
   6. **Big button:** grey "NEED 1.35B" with a lock when you can't afford it yet, gold pulsing **"REBIRTH!"** when you can. Pressing it shows one confirm pop-up with the same ↺ icons and "Are you sure?" plus YES / NO.
   - **A small "?" button** in the corner opens the full details (the old lose/keep/get lists) for players who want them.
   - Use drawn icons, no emoji (UI Kit rule). Text is at most 3–4 words per spot.
-  - **Still not built (owner, 2026-10-13, later):** the game still shows the old three columns (YOU LOSE / YOU KEEP / YOU GET). The owner still finds it hard to read. Delete the three columns completely and build the layout above. The whole window should have **under 15 words**.
+  - **Built 2026-10-14** (see [[Break A Bed/2026-10-14|2026-10-14]]; the lists are behind the "?" button now).
+  - **Was: still not built (owner, 2026-10-13, later):** the game still shows the old three columns (YOU LOSE / YOU KEEP / YOU GET). The owner still finds it hard to read. Delete the three columns completely and build the layout above. The whole window should have **under 15 words**.
 - Rebirth also replays the bed path fast (the multiplier makes the early beds instant), so the second run takes about 15–20 min and the later ones get longer.
 
 ## 3. Gloves (a second thing to buy with Cash)
