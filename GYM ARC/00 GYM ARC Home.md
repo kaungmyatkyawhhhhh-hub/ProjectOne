@@ -245,6 +245,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Prompt - Avatar headshots]]
 - [[2026-10-14 GYM ARC Prompt - Final UI pass]]
 - [[2026-10-14 GYM ARC Prompt - Free machines and new main menu]]
+- [[2026-10-14 GYM ARC Prompt - Loading screen, declutter HUD, Genetics mobile]]
 - [[2026-10-14 GYM ARC Prompt - Multiple songs per area]]
 - [[2026-10-14 GYM ARC Prompt - Rep and pump bar and treadmill sounds]]
 
