@@ -53,3 +53,7 @@ What you see while you are on a machine. Rebuilt on 13 Oct to the owner's v2 moc
 ## Final look (14 Oct)
 Weight card top right, PUMP panel under it, big red REP bottom right, quiet STOP bottom left, stamina panel at the bottom. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
 ![[GYM ARC/Screenshots/ui_compare_final_02_lifting_phone.jpg]]
+
+## Phones (14 Oct)
+REP 150 x 52 above Roblox's jump button, PUMP right above it, STOP above the thumbstick, a shorter weight card under the top bar; a level requirement gets its own line. No coach lines on screen.
+![[GYM ARC/Screenshots/declutter_lifting_after_phone.jpg]]

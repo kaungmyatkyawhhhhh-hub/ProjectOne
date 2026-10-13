@@ -141,3 +141,7 @@ Our top bar buttons now live on Roblox's own top bar, made with TopbarPlus by Fo
 ![[GYM ARC/Screenshots/declutter_topbarplus_phone.jpg]]
 Before:
 ![[GYM ARC/Screenshots/declutter_hud_before_phone.jpg]]
+
+## Less on screen (14 Oct)
+Only the top bar, the left menu, ONE card on the right and the stamina bar at the bottom. The right card is picked by importance (TAP TO GROW first, then posing, a ready coach quest, today's quest, legend, coach quest going, Growth Spurt progress). The left menu sits in the middle of the left side and slides away while a window is open. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
+![[GYM ARC/Screenshots/declutter_hud_after_phone.jpg]]

@@ -114,3 +114,25 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - Top bar with TopbarPlus]]): the t
 - Also found and fixed: a stray "5" typed into a server script stopped the whole game from starting ([[GYM ARC - Bug - Stray character stopped the server]]).
 - Also: the Studio test setting TestPhoneSize was switched off. It squeezed the HUD into a box inside the Device Emulator, which is why the left menu looked stuck near the top and the stamina bar looked too high.
 ![[GYM ARC/Screenshots/declutter_topbarplus_phone.jpg]]
+
+## 10. Less UI on screen (declutter) and lifting on phones
+Owner's requests ([[2026-10-14 GYM ARC Prompt - Loading screen, declutter HUD, Genetics mobile]], [[2026-10-14 GYM ARC Prompt - Lifting HUD, top bar, Physique, left menu on mobile]], and "the daily quests and coach quests uis are so big").
+- The right side shows only ONE small card at a time. Which one: TAP TO GROW when ready, then the posing competition, then a coach quest ready to hand in, then today's quest, then the legend challenge, then the coach quest still going, then the Growth Spurt progress. Every quest is still in the Quests window.
+- The cards are smaller (narrower, smaller text, a thin bar).
+- No more MAX HEIGHT card (the top bar shows the height).
+- Stamina is a slim bar at the very bottom center (280 wide, 10 px from the edge).
+- The left menu is always in the middle of the left side, has no Quests tile any more (QUESTS is on the top bar) and slides away while a window is open.
+- Area notes ("Stretching area...") show once when you walk in, then not again for a minute.
+- The yellow "!" over new machines only shows within 25 studs.
+- No coach lines on screen while lifting.
+Lifting on phones:
+- REP is smaller (150 x 52) and sits above Roblox's jump button; PUMP sits right above REP; STOP sits above the thumbstick. (While you sit on a machine Roblox hides its touch buttons, so they then sit a fixed 150 px up.)
+- The weight card is shorter. When a weight needs a higher level, that line gets its own row and BEST WEIGHT moves under it, so they never overlap.
+Before and after (phone):
+![[GYM ARC/Screenshots/declutter_hud_before_phone.jpg]]
+![[GYM ARC/Screenshots/declutter_hud_after_phone.jpg]]
+![[GYM ARC/Screenshots/declutter_lifting_after_phone.jpg]]
+![[GYM ARC/Screenshots/declutter_lifting_needs_line.jpg]]
+Small phone (667 x 375) and REP above the jump button:
+![[GYM ARC/Screenshots/declutter_lifting_small_phone.jpg]]
+![[GYM ARC/Screenshots/declutter_lifting_above_jump.jpg]]

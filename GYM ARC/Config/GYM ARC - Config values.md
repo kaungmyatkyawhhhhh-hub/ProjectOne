@@ -519,3 +519,11 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 ## Tutorial (13 Oct)
 - Finish reward: 50 coins (`Config/Onboarding`, FinishCoins). Not paid when skipped.
 - The Coach's words per step: `Config/Onboarding`, `coach` on each step.
+
+## HUD layout (14 Oct)
+- `RightColumn.Priority`: which card shows on the right (highest wins): GrowReady 100, Posing 95, CoachReady 80, Daily 50, Legend 40, Coach 20, Grow 10.
+- `HudBottom.BarSize` 280 x 34, `HudBottom.Bottom` 10: the stamina bar.
+- `MachineHud.RepSize` 150 x 52, `PumpSize` 150 x 40, `PanelSize` 184 x 86 (+16 when a requirement shows), `TouchGap` 10 (REP above the jump button), `TouchLift` 150 (when Roblox hides its touch buttons).
+- `MachineSignsClient` `BANG.Far` 25 studs: the "!" over new machines.
+- `ShakeClient` `NOTE_AGAIN` 60 s: an area note only once per visit.
+- `Kit.TopbarGap` 8: everything under Roblox's top bar starts this far under it.

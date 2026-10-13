@@ -38,3 +38,6 @@ Every rep costs stamina, which refills on its own. Running on treadmills raises 
 ![[GYM ARC/Screenshots/treadmill_run_stride.jpg]]
 ![[GYM ARC/Screenshots/pro_gym_treadmill_working.png]]
 ![[GYM ARC/Screenshots/sauna-inside_after.png]]
+
+## Stamina bar (14 Oct)
+A slim bar at the very bottom center of the screen, 280 wide, 10 px above the edge.
