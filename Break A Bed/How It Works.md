@@ -143,7 +143,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - **ScreenFx** (on each player's screen): edge glow, speed lines, break pulse, flying cash/strength icons, combo text.
 - **Sounds** play on your own screen; nearby players hear a quieter version.
 
-## City backdrop (2026-10-11)
+## City backdrop (2026-10-11, removed by the owner 2026-10-13: clean map wanted)
 - **City** (server module, run once in Edit mode, safe to re-run): removed the trees, bushes, hills and pond outside the play area, flattened and widened the grass, then built a city around the map in `Workspace.City`: roads with sidewalks, lamps and parked cars; houses and shops (with signs) in front, apartments and hotels behind, glass towers further back; and three landmarks: **BED MART** (east of spawn, giant bed on the roof), **MATTRESS FACTORY** (west, halfway down the path, smoking chimneys) and the **GRAND SLEEP HOTEL** (past the end of the path).
 - Nothing is built inside the play area (path, plaza, upgrades, training). About 4,450 parts, anchored, no collisions, only the main building blocks cast shadows.
 

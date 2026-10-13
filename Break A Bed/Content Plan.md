@@ -219,7 +219,7 @@ Seen from spawn, everything is squeezed into the back corner while the big paved
 
 - **Whole-map check (2026-10-13, latest):** the layout is clean and every zone reads clearly (the bed path with the BREAK A BED arch, training, VIP Lounge, stands, crate, upgrades, leaderboards). Small things left:
   - The Glove Shop stall touches the VIP Lounge's glass corner. Give it about 4 studs of space.
-  - **The map floats in empty blue sky.** The city backdrop from 2026-10-11 (`Workspace.City`) isn't visible. Check whether it was removed or moved when the plaza was extended, and put it back around the new plaza shape (or add hills and trees), so the world doesn't look unfinished.
+  - ~~The map floats in empty blue sky; put the city back.~~ **No: the owner removed the city on purpose and wants a clean map (2026-10-13). Don't add a city back.**
   - The grass to the right of training is empty. It's a good spot for a future stand (Rebirth or AFK Zone).
 
 ## Pacing targets (check after building)
