@@ -13,7 +13,7 @@
 	  * drive the camera (interior cockpit or chase) with speed-based FOV,
 	    shake and blur
 	  * update the HUD + the live gauge cluster on the dashboard
-	Car controls (keyboard): J ignition, F start / stop the engine, Q / E shift down / up (the
+	Car controls (keyboard): F start / stop the engine, Q / E shift down / up (the
 	gearbox turns manual on the first shift, or from Settings), Left Shift clutch, P handbrake,
 	T traction control, L lights, Z / X / C left blinker / hazards / right blinker, V camera.
 	Touch and gamepad players start with the engine running and an automatic gearbox.
@@ -145,6 +145,19 @@ type State = {
 	blinkT: number,
 	blinkLights: { L: { PointLight }, R: { PointLight } },
 	dashPanel: BasePart?,
+	-- drivetrain feel
+	agear: number, -- the automatic gearbox's gear (1..GEARS)
+	shiftT: number, -- seconds left of a shift: no drive while the gear changes
+	nextGear: number,
+	powerK: number, -- per car, so 0-60 mph matches its real time with gears and shifts
+	dragC: number, -- per car aero drag
+	brakeIn: number, -- the brakes bite in over a moment
+	pitchVel: number,
+	rollVel: number,
+	lonG: number,
+	latG: number,
+	headPos: Vector3, -- the driver's head moving with the g-forces (cockpit camera)
+	headVel: Vector3,
 }
 
 local state: State? = nil
@@ -426,8 +439,88 @@ function Driving.reset()
 	s.lastCommand = Vector3.zero
 end
 
--- the live cluster on the dashboard: off with the ignition, and built again (needle sweep and all)
--- when it comes on or the speed units change
+---------------------------------------------------------------------
+-- Drivetrain: gears, torque, shifts
+---------------------------------------------------------------------
+-- the share of top speed each gear reaches at the rev limiter; top gear reaches top speed at
+-- 88% of the revs, so the car tops out without hitting the limiter
+local function gearHi(g: number): number
+	return (math.max(g, 1) / GEARS) ^ 1.25 / 0.88
+end
+
+-- low gears pull harder
+local function gearMul(g: number): number
+	return 1 + 0.25 * (1 - (math.max(g, 1) - 1) / (GEARS - 1))
+end
+
+-- engine torque over the rev range (rev 0..1 of the limiter): soft at the bottom, strongest in the
+-- upper middle, easing off before the limiter, nothing at it
+local function torqueCurve(rev: number): number
+	if rev >= 1 then
+		return 0
+	end
+	return 0.72 + 0.33 * math.sin(math.clamp(rev / 0.72, 0, 1) * math.pi / 2) - math.max(0, rev - 0.82) * 0.9
+end
+
+local UPSHIFT_AT = 0.92 -- flat out the automatic shifts here
+local SHIFT_TIME = 0.2
+
+-- air drag that exactly balances top gear's pull at top speed (at 88% of the revs)
+local function dragFor(accel: number, k: number, top: number): number
+	return math.max(accel * k * torqueCurve(0.88) * gearMul(GEARS) - 2, 0.5) / (top * top)
+end
+
+-- the power scale that gives a car its real 0-60 mph time once gears, shifts and drag are in
+-- (worked out once per car); returns it with the car's drag
+local powerCache: { [string]: { number } } = {}
+local function powerFor(spec: Cars.CarSpec): (number, number)
+	local top = Config.mphToSps(spec.TopSpeed)
+	local accel = Config.mphToSps(60) / spec.ZeroToSixty
+	local cached = powerCache[spec.Id]
+	if cached then
+		return cached[1], cached[2]
+	end
+	local target = Config.mphToSps(60)
+	local function zeroToSixty(k: number): number
+		local c = dragFor(accel, k, top)
+		local v, g, cut, t, dt = 0, 1, 0, 0, 1 / 60
+		while t < 40 do
+			local frac = v / top
+			local rev = frac / gearHi(g)
+			local a = 0
+			if cut > 0 then
+				cut -= dt
+			else
+				a = accel * k * torqueCurve(math.max(rev, 0.3)) * gearMul(g)
+				if rev >= UPSHIFT_AT and g < GEARS then
+					g += 1
+					cut = SHIFT_TIME
+				end
+			end
+			a -= 2 + c * v * v
+			v = math.max(0, v + a * dt)
+			t += dt
+			if v >= target then
+				return t
+			end
+		end
+		return 40
+	end
+	local lo, hi = 0.3, 6
+	for _ = 1, 16 do
+		local mid = (lo + hi) / 2
+		if zeroToSixty(mid) > spec.ZeroToSixty then
+			lo = mid
+		else
+			hi = mid
+		end
+	end
+	powerCache[spec.Id] = { hi, dragFor(accel, hi, top) }
+	return hi, dragFor(accel, hi, top)
+end
+
+-- the live cluster on the dashboard: built again (needle sweep and all) when switched on or when
+-- the speed units change
 local function setClusterPower(s: State, on: boolean)
 	local panel = s.dashPanel
 	if not panel then
@@ -466,24 +559,13 @@ local function setLights(s: State, on: boolean)
 	end
 end
 
--- J / F / Q / E / P / T / L / Z / X / C
+-- F / Q / E / P / T / L / Z / X / C
 local function carKey(s: State, key: Enum.KeyCode)
-	if key == Enum.KeyCode.J then
-		s.ignition = not s.ignition
-		if not s.ignition and s.engineOn then
-			s.engineOn = false
-			s.engine:setRunning(false)
-		end
-		s.cranking = 0
-		setClusterPower(s, s.ignition)
-		UI.toast(if s.ignition then "Ignition on" else "Ignition off")
-	elseif key == Enum.KeyCode.F then
+	if key == Enum.KeyCode.F then
 		if s.engineOn then
 			s.engineOn = false
 			s.engine:setRunning(false)
 			UI.toast("Engine off")
-		elseif not s.ignition then
-			UI.toast("Turn the ignition on first (J)", Config.Theme.Warning)
 		elseif s.cranking <= 0 then
 			s.cranking = 0.8
 			Audio.engineStart()
@@ -507,6 +589,10 @@ local function carKey(s: State, key: Enum.KeyCode)
 		end
 		if s.mgear ~= before and s.mgear <= 0 then
 			UI.toast(if s.mgear < 0 then "Reverse" else "Neutral")
+		end
+		if s.mgear ~= before and s.mgear > 0 and not s.clutch then
+			s.shiftT = 0.1 -- a quick shift: the drive drops for a moment, then kicks back in
+			s.nextGear = s.mgear
 		end
 	elseif key == Enum.KeyCode.P then
 		s.parkBrake = not s.parkBrake
@@ -932,7 +1018,7 @@ function Driving.attach(model: Model)
 		end
 	end
 
-	-- keyboard players start the car themselves (J, then F); touch and gamepad start running
+	-- keyboard players start the engine themselves (F); touch and gamepad start running
 	local autoStart = UI.isTouch or not UserInputService.KeyboardEnabled
 	-- blinker lights at the four corners (seen by this player only)
 	local blinkLights = { L = {} :: { PointLight }, R = {} :: { PointLight } }
@@ -1022,7 +1108,7 @@ function Driving.attach(model: Model)
 		throttleIn = 0,
 		pops = 0,
 		popTimer = 0,
-		ignition = autoStart,
+		ignition = true, -- no ignition key (owner): the dash is always on in the car
 		engineOn = autoStart,
 		cranking = 0,
 		manual = Driving.gearbox == "Manual",
@@ -1037,14 +1123,26 @@ function Driving.attach(model: Model)
 		blinkT = 0,
 		blinkLights = blinkLights,
 		dashPanel = if dashPanel and dashPanel:IsA("BasePart") then dashPanel else nil,
+		agear = 1,
+		shiftT = 0,
+		nextGear = 1,
+		powerK = 1,
+		dragC = 0,
+		brakeIn = 0,
+		pitchVel = 0,
+		rollVel = 0,
+		lonG = 0,
+		latG = 0,
+		headPos = Vector3.zero,
+		headVel = Vector3.zero,
 	}
 	state = s
+	s.powerK, s.dragC = powerFor(spec)
 	s.engine:setRunning(s.engineOn)
 	if s.engineOn then
 		Audio.engineStart()
 	else
-		setClusterPower(s, false)
-		UI.toast("Press J for the ignition, then F to start the engine")
+		UI.toast("Press F to start the engine")
 	end
 	UI.setIndicators(indicatorState(s))
 	camera.CameraType = Enum.CameraType.Scriptable
@@ -1180,57 +1278,54 @@ function Driving.step(dt: number)
 		-- longitudinal
 		local a = 0
 		local speedFrac = fwdSpeed / s.topSpeed
-		if s.manual then
-			-- manual: the gear sets how hard the engine pulls; at the top of a gear it hits the limiter
-			local engaged = s.engineOn and not s.clutch
-			if engaged and s.mgear > 0 then
-				local hi = (s.mgear / GEARS) ^ (1 / 0.8)
-				local rev = math.max(speedFrac, 0) / hi
-				if throttle > 0 then
-					if fwdSpeed < -2 then
-						a += 140 * throttle
-					else
-						local torque = if rev >= 1 then 0 else math.clamp(0.4 + 0.9 * rev, 0.4, 1)
-						a += s.accel * 1.25 * throttle * torque * math.max(0, 1 - math.max(speedFrac, 0) ^ 2.6) * (if s.launch > 0 then 1.35 else 1)
-					end
-				elseif fwdSpeed > 2 then
-					a -= 6 -- engine braking
+		s.brakeIn += (brake - s.brakeIn) * math.min(1, dt * 7)
+		-- the automatic picks its gear by revs and how hard you press: flat out it holds each gear
+		-- near the limiter, cruising it shifts early; pressing hard at low revs kicks down
+		if not s.manual and s.shiftT <= 0 then
+			if fwdSpeed > 1 and s.engineOn then
+				local rev = speedFrac / gearHi(s.agear)
+				if s.agear < GEARS and rev >= 0.5 + (UPSHIFT_AT - 0.5) * throttle then
+					s.nextGear = s.agear + 1
+					s.shiftT = if throttle > 0.5 then SHIFT_TIME else SHIFT_TIME * 1.6
+				elseif s.agear > 1 and rev < (if throttle > 0.8 then 0.55 else 0.28) and speedFrac / gearHi(s.agear - 1) < 0.9 then
+					s.nextGear = s.agear - 1
+					s.shiftT = 0.12
 				end
-				if rev > 1.02 then
-					a -= 30 * (rev - 1) -- shifted down too early: the engine holds the car back
-				end
-			elseif engaged and s.mgear < 0 and throttle > 0 then
-				if fwdSpeed > 2 then
-					a -= 140 * throttle
-				elseif fwdSpeed > -s.topSpeed * 0.22 then
-					a -= s.accel * 0.6 * throttle
-				end
-			end
-			if brake > 0 then
-				if fwdSpeed > 2 then
-					a -= 150 * brake
-				elseif fwdSpeed < -2 then
-					a += 150 * brake
-				end
-			end
-		else
-			if throttle > 0 then
-				if fwdSpeed < -2 then
-					a += 140 * throttle -- braking out of reverse
-				else
-					a += s.accel * 1.25 * throttle * math.max(0, 1 - math.max(speedFrac, 0) ^ 2.6)
-				end
-			end
-			if brake > 0 then
-				if fwdSpeed > 2 then
-					a -= 150 * brake
-				elseif fwdSpeed > -s.topSpeed * 0.22 and s.engineOn then
-					a -= s.accel * 0.6 * brake
-				end
+			elseif fwdSpeed <= 1 then
+				s.agear = 1
 			end
 		end
-		-- rolling resistance + aero drag
-		local drag = 4 + 0.00045 * fwdSpeed * fwdSpeed
+		local gearNow = if s.manual then s.mgear else s.agear
+		local engaged = s.engineOn and not s.clutch and s.shiftT <= 0 and gearNow ~= 0
+		if engaged and gearNow > 0 and fwdSpeed > -2 then
+			local rev = math.max(speedFrac, 0) / gearHi(gearNow)
+			if throttle > 0 then
+				a += s.accel * s.powerK * throttle * torqueCurve(math.max(rev, 0.3)) * gearMul(gearNow) * (if s.launch > 0 then 1.15 else 1)
+			elseif fwdSpeed > 2 then
+				a -= 3 + 6 * math.min(rev, 1) -- engine braking, stronger at high revs
+			end
+			if rev > 1.02 then
+				a -= 30 * (rev - 1) -- shifted down too early: the engine holds the car back
+			end
+		elseif throttle > 0 and fwdSpeed < -2 then
+			a += 140 * throttle -- braking out of reverse
+		end
+		if s.manual then
+			if engaged and gearNow < 0 and throttle > 0 and fwdSpeed > -s.topSpeed * 0.22 then
+				a -= if fwdSpeed > 2 then 140 * throttle else s.accel * 0.6 * throttle
+			end
+			if fwdSpeed > 2 then
+				a -= 150 * s.brakeIn
+			elseif fwdSpeed < -2 then
+				a += 150 * s.brakeIn
+			end
+		elseif fwdSpeed > 2 then
+			a -= 150 * s.brakeIn
+		elseif brake > 0 and fwdSpeed > -s.topSpeed * 0.22 and s.engineOn then
+			a -= s.accel * 0.6 * brake -- automatic: hold the brake at a stop to reverse
+		end
+		-- rolling resistance + aero drag (each car's own, so it tops out at its real top speed)
+		local drag = 2 + s.dragC * fwdSpeed * fwdSpeed
 		if handbrake then
 			drag += 40
 		end
@@ -1256,41 +1351,43 @@ function Driving.step(dt: number)
 		yawRate = math.clamp(yawRate, -cap, cap)
 		s.yaw -= yawRate * dt
 
-		-- lateral grip (low with handbrake -> drift)
+		-- lateral grip (low with handbrake -> drift). Power only slides the rear with traction
+		-- control off, or on a clutch-drop launch; with it on the tyres just bite
 		local grip = if handbrake then 1.4 else 4.5 + 5 * handling
-		-- hard launch: the rear steps out a little while the tyres find grip; traction control
-		-- keeps it tidy, and with it off the rear lets go under power much longer
-		if (throttle > 0.6 or s.launch > 0) and not handbrake then
-			local loss = (if s.tc then 0.2 else 0.55) * throttle * math.clamp(1 - math.abs(speedFrac) * (if s.tc then 2.5 else 1.3), 0, 1)
+		if not handbrake and (throttle > 0.5 or s.launch > 0) then
+			local loss = (if s.tc then 0.05 else 0.4) * throttle * math.clamp(1 - math.abs(speedFrac) * 1.5, 0, 1)
 			if s.launch > 0 then
-				loss += 0.3
+				loss += 0.2
 			end
-			grip *= 1 - math.min(loss, 0.8)
+			grip *= 1 - math.min(loss, 0.7)
 		end
 		latSpeed *= math.exp(-grip * dt)
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
-		-- tyres squeal: flooring it from low speed, braking hard at speed, turning hard when fast
+		-- tyre noise and smoke: a real launch (traction control off, flooring it from a stop, or a
+		-- clutch drop) for a moment only, a hard stop at speed, and turning hard when fast
 		local sf = math.abs(fwdSpeed) / s.topSpeed
-		if throttle > 0.7 and fwdSpeed >= -1 and sf < 0.35 then
-			s.slip += (if s.tc then 22 else 52) * throttle * (1 - sf / 0.35)
+		if not s.tc and throttle > 0.8 and fwdSpeed >= -1 and sf < 0.06 then
+			s.slip += 30 * throttle * (1 - sf / 0.06)
 		end
 		if s.launch > 0 then
-			s.slip += 40
+			s.slip += 25 * s.launch / 0.8
 		end
-		if brake > 0.6 and fwdSpeed > 40 then
-			s.slip += 36 * brake
+		if s.brakeIn > 0.85 and fwdSpeed > 70 then
+			s.slip += 14 * s.brakeIn
 		end
 		if math.abs(s.steer) > 0.35 and sf > 0.4 then
 			s.slip += 60 * math.abs(s.steer) * (sf - 0.4)
 		end
 
-		-- body lean: outward in turns, nose down when braking, squat when accelerating
+		-- body on its springs: leans out in turns, dives under braking, squats pulling away, and
+		-- rocks a little when a shift cuts and returns the drive
 		local latG = math.clamp(fwdSpeed * yawRate / 196.2, -1.5, 1.5)
 		local lonG = math.clamp(a / 196.2, -1.5, 1.5)
-		local rollTarget = math.rad(3.2) * latG
-		local pitchTarget = math.rad(2.2) * lonG
-		s.roll += (rollTarget - s.roll) * math.min(1, dt * 6)
-		s.pitch += (pitchTarget - s.pitch) * math.min(1, dt * 6)
+		s.latG, s.lonG = latG, lonG
+		s.pitchVel += ((math.rad(3.0) * lonG - s.pitch) * 70 - s.pitchVel * 10) * dt
+		s.pitch += s.pitchVel * dt
+		s.rollVel += ((math.rad(3.4) * latG - s.roll) * 90 - s.rollVel * 12) * dt
+		s.roll += s.rollVel * dt
 
 		local newFwd = forwardFromYaw(s.yaw)
 		local newRight = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
@@ -1318,36 +1415,54 @@ function Driving.step(dt: number)
 	local function manualName(): string
 		return if s.mgear < 0 then "R" elseif s.mgear == 0 then "N" else tostring(s.mgear)
 	end
+	-- a shift: the drive comes back with a kick
+	if s.shiftT > 0 then
+		s.shiftT -= dt
+		if s.shiftT <= 0 then
+			if not s.manual then
+				s.agear = s.nextGear
+			end
+			s.pitchVel += math.rad(16) * throttle
+			s.headVel += Vector3.new(0, 0, 1.6 * throttle)
+		end
+	end
 	if not s.engineOn then
 		s.gear = if s.manual then manualName() else "N"
 		s.rpm = if s.cranking > 0 then 0.12 else 0
 		s.freeRpm = s.rpm
-	elseif s.manual then
-		s.gear = manualName()
+	else
+		local free = s.manual and (s.mgear == 0 or s.clutch)
 		s.freeRpm += (0.12 + 0.86 * throttle - s.freeRpm) * math.min(1, dt * 6)
-		if s.mgear == 0 or s.clutch then
-			s.rpm = s.freeRpm
-		elseif s.mgear < 0 then
-			s.rpm = math.clamp(0.12 + 0.8 * -fs / (s.topSpeed * 0.22), 0.12, 1)
-			s.freeRpm = s.rpm
+		local target
+		if s.manual then
+			s.gear = manualName()
+		elseif fs < -1 then
+			s.gear = "R"
+		elseif math.abs(fs) < 1 and throttle == 0 then
+			s.gear = "N"
 		else
-			local hi = (s.mgear / GEARS) ^ (1 / 0.8)
-			s.rpm = math.clamp(0.12 + 0.88 * frac / hi, 0.12, 1.05)
+			s.gear = tostring(s.agear)
+		end
+		if free then
+			target = s.freeRpm
+		elseif fs < -1 or (s.manual and s.mgear < 0) then
+			target = math.clamp(0.12 + 0.8 * -fs / (s.topSpeed * 0.22), 0.12, 1)
+		elseif s.gear == "N" then
+			target = 0.12
+		else
+			-- during an automatic shift the revs already fall to the next gear
+			local g = if s.manual then s.mgear elseif s.shiftT > 0 then s.nextGear else s.agear
+			local rev = frac / gearHi(g)
+			target = 0.12 + 0.88 * rev
+			if rev < 0.35 and throttle > 0 then
+				target = math.max(target, 0.2 + 0.25 * throttle) -- pulling away: the clutch slips
+			end
+			target = math.clamp(target, 0.12, 1.02)
+		end
+		s.rpm += (target - s.rpm) * math.min(1, dt * 14)
+		if not free then
 			s.freeRpm = s.rpm
 		end
-	elseif fs < -1 then
-		s.gear = "R"
-		s.rpm = math.clamp(-fs / (s.topSpeed * 0.22), 0, 1)
-	elseif math.abs(fs) < 1 and throttle == 0 then
-		s.gear = "N"
-		s.rpm = 0.1
-	else
-		local gears = GEARS
-		local g = math.clamp(math.floor(frac ^ 0.8 * gears) + 1, 1, gears)
-		s.gear = tostring(g)
-		local lo = ((g - 1) / gears) ^ (1 / 0.8)
-		local hi = (g / gears) ^ (1 / 0.8)
-		s.rpm = math.clamp((frac - lo) / (hi - lo), 0, 1) * 0.75 + 0.2
 	end
 
 	-- shift sounds (dip in revs, pops on hard upshifts)
@@ -1541,9 +1656,13 @@ function Driving.render(dt: number)
 		end
 		local lookInto = -s.steer * math.rad(9)
 		local eyeCF = rootCF * CFrame.new(s.eye) * CFrame.Angles(0, lookInto + mouseLook, 0) * CFrame.Angles(math.rad(-4), 0, 0)
-		-- inside the cabin the view stays steady; only a crash jolts it
+		-- the driver's head moves with the car: pressed back pulling away (and kicked on each shift),
+		-- thrown forward under braking, leaning out in turns; a crash jolts it
+		local headTarget = Vector3.new(-s.latG * 0.12, 0, s.lonG * 0.35)
+		s.headVel += ((headTarget - s.headPos) * 80 - s.headVel * 11) * math.min(dt, 1 / 30)
+		s.headPos += s.headVel * math.min(dt, 1 / 30)
 		local jolt = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * s.shake * 0.15
-		camera.CFrame = eyeCF * CFrame.new(jolt)
+		camera.CFrame = eyeCF * CFrame.new(s.headPos + jolt)
 		s.camPos = camera.CFrame.Position
 		if blur then
 			blur.Size = 0

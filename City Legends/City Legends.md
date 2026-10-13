@@ -141,11 +141,17 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - The racing-game rips (Urus, LFA, 540i/M5 CS, Cayman) tint some parts by game-set colours that aren't in the file. They are set by hand to match the renders: Urus body-colour trim yellow, LFA paint white, base plastic black, seat belts dark, Cayman calipers red.
   - G63 (2015) black first-person screen: its whole-cabin `Interior` part was double-sided around the camera, so it now draws one side only. This is the likely cause of the earlier red screen too. Not tested in Roblox yet.
 - **Car controls and units (2026-10-13, owner's list):**
-  - J ignition, F start / stop the engine, Q / E shift down / up, Left Shift clutch, P handbrake (on / off; Space still works while held), T traction control, L lights, Z / X / C left blinker / hazards / right blinker.
+  - F start / stop the engine (no ignition key: the owner said not to add one), Q / E shift down / up, Left Shift clutch, P handbrake (on / off; Space still works while held), T traction control, L lights, Z / X / C left blinker / hazards / right blinker.
   - The camera moved from C to V, because C is now the right blinker.
-  - Keyboard players start each drive with the engine off: J, then F. Touch and gamepad players start running (they have no such keys).
+  - Keyboard players start each drive with the engine off (press F). Touch and gamepad players start running. The dash is always on.
   - Gearbox: the first Q / E switches to manual (7 gears, a rev limiter, engine braking, and a launch when the clutch is dropped at high revs). Settings has Auto / Manual.
   - Traction control off lets the rear slide under power. Mouse shift-lock is turned off so Left Shift is free.
   - Blinkers and lights are seen by every player: the driver's client sends them (`CarSignals` remote), the server puts them on the car as `Blinker` / `Lights` attributes, and other clients flash corner lights and switch the headlights.
   - Settings → Speed: MPH / KM/H. It changes the HUD and every cluster (dial numbers, needles, digital readouts). Units and gearbox are saved with the profile.
   - Warning lights under the HUD speedometer: blinker arrows, ENGINE OFF, (P), TC OFF, LIGHTS. The gear tag shows AT / MT.
+- **Driving feel (2026-10-13, owner: "jerk feeling", "slide don't slip", no redline at top speed, feel like a real car):**
+  - 7 gears with a torque curve. Every shift cuts the drive for 0.2 s (0.1 s for a manual shift) and it comes back with a kick: the body rocks and the driver's head is pushed back.
+  - The automatic shifts near the limiter flat out, early when cruising, and kicks down when you floor it.
+  - Each car's power is worked out so its 0-60 mph matches its real time. Its own air drag makes it reach its real top speed in 7th gear at 88% of the revs, so it never hits the limiter there. (Before, cars topped out at about 75-80% of their listed top speed.)
+  - No more running burnouts: with traction control on the tyres just bite. Wheelspin smoke only comes for a moment on a real launch (traction control off and flooring it from a stop, or a clutch drop). Sliding in turns and drifting are unchanged.
+  - The brakes bite in over a moment. The body sits on springs (dives, squats, leans and settles). In the cockpit the driver's head moves with the g-forces.

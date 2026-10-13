@@ -725,7 +725,6 @@ local function buildCashTab()
 	local rows = {
 		{ "W / S", "Throttle  ·  brake / reverse" },
 		{ "A / D", "Steer" },
-		{ "J", "Ignition on / off" },
 		{ "F", "Start / stop the engine" },
 		{ "Q / E", "Shift down / up (manual)" },
 		{ "L SHIFT", "Clutch" },
