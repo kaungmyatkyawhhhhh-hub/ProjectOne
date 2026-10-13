@@ -54,7 +54,7 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 - **"Need more Strength?"** When the bed prompt says "Need X Strength", show a small button: *x3 Strength 10 min, R$15*.
 - **Instant Break: R$9.** Breaks the bed you're stuck on once, paying its Cash and marking it completed. It's shown on the same "Need X Strength" prompt.
 - **Change (owner, 2026-10-13): BREAK IT only, priced by the gap.** The "Need more Strength?" box with the x3 boost is removed. It no longer pops up just from standing near a locked bed.
-  - **When it shows:** only when the player **tries to break** a bed they're too weak for (presses E or taps the prompt). A single green **BREAK IT ⏣ X** button pops up above the bottom HUD, showing "Need 1M Strength" small above it. It hides after 5 s or when they walk away. The same bed shows it at most once every 20 s.
+  - **When it shows:** only when the player **activates the bed's ProximityPrompt** (holds or presses E, or taps it on phones) on a bed they're too weak for. A single green **BREAK IT ⏣ X** button pops up above the bottom HUD, showing "Need 1M Strength" small above it. It hides after 5 s or when they walk away. The same bed shows it at most once every 20 s.
   - **Price grows with the gap.** Gap = the bed's Strength need ÷ the player's Strength. Each tier is its own developer product, because a product's price is fixed on Roblox:
 
     | Gap | Price | Product |
