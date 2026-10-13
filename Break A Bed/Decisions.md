@@ -161,3 +161,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: gloves use the owner's Toolbox "blocky boxing glove" mesh (no scripts), recoloured per tier. The Glove Shop pad copies the Exclusive Chest pad's style (owner). #break-a-bed
 - 2026-10-13: Glove Shop pad changed to a simple solid design (navy disc, white edge, one cyan glowing ring); the chest-style and see-through versions were dropped (owner). #break-a-bed
 - 2026-10-13: Glove Shop pad = a plain flat glowing disc like a typical simulator pad (owner), replacing the solid navy version. #break-a-bed
+- 2026-10-13: stand pads = big see-through tinted circle with a thick glowing neon ring (SELL-stall look); cyan for Glove Shop, yellow for Invite Friend. Invite figure = rongstrix's avatar (userId 1834504124). #break-a-bed

@@ -145,3 +145,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: glove cuff flickered at the top #bugs #done
 - The CuffCore and the top CuffBand had their top faces at the same height (z-fighting). The core is now shorter by one band, so it ends inside the top and bottom bands.
+
+## 2026-10-13: Invite Friend stand looked empty (a column of cash) #bugs #done
+- The figure is only made in a running server, and the bills and dumbbells were saved stacked above the centre (they only spread out on a player's screen). Now the figure is rongstrix's avatar (with a plain fallback) and the items are saved in a loose ring at shoulder-free heights.
