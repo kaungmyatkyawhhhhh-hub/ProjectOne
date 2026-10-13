@@ -223,6 +223,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-06 GYM ARC Prompt - Fixes and muscles]]
 - [[2026-10-06 GYM ARC Prompt - Overnight sessions]]
 - [[2026-10-08 GYM ARC Prompt - Overnight tonight]]
+- [[2026-10-13 GYM ARC Prompt - Big UI and bug run]]
 - [[2026-10-13 GYM ARC Prompt - Clean up duplicates and links]]
 - [[2026-10-13 GYM ARC Prompt - Monetization and hype]]
 - [[2026-10-13 GYM ARC Prompt - New features run]]
