@@ -1,0 +1,31 @@
+---
+date: 2026-10-13
+tags: [gymarc, feature]
+status: done
+---
+# GYM ARC - Studio Test Hooks
+
+Back to [[00 GYM ARC Home|GYM ARC Home]].
+
+Workspace attributes that change how the game behaves in a Studio play test, for testing and screenshots. They do nothing in the live game.
+
+## How it works
+- **Player state:**
+  - `FreshPlayer` (true): play as a new player on temporary data (never touches the real save)
+  - `ReplayTutorial`: replay the tutorial on your own save
+  - `TestCoins`, `TestSpurts`: set coins / Growth Spurts
+  - `TestMuscleShare` (0..6 x the goal, live; 2 = full look, 5 = mass monster), `TestMuscleIds` (only some muscles, for example "Biceps,Triceps" or "Abs=0.7,Lats=2")
+  - `TestMuscleExp` (without FreshPlayer): every muscle at that EXP on your own save, saving off
+- **Genetics:** `TestGenetics` / `TestRerollGenetics` ("C,B,A,S,S,D" or with a frame), `TestGeneticsHold` (freeze the reveal at plate n)
+- **Machines and feel:** `TestMachine` (puts you on a machine, for example "Beach/BicepCurl"), `TestPoseDepth` (freeze a rep at that depth), `TestPopupSlow`, `TestFlashSlow`, `TestSignCamera` (where the machine sign faces)
+- **Screens:** `TestOpenMirror`, `TestPhoneLayout` (phone layout on PC)
+- **Other:** `ForceSeason` (for example "Halloween"), `TestSkateMove` (scripted skating), `TestBrokenStage` (fake a failed body stage download), `PoseDebug`, `SoftShutdown` (shows the update note and holding screen)
+
+## Where it lives
+- Read by the matching services and client scripts; the list is kept in `PROGRESS.md` ("Studio test hooks").
+
+## Known issues
+- Remember to remove test attributes after testing (Studio was left with `TestMuscleShare = 2` for a 2-player test on 9 Oct).
+
+## Related
+[[GYM ARC - Player Data and Saving]], [[GYM ARC - Tutorial]], [[GYM ARC - Genetics]]

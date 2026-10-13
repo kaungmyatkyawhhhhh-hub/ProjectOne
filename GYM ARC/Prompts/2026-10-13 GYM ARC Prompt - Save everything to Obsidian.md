@@ -3,7 +3,7 @@ date: 2026-10-13
 tags: [gymarc, prompt]
 status: done
 ---
-# 2026-10-13 Prompt - Save everything to Obsidian
+# 2026-10-13 GYM ARC Prompt - Save everything to Obsidian
 
 Back to [[GYM ARC/00 GYM ARC Home|GYM ARC Home]].
 
