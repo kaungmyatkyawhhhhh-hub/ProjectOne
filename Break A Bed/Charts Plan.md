@@ -14,7 +14,7 @@ Roblox's discovery ranks games on **engagement**, not on art or ad spend alone. 
 | **Day 1 retention** | % of new players who come back the next day | **0%** (2026-10-12) | 15% first, then 25%+ |
 | Day 7 retention | % still playing a week later | – | 5%+ |
 | Average session length | minutes per visit | **1.4 min** (2026-10-13) | 15+ min |
-| Like ratio | 👍 / (👍+👎) | – | 85%+ (trending games are 90–97%) |
+| Like ratio | 👍 / (👍+👎) | **83%** (2026-10-13) | 85%+ (trending games are 90–97%) |
 | Concurrent players | players online at once | – | steady growth day over day |
 
 **The honest part:** ads and a nice icon bring players in, but the charts only push games that **keep** them. With 0% Day 1 retention, every ad Robux mostly leaks out. So: fix retention first, then spend on ads.
