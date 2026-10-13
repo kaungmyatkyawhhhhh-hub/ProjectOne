@@ -33,15 +33,25 @@ local CarSkin = {}
 
 -- cars with their own dashboard design (DashGauges styles), built from the owner's reference photos
 CarSkin.CLUSTER_STYLE = {
+	-- owner's photos (2026-10-13): BMW Live Cockpit for the G-series BMWs, the F80 M3 cluster for the
+	-- M3 / M4 (all three in the M3 E92 cabin), and the LX700h's digital meter
+	bnw_330i_g20 = "BMWLiveCockpit",
+	bnw_530i = "BMWLiveCockpit",
+	bnw_540i = "BMWLiveCockpit",
+	bnw_x6 = "BMWLiveCockpit",
+	bnw_x7 = "BMWLiveCockpit",
+	bnw_m8gc = "BMWLiveCockpit",
+	bnw_m3_e92 = "BMWF80",
+	bnw_m3_f80 = "BMWF80",
+	bnw_m4_f82 = "BMWF80",
+	lexis_lx700 = "LexusLX700",
 	ferrara_458 = "Ferrari",
 	ferrara_f430 = "Ferrari599", -- owner: same cluster as the 599
-	bnw_330i_g20 = "BMWLive",
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "SupraTRD",
 	toyoka_camri = "Toyota",
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
-	bnw_x6 = "BMWLive", -- the 2020 X6 file has its own modern cabin (owner, 2026-10-13)
 	lambrini_lp570 = "Gallardo",
 	kio_ev6 = "EV6",
 	lambrini_urus = "Urus",
@@ -52,11 +62,7 @@ CarSkin.CLUSTER_STYLE = {
 	bentz_s63 = "W213", -- S 65 W222: wide glass screen
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",
-	bnw_m8gc = "BMWLive",
-	bnw_x7 = "BMWLive",
-	bnw_540i = "BMWLive",
 	lexis_lfa = "LFA",
-	lexis_lx700 = "LexusLX",
 	lambrini_lp750 = "AventadorSV", -- its own cluster (owner's photo)
 	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
 	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
@@ -67,6 +73,21 @@ CarSkin.CLUSTER_STYLE = {
 	bentz_gls = "W213",
 	bnw_750li = "BMWClassic",
 } :: { [string]: string }
+
+-- where a car's own cluster screen is (measured on the model): its middle from the middle of the
+-- steering wheel part, in metres along the car's right / up / back, the way it faces (towards the
+-- driver) and its width and height in metres. A cluster style is drawn right there, covering it
+-- (owner, 2026-10-13: "place them right above the dashboard where it covers the old cluster")
+CarSkin.CLUSTER_RECT = {
+	bnw_m3_e92 = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- its cluster hood (from the model)
+	bnw_330i_g20 = { at = Vector3.new(0.0138, 0.0203, -0.2368), face = Vector3.new(-0, 0.321, 0.9471), w = 0.3191, h = 0.1134 },
+	bnw_530i = { at = Vector3.new(-0.003, 0.0057, -0.2492), face = Vector3.new(-0.007, 0.3171, 0.9484), w = 0.3461, h = 0.1269 },
+	bnw_540i = { at = Vector3.new(0.0025, 0.0094, -0.2389), face = Vector3.new(0.006, 0.3482, 0.9374), w = 0.3791, h = 0.136 },
+	bnw_m8gc = { at = Vector3.new(0.0106, 0.0113, -0.2609), face = Vector3.new(0, 0.5269, 0.8499), w = 0.3273, h = 0.1128 },
+	bnw_x6 = { at = Vector3.new(0.0101, 0.0352, -0.1909), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3494, h = 0.1211 },
+	bnw_x7 = { at = Vector3.new(-0.0025, -0.0002, -0.257), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3496, h = 0.1339 },
+	lexis_lx700 = { at = Vector3.new(-0.011, 0.0755, -0.114), face = Vector3.new(-0.012, -0.069, 0.9975), w = 0.3288, h = 0.1511 },
+} :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the
 -- converted model has them painted out of its texture; owner: keep the car's own cluster, no
@@ -118,10 +139,6 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0958, 0.0054, -0.2386), face = Vector3.new(0.0192, 0.2122, 0.977), length = 0.038, scale = "0:-178.8,30:-157.6,360:89.7" },
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.101, 0.0052, -0.2396), face = Vector3.new(-0.0196, 0.2122, 0.977), length = 0.0336, scale = "0:177.3,1000:206.2,9000:446.0" },
 	},
-	bnw_530i = { -- 530i (labels too blurry to read: an even 250 degree sweep)
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0682, 0.0048, -0.25), face = Vector3.new(0.0027, 0.3223, 0.9466), length = 0.0582, scale = "0:-125.0,260:125.0" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0743, 0.0015, -0.2483), face = Vector3.new(0.0092, 0.355, 0.9348), length = 0.0494, scale = "0:-125.0,8000:125.0" },
-	},
 	brabos_g63 = { -- Brabus G63 (screen dials)
 		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0921, 0.0647, -0.2335), face = Vector3.new(-0.0011, 0.2758, 0.9612), length = 0.0435, scale = "0:-125.2,150:5.8,300:122.8" },
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0698, 0.0673, -0.2341), face = Vector3.new(-0.0012, 0.2757, 0.9613), length = 0.0422, scale = "0:-127.7,4000:-0.9,8000:124.6" },
@@ -164,6 +181,8 @@ CarSkin.INTERIOR_DONOR = {
 	-- owner (2026-10-13): the M3 F80 and M4 F82 files' own cabins look bad; the M3 E92's goes in
 	bnw_m3_f80 = { from = "bnw_m3_e92", rear = 1.8 },
 	bnw_m4_f82 = { from = "bnw_m3_e92", rear = 1.8 },
+	-- owner (2026-10-13): the Panamera's own cluster is broken; the 718 Boxster's cockpit goes in
+	porsha_panamera = { from = "porsha_boxster", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
 
 -- cars that take only another model's steering wheel, put where their own one sits
@@ -1610,11 +1629,16 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		-- live instrument cluster on the car's own gauge spot, when it has no working gauges of its own
 		-- (cars with their own design here, like the Ferrari, always get it)
 		local ownDesign = CarSkin.CLUSTER_STYLE[id] ~= nil
-		local dials = CarSkin.DIAL_NEEDLES[id]
-		if imported.cluster and imported.clusterSize and not liteMode and not dials and (ownDesign or not imported.ownGauges) then
+		-- a car with another model's cabin uses that cabin's dials and cluster spot
+		local swap = CarSkin.INTERIOR_DONOR[id]
+		local cabinId = if swap then swap.from else id
+		local dials = CarSkin.DIAL_NEEDLES[cabinId]
+		local rect = CarSkin.CLUSTER_RECT[cabinId]
+		if (rect or (imported.cluster and imported.clusterSize)) and not liteMode and not dials and (ownDesign or not imported.ownGauges) then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
-			cluster.Size = Vector3.new(imported.clusterSize.X, imported.clusterSize.Y, 0.02)
+			local cs = imported.clusterSize or Vector2.new(1, 0.4)
+			cluster.Size = Vector3.new(cs.X, cs.Y, 0.02)
 			cluster.Transparency = 1
 			cluster.CanCollide = false
 			cluster.CanQuery = false
@@ -1627,7 +1651,18 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			local fwd = if src then (src:GetAttribute("ClusterForward") :: number?) or 0 else 0
 			local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
 			cluster.Size = Vector3.new(cluster.Size.X * k, cluster.Size.Y * k, cluster.Size.Z)
-			cluster.CFrame = groundCF * imported.cluster * CFrame.new(0, up, -fwd)
+			if rect and imported.steer then
+				-- right over the car's own cluster screen, just in front of it
+				local m = CarBuilder.STUDS_PER_METRE
+				local face = rect.face.Unit
+				local upV = (Vector3.yAxis - face * face.Y).Unit
+				local pos = imported.steer.mount.Position + rect.at * m + face * 0.004 * m
+				cluster.Size = Vector3.new(rect.w * m * k, rect.h * m * k, 0.02)
+				cluster.CFrame = groundCF * CFrame.lookAt(pos, pos - face, upV) * CFrame.new(0, up, -fwd) -- back face looks at the driver
+				cluster:SetAttribute("Placed", true) -- Driving leaves it where it is
+			else
+				cluster.CFrame = groundCF * (imported.cluster :: CFrame) * CFrame.new(0, up, -fwd)
+			end
 			cluster.Parent = skin
 			local w = Instance.new("WeldConstraint")
 			w.Part0 = root
@@ -1690,7 +1725,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				end
 				-- our dial, drawn like the real one; the panel grows to the dial's size (100 px = one
 				-- needle length)
-				local look = DialLooks[id] and DialLooks[id][i] or nil
+				local look = DialLooks[cabinId] and DialLooks[cabinId][i] or nil
 				if type(look) ~= "table" then
 					look = DEFAULT_LOOK
 				end

@@ -79,14 +79,6 @@ LOOKS = {
     num=W, numR=102, size=30, font="GothamBold", step=1000, div=1000, red=7000, redC=RED, numRed=RED, bands=[(7000, 9000, 120, 10, RED)], needle=RED, needleW=6, hub=(40, 40, 44), hubR=14,
     texts=[("x1000 1/min", 56, 32, 10, W, "GothamMedium")]),
  ],
- "bnw_530i": [
-  L(r=120, face=(8, 8, 10), bezel=(168, 170, 176), bezelW=3, tick=W, tickR=114, major=(12, 3), minor=(6, 1.5), minors=1,
-    num=W, numR=90, size=15, font="GothamMedium", step=20, needle=(242, 112, 42), needleW=5, hub=(20, 20, 22), hubR=10,
-    texts=[("km/h", 0, 40, 11, (190, 192, 198), "GothamMedium")]),
-  L(r=120, face=(8, 8, 10), bezel=(168, 170, 176), bezelW=3, tick=W, tickR=114, major=(12, 3), minor=(6, 1.5), minors=4,
-    num=W, numR=90, size=20, font="GothamMedium", step=1000, div=1000, red=6500, redC=(230, 60, 40), needle=(242, 112, 42), needleW=5, hub=(20, 20, 22), hubR=10,
-    texts=[("1/min x1000", 0, 40, 10, (190, 192, 198), "GothamMedium")]),
- ],
  "brabos_g63": [
   L(r=118, face=(16, 16, 18), bezel=(226, 32, 30), bezelW=9, tick=W, tickR=110, major=(13, 3), minor=(7, 1.5), minors=1,
     num=W, numR=88, size=19, font="GothamBold", step=30, needle=(236, 40, 32), needleW=6, hub=(30, 30, 32), hubR=14,

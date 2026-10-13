@@ -463,11 +463,13 @@ local function gearMul(g: number): number
 	return gearHi(1) / gearHi(g)
 end
 
--- an electric car's single gear: full pull up to 35% of top speed, then its power runs out with
--- speed (no shifts, no limiter)
+-- an electric car's single gear (owner: "0-100 very fast but hard to get top speed"): instant full
+-- pull up to a quarter of top speed, then it fades away fast, so the last stretch to top speed takes
+-- a long time (no shifts, no limiter)
 local function evPull(frac: number): number
-	return math.min(1, 0.35 / math.max(frac, 1e-3))
+	return math.min(1, (0.25 / math.max(frac, 1e-3)) ^ 2)
 end
+local EV_LAUNCH = 0.7 -- electric cars reach 60 mph in 70% of their listed time
 
 -- engine torque over the rev range (rev 0..1 of the limiter): soft at the bottom, strongest in the
 -- upper middle, easing off before the limiter, nothing at it
@@ -530,7 +532,7 @@ local function powerFor(spec: Cars.CarSpec): (number, number)
 	local lo, hi = 0.3, 8
 	for _ = 1, 18 do
 		local mid = (lo + hi) / 2
-		if zeroToSixty(mid) > spec.ZeroToSixty then
+		if zeroToSixty(mid) > spec.ZeroToSixty * (if electric then EV_LAUNCH else 1) then
 			lo = mid
 		else
 			hi = mid
@@ -1007,7 +1009,7 @@ function Driving.attach(model: Model)
 		C7 = { 2.0, 0.66 },
 	}
 	local sizeFor = if type(style) == "string" then CLUSTER_SIZE[style] else nil
-	if dashPanel and dashPanel:IsA("BasePart") and sizeFor
+	if dashPanel and dashPanel:IsA("BasePart") and sizeFor and not dashPanel:GetAttribute("Placed")
 		and typeof(mountAttr) == "CFrame" and type(radiusAttr) == "number" and typeof(eyeAttr) == "Vector3" then
 		-- sit where the car's own cluster is: seen through the top half of the wheel, just behind
 		-- the rim, facing the driver's eye (the same eye the first-person camera uses)
