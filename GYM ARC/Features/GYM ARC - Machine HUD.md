@@ -57,3 +57,6 @@ Weight card top right, PUMP panel under it, big red REP bottom right, quiet STOP
 ## Phones (14 Oct)
 REP 150 x 52 above Roblox's jump button, PUMP right above it, STOP above the thumbstick, a shorter weight card under the top bar; a level requirement gets its own line. No coach lines on screen.
 ![[GYM ARC/Screenshots/declutter_lifting_after_phone.jpg]]
+
+## REP never moves (14 Oct, later)
+REP (150 x 46) sits right above Roblox's jump button on phones, PUMP right above it, worked out once and only again when the screen size changes. On a PC it sits in the bottom right corner.

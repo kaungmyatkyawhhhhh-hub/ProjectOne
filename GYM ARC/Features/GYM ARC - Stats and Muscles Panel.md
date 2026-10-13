@@ -43,3 +43,6 @@ See [[GYM ARC - Bug - Physique numbers did not match]].
 ![[GYM ARC/Screenshots/declutter_physique_phone.jpg]]
 Small phone:
 ![[GYM ARC/Screenshots/declutter_physique_small_phone.jpg]]
+
+## Taller frame note (14 Oct, later)
+Above the starting height a small gray line under the big %: "Taller frame - more muscle to fill". After every Growth Spurt a small message once: "You grew! Your muscles have more room to grow."

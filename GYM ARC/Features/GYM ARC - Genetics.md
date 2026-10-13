@@ -56,3 +56,6 @@ Asking before replacing a good roll, after a reroll, on a small phone, and the o
 ![[GYM ARC/Screenshots/panel_genetics_rerolled.jpg]]
 ![[GYM ARC/Screenshots/panel_genetics_small_phone.jpg]]
 ![[GYM ARC/Screenshots/panel_genetics_odds.jpg]]
+
+## The 3D stage is back (14 Oct, later the same day)
+The owner wanted the 3D stage back instead of the flat panel. It now frames the same on every screen: the camera is set up once as on a 16:9 PC screen, and on other screens only the zoom (field of view) changes so the whole stage always fits. Nothing covers the stage: GENETICS and the DNA tokens sit on the top bar line, and Overall, the six groups, Frame / Body, View odds, REROLL and KEEP are one panel along the bottom in the black and gold style.

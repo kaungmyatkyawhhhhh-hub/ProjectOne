@@ -144,3 +144,9 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - Loading screen, declutter HUD, Ge
 ## 12. Physique numbers and phones
 Owner's request ([[2026-10-14 GYM ARC Prompt - Lifting HUD, top bar, Physique, left menu on mobile]]): the Physique window's %, grades and total now all come from one number ([[GYM ARC - Bug - Physique numbers did not match]]), bars follow the grade color, the labels switch is an eye button on the body card, and the window fits small phones. See [[GYM ARC - Stats and Muscles Panel]].
 ![[GYM ARC/Screenshots/declutter_physique_phone.jpg]]
+
+## 13. Physique note, REP that never moves, the 3D genetics stage back
+- Physique ([[2026-10-14 GYM ARC Prompt - Physique taller frame note]]): the real numbers stay. Under the big % a small gray line "Taller frame - more muscle to fill" shows once you are taller than the starting height. After a Growth Spurt a small message shows once: "You grew! Your muscles have more room to grow." The Studio test switch only works in Studio.
+- REP ([[2026-10-14 GYM ARC Prompt - Fixed REP spot and 3D genetics back]]): REP now has ONE spot, right above Roblox's jump button (12 px gap, right edges lined up), worked out once and only again if the screen size changes. Found on the way: the first try measured the jump button before Roblox had placed it (REP ended up at the top), so a measurement only counts once the button is in the lower half of the screen.
+- Genetics: the 3D stage (the bar with the plates, the overall plate, the DNA helix) is back. Phones now see it framed exactly like a PC; nothing sits on top of the stage any more: the title and DNA tokens are on the top bar line, everything else is one panel along the bottom. (The set pieces had never been moved, so nothing needed moving back.)
+- Still to do: the side-by-side screenshots at 844x390, 667x375 and 1920x1080 (Studio's Play button got stuck waiting, see the session notes).
