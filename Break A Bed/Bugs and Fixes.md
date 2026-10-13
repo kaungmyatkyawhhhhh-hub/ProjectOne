@@ -148,3 +148,12 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: Invite Friend stand looked empty (a column of cash) #bugs #done
 - The figure is only made in a running server, and the bills and dumbbells were saved stacked above the centre (they only spread out on a player's screen). Now the figure is rongstrix's avatar (with a plain fallback) and the items are saved in a loose ring at shoulder-free heights.
+
+## 2026-10-13: old code ran in play tests #bugs #done
+- Script tabs open in Studio held older copies of GameServer and GameConfig, and play mode used those. Fixed by writing through ScriptEditorService so the tab and the saved script match.
+
+## 2026-10-13: Studio Play button stuck (open) #bugs
+- Every start/stop returned "Start play hasn't finished yet", even after reopening Studio. Blocks testing the new Glove Shop window, the leaderboard SERVER tab and the music.
+
+## 2026-10-13: Invite Friend stand blocked the upgrade boards #bugs #done
+- The layout move put it right in front of WALK SPEED / TRAINING SPEED and their pads. Now placed from a plaza list with 10-stud keep-out zones checked by script; the Glove Shop was also nudged off the walkway to training.

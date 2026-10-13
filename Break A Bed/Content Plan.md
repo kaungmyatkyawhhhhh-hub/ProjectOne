@@ -160,6 +160,7 @@ Beds you haven't broken yet are **black silhouettes**, so you want to keep playi
   - **Cash and dumbbells** orbit the figure in a loose ring at different heights (6–8 items, small, slowly circling and bobbing). They aren't stacked in a column, and they never cover the figure's face.
 
 ## 8. Leaderboards (owner, 2026-10-13)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
 Three world boards stand side by side near spawn: **TOP TOTAL DAMAGE** (exists now), **TOP TOTAL MONEY** and **TOP TOTAL REBIRTHS**.
 - **GLOBAL / SERVER switch:** two tab buttons under each title. GLOBAL (the default) shows everyone, from an OrderedDataStore. SERVER shows only the players in this server, live, updating every few seconds. The chosen tab is per player and only changes their own view.
 - **Top 100, scrollable:** the list is a `ScrollingFrame` that holds 10 rows at a time, and players scroll with the mouse wheel, by dragging or by touch.
@@ -179,6 +180,7 @@ Three world boards stand side by side near spawn: **TOP TOTAL DAMAGE** (exists n
   - Each board has a small matching light on top.
 
 ## 9. Map layout fixes (owner's screenshot, 2026-10-13)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
 Seen from spawn, everything is squeezed into the back corner while the big paved plaza in front is empty.
 - **The Glove Shop is jammed** between the training floor and the VIP Lounge. Its "Glove Shop" title overlaps the "VIP POST / 2x your best post" sign. **Move it into the open plaza**, front-left of the training area, facing spawn, with about 8 studs of free space around its pad.
 - **The Invite Friend stand** has no figure yet (only small dumbbells on the ring). Build the rongstrix figure (section 7), and move the stand into the open plaza closer to spawn, front-right, so it's one of the first things players see.

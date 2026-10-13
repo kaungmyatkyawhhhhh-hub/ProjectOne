@@ -164,3 +164,6 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: stand pads = big see-through tinted circle with a thick glowing neon ring (SELL-stall look); cyan for Glove Shop, yellow for Invite Friend. Invite figure = rongstrix's avatar (userId 1834504124). #break-a-bed
 - 2026-10-13: game page showed "Ages 16+" → under-16 players can't join. Top priority: make the game all-ages (fix the questionnaire/age setting truthfully). #break-a-bed
 - 2026-10-13: the 16+ limit lifts after 250+ engaged players (Roblox rule for new games). Goal: reach 250 engaged players fast, then the ads can bring kids. #break-a-bed
+- 2026-10-13: Money leaderboard reuses the existing TotalCash save field (all Cash ever earned) instead of a new TotalCashEarned. Glove rarities: 2 Common, 2 Uncommon, 2 Rare, 2 Epic, 2 Legendary, Void Mythic, Infinity Secret. #break-a-bed
+- 2026-10-13: map layout: stands in the front plaza (Glove Shop front-left, Invite front-right), training floor 76x88 with staggered posts. Music = a shuffled 3-song APM playlist. #break-a-bed
+- 2026-10-13: Invite Friend stand at (-18.5, 35) between the upgrade boards and the VIP Lounge; plaza items keep 10 studs clear in front of boards, pads, crate, VIP door, arch and leaderboards. #break-a-bed

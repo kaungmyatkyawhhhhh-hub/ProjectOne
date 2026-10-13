@@ -11,7 +11,7 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 Game based on Chop A Brick: train to gain Strength and Level, then karate-chop beds along a path for Cash.
 - **Details:** [[Break A Bed/Project Overview]] (all Break A Bed notes go in the `Break A Bed` folder)
 - **Code:** `C:\Users\USER\Documents\Cashgrab` on one PC, folder `BAB` on the other. Studio place "Break A Bed" (placeId 116443177548785).
-- **Now:** big content update built and tested: unique posts, gloves (blocky), late-game pacing, Rebirths + token shop, black undiscovered beds/posts, new Glove Shop stand, Invite Friend stand + friend bonus, shop order ([[Break A Bed/2026-10-13|2026-10-13]]). Next: fix the bed 20 pacing wall (32 min), save + publish.
+- **Now:** content update + leaderboards (3 boards, GLOBAL/SERVER), Ninja Legends glove shop, plaza re-layout, music playlist ([[Break A Bed/2026-10-13|2026-10-13]]). Next: Studio Play is stuck, so test the glove window, leaderboard tabs and music; fix the bed 20 pacing wall; save + publish.
 - **Ads:** released as "[🎉 RELEASE] Break a Bed". 12K Robux spent on ads; earning about 500 Robux a day ([[Break A Bed/Ads|Ads]]).
 - **Next:** save + publish, then [[Break A Bed/Retention Plan|Retention Plan]].
 - **Last updated:** 2026-10-13
