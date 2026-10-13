@@ -131,3 +131,13 @@ Replaces every earlier look (grit, Gym League, premium). Layouts stay; only the 
 - Gold gradient for the active tab, hero names, rewards, big numbers and rank plates. Red only for the main button. Teal only for progress / stamina.
 - Main buttons: shiny bevel, glow, a light streak that sweeps once, a gentle pulse. Other buttons quiet and dark; inactive tabs flat.
 - Windows: title + tabs in the header, coins + X on the right, 90% size, soft shade around them so the gym shows.
+
+## Top bar: TopbarPlus (14 Oct)
+Our top bar buttons now live on Roblox's own top bar, made with TopbarPlus by ForeverHD (see [[GYM ARC - Credits]]). They are exactly as tall as Roblox's buttons and on the same line.
+- Left: coins (gold coin), height ("7'0" MAX" when you can't grow more), level ("LVL 60"; hover shows how close the next level is).
+- Right: Daily, Quests (with a red number when something is ready), the gear (Settings).
+- On a narrow phone the height button folds away first.
+- Everything under the top bar (quest card, messages, the weight card while lifting, posing and arm wrestling headers) starts 8 px under it.
+![[GYM ARC/Screenshots/declutter_topbarplus_phone.jpg]]
+Before:
+![[GYM ARC/Screenshots/declutter_hud_before_phone.jpg]]

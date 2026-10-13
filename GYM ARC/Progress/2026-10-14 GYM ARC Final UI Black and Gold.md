@@ -108,3 +108,9 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - Arm wrestling one per seat]]): on
 Mockup, then the game:
 ![[GYM ARC/Screenshots/ui_compare_final_00_loading_mockup.png]]
 ![[GYM ARC/Screenshots/ui_compare_final_00_loading_game.jpg]]
+
+## 9. Top bar with TopbarPlus
+Owner's request ([[2026-10-14 GYM ARC Prompt - Top bar with TopbarPlus]]): the top bar buttons are now TopbarPlus icons on Roblox's own top bar, the same size and line as Roblox's buttons. Coins, height and level on the left; Daily, Quests and Settings on the right. On a narrow phone the height button folds away first. See [[GYM ARC - UI System]] and [[GYM ARC - Credits]].
+- Also found and fixed: a stray "5" typed into a server script stopped the whole game from starting ([[GYM ARC - Bug - Stray character stopped the server]]).
+- Also: the Studio test setting TestPhoneSize was switched off. It squeezed the HUD into a box inside the Device Emulator, which is why the left menu looked stuck near the top and the stamina bar looked too high.
+![[GYM ARC/Screenshots/declutter_topbarplus_phone.jpg]]
