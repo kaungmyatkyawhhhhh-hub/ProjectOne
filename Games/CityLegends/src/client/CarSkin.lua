@@ -27,6 +27,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CarMesh = require(Shared:WaitForChild("CarMesh"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 
 local CarSkin = {}
 
@@ -77,16 +78,16 @@ CarSkin.CLUSTER_STYLE = {
 export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string }
 CarSkin.DIAL_NEEDLES = {
 	lambrini_countach = { -- Countach
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0825, 0.0077, -0.2274), face = Vector3.new(0, 0.1961, 0.9806), length = 0.0309, scale = "20:-98.2,100:-51.7,180:3.1,320:114.9" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0911, 0.0056, -0.227), face = Vector3.new(-0, 0.1961, 0.9806), length = 0.0329, scale = "1000:-99.6,2000:-56.6,3000:-24.7,4000:0.7,5000:26.9" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0825, 0.0077, -0.2274), face = Vector3.new(0, 0.1961, 0.9806), length = 0.0309, scale = "0:-110,20:-98.2,100:-51.7,180:3.1,320:114.9" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0911, 0.0056, -0.227), face = Vector3.new(-0, 0.1961, 0.9806), length = 0.0329, scale = "0:-138,1000:-99.6,2000:-56.6,3000:-24.7,4000:0.7,5000:26.9,6000:53,7000:79,8000:105,9000:131" },
 	},
 	astin_vantage = { -- V12 Vantage
-		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0517, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:-14.9,200:245.1" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0591, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:15.0,8000:-245.0" },
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0517, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:162,200:377" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0591, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:208,1000:181,2000:150,3000:119,4000:89,5000:61,6000:30,7000:-4,8000:-34" },
 	},
 	astin_db9 = { -- Vanquish
-		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0582, 0.0319, -0.2625), face = Vector3.new(-0, 0.3132, 0.9497), length = 0.045, scale = "0:-28.2,200:231.8" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0492, 0.0319, -0.2625), face = Vector3.new(-0, 0.3132, 0.9497), length = 0.045, scale = "0:29.9,8000:-230.1" },
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0582, 0.0319, -0.2625), face = Vector3.new(-0, 0.3132, 0.9497), length = 0.045, scale = "0:162,206:383.5" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0492, 0.0319, -0.2625), face = Vector3.new(-0, 0.3132, 0.9497), length = 0.045, scale = "0:208,1000:181,2000:150,3000:119,4000:89,5000:61,6000:30,7000:-4,8000:-34" },
 	},
 	bentlee_bentayga = { -- Bentayga
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.1002, -0.0152, -0.263), face = Vector3.new(-0.012, 0.4411, 0.8974), length = 0.0394, scale = "0:-123.7,4000:6.8,7000:102.3,8000:133.7" },
@@ -1328,15 +1329,24 @@ end
 	hidden with LocalTransparencyModifier instead.
 	lite: lighter meshes (traffic)
 ]]
--- our own round dial face for a CarSkin.DIAL_NEEDLES entry, on a 230 px canvas (100 px = needle
--- length): dark face, ring, ticks and numbers along the car's own scale, red zone, unit
-local function drawDialFace(sg: SurfaceGui, dl: DialSpec)
+local DEFAULT_LOOK = {
+	r = 115, face = Color3.fromRGB(12, 12, 14), bezel = Color3.fromRGB(170, 174, 184), bezelW = 4, tick = Color3.fromRGB(235, 238, 245),
+	tickR = 110, major = { 13, 3 }, minor = { 7, 1.5 }, minors = 1, num = Color3.fromRGB(240, 242, 248), numR = 84, size = 20,
+	font = "GothamBold", step = 20, needle = Color3.fromRGB(235, 40, 30), needleW = 6, hub = Color3.fromRGB(24, 24, 26), hubR = 14,
+}
+
+-- our own dial over one of the car's dials, drawn like the real one (DialLooks: colours, numbers,
+-- red zone, needle, logos), in canvas pixels where 100 is the needle length. Returns the canvas
+-- radius in those pixels.
+local function drawDialFace(sg: SurfaceGui, dl: DialSpec, look: { [string]: any }): number
 	local pts: { { number } } = {}
 	for v, a in string.gmatch(dl.scale, "(%-?[%d%.]+):(%-?[%d%.]+)") do
 		table.insert(pts, { tonumber(v) :: number, tonumber(a) :: number })
 	end
+	local R = look.r + (look.bezelW or 0) + 4
+	sg.CanvasSize = Vector2.new(2 * R, 2 * R)
 	if #pts < 2 then
-		return
+		return R
 	end
 	local function angleOf(v: number): number
 		for i = 1, #pts - 1 do
@@ -1347,76 +1357,145 @@ local function drawDialFace(sg: SurfaceGui, dl: DialSpec)
 		end
 		return pts[#pts][2]
 	end
-	local lo, top = pts[1][1], pts[#pts][1]
-	local rpm = dl.kind == "rpm"
-	local step = if rpm then 1000 else 10
-	if not rpm then
-		for _, st in { 10, 20, 40, 50 } do
-			step = st
-			if (top - lo) / st <= 12 then
-				break
-			end
-		end
-	end
-	local function frame(props: { [string]: any }): Frame
+	local function frame(z: number, color: Color3?): Frame
 		local f = Instance.new("Frame")
 		f.BorderSizePixel = 0
-		for k, v in props do
-			(f :: any)[k] = v
-		end
+		f.AnchorPoint = Vector2.new(0.5, 0.5)
+		f.BackgroundColor3 = color or Color3.new()
+		f.BackgroundTransparency = if color then 0 else 1
+		f.ZIndex = z
+		f.Parent = sg
 		return f
 	end
-	local face = frame({ Name = "DialFace", BackgroundColor3 = Color3.fromRGB(12, 12, 14), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(228, 228), ZIndex = 0, Parent = sg })
-	local round = Instance.new("UICorner")
-	round.CornerRadius = UDim.new(0.5, 0)
-	round.Parent = face
-	local ring = Instance.new("UIStroke")
-	ring.Color = Color3.fromRGB(170, 174, 184)
-	ring.Thickness = 3
-	ring.Parent = face
-	local redFrom = if rpm then top * 0.8 else math.huge
-	local v = math.ceil(lo / (step / 2)) * (step / 2)
-	while v <= top + 1e-6 do
-		local major = math.abs(v / step - math.floor(v / step + 0.5)) < 1e-6
-		local a = angleOf(v)
-		local red = v >= redFrom
-		-- a tick: a full-size holder turned to the angle, the tick at its top edge
-		local holder = frame({ BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(222, 222), Rotation = a, ZIndex = 1, Parent = sg })
-		frame({
-			BackgroundColor3 = if red then Color3.fromRGB(255, 40, 30) else Color3.fromRGB(235, 238, 245),
-			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.fromScale(0.5, 0),
-			Size = UDim2.fromOffset(if major then 5 else 3, if major then 18 else 10),
-			ZIndex = 1,
-			Parent = holder,
-		})
-		if major then
-			local r = math.rad(a)
-			local label = Instance.new("TextLabel")
-			label.BackgroundTransparency = 1
-			label.AnchorPoint = Vector2.new(0.5, 0.5)
-			label.Position = UDim2.fromOffset(115 + 76 * math.sin(r), 115 - 76 * math.cos(r))
-			label.Size = UDim2.fromOffset(48, 26)
-			label.Font = Enum.Font.GothamBold
-			label.TextSize = if rpm then 26 else 22
-			label.TextColor3 = if red then Color3.fromRGB(255, 60, 45) else Color3.fromRGB(240, 242, 248)
-			label.Text = tostring(math.floor((if rpm then v / 1000 else v) + 0.5))
-			label.ZIndex = 1
-			label.Parent = sg
+	local function circle(x: number, y: number, r: number, fill: Color3?, stroke: Color3?, w: number?, z: number)
+		local f = frame(z, fill)
+		f.Position = UDim2.fromOffset(R + x, R + y)
+		f.Size = UDim2.fromOffset(2 * r, 2 * r)
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0.5, 0)
+		c.Parent = f
+		if stroke then
+			local st = Instance.new("UIStroke")
+			st.Color = stroke
+			st.Thickness = w or 2
+			st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			st.Parent = f
 		end
-		v += step / 2
 	end
-	local unit = Instance.new("TextLabel")
-	unit.BackgroundTransparency = 1
-	unit.AnchorPoint = Vector2.new(0.5, 0.5)
-	unit.Position = UDim2.fromOffset(115, 160)
-	unit.Size = UDim2.fromOffset(110, 20)
-	unit.Font = Enum.Font.Gotham
-	unit.TextSize = 15
-	unit.TextColor3 = Color3.fromRGB(170, 175, 186)
-	unit.Text = if rpm then "x1000 r/min" elseif dl.unit == "kmh" then "km/h" else "MPH"
-	unit.ZIndex = 1
-	unit.Parent = sg
+	-- a bar along the radius at angle a (degrees clockwise from 12), from r0 to r1
+	local function bar(a: number, r0: number, r1: number, w: number, color: Color3, z: number)
+		local t = math.rad(a)
+		local mid = (r0 + r1) / 2
+		local f = frame(z, color)
+		f.Position = UDim2.fromOffset(R + mid * math.sin(t), R - mid * math.cos(t))
+		f.Size = UDim2.fromOffset(w, r1 - r0)
+		f.Rotation = a
+	end
+	local function text(t: string, x: number, y: number, size: number, color: Color3, font: string?, z: number)
+		local l = Instance.new("TextLabel")
+		l.BackgroundTransparency = 1
+		l.AnchorPoint = Vector2.new(0.5, 0.5)
+		l.Position = UDim2.fromOffset(R + x, R + y)
+		l.Size = UDim2.fromOffset(math.max(40, size * #t), size + 6)
+		local okFont, f = pcall(function()
+			return (Enum.Font :: any)[font or "GothamMedium"]
+		end)
+		l.Font = if okFont and f then f else Enum.Font.GothamMedium
+		l.TextSize = size
+		l.TextColor3 = color
+		l.Text = t
+		l.ZIndex = z
+		l.Parent = sg
+	end
+	-- numbers never touch: at most the gap to their neighbour along the arc
+	local function fitSize(size: number, r: number, vals: { number }, labels: { string }, toMain: (number) -> number): number
+		local gap, chars = math.huge, 1
+		for i, v in vals do
+			chars = math.max(chars, #labels[i])
+			if i > 1 then
+				gap = math.min(gap, math.abs(angleOf(toMain(v)) - angleOf(toMain(vals[i - 1]))) * math.pi / 180 * r)
+			end
+		end
+		return if gap < math.huge then math.min(size, gap * 0.92 / (0.62 * chars)) else size
+	end
+	local top = pts[#pts][1]
+	if look.bezelW then
+		circle(0, 0, look.r + look.bezelW, look.bezel, nil, nil, 1)
+	end
+	circle(0, 0, look.r, look.face, nil, nil, 2)
+	if look.inner then
+		circle(0, 0, look.innerR, look.inner, nil, nil, 3)
+	end
+	for _, l in look.lines or {} do
+		circle(0, 0, l.r, nil, l.c, l.w, 4)
+	end
+	for _, c in look.circles or {} do
+		circle(c.x, c.y, c.r, c.fill, c.stroke, c.w, 4)
+	end
+	for _, b in look.bands or {} do
+		local a0, a1 = angleOf(b.from), angleOf(b.to)
+		local n = math.max(2, math.floor(math.abs(a1 - a0) / 3))
+		for i = 0, n - 1 do
+			local a = a0 + (a1 - a0) * (i + 0.5) / n
+			bar(a, b.r - b.w / 2, b.r + b.w / 2, math.abs(a1 - a0) / n * math.pi / 180 * b.r + 1.5, b.c, 5)
+		end
+	end
+	for _, rc in look.rects or {} do
+		local f = frame(6, rc.c)
+		f.Position = UDim2.fromOffset(R + rc.x, R + rc.y)
+		f.Size = UDim2.fromOffset(rc.w, rc.h)
+	end
+	-- ticks and numbers
+	local step = look.step
+	local v0 = look.start or math.ceil(pts[1][1] / step) * step
+	local vals, labels = {}, {}
+	local v = v0
+	while v <= top + 1e-6 do
+		table.insert(vals, v)
+		table.insert(labels, tostring(math.floor(v / (look.div or 1) + 0.5)))
+		v += step
+	end
+	local size = fitSize(look.size, look.numR, vals, labels, function(x)
+		return x
+	end)
+	local minors = look.minors or 1
+	for i, val in vals do
+		for k = 0, minors do
+			local vv = val + step * k / (minors + 1)
+			if vv <= top + 1e-6 and not (k > 0 and i == #vals and vv > val) then
+				local major = k == 0
+				local dims = if major then look.major else look.minor
+				local red = look.red ~= nil and vv >= look.red
+				bar(angleOf(vv), look.tickR - dims[1], look.tickR, dims[2], if red then look.redC or Color3.fromRGB(225, 35, 28) else look.tick, 6)
+			end
+		end
+		local t = math.rad(angleOf(val))
+		local red = look.numRed ~= nil and look.red ~= nil and val >= look.red
+		text(labels[i], look.numR * math.sin(t), -look.numR * math.cos(t), size, if red then look.numRed else look.num, look.font, 7)
+	end
+	-- a second scale in another unit (km/h round the outside of a mph dial)
+	local alt = look.alt
+	if alt then
+		local avals, alabels = {}, {}
+		local av = alt.start or 0
+		while av <= top * alt.mul + 1e-6 do
+			table.insert(avals, av)
+			table.insert(alabels, tostring(math.floor(av + 0.5)))
+			av += alt.step
+		end
+		local function toMain(x: number): number
+			return x / alt.mul
+		end
+		local asize = fitSize(alt.size, alt.numR, avals, alabels, toMain)
+		for i, x in avals do
+			local t = math.rad(angleOf(toMain(x)))
+			text(alabels[i], alt.numR * math.sin(t), -alt.numR * math.cos(t), asize, alt.c, look.font, 7)
+		end
+	end
+	for _, tx in look.texts or {} do
+		text(tx.t, tx.x, tx.y, tx.size, tx.c, tx.font, 7)
+	end
+	return R
 end
 
 function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?): boolean
@@ -1566,8 +1645,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			for i, dl in dials do
 				local face = dl.face.Unit
 				local up = (Vector3.yAxis - face * face.Y).Unit
-				local pos = imported.steer.mount.Position + dl.at * m + face * 0.002 * m
 				local digits = dl.kind == "digits"
+				local pos = imported.steer.mount.Position + dl.at * m + face * (if digits then 0.004 else 0.002) * m
 				local size = if digits then dl.length * m else dl.length * 2.3 * m
 				local p = Instance.new("Part")
 				p.Name = "DialPanel" .. i
@@ -1608,20 +1687,26 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 					label.Parent = sg
 					continue
 				end
-				-- 230 px across: 100 px is one needle length
-				sg.CanvasSize = Vector2.new(230, 230)
-				drawDialFace(sg, dl)
+				-- our dial, drawn like the real one; the panel grows to the dial's size (100 px = one
+				-- needle length)
+				local look = DialLooks[id] and DialLooks[id][i] or nil
+				if type(look) ~= "table" then
+					look = DEFAULT_LOOK
+				end
+				local R = drawDialFace(sg, dl, look :: any)
+				local side = 2 * R / 100 * dl.length * m
+				p.Size = Vector3.new(side, side, 0.01)
 				-- the needle turns about its own middle, which sits on the hub: it runs 100 px up to
 				-- the tip, and of the lower half only a 22 px tail shows
 				local needle = Instance.new("Frame")
 				needle.Name = "DialNeedle"
 				needle.BorderSizePixel = 0
-				needle.BackgroundColor3 = Color3.fromRGB(255, 52, 30)
+				needle.BackgroundColor3 = look.needle
 				needle.AnchorPoint = Vector2.new(0.5, 0.5)
 				needle.Position = UDim2.fromScale(0.5, 0.5)
-				needle.Size = UDim2.fromOffset(7, 200)
+				needle.Size = UDim2.fromOffset(look.needleW or 6, 200)
 				needle.Rotation = -125
-				needle.ZIndex = 3
+				needle.ZIndex = 8
 				needle:SetAttribute("GaugeKind", dl.kind)
 				needle:SetAttribute("GaugeUnit", dl.unit)
 				needle:SetAttribute("GaugeScale", dl.scale)
@@ -1638,17 +1723,23 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				local corner = Instance.new("UICorner")
 				corner.CornerRadius = UDim.new(0.5, 0)
 				corner.Parent = needle
-				local cap = Instance.new("Frame")
-				cap.BorderSizePixel = 0
-				cap.BackgroundColor3 = Color3.fromRGB(24, 24, 26)
-				cap.AnchorPoint = Vector2.new(0.5, 0.5)
-				cap.Position = UDim2.fromScale(0.5, 0.5)
-				cap.Size = UDim2.fromOffset(46, 46)
-				cap.ZIndex = 4
-				cap.Parent = sg
-				local round = Instance.new("UICorner")
-				round.CornerRadius = UDim.new(0.5, 0)
-				round.Parent = cap
+				local hubR = look.hubR or 14
+				for k, c in { look.hubRing or false, look.hub or Color3.fromRGB(24, 24, 26) } do
+					if c then
+						local cap = Instance.new("Frame")
+						cap.BorderSizePixel = 0
+						cap.BackgroundColor3 = c
+						cap.AnchorPoint = Vector2.new(0.5, 0.5)
+						cap.Position = UDim2.fromScale(0.5, 0.5)
+						local r = if k == 1 then hubR + 3 else hubR
+						cap.Size = UDim2.fromOffset(2 * r, 2 * r)
+						cap.ZIndex = 8 + k
+						cap.Parent = sg
+						local round = Instance.new("UICorner")
+						round.CornerRadius = UDim.new(0.5, 0)
+						round.Parent = cap
+					end
+				end
 			end
 		end
 		-- the camera sits at the model's own driver's seat
