@@ -88,11 +88,11 @@ File: `Config/GrowthSpurts.luau`. See also [[GYM ARC - Growth Spurts]].
 | StartHeight | 48 in (4'0") | Height at Growth Spurt 0 |
 | MaxHeightInches | 84 in (7'0") | Height cap; the spurt that reaches it is the last |
 | Stage 1 | 4'6", level 15, x1.25 | Height, group level goal, permanent gains bonus |
-| Stage 2 | 5'0", level 47, x1.5 | |
-| Stage 3 | 5'6", level 72, x1.75 | |
-| Stage 4 | 6'0", level 103, x2 | |
-| Stage 5 | 6'6", level 135, x2.5 | |
-| Stage 6 | 7'0", level 157, x3 | Last spurt (max height) |
+| Stage 2 | 5'0", level 58, x1.5 | Re-tuned 14 Oct for free weights (was 47) |
+| Stage 3 | 5'6", level 92, x1.75 | was 72 |
+| Stage 4 | 6'0", level 132, x2 | was 103 |
+| Stage 5 | 6'6", level 164, x2.5 | was 135 |
+| Stage 6 | 7'0", level 178, x3 | Last spurt (max height); was 157 |
 | ExtraPerStage | +6 in, +18 levels, +0.5 bonus | Rule for stages past the table (height still capped) |
 | Targets | 8, 15, 25, 35, 45 min | Target play time per spurt (pacing test tunes to these) |
 | Level cap | none | Muscles keep growing; only diminishing returns slow them |

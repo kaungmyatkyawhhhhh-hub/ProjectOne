@@ -22,3 +22,4 @@ Prompts: [[2026-10-14 GYM ARC Prompt - Rep and pump bar and treadmill sounds]], 
 ![[GYM ARC/Screenshots/ui_compare_v2_main_menu_updates.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_left_menu_pc.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_free_weights_new_save.jpg]]
+- Growth Spurt goals re-tuned so each spurt still takes the planned time with free weights (spurts 2-6: 58 / 92 / 132 / 164 / 178). All tests pass. Commit 6eafbda.
