@@ -122,6 +122,13 @@ Beds you haven't broken yet are **black silhouettes**, so you want to keep playi
 - **Stepping on the yellow ring** (a touch sensor, no prompt) opens Roblox's invite window (`SocialService:PromptGameInvite`), with a 5 s cooldown.
 - **The bonus:** +10% Strength for each friend in the same server, max +30%. It shows as a small chip on the HUD ("Friends +20%"). This is item 3 of "Next retention features" in [[Break A Bed/Retention Plan|Retention Plan]].
 
+- **Fix (owner, 2026-10-13):** the first build had no figure, just dumbbells and cash bills stacked in a column. Now:
+  - **The figure is the Roblox avatar of the user "rongstrix".** On the server, use `Players:GetUserIdFromNameAsync("rongstrix")` and then `Players:CreateHumanoidModelFromUserId(id)`. Wrap both in pcall with a retry, and save the userId as a constant once found so the name lookup isn't needed every server.
+    - The figure stands in the middle of the yellow ring facing spawn. Its HumanoidRootPart is anchored, its name tag is hidden, and it can't be pushed.
+    - It plays an idle animation, and a wave every ~6 s (a looping `Animator` animation, or the default "wave" emote).
+    - If loading fails, it falls back to a plain R15 rig, so the stand never looks empty.
+  - **Cash and dumbbells** orbit the figure in a loose ring at different heights (6–8 items, small, slowly circling and bobbing). They aren't stacked in a column, and they never cover the figure's face.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
