@@ -34,6 +34,8 @@ The first build used plain dark panels that didn't match the [[Break A Bed/UI Ki
 - Only one guide element at a time. Never stack two dark panels.
 
 ## Make it smaller (owner, 2026-10-13)
+**Built 2026-10-13** (the `Tracker` pill), see [[Break A Bed/2026-10-13|2026-10-13]].
+
 The owner's screenshot: the step card is huge (about 60% of the screen width and a big chunk of the height) and covers the middle of the screen. It must be a small strip at the top center, with the world arrow and beam doing the telling.
 - **Size:** a slim pill **at most 24% of the screen width on PC** and 40% on phones, and about 6% of the screen height (around 40–48 px on PC). Use `UISizeConstraint` so it never grows on big screens.
 - **Inside, one row:** a small icon on the left (about 70% of the pill's height), then the step text in one line, with the text size scaling down to fit (`TextScaled` plus a `UITextSizeConstraint`, max around 22). Keep the light card style from the UI Kit.

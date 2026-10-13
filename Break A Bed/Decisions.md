@@ -1,4 +1,4 @@
-﻿# Break A Bed: Decisions
+# Break A Bed: Decisions
 
 #break-a-bed
 
@@ -145,3 +145,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: training combo is counted on the server (punches faster than auto alone); +10% / +20% / +30% Strength at x5 / x10 / x25. The click hint shows in the first 3 sessions and hides once you start clicking; saves from before today count as 3 sessions. #break-a-bed
 - 2026-10-13: next-bed bar always on screen, also while breaking or training (phones: under the bed panel). Newly affordable beds/posts get the guide's arrow + beam for up to 40 s. Come-back toast once a session at 8 min, with tomorrow's daily day number. #break-a-bed
 - 2026-10-13: the tutorial can't be skipped (SKIP removed). The Starter Quest/next-bed pills can be hidden with an x and brought back from the Quests menu (TRACK). The tutorial ends with dimmed-screen highlights on To Bed, then SPAWN. #break-a-bed
+- 2026-10-13: top centre = one slim tracker pill (tutorial step → Starter Quest → next bed). Smallest size 240×36 on PC and 210×32 on phones, so it stays readable (6% of a 338 px phone screen would be 20 px). Boost timers became chips above Strength (PC) or under the Level bar (phones, where the stats touch the top bar). #break-a-bed
+- 2026-10-13: To Bed button (owner): under Shop/Boosts, purple. Goes to the next bed if you're strong enough, otherwise your best broken bed. Hidden until the New Player Guide is done. Once every 2 s. #break-a-bed

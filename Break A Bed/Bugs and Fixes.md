@@ -102,3 +102,15 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 ## 2026-10-13: (testing) MCP screenshots freeze the camera #bugs
 - Studio MCP's screen capture during a playtest leaves the camera on Scriptable. The view stops following the player, and prompts (Break / Train) stop showing, so a test bot "can't" press E. Not a game bug. After a screenshot, set `workspace.CurrentCamera.CameraType = Enum.CameraType.Custom` (only when not breaking or training).
 - Studio's "Stop" counts as a normal leave (no Soft Shutdown save). To test a Soft Shutdown rejoin, run `ServerStorage.StudioSoftShutdown:Invoke()` first.
+
+## 2026-10-13: tracker pill under Roblox's top bar on phones #bugs #done
+- On the Galaxy A06 the new pill sat 45 px from the top, inside Roblox's 58 px top bar. Now it's always at least 4 px under the top bar. Its row also got taller (the thin bar hugs the bottom edge), because on a 32 px phone pill the text was tiny.
+
+## 2026-10-13: click hint said "nil TO PUNCH 2x FASTER!" #bugs #done
+- Moving the Starter Quest card into the pill removed the line that set TAP/CLICK, which the click hint also used. Put back. Found in the phone test before publishing.
+
+## 2026-10-13: To Bed didn't move the player (first try) #bugs #done
+- Server error "attempt to compare number <= Instance": the Strength stat is an object, so the check needed `.Value`. Fixed; every later teleport landed exactly on the bed's stand point.
+
+## 2026-10-13: Starter Quest showed the old goal for a second #bugs #done
+- When two goals finished less than 4 s apart (gift claim, then the spin), the first one's safety timer brought back "Spin the wheel 1/1" for a moment. Each finished goal now has its own timer. (The old card had the same bug.)
