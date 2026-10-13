@@ -208,6 +208,10 @@ Seen from spawn, everything is squeezed into the back corner while the big paved
   3. **The Glove Shop's pad touches the spawn circle** and sits in the walkway. Move the shop into the space freed at the front-left of the training floor (between spawn and the bed path entrance, without blocking the entrance), with its pad facing spawn and at least 6 studs from the spawn circle.
   - The Invite Friend stand's new spot (right side, by the VIP Lounge) is fine.
 
+- **Check after the move (2026-10-13, latest):** the training floor is clear of the bed path and the VIP Lounge now (the plaza was extended), which is good. Two things are left:
+  1. **The TRAINING sign is still at the back-left end**, facing away from spawn and past the plaza edge. It goes on the **front edge of the floor, the end nearest spawn and the Glove Shop**, centered and facing spawn.
+  2. **The Glove Shop's pad is on the walking route** from spawn to training, so players would open the shop every time they walk past. Move the shop to the **left side of the route** (toward the bed path side, without blocking it), with its pad facing the route but **at least 4 studs off it**, and at least 6 studs from the spawn circle.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
