@@ -1328,6 +1328,97 @@ end
 	hidden with LocalTransparencyModifier instead.
 	lite: lighter meshes (traffic)
 ]]
+-- our own round dial face for a CarSkin.DIAL_NEEDLES entry, on a 230 px canvas (100 px = needle
+-- length): dark face, ring, ticks and numbers along the car's own scale, red zone, unit
+local function drawDialFace(sg: SurfaceGui, dl: DialSpec)
+	local pts: { { number } } = {}
+	for v, a in string.gmatch(dl.scale, "(%-?[%d%.]+):(%-?[%d%.]+)") do
+		table.insert(pts, { tonumber(v) :: number, tonumber(a) :: number })
+	end
+	if #pts < 2 then
+		return
+	end
+	local function angleOf(v: number): number
+		for i = 1, #pts - 1 do
+			local a, b = pts[i], pts[i + 1]
+			if v <= b[1] or i == #pts - 1 then
+				return a[2] + (b[2] - a[2]) * (v - a[1]) / (b[1] - a[1])
+			end
+		end
+		return pts[#pts][2]
+	end
+	local lo, top = pts[1][1], pts[#pts][1]
+	local rpm = dl.kind == "rpm"
+	local step = if rpm then 1000 else 10
+	if not rpm then
+		for _, st in { 10, 20, 40, 50 } do
+			step = st
+			if (top - lo) / st <= 12 then
+				break
+			end
+		end
+	end
+	local function frame(props: { [string]: any }): Frame
+		local f = Instance.new("Frame")
+		f.BorderSizePixel = 0
+		for k, v in props do
+			(f :: any)[k] = v
+		end
+		return f
+	end
+	local face = frame({ Name = "DialFace", BackgroundColor3 = Color3.fromRGB(12, 12, 14), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(228, 228), ZIndex = 0, Parent = sg })
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0.5, 0)
+	round.Parent = face
+	local ring = Instance.new("UIStroke")
+	ring.Color = Color3.fromRGB(170, 174, 184)
+	ring.Thickness = 3
+	ring.Parent = face
+	local redFrom = if rpm then top * 0.8 else math.huge
+	local v = math.ceil(lo / (step / 2)) * (step / 2)
+	while v <= top + 1e-6 do
+		local major = math.abs(v / step - math.floor(v / step + 0.5)) < 1e-6
+		local a = angleOf(v)
+		local red = v >= redFrom
+		-- a tick: a full-size holder turned to the angle, the tick at its top edge
+		local holder = frame({ BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(222, 222), Rotation = a, ZIndex = 1, Parent = sg })
+		frame({
+			BackgroundColor3 = if red then Color3.fromRGB(255, 40, 30) else Color3.fromRGB(235, 238, 245),
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0),
+			Size = UDim2.fromOffset(if major then 5 else 3, if major then 18 else 10),
+			ZIndex = 1,
+			Parent = holder,
+		})
+		if major then
+			local r = math.rad(a)
+			local label = Instance.new("TextLabel")
+			label.BackgroundTransparency = 1
+			label.AnchorPoint = Vector2.new(0.5, 0.5)
+			label.Position = UDim2.fromOffset(115 + 76 * math.sin(r), 115 - 76 * math.cos(r))
+			label.Size = UDim2.fromOffset(48, 26)
+			label.Font = Enum.Font.GothamBold
+			label.TextSize = if rpm then 26 else 22
+			label.TextColor3 = if red then Color3.fromRGB(255, 60, 45) else Color3.fromRGB(240, 242, 248)
+			label.Text = tostring(math.floor((if rpm then v / 1000 else v) + 0.5))
+			label.ZIndex = 1
+			label.Parent = sg
+		end
+		v += step / 2
+	end
+	local unit = Instance.new("TextLabel")
+	unit.BackgroundTransparency = 1
+	unit.AnchorPoint = Vector2.new(0.5, 0.5)
+	unit.Position = UDim2.fromOffset(115, 160)
+	unit.Size = UDim2.fromOffset(110, 20)
+	unit.Font = Enum.Font.Gotham
+	unit.TextSize = 15
+	unit.TextColor3 = Color3.fromRGB(170, 175, 186)
+	unit.Text = if rpm then "x1000 r/min" elseif dl.unit == "kmh" then "km/h" else "MPH"
+	unit.ZIndex = 1
+	unit.Parent = sg
+end
+
 function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?): boolean
 	if model:GetAttribute("Skinned") then
 		return true
@@ -1467,8 +1558,9 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				model:SetAttribute("OwnCluster", true) -- the model's own gauge screens stay off
 			end
 		end
-		-- live needles on the car's own dials: a lit red needle and a dark hub cap on a see-through
-		-- panel just in front of each dial face (Driving turns the needles)
+		-- our own dial over each of the car's dials (owner: "create your own cluster and replace that
+		-- old cluster"): a solid face with the car's scale, numbers and a red needle, so the old needle
+		-- and any washed-out print are covered (Driving turns the needles)
 		if dials and imported.steer and not liteMode then
 			local m = CarBuilder.STUDS_PER_METRE
 			for i, dl in dials do
@@ -1498,11 +1590,14 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				sg.MaxDistance = 40
 				sg.Parent = p
 				if digits then
-					-- the speed in the dial's own unit, like the car's display (Driving fills it in)
+					-- the speed in the dial's own unit, like the car's display (Driving fills it in), on
+					-- a dark plate over the fixed number
 					sg.CanvasSize = Vector2.new(200, 90)
 					local label = Instance.new("TextLabel")
 					label.Name = "Speed"
-					label.BackgroundTransparency = 1
+					label.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+					label.BackgroundTransparency = 0
+					label.BorderSizePixel = 0
 					label.Size = UDim2.fromScale(1, 1)
 					label.Font = Enum.Font.GothamBold
 					label.TextScaled = true
@@ -1513,20 +1608,9 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 					label.Parent = sg
 					continue
 				end
-				-- the dial's numbers lit from just in front of it while the engine runs (Driving)
-				local glow = Instance.new("SurfaceLight")
-				glow.Name = "DialLight"
-				glow.Face = Enum.NormalId.Front -- towards the dial face
-				-- faint: right up against the dial a stronger light washes the numbers out
-				glow.Range = dl.length * 3 * m
-				glow.Angle = 150
-				glow.Brightness = 0.2
-				glow.Color = Color3.fromRGB(235, 238, 245)
-				glow.Shadows = false
-				glow.Enabled = false
-				glow.Parent = p
 				-- 230 px across: 100 px is one needle length
 				sg.CanvasSize = Vector2.new(230, 230)
+				drawDialFace(sg, dl)
 				-- the needle turns about its own middle, which sits on the hub: it runs 100 px up to
 				-- the tip, and of the lower half only a 22 px tail shows
 				local needle = Instance.new("Frame")
@@ -1537,6 +1621,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				needle.Position = UDim2.fromScale(0.5, 0.5)
 				needle.Size = UDim2.fromOffset(7, 200)
 				needle.Rotation = -125
+				needle.ZIndex = 3
 				needle:SetAttribute("GaugeKind", dl.kind)
 				needle:SetAttribute("GaugeUnit", dl.unit)
 				needle:SetAttribute("GaugeScale", dl.scale)
@@ -1559,7 +1644,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				cap.AnchorPoint = Vector2.new(0.5, 0.5)
 				cap.Position = UDim2.fromScale(0.5, 0.5)
 				cap.Size = UDim2.fromOffset(46, 46)
-				cap.ZIndex = 2
+				cap.ZIndex = 4
 				cap.Parent = sg
 				local round = Instance.new("UICorner")
 				round.CornerRadius = UDim.new(0.5, 0)
