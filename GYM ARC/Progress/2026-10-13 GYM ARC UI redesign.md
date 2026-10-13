@@ -47,3 +47,5 @@ Prompts: [[2026-10-13 GYM ARC Prompt - Big UI and bug run]], then [[2026-10-13 G
 ![[GYM ARC/Screenshots/ui_compare_v2_07_stats_lifts_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_07_stats_genetics_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_07_growth_spurt_moment_phone.jpg]]
+- Shop window (mockup 04) done: Gym Store with pass cards, Robux prices from Roblox and a big detail panel with the buy button. Only items with ids show (today: Extra Trainer).
+![[GYM ARC/Screenshots/ui_compare_v2_04_shop_phone.jpg]]
