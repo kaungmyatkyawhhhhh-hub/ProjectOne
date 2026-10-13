@@ -26,7 +26,7 @@ Rolled on first join: a grade for each muscle group plus a body frame and body t
 - `Config/Genetics`, `Theme.GradePlates`
 - `GeneticsClient`, `Server/ActionService` (reroll)
 - `ReplicatedStorage.GeneticsSet` (builder `tools/builders/GeneticsSet`), `ReplicatedStorage.GeneticsCameraRig` (CamPitch / CamHeight)
-- Sounds: GeneticsClank, GeneticsShimmer, GeneticsThud (placeholders, see [[GYM ARC - Sounds]])
+- Sounds: GeneticsClank, GeneticsShimmer, GeneticsThud (placeholders, see [[GYM ARC - Music and Sounds]])
 
 ## Planned change
 - None in the new prompts. (The old monetization config has a "Gene Lock" pass and a "DNA Token" product, both off.)

@@ -21,7 +21,7 @@ The vault setup that day is in [[2026-10-13 GYM ARC Obsidian vault setup]].
   - Tested in Studio (the note and the holding screen); the teleports only work in a live game.
 
 ## Bugs fixed
-- [[GYM ARC - Bug - Dante skinny then suddenly huge|Dante skinny then suddenly huge]]
+- [[GYM ARC - Bug - NPC body shapes lost on players screens|Dante skinny then suddenly huge]]
 - [[GYM ARC - Bug - 7'0 players did not fit some equipment|7'0 players did not fit some equipment]]
 
 Found and still open (or engine limits):

@@ -1,11 +1,33 @@
 ---
 date: 2026-10-13
-tags: [gymarc, sounds]
-status: current
+tags: [gymarc, feature, sounds]
+status: done
+aliases: ["GYM ARC - Sounds"]
 ---
-# GYM ARC - Sounds
+# GYM ARC - Music and Sounds
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]
+Back to [[00 GYM ARC Home|GYM ARC Home]].
+
+Background music per area and satisfying weight sounds. The owner picks every sound id; the full list of slots is below.
+
+## How it works
+- **Music:** low chill background tracks that loop; area music for the starter gym and the pro gym (different tracks). Volume slider in Settings.
+- **Effects:** plate clank at lockout (pitch varies, deeper on heavy tiers), rep tick, soft breath on heavy reps, set chime, level up, title unlocked, tier unlocked, out of stamina, genetics reveal sounds, spotting sounds.
+- **Rules today:** no grunts or screams; sounds are played through sound groups (Gameplay, UI, Music) with balanced volumes.
+- **Placeholders:** many sounds reuse other clips until the owner picks ids (see "Every sound slot" below).
+- **Missing sounds:** skateboard rolling, grinding, sliding doors, store purchase, mirror opening. Area music only has Starter and Pro.
+
+## Where it lives
+- `Config/Sounds`, `Shared/Audio`, `SettingsClient`
+
+## Planned change
+- **Hardtekk music (monetization prompt, task 2):** replace the chill music with a hardtekk playlist slot `Config.Music.Tracks` (empty for the owner's ids), volume default 0.35, a music on / off toggle, optional per-area lists (Town, StarterGym, ProGym, BeachGym) with a 1.5 s cross-fade.
+- **Lift screams (task 3):** grunts and screams become allowed. A 3D scream from the lifter on a heavy rep (at least 85% of max, 35% chance), always on the last rep of a set, on a new personal record (a big one), and on arm wrestling / posing competition wins. Slots `Config.Screams.Normal` / `Big` (random, never the same twice in a row), 2.5 s cooldown per player, a "Screams" toggle in Settings that mutes other players, a small camera shake for the screamer (off on low graphics).
+
+## Related
+[[GYM ARC - Game Feel]], [[GYM ARC - Settings]], [[GYM ARC - Monetization]]
+
+## Every sound slot
 
 **You pick every sound id.** All sounds live in one place: `ReplicatedStorage > Shared > Config > Sounds` (repo copy:
 `C:\Users\kaung\ClaudeOne\src\ReplicatedStorage\Shared\Config\Sounds.luau`). To change a sound, swap the number in its
@@ -23,7 +45,7 @@ Status key:
 - **Placeholder** = reuses a clip from another slot (pitched up or down) until you pick a real one.
 - **Unused** = the slot exists but nothing plays it right now.
 
-## Lifting (3D, heard at the machine)
+### Lifting (3D, heard at the machine)
 
 | Slot | SoundId | Used for | Status |
 |---|---|---|---|
@@ -34,7 +56,7 @@ Status key:
 | FloorThud | 9113479635 | Rubber floor thud | Filled |
 | Breath | 9113585730, 9113586280 | Soft exhale on heavy tiers / low stamina only | Filled |
 
-## Training feedback
+### Training feedback
 
 | Slot | SoundId | Used for | Status |
 |---|---|---|---|
@@ -52,7 +74,7 @@ Status key:
 | Grew | 9119388384 | "You grew" moment | Placeholder (GeneticsThud clip) |
 | CrowdOoh | 9119388384 | Crowd "ooh" when a pose hits (3D) | Placeholder (GeneticsThud clip, higher) |
 
-## Spotting
+### Spotting
 
 | Slot | SoundId | Used for | Status |
 |---|---|---|---|
@@ -62,14 +84,14 @@ Status key:
 | SpotAssist | 9116717455, 9116717780 | Lifter's rep landed while you pushed | Placeholder (PlateKnock clip) |
 | SpotPayout | 9116163687 | Spotting coins paid | Placeholder (SetComplete clip) |
 
-## Interface
+### Interface
 
 | Slot | SoundId | Used for | Status |
 |---|---|---|---|
 | Click | 9114212934 | Every button press | Placeholder (listed in PROGRESS as yours to pick) |
 | Whoosh | 9125715121 | Menus and panels opening | Filled |
 
-## Genetics reveal
+### Genetics reveal
 
 | Slot | SoundId | Used for | Status |
 |---|---|---|---|
@@ -86,7 +108,7 @@ Status key:
 | GeneticsExplode | 9119388384 | Old reveal: S explodes | Placeholder; Unused |
 | GeneticsBlessed | 9113421788 | Old reveal: BLESSED banner | Placeholder; Unused |
 
-## Music
+### Music
 
 | Slot | SoundId | Used for | Status |
 |---|---|---|---|
@@ -95,13 +117,13 @@ Status key:
 | AreaMusic.Pro | 9043990341 | Pro gym | Filled |
 | AreaMusic (Beach, Town) | none | No own track; uses the main playlist | Empty |
 
-## Totals
+### Totals
 - 41 slots: 38 sound effects, the Music playlist and 2 area music lists.
 - 15 filled with their own clip, 26 placeholders reusing another clip, 0 completely empty in Config.
 - 9 slots are unused right now (Maxed, ChalkPuff and the 7 old genetics reveal slots).
 - Only 17 different sound ids are used in the whole game (15 effects, 2 music tracks).
 
-## No sound yet (from PROGRESS "Waiting on you")
+### No sound yet (from PROGRESS "Waiting on you")
 These have no slot at all yet; tell Claude the id and it adds the slot:
 - Skateboard rolling
 - Grinding on a rail
@@ -110,7 +132,7 @@ These have no slot at all yet; tell Claude the id and it adds the slot:
 - Mirror opening
 - Area music for the beach gym and the town
 
-## Planned new slots (not built yet)
+### Planned new slots (not built yet)
 From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] (grunts and screams become allowed there) and
 [[2026-10-13 GYM ARC Prompt - New features run]]. Both prompts say to leave the SoundId fields empty for you to fill.
 

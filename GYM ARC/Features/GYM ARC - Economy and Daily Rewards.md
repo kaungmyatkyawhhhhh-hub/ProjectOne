@@ -32,7 +32,7 @@ One currency: coins. Earned by lifting and playing, spent on weights, shakes, co
 - Monetization prompt: "2x Coins" pass and coin packs (see [[GYM ARC - Monetization]]).
 
 ## Related
-[[GYM ARC - Quests and Muscle of the Day]], [[GYM ARC - Daily Quests]], [[GYM ARC - Machines]], [[GYM ARC - Wardrobe and Gear and Fits Store]]
+[[GYM ARC - Quests and Muscle of the Day]], [[GYM ARC - Quests and Muscle of the Day]], [[GYM ARC - Machines]], [[GYM ARC - Wardrobe and Gear and Fits Store]]
 
 ## Screenshots
 ![[GYM ARC/Screenshots/ui_v7_hud_pc.png]]

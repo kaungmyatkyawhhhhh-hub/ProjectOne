@@ -24,7 +24,7 @@ Everything that makes lifting feel satisfying: weighty motion, sounds, popups, t
 ## Where it lives
 - `MachineClient` (gainPopup, `ExpPops`), `MuscleRig.SetTraining` / `MuscleRig.Flash`, `Config/HudIcons.MuscleGroups`, `Config/Sounds`
 - Studio hooks `TestPopupSlow`, `TestFlashSlow`
-- Sounds: see [[GYM ARC - Sounds]]
+- Sounds: see [[GYM ARC - Music and Sounds]]
 
 ## Known issues
 - The warm rep flash on the body-map is hard to see on light skin under bright lights.

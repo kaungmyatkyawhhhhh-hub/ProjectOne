@@ -2,6 +2,7 @@
 date: 2026-10-08
 tags: [gymarc, feature]
 status: done
+aliases: ["GYM ARC - Stamina"]
 ---
 # GYM ARC - Stamina and Treadmills
 

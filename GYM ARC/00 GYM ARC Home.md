@@ -15,7 +15,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 ## Current status (13 Oct 2026)
 - The whole core game is built and tested in Studio: training, 18 muscles, genetics, Growth Spurts, titles, stats, quests, spotting, arm wrestling, the town and three gyms.
 - 13 Oct: Growth Spurts now stop at 7'0" ([[GYM ARC - Growth Spurts]]), the NPC size glitch is fixed ([[GYM ARC - NPC Regulars and Gym Cat]]), and soft shutdown is in ([[GYM ARC - Soft Shutdown]]). See [[2026-10-13 GYM ARC Height cap and soft shutdown]].
-- Monetization is OFF; no ids are set yet ([[GYM ARC - Monetization products]]).
+- Monetization is OFF; no ids are set yet ([[GYM ARC - Monetization]]).
 - Not verified yet: phones on a real device, and anything that needs 2 players (spotting, crews, arm wrestling against a player).
 
 ## What's next
@@ -25,7 +25,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 4. New prompts, not started yet:
    - [[2026-10-13 GYM ARC Prompt - New features run|New features run]] (Posing Competition, NPC Rivals, Daily Quests and more)
    - [[2026-10-13 GYM ARC Prompt - Monetization and hype|Monetization and hype]] (monetization ON, Aura, music)
-5. Pick the sound ids ([[GYM ARC - Sounds]]: 26 slots still reuse another clip).
+5. Pick the sound ids ([[GYM ARC - Music and Sounds]]: 26 slots still reuse another clip).
 
 ## Open bugs
 All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main ones:
@@ -40,8 +40,8 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[GYM ARC - Features index|Features]]: one note per system
 - [[GYM ARC - Bugs index|Bugs]]: fixed and open
 - [[GYM ARC - Config values|Config values]]: every tunable number
-- [[GYM ARC - Monetization products|Monetization products]]: passes, products, badges
-- [[GYM ARC - Sounds|Sounds]]: every sound and music slot
+- [[GYM ARC - Monetization|Monetization]]: passes, products, badges (ids, prices, status)
+- [[GYM ARC - Music and Sounds|Music and Sounds]]: every sound and music slot
 - [[GYM ARC - Assets|Assets]]: meshes, textures, images and their ids
 - Progress (one note per work session):
   - [[2026-10-04 GYM ARC Full game built overnight]]

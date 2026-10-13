@@ -193,7 +193,7 @@ File: `Config/MuscleOfTheDay.luau`.
 
 ## Config/Monetization
 File: `Config/Monetization.luau`. All ids are empty, so the Store never shows. Full list in
-[[GYM ARC - Monetization products]].
+[[GYM ARC - Monetization]].
 
 | Setting | Value | What it does |
 |---|---|---|
@@ -363,7 +363,7 @@ File: `Config/HudIcons.luau`. Tile and pill colors and icons. Every `image` fiel
 | Pills | Coins, Quests, Daily, Settings | Top bar pills |
 
 ## Config/Sounds
-File: `Config/Sounds.luau`. Every sound id, volume and pitch. Full list in [[GYM ARC - Sounds]].
+File: `Config/Sounds.luau`. Every sound id, volume and pitch. Full list in [[GYM ARC - Music and Sounds]].
 
 ## Config/Poses
 File: `Config/Poses.luau`. Where the body sits, lies or stands on each of the 21 machine poses (positions, seat heights,
