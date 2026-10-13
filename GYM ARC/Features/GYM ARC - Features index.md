@@ -30,8 +30,8 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 
 ## Progress and rewards
 - [[GYM ARC - Titles]]: collectible titles and the overhead title (done)
-- [[GYM ARC - Economy and Daily Rewards]]: coins, streak, offline coins, re-racking, rush hour (done)
-- [[GYM ARC - Quests and Muscle of the Day]]: Coach Dex quests and the daily 2x group (done); 3 daily quests + 7-day login calendar (planned)
+- [[GYM ARC - Economy and Daily Rewards]]: coins, offline coins, the 7-day login calendar (done)
+- [[GYM ARC - Quests and Muscle of the Day]]: Coach Dex quests, the daily 2x group, 3 daily quests (done)
 - [[GYM ARC - Membership Card]]: Bronze to Diamond by lifetime reps (done)
 - [[GYM ARC - Seasons and Events]]: Halloween, Winter, Summer, rush hour (done)
 

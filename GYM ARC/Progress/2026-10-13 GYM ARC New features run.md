@@ -23,5 +23,14 @@ Prompts: [[2026-10-13 GYM ARC Prompt - New features run]] and [[2026-10-13 GYM A
 ![[GYM ARC/Screenshots/posing_3_contestants_score_cards.jpg]]
 ![[GYM ARC/Screenshots/posing_podium.jpg]]
 
+## Task 2: Daily quests + login streak (done)
+- 3 daily quests per player from a pool of 12, reset at 00:00 UTC, tracked automatically; a Quests tile in the side menu with CLAIM, one SWAP a day and a +150 bonus for all three. Details: [[GYM ARC - Quests and Muscle of the Day]].
+- The login streak is now a 7-day calendar with a CLAIM card on join; day 7 = 300 coins, a DNA token and the "Dedicated" title; missing a day starts again at day 1. Details: [[GYM ARC - Economy and Daily Rewards]].
+- Tested solo (claims, swap limit, day 7, quest progress); no errors. Not tested: the spotting quest with two players, a real midnight reset.
+- Commit: f9f6f1e
+
+![[GYM ARC/Screenshots/daily_quests_panel.jpg]]
+![[GYM ARC/Screenshots/streak_popup_day7.jpg]]
+
 ## Saved / published
 - Not saved to Roblox yet: File > Save to Roblox, then File > Download a Copy to `Documents\GymArc_backups\GymArc_2026-10-13.rbxl`.

@@ -166,11 +166,8 @@ File: `Config/Economy.luau`.
 
 | Setting | Value | What it does |
 |---|---|---|
-| Daily.BaseCoins | 20 | Daily streak base reward |
-| Daily.CoinsPerDay | 5 | Extra per streak day |
-| Daily.MaxStreakBonus | 30 days | Streak days counted for coins (max 170 coins) |
-| Daily.DropPerMissedDay | 3 | Days taken off the streak per missed day |
-| Daily.TokenEvery | 7 | DNA token every 7th streak day |
+| Login.Coins | 25, 35, 50, 70, 90, 120, 300 | Login calendar coins for day 1..7 (13 Oct; replaced the Daily streak numbers) |
+| Login.Day7DnaTokens | 1 | DNA tokens on day 7 (with the "Dedicated" title) |
 | Offline.CoinsPerMinute | 0.5 | Offline coins rate |
 | Offline.CapHours | 8 h | Offline cap (max 240 coins) |
 | Offline.MinMinutes | 10 | Shorter breaks give nothing |
@@ -182,6 +179,16 @@ File: `Config/Economy.luau`.
 | RushHour.EveryMinutes | 30 | Rush hour cycle |
 | RushHour.LengthMinutes | 3 | Rush hour length |
 | RushHour.Coins | 2x | Coins per rep during rush hour |
+
+## Config/DailyQuests
+File: `src/ReplicatedStorage/Shared/Config/DailyQuests.luau` (new 13 Oct)
+
+| Setting | Value | What it does |
+|---|---|---|
+| PerDay | 3 | Quests a player gets each UTC day |
+| BonusCoins | 150 | For claiming all of the day's quests |
+| SwapsPerDay | 1 | Swaps a day (never into a quest that needs another player) |
+| Pool | 12 quests | Each: text, type, count, coins (chest/leg/back reps 50, shoulder/arm/core reps 40, 100 reps, 3 groups, 1 km run, 2 spots, a posing entry, an arm wrestle win; 50-80 coins) |
 
 ## Config/MuscleOfTheDay
 File: `Config/MuscleOfTheDay.luau`.

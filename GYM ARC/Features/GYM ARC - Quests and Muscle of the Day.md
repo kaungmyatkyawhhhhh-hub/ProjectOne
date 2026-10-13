@@ -1,5 +1,5 @@
 ---
-date: 2026-10-07
+date: 2026-10-13
 tags: [gymarc, feature]
 status: done
 aliases: ["GYM ARC - Daily Quests"]
@@ -23,30 +23,13 @@ Coach Dex hands out quests at the front desk, and one muscle group trains at dou
 - `Server/QuestService`, `Server/MuscleOfTheDayService`, `QuestClient`
 - Builder: `tools/builders/NPCs` (Coach Dex)
 
-## Planned change
-- New features prompt adds 3 **daily quests** per player with a Quests panel and Claim buttons, plus a 7-day login calendar (see "Daily Quests (planned)" below).
-
-## Daily Quests (planned)
-
-Planned (new features prompt, task 2): three fresh quests per player every day, plus a 7-day login calendar. Not built yet.
-
-### How it works (as the prompt asks)
-- **3 daily quests** per player from a pool in Config, reset at 00:00 UTC. Examples:
-  - 50 reps on any chest machine / 50 leg reps / 100 reps total
-  - Spot another player 2 times
-  - Run 1 km on the treadmill
-  - Enter a posing competition
-  - Win an arm wrestle
-  - Train 3 different muscle groups
-- **Tracking:** automatic, from the existing rep / EXP events.
-- **Quests panel:** a small panel in the existing menu style, one button on the HUD side bar, progress bars and a Claim button. Coins as the reward; completing all 3 gives an extra reward.
-- **Empty server:** quests that need another player (spotting) get another way to finish, for example a swap button once per day.
-- **Login streak:** 7-day calendar with rising coin rewards, day 7 = big reward + the title "Dedicated". Missing a day resets to day 1. Popup on join with a Claim button. Saved per player.
-- Monetization prompt: the VIP pass gives +1 daily quest reroll.
-
-### Where it lives
-- Not built. Would extend `Server/QuestService` / `Server/RetentionService` and `Config` (one table per feature).
-
+## Daily Quests (built 13 Oct)
+- **3 quests a day** per player, new every day at 00:00 UTC (the same list all day). Picked from 12 in `Config/DailyQuests`: chest / leg / back / shoulder / arm / core reps, 100 reps, train 3 different groups, run 1 km on the treadmill, spot another player 2 times, enter a posing competition, win an arm wrestle. At most one a day needs another player.
+- **Tracking** is automatic on the server (DailyService, from the game's own events: reps by the machine's main muscle group, treadmill distance, spots, posing entries, arm wrestling wins against a player or a practice opponent).
+- **Quests tile** in the left side menu opens a small panel: each quest with a chunky progress bar, CLAIM (+coins) when done, and SWAP (one swap a day; a swap never gives a quest that needs another player, so an empty server never blocks you). Claiming all 3 unlocks a +150 bonus.
+- Coach Dex's quests (above) and the top-bar Quests pill are unchanged.
+- Where it lives: `Config/DailyQuests`, `Server/DailyService`, `DailyClient`; numbers in [[GYM ARC - Config values]].
+- Not tested yet: the spotting quest with two players, a real midnight reset.
 
 ## Related
 [[GYM ARC - Tutorial]], [[GYM ARC - Legend NPCs]], [[GYM ARC - Economy and Daily Rewards]], [[GYM ARC - Gains and EXP]]
@@ -54,3 +37,4 @@ Planned (new features prompt, task 2): three fresh quests per player every day, 
 ## Screenshots
 ![[GYM ARC/Screenshots/coach-talk_fixed.png]]
 ![[GYM ARC/Screenshots/s2_reception_after.png]]
+![[GYM ARC/Screenshots/daily_quests_panel.jpg]]

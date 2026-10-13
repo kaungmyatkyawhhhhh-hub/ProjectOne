@@ -1,5 +1,5 @@
 ---
-date: 2026-10-04
+date: 2026-10-13
 tags: [gymarc, feature]
 status: done
 ---
@@ -16,23 +16,27 @@ One currency: coins. Earned by lifting and playing, spent on weights, shakes, co
   - Re-racking loose plates: up to 3 plates lie around the gym, 5 coins each, a new one every 90 s
   - Rush hour: every 30 minutes (same clock on every server) 3 minutes of 2x coins per rep
   - Seasonal events: x1.25 coins
-- **Daily streak:** claimed automatically on the first join of each UTC day: 20 coins + 5 per streak day (up to 30 days counted). Missing a day only drops the streak 3 days per missed day (not to zero). A DNA Token on every 7th streak day.
+- **Login streak (13 Oct, replaces the old automatic streak):** a 7-day calendar. Join each UTC day and press CLAIM: 25 / 35 / 50 / 70 / 90 / 120 / 300 coins. Day 7 also gives a DNA token and (the first time) the title "Dedicated", then the calendar starts over. Missing a day starts again at day 1. The calendar card pops up after Play when today's reward is waiting; the Daily pill opens it too (a dot when unclaimed).
 - **Offline coins:** 0.5 coins per minute away, from 10 minutes up to 8 hours.
 - **Spending:** weight tiers (5-600 coins), [[GYM ARC - Energy Shakes|Energy Shakes]] (25), cosmetics (60-900), DNA Tokens (400 at the front desk).
-- **Top bar:** a coins pill on the left and a Daily Reward pill on the right.
+- **Top bar:** a coins pill on the left and the Daily pill (login calendar) on the right.
 - Everything is paid out on the server.
 
 ## Where it lives
 - `Config/Economy`
-- `Server/RetentionService`, `RetentionClient`
+- `Server/RetentionService`, `RetentionClient` (offline coins, loose plates, rush hour); the login calendar: `Server/DailyService`, `DailyClient`
 - Numbers: [[GYM ARC - Config values]]
 
 ## Planned change
-- **Login streak redo** (new features prompt, task 2): a 7-day calendar with rising coin rewards, day 7 = big reward + the title "Dedicated". Missing a day resets to day 1 (today it only drops 3 days). A popup with a Claim button on join. Comes with the daily quests (see [[GYM ARC - Quests and Muscle of the Day]]).
 - Monetization prompt: "2x Coins" pass and coin packs (see [[GYM ARC - Monetization]]).
+
+## History
+- Before 13 Oct the daily streak was paid automatically on join (20 coins + 5 per streak day, up to 30 days), missing a day only took 3 days off the streak, and a DNA token came every 7th streak day.
 
 ## Related
 [[GYM ARC - Quests and Muscle of the Day]], [[GYM ARC - Energy Shakes]], [[GYM ARC - Machines]], [[GYM ARC - Wardrobe and Gear and Fits Store]]
 
 ## Screenshots
 ![[GYM ARC/Screenshots/ui_v7_hud_pc.png]]
+![[GYM ARC/Screenshots/streak_popup_day1.jpg]]
+![[GYM ARC/Screenshots/streak_popup_day7.jpg]]
