@@ -43,6 +43,7 @@ local Earned: RemoteEvent = remote("RemoteEvent", "Earned")
 local Progress: RemoteEvent = remote("RemoteEvent", "Progress") -- server -> client XP / level updates
 local ClaimDaily: RemoteFunction = remote("RemoteFunction", "ClaimDaily")
 local SaveSettings: RemoteEvent = remote("RemoteEvent", "SaveSettings") -- client -> server: speed units, gearbox
+local CarSignals: RemoteEvent = remote("RemoteEvent", "CarSignals") -- client -> server: blinkers + lights, shown to everyone
 remotes.Parent = ReplicatedStorage
 
 local playerCars = Instance.new("Folder")
@@ -244,6 +245,20 @@ SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)
 		return
 	end
 	spawnFor(player, carId)
+end)
+
+-- the driver's blinkers and lights go on their car as attributes, so every player sees them
+CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
+	local car = getSession(player).car
+	if not car or not car.Parent or type(raw) ~= "table" then
+		return
+	end
+	if raw.blinker == "" or raw.blinker == "L" or raw.blinker == "R" or raw.blinker == "H" then
+		car:SetAttribute("Blinker", raw.blinker)
+	end
+	if type(raw.lights) == "boolean" then
+		car:SetAttribute("Lights", raw.lights)
+	end
 end)
 
 SaveSettings.OnServerEvent:Connect(function(player: Player, raw: any)

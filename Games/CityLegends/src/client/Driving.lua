@@ -525,6 +525,81 @@ local function carKey(s: State, key: Enum.KeyCode)
 		return
 	end
 	UI.setIndicators(indicatorState(s))
+	if key == Enum.KeyCode.L or key == Enum.KeyCode.Z or key == Enum.KeyCode.X or key == Enum.KeyCode.C then
+		remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn })
+	end
+end
+
+-- other players' cars: their blinkers and lights, from the attributes the server sets on them
+type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean? }
+local others: { [Model]: OtherCar } = {}
+local function otherCar(model: Model): OtherCar?
+	local found = others[model]
+	if found then
+		return found
+	end
+	local root = model.PrimaryPart
+	if not root then
+		return nil
+	end
+	local _, size = model:GetBoundingBox()
+	local o: OtherCar = { model = model, L = {}, R = {} }
+	for _, side in { "L", "R" } do
+		for _, z in { -size.Z * 0.46, size.Z * 0.46 } do
+			local att = Instance.new("Attachment")
+			att.Name = "Blinker"
+			att.Position = Vector3.new(if side == "L" then -size.X * 0.46 else size.X * 0.46, 0, z)
+			att.Parent = root
+			local light = Instance.new("PointLight")
+			light.Color = Color3.fromRGB(255, 150, 20)
+			light.Range = 7
+			light.Brightness = 3
+			light.Shadows = false
+			light.Enabled = false
+			light.Parent = att
+			table.insert((o :: any)[side], light)
+		end
+	end
+	others[model] = o
+	return o
+end
+
+local function updateOthers()
+	local folder = workspace:FindFirstChild("PlayerCars")
+	if not folder then
+		return
+	end
+	local lit = (os.clock() % 0.8) < 0.4
+	for _, model in folder:GetChildren() do
+		if not model:IsA("Model") or model:GetAttribute("Owner") == player.UserId then
+			continue
+		end
+		local blinker = (model:GetAttribute("Blinker") :: string?) or ""
+		local lights = model:GetAttribute("Lights")
+		local o = others[model] or (if blinker ~= "" or lights ~= nil then otherCar(model) else nil)
+		if not o then
+			continue
+		end
+		for side, list in { L = o.L, R = o.R } do
+			local on = lit and (blinker == "H" or blinker == side)
+			for _, l in list do
+				l.Enabled = on
+			end
+		end
+		if lights ~= nil and lights ~= o.lights then
+			o.lights = lights :: boolean
+			for _, d in model:GetDescendants() do
+				if d:IsA("SpotLight") then
+					d.Enabled = lights :: boolean
+				end
+			end
+		end
+	end
+	for model in others do
+		if not model.Parent then
+			others[model] = nil
+		end
+	end
 end
 
 function Driving.attach(model: Model)
@@ -1532,6 +1607,8 @@ function Driving.init()
 	b.Size = 0
 	b.Parent = Lighting
 	blur = b
+
+	RunService.Heartbeat:Connect(updateOthers)
 
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or not state then

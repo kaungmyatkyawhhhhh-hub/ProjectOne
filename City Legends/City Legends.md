@@ -145,6 +145,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - The camera moved from C to V, because C is now the right blinker.
   - Keyboard players start each drive with the engine off: J, then F. Touch and gamepad players start running (they have no such keys).
   - Gearbox: the first Q / E switches to manual (7 gears, a rev limiter, engine braking, and a launch when the clutch is dropped at high revs). Settings has Auto / Manual.
-  - Traction control off lets the rear slide under power. Lights and blinkers show only for the driver (client side). Mouse shift-lock is turned off so Left Shift is free.
+  - Traction control off lets the rear slide under power. Mouse shift-lock is turned off so Left Shift is free.
+  - Blinkers and lights are seen by every player: the driver's client sends them (`CarSignals` remote), the server puts them on the car as `Blinker` / `Lights` attributes, and other clients flash corner lights and switch the headlights.
   - Settings → Speed: MPH / KM/H. It changes the HUD and every cluster (dial numbers, needles, digital readouts). Units and gearbox are saved with the profile.
   - Warning lights under the HUD speedometer: blinker arrows, ENGINE OFF, (P), TC OFF, LIGHTS. The gear tag shows AT / MT.
