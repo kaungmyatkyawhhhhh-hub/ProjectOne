@@ -223,3 +223,4 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - Kept as they were: digital clusters (330i, M8, X6, X7, 540i, S65, LX700, LFA, SU7, U8, Seal, LP750, Urus, Maybach, Phantom, Wraith), cars whose model has no needles to work with (458, F430, CLA 45, Supra, Camry, Crown, LC200, Gallardo, EV6, Vantage, C7), and the C6 and DB9, whose needle parts aren't named as needles yet.
   - No converted car's cluster renders upside down (all checked). Ask which car if the owner still sees one.
 - **M3 and M4 cabins (2026-10-13, owner: "Put the M3 E92 interior into the BMW M4 and M3"):** the M3 F80 and M4 F82 take the M3 E92's cabin, with its dash and needles (`INTERIOR_DONOR`).
+- **Where new cars go (2026-10-13, owner):** converted cars to bring in with Import 3D are pushed to `Games/CityLegends/imports/new_cars/`. The folder holds only what is still to be imported, and is emptied once those cars are in the game.
