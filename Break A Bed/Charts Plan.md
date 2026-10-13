@@ -119,3 +119,9 @@ Goal: "Stayed 10 min" from 31% to 45%+. Build in this order:
 4. **Always a visible next goal:** the next-bed bar ("Next: Water Bed · 💪 340 / 500") always on screen; when a new bed or post becomes affordable, a bouncing arrow + beam points to it (same style as the guide).
 5. **Make waiting active:** while auto-training, a small hint "Click to punch 2x faster!" (the first 3 sessions only) and a combo counter for fast clicks (x5, x10 COMBO with a small Strength bonus).
 6. **Come-back hook:** the game can't detect a player about to leave, so at ~8 min show once: "Come back tomorrow: Day 2 reward + new quests!" toast once.
+
+## Sales check (2026-10-13)
+- Robux spent since launch: **R$537** (passes 501, developer products 36). Two big buys came on the night of 10/11 (~R$200) and the morning of 10/12 (~R$250), then **nothing from 10/12 ~7 AM to 10/13 evening**.
+- **To check:** (1) do purchase prompts still open in the live game (buy a pass and a product, then cancel; F9 for errors)? (2) Did visits/players also drop over the same hours (then it's traffic, not the shop)?
+- With only ~40–100 players so far, a day with no sales can be normal. Most Robux comes from 1–2 buyers.
+
