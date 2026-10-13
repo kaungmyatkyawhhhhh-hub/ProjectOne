@@ -159,3 +159,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: Glove Shop stand moved to the plaza between spawn and the training area (visible from spawn), pad instead of a prompt. Invite Friend stand on the left of the plaza. Friend bonus counts Roblox friends in the same server, +10% each, max +30%. #break-a-bed
 - 2026-10-13: shop order FEATURED → PASSES → DEALS (Starter Pack, Server x2, Spins) → STRENGTH → CASH. #break-a-bed
 - 2026-10-13: gloves use the owner's Toolbox "blocky boxing glove" mesh (no scripts), recoloured per tier. The Glove Shop pad copies the Exclusive Chest pad's style (owner). #break-a-bed
+- 2026-10-13: Glove Shop pad changed to a simple solid design (navy disc, white edge, one cyan glowing ring); the chest-style and see-through versions were dropped (owner). #break-a-bed
