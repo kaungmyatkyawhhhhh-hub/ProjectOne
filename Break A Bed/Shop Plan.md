@@ -53,6 +53,20 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 ### Impulse buys (shown at the right moment)
 - **"Need more Strength?"** When the bed prompt says "Need X Strength", show a small button: *x3 Strength 10 min, R$15*.
 - **Instant Break: R$9.** Breaks the bed you're stuck on once, paying its Cash and marking it completed. It's shown on the same "Need X Strength" prompt.
+- **Change (owner, 2026-10-13): BREAK IT only, priced by the gap.** The "Need more Strength?" box with the x3 boost is removed. It no longer pops up just from standing near a locked bed.
+  - **When it shows:** only when the player **tries to break** a bed they're too weak for (presses E or taps the prompt). A single green **BREAK IT ⏣ X** button pops up above the bottom HUD, showing "Need 1M Strength" small above it. It hides after 5 s or when they walk away. The same bed shows it at most once every 20 s.
+  - **Price grows with the gap.** Gap = the bed's Strength need ÷ the player's Strength. Each tier is its own developer product, because a product's price is fixed on Roblox:
+
+    | Gap | Price | Product |
+    |---|---|---|
+    | up to 2x | R$9 | INSTANT BREAK (existing, 3718128950) |
+    | 2x–5x | R$19 | INSTANT BREAK 2 (new) |
+    | 5x–20x | R$39 | INSTANT BREAK 3 (new) |
+    | 20x–100x | R$79 | INSTANT BREAK 4 (new) |
+    | over 100x | R$149 | INSTANT BREAK 5 (new) |
+
+  - **The reward stays the same:** it breaks that bed once, pays its Cash and marks it completed. The server works out the tier again at purchase time, so the price can't be cheated.
+  - **The owner creates the 4 new products** in the Creator Dashboard (Monetization → Developer Products) and gives Claude Code the IDs.
 - **Starter Pack: R$19, one time only.** x3 Strength 30 min + Medium Cash + 3 Spins. It pops up once, after the player's first bed break (not on join), with a "70% OFF" tag.
 - **Boost ran out:** when a boost ends, a small toast offers "Buy again, R$X".
 
