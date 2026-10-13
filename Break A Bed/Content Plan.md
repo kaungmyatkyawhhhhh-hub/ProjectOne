@@ -9,6 +9,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 **Goal:** a first finish takes about **2–3 hours** over several sessions, and rebirths add many more hours on top. Minutes 0–10 stay fast (see [[Break A Bed/Charts Plan|Charts Plan]]). Only the later game gets longer, and always with something new to chase, never just bigger numbers.
 
 ## 1. Unique training posts
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
 Every post gets its own model, punch effect and sound, so each new post feels like a reward. Use each post's name as its theme, with the [[Break A Bed/UI Kit/UI Kit|UI Kit]] colors and chunky low-poly parts. The posts get bigger and fancier toward the end of the row.
 
 | Theme in the name | Look | Punch effect |
@@ -27,12 +28,15 @@ Every post gets its own model, punch effect and sound, so each new post feels li
 | Galaxy / cosmic | a floating planet with a ring and orbiting stars | star burst |
 | Void / dark | a black orb with a purple swirl | purple shockwave |
 | Rainbow / infinity (last post) | a big glowing rainbow crystal on a gold base | rainbow ring + screen flash |
+| Steel (added by Claude Code) | a riveted steel I-beam on a yellow/black hazard-striped base | orange sparks + steel chips, metal box clang |
+| Neon (added by Claude Code) | a tower of pink and cyan neon tubes with a yellow lightning bolt sign | pink + cyan sparks and a ring, electric zap |
 
 - Names that don't fit a theme: Claude Code picks a fitting look and adds it to this table.
 - Every post keeps its glowing pad, sign, price, ProximityPrompt and name, and only the model changes. The effects are client-side and pooled, using the same no-lag rules as bed breaks.
 - Phones with Low Graphics: smaller effects, no extra lights.
 
 ## 2. Rebirths (the main replay loop)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
 - **Unlocked** after breaking bed 15 the first time. A gold **REBIRTH** button appears on the left (under Boosts) with a "!" when it's ready.
 - **Cost:** reaching a Strength goal (rebirth 1 = the bed 15 requirement, then ×3 each rebirth). It's shown in the menu with a progress bar.
 - **Resets:** Cash, Strength, beds completed, posts owned. **Keeps:** auras, passes, codes, gifts, Level, daily streak.
@@ -43,6 +47,7 @@ Every post gets its own model, punch effect and sound, so each new post feels li
 - Rebirth also replays the bed path fast (the multiplier makes the early beds instant), so the second run takes about 15–20 min and the later ones get longer.
 
 ## 3. Gloves (a second thing to buy with Cash)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
 - 12 gloves bought with Cash at a **Glove Shop** stand by the training area: Boxing → Wooden → Spiked → Iron → Gold → Ice → Fire → Thunder → Emerald → Galaxy → Void → Infinity.
 - Each one **multiplies all Strength from punching** (x1.5, x2, x3… up to about x50). They're priced so each takes 3–8 minutes of play at that stage, and they're spread between the post prices so there's always something to buy.
 - The equipped glove shows on both hands and changes the punch effect color. Owned gloves are saved.
@@ -89,6 +94,7 @@ Every post gets its own model, punch effect and sound, so each new post feels li
 - It comes with 6 new posts and gloves. Announce it with a group shout and a new code.
 
 ## 6. Undiscovered beds are black (owner, 2026-10-13)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
 Beds you haven't broken yet are **black silhouettes**, so you want to keep playing to find out what they look like.
 - **Look:** every part of an undiscovered bed turns near-black (`#0E0E14`, SmoothPlastic). Textures and decals are hidden, and its glow, sparkles and particles are off. A faint dark-purple `Highlight` outline makes it look mysterious, not broken.
 - **Name:** the sign and prompt show **"???"** instead of the name. The Strength needed still shows ("??? · Need 1M Strength"). The next-bed pill says "Next: ???" and the Index shows "???" too.
@@ -103,6 +109,7 @@ Beds you haven't broken yet are **black silhouettes**, so you want to keep playi
   - The same applies to the new unique post models from section 1.
 
 ## 7. Invite Friend stand (owner, 2026-10-13, from a reference picture)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
 - **A figure** (an R15 rig wearing a cash/money outfit, with a cheerful idle and a wave every few seconds) stands on a **glowing yellow ring pad** near spawn. Cash bills and dumbbell icons float and swirl around them.
 - **Above it**, a floating title "**INVITE FRIEND**" in big yellow text with a thick dark outline and a 👥 icon on each side, and a green line under it: "**Each Friend = +10% Strength**".
 - **Stepping on the yellow ring** (a touch sensor, no prompt) opens Roblox's invite window (`SocialService:PromptGameInvite`), with a 5 s cooldown.
@@ -114,6 +121,25 @@ Beds you haven't broken yet are **black silhouettes**, so you want to keep playi
 - Beds 16–25: about 6–10 min each, with gloves and posts filling the gaps.
 - First rebirth: about 60–90 min in.
 - Claude Code measures this with a fresh-save test bot and writes the real times here.
+
+**Real times (test bot, fresh save, 2026-10-13):** a scripted player that trains, breaks each new bed with To Bed, re-breaks its best bed for Cash, and buys posts and gloves as soon as it can.
+
+| | Time | Gap | | Time | Gap |
+|---|---|---|---|---|---|
+| Bed 5 | 3:25 | | Bed 16 | 31:31 | 6.9 min |
+| Bed 10 | 5:03 | | Bed 17 | 36:11 | 4.7 min |
+| Bed 11 | 6:25 | 1.4 min | Bed 18 | 43:27 | 7.3 min |
+| Bed 12 | 11:11 | 4.8 min | Bed 19 | 45:33 | 2.1 min |
+| Bed 13 | 16:12 | 5.0 min | **Bed 20** | **1:17:52** | **32.3 min** |
+| Bed 14 | 18:48 | 2.6 min | Bed 21 | 1:26:09 | 8.3 min |
+| Bed 15 | 24:39 | 5.9 min | | | |
+
+- First 10 minutes: the bot reached bed 10 at 5:03 (the model: 6:22). It was a bit faster than before thanks to the Starter Quest rewards; the minutes 2–10 pacing is unchanged.
+- Beds 11–15: 1.4–5.9 min each (target 3–5). Beds 16–19: 2.1–7.3 min.
+- **Bed 20 is a wall (32 min).** To fix next: lower bed 20's need or the price of posts 13–14, then re-run.
+- Gloves and posts filled the gaps (gloves 1–11 and posts 7–14 came between beds).
+- The run was stopped at bed 21 (1:26) for other work, so the first rebirth time (target 60–90 min) is **not measured yet**. The model says about 1 h 45 to bed 25 before the bed 20 fix.
+- Rebirth costs (real): 450M, 1.35B, 4.05B, 12.2B, 36.5B Strength (×3 each). Second run from the model: about 27 min to 1.35B.
 
 ## Build order
 1. Unique posts + Gloves + the late-game pacing retune (one update).

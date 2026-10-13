@@ -51,6 +51,7 @@ Owner's decision (2026-10-12): **keep game pass prices as they are now** and add
 - Show a **"BEST VALUE"** tag on the biggest pack of each row and a **"POPULAR"** tag on the middle one.
 
 ### Shop order (owner, 2026-10-13)
+**Built 2026-10-13** (FEATURED → PASSES → DEALS → STRENGTH → CASH).
 Top to bottom in the shop window: **1. FEATURED (Halloween Auras crate)** → **2. GAME PASSES** → then everything else (Starter Pack, boosts, packs…) in the current order.
 
 ### Impulse buys (shown at the right moment)
