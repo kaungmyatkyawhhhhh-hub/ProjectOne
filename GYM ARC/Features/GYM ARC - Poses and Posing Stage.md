@@ -1,5 +1,5 @@
 ---
-date: 2026-10-07
+date: 2026-10-13
 tags: [gymarc, feature]
 status: done
 ---
@@ -25,8 +25,10 @@ Real bodybuilding poses you can strike anywhere, scored by judges on the beach p
 ## Known issues
 - The pose name panel on phones is not verified on a real device.
 
-## Planned change
-- **New features prompt:** a timed [[GYM ARC - Posing Competition]] on a new stage; flex emotes reachable with one tap on mobile (Front Double Biceps, Lat Spread, Most Muscular, Side Chest + a fun one like a victory wave); **photo mode** at the mirrors and posing area (hide HUD, orbit / zoom the camera, pick a pose, tap to exit).
+## Done (13 Oct)
+- [[GYM ARC - Posing Competition]] (task 1).
+- Flex poses with one tap: the four required poses were already in the Poses panel; **Victory wave** added (task 7A). The panel is two columns on phones.
+- [[GYM ARC - Photo Mode]] at the mirrors and the posing stage (task 7D).
 
 ## Related
 [[GYM ARC - Posing Competition]], [[GYM ARC - Leaderboards and Statue]], [[GYM ARC - Progress Mirror]], [[GYM ARC - Town and Gyms]]
@@ -36,3 +38,8 @@ Real bodybuilding poses you can strike anywhere, scored by judges on the beach p
 ![[GYM ARC/Screenshots/poses_fixed_BackDoubleBiceps.png]]
 ![[GYM ARC/Screenshots/full_poses_panel.png]]
 ![[GYM ARC/Screenshots/s3_posing-stage_after.png]]
+![[GYM ARC/Screenshots/emote_front_double_biceps.jpg]]
+![[GYM ARC/Screenshots/emote_front_lat_spread.jpg]]
+![[GYM ARC/Screenshots/emote_most_muscular.jpg]]
+![[GYM ARC/Screenshots/emote_side_chest.jpg]]
+![[GYM ARC/Screenshots/emote_victory_wave.jpg]]

@@ -1,7 +1,7 @@
 ---
 date: 2026-10-13
 tags: [gymarc, prompt]
-status: in progress
+status: done
 source: GYM_ARC_new_features.md
 ---
 # 2026-10-13 GYM ARC Prompt - New features run

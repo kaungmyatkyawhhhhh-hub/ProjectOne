@@ -1,5 +1,5 @@
 ---
-date: 2026-10-09
+date: 2026-10-13
 tags: [gymarc, feature]
 status: done
 ---
@@ -21,8 +21,8 @@ Moody but never dark: warm light pools in the starter gym, brighter spotlight po
 - Builder `tools/builders/GymLighting` (also run at the end of `Gyms.Build`)
 - `Server/NightLightService`
 
-## Planned change
-- **New features prompt, task 7C:** a day / night cycle in town (`Config.DayNight.Length`, default 20 min). Street lamps, shop windows and gym signs turn on at night; gym interiors keep their own lighting; keep one shadow light per room.
+## Done (13 Oct)
+- Day / night in town: see [[GYM ARC - Day and Night]] (gym interiors keep this lighting).
 
 ## Related
 [[GYM ARC - Town and Gyms]]

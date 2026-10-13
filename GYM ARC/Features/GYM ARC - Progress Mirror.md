@@ -1,5 +1,5 @@
 ---
-date: 2026-10-08
+date: 2026-10-13
 tags: [gymarc, feature]
 status: done
 ---
@@ -23,9 +23,8 @@ A mirror near the gym door that shows your live reflection and a before / after 
 ## Known issues
 - A small lip at the outer sides of the shorts' waistband.
 
-## Planned change
-- New features prompt: a photo mode camera button at the mirrors (see [[GYM ARC - Poses and Posing Stage]]).
-- Monetization prompt: a mirror in the VIP lounge.
+## Done (13 Oct)
+- [[GYM ARC - Photo Mode]]: the PHOTO button shows at the mirrors.
 
 ## Related
 [[GYM ARC - Muscles and Bodies]], [[GYM ARC - Poses and Posing Stage]]

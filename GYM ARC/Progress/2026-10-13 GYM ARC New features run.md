@@ -1,13 +1,22 @@
 ---
 date: 2026-10-13
 tags: [gymarc, progress]
-status: in progress
+status: done
 ---
 # 2026-10-13 GYM ARC New features run
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 Prompts: [[2026-10-13 GYM ARC Prompt - New features run]] and [[2026-10-13 GYM ARC Prompt - Pick audios]]. Seven tasks in order; this note grows with each one.
+
+## Report (run finished)
+- **All 7 tasks done**, each tested solo in Studio. Not possible from here: two-player tests and the phone emulator (phone sizes checked with the phone-layout switch).
+- **Rivals are an extra goal:** gyms already open by Growth Spurt, so beating a rival gives coins and a title and points to the next rival.
+- **FPS:** no "before" number on the phone emulator exists. After all tasks in Studio (PC): day 9.2 ms CPU / 10.8 ms GPU per frame, night 8.7 / 3.4 ms. Night costs nothing extra. Please check on a phone.
+- **Sound ids:** none left empty.
+- **TRY FIRST:** 1) the town at night on a phone; 2) hire a trainer and bench; 3) beat Benny on the bench; 4) photo mode at a mirror; 5) buy a smoothie, leave and rejoin.
+- **Not saved to Roblox yet:** File > Save to Roblox + a dated backup copy.
+- Full report with every config value and screenshot name: PROGRESS.md in the repo (commit 63d7cd0).
 
 ## Sounds picked (owner's request)
 - Every placeholder and every new sound slot now has a real id, only from Roblox's licensed library (ProSoundEffects, APM Music). Full list: [[GYM ARC - Music and Sounds]].
@@ -65,6 +74,15 @@ Prompts: [[2026-10-13 GYM ARC Prompt - New features run]] and [[2026-10-13 GYM A
 
 ![[GYM ARC/Screenshots/rival_card_benny.jpg]]
 ![[GYM ARC/Screenshots/rival_win_benny.jpg]]
+
+## Task 7: emotes, trainers, day / night, photo mode (done)
+- A) Victory wave pose (the four flex poses were already there). B) [[GYM ARC - Personal Trainers]] instead of pets. C) [[GYM ARC - Day and Night]]. D) [[GYM ARC - Photo Mode]].
+- Fixed in testing: [[GYM ARC - Bug - Trainer hair fell off]], [[GYM ARC - Bug - Trainer stood inside the next bench]], [[GYM ARC - Bug - Trainer desks built in the air]], [[GYM ARC - Bug - Photo mode missed the mirror wall]], [[GYM ARC - Bug - Photo mode froze without the player module]].
+- Commit: 63d7cd0
+
+![[GYM ARC/Screenshots/trainers_cheering_bench.jpg]]
+![[GYM ARC/Screenshots/town_night_street.jpg]]
+![[GYM ARC/Screenshots/photo_mode_mirror.jpg]]
 
 ## Saved / published
 - Not saved to Roblox yet: File > Save to Roblox, then File > Download a Copy to `Documents\GymArc_backups\GymArc_2026-10-13.rbxl`.

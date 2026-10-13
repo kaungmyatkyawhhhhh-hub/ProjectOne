@@ -217,6 +217,43 @@ File: `src/ReplicatedStorage/Shared/Config/Rivals.luau` (new 13 Oct, [[GYM ARC -
 | HoldSeconds | 10 s | How long a rival stops and faces you when you open his card |
 | PromptDistance | 8 studs | How close you must be to press Challenge |
 
+## Config/Trainers
+File: `src/ReplicatedStorage/Shared/Config/Trainers.luau` (new 13 Oct, [[GYM ARC - Personal Trainers]])
+
+| Setting | Value | What it does |
+|---|---|---|
+| List | Rookie 300 (+5% EXP), Cardio 450 (+10% refill), Money 600 (+5% coins), Pump 800 (pump x1.25) | Coaches, prices and perks |
+| Slots | 1 (+1 with the Extra Trainer pass) | Trainers following you at once |
+| DeskDistance | 8 studs | How close to a desk you must be to hire |
+| RenderDistance | 90 studs | Other players' trainers farther away aren't drawn |
+| FollowBehind / FollowSide | 3 / 2.6 studs | Where he walks next to you |
+| WalkSpeed / CatchUpSpeed | 15 / 26 | How fast he walks / catches up |
+| TeleportDistance / StuckSeconds | 45 studs / 2.5 s | When he pops back beside you |
+| CheerCooldown / CheerChance | 9 s / 0.35 | How often he cheers during a set |
+| BubbleSeconds / ClapSeconds | 3 s / 1.4 s | How long a line and a clap last |
+
+## Config/DayNight
+File: `src/ReplicatedStorage/Shared/Config/DayNight.luau` (new 13 Oct, [[GYM ARC - Day and Night]])
+
+| Setting | Value | What it does |
+|---|---|---|
+| Length | 1200 s (20 min) | One full day |
+| DayShare | 0.7 | Share of the day that is daytime |
+| StartHour | 9 | Time of day when a server starts |
+| Dawn / Dusk | 6 / 18 | When the night lights switch |
+| NightOutdoorAmbient | #2E3550 | Outdoor light at night |
+| AmbientFade | 1.5 h | Blend around dusk and dawn |
+| WindowLitShare | 0.6 | Share of town windows lit at night |
+
+## Config/PhotoMode
+File: `src/ReplicatedStorage/Shared/Config/PhotoMode.luau` (new 13 Oct, [[GYM ARC - Photo Mode]])
+
+| Setting | Value | What it does |
+|---|---|---|
+| Spots | gym mirror walls 12, clothing store mirror 8, progress mirror 10, posing stage 10 (studs) | Where the PHOTO button shows |
+| Distance | 9 (4 to 20) | Camera distance |
+| DragSpeed / ZoomStep | 0.008 / 1.2 | Turning and zoom speed |
+
 ## Config/MuscleOfTheDay
 File: `Config/MuscleOfTheDay.luau`.
 

@@ -22,9 +22,9 @@ NPC gym-goers who walk around, lift, rest and pose, including the giant Dante, p
 - `Server/StaminaService` (cat), `ShakeClient` (tail wag), `Workspace.NPCs.GymCat`
 - Builder: `tools/builders/NPCs`
 
-## Planned change
-- **New features prompt, task 6:** one named rival per gym (see [[GYM ARC - NPC Rivals]]), reusing Dante if he fits. Rivals must use the fixed NPC size rules.
-- **Task 7B, gym buddy pets:** 3-4 more simple pets (building on Plates) bought with coins that follow you and cheer when you finish a set. Cosmetic only (bonus 0 by default). Monetization prompt: an "Extra Pet Slot" pass (2 pets at once).
+## Done (13 Oct)
+- Pets were replaced by [[GYM ARC - Personal Trainers]] (owner's call); Plates stays a gym NPC.
+- Rivals Benny, Coral and Dante: [[GYM ARC - NPC Rivals]].
 
 ## Related
 [[GYM ARC - Muscles and Bodies]], [[GYM ARC - Legend NPCs]], [[GYM ARC - Stamina and Treadmills]]

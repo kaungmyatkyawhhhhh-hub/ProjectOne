@@ -46,11 +46,14 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 
 ## World and characters
 - [[GYM ARC - Town and Gyms]]: town hub, starter, pro and beach gyms (done)
-- [[GYM ARC - Gym Lighting]]: pendant pools, wall washers, night lamps; day / night planned (done)
+- [[GYM ARC - Gym Lighting]]: pendant pools, wall washers, night lamps; see Day and Night (done)
 - [[GYM ARC - Skateboard and Skate Park]]: riding, ollies, grinding, the big park (done)
 - [[GYM ARC - Wardrobe and Gear and Fits Store]]: gear, fits, wardrobe; hiding planned (done)
-- [[GYM ARC - NPC Regulars and Gym Cat]]: regulars, Dante the 8'0" giant, Plates the cat; pets planned (done)
+- [[GYM ARC - NPC Regulars and Gym Cat]]: regulars, Dante the 8'0" giant, Plates the cat; pets replaced by Personal Trainers (done)
 - [[GYM ARC - Legend NPCs]]: visiting legends with one-time challenges (done)
+- [[GYM ARC - Personal Trainers]]: hire a coach who follows you and cheers (done)
+- [[GYM ARC - Day and Night]]: 20-minute day in town, lights at night (done)
+- [[GYM ARC - Photo Mode]]: photo mode at the mirrors and the posing stage (done)
 - [[GYM ARC - NPC Rivals]]: Benny, Coral and Dante, one rival per gym with a challenge (done)
 
 ## Money, sound, tech

@@ -90,7 +90,7 @@ when the work is done.
 | VIP | Game pass | VIP chat tag, VIP title, small VIP lounge in the pro gym (mirror + smoothie cart), +1 daily quest reroll | To decide | 0 | Planned |
 | Aura Pack | Game pass | Unlocks all lift aura colors | To decide | 0 | Planned |
 | Auto Rep | Game pass | Holding the rep button keeps repping at normal speed (on a machine, not AFK, still uses stamina) | To decide | 0 | Planned |
-| Extra Pet Slot | Game pass | Two pets follow you at once | To decide | 0 | Planned |
+| Extra Trainer | Game pass | A second personal trainer follows you, perks stack ([[GYM ARC - Personal Trainers]]); in `Config/Monetization` with no id, so off | To decide | 0 | In config, off |
 | Coin pack (small) | Developer product | Coins | To decide | 0 | Planned |
 | Coin pack (medium) | Developer product | Coins | To decide | 0 | Planned |
 | Coin pack (large) | Developer product | Coins | To decide | 0 | Planned |
