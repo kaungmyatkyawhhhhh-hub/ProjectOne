@@ -174,3 +174,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: gloves in the tutorial = a last step that leads to the Glove Shop pad and opens it, with no free glove (the first costs $91K), to keep early pacing. #break-a-bed
 - 2026-10-14: Rebirth window = pictures (two cards, chips, icon row), 9 visible words; the lose/keep/get lists only behind "?". Tests that change Strength/Cash/Rebirths in Studio must be client-side (the real save is loaded and saved). #break-a-bed
 - 2026-10-14: Rebirth resets the discovered beds and posts (they go black again; Bed 1 / Post 1 stay), reversing the earlier "never reset" rule. #break-a-bed
+- 2026-10-14: buying a Head Start level tops Cash up to that amount immediately if you're below it (and still applies each rebirth). #break-a-bed
