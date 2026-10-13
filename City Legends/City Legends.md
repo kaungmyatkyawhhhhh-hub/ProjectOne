@@ -136,3 +136,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - A part named `SteeringWheel_t<tilt>` is the whole wheel. Other parts with "steering wheel" in their names (the column left in the dash on the S65, X6 and X7) stay put.
   - Steering tilt set by hand: X6 23° (same wheel as the X7), LX700 20°.
   - The original GLB files in `imports` were deleted (about 450 MB), as the owner allowed. The six `cars_*.fbx` files are kept.
+- **Interiors and colours (2026-10-13):**
+  - Studio's importer left every converted car's MeshParts on RenderFidelity "Automatic", which swaps in rough low-detail meshes. All car parts in CarModels are now "Precise" (it can be set in the file, not by game scripts).
+  - The racing-game rips (Urus, LFA, 540i/M5 CS, Cayman) tint some parts by game-set colours that aren't in the file. They are set by hand to match the renders: Urus body-colour trim yellow, LFA paint white, base plastic black, seat belts dark, Cayman calipers red.
+  - G63 (2015) black first-person screen: its whole-cabin `Interior` part was double-sided around the camera, so it now draws one side only. This is the likely cause of the earlier red screen too. Not tested in Roblox yet.
