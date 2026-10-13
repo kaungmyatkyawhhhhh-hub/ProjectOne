@@ -84,6 +84,26 @@ Every post gets its own model, punch effect and sound, so each new post feels li
       - **Option B:** if there's no good mesh, Claude Code builds it from parts: a main block with `SpecialMesh`/bevel or rounded Union, a padded front, a thumb wedge and a cuff block. It must still read as a padded glove, not a plain box.
     - **Tier looks (like the references):** basic gloves are a plain color with a darker cuff. Mid tiers get trims, stripes or spikes, and some get **chains wrapped around the cuff**. Top tiers get **an energy aura on the gloves**: small crackling sparks or lightning (e.g. purple for Void, rainbow for Infinity), kept small so it doesn't hide the avatar.
     - Welded to the hand/lower arm, it moves with every punch, with no gap and nothing hanging below. It works on R15 and R6.
+- **Shop window: Ninja Legends style (owner, 2026-10-13):** the first build was a long text list of rows. Now it's a **grid on the left and a big preview on the right**, like the Ninja Legends sword/belt shop:
+  - **Left (about 60%): a grid of square tiles**, 4 per row, scrolling. Each tile has:
+    - a **rarity-colored gradient background** (Common grey, Uncommon green, Rare blue, Epic purple, Legendary gold, Mythic red, Secret rainbow);
+    - the **real 3D glove** in a `ViewportFrame`, slowly turning.
+    - **States:**
+      - Owned: a green check in the corner.
+      - Equipped: a small "EQUIPPED" ribbon.
+      - Affordable next: a soft glow pulse.
+      - Not affordable: darker, with the price in the corner.
+      - Not yet reached: a black silhouette with "?" (same idea as undiscovered beds).
+  - **Right (about 40%): the details of the selected tile:**
+    - a big `ViewportFrame` of the glove spinning on a small pedestal with light rays behind it;
+    - the name in its rarity color and a rarity tag;
+    - one big stat line, "**x1.5 Strength**";
+    - the price with a cash icon;
+    - one big button: **BUY** (green), **EQUIP** (blue), **EQUIPPED** (grey) or **NEED $1.3M** (red).
+  - **Bottom bar:** a **BUY ALL** button (buys every glove you can afford, in order, then equips the best, the classic Ninja Legends button) and **EQUIP BEST**.
+  - Opening the shop selects the next glove to buy. Buying plays a coin burst on the tile, and the tile flips to owned.
+  - UI Kit dark window with the cyan title bar "GLOVE SHOP" stays. The one-line hint "Gloves multiply the Strength from every punch!" can go: the x1.5 stat on the right says it.
+  - Phones: the grid gets 3 per row, and the preview panel shrinks but stays on the right.
 - **Glove Shop stand (owner, 2026-10-13, from a reference picture of a "Pickaxe Shop" market stall):**
   - **No ProximityPrompt.** A glowing **blue circle pad** on the ground in front of the stall is a touch sensor. Stepping into it opens the Glove Shop window, and stepping out (or the X) closes it. A 1 s cooldown stops it reopening right after closing while still standing in it.
   - **Our own design (not a copy):** a chunky low-poly boxing-themed stall.
