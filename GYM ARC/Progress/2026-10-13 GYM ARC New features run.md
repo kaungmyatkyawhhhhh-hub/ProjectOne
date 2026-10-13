@@ -32,5 +32,14 @@ Prompts: [[2026-10-13 GYM ARC Prompt - New features run]] and [[2026-10-13 GYM A
 ![[GYM ARC/Screenshots/daily_quests_panel.jpg]]
 ![[GYM ARC/Screenshots/streak_popup_day7.jpg]]
 
+## Task 3: Arm wrestling (done)
+- Two tables now (a new one in the pro gym), the machines' OCCUPY prompt and sign, NPC opponents to pick from (easy / medium / hard), a big TAP button, 8 s matches, a 15 taps/s cap, a capped strength bonus, a little EXP, and the "Arm Wrestling King" title. Details: [[GYM ARC - Arm Wrestling]].
+- Fixed: pins against an NPC never counted ([[GYM ARC - Bug - Pins against an NPC never counted]]).
+- Tested solo against the NPCs (pick, countdown, tapping, pin, win, title, coins, quest); no errors. Not tested: two real players.
+- Commit: d1b3b0c
+
+![[GYM ARC/Screenshots/armwrestle_vs_npc_live_bar.jpg]]
+![[GYM ARC/Screenshots/armwrestle_win_screen.jpg]]
+
 ## Saved / published
 - Not saved to Roblox yet: File > Save to Roblox, then File > Download a Copy to `Documents\GymArc_backups\GymArc_2026-10-13.rbxl`.

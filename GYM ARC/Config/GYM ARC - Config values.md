@@ -221,20 +221,19 @@ File: `Config/Social.luau`.
 |---|---|---|
 | Together.GainsBoost | 1.1x | Workout-together bonus |
 | Together.Range | 30 studs | Distance between lifters for the bonus |
-| ArmWrestle.Muscles | Biceps, Forearms, Front Delts | Muscles that give arm wrestling strength |
-| ArmWrestle.PushPerTap | 0.035 | Meter moved per tap |
-| ArmWrestle.LevelForDouble | 40 | Muscle level that doubles your push |
-| ArmWrestle.MaxTapsPerSecond | 14 | Faster taps ignored |
+| ArmWrestle.TableSpot / ProTableSpot | (13.4, 0.1, -18.1) / (88, 0.1, -64) | Where the starter and pro gym tables stand (the builder uses them) |
+| ArmWrestle.Muscles | Biceps, Forearms | Muscles whose look gives arm wrestling strength (13 Oct; was + Front Delts by level) |
+| ArmWrestle.PushPerTap | 0.035 | Bar moved per tap at strength 1 (the bar goes -1..1) |
+| ArmWrestle.StrengthBonus / StrengthLookCap | 0.5 / 1 | Up to +50% per tap at the full look, nothing more above it |
+| ArmWrestle.MaxTapsPerSecond | 15 | Faster taps are ignored by the server |
 | ArmWrestle.Countdown | 3 s | Countdown before a match |
-| ArmWrestle.MaxSeconds | 12 s | Match time limit |
-| ArmWrestle.WaitForOpponent | 8 s | Then a practice opponent sits down |
-| ArmWrestle.WinCoins / LoseCoins | 15 / 5 | Coins vs a player |
-| ArmWrestle.PracticeWinCoins | 8 | Coins for beating a practice opponent |
-| ArmWrestle.Rookies | Rocco, Tess, Big Lou | Practice opponents |
-| ArmWrestle.RookieTapsPerSecond | 5-8 | Practice opponent tap speed |
-| ArmWrestle.RookieStrength | 0.85-1.05x | Practice opponent strength vs yours |
+| ArmWrestle.MaxTime | 8 s | Match time limit, then whoever is ahead wins |
+| ArmWrestle.WinCoins / LoseCoins | 15 / 5 | Coins for beating a player / for everyone who finished |
+| ArmWrestle.Xp | Win 40, Lose 20 | Biceps and Forearms XP each |
+| ArmWrestle.Npcs | Rocco (easy, 0.9x, 5-7 taps/s, 8 coins), Tess (medium, 1.15x, 7.5-9.5, 15), Big Lou (hard, 1.35x, 9-10.5, 35, the King title) | NPC opponents |
+| ArmWrestle.SeatedRootY | 1.6 | Seated height (the NPC sits like a player) |
 | ArmWrestle.LiveAngle / PinAngle | 70 / 86 degrees | Arm swing / final slam angle |
-| ArmWrestle.AnimateDistance | 70 studs | Table only animates this close |
+| ArmWrestle.AnimateDistance | 70 studs | A table only animates this close to the camera |
 | Crew.MaxMembers | 8 | Crew size |
 | Crew.NameLength / TagLength | 3-20 / 2-4 letters | Crew name and tag length |
 | Crew.CreateCost | 0 coins | Price to make a crew |

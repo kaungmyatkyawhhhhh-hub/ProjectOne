@@ -158,6 +158,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Only 8 live muscle meshes per player]]
 - [[GYM ARC - Bug - Panels hidden under the tile menu]]
 - [[GYM ARC - Bug - Parking arrows pointed backwards]]
+- [[GYM ARC - Bug - Pins against an NPC never counted]]
 - [[GYM ARC - Bug - Place lost back to 7 Oct]]
 - [[GYM ARC - Bug - Pointed traps and triceps at mass monster]]
 - [[GYM ARC - Bug - Poses looked wrong]]

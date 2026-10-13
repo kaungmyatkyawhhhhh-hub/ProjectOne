@@ -37,7 +37,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 
 ## Social and showing off
 - [[GYM ARC - Spotting]]: tap a lifter, click to push, boost and coins (done)
-- [[GYM ARC - Arm Wrestling]]: tapping duel with animation; bigger redo planned (done)
+- [[GYM ARC - Arm Wrestling]]: two tables, NPC opponents, tapping duel, Arm Wrestling King (done)
 - [[GYM ARC - Crews]]: groups of up to 8 with tags (done)
 - [[GYM ARC - Poses and Posing Stage]]: bodybuilding poses, judges on the beach stage (done)
 - [[GYM ARC - Posing Competition]]: rounds every 12 min on the beach stage, judges, vote, podium, statue (done)
