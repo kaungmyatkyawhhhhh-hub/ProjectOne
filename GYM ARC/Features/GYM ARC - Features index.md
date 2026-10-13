@@ -62,4 +62,4 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Studio Test Hooks]]: Workspace attributes for testing (done)
 
 ## See also
-- [[GYM ARC - Config values]], [[GYM ARC - Music and Sounds]], [[GYM ARC - Monetization]]
+- [[GYM ARC - Config values]], [[GYM ARC - Assets]]

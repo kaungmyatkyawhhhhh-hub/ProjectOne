@@ -5,10 +5,11 @@ status: done
 ---
 # 2026-10-13 GYM ARC Prompt - Save everything to Obsidian
 
-Back to [[GYM ARC/00 GYM ARC Home|GYM ARC Home]].
+Back to [[00 GYM ARC Home|GYM ARC Home]].
 
-Saved exactly as sent:
+Saved exactly as sent (in a text block, so the example links in it don't show as missing notes):
 
+```text
 STANDING RULE: SAVE EVERYTHING TO MY OBSIDIAN VAULT TOO
 
 1. The vault
@@ -48,3 +49,4 @@ STANDING RULE: SAVE EVERYTHING TO MY OBSIDIAN VAULT TOO
    - The vault is a copy. Don't move or delete anything from the repo or Downloads. GitHub src/ stays the backup; Studio stays the source of truth.
    - Add this whole rule to CLAUDE.md so every future session follows it.
    - Tell me what you created and how you matched my other games' layout.
+```

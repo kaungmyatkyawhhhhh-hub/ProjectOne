@@ -5,8 +5,9 @@ status: done
 ---
 # 2026-10-13 GYM ARC Prompt - Clean up duplicates and links
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]. Saved exactly as sent:
+Back to [[00 GYM ARC Home|GYM ARC Home]]. Saved exactly as sent (in a text block, so the example links in it don't show as missing notes):
 
+```text
 CLEAN UP THE GYM ARC NOTES IN MY OBSIDIAN VAULT (C:\ObsidianOne\Claude+Obsidian)
 Only touch GYM ARC notes. Never touch my other games' notes.
 
@@ -29,3 +30,4 @@ Only touch GYM ARC notes. Never touch my other games' notes.
    - Keep a "GYM ARC - Index" list in 00 GYM ARC Home with every note name, and use it as the source of truth for names.
 
 5. Report: list the merges (kept note <- merged notes), the links you fixed, and the final note count.
+```
