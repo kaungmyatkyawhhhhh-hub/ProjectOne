@@ -23,7 +23,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 2. Test soft shutdown live: join the game, then use "Migrate to latest update".
 3. Run a 2-player test (spotting, arm wrestling, other players' muscles).
 4. New prompts, not started yet:
-   - [[2026-10-13 GYM ARC Prompt - New features run|New features run]] (Posing Competition, NPC Rivals, Daily Quests and more)
+   - [[2026-10-13 GYM ARC Prompt - New features run|New features run]] (Posing Competition, NPC Rivals, Daily Quests and more): in progress since 13 Oct
    - [[2026-10-13 GYM ARC Prompt - Monetization and hype|Monetization and hype]] (monetization ON, Aura, music)
 5. Pick the sound ids ([[GYM ARC - Music and Sounds]]: 26 slots still reuse another clip).
 

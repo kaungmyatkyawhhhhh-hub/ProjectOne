@@ -1,12 +1,12 @@
 ---
 date: 2026-10-13
 tags: [gymarc, prompt]
-status: not started
+status: in progress
 source: GYM_ARC_new_features.md
 ---
 # 2026-10-13 GYM ARC Prompt - New features run
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]. Saved exactly as sent (original file: `GYM_ARC_new_features.md`).
+Back to [[00 GYM ARC Home|GYM ARC Home]]. Saved exactly as sent (original file: `GYM_ARC_new_features.md`). Started on 2026-10-13.
 
 BIG FEATURE RUN. Work through the tasks IN ORDER. Don't ask me anything; make sensible choices and write them down.
 After EACH task: play-test solo and with 2 players (local server), check phone size, check Output for errors, run the test suites, take screenshots into the screenshots folder, export changed scripts to src/, update PROGRESS.md and commit. If something is blocked, write why in PROGRESS.md and move on to the next task.
