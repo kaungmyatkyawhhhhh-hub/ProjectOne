@@ -44,3 +44,6 @@ A tapping duel at two tables (starter gym and pro gym). Bigger biceps and forear
 
 ## Moved off the spawn (14 Oct)
 The starter gym's table was right inside the front door where you spawn. It now stands right of the center aisle, about 28 studs into the gym (Config/Social TableSpot 18, 0.1, -31).
+
+## One per stool (14 Oct)
+Each stool holds only one person or NPC. While an NPC opponent is coming to a stool, sitting on it or doing the win slam, that stool is locked: nobody can walk onto it and its OCCUPY prompt is off. NPCs only sit on an empty stool. Anything that isn't a player and lands on a stool is pushed off. When the NPC leaves, the stool opens again.

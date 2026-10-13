@@ -96,3 +96,6 @@ Mockup, then the game:
 
 ## Settings: Reduce Motion
 A new Settings row, Reduce Motion (Off by default). On = the looping pulses and shine sweeps on buttons stop.
+
+## Arm wrestling: one per stool
+Owner's request ([[2026-10-14 GYM ARC Prompt - Arm wrestling one per seat]]): only one person or NPC per arm wrestling stool. NPC opponents now lock their stool while they're on it; tested in Play (dropping a dummy onto the NPC's stool and forcing it to sit: it never stays on). Also fixed a small bug found while testing: the OCCUPY prompt could stay off after a match. See [[GYM ARC - Arm Wrestling]].
