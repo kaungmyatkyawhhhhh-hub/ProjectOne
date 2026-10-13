@@ -102,3 +102,12 @@ The treadmill never plays the lifting sounds (no plate clank, bar rattle, floor 
 - TreadmillLoop: a quiet looping belt / running sound on the treadmill while someone runs; fades out in 0.3 s when they stop.
 - TreadmillStep: a soft footstep on every stride (faster when running faster).
 Also: pull-ups and dips with no plates (bodyweight) no longer clank.
+
+## Your own music (14 Oct)
+You replaced the music with your own tracks (in Studio: ReplicatedStorage > Shared > Config > Sounds).
+- Music (the fallback list): 118959016267248, 131532099124744, 139266399633943, 86451874359343, 113417603188158, 1840007392 (volume 0.7).
+- Starter gym: 86451874359343. Pro gym: 118959016267248. Beach: 1837324500. Town: 1840007392.
+
+How to play several songs in one area: in `AreaMusic`, put more ids in that area's list, separated by commas, for example
+`Starter = { 86451874359343, 131532099124744, 139266399633943 },`
+They play one after another in that order, then start again from the first. When you walk into another area, its list starts from its first song. Save the place afterwards.
