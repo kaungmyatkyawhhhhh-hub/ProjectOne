@@ -318,3 +318,10 @@ The trick to "satisfying": short sounds (under 0.4 s), a little random pitch on 
 
 ## Remaking the images
 `source/kit.py` makes the images and `source/preview.py` makes the preview, using Python with Pillow. They need the Montserrat Black font as `fonts/Montserrat-Black.ttf` next to `source` (from the npm package `@fontsource/montserrat`). Colors are in `COLORS` at the top of `kit.py`.
+
+## Top center: one slim tracker (owner, 2026-10-13)
+The owner's screenshot: three panels were stacked in the top center (the x2 STRENGTH timer, "Next: Water Bed" and the Starter Quest card), covering a big part of the view. The rule now:
+- **Only one tracker at a time** in the top center, as a slim pill: **at most 24% of the screen width on PC** (40% on phones), about 6% of the screen height, with a `UISizeConstraint`. Inside: a small icon, one line of text and a thin progress bar (about 6 px) along the bottom edge with small "1/2" text. Same light or slate style as now, just slimmer.
+- **What it shows, in priority order:** the tutorial step → the current Starter Quest (with "+1 SPIN" as a small tag) → the next bed. When a quest finishes, the pill flashes and switches to the next item.
+- **Boost timers** (x2 STRENGTH and the others) leave the center. They become small chips (icon + "2:41", about the size of one HUD stat line) stacked just above the Strength stat on the left. Several boosts sit side by side.
+- The tutorial card follows the same size rule (see [[Break A Bed/New Player Guide|New Player Guide]]).
