@@ -127,3 +127,15 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-13: pill title wrapped onto two lines #bugs #done
 - With the new x, long goals ("Buy the Bamboo Post") wrapped. The title is one line and shrinks to fit.
+
+## 2026-10-13: gloves looked like blobs #bugs #done
+- The first gloves were stacks of balls (green blobs over the arms with white glow dots), the second a round egg ("a red blob stuck under the arm"). Now a block sized from the hand part × 1.15 with a cuff and thumb, centred exactly on the hand (owner's "blocky, not round").
+
+## 2026-10-13: old saves didn't unlock Rebirth #bugs #done
+- Only "bed 15 completed" counted; the owner's save has bed 15 still black but beds 17–25 broken. Now any bed 15 or later counts.
+
+## 2026-10-13: undiscovered bed's name showed in the break panel and banner #bugs #done
+- The break panel and "NEW BED UNLOCKED! (next bed)" used the real name. Both say "???" now, and the reveal's "NEW BED DISCOVERED!" no longer clashes with the old banner.
+
+## 2026-10-13: pacing wall at bed 20 (open) #bugs
+- Test bot: 32 min between bed 19 and bed 20. Bed 20 (720B) is too far from what Lava Post + gloves give. To fix next.
