@@ -55,6 +55,12 @@ Every post gets its own model, punch effect and sound, so each new post feels li
     - **Effects stay small.** No big neon balls or white dots. Higher gloves only get a soft `PointLight` or a light particle at the knuckles.
   - Hide the player's normal hand under the glove (`LocalTransparencyModifier` or a cut-off), and keep hats, hair and accessories as they are.
   - Check on R15 and R6, on a small and a big avatar, and in first person.
+  - **Changed again (owner, 2026-10-13): blocky, not round.** The round glove looked like a red blob stuck under the arm. Now the glove is a **square block that fits the player's hand**, matching Roblox's blocky arms:
+    - **Main block:** a `Part` (Block) sized from the player's actual hand part: hand size × about 1.15 on each side (on R6, the bottom ~0.8 stud of the arm × 1.15), so it wraps the hand exactly with a small even rim. Small rounded edges are fine (a slight bevel), but no balls.
+    - **Cuff:** a thin block band at the wrist in a trim color (white or darker), the same width as the main block.
+    - **Thumb:** a small block on the inner side of the fist. Optional, and only if it doesn't stick out.
+    - **Fit:** the block's center sits exactly on the hand's center and turns with it. There's no gap under the arm and nothing floating below the hand.
+    - Colors and the small effects stay as described above.
 - **Glove Shop stand (owner, 2026-10-13, from a reference picture of a "Pickaxe Shop" market stall):**
   - **No ProximityPrompt.** A glowing **blue circle pad** on the ground in front of the stall is a touch sensor. Stepping into it opens the Glove Shop window, and stepping out (or the X) closes it. A 1 s cooldown stops it reopening right after closing while still standing in it.
   - **Our own design (not a copy):** a chunky low-poly boxing-themed stall.
