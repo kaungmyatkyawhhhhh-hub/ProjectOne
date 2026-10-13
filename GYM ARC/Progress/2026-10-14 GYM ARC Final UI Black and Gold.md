@@ -136,3 +136,7 @@ Before and after (phone):
 Small phone (667 x 375) and REP above the jump button:
 ![[GYM ARC/Screenshots/declutter_lifting_small_phone.jpg]]
 ![[GYM ARC/Screenshots/declutter_lifting_above_jump.jpg]]
+
+## 11. Genetics screen for phones
+Owner's request ([[2026-10-14 GYM ARC Prompt - Loading screen, declutter HUD, Genetics mobile]]): the genetics screen was broken on phones ([[GYM ARC - Bug - Genetics screen broken on phones]]). It is now one centered panel that always fits. Tested: the first reveal, the "are you sure" question for a good roll, a reroll with UP / DOWN, the odds, and the small phone size. See [[GYM ARC - Genetics]].
+![[GYM ARC/Screenshots/panel_genetics_phone.jpg]]

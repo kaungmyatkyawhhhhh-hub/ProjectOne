@@ -119,3 +119,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Wardrobe tops broken on the muscle body|Wardrobe tops broken on the muscle body]] - 2026-10-13
 - [[GYM ARC - Bug - Treadmill played the plate clank|Treadmill played the plate clank]] - 2026-10-14
 - [[GYM ARC - Bug - Stray character stopped the server|Stray character stopped the server]] - 2026-10-14
+- [[GYM ARC - Bug - Genetics screen broken on phones|Genetics screen broken on phones]] - 2026-10-14

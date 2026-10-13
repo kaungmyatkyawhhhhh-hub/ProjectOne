@@ -128,6 +128,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Full look bulkier than lean V-taper]]
 - [[GYM ARC - Bug - Gain popup covered the bar and face]]
 - [[GYM ARC - Bug - Genetics reroll error]]
+- [[GYM ARC - Bug - Genetics screen broken on phones]]
 - [[GYM ARC - Bug - Genetics screen text clipped]]
 - [[GYM ARC - Bug - Ghost outline of the minus button]]
 - [[GYM ARC - Bug - Gym-goers blocked the walk to the bench]]

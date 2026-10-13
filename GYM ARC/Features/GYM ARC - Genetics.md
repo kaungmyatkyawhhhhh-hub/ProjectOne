@@ -39,3 +39,20 @@ Rolled on first join: a grade for each muscle group plus a body frame and body t
 ![[GYM ARC/Screenshots/genetics_gym_set_pc.png]]
 ![[GYM ARC/Screenshots/genetics_reroll_confirm.png]]
 ![[GYM ARC/Screenshots/genetics_plate_print_pc.png]]
+
+## Panel screen (14 Oct, replaces the 3D stage)
+Owner's request: the genetics screen is now ONE panel in the middle of the screen, in the black and gold style, so it fits every phone.
+- Top: GENETICS (NEW GENETICS after a reroll) and your DNA tokens.
+- Left: OVERALL, your overall grade on a gold plate and its word (for example BLESSED) in gold, and "View odds".
+- Right: the six groups in two columns, each with its full name, a gold grade plate and its multiplier ("x1.50"). After a reroll, a green UP or gray DOWN shows which ones changed.
+- Under them: Frame and Body as two small chips.
+- Bottom: REROLL (dark) and KEEP (red). A good roll asks first, in the same row.
+- The reveal: the groups pop in best first with a clank, S grades shine, then the overall plate drops in. Tap to skip.
+- The gym stays visible around the panel; the rest of the HUD hides while it's open.
+- The old 3D plate stage is no longer used.
+![[GYM ARC/Screenshots/panel_genetics_phone.jpg]]
+Asking before replacing a good roll, after a reroll, on a small phone, and the odds:
+![[GYM ARC/Screenshots/panel_genetics_confirm.jpg]]
+![[GYM ARC/Screenshots/panel_genetics_rerolled.jpg]]
+![[GYM ARC/Screenshots/panel_genetics_small_phone.jpg]]
+![[GYM ARC/Screenshots/panel_genetics_odds.jpg]]
