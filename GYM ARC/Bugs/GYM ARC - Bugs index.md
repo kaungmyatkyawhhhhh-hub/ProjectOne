@@ -7,7 +7,7 @@ status: current
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
-97 bugs: 21 open or engine limits, 76 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
+101 bugs: 21 open or engine limits, 80 fixed (2 duplicates merged on 13 Oct). Sources: PROGRESS.md (and its full git history) and the commit log, 4-13 Oct 2026.
 
 ## Open
 
@@ -111,3 +111,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Still saving from another server kick|Still saving from another server kick]] - 2026-10-09
 - [[GYM ARC - Bug - Upper traps never grew|Upper traps never grew]] - 2026-10-09
 - [[GYM ARC - Bug - 7'0 players did not fit some equipment|7'0 players did not fit some equipment]] - 2026-10-13
+- [[GYM ARC - Bug - Could not leave a machine|Could not leave a machine]] - 2026-10-13
+- [[GYM ARC - Bug - Pro gym door teleport loop|Pro gym door teleport loop]] - 2026-10-13
+- [[GYM ARC - Bug - Machine panel covered the player|Machine panel covered the player]] - 2026-10-13
+- [[GYM ARC - Bug - Too much floating text while lifting|Too much floating text while lifting]] - 2026-10-13

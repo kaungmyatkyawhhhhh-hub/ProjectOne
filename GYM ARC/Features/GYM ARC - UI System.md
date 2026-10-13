@@ -9,7 +9,21 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 The owner's UI redesign (13 Oct): every screen rebuilt to the new mockups with image pieces. It replaces the older "clean minimal" look (kept below under History).
 
-## How it works (redesign)
+## How it works (UI v2, 13 Oct evening: Gym League style)
+The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. The UI now follows the v2 mockups and style guide:
+- **Look:** FredokaOne text, white with a black outline; Montserrat for descriptions. Buttons are glossy color gradients (green, red, gold, blue, gray, purple, orange, teal) with a darker bottom edge and a lighter border in their own color, like the left menu tiles. Panels are dark with rounded corners, tabs sit above them, the red X has a white border, and the game blurs behind an open menu.
+- **Left menu:** the owner's OLD colored tiles stay (Shop gold first, Stats, Muscles, Titles, Genetics, Poses, Crew, Quests, Trainers; Wardrobe hidden while the Wardrobe feature is off). Same size and gap everywhere, a red number badge for news, a "<" tab that folds them away (remembered per player), and they fold away by themselves while you lift.
+- **Top bar:** dark round pills: coins, height "6'4" / 7'0"", level on the left; Daily Reward, Quests and the settings gear on the right.
+- **Right side:** the DAILY QUESTS card and the gold GROW tile (READY when you can grow).
+- **Bottom:** a big blue stamina bar ("82/100") with the active boost icons and their timers above it.
+- **Hints and toasts:** one hint at a time in a band at the top, gone after 4 seconds (Tutorial Hints in Settings turns them off); toasts stack under the top bar.
+- **Machine HUD:** see [[GYM ARC - Machine HUD]]: the weight panel on the right, REP and PUMP bottom right, STOP TRAINING above the stamina bar.
+
+## Where it lives (UI v2)
+- `Shared/UI/Theme` (colors, gradients, fonts, panels, buttons), `Shared/UI/Kit` (buttons, bars, tabs, the menu window), `Shared/UI/SideMenu`, `TopBar`, `RightColumn`, `HudBottom`, `Notify`, `MachineHud`; tile colors and icons in `Config/HudIcons`; images and loading tips in `Config/UI`; feature switches in `Config/Features`.
+
+## Earlier on 13 Oct (cancelled): dark image-piece redesign
+
 - **Mockups are the source of truth:** 16 mockups at 844x390 (a landscape phone). Screens are built in the mockup's pixels inside a root that scales with the screen (the shorter side against 390, never wider than the 844px layout), so a phone, a tablet and a PC show the same layout.
 - **Image pieces:** panels, cards, buttons, tabs, chips, bars, toggles, tags and badges are the owner's 9-slice images in the Myanmar Builders Club group (corners stay sharp at any size). Text, numbers and icons stay live on top. Icons are the owner's white line icons, tinted.
 - **Colors:** dark warm panels (#141113), cards #1D191B, red #E4262F for main buttons, gold #F5B62F for coins and big moments, green #36C26B for claim / done, blue and purple for tags; grades and rarity keep the bumper plate colors.
@@ -19,7 +33,7 @@ The owner's UI redesign (13 Oct): every screen rebuilt to the new mockups with i
 - **Main HUD (mockup 01):** top center the coins (gold + opens the shop's coins tab, only while the shop exists), the LEVEL badge with an EXP bar (level = the average of the 18 muscle levels) and the height; menu tiles on the left (Quests shows a red count); on the right the daily quest card, boost chips with timers and the Growth Spurt card (tap it to grow when ready); small toasts at the bottom center.
 - **Studio checks:** `TestPhoneSize` (for example 844, 390) shows the screens as that phone.
 
-## Where it lives (redesign)
+### Where it lived
 - `Config/UI` (all 85 image ids), `Shared/UI/Pieces`, `Shared/UI/Kit` (the components), `Shared/UI/Theme`, `Shared/UI/TopBar`, `Shared/UI/SideMenu`, `Shared/UI/RightColumn`, `Shared/UI/Notify`; tile order, labels and icons in `Config/HudIcons`.
 
 ## History (before 13 Oct)
@@ -57,3 +71,5 @@ The owner's UI redesign (13 Oct): every screen rebuilt to the new mockups with i
 ![[GYM ARC/Screenshots/ui_compare_01_main_hud_pc.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_01_main_hud_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_02_machine_hud_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_01_main_hud_menu_phone.jpg]]
+![[GYM ARC/Screenshots/ui_compare_v2_02_machine_hud_phone.jpg]]
