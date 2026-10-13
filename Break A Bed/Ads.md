@@ -49,4 +49,5 @@ Campaign `BAB_Plays_AllPlayers_Oct`, still on and "Learning".
   - Does the game page's first thumbnail match the ads?
   - Some plays may still be "unvalidated" because of the delay.
 - Leave all creatives on while it's "Learning". Judge them again after Oct 15 with more data.
+- **Found (2026-10-13):** the game page says **"Maturity: Minimal · Ages 16+"**. Players under 16 (most simulator players and most ad clickers) can't join, which most likely explains why only 8.5% of clicks became plays and why there are few sales. **Fix:** find where the 16+ comes from (the Maturity & Compliance questionnaire answers or an age setting on the experience) and correct it truthfully so the game is open to all ages. Then the ad will deliver to players who can actually join.
 
