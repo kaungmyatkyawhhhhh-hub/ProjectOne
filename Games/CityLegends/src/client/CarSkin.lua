@@ -183,6 +183,9 @@ CarSkin.INTERIOR_DONOR = {
 	bnw_m4_f82 = { from = "bnw_m3_e92", rear = 1.8 },
 	-- owner (2026-10-13): the Panamera's own cluster is broken; the 718 Boxster's cockpit goes in
 	porsha_panamera = { from = "porsha_boxster", rear = 1.8 },
+	-- owner (2026-10-13): the 458 Italia keeps its body and takes the 458 Speciale's cabin (a cabin
+	-- donor only, not a car in the roster); its own Ferrari cluster design stays
+	ferrara_458 = { from = "ferrara_458s", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
 
 -- cars that take only another model's steering wheel, put where their own one sits
