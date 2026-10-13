@@ -49,3 +49,7 @@ What you see while you are on a machine. Rebuilt on 13 Oct to the owner's v2 moc
 - Nothing overlaps: the pump bar, REP, STOP TRAINING and the stamina bar each have their own space (phone and PC).
 ![[GYM ARC/Screenshots/ui_compare_v2_machine_hud_pump_full_phone.jpg]]
 ![[GYM ARC/Screenshots/ui_compare_v2_machine_hud_pump_pc.jpg]]
+
+## Final look (14 Oct)
+Weight card top right, PUMP panel under it, big red REP bottom right, quiet STOP bottom left, stamina panel at the bottom. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
+![[GYM ARC/Screenshots/ui_compare_final_02_lifting_phone.jpg]]

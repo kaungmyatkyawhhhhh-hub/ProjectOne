@@ -74,3 +74,13 @@ Mockup, then the game (your save is maxed, so every bar is full):
 Mockup, then the game (your save is at max height, so it shows MAX HEIGHT):
 ![[GYM ARC/Screenshots/ui_compare_final_01_hud_mockup.png]]
 ![[GYM ARC/Screenshots/ui_compare_final_01_hud_phone.jpg]]
+
+## 6. Lifting
+- Top right, the weight card: the machine name with its muscle group in a red tag, dark - and + squares, the weight big ("315 LB"), "Tier 12 / 12" and BEST WEIGHT in gold.
+- Under it, the PUMP panel: a gold flame, PUMP, the % and a shiny gold bar. When it's full it glows and says TAP TO PUMP!
+- Bottom right: the big red REP button with the rep count.
+- Bottom left: a quiet "x STOP" button.
+- Bottom center: the stamina panel from the HUD step.
+Mockup, then the game:
+![[GYM ARC/Screenshots/ui_compare_final_02_lifting_mockup.png]]
+![[GYM ARC/Screenshots/ui_compare_final_02_lifting_phone.jpg]]
