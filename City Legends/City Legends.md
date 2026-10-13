@@ -242,3 +242,4 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - Live needles on the Vanquish, Vantage (Aston rev counters turn counter-clockwise) and Countach.
   - Packs: `imports/new_cars/cars_13_astin.fbx`, `cars_14_luxury.fbx`.
   - Old, already-imported packs were deleted from `imports` (owner OK).
+- **Dial glow (2026-10-13, owner: clusters glow too much, speed hard to read):** the dial light is now a tenth as strong (0.2) and spread wider, and the needles sit below the bloom. The old needles still show until the owner's re-imported cars (new_cars packs) are pushed in `CityLegendsCars.rbxl` and copied into `CarModels.rbxm`.

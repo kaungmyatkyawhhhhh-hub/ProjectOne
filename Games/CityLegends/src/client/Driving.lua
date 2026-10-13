@@ -548,7 +548,7 @@ local function setClusterPower(s: State, on: boolean)
 		local sg = n.gui:FindFirstAncestorWhichIsA("SurfaceGui")
 		if sg then
 			sg.LightInfluence = if on then 0 else 1
-			sg.Brightness = if on then 1.4 else 1
+			sg.Brightness = if on then 0.9 else 1 -- lit, but below the bloom: a crisp needle, no halo
 			local light = sg.Parent and sg.Parent:FindFirstChild("DialLight")
 			if light and light:IsA("Light") then
 				light.Enabled = on

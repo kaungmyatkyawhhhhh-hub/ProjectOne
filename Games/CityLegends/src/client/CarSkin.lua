@@ -1517,10 +1517,11 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				local glow = Instance.new("SurfaceLight")
 				glow.Name = "DialLight"
 				glow.Face = Enum.NormalId.Front -- towards the dial face
-				glow.Range = dl.length * 2.5 * m
-				glow.Angle = 120
-				glow.Brightness = 2
-				glow.Color = Color3.fromRGB(255, 244, 228)
+				-- faint: right up against the dial a stronger light washes the numbers out
+				glow.Range = dl.length * 3 * m
+				glow.Angle = 150
+				glow.Brightness = 0.2
+				glow.Color = Color3.fromRGB(235, 238, 245)
 				glow.Shadows = false
 				glow.Enabled = false
 				glow.Parent = p
