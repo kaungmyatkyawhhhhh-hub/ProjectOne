@@ -1220,6 +1220,238 @@ local function ferrari599(gui: SurfaceGui): Update
 	end
 end
 
+-- a small screen in a grey frame (gear, speed and the like sit on it)
+local function panelScreen(parent: Instance, pos: UDim2, size: UDim2, color: Color3?): Frame
+	local f = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = pos, Size = size, BackgroundColor3 = color or Color3.fromRGB(8, 9, 12), BorderSizePixel = 0 }, parent)
+	new("UICorner", { CornerRadius = UDim.new(0.08, 0) }, f)
+	new("UIStroke", { Color = Color3.fromRGB(80, 84, 94), Thickness = 2 }, f)
+	return f
+end
+
+-- Maybach 57 S: two big dials with chrome rings on black, the speedometer left and the rev counter
+-- right (red from 6), orange-red needles, a screen between them with the gear, the speed, the
+-- outside temperature and the clock
+local function maybach(gui: SurfaceGui): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(6, 6, 8), BorderSizePixel = 0 }, gui)
+	local chrome = Color3.fromRGB(206, 208, 214)
+	local face = Color3.fromRGB(14, 14, 17)
+	local needle = Color3.fromRGB(255, 96, 40)
+	bezel(bg, UDim2.fromScale(0.25, 0.5), 1, chrome, 6)
+	bezel(bg, UDim2.fromScale(0.75, 0.5), 1, chrome, 6)
+	local setSpeed = dial(bg, UDim2.fromScale(0.25, 0.5), 0.95, numbers(0, 200, 20), nil, needle, -135, 135, face)
+	local setRpm = dial(bg, UDim2.fromScale(0.75, 0.5), 0.95, numbers(0, 7, 1), 6 / 7, needle, -135, 135, face)
+	text(bg, "mph", UDim2.fromScale(0.25, 0.68), UDim2.fromScale(0.03, 0.045), DIM, Enum.Font.Gotham)
+	text(bg, "1/min x1000", UDim2.fromScale(0.75, 0.68), UDim2.fromScale(0.06, 0.04), DIM, Enum.Font.Gotham)
+	text(bg, "57 S", UDim2.fromScale(0.75, 0.33), UDim2.fromScale(0.045, 0.06), WHITE, Enum.Font.GothamBold)
+	local screen = panelScreen(bg, UDim2.fromScale(0.5, 0.54), UDim2.fromScale(0.13, 0.66))
+	local gear = text(screen, "P", UDim2.fromScale(0.5, 0.2), UDim2.fromScale(0.35, 0.22), WHITE, Enum.Font.GothamBold)
+	local speed = text(screen, "0", UDim2.fromScale(0.5, 0.47), UDim2.fromScale(0.6, 0.2), WHITE, Enum.Font.GothamBold)
+	text(screen, "mph", UDim2.fromScale(0.5, 0.6), UDim2.fromScale(0.3, 0.08), DIM, Enum.Font.Gotham)
+	text(screen, "+64 °F", UDim2.fromScale(0.5, 0.75), UDim2.fromScale(0.55, 0.08), WHITE, Enum.Font.Gotham)
+	local clockText = text(screen, clock(), UDim2.fromScale(0.5, 0.88), UDim2.fromScale(0.5, 0.09), WHITE, Enum.Font.Gotham)
+	local last = 0
+	return function(mph: number, g: string, rpm: number)
+		setSpeed(mph / 200)
+		setRpm(rpm)
+		gear.Text = if tonumber(g) then "D" else g
+		speed.Text = tostring(math.floor(mph + 0.5))
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
+-- electric cars' wide screen (Xiaomi SU7: a thin strip above the wheel; Yangwang U8: a wide screen):
+-- big digital speed on the left, P R N D with the one in use lit, a power bar that fills as you
+-- pull away, battery and range on the right, the clock in the corner
+local function evScreen(gui: SurfaceGui, accent: Color3): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(4, 5, 8), BorderSizePixel = 0 }, gui)
+	new("UICorner", { CornerRadius = UDim.new(0.12, 0) }, bg)
+	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(22, 26, 36), Color3.fromRGB(4, 5, 8)), Rotation = 90 }, bg)
+	local speed = text(bg, "0", UDim2.fromScale(0.2, 0.44), UDim2.fromScale(0.2, 0.5), WHITE, Enum.Font.GothamBold)
+	text(bg, "mph", UDim2.fromScale(0.2, 0.76), UDim2.fromScale(0.06, 0.1), DIM, Enum.Font.Gotham)
+	local letters: { [string]: TextLabel } = {}
+	for i, l in { "P", "R", "N", "D" } do
+		letters[l] = text(bg, l, UDim2.fromScale(0.41 + (i - 1) * 0.06, 0.36), UDim2.fromScale(0.05, 0.22), DIM, Enum.Font.GothamBold)
+	end
+	local back = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.7), Size = UDim2.fromScale(0.3, 0.06), BackgroundColor3 = Color3.fromRGB(36, 40, 50), BorderSizePixel = 0 }, bg)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, back)
+	local fill = new("Frame", { Size = UDim2.fromScale(0, 1), BackgroundColor3 = accent, BorderSizePixel = 0 }, back)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, fill)
+	text(bg, "POWER", UDim2.fromScale(0.5, 0.84), UDim2.fromScale(0.08, 0.08), DIM, Enum.Font.Gotham)
+	-- battery
+	local batt = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.8, 0.38), Size = UDim2.fromScale(0.09, 0.2), BackgroundTransparency = 1, BorderSizePixel = 0 }, bg)
+	new("UIStroke", { Color = WHITE, Thickness = 2 }, batt)
+	new("Frame", { Position = UDim2.fromScale(0.06, 0.12), Size = UDim2.fromScale(0.88 * 0.82, 0.76), BackgroundColor3 = Color3.fromRGB(80, 220, 120), BorderSizePixel = 0 }, batt)
+	text(bg, "82%", UDim2.fromScale(0.91, 0.38), UDim2.fromScale(0.07, 0.16), WHITE, Enum.Font.GothamBold)
+	text(bg, "318 mi", UDim2.fromScale(0.84, 0.66), UDim2.fromScale(0.1, 0.13), WHITE, Enum.Font.GothamMedium)
+	local clockText = text(bg, clock(), UDim2.fromScale(0.9, 0.14), UDim2.fromScale(0.07, 0.12), DIM, Enum.Font.Gotham)
+	local last, lastLetter = 0, ""
+	local shown = 0
+	return function(mph: number, g: string, rpm: number)
+		speed.Text = tostring(math.floor(mph + 0.5))
+		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+		fill.Size = UDim2.fromScale(shown, 1)
+		local letter = if g == "R" then "R" elseif g == "N" then "N" else "D"
+		if letter ~= lastLetter then
+			if letters[lastLetter] then
+				letters[lastLetter].TextColor3 = DIM
+			end
+			letters[letter].TextColor3 = accent
+			lastLetter = letter
+		end
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
+-- Mazda RX-8: three tubes with chrome rings, the big rev counter in the middle (0-10, red from 9)
+-- with the speed in digits and the gear inside it, fuel on the left and water temperature on the
+-- right; black faces, white numbers, red needles
+local function rx8(gui: SurfaceGui): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(5, 5, 7), BorderSizePixel = 0 }, gui)
+	local chrome = Color3.fromRGB(190, 194, 202)
+	local face = Color3.fromRGB(10, 10, 12)
+	local needle = Color3.fromRGB(240, 40, 30)
+	for _, d in { { 0.2, 0.56, 0.66, { "E", "", "F" }, 0.7, "FUEL" }, { 0.8, 0.56, 0.66, { "C", "", "H" }, 0.45, "TEMP" } } do
+		local x, y, sz = d[1] :: number, d[2] :: number, d[3] :: number
+		bezel(bg, UDim2.fromScale(x, y), sz, chrome, 4)
+		dial(bg, UDim2.fromScale(x, y), sz - 0.04, d[4] :: { string }, nil, needle, -70, 70, face)(d[5] :: number)
+		text(bg, d[6] :: string, UDim2.fromScale(x, y + 0.16), UDim2.fromScale(0.04, 0.05), DIM, Enum.Font.Gotham)
+	end
+	bezel(bg, UDim2.fromScale(0.5, 0.5), 1, chrome, 6)
+	local setRpm = dial(bg, UDim2.fromScale(0.5, 0.5), 0.96, numbers(0, 10, 1), 0.9, needle, -135, 135, face)
+	text(bg, "x1000r/min", UDim2.fromScale(0.5, 0.36), UDim2.fromScale(0.06, 0.04), DIM, Enum.Font.Gotham)
+	local screen = panelScreen(bg, UDim2.fromScale(0.5, 0.72), UDim2.fromScale(0.1, 0.2), Color3.fromRGB(10, 12, 16))
+	local speed = text(screen, "0", UDim2.fromScale(0.4, 0.5), UDim2.fromScale(0.55, 0.7), WHITE, Enum.Font.GothamBold)
+	text(screen, "mph", UDim2.fromScale(0.82, 0.62), UDim2.fromScale(0.25, 0.3), DIM, Enum.Font.Gotham)
+	local gear = text(bg, "N", UDim2.fromScale(0.5, 0.6), UDim2.fromScale(0.03, 0.08), Color3.fromRGB(255, 140, 40), Enum.Font.GothamBold)
+	return function(mph: number, g: string, rpm: number)
+		setRpm(rpm)
+		speed.Text = tostring(math.floor(mph + 0.5))
+		gear.Text = g
+	end
+end
+
+-- Lexus LFA screen (the LX 700's meter carries the same look): one big round rev counter in a
+-- silver ring with a thin bright needle, the speed in big digits and the gear in the middle, fuel
+-- and temperature bars on the left, trip and clock on the right
+local function lexus(gui: SurfaceGui, rpmTop: number, redFrom: number, accent: Color3): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(4, 5, 7), BorderSizePixel = 0 }, gui)
+	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(18, 22, 30), Color3.fromRGB(4, 5, 7)), Rotation = 90 }, bg)
+	bezel(bg, UDim2.fromScale(0.5, 0.5), 1, Color3.fromRGB(200, 204, 212), 7)
+	local setRpm = dial(bg, UDim2.fromScale(0.5, 0.5), 0.96, numbers(0, rpmTop, 1), redFrom / rpmTop, accent, -135, 135, Color3.fromRGB(8, 9, 12), nil, 0.012)
+	local speed = text(bg, "0", UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.1, 0.2), WHITE, Enum.Font.GothamMedium)
+	text(bg, "mph", UDim2.fromScale(0.5, 0.63), UDim2.fromScale(0.03, 0.05), DIM, Enum.Font.Gotham)
+	local gear = text(bg, "N", UDim2.fromScale(0.5, 0.78), UDim2.fromScale(0.03, 0.1), accent, Enum.Font.GothamBold)
+	bar(bg, UDim2.fromScale(0.16, 0.5), WHITE, "FUEL", 0.72)
+	bar(bg, UDim2.fromScale(0.24, 0.5), WHITE, "TEMP", 0.5)
+	text(bg, "TRIP A", UDim2.fromScale(0.8, 0.36), UDim2.fromScale(0.07, 0.06), DIM, Enum.Font.Gotham)
+	text(bg, "128.4 mi", UDim2.fromScale(0.8, 0.46), UDim2.fromScale(0.1, 0.08), WHITE, Enum.Font.GothamMedium)
+	local clockText = text(bg, clock(), UDim2.fromScale(0.8, 0.64), UDim2.fromScale(0.07, 0.08), WHITE, Enum.Font.Gotham)
+	local last = 0
+	return function(mph: number, g: string, rpm: number)
+		setRpm(rpm)
+		speed.Text = tostring(math.floor(mph + 0.5))
+		gear.Text = g
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
+-- Porsche 718 Cayman: three round tubes, the rev counter in the middle and biggest (0-8, red from
+-- 7.5) with the gear and the speed in digits inside, the speedometer on the left, a round screen
+-- on the right (range, outside temperature, clock); black faces, white numbers, red needles
+local function porsche718(gui: SurfaceGui): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(5, 5, 7), BorderSizePixel = 0 }, gui)
+	local ring = Color3.fromRGB(150, 154, 162)
+	local face = Color3.fromRGB(10, 10, 12)
+	local needle = Color3.fromRGB(240, 40, 30)
+	bezel(bg, UDim2.fromScale(0.2, 0.55), 0.82, ring, 4)
+	local setSpeed = dial(bg, UDim2.fromScale(0.2, 0.55), 0.78, numbers(0, 200, 40), nil, needle, -135, 135, face)
+	text(bg, "mph", UDim2.fromScale(0.2, 0.72), UDim2.fromScale(0.03, 0.045), DIM, Enum.Font.Gotham)
+	bezel(bg, UDim2.fromScale(0.5, 0.5), 1, ring, 5)
+	local setRpm = dial(bg, UDim2.fromScale(0.5, 0.5), 0.96, numbers(0, 8, 1), 7.5 / 8, needle, -135, 135, face)
+	text(bg, "1/min x1000", UDim2.fromScale(0.5, 0.35), UDim2.fromScale(0.06, 0.04), DIM, Enum.Font.Gotham)
+	local gear = text(bg, "N", UDim2.fromScale(0.5, 0.62), UDim2.fromScale(0.035, 0.1), WHITE, Enum.Font.GothamBold)
+	local speed = text(bg, "0", UDim2.fromScale(0.5, 0.76), UDim2.fromScale(0.05, 0.08), WHITE, Enum.Font.GothamBold)
+	-- the round screen
+	bezel(bg, UDim2.fromScale(0.8, 0.55), 0.82, ring, 4)
+	local screen = squareBox(bg, UDim2.fromScale(0.8, 0.55), 0.78)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(14, 18, 26), BorderSizePixel = 0 }, screen))
+	text(screen, "RANGE", UDim2.fromScale(0.5, 0.3), UDim2.fromScale(0.3, 0.08), DIM, Enum.Font.Gotham)
+	text(screen, "214 mi", UDim2.fromScale(0.5, 0.42), UDim2.fromScale(0.5, 0.13), WHITE, Enum.Font.GothamBold)
+	text(screen, "+61 °F", UDim2.fromScale(0.5, 0.62), UDim2.fromScale(0.36, 0.1), WHITE, Enum.Font.Gotham)
+	local clockText = text(screen, clock(), UDim2.fromScale(0.5, 0.76), UDim2.fromScale(0.3, 0.1), WHITE, Enum.Font.Gotham)
+	local last = 0
+	return function(mph: number, g: string, rpm: number)
+		setSpeed(mph / 200)
+		setRpm(rpm)
+		gear.Text = g
+		speed.Text = tostring(math.floor(mph + 0.5))
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
+-- Nissan GT-R (R35): the big rev counter in the middle (0-8, red from 7) with the gear in a window
+-- and the speed in digits inside, the speedometer on the right (0-200 mph), fuel and water temperature
+-- dials on the left; silver rings, black faces, white numbers, red needles
+local function gtr(gui: SurfaceGui): Update
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(5, 5, 7), BorderSizePixel = 0 }, gui)
+	local ring = Color3.fromRGB(176, 182, 192)
+	local face = Color3.fromRGB(10, 10, 12)
+	local needle = Color3.fromRGB(240, 40, 30)
+	for _, d in { { 0.15, 0.32, { "E", "", "F" }, 0.7, "FUEL" }, { 0.15, 0.74, { "C", "", "H" }, 0.45, "TEMP" } } do
+		local x, y = d[1] :: number, d[2] :: number
+		bezel(bg, UDim2.fromScale(x, y), 0.42, ring, 3)
+		dial(bg, UDim2.fromScale(x, y), 0.4, d[3] :: { string }, nil, needle, -90, 90, face)(d[4] :: number)
+		text(bg, d[5] :: string, UDim2.fromScale(x, y + 0.12), UDim2.fromScale(0.035, 0.045), DIM, Enum.Font.Gotham)
+	end
+	bezel(bg, UDim2.fromScale(0.47, 0.5), 1, ring, 6)
+	local setRpm = dial(bg, UDim2.fromScale(0.47, 0.5), 0.96, numbers(0, 8, 1), 7 / 8, needle, -135, 135, face)
+	text(bg, "x1000r/min", UDim2.fromScale(0.47, 0.36), UDim2.fromScale(0.06, 0.04), DIM, Enum.Font.Gotham)
+	local window = panelScreen(bg, UDim2.fromScale(0.47, 0.68), UDim2.fromScale(0.08, 0.22), Color3.fromRGB(14, 16, 20))
+	local gear = text(window, "N", UDim2.fromScale(0.5, 0.36), UDim2.fromScale(0.5, 0.5), Color3.fromRGB(255, 140, 40), Enum.Font.GothamBold)
+	local speed = text(window, "0 mph", UDim2.fromScale(0.5, 0.8), UDim2.fromScale(0.85, 0.28), WHITE, Enum.Font.Gotham)
+	bezel(bg, UDim2.fromScale(0.82, 0.52), 0.86, ring, 4)
+	local setSpeed = dial(bg, UDim2.fromScale(0.82, 0.52), 0.82, numbers(0, 200, 40), nil, needle, -135, 135, face)
+	text(bg, "MPH", UDim2.fromScale(0.82, 0.7), UDim2.fromScale(0.03, 0.045), DIM, Enum.Font.Gotham)
+	return function(mph: number, g: string, rpm: number)
+		setRpm(rpm)
+		setSpeed(mph / 200)
+		gear.Text = g
+		speed.Text = tostring(math.floor(mph + 0.5)) .. " mph"
+	end
+end
+
+-- the styles by name (the DashCluster panel's Style attribute)
+local STYLES: { [string]: (SurfaceGui) -> Update } = {
+	Maybach57 = maybach,
+	SU7 = function(gui)
+		return evScreen(gui, Color3.fromRGB(255, 105, 0))
+	end,
+	U8 = function(gui)
+		return evScreen(gui, Color3.fromRGB(60, 200, 230))
+	end,
+	RX8 = rx8,
+	LFA = function(gui)
+		return lexus(gui, 10, 9, Color3.fromRGB(255, 120, 40))
+	end,
+	LexusLX = function(gui)
+		return lexus(gui, 8, 6, Color3.fromRGB(80, 170, 255))
+	end,
+	Porsche718 = porsche718,
+	GTR = gtr,
+}
+
 function DashGauges.build(panel: BasePart): Update
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "Gauges"
@@ -1230,7 +1462,8 @@ function DashGauges.build(panel: BasePart): Update
 	gui.MaxDistance = 60
 	gui.Parent = panel
 	local style = panel:GetAttribute("Style")
-	local update = if style == "BMWLive" then bmwLive(gui) elseif style == "BMWClassic" then bmwClassic(gui) elseif style == "BMWClassicGrey" then bmwClassic(gui, true) elseif style == "AMG" then amg(gui) elseif style == "AMGBiturbo" then amg(gui, true) elseif style == "G63" then g63(gui) elseif style == "AMGSls" then amg(gui, false, 220) elseif style == "Aston" then aston(gui) elseif style == "Urus" then urus(gui) elseif style == "Murcielago" then twinWithSmalls(gui, true, 9, 8, Color3.fromRGB(255, 90, 20), Color3.fromRGB(176, 182, 192), { { "OIL °C", "50", "150" }, { "OIL bar", "0", "10" }, { "FUEL", "0", "1" }, { "°C", "50", "130" } }) elseif style == "C6" then twinWithSmalls(gui, false, 7, 6.5, Color3.fromRGB(255, 110, 30), Color3.fromRGB(150, 156, 166), { { "FUEL", "E", "F" }, { "OIL", "0", "80" }, { "TEMP", "100", "280" }, { "VOLTS", "8", "18" } }) elseif style == "C7" then c7(gui) elseif style == "W212" then w212(gui) elseif style == "W213" then w213(gui) elseif style == "Gallardo" then gallardo(gui) elseif style == "SupraTRD" then supraTrd(gui) elseif style == "Toyota" then toyota(gui) elseif style == "Aventador" then aventador(gui, true) elseif style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) elseif style == "Ferrari599" then ferrari599(gui) else modern(gui)
+	local own = if type(style) == "string" then STYLES[style] else nil
+	local update = if own then own(gui) elseif style == "BMWLive" then bmwLive(gui) elseif style == "BMWClassic" then bmwClassic(gui) elseif style == "BMWClassicGrey" then bmwClassic(gui, true) elseif style == "AMG" then amg(gui) elseif style == "AMGBiturbo" then amg(gui, true) elseif style == "G63" then g63(gui) elseif style == "AMGSls" then amg(gui, false, 220) elseif style == "Aston" then aston(gui) elseif style == "Urus" then urus(gui) elseif style == "Murcielago" then twinWithSmalls(gui, true, 9, 8, Color3.fromRGB(255, 90, 20), Color3.fromRGB(176, 182, 192), { { "OIL °C", "50", "150" }, { "OIL bar", "0", "10" }, { "FUEL", "0", "1" }, { "°C", "50", "130" } }) elseif style == "C6" then twinWithSmalls(gui, false, 7, 6.5, Color3.fromRGB(255, 110, 30), Color3.fromRGB(150, 156, 166), { { "FUEL", "E", "F" }, { "OIL", "0", "80" }, { "TEMP", "100", "280" }, { "VOLTS", "8", "18" } }) elseif style == "C7" then c7(gui) elseif style == "W212" then w212(gui) elseif style == "W213" then w213(gui) elseif style == "Gallardo" then gallardo(gui) elseif style == "SupraTRD" then supraTrd(gui) elseif style == "Toyota" then toyota(gui) elseif style == "Aventador" then aventador(gui, true) elseif style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) elseif style == "Ferrari599" then ferrari599(gui) else modern(gui)
 	-- start-up: the screens fade up and the needles sweep to the end and back, like a real car
 	local started = os.clock()
 	local SWEEP = 1.6

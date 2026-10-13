@@ -46,7 +46,7 @@ CarSkin.CLUSTER_STYLE = {
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
 	toyoka_alfard = "Toyota",
-	bnw_x6 = "BMWClassicGrey", -- same cabin and cluster as the M5
+	bnw_x6 = "BMWLive", -- the 2020 X6 file has its own modern cabin (owner, 2026-10-13)
 	bentz_cls63s = "AMGBiturbo",
 	bentz_g63 = "G63",
 	bentz_e300 = "W212",
@@ -60,13 +60,30 @@ CarSkin.CLUSTER_STYLE = {
 	lambrini_lp640 = "Murcielago",
 	chevo_c6 = "C6",
 	chevo_c7 = "C7",
+	-- the Sketchfab cars of 2026-10-12 (the owner's list of looks, from the real cars)
+	bentz_maybach = "Maybach57",
+	bentz_gle53 = "AMGBiturbo", -- the GLE 63 coupe file: two AMG dials with a screen between
+	bentz_s63 = "W213", -- S 65 W222: wide glass screen
+	brabos_g63 = "W213", -- the new G-Class's wide glass screen
+	xiaomo_su7 = "SU7",
+	byt_u8 = "U8",
+	mazdo_rx8 = "RX8",
+	bnw_m8gc = "BMWLive",
+	bnw_x7 = "BMWLive",
+	bnw_530i = "BMWLive",
+	bnw_540i = "BMWLive",
+	bnw_m3_f80 = "BMWClassic",
+	lexis_lfa = "LFA",
+	lexis_lx700 = "LexusLX",
+	porsha_boxster = "Porsche718",
+	nisun_gtr = "GTR",
+	lambrini_lp750 = "Aventador",
 } :: { [string]: string }
 
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
 -- driver's eye; rear: how far behind the eye the swap reaches (studs: front seats only, or rear too)
 CarSkin.INTERIOR_DONOR = {
 	porsha_gt3 = { from = "porsha_panamera", rear = 1.8 },
-	bnw_x6 = { from = "bnw_m5_e60", rear = 3.6 },
 } :: { [string]: { from: string, rear: number } }
 
 -- cars that take only another model's steering wheel, put where their own one sits

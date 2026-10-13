@@ -124,4 +124,8 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - `tools/pack_cars.py` puts several cars in one FBX (one group per car id) for one Import 3D. `tools/take_cars.luau` copies them from the owner's saved place into `assets/CarModels.rbxm`: Blender's ".001" name endings come off and windows are made two-sided.
   - Steering tilt: Studio's importer keeps a part's own turn in its pivot, so CarSkin turns a `SteeringWheel` about its pivot's axis. That fixes the 599 and G63 too. New cars also carry it in the name (`SteeringWheel_t21`).
   - Wheelbases match the files: GLE coupe 2.915 m, X6 (G06) 2.975 m.
-  - Open: cluster designs for the new cars (owner asked to be asked how each cluster looks); whether the new X6 keeps the M5 interior.
+  - Clusters for the new cars (2026-10-13), from the real cars, until the owner corrects any:
+    - new designs: Maybach 57 S (two chrome-ringed dials, screen between), SU7 and U8 (wide EV screen: big digital speed, P R N D, power bar, battery and range), RX-8 (big rev counter in the middle with digital speed, fuel and temperature either side), LFA (one big rev counter, 0-10, speed and gear inside), LX700 (the same Lexus look, 0-8), 718 Cayman (rev counter in the middle, speedometer left, round screen right), GT-R (rev counter in the middle, speedometer right, fuel and temperature left);
+    - existing designs: GLE 53 = AMG Biturbo; S65 and Brabus G700 = W213 wide screen; M8, X7, 530i, 540i, X6 = BMW Live; M3 = BMW Classic; LP750 = Aventador.
+  - The new X6 uses its own modern cabin (owner, 2026-10-13); the M5 interior swap is gone.
+  - The owner allowed deleting the original GLB files in `imports` once the cars are in the game.
