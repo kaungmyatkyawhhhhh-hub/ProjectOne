@@ -170,3 +170,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-13: training floor x 56..132 / z -6..42 with the TRAINING sign on its front edge; Glove Shop left of the spawn -> training route; leaderboards moved 8 studs back to make room. #break-a-bed
 - 2026-10-13: AFK training hop at 15 min idle (before Roblox's 20-min kick), same server first, any server if full; only while training. #break-a-bed
 - 2026-10-13: no city backdrop. The owner removed it on purpose and wants a clean, simple map floating in the sky. #break-a-bed
+- 2026-10-13: the map stays clean on purpose: no city or backdrop around it (owner). Glove Shop kept about 4 studs from the VIP Lounge's glass corner. #break-a-bed
