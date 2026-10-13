@@ -105,8 +105,12 @@ type State = {
 	-- the model's own gauges: needle parts and on-screen needles (0..1 sweeps 240 degrees)
 	partNeedles: { { part: BasePart, kind: string, pivot: CFrame, offset: CFrame } },
 	guiNeedles: { { gui: GuiObject, kind: string, base: number } },
-	guiTexts: { { label: TextLabel, kind: string } }, -- on-screen "Speed" / "RPM" / "Gear" read-outs
+	guiTexts: { { label: TextLabel, kind: string, unit: string? } }, -- on-screen "Speed" / "RPM" / "Gear" read-outs
+	-- live needles over a model's own painted dials (CarSkin.DIAL_NEEDLES): reading -> degrees
+	dialNeedles: { { gui: GuiObject, kind: string, unit: string, scale: { { number } } } },
+	dialSweep: number?, -- when the engine started: the needles sweep to the end and back
 	speedShown: number,
+	mphShown: number,
 	smoke: { { emitter: ParticleEmitter, rear: boolean } },
 	-- body lean (radians): roll in turns, pitch on braking / accelerating
 	roll: number,
@@ -539,6 +543,19 @@ end
 -- the live cluster on the dashboard: built again (needle sweep and all) when switched on or when
 -- the speed units change
 local function setClusterPower(s: State, on: boolean)
+	-- the car's own dials: the needles glow and sweep when it starts, and go unlit when it stops
+	for _, n in s.dialNeedles do
+		local sg = n.gui:FindFirstAncestorWhichIsA("SurfaceGui")
+		if sg then
+			sg.LightInfluence = if on then 0 else 1
+			sg.Brightness = if on then 1.4 else 1
+			local light = sg.Parent and sg.Parent:FindFirstChild("DialLight")
+			if light and light:IsA("Light") then
+				light.Enabled = on
+			end
+		end
+	end
+	s.dialSweep = if on then os.clock() else nil
 	local panel = s.dashPanel
 	if not panel then
 		return
@@ -782,6 +799,7 @@ function Driving.attach(model: Model)
 	local partNeedles = {}
 	local guiNeedles = {}
 	local guiTexts = {}
+	local dialNeedles = {}
 	-- extras for imported cars; a fault here must never stop the car from driving
 	local okExtras, errExtras = pcall(function()
 		-- imported cars: pose their steering wheel and our arms ourselves (anchored, local only)
@@ -809,8 +827,18 @@ function Driving.attach(model: Model)
 					end
 					d.Anchored = true
 					table.insert(partNeedles, { part = d, kind = kind, pivot = d:GetAttribute("GaugePivot") :: CFrame, offset = d:GetAttribute("GaugeOffset") :: CFrame })
+				elseif d:IsA("GuiObject") and d.Name == "DialNeedle" then
+					local pts = {}
+					for v, a in string.gmatch(tostring(d:GetAttribute("GaugeScale")), "(%-?[%d%.]+):(%-?[%d%.]+)") do
+						table.insert(pts, { tonumber(v) :: number, tonumber(a) :: number })
+					end
+					if #pts >= 2 then
+						table.insert(dialNeedles, { gui = d, kind = tostring(d:GetAttribute("GaugeKind")), unit = tostring(d:GetAttribute("GaugeUnit")), scale = pts })
+					end
 				elseif d:IsA("TextLabel") and model:GetAttribute("OwnInterior") and (d.Name == "Speed" or d.Name == "RPM" or d.Name == "Gear") then
-					table.insert(guiTexts, { label = d, kind = d.Name })
+					-- a read-out printed for one unit (a car's own km/h display) keeps to it
+					local unit = d:GetAttribute("GaugeUnit")
+					table.insert(guiTexts, { label = d, kind = d.Name, unit = if type(unit) == "string" then unit else nil })
 				elseif d:IsA("GuiObject") and d.Name == "Needle" and model:GetAttribute("OwnInterior") then
 					-- which dial: the nearest named ancestor (the screen part keeps its model name as SrcName)
 					local gk: string? = nil
@@ -1117,7 +1145,9 @@ function Driving.attach(model: Model)
 		partNeedles = partNeedles,
 		guiNeedles = guiNeedles,
 		guiTexts = guiTexts,
+		dialNeedles = dialNeedles,
 		speedShown = 0,
+		mphShown = 0,
 		smoke = smoke,
 		roll = 0,
 		pitch = 0,
@@ -1645,16 +1675,43 @@ function Driving.render(dt: number)
 		pcall(s.dashUpdate, mph, s.gear, s.rpm)
 	end
 	pcall(function()
-		if #s.partNeedles > 0 or #s.guiNeedles > 0 or #s.guiTexts > 0 then
+		if #s.partNeedles > 0 or #s.guiNeedles > 0 or #s.guiTexts > 0 or #s.dialNeedles > 0 then
 			local k = 1 - math.exp(-dt * 10) -- needles swing, they don't snap
 			s.speedShown += (math.clamp(mph / 160, 0, 1) - s.speedShown) * k
+			s.mphShown += (mph - s.mphShown) * k
 			s.rpmShown += (math.clamp(s.rpm, 0, 1) - s.rpmShown) * k
+			local sweep = 0
+			if s.dialSweep then
+				local t = (os.clock() - s.dialSweep) / 1.6
+				if t < 1 then
+					sweep = math.sin(t * math.pi)
+				else
+					s.dialSweep = nil
+				end
+			end
+			for _, n in s.dialNeedles do
+				local pts = n.scale
+				local top = pts[#pts][1]
+				-- the rev counter reads 8000 at our limiter (as the cars' own read-outs do)
+				local v = if n.kind == "speed" then (if n.unit == "kmh" then s.mphShown * 1.609 else s.mphShown) else s.rpmShown * 8000
+				v = math.max(v, sweep * top)
+				local ang = pts[#pts][2]
+				for i = 1, #pts - 1 do
+					local a, b = pts[i], pts[i + 1]
+					if v <= b[1] then
+						ang = a[2] + (b[2] - a[2]) * math.clamp((v - a[1]) / (b[1] - a[1]), 0, 1)
+						break
+					end
+				end
+				n.gui.Rotation = ang
+			end
 			for _, n in s.partNeedles do
 				local v = if n.kind == "speed" then s.speedShown else s.rpmShown
-				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, math.rad(v * 240)) * n.offset
+				-- the pivot's +Z looks at the driver: a negative turn is clockwise as the driver sees it
+				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, -math.rad(v * 240)) * n.offset
 			end
 			for _, tl in s.guiTexts do
-				tl.label.Text = if tl.kind == "Speed" then tostring(math.floor((if Driving.units == "kmh" then mph * 1.609 else mph) + 0.5)) elseif tl.kind == "RPM" then tostring(math.floor(s.rpm * 80) * 100) else s.gear
+				tl.label.Text = if tl.kind == "Speed" then tostring(math.floor((if (tl.unit or Driving.units) == "kmh" then mph * 1.609 else mph) + 0.5)) elseif tl.kind == "RPM" then tostring(math.floor(s.rpm * 80) * 100) else s.gear
 			end
 			for _, n in s.guiNeedles do
 				n.gui.Rotation = n.base + (if n.kind == "speed" then s.speedShown else s.rpmShown) * 240

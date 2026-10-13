@@ -190,3 +190,36 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - Street lamps are warmer and about twice as bright, with a wider pool of light on the road. Lamps within ~170 studs of the camera cast real shadows (poles, cars, players), but not on low graphics or on phones.
   - Headlights reach further (80 studs) and are a little brighter.
   - Rain still blends its darker, greyer mood on top of all this.
+
+- **Own clusters with live needles (2026-10-13, owner: "remove the digital cluster over it and just use the original and just add a needle", for every car that has needles; numbers readable; fix upside-down ones):**
+  - Cars whose own model has needle dials now show their own cluster. Our screen over it is gone, and a lit red needle with a dark hub turns on each speedometer and rev counter (`CarSkin.DIAL_NEEDLES`).
+  - The needles sweep when the engine starts and glow while it runs. A small light in front of each dial makes its numbers readable at night.
+  - The old painted or modelled needles were taken out of the car files. Those cars need a new Import 3D before the old needles disappear.
+  - Where a cluster had a fixed digital speed, it now shows the live speed: RX-8, LP700 and Land Cruzer 300.
+  - Converted cars with needles (16):
+
+    | Car | Note |
+    |---|---|
+    | R34 | |
+    | SL65 | |
+    | Bentayga | |
+    | Dodger SRT | |
+    | Land Cruzer 300 | |
+    | CLS 63 S | |
+    | SLS | |
+    | GT-R | |
+    | RX-8 | rev counter |
+    | Boxster | |
+    | 530i | blurry, estimated |
+    | GLE coupe | blurry, estimated |
+    | Brabus G63 | screen dials |
+    | LP700 | screen rev counter |
+    | 2015 G63 | |
+    | 599 | |
+
+    The 2015 G63 and 599 clusters had been built from the owner's photos; their own clusters look the same.
+  - Roblox-built cars with their own needle parts now use them instead of our screen: M3 E92, M5 E60, M6, E300, E400, LP640, Alphard. These were already on their own needles: Camaro, Challenger, RX-7, 350Z, Panamera (and GT3), Belta. Their dial pictures can't be seen from here, so needle sweeps there are a general 240 degrees.
+  - Part needles turned the wrong way (counter-clockwise); fixed.
+  - Kept as they were: digital clusters (330i, M8, X6, X7, 540i, S65, LX700, LFA, SU7, U8, Seal, LP750, Urus, Maybach, Phantom, Wraith), cars whose model has no needles to work with (458, F430, CLA 45, Supra, Camry, Crown, LC200, Gallardo, EV6, Vantage, C7), and the C6 and DB9, whose needle parts aren't named as needles yet.
+  - No converted car's cluster renders upside down (all checked). Ask which car if the owner still sees one.
+- **M3 and M4 cabins (2026-10-13, owner: "Put the M3 E92 interior into the BMW M4 and M3"):** the M3 F80 and M4 F82 take the M3 E92's cabin, with its dash and needles (`INTERIOR_DONOR`).

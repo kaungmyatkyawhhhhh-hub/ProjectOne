@@ -32,68 +32,123 @@ local CarSkin = {}
 
 -- cars with their own dashboard design (DashGauges styles), built from the owner's reference photos
 CarSkin.CLUSTER_STYLE = {
-	lambrini_lp700 = "Aventador",
 	ferrara_458 = "Ferrari",
-	ferrara_599 = "Ferrari599",
 	ferrara_f430 = "Ferrari599", -- owner: same cluster as the 599
 	bnw_330i_g20 = "BMWLive",
-	bnw_m3_e92 = "BMWClassic",
-	bnw_m5_e60 = "BMWClassicGrey",
-	bnw_m6_v10 = "BMWClassicGrey",
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "SupraTRD",
 	toyoka_camri = "Toyota",
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
-	toyoka_alfard = "Toyota",
 	bnw_x6 = "BMWLive", -- the 2020 X6 file has its own modern cabin (owner, 2026-10-13)
-	bentz_cls63s = "AMGBiturbo",
-	bentz_g63 = "G63",
-	bentz_e300 = "W212",
-	bentz_e400 = "W213",
 	lambrini_lp570 = "Gallardo",
 	kio_ev6 = "EV6",
 	astin_db9 = "Aston",
 	astin_vantage = "Aston",
-	bentz_sls = "AMGSls",
 	lambrini_urus = "Urus",
-	lambrini_lp640 = "Murcielago",
 	chevo_c6 = "C6",
 	chevo_c7 = "C7",
 	-- the Sketchfab cars of 2026-10-12 (the owner's list of looks, from the real cars)
 	bentz_maybach = "Maybach57",
-	bentz_gle53 = "AMGBiturbo", -- the GLE 63 coupe file: two AMG dials with a screen between
 	bentz_s63 = "W213", -- S 65 W222: wide glass screen
-	brabos_g63 = "W213", -- the new G-Class's wide glass screen
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",
-	mazdo_rx8 = "RX8",
 	bnw_m8gc = "BMWLive",
 	bnw_x7 = "BMWLive",
-	bnw_530i = "BMWLive",
 	bnw_540i = "BMWLive",
-	bnw_m3_f80 = "BMWClassic",
 	lexis_lfa = "LFA",
 	lexis_lx700 = "LexusLX",
-	porsha_boxster = "Porsche718",
-	nisun_gtr = "GTR",
 	lambrini_lp750 = "AventadorSV", -- its own cluster (owner's photo)
 	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
-	bentz_gt63s = "Aston", -- Dodger SRT (Charger Hellcat): two big dials with a screen between
-	bentlee_bentayga = "Aston",
 	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
 	rolls_wraith = "Maybach57",
 	byt_seal = "U8", -- wide electric screen
-	toyoka_lc300 = "Toyota",
-	nisun_r34 = "GTR",
-	bentz_sl65bs = "AMGBiturbo",
-	bnw_m4_f82 = "BMWClassic",
 } :: { [string]: string }
+
+-- live needles over a car's own dials, for models whose needles are only painted on (the
+-- converted model has them painted out of its texture; owner: keep the car's own cluster, no
+-- screen over it). Per dial: its middle from the middle of the steering wheel part, in metres
+-- along the car's right / up / back, the way the dial face looks (towards the driver), the
+-- needle length (m) and its scale: dial reading -> degrees clockwise from 12 o'clock, with more
+-- points for an uneven scale (a rev counter squeezed below 3000). Units: kmh, mph or rpm.
+-- kind "digits" is a live speed read-out instead (length = its width) where the model's own showed
+-- a fixed number. Measured from the converted files (needle ends, labels) by tools in the notes.
+export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string }
+CarSkin.DIAL_NEEDLES = {
+	bentlee_bentayga = { -- Bentayga
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.1002, -0.0152, -0.263), face = Vector3.new(-0.012, 0.4411, 0.8974), length = 0.0394, scale = "0:-123.7,4000:6.8,7000:102.3,8000:133.7" },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.0965, -0.0163, -0.2622), face = Vector3.new(0.0126, 0.4677, 0.8838), length = 0.0474, scale = "0:-136.2,100:5.7,200:134.6" },
+	},
+	bentz_cls63s = { -- CLS 63 S
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0002, 0.0271, -0.2274), face = Vector3.new(0.0033, 0.3457, 0.9384), length = 0.0562, scale = "0:-118.9,240:121.8" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.1286, 0.0137, -0.2229), face = Vector3.new(0.0033, 0.3457, 0.9384), length = 0.0422, scale = "0:-127.1,8000:126.5" },
+	},
+	bentz_g63 = { -- 2015 G63 (its own cluster, like the owner's photo)
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0944, 0.0168, -0.2315), face = Vector3.new(0, 0.4173, 0.9088), length = 0.0425, scale = "0:-179.0,40:-122.1,80:-57.7,120:16.8,160:76.5" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0946, 0.0168, -0.2315), face = Vector3.new(0, 0.4173, 0.9088), length = 0.0418, scale = "0:-177.1,3000:-80.0,8000:93.6" },
+	},
+	bentz_gle53 = { -- GLE coupe (labels too blurry to read: an even 240 degree sweep)
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0866, 0.0505, -0.2422), face = Vector3.new(0.0005, 0.1327, 0.9912), length = 0.0466, scale = "0:-120.0,200:120.0" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0682, 0.0505, -0.2422), face = Vector3.new(0.0002, 0.1326, 0.9912), length = 0.0467, scale = "0:-120.0,8000:120.0" },
+	},
+	bentz_gt63s = { -- Dodger SRT
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0959, 0.004, -0.2664), face = Vector3.new(-0.0179, 0.2773, 0.9606), length = 0.0439, scale = "0:-127.1,4000:20.1,7000:125.1" },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.1096, 0.0033, -0.2624), face = Vector3.new(-0.0179, 0.2773, 0.9606), length = 0.0447, scale = "0:-122.2,200:123.0" },
+	},
+	bentz_sl65bs = { -- SL65
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0388, 0.0642, -0.2453), face = Vector3.new(0.0004, 0.2209, 0.9753), length = 0.0427, scale = "0:-116.6,220:141.9" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0909, 0.0704, -0.2466), face = Vector3.new(0.0014, 0.2203, 0.9754), length = 0.041, scale = "0:-113.3,8000:120.9" },
+	},
+	bentz_sls = { -- SLS
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0958, 0.0054, -0.2386), face = Vector3.new(0.0192, 0.2122, 0.977), length = 0.038, scale = "0:-178.8,30:-157.6,360:89.7" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.101, 0.0052, -0.2396), face = Vector3.new(-0.0196, 0.2122, 0.977), length = 0.0336, scale = "0:177.3,1000:206.2,9000:446.0" },
+	},
+	bnw_530i = { -- 530i (labels too blurry to read: an even 250 degree sweep)
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0682, 0.0048, -0.25), face = Vector3.new(0.0027, 0.3223, 0.9466), length = 0.0582, scale = "0:-125.0,260:125.0" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0743, 0.0015, -0.2483), face = Vector3.new(0.0092, 0.355, 0.9348), length = 0.0494, scale = "0:-125.0,8000:125.0" },
+	},
+	brabos_g63 = { -- Brabus G63 (screen dials)
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0921, 0.0647, -0.2335), face = Vector3.new(-0.0011, 0.2758, 0.9612), length = 0.0435, scale = "0:-125.2,150:5.8,300:122.8" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0698, 0.0673, -0.2341), face = Vector3.new(-0.0012, 0.2757, 0.9613), length = 0.0422, scale = "0:-127.7,4000:-0.9,8000:124.6" },
+	},
+	ferrara_599 = { -- 599 (its own cluster, like the owner's photo)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0093, 0.0332, -0.2044), face = Vector3.new(-0, 0.3732, 0.9278), length = 0.0362, scale = "0:-179.4,5000:-46.3,10000:74.1" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.1007, 0.0333, -0.2044), face = Vector3.new(-0, 0.3734, 0.9277), length = 0.0333, scale = "0:176.2,170:316.2,350:470.8" },
+	},
+	lambrini_lp700 = { -- LP700 (screen rev counter and the speed read-out)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0174, 0.081, -0.2818), face = Vector3.new(-0.0175, 0.1158, 0.9931), length = 0.043, scale = "0:-140.0,4000:-53.6,8000:66.6" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0057, 0.0508, -0.2783), face = Vector3.new(-0.0382, 0.1157, 0.9925), length = 0.0404, scale = "" },
+	},
+	mazdo_rx8 = { -- RX-8 (rev counter and the speed read-out)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0021, 0.0463, -0.2049), face = Vector3.new(0, 0.18, 0.9837), length = 0.043, scale = "0:178.5,1000:201.4,4000:269.9,7000:347.7,10000:424.0" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0286, 0.0321, -0.2023), face = Vector3.new(0, 0.18, 0.9837), length = 0.0242, scale = "" },
+	},
+	nisun_gtr = { -- GT-R
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0881, 0.0233, -0.2101), face = Vector3.new(-0.0032, 0.2483, 0.9687), length = 0.0331, scale = "0:125.2,100:253.0,220:406.0" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0009, 0.0267, -0.2107), face = Vector3.new(-0.0009, 0.2484, 0.9687), length = 0.0392, scale = "0:-134.5,4000:-30.1,8000:69.5" },
+	},
+	nisun_r34 = {
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0541, 0.0125, -0.1938), face = Vector3.new(0, 0.314, 0.949), length = 0.047, scale = "0:-125.6,180:125.6" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0656, 0.0126, -0.1935), face = Vector3.new(0, 0.314, 0.949), length = 0.047, scale = "0:-125.7,3000:-85.2,10000:125.3" },
+	},
+	porsha_boxster = { -- Boxster (labels too blurry to read: an even 243 degree sweep)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0008, 0.0489, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), length = 0.0432, scale = "0:-122.0,8000:121.0" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0894, 0.0323, -0.2277), face = Vector3.new(-0.0042, 0.2663, 0.9639), length = 0.0346, scale = "0:-122.0,300:121.0" },
+	},
+	toyoka_lc300 = { -- Land Cruzer 300
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0853, 0.0288, -0.266), face = Vector3.new(0.0001, 0.1741, 0.9847), length = 0.0394, scale = "0:-110.9,4000:19.8,7000:119.7" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.091, 0.03, -0.2662), face = Vector3.new(-0.0001, 0.1735, 0.9848), length = 0.0385, scale = "0:-113.0,140:-6.8,260:96.0" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0041, 0.0646, -0.2678), face = Vector3.new(0.0007, 0.174, 0.9848), length = 0.0131, scale = "" },
+	},
+} :: { [string]: { DialSpec } }
 
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
 -- driver's eye; rear: how far behind the eye the swap reaches (studs: front seats only, or rear too)
 CarSkin.INTERIOR_DONOR = {
 	porsha_gt3 = { from = "porsha_panamera", rear = 1.8 },
+	-- owner (2026-10-13): the M3 F80 and M4 F82 files' own cabins look bad; the M3 E92's goes in
+	bnw_m3_f80 = { from = "bnw_m3_e92", rear = 1.8 },
+	bnw_m4_f82 = { from = "bnw_m3_e92", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
 
 -- cars that take only another model's steering wheel, put where their own one sits
@@ -1371,7 +1426,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		-- live instrument cluster on the car's own gauge spot, when it has no working gauges of its own
 		-- (cars with their own design here, like the Ferrari, always get it)
 		local ownDesign = CarSkin.CLUSTER_STYLE[id] ~= nil
-		if imported.cluster and imported.clusterSize and not liteMode and (ownDesign or not imported.ownGauges) then
+		local dials = CarSkin.DIAL_NEEDLES[id]
+		if imported.cluster and imported.clusterSize and not liteMode and not dials and (ownDesign or not imported.ownGauges) then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
 			cluster.Size = Vector3.new(imported.clusterSize.X, imported.clusterSize.Y, 0.02)
@@ -1396,6 +1452,104 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			cluster:SetAttribute("Style", CarSkin.CLUSTER_STYLE[id] or (if id:sub(1, 8) == "lambrini" then "Lambo" else "Modern"))
 			if ownDesign then
 				model:SetAttribute("OwnCluster", true) -- the model's own gauge screens stay off
+			end
+		end
+		-- live needles on the car's own dials: a lit red needle and a dark hub cap on a see-through
+		-- panel just in front of each dial face (Driving turns the needles)
+		if dials and imported.steer and not liteMode then
+			local m = CarBuilder.STUDS_PER_METRE
+			for i, dl in dials do
+				local face = dl.face.Unit
+				local up = (Vector3.yAxis - face * face.Y).Unit
+				local pos = imported.steer.mount.Position + dl.at * m + face * 0.002 * m
+				local digits = dl.kind == "digits"
+				local size = if digits then dl.length * m else dl.length * 2.3 * m
+				local p = Instance.new("Part")
+				p.Name = "DialPanel" .. i
+				p.Size = if digits then Vector3.new(size, size * 0.45, 0.01) else Vector3.new(size, size, 0.01)
+				p.Transparency = 1
+				p.CanCollide = false
+				p.CanQuery = false
+				p.CanTouch = false
+				p.Massless = true
+				p.CastShadow = false
+				p.CFrame = groundCF * CFrame.lookAt(pos, pos - face, up) -- back face looks at the driver
+				p.Parent = skin
+				local w = Instance.new("WeldConstraint")
+				w.Part0 = root
+				w.Part1 = p
+				w.Parent = p
+				local sg = Instance.new("SurfaceGui")
+				sg.Face = Enum.NormalId.Back
+				sg.LightInfluence = 1
+				sg.MaxDistance = 40
+				sg.Parent = p
+				if digits then
+					-- the speed in the dial's own unit, like the car's display (Driving fills it in)
+					sg.CanvasSize = Vector2.new(200, 90)
+					local label = Instance.new("TextLabel")
+					label.Name = "Speed"
+					label.BackgroundTransparency = 1
+					label.Size = UDim2.fromScale(1, 1)
+					label.Font = Enum.Font.GothamBold
+					label.TextScaled = true
+					label.TextColor3 = Color3.fromRGB(235, 240, 255)
+					label.TextXAlignment = Enum.TextXAlignment.Right
+					label.Text = "0"
+					label:SetAttribute("GaugeUnit", dl.unit)
+					label.Parent = sg
+					continue
+				end
+				-- the dial's numbers lit from just in front of it while the engine runs (Driving)
+				local glow = Instance.new("SurfaceLight")
+				glow.Name = "DialLight"
+				glow.Face = Enum.NormalId.Front -- towards the dial face
+				glow.Range = dl.length * 2.5 * m
+				glow.Angle = 120
+				glow.Brightness = 2
+				glow.Color = Color3.fromRGB(255, 244, 228)
+				glow.Shadows = false
+				glow.Enabled = false
+				glow.Parent = p
+				-- 230 px across: 100 px is one needle length
+				sg.CanvasSize = Vector2.new(230, 230)
+				-- the needle turns about its own middle, which sits on the hub: it runs 100 px up to
+				-- the tip, and of the lower half only a 22 px tail shows
+				local needle = Instance.new("Frame")
+				needle.Name = "DialNeedle"
+				needle.BorderSizePixel = 0
+				needle.BackgroundColor3 = Color3.fromRGB(255, 52, 30)
+				needle.AnchorPoint = Vector2.new(0.5, 0.5)
+				needle.Position = UDim2.fromScale(0.5, 0.5)
+				needle.Size = UDim2.fromOffset(7, 200)
+				needle.Rotation = -125
+				needle:SetAttribute("GaugeKind", dl.kind)
+				needle:SetAttribute("GaugeUnit", dl.unit)
+				needle:SetAttribute("GaugeScale", dl.scale)
+				needle.Parent = sg
+				local fade = Instance.new("UIGradient")
+				fade.Rotation = 90 -- top to bottom
+				fade.Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0),
+					NumberSequenceKeypoint.new(0.61, 0),
+					NumberSequenceKeypoint.new(0.615, 1),
+					NumberSequenceKeypoint.new(1, 1),
+				})
+				fade.Parent = needle
+				local corner = Instance.new("UICorner")
+				corner.CornerRadius = UDim.new(0.5, 0)
+				corner.Parent = needle
+				local cap = Instance.new("Frame")
+				cap.BorderSizePixel = 0
+				cap.BackgroundColor3 = Color3.fromRGB(24, 24, 26)
+				cap.AnchorPoint = Vector2.new(0.5, 0.5)
+				cap.Position = UDim2.fromScale(0.5, 0.5)
+				cap.Size = UDim2.fromOffset(46, 46)
+				cap.ZIndex = 2
+				cap.Parent = sg
+				local round = Instance.new("UICorner")
+				round.CornerRadius = UDim.new(0.5, 0)
+				round.Parent = cap
 			end
 		end
 		-- the camera sits at the model's own driver's seat

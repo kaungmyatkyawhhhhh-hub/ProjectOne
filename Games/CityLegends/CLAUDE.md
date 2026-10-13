@@ -48,6 +48,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
     - Meshes that get thinned out are welded at their seams first; otherwise glossy paint comes out crumpled.
     - Parts coloured by vertex colour (Studio drops those, the car comes in white) are split by colour, each with a plain colour.
     - When the steering wheel pick is wrong, set `DEBUG = True` to print the candidates, and pass the right one as a hint: `{"steer": [side, up, along], "tilt": 23}` (metres, as printed). A wheel that leans far back is often centred a few cm too far forward; plotting the points around it from the side shows the real centre and tilt.
+  - `dial_probe.py` + `dial_fit.py`: live needles on a converted car's own dials (`CarSkin.DIAL_NEEDLES`). Probe a render pixel to find the dial texture, read the hub, two or three labels and the painted needle in texture pixels, then fit: it prints the table entry and paints the old needle out of the texture (the car then needs a new Import 3D). Check by drawing needles at 0 and at the top in a render.
   - `pack_cars.py out.fbx id=car.blend ...`: several converted cars in one FBX, one group per car id, for a single Import 3D.
   - `take_cars.luau <place> <ids...>` (Lune, from `Games/CityLegends`): copies imported cars from the owner's saved place into `assets/CarModels.rbxm`. It takes off Blender's `.001` name endings and makes the windows two-sided.
 
