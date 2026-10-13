@@ -13,7 +13,7 @@ Roblox's discovery ranks games on **engagement**, not on art or ad spend alone. 
 | Click-through (impressions → plays) | Does the icon make people click? | new icon, not measured yet | 5%+ |
 | **Day 1 retention** | % of new players who come back the next day | **0%** (2026-10-12) | 15% first, then 25%+ |
 | Day 7 retention | % still playing a week later | – | 5%+ |
-| Average session length | minutes per visit | – | 15+ min |
+| Average session length | minutes per visit | **1.4 min** (2026-10-13) | 15+ min |
 | Like ratio | 👍 / (👍+👎) | – | 85%+ (trending games are 90–97%) |
 | Concurrent players | players online at once | – | steady growth day over day |
 
@@ -71,3 +71,18 @@ RELEASE • BREAKABED • MYANMAR (group members)
 
 🔄 New update every week!
 ```
+
+## Problem found (2026-10-13): average session is only 1.4 minutes
+Most players leave in the first minute, before the game's fun starts (the first bed break, gifts, quests). Find out *where* before changing more:
+1. **Date range:** check whether the 1.4 min is mostly from before today's update (Analytics → set the range to after the publish).
+2. **Funnel:** Onboarding funnel step counts: joined → first punch → 10 punches → first bed → Wooden Post. The step with the biggest drop is the problem.
+3. **Device split:** session time on phone vs PC. Much lower on phone = phone UI/lag problem.
+4. **Traffic source:** ad players vs others. Ads to "All players" bring many who leave in seconds; that alone pulls the average down.
+5. **Load time:** how long until a player can move and punch, on a low-end phone.
+
+Likely fixes, depending on what the data shows:
+- **Spawn next to the Straw Post** with the guide already pointing at it, so the first punch happens in under 10 s.
+- **Fun in the first 30 s:** first bed break within 30 s (a cheap Cardboard Bed right by spawn), big effects and cash.
+- **Nothing blocking at join:** no pop-ups before the first bed break (already the rule; double-check on phones).
+- **Load faster:** preload only what the first minute needs; stream in the rest.
+- **Performance on phones:** Low Graphics on by default for low-end devices; check FPS with many players.
