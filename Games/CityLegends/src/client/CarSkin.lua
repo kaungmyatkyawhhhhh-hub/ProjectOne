@@ -356,6 +356,14 @@ local function visualClone(d: BasePart, scale: number): BasePart
 end
 
 function readGeneric(src: Instance, dims: { [string]: number }): Imported
+	-- several cars imported from one file carry Blender's ".001" name endings (Wheels.001, FL.001,
+	-- SteeringWheel_t21.001): take them off so the names below are found
+	for _, d in src:GetDescendants() do
+		local base = d.Name:match("^(.-)%.%d%d%d$")
+		if base and base ~= "" then
+			d.Name = base
+		end
+	end
 	-- the model's steering wheel: an "SW" group (A-Chassis) or anything named steering wheel
 	local steerRoots: { Instance } = {}
 	local function isSteerName(n: string): boolean
