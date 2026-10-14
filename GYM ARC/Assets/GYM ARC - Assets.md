@@ -204,3 +204,13 @@ Studio can only upload to the owner's account. These work in the game; to use gr
 | Image | Asset ID | Note |
 |---|---|---|
 | backpack (INVENTORY tile) | 101113089317721 | uploaded from Studio (owner's own inventory); search_asset found no group copy |
+
+## Aura VFX v3 textures (14 Oct, uploaded from Studio: owner's own inventory)
+| Texture | Asset ID |
+|---|---|
+| rim_glow | 138347218007327 |
+| wisp_flipbook_4x4 (1024, 4x4) | 136758735885193 |
+| lightning_flipbook_4x4 (1024, 4x4) | 80590302550492 |
+| smoke_shaded_4x4 (1024, 4x4) | 113405238797101 |
+| ember_dot | 76009392745145 |
+| droplet | 137490039482038 |

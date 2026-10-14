@@ -191,3 +191,4 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]])
 - Test purchases gave the owner's own save 60 minutes of Endless Stamina.
 - Aura effects v2 (the owner's updated module) is in, with 24 screenshots in [[GYM ARC - Aura]].
 - Titles became the Inventory window (Titles, Auras, Items), and card text now always fits. See [[GYM ARC - Titles]] and [[GYM ARC - UI System]]. Screenshots still to take (Studio's Play got stuck).
+- Aura effects v3 (body-hugging) is in, with 53 screenshots in [[GYM ARC - Aura]].

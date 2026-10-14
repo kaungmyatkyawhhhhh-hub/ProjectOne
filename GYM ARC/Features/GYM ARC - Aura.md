@@ -133,3 +133,27 @@ Previous version (the 3-layer particle aura built in AuraClient) is replaced.
 | Shadow | ![[GYM ARC/Screenshots/auras_v3_shadow_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_shadow_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_shadow_bench.jpg]] |
 
 For comparison, the bench with no aura (the pale skin is the bench light): ![[GYM ARC/Screenshots/auras_v3_no_aura_bench_for_comparison.jpg]]
+
+## Effects v3: body-hugging (14 Oct)
+The owner's third module. The effect now comes off the body itself (the 10 biggest body parts, muscles included): a soft rim glow on every aura, plus flames (Ember, Titan, Inferno), lightning (Storm, Neon), thick smoke (Void, Toxic, Shadow), glow and wisps (Frost, Golden, Galaxy, Royal) or red mist with drops (Blood Moon).
+- The aura is rebuilt when the body changes (muscles loading, a new muscle stage, a Growth Spurt), so it keeps hugging the new shape.
+- Six new textures (see [[GYM ARC - Assets]]); nothing from the older versions is left.
+- Frame rate: Studio runs at about 15 fps while it is remote-controlled, with or without auras, so there is no real phone number. Ten NPCs with full-power auras made no measurable difference (about 40 particle emitters per body).
+
+| Aura | Idle front | Full front | Idle side | Full side |
+|---|---|---|---|---|
+| Inferno | ![[GYM ARC/Screenshots/auras_v4_inferno_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_inferno_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_inferno_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_inferno_full_side.jpg]] |
+| Storm | ![[GYM ARC/Screenshots/auras_v4_storm_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_storm_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_storm_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_storm_full_side.jpg]] |
+| Void | ![[GYM ARC/Screenshots/auras_v4_void_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_void_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_void_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_void_full_side.jpg]] |
+| Toxic | ![[GYM ARC/Screenshots/auras_v4_toxic_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_toxic_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_toxic_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_toxic_full_side.jpg]] |
+| Golden | ![[GYM ARC/Screenshots/auras_v4_golden_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_golden_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_golden_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_golden_full_side.jpg]] |
+| Royal | ![[GYM ARC/Screenshots/auras_v4_royal_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_royal_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_royal_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_royal_full_side.jpg]] |
+| Neon | ![[GYM ARC/Screenshots/auras_v4_neon_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_neon_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_neon_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_neon_full_side.jpg]] |
+| Shadow | ![[GYM ARC/Screenshots/auras_v4_shadow_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_shadow_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_shadow_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_shadow_full_side.jpg]] |
+| Ember | ![[GYM ARC/Screenshots/auras_v4_ember_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_ember_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_ember_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_ember_full_side.jpg]] |
+| Frost | ![[GYM ARC/Screenshots/auras_v4_frost_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_frost_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_frost_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_frost_full_side.jpg]] |
+| Titan | ![[GYM ARC/Screenshots/auras_v4_titan_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_titan_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_titan_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_titan_full_side.jpg]] |
+| Blood Moon | ![[GYM ARC/Screenshots/auras_v4_bloodmoon_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_bloodmoon_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_bloodmoon_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_bloodmoon_full_side.jpg]] |
+| Galaxy | ![[GYM ARC/Screenshots/auras_v4_galaxy_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_galaxy_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_galaxy_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_galaxy_full_side.jpg]] |
+
+While benching: ![[GYM ARC/Screenshots/auras_v4_inferno_bench.jpg]]
