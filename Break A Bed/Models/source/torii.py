@@ -10,7 +10,7 @@ def torii():
         pil.append(loft([V(s*half, 0, 0), V(s*half, 1.2, 0)], [0.95, 0.9], seg=20, smooth=False, samples=4))
     parts["Pillars"] = pil[0::2]; parts["Bases"] = pil[1::2]
     # nuki: lower tie beam, rectangular, sticking out past pillars
-    nuki = trimesh.creation.box((2*half+3.2, 0.9, 0.6)); nuki.apply_translation((0, H-3.4, 0))
+    nuki = box((2*half+3.2, 0.9, 0.6), (0, H-3.4, 0))
     parts["Nuki"] = [nuki]
     # shimaki + kasagi: top beams, curving up at ends
     xs = np.linspace(-(half+3.0), half+3.0, 41)
@@ -23,8 +23,8 @@ def torii():
     kasagi.apply_scale((1, 1, 1.6))
     parts["TopBeam"] = [shimaki]; parts["Roof"] = [kasagi]
     # gakuzuka strut + plaque
-    strut = trimesh.creation.box((0.6, 1.4, 0.5)); strut.apply_translation((0, H-2.3, 0))
-    plaque = trimesh.creation.box((3.6, 2.2, 0.35)); plaque.apply_translation((0, H-1.8, -0.35))
-    frame = trimesh.creation.box((4.0, 2.6, 0.25)); frame.apply_translation((0, H-1.8, -0.2))
+    strut = box((0.6, 1.4, 0.5), (0, H-2.3, 0))
+    plaque = box((3.6, 2.2, 0.35), (0, H-1.8, -0.35))
+    frame = box((4.0, 2.6, 0.25), (0, H-1.8, -0.2))
     parts["Strut"] = [strut]; parts["PlaqueFrame"] = [frame]; parts["Plaque"] = [plaque]
     return parts

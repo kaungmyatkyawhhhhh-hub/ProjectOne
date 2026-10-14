@@ -43,31 +43,64 @@ def loft(path, radii, seg=16, up=(0, 1, 0), samples=40, smooth=True, cap=True):
     rx = np.interp(s, s_ctrl, r[:, 0]); ry = np.interp(s, s_ctrl, r[:, 1])
     return tube(P, rx, ry, seg, up, cap)
 
-def tube(P, rx, ry, seg=16, up=(0, 1, 0), cap=True):
-    T, N, B = frames(P, up)
-    a = np.linspace(0, 2*np.pi, seg, endpoint=False)
-    verts = (P[:, None, :] + rx[:, None, None]*np.cos(a)[None, :, None]*B[:, None, :]
-             + ry[:, None, None]*np.sin(a)[None, :, None]*N[:, None, :]).reshape(-1, 3)
-    n = len(P); f = []
-    for i in range(n-1):
-        for j in range(seg):
-            a0 = i*seg+j; a1 = i*seg+(j+1) % seg; b0 = a0+seg; b1 = a1+seg
-            f += [[a0, b0, b1], [a0, b1, a1]]
-    verts = list(verts)
-    if cap:
-        c0 = len(verts); verts.append(P[0]); c1 = len(verts); verts.append(P[-1])
-        for j in range(seg):
-            f.append([c0, (j+1) % seg, j])
-            f.append([c1, (n-1)*seg+j, (n-1)*seg+(j+1) % seg])
-    m = trimesh.Trimesh(np.array(verts), np.array(f), process=True)
-    trimesh.repair.fix_normals(m)
+def mk(verts, faces, uv):
+    m = trimesh.Trimesh(np.asarray(verts, float), np.asarray(faces), process=False)
+    m.metadata["uv"] = np.asarray(uv, float)
     return m
 
-def ellipsoid(c, r, R=None, sub=3):
-    m = trimesh.creation.icosphere(subdivisions=sub)
-    m.apply_scale(r)
+def tube(P, rx, ry, seg=16, up=(0, 1, 0), cap=True):
+    T, N, B = frames(P, up)
+    a = np.linspace(0, 2*np.pi, seg+1)
+    verts = (P[:, None, :] + rx[:, None, None]*np.cos(a)[None, :, None]*B[:, None, :]
+             + ry[:, None, None]*np.sin(a)[None, :, None]*N[:, None, :]).reshape(-1, 3)
+    n = len(P); W = seg+1
+    d = np.r_[0, np.cumsum(np.linalg.norm(np.diff(P, axis=0), axis=1))]; u = d/max(d[-1], 1e-9)
+    uv = np.stack([np.repeat(u, W), np.tile(np.linspace(0, 1, W), n)], 1)
+    f = []
+    for i in range(n-1):
+        for j in range(seg):
+            a0 = i*W+j; a1 = a0+1; b0 = a0+W; b1 = a1+W
+            f += [[a0, b0, b1], [a0, b1, a1]]
+    verts = list(verts); uv = list(uv)
+    if cap:
+        c0 = len(verts); verts.append(P[0]); uv.append((0.0, 0.25))
+        c1 = len(verts); verts.append(P[-1]); uv.append((1.0, 0.25))
+        for j in range(seg):
+            f.append([c0, j+1, j])
+            f.append([c1, (n-1)*W+j, (n-1)*W+j+1])
+    m = mk(verts, f, uv)
+    # outward winding check: compare normal with radial direction on first quad
+    c = m.triangles_center[0]; nn = m.face_normals[0]
+    if np.dot(nn, c - P[0]) < 0 and np.dot(nn, c - P[min(1, n-1)]) < 0:
+        m.faces = m.faces[:, ::-1]
+    return m
+
+def ellipsoid(c, r, R=None, sub=3, nu=28, nv=16):
+    th = np.linspace(0, np.pi, nv+1); ph = np.linspace(0, 2*np.pi, nu+1)
+    verts = []; uv = []
+    for i, t in enumerate(th):
+        for j, p in enumerate(ph):
+            verts.append([np.sin(t)*np.cos(p)*r[0], np.cos(t)*r[1], np.sin(t)*np.sin(p)*r[2]])
+            uv.append([j/nu, 1-i/nv])
+    W = nu+1; f = []
+    for i in range(nv):
+        for j in range(nu):
+            a = i*W+j; b = a+W
+            f += [[a, a+1, b+1], [a, b+1, b]]
+    m = mk(verts, f, uv)
+    if np.dot(m.face_normals[nu+3], m.triangles_center[nu+3]) < 0: m.faces = m.faces[:, ::-1]
     if R is not None: m.apply_transform(R)
     m.apply_translation(c); return m
+
+def box(size, center=(0, 0, 0)):
+    m = trimesh.creation.box(size)
+    m = trimesh.Trimesh(m.vertices[m.faces].reshape(-1, 3), np.arange(len(m.faces)*3).reshape(-1, 3), process=False)
+    v = m.vertices; n = np.repeat(m.face_normals, 3, axis=0); uv = np.zeros((len(v), 2))
+    ax = np.abs(n).argmax(1); sz = np.array(size)
+    for k in range(3):
+        sel = ax == k; o = [i for i in range(3) if i != k]
+        uv[sel, 0] = v[sel, o[0]]/sz[o[0]] + 0.5; uv[sel, 1] = v[sel, o[1]]/sz[o[1]] + 0.5
+    m.metadata["uv"] = uv; m.apply_translation(center); return m
 
 def leaf(path, width, thick=0.08, up=(0, 1, 0), seg=10, samples=24, shape=0.8, tipw=0.0):
     """flat pointed blade: width lies along B (perp to up and the path)."""
@@ -78,25 +111,27 @@ def leaf(path, width, thick=0.08, up=(0, 1, 0), seg=10, samples=24, shape=0.8, t
     return tube(P, w, np.full_like(w, thick), seg, up)
 
 def sheet(grid, thick=0.06):
-    """grid: (nu, nv, 3) surface -> thin closed slab (both sides)."""
     g = np.asarray(grid, float); nu, nv, _ = g.shape
     du = np.gradient(g, axis=0); dv = np.gradient(g, axis=1)
     nn = nrm(np.cross(du, dv))
     top = (g + nn*thick/2).reshape(-1, 3); bot = (g - nn*thick/2).reshape(-1, 3)
-    verts = np.vstack([top, bot]); off = nu*nv; f = []
+    verts = np.vstack([top, bot]); off = nu*nv
+    U, Vv = np.meshgrid(np.linspace(0, 1, nu), np.linspace(0, 1, nv), indexing="ij")
+    uv1 = np.stack([U.ravel(), Vv.ravel()], 1); uv = np.vstack([uv1, uv1])
+    f = []
     idx = lambda i, j: i*nv+j
     for i in range(nu-1):
         for j in range(nv-1):
             a, b, c, d = idx(i, j), idx(i+1, j), idx(i+1, j+1), idx(i, j+1)
             f += [[a, b, c], [a, c, d], [a+off, c+off, b+off], [a+off, d+off, c+off]]
-    # close the rim
     rim = [idx(i, 0) for i in range(nu)] + [idx(nu-1, j) for j in range(1, nv)] + \
           [idx(i, nv-1) for i in range(nu-2, -1, -1)] + [idx(0, j) for j in range(nv-2, 0, -1)]
     for k in range(len(rim)):
         a = rim[k]; b = rim[(k+1) % len(rim)]
         f += [[a, b, b+off], [a, b+off, a+off]]
-    m = trimesh.Trimesh(verts, np.array(f), process=True)
-    trimesh.repair.fix_normals(m); return m
+    m = mk(verts, f, uv)
+    if np.dot(m.face_normals[0], nn[0, 0]) < 0: m.faces = m.faces[:, ::-1]
+    return m
 
 def cone(base, tip, r, seg=12, up=(0, 1, 0)):
     return loft([base, tip], [r, 0.01], seg=seg, up=up, smooth=False, samples=8)
@@ -115,7 +150,7 @@ def look(fwd, up=(0, 1, 0)):
 def place(meshes, R=None, t=(0, 0, 0)):
     out = []
     for m in meshes:
-        m = m.copy()
+        uv = m.metadata.get("uv"); m = m.copy(); m.metadata["uv"] = uv
         if R is not None: m.apply_transform(R)
         m.apply_translation(t); out.append(m)
     return out

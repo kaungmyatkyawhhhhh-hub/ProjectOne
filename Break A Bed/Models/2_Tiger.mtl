@@ -1,0 +1,27 @@
+newmtl Body
+Kd 1 1 1
+map_Kd 2_Tiger_textures/Body.png
+
+newmtl Head
+Kd 1 1 1
+map_Kd 2_Tiger_textures/Head.png
+
+newmtl Nose
+Kd 1 1 1
+map_Kd 2_Tiger_textures/Nose.png
+
+newmtl Fangs
+Kd 1 1 1
+map_Kd 2_Tiger_textures/Fangs.png
+
+newmtl Eyes
+Kd 1 1 1
+map_Kd 2_Tiger_textures/Eyes.png
+
+newmtl Legs
+Kd 1 1 1
+map_Kd 2_Tiger_textures/Legs.png
+
+newmtl Tail
+Kd 1 1 1
+map_Kd 2_Tiger_textures/Tail.png

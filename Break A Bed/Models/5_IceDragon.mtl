@@ -1,0 +1,31 @@
+newmtl Body
+Kd 1 1 1
+map_Kd 5_IceDragon_textures/Body.png
+
+newmtl Head
+Kd 1 1 1
+map_Kd 5_IceDragon_textures/Head.png
+
+newmtl Horns
+Kd 1 1 1
+map_Kd 5_IceDragon_textures/Horns.png
+
+newmtl Eyes
+Kd 1 1 1
+map_Kd 5_IceDragon_textures/Eyes.png
+
+newmtl WingR
+Kd 1 1 1
+map_Kd 5_IceDragon_textures/WingR.png
+
+newmtl WingL
+Kd 1 1 1
+map_Kd 5_IceDragon_textures/WingL.png
+
+newmtl Crystals
+Kd 1 1 1
+map_Kd 5_IceDragon_textures/Crystals.png
+
+newmtl Legs
+Kd 1 1 1
+map_Kd 5_IceDragon_textures/Legs.png

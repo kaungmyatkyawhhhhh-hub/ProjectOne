@@ -1,0 +1,31 @@
+newmtl Body
+Kd 1 1 1
+map_Kd 4_GoldDragon_textures/Body.png
+
+newmtl Spines
+Kd 1 1 1
+map_Kd 4_GoldDragon_textures/Spines.png
+
+newmtl Legs
+Kd 1 1 1
+map_Kd 4_GoldDragon_textures/Legs.png
+
+newmtl Head
+Kd 1 1 1
+map_Kd 4_GoldDragon_textures/Head.png
+
+newmtl Horns
+Kd 1 1 1
+map_Kd 4_GoldDragon_textures/Horns.png
+
+newmtl Whiskers
+Kd 1 1 1
+map_Kd 4_GoldDragon_textures/Whiskers.png
+
+newmtl Eyes
+Kd 1 1 1
+map_Kd 4_GoldDragon_textures/Eyes.png
+
+newmtl TailTip
+Kd 1 1 1
+map_Kd 4_GoldDragon_textures/TailTip.png

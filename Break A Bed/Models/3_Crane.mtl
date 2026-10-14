@@ -1,0 +1,35 @@
+newmtl Body
+Kd 1 1 1
+map_Kd 3_Crane_textures/Body.png
+
+newmtl Head
+Kd 1 1 1
+map_Kd 3_Crane_textures/Head.png
+
+newmtl Crown
+Kd 1 1 1
+map_Kd 3_Crane_textures/Crown.png
+
+newmtl Beak
+Kd 1 1 1
+map_Kd 3_Crane_textures/Beak.png
+
+newmtl Eyes
+Kd 1 1 1
+map_Kd 3_Crane_textures/Eyes.png
+
+newmtl WingR
+Kd 1 1 1
+map_Kd 3_Crane_textures/WingR.png
+
+newmtl WingL
+Kd 1 1 1
+map_Kd 3_Crane_textures/WingL.png
+
+newmtl Legs
+Kd 1 1 1
+map_Kd 3_Crane_textures/Legs.png
+
+newmtl Tail
+Kd 1 1 1
+map_Kd 3_Crane_textures/Tail.png
