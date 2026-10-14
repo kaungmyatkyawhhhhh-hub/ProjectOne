@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 tags: [gymarc, feature, performance]
-status: in progress
+status: done (owner: streaming radius setting)
 aliases: [GYM ARC Performance, Culling and LOD, Streaming]
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
@@ -36,5 +36,15 @@ Before, then after:
 ![[GYM ARC/Screenshots/performance_scene_before.jpg]]
 ![[GYM ARC/Screenshots/performance_scene_after_lod.jpg]]
 
-## Step 3: instance streaming
-To do.
+## Step 3: instance streaming (done, one setting left for the owner)
+- Streaming was already on. Each machine, NPC, arm wrestling table, the posing stage and the smoothie bars now load as one whole piece when you come near (never half), and leave when you're far. Only the spawn area (starter gym, entrance, gym front) is always loaded.
+- Every player-side script was checked so nothing breaks when something isn't loaded yet or leaves: the pro gym door, the machines, the mirror, the tutorial's guide path, the machine signs, the rival tags and the arm wrestling tables were fixed.
+- Before the server moves a player out of the locked pro gym, it makes sure the spot is loaded on their device.
+- **Owner to do (Studio, Properties panel; scripts can't change these):** select Workspace, then under Streaming set StreamingTargetRadius 256, StreamingMinRadius 64, StreamOutBehavior Opportunistic, StreamingIntegrityMode PauseOutsideLoadedArea. Until then the whole map still loads at once.
+- Tested: machines in the starter gym, pro gym and beach gym (sit, HUD, REP), both arm tables, the posing stage, the smoothie bars, the mirror, the pro gym door; no errors.
+
+## Before and after (same view)
+- Before: about 27-41 frames a second, the slowest frame up to 142 ms, about 250 draw calls, 1.78 million triangles.
+- After all three steps: about 36-48 frames a second, the slowest frame 31-84 ms, about 150-190 draw calls, 0.5-1.2 million triangles (it moves as the regulars walk in and out of range).
+- Next big lever: the gym's many lights that cast shadows (about 600-700 shadow draw calls).
+![[GYM ARC/Screenshots/performance_scene_after_all.jpg]]

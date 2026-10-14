@@ -163,3 +163,6 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - Lifting HUD, top bar, Physique, l
 ![[GYM ARC/Screenshots/stats_overlay_before.jpg]]
 ![[GYM ARC/Screenshots/stats_overlay_phone_still.jpg]]
 ![[GYM ARC/Screenshots/stats_overlay_phone_walking.jpg]]
+
+## 15. Performance: culling, LOD, streaming
+Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]]). All three steps are done; see [[GYM ARC - Performance]] for what changed, the before / after numbers and the one Studio setting the owner still has to set (the streaming radius).
