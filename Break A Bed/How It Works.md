@@ -169,6 +169,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - It must look right on **phone landscape and PC**, and the health panel, "Next" bar and EXIT must not cover the character or the bed.
 
 ## Training and breaking feel, like the reference game (owner, 2026-10-14)
+**Built 2026-10-15**, see [[Break A Bed/2026-10-15|2026-10-15]] (also the two sections below).
 The owner sent screenshots of a reference game and wants ours to feel like it. Art and sound are in `Models/juice/` (made by Claude): `bicep.png`, `cube_x2/x3/x5.png`, `cash_bill.png`, `cash_stack_hex.png`, `pieces_break.ogg`. Preview: ![[Models/juice/sheet.png]]
 
 ### Training
