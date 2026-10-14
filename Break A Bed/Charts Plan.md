@@ -134,4 +134,10 @@ Goal: "Stayed 10 min" from 31% to 45%+. Build in this order:
   2. **Too much free stuff.** Also on 10/12–13: 12 free gifts, the free/exclusive chest, the Free Gift x2 Strength, spins, codes, daily rewards, quests, OP Day 7, all giving boosts. Players who get x2/x3 boosts for free have little reason to buy them.
   3. **Fewer buy moments.** The "Need more Strength?" offer at a locked bed was replaced on 10/13 by BREAK IT only when the prompt is used.
   4. Traffic and the Ages 16+ limit (see [[Break A Bed/Ads|Ads]]).
+- **Tested (owner, 2026-10-14):** a real purchase in the live game works, so suspect 1 is ruled out. Next: make free boosts weaker than paid ones.
+- **Free vs paid boosts plan (2026-10-14):**
+  - Free rewards (gifts, chests, spins, codes, daily, quests) give **only x2** boosts, at most 15 min each. **x3 and higher are only sold.** Swap some free boosts for Cash/Strength rewards.
+  - Paid boosts **stack on top of** a running free x2, so a free boost never makes a purchase pointless.
+  - When a free boost runs out: one small toast "Boost ended! Get x3 for 15 min" with a BUY button. At most once every 20 min.
+  - In the shop's BOOSTS tab, show "FREE x2 → BUY x5" so the paid one looks clearly better.
 
