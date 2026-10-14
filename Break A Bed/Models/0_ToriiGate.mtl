@@ -1,0 +1,31 @@
+newmtl Pillars
+Kd 1 1 1
+map_Kd 0_ToriiGate_textures/Pillars.png
+
+newmtl Bases
+Kd 1 1 1
+map_Kd 0_ToriiGate_textures/Bases.png
+
+newmtl Nuki
+Kd 1 1 1
+map_Kd 0_ToriiGate_textures/Nuki.png
+
+newmtl TopBeam
+Kd 1 1 1
+map_Kd 0_ToriiGate_textures/TopBeam.png
+
+newmtl Roof
+Kd 1 1 1
+map_Kd 0_ToriiGate_textures/Roof.png
+
+newmtl Strut
+Kd 1 1 1
+map_Kd 0_ToriiGate_textures/Strut.png
+
+newmtl PlaqueFrame
+Kd 1 1 1
+map_Kd 0_ToriiGate_textures/PlaqueFrame.png
+
+newmtl Plaque
+Kd 1 1 1
+map_Kd 0_ToriiGate_textures/Plaque.png

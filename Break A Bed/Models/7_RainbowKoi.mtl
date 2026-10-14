@@ -1,0 +1,19 @@
+newmtl Body
+Kd 1 1 1
+map_Kd 7_RainbowKoi_textures/Body.png
+
+newmtl Eyes
+Kd 1 1 1
+map_Kd 7_RainbowKoi_textures/Eyes.png
+
+newmtl Barbels
+Kd 1 1 1
+map_Kd 7_RainbowKoi_textures/Barbels.png
+
+newmtl TailFin
+Kd 1 1 1
+map_Kd 7_RainbowKoi_textures/TailFin.png
+
+newmtl Fins
+Kd 1 1 1
+map_Kd 7_RainbowKoi_textures/Fins.png

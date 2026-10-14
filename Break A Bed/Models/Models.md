@@ -15,12 +15,14 @@ The owner asked for custom models, not Creator Store ones. They were generated w
 | `7_RainbowKoi` | rebirths 30–34 (use 3–5 copies) | Body, Head, TailFin, Fins |
 | `8_GalaxyDragon` | rebirths 35+ | Body, Spines, Legs, Head, TailTip |
 
-Each file comes as `.glb` and `.obj` (same model). Every part is under Roblox's 20k-triangle MeshPart limit.
+Each file comes as `.glb` (textures built in) and `.obj` + `.mtl` (textures in the `<name>_textures` folder, one 512x512 PNG per part). Every part is under Roblox's 20k-triangle MeshPart limit.
+
+**Textures (owner asked, 2026-10-14):** feathers with shafts and barbs (phoenix gold→orange, fire phoenix red→yellow flames, crane white with black wingtips), tiger fur with black stripes and a white belly, gold dragon scales with cream belly plates, ice dragon pale-blue scales with crystal wings and spikes, rainbow koi with colored patches and rainbow fins, galaxy dragon with a nebula and stars, red wood-grain torii with black parts and a gold "BELT TEST" plaque, plus eyes on every animal.
 
 ## How to bring them into the game
 1. In Studio: **Avatar/Model tab → Import 3D** (3D Importer), pick the `.glb` (or `.obj`). Keep the parts as separate MeshParts. Uncheck "Anchored" only for parts that must move.
 2. Put the imported models in `ReplicatedStorage.RebirthCreatures` (named Phoenix, Tiger, ...) and the gate in `ReplicatedStorage.Props.ToriiGate`.
 3. Set the parts up (they come in plain grey):
-   - **Creatures:** spirit look, see Content Plan section 11b "Creature quality": Material Neon or ForceField, ~0.3–0.5 transparent, tier color, a Highlight outline, Trails, ParticleEmitters, Beams and a PointLight. The Rainbow Koi cycles its color.
-   - **Torii gate:** Pillars, Nuki, TopBeam and Strut are vermilion red (#D8352A), SmoothPlastic. Bases and Roof are black (#1B1B1B). PlaqueFrame is black with gold edges, Plaque dark wood with "BELT TEST" (SurfaceGui, gold text).
+   - **Creatures:** keep the textures visible. Use Material **SmoothPlastic** (Neon and ForceField hide textures) with each part's PNG as `TextureID`, or a SurfaceAppearance ColorMap if the importer made one. For the spirit glow, use a **Highlight** in the tier color (FillTransparency ~0.75, OutlineTransparency 0), a PointLight inside, and the Trails, ParticleEmitters and Beams from Content Plan 11b. At the very end of the cutscene, fade the parts to transparent while they dissolve into particles.
+   - **Torii gate:** the textures already give it red wood grain, black bases and roof and the gold "BELT TEST" plaque. Use SmoothPlastic with the PNGs as TextureID. Only add the belt-color glow strip (a thin Neon part under the roof beam).
 4. Animate the moving parts (wings, tail, fins, legs) with tweens on Motor6Ds/WeldConstraints pivoted at the joint where each part meets the body.

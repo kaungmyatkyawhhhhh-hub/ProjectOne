@@ -1,0 +1,27 @@
+newmtl Body
+Kd 1 1 1
+map_Kd 8_GalaxyDragon_textures/Body.png
+
+newmtl Spines
+Kd 1 1 1
+map_Kd 8_GalaxyDragon_textures/Spines.png
+
+newmtl Legs
+Kd 1 1 1
+map_Kd 8_GalaxyDragon_textures/Legs.png
+
+newmtl Head
+Kd 1 1 1
+map_Kd 8_GalaxyDragon_textures/Head.png
+
+newmtl Horns
+Kd 1 1 1
+map_Kd 8_GalaxyDragon_textures/Horns.png
+
+newmtl Eyes
+Kd 1 1 1
+map_Kd 8_GalaxyDragon_textures/Eyes.png
+
+newmtl TailTip
+Kd 1 1 1
+map_Kd 8_GalaxyDragon_textures/TailTip.png

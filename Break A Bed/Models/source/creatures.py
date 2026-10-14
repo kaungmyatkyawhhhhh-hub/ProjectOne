@@ -34,8 +34,9 @@ def phoenix(flame=False):
     P = {}
     P["Body"] = [loft([V(0, -0.5, 3.5), V(0, 0, 1.5), V(0, 0.8, -1), V(0, 2.2, -3), V(0, 3.6, -4.2)],
                       [(0.5, 0.5), (1.5, 1.6), (1.4, 1.5), (0.7, 0.75), (0.6, 0.6)], seg=20)]
-    head = [ellipsoid(V(0, 4.1, -4.8), V(0.95, 1.0, 1.25)),
-            loft([V(0, 4.0, -5.8), V(0, 3.85, -6.6), V(0, 3.5, -7.2)], [(0.32, 0.3), (0.18, 0.18), 0.02], seg=12)]
+    head = [ellipsoid(V(0, 4.1, -4.8), V(0.95, 1.0, 1.25))]
+    P["Beak"] = [loft([V(0, 4.0, -5.8), V(0, 3.85, -6.6), V(0, 3.5, -7.2)], [(0.32, 0.3), (0.18, 0.18), 0.02], seg=12)]
+    P["Eyes"] = [ellipsoid(V(s*0.72, 4.35, -5.45), V(0.2, 0.2, 0.16)) for s in (1, -1)]
     for x, tip in [(0, V(0, 7.2, -3.0)), (0.5, V(0.9, 6.6, -2.6)), (-0.5, V(-0.9, 6.6, -2.6)), (0, V(0, 6.0, -1.8))]:
         base = V(x*0.4, 4.7, -4.5)
         mid = (base+tip)/2 + V(0, 0.6, -0.6)
@@ -64,15 +65,16 @@ def tiger():
                       [(1.25, 1.35), (1.45, 1.55), (1.55, 1.75), (1.2, 1.4)], seg=22)]
     head = [ellipsoid(V(0, 3.7, -3.7), V(1.3, 1.15, 1.25)),
             ellipsoid(V(0, 3.25, -4.75), V(0.85, 0.62, 0.75)),
-            ellipsoid(V(0, 3.5, -5.35), V(0.32, 0.22, 0.2)),           # nose
             ellipsoid(V(0, 2.75, -4.5), V(0.7, 0.35, 0.65)),            # jaw (open roar)
             ellipsoid(V(1.0, 3.3, -3.6), V(0.5, 0.75, 0.75)), ellipsoid(V(-1.0, 3.3, -3.6), V(0.5, 0.75, 0.75))]  # cheek ruff
     for s in (1, -1):
         head.append(loft([V(s*0.75, 4.5, -3.3), V(s*0.95, 5.3, -3.2)], [(0.45, 0.2), 0.05], seg=10, smooth=False, samples=8, up=(0, 0, 1)))
         for k in range(3):  # fangs
             pass
-    head.append(cone(V(0.35, 2.95, -5.0), V(0.35, 2.5, -5.0), 0.1)); head.append(cone(V(-0.35, 2.95, -5.0), V(-0.35, 2.5, -5.0), 0.1))
     P["Head"] = head
+    P["Nose"] = [ellipsoid(V(0, 3.5, -5.35), V(0.32, 0.22, 0.2))]
+    P["Fangs"] = [cone(V(0.35, 2.95, -5.0), V(0.35, 2.5, -5.0), 0.1), cone(V(-0.35, 2.95, -5.0), V(-0.35, 2.5, -5.0), 0.1)]
+    P["Eyes"] = [ellipsoid(V(s*0.55, 4.0, -4.62), V(0.24, 0.16, 0.12)) for s in (1, -1)]
     legs = []
     for s in (1, -1):
         legs.append(loft([V(s*0.95, 2.4, -1.9), V(s*1.05, 1.6, -3.3), V(s*1.0, 1.7, -5.0)], [0.55, 0.42, 0.36], seg=14))
@@ -87,9 +89,10 @@ def crane():
     P = {}
     P["Body"] = [ellipsoid(V(0, 0, 0), V(1.15, 1.05, 2.4))]
     P["Head"] = [loft([V(0, 0.6, -1.9), V(0, 1.8, -2.8), V(0, 3.0, -2.5), V(0, 4.0, -3.3)], [0.55, 0.38, 0.33, 0.33], seg=14),
-                 ellipsoid(V(0, 4.1, -3.55), V(0.42, 0.45, 0.62)),
-                 ellipsoid(V(0, 4.45, -3.5), V(0.28, 0.12, 0.3)),  # crown cap
-                 loft([V(0, 4.0, -4.05), V(0, 3.75, -6.0)], [(0.16, 0.13), 0.01], seg=10, smooth=False, samples=10)]
+                 ellipsoid(V(0, 4.1, -3.55), V(0.42, 0.45, 0.62))]
+    P["Crown"] = [ellipsoid(V(0, 4.45, -3.5), V(0.28, 0.12, 0.3))]
+    P["Beak"] = [loft([V(0, 4.0, -4.05), V(0, 3.75, -6.0)], [(0.16, 0.13), 0.01], seg=10, smooth=False, samples=10)]
+    P["Eyes"] = [ellipsoid(V(s*0.36, 4.2, -3.85), V(0.09, 0.09, 0.08)) for s in (1, -1)]
     for s, name in [(1, "WingR"), (-1, "WingL")]:
         bone = [V(s*0.9, 0.6, -0.8), V(s*4.5, 1.6, -0.3), V(s*8.5, 2.6, 0.0), V(s*11.5, 3.0, 0.5)]
         P[name] = bird_wing(s, bone, n_prim=12, n_cov=10, prim_len=(2.5, 4.5), finger=True, width=0.8)
@@ -106,22 +109,24 @@ def serpent_body(turns=1.15, R=5.5, height=10.0, n=9):
     return pts
 
 def dragon_head(kind):
-    h = [ellipsoid(V(0, 0, 0), V(1.15, 0.95, 1.5)),
-         ellipsoid(V(0, -0.15, -1.6), V(0.8, 0.55, 1.35)),
-         ellipsoid(V(0, -0.65, -1.3), V(0.7, 0.3, 1.2)),          # lower jaw
-         ellipsoid(V(0.45, 0.45, -0.7), V(0.25, 0.2, 0.35)), ellipsoid(V(-0.45, 0.45, -0.7), V(0.25, 0.2, 0.35))]  # brows
+    H = {"Head": [ellipsoid(V(0, 0, 0), V(1.15, 0.95, 1.5)),
+                  ellipsoid(V(0, -0.15, -1.6), V(0.8, 0.55, 1.35)),
+                  ellipsoid(V(0, -0.65, -1.3), V(0.7, 0.3, 1.2)),
+                  ellipsoid(V(0.45, 0.45, -0.7), V(0.25, 0.2, 0.35)), ellipsoid(V(-0.45, 0.45, -0.7), V(0.25, 0.2, 0.35))],
+         "Horns": [], "Whiskers": [],
+         "Eyes": [ellipsoid(V(s*0.62, 0.28, -0.85), V(0.2, 0.15, 0.22)) for s in (1, -1)]}
     for s in (1, -1):
-        if kind == "gold":  # antler horns
-            h.append(loft([V(s*0.5, 0.7, 0.3), V(s*0.9, 1.6, 1.3), V(s*1.1, 2.0, 2.8)], [0.22, 0.17, 0.05], seg=10))
-            h.append(loft([V(s*0.9, 1.6, 1.3), V(s*1.6, 2.4, 1.6)], [0.12, 0.03], seg=8, smooth=False, samples=6))
-            h.append(loft([V(s*0.6, -0.2, -2.5), V(s*1.8, -0.4, -2.0), V(s*2.8, -1.2, -0.6), V(s*3.4, -0.6, 1.2)], [0.08, 0.06, 0.04, 0.01], seg=6))  # whiskers
-            h.append(leaf([V(s*0.9, 0.2, 0.5), V(s*1.7, 0.6, 1.4), V(s*2.0, 0.2, 2.4)], 0.5, 0.05, up=(s, 1, 0), shape=0.7))  # mane tuft
-        else:  # galaxy: two pairs of straight swept horns
-            h.append(loft([V(s*0.55, 0.7, 0.4), V(s*0.9, 1.4, 2.0), V(s*1.0, 1.9, 3.6)], [0.25, 0.15, 0.02], seg=10))
-            h.append(loft([V(s*0.8, 0.2, 0.7), V(s*1.5, 0.4, 2.0), V(s*1.9, 0.6, 3.0)], [0.16, 0.1, 0.02], seg=8))
-            h.append(cone(V(s*0.4, -0.85, -2.4), V(s*0.4, -1.3, -2.3), 0.09))
-    h.append(cone(V(0.3, -0.45, -2.55), V(0.3, -0.85, -2.55), 0.08)); h.append(cone(V(-0.3, -0.45, -2.55), V(-0.3, -0.85, -2.55), 0.08))
-    return h
+        if kind == "gold":
+            H["Horns"].append(loft([V(s*0.5, 0.7, 0.3), V(s*0.9, 1.6, 1.3), V(s*1.1, 2.0, 2.8)], [0.22, 0.17, 0.05], seg=10))
+            H["Horns"].append(loft([V(s*0.9, 1.6, 1.3), V(s*1.6, 2.4, 1.6)], [0.12, 0.03], seg=8, smooth=False, samples=6))
+            H["Whiskers"].append(loft([V(s*0.6, -0.2, -2.5), V(s*1.8, -0.4, -2.0), V(s*2.8, -1.2, -0.6), V(s*3.4, -0.6, 1.2)], [0.08, 0.06, 0.04, 0.01], seg=6))
+            H["Whiskers"].append(leaf([V(s*0.9, 0.2, 0.5), V(s*1.7, 0.6, 1.4), V(s*2.0, 0.2, 2.4)], 0.5, 0.05, up=(s, 1, 0), shape=0.7))
+        else:
+            H["Horns"].append(loft([V(s*0.55, 0.7, 0.4), V(s*0.9, 1.4, 2.0), V(s*1.0, 1.9, 3.6)], [0.25, 0.15, 0.02], seg=10))
+            H["Horns"].append(loft([V(s*0.8, 0.2, 0.7), V(s*1.5, 0.4, 2.0), V(s*1.9, 0.6, 3.0)], [0.16, 0.1, 0.02], seg=8))
+            H["Horns"].append(cone(V(s*0.4, -0.85, -2.4), V(s*0.4, -1.3, -2.3), 0.09))
+    H["Horns"].append(cone(V(0.3, -0.45, -2.55), V(0.3, -0.85, -2.55), 0.08)); H["Horns"].append(cone(V(-0.3, -0.45, -2.55), V(-0.3, -0.85, -2.55), 0.08))
+    return {k: v for k, v in H.items() if v}
 
 def east_dragon(kind="gold"):
     P = {}
@@ -156,7 +161,7 @@ def east_dragon(kind="gold"):
     i = len(C)-1
     R = look(T[i]*1.0 + V(0, 0.5, 0))
     S = np.diag([1.45, 1.45, 1.45, 1.0])
-    P["Head"] = place(dragon_head(kind), R @ S, C[i] + T[i]*1.6)
+    for k, v in dragon_head(kind).items(): P[k] = place(v, R @ S, C[i] + T[i]*1.6)
     # tail tip
     if kind == "gold":
         P["TailTip"] = [leaf([C[0], C[0]-T[0]*1.2 + N[0]*0.5, C[0]-T[0]*2.5], 0.8, 0.05, up=Bn[0], shape=0.6)]
@@ -197,7 +202,7 @@ def ice_dragon():
     P = {}
     P["Body"] = [loft([V(0, -2.5, 13), V(0, -1.5, 9), V(0, -0.3, 5), V(0, 0.2, 2), V(0, 0.9, -1), V(0, 2.4, -3), V(0, 4.6, -4.0), V(0, 6.0, -4.6)],
                       [0.12, 0.5, 1.1, 1.6, 1.7, 1.0, 0.75, 0.7], seg=22, samples=90)]
-    P["Head"] = place(dragon_head("ice"), look(V(0, -0.2, -1)), V(0, 6.6, -5.6))
+    for k, v in dragon_head("ice").items(): P[k] = place(v, look(V(0, -0.2, -1)), V(0, 6.6, -5.6))
     P["WingR"] = bat_wing(1, V(1.1, 1.6, -0.2)); P["WingL"] = bat_wing(-1, V(-1.1, 1.6, -0.2))
     spikes = []
     path = catmull([V(0, -1.5, 9), V(0, -0.3, 5), V(0, 0.2, 2), V(0, 0.9, -1), V(0, 2.4, -3), V(0, 4.6, -4.0)], 40)
@@ -225,7 +230,7 @@ def koi():
     P["Body"] = [loft(path, prof, seg=22, samples=60)]
     eye = [ellipsoid(V(s*0.6, 0.3, -3.4), V(0.18, 0.18, 0.18)) for s in (1, -1)]
     barbel = [loft([V(s*0.3, -0.25, -4.2), V(s*0.9, -0.5, -3.9), V(s*1.4, -0.9, -3.0)], [0.06, 0.04, 0.01], seg=6) for s in (1, -1)]
-    P["Head"] = eye + barbel
+    P["Eyes"] = eye; P["Barbels"] = barbel
     tb = path[-1]
     # big flowing double-lobe tail fin (vertical sheet)
     nu, nv = 14, 10; g = np.zeros((nu, nv, 3))
