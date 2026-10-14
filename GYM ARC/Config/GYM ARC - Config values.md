@@ -541,3 +541,10 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 | FreeRerollsPerDay | 1 | Free daily quest rerolls per daily reset |
 | RerollRobux | 19 | Shown on the button until Roblox's real price loads |
 | Products.QuestReroll | 3718500732 | The Quest Reroll developer product |
+
+## Machine panel (`Shared/UI/MachineHud`, 14 Oct)
+| Value | Default | What it does |
+|---|---|---|
+| PanelCenterY | 0.40 | The weight card's centre, as a share of the screen height |
+| PanelRight | 16 | px from the right safe edge |
+| Gap | 10 | px between the card, PUMP and REP |

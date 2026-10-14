@@ -173,3 +173,4 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]])
 - DNA tokens now come only from Growth Spurts (+1), 25,000 coins, or the 99 Robux product 3718499538. See [[GYM ARC - Genetics]] and [[GYM ARC - Monetization]].
 - Quest rerolls: 1 free a day, then 19 Robux (product 3718500732), swapped only after the purchase is saved. See [[GYM ARC - Quests and Muscle of the Day]].
 - Fixed the ghost ring on gold / red buttons in the shared button code. See [[GYM ARC - Bug - Ghost ring on gold and red buttons]].
+- Machine panel moved down to the right middle, greyed - / +, "100 LB" without the plus, a real BEST WEIGHT button. See [[GYM ARC - Machine HUD]].

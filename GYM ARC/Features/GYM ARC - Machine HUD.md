@@ -60,3 +60,16 @@ REP 150 x 52 above Roblox's jump button, PUMP right above it, STOP above the thu
 
 ## REP never moves (14 Oct, later)
 REP (150 x 46) sits right above Roblox's jump button on phones, PUMP right above it, worked out once and only again when the screen size changes. On a PC it sits in the bottom right corner.
+
+## Weight card moved down, BEST WEIGHT button (14 Oct)
+- The weight card (machine name, - weight +, Tier, BEST WEIGHT) now sits on the right a bit above the middle of the screen (its centre at 40% of the height, 16 px from the right edge, inside the phone's safe area), no longer stuck under the top bar.
+- PUMP and REP stay below it on the right, 10 px apart. On short screens the card shrinks a little (0.9) and only moves up if it still doesn't fit.
+- The - and + buttons are always there; at the lightest / heaviest weight they turn grey and do nothing, so the weight stays centred.
+- Bodyweight machines showed "+100 LB"; now just "100 LB".
+- BEST WEIGHT is a real gold button with an up-arrow icon (no ring), on the same line as "Tier 10 / 12". When you are already on your best weight it turns into a flat dark "AT BEST" with a check and can't be pressed.
+
+![[GYM ARC/Screenshots/panel_crunch_max_atbest.jpg]]
+![[GYM ARC/Screenshots/panel_crunch_bestweight.jpg]]
+![[GYM ARC/Screenshots/panel_squat.jpg]]
+![[GYM ARC/Screenshots/panel_bench_max.jpg]]
+
