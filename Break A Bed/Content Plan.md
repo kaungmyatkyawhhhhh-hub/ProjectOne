@@ -287,6 +287,14 @@ Players get bored replaying the same beds after a rebirth. Three fixes:
 2. **Something new every rebirth (milestone track):**
    - A row of rewards in the Rebirth menu, shown as pictures with locks: 1 = new training post, 2 = rare glove, 3 = Rebirth aura, 4 = +1 pet slot (once pets exist), 5 = Bronze belt, 7 = exclusive Rebirth Bed skin, 10 = Silver belt, then every 5.
    - The next reward is always shown with "1 more rebirth!".
+   - **What the rewards look like (2026-10-14).** Theme: **Phoenix**, the bird reborn from fire, so it fits rebirth. Colors: gold, orange and white.
+     - **R1 Phoenix Dummy (training post):** a karate wooden dummy (the kind with 3 arms) made of glowing gold-white wood, with a small spinning gold star above it. Each punch makes a burst of gold sparks and feathers and a soft "ting". It gives **1.5x your best post**. It stands on the empty grass right of the training area, on its own orange glowing pad. Black silhouette until unlocked.
+     - **R2 Phoenix Gloves:** the blocky padded glove style, orange-red, with gold wing shapes on the cuffs. Small flames trail from the fists. Each punch shows a flame puff. Rarity **Mythic**, better than the glove you own.
+     - **R3 Rebirth Aura:** a slow ring of small gold stars turning around your feet, soft white-gold light rising up your body, and a sparkle every few seconds. It stays around the body, never over the face.
+     - **R5 Bronze belt:** a shiny bronze metal belt with a light shine sweep every few seconds, and a bronze badge next to your name.
+     - **R7 Phoenix Bed skin:** all your beds get a night-blue blanket with gold stars, a gold frame and a pillow with a little phoenix. Only you see it, and it can be turned off in Settings.
+     - **R10 Silver belt:** a chrome silver belt that sparkles, plus a faint silver trail behind you when you run.
+     - **Reward row in the Rebirth menu:** round icons on a line, like a path. Earned ones are bright with a ✔, the next one pulses with "1 more rebirth!", and later ones are dark with a 🔒 (you can still see the shape, so you want it).
 3. **Surprises during a run:**
    - **Golden Bed:** every ~5 min, a random bed you can break turns gold for 60 s ("GOLDEN BED!" toast and a beam). Breaking it pays **x10 Cash**.
    - **Lucky Hour:** a random server event, 10 min of x2 Strength for everyone, with a countdown.
