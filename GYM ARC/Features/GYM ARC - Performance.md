@@ -24,8 +24,17 @@ Studio test, one player, starter gym floor looking down the gym, 16 NPCs:
 - Your own trainer is never frozen; an arm wrestling opponent is always treated as close.
 - Result in the same scene: 211 draw calls (was about 250), 1.41 million triangles (was 1.78).
 
-## Step 2: LOD (simpler far NPCs)
-To do.
+## Step 2: LOD (simpler far NPCs) (done)
+- An NPC further than 60 studs away shows a plain body (no muscle shapes, no hair or hats); closer than 50 studs it gets its full look back. The gap stops it flickering.
+- Nothing is rebuilt when it switches: the muscle shapes are just hidden and shown again.
+- Never for your own character, other players, the statue or an arm wrestling opponent.
+- This replaces the old rule from 13 Oct ("never a visible change by distance") for NPCs.
+- Also across the map: meshes now simplify themselves when far away, decorations use simple collision shapes, and 491 small props no longer cast shadows (machines, the arm wrestling table and characters keep theirs).
+- Result in the same scene: about 47-48 frames a second (was 30-40), the slowest frame 24 ms (was up to 142 ms), 125-146 draw calls (was 250), about 0.5-0.7 million triangles (was 1.78).
+- Still high: about 700 shadow draw calls, from the gym's many lights that cast shadows. That is the next thing to look at.
+Before, then after:
+![[GYM ARC/Screenshots/performance_scene_before.jpg]]
+![[GYM ARC/Screenshots/performance_scene_after_lod.jpg]]
 
 ## Step 3: instance streaming
 To do.
