@@ -64,3 +64,6 @@ The main menu is one dark panel on the left: logo, tagline, red PLAY, gold SHOP,
 ## Final loading screen (14 Oct)
 Logo picture, gray tagline, the tip in a dark tile with a gold TIP tag, a shiny red bar with the gold percent, small tip dots and a quiet SKIP. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
 ![[GYM ARC/Screenshots/ui_compare_final_00_loading_game.jpg]]
+
+## Music (14 Oct)
+The owner's track plays from the first frame of the loading screen through the menu and fades out on Play. See [[GYM ARC - Music and Sounds]].

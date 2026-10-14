@@ -119,3 +119,7 @@ They play one after another in that order, then start again from the first. When
 
 ### Back to one song per area (14 Oct, your change in Studio)
 You set every area back to a single song: Starter 86451874359343, Pro 118959016267248, Beach 1837324500, Town 1840007392. The four-songs-per-area lists above are no longer used. The backup copy matches your version. To play several songs in an area again, add more ids to its list (comma separated).
+
+## Loading screen and menu music (14 Oct)
+- MenuMusic: **118959016267248** (the owner's pick, the same track as the pro gym). Starts on the very first frame of the loading screen, keeps playing (one loop, never restarted) through the main menu, and fades out when you press Play; then the area music starts.
+- To change it, change the id in two places: `Config/Sounds` (MenuMusic) and `ReplicatedFirst.LoadingScreen` (LOOK.Music), because the loading screen starts before the sound list loads.
