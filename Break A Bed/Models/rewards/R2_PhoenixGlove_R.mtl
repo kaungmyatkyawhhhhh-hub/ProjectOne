@@ -1,0 +1,11 @@
+newmtl Glove
+Kd 1 1 1
+map_Kd R2_PhoenixGlove_R_textures/Glove.png
+
+newmtl Cuff
+Kd 1 1 1
+map_Kd R2_PhoenixGlove_R_textures/Cuff.png
+
+newmtl Wings
+Kd 1 1 1
+map_Kd R2_PhoenixGlove_R_textures/Wings.png

@@ -154,3 +154,35 @@ def place(meshes, R=None, t=(0, 0, 0)):
         if R is not None: m.apply_transform(R)
         m.apply_translation(t); out.append(m)
     return out
+
+def roundbox(c, h, e=0.25, nu=32, nv=20):
+    """superellipsoid: rounded box with half-sizes h; e small = boxier."""
+    def sp(w, m): return np.sign(w)*np.abs(w)**m
+    th = np.linspace(-np.pi/2, np.pi/2, nv+1); ph = np.linspace(-np.pi, np.pi, nu+1)
+    verts = []; uv = []
+    for i, t in enumerate(th):
+        for j, p in enumerate(ph):
+            verts.append([h[0]*sp(np.cos(t), e)*sp(np.cos(p), e), h[1]*sp(np.sin(t), e), h[2]*sp(np.cos(t), e)*sp(np.sin(p), e)])
+            uv.append([j/nu, i/nv])
+    W = nu+1; f = []
+    for i in range(nv):
+        for j in range(nu):
+            a = i*W+j; b = a+W
+            f += [[a, b, b+1], [a, b+1, a+1]]
+    m = mk(verts, f, uv)
+    k = len(f)//2
+    if np.dot(m.face_normals[k], m.triangles_center[k]) < 0: m.faces = m.faces[:, ::-1]
+    m.apply_translation(c); return m
+
+def star_prism(c, R=1.0, r=0.42, depth=0.35):
+    pts = [(R if i % 2 == 0 else r)*np.array([np.cos(np.pi/2 + i*np.pi/5), np.sin(np.pi/2 + i*np.pi/5)]) for i in range(10)]
+    verts = [[0, 0, depth/2], [0, 0, -depth/2]]; uv = [[0.5, 0.5], [0.5, 0.5]]
+    for p in pts:
+        verts += [[p[0], p[1], depth/2], [p[0], p[1], -depth/2]]; uv += [[(p[0]/R+1)/2, (p[1]/R+1)/2]]*2
+    f = []
+    for i in range(10):
+        a = 2+2*i; b = 2+2*((i+1) % 10)
+        f += [[0, a, b], [1, b+1, a+1], [a, a+1, b+1], [a, b+1, b]]
+    m = mk(verts, f, uv)
+    m.fix_normals() if False else None
+    m.apply_translation(c); return m
