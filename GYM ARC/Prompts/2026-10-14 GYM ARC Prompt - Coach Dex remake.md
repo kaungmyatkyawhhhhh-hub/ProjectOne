@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 tags: [gymarc, prompt, npc]
-status: in progress
+status: Coach Dex done (15 Oct)
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 

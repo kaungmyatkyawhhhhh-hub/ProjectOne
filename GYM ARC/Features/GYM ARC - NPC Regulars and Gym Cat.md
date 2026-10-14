@@ -34,3 +34,17 @@ NPC gym-goers who walk around, lift, rest and pose, including the giant Dante, p
 ![[GYM ARC/Screenshots/giant_vs_maxed_player.jpg]]
 ![[GYM ARC/Screenshots/gym_cat_on_bed_by_towel_rack.jpg]]
 ![[GYM ARC/Screenshots/s2_pro-npcs_after.png]]
+
+## Coach Dex remake (15 Oct)
+Coach Dex is now built like Dante: 7'6", a mass monster with the widest shoulders, shirtless in black shorts, bald, warm brown skin and his own stern bearded face.
+- He leans on the front desk with his fists on the counter, breathing and shifting his weight; every ~10 s he rolls his shoulders or cracks his neck.
+- Within 15 studs his head turns to follow you (each player sees him look at themselves); he nods when you come close and points when you talk to him.
+- His booth: protein tub, shaker, clipboard and whistle on the counter, a gold COACH DEX sign over the desk, a warm spotlight.
+- The tutorial portrait shows the new Dex (head and shoulders).
+
+![[GYM ARC/Screenshots/coach_dex_front.jpg]]
+![[GYM ARC/Screenshots/coach_dex_three_quarter.jpg]]
+![[GYM ARC/Screenshots/coach_dex_head_follows_player.jpg]]
+![[GYM ARC/Screenshots/coach_dex_player_talks_point.jpg]]
+![[GYM ARC/Screenshots/coach_dex_next_to_dante.jpg]]
+![[GYM ARC/Screenshots/coach_dex_portrait.jpg]]
