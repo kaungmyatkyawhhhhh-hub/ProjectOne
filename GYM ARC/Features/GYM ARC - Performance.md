@@ -54,7 +54,7 @@ Before, then after:
 
 Two things make drawing expensive:
 - **Muscle bodies are very detailed.** One body wearing the muscle stage meshes is about 123,000 triangles (torso halves 19,950 each, upper arms 13,728 each, forearms and calves 8,256 each, thighs about 11,000 each). At the starter gym about 750,000 body triangles were drawn at once. This is the part to simplify in Blender.
-- **The map has a lot of parts.** 21,859 parts (the town alone 16,844), 294 lights, 424 signs. Streaming is on but the phone still loads the whole town (23,736 parts), because the streaming distance settings were never set (owner's job in Workspace Properties).
+- **The map has a lot of parts.** 21,859 parts (the town alone 16,844), 294 lights, 424 signs. Streaming is set (radius 256), but the town is compact: almost all of it (20,265 of 21,859 parts) is within 256 studs of the spawn, so the phone still loads nearly everything. A radius of 128 to 160 would about halve that, with far buildings appearing a bit later.
 
 **Quick wins done:** 192 small props no longer cast shadows. The map's mesh settings were already correct. No duplicate parts were found, and no free-model scripts.
 
