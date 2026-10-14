@@ -55,3 +55,9 @@ AURA SYSTEM (new). Save to Obsidian first. Players may already own the Aura Pack
 
 Commit after each part, update PROGRESS.md and Obsidian.
 ```
+
+Follow-up message:
+
+```text
+Aura icons: Downloads\gym_arc_aura_icons\aura_<name>.png (ember, frost, storm, golden, titan, inferno, blood_moon, void, neon, galaxy, royal, toxic, shadow). Upload all 13 to Myanmar Builders Club, find the IDs with search_asset by exact name, and put them in Config.Auras[name].Icon. Use them on the aura tiles in the Auras panel and the Store's Auras tab.
+```

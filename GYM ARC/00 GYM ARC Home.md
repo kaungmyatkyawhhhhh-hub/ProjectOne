@@ -198,6 +198,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Stats labels hidden behind walls]]
 - [[GYM ARC - Bug - Stats lines pointed at the wrong places]]
 - [[GYM ARC - Bug - Still saving from another server kick]]
+- [[GYM ARC - Bug - Store showed only one pass]]
 - [[GYM ARC - Bug - Stray character stopped the server]]
 - [[GYM ARC - Bug - Stray lines inside panels]]
 - [[GYM ARC - Bug - Studio DataStore InternalServerError]]

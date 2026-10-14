@@ -125,3 +125,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Stats lines pointed at the wrong places|Stats lines pointed at the wrong places]] - 2026-10-14
 - [[GYM ARC - Bug - Ghost ring on gold and red buttons|Ghost ring on gold and red buttons]] - 2026-10-14
 - [[GYM ARC - Bug - Big players skated slowly|Big players skated slowly]] - 2026-10-14
+- [[GYM ARC - Bug - Store showed only one pass|Store showed only one pass]] - 2026-10-14

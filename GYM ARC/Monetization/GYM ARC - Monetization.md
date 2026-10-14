@@ -112,3 +112,27 @@ monetization prompt is the one that turns it on.
 
 ## Quest Reroll (14 Oct)
 - Developer product **Quest Reroll**, 19 Robux, id **3718500732** (`Config/Products.QuestReroll`). Bought only from the Quests window after picking a quest (not shown in the Store). The reroll happens in ProcessReceipt, once per PurchaseId, after the save is stored. See [[GYM ARC - Quests and Muscle of the Day]].
+
+## Everything on sale (14 Oct, the owner's ids)
+| Name | Type | What it does | Price (Robux) | ID | Store tab | Status |
+|---|---|---|---|---|---|---|
+| 2x EXP | Game pass | Double all training EXP | 249 | 2032508303 | Passes | ON |
+| 2x Coins | Game pass | Double all coins earned | 149 | 2032286316 | Passes | ON |
+| VIP | Game pass | +10% coins, VIP tag, the Royal aura (aura system coming) | 299 | 2032988308 | Passes | ON |
+| Aura Pack | Game pass | Unlocks 5 auras (aura system coming next) | 199 | 2033954299 | Passes | ON |
+| Auto Rep | Game pass | Lifts for you on a machine | 249 | 2033558291 | Passes | ON |
+| Extra Trainer | Game pass | A second personal trainer | 99 | 2032496303 | Passes | ON |
+| Small Coins | Developer product | +1,000 coins | 25 | 3718306241 | Coins | ON |
+| Medium Coins | Developer product | +5,000 coins | 99 | 3718306326 | Coins | ON |
+| Large Coins | Developer product | +15,000 coins | 249 | 3718306360 | Coins | ON |
+| Shake Bundle | Developer product | 3 Energy Shakes | 49 | 3718306390 | Boosts | ON |
+| Stamina Refill | Developer product | Stamina to full | 15 | 3718306417 | Boosts | ON |
+| DNA Token | Developer product | 1 DNA token | 99 | 3718499538 | Boosts | ON |
+| Skip Growth Cooldown | Developer product | Nothing to skip yet (no wait between Growth Spurts) | 35 | 3718306447 | Boosts | HIDDEN |
+| Quest Reroll | Developer product | Reroll one daily quest | 19 | 3718500732 | (Quests window only) | ON |
+
+Notes:
+- The VIP pass's Roblox description mentions a VIP chat tag, a VIP title and a VIP Lounge in the pro gym; the game gives +10% coins and a VIP tag (no lounge yet).
+- The Shake Bundle's Roblox description says "+20% EXP for 5 minutes each"; the game's Energy Shake refills stamina and gives +50% gains for 30 s.
+- Prices shown in the Store come from Roblox; the numbers above are only the fallback if Roblox can't be reached.
+
