@@ -268,6 +268,16 @@ Replaces the rejected Sleep King. No villain. You train with an old karate maste
   | 25 | **Black** |
 
 - **Belt-test beds** look special: a gold glowing floor ring, a small floating belt in that color above the bed, and a "BELT TEST" tag on the bed sign.
+- **Belt-test beds, cooler look (owner, 2026-10-14).** This replaces the plain gold ring above. Each test bed becomes a small **dojo arena**, compact so the map stays clean:
+  - **Torii gate:** a red Japanese gate over the path just before the bed, with a hanging wooden plaque "BELT TEST". The gate's top beam glows softly in the **belt color**.
+  - **Dojo floor:** the bed's tile becomes a raised square of tatami mats (light straw color, dark borders) with a gold edge. A big circle on the floor glows in the belt color and slowly pulses.
+  - **Stone lanterns:** 2 small Japanese stone lanterns at the front corners, with flames in the belt color.
+  - **Banners:** 2 tall cloth banners in the belt color behind the bed, waving gently, with a fist icon.
+  - **The prize:** a big version of the belt floats above the bed, slowly spinning and bobbing, with a glow and a light beam in the belt color going up into the sky (visible from far away, so players see the next goal). Sparkles drip off it.
+  - **Sound:** a slow taiko drum beat when you walk near it.
+  - **Undiscovered:** the bed is still a black silhouette, but the gate, the floating belt and the beam still show, so players know a belt is waiting there.
+  - **After you've earned it:** the beam and banners turn off, the floating belt is replaced by a small gold ✔ medallion, and the gate stays (calm). For your next belt test, everything is fully lit.
+  - Low Graphics turns off the beam, sparkles and waving.
 - **Earning a belt (first time you break a test bed):** a short ceremony (~3 s): the screen dims a little, Sensei pops in at the side and bows, a big "YELLOW BELT!" in the belt color, the belt flies onto your character, confetti and a gong. Reward: **+10% Strength forever per belt** (stacks), shown as a small chip.
 - **The belt is worn:** a belt in your color around your character's waist, visible to everyone. Your belt color also shows next to your name above your head and on the leaderboards.
 - **Tracker:** the next-bed bar shows a small belt icon: "Next belt: Bed 6".
