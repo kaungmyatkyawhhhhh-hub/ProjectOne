@@ -254,6 +254,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Prompt - Lifting HUD, top bar, Physique, left menu on mobile]]
 - [[2026-10-14 GYM ARC Prompt - Loading screen, declutter HUD, Genetics mobile]]
 - [[2026-10-14 GYM ARC Prompt - Multiple songs per area]]
+- [[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]]
 - [[2026-10-14 GYM ARC Prompt - Physique taller frame note]]
 - [[2026-10-14 GYM ARC Prompt - Rep and pump bar and treadmill sounds]]
 - [[2026-10-14 GYM ARC Prompt - Top bar with TopbarPlus]]
