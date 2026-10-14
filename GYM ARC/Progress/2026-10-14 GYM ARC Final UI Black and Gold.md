@@ -189,3 +189,4 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]])
 - Auras now use the owner's AuraVFX module: all 13 checked at full power, plus idle / half pump / burst. See [[GYM ARC - Aura]].
 - Stamina Refill became Endless Stamina: 15 minutes without stamina drain, stacking to 60, time kept when you leave. See [[GYM ARC - Monetization]] and [[GYM ARC - Stamina and Treadmills]].
 - Test purchases gave the owner's own save 60 minutes of Endless Stamina.
+- Aura effects v2 (the owner's updated module) is in, with 24 screenshots in [[GYM ARC - Aura]].

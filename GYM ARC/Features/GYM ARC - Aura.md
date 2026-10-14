@@ -113,3 +113,23 @@ Previous version (the 3-layer particle aura built in AuraClient) is replaced.
 ![[GYM ARC/Screenshots/auras_v2_toxic.jpg]]
 ![[GYM ARC/Screenshots/auras_v2_shadow.jpg]]
 ![[GYM ARC/Screenshots/auras_v2_small_npc.jpg]]
+
+## Effects v2: the owner's updated module (14 Oct)
+- New flame flipbook (90041400001838); the other textures stay.
+- Flames, glow and smoke now sit behind the body, so they only show around the outline; softer colours (no white-out); thinner flames.
+- The ground ring stays flat on the floor (it finds the floor below you), also while lying on a bench.
+- Only this module draws aura effects: the gold PUMPED glow on the muscles is skipped while you wear (or try on) an aura.
+- Shadow is still very faint in the dark gym.
+
+| Aura | Front | Side | Bench |
+|---|---|---|---|
+| Inferno | ![[GYM ARC/Screenshots/auras_v3_inferno_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_inferno_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_inferno_bench.jpg]] |
+| Storm | ![[GYM ARC/Screenshots/auras_v3_storm_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_storm_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_storm_bench.jpg]] |
+| Void | ![[GYM ARC/Screenshots/auras_v3_void_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_void_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_void_bench.jpg]] |
+| Toxic | ![[GYM ARC/Screenshots/auras_v3_toxic_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_toxic_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_toxic_bench.jpg]] |
+| Golden | ![[GYM ARC/Screenshots/auras_v3_golden_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_golden_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_golden_bench.jpg]] |
+| Royal | ![[GYM ARC/Screenshots/auras_v3_royal_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_royal_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_royal_bench.jpg]] |
+| Neon | ![[GYM ARC/Screenshots/auras_v3_neon_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_neon_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_neon_bench.jpg]] |
+| Shadow | ![[GYM ARC/Screenshots/auras_v3_shadow_front.jpg]] | ![[GYM ARC/Screenshots/auras_v3_shadow_side.jpg]] | ![[GYM ARC/Screenshots/auras_v3_shadow_bench.jpg]] |
+
+For comparison, the bench with no aura (the pale skin is the bench light): ![[GYM ARC/Screenshots/auras_v3_no_aura_bench_for_comparison.jpg]]

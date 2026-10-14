@@ -186,7 +186,7 @@ Studio can only upload to the owner's account. These work in the game; to use gr
 ## Aura VFX textures (14 Oct, uploaded from Studio: owner's own inventory)
 | Texture | Asset ID |
 |---|---|
-| flame_flipbook_4x4 (1024, 4x4) | 91013788221828 |
+| flame_flipbook_4x4 (1024, 4x4), v2 (14 Oct) | 90041400001838 (v1 was 91013788221828) |
 | smoke_flipbook_4x4 (1024, 4x4) | 105468903616816 |
 | glow_soft | 108461610476976 |
 | spark_star | 82372237523631 |
