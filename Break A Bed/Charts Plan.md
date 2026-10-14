@@ -129,4 +129,9 @@ Goal: "Stayed 10 min" from 31% to 45%+. Build in this order:
   - **First-session retention:** 36.7% still playing at 5 min. The steepest drop is in the **first 4 minutes** (100% → about 38%), then about 13% at 15 min and about 5% at 30 min (the content runs out there).
   - **Sales per player:** about R$3.4 per player so far (R$537 / ~155), which is fine for this size.
   - **To check next:** Oct 12–13 players once they load, and the ad's impressions/clicks for Oct 12–13 in Ads Manager. If the ad stopped delivering, traffic and sales stop together.
+- **Correction (owner, 2026-10-14):** the launch buyers were **not fans**. The group had 1 member at release, so they were strangers. So something in the game likely changed on 10/12, the day sales stopped. Suspects, most likely first:
+  1. **Purchases broken in the live game.** On 10/12 the whole shop was rebuilt (25 products, new ids, renamed Cash packs, a Studio-only test hook, boost levels). Test: buy the cheapest product for real in the live game and check you get it (F9 for errors). Check there is exactly one ProcessReceipt.
+  2. **Too much free stuff.** Also on 10/12–13: 12 free gifts, the free/exclusive chest, the Free Gift x2 Strength, spins, codes, daily rewards, quests, OP Day 7, all giving boosts. Players who get x2/x3 boosts for free have little reason to buy them.
+  3. **Fewer buy moments.** The "Need more Strength?" offer at a locked bed was replaced on 10/13 by BREAK IT only when the prompt is used.
+  4. Traffic and the Ages 16+ limit (see [[Break A Bed/Ads|Ads]]).
 
