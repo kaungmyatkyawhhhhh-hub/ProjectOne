@@ -16,10 +16,40 @@ Synthesized with code (`../source/sounds.py`), so they're 100% ours, with no cop
 **Animal voices** (tiger roar, dragon roar, phoenix screech) can't be synthesized well. Use Roblox's own licensed sound library in the Creator Store (Audio tab, made by Roblox; sounds have no scripts, so they're safe). Search "tiger roar", "dragon roar", "eagle screech" (for the phoenix), "ice crack", "coins", "bubbles". Mix each one under `boom.ogg` at the burst.
 
 ## Combo sound: do re mi... (owner, 2026-10-14)
-`combo_1_do.ogg` … `combo_8_do2.ogg`: 8 **heavenly high piano** notes (C6 up to C7, with a soft octave shimmer above and a long airy reverb), going up the C major scale (do re mi fa so la ti do). `combo_demo.ogg` plays it twice so you can hear the idea.
-- (Changed 2026-10-14: the owner wants a heavenly, very high-pitched piano. The current files are high piano C6–C7 with shimmer and reverb.)
-- **Every punch (training and breaking) plays the next note:** do → re → mi → fa → so → la → ti → high do, then **back to do** and up again.
-- If no punch for **1.2 s**, the scale restarts from do next time.
-- On the 8th note (high do) add a tiny sparkle burst on the punch popup, as a small reward for finishing the scale.
-- Volume follows the Sounds slider, about 0.35 so it doesn't get annoying at 8 punches/second. Only the punching player hears their own notes.
-- Alternative if 8 files are a hassle: upload only `combo_1_do.ogg` and set `PlaybackSpeed` to 1, 1.125, 1.25, 1.333, 1.5, 1.667, 1.875, 2.
+`combo_1_do.ogg` … `combo_8_do2.ogg`: 8 **heavenly high piano** notes (C6 up to C7 with a soft octave shimmer; only a little reverb, changed after the owner said there was too much). `combo_demo.ogg` plays the scale with a pause between notes, like breaking beds in a row.
+- **It plays on each bed BREAK, not on each punch (owner, 2026-10-14):** the 1st break plays **do**, the 2nd **re**, then mi, fa, so, la, ti and high **do**, then back to **do** and up again.
+- It plays together with that bed's own break sound (below), a little quieter (volume ~0.5).
+- If the player doesn't break a bed for **15 s** (or leaves the bed area), the scale restarts from do on the next break.
+- On the high do (8th break), add a small sparkle burst and a "COMBO x8!" pop.
+- Only the breaking player hears their own notes. Volume follows the Sounds slider.
+
+## Unique break sound for every bed (owner, 2026-10-14)
+`bed_breaks/bed01_cardboard.ogg` … `bed25_infinity.ogg`: **25 different break sounds**, one per bed, made with code to match each material. Play the bed's own sound when it breaks (instead of the shared one). Hits during chopping can keep the normal punch sound.
+
+| # | Sound |
+|---|---|
+| 1 Cardboard | paper rip + soft box thuds |
+| 2 Air Mattress | pop + air hissing out |
+| 3 Sleeping Bag | fabric rip + soft thud |
+| 4 Wooden | wood crack + wooden pieces knocking |
+| 5 Bunk | big crack + boom + lots of wood pieces |
+| 6 Water | pop + splash + drips |
+| 7 Hospital | metal clank + rattles + monitor beeps |
+| 8 Royal | wood crack + royal chime |
+| 9 Gold | gold clang + raining coins |
+| 10 Diamond | bright glass shatter + sparkle chime |
+| 11 Emerald | gem shatter, lower + ring |
+| 12 Ruby | deep gem shatter + boom |
+| 13 Ice | ice crack + tinkling shards |
+| 14 Lava | rock crunch + boom + sizzle |
+| 15 Crystal | crystal shatter + magic chime + shimmer |
+| 16 Neon | glass + electric buzz + zap |
+| 17 Robot | metal crash + powering-down whine + sparks |
+| 18 Alien | wobbly zap + goo splat + rising beep |
+| 19 Lunar | muffled rock crumble + low boom (echo) |
+| 20 Solar | fiery whoosh + big boom |
+| 21 Galaxy | whoosh + star chime + boom |
+| 22 Nebula | airy whoosh + soft chimes |
+| 23 Black Hole | sucking-in rise + huge boom |
+| 24 Cosmic | rising chime + boom + shimmer |
+| 25 Infinity | heavenly chord + boom + shatter |
