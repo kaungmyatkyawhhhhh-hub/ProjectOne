@@ -174,3 +174,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-14: belt fell off when the avatar loaded #bugs #done
 - Loading the avatar replaces the body parts, so the belt welded to the old waist fell away. It's put on again whenever the waist is replaced.
+
+## 2026-10-14: imported models faced different ways / dragon roar broken #bugs #done
+- The torii gate was turned the wrong way (its frame hid the plaque); the gold and galaxy dragons face -Z while the other animals face +Z. The game now works out each animal's front from body to head.
+- The first ProSoundEffects dragon roar picked was only 0.1 s long; swapped for a 3.1 s one.

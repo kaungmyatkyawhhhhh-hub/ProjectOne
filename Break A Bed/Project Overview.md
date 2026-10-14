@@ -51,6 +51,9 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 - **Limited Aura Crates** ([[Break A Bed/Auras/Limited Auras|Limited Auras]], client module `Auras`): the Halloween crate (until Nov 1) in the shop's FEATURED section, 6 auras (Ghost → Reaper) that multiply Strength and add Walk Speed, opening animation, Auras button + inventory with EQUIP, Aura Dust stars, pity at 50, Reaper announcement, gifting. Product ids not set yet.
 - **Effects** ([[Break A Bed/Effects/Effects|Effects]], client module `Effects`): bloom and colour grade, big bed-break bursts (bigger from the Crystal / Galaxy beds), glowing beds from the Ice Bed, player auras by Level / VIP / boost, hit sparks and big italic numbers, server announcements, big centre text, level-up fountain, world sparkles and neon gates. Settings: Low Graphics and Others' Effects.
 - **Look and feel:** grass terrain with trees and bushes, a brick spawn plaza, soft sunlight with haze and bloom, real sound effects and background music (on/off in Settings), beds that jolt on every hit, dust, flying coins and a screen flash when a bed breaks, numbers that count up, glossy buttons.
+- **Karate belts and Sensei (2026-10-14, [[Break A Bed/Content Plan|Content Plan]] 11):** White → Black belt from the belt-test beds (3, 6, 9, 12, 15, 18, 21, 25), +10% Strength per belt, a gold stripe per rebirth and master belts every 5 rebirths. Each test bed has a custom torii gate; only the next unearned test has a soft light column. The floating Sensei by spawn; his song fades in within 6 studs and the music dips. "Belt +X%" sits under "Rebirth x1.5" on the Strength row.
+- **Cutscenes (2026-10-14):** first time per belt colour (Sensei, belt ties on), black belt, 8 rebirth versions with the custom animals (phoenix, tiger, crane, gold/ice/galaxy dragon, fire phoenix, rainbow koi), master belt change, first-join intro. Custom VFX (`RebirthVFX`) and custom sounds; Low Graphics turns the VFX down.
+- **Phoenix rebirth rewards (2026-10-14):** rebirth 1 Phoenix Dummy (1.5x your best post, by the training area), 2 Phoenix Gloves (a look + 20% on any glove, kept forever; last tile in the glove shop), 3 Rebirth Aura, 4 pet slot (soon), 7 Phoenix Beds (own screen, Settings switch). Plus fast replay, Head Start, Golden Bed, Lucky Hour and a daily challenge (section 12).
 - **Personal progress:** each player breaks their own copy of a bed (effects are client-side), and COMPLETED signs are personal. Everything saves.
 
 ## Scripts (where they are in Studio)
@@ -78,6 +81,13 @@ A Roblox game based on Chop A Brick. Train to gain Strength 💪, which raises y
 | `QuestsUI` | ModuleScript | StarterPlayer › StarterPlayerScripts | Quests window + square, MY BOOSTS window + badge (2026-10-13) |
 | `FavoritePrompt` | ModuleScript | StarterPlayer › StarterPlayerScripts | "Favorite to find it again!" popup, once (2026-10-13) |
 | `SoftShutdownScreen` | LocalScript | StarterPlayer › StarterPlayerScripts | "UPDATING THE GAME..." screen (2026-10-13) |
+| `Belts` / `BeltUI` / `BeltModel` | Server / client / ReplicatedStorage | Karate belts, Sensei, belt-test arenas (2026-10-14) |
+| `Cutscenes` | ModuleScript | StarterPlayerScripts | Belt, rebirth (8), master belt and intro cutscenes (2026-10-14) |
+| `RebirthVFX` / `RebirthVFXAnchors` | ModuleScript | ReplicatedStorage | Custom cutscene VFX + anchor points on the models (2026-10-14) |
+| `PhoenixRewardsUI` / `PhoenixGloves` | Client / ServerScriptService | Phoenix rebirth rewards (2026-10-14) |
+| `SenseiZone` | ModuleScript | StarterPlayerScripts | Sensei's song fades in/out, music dips (2026-10-14) |
+| `RunExtras` / `RunExtrasUI` | Server / client | Fast replay, Head Start, Golden Bed, Lucky Hour, daily challenge (2026-10-14) |
+| `ImportedModelsSetup` / `PhoenixRewardsSetup` | ModuleScript | ServerStorage | Run once after importing the custom models (2026-10-14) |
 
 The Studio place has the newest scripts; the `src` files are older.
 
