@@ -28,6 +28,8 @@ VFX.Sprites = {
 	energy = "rbxassetid://125689238568684", dust = "rbxassetid://137582597658372", orb = "rbxassetid://107235527432295",
 	-- 4x4 flipbooks (1024x1024): animated cartoon flames and anime aura spikes. Upload these two and paste the ids.
 	flame_flipbook = "rbxassetid://80758190475188", aura_flipbook = "rbxassetid://89060942632732",
+	-- swirl tornado (replaces the blocky swirl parts): upload these two and paste the ids
+	swirl_band = "rbxassetid://0", swirl = "rbxassetid://0",
 }
 
 -- sprites that don't load yet (a new upload still in moderation) are swapped for a plain one, so nothing shows blank
@@ -566,6 +568,93 @@ function VFX.PlayerAura(character: Model, colorHex: string, duration: number)
 		task.wait(0.8)
 		for _, i in ipairs(made) do if i.Parent then i:Destroy() end end
 	end)
+end
+
+-- Energy tornado around the player (rebirth step 2). Pure VFX: curved Beams with a flowing
+-- texture spiral up around the character, plus spinning swirl particles and rising sparks.
+-- Replaces the old swirl made of parts: never build the swirl from Parts/MeshParts.
+-- colors: 1-3 hex colors (tier colors). Returns a stop() function.
+function VFX.Swirl(root: BasePart, colors: { string }, duration: number, height: number?)
+	height = height or 9
+	local hub = Instance.new("Part")
+	hub.Anchored = true; hub.CanCollide = false; hub.CanQuery = false; hub.CanTouch = false
+	hub.Transparency = 1; hub.Size = Vector3.one
+	hub.CFrame = CFrame.new(root.Position - Vector3.new(0, 3, 0))
+	hub.Parent = workspace
+	local strands = low and 3 or 5          -- spiral ribbons
+	local segs = 4                          -- beam segments per ribbon (each ~100 deg of arc)
+	local arc = math.rad(100)
+	local beams = {}
+	local atts = {}
+	for sIdx = 1, strands do
+		local colHex = colors[((sIdx - 1) % #colors) + 1]
+		local prev: Attachment? = nil
+		for k = 0, segs do
+			local a = Instance.new("Attachment"); a.Parent = hub
+			table.insert(atts, { att = a, strand = sIdx, k = k })
+			if prev then
+				local b = Instance.new("Beam")
+				b.Attachment0 = prev; b.Attachment1 = a
+				b.Texture = VFX.Sprites.swirl_band
+				b.TextureMode = Enum.TextureMode.Wrap; b.TextureLength = 6; b.TextureSpeed = 2.5
+				b.Color = ColorSequence.new(c3(colHex):Lerp(Color3.new(1, 1, 1), 0.35), c3(colHex))
+				b.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(0.5, 0.05), NumberSequenceKeypoint.new(1, 0.25) })
+				b.LightEmission = 1; b.LightInfluence = 0
+				b.FaceCamera = true; b.Segments = 20
+				b.Width0 = 1.6; b.Width1 = 1.6
+				b.Parent = hub
+				table.insert(beams, b)
+			end
+			prev = a
+		end
+	end
+	-- spinning swirl particles at the feet and rising sparks
+	local foot = Instance.new("Attachment"); foot.Parent = hub
+	local swirlPE = emitter({ sprite = "swirl", color = ColorSequence.new(c3(colors[1])), size = ns(3, 9), rate = 6, life = { 0.6, 0.8 },
+		speed = { 0, 0 }, trans = ns(1, 0.2, 1), light = 1, rot = { 0, 360 }, rotSpeed = { 400, 600 } }, foot)
+	swirlPE.Orientation = Enum.ParticleOrientation.VelocityPerpendicular
+	swirlPE.EmissionDirection = Enum.NormalId.Top
+	local sparks = emitter({ sprite = "spark", color = ColorSequence.new(Color3.new(1, 1, 1), c3(colors[1])), size = ns(1.2, 0), rate = 40,
+		life = { 0.5, 0.9 }, speed = { 6, 12 }, spread = 25, light = 1 }, foot)
+
+	-- animate: spin fast, radius tightens and the whole tornado rises as it speeds up
+	local t0 = os.clock()
+	local conn
+	conn = RunService.RenderStepped:Connect(function()
+		local t = os.clock() - t0
+		local p = math.clamp(t / duration, 0, 1)
+		local spin = t * (6 + 14 * p)                     -- rad/s, speeds up
+		local radius = 4.5 - 2.3 * p                      -- tightens around the player
+		local rise = height * (0.6 + 0.4 * p)
+		hub.CFrame = CFrame.new(root.Position - Vector3.new(0, 3, 0))
+		for _, e in ipairs(atts) do
+			local base = (e.strand - 1) / strands * math.pi * 2 + spin
+			local ang = base + e.k * arc
+			local y = (e.k / segs) * rise + math.sin(t * 3 + e.strand) * 0.3
+			local r = radius * (1 - 0.25 * (e.k / segs))    -- slightly narrower at the top
+			local pos = Vector3.new(math.cos(ang) * r, y, math.sin(ang) * r)
+			local tangent = Vector3.new(-math.sin(ang), 0.18, math.cos(ang)).Unit
+			e.att.CFrame = CFrame.fromMatrix(pos, tangent, Vector3.yAxis)
+		end
+		local L = radius * 0.62                              -- bezier handle length for a ~100 deg arc
+		for _, b in ipairs(beams) do
+			b.CurveSize0 = L; b.CurveSize1 = -L
+			local w = 1.2 + 1.2 * math.sin(math.pi * p)        -- ribbons swell in the middle
+			b.Width0 = w; b.Width1 = w * 0.8
+		end
+		if t > duration then
+			for _, b in ipairs(beams) do
+				TweenService:Create(b, TweenInfo.new(0.3), { Width0 = 0, Width1 = 0 }):Play()
+			end
+			swirlPE.Enabled = false; sparks.Enabled = false
+			conn:Disconnect()
+			Debris:AddItem(hub, 1)
+		end
+	end)
+	return function()
+		if conn.Connected then conn:Disconnect() end
+		hub:Destroy()
+	end
 end
 
 function VFX.Dissolve(model: Model, creature: string, duration: number, handle: Handle?)
