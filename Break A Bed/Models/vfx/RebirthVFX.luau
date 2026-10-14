@@ -417,7 +417,7 @@ function VFX.Attach(model: Model, creature: string, sizeMul: number?): Handle
 	table.insert(conns, RunService.RenderStepped:Connect(function()
 		local s = 0.5 + 0.5 * math.sin((os.clock() - t0) * 4)
 		light.Brightness = prof.light[2] * (0.75 + 0.5 * s)
-		hl.FillTransparency = 0.82 - 0.1 * s
+		hl.FillTransparency = 0.92 - 0.05 * s -- (tuned in Play: a stronger fill hid the textures)
 		if prof.rainbow then
 			local h = ((os.clock() - t0) * 0.25) % 1
 			hl.OutlineColor = Color3.fromHSV(h, 0.6, 1); light.Color = Color3.fromHSV(h, 0.5, 1)
