@@ -5,7 +5,7 @@ The owner asked for custom models, not Creator Store ones. They were generated w
 
 | File | What | Parts (separate objects) |
 |---|---|---|
-| `0_ToriiGate` | the belt-test gate (replaces the box gate) | Pillars, Bases, Nuki, TopBeam, Roof, Strut, PlaqueFrame, Plaque |
+| `0_ToriiGate` | belt-test gate, **not used: the owner removed the gates (2026-10-14)** | Pillars, Bases, Nuki, TopBeam, Roof, Strut, PlaqueFrame, Plaque |
 | `1_Phoenix` | rebirths 1–4 | Body, Head, WingR, WingL, Tail |
 | `2_Tiger` | rebirths 5–9 | Body, Head, Legs, Tail |
 | `3_Crane` | rebirths 10–14 | Body, Head, WingR, WingL, Legs, Tail |

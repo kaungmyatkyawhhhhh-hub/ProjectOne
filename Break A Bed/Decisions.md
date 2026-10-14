@@ -190,3 +190,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-14: Phoenix Gloves (rebirth 2 reward) are NOT a fixed x65 glove (that skipped the glove shop every run, since gloves reset on rebirth). They are a permanent look + x1.2 on top of the equipped shop glove, kept through rebirths. #break-a-bed
 - 2026-10-14: Phoenix Gloves in the Glove Shop = a special first tile (flame background, +20% badge, REBIRTH 2 lock), with WEAR/WEARING in the preview. No PHOENIX: ON toggle or "Wearing" text in the bottom bar. #break-a-bed
 - 2026-10-14: the Phoenix Gloves tile goes LAST in the glove grid (owner), not first. Sensei zone: song fades in at 18 studs / out past 22, music dips to 30%. #break-a-bed
+- 2026-10-14: the owner removed the dojo (torii) gates from the belt-test beds. Do not add them back. #break-a-bed

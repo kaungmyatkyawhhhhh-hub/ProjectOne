@@ -247,4 +247,4 @@ Each bed's tile area gets decorated in that bed's theme. Keep it **compact**: on
 
 - Reuse the sprites in `Models/vfx/sprites` for the effects. Never use Roblox's default Fire/Smoke/Sparkles.
 - Low Graphics turns off the ambient effects and keeps the floor and props.
-- Belt-test beds (3, 6, 9, ...) keep their torii gate in front. The zone decor goes around it.
+- Belt-test beds (3, 6, 9, ...) have no gate (the owner removed the dojo gates). They keep the floating belt and the "BELT TEST" tag.
