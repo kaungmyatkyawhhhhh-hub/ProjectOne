@@ -44,3 +44,13 @@ Tabs DAILY / STREAK / GOALS. Ready quests glow gold with a red CLAIM, quests in 
 
 ## Quest cards (14 Oct)
 The quest cards on the right are smaller, and only one card shows at a time: a coach quest ready to hand in comes first, then today's quest. All quests are in the Quests window (QUESTS on the top bar; the left menu has no Quests tile any more).
+
+## Quest rerolls (14 Oct)
+- One FREE reroll per daily reset (`Config/DailyQuests.FreeRerollsPerDay` = 1). It is saved with the day's quests, so rejoining or switching servers doesn't give another.
+- After that every reroll is the "Quest Reroll" product, 19 Robux (id 3718500732). The game remembers which quest you picked BEFORE the purchase window opens, and swaps it only after Roblox confirms the purchase and the save is stored (once per purchase, never twice). If that quest got finished meanwhile, the first unfinished one is swapped; if none is left, the reroll is kept for later.
+- A reroll gives a new random quest: never the same one, never one of your other two. Finished or claimed quests can't be rerolled.
+- In the Quests window (Daily tab), the bonus card has the button: "REROLL - FREE" (gold) or "REROLL - R$ 19", with "Free reroll in 5h 12m" under it. Tap it, then tap the quest (its pill says REROLL). Tap again to cancel.
+- Studio test: Workspace attribute `TestDayOffset` = number of days to fake the date.
+
+![[GYM ARC/Screenshots/quest_reroll_pick.jpg]]
+![[GYM ARC/Screenshots/quest_reroll_paid.jpg]]

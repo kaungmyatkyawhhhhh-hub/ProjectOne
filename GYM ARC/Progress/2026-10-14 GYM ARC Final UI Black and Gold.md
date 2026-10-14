@@ -171,4 +171,4 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]])
 - Loading screen and menu play the owner's track 118959016267248, faded out on Play. See [[GYM ARC - Music and Sounds]].
 - Saves past the 7'0" cap got +10,000,000 EXP on every muscle once and their Growth Spurt set back to 6. See [[GYM ARC - Growth Spurts]].
 - DNA tokens now come only from Growth Spurts (+1), 25,000 coins, or the 99 Robux product 3718499538. See [[GYM ARC - Genetics]] and [[GYM ARC - Monetization]].
-
+- Quest rerolls: 1 free a day, then 19 Robux (product 3718500732), swapped only after the purchase is saved. See [[GYM ARC - Quests and Muscle of the Day]].

@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 tags: [gymarc, prompt, monetization]
-status: in progress
+status: done
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
@@ -15,4 +15,10 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - All checks on the server.
 
 Test: free once per day only (fake the date in Studio to test the reset), R$ 19 rerolls exactly one quest, rejoin doesn't refresh the free one, can't reroll a done quest. Commit, update PROGRESS.md and Obsidian.
+```
+
+Follow-up message:
+
+```text
+this is the quest reroll id: 3718500732
 ```

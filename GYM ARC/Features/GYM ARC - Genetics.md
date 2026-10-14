@@ -67,3 +67,6 @@ Only three ways to get a DNA Token (`Config/DNA`):
 3. Robux: the DNA Token product, 99 Robux. See [[GYM ARC - Monetization]].
 
 Nothing else gives tokens any more (the day-7 login reward, the "Do 200 reps" quest, legend challenges and the 400-coin front desk prompt were removed). Players keep the tokens they already had. The Genetics screen shows the count in gold; with no free reroll and no token, REROLL opens a small choice "25,000 coins" or "R$ 99" (nothing is spent until you tap one). All checks are on the server and tokens can't go below 0.
+
+![[GYM ARC/Screenshots/dna_genetics_choice.jpg]]
+![[GYM ARC/Screenshots/dna_store.jpg]]

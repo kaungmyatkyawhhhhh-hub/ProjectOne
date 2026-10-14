@@ -534,3 +534,10 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 | PerGrowthSpurt | 1 | Free tokens per Growth Spurt |
 | RobuxPrice | 99 | Shown on the R$ button until Roblox's real price loads |
 | Products.DNAToken | 3718499538 | The DNA Token developer product |
+
+## Quest rerolls (`Config/DailyQuests`, 14 Oct)
+| Value | Default | What it does |
+|---|---|---|
+| FreeRerollsPerDay | 1 | Free daily quest rerolls per daily reset |
+| RerollRobux | 19 | Shown on the button until Roblox's real price loads |
+| Products.QuestReroll | 3718500732 | The Quest Reroll developer product |

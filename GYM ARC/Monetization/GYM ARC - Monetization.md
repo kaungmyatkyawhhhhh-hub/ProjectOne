@@ -59,6 +59,7 @@ Store only appears after the tutorial plus 5 minutes of play, and never pops up 
 | Name | Type | Description | Price (Robux) | ID | Status |
 |---|---|---|---|---|---|
 | DNA Token | Developer product | One genetics reroll (1 token) | 99 | 3718499538 | ON (owner, 14 Oct) |
+| Quest Reroll | Developer product | Swap one daily quest for a new one (after the free one each day) | 19 | 3718500732 | ON (owner, 14 Oct) |
 | Shake Pack | Developer product | 5 Energy Shakes | Not set | none | OFF (no id yet) |
 | Server Boost | Developer product | 2x gains for everyone in the server for 30 minutes; buyer's name on the board | Not set | none | OFF (no id yet) |
 
@@ -108,3 +109,6 @@ monetization prompt is the one that turns it on.
 ## DNA Token (14 Oct)
 - Developer product **DNA Token**, 99 Robux, id **3718499538** (`Config/Products.DNAToken`). Gives 1 token, granted in ProcessReceipt only after the save is stored, once per PurchaseId (a retried or repeated receipt never grants twice). Tested with a Studio test receipt, also after rejoining.
 - Sold in the Shop (Items, next to the 25,000 coin button) and on the Genetics screen when you press REROLL with no token.
+
+## Quest Reroll (14 Oct)
+- Developer product **Quest Reroll**, 19 Robux, id **3718500732** (`Config/Products.QuestReroll`). Bought only from the Quests window after picking a quest (not shown in the Store). The reroll happens in ProcessReceipt, once per PurchaseId, after the save is stored. See [[GYM ARC - Quests and Muscle of the Day]].
