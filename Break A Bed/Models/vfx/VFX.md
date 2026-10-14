@@ -16,6 +16,15 @@ The owner said the flame around the character looked like Roblox's default Fire 
 
 ![[flame_flipbook_prev.png]]
 
+## Swirl tornado: VFX only, no parts (owner, 2026-10-14)
+The owner said the swirl bands around the player (rebirth step 2) were blocky parts. **Never build the swirl from Parts/MeshParts.** Use `VFX.Swirl(rootPart, {tierColor1, tierColor2}, seconds)`:
+- 5 glowing **energy ribbons** (curved Beams with the flowing `swirl_band.png` texture) spiral up around the player. They spin faster and faster, tighten in, rise, and swell in the middle.
+- **Spinning swirl particles** (`swirl.png`) under the feet, plus white sparks shooting up.
+- At the end the ribbons thin out and vanish. It returns a stop() function. Low Graphics uses 3 ribbons.
+- Colors per tier, for example the Phoenix uses {"#FFE27A", "#FF8A1E"} and the Galaxy dragon {"#E048C8", "#6A2CFF", "#3FA8FF"}.
+
+![[swirl_band_prev.png]] ![[swirl_prev.png]]
+
 ## What each animal gets
 | Animal | Looping VFX | Burst moment |
 |---|---|---|
