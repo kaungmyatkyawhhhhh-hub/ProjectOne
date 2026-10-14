@@ -527,3 +527,4 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 - `MachineSignsClient` `BANG.Far` 25 studs: the "!" over new machines.
 - `ShakeClient` `NOTE_AGAIN` 60 s: an area note only once per visit.
 - `Kit.TopbarGap` 8: everything under Roblox's top bar starts this far under it.
+- `PlayerData` `OVER_CAP_EXP` 10,000,000: EXP added once to every muscle of a save past the last Growth Spurt (then the spurt count goes back to 6).
