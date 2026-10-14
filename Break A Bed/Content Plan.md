@@ -358,6 +358,12 @@ The rebirth cutscene keeps the same 5 steps (camera pulls up → swirl → flash
 | 30–34 | Rainbow | rainbow ribbons | rainbow **koi fish** swim through the air in a circle | a rainbow arc over you | magical sparkle + choir |
 | 35+ | Galaxy | stars + purple nebula, sky goes to space | **galaxy dragon** made of stars, a tiny black hole flash | planets orbit you, then fade | deep space boom + choir |
 
+- **Creature quality (owner, 2026-10-14): no animals built from blocky parts.** Make them **glowing spirit animals**, like an anime power-up:
+  - **Model:** a real animal **MeshPart** from the Creator Store (search e.g. "phoenix mesh", "tiger mesh", "dragon mesh", "koi fish mesh", "crane mesh"). Prefer rigged ones with bones so wings, tails and bodies can move. **Delete every script inside a free model** before using it and check the model is free to use. Only if no good mesh exists, build a smooth one from MeshParts/unions, never plain blocks.
+  - **Spirit look:** the mesh uses a see-through glowing material (Neon or ForceField, ~0.3–0.5 transparent) in the tier color, with a brighter outline (Highlight, OutlineTransparency 0) so it reads as pure energy. Details don't need to be perfect because the glow hides them.
+  - **VFX on the creature:** **Trails** on the wing tips, tail and claws; **ParticleEmitters** along the body (sparks, feathers, embers, snowflakes, stars, depending on the tier); **Beams** of energy swirling around it; a soft **light** (PointLight) inside it that lights up the player.
+  - **Motion:** smooth, never stiff. Wings flap with bones or tweens, tails wave, the body follows a curved path (Bezier) around the player and then up into the sky. It grows from small to big as it bursts out (scale tween, ~0.3 s) and dissolves into particles at the end instead of just disappearing.
+  - **Extras:** a big flat **2D glow flash** (a BillboardGui/decal of the creature's silhouette) right at the burst moment makes it pop even on phones.
 - Same length (~5 s) and same rules as the rebirth cutscene above (only the player sees it; others see a flash in the tier color).
 - Low Graphics uses fewer particles but keeps the creature.
 
