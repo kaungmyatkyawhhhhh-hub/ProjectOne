@@ -278,6 +278,14 @@ Replaces the rejected Sleep King. No villain. You train with an old karate maste
   - During a run you still wear the run belt (White → Black). The master belt shows as a **small badge next to your name** and a glowing **knot/edge** on your belt, so both are visible.
 - Don't change the clean map. Don't add long text.
 
+## Update roadmap (2026-10-14, suggested, the owner can change it)
+One update about every week. Each update gets a new code, a title tag like "[🥋 UPDATE 1]" and a line on the update board.
+1. **Update 1: Belts (~Oct 16):** the belt story (section 11), simpler Rebirth menu, camera fix, free vs paid boosts, group-only rewards. Publish, then check the data Oct 15–16.
+2. **Update 2: Pets (~Oct 21):** "Dojo animals" (panda, tiger, crane, monkey, dragon...) that follow you and give +% Strength. Hatched from eggs bought with Cash, with rarities. Robux: Robux-only eggs, +pet slots and Lucky passes. Pets are the biggest money-maker in simulators.
+3. **Update 3: Halloween event (~Oct 25 to Nov 1):** limited spooky beds and posts, a candy currency, a Halloween egg with event-only pets, then the Nov 1 swap.
+4. **Update 4: World 2, Mountain Temple (November):** a portal at the end of the bed path. It unlocks the first time you reach Black belt and stays unlocked after rebirth. New beds 26–50 (stone, bamboo, jade, temple bell...), new posts, and an old **Grandmaster** NPC who says "Your training is not done!" World 2 has its own eggs and pets.
+- The data from each update decides the next one (if players still leave in the first 4 minutes, fix that first).
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
