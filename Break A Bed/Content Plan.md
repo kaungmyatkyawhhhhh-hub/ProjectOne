@@ -325,7 +325,7 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 4. **2.8 s:** a shockwave ring in the belt color bursts out from you. A big "**YELLOW BELT!**" (in the belt color, white outline) slams in at the top with a bounce, and "+10% 💪" shows under it. Your character does a karate pose (fists together, bow).
 5. **4.0 s:** confetti in the belt color. Sensei gives a thumbs up and fades out in smoke.
 6. **5.0 s:** back to normal.
-- **After a rebirth (2026-10-14):** belts are earned again on every run, but the full cutscene only plays the **first time ever** for each color. On later runs a **quick version (~1.5 s)** plays without locking controls or adding cinema bars: the belt flies onto you, a gong, a shockwave ring in the belt color, and "YELLOW BELT!" text. Black belt on a later run uses the quick version too, plus the Rebirth button pulse.
+- **After a rebirth (owner, 2026-10-14):** **no cutscene** when a belt is earned again on a later run, not even a short one. The belt just changes color on your character, with a small toast "Yellow belt!" (2 s) and the +10% chip. The full cutscene only plays the first time ever for each color.
 - **Black belt** is longer (~7 s): the sky darkens, the light beam from above turns gold, Sensei bows deeply, and the text says "**BLACK BELT! MASTER!**". Then the Rebirth button pulses.
 
 **B. Rebirth:**
@@ -336,6 +336,23 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 5. **3.4 s:** big "**REBIRTH 3!**" text, then the reward chips pop in one by one: "+50% 💪", "+1 token", plus the milestone reward picture if this rebirth has one ("NEW: Rebirth Aura!").
 6. **5.0 s:** back to normal.
 - **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
+
+### Rebirth cutscene changes with each master belt (owner, 2026-10-14)
+The rebirth cutscene keeps the same 5 steps (camera pulls up → swirl → flash + creature → back at spawn with the new stripe → "REBIRTH X!" + rewards), but each master belt tier has its **own creature, colors and sound**. The cutscene uses the tier you're in **after** this rebirth, so reaching a new master belt shows the new style for the first time (together with the stripes-melt, "BRONZE MASTER!" part).
+
+| Rebirths | Belt tier | Swirl | Creature (step 3) | Landing (step 4) | Sound |
+|---|---|---|---|---|---|
+| 1–4 | Black | gold light + feathers | golden **phoenix** spreads its wings | ring of gold fire | phoenix screech |
+| 5–9 | Bronze | dust + orange sparks | bronze **tiger** leaps out and roars | ground cracks in a circle, glowing orange | tiger roar + rumble |
+| 10–14 | Silver | moonlight + silver feathers, sky turns night | silver **crane** flies up past a big full moon | ring of silver mist | soft flute + wing flap |
+| 15–19 | Gold | gold coins spinning | golden **dragon** coils around you and flies up | rain of gold coins | dragon roar + coin shower |
+| 20–24 | Diamond | ice crystals + snow | crystal **ice dragon**, shards shatter outward | ring of diamond spikes that melt | ice crack + chime |
+| 25–29 | Ruby | red flames + embers | ruby **fire phoenix**, lava burst behind | ring of red fire and lava cracks | fire whoosh + screech |
+| 30–34 | Rainbow | rainbow ribbons | rainbow **koi fish** swim through the air in a circle | a rainbow arc over you | magical sparkle + choir |
+| 35+ | Galaxy | stars + purple nebula, sky goes to space | **galaxy dragon** made of stars, a tiny black hole flash | planets orbit you, then fade | deep space boom + choir |
+
+- Same length (~5 s) and same rules as the rebirth cutscene above (only the player sees it; others see a flash in the tier color).
+- Low Graphics uses fewer particles but keeps the creature.
 
 ## 12. Rebirth feels repetitive (owner, 2026-10-14)
 **Built 2026-10-14** (the reward row only shows the track; the Phoenix rewards still need building), see [[Break A Bed/2026-10-14|2026-10-14]].
