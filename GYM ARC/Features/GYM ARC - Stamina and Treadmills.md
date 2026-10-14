@@ -41,3 +41,10 @@ Every rep costs stamina, which refills on its own. Running on treadmills raises 
 
 ## Stamina bar (14 Oct)
 A slim bar at the very bottom center of the screen, 280 wide, 10 px above the edge.
+
+## Stamina bar only while exercising (14 Oct)
+- The stamina bar is hidden while you walk around. It fades in (0.2 s) when you get on a machine (lifting, the treadmill, Auto Lift) and fades out (0.4 s) about 1.5 s after you get off.
+- When stamina jumps up while you're not on a machine (a shake, a refill), the bar shows for 3 s so you see it fill. The slow refill in the background stays hidden.
+- The bar never moves, and the boost icons above it stay where they are.
+
+![[GYM ARC/Screenshots/stamina_on_machine.jpg]]

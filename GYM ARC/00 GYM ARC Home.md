@@ -111,6 +111,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - 7'0 players did not fit some equipment]]
 - [[GYM ARC - Bug - Arm wrestling and crew race bugs]]
 - [[GYM ARC - Bug - Bench reps dropped to 22 FPS]]
+- [[GYM ARC - Bug - Big players skated slowly]]
 - [[GYM ARC - Bug - Blocky arms and spiky legs at level 0]]
 - [[GYM ARC - Bug - Broken statue]]
 - [[GYM ARC - Bug - Camera zoomed into your arm on first lift]]

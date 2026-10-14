@@ -548,3 +548,19 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 | PanelCenterY | 0.40 | The weight card's centre, as a share of the screen height |
 | PanelRight | 16 | px from the right safe edge |
 | Gap | 10 | px between the card, PUMP and REP |
+
+## Skating (`Config/Skate`, 14 Oct)
+| Value | Default | What it does |
+|---|---|---|
+| BaseSpeed | 32 | Top speed (studs/s) with the plain wheels at 4'0" |
+| HeightBoost | 0.35 | Taller riders are faster: x (1 + 0.35 x (height / 4'0" - 1)) |
+| MaxSpeed | 54 | Never faster than this |
+| BoardScaleMin / Max | 0.85 / 1.3 | Board size under a 4'0" / 7'0" rider |
+
+## Stamina bar (`Shared/UI/HudBottom`, 14 Oct)
+| Value | Default | What it does |
+|---|---|---|
+| FadeIn / FadeOut | 0.2 / 0.4 s | Bar fade times |
+| HideAfterLeave | 1.5 s | Wait after getting off a machine |
+| ShowOnRefill | 3 s | How long a refill shows the bar |
+| RefillJump | 0.1 | A rise of 10% of max at once counts as a refill |
