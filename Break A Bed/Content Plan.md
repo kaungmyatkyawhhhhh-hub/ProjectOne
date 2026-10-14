@@ -253,6 +253,15 @@ Replaces the rejected Sleep King. No villain. You train with an old karate maste
   - **When a player comes close (8 studs):** he opens his eyes (they glow gold for a second), the aura flares once and the speech bubble "Become a BLACK BELT!" pops up.
   - **Sound:** a soft wind chime / singing bowl hum, only heard up close.
   - Keep the particles light (low graphics setting turns most of them off). Nothing covers the path or the buttons.
+  - **Fixes after the first build (2026-10-14 screenshot):**
+    - The yin-yang is a **tilted square part**. Make it a **round, flat disc** lying flat in the middle of the ring, softly glowing.
+    - **Pose:** the arms stick out to the sides and the legs are a blob. Use a real lotus pose: legs crossed in front, hands resting on the knees.
+    - He floats too low. Raise him so there's clear air (~3 studs) between him and the ring.
+    - The big gold "V" on the chest looks odd. Make it thin gold trim along the gi's collar edges.
+    - The rocks are plain grey blocks. Use smooth round stones with a faint gold glow outline, smaller, orbiting slowly.
+    - The petals and aura are barely visible. Make the aura and the rising cherry petals/gold sparkles clearly visible but soft.
+    - The ring is so big that players stand in it. Make it smaller and keep it off the walkway. Use thinner dots.
+    - The speech bubble is too big. Make it ~60% of the size and show it only when a player is close.
 - **Belts (25 beds):** you start as a **White belt**. Some beds are **belt tests**:
 
   | Bed | Belt |
