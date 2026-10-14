@@ -140,4 +140,5 @@ Goal: "Stayed 10 min" from 31% to 45%+. Build in this order:
   - Paid boosts **stack on top of** a running free x2, so a free boost never makes a purchase pointless.
   - When a free boost runs out: one small toast "Boost ended! Get x3 for 15 min" with a BUY button. At most once every 20 min.
   - In the shop's BOOSTS tab, show "FREE x2 → BUY x5" so the paid one looks clearly better.
+- **Monetization charts (seen 2026-10-14):** paying users peaked at about **5 in one day** around Oct 11–12, then fell toward 0. The top-10,000 benchmark is about 15–27 a day. Payer conversion spiked to ~50% on the first day (very few players, so 1–2 buyers is a big %), then dropped near 0. The 1.92% "average" is spread over weeks with no players, so ignore it. The charts end around Oct 12–13 (data comes in late). Conclusion: the early buyers were a handful of players on a small day. The drop is mostly too few players, not a broken shop.
 
