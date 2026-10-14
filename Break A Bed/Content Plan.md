@@ -262,17 +262,18 @@ Replaces the rejected Sleep King. No villain. You train with an old karate maste
 - **Rebirth:** your belt resets to White for the run (the +10% bonuses reset with it), but each rebirth adds a **gold stripe** to your belt that stays forever (shown on the belt and the name tag). Saved: `Belt`, `BeltStripes` (= Rebirths).
 - **When the stripes fill up (owner asked, 2026-10-14):** a belt holds at most **5 stripes**. On the 5th rebirth the stripes merge into a new **master belt**, and the stripes start again at 0 on top of it:
 
-  | Rebirths | Master belt (the black belt's base color, after you reach black) |
+  | Rebirths | Master belt (replaces the black belt's base color) |
   |---|---|
   | 0–4 | Black + 0–4 gold stripes |
   | 5 | **Bronze** |
   | 10 | **Silver** |
   | 15 | **Gold** |
-  | 25 | **Diamond** (light blue, sparkles) |
-  | 50 | **Rainbow** (animated color shift) |
-  | 100+ | **Galaxy** (dark purple with moving stars) |
+  | 20 | **Diamond** (light blue, sparkles) |
+  | 25 | **Ruby** (red glow) |
+  | 30 | **Rainbow** (animated color shift) |
+  | 35+ | **Galaxy** (dark purple with moving stars) |
 
-  - Between master belts, stripes count again (each master belt shows 0–4 stripes until the next one). After Galaxy, the stripes are replaced by a small number badge on the belt ("x120").
+  - A new master belt every 5 rebirths, so each one shows 0–4 stripes until the next. After Galaxy, the stripes are replaced by a small number badge on the belt ("x52").
   - Earning a master belt plays the big ceremony again: "SILVER MASTER!".
   - During a run you still wear the run belt (White → Black). The master belt shows as a **small badge next to your name** and a glowing **knot/edge** on your belt, so both are visible.
 - Don't change the clean map. Don't add long text.
