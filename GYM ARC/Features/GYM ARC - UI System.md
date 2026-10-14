@@ -151,3 +151,6 @@ Only the top bar, the left menu, ONE card on the right and the stamina bar at th
 - **Green:** the same gold without the ring, for buttons that come in rows (EQUIP, shop tiles, toggles, choices). Never pulses.
 - **Tab:** the active tab, a plain gold fill. **Flat:** an inactive tab.
 - Press and pulse share one scale from the button's centre. See [[GYM ARC - Bug - Ghost ring on gold and red buttons]].
+
+## Text fit in cards (14 Oct, owner's bug)
+Labels inside cards and tiles now always stay inside, with 8 px space on each side. Each label gets the biggest size that fits (never below 10 px). Names stay on one line and only drop to two lines when they can't fit at 10 px. How-to-unlock text uses the body font and normal case ("Finish every Coach Quest") and can use two lines. Checked at phone, small phone and PC sizes: everything fits.

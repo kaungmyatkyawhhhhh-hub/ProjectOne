@@ -45,3 +45,10 @@ Collectible titles earned by playing. You keep them forever and wear one above y
 ## Screenshots
 ![[GYM ARC/Screenshots/fonts_before_titles.png]]
 ![[GYM ARC/Screenshots/rank_tag_after_muscles.png]]
+
+## Inventory window (14 Oct)
+The Titles tile is now **INVENTORY** (backpack icon). Its window has three tabs, and it remembers the last one you used:
+- **Titles:** the titles grid, as before (the old All / Owned filter is gone).
+- **Auras:** the aura grid and the big card for the picked aura (see [[GYM ARC - Aura]]).
+- **Items:** Energy Shakes (count + DRINK), DNA Tokens (count + "Use in Genetics", which opens the Genetics screen), and every boost running now with its timer (2x EXP, 2x Coins, VIP, Endless Stamina, Energy Shake, Server Boost, smoothie bar drinks).
+The Store's Auras tab and the "new aura" message now open the Inventory.

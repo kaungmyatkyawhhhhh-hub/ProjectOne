@@ -199,3 +199,8 @@ Studio can only upload to the owner's account. These work in the game; to use gr
 | Image | Asset ID | Note |
 |---|---|---|
 | product_endless_stamina | 96813280646116 | uploaded from Studio (owner's own inventory); replaces product_stamina_refill 136768220289914 |
+
+## UI icons (14 Oct)
+| Image | Asset ID | Note |
+|---|---|---|
+| backpack (INVENTORY tile) | 101113089317721 | uploaded from Studio (owner's own inventory); search_asset found no group copy |
