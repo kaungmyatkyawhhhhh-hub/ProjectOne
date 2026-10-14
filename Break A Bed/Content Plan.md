@@ -365,12 +365,17 @@ Every cutscene must be full of VFX. The custom sprites are in `Break A Bed/Model
   - A shockwave and sparks follow in the new color, and that animal's special burst plays again.
 - **First-join intro:** petals and gold motes drifting past the camera during the fly-down; Sensei's eyes open with a gold flash, an aura flare and a ring.
 
-### First-join intro (suggested 2026-10-14, not built yet)
-Only on a player's very first join, before the tutorial. **~6 s**, with "Tap to skip" from the start (most players leave in the first 4 minutes, so it must be short).
-1. **0–2 s:** the camera starts high above the end of the bed path and flies down along it. The belt-test beams glow in their colors, and the black belt beam at bed 25 is the brightest.
-2. **2–4 s:** the camera swoops to spawn and stops in front of the floating **Sensei**. He opens his eyes (gold glow) and his aura flares. The speech bubble says **"Become a BLACK BELT!"**
-3. **4–6 s:** the camera glides behind the player, the cinema bars slide away, and the tutorial's first step starts.
-- Soft taiko drums plus the gong when Sensei opens his eyes. No other text.
+### First-join intro (updated 2026-10-14 for the hidden cloud zones)
+Only on a player's very first join, before the tutorial. **~7 s**, with "Tap to skip" from the start (most players leave in the first 4 minutes, so keep it short). Because the zones ahead are now hidden in clouds, the intro shows them as a **mystery**:
+1. **0–1.5 s:** the camera starts low over spawn and the first open zones (Cardboard Bed, Air Mattress...), gliding forward along the path.
+2. **1.5–3.5 s:** the camera rises and flies over the **sea of clouds** covering the rest of the path. Inside the clouds, glows in different colors flicker (the hidden zones: a red lava glow, blue ice, purple crystal...). Far away a **black-belt light** shines up through the clouds. Soft taiko drums.
+3. **3.5–5.5 s:** the camera swoops back to spawn and stops in front of the floating **Sensei**. He opens his eyes (gold glow), his aura flares, and with a gong the bubble says **"Become a BLACK BELT!"**
+4. **5.5–7 s:** the camera glides behind the player, the cinema bars slide away, and the tutorial starts.
+- Petals and gold motes drift past the camera. No other text.
+
+**Zone unlock moment (new, short, ~1.5 s, no cinema bars, controls stay on):** when a zone's clouds blow apart, the camera does a quick gentle push toward that zone (FOV 70 → 64 → 70) while the clouds burst outward. The zone's colors fade in, "NEW ZONE UNLOCKED!" shows with the bed name, and a wind whoosh plus a bright chime play. If the player is training or breaking, skip the camera push and only show the text.
+
+**Belt light column + clouds:** if your next belt test is inside the clouds, its soft light column rises **above** the cloud bank, so you can still see where your next belt is waiting.
 
 ### Rebirth cutscene changes with each master belt (owner, 2026-10-14)
 The rebirth cutscene keeps the same 5 steps (camera pulls up → swirl → flash + creature → back at spawn with the new stripe → "REBIRTH X!" + rewards), but each master belt tier has its **own creature, colors and sound**. The cutscene uses the tier you're in **after** this rebirth, so reaching a new master belt shows the new style for the first time (together with the stripes-melt, "BRONZE MASTER!" part).
