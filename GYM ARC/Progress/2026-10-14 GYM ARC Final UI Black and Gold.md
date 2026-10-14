@@ -166,3 +166,9 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - Lifting HUD, top bar, Physique, l
 
 ## 15. Performance: culling, LOD, streaming
 Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]]). All three steps are done; see [[GYM ARC - Performance]] for what changed, the before / after numbers and the one Studio setting the owner still has to set (the streaming radius).
+
+## 16. Menu music, past the height cap, DNA tokens
+- Loading screen and menu play the owner's track 118959016267248, faded out on Play. See [[GYM ARC - Music and Sounds]].
+- Saves past the 7'0" cap got +10,000,000 EXP on every muscle once and their Growth Spurt set back to 6. See [[GYM ARC - Growth Spurts]].
+- DNA tokens now come only from Growth Spurts (+1), 25,000 coins, or the 99 Robux product 3718499538. See [[GYM ARC - Genetics]] and [[GYM ARC - Monetization]].
+

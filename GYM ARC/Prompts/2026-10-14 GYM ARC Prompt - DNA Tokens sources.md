@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 tags: [gymarc, prompt, monetization]
-status: in progress
+status: done
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
@@ -23,4 +23,10 @@ Genetics screen:
 - Tokens are saved in the player's data and can't go negative. All checks are on the server.
 
 Test: growth spurt gives exactly 1, buying with coins works and fails correctly, Robux purchase in Studio test mode gives 1 (and not again on rejoin). Commit, update PROGRESS.md and Obsidian.
+```
+
+Follow-up message:
+
+```text
+this is the id for the dna token: 3718499538
 ```

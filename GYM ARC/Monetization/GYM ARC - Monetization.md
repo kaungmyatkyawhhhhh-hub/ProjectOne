@@ -58,13 +58,12 @@ Store only appears after the tutorial plus 5 minutes of play, and never pops up 
 
 | Name | Type | Description | Price (Robux) | ID | Status |
 |---|---|---|---|---|---|
-| DNA Token | Developer product | One genetics reroll | Not set | none | OFF (no id yet) |
+| DNA Token | Developer product | One genetics reroll (1 token) | 99 | 3718499538 | ON (owner, 14 Oct) |
 | Shake Pack | Developer product | 5 Energy Shakes | Not set | none | OFF (no id yet) |
 | Server Boost | Developer product | 2x gains for everyone in the server for 30 minutes; buyer's name on the board | Not set | none | OFF (no id yet) |
 
 Prices are set on the Creator Hub when you create each item; the game reads the price from Roblox, so there is no price
-in Config. Everything paid can also be earned for free (DNA tokens from Growth Spurts, streaks and 400 coins at the
-front desk; shakes for 25 coins).
+in Config. Everything paid can also be earned for free (DNA tokens: +1 every Growth Spurt or 25,000 coins; shakes for 25 coins).
 
 ### Badges (linked to titles)
 
@@ -105,3 +104,7 @@ height and every title. Purchases saved before they are granted, never granted t
 
 Note: the other planned prompt ([[2026-10-13 GYM ARC Prompt - New features run]]) says monetization stays OFF; the
 monetization prompt is the one that turns it on.
+
+## DNA Token (14 Oct)
+- Developer product **DNA Token**, 99 Robux, id **3718499538** (`Config/Products.DNAToken`). Gives 1 token, granted in ProcessReceipt only after the save is stored, once per PurchaseId (a retried or repeated receipt never grants twice). Tested with a Studio test receipt, also after rejoining.
+- Sold in the Shop (Items, next to the 25,000 coin button) and on the Genetics screen when you press REROLL with no token.

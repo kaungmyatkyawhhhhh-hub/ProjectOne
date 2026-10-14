@@ -40,3 +40,6 @@ One currency: coins. Earned by lifting and playing, spent on weights, shakes, co
 ![[GYM ARC/Screenshots/ui_v7_hud_pc.png]]
 ![[GYM ARC/Screenshots/streak_popup_day1.jpg]]
 ![[GYM ARC/Screenshots/streak_popup_day7.jpg]]
+
+## DNA tokens (14 Oct)
+Day 7 of the login calendar no longer gives a DNA token (only coins and, the first time, the "Dedicated" title). The front desk no longer sells tokens; they cost 25,000 coins in the Shop or on the Genetics screen. See [[GYM ARC - Genetics]].

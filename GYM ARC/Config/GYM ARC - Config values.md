@@ -167,7 +167,6 @@ File: `Config/Economy.luau`.
 | Setting | Value | What it does |
 |---|---|---|
 | Login.Coins | 25, 35, 50, 70, 90, 120, 300 | Login calendar coins for day 1..7 (13 Oct; replaced the Daily streak numbers) |
-| Login.Day7DnaTokens | 1 | DNA tokens on day 7 (with the "Dedicated" title) |
 | Offline.CoinsPerMinute | 0.5 | Offline coins rate |
 | Offline.CapHours | 8 h | Offline cap (max 240 coins) |
 | Offline.MinMinutes | 10 | Shorter breaks give nothing |
@@ -175,7 +174,6 @@ File: `Config/Economy.luau`.
 | Rerack.MaxLoose | 3 | Loose plates at once |
 | Rerack.SpawnEvery | 90 s | Time between new loose plates |
 | Rerack.Spots | 8 spots | Floor spots for loose plates |
-| DnaTokenCost | 400 coins | DNA token price at the front desk |
 | RushHour.EveryMinutes | 30 | Rush hour cycle |
 | RushHour.LengthMinutes | 3 | Rush hour length |
 | RushHour.Coins | 2x | Coins per rep during rush hour |
@@ -322,7 +320,7 @@ File: `Config/Quests.luau`. Coach Dex quests: a one-time chain of 12, then 6 rep
 
 | Setting | Value | What it does |
 |---|---|---|
-| Chain | 12 quests, rewards 10-200 coins (+ shakes, 1 DNA token) | First quests, in order |
+| Chain | 12 quests, rewards 10-200 coins (+ shakes) | First quests, in order |
 | Repeatable | 6 quests, 30-60 coins | Loop after the chain |
 | CoachName | "Coach Dex" | Quest giver |
 | Prompt distance | 10 studs | Talk prompt range |
@@ -349,7 +347,7 @@ File: `Config/Legends.luau`.
 | Visit.StayMinutes | 3 min | How long a legend stays |
 | Visit.FirstVisitSeconds | 120 s | First visit after a server starts (30 in Studio) |
 | List | 8 legends | Lance Lats, Brody Pumpkins, Tank McFlex, Kyle Swole, Ricky Reps, Big Beefington, Tiny Tim Gains, Chad Gainsworth (each with a title and a 15-40 rep challenge) |
-| Reward | 60 coins + 1 DNA token | Per finished legend challenge |
+| Reward | 60 coins | Per finished legend challenge |
 
 ## Config/Seasons
 File: `Config/Seasons.luau`.
@@ -528,3 +526,11 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 - `ShakeClient` `NOTE_AGAIN` 60 s: an area note only once per visit.
 - `Kit.TopbarGap` 8: everything under Roblox's top bar starts this far under it.
 - `PlayerData` `OVER_CAP_EXP` 10,000,000: EXP added once to every muscle of a save past the last Growth Spurt (then the spurt count goes back to 6).
+
+## DNA (`Config/DNA`, 14 Oct)
+| Value | Default | What it does |
+|---|---|---|
+| CoinPrice | 25000 | Coins for 1 DNA token (Shop, Genetics screen) |
+| PerGrowthSpurt | 1 | Free tokens per Growth Spurt |
+| RobuxPrice | 99 | Shown on the R$ button until Roblox's real price loads |
+| Products.DNAToken | 3718499538 | The DNA Token developer product |
