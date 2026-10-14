@@ -278,6 +278,32 @@ Replaces the rejected Sleep King. No villain. You train with an old karate maste
   - During a run you still wear the run belt (White → Black). The master belt shows as a **small badge next to your name** and a glowing **knot/edge** on your belt, so both are visible.
 - Don't change the clean map. Don't add long text.
 
+## 11b. Cutscenes for belts and rebirth (owner, 2026-10-14)
+These replace the short belt "ceremony" in section 11 with real cutscenes. Shared rules:
+- Only the player who earned it sees the cutscene. Other players just see a gold flash and a burst of light on that player.
+- Controls are locked and the HUD hides. Black cinema bars slide in at the top and bottom (0.3 s).
+- About **5 s** long. A small "Tap to skip" appears after 1.5 s (only for cutscenes you've seen before).
+- The camera returns smoothly (0.4 s) to the normal view, and the HUD fades back in.
+- Text is big and short, with no sentences.
+
+**A. First time you earn a belt (each belt color once):**
+1. **0.0 s:** the bed shatters in slow motion (time slows to about 30% for 1 s). The camera swings around to the front of your character.
+2. **1.0 s:** the screen dims except for you. **Sensei** appears beside you in a puff of smoke, bows and holds out the new belt in both hands. A soft drum roll plays.
+3. **2.2 s:** the belt floats from his hands, spins once around your character, and ties itself around your waist with a "whoosh". Then a **gong**.
+4. **2.8 s:** a shockwave ring in the belt color bursts out from you. A big "**YELLOW BELT!**" (in the belt color, white outline) slams in at the top with a bounce, and "+10% 💪" shows under it. Your character does a karate pose (fists together, bow).
+5. **4.0 s:** confetti in the belt color. Sensei gives a thumbs up and fades out in smoke.
+6. **5.0 s:** back to normal.
+- **Black belt** is longer (~7 s): the sky darkens, the light beam from above turns gold, Sensei bows deeply, and the text says "**BLACK BELT! MASTER!**". Then the Rebirth button pulses.
+
+**B. Rebirth:**
+1. **0.0 s:** you press REBIRTH. The camera pulls up and out above you while a rising whoosh plays.
+2. **0.8 s:** gold light swirls around your character like a tornado, faster and faster. Phoenix feathers fly around.
+3. **2.0 s:** a white flash. A golden **phoenix** flies up out of you with a screech and wings spread (behind the character, never over the face).
+4. **2.6 s:** you're back at spawn standing in a ring of gold fire that fades away. Your belt is White again. The **new gold stripe** appears on it with a sparkle and a "ting".
+5. **3.4 s:** big "**REBIRTH 3!**" text, then the reward chips pop in one by one: "x2 💪", "+1 token", plus the milestone reward picture if this rebirth has one ("NEW: Rebirth Aura!").
+6. **5.0 s:** back to normal.
+- **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
+
 ## 12. Rebirth feels repetitive (owner, 2026-10-14)
 Players get bored replaying the same beds after a rebirth. Three fixes:
 1. **Fast replay:**
