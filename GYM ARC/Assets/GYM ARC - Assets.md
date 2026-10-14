@@ -182,3 +182,15 @@ Studio can only upload to the owner's account. These work in the game; to use gr
 | aura_royal.png | 84584030021403 | `Config/Auras` |
 | aura_toxic.png | 72766894142392 | `Config/Auras` |
 | aura_shadow.png | 110201785660530 | `Config/Auras` |
+
+## Aura VFX textures (14 Oct, uploaded from Studio: owner's own inventory)
+| Texture | Asset ID |
+|---|---|
+| flame_flipbook_4x4 (1024, 4x4) | 91013788221828 |
+| smoke_flipbook_4x4 (1024, 4x4) | 105468903616816 |
+| glow_soft | 108461610476976 |
+| spark_star | 82372237523631 |
+| energy_streak | 84289295380894 |
+| shockwave_ring | 131893925782949 |
+| ground_circle | 74138882329945 |
+| lightning_beam | 138403894498190 |

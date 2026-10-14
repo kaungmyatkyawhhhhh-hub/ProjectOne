@@ -83,3 +83,33 @@ Earned and bought auras are kept forever. Pass auras count while you own the pas
 
 ## Related
 [[GYM ARC - Game Feel]], [[GYM ARC - Monetization]], [[GYM ARC - Muscles and Bodies]]
+
+## New effects: the owner's AuraVFX module (14 Oct)
+The old aura effects are replaced by the owner's ready-made module (`Shared/VFX/AuraVFX`, from Downloads\gym_arc_aura_vfx). Each aura has a matching look (preset).
+- **Who sees it:** every player's aura is drawn on every screen. The server marks the character with the aura's look ("EquippedAura"), also after a respawn.
+- **How strong:** soft glow when not lifting (power 0.15); while lifting it follows the PUMP bar; full while PUMPED.
+- **Burst:** a ring, flames and sparks on a new personal record (with the sound) or when the pump hits 100%.
+- **Distance:** your own aura is always full. Others: full within 40 studs, only glow and ground ring up to 90, nothing further away or with "Others' Auras" off / Low Graphics.
+- **Try-on:** in the Titles window's AURAS tab your own character wears the picked aura at full power (nothing is equipped).
+- **Fixes while testing:** the aura was too narrow when built before the muscles loaded (now rebuilt when the body size changes a lot); textures load at join so the first aura never shows blank cards; Shadow made a little lighter (it was invisible in the dark gym).
+- **Performance:** Studio's frame rate while remote-controlled is about 11 fps with or without auras, so no useful FPS number. Budget: about 90 particles per full aura (60% on phones); far players about 10.
+
+Previous version (the 3-layer particle aura built in AuraClient) is replaced.
+
+![[GYM ARC/Screenshots/auras_v2_golden_idle.jpg]]
+![[GYM ARC/Screenshots/auras_v2_golden_50.jpg]]
+![[GYM ARC/Screenshots/auras_v2_golden_100.jpg]]
+![[GYM ARC/Screenshots/auras_v2_golden_burst.jpg]]
+![[GYM ARC/Screenshots/auras_v2_ember.jpg]]
+![[GYM ARC/Screenshots/auras_v2_frost.jpg]]
+![[GYM ARC/Screenshots/auras_v2_storm.jpg]]
+![[GYM ARC/Screenshots/auras_v2_titan.jpg]]
+![[GYM ARC/Screenshots/auras_v2_inferno.jpg]]
+![[GYM ARC/Screenshots/auras_v2_blood_moon.jpg]]
+![[GYM ARC/Screenshots/auras_v2_void.jpg]]
+![[GYM ARC/Screenshots/auras_v2_neon.jpg]]
+![[GYM ARC/Screenshots/auras_v2_galaxy.jpg]]
+![[GYM ARC/Screenshots/auras_v2_royal.jpg]]
+![[GYM ARC/Screenshots/auras_v2_toxic.jpg]]
+![[GYM ARC/Screenshots/auras_v2_shadow.jpg]]
+![[GYM ARC/Screenshots/auras_v2_small_npc.jpg]]
