@@ -113,3 +113,8 @@ The owner changed their mind: **put the favorite step back** on the Free Gift an
 1. Free chest: a model + pad + BillboardGui, with the saved 15-minute cooldown on the server.
 2. Ad board: a SurfaceGui, a rewarded video ad via `AdService` (check eligibility; hide the board if no ad is available), the reward given on the server after the ad completes, a 10-minute limit.
 3. Free Gift popup: the FINAL STYLE window like `preview-free-gift.png`, a group check on the server, given once (saved).
+
+## One step: join the group (owner, 2026-10-14)
+- The Free Gift and the Exclusive Chest now need only **one step: join the group** (checked by the server). The like and favorite steps are removed from both screens.
+- About 1 minute after the group reward is claimed, a small popup with no reward: "Enjoying the game? Like and Favorite!" with OK. Once per player, ever.
+- See [[Break A Bed/2026-10-14|2026-10-14]].
