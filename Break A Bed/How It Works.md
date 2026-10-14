@@ -274,6 +274,14 @@ To make the game more exciting, players can't see far ahead.
     - Material **SmoothPlastic**, Transparency 0, CastShadow off, CanCollide/CanQuery/CanTouch off. Colors come from the texture. No outline, no glow.
     - Optional softness: a few slow `smoke` particles (white, LightEmission 0, Transparency ~0.6) only along the bottom edge where the clouds meet the ground, to blend them in. **Don't use the swirly `cloud` sprite here at all.**
     - Gentle motion: each cloud drifts/bobs 0.5 stud slowly (client tween).
+  - **VFX on the clouds (owner: "it's just white balls", 2026-10-14):** the clouds themselves stay solid white (no glow), but they get a layer of soft magic around them:
+    1. **Mist wisps:** slow, see-through `smoke` particles (white, Transparency ~0.7, LightEmission 0) drifting sideways across the cloud surface and spilling over the front edge like dry ice. Big (8–15 studs), long life (6–8 s).
+    2. **Twinkles:** tiny `spark`/`star` particles that blink on and off all over the cloud surface (white with a hint of gold, LightEmission 1, size 0.4–0.8, rate low). Magical, not busy.
+    3. **Mystery glow inside:** 2–3 big soft `glow` sprites hidden just inside the front clouds, in the **theme color of the next hidden zone** (red for Lava, icy blue for Ice, purple for Crystal...). They pulse slowly (4 s), as if something is waiting inside.
+    4. **Inner flashes:** every 8–15 s, a soft flash deep in the clouds (a PointLight flickering 2–3 times in the zone color) with a very quiet distant rumble. On later zones (16+), it's light purple lightning `lightning` sprites inside.
+    5. **Light rays from above:** 1–2 soft `rays` billboards high above the cloud top, very faint (Transparency ~0.85), slowly turning, like sunbeams on the clouds.
+    6. **Touching the wall:** a puff of cloud particles plus a soft whoosh where the player walks into it.
+    - Low Graphics: keep only the mist (fewer) and the mystery glow.
   - **Remove the floating grey blocks** visible in the sky above the map (debris/props left floating), unless they're meant to be there.
   - **The hidden zones must be truly invisible, from every angle (owner: "I can see the front too"):** clouds alone don't hide them when the camera looks from above, the side or past the wall. So on the client, everything in a hidden zone (bed, cinder blocks, tile, props, signs, name tags, lights, particles, sounds) is **removed locally**: moved into a client-side folder outside Workspace, and brought back when revealed. Not just made see-through.
   - The cloud blanket also covers the **top** of the hidden area, so looking down from above you see only clouds.
