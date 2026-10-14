@@ -18,20 +18,22 @@ local Anchors = require(script.Parent:WaitForChild("RebirthVFXAnchors"))
 
 local VFX = {}
 
--- 1) Upload every PNG in "Break A Bed/Models/vfx/sprites" (Asset Manager > Bulk Import) and paste the ids here.
+-- The custom sprites in "Break A Bed/Models/vfx/sprites", uploaded 2026-10-14.
 VFX.Sprites = {
-	glow = "rbxassetid://0", spark = "rbxassetid://0", star = "rbxassetid://0", flame = "rbxassetid://0",
-	flame_white = "rbxassetid://0", smoke = "rbxassetid://0", feather = "rbxassetid://0", ember = "rbxassetid://0",
-	snowflake = "rbxassetid://0", ice_shard = "rbxassetid://0", coin = "rbxassetid://0", bubble = "rbxassetid://0",
-	ring = "rbxassetid://0", petal = "rbxassetid://0", claw_slash = "rbxassetid://0", lightning = "rbxassetid://0",
-	rune_circle = "rbxassetid://0", rays = "rbxassetid://0", cloud = "rbxassetid://0", trail = "rbxassetid://0",
-	energy = "rbxassetid://0", dust = "rbxassetid://0", orb = "rbxassetid://0",
+	glow = "rbxassetid://72718961291471", spark = "rbxassetid://118257515762052", star = "rbxassetid://91261169508957", flame = "rbxassetid://84524091514752",
+	flame_white = "rbxassetid://99098586951767", smoke = "rbxassetid://116516066522009", feather = "rbxassetid://90477064327301", ember = "rbxassetid://86116414486799",
+	snowflake = "rbxassetid://133312230570253", ice_shard = "rbxassetid://93934057963322", coin = "rbxassetid://75677936675812", bubble = "rbxassetid://74830347392931",
+	ring = "rbxassetid://114812788166514", petal = "rbxassetid://103770413540512", claw_slash = "rbxassetid://136607883066223", lightning = "rbxassetid://94110313424083",
+	rune_circle = "rbxassetid://105909629892935", rays = "rbxassetid://84297323769537", cloud = "rbxassetid://107048214238270", trail = "rbxassetid://82683263065069",
+	energy = "rbxassetid://125689238568684", dust = "rbxassetid://137582597658372", orb = "rbxassetid://107235527432295",
 }
 
 local low = false
 function VFX.SetLowGraphics(on: boolean) low = on end
+-- size multiplier for the particles and trails of the creature being set up (the cutscene resizes the models)
+local curMul = 1
 
-local function c3(hex: string): Color3 return Color3.fromHex(hex) end
+local function c3(hex: any): Color3 if typeof(hex) == "Color3" then return hex end return Color3.fromHex(hex) end
 local function cs(...: string): ColorSequence
 	local list = { ... }
 	if #list == 1 then return ColorSequence.new(c3(list[1])) end
@@ -47,6 +49,12 @@ local function ns(...: number): NumberSequence
 	return NumberSequence.new(keys)
 end
 local FADE = ns(1, 0, 0.15, 1) -- fade in, hold, fade out
+local function scaleSeq(seq: NumberSequence, k: number): NumberSequence
+	if k == 1 then return seq end
+	local keys = {}
+	for _, kp in ipairs(seq.Keypoints) do table.insert(keys, NumberSequenceKeypoint.new(kp.Time, kp.Value * k, kp.Envelope * k)) end
+	return NumberSequence.new(keys)
+end
 
 ------------------------------------------------------------------------------------------
 -- Profiles: one per creature. Every emitter is fully custom per creature.
@@ -249,7 +257,7 @@ local function anchorAttachment(model: Model, creature: string, anchor: string):
 	if not part then return nil end
 	local a = Instance.new("Attachment")
 	a.Name = "VFX_" .. anchor
-	a.Position = offset
+	a.Position = offset * model:GetScale() -- (the anchors were measured on the unscaled model)
 	a.Parent = part
 	return a
 end
@@ -258,7 +266,7 @@ local function emitter(e: any, parent: Instance): ParticleEmitter
 	local pe = Instance.new("ParticleEmitter")
 	pe.Texture = VFX.Sprites[e.sprite]
 	pe.Color = e.color or ColorSequence.new(Color3.new(1, 1, 1))
-	pe.Size = e.size or ns(1)
+	pe.Size = scaleSeq(e.size or ns(1), curMul)
 	pe.Transparency = e.trans or FADE
 	pe.Lifetime = NumberRange.new(e.life[1], e.life[2])
 	pe.Speed = NumberRange.new(e.speed[1], e.speed[2])
@@ -279,7 +287,7 @@ end
 local function trail(t: any, a0: Attachment): Trail
 	local a1 = Instance.new("Attachment")
 	a1.Name = a0.Name .. "_B"
-	a1.Position = a0.Position + Vector3.new(0, t.width, 0)
+	a1.Position = a0.Position + Vector3.new(0, t.width * curMul, 0)
 	a1.Parent = a0.Parent
 	local tr = Instance.new("Trail")
 	tr.Attachment0 = a0
@@ -355,7 +363,8 @@ end
 ------------------------------------------------------------------------------------------
 export type Handle = { Destroy: (self: Handle) -> (), Instances: { Instance }, Conns: { RBXScriptConnection } }
 
-function VFX.Attach(model: Model, creature: string): Handle
+function VFX.Attach(model: Model, creature: string, sizeMul: number?): Handle
+	curMul = sizeMul or 1
 	local prof = P[creature]
 	assert(prof, "RebirthVFX: unknown creature " .. tostring(creature))
 	local made: { Instance } = {}
@@ -423,6 +432,7 @@ function VFX.Attach(model: Model, creature: string): Handle
 		end))
 	end
 
+	curMul = 1
 	local h = { Instances = made, Conns = conns } :: any
 	function h:Destroy()
 		for _, c in ipairs(self.Conns) do c:Disconnect() end
@@ -509,5 +519,14 @@ function VFX.Dissolve(model: Model, creature: string, duration: number, handle: 
 		model:Destroy()
 	end)
 end
+
+-- the building blocks, for the belt / master belt / intro cutscenes (colors: hex or Color3)
+VFX.Billboard = billboard
+VFX.FlatDecal = flatDecal
+VFX.WorldBurst = worldBurst
+VFX.Emitter = emitter
+VFX.Trail = trail
+VFX.ns = ns
+VFX.cs = cs
 
 return VFX
