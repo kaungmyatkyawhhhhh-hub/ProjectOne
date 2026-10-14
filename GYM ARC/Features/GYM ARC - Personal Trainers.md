@@ -68,3 +68,9 @@ Trainers don't bump into players any more: every trainer part is in a "Trainers"
 ![[GYM ARC/Screenshots/trainers_portrait_pump.png]]
 ![[GYM ARC/Screenshots/trainers_follow_exp.jpg]]
 ![[GYM ARC/Screenshots/trainers_lats_fixed_exp.jpg]]
+
+### Skin fix (14 Oct, later)
+Hiding the skin layer made the trainers look like floating clothes (no bare skin). Now each trainer's skin color is painted into his clothing images under the clothes, so arms, legs and necklines show skin and the clothes stay solid (no torn patches at the lats).
+
+![[GYM ARC/Screenshots/trainers_skin_fixed_pump.jpg]]
+![[GYM ARC/Screenshots/trainers_skin_fixed_stamina.jpg]]

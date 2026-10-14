@@ -46,3 +46,9 @@ Follow-up message:
 some of the trainers clothes look torn and their skin is showing in some parts of the clothes
 especially in the front view of the lats
 ```
+
+Follow-up message:
+
+```text
+only the trainers' clothes show and not their skin now
+```
