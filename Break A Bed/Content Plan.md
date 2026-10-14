@@ -337,6 +337,23 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 6. **5.0 s:** back to normal.
 - **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
 
+### Rebirth cutscene changes with each master belt (owner, 2026-10-14)
+The rebirth cutscene keeps the same 5 steps (camera pulls up → swirl → flash + creature → back at spawn with the new stripe → "REBIRTH X!" + rewards), but each master belt tier has its **own creature, colors and sound**. The cutscene uses the tier you're in **after** this rebirth, so reaching a new master belt shows the new style for the first time (together with the stripes-melt, "BRONZE MASTER!" part).
+
+| Rebirths | Belt tier | Swirl | Creature (step 3) | Landing (step 4) | Sound |
+|---|---|---|---|---|---|
+| 1–4 | Black | gold light + feathers | golden **phoenix** spreads its wings | ring of gold fire | phoenix screech |
+| 5–9 | Bronze | dust + orange sparks | bronze **tiger** leaps out and roars | ground cracks in a circle, glowing orange | tiger roar + rumble |
+| 10–14 | Silver | moonlight + silver feathers, sky turns night | silver **crane** flies up past a big full moon | ring of silver mist | soft flute + wing flap |
+| 15–19 | Gold | gold coins spinning | golden **dragon** coils around you and flies up | rain of gold coins | dragon roar + coin shower |
+| 20–24 | Diamond | ice crystals + snow | crystal **ice dragon**, shards shatter outward | ring of diamond spikes that melt | ice crack + chime |
+| 25–29 | Ruby | red flames + embers | ruby **fire phoenix**, lava burst behind | ring of red fire and lava cracks | fire whoosh + screech |
+| 30–34 | Rainbow | rainbow ribbons | rainbow **koi fish** swim through the air in a circle | a rainbow arc over you | magical sparkle + choir |
+| 35+ | Galaxy | stars + purple nebula, sky goes to space | **galaxy dragon** made of stars, a tiny black hole flash | planets orbit you, then fade | deep space boom + choir |
+
+- Same length (~5 s) and same rules as the rebirth cutscene above (only the player sees it; others see a flash in the tier color).
+- Low Graphics uses fewer particles but keeps the creature.
+
 ## 12. Rebirth feels repetitive (owner, 2026-10-14)
 **Built 2026-10-14** (the reward row only shows the track; the Phoenix rewards still need building), see [[Break A Bed/2026-10-14|2026-10-14]].
 Players get bored replaying the same beds after a rebirth. Three fixes:
