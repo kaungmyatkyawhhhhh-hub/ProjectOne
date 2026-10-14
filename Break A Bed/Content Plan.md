@@ -366,6 +366,14 @@ The rebirth cutscene keeps the same 5 steps (camera pulls up → swirl → flash
   - **Spirit look:** the mesh uses a see-through glowing material (Neon or ForceField, ~0.3–0.5 transparent) in the tier color, with a brighter outline (Highlight, OutlineTransparency 0) so it reads as pure energy. Details don't need to be perfect because the glow hides them.
   - **VFX on the creature:** **Trails** on the wing tips, tail and claws; **ParticleEmitters** along the body (sparks, feathers, embers, snowflakes, stars, depending on the tier); **Beams** of energy swirling around it; a soft **light** (PointLight) inside it that lights up the player.
   - **Motion:** smooth, never stiff. Wings flap with bones or tweens, tails wave, the body follows a curved path (Bezier) around the player and then up into the sky. It grows from small to big as it bursts out (scale tween, ~0.3 s) and dissolves into particles at the end instead of just disappearing.
+  - **New VFX (owner: "you can add new vfx too"):**
+    - **Afterimages:** 3 fading copies of the creature trail behind it as it flies (clones at 0.6 / 0.75 / 0.9 transparency, removed after 0.3 s).
+    - **Shockwave rings:** 2 flat rings in the tier color expand on the ground when it bursts out, plus 1 vertical ring when it shoots up.
+    - **Speed lines:** thin white streaks rushing toward the camera for 0.4 s at the burst moment (a ScreenGui overlay).
+    - **Light rays:** a sunburst of soft rays behind the creature at the burst moment.
+    - **Ground glow decal:** a glowing rune circle under the player in the tier color that spins and fades.
+    - **Camera:** a short shake at the burst and a quick zoom-punch (FOV 70 → 60 → 70).
+    - **Tier extras:** tiger has glowing claw-slash marks; crane has falling silver feathers; gold dragon has coins bouncing on the ground; ice dragon has frost spreading on the ground; fire phoenix has embers and heat shimmer; koi have bubbles and water ripples in the air; galaxy dragon has twinkling stars and a purple vortex.
   - **Extras:** a big flat **2D glow flash** (a BillboardGui/decal of the creature's silhouette) right at the burst moment makes it pop even on phones.
 - Same length (~5 s) and same rules as the rebirth cutscene above (only the player sees it; others see a flash in the tier color).
 - Low Graphics uses fewer particles but keeps the creature.
