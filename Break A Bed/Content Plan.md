@@ -325,7 +325,7 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 4. **2.8 s:** a shockwave ring in the belt color bursts out from you. A big "**YELLOW BELT!**" (in the belt color, white outline) slams in at the top with a bounce, and "+10% 💪" shows under it. Your character does a karate pose (fists together, bow).
 5. **4.0 s:** confetti in the belt color. Sensei gives a thumbs up and fades out in smoke.
 6. **5.0 s:** back to normal.
-- **After a rebirth (2026-10-14):** belts are earned again on every run, but the full cutscene only plays the **first time ever** for each color. On later runs a **quick version (~1.5 s)** plays without locking controls or adding cinema bars: the belt flies onto you, a gong, a shockwave ring in the belt color, and "YELLOW BELT!" text. Black belt on a later run uses the quick version too, plus the Rebirth button pulse.
+- **After a rebirth (owner, 2026-10-14):** **no cutscene** when a belt is earned again on a later run, not even a short one. The belt just changes color on your character, with a small toast "Yellow belt!" (2 s) and the +10% chip. The full cutscene only plays the first time ever for each color.
 - **Black belt** is longer (~7 s): the sky darkens, the light beam from above turns gold, Sensei bows deeply, and the text says "**BLACK BELT! MASTER!**". Then the Rebirth button pulses.
 
 **B. Rebirth:**
