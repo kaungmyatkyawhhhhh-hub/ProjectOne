@@ -237,6 +237,31 @@ Short and told with pictures, because kids don't read much. Max ~6 words per lin
 - **World 2 (later):** the Sleep King's Dream Castle.
 - Don't change the clean map. Don't add long text.
 
+## 11. Story: Karate belt journey (owner's pick, 2026-10-14)
+Replaces the rejected Sleep King. No villain. You train with an old karate master and earn belts until you're a black belt. Told with pictures, at most ~6 words per line.
+- **Sensei:** an old karate master NPC at spawn (white beard, white gi, black belt, small and tidy so the map stays clean). Idle animation: arms crossed, nods; bows when you walk past. The tutorial's first line comes from him: "Become a BLACK BELT!"
+- **Belts (25 beds):** you start as a **White belt**. Some beds are **belt tests**:
+
+  | Bed | Belt |
+  |---|---|
+  | start | White |
+  | 3 | Yellow |
+  | 6 | Orange |
+  | 9 | Green |
+  | 12 | Blue |
+  | 15 | Purple |
+  | 18 | Brown |
+  | 21 | Red |
+  | 25 | **Black** |
+
+- **Belt-test beds** look special: a gold glowing floor ring, a small floating belt in that color above the bed, and a "BELT TEST" tag on the bed sign.
+- **Earning a belt (first time you break a test bed):** a short ceremony (~3 s): the screen dims a little, Sensei pops in at the side and bows, a big "YELLOW BELT!" in the belt color, the belt flies onto your character, confetti and a gong. Reward: **+10% Strength forever per belt** (stacks), shown as a small chip.
+- **The belt is worn:** a belt in your color around your character's waist, visible to everyone. Your belt color also shows next to your name above your head and on the leaderboards.
+- **Tracker:** the next-bed bar shows a small belt icon: "Next belt: Bed 6".
+- **Black belt (bed 25):** a bigger ceremony; Sensei says "You are a MASTER!" Then the **Rebirth** button: "Train again, even stronger!"
+- **Rebirth:** your belt resets to White for the run (the +10% bonuses reset with it), but each rebirth adds a **gold stripe** to your belt that stays forever (shown on the belt and the name tag). Saved: `Belt`, `BeltStripes` (= Rebirths).
+- Don't change the clean map. Don't add long text.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
