@@ -11,7 +11,7 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 Game based on Chop A Brick: train to gain Strength and Level, then karate-chop beds along a path for Cash.
 - **Details:** [[Break A Bed/Project Overview]] (all Break A Bed notes go in the `Break A Bed` folder)
 - **Code:** `C:\Users\USER\Documents\Cashgrab` on one PC, folder `BAB` on the other. Studio place "Break A Bed" (placeId 116443177548785).
-- **Now:** group offer back (JOIN GROUP button + 3-min popup), Free Gift / Exclusive Chest = one group step, free vs paid boosts (free x2 only, bought stack) ([[Break A Bed/2026-10-14|2026-10-14]]). Next: bed 20 pacing wall; save + publish.
+- **Now:** cutscenes (belts, 8 rebirth animals from the custom models, first-join intro), torii belt-test gates, belt label under the rebirth label ([[Break A Bed/2026-10-14|2026-10-14]]). Next: bed 20 pacing wall; Phoenix rewards; save + publish.
 - **Next:** on Oct 15–16, check Analytics (5-min retention, session length, funnel), Ads Manager, sales and progress toward 250 engaged players (unlocks under-16 players). Then decide: Bed Mastery, World 2 or the AFK Zone. Halloween swap on Nov 1.
 - **Ads:** released as "[🎉 RELEASE] Break a Bed". 12K Robux spent on ads; earning about 500 Robux a day ([[Break A Bed/Ads|Ads]]).
 - **Last updated:** 2026-10-14
