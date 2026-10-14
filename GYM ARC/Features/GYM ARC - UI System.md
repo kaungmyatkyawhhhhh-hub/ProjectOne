@@ -151,9 +151,3 @@ Only the top bar, the left menu, ONE card on the right and the stamina bar at th
 - **Green:** the same gold without the ring, for buttons that come in rows (EQUIP, shop tiles, toggles, choices). Never pulses.
 - **Tab:** the active tab, a plain gold fill. **Flat:** an inactive tab.
 - Press and pulse share one scale from the button's centre. See [[GYM ARC - Bug - Ghost ring on gold and red buttons]].
-
-## Stats overlay never turns you (14 Oct)
-Opening Stats no longer turns your character to face the camera; you keep facing wherever you were and the camera is untouched. Lines to body parts on the far side (Chest seen from behind) are dashed and fainter.
-
-![[GYM ARC/Screenshots/stats_no_turn_back.jpg]]
-![[GYM ARC/Screenshots/stats_no_turn_side.jpg]]

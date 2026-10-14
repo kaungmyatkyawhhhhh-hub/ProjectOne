@@ -49,3 +49,9 @@ Above the starting height a small gray line under the big %: "Taller frame - mor
 
 ## Stats labels lines (14 Oct)
 Each line ends exactly on its body part every frame, on the muscle's surface. Shoulders, Chest and Arms on the left; Back, Core and Legs on the right; a part on the far side of the body gets a faded line. Standing still with the labels open turns you to face the camera. See [[GYM ARC - Bug - Stats lines pointed at the wrong places]].
+
+## Stats overlay never turns you (14 Oct)
+Opening Stats no longer turns your character to face the camera; you keep facing wherever you were and the camera is untouched. Lines to body parts on the far side (Chest seen from behind) are dashed and fainter.
+
+![[GYM ARC/Screenshots/stats_no_turn_back.jpg]]
+![[GYM ARC/Screenshots/stats_no_turn_side.jpg]]
