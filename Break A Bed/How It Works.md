@@ -305,6 +305,11 @@ To make the game more exciting, players can't see far ahead.
   - **Camera:** limit zoom-out (CameraMaxZoomDistance ~45) so the camera can't fly high over the wall, and don't let the camera pass through the cloud wall (if it would, pull it back to the near side).
   - Check from far away (zoomed out and from the plaza): it should look like a fluffy cloud bank sitting on the back of the island, with nothing across the sky.
 - **Moving the wall:** when your Strength reaches the next zone's need, the wall **moves forward by one zone**: the front clouds blow apart (~1.5 s, wind whoosh), that zone fades in, and "NEW ZONE REVEALED!" shows with the bed's name (black silhouette until first broken).
+- **The reveal waits until you walk up to it (owner, 2026-10-14).** Reaching the Strength (for example while training) does NOT reveal the zone right away. It only makes it **ready**:
+  - When a zone becomes ready, a small toast says "☁️ The clouds are thinning... go see!", and the 🔒 sign on the wall changes to "✨ Walk closer!" with a soft pulsing glow. The next-bed bar shows "New zone ready!".
+  - The clouds only blow apart (the reveal moment with "NEW ZONE REVEALED!") when the player **walks within ~20 studs of the wall** while the zone is ready.
+  - If several zones became ready at once (big Strength jump), they reveal **one by one** as the player walks forward: each time you approach the new wall position, the next zone opens.
+  - While the zone is ready but not revealed yet, the wall stays solid.
 - To Bed, the guide beam and the next-bed bar never point past the wall.
 - **Rebirth (decided 2026-10-14): the wall does NOT come back.** Revealed zones stay revealed forever, saved as `FurthestZone` (like DiscoveredBeds, not reset by Rebirth). The wall stays at the furthest spot you ever reached and only moves further when your Strength goes past your old best. After a rebirth the world doesn't shrink: you see where you've been, beds you broke before have the ⚡ 5x-faster mark, and the clouds ahead are the next real mystery. This keeps rebirth feeling like progress, not losing the map.
 - Low Graphics: fewer particles; it uses mostly billboards.
