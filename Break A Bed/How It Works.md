@@ -187,6 +187,11 @@ The owner sent screenshots of a reference game and wants ours to feel like it. A
   - Only the highest active one counts. A collected cube restarts its 10 s timer. A small "X3 10s" chip shows the timer.
   - The cube is a Part with the cube image on all 6 faces (Decals) plus a soft glow. Only you see your own cubes.
   - The strength popups show the multiplied number while a cube is active.
+- **Change (owner, 2026-10-14): the X2 / X3 / X5 pickups are on the SCREEN, not 3D cubes in the world.** Remove the 3D cube parts. While training:
+  - Every ~4–6 s, a square **X2 / X3 / X5 button** (the same `cube_x2/x3/x5.png` images, ~11% of screen height) **pops onto the screen** at a random spot in the middle area. It never covers the HUD, the side buttons, the top bar or the training panel.
+  - It pops in with a bounce (scale 0 → 1.15 → 1, 0.25 s), wobbles gently, and has a soft glow behind it (X5 also sparkles and shows a small "RARE!" tag). It stays 4 s, then shrinks away.
+  - **Tap/click it** to collect: it bursts into small stars of its color, flies into a timer chip near the Strength stat ("X3 10s"), and gives the 10 s boost. Same chances (X2 70%, X3 25%, X5 5%), and the highest active one counts.
+  - At most 1 on screen at a time. Only during training.
 - **Camera:** training uses the **normal free camera**. The player can rotate and zoom around while locked in place, instead of the fixed side view. It starts behind the player looking at the post.
 
 ### Breaking beds
