@@ -167,3 +167,78 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - It smoothly glides into place in **0.4 s** (Quad Out) on Break/Train, and back to the normal camera in 0.4 s on EXIT, SPAWN or To Bed.
 - It stays still while punching. Only the existing small hit shake/kick plays.
 - It must look right on **phone landscape and PC**, and the health panel, "Next" bar and EXIT must not cover the character or the bed.
+
+## Training and breaking feel, like the reference game (owner, 2026-10-14)
+The owner sent screenshots of a reference game and wants ours to feel like it. Art and sound are in `Models/juice/` (made by Claude): `bicep.png`, `cube_x2/x3/x5.png`, `cash_bill.png`, `cash_stack_hex.png`, `pieces_break.ogg`. Preview: ![[Models/juice/sheet.png]]
+
+### Training
+- **Auto train is the fastest possible.** Auto punches at the maximum punch rate (the same as the fastest allowed clicking, about 8 a second), so clicking is never faster. Remove the "Click to punch 2x faster!" hint.
+- **Strength popups:** every punch pops a yellow **bicep icon with "+4"** (the real gain, short numbers like +1.2K) from the post. It floats up and to the side with a little bounce and fades out after ~0.8 s. It's a BillboardGui with `bicep.png` and white bold text with a thick black outline, and a few can be on screen at once.
+- **Multiplier cubes:** while training, glowing cubes pop up on the floor of your training pad, within reach, every ~4–6 s, and stay 6 s, bobbing and spinning slowly:
+
+  | Cube | Chance | Effect |
+  |---|---|---|
+  | **X2** (green) | common, 70% | 10 s of x2 training Strength |
+  | **X3** (blue) | uncommon, 25% | 10 s of x3 |
+  | **X5** (purple, sparkles + glow) | rare, 5% | 10 s of x5, with a "RARE!" pop |
+
+  - Collect one by **clicking/tapping it** (you're locked in place while training). It pops with a burst in its color and a sound.
+  - Only the highest active one counts. A collected cube restarts its 10 s timer. A small "X3 10s" chip shows the timer.
+  - The cube is a Part with the cube image on all 6 faces (Decals) plus a soft glow. Only you see your own cubes.
+  - The strength popups show the multiplied number while a cube is active.
+- **Camera:** training uses the **normal free camera**. The player can rotate and zoom around while locked in place, instead of the fixed side view. It starts behind the player looking at the post.
+
+### Breaking beds
+- **Camera:** like the reference: from the **front**, slightly above, on the other side of the bed, looking at the player's face with the bed between. Close enough that the player and bed fill the middle of the screen.
+- **Prompt style:** every ProximityPrompt looks like the reference: a big **white square key with a thick black border** and the letter in bold black, then the action word ("Break", "Train", "Buy") in **big bold white text with a thick black outline**. No panel or background.
+- **When a bed breaks:**
+  - The bed **shatters into many pieces** (planks, frame, mattress chunks, pillow), cut from its parts. They fly out, fall, bounce and scatter on the ground. They fade after ~3 s, client side.
+  - **`pieces_break.ogg`** plays: a crack, then many pieces knocking on the ground.
+  - **Screen money:** 15–25 cartoon **cash bills** (`cash_bill.png`) burst across the whole screen, spinning, flying out from the center and falling with gravity. They're big near the camera and fade out in ~1.2 s, as a ScreenGui overlay.
+  - **"+5" money badges:** 3–4 green **cash-stack hexagons** (`cash_stack_hex.png`) with the Cash earned ("+5", "+1.2K") in white bold outlined text pop up around the top of the screen, bounce and fly to the Cash counter.
+- **CRITICAL hits:** "**CRITICAL!**" in an orange-to-red gradient with a thick dark outline pops at the hit spot. The damage number ("326K") is big white text with a black outline, **tilted ~15°**, punching in with a scale bounce.
+
+## Break any bed, slower when you're weak (owner, 2026-10-14)
+The owner wants players to be able to break beds far ahead on the path, but very slowly when their Strength is low.
+- **No Strength lock anymore:** the Break prompt works on every bed. "Need 💪 X" is gone from the prompt. The bed sign still shows the recommended Strength.
+- **Damage per chop is the same as now (from Strength).** A bed far ahead just has far more health compared with your hits, so it takes much longer. Roughly: time ≈ 4 s × (bed's Strength need ÷ your Strength). For example, 10x too weak is about 40 s, 100x too weak about 7 min, and 1,000x too weak about an hour.
+- **The health panel shows an estimate** under the bar: "⏱ ~7m 20s" (live, from your current damage per second, auto or clicking). Green under 1 min, yellow under 10 min, red above. "Too long" isn't shown; just the time.
+- **Progress resets** if you EXIT or walk away for more than 10 s (the health refills), so you can't chip at it a bit each day. AFK breaking with Auto/AFK rejoin is fine, though.
+- **BREAK IT (Robux):** if the estimate is over 60 s, a gold "⚡ BREAK IT" button with the live price (gap tiers in [[Break A Bed/Shop Plan|Shop Plan]]) shows next to the health bar. It replaces the old "you can't break this" moment.
+- Undiscovered (black) beds can be broken too. The "NEW BED DISCOVERED!" reveal plays when it breaks.
+- Balance check: cash per minute from a bed far ahead stays a little below the best bed you can break normally (cash grows ~3x per bed, health ~3.3x), so breaking far ahead is a fun "big goal", not a shortcut.
+
+## Unique zone for every bed (owner, 2026-10-14)
+Each bed's tile area gets decorated in that bed's theme. Keep it **compact**: only on that bed's tile and the fence posts beside it, nothing on the walkway, and nothing taller than the bed sign. Each zone has: a themed **floor** (texture/material on the tile), **2–4 small props** at the tile edges, and **one ambient effect** (particles or light). Undiscovered beds: the zone is dark/greyed until the bed is first broken, then it "comes alive" (colors fade in).
+
+| # | Bed | Floor | Props | Ambient |
+|---|---|---|---|---|
+| 1 | Cardboard | brown cardboard texture | stacked cardboard boxes, tape roll | – |
+| 2 | Air Mattress | pool tiles, light blue | inflatable ring, beach ball, air pump | soft bubbles |
+| 3 | Sleeping Bag | forest grass + dirt | small tent, campfire (custom flame flipbook), log seat | campfire embers |
+| 4 | Wooden | wooden planks | log pile, axe in a stump | sawdust motes |
+| 5 | Bunk Bed | kid's room carpet | toy blocks, teddy bear, small ladder | – |
+| 6 | Water Bed | shallow water (glass + ripples) | lily pads, rubber duck | water ripple rings |
+| 7 | Hospital Bed | white clean tiles | IV stand, heart monitor (beeping green line), curtain | – |
+| 8 | Royal Bed | red carpet with gold trim | 2 gold pillars, red rope barriers | gold sparkles |
+| 9 | Gold Bed | gold tiles | coin piles, gold bars | coin glints |
+| 10 | Diamond Bed | white marble | diamond crystals on stands | white sparkles |
+| 11 | Emerald Bed | green marble | emerald crystal clusters, vines | green glints |
+| 12 | Ruby Bed | dark red stone | ruby clusters, red velvet cushions | red glow |
+| 13 | Ice Bed | snow + ice | ice spikes, snowman | falling snow |
+| 14 | Lava Bed | cracked black rock with glowing lava lines | lava rocks, small lava pool | embers + heat glow |
+| 15 | Crystal Bed | purple crystal floor | big floating crystals (slow spin) | purple shimmer |
+| 16 | Neon Bed | dark floor with neon grid lines | neon signs, glowing tubes | neon flicker |
+| 17 | Robot Bed | metal plates with bolts | gears, a small robot, warning stripes | sparks |
+| 18 | Alien Bed | green alien goo floor | alien plants, a small UFO hovering | green beam |
+| 19 | Lunar Bed | grey moon dust with craters | flag, moon rocks | low floating dust |
+| 20 | Solar Bed | orange-hot floor | small sun orb, solar flares | heat shimmer, orange glow |
+| 21 | Galaxy Bed | starry space floor (galaxy texture) | tiny planets orbiting | stars |
+| 22 | Nebula Bed | pink-blue cloudy floor | nebula clouds (soft parts) | drifting cloud particles |
+| 23 | Black Hole Bed | pitch black with a swirl | a small black hole vortex (rune/swirl sprites) | particles being sucked in |
+| 24 | Cosmic Bed | deep purple with constellations | comets, star shards | twinkling lines |
+| 25 | Infinity Bed | rainbow shifting floor with an ∞ symbol | floating ∞ rings | rainbow sparkles |
+
+- Reuse the sprites in `Models/vfx/sprites` for the effects. Never use Roblox's default Fire/Smoke/Sparkles.
+- Low Graphics turns off the ambient effects and keeps the floor and props.
+- Belt-test beds (3, 6, 9, ...) keep their torii gate in front. The zone decor goes around it.
