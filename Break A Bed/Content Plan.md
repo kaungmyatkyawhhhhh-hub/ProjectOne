@@ -278,6 +278,20 @@ Replaces the rejected Sleep King. No villain. You train with an old karate maste
   - During a run you still wear the run belt (White → Black). The master belt shows as a **small badge next to your name** and a glowing **knot/edge** on your belt, so both are visible.
 - Don't change the clean map. Don't add long text.
 
+## 12. Rebirth feels repetitive (owner, 2026-10-14)
+Players get bored replaying the same beds after a rebirth. Three fixes:
+1. **Fast replay:**
+   - After a rebirth, every bed you have broken before shows a small ⚡ and breaks **5x faster** (the bonus stops at your old best bed).
+   - New token-shop upgrade **"Head Start"**: start each rebirth at bed 5 / 10 / 15 (3 levels), with those beds counted as broken.
+   - The second run should take about 5–10 min to get back to where you were, not 20+.
+2. **Something new every rebirth (milestone track):**
+   - A row of rewards in the Rebirth menu, shown as pictures with locks: 1 = new training post, 2 = rare glove, 3 = Rebirth aura, 4 = +1 pet slot (once pets exist), 5 = Bronze belt, 7 = exclusive Rebirth Bed skin, 10 = Silver belt, then every 5.
+   - The next reward is always shown with "1 more rebirth!".
+3. **Surprises during a run:**
+   - **Golden Bed:** every ~5 min, a random bed you can break turns gold for 60 s ("GOLDEN BED!" toast and a beam). Breaking it pays **x10 Cash**.
+   - **Lucky Hour:** a random server event, 10 min of x2 Strength for everyone, with a countdown.
+   - **Daily challenge:** one bed a day is "Today's Challenge" (break it 20 times) for tokens.
+
 ## Update roadmap (2026-10-14, suggested, the owner can change it)
 One update about every week. Each update gets a new code, a title tag like "[🥋 UPDATE 1]" and a line on the update board.
 1. **Update 1: Belts (~Oct 16):** the belt story (section 11), simpler Rebirth menu, camera fix, free vs paid boosts, group-only rewards. Publish, then check the data Oct 15–16.
