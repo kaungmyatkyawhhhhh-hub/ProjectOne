@@ -167,3 +167,33 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - It smoothly glides into place in **0.4 s** (Quad Out) on Break/Train, and back to the normal camera in 0.4 s on EXIT, SPAWN or To Bed.
 - It stays still while punching. Only the existing small hit shake/kick plays.
 - It must look right on **phone landscape and PC**, and the health panel, "Next" bar and EXIT must not cover the character or the bed.
+
+## Training and breaking feel, like the reference game (owner, 2026-10-14)
+The owner sent screenshots of a reference game and wants ours to feel like it. Art and sound are in `Models/juice/` (made by Claude): `bicep.png`, `cube_x2/x3/x5.png`, `cash_bill.png`, `cash_stack_hex.png`, `pieces_break.ogg`. Preview: ![[Models/juice/sheet.png]]
+
+### Training
+- **Auto train is the fastest possible.** Auto punches at the maximum punch rate (the same as the fastest allowed clicking, about 8 a second), so clicking is never faster. Remove the "Click to punch 2x faster!" hint.
+- **Strength popups:** every punch pops a yellow **bicep icon with "+4"** (the real gain, short numbers like +1.2K) from the post. It floats up and to the side with a little bounce and fades out after ~0.8 s. It's a BillboardGui with `bicep.png` and white bold text with a thick black outline, and a few can be on screen at once.
+- **Multiplier cubes:** while training, glowing cubes pop up on the floor of your training pad, within reach, every ~4–6 s, and stay 6 s, bobbing and spinning slowly:
+
+  | Cube | Chance | Effect |
+  |---|---|---|
+  | **X2** (green) | common, 70% | 10 s of x2 training Strength |
+  | **X3** (blue) | uncommon, 25% | 10 s of x3 |
+  | **X5** (purple, sparkles + glow) | rare, 5% | 10 s of x5, with a "RARE!" pop |
+
+  - Collect one by **clicking/tapping it** (you're locked in place while training). It pops with a burst in its color and a sound.
+  - Only the highest active one counts. A collected cube restarts its 10 s timer. A small "X3 10s" chip shows the timer.
+  - The cube is a Part with the cube image on all 6 faces (Decals) plus a soft glow. Only you see your own cubes.
+  - The strength popups show the multiplied number while a cube is active.
+- **Camera:** training uses the **normal free camera**. The player can rotate and zoom around while locked in place, instead of the fixed side view. It starts behind the player looking at the post.
+
+### Breaking beds
+- **Camera:** like the reference: from the **front**, slightly above, on the other side of the bed, looking at the player's face with the bed between. Close enough that the player and bed fill the middle of the screen.
+- **Prompt style:** every ProximityPrompt looks like the reference: a big **white square key with a thick black border** and the letter in bold black, then the action word ("Break", "Train", "Buy") in **big bold white text with a thick black outline**. No panel or background.
+- **When a bed breaks:**
+  - The bed **shatters into many pieces** (planks, frame, mattress chunks, pillow), cut from its parts. They fly out, fall, bounce and scatter on the ground. They fade after ~3 s, client side.
+  - **`pieces_break.ogg`** plays: a crack, then many pieces knocking on the ground.
+  - **Screen money:** 15–25 cartoon **cash bills** (`cash_bill.png`) burst across the whole screen, spinning, flying out from the center and falling with gravity. They're big near the camera and fade out in ~1.2 s, as a ScreenGui overlay.
+  - **"+5" money badges:** 3–4 green **cash-stack hexagons** (`cash_stack_hex.png`) with the Cash earned ("+5", "+1.2K") in white bold outlined text pop up around the top of the screen, bounce and fly to the Cash counter.
+- **CRITICAL hits:** "**CRITICAL!**" in an orange-to-red gradient with a thick dark outline pops at the hit spot. The damage number ("326K") is big white text with a black outline, **tilted ~15°**, punching in with a scale bounce.
