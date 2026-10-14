@@ -262,6 +262,11 @@ Replaces the rejected Sleep King. No villain. You train with an old karate maste
     - The petals and aura are barely visible. Make the aura and the rising cherry petals/gold sparkles clearly visible but soft.
     - The ring is so big that players stand in it. Make it smaller and keep it off the walkway. Use thinner dots.
     - The speech bubble is too big. Make it ~60% of the size and show it only when a player is close.
+- **Sensei zone sound (owner, 2026-10-14):** Sensei's song (the `singing_bowl.ogg` hum with `wind_chime.ogg` now and then) fades in and out smoothly instead of popping on/off.
+  - Zone: a circle around Sensei. You **enter at 18 studs** and **leave at 22 studs**, so standing on the edge doesn't flicker it on and off. The client checks the distance every 0.2 s.
+  - **Entering:** the song fades from 0 to its volume (about 0.5 x the player's Music setting) over **1.5 s** (Sine). The background music fades down to 30% at the same time.
+  - **Leaving:** the song fades to 0 over **1.5 s** while the background music fades back to 100%. The song keeps looping silently (no restart pop) and pauses after the fade.
+  - Use TweenService on `Sound.Volume`, and cancel the running tween before starting the opposite one. It respects the Music slider (Music 0% = silent).
 - **Belts (25 beds):** you start as a **White belt**. Some beds are **belt tests**:
 
   | Bed | Belt |
