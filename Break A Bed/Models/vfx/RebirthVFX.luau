@@ -221,7 +221,7 @@ P.IceDragon = {
 }
 
 P.RainbowKoi = {
-	tint = "#FF7AD9", outline = "#FFFFFF", light = { "#C8A0FF", 5, 20 }, rainbow = true,
+	tint = "#FF7AD9", outline = "#FFFFFF", light = { "#C8A0FF", 3, 14 }, rainbow = true, fill = 0.9, -- (owner: lower glow so the textures show)
 	emit = {
 		{ at = "Mouth", sprite = "bubble", color = cs("#FFFFFF", "#BDEBFF"), size = ns(0.4, 0.7), rate = 10, life = { 1.2, 2 }, speed = { 2, 4 }, spread = 25, accel = Vector3.new(0, 3, 0), light = 0.4 },
 		{ at = "Dorsal", sprite = "spark", color = cs("#FF5A5A", "#FFD34D", "#5AFF8A", "#5AC8FF", "#C85AFF"), size = ns(1, 0), rate = 15, life = { 0.5, 0.9 }, speed = { 1, 2 }, spread = 180, light = 1 },
@@ -417,7 +417,7 @@ function VFX.Attach(model: Model, creature: string, sizeMul: number?): Handle
 	table.insert(conns, RunService.RenderStepped:Connect(function()
 		local s = 0.5 + 0.5 * math.sin((os.clock() - t0) * 4)
 		light.Brightness = prof.light[2] * (0.75 + 0.5 * s)
-		hl.FillTransparency = 0.92 - 0.05 * s -- (tuned in Play: a stronger fill hid the textures)
+		hl.FillTransparency = prof.fill or (0.92 - 0.05 * s) -- (tuned in Play: a stronger fill hid the textures)
 		if prof.rainbow then
 			local h = ((os.clock() - t0) * 0.25) % 1
 			hl.OutlineColor = Color3.fromHSV(h, 0.6, 1); light.Color = Color3.fromHSV(h, 0.5, 1)
