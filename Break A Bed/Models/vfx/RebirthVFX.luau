@@ -26,6 +26,8 @@ VFX.Sprites = {
 	ring = "rbxassetid://114812788166514", petal = "rbxassetid://103770413540512", claw_slash = "rbxassetid://136607883066223", lightning = "rbxassetid://94110313424083",
 	rune_circle = "rbxassetid://105909629892935", rays = "rbxassetid://84297323769537", cloud = "rbxassetid://107048214238270", trail = "rbxassetid://82683263065069",
 	energy = "rbxassetid://125689238568684", dust = "rbxassetid://137582597658372", orb = "rbxassetid://107235527432295",
+	-- 4x4 flipbooks (1024x1024): animated cartoon flames and anime aura spikes. Upload these two and paste the ids.
+	flame_flipbook = "rbxassetid://0", aura_flipbook = "rbxassetid://0",
 }
 
 local low = false
@@ -69,7 +71,7 @@ local P: { [string]: Profile } = {}
 P.Phoenix = {
 	tint = "#FFB42A", outline = "#FFE27A", light = { "#FFB347", 6, 22 },
 	emit = {
-		{ at = "Body", sprite = "flame", color = cs("#FFF2B0", "#FFB42A", "#E8551C"), size = ns(3.2, 2.2, 0.4), rate = 40, life = { 0.5, 0.9 }, speed = { 2, 4 }, spread = 180, accel = Vector3.new(0, 8, 0), light = 1, rotSpeed = { -60, 60 } },
+		{ at = "Body", sprite = "flame_flipbook", color = cs("#FFF2B0", "#FFB42A", "#E8551C"), size = ns(3.2, 2.2, 0.4), rate = 40, life = { 0.5, 0.9 }, speed = { 2, 4 }, spread = 180, accel = Vector3.new(0, 8, 0), light = 1 },
 		{ at = "WingR_Back", sprite = "feather", color = cs("#FFE27A", "#F28C1C"), size = ns(0.9, 0.7), rate = 10, life = { 1.4, 2.2 }, speed = { 1, 3 }, spread = 70, accel = Vector3.new(0, -2, 0), drag = 1.5, rotSpeed = { -120, 120 }, light = 0.6 },
 		{ at = "WingL_Back", sprite = "feather", color = cs("#FFE27A", "#F28C1C"), size = ns(0.9, 0.7), rate = 10, life = { 1.4, 2.2 }, speed = { 1, 3 }, spread = 70, accel = Vector3.new(0, -2, 0), drag = 1.5, rotSpeed = { -120, 120 }, light = 0.6 },
 		{ at = "Tail_Mid", sprite = "ember", color = cs("#FFF6C8", "#FF8A1E"), size = ns(0.5, 0.15), rate = 45, life = { 0.8, 1.4 }, speed = { 2, 6 }, spread = 60, accel = Vector3.new(0, 4, 0), light = 1 },
@@ -91,12 +93,12 @@ P.Phoenix = {
 P.FirePhoenix = {
 	tint = "#FF3B2F", outline = "#FF9A3C", light = { "#FF5A1F", 8, 26 },
 	emit = {
-		{ at = "Body", sprite = "flame", color = cs("#FFF0A0", "#FF6A1A", "#B3120A"), size = ns(4.5, 3, 0.5), rate = 70, life = { 0.5, 0.9 }, speed = { 3, 6 }, spread = 180, accel = Vector3.new(0, 14, 0), light = 1, rotSpeed = { -80, 80 } },
-		{ at = "WingR_Back", sprite = "flame", color = cs("#FFD34D", "#FF3B2F"), size = ns(2.2, 0.3), rate = 30, life = { 0.4, 0.7 }, speed = { 2, 4 }, spread = 40, accel = Vector3.new(0, 10, 0), light = 1 },
-		{ at = "WingL_Back", sprite = "flame", color = cs("#FFD34D", "#FF3B2F"), size = ns(2.2, 0.3), rate = 30, life = { 0.4, 0.7 }, speed = { 2, 4 }, spread = 40, accel = Vector3.new(0, 10, 0), light = 1 },
+		{ at = "Body", sprite = "flame_flipbook", color = cs("#FFF0A0", "#FF6A1A", "#B3120A"), size = ns(4.5, 3, 0.5), rate = 70, life = { 0.5, 0.9 }, speed = { 3, 6 }, spread = 180, accel = Vector3.new(0, 14, 0), light = 1 },
+		{ at = "WingR_Back", sprite = "flame_flipbook", color = cs("#FFD34D", "#FF3B2F"), size = ns(2.2, 0.3), rate = 30, life = { 0.4, 0.7 }, speed = { 2, 4 }, spread = 40, accel = Vector3.new(0, 10, 0), light = 1 },
+		{ at = "WingL_Back", sprite = "flame_flipbook", color = cs("#FFD34D", "#FF3B2F"), size = ns(2.2, 0.3), rate = 30, life = { 0.4, 0.7 }, speed = { 2, 4 }, spread = 40, accel = Vector3.new(0, 10, 0), light = 1 },
 		{ at = "Tail_Mid", sprite = "ember", color = cs("#FFF6C8", "#FF3B1A"), size = ns(0.6, 0.1), rate = 80, life = { 1, 1.8 }, speed = { 4, 9 }, spread = 70, accel = Vector3.new(0, 6, 0), light = 1 },
 		{ at = "Body", sprite = "smoke", color = cs("#3A1A12", "#1A0E0A"), size = ns(4, 9), rate = 10, life = { 1.5, 2.5 }, speed = { 2, 4 }, spread = 60, accel = Vector3.new(0, 6, 0), trans = ns(1, 0.55, 1), light = 0 },
-		{ at = "Beak", sprite = "flame", color = cs("#FFF0A0", "#FF3B2F"), size = ns(1.6, 0.2), rate = 25, life = { 0.3, 0.5 }, speed = { 8, 12 }, spread = 15, light = 1 },
+		{ at = "Beak", sprite = "flame_flipbook", color = cs("#FFF0A0", "#FF3B2F"), size = ns(1.6, 0.2), rate = 25, life = { 0.3, 0.5 }, speed = { 8, 12 }, spread = 15, light = 1 },
 	},
 	trails = {
 		{ from = "WingR_Tip", width = 1.6, color = cs("#FFF0A0", "#FF3B2F", "#5A0A06"), life = 0.6, light = 1 },
@@ -106,16 +108,16 @@ P.FirePhoenix = {
 		{ from = "Tail_Mid", width = 1.8, color = cs("#FFD34D", "#C21807"), life = 0.9, light = 1 },
 	},
 	burst = { ring = "#FF3B2F", rays = "#FFB347", rune = "#FF5A1F",
-		extra = { { sprite = "flame", color = cs("#FFF0A0", "#FF3B2F"), count = 60, size = ns(4, 0.5), speed = { 20, 40 }, life = { 0.6, 1 }, accel = Vector3.new(0, 10, 0) },
+		extra = { { sprite = "flame_flipbook", color = cs("#FFF0A0", "#FF3B2F"), count = 60, size = ns(4, 0.5), speed = { 20, 40 }, life = { 0.6, 1 }, accel = Vector3.new(0, 10, 0) },
 			{ sprite = "smoke", color = cs("#2A1410"), count = 20, size = ns(6, 14), speed = { 8, 14 }, life = { 1.5, 2.5 }, accel = Vector3.new(0, 5, 0), trans = ns(1, 0.5, 1) } },
 		lava = true },
-	dissolve = { sprite = "flame", color = cs("#FFD34D", "#FF3B2F") },
+	dissolve = { sprite = "flame_flipbook", color = cs("#FFD34D", "#FF3B2F") },
 }
 
 P.Tiger = {
 	tint = "#FF8A2B", outline = "#FFD08A", light = { "#FF9A3C", 6, 20 },
 	emit = {
-		{ at = "Back", sprite = "flame_white", color = cs("#FFE0A0", "#FF8A2B", "#C24A0A"), size = ns(3, 2, 0.3), rate = 50, life = { 0.4, 0.8 }, speed = { 2, 5 }, spread = 50, accel = Vector3.new(0, 10, 0), light = 1, rotSpeed = { -40, 40 } },
+		{ at = "Back", sprite = "flame_flipbook", color = cs("#FFE0A0", "#FF8A2B", "#C24A0A"), size = ns(3, 2, 0.3), rate = 50, life = { 0.4, 0.8 }, speed = { 2, 5 }, spread = 50, accel = Vector3.new(0, 10, 0), light = 1 },
 		{ at = "Belly", sprite = "dust", color = cs("#C9A27A"), size = ns(2, 5), rate = 12, life = { 0.8, 1.2 }, speed = { 1, 3 }, spread = 90, trans = ns(1, 0.6, 1), light = 0 },
 		{ at = "Back", sprite = "lightning", color = cs("#FFF2C8", "#FFB000"), size = ns(3, 2), rate = 6, life = { 0.12, 0.2 }, speed = { 0, 0 }, spread = 180, light = 1, rotSpeed = { 0, 0 }, rot = { 0, 360 }, lockedToPart = true },
 		{ at = "TailTip", sprite = "ember", color = cs("#FFF0C0", "#FF8A2B"), size = ns(0.6, 0.1), rate = 30, life = { 0.6, 1 }, speed = { 1, 3 }, spread = 180, light = 1 },
@@ -132,7 +134,7 @@ P.Tiger = {
 		extra = { { sprite = "claw_slash", color = cs("#FFF6D8", "#FF8A2B"), count = 3, size = ns(10, 12), speed = { 0, 0 }, life = { 0.45, 0.45 }, trans = ns(0, 1), rot = { -30, 30 } },
 			{ sprite = "dust", color = cs("#B89470"), count = 25, size = ns(3, 8), speed = { 10, 20 }, life = { 0.8, 1.4 }, trans = ns(0.3, 1) } },
 		groundCrack = "#FF8A2B" },
-	dissolve = { sprite = "flame_white", color = cs("#FFE0A0", "#FF8A2B") },
+	dissolve = { sprite = "flame_flipbook", color = cs("#FFE0A0", "#FF8A2B") },
 }
 
 P.Crane = {
@@ -157,8 +159,8 @@ P.Crane = {
 P.GoldDragon = {
 	tint = "#FFD23A", outline = "#FFF2A8", light = { "#FFD23A", 7, 26 },
 	emit = {
-		{ at = "Spine2", sprite = "flame", color = cs("#FFF2A8", "#FFB000"), size = ns(2, 0.3), rate = 25, life = { 0.4, 0.7 }, speed = { 1, 3 }, spread = 30, accel = Vector3.new(0, 8, 0), light = 1 },
-		{ at = "Spine4", sprite = "flame", color = cs("#FFF2A8", "#FFB000"), size = ns(2, 0.3), rate = 25, life = { 0.4, 0.7 }, speed = { 1, 3 }, spread = 30, accel = Vector3.new(0, 8, 0), light = 1 },
+		{ at = "Spine2", sprite = "flame_flipbook", color = cs("#FFF2A8", "#FFB000"), size = ns(2, 0.3), rate = 25, life = { 0.4, 0.7 }, speed = { 1, 3 }, spread = 30, accel = Vector3.new(0, 8, 0), light = 1 },
+		{ at = "Spine4", sprite = "flame_flipbook", color = cs("#FFF2A8", "#FFB000"), size = ns(2, 0.3), rate = 25, life = { 0.4, 0.7 }, speed = { 1, 3 }, spread = 30, accel = Vector3.new(0, 8, 0), light = 1 },
 		{ at = "Spine3", sprite = "coin", color = cs("#FFFFFF"), size = ns(0.8, 0.8), rate = 14, life = { 1.5, 2.2 }, speed = { 3, 6 }, spread = 60, accel = Vector3.new(0, -14, 0), rotSpeed = { -300, 300 }, light = 0.2 },
 		{ at = "Spine5", sprite = "coin", color = cs("#FFFFFF"), size = ns(0.8, 0.8), rate = 14, life = { 1.5, 2.2 }, speed = { 3, 6 }, spread = 60, accel = Vector3.new(0, -14, 0), rotSpeed = { -300, 300 }, light = 0.2 },
 		{ at = "Spine1", sprite = "cloud", color = cs("#FFF6D8"), size = ns(3, 5), rate = 4, life = { 1.5, 2 }, speed = { 0.5, 1 }, spread = 90, trans = ns(1, 0.3, 1), light = 0.3 },
@@ -280,6 +282,15 @@ local function emitter(e: any, parent: Instance): ParticleEmitter
 	pe.LockedToPart = e.lockedToPart or false
 	pe.ZOffset = e.zOffset or 0
 	pe.Rate = (e.rate or 0) * (low and 0.35 or 1)
+	if string.find(e.sprite, "flipbook") then
+		pe.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
+		pe.FlipbookMode = Enum.ParticleFlipbookMode.Loop
+		pe.FlipbookFramerate = NumberRange.new(18, 26)
+		pe.FlipbookStartRandom = true
+		pe.Orientation = Enum.ParticleOrientation.FacingCameraWorldUp -- flames stay upright
+		if e.rot == nil then pe.Rotation = NumberRange.new(0) end
+		if e.rotSpeed == nil then pe.RotSpeed = NumberRange.new(0) end
+	end
 	pe.Parent = parent
 	return pe
 end
@@ -499,6 +510,45 @@ function VFX.Burst(model: Model, creature: string, ground: Vector3)
 		TweenService:Create(cam, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { FieldOfView = fov - 10 }):Play()
 		task.delay(0.12, function() TweenService:Create(cam, TweenInfo.new(0.35, Enum.EasingStyle.Back), { FieldOfView = fov }):Play() end)
 	end
+end
+
+-- Anime-style power aura around the player's character (used in the belt and rebirth cutscenes).
+-- Replaces any Roblox default Fire/Sparkles/Smoke effect: never use those instances.
+function VFX.PlayerAura(character: Model, colorHex: string, duration: number)
+	local root = character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not root then return end
+	local made = {}
+	local function add(i)
+		table.insert(made, i)
+		return i
+	end
+	local feet = add(Instance.new("Attachment")); feet.Position = Vector3.new(0, -2.8, 0); feet.Parent = root
+	local mid = add(Instance.new("Attachment")); mid.Parent = root
+	local col = c3(colorHex)
+	local hot = col:Lerp(Color3.new(1, 1, 1), 0.6)
+	-- 1) ring of sharp aura spikes rising around the feet (8 points on a circle), tier color outside, white-hot inside
+	for k = 1, (low and 4 or 8) do
+		local ang = (k / (low and 4 or 8)) * math.pi * 2
+		local a = add(Instance.new("Attachment"))
+		a.Position = Vector3.new(math.cos(ang) * 1.6, -2.8, math.sin(ang) * 1.6)
+		a.Parent = root
+		add(emitter({ sprite = "aura_flipbook", color = ColorSequence.new(col), size = ns(2.4, 3.2, 1.0), rate = 7, life = { 0.35, 0.55 },
+			speed = { 6, 9 }, spread = 10, trans = ns(1, 0.1, 0.2, 1), light = 1 }, a))
+		add(emitter({ sprite = "aura_flipbook", color = ColorSequence.new(hot), size = ns(1.4, 2.0, 0.5), rate = 5, life = { 0.3, 0.45 },
+			speed = { 5, 7 }, spread = 8, trans = ns(1, 0.2, 1), light = 1, zOffset = 0.5 }, a))
+	end
+	-- 3) soft body glow + rising embers + a glowing ground ring
+	add(emitter({ sprite = "glow", color = ColorSequence.new(col), size = ns(7, 8), rate = 6, life = { 0.5, 0.5 }, speed = { 0, 0 }, trans = ns(1, 0.6, 1), light = 1, lockedToPart = true }, mid))
+	add(emitter({ sprite = "ember", color = ColorSequence.new(hot, col), size = ns(0.35, 0.05), rate = 40, life = { 0.8, 1.3 }, speed = { 3, 7 }, spread = 25, accel = Vector3.new(0, 6, 0), light = 1 }, feet))
+	flatDecal(root.Position - Vector3.new(0, 2.9, 0), "ring", colorHex, 7, duration, nil, 1.2)
+	local light = add(Instance.new("PointLight")); light.Color = col; light.Brightness = 4; light.Range = 14; light.Parent = root
+	task.delay(duration, function()
+		for _, i in ipairs(made) do
+			if i:IsA("ParticleEmitter") then i.Enabled = false end
+		end
+		task.wait(0.8)
+		for _, i in ipairs(made) do if i.Parent then i:Destroy() end end
+	end)
 end
 
 function VFX.Dissolve(model: Model, creature: string, duration: number, handle: Handle?)

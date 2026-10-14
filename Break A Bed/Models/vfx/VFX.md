@@ -8,6 +8,14 @@ The owner said the animals look ugly without VFX and asked for custom VFX on eve
 - `RebirthVFX.luau`: a ModuleScript with **its own VFX for each of the 8 animals**: particles on the wings/tail/mouth/body, light trails on the wing tips and tails, a spirit outline and a pulsing inner light, afterimages, the burst moment (white flash, light rays, double shockwave ring, vertical ring, spinning rune circle, camera zoom-punch), each animal's special burst, and a dissolve into particles at the end. Compiles with Luau.
 - `RebirthVFXAnchors.luau`: the exact points on each model (wing tips, tail tips, mouth, paws, spine...) the VFX attach to. Generated from the models, so they line up.
 
+## Flames: no Roblox default fire (owner, 2026-10-14)
+The owner said the flame around the character looked like Roblox's default Fire effect, which is ugly.
+- **Never use Roblox's built-in `Fire`, `Smoke` or `Sparkles` instances** anywhere in the cutscenes.
+- All flames now use `flame_flipbook.png`: a custom **animated cartoon flame** (16 frames, 4x4 flipbook, hard cel-shaded bands, sharp tongues, white-hot core) that stays upright. The code sets `FlipbookLayout = Grid4x4`, `FlipbookMode = Loop` and `Orientation = FacingCameraWorldUp`.
+- The glow around the player is now `VFX.PlayerAura(character, color, seconds)`: an **anime power aura** with sharp energy spikes (`aura_flipbook.png`) rising in a ring around the feet, white-hot inner spikes, a soft body glow, rising embers, a ground ring and a light. Use it in the belt cutscenes (belt color), the rebirth cutscene (tier color) and the black belt cutscene (gold).
+
+![[flame_flipbook_prev.png]]
+
 ## What each animal gets
 | Animal | Looping VFX | Burst moment |
 |---|---|---|
