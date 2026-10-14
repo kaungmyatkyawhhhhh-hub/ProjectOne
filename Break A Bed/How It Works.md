@@ -251,6 +251,7 @@ Each bed's tile area gets decorated in that bed's theme. Keep it **compact**: on
 - Belt-test beds (3, 6, 9, ...) have no gate (the owner removed the dojo gates). They keep the floating belt and the "BELT TEST" tag.
 
 ## Hidden zones in the clouds (owner, 2026-10-14, corrected)
+**Built 2026-10-15** (client `CloudZones`, saved `FurthestZone`), see [[Break A Bed/2026-10-15|2026-10-15]].
 To make the game more exciting, players can't see far ahead.
 - **Rule:** you can see every zone you meet the Strength for, **plus the next 3 zones** after it (normal, visible, and you can break them slowly). **From the 4th zone onward, a cloud wall covers everything**, and you **can't walk past it**: it's solid like a wall.
   - Example: your Strength meets the Gold Bed (bed 9). You see beds 1–9 plus 10, 11 and 12. The cloud wall starts at bed 13 and blocks the path there.
