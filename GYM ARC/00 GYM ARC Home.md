@@ -85,6 +85,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Muscles and Bodies]]
 - [[GYM ARC - NPC Regulars and Gym Cat]]
 - [[GYM ARC - NPC Rivals]]
+- [[GYM ARC - Performance]]
 - [[GYM ARC - Personal Trainers]]
 - [[GYM ARC - Photo Mode]]
 - [[GYM ARC - Player Data and Saving]]

@@ -64,5 +64,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Soft Shutdown]]: move players through a holding server on update (done)
 - [[GYM ARC - Studio Test Hooks]]: Workspace attributes for testing (done)
 
+- [[GYM ARC - Performance]]: culling, LOD and streaming for phones (in progress)
+
 ## See also
 - [[GYM ARC - Config values]], [[GYM ARC - Assets]]
