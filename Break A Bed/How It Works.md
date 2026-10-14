@@ -192,6 +192,14 @@ The owner sent screenshots of a reference game and wants ours to feel like it. A
   - It pops in with a bounce (scale 0 → 1.15 → 1, 0.25 s), wobbles gently, and has a soft glow behind it (X5 also sparkles and shows a small "RARE!" tag). It stays 4 s, then shrinks away.
   - **Tap/click it** to collect: it bursts into small stars of its color, flies into a timer chip near the Strength stat ("X3 10s"), and gives the 10 s boost. Same chances (X2 70%, X3 25%, X5 5%), and the highest active one counts.
   - At most 1 on screen at a time. Only during training.
+  - **Timer chip design (owner: "make this UI better", 2026-10-14).** Mockup: ![[Models/juice/boost_chip_mockup.png]]
+    - The **cube icon is big** (as tall as the chip plus a bit more), tilted ~12°, with a drop shadow, and overlaps the chip's left end.
+    - The chip is a dark rounded panel (UI Kit studs) with a **2-layer border**: black outside, the boost's color inside (green X2, blue X3, purple X5), plus a soft outer glow in that color.
+    - The top line reads "**x2 STRENGTH**" on the left and the seconds "**7s**" on the right, in white bold text with a black outline.
+    - Underneath is a **countdown bar** in the boost color that shrinks smoothly (not in steps).
+    - When collected, the chip slides in from the left with a bounce. In the **last 3 s** it pulses and the bar blinks. When it ends, it shrinks away. If a new pickup restarts the timer, the bar refills with a quick flash.
+    - Size: about 9% of screen height. It sits just above the Strength stat, never over buttons.
+
 - **Camera:** training uses the **normal free camera**. The player can rotate and zoom around while locked in place, instead of the fixed side view. It starts behind the player looking at the post.
 
 ### Breaking beds
