@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 tags: [gymarc, prompt, trainers]
-status: in progress
+status: done
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
@@ -38,4 +38,11 @@ TRAINERS LOOK BAD. Remake the 4 trainer NPCs (EXP, Stamina, Coins, Pump) so they
    - Follow the NPC culling/LOD rules from before. Other players' trainers far away = simplified, no animations.
 
 Screenshot each trainer: front, following the player, and cheering while the player lifts. Put them in screenshots/trainers/ next to the old ones. Commit, update PROGRESS.md and Obsidian.
+```
+
+Follow-up message:
+
+```text
+some of the trainers clothes look torn and their skin is showing in some parts of the clothes
+especially in the front view of the lats
 ```

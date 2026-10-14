@@ -50,3 +50,21 @@ The window is now titled COACHES: gold frame and "COACHING" on the coach with yo
 
 ## Trainers never collide with players (14 Oct)
 Trainers don't bump into players any more: every trainer part is in a "Trainers" collision group that collides with nothing (the server registers it), and they can't be touched or hit by rays (so the camera never zooms in on them).
+
+## Remake: real gym coaches (14 Oct)
+- **Coach Sam** (+5% EXP): red tracksuit with white stripes, black joggers, a whistle, brown hair, a big grin. Stands with arms crossed.
+- **Coach Nia** (+10% stamina): green tank and shorts, white headband, a water bottle, lavender updo. Hands on hips.
+- **Coach Lou** (+5% coins): gold polo with a black collar, black pants, a black cap, a clipboard he reads.
+- **Coach Rex** (+25% pump): the biggest; bald, purple stringer, black shorts, a leather lifting belt and wrist wraps. Arms crossed.
+- Built like players: a real R15 body, Roblox's own free hair, a classic Roblox face, our own clothing images (no brands), and the game's muscle stages (Rex the most muscular).
+- Always a little alive: breathing, a slow weight shift and his own stance. While you lift he faces you, claps or pumps a fist every 3 reps, and says a short line now and then (at most one bubble per 10 seconds).
+- Other players' trainers far away (over 60 studs) stand still; past 90 studs they aren't drawn.
+- Clothes no longer look torn: the separate skin layer of the muscle meshes poked through the clothing at the lats; it's hidden on trainers now.
+- New portraits for the Trainers window (same camera for all four, dark background).
+
+![[GYM ARC/Screenshots/trainers_portrait_exp.png]]
+![[GYM ARC/Screenshots/trainers_portrait_stamina.png]]
+![[GYM ARC/Screenshots/trainers_portrait_coins.png]]
+![[GYM ARC/Screenshots/trainers_portrait_pump.png]]
+![[GYM ARC/Screenshots/trainers_follow_exp.jpg]]
+![[GYM ARC/Screenshots/trainers_lats_fixed_exp.jpg]]

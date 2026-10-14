@@ -182,3 +182,5 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]])
 - Store fixed: all the owner's passes and products, on Passes / Coins / Boosts tabs. See [[GYM ARC - Bug - Store showed only one pass]] and [[GYM ARC - Monetization]].
 
 - Auras built (13, three layers that grow with the pump, Titles + Store tabs). Trainers no longer collide with players. See [[GYM ARC - Aura]] and [[GYM ARC - Personal Trainers]].
+
+- Trainers remade as real coaches (new looks, poses, cheers, portraits). Stats overlay no longer turns the character. See [[GYM ARC - Personal Trainers]].
