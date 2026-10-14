@@ -52,3 +52,12 @@ Campaign `BAB_Plays_AllPlayers_Oct`, still on and "Learning".
 - **Found (2026-10-13):** the game page says **"Maturity: Minimal · Ages 16+"**. Players under 16 (most simulator players and most ad clickers) can't join, which most likely explains why only 8.5% of clicks became plays and why there are few sales. **Fix:** find where the 16+ comes from (the Maturity & Compliance questionnaire answers or an age setting on the experience) and correct it truthfully so the game is open to all ages. Then the ad will deliver to players who can actually join.
 - **Update (owner, 2026-10-13):** the 16+ limit is Roblox's rule for new games. The game needs **250+ engaged players** before players under 16 can join. So the near-term goal is to reach 250 engaged players fast: keep the ad running (about 150 plays per ~14 Ad Credit), aim it at older players if Ads Manager allows an age choice (no point paying for clicks from under-16s who can't join), and bring friends, group members and Discord/TikTok viewers. Longer sessions help each player count as "engaged".
 
+
+## When the ad credit runs out (2026-10-14)
+The owner says the ad credit runs out around the time of the next updates. Plan:
+- **Don't top up big** until players stay (Day 1 retention 10%+). Until then every ad Robux mostly leaks out.
+- **Keep a small ad running if possible:** put part of the game's own earnings back into a small daily budget. The 250 engaged players goal still needs new players.
+- **Free traffic, every day:** 15–30 s TikTok / YouTube Shorts of satisfying bed breaks, belt ceremonies and rebirths, with the game name and a code in the caption ("New code BELTS!"). 1 clip a day.
+- **Updates are the free ad:** each update + new code + title tag "[🥋 UPDATE 1]". Roblox shows games more when players stay and come back.
+- **Friends:** the Invite Friend stand (+10% per friend) and group shouts for every update and code.
+- Restart a real ad campaign when the numbers are good, with the best creative ("Can you break it?", 1.9% CTR).
