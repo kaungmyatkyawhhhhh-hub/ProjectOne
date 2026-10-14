@@ -274,6 +274,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Prompt - Skating speed, stamina bar, skate button]]
 - [[2026-10-14 GYM ARC Prompt - Store shows only one item]]
 - [[2026-10-14 GYM ARC Prompt - Top bar with TopbarPlus]]
+- [[2026-10-14 GYM ARC Prompt - Trainers not collidable]]
 - [[2026-10-14 GYM ARC Prompt - Trainers remake]]
 - [[2026-10-14 GYM ARC Prompt - World signs and stats overlay]]
 
