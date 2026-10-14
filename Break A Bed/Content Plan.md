@@ -300,7 +300,7 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 2. **0.8 s:** gold light swirls around your character like a tornado, faster and faster. Phoenix feathers fly around.
 3. **2.0 s:** a white flash. A golden **phoenix** flies up out of you with a screech and wings spread (behind the character, never over the face).
 4. **2.6 s:** you're back at spawn standing in a ring of gold fire that fades away. Your belt is White again. The **new gold stripe** appears on it with a sparkle and a "ting".
-5. **3.4 s:** big "**REBIRTH 3!**" text, then the reward chips pop in one by one: "x2 💪", "+1 token", plus the milestone reward picture if this rebirth has one ("NEW: Rebirth Aura!").
+5. **3.4 s:** big "**REBIRTH 3!**" text, then the reward chips pop in one by one: "+50% 💪", "+1 token", plus the milestone reward picture if this rebirth has one ("NEW: Rebirth Aura!").
 6. **5.0 s:** back to normal.
 - **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
 
