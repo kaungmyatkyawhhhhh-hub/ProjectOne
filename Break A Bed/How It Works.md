@@ -157,3 +157,12 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - This happens only while training. Players who are idle anywhere else get Roblox's normal kick.
 - A short fade to black hides the teleport. Saving happens before the teleport, so nothing is lost.
 
+
+## Camera fix for breaking and training (owner, 2026-10-14)
+**Problem:** on phones the break camera sits too close, behind the player's back, and the big beds (Diamond Bed) fill half the screen. You can't see the character's punch or the bed properly. Training has the same issue.
+**New camera (same for breaking and training):**
+- A fixed **3/4 side view**: the camera is about **45° to the side** of the player, **slightly above** (looks down about 15–20°), and far enough back that the **whole character and the whole bed/post** fit on screen, with the bed a bit right of center. The distance is worked out from the bed's size, so big beds pull the camera further back.
+- The camera never goes inside or behind the bed. Place it on the open side (path side), never clipping through the bed, fences or other beds. If something blocks the view, move to the other side.
+- It smoothly glides into place in **0.4 s** (Quad Out) on Break/Train, and back to the normal camera in 0.4 s on EXIT, SPAWN or To Bed.
+- It stays still while punching. Only the existing small hit shake/kick plays.
+- It must look right on **phone landscape and PC**, and the health panel, "Next" bar and EXIT must not cover the character or the bed.
