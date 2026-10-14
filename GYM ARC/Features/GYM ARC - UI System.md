@@ -145,3 +145,10 @@ Before:
 ## Less on screen (14 Oct)
 Only the top bar, the left menu, ONE card on the right and the stamina bar at the bottom. The right card is picked by importance (TAP TO GROW first, then posing, a ready coach quest, today's quest, legend, coach quest going, Growth Spurt progress). The left menu sits in the middle of the left side and slides away while a window is open. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
 ![[GYM ARC/Screenshots/declutter_hud_after_phone.jpg]]
+
+## Button styles (14 Oct)
+- **Gold / Red:** the main button of a screen (PLAY, KEEP, BUY, a bonus CLAIM): gradient, glossy top, shine, a colored ring just outside, and it can pulse.
+- **Green:** the same gold without the ring, for buttons that come in rows (EQUIP, shop tiles, toggles, choices). Never pulses.
+- **Tab:** the active tab, a plain gold fill. **Flat:** an inactive tab.
+- Press and pulse share one scale from the button's centre. See [[GYM ARC - Bug - Ghost ring on gold and red buttons]].
+

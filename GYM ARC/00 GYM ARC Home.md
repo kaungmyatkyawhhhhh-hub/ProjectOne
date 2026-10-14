@@ -132,6 +132,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Genetics screen broken on phones]]
 - [[GYM ARC - Bug - Genetics screen text clipped]]
 - [[GYM ARC - Bug - Ghost outline of the minus button]]
+- [[GYM ARC - Bug - Ghost ring on gold and red buttons]]
 - [[GYM ARC - Bug - Gym-goers blocked the walk to the bench]]
 - [[GYM ARC - Bug - Headbands hide under big hair]]
 - [[GYM ARC - Bug - High part count on phones]]
