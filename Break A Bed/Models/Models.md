@@ -19,7 +19,7 @@ Each file comes as `.glb` (textures built in) and `.obj` + `.mtl` (textures in t
 
 **Textures (owner asked, 2026-10-14):** feathers with shafts and barbs (phoenix gold→orange, fire phoenix red→yellow flames, crane white with black wingtips), tiger fur with black stripes and a white belly, gold dragon scales with cream belly plates, ice dragon pale-blue scales with crystal wings and spikes, rainbow koi with colored patches and rainbow fins, galaxy dragon with a nebula and stars, red wood-grain torii with black parts and a gold "BELT TEST" plaque, plus eyes on every animal.
 
-**Rewards + Sensei legs + koi fix:** see [[rewards/Rewards|Rewards]]. **Sounds:** see [[sounds/Sounds|Sounds]].
+**Rewards + koi fix:** see [[rewards/Rewards|Rewards]]. **Sounds:** see [[sounds/Sounds|Sounds]].
 
 **VFX:** see [[vfx/VFX|VFX]], with custom particle images and a ready VFX module for every animal.
 

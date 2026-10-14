@@ -1,7 +1,0 @@
-newmtl Legs
-Kd 1 1 1
-map_Kd SenseiLegs_textures/Legs.png
-
-newmtl Feet
-Kd 1 1 1
-map_Kd SenseiLegs_textures/Feet.png

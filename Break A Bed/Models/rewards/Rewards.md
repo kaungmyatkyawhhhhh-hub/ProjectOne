@@ -1,4 +1,4 @@
-# Phoenix rebirth rewards + Sensei legs (made by Claude, 2026-10-14)
+# Phoenix rebirth rewards (made by Claude, 2026-10-14)
 Claude Code reported that the rebirth reward row shows the track, but the rewards don't exist yet. These are the models and textures for them. The look is in Content Plan section 12 ("What the rewards look like").
 
 ![[previews/rewards_sheet.png]]
@@ -12,8 +12,8 @@ Claude Code reported that the rebirth reward row shows the track, but the reward
 | 5/10 | Bronze / Silver belt | already in the belt system | (master belts) |
 | 7 | **Phoenix Bed skin** | `R7_PhoenixBed_blanket.png`, `R7_PhoenixBed_pillow.png` | Upload both. For the player who owns it (and has it on), every bed's blanket top gets a `Texture` (Face Top) with the blanket image (night blue with gold stars and a gold border) and the pillow gets the phoenix pillow image. Bed frame turns gold. Client-side only, toggle in Settings ("Phoenix Beds"). |
 
-## Sensei legs (polish 6)
-`SenseiLegs.glb` (Legs, Feet): real lotus-pose crossed legs in white gi cloth with folds, with bare feet. Replace Sensei's blocky legs with it. The origin is at the hip center, so weld it to the LowerTorso/HipCenter.
+## Sensei legs
+Not needed (owner, 2026-10-14). Keep Sensei as he is.
 
 ## Rainbow koi (polish 7)
 - New, stronger textures are in `../7_RainbowKoi_textures_v2/` (Body, TailFin, Fins): fully saturated rainbow patches with dark outlines, so the glow doesn't wash them out.
