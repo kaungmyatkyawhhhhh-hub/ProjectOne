@@ -48,3 +48,42 @@ Before, then after:
 - After all three steps: about 36-48 frames a second, the slowest frame 31-84 ms, about 150-190 draw calls, 0.5-1.2 million triangles (it moves as the regulars walk in and out of range).
 - Next big lever: the gym's many lights that cast shadows (about 600-700 shadow draw calls).
 ![[GYM ARC/Screenshots/performance_scene_after_all.jpg]]
+
+## Lag check, 14 Oct
+**What causes the lag: drawing (rendering), not scripts or physics.** Scripts take about 1.4 ms a frame and physics about 1.1 ms; drawing takes 15 to 30 ms.
+
+Two things make drawing expensive:
+- **Muscle bodies are very detailed.** One body wearing the muscle stage meshes is about 123,000 triangles (torso halves 19,950 each, upper arms 13,728 each, forearms and calves 8,256 each, thighs about 11,000 each). At the starter gym about 750,000 body triangles were drawn at once. This is the part to simplify in Blender.
+- **The map has a lot of parts.** 21,859 parts (the town alone 16,844), 294 lights, 424 signs. Streaming is on but the phone still loads the whole town (23,736 parts), because the streaming distance settings were never set (owner's job in Workspace Properties).
+
+**Quick wins done:** 192 small props no longer cast shadows. The map's mesh settings were already correct. No duplicate parts were found, and no free-model scripts.
+
+**Still to do by hand (scripts can't change it):** select every mesh in ReplicatedStorage > BodyStages and LimbStages and set CollisionFidelity to Box in Properties.
+
+**Far bodies:** NPCs further than 60 studs already switch to a plain body (checked). Other players never do, by the earlier rule; this could change if wanted.
+
+### Heaviest meshes
+| # | Mesh | MeshId | Triangles | Copies in the place | Where |
+|---|---|---|---|---|---|
+| 1 | BS_Torso_Front_g000 | 78363131212696 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 2 | BS_Torso_Front_g020 | 84851847888387 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 3 | BS_Torso_Front_g040 | 71416633931227 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 4 | BS_Torso_Front_g060 | 115336578035539 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 5 | BS_Torso_Front_g080 | 99677012136257 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 6 | BS_Torso_Front_g100 | 129324753285817 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 7 | BS_Torso_Front_gmon | 137013043275089 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 8 | BS_Torso_Back_g000 | 109599664465114 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 9 | BS_Torso_Back_g020 | 96188948784068 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 10 | BS_Torso_Back_g040 | 114001138197400 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 11 | BS_Torso_Back_g060 | 97198593908439 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 12 | BS_Torso_Back_g080 | 125070479825044 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 13 | BS_Torso_Back_g100 | 140465933559267 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 14 | BS_Torso_Back_gmon | 127301004702519 | 19,950 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (torso stage) |
+| 15 | BS_LeftArm_Arm_g000 | 106820270054132 | 13,728 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (upper arm stage) |
+| 16 | BS_LeftArm_Arm_g020 | 76714840120580 | 13,728 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (upper arm stage) |
+| 17 | BS_LeftArm_Arm_g040 | 126982024186662 | 13,728 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (upper arm stage) |
+| 18 | BS_LeftArm_Arm_g060 | 84400921353716 | 13,728 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (upper arm stage) |
+| 19 | BS_LeftArm_Arm_g080 | 127996084088671 | 13,728 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (upper arm stage) |
+| 20 | BS_LeftArm_Arm_g100 | 134822315929590 | 13,728 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (upper arm stage) |
+
+Full numbers are in PROGRESS.md.
