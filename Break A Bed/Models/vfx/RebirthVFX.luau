@@ -27,7 +27,7 @@ VFX.Sprites = {
 	rune_circle = "rbxassetid://105909629892935", rays = "rbxassetid://84297323769537", cloud = "rbxassetid://107048214238270", trail = "rbxassetid://82683263065069",
 	energy = "rbxassetid://125689238568684", dust = "rbxassetid://137582597658372", orb = "rbxassetid://107235527432295",
 	-- 4x4 flipbooks (1024x1024): animated cartoon flames and anime aura spikes. Upload these two and paste the ids.
-	flame_flipbook = "rbxassetid://0", aura_flipbook = "rbxassetid://0",
+	flame_flipbook = "rbxassetid://80758190475188", aura_flipbook = "rbxassetid://89060942632732",
 }
 
 local low = false
