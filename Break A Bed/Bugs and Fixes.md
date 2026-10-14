@@ -166,3 +166,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-14: a test overwrote the saved Strength (restored) #bugs #done
 - Setting Strength in Studio play on the real save got saved. Restored to 0 (the last seen value). See [[Break A Bed/2026-10-14|2026-10-14]].
+
+## 2026-10-14: background music doesn't play #bugs
+- **Reported by the owner.** The shuffled 3-song APM playlist (2026-10-13) was never tested, because Studio Play was stuck that day.
+- **Likely causes to check:** the 3 song ids don't load (wrong id, not allowed in this experience, F9 shows "Failed to load sound"); the playlist script errors or never starts; the Music SoundGroup volume or the player's saved Music setting is 0; the Sound isn't parented where the client can play it (SoundService/PlayerGui); the next song never starts because `Ended` isn't hooked up.
