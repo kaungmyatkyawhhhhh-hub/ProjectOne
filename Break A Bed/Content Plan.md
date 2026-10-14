@@ -225,6 +225,17 @@ Seen from spawn, everything is squeezed into the back corner while the big paved
   - ~~The map floats in empty blue sky; put the city back.~~ **No: the owner removed the city on purpose and wants a clean map (2026-10-13). Don't add a city back.**
   - The grass to the right of training is empty. It's a good spot for a future stand (Rebirth or AFK Zone).
 
+## 10. Story: The Sleep King (owner asked for a story, 2026-10-14)
+Short and told with pictures, because kids don't read much. Max ~6 words per line.
+- **The story:** the evil **Sleep King** (a big grumpy king in pajamas, a nightcap and a crown) cursed every bed. Anyone who touches one falls asleep forever, and the beds get stronger and stronger. You're the last kid awake. Train, break the cursed beds, wake everyone up, and beat the Sleep King.
+- **Intro (first join only, ~10 s):** 3 comic panels before the tutorial, tap to continue: (1) "The Sleep King cursed the beds!" (king laughing, people snoring on beds), (2) "Everyone fell asleep..." (sleepy town), (3) "Only YOU can break them!" (the player in karate pose). Then the normal tutorial starts.
+- **Sleepers on the beds:** each unbroken bed has a sleeping NPC lying on it with floating "Zzz". When you break that bed for the first time, the NPC jumps up, cheers ("Thank you!" bubble) and runs to spawn. Freed people stand around spawn waving and cheering. Spawn slowly fills up = visible progress. Saved per player (FreedSleepers), shown only to that player. Keep them small so the map stays clean.
+- **Story tracker:** "Freed 7 / 15" with a sleeping-face icon on the next-bed bar.
+- **The Sleep King talks:** at a few beds (5, 10, 14) he pops up as a small floating face, one line, 3 s: "You can't stop me!", "My beds are too strong!", "Come to my castle... if you dare!"
+- **Boss: the Sleep King's Royal Bed** at the end of the path: a giant purple-and-gold bed with the King sitting on it, a boss health bar and "BOSS" tag. Breaking it plays a short win scene (the King falls, everyone cheers, confetti) and then shows the **Rebirth** button: "The Sleep King will return... STRONGER!" This explains why rebirth resets everything.
+- **World 2 (later):** the Sleep King's Dream Castle.
+- Don't change the clean map. Don't add long text.
+
 ## Pacing targets (check after building)
 - First 10 minutes: unchanged (new thing every 45–75 s).
 - Beds 10–15: about 3–5 min each.
