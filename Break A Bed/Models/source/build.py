@@ -8,8 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from PIL import Image
 
-OUT = sys.argv[1]; PREV = sys.argv[2]
-os.makedirs(OUT, exist_ok=True); os.makedirs(PREV, exist_ok=True)
+OUT = sys.argv[1] if len(sys.argv) > 1 else "out"; PREV = sys.argv[2] if len(sys.argv) > 2 else "prev"
 
 def concat(meshes):
     vs, fs, uvs, off = [], [], [], 0
@@ -61,15 +60,17 @@ def render(name, merged, tex, path, views=((20, -60), (10, -140))):
         c = (vp.max(0)+vp.min(0))/2; r = np.ptp(vp, 0).max()/2
         ax.set_xlim(c[0]-r, c[0]+r); ax.set_ylim(c[1]-r, c[1]+r); ax.set_zlim(c[2]-r, c[2]+r)
         ax.set_box_aspect((1, 1, 1)); ax.view_init(el, az); ax.axis("off")
-    fig.suptitle(name.split("_", 1)[1], color="white", fontsize=18)
+    fig.suptitle(name.split("_", 1)[-1], color="white", fontsize=18)
     plt.tight_layout(); fig.savefig(path, dpi=80, facecolor=fig.get_facecolor()); plt.close(fig)
 
-only = sys.argv[3:] or None
-items = dict(ALL); items["0_ToriiGate"] = (torii, None)
-for name, (fn, _) in sorted(items.items()):
-    if only and name not in only: continue
-    parts = fn(); tex = textures_for(name)
-    missing = [p for p in parts if p not in tex]
-    t, merged = export(name, parts, tex)
-    render(name, merged, tex, os.path.join(PREV, name + ".png"))
-    print(name, "max tris/part", t, "missing tex", missing)
+if __name__ == "__main__":
+    os.makedirs(OUT, exist_ok=True); os.makedirs(PREV, exist_ok=True)
+    only = sys.argv[3:] or None
+    items = dict(ALL); items["0_ToriiGate"] = (torii, None)
+    for name, (fn, _) in sorted(items.items()):
+        if only and name not in only: continue
+        parts = fn(); tex = textures_for(name)
+        missing = [p for p in parts if p not in tex]
+        t, merged = export(name, parts, tex)
+        render(name, merged, tex, os.path.join(PREV, name + ".png"))
+        print(name, "max tris/part", t, "missing tex", missing)

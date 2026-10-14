@@ -1,0 +1,23 @@
+newmtl Post
+Kd 1 1 1
+map_Kd R1_PhoenixDummy_textures/Post.png
+
+newmtl Arms
+Kd 1 1 1
+map_Kd R1_PhoenixDummy_textures/Arms.png
+
+newmtl Leg
+Kd 1 1 1
+map_Kd R1_PhoenixDummy_textures/Leg.png
+
+newmtl Frame
+Kd 1 1 1
+map_Kd R1_PhoenixDummy_textures/Frame.png
+
+newmtl Star
+Kd 1 1 1
+map_Kd R1_PhoenixDummy_textures/Star.png
+
+newmtl Pad
+Kd 1 1 1
+map_Kd R1_PhoenixDummy_textures/Pad.png
