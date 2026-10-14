@@ -318,6 +318,7 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 - **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
 
 ## 12. Rebirth feels repetitive (owner, 2026-10-14)
+**Built 2026-10-14** (the reward row only shows the track; the Phoenix rewards still need building), see [[Break A Bed/2026-10-14|2026-10-14]].
 Players get bored replaying the same beds after a rebirth. Three fixes:
 1. **Fast replay:**
    - After a rebirth, every bed you have broken before shows a small ⚡ and breaks **5x faster** (the bonus stops at your old best bed).
