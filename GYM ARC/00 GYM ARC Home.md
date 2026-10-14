@@ -272,6 +272,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Prompt - Performance part 2]]
 - [[2026-10-14 GYM ARC Prompt - Physique taller frame note]]
 - [[2026-10-14 GYM ARC Prompt - Quest rerolls]]
+- [[2026-10-14 GYM ARC Prompt - Remove Skip Growth Cooldown]]
 - [[2026-10-14 GYM ARC Prompt - Rep and pump bar and treadmill sounds]]
 - [[2026-10-14 GYM ARC Prompt - Skating speed, stamina bar, skate button]]
 - [[2026-10-14 GYM ARC Prompt - Stats overlay no turning]]
