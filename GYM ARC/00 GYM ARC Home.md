@@ -262,6 +262,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Prompt - Coach Dex remake]]
 - [[2026-10-14 GYM ARC Prompt - DNA Tokens sources]]
 - [[2026-10-14 GYM ARC Prompt - Daily rewards DNA tokens]]
+- [[2026-10-14 GYM ARC Prompt - Endless Stamina]]
 - [[2026-10-14 GYM ARC Prompt - Final UI pass]]
 - [[2026-10-14 GYM ARC Prompt - Fixed REP spot and 3D genetics back]]
 - [[2026-10-14 GYM ARC Prompt - Free machines and new main menu]]
