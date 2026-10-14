@@ -221,7 +221,7 @@ P.IceDragon = {
 }
 
 P.RainbowKoi = {
-	tint = "#FF7AD9", outline = "#FFFFFF", light = { "#C8A0FF", 3, 14 }, rainbow = true, fill = 0.9, -- (owner: lower glow so the textures show)
+	tint = "#FF7AD9", outline = "#FFFFFF", light = { "#C8A0FF", 3, 14 }, rainbow = true, fill = 0.9, noAfterimages = true, -- (owner: lower glow so the textures show; pink ghosts washed them out)
 	emit = {
 		{ at = "Mouth", sprite = "bubble", color = cs("#FFFFFF", "#BDEBFF"), size = ns(0.4, 0.7), rate = 10, life = { 1.2, 2 }, speed = { 2, 4 }, spread = 25, accel = Vector3.new(0, 3, 0), light = 0.4 },
 		{ at = "Dorsal", sprite = "spark", color = cs("#FF5A5A", "#FFD34D", "#5AFF8A", "#5AC8FF", "#C85AFF"), size = ns(1, 0), rate = 15, life = { 0.5, 0.9 }, speed = { 1, 2 }, spread = 180, light = 1 },
@@ -440,7 +440,7 @@ function VFX.Attach(model: Model, creature: string, sizeMul: number?): Handle
 		end
 	end
 	-- afterimages: 3 fading ghost copies every 0.12 s while it moves (off on low graphics)
-	if not low then
+	if not low and not prof.noAfterimages then
 		local last = 0
 		table.insert(conns, RunService.Heartbeat:Connect(function()
 			if os.clock() - last < 0.12 then return end
