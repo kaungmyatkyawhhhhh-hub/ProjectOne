@@ -203,6 +203,11 @@ The owner sent screenshots of a reference game and wants ours to feel like it. A
   - **Damage number** on each hit: big white bold text with a thick black outline, tilted ~25°, popping out near the hit and drifting up. The same style is used for CRITICAL in orange.
   - **Health bar** under the bed: wide, **pink fill on a dark red track**, white bold "418K / 612K" text with a dark outline, and a red **plus icon** (`health_plus.png`) on its left. The fill eases down on each hit, with a white "damage chunk" that shrinks after 0.2 s.
   - The bed jolts and squashes slightly on every hit (already in the game, keep it).
+- **The money must never cover the buttons and HUD (owner, 2026-10-14 screenshot):** the cash bills and "+9.9K" badges covered the side buttons, the stats, the health bar and EXIT, and there were far too many.
+  - Put the money effects in their own ScreenGui with a **lower DisplayOrder than every HUD ScreenGui** (e.g. money -10, HUD 0 and up), so all buttons, stats, the health bar and EXIT are always drawn **on top** of the money.
+  - Keep the bills inside the **middle area** of the screen: not over the left buttons/stats column, the right button column, the top buttons or the bottom health bar/EXIT. Start them from the center and fade them out before they reach those areas.
+  - **Fewer and smaller:** at most **10 bills** per break (smaller, ~8% of screen height), gone within 1 s. Only **one "+cash" badge per break** (the total, e.g. "+9.9K"), not one per bill. If breaks come fast (auto), merge them into the same badge and count it up, and never more than 2 badges on screen.
+  - Low Graphics: 4 bills.
 - **CRITICAL hits:** "**CRITICAL!**" in an orange-to-red gradient with a thick dark outline pops at the hit spot. The damage number ("326K") is big white text with a black outline, **tilted ~15°**, punching in with a scale bounce.
 
 ## Break any bed, slower when you're weak (owner, 2026-10-14)
