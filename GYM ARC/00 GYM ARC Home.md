@@ -293,8 +293,10 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Prompt - Trainers not collidable]]
 - [[2026-10-14 GYM ARC Prompt - Trainers remake]]
 - [[2026-10-14 GYM ARC Prompt - World signs and stats overlay]]
+- [[2026-10-15 GYM ARC Prompt - Do all unstarted requests]]
 - [[2026-10-15 GYM ARC Prompt - Low-poly body stage meshes]]
 - [[2026-10-15 GYM ARC Prompt - Menu and loading background art]]
+- [[2026-10-15 GYM ARC Prompt - Right side cards collapse]]
 
 ### Config
 - [[GYM ARC - Config values]]
