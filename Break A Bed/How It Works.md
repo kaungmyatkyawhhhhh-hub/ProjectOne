@@ -248,3 +248,14 @@ Each bed's tile area gets decorated in that bed's theme. Keep it **compact**: on
 - Reuse the sprites in `Models/vfx/sprites` for the effects. Never use Roblox's default Fire/Smoke/Sparkles.
 - Low Graphics turns off the ambient effects and keeps the floor and props.
 - Belt-test beds (3, 6, 9, ...) have no gate (the owner removed the dojo gates). They keep the floating belt and the "BELT TEST" tag.
+
+## Hidden zones in the clouds (owner, 2026-10-14)
+To make the game more exciting, players can't see the zones ahead until they're strong enough.
+- **Rule:** every bed zone whose Strength need you don't meet yet is hidden inside thick **clouds**. You always see the zones you can break and the cloud bank right after them. The **next 6 zones** are the cloud bank you can see into the distance. Zones beyond those 6 aren't shown at all; the path just disappears into the clouds.
+- **The clouds:** a soft, fluffy white-grey cloud wall filling each hidden zone from the floor to above the bed sign. It's built from the custom `cloud`/`smoke` sprites (ParticleEmitters with big slow particles, plus a few big cloud billboards for the shape), never plain grey parts. They drift slowly. The fence on both sides still shows, so the path leads into the clouds. A small sign at the cloud edge says "🔒 💪 1.2M" (the Strength needed to clear the next zone).
+- **Per player:** this is all client side, so every player sees their own clouds. Hidden zones' beds, props and signs are made invisible locally (LocalTransparencyModifier/Transparency on the client).
+- **Clearing a zone:** the moment your Strength reaches that bed's need, the clouds in that zone **blow apart**: the particles push outward and fade over ~1.5 s with a wind whoosh. The zone fades in, and "NEW ZONE UNLOCKED!" appears with the bed's name. The bed is still a black silhouette until you break it (same as now).
+- **Walking into the clouds is allowed** (so "break any bed, slower when you're weak" still works): inside a hidden zone you only see about 10 studs around you, and the bed shows as a black silhouette when you're right next to it.
+- To Bed, the guide beam and the next-bed bar never point into hidden zones, except the next-bed bar showing "Next: ???" with the Strength needed.
+- Rebirth: zones go back into the clouds as your Strength resets, but clouds clear faster (0.6 s) for zones you've cleared before.
+- Low Graphics: fewer particles; it uses plain cloud billboards.
