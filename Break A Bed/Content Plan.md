@@ -340,6 +340,24 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 6. **5.0 s:** back to normal.
 - **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
 
+### VFX on every cutscene (owner, 2026-10-14: "it's ugly without vfx")
+Every cutscene must be full of VFX. The custom sprites are in `Break A Bed/Models/vfx/sprites`.
+- **Rebirth cutscenes:** use `Models/vfx/RebirthVFX.luau` (custom VFX per animal, see [[Break A Bed/Models/vfx/VFX|VFX]]).
+- **Belt cutscene:**
+  - Sensei appears in a **smoke puff** (smoke + petals).
+  - The belt glows in its color, with a **trail** following it as it spins around the player.
+  - When it ties: a gong **shockwave ring** on the ground, a vertical ring, light rays behind the player, and a **rune circle** spinning under them in the belt color.
+  - Sparks and stars burst out.
+  - The player gets a soft aura in the belt color for 2 s (glow + rising embers).
+  - Confetti in the belt color.
+  - The camera zoom-punches.
+- **Black belt cutscene:** all of the belt cutscene, plus a gold light pillar from the sky (wide, soft, fading), lightning sparks around the player, a double rune circle (gold + black), golden rays and a bigger shockwave.
+- **Master belt change (every 5th rebirth):**
+  - The 4 stripes fly together as glowing orbs with trails.
+  - The belt flashes white and color-sweeps into the new color.
+  - A shockwave and sparks follow in the new color, and that animal's special burst plays again.
+- **First-join intro:** petals and gold motes drifting past the camera during the fly-down; Sensei's eyes open with a gold flash, an aura flare and a ring.
+
 ### First-join intro (suggested 2026-10-14, not built yet)
 Only on a player's very first join, before the tutorial. **~6 s**, with "Tap to skip" from the start (most players leave in the first 4 minutes, so it must be short).
 1. **0–2 s:** the camera starts high above the end of the bed path and flies down along it. The belt-test beams glow in their colors, and the black belt beam at bed 25 is the brightest.

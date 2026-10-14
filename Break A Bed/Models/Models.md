@@ -19,6 +19,8 @@ Each file comes as `.glb` (textures built in) and `.obj` + `.mtl` (textures in t
 
 **Textures (owner asked, 2026-10-14):** feathers with shafts and barbs (phoenix gold→orange, fire phoenix red→yellow flames, crane white with black wingtips), tiger fur with black stripes and a white belly, gold dragon scales with cream belly plates, ice dragon pale-blue scales with crystal wings and spikes, rainbow koi with colored patches and rainbow fins, galaxy dragon with a nebula and stars, red wood-grain torii with black parts and a gold "BELT TEST" plaque, plus eyes on every animal.
 
+**VFX:** see [[vfx/VFX|VFX]], with custom particle images and a ready VFX module for every animal.
+
 ## How to bring them into the game
 1. In Studio: **Avatar/Model tab → Import 3D** (3D Importer), pick the `.glb` (or `.obj`). Keep the parts as separate MeshParts. Uncheck "Anchored" only for parts that must move.
 2. Put the imported models in `ReplicatedStorage.RebirthCreatures` (named Phoenix, Tiger, ...) and the gate in `ReplicatedStorage.Props.ToriiGate`.
