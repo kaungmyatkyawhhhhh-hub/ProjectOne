@@ -177,3 +177,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-14: buying a Head Start level tops Cash up to that amount immediately if you're below it (and still applies each rebirth). #break-a-bed
 - 2026-10-14: Free Gift and Exclusive Chest need only the group (no like/favorite steps); a no-reward "Like and Favorite!" popup shows once, a minute after the group reward. A JOIN GROUP button + a once-per-session 3-minute popup bring the group offer back. #break-a-bed
 - 2026-10-14: free boosts = x2 only, 15 min max, on their own timer; bought boosts stack on top (x2 free + x3 bought = x6). x3 products kept at 10 min (their pictures say 10 MIN). #break-a-bed
+- 2026-10-14: break/training camera = fixed 3/4 side view sized to the bed/post (SessionCamera); steeper and closer at the training posts; JOIN GROUP button hidden during sessions. #break-a-bed
