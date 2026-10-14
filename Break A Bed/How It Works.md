@@ -196,6 +196,12 @@ The owner sent screenshots of a reference game and wants ours to feel like it. A
   - **`pieces_break.ogg`** plays: a crack, then many pieces knocking on the ground.
   - **Screen money:** 15–25 cartoon **cash bills** (`cash_bill.png`) burst across the whole screen, spinning, flying out from the center and falling with gravity. They're big near the camera and fade out in ~1.2 s, as a ScreenGui overlay.
   - **"+5" money badges:** 3–4 green **cash-stack hexagons** (`cash_stack_hex.png`) with the Cash earned ("+5", "+1.2K") in white bold outlined text pop up around the top of the screen, bounce and fly to the Cash counter.
+- **Every hit, like the owner's second reference screenshot (2026-10-14):**
+  - **Chips fly off on every hit**, not only when it breaks: 4–6 small flat pieces in the bed's own colors (sampled from its parts: frame, blanket, mattress) burst out from the hit point. They tumble, fall, bounce once and fade after ~1.5 s, client side. They pile up a little around the bed while you chop.
+  - **Hit marker:** a white ring with short radial lines (`Models/juice/hit_marker.png`) flashes at the exact hit point on the bed on every punch. It pops from 60% to 110% size in 0.1 s and fades in 0.15 s.
+  - **Damage number** on each hit: big white bold text with a thick black outline, tilted ~25°, popping out near the hit and drifting up. The same style is used for CRITICAL in orange.
+  - **Health bar** under the bed: wide, **pink fill on a dark red track**, white bold "418K / 612K" text with a dark outline, and a red **plus icon** (`health_plus.png`) on its left. The fill eases down on each hit, with a white "damage chunk" that shrinks after 0.2 s.
+  - The bed jolts and squashes slightly on every hit (already in the game, keep it).
 - **CRITICAL hits:** "**CRITICAL!**" in an orange-to-red gradient with a thick dark outline pops at the hit spot. The damage number ("326K") is big white text with a black outline, **tilted ~15°**, punching in with a scale bounce.
 
 ## Break any bed, slower when you're weak (owner, 2026-10-14)
