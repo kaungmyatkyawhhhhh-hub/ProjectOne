@@ -16,8 +16,8 @@ Synthesized with code (`../source/sounds.py`), so they're 100% ours, with no cop
 **Animal voices** (tiger roar, dragon roar, phoenix screech) can't be synthesized well. Use Roblox's own licensed sound library in the Creator Store (Audio tab, made by Roblox; sounds have no scripts, so they're safe). Search "tiger roar", "dragon roar", "eagle screech" (for the phoenix), "ice crack", "coins", "bubbles". Mix each one under `boom.ogg` at the burst.
 
 ## Combo sound: do re mi... (owner, 2026-10-14)
-`combo_1_do.ogg` … `combo_8_do2.ogg`: 8 **piano** notes, middle C (C4) up to C5, going up the C major scale (do re mi fa so la ti do). `combo_demo.ogg` plays it twice so you can hear the idea.
-- (Changed 2026-10-14: the first version was too high-pitched; now a real piano sound from middle C.)
+`combo_1_do.ogg` … `combo_8_do2.ogg`: 8 **heavenly high piano** notes (C6 up to C7, with a soft octave shimmer above and a long airy reverb), going up the C major scale (do re mi fa so la ti do). `combo_demo.ogg` plays it twice so you can hear the idea.
+- (Changed 2026-10-14: the owner wants a heavenly, very high-pitched piano. The current files are high piano C6–C7 with shimmer and reverb.)
 - **Every punch (training and breaking) plays the next note:** do → re → mi → fa → so → la → ti → high do, then **back to do** and up again.
 - If no punch for **1.2 s**, the scale restarts from do next time.
 - On the 8th note (high do) add a tiny sparkle burst on the punch popup, as a small reward for finishing the scale.
