@@ -30,6 +30,23 @@ VFX.Sprites = {
 	flame_flipbook = "rbxassetid://80758190475188", aura_flipbook = "rbxassetid://89060942632732",
 }
 
+-- sprites that don't load yet (a new upload still in moderation) are swapped for a plain one, so nothing shows blank
+VFX.FallbackUsed = {}
+local FALLBACK = { flame_flipbook = "flame", aura_flipbook = "flame_white", rune_circle = "ring" }
+task.spawn(function()
+	local ids = {}
+	for name, id in pairs(VFX.Sprites) do ids[id] = name end
+	local list = {}
+	for id in pairs(ids) do table.insert(list, id) end
+	game:GetService("ContentProvider"):PreloadAsync(list, function(id, status)
+		local name = ids[id]
+		if status ~= Enum.AssetFetchStatus.Success and name and FALLBACK[name] then
+			VFX.FallbackUsed[name] = true
+			VFX.Sprites[name] = VFX.Sprites[FALLBACK[name]]
+		end
+	end)
+end)
+
 local low = false
 function VFX.SetLowGraphics(on: boolean) low = on end
 -- size multiplier for the particles and trails of the creature being set up (the cutscene resizes the models)
@@ -282,7 +299,7 @@ local function emitter(e: any, parent: Instance): ParticleEmitter
 	pe.LockedToPart = e.lockedToPart or false
 	pe.ZOffset = e.zOffset or 0
 	pe.Rate = (e.rate or 0) * (low and 0.35 or 1)
-	if string.find(e.sprite, "flipbook") then
+	if string.find(e.sprite, "flipbook") and not VFX.FallbackUsed[e.sprite] then
 		pe.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
 		pe.FlipbookMode = Enum.ParticleFlipbookMode.Loop
 		pe.FlipbookFramerate = NumberRange.new(18, 26)
@@ -432,7 +449,7 @@ function VFX.Attach(model: Model, creature: string, sizeMul: number?): Handle
 					local g = d:Clone()
 					g:ClearAllChildren()
 					g.Anchored = true; g.CanCollide = false; g.CanQuery = false; g.CanTouch = false
-					g.Material = Enum.Material.Neon; g.Color = c3(prof.tint); g.Transparency = 0.6
+					g.Material = Enum.Material.Neon; g.Color = c3(prof.tint); g.Transparency = 0.85 -- (tuned in Play: 0.6 washed the animal out)
 					g.TextureID = ""
 					g.Parent = ghost
 					TweenService:Create(g, TweenInfo.new(0.35), { Transparency = 1 }):Play()
@@ -538,10 +555,10 @@ function VFX.PlayerAura(character: Model, colorHex: string, duration: number)
 			speed = { 5, 7 }, spread = 8, trans = ns(1, 0.2, 1), light = 1, zOffset = 0.5 }, a))
 	end
 	-- 3) soft body glow + rising embers + a glowing ground ring
-	add(emitter({ sprite = "glow", color = ColorSequence.new(col), size = ns(7, 8), rate = 6, life = { 0.5, 0.5 }, speed = { 0, 0 }, trans = ns(1, 0.6, 1), light = 1, lockedToPart = true }, mid))
+	add(emitter({ sprite = "glow", color = ColorSequence.new(col), size = ns(6, 7), rate = 6, life = { 0.5, 0.5 }, speed = { 0, 0 }, trans = ns(1, 0.8, 1), light = 1, lockedToPart = true }, mid))
 	add(emitter({ sprite = "ember", color = ColorSequence.new(hot, col), size = ns(0.35, 0.05), rate = 40, life = { 0.8, 1.3 }, speed = { 3, 7 }, spread = 25, accel = Vector3.new(0, 6, 0), light = 1 }, feet))
 	flatDecal(root.Position - Vector3.new(0, 2.9, 0), "ring", colorHex, 7, duration, nil, 1.2)
-	local light = add(Instance.new("PointLight")); light.Color = col; light.Brightness = 4; light.Range = 14; light.Parent = root
+	local light = add(Instance.new("PointLight")); light.Color = col; light.Brightness = 2; light.Range = 12; light.Parent = root -- (tuned in Play: 4 overexposed the player)
 	task.delay(duration, function()
 		for _, i in ipairs(made) do
 			if i:IsA("ParticleEmitter") then i.Enabled = false end
