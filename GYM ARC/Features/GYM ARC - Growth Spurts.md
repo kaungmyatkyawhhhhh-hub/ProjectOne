@@ -48,3 +48,6 @@ The rebirth system (never called "sacrifice"): when all 6 muscle groups hit the 
 
 ## Players past the height cap (14 Oct)
 Some old saves had more Growth Spurts than the last one (6, which reaches 7'0") from before the cap existed. When such a save loads, once: every one of the 18 muscles gets +10,000,000 EXP and the Growth Spurt count goes back to 6. It can't happen twice, because the save isn't past the cap any more. (Spurt 7's gains bonus x3.5 becomes spurt 6's x3.0.) Tested on the owner's save.
+
+## Rules
+- **No growth spurt cooldown.** A player can do the next Growth Spurt as soon as they've earned it (owner, 14 Oct). Checked: no timer or time check exists in the code; the Skip Growth Cooldown product was removed.
