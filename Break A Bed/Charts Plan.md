@@ -135,7 +135,7 @@ Goal: "Stayed 10 min" from 31% to 45%+. Build in this order:
   3. **Fewer buy moments.** The "Need more Strength?" offer at a locked bed was replaced on 10/13 by BREAK IT only when the prompt is used.
   4. Traffic and the Ages 16+ limit (see [[Break A Bed/Ads|Ads]]).
 - **Tested (owner, 2026-10-14):** a real purchase in the live game works, so suspect 1 is ruled out. Next: make free boosts weaker than paid ones.
-- **Free vs paid boosts plan (2026-10-14):**
+- **Free vs paid boosts plan (2026-10-14):** **Built 2026-10-14**, see [[Break A Bed/2026-10-14|2026-10-14]] (the toast says "x3 for 10 min": the x3 products stay 10 min).
   - Free rewards (gifts, chests, spins, codes, daily, quests) give **only x2** boosts, at most 15 min each. **x3 and higher are only sold.** Swap some free boosts for Cash/Strength rewards.
   - Paid boosts **stack on top of** a running free x2, so a free boost never makes a purchase pointless.
   - When a free boost runs out: one small toast "Boost ended! Get x3 for 15 min" with a BUY button. At most once every 20 min.
