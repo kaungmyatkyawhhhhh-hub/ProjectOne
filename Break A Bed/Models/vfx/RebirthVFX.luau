@@ -29,12 +29,12 @@ VFX.Sprites = {
 	-- 4x4 flipbooks (1024x1024): animated cartoon flames and anime aura spikes. Upload these two and paste the ids.
 	flame_flipbook = "rbxassetid://80758190475188", aura_flipbook = "rbxassetid://89060942632732",
 	-- swirl tornado (replaces the blocky swirl parts): upload these two and paste the ids
-	swirl_band = "rbxassetid://0", swirl = "rbxassetid://0",
+	swirl_band = "rbxassetid://101899940636668", swirl = "rbxassetid://108087381980609",
 }
 
 -- sprites that don't load yet (a new upload still in moderation) are swapped for a plain one, so nothing shows blank
 VFX.FallbackUsed = {}
-local FALLBACK = { flame_flipbook = "flame", aura_flipbook = "flame_white", rune_circle = "ring" }
+local FALLBACK = { flame_flipbook = "flame", aura_flipbook = "flame_white", rune_circle = "ring", swirl_band = "trail", swirl = "ring" }
 task.spawn(function()
 	local ids = {}
 	for name, id in pairs(VFX.Sprites) do ids[id] = name end

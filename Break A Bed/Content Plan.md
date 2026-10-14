@@ -341,6 +341,7 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 - **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
 
 ### VFX on every cutscene (owner, 2026-10-14: "it's ugly without vfx")
+**Built 2026-10-14**, see [[Break A Bed/2026-10-14|2026-10-14]].
 Every cutscene must be full of VFX. The custom sprites are in `Break A Bed/Models/vfx/sprites`.
 - **Rebirth cutscenes:** use `Models/vfx/RebirthVFX.luau` (custom VFX per animal, see [[Break A Bed/Models/vfx/VFX|VFX]]).
 - **Belt cutscene:**
