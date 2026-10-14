@@ -128,7 +128,6 @@ monetization prompt is the one that turns it on.
 | Shake Bundle | Developer product | 3 Energy Shakes | 49 | 3718306390 | Boosts | ON |
 | Stamina Refill | Developer product | Stamina to full | 15 | 3718306417 | Boosts | ON |
 | DNA Token | Developer product | 1 DNA token | 99 | 3718499538 | Boosts | ON |
-| Skip Growth Cooldown | Developer product | Nothing to skip yet (no wait between Growth Spurts) | 35 | 3718306447 | Boosts | HIDDEN |
 | Quest Reroll | Developer product | Reroll one daily quest | 19 | 3718500732 | (Quests window only) | ON |
 
 Notes:
@@ -136,3 +135,5 @@ Notes:
 - The Shake Bundle's Roblox description says "+20% EXP for 5 minutes each"; the game's Energy Shake refills stamina and gives +50% gains for 30 s.
 - Prices shown in the Store come from Roblox; the numbers above are only the fallback if Roblox can't be reached.
 
+## Removed (14 Oct)
+- **Skip Growth Cooldown** (developer product 3718306447): removed from the game on the owner's request (it was never on sale: there is no wait between Growth Spurts). The product still exists on the Creator Hub; turn it off there if wanted.
