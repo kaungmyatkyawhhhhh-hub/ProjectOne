@@ -1,7 +1,7 @@
 ---
 date: 2026-10-15
 tags: [gymarc, prompt, performance]
-status: in progress
+status: done
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
@@ -18,4 +18,10 @@ LOW-POLY BODY STAGE MESHES: I already imported all of them myself in Studio (the
 6. Check an NPC/other player at every stage (g000 to gmon), front and back, close up: no gaps at the seams, skin texture and shorts look the same. Screenshot before/after.
 7. Measure again at the starter gym, same view as the 14 Oct lag check: triangles, draw calls, FPS. Put the numbers in PROGRESS.md and the Obsidian Performance note.
 Commit.
+```
+
+Message sent while this was running:
+
+```text
+everyones clothes disappear when i look through the glass
 ```

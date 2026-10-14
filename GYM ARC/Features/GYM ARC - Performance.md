@@ -87,3 +87,20 @@ Two things make drawing expensive:
 | 20 | BS_LeftArm_Arm_g100 | 134822315929590 | 13,728 | 1 template; 1 clone per body at that stage | ReplicatedStorage.BodyStages (upper arm stage) |
 
 Full numbers are in PROGRESS.md.
+
+## Low-poly body meshes, 15 Oct
+The owner's simplified (Blender) body meshes replaced the detailed ones on every NPC, other player, trainer and the statue. Your own live muscles are unchanged, and so is the waist piece.
+- **One body is now about 31,000 triangles instead of about 123,000 (4 times fewer).**
+- Every stage from skinny to mass monster was checked front and back: the clothes and skin look the same, no gaps.
+- The old mesh ids are saved (Config > StageMeshBackup) so this can be undone.
+- Frame rate in Studio stays about 15 fps either way while it is remote-controlled; the real gain shows on a phone.
+
+| Stage | Before (front) | After (front) | Before (back) | After (back) |
+|---|---|---|---|---|
+| g000 | ![[GYM ARC/Screenshots/lowpoly_before_g000_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g000_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_g000_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g000_back.jpg]] |
+| g020 | ![[GYM ARC/Screenshots/lowpoly_before_g020_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g020_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_g020_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g020_back.jpg]] |
+| g040 | ![[GYM ARC/Screenshots/lowpoly_before_g040_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g040_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_g040_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g040_back.jpg]] |
+| g060 | ![[GYM ARC/Screenshots/lowpoly_before_g060_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g060_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_g060_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g060_back.jpg]] |
+| g080 | ![[GYM ARC/Screenshots/lowpoly_before_g080_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g080_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_g080_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g080_back.jpg]] |
+| g100 | ![[GYM ARC/Screenshots/lowpoly_before_g100_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g100_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_g100_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g100_back.jpg]] |
+| gmon | ![[GYM ARC/Screenshots/lowpoly_before_gmon_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_gmon_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_gmon_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_gmon_back.jpg]] |

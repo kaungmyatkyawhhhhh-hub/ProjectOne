@@ -119,6 +119,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Blocky arms and spiky legs at level 0]]
 - [[GYM ARC - Bug - Broken statue]]
 - [[GYM ARC - Bug - Camera zoomed into your arm on first lift]]
+- [[GYM ARC - Bug - Clothes vanish behind glass]]
 - [[GYM ARC - Bug - Coins pill overlapped the Menu button]]
 - [[GYM ARC - Bug - Could not leave a machine]]
 - [[GYM ARC - Bug - Crunch leg curl and calf raise animations]]
