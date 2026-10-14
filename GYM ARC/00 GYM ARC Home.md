@@ -257,6 +257,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Prompt - Arm wrestling one per seat]]
 - [[2026-10-14 GYM ARC Prompt - Aura VFX module]]
 - [[2026-10-14 GYM ARC Prompt - Aura VFX v2]]
+- [[2026-10-14 GYM ARC Prompt - Aura VFX v3]]
 - [[2026-10-14 GYM ARC Prompt - Aura system]]
 - [[2026-10-14 GYM ARC Prompt - Avatar headshots]]
 - [[2026-10-14 GYM ARC Prompt - Button ghost outline bug]]
