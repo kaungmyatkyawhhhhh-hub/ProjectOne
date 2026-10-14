@@ -250,13 +250,13 @@ Each bed's tile area gets decorated in that bed's theme. Keep it **compact**: on
 - Low Graphics turns off the ambient effects and keeps the floor and props.
 - Belt-test beds (3, 6, 9, ...) have no gate (the owner removed the dojo gates). They keep the floating belt and the "BELT TEST" tag.
 
-## Hidden zones in the clouds (owner, 2026-10-14)
-To make the game more exciting, players can't see the zones ahead until they're strong enough.
-- **Rule:** every bed zone whose Strength need you don't meet yet is hidden inside thick **clouds**. You always see the zones you can break and the cloud bank right after them. The **next 6 zones** are the cloud bank you can see into the distance. Zones beyond those 6 aren't shown at all; the path just disappears into the clouds.
-- **The clouds:** a soft, fluffy white-grey cloud wall filling each hidden zone from the floor to above the bed sign. It's built from the custom `cloud`/`smoke` sprites (ParticleEmitters with big slow particles, plus a few big cloud billboards for the shape), never plain grey parts. They drift slowly. The fence on both sides still shows, so the path leads into the clouds. A small sign at the cloud edge says "🔒 💪 1.2M" (the Strength needed to clear the next zone).
-- **Per player:** this is all client side, so every player sees their own clouds. Hidden zones' beds, props and signs are made invisible locally (LocalTransparencyModifier/Transparency on the client).
-- **Clearing a zone:** the moment your Strength reaches that bed's need, the clouds in that zone **blow apart**: the particles push outward and fade over ~1.5 s with a wind whoosh. The zone fades in, and "NEW ZONE UNLOCKED!" appears with the bed's name. The bed is still a black silhouette until you break it (same as now).
-- **Walking into the clouds is allowed** (so "break any bed, slower when you're weak" still works): inside a hidden zone you only see about 10 studs around you, and the bed shows as a black silhouette when you're right next to it.
-- To Bed, the guide beam and the next-bed bar never point into hidden zones, except the next-bed bar showing "Next: ???" with the Strength needed.
-- Rebirth: zones go back into the clouds as your Strength resets, but clouds clear faster (0.6 s) for zones you've cleared before.
-- Low Graphics: fewer particles; it uses plain cloud billboards.
+## Hidden zones in the clouds (owner, 2026-10-14, corrected)
+To make the game more exciting, players can't see far ahead.
+- **Rule:** you can see every zone you meet the Strength for, **plus the next 3 zones** after it (normal, visible, and you can break them slowly). **From the 4th zone onward, a cloud wall covers everything**, and you **can't walk past it**: it's solid like a wall.
+  - Example: your Strength meets the Gold Bed (bed 9). You see beds 1–9 plus 10, 11 and 12. The cloud wall starts at bed 13 and blocks the path there.
+- **The cloud wall:** a big, fluffy white-grey cloud bank across the whole path (fence to fence and high up), made from our `cloud`/`smoke` sprites (ParticleEmitters with big slow particles + cloud billboards for the shape), never plain grey parts. It drifts slowly. Everything behind it is invisible (client side). A sign in front of it says "🔒 Reach 💪 1.2M to clear the clouds" (the Strength need of the zone 3 before the wall, i.e. clearing the next one moves the wall).
+- **Solid:** an invisible wall part with CanCollide on, made on the client only (each player has their own wall at their own spot). Walking into it just stops you, with a soft "poof" of cloud particles where you touch it.
+- **Moving the wall:** when your Strength reaches the next zone's need, the wall **moves forward by one zone**: the front clouds blow apart (~1.5 s, wind whoosh), that zone fades in, and "NEW ZONE REVEALED!" shows with the bed's name (black silhouette until first broken).
+- To Bed, the guide beam and the next-bed bar never point past the wall.
+- Rebirth: Strength resets, so the wall comes back to its early spot (clouds clear faster, 0.6 s, for zones seen before).
+- Low Graphics: fewer particles; it uses mostly billboards.

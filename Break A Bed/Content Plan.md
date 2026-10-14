@@ -367,13 +367,13 @@ Every cutscene must be full of VFX. The custom sprites are in `Break A Bed/Model
 
 ### First-join intro (updated 2026-10-14 for the hidden cloud zones)
 Only on a player's very first join, before the tutorial. **~7 s**, with "Tap to skip" from the start (most players leave in the first 4 minutes, so keep it short). Because the zones ahead are now hidden in clouds, the intro shows them as a **mystery**:
-1. **0–1.5 s:** the camera starts low over spawn and the first open zones (Cardboard Bed, Air Mattress...), gliding forward along the path.
-2. **1.5–3.5 s:** the camera rises and flies over the **sea of clouds** covering the rest of the path. Inside the clouds, glows in different colors flicker (the hidden zones: a red lava glow, blue ice, purple crystal...). Far away a **black-belt light** shines up through the clouds. Soft taiko drums.
+1. **0–1.5 s:** the camera starts low over spawn and glides forward over the first zones (the open ones plus the next 3 visible ones) up to the cloud wall.
+2. **1.5–3.5 s:** at the cloud wall the camera rises and flies over the **sea of clouds** covering the rest of the path. Inside the clouds, glows in different colors flicker (the hidden zones: a red lava glow, blue ice, purple crystal...). Far away a **black-belt light** shines up through the clouds. Soft taiko drums.
 3. **3.5–5.5 s:** the camera swoops back to spawn and stops in front of the floating **Sensei**. He opens his eyes (gold glow), his aura flares, and with a gong the bubble says **"Become a BLACK BELT!"**
 4. **5.5–7 s:** the camera glides behind the player, the cinema bars slide away, and the tutorial starts.
 - Petals and gold motes drift past the camera. No other text.
 
-**Zone unlock moment (new, short, ~1.5 s, no cinema bars, controls stay on):** when a zone's clouds blow apart, the camera does a quick gentle push toward that zone (FOV 70 → 64 → 70) while the clouds burst outward. The zone's colors fade in, "NEW ZONE UNLOCKED!" shows with the bed name, and a wind whoosh plus a bright chime play. If the player is training or breaking, skip the camera push and only show the text.
+**Zone reveal moment (new, short, ~1.5 s, no cinema bars, controls stay on):** when the cloud wall moves forward one zone, the camera does a quick gentle push toward that zone (FOV 70 → 64 → 70) while the clouds burst outward. The zone's colors fade in, "NEW ZONE REVEALED!" shows with the bed name, and a wind whoosh plus a bright chime play. If the player is training or breaking, skip the camera push and only show the text.
 
 **Belt light column + clouds:** if your next belt test is inside the clouds, its soft light column rises **above** the cloud bank, so you can still see where your next belt is waiting.
 
