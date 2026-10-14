@@ -226,6 +226,7 @@ Seen from spawn, everything is squeezed into the back corner while the big paved
   - The grass to the right of training is empty. It's a good spot for a future stand (Rebirth or AFK Zone).
 
 ## 10. Story: The Sleep King (owner asked for a story, 2026-10-14)
+**Rejected by the owner (2026-10-14): "bad idea". Don't build this. A different story is still wanted.**
 Short and told with pictures, because kids don't read much. Max ~6 words per line.
 - **The story:** the evil **Sleep King** (a big grumpy king in pajamas, a nightcap and a crown) cursed every bed. Anyone who touches one falls asleep forever, and the beds get stronger and stronger. You're the last kid awake. Train, break the cursed beds, wake everyone up, and beat the Sleep King.
 - **Intro (first join only, ~10 s):** 3 comic panels before the tutorial, tap to continue: (1) "The Sleep King cursed the beds!" (king laughing, people snoring on beds), (2) "Everyone fell asleep..." (sleepy town), (3) "Only YOU can break them!" (the player in karate pose). Then the normal tutorial starts.
