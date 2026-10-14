@@ -269,6 +269,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Prompt - Fixed REP spot and 3D genetics back]]
 - [[2026-10-14 GYM ARC Prompt - Free machines and new main menu]]
 - [[2026-10-14 GYM ARC Prompt - Inventory panel and text fit]]
+- [[2026-10-14 GYM ARC Prompt - Lag and triangles]]
 - [[2026-10-14 GYM ARC Prompt - Lifting HUD, top bar, Physique, left menu on mobile]]
 - [[2026-10-14 GYM ARC Prompt - Loading screen sound]]
 - [[2026-10-14 GYM ARC Prompt - Loading screen, declutter HUD, Genetics mobile]]
