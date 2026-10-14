@@ -67,3 +67,18 @@ Logo picture, gray tagline, the tip in a dark tile with a gold TIP tag, a shiny 
 
 ## Music (14 Oct)
 The owner's track plays from the first frame of the loading screen through the menu and fades out on Play. See [[GYM ARC - Music and Sounds]].
+
+## New art, 15 Oct
+Both screens now use the owner's new picture (the glowing muscle character at the barbell) across the whole screen, and the 3D stone GYM ARC logo top left with a soft red glow.
+- The picture is pinned to the right edge, so the character always shows whole; on an iPad the crop comes off the empty left side.
+- A dark fade on the left 40% keeps the text readable.
+- **Main menu:** "Everyone starts tiny.", then PLAY, SHOP, SETTINGS and NEWS stacked on the left, and the player card bottom left. The old NEW pill bottom right is gone (it sat on the character's feet; NEWS is in the list now).
+- **Loading screen:** the tip card and the loading bar sit along the bottom left.
+- The picture is stored at 1024x576 (Roblox's size limit), so it is a little soft on a large PC screen.
+
+| | Menu | Loading |
+|---|---|---|
+| Phone 844x390 | ![[GYM ARC/Screenshots/menu_art_v2_menu_844x390.jpg]] | ![[GYM ARC/Screenshots/menu_art_v2_loading_844x390.jpg]] |
+| Small phone 667x375 | ![[GYM ARC/Screenshots/menu_art_v2_menu_667x375.jpg]] | ![[GYM ARC/Screenshots/menu_art_v2_loading_667x375.jpg]] |
+| iPad | ![[GYM ARC/Screenshots/menu_art_v2_menu_ipad_1024x768.jpg]] | ![[GYM ARC/Screenshots/menu_art_v2_loading_ipad_1024x768.jpg]] |
+| PC 1920x1080 | ![[GYM ARC/Screenshots/menu_art_v2_menu_1920x1080.jpg]] | ![[GYM ARC/Screenshots/menu_art_v2_loading_1920x1080.jpg]] |

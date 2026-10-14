@@ -214,3 +214,9 @@ Studio can only upload to the owner's account. These work in the game; to use gr
 | smoke_shaded_4x4 (1024, 4x4) | 113405238797101 |
 | ember_dot | 76009392745145 |
 | droplet | 137490039482038 |
+
+## Menu art (15 Oct, uploaded from Studio: owner's own inventory)
+| Image | Asset ID | Note |
+|---|---|---|
+| gym_arc_thumbnail2_nologo_1920x1080 (menu + loading background) | 124549460345839 | kept by Roblox at 1024x576; replaces menu_art 99238211044120 |
+| gym_arc_logo_3d (menu + loading logo) | 86034269506160 | 432x354 |

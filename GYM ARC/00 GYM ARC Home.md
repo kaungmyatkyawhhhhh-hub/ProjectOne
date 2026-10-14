@@ -239,6 +239,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-13 GYM ARC UI redesign]]
 - [[2026-10-14 GYM ARC Final UI Black and Gold]]
 - [[2026-10-14 GYM ARC REP PUMP and menu fixes]]
+- [[2026-10-15 GYM ARC Menu art]]
 
 ### Prompts
 - [[2026-10-04 GYM ARC Prompt - Design brief]]
