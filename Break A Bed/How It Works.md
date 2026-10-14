@@ -197,3 +197,48 @@ The owner sent screenshots of a reference game and wants ours to feel like it. A
   - **Screen money:** 15–25 cartoon **cash bills** (`cash_bill.png`) burst across the whole screen, spinning, flying out from the center and falling with gravity. They're big near the camera and fade out in ~1.2 s, as a ScreenGui overlay.
   - **"+5" money badges:** 3–4 green **cash-stack hexagons** (`cash_stack_hex.png`) with the Cash earned ("+5", "+1.2K") in white bold outlined text pop up around the top of the screen, bounce and fly to the Cash counter.
 - **CRITICAL hits:** "**CRITICAL!**" in an orange-to-red gradient with a thick dark outline pops at the hit spot. The damage number ("326K") is big white text with a black outline, **tilted ~15°**, punching in with a scale bounce.
+
+## Break any bed, slower when you're weak (owner, 2026-10-14)
+The owner wants players to be able to break beds far ahead on the path, but very slowly when their Strength is low.
+- **No Strength lock anymore:** the Break prompt works on every bed. "Need 💪 X" is gone from the prompt. The bed sign still shows the recommended Strength.
+- **Damage per chop is the same as now (from Strength).** A bed far ahead just has far more health compared with your hits, so it takes much longer. Roughly: time ≈ 4 s × (bed's Strength need ÷ your Strength). For example, 10x too weak is about 40 s, 100x too weak about 7 min, and 1,000x too weak about an hour.
+- **The health panel shows an estimate** under the bar: "⏱ ~7m 20s" (live, from your current damage per second, auto or clicking). Green under 1 min, yellow under 10 min, red above. "Too long" isn't shown; just the time.
+- **Progress resets** if you EXIT or walk away for more than 10 s (the health refills), so you can't chip at it a bit each day. AFK breaking with Auto/AFK rejoin is fine, though.
+- **BREAK IT (Robux):** if the estimate is over 60 s, a gold "⚡ BREAK IT" button with the live price (gap tiers in [[Break A Bed/Shop Plan|Shop Plan]]) shows next to the health bar. It replaces the old "you can't break this" moment.
+- Undiscovered (black) beds can be broken too. The "NEW BED DISCOVERED!" reveal plays when it breaks.
+- Balance check: cash per minute from a bed far ahead stays a little below the best bed you can break normally (cash grows ~3x per bed, health ~3.3x), so breaking far ahead is a fun "big goal", not a shortcut.
+
+## Unique zone for every bed (owner, 2026-10-14)
+Each bed's tile area gets decorated in that bed's theme. Keep it **compact**: only on that bed's tile and the fence posts beside it, nothing on the walkway, and nothing taller than the bed sign. Each zone has: a themed **floor** (texture/material on the tile), **2–4 small props** at the tile edges, and **one ambient effect** (particles or light). Undiscovered beds: the zone is dark/greyed until the bed is first broken, then it "comes alive" (colors fade in).
+
+| # | Bed | Floor | Props | Ambient |
+|---|---|---|---|---|
+| 1 | Cardboard | brown cardboard texture | stacked cardboard boxes, tape roll | – |
+| 2 | Air Mattress | pool tiles, light blue | inflatable ring, beach ball, air pump | soft bubbles |
+| 3 | Sleeping Bag | forest grass + dirt | small tent, campfire (custom flame flipbook), log seat | campfire embers |
+| 4 | Wooden | wooden planks | log pile, axe in a stump | sawdust motes |
+| 5 | Bunk Bed | kid's room carpet | toy blocks, teddy bear, small ladder | – |
+| 6 | Water Bed | shallow water (glass + ripples) | lily pads, rubber duck | water ripple rings |
+| 7 | Hospital Bed | white clean tiles | IV stand, heart monitor (beeping green line), curtain | – |
+| 8 | Royal Bed | red carpet with gold trim | 2 gold pillars, red rope barriers | gold sparkles |
+| 9 | Gold Bed | gold tiles | coin piles, gold bars | coin glints |
+| 10 | Diamond Bed | white marble | diamond crystals on stands | white sparkles |
+| 11 | Emerald Bed | green marble | emerald crystal clusters, vines | green glints |
+| 12 | Ruby Bed | dark red stone | ruby clusters, red velvet cushions | red glow |
+| 13 | Ice Bed | snow + ice | ice spikes, snowman | falling snow |
+| 14 | Lava Bed | cracked black rock with glowing lava lines | lava rocks, small lava pool | embers + heat glow |
+| 15 | Crystal Bed | purple crystal floor | big floating crystals (slow spin) | purple shimmer |
+| 16 | Neon Bed | dark floor with neon grid lines | neon signs, glowing tubes | neon flicker |
+| 17 | Robot Bed | metal plates with bolts | gears, a small robot, warning stripes | sparks |
+| 18 | Alien Bed | green alien goo floor | alien plants, a small UFO hovering | green beam |
+| 19 | Lunar Bed | grey moon dust with craters | flag, moon rocks | low floating dust |
+| 20 | Solar Bed | orange-hot floor | small sun orb, solar flares | heat shimmer, orange glow |
+| 21 | Galaxy Bed | starry space floor (galaxy texture) | tiny planets orbiting | stars |
+| 22 | Nebula Bed | pink-blue cloudy floor | nebula clouds (soft parts) | drifting cloud particles |
+| 23 | Black Hole Bed | pitch black with a swirl | a small black hole vortex (rune/swirl sprites) | particles being sucked in |
+| 24 | Cosmic Bed | deep purple with constellations | comets, star shards | twinkling lines |
+| 25 | Infinity Bed | rainbow shifting floor with an ∞ symbol | floating ∞ rings | rainbow sparkles |
+
+- Reuse the sprites in `Models/vfx/sprites` for the effects. Never use Roblox's default Fire/Smoke/Sparkles.
+- Low Graphics turns off the ambient effects and keeps the floor and props.
+- Belt-test beds (3, 6, 9, ...) keep their torii gate in front. The zone decor goes around it.
