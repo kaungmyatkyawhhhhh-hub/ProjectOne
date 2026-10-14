@@ -238,6 +238,7 @@ Short and told with pictures, because kids don't read much. Max ~6 words per lin
 - Don't change the clean map. Don't add long text.
 
 ## 11. Story: Karate belt journey (owner's pick, 2026-10-14)
+**Built 2026-10-14**, see [[Break A Bed/2026-10-14|2026-10-14]].
 Replaces the rejected Sleep King. No villain. You train with an old karate master and earn belts until you're a black belt. Told with pictures, at most ~6 words per line.
 - **Sensei:** an old karate master NPC at spawn (white beard, white gi, black belt, small and tidy so the map stays clean). Idle animation: arms crossed, nods; bows when you walk past. The tutorial's first line comes from him: "Become a BLACK BELT!"
 - **Belts (25 beds):** you start as a **White belt**. Some beds are **belt tests**:
