@@ -337,6 +337,13 @@ These replace the short belt "ceremony" in section 11 with real cutscenes. Share
 6. **5.0 s:** back to normal.
 - **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
 
+### First-join intro (suggested 2026-10-14, not built yet)
+Only on a player's very first join, before the tutorial. **~6 s**, with "Tap to skip" from the start (most players leave in the first 4 minutes, so it must be short).
+1. **0–2 s:** the camera starts high above the end of the bed path and flies down along it. The belt-test beams glow in their colors, and the black belt beam at bed 25 is the brightest.
+2. **2–4 s:** the camera swoops to spawn and stops in front of the floating **Sensei**. He opens his eyes (gold glow) and his aura flares. The speech bubble says **"Become a BLACK BELT!"**
+3. **4–6 s:** the camera glides behind the player, the cinema bars slide away, and the tutorial's first step starts.
+- Soft taiko drums plus the gong when Sensei opens his eyes. No other text.
+
 ### Rebirth cutscene changes with each master belt (owner, 2026-10-14)
 The rebirth cutscene keeps the same 5 steps (camera pulls up → swirl → flash + creature → back at spawn with the new stripe → "REBIRTH X!" + rewards), but each master belt tier has its **own creature, colors and sound**. The cutscene uses the tier you're in **after** this rebirth, so reaching a new master belt shows the new style for the first time (together with the stripes-melt, "BRONZE MASTER!" part).
 
