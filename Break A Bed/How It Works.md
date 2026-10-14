@@ -258,5 +258,5 @@ To make the game more exciting, players can't see far ahead.
 - **Solid:** an invisible wall part with CanCollide on, made on the client only (each player has their own wall at their own spot). Walking into it just stops you, with a soft "poof" of cloud particles where you touch it.
 - **Moving the wall:** when your Strength reaches the next zone's need, the wall **moves forward by one zone**: the front clouds blow apart (~1.5 s, wind whoosh), that zone fades in, and "NEW ZONE REVEALED!" shows with the bed's name (black silhouette until first broken).
 - To Bed, the guide beam and the next-bed bar never point past the wall.
-- Rebirth: Strength resets, so the wall comes back to its early spot (clouds clear faster, 0.6 s, for zones seen before).
+- **Rebirth (decided 2026-10-14): the wall does NOT come back.** Revealed zones stay revealed forever, saved as `FurthestZone` (like DiscoveredBeds, not reset by Rebirth). The wall stays at the furthest spot you ever reached and only moves further when your Strength goes past your old best. After a rebirth the world doesn't shrink: you see where you've been, beds you broke before have the ⚡ 5x-faster mark, and the clouds ahead are the next real mystery. This keeps rebirth feeling like progress, not losing the map.
 - Low Graphics: fewer particles; it uses mostly billboards.

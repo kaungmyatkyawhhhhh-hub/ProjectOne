@@ -192,3 +192,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-14: the Phoenix Gloves tile goes LAST in the glove grid (owner), not first. Sensei zone: song fades in at 18 studs / out past 22, music dips to 30%. #break-a-bed
 - 2026-10-14: the owner removed the dojo (torii) gates from the belt-test beds. Do not add them back. #break-a-bed
 - 2026-10-15: no Strength lock on beds (any bed, slower; live time estimate, BREAK IT over 60 s). Auto train = fastest punch rate. Training cubes X2/X3/X5 (70/25/5%) for 10 s. Front camera for beds, free camera for training. Dojo (torii) gates removed (owner). Global leaderboards show saved belts. #break-a-bed
+- 2026-10-14: hidden zones: the cloud wall never moves back. Revealed zones stay revealed through rebirths (FurthestZone saved); the wall only advances past your best ever. #break-a-bed
