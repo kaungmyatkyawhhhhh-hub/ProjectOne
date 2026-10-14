@@ -70,3 +70,6 @@ Nothing else gives tokens any more (the day-7 login reward, the "Do 200 reps" qu
 
 ![[GYM ARC/Screenshots/dna_genetics_choice.jpg]]
 ![[GYM ARC/Screenshots/dna_store.jpg]]
+
+## DNA token sources update (14 Oct, later)
+The daily login calendar is now also an allowed source: +1 on day 4 and +1 on day 7. So the full list is: Growth Spurts, the daily calendar (days 4 and 7), 25,000 coins, and the 99 Robux product. See [[GYM ARC - Economy and Daily Rewards]].

@@ -43,3 +43,11 @@ One currency: coins. Earned by lifting and playing, spent on weights, shakes, co
 
 ## DNA tokens (14 Oct)
 Day 7 of the login calendar no longer gives a DNA token (only coins and, the first time, the "Dedicated" title). The front desk no longer sells tokens; they cost 25,000 coins in the Shop or on the Genetics screen. See [[GYM ARC - Genetics]].
+
+## DNA tokens on days 4 and 7 (14 Oct, later the same day)
+- Day 4 gives +1 DNA Token on top of its 70 coins; day 7 gives +1 DNA Token on top of its 300 coins (and the "Dedicated" title the first time). This replaces the earlier note that the calendar gives no tokens.
+- The 7-day grid shows the DNA token icon with "+1" next to the coin on those days. Claiming shows the reward toast plus a "+1 DNA Token" toast.
+- Paid on the server with the claim; the claim day is saved first, so rejoining or another server can't pay it twice.
+- Tested: days 1 to 7 claimed (each twice): exactly +1 token on day 4 and day 7, none on the others.
+
+![[GYM ARC/Screenshots/daily_dna_tokens.jpg]]

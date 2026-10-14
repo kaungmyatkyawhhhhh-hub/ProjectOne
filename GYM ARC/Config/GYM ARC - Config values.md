@@ -564,3 +564,8 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 | HideAfterLeave | 1.5 s | Wait after getting off a machine |
 | ShowOnRefill | 3 s | How long a refill shows the bar |
 | RefillJump | 0.1 | A rise of 10% of max at once counts as a refill |
+
+## Daily DNA tokens (`Config/Economy.Login.DnaTokens`, 14 Oct)
+| Value | Default | What it does |
+|---|---|---|
+| DnaTokens | day 4: 1, day 7: 1 | DNA tokens on those calendar days, on top of the coins |

@@ -176,3 +176,5 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]])
 - Machine panel moved down to the right middle, greyed - / +, "100 LB" without the plus, a real BEST WEIGHT button. See [[GYM ARC - Machine HUD]].
 
 - Skating is as fast for big players, the stamina bar only shows while exercising, a new SKATE button next to jump. See [[GYM ARC - Skateboard and Skate Park]] and [[GYM ARC - Stamina and Treadmills]].
+
+- Daily rewards: +1 DNA token on days 4 and 7. See [[GYM ARC - Economy and Daily Rewards]].
