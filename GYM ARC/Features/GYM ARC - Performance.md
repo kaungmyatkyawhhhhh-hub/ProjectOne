@@ -58,7 +58,7 @@ Two things make drawing expensive:
 
 **Quick wins done:** 192 small props no longer cast shadows. The map's mesh settings were already correct. No duplicate parts were found, and no free-model scripts.
 
-**Still to do by hand (scripts can't change it):** select every mesh in ReplicatedStorage > BodyStages and LimbStages and set CollisionFidelity to Box in Properties.
+**Body mesh collision:** already Box on all 90 muscle stage meshes (checked again; nothing to do).
 
 **Far bodies:** NPCs further than 60 studs already switch to a plain body (checked). Other players never do, by the earlier rule; this could change if wanted.
 
