@@ -14,3 +14,11 @@ Synthesized with code (`../source/sounds.py`), so they're 100% ours, with no cop
 | `boom.ogg` | the burst moment (flash + shockwave) in every rebirth cutscene | 3.5 s |
 
 **Animal voices** (tiger roar, dragon roar, phoenix screech) can't be synthesized well. Use Roblox's own licensed sound library in the Creator Store (Audio tab, made by Roblox; sounds have no scripts, so they're safe). Search "tiger roar", "dragon roar", "eagle screech" (for the phoenix), "ice crack", "coins", "bubbles". Mix each one under `boom.ogg` at the burst.
+
+## Combo sound: do re mi... (owner, 2026-10-14)
+`combo_1_do.ogg` … `combo_8_do2.ogg`: 8 bright marimba/bell notes going up the C major scale (do re mi fa so la ti do). `combo_demo.ogg` plays it twice so you can hear the idea.
+- **Every punch (training and breaking) plays the next note:** do → re → mi → fa → so → la → ti → high do, then **back to do** and up again.
+- If no punch for **1.2 s**, the scale restarts from do next time.
+- On the 8th note (high do) add a tiny sparkle burst on the punch popup, as a small reward for finishing the scale.
+- Volume follows the Sounds slider, about 0.35 so it doesn't get annoying at 8 punches/second. Only the punching player hears their own notes.
+- Alternative if 8 files are a hassle: upload only `combo_1_do.ogg` and set `PlaybackSpeed` to 1, 1.125, 1.25, 1.333, 1.5, 1.667, 1.875, 2.
