@@ -48,3 +48,8 @@ A slim bar at the very bottom center of the screen, 280 wide, 10 px above the ed
 - The bar never moves, and the boost icons above it stay where they are.
 
 ![[GYM ARC/Screenshots/stamina_on_machine.jpg]]
+
+## Endless Stamina (14 Oct)
+A Robux boost (see [[GYM ARC - Monetization]]): while it runs, reps and the treadmill cost no stamina and the bar stays full, gold, with a slow shine and an infinity sign; a gold chip above it counts down. Time left is saved and only runs while you play.
+
+![[GYM ARC/Screenshots/endless_stamina_hud_lifting.jpg]]

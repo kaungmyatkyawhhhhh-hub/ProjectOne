@@ -194,3 +194,8 @@ Studio can only upload to the owner's account. These work in the game; to use gr
 | shockwave_ring | 131893925782949 |
 | ground_circle | 74138882329945 |
 | lightning_beam | 138403894498190 |
+
+## Shop icons (14 Oct)
+| Image | Asset ID | Note |
+|---|---|---|
+| product_endless_stamina | 96813280646116 | uploaded from Studio (owner's own inventory); replaces product_stamina_refill 136768220289914 |

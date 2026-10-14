@@ -126,7 +126,7 @@ monetization prompt is the one that turns it on.
 | Medium Coins | Developer product | +5,000 coins | 99 | 3718306326 | Coins | ON |
 | Large Coins | Developer product | +15,000 coins | 249 | 3718306360 | Coins | ON |
 | Shake Bundle | Developer product | 3 Energy Shakes | 49 | 3718306390 | Boosts | ON |
-| Stamina Refill | Developer product | Stamina to full | 15 | 3718306417 | Boosts | ON |
+| Endless Stamina (was Stamina Refill) | Developer product | 15 min of no stamina drain, stacks to 60 min | R$ 49 on Roblox | 3718306417 | Boosts | ON |
 | DNA Token | Developer product | 1 DNA token | 99 | 3718499538 | Boosts | ON |
 | Quest Reroll | Developer product | Reroll one daily quest | 19 | 3718500732 | (Quests window only) | ON |
 
@@ -137,3 +137,14 @@ Notes:
 
 ## Removed (14 Oct)
 - **Skip Growth Cooldown** (developer product 3718306447): removed from the game on the owner's request (it was never on sale: there is no wait between Growth Spurts). The product still exists on the Creator Hub; turn it off there if wanted.
+
+## Endless Stamina (14 Oct)
+Same product as the old Stamina Refill (3718306417), renamed by the owner in the Creator Hub.
+- One purchase = 15 minutes where stamina never goes down (lifting, treadmills, Auto Rep keeps going without resting).
+- Buying again adds 15 more minutes, up to 60. When another 15 wouldn't fit, the Store button says "Full: 60 min".
+- The timer only runs while the player is in the game; leaving saves the time left.
+- Given only inside ProcessReceipt, together with saving the purchase id, so a repeated purchase id never gives it twice.
+- Shown as a gold lightning chip with a countdown ("14:32") above the stamina bar; the bar turns gold with a slow shine and an infinity sign.
+
+![[GYM ARC/Screenshots/endless_stamina_store.jpg]]
+![[GYM ARC/Screenshots/endless_stamina_store_full.jpg]]

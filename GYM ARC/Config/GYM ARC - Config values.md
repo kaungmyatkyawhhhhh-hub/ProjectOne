@@ -579,3 +579,10 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 | MobileRate | 0.5 | particle rates on phones |
 | HalfPump | 0.5 | PUMP share where layer 2 comes in |
 | Toxic / Shadow price | 50,000 / 150,000 coins | coin auras |
+
+## Endless Stamina (Config/Monetization, Effects)
+| Value | Now | What it does |
+|---|---|---|
+| EndlessStaminaMinutes | 15 | minutes one purchase adds |
+| EndlessStaminaMaxMinutes | 60 | most minutes you can have at once |
+| HudBottom.ShineEvery | 2.6 | seconds per shine sweep along the gold stamina bar |
