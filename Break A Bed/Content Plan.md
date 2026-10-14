@@ -241,6 +241,18 @@ Short and told with pictures, because kids don't read much. Max ~6 words per lin
 **Built 2026-10-14**, see [[Break A Bed/2026-10-14|2026-10-14]].
 Replaces the rejected Sleep King. No villain. You train with an old karate master and earn belts until you're a black belt. Told with pictures, at most ~6 words per line.
 - **Sensei:** an old karate master NPC at spawn (white beard, white gi, black belt, small and tidy so the map stays clean). Idle animation: arms crossed, nods; bows when you walk past. The tutorial's first line comes from him: "Become a BLACK BELT!"
+- **Sensei look (owner, 2026-10-14): floating zen master.** This replaces the standing idle above.
+  - **Pose:** sitting cross-legged in the lotus pose, hands resting on his knees with fingers in a circle, eyes closed, calm. He **floats about 3 studs above the ground** and slowly bobs up and down (1 stud, 4 s loop), turning very slightly.
+  - **Look:** white gi with gold trim, black belt with its ends gently swaying, long white beard and eyebrows, a small topknot.
+  - **VFX (soft and calm, not flashy):**
+    - A **glowing gold-white aura** around his body that slowly pulses, like breathing.
+    - A **spinning ring of light** on the ground under him with soft karate/zen symbols (yin-yang in the middle), turning slowly.
+    - **Floating stones:** 3–4 small smooth rocks orbiting him slowly at different heights.
+    - **Light particles** drifting upward, like fireflies or tiny petals (cherry blossom pink + gold), a few at a time.
+    - A thin **light beam** from the ground ring up through him, very faint.
+  - **When a player comes close (8 studs):** he opens his eyes (they glow gold for a second), the aura flares once and the speech bubble "Become a BLACK BELT!" pops up.
+  - **Sound:** a soft wind chime / singing bowl hum, only heard up close.
+  - Keep the particles light (low graphics setting turns most of them off). Nothing covers the path or the buttons.
 - **Belts (25 beds):** you start as a **White belt**. Some beds are **belt tests**:
 
   | Bed | Belt |
