@@ -180,3 +180,5 @@ Owner's request ([[2026-10-14 GYM ARC Prompt - NPC culling, LOD and streaming]])
 - Daily rewards: +1 DNA token on days 4 and 7. See [[GYM ARC - Economy and Daily Rewards]].
 
 - Store fixed: all the owner's passes and products, on Passes / Coins / Boosts tabs. See [[GYM ARC - Bug - Store showed only one pass]] and [[GYM ARC - Monetization]].
+
+- Auras built (13, three layers that grow with the pump, Titles + Store tabs). Trainers no longer collide with players. See [[GYM ARC - Aura]] and [[GYM ARC - Personal Trainers]].

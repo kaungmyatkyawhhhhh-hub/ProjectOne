@@ -123,3 +123,6 @@ You set every area back to a single song: Starter 86451874359343, Pro 1189590162
 ## Loading screen and menu music (14 Oct)
 - MenuMusic: **118959016267248** (the owner's pick, the same track as the pro gym). Starts on the very first frame of the loading screen, keeps playing (one loop, never restarted) through the main menu, and fades out when you press Play; then the area music starts.
 - To change it, change the id in two places: `Config/Sounds` (MenuMusic) and `ReplicatedFirst.LoadingScreen` (LOOK.Music), because the loading screen starts before the sound list loads.
+
+## Aura burst (14 Oct)
+- `AuraBurst` (a new personal record with an aura): PSE Magic Glows Chiming Hits 1 (9116394545). The prompt asked for a short scream; a power burst is used instead because of the "no grunts" rule. Swap the id in `Config/Sounds` for another if wanted.

@@ -569,3 +569,13 @@ From [[2026-10-13 GYM ARC Prompt - Monetization and hype]] and [[2026-10-13 GYM 
 | Value | Default | What it does |
 |---|---|---|
 | DnaTokens | day 4: 1, day 7: 1 | DNA tokens on those calendar days, on top of the coins |
+
+## Auras (`Config/Auras`, 14 Oct)
+| Value | Default | What it does |
+|---|---|---|
+| FarOff | 40 | studs: other players' auras off beyond this |
+| MidFrom | 20 | studs: from here to FarOff only the inner glow |
+| MaxShown | 8 | most other players' auras shown at once (the nearest) |
+| MobileRate | 0.5 | particle rates on phones |
+| HalfPump | 0.5 | PUMP share where layer 2 comes in |
+| Toxic / Shadow price | 50,000 / 150,000 coins | coin auras |

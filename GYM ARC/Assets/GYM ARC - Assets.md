@@ -161,3 +161,24 @@ nothing from the Creator Store unless it is made by Roblox or a trusted creator 
 
 ## Logo image (14 Oct)
 - GYM ARC logo (white GYM, red ARC): rbxassetid://84167052331251, from Downloads/gym_arc_ui_3d_icons/logo.png (1182 x 286). Used on the loading screen and the main menu (`Config/UI.Logo`).
+
+## Uploaded from Studio, 14 Oct (in the owner's own inventory, not the group)
+Studio can only upload to the owner's account. These work in the game; to use group copies, upload the files to Myanmar Builders Club and change the ids.
+| Image | ID | Used in |
+|---|---|---|
+| skate_button.png | 117777612617836 | `Config/UI.SkateButton` |
+| product_dna_token.png | 87375007150587 | `Config/UI.ShopIcons` (Store, daily grid) |
+| product_quest_reroll.png | 124460070314904 | `Config/UI.ShopIcons` |
+| aura_ember.png | 90339926517742 | `Config/Auras` |
+| aura_frost.png | 80248947606528 | `Config/Auras` |
+| aura_storm.png | 103088568186604 | `Config/Auras` |
+| aura_golden.png | 90116111446884 | `Config/Auras` |
+| aura_titan.png | 136822081933398 | `Config/Auras` |
+| aura_inferno.png | 101220273317214 | `Config/Auras` |
+| aura_blood_moon.png | 83696658917366 | `Config/Auras` |
+| aura_void.png | 90846813368952 | `Config/Auras` |
+| aura_neon.png | 93346976519907 | `Config/Auras` |
+| aura_galaxy.png | 139009049495184 | `Config/Auras` |
+| aura_royal.png | 84584030021403 | `Config/Auras` |
+| aura_toxic.png | 72766894142392 | `Config/Auras` |
+| aura_shadow.png | 110201785660530 | `Config/Auras` |

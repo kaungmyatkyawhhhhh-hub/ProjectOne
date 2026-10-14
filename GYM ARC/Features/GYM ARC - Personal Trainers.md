@@ -47,3 +47,6 @@ A coach who follows you around, stands beside your machine and cheers you on. Bu
 
 ## Coaches window, final look (14 Oct)
 The window is now titled COACHES: gold frame and "COACHING" on the coach with you, EQUIP on owned ones, gray with a lock and price on the rest, and the gold 2nd slot button. See [[2026-10-14 GYM ARC Final UI Black and Gold]].
+
+## Trainers never collide with players (14 Oct)
+Trainers don't bump into players any more: every trainer part is in a "Trainers" collision group that collides with nothing (the server registers it), and they can't be touched or hit by rays (so the camera never zooms in on them).
