@@ -187,6 +187,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Puffy inner tube shorts]]
 - [[GYM ARC - Bug - Quarter pipe sides looked like stairs]]
 - [[GYM ARC - Bug - Quest tracker contradicted the tutorial]]
+- [[GYM ARC - Bug - Quests window opened by itself]]
 - [[GYM ARC - Bug - Rep flash hard to see on light skin]]
 - [[GYM ARC - Bug - Rep popup numbers very big]]
 - [[GYM ARC - Bug - Roblox spawn pad in the menu shot]]
@@ -299,6 +300,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-15 GYM ARC Prompt - Low-poly body stage meshes]]
 - [[2026-10-15 GYM ARC Prompt - Menu and loading background art]]
 - [[2026-10-15 GYM ARC Prompt - Right side cards collapse]]
+- [[2026-10-15 GYM ARC Prompt - Test with a fresh player]]
 
 ### Config
 - [[GYM ARC - Config values]]

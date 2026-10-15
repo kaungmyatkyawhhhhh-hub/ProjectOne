@@ -128,3 +128,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Store showed only one pass|Store showed only one pass]] - 2026-10-14
 - [[GYM ARC - Bug - Clothes vanish behind glass]] (fixed, 15 Oct)
 - [[GYM ARC - Bug - Growth Spurt button disappeared]] (fixed, 15 Oct)
+- [[GYM ARC - Bug - Quests window opened by itself]] (fixed, 15 Oct)
