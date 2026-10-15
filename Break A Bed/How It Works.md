@@ -323,6 +323,13 @@ To make the game more exciting, players can't see far ahead.
   - The clouds only blow apart (the reveal moment with "NEW ZONE REVEALED!") when the player **walks within ~20 studs of the wall** while the zone is ready.
   - If several zones became ready at once (big Strength jump), they reveal **one by one** as the player walks forward: each time you approach the new wall position, the next zone opens.
   - While the zone is ready but not revealed yet, the wall stays solid.
+  - **Bug fix (owner, 2026-10-15): walking fast through several ready zones left the player stuck** (the clouds had moved far ahead, but the invisible wall and the "✨ Walk closer!" sign stayed in the old spot). New rules:
+    - **No cooldown and no waiting.** When a ready zone opens, the **solid wall and the sign move instantly** to the next spot (same frame). The cloud blow-apart and "NEW ZONE REVEALED!" are only visuals that play on top and never block movement.
+    - **Chain reveal:** if the player keeps walking and the next zone is also ready, it opens as soon as they reach the new wall, right away, even while the previous animation is still playing. Combine the toasts so only one "NEW ZONE REVEALED!" shows at a time (or "3 NEW ZONES!").
+    - **Always recompute from the truth:** the wall position = based on the player's Strength / FurthestZone and which zones were revealed, computed in one function. Every time anything changes (Strength, a reveal, respawn, teleport, To Bed), call it and place the wall, sign and clouds from scratch. Never move them step by step from the old state.
+    - **Safety net:** if the player is ever standing behind the wall's current position (desync), don't push them back. Recompute; if the zones they're in are ready, reveal them instantly.
+    - Test: train far past 3–4 zones, then sprint (and use To Bed) straight through. Every wall should open with no stopping, and the player should never get stuck.
+
 - To Bed, the guide beam and the next-bed bar never point past the wall.
 - **Rebirth (decided 2026-10-14): the wall does NOT come back.** Revealed zones stay revealed forever, saved as `FurthestZone` (like DiscoveredBeds, not reset by Rebirth). The wall stays at the furthest spot you ever reached and only moves further when your Strength goes past your old best. After a rebirth the world doesn't shrink: you see where you've been, beds you broke before have the ⚡ 5x-faster mark, and the clouds ahead are the next real mystery. This keeps rebirth feeling like progress, not losing the map.
 - Low Graphics: fewer particles; it uses mostly billboards.
