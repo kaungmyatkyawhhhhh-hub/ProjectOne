@@ -127,3 +127,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Big players skated slowly|Big players skated slowly]] - 2026-10-14
 - [[GYM ARC - Bug - Store showed only one pass|Store showed only one pass]] - 2026-10-14
 - [[GYM ARC - Bug - Clothes vanish behind glass]] (fixed, 15 Oct)
+- [[GYM ARC - Bug - Growth Spurt button disappeared]] (fixed, 15 Oct)
