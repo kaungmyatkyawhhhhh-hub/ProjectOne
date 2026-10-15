@@ -300,6 +300,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-15 GYM ARC Prompt - Keep the 3D genetics screen]]
 - [[2026-10-15 GYM ARC Prompt - Low-poly body stage meshes]]
 - [[2026-10-15 GYM ARC Prompt - Menu and loading background art]]
+- [[2026-10-15 GYM ARC Prompt - Onboarding funnel names]]
 - [[2026-10-15 GYM ARC Prompt - Right side cards collapse]]
 - [[2026-10-15 GYM ARC Prompt - Test with a fresh player]]
 
