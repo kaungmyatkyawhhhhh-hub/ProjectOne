@@ -187,3 +187,5 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - Walking fast through several ready zones got you stuck (a 1.6 s cooldown between reveals, and the wall only opened when you were in front of it). Now the wall is worked out from scratch and opens in the same frame, in a chain.
 - The on-screen X2 pickup sat under the big LEVEL UP text; its layer is now above it.
 - The boost chip, placed right above the Strength stat, covered the Boosts button; it moves right of the left buttons.
+- On phones the boost chip sat under Roblox's top bar and over To Bed (it was placed above the Strength stat, which is at the top on phones). It now has its own CoreUISafeInsets layer, centered under the To Bed row.
+- On phones X2/X3/X5 pickups could land on the training panel: the spawn code read a `hud` variable that is declared further down the script, so it never saw the HUD. It now looks the HUD up directly.

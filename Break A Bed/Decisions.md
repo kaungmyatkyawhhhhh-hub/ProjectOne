@@ -197,3 +197,4 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 - 2026-10-15: the cloud bank uses the custom 3D cloud meshes (no flat cloud pictures) with a light VFX layer (mist, twinkles, zone-colour glow, flashes, sunbeams); the floating pillows over the path were taken out (kept in ServerStorage). #break-a-bed
 - 2026-10-15: cloud wall follows 5 hard rules (8-stud boundary, wall on it, clouds CanQuery, sign 1 stud in front), checked 22/22 by an instant self-check; zones reveal only when you walk up (no toast); training pickups are on-screen buttons. #break-a-bed
 - 2026-10-15: the cloud wall opens when you touch it with the Strength (no distance trigger, no toast); a silent self-check runs every time the wall is placed and fixes what's wrong. Boost timer chip follows the owner's mockup. #break-a-bed
+- 2026-10-15: the boost chip goes centered under the To Bed / SPAWN row on every device (7% of screen height), and the top HUD slides down while it shows. #break-a-bed
