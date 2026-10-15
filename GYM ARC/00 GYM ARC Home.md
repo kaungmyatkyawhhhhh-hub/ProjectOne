@@ -67,6 +67,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[00 GYM ARC Home]]
 
 ### Features
+- [[GYM ARC - Analytics]]
 - [[GYM ARC - Arm Wrestling]]
 - [[GYM ARC - Aura]]
 - [[GYM ARC - Crews]]
