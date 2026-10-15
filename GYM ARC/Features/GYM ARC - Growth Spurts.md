@@ -51,3 +51,6 @@ Some old saves had more Growth Spurts than the last one (6, which reaches 7'0") 
 
 ## Rules
 - **No growth spurt cooldown.** A player can do the next Growth Spurt as soon as they've earned it (owner, 14 Oct). Checked: no timer or time check exists in the code; the Skip Growth Cooldown product was removed.
+
+## At 7'0" (15 Oct)
+No Growth Spurt card on the HUD at 7'0" (owner): the top bar's "7'0" MAX" says it. The Stats panel keeps its greyed "Max Growth Spurt reached" button.

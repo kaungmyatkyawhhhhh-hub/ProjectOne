@@ -16,7 +16,8 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 ## Rules
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
-## Current status (13 Oct 2026)
+## Current status (15 Oct 2026)
+- 15 Oct: the Store opens right away, phones get the phone machine layout, the menu always fills the screen, the right cards stay under the top bar, and mirrors are plain (no reflection). See [[2026-10-15 GYM ARC Menu art]].
 - The whole core game is built and tested in Studio: training, 18 muscles, genetics, Growth Spurts, titles, stats, quests, spotting, arm wrestling, the town and three gyms.
 - 13 Oct: Growth Spurts now stop at 7'0" ([[GYM ARC - Growth Spurts]]), the NPC size glitch is fixed ([[GYM ARC - NPC Regulars and Gym Cat]]), and soft shutdown is in ([[GYM ARC - Soft Shutdown]]). See [[2026-10-13 GYM ARC Height cap and soft shutdown]].
 - 13 Oct (new features run, in progress): the Posing Competition is in ([[GYM ARC - Posing Competition]]); every sound id is picked ([[GYM ARC - Music and Sounds]]). See [[2026-10-13 GYM ARC New features run]].
@@ -159,6 +160,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - MachineClient at the 200 locals limit]]
 - [[GYM ARC - Bug - Machines froze with streaming on]]
 - [[GYM ARC - Bug - Machines unusable after Exit]]
+- [[GYM ARC - Bug - Menu did not fill the screen]]
 - [[GYM ARC - Bug - Mirror glass did not reflect]]
 - [[GYM ARC - Bug - Mirror reflection froze]]
 - [[GYM ARC - Bug - Mirror showed your back and a white torso]]
@@ -192,6 +194,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Quests window opened by itself]]
 - [[GYM ARC - Bug - Rep flash hard to see on light skin]]
 - [[GYM ARC - Bug - Rep popup numbers very big]]
+- [[GYM ARC - Bug - Right cards over the top bar]]
 - [[GYM ARC - Bug - Roblox spawn pad in the menu shot]]
 - [[GYM ARC - Bug - Saves could be cut off at shutdown]]
 - [[GYM ARC - Bug - Scripts cannot upload meshes]]
@@ -304,6 +307,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-15 GYM ARC Prompt - Low-poly body stage meshes]]
 - [[2026-10-15 GYM ARC Prompt - Machine HUD phone layout]]
 - [[2026-10-15 GYM ARC Prompt - Menu and loading background art]]
+- [[2026-10-15 GYM ARC Prompt - Menu fill, right cards, mirrors]]
 - [[2026-10-15 GYM ARC Prompt - Onboarding funnel names]]
 - [[2026-10-15 GYM ARC Prompt - Right side cards collapse]]
 - [[2026-10-15 GYM ARC Prompt - Store loads slowly]]

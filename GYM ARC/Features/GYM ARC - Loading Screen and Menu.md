@@ -82,3 +82,6 @@ Both screens now use the owner's new picture (the glowing muscle character at th
 | Small phone 667x375 | ![[GYM ARC/Screenshots/menu_art_v2_menu_667x375.jpg]] | ![[GYM ARC/Screenshots/menu_art_v2_loading_667x375.jpg]] |
 | iPad | ![[GYM ARC/Screenshots/menu_art_v2_menu_ipad_1024x768.jpg]] | ![[GYM ARC/Screenshots/menu_art_v2_loading_ipad_1024x768.jpg]] |
 | PC 1920x1080 | ![[GYM ARC/Screenshots/menu_art_v2_menu_1920x1080.jpg]] | ![[GYM ARC/Screenshots/menu_art_v2_loading_1920x1080.jpg]] |
+
+## Always fills the screen (15 Oct)
+The backgrounds now always cover the whole screen, whatever its size or turn, and the logo starts under Roblox's top bar. See [[GYM ARC - Bug - Menu did not fill the screen]].

@@ -112,3 +112,6 @@ Measured first at the starter gym. The game's own scripts are cheap (about 1 ms 
 - **Not changed:** lights, particles, post effects (no clear cost), and the map's part count (merging parts would change the build; lowering the streaming radius to 128-160 in Workspace Properties is the owner's choice).
 - Studio can't give real phone numbers while it is remote-controlled; a test on a phone (F9 Developer Console) is still needed.
 Full list in PROGRESS.md.
+
+## Mirror reflection removed (15 Oct)
+The live mirror reflection cost about 42 ms of drawing time every frame near the progress mirror (Studio: 49 ms down to 7 ms on the computer side, 16-20 ms down to 2-7 ms on the graphics side). The mirrors are plain now. See [[GYM ARC - Progress Mirror]].

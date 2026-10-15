@@ -14,3 +14,6 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - Coach Dex remade and checked in play. See [[GYM ARC - NPC Regulars and Gym Cat]].
 - Fixed: some phones got the PC machine layout. See [[GYM ARC - Bug - Phones got the PC machine layout]].
 - Fixed: the Store took about 10 minutes to show up (the 5-minute wait restarted every session). See [[GYM ARC - Bug - Store took 10 minutes to load]].
+- Fixed: the menu and loading screen didn't always fill the screen, and the logo sat under Roblox's buttons. See [[GYM ARC - Bug - Menu did not fill the screen]].
+- Fixed: the right-side cards covered the top bar; the MAX GROWTH SPURT card is gone from the HUD. See [[GYM ARC - Bug - Right cards over the top bar]].
+- Mirrors: the live reflection is removed, all mirrors are plain now (much less drawing work near the mirror). See [[GYM ARC - Progress Mirror]].

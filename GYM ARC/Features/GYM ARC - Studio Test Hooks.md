@@ -35,3 +35,6 @@ Workspace attributes that change how the game behaves in a Studio play test, for
 Workspace attribute `TestOpenPanel` = "Physique" (set it during Play) opens the Physique window. Made because in the Device Emulator the test clicks can miss the left menu tiles.
 
 `TestOpenPanel` = "Stats" (during Play, Studio only) turns the stats labels on.
+
+## Phone or PC layout (15 Oct)
+Workspace attributes, Studio only: `TestInput` = "Touch", "TouchKeyboard" or "KeyboardAndMouse" acts as that input; `TestNoJump` = true acts as if Roblox's jump button were hidden. With `TestPhoneSize` they test the machine buttons' phone / PC layout. See [[GYM ARC - Bug - Phones got the PC machine layout]].

@@ -154,3 +154,6 @@ Only the top bar, the left menu, ONE card on the right and the stamina bar at th
 
 ## Text fit in cards (14 Oct, owner's bug)
 Labels inside cards and tiles now always stay inside, with 8 px space on each side. Each label gets the biggest size that fits (never below 10 px). Names stay on one line and only drop to two lines when they can't fit at 10 px. How-to-unlock text uses the body font and normal case ("Finish every Coach Quest") and can use two lines. Checked at phone, small phone and PC sizes: everything fits.
+
+## Under the top bar (15 Oct)
+Everything placed "under the top bar" (the right-side cards, hints, toasts, the left menu) now works out that spot from the screen layout settings, so it is right from the first frame: 8 px under Roblox's top bar. See [[GYM ARC - Bug - Right cards over the top bar]].
