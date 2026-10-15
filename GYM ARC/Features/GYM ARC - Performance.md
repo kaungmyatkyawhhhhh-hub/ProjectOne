@@ -104,3 +104,11 @@ The owner's simplified (Blender) body meshes replaced the detailed ones on every
 | g080 | ![[GYM ARC/Screenshots/lowpoly_before_g080_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g080_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_g080_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g080_back.jpg]] |
 | g100 | ![[GYM ARC/Screenshots/lowpoly_before_g100_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g100_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_g100_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_g100_back.jpg]] |
 | gmon | ![[GYM ARC/Screenshots/lowpoly_before_gmon_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_gmon_front.jpg]] | ![[GYM ARC/Screenshots/lowpoly_before_gmon_back.jpg]] | ![[GYM ARC/Screenshots/lowpoly_after_gmon_back.jpg]] |
+
+## Performance part 2 (15 Oct)
+Measured first at the starter gym. The game's own scripts are cheap (about 1 ms a frame, all of them together); the server does very little; network traffic is tiny. Drawing is the cost, as on 14 Oct.
+- **Shadows** were the one clear cost: switching them off cut drawing time by about a third. 314 small or see-through parts no longer cast shadows (buildings and big objects still do).
+- **65 signs** now stop drawing beyond 100 studs.
+- **Not changed:** lights, particles, post effects (no clear cost), and the map's part count (merging parts would change the build; lowering the streaming radius to 128-160 in Workspace Properties is the owner's choice).
+- Studio can't give real phone numbers while it is remote-controlled; a test on a phone (F9 Developer Console) is still needed.
+Full list in PROGRESS.md.
