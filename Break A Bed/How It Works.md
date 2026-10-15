@@ -199,6 +199,11 @@ The owner sent screenshots of a reference game and wants ours to feel like it. A
     - Underneath is a **countdown bar** in the boost color that shrinks smoothly (not in steps).
     - When collected, the chip slides in from the left with a bounce. In the **last 3 s** it pulses and the bar blinks. When it ends, it shrinks away. If a new pickup restarts the timer, the bar refills with a quick flash.
     - Size: about 9% of screen height. It sits just above the Strength stat, never over buttons.
+    - **Phone fix (owner screenshot, 2026-10-15):** on phones the chip sat at the very top, under Roblox's own top-bar buttons and over To Bed. On phones:
+      - The chip's ScreenGui uses `ScreenInsets = CoreUISafeInsets` (stays out of Roblox's top bar and the notch).
+      - Put it **centered at the top, just below the To Bed / SPAWN row**, at about 7% of screen height. While a boost is active, the training panel ("Brick Post" bar) slides down by the chip's height so they never overlap.
+      - It must not cover the stats, side buttons, EXIT, the "+per punch" text or the combo counter. Test on iPhone SE, iPhone 14 and a tablet in the Studio device emulator, plus PC.
+
 
 - **Camera:** training uses the **normal free camera**. The player can rotate and zoom around while locked in place, instead of the fixed side view. It starts behind the player looking at the post.
 
