@@ -181,3 +181,9 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 
 ## 2026-10-15: combo texts overlapped #bugs #done
 - The piano combo "COMBO x8!" (Juice) and the break counter "x8" (ScreenFx) were at almost the same spot. "COMBO x8!" moved below the counter.
+
+## 2026-10-15: cloud wall bugs #bugs #done
+- Clouds still poked onto the last visible bed's tile: the check measured each cloud's box without its turn, so it was too small. It now measures the real turned size.
+- Walking fast through several ready zones got you stuck (a 1.6 s cooldown between reveals, and the wall only opened when you were in front of it). Now the wall is worked out from scratch and opens in the same frame, in a chain.
+- The on-screen X2 pickup sat under the big LEVEL UP text; its layer is now above it.
+- The boost chip, placed right above the Strength stat, covered the Boosts button; it moves right of the left buttons.
