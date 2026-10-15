@@ -14,7 +14,7 @@ Today monetization is OFF: the framework is built but no passes or products exis
 - **Framework built (4 Oct)** with every id empty, so the Store never shows.
 - **Passes in the old config:** 2x Gains, Auto Lift, Iron Lungs (+50% stamina), Fast Recovery, Shake Fridge, Gene Lock, VIP Gym.
 - **Products in the old config:** DNA Token, Shake Pack (5), Server Boost (2x gains for the whole server for 30 min, buyer named on a board).
-- **Rules built in:** the Store button only appears after the tutorial plus 5 minutes of play; no purchase prompt ever opens by itself.
+- **Rules built in:** the Store button only appears after the tutorial plus the player's first 5 minutes in the game (counted from their first join, not every session; changed 15 Oct, see [[GYM ARC - Bug - Store took 10 minutes to load]]); no purchase prompt ever opens by itself.
 - Ids, prices and badges: see "Passes, products and badges" below.
 
 ## Planned change (monetization prompt, task 5)

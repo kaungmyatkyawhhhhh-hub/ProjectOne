@@ -73,3 +73,7 @@ REP (150 x 46) sits right above Roblox's jump button on phones, PUMP right above
 ![[GYM ARC/Screenshots/panel_squat.jpg]]
 ![[GYM ARC/Screenshots/panel_bench_max.jpg]]
 
+
+## Phone or PC layout (15 Oct)
+- A small screen (short side under 500) is always the phone layout; otherwise the player's current input decides (touch = phone), checked again when it changes. No jump button = a fixed raised spot. F9 says "HUD layout = phone/pc, reason = ...". See [[GYM ARC - Bug - Phones got the PC machine layout]].
+- Studio test switches on Workspace: TestInput ("Touch", "TouchKeyboard", "KeyboardAndMouse"), TestNoJump, TestPhoneSize.

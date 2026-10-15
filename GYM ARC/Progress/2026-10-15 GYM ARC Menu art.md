@@ -12,3 +12,5 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - Body meshes for everyone else are now the owner's low-poly versions (about 4x fewer triangles). See [[GYM ARC - Performance]].
 - Fixed: clothes vanished behind glass. See [[GYM ARC - Bug - Clothes vanish behind glass]].
 - Coach Dex remade and checked in play. See [[GYM ARC - NPC Regulars and Gym Cat]].
+- Fixed: some phones got the PC machine layout. See [[GYM ARC - Bug - Phones got the PC machine layout]].
+- Fixed: the Store took about 10 minutes to show up (the 5-minute wait restarted every session). See [[GYM ARC - Bug - Store took 10 minutes to load]].

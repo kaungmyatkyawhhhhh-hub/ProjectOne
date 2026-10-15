@@ -129,3 +129,5 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Clothes vanish behind glass]] (fixed, 15 Oct)
 - [[GYM ARC - Bug - Growth Spurt button disappeared]] (fixed, 15 Oct)
 - [[GYM ARC - Bug - Quests window opened by itself]] (fixed, 15 Oct)
+- [[GYM ARC - Bug - Phones got the PC machine layout]] (fixed, 15 Oct)
+- [[GYM ARC - Bug - Store took 10 minutes to load]] (fixed, 15 Oct)
