@@ -177,7 +177,7 @@ CarSkin.DIAL_NEEDLES = {
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
 -- driver's eye; rear: how far behind the eye the swap reaches (studs: front seats only, or rear too)
 CarSkin.INTERIOR_DONOR = {
-	porsha_gt3 = { from = "porsha_panamera", rear = 1.8 },
+	porsha_gt3 = { from = "porsha_boxster", rear = 1.8 }, -- owner (2026-10-16): the 718 cockpit, like the Panamera
 	-- owner (2026-10-13): the M3 F80 and M4 F82 files' own cabins look bad; the M3 E92's goes in
 	bnw_m3_f80 = { from = "bnw_m3_e92", rear = 1.8 },
 	bnw_m4_f82 = { from = "bnw_m3_e92", rear = 1.8 },
