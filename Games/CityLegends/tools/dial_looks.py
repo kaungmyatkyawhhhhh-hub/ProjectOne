@@ -87,12 +87,6 @@ LOOKS = {
     num=W, numR=88, size=22, font="GothamBold", step=1000, div=1000, needle=(236, 40, 32), needleW=6, hub=(30, 30, 32), hubR=14,
     texts=[("x1000/min", 0, -42, 10, W, "GothamMedium")]),
  ],
- "lambrini_lp700": [
-  L(r=125, face=(18, 34, 70), inner=(10, 22, 48), innerR=62, bezel=(96, 116, 156), bezelW=4, tick=W, tickR=120, major=(13, 3), minor=(7, 1.5), minors=4,
-    num=W, numR=86, size=22, font="GothamBold", step=1000, div=1000, red=7000, redC=(245, 85, 45), numRed=(245, 85, 45), needle=(245, 75, 45), needleW=4, hub=(14, 24, 50), hubR=12,
-    texts=[]),
-  None,
- ],
  "mazdo_rx8": [
   L(r=126, face=(28, 28, 30), bezel=(205, 205, 209), bezelW=11, tick=W, tickR=114, major=(14, 4), minor=(7, 2), minors=1,
     num=W, numR=88, size=24, font="GothamBold", step=1000, div=1000, start=1000, red=9000, redC=(235, 55, 40),

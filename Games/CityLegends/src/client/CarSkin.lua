@@ -64,6 +64,7 @@ CarSkin.CLUSTER_STYLE = {
 	byt_u8 = "U8",
 	lexis_lfa = "LFA",
 	lambrini_lp750 = "AventadorSV", -- its own cluster (owner's photo)
+	lambrini_lp700 = "AventadorLP700", -- owner (2026-10-17): its own, copied from an LP700-4 video
 	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
 	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
 	rolls_wraith = "Maybach57",
@@ -87,6 +88,9 @@ CarSkin.CLUSTER_RECT = {
 	bnw_x6 = { at = Vector3.new(0.0101, 0.0352, -0.1909), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3494, h = 0.1211 },
 	bnw_x7 = { at = Vector3.new(-0.0025, -0.0002, -0.257), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3496, h = 0.1339 },
 	lexis_lx700 = { at = Vector3.new(-0.011, 0.0755, -0.114), face = Vector3.new(-0.012, -0.069, 0.9975), w = 0.3288, h = 0.1511 },
+	-- the LP700 in the LP750's cabin: the LP750's whole screen (rev counter and both side screens),
+	-- so the LP750 itself keeps its own cluster where it was
+	lambrini_lp700 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.334, h = 0.1455 },
 } :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the
@@ -147,10 +151,6 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0093, 0.0332, -0.2044), face = Vector3.new(-0, 0.3732, 0.9278), length = 0.0362, scale = "0:-179.4,5000:-46.3,10000:74.1" },
 		{ kind = "speed", unit = "kmh", at = Vector3.new(0.1007, 0.0333, -0.2044), face = Vector3.new(-0, 0.3734, 0.9277), length = 0.0333, scale = "0:176.2,170:316.2,350:470.8" },
 	},
-	lambrini_lp700 = { -- LP700 (screen rev counter and the speed read-out)
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0174, 0.081, -0.2818), face = Vector3.new(-0.0175, 0.1158, 0.9931), length = 0.043, scale = "0:-140.0,4000:-53.6,8000:66.6" },
-		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0057, 0.0508, -0.2783), face = Vector3.new(-0.0382, 0.1157, 0.9925), length = 0.0404, scale = "" },
-	},
 	mazdo_rx8 = { -- RX-8 (rev counter and the speed read-out)
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0021, 0.0463, -0.2049), face = Vector3.new(0, 0.18, 0.9837), length = 0.043, scale = "0:178.5,1000:201.4,4000:269.9,7000:347.7,10000:424.0" },
 		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0286, 0.0321, -0.2023), face = Vector3.new(0, 0.18, 0.9837), length = 0.0242, scale = "" },
@@ -186,6 +186,9 @@ CarSkin.INTERIOR_DONOR = {
 	-- owner (2026-10-13): the 458 Italia keeps its body and takes the 458 Speciale's cabin (a cabin
 	-- donor only, not a car in the roster); its own Ferrari cluster design stays
 	ferrara_458 = { from = "ferrara_458s", rear = 1.8 },
+	-- owner (2026-10-17): the LP700's own cabin looks off and blocky; the LP750's goes in, with the
+	-- LP700's own cluster design over its screen (not the LP750's)
+	lambrini_lp700 = { from = "lambrini_lp750", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
 
 -- cars that take only another model's steering wheel, put where their own one sits
@@ -1636,7 +1639,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		local swap = CarSkin.INTERIOR_DONOR[id]
 		local cabinId = if swap then swap.from else id
 		local dials = CarSkin.DIAL_NEEDLES[cabinId]
-		local rect = CarSkin.CLUSTER_RECT[cabinId]
+		local rect = CarSkin.CLUSTER_RECT[id] or CarSkin.CLUSTER_RECT[cabinId]
 		if (rect or (imported.cluster and imported.clusterSize)) and not liteMode and not dials and (ownDesign or not imported.ownGauges) then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
