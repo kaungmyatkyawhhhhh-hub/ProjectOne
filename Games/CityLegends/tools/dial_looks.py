@@ -40,11 +40,11 @@ LOOKS = {
  "bentz_sl65bs": [
   L(r=150, face=(58, 60, 64), inner=(22, 24, 28), innerR=74, bezel=(150, 152, 156), bezelW=4, tick=W, tickR=146, major=(14, 3), minor=(7, 1.5), minors=1,
     num=W, numR=114, size=19, font="GothamMedium", step=20, needle=RED, needleW=5, hub=(20, 20, 22), hubR=13,
-    texts=[("AMG", 0, 48, 16, W, "GothamBlack"), ("MPH", 0, -40, 11, (190, 192, 198), "GothamMedium")]),
+    texts=[("MPH", 0, -40, 11, (190, 192, 198), "GothamMedium")]),
   L(r=150, face=(214, 216, 220), inner=(22, 24, 28), innerR=74, bezel=(150, 152, 156), bezelW=4, tick=(30, 30, 32), tickR=146, major=(14, 3), minor=(7, 1.5), minors=4,
     num=(28, 28, 30), numR=110, size=26, font="GothamMedium", step=1000, div=1000, red=6500, redC=RED, numRed=RED, bands=[(6500, 8000, 143, 9, RED)],
     needle=RED, needleW=5, hub=(20, 20, 22), hubR=13,
-    texts=[("V12 BITURBO", 0, 46, 12, (200, 202, 208), "GothamBold"), ("x1000/min", 0, -40, 10, (190, 192, 198), "GothamMedium")]),
+    texts=[("x1000/min", 0, -40, 10, (190, 192, 198), "GothamMedium")]),
  ],
  "toyoka_lc300": [
   L(r=118, face=(10, 10, 12), bezel=(215, 216, 220), bezelW=6, tick=W, tickR=112, major=(14, 4), minor=(7, 1.5), minors=4,
@@ -66,7 +66,7 @@ LOOKS = {
  "bentz_gle53": [
   L(r=118, face=(14, 14, 16), bezel=(192, 194, 198), bezelW=5, tick=W, tickR=113, major=(13, 3), minor=(7, 1.5), minors=1,
     num=W, numR=88, size=17, font="GothamMedium", step=20, needle=RED, needleW=5, hub=(26, 26, 28), hubR=13,
-    texts=[("AMG", 0, 44, 15, W, "GothamBlack"), ("MPH", 0, -40, 11, (190, 192, 198), "GothamMedium")]),
+    texts=[("MPH", 0, -40, 11, (190, 192, 198), "GothamMedium")]),
   L(r=118, face=(14, 14, 16), bezel=(192, 194, 198), bezelW=5, tick=W, tickR=113, major=(13, 3), minor=(7, 1.5), minors=4,
     num=W, numR=88, size=22, font="GothamMedium", step=1000, div=1000, red=6500, redC=RED, bands=[(6500, 8000, 110, 8, RED)], needle=RED, needleW=5, hub=(26, 26, 28), hubR=13,
     texts=[("x1000/min", 0, -40, 10, (190, 192, 198), "GothamMedium")]),
@@ -82,15 +82,15 @@ LOOKS = {
  "brabos_g63": [
   L(r=118, face=(16, 16, 18), bezel=(226, 32, 30), bezelW=9, tick=W, tickR=110, major=(13, 3), minor=(7, 1.5), minors=1,
     num=W, numR=88, size=19, font="GothamBold", step=30, needle=(236, 40, 32), needleW=6, hub=(30, 30, 32), hubR=14,
-    texts=[("km/h", 0, -42, 12, W, "GothamMedium"), ("BRABUS", 0, 64, 15, W, "GothamBlack")]),
+    texts=[("km/h", 0, -42, 12, W, "GothamMedium")]),
   L(r=118, face=(16, 16, 18), bezel=(226, 32, 30), bezelW=9, tick=W, tickR=110, major=(13, 3), minor=(7, 1.5), minors=4,
     num=W, numR=88, size=22, font="GothamBold", step=1000, div=1000, needle=(236, 40, 32), needleW=6, hub=(30, 30, 32), hubR=14,
-    texts=[("x1000/min", 0, -42, 10, W, "GothamMedium"), ("V12 BITURBO", 0, 64, 12, W, "GothamBlack")]),
+    texts=[("x1000/min", 0, -42, 10, W, "GothamMedium")]),
  ],
  "lambrini_lp700": [
   L(r=125, face=(18, 34, 70), inner=(10, 22, 48), innerR=62, bezel=(96, 116, 156), bezelW=4, tick=W, tickR=120, major=(13, 3), minor=(7, 1.5), minors=4,
     num=W, numR=86, size=22, font="GothamBold", step=1000, div=1000, red=7000, redC=(245, 85, 45), numRed=(245, 85, 45), needle=(245, 75, 45), needleW=4, hub=(14, 24, 50), hubR=12,
-    texts=[("Lamborghini", 0, -30, 13, W, "SourceSansItalic")]),
+    texts=[]),
   None,
  ],
  "mazdo_rx8": [
@@ -117,7 +117,7 @@ LOOKS = {
  "porsha_boxster": [
   L(r=118, face=(14, 14, 16), bezel=(62, 62, 66), bezelW=3, tick=W, tickR=113, major=(13, 3), minor=(7, 1.5), minors=4,
     num=W, numR=88, size=22, font="GothamMedium", step=1000, div=1000, red=7500, redC=RED, needle=RED, needleW=5, hub=(26, 26, 28), hubR=13,
-    texts=[("GTS", 0, -38, 14, W, "GothamBold"), ("1/min x1000", 0, 40, 10, (190, 192, 198), "GothamMedium")]),
+    texts=[("1/min x1000", 0, 40, 10, (190, 192, 198), "GothamMedium")]),
   L(r=118, face=(14, 14, 16), bezel=(62, 62, 66), bezelW=3, tick=W, tickR=113, major=(12, 3), minor=(6, 1.5), minors=1,
     num=W, numR=89, size=13, font="GothamMedium", step=20, needle=RED, needleW=5, hub=(26, 26, 28), hubR=13,
     texts=[("km/h", 0, 40, 11, (190, 192, 198), "GothamMedium")]),
@@ -128,7 +128,7 @@ LOOKS = {
     circles=[(42, 56, 27, None, (222, 222, 226), 2)], texts=[("MPH", 0, -36, 10, W, "GothamMedium")]),
   L(r=122, face=(10, 10, 12), bezel=(206, 208, 212), bezelW=12, lines=[(60, (222, 222, 226), 2)], tick=W, tickR=114, major=(13, 3), minor=(6, 1.5), minors=4,
     num=W, numR=92, size=22, font="GothamMedium", step=1000, div=1000, bands=[(6500, 8000, 114, 7, RED)], needle=(230, 32, 26), needleW=5, hub=(26, 26, 28), hubR=13,
-    circles=[(42, 56, 27, None, (222, 222, 226), 2)], texts=[("AMG", 0, -36, 14, W, "GothamBlack"), ("x1000/min", 62, 22, 9, W, "GothamMedium")]),
+    circles=[(42, 56, 27, None, (222, 222, 226), 2)], texts=[("x1000/min", 62, 22, 9, W, "GothamMedium")]),
  ],
  "ferrara_599": [
   L(r=118, face=(244, 180, 22), bezel=(40, 40, 42), bezelW=6, tick=(22, 22, 22), tickR=113, major=(13, 3), minor=(6, 1.5), minors=4,

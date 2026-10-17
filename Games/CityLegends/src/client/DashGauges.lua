@@ -704,9 +704,9 @@ local function amg(gui: SurfaceGui, biturbo: boolean?, topMph: number?): Update
 	dial(bg, UDim2.fromScale(sx + 0.05, 0.72), 0.3, { "0", "1/2", "1" }, nil, needle, -120, 0)(0.75)
 	dial(bg, UDim2.fromScale(rx + 0.05, 0.72), 0.3, { "40", "80", "120" }, nil, needle, -120, 0)(0.55)
 	text(bg, unit(), UDim2.fromScale(sx + 0.07, 0.6), UDim2.fromScale(0.03, 0.04), DIM, Enum.Font.Gotham)
-	text(bg, "AMG", UDim2.fromScale(rx + 0.02, 0.3), UDim2.fromScale(0.05, 0.05), WHITE, Enum.Font.GothamBlack)
+	-- (brand mark removed: owner, 2026-10-17)
 	if biturbo then
-		text(bg, "V8 BITURBO", UDim2.fromScale(rx, 0.86), UDim2.fromScale(0.09, 0.045), WHITE, Enum.Font.GothamBold)
+		-- (brand mark removed: owner, 2026-10-17)
 		text(bg, "1/min x1000", UDim2.fromScale(rx, 0.38), UDim2.fromScale(0.06, 0.035), DIM, Enum.Font.Gotham)
 	end
 	-- the middle screen
@@ -753,10 +753,10 @@ local function supraTrd(gui: SurfaceGui): Update
 	local needle = Color3.fromRGB(240, 40, 30)
 	dial(bg, UDim2.fromScale(0.17, 0.38), 0.6, { "E", "", "F" }, nil, needle, -150, -30, nil, true)(0.8)
 	dial(bg, UDim2.fromScale(0.17, 0.72), 0.5, { "C", "", "H" }, nil, needle, -150, -30, nil, true)(0.45)
-	text(bg, "TRD", UDim2.fromScale(0.21, 0.5), UDim2.fromScale(0.05, 0.06), WHITE, Enum.Font.GothamBlack)
+	-- (brand mark removed: owner, 2026-10-17)
 	local setRpm = dial(bg, UDim2.fromScale(0.5, 0.5), 1, numbers(0, 10, 1), 0.7, needle, -180 + 10, 170, nil)
 	text(bg, "x1000RPM", UDim2.fromScale(0.5, 0.6), UDim2.fromScale(0.07, 0.04), WHITE, Enum.Font.Gotham)
-	text(bg, "TRD", UDim2.fromScale(0.52, 0.72), UDim2.fromScale(0.05, 0.06), WHITE, Enum.Font.GothamBlack)
+	-- (brand mark removed: owner, 2026-10-17)
 	local setSpeed = speedDial(bg, UDim2.fromScale(0.83, 0.5), 0.95, 200, 20, 0.85, needle, -125, 125, nil)
 	text(bg, unit(true), UDim2.fromScale(0.85, 0.62), UDim2.fromScale(0.03, 0.04), WHITE, Enum.Font.Gotham)
 	text(bg, "Supra", UDim2.fromScale(0.82, 0.74), UDim2.fromScale(0.07, 0.07), WHITE, Enum.Font.Arcade)
@@ -1161,7 +1161,7 @@ local function g63(gui: SurfaceGui): Update
 	local setSpeed = speedDial(bg, UDim2.fromScale(0.21, 0.5), 0.96, 160, 20, nil, white, -135, 135, face, nil, 0.011)
 	local setRpm = dial(bg, UDim2.fromScale(0.79, 0.5), 0.96, numbers(0, 7, 1), 6 / 7, red, -135, 135, face, nil, 0.011)
 	text(bg, unit(), UDim2.fromScale(0.21, 0.33), UDim2.fromScale(0.03, 0.045), DIM, Enum.Font.Gotham)
-	text(bg, "AMG", UDim2.fromScale(0.79, 0.32), UDim2.fromScale(0.045, 0.06), WHITE, Enum.Font.GothamBlack)
+	-- (brand mark removed: owner, 2026-10-17)
 	text(bg, "1/min x1000", UDim2.fromScale(0.79, 0.4), UDim2.fromScale(0.05, 0.035), DIM, Enum.Font.Gotham)
 	-- small dials inside the big ones
 	dial(bg, UDim2.fromScale(0.21, 0.8), 0.22, { "0", "", "1" }, nil, white, -90, 90, face, nil, 0.02)(0.7)
@@ -1704,14 +1704,6 @@ local function angleOn(points: { { number } }, v: number): number
 	return points[#points][2]
 end
 
--- the M stripes (light blue, dark blue, red) and the letter
-local function mLogo(D: Design, x: number, y: number, s: number)
-	for i, c in { Color3.fromRGB(0, 156, 222), Color3.fromRGB(30, 50, 150), Color3.fromRGB(226, 32, 36) } do
-		D.rect(x - 18 * s + (i - 1) * 7 * s, y, 5 * s, 16 * s, c, 3, 18)
-	end
-	D.label("M", x + 9 * s, y, 20 * s, WHITE, Enum.Font.GothamBlack, 3, 1.2)
-end
-
 -- BMW M3 F80 / M4 F82 (owner's photo): two dark dials in chrome rings, white numbers, red needles,
 -- orange / red shift lights at the top of the rev counter, small fuel and oil temperature dials at
 -- the sides, the M stripes, digital speed, outside temperature, odometers, gear and drive modes
@@ -1783,7 +1775,7 @@ local function bmwF80(gui: SurfaceGui): Update
 	end
 	D.label(if KMH then "°C" else "°F", 918, 300, 12, GREY, Enum.Font.GothamMedium, 3)
 	-- middle: M stripes, digital speed, outside temperature, odometers, gear, drive modes
-	mLogo(D, 300, 372, 1.0)
+	-- (brand mark removed: owner, 2026-10-17)
 	local speedText = D.label("0", 492, 316, 34, WHITE, Enum.Font.GothamBold, 3, 3)
 	local unitText = D.label(unit(), 548, 322, 14, GREY, Enum.Font.GothamMedium, 3, 4)
 	D.label(if KMH then "+12 °C" else "+53 °F", 500, 352, 16, WHITE, Enum.Font.GothamMedium, 3)
@@ -1862,7 +1854,7 @@ local function bmwLiveCockpit(gui: SurfaceGui): Update
 	local clockText = D.label(clock(), 500, 72, 30, WHITE, Enum.Font.GothamMedium, 3)
 	D.label(if KMH then "+14.5°C" else "+58°F", 500, 104, 14, GREY, Enum.Font.GothamMedium, 3)
 	D.rect(500, 120, 80, 2, Color3.fromRGB(70, 70, 78), 2)
-	mLogo(D, 500, 176, 1.1)
+	-- (brand mark removed: owner, 2026-10-17)
 	D.line(468, 205, 330, 330, 4, Color3.fromRGB(196, 30, 30), 2, 0.15)
 	D.line(532, 205, 670, 330, 4, Color3.fromRGB(196, 30, 30), 2, 0.15)
 	local bar = D.rect(500, 352, 340, 30, Color3.fromRGB(12, 12, 14), 2)
