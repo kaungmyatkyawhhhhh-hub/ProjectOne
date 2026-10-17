@@ -124,7 +124,12 @@ local LAMP_ON = {
 	Y = Color3.fromRGB(255, 176, 0),
 	G = Color3.fromRGB(40, 255, 120),
 }
-local LAMP_OFF = Color3.fromRGB(26, 26, 28)
+-- unlit lenses: dark, but still tinted their colour like real glass
+local LAMP_OFF = {
+	R = Color3.fromRGB(52, 8, 8),
+	Y = Color3.fromRGB(56, 38, 4),
+	G = Color3.fromRGB(6, 40, 22),
+}
 
 ---------------------------------------------------------------------
 -- Monorail train
@@ -233,7 +238,18 @@ function WorldFx.start()
 					local on = CityLayout.lightState(i, j, axis, now) == mine
 					if lampCache[lamp] ~= on then
 						lampCache[lamp] = on
-						lamp.Color = if on then LAMP_ON[mine] else LAMP_OFF
+						lamp.Color = if on then LAMP_ON[mine] else LAMP_OFF[mine] or LAMP_OFF.R
+						lamp.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+					end
+				end
+			end
+			-- each signal head's glow takes the colour of its lit lens
+			for _, glow in CollectionService:GetTagged("SignalGlow") do
+				if glow:IsA("PointLight") then
+					local st = CityLayout.lightState(glow:GetAttribute("I") :: number, glow:GetAttribute("J") :: number, glow:GetAttribute("Axis") :: string, now)
+					local c = LAMP_ON[st]
+					if glow.Color ~= c then
+						glow.Color = c
 					end
 				end
 			end

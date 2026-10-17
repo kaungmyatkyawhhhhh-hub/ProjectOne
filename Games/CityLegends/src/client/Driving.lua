@@ -148,6 +148,9 @@ type State = {
 	blinker: string, -- "" | "L" | "R" | "H"
 	blinkT: number,
 	blinkLights: { L: { PointLight }, R: { PointLight } },
+	tails: { BasePart }, -- tail lamps (TailLight parts): dim with the lights on, bright when braking
+	rearGlow: { PointLight },
+	tailBrake: boolean?,
 	dashPanel: BasePart?,
 	-- drivetrain feel
 	agear: number, -- the automatic gearbox's gear (1..GEARS)
@@ -398,6 +401,7 @@ function Driving.detach()
 		f:Destroy()
 	end
 	s.engine:destroy()
+	UI.startPrompt(false)
 	if s.cabinLight then
 		s.cabinLight:Destroy()
 	end
@@ -550,7 +554,7 @@ local function setClusterPower(s: State, on: boolean)
 		local sg = n.gui:FindFirstAncestorWhichIsA("SurfaceGui")
 		if sg then
 			sg.LightInfluence = if on then 0 else 1
-			sg.Brightness = if on then 0.9 else 1 -- lit, but below the bloom: a crisp needle, no halo
+			sg.Brightness = if on then 0.8 else 1 -- lit, but below the bloom: a crisp needle, no halo
 			local light = sg.Parent and sg.Parent:FindFirstChild("DialLight")
 			if light and light:IsA("Light") then
 				light.Enabled = on
@@ -586,8 +590,30 @@ local function indicatorState(s: State): { [string]: any }
 	}
 end
 
+-- tail lamps: off with the lights, dim red with them on, bright red while braking
+local TAIL_DIM, TAIL_BRAKE = Color3.fromRGB(150, 0, 6), Color3.fromRGB(255, 22, 22)
+local function setTails(s: State)
+	local braking = s.tailBrake == true
+	for _, t in s.tails do
+		local off = t:GetAttribute("TailOff") :: number?
+		if off then
+			-- a glowing copy over the model's own lamp: gone when the lights are off
+			t.Color = if braking then TAIL_BRAKE else TAIL_DIM
+			t.Transparency = if not s.lightsOn and not braking then 1 elseif braking then off * 0.3 else off
+		else
+			-- the lamp itself (our own bodies): darker when off
+			t.Color = if braking then TAIL_BRAKE elseif s.lightsOn then TAIL_DIM else Color3.fromRGB(60, 0, 4)
+		end
+	end
+	for _, g in s.rearGlow do
+		g.Enabled = s.lightsOn or braking
+		g.Brightness = if braking then 2.2 else 0.6
+	end
+end
+
 local function setLights(s: State, on: boolean)
 	s.lightsOn = on
+	setTails(s)
 	for _, d in s.model:GetDescendants() do
 		if d:IsA("SpotLight") or (d:IsA("SurfaceLight") and d.Parent and d.Parent.Name:lower():find("head")) then
 			d.Enabled = on
@@ -789,8 +815,8 @@ function Driving.attach(model: Model)
 
 	local cabinLight = Instance.new("PointLight")
 	cabinLight.Color = Color3.fromRGB(255, 244, 228) -- warm dome light so the cabin is readable at night
-	cabinLight.Brightness = 1.6
-	cabinLight.Range = 9
+	cabinLight.Brightness = 0.45 -- just enough to read the cabin; brighter washed it out (owner, 2026-10-17)
+	cabinLight.Range = 7
 	cabinLight.Shadows = false
 	cabinLight.Enabled = false
 	cabinLight.Parent = root
@@ -1185,6 +1211,8 @@ function Driving.attach(model: Model)
 		blinker = "",
 		blinkT = 0,
 		blinkLights = blinkLights,
+		tails = {},
+		rearGlow = {},
 		dashPanel = if dashPanel and dashPanel:IsA("BasePart") then dashPanel else nil,
 		agear = 1,
 		shiftT = 0,
@@ -1204,6 +1232,13 @@ function Driving.attach(model: Model)
 		launchReady = false,
 	}
 	state = s
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") and d:GetAttribute("TailLight") then
+			table.insert(s.tails, d)
+		elseif d:IsA("PointLight") and (d.Name == "RearGlow" or d.Name == "TailGlow") and d.Enabled then
+			table.insert(s.rearGlow, d)
+		end
+	end
 	s.powerK, s.dragC = powerFor(spec)
 	s.engine:setRunning(s.engineOn and not s.electric)
 	if s.engineOn and not s.electric then
@@ -1212,7 +1247,7 @@ function Driving.attach(model: Model)
 		setClusterPower(s, false) -- dark dash and lights until the engine starts
 		setLights(s, false)
 		remote("CarSignals"):FireServer({ blinker = "", lights = false })
-		UI.toast("Press F to start the engine")
+		UI.startPrompt(true)
 	end
 	UI.setIndicators(indicatorState(s))
 	camera.CameraType = Enum.CameraType.Scriptable
@@ -1299,6 +1334,7 @@ function Driving.step(dt: number)
 	if s.cranking > 0 then
 		s.cranking -= dt
 		if s.cranking <= 0 and s.ignition then
+			UI.startPrompt(false)
 			s.engineOn = true
 			s.engine:setRunning(not s.electric)
 			setCarPower(s, true)
@@ -1306,6 +1342,11 @@ function Driving.step(dt: number)
 		end
 	end
 	local throttle = if s.engineOn then throttleKey else 0
+	local braking = s.engineOn and brake > 0.05
+	if braking ~= (s.tailBrake == true) then
+		s.tailBrake = braking
+		setTails(s)
+	end
 	handbrake = handbrake or s.parkBrake
 	-- clutch (manual gearbox): dropping it at high revs from a standstill launches the car
 	local clutchWas = s.clutch
@@ -1648,6 +1689,15 @@ function Driving.render(dt: number)
 						arm.upper.Size = Vector3.new(arm.upper.Size.X, len, arm.upper.Size.Z)
 					end
 					arm.upper.CFrame = root.CFrame * CFrame.lookAt((arm.shoulder + handPos) / 2, handPos) * arm.rot
+				end
+				-- in first person the arms came right past the camera as big grey slabs (owner,
+				-- 2026-10-17: "make it so that u can see clearly in the first person view")
+				arm.upper.LocalTransparencyModifier = if Driving.cameraMode == "Interior" then 1 else 0
+				if fore then
+					fore.LocalTransparencyModifier = arm.upper.LocalTransparencyModifier
+				end
+				if arm.glove then
+					(arm.glove :: BasePart).LocalTransparencyModifier = arm.upper.LocalTransparencyModifier
 				end
 			end
 		end

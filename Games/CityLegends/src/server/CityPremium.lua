@@ -376,7 +376,8 @@ local function distantSkyline(kit: any, parent: Instance)
 	for _, side in { { Vector3.new(0, 0, -1), Vector3.new(1, 0, 0) }, { Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1) }, { Vector3.new(0, 0, 1), Vector3.new(1, 0, 0) } } do
 		local n, t = side[1], side[2]
 		for k = -14, 14 do
-			local dist = o + 1350 + rng:NextNumber(0, 250)
+			-- on the far shore, between the water and the suburbs' street (Mainland)
+			local dist = o + 1560 + rng:NextNumber(0, 100)
 			local along = k * 150 + rng:NextNumber(-40, 40)
 			local h = rng:NextNumber(60, 320)
 			local w = rng:NextNumber(50, 110)
@@ -415,7 +416,7 @@ local function monorailTrack(kit: any, parent: Instance)
 	local step = total / count
 	local R = E + Config.Monorail.Offset
 	local cornerStart = R - Config.Monorail.CornerRadius
-	local concrete = Color3.fromRGB(150, 150, 158)
+	local concrete = Color3.fromRGB(92, 94, 100) -- (darker: the bright grey stood out at night)
 	for k = 0, count - 1 do
 		local a = CityLayout.monorailSample(k * step)
 		local b = CityLayout.monorailSample((k + 1) * step)

@@ -189,15 +189,12 @@ local function collectSurfaces()
 				add(p, true)
 			end
 		end
-		local plaza = highway:FindFirstChild("Plaza")
-		if plaza then
-			for _, p in plaza:GetChildren() do
-				if p:IsA("BasePart") and bigSlab(p) then
-					if p.Name == "Island" then
-						add(p, false)
-					elseif isRoad(p) then
-						add(p, true)
-					end
+		-- the Legends Loop's paving
+		local loop = highway:FindFirstChild("Loop")
+		if loop then
+			for _, p in loop:GetChildren() do
+				if p:IsA("BasePart") and bigSlab(p) and isRoad(p) then
+					add(p, true)
 				end
 			end
 		end

@@ -20,11 +20,14 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `Cars`: the roster of 69 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`.
   - `CarBuilder`: part-built car, physics hitbox, interior, driver arms. `getDims(class, id)` gives per-car proportions through `DIM_OVERRIDES`.
   - `CarMesh`: procedural lofted car meshes, with a `DESIGNS` table per car.
-  - `CityLayout`, `FacadeTex`.
+  - `CityLayout`: grid maths, traffic-light phases, the Legends Loop's shape (`loopSample`) and the lane graph NPC traffic drives (city lanes plus the highway: `addHighway`).
+  - `FacadeTex`.
 - `src/server`:
   - `Main.server.lua`: remotes, car spawn, cash / XP / cut-up validation, daily gift, console cash hook.
   - `PlayerData`: DataStore profile with Cash, Owned, Selected, Level, XP, LastDaily.
-  - `CityBuilder`, `CityPremium`.
+  - `CityBuilder`: lighting, roads, blocks, traffic signals, skyline ring, the east highway (tunnel) and the Legends Loop.
+  - `CityPremium`: landmarks, streetscape, harbour water, distant skyline, monorail.
+  - `Mainland`: the land round the harbour: shore, suburbs, container port, forest, hills, wind turbines, mountain range, loop billboards.
 - `src/client`:
   - `Main.client.lua`: startup order.
   - `UI`: HUD, garage, menus.
@@ -51,6 +54,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `dial_probe.py` + `dial_fit.py`: live needles on a converted car's own dials (`CarSkin.DIAL_NEEDLES`). Probe a render pixel to find the dial texture, read the hub, two or three labels and the painted needle in texture pixels, then fit: it prints the table entry and paints the old needle out of the texture (the car then needs a new Import 3D). Check by drawing needles at 0 and at the top in a render.
   - `dial_looks.py` (run from `Games/CityLegends`): each needle car's dial design, copied from its real cluster (colours, numbers, red zone, needle, logos, second km/h scale, screens), written to `src/client/DialLooks.lua`, with preview PNGs in `build/dials`. CarSkin draws them over the car's own dials. To check one, put the preview PNG on a plane at the dial in Blender and render from the driver's eye next to the real dial.
   - `brand_marks/` (see its README): where the real makers' badges, logos and name plates are on each converted car, measured in Blender and written to `src/client/BrandMarks.lua`. CarSkin hides badge parts, covers printed logos and plates with patches in the colour round them, covers wheel caps and the steering hub, and puts our fictional emblems (BNW, Mercer, Lexis) where those makers' badges were. Cars built in Roblox lose parts and decals named badge, logo or emblem.
+  - `tail_lights/` (see its README): each converted car's tail lamps (red parts measured in Blender, or spots picked on a rear render), written to `src/client/TailLights.lua`.
   - `pack_cars.py out.fbx id=car.blend ...`: several converted cars in one FBX, one group per car id, for a single Import 3D. Packs for the owner go in `imports/new_cars/` (owner, 2026-10-13: new cars in their own folder); it holds only what is still to be imported, so clear it once the cars are in `CarModels.rbxm`.
   - `take_cars.luau <place> <ids...>` (Lune, from `Games/CityLegends`): copies imported cars from the owner's saved place into `assets/CarModels.rbxm`. It takes off Blender's `.001` name endings and makes the windows two-sided.
 

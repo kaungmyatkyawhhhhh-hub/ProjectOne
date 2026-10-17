@@ -28,17 +28,23 @@ Config.City = {
 	CurbHeight = 0.6,
 	OuterRingDepth = 260, -- skyline ring of buildings around the grid
 
-	-- Highway that leaves the city to the east and runs through the tunnel
+	-- Highway that leaves the city to the east, runs through the tunnel and joins the Legends Loop
 	HighwayLanesPerSide = 3,
-	HighwayLength = 2000,
 	TunnelStart = 1300, -- measured from the city edge
 	TunnelLength = 600,
-	PlazaRadius = 110,
+	-- the Legends Loop (owner, 2026-10-17: "make the highway very long and slowly loops around
+	-- the map"): a 6-lane ring road round the city and the harbour, a rounded square with long,
+	-- gentle corners (about 24,000 studs, 8 km, a lap)
+	LoopHalf = 3300, -- from the city centre to the loop's centre line
+	LoopCorner = 1300, -- corner radius
+	HighwaySpeedK = 1.7, -- traffic drives this much faster on the highway
 }
 
 Config.City.RoadWidth = Config.City.LaneWidth * Config.City.LanesPerSide * 2
 Config.City.HalfExtent = Config.City.Blocks * Config.City.BlockSize / 2
 Config.City.HighwayWidth = Config.City.LaneWidth * Config.City.HighwayLanesPerSide * 2
+-- the east highway runs from the city's edge to the loop's inner edge
+Config.City.HighwayLength = Config.City.LoopHalf - Config.City.HighwayWidth / 2 - (Config.City.HalfExtent + Config.City.RoadWidth / 2)
 
 ---------------------------------------------------------------------
 -- Graphics / city detail. Turn things off here for low-end devices.

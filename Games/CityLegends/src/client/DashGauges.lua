@@ -2150,13 +2150,16 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	AventadorLP700 = aventadorLP700,
 }
 
+-- screens lit but below the bloom, so the numbers stay sharp in first person (owner, 2026-10-17)
+local BRIGHT = 1.1
+
 function DashGauges.build(panel: BasePart): Update
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "Gauges"
 	gui.Face = Enum.NormalId.Back
 	gui.CanvasSize = Vector2.new(math.floor(panel.Size.X / panel.Size.Y * 300), 300)
 	gui.LightInfluence = 0
-	gui.Brightness = 1.8
+	gui.Brightness = BRIGHT
 	gui.MaxDistance = 60
 	gui.Parent = panel
 	local style = panel:GetAttribute("Style")
@@ -2168,11 +2171,11 @@ function DashGauges.build(panel: BasePart): Update
 	return function(mph: number, g: string, rpm: number)
 		local t = os.clock() - started
 		if t < SWEEP then
-			gui.Brightness = 1.8 * math.clamp(t / 0.5, 0, 1)
+			gui.Brightness = BRIGHT * math.clamp(t / 0.5, 0, 1)
 			local sweep = math.sin(math.clamp(t / SWEEP, 0, 1) * math.pi)
 			update(math.max(mph, sweep * 180), g, math.max(rpm, sweep))
 		else
-			gui.Brightness = 1.8
+			gui.Brightness = BRIGHT
 			update(mph, g, rpm)
 		end
 	end

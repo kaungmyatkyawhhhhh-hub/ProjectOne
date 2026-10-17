@@ -29,6 +29,7 @@ local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 local BrandMarks = require(script.Parent:WaitForChild("BrandMarks"))
+local TailLights = require(script.Parent:WaitForChild("TailLights"))
 
 local CarSkin = {}
 
@@ -216,6 +217,8 @@ type Imported = {
 	gauges: { { kind: string, pivot: CFrame, parts: { Template } } }?,
 	ownGauges: boolean?,
 	clusterSize: Vector2?,
+	-- where the red glow behind the tail lamps goes (ground space)
+	tailGlow: Vector3?,
 }
 type Look = { material: Enum.Material, color: Color3?, reflectance: number, transparency: number, shadow: boolean }
 
@@ -589,6 +592,48 @@ local function coverParts(cf: CFrame, w: number, h: number, color: Color3, disc:
 	return out
 end
 
+-- tail lamps (owner, 2026-10-17: "add rear tail light for all cars"): a lamp part of the model gets
+-- a red glowing copy over it, a hair bigger; Driving and Traffic brighten it when braking
+local TAIL_COLOR = Color3.fromRGB(150, 0, 6)
+local TAIL_WORDS = { "taillight", "tail light", "tail_light", "brakelight", "brake light", "brake_light", "rearlight", "rear light", "rear_light", "stoplight", "stop light" }
+local function isTailName(name: string): boolean
+	local n = name:lower()
+	for _, w in TAIL_WORDS do
+		if n:find(w, 1, true) then
+			return n:find("cover", 1, true) == nil and n:find("frame", 1, true) == nil and n:find("bucket", 1, true) == nil
+		end
+	end
+	return false
+end
+local function hasTexture(m: MeshPart): boolean
+	local ok, id = pcall(function()
+		return m.TextureID
+	end)
+	return not ok or id ~= ""
+end
+local function tailShell(p: BasePart, grow: number, transparency: number)
+	for _, c in p:GetChildren() do
+		if c:IsA("SurfaceAppearance") or c:IsA("Decal") or c:IsA("SurfaceGui") then
+			c:Destroy()
+		elseif c:IsA("SpecialMesh") then
+			c.TextureId = ""
+			c.Scale *= grow
+		end
+	end
+	if p:IsA("MeshPart") then
+		pcall(function()
+			(p :: MeshPart).TextureID = ""
+		end)
+	end
+	p.Size *= grow
+	p.Material = Enum.Material.Neon
+	p.Color = TAIL_COLOR
+	p.Transparency = transparency
+	p.CastShadow = false
+	p:SetAttribute("TailLight", true)
+	p:SetAttribute("TailOff", transparency)
+end
+
 local function visualClone(d: BasePart, scale: number): BasePart
 	local p = d:Clone()
 	for _, c in p:GetChildren() do
@@ -726,6 +771,29 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			a = a.Parent
 		end
 		return false
+	end
+	-- tail lamps: parts named as tail / brake lights, the converted cars' measured lamp parts
+	-- (TailLights), and A-Chassis brake-light glow meshes (a "Brake" group, invisible when off)
+	local tails = TailLights[src.Name]
+	local function isTail(d: BasePart): boolean
+		if tails then
+			for _, sh in tails.shells do
+				if d.Name == sh.name and (sh.size == nil or (d.Size - sh.size).Magnitude < 0.01) then
+					return true
+				end
+			end
+		end
+		return isTailName(d.Name) or (d.Parent ~= nil and d.Parent ~= src and isTailName(d.Parent.Name))
+	end
+	local lampGlows: { BasePart } = {}
+	for _, d in src:GetDescendants() do
+		if d:IsA("BasePart") and d.Transparency >= 0.98 and d.Parent then
+			local n, pn = d.Name:lower(), d.Parent.Name:lower()
+			local lampGroup = pn == "brake" or pn == "lights" or isTailName(pn)
+			if (d:IsA("MeshPart") and (pn == "brake" or isTailName(pn))) or (lampGroup and (isTailName(n) or n:match("^brake%d*$") ~= nil or n == "tail")) then
+				table.insert(lampGlows, d)
+			end
+		end
 	end
 	local visible: { BasePart } = {}
 	for _, d in src:GetDescendants() do
@@ -1366,6 +1434,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 
 	local k = 0
+	local redParts: { { d: BasePart, t: Template } } = {}
 	for _, d in visible do
 		if not inWheel[d] and not (out.steer and inSteer(d)) and not gaugeOf[d] then
 			k += 1
@@ -1377,6 +1446,75 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				t.part.Transparency = math.max(t.part.Transparency, 0.6)
 			end
 			out.body["Part" .. k] = t
+			if isTail(d) then
+				local sh = tmpl(d, Vector3.zero)
+				tailShell(sh.part, 1.012, 0.45)
+				out.body["Tail" .. k] = sh
+			elseif not d:IsA("MeshPart") or not hasTexture(d :: MeshPart) then
+				-- plain red parts at the back may be the lamps of a car with nothing named (below)
+				local c = d.Color
+				if c.R > 0.45 and c.R > c.G * 2.2 and c.R > c.B * 2.2 and d.Transparency < 0.6 then
+					table.insert(redParts, { d = d, t = t })
+				end
+			end
+		end
+	end
+	for i, d in lampGlows do
+		local sh = tmpl(d, Vector3.zero)
+		tailShell(sh.part, 1, 0.3)
+		out.body["TailGlow" .. i] = sh
+	end
+	if tails and tails.wb then
+		local spm = dims.wb / tails.wb
+		for i, spot in tails.spots do
+			local face = spot.face.Unit
+			local pos = Vector3.new(spot.at.X * spm, spot.at.Y * spm + modelR * scale, spot.at.Z * spm) + face * 0.006 * spm
+			local p = Instance.new("Part")
+			p.Name = "TailSpot"
+			p.Size = Vector3.new(spot.w * spm, spot.h * spm, 0.02)
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.Massless = true
+			tailShell(p, 1, 0.3)
+			local up = if math.abs(face.Y) > 0.95 then Vector3.zAxis else Vector3.yAxis
+			out.body["TailSpot" .. i] = { part = p, offset = CFrame.lookAt(pos, pos + face, up) }
+		end
+	end
+	-- the red glow behind the lamps: level with them, just behind the car
+	do
+		local back, ySum, n = -math.huge, 0, 0
+		for name, t in out.body do
+			local ocf = t.offset
+			local h = t.part.Size / 2
+			local ext = math.abs(ocf.RightVector.Z) * h.X + math.abs(ocf.UpVector.Z) * h.Y + math.abs(ocf.LookVector.Z) * h.Z
+			back = math.max(back, ocf.Position.Z + ext)
+			if t.part:GetAttribute("TailLight") then
+				ySum += ocf.Position.Y
+				n += 1
+			end
+		end
+		-- nothing named or measured: plain red parts in the last sixth of the car, above the axles
+		if n == 0 and back > -math.huge then
+			local front = math.huge
+			for _, t in out.body do
+				front = math.min(front, t.offset.Position.Z)
+			end
+			local len = back - front
+			for i, rp in redParts do
+				local o = rp.t.offset.Position
+				local sz = rp.t.part.Size
+				if o.Z > back - len / 6 and o.Y > dims.wheelR * 0.9 and math.max(sz.X, sz.Y, sz.Z) < 2.4 then
+					local sh = tmpl(rp.d, Vector3.zero)
+					tailShell(sh.part, 1.012, 0.45)
+					out.body["TailRed" .. i] = sh
+					ySum += o.Y
+					n += 1
+				end
+			end
+		end
+		if back > -math.huge then
+			out.tailGlow = Vector3.new(0, if n > 0 then ySum / n else dims.wheelR * 1.6, back + 0.8)
 		end
 	end
 	local generic = out.generic :: { [string]: GenericWheel }
@@ -1795,6 +1933,20 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		end
 	end
 
+	if generic and imported and imported.tailGlow and not liteMode then
+		-- a soft red glow on the road and bumper behind the tail lamps (brighter when braking)
+		local att = Instance.new("Attachment")
+		att.Name = "RearGlow"
+		att.Position = root.CFrame:PointToObjectSpace((groundCF * CFrame.new(imported.tailGlow)).Position)
+		att.Parent = root
+		local glow = Instance.new("PointLight")
+		glow.Name = "RearGlow"
+		glow.Color = Color3.fromRGB(255, 30, 20)
+		glow.Brightness = 0.6
+		glow.Range = 9
+		glow.Shadows = false
+		glow.Parent = att
+	end
 	if generic and imported then
 		-- the model's own steering wheel: welded still here; Driving turns it on the local player's car
 		local steer = imported.steer

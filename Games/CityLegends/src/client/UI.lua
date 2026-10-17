@@ -225,6 +225,76 @@ function UI.flash(color: Color3)
 	tween(f, 0.5, { BackgroundTransparency = 1 })
 end
 
+-- "Press F to start up": shown when you get in a car with the engine off, until it starts
+-- (owner, 2026-10-17)
+local startPrompt: Frame? = nil
+local startPulse: RBXScriptConnection? = nil
+function UI.startPrompt(show: boolean)
+	if not show then
+		if startPulse then
+			startPulse:Disconnect()
+			startPulse = nil
+		end
+		if startPrompt then
+			local f = startPrompt
+			startPrompt = nil
+			tween(f, 0.25, { BackgroundTransparency = 1 })
+			for _, d in f:GetDescendants() do
+				if d:IsA("TextLabel") then
+					tween(d, 0.25, { TextTransparency = 1, BackgroundTransparency = 1 })
+				elseif d:IsA("UIStroke") then
+					tween(d, 0.25, { Transparency = 1 })
+				end
+			end
+			task.delay(0.3, function()
+				f:Destroy()
+			end)
+		end
+		return
+	end
+	if startPrompt or not hud then
+		return
+	end
+	local f = new("Frame", {
+		Name = "StartPrompt",
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 0.78, 0),
+		Size = UDim2.fromOffset(360, 64),
+		BackgroundColor3 = Theme.Panel,
+		BackgroundTransparency = 0.12,
+		Parent = hud,
+	}, { corner(12), stroke(Theme.Accent, 1.5, 0.15) })
+	local key = label({
+		Text = if UI.isTouch then "START" else "F",
+		TextSize = if UI.isTouch then 15 else 28,
+		Font = Enum.Font.GothamBlack,
+		TextColor3 = Theme.Panel,
+		BackgroundColor3 = Theme.Accent,
+		BackgroundTransparency = 0,
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 12, 0.5, 0),
+		Size = UDim2.fromOffset(if UI.isTouch then 70 else 44, 44),
+		Parent = f,
+	})
+	corner(8).Parent = key
+	label({
+		Text = if UI.isTouch then "Tap to start up" else "Press F to start up",
+		TextSize = 24,
+		Font = Enum.Font.GothamBold,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.new(0, if UI.isTouch then 96 else 70, 0, 0),
+		Size = UDim2.new(1, -80, 1, 0),
+		Parent = f,
+	})
+	startPrompt = f
+	-- a slow pulse on the key so it catches the eye
+	local t0 = os.clock()
+	startPulse = RunService.RenderStepped:Connect(function()
+		key.BackgroundTransparency = 0.25 - 0.25 * math.cos((os.clock() - t0) * 4)
+	end)
+end
+
 local toastToken = 0
 function UI.toast(text: string, color: Color3?)
 	toastToken += 1
