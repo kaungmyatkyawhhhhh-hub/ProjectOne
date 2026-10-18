@@ -1,7 +1,7 @@
 ---
 date: 2026-10-09
 tags: [gymarc, bug]
-status: in progress
+status: fixed
 ---
 # GYM ARC - Bug - Upper traps never grew
 
@@ -30,3 +30,7 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 4 Upper traps missing]].
 
 ## Wider yoke (19 Oct, prompt 7)
 The slope is now a wide yoke from the base of the neck to the shoulders, the data's own upper traps fade under it (no horns at mass monster). See [[GYM ARC - Muscles and Bodies]].
+
+
+## Finished (19 Oct night)
+The owner imported the 48-file set (prompt 8); every body now has the upper traps, the yoke and the round shoulders.

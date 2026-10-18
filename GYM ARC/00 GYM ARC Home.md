@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (19 Oct 2026)
+- 19 Oct night: the 48 body meshes are imported and set up: everyone (other players, NPCs, statue, mirror) now has the new traps, shoulders, back and adductors.
 - 19 Oct night: the back is filled (no hollow), adductors fill the inner thighs (inner side only, nothing near the shorts), and the delt caps were made smaller after the owner's note (biceps / triceps / upper chest look normal again). Other bodies wait for the 48-file import.
 - 19 Oct evening: traps reshaped into a wide yoke and the delts into big round caps (your reference picture); SideDelts mass monster size set to 1.5. Other bodies wait for the import.
 - 19 Oct afternoon: inner quad bulge fixed everywhere; mirror and statue now have your real body shape; crew names and tags are unique (ARAQ313 is now [SRT1]); Top Crews member view tested; upper traps fixed on your body, other bodies wait for the torso import.
@@ -31,7 +32,6 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 
 ## What's next
 1. **Save to Roblox** and make a dated backup, then **publish**. No save is recorded for the 9 and 13 Oct work.
-1. Import the 48 fixed body meshes from `Downloads\gym_arc_meshes_lowpoly_backfix\other_player_stages\` (torso, upper arms, thighs; skip the older trapsfix / shoulderfix folders), then tell Claude.
 2. Test soft shutdown live: join the game, then use "Migrate to latest update".
 3. Run a 2-player test (spotting, arm wrestling, other players' muscles).
 4. New prompts, not started yet:
@@ -40,7 +40,6 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 5. Listen to the picked sounds and swap any you don't like ([[GYM ARC - Music and Sounds]]).
 
 ## Open bugs
-- [[GYM ARC - Bug - Upper traps never grew|Upper traps]], round shoulders, full back, adductors: your own body done 19 Oct; other players / NPCs wait for you to import 48 fixed meshes (`Downloads\gym_arc_meshes_lowpoly_backfix\other_player_stages\`; the older trapsfix / shoulderfix folders are not needed).
 All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main ones:
 - [[GYM ARC - Bug - Full look bulkier than lean V-taper|Full look bulkier than the lean V-taper]]
 - [[GYM ARC - Bug - Pointed traps and triceps at mass monster|Pointed traps and triceps at mass monster]]

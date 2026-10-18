@@ -87,3 +87,6 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 8 Fill the back and add adductors]]. Detai
 - Your own body: the back is filled (raised diamond, thick lower-back columns, shallow spine groove); adductors fill the inner side of each thigh (straight inward only, nothing near the groin or under the shorts). The owner said mid-task that the triceps, biceps and upper chest looked weird: the delt caps were too big (reaching the elbow) and the yoke put too much on the front; both made smaller.
 - Everyone else: 48 fixed low-poly files (torso, upper arms, thighs) in `Downloads\gym_arc_meshes_lowpoly_backfix\other_player_stages\`, containing every fix of today. Waiting for the import (the trapsfix / shoulderfix folders are outdated).
 - Checks: 18 logic test files pass. Screenshots: `Screenshots/back_adductors/` (3).
+
+## Body meshes imported (night)
+The owner imported the 48 files; `tools/body_stage_setup.luau` put them on the templates, Config/BodyStages sizes updated (0 mismatches), MeshIds recorded (StageMeshBackup.Reshape19Oct). Coach Dex checked in play: yoke, round delts, full back.
