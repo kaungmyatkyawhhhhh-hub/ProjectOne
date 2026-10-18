@@ -1,7 +1,8 @@
 ---
 date: 2026-10-19
 tags: [gymarc, prompt]
-status: todo
+status: done
+aliases: ["2026-10-19 GYM ARC Prompt - Document owner changes"]
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 

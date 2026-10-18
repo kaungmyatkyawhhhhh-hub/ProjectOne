@@ -7,7 +7,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 # 2026-10-19 GYM ARC Owner changes
 
-The owner changed things in Studio by hand. Claude compared the place with the last commit (15 Oct) and wrote everything down. Nothing the owner made was changed or "fixed". Prompt: [[2026-10-19 GYM ARC Prompt - Document owner changes]].
+The owner changed things in Studio by hand. Claude compared the place with the last commit (15 Oct) and wrote everything down. Nothing the owner made was changed or "fixed". Prompt: [[2026-10-19 GYM ARC Prompt - 1 Document owner changes]].
 
 ## How it was checked
 - Every script exported from Studio into `src/` (440 scripts, same list as before: none added, none deleted) and compared with the 15 Oct commit.
@@ -47,3 +47,6 @@ The owner changed things in Studio by hand. Claude compared the place with the l
 
 ## To do for the owner
 - File > Save to Roblox, then File > Download a Copy to `Documents\GymArc_backups\GymArc_2026-10-19.rbxl`.
+
+## Prompt queue for today (not started)
+[[2026-10-19 GYM ARC Prompt - 2 Inner quad bulge]], [[2026-10-19 GYM ARC Prompt - 3 Mirror statue width and duplicate crew tags]], [[2026-10-19 GYM ARC Prompt - 4 Upper traps missing]], [[2026-10-19 GYM ARC Prompt - 5 Top crews member view]]. Prompt 5 was mostly built on 15 Oct (see [[GYM ARC - Crews]]); its phone / PC test and screenshot are still missing.

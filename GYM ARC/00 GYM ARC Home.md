@@ -28,6 +28,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 
 ## What's next
 1. **Save to Roblox** and make a dated backup, then **publish**. No save is recorded for the 9 and 13 Oct work.
+1. Owner's 19 Oct prompt queue: 2 inner quad bulge, 3 mirror / statue width + duplicate crew tags, 4 upper traps missing, 5 top crews member view (mostly built 15 Oct). See [[2026-10-19 GYM ARC Owner changes]].
 2. Test soft shutdown live: join the game, then use "Migrate to latest update".
 3. Run a 2-player test (spotting, arm wrestling, other players' muscles).
 4. New prompts, not started yet:
@@ -316,7 +317,11 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-15 GYM ARC Prompt - Store loads slowly]]
 - [[2026-10-15 GYM ARC Prompt - Test with a fresh player]]
 - [[2026-10-15 GYM ARC Prompt - Top crews member view]]
-- [[2026-10-19 GYM ARC Prompt - Document owner changes]]
+- [[2026-10-19 GYM ARC Prompt - 1 Document owner changes]]
+- [[2026-10-19 GYM ARC Prompt - 2 Inner quad bulge]]
+- [[2026-10-19 GYM ARC Prompt - 3 Mirror statue width and duplicate crew tags]]
+- [[2026-10-19 GYM ARC Prompt - 4 Upper traps missing]]
+- [[2026-10-19 GYM ARC Prompt - 5 Top crews member view]]
 
 ### Config
 - [[GYM ARC - Config values]]
