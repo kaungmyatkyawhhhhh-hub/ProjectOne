@@ -74,3 +74,10 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 2 Inner quad bulge]]. Bug note: [[GYM ARC 
 - **4 Upper traps, your body done, others wait:** a real neck-to-shoulder slope on the Traps muscle; 12 fixed low-poly torso files are ready to import in `Downloads\gym_arc_meshes_lowpoly_trapsfix\other_player_stages\`. [[GYM ARC - Bug - Upper traps never grew]]
 - **5 Top crews member view, done:** tested on phone and PC (full, one-member, deleted crew); fixed the deleted crew's header name. [[GYM ARC - Crews]]
 - Checks: 18 logic test files pass; no game errors in Output.
+
+## Wide traps and round shoulders (prompt 7, evening)
+Prompt: [[2026-10-19 GYM ARC Prompt - 7 Wide traps and round shoulders]]. Details: [[GYM ARC - Muscles and Bodies]].
+- Your own body: a wide traps yoke from the neck to the shoulders and big round delt caps (the widest point of the upper body), as shape layers with a gentle mass monster size; the data's upper traps and delt tops fade under them (no horns or folded caps at mass monster). SideDelts mass monster size set to 1.5.
+- Everyone else: 24 fixed low-poly torso + upper arm files in `Downloads\gym_arc_meshes_lowpoly_shoulderfix\other_player_stages\` (they include the upper traps fix; the trapsfix folder is outdated). Waiting for the import.
+- Seen, not changed: your Rhomboids mass monster size 3.2 makes pointed flaps on the shoulder blades.
+- Checks: 18 logic test files pass. Screenshots: `Screenshots/shoulders/` (3).

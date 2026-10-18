@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (19 Oct 2026)
+- 19 Oct evening: traps reshaped into a wide yoke and the delts into big round caps (your reference picture); SideDelts mass monster size set to 1.5. Other bodies wait for the import.
 - 19 Oct afternoon: inner quad bulge fixed everywhere; mirror and statue now have your real body shape; crew names and tags are unique (ARAQ313 is now [SRT1]); Top Crews member view tested; upper traps fixed on your body, other bodies wait for the torso import.
 - 19 Oct: the owner changed bodies, titles and music in Studio; everything is written down in [[2026-10-19 GYM ARC Owner changes]] (narrower shoulders, new mass monster sizes for your own muscles, three rival titles one rarity higher, three songs per area). Nothing was "fixed".
 - Top crews: tapping a crew shows its members ([[GYM ARC - Crews]]); saved to git 19 Oct.
@@ -29,7 +30,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 
 ## What's next
 1. **Save to Roblox** and make a dated backup, then **publish**. No save is recorded for the 9 and 13 Oct work.
-1. Import the 12 fixed torso meshes (upper traps), then tell Claude. 19 Oct prompts 2, 3 and 5 are done. See [[2026-10-19 GYM ARC Owner changes]].
+1. Import the 24 fixed torso + upper arm meshes from `Downloads\gym_arc_meshes_lowpoly_shoulderfix\other_player_stages` (traps yoke + round shoulders; skip the older trapsfix folder), then tell Claude. 19 Oct prompts 2, 3 and 5 are done. See [[2026-10-19 GYM ARC Owner changes]].
 2. Test soft shutdown live: join the game, then use "Migrate to latest update".
 3. Run a 2-player test (spotting, arm wrestling, other players' muscles).
 4. New prompts, not started yet:
@@ -38,7 +39,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 5. Listen to the picked sounds and swap any you don't like ([[GYM ARC - Music and Sounds]]).
 
 ## Open bugs
-- [[GYM ARC - Bug - Upper traps never grew|Upper traps]]: your own body fixed 19 Oct; other players / NPCs wait for you to import 12 fixed torso meshes (`Downloads\gym_arc_meshes_lowpoly_trapsfix`).
+- [[GYM ARC - Bug - Upper traps never grew|Upper traps]] + round shoulders: your own body fixed 19 Oct; other players / NPCs wait for you to import 24 fixed torso and upper arm meshes (`Downloads\gym_arc_meshes_lowpoly_shoulderfix`; the older `trapsfix` folder is not needed).
 All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main ones:
 - [[GYM ARC - Bug - Full look bulkier than lean V-taper|Full look bulkier than the lean V-taper]]
 - [[GYM ARC - Bug - Pointed traps and triceps at mass monster|Pointed traps and triceps at mass monster]]
@@ -328,6 +329,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-19 GYM ARC Prompt - 4 Upper traps missing]]
 - [[2026-10-19 GYM ARC Prompt - 5 Top crews member view]]
 - [[2026-10-19 GYM ARC Prompt - 6 Install Graphify]]
+- [[2026-10-19 GYM ARC Prompt - 7 Wide traps and round shoulders]]
+- [[2026-10-19 GYM ARC Prompt - 8 Fill the back and add adductors]]
 
 ### Config
 - [[GYM ARC - Config values]]
