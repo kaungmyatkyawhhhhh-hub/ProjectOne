@@ -81,3 +81,9 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 7 Wide traps and round shoulders]]. Detail
 - Everyone else: 24 fixed low-poly torso + upper arm files in `Downloads\gym_arc_meshes_lowpoly_shoulderfix\other_player_stages\` (they include the upper traps fix; the trapsfix folder is outdated). Waiting for the import.
 - Seen, not changed: your Rhomboids mass monster size 3.2 makes pointed flaps on the shoulder blades.
 - Checks: 18 logic test files pass. Screenshots: `Screenshots/shoulders/` (3).
+
+## Full back and adductors (prompt 8, night)
+Prompt: [[2026-10-19 GYM ARC Prompt - 8 Fill the back and add adductors]]. Details: [[GYM ARC - Muscles and Bodies]].
+- Your own body: the back is filled (raised diamond, thick lower-back columns, shallow spine groove); adductors fill the inner side of each thigh (straight inward only, nothing near the groin or under the shorts). The owner said mid-task that the triceps, biceps and upper chest looked weird: the delt caps were too big (reaching the elbow) and the yoke put too much on the front; both made smaller.
+- Everyone else: 48 fixed low-poly files (torso, upper arms, thighs) in `Downloads\gym_arc_meshes_lowpoly_backfix\other_player_stages\`, containing every fix of today. Waiting for the import (the trapsfix / shoulderfix folders are outdated).
+- Checks: 18 logic test files pass. Screenshots: `Screenshots/back_adductors/` (3).
