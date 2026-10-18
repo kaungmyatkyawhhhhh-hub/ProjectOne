@@ -1127,6 +1127,16 @@ buildLoop = function(hwy: Instance)
 	-- the junction's corners, paved
 	-- (a hair lower than the roads it meets, so nothing shimmers where they overlap)
 	slab(loop, LOOP_S - LOOP_HW - 110, -116, LOOP_S - LOOP_HW + 1, 116, -0.02, 2, ASPHALT, ROAD_MAT, table.clone(ROAD_OPTS))
+	-- its edges are walled in (rail + invisible wall), joining the spur's walls to the loop's
+	local jx0, jx1 = LOOP_S - LOOP_HW - 110, LOOP_S - LOOP_HW + 1
+	for _, sz in { -1, 1 } do
+		for _, seg in { { Vector3.new(jx0, 0, sz * (HW + 3)), Vector3.new(jx0, 0, sz * 116) }, { Vector3.new(jx0, 0, sz * 116), Vector3.new(jx1, 0, sz * 116) } } do
+			local a0, a1 = seg[1], seg[2]
+			local cen, len = (a0 + a1) / 2, (a1 - a0).Magnitude + 0.6
+			mk(loop, Vector3.new(0.6, 1.2, len), CFrame.lookAt(cen + Vector3.new(0, 2.2, 0), a1 + Vector3.new(0, 2.2, 0)), Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.2, name = "GuardRail" })
+			mk(loop, Vector3.new(2, 60, len), CFrame.lookAt(cen + Vector3.new(0, 30, 0), a1 + Vector3.new(0, 30, 0)), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Wall" })
+		end
+	end
 
 	-- markings, rails, barrier and lights, walked along the loop in chunks (LOD groups)
 	local CHUNK = 600
