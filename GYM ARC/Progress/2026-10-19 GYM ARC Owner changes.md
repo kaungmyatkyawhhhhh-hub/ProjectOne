@@ -50,3 +50,12 @@ The owner changed things in Studio by hand. Claude compared the place with the l
 
 ## Prompt queue for today (not started)
 [[2026-10-19 GYM ARC Prompt - 2 Inner quad bulge]], [[2026-10-19 GYM ARC Prompt - 3 Mirror statue width and duplicate crew tags]], [[2026-10-19 GYM ARC Prompt - 4 Upper traps missing]], [[2026-10-19 GYM ARC Prompt - 5 Top crews member view]]. Prompt 5 was mostly built on 15 Oct (see [[GYM ARC - Crews]]); its phone / PC test and screenshot are still missing.
+
+## Graphify code map (prompt 6)
+Prompt: [[2026-10-19 GYM ARC Prompt - 6 Install Graphify]].
+- Checked first: open source (GitHub Graphify-Labs/graphify, Apache-2.0 / MIT), code is read on this PC (tree-sitter), no telemetry, no API key for code. `.luau` counts as code, so nothing is sent anywhere. Built with `--code-only` and `GRAPHIFY_BACKEND=none` to be sure.
+- Installed: uv (with pip), then `uv tool install graphifyy` (0.9.92).
+- Graph of `src/` only, in `src/graphify-out/` (the generated `MuscleData` folder is left out by `.graphifyignore`): 172 scripts, about 1,760 nodes, 4,048 links, about 110 groups; graph.json 1.8 MB. Full build 6.5 s, update 5.3 s, a question about 1 s.
+- Limits: 34 scripts only partly read (the Lua reader doesn't know Luau type notes), and handlers written as `actions.Create = function` don't show up as their own entries.
+- Test "where is the crew tag checked?": the graph pointed to the right file (CrewService) but not the right spot (`actions.Create`, line 289); its first hit was a wrong `tag()` in RivalClient. A targeted search found it in one step. Useful as a map, not better than a search for exact lines.
+- Not done: `graphify install --project` (Claude Code's safety check blocks Claude from writing its own skill / hooks; the owner can run it), and `graphify hook install` (it would rebuild from the repo root instead of `src/`). CLAUDE.md has the two new lines.

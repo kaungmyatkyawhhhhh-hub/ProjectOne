@@ -322,6 +322,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-19 GYM ARC Prompt - 3 Mirror statue width and duplicate crew tags]]
 - [[2026-10-19 GYM ARC Prompt - 4 Upper traps missing]]
 - [[2026-10-19 GYM ARC Prompt - 5 Top crews member view]]
+- [[2026-10-19 GYM ARC Prompt - 6 Install Graphify]]
 
 ### Config
 - [[GYM ARC - Config values]]
