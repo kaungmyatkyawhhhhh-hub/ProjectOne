@@ -77,7 +77,8 @@ File: `Config/Muscles.luau`. 18 muscles in 6 groups (Chest 2, Shoulders 3, Back 
 | Look.MonsterAt | 5x goal | EXP for the full mass monster look |
 | Look.Ease | 1.6 | Curve of the look growth |
 | Look.DefaultMonsterG | 1.35 | Mass monster size if a muscle has no own value |
-| Look.MonsterG | 1.32 to 2.91 | Mass monster size per muscle (biggest: Obliques 2.909, Traps 2.625) |
+| Look.MonsterG | 1.32 to 2.91 | Mass monster LOOK value per muscle (biggest: Obliques 2.909, Traps 2.625): how far past the full look a muscle's look number goes; unchanged 19 Oct |
+| MuscleData.Index monsterG (owner, 19 Oct) | Abs 2.416, Biceps 2.883, Calves 1.675, DeltCap 1.3, Forearms 2.55, FrontDelts 1.826, Glutes 2.3, Hamstrings 2.8, Lats 1.318, LowerBack 2.4, MidChest 1.222, Obliques 2.2, Quads 0.6, RearDelts 1.9, Rhomboids 3.2, SideDelts 0.8, Traps 2.625, Triceps 2.083, UpperChest 1.522, UpperTraps 2.6 | How big YOUR OWN live muscle meshes are drawn at the full mass monster (x1.12 extra thickness on top). Under 1 (Quads 0.6, SideDelts 0.8) = smaller than at the full aesthetic look. Old values: Abs 1.316, Biceps 2.083, Calves 1.875, Forearms 2, FrontDelts 1.526, Glutes 1.8, Hamstrings 2, LowerBack 1.647, MidChest 1.522, Obliques 2.909, Quads 2.132, RearDelts 1.45, Rhomboids 1.7, SideDelts 1.5, UpperTraps 1.45. Static stage meshes (others, NPCs) do NOT use these. |
 | Body (table) | per muscle | Where each muscle sits on the body (for stats dots, highlights, pump) |
 
 ## Config/GrowthSpurts
@@ -110,8 +111,8 @@ File: `Config/Genetics.luau`. See also [[GYM ARC - Genetics]].
 | Grade S | x1.5, 10% | |
 | Frame Narrow | 25%, shoulders 0.9x, +10% Arms | Roll chance, shoulder width, bonus |
 | Frame Average | 35%, shoulders 1.0x, +5% all | |
-| Frame Wide | 25%, shoulders 1.1x, +10% Back and Legs | |
-| Frame V-Taper | 15%, shoulders 1.2x, +10% Shoulders and Lats | |
+| Frame Wide | 25%, shoulders 1.05x, +10% Back and Legs | (owner, 19 Oct: was 1.1x) |
+| Frame V-Taper | 15%, shoulders 1.1x, +10% Shoulders and Lats | (owner, 19 Oct: was 1.2x) |
 | Body Lean | 33%, no bonus, detail shows at 0.8x | Abs/detail show earlier |
 | Body Balanced | 34%, +5% all | |
 | Body Stocky | 33%, +15% Legs, Back, Traps, detail at 1.25x | |
@@ -359,9 +360,10 @@ File: `Config/Seasons.luau`.
 | Summer Shred | 15 Jun - 31 Aug, 1.25x coins | Title "Beach Ready" |
 
 ## Config/Titles
-File: `Config/Titles.luau`. About 21 base titles (1 Common, 5 Uncommon, 6 Rare, 5 Epic, 3 Legendary, 1 Secret) plus one
+File: `Config/Titles.luau`. 25 base titles (19 Oct count: 1 Common, 5 Uncommon, 8 Rare, 6 Epic, 4 Legendary, 1 Secret) plus one
 per legend and one per season added automatically. Each has a condition (reps, ratios between groups, height, genetics
 grade, etc.). Three have a `badgeId` slot (empty): Aesthetics God, Skyscraper, Defied Genetics. See [[GYM ARC - Titles]].
+Owner, 19 Oct: Beat Benny Uncommon -> Rare, Beat Coral Rare -> Epic, Beat Dante Epic -> Legendary.
 
 ## Config/Onboarding
 File: `Config/Onboarding.luau`.
@@ -399,8 +401,8 @@ File: `Config/Body.luau`. See also [[GYM ARC - Muscles and Bodies]].
 | Scales | BodyType 0, Proportion 0, Width 1, Depth 1, Head 1 | Same shape for all |
 | Proportions | Stretch 1.08, Shrink 0.893 | Golden ratio legs vs torso |
 | Widths.Skinny | shoulders 0.4, hips 0.2, arms 0.08, legs 0.06, depth 0.35 | Width growth with height for a beginner |
-| Widths.Maxed | shoulders 1.15, hips 0.7, arms 0.5, legs 0.5, depth 0.45 | Full aesthetic look |
-| Widths.MassMonster | shoulders 1.4, hips 1.2, arms 0.9, legs 0.9, depth 0.9, +12% muscle | Mass monster |
+| Widths.Maxed | shoulders 0.85, hips 0.65, arms 0.5, legs 0.5, depth 0.45 | Full aesthetic look (owner, 19 Oct: was shoulders 1.15, hips 0.7) |
+| Widths.MassMonster | shoulders 1.05, hips 1.1, arms 0.9, legs 0.9, depth 0.9, +12% muscle | Mass monster (owner, 19 Oct: was shoulders 1.4, hips 1.2) |
 | Widths.ShouldersOverHips | 1.1 | Shoulders always wider than hips |
 | ShortsColors | Black, Navy, Red, Gray, Teal | Game shorts (default Black) |
 | Tops | Shirtless, Tank top, Sports top | Default Shirtless |
