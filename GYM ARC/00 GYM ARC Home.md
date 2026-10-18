@@ -315,6 +315,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-15 GYM ARC Prompt - Right side cards collapse]]
 - [[2026-10-15 GYM ARC Prompt - Store loads slowly]]
 - [[2026-10-15 GYM ARC Prompt - Test with a fresh player]]
+- [[2026-10-15 GYM ARC Prompt - Top crews member view]]
+- [[2026-10-19 GYM ARC Prompt - Document owner changes]]
 
 ### Config
 - [[GYM ARC - Config values]]
