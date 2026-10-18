@@ -36,6 +36,22 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0021, -0.0179, 0.0432), face = Vector3.new(0, -0.0561, 0.9984), r = 0.03, color = Color3.fromRGB(43, 43, 43) },
 	},
+	astin_dbx = {
+		wb = 3.06,
+		hide = {},
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.4758, -2.4012), face = Vector3.new(-0.0264, 0.8145, -0.5796), w = 0.2089, h = 0.0522, color = Color3.fromRGB(91, 93, 105) },
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.6871, 2.5706), face = Vector3.new(0.0217, -0.4416, 0.8969), w = 0.1555, h = 0.0518, color = Color3.fromRGB(91, 93, 105) },
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.604, 2.5661), face = Vector3.new(0.0115, 0.4363, 0.8997), w = 0.5629, h = 0.0519, color = Color3.fromRGB(91, 93, 105) },
+		},
+		caps = {
+			FL = { r = 0.033, surface = 0.1082, color = Color3.fromRGB(24, 24, 24) },
+			FR = { r = 0.033, surface = 0.1082, color = Color3.fromRGB(24, 24, 24) },
+			RL = { r = 0.033, surface = 0.1082, color = Color3.fromRGB(24, 24, 24) },
+			RR = { r = 0.033, surface = 0.1082, color = Color3.fromRGB(24, 24, 24) },
+		},
+		hub = { at = Vector3.new(0.0003, -0.0083, 0.047), face = Vector3.new(0.048, -0.4324, 0.9004), r = 0.03, color = Color3.fromRGB(85, 31, 31) },
+	},
 	astin_vantage = {
 		wb = 2.6,
 		hide = {},
@@ -65,6 +81,41 @@ return {
 			RR = { r = 0.048, surface = 0.0796, color = Color3.fromRGB(174, 174, 174) },
 		},
 		hub = { at = Vector3.new(-0.0003, -0.0301, 0.0584), face = Vector3.new(-0.0049, 0.0124, 0.9999), r = 0.03, color = Color3.fromRGB(40, 40, 40) },
+	},
+	bentz_190e = {
+		wb = 2.665,
+		brand = "Mercer",
+		hide = { { name = "Body_badge" }, { name = "Body_emblem" } },
+		covers = {
+			{ emblem = true, disc = true, at = Vector3.new(0, 0.4666, -1.9221), face = Vector3.new(0, -0.0064, -1), w = 0.0978, h = 0.0978, color = Color3.fromRGB(55, 55, 55) },
+			{ emblem = true, disc = true, at = Vector3.new(-0.0083, 0.571, 2.2747), face = Vector3.new(-0.0604, 0.2071, 0.9765), w = 0.0956, h = 0.0956, color = Color3.fromRGB(55, 55, 55) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.4711, 0.5492, 2.2631), face = Vector3.new(-0.0411, 0.1933, 0.9803), w = 0.212, h = 0.0514, color = Color3.fromRGB(55, 55, 55) },
+			{ emblem = false, disc = false, at = Vector3.new(0.4572, 0.5492, 2.2634), face = Vector3.new(0.0574, 0.2412, 0.9688), w = 0.2183, h = 0.0514, color = Color3.fromRGB(55, 55, 55) },
+		},
+		caps = {
+			FL = { r = 0.038, surface = 0.1018, color = Color3.fromRGB(76, 76, 76) },
+			FR = { r = 0.038, surface = 0.1018, color = Color3.fromRGB(76, 76, 76) },
+			RL = { r = 0.038, surface = 0.1018, color = Color3.fromRGB(76, 76, 76) },
+			RR = { r = 0.038, surface = 0.1018, color = Color3.fromRGB(76, 76, 76) },
+		},
+		hub = { at = Vector3.new(0.0016, -0.0086, 0.0103), face = Vector3.new(-0.009, 0.0319, 0.9994), r = 0.03, color = Color3.fromRGB(89, 89, 89) },
+	},
+	bentz_c63c = {
+		wb = 2.84,
+		brand = "Mercer",
+		hide = { { name = "Body_nfsM_Badge_Max1" } },
+		covers = {
+			{ emblem = true, disc = true, at = Vector3.new(-0.0001, 0.4981, 2.3916), face = Vector3.new(-0.5226, 0.3402, 0.7817), w = 0.0964, h = 0.0964, color = Color3.fromRGB(0, 51, 140) },
+			{ emblem = true, disc = true, at = Vector3.new(-0.0001, 0.2694, -2.2638), face = Vector3.new(-0.0053, 0.1122, -0.9937), w = 0.1951, h = 0.1951, color = Color3.fromRGB(255, 255, 255) },
+			{ emblem = true, disc = true, at = Vector3.new(-0.0002, 0.4747, -2.0873), face = Vector3.new(0.0057, 0.9324, -0.3614), w = 0.0515, h = 0.0515, color = Color3.fromRGB(0, 51, 140) },
+		},
+		caps = {
+			FL = { r = 0.028, surface = 0.106, color = Color3.fromRGB(20, 20, 20) },
+			FR = { r = 0.028, surface = 0.106, color = Color3.fromRGB(20, 20, 20) },
+			RL = { r = 0.028, surface = 0.1368, color = Color3.fromRGB(20, 20, 20) },
+			RR = { r = 0.028, surface = 0.1369, color = Color3.fromRGB(20, 20, 20) },
+		},
+		hub = { at = Vector3.new(0.0017, -0.0138, 0.0508), face = Vector3.new(-0.0266, 0.0971, 0.9949), r = 0.03, color = Color3.fromRGB(35, 35, 35) },
 	},
 	bentz_cls63s = {
 		wb = 2.874,
@@ -126,6 +177,22 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0017, -0.009, 0.0281), face = Vector3.new(-0.0359, 0.2107, 0.9769), r = 0.033, color = Color3.fromRGB(71, 73, 71) },
 	},
+	bentz_gls = {
+		wb = 3.135,
+		brand = "Mercer",
+		hide = { { name = "Body_etk800_lettering_001" } },
+		covers = {
+			{ emblem = true, disc = true, at = Vector3.new(-0.0025, 0.6657, -2.4406), face = Vector3.new(0, -0.0407, -0.9992), w = 0.0713, h = 0.0713, color = Color3.fromRGB(214, 214, 214) },
+			{ emblem = true, disc = true, at = Vector3.new(-0.0094, 0.864, 2.628), face = Vector3.new(0.0733, 0.5525, 0.8303), w = 0.1203, h = 0.1043, color = Color3.fromRGB(214, 214, 214) },
+		},
+		caps = {
+			FL = { r = 0.043, surface = 0.1654, color = Color3.fromRGB(231, 231, 231) },
+			FR = { r = 0.043, surface = 0.1605, color = Color3.fromRGB(231, 231, 231) },
+			RL = { r = 0.043, surface = 0.134, color = Color3.fromRGB(231, 231, 231) },
+			RR = { r = 0.043, surface = 0.129, color = Color3.fromRGB(231, 231, 231) },
+		},
+		hub = { at = Vector3.new(-0.0016, 0.0108, 0.1172), face = Vector3.new(-0.0257, 0.0851, 0.996), r = 0.038, color = Color3.fromRGB(10, 10, 10) },
+	},
 	bentz_gt63s = {
 		wb = 3.052,
 		hide = {},
@@ -164,6 +231,27 @@ return {
 			RR = { r = 0.028, surface = 0.1351, color = Color3.fromRGB(184, 184, 184) },
 		},
 		hub = { at = Vector3.new(-0.0001, -0.0207, 0.07), face = Vector3.new(0, 0, 1), r = 0.05, color = Color3.fromRGB(231, 181, 144) },
+	},
+	bentz_s65_w221 = {
+		wb = 3.165,
+		brand = "Mercer",
+		hide = { { name = "Body_sw221_badges" } },
+		covers = {
+			{ emblem = true, disc = true, at = Vector3.new(-0.0001, 0.4946, -2.2627), face = Vector3.new(0, -0.0271, -0.9996), w = 0.1037, h = 0.1037, color = Color3.fromRGB(255, 255, 255) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.0001, 0.3917, -2.3528), face = Vector3.new(0.0339, 0.4009, -0.9155), w = 0.0651, h = 0.0506, color = Color3.fromRGB(174, 174, 174) },
+			{ emblem = true, disc = true, at = Vector3.new(-0.0001, 0.6011, 2.6797), face = Vector3.new(0.0282, 0.1961, 0.9802), w = 0.1084, h = 0.1084, color = Color3.fromRGB(255, 255, 255) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.4666, 0.5713, 2.6479), face = Vector3.new(-0.184, 0.3671, 0.9118), w = 0.2705, h = 0.0658, color = Color3.fromRGB(255, 255, 255) },
+			{ emblem = false, disc = false, at = Vector3.new(0.4902, 0.572, 2.633), face = Vector3.new(0.2151, 0.3488, 0.9122), w = 0.1909, h = 0.0514, color = Color3.fromRGB(255, 255, 255) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.9313, 0.3009, -1.0404), face = Vector3.new(-1, -0.0018, -0.0037), w = 0.2377, h = 0.0594, color = Color3.fromRGB(255, 255, 255) },
+			{ emblem = false, disc = false, at = Vector3.new(0.9158, 0.3009, -1.0403), face = Vector3.new(0.9999, -0.0158, -0.0049), w = 0.2377, h = 0.0594, color = Color3.fromRGB(255, 255, 255) },
+		},
+		caps = {
+			FL = { r = 0.043, surface = 0.1579, color = Color3.fromRGB(152, 152, 152) },
+			FR = { r = 0.043, surface = 0.1577, color = Color3.fromRGB(152, 152, 152) },
+			RL = { r = 0.043, surface = 0.1532, color = Color3.fromRGB(152, 152, 152) },
+			RR = { r = 0.043, surface = 0.153, color = Color3.fromRGB(152, 152, 152) },
+		},
+		hub = { at = Vector3.new(-0.059, -0.0113, 0.1027), face = Vector3.new(-0.0403, 0.0998, 0.9942), r = 0.03, color = Color3.fromRGB(33, 34, 33) },
 	},
 	bentz_s680 = {
 		wb = 3.396,
@@ -285,6 +373,24 @@ return {
 		},
 		hub = { at = Vector3.new(0.0007, -0.0221, 0.0572), face = Vector3.new(-0.013, 0.1355, 0.9906), r = 0.03, color = Color3.fromRGB(43, 43, 43) },
 	},
+	bnw_750li = {
+		wb = 3.21,
+		brand = "BNW",
+		hide = { { name = "Body_Emblema_texture" } },
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0.6695, 0.6184, 2.5689), face = Vector3.new(0.1643, 0.3206, 0.9329), w = 0.1754, h = 0.0458, color = Color3.fromRGB(165, 167, 157) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.4186, 0.6153, 2.628), face = Vector3.new(-0.2027, 0.0259, 0.9789), w = 0.1567, h = 0.0448, color = Color3.fromRGB(165, 167, 157) },
+			{ emblem = true, disc = true, at = Vector3.new(0, 0.4858, -2.3984), face = Vector3.new(0, 0.8137, -0.5813), w = 0.0719, h = 0.0719, color = Color3.fromRGB(165, 167, 157) },
+			{ emblem = true, disc = true, at = Vector3.new(0, 0.634, 2.6629), face = Vector3.new(0, 0.0925, 0.9957), w = 0.0667, h = 0.0667, color = Color3.fromRGB(165, 167, 157) },
+		},
+		caps = {
+			FL = { r = 0.033, surface = 0.0753, color = Color3.fromRGB(26, 26, 26) },
+			FR = { r = 0.033, surface = 0.0746, color = Color3.fromRGB(26, 26, 26) },
+			RL = { r = 0.033, surface = 0.0752, color = Color3.fromRGB(26, 26, 26) },
+			RR = { r = 0.033, surface = 0.0749, color = Color3.fromRGB(26, 26, 26) },
+		},
+		hub = { at = Vector3.new(0.0008, -0.0053, 0.0415), face = Vector3.new(-0.0292, 0.0335, 0.999), r = 0.03, color = Color3.fromRGB(40, 40, 40) },
+	},
 	bnw_m3_f80 = {
 		wb = 2.8116,
 		brand = "BNW",
@@ -393,6 +499,21 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0046, -0.0238, 0.0577), face = Vector3.new(0, 0, 1), r = 0.05, color = Color3.fromRGB(231, 91, 0) },
 	},
+	bugotti_veyron = {
+		wb = 2.7124,
+		hide = { { name = "Body_badge" }, { name = "Body_badge_cp" }, { name = "SeeThrough_badge" } },
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.1098, -2.1856), face = Vector3.new(0.014, 0.3239, -0.946), w = 0.1161, h = 0.0547, color = Color3.fromRGB(0, 0, 0) },
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.4303, 2.1538), face = Vector3.new(0.0037, -0.257, 0.9664), w = 0.1748, h = 0.121, color = Color3.fromRGB(0, 0, 0) },
+		},
+		caps = {
+			FL = { r = 0.053, surface = 0.0552, color = Color3.fromRGB(76, 78, 76) },
+			FR = { r = 0.053, surface = 0.0552, color = Color3.fromRGB(172, 174, 172) },
+			RL = { r = 0.053, surface = 0.0585, color = Color3.fromRGB(172, 174, 172) },
+			RR = { r = 0.053, surface = 0.0585, color = Color3.fromRGB(172, 174, 172) },
+		},
+		hub = { at = Vector3.new(-0.0002, 0.004, 0.0644), face = Vector3.new(-0.0066, 0.1108, 0.9939), r = 0.03, color = Color3.fromRGB(117, 117, 117) },
+	},
 	byt_seal = {
 		wb = 2.92,
 		hide = {},
@@ -441,6 +562,26 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0017, -0.0041, 0.0509), face = Vector3.new(0, -0.0412, 0.9992), r = 0.046, color = Color3.fromRGB(59, 60, 59) },
 	},
+	chevo_malibu = {
+		wb = 2.829,
+		hide = {},
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0.0096, 0.2716, -2.408), face = Vector3.new(-0.0819, 0.1336, -0.9876), w = 0.1906, h = 0.066, color = Color3.fromRGB(28, 28, 28) },
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.6048, 2.3948), face = Vector3.new(0.0929, -0.1061, 0.99), w = 0.1334, h = 0.0593, color = Color3.fromRGB(188, 188, 188) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.4864, 0.6133, 2.3591), face = Vector3.new(-0.2112, -0.0933, 0.973), w = 0.1958, h = 0.0452, color = Color3.fromRGB(188, 188, 188) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.9199, 0.2913, -0.7158), face = Vector3.new(-1, 0.0039, -0.0048), w = 0.3303, h = 0.0472, color = Color3.fromRGB(188, 188, 188) },
+			{ emblem = false, disc = false, at = Vector3.new(0.9066, 0.2912, -0.7158), face = Vector3.new(0.9999, 0.0077, -0.0077), w = 0.3303, h = 0.0472, color = Color3.fromRGB(188, 188, 188) },
+			{ emblem = false, disc = false, at = Vector3.new(0.0001, 0.117, -2.4019), face = Vector3.new(0.02, -0.113, -0.9934), w = 0.4519, h = 0.1045, color = Color3.fromRGB(255, 255, 255) },
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.4553, 2.3414), face = Vector3.new(0, 0.0757, 0.9971), w = 0.4481, h = 0.1003, color = Color3.fromRGB(255, 255, 255) },
+		},
+		caps = {
+			FL = { r = 0.038, surface = 0.1156, color = Color3.fromRGB(195, 195, 195) },
+			FR = { r = 0.038, surface = 0.1156, color = Color3.fromRGB(195, 195, 195) },
+			RL = { r = 0.038, surface = 0.1156, color = Color3.fromRGB(195, 195, 195) },
+			RR = { r = 0.038, surface = 0.1156, color = Color3.fromRGB(195, 195, 195) },
+		},
+		hub = { at = Vector3.new(0.0006, -0.0088, 0.0833), face = Vector3.new(-0.0001, 0.1095, 0.994), r = 0.03, color = Color3.fromRGB(149, 143, 137) },
+	},
 	ferrara_458s = {
 		wb = 2.6501,
 		hide = { { name = "Body_Ferrari_458Speciale_2014", size = Vector3.new(1.8772, 0.6678, 4.5001) } },
@@ -453,6 +594,22 @@ return {
 			RR = { r = 0.038, surface = 0.1321, color = Color3.fromRGB(168, 168, 168) },
 		},
 		hub = { at = Vector3.new(-0.0008, -0.0115, 0.0563), face = Vector3.new(-0.0136, 0.1056, 0.9943), r = 0.03, color = Color3.fromRGB(46, 46, 46) },
+	},
+	ferrara_california = {
+		wb = 2.6699,
+		hide = { { name = "Body_Logos" } },
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0.0005, 0.0509, -2.2701), face = Vector3.new(0.1036, 0.0702, -0.9921), w = 0.0913, h = 0.1264, color = Color3.fromRGB(0, 0, 0) },
+			{ emblem = false, disc = false, at = Vector3.new(0.0008, 0.4642, 2.2063), face = Vector3.new(-0.0735, 0.2888, 0.9546), w = 0.0923, h = 0.1136, color = Color3.fromRGB(50, 47, 44) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.93, -0.0306, 0.7632), face = Vector3.new(-0.9931, -0.0581, -0.1016), w = 0.1752, h = 0.0365, color = Color3.fromRGB(50, 47, 44) },
+		},
+		caps = {
+			FL = { r = 0.038, surface = 0.0887, color = Color3.fromRGB(167, 167, 156) },
+			FR = { r = 0.038, surface = 0.0887, color = Color3.fromRGB(167, 167, 156) },
+			RL = { r = 0.038, surface = 0.1197, color = Color3.fromRGB(167, 167, 156) },
+			RR = { r = 0.038, surface = 0.1197, color = Color3.fromRGB(167, 167, 156) },
+		},
+		hub = { at = Vector3.new(-0.0011, -0.0176, 0.0618), face = Vector3.new(-0.0164, 0.0523, 0.9984), r = 0.03, color = Color3.fromRGB(29, 29, 29) },
 	},
 	lambrini_countach = {
 		wb = 2.45,
@@ -468,6 +625,21 @@ return {
 			RR = { r = 0.038, surface = 0.0387, color = Color3.fromRGB(186, 185, 186) },
 		},
 		hub = { at = Vector3.new(0.0003, -0.0146, 0.0493), face = Vector3.new(0.0005, 0.04, 0.9992), r = 0.03, color = Color3.fromRGB(33, 31, 33) },
+	},
+	lambrini_lp640 = {
+		wb = 2.6651,
+		hide = {},
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.2124, -2.1925), face = Vector3.new(-0.0031, 0.8843, -0.467), w = 0.0682, h = 0.0758, color = Color3.fromRGB(0, 129, 223) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.0485, 0.4815, 2.0988), face = Vector3.new(-0.0111, 0.485, 0.8744), w = 0.2388, h = 0.0522, color = Color3.fromRGB(0, 129, 223) },
+		},
+		caps = {
+			FL = { r = 0.043, surface = 0.0922, color = Color3.fromRGB(30, 30, 30) },
+			FR = { r = 0.043, surface = 0.0922, color = Color3.fromRGB(30, 30, 30) },
+			RL = { r = 0.048, surface = 0.057, color = Color3.fromRGB(0, 0, 0) },
+			RR = { r = 0.048, surface = 0.057, color = Color3.fromRGB(30, 30, 30) },
+		},
+		hub = { at = Vector3.new(0.0001, -0.0161, 0.0665), face = Vector3.new(0.0038, 0.0614, 0.9981), r = 0.03, color = Color3.fromRGB(8, 8, 9) },
 	},
 	lambrini_lp700 = {
 		wb = 2.7,
@@ -512,6 +684,23 @@ return {
 		},
 		hub = { at = Vector3.new(0.0005, -0.022, 0.0573), face = Vector3.new(0, 0.3317, 0.9433), r = 0.03, color = Color3.fromRGB(43, 43, 43) },
 	},
+	lexis_lc500 = {
+		wb = 2.87,
+		brand = "Lexis",
+		hide = {},
+		covers = {
+			{ emblem = true, disc = true, at = Vector3.new(0, 0.2168, -2.4122), face = Vector3.new(0.0406, 0.1604, -0.9862), w = 0.1698, h = 0.1329, color = Color3.fromRGB(0, 0, 0) },
+			{ emblem = true, disc = true, at = Vector3.new(0, 0.5622, 2.433), face = Vector3.new(0.0988, -0.0278, 0.9947), w = 0.1347, h = 0.0973, color = Color3.fromRGB(255, 0, 0) },
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.4571, 2.476), face = Vector3.new(-0.0611, 0.6044, 0.7944), w = 0.1919, h = 0.0369, color = Color3.fromRGB(255, 0, 0) },
+		},
+		caps = {
+			FL = { r = 0.043, surface = 0.0993, color = Color3.fromRGB(0, 0, 0) },
+			FR = { r = 0.043, surface = 0.0993, color = Color3.fromRGB(0, 0, 0) },
+			RL = { r = 0.043, surface = 0.0994, color = Color3.fromRGB(0, 0, 0) },
+			RR = { r = 0.043, surface = 0.0994, color = Color3.fromRGB(0, 0, 0) },
+		},
+		hub = { at = Vector3.new(-0.0032, -0.0085, 0.0735), face = Vector3.new(-0.0054, 0.1126, 0.9937), r = 0.03, color = Color3.fromRGB(154, 118, 48) },
+	},
 	lexis_lfa = {
 		wb = 2.605,
 		brand = "Lexis",
@@ -547,6 +736,26 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0191, 0.0096, 0.1032), face = Vector3.new(-0.0169, 0.3546, 0.9349), r = 0.045, color = Color3.fromRGB(16, 16, 16) },
 	},
+	maseroti_levante = {
+		wb = 3.004,
+		hide = { { name = "Body_mcaliper_badge" } },
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.248, -2.3916), face = Vector3.new(0, -0.1036, -0.9946), w = 0.1321, h = 0.1688, color = Color3.fromRGB(33, 33, 33) },
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.4776, -2.3685), face = Vector3.new(0.0032, 0.8166, -0.5772), w = 0.0663, h = 0.0369, color = Color3.fromRGB(121, 121, 121) },
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.7174, 2.4293), face = Vector3.new(0.0048, 0.3888, 0.9213), w = 0.3837, h = 0.059, color = Color3.fromRGB(121, 121, 121) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.5644, 0.5003, 2.3979), face = Vector3.new(-0.2505, 0.0729, 0.9654), w = 0.1348, h = 0.0524, color = Color3.fromRGB(121, 121, 121) },
+			{ emblem = false, disc = false, at = Vector3.new(0.5466, 0.5002, 2.4106), face = Vector3.new(0.2425, 0.0881, 0.9661), w = 0.2015, h = 0.0522, color = Color3.fromRGB(121, 121, 121) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.7742, 0.9116, 1.5927), face = Vector3.new(-0.8641, 0.4957, 0.087), w = 0.0929, h = 0.1013, color = Color3.fromRGB(121, 121, 121) },
+			{ emblem = false, disc = false, at = Vector3.new(0.7527, 0.8992, 1.5905), face = Vector3.new(0.861, 0.4963, 0.1113), w = 0.0929, h = 0.1013, color = Color3.fromRGB(121, 121, 121) },
+		},
+		caps = {
+			FL = { r = 0.043, surface = 0.1285, color = Color3.fromRGB(217, 217, 217) },
+			FR = { r = 0.043, surface = 0.1285, color = Color3.fromRGB(217, 217, 217) },
+			RL = { r = 0.043, surface = 0.1327, color = Color3.fromRGB(217, 217, 217) },
+			RR = { r = 0.043, surface = 0.1328, color = Color3.fromRGB(217, 217, 217) },
+		},
+		hub = { at = Vector3.new(-0.0005, -0.0119, 0.0534), face = Vector3.new(0, 0.0885, 0.9961), r = 0.03, color = Color3.fromRGB(33, 33, 33) },
+	},
 	mazdo_rx8 = {
 		wb = 2.7,
 		hide = {},
@@ -564,6 +773,20 @@ return {
 			RR = { r = 0.038, surface = 0.1099, color = Color3.fromRGB(58, 48, 31) },
 		},
 		hub = { at = Vector3.new(0.0003, -0.0057, 0.066), face = Vector3.new(-0.0169, 0.1218, 0.9924), r = 0.037, color = Color3.fromRGB(19, 19, 19) },
+	},
+	mclaran_12c = {
+		wb = 2.6701,
+		hide = {},
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0, 0.1969, -2.2372), face = Vector3.new(-0.0035, 0.87, -0.493), w = 0.0862, h = 0.0359, color = Color3.fromRGB(234, 112, 0) },
+		},
+		caps = {
+			FL = { r = 0.043, surface = 0.0892, color = Color3.fromRGB(69, 69, 69) },
+			FR = { r = 0.043, surface = 0.0892, color = Color3.fromRGB(69, 69, 69) },
+			RL = { r = 0.043, surface = 0.0976, color = Color3.fromRGB(69, 69, 69) },
+			RR = { r = 0.043, surface = 0.0976, color = Color3.fromRGB(69, 69, 69) },
+		},
+		hub = { at = Vector3.new(-0.0033, -0.0214, 0.0959), face = Vector3.new(0, -0.0841, 0.9964), r = 0.03, color = Color3.fromRGB(22, 23, 22) },
 	},
 	nisun_gtr = {
 		wb = 2.78,
@@ -636,6 +859,23 @@ return {
 			RR = { r = 0.058, surface = 0.1142, color = Color3.fromRGB(196, 197, 196) },
 		},
 		hub = { at = Vector3.new(-0.0045, -0.0108, 0.0617), face = Vector3.new(0.0001, -0.008, 0.9999), r = 0.03, color = Color3.fromRGB(0, 0, 0) },
+	},
+	toyoka_chaser = {
+		wb = 2.73,
+		hide = {},
+		covers = {
+			{ emblem = false, disc = false, at = Vector3.new(0.0003, 0.3122, -2.0782), face = Vector3.new(-0.1174, 0.2062, -0.9714), w = 0.0718, h = 0.0718, color = Color3.fromRGB(176, 176, 176) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.0081, 0.5824, 2.4157), face = Vector3.new(0.0247, -0.0363, 0.999), w = 0.0973, h = 0.0648, color = Color3.fromRGB(176, 176, 176) },
+			{ emblem = false, disc = false, at = Vector3.new(-0.5208, 0.5659, 2.4077), face = Vector3.new(-0.1313, 0.1032, 0.986), w = 0.1899, h = 0.0458, color = Color3.fromRGB(176, 176, 176) },
+			{ emblem = false, disc = false, at = Vector3.new(0.4928, 0.5657, 2.4122), face = Vector3.new(0.1063, 0.1251, 0.9864), w = 0.2156, h = 0.0457, color = Color3.fromRGB(176, 176, 176) },
+		},
+		caps = {
+			FL = { r = 0.033, surface = 0.1187, color = Color3.fromRGB(225, 224, 225) },
+			FR = { r = 0.033, surface = 0.1185, color = Color3.fromRGB(222, 223, 222) },
+			RL = { r = 0.033, surface = 0.1183, color = Color3.fromRGB(222, 223, 222) },
+			RR = { r = 0.033, surface = 0.1183, color = Color3.fromRGB(225, 227, 225) },
+		},
+		hub = { at = Vector3.new(0.0006, -0.0143, 0.0205), face = Vector3.new(0.0108, -0.1079, 0.9942), r = 0.03, color = Color3.fromRGB(19, 20, 19) },
 	},
 	toyoka_lc300 = {
 		wb = 2.85,

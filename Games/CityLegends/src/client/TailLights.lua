@@ -12,8 +12,12 @@ return {
 		shells = { { name = "SeeThrough_red_glass" } },
 		spots = {},
 	},
+	astin_dbx = {
+		shells = { { name = "Body_LightsBrakes1Mtl" }, { name = "Body_LightsBrakes2Mtl" }, { name = "Body_LightsRearRls1Mtl" }, { name = "Body_LightsRearRls2Mtl" } },
+		spots = {},
+	},
 	astin_vantage = {
-		shells = {  },
+		shells = {},
 		wb = 2.6,
 		spots = {
 			{ at = Vector3.new(-0.5358, 0.4534, 2.1109), face = Vector3.new(-0.2169, 0.3603, 0.9073), w = 0.4322, h = 0.1037 },
@@ -24,8 +28,16 @@ return {
 		shells = { { name = "SeeThrough_red_glass" } },
 		spots = {},
 	},
+	bentz_190e = {
+		shells = {},
+		wb = 2.665,
+		spots = {
+			{ at = Vector3.new(-0.4929, 0.4052, 2.269), face = Vector3.new(-0.043, -0.0537, 0.9976), w = 0.4812, h = 0.1283 },
+			{ at = Vector3.new(0.4846, 0.4052, 2.2687), face = Vector3.new(0.043, -0.0537, 0.9976), w = 0.4811, h = 0.1283 },
+		},
+	},
 	bentz_cls63s = {
-		shells = {  },
+		shells = {},
 		wb = 2.874,
 		spots = {
 			{ at = Vector3.new(-0.5698, 0.4795, 2.5079), face = Vector3.new(-0.2151, 0.1928, 0.9574), w = 0.4295, h = 0.1288 },
@@ -40,12 +52,24 @@ return {
 		shells = { { name = "SeeThrough_red_glass1" } },
 		spots = {},
 	},
+	bentz_gls = {
+		shells = { { name = "Body_gls_stop_001" } },
+		wb = 3.135,
+		spots = {
+			{ at = Vector3.new(-0.5982, 0.735, 2.6485), face = Vector3.new(-0.1062, 0.06, 0.9925), w = 0.4819, h = 0.1205 },
+			{ at = Vector3.new(0.6, 0.735, 2.6492), face = Vector3.new(0.1071, 0.0523, 0.9929), w = 0.4819, h = 0.1205 },
+		},
+	},
 	bentz_gt63s = {
 		shells = { { name = "SeeThrough_d2phong12SG1" } },
 		spots = {},
 	},
 	bentz_s63 = {
 		shells = { { name = "Body_sw222_brakelight" }, { name = "Body_sw222_taillight" }, { name = "Body_sw222_vehiclelights" } },
+		spots = {},
+	},
+	bentz_s65_w221 = {
+		shells = { { name = "Body_sw221_lights_lod0_trans" } },
 		spots = {},
 	},
 	bentz_s680 = {
@@ -57,7 +81,7 @@ return {
 		spots = {},
 	},
 	bentz_sls = {
-		shells = {  },
+		shells = {},
 		wb = 2.68,
 		spots = {
 			{ at = Vector3.new(-0.6781, 0.4316, 2.1329), face = Vector3.new(-0.3461, 0.5151, 0.7841), w = 0.3082, h = 0.058 },
@@ -65,7 +89,7 @@ return {
 		},
 	},
 	bnw_330i_g20 = {
-		shells = {  },
+		shells = {},
 		wb = 2.8511,
 		spots = {
 			{ at = Vector3.new(-0.5262, 0.5205, 2.3811), face = Vector3.new(-0.0744, 0.0452, 0.9962), w = 0.4972, h = 0.0923 },
@@ -77,12 +101,16 @@ return {
 		spots = {},
 	},
 	bnw_540i = {
-		shells = {  },
+		shells = {},
 		wb = 2.975,
 		spots = {
 			{ at = Vector3.new(-0.5272, 0.5171, 2.5087), face = Vector3.new(-0.0288, 0.1538, 0.9877), w = 0.4554, h = 0.0656 },
 			{ at = Vector3.new(0.5272, 0.5171, 2.5087), face = Vector3.new(0.0288, 0.1538, 0.9877), w = 0.4554, h = 0.0656 },
 		},
+	},
+	bnw_750li = {
+		shells = { { name = "Body_Material_167" }, { name = "SeeThrough_BackLights_Glass_Red" } },
+		spots = {},
 	},
 	bnw_m3_f80 = {
 		shells = { { name = "SeeThrough_r_glass" } },
@@ -108,12 +136,16 @@ return {
 		shells = { { name = "Body_plastic5_14_002" } },
 		spots = {},
 	},
+	bugotti_veyron = {
+		shells = { { name = "Body_detail_glass_red" } },
+		spots = {},
+	},
 	byt_seal = {
 		shells = { { name = "Body_red_emis" }, { name = "Body_tail_light" } },
 		spots = {},
 	},
 	byt_u8 = {
-		shells = {  },
+		shells = {},
 		wb = 3.05,
 		spots = {
 			{ at = Vector3.new(-0.6469, 0.5671, 2.5276), face = Vector3.new(-0.1989, 0.1419, 0.9697), w = 0.3763, h = 0.3565 },
@@ -124,20 +156,36 @@ return {
 		shells = { { name = "Body_BRAKELIGHT_BRAKELIGHT_CE" }, { name = "Body_BRAKELIGHT_BRAKELIGHT_RI" }, { name = "Body_BRAKELIGHTGLASS_BRAKELIG" } },
 		spots = {},
 	},
+	chevo_malibu = {
+		shells = { { name = "SeeThrough_red_glass" } },
+		spots = {},
+	},
 	ferrara_458s = {
 		shells = { { name = "SeeThrough_Red_glass" } },
 		spots = {},
 	},
+	ferrara_california = {
+		shells = { { name = "SeeThrough_Red_glass" } },
+		spots = {},
+	},
 	lambrini_countach = {
-		shells = {  },
+		shells = {},
 		wb = 2.45,
 		spots = {
 			{ at = Vector3.new(-0.5815, 0.3856, 1.9664), face = Vector3.new(0, 0.0078, 1), w = 0.4018, h = 0.1005 },
 			{ at = Vector3.new(0.5815, 0.3856, 1.9664), face = Vector3.new(0, 0.0078, 1), w = 0.4018, h = 0.1005 },
 		},
 	},
+	lambrini_lp640 = {
+		shells = {},
+		wb = 2.6651,
+		spots = {
+			{ at = Vector3.new(-0.6498, 0.5344, 2.0808), face = Vector3.new(-0.1851, 0.5185, 0.8348), w = 0.4555, h = 0.1898 },
+			{ at = Vector3.new(0.6498, 0.5344, 2.0808), face = Vector3.new(0.1851, 0.5185, 0.8348), w = 0.4555, h = 0.1898 },
+		},
+	},
 	lambrini_lp700 = {
-		shells = {  },
+		shells = {},
 		wb = 2.7,
 		spots = {
 			{ at = Vector3.new(-0.6232, 0.3988, 2.1657), face = Vector3.new(-0.1503, -0.5767, 0.803), w = 0.4708, h = 0.0942 },
@@ -149,15 +197,23 @@ return {
 		spots = {},
 	},
 	lambrini_urus = {
-		shells = {  },
+		shells = {},
 		wb = 3.003,
 		spots = {
 			{ at = Vector3.new(-0.741, 0.7494, 2.2941), face = Vector3.new(-0.4865, -0.3525, 0.7994), w = 0.2172, h = 0.0632 },
 			{ at = Vector3.new(0.741, 0.7494, 2.2941), face = Vector3.new(0.4865, -0.3525, 0.7994), w = 0.2172, h = 0.0632 },
 		},
 	},
+	lexis_lc500 = {
+		shells = {},
+		wb = 2.87,
+		spots = {
+			{ at = Vector3.new(-0.6072, 0.5054, 2.3338), face = Vector3.new(-0.2198, 0.809, 0.5452), w = 0.4636, h = 0.1005 },
+			{ at = Vector3.new(0.6034, 0.5052, 2.3369), face = Vector3.new(0.2226, 0.8048, 0.5503), w = 0.4632, h = 0.1004 },
+		},
+	},
 	lexis_lfa = {
-		shells = {  },
+		shells = {},
 		wb = 2.605,
 		spots = {
 			{ at = Vector3.new(-0.6183, 0.4921, 2.1565), face = Vector3.new(-0.001, -0.0203, 0.9998), w = 0.3585, h = 0.0574 },
@@ -168,8 +224,16 @@ return {
 		shells = { { name = "SeeThrough_LX700hred_glass1" } },
 		spots = {},
 	},
+	maseroti_levante = {
+		shells = { { name = "SeeThrough_mred_glass" } },
+		spots = {},
+	},
 	mazdo_rx8 = {
 		shells = { { name = "SeeThrough_RX8phong13SG1" } },
+		spots = {},
+	},
+	mclaran_12c = {
+		shells = { { name = "SeeThrough_Mphong7SG1" } },
 		spots = {},
 	},
 	nisun_gtr = {
@@ -185,7 +249,7 @@ return {
 		spots = {},
 	},
 	rolls_cullinan = {
-		shells = {  },
+		shells = {},
 		wb = 3.7719,
 		spots = {
 			{ at = Vector3.new(-0.672, 0.3981, 3.0819), face = Vector3.new(-0.4379, 0.2043, 0.8755), w = 0.1443, h = 0.1974 },
@@ -196,12 +260,16 @@ return {
 		shells = { { name = "SeeThrough_glass_018__native_UV_glT" } },
 		spots = {},
 	},
+	toyoka_chaser = {
+		shells = { { name = "SeeThrough_Meshesredtrasnpar1Mtl" } },
+		spots = {},
+	},
 	toyoka_lc300 = {
 		shells = { { name = "Body_Light_Red_Back" }, { name = "Body_Light_Red_Back_Lower" } },
 		spots = {},
 	},
 	xiaomo_su7 = {
-		shells = {  },
+		shells = {},
 		wb = 3,
 		spots = {
 			{ at = Vector3.new(-0.6205, 0.5009, 2.4091), face = Vector3.new(-0.198, 0.7221, 0.6629), w = 0.342, h = 0.0836 },

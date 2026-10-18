@@ -113,7 +113,7 @@ local list: { CarSpec } = {
 	{ Id = "chevo_malibu", Name = "Chevo Malibo LS", Class = "Sedan", Tier = "Starter", TopSpeed = 130, ZeroToSixty = 8.4, Handling = 0.56, Price = 18000, Color = Color3.fromRGB(235, 236, 238), Order = 70 },
 	{ Id = "toyoka_chaser", Name = "Toyoka Chasor Tourer V", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.6, Handling = 0.76, Price = 55000, Color = Color3.fromRGB(200, 202, 206), Order = 71 },
 	{ Id = "bentz_190e", Name = "Mercer 190E Evo II", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 7.1, Handling = 0.74, Price = 80000, Color = Color3.fromRGB(20, 21, 24), Order = 72 },
-	{ Id = "bentz_s65_w221", Name = "Mercer S65 W221", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.66, Price = 140000, Color = Color3.fromRGB(235, 236, 238), Order = 73 },
+	{ Id = "bentz_s65_w221", Name = "Mercer S63 W221", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.66, Price = 140000, Color = Color3.fromRGB(235, 236, 238), Order = 73 },
 	{ Id = "maseroti_levante", Name = "Maseroti Levanto GTS", Class = "SUV", Tier = "Mid", TopSpeed = 181, ZeroToSixty = 4.0, Handling = 0.64, Price = 190000, Color = Color3.fromRGB(88, 92, 98), Order = 74 },
 	{ Id = "lexis_lc500", Name = "Lexis LC500", Class = "Coupe", Tier = "Mid", TopSpeed = 168, ZeroToSixty = 4.4, Handling = 0.78, Price = 240000, Color = Color3.fromRGB(190, 30, 35), Order = 75 },
 	{ Id = "astin_dbx", Name = "Astin Marlin DBX", Class = "SUV", Tier = "High", TopSpeed = 181, ZeroToSixty = 4.3, Handling = 0.66, Price = 450000, Color = Color3.fromRGB(88, 92, 98), Order = 76 },

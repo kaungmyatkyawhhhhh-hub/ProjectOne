@@ -13,7 +13,7 @@ for f in sorted(glob.glob("/tmp/claude-0/tail/*.json")):
     car = d["car"]
     shells = []
     for p in d["parts"]:
-        if EXCL.search(p["name"]) or p["rearFrac"] < 0.85:
+        if EXCL.search(p["name"]) or p["rearFrac"] < 0.85 or p["dims"][2] > 1.5:  # a lamp part that runs to the front
             continue
         if not (p["red"] >= 0.3 or NAMED.search(p["name"])):
             continue

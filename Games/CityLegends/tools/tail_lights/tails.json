@@ -7,6 +7,23 @@
   ],
   "spots": []
  },
+ "astin_dbx": {
+  "shells": [
+   {
+    "name": "Body_LightsBrakes1Mtl"
+   },
+   {
+    "name": "Body_LightsBrakes2Mtl"
+   },
+   {
+    "name": "Body_LightsRearRls1Mtl"
+   },
+   {
+    "name": "Body_LightsRearRls2Mtl"
+   }
+  ],
+  "spots": []
+ },
  "astin_vantage": {
   "shells": [],
   "spots": [
@@ -48,6 +65,40 @@
    }
   ],
   "spots": []
+ },
+ "bentz_190e": {
+  "shells": [],
+  "spots": [
+   {
+    "at": [
+     -0.4929,
+     0.4052,
+     2.269
+    ],
+    "face": [
+     -0.043,
+     -0.0537,
+     0.9976
+    ],
+    "w": 0.4812,
+    "h": 0.1283
+   },
+   {
+    "at": [
+     0.4846,
+     0.4052,
+     2.2687
+    ],
+    "face": [
+     0.043,
+     -0.0537,
+     0.9976
+    ],
+    "w": 0.4811,
+    "h": 0.1283
+   }
+  ],
+  "wb": 2.665
  },
  "bentz_e400": {
   "shells": [
@@ -95,6 +146,44 @@
   ],
   "spots": []
  },
+ "bentz_gls": {
+  "shells": [
+   {
+    "name": "Body_gls_stop_001"
+   }
+  ],
+  "spots": [
+   {
+    "at": [
+     -0.5982,
+     0.735,
+     2.6485
+    ],
+    "face": [
+     -0.1062,
+     0.06,
+     0.9925
+    ],
+    "w": 0.4819,
+    "h": 0.1205
+   },
+   {
+    "at": [
+     0.6,
+     0.735,
+     2.6492
+    ],
+    "face": [
+     0.1071,
+     0.0523,
+     0.9929
+    ],
+    "w": 0.4819,
+    "h": 0.1205
+   }
+  ],
+  "wb": 3.135
+ },
  "bentz_gt63s": {
   "shells": [
    {
@@ -113,6 +202,14 @@
    },
    {
     "name": "Body_sw222_vehiclelights"
+   }
+  ],
+  "spots": []
+ },
+ "bentz_s65_w221": {
+  "shells": [
+   {
+    "name": "Body_sw221_lights_lod0_trans"
    }
   ],
   "spots": []
@@ -246,6 +343,17 @@
   ],
   "wb": 2.975
  },
+ "bnw_750li": {
+  "shells": [
+   {
+    "name": "Body_Material_167"
+   },
+   {
+    "name": "SeeThrough_BackLights_Glass_Red"
+   }
+  ],
+  "spots": []
+ },
  "bnw_m3_f80": {
   "shells": [
    {
@@ -299,6 +407,14 @@
   "shells": [
    {
     "name": "Body_plastic5_14_002"
+   }
+  ],
+  "spots": []
+ },
+ "bugotti_veyron": {
+  "shells": [
+   {
+    "name": "Body_detail_glass_red"
    }
   ],
   "spots": []
@@ -362,7 +478,23 @@
   ],
   "spots": []
  },
+ "chevo_malibu": {
+  "shells": [
+   {
+    "name": "SeeThrough_red_glass"
+   }
+  ],
+  "spots": []
+ },
  "ferrara_458s": {
+  "shells": [
+   {
+    "name": "SeeThrough_Red_glass"
+   }
+  ],
+  "spots": []
+ },
+ "ferrara_california": {
   "shells": [
    {
     "name": "SeeThrough_Red_glass"
@@ -403,6 +535,40 @@
    }
   ],
   "wb": 2.45
+ },
+ "lambrini_lp640": {
+  "shells": [],
+  "spots": [
+   {
+    "at": [
+     -0.6498,
+     0.5344,
+     2.0808
+    ],
+    "face": [
+     -0.1851,
+     0.5185,
+     0.8348
+    ],
+    "w": 0.4555,
+    "h": 0.1898
+   },
+   {
+    "at": [
+     0.6498,
+     0.5344,
+     2.0808
+    ],
+    "face": [
+     0.1851,
+     0.5185,
+     0.8348
+    ],
+    "w": 0.4555,
+    "h": 0.1898
+   }
+  ],
+  "wb": 2.6651
  },
  "lambrini_lp700": {
   "shells": [],
@@ -483,6 +649,40 @@
   ],
   "wb": 3.003
  },
+ "lexis_lc500": {
+  "shells": [],
+  "spots": [
+   {
+    "at": [
+     -0.6072,
+     0.5054,
+     2.3338
+    ],
+    "face": [
+     -0.2198,
+     0.809,
+     0.5452
+    ],
+    "w": 0.4636,
+    "h": 0.1005
+   },
+   {
+    "at": [
+     0.6034,
+     0.5052,
+     2.3369
+    ],
+    "face": [
+     0.2226,
+     0.8048,
+     0.5503
+    ],
+    "w": 0.4632,
+    "h": 0.1004
+   }
+  ],
+  "wb": 2.87
+ },
  "lexis_lfa": {
   "shells": [],
   "spots": [
@@ -525,10 +725,26 @@
   ],
   "spots": []
  },
+ "maseroti_levante": {
+  "shells": [
+   {
+    "name": "SeeThrough_mred_glass"
+   }
+  ],
+  "spots": []
+ },
  "mazdo_rx8": {
   "shells": [
    {
     "name": "SeeThrough_RX8phong13SG1"
+   }
+  ],
+  "spots": []
+ },
+ "mclaran_12c": {
+  "shells": [
+   {
+    "name": "SeeThrough_Mphong7SG1"
    }
   ],
   "spots": []
@@ -595,6 +811,14 @@
   "shells": [
    {
     "name": "SeeThrough_glass_018__native_UV_glT"
+   }
+  ],
+  "spots": []
+ },
+ "toyoka_chaser": {
+  "shells": [
+   {
+    "name": "SeeThrough_Meshesredtrasnpar1Mtl"
    }
   ],
   "spots": []
