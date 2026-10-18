@@ -42,3 +42,6 @@ A mirror near the gym door with a before / after card. (Since 15 Oct the mirror 
 ![[GYM ARC/Screenshots/2026-10-15_mirror_progress_plain.jpg]]
 ![[GYM ARC/Screenshots/2026-10-15_mirror_wall_plain.jpg]]
 ![[GYM ARC/Screenshots/2026-10-15_mirror_card_still_works.jpg]]
+
+## Same body shape as you (19 Oct)
+The "Now" body gets your real widths (genetics shoulders, widths from height and muscle), so it matches your character. "Day one" stays the plain starting body. See [[GYM ARC - Bug - Mirror and statue bodies too narrow]].

@@ -405,6 +405,7 @@ File: `Config/Body.luau`. See also [[GYM ARC - Muscles and Bodies]].
 | Widths.MassMonster | shoulders 1.05, hips 1.1, arms 0.9, legs 0.9, depth 0.9, +12% muscle | Mass monster (owner, 19 Oct: was shoulders 1.4, hips 1.2) |
 | Widths.ShouldersOverHips | 1.1 | Shoulders always wider than hips |
 | MuscleMeshes QUADS (19 Oct) | FadeFrom 0.25, FadeTo 0.6, OuterFrom 0.05, OuterTo 0.25 | Inner / front quad growth by height on the bare thigh (0 = bottom, 1 = shorts hem): full up to FadeFrom, none from FadeTo up and under the shorts; OuterFrom..OuterTo studs out from the thigh's middle keep full growth (the outer sweep). In `Shared/MuscleMeshes`. See [[GYM ARC - Bug - Inner quad bulge]] |
+| MuscleMeshes UPPER_TRAPS (19 Oct) | Height 0.16, Back 0.03, NeckFrom 0.18, NeckTo 0.35, PeakTo 0.55, ShoulderTo 0.95, Depth 0.3, Edge 0.15, FrontShare 0.35 | The upper traps slope added to the Traps growth: Height (studs at the full look) from NeckTo to PeakTo out from the middle, easing in from NeckFrom and out to none at ShoulderTo; only the top Depth of the torso; the front gets FrontShare. See [[GYM ARC - Bug - Upper traps never grew]] |
 | ShortsColors | Black, Navy, Red, Gray, Teal | Game shorts (default Black) |
 | Tops | Shirtless, Tank top, Sports top | Default Shirtless |
 | CoveringAccessories | 7 types removed | T-shirt, shirt, pants, jacket, sweater, shorts, dress/skirt |

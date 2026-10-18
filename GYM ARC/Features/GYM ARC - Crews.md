@@ -35,3 +35,15 @@ Player pictures here are the real Roblox avatar headshot in a plain dark circle 
 - Button: JOIN (open crews), REQUEST TO JOIN, REQUESTED, FULL or IN A CREW (greyed). The leader picks "join requests" (default) or "open to all" in MY CREW; leader and officers accept or decline requests there. A player accepted while in another server is told through the `CrewInboxV1` DataStore when they join.
 - Studio test: Workspace attribute `TestCrews` = true shows test crews (never saved).
 - This was in Studio and in `src/` since 15 Oct but never committed; it went into git with the 19 Oct commit. Not yet tested with two real players.
+
+## Unique names and tags, empty crews deleted (19 Oct)
+- Crew names and tags are unique, whatever the capitals: "That tag is already taken." / "That crew name is already taken." (`CrewNamesV1`). See [[GYM ARC - Bug - Two crews with the same tag]].
+- When the last member leaves, the crew is deleted and leaves TOP CREWS; its name and tag are free again.
+- A crew leader can get a one-time message when they join (used once: ARAQ313's tag changed to SRT1).
+
+## Top crews member view tested (19 Oct)
+Tested on the phone layout and the PC layout with the Studio test crews: the full crew with long names (fits, scrolls, greyed FULL at the bottom), the one-member open crew (JOIN), a deleted crew ("This crew no longer exists", its name kept in the header: fixed 19 Oct), headshots, online dots, roles, back returns to the same scroll position. Not testable in Studio: tapping your own crew (needs a saved crew); the code opens MY CREW. Note: the back arrow scrolls away with a long member list (scroll up to reach it).
+![[GYM ARC/Screenshots/crews_top_view/phone_full_crew.jpg]]
+![[GYM ARC/Screenshots/crews_top_view/phone_full_crew_bottom.jpg]]
+![[GYM ARC/Screenshots/crews_top_view/phone_solo_crew.jpg]]
+![[GYM ARC/Screenshots/crews_top_view/pc_gone_crew.jpg]]

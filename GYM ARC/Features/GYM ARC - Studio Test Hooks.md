@@ -38,3 +38,6 @@ Workspace attribute `TestOpenPanel` = "Physique" (set it during Play) opens the 
 
 ## Phone or PC layout (15 Oct)
 Workspace attributes, Studio only: `TestInput` = "Touch", "TouchKeyboard" or "KeyboardAndMouse" acts as that input; `TestNoJump` = true acts as if Roblox's jump button were hidden. With `TestPhoneSize` they test the machine buttons' phone / PC layout. See [[GYM ARC - Bug - Phones got the PC machine layout]].
+
+## TestStatueMe (19 Oct)
+Workspace attribute `TestStatueMe` = true: the first player becomes the statue (as the posing champion), to compare the statue with your own body. Studio only.

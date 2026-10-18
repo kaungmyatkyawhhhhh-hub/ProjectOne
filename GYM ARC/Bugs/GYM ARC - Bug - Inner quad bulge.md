@@ -1,7 +1,7 @@
 ---
 date: 2026-10-19
 tags: [gymarc, bug]
-status: in progress
+status: fixed
 aliases: ["GYM ARC - Bug - Inner thigh bulge"]
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
@@ -18,10 +18,13 @@ The quad muscle data (`MuscleData` LeftUpperLeg / RightUpperLeg Quads and Quads_
 
 ## Fix
 - **Your own body (live meshes), done:** `Shared/MuscleMeshes` now shapes the quad growth when it loads the thigh (the `QUADS` settings). Measured on the bare thigh (0 = its bottom, 1 = the shorts' hem): the inner and front quad grows fully up to 25%, fades out to none at 60%, and stays flat above that and under the shorts. The inner teardrop now sits low, just above the knee. The outer sweep keeps all its growth. Both legs, every size up to mass monster. The progress mirror's "Now" body copies your live meshes, so it is fixed too.
-- **Everyone else (stage meshes), WAITING FOR THE IMPORT:** other players, NPCs (Coach Dex, Dante, the regulars) and the statue wear your low-poly thigh stage meshes. The same correction was applied to them (`tools/quad_fix_stage_corrections.luau` + `tools/quad_fix_lowpoly.py`: every low-poly vertex moves like the nearest vertices of the original high-res stage; the rebuilt old stages matched the originals exactly). New files: `Downloads\gym_arc_meshes_lowpoly_quadfix\other_player_stages\` (24 OBJs; the g000 ones did not change). Your originals were not touched.
+- **Everyone else (stage meshes), done 19 Oct (owner imported them):** other players, NPCs (Coach Dex, Dante, the regulars) and the statue wear your low-poly thigh stage meshes. The same correction was applied to them (`tools/quad_fix_stage_corrections.luau` + `tools/quad_fix_lowpoly.py`: every low-poly vertex moves like the nearest vertices of the original high-res stage; the rebuilt old stages matched the originals exactly). New files: `Downloads\gym_arc_meshes_lowpoly_quadfix\other_player_stages\` (24 OBJs; the g000 ones did not change). Your originals were not touched.
 - Far-away bodies (plain body without muscle meshes) have no quads to fix.
 
-## To finish (owner)
+## Finished (19 Oct)
+The owner imported the files; the 24 templates in ReplicatedStorage.BodyStages now use them (sizes checked against Config/BodyStages: 0 mismatches), the new MeshIds are in Config/StageMeshBackup (`new`; `lowpoly` = the 15 Oct mesh), Dante wears the fixed mass monster thighs in play.
+
+## How it was finished
 1. In Studio: File > Import 3D, import the 24 OBJs from `Downloads\gym_arc_meshes_lowpoly_quadfix\other_player_stages\` into the Workspace (same way as the 15 Oct low-poly import).
 2. Tell Claude. Claude runs `tools/quad_fix_stage_setup.luau` (the templates in ReplicatedStorage.BodyStages take the new meshes and sizes, the imported copies are deleted), `tools/quad_fix_patch_config.py` (new centres / sizes in Config/BodyStages), records the old / new MeshIds in Config/StageMeshBackup, and checks Coach Dex, Dante and a regular in play.
 

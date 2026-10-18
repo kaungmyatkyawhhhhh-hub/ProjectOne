@@ -133,4 +133,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Store took 10 minutes to load]] (fixed, 15 Oct)
 - [[GYM ARC - Bug - Menu did not fill the screen]] (fixed, 15 Oct)
 - [[GYM ARC - Bug - Right cards over the top bar]] (fixed, 15 Oct)
-- [[GYM ARC - Bug - Inner quad bulge]] (in progress: live body fixed, stage meshes wait for the import, 19 Oct)
+- [[GYM ARC - Bug - Inner quad bulge]] (fixed, 19 Oct)
+- [[GYM ARC - Bug - Mirror and statue bodies too narrow]] (fixed, 19 Oct)
+- [[GYM ARC - Bug - Two crews with the same tag]] (fixed, 19 Oct)
+- [[GYM ARC - Bug - Upper traps never grew]] (back again 19 Oct: your body fixed, other bodies wait for the torso import)

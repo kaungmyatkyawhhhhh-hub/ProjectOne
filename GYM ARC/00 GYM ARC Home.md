@@ -28,7 +28,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 
 ## What's next
 1. **Save to Roblox** and make a dated backup, then **publish**. No save is recorded for the 9 and 13 Oct work.
-1. Owner's 19 Oct prompt queue: 2 inner quad bulge, 3 mirror / statue width + duplicate crew tags, 4 upper traps missing, 5 top crews member view (mostly built 15 Oct). See [[2026-10-19 GYM ARC Owner changes]].
+1. Import the 12 fixed torso meshes (upper traps), then tell Claude. 19 Oct prompts 2, 3 and 5 are done. See [[2026-10-19 GYM ARC Owner changes]].
 2. Test soft shutdown live: join the game, then use "Migrate to latest update".
 3. Run a 2-player test (spotting, arm wrestling, other players' muscles).
 4. New prompts, not started yet:
@@ -37,7 +37,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 5. Listen to the picked sounds and swap any you don't like ([[GYM ARC - Music and Sounds]]).
 
 ## Open bugs
-- [[GYM ARC - Bug - Inner quad bulge|Inner quad bulge]]: your own body fixed 19 Oct; other players / NPCs wait for you to import 24 fixed thigh meshes.
+- [[GYM ARC - Bug - Upper traps never grew|Upper traps]]: your own body fixed 19 Oct; other players / NPCs wait for you to import 12 fixed torso meshes (`Downloads\gym_arc_meshes_lowpoly_trapsfix`).
 All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main ones:
 - [[GYM ARC - Bug - Full look bulkier than lean V-taper|Full look bulkier than the lean V-taper]]
 - [[GYM ARC - Bug - Pointed traps and triceps at mass monster|Pointed traps and triceps at mass monster]]
@@ -200,6 +200,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Rep popup numbers very big]]
 - [[GYM ARC - Bug - Right cards over the top bar]]
 - [[GYM ARC - Bug - Inner quad bulge]]
+- [[GYM ARC - Bug - Mirror and statue bodies too narrow]]
+- [[GYM ARC - Bug - Two crews with the same tag]]
 - [[GYM ARC - Bug - Roblox spawn pad in the menu shot]]
 - [[GYM ARC - Bug - Saves could be cut off at shutdown]]
 - [[GYM ARC - Bug - Scripts cannot upload meshes]]

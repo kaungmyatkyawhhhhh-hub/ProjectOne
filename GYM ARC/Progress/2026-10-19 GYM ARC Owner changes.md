@@ -66,3 +66,11 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 2 Inner quad bulge]]. Bug note: [[GYM ARC 
 - Your own body: fixed in `Shared/MuscleMeshes` (inner / front quads flat near the shorts, teardrop low above the knee, outer sweep kept). Checked in play at 25%, 60%, full look and mass monster: screenshots in `Screenshots/quad_fix/`.
 - Other players, NPCs, statue: 24 fixed low-poly thigh OBJs are ready in `Downloads\gym_arc_meshes_lowpoly_quadfix\other_player_stages\`. Waiting for the owner to import them; then Claude sets them up.
 - Found, not changed: at mass monster the hamstrings (your size 2.8) push a lump between the knees. Owner decides.
+
+## Prompts 2 to 5 (afternoon)
+- **2 Inner quad bulge, done:** the owner imported the 24 fixed thigh meshes; the templates use them, Config/BodyStages and StageMeshBackup updated, Dante wears them in play. [[GYM ARC - Bug - Inner quad bulge]]
+- **3 Mirror / statue width, done:** the mirror's "Now" body and the statue get the same widths as the real body (the statue reads the strongest player's save read-only). Checked: me, mirror and statue all 1.386 / 1.244. [[GYM ARC - Bug - Mirror and statue bodies too narrow]]
+- **3 Duplicate crew tags, done:** names and tags unique (any capitals), empty crews deleted; ARAQ313 (mosa_ali, newer) is now [SRT1] with a message, SRT313 (cort) keeps [SRT9]; different players. [[GYM ARC - Bug - Two crews with the same tag]]
+- **4 Upper traps, your body done, others wait:** a real neck-to-shoulder slope on the Traps muscle; 12 fixed low-poly torso files are ready to import in `Downloads\gym_arc_meshes_lowpoly_trapsfix\other_player_stages\`. [[GYM ARC - Bug - Upper traps never grew]]
+- **5 Top crews member view, done:** tested on phone and PC (full, one-member, deleted crew); fixed the deleted crew's header name. [[GYM ARC - Crews]]
+- Checks: 18 logic test files pass; no game errors in Output.
