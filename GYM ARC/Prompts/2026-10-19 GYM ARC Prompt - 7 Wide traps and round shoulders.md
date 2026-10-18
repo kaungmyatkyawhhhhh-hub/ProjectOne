@@ -12,6 +12,8 @@ TRAPS + SHOULDERS reshape (owner, with a reference picture of a classic Roblox m
 
 Now: the upper traps are a thin ridge close to the neck, and the shoulders look weird (lumpy, folded, pointy cap; from behind they don't connect to the traps).
 
+Reference picture of the target shape (front + back): Downloads\gym_arc_traps_shoulders_reference.png. Match the traps slope and delt caps, not the simple blob style.
+
 Target look:
 1. TRAPS: one wide, smooth slope (a "yoke") from the base of the neck all the way out to the top of each shoulder. Seen from the front it makes a big triangle/trapezoid so the neck looks short and thick. Width at full size: almost to the shoulder caps. From behind it continues down into a diamond shape between the shoulder blades (mid traps). Thick, not a thin ridge. No hard outline where it meets the torso.
 2. SHOULDERS (delts): big ROUND caps like half-balls sitting on the outside of the shoulder, wider than the chest. Front, side and rear delt blend into one smooth round cap; the traps flow straight into the top of the cap. No folds, no pointy tips, no gap or crease between traps, delts and upper arm.
