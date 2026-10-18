@@ -27,5 +27,13 @@ Trainers currently slide around without leg movement.
 - Keep their existing idle and the "look at player within 15 studs" behavior. Only look at the player while standing, not while walking or running.
 - Animations should only run on the client, and only for trainers within streaming/culling range.
 
+3) FULLER CHEST
+Owner wants the chest to look more full. Edit BS_Torso_Front (live EditableMesh muscle shape AND new stage meshes):
+- Fuller pecs: more volume in the upper chest (clavicle area, filling the dip under the collarbone), rounder lower pec line, and pecs that wrap out into the front delts with no flat gap at the armpit.
+- Slightly more forward projection, scaled with the Chest stat (small at g000, big at gmon). Keep the middle sternum line.
+- Kids' game: smooth athletic shape, no nipple detail, nothing sagging or bust-like.
+- Keep the triangle count (BS_Torso_Front about 5k tris for stage meshes). Keep seams with Torso_Back, traps and arms exact (same boundary verts).
+- Export the changed stage meshes to Downloads\gym_arc_meshes_lowpoly_chestfix\ (only changed files, list exactly how many there are) and tell me to import them.
+
 Write a short progress note in the vault when done.
 ```
