@@ -60,7 +60,6 @@ CarSkin.CLUSTER_STYLE = {
 	chevo_c6 = "C6",
 	chevo_c7 = "C7",
 	-- the Sketchfab cars of 2026-10-12 (the owner's list of looks, from the real cars)
-	bentz_maybach = "Maybach57",
 	bentz_s63 = "W213", -- S 65 W222: wide glass screen
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",

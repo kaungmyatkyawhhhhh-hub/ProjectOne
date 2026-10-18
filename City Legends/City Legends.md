@@ -286,3 +286,5 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - **Mainland:** rocky shore with lamps, suburbs with lit houses along a street, a container port with cranes, forest, hills, wind turbines and radio masts with blinking lights, billboards along the loop and a mountain range on the horizon. The far-shore skyline moved onto the land.
   - **Grey parts:** the monorail concrete and the new median barrier are darker. Waiting for the owner to point at any other grey parts.
   - Not tested in Roblox yet.
+- **Brabus Maybach removed (2026-10-18, owner):** the Maybach 57S Brabus (`bentz_maybach`) is out of the game: roster, model, and its data. Players who owned it lose it (saves skip unknown cars).
+- **Next import (2026-10-18, owner):** an "Adding new cars" file in `imports`: some new cars, some replacement models. The Mercedes C63 AMG coupe in it is not a car to add: only its cockpit, for the CLA 45 AMG and the GLE. The file had not reached GitHub yet when asked.

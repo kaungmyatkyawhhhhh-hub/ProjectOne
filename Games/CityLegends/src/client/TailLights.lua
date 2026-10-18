@@ -48,10 +48,6 @@ return {
 		shells = { { name = "SeeThrough_d2phong12SG1" } },
 		spots = {},
 	},
-	bentz_maybach = {
-		shells = { { name = "Body_taillight_1" } },
-		spots = {},
-	},
 	bentz_s63 = {
 		shells = { { name = "Body_sw222_brakelight" }, { name = "Body_sw222_taillight" }, { name = "Body_sw222_vehiclelights" } },
 		spots = {},
