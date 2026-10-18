@@ -16,7 +16,9 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 ## Rules
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
-## Current status (15 Oct 2026)
+## Current status (19 Oct 2026)
+- 19 Oct: the owner changed bodies, titles and music in Studio; everything is written down in [[2026-10-19 GYM ARC Owner changes]] (narrower shoulders, new mass monster sizes for your own muscles, three rival titles one rarity higher, three songs per area). Nothing was "fixed".
+- Top crews: tapping a crew shows its members ([[GYM ARC - Crews]]); saved to git 19 Oct.
 - 15 Oct: the Store opens right away, phones get the phone machine layout, the menu always fills the screen, the right cards stay under the top bar, and mirrors are plain (no reflection). See [[2026-10-15 GYM ARC Menu art]].
 - The whole core game is built and tested in Studio: training, 18 muscles, genetics, Growth Spurts, titles, stats, quests, spotting, arm wrestling, the town and three gyms.
 - 13 Oct: Growth Spurts now stop at 7'0" ([[GYM ARC - Growth Spurts]]), the NPC size glitch is fixed ([[GYM ARC - NPC Regulars and Gym Cat]]), and soft shutdown is in ([[GYM ARC - Soft Shutdown]]). See [[2026-10-13 GYM ARC Height cap and soft shutdown]].
@@ -249,6 +251,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Final UI Black and Gold]]
 - [[2026-10-14 GYM ARC REP PUMP and menu fixes]]
 - [[2026-10-15 GYM ARC Menu art]]
+- [[2026-10-19 GYM ARC Owner changes]]
 
 ### Prompts
 - [[2026-10-04 GYM ARC Prompt - Design brief]]

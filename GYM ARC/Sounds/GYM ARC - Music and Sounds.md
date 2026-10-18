@@ -126,3 +126,12 @@ You set every area back to a single song: Starter 86451874359343, Pro 1189590162
 
 ## Aura burst (14 Oct)
 - `AuraBurst` (a new personal record with an aura): PSE Magic Glows Chiming Hits 1 (9116394545). The prompt asked for a short scream; a power burst is used instead because of the "no grunts" rule. Swap the id in `Config/Sounds` for another if wanted.
+
+## Your music, now (owner's change in Studio, found 19 Oct)
+This replaces "Back to one song per area" above (no longer true): every area plays three songs again, in this order, then starts over.
+- Starter gym: 86451874359343, 131532099124744, **135822443550596** (new)
+- Pro gym: 118959016267248, 113417603188158, **139777823649977** (new)
+- Beach (beach, beach gym, posing stage, skate park): 1837324500, **95854242246323** (new), **102866809292046** (new)
+- Town: 1840007392 (one song, unchanged)
+- Music (the fallback list where an area has none): 118959016267248, **99979837873059** (new), 131532099124744, 139266399633943, 86451874359343, 113417603188158, 1840007392 (volume 0.7).
+- The five new ids are your own picks (not checked against the licensed-library rule; Claude did not pick them).

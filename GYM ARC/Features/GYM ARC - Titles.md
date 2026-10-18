@@ -28,6 +28,42 @@ Collectible titles earned by playing. You keep them forever and wear one above y
 - **Dedicated** (Rare, added 13 Oct): claim all 7 days of the login calendar in a row ([[GYM ARC - Economy and Daily Rewards]]).
 - **Posing Champion** (Epic, added 13 Oct): win a posing competition ([[GYM ARC - Posing Competition]]).
 
+## The full list now (checked 19 Oct)
+Owner, 19 Oct: the three rival titles were raised one rarity each: Beat Benny Uncommon -> **Rare**, Beat Coral Rare -> **Epic**, Beat Dante Epic -> **Legendary**. Nothing else in the titles changed.
+
+| Title | Rarity | Category | How to unlock |
+|---|---|---|---|
+| Beginner Gains | Common | Activity | Do your first rep |
+| Gym Rat | Uncommon | Activity | 1,000 reps |
+| Cardio King | Rare | Activity | Run 10 km on the treadmill |
+| Dedicated | Rare | Activity | Claim all 7 days of the login calendar in a row |
+| Lock In | Rare | Trend | 50 reps in one set |
+| Glow Up | Epic | Trend | Every muscle to level 25 (shown as EXP) |
+| Skipped Leg Day | Uncommon | Physique | Chest 2x your legs (level 15+) |
+| Chicken Legs | Uncommon | Physique | Arms 2x your legs (level 15+) |
+| Boulder Shoulders | Rare | Physique | Shoulders 1.5x your other groups (level 20+) |
+| Greek Statue | Epic | Physique | All groups within 10% of each other, level 30+ |
+| Aesthetics God | Legendary | Physique | Every muscle level 45+ (badge slot empty) |
+| Late Bloomer | Rare | Growth Spurt | First Growth Spurt |
+| Skyscraper | Legendary | Growth Spurt | Reach 7'0" (badge slot empty) |
+| Genetic Freak | Epic | Genetics | Overall genetics S |
+| Hard Gainer | Uncommon | Genetics | Overall genetics D |
+| Defied Genetics | Legendary | Genetics | A D-grade group to 130% of the Growth Spurt goal (badge slot empty) |
+| Spotter | Rare | Social | Spot others for 10 reps |
+| Gym Buddy | Uncommon | Social | 100 reps while someone lifts nearby |
+| Iron Grip | Rare | Social | Win 10 arm wrestling matches |
+| Arm Wrestling King | Epic | Social | Beat Big Lou |
+| Beat Benny | Rare | Social | Beat Benny on the flat bench |
+| Beat Coral | Epic | Social | Beat Coral at arm wrestling |
+| Beat Dante | Legendary | Social | Beat Dante on the squat rack |
+| Posing Champion | Epic | Social | Win a posing competition |
+| No Days Off | Secret | Secret | 500 reps in one visit |
+| Legend titles | Epic | Legend | Finish that legend's challenge: Wingspan, Pumpkin Delts, Tank Mode, Certified Swole, Rep Machine, Beefcake, Small but Mighty, Gainsworth Approved |
+| Season titles | Epic | Seasonal | Lift during the event: Pumpkin Spice Swole, Snow Plow, Beach Ready |
+
+- **How they unlock:** the server checks the conditions (`Titles.Check`) and saves earned ones in the player's save as `titles.owned` (title id -> time earned); the worn one is `titles.equipped`.
+- **Where they show:** above the head (`OverheadTitleClient`), in the INVENTORY window's Titles tab (`TitlesClient`, the side menu's INVENTORY tile; locked ones as "???"), and a red dot on the tile for new ones.
+
 ## Where it lives
 - `Config/Titles`
 - `Server/TitleService`, `TitlesClient`, `OverheadTitleClient`

@@ -157,3 +157,6 @@ Labels inside cards and tiles now always stay inside, with 8 px space on each si
 
 ## Under the top bar (15 Oct)
 Everything placed "under the top bar" (the right-side cards, hints, toasts, the left menu) now works out that spot from the screen layout settings, so it is right from the first frame: 8 px under Roblox's top bar. See [[GYM ARC - Bug - Right cards over the top bar]].
+
+## Check of the owner's Studio changes (19 Oct)
+No UI script, Theme, Kit or UI config changed since the last commit (15 Oct). StarterGui is still empty (all UI built in code). See [[2026-10-19 GYM ARC Owner changes]].

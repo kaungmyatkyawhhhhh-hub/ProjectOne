@@ -40,3 +40,12 @@ Buy gym gear and outfits with coins at the clothing store in town, then wear the
 ![[GYM ARC/Screenshots/s3_clothing-store-interior_after.png]]
 ![[GYM ARC/Screenshots/task2_fit_stringer_front.png]]
 ![[GYM ARC/Screenshots/skate-wardrobe_after.png]]
+
+## The looks system now (checked 19 Oct)
+Nothing here changed in the owner's 19 Oct Studio work. What a player can change today:
+- **Wardrobe: still OFF** (`Config/Features.Wardrobe = false`): no Wardrobe tile, tops can't be bought or worn.
+- **Gear that works:** lifting belt, headband, wrist wraps, shaker, skateboard deck and wheels (bought at the clothing store with coins, one per slot). Saved in the player's save as `cosmetics.owned` / `cosmetics.equipped`.
+- **Top and shorts color:** saved as `settings.top` (default "Shirtless") and `settings.shorts` (default "Black"); with the Wardrobe off nobody can change them.
+- **Auras:** saved as `auras.owned` / `auras.equipped`, picked in the INVENTORY window ([[GYM ARC - Aura]]).
+- **Body look:** not a choice: it comes from your muscles, height and genetics frame ([[GYM ARC - Muscles and Bodies]]). Your own Roblox head, face, hair, hats and skin color stay; back, front and neck accessories are removed.
+- **Your own Roblox clothes:** your avatar's classic Shirt / Pants are worn on the muscle meshes (without them you are shirtless in the game shorts). Layered 3D clothing hides the muscles.

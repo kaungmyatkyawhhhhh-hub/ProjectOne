@@ -29,3 +29,9 @@ Small groups of friends with a name and a short tag above their heads.
 
 ## Avatar headshots (14 Oct)
 Player pictures here are the real Roblox avatar headshot in a plain dark circle (the same look everywhere, see [[GYM ARC - Loading Screen and Menu]]).
+
+## Top crews member view (built 15 Oct, saved to git 19 Oct)
+- Tapping a crew in TOP CREWS opens that crew's members, read-only, in the same view as MY CREW: name, tag, rank, score, members (headshot with an online dot, name, role, level, height, score; leader first, then by score). A back arrow returns to the list where it was scrolled. Your own crew opens MY CREW instead.
+- Button: JOIN (open crews), REQUEST TO JOIN, REQUESTED, FULL or IN A CREW (greyed). The leader picks "join requests" (default) or "open to all" in MY CREW; leader and officers accept or decline requests there. A player accepted while in another server is told through the `CrewInboxV1` DataStore when they join.
+- Studio test: Workspace attribute `TestCrews` = true shows test crews (never saved).
+- This was in Studio and in `src/` since 15 Oct but never committed; it went into git with the 19 Oct commit. Not yet tested with two real players.
