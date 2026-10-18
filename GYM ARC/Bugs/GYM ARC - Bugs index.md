@@ -133,3 +133,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - [[GYM ARC - Bug - Store took 10 minutes to load]] (fixed, 15 Oct)
 - [[GYM ARC - Bug - Menu did not fill the screen]] (fixed, 15 Oct)
 - [[GYM ARC - Bug - Right cards over the top bar]] (fixed, 15 Oct)
+- [[GYM ARC - Bug - Inner quad bulge]] (in progress: live body fixed, stage meshes wait for the import, 19 Oct)

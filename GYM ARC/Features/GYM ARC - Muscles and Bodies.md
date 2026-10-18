@@ -55,3 +55,6 @@ Everyone wears the same Robloxian 2.0 body, and 18 real muscles grow on it as yo
 ![[GYM ARC/Screenshots/v9_monster_front.png]]
 ![[GYM ARC/Screenshots/meshes/stage3_front.png]]
 ![[GYM ARC/Screenshots/skin_gym_max.png]]
+
+## Quad shape (19 Oct, bug fix)
+The inner and front quads no longer grow near the shorts: on the bare thigh they grow fully up to 25% of its height, fade out by 60%, and stay flat above that and under the shorts, so the inner teardrop sits low above the knee. The outer sweep keeps its size. Done in `Shared/MuscleMeshes` (`QUADS` settings) for your own live body; the stage meshes for everyone else are fixed copies of your low-poly thighs that still need importing. See [[GYM ARC - Bug - Inner quad bulge]].

@@ -37,6 +37,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 5. Listen to the picked sounds and swap any you don't like ([[GYM ARC - Music and Sounds]]).
 
 ## Open bugs
+- [[GYM ARC - Bug - Inner quad bulge|Inner quad bulge]]: your own body fixed 19 Oct; other players / NPCs wait for you to import 24 fixed thigh meshes.
 All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main ones:
 - [[GYM ARC - Bug - Full look bulkier than lean V-taper|Full look bulkier than the lean V-taper]]
 - [[GYM ARC - Bug - Pointed traps and triceps at mass monster|Pointed traps and triceps at mass monster]]
@@ -198,6 +199,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Rep flash hard to see on light skin]]
 - [[GYM ARC - Bug - Rep popup numbers very big]]
 - [[GYM ARC - Bug - Right cards over the top bar]]
+- [[GYM ARC - Bug - Inner quad bulge]]
 - [[GYM ARC - Bug - Roblox spawn pad in the menu shot]]
 - [[GYM ARC - Bug - Saves could be cut off at shutdown]]
 - [[GYM ARC - Bug - Scripts cannot upload meshes]]

@@ -60,3 +60,9 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 6 Install Graphify]].
 - Test "where is the crew tag checked?": the graph pointed to the right file (CrewService) but not the right spot (`actions.Create`, line 289); its first hit was a wrong `tag()` in RivalClient. A targeted search found it in one step. Useful as a map, not better than a search for exact lines.
 - Not done: `graphify install --project` (Claude Code's safety check blocks Claude from writing its own skill / hooks; the owner can run it), and `graphify hook install` (it would rebuild from the repo root instead of `src/`). CLAUDE.md has the two new lines.
 - Owner ran `graphify install --project`: the skill is in `.claude/skills/graphify`. Its CLAUDE.md section now points at `src/graphify-out` and `graphify update src`; its two search / read hooks are removed because they only look for a graph at the repo root (owner chose "keep src only").
+
+## Inner quad bulge (prompt 2)
+Prompt: [[2026-10-19 GYM ARC Prompt - 2 Inner quad bulge]]. Bug note: [[GYM ARC - Bug - Inner quad bulge]].
+- Your own body: fixed in `Shared/MuscleMeshes` (inner / front quads flat near the shorts, teardrop low above the knee, outer sweep kept). Checked in play at 25%, 60%, full look and mass monster: screenshots in `Screenshots/quad_fix/`.
+- Other players, NPCs, statue: 24 fixed low-poly thigh OBJs are ready in `Downloads\gym_arc_meshes_lowpoly_quadfix\other_player_stages\`. Waiting for the owner to import them; then Claude sets them up.
+- Found, not changed: at mass monster the hamstrings (your size 2.8) push a lump between the knees. Owner decides.
