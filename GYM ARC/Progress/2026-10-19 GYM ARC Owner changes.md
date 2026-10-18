@@ -90,3 +90,9 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 8 Fill the back and add adductors]]. Detai
 
 ## Body meshes imported (night)
 The owner imported the 48 files; `tools/body_stage_setup.luau` put them on the templates, Config/BodyStages sizes updated (0 mismatches), MeshIds recorded (StageMeshBackup.Reshape19Oct). Coach Dex checked in play: yoke, round delts, full back.
+
+## Joint holes and trainer walk / run (prompt 9)
+Prompt: [[2026-10-19 GYM ARC Prompt - 9 Joint holes trainer walk run and fuller chest]].
+- Elbows and knees: skin balls fill the joints on every body ([[GYM ARC - Muscles and Bodies]]). Checked at mass monster with a deep bend: no holes; straight: nothing sticks out.
+- Trainers: they really animate now (the tracks never played before), idle / walk / run by measured speed ([[GYM ARC - Personal Trainers]]).
+- The prompt's title says "fuller chest" but its text has no chest part: not done.

@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (19 Oct 2026)
+- 19 Oct late: elbows and knees no longer show see-through holes when bent; trainers now idle, walk and run instead of sliding.
 - 19 Oct night: the 48 body meshes are imported and set up: everyone (other players, NPCs, statue, mirror) now has the new traps, shoulders, back and adductors.
 - 19 Oct night: the back is filled (no hollow), adductors fill the inner thighs (inner side only, nothing near the shorts), and the delt caps were made smaller after the owner's note (biceps / triceps / upper chest look normal again). Other bodies wait for the 48-file import.
 - 19 Oct evening: traps reshaped into a wide yoke and the delts into big round caps (your reference picture); SideDelts mass monster size set to 1.5. Other bodies wait for the import.
@@ -331,6 +332,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-19 GYM ARC Prompt - 6 Install Graphify]]
 - [[2026-10-19 GYM ARC Prompt - 7 Wide traps and round shoulders]]
 - [[2026-10-19 GYM ARC Prompt - 8 Fill the back and add adductors]]
+- [[2026-10-19 GYM ARC Prompt - 9 Joint holes trainer walk run and fuller chest]]
 
 ### Config
 - [[GYM ARC - Config values]]

@@ -1,7 +1,7 @@
 ---
 date: 2026-10-19
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 9 Joint holes and trainer walk/run
 

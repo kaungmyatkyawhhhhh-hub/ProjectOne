@@ -74,3 +74,7 @@ Hiding the skin layer made the trainers look like floating clothes (no bare skin
 
 ![[GYM ARC/Screenshots/trainers_skin_fixed_pump.jpg]]
 ![[GYM ARC/Screenshots/trainers_skin_fixed_stamina.jpg]]
+
+## Walk and run (19 Oct, prompt 9)
+Trainers slid without moving their legs: their animation tracks were loaded before the trainer was put in the world, so they never played. Now they load the first time he's shown, and his speed is measured from how far he moved each frame: idle under 0.5 studs/s, walk under 12, run above (Roblox's standard R15 idle / walk / run, 0.2 s crossfades); walk and run play at a speed matched to his pace so the feet don't skate. Far-away trainers still freeze. Facing: he faces where he walks and faces you while standing (unchanged). Client only.
+![[GYM ARC/Screenshots/joints/straight_full_with_trainer.jpg]]

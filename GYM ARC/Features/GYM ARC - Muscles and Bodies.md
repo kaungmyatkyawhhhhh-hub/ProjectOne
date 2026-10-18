@@ -85,3 +85,7 @@ Target: your reference picture (`Downloads\gym_arc_traps_shoulders_reference.png
 ![[GYM ARC/Screenshots/back_adductors/full_back.jpg]]
 ![[GYM ARC/Screenshots/back_adductors/full_front.jpg]]
 ![[GYM ARC/Screenshots/back_adductors/monster_low_between_legs.jpg]]
+
+## Joint fillers (19 Oct, prompt 9)
+Bent elbows and knees opened a see-through gap (the limb meshes are open at the joint). Every body with forearm / calf stages (yours, other players, NPCs, statue, mirror) now has a skin-colored ball on each elbow and knee, on the joint so it follows the pose, sized from the forearm / calf stage's girth (grows with the muscle; inside the limb while straight). One Ball part per joint, resized only when the stage changes (`Shared/LimbStages`, `JOINT_SIZE`). Not done: capping the open mesh ends (the ball already hides the inside). The ball is plain skin color without the skin texture, so in a deep bend it reads slightly smoother / lighter.
+![[GYM ARC/Screenshots/joints/bent_monster.jpg]]
