@@ -106,9 +106,19 @@ local list: { CarSpec } = {
 	{ Id = "lambrini_lp750", Name = "Lambrini Aventador SV LP750-4", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.8, Handling = 0.92, Price = 3500000, Color = Color3.fromRGB(120, 200, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 63 },
 	{ Id = "lambrini_lp640", Name = "Lambrini Murcielago LP640", Class = "Supercar", Tier = "High", TopSpeed = 211, ZeroToSixty = 3.3, Handling = 0.86, Price = 1800000, Color = Color3.fromRGB(255, 140, 0), Order = 64 },
 	{ Id = "bnw_750li", Name = "BNW 750Li", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.8, Handling = 0.64, Price = 150000, Color = Color3.fromRGB(20, 21, 24), Order = 66 },
-	{ Id = "bentz_gls", Name = "Mercer GLS", Class = "SUV", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.3, Handling = 0.6, Price = 160000, Color = Color3.fromRGB(235, 235, 235), Order = 67 },
+	{ Id = "bentz_gls", Name = "Mercer Maybech GLS 600", Class = "SUV", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.8, Handling = 0.58, Price = 1200000, Color = Color3.fromRGB(235, 235, 235), Order = 67 },
 	{ Id = "bentz_s680", Name = "Mercer Maybech S680", Class = "Sedan", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.62, Price = 1600000, Color = Color3.fromRGB(110, 20, 30), Accent = Color3.fromRGB(215, 200, 170), Order = 68 },
 	{ Id = "lambrini_countach", Name = "Lambrini Countach LP400S", Class = "Supercar", Tier = "High", TopSpeed = 179, ZeroToSixty = 5.6, Handling = 0.78, Price = 2500000, Color = Color3.fromRGB(235, 235, 235), Order = 69 },
+	-- the cars of 2026-10-18
+	{ Id = "chevo_malibu", Name = "Chevo Malibo LS", Class = "Sedan", Tier = "Starter", TopSpeed = 130, ZeroToSixty = 8.4, Handling = 0.56, Price = 18000, Color = Color3.fromRGB(235, 236, 238), Order = 70 },
+	{ Id = "toyoka_chaser", Name = "Toyoka Chasor Tourer V", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.6, Handling = 0.76, Price = 55000, Color = Color3.fromRGB(200, 202, 206), Order = 71 },
+	{ Id = "bentz_190e", Name = "Mercer 190E Evo II", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 7.1, Handling = 0.74, Price = 80000, Color = Color3.fromRGB(20, 21, 24), Order = 72 },
+	{ Id = "bentz_s65_w221", Name = "Mercer S65 W221", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.66, Price = 140000, Color = Color3.fromRGB(235, 236, 238), Order = 73 },
+	{ Id = "maseroti_levante", Name = "Maseroti Levanto GTS", Class = "SUV", Tier = "Mid", TopSpeed = 181, ZeroToSixty = 4.0, Handling = 0.64, Price = 190000, Color = Color3.fromRGB(88, 92, 98), Order = 74 },
+	{ Id = "lexis_lc500", Name = "Lexis LC500", Class = "Coupe", Tier = "Mid", TopSpeed = 168, ZeroToSixty = 4.4, Handling = 0.78, Price = 240000, Color = Color3.fromRGB(190, 30, 35), Order = 75 },
+	{ Id = "astin_dbx", Name = "Astin Marlin DBX", Class = "SUV", Tier = "High", TopSpeed = 181, ZeroToSixty = 4.3, Handling = 0.66, Price = 450000, Color = Color3.fromRGB(88, 92, 98), Order = 76 },
+	{ Id = "ferrara_california", Name = "Ferrara Californa", Class = "Supercar", Tier = "High", TopSpeed = 193, ZeroToSixty = 3.8, Handling = 0.84, Price = 650000, Color = Color3.fromRGB(20, 21, 24), Order = 77 },
+	{ Id = "bugotti_veyron", Name = "Bugotti Veyrun 16.4", Class = "Hypercar", Tier = "High", TopSpeed = 253, ZeroToSixty = 2.5, Handling = 0.86, Price = 5000000, Color = Color3.fromRGB(20, 21, 24), Accent = Color3.fromRGB(110, 20, 30), Order = 78 },
 }
 
 Cars.List = list

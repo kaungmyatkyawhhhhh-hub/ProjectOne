@@ -336,6 +336,8 @@ def find_wheels(parts, up, length_axis, side_axis, lo, hi):
         c = (a + b) / 2
         if c[up] - lo[up] > 0.75 * diam:  # wheels sit on the ground
             continue
+        if abs(c[side_axis] - (lo[side_axis] + hi[side_axis]) / 2) < 0.25 * (hi[side_axis] - lo[side_axis]):
+            continue  # and out at the sides (seats can be as round and low)
         cands.append((c, diam / 2))
     if len(cands) < 4:
         return None
@@ -533,10 +535,11 @@ def main():
     report["turned"] = align_yaw()
     report["dropped"] = drop_props()
     report["tris_in"] = sum(tris(o) for o in meshes())
-    decimate_to(BUDGET, final=False)
-
+    # the car's extent before thinning: the quick thinning can throw a few points far out
     allv = np.concatenate([verts_world(o) for o in meshes()])
     lo, hi = allv.min(axis=0), allv.max(axis=0)
+    decimate_to(BUDGET, final=False)
+
     size = hi - lo
     up = 2  # glTF comes in Z-up
     length_axis = 0 if size[0] > size[1] else 1

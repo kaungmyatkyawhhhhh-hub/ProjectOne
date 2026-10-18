@@ -126,23 +126,6 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0017, -0.009, 0.0281), face = Vector3.new(-0.0359, 0.2107, 0.9769), r = 0.033, color = Color3.fromRGB(71, 73, 71) },
 	},
-	bentz_gls = {
-		wb = 3.135,
-		brand = "Mercer",
-		hide = { { name = "Body_etk800_lettering_001" } },
-		covers = {
-			{ emblem = true, disc = true, at = Vector3.new(-0.0025, 0.4312, -2.4948), face = Vector3.new(-0.0364, 0.0442, -0.9984), w = 0.2398, h = 0.2398, color = Color3.fromRGB(255, 255, 255) },
-			{ emblem = false, disc = false, at = Vector3.new(-0.0025, 0.6726, -2.4193), face = Vector3.new(0.0818, 0.7414, -0.6661), w = 0.0646, h = 0.0431, color = Color3.fromRGB(255, 255, 255) },
-			{ emblem = true, disc = true, at = Vector3.new(-0.0117, 0.8621, 2.6338), face = Vector3.new(0.0321, 0.5535, 0.8322), w = 0.1287, h = 0.1287, color = Color3.fromRGB(255, 255, 255) },
-		},
-		caps = {
-			FL = { r = 0.043, surface = 0.1411, color = Color3.fromRGB(105, 105, 105) },
-			FR = { r = 0.043, surface = 0.1366, color = Color3.fromRGB(105, 105, 105) },
-			RL = { r = 0.043, surface = 0.1119, color = Color3.fromRGB(105, 105, 105) },
-			RR = { r = 0.043, surface = 0.1074, color = Color3.fromRGB(105, 105, 105) },
-		},
-		hub = { at = Vector3.new(0.0039, -0.0098, 0.0528), face = Vector3.new(0.3016, 0.0629, 0.9513), r = 0.038, color = Color3.fromRGB(28, 28, 28) },
-	},
 	bentz_gt63s = {
 		wb = 3.052,
 		hide = {},
@@ -301,22 +284,6 @@ return {
 			RR = { r = 0.038, surface = 0.0804, color = Color3.fromRGB(144, 135, 110) },
 		},
 		hub = { at = Vector3.new(0.0007, -0.0221, 0.0572), face = Vector3.new(-0.013, 0.1355, 0.9906), r = 0.03, color = Color3.fromRGB(43, 43, 43) },
-	},
-	bnw_750li = {
-		wb = 3.07,
-		brand = "BNW",
-		hide = {},
-		covers = {
-			{ emblem = true, disc = true, at = Vector3.new(0, 0.4645, -2.2358), face = Vector3.new(0.0206, 0.5227, -0.8523), w = 0.0828, h = 0.0552, color = Color3.fromRGB(0, 0, 0) },
-			{ emblem = true, disc = true, at = Vector3.new(0, 0.6009, 2.5548), face = Vector3.new(0.0021, 0.054, 0.9985), w = 0.1031, h = 0.1031, color = Color3.fromRGB(0, 0, 0) },
-		},
-		caps = {
-			FL = { r = 0.048, surface = 0.0527, color = Color3.fromRGB(231, 231, 231) },
-			FR = { r = 0.048, surface = 0.0527, color = Color3.fromRGB(231, 231, 231) },
-			RL = { r = 0.048, surface = 0.0527, color = Color3.fromRGB(231, 231, 231) },
-			RR = { r = 0.048, surface = 0.0527, color = Color3.fromRGB(231, 231, 231) },
-		},
-		hub = { at = Vector3.new(0, -0.01, 0.0661), face = Vector3.new(-0.0438, -0.1292, 0.9907), r = 0.03, color = Color3.fromRGB(54, 54, 54) },
 	},
 	bnw_m3_f80 = {
 		wb = 2.8116,

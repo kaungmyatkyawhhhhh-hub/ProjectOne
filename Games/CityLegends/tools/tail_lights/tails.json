@@ -95,26 +95,6 @@
   ],
   "spots": []
  },
- "bentz_gls": {
-  "shells": [
-   {
-    "name": "Body_etk800_glass_002"
-   },
-   {
-    "name": "Body_gls_run_001"
-   },
-   {
-    "name": "Body_gls_stop_001"
-   },
-   {
-    "name": "Body_RearLights_003"
-   },
-   {
-    "name": "SeeThrough_etk800_glass_002"
-   }
-  ],
-  "spots": []
- },
  "bentz_gt63s": {
   "shells": [
    {
@@ -265,14 +245,6 @@
    }
   ],
   "wb": 2.975
- },
- "bnw_750li": {
-  "shells": [
-   {
-    "name": "Body_Taillight_Glass"
-   }
-  ],
-  "spots": []
  },
  "bnw_m3_f80": {
   "shells": [

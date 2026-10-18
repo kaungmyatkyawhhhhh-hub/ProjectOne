@@ -287,4 +287,10 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - **Grey parts:** the monorail concrete and the new median barrier are darker. Waiting for the owner to point at any other grey parts.
   - Not tested in Roblox yet.
 - **Brabus Maybach removed (2026-10-18, owner):** the Maybach 57S Brabus (`bentz_maybach`) is out of the game: roster, model, and its data. Players who owned it lose it (saves skip unknown cars).
-- **Next import (2026-10-18, owner):** an "Adding new cars" file in `imports`: some new cars, some replacement models. The Mercedes C63 AMG coupe in it is not a car to add: only its cockpit, for the CLA 45 AMG and the GLE. The file had not reached GitHub yet when asked.
+- **New cars and new models (2026-10-18, owner's "Adding new cars" folder, 14 `.glb` files):**
+  - Converted with `auto_car.py` and checked in Blender renders (outside and the driver's seat). Packed as `imports/new_cars/cars_17.fbx` to `cars_20.fbx`; they work once the owner imports them and the cars are copied into `CarModels`.
+  - **New models for cars already in the game:** Lambrini Murcielago LP640 and McLaran MP4-12C (were Roblox models), BNW 750Li (now the G12 750Li xDrive, real wheelbase 3.21 m) and the Mercer GLS, which is now the **Mercer Maybech GLS 600** (High tier, $1.2M).
+  - **New cars (9):** Chevo Malibo LS (Starter, $18k), Toyoka Chasor Tourer V ($55k), Mercer 190E Evo II ($80k), Mercer S65 W221 ($140k), Maseroti Levanto GTS ($190k), Lexis LC500 ($240k), Astin Marlin DBX ($450k), Ferrara Californa ($650k) and Bugotti Veyrun 16.4 (Hypercar, $5M, 253 mph). Roster: 77 cars.
+  - **C63 AMG coupe (2017):** not a car. Its cockpit (`bentz_c63c`, a cabin donor like the 458 Speciale) goes into the Mercer CLA 45 and the Mercer GLE 53, with the AMG cluster drawn on.
+  - Assumed which files replace which car (the owner didn't say): the LP640, 12C, 750Li and GLS files replace those cars; the S-Class W221 is a new car next to the S65 W222.
+  - Converter fixes: wheels must sit out at the car's sides (the Murcielago's seats were taken for wheels), and the car is measured before its quick thinning (the Malibu's shrank into a 10 m wide car). The GLS 600's front bumper came out with a torn piece hanging down; it was cut off.

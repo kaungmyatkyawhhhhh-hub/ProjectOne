@@ -40,10 +40,6 @@ return {
 		shells = { { name = "SeeThrough_red_glass1" } },
 		spots = {},
 	},
-	bentz_gls = {
-		shells = { { name = "Body_etk800_glass_002" }, { name = "Body_gls_run_001" }, { name = "Body_gls_stop_001" }, { name = "Body_RearLights_003" }, { name = "SeeThrough_etk800_glass_002" } },
-		spots = {},
-	},
 	bentz_gt63s = {
 		shells = { { name = "SeeThrough_d2phong12SG1" } },
 		spots = {},
@@ -87,10 +83,6 @@ return {
 			{ at = Vector3.new(-0.5272, 0.5171, 2.5087), face = Vector3.new(-0.0288, 0.1538, 0.9877), w = 0.4554, h = 0.0656 },
 			{ at = Vector3.new(0.5272, 0.5171, 2.5087), face = Vector3.new(0.0288, 0.1538, 0.9877), w = 0.4554, h = 0.0656 },
 		},
-	},
-	bnw_750li = {
-		shells = { { name = "Body_Taillight_Glass" } },
-		spots = {},
 	},
 	bnw_m3_f80 = {
 		shells = { { name = "SeeThrough_r_glass" } },

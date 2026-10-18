@@ -72,8 +72,20 @@ CarSkin.CLUSTER_STYLE = {
 	byt_seal = "U8", -- wide electric screen
 	bentz_s680 = "W213",
 	bentz_e400 = "W213", -- the E63 S W213 model: its wide glass screen
-	bentz_gls = "W213",
-	bnw_750li = "BMWClassic",
+	bentz_gls = "W213", -- Maybach GLS 600: wide glass screen
+	bnw_750li = "BMWLiveCockpit", -- the 750Li G12 (2026-10-18 model)
+	bentz_gle53 = "AMG", -- in the C63 coupe's cabin, like the CLA 45
+	-- the cars of 2026-10-18 (looks from the real cars)
+	ferrara_california = "Ferrari",
+	bentz_s65_w221 = "Maybach57", -- W221: round chrome dials
+	bentz_190e = "Maybach57",
+	toyoka_chaser = "Toyota",
+	lexis_lc500 = "LFA", -- the LC takes the LFA's moving-ring screen
+	astin_dbx = "Aston",
+	lambrini_lp640 = "Murcielago", -- the 2026-10-18 model
+	maseroti_levante = "Modern",
+	chevo_malibu = "Modern",
+	bugotti_veyron = "Maybach57",
 } :: { [string]: string }
 
 -- where a car's own cluster screen is (measured on the model): its middle from the middle of the
@@ -190,6 +202,10 @@ CarSkin.INTERIOR_DONOR = {
 	-- owner (2026-10-17): the LP700's own cabin looks off and blocky; the LP750's goes in, with the
 	-- LP700's own cluster design over its screen (not the LP750's)
 	lambrini_lp700 = { from = "lambrini_lp750", rear = 1.8 },
+	-- owner (2026-10-18): the CLA 45 and the GLE take the 2017 C63 AMG coupe's cockpit (a cabin
+	-- donor only, not a car in the roster)
+	bentz_cla45 = { from = "bentz_c63c", rear = 1.8 },
+	bentz_gle53 = { from = "bentz_c63c", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
 
 -- cars that take only another model's steering wheel, put where their own one sits
@@ -351,7 +367,8 @@ local function readImported(src: Instance): Imported
 		if swap and donorSrc then
 			local dspec = Cars.ById[swap.from]
 			local ok, err = pcall(function()
-				local donorDims = if dspec then CarBuilder.getDims(dspec.Class, dspec.Id) :: any else dims
+				-- a donor not in the roster: the car's class at the donor's own wheelbase (REAL_WB)
+				local donorDims = if dspec then CarBuilder.getDims(dspec.Class, dspec.Id) :: any else CarBuilder.getDims(spec.Class, swap.from) :: any
 				transplantInterior(out, readGeneric(donorSrc :: Instance, donorDims), swap.rear)
 			end)
 			if not ok then
