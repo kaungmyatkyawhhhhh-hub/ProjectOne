@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (19 Oct 2026)
+- 19 Oct afternoon: inner quad bulge fixed everywhere; mirror and statue now have your real body shape; crew names and tags are unique (ARAQ313 is now [SRT1]); Top Crews member view tested; upper traps fixed on your body, other bodies wait for the torso import.
 - 19 Oct: the owner changed bodies, titles and music in Studio; everything is written down in [[2026-10-19 GYM ARC Owner changes]] (narrower shoulders, new mass monster sizes for your own muscles, three rival titles one rarity higher, three songs per area). Nothing was "fixed".
 - Top crews: tapping a crew shows its members ([[GYM ARC - Crews]]); saved to git 19 Oct.
 - 15 Oct: the Store opens right away, phones get the phone machine layout, the menu always fills the screen, the right cards stay under the top bar, and mirrors are plain (no reflection). See [[2026-10-15 GYM ARC Menu art]].
