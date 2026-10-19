@@ -78,3 +78,7 @@ Hiding the skin layer made the trainers look like floating clothes (no bare skin
 ## Walk and run (19 Oct, prompt 9)
 Trainers slid without moving their legs: their animation tracks were loaded before the trainer was put in the world, so they never played. Now they load the first time he's shown, and his speed is measured from how far he moved each frame: idle under 0.5 studs/s, walk under 12, run above (Roblox's standard R15 idle / walk / run, 0.2 s crossfades); walk and run play at a speed matched to his pace so the feet don't skate. Far-away trainers still freeze. Facing: he faces where he walks and faces you while standing (unchanged). Client only.
 ![[GYM ARC/Screenshots/joints/straight_full_with_trainer.jpg]]
+
+## Heights (19 Oct, prompt 11)
+In the players' height system (Config/Trainers `heightInches`, 60 = 5'0"), by shop order: Rookie Coach (Coach Sam) 5'0", Cardio Coach (Coach Nia) 5'5", Money Coach (Coach Lou) 6'0", Pump Coach (Coach Rex) 6'6". TrainerService scales the whole rig when it builds the models (`NpcService.ApplyBody`, like the giant NPCs: same body and proportions, width scales unchanged, so the torso stays the same width). Feet stay on the floor (the client places him from his own hip height), the speech bubble sits on his head, and the walk / run playback already scales with his size. There is no 15-stud look-at on trainers (that's Coach Dex at the desk), so nothing to change there.
+![[GYM ARC/Screenshots/trainers/heights_lineup.jpg]]
