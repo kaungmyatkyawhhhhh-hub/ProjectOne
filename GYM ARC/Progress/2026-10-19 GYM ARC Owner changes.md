@@ -111,3 +111,6 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 11 Trainer heights]]. Rookie 5'0", Cardio 
 Prompt: [[2026-10-19 GYM ARC Prompt - 12 Bigger upper traps]]. Owner: 0.52 was too big, now 0.32 studs at the full look (was 0.26), more at mass monster. Own body done; 12 torso files wait for the import. [[GYM ARC - Muscles and Bodies]]
 
 - Upper traps import: 11 of 12 torso files set up; BS_Torso_Front_g080 was the old 0.52 file, waiting for a re-import.
+
+## Inner quad ball removed (prompt 13)
+Prompt: [[2026-10-19 GYM ARC Prompt - 13 Remove inner quad ball]]. Torso g080 re-import set up (all 12 upper-traps torso files done). Inner quads and inner hamstrings get no growth; the joint balls only show while bent. 24 thigh files wait for the import. [[GYM ARC - Bug - Inner quad bulge]]

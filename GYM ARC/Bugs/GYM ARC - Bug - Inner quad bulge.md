@@ -1,7 +1,7 @@
 ---
 date: 2026-10-19
 tags: [gymarc, bug]
-status: fixed
+status: in progress
 aliases: ["GYM ARC - Bug - Inner thigh bulge"]
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
@@ -49,3 +49,11 @@ Stage meshes, old vs fixed (full look, mass monster):
 ![[GYM ARC/Screenshots/quad_fix/stage_gmon_old.jpg]]
 ![[GYM ARC/Screenshots/quad_fix/stage_gmon_new.jpg]]
 All 20 shots: `Screenshots/quad_fix/` (front, 3/4, side, low angle).
+
+## Second pass (19 Oct, owner: "the ball bump on the inner quads is still there, remove it")
+Three things made ball shapes on the inner legs, all removed:
+- **The low inner teardrop** kept above the knee in the first fix: the inner side of the quads now gets no growth at any height (`QUADS` InnerFrom / InnerTo); the front and outer quad keep theirs.
+- **The hamstrings' inner side** (big at mass monster, the owner's 2.8 size) made a round lump between the knees: no inner growth there either. The adductor fill keeps the inner thigh smooth and full.
+- **The knee / elbow joint balls** (prompt 9) stuck out of straight knees at big sizes as pale bumps: they now show only while the joint is bent past 30 degrees (fully from 50), when the gap they close opens.
+Your own body: done. Everyone else: 24 rebuilt thigh files (skin + shorts) in `Downloads\gym_arc_meshes_lowpoly_innerfix\other_player_stages\` wait for the import (then `tools/legs_stage_setup.luau` + `tools/quad_fix_patch_config.py`). The joint ball change is code only: already on every body.
+![[GYM ARC/Screenshots/quad_fix/inner_ball_removed_monster.jpg]]
