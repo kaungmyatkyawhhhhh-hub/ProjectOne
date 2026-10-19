@@ -114,3 +114,4 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 12 Bigger upper traps]]. Owner: 0.52 was t
 
 ## Inner quad ball removed (prompt 13)
 Prompt: [[2026-10-19 GYM ARC Prompt - 13 Remove inner quad ball]]. Torso g080 re-import set up (all 12 upper-traps torso files done). Inner quads and inner hamstrings get no growth; the joint balls only show while bent. 24 thigh files wait for the import. [[GYM ARC - Bug - Inner quad bulge]]
+- Thigh files imported and set up: every body is free of the inner quad ball now.
