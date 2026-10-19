@@ -108,4 +108,4 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 11 Trainer heights]]. Rookie 5'0", Cardio 
 - Trainer width and depth scale with height; Wide / V-Taper shoulders for the two tallest. Rejoin bug fixed (the second trainer was dropped before the pass was known). [[GYM ARC - Personal Trainers]]
 
 ## Bigger upper traps (prompt 12)
-Prompt: [[2026-10-19 GYM ARC Prompt - 12 Bigger upper traps]]. Twice the height and thickness, more at mass monster. Own body done; 12 torso files wait for the import. [[GYM ARC - Muscles and Bodies]]
+Prompt: [[2026-10-19 GYM ARC Prompt - 12 Bigger upper traps]]. Owner: 0.52 was too big, now 0.32 studs at the full look (was 0.26), more at mass monster. Own body done; 12 torso files wait for the import. [[GYM ARC - Muscles and Bodies]]

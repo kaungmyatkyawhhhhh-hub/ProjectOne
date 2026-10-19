@@ -10,3 +10,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ```text
 make the upper traps way bigger
 ```
+
+## Follow-up (same day)
+```text
+make it smaller like 0.32 at full look
+```
