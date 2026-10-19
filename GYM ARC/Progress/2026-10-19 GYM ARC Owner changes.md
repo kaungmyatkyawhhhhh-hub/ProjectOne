@@ -96,3 +96,6 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 9 Joint holes trainer walk run and fuller 
 - Elbows and knees: skin balls fill the joints on every body ([[GYM ARC - Muscles and Bodies]]). Checked at mass monster with a deep bend: no holes; straight: nothing sticks out.
 - Trainers: they really animate now (the tracks never played before), idle / walk / run by measured speed ([[GYM ARC - Personal Trainers]]).
 - The prompt's title says "fuller chest" but its text has no chest part: not done.
+
+## Flex poses (prompt 10)
+Prompt: [[2026-10-19 GYM ARC Prompt - 10 Fix flex poses]]. The four flex poses were redone and checked at both sizes; 0.3 s blends and a breathing sway. Details: [[GYM ARC - Poses and Posing Stage]].

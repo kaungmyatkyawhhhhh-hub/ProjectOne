@@ -43,3 +43,10 @@ Real bodybuilding poses you can strike anywhere, scored by judges on the beach p
 ![[GYM ARC/Screenshots/emote_most_muscular.jpg]]
 ![[GYM ARC/Screenshots/emote_side_chest.jpg]]
 ![[GYM ARC/Screenshots/emote_victory_wave.jpg]]
+
+## Flex poses redone (19 Oct, prompt 10)
+Front double biceps, side chest, back double biceps and abs and thigh were redone against the owner's reference photos (body position only), in the same system (`PoseData` joint angles, blended by `PoseController` on every client; the statue and mirror use the same table through `PoseApply`). Measured at look 0 and the mass monster: no hand or forearm inside the head, every foot on the floor (raised heels stand on their toes). Wider bodies spread their own shoulders, so the arms open out with size. Blend in / out 0.3 s, and a slow breath (chest, neck, shoulders) while holding. The back double biceps heel was 1 stud up before; now about 0.3. (Note: the old file comment had the shoulder X sign backwards; fixed.) The pose angles were tuned on the posing character itself in one play test: the mass monster shots below.
+![[GYM ARC/Screenshots/poses/front_double_biceps.jpg]]
+![[GYM ARC/Screenshots/poses/side_chest.jpg]]
+![[GYM ARC/Screenshots/poses/back_double_biceps.jpg]]
+![[GYM ARC/Screenshots/poses/abs_and_thigh.jpg]]
