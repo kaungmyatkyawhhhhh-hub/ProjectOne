@@ -89,3 +89,8 @@ Target: your reference picture (`Downloads\gym_arc_traps_shoulders_reference.png
 ## Joint fillers (19 Oct, prompt 9)
 Bent elbows and knees opened a see-through gap (the limb meshes are open at the joint). Every body with forearm / calf stages (yours, other players, NPCs, statue, mirror) now has a skin-colored ball on each elbow and knee, on the joint so it follows the pose, sized from the forearm / calf stage's girth (grows with the muscle; inside the limb while straight). One Ball part per joint, resized only when the stage changes (`Shared/LimbStages`, `JOINT_SIZE`). Not done: capping the open mesh ends (the ball already hides the inside). The ball is plain skin color without the skin texture, so in a deep bend it reads slightly smoother / lighter.
 ![[GYM ARC/Screenshots/joints/bent_monster.jpg]]
+
+## Bigger upper traps (19 Oct, owner: "make the upper traps way bigger")
+The traps yoke is twice as tall (0.52 studs at the full look, was 0.26), twice as thick from behind, reaches further down the upper back, and keeps growing more toward the mass monster (shape size 1.6, was 1.35). Your own body: done. Everyone else: 12 rebuilt torso files in `Downloads\gym_arc_meshes_lowpoly_trapsbig\other_player_stages\` wait for the import (then `tools/torso_stage_setup.luau` + `tools/quad_fix_patch_config.py`).
+![[GYM ARC/Screenshots/shoulders/traps_big_back34.jpg]]
+![[GYM ARC/Screenshots/shoulders/traps_big_front.jpg]]
