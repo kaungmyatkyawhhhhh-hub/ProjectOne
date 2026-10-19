@@ -336,6 +336,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-19 GYM ARC Prompt - 10 Fix flex poses]]
 - [[2026-10-19 GYM ARC Prompt - 11 Trainer heights]]
 - [[2026-10-19 GYM ARC Prompt - 12 Bigger upper traps]]
+- [[2026-10-19 GYM ARC Prompt - 13 Remove inner quad ball]]
 
 ### Config
 - [[GYM ARC - Config values]]
