@@ -91,6 +91,6 @@ Bent elbows and knees opened a see-through gap (the limb meshes are open at the 
 ![[GYM ARC/Screenshots/joints/bent_monster.jpg]]
 
 ## Bigger upper traps (19 Oct, owner: "make the upper traps way bigger")
-The traps yoke is taller (0.32 studs at the full look, was 0.26; the owner tried 0.52 first, then asked for 0.32), thicker from behind (0.1), reaches further down the upper back, and keeps growing more toward the mass monster (shape size 1.6, was 1.35). Your own body: done. Everyone else: 12 rebuilt torso files in `Downloads\gym_arc_meshes_lowpoly_trapsbig\other_player_stages\` wait for the import (then `tools/torso_stage_setup.luau` + `tools/quad_fix_patch_config.py`).
+The traps yoke is taller (0.32 studs at the full look, was 0.26; the owner tried 0.52 first, then asked for 0.32), thicker from behind (0.1), reaches further down the upper back, and keeps growing more toward the mass monster (shape size 1.6, was 1.35). Your own body: done. Everyone else: 11 of the 12 rebuilt torso files are imported and set up (StageMeshBackup `Traps032`). `BS_Torso_Front_g080` was imported from the earlier 0.52 file, so it was skipped: re-import that one file from `Downloads\gym_arc_meshes_lowpoly_trapsbig\other_player_stages\`, then run `tools/torso_stage_setup.luau` (only that entry) + `tools/quad_fix_patch_config.py`.
 ![[GYM ARC/Screenshots/shoulders/traps_big_back34.jpg]]
 ![[GYM ARC/Screenshots/shoulders/traps_big_front.jpg]]
