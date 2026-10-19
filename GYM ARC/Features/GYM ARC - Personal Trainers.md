@@ -82,3 +82,9 @@ Trainers slid without moving their legs: their animation tracks were loaded befo
 ## Heights (19 Oct, prompt 11)
 In the players' height system (Config/Trainers `heightInches`, 60 = 5'0"), by shop order: Rookie Coach (Coach Sam) 5'0", Cardio Coach (Coach Nia) 5'5", Money Coach (Coach Lou) 6'0", Pump Coach (Coach Rex) 6'6". TrainerService scales the whole rig when it builds the models (`NpcService.ApplyBody`, like the giant NPCs: same body and proportions, width scales unchanged, so the torso stays the same width). Feet stay on the floor (the client places him from his own hip height), the speech bubble sits on his head, and the walk / run playback already scales with his size. There is no 15-stud look-at on trainers (that's Coach Dex at the desk), so nothing to change there.
 ![[GYM ARC/Screenshots/trainers/heights_lineup.jpg]]
+
+## Width grows with height (19 Oct, owner)
+Every trainer's width and depth (shoulders, chest, back, arms, legs) scale by the same amount as his height, so the taller ones keep the same thick proportions (BodyShape.ApplyWidths, like the giant NPCs). On top: Coach Lou (6'0") the Wide frame's shoulders (1.05x), Coach Rex (6'6") the V-Taper frame (1.1x) plus a full-look shoulder bonus (1.1x): shoulders 1.26 and 1.57 of the 5'0" trainer. Config: `frame`, `shoulderBonus`.
+
+## Trainer gone after a rejoin (bug fixed, 19 Oct)
+On join the equipped list was cut to the slots known at that moment, before the Extra Trainer pass was checked, and that cut list was saved, so the second trainer was lost on every rejoin. Now the save keeps up to the most slots anyone can have and only the trainers that follow you are capped to your slots; the Coaches window shows only those as coaching. Not testable in Studio (needs a rejoin with the pass): please check in the live game.

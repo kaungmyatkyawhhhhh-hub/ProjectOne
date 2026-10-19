@@ -102,3 +102,7 @@ Prompt: [[2026-10-19 GYM ARC Prompt - 10 Fix flex poses]]. The four flex poses w
 
 ## Trainer heights (prompt 11)
 Prompt: [[2026-10-19 GYM ARC Prompt - 11 Trainer heights]]. Rookie 5'0", Cardio 5'5", Money 6'0", Pump 6'6"; whole rig scaled, feet on the floor, widths kept. Details: [[GYM ARC - Personal Trainers]].
+
+## Poses second pass, trainer widths, trainer rejoin bug
+- Double biceps now show a clear elbow bend; side chest forearm no longer goes through the chest (rests on it at the full look). Mass monster side chest still sinks into the belly: owner decides. [[GYM ARC - Poses and Posing Stage]]
+- Trainer width and depth scale with height; Wide / V-Taper shoulders for the two tallest. Rejoin bug fixed (the second trainer was dropped before the pass was known). [[GYM ARC - Personal Trainers]]
