@@ -28,7 +28,9 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - The whole core game is built and tested in Studio: training, 18 muscles, genetics, Growth Spurts, titles, stats, quests, spotting, arm wrestling, the town and three gyms.
 - 13 Oct: Growth Spurts now stop at 7'0" ([[GYM ARC - Growth Spurts]]), the NPC size glitch is fixed ([[GYM ARC - NPC Regulars and Gym Cat]]), and soft shutdown is in ([[GYM ARC - Soft Shutdown]]). See [[2026-10-13 GYM ARC Height cap and soft shutdown]].
 - 13 Oct (new features run, in progress): the Posing Competition is in ([[GYM ARC - Posing Competition]]); every sound id is picked ([[GYM ARC - Music and Sounds]]). See [[2026-10-13 GYM ARC New features run]].
-- Monetization is OFF; no ids are set yet ([[GYM ARC - Monetization]]).
+- Monetization is ON with the owner's pass / product ids ([[GYM ARC - Monetization]]).
+- The final UI is the Black + Gold kit ([[2026-10-14 GYM ARC Final UI Black and Gold]]); all UI uses `Shared.UI.Theme` / `Shared.UI.Kit`.
+- The owner edits bodies by hand in Studio too (October): see [[2026-10-19 GYM ARC Owner changes]] and [[GYM ARC - Muscles and Bodies]].
 - Not verified yet: phones on a real device, and anything that needs 2 players (spotting, crews, arm wrestling against a player).
 
 ## What's next
