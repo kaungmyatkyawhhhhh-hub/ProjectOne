@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 21 Oct: posing show every 5 minutes: height divisions, 4 called poses, judges out of 100 with the breakdown, show ladder prizes, trophies, titles, a timer with JOIN. See [[2026-10-21 GYM ARC Posing show]].
 - 21 Oct: boosts inventory: Inventory > Boosts with 5 items (Protein Shake = the old Energy Shake, Coconut Water, Creatine, Protein Powder, Supplements), USE or EQUIP, timers by the stamina bar. See [[2026-10-21 GYM ARC Boosts inventory]].
 - 21 Oct: playtest fixes: the tutorial can't get stuck (shake button always on screen, arrow, 15 s safety net), stamina refills on the machine in 10 s and lasts 60-90 s, the Growth Spurt says what it needs (with GO paths), reward popups and a READY TO GROW popup, first Growth Spurt in ~5 min (was 17), Store opens on Auras. See [[2026-10-21 GYM ARC Playtest fixes]].
 - 20-21 Oct: playtest review as a new kid on a phone: biggest problems are the first 5 minutes (stuck on the shake step at 0 stamina), stamina breaks every 30 s, no next-goal hint on machines, silent unlocks, and nothing to buy with coins. The Shop now shows from the start. See [[2026-10-20 GYM ARC Playtest review]].
@@ -79,6 +80,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-20 GYM ARC Playtest review]]
 - [[2026-10-21 GYM ARC Playtest fixes]]
 - [[2026-10-21 GYM ARC Boosts inventory]]
+- [[2026-10-21 GYM ARC Posing show]]
 - Prompts: the `Prompts` folder (every prompt, saved as it was sent)
 - Screenshots: the `Screenshots` folder (copies of the repo's `screenshots/`)
 
@@ -359,6 +361,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Prompt - 15 Upper traps texture and back shape]]
 - [[2026-10-20 GYM ARC Prompt - 16 Beta tester badge]]
 - [[2026-10-20 GYM ARC Prompt - 17 Playtest like a real player]]
+- [[2026-10-20 GYM ARC Prompt - 18 Posing show every 5 minutes]]
 - [[2026-10-21 GYM ARC Prompt - 20 Playtest fixes]]
 
 ### Config
