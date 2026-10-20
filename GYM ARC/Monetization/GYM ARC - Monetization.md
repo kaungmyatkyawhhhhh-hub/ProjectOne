@@ -77,6 +77,13 @@ an id from the Creator Hub, pasted into `Config/Titles.luau` (`badgeId`). See [[
 | Skyscraper | Legendary | Grow to 7'0" | none | No badge yet (badgeId = nil) |
 | Defied Genetics | Legendary | Take a D-grade muscle group to 130% of the Growth Spurt goal | none | No badge yet (badgeId = nil) |
 
+### BETA TESTER badge (20 Oct)
+| Badge | How to get it | Badge ID | Status |
+|---|---|---|---|
+| BETA TESTER | Join the game while the beta is on | 471600537426484 | ON (checked: the badge exists and is enabled) |
+
+Every player who joins gets it once, and sees a gold toast "BETA TESTER badge earned!" the first time (after the main menu). The id and the switch are in `Config/Titles.luau`: set `BETA_BADGE_ENABLED = false` when the beta ends. Server: `BetaBadgeService` (checks the badge, then awards it; each call is in pcall and retried once after 5 s; joining never waits; never in Studio). Prompt: [[2026-10-20 GYM ARC Prompt - 16 Beta tester badge]].
+
 ### Planned (not built yet)
 
 From [[2026-10-13 GYM ARC Prompt - Monetization and hype]]. This prompt turns monetization ON and replaces the list

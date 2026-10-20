@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (20 Oct 2026)
+- 20 Oct: BETA TESTER badge: every player who joins during the beta gets it, with a gold toast the first time. Turn it off with `BETA_BADGE_ENABLED = false` in Config/Titles ([[GYM ARC - Monetization]]).
 - 20 Oct: the lag after the body changes is fixed: your body was rebuilt up to 26 times a second while training; now at most once a second (about 33 -> 46 FPS on PC). Low-end phones show the low-poly body for you when the camera is far. New: a cheap pump (body scales up and back with a gold flash and sparks) on level-ups and poses, soft blob shadows under every body, and all light shadows off on phones / low-end devices. See [[2026-10-20 GYM ARC Body lag]].
 - 19 Oct late: elbows and knees no longer show see-through holes when bent; trainers now idle, walk and run instead of sliding.
 - 19 Oct night: the 48 body meshes are imported and set up: everyone (other players, NPCs, statue, mirror) now has the new traps, shoulders, back and adductors.
@@ -344,6 +345,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-19 GYM ARC Prompt - 13 Remove inner quad ball]]
 - [[2026-10-20 GYM ARC Prompt - 13 Find the body lag]]
 - [[2026-10-20 GYM ARC Prompt - 15 Cheap pump, blob shadows, light shadows]]
+- [[2026-10-20 GYM ARC Prompt - 16 Beta tester badge]]
 
 ### Config
 - [[GYM ARC - Config values]]
