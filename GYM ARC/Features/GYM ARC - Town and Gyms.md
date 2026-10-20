@@ -37,3 +37,6 @@ A sunny beach-side fitness town with three gyms: the warm old-school starter gym
 ![[GYM ARC/Screenshots/starter_gym_bigger_wide.jpg]]
 ![[GYM ARC/Screenshots/pro_gym_bigger_wide.jpg]]
 ![[GYM ARC/Screenshots/beach_real_machines_row.jpg]]
+
+## 21 Oct (prompt 16)
+- The starter gym has a copy of every pro machine (two columns in the middle of the room) and every gym's dumbbell rack has Train spots (starter 6, beach 6, pro 4). See [[GYM ARC - Machines]].

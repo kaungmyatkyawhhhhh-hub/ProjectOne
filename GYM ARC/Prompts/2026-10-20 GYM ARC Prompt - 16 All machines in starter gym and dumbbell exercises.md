@@ -1,7 +1,7 @@
 ---
 date: 2026-10-20
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 16 All machines in starter gym + dumbbell exercises
 

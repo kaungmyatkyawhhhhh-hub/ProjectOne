@@ -54,3 +54,10 @@ One reusable machine system: every machine is a config entry with the muscles it
 - Tested: a brand-new save went from 45 lb to 135 lb with 38 coins and no coins were taken.
 - Because heavier weights now come sooner, the Growth Spurt goals were re-tuned so each spurt still takes about the same play time (see [[GYM ARC - Config values]]).
 ![[GYM ARC/Screenshots/ui_compare_v2_free_weights_new_save.jpg]]
+
+## Starter gym copies and dumbbells (21 Oct, prompt 16)
+- The starter gym has one copy of every pro machine (model attribute Gym = "Starter", `tools/builders/StarterProMachines`); `machine.openAt = 0` opens those exercises from the start, the pro gym's copies still need Growth Spurt 2 (`Machines.GymOpenAt`). New helper `Machines.OpenAt(machine)` for "is this exercise open anywhere".
+- Dumbbells: Train spots at every rack (`tools/builders/DumbbellSpots`: small machine models, tag "Machine", attribute Dumbbell = true, MachineId = the exercise picked). The prompt opens the picker (`Shared/UI/DumbbellPicker`, action "Dumbbell" on MachineAction: the server checks the spot is free and within 14 studs, or switches the exercise on your own spot).
+- 11 exercises in `Machines.Dumbbells` (ids DB*, gym "Dumbbell", tier set "Dumbbell" 10-100 lb, `gainScale` 0.85, `grip` = the hand axis the handle lies along, `hands` = 1 for one-dumbbell moves). Poses `DB_*` (Config/Poses), moves in MachineClient (`bars.dbArm` / `bars.dbBoth`).
+- MachineService welds the dumbbells to the hands (folder "HeldDumbbells" on the character), resized when the weight changes and removed on leave. NPC regulars never use the spots. The sign over a spot says DUMBBELLS / TRAIN with no NEW mark.
+- Machine HUD: EXERCISE button above STOP for dumbbells. Settings: `dumbbellLast` (the picker's first card).
