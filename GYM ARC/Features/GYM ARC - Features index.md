@@ -65,6 +65,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Studio Test Hooks]]: Workspace attributes for testing (done)
 
 - [[GYM ARC - Performance]]: culling, LOD and streaming for phones (in progress)
+- [[GYM ARC - Boosts Inventory]]: Inventory > Boosts: shakes, Coconut Water, Creatine, Protein Powder, Supplements (use / equip, timers)
 
 ## See also
 - [[GYM ARC - Config values]], [[GYM ARC - Assets]]

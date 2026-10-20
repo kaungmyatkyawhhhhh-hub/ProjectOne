@@ -88,3 +88,6 @@ The Titles tile is now **INVENTORY** (backpack icon). Its window has three tabs,
 - **Auras:** the aura grid and the big card for the picked aura (see [[GYM ARC - Aura]]).
 - **Items:** Energy Shakes (count + DRINK), DNA Tokens (count + "Use in Genetics", which opens the Genetics screen), and every boost running now with its timer (2x EXP, 2x Coins, VIP, Endless Stamina, Energy Shake, Server Boost, smoothie bar drinks).
 The Store's Auras tab and the "new aura" message now open the Inventory.
+
+## Boosts tab (21 Oct, prompt 14)
+The Inventory has a **Boosts** tab first now (Boosts | Titles | Auras | Items): see [[GYM ARC - Boosts Inventory]]. The Items tab keeps DNA Tokens and the running boosts (the shakes moved to Boosts).
