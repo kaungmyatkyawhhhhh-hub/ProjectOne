@@ -108,3 +108,6 @@ Replaces the 19 Oct back fill. The back is now sculpted from muscle bellies (`Mu
 ### Part 3 (20 Oct): real trap depth
 The torso's top lid is re-meshed densely (3,212 triangles, its own piece `Top`), the traps are a smooth height profile (high behind the neck, a concave slope to the shoulder, rolling into the back), and the mass monster skin maps are softer (Config/SkinStages Stage4 / Stage5). See [[2026-10-20 GYM ARC Traps texture and back]].
 ![[GYM ARC/Screenshots/traps_back/part3_back_gmon.jpg]]
+
+## Body Alter skins (21 Oct, prompt 21)
+At 7'0" a Body Alter's texture set replaces the 5 skin stages at every muscle size (the shape still grows with the muscles), tinted with the skin color, on your live body and on the stage meshes others see: the character's "Alter" attribute names a SurfaceAppearance `Alter_<id>` in ReplicatedStorage.SkinStages (MuscleRig `skinKey`). See [[GYM ARC - Body Alters]].

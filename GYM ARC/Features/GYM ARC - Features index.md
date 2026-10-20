@@ -70,3 +70,4 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 
 ## See also
 - [[GYM ARC - Config values]], [[GYM ARC - Assets]]
+- [[GYM ARC - Body Alters]]: after 7'0", alters with new skins and a gains bonus (21 Oct)
