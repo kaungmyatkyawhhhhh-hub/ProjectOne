@@ -100,3 +100,7 @@ Your live body is rewritten in one round at most once a second (`MuscleRig` `WRI
 
 ## Blob shadows (20 Oct)
 No body mesh casts a shadow. Every body gets a soft dark blob shadow on the floor under it (BlobShadowClient, sized to the body's width). See [[2026-10-20 GYM ARC Body lag]].
+
+## Traps texture and sculpted back (20 Oct, prompt 15)
+Replaces the 19 Oct back fill. The back is now sculpted from muscle bellies (`MuscleMeshes` `BACK_BELLIES`): a trapezius diamond (upper traps, mid-trap lobes, lower traps), a spine groove, shoulder-blade and teres bumps, lats sweeping out under the arms, and erector columns. Each grows with its own muscle; the data's own back growth gives way on the back-facing surface. The top of the torso is re-meshed (MuscleData `UpperTorso__Unified__cap`) and the torso has a new texture map that follows the surface (`UpperTorso__Unified__uvfix`, read by `applyUVPatch`; MuscleRig draws those triangles with their own corners). Low-poly torso stages: 14 rebuilt files in `Downloads\gym_arc_meshes_lowpoly_trapsback\other_player_stages\` (waiting for the owner's import). Your mass monster numbers for Rhomboids / LowerBack / Lats no longer shape the back (owner to decide). Details: [[2026-10-20 GYM ARC Traps texture and back]].
+![[GYM ARC/Screenshots/traps_back/back_g060.jpg]]
