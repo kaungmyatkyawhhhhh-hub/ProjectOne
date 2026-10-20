@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 21 Oct: equipped items show in a Black + Gold hotbar (slots 1-9) above the boost timers; the skate button bobs and shines, bounces on tap, spins its wheels and glows gold while skating. See [[2026-10-21 GYM ARC Hotbar and skate button]].
 - 21 Oct: every pro machine now also stands in the starter gym (open from the start) and every dumbbell rack has Train spots with 11 dumbbell exercises (picker, own moves, dumbbells in the hands). Growth Spurt 2 level 56 -> 52. See [[2026-10-21 GYM ARC Starter machines and dumbbells]].
 - 21 Oct: PUMP SHOP in town (on the old parking lot): supplements, gear with perks, apparel, DNA Lab, all for coins, priced from measured coins per minute. See [[2026-10-21 GYM ARC Pump Shop]].
 - 21 Oct: posing show every 5 minutes: height divisions, 4 called poses, judges out of 100 with the breakdown, show ladder prizes, trophies, titles, a timer with JOIN. See [[2026-10-21 GYM ARC Posing show]].
@@ -85,6 +86,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-21 GYM ARC Posing show]]
 - [[2026-10-21 GYM ARC Pump Shop]]
 - [[2026-10-21 GYM ARC Starter machines and dumbbells]]
+- [[2026-10-21 GYM ARC Hotbar and skate button]]
 - Prompts: the `Prompts` folder (every prompt, saved as it was sent)
 - Screenshots: the `Screenshots` folder (copies of the repo's `screenshots/`)
 

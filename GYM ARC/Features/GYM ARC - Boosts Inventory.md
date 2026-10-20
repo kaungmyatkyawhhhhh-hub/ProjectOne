@@ -34,3 +34,6 @@ Built 21 Oct ([[2026-10-20 GYM ARC Prompt - 14 Boosts inventory]]). Code: `Confi
 - Placeholder icons (Config/UI icons in a colored tile) until the owner's art.
 - In the Studio phone test the Roblox hotbar didn't draw; pressing 1 still held the item and a click used it. Check EQUIP on a real phone.
 - Protein Powder and Creatine both end up as EXP boosts (Growth Spurt progress is muscle EXP).
+
+## Hotbar (21 Oct)
+- EQUIP puts the item in our own Black + Gold hotbar (`HotbarClient`; Roblox's toolbar is off because it covered the stamina bar): slots 1-9 with the icon and count, tap or the number key to hold / put away, the held one gold-bordered. It sits above the boost timers row. See [[2026-10-21 GYM ARC Hotbar and skate button]].
