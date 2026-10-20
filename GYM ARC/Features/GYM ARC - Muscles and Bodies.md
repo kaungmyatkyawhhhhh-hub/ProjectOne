@@ -96,4 +96,7 @@ The traps yoke is taller (0.32 studs at the full look, was 0.26; the owner tried
 ![[GYM ARC/Screenshots/shoulders/traps_big_front.jpg]]
 
 ## Mesh rewrite rule (20 Oct, lag fix)
-Your live body is rewritten in one round at most once a second (`MuscleRig` `WRITE_EVERY`). A level-up shows within a second, with no 0.4 s growth animation. `rig:Pulse` (the pump every 10 levels, the pose pump) no longer changes the mesh. Low-end devices: your body shows the low-poly stage meshes when the camera is more than 15 studs away (MuscleRig `SetFarLook`, set by MuscleClient). The live meshes stay built and hidden, so coming back costs one rewrite. See [[2026-10-20 GYM ARC Body lag]].
+Your live body is rewritten in one round at most once a second (`MuscleRig` `WRITE_EVERY`). A level-up shows within a second, with no 0.4 s growth animation. The mesh pump is gone. The level-up pump (every 10 levels) and the pose pump are now Shared/VFX/BodyPump: your whole character scales up 3.5% and back (0.15 s up, 0.4 s down), with a gold flash and sparks, and no mesh rewrite. Low-end devices: your body shows the low-poly stage meshes when the camera is more than 15 studs away (MuscleRig `SetFarLook`, set by MuscleClient). The live meshes stay built and hidden, so coming back costs one rewrite. See [[2026-10-20 GYM ARC Body lag]].
+
+## Blob shadows (20 Oct)
+No body mesh casts a shadow. Every body gets a soft dark blob shadow on the floor under it (BlobShadowClient, sized to the body's width). See [[2026-10-20 GYM ARC Body lag]].

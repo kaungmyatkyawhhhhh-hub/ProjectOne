@@ -2,6 +2,7 @@
 date: 2026-10-20
 tags: [gymarc, progress, performance]
 status: done (owner: test on a phone)
+aliases: [Cheap pump, Blob shadows]
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
@@ -48,3 +49,26 @@ Studio can't act as a phone here (the device emulator can't be driven remotely),
 - Decide: is losing the small pump every 10 levels and in poses OK? It could come back as a color flash instead.
 - The torso stage meshes don't cast a shadow (none do). The prompt allows a torso shadow, but it would add drawing cost, so it was left off.
 - The biggest cost left is the gym lights' shadows, not the bodies. That's the next thing to cut if phones still lag.
+
+## Follow-up (owner's answers, [[2026-10-20 GYM ARC Prompt - 15 Cheap pump, blob shadows, light shadows]])
+- **Cheap pump** (Shared/VFX/BodyPump): your whole character grows 3.5% over 0.15 s and back over 0.4 s (Model:ScaleTo, no mesh rewrite), with a short gold flash (a Highlight) and about 10 gold sparks. It plays on the level-up pump (whenever a muscle passes a multiple of 10 levels, like the old pump) and on every pose hit. Other players posing get the flash and sparks but are not scaled. Tested: peak +3.5%, back to exactly 1.0, the flash and sparks clean themselves up. The old mesh pump code is removed from MuscleRig.
+- **Blob shadows** (BlobShadowClient): a soft dark round shadow under every body (players, regulars, trainers, statue). It's a flat part with a black radial-fade image (uploaded: rbxassetid://76083127218780), raycast to the floor, sized to the torso plus both upper arms, lighter and bigger while jumping, and hidden past 120 studs. No stage mesh casts a shadow. On the dark rubber gym floor it is subtle (Transparency 0.2 under the body).
+- **Light shadows:** the place already had shadows on only the main lights: 2 big spots in the starter gym, 2 in the pro gym and 1 on the posing stage (5 of 296 lights). Every small / accent light was already off, so nothing changed in the place. New LightShadowsClient: on a phone or a low-end device (Shared/LowEnd: FPS under 40 for 5 s, or graphics quality 1-3) every light's shadow is turned off on that device, including lights that stream in later.
+- Shared/LowEnd now holds the low-end check (MuscleClient uses it for the far look too).
+
+### FPS before / after, 7 bodies on screen (starter gym)
+Studio's phone emulator can't be driven remotely, so "phone" is Studio set to graphics level 1 on the PC (the closest stand-in). Each line is the average of 3 rounds of 2.5 s.
+
+| Graphics | Setup | FPS | Render CPU | GPU | Shadow draw calls |
+|---|---|---|---|---|---|
+| PC max (21) | before: no blobs, 5 light shadows | 51.5 | 16.2 ms | 3.7 ms | 673 |
+| PC max (21) | after, PC: blobs, 5 light shadows | 53.2 | 14.8 ms | 3.9 ms | 661 |
+| PC max (21) | after, phone rule: blobs, light shadows off | 51.5 | 16.0 ms | 3.5 ms | 575 |
+| PC max (21) | (info) also sun shadows off | 54.7 | 14.4 ms | 2.8 ms | 0 |
+| Level 1 (phone-like) | before | 57.2 | 11.4 ms | 1.2 ms | 0 |
+| Level 1 (phone-like) | after, phone rule | 54.8 | 14.2 ms | 1.0 ms | 0 |
+
+What it shows:
+- At low graphics quality Roblox already draws **no shadows at all**, so on phones the light switch makes no measurable difference. The differences between rows are within Studio's noise (about ±2 FPS).
+- On a PC the 5 lights are only about 100 of about 670 shadow draw calls. The rest come from the sun's shadows (Lighting.GlobalShadows) on the map's parts. Turning the sun's shadows off gave about +3 FPS and 1 ms less GPU on the PC, but that was not changed (it's a big visual change; owner decides).
+- The blob shadows cost nothing measurable.

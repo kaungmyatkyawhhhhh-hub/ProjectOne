@@ -118,3 +118,6 @@ The live mirror reflection cost about 42 ms of drawing time every frame near the
 
 ## Body lag fixed (20 Oct)
 Your own body was rewritten up to 26 times a second while training (each one a 65-90 ms frame). Now it's rewritten at most once a second, with no growth animation and no mesh pump. On PC a fresh player training went from about 33 to 46 FPS. Low-end devices (FPS under 40 for 5 s, or graphics quality 1-3) show the low-poly stage body for you when the camera is more than 15 studs away. All stage meshes are low-poly; the biggest cost left is the gym lights' shadows. See [[2026-10-20 GYM ARC Body lag]].
+
+## Blob shadows and light shadows (20 Oct)
+Bodies cast no real shadow. Each one gets a cheap soft blob shadow instead (BlobShadowClient). Only 5 of the 296 lights cast shadows (the main spots of the starter gym, the pro gym and the posing stage). On a phone or a low-end device all light shadows are turned off (LightShadowsClient). At low graphics quality Roblox draws no shadows anyway. Most shadow draw calls on a PC come from the sun's shadows, which haven't been changed (owner decides). Numbers: [[2026-10-20 GYM ARC Body lag]].
