@@ -41,3 +41,6 @@ Workspace attributes, Studio only: `TestInput` = "Touch", "TouchKeyboard" or "Ke
 
 ## TestStatueMe (19 Oct)
 Workspace attribute `TestStatueMe` = true: the first player becomes the statue (as the posing champion), to compare the statue with your own body. Studio only.
+
+## TestLowEnd (20 Oct)
+Workspace attribute `TestLowEnd` = true: your own body acts as if on a low-end phone. It shows the low-poly stage meshes when the camera is more than 15 studs away, and the live body nearer than 12. Studio only. See [[2026-10-20 GYM ARC Body lag]].

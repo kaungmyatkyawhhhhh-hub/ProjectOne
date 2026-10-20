@@ -16,7 +16,8 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 ## Rules
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
-## Current status (19 Oct 2026)
+## Current status (20 Oct 2026)
+- 20 Oct: the lag after the body changes is fixed: your body was rebuilt up to 26 times a second while training; now at most once a second (about 33 -> 46 FPS on PC). Low-end phones show the low-poly body for you when the camera is far. See [[2026-10-20 GYM ARC Body lag]].
 - 19 Oct late: elbows and knees no longer show see-through holes when bent; trainers now idle, walk and run instead of sliding.
 - 19 Oct night: the 48 body meshes are imported and set up: everyone (other players, NPCs, statue, mirror) now has the new traps, shoulders, back and adductors.
 - 19 Oct night: the back is filled (no hollow), adductors fill the inner thighs (inner side only, nothing near the shorts), and the delt caps were made smaller after the owner's note (biceps / triceps / upper chest look normal again). Other bodies wait for the 48-file import.
@@ -68,6 +69,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
   - [[2026-10-13 GYM ARC Height cap and soft shutdown]]
   - [[2026-10-13 GYM ARC Obsidian vault setup]]
   - [[2026-10-13 GYM ARC New features run]]
+  - [[2026-10-20 GYM ARC Body lag]]
 - Prompts: the `Prompts` folder (every prompt, saved as it was sent)
 - Screenshots: the `Screenshots` folder (copies of the repo's `screenshots/`)
 
@@ -262,6 +264,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC REP PUMP and menu fixes]]
 - [[2026-10-15 GYM ARC Menu art]]
 - [[2026-10-19 GYM ARC Owner changes]]
+- [[2026-10-20 GYM ARC Body lag]]
 
 ### Prompts
 - [[2026-10-04 GYM ARC Prompt - Design brief]]
@@ -339,6 +342,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-19 GYM ARC Prompt - 11 Trainer heights]]
 - [[2026-10-19 GYM ARC Prompt - 12 Bigger upper traps]]
 - [[2026-10-19 GYM ARC Prompt - 13 Remove inner quad ball]]
+- [[2026-10-20 GYM ARC Prompt - 13 Find the body lag]]
 
 ### Config
 - [[GYM ARC - Config values]]

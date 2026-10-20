@@ -115,3 +115,6 @@ Full list in PROGRESS.md.
 
 ## Mirror reflection removed (15 Oct)
 The live mirror reflection cost about 42 ms of drawing time every frame near the progress mirror (Studio: 49 ms down to 7 ms on the computer side, 16-20 ms down to 2-7 ms on the graphics side). The mirrors are plain now. See [[GYM ARC - Progress Mirror]].
+
+## Body lag fixed (20 Oct)
+Your own body was rewritten up to 26 times a second while training (each one a 65-90 ms frame). Now it's rewritten at most once a second, with no growth animation and no mesh pump. On PC a fresh player training went from about 33 to 46 FPS. Low-end devices (FPS under 40 for 5 s, or graphics quality 1-3) show the low-poly stage body for you when the camera is more than 15 studs away. All stage meshes are low-poly; the biggest cost left is the gym lights' shadows. See [[2026-10-20 GYM ARC Body lag]].
