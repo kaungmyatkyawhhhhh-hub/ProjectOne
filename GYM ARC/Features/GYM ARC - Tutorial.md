@@ -31,3 +31,10 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 - Finishing the whole tutorial now gives 50 coins.
 - The last step now asks you to open the Muscles window (where the Growth Spurt row is).
 ![[GYM ARC/Screenshots/ui_compare_v2_11_tutorial_dialog_phone.jpg]]
+
+## Never stuck (21 Oct, prompt 20)
+- Shake step: "Tap the shake!" with a bouncing gold arrow on the DRINK SHAKE button (left of the stamina bar). After 15 s the free shake is drunk for the player and the tutorial moves on.
+- Steps can have a `timeout` (Config/Onboarding): Open Stats and Open Muscles finish after 40 s anyway, and have an on-machine line ("Tap STOP, then...").
+- No goal hints in the band while the tutorial runs (they used to give a different "next" step than the coach).
+- The glowing path is now `Shared/UI/GuidePath` (also used by the Growth Spurt's GO buttons); it only leads to machines in gyms the player has opened.
+- Re-test: tutorial done at 3:16 (was 8:10).

@@ -149,3 +149,17 @@ Prompt: [[2026-10-20 GYM ARC Prompt - 17 Playtest like a real player]].
 
 ## Compared with popular Roblox simulators
 The good ones give a reward every few seconds (numbers popping), an unlock every 1-2 minutes, always show the next goal and its price, and let you keep clicking with no hard stop. GYM ARC has a better core (real bodies that change, rivals, titles with jokes), but it hides its rewards (silent unlocks, off-screen READY) and stops the player too often (stamina, stuck bars, walking). Fix the pacing and show the rewards, and the body system becomes the hook.
+
+## Re-test after the fixes (21 Oct)
+Fixes: [[2026-10-21 GYM ARC Playtest fixes]].
+
+**Run 1 again (new save, 844x390):** first rep 0:29 (was 1:05 after PLAY), first heavier weight 0:33 (was 14:28), tutorial done 3:16 (was 8:10), first quest 5:00 (was 3:56; the coach's quest comes after the tutorial), first Growth Spurt about 6:40 (was 17:19; my test tools add delay, the simulator says 4.8 min). Waiting: one 10 s recovery in the first 8 minutes (was about 6.5 of 20 min). The shake step finished by itself after 15 s when I didn't tap. "Needs CORE, BACK" led me to the Crunch Bench and Deadlift; READY TO GROW popped up on the machine.
+
+**Run 3 (7'0" max save, LVL 347, 20,000 coins):** no Growth Spurt card (by design). The Store opens on Auras: the level auras are owned, the rest are Titan (all quests), Aura Pack (Robux) and the coin auras (50k / 150k). The Goals tab still shows beginner goals (+10 coins). Daily streak and today's quest work. There is little to chase at max until Body Alters (gameplay plan) exist.
+
+**Skateboard:** works outdoors (SKATE button / Q), fast, the button shows SKATING.
+
+**Dumbbells:** there are no dumbbell exercises in the game yet (the gameplay plan has them), so nothing to test.
+
+**New problems found:** window headers (tabs, X) sat under the top bar's icons on phones (fixed); toasts at the top still draw over an open window's header; the daily streak window still opens by itself right after the tutorial ends; the STATS floating numbers stay on until tapped again.
+

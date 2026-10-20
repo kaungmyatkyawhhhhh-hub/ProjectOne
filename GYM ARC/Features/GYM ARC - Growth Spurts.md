@@ -54,3 +54,13 @@ Some old saves had more Growth Spurts than the last one (6, which reaches 7'0") 
 
 ## At 7'0" (15 Oct)
 No Growth Spurt card on the HUD at 7'0" (owner): the top bar's "7'0" MAX" says it. The Stats panel keeps its greyed "Max Growth Spurt reached" button.
+
+## What it needs, READY popup, faster first spurt (21 Oct, prompt 20)
+- First Growth Spurt goal: level 15 -> **9** (about 5 min); spurt 2: 58 -> 56 to keep its 15 min with the new stamina. `GrowthSpurts.Targets` = 5, 15, 25, 35, 45 (tests/pacing passes). The EXP scale stays (level 15 = 50,000 EXP), so the first goal now shows about 24,700 EXP.
+- The card says what's behind: "62% · Needs LEGS" (groups at least 15% behind the best one). A tap opens **Train next**: the machines for those groups with a GO button each (a glowing path to the nearest free one). On a machine a small card at the top left shows the same.
+- On a machine that doesn't train the groups that are behind: one hint, "Your legs are holding you back. Try the Squat Rack."
+- The Body Map colors the needed groups red.
+- When the spurt is ready: a big **READY TO GROW!** popup (sound, glowing TAP TO GROW, Later), over the machine HUD too. Tapping it on a machine gets you off, then grows.
+
+![[GYM ARC/Screenshots/playtest_fixes/train_next_window.jpg]]
+![[GYM ARC/Screenshots/playtest_fixes/ready_to_grow.jpg]]
