@@ -1,13 +1,11 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done (trimmed)
 ---
 # 27 Trainer Agency UI + roll reveal redesign
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]
-
-> Owner, 21 Oct (prompt 28b): "odds board" here means the odds grid INSIDE the Agency window. No odds text on the board in the world (that board is the gold TRAINER AGENCY sign + pictures since prompt 28).
+Back to [[00 GYM ARC Home|GYM ARC Home]] - done (trimmed): [[2026-10-22 GYM ARC Trainer Agency redesign]]
 
 ```text
 
@@ -62,13 +60,17 @@ OWNER UPDATE (21 Oct): the panel mockups were rejected too. NO big Agency panel.
 2) ROLL REVEAL (what's wrong: a plain grey card with a "?", the Agency panel stays visible behind it, the trainer is cropped and posed awkwardly, small text)
 New reveal (about 2 s, tap to skip, like a pet-sim hatch):
 - Same kit style as the rest of the game (graphite, gold, heavy italic). Full-screen dark backdrop (hide the Agency behind it), slight blur, a spotlight in the middle.
-- A designed card BACK: black + gold with the GYM ARC logo / a dumbbell emblem and a gold border pattern (not a plain grey card).
-- Build-up: the card shakes harder and harder, and its glow climbs through the rarity colors (grey -> green -> blue -> purple -> gold...) and STOPS at the rolled rarity, so the player feels the suspense. Rising sound with each color step.
-- Reveal: the card flips / bursts open in the rarity color: rotating light rays behind, a shockwave ring, sparks (VFX from Downloads\gym_arc_aura_vfx), a hit sound. Bigger effects for rarer pulls (as in prompt 24 section 3).
+- RARITY-SCALED REVEAL (owner, 22 Oct; replaces the card back, the card flip and the color climb). The rarer the pull, the longer and bigger the reveal:
+  - Common / Uncommon: the card drops in from above with a small bounce. A short pop sound. About 0.6 s.
+  - Rare: a glowing orb in the rarity colour floats in, pulses twice, then bursts into the card with a short camera/UI shake and a spark burst. About 1.2 s.
+  - Epic: slower, larger pulses, a purple tint creeps in from the screen edges, then a bigger particle burst into the card. About 1.8 s.
+  - Legendary and above (Mythic, Secret, Eternal): the screen darkens around the orb, the pulses slow down almost to a stop (tension), then a hard white flash, a slow-motion burst with gold light rays and a shockwave ring, the card lands with a scale overshoot (1.2 -> 1.0), and the NAME slams in last with a hit sound. About 3 s. Mythic/Secret/Eternal use their own colour for the rays and ring.
+  - Use the VFX textures in Downloads\gym_arc_aura_vfx (shockwave_ring, spark_star, rim_glow) and layered sounds. Reduced Motion: no shake, shorter flash.
 - Show the trainer FULL BODY, centered, in a good pose (their idle/flex pose, arms not cut off), large (about 55% of the screen height), slowly turning or breathing in a ViewportFrame.
-- Under it: the rarity banner (pill in the rarity color), the NAME big (Luckiest Guy, white with the rarity color outline), the boost line, the quote in a small speech bubble, and "NEW!" (gold burst) if it's the first one, otherwise "x2 · 2/5 to Golden" with a small progress bar.
+- Under it: the rarity banner (pill in the rarity color), the NAME big (Luckiest Guy, white with the rarity color outline), the boost line, the quote in a small speech bubble, and "NEW!" (gold burst) if it's the first one, otherwise "x2 · 2/3 to IRON-BORN" with a small progress bar (Golden was removed, prompt 33).
 - "Tap to continue" pulsing at the bottom.
-- X3 rolls: 3 cards side by side, revealed left to right one after another, then all three shown together.
+- X3 / multi rolls: the cards resolve ONE AT A TIME, sorted so the HIGHEST rarity is revealed LAST (the build-up ends on the best pull). Then all cards are shown together.
+- Tapping during a reveal resolves ALL remaining cards instantly (skip straight to the final all-cards view), never one tap per card.
 - Auto Roll: a faster reveal (0.6 s) unless it's Epic or better, which plays the full reveal and stops auto roll.
 
 Test on a phone layout (667x375): the odds display, the action bar, the Trainers tab (with and without trainers), the stand, and the reveal for a Common, an Epic and a Legendary. Screenshots of each. Short progress note in the vault.

@@ -150,3 +150,9 @@ On join the equipped list was cut to the slots known at that moment, before the 
 ## Prompt 28 (21 Oct; [[2026-10-21 GYM ARC UI cleanup]])
 - The TRAINERS window has two tabs: AGENCY and MY TRAINERS (`Shared/UI/TrainersPanel`, it was the Inventory's Trainers tab). `UIBus.OpenAgency("My")` opens MY TRAINERS.
 - The Agency desk boards show only "TRAINER AGENCY" in gold and the 8 trainer pictures; the odds are in the window only.
+
+## Agency redesign (22 Oct, prompt 27 trimmed; [[2026-10-22 GYM ARC Trainer Agency redesign]])
+- Art: the owner's portraits (Config/Trainers `icon` waist-up, `art` full body).
+- Agency tab: 2x4 odds grid of rarity slots (glow + rays, silhouette with a rim until owned, Secret "?", gold check, count, tooltip with the boost); pity pill; red ROLL, flat X3 / AUTO / gear (auto-delete); E / R / T on a keyboard.
+- Reveal: dark backdrop, black + gold card back, shake, flip to the full body with rarity pill, name, boost, NEW! / duplicate bar, quote bubble; X3 left to right; quick auto reveal unless Epic+. TODO: escalating color build-up, aura VFX, 3D trainer.
+- One stand, in the starter gym: an old-school PT desk with a cork board of photo cards, a chalkboard sign, a certificate, a desk lamp and a plant (tools/builders/TrainerAgency). The Pro / Beach desks are in ServerStorage.AgencyBackup.

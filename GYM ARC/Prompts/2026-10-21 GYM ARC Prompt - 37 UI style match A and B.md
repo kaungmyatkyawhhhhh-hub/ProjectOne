@@ -34,6 +34,9 @@ Build it as 3 shared components in the UI Kit. Every screen uses them, with no o
 ONE rarity colour table, used for text, outlines and tile tints everywhere:
 Common grey #AAAAB2, Uncommon green #50D264, Rare blue #468CFF, Epic purple #AA50FF, Legendary gold #F5BE28, Mythic pink #FF5AC8, Eternal white #F0F0FF.
 
+MINIMUM TEXT SIZE (owner, 22 Oct): nothing on screen is smaller than the smallest HUD label. On tiles: the name is the loudest text (same size for alter, aura and title names), rarity label ~70% of the name, button text a bit smaller than the name. Requirement pills ("REACH ALTER 5") use the same size as EQUIP. Detail panels: benefit pill ("+15% COINS") big and bright; "SHOW EFFECT" toggle label = rarity size, with a large toggle switch; notes in grey italic stay readable. Use TextScaled with a MinTextSize so nothing shrinks below this on small phones.
+Auras detail panel (owner): name, rarity, the benefit as a large gold chunky pill, a tall EQUIP/EQUIPPED button, then a one-line "SHOW EFFECT" toggle with "Boost stays active when hidden." in grey italic under it. The benefit pill stays bright when the effect is hidden.
+
 Fonts: only 2 in the whole game. LuckiestGuy for buttons, numbers, names, labels; the current italic font for screen titles, tabs and body text. Remove any third font (e.g. on "YOUR GENETICS" and tooltips).
 
 Per-screen notes (see the mockups):
