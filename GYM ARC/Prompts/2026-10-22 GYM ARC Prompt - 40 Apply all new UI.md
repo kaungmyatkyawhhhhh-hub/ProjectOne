@@ -1,11 +1,11 @@
 ---
 date: 2026-10-22
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 40 Apply ALL the new UI (master list)
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]
+Back to [[00 GYM ARC Home|GYM ARC Home]] - done: [[2026-10-22 GYM ARC New UI applied]]
 
 ```text
 Put EVERY new UI design from the planner into the game. This is the master list: it points to the mockups and to prompts 27, 37 and 39, which hold the detailed specs. Follow CLAUDE.md Speed rules. Mobile first (667x375 and 844x390). Never undo the owner's manual Studio changes. Work screen by screen, save after each, and keep a checklist in the progress note so a fresh session can continue.

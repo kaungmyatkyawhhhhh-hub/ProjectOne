@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 22 Oct: the new UI everywhere (chunky LuckiestGuy buttons, hex panels, rank badges, coloured reward tiles; prompt 40). See [[2026-10-22 GYM ARC New UI applied]].
 - 22 Oct: unlock guides (Coach Dex points at each new feature, +25) and locked menu tiles + tabs with a padlock + teaser, tiles in the earlier gold-outline style (prompts 39, 39b). See [[2026-10-22 GYM ARC Unlock guides]].
 - 22 Oct: GO TO buttons teleport, a quiet tutorial (SKIP pill, gold marker + arrow), Secret / Eternal hidden + odds in %, grunts instead of lift screams ("Lifting Voices" setting). See [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]].
 - 22 Oct: Trainer Agency redesign (trimmed): the owner's trainer art, a kit-style odds grid + ROLL / X3 / AUTO, a card-flip reveal, one old-school PT desk with a cork board in the starter gym. See [[2026-10-22 GYM ARC Trainer Agency redesign]].
@@ -117,6 +118,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-22 GYM ARC Trainer Agency redesign]]
 - [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]]
 - [[2026-10-22 GYM ARC Unlock guides]]
+- [[2026-10-22 GYM ARC New UI applied]]
 - [[GYM ARC - Unlock Guides]]
 - [[2026-10-21 GYM ARC Funnel fixes]]
 - [[2026-10-21 GYM ARC Trainer outfits and gear]]
@@ -422,6 +424,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-22 GYM ARC Prompt - Lifting voices grunts]]
 - [[2026-10-22 GYM ARC Prompt - 39 Unlock guides]]
 - [[2026-10-22 GYM ARC Prompt - 39b Unlock guides follow-up]]
+- [[2026-10-22 GYM ARC Prompt - 40 Apply all new UI]]
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]
