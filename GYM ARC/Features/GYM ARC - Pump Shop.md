@@ -9,8 +9,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 Built 21 Oct ([[2026-10-20 GYM ARC Prompt - 19 Coins useful again (shops)]]). One big store in the town hub that sells everything worth buying with coins. Coins only, no random rolls.
 
 ## Where and what
-- **Building:** on the old parking lot between the gyms, on the way to the Beach Gym (`Workspace.Town.PumpShop`, built by `tools/builders/PumpShop.luau`). Glass front with open doors, a lit gold "PUMP SHOP" sign on the roof, ceiling lights. **The parking lot and 5 street lamps + the bus stop that stood there are in `ServerStorage.PumpShopBackup`** (move them back to undo).
-- **4 sections**, each with a counter ("Shop" prompt), a sign and a clerk (Mo, Rita, Jay, Dr. Vale): SUPPLEMENTS (tubs and shakers), GEAR (belts and straps on hooks, knee sleeves), APPAREL (3 mannequins), DNA LAB (glowing sample tubes). An "ALTERS · COMING SOON" corner is kept free.
+- **Building (rebuilt 21 Oct, prompt 23, [[2026-10-21 GYM ARC Pump Shop building rebuilt]]):** a 2-storey red brick corner store (38 x 44) on the north-east corner of the old parking lot (`Workspace.Town.PumpShop`, built by `tools/builders/PumpShop.luau`): black storefront with display windows and mannequins, striped awning, lit sign on the facade and a hanging blade sign, a "GET PUMPED" mural on the north wall, windows on every side, AC units and a water tank on the roof. The rest of the lot is paving and a small park. **The parking lot and the first shop (`PumpShop_old`) are in `ServerStorage.PumpShopBackup`** (move them back to undo).
+- **4 sections**, each with a counter ("Shop" prompt), a sign and a clerk (Mo, Rita, Jay, Dr. Vale): SUPPLEMENTS (tubs and shakers) and GEAR (belts and straps, knee sleeves) on the back wall, APPAREL (2 mannequins) and DNA LAB (glowing sample tubes) on the side walls, a shake fridge and a podium with a giant tub.
 - The window has a tab for every section, so you can browse everything from any counter.
 - **PUMP SHOP tile** in the left menu once the shop is open: takes you to the entrance (10 s cooldown).
 - The smoothie bar and carts still stand; their prompt opens the Supplements section now.

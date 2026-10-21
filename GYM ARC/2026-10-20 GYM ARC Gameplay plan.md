@@ -131,7 +131,7 @@ Auras are cosmetic only right now. Each aura gets one small perk. One aura equip
 | Feature | Role | Change |
 |---|---|---|
 | Genetics + DNA tokens | Faster gains for some muscles | Also a DNA token per alter tier |
-| Trainers | Passive boosts | Slot 2 at spurt 2, slot 3 at alter tier 1 |
+| Trainers | Passive boosts | Coin-roll RNG (prompt 24): 8 trainers, Common to Eternal (a higher rank comes in a later update), odds shown, pity every 100 rolls, Golden from 5 duplicates. Slot 2 at spurt 2, slot 3 at alter tier 1, +1 Extra Trainer pass |
 | Quests + Muscle of the Day | Small goals, coins | Add show quests ("Place top 3") and alter quests |
 | Arm wrestling | Fun break, coins | Weekly arm wrestling leaderboard |
 | Spotting | Both get a bonus | Later becomes coach mode |
