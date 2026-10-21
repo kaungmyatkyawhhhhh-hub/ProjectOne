@@ -64,3 +64,8 @@ No Growth Spurt card on the HUD at 7'0" (owner): the top bar's "7'0" MAX" says i
 
 ![[GYM ARC/Screenshots/playtest_fixes/train_next_window.jpg]]
 ![[GYM ARC/Screenshots/playtest_fixes/ready_to_grow.jpg]]
+
+## Milestone rewards (21 Oct, prompt 11; [[2026-10-21 GYM ARC Funnel fixes]])
+- At 25%, 50% and 75% of the goal bar (the same share the HUD shows): a popup ("Growth Spurt 1: 50%, +14 coins"), a sound and a few coins (half a minute of coins at your stage). At 75%: "Almost there!". Every spurt, not at 7'0" (alters have their own).
+- `Config/GrowthSpurts` Milestones / MilestoneCoinMinutes / Share, `Server/SpurtMilestoneService` (checked after reps, data.spurtMilestones), popup in ProgressClient.
+![[GYM ARC/Screenshots/funnel_fixes/milestone_75.jpg]]
