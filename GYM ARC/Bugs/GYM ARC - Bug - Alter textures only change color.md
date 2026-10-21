@@ -27,8 +27,8 @@ Wearing a Body Alter only changed the skin color; no striations, veins or gloss.
 - **MuscleRig:** the skin pass also runs when a piece is added to the body and every 2 s (cheap: a piece that already wears the right skin is skipped). Tested: a stripped piece got its alter back in 1.3 s.
 - **MuscleRig preload:** every skin map is preloaded through an image, so a first-time alter shows at once.
 
-## Left as is
-- The head keeps the avatar's own head skin with every alter (its own SurfaceAppearance holds the face), so the head can look lighter than an alter body (most with Tanned).
-- Tanned comes out a strong orange-red on a light skin tone (the planner's tan map times the skin tint). Owner to decide.
+## Follow-up (owner's answers, [[2026-10-21 GYM ARC Prompt - 38b Bronze tan and head color]])
+- Tanned / Peak: a deep bronze tint worked out from the skin (no more orange-red); the head's color follows the alter (no alter maps on it). See [[2026-10-21 GYM ARC Alter textures fix]].
+- The preload above did NOT work in game (a game script can't read a SurfaceAppearance's map ids: it errored); it uses the config ids now. Peak's normal map never loaded (re-uploaded as 99012039750322).
 
 ![[GYM ARC/Screenshots/alters/alters_side_by_side.jpg]]

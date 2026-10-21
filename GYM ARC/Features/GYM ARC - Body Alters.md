@@ -43,5 +43,11 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 
 ## Texture fix (21 Oct, prompt 38; [[GYM ARC - Bug - Alter textures only change color]])
 - The body's UVs spread one texture over 10-14 studs, so Tier 1's detail came out too big and soft ("only the color changes"). Shredded and Peak maps now repeat 2x2 inside the image; Vascular keeps its scale with much stronger veins (`Downloads\gym_arc_alters\tier1_human_tiled`, ids in Config/Alters). Rule for new tiers: design detail for ~10-14 studs per texture (70-120 px per stud), thin lines need strong contrast.
-- MuscleRig re-applies the skin on every new body piece and every 2 s, and preloads every skin map.
+- MuscleRig re-applies the skin on every new body piece and every 2 s, and preloads every skin map (ids from Config/SkinStages + Config/Alters).
 ![[GYM ARC/Screenshots/alters/alters_side_by_side.jpg]]
+
+## Tint and head (21 Oct, prompt 38b)
+- Each textured alter has `mean` (its color map's average). Tanned and Peak have `tone = "Tan"`: their tint comes from `Alters.TanColor(skin)` (a deep bronze, numbers in `Alters.Tan`) instead of the plain skin, so a light skin is warm bronze and a dark one a bit deeper. Others: the skin.
+- `Alters.PlainSkin(id, skin)`: the plain color that matches the alter's body. The head (no alter maps on it), the elbow / knee balls and the flat skin under a training tint use it; Natural = the skin. The head's own color comes back on Natural (`NaturalColor` attribute while tinted).
+- A Face accessory with the skin baked in can't be tinted (it keeps its color).
+![[GYM ARC/Screenshots/alters/alters_bronze_light_dark.jpg]]
