@@ -1,11 +1,11 @@
 ---
 date: 2026-10-22
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 39 Unlock guides (mini tutorials for new features)
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]
+Back to [[00 GYM ARC Home|GYM ARC Home]] - done: [[2026-10-22 GYM ARC Unlock guides]]
 
 ```text
 When a player unlocks something new, guide them to it the same way the tutorial does. Read "GYM ARC\2026-10-20 GYM ARC Gameplay plan.md" (section "Introduce features slowly") and "GYM ARC\Features\GYM ARC - Tutorial.md" first. Follow CLAUDE.md Speed rules. Mobile first. Reuse the tutorial pieces (Coach Dex dialog, GuidePath gold path, glowing outline, gold marker + arrow, teleporting GO TO button). Don't build a second system.
@@ -36,16 +36,20 @@ Every unlock in the plan's unlock table, plus:
 
 5) LOCKED MENU BUTTONS (owner, 22 Oct; this REPLACES "hide the button until it unlocks" from the gameplay plan)
 - Side menu buttons (SHOP, STATS, MUSCLES, INVENTORY, GENETICS, POSES, CREW, TRAINERS) are always visible. If the feature isn't unlocked yet, the button is dimmed (~50%), its icon greyed, with a small gold padlock badge in the corner.
-- Tapping a locked button: a small shake + a "locked" click sound, and a toast pops up (same style as the locked-title tooltip: dark tile, gold outline, lock icon, stroked title, clean italic line, auto-hides after ~3 s). It tells WHEN it unlocks and teases WHAT's inside, so players want it. Example lines (edit in config):
-  - TRAINERS: "LOCKED · Unlocks at Growth Spurt 2" / "Real coaches who train you while you train. Some are legendary..."
-  - CREW: "LOCKED · Unlocks at Growth Spurt 1" / "Team up, win shows together, climb the crew board."
-  - POSES: "LOCKED · Unlocks at Growth Spurt 1" / "Hit the stage. Flex in front of the whole server."
-  - GENETICS: "LOCKED · Unlocks at LVL 5" / "Your DNA is hiding something. Find out what you were born for."
-  - INVENTORY: "LOCKED · Unlocks in a few minutes" / "Boosts, gear and secret drops go here."
-  - SHOP: "LOCKED · Unlocks at Growth Spurt 1" / "Rare stuff. Only for lifters who make it."
+- Tapping a locked button: a small shake + a "locked" click sound, and a toast pops up (same style as the locked-title tooltip: dark tile, gold outline, lock icon, stroked title, clean italic line, auto-hides after ~3 s). It tells WHEN it unlocks and teases WHAT's inside, so players want it. Example lines (edit in config). Tone: plain, short, like a gym friend talking to a kid. Say what it is and why it's fun. No slogans, no "legend", no "secret", no dramatic "...":
+  - TRAINERS: "LOCKED · Unlocks at Growth Spurt 2" / "Hire a coach who lifts with you. Some are really rare."
+  - CREW: "LOCKED · Unlocks at Growth Spurt 1" / "Make a crew with your friends and win shows together."
+  - POSES: "LOCKED · Unlocks at Growth Spurt 1" / "Get on stage and flex in front of everyone."
+  - GENETICS: "LOCKED · Unlocks at LVL 5" / "See which muscles grow fastest for you."
+  - INVENTORY: "LOCKED · Unlocks in a few minutes" / "Your shakes and boosts go here."
+  - SHOP: "LOCKED · Unlocks at Growth Spurt 1" / "Spend your coins on boosts and gear."
   Always show the real unlock condition (from the unlock table), plus a progress hint when it helps: "Growth Spurt 1 · 54% there".
 - When it unlocks: the padlock breaks open (small pop + sparkle sound), the button brightens with the gold NEW glow, and the unlock guide from sections 1-2 starts.
-- Same rule for locked tabs inside menus (e.g. Alters before 7'0"): padlock + teaser toast.
+- Same rule for EVERY tab inside menus. Nothing appears later out of nowhere: all tabs and sub-tabs exist from the first time the menu opens, the not-yet-unlocked ones are locked (dimmed + padlock + teaser toast on tap).
+  - Inventory: ITEMS · GEAR · AURAS · LOOKS (and Looks > ALTERS · TITLES) are all visible from the start. Locked example lines: GEAR "Unlocks at Growth Spurt 2 · Belts, wraps and straps. Each one makes a lift stronger." AURAS "Unlocks at Growth Spurt 3 · A glow around your body. Each aura gives a small bonus." ALTERS "Unlocks at 7'0\" · Change your skin once you hit max height."
+  - Same for Store tabs, Stats/Muscles tabs and any other menu with tabs.
+  - A locked tab can't be opened; it never opens an empty page.
+  - The menu opens on the first UNLOCKED tab.
 
 4) ANALYTICS
 Log per guide: shown, completed, skipped, timed out. Also log taps on locked buttons (which button, player level), to see what players are curious about.
