@@ -28,3 +28,7 @@ From [[2026-10-21 GYM ARC Prompt - Audit all prompts]]: the prompts that weren't
 - **Auto quality:** other players' auras also turn off when your Roblox graphics level is set low (1-3). Low Graphics in Settings already covers "Low Effects" (post effects, others' auras), so no second toggle.
 - Still yours: the real-phone and 10-player numbers (F9 Developer Console, Ctrl+F6 MicroProfiler).
 - Found on the way: Studio's screen capture doesn't draw "always on top" billboards (EXP popups, gain numbers), so they never show in my screenshots; they do show in the game.
+
+## 4. Town music + treadmill sounds (14 Oct) - done / owner
+- **Town** now has 3 songs like the other areas: the old one + APM "Hit The Street" (1840558258) and "City Lights (A)" (1840517437), both from Roblox's licensed library (about 2:45 each, checked they load). Swap them for your own any time in `Config/Sounds` AreaMusic.
+- **Treadmill:** Roblox's licensed library has no clean treadmill belt hum or single running footstep (only conveyor belts / washing machines with start and stop noises, which loop badly), so `TreadmillLoop` / `TreadmillStep` stay empty for your own picks, as your 14 Oct note says.

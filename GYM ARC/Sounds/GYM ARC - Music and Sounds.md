@@ -175,3 +175,7 @@ Picked from Roblox's licensed library (Pro Sound Effects), swap any id in `Confi
 - **ScreamNormal** (heavy rep, last rep of a set): PSE Video Game Effects 1 / 2 / 4 / 21 / 23 (fight vocals: yells, grunts): 9120415730, 9120415788, 9120415873, 9120417141, 9120417581.
 - **ScreamBig** (personal record, arm wrestling / posing win): PSE Male Scream Short Yelling Bursts 1 / 10 / 5 (throaty shouts): 9125650883, 9125651373, 9125652432.
 - Rules in `Config/Screams`; see [[2026-10-21 GYM ARC Audit follow-ups]].
+
+## Town music (21 Oct)
+- Town playlist: 1840007392 + APM Hit The Street 1840558258 + APM City Lights (A) 1840517437 (licensed library).
+- Treadmill slots still empty: no clean loop in the licensed library (owner's pick).
