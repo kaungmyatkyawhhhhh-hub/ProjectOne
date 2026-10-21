@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: skipped (owner, 21 Oct: already in the game)
 ---
 # 30 Make the gym alive + equipment for every sub-muscle
 

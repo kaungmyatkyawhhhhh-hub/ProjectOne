@@ -31,3 +31,15 @@ Then: 29 (trainer lag, first because players are lagging), 32 (restore starter g
 15 and 35 when I've imported the files.
 Also confirm prompts 34 (trainer outfits + gear meshes) and 25 (new trainers) are really DONE. 34 was still in progress last time I looked. If not done, do 34 right after 33 (it needs the gear meshes in Downloads\gym_arc_gear_meshes\).
 ```
+
+## Owner's later messages (21 Oct)
+```text
+Skip prompt 30 (living gym), it's already in the game.
+```
+```text
+New plan to ship faster. Do in this order: 29, 32, 28, 12, then 27 (TRIMMED: stand + odds board + ROLL/X3/AUTO + a simple reveal: card flip + rarity color + sound. Skip the escalating color build-up and extra VFX for now; leave TODO notes in the code).
+After those, STOP and tell me, so I can publish and test with players.
+Then 31, 33, 22 (banner + ALTER button first; full VFX/sound show later), 9.
+30, 15, 35 last.
+Keep each prompt tight: 1 playtest, 2 screenshots, short notes.
+```

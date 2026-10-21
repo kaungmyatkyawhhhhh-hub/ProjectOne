@@ -45,3 +45,10 @@ From [[2026-10-21 GYM ARC Prompt - Audit all prompts]]: the prompts that weren't
 ### 5b. Chest + traps/back import (prompts 9 and 15) - done
 - You imported the 14 chestfix torso files; they now replace the torso templates in `ReplicatedStorage.BodyStages` (bounds in `Config/BodyStages`, the old mesh ids in `Config/StageMeshBackup.ChestFix21Oct`). Everyone else now sees the fuller chest and prompt 15's traps / back. Checked on Dante: no gaps, no errors.
 ![[GYM ARC/Screenshots/audit_followups/chest_dante_stage_meshes.jpg]]
+
+## 6. Prompt 29 Trainer follower lag - done
+- One trainer follows each player (the rarest equipped; all still give boosts). Your other equipped trainers are portrait chips in the boosts row (tap: name + boost).
+- Settings **Others' Trainers** (On by default; Low Graphics hides them too).
+- Cheaper followers: stepped 30 Hz (yours) / 15 Hz (others), eased in between; no Humanoid state machine; idle poses pause off-screen; auras only within 40 studs, off on Low Graphics, max ~10 particles each.
+- Tested: 3 equipped -> 1 follower + 2 chips; 10 equip / unequip cycles -> still 1 model (no leak); no errors. FPS numbers: Studio driven by tools sits near 15 fps, so the real before / after is the owner's phone test.
+- Prompt 30 skipped (owner: already in the game).

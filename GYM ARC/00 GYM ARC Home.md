@@ -105,6 +105,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-21 GYM ARC Funnel fixes]]
 - [[2026-10-21 GYM ARC Trainer outfits and gear]]
 - [[2026-10-21 GYM ARC Audit follow-ups]]
+- [[Handoff]]
 - Prompts: the `Prompts` folder (every prompt, saved as it was sent)
 - Screenshots: the `Screenshots` folder (copies of the repo's `screenshots/`)
 
