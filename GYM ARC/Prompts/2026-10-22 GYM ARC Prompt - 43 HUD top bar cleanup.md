@@ -1,7 +1,7 @@
 ---
 date: 2026-10-22
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 43 HUD top bar cleanup
 

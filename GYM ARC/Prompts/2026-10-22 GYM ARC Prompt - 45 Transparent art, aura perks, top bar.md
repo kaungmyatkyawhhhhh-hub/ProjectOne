@@ -1,7 +1,7 @@
 ---
 date: 2026-10-22
 tags: [gymarc, prompt]
-status: in progress
+status: done
 ---
 # 45 Transparent art, aura perks, top bar (prompt 40 follow-up)
 
