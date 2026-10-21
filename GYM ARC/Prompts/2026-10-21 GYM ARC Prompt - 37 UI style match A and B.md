@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 37 UI style match (chunky buttons + reward tiles)
 
@@ -52,3 +52,6 @@ Per-screen notes (see the mockups):
 Order: ChunkyButton -> RankBadge/ChunkyBar -> RewardTile -> apply to Looks -> Store -> Streak -> everything else.
 Test on a phone size. Screenshot each changed screen and compare with its mockup. Short progress note in the vault.
 ```
+
+## Done (checked 22 Oct)
+Built in prompt 40 ([[2026-10-22 GYM ARC New UI applied]]): ChunkyButton (all buttons), RankBadge, ChunkyBar, RewardTile, the rarity table (Theme.RarityColor), 2 fonts, Store / Streak / Genetics / Physique / Quests screens. Where prompt 40 / 44 / 47 changed the spec later (Titles as nameplates, hex rules, no outlines on the top bar), the newer one won.

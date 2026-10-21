@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 22 Unique Body Alter popup per alter
 
@@ -101,3 +101,6 @@ Mixing: nothing clips or is too loud; the impact is the loudest, voices/cheers a
 
 Keep it light: one background image, a few tweens, max ~20 particles. Test each Tier 1 popup once (phone screenshot of 2 of them). Short progress note in the vault.
 ```
+
+## Done (checked 22 Oct)
+Built 21 Oct (code commit 57e920f): Config/AlterThemes, Shared/UI/AlterPopup, Shared/VFX/AlterFX, themed strips on the Alters cards. Seen working in the 39b first-alter test (BODY ALTER READY popup).

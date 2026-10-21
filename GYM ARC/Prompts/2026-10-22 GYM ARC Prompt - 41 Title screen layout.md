@@ -1,7 +1,7 @@
 ---
 date: 2026-10-22
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 41 Title screen layout (desktop + phone)
 
@@ -33,3 +33,15 @@ Polish the title screen. Current look: C:\Users\kaung\Downloads\gym_arc_ui_curre
 
 TEST: screenshots at 1920x1080, 1280x720, 844x390 and 667x375 (phone variant on the last two). Short progress note in the vault.
 ```
+
+## Done (22 Oct, batch run)
+- The live gym behind the menu (the menu art is off: it was also a shirtless body picture), gradient over the left 45%, all other screens hidden until PLAY (and back after).
+- One column (logo, tagline, PLAY, SHOP, SETTINGS, NEWS, player card), centred, 12 px gaps; PLAY bigger with a soft red glow only.
+- Phone variant (touch + height under 500; Studio: TestPhoneSize): 38% width, logo 120, no tagline, PLAY 56, SHOP 44, SETTINGS / NEWS as 44 px icon squares (NEWS keeps its "!"), a 40 px card.
+- Camera: the doorway and the character on the right, lamp out of frame, stops inside walls; your own trainers are hidden while the menu is up.
+- Not matched: Studio can't show 1280x720 separately (its window stays the same size); the loading screen still uses the old menu art (not in this prompt).
+
+![[GYM ARC/Screenshots/title41/desktop.jpg]]
+![[GYM ARC/Screenshots/title41/phone_844.jpg]]
+![[GYM ARC/Screenshots/title41/phone_667.jpg]]
+![[GYM ARC/Screenshots/title41/after_play.jpg]]

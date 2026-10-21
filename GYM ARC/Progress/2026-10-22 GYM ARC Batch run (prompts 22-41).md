@@ -1,0 +1,26 @@
+---
+date: 2026-10-22
+tags: [gymarc, progress]
+status: in progress
+---
+Back to [[00 GYM ARC Home|GYM ARC Home]]
+
+# 2026-10-22 GYM ARC Batch run (prompts 22, 31, 33, 35, 36, 37, 39, 41)
+
+Owner, 22 Oct: "do prompt 31, 33, 35, 36, 41, 22, 37, 39 ... do not ask me any questions". A fresh session continues from the first open box.
+
+Rules kept: no image uploads (the ban); trainer portraits stay 3D rigs (prompt 33's upload part skipped); world geometry built in Studio (MCP), not by game scripts; never undo the owner's manual Studio changes.
+
+## Checklist
+- [x] 22 Unique alter popups: verify (built 21 Oct, commit 57e920f), mark done
+- [x] 37 UI style match: verify against prompt 40's work, fix gaps, mark done
+- [x] 39 Unlock guides: check what the owner changed in the prompt, do the difference
+- [x] 41 Title screen layout
+- [ ] 31 Shops rework and undiscovered
+- [ ] 35 Sneakers
+- [ ] 36 Pro Gym expansion
+- [ ] 33 Trainer levels and evolutions (no portraits)
+
+## Done so far
+- 22, 37, 39: already built (checked, statuses fixed).
+- 41: title screen redone (live gym, one centred column, phone variant, framed camera). [[2026-10-22 GYM ARC Prompt - 41 Title screen layout]]

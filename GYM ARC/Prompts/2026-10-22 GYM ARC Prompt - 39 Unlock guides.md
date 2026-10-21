@@ -1,7 +1,7 @@
 ---
 date: 2026-10-22
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 39 Unlock guides (mini tutorials for new features)
 
@@ -60,3 +60,6 @@ Log per guide: shown, completed, skipped, timed out. Also log taps on locked but
 
 Test: a fresh save through Growth Spurt 1 and 2 (Beach Gym, posing shows, trainers), and a 7'0" save getting its first alter. Phone screenshots of one UI guide and one world guide. Short progress note in the vault.
 ```
+
+## Done (checked 22 Oct)
+The owner's update to section 5 (earlier tile style, badges, locked tabs) is exactly prompt 39b, done: [[2026-10-22 GYM ARC Unlock guides]].
