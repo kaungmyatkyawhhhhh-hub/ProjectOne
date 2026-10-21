@@ -4,7 +4,7 @@ tags: [gymarc, handoff]
 ---
 # GYM ARC Handoff (21 Oct)
 Back to [[00 GYM ARC Home|GYM ARC Home]] - details: [[2026-10-21 GYM ARC Audit follow-ups]]
-- **Fully done (21 Oct):** 25, 26 (later cancelled), 11, 34 (+ ripped clothes, portrait export), audit of all prompts, lift screams (Monetization task 3), NPC-on-machine test, Performance part 2 leftovers, Town music, 9 (fuller chest), 15 (traps/back: imported with the chestfix set), 29 (trainer follower lag), 32 (old starter gym restored: [[2026-10-21 GYM ARC Old starter gym restored]]), 28 (UI cleanup: [[2026-10-21 GYM ARC UI cleanup]]). 30: skipped (owner: already in the game).
+- **Fully done (21 Oct):** 25, 26 (later cancelled), 11, 34 (+ ripped clothes, portrait export), audit of all prompts, lift screams (Monetization task 3), NPC-on-machine test, Performance part 2 leftovers, Town music, 9 (fuller chest), 15 (traps/back: imported with the chestfix set), 29 (trainer follower lag), 32 (old starter gym restored: [[2026-10-21 GYM ARC Old starter gym restored]]), 28 + 28b (UI cleanup, boosts like tools: [[2026-10-21 GYM ARC UI cleanup]]). 30: skipped (owner: already in the game).
 - **In progress:** none. Studio is saved state = git (branch claude/eloquent-darwin-b4srob, last code commit for 28).
 - **Remaining order (owner, 21 Oct):** 12 (developer product sales), 27 TRIMMED (stand + odds board + ROLL/X3/AUTO + simple card-flip reveal with rarity color + sound; TODO notes for the build-up / extra VFX) -> then STOP so the owner can publish and test.
 - **After that:** 31, 33, 22 (banner + ALTER button first; full VFX / sound later), 35 (needs the owner to import gym_arc_gear_meshes/sneaker.glb as .glb, Merge Meshes off).

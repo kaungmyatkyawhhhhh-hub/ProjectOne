@@ -43,7 +43,14 @@ Prompt: [[2026-10-21 GYM ARC Prompt - 28 UI cleanup]]. Feature notes: [[GYM ARC 
 ![[GYM ARC/Screenshots/ui_cleanup/hud_phone667.jpg]]
 ![[GYM ARC/Screenshots/ui_cleanup/agency_sign.jpg]]
 
-## Needs the owner
-- Tapping a boost slot now USES it (one tap, like the old DRINK SHAKE button) instead of putting it in your hand. OK?
-- If you UNEQUIP the shake in the Inventory, it comes back when you rejoin or get new shakes. OK?
-- Check on a real phone: the hotbar, the stamina bar above it, and a machine's STOP / REP.
+## Owner's answers (21 Oct, [[2026-10-21 GYM ARC Prompt - 28b Boosts work like tools]]) - done
+- **Boosts work like tools:** tap a slot = the bottle goes in your hand, tap it again = put away. While holding it, tap / click the screen = a ~1 s drink (the chug); the item is used and its effect starts at the END. Taps during the drink do nothing (1 s cooldown, checked on the server). A radial sweep runs over the slot. Put away, dead or another tool in hand mid-drink: nothing is used. Same for every boost. The first time you hold one: "Tap the screen to drink it." Slots never shrink under ~44 px.
+- **Unequipped stays unequipped** (saved, `itemsEquipped`), also after a rejoin or getting more. A new item type goes in by itself only the first time you get it, while a slot is free. One that ran out comes back when you get more if you kept it in.
+- **Odds only in the Agency window** (the world board has no odds text). Prompt 27's "odds board" = the odds grid in the window.
+- The tutorial's shake step says "Tap it, then tap the screen to drink!"; the Coach dialog and the GO TO button sit above the hotbar.
+- Tested (new test player): one drink from 3 quick taps, put away halfway = nothing used, unequipped Coconut Water stayed out after getting more and after a respawn. Not tested: a real rejoin (the test save doesn't keep), a real phone.
+
+![[GYM ARC/Screenshots/ui_cleanup/drink_sweep_bottle_in_hand.jpg]]
+
+## Still to check (owner)
+- On a real phone: the hotbar, the stamina bar above it, a machine's STOP / REP, and tapping the screen to drink while the camera moves.

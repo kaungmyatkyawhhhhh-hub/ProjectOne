@@ -7,6 +7,8 @@ status: todo
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
+> Owner, 21 Oct (prompt 28b): "odds board" here means the odds grid INSIDE the Agency window. No odds text on the board in the world (that board is the gold TRAINER AGENCY sign + pictures since prompt 28).
+
 ```text
 
 TRAINER PORTRAITS (owner, 21 Oct): Downloads\gym_arc_trainer_portraits\ has transparent PNGs for all 8: 01_coach_sam ... 08_atlas (512 square, waist-up) and *_full.png (full body). Upload them and use these as the tile/detail/reveal art (crop to the visible pixels and fit the art area).
