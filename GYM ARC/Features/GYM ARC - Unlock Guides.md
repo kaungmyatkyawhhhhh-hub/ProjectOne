@@ -9,11 +9,15 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 Prompt: [[2026-10-22 GYM ARC Prompt - 39 Unlock guides]]. Progress: [[2026-10-22 GYM ARC Unlock guides]]. Related: [[GYM ARC - Tutorial]], [[2026-10-20 GYM ARC Gameplay plan]] ("Introduce features slowly").
 
+## Look (22 Oct, prompt 39b)
+- Tiles: graphite + faint hex mesh, thin gold inner outline, gold line icons, chunky white labels. Locked: darker, grey outline, grey padlock in place of the icon, grey label. One badge top-right: locked > gold NEW tag > red "!".
+- Tabs (`Config/Guides.TabLocks`, `Kit.Tabs` tab.lock, `Kit.OpenTab`): Inventory GEAR (Spurt 2 or owning gear), AURAS (Spurt 3 or an aura / aura pass), Looks ALTERS (7'0"), Physique GENES (LVL 5 / Spurt 1).
+
 ## Locked menu tiles
 - The side menu always shows all 8 tiles. A tile whose feature isn't open: dimmed, a small gold padlock. A tap: a small shake, a click, and a toast "LOCKED · Unlocks at Growth Spurt 2" with a teaser line (+ "Growth Spurt 1 · 54% there" when it's the next spurt). Taps are logged (`Locked_Tap_<tile>`, value = LVL).
 - Other ways in (the Shop links, the Agency desk, Inventory / Genetics links) show the same toast while locked.
 - When it opens: the padlock pops off with a sparkle sound, and a gold NEW tag + pulsing gold border stay until the tile is tapped once (saved).
-- Today: SHOP, POSES, CREW at Growth Spurt 1; INVENTORY after ~60 reps (or Spurt 1); GENETICS at LVL 5 (or Spurt 1); TRAINERS at Growth Spurt 2. STATS and MUSCLES are open from the start. (Alters tab locks: not done yet.)
+- Today: SHOP, POSES, CREW at Growth Spurt 1; INVENTORY after ~60 reps (or Spurt 1); GENETICS at LVL 5 (or Spurt 1); TRAINERS at Growth Spurt 2. STATS and MUSCLES are open from the start.
 
 ## Guides
 - Coach Dex's dialog (the tutorial's box, unchanged) with 1-3 lines and "Reward (coin) 25", then:

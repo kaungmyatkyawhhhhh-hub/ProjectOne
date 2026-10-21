@@ -1,11 +1,11 @@
 ---
 date: 2026-10-22
 tags: [gymarc, prompt]
-status: done
+status: todo
 ---
 # 39 Unlock guides (mini tutorials for new features)
 
-Back to [[00 GYM ARC Home|GYM ARC Home]] - done: [[2026-10-22 GYM ARC Unlock guides]]
+Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 ```text
 When a player unlocks something new, guide them to it the same way the tutorial does. Read "GYM ARC\2026-10-20 GYM ARC Gameplay plan.md" (section "Introduce features slowly") and "GYM ARC\Features\GYM ARC - Tutorial.md" first. Follow CLAUDE.md Speed rules. Mobile first. Reuse the tutorial pieces (Coach Dex dialog, GuidePath gold path, glowing outline, gold marker + arrow, teleporting GO TO button). Don't build a second system.
@@ -35,7 +35,11 @@ Every unlock in the plan's unlock table, plus:
 - All texts and steps in one config (like Config/Onboarding), so the owner can edit lines.
 
 5) LOCKED MENU BUTTONS (owner, 22 Oct; this REPLACES "hide the button until it unlocks" from the gameplay plan)
-- Side menu buttons (SHOP, STATS, MUSCLES, INVENTORY, GENETICS, POSES, CREW, TRAINERS) are always visible. If the feature isn't unlocked yet, the button is dimmed (~50%), its icon greyed, with a small gold padlock badge in the corner.
+- Side menu buttons (SHOP, STATS, MUSCLES, INVENTORY, GENETICS, POSES, CREW, TRAINERS) are always visible. Use the EARLIER left-nav tile style (owner, 22 Oct): dark graphite tile with faint hex mesh, thin gold inner outline, thick dark bottom edge, GOLD line icons (all the same gold), white chunky labels with a dark stroke. Same 8 buttons as now: SHOP, STATS, MUSCLES, INVENTORY, GENETICS, POSES, CREW, TRAINERS.
+  If the feature isn't unlocked yet: the tile darker (~50-60% brightness), the gold outline turns grey, a GREY padlock in place of the icon (same size), the label grey but readable. Mockup: Downloads\gym_arc_ui_style_match\real\left_nav_badges.png.
+- Button badges (left nav and other menu buttons/tabs), ONE badge per tile at a time, priority LOCKED > NEW > NOTIFICATION. Badges stay inside the tile (clip to its rounded corners); tile size never changes:
+  - NEW: a small gold "NEW" tag (dark text) inside the tile's top-right corner. Stays until the button is tapped once.
+  - NOTIFICATION: the small red chip with a white "!" inside the top-right corner (as now). Gentle pulse. Replaces the old red dot.
 - Tapping a locked button: a small shake + a "locked" click sound, and a toast pops up (same style as the locked-title tooltip: dark tile, gold outline, lock icon, stroked title, clean italic line, auto-hides after ~3 s). It tells WHEN it unlocks and teases WHAT's inside, so players want it. Example lines (edit in config). Tone: plain, short, like a gym friend talking to a kid. Say what it is and why it's fun. No slogans, no "legend", no "secret", no dramatic "...":
   - TRAINERS: "LOCKED · Unlocks at Growth Spurt 2" / "Hire a coach who lifts with you. Some are really rare."
   - CREW: "LOCKED · Unlocks at Growth Spurt 1" / "Make a crew with your friends and win shows together."
