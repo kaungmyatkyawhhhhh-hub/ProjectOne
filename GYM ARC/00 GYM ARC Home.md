@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 21 Oct: every Body Alter has its own BODY ALTER READY popup (art, colors, intro, particles, layered sounds) and a matching dramatic transformation (slow-mo, energy, flash, flex, title card); nearby players see the flash. See [[2026-10-21 GYM ARC Unique alter popups]].
 - 21 Oct: the PUMP SHOP building is now a 2-storey red brick corner store the size of the neighbours (storefront windows, awning, lit sign and blade sign, GET PUMPED mural, roof props) with a small park on the rest of the lot. See [[2026-10-21 GYM ARC Pump Shop building rebuilt]].
 - 21 Oct: Body Alters after 7'0": 5 Human alters (Pumped to Peak) with new skins, +15% gains each, keep 25% EXP, Inventory > Alters to wear any, PUMP SHOP Alters section, divisions by alter tier. See [[2026-10-21 GYM ARC Body alters]].
 - 21 Oct: equipped items show in a Black + Gold hotbar (slots 1-9) above the boost timers; the skate button bobs and shines, bounces on tap, spins its wheels and glows gold while skating. See [[2026-10-21 GYM ARC Hotbar and skate button]].
@@ -91,6 +92,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-21 GYM ARC Hotbar and skate button]]
 - [[2026-10-21 GYM ARC Body alters]]
 - [[2026-10-21 GYM ARC Pump Shop building rebuilt]]
+- [[2026-10-21 GYM ARC Unique alter popups]]
 - Prompts: the `Prompts` folder (every prompt, saved as it was sent)
 - Screenshots: the `Screenshots` folder (copies of the repo's `screenshots/`)
 
@@ -377,6 +379,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Prompt - 19 Coins useful again (shops)]]
 - [[2026-10-21 GYM ARC Prompt - 20 Playtest fixes]]
 - [[2026-10-21 GYM ARC Prompt - 23 Rebuild PUMP SHOP building]]
+- [[2026-10-21 GYM ARC Prompt - 22 Unique alter popups]]
 
 ### Config
 - [[GYM ARC - Config values]]

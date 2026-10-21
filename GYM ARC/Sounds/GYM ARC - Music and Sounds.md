@@ -135,3 +135,37 @@ This replaces "Back to one song per area" above (no longer true): every area pla
 - Town: 1840007392 (one song, unchanged)
 - Music (the fallback list where an area has none): 118959016267248, **99979837873059** (new), 131532099124744, 139266399633943, 86451874359343, 113417603188158, 1840007392 (volume 0.7).
 - The five new ids are your own picks (not checked against the licensed-library rule; Claude did not pick them).
+
+## Body Alter sounds (prompt 22, 21 Oct)
+All in `Config/AlterThemes` (`AlterThemes.Sounds`, swap any id there). Picked by Claude from the Roblox licensed library only (Pro Sound Effects / APM). Group "AlterFX"; music and gym sounds duck to 30% and go muffled during the moment.
+
+| Layer | SoundId | What it's for |
+|---|---|---|
+| Riser | 9120735973 | PSE Whoosh Suction 10: the build before the popup slams in |
+| ImpactSub | 9125484526 | PSE Deep Hits Big Reverberant Booms 1: the panel's sub boom |
+| ImpactPunch / FlashPunch | 9120730275 | PSE Whoosh Impact 1: the mid punch (phone speakers) |
+| Stamp | 9043367506 | APM Percussive Noise 07 Kick 04: the name stamps in |
+| Shimmer / CrystalChime | 9116394876 | PSE Magic Glows Chiming Hits 2 |
+| Hum | 9114353038 | PSE Evil Drone Deep Airy Swell 1: soft hum while the popup is open |
+| Confirm | 9116684733 | PSE Metal Impacts 1: ALTER tapped |
+| ChargeUp | 9043365842 | APM Heartbeat 02 96BPM: slow-mo heartbeat, faster and faster |
+| Swell | 9120273504 | PSE Tsunami Wind Up Huge Synth Powerup 1: energy gathering |
+| FlashBoom | 9125484367 | PSE Deep Hits Big Reverberant Booms 2: THE flash (with reverb) |
+| Sparkle | 9126073302 | PSE Synth Sparkle Bell Ding 2: glassy sparkle on the flash |
+| Chime | 9126073001 | PSE Synth Sparkle Bell Ding 4: the reveal, +0.03 pitch per alter |
+| Cheer | 9120973900 | PSE Wrestling Crowd 2 |
+| CheerBig | 9112766176 | PSE Crowd Cheer And Applause 1: tier finale |
+| TitleHit | 1837830196 | APM BOOM Deep Boom 02: the title card lands |
+| FinaleBoom | 9125484743 | PSE Deep Hits Big Reverberant Booms 3: tier finale |
+| Heartbeat (Pumped) | 1840158546 | APM Heart Pulse |
+| Shing (Shredded) | 9119076918 | PSE Shing Ringy 4 |
+| WarmWhoosh (Tanned, Lava) | 9113083076 | PSE Airy Whoosh Blast 23 |
+| WarmChime (Tanned) | 9126073011 | PSE Synth Sparkle Bell Ding 3 |
+| Crackle (Vascular, Plasma) | 9114237487 | PSE Electric Arcing 4 |
+| Brass (Peak) | 9040287624 | APM Caught Off Guard (orchestra stab) |
+| StoneThud (Stone tier) | 9125869505 | PSE Rock Drops Smashes Impacts Hits 1 |
+| MetalClang (Metal tier) | 9116750726 | PSE Metal Plate Impact |
+| IceCrack (Frost) | 9118587494 | PSE Rock Drop On Concrete Breaks 2, pitched up |
+| Thunder (Storm) | 9113169432 | PSE Artillery Distant 2 |
+| Bubble (Toxic) | 9120348019 | PSE Underwater Movement 801 |
+| CosmicSwell (Legend tier) | 9039636793 | APM Stargazing (sting c) |

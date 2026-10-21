@@ -21,8 +21,16 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - **Shows:** at 7'0" the posing divisions are Open (Natural) and one per alter tier; stage presence at 7'0" = 50% + the rest by alter number (of 30).
 - **HUD:** the Growth Spurt card / machine strip become "NEXT: SHREDDED · 62% · Needs LEGS"; top bar "7'0" MAX · Alter 3 Tanned"; a small gold "ALTER 3" pill over the nametag.
 
+## Popups and transformation (prompt 22, 21 Oct; [[2026-10-21 GYM ARC Unique alter popups]])
+- **Every alter has its own theme** (`Config/AlterThemes`): background art (Tier 1, by the planner), accent, title gradient, intro, particles, sounds. Tiers 2-6 use colors only until their art comes (Stone thud + dust, Metal clang + sheen, Gem chime + prism, each Element its own sound and particles, Legend cosmic swell + rays); every alter has its own name colors.
+- **BODY ALTER READY popup** (`Shared/UI/AlterPopup`): the screen dims with a vignette, letterbox bars, the music ducks, a riser; the panel slams in (sub boom + punch, shockwave ring, small shake), the name stamps in with sparks, then the theme's beat (Pumped heartbeat x2, Shredded slashes + wipe, Tanned rise, Vascular vein crackles, Peak spotlight + gold dust). While open: border pulse, title shine every 2.5 s, drifting particles, breathing ALTER button, soft hum. Tier finale: "TIER 1 COMPLETE".
+- **Transformation** (`Shared/VFX/AlterFX`, ~3 s, tap to skip): camera close (picks a clear angle, never through walls), world darker, music muffled, heartbeat faster + swell, energy pulled into the body with an accent rim glow, 0.2 s silence, FLASH (boom + punch + sparkle + reverb, ground shockwave, particles, camera shake), the reveal chime (a step higher every alter) + the theme's sting + cheer + its screen effect, the body flexes (front double biceps, everyone sees it), the title card "ALTER 3: TANNED". The ALTER action goes to the server at the flash, so the new skin appears under the white.
+- **Others nearby** (150 studs) see the flash, the ground shockwave and particles and hear a quieter 3D boom (no camera move).
+- **Inventory > Alters and PUMP SHOP > Alters** cards have a strip of each alter's art (or colors) and a line in its accent.
+- Sound ids: [[GYM ARC - Music and Sounds]]. Max ~40 particles at the peak, ~20 idle, half on low graphics; Reduced Motion: no shakes.
+
 ## Where it lives
-- `Config/Alters` (all numbers), `PlayerData.Alter / EquipAlter / UpdateBest`, `ActionService` (Alter, EquipAlter), `BodyService.PublishData` (Alter, AlterNumber attributes), `Gains.PerRep` (bonus), `MuscleRig` (skin), `ProgressClient`, `Shared/UI/AltersPanel`, `PumpShopClient`, `TopBarClient`, `OverheadTitleClient`, `ShowOffService` (best physique), `PosingComp`.
+- `Config/Alters` (all numbers), `PlayerData.Alter / EquipAlter / UpdateBest`, `ActionService` (Alter, EquipAlter), `BodyService.PublishData` (Alter, AlterNumber attributes), `Gains.PerRep` (bonus), `MuscleRig` (skin), `ProgressClient`, `Shared/UI/AltersPanel`, `PumpShopClient`, `TopBarClient`, `OverheadTitleClient`, `ShowOffService` (best physique), `PosingComp`, `Config/AlterThemes`, `Shared/UI/AlterPopup`, `Shared/VFX/AlterFX`, `Audio.Duck / Muffle`.
 - Textures: `Downloads\gym_arc_alters\tier1_human`, uploaded 21 Oct (ids in Config/Alters). Skins built with `tools/builders/SkinStages` `BuildAlters()`.
 - Pacing: `lune run tests/pacing alters`. Tests: `tests/alters`.
 
