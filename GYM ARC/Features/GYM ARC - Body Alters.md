@@ -40,3 +40,8 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 3. Re-run `tests/pacing alters` and tune `FirstGoal` / `GoalPer`.
 
 ![[GYM ARC/Screenshots/alters/tier1_preview.png]]
+
+## Texture fix (21 Oct, prompt 38; [[GYM ARC - Bug - Alter textures only change color]])
+- The body's UVs spread one texture over 10-14 studs, so Tier 1's detail came out too big and soft ("only the color changes"). Shredded and Peak maps now repeat 2x2 inside the image; Vascular keeps its scale with much stronger veins (`Downloads\gym_arc_alters\tier1_human_tiled`, ids in Config/Alters). Rule for new tiers: design detail for ~10-14 studs per texture (70-120 px per stud), thin lines need strong contrast.
+- MuscleRig re-applies the skin on every new body piece and every 2 s, and preloads every skin map.
+![[GYM ARC/Screenshots/alters/alters_side_by_side.jpg]]

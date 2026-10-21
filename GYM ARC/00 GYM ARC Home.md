@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 21 Oct (later): Body Alter textures fixed (detail was drawn too big; new maps, skin kept after body updates) and the hotbar hides on machines. See [[2026-10-21 GYM ARC Alter textures fix]].
 - 21 Oct (later): UI cleanup: Inventory 3 tabs (Items / Gear / Looks), trainers in the TRAINERS window, 8 side buttons (Pump Shop link in the Shop), no DRINK SHAKE button, hotbar at the bottom (boosts are held and drunk like tools, the hotbar choice is saved), clean Agency sign. See [[2026-10-21 GYM ARC UI cleanup]].
 - 21 Oct: audit of every prompt, then the missing ones one by one. See [[2026-10-21 GYM ARC Audit follow-ups]].
 - 21 Oct: trainers' clothes fixed (no more ripped shirts: solid outfits on the muscles, shorts to the knee) and real gear meshes (belts, wraps, knee sleeves, straps, whistles) on trainers and players' shop gear. See [[2026-10-21 GYM ARC Trainer outfits and gear]].
@@ -106,6 +107,8 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-21 GYM ARC Starter gym layout]]
 - [[2026-10-21 GYM ARC Old starter gym restored]]
 - [[2026-10-21 GYM ARC UI cleanup]]
+- [[2026-10-21 GYM ARC Alter textures fix]]
+- [[GYM ARC - Bug - Alter textures only change color]]
 - [[2026-10-21 GYM ARC Funnel fixes]]
 - [[2026-10-21 GYM ARC Trainer outfits and gear]]
 - [[2026-10-21 GYM ARC Audit follow-ups]]
@@ -402,6 +405,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-21 GYM ARC Prompt - 26 Starter gym layout]]
 - [[2026-10-21 GYM ARC Prompt - 28 UI cleanup]]
 - [[2026-10-21 GYM ARC Prompt - 28b Boosts work like tools]]
+- [[2026-10-21 GYM ARC Prompt - 38 Alter textures not showing]]
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]

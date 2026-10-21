@@ -43,3 +43,5 @@ Built 21 Oct ([[2026-10-20 GYM ARC Prompt - 14 Boosts inventory]]). Code: `Confi
 - The hotbar sits at the very bottom centre (no longer above the timers).
 - (prompt 28b) Boosts work like tools: tap the slot = hold the bottle, again = put away; tap / click while holding = a `Boosts.DrinkSeconds` (1 s) drink, the item is used at the end (`ItemService` startDrink: server cooldown, nothing used if put away). The slot shows a radial sweep (player attributes DrinkItem / DrinkUntil).
 - The hotbar choice is saved (`data.itemsEquipped`, `PlayerData.SetItemEquipped`): unequipped stays out; a new item type fills a free slot only the first time; the Protein Shake is slot 1.
+
+- (owner, 21 Oct) On a machine the hotbar hides and the held item is put away (HotbarClient on MachineState Enter / Exit; MachineService unequips and keeps tools out during the session; ItemService won't start a drink while the root is anchored). It shows again on Exit.
