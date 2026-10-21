@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done (stand-in shoe until the owner imports sneaker.glb)
 ---
 # 35 Real sneakers instead of block feet
 

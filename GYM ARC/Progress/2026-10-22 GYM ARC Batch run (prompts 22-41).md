@@ -17,7 +17,7 @@ Rules kept: no image uploads (the ban); trainer portraits stay 3D rigs (prompt 3
 - [x] 39 Unlock guides: check what the owner changed in the prompt, do the difference
 - [x] 41 Title screen layout
 - [x] 31 Shops rework and undiscovered (commit ef7808d)
-- [ ] 35 Sneakers
+- [x] 35 Sneakers (commit 09d43ff; owner imports sneaker.glb)
 - [ ] 36 Pro Gym expansion
 - [ ] 33 Trainer levels and evolutions (no portraits)
 
@@ -25,3 +25,4 @@ Rules kept: no image uploads (the ban); trainer portraits stay 3D rigs (prompt 3
 - 22, 37, 39: already built (checked, statuses fixed).
 - 41: title screen redone (live gym, one centred column, phone variant, framed camera). [[2026-10-22 GYM ARC Prompt - 41 Title screen layout]]
 - 31: Coach Dex is the main shop, PUMP SHOP sells specials only (one counter), coconut stand on the ground selling Coconut Water, smoothie stands replaced (park, plant, lounge bench), quests claimed in Quests > Goals, UNDISCOVERED tiles + reveal + red dots, themed NEXT alter card. [[GYM ARC - Pump Shop]], [[GYM ARC - Undiscovered items]]
+- 35: sneakers on every trainer, NPC and player (Shared/Gear), sized to the foot or a big calf, in each trainer's colors. The shoe is a plain-part stand-in until the owner imports sneaker.glb (steps in [[GYM ARC - Sneakers]]).
