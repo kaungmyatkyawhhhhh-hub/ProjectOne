@@ -34,4 +34,4 @@ Prompt: [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]. Feature 
 
 ## Needs the owner
 - Walk through the gym once: if you had moved anything by hand after the re-layout (this afternoon), it went back with the old layout. The re-laid-out version is still in `StarterGymBackup.LayoutV2` if you want to copy something out of it.
-- The pro gym still needs its own reason to unlock (open question from prompt 16).
+- ~~The pro gym still needs its own reason to unlock~~ Closed (owner, 21 Oct): prompt 36 is the answer ([[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]).

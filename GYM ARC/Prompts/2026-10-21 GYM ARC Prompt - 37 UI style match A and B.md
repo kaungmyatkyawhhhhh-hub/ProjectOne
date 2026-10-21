@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: on hold (owner, 21 Oct: do NOT run until he has approved the mockups and updated it)
 ---
 # 37 UI style match (A chunky / B premium)
 

@@ -33,7 +33,7 @@ Prompt: [[2026-10-20 GYM ARC Prompt - 16 All machines in starter gym and dumbbel
 ![[GYM ARC/Screenshots/dumbbells/curl_g000.jpg]]
 
 ## Needs the owner
-- **The pro gym needs its own reason to unlock** (not built). Options: (a) the top 3 weight tiers only on the pro gym's machines, (b) +25% gains while training in the pro gym, (c) pro-only machines or cosmetics (for example a Smith machine, a pro towel / shaker only sold there).
+- **CLOSED (owner, 21 Oct): answered by prompt 36** ([[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]: Pro versions of the starter machines, weights from the starter max up to 450, +10% gains, sub-muscle machines). Was: **the pro gym needs its own reason to unlock** (not built). Options: (a) the top 3 weight tiers only on the pro gym's machines, (b) +25% gains while training in the pro gym, (c) pro-only machines or cosmetics (for example a Smith machine, a pro towel / shaker only sold there).
 - Growth Spurt 2 level 56 -> 52 (see above). OK?
 - Long names are cut on the machine HUD title ("OVERHEAD...", "SHOULDER..."), as before for long machine names.
 - My test reps in Studio went into your real save (Rong) for the dumbbell exercises.
