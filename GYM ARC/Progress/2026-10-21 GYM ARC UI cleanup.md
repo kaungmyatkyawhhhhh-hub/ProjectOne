@@ -52,5 +52,13 @@ Prompt: [[2026-10-21 GYM ARC Prompt - 28 UI cleanup]]. Feature notes: [[GYM ARC 
 
 ![[GYM ARC/Screenshots/ui_cleanup/drink_sweep_bottle_in_hand.jpg]]
 
+## Drink animation redone (owner: "looks like throwing")
+- The old chug was one quick arm swing up beside the head (bottle pointing out and back), eased in and out in 0.2 s: it read as a throw.
+- Now a real drink over the drink's length: the elbow comes up in front of the chest and the bottle to the mouth (first quarter), then the bottle tips up further and the head goes back with a few small gulps, then the arm comes down (last 15%). Angles checked on a character in Studio from the front, side and behind (`EmoteClient` POSES.Chug; also used by the Inventory's USE).
+
+![[GYM ARC/Screenshots/ui_cleanup/chug_old_throw_look.jpg]]
+![[GYM ARC/Screenshots/ui_cleanup/chug_new_1_lift.jpg]]
+![[GYM ARC/Screenshots/ui_cleanup/chug_new_2_drink.jpg]]
+
 ## Still to check (owner)
 - On a real phone: the hotbar, the stamina bar above it, a machine's STOP / REP, and tapping the screen to drink while the camera moves.
