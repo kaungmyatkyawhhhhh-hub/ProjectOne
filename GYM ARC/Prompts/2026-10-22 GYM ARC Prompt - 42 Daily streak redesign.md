@@ -1,11 +1,11 @@
 ---
 date: 2026-10-22
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 42 Daily Streak redesign
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]
+Back to [[00 GYM ARC Home|GYM ARC Home]] - done: [[2026-10-22 GYM ARC Daily streak redesign]]
 
 ```text
 Redesign the Daily Streak tab (Quests > STREAK). Match the mockup: C:\Users\kaung\Downloads\gym_arc_ui_style_match\real\quests_streak.png (current look: C:\Users\kaung\Downloads\gym_arc_ui_current\quests_streak.png). Follow CLAUDE.md Speed rules. Mobile first. Use the prompt 37 components (ChunkyButton, pills, hex tile style) if they exist.
