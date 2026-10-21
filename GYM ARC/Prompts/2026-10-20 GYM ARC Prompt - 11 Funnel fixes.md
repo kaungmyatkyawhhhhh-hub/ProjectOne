@@ -34,3 +34,13 @@ Half the players finish the tutorial and leave before their first Growth Spurt. 
 
 Don't change step names 1-15, so the funnel stays comparable. Write a short progress note in the vault with the time measurements.
 ```
+
+## Owner update (21 Oct, given while prompt 25 ran; do after prompt 26)
+```text
+For prompt 11, skip everything prompt 20 already did (the tutorial shake + auto-drink, the first Growth Spurt timing, the ready popups). Don't change those.
+Only do what's still missing:
+1) Small rewards at 25%, 50% and 75% of the Growth Spurt bar (popup, sound, a few coins), plus the new funnel steps 13a/13b/13c. Keep the 15 funnel step names unchanged.
+2) The walk to the Flat Bench: spawn new players closer (under 5 s walk) after the new starter gym layout from prompt 26, a gold Beam path to the bench, and a "Go to bench" button that auto-walks there.
+3) Load the shop and other heavy UI after the tutorial starts, not on join.
+Then mark prompt 11 done.
+```

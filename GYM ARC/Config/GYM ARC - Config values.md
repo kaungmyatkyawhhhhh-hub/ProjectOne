@@ -45,7 +45,8 @@ Muscle of the Day x diminishing.
 | Setting | Value | What it does |
 |---|---|---|
 | BaseXp | 34 | Base EXP per rep (tuned so the first Growth Spurt is about 8 min) |
-| MaxMultiplier | 5 | Cap on all stacked multipliers together |
+| MaxMultiplier | 5 | Cap on all stacked multipliers together, until the first Body Alter |
+| CapPerAlterTier | 1 | (prompt 25) the cap goes up by this per Body Alter tier: x6 from alter 1, x7 from alter 6, ... (Gains.Cap); MAX BOOST tag on the HUD when a player's boosts pass it |
 | DiminishLevel | 50 | A muscle at this level grows at half speed |
 | BalancedBonus | 1.1x | Bonus when all 6 groups are close together |
 | BalancedSpread | 10 levels | "Close together" means within this many levels |

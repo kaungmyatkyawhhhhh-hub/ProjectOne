@@ -16,7 +16,7 @@ Built 21 Oct ([[2026-10-20 GYM ARC Prompt - 14 Boosts inventory]]). Code: `Confi
 | Creatine | +25% EXP on every rep | 10 min |
 | Protein Powder | +25% Growth Spurt progress (= muscle EXP, so it works like Creatine) | 10 min |
 | Supplements | +10% to all training gains | 15 min |
-- Using the same boost again adds its time, up to 60 min. Different boosts stack (with every other boost, inside the game's overall gains cap).
+- Using the same boost again adds its time, up to 60 min. Different boosts stack (with every other boost, inside the game's overall gains cap: x5, +1 per Body Alter tier; a MAX BOOST tag shows with the timers when you're past it).
 - Boost time only counts down while you're in the game; it is saved and picks up when you come back.
 - Saved: `data.items[id]` (how many), `data.boostLeft[id]` (seconds still running).
 

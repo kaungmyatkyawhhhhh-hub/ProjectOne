@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 21 Oct: trainers 5-8 remade (Duke Ironside, Volta, The Shadow, Atlas) with idles, lines, auras and rendered icons; rarer odds for Mythic / Secret / Eternal; gains cap +1 per alter tier with a MAX BOOST tag. See [[2026-10-21 GYM ARC New trainers 5-8]].
 - 21 Oct: trainers come from coin rolls at the Trainer Agency: 8 rarities (Common to Eternal), odds shown, pity every 100 rolls, Auto Roll, Golden from 5, up to 4 slots, an exciting roll animation, Inventory > Trainers. See [[2026-10-21 GYM ARC Trainer rolls]].
 - 21 Oct: every Body Alter has its own BODY ALTER READY popup (art, colors, intro, particles, layered sounds) and a matching dramatic transformation (slow-mo, energy, flash, flex, title card); nearby players see the flash. See [[2026-10-21 GYM ARC Unique alter popups]].
 - 21 Oct: the PUMP SHOP building is now a 2-storey red brick corner store the size of the neighbours (storefront windows, awning, lit sign and blade sign, GET PUMPED mural, roof props) with a small park on the rest of the lot. See [[2026-10-21 GYM ARC Pump Shop building rebuilt]].
@@ -95,6 +96,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-21 GYM ARC Pump Shop building rebuilt]]
 - [[2026-10-21 GYM ARC Unique alter popups]]
 - [[2026-10-21 GYM ARC Trainer rolls]]
+- [[2026-10-21 GYM ARC New trainers 5-8]]
 - Prompts: the `Prompts` folder (every prompt, saved as it was sent)
 - Screenshots: the `Screenshots` folder (copies of the repo's `screenshots/`)
 
@@ -383,6 +385,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-21 GYM ARC Prompt - 23 Rebuild PUMP SHOP building]]
 - [[2026-10-21 GYM ARC Prompt - 22 Unique alter popups]]
 - [[2026-10-21 GYM ARC Prompt - 24 Trainer rolls]]
+- [[2026-10-21 GYM ARC Prompt - 25 New trainers 5-8]]
+- [[2026-10-21 GYM ARC Prompt - 26 Starter gym layout]]
 
 ### Config
 - [[GYM ARC - Config values]]
