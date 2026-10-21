@@ -61,3 +61,6 @@ One reusable machine system: every machine is a config entry with the muscles it
 - 11 exercises in `Machines.Dumbbells` (ids DB*, gym "Dumbbell", tier set "Dumbbell" 10-100 lb, `gainScale` 0.85, `grip` = the hand axis the handle lies along, `hands` = 1 for one-dumbbell moves). Poses `DB_*` (Config/Poses), moves in MachineClient (`bars.dbArm` / `bars.dbBoth`).
 - MachineService welds the dumbbells to the hands (folder "HeldDumbbells" on the character), resized when the weight changes and removed on leave. NPC regulars never use the spots. The sign over a spot says DUMBBELLS / TRAIN with no NEW mark.
 - Machine HUD: EXERCISE button above STOP for dumbbells. Settings: `dumbbellLast` (the picker's first card).
+
+## Starter gym re-layout (21 Oct, prompt 26)
+- The starter gym now has 2 Flat Benches and 2 Squat Racks, 1 of every other machine (the extra Overhead Press, Incline Bench, Deadlift, Barbell Row, Leg Press, Hack Squat, Crunch Bench and Pull-Up Bar copies, and the third Flat Bench / Squat Rack, are in `ServerStorage.StarterGymBackup.Removed`). Zones and rows: [[GYM ARC - Town and Gyms]].

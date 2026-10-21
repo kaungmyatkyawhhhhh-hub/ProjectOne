@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 26 Starter gym feels packed
 

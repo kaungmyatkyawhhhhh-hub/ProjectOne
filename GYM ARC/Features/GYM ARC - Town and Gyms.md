@@ -40,3 +40,17 @@ A sunny beach-side fitness town with three gyms: the warm old-school starter gym
 
 ## 21 Oct (prompt 16)
 - The starter gym has a copy of every pro machine (two columns in the middle of the room) and every gym's dumbbell rack has Train spots (starter 6, beach 6, pro 4). See [[GYM ARC - Machines]].
+
+## Starter gym re-layout (21 Oct, prompt 26; [[2026-10-21 GYM ARC Starter gym layout]])
+The starter gym felt packed after prompt 16 (every machine, dumbbells, the Agency). Re-laid out like a real, organised gym:
+- **Bigger room:** 30 studs wider to the west (now 118 x 85, +34%); the ceiling 16 -> 18 (the same as the pro gym). The front wall, door, the glass wall to the pro gym and the back (mirror) wall stayed where they were; the new wing has its own street windows, west wall windows, a duct line and an AC unit on the roof. Trees on that ground moved west; the terrain under the new floor was cleared.
+- **Zones, straight rows, hanging black + gold zone signs:** FREE WEIGHTS (west: squat racks + overhead press against the wall, benches, deadlift / row platforms, all facing into the room), CABLES + ARMS (pushdown, curl, woodchop), MACHINES (two rows on the east, same spacing, all facing the aisle), CARDIO (one row by the glass wall), DUMBBELLS (rack + 6 train spots on the mirror wall), STRETCH (back-left corner). FRONT: desk + Coach Dex, the Trainer Agency, the lounge corner (arm wrestling, smoothie cart, a bench).
+- **Walkways:** a main aisle from the door (12+ studs, open to the dumbbells), 8+ studs between all rows; the path to the pro gym's glass door stays clear.
+- **Fewer duplicates:** 2 Flat Benches and 2 Squat Racks (the tutorial ones), 1 of everything else (10 machines removed). Gym bags, the floor mat, a sitting bench and the free-standing whiteboard removed.
+- **The big dark board** (the hanging COACH DEX sign, seen from behind) is gone; the name is a nameplate on the desk.
+- **Lights:** one grid of 20 pendants at one height (2 cast shadows, as before), 12 fill lights; the 3 extra pendants removed.
+- Every machine kept its MachineId, prompts and Hype / Spot points (moved as whole models); the tutorial's glowing path finds the new spots by itself.
+- Everything changed is backed up in `ServerStorage.StarterGymBackup` (Before: the whole old gym; Removed: what was taken out; tags removed, kept as a WasTags attribute). Builder: `tools/builders/StarterLayout`.
+
+![[GYM ARC/Screenshots/starter_layout/angle1_from_desk.jpg]]
+![[GYM ARC/Screenshots/starter_layout/top_after.jpg]]
