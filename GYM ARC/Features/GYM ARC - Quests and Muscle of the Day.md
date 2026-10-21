@@ -6,6 +6,8 @@ aliases: ["GYM ARC - Daily Quests"]
 ---
 # GYM ARC - Quests and Muscle of the Day
 
+> **22 Oct (prompt 31):** Coach Dex is a shop now. A finished Coach quest is claimed with **CLAIM in Quests > Goals** (action `ClaimCoachQuest`); talking to him also still pays it out. After the tutorial the next quest is given by itself.
+
 Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 Coach Dex hands out quests at the front desk, and one muscle group trains at double gains each day.

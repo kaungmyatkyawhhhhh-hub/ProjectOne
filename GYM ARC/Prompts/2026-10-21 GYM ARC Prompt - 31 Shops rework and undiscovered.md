@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 31 Shops rework (Coach Dex shop, PUMP SHOP specials) + UNDISCOVERED items
 

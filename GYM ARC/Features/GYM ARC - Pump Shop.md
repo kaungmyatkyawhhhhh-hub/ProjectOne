@@ -6,6 +6,17 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 # GYM ARC - Pump Shop
 
+## Now: three shops (22 Oct, [[2026-10-21 GYM ARC Prompt - 31 Shops rework and undiscovered|prompt 31]])
+One shop window for all three (`PumpShopClient`); its title and tabs follow the shop. Tabs are always SUPPLEMENTS / GEAR (+ ALTERS or DNA LAB). Config: `Config/PumpShop.Shops`. The server only sells a shop's own items to a player standing at it.
+- **Coach Dex** (Starter Gym front desk, the main shop): SUPPLEMENTS (Protein Shake, Creatine, Protein Powder, Supplements, Pre-Workout), GEAR (Basic and Pro), ALTERS. Talking to him: the tutorial's first quest, else he pays out a finished quest, then his shop opens. Quests are claimed in **Quests > Goals (CLAIM)**; new quests come by themselves after the tutorial.
+- **PUMP SHOP** (town): ONE counter (the old Supplements one, sign "SPECIALS", clerk Mo). The Gear / Apparel / DNA Lab counters, tills, hanging signs and the COLD SHAKES fridge are gone (their wall displays stay as decoration; a plant where the fridge was). Sells: Mass Gainer (+50% progress, 10 min), Elite Pre-Workout (+50% rep speed, 10 min), Whey Isolate (+50% EXP, 15 min), BCAA Recovery (stamina refills 2x, 15 min); Elite and **Champion** gear (+20%, gold, 150,000); DNA LAB.
+- **Coconut Stand** (beach gym, tag `CoconutStand`): Coconut Water only, x1 / x5. The cart was 3 studs in the air: now on the sand.
+- **Apparel is off sale** (players keep what they own). **Smoothie stands removed** everywhere: Starter Gym cart (a plant now), Pro Gym bar (bench + 2 plants, its zone sign says LOUNGE), the town smoothie bar building (a small park now: `Town.PocketPark`, signpost arrow says "Park").
+- **Links:** the Shop window has "Coach Dex" (teleports in front of him, camera behind you) and "Go to Pump Shop"; 10 s cooldown each, checked on the server. A gear level sold in the other shop shows a "Go to ..." button.
+- Prices (minutes of coins at your stage): Mass Gainer 14, Elite Pre-Workout 12, Whey Isolate 16, BCAA 12.
+
+## Before prompt 31 (history)
+
 Built 21 Oct ([[2026-10-20 GYM ARC Prompt - 19 Coins useful again (shops)]]). One big store in the town hub that sells everything worth buying with coins. Coins only, no random rolls.
 
 ## Where and what

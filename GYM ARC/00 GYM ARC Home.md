@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 22 Oct: shops reworked: Coach Dex is the main shop, the PUMP SHOP sells specials only (one counter, Champion gear), coconut stand sells Coconut Water, smoothie stands gone (park, plants, lounge); UNDISCOVERED items in the Inventory with a reveal; NEXT alter card in its theme (prompt 31). See [[GYM ARC - Pump Shop]], [[GYM ARC - Undiscovered items]].
 - 22 Oct: HUD back in the top bar (coins, LVL, POSING SHOW + JOIN, DAILY, gear; TopbarPlus, no outlines), square nav tiles (prompt 46). See [[2026-10-22 GYM ARC HUD back in the top bar]].
 - 22 Oct: top bar holds only the coins (LVL pill + gear under the left menu, DAILY REWARD card), aura perks, final hex rules, no trainer pictures after the ban (prompts 43-45). See [[2026-10-22 GYM ARC Top bar, aura perks, hex rules]].
 - 22 Oct: Daily Streak tab redesigned (full-width day tiles, TODAY tag, streak record; prompt 42). See [[2026-10-22 GYM ARC Daily streak redesign]].
@@ -151,6 +152,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Features index]]
 - [[GYM ARC - Boosts Inventory]]
 - [[GYM ARC - Pump Shop]]
+- [[GYM ARC - Undiscovered items]]
 - [[GYM ARC - Body Alters]]
 - [[GYM ARC - Gains and EXP]]
 - [[GYM ARC - Game Feel]]
