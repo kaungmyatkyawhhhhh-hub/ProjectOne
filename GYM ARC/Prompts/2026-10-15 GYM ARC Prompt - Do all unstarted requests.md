@@ -1,7 +1,7 @@
 ---
 date: 2026-10-15
 tags: [gymarc, prompt]
-status: in progress
+status: done (phone / 10-player numbers: owner)
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 

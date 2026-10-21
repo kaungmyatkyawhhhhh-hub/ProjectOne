@@ -20,3 +20,11 @@ From [[2026-10-21 GYM ARC Prompt - Audit all prompts]]: the prompts that weren't
 - Tested in play with the gym NPCs: an NPC on the Flat Bench / Calf Raise, then after it left. The floor outline stays flat on the floor (floor 0.15, strips 0.22) and never follows the NPC; the prompt shows **OCCUPIED** in red while an NPC is on it and **OCCUPY** again after it leaves. On your own machine the outline hides (by design). No code change needed.
 ![[GYM ARC/Screenshots/audit_followups/npc_on_flat_bench_outline.jpg]]
 ![[GYM ARC/Screenshots/audit_followups/after_npc_left_outline.jpg]]
+
+## 3. Performance part 2 leftovers (14 Oct) - done
+- **EXP popups pooled:** built once per style and reused (no new billboards every rep; 20 reps: the count stays flat).
+- **Other players' sounds:** only within 50 studs and at most 6 at once (lift sounds, screams).
+- **Scream remote** is unreliable (cosmetic, cheaper).
+- **Auto quality:** other players' auras also turn off when your Roblox graphics level is set low (1-3). Low Graphics in Settings already covers "Low Effects" (post effects, others' auras), so no second toggle.
+- Still yours: the real-phone and 10-player numbers (F9 Developer Console, Ctrl+F6 MicroProfiler).
+- Found on the way: Studio's screen capture doesn't draw "always on top" billboards (EXP popups, gain numbers), so they never show in my screenshots; they do show in the game.
