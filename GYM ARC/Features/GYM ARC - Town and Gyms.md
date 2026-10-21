@@ -39,9 +39,14 @@ A sunny beach-side fitness town with three gyms: the warm old-school starter gym
 ![[GYM ARC/Screenshots/beach_real_machines_row.jpg]]
 
 ## 21 Oct (prompt 16)
-- The starter gym has a copy of every pro machine (two columns in the middle of the room) and every gym's dumbbell rack has Train spots (starter 6, beach 6, pro 4). See [[GYM ARC - Machines]].
+- (Copies removed again by prompt 32.) The starter gym had a copy of every pro machine (two columns in the middle of the room) and every gym's dumbbell rack has Train spots (starter 6, beach 6, pro 4). See [[GYM ARC - Machines]].
 
-## Starter gym re-layout (21 Oct, prompt 26; [[2026-10-21 GYM ARC Starter gym layout]])
+## Old starter gym restored (21 Oct, prompt 32; [[2026-10-21 GYM ARC Old starter gym restored]])
+- The owner went back to the old starter gym: the re-layout below and prompt 16's pro machine copies are undone. The room is 88 x 85 again (ceiling 16), original zones and machines, plus the dumbbell Train spots and the Trainer Agency.
+- Backups in `ServerStorage.StarterGymBackup`: `Before` (the old gym, what is live now), `LayoutV2` (the re-layout), `ProCopies` (the 11 pro copies), `Removed`. All untagged.
+- The grass west of the gym is filled back in; the trees there were spread out again (their exact old spots were lost).
+
+## Starter gym re-layout (21 Oct, prompt 26; UNDONE by prompt 32)
 The starter gym felt packed after prompt 16 (every machine, dumbbells, the Agency). Re-laid out like a real, organised gym:
 - **Bigger room:** 30 studs wider to the west (now 118 x 85, +34%); the ceiling 16 -> 18 (the same as the pro gym). The front wall, door, the glass wall to the pro gym and the back (mirror) wall stayed where they were; the new wing has its own street windows, west wall windows, a duct line and an AC unit on the roof. Trees on that ground moved west; the terrain under the new floor was cleared.
 - **Zones, straight rows, hanging black + gold zone signs:** FREE WEIGHTS (west: squat racks + overhead press against the wall, benches, deadlift / row platforms, all facing into the room), CABLES + ARMS (pushdown, curl, woodchop), MACHINES (two rows on the east, same spacing, all facing the aisle), CARDIO (one row by the glass wall), DUMBBELLS (rack + 6 train spots on the mirror wall), STRETCH (back-left corner). FRONT: desk + Coach Dex, the Trainer Agency, the lounge corner (arm wrestling, smoothie cart, a bench).

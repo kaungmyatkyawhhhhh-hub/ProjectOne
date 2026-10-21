@@ -1,11 +1,11 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 32 Restore the old starter gym
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]
+Back to [[00 GYM ARC Home|GYM ARC Home]] - done: [[2026-10-21 GYM ARC Old starter gym restored]]
 
 ```text
 Owner decision (21 Oct): the Starter Gym with every machine is too much and too complicated for new players. Go back to the OLD starter gym. This replaces prompt 16 part 1 and cancels prompt 26 (starter gym re-layout). Never undo the owner's own manual Studio changes. Follow CLAUDE.md Speed rules.

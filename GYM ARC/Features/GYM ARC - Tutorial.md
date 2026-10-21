@@ -40,7 +40,7 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 - Re-test: tutorial done at 3:16 (was 8:10).
 
 ## Start in the gym, gold path, Go button (21 Oct, prompt 11; [[2026-10-21 GYM ARC Funnel fixes]])
-- New players start the tutorial inside the starter gym (after keeping their genetics), facing the free weights: 26 studs (~1.6 s) from the Flat Bench (`Config/Onboarding` StartSpot; ActionService GeneticsSeen). The old spawn by the door was 58 studs.
+- New players start the tutorial inside the starter gym (after keeping their genetics): since prompt 32 (old layout back) in the middle aisle at (-12, -64), facing the Flat Bench 16 studs away (`Config/Onboarding` StartSpot / StartFacing; ActionService GeneticsSeen).
 - The guide path has a glowing gold ribbon on the floor under its dots (flat Beams, `Shared/UI/GuidePath`).
 - A **GO TO FLAT BENCH** button (gold, above the coach dialog) walks the player there along the path (`GuidePath.Walk`, Humanoid:MoveTo); the label follows the step's machine ("Go to Squat Rack", "Go to Coach Dex"). Any steering takes over.
 ![[GYM ARC/Screenshots/funnel_fixes/start_gold_path_go_button.jpg]]

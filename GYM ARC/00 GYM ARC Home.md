@@ -20,7 +20,8 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 21 Oct: audit of every prompt, then the missing ones one by one. See [[2026-10-21 GYM ARC Audit follow-ups]].
 - 21 Oct: trainers' clothes fixed (no more ripped shirts: solid outfits on the muscles, shorts to the knee) and real gear meshes (belts, wraps, knee sleeves, straps, whistles) on trainers and players' shop gear. See [[2026-10-21 GYM ARC Trainer outfits and gear]].
 - 21 Oct: funnel fixes: rewards at 25 / 50 / 75% of the Growth Spurt bar (funnel 13a-c), new players start 1.6 s from the Flat Bench with a gold path and a Go button, the shop loads after the tutorial starts. See [[2026-10-21 GYM ARC Funnel fixes]].
-- 21 Oct: the starter gym re-laid out: 34% bigger, higher ceiling, clear zones in straight rows with hanging signs, a wide main aisle, fewer duplicates, one light grid. See [[2026-10-21 GYM ARC Starter gym layout]].
+- 21 Oct (later): the OLD starter gym is back (owner, prompt 32): the re-layout and the pro machine copies are undone; dumbbells and the Agency stay. See [[2026-10-21 GYM ARC Old starter gym restored]].
+- 21 Oct (undone by prompt 32): the starter gym re-laid out: 34% bigger, higher ceiling, clear zones in straight rows with hanging signs, a wide main aisle, fewer duplicates, one light grid. See [[2026-10-21 GYM ARC Starter gym layout]].
 - 21 Oct: trainers 5-8 remade (Duke Ironside, Volta, The Shadow, Atlas) with idles, lines, auras and rendered icons; rarer odds for Mythic / Secret / Eternal; gains cap +1 per alter tier with a MAX BOOST tag. See [[2026-10-21 GYM ARC New trainers 5-8]].
 - 21 Oct: trainers come from coin rolls at the Trainer Agency: 8 rarities (Common to Eternal), odds shown, pity every 100 rolls, Auto Roll, Golden from 5, up to 4 slots, an exciting roll animation, Inventory > Trainers. See [[2026-10-21 GYM ARC Trainer rolls]].
 - 21 Oct: every Body Alter has its own BODY ALTER READY popup (art, colors, intro, particles, layered sounds) and a matching dramatic transformation (slow-mo, energy, flash, flex, title card); nearby players see the flash. See [[2026-10-21 GYM ARC Unique alter popups]].
@@ -102,6 +103,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-21 GYM ARC Trainer rolls]]
 - [[2026-10-21 GYM ARC New trainers 5-8]]
 - [[2026-10-21 GYM ARC Starter gym layout]]
+- [[2026-10-21 GYM ARC Old starter gym restored]]
 - [[2026-10-21 GYM ARC Funnel fixes]]
 - [[2026-10-21 GYM ARC Trainer outfits and gear]]
 - [[2026-10-21 GYM ARC Audit follow-ups]]
@@ -396,6 +398,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-21 GYM ARC Prompt - 24 Trainer rolls]]
 - [[2026-10-21 GYM ARC Prompt - 25 New trainers 5-8]]
 - [[2026-10-21 GYM ARC Prompt - 26 Starter gym layout]]
+- [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 
 ### Config
 - [[GYM ARC - Config values]]
