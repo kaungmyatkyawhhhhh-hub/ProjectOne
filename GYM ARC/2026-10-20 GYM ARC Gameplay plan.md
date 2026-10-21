@@ -16,14 +16,14 @@ Agreed with the owner on 20 Oct 2026. This plan replaces the older progression n
 4. **Growth Spurt** (until 7'0") or **Body Alter** (after 7'0"): reset, reward, bonus, repeat.
 
 ## Gyms and machines
-- The starter gym has every machine (1 copy of each pro gym machine).
+- The Starter Gym stays simple: only the original starter machines + the dumbbell rack (owner, 21 Oct). Pro gym machines open with the Pro Gym at Spurt 2. Extra machines for every sub-muscle go in the Pro Gym and later gyms.
 - Dumbbell racks in every gym work: a "Train" prompt opens an exercise picker (11 dumbbell exercises), at about 85% of machine EXP.
 - Every new gym has heavier top weight tiers and a small gains bonus (+10% per gym), so players always train in their newest gym. Each gym also has one unique feature.
 - Gyms are REAL gym types that gym bros recognize. The fantasy is in the alters, not the gyms.
 
 | Unlock | Gym | Look and special |
 |---|---|---|
-| Start | Starter Gym | Regular brick gym with every machine |
+| Start | Starter Gym | Regular brick gym, the original starter machines |
 | Spurt 1 | Beach Gym | Outdoor weights by the sand, posing stage, shows |
 | Spurt 2 | Pro Gym | Premium modern gym, mirrors, LED lights, Dante |
 | Spurt 3 | Garage Gym | Home setup: power rack, rubber mats, toolboxes, speaker, fridge |
@@ -131,16 +131,19 @@ Auras are cosmetic only right now. Each aura gets one small perk. One aura equip
 | Feature | Role | Change |
 |---|---|---|
 | Genetics + DNA tokens | Faster gains for some muscles | Also a DNA token per alter tier |
-| Trainers | Passive boosts | Coin-roll RNG (prompt 24): 8 trainers, Common to Eternal (a higher rank comes in a later update), odds shown, pity every 100 rolls, Golden from 5 duplicates. Slot 2 at spurt 2, slot 3 at alter tier 1, +1 Extra Trainer pass |
+| Trainers | Passive boosts | Coin-roll RNG (prompt 24): 8 trainers, Common to Eternal (a higher rank comes in a later update), odds shown, pity every 100 rolls. Trainers level up (Lv 1-20) from the player's training and evolve with duplicates + coins: BASE > SWOLE > BEAST > TITAN > APEX (x1 to x5 boost). Golden removed (prompt 33). Slot 2 at spurt 2, slot 3 at alter tier 1, +1 Extra Trainer pass |
 | Quests + Muscle of the Day | Small goals, coins | Add show quests ("Place top 3") and alter quests |
 | Arm wrestling | Fun break, coins | Weekly arm wrestling leaderboard |
 | Spotting | Both get a bonus | Later becomes coach mode |
 | Crews | Social, leaderboard | Unlock at spurt 1; crew score from shows won |
 | Titles | Collection | Add titles for shows, alters, belts |
 | Statue + leaderboards | Showing off | Statue shows the biggest physique and alter |
-| Smoothie bar | Decoration | Shop moves to the PUMP SHOP (big coin store in town) |
+| Shops (21 Oct) | Coin sinks | Coach Dex = main shop, only in the Starter Gym (SUPPLEMENTS, GEAR Basic/Pro, ALTERS). PUMP SHOP = one counter with special SUPPLEMENTS, special GEAR (Elite, Champion) and DNA LAB. Coconut stand sells only Coconut Water. Smoothie bar removed everywhere. Coach Dex is no longer a quest NPC (quests from the HUD). |
 | Clothing store | Cosmetics | Later |
 | Seasonal events | Come back for events | A small Halloween event now (decor, aura, limited title) |
+
+## Inventory discovery
+- Locked items that aren't next in line show as UNDISCOVERED ("???", silhouette) to make players curious. Alters: owned + the next one visible, the rest undiscovered; tiers without art are hidden. Count per tab ("3 / 30 discovered").
 
 ## Other systems already planned
 - Boosts inventory: Protein Shake, Coconut Water, Creatine, Protein Powder, Supplements (prompt 14).

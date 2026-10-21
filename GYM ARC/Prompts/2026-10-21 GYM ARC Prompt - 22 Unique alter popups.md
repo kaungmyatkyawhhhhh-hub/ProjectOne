@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: done
+status: todo
 ---
 # 22 Unique Body Alter popup per alter
 
@@ -16,6 +16,7 @@ Art (made by the planner) in C:\Users\kaung\Downloads\gym_arc_alters\ui_tier1\:
 
 1) THEME PER ALTER (config, one entry per alter)
 - background image, accent color (border, ALTER button), button text color, title gradient (2 colors), intro animation, sound, particles.
+- OWNER UPDATE (21 Oct, see the updated mockups.png): border = 4 px (on screen, at the same scale as the trainer tiles) in the accent color + a 2 px dark inner ring + the soft outer glow (same as the trainer tiles). ALL text in the chunky font (LuckiestGuy) with dark strokes: one top line "BODY ALTER READY · ALTER 3" (adds " · TIER 1 COMPLETE" on the 5th alter) in white, then the alter NAME big, then the multiplier as the second-loudest line "x1.15 GAINS" in the accent color with a glow. Shredded has more and brighter slashes; Peak has a strong gold summit edge, a sun glow behind it, rays and gold particles (it's the finale).
 - Layout stays the same for all: small "BODY ALTER READY" on top, the alter NAME big in the middle (Luckiest Guy, gradient + soft shadow), "Alter N · gains xN.NN" under it, ALTER (accent) + LATER (dark) buttons. The 5th alter of a tier adds "TIER 1 COMPLETE".
 
 2) TIER 1 THEMES (match mockups.png)
@@ -31,6 +32,15 @@ Art (made by the planner) in C:\Users\kaung\Downloads\gym_arc_alters\ui_tier1\:
 
 4) THE TRANSFORMATION MOMENT MATCHES TOO
 - When ALTER is pressed, the transformation flash and title card use the same theme (color, sound, particles): e.g. Vascular veins flash over the screen, Tanned gets a sun flare, Peak gets the gold spotlight.
+
+4a) THE ALTER BUTTON (owner, 21 Oct, LATEST, overrides the details below): style it like the trainer EVOLVE button and the updated mockups.png. A wide rounded bar (~20% wider than before) with a BRIGHT saturated accent-color gradient fill (light at the top, deeper at the bottom), not a dark panel, and the alter's own motif layered over it at ~50% (Pumped: heartbeat line + pulse rings; Shredded: bright diagonal slashes; Tanned: sunburst rays from the bottom; Vascular: red + blue veins; Peak: gold mountain summit with a bright edge, sun glow, rays and gold dust), 4 px dark outline, a white highlight line on the top edge, a thick darker bottom edge (6-7 px), soft glow in the accent color. Text: the alter NAME in chunky font with a DARK fill and a bright accent-colored stroke + glow (lit from behind), and "ALTER >" under it in white stroked text at ~60% of the name's size, so the button previews what you become. LATER: the small grey chunky button with the same 4 px outline, top highlight and 6-7 px bottom edge. The banner outline is 4 px + inner ring.
+4a-old) THE ALTER BUTTON MUST LOOK LIKE A REAL BUTTON (owner: it looks flat). See the updated mockups.png.
+- Raised 3D look: the face has a vertical gradient (lighter accent on top, darker at the bottom), a darker "lip" under it (6-8 px, about 45% of the accent color) so it looks thick, a soft drop shadow under that, a 2-3 px lighter UIStroke, and a glossy highlight strip on the top half (white, ~75% transparent, rounded).
+- Text: Luckiest Guy "ALTER" with an arrow icon (>), white with a dark outline on dark accents, dark text on light accents (Shredded, Tanned, Peak), always high contrast.
+- An outer glow in the accent color that breathes slowly, and a shine that sweeps across the face every ~2.5 s.
+- Press feel: on press the face moves down into the lip (lip shrinks to 1-2 px, face 6 px lower, a bit darker) with a "clunk" sound; on release it pops back with a small bounce. Hover (PC): slightly brighter and 1.03x scale.
+- LATER is the same 3D style but dark grey and smaller, so ALTER is clearly the main button.
+- Big tap target on phones (at least 56 px tall). Make this button style a reusable component (Kit) so other important buttons in the game can use it later.
 
 4b) MAKE IT DRAMATIC, WITH VFX (owner: "more exciting, dramatic")
 Reuse the VFX textures in C:\Users\kaung\Downloads\gym_arc_aura_vfx\ (shockwave_ring, spark_star, ember_dot, lightning_flipbook_4x4, smoke_shaded_4x4, flame_flipbook_4x4, wisp_flipbook_4x4, rim_glow, ground_circle, droplet). Use UI ImageLabels (flipbooks via ImageRectOffset) for the popup and ParticleEmitters/Beams on the character for the transformation.

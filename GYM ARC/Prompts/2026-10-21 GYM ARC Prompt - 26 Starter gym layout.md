@@ -1,9 +1,9 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: done
+status: cancelled
 ---
-# 26 Starter gym feels packed
+# 26 Starter gym feels packed (CANCELLED 21 Oct: replaced by prompt 32, old starter gym restored)
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 

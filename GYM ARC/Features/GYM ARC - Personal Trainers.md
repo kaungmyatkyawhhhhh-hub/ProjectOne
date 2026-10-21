@@ -139,3 +139,10 @@ Every trainer's width and depth (shoulders, chest, back, arms, legs) scale by th
 
 ## Trainer gone after a rejoin (bug fixed, 19 Oct)
 On join the equipped list was cut to the slots known at that moment, before the Extra Trainer pass was checked, and that cut list was saved, so the second trainer was lost on every rejoin. Now the save keeps up to the most slots anyone can have and only the trainers that follow you are capped to your slots; the Coaches window shows only those as coaching. Not testable in Studio (needs a rejoin with the pass): please check in the live game.
+
+## Outfits and gear meshes (21 Oct, prompt 34; [[2026-10-21 GYM ARC Trainer outfits and gear]])
+- **No classic Shirt / Pants on trainers any more** (they looked ripped: see [[GYM ARC - Muscles and Bodies]]). Each trainer's outfit is one solid color worn by the muscle pieces themselves (`Config/Trainers look.outfit`: shirt / pants images from `tools/trainer_outfits.py`, sleeves none / short (to the elbow) / long (to the wrist), legs shorts (to the knee) / long, shoes). `Shared/Outfit` decides which pieces wear it.
+- Outfits: Sam red track top (long sleeves) + black pants + white shoes; Nia green tank + green shorts; Lou yellow polo (to the elbow) + black pants; Rex purple tank + black shorts; Duke black sleeveless + black shorts; Volta black sports top + black shorts (the V harness / tied jacket is gone); The Shadow black long sleeves + black shorts; Atlas marble with white shorts.
+- **Gear = the planner's meshes** (`Shared/Gear`, `ReplicatedStorage.GearMeshes`): Coaches 1-4 a whistle + lanyard; Rex belt + wraps; Duke belt (gold stitching) + wraps (gold stripes); Volta belt (red stitching) + red knee sleeves; Atlas gold cuffs + a thin gold waistband. Fitted to the muscles on each client (`GearClient`). The box shorts and the blocky belts, wraps, sleeves and cuffs are gone.
+- Coaches 1-4's shoes come from a shoes-only classic Pants image (the feet are drawn with the avatar's own texture, so painting them did nothing).
+![[GYM ARC/Screenshots/trainer_outfits/05_duke_front.jpg]]

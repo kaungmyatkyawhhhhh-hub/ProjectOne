@@ -49,3 +49,7 @@ Nothing here changed in the owner's 19 Oct Studio work. What a player can change
 - **Auras:** saved as `auras.owned` / `auras.equipped`, picked in the INVENTORY window ([[GYM ARC - Aura]]).
 - **Body look:** not a choice: it comes from your muscles, height and genetics frame ([[GYM ARC - Muscles and Bodies]]). Your own Roblox head, face, hair, hats and skin color stay; back, front and neck accessories are removed.
 - **Your own Roblox clothes:** your avatar's classic Shirt / Pants are worn on the muscle meshes (without them you are shirtless in the game shorts). Layered 3D clothing hides the muscles.
+
+## Gear meshes (21 Oct, prompt 34)
+- Belts, wrist wraps, lifting straps and knee sleeves are now the planner's Blender meshes (`ReplicatedStorage.GearMeshes`, built by `Shared/Gear`, fitted to the muscles you see by `GearClient`): a leather belt with stitching and a steel buckle, wraps with stripes and a thumb loop, straps with a tail, knee sleeves with bands. Color = the item's color (PUMP SHOP levels: the level color with a matching trim).
+![[GYM ARC/Screenshots/trainer_outfits/player_gear_g000.jpg]]

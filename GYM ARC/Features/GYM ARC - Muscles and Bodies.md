@@ -20,7 +20,7 @@ Everyone wears the same Robloxian 2.0 body, and 18 real muscles grow on it as yo
 - **Your own muscles (muscle v9 "unified"):** the torso and upper arms are each one welded mesh, so any mix of levels (one muscle huge, the rest flat) stays smooth with no holes. 7 live meshes: torso front + back, 2 upper arms, 2 upper legs, the waist. Forearms and calves use static stage meshes. The traps rise from the neck toward the shoulders (added 9 Oct).
 - **Other players and NPCs:** a client can only hold 8 live meshes, so everyone else wears static **body stage meshes**: 7 stages per body region (look 0, 0.2 ... 1.0, mass monster), picked from their replicated look values with a 0.3 s cross-fade.
 - **The look:** reaching the Growth Spurt goal gives about two thirds of the look; 2x the goal's EXP is the full lean V-taper; 2x to 5x grows on to the "mass monster" (veins come in); past 5x the look stays but stats keep going.
-- **Clothing:** muscles wear the character's own classic Shirt/Pants. Default look is shirtless with game shorts. Under the shorts the thighs grow like fabric over muscle (about half the bulge).
+- **Clothing:** muscles wear the character's own classic Shirt/Pants. Default look is shirtless with game shorts. Under the shorts the thighs grow like fabric over muscle (about half the bulge). Trainers (prompt 34) wear solid outfit images instead, see below.
 - **Skin texture stages:** 5 skin textures tinted to the skin color: Stage1 at level 0, Stage2 about half, Stage3 at the full look, Stage4-5 toward the mass monster (rock-like skin).
 - **Performance rule:** every change to a muscle mesh costs about 40 ms, so the look moves in small steps, one body region per frame, and tints fade with a cheap part property instead of rewriting the mesh.
 
@@ -111,3 +111,9 @@ The torso's top lid is re-meshed densely (3,212 triangles, its own piece `Top`),
 
 ## Body Alter skins (21 Oct, prompt 21)
 At 7'0" a Body Alter's texture set replaces the 5 skin stages at every muscle size (the shape still grows with the muscles), tinted with the skin color, on your live body and on the stage meshes others see: the character's "Alter" attribute names a SurfaceAppearance `Alter_<id>` in ReplicatedStorage.SkinStages (MuscleRig `skinKey`). See [[GYM ARC - Body Alters]].
+
+## Why classic clothing looks ripped on the stage meshes (21 Oct, prompt 34)
+- The static stage meshes (`BodyStages`, `LimbStages`: everyone you see except yourself) map the classic clothing layout, but **sideways the mapping jumps at every corner of the old template's faces**: about 1 triangle in 5 squeezes a whole face of the shirt image into a sliver (measured on all 90 stage meshes). A classic Shirt then draws its template edges as white "tear" lines and its see-through gaps as skin. Up and down the mapping is close to level, but where the muscles bulge (lats, shoulders) a row wanders, so even a hem line came out jagged.
+- Trainers now wear one solid color per outfit (`Shared/Outfit`, attributes OutfitShirt / OutfitPants / OutfitSleeves / OutfitLegs), so nothing can tear. Their outfit pieces are matte Fabric; the elbow / knee balls take the outfit color under a sleeve.
+- **Players' own classic shirts still tear on other people's screens** (the same meshes). The real fix is re-exporting the stage meshes with clean texture seams (owner's import); not done.
+![[GYM ARC/Screenshots/trainer_outfits/before_ripped_sam.jpg]]
