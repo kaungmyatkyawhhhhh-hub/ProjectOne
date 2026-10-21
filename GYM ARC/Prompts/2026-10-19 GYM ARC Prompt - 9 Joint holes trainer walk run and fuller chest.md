@@ -1,7 +1,7 @@
 ---
 date: 2026-10-19
 tags: [gymarc, prompt]
-status: done (owner: import the 14 chestfix torso files)
+status: done
 ---
 # 9 Joint holes and trainer walk/run
 

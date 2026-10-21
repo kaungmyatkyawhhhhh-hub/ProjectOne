@@ -41,3 +41,7 @@ From [[2026-10-21 GYM ARC Prompt - Audit all prompts]]: the prompts that weren't
 ![[GYM ARC/Screenshots/audit_followups/chest_mass_monster_new_left_old_right.jpg]]
 ![[GYM ARC/Screenshots/audit_followups/chest_side.jpg]]
 ![[GYM ARC/Screenshots/audit_followups/chest_own_body.jpg]]
+
+### 5b. Chest + traps/back import (prompts 9 and 15) - done
+- You imported the 14 chestfix torso files; they now replace the torso templates in `ReplicatedStorage.BodyStages` (bounds in `Config/BodyStages`, the old mesh ids in `Config/StageMeshBackup.ChestFix21Oct`). Everyone else now sees the fuller chest and prompt 15's traps / back. Checked on Dante: no gaps, no errors.
+![[GYM ARC/Screenshots/audit_followups/chest_dante_stage_meshes.jpg]]
