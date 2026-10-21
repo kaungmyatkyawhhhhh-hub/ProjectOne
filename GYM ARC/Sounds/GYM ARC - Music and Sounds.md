@@ -169,3 +169,9 @@ All in `Config/AlterThemes` (`AlterThemes.Sounds`, swap any id there). Picked by
 | Thunder (Storm) | 9113169432 | PSE Artillery Distant 2 |
 | Bubble (Toxic) | 9120348019 | PSE Underwater Movement 801 |
 | CosmicSwell (Legend tier) | 9039636793 | APM Stargazing (sting c) |
+
+## Lift screams (21 Oct)
+Picked from Roblox's licensed library (Pro Sound Effects), swap any id in `Config/Sounds`:
+- **ScreamNormal** (heavy rep, last rep of a set): PSE Video Game Effects 1 / 2 / 4 / 21 / 23 (fight vocals: yells, grunts): 9120415730, 9120415788, 9120415873, 9120417141, 9120417581.
+- **ScreamBig** (personal record, arm wrestling / posing win): PSE Male Scream Short Yelling Bursts 1 / 10 / 5 (throaty shouts): 9125650883, 9125651373, 9125652432.
+- Rules in `Config/Screams`; see [[2026-10-21 GYM ARC Audit follow-ups]].

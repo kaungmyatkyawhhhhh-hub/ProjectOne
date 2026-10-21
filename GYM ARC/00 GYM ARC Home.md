@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 21 Oct: audit of every prompt, then the missing ones one by one. See [[2026-10-21 GYM ARC Audit follow-ups]].
 - 21 Oct: trainers' clothes fixed (no more ripped shirts: solid outfits on the muscles, shorts to the knee) and real gear meshes (belts, wraps, knee sleeves, straps, whistles) on trainers and players' shop gear. See [[2026-10-21 GYM ARC Trainer outfits and gear]].
 - 21 Oct: funnel fixes: rewards at 25 / 50 / 75% of the Growth Spurt bar (funnel 13a-c), new players start 1.6 s from the Flat Bench with a gold path and a Go button, the shop loads after the tutorial starts. See [[2026-10-21 GYM ARC Funnel fixes]].
 - 21 Oct: the starter gym re-laid out: 34% bigger, higher ceiling, clear zones in straight rows with hanging signs, a wide main aisle, fewer duplicates, one light grid. See [[2026-10-21 GYM ARC Starter gym layout]].
@@ -103,6 +104,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-21 GYM ARC Starter gym layout]]
 - [[2026-10-21 GYM ARC Funnel fixes]]
 - [[2026-10-21 GYM ARC Trainer outfits and gear]]
+- [[2026-10-21 GYM ARC Audit follow-ups]]
 - Prompts: the `Prompts` folder (every prompt, saved as it was sent)
 - Screenshots: the `Screenshots` folder (copies of the repo's `screenshots/`)
 
