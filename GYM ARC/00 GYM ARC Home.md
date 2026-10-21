@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 22 Oct: HUD back in the top bar (coins, LVL, POSING SHOW + JOIN, DAILY, gear; TopbarPlus, no outlines), square nav tiles (prompt 46). See [[2026-10-22 GYM ARC HUD back in the top bar]].
 - 22 Oct: top bar holds only the coins (LVL pill + gear under the left menu, DAILY REWARD card), aura perks, final hex rules, no trainer pictures after the ban (prompts 43-45). See [[2026-10-22 GYM ARC Top bar, aura perks, hex rules]].
 - 22 Oct: Daily Streak tab redesigned (full-width day tiles, TODAY tag, streak record; prompt 42). See [[2026-10-22 GYM ARC Daily streak redesign]].
 - 22 Oct: the new UI everywhere (chunky LuckiestGuy buttons, hex panels, rank badges, coloured reward tiles; prompt 40). See [[2026-10-22 GYM ARC New UI applied]].
@@ -124,6 +125,8 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-22 GYM ARC Daily streak redesign]]
 - [[GYM ARC - Uploaded images 21-22 Oct]]
 - [[2026-10-22 GYM ARC Top bar, aura perks, hex rules]]
+- [[2026-10-22 GYM ARC HUD back in the top bar]]
+- [[2026-10-22 GYM ARC Prompt - 46 HUD back in the top bar]]
 - [[GYM ARC - Unlock Guides]]
 - [[2026-10-21 GYM ARC Funnel fixes]]
 - [[2026-10-21 GYM ARC Trainer outfits and gear]]
