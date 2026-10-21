@@ -47,3 +47,6 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 
 ## Prompt 28 (21 Oct; [[2026-10-21 GYM ARC UI cleanup]])
 - The shake step points at hotbar slot 1 (the DRINK SHAKE button is gone); tapping the slot drinks it. The Coach Dex dialog moves up above the hotbar while it shows.
+
+## Quiet tutorial + teleport (22 Oct; [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]])
+- GO TO buttons teleport (GoToService); a small dark SKIP pill top-right; the target machine glows gold with a bouncing gold arrow; only its sign shows; no quest card, notices, item popups or offers until the tutorial ends (`UIBus.InTutorial`, `UIBus.AfterTutorial`). The Coach Dex dialog is unchanged.

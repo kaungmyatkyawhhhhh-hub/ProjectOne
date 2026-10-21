@@ -28,6 +28,7 @@ Prompt: [[2026-10-21 GYM ARC Prompt - 27 Trainer Agency UI redesign]] (the trimm
 ![[GYM ARC/Screenshots/agency27/reveal_uncommon.jpg]]
 ![[GYM ARC/Screenshots/agency27/reveal_legendary.jpg]]
 ![[GYM ARC/Screenshots/agency27/stand_before.jpg]]
+![[GYM ARC/Screenshots/agency27/stand_cork_board.jpg]] (before the Eternal card was covered too)
 
 ## Not done (trimmed, or later prompts)
 - The pet-sim odds display over the stand and the action bar there (prompt 28b: the odds stay in the window).

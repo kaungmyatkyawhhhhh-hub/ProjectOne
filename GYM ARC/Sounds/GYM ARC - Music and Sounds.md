@@ -179,3 +179,7 @@ Picked from Roblox's licensed library (Pro Sound Effects), swap any id in `Confi
 ## Town music (21 Oct)
 - Town playlist: 1840007392 + APM Hit The Street 1840558258 + APM City Lights (A) 1840517437 (licensed library).
 - Treadmill slots still empty: no clean loop in the licensed library (owner's pick).
+
+## Lifting voices (22 Oct; [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]])
+- The owner: "the lifting screams are disturbing". ScreamNormal / ScreamBig are gone; **LiftGrunt** (Pro Sound Effects, Roblox's licensed library, picked by description, not heard): Gasps Male Deep Breaths Struggling 10 / 13 (9125572953, 9125573322), Video Game Effects 15 / 26 (9120416707, 9120417872). Volume 0.18 (40% of 0.45), pitch +-0.05, range 6-35 studs.
+- Every 5th heavy rep and a new PR only (`Config/Screams`); Settings "Lifting Voices".
