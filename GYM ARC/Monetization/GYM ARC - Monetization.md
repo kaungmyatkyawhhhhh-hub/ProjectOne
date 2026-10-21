@@ -128,7 +128,7 @@ monetization prompt is the one that turns it on.
 | VIP | Game pass | +10% coins, VIP tag, the Royal aura (aura system coming) | 299 | 2032988308 | Passes | ON |
 | Aura Pack | Game pass | Unlocks 5 auras (aura system coming next) | 199 | 2033954299 | Passes | ON |
 | Auto Rep | Game pass | Lifts for you on a machine | 249 | 2033558291 | Passes | ON |
-| Extra Trainer | Game pass | A second personal trainer | 99 | 2032496303 | Passes | ON |
+| Extra Trainer | Game pass | +1 trainer slot (prompt 24: up to 4 with the free slots) | 99 | 2032496303 | Passes | ON |
 | Small Coins | Developer product | +1,000 coins | 25 | 3718306241 | Coins | ON |
 | Medium Coins | Developer product | +5,000 coins | 99 | 3718306326 | Coins | ON |
 | Large Coins | Developer product | +15,000 coins | 249 | 3718306360 | Coins | ON |

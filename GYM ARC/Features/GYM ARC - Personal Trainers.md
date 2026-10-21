@@ -9,7 +9,39 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 A coach who follows you around, stands beside your machine and cheers you on. Built 13 Oct (new features run, task 7B) instead of pets; Plates the gym cat stays a gym NPC ([[GYM ARC - NPC Regulars and Gym Cat]]).
 
-## How it works
+## Trainer rolls (prompt 24, 21 Oct; [[2026-10-21 GYM ARC Trainer rolls]])
+Trainers now come from **coin rolls** at the **Trainer Agency** (the desks at the front of each gym), like eggs in pet games. Coins only, never Robux, no Robux luck. The odds are always shown. This replaces hiring (the old Coaches window and prices are gone).
+- **8 trainers, one per rarity** (`Config/Trainers`; a 9th rarity later = one more config entry):
+
+| Rarity | Chance | Trainer | Boost while equipped |
+|---|---|---|---|
+| Common | 50% | Coach Sam | +5% EXP |
+| Uncommon | 30% | Coach Nia | +10% coins |
+| Rare | 12% | Coach Lou | +15% EXP, +10% max stamina |
+| Epic | 5% | Coach Rex | +25% EXP and coins |
+| Legendary | 2% | Coach Atlas (new) | +40% EXP and coins, +10% progress |
+| Mythic | 0.75% | Coach Blaze (new) | +70% EXP and coins, +20% progress |
+| Secret | 0.2% (1 in 500) | Coach Shade (new, "???" until you own him) | +110% EXP and coins, +30% progress |
+| Eternal | 0.05% (1 in 2,000) | Coach Aeon (new) | +150% EXP and coins, +50% progress |
+
+- The 4 new ones are taller and bigger, bare-chested with part-built shorts, and wear rarer gear (gold shoulder pads, a red-purple cape, a dark hood, a crown and cape), with a rarity aura (gold / red-purple / shadow / white-gold).
+- **Progress** = the Growth Spurt / alter goal's EXP counts that much more (the level a goal asks for drops a little). Boosts add up over all equipped trainers, capped at +400%.
+- **Rolling:** ROLL x1, ROLL x3 (from Growth Spurt 2). Price = 1.6 minutes of coins at your stage (90 coins at the start, 525 at 7'0"). **AUTO ROLL** keeps rolling until you have no coins, tap Off, or pull an Epic or better. **Auto-delete** toggles: Common / Uncommon duplicates become 10% of the roll price instead. **Pity:** 100 rolls without an Epic or better = the next one is an Epic ("Epic guaranteed in 37 rolls" and a bar). All rolls happen on the server.
+- **Roll animation** (~1.5 s, tap to skip): a capsule card drops in, shakes and glows in the rarity color, cracks open, the trainer flexes in 3D with his name and rarity banner. Epic a purple burst; Legendary a gold explosion and a slower build; Mythic a screen shake and lightning; Secret the screen goes dark first; Eternal a white flash, stars and a swell. Layered sounds (the Body Alter set).
+- **Announcements:** Legendary or better: a chat line for everyone ("Rong pulled a MYTHIC trainer: Coach Blaze!") and a toast; Secret / Eternal also a big banner for others.
+- **Owning / equipping:** Inventory > **Trainers** tab: the following slots on top (tap to remove; locked ones say what opens them) and every trainer you own (count, boost, EQUIP, "3/5 to Golden" / MAKE GOLDEN). **Slots:** 1, 2 at Growth Spurt 2, 3 at the first Body Alter, +1 with the Extra Trainer pass (max 4). Duplicates can fill several slots.
+- **Golden:** 5 of the same trainer -> 1 Golden (1.5x his boost, a gold glow on him).
+- **Odds boards:** a lit board behind each Agency desk (`tools/builders/TrainerAgency`) lists all 8 with colors, chances and boosts, filled from the config.
+- **Old saves:** coaches hired before keep coming as one of each (the same coach, now his rarity). The old per-coach perks (stamina refill, pump) are replaced by the table above.
+- **Pacing** (`lune run tests/trainers`, all coins into rolls, with pity): first Epic or better ~20 min, Legendary ~53 min, Mythic ~2.7 h, Secret ~11 h, Eternal ~54 h.
+- Analytics: TrainerRoll (rarity), TrainerAutoRoll, TrainerGolden.
+- Where it lives: `Config/Trainers`, `Server/TrainerService`, `TrainerClient` (Agency, roll animation, boards), `Shared/UI/TrainersPanel` (Inventory tab), `Shared/UI/TrainerPortrait` (3D portraits), `TrainerFollowClient` (Golden glow, auras, slots 3-4). Studio test switches: `TestTrainers` ("PumpCoach,RookieCoach@g"), `TestTrainerSlots` (2), `TestRollRarity` ("Mythic": every roll that rarity).
+
+![[GYM ARC/Screenshots/trainer_rolls/agency.jpg]]
+![[GYM ARC/Screenshots/trainer_rolls/pull_legendary_phone.jpg]]
+![[GYM ARC/Screenshots/trainer_rolls/inventory_trainers.jpg]]
+
+## How it worked before the rolls (13-19 Oct)
 - **Trainer Desks:** one at the front of each gym (starter gym left of the door between the smoothie cart and the shake machine, pro gym front left, just inside the beach gym gate). Press **Trainers** at the desk to hire.
 - **Four coaches** (coins): Rookie Coach Sam +5% EXP (300), Cardio Coach Nia +10% stamina refill (450), Money Coach Lou +5% coins (600), Pump Coach Rex: the Pump meter fills 25% faster and PUMPED lasts 25% longer (800).
 - **Trainers panel:** the **Trainers** tile in the side menu (equip / unequip anywhere). Hiring only works at a desk. One trainer follows you; the Extra Trainer pass would add a second and the perks stack (the pass is in the config but monetization is off).
