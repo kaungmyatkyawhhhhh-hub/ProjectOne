@@ -37,3 +37,7 @@ Built 21 Oct ([[2026-10-20 GYM ARC Prompt - 14 Boosts inventory]]). Code: `Confi
 
 ## Hotbar (21 Oct)
 - EQUIP puts the item in our own Black + Gold hotbar (`HotbarClient`; Roblox's toolbar is off because it covered the stamina bar): slots 1-9 with the icon and count, tap or the number key to hold / put away, the held one gold-bordered. It sits above the boost timers row. See [[2026-10-21 GYM ARC Hotbar and skate button]].
+
+## Prompt 28 (21 Oct; [[2026-10-21 GYM ARC UI cleanup]])
+- The Inventory's ITEMS tab (`Shared/UI/BoostsPanel`) holds the boosts, DNA Tokens and the boosts running now; the old BOOSTS and ITEMS tabs are merged.
+- The hotbar sits at the very bottom centre (no longer above the timers); a boost slot is a one-tap USE. The Protein Shake is put in slot 1 by the server (`ItemService` autoShake, `PlayerData.ItemChanged`); UNEQUIP keeps it out until you rejoin or get more shakes.

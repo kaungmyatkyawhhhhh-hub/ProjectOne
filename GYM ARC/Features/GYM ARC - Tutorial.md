@@ -44,3 +44,6 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 - The guide path has a glowing gold ribbon on the floor under its dots (flat Beams, `Shared/UI/GuidePath`).
 - A **GO TO FLAT BENCH** button (gold, above the coach dialog) walks the player there along the path (`GuidePath.Walk`, Humanoid:MoveTo); the label follows the step's machine ("Go to Squat Rack", "Go to Coach Dex"). Any steering takes over.
 ![[GYM ARC/Screenshots/funnel_fixes/start_gold_path_go_button.jpg]]
+
+## Prompt 28 (21 Oct; [[2026-10-21 GYM ARC UI cleanup]])
+- The shake step points at hotbar slot 1 (the DRINK SHAKE button is gone); tapping the slot drinks it. The Coach Dex dialog moves up above the hotbar while it shows.

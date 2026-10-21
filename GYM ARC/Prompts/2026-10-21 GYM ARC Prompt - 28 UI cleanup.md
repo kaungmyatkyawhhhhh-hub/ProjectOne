@@ -1,11 +1,11 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 28 UI cleanup (too many tabs and buttons)
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]
+Back to [[00 GYM ARC Home|GYM ARC Home]] - done: [[2026-10-21 GYM ARC UI cleanup]]
 
 ```text
 The owner says there's too much UI now. Clean it up. Follow CLAUDE.md Speed rules. Black + Gold kit, mobile first (844x390 and 667x375). Keep every feature working; only reorganize.

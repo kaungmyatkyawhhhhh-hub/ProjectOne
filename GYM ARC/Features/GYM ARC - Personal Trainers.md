@@ -146,3 +146,7 @@ On join the equipped list was cut to the slots known at that moment, before the 
 - **Gear = the planner's meshes** (`Shared/Gear`, `ReplicatedStorage.GearMeshes`): Coaches 1-4 a whistle + lanyard; Rex belt + wraps; Duke belt (gold stitching) + wraps (gold stripes); Volta belt (red stitching) + red knee sleeves; Atlas gold cuffs + a thin gold waistband. Fitted to the muscles on each client (`GearClient`). The box shorts and the blocky belts, wraps, sleeves and cuffs are gone.
 - Coaches 1-4's shoes come from a shoes-only classic Pants image (the feet are drawn with the avatar's own texture, so painting them did nothing).
 ![[GYM ARC/Screenshots/trainer_outfits/05_duke_front.jpg]]
+
+## Prompt 28 (21 Oct; [[2026-10-21 GYM ARC UI cleanup]])
+- The TRAINERS window has two tabs: AGENCY and MY TRAINERS (`Shared/UI/TrainersPanel`, it was the Inventory's Trainers tab). `UIBus.OpenAgency("My")` opens MY TRAINERS.
+- The Agency desk boards show only "TRAINER AGENCY" in gold and the 8 trainer pictures; the odds are in the window only.

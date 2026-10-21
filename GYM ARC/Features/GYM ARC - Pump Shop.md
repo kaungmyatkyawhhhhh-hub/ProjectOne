@@ -33,3 +33,6 @@ Coins per minute of active play (`lune run tests/pacing coins`, 60 simulated pla
 
 ## Gear levels look (21 Oct, prompt 34)
 - Basic black, Pro red, **Elite silver** (was gold; gold is for the Champion level of prompt 31), on the new gear meshes ([[GYM ARC - Wardrobe and Gear and Fits Store]]).
+
+## Prompt 28 (21 Oct; [[2026-10-21 GYM ARC UI cleanup]])
+- No PUMP SHOP side menu button any more. The Shop window has a small "Go to Pump Shop" link under the grid (once the Pump Shop is open for you; `UIBus.GoPumpShop`, same 10 s cooldown).

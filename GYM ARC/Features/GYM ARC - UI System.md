@@ -160,3 +160,8 @@ Everything placed "under the top bar" (the right-side cards, hints, toasts, the 
 
 ## Check of the owner's Studio changes (19 Oct)
 No UI script, Theme, Kit or UI config changed since the last commit (15 Oct). StarterGui is still empty (all UI built in code). See [[2026-10-19 GYM ARC Owner changes]].
+
+## UI cleanup (21 Oct, prompt 28; [[2026-10-21 GYM ARC UI cleanup]])
+- Side menu: exactly 8 buttons (Shop, Stats, Muscles, Inventory, Genetics, Poses, Crew, Trainers). No new side buttons: new features go inside existing windows.
+- Inventory: 3 tabs ITEMS / GEAR / LOOKS (LOOKS has chips All / Alters / Auras / Titles); a tab shows once its feature is open for you. Big tiles, 5 a row, and empty states that say where to get things.
+- No DRINK SHAKE button; the hotbar (`HotbarClient`) is pinned bottom centre, and `HudBottom.SetLift` moves the stamina bar and boost timers above it.
