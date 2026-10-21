@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 22 Oct: developer products: small honest offer cards at the right moment (stamina out, last shake, after a Growth Spurt), "Finish faster" link at 75%, shop analytics, Endless Stamina's wrong R$ 15 fallback fixed; SKIP TUTORIAL after 5 s. See [[2026-10-22 GYM ARC Developer product sales]].
 - 21 Oct (later): Body Alter textures fixed (detail was drawn too big; new maps, skin kept after body updates) and the hotbar hides on machines. Then Tanned / Peak a deep bronze on any skin, the head's color follows the alter, skin preload really works, Peak's bump map loads. See [[2026-10-21 GYM ARC Alter textures fix]].
 - 21 Oct (later): UI cleanup: Inventory 3 tabs (Items / Gear / Looks), trainers in the TRAINERS window, 8 side buttons (Pump Shop link in the Shop), no DRINK SHAKE button, hotbar at the bottom (boosts are held and drunk like tools, the hotbar choice is saved), clean Agency sign. See [[2026-10-21 GYM ARC UI cleanup]].
 - 21 Oct: audit of every prompt, then the missing ones one by one. See [[2026-10-21 GYM ARC Audit follow-ups]].
@@ -109,6 +110,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-21 GYM ARC UI cleanup]]
 - [[2026-10-21 GYM ARC Alter textures fix]]
 - [[GYM ARC - Bug - Alter textures only change color]]
+- [[2026-10-22 GYM ARC Developer product sales]]
 - [[2026-10-21 GYM ARC Funnel fixes]]
 - [[2026-10-21 GYM ARC Trainer outfits and gear]]
 - [[2026-10-21 GYM ARC Audit follow-ups]]
@@ -407,6 +409,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-21 GYM ARC Prompt - 28b Boosts work like tools]]
 - [[2026-10-21 GYM ARC Prompt - 38 Alter textures not showing]]
 - [[2026-10-21 GYM ARC Prompt - 38b Bronze tan and head color]]
+- [[2026-10-22 GYM ARC Prompt - Skip button after 5 seconds]]
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]

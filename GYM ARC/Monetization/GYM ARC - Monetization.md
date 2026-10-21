@@ -133,14 +133,20 @@ monetization prompt is the one that turns it on.
 | Medium Coins | Developer product | +5,000 coins | 99 | 3718306326 | Coins | ON |
 | Large Coins | Developer product | +15,000 coins | 249 | 3718306360 | Coins | ON |
 | Shake Bundle | Developer product | 3 Energy Shakes | 49 | 3718306390 | Boosts | ON |
-| Endless Stamina (was Stamina Refill) | Developer product | 15 min of no stamina drain, stacks to 60 min | R$ 49 on Roblox | 3718306417 | Boosts | ON |
+| Endless Stamina (was Stamina Refill) | Developer product | 15 min of no stamina drain, stacks to 60 min | 49 | 3718306417 | Boosts | ON |
 | DNA Token | Developer product | 1 DNA token | 99 | 3718499538 | Boosts | ON |
 | Quest Reroll | Developer product | Reroll one daily quest | 19 | 3718500732 | (Quests window only) | ON |
 
 Notes:
 - The VIP pass's Roblox description mentions a VIP chat tag, a VIP title and a VIP Lounge in the pro gym; the game gives +10% coins and a VIP tag (no lounge yet).
 - The Shake Bundle's Roblox description says "+20% EXP for 5 minutes each"; the game's Energy Shake refills stamina and gives +50% gains for 30 s.
-- Prices shown in the Store come from Roblox; the numbers above are only the fallback if Roblox can't be reached.
+- Prices shown in the Store come from Roblox; the numbers above are only the fallback if Roblox can't be reached. (22 Oct: the game's fallback for Endless Stamina said 15; fixed to 49.)
+
+## Offers at the right moment (22 Oct, prompt 12; [[2026-10-22 GYM ARC Developer product sales]])
+- `OfferClient`: one small card above the stamina bar with an X, gone after 12 s, never over a window / the menu / in the tutorial, no timers. Stamina runs out -> Endless Stamina (max once per 10 min, not while it runs); last shake drunk -> Shake Bundle (+ the coin price at the shake machine; once per session); after a Growth Spurt -> the 3 coin packs (once per spurt). Buy = Roblox's prompt (2 taps).
+- Growth Spurt card / machine strip at 75%+: "Finish faster: Shake Bundle >" opens the Store on it (`UIBus.OpenShop(tab, itemKey)`).
+- Card prices = the Store's Roblox prices (`Shared/ShopPrices`).
+- Analytics custom events: `Shop_Opened`, `Offer_Shown_<offer>`, `Offer_Tapped_<offer>`, `Product_Bought_<key>` (value = Robux). Offers: Stamina, ShakeOut, AfterSpurt, FinishFaster.
 
 ## Removed (14 Oct)
 - **Skip Growth Cooldown** (developer product 3718306447): removed from the game on the owner's request (it was never on sale: there is no wait between Growth Spurts). The product still exists on the Creator Hub; turn it off there if wanted.

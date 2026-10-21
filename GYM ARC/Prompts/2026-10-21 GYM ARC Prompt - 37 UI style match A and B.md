@@ -27,7 +27,7 @@ Build it as 3 shared components in the UI Kit. Every screen uses them, with no o
 3) RewardTile (the trainer tile formula)
 - Hex-mesh background tinted in the item's colour, 4 px outline in that colour + 2 px dark inner ring + soft outer glow, the art BIG (icon/swatch fills most of the tile), the name in white stroked chunky text, the rarity in its colour, a ChunkyButton at the bottom.
 - States: owned (normal), EQUIPPED/WORN (gold glow + gold check badge + grey "EQUIPPED" button), owned-in-store (dimmed ~50%, small green OWNED button + check, never a big stamp), locked/undiscovered (dark, black silhouette with a rim light in the rarity colour, "LOCKED" or the unlock requirement as a small dark pill, "???" if undiscovered).
-- Use it for: Inventory > Looks (Auras, Alters, Titles, All), Store > Auras (+ the other store tabs), the Trainers screens.
+- Use it for: Inventory top tabs are ITEMS · GEAR · AURAS · LOOKS (Auras is its own top-level tab; Looks keeps only Alters and Titles; no ALL tab), Store > Auras (+ the other store tabs), the Trainers screens.
 - Alters tiles use the alter's own banner background (the alter popup backgrounds) behind the whole tile and the skin swatch as a big circle.
 - Titles tiles: a medal icon in the rarity colour on the left, rarity + name on the right.
 

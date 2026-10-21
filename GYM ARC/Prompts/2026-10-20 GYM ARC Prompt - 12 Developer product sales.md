@@ -1,11 +1,11 @@
 ---
 date: 2026-10-20
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 12 Developer product sales
 
-Back to [[00 GYM ARC Home|GYM ARC Home]]
+Back to [[00 GYM ARC Home|GYM ARC Home]] - done: [[2026-10-22 GYM ARC Developer product sales]]
 
 Monetization (17-20 Oct): 417 Robux, all from passes, 0 from developer products.
 

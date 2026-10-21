@@ -26,7 +26,7 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 
 ## UI v2 change (13 Oct)
 - Each step's short line shows in the top band (gone after 4 seconds).
-- A green SKIP TUTORIAL button sits under the band. Tap it twice to skip (the first tap turns it gold: "Tap again to skip"). Skipping gives no reward.
+- A green SKIP TUTORIAL button sits under the band. Tap it twice to skip (the first tap turns it gold: "Tap again to skip"). Skipping gives no reward. (22 Oct, owner: it shows only after 5 s of play, counted from when the menu is gone and the genetics screen has closed.)
 - Coach Dex talks in a dialog at the bottom with his live portrait, "Reward 50 coins" and "Tap to continue (1/2)". There is no dialog while you are on a machine, so it never covers the machine controls.
 - Finishing the whole tutorial now gives 50 coins.
 - The last step now asks you to open the Muscles window (where the Growth Spurt row is).
