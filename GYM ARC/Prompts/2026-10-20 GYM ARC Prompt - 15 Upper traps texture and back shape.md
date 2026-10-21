@@ -1,7 +1,7 @@
 ---
 date: 2026-10-20
 tags: [gymarc, prompt]
-status: done (owner: import 14 files)
+status: done (owner: import the 14 chestfix torso files, they include this)
 ---
 # 15 Upper traps texture and back shape
 

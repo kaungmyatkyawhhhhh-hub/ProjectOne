@@ -32,3 +32,12 @@ From [[2026-10-21 GYM ARC Prompt - Audit all prompts]]: the prompts that weren't
 ## 4. Town music + treadmill sounds (14 Oct) - done / owner
 - **Town** now has 3 songs like the other areas: the old one + APM "Hit The Street" (1840558258) and "City Lights (A)" (1840517437), both from Roblox's licensed library (about 2:45 each, checked they load). Swap them for your own any time in `Config/Sounds` AreaMusic.
 - **Treadmill:** Roblox's licensed library has no clean treadmill belt hum or single running footstep (only conveyor belts / washing machines with start and stop noises, which loop badly), so `TreadmillLoop` / `TreadmillStep` stay empty for your own picks, as your 14 Oct note says.
+
+## 5. Fuller chest (19 Oct prompt 9, part 3) - done, waiting for your import
+- **Your own body (live):** the chest is sculpted fuller: the dip under the collarbone filled, a little more forward projection, a rounder lower pec line, the upper chest wrapping out into the front delts (no flat gap at the armpit), the sternum line kept. Wide, shallow shapes (no nipple or bust detail). It grows with Upper Chest / Mid Chest (nothing at level 0, most at mass monster). `MuscleMeshes` addChestSculpt.
+- **Everyone else (stage meshes):** 14 new torso files in `Downloads\gym_arc_meshes_lowpoly_chestfix\other_player_stages\` (7 front with the chest, 7 back): they are built on prompt 15's trapsback set (never imported), so **importing these 14 does prompt 9 AND prompt 15**; skip the trapsback folder. Same triangle count; the 399 seam vertices with the back don't move.
+- After the import: Claude runs `tools/chest_stage_setup.luau` and `tools/quad_fix_patch_config.py` (bounds.json, --with-g000).
+![[GYM ARC/Screenshots/audit_followups/chest_full_look_new_left_old_right.jpg]]
+![[GYM ARC/Screenshots/audit_followups/chest_mass_monster_new_left_old_right.jpg]]
+![[GYM ARC/Screenshots/audit_followups/chest_side.jpg]]
+![[GYM ARC/Screenshots/audit_followups/chest_own_body.jpg]]
