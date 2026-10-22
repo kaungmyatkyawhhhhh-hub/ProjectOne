@@ -27,6 +27,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `PlayerData`: DataStore profile with Cash, Owned, Selected, Level, XP, LastDaily.
   - `CityBuilder`: lighting, roads, blocks, traffic signals, skyline ring, the east highway (tunnel) and the Legends Loop.
   - `CityPremium`: landmarks, streetscape, harbour water, distant skyline, monorail.
+  - `OnFoot` (getting out and walking), `Police` (wanted level, speed cameras), `Bank` (the robbery), `Towers` (penthouses), `Market` (car stock market), `Activities` (races, jobs, chips).
   - `Mainland`: the land round the harbour: shore, suburbs, container port, forest, hills, wind turbines, mountain range, loop billboards.
 - `src/client`:
   - `Main.client.lua`: startup order.
@@ -56,6 +57,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `brand_marks/` (see its README): where the real makers' badges, logos and name plates are on each converted car, measured in Blender and written to `src/client/BrandMarks.lua`. CarSkin hides badge parts, covers printed logos and plates with patches in the colour round them, covers wheel caps and the steering hub, and puts our fictional emblems (BNW, Mercer, Lexis) where those makers' badges were. Cars built in Roblox lose parts and decals named badge, logo or emblem.
   - `tail_lights/` (see its README): each converted car's tail lamps (red parts measured in Blender, or spots picked on a rear render), written to `src/client/TailLights.lua`.
   - `pack_cars.py out.fbx id=car.blend ...`: several converted cars in one FBX, one group per car id, for a single Import 3D. Packs for the owner go in `imports/new_cars/` (owner, 2026-10-13: new cars in their own folder); it holds only what is still to be imported, so clear it once the cars are in `CarModels.rbxm`.
+  - `fix_models.py in.blend out.blend [--cabin]`: readies a converted car for Studio. One part per material in wheels and steering wheel, only spinning pieces in wheels (`<corner>_static_*` steer, `Body_Fixed_*` static), UV transforms baked into the first layer, solid alpha, no metal/roughness maps, `--cabin` splits `Cabin_*` parts for cabin donors. `auto_car.py` runs it last and takes a `"budget"` hint.
   - `take_cars.luau <place> <ids...>` (Lune, from `Games/CityLegends`): copies imported cars from the owner's saved place into `assets/CarModels.rbxm`. It takes off Blender's `.001` name endings and makes the windows two-sided.
 
 ## Build and check
