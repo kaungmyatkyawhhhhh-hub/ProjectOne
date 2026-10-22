@@ -15,6 +15,13 @@ One shop window for all three (`PumpShopClient`); its title and tabs follow the 
 - **Links:** the Shop window has "Coach Dex" (teleports in front of him, camera behind you) and "Go to Pump Shop"; 10 s cooldown each, checked on the server. A gear level sold in the other shop shows a "Go to ..." button.
 - Prices (minutes of coins at your stage): Mass Gainer 14, Elite Pre-Workout 12, Whey Isolate 16, BCAA 12.
 
+## The room (23 Oct, prompt 51, [[2026-10-23 GYM ARC Pump Shop redesign]])
+- ONE counter in the middle of the back wall (`Town.PumpShop.Interior.Counter`, its `Top` is the tagged PumpShopCounter with the SHOP prompt); a straight 13-stud aisle from the door with gold inlay lines.
+- Behind it: PUMP SHOP in gold, the trophy shelf with the 4 specials, two SPECIALS menu boards. Side walls: 3 tall shelf units each. Front left GEAR (mannequins, Champion belt on a gold pedestal), front right DNA LAB (glass case with a turning, pulsing helix). Middle: BEST SELLER pyramid and a turning Elite Pre-Workout tub (NEW!).
+- Shopkeeper Mo: bigger, black shirt with gold trim, black cap with a gold peak; leans, breathes, looks at you and points when you open the shop (CoachDexClient). Built at `Interior.ClerkSpot` by PumpShopService.
+- Music inside: the town's tracks at 55% volume. Builder: `tools/builders/PumpShopRedesign.luau`; backup `ServerStorage.PumpShopBackup_23Oct`.
+- The GET PUMPED mural is missing from the place (in the backup): owner to decide.
+
 ## Before prompt 31 (history)
 
 Built 21 Oct ([[2026-10-20 GYM ARC Prompt - 19 Coins useful again (shops)]]). One big store in the town hub that sells everything worth buying with coins. Coins only, no random rolls.

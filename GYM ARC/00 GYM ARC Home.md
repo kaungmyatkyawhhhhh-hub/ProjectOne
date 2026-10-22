@@ -37,6 +37,8 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 23 Oct: chrome reset: quiet graphite chrome (menu, left nav, HUD, toasts) with clean italic labels and no gold borders; gold only on numbers, progress and the one NEXT / Growth Spurt card; earlier nav tiles back (white icons); hex ~18 px cells, panels 5%, collectibles only. See [[2026-10-23 GYM ARC Chrome reset]].
 - 23 Oct: TOP CREWS shows the top 25 (was 5). See [[GYM ARC - Crews]].
 - 23 Oct: tutorial in the new UI and a clean screen (prompts 53a / 53): new Coach Dex dialog, small SKIP pill, Spotlight on buttons, gold marker, only the tutorial on screen; one toast lane at the top centre for every toast; small "+80.5K CHEST" by REP; even machine controls; SHOP never locked. See [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]].
+- 23 Oct: PUMP SHOP redesigned inside around ONE counter at the back (trophy shelf, menu boards, tall shelves, GEAR and DNA LAB corners, islands, warm + gold light), bigger shopkeeper Mo who leans and looks like Dex, quieter music inside (prompt 51). See [[2026-10-23 GYM ARC Pump Shop redesign]].
+- 23 Oct: Coach Dex's dialog portrait always shows his muscles (its own dressed copy, never the live NPC) and wears his coach tee; dialog words never cut. See [[2026-10-23 GYM ARC Coach Dex portrait muscles]].
 - 23 Oct: sneakers removed (prompt 35b), then all shoes (35c): trainers, Dante, Coach Dex and the posing show have bare feet in their skin colour; players' own Roblox shoes stay. See [[GYM ARC - Sneakers]], [[2026-10-23 GYM ARC Sneakers removed]].
 - 22 Oct: shops reworked: Coach Dex is the main shop, the PUMP SHOP sells specials only (one counter, Champion gear), coconut stand sells Coconut Water, smoothie stands gone (park, plants, lounge); UNDISCOVERED items in the Inventory with a reveal; NEXT alter card in its theme (prompt 31). See [[GYM ARC - Pump Shop]], [[GYM ARC - Undiscovered items]].
 - 22 Oct: HUD back in the top bar (coins, LVL, POSING SHOW + JOIN, DAILY, gear; TopbarPlus, no outlines), square nav tiles (prompt 46). See [[2026-10-22 GYM ARC HUD back in the top bar]].
@@ -125,6 +127,8 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
   - [[2026-10-13 GYM ARC New features run]]
   - [[2026-10-20 GYM ARC Body lag]]
   - [[2026-10-20 GYM ARC Traps texture and back]]
+- [[2026-10-23 GYM ARC Pump Shop redesign]]
+- [[2026-10-23 GYM ARC Coach Dex portrait muscles]]
 - [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]]
 - [[2026-10-20 GYM ARC Playtest review]]
 - [[2026-10-21 GYM ARC Playtest fixes]]
@@ -529,6 +533,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]
+
+- [[2026-10-23 GYM ARC Prompt - Coach Dex portrait muscles and dialog wrap]]
 
 ### Config
 - [[GYM ARC - Config values]]
