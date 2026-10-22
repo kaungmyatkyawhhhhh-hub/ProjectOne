@@ -47,3 +47,6 @@ Tested on the phone layout and the PC layout with the Studio test crews: the ful
 ![[GYM ARC/Screenshots/crews_top_view/phone_full_crew_bottom.jpg]]
 ![[GYM ARC/Screenshots/crews_top_view/phone_solo_crew.jpg]]
 ![[GYM ARC/Screenshots/crews_top_view/pc_gone_crew.jpg]]
+
+## Top 25 (owner, 23 Oct)
+- TOP CREWS shows the top 25 crews (was 5), `Social.Crew.TopCount`. See [[2026-10-23 GYM ARC Prompt - Top crews to 25]].
