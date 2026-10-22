@@ -23,6 +23,7 @@ local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
 local Activities = require(script.Parent:WaitForChild("Activities"))
+local Hotel = require(script.Parent:WaitForChild("Hotel"))
 
 Players.CharacterAutoLoads = false
 
@@ -144,6 +145,9 @@ local function findSpawnCFrame(): CFrame
 	return CFrame.lookAt(pos, pos + dir)
 end
 
+-- one-off spawn spots for a player's next car (the hotel valet brings it round to the door)
+local spawnAt: { [Player]: CFrame } = {}
+
 -- what the gameplay modules (on foot, police, bank) get from here
 local ctx = {
 	remote = remote,
@@ -153,11 +157,24 @@ local ctx = {
 	end,
 	grantXp = grantXp,
 	playerCars = playerCars,
+	-- the next car this player drives out starts here (ground level, facing the way to go)
+	setSpawnAt = function(player: Player, cf: CFrame)
+		spawnAt[player] = cf
+	end,
+	-- hands the player's car over (the hotel valet drives it away): it stops being their car
+	releaseCar = function(player: Player): Model?
+		local s = getSession(player)
+		local car = s.car
+		s.car = nil
+		s.combo = 0
+		return if car and car.Parent then car else nil
+	end,
 }
 OnFoot.init(ctx)
 Police.init(ctx)
 Bank.init(ctx, Police)
 Activities.init(ctx)
+Hotel.init(ctx)
 
 local function despawn(player: Player)
 	local s = getSession(player)
@@ -209,7 +226,8 @@ local function spawnFor(player: Player, carId: string)
 	ao.Responsiveness = 60
 	ao.Parent = root
 
-	local spawnCF = findSpawnCFrame()
+	local spawnCF = spawnAt[player] or findSpawnCFrame()
+	spawnAt[player] = nil
 	local h = model:GetAttribute("Height") :: number
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation

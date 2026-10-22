@@ -18,6 +18,9 @@
 	residents' plaque. Effects, the telescope and the tour run on the client (Penthouse.client.lua).
 
 	CityBuilder calls Towers.block for every city block; it returns true where it built a tower.
+	Towers.suite builds just a penthouse floor (and optionally the roof terrace) on another
+	building, for the Legends Grand Hotel's suites (Hotel.lua): same rooms, buying, home, party
+	mode and showcase, with the elevator's lobby and roof stops set by that building.
 ]]
 
 local CollectionService = game:GetService("CollectionService")
@@ -33,7 +36,23 @@ local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local Towers = {}
 
-type TowerSpec = { id: string, name: string, block: { number }, height: number, price: number, rent: number, accent: Color3 }
+type TowerSpec = {
+	id: string,
+	name: string,
+	block: { number },
+	height: number,
+	price: number,
+	rent: number,
+	accent: Color3,
+	perMinute: number?, -- hotel suites: paid every minute instead of the safe's daily rent
+	levelName: string?, -- what the elevators call the penthouse floor (default "Penthouse")
+}
+-- a penthouse floor on someone else's building (the hotel's suites)
+export type SuiteOpts = {
+	frame: CFrame, -- the building's frame at ground level, -Z out of the entrance; the floor is 84 x 84 round it
+	yP: number, -- the suite's floor height above the frame
+	roof: boolean, -- also build the roof terrace (pool, telescope, helipad) on top of this suite
+}
 type Built = {
 	spec: TowerSpec,
 	frame: CFrame, -- street level, -Z = the entrance side
@@ -157,21 +176,31 @@ local function seat(parent: Instance, cf: CFrame, w: number, d: number): Seat
 	return s
 end
 
-local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, cz: number, lot: number)
+local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, cz: number, lot: number, suite: SuiteOpts?): Built
 	local mk, deco = kit.mk, kit.deco
-	-- the entrance faces the city centre along the block's longer offset
-	local front = if math.abs(cx) >= math.abs(cz) then Vector3.new(-math.sign(cx), 0, 0) else Vector3.new(0, 0, -math.sign(cz))
-	if front.Magnitude < 0.5 then
-		front = Vector3.new(0, 0, -1)
+	local frame: CFrame
+	if suite then
+		frame = suite.frame
+		cx, cz = frame.Position.X, frame.Position.Z
+	else
+		-- the entrance faces the city centre along the block's longer offset
+		local front = if math.abs(cx) >= math.abs(cz) then Vector3.new(-math.sign(cx), 0, 0) else Vector3.new(0, 0, -math.sign(cz))
+		if front.Magnitude < 0.5 then
+			front = Vector3.new(0, 0, -1)
+		end
+		local b = Vector3.new(cx, CURB, cz)
+		frame = CFrame.lookAt(b, b + front)
 	end
-	local base = Vector3.new(cx, CURB, cz)
-	local frame = CFrame.lookAt(base, base + front)
+	local base = frame.Position
+	local groundY = base.Y -- (CURB for the towers)
 	local accent = t.accent
-	local yP = t.height - PH - 4 -- penthouse floor (local)
+	local yP = if suite then suite.yP else t.height - PH - 4 -- penthouse floor (local)
 	local yR = yP + PH + 1.5 -- roof top
+	local withStreet = suite == nil
+	local withRoof = suite == nil or suite.roof
 
 	local model = Instance.new("Model")
-	model.Name = "Tower_" .. t.id
+	model.Name = (if suite then "Suite_" else "Tower_") .. t.id
 	model:SetAttribute("TowerId", t.id)
 	model.Parent = parent
 
@@ -312,7 +341,7 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		local panel = dbox(par, 1, 2.4, 0.3, x + 5, y + 5, z - 0.45, GOLD, Enum.Material.Metal, { reflectance = 0.3 })
 		dbox(par, 0.5, 0.5, 0.1, x + 5, y + 5.5, z - 0.62, accent, Enum.Material.Neon)
 		local options = if level == "lobby" then { "penthouse", "roof" } elseif level == "penthouse" then { "lobby", "roof" } else { "penthouse", "lobby" }
-		local labels = { lobby = "Lobby", penthouse = "Penthouse", roof = "Roof: sky pool & helipad" }
+		local labels = { lobby = "Lobby", penthouse = t.levelName or "Penthouse", roof = "Roof: sky pool & helipad" }
 		for k, dest in options do
 			local p = prompt(panel, labels[dest], "Elevator", if k == 1 then Enum.KeyCode.E else Enum.KeyCode.R, 0, 10)
 			p.GamepadKeyCode = if k == 1 then Enum.KeyCode.ButtonX else Enum.KeyCode.ButtonY
@@ -331,136 +360,138 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		table.insert(plaques, label)
 	end
 
-	---------------------------------------------------------------- street level
-	local plaza = kit.lodGroup(model, "Plaza", base + Vector3.new(0, 20, 0), 520)
-	deco(plaza, Vector3.new(lot, 0.12, lot), CFrame.new(cx, CURB + 0.06, cz), Color3.fromRGB(56, 56, 62), Enum.Material.Granite)
-	-- glowing paving lines leading to the door
-	for _, sx in { -1, 1 } do
-		dbox(plaza, 0.5, 0.14, lot / 2 - HF - 4, sx * 12, 0.08, -HF - (lot / 2 - HF) / 2 - 2, accent, Enum.Material.Neon, { transparency = 0.35 })
-	end
-	-- red carpet and steps
-	dbox(plaza, 12, 0.2, 18, 0, 0.18, -HF - 9, Color3.fromRGB(120, 18, 26), Enum.Material.Fabric)
-	-- the canopy over the entrance, with the tower's name
-	local canopy = box(plaza, 34, 1.2, 18, 0, 16, -HF - 8, BLACK, Enum.Material.Metal, { shadow = true })
-	dbox(plaza, 34.4, 0.2, 18.4, 0, 15.3, -HF - 8, WARM_LIGHT, Enum.Material.Neon, { transparency = 0.25 })
-	light(canopy, WARM_LIGHT, 28, 1.6)
-	for _, sx in { -1, 1 } do
-		box(plaza, 0.8, 16, 0.8, sx * 15.5, 8, -HF - 16, GOLD, Enum.Material.Metal, { reflectance = 0.3 })
-	end
-	local sign = dbox(plaza, 32, 3, 0.4, 0, 18.3, -HF - 17, BLACK, Enum.Material.SmoothPlastic)
-	kit.surfaceText(sign, Enum.NormalId.Front, t.name, GOLD:Lerp(Color3.new(1, 1, 1), 0.3), nil, nil, Enum.Font.GothamMedium, Vector2.new(800, 75))
-	dbox(plaza, 32, 0.25, 0.3, 0, 16.7, -HF - 17.25, accent, Enum.Material.Neon)
-	-- brass lanterns and planters either side of the door
-	for _, sx in { -1, 1 } do
-		plant(plaza, sx * 20, 0.1, -HF - 4, 1.4)
-		local lantern = dbox(plaza, 1.6, 2.6, 1.6, sx * 10, 9, -HF - 0.6, WARM_LIGHT, Enum.Material.Neon, { transparency = 0.2 })
-		light(lantern, WARM_LIGHT, 14, 1)
-	end
-	-- fountain in the forecourt
-	local fz = -HF - (lot / 2 - HF) * 0.62
-	part(plaza, true, 2.2, 22, 22, at(28, 1.1, fz) * CFrame.Angles(0, 0, math.pi / 2), MARBLE, Enum.Material.Marble, { shape = Enum.PartType.Cylinder })
-	part(plaza, false, 0.4, 20, 20, at(28, 2.1, fz) * CFrame.Angles(0, 0, math.pi / 2), WATER, Enum.Material.Glass, { shape = Enum.PartType.Cylinder, transparency = 0.25, reflectance = 0.3 })
-	part(plaza, false, 0.3, 20.5, 20.5, at(28, 1.9, fz) * CFrame.Angles(0, 0, math.pi / 2), accent, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.5 })
-	part(plaza, true, 6, 3, 3, at(28, 4.5, fz) * CFrame.Angles(0, 0, math.pi / 2), MARBLE, Enum.Material.Marble, { shape = Enum.PartType.Cylinder })
-	local jet = Instance.new("ParticleEmitter")
-	jet.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	jet.Color = ColorSequence.new(Color3.fromRGB(200, 235, 255))
-	jet.LightEmission = 0.6
-	jet.Size = NumberSequence.new(0.6, 0.2)
-	jet.Transparency = NumberSequence.new(0.3, 1)
-	jet.Speed = NumberRange.new(14, 18)
-	jet.SpreadAngle = Vector2.new(8, 8)
-	jet.Acceleration = Vector3.new(0, -30, 0)
-	jet.Lifetime = NumberRange.new(1, 1.3)
-	jet.Rate = 60
-	jet.EmissionDirection = Enum.NormalId.Top
-	local nozzle = dbox(plaza, 0.6, 0.6, 0.6, 28, 7.2, fz, MARBLE, Enum.Material.Marble)
-	jet.Parent = nozzle
-	-- palms at the corners of the plaza
-	for _, sx in { -1, 1 } do
-		for _, sz in { -1, 1 } do
-			kit.tree(plaza, (frame * CFrame.new(sx * (lot / 2 - 18), 0, sz * (lot / 2 - 18))).Position)
+	if withStreet then
+		---------------------------------------------------------------- street level
+		local plaza = kit.lodGroup(model, "Plaza", base + Vector3.new(0, 20, 0), 520)
+		deco(plaza, Vector3.new(lot, 0.12, lot), CFrame.new(cx, CURB + 0.06, cz), Color3.fromRGB(56, 56, 62), Enum.Material.Granite)
+		-- glowing paving lines leading to the door
+		for _, sx in { -1, 1 } do
+			dbox(plaza, 0.5, 0.14, lot / 2 - HF - 4, sx * 12, 0.08, -HF - (lot / 2 - HF) / 2 - 2, accent, Enum.Material.Neon, { transparency = 0.35 })
 		end
-	end
+		-- red carpet and steps
+		dbox(plaza, 12, 0.2, 18, 0, 0.18, -HF - 9, Color3.fromRGB(120, 18, 26), Enum.Material.Fabric)
+		-- the canopy over the entrance, with the tower's name
+		local canopy = box(plaza, 34, 1.2, 18, 0, 16, -HF - 8, BLACK, Enum.Material.Metal, { shadow = true })
+		dbox(plaza, 34.4, 0.2, 18.4, 0, 15.3, -HF - 8, WARM_LIGHT, Enum.Material.Neon, { transparency = 0.25 })
+		light(canopy, WARM_LIGHT, 28, 1.6)
+		for _, sx in { -1, 1 } do
+			box(plaza, 0.8, 16, 0.8, sx * 15.5, 8, -HF - 16, GOLD, Enum.Material.Metal, { reflectance = 0.3 })
+		end
+		local sign = dbox(plaza, 32, 3, 0.4, 0, 18.3, -HF - 17, BLACK, Enum.Material.SmoothPlastic)
+		kit.surfaceText(sign, Enum.NormalId.Front, t.name, GOLD:Lerp(Color3.new(1, 1, 1), 0.3), nil, nil, Enum.Font.GothamMedium, Vector2.new(800, 75))
+		dbox(plaza, 32, 0.25, 0.3, 0, 16.7, -HF - 17.25, accent, Enum.Material.Neon)
+		-- brass lanterns and planters either side of the door
+		for _, sx in { -1, 1 } do
+			plant(plaza, sx * 20, 0.1, -HF - 4, 1.4)
+			local lantern = dbox(plaza, 1.6, 2.6, 1.6, sx * 10, 9, -HF - 0.6, WARM_LIGHT, Enum.Material.Neon, { transparency = 0.2 })
+			light(lantern, WARM_LIGHT, 14, 1)
+		end
+		-- fountain in the forecourt
+		local fz = -HF - (lot / 2 - HF) * 0.62
+		part(plaza, true, 2.2, 22, 22, at(28, 1.1, fz) * CFrame.Angles(0, 0, math.pi / 2), MARBLE, Enum.Material.Marble, { shape = Enum.PartType.Cylinder })
+		part(plaza, false, 0.4, 20, 20, at(28, 2.1, fz) * CFrame.Angles(0, 0, math.pi / 2), WATER, Enum.Material.Glass, { shape = Enum.PartType.Cylinder, transparency = 0.25, reflectance = 0.3 })
+		part(plaza, false, 0.3, 20.5, 20.5, at(28, 1.9, fz) * CFrame.Angles(0, 0, math.pi / 2), accent, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.5 })
+		part(plaza, true, 6, 3, 3, at(28, 4.5, fz) * CFrame.Angles(0, 0, math.pi / 2), MARBLE, Enum.Material.Marble, { shape = Enum.PartType.Cylinder })
+		local jet = Instance.new("ParticleEmitter")
+		jet.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		jet.Color = ColorSequence.new(Color3.fromRGB(200, 235, 255))
+		jet.LightEmission = 0.6
+		jet.Size = NumberSequence.new(0.6, 0.2)
+		jet.Transparency = NumberSequence.new(0.3, 1)
+		jet.Speed = NumberRange.new(14, 18)
+		jet.SpreadAngle = Vector2.new(8, 8)
+		jet.Acceleration = Vector3.new(0, -30, 0)
+		jet.Lifetime = NumberRange.new(1, 1.3)
+		jet.Rate = 60
+		jet.EmissionDirection = Enum.NormalId.Top
+		local nozzle = dbox(plaza, 0.6, 0.6, 0.6, 28, 7.2, fz, MARBLE, Enum.Material.Marble)
+		jet.Parent = nozzle
+		-- palms at the corners of the plaza
+		for _, sx in { -1, 1 } do
+			for _, sz in { -1, 1 } do
+				kit.tree(plaza, (frame * CFrame.new(sx * (lot / 2 - 18), 0, sz * (lot / 2 - 18))).Position)
+			end
+		end
 
-	---------------------------------------------------------------- lobby
-	local lobby = kit.lodGroup(model, "Lobby", base + Vector3.new(0, LH / 2, 0), 360)
-	box(model, F - 0.8, 0.5, F - 0.8, 0, 0.25, 0, MARBLE, Enum.Material.Marble, { name = "LobbyFloor" })
-	box(model, F + 1, 1.2, F + 1, 0, LH + 0.6, 0, CHARCOAL, Enum.Material.Concrete, { name = "LobbyCeiling" })
-	glassBox(model, lobby, 0.5, LH, 16)
-	-- revolving door (decoration: you walk straight through)
-	part(lobby, false, 11, 12, 12, at(0, 6, -HF + 0.3) * CFrame.Angles(0, 0, math.pi / 2), GLASS, Enum.Material.Glass, { shape = Enum.PartType.Cylinder, transparency = 0.85 })
-	for k = 0, 3 do
-		part(lobby, false, 11, 0.2, 5.5, at(0, 6, -HF + 0.3) * CFrame.Angles(0, k * math.pi / 2 + 0.4, 0) * CFrame.new(0, 0, 2.75), GLASS, Enum.Material.Glass, { transparency = 0.7 })
-	end
-	dbox(lobby, 13, 0.6, 13, 0, 11.6, -HF + 0.3, GOLD, Enum.Material.Metal)
-	-- floor inlay and a dark border
-	dbox(lobby, 30, 0.06, 30, 0, 0.53, -8, MARBLE_DARK, Enum.Material.Marble)
-	dbox(lobby, 26, 0.08, 26, 0, 0.55, -8, MARBLE, Enum.Material.Marble)
-	part(lobby, false, 0.1, 10, 10, at(0, 0.6, -8) * CFrame.Angles(0, 0, math.pi / 2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
-	-- elevator core at the back
-	box(model, 22, LH, 14, 0, LH / 2 + 0.5, HF - 7, MARBLE_DARK, Enum.Material.Marble, { name = "Core" })
-	elevator(lobby, 0, 0.5, HF - 14.1, "lobby")
-	-- chandelier: three glowing rings
-	for k, r in { 18, 12, 6 } do
-		local ring = part(lobby, false, 0.5, r, r, at(0, LH - 3 - k * 1.6, -8) * CFrame.Angles(0, 0, math.pi / 2), WARM_LIGHT, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.2 })
-		if k == 2 then
-			light(ring, WARM_LIGHT, 40, 1.4)
+		---------------------------------------------------------------- lobby
+		local lobby = kit.lodGroup(model, "Lobby", base + Vector3.new(0, LH / 2, 0), 360)
+		box(model, F - 0.8, 0.5, F - 0.8, 0, 0.25, 0, MARBLE, Enum.Material.Marble, { name = "LobbyFloor" })
+		box(model, F + 1, 1.2, F + 1, 0, LH + 0.6, 0, CHARCOAL, Enum.Material.Concrete, { name = "LobbyCeiling" })
+		glassBox(model, lobby, 0.5, LH, 16)
+		-- revolving door (decoration: you walk straight through)
+		part(lobby, false, 11, 12, 12, at(0, 6, -HF + 0.3) * CFrame.Angles(0, 0, math.pi / 2), GLASS, Enum.Material.Glass, { shape = Enum.PartType.Cylinder, transparency = 0.85 })
+		for k = 0, 3 do
+			part(lobby, false, 11, 0.2, 5.5, at(0, 6, -HF + 0.3) * CFrame.Angles(0, k * math.pi / 2 + 0.4, 0) * CFrame.new(0, 0, 2.75), GLASS, Enum.Material.Glass, { transparency = 0.7 })
 		end
-	end
-	-- concierge desk (left) and penthouse sales (right)
-	for _, side in { -1, 1 } do
-		local x = side * 24
-		box(lobby, 16, 4, 4, x, 2.5, 6, WALNUT, Enum.Material.Wood)
-		dbox(lobby, 16.4, 0.4, 4.4, x, 4.7, 6, MARBLE, Enum.Material.Marble)
-		dbox(lobby, 16.2, 0.2, 0.2, x, 0.9, 3.9, accent, Enum.Material.Neon)
-		local back = dbox(lobby, 18, 9, 0.6, x, 8, 13, WALNUT, Enum.Material.Wood)
-		local signP = dbox(lobby, 14, 2, 0.2, x, 9.5, 12.6, BLACK, Enum.Material.SmoothPlastic)
-		kit.surfaceText(signP, Enum.NormalId.Front, if side < 0 then "CONCIERGE" else "PENTHOUSE SALES", GOLD:Lerp(Color3.new(1, 1, 1), 0.3), nil, nil, Enum.Font.GothamMedium, Vector2.new(560, 80))
-		light(back, WARM_LIGHT, 16, 0.8)
-	end
-	-- scale model of the tower on the sales desk, and the buy prompt
-	local modelBase = dbox(lobby, 2.4, 0.3, 2.4, 24, 5.05, 6, BLACK, Enum.Material.SmoothPlastic)
-	dbox(lobby, 1.4, 5, 1.4, 24, 7.7, 6, Color3.fromRGB(30, 40, 56), Enum.Material.Glass, { reflectance = 0.3 })
-	dbox(lobby, 1.5, 0.15, 1.5, 24, 10.2, 6, accent, Enum.Material.Neon)
-	local buy = prompt(modelBase, "Buy penthouse", t.name .. "  " .. money(t.price), Enum.KeyCode.E, 1.5, 10)
-	CollectionService:AddTag(buy, "TowerBuy")
-	buy:SetAttribute("Tower", t.id)
-	buy:SetAttribute("Price", t.price)
-	buy.Triggered:Connect(function(player: Player)
-		Towers.buy(player, t.id)
-	end)
-	plaque(lobby, at(0, 17.5, HF - 14.25))
-	-- lounge seating facing each other across a low table
-	for _, sx in { -1, 1 } do
-		sofa(lobby, at(sx * 22, 0.5, -18), 14, CREAM)
-		sofa(lobby, at(sx * 22, 0.5, -32) * CFrame.Angles(0, math.pi, 0), 14, CREAM)
-		dbox(lobby, 8, 1.4, 5, sx * 22, 1.2, -25, MARBLE_DARK, Enum.Material.Marble)
-		plant(lobby, sx * 36, 0.5, -36, 1.2)
-		plant(lobby, sx * 36, 0.5, 20, 1.2)
-	end
+		dbox(lobby, 13, 0.6, 13, 0, 11.6, -HF + 0.3, GOLD, Enum.Material.Metal)
+		-- floor inlay and a dark border
+		dbox(lobby, 30, 0.06, 30, 0, 0.53, -8, MARBLE_DARK, Enum.Material.Marble)
+		dbox(lobby, 26, 0.08, 26, 0, 0.55, -8, MARBLE, Enum.Material.Marble)
+		part(lobby, false, 0.1, 10, 10, at(0, 0.6, -8) * CFrame.Angles(0, 0, math.pi / 2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+		-- elevator core at the back
+		box(model, 22, LH, 14, 0, LH / 2 + 0.5, HF - 7, MARBLE_DARK, Enum.Material.Marble, { name = "Core" })
+		elevator(lobby, 0, 0.5, HF - 14.1, "lobby")
+		-- chandelier: three glowing rings
+		for k, r in { 18, 12, 6 } do
+			local ring = part(lobby, false, 0.5, r, r, at(0, LH - 3 - k * 1.6, -8) * CFrame.Angles(0, 0, math.pi / 2), WARM_LIGHT, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.2 })
+			if k == 2 then
+				light(ring, WARM_LIGHT, 40, 1.4)
+			end
+		end
+		-- concierge desk (left) and penthouse sales (right)
+		for _, side in { -1, 1 } do
+			local x = side * 24
+			box(lobby, 16, 4, 4, x, 2.5, 6, WALNUT, Enum.Material.Wood)
+			dbox(lobby, 16.4, 0.4, 4.4, x, 4.7, 6, MARBLE, Enum.Material.Marble)
+			dbox(lobby, 16.2, 0.2, 0.2, x, 0.9, 3.9, accent, Enum.Material.Neon)
+			local back = dbox(lobby, 18, 9, 0.6, x, 8, 13, WALNUT, Enum.Material.Wood)
+			local signP = dbox(lobby, 14, 2, 0.2, x, 9.5, 12.6, BLACK, Enum.Material.SmoothPlastic)
+			kit.surfaceText(signP, Enum.NormalId.Front, if side < 0 then "CONCIERGE" else "PENTHOUSE SALES", GOLD:Lerp(Color3.new(1, 1, 1), 0.3), nil, nil, Enum.Font.GothamMedium, Vector2.new(560, 80))
+			light(back, WARM_LIGHT, 16, 0.8)
+		end
+		-- scale model of the tower on the sales desk, and the buy prompt
+		local modelBase = dbox(lobby, 2.4, 0.3, 2.4, 24, 5.05, 6, BLACK, Enum.Material.SmoothPlastic)
+		dbox(lobby, 1.4, 5, 1.4, 24, 7.7, 6, Color3.fromRGB(30, 40, 56), Enum.Material.Glass, { reflectance = 0.3 })
+		dbox(lobby, 1.5, 0.15, 1.5, 24, 10.2, 6, accent, Enum.Material.Neon)
+		local buy = prompt(modelBase, "Buy penthouse", t.name .. "  " .. money(t.price), Enum.KeyCode.E, 1.5, 10)
+		CollectionService:AddTag(buy, "TowerBuy")
+		buy:SetAttribute("Tower", t.id)
+		buy:SetAttribute("Price", t.price)
+		buy.Triggered:Connect(function(player: Player)
+			Towers.buy(player, t.id)
+		end)
+		plaque(lobby, at(0, 17.5, HF - 14.25))
+		-- lounge seating facing each other across a low table
+		for _, sx in { -1, 1 } do
+			sofa(lobby, at(sx * 22, 0.5, -18), 14, CREAM)
+			sofa(lobby, at(sx * 22, 0.5, -32) * CFrame.Angles(0, math.pi, 0), 14, CREAM)
+			dbox(lobby, 8, 1.4, 5, sx * 22, 1.2, -25, MARBLE_DARK, Enum.Material.Marble)
+			plant(lobby, sx * 36, 0.5, -36, 1.2)
+			plant(lobby, sx * 36, 0.5, 20, 1.2)
+		end
 
-	---------------------------------------------------------------- the tower body
-	local fine = kit.lodGroup(model, "Facade", base + Vector3.new(0, t.height / 2, 0), 700 + t.height * 0.6)
-	local pal = kit.randomPalette("glass")
-	pal.body = Color3.fromRGB(16, 22, 32)
-	pal.warm = true
-	pal.lit = 0.5
-	kit.facadeTier(model, cx, cz, F, F, CURB + LH + 1.2, CURB + yP - 1.6, pal, true, nil, fine)
-	-- corner light columns in the tower's accent
-	for _, sx in { -1, 1 } do
-		for _, sz in { -1, 1 } do
-			dbox(model, 0.6, yP - LH - 4, 0.6, sx * (HF + 0.5), (LH + yP) / 2, sz * (HF + 0.5), accent, Enum.Material.Neon, { transparency = 0.15 })
+		---------------------------------------------------------------- the tower body
+		local fine = kit.lodGroup(model, "Facade", base + Vector3.new(0, t.height / 2, 0), 700 + t.height * 0.6)
+		local pal = kit.randomPalette("glass")
+		pal.body = Color3.fromRGB(16, 22, 32)
+		pal.warm = true
+		pal.lit = 0.5
+		kit.facadeTier(model, cx, cz, F, F, CURB + LH + 1.2, CURB + yP - 1.6, pal, true, nil, fine)
+		-- corner light columns in the tower's accent
+		for _, sx in { -1, 1 } do
+			for _, sz in { -1, 1 } do
+				dbox(model, 0.6, yP - LH - 4, 0.6, sx * (HF + 0.5), (LH + yP) / 2, sz * (HF + 0.5), accent, Enum.Material.Neon, { transparency = 0.15 })
+			end
 		end
-	end
-	-- the tower's name in a band below the penthouse, on every side
-	local band = deco(model, Vector3.new(F + 0.8, 9, F + 0.8), CFrame.new(cx, CURB + yP - 7, cz), BLACK, Enum.Material.SmoothPlastic)
-	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right } do
-		local _, _, label = kit.surfaceText(band, face, t.name, Color3.new(1, 1, 1), BLACK, 0, Enum.Font.GothamMedium, Vector2.new(1100, 120))
-		local grad = Instance.new("UIGradient")
-		grad.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, GOLD), ColorSequenceKeypoint.new(0.5, Color3.new(1, 1, 1)), ColorSequenceKeypoint.new(1, accent) })
-		grad.Parent = label
-	end
+		-- the tower's name in a band below the penthouse, on every side
+		local band = deco(model, Vector3.new(F + 0.8, 9, F + 0.8), CFrame.new(cx, CURB + yP - 7, cz), BLACK, Enum.Material.SmoothPlastic)
+		for _, face in { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right } do
+			local _, _, label = kit.surfaceText(band, face, t.name, Color3.new(1, 1, 1), BLACK, 0, Enum.Font.GothamMedium, Vector2.new(1100, 120))
+			local grad = Instance.new("UIGradient")
+			grad.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, GOLD), ColorSequenceKeypoint.new(0.5, Color3.new(1, 1, 1)), ColorSequenceKeypoint.new(1, accent) })
+			grad.Parent = label
+		end
+	end -- withStreet
 
 	---------------------------------------------------------------- penthouse
 	local ph = kit.lodGroup(model, "Penthouse", base + Vector3.new(0, yP + PH / 2, 0), 380)
@@ -468,8 +499,8 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	box(model, F - 0.8, 0.3, F - 0.8, 0, yP + 0.15, 0, OAK:Lerp(WALNUT, 0.4), Enum.Material.WoodPlanks, { name = "PenthouseFloor" })
 	box(model, F + 2, 1.5, F + 2, 0, yR - 0.75, 0, CHARCOAL, Enum.Material.Concrete, { name = "Roof" })
 	glassBox(model, ph, yP + 0.3, PH)
-	kit.neonOutline(model, cx, cz, F + 1, F + 1, CURB + yP - 0.2, accent, 0.5)
-	kit.neonOutline(model, cx, cz, F + 2, F + 2, CURB + yR + 0.1, accent, 0.5)
+	kit.neonOutline(model, cx, cz, F + 1, F + 1, groundY + yP - 0.2, accent, 0.5)
+	kit.neonOutline(model, cx, cz, F + 2, F + 2, groundY + yR + 0.1, accent, 0.5)
 	-- warm cove lights in the ceiling
 	for _, sx in { -1, 1 } do
 		dbox(ph, 0.6, 0.3, F - 8, sx * (HF - 4), yP + PH - 0.4, 0, WARM_LIGHT, Enum.Material.Neon, { transparency = 0.1 })
@@ -648,122 +679,130 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	local safe = box(ph, 4, 4, 1.4, 36, yP + 7, bz0 + 1.1, Color3.fromRGB(46, 48, 54), Enum.Material.DiamondPlate)
 	part(ph, false, 0.3, 1.6, 1.6, at(36, yP + 7, bz0 + 1.9) * CFrame.Angles(0, math.pi / 2, 0) * CFrame.Angles(0, 0, math.pi / 2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 	dbox(ph, 0.3, 0.3, 0.1, 37.4, yP + 8.4, bz0 + 1.85, Color3.fromRGB(60, 255, 120), Enum.Material.Neon)
-	local rent = prompt(safe, "Open safe", "Daily rent " .. money(t.rent), Enum.KeyCode.E, 1, 9)
-	CollectionService:AddTag(rent, "TowerOwner")
-	rent:SetAttribute("Tower", t.id)
-	rent.Triggered:Connect(function(player: Player)
-		Towers.collectRent(player, t.id)
-	end)
+	if t.perMinute then
+		-- a hotel suite pays by the minute on its own: a card on the safe shows the rate
+		local card = dbox(ph, 3.6, 1.2, 0.1, 36, yP + 9.8, bz0 + 1.85, BLACK, Enum.Material.SmoothPlastic)
+		kit.surfaceText(card, Enum.NormalId.Back, money(t.perMinute) .. " / MIN", Color3.fromRGB(60, 255, 120), nil, nil, Enum.Font.GothamBold, Vector2.new(300, 100))
+	else
+		local rent = prompt(safe, "Open safe", "Daily rent " .. money(t.rent), Enum.KeyCode.E, 1, 9)
+		CollectionService:AddTag(rent, "TowerOwner")
+		rent:SetAttribute("Tower", t.id)
+		rent.Triggered:Connect(function(player: Player)
+			Towers.collectRent(player, t.id)
+		end)
+	end
 	floorLamp(ph, 40, yP + 0.3, 18)
 
-	---------------------------------------------------------------- roof terrace
-	local roof = kit.lodGroup(model, "RoofTerrace", base + Vector3.new(0, yR, 0), 380)
-	box(model, F + 2, 0.3, F + 2, 0, yR + 0.15, 0, Color3.fromRGB(96, 86, 74), Enum.Material.WoodPlanks, { name = "Deck" })
-	-- glass balustrade with a handrail
-	for i, s in { { 0, -HF - 0.6, F + 2.4, 0.4 }, { 0, HF + 0.6, F + 2.4, 0.4 }, { -HF - 0.6, 0, 0.4, F + 2.4 }, { HF + 0.6, 0, 0.4, F + 2.4 } } do
-		box(model, s[3], 4.5, s[4], s[1], yR + 2.55, s[2], GLASS, Enum.Material.Glass, { transparency = 0.7, name = "Balustrade" })
-		dbox(roof, s[3] + (if i <= 2 then 0 else 0.2), 0.35, s[4] + (if i <= 2 then 0.2 else 0), s[1], yR + 4.95, s[2], GOLD, Enum.Material.Metal)
-	end
-	-- sky pool along the front edge (wade in: 2 studs deep)
-	local poolW, poolD, poolZ = 64, 20, -HF + 12
-	box(roof, poolW + 2, 3, 1, 0, yR + 1.8, poolZ + poolD / 2 + 0.5, MARBLE, Enum.Material.Marble)
-	for _, sx in { -1, 1 } do
-		box(roof, 1, 3, poolD + 2, sx * (poolW / 2 + 0.5), yR + 1.8, poolZ, MARBLE, Enum.Material.Marble)
-	end
-	box(roof, poolW, 0.4, poolD, 0, yR + 0.5, poolZ, Color3.fromRGB(70, 160, 190), Enum.Material.SmoothPlastic)
-	dbox(roof, poolW, 2.4, poolD, 0, yR + 1.9, poolZ, WATER, Enum.Material.Glass, { transparency = 0.45, reflectance = 0.25, name = "Water" })
-	dbox(roof, poolW, 0.25, 0.25, 0, yR + 0.8, poolZ - poolD / 2 + 0.2, Color3.fromRGB(120, 230, 255), Enum.Material.Neon)
-	local poolGlow = dbox(roof, poolW - 4, 0.2, poolD - 4, 0, yR + 0.75, poolZ, Color3.fromRGB(60, 200, 255), Enum.Material.Neon, { transparency = 0.6 })
-	light(poolGlow, Color3.fromRGB(80, 200, 255), 26, 1.2)
-	-- loungers facing the pool and the view
-	for _, x in { -27, -15, 15, 27 } do
-		local cf = at(x, yR + 0.3, -HF + 30) * CFrame.Angles(0, 0, 0)
-		part(roof, true, 3.4, 1.2, 8, cf * CFrame.new(0, 1, 0), Color3.fromRGB(236, 234, 228), Enum.Material.SmoothPlastic)
-		part(roof, false, 3.4, 0.6, 3.2, cf * CFrame.new(0, 2.3, 2.6) * CFrame.Angles(math.rad(35), 0, 0), Color3.fromRGB(236, 234, 228), Enum.Material.SmoothPlastic)
-		seat(roof, cf * CFrame.new(0, 2.1, 0.5), 2.6, 2.6)
-	end
-	-- parasols
-	for _, x in { -21, 21 } do
-		dbox(roof, 0.3, 9, 0.3, x, yR + 4.5, -HF + 31, GOLD, Enum.Material.Metal)
-		part(roof, false, 0.6, 11, 11, at(x, yR + 9, -HF + 31) * CFrame.Angles(0, 0, math.pi / 2), CREAM, Enum.Material.Fabric, { shape = Enum.PartType.Cylinder })
-	end
-	-- telescope at the corner, looking out over the city
-	local scopeX, scopeZ = HF - 6, -HF + 6
-	dbox(roof, 0.4, 4, 0.4, scopeX, yR + 2.3, scopeZ, GOLD, Enum.Material.Metal)
-	local scope = part(roof, true, 4, 0.9, 0.9, at(scopeX, yR + 4.6, scopeZ) * CFrame.Angles(0, math.rad(45), 0) * CFrame.Angles(math.rad(8), 0, 0) * CFrame.Angles(0, math.pi / 2, 0), Color3.fromRGB(60, 50, 40), Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
-	local scopePrompt = prompt(scope, "Look through", "Telescope", Enum.KeyCode.E, 0, 8)
-	scopePrompt.Triggered:Connect(function(player: Player)
-		-- out over the corner of the roof, towards the city centre
-		local eye = at(scopeX, yR + 5.4, scopeZ).Position
-		local dir = (Vector3.new(0, eye.Y - 120, 0) - eye)
-		dir = Vector3.new(dir.X, math.min(dir.Y * 0.15, 0), dir.Z).Unit
-		send(player, { kind = "scope", eye = eye, dir = dir })
-	end)
-	-- helipad with a parked helicopter (back half of the roof)
-	local hx, hz = 10, 18
-	part(roof, true, 0.4, 34, 34, at(hx, yR + 0.5, hz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(40, 42, 46), Enum.Material.Concrete, { shape = Enum.PartType.Cylinder })
-	part(roof, false, 0.1, 30, 30, at(hx, yR + 0.72, hz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(230, 200, 60), Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder })
-	part(roof, false, 0.12, 28.6, 28.6, at(hx, yR + 0.74, hz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(40, 42, 46), Enum.Material.Concrete, { shape = Enum.PartType.Cylinder })
-	for k = 0, 11 do
-		local a = k * math.pi / 6
-		local l = dbox(roof, 0.6, 0.4, 0.6, hx + math.cos(a) * 16.4, yR + 0.9, hz + math.sin(a) * 16.4, Color3.fromRGB(80, 255, 120), Enum.Material.Neon)
-		if k % 2 == 0 then
-			CollectionService:AddTag(l, "Blink")
+	if withRoof then
+		---------------------------------------------------------------- roof terrace
+		local roof = kit.lodGroup(model, "RoofTerrace", base + Vector3.new(0, yR, 0), 380)
+		box(model, F + 2, 0.3, F + 2, 0, yR + 0.15, 0, Color3.fromRGB(96, 86, 74), Enum.Material.WoodPlanks, { name = "Deck" })
+		-- glass balustrade with a handrail
+		for i, s in { { 0, -HF - 0.6, F + 2.4, 0.4 }, { 0, HF + 0.6, F + 2.4, 0.4 }, { -HF - 0.6, 0, 0.4, F + 2.4 }, { HF + 0.6, 0, 0.4, F + 2.4 } } do
+			box(model, s[3], 4.5, s[4], s[1], yR + 2.55, s[2], GLASS, Enum.Material.Glass, { transparency = 0.7, name = "Balustrade" })
+			dbox(roof, s[3] + (if i <= 2 then 0 else 0.2), 0.35, s[4] + (if i <= 2 then 0.2 else 0), s[1], yR + 4.95, s[2], GOLD, Enum.Material.Metal)
 		end
-	end
-	local hLetter = dbox(roof, 10, 0.1, 12, hx, yR + 0.8, hz, Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, { transparency = 1 })
-	local hGui = Instance.new("SurfaceGui")
-	hGui.Face = Enum.NormalId.Top
-	hGui.CanvasSize = Vector2.new(100, 120)
-	hGui.LightInfluence = 0.4
-	hGui.Parent = hLetter
-	local hText = Instance.new("TextLabel")
-	hText.BackgroundTransparency = 1
-	hText.Size = UDim2.fromScale(1, 1)
-	hText.Text = "H"
-	hText.Font = Enum.Font.GothamBlack
-	hText.TextScaled = true
-	hText.TextColor3 = Color3.new(1, 1, 1)
-	hText.Rotation = 0
-	hText.Parent = hGui
-	-- the helicopter: body, cockpit glass, tail boom, rotors, skids
-	local heli = Instance.new("Model")
-	heli.Name = "Helicopter"
-	heli.Parent = roof
-	local hcf = at(hx, yR + 0.8, hz) * CFrame.Angles(0, math.rad(-30), 0)
-	local body = part(heli, true, 7, 6, 12, hcf * CFrame.new(0, 4.6, 0), Color3.fromRGB(22, 24, 30), Enum.Material.SmoothPlastic, { reflectance = 0.15 })
-	part(heli, false, 6.6, 4.4, 4.6, hcf * CFrame.new(0, 5.2, -6.2), Color3.fromRGB(40, 70, 90), Enum.Material.Glass, { transparency = 0.35, reflectance = 0.4 })
-	part(heli, false, 7.1, 0.3, 12.1, hcf * CFrame.new(0, 3.4, 0), accent, Enum.Material.Neon)
-	part(heli, true, 1.6, 1.8, 14, hcf * CFrame.new(0, 5.8, 12.5), Color3.fromRGB(22, 24, 30), Enum.Material.SmoothPlastic)
-	part(heli, false, 0.4, 4, 3, hcf * CFrame.new(0, 7.4, 19), Color3.fromRGB(22, 24, 30), Enum.Material.SmoothPlastic)
-	part(heli, false, 0.2, 5, 0.6, hcf * CFrame.new(0.4, 7.4, 19.4), Color3.fromRGB(80, 80, 86), Enum.Material.Metal)
-	part(heli, false, 1, 1.2, 1, hcf * CFrame.new(0, 8.1, 0), Color3.fromRGB(60, 60, 66), Enum.Material.Metal)
-	for k = 0, 3 do
-		part(heli, false, 30, 0.2, 1.2, hcf * CFrame.new(0, 8.8, 0) * CFrame.Angles(0, k * math.pi / 4 + math.pi / 8, 0), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
-	end
-	for _, sx in { -1, 1 } do
-		part(heli, true, 0.5, 0.5, 13, hcf * CFrame.new(sx * 3.4, 0.25, -0.5), Color3.fromRGB(60, 60, 66), Enum.Material.Metal)
-		for _, sz in { -3.5, 3 } do
-			part(heli, false, 0.3, 1.8, 0.3, hcf * CFrame.new(sx * 3.1, 1.2, sz) * CFrame.Angles(0, 0, sx * 0.3), Color3.fromRGB(60, 60, 66), Enum.Material.Metal)
+		-- sky pool along the front edge (wade in: 2 studs deep)
+		local poolW, poolD, poolZ = 64, 20, -HF + 12
+		box(roof, poolW + 2, 3, 1, 0, yR + 1.8, poolZ + poolD / 2 + 0.5, MARBLE, Enum.Material.Marble)
+		for _, sx in { -1, 1 } do
+			box(roof, 1, 3, poolD + 2, sx * (poolW / 2 + 0.5), yR + 1.8, poolZ, MARBLE, Enum.Material.Marble)
 		end
-	end
-	local nav = part(heli, false, 0.5, 0.5, 0.5, hcf * CFrame.new(0, 3.2, 19.8), Color3.fromRGB(255, 40, 40), Enum.Material.Neon)
-	CollectionService:AddTag(nav, "Blink")
-	prompt(body, "Helicopter tour", "Helicopter", Enum.KeyCode.E, 0.5, 12).Triggered:Connect(function(player: Player)
-		send(player, { kind = "tour", from = body.Position })
-	end)
-	-- roof elevator: a small glass kiosk at the back corner
-	local kx, kz = -HF + 9, HF - 9
-	box(model, 14, 12, 0.6, kx, yR + 6, kz + 6.7, Color3.fromRGB(28, 28, 32), Enum.Material.Metal)
-	for _, sx in { -1, 1 } do
-		box(model, 0.6, 12, 13.4, kx + sx * 6.7, yR + 6, kz, GLASS, Enum.Material.Glass, { transparency = 0.6 })
-	end
-	box(model, 14.4, 0.8, 14.4, kx, yR + 12.4, kz, Color3.fromRGB(28, 28, 32), Enum.Material.Metal)
-	kit.neonOutline(roof, (frame * CFrame.new(kx, 0, kz)).Position.X, (frame * CFrame.new(kx, 0, kz)).Position.Z, 14.4, 14.4, CURB + yR + 12.9, accent, 0.3)
-	elevator(roof, kx, yR + 0.3, kz + 6.3, "roof")
-	-- spire on the kiosk corner of the roof
-	local spirePos = frame * CFrame.new(HF - 6, 0, HF - 6)
-	kit.spire(model, spirePos.Position.X, spirePos.Position.Z, CURB + yR + 0.3, 0.9)
+		box(roof, poolW, 0.4, poolD, 0, yR + 0.5, poolZ, Color3.fromRGB(70, 160, 190), Enum.Material.SmoothPlastic)
+		dbox(roof, poolW, 2.4, poolD, 0, yR + 1.9, poolZ, WATER, Enum.Material.Glass, { transparency = 0.45, reflectance = 0.25, name = "Water" })
+		dbox(roof, poolW, 0.25, 0.25, 0, yR + 0.8, poolZ - poolD / 2 + 0.2, Color3.fromRGB(120, 230, 255), Enum.Material.Neon)
+		local poolGlow = dbox(roof, poolW - 4, 0.2, poolD - 4, 0, yR + 0.75, poolZ, Color3.fromRGB(60, 200, 255), Enum.Material.Neon, { transparency = 0.6 })
+		light(poolGlow, Color3.fromRGB(80, 200, 255), 26, 1.2)
+		-- loungers facing the pool and the view
+		for _, x in { -27, -15, 15, 27 } do
+			local cf = at(x, yR + 0.3, -HF + 30) * CFrame.Angles(0, 0, 0)
+			part(roof, true, 3.4, 1.2, 8, cf * CFrame.new(0, 1, 0), Color3.fromRGB(236, 234, 228), Enum.Material.SmoothPlastic)
+			part(roof, false, 3.4, 0.6, 3.2, cf * CFrame.new(0, 2.3, 2.6) * CFrame.Angles(math.rad(35), 0, 0), Color3.fromRGB(236, 234, 228), Enum.Material.SmoothPlastic)
+			seat(roof, cf * CFrame.new(0, 2.1, 0.5), 2.6, 2.6)
+		end
+		-- parasols
+		for _, x in { -21, 21 } do
+			dbox(roof, 0.3, 9, 0.3, x, yR + 4.5, -HF + 31, GOLD, Enum.Material.Metal)
+			part(roof, false, 0.6, 11, 11, at(x, yR + 9, -HF + 31) * CFrame.Angles(0, 0, math.pi / 2), CREAM, Enum.Material.Fabric, { shape = Enum.PartType.Cylinder })
+		end
+		-- telescope at the corner, looking out over the city
+		local scopeX, scopeZ = HF - 6, -HF + 6
+		dbox(roof, 0.4, 4, 0.4, scopeX, yR + 2.3, scopeZ, GOLD, Enum.Material.Metal)
+		local scope = part(roof, true, 4, 0.9, 0.9, at(scopeX, yR + 4.6, scopeZ) * CFrame.Angles(0, math.rad(45), 0) * CFrame.Angles(math.rad(8), 0, 0) * CFrame.Angles(0, math.pi / 2, 0), Color3.fromRGB(60, 50, 40), Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+		local scopePrompt = prompt(scope, "Look through", "Telescope", Enum.KeyCode.E, 0, 8)
+		scopePrompt.Triggered:Connect(function(player: Player)
+			-- out over the corner of the roof, towards the city centre
+			local eye = at(scopeX, yR + 5.4, scopeZ).Position
+			local dir = (Vector3.new(0, eye.Y - 120, 0) - eye)
+			dir = Vector3.new(dir.X, math.min(dir.Y * 0.15, 0), dir.Z).Unit
+			send(player, { kind = "scope", eye = eye, dir = dir })
+		end)
+		-- helipad with a parked helicopter (back half of the roof)
+		local hx, hz = 10, 18
+		part(roof, true, 0.4, 34, 34, at(hx, yR + 0.5, hz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(40, 42, 46), Enum.Material.Concrete, { shape = Enum.PartType.Cylinder })
+		part(roof, false, 0.1, 30, 30, at(hx, yR + 0.72, hz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(230, 200, 60), Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder })
+		part(roof, false, 0.12, 28.6, 28.6, at(hx, yR + 0.74, hz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(40, 42, 46), Enum.Material.Concrete, { shape = Enum.PartType.Cylinder })
+		for k = 0, 11 do
+			local a = k * math.pi / 6
+			local l = dbox(roof, 0.6, 0.4, 0.6, hx + math.cos(a) * 16.4, yR + 0.9, hz + math.sin(a) * 16.4, Color3.fromRGB(80, 255, 120), Enum.Material.Neon)
+			if k % 2 == 0 then
+				CollectionService:AddTag(l, "Blink")
+			end
+		end
+		local hLetter = dbox(roof, 10, 0.1, 12, hx, yR + 0.8, hz, Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, { transparency = 1 })
+		local hGui = Instance.new("SurfaceGui")
+		hGui.Face = Enum.NormalId.Top
+		hGui.CanvasSize = Vector2.new(100, 120)
+		hGui.LightInfluence = 0.4
+		hGui.Parent = hLetter
+		local hText = Instance.new("TextLabel")
+		hText.BackgroundTransparency = 1
+		hText.Size = UDim2.fromScale(1, 1)
+		hText.Text = "H"
+		hText.Font = Enum.Font.GothamBlack
+		hText.TextScaled = true
+		hText.TextColor3 = Color3.new(1, 1, 1)
+		hText.Rotation = 0
+		hText.Parent = hGui
+		-- the helicopter: body, cockpit glass, tail boom, rotors, skids
+		local heli = Instance.new("Model")
+		heli.Name = "Helicopter"
+		heli.Parent = roof
+		local hcf = at(hx, yR + 0.8, hz) * CFrame.Angles(0, math.rad(-30), 0)
+		local body = part(heli, true, 7, 6, 12, hcf * CFrame.new(0, 4.6, 0), Color3.fromRGB(22, 24, 30), Enum.Material.SmoothPlastic, { reflectance = 0.15 })
+		part(heli, false, 6.6, 4.4, 4.6, hcf * CFrame.new(0, 5.2, -6.2), Color3.fromRGB(40, 70, 90), Enum.Material.Glass, { transparency = 0.35, reflectance = 0.4 })
+		part(heli, false, 7.1, 0.3, 12.1, hcf * CFrame.new(0, 3.4, 0), accent, Enum.Material.Neon)
+		part(heli, true, 1.6, 1.8, 14, hcf * CFrame.new(0, 5.8, 12.5), Color3.fromRGB(22, 24, 30), Enum.Material.SmoothPlastic)
+		part(heli, false, 0.4, 4, 3, hcf * CFrame.new(0, 7.4, 19), Color3.fromRGB(22, 24, 30), Enum.Material.SmoothPlastic)
+		part(heli, false, 0.2, 5, 0.6, hcf * CFrame.new(0.4, 7.4, 19.4), Color3.fromRGB(80, 80, 86), Enum.Material.Metal)
+		part(heli, false, 1, 1.2, 1, hcf * CFrame.new(0, 8.1, 0), Color3.fromRGB(60, 60, 66), Enum.Material.Metal)
+		for k = 0, 3 do
+			part(heli, false, 30, 0.2, 1.2, hcf * CFrame.new(0, 8.8, 0) * CFrame.Angles(0, k * math.pi / 4 + math.pi / 8, 0), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
+		end
+		for _, sx in { -1, 1 } do
+			part(heli, true, 0.5, 0.5, 13, hcf * CFrame.new(sx * 3.4, 0.25, -0.5), Color3.fromRGB(60, 60, 66), Enum.Material.Metal)
+			for _, sz in { -3.5, 3 } do
+				part(heli, false, 0.3, 1.8, 0.3, hcf * CFrame.new(sx * 3.1, 1.2, sz) * CFrame.Angles(0, 0, sx * 0.3), Color3.fromRGB(60, 60, 66), Enum.Material.Metal)
+			end
+		end
+		local nav = part(heli, false, 0.5, 0.5, 0.5, hcf * CFrame.new(0, 3.2, 19.8), Color3.fromRGB(255, 40, 40), Enum.Material.Neon)
+		CollectionService:AddTag(nav, "Blink")
+		prompt(body, "Helicopter tour", "Helicopter", Enum.KeyCode.E, 0.5, 12).Triggered:Connect(function(player: Player)
+			send(player, { kind = "tour", from = body.Position })
+		end)
+		-- roof elevator: a small glass kiosk at the back corner
+		local kx, kz = -HF + 9, HF - 9
+		box(model, 14, 12, 0.6, kx, yR + 6, kz + 6.7, Color3.fromRGB(28, 28, 32), Enum.Material.Metal)
+		for _, sx in { -1, 1 } do
+			box(model, 0.6, 12, 13.4, kx + sx * 6.7, yR + 6, kz, GLASS, Enum.Material.Glass, { transparency = 0.6 })
+		end
+		box(model, 14.4, 0.8, 14.4, kx, yR + 12.4, kz, Color3.fromRGB(28, 28, 32), Enum.Material.Metal)
+		kit.neonOutline(roof, (frame * CFrame.new(kx, 0, kz)).Position.X, (frame * CFrame.new(kx, 0, kz)).Position.Z, 14.4, 14.4, groundY + yR + 12.9, accent, 0.3)
+		elevator(roof, kx, yR + 0.3, kz + 6.3, "roof")
+		-- spire on the kiosk corner of the roof
+		local spirePos = frame * CFrame.new(HF - 6, 0, HF - 6)
+		kit.spire(model, spirePos.Position.X, spirePos.Position.Z, groundY + yR + 0.3, 0.9)
+	end -- withRoof
 
 	local rec: Built = {
 		spec = t,
@@ -783,6 +822,7 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	model:SetAttribute("Party", false)
 	CollectionService:AddTag(model, "TowerPenthouse")
 	built[t.id] = rec
+	return rec
 end
 
 ---------------------------------------------------------------------
@@ -992,6 +1032,19 @@ function Towers.block(kit: any, parent: Instance, bi: number, bj: number, cx: nu
 	buildTower(kit, parent, t, cx, cz, lot)
 	start()
 	return true
+end
+
+-- a penthouse floor on another building (the hotel's suites); returns its elevator stops, which
+-- that building fills in for "lobby" (and "roof" when this suite has no roof terrace)
+function Towers.suite(kit: any, parent: Instance, t: TowerSpec, opts: SuiteOpts): { [string]: CFrame }
+	local rec = buildTower(kit, parent, t, 0, 0, 0, opts)
+	start()
+	return rec.stops
+end
+
+-- TowerFX messages for other modules (toasts, cash popups)
+function Towers.send(player: Player, info: { [string]: any })
+	send(player, info)
 end
 
 -- for code that wants the blocks without CityLayout maths

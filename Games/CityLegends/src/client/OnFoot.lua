@@ -27,6 +27,11 @@ local ENTER_RANGE = 14
 local remotes: Folder
 local busy = false
 
+-- another module can offer a different action for a slow car at a spot (the hotel's valet bay):
+-- it returns the pill's label and what Y does, or nil to leave GET OUT
+OnFoot.driveAction = nil :: (() -> (string?, (() -> ())?))?
+local driveActionFn: (() -> ())? = nil
+
 local function myCar(): Model?
 	local cars = workspace:FindFirstChild("PlayerCars")
 	local car = if cars then cars:FindFirstChild(player.Name) else nil
@@ -56,6 +61,11 @@ function OnFoot.getOut()
 		return
 	end
 	Driving.park()
+	OnFoot.footMode()
+end
+
+-- the server has stood the avatar up: walking camera and the on-foot HUD (after the car is parked)
+function OnFoot.footMode()
 	OnFoot.active = true
 	UI.setOnFoot(true)
 	camera.CameraType = Enum.CameraType.Custom
@@ -96,7 +106,9 @@ function OnFoot.reset()
 end
 
 function OnFoot.toggle()
-	if Driving.isDriving() then
+	if Driving.isDriving() and driveActionFn then
+		driveActionFn()
+	elseif Driving.isDriving() then
 		OnFoot.getOut()
 	elseif OnFoot.active then
 		OnFoot.getIn()
@@ -116,8 +128,16 @@ function OnFoot.init()
 	UI.onAction = OnFoot.toggle
 	-- the action pill: "GET OUT" when slow enough, "GET IN" beside your car
 	RunService.Heartbeat:Connect(function()
+		driveActionFn = nil
 		if Driving.isDriving() then
-			if Driving.getSpeed() <= EXIT_SPEED and not UI.isGarageOpen() then
+			local label: string?, fn: (() -> ())? = nil, nil
+			if OnFoot.driveAction and Driving.getSpeed() <= EXIT_SPEED and not UI.isGarageOpen() then
+				label, fn = OnFoot.driveAction()
+			end
+			if label and fn then
+				driveActionFn = fn
+				UI.setAction(label, "Y")
+			elseif Driving.getSpeed() <= EXIT_SPEED and not UI.isGarageOpen() then
 				UI.setAction("GET OUT", "Y")
 			else
 				UI.setAction(nil)
