@@ -26,6 +26,7 @@ export type Profile = {
 	Penthouses: { [string]: boolean }, -- owned luxury tower penthouses (Config.Towers ids)
 	Rent: { [string]: number }, -- os.time() each penthouse's safe was last emptied
 	Home: string, -- penthouse id set as home ("" = none)
+	Luxe: { [string]: any }, -- VIP card, owned and worn flex items (Luxe.lua checks it)
 	Loaded: boolean,
 }
 
@@ -84,6 +85,7 @@ local function defaultProfile(): Profile
 		Penthouses = {},
 		Rent = {},
 		Home = "",
+		Luxe = {},
 		Loaded = false,
 	}
 end
@@ -149,6 +151,9 @@ function PlayerData.load(player: Player): Profile
 			if type(saved.Activities) == "table" then
 				profile.Activities = saved.Activities
 			end
+			if type(saved.Luxe) == "table" then
+				profile.Luxe = saved.Luxe
+			end
 			-- luxury towers (absent in older saves)
 			local towerIds = {}
 			for _, t in Config.Towers.List do
@@ -207,6 +212,7 @@ function PlayerData.save(player: Player)
 		Penthouses = penthouses,
 		Rent = profile.Rent,
 		Home = profile.Home,
+		Luxe = profile.Luxe,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)

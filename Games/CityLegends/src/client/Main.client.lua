@@ -201,6 +201,7 @@ Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualitySca
 Police.init()
 BankClient.init()
 Activities.init()
+require(script.Parent:WaitForChild("LuxeClient")).init() -- casino VIP, the gem shop, heist messages
 UI.hideLoading()
 
 ---------------------------------------------------------------------
