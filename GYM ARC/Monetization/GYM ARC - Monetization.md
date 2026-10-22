@@ -161,3 +161,6 @@ Same product as the old Stamina Refill (3718306417), renamed by the owner in the
 
 ![[GYM ARC/Screenshots/endless_stamina_store.jpg]]
 ![[GYM ARC/Screenshots/endless_stamina_store_full.jpg]]
+
+## Store look (23 Oct, prompt 61; [[2026-10-23 GYM ARC Store passes premium restyle]])
+Premium tiles in each item's colour, Robux prices on slim graphite buttons, owned = gold OWNED at full brightness (no checkmarks). The hero card on PASSES features the first pass you don't own in `Monetization.PopularPasses` (or THANK YOU when you own them all). Coach Dex / Go to Pump Shop sit at the bottom of the Store.
