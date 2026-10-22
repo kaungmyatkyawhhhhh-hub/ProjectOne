@@ -48,6 +48,9 @@ local SaveSettings: RemoteEvent = remote("RemoteEvent", "SaveSettings") -- clien
 local CarSignals: RemoteEvent = remote("RemoteEvent", "CarSignals") -- client -> server: blinkers + lights, shown to everyone
 remotes.Parent = ReplicatedStorage
 
+-- the car stock market (its own remotes, MarketCall / MarketPush)
+require(script.Parent:WaitForChild("Market")).start(remotes)
+
 local playerCars = Instance.new("Folder")
 playerCars.Name = "PlayerCars"
 playerCars.Parent = workspace

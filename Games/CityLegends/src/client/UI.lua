@@ -35,6 +35,7 @@ UI.onCameraButton = nil :: (() -> ())?
 UI.onUnitsChanged = nil :: ((string) -> ())? -- Settings: "mph" | "kmh"
 UI.onGearboxChanged = nil :: ((string) -> ())? -- Settings: "Auto" | "Manual"
 UI.onDailyClaim = nil :: (() -> ())? -- asks the server to pay the daily gift
+UI.onMarketButton = nil :: (() -> ())? -- opens the car stock market (MarketUI)
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -428,6 +429,15 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		box(17, 18, 9, 11, 1.5)
 		box(8.5, 5, 8, 5.5, -1, 30) -- bow loops
 		box(15.5, 5, 8, 5.5, -1, -30)
+	elseif kind == "chart" then
+		-- rising bars and a trend line (the car stock market)
+		box(4, 20, 5, 8, 1)
+		box(11.5, 15, 5, 13, 1)
+		box(19, 18, 5, 10, 1)
+		box(26, 9, 4, 19, 1)
+		box(5, 9, 11, 2.6, 1.3, -32)
+		box(14, 9.5, 9, 2.6, 1.3, 20)
+		box(21, 7, 10, 2.6, 1.3, -38)
 	end
 	return canvas
 end
@@ -807,6 +817,7 @@ local function buildCashTab()
 		{ "R", "Reset car to road" },
 		{ "Y", "Get out / get in" },
 		{ "G", "Garage / shop" },
+		{ "K", "Car stock market" },
 		{ "M", "Music on / off" },
 	}
 	local panel = new("Frame", {
@@ -894,7 +905,7 @@ local function buildSideButtons()
 		AnchorPoint = Vector2.new(0, 0.5),
 		-- on touch, lift it clear of the steering buttons
 		Position = if UI.isTouch then UDim2.new(0, 14, 0.4, 0) else UDim2.new(0, 20, 0.5, 0),
-		Size = UDim2.fromOffset(size, size * 3 + 20),
+		Size = UDim2.fromOffset(size, size * 4 + 30),
 		BackgroundTransparency = 1,
 		Parent = hud,
 	}, {
@@ -932,6 +943,13 @@ local function buildSideButtons()
 	local settingsBtn = sideButton("gear", "SETTINGS", 1)
 	local shopBtn = sideButton("cart", "SHOP", 2)
 	local giftBtn = sideButton("gift", "GIFTS", 3)
+	local marketBtn = sideButton("chart", "MARKET", 4)
+	marketBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onMarketButton then
+			UI.onMarketButton()
+		end
+	end)
 	giftDot = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(1, -6, 0, 6),

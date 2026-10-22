@@ -269,4 +269,60 @@ Config.Theme = {
 	Danger = Color3.fromRGB(255, 64, 64),
 }
 
+---------------------------------------------------------------------
+-- Car stock market (owner, 2026-10-22: a car stocks marketplace like the Flip Rush market).
+-- Cars trade as collectible stock: buying a unit doesn't give you the car (a Showroom unit can
+-- be taken delivery of). Prices are the server's: a random walk round each car's base value.
+---------------------------------------------------------------------
+Config.Market = {
+	TickSeconds = 15, -- prices move this often
+	History = 40, -- price points kept per car (sparklines)
+	BaseK = 0.75, -- a Clean unit's base value, as a share of the car's dealer price
+	MinBase = 4000, -- floor for cheap cars (the free starter)
+	Volatility = 0.035, -- random move per tick (share of the price)
+	Revert = 0.05, -- pull back towards the base value per tick
+	Floor = 0.35, -- prices stay between these shares of the base value
+	Ceiling = 3.5,
+	-- condition: value multiplier and the tag colour on the cards
+	Conditions = {
+		{ Id = "Barn", Name = "Barn find", Mult = 0.45, Color = Color3.fromRGB(178, 120, 74) },
+		{ Id = "Driven", Name = "Driven", Mult = 0.75, Color = Color3.fromRGB(150, 156, 172) },
+		{ Id = "Clean", Name = "Clean", Mult = 1.0, Color = Color3.fromRGB(96, 196, 255) },
+		{ Id = "Showroom", Name = "Showroom", Mult = 1.35, Color = Color3.fromRGB(122, 255, 170) },
+	},
+	Listings = 6, -- cars for sale in your market at a time
+	ListingSpread = { 0.82, 1.22 }, -- asking price vs market value (some deals, some rip-offs)
+	ListingRotate = 2, -- listings replaced on each price tick
+	StashSlots = 32,
+	Fee = 0.14, -- selling to the market (Stalls); drops with hype
+	FeePerHype = 0.01,
+	MinFee = 0.04,
+	HypeMax = 10,
+	HypeFlip = 0.25, -- a flip this profitable (share of what you paid) adds a hype point
+	HypeDecayMinutes = 30, -- one hype point fades after this long without a good flip
+	-- hold BUY to lowball: the chance it works and the discount, else the seller walks
+	LowballChance = 0.35,
+	LowballChancePerHype = 0.03,
+	LowballMaxChance = 0.7,
+	LowballDiscount = { 0.1, 0.3 },
+	-- NPC buyers offering on your stash (no fee on an offer)
+	OfferEvery = { 25, 60 }, -- seconds
+	OfferSpread = { 0.85, 1.3 },
+	OfferPerHype = 0.02,
+	OfferLasts = 30, -- seconds
+	-- daily requests: a buyer wants a car in a condition (or better) and pays a premium
+	Requests = 3,
+	RequestPremium = { 1.4, 1.8 },
+	-- news moves a brand or class up or down for a few ticks
+	NewsEvery = { 90, 150 }, -- seconds
+	NewsImpact = { 0.06, 0.25 }, -- total move, spread over NewsTicks
+	NewsTicks = 6,
+	-- Flip-off vs Slick Vinny: out-earn him in 3 minutes
+	FlipOffSeconds = 180,
+	FlipOffPrize = 15000, -- plus a share of your stash value (capped)
+	FlipOffPrizeShare = 0.02,
+	FlipOffPrizeCap = 400000,
+	FlipOffCooldown = 120,
+}
+
 return Config
