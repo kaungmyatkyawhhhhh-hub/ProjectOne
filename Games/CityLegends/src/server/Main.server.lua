@@ -19,6 +19,7 @@ local CityLayout = require(Shared:WaitForChild("CityLayout"))
 
 local CityBuilder = require(script.Parent:WaitForChild("CityBuilder"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
+local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 
 Players.CharacterAutoLoads = false
 
@@ -137,6 +138,18 @@ local function findSpawnCFrame(): CFrame
 	return CFrame.lookAt(pos, pos + dir)
 end
 
+-- what the gameplay modules (on foot, police, bank) get from here
+local ctx = {
+	remote = remote,
+	getCar = function(player: Player): Model?
+		local car = getSession(player).car
+		return if car and car.Parent then car else nil
+	end,
+	grantXp = grantXp,
+	playerCars = playerCars,
+}
+OnFoot.init(ctx)
+
 local function despawn(player: Player)
 	local s = getSession(player)
 	if s.car then
@@ -153,6 +166,7 @@ local function spawnFor(player: Player, carId: string)
 	end
 	profile.Selected = carId
 	despawn(player)
+	OnFoot.removeCharacter(player) -- a car from the garage: straight in, off your feet
 
 	local spec = Cars.get(carId)
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })

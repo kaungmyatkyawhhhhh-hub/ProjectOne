@@ -21,6 +21,7 @@ local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local BuildingSkin = require(script.Parent:WaitForChild("BuildingSkin"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
 local Weather = require(script.Parent:WaitForChild("Weather"))
+local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -38,6 +39,7 @@ local Progress = remotes:WaitForChild("Progress") :: RemoteEvent
 local ClaimDaily = remotes:WaitForChild("ClaimDaily") :: RemoteFunction
 
 Driving.init()
+OnFoot.init()
 
 -- wait for the server to finish building the city
 local city = workspace:WaitForChild("City", 120)
@@ -231,6 +233,7 @@ local function tryAttach(model: Instance)
 			warn("[CityLegends] car skin failed:", errSkin)
 		end
 		stopOrbit()
+		OnFoot.reset()
 		Traffic.clearAround(model:GetPivot().Position, 35)
 		Driving.attach(model)
 		UI.showHud(true)
@@ -283,7 +286,7 @@ local function openGarage(fromMenu: boolean)
 			requestDrive(id)
 		end,
 		close = function()
-			if fromMenu and not Driving.isDriving() then
+			if fromMenu and not Driving.isDriving() and not OnFoot.active then
 				showMenu()
 			end
 		end,
@@ -315,7 +318,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.G and Driving.isDriving() then
+	if input.KeyCode == Enum.KeyCode.G and (Driving.isDriving() or OnFoot.active) then
 		toggleGarage()
 	end
 end)

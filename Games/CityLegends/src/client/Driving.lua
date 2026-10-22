@@ -41,7 +41,7 @@ local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
 local camera = workspace.CurrentCamera
 
 local Driving = {}
-Driving.cameraMode = "Chase" -- "Chase" | "Interior"
+Driving.cameraMode = "Immersive" -- "Immersive" | "Chase" | "Interior" (owner, 2026-10-22: an immersive view that feels fast)
 Driving.inputEnabled = true
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings; Q / E switch to manual too)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
@@ -166,6 +166,9 @@ type State = {
 	latG: number,
 	headPos: Vector3, -- the driver's head moving with the g-forces (cockpit camera)
 	headVel: Vector3,
+	camLag: number,
+	camSwing: number,
+	camBob: number,
 	screech: number, -- tyre cry on hard launches (sound only)
 	chirp: number, -- seconds left of a tyre chirp after a hard low-gear shift
 	launchReady: boolean, -- launch control: brake + throttle held at a stop
@@ -402,6 +405,7 @@ function Driving.detach()
 	end
 	s.engine:destroy()
 	UI.startPrompt(false)
+	UI.setSpeedLines(0)
 	if s.cabinLight then
 		s.cabinLight:Destroy()
 	end
@@ -419,8 +423,38 @@ function Driving.getRoot(): BasePart?
 	return if state then state.root else nil
 end
 
+function Driving.getModel(): Model?
+	return if state then state.model else nil
+end
+
+-- ground speed in studs per second (0 when not driving)
+function Driving.getSpeed(): number
+	return if state then Vector3.new(state.vel.X, 0, state.vel.Z).Magnitude else 0
+end
+
+-- leaving the car (getting out to walk): it stops where it is, the cabin shows from outside again
+function Driving.park()
+	local s = state
+	if not s then
+		return
+	end
+	s.vel = Vector3.zero
+	s.lv.PlaneVelocity = Vector2.zero
+	for _, p in s.hidden do
+		p.LocalTransparencyModifier = 0
+	end
+	for _, g in s.glass do
+		g.LocalTransparencyModifier = 0
+	end
+	if s.cabinLight then
+		s.cabinLight.Enabled = false
+	end
+	Driving.detach()
+end
+
+local CAMERA_ORDER = { Immersive = "Chase", Chase = "Interior", Interior = "Immersive" }
 function Driving.toggleCamera()
-	Driving.cameraMode = if Driving.cameraMode == "Chase" then "Interior" else "Chase"
+	Driving.cameraMode = CAMERA_ORDER[Driving.cameraMode] or "Immersive"
 	UI.setCameraLabel(Driving.cameraMode)
 	local s = state
 	if s then
@@ -1182,6 +1216,9 @@ function Driving.attach(model: Model)
 		rpmShown = 0,
 		camPos = root.Position + Vector3.new(0, 8, 20),
 		camLook = root.Position,
+		camLag = 0, -- immersive camera: pulled back on hard acceleration, pushed in braking
+		camSwing = 0, -- immersive camera: looks into the turn
+		camBob = 0,
 		fov = Config.Camera.ChaseFov,
 		shake = 0,
 		gear = "N",
@@ -1253,7 +1290,13 @@ function Driving.attach(model: Model)
 	camera.CameraType = Enum.CameraType.Scriptable
 
 	-- apply current camera mode visibility
-	Driving.cameraMode = if Driving.cameraMode == "Interior" then "Chase" else "Interior"
+	-- toggleCamera below moves one step on: start one step back so it lands on the current mode
+	local back = Driving.cameraMode
+	for prev, nxt in CAMERA_ORDER do
+		if nxt == back then
+			Driving.cameraMode = prev
+		end
+	end
 	Driving.toggleCamera()
 
 	table.insert(s.connections, RunService.PreSimulation:Connect(function(dt)
@@ -1854,6 +1897,32 @@ function Driving.render(dt: number)
 		if blur then
 			blur.Size = 0
 		end
+	elseif Driving.cameraMode == "Immersive" then
+		-- low and close behind the car, like a racing game's near camera: the road rushes past,
+		-- the view stretches with speed, the camera is thrown back on launch and forward under
+		-- braking, lags round the outside of a turn looking into it, and buzzes with the road
+		local IC = C.Immersive
+		targetFov = IC.Fov + IC.FovBoost * speedFrac ^ 1.25
+		local yawRate = s.steer * math.min(math.abs(fwdSpeed), 60) / 60
+		s.camLag += ((math.clamp(s.lonG, -1.2, 1.2) * IC.Lag) - s.camLag) * math.min(1, dt * 5)
+		s.camSwing += ((yawRate * IC.Swing) - s.camSwing) * math.min(1, dt * 3.5)
+		local back = IC.Distance + s.camLag + speedFrac * IC.SpeedPull
+		local up = IC.Height - speedFrac * 0.5
+		local base = CFrame.new(root.Position) * CFrame.Angles(0, s.yaw, 0) -- level with the road, not the body roll
+		local camPos = (base * CFrame.Angles(0, s.camSwing, 0) * CFrame.new(0, up, back)).Position
+		-- road buzz: fine fast shake that grows with speed, plus a slow float
+		s.camBob += dt * (6 + speedFrac * 30)
+		local buzz = (0.015 + speedFrac ^ 2 * IC.Buzz + s.shake * 0.4)
+		local shake = Vector3.new(math.noise(t * 31, 0, 3), math.noise(0, t * 29, 4), 0) * buzz
+			+ Vector3.new(0, math.sin(s.camBob) * 0.03 * speedFrac, 0)
+		local lookAt = (base * CFrame.Angles(0, -s.camSwing * 0.6, 0) * CFrame.new(0, IC.LookHeight, -IC.LookAhead)).Position
+		local roll = math.clamp(-s.latG * 0.035, -0.06, 0.06)
+		s.camPos = camPos
+		s.camLook = lookAt
+		camera.CFrame = CFrame.lookAt(camPos + shake, lookAt + shake * 0.5) * CFrame.Angles(0, 0, roll)
+		if blur then
+			blur.Size = IC.Blur * math.max(0, speedFrac - 0.35) ^ 1.3
+		end
 	else
 		targetFov = C.ChaseFov + C.MaxFovBoost * speedFrac ^ 1.4
 		-- follow the direction of travel a little when drifting
@@ -1881,6 +1950,7 @@ function Driving.render(dt: number)
 	end
 	s.fov += (targetFov - s.fov) * math.min(1, dt * 4)
 	camera.FieldOfView = s.fov
+	UI.setSpeedLines(if Driving.cameraMode == "Interior" then 0 else math.max(0, speedFrac - 0.3) / 0.7)
 end
 
 -- Settings: speed units for the HUD and the cluster ("mph" | "kmh")

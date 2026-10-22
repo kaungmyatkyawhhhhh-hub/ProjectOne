@@ -805,6 +805,7 @@ local function buildCashTab()
 		{ "Z / X / C", "Left blinker · hazards · right blinker" },
 		{ "V", "Camera  (hold RMB to look)" },
 		{ "R", "Reset car to road" },
+		{ "Y", "Get out / get in" },
 		{ "G", "Garage / shop" },
 		{ "M", "Music on / off" },
 	}
@@ -951,7 +952,7 @@ local function buildSideButtons()
 		return button("", Theme.Accent, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, y), Size = UDim2.fromOffset(120, 32), TextSize = 13, TextColor3 = Theme.Accent, ZIndex = 6, Parent = settingsPanel })
 	end
 	camToggle = settingRow("Camera", "V", 52)
-	camToggle.Text = "CHASE"
+	camToggle.Text = "IMMERSIVE"
 	musicToggle = settingRow("Music", "M", 96)
 	local function refreshMusic()
 		local on = musicOn()
@@ -1916,8 +1917,120 @@ function UI.setBlink(left: boolean, right: boolean)
 	end
 end
 
+-- on foot: the speedometer goes away (the rest of the HUD stays)
+function UI.setOnFoot(onFoot: boolean)
+	local speedo = hud and hud:FindFirstChild("Speedometer")
+	if speedo and speedo:IsA("GuiObject") then
+		speedo.Visible = not onFoot
+	end
+end
+
+-- the context action pill (bottom right): "[Y] GET OUT", "[Y] GET IN", "[E] ROB THE VAULT" ...
+-- clicking or tapping it does the same as the key (UI.onAction)
+UI.onAction = nil :: (() -> ())?
+local actionPill: TextButton? = nil
+local actionKey: TextLabel? = nil
+local actionText: TextLabel? = nil
+function UI.setAction(text: string?, key: string?)
+	if not gui then
+		return
+	end
+	if not actionPill then
+		local b: TextButton = new("TextButton", {
+			Name = "ActionPill",
+			AutoButtonColor = false,
+			Text = "",
+			AnchorPoint = Vector2.new(1, 1),
+			Position = if UI.isTouch then UDim2.new(1, -24, 1, -250) else UDim2.new(1, -28, 1, -200),
+			Size = UDim2.fromOffset(if UI.isTouch then 150 else 190, 48),
+			BackgroundColor3 = Theme.Panel,
+			BackgroundTransparency = 0.08,
+			Visible = false,
+			ZIndex = 8,
+			Parent = gui,
+		}, { corner(12), stroke(Theme.Accent, 1.5, 0.1) })
+		actionKey = label({
+			Text = "Y",
+			TextSize = 18,
+			Font = Enum.Font.GothamBlack,
+			TextColor3 = Theme.Panel,
+			BackgroundColor3 = Theme.Accent,
+			BackgroundTransparency = 0,
+			Position = UDim2.fromOffset(8, 8),
+			Size = UDim2.fromOffset(32, 32),
+			ZIndex = 9,
+			Parent = b,
+		})
+		corner(8).Parent = actionKey
+		actionText = label({
+			Text = "",
+			TextSize = 15,
+			Font = Enum.Font.GothamBlack,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Position = UDim2.fromOffset(50, 0),
+			Size = UDim2.new(1, -56, 1, 0),
+			ZIndex = 9,
+			Parent = b,
+		})
+		b.Activated:Connect(function()
+			Audio.click()
+			if UI.onAction then
+				UI.onAction()
+			end
+		end)
+		actionPill = b
+	end
+	local pill = actionPill :: TextButton
+	if not text then
+		pill.Visible = false
+		return
+	end
+	pill.Visible = true;
+	(actionText :: TextLabel).Text = text;
+	(actionKey :: TextLabel).Text = if UI.isTouch then "▶" else (key or "Y")
+end
+
+-- speed lines: thin streaks rushing in from the screen edges at speed (0 = off .. 1 = flat out)
+local speedLines: { Frame } = {}
+local speedRng = Random.new()
+function UI.setSpeedLines(k: number)
+	if not gui then
+		return
+	end
+	if #speedLines == 0 then
+		if k <= 0 then
+			return
+		end
+		local holder = new("Frame", { Name = "SpeedLines", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 0, Parent = gui })
+		for i = 1, 36 do
+			speedLines[i] = new("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BorderSizePixel = 0,
+				BackgroundTransparency = 1,
+				Parent = holder,
+			})
+		end
+	end
+	for i, f in speedLines do
+		if k <= 0.01 then
+			f.BackgroundTransparency = 1
+			continue
+		end
+		-- a ray from the middle of the screen, drawn only near the edges
+		local a = (i / #speedLines) * math.pi * 2 + speedRng:NextNumber(-0.08, 0.08)
+		local r = speedRng:NextNumber(0.55, 0.85)
+		local len = (0.06 + 0.22 * k) * speedRng:NextNumber(0.5, 1.2)
+		local dx, dy = math.cos(a), math.sin(a)
+		f.Position = UDim2.fromScale(0.5 + dx * r * 0.62, 0.5 + dy * r * 0.62)
+		f.Size = UDim2.new(len * 0.62, 0, 0, if speedRng:NextNumber() < 0.3 then 2 else 1)
+		f.Rotation = math.deg(a)
+		f.BackgroundTransparency = 1 - k * speedRng:NextNumber(0.15, 0.45)
+	end
+end
+
 function UI.setCameraLabel(mode: string)
-	camToggle.Text = if mode == "Interior" then "INTERIOR" else "CHASE"
+	camToggle.Text = string.upper(mode)
 end
 
 function UI.toggleControls(show: boolean?)

@@ -165,6 +165,20 @@ Config.Camera = {
 	MaxFovBoost = 32,
 	ChaseDistance = 17,
 	ChaseHeight = 5.2,
+	-- the immersive camera (default): low and close behind the car (studs)
+	Immersive = {
+		Fov = 74,
+		FovBoost = 38, -- added at top speed: the view stretches the faster you go
+		Distance = 11.5,
+		Height = 3.4,
+		SpeedPull = 2.5, -- pulled back a little more at speed
+		Lag = 2.2, -- thrown back on hard launches, forward under braking (studs per g)
+		Swing = 0.22, -- looks into turns (radians at full lock)
+		Buzz = 0.09, -- road shake at top speed
+		LookAhead = 22,
+		LookHeight = 1.6,
+		Blur = 4,
+	},
 }
 
 ---------------------------------------------------------------------
