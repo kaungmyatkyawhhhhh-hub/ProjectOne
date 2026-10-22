@@ -69,3 +69,18 @@ Prompt: [[2026-10-23 GYM ARC Prompt - Chrome reset]]. Game commit 0034b67. The r
 
 ![[GYM ARC/Screenshots/chrome_reset/menu_hero_desktop.jpg]]
 ![[GYM ARC/Screenshots/chrome_reset/menu_hero_667.jpg]]
+
+## PLAY and SHOP colours ([[2026-10-23 GYM ARC Prompt - PLAY and SHOP colours]])
+- **PLAY:**
+  - red #FF4A4A to #D9262B, a soft white band over the top third (25%);
+  - a 4 px outline #1A0A0A, an outer 2 px ring #3A0F12 with a soft red glow outside it;
+  - a 6 px bottom edge #8E1A1F, 18 px corners.
+- **SHOP:**
+  - gold #FFD75A to #E0A825, dark words;
+  - the same shape as PLAY (18 px corners, 4 px outline, 6 px edge #9A6A0E, the top-third band);
+  - no ring or glow.
+- The earlier 2 px top line is replaced by the band.
+- All values are in `Theme` (`HERO`, `Theme.HeroCorner`, `Theme.HeroLip`).
+
+![[GYM ARC/Screenshots/chrome_reset/menu_hero_colours_desktop.jpg]]
+![[GYM ARC/Screenshots/chrome_reset/menu_hero_colours_667.jpg]]
