@@ -22,6 +22,7 @@ local CityPremium = require(script.Parent:WaitForChild("CityPremium"))
 local Mainland = require(script.Parent:WaitForChild("Mainland"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
 local Towers = require(script.Parent:WaitForChild("Towers"))
+local West = require(script.Parent:WaitForChild("West"))
 
 local CityBuilder = {}
 
@@ -41,6 +42,8 @@ local LOOP_R = C.LoopCorner
 local LOOP_C = LOOP_S - LOOP_R
 local LOOP_HW = HW + 8 -- half the loop's paved width (lanes and shoulders)
 local SPUR_END = LOOP_S - HW - 110 -- the spur's rails and markings stop at the junction
+local DT = Config.West.IndexBase -- Downtown's first road index (its grid: DT .. DT + N)
+local HJ = CityLayout.HighwayJ
 
 local rng = Random.new(20261007)
 
@@ -336,10 +339,10 @@ local function solidLine(parent: Instance, a: Vector3, b: Vector3, width: number
 	end
 end
 
-local function buildRoadMarkings(parent: Instance)
-	local root = folder("Markings", parent)
+local function buildRoadMarkings(parent: Instance, ib: number)
+	local root = folder(if ib == 0 then "Markings" else "DowntownMarkings", parent)
 	-- segments between adjacent intersections
-	for i = 0, N do
+	for i = ib, ib + N do
 		for j = 0, N do
 			local a = CityLayout.intersectionPos(i, j)
 			local marks = lodGroup(root, `Cell_{i}_{j}`, a + Vector3.new(B / 4, 0, B / 4), 420)
@@ -446,7 +449,8 @@ local function trafficSignal(parent: Instance, i: number, j: number, k: number)
 	local right = dir:Cross(Vector3.yAxis)
 	local axis = if k % 2 == 1 then "X" else "Z"
 	-- (where the far side is the highway's mouth, the pole stands beyond the highway's edge)
-	local poleSide = if i == N and j == CityLayout.HighwayJ and k == 1 then HW + 8 else HALF_ROAD + 4
+	local mouth = j == HJ and ((i == N and k == 1) or (i == 0 and k == 3) or (i == DT + N and k == 1) or (i == DT and k == 3))
+	local poleSide = if mouth then HW + 8 else HALF_ROAD + 4
 	local poleBase = center + dir * (HALF_ROAD + 6) + right * poleSide + Vector3.new(0, CURB, 0)
 	local poleH = 21
 	-- base plinth, the pole and a cap
@@ -469,7 +473,7 @@ local function trafficSignal(parent: Instance, i: number, j: number, k: number)
 		signalHead(parent, CFrame.lookAt(headPos, headPos - dir), i, j, axis)
 	end
 	-- the cross street's name on the arm, near the pole
-	local crossName = if axis == "X" then NS_NAMES[i + 1] else EW_NAMES[j + 1]
+	local crossName = if i >= DT then (if axis == "X" then West.NS_NAMES[i - DT + 1] else West.EW_NAMES[j + 1]) elseif axis == "X" then NS_NAMES[i + 1] else EW_NAMES[j + 1]
 	local signPos = armStart - right * (armLen - 4) + Vector3.new(0, 1.6, 0)
 	local sign = deco(parent, Vector3.new(11, 2.2, 0.2), CFrame.lookAt(signPos, signPos - dir), Color3.fromRGB(14, 96, 52), Enum.Material.SmoothPlastic, { name = "StreetSign" })
 	surfaceText(sign, Enum.NormalId.Front, crossName or "", Color3.fromRGB(245, 245, 245), Color3.fromRGB(14, 96, 52), 0, Enum.Font.GothamBold, Vector2.new(550, 110))
@@ -925,10 +929,11 @@ end
 ---------------------------------------------------------------------
 -- City grid
 ---------------------------------------------------------------------
-local function buildBlocks(parent: Instance)
-	local blocks = folder("Blocks", parent)
+local function buildBlocks(parent: Instance, ib: number)
+	local blocks = folder(if ib == 0 then "Blocks" else "DowntownBlocks", parent)
 	local inner = B - C.RoadWidth
-	for bi = 0, N - 1 do
+	local downtown = ib ~= 0
+	for bi = ib, ib + N - 1 do
 		for bj = 0, N - 1 do
 			local cx = (CityLayout.roadCoord(bi) + CityLayout.roadCoord(bi + 1)) / 2
 			local cz = (CityLayout.roadCoord(bj) + CityLayout.roadCoord(bj + 1)) / 2
@@ -942,16 +947,22 @@ local function buildBlocks(parent: Instance)
 			end
 
 			local lot = inner - C.SidewalkWidth * 2
-			-- gameplay venues first (the bank), then the landmark towers
-			local landmark = Bank.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Towers.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
-			local isPark = not landmark and rng:NextNumber() < 0.12
+			-- gameplay venues first (the bank), then the landmark towers; Downtown: its sites (hotel,
+			-- casino, gem showcase), the Ocean Drive hotels and its own skyline
+			local landmark
+			if downtown then
+				landmark = West.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
+			else
+				landmark = Bank.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Towers.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
+			end
+			local isPark = not landmark and rng:NextNumber() < (if downtown then 0.06 else 0.12)
 			if landmark then
 				-- block is taken by a landmark tower
 			elseif isPark then
 				park(blockFolder, cx, cz, inner)
 			else
 				local cell = if rng:NextNumber() < 0.25 then lot else lot / 2
-				fillBuildings(blockFolder, cx - lot / 2, cz - lot / 2, cx + lot / 2, cz + lot / 2, downtownHeight, cell - 1)
+				fillBuildings(blockFolder, cx - lot / 2, cz - lot / 2, cx + lot / 2, cz + lot / 2, if downtown then West.height else downtownHeight, cell - 1)
 			end
 
 			-- street lights along each edge (arms reach over the road)
@@ -962,14 +973,18 @@ local function buildBlocks(parent: Instance)
 					streetLight(blockFolder, pos, edge)
 				end
 			end
-			CityPremium.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
+			if downtown then
+				West.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
+			else
+				CityPremium.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
+			end
 		end
 	end
 end
 
-local function buildSignals(parent: Instance)
-	local root = folder("TrafficLights", parent)
-	for i = 0, N do
+local function buildSignals(parent: Instance, ib: number)
+	local root = folder(if ib == 0 then "TrafficLights" else "DowntownLights", parent)
+	for i = ib, ib + N do
 		for j = 0, N do
 			local signals = lodGroup(root, `Signal_{i}_{j}`, CityLayout.intersectionPos(i, j), 520)
 			for k = 1, 4 do
@@ -978,7 +993,9 @@ local function buildSignals(parent: Instance)
 				local pi = i - math.round(dir.X)
 				local pj = j - math.round(dir.Z)
 				-- (and the highway's approach into the city's east edge)
-				if CityLayout.inGrid(pi, pj) or (i == N and j == CityLayout.HighwayJ and k == 3) then
+				-- (and the highways' and the causeway's approaches into the grids' edges)
+				local edge = j == HJ and ((i == N and k == 3) or (i == 0 and k == 1) or (i == DT + N and k == 3) or (i == DT and k == 1))
+				if CityLayout.inGrid(pi, pj) or edge then
 					trafficSignal(signals, i, j, k)
 				end
 			end
@@ -995,7 +1012,8 @@ local function buildRing(parent: Instance)
 	local regions: { { any } } = {
 		{ -E - RING, -E - RING, E + RING, -E, Vector3.new(0, 0, 1) }, -- north
 		{ -E - RING, E, E + RING, E + RING, Vector3.new(0, 0, -1) }, -- south
-		{ -E - RING, -E, -E, E, Vector3.new(1, 0, 0) }, -- west
+		{ -E - RING, -E, -E, -HW - 16, Vector3.new(1, 0, 0) }, -- west (north of the west highway)
+		{ -E - RING, HW + 16, -E, E, Vector3.new(1, 0, 0) }, -- west (south of the west highway)
 		{ E, -E, E + RING, -HW - 16, Vector3.new(-1, 0, 0) }, -- east (north of the highway)
 		{ E, HW + 16, E + RING, E, Vector3.new(-1, 0, 0) }, -- east (south of the highway)
 	}
@@ -1007,7 +1025,7 @@ local function buildRing(parent: Instance)
 	for s = -1, 1, 2 do
 		for t = -E + 60, E - 60, 150 do
 			streetLight(ring, Vector3.new(t, CURB, s * (E + 3)), Vector3.new(0, 0, -s))
-			if math.abs(t) > HW + 30 or s == -1 then
+			if math.abs(t) > HW + 30 then
 				streetLight(ring, Vector3.new(s * (E + 3), CURB, t), Vector3.new(-s, 0, 0))
 			end
 		end
@@ -1017,7 +1035,8 @@ local function buildRing(parent: Instance)
 	local wallParts = {
 		{ -o, -o - 2, o, -o + 2 },
 		{ -o, o - 2, o, o + 2 },
-		{ -o - 2, -o, -o + 2, o },
+		{ -o - 2, -o, -o + 2, -HW - 6 },
+		{ -o - 2, HW + 6, -o + 2, o },
 		{ o - 2, -o, o + 2, -HW - 6 },
 		{ o - 2, HW + 6, o + 2, o },
 	}
@@ -1374,6 +1393,18 @@ CityBuilder.kit = {
 	rng = rng,
 	building = building,
 	tree = tree,
+	park = park,
+	fillBuildings = fillBuildings,
+	streetLight = streetLight,
+	dashedLine = dashedLine,
+	solidLine = solidLine,
+	cityLegendsSign = cityLegendsSign,
+	ASPHALT = ASPHALT,
+	ROAD_MAT = ROAD_MAT,
+	ROAD_OPTS = ROAD_OPTS,
+	SIDEWALK = SIDEWALK,
+	LINE_WHITE = LINE_WHITE,
+	LINE_YELLOW = LINE_YELLOW,
 	facadeTier = facadeTier,
 	neonOutline = neonOutline,
 	spire = spire,
@@ -1407,13 +1438,16 @@ function CityBuilder.build(): Folder
 	local ground = folder("Ground", city)
 	slab(ground, -E - RING, -E - RING, E + RING, E + RING, 0, 4, ASPHALT, ROAD_MAT, table.clone(ROAD_OPTS))
 
-	buildRoadMarkings(city)
-	buildBlocks(city)
-	buildSignals(city)
+	for _, ib in CityLayout.GridBases do
+		buildRoadMarkings(city, ib)
+		buildBlocks(city, ib)
+		buildSignals(city, ib)
+	end
 	buildRing(city)
 	buildHighway(city)
 	CityPremium.environment(CityBuilder.kit, city)
 	Mainland.build(CityBuilder.kit, city)
+	West.build(CityBuilder.kit, city)
 
 	city.Parent = workspace
 	city:SetAttribute("Ready", true)

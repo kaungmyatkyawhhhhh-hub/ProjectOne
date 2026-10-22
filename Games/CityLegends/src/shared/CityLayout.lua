@@ -433,6 +433,311 @@ function CityLayout.addHighway(all: { Segment }, lanes: { Segment }, byKey: { [s
 	end
 end
 
+---------------------------------------------------------------------
+-- The west (Config.West, WestLayout): road heights and lanes
+---------------------------------------------------------------------
+local WEST = Config.West
+
+-- smooth ramp between two heights (no kink at either end)
+local function ramp(v: number, a: number, b: number, y0: number, y1: number): number
+	local t = math.clamp((v - a) / (b - a), 0, 1)
+	t = t * t * (3 - 2 * t)
+	return y0 + (y1 - y0) * t
+end
+
+-- the coastal highway's deck height at x (0 on the ground): up onto the viaduct over the harbour,
+-- the suburbs and the loop, down in the countryside, up over the river on the bridge, down into
+-- Downtown
+function CityLayout.westRoadY(x: number): number
+	if x > WEST.ViaductUp[1] then
+		return 0
+	elseif x > WEST.ViaductUp[2] then
+		return ramp(x, WEST.ViaductUp[1], WEST.ViaductUp[2], 0, WEST.ViaductY)
+	elseif x > WEST.ViaductDown[1] then
+		return WEST.ViaductY
+	elseif x > WEST.ViaductDown[2] then
+		return ramp(x, WEST.ViaductDown[1], WEST.ViaductDown[2], WEST.ViaductY, 0)
+	elseif x > WEST.BridgeUp[1] then
+		return 0
+	elseif x > WEST.BridgeUp[2] then
+		return ramp(x, WEST.BridgeUp[1], WEST.BridgeUp[2], 0, WEST.DeckY)
+	elseif x > WEST.BridgeDown[1] then
+		return WEST.DeckY
+	elseif x > WEST.BridgeDown[2] then
+		return ramp(x, WEST.BridgeDown[1], WEST.BridgeDown[2], WEST.DeckY, 0)
+	end
+	return 0
+end
+
+-- island roads over the sea (the causeway and the bridges between the islands), at distance d
+-- along a road of length len: up off the land at its start (landA long), level over the sea, down
+-- onto the land at its end (landB long)
+function CityLayout.seaRoadY(d: number, len: number, landA: number, landB: number): number
+	local y = WEST.CausewayY
+	if d < landA + 120 then
+		return ramp(d, landA - 40, landA + 120, 0, y)
+	elseif d > len - landB - 120 then
+		return ramp(d, len - landB - 120, len - landB + 40, y, 0)
+	end
+	return y
+end
+
+-- where two lanes' straight lines meet (a turn's control point); the middle if they're parallel
+local function cornerOf(a: Segment, b: Segment): Vector3
+	local pa, pb = a.p2, b.p0
+	local da = (a.p2 - a.p1)
+	local db = (b.p1 - b.p0)
+	da = Vector3.new(da.X, 0, da.Z)
+	db = Vector3.new(db.X, 0, db.Z)
+	if da.Magnitude < 1e-3 or db.Magnitude < 1e-3 then
+		return (pa + pb) / 2
+	end
+	da, db = da.Unit, db.Unit
+	local cross = da:Cross(db).Y
+	if math.abs(cross) < 1e-3 then
+		return (pa + pb) / 2
+	end
+	local t = (pb - pa):Cross(db).Y / cross
+	local c = pa + da * t
+	return Vector3.new(c.X, (pa.Y + pb.Y) / 2, c.Z)
+end
+
+-- one direction of a straight road from a to b (centre line, y from yAt(distance)), nL lanes to
+-- the right of travel; cut into short pieces where the height changes, long ones where it's
+-- level. Returns each lane's pieces, chained, in travel order.
+local function oneWay(all: { Segment }, lanes: { Segment }, a: Vector3, b: Vector3, nL: number, yAt: (number) -> number, code: number, speedK: number, endGap: number?): { { Segment } }
+	local flatDir = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+	local len = flatDir.Magnitude - (endGap or 0)
+	local dir = flatDir.Unit
+	local right = dir:Cross(Vector3.yAxis)
+	local STEP = 40
+	-- the cut distances
+	local cuts = { 0 }
+	local d = 0
+	while d < len do
+		local nd = math.min(d + STEP, len)
+		local level = math.abs(yAt(d) - yAt(nd)) < 1e-3 and math.abs(yAt((d + nd) / 2) - yAt(d)) < 1e-3
+		local last = cuts[#cuts]
+		-- merge level steps into the piece before (when that one is level too), up to 1200 long
+		if level and #cuts >= 2 and nd - cuts[#cuts - 1] <= 1200 and math.abs(yAt(cuts[#cuts - 1]) - yAt(last)) < 1e-3 and math.abs(yAt((cuts[#cuts - 1] + last) / 2) - yAt(last)) < 1e-3 then
+			cuts[#cuts] = nd
+		else
+			table.insert(cuts, nd)
+		end
+		d = nd
+	end
+	local out: { { Segment } } = {}
+	for l = 1, nL do
+		local off = right * (C.LaneWidth * (l - 0.5))
+		local chainL: { Segment } = {}
+		for k = 1, #cuts - 1 do
+			local d0, d1 = cuts[k], cuts[k + 1]
+			local function at(dd: number): Vector3
+				local p = a + dir * dd + off
+				return Vector3.new(p.X, yAt(dd), p.Z)
+			end
+			local seg = newSegment(all, at(d0), at((d0 + d1) / 2), at(d1), "lane")
+			seg.i, seg.j = -1, -1
+			seg.dir = code
+			seg.lane = l
+			seg.axis = if math.abs(dir.X) > 0.5 then "X" else "Z"
+			seg.speedK = speedK
+			table.insert(lanes, seg)
+			table.insert(chainL, seg)
+		end
+		chain(chainL)
+		out[l] = chainL
+	end
+	return out
+end
+
+-- an island's ring road, one lane each way, cut either side of each junction angle. Returns, per
+-- junction: the pieces leaving it and arriving at it in each direction.
+type RingJoin = { ccwOut: Segment, ccwIn: Segment, cwOut: Segment, cwIn: Segment }
+local function islandRing(all: { Segment }, lanes: { Segment }, center: Vector3, radius: number, joinsAt: { number }, gaps: { number }): { RingJoin }
+	local TAU = 2 * math.pi
+	local cuts: { number } = {}
+	local function near(a: number): boolean
+		for k, j in joinsAt do
+			local dd = (a - j) % TAU
+			dd = math.min(dd, TAU - dd)
+			if dd < gaps[k] + 0.05 then
+				return true
+			end
+		end
+		return false
+	end
+	for k = 0, 23 do
+		local a = k / 24 * TAU
+		if not near(a) then
+			table.insert(cuts, a)
+		end
+	end
+	for k, j in joinsAt do
+		table.insert(cuts, (j - gaps[k]) % TAU)
+		table.insert(cuts, (j + gaps[k]) % TAU)
+	end
+	table.sort(cuts)
+	local n = #cuts
+	local function piece(a0: number, a1: number, rr: number, way: number): Segment
+		-- a0 -> a1 going the `way` round (1 = increasing angle)
+		local span = if way == 1 then (a1 - a0) % TAU else -((a0 - a1) % TAU)
+		local function p(a: number): Vector3
+			return center + Vector3.new(math.cos(a), 0, math.sin(a)) * rr
+		end
+		local mid = a0 + span / 2
+		-- control point: where the end tangents meet (on the bisector, rr / cos(half span) out)
+		local c = center + Vector3.new(math.cos(mid), 0, math.sin(mid)) * (rr / math.cos(span / 2))
+		local seg = newSegment(all, p(a0), c, p(a0 + span), "hwy")
+		seg.i, seg.j = -1, -1
+		seg.dir = if way == 1 then 31 else 32
+		seg.lane = 1
+		seg.axis = "X"
+		seg.speedK = 0.75
+		table.insert(lanes, seg)
+		return seg
+	end
+	local ccw: { Segment } = {}
+	local cw: { Segment } = {}
+	local LW2 = C.LaneWidth / 2
+	for k = 1, n do
+		local a0, a1 = cuts[k], cuts[(k % n) + 1]
+		-- right of anticlockwise (increasing angle) travel is towards the centre
+		ccw[k] = piece(a0, a1, radius - LW2, 1)
+		cw[k] = piece(a1, a0, radius + LW2, -1)
+	end
+	for k = 1, n do
+		table.insert(ccw[k].next, ccw[(k % n) + 1])
+		table.insert(cw[(k % n) + 1].next, cw[k])
+	end
+	local function startsAt(list: { Segment }, a: number, rr: number): Segment
+		local target = center + Vector3.new(math.cos(a), 0, math.sin(a)) * rr
+		local best, bd = list[1], math.huge
+		for _, sg in list do
+			local dd = (sg.p0 - target).Magnitude
+			if dd < bd then
+				best, bd = sg, dd
+			end
+		end
+		return best
+	end
+	local function endsAt(list: { Segment }, a: number, rr: number): Segment
+		local target = center + Vector3.new(math.cos(a), 0, math.sin(a)) * rr
+		local best, bd = list[1], math.huge
+		for _, sg in list do
+			local dd = (sg.p2 - target).Magnitude
+			if dd < bd then
+				best, bd = sg, dd
+			end
+		end
+		return best
+	end
+	local out: { RingJoin } = {}
+	for k, j in joinsAt do
+		local g = gaps[k]
+		out[k] = {
+			ccwOut = startsAt(ccw, j + g, radius - LW2),
+			ccwIn = endsAt(ccw, j - g, radius - LW2),
+			cwOut = startsAt(cw, j - g, radius + LW2),
+			cwIn = endsAt(cw, j + g, radius + LW2),
+		}
+	end
+	return out
+end
+
+-- a spur's lanes meeting a ring road at a junction: in -> both ways round, both ways round -> out
+local function joinRing(all: { Segment }, join: RingJoin, spurIn: { { Segment } }, spurOut: { { Segment } })
+	local nL = #spurIn
+	local inR, inL = spurIn[nL][#spurIn[nL]], spurIn[1][#spurIn[1]]
+	connector(all, inR, join.cwOut, cornerOf(inR, join.cwOut), 18).speedK = 1
+	connector(all, inL, join.ccwOut, cornerOf(inL, join.ccwOut), 18).speedK = 1
+	local outR, outL = spurOut[#spurOut][1], spurOut[1][1]
+	connector(all, join.cwIn, outR, cornerOf(join.cwIn, outR), 18).speedK = 1
+	connector(all, join.ccwIn, outL, cornerOf(join.ccwIn, outL), 18).speedK = 1
+end
+
+-- The west's lanes (owner, 2026-10-22): the coastal highway from the city's west edge to
+-- Downtown's east edge (two lanes each way, joining both grids' lights), the causeway from Ocean
+-- Drive to Legends Key, the islands' ring roads and the bridges between them
+function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [string]: Segment })
+	local j = CityLayout.HighwayJ
+	local nL = C.LanesPerSide
+	local gap = CityLayout.StopLineGap
+	local cityEdge = Vector3.new(CityLayout.roadCoord(0) - HALF_ROAD, 0, CityLayout.roadCoord(j))
+	local dtE = DT_BASE + N
+	local dtEdge = Vector3.new(CityLayout.roadCoord(dtE) + HALF_ROAD, 0, CityLayout.roadCoord(j))
+	local function hwyY(xStart: number, sign: number): (number) -> number
+		return function(d: number): number
+			return CityLayout.westRoadY(xStart + sign * d)
+		end
+	end
+	-- westbound, city -> Downtown
+	local west = oneWay(all, lanes, cityEdge, dtEdge, nL, hwyY(cityEdge.X, -1), 15, C.HighwaySpeedK, gap)
+	-- eastbound, Downtown -> city
+	local east = oneWay(all, lanes, dtEdge, cityEdge, nL, hwyY(dtEdge.X, 1), 16, C.HighwaySpeedK, gap)
+	for l = 1, nL do
+		byKey[`0,{j},3,{l}`] = west[l][1]
+		local wl = west[l][#west[l]]
+		wl.i, wl.j, wl.dir, wl.signal = dtE, j, 3, true
+		byKey[`{dtE},{j},1,{l}`] = east[l][1]
+		local el = east[l][#east[l]]
+		el.i, el.j, el.dir, el.signal = 0, j, 1, true
+	end
+
+	-- the causeway, Ocean Drive -> Legends Key (and back)
+	local islands = WEST.Islands
+	local key = islands[1]
+	local road = WEST.IslandRoad
+	local beachEdge = Vector3.new(CityLayout.roadCoord(DT_BASE) - HALF_ROAD, 0, CityLayout.roadCoord(j))
+	local keyEnd = Vector3.new(key.x + key.ring + road / 2, 0, CityLayout.roadCoord(j))
+	local cLen = beachEdge.X - keyEnd.X
+	local seaA = beachEdge.X - WEST.BeachWest -- the beach, then the sea
+	local seaB = (key.x + key.r) - keyEnd.X -- the island's shore to the ring road
+	local cwW = oneWay(all, lanes, beachEdge, keyEnd, nL, function(d)
+		return CityLayout.seaRoadY(d, cLen, seaA, seaB)
+	end, 21, 1.1)
+	local cwE = oneWay(all, lanes, keyEnd, beachEdge, nL, function(d)
+		return CityLayout.seaRoadY(d, cLen, seaB, seaA)
+	end, 22, 1.1, gap)
+	for l = 1, nL do
+		byKey[`{DT_BASE},{j},3,{l}`] = cwW[l][1]
+		local last = cwE[l][#cwE[l]]
+		last.i, last.j, last.dir, last.signal = DT_BASE, j, 1, true
+	end
+
+	-- the islands' ring roads; Legends Key joins the causeway (east) and the two bridges
+	local keyC = Vector3.new(key.x, 0, key.z)
+	local keyJoins, keyGaps = { 0 }, { (HALF_ROAD + 12) / key.ring }
+	local bridgeIdx = {}
+	for k = 2, #islands do
+		local isl = islands[k]
+		table.insert(keyJoins, if isl.z < key.z then -math.pi / 2 else math.pi / 2)
+		table.insert(keyGaps, (C.LaneWidth + 14) / key.ring)
+		bridgeIdx[k] = #keyJoins
+	end
+	local keyRing = islandRing(all, lanes, keyC, key.ring, keyJoins, keyGaps)
+	joinRing(all, keyRing[1], cwW, cwE)
+	for k = 2, #islands do
+		local isl = islands[k]
+		local sgn = if isl.z < key.z then -1 else 1
+		local c = Vector3.new(isl.x, 0, isl.z)
+		local ring = islandRing(all, lanes, c, isl.ring, { -sgn * math.pi / 2 }, { (C.LaneWidth + 14) / isl.ring })
+		local a = keyC + Vector3.new(0, 0, sgn * (key.ring + road / 2))
+		local b = c - Vector3.new(0, 0, sgn * (isl.ring + road / 2))
+		local len = math.abs(b.Z - a.Z)
+		local landA = key.r - key.ring - road / 2
+		local landB = isl.r - isl.ring - road / 2
+		local out = oneWay(all, lanes, a, b, 1, function(d)
+			return CityLayout.seaRoadY(d, len, landA, landB)
+		end, 23, 0.9)
+		local back = oneWay(all, lanes, b, a, 1, function(d)
+			return CityLayout.seaRoadY(d, len, landB, landA)
+		end, 24, 0.9)
+		joinRing(all, keyRing[bridgeIdx[k]], back, out)
+		joinRing(all, ring[1], out, back)
+	end
+end
+
 local cachedGraph: { lanes: { Segment }, all: { Segment } }? = nil
 
 function CityLayout.buildGraph(): { lanes: { Segment }, all: { Segment } }
@@ -444,28 +749,30 @@ function CityLayout.buildGraph(): { lanes: { Segment }, all: { Segment } }
 	local byKey: { [string]: Segment } = {}
 	local lanesPerSide = C.LanesPerSide
 
-	-- straight lane segments between intersections
-	for i = 0, N do
-		for j = 0, N do
-			local a = CityLayout.intersectionPos(i, j)
-			for k = 1, 4 do
-				local ni, nj = i + DI[k][1], j + DI[k][2]
-				if CityLayout.inGrid(ni, nj) then
-					local dir = CityLayout.Dirs[k]
-					local right = dir:Cross(Vector3.yAxis)
-					local b = CityLayout.intersectionPos(ni, nj)
-					for l = 1, lanesPerSide do
-						local off = right * CityLayout.laneOffset(l)
-						local p0 = a + dir * HALF_ROAD + off
-						local p2 = b - dir * (HALF_ROAD + CityLayout.StopLineGap) + off
-						local seg = newSegment(all, p0, (p0 + p2) / 2, p2, "lane")
-						seg.i, seg.j = ni, nj
-						seg.dir = k
-						seg.lane = l
-						seg.axis = if k % 2 == 1 then "X" else "Z"
-						seg.signal = true
-						byKey[`{i},{j},{k},{l}`] = seg
-						table.insert(lanes, seg)
+	-- straight lane segments between intersections (the city's grid and Downtown's)
+	for _, ib in CityLayout.GridBases do
+		for i = ib, ib + N do
+			for j = 0, N do
+				local a = CityLayout.intersectionPos(i, j)
+				for k = 1, 4 do
+					local ni, nj = i + DI[k][1], j + DI[k][2]
+					if CityLayout.inGrid(ni, nj) then
+						local dir = CityLayout.Dirs[k]
+						local right = dir:Cross(Vector3.yAxis)
+						local b = CityLayout.intersectionPos(ni, nj)
+						for l = 1, lanesPerSide do
+							local off = right * CityLayout.laneOffset(l)
+							local p0 = a + dir * HALF_ROAD + off
+							local p2 = b - dir * (HALF_ROAD + CityLayout.StopLineGap) + off
+							local seg = newSegment(all, p0, (p0 + p2) / 2, p2, "lane")
+							seg.i, seg.j = ni, nj
+							seg.dir = k
+							seg.lane = l
+							seg.axis = if k % 2 == 1 then "X" else "Z"
+							seg.signal = true
+							byKey[`{i},{j},{k},{l}`] = seg
+							table.insert(lanes, seg)
+						end
 					end
 				end
 			end
@@ -474,6 +781,8 @@ function CityLayout.buildGraph(): { lanes: { Segment }, all: { Segment } }
 
 	-- the highway: the spur from the city's east edge to the loop, and the loop itself
 	CityLayout.addHighway(all, lanes, byKey)
+	-- the west: the coastal highway to Downtown, the causeway and the islands
+	CityLayout.addWest(all, lanes, byKey)
 
 	-- connectors through each intersection
 	for _, seg in lanes do
@@ -524,7 +833,7 @@ end
 function CityLayout.nearestLaneCFrame(pos: Vector3): CFrame
 	local graph = CityLayout.buildGraph()
 	local best, bestDist = nil, math.huge
-	local flat = Vector3.new(pos.X, 0, pos.Z)
+	local flat = pos - Vector3.new(0, 2, 0) -- (a car's middle sits about 2 above its lane)
 	for _, seg in graph.lanes do
 		if seg.kind == "lane" then
 			local ab = seg.p2 - seg.p0

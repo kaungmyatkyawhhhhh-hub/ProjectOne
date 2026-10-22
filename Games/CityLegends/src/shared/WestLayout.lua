@@ -78,33 +78,8 @@ function WestLayout.inWest(p: Vector3): boolean
 	return p.X < W.Canyon[1] and math.abs(p.Z) < W.HalfZ
 end
 
--- the road's deck height along the west road (0 on the ground)
-function WestLayout.roadY(x: number): number
-	local function ramp(a: number, b: number, y0: number, y1: number): number
-		local t = math.clamp((x - a) / (b - a), 0, 1)
-		-- smoothstep: no kink at either end
-		t = t * t * (3 - 2 * t)
-		return y0 + (y1 - y0) * t
-	end
-	if x > W.ViaductUp[1] then
-		return 0
-	elseif x > W.ViaductUp[2] then
-		return ramp(W.ViaductUp[1], W.ViaductUp[2], 0, W.ViaductY)
-	elseif x > W.ViaductDown[1] then
-		return W.ViaductY
-	elseif x > W.ViaductDown[2] then
-		return ramp(W.ViaductDown[1], W.ViaductDown[2], W.ViaductY, 0)
-	elseif x > W.BridgeUp[1] then
-		return 0
-	elseif x > W.BridgeUp[2] then
-		return ramp(W.BridgeUp[1], W.BridgeUp[2], 0, W.DeckY)
-	elseif x > W.BridgeDown[1] then
-		return W.DeckY
-	elseif x > W.BridgeDown[2] then
-		return ramp(W.BridgeDown[1], W.BridgeDown[2], W.DeckY, 0)
-	end
-	return 0
-end
+-- the coastal highway's deck height at x (0 on the ground)
+WestLayout.roadY = CityLayout.westRoadY
 
 ---------------------------------------------------------------------
 -- Islands: ring roads, the causeway and the bridges between them, and house plots
