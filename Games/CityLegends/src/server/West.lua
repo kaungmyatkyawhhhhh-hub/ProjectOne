@@ -30,7 +30,6 @@ local West = {}
 
 local C = Config.City
 local W = Config.West
-local N = C.Blocks
 local DT = W.IndexBase
 local HW = C.HighwayWidth / 2
 local DECK_W = C.HighwayWidth + 12
@@ -232,13 +231,21 @@ local function artDeco(kit: any, parent: Instance, cf: CFrame, w: number, d: num
 	return model
 end
 
--- the hotel / casino / gem showcase sites stay bare (their own modules build there); the Ocean
--- Drive row gets art deco hotels in front and glass condo towers behind
-function West.block(kit: any, parent: Instance, bi: number, bj: number, cx: number, cz: number, lot: number): boolean
+-- one of Downtown's venue sites (hotel, casino, gem showcase)?
+function West.isSite(bi: number, bj: number): boolean
 	for _, s in W.Sites do
 		if s[1] == bi and s[2] == bj then
 			return true
 		end
+	end
+	return false
+end
+
+-- the hotel / casino / gem showcase sites stay bare (their own modules build there); the Ocean
+-- Drive row gets art deco hotels in front and glass condo towers behind
+function West.block(kit: any, parent: Instance, bi: number, bj: number, cx: number, cz: number, lot: number): boolean
+	if West.isSite(bi, bj) then
+		return true
 	end
 	if bi == DT then
 		-- three hotels along the lot's west edge, facing Ocean Drive (-X)

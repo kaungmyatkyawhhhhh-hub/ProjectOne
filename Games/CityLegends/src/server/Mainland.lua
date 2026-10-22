@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local WestLayout = require(Shared:WaitForChild("WestLayout"))
 
 local Mainland = {}
 
@@ -159,7 +160,10 @@ local function suburbs(kit: any, parent: Instance)
 			local x = 20
 			while x < len - 20 do
 				local p = a:Lerp(b, x / len) + sd.n * 34
-				house(kit, group, Vector3.new(p.X, -0.3, p.Z), -sd.n)
+				-- (not under the coastal highway's viaduct)
+				if not WestLayout.inCorridor(p, 30) then
+					house(kit, group, Vector3.new(p.X, -0.3, p.Z), -sd.n)
+				end
 				x += kit.rng:NextNumber(38, 48)
 			end
 			-- lamps along the street
@@ -239,7 +243,7 @@ local function outer(kit: any, parent: Instance)
 		local sd = SIDES[rng:NextInteger(1, 4)]
 		local r = rng:NextNumber(160, 300)
 		local p = sd.n * rng:NextNumber(LOOP_OUT + r + 40, OUT + 200) + sd.t * rng:NextNumber(-OUT + 200, OUT - 200)
-		if nearLoop(p, r + 30) then
+		if nearLoop(p, r + 30) or WestLayout.inCorridor(p, r + 40) then
 			continue
 		end
 		kit.mk(root, Vector3.new(r * 2, rng:NextNumber(50, 120), r * 2), CFrame.new(p.X, -10, p.Z), GRASS:Lerp(Color3.fromRGB(30, 44, 28), rng:NextNumber()), Enum.Material.Grass, { shape = Enum.PartType.Ball, name = "Hill" })
@@ -251,7 +255,7 @@ local function outer(kit: any, parent: Instance)
 		local group = kit.lodGroup(root, `Forest_{c}`, center, 1100)
 		for _ = 1, rng:NextInteger(14, 26) do
 			local p = center + Vector3.new(rng:NextNumber(-90, 90), 0, rng:NextNumber(-90, 90))
-			if math.max(math.abs(p.X), math.abs(p.Z)) > LOOP_OUT + 30 and not nearLoop(p, 30) then
+			if math.max(math.abs(p.X), math.abs(p.Z)) > LOOP_OUT + 30 and not nearLoop(p, 30) and not WestLayout.inCorridor(p, 40) then
 				-- a conifer: trunk and two cones (wedge-less: stacked shrinking blocks read as a fir at night)
 				local h = rng:NextNumber(26, 44)
 				kit.deco(group, Vector3.new(1.4, h * 0.3, 1.4), CFrame.new(p + Vector3.new(0, h * 0.15, 0)), Color3.fromRGB(46, 34, 26), Enum.Material.Wood)
@@ -266,6 +270,9 @@ local function outer(kit: any, parent: Instance)
 	for k = 1, 16 do
 		local sd = SIDES[(k % 4) + 1]
 		local p = sd.n * (OUT - 300 + rng:NextNumber(-80, 80)) + sd.t * rng:NextNumber(-OUT + 400, OUT - 400)
+		if WestLayout.inCorridor(p, 120) then
+			continue
+		end
 		local h = 150
 		kit.mk(root, Vector3.new(h, 6, 6), CFrame.new(p + Vector3.new(0, h / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(196, 198, 202), Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder, name = "Turbine" })
 		local hub = p + Vector3.new(0, h + 2, 0) - sd.n * 6
@@ -283,6 +290,9 @@ local function outer(kit: any, parent: Instance)
 	for k = 1, 4 do
 		local sd = SIDES[k]
 		local p = sd.n * (OUT - 160) + sd.t * rng:NextNumber(-1500, 1500)
+		if WestLayout.inCorridor(p, 120) then
+			p += sd.t * 600
+		end
 		kit.mk(root, Vector3.new(4, 260, 4), CFrame.new(p + Vector3.new(0, 130, 0)), Color3.fromRGB(150, 60, 50), Enum.Material.Metal, { name = "Mast" })
 		for y = 60, 260, 100 do
 			local l = kit.deco(root, Vector3.one * 2.4, CFrame.new(p + Vector3.new(0, y, 0)), Color3.fromRGB(255, 25, 25), Enum.Material.Neon, { shape = Enum.PartType.Ball })
@@ -297,6 +307,10 @@ local function outer(kit: any, parent: Instance)
 				local p = sd.n * (OUT + 260 + row * 330 + rng:NextNumber(-60, 60)) + sd.t * t
 				local hgt = rng:NextNumber(220, 420) * (1 + row * 0.6)
 				local w = rng:NextNumber(420, 700)
+				-- the coastal highway's canyon cuts through the west range (West builds its walls)
+				if sd.n.X < -0.5 and math.abs(t) < Config.West.CorridorHalf + w / 2 + 60 then
+					continue
+				end
 				local d = hgt * rng:NextNumber(1.1, 1.6)
 				local cf = CFrame.lookAt(Vector3.new(p.X, hgt / 2 - 30, p.Z), Vector3.new(p.X, hgt / 2 - 30, p.Z) - sd.n) * CFrame.Angles(0, rng:NextNumber(-0.25, 0.25), 0)
 				local rock = Color3.fromRGB(20, 22, 26):Lerp(Color3.fromRGB(34, 34, 40), rng:NextNumber())
@@ -311,7 +325,8 @@ local function outer(kit: any, parent: Instance)
 	end
 	-- invisible walls round the outside of the land (nobody drives off the world)
 	local o = OUT + 20
-	for _, wpart in { { -o, -o - 2, o, -o + 2 }, { -o, o - 2, o, o + 2 }, { -o - 2, -o, -o + 2, o }, { o - 2, -o, o + 2, o } } do
+	local gap = Config.West.CorridorHalf -- the coastal highway leaves to the west here
+	for _, wpart in { { -o, -o - 2, o, -o + 2 }, { -o, o - 2, o, o + 2 }, { -o - 2, -o, -o + 2, -gap }, { -o - 2, gap, -o + 2, o }, { o - 2, -o, o + 2, o } } do
 		kit.slab(root, wpart[1], wpart[2], wpart[3], wpart[4], 400, 400, Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Boundary" })
 	end
 end
@@ -330,7 +345,7 @@ local function billboards(kit: any, parent: Instance)
 		local sgn = if k % 2 == 0 then 1 else -1
 		local p, dir = CityLayout.loopSample(s, sgn * (HW + 40))
 		-- (not at the spur's junction)
-		if not (p.X > LOOP_S - 200 and math.abs(p.Z) < 300) then
+		if not (p.X > LOOP_S - 200 and math.abs(p.Z) < 300) and not WestLayout.inCorridor(p, 160) then
 			local group = kit.lodGroup(root, `Board_{k}`, p, 1400)
 			local face = if sgn > 0 then -dir else dir -- towards the traffic coming at it on that side
 			local cf = CFrame.lookAt(p + Vector3.new(0, 34, 0), p + Vector3.new(0, 34, 0) + face)

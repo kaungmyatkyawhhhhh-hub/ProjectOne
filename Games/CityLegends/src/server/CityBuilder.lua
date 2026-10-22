@@ -23,6 +23,10 @@ local Mainland = require(script.Parent:WaitForChild("Mainland"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
 local Towers = require(script.Parent:WaitForChild("Towers"))
 local West = require(script.Parent:WaitForChild("West"))
+local Hotel = require(script.Parent:WaitForChild("Hotel"))
+local Casino = require(script.Parent:WaitForChild("Casino"))
+local GemShowcase = require(script.Parent:WaitForChild("GemShowcase"))
+local Houses = require(script.Parent:WaitForChild("Houses"))
 
 local CityBuilder = {}
 
@@ -965,15 +969,20 @@ local function buildBlocks(parent: Instance, ib: number)
 				fillBuildings(blockFolder, cx - lot / 2, cz - lot / 2, cx + lot / 2, cz + lot / 2, if downtown then West.height else downtownHeight, cell - 1)
 			end
 
+			-- (Downtown's venue sites light their own fronts and driveways)
+			local site = downtown and West.isSite(bi, bj)
 			-- street lights along each edge (arms reach over the road)
-			for _, edge in { Vector3.new(1, 0, 0), Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1), Vector3.new(0, 0, -1) } do
+			local edges: { Vector3 } = if site then {} else { Vector3.new(1, 0, 0), Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1), Vector3.new(0, 0, -1) }
+			for _, edge in edges do
 				local tangent = edge:Cross(Vector3.yAxis)
 				for _, t in { -0.25, 0.25 } do
 					local pos = Vector3.new(cx, CURB, cz) + edge * (inner / 2 - 2) + tangent * (inner * t)
 					streetLight(blockFolder, pos, edge)
 				end
 			end
-			if downtown then
+			if site then
+				-- nothing: the venue builds its own plaza
+			elseif downtown then
 				West.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
 			else
 				CityPremium.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
@@ -1448,6 +1457,11 @@ function CityBuilder.build(): Folder
 	CityPremium.environment(CityBuilder.kit, city)
 	Mainland.build(CityBuilder.kit, city)
 	West.build(CityBuilder.kit, city)
+	-- the venues on Downtown's sites and the houses on the islands' plots
+	Hotel.buildWorld(CityBuilder.kit, city)
+	Casino.buildWorld(CityBuilder.kit, city)
+	GemShowcase.buildWorld(CityBuilder.kit, city)
+	Houses.buildWorld(CityBuilder.kit, city)
 
 	city.Parent = workspace
 	city:SetAttribute("Ready", true)

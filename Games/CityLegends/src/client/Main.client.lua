@@ -66,6 +66,7 @@ if city then
 end
 WorldFx.start()
 Weather.init() -- rain cycle (starts raining), wet roads, mist, rain sound
+require(script.Parent:WaitForChild("DayCycle")).start() -- morning, day, sunset, night
 
 ---------------------------------------------------------------------
 -- Data

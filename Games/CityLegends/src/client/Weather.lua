@@ -316,6 +316,21 @@ end
 ---------------------------------------------------------------------
 -- Public API
 ---------------------------------------------------------------------
+-- the clear-weather light the rain mood starts from (DayCycle moves it through the day)
+function Weather.setBaseLighting(t: { density: number, haze: number, atmoColor: Color3, decay: Color3, exposure: number, outdoor: Color3 })
+	local b = base
+	if not b then
+		return
+	end
+	b.density = t.density
+	b.haze = t.haze
+	b.atmoColor = t.atmoColor
+	b.decay = t.decay
+	b.exposure = t.exposure
+	b.outdoor = t.outdoor
+	applyMood(if wet then wet.Value else 0)
+end
+
 function Weather.isRaining(): boolean
 	return raining
 end

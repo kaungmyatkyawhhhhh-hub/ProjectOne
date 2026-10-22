@@ -609,4 +609,14 @@ Config.Luxe = {
 	},
 }
 
+---------------------------------------------------------------------
+-- Time of day (owner, 2026-10-22: "morning, evening, sunset and night"): one full day takes
+-- CycleMinutes of real time, the same hour for everyone (from the server's clock)
+---------------------------------------------------------------------
+Config.DayCycle = {
+	Enabled = true,
+	CycleMinutes = 24, -- one game hour a minute
+	StartHour = 20, -- where the clock stands at server time 0 (shifts the whole cycle)
+}
+
 return Config

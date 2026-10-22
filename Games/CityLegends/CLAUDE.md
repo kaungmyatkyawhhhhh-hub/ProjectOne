@@ -20,7 +20,9 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `Cars`: the roster of 79 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`; series (`Cars.Series`), market-only from $600k (`Cars.MarketFromPrice`), 5 levels per step in a series, and trims on another car's model (`Model` field, `Cars.modelOf`).
   - `CarBuilder`: part-built car, physics hitbox, interior, driver arms. `getDims(class, id)` gives per-car proportions through `DIM_OVERRIDES`.
   - `CarMesh`: procedural lofted car meshes, with a `DESIGNS` table per car.
-  - `CityLayout`: grid maths, traffic-light phases, the Legends Loop's shape (`loopSample`) and the lane graph NPC traffic drives (city lanes plus the highway: `addHighway`).
+  - `CityLayout`: grid maths (the city's roads i = 0..6, Downtown's i = 100..106 along x), traffic-light phases, the Legends Loop's shape (`loopSample`) and the lane graph NPC traffic drives (city and Downtown lanes, the highway and loop: `addHighway`, the west: `addWest`; heights from `westRoadY` / `seaRoadY`).
+  - `WestLayout`: where things are in the west (Config.West): venue sites, house plots, chauffeur places, the corridor test.
+  - `ChauffeurRoute`, `Flex` (wearables).
   - `FacadeTex`.
 - `src/server`:
   - `Main.server.lua`: remotes, car spawn, cash / XP / cut-up validation, daily gift, console cash hook.
@@ -29,6 +31,8 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `CityPremium`: landmarks, streetscape, harbour water, distant skyline, monorail.
   - `OnFoot` (getting out and walking), `Police` (wanted level, speed cameras), `Bank` (the robbery), `Towers` (penthouses), `Market` (car stock market), `Activities` (races, jobs, chips).
   - `Mainland`: the land round the harbour: shore, suburbs, container port, forest, hills, wind turbines, mountain range, loop billboards.
+  - `West`: the coastal highway (viaduct), canyon, river and Legends Bridge, Downtown's surroundings, Ocean Drive and the beach, the causeway and islands; hooks CityBuilder calls for Downtown's blocks.
+  - `Hotel`, `Casino`, `GemShowcase` (+ `Luxe`), `Houses`, `Chauffeur`: the west's venues, built by `buildWorld` from CityBuilder.
 - `src/client`:
   - `Main.client.lua`: startup order.
   - `UI`: HUD, garage, menus.
@@ -37,7 +41,9 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `Traffic`: NPC cars that obey red lights.
   - `Weather`: rain cycle, wet roads.
   - `Audio`, `Cutscene`, `WorldFx`, `BuildingSkin`.
+- Client extras: `DayCycle` (time of day), `Pedestrians`, `HouseClient`, `HotelClient`, `ChauffeurClient`, `LuxeClient`.
 - `tools/`:
+  - Lune tests (run from `Games/CityLegends`, `lune run tools/<name>.luau .`): `world_test` (builds the whole map in Lune: no script errors, road under every lane, nothing solid in a lane; Lune's `CFrame.lookAt` is wrong for sloped directions, so the test passes the builders a fixed one), `graph_test`, `chauffeur_test`, `luxe_test`, `market_test`.
   - `export_models.luau` (run with Lune) plus `make_glb.py`: export every car as a `.glb` for Studio's 3D Importer into `build/models` (gitignored).
   - `shrink_model.py`: makes a downloaded model (Sketchfab `.glb`, `.fbx`, `.obj`) fit Studio's 3D Importer. Each mesh gets at most 18,000 triangles, textures at most 1024 px, and the result is one `.fbx` with the textures inside. Run it with Blender's Python module: `pip install bpy` in a venv, then `python tools/shrink_model.py imports/car.glb`. The owner sends models by pushing them into `Games/CityLegends/imports` (GitHub takes files under 100 MB).
   - `convert_car.py` plus a layout file in `tools/cars/*.json`: the full conversion of a downloaded car for the game.

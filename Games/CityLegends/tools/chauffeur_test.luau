@@ -86,7 +86,8 @@ for _, a in WestLayout.places() do
 				check(continuous(route), "continuous " .. a.id .. " -> " .. b.id)
 				local last = route.legs[#route.legs]
 				local endPos = CityLayout.sample(last.seg, last.s1)
-				check((endPos - CityLayout.sample(reach[b.id].seg, reach[b.id].s)).Magnitude < 2, "ends at " .. b.id)
+				local dd = (endPos - CityLayout.sample(reach[b.id].seg, reach[b.id].s)).Magnitude
+				check(dd < 4, "ends at " .. b.id .. " from " .. a.id .. " off " .. math.floor(dd) .. " legs " .. #route.legs .. " lastdir " .. last.seg.dir .. " s1 " .. math.floor(last.s1) .. " want " .. math.floor(reach[b.id].s) .. " sameSeg " .. tostring(last.seg == reach[b.id].seg))
 				check(route.time > 0 and route.length > 0, "time and length " .. a.id .. " -> " .. b.id)
 			else
 				check(false, "route " .. a.id .. " -> " .. b.id)

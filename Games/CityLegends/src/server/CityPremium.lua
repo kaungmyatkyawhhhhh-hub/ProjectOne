@@ -17,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local WestLayout = require(Shared:WaitForChild("WestLayout"))
 
 local CityPremium = {}
 
@@ -382,6 +383,10 @@ local function distantSkyline(kit: any, parent: Instance)
 			local h = rng:NextNumber(60, 320)
 			local w = rng:NextNumber(50, 110)
 			local p = n * dist + t * along
+			-- (clear of the coastal highway's viaduct on the west side)
+			if WestLayout.inCorridor(p, 80) then
+				continue
+			end
 			kit.deco(folder, Vector3.new(w, h, w), CFrame.new(p.X, h / 2 - 2, p.Z), Color3.fromRGB(12, 14, 20), Enum.Material.SmoothPlastic)
 			for _ = 1, rng:NextInteger(2, 4) do
 				local y = rng:NextNumber(10, h - 6)
@@ -430,7 +435,7 @@ local function monorailTrack(kit: any, parent: Instance)
 		-- pillars on the straights, never on a road or the highway
 		if k % 2 == 0 then
 			local onCorner = math.abs(a.X) > cornerStart - 1 and math.abs(a.Z) > cornerStart - 1
-			local overHighway = a.X > cornerStart and math.abs(a.Z) < HW + 20
+			local overHighway = math.abs(a.X) > cornerStart and math.abs(a.Z) < HW + 20 -- (east and west)
 			if not onCorner and not overHighway then
 				local ph = a.Y - 1.3 - CURB
 				kit.mk(folder, Vector3.new(ph, 3.6, 3.6), CFrame.new(a.X, CURB + ph / 2, a.Z) * CFrame.Angles(0, 0, math.pi / 2), concrete, Enum.Material.Concrete, { shape = Enum.PartType.Cylinder })
