@@ -26,7 +26,7 @@ Prompt: [[2026-10-23 GYM ARC Prompt - 48 Evolution names and server messages]]. 
   - The Server Boost purchase toast to everyone ("Rong: 2x gains for 15 minutes"). Only the buyer is thanked now; everyone still sees the boost in their boosts row.
   - The posing show's "X won the Y division!" toast to everyone. Placed players still get their own reward popup; confetti at the stage stays.
 - **Not found (nothing to remove):** alters, growth spurts and titles had no server-wide messages.
-- **Left as they are (game events, not news about a player):** the alter flash for players standing nearby (a visual, no text), rush hour notices, the visiting legend NPC notices, the "server is updating" notice, crew messages (only to that crew) and high fives (only the other player). Tell me if any of these should go too.
+- **Left as they are (game events, not news about a player):** the alter flash for players standing nearby (a visual, no text), rush hour notices, the visiting legend NPC notices, the "server is updating" notice, crew messages (only to that crew) and high fives (only the other player). Owner: keep these; nothing else server-wide.
 
 ## Tested (Studio, temporary save, solo)
 - A BASE Coach Sam: "EVOLVE > IRON-BORN · LV 1" in orange; Atlas LIMITLESS: "MAX STAGE"; the chart with all real names; an evolve stamped "IRON-BORN!".
@@ -41,5 +41,6 @@ Prompt: [[2026-10-23 GYM ARC Prompt - 48 Evolution names and server messages]]. 
 ![[GYM ARC/Screenshots/prompt48/banner_eternal.jpg]]
 ![[GYM ARC/Screenshots/prompt48/banner_secret.jpg]]
 
-## Note
-- The banner shows the trainer's real name ("ROLLED ATLAS!"), as in your example, even to players who don't own him yet. Before, a hidden trainer's name was "???" for them.
+## Owner decisions (22 Oct)
+- The banner shows the trainer's real name ("ROLLED ATLAS!") to everyone, even players who don't own him yet. In their own Agency grid he stays a silhouette until they own him (already so).
+- Keep rush hour, the visiting legend, "server updating" and the nearby Body Alter flash. Nothing else goes server-wide.

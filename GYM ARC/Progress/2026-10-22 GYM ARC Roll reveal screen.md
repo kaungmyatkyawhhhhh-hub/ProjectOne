@@ -41,7 +41,7 @@ Prompt: [[2026-10-23 GYM ARC Prompt - 49 Roll reveal screen]]. It replaces the 2
 - Auto Roll: Commons snap in and close by themselves until the coins run out; with an Epic forced, the full reveal plays and Auto turns OFF.
 - An X3 of three Mythic+ cards at 667x375.
 - No errors.
-- No video clip: the Studio tools here only take screenshots. The Legendary sequence is in screenshots 05-07.
+- No video clip (owner: screenshots are fine). The Legendary sequence is in screenshots 05-07.
 
 ![[GYM ARC/Screenshots/prompt49/01_common_orb.jpg]]
 ![[GYM ARC/Screenshots/prompt49/02_common_final_bar.jpg]]
@@ -59,4 +59,4 @@ Prompt: [[2026-10-23 GYM ARC Prompt - 49 Roll reveal screen]]. It replaces the 2
 ![[GYM ARC/Screenshots/prompt49/14_x3_mythic_plus_667.jpg]]
 
 ## Please check by ear
-- I can't hear the sounds from here. Everything is built from sounds already in the game, pitched and layered. Tell me if any tone is off.
+- I can't hear the sounds from here. Everything is built from sounds already in the game, pitched and layered. Owner will listen and say what to change (all volumes and pitches are in `Config/RollReveal`).
