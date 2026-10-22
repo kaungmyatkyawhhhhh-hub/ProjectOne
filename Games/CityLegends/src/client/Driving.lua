@@ -675,7 +675,7 @@ local function carKey(s: State, key: Enum.KeyCode)
 				s.cranking = 0.3 -- an electric car is just ready, silently
 			else
 				s.cranking = 0.8
-				Audio.engineStart()
+				s.engine:crank()
 			end
 		end
 	elseif (key == Enum.KeyCode.E or key == Enum.KeyCode.Q) and s.electric then
@@ -1279,7 +1279,7 @@ function Driving.attach(model: Model)
 	s.powerK, s.dragC = powerFor(spec)
 	s.engine:setRunning(s.engineOn and not s.electric)
 	if s.engineOn and not s.electric then
-		Audio.engineStart()
+		s.engine:crank()
 	else
 		setClusterPower(s, false) -- dark dash and lights until the engine starts
 		setLights(s, false)
@@ -1409,6 +1409,7 @@ function Driving.step(dt: number)
 		UI.toast("Launch control: let go of the brake")
 	end
 	s.launchReady = holding
+	s.engine:setLaunch(holding)
 	s.throttle += (throttle - s.throttle) * math.min(1, dt * 10)
 	-- lifting off at high revs: a short crackle of pops + flames
 	if s.throttleIn > 0.7 and throttle < 0.2 and s.rpm > 0.6 and Config.spsToMph(s.vel.Magnitude) > 30 and not s.electric then

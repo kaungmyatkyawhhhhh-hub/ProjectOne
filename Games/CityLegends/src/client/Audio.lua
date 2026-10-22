@@ -308,8 +308,26 @@ export type Engine = {
 	update: (self: Engine, rpm: number, throttle: number, speedFrac: number, slip: number, timeScale: number?, screech: number?) -> (),
 	shift: (self: Engine, up: boolean) -> (),
 	setRunning: (self: Engine, on: boolean) -> (), -- engine off: only wind and tyres are heard
+	crank: (self: Engine) -> (), -- the starter: the car's own start-up sound, else the shared one
+	setLaunch: (self: Engine, on: boolean) -> (), -- launch control held (brake + throttle at a stop)
 	destroy: (self: Engine) -> (),
 }
+
+-- a car's own exhaust recordings (Config.Sounds.Exhaust_<car id>_<part>), when they loaded
+local EXHAUST_PARTS = { "Start", "Idle", "Mid", "High", "Launch", "Crackle", "Redline" }
+local function exhaustSet(carId: string?): { [string]: string }?
+	if not carId then
+		return nil
+	end
+	local set: { [string]: string } = {}
+	for _, k in EXHAUST_PARTS do
+		local id = pickCustom("Exhaust_" .. carId .. "_" .. k)
+		if id then
+			set[k] = id
+		end
+	end
+	return if set.Idle or set.Mid or set.High then set else nil
+end
 
 local CLASS_PITCH = { Sedan = 0.9, SUV = 0.82, Coupe = 1.0, Supercar = 1.08, Hypercar = 1.15 }
 
@@ -366,6 +384,45 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	local running, power = true, 1
 	local self = {} :: any
 
+	-- the car's own exhaust: idle / mid / high loops crossfaded by rpm, plus launch control, the
+	-- rev limiter and crackles on lift-off
+	local ex = exhaustSet(carId)
+	local layers: { [string]: Sound } = {}
+	local startedAt = -1e9
+	local launching = false
+	local lastThrottle = 0
+	local crackleCool = 0
+	if ex then
+		for _, k in { "Idle", "Mid", "High", "Launch", "Redline" } do
+			local id = ex[k]
+			if id then
+				local snd = newSound(id, holder, 0, true)
+				snd.Name = "Exhaust" .. k
+				if positional then
+					snd.RollOffMode = Enum.RollOffMode.InverseTapered
+					snd.RollOffMinDistance = 14
+					snd.RollOffMaxDistance = 520
+				end
+				snd:Play()
+				layers[k] = snd
+			end
+		end
+	end
+	local function crackle(volume: number)
+		if not (ex and ex.Crackle) or crackleCool > 0 then
+			return
+		end
+		crackleCool = 0.35
+		local snd = newSound(ex.Crackle, holder, volume)
+		snd.PlaybackSpeed = 0.95 + math.random() * 0.1
+		if positional then
+			snd.RollOffMinDistance = 14
+			snd.RollOffMaxDistance = 520
+		end
+		snd:Play()
+		Debris:AddItem(snd, 6)
+	end
+
 	-- screech 0..1: tyres crying on a hard launch / pull-away, on top of what the slip gives
 	function self.update(_, rpm: number, throttle: number, speedFrac: number, slip: number, timeScale: number?, screech: number?)
 		local ts = timeScale or 1
@@ -387,8 +444,53 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 			end
 		end
 		rumble.Volume *= power
+		if ex then
+			-- the recorded exhaust replaces the shared engine loop and growl
+			rumble.Volume = 0
+			local now = os.clock()
+			crackleCool = math.max(0, crackleCool - 1 / 60)
+			-- after the start-up sound, the idle comes in
+			local fadeIn = if ex.Start then math.clamp((now - startedAt - 1.1) / 0.8, 0, 1) else 1
+			local load = 0.55 + 0.45 * throttle
+			local limiter = r >= 0.97 and throttle > 0.6 and layers.Redline ~= nil
+			local duck = if limiter or (launching and layers.Launch) then 0.35 else 1
+			local wIdle = math.clamp(1 - (r - 0.15) / 0.25, 0, 1)
+			local wMid = math.clamp((r - 0.15) / 0.25, 0, 1) * math.clamp(1 - (r - 0.6) / 0.25, 0, 1)
+			local wHigh = math.clamp((r - 0.6) / 0.25, 0, 1)
+			-- a missing band borrows its neighbour
+			if not layers.Mid then
+				wIdle += wMid * 0.5
+				wHigh += wMid * 0.5
+			end
+			if not layers.High then
+				wMid += wHigh
+			end
+			local function set(k: string, w: number, pitch: number)
+				local snd = layers[k]
+				if snd then
+					snd.Volume = 0.95 * w * load * duck * fadeIn * power
+					snd.PlaybackSpeed = pitch * ts
+				end
+			end
+			set("Idle", wIdle, math.clamp((r + 0.05) / 0.2, 0.85, 1.6))
+			set("Mid", wMid, math.clamp(0.6 + r * 0.8, 0.75, 1.3))
+			set("High", wHigh, math.clamp(0.55 + r * 0.53, 0.85, 1.22))
+			if layers.Redline then
+				layers.Redline.Volume = if limiter then 0.95 * power else 0
+				layers.Redline.PlaybackSpeed = ts
+			end
+			if layers.Launch then
+				layers.Launch.Volume = if launching then 0.95 * power * fadeIn else 0
+				layers.Launch.PlaybackSpeed = ts
+			end
+			-- lift off at high revs: pops and crackles
+			if running and lastThrottle > 0.6 and throttle < 0.25 and r > 0.45 then
+				crackle(0.85)
+			end
+			lastThrottle = throttle
+		end
 		growl.PlaybackSpeed = (0.5 + r * 0.95) * base * ts
-		growl.Volume = (0.08 + 0.42 * throttle) * math.clamp(r * 1.3, 0.2, 1) * (if usingCustom then 0.35 else 1) * power
+		growl.Volume = (0.08 + 0.42 * throttle) * math.clamp(r * 1.3, 0.2, 1) * (if usingCustom then 0.35 else 1) * power * (if ex then 0 else 1)
 		wind.PlaybackSpeed = (0.85 + speedFrac * 0.6) * ts
 		-- the driver's own car: wind rushes in from walking pace and roars at speed
 		wind.Volume = if positional then 0.55 * speedFrac ^ 1.8 else (if speedFrac > 0.02 then 0.12 + 1.0 * speedFrac ^ 1.3 else 0)
@@ -406,7 +508,11 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		if up then
 			dip = 0.22
 			if smoothRpm > 0.8 and math.random() < 0.6 then
-				Audio.backfire(if positional then parent else nil)
+				if ex and ex.Crackle then
+					crackle(0.9)
+				else
+					Audio.backfire(if positional then parent else nil)
+				end
 			end
 		end
 	end
@@ -415,9 +521,27 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		running = on
 	end
 
+	function self.crank(_)
+		startedAt = os.clock()
+		if ex and ex.Start then
+			local snd = newSound(ex.Start, holder, 0.95)
+			snd:Play()
+			Debris:AddItem(snd, 10)
+		else
+			Audio.engineStart(if positional then parent else nil)
+		end
+	end
+
+	function self.setLaunch(_, on: boolean)
+		launching = on
+	end
+
 	function self.destroy(_)
 		for _, s in { rumble, growl, wind, tyres } do
 			s:Destroy()
+		end
+		for _, snd in layers do
+			snd:Destroy()
 		end
 	end
 

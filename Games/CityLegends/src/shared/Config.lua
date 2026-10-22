@@ -211,6 +211,16 @@ Config.Sounds = {
 		"rbxassetid://1842960025", -- Infinite Void (APM)
 	},
 	MusicVolume = 0.22,
+	-- per-car exhaust sets (owner's uploads): Exhaust_<car id>_<Start | Idle | Mid | High | Launch |
+	-- Crackle | Redline>. Idle / Mid / High are loops blended by rpm; a car with them uses these
+	-- instead of the shared engine sound (owner, 2026-10-22: the LP750 first, as a test)
+	Exhaust_lambrini_lp750_Start = "rbxassetid://70853763868958",
+	Exhaust_lambrini_lp750_Idle = "rbxassetid://91209556236511",
+	Exhaust_lambrini_lp750_Mid = "rbxassetid://70783605428332",
+	Exhaust_lambrini_lp750_High = "rbxassetid://132442120648563",
+	Exhaust_lambrini_lp750_Launch = "rbxassetid://100034849111835",
+	Exhaust_lambrini_lp750_Crackle = "rbxassetid://128716617727916",
+	Exhaust_lambrini_lp750_Redline = "rbxassetid://106081038994367",
 	-- police and the bank (verified creators / ProSoundEffects)
 	Siren = "rbxassetid://9056622054", -- Yelp-Police-Siren (loops)
 	CameraFlash = "rbxassetid://9113678227", -- Camera Shutter 1 (SFX)
