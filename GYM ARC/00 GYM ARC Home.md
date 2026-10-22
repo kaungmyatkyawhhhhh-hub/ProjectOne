@@ -20,6 +20,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 22 Oct: active boosts row bottom-left, new boost icons everywhere, Agency + MY TRAINERS with the portraits and evo backgrounds, new shop panel, the Pro Gym as one hall with every machine PRO (prompt 47). See [[2026-10-22 GYM ARC Prompt 47 run]].
 - 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
 - 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
+- 23 Oct: chrome reset: quiet graphite chrome (menu, left nav, HUD, toasts) with clean italic labels and no gold borders; gold only on numbers, progress and the one NEXT / Growth Spurt card; earlier nav tiles back (white icons); hex ~18 px cells, panels 5%, collectibles only. See [[2026-10-23 GYM ARC Chrome reset]].
 - 23 Oct: TOP CREWS shows the top 25 (was 5). See [[GYM ARC - Crews]].
 - 23 Oct: tutorial in the new UI and a clean screen (prompts 53a / 53): new Coach Dex dialog, small SKIP pill, Spotlight on buttons, gold marker, only the tutorial on screen; one toast lane at the top centre for every toast; small "+80.5K CHEST" by REP; even machine controls; SHOP never locked. See [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]].
 - 23 Oct: sneakers removed (prompt 35b), then all shoes (35c): trainers, Dante, Coach Dex and the posing show have bare feet in their skin colour; players' own Roblox shoes stay. See [[GYM ARC - Sneakers]], [[2026-10-23 GYM ARC Sneakers removed]].
@@ -134,6 +135,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-22 GYM ARC Roll reveal screen]]
 - [[2026-10-23 GYM ARC Sneakers removed]]
 - [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]]
+- [[2026-10-23 GYM ARC Chrome reset]]
 - [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]]
 - [[2026-10-22 GYM ARC Unlock guides]]
 - [[2026-10-22 GYM ARC New UI applied]]
@@ -469,6 +471,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-23 GYM ARC Prompt - SHOP never locked]]
 - [[2026-10-23 GYM ARC Prompt - Shake step tap STOP first]]
 - [[2026-10-23 GYM ARC Prompt - Top crews to 25]]
+- [[2026-10-23 GYM ARC Prompt - Chrome reset]]
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]
