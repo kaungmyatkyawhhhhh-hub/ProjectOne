@@ -323,3 +323,13 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - Market-only cars ($600k and up) show up less: about 1 in 12 listings is a car you could unlock next (was 1 in 5), and only about 15% of those are Showroom (the only condition that can be delivered). Other listings of market-only cars are rarely Showroom, and their asking prices run from 95% to 160% of value (mostly over).
   - The garage lists brands (BNW, MERCER, TOYOKA, LAMBRINI ...), each with its series under it. The brand is the make in the car's name (`Series.Brand` in `Cars`).
 - **M5 E60 and M6 needles (2026-10-22, owner screenshot):** the red needles reached past the dials; they're now two-thirds as long (`CarSkin.NEEDLE_LENGTH`).
+
+- **Fix list (2026-10-22, owner):**
+  - Alfard: it gets the Land Cruzer 200's cluster design, placed over its own dials, and the Land Cruzer 300's steering wheel (its own has the maker's logo printed on it).
+  - Land Cruzer 200: its cluster now sits over the model's own dial panel ("bring it down and match it exactly"), not above the dash.
+  - The Chevo Malibo is gone from the game (roster, garage, model). Saves that owned it just lose it. Pack `cars_21` still holds it: skip it when copying cars in.
+  - X6: it takes the 7 Series' (750Li) steering wheel. The fixed X6 and 750Li models are in packs `cars_30` and `cars_31`, still to be imported.
+  - No logos anywhere (2026-10-22, owner: "remove all of the logo in the game"): the fictional BNW / Mercer / Lexis emblems are off too; badge spots get plain covers. On Roblox-built cars, a small logo piece in the middle of the steering wheel is taken off. Replaces the 2026-10-17 emblem decision.
+  - 330i steering wheel: its own wheel came in as one part with one texture, so parts of it don't show. The fixed 330i is in pack `cars_28`, still to be imported.
+  - Police: getting caught takes 10% of the cash you have, with no cap (was 6%, $500 to $150k).
+  - Wider roads: lanes 16 studs (were 12). Every road, the highway and the loop are a third wider; blocks are a little smaller.

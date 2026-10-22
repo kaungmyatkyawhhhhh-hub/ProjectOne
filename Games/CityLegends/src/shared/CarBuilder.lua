@@ -80,7 +80,7 @@ local REAL_WB: { [string]: number } = {
 	bentz_s63 = 3.165, mazdo_rx8 = 2.7, bnw_m8gc = 3.023, bnw_x7 = 3.105, xiaomo_su7 = 3.0, porsha_boxster = 2.475, lambrini_lp640 = 2.665, mazdo_rx7 = 2.425,
 	bentz_gt63s = 3.052, chevo_c7 = 2.71, chevo_c6 = 2.686, chevo_camaro = 2.811,
 	-- the cars of 2026-10-18
-	ferrara_california = 2.67, bugotti_veyron = 2.71, chevo_malibu = 2.829, maseroti_levante = 3.004,
+	ferrara_california = 2.67, bugotti_veyron = 2.71, maseroti_levante = 3.004,
 	lexis_lc500 = 2.87, astin_dbx = 3.06, bentz_190e = 2.665, bentz_s65_w221 = 3.165, toyoka_chaser = 2.73,
 	-- cabin donors only (not in the roster): their cabins keep their own size
 	ferrara_458s = 2.65, bentz_c63c = 2.84,

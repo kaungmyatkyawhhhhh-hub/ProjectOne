@@ -22,7 +22,7 @@ end
 Config.City = {
 	Blocks = 6, -- blocks per side (roads = Blocks + 1 per axis)
 	BlockSize = 300, -- distance between road centre lines
-	LaneWidth = 12,
+	LaneWidth = 16, -- owner (2026-10-22): "the road is too small" (was 12)
 	LanesPerSide = 2,
 	SidewalkWidth = 10,
 	CurbHeight = 0.6,
@@ -253,9 +253,9 @@ Config.Police = {
 	MinChaseSeconds = 12,
 	EscapeBounty = { 1500, 3500, 7000, 12000, 20000 },
 	EscapeXp = 60,
-	BustedFineFrac = 0.06,
-	BustedFineMin = 500,
-	BustedFineMax = 150000,
+	BustedFineFrac = 0.1, -- owner (2026-10-22): caught = 10% of the cash you have, no cap
+	BustedFineMin = 0,
+	BustedFineMax = math.huge,
 	RamCooldown = 6,
 	EscalateSeconds = 75, -- a chase this long adds a star...
 	EscalateMax = 3, -- ...up to here

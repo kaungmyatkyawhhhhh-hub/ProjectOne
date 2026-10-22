@@ -156,10 +156,6 @@ return {
 		shells = { { name = "Body_BRAKELIGHT_BRAKELIGHT_CE" }, { name = "Body_BRAKELIGHT_BRAKELIGHT_RI" }, { name = "Body_BRAKELIGHTGLASS_BRAKELIG" } },
 		spots = {},
 	},
-	chevo_malibu = {
-		shells = { { name = "SeeThrough_red_glass" } },
-		spots = {},
-	},
 	ferrara_458s = {
 		shells = { { name = "SeeThrough_Red_glass" } },
 		spots = {},

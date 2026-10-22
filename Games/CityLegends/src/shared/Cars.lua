@@ -111,7 +111,6 @@ local list: { CarSpec } = {
 	{ Id = "bentz_s680", Name = "Mercer Maybech S680", Class = "Sedan", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.62, Price = 1600000, Color = Color3.fromRGB(110, 20, 30), Accent = Color3.fromRGB(215, 200, 170), Order = 68 },
 	{ Id = "lambrini_countach", Name = "Lambrini Countach LP400S", Class = "Supercar", Tier = "High", TopSpeed = 179, ZeroToSixty = 5.6, Handling = 0.78, Price = 2500000, Color = Color3.fromRGB(235, 235, 235), Order = 69 },
 	-- the cars of 2026-10-18
-	{ Id = "chevo_malibu", Name = "Chevo Malibo LS", Class = "Sedan", Tier = "Starter", TopSpeed = 130, ZeroToSixty = 8.4, Handling = 0.56, Price = 18000, Color = Color3.fromRGB(235, 236, 238), Order = 70 },
 	{ Id = "toyoka_chaser", Name = "Toyoka Chasor Tourer V", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.6, Handling = 0.76, Price = 55000, Color = Color3.fromRGB(200, 202, 206), Order = 71 },
 	{ Id = "bentz_190e", Name = "Mercer 190E Evo II", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 7.1, Handling = 0.74, Price = 80000, Color = Color3.fromRGB(20, 21, 24), Order = 72 },
 	{ Id = "bentz_s65_w221", Name = "Mercer S63 W221", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.66, Price = 140000, Color = Color3.fromRGB(235, 236, 238), Order = 73 },
@@ -159,7 +158,6 @@ Cars.Series = {
 	{ Name = "KIO EV6", Ids = { "kio_ev6" } },
 	{ Name = "BYT", Ids = { "byt_seal", "byt_u8" } },
 	{ Name = "TOYOKA CAMRI", Ids = { "toyoka_camri" } },
-	{ Name = "CHEVO MALIBO", Ids = { "chevo_malibu" } },
 	{ Name = "TOYOKA CROWNE", Ids = { "toyoka_crown" } },
 	{ Name = "TOYOKA ALFARD", Ids = { "toyoka_alfard" } },
 	{ Name = "TOYOKA LAND CRUZER", Ids = { "toyoka_lc200", "toyoka_lc300" } },

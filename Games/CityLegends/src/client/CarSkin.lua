@@ -54,6 +54,7 @@ CarSkin.CLUSTER_STYLE = {
 	toyoka_camri = "Toyota",
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
+	toyoka_alfard = "Toyota", -- owner (2026-10-22): its own dials didn't work; the LC200's cluster
 	lambrini_lp570 = "Gallardo",
 	kio_ev6 = "EV6",
 	lambrini_urus = "Urus",
@@ -84,7 +85,6 @@ CarSkin.CLUSTER_STYLE = {
 	astin_dbx = "Aston",
 	lambrini_lp640 = "Murcielago", -- the 2026-10-18 model
 	maseroti_levante = "Modern",
-	chevo_malibu = "Modern",
 	bugotti_veyron = "Maybach57",
 } :: { [string]: string }
 
@@ -94,6 +94,10 @@ CarSkin.CLUSTER_STYLE = {
 -- (owner, 2026-10-13: "place them right above the dashboard where it covers the old cluster")
 CarSkin.CLUSTER_RECT = {
 	bnw_m3_e92 = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- its cluster hood (from the model)
+	-- the Land Cruzer 200 and the Alfard: over their models' own dial panels (owner, 2026-10-22: the
+	-- LC200's sat too high, above the dash; "bring it down and match it exactly")
+	toyoka_lc200 = { at = Vector3.new(0, 0.02, -0.247), face = Vector3.new(0, 0.12, 0.993), w = 0.267, h = 0.112 },
+	toyoka_alfard = { at = Vector3.new(0.008, 0.053, -0.262), face = Vector3.new(0, 0.18, 0.984), w = 0.3, h = 0.12 },
 	bnw_330i_g20 = { at = Vector3.new(0.0138, 0.0203, -0.2368), face = Vector3.new(-0, 0.321, 0.9471), w = 0.3191, h = 0.1134 },
 	bnw_530i = { at = Vector3.new(-0.003, 0.0057, -0.2492), face = Vector3.new(-0.007, 0.3171, 0.9484), w = 0.3461, h = 0.1269 },
 	bnw_540i = { at = Vector3.new(0.0025, 0.0094, -0.2389), face = Vector3.new(0.006, 0.3482, 0.9374), w = 0.3791, h = 0.136 },
@@ -218,6 +222,8 @@ CarSkin.INTERIOR_DONOR = {
 -- cars that take only another model's steering wheel, put where their own one sits
 CarSkin.STEER_DONOR = {
 	ferrara_599 = "ferrara_f430", -- owner: the F430's wheel in the 599
+	bnw_x6 = "bnw_750li", -- owner (2026-10-22): the X6's own wheel looked bad; the 7 Series' one
+	toyoka_alfard = "toyoka_lc300", -- its own wheel has the maker's logo printed on (owner: no logos)
 } :: { [string]: string }
 
 type Template = { part: MeshPart, offset: CFrame }
@@ -478,6 +484,10 @@ local function isMarkName(name: string): boolean
 	return false
 end
 
+-- owner (2026-10-22): "remove all of the logo in the game": badge spots get plain covers, no
+-- fictional emblems either (set true to bring them back)
+local SHOW_EMBLEMS = false
+
 -- our fictional emblems (similar to the real makers', not the same), drawn on a SurfaceGui
 local EMBLEM_SILVER = Color3.fromRGB(206, 210, 218)
 local function ring(parent: Instance, size: UDim2, aspect: number, color: Color3, thickness: number, fill: Color3?): Frame
@@ -599,7 +609,7 @@ local function coverParts(cf: CFrame, w: number, h: number, color: Color3, disc:
 		base.Size = Vector3.new(w, h, thick)
 		table.insert(out, { part = base, offset = cf * CFrame.new(0, 0, -thick / 2) })
 	end
-	if brand then
+	if brand and SHOW_EMBLEMS then
 		local e = Instance.new("Part")
 		e.Name = "MarkEmblem"
 		e.Transparency = 1
@@ -1096,6 +1106,20 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			table.insert(parts, t)
 		end
 		local radius = discSize / 2 * scale * 0.9
+		if not (marks and marks.hub) then
+			-- a maker's logo as its own little piece in the middle of the hub goes (owner,
+			-- 2026-10-22: no logos); buttons sit out on the spokes and stay
+			local kept = {}
+			for _, t in parts do
+				local p = t.offset.Position
+				local s = t.part.Size
+				if Vector2.new(p.X, p.Y).Magnitude < radius * 0.3 and math.max(s.X, s.Y, s.Z) < radius * 0.45 then
+					continue
+				end
+				table.insert(kept, t)
+			end
+			parts = kept
+		end
 		if src:GetAttribute("AddSteerHub") then
 			-- the model's wheel centre is fused with something else and hidden: build one
 			local function hubPiece(size: Vector3, color: Color3, material: Enum.Material, z: number): Template

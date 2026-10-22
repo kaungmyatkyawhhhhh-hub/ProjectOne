@@ -371,8 +371,8 @@ local function buildRoadMarkings(parent: Instance)
 					deco(marks, Vector3.new(HALF_ROAD - 1, 0.05, 1.2), CFrame.lookAt(Vector3.new(center.X, 0.035, center.Z), Vector3.new(center.X, 0.035, center.Z) + dir), LINE_WHITE, Enum.Material.SmoothPlastic)
 					-- zebra crossing just inside the intersection box
 					local cw = a - dir * (HALF_ROAD - 3)
-					for s = -2, 2 do
-						local p = cw + right * (s * 9)
+					for s = -3, 3 do
+						local p = cw + right * (s * HALF_ROAD / 3.6)
 						deco(marks, Vector3.new(4, 0.05, 5), CFrame.lookAt(Vector3.new(p.X, 0.035, p.Z), Vector3.new(p.X, 0.035, p.Z) + dir), LINE_WHITE, Enum.Material.SmoothPlastic, { transparency = 0.1 })
 					end
 				end
@@ -1194,7 +1194,7 @@ buildLoop = function(hwy: Instance)
 		-- dashed lane lines: 12 long, 18 apart
 		local d = cs0
 		while d < cs1 - 12 do
-			for _, off in { -24, -12, 12, 24 } do
+			for _, off in { -2 * C.LaneWidth, -C.LaneWidth, C.LaneWidth, 2 * C.LaneWidth } do
 				local q0 = CityLayout.loopSample(d, off)
 				local q1 = CityLayout.loopSample(d + 12, off)
 				if not junction(q0) then
@@ -1247,7 +1247,7 @@ local function buildHighway(parent: Instance)
 	local b = Vector3.new(SPUR_END, 0, 0)
 	solidLine(marks, a + Vector3.new(0, 0, 0.4), b + Vector3.new(0, 0, 0.4), 0.3, LINE_YELLOW)
 	solidLine(marks, a - Vector3.new(0, 0, 0.4), b - Vector3.new(0, 0, 0.4), 0.3, LINE_YELLOW)
-	for _, z in { -24, -12, 12, 24 } do
+	for _, z in { -2 * C.LaneWidth, -C.LaneWidth, C.LaneWidth, 2 * C.LaneWidth } do
 		dashedLine(marks, a + Vector3.new(0, 0, z), b + Vector3.new(0, 0, z), 0.35, 12, 18, LINE_WHITE)
 	end
 	for _, z in { -HW + 1, HW - 1 } do

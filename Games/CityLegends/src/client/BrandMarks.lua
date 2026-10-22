@@ -562,26 +562,6 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0017, -0.0041, 0.0509), face = Vector3.new(0, -0.0412, 0.9992), r = 0.046, color = Color3.fromRGB(59, 60, 59) },
 	},
-	chevo_malibu = {
-		wb = 2.829,
-		hide = {},
-		covers = {
-			{ emblem = false, disc = false, at = Vector3.new(0.0096, 0.2716, -2.408), face = Vector3.new(-0.0819, 0.1336, -0.9876), w = 0.1906, h = 0.066, color = Color3.fromRGB(28, 28, 28) },
-			{ emblem = false, disc = false, at = Vector3.new(0, 0.6048, 2.3948), face = Vector3.new(0.0929, -0.1061, 0.99), w = 0.1334, h = 0.0593, color = Color3.fromRGB(188, 188, 188) },
-			{ emblem = false, disc = false, at = Vector3.new(-0.4864, 0.6133, 2.3591), face = Vector3.new(-0.2112, -0.0933, 0.973), w = 0.1958, h = 0.0452, color = Color3.fromRGB(188, 188, 188) },
-			{ emblem = false, disc = false, at = Vector3.new(-0.9199, 0.2913, -0.7158), face = Vector3.new(-1, 0.0039, -0.0048), w = 0.3303, h = 0.0472, color = Color3.fromRGB(188, 188, 188) },
-			{ emblem = false, disc = false, at = Vector3.new(0.9066, 0.2912, -0.7158), face = Vector3.new(0.9999, 0.0077, -0.0077), w = 0.3303, h = 0.0472, color = Color3.fromRGB(188, 188, 188) },
-			{ emblem = false, disc = false, at = Vector3.new(0.0001, 0.117, -2.4019), face = Vector3.new(0.02, -0.113, -0.9934), w = 0.4519, h = 0.1045, color = Color3.fromRGB(255, 255, 255) },
-			{ emblem = false, disc = false, at = Vector3.new(0, 0.4553, 2.3414), face = Vector3.new(0, 0.0757, 0.9971), w = 0.4481, h = 0.1003, color = Color3.fromRGB(255, 255, 255) },
-		},
-		caps = {
-			FL = { r = 0.038, surface = 0.1156, color = Color3.fromRGB(195, 195, 195) },
-			FR = { r = 0.038, surface = 0.1156, color = Color3.fromRGB(195, 195, 195) },
-			RL = { r = 0.038, surface = 0.1156, color = Color3.fromRGB(195, 195, 195) },
-			RR = { r = 0.038, surface = 0.1156, color = Color3.fromRGB(195, 195, 195) },
-		},
-		hub = { at = Vector3.new(0.0006, -0.0088, 0.0833), face = Vector3.new(-0.0001, 0.1095, 0.994), r = 0.03, color = Color3.fromRGB(149, 143, 137) },
-	},
 	ferrara_458s = {
 		wb = 2.6501,
 		hide = { { name = "Body_Ferrari_458Speciale_2014", size = Vector3.new(1.8772, 0.6678, 4.5001) } },
