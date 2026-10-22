@@ -393,4 +393,46 @@ Config.Towers = {
 	RentCooldown = 24 * 3600, -- the wall safe refills once a day
 }
 
+---------------------------------------------------------------------
+-- The west (owner, 2026-10-22): a coastal highway from the city over a river on a suspension
+-- bridge to a Miami / New York style Downtown on the beach, and private islands offshore.
+-- The world runs west (-X) along z = 0. Positions are x values unless said. WestLayout (shared)
+-- turns these into sites, plots and places.
+---------------------------------------------------------------------
+Config.West = {
+	-- the viaduct: up off the city's west edge, over the harbour, the suburbs and the loop, down in
+	-- the countryside (deck top at ViaductY)
+	ViaductY = 34,
+	ViaductUp = { -990, -1290 }, -- rises between these
+	ViaductDown = { -3440, -3740 }, -- falls between these
+	CorridorHalf = 170, -- trees, houses and mountains stay this far either side of the road
+	Canyon = { -4420, -5300 }, -- the cut through the mountain range
+	River = { -5500, -6200 }, -- banks
+	BridgeUp = { -5300, -5580 }, -- the deck rises between these
+	BridgeTowers = { -5640, -6060 },
+	BridgeDown = { -6120, -6420 },
+	DeckY = 40,
+	DowntownX = -7400, -- the centre of Downtown's street grid (6 x 6 blocks like the city)
+	IndexBase = 100, -- Downtown's road indices along x: i = 100 .. 106 (j is the city's 0 .. 6)
+	DowntownRing = 300, -- skyline blocks round Downtown (north, south, east)
+	BeachWest = -8560, -- sand from Ocean Drive to here, then the sea
+	SeaWest = -12600,
+	HalfZ = 2700, -- the west's north / south edges
+	CausewayY = 6, -- the causeway's deck over the sea
+	-- block sites in Downtown {bi, bj, the side the entrance faces: "N" -Z, "S" +Z, "E" +X, "W" -X}
+	Sites = {
+		hotel = { 100, 2, "S" }, -- on Ocean Drive, facing Legends Boulevard (z = 0)
+		casino = { 100, 3, "N" }, -- across the boulevard from the hotel
+		gems = { 102, 3, "N" }, -- the gem showcase, up the boulevard
+	},
+	-- private islands offshore (centre x, z, radius); Legends Key is on the causeway, the other two
+	-- hang off it by bridges north and south
+	Islands = {
+		{ id = "key", name = "LEGENDS KEY", x = -9760, z = 0, r = 440, ring = 300 },
+		{ id = "palm", name = "PALM ISLE", x = -9760, z = -1500, r = 340, ring = 225 },
+		{ id = "coral", name = "CORAL CAY", x = -9760, z = 1500, r = 340, ring = 225 },
+	},
+	IslandRoad = 30, -- island ring roads' width
+}
+
 return Config

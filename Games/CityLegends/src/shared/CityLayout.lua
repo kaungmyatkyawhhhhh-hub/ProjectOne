@@ -29,17 +29,28 @@ CityLayout.Dirs = {
 }
 local DI = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } }
 
+-- road i's coordinate (x for i, z for j). Downtown in the west has its own grid along x: road
+-- indices from Config.West.IndexBase (100 .. 106), the same z roads as the city
+local DT_BASE = Config.West.IndexBase
+local DT_X = Config.West.DowntownX
 function CityLayout.roadCoord(i: number): number
+	if i >= DT_BASE - 1 then
+		return DT_X + (i - DT_BASE - N / 2) * C.BlockSize
+	end
 	return (i - N / 2) * C.BlockSize
 end
+CityLayout.DowntownBase = DT_BASE
 
 function CityLayout.intersectionPos(i: number, j: number): Vector3
 	return Vector3.new(CityLayout.roadCoord(i), 0, CityLayout.roadCoord(j))
 end
 
 function CityLayout.inGrid(i: number, j: number): boolean
-	return i >= 0 and i <= N and j >= 0 and j <= N
+	return ((i >= 0 and i <= N) or (i >= DT_BASE and i <= DT_BASE + N)) and j >= 0 and j <= N
 end
+
+-- the grids' first road indices along x (the city, Downtown)
+CityLayout.GridBases = { 0, DT_BASE }
 
 function CityLayout.laneOffset(lane: number): number
 	return C.LaneWidth * (lane - 0.5)
