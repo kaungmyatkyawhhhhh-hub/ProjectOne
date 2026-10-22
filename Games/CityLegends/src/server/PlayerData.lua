@@ -21,6 +21,7 @@ export type Profile = {
 	XP: number, -- progress inside the current level
 	LastDaily: number, -- os.time() of the last daily gift claim (0 = never)
 	Settings: Settings,
+	Market: { [string]: any }, -- car stock market: stash, hype, requests (Market.lua checks it)
 	Loaded: boolean,
 }
 
@@ -72,6 +73,7 @@ local function defaultProfile(): Profile
 		XP = 0,
 		LastDaily = 0,
 		Settings = { Units = "mph", Gearbox = "Auto" },
+		Market = {},
 		Loaded = false,
 	}
 end
@@ -131,6 +133,9 @@ function PlayerData.load(player: Player): Profile
 			if type(saved.Settings) == "table" then
 				PlayerData.setSettings(player, saved.Settings, profile)
 			end
+			if type(saved.Market) == "table" then
+				profile.Market = saved.Market
+			end
 		elseif not ok then
 			warn("[CityLegends] load failed for", player.Name, saved)
 		end
@@ -158,6 +163,7 @@ function PlayerData.save(player: Player)
 		XP = profile.XP,
 		LastDaily = profile.LastDaily,
 		Settings = profile.Settings,
+		Market = profile.Market,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)

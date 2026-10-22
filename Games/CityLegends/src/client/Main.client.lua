@@ -311,6 +311,11 @@ UI.onCameraButton = function()
 	Driving.toggleCamera()
 end
 
+-- the car stock market (K or the MARKET button)
+local MarketUI = require(script.Parent:WaitForChild("MarketUI"))
+MarketUI.init()
+UI.onMarketButton = MarketUI.toggle
+
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
