@@ -22,6 +22,7 @@ local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
+local Activities = require(script.Parent:WaitForChild("Activities"))
 
 Players.CharacterAutoLoads = false
 
@@ -156,6 +157,7 @@ local ctx = {
 OnFoot.init(ctx)
 Police.init(ctx)
 Bank.init(ctx, Police)
+Activities.init(ctx)
 
 local function despawn(player: Player)
 	local s = getSession(player)

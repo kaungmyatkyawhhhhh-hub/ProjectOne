@@ -272,6 +272,26 @@ Config.Bank = {
 }
 
 ---------------------------------------------------------------------
+-- Things to do: time-trial races, delivery jobs, Legends chips
+---------------------------------------------------------------------
+Config.Activities = {
+	GoldMph = 80, -- average speed over the route for each medal
+	SilverMph = 66,
+	BronzeMph = 52,
+	RaceRewards = { Gold = 9000, Silver = 5000, Bronze = 2500, Finish = 1000 },
+	RaceXp = { Gold = 300, Silver = 180, Bronze = 100, Finish = 50 },
+	CheckpointRadius = 26,
+	JobMinDistance = 900, -- studs between dispatch and drop
+	JobMph = 42, -- the time limit allows this average speed (+ JobGrace s)
+	JobGrace = 25,
+	JobPayPerStud = 7,
+	JobTimeBonus = 40, -- per second left
+	ChipCount = 25,
+	ChipCash = 2500,
+	ChipAllBonus = 100000,
+}
+
+---------------------------------------------------------------------
 -- UI theme (dark)
 ---------------------------------------------------------------------
 Config.Theme = {

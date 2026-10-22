@@ -24,6 +24,7 @@ local Weather = require(script.Parent:WaitForChild("Weather"))
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local BankClient = require(script.Parent:WaitForChild("BankClient"))
+local Activities = require(script.Parent:WaitForChild("Activities"))
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -199,6 +200,7 @@ UI.fade(false, 0.01)
 Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualityScale(), 0.6, 1)), focusPoint)
 Police.init()
 BankClient.init()
+Activities.init()
 UI.hideLoading()
 
 ---------------------------------------------------------------------
