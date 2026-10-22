@@ -8,6 +8,10 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 Built 22 Oct ([[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines|prompt 36]]).
 
+## Rearrange and makeover (23 Oct, prompt 50; [[2026-10-23 GYM ARC Pro Gym rearrange and makeover]])
+- Every machine in the Pro Gym is a real Pro machine now (the starter-config copies with the Pro skin got their Pro id: Pro tiers, +10%); every machine carries `Gym = "Pro"`.
+- Zones: ENTRANCE (PRO GYM sign wall, desk), CARDIO row (4 Pro Treadmills, bike, rower) facing the windows, a MACHINES row (LEGS / BACK / ABS), FREE WEIGHTS at the mirror wall (2 Pro dumbbell racks, 8 spots), ELITE (the 11 sub-muscle machines) under a GYM ARC mural, STRETCH by the east mirrors. Black rubber mats with gold lines, hanging lamps, gold LEDs. Recipe `tools/builders/ProGymMakeover`; backup `ServerStorage.ProGymBackup_23Oct`.
+
 ## Prompt 47 (22 Oct)
 - ONE hall: the wall between the two rooms is gone (pieces in `ServerStorage.ProGymExpansionBackup`); the GYM ARC PRO sign, mirror, TVs, speakers, lockers moved to the new east wall.
 - Every Pro Gym machine has the PRO look (black satin, gold accents, chrome bars, gold-stitched pads, PRO badge, gold underglow), gold plates, "PRO" in gold on its sign.
