@@ -183,3 +183,13 @@ Picked from Roblox's licensed library (Pro Sound Effects), swap any id in `Confi
 ## Lifting voices (22 Oct; [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]])
 - The owner: "the lifting screams are disturbing". ScreamNormal / ScreamBig are gone; **LiftGrunt** (Pro Sound Effects, Roblox's licensed library, picked by description, not heard): Gasps Male Deep Breaths Struggling 10 / 13 (9125572953, 9125573322), Video Game Effects 15 / 26 (9120416707, 9120417872). Volume 0.18 (40% of 0.45), pitch +-0.05, range 6-35 studs.
 - Every 5th heavy rep and a new PR only (`Config/Screams`); Settings "Lifting Voices".
+
+## Trainer roll reveal (prompt 49, 22 Oct; [[2026-10-22 GYM ARC Roll reveal screen]])
+No new sound ids: every step is layered from sounds the game already uses (Roblox's licensed library: PSE / APM), pitched in code. Volumes and pitches: `Config/RollReveal`. Rarer = louder, capped at about +4 dB over Common; one-shots cut at 1.5 s except the Legendary+ shine.
+- Orb lands: Stamp (APM Percussive Noise 07 Kick 04, 9043367506) at 0.6 pitch + Shimmer (PSE Magic Glows Chiming Hits 2, 9116394876).
+- Pulse tones: Chime (PSE Synth Sparkle Bell Ding 4, 9126073001) pitched: Uncommon / Rare a minor third apart, Epic three climbing, Legendary+ four climbing an octave. Common: the UI Click (muted tick). Epic / Legendary+ swell: Swell (PSE Tsunami Wind Up Huge Synth Powerup 1, 9120273504) at low pitch. Legendary+ hold: Heartbeat (APM Heart Pulse, 1840158546).
+- Burst: Common / Uncommon GeneticsPop (PSE Comic Pops, 9117183955) (+ Chime); Epic WarmWhoosh (PSE Airy Whoosh Blast 23, 9113083076) + Chime + ImpactSub (PSE Deep Hits Big Reverberant Booms 1, 9125484526); Legendary+ ImpactPunch (PSE Whoosh Impact 1, 9120730275) + FlashBoom (PSE Deep Hits ... Booms 2, 9125484367) + CosmicSwell shine (APM Stargazing, 9039636793) + a slow WarmWhoosh + TitleHit ring boom (APM BOOM Deep Boom 02, 1837830196). Legendary also Brass (APM Caught Off Guard, 9040287624); Mythic Crackle (PSE Electric Arcing 4, 9114237487).
+- Dress: pill = UI Click; name = Stamp (higher for rarer); NEW! = Stamp low (rubber-stamp thunk); dupe bar = 3 quick Clicks.
+- Hold: Hum (PSE Evil Drone Deep Airy Swell 1, 9114353038) looping very quietly, pitched by mood (warm gold lower, airy white higher).
+- Between cards: Riser (PSE Whoosh Suction 10, 9120735973) soft. Fanfare: Chime notes (2, or 4 + Brass when the batch has Legendary+). Bar: UI Whoosh. ROLL AGAIN: Click + QuestClaim coins (PSE Coin Throws 1, 9113849579). CLOSE: soft Click.
+- Music is ducked to ~30% from the setup until the reveal closes (Audio.Duck).
