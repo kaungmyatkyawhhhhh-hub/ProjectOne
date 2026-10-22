@@ -34,3 +34,9 @@ Prompt: [[2026-10-22 GYM ARC Prompt - 39 Unlock guides]]. Progress: [[2026-10-22
 
 ## Where it lives
 - `Config/Guides`, `StarterPlayerScripts/GuideClient`, `Shared/UI/CoachDialog` (moved out of TutorialClient), `Shared/UI/SideMenu` (SetLocked / SetNew / Button), `Shared/GoTo` (places), `ActionService` (Guide, LockedTap), `PlayerData` (SetGuideSeen, MarkOpenGuidesSeen), `Analytics.GuideEvent`.
+
+## SHOP is never locked (owner, 23 Oct; [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]])
+- SHOP is out of `Guides.Locks` and the guide list: open from the first join, no padlock, no NEW badge, no unlock guide. Every Store tab is usable; if a single item ever needs a level, only that item locks.
+- The guides got the tutorial's new pieces: the restyled Coach Dex dialog, the small SKIP pill (one tap here), the Spotlight on their tile and the new gold marker.
+![[GYM ARC/Screenshots/ui_v3/tutorial/desktop_04_unlock_guide_dialog.jpg]]
+![[GYM ARC/Screenshots/ui_v3/tutorial/desktop_05_unlock_guide_spotlight.jpg]]
