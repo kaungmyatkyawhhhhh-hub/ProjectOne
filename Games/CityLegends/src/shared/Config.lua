@@ -253,6 +253,25 @@ Config.Police = {
 }
 
 ---------------------------------------------------------------------
+-- The bank robbery (owner, 2026-10-22: "add a bank which u can rob")
+---------------------------------------------------------------------
+Config.Bank = {
+	Block = { 1, 2 }, -- the city block the bank stands on
+	Dropoff = { 6, 0 }, -- intersection whose corner has the drop-off
+	CrackSeconds = 8, -- hold E at the vault door
+	GrabSeconds = 2.5, -- hold E at a cash cart
+	GrabsPerCart = 3,
+	GrabMin = 6000,
+	GrabMax = 11000, -- times 1 + 2% per level (up to level 50)
+	MaxLoot = 60000, -- one bag
+	Stars = 4,
+	OpenSeconds = 90, -- the vault stays open
+	CooldownSeconds = 300, -- then stays locked this long
+	DropoffRadius = 22,
+	DeliverXp = 400,
+}
+
+---------------------------------------------------------------------
 -- UI theme (dark)
 ---------------------------------------------------------------------
 Config.Theme = {

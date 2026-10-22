@@ -20,6 +20,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local CityPremium = require(script.Parent:WaitForChild("CityPremium"))
 local Mainland = require(script.Parent:WaitForChild("Mainland"))
+local Bank = require(script.Parent:WaitForChild("Bank"))
 
 local CityBuilder = {}
 
@@ -940,7 +941,8 @@ local function buildBlocks(parent: Instance)
 			end
 
 			local lot = inner - C.SidewalkWidth * 2
-			local landmark = CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
+			-- gameplay venues first (the bank), then the landmark towers
+			local landmark = Bank.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
 			local isPark = not landmark and rng:NextNumber() < 0.12
 			if landmark then
 				-- block is taken by a landmark tower
