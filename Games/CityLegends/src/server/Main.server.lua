@@ -23,6 +23,7 @@ local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
 local Activities = require(script.Parent:WaitForChild("Activities"))
+local Chauffeur = require(script.Parent:WaitForChild("Chauffeur"))
 
 Players.CharacterAutoLoads = false
 
@@ -158,6 +159,7 @@ OnFoot.init(ctx)
 Police.init(ctx)
 Bank.init(ctx, Police)
 Activities.init(ctx)
+Chauffeur.init(ctx)
 
 local function despawn(player: Player)
 	local s = getSession(player)

@@ -435,4 +435,38 @@ Config.West = {
 	IslandRoad = 30, -- island ring roads' width
 }
 
+---------------------------------------------------------------------
+-- Luxury chauffeur service (owner, 2026-10-22: "hire an NPC driver to transport them across the
+-- map in high-end luxury vehicles"). A contract for a car is bought once (in-game cash); then
+-- that car and its driver come whenever you call, and rides are free.
+---------------------------------------------------------------------
+Config.Chauffeur = {
+	-- car id -> contract price (the owner's fleet list; the prices match the cars' own)
+	Fleet = {
+		astin_dbx = 450000,
+		bentlee_contgt = 1100000,
+		bentlee_bentayga = 1200000,
+		bentz_gls = 1200000,
+		lambrini_urus = 1500000,
+		brabos_g63 = 1600000,
+		bentz_s680 = 1600000,
+		rolls_wraith = 2000000,
+		rolls_cullinan = 2500000,
+	},
+	-- the order the phone lists them in
+	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urus", "brabos_g63", "bentz_s680", "rolls_wraith", "rolls_cullinan" },
+	CityMph = 44, -- how fast the driver goes in town
+	HighwayMph = 92, -- on the highway and the loop
+	TurnMph = 15, -- round corners (highway ramps use their own speed)
+	Accel = 16, -- studs/s per second
+	Brake = 24,
+	ArriveFrom = 260, -- a called car starts this far back up the road and drives to you
+	PickupRange = 90, -- you must be this close to a road to call a car
+	WaitSeconds = 120, -- a car you called but didn't get into leaves after this
+	BringOwnCar = true, -- your own parked car is brought along and left behind you when you arrive
+	SuitColor = Color3.fromRGB(22, 24, 30),
+	-- chauffeur stands (phone booths for the service): city corners {i, j, si, sj}
+	Stands = { { 3, 3, -1, -1 }, { 0, 3, 1, 1 }, { 6, 1, -1, 1 } },
+}
+
 return Config

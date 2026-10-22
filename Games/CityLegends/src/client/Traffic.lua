@@ -223,11 +223,17 @@ end
 
 local function refreshPlayerCars()
 	table.clear(playerCarCache)
-	local pc = workspace:FindFirstChild("PlayerCars")
-	if not pc then
-		return
+	-- (and the chauffeur service's cars: traffic yields to them too)
+	local list = {}
+	for _, name in { "PlayerCars", "Chauffeurs" } do
+		local f = workspace:FindFirstChild(name)
+		if f then
+			for _, m in f:GetChildren() do
+				table.insert(list, m)
+			end
+		end
 	end
-	for _, model in pc:GetChildren() do
+	for _, model in list do
 		if model:IsA("Model") and model.PrimaryPart then
 			local root = model.PrimaryPart
 			local v = root.AssemblyLinearVelocity

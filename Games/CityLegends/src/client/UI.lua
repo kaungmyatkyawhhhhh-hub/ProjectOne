@@ -36,6 +36,7 @@ UI.onUnitsChanged = nil :: ((string) -> ())? -- Settings: "mph" | "kmh"
 UI.onGearboxChanged = nil :: ((string) -> ())? -- Settings: "Auto" | "Manual"
 UI.onDailyClaim = nil :: (() -> ())? -- asks the server to pay the daily gift
 UI.onMarketButton = nil :: (() -> ())? -- opens the car stock market (MarketUI)
+UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (ChauffeurClient)
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -438,6 +439,15 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		box(5, 9, 11, 2.6, 1.3, -32)
 		box(14, 9.5, 9, 2.6, 1.3, 20)
 		box(21, 7, 10, 2.6, 1.3, -38)
+	elseif kind == "phone" then
+		-- a phone with a car key on its screen (the chauffeur service)
+		local body = box(8, 2, 16, 28, 3)
+		body.BackgroundTransparency = 1
+		new("UIStroke", { Color = col, Thickness = math.max(1.5, 3 * k), Parent = body })
+		box(13, 5, 6, 1.6, 0.8) -- earpiece
+		box(11.5, 11, 9, 9, -1) -- key head
+		box(15, 19, 2.6, 7, 0.6) -- key blade
+		box(17, 23, 2.6, 1.8, 0.4)
 	end
 	return canvas
 end
@@ -905,7 +915,7 @@ local function buildSideButtons()
 		AnchorPoint = Vector2.new(0, 0.5),
 		-- on touch, lift it clear of the steering buttons
 		Position = if UI.isTouch then UDim2.new(0, 14, 0.4, 0) else UDim2.new(0, 20, 0.5, 0),
-		Size = UDim2.fromOffset(size, size * 4 + 30),
+		Size = UDim2.fromOffset(size, size * 5 + 40),
 		BackgroundTransparency = 1,
 		Parent = hud,
 	}, {
@@ -948,6 +958,13 @@ local function buildSideButtons()
 		closePanels()
 		if UI.onMarketButton then
 			UI.onMarketButton()
+		end
+	end)
+	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)
+	chauffeurBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onChauffeurButton then
+			UI.onChauffeurButton()
 		end
 	end)
 	giftDot = new("Frame", {
