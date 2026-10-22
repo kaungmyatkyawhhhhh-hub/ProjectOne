@@ -7,7 +7,7 @@ status: done
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
-Done together with [[2026-10-23 GYM ARC Prompt - 52 Tutorial restyle|52]] and [[2026-10-23 GYM ARC Prompt - 53 Tutorial and toast cleanup|53]].
+Done together with [[2026-10-23 GYM ARC Prompt - 53a Tutorial restyle|52]] and [[2026-10-23 GYM ARC Prompt - 53 Tutorial and toast cleanup|53]].
 
 ```text
 Tutorial Coach Dex dialog + GO TO button: everything is squeezed together. Fix the spacing (do this with prompt 53 if it isn't done yet).

@@ -8,7 +8,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 # 2026-10-23 GYM ARC Tutorial restyle and screen cleanup
 
 Prompts:
-- [[2026-10-23 GYM ARC Prompt - 52 Tutorial restyle|52 Tutorial restyle]]
+- [[2026-10-23 GYM ARC Prompt - 53a Tutorial restyle|53a Tutorial restyle]]
 - [[2026-10-23 GYM ARC Prompt - 53 Tutorial and toast cleanup|53 Tutorial and toast cleanup]]
 - [[2026-10-23 GYM ARC Prompt - Coach dialog spacing|Coach dialog spacing]]
 - [[2026-10-23 GYM ARC Prompt - Machine controls equal width|Machine controls equal width]]

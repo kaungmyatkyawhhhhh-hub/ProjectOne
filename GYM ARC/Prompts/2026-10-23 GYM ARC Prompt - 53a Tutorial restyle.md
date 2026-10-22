@@ -3,7 +3,7 @@ date: 2026-10-23
 tags: [gymarc, prompt]
 status: done
 ---
-# 52 Tutorial restyle
+# 53a Tutorial restyle
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
