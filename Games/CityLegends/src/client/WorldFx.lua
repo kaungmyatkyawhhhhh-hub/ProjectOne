@@ -65,11 +65,18 @@ local function startLod(scale: number)
 	CollectionService:GetInstanceAddedSignal("LOD"):Connect(register)
 
 	local lights: { Light } = {}
-	for _, l in CollectionService:GetTagged("LODLight") do
-		if l:IsA("Light") then
+	local knownLight: { [Instance]: boolean } = {}
+	local function addLight(l: Instance)
+		if l:IsA("Light") and not knownLight[l] then
+			knownLight[l] = true
 			table.insert(lights, l)
 		end
 	end
+	for _, l in CollectionService:GetTagged("LODLight") do
+		addLight(l)
+	end
+	-- (lights made later: house galleries, showcase cars, anything streamed in)
+	CollectionService:GetInstanceAddedSignal("LODLight"):Connect(addLight)
 	-- wide enough that lights never visibly pop on/off block by block
 	local lightRange = 900 * scale
 	-- street lamps near the camera cast shadows (poles, cars, people across the road); far ones
