@@ -54,3 +54,9 @@ Coins per minute of active play (`lune run tests/pacing coins`, 60 simulated pla
 
 ## Prompt 28 (21 Oct; [[2026-10-21 GYM ARC UI cleanup]])
 - No PUMP SHOP side menu button any more. The Shop window has a small "Go to Pump Shop" link under the grid (once the Pump Shop is open for you; `UIBus.GoPumpShop`, same 10 s cooldown).
+
+## Shop items, Robux and STYLE (23 Oct, prompts 57 / 59 / 60 / 61, [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]])
+- PUMP SHOP tabs: SUPPLEMENTS · STYLE · DNA LAB (no GEAR: all gear is at Coach Dex).
+- The 4 specials are Robux only (x1 25 R$, x5 99 R$; SOON until the products are made); DNA LAB has the coin token and the Robux x1 / x3, with the DNA token picture.
+- STYLE: name tag and title colours, aura colours, alter tints (Config/Style, StyleService).
+- Coach Dex: SUPPLEMENTS + Shake Bundle, DNA Token (+ x3) for Robux; GEAR = Belt and Wraps rows (Basic / Pro).
