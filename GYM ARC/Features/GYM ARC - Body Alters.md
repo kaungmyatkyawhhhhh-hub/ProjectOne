@@ -20,6 +20,7 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - **Best physique:** the biggest body ever (Growth Spurts, then EXP) is saved; the Total / group boards and the statue use it, so an alter never makes them smaller.
 - **Shows:** at 7'0" the posing divisions are Open (Natural) and one per alter tier; stage presence at 7'0" = 50% + the rest by alter number (of 30).
 - **HUD:** the Growth Spurt card / machine strip become "NEXT: SHREDDED · 62% · Needs LEGS"; top bar "7'0" MAX · Alter 3 Tanned"; a small gold "ALTER 3" pill over the nametag.
+  - (23 Oct, prompt 57; [[2026-10-23 GYM ARC Roll card side layout and NEXT pill outline]]) The NEXT pill's outline is the HUD cards' own (1.5 px) in the next alter's colour (no gold); READY = the ready glow (`Shared/UI/ReadyGlow`) in that colour. A dark alter art can get a lighter shade and a wash of its colour on the pill (`AlterThemes` `pillShade` / `pillWash`; SHREDDED has them).
 
 ## Popups and transformation (prompt 22, 21 Oct; [[2026-10-21 GYM ARC Unique alter popups]])
 - **Every alter has its own theme** (`Config/AlterThemes`): background art (Tier 1, by the planner), accent, title gradient, intro, particles, sounds. Tiers 2-6 use colors only until their art comes (Stone thud + dust, Metal clang + sheen, Gem chime + prism, each Element its own sound and particles, Legend cosmic swell + rays); every alter has its own name colors.
