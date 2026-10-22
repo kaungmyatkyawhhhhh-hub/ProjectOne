@@ -364,4 +364,20 @@ Config.Market = {
 	FlipOffCooldown = 120,
 }
 
+---------------------------------------------------------------------
+-- Luxury towers (owner, 2026-10-22: "towers that u can go inside and penthouse stuffs like
+-- larping rich people", GTA 5 style, no alcohol). Each tower has a walk-in lobby, a penthouse at
+-- the top (real floors, so the windows show the city) and a roof with a sky pool and a helipad.
+-- Anyone can visit; buying one gives the daily rent from the wall safe, a home spawn and your name
+-- on the residents' plaque. block = city block (i, j), height = studs to the roof.
+---------------------------------------------------------------------
+Config.Towers = {
+	List = {
+		{ id = "aurum", name = "AURUM RESIDENCES", block = { 2, 3 }, height = 300, price = 750000, rent = 12000, accent = Color3.fromRGB(255, 196, 92) },
+		{ id = "skyline", name = "SKYLINE ONE", block = { 4, 1 }, height = 380, price = 3000000, rent = 45000, accent = Color3.fromRGB(0, 229, 255) },
+		{ id = "crown", name = "THE CROWN", block = { 1, 4 }, height = 460, price = 12000000, rent = 160000, accent = Color3.fromRGB(190, 110, 255) },
+	},
+	RentCooldown = 24 * 3600, -- the wall safe refills once a day
+}
+
 return Config

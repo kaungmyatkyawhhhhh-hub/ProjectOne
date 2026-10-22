@@ -482,15 +482,16 @@ local function update(dt: number)
 		end
 		return
 	end
-	if not driving and state ~= "idle" then
+	if not driving then
 		cancel("You left the car")
 		return
 	end
-	if wanted > 0 and state ~= "idle" then
+	if wanted > 0 then
 		cancel("The police are after you")
 		return
 	end
-	if state == "race" and race and pos then
+	local mode: string = state
+	if mode == "race" and race and pos then
 		local r = race
 		local t = os.clock() - t0
 		cardTime.Text = fmtTime(t)
@@ -509,7 +510,7 @@ local function update(dt: number)
 		if t > r.bronze * 3 then
 			cancel("Race timed out")
 		end
-	elseif state == "job" and job and pos then
+	elseif mode == "job" and job and pos then
 		local drop = ActivityData.dropPoints[job.dest]
 		local left = job.deadline - os.clock()
 		cardTime.Text = fmtTime(math.max(0, left))
