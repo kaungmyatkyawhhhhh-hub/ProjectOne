@@ -193,3 +193,11 @@ No new sound ids: every step is layered from sounds the game already uses (Roblo
 - Hold: Hum (PSE Evil Drone Deep Airy Swell 1, 9114353038) looping very quietly, pitched by mood (warm gold lower, airy white higher).
 - Between cards: Riser (PSE Whoosh Suction 10, 9120735973) soft. Fanfare: Chime notes (2, or 4 + Brass when the batch has Legendary+). Bar: UI Whoosh. ROLL AGAIN: Click + QuestClaim coins (PSE Coin Throws 1, 9113849579). CLOSE: soft Click.
 - Music is ducked to ~30% from the setup until the reveal closes (Audio.Duck).
+
+## Powerlifting Gym (prompt 58, 23 Oct; [[GYM ARC - Powerlifting Gym]])
+All reused from sounds already in the game (Roblox licensed library), swap freely in `Config/Sounds`:
+- `PRBell` 9113421788 (Bell Rings, resonant): the PR bell.
+- `RecordCheer` 9113137529 (PSE Applause Nightclub 1): a new server record.
+- `GoodLift` 9126073318 (PSE Synth Sparkle Bell Ding 1, lower): judge lights.
+- `PlateDrop` 9116750726 / 9116751108 (Metal Plate Impact, lower pitch): a heavy pull set down.
+- Area music `Powerlifting`: the owner's tracks 139777823649977, 113417603188158, 1840007392 for now.

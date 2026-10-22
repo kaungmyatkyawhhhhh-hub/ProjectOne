@@ -8,13 +8,19 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 Built 22 Oct ([[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines|prompt 36]]).
 
+## Lights, windows, city view (23 Oct, prompt 58; [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]])
+- Opens at **Growth Spurt 3** now (was 2); players who had trained there at Spurt 2 keep it.
+- White light everywhere (gold only as metal trim), no reception desk (bench + plants), white linear ceiling fixtures, LED under the mirror, spots on ELITE / stretch, a slight cool colour inside.
+- East wall and front wall floor-to-ceiling glass; below the east side a valley city (client-side backdrop, lit at night). Canopy + white-lit PRO GYM sign outside.
+- Builders `ProGymLights`, `ProGymValley`, `ProGymCity`; backup `ServerStorage.ProGymBackup_23Oct_b`.
+
 ## Rearrange and makeover (23 Oct, prompt 50; [[2026-10-23 GYM ARC Pro Gym rearrange and makeover]])
 - Every machine in the Pro Gym is a real Pro machine now (the starter-config copies with the Pro skin got their Pro id: Pro tiers, +10%); every machine carries `Gym = "Pro"`.
 - Zones: ENTRANCE (PRO GYM sign wall, desk), CARDIO row (4 Pro Treadmills, bike, rower) facing the windows, a MACHINES row (LEGS / BACK / ABS), FREE WEIGHTS at the mirror wall (2 Pro dumbbell racks, 8 spots), ELITE (the 11 sub-muscle machines) under a GYM ARC mural, STRETCH by the east mirrors. Black rubber mats with gold lines, hanging lamps, gold LEDs. Recipe `tools/builders/ProGymMakeover`; backup `ServerStorage.ProGymBackup_23Oct`.
 
 ## Prompt 47 (22 Oct)
 - ONE hall: the wall between the two rooms is gone (pieces in `ServerStorage.ProGymExpansionBackup`); the GYM ARC PRO sign, mirror, TVs, speakers, lockers moved to the new east wall.
-- Every Pro Gym machine has the PRO look (black satin, gold accents, chrome bars, gold-stitched pads, PRO badge, gold underglow), gold plates, "PRO" in gold on its sign.
+- Every Pro Gym machine has the PRO look (black satin, gold accents, chrome bars, gold-stitched pads, PRO badge, gold underglow; the underglow is soft white since prompt 58), gold plates, "PRO" in gold on its sign.
 
 ## Check first (what the starter machines really go to)
 - **Starter Gym machines:** Flat Bench, Incline Bench, Overhead Press, Barbell Row (Barbell set: 45 to **315** lb); Squat Rack, Deadlift (Heavy set: 45 to **455**); Leg Press, Hack Squat (Sled set: 45 to **455**); Pull-Up Bar, Crunch Bench (bodyweight to **+100**); Treadmill (2 to 13 mph); dumbbell rack (10 to **100** lb). 12 tiers each.

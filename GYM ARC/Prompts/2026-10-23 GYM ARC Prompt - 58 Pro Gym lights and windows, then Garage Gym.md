@@ -1,11 +1,13 @@
 ---
 date: 2026-10-23
 tags: [gymarc, prompt]
-status: todo
+status: superseded
 ---
 # 58 Pro Gym lights and windows, then the Garage Gym
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
+
+Replaced by [[2026-10-23 GYM ARC Prompt - 58 Pro Gym lights, gym pacing, Powerlifting Gym]] (Garage Gym cut for now).
 
 ```text
 Two parts: finish the Pro Gym, then build the next gym (Garage Gym). Follow CLAUDE.md Speed rules. Mobile first. Never undo the owner's manual Studio changes. Read "GYM ARC\2026-10-20 GYM ARC Gameplay plan.md" (Gyms and machines, Gym bro details) first. Back up before changing: ServerStorage.ProGymBackup_23Oct_b.

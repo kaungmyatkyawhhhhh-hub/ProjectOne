@@ -19,6 +19,10 @@ A sunny beach-side fitness town with three gyms: the warm old-school starter gym
 - **Performance:** StreamingEnabled on, only a few shadow-casting lights, small props without shadows. Town ~16,100 parts, gyms ~3,500.
 - **13 Oct:** sauna doorway widened and pull-up / dip clearances changed so a 7'0" mass monster fits.
 
+## Gym ladder (23 Oct, prompt 58)
+- Starter, Beach (Spurt 1), Pro (Spurt 3, was 2), Powerlifting (Spurt 5, the warehouse west of the starter gym with an alley from Main Street). See [[GYM ARC - Powerlifting Gym]].
+- East of the Pro Gym the land outside the boundary is a valley with a city below (seen through the Pro Gym's glass).
+
 ## Where it lives
 - `tools/builders` (Gyms, GymKit, Town, Decor, Sauna, ...), `tools/bake.md`
 - `Server/ProGymService`, `ProGymClient`, `AreaSignsClient`, `Config/Town`

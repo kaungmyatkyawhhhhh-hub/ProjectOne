@@ -23,6 +23,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 23 Oct: trainer rolls are cinematic (prompt 55): name roller, calm dark background, in-world cutscene with a beam for Legendary+ (others nearby see the beam); NEXT pill without the bicep icon. See [[2026-10-23 GYM ARC Cinematic roll cutscenes]].
 - 23 Oct: the roll result card comes alive (prompt 56): each trainer's own animated card background (Volta storm, Duke forge, The Shadow smoke, Atlas clouds) with a faint version behind, breathing art, glowing outline, lean toward the finger, stat rows, a livelier bottom bar. See [[2026-10-23 GYM ARC Roll result card comes alive]].
 - 23 Oct: roll cards turn sideways on phones (picture left, stats right; no text under the HUD label size); the NEXT alter pill's outline is the alter's colour (no gold) and glows when READY; SHREDDED's pill art shows (prompt 57). See [[2026-10-23 GYM ARC Roll card side layout and NEXT pill outline]].
+- 23 Oct: Pro Gym in white light with floor-to-ceiling glass over a new valley city (lit at night), no welcome desk; gym ladder changed: Pro Gym at Spurt 3, NEW Powerlifting Gym at Spurt 5 (warehouse, record board, PR bell, judge lights, meets), unlock list in the Growth Spurt moment; spurt 6 goal 238 (prompt 58). See [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]], [[GYM ARC - Powerlifting Gym]].
 - 23 Oct: the GROWTH SPURT card and machine strip get the quiet outline in the Growth Spurt gold and glow when READY (no gold button); no gold outlines left on HUD cards (prompt 58). See [[2026-10-23 GYM ARC Growth Spurt card quiet outline]].
 - 23 Oct: the bottom-left active boost tiles are half size (timer kept readable, 32 px tap area) (prompt 59). See [[2026-10-23 GYM ARC Active boost tiles half size]].
 - 23 Oct: the title screen shows a live camera flyover of the map (6 movable shots in Workspace.MenuCameraPath, light blur + vignette); PLAY swoops down to your character (prompt 60). See [[2026-10-23 GYM ARC Menu camera flyover]].
@@ -124,6 +125,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
   - [[2026-10-13 GYM ARC New features run]]
   - [[2026-10-20 GYM ARC Body lag]]
   - [[2026-10-20 GYM ARC Traps texture and back]]
+- [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]]
 - [[2026-10-20 GYM ARC Playtest review]]
 - [[2026-10-21 GYM ARC Playtest fixes]]
 - [[2026-10-21 GYM ARC Boosts inventory]]
@@ -197,6 +199,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Undiscovered items]]
 - [[GYM ARC - Sneakers]]
 - [[GYM ARC - Pro Gym expansion]]
+- [[GYM ARC - Powerlifting Gym]]
 - [[GYM ARC - Body Alters]]
 - [[GYM ARC - Gains and EXP]]
 - [[GYM ARC - Game Feel]]
@@ -517,6 +520,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-23 GYM ARC Prompt - 56 Roll result card comes alive]]
 - [[2026-10-23 GYM ARC Prompt - 57 Roll card side layout and NEXT pill outline]]
 - [[2026-10-23 GYM ARC Prompt - 58 Growth Spurt card quiet outline]]
+- [[2026-10-23 GYM ARC Prompt - 58 Pro Gym lights, gym pacing, Powerlifting Gym]]
+- [[2026-10-23 GYM ARC Prompt - 58 Pro Gym lights and windows, then Garage Gym]]
 - [[2026-10-23 GYM ARC Prompt - 59 Active boost tiles half size]]
 - [[2026-10-23 GYM ARC Prompt - 60 Menu camera flyover]]
 - [[2026-10-23 GYM ARC Prompt - 61 Store passes premium restyle]]

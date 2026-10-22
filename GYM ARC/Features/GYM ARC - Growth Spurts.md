@@ -68,6 +68,11 @@ No Growth Spurt card on the HUD at 7'0" (owner): the top bar's "7'0" MAX" says i
 ## Card outline (23 Oct, prompt 58; [[2026-10-23 GYM ARC Growth Spurt card quiet outline]])
 The GROWTH SPURT card (right column) and the machine strip are quiet chrome cards: the HUD cards' own 1.5 px outline tinted in the Growth Spurt gold (the TAP TO GROW gold; the strip uses the next alter's colour in alter mode). READY = the same dark card with TAP TO GROW in gold and the outline doing the ready glow (`Shared/UI/ReadyGlow`); no loud gold button any more. The READY TO GROW popup is unchanged.
 
+## Gym ladder and unlock list (23 Oct, prompt 58; [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]])
+- Gyms: Beach at 1, Pro at **3** (was 2), Powerlifting at **5**; no gym at 2 and 4. The "Growth Spurt!" moment adds a gold line with what opened (`GrowthSpurts.Unlocks`, e.g. "NEW: TRAINERS · ARM WRESTLING · REGIONAL SHOW").
+- The card says "Next: Pro Gym" / "Next: Powerlifting Gym" when the next spurt opens a gym.
+- Spurt 6 goal **216 -> 238** (the Powerlifting tiers had made it 41 min; 45.0 again in tests/pacing).
+
 ## Milestone rewards (21 Oct, prompt 11; [[2026-10-21 GYM ARC Funnel fixes]])
 - At 25%, 50% and 75% of the goal bar (the same share the HUD shows): a popup ("Growth Spurt 1: 50%, +14 coins"), a sound and a few coins (half a minute of coins at your stage). At 75%: "Almost there!". Every spurt, not at 7'0" (alters have their own).
 - `Config/GrowthSpurts` Milestones / MilestoneCoinMinutes / Share, `Server/SpurtMilestoneService` (checked after reps, data.spurtMilestones), popup in ProgressClient.

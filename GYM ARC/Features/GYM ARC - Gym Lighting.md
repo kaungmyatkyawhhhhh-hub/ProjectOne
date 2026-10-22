@@ -17,6 +17,10 @@ Moody but never dark: warm light pools in the starter gym, brighter spotlight po
 - **Town:** day lighting; street lamps (tag `NightLight`) glow at night.
 - All values are at the top of the builder to tweak.
 
+## 23 Oct (prompt 58)
+- Pro Gym: clean white light (no gold glow), white linear ceiling fixtures, spots on ELITE and the stretch mat, cool colour while inside (`GymMoodClient`).
+- Powerlifting Gym: white high-bay lamps, 3 with shadows, raw colour while inside. See [[GYM ARC - Powerlifting Gym]].
+
 ## Where it lives
 - Builder `tools/builders/GymLighting` (also run at the end of `Gyms.Build`)
 - `Server/NightLightService`

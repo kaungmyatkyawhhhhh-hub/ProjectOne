@@ -21,19 +21,25 @@ Agreed with the owner on 20 Oct 2026. This plan replaces the older progression n
 - Every new gym has heavier top weight tiers and a small gains bonus (+10% per gym), so players always train in their newest gym. Each gym also has one unique feature.
 - Gyms are REAL gym types that gym bros recognize. The fantasy is in the alters, not the gyms.
 
+Gym ladder (owner, 23 Oct, prompt 58: not a new gym every spurt):
+
 | Unlock | Gym | Look and special |
 |---|---|---|
 | Start | Starter Gym | Regular brick gym, the original starter machines |
 | Spurt 1 | Beach Gym | Outdoor weights by the sand, posing stage, shows |
-| Spurt 2 | Pro Gym | Premium modern gym, mirrors, LED lights, Dante |
-| Spurt 3 | Garage Gym | Home setup: power rack, rubber mats, toolboxes, speaker, fridge |
-| Spurt 4 | Powerlifting Gym | Chalk, deadlift platforms, heavy bars, record board |
-| Spurt 5 | Strongman Yard | Outdoor: atlas stones, tire flips, log press, yoke carry, farmer's walk |
-| 7'0" | Golden Era Gym | Old-school 70s bodybuilding gym: chrome, black-and-white photos, posing room |
+| Spurt 2 | (no gym) | Trainers, arm wrestling, Regional Show |
+| Spurt 3 | Pro Gym (was Spurt 2) | Premium modern gym in white light, city view, mirrors, Dante |
+| Spurt 4 | (no gym) | National Show |
+| Spurt 5 | Powerlifting Gym (built 23 Oct) | Warehouse: chalk, deadlift platforms, heavy bars, record board + PR bell, meets |
+| 7'0" | Golden Era Gym (+ Body Alters) | Old-school 70s bodybuilding gym: chrome, black-and-white photos, posing room |
 | Alter tiers | Champion Arena, Elite Performance Center, more later | Competition stage; high-tech athlete gym |
 
+- Gym bonus per gym in order: Pro +10%, Powerlifting +20% (the beach gym only has starter copies).
+- A Growth Spurt without a gym lists what it opens ("TRAINERS · ARM WRESTLING · REGIONAL SHOW").
+- **Later (cut for now, not built):** Garage Gym (home setup: power rack, rubber mats, toolboxes, hype speaker, fridge) and Strongman Yard (atlas stones, tire flips, log press, yoke, farmer's walk).
+
 - All gyms are in one server with streaming (phones only load the gym you're in). Travel by walking, skateboard or a teleport pad. A map shows locked gyms ("Unlocks at Spurt 3").
-- Build one gym at a time, starting with the Garage Gym (spurt 3 has no new place yet).
+- Build one gym at a time. Next one: the Golden Era Gym at 7'0".
 
 ## Gym bro details
 - PR bell: a new heaviest weight rings a bell for the whole gym, and your name goes on the PR board.
