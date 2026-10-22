@@ -29,6 +29,7 @@ export type Profile = {
 	Houses: { [string]: boolean }, -- owned island houses (Config.Houses.Types ids)
 	HouseBays: { [string]: { string } }, -- per house type: the car id in each garage bay ("" = empty)
 	HousePlots: { [string]: string }, -- per house type: the plot it stood on last time
+	Chauffeur: { [string]: boolean }, -- chauffeur contracts (car ids from Config.Chauffeur.Fleet)
 	Loaded: boolean,
 }
 
@@ -90,6 +91,7 @@ local function defaultProfile(): Profile
 		Houses = {},
 		HouseBays = {},
 		HousePlots = {},
+		Chauffeur = {},
 		Loaded = false,
 	}
 end
@@ -154,6 +156,14 @@ function PlayerData.load(player: Player): Profile
 			end
 			if type(saved.Activities) == "table" then
 				profile.Activities = saved.Activities
+			end
+			-- chauffeur contracts (absent in older saves): only cars still in the fleet
+			if type(saved.Chauffeur) == "table" then
+				for id, on in saved.Chauffeur do
+					if on == true and type(id) == "string" and Config.Chauffeur.Fleet[id] then
+						profile.Chauffeur[id] = true
+					end
+				end
 			end
 			-- luxury towers (absent in older saves)
 			local towerIds = {}
@@ -252,6 +262,7 @@ function PlayerData.save(player: Player)
 		Houses = houses,
 		HouseBays = profile.HouseBays,
 		HousePlots = profile.HousePlots,
+		Chauffeur = profile.Chauffeur,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)

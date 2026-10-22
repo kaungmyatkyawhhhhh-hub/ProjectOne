@@ -27,6 +27,7 @@ local BankClient = require(script.Parent:WaitForChild("BankClient"))
 local Activities = require(script.Parent:WaitForChild("Activities"))
 local Pedestrians = require(script.Parent:WaitForChild("Pedestrians"))
 local HouseClient = require(script.Parent:WaitForChild("HouseClient"))
+local ChauffeurClient = require(script.Parent:WaitForChild("ChauffeurClient"))
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -204,6 +205,7 @@ Police.init()
 BankClient.init()
 Activities.init()
 Pedestrians.start(WorldFx.qualityScale())
+ChauffeurClient.init()
 UI.hideLoading()
 
 ---------------------------------------------------------------------
