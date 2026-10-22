@@ -1,6 +1,6 @@
 ---
 tags: [gymarc, feature]
-status: built (stand-in shoe until the import)
+status: built (the planner's mesh, imported by the owner 22 Oct)
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
@@ -15,7 +15,8 @@ Built 22 Oct ([[2026-10-21 GYM ARC Prompt - 35 Sneakers|prompt 35]]). Every trai
 - **Colors** (`Config/Trainers` gear lists): Coach Sam red, Coach Nia green, Coach Lou yellow, Coach Rex purple (white stripes); Duke black + gold; Volta black + red; The Shadow black + purple (dark sole); Atlas white + gold. Gym NPCs: black with a stripe in one of six colors (Coach Dex red). Players: black + white; a player wearing their own Roblox shoes keeps theirs.
 - Nothing on the shoe collides, is touched, is hit by rays or casts a shadow.
 
-## OWNER STEP: import the real sneaker
+## The real sneaker (imported by the owner, 22 Oct)
+Done: `GearMeshes.Sneaker` is the planner's mesh now (flattened into one model of named pieces). The old steps, for a re-import:
 There's no way for Claude to import a mesh file into Studio (no tool, and a live mesh would use the last of the 8 live-mesh slots the muscles need). So the shoe in the game right now is a **stand-in made of plain parts** (`ReplicatedStorage.GearMeshes.Sneaker`, attribute StandIn).
 To swap in the planner's mesh (about 2 minutes):
 1. Delete `ReplicatedStorage.GearMeshes.Sneaker` (the stand-in).

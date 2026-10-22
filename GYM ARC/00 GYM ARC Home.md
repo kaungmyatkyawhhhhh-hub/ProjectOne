@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 22 Oct: active boosts row bottom-left, new boost icons everywhere, Agency + MY TRAINERS with the portraits and evo backgrounds, new shop panel, the Pro Gym as one hall with every machine PRO (prompt 47). See [[2026-10-22 GYM ARC Prompt 47 run]].
 - 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
 - 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
 - 22 Oct: sneakers on every trainer, NPC and player (trainer colors, bigger on big calves); a stand-in shoe until the owner imports sneaker.glb (prompt 35). See [[GYM ARC - Sneakers]].

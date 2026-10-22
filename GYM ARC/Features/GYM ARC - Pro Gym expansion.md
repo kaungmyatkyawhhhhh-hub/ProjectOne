@@ -8,6 +8,10 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 Built 22 Oct ([[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines|prompt 36]]).
 
+## Prompt 47 (22 Oct)
+- ONE hall: the wall between the two rooms is gone (pieces in `ServerStorage.ProGymExpansionBackup`); the GYM ARC PRO sign, mirror, TVs, speakers, lockers moved to the new east wall.
+- Every Pro Gym machine has the PRO look (black satin, gold accents, chrome bars, gold-stitched pads, PRO badge, gold underglow), gold plates, "PRO" in gold on its sign.
+
 ## Check first (what the starter machines really go to)
 - **Starter Gym machines:** Flat Bench, Incline Bench, Overhead Press, Barbell Row (Barbell set: 45 to **315** lb); Squat Rack, Deadlift (Heavy set: 45 to **455**); Leg Press, Hack Squat (Sled set: 45 to **455**); Pull-Up Bar, Crunch Bench (bodyweight to **+100**); Treadmill (2 to 13 mph); dumbbell rack (10 to **100** lb). 12 tiers each.
 - So the top is 315 on the benches, press and row, but **455** on squat, deadlift and the sleds (not ~300 everywhere).
