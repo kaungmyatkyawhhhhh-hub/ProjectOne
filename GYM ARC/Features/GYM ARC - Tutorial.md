@@ -61,3 +61,4 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 - The step band is a dark pill; toasts use the one lane at the top centre (`Shared/UI/Notify`).
 ![[GYM ARC/Screenshots/ui_v3/tutorial/phone_01_first_step.jpg]]
 ![[GYM ARC/Screenshots/ui_v3/tutorial/phone_04_tap_stop_lvl_up.jpg]]
+- (owner, 23 Oct, option B) The shake step on a machine: "Tap STOP, then tap your free shake to drink it." with the arrow on STOP, then on the shake once off; the safety net waits 25 s.

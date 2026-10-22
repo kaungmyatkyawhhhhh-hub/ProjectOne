@@ -466,6 +466,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-23 GYM ARC Prompt - Coach dialog spacing]]
 - [[2026-10-23 GYM ARC Prompt - Machine controls equal width]]
 - [[2026-10-23 GYM ARC Prompt - SHOP never locked]]
+- [[2026-10-23 GYM ARC Prompt - Shake step tap STOP first]]
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]
