@@ -20,6 +20,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 22 Oct: active boosts row bottom-left, new boost icons everywhere, Agency + MY TRAINERS with the portraits and evo backgrounds, new shop panel, the Pro Gym as one hall with every machine PRO (prompt 47). See [[2026-10-22 GYM ARC Prompt 47 run]].
 - 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
 - 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
+- 23 Oct: new trainer odds (Sam 30 / Nia 25 / Lou 20 / Rex 17 / Duke 5.75 / Volta 1.5 / The Shadow 0.6 / Atlas 0.15%), Volta Legendary, The Shadow Mythic, Atlas Secret, Legendary pity + auto-stop; group welcome gift (1,000 coins, free roll, CREW MEMBER title, Coach Lou). See [[2026-10-23 GYM ARC Trainer odds and group gift]].
 - 23 Oct: Pump Shop / Coach Dex shop restyled premium like the alters and auras panels; no checkmarks on Agency tiles. See [[2026-10-23 GYM ARC Pump Shop premium]].
 - 23 Oct: evolutions chart hides stages you haven't reached (??? until you do, then a flip + gold burst); Inventory aura detail restyled like the alters panel with a themed moving background per aura. See [[2026-10-23 GYM ARC Chart discovery and aura panel]].
 - 23 Oct: Trainer Agency, MY TRAINERS and the evolutions chart rebuilt to the owner's references (prompt 52), next-evolution button always bright with a soft ready glow, no EVOLVE! tag, rounded tier art everywhere. See [[2026-10-23 GYM ARC Trainer screens to the references]].
@@ -144,6 +145,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-23 GYM ARC Trainer screens to the references]]
 - [[2026-10-23 GYM ARC Chart discovery and aura panel]]
 - [[2026-10-23 GYM ARC Pump Shop premium]]
+- [[2026-10-23 GYM ARC Trainer odds and group gift]]
 - [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]]
 - [[2026-10-22 GYM ARC Unlock guides]]
 - [[2026-10-22 GYM ARC New UI applied]]

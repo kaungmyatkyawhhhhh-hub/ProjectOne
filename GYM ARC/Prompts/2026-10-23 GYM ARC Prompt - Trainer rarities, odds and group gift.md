@@ -1,7 +1,7 @@
 ---
 date: 2026-10-23
 tags: [gymarc, prompt, trainers]
-status: in progress
+status: done
 ---
 # Trainer rarities, odds and the group gift
 
