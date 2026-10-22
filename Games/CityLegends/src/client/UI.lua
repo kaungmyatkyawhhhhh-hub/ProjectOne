@@ -1555,7 +1555,7 @@ end
 ---------------------------------------------------------------------
 -- Garage
 ---------------------------------------------------------------------
-export type GarageData = { Cash: number, Owned: { string }, Selected: string }
+export type GarageData = { Cash: number, Owned: { string }, Selected: string, Level: number? }
 export type GarageCallbacks = {
 	buy: (string) -> { ok: boolean, message: string, data: GarageData? },
 	drive: (string) -> (),
@@ -1589,6 +1589,18 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local cash = data.Cash
 	local selectedId = data.Selected
 	local classFilter = "ALL"
+	local level = data.Level or 1
+	-- how a car not owned yet can be had: "buy", "level" (opens at a higher level) or "market"
+	local function access(id: string): (string, number)
+		if Cars.isMarketOnly(id) then
+			return "market", 0
+		end
+		local need = Cars.requiredLevel(id)
+		if level < need then
+			return "level", need
+		end
+		return "buy", 0
+	end
 
 	local f = new("Frame", { BackgroundColor3 = Theme.Background, BackgroundTransparency = 0.08, Size = UDim2.fromScale(1, 1), ZIndex = 60, Parent = gui })
 	garageFrame = f
@@ -1716,9 +1728,27 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 			priceText.TextColor3 = Theme.Accent
 			actionBtn.Text = "DRIVE"
 		else
-			priceText.Text = if spec.Price == 0 then "FREE" else formatCash(spec.Price)
-			priceText.TextColor3 = if cash >= spec.Price then Theme.Money else Theme.Danger
-			actionBtn.Text = "BUY"
+			local how, need = access(id)
+			if how == "market" then
+				priceText.Text = "MARKET ONLY"
+				priceText.TextColor3 = Theme.Warning
+				actionBtn.Text = "CAR MARKET"
+				local prev = Cars.previous(id)
+				local ps = if prev then Cars.ById[prev] else nil
+				msgText.Text = "Find a Showroom one on the car market (K)" .. (if ps and not owned[prev :: string] then " · own the " .. ps.Name .. " first" else "")
+				msgText.TextColor3 = Theme.SubText
+			elseif how == "level" then
+				priceText.Text = formatCash(spec.Price)
+				priceText.TextColor3 = Theme.SubText
+				actionBtn.Text = "LEVEL " .. need
+				msgText.Text = "Unlocks at level " .. need .. " (you're level " .. level .. ")"
+				msgText.TextColor3 = Theme.SubText
+			else
+				priceText.Text = if spec.Price == 0 then "FREE" else formatCash(spec.Price)
+				priceText.TextColor3 = if cash >= spec.Price then Theme.Money else Theme.Danger
+				actionBtn.Text = "BUY"
+				msgText.TextColor3 = Theme.Danger
+			end
 		end
 		for rid, row in rows do
 			local st = row:FindFirstChildOfClass("UIStroke")
@@ -1733,6 +1763,16 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		if owned[id] then
 			UI.closeGarage()
 			callbacks.drive(id)
+			return
+		end
+		local how = access(id)
+		if how == "market" then
+			UI.closeGarage()
+			if UI.onMarketButton then
+				UI.onMarketButton()
+			end
+			return
+		elseif how == "level" then
 			return
 		end
 		actionBtn.Text = "..."
@@ -1755,34 +1795,84 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 
 	refreshList = function()
 		for _, child in list:GetChildren() do
-			if child:IsA("TextButton") then
+			if child:IsA("TextButton") or child.Name == "SeriesHeader" then
 				child:Destroy()
 			end
 		end
 		table.clear(rows)
-		local sorted = table.clone(Cars.List)
-		table.sort(sorted, function(a, b)
-			return a.Order < b.Order
+		-- series in the order of their first car (cheapest first), cars in series order
+		local seriesList = table.clone(Cars.Series)
+		local function firstOrder(series: any): number
+			local best = math.huge
+			for _, id in series.Ids do
+				local sp = Cars.ById[id]
+				if sp then
+					best = math.min(best, sp.Price * 1000 + sp.Order)
+				end
+			end
+			return best
+		end
+		table.sort(seriesList, function(a, b)
+			return firstOrder(a) < firstOrder(b)
 		end)
-		for _, spec in sorted do
-			if classFilter == "ALL" or spec.Class == classFilter then
+		local order = 0
+		for _, series in seriesList do
+			local members = {}
+			for _, id in series.Ids do
+				local sp = Cars.ById[id]
+				if sp and (classFilter == "ALL" or sp.Class == classFilter) then
+					table.insert(members, sp)
+				end
+			end
+			if #members == 0 then
+				continue
+			end
+			order += 1
+			label({
+				Name = "SeriesHeader",
+				Text = series.Name,
+				TextSize = 13,
+				Font = Enum.Font.GothamBlack,
+				TextColor3 = Theme.SubText,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				Size = UDim2.new(1, 0, 0, 24),
+				LayoutOrder = order,
+				ZIndex = 62,
+				Parent = list,
+			})
+			for _, spec in members do
+				order += 1
+				local how, need = access(spec.Id)
+				local locked = not owned[spec.Id] and how ~= "buy"
 				local row: TextButton = new("TextButton", {
 					AutoButtonColor = false,
 					Text = "",
 					Size = UDim2.new(1, 0, 0, 58),
 					BackgroundColor3 = Theme.PanelLight,
-					LayoutOrder = spec.Order,
+					BackgroundTransparency = if locked then 0.35 else 0,
+					LayoutOrder = order,
 					ZIndex = 62,
 					Parent = list,
 				}, { corner(8), stroke(Theme.Stroke, 1.5, 0) })
 				new("Frame", { Size = UDim2.new(0, 4, 1, -16), Position = UDim2.fromOffset(8, 8), BackgroundColor3 = spec.Color, BorderSizePixel = 0, ZIndex = 63, Parent = row }, { corner(2) })
-				label({ Text = spec.Name, TextSize = 17, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 9), Size = UDim2.new(0.6, 0, 0, 20), ZIndex = 63, Parent = row })
+				label({ Text = (if locked then "🔒 " else "") .. spec.Name, TextSize = 17, Font = Enum.Font.GothamBlack, TextColor3 = if locked then Theme.SubText else Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 9), Size = UDim2.new(0.6, 0, 0, 20), ZIndex = 63, Parent = row })
 				label({ Text = Cars.ClassLabels[spec.Class] .. "  ·  " .. spec.TopSpeed .. " MPH", TextSize = 12, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 32), Size = UDim2.new(0.6, 0, 0, 16), ZIndex = 63, Parent = row })
+				local tag, tagColor
+				if owned[spec.Id] then
+					tag, tagColor = "OWNED", Theme.Accent
+				elseif how == "market" then
+					tag, tagColor = "MARKET", Theme.Warning
+				elseif how == "level" then
+					tag, tagColor = "LVL " .. need, Theme.SubText
+				else
+					tag = if spec.Price == 0 then "FREE" else formatCash(spec.Price)
+					tagColor = if cash >= spec.Price then Theme.Money else Theme.SubText
+				end
 				label({
-					Text = if owned[spec.Id] then "OWNED" elseif spec.Price == 0 then "FREE" else formatCash(spec.Price),
+					Text = tag,
 					TextSize = 15,
 					Font = Enum.Font.GothamBlack,
-					TextColor3 = if owned[spec.Id] then Theme.Accent elseif cash >= spec.Price then Theme.Money else Theme.SubText,
+					TextColor3 = tagColor,
 					TextXAlignment = Enum.TextXAlignment.Right,
 					AnchorPoint = Vector2.new(1, 0.5),
 					Position = UDim2.new(1, -14, 0.5, 0),

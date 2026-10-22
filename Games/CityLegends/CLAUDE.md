@@ -17,7 +17,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 
 - `src/shared`: modules used by both sides.
   - `Config`: all tuning: economy, progression, daily gift, traffic, sounds, theme.
-  - `Cars`: the roster of 77 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`.
+  - `Cars`: the roster of 80 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`; series (`Cars.Series`), market-only from $600k (`Cars.MarketFromPrice`), 5 levels per step in a series, and trims on another car's model (`Model` field, `Cars.modelOf`).
   - `CarBuilder`: part-built car, physics hitbox, interior, driver arms. `getDims(class, id)` gives per-car proportions through `DIM_OVERRIDES`.
   - `CarMesh`: procedural lofted car meshes, with a `DESIGNS` table per car.
   - `CityLayout`: grid maths, traffic-light phases, the Legends Loop's shape (`loopSample`) and the lane graph NPC traffic drives (city lanes plus the highway: `addHighway`).

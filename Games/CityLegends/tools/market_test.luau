@@ -138,6 +138,11 @@ for _, x in r.state.stash do
 end
 if other then check(not invoke("redeem", { u = other.u }).ok, "non-showroom delivery refused") end
 if showroom then
+	-- a car later in a series needs the one before it: own that first
+	local prev = Cars.previous(showroom.car)
+	if prev then
+		profiles[player].Owned[prev] = true
+	end
 	local res = invoke("redeem", { u = showroom.u })
 	check(res.ok and profiles[player].Owned[showroom.car] == true, "showroom unit delivered to garage")
 end

@@ -254,6 +254,14 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any)
 		return { ok = true, message = "Already owned", data = PlayerData.snapshot(player) }
 	end
 	local spec = Cars.ById[carId]
+	-- from the F430 up only the car market sells them; in a series each car opens 5 levels on
+	if Cars.isMarketOnly(carId) then
+		return { ok = false, message = "Only on the car market" }
+	end
+	local need = Cars.requiredLevel(carId)
+	if (profile.Level or 1) < need then
+		return { ok = false, message = "Unlocks at level " .. need }
+	end
 	if profile.Cash < spec.Price then
 		return { ok = false, message = "Not enough cash" }
 	end

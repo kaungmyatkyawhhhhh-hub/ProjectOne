@@ -309,10 +309,33 @@ end
 ---------------------------------------------------------------------
 -- Sessions: listings, offers, flip-off
 ---------------------------------------------------------------------
-local function newListing(s: Session, cash: number): Listing
+-- the market-only cars a player could take delivery of next (the first of a series, or the one
+-- after a car they own)
+local function nextUnlocks(owned: { [string]: boolean }): { string }
+	local out = {}
+	for _, spec in Cars.List do
+		if Cars.isMarketOnly(spec.Id) and not owned[spec.Id] then
+			local prev = Cars.previous(spec.Id)
+			if not prev or owned[prev] then
+				table.insert(out, spec.Id)
+			end
+		end
+	end
+	return out
+end
+
+local function newListing(s: Session, cash: number, owned: { [string]: boolean }?): Listing
 	s.nextLid += 1
 	local c = pickCar(cash)
 	local k = pickCond()
+	-- some listings are the high-end cars only the market sells, often in Showroom condition
+	if owned and rng:NextNumber() < M.UnlockListingChance then
+		local options = nextUnlocks(owned)
+		if #options > 0 then
+			c = options[rng:NextInteger(1, #options)]
+			k = if rng:NextNumber() < M.UnlockShowroomChance then "Showroom" else pickCond()
+		end
+	end
 	return {
 		lid = s.nextLid,
 		c = c,
@@ -339,7 +362,7 @@ local function session(player: Player): Session
 	local profile = PlayerData.get(player)
 	local cash = if profile then profile.Cash else 0
 	while #s.listings < M.Listings do
-		table.insert(s.listings, newListing(s, cash))
+		table.insert(s.listings, newListing(s, cash, if profile then profile.Owned else nil))
 	end
 	return s
 end
@@ -489,7 +512,7 @@ local function buy(player: Player, d: Data, args: any): Result
 		local chance = math.min(M.LowballMaxChance, M.LowballChance + M.LowballChancePerHype * d.Hype)
 		if rng:NextNumber() > chance then
 			table.remove(s.listings, idx)
-			table.insert(s.listings, newListing(s, profile.Cash))
+			table.insert(s.listings, newListing(s, profile.Cash, profile.Owned))
 			return { ok = false, msg = "Lowball refused: the seller walked" }
 		end
 		local off = rng:NextNumber(M.LowballDiscount[1], M.LowballDiscount[2])
@@ -502,7 +525,7 @@ local function buy(player: Player, d: Data, args: any): Result
 	PlayerData.addCash(player, -pay)
 	table.insert(d.Stash, { u = HttpService:GenerateGUID(false):sub(1, 8), c = l.c, k = l.k, p = pay, t = os.time() })
 	table.remove(s.listings, idx)
-	table.insert(s.listings, newListing(s, profile.Cash))
+	table.insert(s.listings, newListing(s, profile.Cash, profile.Owned))
 	return { ok = true, msg = msg }
 end
 
@@ -586,6 +609,12 @@ local function redeem(player: Player, d: Data, args: any): Result
 	if profile.Owned[it.c] then
 		return { ok = false, msg = "You already own this car" }
 	end
+	-- a car in a series comes after the one before it (owner, 2026-10-22)
+	local prev = Cars.previous(it.c)
+	if prev and not profile.Owned[prev] then
+		local ps = Cars.ById[prev]
+		return { ok = false, msg = "Own the " .. (if ps then ps.Name else prev) .. " first" }
+	end
 	table.remove(d.Stash, i)
 	profile.Owned[it.c] = true
 	return { ok = true, msg = "Delivered to your garage" }
@@ -662,7 +691,7 @@ local function tick()
 			if #s.listings > 0 then
 				table.remove(s.listings, rng:NextInteger(1, #s.listings))
 			end
-			table.insert(s.listings, newListing(s, cash))
+			table.insert(s.listings, newListing(s, cash, if profile then profile.Owned else nil))
 		end
 		local f = s.flip
 		if f then

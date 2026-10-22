@@ -372,6 +372,9 @@ Config.Market = {
 	FlipOffPrizeShare = 0.02,
 	FlipOffPrizeCap = 400000,
 	FlipOffCooldown = 120,
+	-- market-only cars (F430 and up): a share of listings are the ones you could unlock next
+	UnlockListingChance = 0.22,
+	UnlockShowroomChance = 0.4,
 }
 
 ---------------------------------------------------------------------
