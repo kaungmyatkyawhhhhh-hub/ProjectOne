@@ -8,6 +8,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 > **Removed 23 Oct (owner: they look bad).** [[2026-10-23 GYM ARC Prompt - 35b Remove sneakers|Prompt 35b]], [[2026-10-23 GYM ARC Sneakers removed|progress]]. Nobody wears them now: feet are back to how they were before prompt 35 (block feet visible; Duke, Volta and The Shadow have their old black block shoes again; coaches 1-4 their shoe images). Players' own Roblox shoes still show. The code is gone from `Shared/Gear`, `Config/Trainers` and the services. The mesh is kept in `ServerStorage.SneakerBackup.Sneaker` (not loaded by anything). To bring them back: revert commit d9fccdd in the game repo and move the model back to `ReplicatedStorage.GearMeshes`.
 >
+> **23 Oct, prompt 35c:** no shoes at all now. Duke, Volta and The Shadow's block shoes, the coaches' shoe pictures and the dark feet of Dante, Coach Dex and the posing show NPCs are gone: everyone's feet are bare, in their skin colour. Players' own Roblox shoes still show.
+>
 > Everything below is how it worked (history).
 
 Built 22 Oct ([[2026-10-21 GYM ARC Prompt - 35 Sneakers|prompt 35]]). Every trainer, NPC and player wears sneakers instead of the plain black block feet.

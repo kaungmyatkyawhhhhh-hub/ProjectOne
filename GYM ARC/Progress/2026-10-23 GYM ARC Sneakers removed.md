@@ -7,6 +7,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 
 # 2026-10-23 GYM ARC Sneakers removed (prompt 35b)
 
+> **Then no shoes at all (prompt 35c, owner: "completely remove shoes").** See the 35c section at the bottom: the block shoes listed below are gone too.
+
 Prompt: [[2026-10-23 GYM ARC Prompt - 35b Remove sneakers]]. Feature: [[GYM ARC - Sneakers]] (now marked removed).
 
 ## Done
@@ -33,3 +35,15 @@ Prompt: [[2026-10-23 GYM ARC Prompt - 35b Remove sneakers]]. Feature: [[GYM ARC 
 ![[GYM ARC/Screenshots/prompt35b/01_standing.jpg]]
 ![[GYM ARC/Screenshots/prompt35b/02_posing.jpg]]
 ![[GYM ARC/Screenshots/prompt35b/03_walking.jpg]]
+
+## 35c: no shoes at all
+Prompt: [[2026-10-23 GYM ARC Prompt - 35c Remove all shoes]].
+- **Removed:** the black block shoes (Duke, Volta, The Shadow), the shoe pictures (Coaches Sam, Nia, Lou, Rex), and the dark "shoe" paint on the feet of Dante, Coach Dex and the posing show NPCs.
+- **Now:** all their feet are bare, in their skin colour.
+- **Kept:**
+  - players' own Roblox shoes (from 35b);
+  - the regular gym NPCs and rivals: their feet are part of their normal Roblox clothes, so they look like any avatar in pants.
+- **Tested:** every trainer model has 0 shoe parts or shoe pictures, and its feet are its skin colour. Coach Dex's and Dante's feet are their skin colour. No script errors; the game tests pass. Game commit 1d3906b.
+
+![[GYM ARC/Screenshots/prompt35b/04_no_shoes_player_and_duke.jpg]]
+![[GYM ARC/Screenshots/prompt35b/05_no_shoes_duke_feet.jpg]]
