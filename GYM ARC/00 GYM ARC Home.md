@@ -20,6 +20,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 22 Oct: active boosts row bottom-left, new boost icons everywhere, Agency + MY TRAINERS with the portraits and evo backgrounds, new shop panel, the Pro Gym as one hall with every machine PRO (prompt 47). See [[2026-10-22 GYM ARC Prompt 47 run]].
 - 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
 - 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
+- 23 Oct: evolutions chart hides stages you haven't reached (??? until you do, then a flip + gold burst); Inventory aura detail restyled like the alters panel with a themed moving background per aura. See [[2026-10-23 GYM ARC Chart discovery and aura panel]].
 - 23 Oct: Trainer Agency, MY TRAINERS and the evolutions chart rebuilt to the owner's references (prompt 52), next-evolution button always bright with a soft ready glow, no EVOLVE! tag, rounded tier art everywhere. See [[2026-10-23 GYM ARC Trainer screens to the references]].
 - 23 Oct: bicep icons for every alter, Coach Dex ALTERS tab like the Inventory, tap bounce + select sound, TRAINERS = my trainers / Agency only at the desk, Coach Dex behind the moved desk, Physique flicker fixed, overhead tags stacked, NEXT pill full art and its READY state, new BODY ALTER READY popup, Strength leaderstat (prompt 54 + follow-ups). See [[2026-10-23 GYM ARC Alters shop and fixes]].
 - 23 Oct: chrome reset: quiet graphite chrome (menu, left nav, HUD, toasts) with clean italic labels and no gold borders; gold only on numbers, progress and the one NEXT / Growth Spurt card; earlier nav tiles back (white icons); hex ~18 px cells, panels 5%, collectibles only. See [[2026-10-23 GYM ARC Chrome reset]].
@@ -140,6 +141,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-23 GYM ARC Chrome reset]]
 - [[2026-10-23 GYM ARC Alters shop and fixes]]
 - [[2026-10-23 GYM ARC Trainer screens to the references]]
+- [[2026-10-23 GYM ARC Chart discovery and aura panel]]
 - [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]]
 - [[2026-10-22 GYM ARC Unlock guides]]
 - [[2026-10-22 GYM ARC New UI applied]]
@@ -486,6 +488,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-23 GYM ARC Prompt - Remove EVOLVE tag]]
 - [[2026-10-23 GYM ARC Prompt - Rounded tier backgrounds]]
 - [[2026-10-23 GYM ARC Prompt - Ready glow]]
+- [[2026-10-23 GYM ARC Prompt - Evolutions chart undiscovered stages]]
+- [[2026-10-23 GYM ARC Prompt - Aura detail panel like alters]]
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]
