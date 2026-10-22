@@ -20,6 +20,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 22 Oct: active boosts row bottom-left, new boost icons everywhere, Agency + MY TRAINERS with the portraits and evo backgrounds, new shop panel, the Pro Gym as one hall with every machine PRO (prompt 47). See [[2026-10-22 GYM ARC Prompt 47 run]].
 - 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
 - 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
+- 23 Oct: trainer rolls are cinematic (prompt 55): name roller, calm dark background, in-world cutscene with a beam for Legendary+ (others nearby see the beam); NEXT pill without the bicep icon. See [[2026-10-23 GYM ARC Cinematic roll cutscenes]].
 - 23 Oct: new trainer odds (Sam 30 / Nia 25 / Lou 20 / Rex 17 / Duke 5.75 / Volta 1.5 / The Shadow 0.6 / Atlas 0.15%), Volta Legendary, The Shadow Mythic, Atlas Secret, Legendary pity + auto-stop; group welcome gift (1,000 coins, free roll, CREW MEMBER title, Coach Lou). See [[2026-10-23 GYM ARC Trainer odds and group gift]].
 - 23 Oct: Pump Shop / Coach Dex shop restyled premium like the alters and auras panels; no checkmarks on Agency tiles. See [[2026-10-23 GYM ARC Pump Shop premium]].
 - 23 Oct: evolutions chart hides stages you haven't reached (??? until you do, then a flip + gold burst); Inventory aura detail restyled like the alters panel with a themed moving background per aura. See [[2026-10-23 GYM ARC Chart discovery and aura panel]].
@@ -146,6 +147,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-23 GYM ARC Chart discovery and aura panel]]
 - [[2026-10-23 GYM ARC Pump Shop premium]]
 - [[2026-10-23 GYM ARC Trainer odds and group gift]]
+- [[2026-10-23 GYM ARC Cinematic roll cutscenes]]
 - [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]]
 - [[2026-10-22 GYM ARC Unlock guides]]
 - [[2026-10-22 GYM ARC New UI applied]]
@@ -496,6 +498,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-23 GYM ARC Prompt - Aura detail panel like alters]]
 - [[2026-10-23 GYM ARC Prompt - Pump Shop premium restyle]]
 - [[2026-10-23 GYM ARC Prompt - Trainer rarities, odds and group gift]]
+- [[2026-10-23 GYM ARC Prompt - 55 Cinematic roll cutscenes]]
+- [[2026-10-23 GYM ARC Prompt - NEXT pill without bicep]]
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]
