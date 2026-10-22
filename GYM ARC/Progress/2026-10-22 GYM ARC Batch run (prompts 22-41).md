@@ -1,7 +1,7 @@
 ---
 date: 2026-10-22
 tags: [gymarc, progress]
-status: in progress
+status: done
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 
@@ -19,7 +19,7 @@ Rules kept: no image uploads (the ban); trainer portraits stay 3D rigs (prompt 3
 - [x] 31 Shops rework and undiscovered (commit ef7808d)
 - [x] 35 Sneakers (commit 09d43ff; owner imports sneaker.glb)
 - [x] 36 Pro Gym expansion (commit 309844d)
-- [ ] 33 Trainer levels and evolutions (no portraits)
+- [x] 33 Trainer levels and evolutions (no portraits) (commit 134b5d1)
 
 ## Done so far
 - 22, 37, 39: already built (checked, statuses fixed).
@@ -27,3 +27,5 @@ Rules kept: no image uploads (the ban); trainer portraits stay 3D rigs (prompt 3
 - 31: Coach Dex is the main shop, PUMP SHOP sells specials only (one counter), coconut stand on the ground selling Coconut Water, smoothie stands replaced (park, plant, lounge bench), quests claimed in Quests > Goals, UNDISCOVERED tiles + reveal + red dots, themed NEXT alter card. [[GYM ARC - Pump Shop]], [[GYM ARC - Undiscovered items]]
 - 35: sneakers on every trainer, NPC and player (Shared/Gear), sized to the foot or a big calf, in each trainer's colors. The shoe is a plain-part stand-in until the owner imports sneaker.glb (steps in [[GYM ARC - Sneakers]]).
 - 36: the Pro Gym got a new hall with Pro copies of all 11 starter machines + a Pro dumbbell rack (chrome, black, gold), tiers from the starter top up (bars to 455, squat / deadlift / sleds to 665), locked below the starter top's level, +10% gains in the Pro Gym. Real starter tops: 315 (bench, press, row) and 455 (squat, deadlift, sleds). Spurt 5-6 goals retuned to keep 45 min. [[GYM ARC - Pro Gym expansion]]
+- 33: trainer levels (1-20 from your reps) and evolutions (3 -> 1: BASE to LIMITLESS x16) replace Golden (Goldens became IRON-BORN), hidden stages with server-wide discovery, a new animated trainer tile, MY TRAINERS rebuilt (pages, detail panel, evolutions chart, evolve moment), followers grow and glow per stage. No image uploads. [[GYM ARC - Personal Trainers]]
+- Batch finished 22 Oct.

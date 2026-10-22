@@ -9,6 +9,18 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 A coach who follows you around, stands beside your machine and cheers you on. Built 13 Oct (new features run, task 7B) instead of pets; Plates the gym cat stays a gym NPC ([[GYM ARC - NPC Regulars and Gym Cat]]).
 
+## Levels and evolutions (prompt 33, 22 Oct: they replace Golden)
+- **Every trainer you own is its own copy** with its own stage and level (`data.trainers.copies`). Old saves moved over: counts became copies, **each Golden became that trainer at IRON-BORN**.
+- **Levels 1 -> 20:** the trainers following you gain trainer EXP from your reps (more on heavier weights); each level +1% to his boost (Lv 20 = +20%). Lv 20 in about 20-30 min of reps at BASE (tests/trainers), a bit slower at higher stages. Level up: "COACH LOU LV 12!" with a ding and a quick glow on him. EXP is saved every 10 s and on every level up.
+- **Evolutions:** 3 of the same trainer at the same stage -> 1 at the next: BASE x1, IRON-BORN x2, BEAST-MODE x4, COLOSSUS x8, LIMITLESS x16 (one LIMITLESS = 81 BASE copies). No level needed; he keeps the best level of the 3; a following one's slot goes to the new one. EVOLVE (the detail card) and EVOLVE ALL (every set, lowest stages first, so they cascade). Auto-delete still only removes duplicates of the rarities you switched on.
+- **Hidden stages:** you only see the names of stages you've reached; the next is "???" (a dark glitching tile, "COMBINE 3 TO DISCOVER"). A first discovery: a big "COLOSSUS DISCOVERED!" moment and everyone in the server sees "Rong discovered COLOSSUS!".
+- Boosts still go through the trainer cap (+400% per kind) and the gains cap (MAX BOOST tag).
+- **MY TRAINERS** (Trainers window): one tile everywhere (`Shared/UI/TrainerTile`): stage-colored dark base, hex mesh, radial glow, his 3D rig (no pictures), name / stage / LV, a 4 px stage border, gold glow + check when equipped; stage effects drawn in code (IRON-BORN cracks + sparks, BEAST-MODE green swirl + claw slashes, COLOSSUS rain + lightning, LIMITLESS rainbow spiral + stars + hue border), animated only on screen. 12 tiles a page, the detail panel (big tile, EXP bar, boost box, needs line with 3 mini tiles, EQUIP / EVOLVE), the EVOLUTIONS chart, the evolve moment (3 fly together, shake, flash, slam, confetti).
+- **In the world:** 3% bigger per stage, a glow and light in the stage color (LIMITLESS cycles the rainbow), a small stage tag over his head.
+- **Not done (owner rules):** the trainer portrait PNGs and the evo / hex background PNGs were NOT uploaded (no image uploads; ask first). Everything uses the 3D rigs, the existing hex texture and code-drawn effects. If you want the planner's backgrounds, OK the upload of `evo_bgs` (they show no bodies) and they can be layered in.
+- The Agency's odds grid keeps its 22 Oct design (owned check and counts now read the copies); its tiles were not switched to the new tile.
+- Studio test switches: `TestTrainers` ("PumpCoach,AeonCoach@3" = stage 3), `TestTrainerCopies` ("RookieCoach:81" extra BASE copies), `TestTrainerSlots` (2).
+
 ## Trainer rolls (prompt 24, 21 Oct; [[2026-10-21 GYM ARC Trainer rolls]])
 Trainers now come from **coin rolls** at the **Trainer Agency** (the desks at the front of each gym), like eggs in pet games. Coins only, never Robux, no Robux luck. The odds are always shown. This replaces hiring (the old Coaches window and prices are gone).
 - **8 trainers, one per rarity** (`Config/Trainers`; a 9th rarity later = one more config entry):
@@ -32,7 +44,7 @@ Trainers now come from **coin rolls** at the **Trainer Agency** (the desks at th
 - **Roll animation** (~1.5 s, tap to skip): a capsule card drops in, shakes and glows in the rarity color, cracks open, the trainer flexes in 3D with his name and rarity banner. Epic a purple burst; Legendary a gold explosion and a slower build; Mythic a screen shake and lightning; Secret the screen goes dark first; Eternal a white flash, stars and a swell. Layered sounds (the Body Alter set).
 - **Announcements:** Legendary or better: a chat line for everyone ("Rong pulled a MYTHIC trainer: Coach Blaze!") and a toast; Secret / Eternal also a big banner for others.
 - **Owning / equipping:** Inventory > **Trainers** tab: the following slots on top (tap to remove; locked ones say what opens them) and every trainer you own (count, boost, EQUIP, "3/5 to Golden" / MAKE GOLDEN). **Slots:** 1, 2 at Growth Spurt 2, 3 at the first Body Alter, +1 with the Extra Trainer pass (max 4). Duplicates can fill several slots.
-- **Golden:** 5 of the same trainer -> 1 Golden (1.5x his boost, a gold glow on him).
+- ~~Golden~~ (removed 22 Oct, prompt 33: see Levels and evolutions).
 - **Odds boards:** a lit board behind each Agency desk (`tools/builders/TrainerAgency`) lists all 8 with colors, chances and boosts, filled from the config.
 - **Old saves:** coaches hired before keep coming as one of each (the same coach, now his rarity). The old per-coach perks are replaced by the table above (owner, prompt 25: OK; Coach Nia got +15% stamina regen, the pump perk is gone).
 - **Pacing** (`lune run tests/trainers`, all coins into rolls, with pity; owner kept 1.6 min a roll and lowered the top odds, prompt 25): first Epic or better ~20 min, Legendary ~57 min, Mythic ~3.4 h, Secret ~14.6 h, Eternal ~76 h.

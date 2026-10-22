@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
 - 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
 - 22 Oct: sneakers on every trainer, NPC and player (trainer colors, bigger on big calves); a stand-in shoe until the owner imports sneaker.glb (prompt 35). See [[GYM ARC - Sneakers]].
 - 22 Oct: shops reworked: Coach Dex is the main shop, the PUMP SHOP sells specials only (one counter, Champion gear), coconut stand sells Coconut Water, smoothie stands gone (park, plants, lounge); UNDISCOVERED items in the Inventory with a reveal; NEXT alter card in its theme (prompt 31). See [[GYM ARC - Pump Shop]], [[GYM ARC - Undiscovered items]].

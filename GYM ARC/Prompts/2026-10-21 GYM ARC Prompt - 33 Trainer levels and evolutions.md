@@ -1,7 +1,7 @@
 ---
 date: 2026-10-21
 tags: [gymarc, prompt]
-status: todo
+status: done (no image uploads: 3D rigs and code-drawn backgrounds)
 ---
 # 33 Trainer levels + evolutions (replaces Golden)
 
