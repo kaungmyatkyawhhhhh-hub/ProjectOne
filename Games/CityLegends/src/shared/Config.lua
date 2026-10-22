@@ -466,4 +466,25 @@ Config.Pedestrians = {
 	CrossChance = 0.35, -- at a corner: wait for the light and cross
 }
 
+---------------------------------------------------------------------
+-- The Legends Grand Hotel Downtown (owner, 2026-10-22: "a large skyscraper hotel with valets",
+-- penthouse suites on the hotel that "pay out money every minute to their owners"). The suites
+-- are the top floors, lowest first. They pay while you're in the game (time offline doesn't
+-- pay), one payment per full minute.
+---------------------------------------------------------------------
+Config.Hotel = {
+	Name = "THE LEGENDS GRAND",
+	Accent = Color3.fromRGB(255, 200, 120), -- champagne gold
+	Neon = { Color3.fromRGB(255, 70, 170), Color3.fromRGB(40, 230, 220) }, -- Miami pink and teal
+	IncomeEvery = 60, -- seconds in the game per payment
+	Suites = {
+		{ id = "grand_skyline", name = "SKYLINE SUITE", price = 2000000, perMinute = 2000 },
+		{ id = "grand_ocean", name = "OCEAN SUITE", price = 6000000, perMinute = 6500 },
+		{ id = "grand_royal", name = "ROYAL SUITE", price = 12000000, perMinute = 14000 },
+		{ id = "grand_presidential", name = "PRESIDENTIAL SUITE", price = 25000000, perMinute = 30000 },
+	},
+	ValetRange = 20, -- how close to the middle of the valet bay your car must stop
+	ValetSpeed = 14, -- studs/s: slow enough to hand over
+}
+
 return Config

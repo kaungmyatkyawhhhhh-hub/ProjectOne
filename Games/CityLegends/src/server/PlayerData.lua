@@ -160,6 +160,9 @@ function PlayerData.load(player: Player): Profile
 			for _, t in Config.Towers.List do
 				towerIds[t.id] = true
 			end
+			for _, t in Config.Hotel.Suites do
+				towerIds[t.id] = true -- the hotel's suites save like penthouses
+			end
 			if type(saved.Penthouses) == "table" then
 				for _, id in saved.Penthouses do
 					if type(id) == "string" and towerIds[id] then

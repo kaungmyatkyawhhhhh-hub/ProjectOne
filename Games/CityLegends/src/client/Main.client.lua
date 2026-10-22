@@ -275,6 +275,9 @@ local function requestDrive(id: string)
 	end)
 end
 
+-- the Legends Grand Hotel: the valet takes your car at the bay and brings it back to the door
+require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)
+
 local showMenu: () -> ()
 
 -- island houses: a bay car's "Drive" spawns it on the driveway (the server picks the spot)
