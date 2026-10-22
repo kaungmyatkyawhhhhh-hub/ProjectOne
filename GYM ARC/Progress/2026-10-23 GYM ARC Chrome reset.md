@@ -59,3 +59,13 @@ Prompt: [[2026-10-23 GYM ARC Prompt - Chrome reset]]. Game commit 0034b67. The r
 ![[GYM ARC/Screenshots/chrome_reset/hud_667.jpg]]
 ![[GYM ARC/Screenshots/chrome_reset/daily_streak_solid.jpg]]
 ![[GYM ARC/Screenshots/chrome_reset/new_player_locked_tiles_tutorial.jpg]]
+
+## PLAY and SHOP follow-up ([[2026-10-23 GYM ARC Prompt - PLAY and SHOP buttons]])
+- **PLAY and SHOP** are now the menu's "hero" buttons (`Hero` attribute, `Theme.HeroLip`): 14 px corners, a 3 px dark outline, a 6 px darker bottom edge, a 2 px pale line along the top edge, no glow or halo.
+  - **PLAY:** a red gradient (bright to deep), heavy italic white ~44 px with a 2 px dark stroke; the play triangle is scaled up to match.
+  - **SHOP:** a gold gradient, heavy italic dark ~28 px (no stroke on the dark words); the cart icon is sized to the words.
+- **Unchanged:** SETTINGS and NEWS, and the sizes and spacing.
+- **Checked** on desktop and at 667x375. Game commit after 0034b67.
+
+![[GYM ARC/Screenshots/chrome_reset/menu_hero_desktop.jpg]]
+![[GYM ARC/Screenshots/chrome_reset/menu_hero_667.jpg]]
