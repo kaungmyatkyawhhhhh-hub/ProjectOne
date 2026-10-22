@@ -24,6 +24,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 23 Oct: the roll result card comes alive (prompt 56): each trainer's own animated card background (Volta storm, Duke forge, The Shadow smoke, Atlas clouds) with a faint version behind, breathing art, glowing outline, lean toward the finger, stat rows, a livelier bottom bar. See [[2026-10-23 GYM ARC Roll result card comes alive]].
 - 23 Oct: roll cards turn sideways on phones (picture left, stats right; no text under the HUD label size); the NEXT alter pill's outline is the alter's colour (no gold) and glows when READY; SHREDDED's pill art shows (prompt 57). See [[2026-10-23 GYM ARC Roll card side layout and NEXT pill outline]].
 - 23 Oct: the GROWTH SPURT card and machine strip get the quiet outline in the Growth Spurt gold and glow when READY (no gold button); no gold outlines left on HUD cards (prompt 58). See [[2026-10-23 GYM ARC Growth Spurt card quiet outline]].
+- 23 Oct: the bottom-left active boost tiles are half size (timer kept readable, 32 px tap area) (prompt 59). See [[2026-10-23 GYM ARC Active boost tiles half size]].
 - 23 Oct: new trainer odds (Sam 30 / Nia 25 / Lou 20 / Rex 17 / Duke 5.75 / Volta 1.5 / The Shadow 0.6 / Atlas 0.15%), Volta Legendary, The Shadow Mythic, Atlas Secret, Legendary pity + auto-stop; group welcome gift (1,000 coins, free roll, CREW MEMBER title, Coach Lou). See [[2026-10-23 GYM ARC Trainer odds and group gift]].
 - 23 Oct: Pump Shop / Coach Dex shop restyled premium like the alters and auras panels; no checkmarks on Agency tiles. See [[2026-10-23 GYM ARC Pump Shop premium]].
 - 23 Oct: evolutions chart hides stages you haven't reached (??? until you do, then a flip + gold burst); Inventory aura detail restyled like the alters panel with a themed moving background per aura. See [[2026-10-23 GYM ARC Chart discovery and aura panel]].
@@ -154,6 +155,7 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-23 GYM ARC Roll result card comes alive]]
 - [[2026-10-23 GYM ARC Roll card side layout and NEXT pill outline]]
 - [[2026-10-23 GYM ARC Growth Spurt card quiet outline]]
+- [[2026-10-23 GYM ARC Active boost tiles half size]]
 - [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]]
 - [[2026-10-22 GYM ARC Unlock guides]]
 - [[2026-10-22 GYM ARC New UI applied]]
@@ -509,6 +511,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-23 GYM ARC Prompt - 56 Roll result card comes alive]]
 - [[2026-10-23 GYM ARC Prompt - 57 Roll card side layout and NEXT pill outline]]
 - [[2026-10-23 GYM ARC Prompt - 58 Growth Spurt card quiet outline]]
+- [[2026-10-23 GYM ARC Prompt - 59 Active boost tiles half size]]
 - [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
 - [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
 - [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]
