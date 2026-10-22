@@ -211,6 +211,45 @@ Config.Sounds = {
 		"rbxassetid://1842960025", -- Infinite Void (APM)
 	},
 	MusicVolume = 0.22,
+	-- police and the bank (verified creators / ProSoundEffects)
+	Siren = "rbxassetid://9056622054", -- Yelp-Police-Siren (loops)
+	CameraFlash = "rbxassetid://9113678227", -- Camera Shutter 1 (SFX)
+	Alarm = "rbxassetid://9113084849", -- Alarm Bell Constant Ring (SFX)
+}
+
+---------------------------------------------------------------------
+-- Police and speed cameras (owner, 2026-10-22: limit 120 km/h, the police chase you)
+---------------------------------------------------------------------
+Config.Police = {
+	SpeedLimitKmh = 120,
+	CameraGraceKmh = 3, -- flashed above 123 km/h
+	CameraRange = 42, -- studs from the camera
+	CameraCooldown = 12, -- seconds before the same camera flashes you again
+	CameraFine = 500,
+	FinePerKmh = 25,
+	CameraStars = 1,
+	CityCameraEvery = 7, -- one camera per this many long city lanes
+	LoopCameras = 6, -- pairs round the Legends Loop
+	Patrols = 4, -- patrol cars around you when you're not wanted
+	UnitsPerStar = 1, -- chasing units: 1 + stars (max 6)
+	MaxUnits = 6,
+	PatrolMph = 38,
+	ChaseMph = { 105, 125, 150, 175, 200 }, -- top chase speed per star
+	SpotRange = 90, -- a patrol sees you speeding this close
+	BustRange = 20,
+	BustSeconds = 3, -- stopped next to a police car this long
+	LoseRange = 300, -- out of sight and this far from every unit...
+	LoseSeconds = { 9, 11, 13, 15, 18 }, -- ...for this long per star: escaped
+	MinChaseSeconds = 12,
+	EscapeBounty = { 1500, 3500, 7000, 12000, 20000 },
+	EscapeXp = 60,
+	BustedFineFrac = 0.06,
+	BustedFineMin = 500,
+	BustedFineMax = 150000,
+	RamCooldown = 6,
+	EscalateSeconds = 75, -- a chase this long adds a star...
+	EscalateMax = 3, -- ...up to here
+	CarId = "toyoka_crown", -- the police car's body
 }
 
 ---------------------------------------------------------------------

@@ -20,6 +20,7 @@ local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local CityBuilder = require(script.Parent:WaitForChild("CityBuilder"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
+local Police = require(script.Parent:WaitForChild("Police"))
 
 Players.CharacterAutoLoads = false
 
@@ -149,6 +150,7 @@ local ctx = {
 	playerCars = playerCars,
 }
 OnFoot.init(ctx)
+Police.init(ctx)
 
 local function despawn(player: Player)
 	local s = getSession(player)
