@@ -85,3 +85,6 @@ Both screens now use the owner's new picture (the glowing muscle character at th
 
 ## Always fills the screen (15 Oct)
 The backgrounds now always cover the whole screen, whatever its size or turn, and the logo starts under Roblox's top bar. See [[GYM ARC - Bug - Menu did not fill the screen]].
+
+## Live camera flyover (23 Oct, prompt 60; [[2026-10-23 GYM ARC Menu camera flyover]])
+Behind the title screen the camera glides round the map on a loop of 6 shots (Workspace.MenuCameraPath: one folder per shot with invisible Start / End parts; move / turn them in Studio; `Seconds` attribute), a dip through dark between shots, a light depth of field (off on low graphics / low frame rate) and a soft vignette; your character is hidden. PLAY swoops the camera down to your character in 1 s. Code: `Shared/UI/MenuFlyover`, `MenuClient`.
