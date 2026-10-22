@@ -25,6 +25,8 @@ local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local BankClient = require(script.Parent:WaitForChild("BankClient"))
 local Activities = require(script.Parent:WaitForChild("Activities"))
+local Pedestrians = require(script.Parent:WaitForChild("Pedestrians"))
+local HouseClient = require(script.Parent:WaitForChild("HouseClient"))
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -201,6 +203,7 @@ Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualitySca
 Police.init()
 BankClient.init()
 Activities.init()
+Pedestrians.start(WorldFx.qualityScale())
 UI.hideLoading()
 
 ---------------------------------------------------------------------
@@ -273,6 +276,12 @@ local function requestDrive(id: string)
 end
 
 local showMenu: () -> ()
+
+-- island houses: a bay car's "Drive" spawns it on the driveway (the server picks the spot)
+task.spawn(HouseClient.init, function(id: string)
+	UI.closeGarage()
+	requestDrive(id)
+end)
 
 local function openGarage(fromMenu: boolean)
 	local fresh = GetData:InvokeServer()

@@ -26,6 +26,9 @@ export type Profile = {
 	Penthouses: { [string]: boolean }, -- owned luxury tower penthouses (Config.Towers ids)
 	Rent: { [string]: number }, -- os.time() each penthouse's safe was last emptied
 	Home: string, -- penthouse id set as home ("" = none)
+	Houses: { [string]: boolean }, -- owned island houses (Config.Houses.Types ids)
+	HouseBays: { [string]: { string } }, -- per house type: the car id in each garage bay ("" = empty)
+	HousePlots: { [string]: string }, -- per house type: the plot it stood on last time
 	Loaded: boolean,
 }
 
@@ -84,6 +87,9 @@ local function defaultProfile(): Profile
 		Penthouses = {},
 		Rent = {},
 		Home = "",
+		Houses = {},
+		HouseBays = {},
+		HousePlots = {},
 		Loaded = false,
 	}
 end
@@ -171,6 +177,35 @@ function PlayerData.load(player: Player): Profile
 			if type(saved.Home) == "string" and profile.Penthouses[saved.Home] then
 				profile.Home = saved.Home
 			end
+			-- island houses (absent in older saves)
+			local houseTypes = Config.Houses.Types
+			if type(saved.Houses) == "table" then
+				for _, id in saved.Houses do
+					if type(id) == "string" and houseTypes[id] then
+						profile.Houses[id] = true
+					end
+				end
+			end
+			if type(saved.HouseBays) == "table" then
+				for id, bays in saved.HouseBays do
+					local spec = if type(id) == "string" then houseTypes[id] else nil
+					if spec and type(bays) == "table" then
+						local list = {}
+						for k = 1, spec.bays do
+							local carId = bays[k]
+							list[k] = if type(carId) == "string" and Cars.ById[carId] then carId else ""
+						end
+						profile.HouseBays[id] = list
+					end
+				end
+			end
+			if type(saved.HousePlots) == "table" then
+				for id, plot in saved.HousePlots do
+					if type(id) == "string" and houseTypes[id] and type(plot) == "string" then
+						profile.HousePlots[id] = plot
+					end
+				end
+			end
 		elseif not ok then
 			warn("[CityLegends] load failed for", player.Name, saved)
 		end
@@ -194,6 +229,10 @@ function PlayerData.save(player: Player)
 	for id in profile.Penthouses do
 		table.insert(penthouses, id)
 	end
+	local houses = {}
+	for id in profile.Houses do
+		table.insert(houses, id)
+	end
 	local payload = {
 		Cash = profile.Cash,
 		Owned = owned,
@@ -207,6 +246,9 @@ function PlayerData.save(player: Player)
 		Penthouses = penthouses,
 		Rent = profile.Rent,
 		Home = profile.Home,
+		Houses = houses,
+		HouseBays = profile.HouseBays,
+		HousePlots = profile.HousePlots,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)

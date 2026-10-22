@@ -439,4 +439,31 @@ Config.West = {
 	IslandRoad = 30, -- island ring roads' width
 }
 
+---------------------------------------------------------------------
+-- Island houses (owner, 2026-10-22: "add houses which u can buy and show case your car garage").
+-- Miami-style villas and mansions on the private islands (WestLayout.housePlots). You buy a house
+-- type; in each server you get a free plot of that type (the one you had last time if it's free).
+-- The ground floor is a glass car gallery: you pick which of your cars stand in its bays.
+---------------------------------------------------------------------
+Config.Houses = {
+	Types = {
+		villa = { tier = 1, name = "Island Villa", price = 4000000, bays = 4 },
+		mansion = { tier = 2, name = "Legends Key Mansion", price = 15000000, bays = 6 },
+	},
+	DriveTimeout = 12, -- seconds a "drive this car" spawn point waits for the car
+}
+
+---------------------------------------------------------------------
+-- Pedestrians (client): people walking the sidewalks, crossing on red, strolling the beach
+---------------------------------------------------------------------
+Config.Pedestrians = {
+	Max = 46, -- on high graphics; scaled down by WorldFx.qualityScale()
+	SpawnRadius = 320, -- spawn within this of the camera
+	CullRadius = 420, -- returned to the pool beyond this
+	MinSpawnGap = 70, -- never pop in closer than this to the camera
+	WalkSpeed = { 4.2, 6 }, -- studs a second
+	CrossSpeed = 6.4,
+	CrossChance = 0.35, -- at a corner: wait for the light and cross
+}
+
 return Config

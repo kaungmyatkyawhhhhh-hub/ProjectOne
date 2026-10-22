@@ -23,6 +23,7 @@ local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
 local Activities = require(script.Parent:WaitForChild("Activities"))
+local Houses = require(script.Parent:WaitForChild("Houses"))
 
 Players.CharacterAutoLoads = false
 
@@ -158,6 +159,7 @@ OnFoot.init(ctx)
 Police.init(ctx)
 Bank.init(ctx, Police)
 Activities.init(ctx)
+Houses.init(ctx)
 
 local function despawn(player: Player)
 	local s = getSession(player)
@@ -209,7 +211,12 @@ local function spawnFor(player: Player, carId: string)
 	ao.Responsiveness = 60
 	ao.Parent = root
 
-	local spawnCF = findSpawnCFrame()
+	-- (a house's "Drive" prompt asks for its driveway)
+	local spawnAt = (ctx :: any).spawnAt
+	local spawnCF = (spawnAt and spawnAt[player]) or findSpawnCFrame()
+	if spawnAt then
+		spawnAt[player] = nil
+	end
 	local h = model:GetAttribute("Height") :: number
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation
