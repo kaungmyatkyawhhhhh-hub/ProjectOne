@@ -214,7 +214,7 @@ CarSkin.STEER_DONOR = {
 } :: { [string]: string }
 
 type Template = { part: MeshPart, offset: CFrame }
-type GenericWheel = { x: number, parts: { Template } }
+type GenericWheel = { x: number, parts: { Template }, fixed: { Template }? }
 type Imported = {
 	body: { [string]: Template },
 	wheel: { [string]: Template },
@@ -1070,6 +1070,11 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			b = b:Max(d.Position)
 		end
 		local center = (a + b) / 2
+		if tiltTag then
+			-- our converted wheel, one piece per material (buttons and badge sit off to one side):
+			-- the middle of all the pieces' extents
+			center = biggest.CFrame:PointToWorldSpace((lo + hi) / 2)
+		end
 		if ex[odd] > discSize and #steerParts == 1 then
 			-- wheel and column in one piece: the rim is at the driver's end
 			center -= axis * (ex[odd] / 2 - 0.2)
@@ -1538,8 +1543,10 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		local c = frame:PointToObjectSpace(g.center) * scale
 		local key = (if c.Z < 0 then "F" else "R") .. (if c.X < 0 then "L" else "R")
 		local parts = {}
+		-- our converted cars: "<corner>_static_*" pieces (calipers) steer with the wheel but don't spin
+		local fixed = {}
 		for _, d in g.parts do
-			table.insert(parts, tmpl(d, c))
+			table.insert(if d.Name:lower():find("_static_", 1, true) then fixed else parts, tmpl(d, c))
 		end
 		-- the maker's logo on the wheel's centre cap: covered (our emblem for the brands with one)
 		local cap = marks and marks.caps[key]
@@ -1552,7 +1559,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				table.insert(parts, t)
 			end
 		end
-		generic[key] = { x = c.X, parts = parts }
+		generic[key] = { x = c.X, parts = parts, fixed = if #fixed > 0 then fixed else nil }
 	end
 	-- logos printed on the paint or a plate: covered in the colour round them, or with our emblem
 	if marks then
@@ -2240,6 +2247,37 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 					w.Part0 = tire
 					w.Part1 = p
 					w.Parent = p
+				end
+				local fixed = gw.fixed
+				if fixed then
+					-- calipers ride on a knuckle: it steers with the wheel (Driving turns the front
+					-- ones) but doesn't spin
+					local knuckle = Instance.new("Part")
+					knuckle.Name = "Knuckle" .. j.Name:sub(6)
+					knuckle.Size = Vector3.one * 0.2
+					knuckle.Transparency = 1
+					knuckle.CanCollide = false
+					knuckle.CanQuery = false
+					knuckle.CanTouch = false
+					knuckle.Massless = true
+					knuckle.CFrame = root.CFrame * j.C0
+					knuckle.Parent = skin
+					local km = Instance.new("Motor6D")
+					km.Name = "Knuckle" .. j.Name:sub(6)
+					km.Part0 = root
+					km.Part1 = knuckle
+					km.C0 = j.C0
+					km.Parent = root
+					for i, t in fixed do
+						local p = t.part:Clone()
+						p.Name = "SkinCaliper" .. i
+						p.CFrame = base * t.offset
+						p.Parent = skin
+						local w = Instance.new("WeldConstraint")
+						w.Part0 = knuckle
+						w.Part1 = p
+						w.Parent = p
+					end
 				end
 			end
 			continue
