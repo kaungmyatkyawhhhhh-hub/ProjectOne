@@ -56,5 +56,28 @@ Second boosts, new BASE LV 1: Nia +10% stamina regen, Lou +6% max stamina, Duke 
 ![[GYM ARC/Screenshots/reveal27b/my_trainers_total.jpg]]
 
 ## Owner decisions
-- The BASE boosts are much lower now (Atlas +150% -> +30% at BASE LV 1), so a max LIMITLESS stays at +100-150%. Players who own trainers get smaller boosts after this update. The numbers are all in `Config/Trainers` (`perk`, `Stages[].mult`, `MaxLevelBonus`).
-- The queued prompt 49 (Roll reveal screen) rebuilds this screen again with its own timings.
+- (answered in prompt 27c, below) The 27b BASE boosts (Atlas +30%) were too low.
+- The queued prompt 49 (Roll reveal screen) rebuilds this screen again with its own timings (owner: expected).
+
+## Owner's boost numbers (prompt 27c, 22 Oct, later the same day)
+Prompt: [[2026-10-22 GYM ARC Prompt - 27c Trainer boost numbers]]. **This replaces the 27b numbers above** (the owner found +30% too low for an Eternal: lower what evolving adds, not the starting boost).
+- Stages: BASE x1, IRON-BORN x1.25, BEAST-MODE x1.5, COLOSSUS x1.75, LIMITLESS x2. Levels: LV 1 +0% up to LV 20 +10%. So a LIMITLESS LV 20 = 2.2x the BASE boost.
+- BASE by rarity: Common +5%, Uncommon +8%, Rare +12%, Epic +20%, Legendary +35%, Mythic +50%, Secret +65%, Eternal +75%. The second boosts keep prompt 25's proportions (Nia regen, Lou max stamina, the progress boosts).
+- Total cap stays +400% per kind.
+
+| Trainer (main boost) | BASE LV 1 | BASE LV 20 | LIMITLESS LV 1 | LIMITLESS LV 20 | Second boost (same 4) |
+|---|---|---|---|---|---|
+| Coach Sam, Common (EXP) | +5% | +6% | +10% | +11% | - |
+| Coach Nia, Uncommon (coins) | +8% | +9% | +16% | +18% | stamina regen: +12% / +13% / +24% / +26% |
+| Coach Lou, Rare (EXP) | +12% | +13% | +24% | +26% | max stamina: +8% / +9% / +16% / +18% |
+| Coach Rex, Epic (EXP + coins) | +20% | +22% | +40% | +44% | - |
+| Duke Ironside, Legendary (EXP + coins) | +35% | +39% | +70% | +77% | progress: +9% / +10% / +18% / +20% |
+| Volta, Mythic (EXP + coins) | +50% | +55% | +100% | +110% | progress: +14% / +15% / +28% / +31% |
+| The Shadow, Secret (EXP + coins) | +65% | +72% | +130% | +143% | progress: +18% / +20% / +36% / +40% |
+| Atlas, Eternal (EXP + coins) | +75% | +83% | +150% | **+165%** | progress: +25% / +28% / +50% / +55% |
+
+- **Rebalance gift:** a player who already owned trainers gets, once at join, +500 coins and 1 free roll, and after the menu a popup "TRAINER BOOSTS WERE REBALANCED / A gift for you: +500 coins and 1 free roll". Saved in the trainer data (`rebalance`: 0 not checked, 1 given, 2 seen; `freeRolls`). Players with no trainers are just marked done. A free roll is used before coins (ROLL shows "FREE"; Auto Roll uses it too). Studio switch: `TestRebalanceGift` = true replays the gift when `TestTrainers` is set.
+- Tested (Studio, temporary save): the popup after the menu, +500 coins, ROLL used the free roll (coins unchanged), MY TRAINERS shows Atlas LIMITLESS LV 20 +165% and "TOTAL +197% EXP (MAX +400%)". All logic tests pass.
+
+![[GYM ARC/Screenshots/reveal27b/rebalance_gift_popup.jpg]]
+![[GYM ARC/Screenshots/reveal27b/my_trainers_27c.jpg]]
