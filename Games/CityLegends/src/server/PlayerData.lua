@@ -21,6 +21,9 @@ export type Profile = {
 	XP: number, -- progress inside the current level
 	LastDaily: number, -- os.time() of the last daily gift claim (0 = never)
 	Settings: Settings,
+	Penthouses: { [string]: boolean }, -- owned luxury tower penthouses (Config.Towers ids)
+	Rent: { [string]: number }, -- os.time() each penthouse's safe was last emptied
+	Home: string, -- penthouse id set as home ("" = none)
 	Loaded: boolean,
 }
 
@@ -38,6 +41,8 @@ export type Snapshot = {
 	XPNeed: number,
 	DailyIn: number, -- seconds until the daily gift can be claimed
 	Settings: Settings,
+	Penthouses: { string },
+	Home: string,
 }
 
 export type XpResult = {
@@ -72,6 +77,9 @@ local function defaultProfile(): Profile
 		XP = 0,
 		LastDaily = 0,
 		Settings = { Units = "mph", Gearbox = "Auto" },
+		Penthouses = {},
+		Rent = {},
+		Home = "",
 		Loaded = false,
 	}
 end
@@ -131,6 +139,28 @@ function PlayerData.load(player: Player): Profile
 			if type(saved.Settings) == "table" then
 				PlayerData.setSettings(player, saved.Settings, profile)
 			end
+			-- luxury towers (absent in older saves)
+			local towerIds = {}
+			for _, t in Config.Towers.List do
+				towerIds[t.id] = true
+			end
+			if type(saved.Penthouses) == "table" then
+				for _, id in saved.Penthouses do
+					if type(id) == "string" and towerIds[id] then
+						profile.Penthouses[id] = true
+					end
+				end
+			end
+			if type(saved.Rent) == "table" then
+				for id, t in saved.Rent do
+					if type(id) == "string" and towerIds[id] and type(t) == "number" then
+						profile.Rent[id] = math.clamp(math.floor(t), 0, os.time())
+					end
+				end
+			end
+			if type(saved.Home) == "string" and profile.Penthouses[saved.Home] then
+				profile.Home = saved.Home
+			end
 		elseif not ok then
 			warn("[CityLegends] load failed for", player.Name, saved)
 		end
@@ -150,6 +180,10 @@ function PlayerData.save(player: Player)
 	for id in profile.Owned do
 		table.insert(owned, id)
 	end
+	local penthouses = {}
+	for id in profile.Penthouses do
+		table.insert(penthouses, id)
+	end
 	local payload = {
 		Cash = profile.Cash,
 		Owned = owned,
@@ -158,6 +192,9 @@ function PlayerData.save(player: Player)
 		XP = profile.XP,
 		LastDaily = profile.LastDaily,
 		Settings = profile.Settings,
+		Penthouses = penthouses,
+		Rent = profile.Rent,
+		Home = profile.Home,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)
@@ -236,6 +273,10 @@ function PlayerData.snapshot(player: Player): Snapshot?
 	for id in profile.Owned do
 		table.insert(owned, id)
 	end
+	local penthouses = {}
+	for id in profile.Penthouses do
+		table.insert(penthouses, id)
+	end
 	return {
 		Cash = profile.Cash,
 		Owned = owned,
@@ -245,6 +286,8 @@ function PlayerData.snapshot(player: Player): Snapshot?
 		XPNeed = Config.xpForLevel(profile.Level),
 		DailyIn = PlayerData.dailyReadyIn(player),
 		Settings = { Units = profile.Settings.Units, Gearbox = profile.Settings.Gearbox },
+		Penthouses = penthouses,
+		Home = profile.Home,
 	}
 end
 
