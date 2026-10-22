@@ -14,7 +14,7 @@ Prompts:
 - [[2026-10-23 GYM ARC Prompt - Rounded tier backgrounds]]
 - [[2026-10-23 GYM ARC Prompt - Ready glow]]
 
-Game commit cc77592. Logic, numbers and saves are unchanged.
+Game commits cc77592 and 331b96e. Logic, numbers and saves are unchanged.
 
 ## What changed
 - **Shared tile (`Shared/UI/TrainerTile`):**
@@ -41,7 +41,7 @@ Game commit cc77592. Logic, numbers and saves are unchanged.
 - **Bug fixed:** the detail's slide-in (prompt 54) restored the first trainer's look, which left a dim mini tile at 3/3. It now fades a cover instead. This also fixes the alters detail.
 
 ## Needs the owner
-- **Upload:** `ClaudeOne/assets/ui/ready_glow.png` (a plain white blurred rounded rectangle, the glow texture). Until then the glow uses the round soft glow and is faint.
+- **Glow texture:** uploaded with the owner's OK, no moderation problem: `rbxassetid://130246501630405` (`ClaudeOne/assets/ui/ready_glow.png`, a plain white blurred rounded rectangle, in `Config/UI.ReadyGlow`). The button's edge sits where the glow is ~85% bright, so the halo starts strong and fades over ~22 px.
 - **"LV 1" on the next-stage button:** the server keeps the best level of the 3 copies when evolving, so the button shows that level (e.g. LV 18), not LV 1. Should evolving reset to LV 1 instead? That would be a rule change.
 
 ## Still differs from the references
@@ -62,9 +62,10 @@ Game commit cc77592. Logic, numbers and saves are unchanged.
 ![[GYM ARC/Screenshots/prompt52/06_chart_pc.jpg]]
 ![[GYM ARC/Screenshots/prompt52/07_chart_844.jpg]]
 
-Ready glow (temporary round texture), faintest then brightest:
+Ready glow (the uploaded texture), faintest, brightest, then a close-up:
 ![[GYM ARC/Screenshots/prompt52/09_ready_glow_faintest.jpg]]
 ![[GYM ARC/Screenshots/prompt52/10_ready_glow_brightest.jpg]]
+![[GYM ARC/Screenshots/prompt52/13_ready_glow_closeup.png]]
 
 Corners close up:
 ![[GYM ARC/Screenshots/prompt52/11_closeup_button_corners.png]]
