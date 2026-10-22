@@ -220,7 +220,7 @@ Config.Sounds = {
 	Exhaust_lambrini_lp750_High = "rbxassetid://132442120648563",
 	Exhaust_lambrini_lp750_Launch = "rbxassetid://100034849111835",
 	Exhaust_lambrini_lp750_Crackle = "rbxassetid://128716617727916",
-	Exhaust_lambrini_lp750_Redline = "rbxassetid://106081038994367",
+	Exhaust_lambrini_lp750_Redline = "rbxassetid://15989284563", -- owner, 2026-10-22: new redline
 	-- police and the bank (verified creators / ProSoundEffects)
 	Siren = "rbxassetid://9056622054", -- Yelp-Police-Siren (loops)
 	CameraFlash = "rbxassetid://9113678227", -- Camera Shutter 1 (SFX)

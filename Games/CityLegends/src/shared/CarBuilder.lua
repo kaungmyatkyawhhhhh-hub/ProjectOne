@@ -84,10 +84,17 @@ local REAL_WB: { [string]: number } = {
 	lexis_lc500 = 2.87, astin_dbx = 3.06, bentz_190e = 2.665, bentz_s65_w221 = 3.165, toyoka_chaser = 2.73,
 	-- cabin donors only (not in the roster): their cabins keep their own size
 	ferrara_458s = 2.65, bentz_c63c = 2.84,
+	-- trims on another car's model (owner, 2026-10-22)
+	bnw_m5_f10 = 2.964, bnw_m5_f90 = 2.982, bentz_e63s = 2.939,
 }
 
 -- cars that share another car's imported model (same body and interior) until they get their own
 CarBuilder.MODEL_ALIAS = {} :: { [string]: string }
+for _, spec in Cars.List do
+	if spec.Model then
+		CarBuilder.MODEL_ALIAS[spec.Id] = spec.Model
+	end
+end
 
 -- An imported model's wheelbase and wheel radius (its own studs), from its Wheels folder
 local function partsBounds(inst: Instance): (Vector3?, Vector3?)
@@ -141,7 +148,7 @@ function CarBuilder.getDims(class: string, id: string?): Dims
 		return cached
 	end
 	local d = table.clone(base)
-	local over = DIM_OVERRIDES[id]
+	local over = DIM_OVERRIDES[id] or DIM_OVERRIDES[Cars.modelOf(id)]
 	if over then
 		for k, v in over do
 			(d :: any)[k] = v

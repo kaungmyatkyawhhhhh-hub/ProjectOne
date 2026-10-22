@@ -21,6 +21,7 @@ export type CarSpec = {
 	Accent: Color3?,
 	Order: number,
 	Electric: boolean?, -- one gear, no engine sound
+	Model: string?, -- uses another car's imported model (a trim without its own model yet)
 }
 
 local Cars = {}
@@ -119,6 +120,11 @@ local list: { CarSpec } = {
 	{ Id = "astin_dbx", Name = "Astin Marlin DBX", Class = "SUV", Tier = "High", TopSpeed = 181, ZeroToSixty = 4.3, Handling = 0.66, Price = 450000, Color = Color3.fromRGB(88, 92, 98), Order = 76 },
 	{ Id = "ferrara_california", Name = "Ferrara Californa", Class = "Supercar", Tier = "High", TopSpeed = 193, ZeroToSixty = 3.8, Handling = 0.84, Price = 650000, Color = Color3.fromRGB(20, 21, 24), Order = 77 },
 	{ Id = "bugotti_veyron", Name = "Bugotti Veyrun 16.4", Class = "Hypercar", Tier = "High", TopSpeed = 253, ZeroToSixty = 2.5, Handling = 0.86, Price = 5000000, Color = Color3.fromRGB(20, 21, 24), Accent = Color3.fromRGB(110, 20, 30), Order = 78 },
+	-- owner (2026-10-22): the 5 Series and E Series ladders; no models of their own yet (the M5s
+	-- share the G30 5 Series body, the E63 S the E-Class body, which is an E63 S model)
+	{ Id = "bnw_m5_f10", Name = "BNW M5 F10", Class = "Sedan", Tier = "Mid", TopSpeed = 190, ZeroToSixty = 4.2, Handling = 0.74, Price = 145000, Color = Color3.fromRGB(26, 44, 82), Order = 80, Model = "bnw_540i" },
+	{ Id = "bnw_m5_f90", Name = "BNW M5 F90", Class = "Sedan", Tier = "Mid", TopSpeed = 190, ZeroToSixty = 3.1, Handling = 0.79, Price = 165000, Color = Color3.fromRGB(88, 92, 98), Order = 81, Model = "bnw_540i" },
+	{ Id = "bentz_e63s", Name = "Mercer E63 S", Class = "Sedan", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 3.3, Handling = 0.76, Price = 175000, Color = Color3.fromRGB(20, 21, 24), Order = 82, Model = "bentz_e400" },
 }
 
 Cars.List = list
@@ -128,6 +134,105 @@ for _, spec in list do
 end
 
 Cars.StarterId = "suzaki_swift"
+
+-- the car whose imported model a car uses (its own id unless it borrows one)
+function Cars.modelOf(id: string): string
+	local spec = Cars.ById[id]
+	return if spec and spec.Model then spec.Model else id
+end
+
+---------------------------------------------------------------------
+-- Series and how you get each car (owner, 2026-10-22)
+--   * the dealer groups cars into series; the first car of a series is open from the start and
+--     each next one needs 5 more levels (level 5, 10, 15 ...)
+--   * from the Ferrara F430 up (dealer price $600k and over), cars come only from the car market,
+--     and a car in a series can only be taken delivery of when you own the one before it
+---------------------------------------------------------------------
+Cars.MarketFromPrice = 600000
+Cars.LevelsPerTrim = 5
+
+Cars.Series = {
+	{ Name = "SUZAKI SWIFF", Ids = { "suzaki_swift" } },
+	{ Name = "TOYOKA BELTO", Ids = { "toyoka_belta" } },
+	{ Name = "KIO EV6", Ids = { "kio_ev6" } },
+	{ Name = "BYT", Ids = { "byt_seal", "byt_u8" } },
+	{ Name = "TOYOKA CAMRI", Ids = { "toyoka_camri" } },
+	{ Name = "CHEVO MALIBO", Ids = { "chevo_malibu" } },
+	{ Name = "TOYOKA CROWNE", Ids = { "toyoka_crown" } },
+	{ Name = "TOYOKA ALFARD", Ids = { "toyoka_alfard" } },
+	{ Name = "TOYOKA LAND CRUZER", Ids = { "toyoka_lc200", "toyoka_lc300" } },
+	{ Name = "NISUN Z & GT-R", Ids = { "nisun_350z", "nisun_r34", "nisun_gtr" } },
+	{ Name = "MAZDO RX", Ids = { "mazdo_rx7", "mazdo_rx8" } },
+	{ Name = "BNW 5 SERIES", Ids = { "bnw_530i", "bnw_540i", "bnw_m5_e60", "bnw_m5_f10", "bnw_m5_f90" } },
+	{ Name = "BNW 3 & 4 SERIES", Ids = { "bnw_330i_g20", "bnw_m3_e92", "bnw_m3_f80", "bnw_m4_f82" } },
+	{ Name = "BNW 6 & 8 SERIES", Ids = { "bnw_m6_v10", "bnw_m8gc" } },
+	{ Name = "BNW 7 SERIES", Ids = { "bnw_750li" } },
+	{ Name = "BNW X", Ids = { "bnw_x6", "bnw_x7" } },
+	{ Name = "MERCER E SERIES", Ids = { "bentz_e300", "bentz_e400", "bentz_e63s" } },
+	{ Name = "MERCER 190E", Ids = { "bentz_190e" } },
+	{ Name = "MERCER CLA & CLS", Ids = { "bentz_cla45", "bentz_cls63s" } },
+	{ Name = "MERCER S-CLASS", Ids = { "bentz_s65_w221", "bentz_s63", "bentz_s680" } },
+	{ Name = "MERCER SUV", Ids = { "bentz_gle53", "bentz_g63", "bentz_gls", "brabos_g63" } },
+	{ Name = "MERCER SL & SLS", Ids = { "bentz_sl65bs", "bentz_sls" } },
+	{ Name = "TOYOKA SUPRO", Ids = { "toyoka_supra_mk4" } },
+	{ Name = "TOYOKA CHASOR", Ids = { "toyoka_chaser" } },
+	{ Name = "DODGER", Ids = { "dodger_challenger", "bentz_gt63s" } },
+	{ Name = "XIAOMO SU7", Ids = { "xiaomo_su7" } },
+	{ Name = "LEXIS", Ids = { "lexis_lc500", "lexis_lx700", "lexis_lfa" } },
+	{ Name = "MASEROTI LEVANTO", Ids = { "maseroti_levante" } },
+	{ Name = "CHEVO CAMARO", Ids = { "chevo_camaro" } },
+	{ Name = "CHEVO CORVETTE", Ids = { "chevo_c6", "chevo_c7" } },
+	{ Name = "PORSHA", Ids = { "porsha_boxster", "porsha_panamera", "porsha_gt3" } },
+	{ Name = "ASTIN MARLIN", Ids = { "astin_dbx", "astin_db9", "astin_vantage" } },
+	{ Name = "AUDY R8", Ids = { "audy_r8" } },
+	{ Name = "FERRARA", Ids = { "ferrara_f430", "ferrara_california", "ferrara_599", "ferrara_458" } },
+	{ Name = "LAMBRINI", Ids = { "lambrini_lp570", "lambrini_lp640", "lambrini_lp700", "lambrini_lp750" } },
+	{ Name = "LAMBRINI URUS", Ids = { "lambrini_urus" } },
+	{ Name = "LAMBRINI COUNTACH", Ids = { "lambrini_countach" } },
+	{ Name = "MCLARAN", Ids = { "mclaran_12c" } },
+	{ Name = "BENTLEE", Ids = { "bentlee_contgt", "bentlee_bentayga" } },
+	{ Name = "ROLLS ROYAL", Ids = { "rolls_wraith", "rolls_cullinan" } },
+	{ Name = "BUGOTTI", Ids = { "bugotti_veyron" } },
+}
+
+Cars.SeriesOf = {} :: { [string]: { series: { Name: string, Ids: { string } }, index: number } }
+for _, series in Cars.Series do
+	for i, id in series.Ids do
+		Cars.SeriesOf[id] = { series = series, index = i }
+	end
+end
+-- any car left out gets a series of its own
+for _, spec in list do
+	if not Cars.SeriesOf[spec.Id] then
+		local series = { Name = string.upper(spec.Name), Ids = { spec.Id } }
+		table.insert(Cars.Series, series)
+		Cars.SeriesOf[spec.Id] = { series = series, index = 1 }
+	end
+end
+
+-- from the F430 up: only from the car market
+function Cars.isMarketOnly(id: string): boolean
+	local spec = Cars.ById[id]
+	return spec ~= nil and spec.Price >= Cars.MarketFromPrice
+end
+
+-- the level a dealer car opens at: the series' first car at once, each next one 5 levels on
+function Cars.requiredLevel(id: string): number
+	local at = Cars.SeriesOf[id]
+	if not at or at.index <= 1 then
+		return 1
+	end
+	return (at.index - 1) * Cars.LevelsPerTrim
+end
+
+-- the car before this one in its series (nil for the first)
+function Cars.previous(id: string): string?
+	local at = Cars.SeriesOf[id]
+	if not at or at.index <= 1 then
+		return nil
+	end
+	return at.series.Ids[at.index - 1]
+end
 Cars.CutsceneId = "lambrini_lp750"
 
 -- Realistic paint palette for NPC traffic

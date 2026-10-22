@@ -1901,12 +1901,14 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	if model:GetAttribute("Skinned") then
 		return true
 	end
-	local id = model:GetAttribute("CarId")
+	local rawId = model:GetAttribute("CarId")
 	local class = model:GetAttribute("Class")
 	local root = model.PrimaryPart
-	if type(id) ~= "string" or type(class) ~= "string" or not root then
+	if type(rawId) ~= "string" or type(class) ~= "string" or not root then
 		return false
 	end
+	-- a trim on another car's model looks exactly like that car
+	local id = Cars.modelOf(rawId)
 	local liteMode = lite == true
 	-- imported models first for the cars you look at; runtime lite meshes first for traffic
 	local imported = if liteMode then nil else importedFor(id)
