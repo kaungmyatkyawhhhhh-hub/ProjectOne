@@ -521,4 +521,92 @@ Config.Chauffeur = {
 	Stands = { { 3, 3, -1, -1 }, { 0, 3, 1, 1 }, { 6, 1, -1, 1 } },
 }
 
+---------------------------------------------------------------------
+-- High-Rollers Casino and the Legends Gem Showcase, Downtown (owner, 2026-10-22: "places to spend
+-- big money on rare, visible flex items like custom gems and accessories, and players can steal
+-- and thrive from the casino and gem showcase"). Roblox doesn't allow gambling you can play, even
+-- with fake money, so nothing in the casino takes a bet: you buy VIP membership, look the part and
+-- rob the vault. In-game cash only, never Robux.
+---------------------------------------------------------------------
+Config.Luxe = {
+	-- slot machines and card tables as scenery (none of them can be played). Roblox's maturity
+	-- questionnaire asks about gambling scenery too, which can raise the age label; false puts
+	-- lounge seating and car displays there instead
+	GamingFloorDecor = true,
+	-- VIP membership at the casino's VIP desk: a title over your head, the VIP lounge and money off
+	-- at the Gem Showcase. A higher card replaces the lower one (you pay the difference)
+	Vip = {
+		{ id = 1, name = "GOLD CARD", title = "GOLD HIGH ROLLER", price = 250000, discount = 0.05, color = Color3.fromRGB(255, 200, 70) },
+		{ id = 2, name = "PLATINUM CARD", title = "PLATINUM HIGH ROLLER", price = 2500000, discount = 0.1, color = Color3.fromRGB(215, 230, 245) },
+		{ id = 3, name = "BLACK CARD", title = "BLACK CARD LEGEND", price = 25000000, discount = 0.15, color = Color3.fromRGB(190, 120, 255) },
+	},
+	-- wearables at the Gem Showcase: one per slot, everyone sees them on you (on foot)
+	Slots = { "Neck", "Wrist", "Hand", "Ears", "Eyes", "Head" },
+	Items = {
+		{ id = "rope_silver", slot = "Neck", name = "Silver Rope Chain", price = 25000, metal = "silver", style = "chain" },
+		{ id = "cuban_gold", slot = "Neck", name = "Gold Cuban Link", price = 120000, metal = "gold", style = "cuban" },
+		{ id = "cuban_iced", slot = "Neck", name = "Iced-Out Cuban Link", price = 650000, metal = "white", gem = "diamond", style = "cuban" },
+		{ id = "pendant_legend", slot = "Neck", name = "Legends Diamond Pendant", price = 2500000, metal = "gold", gem = "diamond", style = "pendant" },
+		{ id = "pendant_emerald", slot = "Neck", name = "Emerald Crown Pendant", price = 8000000, metal = "gold", gem = "emerald", style = "pendant" },
+		{ id = "pendant_midnight", slot = "Neck", name = "The Midnight Star", price = 40000000, metal = "white", gem = "sapphire", style = "star" },
+		{ id = "watch_diver", slot = "Wrist", name = "Steel Diver Watch", price = 18000, metal = "silver", style = "watch" },
+		{ id = "watch_presidente", slot = "Wrist", name = "Gold Presidente", price = 95000, metal = "gold", style = "watch" },
+		{ id = "watch_iced", slot = "Wrist", name = "Iced Chronograph", price = 750000, metal = "white", gem = "diamond", style = "watch" },
+		{ id = "watch_tourbillon", slot = "Wrist", name = "Royal Tourbillon", price = 3000000, metal = "rose", gem = "ruby", style = "watch" },
+		{ id = "ring_signet", slot = "Hand", name = "Gold Signet Ring", price = 15000, metal = "gold", style = "ring" },
+		{ id = "ring_ruby", slot = "Hand", name = "Ruby Pinky Ring", price = 450000, metal = "gold", gem = "ruby", style = "ring" },
+		{ id = "ring_black", slot = "Hand", name = "Black Diamond Ring", price = 6000000, metal = "white", gem = "black", style = "ring" },
+		{ id = "studs_diamond", slot = "Ears", name = "Diamond Studs", price = 40000, metal = "white", gem = "diamond", style = "studs" },
+		{ id = "studs_pink", slot = "Ears", name = "Pink Diamond Studs", price = 1200000, metal = "rose", gem = "pink", style = "studs" },
+		{ id = "shades_gold", slot = "Eyes", name = "Gold Aviators", price = 30000, metal = "gold", style = "shades" },
+		{ id = "shades_iced", slot = "Eyes", name = "Iced Shades", price = 900000, metal = "white", gem = "diamond", style = "shades" },
+		{ id = "crown_gold", slot = "Head", name = "Gold Crown", price = 5000000, metal = "gold", gem = "ruby", style = "crown" },
+		{ id = "crown_imperial", slot = "Head", name = "Imperial Crown", price = 25000000, metal = "white", gem = "sapphire", style = "crown" },
+	},
+	Metals = {
+		gold = Color3.fromRGB(255, 196, 70),
+		silver = Color3.fromRGB(200, 204, 212),
+		white = Color3.fromRGB(232, 238, 248),
+		rose = Color3.fromRGB(236, 160, 136),
+	},
+	GemColors = {
+		diamond =Color3.fromRGB(220, 245, 255),
+		emerald = Color3.fromRGB(40, 220, 120),
+		sapphire = Color3.fromRGB(40, 90, 255),
+		ruby = Color3.fromRGB(255, 30, 70),
+		pink = Color3.fromRGB(255, 120, 200),
+		black = Color3.fromRGB(30, 30, 40),
+	},
+	-- the casino vault: hack the security room (the vault corridor's lasers go off), drill the vault
+	-- door (the alarm), then load up from the trolleys. Cash in at the drop-off like the bank's
+	Casino = {
+		HackSeconds = 6, -- hold E at the security panel
+		LasersOffSeconds = 150, -- how long the hack keeps the lasers off
+		DrillSeconds = 12, -- hold E at the vault door, after the hack
+		Stars = 5,
+		OpenSeconds = 120,
+		CooldownSeconds = 600,
+		GrabSeconds = 3,
+		GrabsPerTrolley = 3,
+		GrabMin = 22000,
+		GrabMax = 40000,
+		MaxLoot = 400000, -- one bag
+		HackXp = 80,
+	},
+	-- the Gem Showcase's smash-and-grab: smash a case (the alarm), grab its gems; the showpiece
+	-- under the glass dome is worth the most and brings more stars
+	Showcase = {
+		SmashSeconds = 1.5,
+		GrabSeconds = 1.2,
+		Stars = 3,
+		ShowpieceStars = 4,
+		CaseMin = 9000,
+		CaseMax = 18000,
+		ShowpieceLoot = 75000,
+		ShowpieceSeconds = 5,
+		MaxLoot = 180000,
+		RestockSeconds = 420, -- cases are mended and refilled after this
+	},
+}
+
 return Config

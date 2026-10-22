@@ -206,6 +206,7 @@ BankClient.init()
 Activities.init()
 Pedestrians.start(WorldFx.qualityScale())
 ChauffeurClient.init()
+require(script.Parent:WaitForChild("LuxeClient")).init() -- casino VIP, the gem shop, heist messages
 UI.hideLoading()
 
 ---------------------------------------------------------------------
