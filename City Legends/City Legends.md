@@ -15,6 +15,8 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - The cars Claude generated from code didn't look good enough. Plan: use real car models from the Creator Store, inserted by hand in Studio. Delete their scripts and put them in `ReplicatedStorage/CarModels`, named after the car id.
 - No automatic downloading of Creator Store models by the game.
 - Money can be set from the server console: `game.Players.NAME:SetAttribute("SetCash", amount)` (or `"AddCash"`). Use the Studio command bar in Server mode, or the F9 server console.
+- Testers can own every car from the same server console: `game.Players.NAME:SetAttribute("UnlockAllCars", true)` (2026-10-22).
+- Driver hands (2026-10-22): in the in-car camera the forearms and hands stay on the wheel (only the part near the camera is cut off); if the avatar can't load, plain default arms are used.
 - Claude sends the game as a place file (`CityLegends.rbxlx`) after each change.
 - Never share Roblox or alt account logins or cookies with Claude (offered once, declined).
 - Car looks can be inspired by real cars, but names and badges stay fictional.

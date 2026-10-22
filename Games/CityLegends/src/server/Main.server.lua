@@ -422,6 +422,7 @@ end)
 	set on themselves don't replicate to the server.
 	  game.Players.NAME:SetAttribute("SetCash", 1000000)  -- set to an amount
 	  game.Players.NAME:SetAttribute("AddCash", 50000)    -- add (negative takes)
+	  game.Players.NAME:SetAttribute("UnlockAllCars", true) -- own every car (testers)
 ]]
 local function watchConsoleCash(player: Player)
 	for _, attr in { "SetCash", "AddCash" } do
@@ -442,9 +443,33 @@ local function watchConsoleCash(player: Player)
 	end
 end
 
+-- testers (owner, 2026-10-22): own every car in the roster at once
+local function watchConsoleUnlock(player: Player)
+	player:GetAttributeChangedSignal("UnlockAllCars"):Connect(function()
+		if player:GetAttribute("UnlockAllCars") ~= true then
+			return
+		end
+		player:SetAttribute("UnlockAllCars", nil)
+		local profile = PlayerData.get(player)
+		if not profile then
+			return
+		end
+		local n = 0
+		for _, spec in Cars.List do
+			if not profile.Owned[spec.Id] then
+				profile.Owned[spec.Id] = true
+				n += 1
+			end
+		end
+		task.spawn(PlayerData.save, player)
+		print(("[CityLegends] %s now owns every car (%d new)"):format(player.Name, n))
+	end)
+end
+
 local function onPlayerAdded(player: Player)
 	getSession(player)
 	watchConsoleCash(player)
+	watchConsoleUnlock(player)
 	PlayerData.load(player)
 end
 

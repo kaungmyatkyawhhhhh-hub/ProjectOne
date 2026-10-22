@@ -965,6 +965,12 @@ function Driving.attach(model: Model)
 					end
 					task.wait(attempt)
 				end
+				-- no avatar (a Studio test player, or the avatar service down): plain default arms
+				if not ok then
+					ok, rig = pcall(function()
+						return Players:CreateHumanoidModelFromDescription(Instance.new("HumanoidDescription"), Enum.HumanoidRigType.R6)
+					end)
+				end
 				if not ok or not rig or not rig:FindFirstChild("Left Arm") or not (state and state.model == model) then
 					if not ok then
 						warn("[CityLegends] driver arms unavailable:", rig)
@@ -1727,21 +1733,27 @@ function Driving.render(dt: number)
 						glove.CFrame = root.CFrame * foreCF * CFrame.new(0, 0, -(arm.foreLen + arm.handLen) / 2) * arm.rot
 					end
 				else
-					-- one straight arm, shoulder to hand
-					local len = (handPos - arm.shoulder).Magnitude
+					-- one straight arm, shoulder to hand. In first person only the forearm and hand
+					-- show (owner, 2026-10-17: the whole arm came past the camera as a big slab;
+					-- 2026-10-22: the hands on the wheel disappeared when it was hidden)
+					local from = arm.shoulder
+					if Driving.cameraMode == "Interior" then
+						from = handPos + (arm.shoulder - handPos) * 0.45
+					end
+					local len = (handPos - from).Magnitude
 					if math.abs(arm.upper.Size.Y - len) > 0.02 then
 						arm.upper.Size = Vector3.new(arm.upper.Size.X, len, arm.upper.Size.Z)
 					end
-					arm.upper.CFrame = root.CFrame * CFrame.lookAt((arm.shoulder + handPos) / 2, handPos) * arm.rot
+					arm.upper.CFrame = root.CFrame * CFrame.lookAt((from + handPos) / 2, handPos) * arm.rot
 				end
-				-- in first person the arms came right past the camera as big grey slabs (owner,
-				-- 2026-10-17: "make it so that u can see clearly in the first person view")
-				arm.upper.LocalTransparencyModifier = if Driving.cameraMode == "Interior" then 1 else 0
+				-- jointed arms: in first person the upper arm (next to the camera) hides, the
+				-- forearm and glove stay on the wheel
+				arm.upper.LocalTransparencyModifier = if fore and Driving.cameraMode == "Interior" then 1 else 0
 				if fore then
-					fore.LocalTransparencyModifier = arm.upper.LocalTransparencyModifier
+					fore.LocalTransparencyModifier = 0
 				end
 				if arm.glove then
-					(arm.glove :: BasePart).LocalTransparencyModifier = arm.upper.LocalTransparencyModifier
+					(arm.glove :: BasePart).LocalTransparencyModifier = 0
 				end
 			end
 		end
