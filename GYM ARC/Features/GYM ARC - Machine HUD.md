@@ -84,3 +84,9 @@ REP (150 x 46) sits right above Roblox's jump button on phones, PUMP right above
 - Reward popups (`Notify.Reward`, queued 1.5 s apart, a newer LVL / weight replaces one still waiting): new weight, quest done, new title, LVL up.
 
 ![[GYM ARC/Screenshots/playtest_fixes/reward_popup.jpg]]
+
+## One even stack (owner, 23 Oct; [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]])
+- The weight card, AUTO TRAIN, PUMP and REP are one width (REP's, 150), with the same right and left edges, 8 px gaps (`MachineHud.Gap`) and 12 px corners (`MachineHud.StackCorner`). The stack builds up from REP.
+- The card keeps its own layout (- and + at the ends, the weight in the middle), scaled to that width (`placePanel`), with its outline and gold line as thick as PUMP's. It shrinks further only if the stack wouldn't fit under the top bar.
+- "Set done" / BIG REP: a small "+80.5K CHEST" line rising beside REP (`POPUP.ScreenText` in MachineClient). Your own overhead title hides while you're on a machine.
+![[GYM ARC/Screenshots/ui_v3/tutorial/phone_02_bench_toast_stack.jpg]]

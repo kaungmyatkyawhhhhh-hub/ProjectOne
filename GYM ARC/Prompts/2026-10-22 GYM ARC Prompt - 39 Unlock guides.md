@@ -63,3 +63,6 @@ Test: a fresh save through Growth Spurt 1 and 2 (Beach Gym, posing shows, traine
 
 ## Done (checked 22 Oct)
 The owner's update to section 5 (earlier tile style, badges, locked tabs) is exactly prompt 39b, done: [[2026-10-22 GYM ARC Unlock guides]].
+
+## Changed later
+- 23 Oct (owner): **SHOP is never locked.** It's out of the locked tiles and the unlock guides: open from the first join, no padlock, no NEW badge. See [[2026-10-23 GYM ARC Prompt - SHOP never locked]].

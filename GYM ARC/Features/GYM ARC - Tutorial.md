@@ -50,3 +50,14 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 
 ## Quiet tutorial + teleport (22 Oct; [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]])
 - GO TO buttons teleport (GoToService); a small dark SKIP pill top-right; the target machine glows gold with a bouncing gold arrow; only its sign shows; no quest card, notices, item popups or offers until the tutorial ends (`UIBus.InTutorial`, `UIBus.AfterTutorial`). The Coach Dex dialog is unchanged.
+
+## New UI and a clean screen (23 Oct, prompts 52 / 53; [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]])
+- Coach Dex dialog: graphite + hex, thin gold outline, dark bottom edge; gold-framed live portrait; COACH DEX in gold chunky; the words in Montserrat Bold; a gold "+50" coin pill; "Tap to continue (1/2)". ~55% wide, fits its words (`Shared/UI/CoachDialog`).
+- GO TO: normal ChunkyButton size at the bottom centre, 12 px above the dialog / hotbar / stamina bar.
+- SKIP: a small dark pill under the top bar on the right, always there (`Shared/UI/SkipPill`); first tap gold "TAP AGAIN TO SKIP".
+- Buttons a step needs (shake slot, STOP, Stats, Muscles): the Spotlight (`Shared/UI/Spotlight`): dim around it, gold glow, bouncing arrow + "TAP STOP".
+- World marker: gold name + distance + diamond + chevron, kept under the top bar, hidden right next to the target (`GuidePath.Mark`).
+- While it runs only the tutorial shows (plus coins, LVL, left nav, machine controls); the rest fades back after.
+- The step band is a dark pill; toasts use the one lane at the top centre (`Shared/UI/Notify`).
+![[GYM ARC/Screenshots/ui_v3/tutorial/phone_01_first_step.jpg]]
+![[GYM ARC/Screenshots/ui_v3/tutorial/phone_04_tap_stop_lvl_up.jpg]]
