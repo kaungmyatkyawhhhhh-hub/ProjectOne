@@ -1,7 +1,7 @@
 ---
 date: 2026-10-23
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 52 Match the trainer references (Agency, My Trainers, Evolutions)
 

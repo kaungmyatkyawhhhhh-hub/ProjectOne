@@ -77,7 +77,8 @@ The tutorial's steps and rewards are unchanged; only the look and where things s
 - No script errors. The game tests pass.
 
 ## Needs your decision
-- **The shake step on a machine:** the hotbar (where the shake sits) hides on machines, so there's nothing to tap and the 15 s safety net drinks the shake for the player. Making the shake usable on a machine changes the steps, which this brief ruled out. Tell me if you want it.
+- ~~The shake step on a machine~~: done, option B ([[2026-10-23 GYM ARC Prompt - Shake step tap STOP first]]). On a machine the step says "Tap STOP, then tap your free shake to drink it." with the arrow on STOP; off the machine the hotbar shows and the arrow moves to the shake ("TAP IT"). The safety net now waits 25 s (was 15) to leave room for both taps. Tested: STOP, the shake, a tap on the screen, it's drunk and the next step starts.
+- Also fixed: a dialog line that only just fit on one line lost its last word ("Legs need love too."). It's measured with a margin now.
 - **A Coach Dex still picture:** only if you want one (an upload; I'd ask first).
 
 ## Before / after
@@ -97,3 +98,5 @@ The tutorial's steps and rewards are unchanged; only the look and where things s
 ![[GYM ARC/Screenshots/ui_v3/tutorial/desktop_03_skip_armed.jpg]]
 ![[GYM ARC/Screenshots/ui_v3/tutorial/desktop_04_unlock_guide_dialog.jpg]]
 ![[GYM ARC/Screenshots/ui_v3/tutorial/desktop_05_unlock_guide_spotlight.jpg]]
+![[GYM ARC/Screenshots/ui_v3/tutorial/phone_08_shake_tap_stop.jpg]]
+![[GYM ARC/Screenshots/ui_v3/tutorial/phone_09_shake_tap_it.jpg]]
