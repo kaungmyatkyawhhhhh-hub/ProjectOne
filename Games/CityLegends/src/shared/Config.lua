@@ -373,8 +373,12 @@ Config.Market = {
 	FlipOffPrizeCap = 400000,
 	FlipOffCooldown = 120,
 	-- market-only cars (F430 and up): a share of listings are the ones you could unlock next
-	UnlockListingChance = 0.22,
-	UnlockShowroomChance = 0.4,
+	-- market-only cars (owner, 2026-10-22: "make the high cars harder to get in the market"): rare
+	-- listings, rarely in Showroom condition (the only one that can be delivered), mostly over value
+	UnlockListingChance = 0.08,
+	UnlockShowroomChance = 0.15,
+	HighShowroomKeep = 0.2, -- of the Showroom rolls a market-only car gets, this share stays Showroom
+	HighListingSpread = { 0.95, 1.6 },
 }
 
 ---------------------------------------------------------------------

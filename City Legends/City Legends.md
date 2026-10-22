@@ -318,3 +318,8 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - From the Ferrara F430 up ($600k and over) cars are market-only: find a Showroom unit on the car market (K) and take delivery; a car later in a series needs the one before it owned (e.g. the Aventador SV needs the LP700-4). About 1 in 5 market listings is a market-only car you could unlock next, often in Showroom condition; prices run under and over value.
   - New cars: BNW M5 F10 ($145k) and M5 F90 ($165k) on the G30 5 Series model for now, Mercer E63 S ($175k) on the E-Class model (which is an E63 S). They need their own models later if the owner wants. Named "Mercer E63 S" (no AMG, the brand mark rule).
   - Series and rules live in `Cars.Series`, `Cars.MarketFromPrice`, `Cars.requiredLevel`, `Cars.previous`; the dealer and the market check them on the server.
+
+- **High cars harder to get, garage by brand (2026-10-22, owner: "make the high cars harder to get in the market and also fit each car into the brands"):**
+  - Market-only cars ($600k and up) show up less: about 1 in 12 listings is a car you could unlock next (was 1 in 5), and only about 15% of those are Showroom (the only condition that can be delivered). Other listings of market-only cars are rarely Showroom, and their asking prices run from 95% to 160% of value (mostly over).
+  - The garage lists brands (BNW, MERCER, TOYOKA, LAMBRINI ...), each with its series under it. The brand is the make in the car's name (`Series.Brand` in `Cars`).
+- **M5 E60 and M6 needles (2026-10-22, owner screenshot):** the red needles reached past the dials; they're now two-thirds as long (`CarSkin.NEEDLE_LENGTH`).

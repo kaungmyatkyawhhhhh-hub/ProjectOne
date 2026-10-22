@@ -328,6 +328,10 @@ local function newListing(s: Session, cash: number, owned: { [string]: boolean }
 	s.nextLid += 1
 	local c = pickCar(cash)
 	local k = pickCond()
+	-- a market-only car is hardly ever a Showroom unit
+	if Cars.isMarketOnly(c) and k == "Showroom" and rng:NextNumber() > M.HighShowroomKeep then
+		k = "Clean"
+	end
 	-- some listings are the high-end cars only the market sells, often in Showroom condition
 	if owned and rng:NextNumber() < M.UnlockListingChance then
 		local options = nextUnlocks(owned)
@@ -336,11 +340,12 @@ local function newListing(s: Session, cash: number, owned: { [string]: boolean }
 			k = if rng:NextNumber() < M.UnlockShowroomChance then "Showroom" else pickCond()
 		end
 	end
+	local spread = if Cars.isMarketOnly(c) then M.HighListingSpread else M.ListingSpread
 	return {
 		lid = s.nextLid,
 		c = c,
 		k = k,
-		ask = math.floor(value(c, k) * rng:NextNumber(M.ListingSpread[1], M.ListingSpread[2])),
+		ask = math.floor(value(c, k) * rng:NextNumber(spread[1], spread[2])),
 		rating = math.floor(rng:NextNumber(3.5, 5.0) * 10 + 0.5) / 10,
 	}
 end

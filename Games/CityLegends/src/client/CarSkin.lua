@@ -114,6 +114,13 @@ CarSkin.CLUSTER_RECT = {
 -- points for an uneven scale (a rev counter squeezed below 3000). Units: kmh, mph or rpm.
 -- kind "digits" is a live speed read-out instead (length = its width) where the model's own showed
 -- a fixed number. Measured from the converted files (needle ends, labels) by tools in the notes.
+-- part-needle cars whose needle came out too long from the model's needle part (owner,
+-- 2026-10-22: the M5 E60 and M6 needles reached past the dials): times the measured length
+CarSkin.NEEDLE_LENGTH = {
+	bnw_m5_e60 = 0.66,
+	bnw_m6_v10 = 0.66,
+} :: { [string]: number }
+
 export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string }
 CarSkin.DIAL_NEEDLES = {
 	lambrini_countach = { -- Countach
@@ -1399,7 +1406,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 						len = math.max(d.Size.X, d.Size.Y, d.Size.Z) * scale
 						rest = Vector3.new(-0.7, -0.7, 0).Unit -- needle at rest: about 7 o'clock
 					end
-					len = math.clamp(len, 0.2, 0.6)
+					len = math.clamp(len, 0.2, 0.6) * (CarSkin.NEEDLE_LENGTH[src.Name] or 1)
 					-- a thin red line (no neon glow: it made the needle look thick)
 					local needle = Instance.new("Part")
 					needle.Size = Vector3.new(0.016, 0.016, len)

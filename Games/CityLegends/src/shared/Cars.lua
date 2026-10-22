@@ -148,6 +148,8 @@ end
 --   * from the Ferrara F430 up (dealer price $600k and over), cars come only from the car market,
 --     and a car in a series can only be taken delivery of when you own the one before it
 ---------------------------------------------------------------------
+export type Series = { Name: string, Ids: { string }, Brand: string? }
+
 Cars.MarketFromPrice = 600000
 Cars.LevelsPerTrim = 5
 
@@ -193,9 +195,22 @@ Cars.Series = {
 	{ Name = "BENTLEE", Ids = { "bentlee_contgt", "bentlee_bentayga" } },
 	{ Name = "ROLLS ROYAL", Ids = { "rolls_wraith", "rolls_cullinan" } },
 	{ Name = "BUGOTTI", Ids = { "bugotti_veyron" } },
-}
+} :: { Series }
 
-Cars.SeriesOf = {} :: { [string]: { series: { Name: string, Ids: { string } }, index: number } }
+-- each series' brand (owner, 2026-10-22: "fit each car into the brands"): the make in its first
+-- car's name; the garage lists brands, then their series
+local TWO_WORD_BRANDS = { Rolls = "ROLLS ROYAL", Astin = "ASTIN MARLIN" }
+local byIdEarly: { [string]: CarSpec } = {}
+for _, spec in list do
+	byIdEarly[spec.Id] = spec
+end
+for _, series in Cars.Series do
+	local first = byIdEarly[series.Ids[1]]
+	local word = if first then string.match(first.Name, "^(%S+)") or first.Name else series.Name
+	series.Brand = TWO_WORD_BRANDS[word] or string.upper(word)
+end
+
+Cars.SeriesOf = {} :: { [string]: { series: Series, index: number } }
 for _, series in Cars.Series do
 	for i, id in series.Ids do
 		Cars.SeriesOf[id] = { series = series, index = i }
@@ -204,7 +219,8 @@ end
 -- any car left out gets a series of its own
 for _, spec in list do
 	if not Cars.SeriesOf[spec.Id] then
-		local series = { Name = string.upper(spec.Name), Ids = { spec.Id } }
+		local word = string.match(spec.Name, "^(%S+)") or spec.Name
+		local series = { Name = string.upper(spec.Name), Ids = { spec.Id }, Brand = TWO_WORD_BRANDS[word] or string.upper(word) }
 		table.insert(Cars.Series, series)
 		Cars.SeriesOf[spec.Id] = { series = series, index = 1 }
 	end
