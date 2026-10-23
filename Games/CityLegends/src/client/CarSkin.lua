@@ -235,7 +235,10 @@ CarSkin.KEEP_OWN_CLUSTER = {} :: { [string]: boolean }
 
 -- a drawn cluster's line-up over the car's own hood where it isn't measured (CLUSTER_RECT):
 -- { right, up, forward } in studs and a size factor, checked from the driver's eye in Studio
-CarSkin.CLUSTER_SHIFT = {} :: { [string]: { number } }
+CarSkin.CLUSTER_SHIFT = {
+	audy_r8 = { -0.08, 0.26, 0, 0.84 }, -- up into the twin-dial hood, over its own dials
+	mclaran_12c = { 0, 0.13, -0.12, 0.78 }, -- the dial in the round pod, the screens in the wings
+} :: { [string]: { number } }
 
 -- steering wheels (owner, 2026-10-24: "fix all of the steering wheels bad color and if it doesnt
 -- match the actual real one fix it"). A converted car whose wheel came into Studio as one part
@@ -245,7 +248,7 @@ CarSkin.CLUSTER_SHIFT = {} :: { [string]: { number } }
 -- Roblox keep their wheel's own parts, but plain grey or white plastic on it (wrong on every real
 -- wheel in the game) turns to the same black leather; textured, metal and chrome parts stay.
 local LEATHER = { color = Color3.fromRGB(24, 24, 26), material = Enum.Material.Leather }
-local ALCANTARA = { color = Color3.fromRGB(30, 30, 32), material = Enum.Material.Fabric }
+local ALCANTARA = { color = Color3.fromRGB(30, 30, 32), material = Enum.Material.SmoothPlastic } -- (Fabric's pattern is blotchy at wheel size)
 CarSkin.STEER_LOOK = {
 	lambrini_lp750 = ALCANTARA, -- Aventador SV: Alcantara rim
 	lambrini_lp570 = ALCANTARA, -- Gallardo Superleggera: Alcantara rim, carbon bottom

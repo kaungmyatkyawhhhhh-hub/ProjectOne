@@ -1404,6 +1404,7 @@ function Driving.attach(model: Model)
 			ferrara_599 = { 0.07, 0, 1.04 }, -- on the line from the eye to the car's own cluster (from its 3D file)
 			ferrara_f430 = { 0.09, 0, 1.8 }, -- owner's screenshot: big enough to cover its own cluster down to the hub
 			lambrini_lp570 = { 0.15, 0, 1.25 }, -- owner's screenshot: up above the wheel hub, bigger
+			lambrini_lp640 = { 0, 0, 0.9 }, -- the LP640 design inside its own hood
 			bnw_m5_e60 = { 0, 0, 1.25 }, -- owner: bigger
 		}
 		local nudge = CLUSTER_NUDGE[spec.Id] or { 0, 0, 1 }
