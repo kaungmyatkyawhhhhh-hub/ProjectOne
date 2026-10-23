@@ -52,6 +52,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - NPC Regulars and Gym Cat]]: regulars, Dante the 8'0" giant, Plates the cat; pets replaced by Personal Trainers (done)
 - [[GYM ARC - Legend NPCs]]: visiting legends with one-time challenges (done)
 - [[GYM ARC - Personal Trainers]]: hire a coach who follows you and cheers (done)
+- [[GYM ARC - Admin console]]: the owner gives coins and trainers from the F9 Server console (done)
 - [[GYM ARC - Day and Night]]: 20-minute day in town, lights at night (done)
 - [[GYM ARC - Photo Mode]]: photo mode at the mirrors and the posing stage (done)
 - [[GYM ARC - NPC Rivals]]: Benny, Coral and Dante, one rival per gym with a challenge (done)
