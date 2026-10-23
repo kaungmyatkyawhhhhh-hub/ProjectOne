@@ -1681,6 +1681,38 @@ function transplantInterior(out: Imported, donor: Imported, rear: number)
 	out.clusterSize = donor.clusterSize
 end
 
+-- traffic on an imported model (when the lite meshes can't be made): only what shows from outside.
+-- A part goes when it sits wholly inside the cabin box: between the dash and the rear axle, inside
+-- the wheels' track, under the roof line (owner, 2026-10-23: no interiors in traffic)
+local exteriorCache: { [string]: { [string]: Template } } = {}
+local function exteriorOf(id: string, out: Imported, wb: number): { [string]: Template }
+	local cached = exteriorCache[id]
+	if cached then
+		return cached
+	end
+	local eye = out.eye
+	if not (eye and out.generic and next(out.generic)) then
+		exteriorCache[id] = out.body
+		return out.body
+	end
+	local halfW = cabinHalfWidth(out)
+	local front, back, top = eye.Z - 3.4, wb / 2 - 0.3, eye.Y + 0.4
+	local body: { [string]: Template } = {}
+	for name, t in out.body do
+		local cf, h = t.offset, t.part.Size / 2
+		local p = cf.Position
+		local ex = math.abs(cf.RightVector.X) * h.X + math.abs(cf.UpVector.X) * h.Y + math.abs(cf.LookVector.X) * h.Z
+		local ey = math.abs(cf.RightVector.Y) * h.X + math.abs(cf.UpVector.Y) * h.Y + math.abs(cf.LookVector.Y) * h.Z
+		local ez = math.abs(cf.RightVector.Z) * h.X + math.abs(cf.UpVector.Z) * h.Y + math.abs(cf.LookVector.Z) * h.Z
+		local inside = math.abs(p.X) + ex < halfW and p.Z - ez > front and p.Z + ez < back and p.Y + ey < top and p.Y - ey > 0.3
+		if not inside or t.part.Transparency >= 0.3 or t.part.Material == Enum.Material.Glass then
+			body[name] = t
+		end
+	end
+	exteriorCache[id] = body
+	return body
+end
+
 local function importedFor(id: string): Imported?
 	local cached = importCache[id]
 	if cached ~= nil then
@@ -1952,7 +1984,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	local body = if imported then imported.body else bodyFor(id, class, liteMode)
 	if not body then
 		imported = importedFor(id)
-		body = if imported then imported.body else nil
+		body = if imported then (if liteMode then exteriorOf(id, imported, CarBuilder.getDims(class, id).wb) else imported.body) else nil
 	end
 	if not body then
 		return false
