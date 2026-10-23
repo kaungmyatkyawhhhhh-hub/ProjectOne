@@ -1335,17 +1335,26 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 	end
 	-- every car the same view (owner, 2026-10-23): the eye sits where a driver's eyes are in a real
-	-- car, ~27 cm (0.8 studs) under the roof line above the seat, so the head never goes through
-	-- the roof and the windshield fills the view. A steering wheel found too high for that (a
-	-- wrong pick) doesn't move it; without a roof (a convertible's windshield frame counts) it
-	-- sits 0.8 studs over the wheel. An EyeHeight attribute still nudges it.
+	-- car, under the roof line above the seat by a sixth of the roof's height (~16 cm in a
+	-- supercar, ~30 cm in an SUV), so the head never goes through the roof; and always a little over
+	-- the top of the steering wheel, so the windshield isn't hidden behind it. Without a roof (a
+	-- convertible's windshield frame counts) it sits 0.8 studs over the wheel. An EyeHeight
+	-- attribute still nudges it.
 	if out.eye then
 		local eye = out.eye :: Vector3
 		local lift = (src:GetAttribute("EyeHeight") :: number?) or 0
+		local wheelTop = if out.steer then out.steer.mount.Position.Y + out.steer.radius * 0.9 else nil
+		local y: number? = nil
 		if roofTop then
-			out.eye = Vector3.new(eye.X, roofTop - 0.8 + lift, eye.Z)
+			y = roofTop - math.clamp(roofTop * 0.17, 0.5, 0.95)
+			if wheelTop then
+				y = math.min(math.max(y :: number, wheelTop + 0.35), roofTop - 0.4)
+			end
 		elseif out.steer then
-			out.eye = Vector3.new(eye.X, out.steer.mount.Position.Y + 0.8 + lift, eye.Z)
+			y = out.steer.mount.Position.Y + 0.8
+		end
+		if y then
+			out.eye = Vector3.new(eye.X, y + lift, eye.Z)
 		end
 	end
 
