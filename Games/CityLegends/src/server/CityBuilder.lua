@@ -30,6 +30,7 @@ local Casino = require(script.Parent:WaitForChild("Casino"))
 local GemShowcase = require(script.Parent:WaitForChild("GemShowcase"))
 local Fountain = require(script.Parent:WaitForChild("Fountain"))
 local Plazas = require(script.Parent:WaitForChild("Plazas"))
+local Garages = require(script.Parent:WaitForChild("Garages"))
 local Houses = require(script.Parent:WaitForChild("Houses"))
 
 local CityBuilder = {}
@@ -1552,6 +1553,8 @@ function CityBuilder.build(mode: string?): Folder
 		buildBlocks(city, ib, scenery)
 		buildSignals(city, ib)
 	end
+	-- the luxury towers' underground garages (cut into the ground and the blocks' sidewalks)
+	Garages.build(CityBuilder.kit, city)
 	buildRing(city)
 	buildHighway(city)
 	CityPremium.environment(CityBuilder.kit, city)

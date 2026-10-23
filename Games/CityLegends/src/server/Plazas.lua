@@ -12,6 +12,8 @@
 	and are left as they are.
 ]]
 
+local Garages = require(script.Parent:WaitForChild("Garages"))
+
 local Plazas = {}
 
 local CELL = 18
@@ -232,6 +234,15 @@ function Plazas.fill(kit: any, parent: Instance, bi: number, bj: number, cx: num
 	local function cellZ(i: number): number
 		return z0 + i * CELL
 	end
+	-- a tower's underground garage (Garages): its ramp well stays open, its corner and side free
+	local garageSide = Garages.SIDE[bi .. "_" .. bj]
+	local function inWell(ax: number, bx: number, az: number, bz: number): boolean
+		if not garageSide then
+			return false
+		end
+		local w0, w1 = cx + garageSide * 76, cx + garageSide * 104
+		return math.max(ax, math.min(w0, w1)) < math.min(bx, math.max(w0, w1)) and math.max(az, cz - 52) < math.min(bz, cz + 52)
+	end
 	-- paving round the building: big two-tone stone tiles (two cells square), a lighter rim
 	-- against the building
 	local function pave(c0: number, r0: number, c1: number, r1: number)
@@ -240,6 +251,9 @@ function Plazas.fill(kit: any, parent: Instance, bi: number, bj: number, cx: num
 				local ce, re = math.min(c + 1, c1), math.min(r + 1, r1)
 				local ax, bx = cellX(c), cellX(ce + 1)
 				local az, bz = cellZ(r), cellZ(re + 1)
+				if inWell(ax, bx, az, bz) then
+					continue
+				end
 				local tone = if (c // 2 + r // 2) % 2 == 0 then TILE_A else TILE_B
 				kit.mk(folder, Vector3.new(bx - ax - 0.3, 0.12, bz - az - 0.3), CFrame.new((ax + bx) / 2, top, (az + bz) / 2), tone, Enum.Material.Pavement, { name = "PlazaFloor" })
 			end
@@ -262,6 +276,10 @@ function Plazas.fill(kit: any, parent: Instance, bi: number, bj: number, cx: num
 	local k = 0
 	for _, corner in { { 0, 0 }, { N - 2, 0 }, { 0, N - 2 }, { N - 2, N - 2 } } do
 		k += 1
+		-- (the garage's entrance parking takes that corner)
+		if garageSide and corner[2] == 0 and (corner[1] == 0) == (garageSide < 0) then
+			continue
+		end
 		local c = Vector3.new(cellX(corner[1] + 1), top, cellZ(corner[2] + 1))
 		local face = Vector3.new(0, 0, if corner[2] == 0 then -1 else 1)
 		local theme = CORNER_THEMES[(seed + k) % #CORNER_THEMES + 1]
@@ -280,7 +298,7 @@ function Plazas.fill(kit: any, parent: Instance, bi: number, bj: number, cx: num
 	-- the corners and the clear middle, facing that street
 	local SIDE_THEMES = { garden, screen, artRing }
 	for _, side in { { 0, fp[1] >= 2, -1 }, { N - 2, fp[3] <= N - 3, 1 } } do
-		if side[2] then
+		if side[2] and side[3] ~= garageSide then
 			for _, row in { 2, N - 4 } do
 				k += 1
 				local c = Vector3.new(cellX(side[1] + 1), top, cellZ(row + 1))
