@@ -1362,6 +1362,9 @@ function Driving.attach(model: Model)
 		Aventador = { 0.82, 0.82, 0.8, -0.06 }, -- just the round dial, over the model's own
 		Ferrari = { 1.6, 0.6 },
 		Ferrari599 = { 1.7, 0.6 },
+		F430 = { 1.7, 0.6 },
+		Ferrari458 = { 1.6, 0.6 },
+		FerrariCalifornia = { 1.6, 0.6 },
 		BMWLive = { 1.8, 0.62, 0.85 },
 		BMWClassic = { 1.6, 0.6, 0.85 },
 		BMWClassicGrey = { 1.6, 0.6, 0.85 },
@@ -1373,11 +1376,13 @@ function Driving.attach(model: Model)
 		W212 = { 2.1, 0.62 },
 		W213 = { 2.0, 0.72 },
 		Gallardo = { 1.8, 0.66 },
+		GallardoSL = { 1.8, 0.66 },
 		EV6 = { 1.7, 0.62, 0.95 },
 		Aston = { 1.8, 0.62 },
 		AMGSls = { 1.7, 0.62 },
 		Urus = { 2.0, 0.72 },
 		Murcielago = { 1.9, 0.66 },
+		MurcielagoLP640 = { 1.9, 0.66 },
 		C6 = { 1.9, 0.66 },
 		C7 = { 2.0, 0.66 },
 	}

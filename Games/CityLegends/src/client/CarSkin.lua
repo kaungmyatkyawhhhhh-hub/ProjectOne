@@ -47,15 +47,20 @@ CarSkin.CLUSTER_STYLE = {
 	bnw_m3_f80 = "BMWF80",
 	bnw_m4_f82 = "BMWF80",
 	lexis_lx700 = "LexusLX700",
-	ferrara_458 = "Ferrari",
-	ferrara_f430 = "Ferrari599", -- owner: same cluster as the 599
+	-- supercars and hypercars: copied from the real cars (owner, 2026-10-24: "an exact 1 to 1
+	-- replica of the real one"; photos and video frames in imports/refs)
+	ferrara_458 = "Ferrari458",
+	ferrara_f430 = "F430", -- was the 599's (owner); now the F430's own
+	audy_r8 = "R8",
+	mclaran_12c = "MP412C",
+	porsha_gt3 = "Porsche991GT3", -- the 991.2 GT3's five dials, sized into the 718 cabin's hood
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "SupraTRD",
 	toyoka_camri = "Toyota",
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
 	toyoka_alfard = "Toyota", -- owner (2026-10-22): its own dials didn't work; the LC200's cluster
-	lambrini_lp570 = "Gallardo",
+	lambrini_lp570 = "GallardoSL", -- the Superleggera's white dials
 	kio_ev6 = "EV6",
 	lambrini_urus = "Urus",
 	chevo_c6 = "C6",
@@ -77,13 +82,13 @@ CarSkin.CLUSTER_STYLE = {
 	bnw_750li = "BMWLiveCockpit", -- the 750Li G12 (2026-10-18 model)
 	bentz_gle53 = "AMG", -- in the C63 coupe's cabin, like the CLA 45
 	-- the cars of 2026-10-18 (looks from the real cars)
-	ferrara_california = "Ferrari",
+	ferrara_california = "FerrariCalifornia",
 	bentz_s65_w221 = "Maybach57", -- W221: round chrome dials
 	bentz_190e = "Maybach57",
 	toyoka_chaser = "Toyota",
 	lexis_lc500 = "LFA", -- the LC takes the LFA's moving-ring screen
 	astin_dbx = "Aston",
-	lambrini_lp640 = "Murcielago", -- the 2026-10-18 model
+	lambrini_lp640 = "MurcielagoLP640", -- the 2026-10-18 model
 	maseroti_levante = "Modern",
 	bugotti_veyron = "Veyron", -- 2026-10-23: its own, from real photos (imports/refs)
 } :: { [string]: string }
@@ -108,6 +113,8 @@ CarSkin.CLUSTER_RECT = {
 	-- the LP700 in the LP750's cabin: the LP750's whole screen (rev counter and both side screens),
 	-- so the LP750 itself keeps its own cluster where it was
 	lambrini_lp700 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.334, h = 0.1455 },
+	-- the GT3 in the 718 cabin: the whole hood (its three dials), with the 991's five dials in it
+	porsha_gt3 = { at = Vector3.new(-0.0058, 0.0501, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), w = 0.3, h = 0.118 },
 	-- the LP750 in its own cabin: the same screen
 	lambrini_lp750 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.334, h = 0.1455 },
 } :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
@@ -2153,7 +2160,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		-- a car with another model's cabin uses that cabin's dials and cluster spot
 		local swap = CarSkin.INTERIOR_DONOR[id]
 		local cabinId = if swap then swap.from else id
-		local dials = CarSkin.DIAL_NEEDLES[cabinId]
+		-- (a car with its own drawn cluster over its cabin's hood skips that cabin's dial needles)
+		local dials = if ownDesign and CarSkin.CLUSTER_RECT[id] then nil else CarSkin.DIAL_NEEDLES[cabinId]
 		local rect = CarSkin.CLUSTER_RECT[id] or CarSkin.CLUSTER_RECT[cabinId]
 		if (rect or (imported.cluster and imported.clusterSize)) and not liteMode and not dials and (ownDesign or not imported.ownGauges) and not CarSkin.KEEP_OWN_CLUSTER[id] then
 			local cluster = Instance.new("Part")
