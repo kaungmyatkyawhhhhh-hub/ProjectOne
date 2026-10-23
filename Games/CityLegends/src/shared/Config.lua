@@ -44,6 +44,15 @@ Config.City.RoadWidth = Config.City.LaneWidth * Config.City.LanesPerSide * 2
 Config.City.HalfExtent = Config.City.Blocks * Config.City.BlockSize / 2
 Config.City.HighwayWidth = Config.City.LaneWidth * Config.City.HighwayLanesPerSide * 2
 
+-- knocking props over (owner, 2026-10-23: "when u crash into light poles, trees, lamp, traffic
+-- lights make it fall down like a real life physics but it will return on its own later")
+Config.Knock = {
+	Enabled = true,
+	MinMph = 12, -- slower than this you just bump it
+	Push = 0.35, -- how hard the car shoves it (x its mass x your speed)
+	RestoreSeconds = 40, -- it stands back up after this, once no car is right beside it
+}
+
 -- where players start (owner, 2026-10-23: "make block_3_2 near streetscape the players spawn"): a
 -- first car comes out on the street along this side of the block, and a player on foot with no car
 -- stands up on its sidewalk, by the streetscape

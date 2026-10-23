@@ -64,6 +64,8 @@ if city then
 	UI.showLoading("Painting the skyline...")
 	BuildingSkin.apply(city)
 end
+-- knockable street lights, trees and traffic poles (scanned before the LOD system hides far ones)
+require(script.Parent:WaitForChild("Knockables")).init()
 WorldFx.start()
 Weather.init() -- rain cycle (starts raining), wet roads, mist, rain sound
 require(script.Parent:WaitForChild("DayCycle")).start() -- morning, day, sunset, night

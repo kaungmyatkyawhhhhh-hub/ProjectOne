@@ -52,6 +52,7 @@ local Progress: RemoteEvent = remote("RemoteEvent", "Progress") -- server -> cli
 local ClaimDaily: RemoteFunction = remote("RemoteFunction", "ClaimDaily")
 local SaveSettings: RemoteEvent = remote("RemoteEvent", "SaveSettings") -- client -> server: speed units, gearbox
 local CarSignals: RemoteEvent = remote("RemoteEvent", "CarSignals") -- client -> server: blinkers + lights, shown to everyone
+local Knock: RemoteEvent = remote("RemoteEvent", "Knock") -- a prop knocked down (Knockables): passed on to everyone else
 remotes.Parent = ReplicatedStorage
 
 -- the car stock market (its own remotes, MarketCall / MarketPush)
@@ -439,6 +440,41 @@ CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
 	if type(raw.lights) == "boolean" then
 		car:SetAttribute("Lights", raw.lights)
 	end
+end)
+
+-- a street light, tree or traffic pole knocked down: the other games drop it too (only from a
+-- player whose car is right there, a few a second at most)
+local lastKnock: { [Player]: { number } } = {}
+Knock.OnServerEvent:Connect(function(player: Player, id: any, dir: any, speed: any)
+	if type(id) ~= "string" or #id > 40 or typeof(dir) ~= "Vector3" or dir.Magnitude < 1 or dir.Magnitude ~= dir.Magnitude or type(speed) ~= "number" then
+		return
+	end
+	local car = getSession(player).car
+	local x, y, z = string.match(id, "^(-?%d+),(-?%d+),(-?%d+)$")
+	if not (car and car.Parent and x) then
+		return
+	end
+	if (car:GetPivot().Position - Vector3.new(tonumber(x) :: number, tonumber(y) :: number, tonumber(z) :: number)).Magnitude > 60 then
+		return
+	end
+	local now = os.clock()
+	local recent = lastKnock[player] or {}
+	while recent[1] and now - recent[1] > 1 do
+		table.remove(recent, 1)
+	end
+	if #recent >= 6 then
+		return
+	end
+	table.insert(recent, now)
+	lastKnock[player] = recent
+	for _, other in Players:GetPlayers() do
+		if other ~= player then
+			Knock:FireClient(other, id, dir.Unit * math.min(dir.Magnitude, 400), math.clamp(speed, 0, 400))
+		end
+	end
+end)
+Players.PlayerRemoving:Connect(function(player)
+	lastKnock[player] = nil
 end)
 
 SaveSettings.OnServerEvent:Connect(function(player: Player, raw: any)
