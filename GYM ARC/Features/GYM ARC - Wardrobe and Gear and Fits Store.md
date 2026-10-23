@@ -53,3 +53,8 @@ Nothing here changed in the owner's 19 Oct Studio work. What a player can change
 ## Gear meshes (21 Oct, prompt 34)
 - Belts, wrist wraps, lifting straps and knee sleeves are now the planner's Blender meshes (`ReplicatedStorage.GearMeshes`, built by `Shared/Gear`, fitted to the muscles you see by `GearClient`): a leather belt with stitching and a steel buckle, wraps with stripes and a thumb loop, straps with a tail, knee sleeves with bands. Color = the item's color (PUMP SHOP levels: the level color with a matching trim).
 ![[GYM ARC/Screenshots/trainer_outfits/player_gear_g000.jpg]]
+
+## Gear rework (23 Oct, prompt 59, [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]])
+- Only two gear pieces now: LIFTING BELT (+5% / +10% lower body: legs, back, core) and WRIST WRAPS (+5% / +10% upper body: chest, shoulders, arms). Basic 750 / Pro 4,000 at Coach Dex. Elite / Champion off sale (owners keep them).
+- The best level owned counts, worn or not. Straps and knee sleeves are gone: once per player they turned into the matching piece (a higher level) or their coins came back.
+- Colours like the pictures: Basic brown leather, Pro black + silver, Elite purple + silver, Champion gold (Config/PumpShop.GearIcons).

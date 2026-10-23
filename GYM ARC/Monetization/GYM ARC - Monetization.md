@@ -164,3 +164,11 @@ Same product as the old Stamina Refill (3718306417), renamed by the owner in the
 
 ## Store look (23 Oct, prompt 61; [[2026-10-23 GYM ARC Store passes premium restyle]])
 Premium tiles in each item's colour, Robux prices on slim graphite buttons, owned = gold OWNED at full brightness (no checkmarks). The hero card on PASSES features the first pass you don't own in `Monetization.PopularPasses` (or THANK YOU when you own them all). Coach Dex / Go to Pump Shop sit at the bottom of the Store.
+
+## New products (23 Oct, prompts 57 / 60; IDs set 23 Oct, prompt 63)
+All ON and tested through ProcessReceipt: [[2026-10-23 GYM ARC Shop product IDs wired]]. IDs: Starter Pack 3721356162 (49), DNA Token x3 3721356358 (249), Mass Gainer 3721356862 / x5 3721356950, Elite Pre-Workout 3721357276 / x5 3721357343, Whey Isolate 3721357465 / x5 3721357767, BCAA Recovery 3721357940 / x5 3721358083 (25 / 99). Details and descriptions: [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]].
+- DnaTokenPack: DNA Token x3, 249 R$.
+- StarterPack: Starter Pack, 49 R$, once per player.
+- Supp_MassGainer_1 / _5, Supp_ElitePreWorkout_1 / _5, Supp_WheyIsolate_1 / _5, Supp_BcaaRecovery_1 / _5: 25 R$ (x1) / 99 R$ (x5).
+- Coin packs (existing IDs) now scale with the player's stage: Small 20 min / Medium 120 min / Large 360 min of coins, never less than 1,000 / 5,000 / 15,000. New descriptions in the progress note.
+- Coach Dex sells the existing Shake Bundle and DNA Token products too (same IDs and prices).

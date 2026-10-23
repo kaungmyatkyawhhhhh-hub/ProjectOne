@@ -58,3 +58,8 @@ Built 23 Oct ([[2026-10-23 GYM ARC Prompt - 58 Pro Gym lights, gym pacing, Power
 ![[GYM ARC/Screenshots/p58/pl_pr_bell_board.jpg]]
 ![[GYM ARC/Screenshots/p58/pl_platform_good_lift.jpg]]
 ![[GYM ARC/Screenshots/p58/spurt4_pl_locked.jpg]]
+
+## Street front (23 Oct, prompt 62, [[2026-10-23 GYM ARC Powerlifting front and Pro Gym view]])
+- No more alley: the 6 Main Street buildings in front of it went to `ServerStorage.PowerliftingFrontRemoved_23Oct`; its front faces Main Street, lined up with the starter gym (gym row: Powerlifting, Starter, Pro), with a paved forecourt.
+- Facade (`Workspace.PowerliftingGym.Facade`, `tools/builders/PowerliftingFront`): brick base, 8 industrial windows, steel columns, lit POWERLIFTING / GYM ARC sign, wall lamps, side door, sawtooth roof with skylights, vents and AC units, chalk barbell mural on the east wall.
+- Loading door: locked = steel shutter with a black + white "UNLOCKS AT GROWTH SPURT 5" plate and padlock; tapping it (ClickDetector on the `Blocker`) or walking up shows the locked toast with progress. Unlocked = rolled up.
