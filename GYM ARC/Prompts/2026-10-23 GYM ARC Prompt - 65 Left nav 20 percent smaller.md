@@ -1,7 +1,7 @@
 ---
 date: 2026-10-23
 tags: [gymarc, prompt]
-status: in progress
+status: done
 ---
 # 65 Left nav 20% smaller
 
@@ -14,3 +14,5 @@ Left nav buttons got about 20% bigger in the latest update. Make them 20% smalle
 - Nothing else moves except that the space freed below the nav stays empty (the boost row / STOP rules still apply).
 TEST: phone + desktop screenshots of the nav next to the old size. Short note in the vault.
 ```
+
+Done: [[2026-10-23 GYM ARC Left nav smaller]].

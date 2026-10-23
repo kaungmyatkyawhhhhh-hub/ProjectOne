@@ -26,3 +26,9 @@ Prompt: [[2026-10-23 GYM ARC Prompt - 64 Console gifts|64 Console gifts]]. Featu
 ![[GYM ARC/Screenshots/p64/trainer_toast.jpg]]
 ![[GYM ARC/Screenshots/p64/ironborn_card.jpg]]
 ![[GYM ARC/Screenshots/p64/limitless_card.jpg]]
+
+## Later: old wardrobe shirt removed
+- Owner: remove the shirt from HEINHEIN1922 (from the old wardrobe). The save had `settings.top = "Tank"`. New console command `shirtless` (game commit 0a30dc7); run for HEINHEIN1922: Tank -> Shirtless, the body shows no top, still Shirtless after a rejoin.
+
+![[GYM ARC/Screenshots/p64/shirt_before.jpg]]
+![[GYM ARC/Screenshots/p64/shirtless_after.jpg]]

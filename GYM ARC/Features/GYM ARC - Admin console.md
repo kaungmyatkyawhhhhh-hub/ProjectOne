@@ -19,6 +19,7 @@ game.ServerStorage.Admin:Invoke("coins", "all", 1000)             -- everyone in
 game.ServerStorage.Admin:Invoke("trainer", "LuigiRED", "Atlas")    -- BASE
 game.ServerStorage.Admin:Invoke("trainer", "LuigiRED", "Lou", 3)   -- stage 1 BASE, 2 IRON-BORN, 3 BEAST-MODE, 4 COLOSSUS, 5 LIMITLESS
 game.ServerStorage.Admin:Invoke("trainers")                        -- list the trainers
+game.ServerStorage.Admin:Invoke("shirtless", "HEINHEIN1922")       -- take off a top left over from the old wardrobe
 ```
 - Player: name or display name, any case; the start is enough when only one player matches; `"all"` = everyone in the server. Only players in the **same server** as the console.
 - Trainer: id (`AeonCoach`), name (`Atlas`, `Coach Lou`) or the name without "Coach" (`Lou`).
@@ -34,3 +35,6 @@ game.ServerStorage.Admin:Invoke("trainers")                        -- list the t
 
 ## Code
 `ServerScriptService.Server.AdminService` (started from Main), `TrainerService.AdminGive`, toasts in `TrainerClient` ("AdminGift") and `StoreClient` ("AdminGift" on PlayerEvent). The roll card's dupe line reads a `stage` on the result (rolls are BASE).
+
+## Old wardrobe tops (23 Oct)
+The Wardrobe is off, but old saves still remember the top picked back then (`settings.top`, e.g. "Tank") and the body still showed it. `shirtless` sets it back to Shirtless (and takes off an old gym fit if one is worn). Done for HEINHEIN1922 (Tank -> Shirtless, still off after a rejoin). Other old players may still have one.
