@@ -261,8 +261,8 @@ function UI.startPrompt(show: boolean)
 	local f = new("Frame", {
 		Name = "StartPrompt",
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 0.78, 0),
-		Size = UDim2.fromOffset(360, 64),
+		Position = UDim2.new(0.5, 0, 0.66, 0), -- (clear of the GET OUT pill and the cash)
+		Size = UDim2.fromOffset(300, 54),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.12,
 		Parent = hud,
@@ -276,18 +276,18 @@ function UI.startPrompt(show: boolean)
 		BackgroundTransparency = 0,
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, 12, 0.5, 0),
-		Size = UDim2.fromOffset(if UI.isTouch then 70 else 44, 44),
+		Size = UDim2.fromOffset(if UI.isTouch then 70 else 36, 36),
 		Parent = f,
 	})
 	corner(8).Parent = key
 	label({
 		Text = if UI.isTouch then "Tap to start up" else "Press F to start up",
-		TextSize = 24,
+		TextSize = 20,
 		Font = Enum.Font.GothamBold,
 		TextColor3 = Theme.Text,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.new(0, if UI.isTouch then 96 else 70, 0, 0),
-		Size = UDim2.new(1, -80, 1, 0),
+		Position = UDim2.new(0, if UI.isTouch then 96 else 60, 0, 0),
+		Size = UDim2.new(1, -70, 1, 0),
 		Parent = f,
 	})
 	startPrompt = f
@@ -1759,14 +1759,16 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local viewport = new("ViewportFrame", {
 		Position = UDim2.fromOffset(12, 12),
 		Size = UDim2.new(1, -24, 0.56, 0),
-		BackgroundColor3 = Color3.fromRGB(14, 15, 22),
-		Ambient = Color3.fromRGB(120, 120, 150),
-		LightColor = Color3.fromRGB(255, 245, 235),
-		LightDirection = Vector3.new(-0.6, -1, -0.4),
+		BackgroundColor3 = Color3.fromRGB(34, 37, 46),
+		Ambient = Color3.fromRGB(165, 168, 182),
+		LightColor = Color3.fromRGB(255, 250, 244),
+		LightDirection = Vector3.new(-0.55, -1, -0.5),
 		ZIndex = 62,
 		Parent = detail,
 	}, { corner(10) })
-	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(70, 70, 110), Color3.fromRGB(30, 30, 40)), Rotation = 90, Parent = viewport })
+	-- a studio backdrop, lighter at the top (the gradient tints the car too, so it stays light:
+	-- it was dark blue and the car could hardly be seen)
+	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(196, 200, 212)), Rotation = 90, Parent = viewport })
 	local vpCam = new("Camera", { FieldOfView = 34, Parent = viewport })
 	viewport.CurrentCamera = vpCam
 

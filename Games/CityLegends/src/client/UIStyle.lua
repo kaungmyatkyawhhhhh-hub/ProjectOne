@@ -31,9 +31,6 @@ local WEIGHT: { [Enum.Font]: Enum.FontWeight } = {
 	[Enum.Font.Gotham] = Enum.FontWeight.Regular,
 	[Enum.Font.SourceSansBold] = Enum.FontWeight.Bold,
 	[Enum.Font.SourceSans] = Enum.FontWeight.Regular,
-	[Enum.Font.Montserrat] = Enum.FontWeight.Regular,
-	[Enum.Font.MontserratBold] = Enum.FontWeight.Bold,
-	[Enum.Font.MontserratBlack] = Enum.FontWeight.ExtraBold,
 }
 
 local done: { [Instance]: boolean } = setmetatable({}, { __mode = "k" }) :: any
@@ -41,7 +38,7 @@ local fontsWork = pcall(function()
 	return Font.new(FAMILY, Enum.FontWeight.Bold)
 end)
 
-local function styleText(t: TextLabel | TextButton | TextBox)
+local function styleText(t: any)
 	if not fontsWork then
 		return
 	end
