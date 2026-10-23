@@ -233,6 +233,10 @@ CarSkin.INTERIOR_DONOR = {
 -- isn't working". It now has the live AventadorSV screen exactly over its own one.)
 CarSkin.KEEP_OWN_CLUSTER = {} :: { [string]: boolean }
 
+-- a drawn cluster's line-up over the car's own hood where it isn't measured (CLUSTER_RECT):
+-- { right, up, forward } in studs and a size factor, checked from the driver's eye in Studio
+CarSkin.CLUSTER_SHIFT = {} :: { [string]: { number } }
+
 -- steering wheels (owner, 2026-10-24: "fix all of the steering wheels bad color and if it doesnt
 -- match the actual real one fix it"). A converted car whose wheel came into Studio as one part
 -- with one texture shows it grey or with the wrong patches of texture (the fixed per-material
@@ -2236,7 +2240,11 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				cluster.CFrame = groundCF * CFrame.lookAt(pos, pos - face, upV) * CFrame.new(0, up, -fwd) -- back face looks at the driver
 				cluster:SetAttribute("Placed", true) -- Driving leaves it where it is
 			else
-				cluster.CFrame = groundCF * (imported.cluster :: CFrame) * CFrame.new(0, up, -fwd)
+				local sh = CarSkin.CLUSTER_SHIFT[id]
+				if sh then
+					cluster.Size = Vector3.new(cluster.Size.X * sh[4], cluster.Size.Y * sh[4], cluster.Size.Z)
+				end
+				cluster.CFrame = groundCF * (imported.cluster :: CFrame) * CFrame.new(if sh then sh[1] else 0, up + (if sh then sh[2] else 0), -fwd - (if sh then sh[3] else 0))
 			end
 			cluster.Parent = skin
 			local w = Instance.new("WeldConstraint")
