@@ -10,6 +10,10 @@
 	whole lot: concrete floor and walls, pillars, painted bays and aisles, strip lights, signs. You
 	can drive (or walk) down, park and come back up the same ramp.
 
+	Every basement bay gets an invisible "ParkBay" marker (facing out of the bay) and every entrance
+	bay a "VipBay" marker the size of the bay: Parking (the server) puts parked cars you can steal in
+	the first and charges for the second.
+
 	The city's ground is one 4-stud asphalt slab with nothing under it, and each block has one
 	sidewalk slab; both are cut round the ramp well and the lowered kerb (cut() splits a slab into
 	the pieces round a hole). Plazas leaves the garage's corner and side alone (Garages.SIDE).
@@ -36,6 +40,20 @@ local YELLOW = Color3.fromRGB(240, 196, 40)
 local WHITE = Color3.fromRGB(232, 232, 228)
 local BLUE = Color3.fromRGB(30, 90, 190)
 local TUBE = Color3.fromRGB(236, 244, 255)
+
+-- an invisible marker the parking script finds (its size is the bay's)
+local function marker(parent: Instance, name: string, cf: CFrame, size: Vector3)
+	local m = Instance.new("Part")
+	m.Name = name
+	m.Anchored = true
+	m.CanCollide = false
+	m.CanQuery = false
+	m.CanTouch = false
+	m.Transparency = 1
+	m.Size = size
+	m.CFrame = cf
+	m.Parent = parent
+end
 
 -- splits a flat axis-aligned slab into the pieces round a hole (x0..x1, z0..z1); returns them
 function Garages.cut(part: BasePart, x0: number, x1: number, z0: number, z1: number): { BasePart }
@@ -205,6 +223,14 @@ function Garages.build(kit: any, city: Instance)
 			deco(garage, Vector3.new(0.4, 0.06, HALF * 2 - 24), CFrame.new(X(mid), FLOOR + 0.03, cz), WHITE, Enum.Material.SmoothPlastic)
 			for z = -HALF + 12, HALF - 12, BAY_W do
 				deco(garage, Vector3.new(lx1 - lx0, 0.06, 0.4), CFrame.new((lx0 + lx1) / 2, FLOOR + 0.03, cz + z), WHITE, Enum.Material.SmoothPlastic)
+				-- the bays either side of the middle line, cars backed in (facing the aisle)
+				if z + BAY_W <= HALF - 12 then
+					for _, side in { -1, 1 } do
+						local c = Vector3.new(X(mid + side * BAY_D / 2), FLOOR, cz + z + BAY_W / 2)
+						local out = Vector3.new(X(mid + side * BAY_D) - X(mid), 0, 0).Unit
+						marker(garage, "ParkBay", CFrame.lookAt(c, c + out), Vector3.new(BAY_W - 1, 1, BAY_D - 1))
+					end
+				end
 			end
 			-- pillars on the middle line every few bays, lit strip lights over the aisles
 			for z = -HALF + 12 + BAY_W * 3, HALF - 12, BAY_W * 4 do
@@ -229,17 +255,23 @@ function Garages.build(kit: any, city: Instance)
 		local exit = deco(garage, Vector3.new(8, 2, 0.3), CFrame.new(X((RAMP_IN + RAMP_OUT) / 2), CEIL - 2.2, cz + RAMP_Z1 + 2), Color3.fromRGB(20, 140, 60), Enum.Material.Neon)
 		kit.surfaceText(exit, Enum.NormalId.Back, "EXIT", Color3.new(1, 1, 1), Color3.fromRGB(20, 140, 60), 0, Enum.Font.GothamBlack, Vector2.new(300, 75))
 
-		-- the entrance parking: three marked bays off the apron, in the lot's corner
+		-- the entrance parking: three paid VIP bays off the apron, in the lot's corner (owner,
+		-- 2026-10-23: "make it say VIP parking on the entrance ... and u have to pay to park")
+		local fee = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config")).Parking.VipFee
+		local GOLD = Color3.fromRGB(232, 190, 90)
 		for b = 0, 2 do
 			local mid = 74 + 5 + b * 10
 			local bx = X(mid)
-			deco(garage, Vector3.new(0.4, 0.08, 18), CFrame.new(X(mid - 5), CURB + 0.22, cz + APRON_Z0 - 9), WHITE, Enum.Material.SmoothPlastic)
+			deco(garage, Vector3.new(0.4, 0.08, 18), CFrame.new(X(mid - 5), CURB + 0.22, cz + APRON_Z0 - 9), GOLD, Enum.Material.SmoothPlastic)
 			mk(garage, Vector3.new(5, 0.5, 0.8), CFrame.new(bx, CURB + 0.45, cz + APRON_Z0 - 16.5), YELLOW, Enum.Material.Concrete)
-			local pl = deco(garage, Vector3.new(4, 0.08, 4), CFrame.new(bx, CURB + 0.22, cz + APRON_Z0 - 9), WHITE, Enum.Material.SmoothPlastic, { transparency = 1 })
-			kit.surfaceText(pl, Enum.NormalId.Top, "P", Color3.new(1, 1, 1), nil, 1, Enum.Font.GothamBlack, Vector2.new(100, 100))
+			local pl = deco(garage, Vector3.new(6, 0.08, 3), CFrame.new(bx, CURB + 0.22, cz + APRON_Z0 - 6), WHITE, Enum.Material.SmoothPlastic, { transparency = 1 })
+			kit.surfaceText(pl, Enum.NormalId.Top, "VIP", GOLD, nil, 1, Enum.Font.GothamBlack, Vector2.new(200, 100))
+			local c = Vector3.new(bx, CURB, cz + APRON_Z0 - 9)
+			marker(garage, "VipBay", CFrame.lookAt(c, c + Vector3.new(0, 0, 1)), Vector3.new(9, 8, 17))
 		end
-		deco(garage, Vector3.new(0.4, 0.08, 18), CFrame.new(X(74 + 30 + 0), CURB + 0.22, cz + APRON_Z0 - 9), WHITE, Enum.Material.SmoothPlastic)
+		deco(garage, Vector3.new(0.4, 0.08, 18), CFrame.new(X(74 + 30 + 0), CURB + 0.22, cz + APRON_Z0 - 9), GOLD, Enum.Material.SmoothPlastic)
 		sign(kit, garage, Vector3.new(X(RAMP_IN - 4), CURB, cz + APRON_Z1 + 2), Vector3.new(0, 0, -1), "PARKING", "RESIDENTS · VISITORS")
+		sign(kit, garage, Vector3.new(X(108 - 2), CURB, cz + APRON_Z0 - 19), Vector3.new(0, 0, 1), "VIP PARKING", "$" .. fee .. " · PAY ON ARRIVAL")
 	end
 end
 

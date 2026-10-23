@@ -270,11 +270,16 @@ local function tryAttach(model: Instance)
 end
 playerCars.ChildAdded:Connect(tryAttach)
 
-local function requestDrive(id: string)
+-- stealFrom: a parked car in a tower garage (Parking): the server swaps it for a drivable one
+local function requestDrive(id: string, stealFrom: Model?)
 	pendingAttach = true
-	data.Selected = id
 	UI.fade(true, 0.3)
-	SpawnCar:FireServer(id)
+	if stealFrom then
+		(remotes:WaitForChild("StealCar") :: RemoteEvent):FireServer(stealFrom)
+	else
+		data.Selected = id
+		SpawnCar:FireServer(id)
+	end
 	-- safety: if the car is already there (rare race) attach to it
 	task.delay(0.5, function()
 		if pendingAttach then
@@ -292,6 +297,34 @@ local function requestDrive(id: string)
 		end
 	end)
 end
+
+-- the towers' garages: parked cars get their real bodies, and a finished "Steal" hold drives one off
+local parkedFolder = workspace:WaitForChild("ParkedCars", 30)
+if parkedFolder then
+	local function skinParked(model: Instance)
+		if model:IsA("Model") then
+			task.delay(1, function()
+				if model.Parent then
+					pcall(CarSkin.apply, model, false, true)
+				end
+			end)
+		end
+	end
+	for _, m in parkedFolder:GetChildren() do
+		skinParked(m)
+	end
+	parkedFolder.ChildAdded:Connect(skinParked)
+end
+game:GetService("ProximityPromptService").PromptTriggered:Connect(function(prompt: ProximityPrompt)
+	if prompt.Name ~= "StealCar" or not OnFoot.active then
+		return
+	end
+	local model = prompt:FindFirstAncestorOfClass("Model")
+	local id = if model then model:GetAttribute("CarId") else nil
+	if model and type(id) == "string" then
+		requestDrive(id, model)
+	end
+end)
 
 -- the Legends Grand Hotel: the valet takes your car at the bay and brings it back to the door
 require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)

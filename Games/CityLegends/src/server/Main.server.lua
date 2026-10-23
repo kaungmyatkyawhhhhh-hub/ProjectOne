@@ -293,12 +293,20 @@ local function despawn(player: Player)
 	s.combo = 0
 end
 
-local function spawnFor(player: Player, carId: string)
+-- opts.stolen: a car taken from a garage (Parking): not theirs, never saved or selected;
+-- opts.at: where it starts (ground level, facing the way out)
+local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?, at: CFrame? }?)
 	local profile = PlayerData.get(player)
-	if not profile or not profile.Owned[carId] then
+	local stolen = opts and opts.stolen
+	if not profile or not (profile.Owned[carId] or (stolen and Cars.ById[carId])) then
 		return
 	end
-	profile.Selected = carId
+	if not stolen then
+		profile.Selected = carId
+	end
+	if opts and opts.at then
+		spawnAt[player] = opts.at
+	end
 	-- swapping cars while driving: the new one comes out where the old one was
 	local oldCar = getSession(player).car
 	local swapCF: CFrame? = nil
@@ -322,6 +330,9 @@ local function spawnFor(player: Player, carId: string)
 	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (and its own plate)
 	model.Name = player.Name
 	model:SetAttribute("Owner", player.UserId)
+	if stolen then
+		model:SetAttribute("Stolen", true)
+	end
 
 	local root = model.PrimaryPart :: BasePart
 	local att = Instance.new("Attachment")
@@ -420,6 +431,11 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any)
 	task.spawn(PlayerData.save, player)
 	return { ok = true, message = "Purchased " .. spec.Name, data = PlayerData.snapshot(player) }
 end
+
+-- the luxury towers' garages: parked cars to steal, paid VIP bays (after spawnFor, which a theft uses)
+ctx.spawnCar = spawnFor
+ctx.despawn = despawn
+require(script.Parent:WaitForChild("Parking")).init(ctx, Police, Towers)
 
 SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)
 	if type(carId) ~= "string" then

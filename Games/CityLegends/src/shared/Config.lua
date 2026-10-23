@@ -53,6 +53,17 @@ Config.Knock = {
 	RestoreSeconds = 40, -- it stands back up after this, once no car is right beside it
 }
 
+-- the luxury towers' garages (Garages, Parking): paid VIP bays at the entrance and parked cars in
+-- the basement you can steal (owner, 2026-10-23)
+Config.Parking = {
+	VipFee = 500, -- charged when you leave your car in a VIP bay (no cash: it's towed)
+	ParkedPerGarage = 8, -- parked cars in each basement
+	Tiers = { "Starter", "Mid" }, -- the kinds of car parked there
+	StealHold = 2.5, -- seconds to hold E to break in
+	StealStars = 1, -- police stars for a theft
+	RefillSeconds = { 90, 180 }, -- a stolen car's bay gets a new random car after this long
+}
+
 -- where players start (owner, 2026-10-23: "make block_3_2 near streetscape the players spawn"): a
 -- first car comes out on the street along this side of the block, and a player on foot with no car
 -- stands up on its sidewalk, by the streetscape
