@@ -376,7 +376,7 @@ CutUp.OnServerEvent:Connect(function(player: Player, info: any)
 	s.cutTimes = recent
 
 	local spec = Cars.get(car:GetAttribute("CarId") :: string)
-	local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.05)
+	local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.2) -- (nitro boosts past the top speed)
 	-- a little slack for replication lag
 	if mph < E.CutMinMph * 0.8 then
 		return
@@ -427,7 +427,7 @@ RunService.Heartbeat:Connect(function(dt)
 		local car = s.car
 		if car and car.PrimaryPart then
 			local spec = Cars.get(car:GetAttribute("CarId") :: string)
-			local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.05)
+			local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.2) -- (nitro boosts past the top speed)
 			if mph >= E.DriveMinMph then
 				s.incomeCarry += mph * E.DrivePerSecond * step
 				local whole = math.floor(s.incomeCarry)

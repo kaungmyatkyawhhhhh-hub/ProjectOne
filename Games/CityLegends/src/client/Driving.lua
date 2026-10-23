@@ -15,7 +15,8 @@
 	  * update the HUD + the live gauge cluster on the dashboard
 	Car controls (keyboard): F start / stop the engine, Q / E shift down / up (the
 	gearbox turns manual on the first shift, or from Settings), Left Shift clutch, P handbrake,
-	T traction control, L lights, Z / X / C left blinker / hazards / right blinker, V camera.
+	T traction control, L lights, Z / X / C left blinker / hazards / right blinker, V camera,
+	Left Ctrl or B nitro (R1 on a gamepad, the N2O button on a phone).
 	Touch and gamepad players start with the engine running and an automatic gearbox.
 ]]
 
@@ -37,6 +38,7 @@ local Traffic = require(script.Parent:WaitForChild("Traffic"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
 local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
+local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 
 local camera = workspace.CurrentCamera
 
@@ -178,7 +180,31 @@ type State = {
 	fovPunch: number, -- a moment's wider view (launch, flat-out shift, close pass)
 	blurPulse: number,
 	roar: Sound?, -- tyre and road roar that grows with speed
+	-- physics v2 and extras (Config.DrivingFeel)
+	cls: ClassFeel, -- weight and handling by class
+	drive: string, -- "RWD" | "FWD" | "AWD"
+	drifting: boolean,
+	driftAngle: number, -- the body's slip angle (radians, + when sliding to the right)
+	driftCalm: number, -- seconds the slip has been small (a drift ends after DriftHold)
+	absT: number,
+	airT: number, -- seconds in the air
+	airVy: number, -- falling speed while in the air (for the landing)
+	nitro: number, -- 0..1 in the bottle
+	boosting: boolean,
+	flameColors: { ColorSequence }, -- the flames' own colours (nitro turns them blue)
+	skidL: Vector3?, -- where the last skid mark ended under each rear tyre
+	skidR: Vector3?,
+	skidT: number,
+	boostWas: boolean,
 }
+
+type ClassFeel = { roll: number, pitch: number, understeer: number, shiftTime: number, upshift: number, revRate: number, brake: number, inertia: number }
+
+-- a class's weight and gearbox (Config.DrivingFeel.ClassFeel, Sedan for anything unknown)
+local function classFeel(class: string): ClassFeel
+	local t = Config.DrivingFeel.ClassFeel
+	return t[class] or t.Sedan
+end
 
 local state: State? = nil
 local remotes: Folder? = nil
@@ -239,6 +265,211 @@ local function readInput(): (number, number, number, boolean, boolean)
 	handbrake = handbrake or UI.touch.handbrake
 	return throttle, brake, math.clamp(steer, -1, 1), handbrake, clutch
 end
+
+-- nitro: Left Ctrl or B, R1 on a gamepad, the N2O button on a phone (held)
+local nitroTouch = false
+local function nitroHeld(): boolean
+	if not Driving.inputEnabled or UI.isGarageOpen() then
+		return false
+	end
+	if UserInputService:GetFocusedTextBox() == nil and (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.B)) then
+		return true
+	end
+	if UserInputService.GamepadEnabled and UserInputService:IsGamepadButtonDown(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonR1) then
+		return true
+	end
+	return nitroTouch
+end
+
+-- effects quality: phones and low graphics get fewer particles and marks
+local function fxQuality(): number
+	return math.clamp(WorldFx.qualityScale(), 0.3, 1)
+end
+
+-- the nitro bottle on the HUD (above the rev counter), and the phone's N2O button
+local nitroGui: ScreenGui? = nil
+local nitroFill: Frame? = nil
+local function nitroHud(): (ScreenGui, Frame)
+	if nitroGui and nitroFill then
+		return nitroGui, nitroFill
+	end
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "NitroHUD"
+	gui.ResetOnSpawn = false
+	gui.IgnoreGuiInset = true
+	gui.DisplayOrder = 6
+	gui.Enabled = false
+	gui.Parent = player:WaitForChild("PlayerGui")
+	local back = Instance.new("Frame")
+	back.AnchorPoint = Vector2.new(1, 1)
+	back.Position = if UI.isTouch then UDim2.new(1, -24, 1, -232) else UDim2.new(1, -36, 1, -262)
+	back.Size = UDim2.fromOffset(if UI.isTouch then 150 else 200, 12)
+	back.BackgroundColor3 = Color3.fromRGB(16, 18, 26)
+	back.BackgroundTransparency = 0.2
+	back.BorderSizePixel = 0
+	back.Parent = gui
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(1, 0)
+	c.Parent = back
+	local st = Instance.new("UIStroke")
+	st.Color = Color3.fromRGB(90, 150, 255)
+	st.Transparency = 0.4
+	st.Parent = back
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.fromScale(0, 1)
+	fill.BackgroundColor3 = Color3.fromRGB(70, 150, 255)
+	fill.BorderSizePixel = 0
+	fill.Parent = back
+	local fc = Instance.new("UICorner")
+	fc.CornerRadius = UDim.new(1, 0)
+	fc.Parent = fill
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new(Color3.fromRGB(60, 120, 255), Color3.fromRGB(150, 220, 255))
+	g.Parent = fill
+	local label = Instance.new("TextLabel")
+	label.AnchorPoint = Vector2.new(1, 0.5)
+	label.Position = UDim2.new(0, -8, 0.5, 0)
+	label.Size = UDim2.fromOffset(40, 16)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.GothamBlack
+	label.Text = "N2O"
+	label.TextSize = 13
+	label.TextXAlignment = Enum.TextXAlignment.Right
+	label.TextColor3 = Color3.fromRGB(150, 200, 255)
+	label.Parent = back
+	if UI.isTouch then
+		local b = Instance.new("TextButton")
+		b.Name = "NitroButton"
+		b.AnchorPoint = Vector2.new(1, 1)
+		b.Position = UDim2.new(1, -24, 1, -252)
+		b.Size = UDim2.fromOffset(64, 64)
+		b.BackgroundColor3 = Color3.fromRGB(30, 70, 160)
+		b.BackgroundTransparency = 0.15
+		b.Font = Enum.Font.GothamBlack
+		b.Text = "N2O"
+		b.TextSize = 16
+		b.TextColor3 = Color3.new(1, 1, 1)
+		b.Parent = gui
+		local bc = Instance.new("UICorner")
+		bc.CornerRadius = UDim.new(1, 0)
+		bc.Parent = b
+		b.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+				nitroTouch = true
+			end
+		end)
+		b.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+				nitroTouch = false
+			end
+		end)
+	end
+	nitroGui, nitroFill = gui, fill
+	return gui, fill
+end
+
+-- sparks where the car scrapes a wall (one emitter, moved to the contact)
+local sparkPart: BasePart? = nil
+local sparkEmitter: ParticleEmitter? = nil
+local function sparks(at: Vector3, normal: Vector3, count: number)
+	if not sparkPart then
+		local p = Instance.new("Part")
+		p.Name = "ScrapeSparks"
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.Transparency = 1
+		p.Size = Vector3.new(0.2, 0.2, 0.2)
+		local e = Instance.new("ParticleEmitter")
+		e.Rate = 0
+		e.EmissionDirection = Enum.NormalId.Front
+		e.Lifetime = NumberRange.new(0.15, 0.45)
+		e.Speed = NumberRange.new(18, 40)
+		e.SpreadAngle = Vector2.new(55, 55)
+		e.Acceleration = Vector3.new(0, -70, 0)
+		e.Drag = 2
+		e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.14), NumberSequenceKeypoint.new(1, 0) })
+		e.Color = ColorSequence.new(Color3.fromRGB(255, 230, 150), Color3.fromRGB(255, 120, 30))
+		e.LightEmission = 1
+		e.LightInfluence = 0
+		e.Brightness = 3
+		e.Parent = p
+		p.Parent = workspace
+		sparkPart, sparkEmitter = p, e
+	end
+	local p = sparkPart :: BasePart
+	p.CFrame = CFrame.lookAt(at, at + normal + Vector3.new(0, 0.4, 0))
+	;(sparkEmitter :: ParticleEmitter):Emit(math.max(1, math.floor(count * fxQuality())))
+end
+
+-- skid marks: a pool of thin dark strips under the rear tyres that fade out
+type Skid = { part: BasePart, born: number }
+local skids: { Skid } = {}
+local skidNext = 1
+local skidFolder: Folder? = nil
+local function skidMark(a: Vector3, b: Vector3)
+	local len = (b - a).Magnitude
+	if len < 0.3 or len > 20 then
+		return
+	end
+	local DF = Config.DrivingFeel
+	local cap = math.floor(DF.SkidMax * fxQuality())
+	if not skidFolder then
+		local f = Instance.new("Folder")
+		f.Name = "SkidMarks"
+		f.Parent = workspace
+		skidFolder = f
+	end
+	local entry = skids[skidNext]
+	if not entry then
+		local p = Instance.new("Part")
+		p.Name = "Skid"
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.CastShadow = false
+		p.Material = Enum.Material.SmoothPlastic
+		p.Color = Color3.fromRGB(18, 18, 20)
+		p.Parent = skidFolder
+		entry = { part = p, born = 0 }
+		skids[skidNext] = entry
+	end
+	entry.part.Size = Vector3.new(0.85, 0.04, len + 0.1)
+	entry.part.CFrame = CFrame.lookAt((a + b) / 2, b)
+	entry.part.Transparency = 0.35
+	entry.born = os.clock()
+	skidNext = skidNext % math.max(cap, 1) + 1
+end
+local skidFadeT = 0
+local function fadeSkids(dt: number)
+	skidFadeT += dt
+	if skidFadeT < 0.25 then
+		return
+	end
+	skidFadeT = 0
+	local life = Config.DrivingFeel.SkidLife
+	local now = os.clock()
+	for _, e in skids do
+		if e.born > 0 then
+			local age = (now - e.born) / life
+			if age >= 1 then
+				e.born = 0
+				e.part.Transparency = 1
+			else
+				e.part.Transparency = 0.35 + 0.65 * age * age
+			end
+		end
+	end
+end
+
+-- the flames' blue nitro colour
+local NITRO_FLAME = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 230, 255)),
+	ColorSequenceKeypoint.new(0.4, Color3.fromRGB(70, 130, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 60, 255)),
+})
 
 ---------------------------------------------------------------------
 -- Attach / detach
@@ -455,6 +686,10 @@ function Driving.detach()
 		s.roar:Destroy()
 	end
 	setVignette(0)
+	if nitroGui then
+		nitroGui.Enabled = false
+	end
+	nitroTouch = false
 	UI.startPrompt(false)
 	UI.setSpeedLines(0)
 	if s.cabinLight then
@@ -468,6 +703,17 @@ end
 
 function Driving.isDriving(): boolean
 	return state ~= nil
+end
+
+-- the body's slip angle (radians, + sliding to the right), whether it's drifting, the nitro (0..1)
+function Driving.getSlipAngle(): number
+	return if state then state.driftAngle else 0
+end
+function Driving.isDrifting(): boolean
+	return state ~= nil and state.drifting
+end
+function Driving.getNitro(): number
+	return if state then state.nitro else 0
 end
 
 function Driving.getRoot(): BasePart?
@@ -535,6 +781,9 @@ function Driving.reset()
 	s.vel = Vector3.zero
 	s.yawRate = 0
 	s.groundDist = nil
+	s.drifting = false
+	s.airT, s.airVy = 0, 0
+	s.skidL, s.skidR = nil, nil
 	s.lastCommand = Vector3.zero
 end
 
@@ -571,8 +820,7 @@ local function torqueCurve(rev: number): number
 	return 0.72 + 0.33 * math.sin(math.clamp(rev / 0.72, 0, 1) * math.pi / 2) - math.max(0, rev - 0.82) * 0.9
 end
 
-local UPSHIFT_AT = 0.92 -- flat out the automatic shifts here
-local SHIFT_TIME = 0.2
+-- (where the automatic shifts flat out and how long a shift takes: by class, Config.DrivingFeel.ClassFeel)
 
 -- air drag: at top speed it takes three quarters of the pull, the rest is held back by the
 -- top speed limit, so cars reach their real top speed in a sensible time
@@ -593,6 +841,7 @@ local function powerFor(spec: Cars.CarSpec): (number, number)
 	end
 	local target = Config.mphToSps(60)
 	local electric = spec.Electric == true
+	local cf = classFeel(spec.Class)
 	local function zeroToSixty(k: number): number
 		local c = dragFor(accel, k, top, electric)
 		local v, g, cut, t, dt = 0, 1, 0, 0, 1 / 60
@@ -606,9 +855,9 @@ local function powerFor(spec: Cars.CarSpec): (number, number)
 				cut -= dt
 			else
 				a = accel * k * torqueCurve(math.max(rev, 0.3)) * gearMul(g)
-				if rev >= UPSHIFT_AT and g < GEARS then
+				if rev >= cf.upshift and g < GEARS then
 					g += 1
-					cut = SHIFT_TIME
+					cut = cf.shiftTime
 				end
 			end
 			a -= 2 + c * v * v
@@ -1331,8 +1580,30 @@ function Driving.attach(model: Model)
 		fovPunch = 0,
 		blurPulse = 0,
 		roar = nil,
+		cls = classFeel(spec.Class),
+		drive = if Config.DrivingFeel.AllDrive[spec.Id] then "AWD" elseif Config.DrivingFeel.FrontDrive[spec.Id] then "FWD" else "RWD",
+		drifting = false,
+		driftAngle = 0,
+		driftCalm = 0,
+		absT = 0,
+		airT = 0,
+		airVy = 0,
+		nitro = 0.5, -- half a bottle to start
+		boosting = false,
+		boostWas = false,
+		flameColors = {},
+		skidL = nil,
+		skidR = nil,
+		skidT = 0,
 	}
+	for _, e in flames do
+		table.insert(s.flameColors, e.Color)
+	end
 	state = s
+	nitroHud()
+	if nitroGui then
+		nitroGui.Enabled = true
+	end
 	-- road roar: the tyres on the tarmac and the air round the car, rising with speed
 	do
 		local roar = Instance.new("Sound")
@@ -1438,6 +1709,7 @@ local function detectCuts(s: State, fwd: Vector3, speedMph: number)
 				remote("CutUp"):FireServer({ closeness = closeness, oncoming = oncoming, thread = thread })
 				-- the whoosh of a car going past, and a flick of the view
 				Audio.passBy(0.35 + 0.45 * closeness)
+				s.nitro = math.min(1, s.nitro + Config.DrivingFeel.NitroFillPass * (0.5 + closeness))
 				s.fovPunch += Config.DrivingFeel.NearMissFov * (0.5 + closeness)
 				s.shake = math.max(s.shake, 0.12 + 0.2 * closeness)
 			end
@@ -1535,12 +1807,38 @@ function Driving.step(dt: number)
 	local actual = root.AssemblyLinearVelocity
 	local actualFlat = Vector3.new(actual.X, 0, actual.Z)
 
+	-- in the air (a ramp, the viaduct's kinks, a kerb at speed) and the landing: the body
+	-- compresses, the nose dips, the camera thumps, a hard one bangs
+	if not s.grounded then
+		s.airT += dt
+		s.airVy = math.min(s.airVy, actual.Y)
+	else
+		if s.airT > 0.25 then
+			local fall = -s.airVy
+			if fall > 8 then
+				s.pitchVel -= DF.LandKick * fall
+				s.headVel += Vector3.new(0, -fall * 0.04, 0)
+				s.shake = math.max(s.shake, math.clamp(fall / 60, 0.2, 1))
+				if fall > 45 then
+					Audio.crash(fall * 0.5)
+				end
+			end
+		end
+		s.airT, s.airVy = 0, 0
+	end
+
 	-- Crash detection: physics couldn't give us the velocity we asked for
 	if s.grounded and s.lastCommand.Magnitude > 25 then
 		local loss = (s.lastCommand - actualFlat).Magnitude
 		if loss > math.max(22, s.lastCommand.Magnitude * 0.35) then
 			s.vel = actualFlat
 			reportCrash(s, loss)
+			-- the jolt: the body and the driver's head are thrown
+			local k = math.clamp(loss / 40, 0, 2) * DF.CrashJolt
+			s.pitchVel -= k * 2
+			s.rollVel += k * 3 * (if math.random() < 0.5 then -1 else 1)
+			s.headVel += Vector3.new(0, 0, -k * 3)
+			s.drifting = false
 		end
 	end
 
@@ -1560,9 +1858,9 @@ function Driving.step(dt: number)
 		if not s.manual and s.shiftT <= 0 and not s.electric then
 			if fwdSpeed > 1 and s.engineOn then
 				local rev = speedFrac / gearHi(s.agear)
-				if s.agear < GEARS and rev >= 0.5 + (UPSHIFT_AT - 0.5) * throttle then
+				if s.agear < GEARS and rev >= 0.5 + (s.cls.upshift - 0.5) * throttle then
 					s.nextGear = s.agear + 1
-					s.shiftT = if throttle > 0.5 then SHIFT_TIME else SHIFT_TIME * 1.6
+					s.shiftT = if throttle > 0.5 then s.cls.shiftTime else s.cls.shiftTime * 1.6
 				elseif s.agear > 1 and rev < (if throttle > 0.8 then 0.55 else 0.28) and speedFrac / gearHi(s.agear - 1) < 0.9 then
 					s.nextGear = s.agear - 1
 					s.shiftT = 0.12
@@ -1587,6 +1885,14 @@ function Driving.step(dt: number)
 		elseif throttle > 0 and fwdSpeed < -2 then
 			a += 140 * throttle -- braking out of reverse
 		end
+		-- brakes by class; a hard stop at speed pulses the anti-lock (keeps some steering)
+		local brakeForce = s.cls.brake * s.brakeIn
+		local abs = s.brakeIn > 0.8 and Config.spsToMph(math.abs(fwdSpeed)) > 12
+		if abs then
+			s.absT += dt
+			brakeForce *= 1 - DF.AbsPulse * (0.5 + 0.5 * math.sin(s.absT * math.pi * 2 * DF.AbsHz))
+			s.shake = math.max(s.shake, 0.05)
+		end
 		-- reverse: up to a third of top speed (35 mph at most), pulling away briskly
 		local reverseTop = Config.mphToSps(math.min(35, s.spec.TopSpeed * 0.33))
 		local reversePull = math.max(s.accel * s.powerK * 0.8, 18)
@@ -1595,12 +1901,12 @@ function Driving.step(dt: number)
 				a -= if fwdSpeed > 2 then 140 * throttle else reversePull * throttle
 			end
 			if fwdSpeed > 2 then
-				a -= 150 * s.brakeIn
+				a -= brakeForce
 			elseif fwdSpeed < -2 then
-				a += 150 * s.brakeIn
+				a += brakeForce
 			end
 		elseif fwdSpeed > 2 then
-			a -= 150 * s.brakeIn
+			a -= brakeForce
 		elseif brake > 0 and fwdSpeed > -reverseTop and s.engineOn and not s.launchReady then
 			a -= reversePull * brake -- automatic: hold the brake at a stop to reverse
 		end
@@ -1617,6 +1923,16 @@ function Driving.step(dt: number)
 		elseif throttle == 0 and brake == 0 then
 			fwdSpeed = 0
 		end
+		-- nitro: extra pull, and past the car's own top speed up to NitroTop of it
+		s.boosting = nitroHeld() and s.nitro > 0 and engaged and gearNow > 0 and throttle > 0.3 and fwdSpeed > 5
+		if s.boosting then
+			if speedFrac < 1 then
+				a += DF.NitroAccel
+			else
+				a += drag + DF.NitroAccel * math.clamp((DF.NitroTop - speedFrac) / (DF.NitroTop - 1), 0, 1)
+			end
+			s.nitro = math.max(0, s.nitro - DF.NitroDrain * dt)
+		end
 		fwdSpeed += a * dt
 
 		-- steering: speed-sensitive wheel angle, capped by lateral grip; the wheel turns slower and
@@ -1632,14 +1948,26 @@ function Driving.step(dt: number)
 		gripG *= 1 + (DF.Downforce[s.spec.Class] or 0) * math.clamp(speedAbs / s.topSpeed, 0, 1) ^ 2
 		-- power on the rear (traction control off, or a clutch-drop launch) loosens it
 		local loss = 0
-		if not handbrake and (throttle > 0.5 or s.launch > 0) then
+		if not handbrake and (throttle > 0.5 or s.launch > 0) and s.drive ~= "FWD" then
 			loss = (if s.tc then 0.05 else 0.4) * throttle * math.clamp(1 - math.abs(speedFrac) * 1.5, 0, 1)
 			if s.launch > 0 then
 				loss += 0.2
 			end
+			if s.drive == "AWD" then
+				loss *= DF.AwdPowerOversteer -- all four wheels share the power
+			end
 			loss = math.min(loss, 0.7)
 		end
 		local cap = gripG * 28 / math.max(speedAbs, 1)
+		-- the front tyres give up first on a heavy-nosed car at speed (understeer), more so when a
+		-- front-drive car is flooring it through the corner; braking hard keeps most of the steering
+		cap *= 1 - s.cls.understeer * math.clamp(speedAbs / s.topSpeed, 0, 1)
+		if s.drive == "FWD" then
+			cap *= 1 - DF.FwdUndersteer * throttle * math.clamp(speedAbs / (s.topSpeed * 0.5), 0, 1)
+		end
+		if abs then
+			cap *= DF.AbsSteer
+		end
 		if handbrake then
 			cap *= 1.7
 		elseif not s.tc then
@@ -1647,10 +1975,47 @@ function Driving.step(dt: number)
 		end
 		yawRate = math.clamp(yawRate, -cap, cap)
 		-- the car's turn follows the wheel with its weight: quick when parking, heavier at speed
-		local response = (DF.YawResponse + DF.YawResponseHandling * handling) * (1 + 3 * math.max(0, 1 - speedAbs / 40))
+		local response = (DF.YawResponse + DF.YawResponseHandling * handling) * (1 + 3 * math.max(0, 1 - speedAbs / 40)) / s.cls.inertia
 		s.yawRate += (yawRate - s.yawRate) * math.min(1, dt * response)
 		yawRate = s.yawRate
 		s.yaw -= yawRate * dt
+
+		-- drifting: a slide past DriftEnter at speed (or the handbrake thrown into a corner) is a
+		-- drift; the nose is eased towards where the car is going (countersteer help), gently while
+		-- you steer and firmly past the spin limit, so a drift can be held and linked
+		local driftAngle = math.atan2(latSpeed, math.max(math.abs(fwdSpeed), 1))
+		s.driftAngle = driftAngle
+		local driftMph = Config.spsToMph(speedAbs)
+		if not s.drifting then
+			if driftMph > DF.DriftMinMph and fwdSpeed > 0 and (math.abs(driftAngle) > DF.DriftEnter or (handbrake and math.abs(s.steer) > 0.25)) then
+				s.drifting = true
+				s.driftCalm = 0
+			end
+		else
+			s.driftCalm = if math.abs(driftAngle) < DF.DriftExit then s.driftCalm + dt else 0
+			if s.driftCalm > DF.DriftHold or driftMph < DF.DriftMinMph * 0.7 or fwdSpeed <= 0 then
+				s.drifting = false
+			end
+		end
+		if s.drifting and speedAbs > 1 then
+			local velYaw = yawFromLook((fwd * fwdSpeed + right * latSpeed).Unit)
+			local d = (velYaw - s.yaw + math.pi) % (2 * math.pi) - math.pi
+			s.yaw += d * DF.DriftAssist * (1 - 0.6 * math.abs(steerIn)) * dt
+			if math.abs(d) > DF.DriftMaxAngle then
+				s.yaw += (math.abs(d) - DF.DriftMaxAngle) * math.sign(d) * math.min(1, dt * 12)
+			end
+			s.nitro = math.min(1, s.nitro + DF.NitroFillDrift * dt)
+		end
+
+		-- the car turns, its momentum doesn't: the velocity stays where it was and the tyres pull
+		-- it round as far as their grip allows (below), which is what lets a car slide and drift
+		do
+			local nf = forwardFromYaw(s.yaw)
+			local nr = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
+			local wv = fwd * fwdSpeed + right * latSpeed
+			fwdSpeed, latSpeed = wv:Dot(nf), wv:Dot(nr)
+			fwd, right = nf, nr
+		end
 
 		-- lateral grip (low with handbrake -> drift). Past the tyres' peak slip angle the grip falls
 		-- away, so a slide keeps going until you catch it
@@ -1660,8 +2025,23 @@ function Driving.step(dt: number)
 		if slipAngle > DF.SlipPeak then
 			grip *= 1 - (1 - DF.SlideGrip) * math.clamp((slipAngle - DF.SlipPeak) / DF.SlipPeak, 0, 1)
 		end
-		latSpeed *= math.exp(-grip * dt)
+		if s.drifting and not handbrake then
+			-- in a held drift the side grip stays low while you stay on the throttle
+			grip = math.min(grip, if throttle > 0.4 then DF.DriftGrip else DF.DriftGrip * 2.2)
+		end
+		-- the tyres pull the side speed out up to the sideways force they have (the same grip that
+		-- caps the turn, a little more so a normal corner holds its line); a drift, the handbrake,
+		-- wheelspin or a slide past the peak leaves them less, and the car slides
+		do
+			local gripK = grip / (4.5 + 5 * handling)
+			local remove = gripG * 28 * 1.15 * gripK * dt
+			latSpeed *= math.exp(-grip * 0.5 * dt)
+			latSpeed = math.sign(latSpeed) * math.max(0, math.abs(latSpeed) - remove)
+		end
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
+		if s.drifting then
+			s.slip += 30 * math.clamp(math.abs(driftAngle) / 0.5, 0, 1)
+		end
 		-- tyre noise and smoke: a real launch (traction control off, flooring it from a stop, or a
 		-- clutch drop) for a moment only, a hard stop at speed, and turning hard when fast
 		local sf = math.abs(fwdSpeed) / s.topSpeed
@@ -1701,9 +2081,9 @@ function Driving.step(dt: number)
 		local tnow = os.clock()
 		local texP = tex * math.noise(tnow * 9, 0, 7)
 		local texR = tex * math.noise(0, tnow * 11, 8)
-		s.pitchVel += ((math.rad(3.0) * lonG + texP - s.pitch) * 70 - s.pitchVel * 10) * dt
+		s.pitchVel += ((math.rad(3.0) * s.cls.pitch * lonG + texP - s.pitch) * 70 - s.pitchVel * 10) * dt
 		s.pitch += s.pitchVel * dt
-		s.rollVel += ((math.rad(3.4) * latG + texR - s.roll) * 90 - s.rollVel * 12) * dt
+		s.rollVel += ((math.rad(3.4) * s.cls.roll * latG + texR - s.roll) * 90 - s.rollVel * 12) * dt
 		s.roll += s.rollVel * dt
 
 		local newFwd = forwardFromYaw(s.yaw)
@@ -1714,6 +2094,54 @@ function Driving.step(dt: number)
 		s.lv.MaxForce = root.AssemblyMass * 8
 		s.steer += (steerIn - s.steer) * math.min(1, dt * 6)
 		s.yawRate *= math.exp(-dt * 2)
+		s.boosting = false
+		-- in the air the nose follows the arc (up off a ramp, down to land)
+		local arc = math.clamp(math.atan2(actual.Y, math.max(actualFlat.Magnitude, 1)) * 0.6, -0.35, 0.35)
+		s.pitch += (arc - s.pitch) * math.min(1, dt * 2)
+		s.pitchVel *= math.exp(-dt * 4)
+	end
+
+	-- scraping a wall: sparks, speed bleeding off, a buzz in the camera
+	if s.grounded and Config.spsToMph(s.vel.Magnitude) > DF.ScrapeMinMph then
+		local side = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
+		for _, sd in { 1, -1 } do
+			local w = workspace:Raycast(root.Position, side * sd * (s.width / 2 + 0.4), rayParams)
+			if w and w.Instance.CanCollide and math.abs(w.Normal.Y) < 0.5 then
+				s.vel *= 1 - DF.ScrapeDrag * dt
+				s.shake = math.max(s.shake, 0.15)
+				sparks(w.Position, w.Normal, 3 + math.floor(Config.spsToMph(s.vel.Magnitude) / 25))
+			end
+		end
+	end
+
+	-- nitro fills from driving fast (not while it's being used)
+	local mphNow = Config.spsToMph(s.vel.Magnitude)
+	if not s.boosting and mphNow > 60 then
+		s.nitro = math.min(1, s.nitro + DF.NitroFillSpeed * math.clamp((mphNow - 60) / 80, 0, 1) * dt)
+	end
+
+	-- skid marks under the rear tyres while they slide
+	if s.grounded and hit and (s.slip > 28 or s.drifting) and mphNow > 8 then
+		s.skidT += dt
+		if s.skidT > 0.05 then
+			s.skidT = 0
+			local y = hit.Position.Y + 0.03
+			local cf = CFrame.new(root.Position) * CFrame.Angles(0, s.yaw, 0)
+			local back = s.wheelbase * 0.5
+			local l = cf:PointToWorldSpace(Vector3.new(-(s.width / 2 - 1.1), 0, back))
+			local r = cf:PointToWorldSpace(Vector3.new(s.width / 2 - 1.1, 0, back))
+			l = Vector3.new(l.X, y, l.Z)
+			r = Vector3.new(r.X, y, r.Z)
+			if s.skidL then
+				skidMark(s.skidL, l)
+			end
+			if s.skidR then
+				skidMark(s.skidR, r)
+			end
+			s.skidL, s.skidR = l, r
+		end
+	else
+		s.skidL, s.skidR = nil, nil
 	end
 
 	-- out of the world
@@ -1790,7 +2218,7 @@ function Driving.step(dt: number)
 			end
 			target = math.clamp(target, 0.12, 1.02)
 		end
-		s.rpm += (target - s.rpm) * math.min(1, dt * 14)
+		s.rpm += (target - s.rpm) * math.min(1, dt * s.cls.revRate)
 		if not free then
 			s.freeRpm = s.rpm
 		end
@@ -1998,8 +2426,48 @@ function Driving.render(dt: number)
 	end
 	-- smoke with the squeal (same curve as the sound); launches smoke the rear tyres most
 	local squeal = math.clamp((s.slip - 8) / 40, 0, 1)
+	local q = fxQuality()
 	for _, sm in s.smoke do
-		sm.emitter.Rate = if squeal > 0.05 then squeal * (if sm.rear then 70 else 35) else 0
+		local rate = if squeal > 0.05 then squeal * (if sm.rear then 70 else 35) else 0
+		-- a drift smokes the rear tyres hard
+		if s.drifting and sm.rear then
+			rate = math.max(rate, 55 * math.clamp(math.abs(s.driftAngle) / 0.4, 0.4, 1))
+		end
+		sm.emitter.Rate = rate * q
+	end
+	fadeSkids(dt)
+
+	-- nitro: blue flames out of the pipes, the view kicks wide and blurs, a whoosh as it lights
+	if s.boosting then
+		if not s.boostWas then
+			for _, e in s.flames do
+				e.Color = NITRO_FLAME
+			end
+			if s.flameLight then
+				s.flameLight.Color = Color3.fromRGB(90, 140, 255)
+			end
+			Audio.passBy(1)
+			s.camLag += 2
+			s.shake = math.max(s.shake, 0.3)
+		end
+		for _, e in s.flames do
+			e:Emit(if q > 0.7 then 2 else 1)
+		end
+		s.flameGlow = math.max(s.flameGlow, 3)
+		s.fovPunch = math.max(s.fovPunch, Config.DrivingFeel.NitroFov)
+		s.blurPulse = math.max(s.blurPulse, Config.DrivingFeel.NitroBlur)
+	elseif s.boostWas then
+		for i, e in s.flames do
+			e.Color = s.flameColors[i] or e.Color
+		end
+		if s.flameLight then
+			s.flameLight.Color = Color3.fromRGB(130, 160, 255)
+		end
+	end
+	s.boostWas = s.boosting
+	if nitroFill then
+		nitroFill.Size = UDim2.fromScale(math.clamp(s.nitro, 0, 1), 1)
+		nitroFill.BackgroundTransparency = if s.boosting then 0 else 0.15
 	end
 
 	-- exhaust crackle + flame glow
