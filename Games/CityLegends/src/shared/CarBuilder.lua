@@ -65,26 +65,24 @@ local DIM_OVERRIDES: { [string]: { [string]: number } } = {
 -- sets the length, and an imported model's own wheels set the wheel size.
 CarBuilder.STUDS_PER_METRE = 3.0
 local REAL_WB: { [string]: number } = {
-	suzaki_swift = 2.45, toyoka_belta = 2.55, byt_dolphin = 2.7, kio_ev6 = 2.9, byt_seal = 2.92,
+	suzaki_swift = 2.45, toyoka_belta = 2.55, kio_ev6 = 2.9, byt_seal = 2.92,
 	toyoka_camri = 2.825, toyoka_crown = 2.85, toyoka_alfard = 3.0, toyoka_lc200 = 2.85, nisun_350z = 2.65,
-	bnw_530i = 2.975, bnw_540i = 2.975, bentz_e200 = 2.939, bentz_e300 = 2.939, bentz_e400 = 2.939,
+	bnw_530i = 2.975, bnw_540i = 2.975, bentz_e300 = 2.939, bentz_e400 = 2.939,
 	 bnw_330i_g20 = 2.851,
-	bnw_m3_e92 = 2.761, bnw_m3_f80 = 2.812, bnw_m5_e60 = 2.889, bnw_m6_v10 = 2.78, bentz_cla45 = 2.699,
-	bentz_cls550 = 2.874, bentz_cls55 = 2.854, bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
-	dodger_challenger = 2.946, bnw_x6 = 2.933, toyoka_lc300 = 2.85, lexis_lx570 = 2.85, bentz_g63 = 2.89,
-	porsha_panamera = 2.95, nisun_gtr = 2.78, astin_db9 = 2.74, astin_vantage = 2.6, ferrara_f430 = 2.6,
-	lambrini_lp560 = 2.56, lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
+	bnw_m3_e92 = 2.761, bnw_m3_f80 = 2.812, bnw_m4_f82 = 2.812, bnw_m5_e60 = 2.889, bnw_m6_v10 = 2.78, bentz_cla45 = 2.699,
+	bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
+	dodger_challenger = 2.946, bnw_x6 = 2.975, toyoka_lc300 = 2.85, lexis_lx700 = 2.85, bentz_gle53 = 2.915, byt_u8 = 3.05, bentz_g63 = 2.89,
+	porsha_panamera = 2.95, nisun_gtr = 2.78, nisun_r34 = 2.665, bentz_sl65bs = 2.56, astin_db9 = 2.74, bnw_750li = 3.07, bentz_gls = 3.135, bentz_s680 = 3.396, lambrini_countach = 2.45, astin_vantage = 2.6, ferrara_f430 = 2.6,
+	lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
 	ferrara_458 = 2.65, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,
-	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.295,
+	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.772,
 	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lambrini_lp750 = 2.7,
-	bentz_s63 = 3.165, bentz_maybach = 3.365, porsha_boxster = 2.475, lambrini_lp640 = 2.665, mazdo_rx7 = 2.425,
-	bentz_gt63s = 2.951, chevo_c7 = 2.71, chevo_c6 = 2.686, chevo_camaro = 2.811,
+	bentz_s63 = 3.165, bentz_maybach = 3.39, mazdo_rx8 = 2.7, bnw_m8gc = 3.023, bnw_x7 = 3.105, xiaomo_su7 = 3.0, porsha_boxster = 2.475, lambrini_lp640 = 2.665, mazdo_rx7 = 2.425,
+	bentz_gt63s = 3.052, chevo_c7 = 2.71, chevo_c6 = 2.686, chevo_camaro = 2.811,
 }
 
 -- cars that share another car's imported model (same body and interior) until they get their own
-CarBuilder.MODEL_ALIAS = {
-	lambrini_lp570 = "lambrini_lp560",
-} :: { [string]: string }
+CarBuilder.MODEL_ALIAS = {} :: { [string]: string }
 
 -- An imported model's wheelbase and wheel radius (its own studs), from its Wheels folder
 local function partsBounds(inst: Instance): (Vector3?, Vector3?)
@@ -776,10 +774,10 @@ function CarBuilder.build(spec: Cars.CarSpec, options: BuildOptions?): Model
 		for _, hl in headLights do
 			local spot = Instance.new("SpotLight")
 			spot.Face = Enum.NormalId.Front
-			spot.Range = 60
-			spot.Angle = 70
-			spot.Brightness = 5
-			spot.Color = Color3.fromRGB(230, 238, 255)
+			spot.Range = 80 -- a long, bright beam down the dark road
+			spot.Angle = 64
+			spot.Brightness = 6
+			spot.Color = Color3.fromRGB(232, 240, 255)
 			spot.Shadows = false
 			spot.Parent = hl
 		end

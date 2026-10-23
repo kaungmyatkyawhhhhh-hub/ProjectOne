@@ -19,6 +19,8 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 
 ![[preview-hud.png]]
 
+![[preview-stats.png]]
+
 ![[preview-shop.png]]
 
 ![[preview-shop-passes.png]]
@@ -32,8 +34,38 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 ### Main screen
 - **Left:** wide buttons **Shop** (green, cart) and **Boosts** (cyan, dumbbell), then an **on/off switch** with a white label (Auto Punch). Buttons are about 196 × 76.
 - **Right:** a column of **square buttons** for the free stuff (owner: nobody looks inside the shop for it): **Daily** reward (yellow, star), **Spin** wheel (orange, wheel), **Gifts** = Free Gifts (red, gift), then **Settings** (blue, gear). Each has a white label under it. Gifts shows its countdown instead ("0:10", yellow) and the label turns into "Ready!" when a gift can be claimed. A red badge in the top-left corner shows "!" (daily ready) or a number (free spins, gifts ready). Ready buttons do the "Ready" pulse.
-- **Stats float in the bottom-left with no panel:** a big 3D icon and a huge **italic** number (Montserrat Heavy Italic, thick dark stroke): Strength **yellow** `#FFEB1E`, Cash **green** `#5AEB3C`. Under them, white italic "Group Bonus: +10%".
+- **Stats float with no panel, polished (2026-10-12; the owner found the first build ugly).** Match `preview-stats.png`:
+  - **Level:** a shiny 3D **star** (`icon-star-level.png`) with the level number on it (white, dark stroke), then a dark studded bar (`stats-bar-track.png`) with a green studded fill (`stats-bar-fill.png`) and "0 / 4" in the middle. A small yellow "LEVEL" label goes **on top of the bar** (just above its left end, changed 2026-10-12; it used to be under it). No plain dark pill, and no "Level 1" text.
+  - **Strength:** the red **3D dumbbell** (`icon-dumbbell-3d.png`, not the flat dark glyph), then a big **italic** number in a yellow → orange gradient with a thick dark stroke and shadow.
+  - **Cash:** `money-small.png`, then a big italic number in a light green → dark green gradient.
+  - Use **one font everywhere** (Montserrat Heavy / Heavy Italic). Line them up in a neat column with the icons the same size (about 100 px on PC).
+  - **Order, top to bottom (owner 2026-10-12):** Strength → Cash → **Level** → "Group Bonus: +10%" (or "Join group: +10% Strength!" in yellow for non-members).
+  - **Bug to fix:** the level bar's green fill must show the progress (for 9.74Qa / 13.1Qa it should be about 74% full; it was showing empty).
 - **Tutorial:** a cyan box at the top center with white text and a dark bar track with a green studded fill ("3/10"). Skip is a small red button.
+
+### Left side: Shop and Boosts in the middle of the left edge (owner 2026-10-12, replaces the "LeftColumn" version)
+The owner **didn't** want the stats moved. **Revert the stats** to exactly where and how they were before the LeftColumn change (same position, size and anchoring, on PC and on phones). Only the buttons move.
+- **Shop and Boosts** (and the Auto Punch switch under them, when shown) go in a small frame `LeftButtons`:
+  - `AnchorPoint = (0, 0.5)`, `Position = UDim2.new(0, 16, 0.5, 0)`: the **vertical middle of the left side** of the screen, on every screen size.
+  - A vertical `UIListLayout`, `Padding` 10 px, `AutomaticSize = Y`.
+  - A `UIScale` = `math.clamp(screenHeight / 900, 0.6, 1.2)`, updated when the screen size changes.
+- Inside the safe area (`ScreenGui.ScreenInsets = CoreUISafeInsets`).
+- **Phones:** keep the buttons at the middle-left too. Only if they would touch the thumbstick (read `PlayerGui.TouchGui.TouchControlFrame.ThumbstickFrame`) move them up just enough to clear it, with a 20 px gap. Nothing else changes on phones.
+- **Test** in the Device Emulator: 1920×1080, a tall window, iPhone SE, iPhone 14 Pro Max and iPad, landscape. The buttons should sit at the middle of the left edge, and the stats exactly where they were before.
+
+### Phone sizes (bug, owner 2026-10-12: "it's so bad on phone, make the buttons smaller")
+On a phone (landscape) the five squares (Settings, Auras, Gifts, Spin, Daily) were huge and lined up in a **row across the top middle of the screen**, covering the view. Fix:
+- **Size everything from the screen height**, not fixed pixels. On phones (touch, screen height under 500 px after Roblox's scaling):
+  - **Squares:** about **11% of the screen height** each (about 34 px on a 308 px tall screen, never more than 48 px), label text about 3.5% of the height.
+  - **Shop / Boosts:** about **10% of the screen height** tall (about 30 px), same width ratio as now.
+  - **Stats:** icons about 7% of the height, numbers to match.
+  - Badges ("!", "1") scale with the square (about 40% of its size).
+- **Squares go in a column on the right edge**, vertically centered (`AnchorPoint (1, 0.5)`, `Position (1, -12, 0.5, 0)`), never in a row across the top. If 5 don't fit above the jump button, use 2 columns side by side.
+- **Nothing in the top middle** on phones: that's where the player looks. Keep it empty.
+- Keep the small "⚡ boost" icon next to the squares only if it fits in the column; otherwise put it under the Boosts button.
+- On PC keep the current sizes (the 1080p look stays as it is).
+- **A bit smaller still:** in the owner's test the squares were about 15% of the screen height. Aim for 11–12%.
+- **Test** in the Device Emulator with iPhone SE, iPhone 14 Pro Max and a Galaxy phone in landscape. Take a screenshot of each for the session log.
 
 ### Big menus (Shop, Free Gifts, Settings, Index…)
 - **Window:** solid dark grey `#3E4048` with a dark stud pattern and a near-black outline (`sim-window.png`). It's **not** see-through.
@@ -52,6 +84,66 @@ The owner sent screenshots of a popular simulator (Shop/Index buttons, a dark st
 - **The biggest difference is the item art.** The other game uses really well-drawn **2D pictures** (not 3D models): thick dark outlines, shaded sides, shine and depth. Ours should match that quality.
   - **Money art (2026-10-12, matches the other game):** front-facing tilted bill bundles with a $ circle, a yellow band, stacked edges, a shine and thick black outlines: `money-small.png` (1 bundle), `money-medium.png` (3), `money-big.png` (pile), `money-bag.png`, `money-safe.png` (open safe full of cash). **Use these everywhere money shows**: Cash shop cards, the Cash stat icon, the ad board, the Free Gift popup, the Group Reward, daily/gift rewards, Cash products, and the shop's Cash category icon. (`icon-cash.png` and `art-cash-*.png` were replaced with the same art.)
   - Still to make at this quality: Strength (dumbbells), boosts, spins, gifts and beds.
+
+### Daily Reward window (2026-10-12: icons, not text)
+![[preview-daily.png]]
+- Each day card shows a **big picture of the reward** with a soft glow, placed in the middle of the card. **Cards are short** (about 176 × 250 on PC; Day 7 about 316 × 290), with the picture between the DAY title and the amount, and only a **short amount** at the bottom ("$28T", "+2 SPINS", "10 MIN"). No sentences.
+  - Cash: `money-small.png` / `money-medium.png` / `money-big.png` (bigger amounts get bigger piles).
+  - Spins: `icon-wheel.png`. Strength boost: `icon-boost-x2.png` (a dumbbell with "x2"). Levels: `icon-star.png`.
+  - Two rewards: the main icon big, the second smaller in the bottom-right corner.
+- **States:** claimed = green, dimmed, with a big green check; today = cyan with soft rays (the one to claim); later days = grey.
+- **Day 7 is a bigger gold card** with a red "MEGA!" tag and `money-safe.png` + a star, so players see the big reward coming.
+- A yellow line at the bottom: "Come back tomorrow for Day X!"
+
+### Spin wheel (fix 2026-10-12: slices and lines were not lined up)
+![[preview-wheel.png]]
+- Use **one image for the slices, lines, rim and hub together**: `wheel-base.png` (8 slices, 45° each). Because they're one picture, the lines can never drift off the colors.
+- Slice order clockwise from the top: CASH (blue), x2 STR (pink), +1 SPIN (yellow), BIG CASH (green), x2 CASH (purple), +1 LEVEL (orange), MEGA CASH (cyan), JACKPOT (red). Slice 1 is **centered** under the pointer at rotation 0.
+- **Labels:** put each label in a Frame that rotates with the wheel, at angle `i * 45°` from the top, about 28% of the wheel size out from the center, reading outward along the middle of its slice (like `preview-wheel.png`).
+- **Landing:** to stop on prize `i` (0–7), the final rotation is `-(i * 45) + 360 * spins + random(-15, 15)` degrees. The random part stays inside the slice, so the pointer always lands on the slice the server picked.
+
+### Active boost timer pill (fix 2026-10-12: text went outside the border)
+- The pill must **grow to fit its text**: use `AutomaticSize = X` on the frame, a `UIListLayout` (horizontal, centered, Padding 8 px) and a `UIPadding` of 12 px left/right. The icon, "x2 STRENGTH" and "10:29" are separate labels inside it, each with `AutomaticSize = X` and `TextScaled = false` (fixed text size, about 20 px).
+- Same style as the other buttons: orange studded box, dark outline, white text with the dark stroke, and the timer in yellow.
+- Several boosts stack under each other, each in its own pill, with the same width (the widest one).
+
+### Level bar fill (bug, still not working 2026-10-12)
+The bar shows "9.74Qa / 13.1Qa" but stays empty. It must fill with green as Strength grows.
+- Inside the dark track, add a **Fill** frame (`stats-bar-fill.png`, green studded, same corner radius), anchored on the left, with `Size = UDim2.new(progress, 0, 1, 0)` and `ClipsDescendants` on the track so the rounded end looks right. The text label sits **on top** of the fill (higher ZIndex).
+- **progress** = (Strength − Strength needed for the current level) ÷ (Strength needed for the next level − Strength needed for the current level), clamped 0–1. Don't use Strength ÷ next level directly. With huge numbers, do the math with plain numbers (not the formatted "9.74Qa" strings).
+- Update it every time Strength changes, with a short smooth tween (0.2 s). On level up: fill to 100%, flash white, reset to the new progress, and play the level-up effect.
+- Test: at 9.74Qa / 13.1Qa (if the previous level needed about 7.2Qa) the bar should be about 43% full. Check it on a fresh save as well: it should visibly grow while punching.
+
+### More VFX on shop cards (owner 2026-10-12: "doesn't look appetizing")
+Every shop card should look rich, like the reference game. Static effects (no movement needed):
+- **Use the 3D icons, not flat glyphs:** Strength upgrade = the red 3D dumbbell (`icon-dumbbell-3d.png`), Server boost = the 3D bolt (`icon-bolt.png`), Starter Pack = the 3D gift, Cash = `money-*.png`. The flat grey dumbbell and the flat bolt look cheap.
+- **Behind every big icon:** a soft white glow (`fx-glow.png`, ImageTransparency 0.35, 1.4× the icon) plus a light burst in the card's color (`fx-rays.png` or `burst-*.png`, ImageTransparency 0.5).
+- **Sparkles:** 3–4 `fx-sparkle.png` / `fx-star4.png` around each icon, different sizes (they may twinkle slowly; that's the only movement).
+- **Card background:** a diagonal gradient + soft sunburst (as in `preview-shop.png`), not a flat color.
+- **Starter Pack:** a gold glow edge and a soft shine stripe across the card; the "70% OFF" ribbon stays.
+- **Server x2 Strength:** a big 3D bolt with a cyan glow, and small bolt sparks around it.
+- **DOUBLE Your STRENGTH:** a 3D dumbbell with a glow, and a light burst behind "x2" in yellow.
+- Item card icons may overlap the card's top edge a little (like the reference) for depth.
+
+### Make shop cards look different from each other (owner 2026-10-12: "they all look the same if you blur your eyes")
+Every card was blue with the same grey dumbbell. Each card needs its own **color, picture and size**, so you can tell them apart at a glance:
+- **Card color by tier (cheap → expensive):** R$9 = blue, R$10–15 = green, R$25 = purple, R$30 = orange, R$49 = gold/red. Bigger packs = warmer, brighter colors.
+- **Pictures that grow:** use the product pictures already made (`Product Icons/*.png`), or the same art:
+  - Boosts x2 / x3 / x5 / x10: the red 3D dumbbell with the multiplier, getting bigger and adding effects as the number goes up (x5 gets purple sparkles, x10 a lightning bolt and a gold glow).
+  - Strength packs Small / Medium / Big: **1 dumbbell → 2 dumbbells → a pile of dumbbells**, not the same single grey dumbbell.
+  - Fast Punch: a **fist with speed lines** (orange), not a dumbbell.
+  - Levels: a **star** (+1), 3 stars (+3), a big glowing gold star (+9).
+  - Spins: the wheel (+1), the wheel with sparkles (+3), the wheel with "+10" and a glow (+10).
+  - Cash: `money-small` → `money-medium` → `money-big` → `money-bag` → `money-safe`.
+- **Never use the flat grey dumbbell glyph** on shop cards.
+- **Size:** the best / biggest item in each section gets a wider card (2 columns) with a glow edge.
+- Tags stay ("POPULAR", "BEST VALUE"), and the active boost shows "Active: 12:09" in green.
+
+### Sound variety (owner 2026-10-12)
+- **Keep the bubbly "pop" on button presses**: the owner finds it satisfying. Give it a small random pitch (0.92–1.1) so it never sounds exactly the same.
+- **The "whoosh" was annoying because it played on every button.** Use it **only when a big window opens** (Shop, Auras, Free Gifts, Daily, Settings), not on normal buttons, tabs, hover or close. Don't play it again if the same window was opened in the last 2 seconds.
+- Give each action its own sound so things don't blend together: press = pop, tab = soft click, close = lower pop (pitch 0.85), claim = coin + chime, buy = fanfare, error = soft buzz, hover = quiet tick.
+- Have 2–3 variations of the most frequent sounds (pop, coin) and pick one at random each time.
 
 ### Effects (the owner: "the effects in this game are crazy")
 - **Server announcements:** a big line at the top center for everyone, white with a dark stroke and the important part colored: "**Rong** broke the **INFINITY BED!**", "**Rong** bought **SERVER x2 STRENGTH!**". It slides in, stays 4 s and fades.
@@ -226,3 +318,12 @@ The trick to "satisfying": short sounds (under 0.4 s), a little random pitch on 
 
 ## Remaking the images
 `source/kit.py` makes the images and `source/preview.py` makes the preview, using Python with Pillow. They need the Montserrat Black font as `fonts/Montserrat-Black.ttf` next to `source` (from the npm package `@fontsource/montserrat`). Colors are in `COLORS` at the top of `kit.py`.
+
+## Top center: one slim tracker (owner, 2026-10-13)
+**Built 2026-10-13** (`Tracker` pill + boost chips), see [[Break A Bed/2026-10-13|2026-10-13]].
+
+The owner's screenshot: three panels were stacked in the top center (the x2 STRENGTH timer, "Next: Water Bed" and the Starter Quest card), covering a big part of the view. The rule now:
+- **Only one tracker at a time** in the top center, as a slim pill: **at most 24% of the screen width on PC** (40% on phones), about 6% of the screen height, with a `UISizeConstraint`. Inside: a small icon, one line of text and a thin progress bar (about 6 px) along the bottom edge with small "1/2" text. Same light or slate style as now, just slimmer.
+- **What it shows, in priority order:** the tutorial step → the current Starter Quest (with "+1 SPIN" as a small tag) → the next bed. When a quest finishes, the pill flashes and switches to the next item.
+- **Boost timers** (x2 STRENGTH and the others) leave the center. They become small chips (icon + "2:41", about the size of one HUD stat line) stacked just above the Strength stat on the left. Several boosts sit side by side.
+- The tutorial card follows the same size rule (see [[Break A Bed/New Player Guide|New Player Guide]]).

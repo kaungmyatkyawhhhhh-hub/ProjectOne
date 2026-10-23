@@ -1,0 +1,11 @@
+{
+  "note": "the G63 was converted with an earlier one-off version of this script; these numbers match it",
+  "scale": 100,
+  "remove": ["Icosphere"],
+  "forward": [0, -1, 0],
+  "steering": { "x": 0.3875, "z": 1.285, "radius": 0.215, "y": [-0.53, -0.27] },
+  "corners": { "FL": [0.82, -1.48, 0.4], "FR": [-0.82, -1.48, 0.4], "RL": [0.82, 1.36, 0.4], "RR": [-0.82, 1.36, 0.4] },
+  "wheel_meshes": ["Rim_Main", "wheelfl_set", "RewardRecycled_2020_Wheel"],
+  "wheel_reach": 0.45,
+  "glass": ["M_Glass", "phong3SG1"]
+}

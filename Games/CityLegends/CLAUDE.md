@@ -17,7 +17,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 
 - `src/shared`: modules used by both sides.
   - `Config`: all tuning: economy, progression, daily gift, traffic, sounds, theme.
-  - `Cars`: the roster of 55 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`.
+  - `Cars`: the roster of 65 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`.
   - `CarBuilder`: part-built car, physics hitbox, interior, driver arms. `getDims(class, id)` gives per-car proportions through `DIM_OVERRIDES`.
   - `CarMesh`: procedural lofted car meshes, with a `DESIGNS` table per car.
   - `CityLayout`, `FacadeTex`.
@@ -36,6 +36,22 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 - `tools/`:
   - `export_models.luau` (run with Lune) plus `make_glb.py`: export every car as a `.glb` for Studio's 3D Importer into `build/models` (gitignored).
   - `shrink_model.py`: makes a downloaded model (Sketchfab `.glb`, `.fbx`, `.obj`) fit Studio's 3D Importer. Each mesh gets at most 18,000 triangles, textures at most 1024 px, and the result is one `.fbx` with the textures inside. Run it with Blender's Python module: `pip install bpy` in a venv, then `python tools/shrink_model.py imports/car.glb`. The owner sends models by pushing them into `Games/CityLegends/imports` (GitHub takes files under 100 MB).
+  - `convert_car.py` plus a layout file in `tools/cars/*.json`: the full conversion of a downloaded car for the game.
+    - It removes stray objects and sizes the car in metres.
+    - It cuts the steering wheel out of every mesh as its own tilted part `SteeringWheel`.
+    - It makes the road wheels into FL/FR/RL/RR parts in a `Wheels` group.
+    - It names windows `SeeThrough_*` and bakes plain colours into tiny textures.
+    - To find the layout numbers, render the cabin with Blender (Cycles, CPU) from the driver's eye and highlight the picked pieces.
+  - `auto_car.py`: the same conversion with no layout file (`python tools/auto_car.py car.glb <real wheelbase m> out.blend ['{"front": -1, "tilt": 20}']`).
+    - It finds the wheels, the steering wheel, the front and the steering tilt by shape.
+    - It writes a `.blend` plus a JSON report. Always render each car from outside and from the driver's seat (steering wheel highlighted) before sending: a wrong pick turns the car back to front.
+    - Meshes that get thinned out are welded at their seams first; otherwise glossy paint comes out crumpled.
+    - Parts coloured by vertex colour (Studio drops those, the car comes in white) are split by colour, each with a plain colour.
+    - When the steering wheel pick is wrong, set `DEBUG = True` to print the candidates, and pass the right one as a hint: `{"steer": [side, up, along], "tilt": 23}` (metres, as printed). A wheel that leans far back is often centred a few cm too far forward; plotting the points around it from the side shows the real centre and tilt.
+  - `dial_probe.py` + `dial_fit.py`: live needles on a converted car's own dials (`CarSkin.DIAL_NEEDLES`). Probe a render pixel to find the dial texture, read the hub, two or three labels and the painted needle in texture pixels, then fit: it prints the table entry and paints the old needle out of the texture (the car then needs a new Import 3D). Check by drawing needles at 0 and at the top in a render.
+  - `dial_looks.py` (run from `Games/CityLegends`): each needle car's dial design, copied from its real cluster (colours, numbers, red zone, needle, logos, second km/h scale, screens), written to `src/client/DialLooks.lua`, with preview PNGs in `build/dials`. CarSkin draws them over the car's own dials. To check one, put the preview PNG on a plane at the dial in Blender and render from the driver's eye next to the real dial.
+  - `pack_cars.py out.fbx id=car.blend ...`: several converted cars in one FBX, one group per car id, for a single Import 3D. Packs for the owner go in `imports/new_cars/` (owner, 2026-10-13: new cars in their own folder); it holds only what is still to be imported, so clear it once the cars are in `CarModels.rbxm`.
+  - `take_cars.luau <place> <ids...>` (Lune, from `Games/CityLegends`): copies imported cars from the owner's saved place into `assets/CarModels.rbxm`. It takes off Blender's `.001` name endings and makes the windows two-sided.
 
 ## Build and check
 

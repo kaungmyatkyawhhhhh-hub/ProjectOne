@@ -20,7 +20,13 @@ export type Profile = {
 	Level: number,
 	XP: number, -- progress inside the current level
 	LastDaily: number, -- os.time() of the last daily gift claim (0 = never)
+	Settings: Settings,
 	Loaded: boolean,
+}
+
+export type Settings = {
+	Units: string, -- "mph" | "kmh"
+	Gearbox: string, -- "Auto" | "Manual"
 }
 
 export type Snapshot = {
@@ -31,6 +37,7 @@ export type Snapshot = {
 	XP: number,
 	XPNeed: number,
 	DailyIn: number, -- seconds until the daily gift can be claimed
+	Settings: Settings,
 }
 
 export type XpResult = {
@@ -64,6 +71,7 @@ local function defaultProfile(): Profile
 		Level = 1,
 		XP = 0,
 		LastDaily = 0,
+		Settings = { Units = "mph", Gearbox = "Auto" },
 		Loaded = false,
 	}
 end
@@ -120,6 +128,9 @@ function PlayerData.load(player: Player): Profile
 			if type(saved.LastDaily) == "number" then
 				profile.LastDaily = math.clamp(math.floor(saved.LastDaily), 0, os.time())
 			end
+			if type(saved.Settings) == "table" then
+				PlayerData.setSettings(player, saved.Settings, profile)
+			end
 		elseif not ok then
 			warn("[CityLegends] load failed for", player.Name, saved)
 		end
@@ -146,6 +157,7 @@ function PlayerData.save(player: Player)
 		Level = profile.Level,
 		XP = profile.XP,
 		LastDaily = profile.LastDaily,
+		Settings = profile.Settings,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)
@@ -232,7 +244,22 @@ function PlayerData.snapshot(player: Player): Snapshot?
 		XP = profile.XP,
 		XPNeed = Config.xpForLevel(profile.Level),
 		DailyIn = PlayerData.dailyReadyIn(player),
+		Settings = { Units = profile.Settings.Units, Gearbox = profile.Settings.Gearbox },
 	}
+end
+
+-- the player's settings (from a save or the client): only known values are kept
+function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
+	local profile = into or profiles[player]
+	if not profile or type(raw) ~= "table" then
+		return
+	end
+	if raw.Units == "mph" or raw.Units == "kmh" then
+		profile.Settings.Units = raw.Units
+	end
+	if raw.Gearbox == "Auto" or raw.Gearbox == "Manual" then
+		profile.Settings.Gearbox = raw.Gearbox
+	end
 end
 
 function PlayerData.release(player: Player)

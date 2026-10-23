@@ -7,7 +7,7 @@ Back to [[Break A Bed/Project Overview|Project Overview]].
 Why: Day 1 retention showed 0% on 2026-10-12. New players spawn with nothing telling them what to do, and most players who are lost in the first 30 seconds never come back. The guide makes a new player's first minute fun and clear. It uses the [[Break A Bed/UI Kit/UI Kit|UI Kit]] style, animations and sounds.
 
 ## The steps (only for players who have never broken a bed)
-1. **"Punch to get stronger!"** A glowing beam and a bouncing arrow lead from spawn to the Straw Post pad. A hint bubble appears above the pad.
+1. **"Punch to get stronger!"** A glowing beam and a bouncing arrow lead from spawn to the Straw Post pad. A hint bubble appears above the pad. **(2026-10-12) Training now uses a prompt: the hint says "Press E to train!", and the 10 punches count auto punches too (training auto-punches for free).** **Built:** the step card says "PRESS E TO TRAIN!" (phones: "TAP TRAIN!"), then "PUNCH 10 TIMES!" with the bar once training; after 10 punches training ends by itself so the player can walk to the bed.
 2. **Punch 10 times.** A progress bar shows 0/10. Each punch pops "+1 💪" (already in the game). Done → sparkle burst + "Nice!" sound.
 3. **"Now break a bed!"** The beam moves to the Cardboard Bed. The bed prompt glows.
 4. **Break the Cardboard Bed.** It's easy on purpose (6 health). The normal break effects play.
@@ -33,6 +33,41 @@ The first build used plain dark panels that didn't match the [[Break A Bed/UI Ki
 - **Animations:** the card drops in from above (Back Out). The bar fill slides smoothly. Each step done = the card flashes white, sparkles burst and a "ding" plays, then the next step's text pops in. The arrow bobs 10 px up and down.
 - Only one guide element at a time. Never stack two dark panels.
 
+## Make it smaller (owner, 2026-10-13)
+**Built 2026-10-13** (the `Tracker` pill), see [[Break A Bed/2026-10-13|2026-10-13]].
+
+The owner's screenshot: the step card is huge (about 60% of the screen width and a big chunk of the height) and covers the middle of the screen. It must be a small strip at the top center, with the world arrow and beam doing the telling.
+- **Size:** a slim pill **at most 24% of the screen width on PC** and 40% on phones, and about 6% of the screen height (around 40–48 px on PC). Use `UISizeConstraint` so it never grows on big screens.
+- **Inside, one row:** a small icon on the left (about 70% of the pill's height), then the step text in one line, with the text size scaling down to fit (`TextScaled` plus a `UITextSizeConstraint`, max around 22). Keep the light card style from the UI Kit.
+- **Progress:** a thin bar (about 6 px) along the bottom edge of the pill, only on steps that count (punches). There's no separate big bar.
+- **SKIP:** a small red "SKIP" chip right under the pill's right end, about 1/3 of the pill's height. It's never a big button.
+- **Position:** top center, below Roblox's top bar, never covering the stats (top right) or the left buttons. On phones, keep it clear of the thumbstick and jump button.
+- Everything else (steps, arrow, beam, sounds) stays the same.
+
+## Changes (owner, 2026-10-13, later)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+
+**1. Quests and trackers can be hidden.** The Starter Quest pill ("Claim 2 free gifts 1/2 +1 SPIN") and the next-bed pill get a small grey "x" at their right end. Tapping it slides the pill away. The quest keeps counting in the background, and the hidden choice is saved.
+- **Bring it back:** open the **Quests** button (right column). The Starter Quests show at the top there with a green **TRACK** button that brings the pill back.
+- A finished quest still shows a short "+1 SPIN" toast even while hidden, so rewards are never missed.
+
+**2. The tutorial can't be skipped.** Remove the SKIP button. If a step could ever get stuck, the guide helps instead. For example, if the player can't afford the Wooden Post, the guide gives the missing cash. Replay Tutorial in Settings stays as it is (watch only, no rewards). Players who already finished it never see it again.
+
+**3. New last steps: To Bed, then SPAWN.** These come after "Buy the Wooden Post!":
+- **Step 7, To Bed:** the whole screen goes **50% darker** (a black overlay at 0.5 transparency over everything) **except a cut-out around the To Bed button**. The button gets a white glow outline that pulses gently, and a **white arrow** points at it and bounces in an idle loop (about 10 px, 0.6 s, Sine InOut). The pill says "TAP TO BED!". Only the To Bed button can be pressed. Tapping it teleports the player as normal.
+- **Step 8, SPAWN:** right after the teleport, the same dim, cut-out, glow and bouncing white arrow move to the **SPAWN** button. The pill says "TAP SPAWN!".
+- **After SPAWN:** the dim fades out (0.3 s), and the guide ends with "You're a pro! Keep breaking beds!", confetti and the finish sound.
+- **How to build it:** the dim is 4 black frames around the button's spot, updated every frame so it follows the button on any screen size. The arrow sits beside the button and points at it (on phones it must stay on screen). It must look right on PC and phones.
+
+**4. New step: free gloves at the Glove Shop (owner, 2026-10-13).** It comes right after "Buy the Wooden Post!" and before the To Bed step:
+- The pill says "**GET FREE GLOVES!**". The beam and the bouncing arrow lead to the Glove Shop's cyan pad.
+- Stepping on the pad opens the Glove Shop as normal, with a new first glove, **Starter Gloves** (x1.25 Strength, price **FREE**, Common, plain red), already selected.
+  - The same 50% dim and cut-out as the To Bed step go around its big **FREE!** button, with the white glow and the bouncing white arrow. Only that button works.
+- Pressing it gives and equips the gloves. A sparkle burst plays on the hands, with "**GLOVES EQUIPPED! x1.25 Strength**".
+- Then the dim moves to the **X** (close) button. Closing the shop moves the guide on to the To Bed step.
+- **Starter Gloves** is a real glove in the shop for everyone: free, one time, saved. Players who skip past it (old saves) can still claim it in the shop. It makes the first real glove (Boxing, $91K) the next goal.
+- The guide gets about 10–15 s longer, which is fine.
+
 ## Rules
 - The beam is a `Beam` from the player's character to the target, plus a bouncing arrow `BillboardGui` above the target. Only the player sees them (made on the client).
 - A small top-center bubble shows the current step (UI Kit style), and a **SKIP** text button sits under it.
@@ -48,3 +83,5 @@ The first build used plain dark panels that didn't match the [[Break A Bed/UI Ki
 1. Build this as a new client module (`Tutorial`) plus the `TutorialDone` save field on the server.
 2. Hold back the other pop-ups until the guide is done.
 3. Test it with a fresh save in Studio, on the PC layout and the phone emulator.
+
+**4. Glove step (owner, 2026-10-13):** after SPAWN the beam and arrow lead to the Glove Shop's pad ("VISIT THE GLOVE SHOP!"). The shop opens on the pad, the pill says "GLOVES = MORE STRENGTH!", and closing the shop ends the guide with "You're a pro!". No free glove is given. If they don't reach it in 45 s the guide ends anyway; Replay Tutorial skips it. Built 2026-10-13, not tested in play yet.

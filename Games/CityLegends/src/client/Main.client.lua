@@ -72,6 +72,28 @@ if type(data.DailyIn) == "number" then
 	UI.setDaily(data.DailyIn)
 end
 
+-- settings kept with the profile: speed units (HUD + clusters) and the gearbox
+local settings = if type(data.Settings) == "table" then data.Settings else {}
+local SaveSettings = remotes:WaitForChild("SaveSettings") :: RemoteEvent
+Driving.setUnits(if settings.Units == "kmh" then "kmh" else "mph")
+Driving.setGearbox(if settings.Gearbox == "Manual" then "Manual" else "Auto")
+UI.setGearboxLabel(Driving.gearbox)
+UI.onUnitsChanged = function(units: string)
+	settings.Units = units
+	Driving.setUnits(units)
+	SaveSettings:FireServer(settings)
+end
+UI.onGearboxChanged = function(mode: string)
+	settings.Gearbox = mode
+	Driving.setGearbox(mode)
+	SaveSettings:FireServer(settings)
+end
+Driving.onGearboxChanged = function(mode: string) -- Q / E switched to manual
+	settings.Gearbox = mode
+	UI.setGearboxLabel(mode)
+	SaveSettings:FireServer(settings)
+end
+
 -- XP / level updates pushed by the server
 Progress.OnClientEvent:Connect(function(info)
 	if type(info) ~= "table" then

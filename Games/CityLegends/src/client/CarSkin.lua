@@ -27,48 +27,171 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CarMesh = require(Shared:WaitForChild("CarMesh"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 
 local CarSkin = {}
 
 -- cars with their own dashboard design (DashGauges styles), built from the owner's reference photos
 CarSkin.CLUSTER_STYLE = {
-	lambrini_lp700 = "Aventador",
+	-- owner's photos (2026-10-13): BMW Live Cockpit for the G-series BMWs, the F80 M3 cluster for the
+	-- M3 / M4 (all three in the M3 E92 cabin), and the LX700h's digital meter
+	bnw_330i_g20 = "BMWLiveCockpit",
+	bnw_530i = "BMWLiveCockpit",
+	bnw_540i = "BMWLiveCockpit",
+	bnw_x6 = "BMWLiveCockpit",
+	bnw_x7 = "BMWLiveCockpit",
+	bnw_m8gc = "BMWLiveCockpit",
+	bnw_m3_e92 = "BMWF80",
+	bnw_m3_f80 = "BMWF80",
+	bnw_m4_f82 = "BMWF80",
+	lexis_lx700 = "LexusLX700",
 	ferrara_458 = "Ferrari",
-	bnw_330i_g20 = "BMWLive",
-	bnw_m3_e92 = "BMWClassic",
-	bnw_m5_e60 = "BMWClassic",
-	bnw_m6_v10 = "BMWClassic",
+	ferrara_f430 = "Ferrari599", -- owner: same cluster as the 599
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "SupraTRD",
 	toyoka_camri = "Toyota",
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
-	toyoka_alfard = "Toyota",
-	bnw_x6 = "BMWClassic", -- same cabin as the M5
-	bentz_cls63s = "AMGBiturbo",
-	bentz_g63 = "G63",
-	bentz_e200 = "W212",
-	bentz_e300 = "W212",
-	bentz_e400 = "W213",
-	lambrini_lp560 = "Gallardo",
 	lambrini_lp570 = "Gallardo",
 	kio_ev6 = "EV6",
-	astin_db9 = "Aston",
-	astin_vantage = "Aston",
-	bentz_sls = "AMGSls",
 	lambrini_urus = "Urus",
-	lambrini_lp640 = "Murcielago",
 	chevo_c6 = "C6",
 	chevo_c7 = "C7",
+	-- the Sketchfab cars of 2026-10-12 (the owner's list of looks, from the real cars)
+	bentz_maybach = "Maybach57",
+	bentz_s63 = "W213", -- S 65 W222: wide glass screen
+	xiaomo_su7 = "SU7",
+	byt_u8 = "U8",
+	lexis_lfa = "LFA",
+	lambrini_lp750 = "AventadorSV", -- its own cluster (owner's photo)
+	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
+	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
+	rolls_wraith = "Maybach57",
+	byt_seal = "U8", -- wide electric screen
+	bentz_s680 = "W213",
+	bentz_e400 = "W213", -- the E63 S W213 model: its wide glass screen
+	bentz_gls = "W213",
+	bnw_750li = "BMWClassic",
 } :: { [string]: string }
+
+-- where a car's own cluster screen is (measured on the model): its middle from the middle of the
+-- steering wheel part, in metres along the car's right / up / back, the way it faces (towards the
+-- driver) and its width and height in metres. A cluster style is drawn right there, covering it
+-- (owner, 2026-10-13: "place them right above the dashboard where it covers the old cluster")
+CarSkin.CLUSTER_RECT = {
+	bnw_m3_e92 = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- its cluster hood (from the model)
+	bnw_330i_g20 = { at = Vector3.new(0.0138, 0.0203, -0.2368), face = Vector3.new(-0, 0.321, 0.9471), w = 0.3191, h = 0.1134 },
+	bnw_530i = { at = Vector3.new(-0.003, 0.0057, -0.2492), face = Vector3.new(-0.007, 0.3171, 0.9484), w = 0.3461, h = 0.1269 },
+	bnw_540i = { at = Vector3.new(0.0025, 0.0094, -0.2389), face = Vector3.new(0.006, 0.3482, 0.9374), w = 0.3791, h = 0.136 },
+	bnw_m8gc = { at = Vector3.new(0.0106, 0.0113, -0.2609), face = Vector3.new(0, 0.5269, 0.8499), w = 0.3273, h = 0.1128 },
+	bnw_x6 = { at = Vector3.new(0.0101, 0.0352, -0.1909), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3494, h = 0.1211 },
+	bnw_x7 = { at = Vector3.new(-0.0025, -0.0002, -0.257), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3496, h = 0.1339 },
+	lexis_lx700 = { at = Vector3.new(-0.011, 0.0755, -0.114), face = Vector3.new(-0.012, -0.069, 0.9975), w = 0.3288, h = 0.1511 },
+} :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
+
+-- live needles over a car's own dials, for models whose needles are only painted on (the
+-- converted model has them painted out of its texture; owner: keep the car's own cluster, no
+-- screen over it). Per dial: its middle from the middle of the steering wheel part, in metres
+-- along the car's right / up / back, the way the dial face looks (towards the driver), the
+-- needle length (m) and its scale: dial reading -> degrees clockwise from 12 o'clock, with more
+-- points for an uneven scale (a rev counter squeezed below 3000). Units: kmh, mph or rpm.
+-- kind "digits" is a live speed read-out instead (length = its width) where the model's own showed
+-- a fixed number. Measured from the converted files (needle ends, labels) by tools in the notes.
+export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string }
+CarSkin.DIAL_NEEDLES = {
+	lambrini_countach = { -- Countach
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0825, 0.0077, -0.2274), face = Vector3.new(0, 0.1961, 0.9806), length = 0.0309, scale = "0:-110,20:-98.2,100:-51.7,180:3.1,320:114.9" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0911, 0.0056, -0.227), face = Vector3.new(-0, 0.1961, 0.9806), length = 0.0329, scale = "0:-138,1000:-99.6,2000:-56.6,3000:-24.7,4000:0.7,5000:26.9,6000:53,7000:79,8000:105,9000:131" },
+	},
+	astin_vantage = { -- V12 Vantage
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0517, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:162,200:377" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0591, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:208,1000:181,2000:150,3000:119,4000:89,5000:61,6000:30,7000:-4,8000:-34" },
+	},
+	astin_db9 = { -- Vanquish
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0582, 0.0319, -0.2625), face = Vector3.new(-0, 0.3132, 0.9497), length = 0.045, scale = "0:162,206:383.5" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0492, 0.0319, -0.2625), face = Vector3.new(-0, 0.3132, 0.9497), length = 0.045, scale = "0:208,1000:181,2000:150,3000:119,4000:89,5000:61,6000:30,7000:-4,8000:-34" },
+	},
+	bentlee_bentayga = { -- Bentayga
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.1002, -0.0152, -0.263), face = Vector3.new(-0.012, 0.4411, 0.8974), length = 0.0394, scale = "0:-123.7,4000:6.8,7000:102.3,8000:133.7" },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.0965, -0.0163, -0.2622), face = Vector3.new(0.0126, 0.4677, 0.8838), length = 0.0474, scale = "0:-136.2,100:5.7,200:134.6" },
+	},
+	bentz_cls63s = { -- CLS 63 S
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0002, 0.0271, -0.2274), face = Vector3.new(0.0033, 0.3457, 0.9384), length = 0.0562, scale = "0:-118.9,240:121.8" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.1286, 0.0137, -0.2229), face = Vector3.new(0.0033, 0.3457, 0.9384), length = 0.0422, scale = "0:-127.1,8000:126.5" },
+	},
+	bentz_g63 = { -- 2015 G63 (its own cluster, like the owner's photo)
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0944, 0.0168, -0.2315), face = Vector3.new(0, 0.4173, 0.9088), length = 0.0425, scale = "0:-179.0,40:-122.1,80:-57.7,120:16.8,160:76.5" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0946, 0.0168, -0.2315), face = Vector3.new(0, 0.4173, 0.9088), length = 0.0418, scale = "0:-177.1,3000:-80.0,8000:93.6" },
+	},
+	bentz_gle53 = { -- GLE coupe (labels too blurry to read: an even 240 degree sweep)
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0866, 0.0505, -0.2422), face = Vector3.new(0.0005, 0.1327, 0.9912), length = 0.0466, scale = "0:-120.0,200:120.0" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0682, 0.0505, -0.2422), face = Vector3.new(0.0002, 0.1326, 0.9912), length = 0.0467, scale = "0:-120.0,8000:120.0" },
+	},
+	bentz_gt63s = { -- Dodger SRT
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0959, 0.004, -0.2664), face = Vector3.new(-0.0179, 0.2773, 0.9606), length = 0.0439, scale = "0:-127.1,4000:20.1,7000:125.1" },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.1096, 0.0033, -0.2624), face = Vector3.new(-0.0179, 0.2773, 0.9606), length = 0.0447, scale = "0:-122.2,200:123.0" },
+	},
+	bentz_sl65bs = { -- SL65
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0388, 0.0642, -0.2453), face = Vector3.new(0.0004, 0.2209, 0.9753), length = 0.0427, scale = "0:-116.6,220:141.9" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0909, 0.0704, -0.2466), face = Vector3.new(0.0014, 0.2203, 0.9754), length = 0.041, scale = "0:-113.3,8000:120.9" },
+	},
+	bentz_sls = { -- SLS
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0958, 0.0054, -0.2386), face = Vector3.new(0.0192, 0.2122, 0.977), length = 0.038, scale = "0:-178.8,30:-157.6,360:89.7" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.101, 0.0052, -0.2396), face = Vector3.new(-0.0196, 0.2122, 0.977), length = 0.0336, scale = "0:177.3,1000:206.2,9000:446.0" },
+	},
+	brabos_g63 = { -- Brabus G63 (screen dials)
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0921, 0.0647, -0.2335), face = Vector3.new(-0.0011, 0.2758, 0.9612), length = 0.0435, scale = "0:-125.2,150:5.8,300:122.8" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0698, 0.0673, -0.2341), face = Vector3.new(-0.0012, 0.2757, 0.9613), length = 0.0422, scale = "0:-127.7,4000:-0.9,8000:124.6" },
+	},
+	ferrara_599 = { -- 599 (its own cluster, like the owner's photo)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0093, 0.0332, -0.2044), face = Vector3.new(-0, 0.3732, 0.9278), length = 0.0362, scale = "0:-179.4,5000:-46.3,10000:74.1" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.1007, 0.0333, -0.2044), face = Vector3.new(-0, 0.3734, 0.9277), length = 0.0333, scale = "0:176.2,170:316.2,350:470.8" },
+	},
+	lambrini_lp700 = { -- LP700 (screen rev counter and the speed read-out)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0174, 0.081, -0.2818), face = Vector3.new(-0.0175, 0.1158, 0.9931), length = 0.043, scale = "0:-140.0,4000:-53.6,8000:66.6" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0057, 0.0508, -0.2783), face = Vector3.new(-0.0382, 0.1157, 0.9925), length = 0.0404, scale = "" },
+	},
+	mazdo_rx8 = { -- RX-8 (rev counter and the speed read-out)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0021, 0.0463, -0.2049), face = Vector3.new(0, 0.18, 0.9837), length = 0.043, scale = "0:178.5,1000:201.4,4000:269.9,7000:347.7,10000:424.0" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0286, 0.0321, -0.2023), face = Vector3.new(0, 0.18, 0.9837), length = 0.0242, scale = "" },
+	},
+	nisun_gtr = { -- GT-R
+		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0881, 0.0233, -0.2101), face = Vector3.new(-0.0032, 0.2483, 0.9687), length = 0.0331, scale = "0:125.2,100:253.0,220:406.0" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0009, 0.0267, -0.2107), face = Vector3.new(-0.0009, 0.2484, 0.9687), length = 0.0392, scale = "0:-134.5,4000:-30.1,8000:69.5" },
+	},
+	nisun_r34 = {
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0541, 0.0125, -0.1938), face = Vector3.new(0, 0.314, 0.949), length = 0.047, scale = "0:-125.6,180:125.6" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0656, 0.0126, -0.1935), face = Vector3.new(0, 0.314, 0.949), length = 0.047, scale = "0:-125.7,3000:-85.2,10000:125.3" },
+	},
+	porsha_boxster = { -- Boxster (labels too blurry to read: an even 243 degree sweep)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0008, 0.0489, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), length = 0.0432, scale = "0:-122.0,8000:121.0" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0894, 0.0323, -0.2277), face = Vector3.new(-0.0042, 0.2663, 0.9639), length = 0.0346, scale = "0:-122.0,300:121.0" },
+	},
+	toyoka_lc300 = { -- Land Cruzer 300
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0853, 0.0288, -0.266), face = Vector3.new(0.0001, 0.1741, 0.9847), length = 0.0394, scale = "0:-110.9,4000:19.8,7000:119.7" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.091, 0.03, -0.2662), face = Vector3.new(-0.0001, 0.1735, 0.9848), length = 0.0385, scale = "0:-113.0,140:-6.8,260:96.0" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0041, 0.0646, -0.2678), face = Vector3.new(0.0007, 0.174, 0.9848), length = 0.0131, scale = "" },
+	},
+} :: { [string]: { DialSpec } }
 
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
 -- driver's eye; rear: how far behind the eye the swap reaches (studs: front seats only, or rear too)
 CarSkin.INTERIOR_DONOR = {
-	porsha_gt3 = { from = "porsha_panamera", rear = 1.8 },
-	bnw_x6 = { from = "bnw_m5_e60", rear = 3.6 },
-	lambrini_lp560 = { from = "lambrini_lp570", rear = 1.8 },
+	porsha_gt3 = { from = "porsha_boxster", rear = 1.8 }, -- owner (2026-10-16): the 718 cockpit, like the Panamera
+	-- owner (2026-10-13): the M3 F80 and M4 F82 files' own cabins look bad; the M3 E92's goes in
+	bnw_m3_f80 = { from = "bnw_m3_e92", rear = 1.8 },
+	bnw_m4_f82 = { from = "bnw_m3_e92", rear = 1.8 },
+	-- owner (2026-10-13): the Panamera's own cluster is broken; the 718 Boxster's cockpit goes in
+	porsha_panamera = { from = "porsha_boxster", rear = 1.8 },
+	-- owner (2026-10-13): the 458 Italia keeps its body and takes the 458 Speciale's cabin (a cabin
+	-- donor only, not a car in the roster); its own Ferrari cluster design stays
+	ferrara_458 = { from = "ferrara_458s", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
+
+-- cars that take only another model's steering wheel, put where their own one sits
+CarSkin.STEER_DONOR = {
+	ferrara_599 = "ferrara_f430", -- owner: the F430's wheel in the 599
+} :: { [string]: string }
 
 type Template = { part: MeshPart, offset: CFrame }
 type GenericWheel = { x: number, parts: { Template } }
@@ -229,6 +352,23 @@ local function readImported(src: Instance): Imported
 				warn("[CityLegends] interior from " .. swap.from .. " could not be used:", err)
 			end
 		end
+		local steerFrom = CarSkin.STEER_DONOR[src.Name]
+		local steerSrc = if steerFrom and folder then folder:FindFirstChild(steerFrom, true) else nil
+		if steerFrom and steerSrc and out.steer then
+			local dspec = Cars.ById[steerFrom]
+			local ok, err = pcall(function()
+				local donorDims = if dspec then CarBuilder.getDims(dspec.Class, dspec.Id) :: any else dims
+				local donor = readGeneric(steerSrc :: Instance, donorDims)
+				local own = out.steer
+				if donor.steer and own then
+					-- same spot and tilt as the car's own wheel, the donor's rim, spokes and size
+					out.steer = { mount = own.mount, parts = donor.steer.parts, radius = donor.steer.radius }
+				end
+			end)
+			if not ok then
+				warn("[CityLegends] steering wheel from " .. steerFrom .. " could not be used:", err)
+			end
+		end
 		return out
 	end
 	local ex, ez = rx - o, rz - o
@@ -318,6 +458,14 @@ local function visualClone(d: BasePart, scale: number): BasePart
 end
 
 function readGeneric(src: Instance, dims: { [string]: number }): Imported
+	-- several cars imported from one file carry Blender's ".001" name endings (Wheels.001, FL.001,
+	-- SteeringWheel_t21.001): take them off so the names below are found
+	for _, d in src:GetDescendants() do
+		local base = d.Name:match("^(.-)%.%d%d%d$")
+		if base and base ~= "" then
+			d.Name = base
+		end
+	end
 	-- the model's steering wheel: an "SW" group (A-Chassis) or anything named steering wheel
 	local steerRoots: { Instance } = {}
 	local function isSteerName(n: string): boolean
@@ -342,6 +490,17 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				table.insert(steerRoots, d)
 			end
 		end
+	end
+	-- our converted cars name the wheel "SteeringWheel_t<tilt>": then that is the wheel, and other
+	-- names with "steering wheel" in them (the column left in the dash) stay put
+	local tagged: { Instance } = {}
+	for _, r in steerRoots do
+		if r.Name:match("^SteeringWheel_t%d+") then
+			table.insert(tagged, r)
+		end
+	end
+	if #tagged > 0 then
+		steerRoots = tagged
 	end
 	-- nothing named: the round, thin part right in front of the driver's seat
 	if #steerRoots == 0 then
@@ -629,6 +788,20 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		if axis:Dot(f) < 0 then
 			axis = -axis
 		end
+		-- our converted cars carry the wheel's tilt in its name ("SteeringWheel_t21"): Studio's
+		-- importer flattens the part's own turn, so the tilt can't be read from the part
+		local tiltTag = tonumber(biggest.Name:match("^SteeringWheel_t(%d+)") or "")
+		if tiltTag then
+			local t = math.rad(tiltTag)
+			axis = (f * math.cos(t) - Vector3.yAxis * math.sin(t)).Unit
+		elseif biggest.Name:match("^SteeringWheel") then
+			-- the importer keeps the part's own turn in its pivot: its look is the turning axis
+			local look = (biggest.CFrame * biggest.PivotOffset).LookVector
+			local along = look:Dot(f)
+			if math.abs(along) > 0.6 and math.abs(along) < 0.9999 then
+				axis = if along > 0 then look else -look
+			end
+		end
 		local a, b = Vector3.one * math.huge, -Vector3.one * math.huge
 		for _, d in steerParts do
 			a = a:Min(d.Position)
@@ -682,6 +855,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		out.steer = { mount = mount, parts = parts, radius = radius }
 	end
 
+	local roofTop: number? = nil
+	local generatedWheel = false
 	-- driver's eye: above the driver's seat, at 80% of the roof height there
 	local seatPart = seat or src:FindFirstChildWhichIsA("Seat", true)
 	local sp: Vector3? = if seatPart then frame:PointToObjectSpace(seatPart.Position) else nil
@@ -700,9 +875,16 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		if n > 0 then
 			sp = Vector3.new(-0.37 * m, 0.35 * m, axleZ / n + 1.35 * m)
 		end
+		-- with the model's own steering wheel found, the driver sits a real reach behind it
+		-- (~63 cm), in line with it
+		if out.steer and sp then
+			local w = out.steer.mount.Position / scale
+			sp = Vector3.new(w.X, sp.Y, w.Z + 0.53 * m) -- (the eye goes 0.1 m further back below)
+		end
 	end
 	if sp then
 		local roof = 0
+		-- (roofTop below keeps the levelled eye under the roof)
 		for _, d in visible do
 			if inWheel[d] then
 				continue
@@ -722,6 +904,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		if roof > 0 then
 			local lift = (src:GetAttribute("EyeHeight") :: number?) or 0 -- per-car tweak, in studs
 			out.eye = Vector3.new(sp.X * scale, roof * scale * 0.8 + lift, sp.Z * scale + 0.3)
+			roofTop = roof * scale
 		end
 	end
 
@@ -791,6 +974,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		local column = piece(Enum.PartType.Cylinder, Vector3.new(0.9, 0.26, 0.26), leather, Enum.Material.SmoothPlastic)
 		table.insert(parts, { part = column :: any, offset = CFrame.new(0, 0, -0.5) * CFrame.Angles(0, math.pi / 2, 0) })
 		out.steer = { mount = mount, parts = parts, radius = R * 0.95 }
+		generatedWheel = true
 	end
 
 	-- the driver sits a real reach behind the wheel (~60 cm): some models' seats put the eye too close
@@ -800,6 +984,17 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		if eye.Z - wz < 1.4 then
 			out.eye = Vector3.new(eye.X, eye.Y, math.min(wz + 1.4, eye.Z + 0.3))
 		end
+	end
+	-- every car the same view (owner): the eye sits the same height above the steering wheel
+	-- (0.8 studs, ~27 cm), kept under the roof; an EyeHeight attribute still nudges it
+	if out.steer and out.eye and not generatedWheel then
+		local eye = out.eye :: Vector3
+		local lift = (src:GetAttribute("EyeHeight") :: number?) or 0
+		local y = out.steer.mount.Position.Y + 0.8 + lift
+		if roofTop then
+			y = math.min(y, roofTop - 0.35)
+		end
+		out.eye = Vector3.new(eye.X, y, eye.Z)
 	end
 
 	-- gauges: look from the eye through the top half of the wheel and stop at the first
@@ -1157,6 +1352,175 @@ end
 	hidden with LocalTransparencyModifier instead.
 	lite: lighter meshes (traffic)
 ]]
+local DEFAULT_LOOK = {
+	r = 115, face = Color3.fromRGB(12, 12, 14), bezel = Color3.fromRGB(170, 174, 184), bezelW = 4, tick = Color3.fromRGB(235, 238, 245),
+	tickR = 110, major = { 13, 3 }, minor = { 7, 1.5 }, minors = 1, num = Color3.fromRGB(240, 242, 248), numR = 84, size = 20,
+	font = "GothamBold", step = 20, needle = Color3.fromRGB(235, 40, 30), needleW = 6, hub = Color3.fromRGB(24, 24, 26), hubR = 14,
+}
+
+-- our own dial over one of the car's dials, drawn like the real one (DialLooks: colours, numbers,
+-- red zone, needle, logos), in canvas pixels where 100 is the needle length. Returns the canvas
+-- radius in those pixels.
+local function drawDialFace(sg: SurfaceGui, dl: DialSpec, look: { [string]: any }): number
+	local pts: { { number } } = {}
+	for v, a in string.gmatch(dl.scale, "(%-?[%d%.]+):(%-?[%d%.]+)") do
+		table.insert(pts, { tonumber(v) :: number, tonumber(a) :: number })
+	end
+	local R = look.r + (look.bezelW or 0) + 4
+	sg.CanvasSize = Vector2.new(2 * R, 2 * R)
+	if #pts < 2 then
+		return R
+	end
+	local function angleOf(v: number): number
+		for i = 1, #pts - 1 do
+			local a, b = pts[i], pts[i + 1]
+			if v <= b[1] or i == #pts - 1 then
+				return a[2] + (b[2] - a[2]) * (v - a[1]) / (b[1] - a[1])
+			end
+		end
+		return pts[#pts][2]
+	end
+	local function frame(z: number, color: Color3?): Frame
+		local f = Instance.new("Frame")
+		f.BorderSizePixel = 0
+		f.AnchorPoint = Vector2.new(0.5, 0.5)
+		f.BackgroundColor3 = color or Color3.new()
+		f.BackgroundTransparency = if color then 0 else 1
+		f.ZIndex = z
+		f.Parent = sg
+		return f
+	end
+	local function circle(x: number, y: number, r: number, fill: Color3?, stroke: Color3?, w: number?, z: number)
+		local f = frame(z, fill)
+		f.Position = UDim2.fromOffset(R + x, R + y)
+		f.Size = UDim2.fromOffset(2 * r, 2 * r)
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0.5, 0)
+		c.Parent = f
+		if stroke then
+			local st = Instance.new("UIStroke")
+			st.Color = stroke
+			st.Thickness = w or 2
+			st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			st.Parent = f
+		end
+	end
+	-- a bar along the radius at angle a (degrees clockwise from 12), from r0 to r1
+	local function bar(a: number, r0: number, r1: number, w: number, color: Color3, z: number)
+		local t = math.rad(a)
+		local mid = (r0 + r1) / 2
+		local f = frame(z, color)
+		f.Position = UDim2.fromOffset(R + mid * math.sin(t), R - mid * math.cos(t))
+		f.Size = UDim2.fromOffset(w, r1 - r0)
+		f.Rotation = a
+	end
+	local function text(t: string, x: number, y: number, size: number, color: Color3, font: string?, z: number)
+		local l = Instance.new("TextLabel")
+		l.BackgroundTransparency = 1
+		l.AnchorPoint = Vector2.new(0.5, 0.5)
+		l.Position = UDim2.fromOffset(R + x, R + y)
+		l.Size = UDim2.fromOffset(math.max(40, size * #t), size + 6)
+		local okFont, f = pcall(function()
+			return (Enum.Font :: any)[font or "GothamMedium"]
+		end)
+		l.Font = if okFont and f then f else Enum.Font.GothamMedium
+		l.TextSize = size
+		l.TextColor3 = color
+		l.Text = t
+		l.ZIndex = z
+		l.Parent = sg
+	end
+	-- numbers never touch: at most the gap to their neighbour along the arc
+	local function fitSize(size: number, r: number, vals: { number }, labels: { string }, toMain: (number) -> number): number
+		local gap, chars = math.huge, 1
+		for i, v in vals do
+			chars = math.max(chars, #labels[i])
+			if i > 1 then
+				gap = math.min(gap, math.abs(angleOf(toMain(v)) - angleOf(toMain(vals[i - 1]))) * math.pi / 180 * r)
+			end
+		end
+		return if gap < math.huge then math.min(size, gap * 0.92 / (0.62 * chars)) else size
+	end
+	local top = pts[#pts][1]
+	if look.bezelW then
+		circle(0, 0, look.r + look.bezelW, look.bezel, nil, nil, 1)
+	end
+	circle(0, 0, look.r, look.face, nil, nil, 2)
+	if look.inner then
+		circle(0, 0, look.innerR, look.inner, nil, nil, 3)
+	end
+	for _, l in look.lines or {} do
+		circle(0, 0, l.r, nil, l.c, l.w, 4)
+	end
+	for _, c in look.circles or {} do
+		circle(c.x, c.y, c.r, c.fill, c.stroke, c.w, 4)
+	end
+	for _, b in look.bands or {} do
+		local a0, a1 = angleOf(b.from), angleOf(b.to)
+		local n = math.max(2, math.floor(math.abs(a1 - a0) / 3))
+		for i = 0, n - 1 do
+			local a = a0 + (a1 - a0) * (i + 0.5) / n
+			bar(a, b.r - b.w / 2, b.r + b.w / 2, math.abs(a1 - a0) / n * math.pi / 180 * b.r + 1.5, b.c, 5)
+		end
+	end
+	for _, rc in look.rects or {} do
+		local f = frame(6, rc.c)
+		f.Position = UDim2.fromOffset(R + rc.x, R + rc.y)
+		f.Size = UDim2.fromOffset(rc.w, rc.h)
+	end
+	-- ticks and numbers
+	local step = look.step
+	local v0 = look.start or math.ceil(pts[1][1] / step) * step
+	local vals, labels = {}, {}
+	local v = v0
+	while v <= top + 1e-6 do
+		table.insert(vals, v)
+		table.insert(labels, tostring(math.floor(v / (look.div or 1) + 0.5)))
+		v += step
+	end
+	local size = fitSize(look.size, look.numR, vals, labels, function(x)
+		return x
+	end)
+	local minors = look.minors or 1
+	for i, val in vals do
+		for k = 0, minors do
+			local vv = val + step * k / (minors + 1)
+			if vv <= top + 1e-6 and not (k > 0 and i == #vals and vv > val) then
+				local major = k == 0
+				local dims = if major then look.major else look.minor
+				local red = look.red ~= nil and vv >= look.red
+				bar(angleOf(vv), look.tickR - dims[1], look.tickR, dims[2], if red then look.redC or Color3.fromRGB(225, 35, 28) else look.tick, 6)
+			end
+		end
+		local t = math.rad(angleOf(val))
+		local red = look.numRed ~= nil and look.red ~= nil and val >= look.red
+		text(labels[i], look.numR * math.sin(t), -look.numR * math.cos(t), size, if red then look.numRed else look.num, look.font, 7)
+	end
+	-- a second scale in another unit (km/h round the outside of a mph dial)
+	local alt = look.alt
+	if alt then
+		local avals, alabels = {}, {}
+		local av = alt.start or 0
+		while av <= top * alt.mul + 1e-6 do
+			table.insert(avals, av)
+			table.insert(alabels, tostring(math.floor(av + 0.5)))
+			av += alt.step
+		end
+		local function toMain(x: number): number
+			return x / alt.mul
+		end
+		local asize = fitSize(alt.size, alt.numR, avals, alabels, toMain)
+		for i, x in avals do
+			local t = math.rad(angleOf(toMain(x)))
+			text(alabels[i], alt.numR * math.sin(t), -alt.numR * math.cos(t), asize, alt.c, look.font, 7)
+		end
+	end
+	for _, tx in look.texts or {} do
+		text(tx.t, tx.x, tx.y, tx.size, tx.c, tx.font, 7)
+	end
+	return R
+end
+
 function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?): boolean
 	if model:GetAttribute("Skinned") then
 		return true
@@ -1268,10 +1632,16 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		-- live instrument cluster on the car's own gauge spot, when it has no working gauges of its own
 		-- (cars with their own design here, like the Ferrari, always get it)
 		local ownDesign = CarSkin.CLUSTER_STYLE[id] ~= nil
-		if imported.cluster and imported.clusterSize and not liteMode and (ownDesign or not imported.ownGauges) then
+		-- a car with another model's cabin uses that cabin's dials and cluster spot
+		local swap = CarSkin.INTERIOR_DONOR[id]
+		local cabinId = if swap then swap.from else id
+		local dials = CarSkin.DIAL_NEEDLES[cabinId]
+		local rect = CarSkin.CLUSTER_RECT[cabinId]
+		if (rect or (imported.cluster and imported.clusterSize)) and not liteMode and not dials and (ownDesign or not imported.ownGauges) then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
-			cluster.Size = Vector3.new(imported.clusterSize.X, imported.clusterSize.Y, 0.02)
+			local cs = imported.clusterSize or Vector2.new(1, 0.4)
+			cluster.Size = Vector3.new(cs.X, cs.Y, 0.02)
 			cluster.Transparency = 1
 			cluster.CanCollide = false
 			cluster.CanQuery = false
@@ -1284,7 +1654,18 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			local fwd = if src then (src:GetAttribute("ClusterForward") :: number?) or 0 else 0
 			local k = if src then (src:GetAttribute("ClusterSize") :: number?) or 1 else 1
 			cluster.Size = Vector3.new(cluster.Size.X * k, cluster.Size.Y * k, cluster.Size.Z)
-			cluster.CFrame = groundCF * imported.cluster * CFrame.new(0, up, -fwd)
+			if rect and imported.steer then
+				-- right over the car's own cluster screen, just in front of it
+				local m = CarBuilder.STUDS_PER_METRE
+				local face = rect.face.Unit
+				local upV = (Vector3.yAxis - face * face.Y).Unit
+				local pos = imported.steer.mount.Position + rect.at * m + face * 0.004 * m
+				cluster.Size = Vector3.new(rect.w * m * k, rect.h * m * k, 0.02)
+				cluster.CFrame = groundCF * CFrame.lookAt(pos, pos - face, upV) * CFrame.new(0, up, -fwd) -- back face looks at the driver
+				cluster:SetAttribute("Placed", true) -- Driving leaves it where it is
+			else
+				cluster.CFrame = groundCF * (imported.cluster :: CFrame) * CFrame.new(0, up, -fwd)
+			end
 			cluster.Parent = skin
 			local w = Instance.new("WeldConstraint")
 			w.Part0 = root
@@ -1293,6 +1674,111 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			cluster:SetAttribute("Style", CarSkin.CLUSTER_STYLE[id] or (if id:sub(1, 8) == "lambrini" then "Lambo" else "Modern"))
 			if ownDesign then
 				model:SetAttribute("OwnCluster", true) -- the model's own gauge screens stay off
+			end
+		end
+		-- our own dial over each of the car's dials (owner: "create your own cluster and replace that
+		-- old cluster"): a solid face with the car's scale, numbers and a red needle, so the old needle
+		-- and any washed-out print are covered (Driving turns the needles)
+		if dials and imported.steer and not liteMode then
+			local m = CarBuilder.STUDS_PER_METRE
+			for i, dl in dials do
+				local face = dl.face.Unit
+				local up = (Vector3.yAxis - face * face.Y).Unit
+				local digits = dl.kind == "digits"
+				local pos = imported.steer.mount.Position + dl.at * m + face * (if digits then 0.004 else 0.002) * m
+				local size = if digits then dl.length * m else dl.length * 2.3 * m
+				local p = Instance.new("Part")
+				p.Name = "DialPanel" .. i
+				p.Size = if digits then Vector3.new(size, size * 0.45, 0.01) else Vector3.new(size, size, 0.01)
+				p.Transparency = 1
+				p.CanCollide = false
+				p.CanQuery = false
+				p.CanTouch = false
+				p.Massless = true
+				p.CastShadow = false
+				p.CFrame = groundCF * CFrame.lookAt(pos, pos - face, up) -- back face looks at the driver
+				p.Parent = skin
+				local w = Instance.new("WeldConstraint")
+				w.Part0 = root
+				w.Part1 = p
+				w.Parent = p
+				local sg = Instance.new("SurfaceGui")
+				sg.Face = Enum.NormalId.Back
+				sg.LightInfluence = 1
+				sg.MaxDistance = 40
+				sg.Parent = p
+				if digits then
+					-- the speed in the dial's own unit, like the car's display (Driving fills it in), on
+					-- a dark plate over the fixed number
+					sg.CanvasSize = Vector2.new(200, 90)
+					local label = Instance.new("TextLabel")
+					label.Name = "Speed"
+					label.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+					label.BackgroundTransparency = 0
+					label.BorderSizePixel = 0
+					label.Size = UDim2.fromScale(1, 1)
+					label.Font = Enum.Font.GothamBold
+					label.TextScaled = true
+					label.TextColor3 = Color3.fromRGB(235, 240, 255)
+					label.TextXAlignment = Enum.TextXAlignment.Right
+					label.Text = "0"
+					label:SetAttribute("GaugeUnit", dl.unit)
+					label.Parent = sg
+					continue
+				end
+				-- our dial, drawn like the real one; the panel grows to the dial's size (100 px = one
+				-- needle length)
+				local look = DialLooks[cabinId] and DialLooks[cabinId][i] or nil
+				if type(look) ~= "table" then
+					look = DEFAULT_LOOK
+				end
+				local R = drawDialFace(sg, dl, look :: any)
+				local side = 2 * R / 100 * dl.length * m
+				p.Size = Vector3.new(side, side, 0.01)
+				-- the needle turns about its own middle, which sits on the hub: it runs 100 px up to
+				-- the tip, and of the lower half only a 22 px tail shows
+				local needle = Instance.new("Frame")
+				needle.Name = "DialNeedle"
+				needle.BorderSizePixel = 0
+				needle.BackgroundColor3 = look.needle
+				needle.AnchorPoint = Vector2.new(0.5, 0.5)
+				needle.Position = UDim2.fromScale(0.5, 0.5)
+				needle.Size = UDim2.fromOffset(look.needleW or 6, 200)
+				needle.Rotation = -125
+				needle.ZIndex = 8
+				needle:SetAttribute("GaugeKind", dl.kind)
+				needle:SetAttribute("GaugeUnit", dl.unit)
+				needle:SetAttribute("GaugeScale", dl.scale)
+				needle.Parent = sg
+				local fade = Instance.new("UIGradient")
+				fade.Rotation = 90 -- top to bottom
+				fade.Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0),
+					NumberSequenceKeypoint.new(0.61, 0),
+					NumberSequenceKeypoint.new(0.615, 1),
+					NumberSequenceKeypoint.new(1, 1),
+				})
+				fade.Parent = needle
+				local corner = Instance.new("UICorner")
+				corner.CornerRadius = UDim.new(0.5, 0)
+				corner.Parent = needle
+				local hubR = look.hubR or 14
+				for k, c in { look.hubRing or false, look.hub or Color3.fromRGB(24, 24, 26) } do
+					if c then
+						local cap = Instance.new("Frame")
+						cap.BorderSizePixel = 0
+						cap.BackgroundColor3 = c
+						cap.AnchorPoint = Vector2.new(0.5, 0.5)
+						cap.Position = UDim2.fromScale(0.5, 0.5)
+						local r = if k == 1 then hubR + 3 else hubR
+						cap.Size = UDim2.fromOffset(2 * r, 2 * r)
+						cap.ZIndex = 8 + k
+						cap.Parent = sg
+						local round = Instance.new("UICorner")
+						round.CornerRadius = UDim.new(0.5, 0)
+						round.Parent = cap
+					end
+				end
 			end
 		end
 		-- the camera sits at the model's own driver's seat
@@ -1426,9 +1912,12 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			return
 		end
 		if ownInterior then
-			-- screens drawn on our hidden dash (old cluster, infotainment) go too
+			-- screens drawn on our hidden dash (old cluster, infotainment) go too, and the hidden
+			-- body's red tail glow: it shone into the model's cabin (pink mirrors, a red screen)
 			for _, g in d:GetChildren() do
 				if g:IsA("SurfaceGui") then
+					g.Enabled = false
+				elseif g:IsA("PointLight") and g.Name == "TailGlow" then
 					g.Enabled = false
 				end
 			end

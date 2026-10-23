@@ -279,6 +279,12 @@ function Audio.passBy(volume: number?)
 	end
 end
 
+-- the blinker relay: a soft click on, a softer one off
+function Audio.tick(on: boolean)
+	local snd = Audio.play("tick", if on then 0.22 else 0.14, if on then 1.3 else 1.05)
+	snd.Name = "BlinkerTick"
+end
+
 function Audio.engineStart(parent: Instance?)
 	if custom.EngineStart then
 		Audio.play("EngineStart", 0.6, 1, parent)
@@ -299,8 +305,9 @@ end
 -- Engine
 ---------------------------------------------------------------------
 export type Engine = {
-	update: (self: Engine, rpm: number, throttle: number, speedFrac: number, slip: number, timeScale: number?) -> (),
+	update: (self: Engine, rpm: number, throttle: number, speedFrac: number, slip: number, timeScale: number?, screech: number?) -> (),
 	shift: (self: Engine, up: boolean) -> (),
+	setRunning: (self: Engine, on: boolean) -> (), -- engine off: only wind and tyres are heard
 	destroy: (self: Engine) -> (),
 }
 
@@ -356,10 +363,13 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 
 	local dip = 0
 	local smoothRpm = 0.1
+	local running, power = true, 1
 	local self = {} :: any
 
-	function self.update(_, rpm: number, throttle: number, speedFrac: number, slip: number, timeScale: number?)
+	-- screech 0..1: tyres crying on a hard launch / pull-away, on top of what the slip gives
+	function self.update(_, rpm: number, throttle: number, speedFrac: number, slip: number, timeScale: number?, screech: number?)
 		local ts = timeScale or 1
+		power += ((if running then 1 else 0) - power) * 0.2
 		smoothRpm += (rpm - smoothRpm) * 0.25
 		local r = math.clamp(smoothRpm - dip, 0.05, 1.1)
 		dip = math.max(0, dip - 0.04)
@@ -376,17 +386,19 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 				tremolo.Depth = math.clamp(0.55 - r * 0.45, 0.08, 0.55)
 			end
 		end
+		rumble.Volume *= power
 		growl.PlaybackSpeed = (0.5 + r * 0.95) * base * ts
-		growl.Volume = (0.08 + 0.42 * throttle) * math.clamp(r * 1.3, 0.2, 1) * (if usingCustom then 0.35 else 1)
+		growl.Volume = (0.08 + 0.42 * throttle) * math.clamp(r * 1.3, 0.2, 1) * (if usingCustom then 0.35 else 1) * power
 		wind.PlaybackSpeed = (0.85 + speedFrac * 0.6) * ts
-		wind.Volume = 0.55 * speedFrac ^ 1.8
-		local squeal = math.clamp((slip - 8) / 40, 0, 1)
+		-- the driver's own car: wind rushes in from walking pace and roars at speed
+		wind.Volume = if positional then 0.55 * speedFrac ^ 1.8 else (if speedFrac > 0.02 then 0.12 + 1.0 * speedFrac ^ 1.3 else 0)
+		local squeal = math.max(math.clamp((slip - 8) / 40, 0, 1), screech or 0)
 		if squealId then
 			tyres.PlaybackSpeed = (0.95 + squeal * 0.1) * ts
-			tyres.Volume = 0.55 * squeal
+			tyres.Volume = 0.95 * squeal
 		else
 			tyres.PlaybackSpeed = (2.4 + squeal * 0.4) * ts
-			tyres.Volume = 0.3 * squeal
+			tyres.Volume = 0.55 * squeal
 		end
 	end
 
@@ -397,6 +409,10 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 				Audio.backfire(if positional then parent else nil)
 			end
 		end
+	end
+
+	function self.setRunning(_, on: boolean)
+		running = on
 	end
 
 	function self.destroy(_)

@@ -4,17 +4,17 @@
 Night-city driving game: earn money by driving and cutting up traffic, buy cars, level up.
 - **Details:** [[City Legends/City Legends]] (all City Legends notes go in the `City Legends` folder)
 - **Code:** this vault, folder `Games/CityLegends` (moved from `ClaudeOne` on 2026-10-10; ClaudeOne is no longer used for it)
-- **Now:** replacing the cars with real car models from the Creator Store (inserted by hand in Studio)
+- **Now:** Daily Quests, Boost Inventory and OP Day 7 are in and tested; the favorite step is gone from the reward screens; like goal is automatic ([[Break A Bed/2026-10-13|2026-10-13]]). Next: save, publish, check the funnels in Creator Hub, then the AFK Zone.
 - **Last updated:** 2026-10-10
 
 ## Break A Bed (Roblox game): active
 Game based on Chop A Brick: train to gain Strength and Level, then karate-chop beds along a path for Cash.
 - **Details:** [[Break A Bed/Project Overview]] (all Break A Bed notes go in the `Break A Bed` folder)
 - **Code:** `C:\Users\USER\Documents\Cashgrab` on one PC, folder `BAB` on the other. Studio place "Break A Bed" (placeId 116443177548785).
-- **Now:** 25-bed fenced path, 17 training posts, upgrade boards, critical hits, Total Damage leaderboard, Group Reward (group set) and Robux shop (products set). Light HUD at the very top of the screen, Roblox default prompts, 5 themed map zones, screen effects, city backdrop with landmarks, full shop (Strength tiers, passes, boosts, spins, daily reward, VIP lounge). Lives in the Studio place "[🎉RELEASE] Break a Bed". Next: save, publish, play-test the balance.
+- **Now:** cloud wall follows the hard rules (self-check 22/22, also live), opens on touch with the Strength; training pickups are on-screen buttons with a boost chip that fits phones, tablets and PC ([[Break A Bed/2026-10-15|2026-10-15]]). Next: check the 🔒 sign in a real Play test (AlwaysOnTop); bed 20 pacing; save + publish.
+- **Next:** on Oct 15–16, check Analytics (5-min retention, session length, funnel), Ads Manager, sales and progress toward 250 engaged players (unlocks under-16 players). Then decide: Bed Mastery, World 2 or the AFK Zone. Halloween swap on Nov 1.
 - **Ads:** released as "[🎉 RELEASE] Break a Bed". 12K Robux spent on ads; earning about 500 Robux a day ([[Break A Bed/Ads|Ads]]).
-- **Next:** put the new UI style into the game ([[Break A Bed/UI Kit/UI Kit|UI Kit]]); add the cheap products ([[Break A Bed/Shop Plan|Shop Plan]]) and Free Gifts ([[Break A Bed/Playtime Rewards|Playtime Rewards]]); add the new-player guide ([[Break A Bed/New Player Guide|New Player Guide]], Day 1 retention showed 0%). Group setup (images, products, payouts) is done. After that: [[Break A Bed/Retention Plan|Retention Plan]].
-- **Last updated:** 2026-10-12
+- **Last updated:** 2026-10-15
 
 ## Obsidian + Claude setup: active
 This vault, synced to GitHub repo `ProjectOne` so Claude can read and update it.

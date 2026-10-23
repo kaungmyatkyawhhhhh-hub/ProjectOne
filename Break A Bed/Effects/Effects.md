@@ -74,3 +74,5 @@ Attached to the HumanoidRootPart. Better aura = more status = players want to le
 
 ## For Claude Code (in the code folder: `Cashgrab` or `BAB`)
 Build an `Effects` module (client) with functions `BedBreak(bed, tier)`, `Hit(pos, crit)`, `LevelUp(player)`, `Announce(text, highlight)`, `BigText(text)`, plus aura setup on character spawn. Use the particle images from this folder and the numbers above. Test in Studio and on the phone emulator.
+
+**Status (2026-10-12): built and tested** (see [[Break A Bed/2026-10-12|2026-10-12]]). Client module `Effects`; Bloom Threshold is 1.5 (0.92 washed out white floors). Rebirth trail not built (no rebirths yet).

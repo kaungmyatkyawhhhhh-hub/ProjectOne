@@ -24,6 +24,9 @@
         "Client": {
           "$path": "src/client"
         }
+      },
+      "$properties": {
+        "EnableMouseLockOption": false
       }
     },
     "Players": {

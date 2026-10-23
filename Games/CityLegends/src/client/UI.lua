@@ -32,6 +32,8 @@ UI.isTouch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnab
 -- Callbacks assigned by Main
 UI.onGarageButton = nil :: (() -> ())?
 UI.onCameraButton = nil :: (() -> ())?
+UI.onUnitsChanged = nil :: ((string) -> ())? -- Settings: "mph" | "kmh"
+UI.onGearboxChanged = nil :: ((string) -> ())? -- Settings: "Auto" | "Manual"
 UI.onDailyClaim = nil :: (() -> ())? -- asks the server to pay the daily gift
 
 ---------------------------------------------------------------------
@@ -151,6 +153,17 @@ local xpText: TextLabel
 local xpGain: TextLabel
 local camToggle: TextButton
 local musicToggle: TextButton
+local unitsToggle: TextButton
+local gearboxToggle: TextButton
+local unitLabel: TextLabel
+local speedKmh = false
+-- warning lights under the speedometer
+local blinkL: TextLabel
+local blinkR: TextLabel
+local engineLamp: TextLabel
+local parkLamp: TextLabel
+local tcLamp: TextLabel
+local lightsLamp: TextLabel
 local settingsPanel: Frame
 local dailyPanel: Frame
 local controlsPanel: Frame? = nil
@@ -502,8 +515,8 @@ local function buildSpeedometer()
 		ZIndex = 3,
 		Parent = gauge,
 	})
-	label({
-		Text = "mph",
+	unitLabel = label({
+		Text = if speedKmh then "km/h" else "mph",
 		TextSize = math.max(10, math.floor(size * 0.05)),
 		Font = Enum.Font.GothamBold,
 		TextColor3 = Theme.SubText,
@@ -513,6 +526,45 @@ local function buildSpeedometer()
 		ZIndex = 3,
 		Parent = gauge,
 	})
+
+	-- warning lights in a row under the dial: blinkers, engine, handbrake, traction control, lights
+	local lamps = new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 1, 2),
+		Size = UDim2.new(1.2, 0, 0, math.max(14, size * 0.075)),
+		BackgroundTransparency = 1,
+		ZIndex = 3,
+		Parent = gauge,
+	}, {
+		new("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Padding = UDim.new(0, 8),
+		}),
+	})
+	local function lamp(text: string, color: Color3, order: number): TextLabel
+		return label({
+			Text = text,
+			TextSize = math.max(10, math.floor(size * 0.055)),
+			Font = Enum.Font.GothamBlack,
+			TextColor3 = color,
+			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromScale(0, 1),
+			LayoutOrder = order,
+			Visible = false,
+			ZIndex = 3,
+			Parent = lamps,
+		})
+	end
+	local GREEN = Color3.fromRGB(70, 230, 110)
+	blinkL = lamp("◀", GREEN, 1)
+	engineLamp = lamp("ENGINE OFF", Theme.Danger, 2)
+	parkLamp = lamp("(P)", Theme.Danger, 3)
+	tcLamp = lamp("TC OFF", Theme.Warning, 4)
+	lightsLamp = lamp("LIGHTS", GREEN, 5)
+	blinkR = lamp("▶", GREEN, 6)
 
 	-- needle: a square the size of the gauge, rotated about its centre; the
 	-- red bar starts outside the centre ring so the gear stays readable
@@ -673,8 +725,15 @@ local function buildCashTab()
 	local rows = {
 		{ "W / S", "Throttle  ·  brake / reverse" },
 		{ "A / D", "Steer" },
-		{ "SPACE", "Handbrake (drift)" },
-		{ "C", "Camera  (hold RMB to look)" },
+		{ "F", "Start / stop the engine" },
+		{ "Q / E", "Shift down / up (manual)" },
+		{ "L SHIFT", "Clutch" },
+		{ "P", "Handbrake on / off" },
+		{ "SPACE", "Handbrake while held (drift)" },
+		{ "T", "Traction control on / off" },
+		{ "L", "Lights on / off" },
+		{ "Z / X / C", "Left blinker · hazards · right blinker" },
+		{ "V", "Camera  (hold RMB to look)" },
 		{ "R", "Reset car to road" },
 		{ "G", "Garage / shop" },
 		{ "M", "Music on / off" },
@@ -682,7 +741,7 @@ local function buildCashTab()
 	local panel = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -56),
-		Size = UDim2.fromOffset(340, 44 + #rows * 28),
+		Size = UDim2.fromOffset(380, 44 + #rows * 28),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.1,
 		Visible = false,
@@ -697,9 +756,9 @@ local function buildCashTab()
 	label({ Text = "CONTROLS", TextSize = 13, Font = Enum.Font.GothamBlack, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 18), LayoutOrder = 0, ZIndex = 5, Parent = panel })
 	for i, row in rows do
 		local r = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = i, ZIndex = 5, Parent = panel })
-		local chip = new("Frame", { Size = UDim2.fromOffset(70, 22), BackgroundColor3 = Theme.PanelLight, ZIndex = 5, Parent = r }, { corner(6), stroke(Theme.Stroke, 1, 0.2) })
+		local chip = new("Frame", { Size = UDim2.fromOffset(86, 22), BackgroundColor3 = Theme.PanelLight, ZIndex = 5, Parent = r }, { corner(6), stroke(Theme.Stroke, 1, 0.2) })
 		label({ Text = row[1], TextSize = 12, Font = Enum.Font.GothamBlack, Size = UDim2.fromScale(1, 1), ZIndex = 6, Parent = chip })
-		label({ Text = row[2], TextSize = 13, Font = Enum.Font.GothamMedium, TextColor3 = Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(84, 0), Size = UDim2.new(1, -84, 1, 0), ZIndex = 5, Parent = r })
+		label({ Text = row[2], TextSize = 13, Font = Enum.Font.GothamMedium, TextColor3 = Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(98, 0), Size = UDim2.new(1, -98, 1, 0), ZIndex = 5, Parent = r })
 	end
 	controlsPanel = panel
 
@@ -813,15 +872,15 @@ local function buildSideButtons()
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Background, 2, 0) })
 
 	-- settings: camera + music toggles (same actions as C and M)
-	settingsPanel = sidePanel("SETTINGS", 148, if UI.isTouch then 0.4 else 0.5)
+	settingsPanel = sidePanel("SETTINGS", 236, if UI.isTouch then 0.4 else 0.5)
 	local function settingRow(name: string, key: string, y: number): TextButton
 		label({ Text = name, TextSize = 14, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, y), Size = UDim2.fromOffset(110, 32), ZIndex = 5, Parent = settingsPanel })
-		if not UI.isTouch then
+		if not UI.isTouch and key ~= "" then
 			label({ Text = "[" .. key .. "]", TextSize = 11, Font = Enum.Font.GothamBold, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(84, y), Size = UDim2.fromOffset(40, 32), ZIndex = 5, Parent = settingsPanel })
 		end
 		return button("", Theme.Accent, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, y), Size = UDim2.fromOffset(120, 32), TextSize = 13, TextColor3 = Theme.Accent, ZIndex = 6, Parent = settingsPanel })
 	end
-	camToggle = settingRow("Camera", "C", 52)
+	camToggle = settingRow("Camera", "V", 52)
 	camToggle.Text = "CHASE"
 	musicToggle = settingRow("Music", "M", 96)
 	local function refreshMusic()
@@ -830,6 +889,24 @@ local function buildSideButtons()
 		musicToggle.TextColor3 = if on then Theme.Accent else Theme.SubText
 	end
 	refreshMusic()
+	unitsToggle = settingRow("Speed", "", 140)
+	unitsToggle.Text = if speedKmh then "KM/H" else "MPH"
+	unitsToggle.Activated:Connect(function()
+		local units = if speedKmh then "mph" else "kmh"
+		UI.setUnits(units)
+		if UI.onUnitsChanged then
+			UI.onUnitsChanged(units)
+		end
+	end)
+	gearboxToggle = settingRow("Gearbox", "Q/E", 184)
+	gearboxToggle.Text = "AUTO"
+	gearboxToggle.Activated:Connect(function()
+		local mode = if gearboxToggle.Text == "AUTO" then "Manual" else "Auto"
+		UI.setGearboxLabel(mode)
+		if UI.onGearboxChanged then
+			UI.onGearboxChanged(mode)
+		end
+	end)
 	camToggle.Activated:Connect(function()
 		if UI.onCameraButton then
 			UI.onCameraButton()
@@ -1698,7 +1775,7 @@ local lastGear = ""
 -- mph, speed fraction of top speed (unused by the analog dial), gear ("N",
 -- "R", "1".."6") and rpm 0..1 (needle sweeps 0..7 x1000)
 function UI.setSpeed(mph: number, _frac: number, gear: string, rpm: number)
-	local speedText = tostring(math.floor(math.abs(mph) + 0.5))
+	local speedText = tostring(math.floor(math.abs(mph) * (if speedKmh then 1.609 else 1) + 0.5))
 	if speedText ~= lastSpeedText then
 		lastSpeedText = speedText
 		speedLabel.Text = speedText
@@ -1726,6 +1803,46 @@ function UI.setSpeed(mph: number, _frac: number, gear: string, rpm: number)
 				seg.BackgroundTransparency = if red then 0.45 else 0.1
 			end
 		end
+	end
+end
+
+-- Settings: "mph" | "kmh" on the HUD speedometer and the settings button
+function UI.setUnits(units: string)
+	speedKmh = units == "kmh"
+	if unitLabel then
+		unitLabel.Text = if speedKmh then "km/h" else "mph"
+	end
+	if unitsToggle then
+		unitsToggle.Text = if speedKmh then "KM/H" else "MPH"
+	end
+	lastSpeedText = ""
+end
+
+function UI.setGearboxLabel(mode: string)
+	if gearboxToggle then
+		gearboxToggle.Text = if mode == "Manual" then "MANUAL" else "AUTO"
+	end
+	if gearTag then
+		gearTag.Text = if mode == "Manual" then "MT" else "AT"
+	end
+end
+
+-- the car's warning lights: { ignition, engine, manual, park, tc, lights, blinker }
+function UI.setIndicators(t: { [string]: any })
+	if not engineLamp then
+		return
+	end
+	engineLamp.Visible = t.ignition == true and t.engine ~= true
+	parkLamp.Visible = t.park == true
+	tcLamp.Visible = t.tc == false
+	lightsLamp.Visible = t.lights == true and t.ignition == true
+	UI.setGearboxLabel(if t.manual then "Manual" else "Auto")
+end
+
+function UI.setBlink(left: boolean, right: boolean)
+	if blinkL then
+		blinkL.Visible = left
+		blinkR.Visible = right
 	end
 end
 

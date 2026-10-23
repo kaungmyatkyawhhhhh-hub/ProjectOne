@@ -1,0 +1,472 @@
+# Break A Bed: Content Plan
+
+#break-a-bed #retention
+
+Back to [[Break A Bed/Project Overview|Project Overview]].
+
+**Problem (owner, 2026-10-13):** the average player finishes the game (all 25 beds) in about **30 minutes**, and then there's nothing left to do. The 17 training posts also all look alike (stacked cylinders in different colors).
+
+**Goal:** a first finish takes about **2–3 hours** over several sessions, and rebirths add many more hours on top. Minutes 0–10 stay fast (see [[Break A Bed/Charts Plan|Charts Plan]]). Only the later game gets longer, and always with something new to chase, never just bigger numbers.
+
+## 1. Unique training posts
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+Every post gets its own model, punch effect and sound, so each new post feels like a reward. Use each post's name as its theme, with the [[Break A Bed/UI Kit/UI Kit|UI Kit]] colors and chunky low-poly parts. The posts get bigger and fancier toward the end of the row.
+
+| Theme in the name | Look | Punch effect |
+|---|---|---|
+| Straw | hay bale tied with rope on a stick | straw bits fly off |
+| Wooden | a wooden training dummy with arms (wing chun style) | wood chips |
+| Bamboo | a bundle of bamboo stalks with a red cloth band | green leaves |
+| Brick | a short brick pillar with a cracked top | brick dust |
+| Stone | a carved stone totem with a face | small rocks |
+| Iron / metal | a heavy punching bag hanging from an iron frame | the bag swings + metal clang |
+| Gold | a gold punching bag with a crown on the frame | gold coins pop out |
+| Gems (Emerald, Ruby, Sapphire, Diamond…) | a floating crystal cluster in that gem color, slowly spinning | crystal shards + sparkle |
+| Ice / frost | an ice pillar with a frost mist | snowflakes + frost ring |
+| Fire / lava | a lava rock with glowing cracks and drips | embers + small fire burst |
+| Electric / thunder | a tesla coil with arcs | lightning spark |
+| Galaxy / cosmic | a floating planet with a ring and orbiting stars | star burst |
+| Void / dark | a black orb with a purple swirl | purple shockwave |
+| Rainbow / infinity (last post) | a big glowing rainbow crystal on a gold base | rainbow ring + screen flash |
+| Steel (added by Claude Code) | a riveted steel I-beam on a yellow/black hazard-striped base | orange sparks + steel chips, metal box clang |
+| Neon (added by Claude Code) | a tower of pink and cyan neon tubes with a yellow lightning bolt sign | pink + cyan sparks and a ring, electric zap |
+
+- Names that don't fit a theme: Claude Code picks a fitting look and adds it to this table.
+- Every post keeps its glowing pad, sign, price, ProximityPrompt and name, and only the model changes. The effects are client-side and pooled, using the same no-lag rules as bed breaks.
+- Phones with Low Graphics: smaller effects, no extra lights.
+
+## 2. Rebirths (the main replay loop)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+- **Unlocked** after breaking bed 15 the first time. A gold **REBIRTH** button appears on the left (under Boosts) with a "!" when it's ready.
+- **Cost:** reaching a Strength goal (rebirth 1 = the bed 15 requirement, then ×3 each rebirth). It's shown in the menu with a progress bar.
+- **Resets:** Cash, Strength, beds completed, posts owned. **Keeps:** auras, passes, codes, gifts, Level, daily streak.
+- **Gives, forever:** **+50% Strength and +25% Cash per rebirth** (stacking), plus **1 Rebirth Token** each time.
+- **Rebirth Token shop** (inside the rebirth menu): permanent upgrades, like start with $1K, +1 auto-punch speed, posts 10% cheaper, +5% crit chance and +1 free Spin a day. Each costs 1–3 tokens.
+- **Discovered beds and posts go black again on every rebirth (owner, 2026-10-14);** Bed 1 and Post 1 stay discovered.
+- **Shows off:** the rebirth count on the leaderboard and over the head ("⟳ 3"), with a new name-tag color at 1/5/10/25.
+- **Menu (replaced by "Simpler menu" below):** UI Kit dark window, rainbow title "REBIRTH". It has a "You lose / You keep / You get" layout and a big gold REBIRTH button with a confirm step, then a white flash, rays and a fanfare.
+- **Simpler menu (owner, 2026-10-13):** the first build had too much text (three columns of "You lose / You keep / You get"), and even the owner needed 10 seconds to understand it. Kids must get it in **2 seconds, from pictures**. New layout, top to bottom:
+  1. **Title bar** "REBIRTH", same as now, with the REBIRTH / TOKEN SHOP tabs.
+  2. **The big picture (most of the window):** two big glowing cards with an arrow between them: **[dumbbell icon "x1"] ➜ [dumbbell icon "x1.5"]** (live numbers: current Strength multiplier → after rebirth, e.g. x1 → x1.5 on the first rebirth). The right card is bigger, gold-rimmed, and slowly breathes and sparkles.
+     - Under the arrow, two small reward chips: **[cash icon "x1.5"]** and **[token icon "+1"]**.
+  3. **One short line** in big text: **"Get stronger forever!"**
+  4. **The reset, as icons only:** a small grey row "**Resets:**" then the cash, dumbbell, bed and post icons, each with a small red ↺. No list of words.
+  5. **Progress bar** with a dumbbell icon: "0 / 1.35B".
+  6. **Big button:** grey "NEED 1.35B" with a lock when you can't afford it yet, gold pulsing **"REBIRTH!"** when you can. Pressing it shows one confirm pop-up with the same ↺ icons and "Are you sure?" plus YES / NO.
+  - **A small "?" button** in the corner opens the full details (the old lose/keep/get lists) for players who want them.
+  - Use drawn icons, no emoji (UI Kit rule). Text is at most 3–4 words per spot.
+  - **Built 2026-10-14** (see [[Break A Bed/2026-10-14|2026-10-14]]; the lists are behind the "?" button now).
+  - **Was: still not built (owner, 2026-10-13, later):** the game still shows the old three columns (YOU LOSE / YOU KEEP / YOU GET). The owner still finds it hard to read. Delete the three columns completely and build the layout above. The whole window should have **under 15 words**.
+- Rebirth also replays the bed path fast (the multiplier makes the early beds instant), so the second run takes about 15–20 min and the later ones get longer.
+
+## 3. Gloves (a second thing to buy with Cash)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+- 12 gloves bought with Cash at a **Glove Shop** stand by the training area: Boxing → Wooden → Spiked → Iron → Gold → Ice → Fire → Thunder → Emerald → Galaxy → Void → Infinity.
+- Each one **multiplies all Strength from punching** (x1.5, x2, x3… up to about x50). They're priced so each takes 3–8 minutes of play at that stage, and they're spread between the post prices so there's always something to buy.
+- The equipped glove shows on both hands and changes the punch effect color. Owned gloves are saved.
+
+- **Glove model fix (owner, 2026-10-13):** the first build was wrong. The owner's screenshot shows huge green blobs made of stacked balls, covering the arms and chest, with bright white glow dots on them. Rules for the glove model:
+  - **Shape:** a real boxing-glove shape built from a few parts: a rounded main fist (slightly egg-shaped, flatter on the palm side), a **thumb** bump on the inner side, a **cuff** (a short cylinder at the wrist in a darker or white trim color) and a thin lace/strap line. No clusters of spheres.
+  - **Size:** about **1.4× the hand** (around 1.1 × 1.0 × 1.3 studs on a normal R15 avatar). It never covers the forearm, chest or face. It scales with the avatar's hand size.
+  - **Fit:** welded (`WeldConstraint`/`Motor6D`) to `LeftHand`/`RightHand` (R15) or the bottom of `Left Arm`/`Right Arm` (R6), centered on the hand, knuckles facing forward, thumb up. It follows punches exactly, with no gap or offset. `CanCollide`, `CanTouch` and `CanQuery` off, `Massless` on.
+  - **Look:** SmoothPlastic, or a soft shine for higher tiers. Each glove has its own color (Boxing red, Wooden brown, Spiked black with silver spikes, Iron grey, Gold, Ice light blue, Fire orange with an ember trail, Thunder yellow with sparks, Emerald green, Galaxy purple with stars, Void black with a purple glow, Infinity rainbow).
+    - **Effects stay small.** No big neon balls or white dots. Higher gloves only get a soft `PointLight` or a light particle at the knuckles.
+  - Hide the player's normal hand under the glove (`LocalTransparencyModifier` or a cut-off), and keep hats, hair and accessories as they are.
+  - Check on R15 and R6, on a small and a big avatar, and in first person.
+  - **Changed again (owner, 2026-10-13): blocky, not round.** The round glove looked like a red blob stuck under the arm. Now the glove is a **square block that fits the player's hand**, matching Roblox's blocky arms:
+    - **Main block:** a `Part` (Block) sized from the player's actual hand part: hand size × about 1.15 on each side (on R6, the bottom ~0.8 stud of the arm × 1.15), so it wraps the hand exactly with a small even rim. Small rounded edges are fine (a slight bevel), but no balls.
+    - **Cuff:** a thin block band at the wrist in a trim color (white or darker), the same width as the main block.
+    - **Thumb:** a small block on the inner side of the fist. Optional, and only if it doesn't stick out.
+    - **Fit:** the block's center sits exactly on the hand's center and turns with it. There's no gap under the arm and nothing floating below the hand.
+    - Colors and the small effects stay as described above.
+  - **Final look (owner, 2026-10-13, from 4 reference pictures of blocky Roblox boxing gloves):** **Built 2026-10-13** with the owner's Toolbox mesh, see [[Break A Bed/2026-10-13|2026-10-13]]. this replaces the shape rules above.
+    - **Size and place:** the glove covers the **hand and the bottom ~40% of the arm** and is about **1.25× the arm's width and depth**. It's chunky and clearly bigger than the arm, like a real boxing glove on a blocky avatar. The top edge of the cuff is flat and straight.
+    - **Shape:** a **cube-like fist with soft rounded edges and slightly puffy sides** (padded, not a sharp brick). There's a padded knuckle bump at the front and a **molded thumb bump on the inner side**, plus a **cuff band** at the top with 2–3 stitch/seam lines.
+    - **How to make it:** a **MeshPart** looks best.
+      - **Option A:** the owner inserts a free blocky boxing-glove mesh from the Toolbox (search "blocky boxing gloves"). Claude Code then recolors, resizes and welds it for every tier, with a left and a right version.
+      - **Option B:** if there's no good mesh, Claude Code builds it from parts: a main block with `SpecialMesh`/bevel or rounded Union, a padded front, a thumb wedge and a cuff block. It must still read as a padded glove, not a plain box.
+    - **Tier looks (like the references):** basic gloves are a plain color with a darker cuff. Mid tiers get trims, stripes or spikes, and some get **chains wrapped around the cuff**. Top tiers get **an energy aura on the gloves**: small crackling sparks or lightning (e.g. purple for Void, rainbow for Infinity), kept small so it doesn't hide the avatar.
+    - Welded to the hand/lower arm, it moves with every punch, with no gap and nothing hanging below. It works on R15 and R6.
+- **Shop window: Ninja Legends style (owner, 2026-10-13):** the first build was a long text list of rows. Now it's a **grid on the left and a big preview on the right**, like the Ninja Legends sword/belt shop:
+  - **Left (about 60%): a grid of square tiles**, 4 per row, scrolling. Each tile has:
+    - a **rarity-colored gradient background** (Common grey, Uncommon green, Rare blue, Epic purple, Legendary gold, Mythic red, Secret rainbow);
+    - the **real 3D glove** in a `ViewportFrame`, slowly turning.
+    - **States:**
+      - Owned: a green check in the corner.
+      - Equipped: a small "EQUIPPED" ribbon.
+      - Affordable next: a soft glow pulse.
+      - Not affordable: darker, with the price in the corner.
+      - Not yet reached: a black silhouette with "?" (same idea as undiscovered beds).
+  - **Right (about 40%): the details of the selected tile:**
+    - a big `ViewportFrame` of the glove spinning on a small pedestal with light rays behind it;
+    - the name in its rarity color and a rarity tag;
+    - one big stat line, "**x1.5 Strength**";
+    - the price with a cash icon;
+    - one big button: **BUY** (green), **EQUIP** (blue), **EQUIPPED** (grey) or **NEED $1.3M** (red).
+  - **Bottom bar:** a **BUY ALL** button (buys every glove you can afford, in order, then equips the best, the classic Ninja Legends button) and **EQUIP BEST**.
+  - Opening the shop selects the next glove to buy. Buying plays a coin burst on the tile, and the tile flips to owned.
+  - UI Kit dark window with the cyan title bar "GLOVE SHOP" stays. The one-line hint "Gloves multiply the Strength from every punch!" can go: the x1.5 stat on the right says it.
+  - Phones: the grid gets 3 per row, and the preview panel shrinks but stays on the right.
+- **Glove Shop stand (owner, 2026-10-13, from a reference picture of a "Pickaxe Shop" market stall):**
+  - **No ProximityPrompt.** A glowing **blue circle pad** on the ground in front of the stall is a touch sensor. Stepping into it opens the Glove Shop window, and stepping out (or the X) closes it. A 1 s cooldown stops it reopening right after closing while still standing in it.
+  - **Our own design (not a copy):** a chunky low-poly boxing-themed stall.
+    - **Awning:** red-and-white striped, scalloped edge.
+    - **Counter:** dark wood, with a pair of giant red boxing gloves hanging from the front beam on a rope and slowly swinging.
+    - **Display:** 3–4 of the real gloves on hooks/stands on the counter, slowly spinning.
+    - **Pad:** a cyan glowing ring with a soft pulse and rising sparkles.
+    - **Title:** "Glove Shop" floating above in big rounded white text with a blue gradient and a thick dark outline (same style as the reference).
+  - It sits by the training area, visible from spawn.
+  - **Pad look (owner, 2026-10-13, from a "SELL" stall reference):** **Built 2026-10-13** (both stands; yellow for Invite Friend).
+    - **Shape:** a **big flat circle** on the ground, about 1.5× the stall's width, so the stall stands at its back edge and the player walks into it from the front.
+    - **Edge:** a **thick glowing neon ring**, about 0.8 stud wide, bright cyan, with a soft glow bleeding outward.
+    - **Inside:** **see-through** with a light cyan tint (about 80% transparent), so the ground shows through.
+    - **How:** a thin flat `Cylinder` (or a flat part with a `SurfaceGui`) for the tinted fill, plus the ring as a glowing circle-outline image (`ImageLabel`, `LightInfluence` 0, high `Brightness`) or a Neon ring mesh. It sits just above the ground so it never flickers.
+    - **Movement:** a slow gentle pulse of the ring's brightness. When a player stands in it, it gets a bit brighter.
+    - The whole circle is the touch sensor (as above).
+
+## 4. Bed Mastery (a reason to re-break beds)
+- Each bed has **3 mastery stars**: break it 10 / 50 / 200 times.
+- Each star = **+5% Cash forever** from that bed, plus a one-time Cash reward. The stars show on the bed's sign and in an **Index** menu (all beds, stars, best time).
+- "Master all 25 beds" is a long goal with a special title and aura reward.
+
+## 5. World 2 (next week's update)
+- A second path of 15 beds past the Infinity Bed (a Halloween/haunted theme while October lasts, e.g. Coffin Bed, Haunted Bed, Pumpkin Bed…), unlocked at **Rebirth 1**.
+- It comes with 6 new posts and gloves. Announce it with a group shout and a new code.
+
+## 6. Undiscovered beds are black (owner, 2026-10-13)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+Beds you haven't broken yet are **black silhouettes**, so you want to keep playing to find out what they look like.
+- **Look:** every part of an undiscovered bed turns near-black (`#0E0E14`, SmoothPlastic). Textures and decals are hidden, and its glow, sparkles and particles are off. A faint dark-purple `Highlight` outline makes it look mysterious, not broken.
+- **Name:** the sign and prompt show **"???"** instead of the name. The Strength needed still shows ("??? · Need 1M Strength"). The next-bed pill says "Next: ???" and the Index shows "???" too.
+- **Discover moment:** the first time you break a bed, the black shell **cracks off**. Black shards fly out, then a white flash and the real colors fade in over 0.5 s, with a "NEW BED DISCOVERED!" banner, its name in big text and a reveal sound. Then the normal break effects play.
+- **Per player:** it's done on each player's own screen (client-side), so everyone sees their own progress. The server sends the list of discovered beds.
+- **Saved forever:** a separate `DiscoveredBeds` list that **isn't reset by Rebirth**, so beds stay revealed after rebirthing. Old saves: every completed bed counts as discovered.
+- The first bed (Cardboard) is always revealed, so the tutorial target is clear.
+- The bed path's colored tiles and the COMPLETED signs stay as they are.
+- **Training posts too (owner, 2026-10-13):** posts you don't own yet are black silhouettes in the same style. Their pad glow is grey and the name sign says "???", but the **price still shows** ("??? · $1.2K") so players know what to save for. The Straw Post (the first, free one) is always revealed.
+  - **On buying:** the black shell cracks off with the same reveal (shards, white flash, colors fade in over 0.5 s, "NEW POST UNLOCKED!" banner with the name and its "+X 💪 per punch").
+  - **Saved:** a `DiscoveredPosts` list that Rebirth doesn't reset (owned posts count as discovered in old saves). After a rebirth, a discovered but not-yet-rebought post shows in full color with its lock and price.
+  - The same applies to the new unique post models from section 1.
+
+## 7. Invite Friend stand (owner, 2026-10-13, from a reference picture)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+- **A figure** (an R15 rig wearing a cash/money outfit, with a cheerful idle and a wave every few seconds) stands on a **glowing yellow ring pad** near spawn. Cash bills and dumbbell icons float and swirl around them.
+- **Above it**, a floating title "**INVITE FRIEND**" in big yellow text with a thick dark outline and a 👥 icon on each side, and a green line under it: "**Each Friend = +10% Strength**".
+- **Stepping on the yellow ring** (a touch sensor, no prompt) opens Roblox's invite window (`SocialService:PromptGameInvite`), with a 5 s cooldown.
+- **The bonus:** +10% Strength for each friend in the same server, max +30%. It shows as a small chip on the HUD ("Friends +20%"). This is item 3 of "Next retention features" in [[Break A Bed/Retention Plan|Retention Plan]].
+
+- **Fix (owner, 2026-10-13):** **Built 2026-10-13** (rongstrix's avatar, userId 1834504124). the first build had no figure, just dumbbells and cash bills stacked in a column. Now:
+  - **The figure is the Roblox avatar of the user "rongstrix".** On the server, use `Players:GetUserIdFromNameAsync("rongstrix")` and then `Players:CreateHumanoidModelFromUserId(id)`. Wrap both in pcall with a retry, and save the userId as a constant once found so the name lookup isn't needed every server.
+    - The figure stands in the middle of the yellow ring facing spawn. Its HumanoidRootPart is anchored, its name tag is hidden, and it can't be pushed.
+    - It plays an idle animation, and a wave every ~6 s (a looping `Animator` animation, or the default "wave" emote).
+    - If loading fails, it falls back to a plain R15 rig, so the stand never looks empty.
+  - **Cash and dumbbells** orbit the figure in a loose ring at different heights (6–8 items, small, slowly circling and bobbing). They aren't stacked in a column, and they never cover the figure's face.
+
+## 8. Leaderboards (owner, 2026-10-13)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+Three world boards stand side by side near spawn: **TOP TOTAL DAMAGE** (exists now), **TOP TOTAL MONEY** and **TOP TOTAL REBIRTHS**.
+- **GLOBAL / SERVER switch:** two tab buttons under each title. GLOBAL (the default) shows everyone, from an OrderedDataStore. SERVER shows only the players in this server, live, updating every few seconds. The chosen tab is per player and only changes their own view.
+- **Top 100, scrollable:** the list is a `ScrollingFrame` that holds 10 rows at a time, and players scroll with the mouse wheel, by dragging or by touch.
+  - **Important:** a SurfaceGui in Workspace can't be scrolled or clicked. The board GUIs go in each player's `PlayerGui` with `Adornee` set to the board part (`MaxDistance` about 60, so far-away boards don't take clicks).
+- **Rows:** rank, avatar headshot (`rbxthumb://type=AvatarHeadShot&id=…&w=48&h=48`), name and the short number (24.3Qi). #1/#2/#3 rows are gold/silver/bronze, and #1 gets a small crown. Your own row is highlighted if you're in the list.
+- **"YOU" bar** at the bottom: your value and your rank ("#523"). If you're not in the global top 100, it shows "100+".
+- **Data:**
+  - Global stores use `GetSortedAsync(false, 100)`, refreshed every 3 min with the "Refreshes in 2:22" countdown. Names are cached from `GetNameFromUserIdAsync`.
+  - Values above an OrderedDataStore's integer limit (about 9.2 quintillion) are saved log-scaled, for example `floor(log10(value + 1) × 10^13)`, and turned back for display.
+  - **Damage:** the existing `BreakABed_TotalDamage_v1`.
+  - **Money:** a new store for **total Cash earned all-time** (not the current balance, which drops when spending or rebirthing). It's added to the save as `TotalCashEarned`. Old saves start from their current Cash.
+  - **Rebirths:** a new store, filled once Rebirths are built.
+- **Designs (same layout, its own look each):** the same frame, row style and font for all three, so they read as one set. Each has its own color and icon:
+  - **Damage:** orange/red with a fist icon (like now).
+  - **Money:** green with a cash-stack icon and a gold coin trim.
+  - **Rebirths:** purple with a gold rebirth-arrows icon and a soft purple glow.
+  - Each board has a small matching light on top.
+
+## 9. Map layout fixes (owner's screenshot, 2026-10-13)
+**Built 2026-10-13**, see [[Break A Bed/2026-10-13|2026-10-13]].
+Seen from spawn, everything is squeezed into the back corner while the big paved plaza in front is empty.
+- **The Glove Shop is jammed** between the training floor and the VIP Lounge. Its "Glove Shop" title overlaps the "VIP POST / 2x your best post" sign. **Move it into the open plaza**, front-left of the training area, facing spawn, with about 8 studs of free space around its pad.
+- **The Invite Friend stand** has no figure yet (only small dumbbells on the ring). Build the rongstrix figure (section 7), and move the stand into the open plaza closer to spawn, front-right, so it's one of the first things players see.
+- **Stands in an arc:** the Glove Shop, Invite Friend and (later) a Rebirth stand stand in a loose arc around the front of the plaza, all facing spawn. The middle stays a clear walkway from spawn to the training area and the bed path arch.
+- **Training floor:** the 17 posts are packed so tight that their name/price signs overlap. Spread them out (a bigger floor or more space between rows) so each sign reads on its own from spawn.
+- **No overlapping signs** from the spawn view. Every big title (TRAINING, VIP POST, Glove Shop, INVITE FRIEND, the leaderboards) must be readable without another one in front of it.
+- Keep the like-goal board and the leaderboards where players see them on the way.
+- **Problem after the move (owner's screenshot, 2026-10-13):** the Invite Friend stand was put right in front of the **WALK SPEED** and **TRAINING SPEED** upgrade boards and their green pads, blocking them. Rules for placing anything on the plaza:
+  - Keep **at least 10 studs clear** in front of every upgrade board and its pad, the aura crate, the VIP Lounge door, the bed path arch and the leaderboards.
+  - Don't place anything on the main walkway from spawn.
+  - Spawn should have a clear view of each stand, board and crate. Nothing stands in front of another.
+  - Before moving anything, Claude Code makes a top-down list of every object on the plaza (name, position, size) and picks free spots from it. Then it takes a screenshot from spawn and one from above.
+- **Still wrong (owner's screenshot, 2026-10-13, later):**
+  - **The Glove Shop** stands half on the front edge of the training floor, wedged between training and the VIP Lounge carpet, with its pad in the walkway.
+  - **The training floor** got bigger when the posts were spread out. It now runs into the VIP Lounge on the right, and it's no longer centered under the TRAINING sign.
+  - **Fix:**
+    1. **Training floor:** shrink it or move it back/left so there's a gap of at least **6 studs** to the VIP Lounge. It must not touch any other building. Center the TRAINING sign over it again (widen the sign if needed), and keep the posts evenly spaced inside.
+    2. **Glove Shop:** fully off the training floor, in the open paved area **front-left of training**, facing spawn, with its cyan pad in front (toward spawn). It must not cover the like-goal board.
+    3. Keep the VIP Lounge carpet and door clear.
+    4. **If the plaza is too small** for everything with these gaps, make the paved plaza bigger (extend it to the front/left) instead of squeezing things together.
+
+- **Top-down check (owner's screenshot, 2026-10-13, latest):** better, with three things left:
+  1. **The training floor's bottom-left corner hangs over the bed path entrance** (the colored path rails), and the floor runs to the very edge of the plaza. There's empty paving to its right (above the VIP Lounge), so **move the floor right/up into that space**, keeping the 6-stud gap to the VIP Lounge and about 4 studs of paving around it.
+  2. **The TRAINING sign** stands along the floor's left side, facing away from spawn and sticking out past the plaza. Put it across the **front edge of the floor (the side facing spawn)**, centered.
+  3. **The Glove Shop's pad touches the spawn circle** and sits in the walkway. Move the shop into the space freed at the front-left of the training floor (between spawn and the bed path entrance, without blocking the entrance), with its pad facing spawn and at least 6 studs from the spawn circle.
+  - The Invite Friend stand's new spot (right side, by the VIP Lounge) is fine.
+
+- **Check after the move (2026-10-13, latest):** the training floor is clear of the bed path and the VIP Lounge now (the plaza was extended), which is good. Two things are left:
+  1. **The TRAINING sign is still at the back-left end**, facing away from spawn and past the plaza edge. It goes on the **front edge of the floor, the end nearest spawn and the Glove Shop**, centered and facing spawn.
+  2. **The Glove Shop's pad is on the walking route** from spawn to training, so players would open the shop every time they walk past. Move the shop to the **left side of the route** (toward the bed path side, without blocking it), with its pad facing the route but **at least 4 studs off it**, and at least 6 studs from the spawn circle.
+
+- **View from spawn (2026-10-13, latest):** the layout works now (the TRAINING sign faces spawn and the posts are unique and spread out). One thing is left: **the post name labels overlap** ("Stone P…" behind "Wooden Post", "Bamboo Post" on top of another).
+  - Size the labels in **studs, not pixels** (BillboardGui `Size` in scale), so far-away labels shrink naturally. Set `AlwaysOnTop` off so a post in front hides the label behind it.
+  - Set `MaxDistance` to about 40 studs, so only nearby posts show labels.
+  - Put each label just above its own post, at the same small height for all.
+
+- **Whole-map check (2026-10-13, latest):** the layout is clean and every zone reads clearly (the bed path with the BREAK A BED arch, training, VIP Lounge, stands, crate, upgrades, leaderboards). Small things left:
+  - The Glove Shop stall touches the VIP Lounge's glass corner. Give it about 4 studs of space.
+  - ~~The map floats in empty blue sky; put the city back.~~ **No: the owner removed the city on purpose and wants a clean map (2026-10-13). Don't add a city back.**
+  - The grass to the right of training is empty. It's a good spot for a future stand (Rebirth or AFK Zone).
+
+## 10. Story: The Sleep King (owner asked for a story, 2026-10-14)
+**Rejected by the owner (2026-10-14): "bad idea". Don't build this. A different story is still wanted.**
+Short and told with pictures, because kids don't read much. Max ~6 words per line.
+- **The story:** the evil **Sleep King** (a big grumpy king in pajamas, a nightcap and a crown) cursed every bed. Anyone who touches one falls asleep forever, and the beds get stronger and stronger. You're the last kid awake. Train, break the cursed beds, wake everyone up, and beat the Sleep King.
+- **Intro (first join only, ~10 s):** 3 comic panels before the tutorial, tap to continue: (1) "The Sleep King cursed the beds!" (king laughing, people snoring on beds), (2) "Everyone fell asleep..." (sleepy town), (3) "Only YOU can break them!" (the player in karate pose). Then the normal tutorial starts.
+- **Sleepers on the beds:** each unbroken bed has a sleeping NPC lying on it with floating "Zzz". When you break that bed for the first time, the NPC jumps up, cheers ("Thank you!" bubble) and runs to spawn. Freed people stand around spawn waving and cheering. Spawn slowly fills up = visible progress. Saved per player (FreedSleepers), shown only to that player. Keep them small so the map stays clean.
+- **Story tracker:** "Freed 7 / 15" with a sleeping-face icon on the next-bed bar.
+- **The Sleep King talks:** at a few beds (5, 10, 14) he pops up as a small floating face, one line, 3 s: "You can't stop me!", "My beds are too strong!", "Come to my castle... if you dare!"
+- **Boss: the Sleep King's Royal Bed** at the end of the path: a giant purple-and-gold bed with the King sitting on it, a boss health bar and "BOSS" tag. Breaking it plays a short win scene (the King falls, everyone cheers, confetti) and then shows the **Rebirth** button: "The Sleep King will return... STRONGER!" This explains why rebirth resets everything.
+- **World 2 (later):** the Sleep King's Dream Castle.
+- Don't change the clean map. Don't add long text.
+
+## 11. Story: Karate belt journey (owner's pick, 2026-10-14)
+**Built 2026-10-14**, see [[Break A Bed/2026-10-14|2026-10-14]].
+Replaces the rejected Sleep King. No villain. You train with an old karate master and earn belts until you're a black belt. Told with pictures, at most ~6 words per line.
+- **Sensei:** an old karate master NPC at spawn (white beard, white gi, black belt, small and tidy so the map stays clean). Idle animation: arms crossed, nods; bows when you walk past. The tutorial's first line comes from him: "Become a BLACK BELT!"
+- **Sensei look (owner, 2026-10-14): floating zen master.** This replaces the standing idle above.
+  - **Pose:** sitting cross-legged in the lotus pose, hands resting on his knees with fingers in a circle, eyes closed, calm. He **floats about 3 studs above the ground** and slowly bobs up and down (1 stud, 4 s loop), turning very slightly.
+  - **Look:** white gi with gold trim, black belt with its ends gently swaying, long white beard and eyebrows, a small topknot.
+  - **VFX (soft and calm, not flashy):**
+    - A **glowing gold-white aura** around his body that slowly pulses, like breathing.
+    - A **spinning ring of light** on the ground under him with soft karate/zen symbols (yin-yang in the middle), turning slowly.
+    - **Floating stones:** 3–4 small smooth rocks orbiting him slowly at different heights.
+    - **Light particles** drifting upward, like fireflies or tiny petals (cherry blossom pink + gold), a few at a time.
+    - A thin **light beam** from the ground ring up through him, very faint.
+  - **When a player comes close (8 studs):** he opens his eyes (they glow gold for a second), the aura flares once and the speech bubble "Become a BLACK BELT!" pops up.
+  - **Sound:** a soft wind chime / singing bowl hum, only heard up close.
+  - Keep the particles light (low graphics setting turns most of them off). Nothing covers the path or the buttons.
+  - **Fixes after the first build (2026-10-14 screenshot):**
+    - The yin-yang is a **tilted square part**. Make it a **round, flat disc** lying flat in the middle of the ring, softly glowing.
+    - **Pose:** the arms stick out to the sides and the legs are a blob. Use a real lotus pose: legs crossed in front, hands resting on the knees.
+    - He floats too low. Raise him so there's clear air (~3 studs) between him and the ring.
+    - The big gold "V" on the chest looks odd. Make it thin gold trim along the gi's collar edges.
+    - The rocks are plain grey blocks. Use smooth round stones with a faint gold glow outline, smaller, orbiting slowly.
+    - The petals and aura are barely visible. Make the aura and the rising cherry petals/gold sparkles clearly visible but soft.
+    - The ring is so big that players stand in it. Make it smaller and keep it off the walkway. Use thinner dots.
+    - The speech bubble is too big. Make it ~60% of the size and show it only when a player is close.
+- **Sensei zone sound (owner, 2026-10-14):** **Built 2026-10-14** (client `SenseiZone`). Sensei's song (the `singing_bowl.ogg` hum with `wind_chime.ogg` now and then) fades in and out smoothly instead of popping on/off.
+  - Zone: a circle around Sensei. You **enter at 18 studs** and **leave at 22 studs**, so standing on the edge doesn't flicker it on and off. The client checks the distance every 0.2 s.
+  - **Entering:** the song fades from 0 to its volume (about 0.5 x the player's Music setting) over **1.5 s** (Sine). The background music fades down to 30% at the same time.
+  - **Leaving:** the song fades to 0 over **1.5 s** while the background music fades back to 100%. The song keeps looping silently (no restart pop) and pauses after the fade.
+  - Use TweenService on `Sound.Volume`, and cancel the running tween before starting the opposite one. It respects the Music slider (Music 0% = silent).
+- **Belts (25 beds):** you start as a **White belt**. Some beds are **belt tests**:
+
+  | Bed | Belt |
+  |---|---|
+  | start | White |
+  | 3 | Yellow |
+  | 6 | Orange |
+  | 9 | Green |
+  | 12 | Blue |
+  | 15 | Purple |
+  | 18 | Brown |
+  | 21 | Red |
+  | 25 | **Black** |
+
+- **Belt-test beds** look special: a gold glowing floor ring, a small floating belt in that color above the bed, and a "BELT TEST" tag on the bed sign.
+- **Belt-test beds, cooler look (owner, 2026-10-14).** This replaces the plain gold ring above. Each test bed becomes a small **dojo arena**, compact so the map stays clean:
+  - **Torii gate:** a red Japanese gate over the path just before the bed, with a hanging wooden plaque "BELT TEST". The gate's top beam glows softly in the **belt color**.
+  - **Dojo floor:** the bed's tile becomes a raised square of tatami mats (light straw color, dark borders) with a gold edge. A big circle on the floor glows in the belt color and slowly pulses.
+  - **Stone lanterns:** 2 small Japanese stone lanterns at the front corners, with flames in the belt color.
+  - **Banners:** 2 tall cloth banners in the belt color behind the bed, waving gently, with a fist icon.
+  - **The prize:** a big version of the belt floats above the bed, slowly spinning and bobbing, with a glow and a light beam in the belt color going up into the sky (visible from far away, so players see the next goal). Sparkles drip off it.
+  - **Sound:** a slow taiko drum beat when you walk near it.
+  - **Undiscovered:** the bed is still a black silhouette, but the gate, the floating belt and the beam still show, so players know a belt is waiting there.
+  - **After you've earned it:** the beam and banners turn off, the floating belt is replaced by a small gold ✔ medallion, and the gate stays (calm). For your next belt test, everything is fully lit.
+  - Low Graphics turns off the beam, sparkles and waving.
+- **Torii gates removed by the owner (2026-10-14).** Don't add the dojo gates back. Belt-test beds are marked only by the floating belt, the soft light column (next test only) and the "BELT TEST" tag on the sign.
+- **Gate and beams fix (owner, 2026-10-14 screenshots: "very ugly"):** **Built 2026-10-14** (custom torii + one light column), see [[Break A Bed/2026-10-14|2026-10-14]].
+  - The built gate is a big flat box frame over the whole bed, like a tent. Replace it with the **custom torii model** `Break A Bed/Models/0_ToriiGate` (round leaning pillars, curved roof beam with upturned ends, crossbeam, plaque). It stands **at the entrance of the bed tile, across the path, in front of the bed, not over it**, about 14 studs tall and 12 wide. The plaque says "BELT TEST".
+  - **The sky beams are removed.** 8 thin laser lines into the sky look ugly and cluttered. Instead, only the **next** belt test you haven't earned gets a soft **light column**: wide (about 6 studs), only ~25 studs tall, fading out toward the top (transparency gradient), in the belt color, with a few slow rising sparkles. All the other belt tests have no column.
+- **Earning a belt (first time you break a test bed):** a short ceremony (~3 s): the screen dims a little, Sensei pops in at the side and bows, a big "YELLOW BELT!" in the belt color, the belt flies onto your character, confetti and a gong. Reward: **+10% Strength forever per belt** (stacks), shown as a small chip.
+- **The belt is worn:** a belt in your color around your character's waist, visible to everyone. Your belt color also shows next to your name above your head and on the leaderboards.
+- **Tracker:** the next-bed bar shows a small belt icon: "Next belt: Bed 6".
+- **Black belt (bed 25):** a bigger ceremony; Sensei says "You are a MASTER!" Then the **Rebirth** button: "Train again, even stronger!"
+- **Rebirth:** your belt resets to White for the run (the +10% bonuses reset with it), but each rebirth adds a **gold stripe** to your belt that stays forever (shown on the belt and the name tag). Saved: `Belt`, `BeltStripes` (= Rebirths).
+- **When the stripes fill up (owner asked, 2026-10-14):** a belt holds at most **5 stripes**. On the 5th rebirth the stripes merge into a new **master belt**, and the stripes start again at 0 on top of it:
+
+  | Rebirths | Master belt (replaces the black belt's base color) |
+  |---|---|
+  | 0–4 | Black + 0–4 gold stripes |
+  | 5 | **Bronze** |
+  | 10 | **Silver** |
+  | 15 | **Gold** |
+  | 20 | **Diamond** (light blue, sparkles) |
+  | 25 | **Ruby** (red glow) |
+  | 30 | **Rainbow** (animated color shift) |
+  | 35+ | **Galaxy** (dark purple with moving stars) |
+
+  - A new master belt every 5 rebirths, so each one shows 0–4 stripes until the next. After Galaxy, the stripes are replaced by a small number badge on the belt ("x52").
+  - Earning a master belt plays the big ceremony again: "SILVER MASTER!".
+  - During a run you still wear the run belt (White → Black). The master belt shows as a **small badge next to your name** and a glowing **knot/edge** on your belt, so both are visible.
+- Don't change the clean map. Don't add long text.
+
+## 11b. Cutscenes for belts and rebirth (owner, 2026-10-14)
+These replace the short belt "ceremony" in section 11 with real cutscenes. Shared rules:
+- Only the player who earned it sees the cutscene. Other players just see a gold flash and a burst of light on that player.
+- Controls are locked and the HUD hides. Black cinema bars slide in at the top and bottom (0.3 s).
+- About **5 s** long. A small "Tap to skip" appears after 1.5 s (only for cutscenes you've seen before).
+- The camera returns smoothly (0.4 s) to the normal view, and the HUD fades back in.
+- Text is big and short, with no sentences.
+
+**A. First time you earn a belt (each belt color once):**
+1. **0.0 s:** the bed shatters in slow motion (time slows to about 30% for 1 s). The camera swings around to the front of your character.
+2. **1.0 s:** the screen dims except for you. **Sensei** appears beside you in a puff of smoke, bows and holds out the new belt in both hands. A soft drum roll plays.
+3. **2.2 s:** the belt floats from his hands, spins once around your character, and ties itself around your waist with a "whoosh". Then a **gong**.
+4. **2.8 s:** a shockwave ring in the belt color bursts out from you. A big "**YELLOW BELT!**" (in the belt color, white outline) slams in at the top with a bounce, and "+10% 💪" shows under it. Your character does a karate pose (fists together, bow).
+5. **4.0 s:** confetti in the belt color. Sensei gives a thumbs up and fades out in smoke.
+6. **5.0 s:** back to normal.
+- **After a rebirth (owner, 2026-10-14):** **no cutscene** when a belt is earned again on a later run, not even a short one. The belt just changes color on your character, with a small toast "Yellow belt!" (2 s) and the +10% chip. The full cutscene only plays the first time ever for each color.
+- **Black belt** is longer (~7 s): the sky darkens, the light beam from above turns gold, Sensei bows deeply, and the text says "**BLACK BELT! MASTER!**". Then the Rebirth button pulses.
+
+**B. Rebirth:**
+1. **0.0 s:** you press REBIRTH. The camera pulls up and out above you while a rising whoosh plays.
+2. **0.8 s:** gold light swirls around your character like a tornado, faster and faster. Phoenix feathers fly around.
+3. **2.0 s:** a white flash. A golden **phoenix** flies up out of you with a screech and wings spread (behind the character, never over the face).
+4. **2.6 s:** you're back at spawn standing in a ring of gold fire that fades away. Your belt is White again. The **new gold stripe** appears on it with a sparkle and a "ting".
+5. **3.4 s:** big "**REBIRTH 3!**" text, then the reward chips pop in one by one: "+50% 💪", "+1 token", plus the milestone reward picture if this rebirth has one ("NEW: Rebirth Aura!").
+6. **5.0 s:** back to normal.
+- **When the stripes become a new master belt** (every 5th rebirth): after step 4, the 4 stripes fly together and melt into the belt, and the belt **changes color** with a sweep (black → bronze). The text is "**BRONZE MASTER!**", with an extra shockwave in the new color and a deeper gong. About 7 s.
+
+### VFX on every cutscene (owner, 2026-10-14: "it's ugly without vfx")
+**Built 2026-10-14**, see [[Break A Bed/2026-10-14|2026-10-14]].
+Every cutscene must be full of VFX. The custom sprites are in `Break A Bed/Models/vfx/sprites`.
+- **Rebirth cutscenes:** use `Models/vfx/RebirthVFX.luau` (custom VFX per animal, see [[Break A Bed/Models/vfx/VFX|VFX]]).
+- **Belt cutscene:**
+  - Sensei appears in a **smoke puff** (smoke + petals).
+  - The belt glows in its color, with a **trail** following it as it spins around the player.
+  - When it ties: a gong **shockwave ring** on the ground, a vertical ring, light rays behind the player, and a **rune circle** spinning under them in the belt color.
+  - Sparks and stars burst out.
+  - The player gets a soft aura in the belt color for 2 s (glow + rising embers).
+  - Confetti in the belt color.
+  - The camera zoom-punches.
+- **Black belt cutscene:** all of the belt cutscene, plus a gold light pillar from the sky (wide, soft, fading), lightning sparks around the player, a double rune circle (gold + black), golden rays and a bigger shockwave.
+- **Master belt change (every 5th rebirth):**
+  - The 4 stripes fly together as glowing orbs with trails.
+  - The belt flashes white and color-sweeps into the new color.
+  - A shockwave and sparks follow in the new color, and that animal's special burst plays again.
+- **First-join intro:** petals and gold motes drifting past the camera during the fly-down; Sensei's eyes open with a gold flash, an aura flare and a ring.
+
+### First-join intro (updated 2026-10-14 for the hidden cloud zones)
+Only on a player's very first join, before the tutorial. **~7 s**, with "Tap to skip" from the start (most players leave in the first 4 minutes, so keep it short). Because the zones ahead are now hidden in clouds, the intro shows them as a **mystery**:
+1. **0–1.5 s:** the camera starts low over spawn and glides forward over the first zones (the open ones plus the next 3 visible ones) up to the cloud wall.
+2. **1.5–3.5 s:** at the cloud wall the camera rises and flies over the **sea of clouds** covering the rest of the path. Inside the clouds, glows in different colors flicker (the hidden zones: a red lava glow, blue ice, purple crystal...). Far away a **black-belt light** shines up through the clouds. Soft taiko drums.
+3. **3.5–5.5 s:** the camera swoops back to spawn and stops in front of the floating **Sensei**. He opens his eyes (gold glow), his aura flares, and with a gong the bubble says **"Become a BLACK BELT!"**
+4. **5.5–7 s:** the camera glides behind the player, the cinema bars slide away, and the tutorial starts.
+- Petals and gold motes drift past the camera. No other text.
+
+**Zone reveal moment (new, short, ~1.5 s, no cinema bars, controls stay on):** when the cloud wall moves forward one zone, the camera does a quick gentle push toward that zone (FOV 70 → 64 → 70) while the clouds burst outward. The zone's colors fade in, "NEW ZONE REVEALED!" shows with the bed name, and a wind whoosh plus a bright chime play. If the player is training or breaking, skip the camera push and only show the text.
+
+**Belt light column + clouds:** if your next belt test is inside the clouds, its soft light column rises **above** the cloud bank, so you can still see where your next belt is waiting.
+
+### Rebirth cutscene changes with each master belt (owner, 2026-10-14)
+The rebirth cutscene keeps the same 5 steps (camera pulls up → swirl → flash + creature → back at spawn with the new stripe → "REBIRTH X!" + rewards), but each master belt tier has its **own creature, colors and sound**. The cutscene uses the tier you're in **after** this rebirth, so reaching a new master belt shows the new style for the first time (together with the stripes-melt, "BRONZE MASTER!" part).
+
+| Rebirths | Belt tier | Swirl | Creature (step 3) | Landing (step 4) | Sound |
+|---|---|---|---|---|---|
+| 1–4 | Black | gold light + feathers | golden **phoenix** spreads its wings | ring of gold fire | phoenix screech |
+| 5–9 | Bronze | dust + orange sparks | bronze **tiger** leaps out and roars | ground cracks in a circle, glowing orange | tiger roar + rumble |
+| 10–14 | Silver | moonlight + silver feathers, sky turns night | silver **crane** flies up past a big full moon | ring of silver mist | soft flute + wing flap |
+| 15–19 | Gold | gold coins spinning | golden **dragon** coils around you and flies up | rain of gold coins | dragon roar + coin shower |
+| 20–24 | Diamond | ice crystals + snow | crystal **ice dragon**, shards shatter outward | ring of diamond spikes that melt | ice crack + chime |
+| 25–29 | Ruby | red flames + embers | ruby **fire phoenix**, lava burst behind | ring of red fire and lava cracks | fire whoosh + screech |
+| 30–34 | Rainbow | rainbow ribbons | rainbow **koi fish** swim through the air in a circle | a rainbow arc over you | magical sparkle + choir |
+| 35+ | Galaxy | stars + purple nebula, sky goes to space | **galaxy dragon** made of stars, a tiny black hole flash | planets orbit you, then fade | deep space boom + choir |
+
+- **Creature quality (owner, 2026-10-14): no animals built from blocky parts.** Make them **glowing spirit animals**, like an anime power-up:
+  - **Model (changed by the owner, 2026-10-14): use the custom models in `Break A Bed/Models/` (see Models.md), NOT the Creator Store.** ~~Old: a real animal **MeshPart** from the Creator Store (search e.g. "phoenix mesh", "tiger mesh", "dragon mesh", "koi fish mesh", "crane mesh"). Prefer rigged ones with bones so wings, tails and bodies can move. **Delete every script inside a free model** before using it and check the model is free to use. Only if no good mesh exists, build a smooth one from MeshParts/unions, never plain blocks.~~
+  - **Spirit look:** the mesh uses a see-through glowing material (Neon or ForceField, ~0.3–0.5 transparent) in the tier color, with a brighter outline (Highlight, OutlineTransparency 0) so it reads as pure energy. Details don't need to be perfect because the glow hides them.
+  - **VFX on the creature:** **Trails** on the wing tips, tail and claws; **ParticleEmitters** along the body (sparks, feathers, embers, snowflakes, stars, depending on the tier); **Beams** of energy swirling around it; a soft **light** (PointLight) inside it that lights up the player.
+  - **Motion:** smooth, never stiff. Wings flap with bones or tweens, tails wave, the body follows a curved path (Bezier) around the player and then up into the sky. It grows from small to big as it bursts out (scale tween, ~0.3 s) and dissolves into particles at the end instead of just disappearing.
+  - **New VFX (owner: "you can add new vfx too"):**
+    - **Afterimages:** 3 fading copies of the creature trail behind it as it flies (clones at 0.6 / 0.75 / 0.9 transparency, removed after 0.3 s).
+    - **Shockwave rings:** 2 flat rings in the tier color expand on the ground when it bursts out, plus 1 vertical ring when it shoots up.
+    - **Speed lines:** thin white streaks rushing toward the camera for 0.4 s at the burst moment (a ScreenGui overlay).
+    - **Light rays:** a sunburst of soft rays behind the creature at the burst moment.
+    - **Ground glow decal:** a glowing rune circle under the player in the tier color that spins and fades.
+    - **Camera:** a short shake at the burst and a quick zoom-punch (FOV 70 → 60 → 70).
+    - **Tier extras:** tiger has glowing claw-slash marks; crane has falling silver feathers; gold dragon has coins bouncing on the ground; ice dragon has frost spreading on the ground; fire phoenix has embers and heat shimmer; koi have bubbles and water ripples in the air; galaxy dragon has twinkling stars and a purple vortex.
+  - **Extras:** a big flat **2D glow flash** (a BillboardGui/decal of the creature's silhouette) right at the burst moment makes it pop even on phones.
+- Same length (~5 s) and same rules as the rebirth cutscene above (only the player sees it; others see a flash in the tier color).
+- Low Graphics uses fewer particles but keeps the creature.
+
+## 12. Rebirth feels repetitive (owner, 2026-10-14)
+**Built 2026-10-14** (the reward row only shows the track; the Phoenix rewards still need building), see [[Break A Bed/2026-10-14|2026-10-14]].
+Players get bored replaying the same beds after a rebirth. Three fixes:
+1. **Fast replay:**
+   - After a rebirth, every bed you have broken before shows a small ⚡ and breaks **5x faster** (the bonus stops at your old best bed).
+   - New token-shop upgrade **"Head Start"**: start each rebirth at bed 5 / 10 / 15 (3 levels), with those beds counted as broken.
+   - The second run should take about 5–10 min to get back to where you were, not 20+.
+2. **Something new every rebirth (milestone track):**
+   - A row of rewards in the Rebirth menu, shown as pictures with locks: 1 = new training post, 2 = rare glove, 3 = Rebirth aura, 4 = +1 pet slot (once pets exist), 5 = Bronze belt, 7 = exclusive Rebirth Bed skin, 10 = Silver belt, then every 5.
+   - The next reward is always shown with "1 more rebirth!".
+   - **What the rewards look like (2026-10-14).** Theme: **Phoenix**, the bird reborn from fire, so it fits rebirth. Colors: gold, orange and white.
+     - **R1 Phoenix Dummy (training post):** a karate wooden dummy (the kind with 3 arms) made of glowing gold-white wood, with a small spinning gold star above it. Each punch makes a burst of gold sparks and feathers and a soft "ting". It gives **1.5x your best post**. It stands on the empty grass right of the training area, on its own orange glowing pad. Black silhouette until unlocked.
+     - **R2 Phoenix Gloves:** the blocky padded glove style, orange-red, with gold wing shapes on the cuffs. Small flames trail from the fists. Each punch shows a flame puff. Rarity **Mythic**, better than the glove you own.
+     - **R3 Rebirth Aura:** a slow ring of small gold stars turning around your feet, soft white-gold light rising up your body, and a sparkle every few seconds. It stays around the body, never over the face.
+     - **R5 Bronze belt:** a shiny bronze metal belt with a light shine sweep every few seconds, and a bronze badge next to your name.
+     - **R7 Phoenix Bed skin:** all your beds get a night-blue blanket with gold stars, a gold frame and a pillow with a little phoenix. Only you see it, and it can be turned off in Settings.
+     - **R10 Silver belt:** a chrome silver belt that sparkles, plus a faint silver trail behind you when you run.
+     - **Reward row in the Rebirth menu:** round icons on a line, like a path. Earned ones are bright with a ✔, the next one pulses with "1 more rebirth!", and later ones are dark with a 🔒 (you can still see the shape, so you want it).
+3. **Surprises during a run:**
+   - **Golden Bed:** every ~5 min, a random bed you can break turns gold for 60 s ("GOLDEN BED!" toast and a beam). Breaking it pays **x10 Cash**.
+   - **Lucky Hour:** a random server event, 10 min of x2 Strength for everyone, with a countdown.
+   - **Daily challenge:** one bed a day is "Today's Challenge" (break it 20 times) for tokens.
+
+## Update roadmap (2026-10-14, suggested, the owner can change it)
+One update about every week. Each update gets a new code, a title tag like "[🥋 UPDATE 1]" and a line on the update board.
+1. **Update 1: Belts (~Oct 16):** the belt story (section 11), simpler Rebirth menu, camera fix, free vs paid boosts, group-only rewards. Publish, then check the data Oct 15–16.
+2. **Update 2: Pets (~Oct 21):** "Dojo animals" (panda, tiger, crane, monkey, dragon...) that follow you and give +% Strength. Hatched from eggs bought with Cash, with rarities. Robux: Robux-only eggs, +pet slots and Lucky passes. Pets are the biggest money-maker in simulators.
+3. **Update 3: Halloween event (~Oct 25 to Nov 1):** limited spooky beds and posts, a candy currency, a Halloween egg with event-only pets, then the Nov 1 swap.
+4. **Update 4: World 2, Mountain Temple (November):** a portal at the end of the bed path. It unlocks the first time you reach Black belt and stays unlocked after rebirth. New beds 26–50 (stone, bamboo, jade, temple bell...), new posts, and an old **Grandmaster** NPC who says "Your training is not done!" World 2 has its own eggs and pets.
+- The data from each update decides the next one (if players still leave in the first 4 minutes, fix that first).
+
+## Pacing targets (check after building)
+- First 10 minutes: unchanged (new thing every 45–75 s).
+- Beds 10–15: about 3–5 min each.
+- Beds 16–25: about 6–10 min each, with gloves and posts filling the gaps.
+- First rebirth: about 60–90 min in.
+- Claude Code measures this with a fresh-save test bot and writes the real times here.
+
+**Real times (test bot, fresh save, 2026-10-13):** a scripted player that trains, breaks each new bed with To Bed, re-breaks its best bed for Cash, and buys posts and gloves as soon as it can.
+
+| | Time | Gap | | Time | Gap |
+|---|---|---|---|---|---|
+| Bed 5 | 3:25 | | Bed 16 | 31:31 | 6.9 min |
+| Bed 10 | 5:03 | | Bed 17 | 36:11 | 4.7 min |
+| Bed 11 | 6:25 | 1.4 min | Bed 18 | 43:27 | 7.3 min |
+| Bed 12 | 11:11 | 4.8 min | Bed 19 | 45:33 | 2.1 min |
+| Bed 13 | 16:12 | 5.0 min | **Bed 20** | **1:17:52** | **32.3 min** |
+| Bed 14 | 18:48 | 2.6 min | Bed 21 | 1:26:09 | 8.3 min |
+| Bed 15 | 24:39 | 5.9 min | | | |
+
+- First 10 minutes: the bot reached bed 10 at 5:03 (the model: 6:22). It was a bit faster than before thanks to the Starter Quest rewards; the minutes 2–10 pacing is unchanged.
+- Beds 11–15: 1.4–5.9 min each (target 3–5). Beds 16–19: 2.1–7.3 min.
+- **Bed 20 is a wall (32 min).** To fix next: lower bed 20's need or the price of posts 13–14, then re-run.
+- Gloves and posts filled the gaps (gloves 1–11 and posts 7–14 came between beds).
+- The run was stopped at bed 21 (1:26) for other work, so the first rebirth time (target 60–90 min) is **not measured yet**. The model says about 1 h 45 to bed 25 before the bed 20 fix.
+- Rebirth costs (real): 450M, 1.35B, 4.05B, 12.2B, 36.5B Strength (×3 each). Second run from the model: about 27 min to 1.35B.
+
+## Build order
+1. Unique posts + Gloves + the late-game pacing retune (one update).
+2. Rebirths + the token shop (next).
+3. Bed Mastery + Index.
+4. World 2 (weekly update).

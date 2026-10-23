@@ -1,0 +1,27 @@
+newmtl Body
+Kd 1 1 1
+map_Kd 6_FirePhoenix_textures/Body.png
+
+newmtl Beak
+Kd 1 1 1
+map_Kd 6_FirePhoenix_textures/Beak.png
+
+newmtl Eyes
+Kd 1 1 1
+map_Kd 6_FirePhoenix_textures/Eyes.png
+
+newmtl Head
+Kd 1 1 1
+map_Kd 6_FirePhoenix_textures/Head.png
+
+newmtl WingR
+Kd 1 1 1
+map_Kd 6_FirePhoenix_textures/WingR.png
+
+newmtl WingL
+Kd 1 1 1
+map_Kd 6_FirePhoenix_textures/WingL.png
+
+newmtl Tail
+Kd 1 1 1
+map_Kd 6_FirePhoenix_textures/Tail.png
