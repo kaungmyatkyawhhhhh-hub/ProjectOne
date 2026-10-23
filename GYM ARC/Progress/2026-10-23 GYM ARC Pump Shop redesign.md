@@ -36,7 +36,7 @@ The shop window (SUPPLEMENTS / GEAR / DNA LAB) is unchanged; only the room, the 
 Walked in, pressed E at the counter, the panel opened, bought 1 Mass Gainer (11,738 -> 7,138 coins, "You have 1", in the hotbar). Mo leans and looks. No errors.
 
 ## Needs the owner
-- **The GET PUMPED mural on the north wall is gone from the place** (it is still in the backup). Nothing in this run deletes it, so it looks like it was removed by hand. Put it back?
+- The GET PUMPED mural on the north wall: removed by the owner on purpose (23 Oct). Leave it out (a copy is still in the backup).
 - Phone check (844x390) of walking in: not done on a real phone.
 
 ![[GYM ARC/Screenshots/pump_shop/p51_before_front.jpg]]

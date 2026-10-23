@@ -20,7 +20,7 @@ One shop window for all three (`PumpShopClient`); its title and tabs follow the 
 - Behind it: PUMP SHOP in gold, the trophy shelf with the 4 specials, two SPECIALS menu boards. Side walls: 3 tall shelf units each. Front left GEAR (mannequins, Champion belt on a gold pedestal), front right DNA LAB (glass case with a turning, pulsing helix). Middle: BEST SELLER pyramid and a turning Elite Pre-Workout tub (NEW!).
 - Shopkeeper Mo: bigger, black shirt with gold trim, black cap with a gold peak; leans, breathes, looks at you and points when you open the shop (CoachDexClient). Built at `Interior.ClerkSpot` by PumpShopService.
 - Music inside: the town's tracks at 55% volume. Builder: `tools/builders/PumpShopRedesign.luau`; backup `ServerStorage.PumpShopBackup_23Oct`.
-- The GET PUMPED mural is missing from the place (in the backup): owner to decide.
+- The GET PUMPED mural was removed by the owner (23 Oct); a copy is in the backup.
 
 ## Before prompt 31 (history)
 
