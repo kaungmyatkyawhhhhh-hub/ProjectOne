@@ -32,6 +32,7 @@ export type Profile = {
 	HousePlots: { [string]: string }, -- per house type: the plot it stood on last time
 	Chauffeur: { [string]: boolean }, -- chauffeur contracts (car ids from Config.Chauffeur.Fleet)
 	Luxe: { [string]: any }, -- VIP card, owned and worn flex items (Luxe.lua checks it)
+	Customs: { [string]: { [string]: any } }, -- per car id: its Legends Customs look (Customs.lua checks it)
 	Loaded: boolean,
 }
 
@@ -96,6 +97,7 @@ local function defaultProfile(): Profile
 		HousePlots = {},
 		Chauffeur = {},
 		Luxe = {},
+		Customs = {},
 		Loaded = false,
 	}
 end
@@ -171,6 +173,9 @@ function PlayerData.load(player: Player): Profile
 			end
 			if type(saved.Luxe) == "table" then
 				profile.Luxe = saved.Luxe
+			end
+			if type(saved.Customs) == "table" then
+				profile.Customs = saved.Customs -- (Customs.lua cleans each look when it's read)
 			end
 			-- luxury towers (absent in older saves)
 			local towerIds = {}
@@ -279,6 +284,7 @@ function PlayerData.save(player: Player)
 		HousePlots = profile.HousePlots,
 		Chauffeur = profile.Chauffeur,
 		Luxe = profile.Luxe,
+		Customs = profile.Customs,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)

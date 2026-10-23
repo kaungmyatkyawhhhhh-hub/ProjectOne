@@ -43,6 +43,7 @@ local camera = workspace.CurrentCamera
 local Driving = {}
 Driving.cameraMode = "Immersive" -- "Immersive" | "Chase" | "Interior" (owner, 2026-10-22: an immersive view that feels fast)
 Driving.inputEnabled = true
+Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings; Q / E switch to manual too)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
 Driving.onGearboxChanged = nil :: ((string) -> ())?
@@ -2020,6 +2021,9 @@ function Driving.render(dt: number)
 		s.flameLight.Enabled = s.flameGlow > 0
 	end
 
+	if Driving.cameraHold then
+		return
+	end
 	-- camera
 	local C = Config.Camera
 	s.shake = math.max(0, s.shake - dt * 2.5)

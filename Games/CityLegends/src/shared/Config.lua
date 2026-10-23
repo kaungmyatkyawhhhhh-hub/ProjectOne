@@ -674,4 +674,44 @@ Config.Dealership = {
 	Display = { "bnw_m5_e60", "bentz_e63s", "toyoka_supra_mk4", "nisun_r34", "porsha_panamera", "chevo_c7", "astin_vantage", "lexis_lc500" },
 }
 
+---------------------------------------------------------------------
+-- Legends Customs (owner, 2026-10-23: "make the game ... cooler"): a drive-in tuning garage.
+-- Drive into its bay and press Y (or tap the pill) to restyle the car you're in: paint, finish,
+-- second colour, window tint, underglow, rims, number plate, headlights. Saved per car.
+---------------------------------------------------------------------
+Config.Customs = {
+	Name = "LEGENDS CUSTOMS",
+	Block = { 3, 1 }, -- the city block it stands on (north of the centre)
+	Face = "S", -- the side its bay doors look out of (towards the city centre)
+	BayRadius = 20, -- how close to the middle of the bay the car must stop
+	-- each change's price; times the car's tier
+	Prices = { paint = 2500, finish = 1500, accent = 2000, tint = 1000, glow = 4000, rim = 2000, plate = 1500, head = 1200 },
+	TierMult = { Starter = 1, Mid = 2.5, High = 6 },
+	-- curated paint colours (name, r, g, b)
+	Palette = {
+		{ "Pearl White", 238, 238, 234 },
+		{ "Arctic Silver", 182, 186, 192 },
+		{ "Gunmetal", 72, 76, 82 },
+		{ "Midnight Black", 16, 16, 18 },
+		{ "Racing Red", 176, 16, 20 },
+		{ "Rosso Deep", 110, 10, 16 },
+		{ "Sunset Orange", 232, 96, 24 },
+		{ "Giallo", 238, 190, 20 },
+		{ "Lime Rush", 140, 200, 40 },
+		{ "British Green", 18, 62, 40 },
+		{ "Petrol Teal", 16, 92, 98 },
+		{ "Estoril Blue", 24, 70, 160 },
+		{ "Navy", 18, 28, 64 },
+		{ "Royal Purple", 74, 30, 120 },
+		{ "Champagne", 196, 172, 132 },
+		{ "Chalk", 214, 210, 198 },
+	},
+	TintLevels = { 0, 0.45, 0.65, 0.85 }, -- window darkness: none, light, dark, limo
+	Headlights = {
+		white = { 255, 250, 240 },
+		warm = { 255, 212, 150 },
+		ice = { 196, 222, 255 },
+	},
+}
+
 return Config

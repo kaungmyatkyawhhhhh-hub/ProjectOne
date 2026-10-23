@@ -282,6 +282,7 @@ end
 
 -- the Legends Grand Hotel: the valet takes your car at the bay and brings it back to the door
 require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)
+require(script.Parent:WaitForChild("CustomsClient")).init() -- Legends Customs (after the hotel: it chains the drive action)
 
 local showMenu: () -> ()
 

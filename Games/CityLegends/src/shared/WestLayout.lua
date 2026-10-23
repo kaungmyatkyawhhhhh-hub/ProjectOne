@@ -56,6 +56,13 @@ function WestLayout.site(name: string): (CFrame, number)
 end
 
 -- the dealership's frame (ground level at its lot's middle, facing out of the showroom) and lot
+-- Legends Customs: its frame (ground level, facing out of the bay doors) and lot
+function WestLayout.customs(): (CFrame, number)
+	local d = Config.Customs
+	local c = WestLayout.blockCenter(d.Block[1], d.Block[2])
+	return CFrame.lookAt(c, c + SIDE_DIR[d.Face]), LOT
+end
+
 function WestLayout.dealership(): (CFrame, number)
 	local d = Config.Dealership
 	local c = WestLayout.blockCenter(d.Block[1], d.Block[2])
@@ -208,6 +215,8 @@ function WestLayout.places(): { Place }
 	-- the dealership
 	local dealerFrame, dealerLot = WestLayout.dealership()
 	add("dealership", "Legends Motors", WestLayout.kerbFor(dealerFrame, dealerLot))
+	local customsFrame, customsLot = WestLayout.customs()
+	add("customs", "Legends Customs", WestLayout.kerbFor(customsFrame, customsLot))
 	-- Downtown
 	for _, name in { "hotel", "casino", "gems" } do
 		local frame, lot = WestLayout.site(name)
