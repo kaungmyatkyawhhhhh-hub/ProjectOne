@@ -479,7 +479,7 @@ local KEEP_CHILD = { SurfaceAppearance = true, SpecialMesh = true, Decal = true,
 
 -- real makers' badges, logos and names come off every car (owner, 2026-10-17): parts and decals
 -- named as badges or logos, at any depth ("BMW SIGN" models, "MAZDA LOGO" decals, "Trunk Badge")
-local MARK_WORDS = { "badge", "logo", "emblem", "bmw sign", "шильд" }
+local MARK_WORDS = { "badge", "logo", "emblem", "bmw sign", "lettering", "шильд", "Шильд" } -- (lower() leaves Cyrillic capitals as they are)
 local function isMarkName(name: string): boolean
 	local n = name:lower()
 	for _, w in MARK_WORDS do
@@ -488,6 +488,16 @@ local function isMarkName(name: string): boolean
 		end
 	end
 	return false
+end
+
+-- the decal images on the Roblox-built cars that are makers' logos, names or badges (each one
+-- looked at, 2026-10-23, owner: "remove all of the car logo and badges in the game"): Toyota,
+-- BMW roundels, M and M5 badges, BBS, Suzuki, the Porsche crest, the Lamborghini shield, "mazda",
+-- "Bathurst R", an "RX-7" plate and a maker's icon. Decals and textures showing them are dropped
+local LOGO_IMAGES: { [string]: boolean } = {}
+for _, id in { 7353079011, 124404822, 150796126, 549310095, 1111196998, 185213509, 271533176, 7353077878, 93175644, 1324215539, 225753371, 68743221, 11794838576, 10812234871, 5005906333 } do
+	LOGO_IMAGES["rbxassetid://" .. id] = true
+	LOGO_IMAGES["http://www.roblox.com/asset/?id=" .. id] = true
 end
 
 -- owner (2026-10-22): "remove all of the logo in the game": badge spots get plain covers, no
@@ -712,7 +722,7 @@ end
 local function visualClone(d: BasePart, scale: number): BasePart
 	local p = d:Clone()
 	for _, c in p:GetChildren() do
-		if not KEEP_CHILD[c.ClassName] or ((c:IsA("Decal") or c:IsA("SurfaceGui")) and isMarkName(c.Name)) then
+		if not KEEP_CHILD[c.ClassName] or ((c:IsA("Decal") or c:IsA("SurfaceGui")) and isMarkName(c.Name)) or ((c:IsA("Decal") or c:IsA("Texture")) and LOGO_IMAGES[(c :: Decal).Texture]) then
 			c:Destroy()
 		end
 	end
