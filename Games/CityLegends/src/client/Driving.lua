@@ -16,7 +16,7 @@
 	Car controls (keyboard): F start / stop the engine, Q / E shift down / up (the
 	gearbox turns manual on the first shift, or from Settings), Left Shift clutch, P handbrake,
 	T traction control, L lights, Z / X / C left blinker / hazards / right blinker, V camera,
-	Left Ctrl or B nitro (R1 on a gamepad, the N2O button on a phone).
+	(nitro is in but switched off: Config.DrivingFeel.NitroEnabled).
 	Touch and gamepad players start with the engine running and an automatic gearbox.
 ]]
 
@@ -269,7 +269,7 @@ end
 -- nitro: Left Ctrl or B, R1 on a gamepad, the N2O button on a phone (held)
 local nitroTouch = false
 local function nitroHeld(): boolean
-	if not Driving.inputEnabled or UI.isGarageOpen() then
+	if not Config.DrivingFeel.NitroEnabled or not Driving.inputEnabled or UI.isGarageOpen() then
 		return false
 	end
 	if UserInputService:GetFocusedTextBox() == nil and (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.B)) then
@@ -1600,9 +1600,11 @@ function Driving.attach(model: Model)
 		table.insert(s.flameColors, e.Color)
 	end
 	state = s
-	nitroHud()
-	if nitroGui then
-		nitroGui.Enabled = true
+	if Config.DrivingFeel.NitroEnabled then
+		nitroHud()
+		if nitroGui then
+			nitroGui.Enabled = true
+		end
 	end
 	-- road roar: the tyres on the tarmac and the air round the car, rising with speed
 	do

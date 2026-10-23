@@ -247,7 +247,9 @@ Config.DrivingFeel = {
 	ScrapeMinMph = 15, -- rubbing a wall faster than this throws sparks
 	ScrapeDrag = 0.6, -- speed lost per second while scraping (share)
 	LandKick = 0.03, -- body pitch per stud/s of falling speed on landing
-	-- nitro (hold Left Ctrl or B, R1 on a gamepad, the N2O button on a phone)
+	-- nitro (hold Left Ctrl or B, R1 on a gamepad, the N2O button on a phone); owner (2026-10-23):
+	-- "remove nitro", so it's off: no bar, no boost
+	NitroEnabled = false,
 	NitroTop = 1.15, -- boost pushes the top speed this much past the car's own
 	NitroAccel = 34, -- extra pull (studs/s^2)
 	NitroDrain = 0.25, -- a full bottle lasts 4 seconds
@@ -753,7 +755,7 @@ Config.Challenges = {
 	StuntCashPerStud = 4,
 	StuntCashMax = 12000,
 	StuntXp = 30,
-	BoardKey = Enum.KeyCode.J, -- the leaderboard panel (B is nitro)
+	BoardKey = Enum.KeyCode.J, -- the leaderboard panel
 	BoardRefresh = 60, -- seconds between leaderboard reads
 }
 
