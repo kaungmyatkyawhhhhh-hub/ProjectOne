@@ -68,6 +68,9 @@ local function kindOf(p: BasePart): string?
 	elseif name:sub(1, 7) == "SkinRim" or name:sub(1, 9) == "SkinWheel" then
 		return "rim"
 	end
+	if p:GetAttribute("Window") then
+		return "glass"
+	end
 	local src = p:GetAttribute("SrcName")
 	if type(src) ~= "string" then
 		return nil

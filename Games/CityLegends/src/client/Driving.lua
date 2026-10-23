@@ -171,6 +171,10 @@ type State = {
 	headVel: Vector3,
 	camLag: number,
 	camSwing: number,
+	camSide: number, -- the outside cameras: slid out of the turn
+	camRoll: number, -- ...banked into it
+	camPitch: number, -- ...tipped by the g: up pulling away, down braking
+	gFov: number, -- ...the view widened pulling away, tightened braking
 	camBob: number,
 	screech: number, -- tyre cry on hard launches (sound only)
 	chirp: number, -- seconds left of a tyre chirp after a hard low-gear shift
@@ -1527,6 +1531,10 @@ function Driving.attach(model: Model)
 		camLook = root.Position,
 		camLag = 0, -- immersive camera: pulled back on hard acceleration, pushed in braking
 		camSwing = 0, -- immersive camera: looks into the turn
+		camSide = 0,
+		camRoll = 0,
+		camPitch = 0,
+		gFov = 0,
 		camBob = 0,
 		fov = Config.Camera.ChaseFov,
 		shake = 0,
@@ -2505,6 +2513,19 @@ function Driving.render(dt: number)
 	local shakeAmt = speedShake + s.shake * 0.5
 	local shakeOffset = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * shakeAmt
 
+	-- the g-forces move the camera (owner, 2026-10-23: "dramatic" turns, launches and stops): it
+	-- slides out of a turn and banks into it, tips up and widens pulling away, dives and tightens
+	-- under braking. Full on the outside cameras, a touch of it in the cabin.
+	local G = C.Drama
+	local gk = math.min(1, dt * G.Response)
+	local latG = math.clamp(s.latG, -1.2, 1.2)
+	local lonG = math.clamp(s.lonG, -1.2, 1.2)
+	local swingFrac = if C.Immersive.Swing > 0 then math.clamp(s.camSwing / C.Immersive.Swing, -1, 1) else 0
+	s.camSide += (swingFrac * G.Side * math.min(1, fx * 3) - s.camSide) * gk
+	s.camRoll += (math.clamp(-latG * G.Roll, -G.MaxRoll, G.MaxRoll) - s.camRoll) * gk
+	s.camPitch += (lonG * G.Pitch - s.camPitch) * gk
+	s.gFov += ((if lonG > 0 then lonG * G.AccelFov else lonG * G.BrakeFov) - s.gFov) * gk
+
 	local targetFov
 	local rootCF = root.CFrame
 	if Driving.cameraMode == "Interior" then
@@ -2523,7 +2544,7 @@ function Driving.render(dt: number)
 		s.headVel += ((headTarget - s.headPos) * 80 - s.headVel * 11) * math.min(dt, 1 / 30)
 		s.headPos += s.headVel * math.min(dt, 1 / 30)
 		local jolt = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * (s.shake * 0.15 + DF.CabinBuzz * rush)
-		camera.CFrame = eyeCF * CFrame.new(s.headPos + jolt)
+		camera.CFrame = eyeCF * CFrame.new(s.headPos + jolt) * CFrame.Angles(0, 0, s.camRoll * G.Cabin)
 		s.camPos = camera.CFrame.Position
 		if blur then
 			blur.Size = 0
@@ -2540,17 +2561,16 @@ function Driving.render(dt: number)
 		local back = IC.Distance + s.camLag + fx * IC.SpeedPull
 		local up = IC.Height - fx * 0.5
 		local base = CFrame.new(root.Position) * CFrame.Angles(0, s.yaw, 0) -- level with the road, not the body roll
-		local camPos = (base * CFrame.Angles(0, s.camSwing, 0) * CFrame.new(0, up, back)).Position
+		local camPos = (base * CFrame.Angles(0, s.camSwing, 0) * CFrame.new(s.camSide, up, back)).Position
 		-- road buzz: fine fast shake that grows with speed, plus a slow float
 		s.camBob += dt * (6 + fx * 30)
 		local buzz = (0.015 + fx ^ 2 * IC.Buzz + s.shake * 0.4)
 		local shake = Vector3.new(math.noise(t * 31, 0, 3), math.noise(0, t * 29, 4), 0) * buzz
 			+ Vector3.new(0, math.sin(s.camBob) * 0.03 * fx, 0)
 		local lookAt = (base * CFrame.Angles(0, -s.camSwing * 0.6, 0) * CFrame.new(0, IC.LookHeight, -IC.LookAhead)).Position
-		local roll = math.clamp(-s.latG * 0.035, -0.06, 0.06)
 		s.camPos = camPos
 		s.camLook = lookAt
-		camera.CFrame = CFrame.lookAt(camPos + shake, lookAt + shake * 0.5) * CFrame.Angles(0, 0, roll)
+		camera.CFrame = CFrame.lookAt(camPos + shake, lookAt + shake * 0.5) * CFrame.Angles(s.camPitch, 0, s.camRoll)
 		if blur then
 			blur.Size = math.max(IC.Blur * math.max(0, fx - 0.35) ^ 1.3, s.blurPulse)
 		end
@@ -2574,14 +2594,14 @@ function Driving.render(dt: number)
 		local look = root.Position + fwd * 10 + Vector3.new(0, 1.8, 0)
 		s.camLook = s.camLook:Lerp(look, 1 - math.exp(-dt * 14))
 		local roll = math.clamp(-s.steer * speedFrac * 0.05, -0.05, 0.05)
-		camera.CFrame = CFrame.lookAt(s.camPos + shakeOffset, s.camLook) * CFrame.Angles(0, 0, roll)
+		camera.CFrame = CFrame.lookAt(s.camPos + shakeOffset, s.camLook) * CFrame.Angles(s.camPitch * 0.7, 0, roll + s.camRoll * 0.7)
 		if blur then
 			blur.Size = math.max(3.5 * math.max(0, fx - 0.45) ^ 1.5, s.blurPulse)
 		end
 	end
 	s.fov += (targetFov - s.fov) * math.min(1, dt * 4)
 	-- (in the cabin only a little of the punch: the owner wants that view steady and readable)
-	camera.FieldOfView = s.fov + s.fovPunch * (if Driving.cameraMode == "Interior" then 0.3 else 1)
+	camera.FieldOfView = s.fov + (s.fovPunch + s.gFov) * (if Driving.cameraMode == "Interior" then G.Cabin else 1)
 	local interior = Driving.cameraMode == "Interior"
 	UI.setSpeedLines(if interior then 0 else math.max(0, fx - 0.3) / 0.7)
 	setVignette(DF.Vignette * math.max(0, fx - 0.25) / 0.75 * (if interior then 0.5 else 1))

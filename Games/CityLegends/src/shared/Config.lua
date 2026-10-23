@@ -172,12 +172,23 @@ Config.Camera = {
 		Distance = 11.5,
 		Height = 3.4,
 		SpeedPull = 2.5, -- pulled back a little more at speed
-		Lag = 2.2, -- thrown back on hard launches, forward under braking (studs per g)
-		Swing = 0.22, -- looks into turns (radians at full lock)
+		Lag = 3.2, -- thrown back on hard launches, forward under braking (studs per g)
+		Swing = 0.3, -- looks into turns (radians at full lock)
 		Buzz = 0.09, -- road shake at top speed
 		LookAhead = 22,
 		LookHeight = 1.6,
 		Blur = 4,
+	},
+	-- the g-forces on the camera (owner, 2026-10-23: dramatic turns, launches and stops)
+	Drama = {
+		Response = 4, -- how fast it follows the g (per second)
+		Side = 1.6, -- studs the outside camera slides out of a full-lock turn (more with speed)
+		Roll = 0.1, -- bank into the turn (radians per g)...
+		MaxRoll = 0.15, -- ...up to about 9 degrees
+		Pitch = 0.04, -- tips up pulling away, down braking (radians per g)
+		AccelFov = 8, -- degrees wider at 1 g of pull...
+		BrakeFov = 6, -- ...and tighter at 1 g of braking
+		Cabin = 0.3, -- how much of it the driver's-seat view gets (kept steady and readable)
 	},
 }
 

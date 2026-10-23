@@ -673,6 +673,42 @@ local function tailShell(p: BasePart, grow: number, transparency: number)
 	p:SetAttribute("TailOff", transparency)
 end
 
+-- a car's windows and windshield (not lamp lenses, mirrors or the black rubber round the glass)
+local function isWindow(d: BasePart): boolean
+	local n = d.Name:lower()
+	for _, w in { "light", "lamp", "lens", "indicator", "drl", "mirror", "reflector", "frame", "trim", "seal", "rubber", "wiper" } do
+		if n:find(w, 1, true) then
+			return false
+		end
+	end
+	if n:sub(1, 10) == "seethrough" or n:find("window", 1, true) or n:find("windshield", 1, true) or n:find("windscreen", 1, true) or n:find("glass", 1, true) then
+		return true
+	end
+	return d.Material == Enum.Material.Glass
+end
+
+-- every window the same clear, lightly tinted glass (owner, 2026-10-23: some came out white and
+-- milky): the model's own texture and surface look come off, the windshield stays see-through
+-- from the driver's seat. Legends Customs' tint works from this ("Window" attribute)
+local function clearGlass(p: BasePart)
+	for _, c in p:GetChildren() do
+		if c:IsA("SurfaceAppearance") or c:IsA("Decal") or c:IsA("Texture") then
+			c:Destroy()
+		end
+	end
+	if p:IsA("MeshPart") then
+		pcall(function()
+			(p :: MeshPart).TextureID = ""
+		end)
+	end
+	p.Color = Color3.fromRGB(22, 27, 34)
+	p.Material = Enum.Material.Glass
+	p.Transparency = 0.72
+	p.Reflectance = 0.06
+	p.CastShadow = false
+	p:SetAttribute("Window", true)
+end
+
 local function visualClone(d: BasePart, scale: number): BasePart
 	local p = d:Clone()
 	for _, c in p:GetChildren() do
@@ -1300,16 +1336,19 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			out.eye = Vector3.new(eye.X, eye.Y, math.min(wz + 1.4, eye.Z + 0.3))
 		end
 	end
-	-- every car the same view (owner): the eye sits the same height above the steering wheel
-	-- (0.8 studs, ~27 cm), kept under the roof; an EyeHeight attribute still nudges it
-	if out.steer and out.eye and not generatedWheel then
+	-- every car the same view (owner, 2026-10-23): the eye sits where a driver's eyes are in a real
+	-- car, ~27 cm (0.8 studs) under the roof line above the seat, so the head never goes through
+	-- the roof and the windshield fills the view. A steering wheel found too high for that (a
+	-- wrong pick) doesn't move it; without a roof (a convertible's windshield frame counts) it
+	-- sits 0.8 studs over the wheel. An EyeHeight attribute still nudges it.
+	if out.eye then
 		local eye = out.eye :: Vector3
 		local lift = (src:GetAttribute("EyeHeight") :: number?) or 0
-		local y = out.steer.mount.Position.Y + 0.8 + lift
 		if roofTop then
-			y = math.min(y, roofTop - 0.35)
+			out.eye = Vector3.new(eye.X, roofTop - 0.8 + lift, eye.Z)
+		elseif out.steer then
+			out.eye = Vector3.new(eye.X, out.steer.mount.Position.Y + 0.8 + lift, eye.Z)
 		end
-		out.eye = Vector3.new(eye.X, y, eye.Z)
 	end
 
 	-- gauges: look from the eye through the top half of the wheel and stop at the first
@@ -1499,9 +1538,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			local t = tmpl(d, Vector3.zero)
 			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
 			cabinMaterial(d, t.part)
-			if d.Name:sub(1, 10) == "SeeThrough" then
-				-- windows of a converted Sketchfab model: an import can make the glass solid
-				t.part.Transparency = math.max(t.part.Transparency, 0.6)
+			if isWindow(d) then
+				clearGlass(t.part)
 			end
 			out.body["Part" .. k] = t
 			if isTail(d) then
