@@ -189,6 +189,9 @@ local function knock(g: Group, dir: Vector3, speed: number)
 		if orig == g.key then
 			key = c
 			c.CanCollide = true
+			-- light, so the car shoves it aside instead of riding up on it and bouncing (owner,
+			-- 2026-10-24: the car glitching out while driving)
+			c.CustomPhysicalProperties = PhysicalProperties.new(0.12, 0.35, 0.1, 1, 1)
 		else
 			c.CanCollide = false
 			c.Massless = true

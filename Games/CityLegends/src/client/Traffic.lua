@@ -487,6 +487,11 @@ function Traffic.update(dt: number)
 				w.Transform = spinCF
 			end
 		end
+		-- cars near you tell the physics how fast they're going (moved by CFrame they'd count as
+		-- standing still, and a touch at speed flung the player's car: owner, 2026-10-24)
+		if dist < 140 then
+			npc.root.AssemblyLinearVelocity = fwd * npc.speed
+		end
 		if not far or (frameCount + _idx) % 3 == 0 then
 			local up = Vector3.new(0, npc.height / 2, 0)
 			table.insert(movedParts, npc.root)
