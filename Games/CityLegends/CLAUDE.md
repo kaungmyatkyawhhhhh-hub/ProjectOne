@@ -32,6 +32,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `OnFoot` (getting out and walking), `Police` (wanted level, speed cameras), `Bank` (the robbery), `Towers` (penthouses), `Market` (car stock market), `Activities` (races, jobs, chips).
   - `Mainland`: the land round the harbour: shore, suburbs, container port, forest, hills, wind turbines, mountain range, loop billboards.
   - `West`: the coastal highway (viaduct), canyon, river and Legends Bridge, Downtown's surroundings, Ocean Drive and the beach, the causeway and islands; hooks CityBuilder calls for Downtown's blocks.
+  - `Dealership` (Legends Motors, city block from Config.Dealership; the only place to buy cars).
   - `Hotel`, `Casino`, `GemShowcase` (+ `Luxe`), `Houses`, `Chauffeur`: the west's venues, built by `buildWorld` from CityBuilder.
 - `src/client`:
   - `Main.client.lua`: startup order.

@@ -22,6 +22,7 @@ local CityPremium = require(script.Parent:WaitForChild("CityPremium"))
 local Mainland = require(script.Parent:WaitForChild("Mainland"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
 local Towers = require(script.Parent:WaitForChild("Towers"))
+local Dealership = require(script.Parent:WaitForChild("Dealership"))
 local West = require(script.Parent:WaitForChild("West"))
 local Hotel = require(script.Parent:WaitForChild("Hotel"))
 local Casino = require(script.Parent:WaitForChild("Casino"))
@@ -964,7 +965,7 @@ local function buildBlocks(parent: Instance, ib: number)
 			if downtown then
 				landmark = West.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
 			else
-				landmark = Bank.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Towers.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
+				landmark = Bank.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Dealership.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Towers.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
 			end
 			local isPark = not landmark and rng:NextNumber() < (if downtown then 0.06 else 0.12)
 			if landmark then

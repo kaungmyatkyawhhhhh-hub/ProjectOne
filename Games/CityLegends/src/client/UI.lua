@@ -424,6 +424,12 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		box(9, 20, 17, 3, 1.5) -- bottom rail
 		box(10, 24.5, 5.5, 5.5, -1) -- wheels
 		box(21, 24.5, 5.5, 5.5, -1)
+	elseif kind == "car" then
+		-- a car side on: cabin, body, two wheels
+		box(9, 9, 13, 7, 3) -- cabin
+		box(3, 14, 26, 8, 3) -- body
+		box(6.5, 19.5, 7, 7, -1) -- wheels
+		box(18.5, 19.5, 7, 7, -1)
 	elseif kind == "gift" then
 		box(4, 11, 11, 6, 1.5) -- lid (split by the ribbon gap)
 		box(17, 11, 11, 6, 1.5)
@@ -835,7 +841,7 @@ local function buildCashTab()
 		{ "V", "Camera  (hold RMB to look)" },
 		{ "R", "Reset car to road" },
 		{ "Y", "Get out / get in" },
-		{ "G", "Garage / shop" },
+		{ "G", "My cars" },
 		{ "K", "Car stock market" },
 		{ "M", "Music on / off" },
 	}
@@ -960,7 +966,8 @@ local function buildSideButtons()
 	end
 
 	local settingsBtn = sideButton("gear", "SETTINGS", 1)
-	local shopBtn = sideButton("cart", "SHOP", 2)
+	-- (owner, 2026-10-23: the SHOP became CARS, your own cars; new ones are sold at the dealership)
+	local shopBtn = sideButton("car", "CARS", 2)
 	local giftBtn = sideButton("gift", "GIFTS", 3)
 	local marketBtn = sideButton("chart", "MARKET", 4)
 	marketBtn.Activated:Connect(function()
@@ -1594,6 +1601,9 @@ export type GarageCallbacks = {
 	buy: (string) -> { ok: boolean, message: string, data: GarageData? },
 	drive: (string) -> (),
 	close: (() -> ())?,
+	-- true at the dealership: every car, to buy; otherwise "my cars": only the ones you own
+	dealer: boolean?,
+	focus: string?, -- the car to show first (a turntable's car at the dealership)
 }
 
 local garageFrame: Frame? = nil
@@ -1624,6 +1634,13 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local selectedId = data.Selected
 	local classFilter = "ALL"
 	local level = data.Level or 1
+	-- owner (2026-10-23): the HUD's CARS shows only the cars you have; buying is at the dealership
+	local dealer = callbacks.dealer == true
+	if dealer and callbacks.focus and Cars.ById[callbacks.focus] then
+		selectedId = callbacks.focus :: string
+	elseif not dealer and not owned[selectedId] then
+		selectedId = data.Owned[1] or Cars.StarterId
+	end
 	-- how a car not owned yet can be had: "buy", "level" (opens at a higher level) or "market"
 	local function access(id: string): (string, number)
 		if Cars.isMarketOnly(id) then
@@ -1641,7 +1658,18 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 
 	-- header
 	local header = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(40, 40), Size = UDim2.new(1, -80, 0, 50), ZIndex = 61, Parent = f })
-	label({ Text = "GARAGE", TextSize = 38, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.5, 0, 1, 0), ZIndex = 61, Parent = header })
+	label({ Text = if dealer then Config.Dealership.Name else "MY CARS", TextSize = 38, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.5, 0, 1, 0), ZIndex = 61, Parent = header })
+	label({
+		Text = if dealer then "NEW CARS · BUY HERE, DRIVE OUT OF THE BAY" else "NEW CARS ARE SOLD AT " .. Config.Dealership.Name .. ", THE DEALERSHIP",
+		TextSize = 12,
+		Font = Enum.Font.GothamBold,
+		TextColor3 = Theme.SubText,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.fromOffset(40, 86),
+		Size = UDim2.new(0.6, 0, 0, 14),
+		ZIndex = 61,
+		Parent = f,
+	})
 	local cashText = label({ Text = formatCash(cash), TextColor3 = Theme.Money, TextSize = 26, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -60, 0, 0), Size = UDim2.new(0.4, 0, 1, 0), ZIndex = 61, Parent = header })
 	if callbacks.close then
 		local close = button("✕", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 4), Size = UDim2.fromOffset(42, 42), TextSize = 18, ZIndex = 61, Parent = header })
@@ -1760,7 +1788,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		if owned[id] then
 			priceText.Text = "OWNED"
 			priceText.TextColor3 = Theme.Accent
-			actionBtn.Text = "DRIVE"
+			actionBtn.Text = if dealer then "DRIVE OUT" else "DRIVE"
 		else
 			local how, need = access(id)
 			if how == "market" then
@@ -1872,7 +1900,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 				local members = {}
 				for _, id in series.Ids do
 					local sp = Cars.ById[id]
-					if sp and (classFilter == "ALL" or sp.Class == classFilter) then
+					if sp and (classFilter == "ALL" or sp.Class == classFilter) and (dealer or owned[id]) then
 						table.insert(members, sp)
 					end
 				end

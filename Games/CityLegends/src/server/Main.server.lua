@@ -181,6 +181,9 @@ Activities.init(ctx)
 Houses.init(ctx)
 Hotel.init(ctx)
 Chauffeur.init(ctx)
+-- Legends Motors: new cars are bought there only (owner, 2026-10-23)
+local Dealership = require(script.Parent:WaitForChild("Dealership"))
+Dealership.init(ctx)
 -- the High-Rollers Casino and the Legends Gem Showcase, Downtown (VIP, flex items, two heists)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
 Luxe.init(ctx)
@@ -284,6 +287,10 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any)
 		return { ok = true, message = "Already owned", data = PlayerData.snapshot(player) }
 	end
 	local spec = Cars.ById[carId]
+	-- new cars come from the dealership, in person
+	if not Dealership.near(player, ctx.getCar) then
+		return { ok = false, message = "Buy new cars at " .. Config.Dealership.Name }
+	end
 	-- from the F430 up only the car market sells them; in a series each car opens 5 levels on
 	if Cars.isMarketOnly(carId) then
 		return { ok = false, message = "Only on the car market" }
