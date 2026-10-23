@@ -33,6 +33,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `Mainland`: the land round the harbour: shore, suburbs, container port, forest, hills, wind turbines, mountain range, loop billboards.
   - `West`: the coastal highway (viaduct), canyon, river and Legends Bridge, Downtown's surroundings, Ocean Drive and the beach, the causeway and islands; hooks CityBuilder calls for Downtown's blocks.
   - `Dealership` (Legends Motors, city block from Config.Dealership; the only place to buy cars), `Customs` (Legends Customs tuning, Config.Customs), `Challenges` (drift, speed traps, jumps, leaderboard; ChallengeData).
+  - `Fountain` (the park fountain), `Plazas` (the landmark / venue blocks' plazas, FOOTPRINT per block), `Garages` (the towers' underground garages: cuts the ground and sidewalk slabs, bay markers) and `Parking` (run time: parked cars to steal, paid VIP bays; Config.Parking).
   - `Hotel`, `Casino`, `GemShowcase` (+ `Luxe`), `Houses`, `Chauffeur`: the west's venues, built by `buildWorld` from CityBuilder.
 - `src/client`:
   - `Main.client.lua`: startup order.
@@ -42,7 +43,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `Traffic`: NPC cars that obey red lights.
   - `Weather`: rain cycle, wet roads.
   - `Audio`, `Cutscene`, `WorldFx`, `BuildingSkin`.
-- Client extras: `Minimap`, `DayCycle` (time of day), `Pedestrians`, `HouseClient`, `HotelClient`, `ChauffeurClient`, `LuxeClient`.
+- Client extras: `Minimap`, `DayCycle` (time of day), `Pedestrians`, `HouseClient`, `HotelClient`, `ChauffeurClient`, `LuxeClient`, `Knockables` (props you knock over; scanned before WorldFx's LOD).
 - `tools/`:
   - Lune tests (run from `Games/CityLegends`, `lune run tools/<name>.luau .`): `world_test` (builds the whole map in Lune: no script errors, road under every lane, nothing solid in a lane; Lune's `CFrame.lookAt` is wrong for sloped directions, so the test passes the builders a fixed one), `graph_test`, `chauffeur_test`, `luxe_test`, `market_test`.
   - `export_models.luau` (run with Lune) plus `make_glb.py`: export every car as a `.glb` for Studio's 3D Importer into `build/models` (gitignored).
