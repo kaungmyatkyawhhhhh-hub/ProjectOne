@@ -137,6 +137,7 @@ local function buildCamera(parent: Instance, cam: Camera)
 	flash.Range = 40
 	flash.Brightness = 0
 	flash.Shadows = false
+	flash.Enabled = false -- on only for the flash itself (60 dark lights still cost frames)
 	flash.Parent = lens
 	-- the limit sign below it: a white disc with a red ring and "120"
 	local sign = part(Vector3.new(0.2, 3.4, 3.4), base * CFrame.new(0, 9.2, -0.6) * CFrame.Angles(0, math.rad(90), 0), Color3.fromRGB(245, 245, 245), Enum.Material.SmoothPlastic, Enum.PartType.Cylinder)

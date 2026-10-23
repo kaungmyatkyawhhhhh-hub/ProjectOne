@@ -435,6 +435,7 @@ local function stand(parent: Instance, base: CFrame)
 	glow.Color = GOLD
 	glow.Range = 14
 	glow.Brightness = 1.2
+	glow:AddTag("LODLight") -- off when far away, like the street lamps
 	glow.Parent = column
 	-- velvet rope posts either side (a VIP pick-up point)
 	for _, x in { -5.5, 5.5 } do

@@ -864,8 +864,13 @@ local function onEvent(info: any)
 		local lens = if cam then cam:FindFirstChild("Lens") else nil
 		local light = if lens then lens:FindFirstChild("Flash") :: PointLight? else nil
 		if light then
+			light.Enabled = true
 			light.Brightness = 12
-			TweenService:Create(light, TweenInfo.new(0.4), { Brightness = 0 }):Play()
+			local fade = TweenService:Create(light, TweenInfo.new(0.4), { Brightness = 0 })
+			fade.Completed:Connect(function()
+				light.Enabled = false
+			end)
+			fade:Play()
 		end
 	elseif info.kind == "busted" then
 		wanted = 0
