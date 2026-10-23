@@ -69,6 +69,8 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 
 ## Build and check
 
+**On the owner's PC (2026-10-23):** Smart App Control blocks rojo and lune (unsigned), so don't build with Rojo there. Studio is open with `CityLegends.rbxl` and the Roblox Studio MCP works: serve `src` with `python -m http.server 34999 --bind 127.0.0.1` and copy each changed file into the Edit place's scripts with HttpService (switch `HttpEnabled` on only for the copy, then back off). Test with Play through the MCP. The owner saves the place (Ctrl+S); Obsidian Git commits it. luau-lsp runs; write `sourcemap.json` by hand (src/shared, src/server, src/client) since `rojo sourcemap` can't run.
+
 These tools are not in the repo; install them first (e.g. with aftman or foreman, or from their GitHub releases): rojo, luau-lsp (plus the Roblox `globalTypes.d.luau`), and lune.
 
 ```
