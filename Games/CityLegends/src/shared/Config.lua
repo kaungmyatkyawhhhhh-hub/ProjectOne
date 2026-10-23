@@ -619,4 +619,15 @@ Config.DayCycle = {
 	StartHour = 20, -- where the clock stands at server time 0 (shifts the whole cycle)
 }
 
+---------------------------------------------------------------------
+-- Minimap (owner, 2026-10-23: "add a mini map to the game"): round, bottom left, turns with the
+-- camera; zooms out with speed. N shows / hides it (M is the music).
+---------------------------------------------------------------------
+Config.Minimap = {
+	Enabled = true,
+	ZoomNear = 0.5, -- pixels per stud when slow (about 220 studs across the radius)
+	ZoomFar = 0.14, -- ...and at FarMph and above
+	FarMph = 150,
+}
+
 return Config
