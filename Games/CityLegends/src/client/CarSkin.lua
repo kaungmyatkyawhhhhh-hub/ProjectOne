@@ -233,6 +233,45 @@ CarSkin.INTERIOR_DONOR = {
 -- isn't working". It now has the live AventadorSV screen exactly over its own one.)
 CarSkin.KEEP_OWN_CLUSTER = {} :: { [string]: boolean }
 
+-- steering wheels (owner, 2026-10-24: "fix all of the steering wheels bad color and if it doesnt
+-- match the actual real one fix it"). A converted car whose wheel came into Studio as one part
+-- with one texture shows it grey or with the wrong patches of texture (the fixed per-material
+-- wheels are in the import packs cars_21-34); until those are in, the whole wheel takes the real
+-- car's finish here: black leather, or black Alcantara where the real car has it. Cars built in
+-- Roblox keep their wheel's own parts, but plain grey or white plastic on it (wrong on every real
+-- wheel in the game) turns to the same black leather; textured, metal and chrome parts stay.
+local LEATHER = { color = Color3.fromRGB(24, 24, 26), material = Enum.Material.Leather }
+local ALCANTARA = { color = Color3.fromRGB(30, 30, 32), material = Enum.Material.Fabric }
+CarSkin.STEER_LOOK = {
+	lambrini_lp750 = ALCANTARA, -- Aventador SV: Alcantara rim
+	lambrini_lp570 = ALCANTARA, -- Gallardo Superleggera: Alcantara rim, carbon bottom
+	porsha_gt3 = ALCANTARA, -- 991.2 GT3: Alcantara rim
+	lexis_lfa = LEATHER,
+} :: { [string]: { color: Color3, material: Enum.Material } }
+
+local function restyleSteer(p: BasePart, id: string, single: boolean)
+	local look = CarSkin.STEER_LOOK[id] or LEATHER
+	if not single then
+		local mat = p.Material
+		local c = p.Color
+		local plain = not (p:IsA("MeshPart") and p.TextureID ~= "") and not p:FindFirstChildOfClass("SurfaceAppearance")
+		local plastic = mat == Enum.Material.Plastic or mat == Enum.Material.SmoothPlastic or mat == Enum.Material.Sand or mat == Enum.Material.Fabric
+		if not (plain and plastic and math.max(c.R, c.G, c.B) > 0.5 and p.Transparency < 1) then
+			return
+		end
+	end
+	if p:IsA("MeshPart") then
+		p.TextureID = ""
+	end
+	for _, d in p:GetChildren() do
+		if d:IsA("SurfaceAppearance") or d:IsA("Decal") or d:IsA("Texture") then
+			d:Destroy()
+		end
+	end
+	p.Color = look.color
+	p.Material = look.material
+end
+
 -- cars that take only another model's steering wheel, put where their own one sits
 CarSkin.STEER_DONOR = {
 	ferrara_599 = "ferrara_f430", -- owner: the F430's wheel in the 599
@@ -2112,8 +2151,15 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		if steer then
 			local mountRoot = root.CFrame:Inverse() * groundCF * steer.mount
 			model:SetAttribute("SteerMount", mountRoot)
+			local meshes = 0
+			for _, t in steer.parts do
+				if t.part:IsA("MeshPart") then
+					meshes += 1
+				end
+			end
 			for i, t in steer.parts do
 				local p = t.part:Clone()
+				restyleSteer(p, id, meshes == 1)
 				p.Name = "SkinSteer" .. i
 				p.CFrame = groundCF * steer.mount * t.offset
 				p:SetAttribute("SteerOffset", t.offset)
