@@ -1612,6 +1612,8 @@ end
 -- Lamborghini Aventador LP750-4 SV (owner's photo of the real cluster): a dark screen in a grey
 -- frame with a big yellow middle; on it a wide rev arc (2 to 10: grey-blue ticks, then red from 6,
 -- black / bright red as they light), a big gear letter and the R 1234567 A strip; under it the
+-- (2026-10-23: red from 8.5 with 9 and 10 in red, as in imports/refs/aventador_sv_cluster_lit_video.jpg;
+-- the arc fills to the revs, 8,500 at the limiter)
 -- speed and the revs in big blue digits, STRADA and the odometer; small yellow screens either side
 -- (clock, date, temperature / fuel) with bar gauges under them
 local function aventadorSV(gui: SurfaceGui): Update
@@ -1652,7 +1654,7 @@ local function aventadorSV(gui: SurfaceGui): Update
 	end
 	for v = 2, 10 do
 		local a = math.rad(a0 + (a1 - a0) * (v - 2) / 8)
-		local l = text(bg, tostring(v), UDim2.fromScale(cx + math.sin(a) * rx * 0.8, cy - math.cos(a) * ry * 0.74), UDim2.fromScale(0.03, 0.1), if v >= 6 then LAMBO_RED else INK, Enum.Font.GothamBlack)
+		local l = text(bg, tostring(v), UDim2.fromScale(cx + math.sin(a) * rx * 0.8, cy - math.cos(a) * ry * 0.74), UDim2.fromScale(0.03, 0.1), if v >= 9 then LAMBO_RED else INK, Enum.Font.GothamBlack)
 		l.ZIndex = 4
 	end
 	local gear = text(bg, "N", UDim2.fromScale(0.5, 0.43), UDim2.fromScale(0.09, 0.34), INK, Enum.Font.GothamBlack)
@@ -1710,9 +1712,9 @@ local function aventadorSV(gui: SurfaceGui): Update
 	local shown, last, lastGear = 0, 0, ""
 	return function(mph: number, g: string, rpm: number)
 		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
-		local v = shown * 10
+		local v = shown * 8.5
 		for _, s in segs do
-			local high = s.at >= 6
+			local high = s.at >= 8.5
 			s.frame.BackgroundColor3 = if s.at <= v then (if high then Color3.fromRGB(255, 24, 24) else INK) else (if high then Color3.fromRGB(122, 30, 30) else Color3.fromRGB(96, 108, 130))
 		end
 		gear.Text = g

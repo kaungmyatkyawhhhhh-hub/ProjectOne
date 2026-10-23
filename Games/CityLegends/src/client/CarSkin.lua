@@ -66,6 +66,7 @@ CarSkin.CLUSTER_STYLE = {
 	byt_u8 = "U8",
 	lexis_lfa = "LFA",
 	lambrini_lp700 = "AventadorLP700", -- owner (2026-10-17): its own, copied from an LP700-4 video
+	lambrini_lp750 = "AventadorSV", -- the real SV screen (owner's photo; refs), live, over the model's own
 	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
 	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
 	rolls_wraith = "Maybach57",
@@ -107,6 +108,8 @@ CarSkin.CLUSTER_RECT = {
 	-- the LP700 in the LP750's cabin: the LP750's whole screen (rev counter and both side screens),
 	-- so the LP750 itself keeps its own cluster where it was
 	lambrini_lp700 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.334, h = 0.1455 },
+	-- the LP750 in its own cabin: the same screen
+	lambrini_lp750 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.334, h = 0.1455 },
 } :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the
@@ -218,12 +221,10 @@ CarSkin.INTERIOR_DONOR = {
 	bentz_gle53 = { from = "bentz_c63c", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
 
--- cars that keep their model's own cluster as it is, with nothing of ours drawn over it (owner,
--- 2026-10-23: the LP750's drawn cluster sat over the original; "just copy it 1:1 from the model's
--- cluster")
-CarSkin.KEEP_OWN_CLUSTER = {
-	lambrini_lp750 = true,
-} :: { [string]: boolean }
+-- cars that keep their model's own cluster as it is, with nothing of ours drawn over it. (The LP750
+-- was here, 2026-10-23, but its own screen is only a picture: owner, the same day, "the SV cluster
+-- isn't working". It now has the live AventadorSV screen exactly over its own one.)
+CarSkin.KEEP_OWN_CLUSTER = {} :: { [string]: boolean }
 
 -- cars that take only another model's steering wheel, put where their own one sits
 CarSkin.STEER_DONOR = {
