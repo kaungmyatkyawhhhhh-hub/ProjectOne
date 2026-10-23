@@ -844,6 +844,12 @@ function Towers.travel(player: Player, id: string, level: string)
 	end)
 end
 
+-- after penthouses were given from the console: the plaques and the player's own view
+function Towers.refresh(player: Player)
+	publish(player)
+	refreshResidents()
+end
+
 function Towers.buy(player: Player, id: string)
 	local rec = built[id]
 	local profile = PlayerData.get(player)

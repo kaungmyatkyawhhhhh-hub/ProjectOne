@@ -98,7 +98,7 @@ Traffic uses the "lite" runtime meshes first. The owner thinks the procedural ca
 
 - **No auto-loading of Creator Store models.** Do not make the game download Creator Store assets at runtime (InsertService with hard-coded asset ids). It was blocked as integrating unvetted third-party content. Models go in by hand, after the owner has checked them.
 - **Assets can't be downloaded from here.** `assetdelivery.roblox.com` needs a login (never use the owner's). The owner allowed `apis.roblox.com` in the environment (2026-10-10): search with `toolbox-service/v1/marketplace/10?keyword=...` and details with `toolbox-service/v1/items/details?assetIds=...`, then give the owner ids to insert by hand.
-- **Money from the console:** `game.Players.NAME:SetAttribute("SetCash", n)` or `"AddCash"` on the server side (Studio command bar in Server mode, or the F9 server console).
+- **Money from the console:** `game.Players.NAME:SetAttribute("SetCash", n)` or `"AddCash"` on the server side (Studio command bar in Server mode, or the F9 server console). Testers: `"UnlockAllCars"` or `"UnlockEverything"` set to `true`.
 - **Saving:** needs "Enable Studio Access to API Services" or a published place.
 - **Git:** commit and push to `master` of ProjectOne (the vault syncs from it). Run all commands from `Games/CityLegends`. The old `ClaudeOne` repo is retired for this game (moved 2026-10-10). No pull requests unless asked.
 

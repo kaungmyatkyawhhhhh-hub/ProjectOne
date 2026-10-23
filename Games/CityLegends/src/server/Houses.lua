@@ -792,6 +792,11 @@ handlers.setBay = function(player, arg)
 	return { ok = true, bays = table.clone(list) }
 end
 
+-- give the player plots for the house types they own (after an unlock from the console)
+function Houses.refresh(player: Player)
+	settle(player)
+end
+
 function Houses.init(c: any)
 	ctx = c
 	ctx.spawnAt = ctx.spawnAt or {}

@@ -25,6 +25,7 @@ local Bank = require(script.Parent:WaitForChild("Bank"))
 local Activities = require(script.Parent:WaitForChild("Activities"))
 local Houses = require(script.Parent:WaitForChild("Houses"))
 local Hotel = require(script.Parent:WaitForChild("Hotel"))
+local Towers = require(script.Parent:WaitForChild("Towers"))
 local Chauffeur = require(script.Parent:WaitForChild("Chauffeur"))
 
 Players.CharacterAutoLoads = false
@@ -452,6 +453,7 @@ end)
 	  game.Players.NAME:SetAttribute("SetCash", 1000000)  -- set to an amount
 	  game.Players.NAME:SetAttribute("AddCash", 50000)    -- add (negative takes)
 	  game.Players.NAME:SetAttribute("UnlockAllCars", true) -- own every car (testers)
+	  game.Players.NAME:SetAttribute("UnlockEverything", true) -- cars, level, homes, VIP, items
 ]]
 local function watchConsoleCash(player: Player)
 	for _, attr in { "SetCash", "AddCash" } do
@@ -495,10 +497,60 @@ local function watchConsoleUnlock(player: Player)
 	end)
 end
 
+-- testers (owner, 2026-10-23: "a server command line to unlock everything"): every car, the
+-- level every car needs, every penthouse and hotel suite, every house, every chauffeur contract,
+-- the top VIP card and every flex item
+local function watchConsoleEverything(player: Player)
+	player:GetAttributeChangedSignal("UnlockEverything"):Connect(function()
+		if player:GetAttribute("UnlockEverything") ~= true then
+			return
+		end
+		player:SetAttribute("UnlockEverything", nil)
+		local profile = PlayerData.get(player) :: any
+		if not profile then
+			return
+		end
+		local need = 1
+		for _, spec in Cars.List do
+			profile.Owned[spec.Id] = true
+			need = math.max(need, Cars.requiredLevel(spec.Id))
+		end
+		if (profile.Level or 1) < need then
+			profile.Level = need
+			profile.XP = 0
+		end
+		Progress:FireClient(player, { level = profile.Level, xp = profile.XP or 0, need = Config.xpForLevel(profile.Level), gained = 0, source = "console", levelUp = false })
+		profile.Penthouses = profile.Penthouses or {}
+		for _, t in Config.Towers.List do
+			profile.Penthouses[t.id] = true
+		end
+		for _, t in Config.Hotel.Suites do
+			profile.Penthouses[t.id] = true
+		end
+		profile.Houses = profile.Houses or {}
+		for kind in Config.Houses.Types do
+			profile.Houses[kind] = true
+		end
+		profile.Chauffeur = profile.Chauffeur or {}
+		for id in Config.Chauffeur.Fleet do
+			profile.Chauffeur[id] = true
+		end
+		if profile.Home == "" or profile.Home == nil then
+			profile.Home = Config.Towers.List[1].id
+		end
+		Towers.refresh(player)
+		Houses.refresh(player)
+		Luxe.unlockAll(player)
+		task.spawn(PlayerData.save, player)
+		print(("[CityLegends] %s has everything unlocked"):format(player.Name))
+	end)
+end
+
 local function onPlayerAdded(player: Player)
 	getSession(player)
 	watchConsoleCash(player)
 	watchConsoleUnlock(player)
+	watchConsoleEverything(player)
 	PlayerData.load(player)
 end
 

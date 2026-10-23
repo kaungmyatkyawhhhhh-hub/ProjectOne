@@ -16,6 +16,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - No automatic downloading of Creator Store models by the game.
 - Money can be set from the server console: `game.Players.NAME:SetAttribute("SetCash", amount)` (or `"AddCash"`). Use the Studio command bar in Server mode, or the F9 server console.
 - Testers can own every car from the same server console: `game.Players.NAME:SetAttribute("UnlockAllCars", true)` (2026-10-22).
+- Unlock everything (2026-10-23, owner): `game.Players.NAME:SetAttribute("UnlockEverything", true)` gives every car, the level every car needs (20), every penthouse and hotel suite, both island house types, every chauffeur contract, the Black VIP card and every flex item. Cash stays as it is (use SetCash).
 - Driver hands (2026-10-22): in the in-car camera the forearms and hands stay on the wheel (only the part near the camera is cut off); if the avatar can't load, plain default arms are used.
 - Claude sends the game as a place file (`CityLegends.rbxlx`) after each change.
 - Never share Roblox or alt account logins or cookies with Claude (offered once, declined).

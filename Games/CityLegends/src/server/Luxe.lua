@@ -160,6 +160,19 @@ local function dress(player: Player)
 	titleTag(character, d.vip)
 end
 
+-- testers (console "UnlockEverything"): the top VIP card and every flex item
+function Luxe.unlockAll(player: Player)
+	local d = data(player)
+	if not d then
+		return
+	end
+	d.vip = #L.Vip
+	for id in Flex.ById do
+		d.items[id] = true
+	end
+	dress(player)
+end
+
 local function onCharacter(player: Player, character: Model)
 	-- wait for the body parts (R15 builds them a moment after CharacterAdded)
 	local humanoid = character:WaitForChild("Humanoid", 10)
