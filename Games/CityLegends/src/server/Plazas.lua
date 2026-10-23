@@ -28,8 +28,10 @@ Plazas.FOOTPRINT = {
 	["1_4"] = { 3, 3, 11, 8 }, -- The Crown
 }
 
-local STONE = Color3.fromRGB(112, 104, 96)
-local STONE_EDGE = Color3.fromRGB(150, 142, 130)
+local TILE_A = Color3.fromRGB(160, 150, 134)
+local TILE_B = Color3.fromRGB(136, 128, 116)
+local STONE_EDGE = Color3.fromRGB(196, 188, 172)
+local LIFT = 0.18 -- the paving sits just over the landmarks' own dark granite floor
 local METAL = Color3.fromRGB(46, 48, 54)
 local WARM = Color3.fromRGB(255, 214, 160)
 local TRUCK_COLORS = { Color3.fromRGB(236, 236, 230), Color3.fromRGB(150, 210, 190), Color3.fromRGB(244, 206, 96), Color3.fromRGB(196, 54, 48), Color3.fromRGB(70, 110, 170) }
@@ -222,6 +224,7 @@ function Plazas.fill(kit: any, parent: Instance, bi: number, bj: number, cx: num
 		return
 	end
 	local folder = kit.lodGroup(parent, "Plaza", Vector3.new(cx, top, cz), 700)
+	top += LIFT
 	local x0, z0 = cx - lot / 2, cz - lot / 2
 	local function cellX(i: number): number
 		return x0 + i * CELL
@@ -229,14 +232,18 @@ function Plazas.fill(kit: any, parent: Instance, bi: number, bj: number, cx: num
 	local function cellZ(i: number): number
 		return z0 + i * CELL
 	end
-	-- paving round the building: warm stone with a lighter rim against the building
+	-- paving round the building: big two-tone stone tiles (two cells square), a lighter rim
+	-- against the building
 	local function pave(c0: number, r0: number, c1: number, r1: number)
-		if c1 < c0 or r1 < r0 then
-			return
+		for c = c0, c1, 2 do
+			for r = r0, r1, 2 do
+				local ce, re = math.min(c + 1, c1), math.min(r + 1, r1)
+				local ax, bx = cellX(c), cellX(ce + 1)
+				local az, bz = cellZ(r), cellZ(re + 1)
+				local tone = if (c // 2 + r // 2) % 2 == 0 then TILE_A else TILE_B
+				kit.mk(folder, Vector3.new(bx - ax - 0.3, 0.12, bz - az - 0.3), CFrame.new((ax + bx) / 2, top, (az + bz) / 2), tone, Enum.Material.Pavement, { name = "PlazaFloor" })
+			end
 		end
-		local ax, bx = cellX(c0), cellX(c1 + 1)
-		local az, bz = cellZ(r0), cellZ(r1 + 1)
-		kit.mk(folder, Vector3.new(bx - ax, 0.12, bz - az), CFrame.new((ax + bx) / 2, top + 0.06, (az + bz) / 2), STONE, Enum.Material.Pavement, { name = "PlazaFloor" })
 	end
 	pave(0, 0, N - 1, fp[2] - 1)
 	pave(0, fp[4] + 1, N - 1, N - 1)
@@ -246,7 +253,7 @@ function Plazas.fill(kit: any, parent: Instance, bi: number, bj: number, cx: num
 	local rx0, rx1, rz0, rz1 = cellX(fp[1]), cellX(fp[3] + 1), cellZ(fp[2]), cellZ(fp[4] + 1)
 	for _, e in { { rx0, rz0 - 0.6, rx1, rz0 }, { rx0, rz1, rx1, rz1 + 0.6 }, { rx0 - 0.6, rz0, rx0, rz1 }, { rx1, rz0, rx1 + 0.6, rz1 } } do
 		if e[3] - e[1] > 0.1 and e[4] - e[2] > 0.1 then
-			kit.deco(folder, Vector3.new(e[3] - e[1], 0.16, e[4] - e[2]), CFrame.new((e[1] + e[3]) / 2, top + 0.08, (e[2] + e[4]) / 2), STONE_EDGE, Enum.Material.Limestone)
+			kit.deco(folder, Vector3.new(e[3] - e[1], 0.16, e[4] - e[2]), CFrame.new((e[1] + e[3]) / 2, top + 0.02, (e[2] + e[4]) / 2), STONE_EDGE, Enum.Material.Limestone)
 		end
 	end
 
@@ -267,6 +274,18 @@ function Plazas.fill(kit: any, parent: Instance, bi: number, bj: number, cx: num
 			local c = Vector3.new(cellX(col + 1), top, cellZ(row) + CELL / 2)
 			local face = Vector3.new(0, 0, if row == 0 then -1 else 1)
 			kiosk(kit, folder, c, face, seed + k)
+		end
+	end
+	-- the x sides, where the building leaves them free: a theme in each 2 x 2 pocket between
+	-- the corners and the clear middle, facing that street
+	local SIDE_THEMES = { garden, screen, artRing }
+	for _, side in { { 0, fp[1] >= 2, -1 }, { N - 2, fp[3] <= N - 3, 1 } } do
+		if side[2] then
+			for _, row in { 2, N - 4 } do
+				k += 1
+				local c = Vector3.new(cellX(side[1] + 1), top, cellZ(row + 1))
+				SIDE_THEMES[(seed + k) % #SIDE_THEMES + 1](kit, folder, c, Vector3.new(side[3], 0, 0), seed + k)
+			end
 		end
 	end
 end
