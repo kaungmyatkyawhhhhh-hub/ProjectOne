@@ -104,11 +104,16 @@ function Fountain.build(kit: any, parent: Instance, center: Vector3)
 		local dir = Vector3.new(math.cos(a), 0, math.sin(a))
 		local bed = center + dir * 25
 		mk(parent, Vector3.new(1.2, 13, 13), CFrame.new(bed + Vector3.new(0, 0.6, 0)) * up, STONE_DARK, Enum.Material.Limestone, { shape = Enum.PartType.Cylinder })
-		deco(parent, Vector3.new(0.3, 12, 12), CFrame.new(bed + Vector3.new(0, 1.25, 0)) * up, Color3.fromRGB(44, 32, 24), Enum.Material.Ground, { shape = Enum.PartType.Cylinder })
-		for f = 1, 9 do
-			local fa = f * 2.4
-			local fr = 1.2 + (f % 3) * 1.6
-			deco(parent, Vector3.one * (1.3 + (f % 2) * 0.5), CFrame.new(bed + Vector3.new(math.cos(fa) * fr, 1.9, math.sin(fa) * fr)), FLOWERS[(f + k) % #FLOWERS + 1], Enum.Material.SmoothPlastic, { shape = Enum.PartType.Ball })
+		deco(parent, Vector3.new(0.3, 12, 12), CFrame.new(bed + Vector3.new(0, 1.25, 0)) * up, Color3.fromRGB(34, 54, 28), Enum.Material.LeafyGrass, { shape = Enum.PartType.Cylinder })
+		-- low leafy shrubs with small flowers dotted over them
+		for sh = 0, 2 do
+			local sa = sh * 2.1 + k
+			deco(parent, Vector3.one * 4.2, CFrame.new(bed + Vector3.new(math.cos(sa) * 2.6, 1.6, math.sin(sa) * 2.6)), Color3.fromRGB(46, 78, 38), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball })
+		end
+		for f = 1, 16 do
+			local fa = f * 2.4 + k
+			local fr = 1 + (f % 4) * 1.3
+			deco(parent, Vector3.one * (0.7 + (f % 3) * 0.2), CFrame.new(bed + Vector3.new(math.cos(fa) * fr, 2.6 + (f % 2) * 0.5, math.sin(fa) * fr)), FLOWERS[(f + k) % #FLOWERS + 1], Enum.Material.SmoothPlastic, { shape = Enum.PartType.Ball })
 		end
 		local bdir = Vector3.new(math.cos(a - math.pi / 4), 0, math.sin(a - math.pi / 4))
 		local bp = center + bdir * 21
