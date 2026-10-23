@@ -71,6 +71,7 @@ local function events(class: string, names: { string })
 		end)
 	end
 end
+events("RemoteEvent", { "OnServerEvent", "OnClientEvent" })
 events("ProximityPrompt", { "Triggered", "TriggerEnded", "PromptButtonHoldBegan", "PromptButtonHoldEnded", "PromptShown", "PromptHidden" })
 for _, c in { "Part", "WedgePart", "MeshPart", "Seat", "VehicleSeat", "TrussPart", "CornerWedgePart", "UnionOperation", "Model", "Folder", "Attachment", "Sound", "ClickDetector", "Humanoid", "SurfaceGui", "BillboardGui", "TextButton", "Frame", "TextLabel", "ImageLabel", "ImageButton", "ScreenGui" } do
 	events(c, { "Touched", "TouchEnded", "Destroying", "ChildAdded", "ChildRemoved", "DescendantAdded", "AncestryChanged", "Changed", "MouseClick", "Ended", "Played", "Activated", "MouseButton1Click", "Died", "Seated" })

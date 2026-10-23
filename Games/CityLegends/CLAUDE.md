@@ -41,7 +41,7 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `Traffic`: NPC cars that obey red lights.
   - `Weather`: rain cycle, wet roads.
   - `Audio`, `Cutscene`, `WorldFx`, `BuildingSkin`.
-- Client extras: `DayCycle` (time of day), `Pedestrians`, `HouseClient`, `HotelClient`, `ChauffeurClient`, `LuxeClient`.
+- Client extras: `Minimap`, `DayCycle` (time of day), `Pedestrians`, `HouseClient`, `HotelClient`, `ChauffeurClient`, `LuxeClient`.
 - `tools/`:
   - Lune tests (run from `Games/CityLegends`, `lune run tools/<name>.luau .`): `world_test` (builds the whole map in Lune: no script errors, road under every lane, nothing solid in a lane; Lune's `CFrame.lookAt` is wrong for sloped directions, so the test passes the builders a fixed one), `graph_test`, `chauffeur_test`, `luxe_test`, `market_test`.
   - `export_models.luau` (run with Lune) plus `make_glb.py`: export every car as a `.glb` for Studio's 3D Importer into `build/models` (gitignored).

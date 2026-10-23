@@ -348,3 +348,16 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
   - **Time of day:** one full day every 24 minutes, the same for everyone: night, pink dawn, morning, day, gold sunset, violet evening (`Config.DayCycle`).
   - **StreamingEnabled stays off** (the skyline would vanish, the menu and tours move the camera far away, several systems read the world once). Distance hiding (LOD groups) and pooled pedestrians keep it lighter instead. The map is about 164,000 parts.
   - Built and checked in a Roblox emulator (Lune): the whole map builds without errors, every lane has road under it and nothing solid in it, and every chauffeur route between places is found. Not yet run in real Roblox.
+
+- **Fixes and additions (2026-10-23, owner):**
+  - Police: at most 3 cars chase you (2 patrols when you're not wanted). Every chase has a timer under the stars ("POLICE GIVE UP IN 0:40": 40 s at 1 star up to 80 s at 5); when it runs out, or you lose them, you get a small bounty ($400 to $4,000). Getting caught still takes 10% of your cash.
+  - Despawn: the DESPAWN side button or the Delete key puts your car away (you get out first); G brings one back.
+  - LP750: our drawn cluster is gone; the model's own cluster shows as it is (`CarSkin.KEEP_OWN_CLUSTER`). Replaces the earlier "AventadorSV" design drawn from the owner's photo.
+  - Penthouse and hotel suite turntables: residents press E "Change car" and pick which of their cars is on show (saved per penthouse, `Showcase` in the save). The island houses already had this (Garage setup).
+  - Less neon ("too cyberpunk"): signs mostly warm white and amber, all neon a little less saturated and bright, fewer lit roof outlines, white or warm crowns, a calmer glow, natural colour grading (no boosted saturation), a less blue night.
+  - Water: deeper sea colour, a little see-through, real swell; its colour follows the time of day.
+  - Mini map (bottom left, turns with the camera, zooms with speed): roads, landmarks, police, race and delivery targets. N hides it; on a phone tap it to make it bigger.
+  - Driving feel: the car's turn builds up instead of snapping, grip falls off in a slide, power oversteer with traction control off, downforce on supercars, slower steering at speed, bumps on kerbs. At speed the view widens, the screen edges darken, wind and road roar rise; launches, flat-out shifts and close passes kick the screen. The cabin view gets only a light version.
+  - Lighter map: about 151,000 parts (was 164,000; simpler traffic light visors).
+  - Car colours (Maybach S680 interior, grey interiors, tyres, LFA steering wheel, 330i / X6 wheels): the fixed models are in the import packs `imports/new_cars/cars_21` to `cars_34`, still to be imported by the owner. The game can't change those textures; only a new Import 3D can.
+  - LFA cluster: waiting for a photo of the real one from the owner.
