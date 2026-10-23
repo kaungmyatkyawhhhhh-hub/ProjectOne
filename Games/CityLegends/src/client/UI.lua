@@ -2175,7 +2175,8 @@ function UI.setAction(text: string?, key: string?)
 			AutoButtonColor = false,
 			Text = "",
 			AnchorPoint = Vector2.new(1, 1),
-			Position = if UI.isTouch then UDim2.new(1, -24, 1, -250) else UDim2.new(1, -28, 1, -200),
+			-- (on PC left of the rev counter: above it, it covered the dial)
+			Position = if UI.isTouch then UDim2.new(1, -24, 1, -250) else UDim2.new(1, -24 - 240 - 16, 1, -100),
 			Size = UDim2.fromOffset(if UI.isTouch then 150 else 190, 48),
 			BackgroundColor3 = Theme.Panel,
 			BackgroundTransparency = 0.08,
