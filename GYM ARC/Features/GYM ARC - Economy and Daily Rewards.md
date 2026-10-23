@@ -51,3 +51,7 @@ Day 7 of the login calendar no longer gives a DNA token (only coins and, the fir
 - Tested: days 1 to 7 claimed (each twice): exactly +1 token on day 4 and day 7, none on the others.
 
 ![[GYM ARC/Screenshots/daily_dna_tokens.jpg]]
+
+## Economy rework (23 Oct, prompt 61, [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]])
+- Every reward is minutes of coins at the player's stage (Config/Economy.Rewards, Economy.Minutes), never less than its old amount. Table at Spurt 0 / 3 / 7'0" in the progress note.
+- Offline coins: 2% of the stage's coins a minute, 8 h cap. Coin packs scale (20 / 120 / 360 min). All coin boosts capped at x8 (trainers' coins +100%); Stats shows COIN BOOST.

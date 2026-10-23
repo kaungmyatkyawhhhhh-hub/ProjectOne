@@ -28,6 +28,8 @@ local CarMesh = require(Shared:WaitForChild("CarMesh"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
+local BrandMarks = require(script.Parent:WaitForChild("BrandMarks"))
+local TailLights = require(script.Parent:WaitForChild("TailLights"))
 
 local CarSkin = {}
 
@@ -52,26 +54,37 @@ CarSkin.CLUSTER_STYLE = {
 	toyoka_camri = "Toyota",
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
+	toyoka_alfard = "Toyota", -- owner (2026-10-22): its own dials didn't work; the LC200's cluster
 	lambrini_lp570 = "Gallardo",
 	kio_ev6 = "EV6",
 	lambrini_urus = "Urus",
 	chevo_c6 = "C6",
 	chevo_c7 = "C7",
 	-- the Sketchfab cars of 2026-10-12 (the owner's list of looks, from the real cars)
-	bentz_maybach = "Maybach57",
 	bentz_s63 = "W213", -- S 65 W222: wide glass screen
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",
 	lexis_lfa = "LFA",
-	lambrini_lp750 = "AventadorSV", -- its own cluster (owner's photo)
+	lambrini_lp700 = "AventadorLP700", -- owner (2026-10-17): its own, copied from an LP700-4 video
 	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
 	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
 	rolls_wraith = "Maybach57",
 	byt_seal = "U8", -- wide electric screen
 	bentz_s680 = "W213",
 	bentz_e400 = "W213", -- the E63 S W213 model: its wide glass screen
-	bentz_gls = "W213",
-	bnw_750li = "BMWClassic",
+	bentz_gls = "W213", -- Maybach GLS 600: wide glass screen
+	bnw_750li = "BMWLiveCockpit", -- the 750Li G12 (2026-10-18 model)
+	bentz_gle53 = "AMG", -- in the C63 coupe's cabin, like the CLA 45
+	-- the cars of 2026-10-18 (looks from the real cars)
+	ferrara_california = "Ferrari",
+	bentz_s65_w221 = "Maybach57", -- W221: round chrome dials
+	bentz_190e = "Maybach57",
+	toyoka_chaser = "Toyota",
+	lexis_lc500 = "LFA", -- the LC takes the LFA's moving-ring screen
+	astin_dbx = "Aston",
+	lambrini_lp640 = "Murcielago", -- the 2026-10-18 model
+	maseroti_levante = "Modern",
+	bugotti_veyron = "Maybach57",
 } :: { [string]: string }
 
 -- where a car's own cluster screen is (measured on the model): its middle from the middle of the
@@ -80,6 +93,10 @@ CarSkin.CLUSTER_STYLE = {
 -- (owner, 2026-10-13: "place them right above the dashboard where it covers the old cluster")
 CarSkin.CLUSTER_RECT = {
 	bnw_m3_e92 = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- its cluster hood (from the model)
+	-- the Land Cruzer 200 and the Alfard: over their models' own dial panels (owner, 2026-10-22: the
+	-- LC200's sat too high, above the dash; "bring it down and match it exactly")
+	toyoka_lc200 = { at = Vector3.new(0, 0.02, -0.247), face = Vector3.new(0, 0.12, 0.993), w = 0.267, h = 0.112 },
+	toyoka_alfard = { at = Vector3.new(0.008, 0.053, -0.262), face = Vector3.new(0, 0.18, 0.984), w = 0.3, h = 0.12 },
 	bnw_330i_g20 = { at = Vector3.new(0.0138, 0.0203, -0.2368), face = Vector3.new(-0, 0.321, 0.9471), w = 0.3191, h = 0.1134 },
 	bnw_530i = { at = Vector3.new(-0.003, 0.0057, -0.2492), face = Vector3.new(-0.007, 0.3171, 0.9484), w = 0.3461, h = 0.1269 },
 	bnw_540i = { at = Vector3.new(0.0025, 0.0094, -0.2389), face = Vector3.new(0.006, 0.3482, 0.9374), w = 0.3791, h = 0.136 },
@@ -87,6 +104,9 @@ CarSkin.CLUSTER_RECT = {
 	bnw_x6 = { at = Vector3.new(0.0101, 0.0352, -0.1909), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3494, h = 0.1211 },
 	bnw_x7 = { at = Vector3.new(-0.0025, -0.0002, -0.257), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3496, h = 0.1339 },
 	lexis_lx700 = { at = Vector3.new(-0.011, 0.0755, -0.114), face = Vector3.new(-0.012, -0.069, 0.9975), w = 0.3288, h = 0.1511 },
+	-- the LP700 in the LP750's cabin: the LP750's whole screen (rev counter and both side screens),
+	-- so the LP750 itself keeps its own cluster where it was
+	lambrini_lp700 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.334, h = 0.1455 },
 } :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the
@@ -97,6 +117,13 @@ CarSkin.CLUSTER_RECT = {
 -- points for an uneven scale (a rev counter squeezed below 3000). Units: kmh, mph or rpm.
 -- kind "digits" is a live speed read-out instead (length = its width) where the model's own showed
 -- a fixed number. Measured from the converted files (needle ends, labels) by tools in the notes.
+-- part-needle cars whose needle came out too long from the model's needle part (owner,
+-- 2026-10-22: the M5 E60 and M6 needles reached past the dials): times the measured length
+CarSkin.NEEDLE_LENGTH = {
+	bnw_m5_e60 = 0.66,
+	bnw_m6_v10 = 0.66,
+} :: { [string]: number }
+
 export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string }
 CarSkin.DIAL_NEEDLES = {
 	lambrini_countach = { -- Countach
@@ -147,10 +174,6 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0093, 0.0332, -0.2044), face = Vector3.new(-0, 0.3732, 0.9278), length = 0.0362, scale = "0:-179.4,5000:-46.3,10000:74.1" },
 		{ kind = "speed", unit = "kmh", at = Vector3.new(0.1007, 0.0333, -0.2044), face = Vector3.new(-0, 0.3734, 0.9277), length = 0.0333, scale = "0:176.2,170:316.2,350:470.8" },
 	},
-	lambrini_lp700 = { -- LP700 (screen rev counter and the speed read-out)
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0174, 0.081, -0.2818), face = Vector3.new(-0.0175, 0.1158, 0.9931), length = 0.043, scale = "0:-140.0,4000:-53.6,8000:66.6" },
-		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0057, 0.0508, -0.2783), face = Vector3.new(-0.0382, 0.1157, 0.9925), length = 0.0404, scale = "" },
-	},
 	mazdo_rx8 = { -- RX-8 (rev counter and the speed read-out)
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0021, 0.0463, -0.2049), face = Vector3.new(0, 0.18, 0.9837), length = 0.043, scale = "0:178.5,1000:201.4,4000:269.9,7000:347.7,10000:424.0" },
 		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0286, 0.0321, -0.2023), face = Vector3.new(0, 0.18, 0.9837), length = 0.0242, scale = "" },
@@ -186,15 +209,31 @@ CarSkin.INTERIOR_DONOR = {
 	-- owner (2026-10-13): the 458 Italia keeps its body and takes the 458 Speciale's cabin (a cabin
 	-- donor only, not a car in the roster); its own Ferrari cluster design stays
 	ferrara_458 = { from = "ferrara_458s", rear = 1.8 },
+	-- owner (2026-10-17): the LP700's own cabin looks off and blocky; the LP750's goes in, with the
+	-- LP700's own cluster design over its screen (not the LP750's)
+	lambrini_lp700 = { from = "lambrini_lp750", rear = 1.8 },
+	-- owner (2026-10-18): the CLA 45 and the GLE take the 2017 C63 AMG coupe's cockpit (a cabin
+	-- donor only, not a car in the roster)
+	bentz_cla45 = { from = "bentz_c63c", rear = 1.8 },
+	bentz_gle53 = { from = "bentz_c63c", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
+
+-- cars that keep their model's own cluster as it is, with nothing of ours drawn over it (owner,
+-- 2026-10-23: the LP750's drawn cluster sat over the original; "just copy it 1:1 from the model's
+-- cluster")
+CarSkin.KEEP_OWN_CLUSTER = {
+	lambrini_lp750 = true,
+} :: { [string]: boolean }
 
 -- cars that take only another model's steering wheel, put where their own one sits
 CarSkin.STEER_DONOR = {
 	ferrara_599 = "ferrara_f430", -- owner: the F430's wheel in the 599
+	bnw_x6 = "bnw_750li", -- owner (2026-10-22): the X6's own wheel looked bad; the 7 Series' one
+	toyoka_alfard = "toyoka_lc300", -- its own wheel has the maker's logo printed on (owner: no logos)
 } :: { [string]: string }
 
 type Template = { part: MeshPart, offset: CFrame }
-type GenericWheel = { x: number, parts: { Template } }
+type GenericWheel = { x: number, parts: { Template }, fixed: { Template }? }
 type Imported = {
 	body: { [string]: Template },
 	wheel: { [string]: Template },
@@ -212,6 +251,8 @@ type Imported = {
 	gauges: { { kind: string, pivot: CFrame, parts: { Template } } }?,
 	ownGauges: boolean?,
 	clusterSize: Vector2?,
+	-- where the red glow behind the tail lamps goes (ground space)
+	tailGlow: Vector3?,
 }
 type Look = { material: Enum.Material, color: Color3?, reflectance: number, transparency: number, shadow: boolean }
 
@@ -345,7 +386,8 @@ local function readImported(src: Instance): Imported
 		if swap and donorSrc then
 			local dspec = Cars.ById[swap.from]
 			local ok, err = pcall(function()
-				local donorDims = if dspec then CarBuilder.getDims(dspec.Class, dspec.Id) :: any else dims
+				-- a donor not in the roster: the car's class at the donor's own wheelbase (REAL_WB)
+				local donorDims = if dspec then CarBuilder.getDims(dspec.Class, dspec.Id) :: any else CarBuilder.getDims(spec.Class, swap.from) :: any
 				transplantInterior(out, readGeneric(donorSrc :: Instance, donorDims), swap.rear)
 			end)
 			if not ok then
@@ -434,10 +476,207 @@ end
 	    colour, material, textures): scripts and everything else stay behind
 ]]
 local KEEP_CHILD = { SurfaceAppearance = true, SpecialMesh = true, Decal = true, Texture = true, SurfaceGui = true }
+
+-- real makers' badges, logos and names come off every car (owner, 2026-10-17): parts and decals
+-- named as badges or logos, at any depth ("BMW SIGN" models, "MAZDA LOGO" decals, "Trunk Badge")
+local MARK_WORDS = { "badge", "logo", "emblem", "bmw sign", "шильд" }
+local function isMarkName(name: string): boolean
+	local n = name:lower()
+	for _, w in MARK_WORDS do
+		if n:find(w, 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
+-- owner (2026-10-22): "remove all of the logo in the game": badge spots get plain covers, no
+-- fictional emblems either (set true to bring them back)
+local SHOW_EMBLEMS = false
+
+-- our fictional emblems (similar to the real makers', not the same), drawn on a SurfaceGui
+local EMBLEM_SILVER = Color3.fromRGB(206, 210, 218)
+local function ring(parent: Instance, size: UDim2, aspect: number, color: Color3, thickness: number, fill: Color3?): Frame
+	local f = Instance.new("Frame")
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Position = UDim2.fromScale(0.5, 0.5)
+	f.Size = size
+	f.BackgroundColor3 = fill or Color3.new()
+	f.BackgroundTransparency = if fill then 0 else 1
+	f.BorderSizePixel = 0
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0.5, 0)
+	c.Parent = f
+	local st = Instance.new("UIStroke")
+	st.Color = color
+	st.Thickness = thickness
+	st.Parent = f
+	if aspect ~= 1 then
+		local a = Instance.new("UIAspectRatioConstraint")
+		a.AspectRatio = aspect
+		a.Parent = f
+	end
+	f.Parent = parent
+	return f
+end
+local function bar(parent: Instance, x: number, y: number, w: number, h: number, rot: number, color: Color3, z: number?)
+	local f = Instance.new("Frame")
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Position = UDim2.fromScale(x, y)
+	f.Size = UDim2.fromScale(w, h)
+	f.Rotation = rot
+	f.BackgroundColor3 = color
+	f.BorderSizePixel = 0
+	f.ZIndex = z or 2
+	f.Parent = parent
+	return f
+end
+-- BNW: a black roundel with a silver edge, the name round the top and a blue and white centre
+-- quartered on the diagonal (the real one is quartered straight). Mercer: a silver ring round a
+-- three-pointed star standing on one point. Lexis: a silver oval round a slanted, mirrored L.
+local function drawEmblem(part: BasePart, brand: string)
+	local gui = Instance.new("SurfaceGui")
+	gui.Name = "Emblem"
+	gui.Face = Enum.NormalId.Front
+	gui.CanvasSize = Vector2.new(200, 200)
+	gui.LightInfluence = 1
+	gui.Parent = part
+	if brand == "BNW" then
+		ring(gui, UDim2.fromScale(0.96, 0.96), 1, EMBLEM_SILVER, 4, Color3.fromRGB(14, 14, 16))
+		local inner = Instance.new("CanvasGroup")
+		inner.AnchorPoint = Vector2.new(0.5, 0.5)
+		inner.Position = UDim2.fromScale(0.5, 0.5)
+		inner.Size = UDim2.fromScale(0.56, 0.56)
+		inner.BackgroundColor3 = Color3.fromRGB(245, 246, 248)
+		inner.BorderSizePixel = 0
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0.5, 0)
+		c.Parent = inner
+		inner.Parent = gui
+		-- two blue quarters, top and bottom, on the diagonal
+		for _, y in { 0.25, 0.75 } do
+			local q = bar(inner, 0.5, y, 0.72, 0.72, 45, Color3.fromRGB(38, 122, 206), 3)
+			q.Position = UDim2.fromScale(0.5, if y < 0.5 then -0.01 else 1.01)
+		end
+		local st = Instance.new("UIStroke")
+		st.Color = EMBLEM_SILVER
+		st.Thickness = 2
+		st.Parent = inner
+		for i, l in { "B", "N", "W" } do
+			local a = math.rad((i - 2) * 34)
+			local t = Instance.new("TextLabel")
+			t.AnchorPoint = Vector2.new(0.5, 0.5)
+			t.Position = UDim2.fromScale(0.5 + math.sin(a) * 0.37, 0.5 - math.cos(a) * 0.37)
+			t.Size = UDim2.fromScale(0.13, 0.13)
+			t.Rotation = math.deg(a)
+			t.BackgroundTransparency = 1
+			t.Text = l
+			t.TextScaled = true
+			t.Font = Enum.Font.GothamBold
+			t.TextColor3 = EMBLEM_SILVER
+			t.ZIndex = 4
+			t.Parent = gui
+		end
+	elseif brand == "Mercer" then
+		ring(gui, UDim2.fromScale(0.92, 0.92), 1, EMBLEM_SILVER, 9)
+		-- points at 6, 10 and 2 o'clock (the real star stands on two)
+		for _, a in { 180, 300, 60 } do
+			local r = math.rad(a)
+			bar(gui, 0.5 + math.sin(r) * 0.23, 0.5 - math.cos(r) * 0.23, 0.07, 0.46, a, EMBLEM_SILVER)
+			bar(gui, 0.5 + math.sin(r) * 0.12, 0.5 - math.cos(r) * 0.12, 0.13, 0.22, a, EMBLEM_SILVER)
+		end
+		ring(gui, UDim2.fromScale(0.13, 0.13), 1, EMBLEM_SILVER, 3, EMBLEM_SILVER)
+	elseif brand == "Lexis" then
+		ring(gui, UDim2.fromScale(0.94, 0.94), 1.42, EMBLEM_SILVER, 7)
+		bar(gui, 0.56, 0.48, 0.07, 0.48, -16, EMBLEM_SILVER)
+		bar(gui, 0.45, 0.715, 0.32, 0.07, -8, EMBLEM_SILVER)
+	end
+end
+
+-- a thin cover over a badge spot (base colour) with, for emblems, ours drawn on top; its back
+-- face sits on the car's surface, `cf` looking out of it
+local function coverParts(cf: CFrame, w: number, h: number, color: Color3, disc: boolean, brand: string?): { Template }
+	local thick = math.max(0.004, w * 0.04)
+	local base = Instance.new("Part")
+	base.Name = "MarkCover"
+	base.Color = color
+	base.Material = Enum.Material.SmoothPlastic
+	base.CastShadow = false
+	base.CanCollide = false
+	base.CanQuery = false
+	base.CanTouch = false
+	base.Massless = true
+	local out: { Template } = {}
+	if disc then
+		base.Shape = Enum.PartType.Cylinder
+		base.Size = Vector3.new(thick, w, w)
+		table.insert(out, { part = base, offset = cf * CFrame.new(0, 0, -thick / 2) * CFrame.Angles(0, math.pi / 2, 0) })
+	else
+		base.Size = Vector3.new(w, h, thick)
+		table.insert(out, { part = base, offset = cf * CFrame.new(0, 0, -thick / 2) })
+	end
+	if brand and SHOW_EMBLEMS then
+		local e = Instance.new("Part")
+		e.Name = "MarkEmblem"
+		e.Transparency = 1
+		e.Size = Vector3.new(w * 0.94, w * 0.94, 0.01)
+		e.CastShadow = false
+		e.CanCollide = false
+		e.CanQuery = false
+		e.CanTouch = false
+		e.Massless = true
+		drawEmblem(e, brand)
+		table.insert(out, { part = e, offset = cf * CFrame.new(0, 0, -thick - 0.006) })
+	end
+	return out
+end
+
+-- tail lamps (owner, 2026-10-17: "add rear tail light for all cars"): a lamp part of the model gets
+-- a red glowing copy over it, a hair bigger; Driving and Traffic brighten it when braking
+local TAIL_COLOR = Color3.fromRGB(150, 0, 6)
+local TAIL_WORDS = { "taillight", "tail light", "tail_light", "brakelight", "brake light", "brake_light", "rearlight", "rear light", "rear_light", "stoplight", "stop light" }
+local function isTailName(name: string): boolean
+	local n = name:lower()
+	for _, w in TAIL_WORDS do
+		if n:find(w, 1, true) then
+			return n:find("cover", 1, true) == nil and n:find("frame", 1, true) == nil and n:find("bucket", 1, true) == nil
+		end
+	end
+	return false
+end
+local function hasTexture(m: MeshPart): boolean
+	local ok, id = pcall(function()
+		return m.TextureID
+	end)
+	return not ok or id ~= ""
+end
+local function tailShell(p: BasePart, grow: number, transparency: number)
+	for _, c in p:GetChildren() do
+		if c:IsA("SurfaceAppearance") or c:IsA("Decal") or c:IsA("SurfaceGui") then
+			c:Destroy()
+		elseif c:IsA("SpecialMesh") then
+			c.TextureId = ""
+			c.Scale *= grow
+		end
+	end
+	if p:IsA("MeshPart") then
+		pcall(function()
+			(p :: MeshPart).TextureID = ""
+		end)
+	end
+	p.Size *= grow
+	p.Material = Enum.Material.Neon
+	p.Color = TAIL_COLOR
+	p.Transparency = transparency
+	p.CastShadow = false
+	p:SetAttribute("TailLight", true)
+	p:SetAttribute("TailOff", transparency)
+end
+
 local function visualClone(d: BasePart, scale: number): BasePart
 	local p = d:Clone()
 	for _, c in p:GetChildren() do
-		if not KEEP_CHILD[c.ClassName] then
+		if not KEEP_CHILD[c.ClassName] or ((c:IsA("Decal") or c:IsA("SurfaceGui")) and isMarkName(c.Name)) then
 			c:Destroy()
 		end
 	end
@@ -549,10 +788,56 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		return false
 	end
 
+	-- makers' badges and logos stay behind: by name (the part or a group it is in), and the ones
+	-- measured on our converted cars (BrandMarks: by name, and by size where the name is shared)
+	local marks = BrandMarks[src.Name]
+	local function isMark(d: BasePart): boolean
+		if marks then
+			if marks.keep and table.find(marks.keep, d.Name) then
+				return false
+			end
+			for _, h in marks.hide do
+				if d.Name == h.name and (h.size == nil or (d.Size - h.size).Magnitude < 0.01) then
+					return true
+				end
+			end
+		end
+		local a: Instance? = d
+		while a and a ~= src do
+			if isMarkName(a.Name) then
+				return true
+			end
+			a = a.Parent
+		end
+		return false
+	end
+	-- tail lamps: parts named as tail / brake lights, the converted cars' measured lamp parts
+	-- (TailLights), and A-Chassis brake-light glow meshes (a "Brake" group, invisible when off)
+	local tails = TailLights[src.Name]
+	local function isTail(d: BasePart): boolean
+		if tails then
+			for _, sh in tails.shells do
+				if d.Name == sh.name and (sh.size == nil or (d.Size - sh.size).Magnitude < 0.01) then
+					return true
+				end
+			end
+		end
+		return isTailName(d.Name) or (d.Parent ~= nil and d.Parent ~= src and isTailName(d.Parent.Name))
+	end
+	local lampGlows: { BasePart } = {}
+	for _, d in src:GetDescendants() do
+		if d:IsA("BasePart") and d.Transparency >= 0.98 and d.Parent then
+			local n, pn = d.Name:lower(), d.Parent.Name:lower()
+			local lampGroup = pn == "brake" or pn == "lights" or isTailName(pn)
+			if (d:IsA("MeshPart") and (pn == "brake" or isTailName(pn))) or (lampGroup and (isTailName(n) or n:match("^brake%d*$") ~= nil or n == "tail")) then
+				table.insert(lampGlows, d)
+			end
+		end
+	end
 	local visible: { BasePart } = {}
 	for _, d in src:GetDescendants() do
 		-- HideInGame: a piece we replace ourselves (e.g. a wheel centre fused with the gauge pod)
-		if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") and not d:GetAttribute("HideInGame") then
+		if d:IsA("BasePart") and d.Transparency < 0.98 and not d:IsA("Seat") and not d:IsA("VehicleSeat") and not d:GetAttribute("HideInGame") and not isMark(d) then
 			table.insert(visible, d)
 		end
 	end
@@ -808,6 +1093,11 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			b = b:Max(d.Position)
 		end
 		local center = (a + b) / 2
+		if tiltTag then
+			-- our converted wheel, one piece per material (buttons and badge sit off to one side):
+			-- the middle of all the pieces' extents
+			center = biggest.CFrame:PointToWorldSpace((lo + hi) / 2)
+		end
 		if ex[odd] > discSize and #steerParts == 1 then
 			-- wheel and column in one piece: the rim is at the driver's end
 			center -= axis * (ex[odd] / 2 - 0.2)
@@ -822,6 +1112,20 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			table.insert(parts, t)
 		end
 		local radius = discSize / 2 * scale * 0.9
+		if not (marks and marks.hub) then
+			-- a maker's logo as its own little piece in the middle of the hub goes (owner,
+			-- 2026-10-22: no logos); buttons sit out on the spokes and stay
+			local kept = {}
+			for _, t in parts do
+				local p = t.offset.Position
+				local s = t.part.Size
+				if Vector2.new(p.X, p.Y).Magnitude < radius * 0.3 and math.max(s.X, s.Y, s.Z) < radius * 0.45 then
+					continue
+				end
+				table.insert(kept, t)
+			end
+			parts = kept
+		end
 		if src:GetAttribute("AddSteerHub") then
 			-- the model's wheel centre is fused with something else and hidden: build one
 			local function hubPiece(size: Vector3, color: Color3, material: Enum.Material, z: number): Template
@@ -850,6 +1154,16 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				spoke.Massless = true
 				spoke.CastShadow = false
 				table.insert(parts, { part = spoke, offset = CFrame.Angles(0, 0, ang) * CFrame.new(radius * 0.55, -0.04, 0) })
+			end
+		end
+		-- the maker's logo on the hub: covered, with our emblem for the brands that have one
+		local hub = marks and marks.hub
+		if marks and hub then
+			local spm = dims.wb / marks.wb -- game studs per metre of the converted file
+			local face = hub.face.Unit
+			local pos = hub.at * spm + face * 0.008 * spm
+			for _, t in coverParts(CFrame.lookAt(pos, pos + face), hub.r * 2 * spm, hub.r * 2 * spm, hub.color, true, marks.brand) do
+				table.insert(parts, t)
 			end
 		end
 		out.steer = { mount = mount, parts = parts, radius = radius }
@@ -931,7 +1245,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 		local leather = Color3.fromRGB(24, 24, 27)
 		local silver = Color3.fromRGB(196, 200, 208)
-		-- Mercedes: AMG-style flat-bottomed rim, silver spokes and the three-pointed star
+		-- Mercer: flat-bottomed rim, silver spokes and a three-pointed star (ours, upside down)
 		local merc = src.Name:sub(1, 6) == "bentz_" or src.Name:sub(1, 7) == "brabos_"
 		local parts: { Template } = {}
 		local segs = 28
@@ -963,7 +1277,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				local seg = piece(Enum.PartType.Block, Vector3.new(2 * math.pi * ring / 16 * 1.2, 0.012, 0.02), silver, Enum.Material.Metal)
 				table.insert(parts, { part = seg :: any, offset = CFrame.new(ring * math.cos(ang), ring * math.sin(ang), 0.15) * CFrame.Angles(0, 0, ang + math.pi / 2) })
 			end
-			for _, ang in { math.pi / 2, math.pi / 2 + math.pi * 2 / 3, math.pi / 2 - math.pi * 2 / 3 } do
+			-- (standing on one point, not the real star's two: owner, 2026-10-17, no real badges)
+			for _, ang in { -math.pi / 2, -math.pi / 2 + math.pi * 2 / 3, -math.pi / 2 - math.pi * 2 / 3 } do
 				local point = piece(Enum.PartType.Block, Vector3.new(ring, 0.014, 0.02), silver, Enum.Material.Metal)
 				table.insert(parts, { part = point :: any, offset = CFrame.Angles(0, 0, ang) * CFrame.new(ring / 2, 0, 0.15) })
 			end
@@ -1121,7 +1436,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 						len = math.max(d.Size.X, d.Size.Y, d.Size.Z) * scale
 						rest = Vector3.new(-0.7, -0.7, 0).Unit -- needle at rest: about 7 o'clock
 					end
-					len = math.clamp(len, 0.2, 0.6)
+					len = math.clamp(len, 0.2, 0.6) * (CarSkin.NEEDLE_LENGTH[src.Name] or 1)
 					-- a thin red line (no neon glow: it made the needle look thick)
 					local needle = Instance.new("Part")
 					needle.Size = Vector3.new(0.016, 0.016, len)
@@ -1177,6 +1492,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 
 	local k = 0
+	local redParts: { { d: BasePart, t: Template } } = {}
 	for _, d in visible do
 		if not inWheel[d] and not (out.steer and inSteer(d)) and not gaugeOf[d] then
 			k += 1
@@ -1188,6 +1504,75 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 				t.part.Transparency = math.max(t.part.Transparency, 0.6)
 			end
 			out.body["Part" .. k] = t
+			if isTail(d) then
+				local sh = tmpl(d, Vector3.zero)
+				tailShell(sh.part, 1.012, 0.45)
+				out.body["Tail" .. k] = sh
+			elseif not d:IsA("MeshPart") or not hasTexture(d :: MeshPart) then
+				-- plain red parts at the back may be the lamps of a car with nothing named (below)
+				local c = d.Color
+				if c.R > 0.45 and c.R > c.G * 2.2 and c.R > c.B * 2.2 and d.Transparency < 0.6 then
+					table.insert(redParts, { d = d, t = t })
+				end
+			end
+		end
+	end
+	for i, d in lampGlows do
+		local sh = tmpl(d, Vector3.zero)
+		tailShell(sh.part, 1, 0.3)
+		out.body["TailGlow" .. i] = sh
+	end
+	if tails and tails.wb then
+		local spm = dims.wb / tails.wb
+		for i, spot in tails.spots do
+			local face = spot.face.Unit
+			local pos = Vector3.new(spot.at.X * spm, spot.at.Y * spm + modelR * scale, spot.at.Z * spm) + face * 0.006 * spm
+			local p = Instance.new("Part")
+			p.Name = "TailSpot"
+			p.Size = Vector3.new(spot.w * spm, spot.h * spm, 0.02)
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.Massless = true
+			tailShell(p, 1, 0.3)
+			local up = if math.abs(face.Y) > 0.95 then Vector3.zAxis else Vector3.yAxis
+			out.body["TailSpot" .. i] = { part = p, offset = CFrame.lookAt(pos, pos + face, up) }
+		end
+	end
+	-- the red glow behind the lamps: level with them, just behind the car
+	do
+		local back, ySum, n = -math.huge, 0, 0
+		for name, t in out.body do
+			local ocf = t.offset
+			local h = t.part.Size / 2
+			local ext = math.abs(ocf.RightVector.Z) * h.X + math.abs(ocf.UpVector.Z) * h.Y + math.abs(ocf.LookVector.Z) * h.Z
+			back = math.max(back, ocf.Position.Z + ext)
+			if t.part:GetAttribute("TailLight") then
+				ySum += ocf.Position.Y
+				n += 1
+			end
+		end
+		-- nothing named or measured: plain red parts in the last sixth of the car, above the axles
+		if n == 0 and back > -math.huge then
+			local front = math.huge
+			for _, t in out.body do
+				front = math.min(front, t.offset.Position.Z)
+			end
+			local len = back - front
+			for i, rp in redParts do
+				local o = rp.t.offset.Position
+				local sz = rp.t.part.Size
+				if o.Z > back - len / 6 and o.Y > dims.wheelR * 0.9 and math.max(sz.X, sz.Y, sz.Z) < 2.4 then
+					local sh = tmpl(rp.d, Vector3.zero)
+					tailShell(sh.part, 1.012, 0.45)
+					out.body["TailRed" .. i] = sh
+					ySum += o.Y
+					n += 1
+				end
+			end
+		end
+		if back > -math.huge then
+			out.tailGlow = Vector3.new(0, if n > 0 then ySum / n else dims.wheelR * 1.6, back + 0.8)
 		end
 	end
 	local generic = out.generic :: { [string]: GenericWheel }
@@ -1195,10 +1580,38 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		local c = frame:PointToObjectSpace(g.center) * scale
 		local key = (if c.Z < 0 then "F" else "R") .. (if c.X < 0 then "L" else "R")
 		local parts = {}
+		-- our converted cars: "<corner>_static_*" pieces (calipers) steer with the wheel but don't spin
+		local fixed = {}
 		for _, d in g.parts do
-			table.insert(parts, tmpl(d, c))
+			table.insert(if d.Name:lower():find("_static_", 1, true) then fixed else parts, tmpl(d, c))
 		end
-		generic[key] = { x = c.X, parts = parts }
+		-- the maker's logo on the wheel's centre cap: covered (our emblem for the brands with one)
+		local cap = marks and marks.caps[key]
+		if marks and cap then
+			local spm = dims.wb / marks.wb
+			local side = if c.X < 0 then -1 else 1
+			local pos = Vector3.new(side * (cap.surface + 0.003) * spm, 0, 0)
+			local look = Vector3.new(side, 0, 0)
+			for _, t in coverParts(CFrame.lookAt(pos, pos + look), cap.r * 2 * spm, cap.r * 2 * spm, cap.color, true, marks.brand) do
+				table.insert(parts, t)
+			end
+		end
+		generic[key] = { x = c.X, parts = parts, fixed = if #fixed > 0 then fixed else nil }
+	end
+	-- logos printed on the paint or a plate: covered in the colour round them, or with our emblem
+	if marks then
+		local spm = dims.wb / marks.wb
+		local n = 0
+		for _, cv in marks.covers do
+			local face = cv.face.Unit
+			-- (the frame's origin is on the ground, the measures from the wheel centres' height)
+			local pos = Vector3.new(cv.at.X * spm, cv.at.Y * spm + modelR * scale, cv.at.Z * spm) + face * 0.003 * spm
+			local up = if math.abs(face.Y) > 0.95 then Vector3.zAxis else Vector3.yAxis
+			for _, t in coverParts(CFrame.lookAt(pos, pos + face, up), cv.w * spm, cv.h * spm, cv.color, cv.disc, if cv.emblem then marks.brand else nil) do
+				n += 1
+				out.body["Mark" .. n] = t
+			end
+		end
 	end
 	return out
 end
@@ -1525,12 +1938,14 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	if model:GetAttribute("Skinned") then
 		return true
 	end
-	local id = model:GetAttribute("CarId")
+	local rawId = model:GetAttribute("CarId")
 	local class = model:GetAttribute("Class")
 	local root = model.PrimaryPart
-	if type(id) ~= "string" or type(class) ~= "string" or not root then
+	if type(rawId) ~= "string" or type(class) ~= "string" or not root then
 		return false
 	end
+	-- a trim on another car's model looks exactly like that car
+	local id = Cars.modelOf(rawId)
 	local liteMode = lite == true
 	-- imported models first for the cars you look at; runtime lite meshes first for traffic
 	local imported = if liteMode then nil else importedFor(id)
@@ -1580,6 +1995,20 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		end
 	end
 
+	if generic and imported and imported.tailGlow and not liteMode then
+		-- a soft red glow on the road and bumper behind the tail lamps (brighter when braking)
+		local att = Instance.new("Attachment")
+		att.Name = "RearGlow"
+		att.Position = root.CFrame:PointToObjectSpace((groundCF * CFrame.new(imported.tailGlow)).Position)
+		att.Parent = root
+		local glow = Instance.new("PointLight")
+		glow.Name = "RearGlow"
+		glow.Color = Color3.fromRGB(255, 30, 20)
+		glow.Brightness = 0.6
+		glow.Range = 9
+		glow.Shadows = false
+		glow.Parent = att
+	end
 	if generic and imported then
 		-- the model's own steering wheel: welded still here; Driving turns it on the local player's car
 		local steer = imported.steer
@@ -1636,8 +2065,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		local swap = CarSkin.INTERIOR_DONOR[id]
 		local cabinId = if swap then swap.from else id
 		local dials = CarSkin.DIAL_NEEDLES[cabinId]
-		local rect = CarSkin.CLUSTER_RECT[cabinId]
-		if (rect or (imported.cluster and imported.clusterSize)) and not liteMode and not dials and (ownDesign or not imported.ownGauges) then
+		local rect = CarSkin.CLUSTER_RECT[id] or CarSkin.CLUSTER_RECT[cabinId]
+		if (rect or (imported.cluster and imported.clusterSize)) and not liteMode and not dials and (ownDesign or not imported.ownGauges) and not CarSkin.KEEP_OWN_CLUSTER[id] then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
 			local cs = imported.clusterSize or Vector2.new(1, 0.4)
@@ -1857,6 +2286,37 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 					w.Part0 = tire
 					w.Part1 = p
 					w.Parent = p
+				end
+				local fixed = gw.fixed
+				if fixed then
+					-- calipers ride on a knuckle: it steers with the wheel (Driving turns the front
+					-- ones) but doesn't spin
+					local knuckle = Instance.new("Part")
+					knuckle.Name = "Knuckle" .. j.Name:sub(6)
+					knuckle.Size = Vector3.one * 0.2
+					knuckle.Transparency = 1
+					knuckle.CanCollide = false
+					knuckle.CanQuery = false
+					knuckle.CanTouch = false
+					knuckle.Massless = true
+					knuckle.CFrame = root.CFrame * j.C0
+					knuckle.Parent = skin
+					local km = Instance.new("Motor6D")
+					km.Name = "Knuckle" .. j.Name:sub(6)
+					km.Part0 = root
+					km.Part1 = knuckle
+					km.C0 = j.C0
+					km.Parent = root
+					for i, t in fixed do
+						local p = t.part:Clone()
+						p.Name = "SkinCaliper" .. i
+						p.CFrame = base * t.offset
+						p.Parent = skin
+						local w = Instance.new("WeldConstraint")
+						w.Part0 = knuckle
+						w.Part1 = p
+						w.Parent = p
+					end
 				end
 			end
 			continue

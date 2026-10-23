@@ -14,15 +14,23 @@ Everyone wears the same Robloxian 2.0 body, and 18 real muscles grow on it as yo
 - **18 muscles in 6 groups:** Chest (Upper, Mid), Shoulders (Front, Side, Rear Delts), Back (Lats, Traps, Rhomboids, Lower Back), Arms (Biceps, Triceps, Forearms), Legs (Quads, Hamstrings, Glutes, Calves), Core (Abs, Obliques). Each muscle has its own level and EXP.
 - **Group numbers:** a group's level is the average of its muscles (used for the Growth Spurt goal); the EXP shown is the muscles added up.
 - **One body for all:** players, NPCs, the statue and mirrors all use the Robloxian 2.0 body. Head, face, hair, hats, skin color and animations stay the player's own. Back, front and neck accessories (capes, backpacks, guitars) are removed so they never hide muscles.
-- **Shoulder width from genetics:** Narrow 0.9x, Average 1x, Wide 1.1x, V-Taper 1.2x, tapering back to the waist so it reads as a V.
+- **Shoulder width from genetics:** Narrow 0.9x, Average 1x, Wide 1.05x, V-Taper 1.1x (owner, 19 Oct; was Wide 1.1x, V-Taper 1.2x), tapering back to the waist so it reads as a V.
 - **Golden ratio:** legs a bit longer and torso a bit shorter (1 : 1.618) at the same total height.
-- **Widths grow with height and muscle:** tall skinny players start with narrow shoulders and hips that widen as they get stronger (shoulders always wider than hips).
+- **Widths grow with height and muscle:** tall skinny players start with narrow shoulders and hips that widen as they get stronger (shoulders always wider than hips). Owner, 19 Oct: the bodies are narrower at the top end: shoulders 0.4 (skinny) -> 0.85 (full look) -> 1.05 (mass monster), hips 0.2 -> 0.65 -> 1.1 (was shoulders 1.15 / 1.4, hips 0.7 / 1.2). The "shoulders always wider than the hips" rule (ShouldersOverHips 1.1) is still in the code; with these numbers the shoulders stay wider on their own.
 - **Your own muscles (muscle v9 "unified"):** the torso and upper arms are each one welded mesh, so any mix of levels (one muscle huge, the rest flat) stays smooth with no holes. 7 live meshes: torso front + back, 2 upper arms, 2 upper legs, the waist. Forearms and calves use static stage meshes. The traps rise from the neck toward the shoulders (added 9 Oct).
 - **Other players and NPCs:** a client can only hold 8 live meshes, so everyone else wears static **body stage meshes**: 7 stages per body region (look 0, 0.2 ... 1.0, mass monster), picked from their replicated look values with a 0.3 s cross-fade.
 - **The look:** reaching the Growth Spurt goal gives about two thirds of the look; 2x the goal's EXP is the full lean V-taper; 2x to 5x grows on to the "mass monster" (veins come in); past 5x the look stays but stats keep going.
-- **Clothing:** muscles wear the character's own classic Shirt/Pants. Default look is shirtless with game shorts. Under the shorts the thighs grow like fabric over muscle (about half the bulge).
+- **Clothing:** muscles wear the character's own classic Shirt/Pants. Default look is shirtless with game shorts. Under the shorts the thighs grow like fabric over muscle (about half the bulge). Trainers (prompt 34) wear solid outfit images instead, see below.
 - **Skin texture stages:** 5 skin textures tinted to the skin color: Stage1 at level 0, Stage2 about half, Stage3 at the full look, Stage4-5 toward the mass monster (rock-like skin).
 - **Performance rule:** every change to a muscle mesh costs about 40 ms, so the look moves in small steps, one body region per frame, and tints fade with a cheap part property instead of rewriting the mesh.
+
+## How the body works now (checked in Studio, 19 Oct)
+- **Your own body:** live EditableMeshes, made in your client from `ReplicatedStorage.MuscleData` (muscle v9). Checked on your character in play: UpperTorsoMusclesFront / Back, Left / RightUpperArmMuscles, Left / RightUpperLegMuscles + Layer, LowerTorsoSnatched. Triangles (from the muscle data): torso 39,900 (two halves), upper arms 2 x 13,728, thighs 2 x about 11,200 (quads, hamstrings, glutes and their shorts parts), waist about 160. Forearms and calves are NOT live: they are the static low-poly LimbStages meshes (about 1,800 triangles each, 4 of them). About 97k triangles in all for your own body.
+- **Everyone else (other players, NPCs, statue, mirror day-one body):** the static stage meshes in `ReplicatedStorage.BodyStages` (62 templates) and `ReplicatedStorage.LimbStages` (28). Still in use (`Shared/BodyStages`, `Shared/LimbStages`). All 84 torso / arm / thigh / shorts / forearm / calf templates still have your low-poly meshes from 15 Oct (every MeshId matches the "new" column in `Config/StageMeshBackup`); the 6 waist templates still have the old mesh. About 31k triangles per body.
+- **Mass monster size of your own muscles (owner, 19 Oct):** `MuscleData.Index monsterG` sets how big each of your live muscle meshes is drawn at the full mass monster. New values: Abs 2.416, Biceps 2.883, Calves 1.675, Forearms 2.55, FrontDelts 1.826, Glutes 2.3, Hamstrings 2.8, LowerBack 2.4, MidChest 1.222, Obliques 2.2, Quads 0.6, RearDelts 1.9, Rhomboids 3.2, SideDelts 0.8, UpperTraps 2.6 (Lats, Traps, Triceps, UpperChest, DeltCap unchanged). Quads 0.6 is below 1, so past 2x the goal the quads shrink back below their full-look size as the rest grows. (SideDelts was 0.8: set to 1.5 on 19 Oct, prompt 7, so the shoulders keep growing.) Old values are in [[GYM ARC - Config values]].
+- What does NOT follow the new monsterG: the static mass monster stage meshes (BS_*_gmon, made from the old numbers), the forearm / calf stage meshes, and the look numbers in `Config/Muscles` (Look.MonsterG, unchanged) that the game uses to decide how far along the mass monster you are. So other players see a mass monster made from the old sizes, and you see yours with the new sizes.
+- `MuscleData/Index` is a GENERATED file (`tools/gen_muscle_data`): running the generator again would put the old monsterG numbers back. Your numbers are only in the place and in `src/` (committed 19 Oct).
+- NPC giants (Dante, Coach Dex): their replicated look values still read the Config/Muscles monster numbers, and they wear the static stage meshes, so the 19 Oct monsterG change does not show on them.
 
 ## Where it lives
 - `Config/Body` (body ids, proportions, widths), `Config/BodyStages`, `Config/SkinStages`, `Config/LimbStages`, `Config/Muscles`
@@ -47,3 +55,65 @@ Everyone wears the same Robloxian 2.0 body, and 18 real muscles grow on it as yo
 ![[GYM ARC/Screenshots/v9_monster_front.png]]
 ![[GYM ARC/Screenshots/meshes/stage3_front.png]]
 ![[GYM ARC/Screenshots/skin_gym_max.png]]
+
+## Quad shape (19 Oct, bug fix)
+The inner and front quads no longer grow near the shorts: on the bare thigh they grow fully up to 25% of its height, fade out by 60%, and stay flat above that and under the shorts, so the inner teardrop sits low above the knee. The outer sweep keeps its size. Done in `Shared/MuscleMeshes` (`QUADS` settings) for your own live body; the stage meshes for everyone else are fixed copies of your low-poly thighs that still need importing. See [[GYM ARC - Bug - Inner quad bulge]].
+
+## Upper traps slope (19 Oct, bug fix)
+The Traps muscle now also lifts the top of the torso as a slope from the neck to the shoulder (`Shared/MuscleMeshes` `UPPER_TRAPS`), so the upper traps show from the front, side and back. Replaced the same day by the wider yoke below. See [[GYM ARC - Bug - Upper traps never grew]].
+
+## Copies of a body (19 Oct)
+The progress mirror's "Now" body and the statue are built with the same body widths as the real character (`BodyService.ApplyFrame`, then the proportions). See [[GYM ARC - Bug - Mirror and statue bodies too narrow]].
+
+## Traps yoke and round shoulders (19 Oct, prompt 7)
+Target: your reference picture (`Downloads\gym_arc_traps_shoulders_reference.png`): a wide yoke from the neck to the shoulders and big round delt caps, the shoulders the widest point.
+- **Traps yoke:** a Traps "shape layer" lifts the whole top of the torso as one smooth slope from the base of the neck (which lifts too) out to the shoulder edge, thick from behind, about half as much on the front. In that top band the data's own Traps growth fades out (at mass monster it stood up as two horns beside the neck); the mid-traps diamond on the back stays.
+- **Round delts:** on the top of each upper arm the data's delts fade out and the three delt heads grow as one smooth cap: at the full look the top of the arm becomes a half-ball (an ellipsoid; the box-like arm's corners pull in, the sides swell), wider than the chest. Front, side and rear delts each grow the part facing their way, with their own level. Below the cap the data's delts stay, so the cap flows into the arm.
+- **Shape layers:** the yoke and the caps grow with their muscle's level but have their own gentle mass monster size (Traps 1.35, delts 1.6: `MuscleMeshes.ShapeMonsterG`); times the data's big monster sizes they made horns and folded wings. Lighting normals for the reshaped areas are recalculated from the new shape.
+- **SideDelts mass monster size:** 1.5 (your 0.8 shrank the side delts at mass monster; 1.5 is the original value).
+- **Everyone else (stage meshes): done** (the 48-file set in "Full back and adductors" below).
+- Seen, not changed: at mass monster your Rhomboids size (3.2) makes pointed flaps on the shoulder blades.
+![[GYM ARC/Screenshots/shoulders/full_front.jpg]]
+![[GYM ARC/Screenshots/shoulders/full_back34.jpg]]
+![[GYM ARC/Screenshots/shoulders/monster_back.jpg]]
+
+## Full back and adductors (19 Oct, prompt 8)
+- **Back:** a Rhomboids / LowerBack shape layer fills the middle of the back up to the muscles beside it (smoothed over the heights), minus a shallow spine groove: a raised diamond between the shoulder blades, thick columns beside the groove low down, no hollow. Grows with Rhomboids (upper) and LowerBack (lower) levels; its own mass monster size 1.7 (`BACK` settings).
+- **Adductors:** a shape layer on each thigh fills the INNER SIDE only, pushing straight toward the other leg (never forward), up to a smooth inner line from the knee to mid thigh; it fades out from 62% to 90% of the bare thigh's height, so the top of the inner thigh, the groin and everything under the shorts stays as it is (the quad fix stays). Grows with the Quads level, mass monster size 1.3 (`ADDUCTORS` settings).
+- **Arms fix (owner, during prompt 8: "triceps, biceps, upper chest look very weird"):** the first delt cap reached down to the elbow and turned the whole upper arm into one ball; now it covers only the top of the arm (biceps and triceps show again), and the traps yoke puts much less on the front of the shoulders (the upper chest is clean again).
+- **Everyone else: done 19 Oct night: the owner imported the 48 files; the templates use them (sizes 0 mismatches, MeshIds in Config/StageMeshBackup `Reshape19Oct`), Coach Dex checked in play.** The 48 fixed low-poly files came from `Downloads\gym_arc_meshes_lowpoly_backfix\other_player_stages\`: torso front / back, both upper arms and both thighs (skin + shorts), look 20% .. mass monster, same triangle counts as now. They contain every fix of today (upper traps, yoke, round delts, back, adductors, the quad fix): import only this folder (the trapsfix and shoulderfix folders are outdated). After the import Claude runs `tools/body_stage_setup.luau` + `tools/quad_fix_patch_config.py`.
+![[GYM ARC/Screenshots/back_adductors/full_back.jpg]]
+![[GYM ARC/Screenshots/back_adductors/full_front.jpg]]
+![[GYM ARC/Screenshots/back_adductors/monster_low_between_legs.jpg]]
+
+## Joint fillers (19 Oct, prompt 9)
+Bent elbows and knees opened a see-through gap (the limb meshes are open at the joint). Every body with forearm / calf stages (yours, other players, NPCs, statue, mirror) now has a skin-colored ball on each elbow and knee, on the joint so it follows the pose, sized from the forearm / calf stage's girth (grows with the muscle; inside the limb while straight). One Ball part per joint, resized only when the stage changes (`Shared/LimbStages`, `JOINT_SIZE`). Not done: capping the open mesh ends (the ball already hides the inside). The ball is plain skin color without the skin texture, so in a deep bend it reads slightly smoother / lighter.
+![[GYM ARC/Screenshots/joints/bent_monster.jpg]]
+
+## Bigger upper traps (19 Oct, owner: "make the upper traps way bigger")
+The traps yoke is taller (0.32 studs at the full look, was 0.26; the owner tried 0.52 first, then asked for 0.32), thicker from behind (0.1), reaches further down the upper back, and keeps growing more toward the mass monster (shape size 1.6, was 1.35). Your own body: done. Everyone else: 11 of the 12 rebuilt torso files are imported and set up (StageMeshBackup `Traps032`). `BS_Torso_Front_g080` was imported from the earlier 0.52 file, so it was skipped: re-import that one file from `Downloads\gym_arc_meshes_lowpoly_trapsbig\other_player_stages\`, then run `tools/torso_stage_setup.luau` (only that entry) + `tools/quad_fix_patch_config.py`.
+![[GYM ARC/Screenshots/shoulders/traps_big_back34.jpg]]
+![[GYM ARC/Screenshots/shoulders/traps_big_front.jpg]]
+
+## Mesh rewrite rule (20 Oct, lag fix)
+Your live body is rewritten in one round at most once a second (`MuscleRig` `WRITE_EVERY`). A level-up shows within a second, with no 0.4 s growth animation. The mesh pump is gone. The level-up pump (every 10 levels) and the pose pump are now Shared/VFX/BodyPump: your whole character scales up 3.5% and back (0.15 s up, 0.4 s down), with a gold flash and sparks, and no mesh rewrite. Low-end devices: your body shows the low-poly stage meshes when the camera is more than 15 studs away (MuscleRig `SetFarLook`, set by MuscleClient). The live meshes stay built and hidden, so coming back costs one rewrite. See [[2026-10-20 GYM ARC Body lag]].
+
+## Blob shadows (20 Oct)
+No body mesh casts a shadow. Every body gets a soft dark blob shadow on the floor under it (BlobShadowClient, sized to the body's width). See [[2026-10-20 GYM ARC Body lag]].
+
+## Traps texture and sculpted back (20 Oct, prompt 15)
+Replaces the 19 Oct back fill. The back is now sculpted from muscle bellies (`MuscleMeshes` `BACK_BELLIES`): a trapezius diamond (upper traps, mid-trap lobes, lower traps), a spine groove, shoulder-blade and teres bumps, lats sweeping out under the arms, and erector columns. Each grows with its own muscle; the data's own back growth gives way on the back-facing surface. The top of the torso is re-meshed (MuscleData `UpperTorso__Unified__cap`) and the torso has a new texture map that follows the surface (`UpperTorso__Unified__uvfix`, read by `applyUVPatch`; MuscleRig draws those triangles with their own corners). Low-poly torso stages: 14 rebuilt files in `Downloads\gym_arc_meshes_lowpoly_trapsback\other_player_stages\` (waiting for the owner's import). Your mass monster numbers for Rhomboids / LowerBack / Lats no longer shape the back (owner to decide). Details: [[2026-10-20 GYM ARC Traps texture and back]].
+![[GYM ARC/Screenshots/traps_back/back_g060.jpg]]
+
+### Part 3 (20 Oct): real trap depth
+The torso's top lid is re-meshed densely (3,212 triangles, its own piece `Top`), the traps are a smooth height profile (high behind the neck, a concave slope to the shoulder, rolling into the back), and the mass monster skin maps are softer (Config/SkinStages Stage4 / Stage5). See [[2026-10-20 GYM ARC Traps texture and back]].
+![[GYM ARC/Screenshots/traps_back/part3_back_gmon.jpg]]
+
+## Body Alter skins (21 Oct, prompt 21)
+At 7'0" a Body Alter's texture set replaces the 5 skin stages at every muscle size (the shape still grows with the muscles), tinted with the skin color, on your live body and on the stage meshes others see: the character's "Alter" attribute names a SurfaceAppearance `Alter_<id>` in ReplicatedStorage.SkinStages (MuscleRig `skinKey`). See [[GYM ARC - Body Alters]].
+
+## Why classic clothing looks ripped on the stage meshes (21 Oct, prompt 34)
+- The static stage meshes (`BodyStages`, `LimbStages`: everyone you see except yourself) map the classic clothing layout, but **sideways the mapping jumps at every corner of the old template's faces**: about 1 triangle in 5 squeezes a whole face of the shirt image into a sliver (measured on all 90 stage meshes). A classic Shirt then draws its template edges as white "tear" lines and its see-through gaps as skin. Up and down the mapping is close to level, but where the muscles bulge (lats, shoulders) a row wanders, so even a hem line came out jagged.
+- Trainers now wear one solid color per outfit (`Shared/Outfit`, attributes OutfitShirt / OutfitPants / OutfitSleeves / OutfitLegs), so nothing can tear. Their outfit pieces are matte Fabric; the elbow / knee balls take the outfit color under a sleeve.
+- **Players' own classic shirts still tear on other people's screens** (the same meshes). The real fix is re-exporting the stage meshes with clean texture seams (owner's import); not done.
+![[GYM ARC/Screenshots/trainer_outfits/before_ripped_sam.jpg]]

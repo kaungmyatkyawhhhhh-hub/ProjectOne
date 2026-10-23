@@ -19,6 +19,10 @@ A sunny beach-side fitness town with three gyms: the warm old-school starter gym
 - **Performance:** StreamingEnabled on, only a few shadow-casting lights, small props without shadows. Town ~16,100 parts, gyms ~3,500.
 - **13 Oct:** sauna doorway widened and pull-up / dip clearances changed so a 7'0" mass monster fits.
 
+## Gym ladder (23 Oct, prompt 58)
+- Starter, Beach (Spurt 1), Pro (Spurt 3, was 2), Powerlifting (Spurt 5, the warehouse west of the starter gym with an alley from Main Street). See [[GYM ARC - Powerlifting Gym]].
+- East of the Pro Gym the land outside the boundary is a valley with a city below (seen through the Pro Gym's glass).
+
 ## Where it lives
 - `tools/builders` (Gyms, GymKit, Town, Decor, Sauna, ...), `tools/bake.md`
 - `Server/ProGymService`, `ProGymClient`, `AreaSignsClient`, `Config/Town`
@@ -37,3 +41,25 @@ A sunny beach-side fitness town with three gyms: the warm old-school starter gym
 ![[GYM ARC/Screenshots/starter_gym_bigger_wide.jpg]]
 ![[GYM ARC/Screenshots/pro_gym_bigger_wide.jpg]]
 ![[GYM ARC/Screenshots/beach_real_machines_row.jpg]]
+
+## 21 Oct (prompt 16)
+- (Copies removed again by prompt 32.) The starter gym had a copy of every pro machine (two columns in the middle of the room) and every gym's dumbbell rack has Train spots (starter 6, beach 6, pro 4). See [[GYM ARC - Machines]].
+
+## Old starter gym restored (21 Oct, prompt 32; [[2026-10-21 GYM ARC Old starter gym restored]])
+- The owner went back to the old starter gym: the re-layout below and prompt 16's pro machine copies are undone. The room is 88 x 85 again (ceiling 16), original zones and machines, plus the dumbbell Train spots and the Trainer Agency.
+- Backups in `ServerStorage.StarterGymBackup`: `Before` (the old gym, what is live now), `LayoutV2` (the re-layout), `ProCopies` (the 11 pro copies), `Removed`. All untagged.
+- The grass west of the gym is filled back in; the trees there were spread out again (their exact old spots were lost).
+
+## Starter gym re-layout (21 Oct, prompt 26; UNDONE by prompt 32)
+The starter gym felt packed after prompt 16 (every machine, dumbbells, the Agency). Re-laid out like a real, organised gym:
+- **Bigger room:** 30 studs wider to the west (now 118 x 85, +34%); the ceiling 16 -> 18 (the same as the pro gym). The front wall, door, the glass wall to the pro gym and the back (mirror) wall stayed where they were; the new wing has its own street windows, west wall windows, a duct line and an AC unit on the roof. Trees on that ground moved west; the terrain under the new floor was cleared.
+- **Zones, straight rows, hanging black + gold zone signs:** FREE WEIGHTS (west: squat racks + overhead press against the wall, benches, deadlift / row platforms, all facing into the room), CABLES + ARMS (pushdown, curl, woodchop), MACHINES (two rows on the east, same spacing, all facing the aisle), CARDIO (one row by the glass wall), DUMBBELLS (rack + 6 train spots on the mirror wall), STRETCH (back-left corner). FRONT: desk + Coach Dex, the Trainer Agency, the lounge corner (arm wrestling, smoothie cart, a bench).
+- **Walkways:** a main aisle from the door (12+ studs, open to the dumbbells), 8+ studs between all rows; the path to the pro gym's glass door stays clear.
+- **Fewer duplicates:** 2 Flat Benches and 2 Squat Racks (the tutorial ones), 1 of everything else (10 machines removed). Gym bags, the floor mat, a sitting bench and the free-standing whiteboard removed.
+- **The big dark board** (the hanging COACH DEX sign, seen from behind) is gone; the name is a nameplate on the desk.
+- **Lights:** one grid of 20 pendants at one height (2 cast shadows, as before), 12 fill lights; the 3 extra pendants removed.
+- Every machine kept its MachineId, prompts and Hype / Spot points (moved as whole models); the tutorial's glowing path finds the new spots by itself.
+- Everything changed is backed up in `ServerStorage.StarterGymBackup` (Before: the whole old gym; Removed: what was taken out; tags removed, kept as a WasTags attribute). Builder: `tools/builders/StarterLayout`.
+
+![[GYM ARC/Screenshots/starter_layout/angle1_from_desk.jpg]]
+![[GYM ARC/Screenshots/starter_layout/top_after.jpg]]

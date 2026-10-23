@@ -29,3 +29,7 @@ The old funnel was numbered from the tutorial's list, so adding the Skate tip on
 | 13 | 13. Tutorial finished or skipped | tutorial done, or SKIP TUTORIAL |
 | 14 | 14. Growth Spurt goal reached | every muscle group at its goal (checked every 5 s) |
 | 15 | 15. First Growth Spurt done | the first Growth Spurt (+ custom event FirstGrowthSpurt = minutes since first join) |
+
+## First Growth Spurt funnel (21 Oct, prompt 11)
+- The 15 onboarding steps are unchanged. A second Roblox funnel **FirstGrowthSpurt** logs: 13. Tutorial finished or skipped, 13a. Growth Spurt goal 25%, 13b. 50%, 13c. 75%, 14. Growth Spurt goal reached (once per player, first spurt only).
+- Note: with the first goal at level 9, many players pass 25% (sometimes 50%) during the tutorial, so 13a / 13b can come before 13. Read it as "how far up the bar new players got".

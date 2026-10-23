@@ -19,6 +19,14 @@ local CityLayout = require(Shared:WaitForChild("CityLayout"))
 
 local CityBuilder = require(script.Parent:WaitForChild("CityBuilder"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
+local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
+local Police = require(script.Parent:WaitForChild("Police"))
+local Bank = require(script.Parent:WaitForChild("Bank"))
+local Activities = require(script.Parent:WaitForChild("Activities"))
+local Houses = require(script.Parent:WaitForChild("Houses"))
+local Hotel = require(script.Parent:WaitForChild("Hotel"))
+local Towers = require(script.Parent:WaitForChild("Towers"))
+local Chauffeur = require(script.Parent:WaitForChild("Chauffeur"))
 
 Players.CharacterAutoLoads = false
 
@@ -45,6 +53,9 @@ local ClaimDaily: RemoteFunction = remote("RemoteFunction", "ClaimDaily")
 local SaveSettings: RemoteEvent = remote("RemoteEvent", "SaveSettings") -- client -> server: speed units, gearbox
 local CarSignals: RemoteEvent = remote("RemoteEvent", "CarSignals") -- client -> server: blinkers + lights, shown to everyone
 remotes.Parent = ReplicatedStorage
+
+-- the car stock market (its own remotes, MarketCall / MarketPush)
+require(script.Parent:WaitForChild("Market")).start(remotes)
 
 local playerCars = Instance.new("Folder")
 playerCars.Name = "PlayerCars"
@@ -137,6 +148,52 @@ local function findSpawnCFrame(): CFrame
 	return CFrame.lookAt(pos, pos + dir)
 end
 
+-- one-off spawn spots for a player's next car (the hotel valet brings it round to the door)
+local spawnAt: { [Player]: CFrame } = {}
+
+-- what the gameplay modules (on foot, police, bank) get from here
+local ctx = {
+	remote = remote,
+	getCar = function(player: Player): Model?
+		local car = getSession(player).car
+		return if car and car.Parent then car else nil
+	end,
+	grantXp = grantXp,
+	playerCars = playerCars,
+	-- the next car this player drives out starts here (ground level, facing the way to go)
+	spawnAt = spawnAt,
+	setSpawnAt = function(player: Player, cf: CFrame)
+		spawnAt[player] = cf
+	end,
+	-- hands the player's car over (the hotel valet drives it away): it stops being their car
+	releaseCar = function(player: Player): Model?
+		local s = getSession(player)
+		local car = s.car
+		s.car = nil
+		s.combo = 0
+		return if car and car.Parent then car else nil
+	end,
+}
+OnFoot.init(ctx)
+Police.init(ctx)
+Bank.init(ctx, Police)
+Activities.init(ctx)
+Houses.init(ctx)
+Hotel.init(ctx)
+Chauffeur.init(ctx)
+-- Legends Motors: new cars are bought there only (owner, 2026-10-23)
+local Dealership = require(script.Parent:WaitForChild("Dealership"))
+Dealership.init(ctx)
+-- drift scoring, speed traps, jumps and the leaderboard
+require(script.Parent:WaitForChild("Challenges")).init(ctx)
+local Customs = require(script.Parent:WaitForChild("Customs"))
+Customs.init(ctx)
+-- the High-Rollers Casino and the Legends Gem Showcase, Downtown (VIP, flex items, two heists)
+local Luxe = require(script.Parent:WaitForChild("Luxe"))
+Luxe.init(ctx)
+require(script.Parent:WaitForChild("Casino")).init(ctx, Police, Luxe)
+require(script.Parent:WaitForChild("GemShowcase")).init(ctx, Police, Luxe)
+
 local function despawn(player: Player)
 	local s = getSession(player)
 	if s.car then
@@ -153,10 +210,12 @@ local function spawnFor(player: Player, carId: string)
 	end
 	profile.Selected = carId
 	despawn(player)
+	OnFoot.removeCharacter(player) -- a car from the garage: straight in, off your feet
 
 	local spec = Cars.get(carId)
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })
 	model:SetAttribute("Plate", string.upper(player.Name):gsub("[^%w]", ""):sub(1, 7))
+	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (and its own plate)
 	model.Name = player.Name
 	model:SetAttribute("Owner", player.UserId)
 
@@ -186,7 +245,9 @@ local function spawnFor(player: Player, carId: string)
 	ao.Responsiveness = 60
 	ao.Parent = root
 
-	local spawnCF = findSpawnCFrame()
+	-- (a house's "Drive" prompt and the hotel valet ask for their own spot)
+	local spawnCF = spawnAt[player] or findSpawnCFrame()
+	spawnAt[player] = nil
 	local h = model:GetAttribute("Height") :: number
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation
@@ -231,6 +292,18 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any)
 		return { ok = true, message = "Already owned", data = PlayerData.snapshot(player) }
 	end
 	local spec = Cars.ById[carId]
+	-- new cars come from the dealership, in person
+	if not Dealership.near(player, ctx.getCar) then
+		return { ok = false, message = "Buy new cars at " .. Config.Dealership.Name }
+	end
+	-- from the F430 up only the car market sells them; in a series each car opens 5 levels on
+	if Cars.isMarketOnly(carId) then
+		return { ok = false, message = "Only on the car market" }
+	end
+	local need = Cars.requiredLevel(carId)
+	if (profile.Level or 1) < need then
+		return { ok = false, message = "Unlocks at level " .. need }
+	end
 	if profile.Cash < spec.Price then
 		return { ok = false, message = "Not enough cash" }
 	end
@@ -306,7 +379,7 @@ CutUp.OnServerEvent:Connect(function(player: Player, info: any)
 	s.cutTimes = recent
 
 	local spec = Cars.get(car:GetAttribute("CarId") :: string)
-	local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.05)
+	local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.2) -- (nitro boosts past the top speed)
 	-- a little slack for replication lag
 	if mph < E.CutMinMph * 0.8 then
 		return
@@ -357,7 +430,7 @@ RunService.Heartbeat:Connect(function(dt)
 		local car = s.car
 		if car and car.PrimaryPart then
 			local spec = Cars.get(car:GetAttribute("CarId") :: string)
-			local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.05)
+			local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.2) -- (nitro boosts past the top speed)
 			if mph >= E.DriveMinMph then
 				s.incomeCarry += mph * E.DrivePerSecond * step
 				local whole = math.floor(s.incomeCarry)
@@ -391,6 +464,8 @@ end)
 	set on themselves don't replicate to the server.
 	  game.Players.NAME:SetAttribute("SetCash", 1000000)  -- set to an amount
 	  game.Players.NAME:SetAttribute("AddCash", 50000)    -- add (negative takes)
+	  game.Players.NAME:SetAttribute("UnlockAllCars", true) -- own every car (testers)
+	  game.Players.NAME:SetAttribute("UnlockEverything", true) -- cars, level, homes, VIP, items
 ]]
 local function watchConsoleCash(player: Player)
 	for _, attr in { "SetCash", "AddCash" } do
@@ -411,9 +486,83 @@ local function watchConsoleCash(player: Player)
 	end
 end
 
+-- testers (owner, 2026-10-22): own every car in the roster at once
+local function watchConsoleUnlock(player: Player)
+	player:GetAttributeChangedSignal("UnlockAllCars"):Connect(function()
+		if player:GetAttribute("UnlockAllCars") ~= true then
+			return
+		end
+		player:SetAttribute("UnlockAllCars", nil)
+		local profile = PlayerData.get(player)
+		if not profile then
+			return
+		end
+		local n = 0
+		for _, spec in Cars.List do
+			if not profile.Owned[spec.Id] then
+				profile.Owned[spec.Id] = true
+				n += 1
+			end
+		end
+		task.spawn(PlayerData.save, player)
+		print(("[CityLegends] %s now owns every car (%d new)"):format(player.Name, n))
+	end)
+end
+
+-- testers (owner, 2026-10-23: "a server command line to unlock everything"): every car, the
+-- level every car needs, every penthouse and hotel suite, every house, every chauffeur contract,
+-- the top VIP card and every flex item
+local function watchConsoleEverything(player: Player)
+	player:GetAttributeChangedSignal("UnlockEverything"):Connect(function()
+		if player:GetAttribute("UnlockEverything") ~= true then
+			return
+		end
+		player:SetAttribute("UnlockEverything", nil)
+		local profile = PlayerData.get(player) :: any
+		if not profile then
+			return
+		end
+		local need = 1
+		for _, spec in Cars.List do
+			profile.Owned[spec.Id] = true
+			need = math.max(need, Cars.requiredLevel(spec.Id))
+		end
+		if (profile.Level or 1) < need then
+			profile.Level = need
+			profile.XP = 0
+		end
+		Progress:FireClient(player, { level = profile.Level, xp = profile.XP or 0, need = Config.xpForLevel(profile.Level), gained = 0, source = "console", levelUp = false })
+		profile.Penthouses = profile.Penthouses or {}
+		for _, t in Config.Towers.List do
+			profile.Penthouses[t.id] = true
+		end
+		for _, t in Config.Hotel.Suites do
+			profile.Penthouses[t.id] = true
+		end
+		profile.Houses = profile.Houses or {}
+		for kind in Config.Houses.Types do
+			profile.Houses[kind] = true
+		end
+		profile.Chauffeur = profile.Chauffeur or {}
+		for id in Config.Chauffeur.Fleet do
+			profile.Chauffeur[id] = true
+		end
+		if profile.Home == "" or profile.Home == nil then
+			profile.Home = Config.Towers.List[1].id
+		end
+		Towers.refresh(player)
+		Houses.refresh(player)
+		Luxe.unlockAll(player)
+		task.spawn(PlayerData.save, player)
+		print(("[CityLegends] %s has everything unlocked"):format(player.Name))
+	end)
+end
+
 local function onPlayerAdded(player: Player)
 	getSession(player)
 	watchConsoleCash(player)
+	watchConsoleUnlock(player)
+	watchConsoleEverything(player)
 	PlayerData.load(player)
 end
 

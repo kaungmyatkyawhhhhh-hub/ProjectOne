@@ -77,3 +77,16 @@ REP (150 x 46) sits right above Roblox's jump button on phones, PUMP right above
 ## Phone or PC layout (15 Oct)
 - A small screen (short side under 500) is always the phone layout; otherwise the player's current input decides (touch = phone), checked again when it changes. No jump button = a fixed raised spot. F9 says "HUD layout = phone/pc, reason = ...". See [[GYM ARC - Bug - Phones got the PC machine layout]].
 - Studio test switches on Workspace: TestInput ("Touch", "TouchKeyboard", "KeyboardAndMouse"), TestNoJump, TestPhoneSize.
+
+## Weights move up, reward popups (21 Oct, prompt 20)
+- A heavier weight that unlocks while you lift your heaviest moves you up to it, with a gold **NEW WEIGHT UNLOCKED** popup and the clank (it used to unlock silently). A machine you never used starts on the heaviest weight your level allows.
+- Machines with a heavier weight ready that you never lifted show the yellow "!" + NEW from a distance.
+- Reward popups (`Notify.Reward`, queued 1.5 s apart, a newer LVL / weight replaces one still waiting): new weight, quest done, new title, LVL up.
+
+![[GYM ARC/Screenshots/playtest_fixes/reward_popup.jpg]]
+
+## One even stack (owner, 23 Oct; [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]])
+- The weight card, AUTO TRAIN, PUMP and REP are one width (REP's, 150), with the same right and left edges, 8 px gaps (`MachineHud.Gap`) and 12 px corners (`MachineHud.StackCorner`). The stack builds up from REP.
+- The card keeps its own layout (- and + at the ends, the weight in the middle), scaled to that width (`placePanel`), with its outline and gold line as thick as PUMP's. It shrinks further only if the stack wouldn't fit under the top bar.
+- "Set done" / BIG REP: a small "+80.5K CHEST" line rising beside REP (`POPUP.ScreenText` in MachineClient). Your own overhead title hides while you're on a machine.
+![[GYM ARC/Screenshots/ui_v3/tutorial/phone_02_bench_toast_stack.jpg]]

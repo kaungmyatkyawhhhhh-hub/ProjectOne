@@ -11,20 +11,29 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 - **Deliverable is a place file.** Build `CityLegends.rbxl` (binary, gitignored; `rojo build default.project.json -o CityLegends.rbxl`, then `python3 tools/fix_rbxl.py CityLegends.rbxl`, which Studio needs: Rojo can compress the big SSTR chunk larger than raw and Studio then refuses the file) after changes. Chat downloads of big files get cut off (Studio then shows a readData error), so the built `CityLegends.rbxl` is committed and pushed (owner chose this 2026-10-11): it reaches their PC through Obsidian Git, or from github.com. Mention the GitHub path when sending.
 - **Target look is "Highway Legends"** (another Roblox game): realistic cars, a Highway Legends-style HUD, a rainy night city.
 - **Never ask for or accept their Roblox / alt account logins or cookies.** They offered once; it was declined.
-- **Fictional names only.** Cars use fictional names and no real badges. Car looks can be inspired by real cars.
+- **Fictional names only.** Cars use fictional names and no real badges (owner, 2026-10-17: logos, badges and names removed from every car; 2026-10-22: no fictional emblems either, every logo spot gets a plain cover). Car looks can be inspired by real cars.
 
 ## Layout
 
 - `src/shared`: modules used by both sides.
   - `Config`: all tuning: economy, progression, daily gift, traffic, sounds, theme.
-  - `Cars`: the roster of 65 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`.
+  - `Cars`: the roster of 79 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`; series (`Cars.Series`), market-only from $600k (`Cars.MarketFromPrice`), 5 levels per step in a series, and trims on another car's model (`Model` field, `Cars.modelOf`).
   - `CarBuilder`: part-built car, physics hitbox, interior, driver arms. `getDims(class, id)` gives per-car proportions through `DIM_OVERRIDES`.
   - `CarMesh`: procedural lofted car meshes, with a `DESIGNS` table per car.
-  - `CityLayout`, `FacadeTex`.
+  - `CityLayout`: grid maths (the city's roads i = 0..6, Downtown's i = 100..106 along x), traffic-light phases, the Legends Loop's shape (`loopSample`) and the lane graph NPC traffic drives (city and Downtown lanes, the highway and loop: `addHighway`, the west: `addWest`; heights from `westRoadY` / `seaRoadY`).
+  - `WestLayout`: where things are in the west (Config.West): venue sites, house plots, chauffeur places, the corridor test.
+  - `ChauffeurRoute`, `Flex` (wearables).
+  - `FacadeTex`.
 - `src/server`:
   - `Main.server.lua`: remotes, car spawn, cash / XP / cut-up validation, daily gift, console cash hook.
   - `PlayerData`: DataStore profile with Cash, Owned, Selected, Level, XP, LastDaily.
-  - `CityBuilder`, `CityPremium`.
+  - `CityBuilder`: lighting, roads, blocks, traffic signals, skyline ring, the east highway (tunnel) and the Legends Loop.
+  - `CityPremium`: landmarks, streetscape, harbour water, distant skyline, monorail.
+  - `OnFoot` (getting out and walking), `Police` (wanted level, speed cameras), `Bank` (the robbery), `Towers` (penthouses), `Market` (car stock market), `Activities` (races, jobs, chips).
+  - `Mainland`: the land round the harbour: shore, suburbs, container port, forest, hills, wind turbines, mountain range, loop billboards.
+  - `West`: the coastal highway (viaduct), canyon, river and Legends Bridge, Downtown's surroundings, Ocean Drive and the beach, the causeway and islands; hooks CityBuilder calls for Downtown's blocks.
+  - `Dealership` (Legends Motors, city block from Config.Dealership; the only place to buy cars), `Customs` (Legends Customs tuning, Config.Customs), `Challenges` (drift, speed traps, jumps, leaderboard; ChallengeData).
+  - `Hotel`, `Casino`, `GemShowcase` (+ `Luxe`), `Houses`, `Chauffeur`: the west's venues, built by `buildWorld` from CityBuilder.
 - `src/client`:
   - `Main.client.lua`: startup order.
   - `UI`: HUD, garage, menus.
@@ -33,7 +42,9 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
   - `Traffic`: NPC cars that obey red lights.
   - `Weather`: rain cycle, wet roads.
   - `Audio`, `Cutscene`, `WorldFx`, `BuildingSkin`.
+- Client extras: `Minimap`, `DayCycle` (time of day), `Pedestrians`, `HouseClient`, `HotelClient`, `ChauffeurClient`, `LuxeClient`.
 - `tools/`:
+  - Lune tests (run from `Games/CityLegends`, `lune run tools/<name>.luau .`): `world_test` (builds the whole map in Lune: no script errors, road under every lane, nothing solid in a lane; Lune's `CFrame.lookAt` is wrong for sloped directions, so the test passes the builders a fixed one), `graph_test`, `chauffeur_test`, `luxe_test`, `market_test`.
   - `export_models.luau` (run with Lune) plus `make_glb.py`: export every car as a `.glb` for Studio's 3D Importer into `build/models` (gitignored).
   - `shrink_model.py`: makes a downloaded model (Sketchfab `.glb`, `.fbx`, `.obj`) fit Studio's 3D Importer. Each mesh gets at most 18,000 triangles, textures at most 1024 px, and the result is one `.fbx` with the textures inside. Run it with Blender's Python module: `pip install bpy` in a venv, then `python tools/shrink_model.py imports/car.glb`. The owner sends models by pushing them into `Games/CityLegends/imports` (GitHub takes files under 100 MB).
   - `convert_car.py` plus a layout file in `tools/cars/*.json`: the full conversion of a downloaded car for the game.
@@ -50,7 +61,10 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
     - When the steering wheel pick is wrong, set `DEBUG = True` to print the candidates, and pass the right one as a hint: `{"steer": [side, up, along], "tilt": 23}` (metres, as printed). A wheel that leans far back is often centred a few cm too far forward; plotting the points around it from the side shows the real centre and tilt.
   - `dial_probe.py` + `dial_fit.py`: live needles on a converted car's own dials (`CarSkin.DIAL_NEEDLES`). Probe a render pixel to find the dial texture, read the hub, two or three labels and the painted needle in texture pixels, then fit: it prints the table entry and paints the old needle out of the texture (the car then needs a new Import 3D). Check by drawing needles at 0 and at the top in a render.
   - `dial_looks.py` (run from `Games/CityLegends`): each needle car's dial design, copied from its real cluster (colours, numbers, red zone, needle, logos, second km/h scale, screens), written to `src/client/DialLooks.lua`, with preview PNGs in `build/dials`. CarSkin draws them over the car's own dials. To check one, put the preview PNG on a plane at the dial in Blender and render from the driver's eye next to the real dial.
+  - `brand_marks/` (see its README): where the real makers' badges, logos and name plates are on each converted car, measured in Blender and written to `src/client/BrandMarks.lua`. CarSkin hides badge parts, covers printed logos and plates with patches in the colour round them, covers wheel caps and the steering hub, and puts our fictional emblems (BNW, Mercer, Lexis) where those makers' badges were. Cars built in Roblox lose parts and decals named badge, logo or emblem.
+  - `tail_lights/` (see its README): each converted car's tail lamps (red parts measured in Blender, or spots picked on a rear render), written to `src/client/TailLights.lua`.
   - `pack_cars.py out.fbx id=car.blend ...`: several converted cars in one FBX, one group per car id, for a single Import 3D. Packs for the owner go in `imports/new_cars/` (owner, 2026-10-13: new cars in their own folder); it holds only what is still to be imported, so clear it once the cars are in `CarModels.rbxm`.
+  - `fix_models.py in.blend out.blend [--cabin]`: readies a converted car for Studio. One part per material in wheels and steering wheel, only spinning pieces in wheels (`<corner>_static_*` steer, `Body_Fixed_*` static), UV transforms baked into the first layer, solid alpha, no metal/roughness maps, `--cabin` splits `Cabin_*` parts for cabin donors. `auto_car.py` runs it last and takes a `"budget"` hint.
   - `take_cars.luau <place> <ids...>` (Lune, from `Games/CityLegends`): copies imported cars from the owner's saved place into `assets/CarModels.rbxm`. It takes off Blender's `.001` name endings and makes the windows two-sided.
 
 ## Build and check
@@ -85,7 +99,7 @@ Traffic uses the "lite" runtime meshes first. The owner thinks the procedural ca
 
 - **No auto-loading of Creator Store models.** Do not make the game download Creator Store assets at runtime (InsertService with hard-coded asset ids). It was blocked as integrating unvetted third-party content. Models go in by hand, after the owner has checked them.
 - **Assets can't be downloaded from here.** `assetdelivery.roblox.com` needs a login (never use the owner's). The owner allowed `apis.roblox.com` in the environment (2026-10-10): search with `toolbox-service/v1/marketplace/10?keyword=...` and details with `toolbox-service/v1/items/details?assetIds=...`, then give the owner ids to insert by hand.
-- **Money from the console:** `game.Players.NAME:SetAttribute("SetCash", n)` or `"AddCash"` on the server side (Studio command bar in Server mode, or the F9 server console).
+- **Money from the console:** `game.Players.NAME:SetAttribute("SetCash", n)` or `"AddCash"` on the server side (Studio command bar in Server mode, or the F9 server console). Testers: `"UnlockAllCars"` or `"UnlockEverything"` set to `true`.
 - **Saving:** needs "Enable Studio Access to API Services" or a published place.
 - **Git:** commit and push to `master` of ProjectOne (the vault syncs from it). Run all commands from `Games/CityLegends`. The old `ClaudeOne` repo is retired for this game (moved 2026-10-10). No pull requests unless asked.
 

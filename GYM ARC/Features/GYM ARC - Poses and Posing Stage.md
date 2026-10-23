@@ -43,3 +43,17 @@ Real bodybuilding poses you can strike anywhere, scored by judges on the beach p
 ![[GYM ARC/Screenshots/emote_most_muscular.jpg]]
 ![[GYM ARC/Screenshots/emote_side_chest.jpg]]
 ![[GYM ARC/Screenshots/emote_victory_wave.jpg]]
+
+## Flex poses redone (19 Oct, prompt 10)
+Front double biceps, side chest, back double biceps and abs and thigh were redone against the owner's reference photos (body position only), in the same system (`PoseData` joint angles, blended by `PoseController` on every client; the statue and mirror use the same table through `PoseApply`). Measured at look 0 and the mass monster: no hand or forearm inside the head, every foot on the floor (raised heels stand on their toes). Wider bodies spread their own shoulders, so the arms open out with size. Blend in / out 0.3 s, and a slow breath (chest, neck, shoulders) while holding. The back double biceps heel was 1 stud up before; now about 0.3. (Note: the old file comment had the shoulder X sign backwards; fixed.) The pose angles were tuned on the posing character itself in one play test: the mass monster shots below.
+![[GYM ARC/Screenshots/poses/front_double_biceps.jpg]]
+![[GYM ARC/Screenshots/poses/side_chest.jpg]]
+![[GYM ARC/Screenshots/poses/back_double_biceps.jpg]]
+![[GYM ARC/Screenshots/poses/abs_and_thigh.jpg]]
+
+## Second pass (19 Oct, owner: "double biceps arms look completely straight", "side chest arm goes through my chest")
+- **Double biceps (front and back):** the forearm went straight up from a raised upper arm, so big arms read as one straight column. Now the upper arm is level with the shoulder and the forearm folds back in toward the head (the fist 0.66 studs inside the elbow), so the bend and the peaked biceps show.
+- **Side chest:** across the stomach the forearm was 0.84 studs inside the chest at the full look. Now the elbow comes forward and the forearm crosses the lower chest, the back hand over it: in front of a slim chest, resting on a full one.
+- **Mass monster:** no side chest arm fits in front of the mass monster belly (the owner's 19 Oct Abs 2.416 / Obliques 2.2 sizes); there the forearm sinks in a little. Owner decides (smaller belly sizes, or a different arm for very big bodies).
+![[GYM ARC/Screenshots/poses/front_double_biceps_v2.jpg]]
+![[GYM ARC/Screenshots/poses/side_chest_v2_full.jpg]]

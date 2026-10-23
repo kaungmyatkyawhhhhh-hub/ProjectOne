@@ -189,15 +189,12 @@ local function collectSurfaces()
 				add(p, true)
 			end
 		end
-		local plaza = highway:FindFirstChild("Plaza")
-		if plaza then
-			for _, p in plaza:GetChildren() do
-				if p:IsA("BasePart") and bigSlab(p) then
-					if p.Name == "Island" then
-						add(p, false)
-					elseif isRoad(p) then
-						add(p, true)
-					end
+		-- the Legends Loop's paving
+		local loop = highway:FindFirstChild("Loop")
+		if loop then
+			for _, p in loop:GetChildren() do
+				if p:IsA("BasePart") and bigSlab(p) and isRoad(p) then
+					add(p, true)
 				end
 			end
 		end
@@ -319,6 +316,27 @@ end
 ---------------------------------------------------------------------
 -- Public API
 ---------------------------------------------------------------------
+-- the clear-weather light the rain mood starts from (DayCycle moves it through the day)
+function Weather.setBaseLighting(t: { density: number, haze: number, atmoColor: Color3, decay: Color3, exposure: number, outdoor: Color3, cloudColor: Color3?, cover: number? })
+	local b = base
+	if not b then
+		return
+	end
+	b.density = t.density
+	b.haze = t.haze
+	b.atmoColor = t.atmoColor
+	b.decay = t.decay
+	b.exposure = t.exposure
+	b.outdoor = t.outdoor
+	if t.cloudColor then
+		b.cloudColor = t.cloudColor
+	end
+	if t.cover then
+		b.cover = t.cover
+	end
+	applyMood(if wet then wet.Value else 0)
+end
+
 function Weather.isRaining(): boolean
 	return raining
 end

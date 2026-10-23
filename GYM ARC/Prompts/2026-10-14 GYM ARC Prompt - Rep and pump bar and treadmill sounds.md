@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 tags: [gymarc, prompt]
-status: done
+status: done (treadmill sound ids: owner)
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 

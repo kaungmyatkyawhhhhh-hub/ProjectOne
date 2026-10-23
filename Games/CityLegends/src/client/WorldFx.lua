@@ -17,6 +17,29 @@ local CityLayout = require(Shared:WaitForChild("CityLayout"))
 
 local WorldFx = {}
 
+-- 0 at night .. 1 in full day (DayCycle): street lamps (tag "DayOff") switch off by day and their
+-- lamp heads (tag "LampGlow") stop glowing
+WorldFx.daylight = 0
+local lampsLit = true
+function WorldFx.setDaylight(d: number)
+	WorldFx.daylight = d
+	local lit = d < 0.55
+	if lit == lampsLit then
+		return
+	end
+	lampsLit = lit
+	task.spawn(function()
+		for i, p in CollectionService:GetTagged("LampGlow") do
+			if p:IsA("BasePart") then
+				p.Material = if lit then Enum.Material.Neon else Enum.Material.SmoothPlastic
+			end
+			if i % 400 == 0 then
+				task.wait()
+			end
+		end
+	end)
+end
+
 ---------------------------------------------------------------------
 -- Quality: scales LOD distances + traffic density from the player's
 -- Roblox graphics setting (and a little lower on phones/tablets)
@@ -65,11 +88,18 @@ local function startLod(scale: number)
 	CollectionService:GetInstanceAddedSignal("LOD"):Connect(register)
 
 	local lights: { Light } = {}
-	for _, l in CollectionService:GetTagged("LODLight") do
-		if l:IsA("Light") then
+	local knownLight: { [Instance]: boolean } = {}
+	local function addLight(l: Instance)
+		if l:IsA("Light") and not knownLight[l] then
+			knownLight[l] = true
 			table.insert(lights, l)
 		end
 	end
+	for _, l in CollectionService:GetTagged("LODLight") do
+		addLight(l)
+	end
+	-- (lights made later: house galleries, showcase cars, anything streamed in)
+	CollectionService:GetInstanceAddedSignal("LODLight"):Connect(addLight)
 	-- wide enough that lights never visibly pop on/off block by block
 	local lightRange = 900 * scale
 	-- street lamps near the camera cast shadows (poles, cars, people across the road); far ones
@@ -104,7 +134,7 @@ local function startLod(scale: number)
 			local part = l.Parent
 			if part and part:IsA("BasePart") then
 				local dist = (part.Position - camPos).Magnitude
-				local on = dist < lightRange
+				local on = dist < lightRange and (lampsLit or not l:HasTag("DayOff"))
 				if l.Enabled ~= on then
 					l.Enabled = on
 				end
@@ -124,7 +154,12 @@ local LAMP_ON = {
 	Y = Color3.fromRGB(255, 176, 0),
 	G = Color3.fromRGB(40, 255, 120),
 }
-local LAMP_OFF = Color3.fromRGB(26, 26, 28)
+-- unlit lenses: dark, but still tinted their colour like real glass
+local LAMP_OFF = {
+	R = Color3.fromRGB(52, 8, 8),
+	Y = Color3.fromRGB(56, 38, 4),
+	G = Color3.fromRGB(6, 40, 22),
+}
 
 ---------------------------------------------------------------------
 -- Monorail train
@@ -233,7 +268,18 @@ function WorldFx.start()
 					local on = CityLayout.lightState(i, j, axis, now) == mine
 					if lampCache[lamp] ~= on then
 						lampCache[lamp] = on
-						lamp.Color = if on then LAMP_ON[mine] else LAMP_OFF
+						lamp.Color = if on then LAMP_ON[mine] else LAMP_OFF[mine] or LAMP_OFF.R
+						lamp.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+					end
+				end
+			end
+			-- each signal head's glow takes the colour of its lit lens
+			for _, glow in CollectionService:GetTagged("SignalGlow") do
+				if glow:IsA("PointLight") then
+					local st = CityLayout.lightState(glow:GetAttribute("I") :: number, glow:GetAttribute("J") :: number, glow:GetAttribute("Axis") :: string, now)
+					local c = LAMP_ON[st]
+					if glow.Color ~= c then
+						glow.Color = c
 					end
 				end
 			end

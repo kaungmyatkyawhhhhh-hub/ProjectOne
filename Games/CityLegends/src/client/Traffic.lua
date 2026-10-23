@@ -107,11 +107,35 @@ local function isFree(pos: Vector3, radius: number, ignore: Npc?): boolean
 	return true
 end
 
+-- each lane's bounding box (its three control points), to pick lanes near a point quickly: the
+-- highway lanes are few but very long, so a plain random pick rarely lands near a driver out there
+local laneBox: { [CityLayout.Segment]: { Vector3 } } = {}
+for _, seg in graph.lanes do
+	laneBox[seg] = { seg.p0:Min(seg.p1):Min(seg.p2), seg.p0:Max(seg.p1):Max(seg.p2) }
+end
+local nearby: { CityLayout.Segment } = {}
+local function lanesNear(center: Vector3, maxDist: number): { CityLayout.Segment }
+	table.clear(nearby)
+	for _, seg in graph.lanes do
+		local b = laneBox[seg]
+		local dx = math.max(b[1].X - center.X, 0, center.X - b[2].X)
+		local dz = math.max(b[1].Z - center.Z, 0, center.Z - b[2].Z)
+		if dx * dx + dz * dz <= maxDist * maxDist then
+			table.insert(nearby, seg)
+		end
+	end
+	return nearby
+end
+
 -- Lane position near "center" (or anywhere if center == nil)
 local function findSpot(center: Vector3?, minDist: number, maxDist: number, ignore: Npc?, avoidView: boolean?): (CityLayout.Segment?, number)
 	local camera = workspace.CurrentCamera
+	local pool = if center and maxDist < 5000 then lanesNear(center, maxDist) else graph.lanes
+	if #pool == 0 then
+		return nil, 0
+	end
 	for _ = 1, 40 do
-		local seg = graph.lanes[rng:NextInteger(1, #graph.lanes)]
+		local seg = pool[rng:NextInteger(1, #pool)]
 		local s = rng:NextNumber(8, math.max(9, seg.length - 25))
 		local pos = CityLayout.sample(seg, s)
 		local ok = true
@@ -199,11 +223,17 @@ end
 
 local function refreshPlayerCars()
 	table.clear(playerCarCache)
-	local pc = workspace:FindFirstChild("PlayerCars")
-	if not pc then
-		return
+	-- (and the chauffeur service's cars: traffic yields to them too)
+	local list = {}
+	for _, name in { "PlayerCars", "Chauffeurs" } do
+		local f = workspace:FindFirstChild(name)
+		if f then
+			for _, m in f:GetChildren() do
+				table.insert(list, m)
+			end
+		end
 	end
-	for _, model in pc:GetChildren() do
+	for _, model in list do
 		if model:IsA("Model") and model.PrimaryPart then
 			local root = model.PrimaryPart
 			local v = root.AssemblyLinearVelocity
@@ -348,21 +378,23 @@ function Traffic.update(dt: number)
 
 	for _idx, npc in Traffic.cars do
 		local seg = npc.seg
-		local target = npc.maxSpeed
+		-- (the highway is driven faster)
+		local target = npc.maxSpeed * seg.speedK
 		local remaining = seg.length - npc.s
 
 		if seg.kind == "turn" then
 			if seg.turning then
-				target = math.min(target, TURN_SPEED)
+				target = math.min(target, if seg.turnSpeed then Config.mphToSps(seg.turnSpeed) else TURN_SPEED)
 			end
 		else
 			-- slow down before a turn
 			local nxt = npc.nextSeg
 			if nxt and nxt.dir ~= seg.dir then
-				target = math.min(target, math.sqrt(TURN_SPEED * TURN_SPEED + 2 * T.Brake * 0.5 * math.max(remaining, 0)))
+				local turnV = if nxt.turnSpeed then Config.mphToSps(nxt.turnSpeed) else TURN_SPEED
+				target = math.min(target, math.sqrt(turnV * turnV + 2 * T.Brake * 0.5 * math.max(remaining, 0)))
 			end
 			-- traffic light at the end of this lane
-			local state = CityLayout.lightState(seg.i, seg.j, seg.axis, now)
+			local state = if seg.signal then CityLayout.lightState(seg.i, seg.j, seg.axis, now) else "G"
 			if state ~= "G" then
 				local stopDist = remaining - 0.5
 				local mustStop = state == "R"

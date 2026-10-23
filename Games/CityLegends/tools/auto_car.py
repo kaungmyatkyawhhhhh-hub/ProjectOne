@@ -9,15 +9,22 @@ without a hand-made layout file. It finds, by shape:
 then lays the car out like convert_car.py does (front along -Y, up +Z, metres, ground at 0): a
 "SteeringWheel" part with its own tilted frame, FL/FR/RL/RR wheels in a "Wheels" group, glass named
 "SeeThrough_*", one part per material, plain colours baked into tiny textures, every part under
-~18,000 triangles and the whole car under a triangle budget.
+~18,000 triangles and the whole car under a triangle budget. Last, tools/fix_models.py readies it
+for Studio's importer: one part per material in the wheels and the steering wheel (a part gets
+only one texture in Roblox), only the pieces that spin in the wheels (calipers steer without
+spinning, arch liners and body bits stay on the body), texture transforms and second UV layers
+baked into the first layer, solid alpha in opaque textures, no metal / roughness maps.
 
     python tools/auto_car.py imports/car.glb <real wheelbase in metres> out.blend ['{"tilt": 20}']
+Hints: "front", "tilt", "steer" (see main) and "budget" (triangles for the whole car, default
+160,000: more for a detailed cabin that would crumple when thinned).
 Writes a .blend (for checking renders) and a JSON report; tools/pack_cars.py puts several
 .blend cars into one .fbx, one group per car id, for a single Import 3D in Studio.
 """
 
 import json
 import math
+import os
 import sys
 
 import bpy  # first: bmesh comes with it
@@ -336,6 +343,8 @@ def find_wheels(parts, up, length_axis, side_axis, lo, hi):
         c = (a + b) / 2
         if c[up] - lo[up] > 0.75 * diam:  # wheels sit on the ground
             continue
+        if abs(c[side_axis] - (lo[side_axis] + hi[side_axis]) / 2) < 0.25 * (hi[side_axis] - lo[side_axis]):
+            continue  # and out at the sides (seats can be as round and low)
         cands.append((c, diam / 2))
     if len(cands) < 4:
         return None
@@ -527,16 +536,18 @@ def main():
     # hand-set help for a car the search gets wrong: {"front": 1 or -1 (along the model's length
     # axis), "tilt": degrees, "steer": [side, up, along] in metres, near the right DEBUG candidate}
     hint = json.loads(args[3]) if len(args) > 3 else {}
+    budget = int(hint.get("budget", BUDGET))
     report = {"src": src, "hint": hint}
     # first pass, to find things: a quick thinning keeps the search fast
     load(src)
     report["turned"] = align_yaw()
     report["dropped"] = drop_props()
     report["tris_in"] = sum(tris(o) for o in meshes())
-    decimate_to(BUDGET, final=False)
-
+    # the car's extent before thinning: the quick thinning can throw a few points far out
     allv = np.concatenate([verts_world(o) for o in meshes()])
     lo, hi = allv.min(axis=0), allv.max(axis=0)
+    decimate_to(BUDGET, final=False)
+
     size = hi - lo
     up = 2  # glTF comes in Z-up
     length_axis = 0 if size[0] > size[1] else 1
@@ -644,7 +655,7 @@ def main():
             if piece:
                 cut.append(piece)
     wheel = join(cut, "SteeringWheel")
-    report["tris"] = decimate_to(BUDGET, keep=("SteeringWheel",))
+    report["tris"] = decimate_to(budget, keep=("SteeringWheel",))
     if tris(wheel) > 9000:
         decimate(wheel, 9000 / tris(wheel), 1e-6 / scale)
 
@@ -802,8 +813,8 @@ def main():
     # a car made of very many small pieces is still over budget (they are left alone above, as
     # thinning each on its own breaks them up): thin the joined parts, which keeps their shapes
     total = sum(tris(o) for o in meshes())
-    if total > BUDGET * 1.15:
-        k = BUDGET / total
+    if total > budget * 1.15:
+        k = budget / total
         for o in meshes():
             if tris(o) > 2000 and not o.name.startswith("SteeringWheel"):
                 decimate(o, k, 1e-5)
@@ -817,6 +828,10 @@ def main():
     # the tilt goes into the name: Studio's importer flattens the part's own turn
     wheel = bpy.data.objects["SteeringWheel"]
     wheel.name = "SteeringWheel_t%d" % max(0, round(report["steering"]["tilt"]))
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import fix_models
+
+    fix_models.fix_all(report)
     report["parts"] = len(meshes())
     report["tris_out"] = sum(tris(o) for o in meshes())
     bpy.ops.wm.save_as_mainfile(filepath=out)

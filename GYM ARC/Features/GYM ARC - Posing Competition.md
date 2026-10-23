@@ -42,3 +42,16 @@ A posing contest on the beach stage every 12 minutes: three poses, judges' cards
 
 ## Avatar headshots (14 Oct)
 Player pictures here are the real Roblox avatar headshot in a plain dark circle (the same look everywhere, see [[GYM ARC - Loading Screen and Menu]]).
+
+## Posing show every 5 minutes (21 Oct, prompt 18) - replaces "How it works" above
+- **Schedule:** a show every 5 min (`PosingComp.Interval = 300`). Players with a Growth Spurt see a small pill in the right column: "POSING SHOW 2:30". In the last 30 s it glows gold with a **JOIN** button (from far away or another gym it puts you on the stage; close by it draws a glowing path) and the stage top glows. On the stage the pill says "ON STAGE". Tap the pill for your show stats. Nobody is pulled out of training.
+- **Divisions** by height, run one after another, smallest first: Bantam (under 5'0"), Middle (5'0"-6'0"), Heavy (over 6'0"), Open (7'0"; by alter tier later). Up to 8 per division; NPC competitors (sized for the division) fill a small one so it never feels empty.
+- **The show** (under 60 s per division): line up, the judges call Side chest, Front double biceps, Back double biceps, Abs and thigh (5 s each), everyone hits each pose together; crowd sound and camera flashes. Contestants get the stage camera. (The old timing tap and the audience vote are gone.)
+- **Judging** (out of 100, all numbers in `Config/PosingComp`): size 60 (compared to the best size in the division), balance 25, stage presence 15 (height; alter tier later). Nothing bought changes a score. Everyone sees "Size 52 / Balance 21 / Presence 11 = 84".
+- **Results:** top 3 on the podium with confetti and the fanfare; the winner is told to the whole server; 1st gets a trophy. Prizes by the player's show: Local (Spurt 1) 150/90/60, Regional (2) 300/180/120, National (4) 700/420/280, Pro Card Qualifier (5) 1200/720/480, Universe Championship (7'0") 2000/1200/800; everyone else 25-250 and "Good effort!".
+- **Stats:** posingEntries, posingWins, posingTrophies, posingBest. **Titles:** Stage Debut (first show), Posing Champion (first win), Stage Veteran (10 wins), Stage Legend (50 wins).
+- **Analytics** (custom events): PosingTimerSeen, PosingJoinTapped, PosingCompeted, PosingPlaced (1/2/3, 4 = other).
+- Studio: `TestPosingComp` + `TestPosingCountdown` (seconds), `TestPosingWatch` (NPC-only show).
+
+![[GYM ARC/Screenshots/posing_show/timer_join_phone.jpg]]
+![[GYM ARC/Screenshots/posing_show/judges_panel.jpg]]

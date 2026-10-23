@@ -16,12 +16,85 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 ## Rules
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
-## Current status (15 Oct 2026)
+## Current status (21 Oct 2026)
+- 22 Oct: active boosts row bottom-left, new boost icons everywhere, Agency + MY TRAINERS with the portraits and evo backgrounds, new shop panel, the Pro Gym as one hall with every machine PRO (prompt 47). See [[2026-10-22 GYM ARC Prompt 47 run]].
+- 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
+- 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
+- 23 Oct: trainer rolls are cinematic (prompt 55): name roller, calm dark background, in-world cutscene with a beam for Legendary+ (others nearby see the beam); NEXT pill without the bicep icon. See [[2026-10-23 GYM ARC Cinematic roll cutscenes]].
+- 23 Oct: the roll result card comes alive (prompt 56): each trainer's own animated card background (Volta storm, Duke forge, The Shadow smoke, Atlas clouds) with a faint version behind, breathing art, glowing outline, lean toward the finger, stat rows, a livelier bottom bar. See [[2026-10-23 GYM ARC Roll result card comes alive]].
+- 23 Oct: roll cards turn sideways on phones (picture left, stats right; no text under the HUD label size); the NEXT alter pill's outline is the alter's colour (no gold) and glows when READY; SHREDDED's pill art shows (prompt 57). See [[2026-10-23 GYM ARC Roll card side layout and NEXT pill outline]].
+- 23 Oct: Pro Gym in white light with floor-to-ceiling glass over a new valley city (lit at night), no welcome desk; gym ladder changed: Pro Gym at Spurt 3, NEW Powerlifting Gym at Spurt 5 (warehouse, record board, PR bell, judge lights, meets), unlock list in the Growth Spurt moment; spurt 6 goal 238 (prompt 58). See [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]], [[GYM ARC - Powerlifting Gym]].
+- 23 Oct: the GROWTH SPURT card and machine strip get the quiet outline in the Growth Spurt gold and glow when READY (no gold button); no gold outlines left on HUD cards (prompt 58). See [[2026-10-23 GYM ARC Growth Spurt card quiet outline]].
+- 23 Oct: the bottom-left active boost tiles are half size (timer kept readable, 32 px tap area) (prompt 59). See [[2026-10-23 GYM ARC Active boost tiles half size]].
+- 23 Oct: the title screen shows a live camera flyover of the map (6 movable shots in Workspace.MenuCameraPath, light blur + vignette); PLAY swoops down to your character (prompt 60). See [[2026-10-23 GYM ARC Menu camera flyover]].
+- 23 Oct: the Store restyled premium (themed tiles, Robux prices, gold OWNED, no checkmarks; hero features an unowned pass or THANK YOU; Coach Dex / Pump Shop buttons at the bottom) (prompt 61). See [[2026-10-23 GYM ARC Store passes premium restyle]].
+- 23 Oct: Pro Gym rearranged and made over: every machine a real Pro machine, clear zones (entrance, cardio, machines, free weights, ELITE, stretch), black + gold look (prompt 50). See [[2026-10-23 GYM ARC Pro Gym rearrange and makeover]].
+- 23 Oct: new trainer odds (Sam 30 / Nia 25 / Lou 20 / Rex 17 / Duke 5.75 / Volta 1.5 / The Shadow 0.6 / Atlas 0.15%), Volta Legendary, The Shadow Mythic, Atlas Secret, Legendary pity + auto-stop; group welcome gift (1,000 coins, free roll, CREW MEMBER title, Coach Lou). See [[2026-10-23 GYM ARC Trainer odds and group gift]].
+- 23 Oct: Pump Shop / Coach Dex shop restyled premium like the alters and auras panels; no checkmarks on Agency tiles. See [[2026-10-23 GYM ARC Pump Shop premium]].
+- 23 Oct: evolutions chart hides stages you haven't reached (??? until you do, then a flip + gold burst); Inventory aura detail restyled like the alters panel with a themed moving background per aura. See [[2026-10-23 GYM ARC Chart discovery and aura panel]].
+- 23 Oct: Trainer Agency, MY TRAINERS and the evolutions chart rebuilt to the owner's references (prompt 52), next-evolution button always bright with a soft ready glow, no EVOLVE! tag, rounded tier art everywhere. See [[2026-10-23 GYM ARC Trainer screens to the references]].
+- 23 Oct: bicep icons for every alter, Coach Dex ALTERS tab like the Inventory, tap bounce + select sound, TRAINERS = my trainers / Agency only at the desk, Coach Dex behind the moved desk, Physique flicker fixed, overhead tags stacked, NEXT pill full art and its READY state, new BODY ALTER READY popup, Strength leaderstat (prompt 54 + follow-ups). See [[2026-10-23 GYM ARC Alters shop and fixes]].
+- 23 Oct: chrome reset: quiet graphite chrome (menu, left nav, HUD, toasts) with clean italic labels and no gold borders; gold only on numbers, progress and the one NEXT / Growth Spurt card; earlier nav tiles back (white icons); hex ~18 px cells, panels 5%, collectibles only. See [[2026-10-23 GYM ARC Chrome reset]].
+- 23 Oct: TOP CREWS shows the top 25 (was 5). See [[GYM ARC - Crews]].
+- 23 Oct: tutorial in the new UI and a clean screen (prompts 53a / 53): new Coach Dex dialog, small SKIP pill, Spotlight on buttons, gold marker, only the tutorial on screen; one toast lane at the top centre for every toast; small "+80.5K CHEST" by REP; even machine controls; SHOP never locked. See [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]].
+- 23 Oct: the Powerlifting Gym has a real street front on Main Street (warehouse facade, lit sign, sawtooth roof, clean UNLOCKS AT GROWTH SPURT 5 door you can tap); the Pro Gym windows now show a colourful city with hills and less haze, trees hide the town building backs (prompt 62). See [[2026-10-23 GYM ARC Powerlifting front and Pro Gym view]].
+- 23 Oct: the Starter Pack, DNA Token x3 and the 4 PUMP SHOP specials (x1 / x5) are on sale with the owner's product IDs, all tested through ProcessReceipt (prompt 63). See [[2026-10-23 GYM ARC Shop product IDs wired]].
+- 23 Oct: the valley city has a cheap far version seen from the rest of town (dark blocks, road grid, lit window strips at night); the valley floor is never bare grey (prompt 62b). See [[2026-10-23 GYM ARC Far city and valley ground]].
+- 23 Oct: the owner can give coins and trainers (any stage) from the F9 Server console: `game.ServerStorage.Admin:Invoke("coins", "Name", 5000)` (prompt 64). See [[GYM ARC - Admin console]].
+- 23 Oct: the left nav is 20% smaller again (one scale on the whole nav; never under 44 px a tile on phones) (prompt 65). See [[2026-10-23 GYM ARC Left nav smaller]].
+- 23 Oct: Inventory Auras tab in the premium tile style, colour swatches only in the detail panels (aura / alter colours off sale), STYLE tab cut to 15 (your name on the tiles), STOP always above the boost row. See [[2026-10-23 GYM ARC Auras tab, colour swatches, STYLE 15, STOP above boosts]].
+- 23 Oct: gear is just a Lifting Belt (lower body) and Wrist Wraps (upper body), Basic / Pro at Coach Dex, old straps / sleeves moved over or refunded; Shake Bundle + DNA tokens at Coach Dex, PUMP SHOP specials for Robux (SOON until the products exist); Auto Rep chip + one soft offer, DNA x3, one-time Starter Pack; rewards and coin packs grow with your stage, coin boosts capped x8; STYLE tab (name / title / aura / alter colours) and trainer snacks (prompts 57, 59, 60, 61). See [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]].
+- 23 Oct: PUMP SHOP redesigned inside around ONE counter at the back (trophy shelf, menu boards, tall shelves, GEAR and DNA LAB corners, islands, warm + gold light), bigger shopkeeper Mo who leans and looks like Dex, quieter music inside (prompt 51). See [[2026-10-23 GYM ARC Pump Shop redesign]].
+- 23 Oct: Coach Dex's dialog portrait always shows his muscles (its own dressed copy, never the live NPC) and wears his coach tee; dialog words never cut. See [[2026-10-23 GYM ARC Coach Dex portrait muscles]].
+- 23 Oct: sneakers removed (prompt 35b), then all shoes (35c): trainers, Dante, Coach Dex and the posing show have bare feet in their skin colour; players' own Roblox shoes stay. See [[GYM ARC - Sneakers]], [[2026-10-23 GYM ARC Sneakers removed]].
+- 22 Oct: shops reworked: Coach Dex is the main shop, the PUMP SHOP sells specials only (one counter, Champion gear), coconut stand sells Coconut Water, smoothie stands gone (park, plants, lounge); UNDISCOVERED items in the Inventory with a reveal; NEXT alter card in its theme (prompt 31). See [[GYM ARC - Pump Shop]], [[GYM ARC - Undiscovered items]].
+- 22 Oct: HUD back in the top bar (coins, LVL, POSING SHOW + JOIN, DAILY, gear; TopbarPlus, no outlines), square nav tiles (prompt 46). See [[2026-10-22 GYM ARC HUD back in the top bar]].
+- 22 Oct: top bar holds only the coins (LVL pill + gear under the left menu, DAILY REWARD card), aura perks, final hex rules, no trainer pictures after the ban (prompts 43-45). See [[2026-10-22 GYM ARC Top bar, aura perks, hex rules]].
+- 22 Oct: Daily Streak tab redesigned (full-width day tiles, TODAY tag, streak record; prompt 42). See [[2026-10-22 GYM ARC Daily streak redesign]].
+- 22 Oct: the new UI everywhere (chunky LuckiestGuy buttons, hex panels, rank badges, coloured reward tiles; prompt 40). See [[2026-10-22 GYM ARC New UI applied]].
+- 22 Oct: unlock guides (Coach Dex points at each new feature, +25) and locked menu tiles + tabs with a padlock + teaser, tiles in the earlier gold-outline style (prompts 39, 39b). See [[2026-10-22 GYM ARC Unlock guides]].
+- 22 Oct: GO TO buttons teleport, a quiet tutorial (SKIP pill, gold marker + arrow), Secret / Eternal hidden + odds in %, grunts instead of lift screams ("Lifting Voices" setting). See [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]].
+- 22 Oct: Trainer Agency redesign (trimmed): the owner's trainer art, a kit-style odds grid + ROLL / X3 / AUTO, a card-flip reveal, one old-school PT desk with a cork board in the starter gym. See [[2026-10-22 GYM ARC Trainer Agency redesign]].
+- 22 Oct: Rarity-scaled roll reveal (orb, flash, rays, name slam; X3 best last) and the trainer boost fix (a LIMITLESS Atlas was +2424%; owner's numbers: BASE 5-75% by rarity, max LIMITLESS Atlas +165%, a one-time rebalance gift; MY TRAINERS shows the real total). See [[2026-10-22 GYM ARC Roll reveal and trainer boost fix]].
+- 22 Oct: Evolution names always shown (EVOLVE > IRON-BORN, MAX STAGE); only Secret / Eternal rolls go server-wide (gold banner + chat line), every other server-wide message removed. See [[2026-10-22 GYM ARC Evolution names and server messages]].
+- 22 Oct: Roll reveal screen rebuilt (prompt 49): tile-style cards sized by rarity, orb -> pulses -> burst -> dress per card, batches in slots lowest to highest, a bottom bar with ROLL AGAIN / CLOSE; all numbers in Config/RollReveal. See [[2026-10-22 GYM ARC Roll reveal screen]].
+- 22 Oct: developer products: small honest offer cards at the right moment (stamina out, last shake, after a Growth Spurt), "Finish faster" link at 75%, shop analytics, Endless Stamina's wrong R$ 15 fallback fixed; SKIP TUTORIAL after 5 s. See [[2026-10-22 GYM ARC Developer product sales]].
+- 21 Oct (later): Body Alter textures fixed (detail was drawn too big; new maps, skin kept after body updates) and the hotbar hides on machines. Then Tanned / Peak a deep bronze on any skin, the head's color follows the alter, skin preload really works, Peak's bump map loads. See [[2026-10-21 GYM ARC Alter textures fix]].
+- 21 Oct (later): UI cleanup: Inventory 3 tabs (Items / Gear / Looks), trainers in the TRAINERS window, 8 side buttons (Pump Shop link in the Shop), no DRINK SHAKE button, hotbar at the bottom (boosts are held and drunk like tools, the hotbar choice is saved), clean Agency sign. See [[2026-10-21 GYM ARC UI cleanup]].
+- 21 Oct: audit of every prompt, then the missing ones one by one. See [[2026-10-21 GYM ARC Audit follow-ups]].
+- 21 Oct: trainers' clothes fixed (no more ripped shirts: solid outfits on the muscles, shorts to the knee) and real gear meshes (belts, wraps, knee sleeves, straps, whistles) on trainers and players' shop gear. See [[2026-10-21 GYM ARC Trainer outfits and gear]].
+- 21 Oct: funnel fixes: rewards at 25 / 50 / 75% of the Growth Spurt bar (funnel 13a-c), new players start 1.6 s from the Flat Bench with a gold path and a Go button, the shop loads after the tutorial starts. See [[2026-10-21 GYM ARC Funnel fixes]].
+- 21 Oct (later): the OLD starter gym is back (owner, prompt 32): the re-layout and the pro machine copies are undone; dumbbells and the Agency stay. See [[2026-10-21 GYM ARC Old starter gym restored]].
+- 21 Oct (undone by prompt 32): the starter gym re-laid out: 34% bigger, higher ceiling, clear zones in straight rows with hanging signs, a wide main aisle, fewer duplicates, one light grid. See [[2026-10-21 GYM ARC Starter gym layout]].
+- 21 Oct: trainers 5-8 remade (Duke Ironside, Volta, The Shadow, Atlas) with idles, lines, auras and rendered icons; rarer odds for Mythic / Secret / Eternal; gains cap +1 per alter tier with a MAX BOOST tag. See [[2026-10-21 GYM ARC New trainers 5-8]].
+- 21 Oct: trainers come from coin rolls at the Trainer Agency: 8 rarities (Common to Eternal), odds shown, pity every 100 rolls, Auto Roll, Golden from 5, up to 4 slots, an exciting roll animation, Inventory > Trainers. See [[2026-10-21 GYM ARC Trainer rolls]].
+- 21 Oct: every Body Alter has its own BODY ALTER READY popup (art, colors, intro, particles, layered sounds) and a matching dramatic transformation (slow-mo, energy, flash, flex, title card); nearby players see the flash. See [[2026-10-21 GYM ARC Unique alter popups]].
+- 21 Oct: the PUMP SHOP building is now a 2-storey red brick corner store the size of the neighbours (storefront windows, awning, lit sign and blade sign, GET PUMPED mural, roof props) with a small park on the rest of the lot. See [[2026-10-21 GYM ARC Pump Shop building rebuilt]].
+- 21 Oct: Body Alters after 7'0": 5 Human alters (Pumped to Peak) with new skins, +15% gains each, keep 25% EXP, Inventory > Alters to wear any, PUMP SHOP Alters section, divisions by alter tier. See [[2026-10-21 GYM ARC Body alters]].
+- 21 Oct: equipped items show in a Black + Gold hotbar (slots 1-9) above the boost timers; the skate button bobs and shines, bounces on tap, spins its wheels and glows gold while skating. See [[2026-10-21 GYM ARC Hotbar and skate button]].
+- 21 Oct: every pro machine now also stands in the starter gym (open from the start) and every dumbbell rack has Train spots with 11 dumbbell exercises (picker, own moves, dumbbells in the hands). Growth Spurt 2 level 56 -> 52. See [[2026-10-21 GYM ARC Starter machines and dumbbells]].
+- 21 Oct: PUMP SHOP in town (on the old parking lot): supplements, gear with perks, apparel, DNA Lab, all for coins, priced from measured coins per minute. See [[2026-10-21 GYM ARC Pump Shop]].
+- 21 Oct: posing show every 5 minutes: height divisions, 4 called poses, judges out of 100 with the breakdown, show ladder prizes, trophies, titles, a timer with JOIN. See [[2026-10-21 GYM ARC Posing show]].
+- 21 Oct: boosts inventory: Inventory > Boosts with 5 items (Protein Shake = the old Energy Shake, Coconut Water, Creatine, Protein Powder, Supplements), USE or EQUIP, timers by the stamina bar. See [[2026-10-21 GYM ARC Boosts inventory]].
+- 21 Oct: playtest fixes: the tutorial can't get stuck (shake button always on screen, arrow, 15 s safety net), stamina refills on the machine in 10 s and lasts 60-90 s, the Growth Spurt says what it needs (with GO paths), reward popups and a READY TO GROW popup, first Growth Spurt in ~5 min (was 17), Store opens on Auras. See [[2026-10-21 GYM ARC Playtest fixes]].
+- 20-21 Oct: playtest review as a new kid on a phone: biggest problems are the first 5 minutes (stuck on the shake step at 0 stamina), stamina breaks every 30 s, no next-goal hint on machines, silent unlocks, and nothing to buy with coins. The Shop now shows from the start. See [[2026-10-20 GYM ARC Playtest review]].
+- 20 Oct: the upper traps texture is even (no smear, no lumps by the neck) and the back is sculpted: trap diamond, spine groove, shoulder blades, lats, lower back. Part 3: the traps have real depth (dense top mesh, a slope from behind the neck to the shoulder) and the mass monster skin is softer (no painted lumps). Your body: done. Everyone else: waits for the owner to import 14 torso files. See [[2026-10-20 GYM ARC Traps texture and back]].
+- 20 Oct: BETA TESTER badge: every player who joins during the beta gets it, with a gold toast the first time. Turn it off with `BETA_BADGE_ENABLED = false` in Config/Titles ([[GYM ARC - Monetization]]).
+- 20 Oct: the lag after the body changes is fixed: your body was rebuilt up to 26 times a second while training; now at most once a second (about 33 -> 46 FPS on PC). Low-end phones show the low-poly body for you when the camera is far. New: a cheap pump (body scales up and back with a gold flash and sparks) on level-ups and poses, soft blob shadows under every body, and all light shadows off on phones / low-end devices. See [[2026-10-20 GYM ARC Body lag]].
+- 19 Oct late: elbows and knees no longer show see-through holes when bent; trainers now idle, walk and run instead of sliding.
+- 19 Oct night: the 48 body meshes are imported and set up: everyone (other players, NPCs, statue, mirror) now has the new traps, shoulders, back and adductors.
+- 19 Oct night: the back is filled (no hollow), adductors fill the inner thighs (inner side only, nothing near the shorts), and the delt caps were made smaller after the owner's note (biceps / triceps / upper chest look normal again). Other bodies wait for the 48-file import.
+- 19 Oct evening: traps reshaped into a wide yoke and the delts into big round caps (your reference picture); SideDelts mass monster size set to 1.5. Other bodies wait for the import.
+- 19 Oct afternoon: inner quad bulge fixed everywhere; mirror and statue now have your real body shape; crew names and tags are unique (ARAQ313 is now [SRT1]); Top Crews member view tested; upper traps fixed on your body, other bodies wait for the torso import.
+- 19 Oct: the owner changed bodies, titles and music in Studio; everything is written down in [[2026-10-19 GYM ARC Owner changes]] (narrower shoulders, new mass monster sizes for your own muscles, three rival titles one rarity higher, three songs per area). Nothing was "fixed".
+- Top crews: tapping a crew shows its members ([[GYM ARC - Crews]]); saved to git 19 Oct.
 - 15 Oct: the Store opens right away, phones get the phone machine layout, the menu always fills the screen, the right cards stay under the top bar, and mirrors are plain (no reflection). See [[2026-10-15 GYM ARC Menu art]].
 - The whole core game is built and tested in Studio: training, 18 muscles, genetics, Growth Spurts, titles, stats, quests, spotting, arm wrestling, the town and three gyms.
 - 13 Oct: Growth Spurts now stop at 7'0" ([[GYM ARC - Growth Spurts]]), the NPC size glitch is fixed ([[GYM ARC - NPC Regulars and Gym Cat]]), and soft shutdown is in ([[GYM ARC - Soft Shutdown]]). See [[2026-10-13 GYM ARC Height cap and soft shutdown]].
 - 13 Oct (new features run, in progress): the Posing Competition is in ([[GYM ARC - Posing Competition]]); every sound id is picked ([[GYM ARC - Music and Sounds]]). See [[2026-10-13 GYM ARC New features run]].
-- Monetization is OFF; no ids are set yet ([[GYM ARC - Monetization]]).
+- Monetization is ON with the owner's pass / product ids ([[GYM ARC - Monetization]]).
+- The final UI is the Black + Gold kit ([[2026-10-14 GYM ARC Final UI Black and Gold]]); all UI uses `Shared.UI.Theme` / `Shared.UI.Kit`.
+- The owner edits bodies by hand in Studio too (October): see [[2026-10-19 GYM ARC Owner changes]] and [[GYM ARC - Muscles and Bodies]].
 - Not verified yet: phones on a real device, and anything that needs 2 players (spotting, crews, arm wrestling against a player).
 
 ## What's next
@@ -59,6 +132,74 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
   - [[2026-10-13 GYM ARC Height cap and soft shutdown]]
   - [[2026-10-13 GYM ARC Obsidian vault setup]]
   - [[2026-10-13 GYM ARC New features run]]
+  - [[2026-10-20 GYM ARC Body lag]]
+  - [[2026-10-20 GYM ARC Traps texture and back]]
+- [[2026-10-23 GYM ARC Pump Shop redesign]]
+- [[2026-10-23 GYM ARC Coach Dex portrait muscles]]
+- [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]]
+- [[2026-10-23 GYM ARC Auras tab, colour swatches, STYLE 15, STOP above boosts]]
+- [[2026-10-23 GYM ARC Powerlifting front and Pro Gym view]]
+- [[2026-10-23 GYM ARC Shop product IDs wired]]
+- [[2026-10-23 GYM ARC Prompt - 63 Wire the shop product IDs]]
+- [[2026-10-23 GYM ARC Far city and valley ground]]
+- [[2026-10-23 GYM ARC Prompt - 62b Far city and valley ground]]
+- [[2026-10-23 GYM ARC Console gifts]]
+- [[2026-10-23 GYM ARC Prompt - 64 Console gifts]]
+- [[GYM ARC - Admin console]]
+- [[2026-10-23 GYM ARC Left nav smaller]]
+- [[2026-10-23 GYM ARC Prompt - 65 Left nav 20 percent smaller]]
+- [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]]
+- [[2026-10-20 GYM ARC Playtest review]]
+- [[2026-10-21 GYM ARC Playtest fixes]]
+- [[2026-10-21 GYM ARC Boosts inventory]]
+- [[2026-10-21 GYM ARC Posing show]]
+- [[2026-10-21 GYM ARC Pump Shop]]
+- [[2026-10-21 GYM ARC Starter machines and dumbbells]]
+- [[2026-10-21 GYM ARC Hotbar and skate button]]
+- [[2026-10-21 GYM ARC Body alters]]
+- [[2026-10-21 GYM ARC Pump Shop building rebuilt]]
+- [[2026-10-21 GYM ARC Unique alter popups]]
+- [[2026-10-21 GYM ARC Trainer rolls]]
+- [[2026-10-21 GYM ARC New trainers 5-8]]
+- [[2026-10-21 GYM ARC Starter gym layout]]
+- [[2026-10-21 GYM ARC Old starter gym restored]]
+- [[2026-10-21 GYM ARC UI cleanup]]
+- [[2026-10-21 GYM ARC Alter textures fix]]
+- [[GYM ARC - Bug - Alter textures only change color]]
+- [[2026-10-22 GYM ARC Developer product sales]]
+- [[2026-10-22 GYM ARC Trainer Agency redesign]]
+- [[2026-10-22 GYM ARC Roll reveal and trainer boost fix]]
+- [[2026-10-22 GYM ARC Evolution names and server messages]]
+- [[2026-10-22 GYM ARC Roll reveal screen]]
+- [[2026-10-23 GYM ARC Sneakers removed]]
+- [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]]
+- [[2026-10-23 GYM ARC Chrome reset]]
+- [[2026-10-23 GYM ARC Alters shop and fixes]]
+- [[2026-10-23 GYM ARC Trainer screens to the references]]
+- [[2026-10-23 GYM ARC Chart discovery and aura panel]]
+- [[2026-10-23 GYM ARC Pump Shop premium]]
+- [[2026-10-23 GYM ARC Trainer odds and group gift]]
+- [[2026-10-23 GYM ARC Cinematic roll cutscenes]]
+- [[2026-10-23 GYM ARC Roll result card comes alive]]
+- [[2026-10-23 GYM ARC Roll card side layout and NEXT pill outline]]
+- [[2026-10-23 GYM ARC Growth Spurt card quiet outline]]
+- [[2026-10-23 GYM ARC Active boost tiles half size]]
+- [[2026-10-23 GYM ARC Menu camera flyover]]
+- [[2026-10-23 GYM ARC Store passes premium restyle]]
+- [[2026-10-23 GYM ARC Pro Gym rearrange and makeover]]
+- [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]]
+- [[2026-10-22 GYM ARC Unlock guides]]
+- [[2026-10-22 GYM ARC New UI applied]]
+- [[2026-10-22 GYM ARC Daily streak redesign]]
+- [[GYM ARC - Uploaded images 21-22 Oct]]
+- [[2026-10-22 GYM ARC Top bar, aura perks, hex rules]]
+- [[2026-10-22 GYM ARC HUD back in the top bar]]
+- [[2026-10-22 GYM ARC Prompt - 46 HUD back in the top bar]]
+- [[GYM ARC - Unlock Guides]]
+- [[2026-10-21 GYM ARC Funnel fixes]]
+- [[2026-10-21 GYM ARC Trainer outfits and gear]]
+- [[2026-10-21 GYM ARC Audit follow-ups]]
+- [[Handoff]]
 - Prompts: the `Prompts` folder (every prompt, saved as it was sent)
 - Screenshots: the `Screenshots` folder (copies of the repo's `screenshots/`)
 
@@ -76,6 +217,13 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Economy and Daily Rewards]]
 - [[GYM ARC - Energy Shakes]]
 - [[GYM ARC - Features index]]
+- [[GYM ARC - Boosts Inventory]]
+- [[GYM ARC - Pump Shop]]
+- [[GYM ARC - Undiscovered items]]
+- [[GYM ARC - Sneakers]]
+- [[GYM ARC - Pro Gym expansion]]
+- [[GYM ARC - Powerlifting Gym]]
+- [[GYM ARC - Body Alters]]
 - [[GYM ARC - Gains and EXP]]
 - [[GYM ARC - Game Feel]]
 - [[GYM ARC - Genetics]]
@@ -195,6 +343,9 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bug - Rep flash hard to see on light skin]]
 - [[GYM ARC - Bug - Rep popup numbers very big]]
 - [[GYM ARC - Bug - Right cards over the top bar]]
+- [[GYM ARC - Bug - Inner quad bulge]]
+- [[GYM ARC - Bug - Mirror and statue bodies too narrow]]
+- [[GYM ARC - Bug - Two crews with the same tag]]
 - [[GYM ARC - Bug - Roblox spawn pad in the menu shot]]
 - [[GYM ARC - Bug - Saves could be cut off at shutdown]]
 - [[GYM ARC - Bug - Scripts cannot upload meshes]]
@@ -249,6 +400,9 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-14 GYM ARC Final UI Black and Gold]]
 - [[2026-10-14 GYM ARC REP PUMP and menu fixes]]
 - [[2026-10-15 GYM ARC Menu art]]
+- [[2026-10-19 GYM ARC Owner changes]]
+- [[2026-10-20 GYM ARC Body lag]]
+- [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
 - [[2026-10-04 GYM ARC Prompt - Design brief]]
@@ -312,6 +466,94 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-15 GYM ARC Prompt - Right side cards collapse]]
 - [[2026-10-15 GYM ARC Prompt - Store loads slowly]]
 - [[2026-10-15 GYM ARC Prompt - Test with a fresh player]]
+- [[2026-10-15 GYM ARC Prompt - Top crews member view]]
+- [[2026-10-19 GYM ARC Prompt - 1 Document owner changes]]
+- [[2026-10-19 GYM ARC Prompt - 2 Inner quad bulge]]
+- [[2026-10-19 GYM ARC Prompt - 3 Mirror statue width and duplicate crew tags]]
+- [[2026-10-19 GYM ARC Prompt - 4 Upper traps missing]]
+- [[2026-10-19 GYM ARC Prompt - 5 Top crews member view]]
+- [[2026-10-19 GYM ARC Prompt - 6 Install Graphify]]
+- [[2026-10-19 GYM ARC Prompt - 7 Wide traps and round shoulders]]
+- [[2026-10-19 GYM ARC Prompt - 8 Fill the back and add adductors]]
+- [[2026-10-19 GYM ARC Prompt - 9 Joint holes trainer walk run and fuller chest]]
+- [[2026-10-19 GYM ARC Prompt - 10 Fix flex poses]]
+- [[2026-10-19 GYM ARC Prompt - 11 Trainer heights]]
+- [[2026-10-19 GYM ARC Prompt - 12 Bigger upper traps]]
+- [[2026-10-19 GYM ARC Prompt - 13 Remove inner quad ball]]
+- [[2026-10-20 GYM ARC Prompt - 13 Find the body lag]]
+- [[2026-10-20 GYM ARC Prompt - 14 Boosts inventory]]
+- [[2026-10-20 GYM ARC Prompt - 15 Cheap pump, blob shadows, light shadows]]
+- [[2026-10-20 GYM ARC Prompt - 15 Upper traps texture and back shape]]
+- [[2026-10-20 GYM ARC Prompt - 16 Beta tester badge]]
+- [[2026-10-20 GYM ARC Prompt - 17 Playtest like a real player]]
+- [[2026-10-20 GYM ARC Prompt - 18 Posing show every 5 minutes]]
+- [[2026-10-20 GYM ARC Prompt - 19 Coins useful again (shops)]]
+- [[2026-10-21 GYM ARC Prompt - 20 Playtest fixes]]
+- [[2026-10-21 GYM ARC Prompt - 23 Rebuild PUMP SHOP building]]
+- [[2026-10-21 GYM ARC Prompt - 22 Unique alter popups]]
+- [[2026-10-21 GYM ARC Prompt - 24 Trainer rolls]]
+- [[2026-10-21 GYM ARC Prompt - 25 New trainers 5-8]]
+- [[2026-10-21 GYM ARC Prompt - 26 Starter gym layout]]
+- [[2026-10-21 GYM ARC Prompt - 28 UI cleanup]]
+- [[2026-10-21 GYM ARC Prompt - 28b Boosts work like tools]]
+- [[2026-10-21 GYM ARC Prompt - 38 Alter textures not showing]]
+- [[2026-10-21 GYM ARC Prompt - 38b Bronze tan and head color]]
+- [[2026-10-22 GYM ARC Prompt - Skip button after 5 seconds]]
+- [[2026-10-22 GYM ARC Prompt - GO TO buttons teleport]]
+- [[2026-10-22 GYM ARC Prompt - Agency odds board fixes]]
+- [[2026-10-22 GYM ARC Prompt - Lifting voices grunts]]
+- [[2026-10-22 GYM ARC Prompt - 39 Unlock guides]]
+- [[2026-10-22 GYM ARC Prompt - 39b Unlock guides follow-up]]
+- [[2026-10-22 GYM ARC Prompt - 40 Apply all new UI]]
+- [[2026-10-22 GYM ARC Prompt - 41 Title screen layout]]
+- [[2026-10-22 GYM ARC Prompt - 42 Daily streak redesign]]
+- [[2026-10-22 GYM ARC Prompt - 43 HUD top bar cleanup]]
+- [[2026-10-22 GYM ARC Prompt - 44 Visible hex mesh]]
+- [[2026-10-22 GYM ARC Prompt - 45 Transparent art, aura perks, top bar]]
+- [[2026-10-22 GYM ARC Prompt - 27b Rarity roll reveal and trainer boost fix]]
+- [[2026-10-22 GYM ARC Prompt - 27c Trainer boost numbers]]
+- [[2026-10-23 GYM ARC Prompt - 48 Evolution names and server messages]]
+- [[2026-10-23 GYM ARC Prompt - 49 Roll reveal screen]]
+- [[2026-10-23 GYM ARC Prompt - 35b Remove sneakers]]
+- [[2026-10-23 GYM ARC Prompt - 35c Remove all shoes]]
+- [[2026-10-23 GYM ARC Prompt - 53a Tutorial restyle]]
+- [[2026-10-23 GYM ARC Prompt - 53 Tutorial and toast cleanup]]
+- [[2026-10-23 GYM ARC Prompt - Coach dialog spacing]]
+- [[2026-10-23 GYM ARC Prompt - Machine controls equal width]]
+- [[2026-10-23 GYM ARC Prompt - SHOP never locked]]
+- [[2026-10-23 GYM ARC Prompt - Shake step tap STOP first]]
+- [[2026-10-23 GYM ARC Prompt - Top crews to 25]]
+- [[2026-10-23 GYM ARC Prompt - Chrome reset]]
+- [[2026-10-23 GYM ARC Prompt - PLAY and SHOP buttons]]
+- [[2026-10-23 GYM ARC Prompt - PLAY and SHOP colours]]
+- [[2026-10-23 GYM ARC Prompt - NEXT alter pill full art]]
+- [[2026-10-23 GYM ARC Prompt - Strength leaderstat]]
+- [[2026-10-23 GYM ARC Prompt - Alter ready pill and popup]]
+- [[2026-10-23 GYM ARC Prompt - 52 Match the trainer references]]
+- [[2026-10-23 GYM ARC Prompt - Next evolution button]]
+- [[2026-10-23 GYM ARC Prompt - Remove EVOLVE tag]]
+- [[2026-10-23 GYM ARC Prompt - Rounded tier backgrounds]]
+- [[2026-10-23 GYM ARC Prompt - Ready glow]]
+- [[2026-10-23 GYM ARC Prompt - Evolutions chart undiscovered stages]]
+- [[2026-10-23 GYM ARC Prompt - Aura detail panel like alters]]
+- [[2026-10-23 GYM ARC Prompt - Pump Shop premium restyle]]
+- [[2026-10-23 GYM ARC Prompt - Trainer rarities, odds and group gift]]
+- [[2026-10-23 GYM ARC Prompt - 55 Cinematic roll cutscenes]]
+- [[2026-10-23 GYM ARC Prompt - NEXT pill without bicep]]
+- [[2026-10-23 GYM ARC Prompt - 56 Roll result card comes alive]]
+- [[2026-10-23 GYM ARC Prompt - 57 Roll card side layout and NEXT pill outline]]
+- [[2026-10-23 GYM ARC Prompt - 58 Growth Spurt card quiet outline]]
+- [[2026-10-23 GYM ARC Prompt - 58 Pro Gym lights, gym pacing, Powerlifting Gym]]
+- [[2026-10-23 GYM ARC Prompt - 58 Pro Gym lights and windows, then Garage Gym]]
+- [[2026-10-23 GYM ARC Prompt - 59 Active boost tiles half size]]
+- [[2026-10-23 GYM ARC Prompt - 60 Menu camera flyover]]
+- [[2026-10-23 GYM ARC Prompt - 61 Store passes premium restyle]]
+- [[2026-10-23 GYM ARC Prompt - 50 Pro Gym rearrange and makeover]]
+- [[2026-10-21 GYM ARC Prompt - 32 Restore the old starter gym]]
+- [[2026-10-21 GYM ARC Prompt - 36 Pro Gym expansion heavier machines]]
+- [[2026-10-21 GYM ARC Prompt - 37 UI style match A and B]]
+
+- [[2026-10-23 GYM ARC Prompt - Coach Dex portrait muscles and dialog wrap]]
 
 ### Config
 - [[GYM ARC - Config values]]

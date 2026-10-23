@@ -17,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local WestLayout = require(Shared:WaitForChild("WestLayout"))
 
 local CityPremium = {}
 
@@ -284,8 +285,8 @@ function CityPremium.streetscape(kit: any, parent: Instance, cx: number, cz: num
 			kit.mk(folder, Vector3.new(4.5, 1.4, 4.5), CFrame.new(p + Vector3.new(0, 0.7, 0)), Color3.fromRGB(46, 46, 50), Enum.Material.Concrete, { name = "Planter" })
 			local h = rng:NextNumber(9, 13)
 			deco(folder, Vector3.new(0.9, h, 0.9), CFrame.new(p + Vector3.new(0, 1.4 + h / 2, 0)), Color3.fromRGB(48, 34, 26), Enum.Material.Wood, { shadow = true })
-			deco(folder, Vector3.one * rng:NextNumber(7, 9), CFrame.new(p + Vector3.new(0, 1.4 + h, 0)), Color3.fromRGB(24, 54, 32), Enum.Material.Grass, { shape = Enum.PartType.Ball, shadow = true })
-			deco(folder, Vector3.one * rng:NextNumber(5, 6.5), CFrame.new(p + Vector3.new(rng:NextNumber(-1.5, 1.5), 1.4 + h + 2.5, rng:NextNumber(-1.5, 1.5))), Color3.fromRGB(30, 62, 36), Enum.Material.Grass, { shape = Enum.PartType.Ball, shadow = true })
+			deco(folder, Vector3.one * rng:NextNumber(7, 9), CFrame.new(p + Vector3.new(0, 1.4 + h, 0)), Color3.fromRGB(48, 82, 42), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
+			deco(folder, Vector3.one * rng:NextNumber(5, 6.5), CFrame.new(p + Vector3.new(rng:NextNumber(-1.5, 1.5), 1.4 + h + 2.5, rng:NextNumber(-1.5, 1.5))), Color3.fromRGB(64, 100, 50), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
 		end
 		-- bench + bin
 		local bp = base + tangent * (inner * 0.03)
@@ -338,11 +339,13 @@ end
 
 local function water(kit: any, parent: Instance)
 	local terrain = workspace.Terrain
-	terrain.WaterColor = Color3.fromRGB(10, 18, 32)
-	terrain.WaterReflectance = 1
-	terrain.WaterTransparency = 0.25
-	terrain.WaterWaveSize = 0.08
-	terrain.WaterWaveSpeed = 7
+	-- (2026-10-23, owner: "better water"): deeper sea colour, see a little into it, real swell;
+	-- DayCycle tints it through the day
+	terrain.WaterColor = Color3.fromRGB(14, 34, 44)
+	terrain.WaterReflectance = 0.85
+	terrain.WaterTransparency = 0.55
+	terrain.WaterWaveSize = 0.16
+	terrain.WaterWaveSpeed = 9
 	local o = E + RING
 	local far = 1500
 	local regions = {
@@ -376,12 +379,18 @@ local function distantSkyline(kit: any, parent: Instance)
 	for _, side in { { Vector3.new(0, 0, -1), Vector3.new(1, 0, 0) }, { Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1) }, { Vector3.new(0, 0, 1), Vector3.new(1, 0, 0) } } do
 		local n, t = side[1], side[2]
 		for k = -14, 14 do
-			local dist = o + 1350 + rng:NextNumber(0, 250)
+			-- on the far shore, between the water and the suburbs' street (Mainland)
+			local dist = o + 1560 + rng:NextNumber(0, 100)
 			local along = k * 150 + rng:NextNumber(-40, 40)
 			local h = rng:NextNumber(60, 320)
 			local w = rng:NextNumber(50, 110)
 			local p = n * dist + t * along
-			kit.deco(folder, Vector3.new(w, h, w), CFrame.new(p.X, h / 2 - 2, p.Z), Color3.fromRGB(12, 14, 20), Enum.Material.SmoothPlastic)
+			-- (clear of the coastal highway's viaduct on the west side)
+			if WestLayout.inCorridor(p, 80) then
+				continue
+			end
+			-- (2026-10-23: blue-grey glass, so by day they read as far towers, not black blocks)
+			kit.deco(folder, Vector3.new(w, h, w), CFrame.new(p.X, h / 2 - 2, p.Z), Color3.fromRGB(62, 70, 82), Enum.Material.Glass, { reflectance = 0.15 })
 			for _ = 1, rng:NextInteger(2, 4) do
 				local y = rng:NextNumber(10, h - 6)
 				local c = if rng:NextNumber() < 0.6 then WARM else COOL
@@ -415,7 +424,7 @@ local function monorailTrack(kit: any, parent: Instance)
 	local step = total / count
 	local R = E + Config.Monorail.Offset
 	local cornerStart = R - Config.Monorail.CornerRadius
-	local concrete = Color3.fromRGB(150, 150, 158)
+	local concrete = Color3.fromRGB(92, 94, 100) -- (darker: the bright grey stood out at night)
 	for k = 0, count - 1 do
 		local a = CityLayout.monorailSample(k * step)
 		local b = CityLayout.monorailSample((k + 1) * step)
@@ -429,7 +438,7 @@ local function monorailTrack(kit: any, parent: Instance)
 		-- pillars on the straights, never on a road or the highway
 		if k % 2 == 0 then
 			local onCorner = math.abs(a.X) > cornerStart - 1 and math.abs(a.Z) > cornerStart - 1
-			local overHighway = a.X > cornerStart and math.abs(a.Z) < HW + 20
+			local overHighway = math.abs(a.X) > cornerStart and math.abs(a.Z) < HW + 20 -- (east and west)
 			if not onCorner and not overHighway then
 				local ph = a.Y - 1.3 - CURB
 				kit.mk(folder, Vector3.new(ph, 3.6, 3.6), CFrame.new(a.X, CURB + ph / 2, a.Z) * CFrame.Angles(0, 0, math.pi / 2), concrete, Enum.Material.Concrete, { shape = Enum.PartType.Cylinder })

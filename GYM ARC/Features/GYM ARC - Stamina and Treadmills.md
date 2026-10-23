@@ -53,3 +53,14 @@ A slim bar at the very bottom center of the screen, 280 wide, 10 px above the ed
 A Robux boost (see [[GYM ARC - Monetization]]): while it runs, reps and the treadmill cost no stamina and the bar stays full, gold, with a slow shine and an infinity sign; a gold chip above it counts down. Time left is saved and only runs while you play.
 
 ![[GYM ARC/Screenshots/endless_stamina_hud_lifting.jpg]]
+
+## Pacing and recovering (21 Oct, prompt 20)
+All lifting stamina numbers are in `Config/Stamina.Pacing` (by Growth Spurt):
+| From spurt | Cost per rep | Empty to full | About |
+|---|---|---|---|
+| 0 | x0.25 | 10 s | 66+ reps (60-90 s of fast tapping), 13% waiting |
+| 2 | x0.45 | 10 s | 37 reps, about 13 s waiting per minute |
+| 4 | x0.5 | 10 s | 33 reps, about 14 s per minute |
+- Running out starts **recovering**: no reps (taps or auto reps) until the bar is full, and it refills right away on the machine (no need to get off). The bar turns red and reads "RECOVERING 6s", with "Growth Spurt needs LEGS" (or a tip) above it. The old sticky "Out of stamina" toast is gone.
+- The DRINK SHAKE button sits left of the stamina bar now (44 px tall), on and off machines. It used to be in the right column, which folds away on a machine.
+- Measured in Studio: a full tapping set lasted ~48 s with the old first numbers, recovering 10 s; the numbers above are the retuned ones.

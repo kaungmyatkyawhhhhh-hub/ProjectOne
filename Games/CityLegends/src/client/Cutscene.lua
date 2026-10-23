@@ -600,7 +600,7 @@ function Cutscene.play()
 		if titleShownAt and t - titleShownAt > 4 then
 			finished = true
 		end
-		if heroX > TUNNEL_X0 + C.TunnelLength + 500 then
+		if heroX > TUNNEL_X0 + C.TunnelLength + 300 then -- (before the Legends Loop's junction)
 			finished = true
 		end
 	end)

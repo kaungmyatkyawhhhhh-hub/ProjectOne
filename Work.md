@@ -14,3 +14,4 @@
 - Claude Code (cloud sessions) and the Claude app
 - Obsidian, synced to GitHub with the Obsidian Git plugin
 - Figma (UI design, from 2026-10-12). Connected to Claude; free Starter plan, so Claude can only make a few Figma calls a month
+- Gemini: connected to Claude cloud sessions (2026-10-16). Claude uses it with the watch plugin to watch YouTube videos

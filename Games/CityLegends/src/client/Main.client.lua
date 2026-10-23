@@ -21,6 +21,13 @@ local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local BuildingSkin = require(script.Parent:WaitForChild("BuildingSkin"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
 local Weather = require(script.Parent:WaitForChild("Weather"))
+local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
+local Police = require(script.Parent:WaitForChild("Police"))
+local BankClient = require(script.Parent:WaitForChild("BankClient"))
+local Activities = require(script.Parent:WaitForChild("Activities"))
+local Pedestrians = require(script.Parent:WaitForChild("Pedestrians"))
+local HouseClient = require(script.Parent:WaitForChild("HouseClient"))
+local ChauffeurClient = require(script.Parent:WaitForChild("ChauffeurClient"))
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -38,6 +45,7 @@ local Progress = remotes:WaitForChild("Progress") :: RemoteEvent
 local ClaimDaily = remotes:WaitForChild("ClaimDaily") :: RemoteFunction
 
 Driving.init()
+OnFoot.init()
 
 -- wait for the server to finish building the city
 local city = workspace:WaitForChild("City", 120)
@@ -58,6 +66,7 @@ if city then
 end
 WorldFx.start()
 Weather.init() -- rain cycle (starts raining), wet roads, mist, rain sound
+require(script.Parent:WaitForChild("DayCycle")).start() -- morning, day, sunset, night
 
 ---------------------------------------------------------------------
 -- Data
@@ -193,6 +202,14 @@ startOrbit()
 UI.showLoading("Filling the streets with traffic...")
 UI.fade(false, 0.01)
 Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualityScale(), 0.6, 1)), focusPoint)
+Police.init()
+BankClient.init()
+Activities.init()
+Pedestrians.start(WorldFx.qualityScale())
+ChauffeurClient.init()
+require(script.Parent:WaitForChild("LuxeClient")).init() -- casino VIP, the gem shop, heist messages
+require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, bottom left (N toggles)
+require(script.Parent:WaitForChild("ChallengesClient")).init() -- drifts, speed traps, jumps, leaderboard (B)
 UI.hideLoading()
 
 ---------------------------------------------------------------------
@@ -231,6 +248,7 @@ local function tryAttach(model: Instance)
 			warn("[CityLegends] car skin failed:", errSkin)
 		end
 		stopOrbit()
+		OnFoot.reset()
 		Traffic.clearAround(model:GetPivot().Position, 35)
 		Driving.attach(model)
 		UI.showHud(true)
@@ -263,9 +281,24 @@ local function requestDrive(id: string)
 	end)
 end
 
+-- the Legends Grand Hotel: the valet takes your car at the bay and brings it back to the door
+require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)
+require(script.Parent:WaitForChild("CustomsClient")).init() -- Legends Customs (after the hotel: it chains the drive action)
+
 local showMenu: () -> ()
 
-local function openGarage(fromMenu: boolean)
+-- island houses: a bay car's "Drive" spawns it on the driveway (the server picks the spot)
+task.spawn(HouseClient.init, function(id: string)
+	UI.closeGarage()
+	requestDrive(id)
+end)
+
+-- Legends Motors, the dealership: its prompts open the buy screen, and cars leave by its bay
+local DealerOpen = remotes:WaitForChild("DealerOpen") :: RemoteEvent
+local DealerCall = remotes:WaitForChild("DealerCall") :: RemoteFunction
+
+-- the garage: "my cars" from the HUD (CARS, G), or every car to buy at the dealership
+local function openGarage(fromMenu: boolean, dealer: boolean?, focus: string?)
 	local fresh = GetData:InvokeServer()
 	if fresh then
 		data = fresh
@@ -280,15 +313,27 @@ local function openGarage(fromMenu: boolean)
 		end,
 		drive = function(id: string)
 			UI.hideMainMenu()
+			if dealer then
+				-- out of the dealership's drive-out bay
+				pcall(function()
+					DealerCall:InvokeServer("door")
+				end)
+			end
 			requestDrive(id)
 		end,
 		close = function()
-			if fromMenu and not Driving.isDriving() then
+			if fromMenu and not Driving.isDriving() and not OnFoot.active then
 				showMenu()
 			end
 		end,
+		dealer = dealer,
+		focus = focus,
 	})
 end
+
+DealerOpen.OnClientEvent:Connect(function(carId: any)
+	openGarage(false, true, if type(carId) == "string" then carId else nil)
+end)
 
 showMenu = function()
 	UI.showHud(false)
@@ -311,12 +356,37 @@ UI.onCameraButton = function()
 	Driving.toggleCamera()
 end
 
+-- the car stock market (K or the MARKET button)
+local MarketUI = require(script.Parent:WaitForChild("MarketUI"))
+MarketUI.init()
+UI.onMarketButton = MarketUI.toggle
+
+-- put your car away (owner, 2026-10-23: "add a function to despawn car"): out of it first if
+-- you're in it, then the server removes it; G brings one back from the garage
+local despawnRemote = remotes:WaitForChild("DespawnCar") :: RemoteEvent
+local function despawnCar()
+	if Driving.isDriving() then
+		OnFoot.getOut()
+		if Driving.isDriving() then
+			return -- couldn't get out (too fast): OnFoot said why
+		end
+	end
+	if not OnFoot.active then
+		return
+	end
+	despawnRemote:FireServer()
+	UI.toast("Car put away · G for the garage", Config.Theme.Accent)
+end
+UI.onDespawnButton = despawnCar
+
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.G and Driving.isDriving() then
+	if input.KeyCode == Enum.KeyCode.G and (Driving.isDriving() or OnFoot.active) then
 		toggleGarage()
+	elseif input.KeyCode == Enum.KeyCode.Delete then
+		despawnCar()
 	end
 end)
 

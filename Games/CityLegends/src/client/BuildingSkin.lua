@@ -25,6 +25,11 @@ type Maps = { color: any, emissive: any }
 type Surface = { normal: any, rough: any, metal: any }
 
 local keepAlive: { any } = {}
+-- every facade texture, so the lit windows can follow the time of day (DayCycle)
+local textures: { Texture } = {}
+local NIGHT_GLOW = 1.4
+local DAY_GLOW = 0.1 -- by day the rooms read as dark glass, not glowing
+local glow = NIGHT_GLOW
 
 local function image(buf: buffer): any
 	local N = FacadeTex.SIZE
@@ -49,6 +54,14 @@ local function buildLibrary(): ({ [string]: Maps }, { [string]: Surface })
 		end
 	end
 	return moods, surfaces
+end
+
+-- night 1 .. day 0 (DayCycle): how brightly the lit rooms glow
+function BuildingSkin.setNight(n: number)
+	glow = DAY_GLOW + (NIGHT_GLOW - DAY_GLOW) * math.clamp(n, 0, 1)
+	for _, tex in textures do
+		tex.EmissiveStrength = glow
+	end
 end
 
 function BuildingSkin.apply(city: Instance): boolean
@@ -88,7 +101,7 @@ function BuildingSkin.apply(city: Instance): boolean
 					tex.Face = face
 					tex.ColorMapContent = maps.color
 					tex.EmissiveMaskContent = maps.emissive
-					tex.EmissiveStrength = 1.4
+					tex.EmissiveStrength = glow
 					tex.EmissiveTint = Color3.new(1, 1, 1)
 					tex.NormalMapContent = surf.normal
 					tex.RoughnessMapContent = surf.rough
@@ -97,6 +110,7 @@ function BuildingSkin.apply(city: Instance): boolean
 					tex.StudsPerTileV = FacadeTex.tileStudsV()
 					tex.OffsetStudsU = offsetU
 					tex.Parent = tower
+					table.insert(textures, tex)
 				end
 			end
 			-- the texture carries the look now; a plain matte core avoids glass refraction artefacts

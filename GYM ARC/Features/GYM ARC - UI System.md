@@ -12,7 +12,7 @@ The owner's UI redesign (13 Oct): every screen rebuilt to the new mockups with i
 ## How it works (UI v2, 13 Oct evening: Gym League style)
 The dark image-piece redesign from earlier on 13 Oct is cancelled by the owner. The UI now follows the v2 mockups and style guide:
 - **Look:** FredokaOne text, white with a black outline; Montserrat for descriptions. Buttons are glossy color gradients (green, red, gold, blue, gray, purple, orange, teal) with a darker bottom edge and a lighter border in their own color, like the left menu tiles. Panels are dark with rounded corners, tabs sit above them, the red X has a white border, and the game blurs behind an open menu.
-- **Left menu:** the owner's OLD colored tiles stay (Shop gold first, Stats, Muscles, Titles, Genetics, Poses, Crew, Quests, Trainers; Wardrobe hidden while the Wardrobe feature is off). Same size and gap everywhere, a red number badge for news, a "<" tab that folds them away (remembered per player), and they fold away by themselves while you lift.
+- **Left menu:** the owner's OLD colored tiles stay (Shop gold first, Stats, Muscles, Titles, Genetics, Poses, Crew, Quests, Trainers; Wardrobe hidden while the Wardrobe feature is off). Same size and gap everywhere, a red number badge for news, a "<" tab that folds them away (remembered per player), and they fold away by themselves while you lift. (23 Oct, prompt 65: the whole nav drawn at 0.8 by one UIScale, never under 44 px a tile on phones; [[2026-10-23 GYM ARC Left nav smaller]].)
 - **Top bar:** dark round pills: coins, height "6'4" / 7'0"", level on the left; Daily Reward, Quests and the settings gear on the right.
 - **Right side:** the DAILY QUESTS card and the gold GROW tile (READY when you can grow).
 - **Bottom:** a big blue stamina bar ("82/100") with the active boost icons and their timers above it.
@@ -157,3 +157,11 @@ Labels inside cards and tiles now always stay inside, with 8 px space on each si
 
 ## Under the top bar (15 Oct)
 Everything placed "under the top bar" (the right-side cards, hints, toasts, the left menu) now works out that spot from the screen layout settings, so it is right from the first frame: 8 px under Roblox's top bar. See [[GYM ARC - Bug - Right cards over the top bar]].
+
+## Check of the owner's Studio changes (19 Oct)
+No UI script, Theme, Kit or UI config changed since the last commit (15 Oct). StarterGui is still empty (all UI built in code). See [[2026-10-19 GYM ARC Owner changes]].
+
+## UI cleanup (21 Oct, prompt 28; [[2026-10-21 GYM ARC UI cleanup]])
+- Side menu: exactly 8 buttons (Shop, Stats, Muscles, Inventory, Genetics, Poses, Crew, Trainers). No new side buttons: new features go inside existing windows.
+- Inventory: 3 tabs ITEMS / GEAR / LOOKS (LOOKS has chips All / Alters / Auras / Titles); a tab shows once its feature is open for you. Big tiles, 5 a row, and empty states that say where to get things.
+- No DRINK SHAKE button; the hotbar (`HotbarClient`) is pinned bottom centre, and `HudBottom.SetLift` moves the stamina bar and boost timers above it.

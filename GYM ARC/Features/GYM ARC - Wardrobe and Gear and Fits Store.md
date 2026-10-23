@@ -40,3 +40,21 @@ Buy gym gear and outfits with coins at the clothing store in town, then wear the
 ![[GYM ARC/Screenshots/s3_clothing-store-interior_after.png]]
 ![[GYM ARC/Screenshots/task2_fit_stringer_front.png]]
 ![[GYM ARC/Screenshots/skate-wardrobe_after.png]]
+
+## The looks system now (checked 19 Oct)
+Nothing here changed in the owner's 19 Oct Studio work. What a player can change today:
+- **Wardrobe: still OFF** (`Config/Features.Wardrobe = false`): no Wardrobe tile, tops can't be bought or worn.
+- **Gear that works:** lifting belt, headband, wrist wraps, shaker, skateboard deck and wheels (bought at the clothing store with coins, one per slot). Saved in the player's save as `cosmetics.owned` / `cosmetics.equipped`.
+- **Top and shorts color:** saved as `settings.top` (default "Shirtless") and `settings.shorts` (default "Black"); with the Wardrobe off nobody can change them.
+- **Auras:** saved as `auras.owned` / `auras.equipped`, picked in the INVENTORY window ([[GYM ARC - Aura]]).
+- **Body look:** not a choice: it comes from your muscles, height and genetics frame ([[GYM ARC - Muscles and Bodies]]). Your own Roblox head, face, hair, hats and skin color stay; back, front and neck accessories are removed.
+- **Your own Roblox clothes:** your avatar's classic Shirt / Pants are worn on the muscle meshes (without them you are shirtless in the game shorts). Layered 3D clothing hides the muscles.
+
+## Gear meshes (21 Oct, prompt 34)
+- Belts, wrist wraps, lifting straps and knee sleeves are now the planner's Blender meshes (`ReplicatedStorage.GearMeshes`, built by `Shared/Gear`, fitted to the muscles you see by `GearClient`): a leather belt with stitching and a steel buckle, wraps with stripes and a thumb loop, straps with a tail, knee sleeves with bands. Color = the item's color (PUMP SHOP levels: the level color with a matching trim).
+![[GYM ARC/Screenshots/trainer_outfits/player_gear_g000.jpg]]
+
+## Gear rework (23 Oct, prompt 59, [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]])
+- Only two gear pieces now: LIFTING BELT (+5% / +10% lower body: legs, back, core) and WRIST WRAPS (+5% / +10% upper body: chest, shoulders, arms). Basic 750 / Pro 4,000 at Coach Dex. Elite / Champion off sale (owners keep them).
+- The best level owned counts, worn or not. Straps and knee sleeves are gone: once per player they turned into the matching piece (a higher level) or their coins came back.
+- Colours like the pictures: Basic brown leather, Pro black + silver, Elite purple + silver, Champion gold (Config/PumpShop.GearIcons).

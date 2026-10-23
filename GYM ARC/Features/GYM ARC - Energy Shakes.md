@@ -43,3 +43,7 @@ A drink that refills stamina and gives bonus gains for a short time.
 ![[GYM ARC/Screenshots/meals_hud_timers.jpg]]
 ![[GYM ARC/Screenshots/meals_drinking_shaker.jpg]]
 ![[GYM ARC/Screenshots/meals_coconut_cart_beach.jpg]]
+
+## Now the inventory's Protein Shake (21 Oct, prompt 14)
+The Energy Shakes in the bag are the **Protein Shake** item of the Inventory's Boosts tab now (same effect: full stamina, +50% EXP for 30 s, stacking to 90 s). Old saves' shakes moved over on join (`data.shakes` -> `data.items.Shake`). The quick DRINK SHAKE button by the stamina bar uses one (it shows "0" and turns grey when you have none). The Shake Bundle product adds 3 to the inventory and offers USE NOW instead of drinking them. See [[GYM ARC - Boosts Inventory]].
+Note: the smoothie bar also sells a "Protein Shake" (+20% EXP for 5 min, Config/Meals). Two different things with the same name: rename one?

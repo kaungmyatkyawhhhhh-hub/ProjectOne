@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 tags: [gymarc, prompt, performance]
-status: done (phone test pending)
+status: done (phone / 10-player numbers: owner)
 ---
 Back to [[00 GYM ARC Home|GYM ARC Home]]
 

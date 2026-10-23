@@ -72,17 +72,29 @@ local REAL_WB: { [string]: number } = {
 	bnw_m3_e92 = 2.761, bnw_m3_f80 = 2.812, bnw_m4_f82 = 2.812, bnw_m5_e60 = 2.889, bnw_m6_v10 = 2.78, bentz_cla45 = 2.699,
 	bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
 	dodger_challenger = 2.946, bnw_x6 = 2.975, toyoka_lc300 = 2.85, lexis_lx700 = 2.85, bentz_gle53 = 2.915, byt_u8 = 3.05, bentz_g63 = 2.89,
-	porsha_panamera = 2.95, nisun_gtr = 2.78, nisun_r34 = 2.665, bentz_sl65bs = 2.56, astin_db9 = 2.74, bnw_750li = 3.07, bentz_gls = 3.135, bentz_s680 = 3.396, lambrini_countach = 2.45, astin_vantage = 2.6, ferrara_f430 = 2.6,
+	porsha_panamera = 2.95, nisun_gtr = 2.78, nisun_r34 = 2.665, bentz_sl65bs = 2.56, astin_db9 = 2.74, bnw_750li = 3.21, bentz_gls = 3.135, bentz_s680 = 3.396, lambrini_countach = 2.45, astin_vantage = 2.6, ferrara_f430 = 2.6,
 	lambrini_lp570 = 2.56, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
 	ferrara_458 = 2.65, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,
 	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.772,
 	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lambrini_lp750 = 2.7,
-	bentz_s63 = 3.165, bentz_maybach = 3.39, mazdo_rx8 = 2.7, bnw_m8gc = 3.023, bnw_x7 = 3.105, xiaomo_su7 = 3.0, porsha_boxster = 2.475, lambrini_lp640 = 2.665, mazdo_rx7 = 2.425,
+	bentz_s63 = 3.165, mazdo_rx8 = 2.7, bnw_m8gc = 3.023, bnw_x7 = 3.105, xiaomo_su7 = 3.0, porsha_boxster = 2.475, lambrini_lp640 = 2.665, mazdo_rx7 = 2.425,
 	bentz_gt63s = 3.052, chevo_c7 = 2.71, chevo_c6 = 2.686, chevo_camaro = 2.811,
+	-- the cars of 2026-10-18
+	ferrara_california = 2.67, bugotti_veyron = 2.71, maseroti_levante = 3.004,
+	lexis_lc500 = 2.87, astin_dbx = 3.06, bentz_190e = 2.665, bentz_s65_w221 = 3.165, toyoka_chaser = 2.73,
+	-- cabin donors only (not in the roster): their cabins keep their own size
+	ferrara_458s = 2.65, bentz_c63c = 2.84,
+	-- trims on another car's model (owner, 2026-10-22)
+	bnw_m5_f10 = 2.964, bnw_m5_f90 = 2.982, bentz_e63s = 2.939,
 }
 
 -- cars that share another car's imported model (same body and interior) until they get their own
 CarBuilder.MODEL_ALIAS = {} :: { [string]: string }
+for _, spec in Cars.List do
+	if spec.Model then
+		CarBuilder.MODEL_ALIAS[spec.Id] = spec.Model
+	end
+end
 
 -- An imported model's wheelbase and wheel radius (its own studs), from its Wheels folder
 local function partsBounds(inst: Instance): (Vector3?, Vector3?)
@@ -136,7 +148,7 @@ function CarBuilder.getDims(class: string, id: string?): Dims
 		return cached
 	end
 	local d = table.clone(base)
-	local over = DIM_OVERRIDES[id]
+	local over = DIM_OVERRIDES[id] or DIM_OVERRIDES[Cars.modelOf(id)]
 	if over then
 		for k, v in over do
 			(d :: any)[k] = v

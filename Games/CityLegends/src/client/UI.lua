@@ -35,6 +35,9 @@ UI.onCameraButton = nil :: (() -> ())?
 UI.onUnitsChanged = nil :: ((string) -> ())? -- Settings: "mph" | "kmh"
 UI.onGearboxChanged = nil :: ((string) -> ())? -- Settings: "Auto" | "Manual"
 UI.onDailyClaim = nil :: (() -> ())? -- asks the server to pay the daily gift
+UI.onMarketButton = nil :: (() -> ())? -- opens the car stock market (MarketUI)
+UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (ChauffeurClient)
+UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -225,6 +228,76 @@ function UI.flash(color: Color3)
 	tween(f, 0.5, { BackgroundTransparency = 1 })
 end
 
+-- "Press F to start up": shown when you get in a car with the engine off, until it starts
+-- (owner, 2026-10-17)
+local startPrompt: Frame? = nil
+local startPulse: RBXScriptConnection? = nil
+function UI.startPrompt(show: boolean)
+	if not show then
+		if startPulse then
+			startPulse:Disconnect()
+			startPulse = nil
+		end
+		if startPrompt then
+			local f = startPrompt
+			startPrompt = nil
+			tween(f, 0.25, { BackgroundTransparency = 1 })
+			for _, d in f:GetDescendants() do
+				if d:IsA("TextLabel") then
+					tween(d, 0.25, { TextTransparency = 1, BackgroundTransparency = 1 })
+				elseif d:IsA("UIStroke") then
+					tween(d, 0.25, { Transparency = 1 })
+				end
+			end
+			task.delay(0.3, function()
+				f:Destroy()
+			end)
+		end
+		return
+	end
+	if startPrompt or not hud then
+		return
+	end
+	local f = new("Frame", {
+		Name = "StartPrompt",
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 0.78, 0),
+		Size = UDim2.fromOffset(360, 64),
+		BackgroundColor3 = Theme.Panel,
+		BackgroundTransparency = 0.12,
+		Parent = hud,
+	}, { corner(12), stroke(Theme.Accent, 1.5, 0.15) })
+	local key = label({
+		Text = if UI.isTouch then "START" else "F",
+		TextSize = if UI.isTouch then 15 else 28,
+		Font = Enum.Font.GothamBlack,
+		TextColor3 = Theme.Panel,
+		BackgroundColor3 = Theme.Accent,
+		BackgroundTransparency = 0,
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 12, 0.5, 0),
+		Size = UDim2.fromOffset(if UI.isTouch then 70 else 44, 44),
+		Parent = f,
+	})
+	corner(8).Parent = key
+	label({
+		Text = if UI.isTouch then "Tap to start up" else "Press F to start up",
+		TextSize = 24,
+		Font = Enum.Font.GothamBold,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.new(0, if UI.isTouch then 96 else 70, 0, 0),
+		Size = UDim2.new(1, -80, 1, 0),
+		Parent = f,
+	})
+	startPrompt = f
+	-- a slow pulse on the key so it catches the eye
+	local t0 = os.clock()
+	startPulse = RunService.RenderStepped:Connect(function()
+		key.BackgroundTransparency = 0.25 - 0.25 * math.cos((os.clock() - t0) * 4)
+	end)
+end
+
 local toastToken = 0
 function UI.toast(text: string, color: Color3?)
 	toastToken += 1
@@ -351,6 +424,12 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		box(9, 20, 17, 3, 1.5) -- bottom rail
 		box(10, 24.5, 5.5, 5.5, -1) -- wheels
 		box(21, 24.5, 5.5, 5.5, -1)
+	elseif kind == "car" then
+		-- a car side on: cabin, body, two wheels
+		box(9, 9, 13, 7, 3) -- cabin
+		box(3, 14, 26, 8, 3) -- body
+		box(6.5, 19.5, 7, 7, -1) -- wheels
+		box(18.5, 19.5, 7, 7, -1)
 	elseif kind == "gift" then
 		box(4, 11, 11, 6, 1.5) -- lid (split by the ribbon gap)
 		box(17, 11, 11, 6, 1.5)
@@ -358,6 +437,32 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		box(17, 18, 9, 11, 1.5)
 		box(8.5, 5, 8, 5.5, -1, 30) -- bow loops
 		box(15.5, 5, 8, 5.5, -1, -30)
+	elseif kind == "chart" then
+		-- rising bars and a trend line (the car stock market)
+		box(4, 20, 5, 8, 1)
+		box(11.5, 15, 5, 13, 1)
+		box(19, 18, 5, 10, 1)
+		box(26, 9, 4, 19, 1)
+		box(5, 9, 11, 2.6, 1.3, -32)
+		box(14, 9.5, 9, 2.6, 1.3, 20)
+		box(21, 7, 10, 2.6, 1.3, -38)
+	elseif kind == "despawn" then
+		-- a car seen from the side with a cross over it
+		box(4, 14, 24, 8, 3) -- body
+		box(9, 9, 13, 7, 3) -- cabin
+		box(7, 20, 6, 6, -1) -- wheels
+		box(19, 20, 6, 6, -1)
+		box(14, 1, 3.5, 30, 1.5, 45)
+		box(14, 1, 3.5, 30, 1.5, -45)
+	elseif kind == "phone" then
+		-- a phone with a car key on its screen (the chauffeur service)
+		local body = box(8, 2, 16, 28, 3)
+		body.BackgroundTransparency = 1
+		new("UIStroke", { Color = col, Thickness = math.max(1.5, 3 * k), Parent = body })
+		box(13, 5, 6, 1.6, 0.8) -- earpiece
+		box(11.5, 11, 9, 9, -1) -- key head
+		box(15, 19, 2.6, 7, 0.6) -- key blade
+		box(17, 23, 2.6, 1.8, 0.4)
 	end
 	return canvas
 end
@@ -735,7 +840,9 @@ local function buildCashTab()
 		{ "Z / X / C", "Left blinker · hazards · right blinker" },
 		{ "V", "Camera  (hold RMB to look)" },
 		{ "R", "Reset car to road" },
-		{ "G", "Garage / shop" },
+		{ "Y", "Get out / get in" },
+		{ "G", "My cars" },
+		{ "K", "Car stock market" },
 		{ "M", "Music on / off" },
 	}
 	local panel = new("Frame", {
@@ -823,7 +930,7 @@ local function buildSideButtons()
 		AnchorPoint = Vector2.new(0, 0.5),
 		-- on touch, lift it clear of the steering buttons
 		Position = if UI.isTouch then UDim2.new(0, 14, 0.4, 0) else UDim2.new(0, 20, 0.5, 0),
-		Size = UDim2.fromOffset(size, size * 3 + 20),
+		Size = UDim2.fromOffset(size, size * 6 + 50),
 		BackgroundTransparency = 1,
 		Parent = hud,
 	}, {
@@ -859,8 +966,31 @@ local function buildSideButtons()
 	end
 
 	local settingsBtn = sideButton("gear", "SETTINGS", 1)
-	local shopBtn = sideButton("cart", "SHOP", 2)
+	-- (owner, 2026-10-23: the SHOP became CARS, your own cars; new ones are sold at the dealership)
+	local shopBtn = sideButton("car", "CARS", 2)
 	local giftBtn = sideButton("gift", "GIFTS", 3)
+	local marketBtn = sideButton("chart", "MARKET", 4)
+	marketBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onMarketButton then
+			UI.onMarketButton()
+		end
+	end)
+	-- owner (2026-10-23): "add a function to despawn car"
+	local despawnBtn = sideButton("despawn", "DESPAWN", 6)
+	despawnBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onDespawnButton then
+			UI.onDespawnButton()
+		end
+	end)
+	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)
+	chauffeurBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onChauffeurButton then
+			UI.onChauffeurButton()
+		end
+	end)
 	giftDot = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(1, -6, 0, 6),
@@ -881,7 +1011,7 @@ local function buildSideButtons()
 		return button("", Theme.Accent, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, y), Size = UDim2.fromOffset(120, 32), TextSize = 13, TextColor3 = Theme.Accent, ZIndex = 6, Parent = settingsPanel })
 	end
 	camToggle = settingRow("Camera", "V", 52)
-	camToggle.Text = "CHASE"
+	camToggle.Text = "IMMERSIVE"
 	musicToggle = settingRow("Music", "M", 96)
 	local function refreshMusic()
 		local on = musicOn()
@@ -1466,11 +1596,14 @@ end
 ---------------------------------------------------------------------
 -- Garage
 ---------------------------------------------------------------------
-export type GarageData = { Cash: number, Owned: { string }, Selected: string }
+export type GarageData = { Cash: number, Owned: { string }, Selected: string, Level: number? }
 export type GarageCallbacks = {
 	buy: (string) -> { ok: boolean, message: string, data: GarageData? },
 	drive: (string) -> (),
 	close: (() -> ())?,
+	-- true at the dealership: every car, to buy; otherwise "my cars": only the ones you own
+	dealer: boolean?,
+	focus: string?, -- the car to show first (a turntable's car at the dealership)
 }
 
 local garageFrame: Frame? = nil
@@ -1500,13 +1633,43 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local cash = data.Cash
 	local selectedId = data.Selected
 	local classFilter = "ALL"
+	local level = data.Level or 1
+	-- owner (2026-10-23): the HUD's CARS shows only the cars you have; buying is at the dealership
+	local dealer = callbacks.dealer == true
+	if dealer and callbacks.focus and Cars.ById[callbacks.focus] then
+		selectedId = callbacks.focus :: string
+	elseif not dealer and not owned[selectedId] then
+		selectedId = data.Owned[1] or Cars.StarterId
+	end
+	-- how a car not owned yet can be had: "buy", "level" (opens at a higher level) or "market"
+	local function access(id: string): (string, number)
+		if Cars.isMarketOnly(id) then
+			return "market", 0
+		end
+		local need = Cars.requiredLevel(id)
+		if level < need then
+			return "level", need
+		end
+		return "buy", 0
+	end
 
 	local f = new("Frame", { BackgroundColor3 = Theme.Background, BackgroundTransparency = 0.08, Size = UDim2.fromScale(1, 1), ZIndex = 60, Parent = gui })
 	garageFrame = f
 
 	-- header
 	local header = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(40, 40), Size = UDim2.new(1, -80, 0, 50), ZIndex = 61, Parent = f })
-	label({ Text = "GARAGE", TextSize = 38, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.5, 0, 1, 0), ZIndex = 61, Parent = header })
+	label({ Text = if dealer then Config.Dealership.Name else "MY CARS", TextSize = 38, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.5, 0, 1, 0), ZIndex = 61, Parent = header })
+	label({
+		Text = if dealer then "NEW CARS · BUY HERE, DRIVE OUT OF THE BAY" else "NEW CARS ARE SOLD AT " .. Config.Dealership.Name .. ", THE DEALERSHIP",
+		TextSize = 12,
+		Font = Enum.Font.GothamBold,
+		TextColor3 = Theme.SubText,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.fromOffset(40, 86),
+		Size = UDim2.new(0.6, 0, 0, 14),
+		ZIndex = 61,
+		Parent = f,
+	})
 	local cashText = label({ Text = formatCash(cash), TextColor3 = Theme.Money, TextSize = 26, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -60, 0, 0), Size = UDim2.new(0.4, 0, 1, 0), ZIndex = 61, Parent = header })
 	if callbacks.close then
 		local close = button("✕", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 4), Size = UDim2.fromOffset(42, 42), TextSize = 18, ZIndex = 61, Parent = header })
@@ -1625,11 +1788,29 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		if owned[id] then
 			priceText.Text = "OWNED"
 			priceText.TextColor3 = Theme.Accent
-			actionBtn.Text = "DRIVE"
+			actionBtn.Text = if dealer then "DRIVE OUT" else "DRIVE"
 		else
-			priceText.Text = if spec.Price == 0 then "FREE" else formatCash(spec.Price)
-			priceText.TextColor3 = if cash >= spec.Price then Theme.Money else Theme.Danger
-			actionBtn.Text = "BUY"
+			local how, need = access(id)
+			if how == "market" then
+				priceText.Text = "MARKET ONLY"
+				priceText.TextColor3 = Theme.Warning
+				actionBtn.Text = "CAR MARKET"
+				local prev = Cars.previous(id)
+				local ps = if prev then Cars.ById[prev] else nil
+				msgText.Text = "Find a Showroom one on the car market (K)" .. (if ps and not owned[prev :: string] then " · own the " .. ps.Name .. " first" else "")
+				msgText.TextColor3 = Theme.SubText
+			elseif how == "level" then
+				priceText.Text = formatCash(spec.Price)
+				priceText.TextColor3 = Theme.SubText
+				actionBtn.Text = "LEVEL " .. need
+				msgText.Text = "Unlocks at level " .. need .. " (you're level " .. level .. ")"
+				msgText.TextColor3 = Theme.SubText
+			else
+				priceText.Text = if spec.Price == 0 then "FREE" else formatCash(spec.Price)
+				priceText.TextColor3 = if cash >= spec.Price then Theme.Money else Theme.Danger
+				actionBtn.Text = "BUY"
+				msgText.TextColor3 = Theme.Danger
+			end
 		end
 		for rid, row in rows do
 			local st = row:FindFirstChildOfClass("UIStroke")
@@ -1644,6 +1825,16 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		if owned[id] then
 			UI.closeGarage()
 			callbacks.drive(id)
+			return
+		end
+		local how = access(id)
+		if how == "market" then
+			UI.closeGarage()
+			if UI.onMarketButton then
+				UI.onMarketButton()
+			end
+			return
+		elseif how == "level" then
 			return
 		end
 		actionBtn.Text = "..."
@@ -1666,46 +1857,134 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 
 	refreshList = function()
 		for _, child in list:GetChildren() do
-			if child:IsA("TextButton") then
+			if child:IsA("TextButton") or child.Name == "SeriesHeader" then
 				child:Destroy()
 			end
 		end
 		table.clear(rows)
-		local sorted = table.clone(Cars.List)
-		table.sort(sorted, function(a, b)
-			return a.Order < b.Order
+		-- brands (owner, 2026-10-22: "fit each car into the brands"), then each brand's series, both in
+		-- the order of their cheapest car; cars in series order
+		local function firstOrder(series: any): number
+			local best = math.huge
+			for _, id in series.Ids do
+				local sp = Cars.ById[id]
+				if sp then
+					best = math.min(best, sp.Price * 1000 + sp.Order)
+				end
+			end
+			return best
+		end
+		local brands: { { name: string, order: number, series: { any } } } = {}
+		local brandOf: { [string]: { name: string, order: number, series: { any } } } = {}
+		for _, series in Cars.Series do
+			local name = series.Brand or series.Name
+			local b = brandOf[name]
+			if not b then
+				b = { name = name, order = math.huge, series = {} }
+				brandOf[name] = b
+				table.insert(brands, b)
+			end
+			table.insert(b.series, series)
+			b.order = math.min(b.order, firstOrder(series))
+		end
+		table.sort(brands, function(a, b)
+			return a.order < b.order
 		end)
-		for _, spec in sorted do
-			if classFilter == "ALL" or spec.Class == classFilter then
-				local row: TextButton = new("TextButton", {
-					AutoButtonColor = false,
-					Text = "",
-					Size = UDim2.new(1, 0, 0, 58),
-					BackgroundColor3 = Theme.PanelLight,
-					LayoutOrder = spec.Order,
-					ZIndex = 62,
-					Parent = list,
-				}, { corner(8), stroke(Theme.Stroke, 1.5, 0) })
-				new("Frame", { Size = UDim2.new(0, 4, 1, -16), Position = UDim2.fromOffset(8, 8), BackgroundColor3 = spec.Color, BorderSizePixel = 0, ZIndex = 63, Parent = row }, { corner(2) })
-				label({ Text = spec.Name, TextSize = 17, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 9), Size = UDim2.new(0.6, 0, 0, 20), ZIndex = 63, Parent = row })
-				label({ Text = Cars.ClassLabels[spec.Class] .. "  ·  " .. spec.TopSpeed .. " MPH", TextSize = 12, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 32), Size = UDim2.new(0.6, 0, 0, 16), ZIndex = 63, Parent = row })
-				label({
-					Text = if owned[spec.Id] then "OWNED" elseif spec.Price == 0 then "FREE" else formatCash(spec.Price),
-					TextSize = 15,
-					Font = Enum.Font.GothamBlack,
-					TextColor3 = if owned[spec.Id] then Theme.Accent elseif cash >= spec.Price then Theme.Money else Theme.SubText,
-					TextXAlignment = Enum.TextXAlignment.Right,
-					AnchorPoint = Vector2.new(1, 0.5),
-					Position = UDim2.new(1, -14, 0.5, 0),
-					Size = UDim2.new(0.4, 0, 0, 20),
-					ZIndex = 63,
-					Parent = row,
-				})
-				row.Activated:Connect(function()
-					Audio.click()
-					showDetail(spec.Id)
-				end)
-				rows[spec.Id] = row
+		local order = 0
+		for _, brand in brands do
+			table.sort(brand.series, function(a, b)
+				return firstOrder(a) < firstOrder(b)
+			end)
+			local brandShown = false
+			for _, series in brand.series do
+				local members = {}
+				for _, id in series.Ids do
+					local sp = Cars.ById[id]
+					if sp and (classFilter == "ALL" or sp.Class == classFilter) and (dealer or owned[id]) then
+						table.insert(members, sp)
+					end
+				end
+				if #members == 0 then
+					continue
+				end
+				if not brandShown then
+					brandShown = true
+					order += 1
+					label({
+						Name = "SeriesHeader",
+						Text = brand.name,
+						TextSize = 18,
+						Font = Enum.Font.GothamBlack,
+						TextColor3 = Theme.Accent,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						Size = UDim2.new(1, 0, 0, 30),
+						LayoutOrder = order,
+						ZIndex = 62,
+						Parent = list,
+					})
+				end
+				-- the series' own heading (left out when the brand has one series named like the brand)
+				if #brand.series > 1 or series.Name ~= brand.name then
+					order += 1
+					label({
+						Name = "SeriesHeader",
+						Text = "   " .. series.Name,
+						TextSize = 13,
+						Font = Enum.Font.GothamBlack,
+						TextColor3 = Theme.SubText,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						Size = UDim2.new(1, 0, 0, 22),
+						LayoutOrder = order,
+						ZIndex = 62,
+						Parent = list,
+					})
+				end
+				for _, spec in members do
+					order += 1
+					local how, need = access(spec.Id)
+					local locked = not owned[spec.Id] and how ~= "buy"
+					local row: TextButton = new("TextButton", {
+						AutoButtonColor = false,
+						Text = "",
+						Size = UDim2.new(1, 0, 0, 58),
+						BackgroundColor3 = Theme.PanelLight,
+						BackgroundTransparency = if locked then 0.35 else 0,
+						LayoutOrder = order,
+						ZIndex = 62,
+						Parent = list,
+					}, { corner(8), stroke(Theme.Stroke, 1.5, 0) })
+					new("Frame", { Size = UDim2.new(0, 4, 1, -16), Position = UDim2.fromOffset(8, 8), BackgroundColor3 = spec.Color, BorderSizePixel = 0, ZIndex = 63, Parent = row }, { corner(2) })
+					label({ Text = (if locked then "🔒 " else "") .. spec.Name, TextSize = 17, Font = Enum.Font.GothamBlack, TextColor3 = if locked then Theme.SubText else Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 9), Size = UDim2.new(0.6, 0, 0, 20), ZIndex = 63, Parent = row })
+					label({ Text = Cars.ClassLabels[spec.Class] .. "  ·  " .. spec.TopSpeed .. " MPH", TextSize = 12, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 32), Size = UDim2.new(0.6, 0, 0, 16), ZIndex = 63, Parent = row })
+					local tag, tagColor
+					if owned[spec.Id] then
+						tag, tagColor = "OWNED", Theme.Accent
+					elseif how == "market" then
+						tag, tagColor = "MARKET", Theme.Warning
+					elseif how == "level" then
+						tag, tagColor = "LVL " .. need, Theme.SubText
+					else
+						tag = if spec.Price == 0 then "FREE" else formatCash(spec.Price)
+						tagColor = if cash >= spec.Price then Theme.Money else Theme.SubText
+					end
+					label({
+						Text = tag,
+						TextSize = 15,
+						Font = Enum.Font.GothamBlack,
+						TextColor3 = tagColor,
+						TextXAlignment = Enum.TextXAlignment.Right,
+						AnchorPoint = Vector2.new(1, 0.5),
+						Position = UDim2.new(1, -14, 0.5, 0),
+						Size = UDim2.new(0.4, 0, 0, 20),
+						ZIndex = 63,
+						Parent = row,
+					})
+					row.Activated:Connect(function()
+						Audio.click()
+						showDetail(spec.Id)
+					end)
+					rows[spec.Id] = row
+				end
 			end
 		end
 	end
@@ -1846,8 +2125,120 @@ function UI.setBlink(left: boolean, right: boolean)
 	end
 end
 
+-- on foot: the speedometer goes away (the rest of the HUD stays)
+function UI.setOnFoot(onFoot: boolean)
+	local speedo = hud and hud:FindFirstChild("Speedometer")
+	if speedo and speedo:IsA("GuiObject") then
+		speedo.Visible = not onFoot
+	end
+end
+
+-- the context action pill (bottom right): "[Y] GET OUT", "[Y] GET IN", "[E] ROB THE VAULT" ...
+-- clicking or tapping it does the same as the key (UI.onAction)
+UI.onAction = nil :: (() -> ())?
+local actionPill: TextButton? = nil
+local actionKey: TextLabel? = nil
+local actionText: TextLabel? = nil
+function UI.setAction(text: string?, key: string?)
+	if not gui then
+		return
+	end
+	if not actionPill then
+		local b: TextButton = new("TextButton", {
+			Name = "ActionPill",
+			AutoButtonColor = false,
+			Text = "",
+			AnchorPoint = Vector2.new(1, 1),
+			Position = if UI.isTouch then UDim2.new(1, -24, 1, -250) else UDim2.new(1, -28, 1, -200),
+			Size = UDim2.fromOffset(if UI.isTouch then 150 else 190, 48),
+			BackgroundColor3 = Theme.Panel,
+			BackgroundTransparency = 0.08,
+			Visible = false,
+			ZIndex = 8,
+			Parent = gui,
+		}, { corner(12), stroke(Theme.Accent, 1.5, 0.1) })
+		actionKey = label({
+			Text = "Y",
+			TextSize = 18,
+			Font = Enum.Font.GothamBlack,
+			TextColor3 = Theme.Panel,
+			BackgroundColor3 = Theme.Accent,
+			BackgroundTransparency = 0,
+			Position = UDim2.fromOffset(8, 8),
+			Size = UDim2.fromOffset(32, 32),
+			ZIndex = 9,
+			Parent = b,
+		})
+		corner(8).Parent = actionKey
+		actionText = label({
+			Text = "",
+			TextSize = 15,
+			Font = Enum.Font.GothamBlack,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Position = UDim2.fromOffset(50, 0),
+			Size = UDim2.new(1, -56, 1, 0),
+			ZIndex = 9,
+			Parent = b,
+		})
+		b.Activated:Connect(function()
+			Audio.click()
+			if UI.onAction then
+				UI.onAction()
+			end
+		end)
+		actionPill = b
+	end
+	local pill = actionPill :: TextButton
+	if not text then
+		pill.Visible = false
+		return
+	end
+	pill.Visible = true;
+	(actionText :: TextLabel).Text = text;
+	(actionKey :: TextLabel).Text = if UI.isTouch then "▶" else (key or "Y")
+end
+
+-- speed lines: thin streaks rushing in from the screen edges at speed (0 = off .. 1 = flat out)
+local speedLines: { Frame } = {}
+local speedRng = Random.new()
+function UI.setSpeedLines(k: number)
+	if not gui then
+		return
+	end
+	if #speedLines == 0 then
+		if k <= 0 then
+			return
+		end
+		local holder = new("Frame", { Name = "SpeedLines", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 0, Parent = gui })
+		for i = 1, 36 do
+			speedLines[i] = new("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BorderSizePixel = 0,
+				BackgroundTransparency = 1,
+				Parent = holder,
+			})
+		end
+	end
+	for i, f in speedLines do
+		if k <= 0.01 then
+			f.BackgroundTransparency = 1
+			continue
+		end
+		-- a ray from the middle of the screen, drawn only near the edges
+		local a = (i / #speedLines) * math.pi * 2 + speedRng:NextNumber(-0.08, 0.08)
+		local r = speedRng:NextNumber(0.55, 0.85)
+		local len = (0.06 + 0.22 * k) * speedRng:NextNumber(0.5, 1.2)
+		local dx, dy = math.cos(a), math.sin(a)
+		f.Position = UDim2.fromScale(0.5 + dx * r * 0.62, 0.5 + dy * r * 0.62)
+		f.Size = UDim2.new(len * 0.62, 0, 0, if speedRng:NextNumber() < 0.3 then 2 else 1)
+		f.Rotation = math.deg(a)
+		f.BackgroundTransparency = 1 - k * speedRng:NextNumber(0.15, 0.45)
+	end
+end
+
 function UI.setCameraLabel(mode: string)
-	camToggle.Text = if mode == "Interior" then "INTERIOR" else "CHASE"
+	camToggle.Text = string.upper(mode)
 end
 
 function UI.toggleControls(show: boolean?)

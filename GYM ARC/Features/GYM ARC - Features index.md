@@ -52,6 +52,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - NPC Regulars and Gym Cat]]: regulars, Dante the 8'0" giant, Plates the cat; pets replaced by Personal Trainers (done)
 - [[GYM ARC - Legend NPCs]]: visiting legends with one-time challenges (done)
 - [[GYM ARC - Personal Trainers]]: hire a coach who follows you and cheers (done)
+- [[GYM ARC - Admin console]]: the owner gives coins and trainers from the F9 Server console (done)
 - [[GYM ARC - Day and Night]]: 20-minute day in town, lights at night (done)
 - [[GYM ARC - Photo Mode]]: photo mode at the mirrors and the posing stage (done)
 - [[GYM ARC - NPC Rivals]]: Benny, Coral and Dante, one rival per gym with a challenge (done)
@@ -65,6 +66,9 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Studio Test Hooks]]: Workspace attributes for testing (done)
 
 - [[GYM ARC - Performance]]: culling, LOD and streaming for phones (in progress)
+- [[GYM ARC - Boosts Inventory]]: Inventory > Boosts: shakes, Coconut Water, Creatine, Protein Powder, Supplements (use / equip, timers)
+- [[GYM ARC - Pump Shop]]: the coin store in town (supplements, gear with perks, apparel, DNA Lab)
 
 ## See also
 - [[GYM ARC - Config values]], [[GYM ARC - Assets]]
+- [[GYM ARC - Body Alters]]: after 7'0", alters with new skins and a gains bonus (21 Oct)

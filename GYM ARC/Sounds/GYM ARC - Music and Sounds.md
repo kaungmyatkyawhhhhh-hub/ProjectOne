@@ -126,3 +126,78 @@ You set every area back to a single song: Starter 86451874359343, Pro 1189590162
 
 ## Aura burst (14 Oct)
 - `AuraBurst` (a new personal record with an aura): PSE Magic Glows Chiming Hits 1 (9116394545). The prompt asked for a short scream; a power burst is used instead because of the "no grunts" rule. Swap the id in `Config/Sounds` for another if wanted.
+
+## Your music, now (owner's change in Studio, found 19 Oct)
+This replaces "Back to one song per area" above (no longer true): every area plays three songs again, in this order, then starts over.
+- Starter gym: 86451874359343, 131532099124744, **135822443550596** (new)
+- Pro gym: 118959016267248, 113417603188158, **139777823649977** (new)
+- Beach (beach, beach gym, posing stage, skate park): 1837324500, **95854242246323** (new), **102866809292046** (new)
+- Town: 1840007392 (one song, unchanged)
+- Music (the fallback list where an area has none): 118959016267248, **99979837873059** (new), 131532099124744, 139266399633943, 86451874359343, 113417603188158, 1840007392 (volume 0.7).
+- The five new ids are your own picks (not checked against the licensed-library rule; Claude did not pick them).
+
+## Body Alter sounds (prompt 22, 21 Oct)
+All in `Config/AlterThemes` (`AlterThemes.Sounds`, swap any id there). Picked by Claude from the Roblox licensed library only (Pro Sound Effects / APM). Group "AlterFX"; music and gym sounds duck to 30% and go muffled during the moment.
+
+| Layer | SoundId | What it's for |
+|---|---|---|
+| Riser | 9120735973 | PSE Whoosh Suction 10: the build before the popup slams in |
+| ImpactSub | 9125484526 | PSE Deep Hits Big Reverberant Booms 1: the panel's sub boom |
+| ImpactPunch / FlashPunch | 9120730275 | PSE Whoosh Impact 1: the mid punch (phone speakers) |
+| Stamp | 9043367506 | APM Percussive Noise 07 Kick 04: the name stamps in |
+| Shimmer / CrystalChime | 9116394876 | PSE Magic Glows Chiming Hits 2 |
+| Hum | 9114353038 | PSE Evil Drone Deep Airy Swell 1: soft hum while the popup is open |
+| Confirm | 9116684733 | PSE Metal Impacts 1: ALTER tapped |
+| ChargeUp | 9043365842 | APM Heartbeat 02 96BPM: slow-mo heartbeat, faster and faster |
+| Swell | 9120273504 | PSE Tsunami Wind Up Huge Synth Powerup 1: energy gathering |
+| FlashBoom | 9125484367 | PSE Deep Hits Big Reverberant Booms 2: THE flash (with reverb) |
+| Sparkle | 9126073302 | PSE Synth Sparkle Bell Ding 2: glassy sparkle on the flash |
+| Chime | 9126073001 | PSE Synth Sparkle Bell Ding 4: the reveal, +0.03 pitch per alter |
+| Cheer | 9120973900 | PSE Wrestling Crowd 2 |
+| CheerBig | 9112766176 | PSE Crowd Cheer And Applause 1: tier finale |
+| TitleHit | 1837830196 | APM BOOM Deep Boom 02: the title card lands |
+| FinaleBoom | 9125484743 | PSE Deep Hits Big Reverberant Booms 3: tier finale |
+| Heartbeat (Pumped) | 1840158546 | APM Heart Pulse |
+| Shing (Shredded) | 9119076918 | PSE Shing Ringy 4 |
+| WarmWhoosh (Tanned, Lava) | 9113083076 | PSE Airy Whoosh Blast 23 |
+| WarmChime (Tanned) | 9126073011 | PSE Synth Sparkle Bell Ding 3 |
+| Crackle (Vascular, Plasma) | 9114237487 | PSE Electric Arcing 4 |
+| Brass (Peak) | 9040287624 | APM Caught Off Guard (orchestra stab) |
+| StoneThud (Stone tier) | 9125869505 | PSE Rock Drops Smashes Impacts Hits 1 |
+| MetalClang (Metal tier) | 9116750726 | PSE Metal Plate Impact |
+| IceCrack (Frost) | 9118587494 | PSE Rock Drop On Concrete Breaks 2, pitched up |
+| Thunder (Storm) | 9113169432 | PSE Artillery Distant 2 |
+| Bubble (Toxic) | 9120348019 | PSE Underwater Movement 801 |
+| CosmicSwell (Legend tier) | 9039636793 | APM Stargazing (sting c) |
+
+## Lift screams (21 Oct)
+Picked from Roblox's licensed library (Pro Sound Effects), swap any id in `Config/Sounds`:
+- **ScreamNormal** (heavy rep, last rep of a set): PSE Video Game Effects 1 / 2 / 4 / 21 / 23 (fight vocals: yells, grunts): 9120415730, 9120415788, 9120415873, 9120417141, 9120417581.
+- **ScreamBig** (personal record, arm wrestling / posing win): PSE Male Scream Short Yelling Bursts 1 / 10 / 5 (throaty shouts): 9125650883, 9125651373, 9125652432.
+- Rules in `Config/Screams`; see [[2026-10-21 GYM ARC Audit follow-ups]].
+
+## Town music (21 Oct)
+- Town playlist: 1840007392 + APM Hit The Street 1840558258 + APM City Lights (A) 1840517437 (licensed library).
+- Treadmill slots still empty: no clean loop in the licensed library (owner's pick).
+
+## Lifting voices (22 Oct; [[2026-10-22 GYM ARC GO TO teleport, quiet tutorial, odds, grunts]])
+- The owner: "the lifting screams are disturbing". ScreamNormal / ScreamBig are gone; **LiftGrunt** (Pro Sound Effects, Roblox's licensed library, picked by description, not heard): Gasps Male Deep Breaths Struggling 10 / 13 (9125572953, 9125573322), Video Game Effects 15 / 26 (9120416707, 9120417872). Volume 0.18 (40% of 0.45), pitch +-0.05, range 6-35 studs.
+- Every 5th heavy rep and a new PR only (`Config/Screams`); Settings "Lifting Voices".
+
+## Trainer roll reveal (prompt 49, 22 Oct; [[2026-10-22 GYM ARC Roll reveal screen]])
+No new sound ids: every step is layered from sounds the game already uses (Roblox's licensed library: PSE / APM), pitched in code. Volumes and pitches: `Config/RollReveal`. Rarer = louder, capped at about +4 dB over Common; one-shots cut at 1.5 s except the Legendary+ shine.
+- Orb lands: Stamp (APM Percussive Noise 07 Kick 04, 9043367506) at 0.6 pitch + Shimmer (PSE Magic Glows Chiming Hits 2, 9116394876).
+- Pulse tones: Chime (PSE Synth Sparkle Bell Ding 4, 9126073001) pitched: Uncommon / Rare a minor third apart, Epic three climbing, Legendary+ four climbing an octave. Common: the UI Click (muted tick). Epic / Legendary+ swell: Swell (PSE Tsunami Wind Up Huge Synth Powerup 1, 9120273504) at low pitch. Legendary+ hold: Heartbeat (APM Heart Pulse, 1840158546).
+- Burst: Common / Uncommon GeneticsPop (PSE Comic Pops, 9117183955) (+ Chime); Epic WarmWhoosh (PSE Airy Whoosh Blast 23, 9113083076) + Chime + ImpactSub (PSE Deep Hits Big Reverberant Booms 1, 9125484526); Legendary+ ImpactPunch (PSE Whoosh Impact 1, 9120730275) + FlashBoom (PSE Deep Hits ... Booms 2, 9125484367) + CosmicSwell shine (APM Stargazing, 9039636793) + a slow WarmWhoosh + TitleHit ring boom (APM BOOM Deep Boom 02, 1837830196). Legendary also Brass (APM Caught Off Guard, 9040287624); Mythic Crackle (PSE Electric Arcing 4, 9114237487).
+- Dress: pill = UI Click; name = Stamp (higher for rarer); NEW! = Stamp low (rubber-stamp thunk); dupe bar = 3 quick Clicks.
+- Hold: Hum (PSE Evil Drone Deep Airy Swell 1, 9114353038) looping very quietly, pitched by mood (warm gold lower, airy white higher).
+- Between cards: Riser (PSE Whoosh Suction 10, 9120735973) soft. Fanfare: Chime notes (2, or 4 + Brass when the batch has Legendary+). Bar: UI Whoosh. ROLL AGAIN: Click + QuestClaim coins (PSE Coin Throws 1, 9113849579). CLOSE: soft Click.
+- Music is ducked to ~30% from the setup until the reveal closes (Audio.Duck).
+
+## Powerlifting Gym (prompt 58, 23 Oct; [[GYM ARC - Powerlifting Gym]])
+All reused from sounds already in the game (Roblox licensed library), swap freely in `Config/Sounds`:
+- `PRBell` 9113421788 (Bell Rings, resonant): the PR bell.
+- `RecordCheer` 9113137529 (PSE Applause Nightclub 1): a new server record.
+- `GoodLift` 9126073318 (PSE Synth Sparkle Bell Ding 1, lower): judge lights.
+- `PlateDrop` 9116750726 / 9116751108 (Metal Plate Impact, lower pitch): a heavy pull set down.
+- Area music `Powerlifting`: the owner's tracks 139777823649977, 113417603188158, 1840007392 for now.

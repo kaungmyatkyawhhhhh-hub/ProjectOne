@@ -43,3 +43,6 @@ A skateboard for getting around town, and a big skate park with ramps and grind 
 
 ![[GYM ARC/Screenshots/skate_button_off_pc.jpg]]
 ![[GYM ARC/Screenshots/skate_button_on_pc.jpg]]
+
+## Animated button (21 Oct)
+- Idle bob + shine every 4.5 s (off with Reduced Motion), squash and bounce on tap, spinning wheels and a soft gold glow while skating (`SkateClient` MOTION table; the wheel spots are measured on the art). See [[2026-10-21 GYM ARC Hotbar and skate button]].

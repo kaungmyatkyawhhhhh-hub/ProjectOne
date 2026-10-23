@@ -21,6 +21,19 @@ export type Profile = {
 	XP: number, -- progress inside the current level
 	LastDaily: number, -- os.time() of the last daily gift claim (0 = never)
 	Settings: Settings,
+	Market: { [string]: any }, -- car stock market: stash, hype, requests (Market.lua checks it)
+	Activities: { [string]: any }, -- race best times, collected chips (Activities.lua checks it)
+	Penthouses: { [string]: boolean }, -- owned luxury tower penthouses (Config.Towers ids)
+	Rent: { [string]: number }, -- os.time() each penthouse's safe was last emptied
+	Home: string, -- penthouse id set as home ("" = none)
+	Showcase: { [string]: string }, -- per penthouse / suite: the car its turntable shows
+	Houses: { [string]: boolean }, -- owned island houses (Config.Houses.Types ids)
+	HouseBays: { [string]: { string } }, -- per house type: the car id in each garage bay ("" = empty)
+	HousePlots: { [string]: string }, -- per house type: the plot it stood on last time
+	Chauffeur: { [string]: boolean }, -- chauffeur contracts (car ids from Config.Chauffeur.Fleet)
+	Luxe: { [string]: any }, -- VIP card, owned and worn flex items (Luxe.lua checks it)
+	Challenges: { [string]: any }, -- speed trap bests, drift and jump bests (Challenges.lua checks it)
+	Customs: { [string]: { [string]: any } }, -- per car id: its Legends Customs look (Customs.lua checks it)
 	Loaded: boolean,
 }
 
@@ -38,6 +51,8 @@ export type Snapshot = {
 	XPNeed: number,
 	DailyIn: number, -- seconds until the daily gift can be claimed
 	Settings: Settings,
+	Penthouses: { string },
+	Home: string,
 }
 
 export type XpResult = {
@@ -72,6 +87,19 @@ local function defaultProfile(): Profile
 		XP = 0,
 		LastDaily = 0,
 		Settings = { Units = "mph", Gearbox = "Auto" },
+		Market = {},
+		Activities = {},
+		Penthouses = {},
+		Rent = {},
+		Home = "",
+		Showcase = {},
+		Houses = {},
+		HouseBays = {},
+		HousePlots = {},
+		Chauffeur = {},
+		Luxe = {},
+		Challenges = {},
+		Customs = {},
 		Loaded = false,
 	}
 end
@@ -131,6 +159,90 @@ function PlayerData.load(player: Player): Profile
 			if type(saved.Settings) == "table" then
 				PlayerData.setSettings(player, saved.Settings, profile)
 			end
+			if type(saved.Market) == "table" then
+				profile.Market = saved.Market
+			end
+			if type(saved.Activities) == "table" then
+				profile.Activities = saved.Activities
+			end
+			-- chauffeur contracts (absent in older saves): only cars still in the fleet
+			if type(saved.Chauffeur) == "table" then
+				for id, on in saved.Chauffeur do
+					if on == true and type(id) == "string" and Config.Chauffeur.Fleet[id] then
+						profile.Chauffeur[id] = true
+					end
+				end
+			end
+			if type(saved.Challenges) == "table" then
+				profile.Challenges = saved.Challenges
+			end
+			if type(saved.Luxe) == "table" then
+				profile.Luxe = saved.Luxe
+			end
+			if type(saved.Customs) == "table" then
+				profile.Customs = saved.Customs -- (Customs.lua cleans each look when it's read)
+			end
+			-- luxury towers (absent in older saves)
+			local towerIds = {}
+			for _, t in Config.Towers.List do
+				towerIds[t.id] = true
+			end
+			for _, t in Config.Hotel.Suites do
+				towerIds[t.id] = true -- the hotel's suites save like penthouses
+			end
+			if type(saved.Penthouses) == "table" then
+				for _, id in saved.Penthouses do
+					if type(id) == "string" and towerIds[id] then
+						profile.Penthouses[id] = true
+					end
+				end
+			end
+			if type(saved.Rent) == "table" then
+				for id, t in saved.Rent do
+					if type(id) == "string" and towerIds[id] and type(t) == "number" then
+						profile.Rent[id] = math.clamp(math.floor(t), 0, os.time())
+					end
+				end
+			end
+			if type(saved.Home) == "string" and profile.Penthouses[saved.Home] then
+				profile.Home = saved.Home
+			end
+			if type(saved.Showcase) == "table" then
+				for id, car in saved.Showcase do
+					if type(id) == "string" and towerIds[id] and type(car) == "string" and Cars.ById[car] then
+						profile.Showcase[id] = car
+					end
+				end
+			end
+			-- island houses (absent in older saves)
+			local houseTypes = Config.Houses.Types
+			if type(saved.Houses) == "table" then
+				for _, id in saved.Houses do
+					if type(id) == "string" and houseTypes[id] then
+						profile.Houses[id] = true
+					end
+				end
+			end
+			if type(saved.HouseBays) == "table" then
+				for id, bays in saved.HouseBays do
+					local spec = if type(id) == "string" then houseTypes[id] else nil
+					if spec and type(bays) == "table" then
+						local list = {}
+						for k = 1, spec.bays do
+							local carId = bays[k]
+							list[k] = if type(carId) == "string" and Cars.ById[carId] then carId else ""
+						end
+						profile.HouseBays[id] = list
+					end
+				end
+			end
+			if type(saved.HousePlots) == "table" then
+				for id, plot in saved.HousePlots do
+					if type(id) == "string" and houseTypes[id] and type(plot) == "string" then
+						profile.HousePlots[id] = plot
+					end
+				end
+			end
 		elseif not ok then
 			warn("[CityLegends] load failed for", player.Name, saved)
 		end
@@ -150,6 +262,14 @@ function PlayerData.save(player: Player)
 	for id in profile.Owned do
 		table.insert(owned, id)
 	end
+	local penthouses = {}
+	for id in profile.Penthouses do
+		table.insert(penthouses, id)
+	end
+	local houses = {}
+	for id in profile.Houses do
+		table.insert(houses, id)
+	end
 	local payload = {
 		Cash = profile.Cash,
 		Owned = owned,
@@ -158,6 +278,19 @@ function PlayerData.save(player: Player)
 		XP = profile.XP,
 		LastDaily = profile.LastDaily,
 		Settings = profile.Settings,
+		Market = profile.Market,
+		Activities = profile.Activities,
+		Penthouses = penthouses,
+		Rent = profile.Rent,
+		Home = profile.Home,
+		Showcase = profile.Showcase,
+		Houses = houses,
+		HouseBays = profile.HouseBays,
+		HousePlots = profile.HousePlots,
+		Chauffeur = profile.Chauffeur,
+		Luxe = profile.Luxe,
+		Challenges = profile.Challenges,
+		Customs = profile.Customs,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)
@@ -236,6 +369,10 @@ function PlayerData.snapshot(player: Player): Snapshot?
 	for id in profile.Owned do
 		table.insert(owned, id)
 	end
+	local penthouses = {}
+	for id in profile.Penthouses do
+		table.insert(penthouses, id)
+	end
 	return {
 		Cash = profile.Cash,
 		Owned = owned,
@@ -245,6 +382,8 @@ function PlayerData.snapshot(player: Player): Snapshot?
 		XPNeed = Config.xpForLevel(profile.Level),
 		DailyIn = PlayerData.dailyReadyIn(player),
 		Settings = { Units = profile.Settings.Units, Gearbox = profile.Settings.Gearbox },
+		Penthouses = penthouses,
+		Home = profile.Home,
 	}
 end
 

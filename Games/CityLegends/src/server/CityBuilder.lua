@@ -19,6 +19,16 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local CityPremium = require(script.Parent:WaitForChild("CityPremium"))
+local Mainland = require(script.Parent:WaitForChild("Mainland"))
+local Bank = require(script.Parent:WaitForChild("Bank"))
+local Towers = require(script.Parent:WaitForChild("Towers"))
+local Dealership = require(script.Parent:WaitForChild("Dealership"))
+local Customs = require(script.Parent:WaitForChild("Customs"))
+local West = require(script.Parent:WaitForChild("West"))
+local Hotel = require(script.Parent:WaitForChild("Hotel"))
+local Casino = require(script.Parent:WaitForChild("Casino"))
+local GemShowcase = require(script.Parent:WaitForChild("GemShowcase"))
+local Houses = require(script.Parent:WaitForChild("Houses"))
 
 local CityBuilder = {}
 
@@ -31,10 +41,15 @@ local E = C.HalfExtent + HALF_ROAD -- outer edge of the perimeter roads
 local RING = C.OuterRingDepth
 local HW = C.HighwayWidth / 2
 local HWY_X0 = CityLayout.HighwayStartX
-local HWY_X1 = HWY_X0 + C.HighwayLength
 local TUNNEL_X0 = HWY_X0 + C.TunnelStart
 local TUNNEL_X1 = TUNNEL_X0 + C.TunnelLength
-local PLAZA_X = HWY_X1 + C.PlazaRadius
+local LOOP_S = C.LoopHalf -- the Legends Loop's centre line
+local LOOP_R = C.LoopCorner
+local LOOP_C = LOOP_S - LOOP_R
+local LOOP_HW = HW + 8 -- half the loop's paved width (lanes and shoulders)
+local SPUR_END = LOOP_S - HW - 110 -- the spur's rails and markings stop at the junction
+local DT = Config.West.IndexBase -- Downtown's first road index (its grid: DT .. DT + N)
+local HJ = CityLayout.HighwayJ
 
 local rng = Random.new(20261007)
 
@@ -67,6 +82,11 @@ local function mk(parent: Instance, size: Vector3, cf: CFrame, color: Color3, ma
 	p.Anchored = true
 	p.Size = size
 	p.CFrame = cf
+	-- neon is calmed down everywhere: a little less saturated and less bright (owner: too much neon)
+	if material == Enum.Material.Neon then
+		local h, sat, v = color:ToHSV()
+		color = Color3.fromHSV(h, sat * 0.7, v * 0.78)
+	end
 	p.Color = color
 	p.Material = material
 	p.Transparency = opts.transparency or 0
@@ -137,6 +157,15 @@ local function addLight(className: string, parent: Instance, color: Color3, rang
 	return l
 end
 
+-- an outdoor lamp: its light switches off and its glowing head goes plain by day (WorldFx, from
+-- DayCycle); the light is optional
+local function dayOff(head: BasePart, light: Light?)
+	CollectionService:AddTag(head, "LampGlow")
+	if light then
+		CollectionService:AddTag(light, "DayOff")
+	end
+end
+
 -- A group of small details the client hides when the camera is far away
 -- (see WorldFx LOD). Engine-wise this removes thousands of parts from the
 -- scene at any one time.
@@ -191,8 +220,9 @@ local WET = Config.Graphics.WetRoads
 local ASPHALT = if WET then Color3.fromRGB(38, 38, 42) else Color3.fromRGB(48, 48, 52)
 local ROAD_MAT = Enum.Material.Asphalt
 local ROAD_OPTS = { reflectance = if WET then 0.05 else 0 }
-local SIDEWALK = Color3.fromRGB(78, 78, 84)
-local CURB_COLOR = Color3.fromRGB(110, 110, 116)
+-- (2026-10-23: natural concrete; the night lighting keeps it dark at night)
+local SIDEWALK = Color3.fromRGB(116, 113, 108)
+local CURB_COLOR = Color3.fromRGB(150, 148, 142)
 local LINE_WHITE = Color3.fromRGB(205, 205, 200)
 local LINE_YELLOW = Color3.fromRGB(230, 170, 30)
 local STREETLIGHT = Color3.fromRGB(255, 202, 146) -- warm sodium-white
@@ -206,14 +236,16 @@ local WINDOW_COLORS = {
 	Color3.fromRGB(96, 116, 146),
 	Color3.fromRGB(134, 140, 152),
 }
+-- signage colours (owner, 2026-10-23: "it looks like cyberpunk too much with those neon stuffs"):
+-- mostly warm white and amber like real city signs, a few softer colours
 local NEON_COLORS = {
-	Color3.fromRGB(255, 40, 140),
-	Color3.fromRGB(0, 230, 255),
-	Color3.fromRGB(150, 70, 255),
-	Color3.fromRGB(255, 120, 0),
-	Color3.fromRGB(40, 255, 140),
-	Color3.fromRGB(255, 230, 40),
-	Color3.fromRGB(255, 60, 60),
+	Color3.fromRGB(255, 236, 214),
+	Color3.fromRGB(255, 196, 120),
+	Color3.fromRGB(255, 236, 214),
+	Color3.fromRGB(150, 210, 230),
+	Color3.fromRGB(230, 90, 80),
+	Color3.fromRGB(255, 214, 140),
+	Color3.fromRGB(220, 120, 170),
 }
 local SHOP_NAMES = {
 	"NOODLE BAR", "24/7", "HOTEL NOVA", "ARCADE", "SUSHI", "PHARMACY", "NEON CLUB", "PIZZA",
@@ -248,15 +280,15 @@ function CityBuilder.setupLighting()
 	end)
 	Lighting.ClockTime = 0
 	Lighting.GeographicLatitude = 30 -- the moon a little off overhead: long soft building shadows
-	Lighting.Brightness = 1.8
+	Lighting.Brightness = 2.3 -- owner (2026-10-17): a little brighter
 	Lighting.GlobalShadows = true
 	Lighting.ShadowSoftness = 0.12
-	Lighting.Ambient = Color3.fromRGB(80, 84, 104) -- lifts shadowed and covered spots, like car cabins
-	Lighting.OutdoorAmbient = Color3.fromRGB(98, 108, 148)
+	Lighting.Ambient = Color3.fromRGB(96, 98, 108) -- lifts shadowed and covered spots, like car cabins
+	Lighting.OutdoorAmbient = Color3.fromRGB(108, 114, 136) -- (2026-10-23: less blue, more natural)
 	Lighting.EnvironmentDiffuseScale = 1
 	Lighting.EnvironmentSpecularScale = 1 -- glossy paint and wet roads mirror the city
-	Lighting.ExposureCompensation = 0.5
-	Lighting.ColorShift_Top = Color3.fromRGB(120, 140, 200)
+	Lighting.ExposureCompensation = 0.75
+	Lighting.ColorShift_Top = Color3.fromRGB(150, 160, 190)
 	Lighting.ColorShift_Bottom = Color3.fromRGB(8, 8, 18)
 
 	for _, child in Lighting:GetChildren() do
@@ -275,17 +307,18 @@ function CityBuilder.setupLighting()
 	local atmo = Instance.new("Atmosphere")
 	atmo.Density = 0.3
 	atmo.Offset = 0.12
-	atmo.Color = Color3.fromRGB(86, 100, 148)
-	atmo.Decay = Color3.fromRGB(40, 46, 84)
+	atmo.Color = Color3.fromRGB(96, 104, 128)
+	atmo.Decay = Color3.fromRGB(46, 50, 70)
 	atmo.Glare = 0.25
 	atmo.Haze = 1.2
 	atmo.Parent = Lighting
 
-	-- a wide, soft glow round genuinely bright things (lamps, neon, lights), not round paint
+	-- a soft glow round genuinely bright things (lamps, neon, lights), not round paint or the
+	-- dashboard screens (owner, 2026-10-17: the glow made first person hard to see)
 	local bloom = Instance.new("BloomEffect")
-	bloom.Intensity = 1
-	bloom.Size = 40
-	bloom.Threshold = 1.05
+	bloom.Intensity = 0.45 -- (2026-10-23: calmer glow, less "cyberpunk")
+	bloom.Size = 28
+	bloom.Threshold = 1.6
 	bloom.Parent = Lighting
 
 	-- faint shafts from the moon through the towers
@@ -297,9 +330,9 @@ function CityBuilder.setupLighting()
 	-- cool shadows, deep blacks, rich colour
 	local cc = Instance.new("ColorCorrectionEffect")
 	cc.Brightness = 0.02
-	cc.Contrast = 0.18
-	cc.Saturation = 0.14
-	cc.TintColor = Color3.fromRGB(236, 242, 255)
+	cc.Contrast = 0.12
+	cc.Saturation = 0.02 -- natural colour, not boosted
+	cc.TintColor = Color3.fromRGB(246, 248, 255)
 	cc.Parent = Lighting
 end
 
@@ -320,15 +353,19 @@ local function dashedLine(parent: Instance, a: Vector3, b: Vector3, width: numbe
 end
 
 local function solidLine(parent: Instance, a: Vector3, b: Vector3, width: number, color: Color3)
-	local dir = b - a
-	local center = (a + b) / 2
-	deco(parent, Vector3.new(width, 0.05, dir.Magnitude), CFrame.lookAt(Vector3.new(center.X, 0.03, center.Z), Vector3.new(b.X, 0.03, b.Z)), color, Enum.Material.SmoothPlastic, { reflectance = 0.05 })
+	-- (in pieces: a part can be at most 2048 studs long)
+	local n = math.max(1, math.ceil((b - a).Magnitude / 1000))
+	for k = 0, n - 1 do
+		local pa, pb = a:Lerp(b, k / n), a:Lerp(b, (k + 1) / n)
+		local center = (pa + pb) / 2
+		deco(parent, Vector3.new(width, 0.05, (pb - pa).Magnitude), CFrame.lookAt(Vector3.new(center.X, 0.03, center.Z), Vector3.new(pb.X, 0.03, pb.Z)), color, Enum.Material.SmoothPlastic, { reflectance = 0.05 })
+	end
 end
 
-local function buildRoadMarkings(parent: Instance)
-	local root = folder("Markings", parent)
+local function buildRoadMarkings(parent: Instance, ib: number)
+	local root = folder(if ib == 0 then "Markings" else "DowntownMarkings", parent)
 	-- segments between adjacent intersections
-	for i = 0, N do
+	for i = ib, ib + N do
 		for j = 0, N do
 			local a = CityLayout.intersectionPos(i, j)
 			local marks = lodGroup(root, `Cell_{i}_{j}`, a + Vector3.new(B / 4, 0, B / 4), 420)
@@ -360,8 +397,8 @@ local function buildRoadMarkings(parent: Instance)
 					deco(marks, Vector3.new(HALF_ROAD - 1, 0.05, 1.2), CFrame.lookAt(Vector3.new(center.X, 0.035, center.Z), Vector3.new(center.X, 0.035, center.Z) + dir), LINE_WHITE, Enum.Material.SmoothPlastic)
 					-- zebra crossing just inside the intersection box
 					local cw = a - dir * (HALF_ROAD - 3)
-					for s = -2, 2 do
-						local p = cw + right * (s * 9)
+					for s = -3, 3 do
+						local p = cw + right * (s * HALF_ROAD / 3.6)
 						deco(marks, Vector3.new(4, 0.05, 5), CFrame.lookAt(Vector3.new(p.X, 0.035, p.Z), Vector3.new(p.X, 0.035, p.Z) + dir), LINE_WHITE, Enum.Material.SmoothPlastic, { transparency = 0.1 })
 					end
 				end
@@ -382,43 +419,92 @@ local function streetLight(parent: Instance, base: Vector3, armDir: Vector3)
 	local lamp = deco(parent, Vector3.new(2.2, 0.15, 1), head.CFrame * CFrame.new(0, -0.3, 0), STREETLIGHT, Enum.Material.Neon)
 	-- a bright warm pool on the road; near the camera it also casts shadows (WorldFx)
 	local pool = addLight("SpotLight", lamp, STREETLIGHT, 62, 2.4, Enum.NormalId.Bottom, 130)
+	dayOff(lamp, pool)
 	CollectionService:AddTag(pool, "ShadowLight")
 end
 
+-- fictional street names for the arm signs: roads along Z (index i) and along X (index j)
+local NS_NAMES = { "HARBOR ST", "NEON BLVD", "KAIZEN ST", "MAIN ST", "LEGEND AVE", "VORTEX ST", "MIDNIGHT ST", "ECLIPSE ST", "ORION ST" }
+local EW_NAMES = { "1ST AVE", "2ND AVE", "3RD AVE", "CENTRAL AVE", "5TH AVE", "6TH AVE", "7TH AVE", "8TH AVE", "9TH AVE" }
+local SIGNAL_METAL = Color3.fromRGB(46, 50, 56)
+local SIGNAL_YELLOW = Color3.fromRGB(214, 168, 30)
+local LENS_OFF = { R = Color3.fromRGB(52, 8, 8), Y = Color3.fromRGB(56, 38, 4), G = Color3.fromRGB(6, 40, 22) }
+
+-- one signal head: black housing on a backplate with a reflective yellow border, three lenses
+-- under tunnel visors, and a small glow light the client colours with the lit lens
+local function signalHead(parent: Instance, cf: CFrame, i: number, j: number, axis: string, small: boolean?)
+	local sc = if small then 0.8 else 1
+	-- backplate: black from behind, a yellow border round a black middle from the front
+	deco(parent, Vector3.new(2.9, 6.1, 0.06) * sc, cf * CFrame.new(0, 0, 0.68 * sc), Color3.fromRGB(14, 14, 16), Enum.Material.SmoothPlastic)
+	deco(parent, Vector3.new(2.9, 6.1, 0.06) * sc, cf * CFrame.new(0, 0, 0.62 * sc), SIGNAL_YELLOW, Enum.Material.SmoothPlastic, { reflectance = 0.1 })
+	deco(parent, Vector3.new(2.55, 5.75, 0.06) * sc, cf * CFrame.new(0, 0, 0.57 * sc), Color3.fromRGB(14, 14, 16), Enum.Material.SmoothPlastic)
+	deco(parent, Vector3.new(1.7, 5.1, 1.1) * sc, cf, Color3.fromRGB(22, 23, 26), Enum.Material.Metal)
+	for idx, state in { "R", "Y", "G" } do
+		local y = (2 - idx) * 1.6 * sc
+		-- cylinder axis is X: turn it so the round face looks down the road
+		local lamp = deco(parent, Vector3.new(0.25, 1.2, 1.2) * sc, cf * CFrame.new(0, y, -0.58 * sc) * CFrame.Angles(0, math.pi / 2, 0), LENS_OFF[state], Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder, name = "Lamp" })
+		lamp:SetAttribute("I", i)
+		lamp:SetAttribute("J", j)
+		lamp:SetAttribute("Axis", axis)
+		lamp:SetAttribute("State", state)
+		CollectionService:AddTag(lamp, "TrafficLamp")
+		-- visor: one hood over the top (fewer parts: the whole map got heavy)
+		deco(parent, Vector3.new(1.45, 0.08, 0.9) * sc, cf * CFrame.new(0, y + 0.7 * sc, -1.0 * sc), Color3.fromRGB(14, 14, 16), Enum.Material.SmoothPlastic)
+	end
+	local glowPart = deco(parent, Vector3.new(0.2, 0.2, 0.2), cf * CFrame.new(0, 0, -1.6 * sc), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "SignalGlow" })
+	-- (a LOD light: switched off when the camera is far away)
+	local glow = addLight("PointLight", glowPart, Color3.fromRGB(255, 35, 35), if small then 9 else 14, 1.4)
+	glow:SetAttribute("I", i)
+	glow:SetAttribute("J", j)
+	glow:SetAttribute("Axis", axis)
+	CollectionService:AddTag(glow, "SignalGlow")
+end
+
 local function trafficSignal(parent: Instance, i: number, j: number, k: number)
-	-- signal for traffic travelling in direction k into intersection (i, j)
+	-- signals for traffic travelling in direction k into intersection (i, j), on the far side of
+	-- the junction like real ones (owner, 2026-10-17: "make the traffic lights look good"): a mast
+	-- pole on the far right corner, an arm over the approach lanes with a head over each lane and
+	-- the cross street's name sign, and a lower head on the pole itself
 	local center = CityLayout.intersectionPos(i, j)
 	local dir = CityLayout.Dirs[k]
 	local right = dir:Cross(Vector3.yAxis)
 	local axis = if k % 2 == 1 then "X" else "Z"
-	local poleBase = center - dir * (HALF_ROAD + 5) + right * (HALF_ROAD + 4) + Vector3.new(0, CURB, 0)
-	local poleH = 19
-	mk(parent, Vector3.new(poleH, 0.9, 0.9), CFrame.new(poleBase + Vector3.new(0, poleH / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(28, 30, 34), Enum.Material.Metal, { shape = Enum.PartType.Cylinder, name = "SignalPole" })
-	local armLen = HALF_ROAD + 2
-	local armStart = poleBase + Vector3.new(0, poleH - 1, 0)
+	-- (where the far side is the highway's mouth, the pole stands beyond the highway's edge)
+	local mouth = j == HJ and ((i == N and k == 1) or (i == 0 and k == 3) or (i == DT + N and k == 1) or (i == DT and k == 3))
+	local poleSide = if mouth then HW + 8 else HALF_ROAD + 4
+	local poleBase = center + dir * (HALF_ROAD + 6) + right * poleSide + Vector3.new(0, CURB, 0)
+	local poleH = 21
+	-- base plinth, the pole and a cap
+	mk(parent, Vector3.new(2.6, 1.4, 2.6), CFrame.new(poleBase + Vector3.new(0, 0.7, 0)), Color3.fromRGB(70, 72, 76), Enum.Material.Concrete, { name = "SignalBase" })
+	mk(parent, Vector3.new(poleH, 1.1, 1.1), CFrame.new(poleBase + Vector3.new(0, poleH / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), SIGNAL_METAL, Enum.Material.Metal, { shape = Enum.PartType.Cylinder, name = "SignalPole", reflectance = 0.08 })
+	deco(parent, Vector3.new(1.4, 0.5, 1.4), CFrame.new(poleBase + Vector3.new(0, poleH + 0.25, 0)), SIGNAL_METAL, Enum.Material.Metal)
+	-- the mast arm, reaching over the approach lanes, with a brace under it
+	local armLen = poleSide
+	local armStart = poleBase + Vector3.new(0, poleH - 2, 0)
 	local armEnd = armStart - right * armLen
-	deco(parent, Vector3.new(0.5, 0.5, armLen), CFrame.lookAt((armStart + armEnd) / 2, armEnd), Color3.fromRGB(28, 30, 34), Enum.Material.Metal)
-
-	-- signal head over the middle of the approach lanes
-	for _, off in { HALF_ROAD * 0.55 } do
-		local headPos = armStart - right * (armLen - off) - Vector3.new(0, 2.6, 0)
-		-- face the oncoming cars (their forward is +dir, so the face looks at -dir)
-		local headCF = CFrame.lookAt(headPos, headPos - dir)
-		deco(parent, Vector3.new(1.6, 4.8, 1.2), headCF, Color3.fromRGB(18, 18, 20), Enum.Material.SmoothPlastic)
-		deco(parent, Vector3.new(2.4, 5.6, 0.15), headCF * CFrame.new(0, 0, 0.65), Color3.fromRGB(12, 12, 12), Enum.Material.SmoothPlastic)
-		for idx, state in { "R", "Y", "G" } do
-			-- cylinder axis is X: turn it so the round face looks down the road
-			local lampCF = headCF * CFrame.new(0, (2 - idx) * 1.5, -0.55) * CFrame.Angles(0, math.pi / 2, 0)
-			local lamp = deco(parent, Vector3.new(0.3, 1.05, 1.05), lampCF, Color3.fromRGB(30, 30, 30), Enum.Material.Neon, { shape = Enum.PartType.Cylinder, name = "Lamp" })
-			lamp:SetAttribute("I", i)
-			lamp:SetAttribute("J", j)
-			lamp:SetAttribute("Axis", axis)
-			lamp:SetAttribute("State", state)
-			CollectionService:AddTag(lamp, "TrafficLamp")
-			-- visor
-			deco(parent, Vector3.new(1.3, 0.12, 0.7), headCF * CFrame.new(0, (2 - idx) * 1.5 + 0.62, -0.9), Color3.fromRGB(14, 14, 14), Enum.Material.SmoothPlastic)
-		end
+	deco(parent, Vector3.new(0.7, 0.7, armLen), CFrame.lookAt((armStart + armEnd) / 2, armEnd), SIGNAL_METAL, Enum.Material.Metal, { reflectance = 0.08 })
+	local braceA = poleBase + Vector3.new(0, poleH - 6, 0)
+	local braceB = armStart - right * 9
+	deco(parent, Vector3.new(0.35, 0.35, (braceB - braceA).Magnitude), CFrame.lookAt((braceA + braceB) / 2, braceB), SIGNAL_METAL, Enum.Material.Metal)
+	-- a head hanging over the middle of each approach lane, facing the oncoming cars
+	for l = 1, C.LanesPerSide do
+		local headPos = center + dir * (HALF_ROAD + 6) + right * CityLayout.laneOffset(l)
+		headPos = Vector3.new(headPos.X, armStart.Y - 3.4, headPos.Z)
+		deco(parent, Vector3.new(0.25, 0.9, 0.25), CFrame.new(headPos + Vector3.new(0, 3, 0)), SIGNAL_METAL, Enum.Material.Metal)
+		signalHead(parent, CFrame.lookAt(headPos, headPos - dir), i, j, axis)
 	end
+	-- the cross street's name on the arm, near the pole
+	local crossName = if i >= DT then (if axis == "X" then West.NS_NAMES[i - DT + 1] else West.EW_NAMES[j + 1]) elseif axis == "X" then NS_NAMES[i + 1] else EW_NAMES[j + 1]
+	local signPos = armStart - right * (armLen - 4) + Vector3.new(0, 1.6, 0)
+	local sign = deco(parent, Vector3.new(11, 2.2, 0.2), CFrame.lookAt(signPos, signPos - dir), Color3.fromRGB(14, 96, 52), Enum.Material.SmoothPlastic, { name = "StreetSign" })
+	surfaceText(sign, Enum.NormalId.Front, crossName or "", Color3.fromRGB(245, 245, 245), Color3.fromRGB(14, 96, 52), 0, Enum.Font.GothamBold, Vector2.new(550, 110))
+	-- a lower head on the pole for cars at the front of the queue
+	local lowPos = poleBase + Vector3.new(0, 10, 0) - right * 1.4
+	signalHead(parent, CFrame.lookAt(lowPos, lowPos - dir), i, j, axis, true)
+	-- a pedestrian signal box facing across the side street
+	local pedPos = poleBase + Vector3.new(0, 8, 0) + dir * 0.9
+	local ped = deco(parent, Vector3.new(1.3, 1.3, 0.6), CFrame.lookAt(pedPos, pedPos + dir), Color3.fromRGB(22, 23, 26), Enum.Material.Metal)
+	deco(parent, Vector3.new(1, 1, 0.1), ped.CFrame * CFrame.new(0, 0, -0.32), Color3.fromRGB(255, 150, 60), Enum.Material.Neon, { transparency = 0.25 })
 end
 
 ---------------------------------------------------------------------
@@ -427,10 +513,9 @@ end
 local CROWN_COLORS = {
 	Color3.fromRGB(235, 245, 255),
 	Color3.fromRGB(235, 245, 255),
-	Config.Theme.Accent,
-	Config.Theme.Accent2,
+	Color3.fromRGB(255, 226, 190),
 	Color3.fromRGB(255, 190, 90),
-	Color3.fromRGB(150, 70, 255),
+	Color3.fromRGB(200, 220, 240),
 }
 local CORP_NAMES = {
 	"NOVA BANK", "ORION", "HALCYON", "VANTA", "APEX", "AURORA", "MERIDIAN", "KESTREL",
@@ -580,6 +665,10 @@ local function facadeTier(model: Instance, cx: number, cz: number, w: number, dp
 end
 
 local function neonOutline(model: Instance, cx: number, cz: number, w: number, dpt: number, y: number, color: Color3, thick: number?)
+	-- only some roofs get a lit outline (fewer neon lines over the skyline)
+	if rng:NextNumber() > 0.4 then
+		return
+	end
 	local t = thick or 0.5
 	deco(model, Vector3.new(w + t, t, t), CFrame.new(cx, y, cz - dpt / 2), color, Enum.Material.Neon)
 	deco(model, Vector3.new(w + t, t, t), CFrame.new(cx, y, cz + dpt / 2), color, Enum.Material.Neon)
@@ -790,13 +879,13 @@ local function tree(parent: Instance, pos: Vector3)
 	deco(parent, Vector3.new(h, 1.1, 1.1), CFrame.new(pos + Vector3.new(0, h / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(45, 32, 24), Enum.Material.Wood, { shape = Enum.PartType.Cylinder, shadow = true })
 	for _ = 1, 3 do
 		local r = rng:NextNumber(6, 9)
-		deco(parent, Vector3.one * r, CFrame.new(pos + Vector3.new(rng:NextNumber(-2, 2), h + rng:NextNumber(-1, 2), rng:NextNumber(-2, 2))), Color3.fromRGB(24, 52, 30), Enum.Material.Grass, { shape = Enum.PartType.Ball, shadow = true })
+		deco(parent, Vector3.one * r, CFrame.new(pos + Vector3.new(rng:NextNumber(-2, 2), h + rng:NextNumber(-1, 2), rng:NextNumber(-2, 2))), Color3.fromRGB(46, 78, 40):Lerp(Color3.fromRGB(64, 96, 48), rng:NextNumber()), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
 	end
 end
 
 local function park(parent: Instance, cx: number, cz: number, size: number)
 	local top = CURB
-	mk(parent, Vector3.new(size - 20, 0.3, size - 20), CFrame.new(cx, top + 0.15, cz), Color3.fromRGB(26, 46, 28), Enum.Material.Grass, { collide = true })
+	mk(parent, Vector3.new(size - 20, 0.3, size - 20), CFrame.new(cx, top + 0.15, cz), Color3.fromRGB(62, 92, 46), Enum.Material.Grass, { collide = true })
 	-- cross paths
 	deco(parent, Vector3.new(size - 20, 0.35, 8), CFrame.new(cx, top + 0.18, cz), Color3.fromRGB(70, 66, 60), Enum.Material.Pavement)
 	deco(parent, Vector3.new(8, 0.35, size - 20), CFrame.new(cx, top + 0.18, cz), Color3.fromRGB(70, 66, 60), Enum.Material.Pavement)
@@ -817,7 +906,7 @@ local function park(parent: Instance, cx: number, cz: number, size: number)
 		local p = Vector3.new(cx + off[1] * size * 0.22, top, cz + off[2] * 7)
 		deco(parent, Vector3.new(0.4, 8, 0.4), CFrame.new(p + Vector3.new(0, 4, 0)), METAL, Enum.Material.Metal)
 		local bulb = deco(parent, Vector3.new(1.2, 1.2, 1.2), CFrame.new(p + Vector3.new(0, 8.4, 0)), STREETLIGHT, Enum.Material.Neon, { shape = Enum.PartType.Ball })
-		addLight("PointLight", bulb, STREETLIGHT, 18, 0.6)
+		dayOff(bulb, addLight("PointLight", bulb, STREETLIGHT, 18, 0.6))
 	end
 end
 
@@ -864,10 +953,11 @@ end
 ---------------------------------------------------------------------
 -- City grid
 ---------------------------------------------------------------------
-local function buildBlocks(parent: Instance)
-	local blocks = folder("Blocks", parent)
+local function buildBlocks(parent: Instance, ib: number)
+	local blocks = folder(if ib == 0 then "Blocks" else "DowntownBlocks", parent)
 	local inner = B - C.RoadWidth
-	for bi = 0, N - 1 do
+	local downtown = ib ~= 0
+	for bi = ib, ib + N - 1 do
 		for bj = 0, N - 1 do
 			local cx = (CityLayout.roadCoord(bi) + CityLayout.roadCoord(bi + 1)) / 2
 			local cz = (CityLayout.roadCoord(bj) + CityLayout.roadCoord(bj + 1)) / 2
@@ -881,33 +971,49 @@ local function buildBlocks(parent: Instance)
 			end
 
 			local lot = inner - C.SidewalkWidth * 2
-			local landmark = CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
-			local isPark = not landmark and rng:NextNumber() < 0.12
+			-- gameplay venues first (the bank), then the landmark towers; Downtown: its sites (hotel,
+			-- casino, gem showcase), the Ocean Drive hotels and its own skyline
+			local landmark
+			if downtown then
+				landmark = West.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
+			else
+				landmark = Bank.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Dealership.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Customs.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Towers.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
+			end
+			local isPark = not landmark and rng:NextNumber() < (if downtown then 0.06 else 0.12)
 			if landmark then
 				-- block is taken by a landmark tower
 			elseif isPark then
 				park(blockFolder, cx, cz, inner)
 			else
 				local cell = if rng:NextNumber() < 0.25 then lot else lot / 2
-				fillBuildings(blockFolder, cx - lot / 2, cz - lot / 2, cx + lot / 2, cz + lot / 2, downtownHeight, cell - 1)
+				fillBuildings(blockFolder, cx - lot / 2, cz - lot / 2, cx + lot / 2, cz + lot / 2, if downtown then West.height else downtownHeight, cell - 1)
 			end
 
+			-- (Downtown's venue sites light their own fronts and driveways)
+			local site = downtown and West.isSite(bi, bj)
 			-- street lights along each edge (arms reach over the road)
-			for _, edge in { Vector3.new(1, 0, 0), Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1), Vector3.new(0, 0, -1) } do
+			local edges: { Vector3 } = if site then {} else { Vector3.new(1, 0, 0), Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1), Vector3.new(0, 0, -1) }
+			for _, edge in edges do
 				local tangent = edge:Cross(Vector3.yAxis)
 				for _, t in { -0.25, 0.25 } do
 					local pos = Vector3.new(cx, CURB, cz) + edge * (inner / 2 - 2) + tangent * (inner * t)
 					streetLight(blockFolder, pos, edge)
 				end
 			end
-			CityPremium.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
+			if site then
+				-- nothing: the venue builds its own plaza
+			elseif downtown then
+				West.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
+			else
+				CityPremium.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
+			end
 		end
 	end
 end
 
-local function buildSignals(parent: Instance)
-	local root = folder("TrafficLights", parent)
-	for i = 0, N do
+local function buildSignals(parent: Instance, ib: number)
+	local root = folder(if ib == 0 then "TrafficLights" else "DowntownLights", parent)
+	for i = ib, ib + N do
 		for j = 0, N do
 			local signals = lodGroup(root, `Signal_{i}_{j}`, CityLayout.intersectionPos(i, j), 520)
 			for k = 1, 4 do
@@ -915,7 +1021,10 @@ local function buildSignals(parent: Instance)
 				-- approach exists if the previous intersection is in the grid
 				local pi = i - math.round(dir.X)
 				local pj = j - math.round(dir.Z)
-				if CityLayout.inGrid(pi, pj) then
+				-- (and the highway's approach into the city's east edge)
+				-- (and the highways' and the causeway's approaches into the grids' edges)
+				local edge = j == HJ and ((i == N and k == 3) or (i == 0 and k == 1) or (i == DT + N and k == 3) or (i == DT and k == 1))
+				if CityLayout.inGrid(pi, pj) or edge then
 					trafficSignal(signals, i, j, k)
 				end
 			end
@@ -932,7 +1041,8 @@ local function buildRing(parent: Instance)
 	local regions: { { any } } = {
 		{ -E - RING, -E - RING, E + RING, -E, Vector3.new(0, 0, 1) }, -- north
 		{ -E - RING, E, E + RING, E + RING, Vector3.new(0, 0, -1) }, -- south
-		{ -E - RING, -E, -E, E, Vector3.new(1, 0, 0) }, -- west
+		{ -E - RING, -E, -E, -HW - 16, Vector3.new(1, 0, 0) }, -- west (north of the west highway)
+		{ -E - RING, HW + 16, -E, E, Vector3.new(1, 0, 0) }, -- west (south of the west highway)
 		{ E, -E, E + RING, -HW - 16, Vector3.new(-1, 0, 0) }, -- east (north of the highway)
 		{ E, HW + 16, E + RING, E, Vector3.new(-1, 0, 0) }, -- east (south of the highway)
 	}
@@ -944,7 +1054,7 @@ local function buildRing(parent: Instance)
 	for s = -1, 1, 2 do
 		for t = -E + 60, E - 60, 150 do
 			streetLight(ring, Vector3.new(t, CURB, s * (E + 3)), Vector3.new(0, 0, -s))
-			if math.abs(t) > HW + 30 or s == -1 then
+			if math.abs(t) > HW + 30 then
 				streetLight(ring, Vector3.new(s * (E + 3), CURB, t), Vector3.new(-s, 0, 0))
 			end
 		end
@@ -954,7 +1064,8 @@ local function buildRing(parent: Instance)
 	local wallParts = {
 		{ -o, -o - 2, o, -o + 2 },
 		{ -o, o - 2, o, o + 2 },
-		{ -o - 2, -o, -o + 2, o },
+		{ -o - 2, -o, -o + 2, -HW - 6 },
+		{ -o - 2, HW + 6, -o + 2, o },
 		{ o - 2, -o, o + 2, -HW - 6 },
 		{ o - 2, HW + 6, o + 2, o },
 	}
@@ -1020,20 +1131,171 @@ local function cityLegendsSign(parent: Instance, pos: Vector3, width: number, he
 	return sign
 end
 
+---------------------------------------------------------------------
+-- The Legends Loop: a 6-lane ring road round the city and the harbour (CityLayout.loopSample)
+---------------------------------------------------------------------
+local buildLoop: (Instance) -> ()
+
+local function gantry(parent: Instance, s: number, text: string, sub: string?)
+	-- an overhead sign across the clockwise half, facing the clockwise traffic
+	local p, dir = CityLayout.loopSample(s)
+	local right = dir:Cross(Vector3.yAxis)
+	for _, off in { -LOOP_HW - 1, LOOP_HW + 1 } do
+		local q = p + right * off
+		mk(parent, Vector3.new(1.4, 28, 1.4), CFrame.new(q + Vector3.new(0, 14, 0)), METAL, Enum.Material.Metal, { name = "GantryPost" })
+	end
+	deco(parent, Vector3.new(LOOP_HW * 2 + 4, 1.6, 1.6), CFrame.lookAt(p + Vector3.new(0, 26.5, 0), p + Vector3.new(0, 26.5, 0) + dir) * CFrame.new(0, 0, 0), METAL, Enum.Material.Metal)
+	local signPos = p + right * (HW / 2) + Vector3.new(0, 22, 0)
+	local sign = deco(parent, Vector3.new(30, 7, 0.6), CFrame.lookAt(signPos, signPos - dir), Color3.fromRGB(10, 70, 40), Enum.Material.SmoothPlastic, { name = "LoopSign" })
+	surfaceText(sign, Enum.NormalId.Front, if sub then text .. "\n" .. sub else text, Color3.new(1, 1, 1), Color3.fromRGB(10, 90, 50), 0, Enum.Font.GothamBold, Vector2.new(800, 190))
+end
+
+buildLoop = function(hwy: Instance)
+	local loop = folder("Loop", hwy)
+	local L = CityLayout.loopLength()
+	local side = 2 * LOOP_C
+	local arc = math.pi / 2 * LOOP_R
+	local junction = function(p: Vector3): boolean
+		-- the spur's mouth on the east side
+		return p.X > LOOP_S - LOOP_HW - 30 and p.X < LOOP_S and math.abs(p.Z) < 112
+	end
+	-- paving: the straights as slabs, the corners as overlapping pieces
+	for k = 0, 3 do
+		local s0 = k * (side + arc)
+		local a = CityLayout.loopSample(s0)
+		local b = CityLayout.loopSample(s0 + side)
+		local half = Vector3.new(LOOP_HW, 0, LOOP_HW)
+		local lo, hi = a:Min(b) - half, a:Max(b) + half
+		slab(loop, lo.X, lo.Z, hi.X, hi.Z, 0, 2, ASPHALT, ROAD_MAT, table.clone(ROAD_OPTS))
+		local n = math.ceil(arc * (LOOP_R + LOOP_HW) / LOOP_R / 24)
+		for q = 0, n - 1 do
+			local s = s0 + side + arc * (q + 0.5) / n
+			local p, dir = CityLayout.loopSample(s)
+			local len = arc * (LOOP_R + LOOP_HW) / LOOP_R / n + 1.5
+			mk(loop, Vector3.new(LOOP_HW * 2, 2, len), CFrame.lookAt(p - Vector3.new(0, 1, 0), p - Vector3.new(0, 1, 0) + dir), ASPHALT, ROAD_MAT, table.clone(ROAD_OPTS))
+		end
+	end
+	-- the junction's corners, paved
+	-- (a hair lower than the roads it meets, so nothing shimmers where they overlap)
+	slab(loop, LOOP_S - LOOP_HW - 110, -116, LOOP_S - LOOP_HW + 1, 116, -0.02, 2, ASPHALT, ROAD_MAT, table.clone(ROAD_OPTS))
+	-- its edges are walled in (rail + invisible wall), joining the spur's walls to the loop's
+	local jx0, jx1 = LOOP_S - LOOP_HW - 110, LOOP_S - LOOP_HW + 1
+	for _, sz in { -1, 1 } do
+		for _, seg in { { Vector3.new(jx0, 0, sz * (HW + 3)), Vector3.new(jx0, 0, sz * 116) }, { Vector3.new(jx0, 0, sz * 116), Vector3.new(jx1, 0, sz * 116) } } do
+			local a0, a1 = seg[1], seg[2]
+			local cen, len = (a0 + a1) / 2, (a1 - a0).Magnitude + 0.6
+			mk(loop, Vector3.new(0.6, 1.2, len), CFrame.lookAt(cen + Vector3.new(0, 2.2, 0), a1 + Vector3.new(0, 2.2, 0)), Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.2, name = "GuardRail" })
+			mk(loop, Vector3.new(2, 60, len), CFrame.lookAt(cen + Vector3.new(0, 30, 0), a1 + Vector3.new(0, 30, 0)), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Wall" })
+		end
+	end
+
+	-- markings, rails, barrier and lights, walked along the loop in chunks (LOD groups)
+	local CHUNK = 600
+	local chunks = math.ceil(L / CHUNK)
+	local walls = folder("LoopWalls", loop)
+	for c = 0, chunks - 1 do
+		local cs0, cs1 = c * CHUNK, math.min(L, (c + 1) * CHUNK)
+		local mid = CityLayout.loopSample((cs0 + cs1) / 2)
+		local marks = lodGroup(loop, `Loop_{c}`, mid, 900)
+		-- (straight stretches get long pieces, corners short ones)
+		local function piece(s: number): number
+			local local_ = s % (side + arc)
+			return if local_ < side then 120 else 20
+		end
+		local s = cs0
+		while s < cs1 - 0.1 do
+			local step = math.min(piece(s), cs1 - s)
+			local pa = CityLayout.loopSample(s)
+			local pb = CityLayout.loopSample(s + step)
+			local function line(off: number, w: number, color: Color3)
+				-- (sampled with the offset, so on the corners it follows the curve)
+				local q0 = CityLayout.loopSample(s, off)
+				local q1 = CityLayout.loopSample(s + step, off)
+				local cen = (q0 + q1) / 2
+				deco(marks, Vector3.new(w, 0.05, (q1 - q0).Magnitude + 0.3), CFrame.lookAt(Vector3.new(cen.X, 0.03, cen.Z), Vector3.new(q1.X, 0.03, q1.Z)), color, Enum.Material.SmoothPlastic, { reflectance = 0.05 })
+			end
+			-- edge lines and the double yellow either side of the barrier
+			for _, off in { -HW + 1, HW - 1 } do
+				line(off, 0.4, LINE_WHITE)
+			end
+			for _, off in { -1.2, 1.2 } do
+				line(off, 0.3, LINE_YELLOW)
+			end
+			-- concrete median barrier
+			do
+				local cen = (pa + pb) / 2
+				mk(marks, Vector3.new(1.4, 2.6, (pb - pa).Magnitude + 0.4), CFrame.lookAt(cen + Vector3.new(0, 1.3, 0), pb + Vector3.new(0, 1.3, 0)), Color3.fromRGB(84, 84, 82), Enum.Material.Concrete, { name = "Barrier" })
+			end
+			-- guard rails and invisible walls on both outer edges (open at the junction)
+			for _, sgn in { -1, 1 } do
+				local q0 = CityLayout.loopSample(s, sgn * (LOOP_HW - 2))
+				local q1 = CityLayout.loopSample(s + step, sgn * (LOOP_HW - 2))
+				if not (junction(q0) or junction(q1)) then
+					local cen = (q0 + q1) / 2
+					local len = (q1 - q0).Magnitude + 0.4
+					mk(marks, Vector3.new(0.6, 1.2, len), CFrame.lookAt(cen + Vector3.new(0, 2.2, 0), q1 + Vector3.new(0, 2.2, 0)), Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.2, name = "GuardRail" })
+					mk(walls, Vector3.new(2, 60, len), CFrame.lookAt(cen + Vector3.new(0, 30, 0), q1 + Vector3.new(0, 30, 0)), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Wall" })
+				end
+			end
+			s += step
+		end
+		-- dashed lane lines: 12 long, 18 apart
+		local d = cs0
+		while d < cs1 - 12 do
+			for _, off in { -2 * C.LaneWidth, -C.LaneWidth, C.LaneWidth, 2 * C.LaneWidth } do
+				local q0 = CityLayout.loopSample(d, off)
+				local q1 = CityLayout.loopSample(d + 12, off)
+				if not junction(q0) then
+					local cen = (q0 + q1) / 2
+					deco(marks, Vector3.new(0.35, 0.05, 12), CFrame.lookAt(Vector3.new(cen.X, 0.03, cen.Z), Vector3.new(q1.X, 0.03, q1.Z)), LINE_WHITE, Enum.Material.SmoothPlastic, { reflectance = 0.05 })
+				end
+			end
+			d += 30
+		end
+		-- lights on the outer edges, arms over the lanes, alternating sides
+		local l = cs0 + 90
+		local flip = c % 2 == 0
+		while l < cs1 do
+			local sgn = if flip then 1 else -1
+			local p, dir = CityLayout.loopSample(l, sgn * (LOOP_HW + 3))
+			if not junction(p) then
+				local inward = -dir:Cross(Vector3.yAxis) * sgn
+				streetLight(marks, p, inward)
+			end
+			flip = not flip
+			l += 180
+		end
+	end
+	-- signs for the clockwise traffic: the exit to downtown ahead of the junction, and the
+	-- loop's name past each corner
+	gantry(loop, LOOP_C - 700, "DOWNTOWN  ➜  NEXT EXIT", "KEEP RIGHT")
+	gantry(loop, LOOP_C - 140, "EXIT  ➜  DOWNTOWN")
+	for k = 0, 3 do
+		gantry(loop, k * (side + arc) + side + arc + 300, "LEGENDS LOOP", if k % 2 == 0 then "CITY LEGENDS 8 KM" else "NIGHT RUN  ➜")
+	end
+end
+
 local function buildHighway(parent: Instance)
 	local hwy = folder("Highway", parent)
-	-- surrounding terrain
-	slab(hwy, E + RING, -1400, PLAZA_X + 400, 1400, -0.3, 4, Color3.fromRGB(18, 26, 18), Enum.Material.Grass)
-	-- road surface (inside the skyline ring the city asphalt is already there)
-	slab(hwy, E + RING, -HW - 6, HWY_X1 + 10, HW + 6, 0, 2, ASPHALT, ROAD_MAT, table.clone(ROAD_OPTS))
+	-- the land east of the city, and the mainland all round the harbour (the loop runs on it)
+	local W = E + RING + 1500 -- the harbour's outer edge (CityPremium's water)
+	local OUT = LOOP_S + 1100
+	local grass = Color3.fromRGB(56, 76, 42)
+	slab(hwy, E + RING, -E - RING, W, E + RING, -0.3, 4, grass, Enum.Material.Grass, { name = "Land" })
+	slab(hwy, -OUT, -OUT, OUT, -W, -0.3, 4, grass, Enum.Material.Grass, { name = "Land" })
+	slab(hwy, -OUT, W, OUT, OUT, -0.3, 4, grass, Enum.Material.Grass, { name = "Land" })
+	slab(hwy, -OUT, -W, -W, W, -0.3, 4, grass, Enum.Material.Grass, { name = "Land" })
+	slab(hwy, W, -W, OUT, W, -0.3, 4, grass, Enum.Material.Grass, { name = "Land" })
+	-- road surface (inside the skyline ring the city asphalt is already there), out to the loop
+	slab(hwy, E + RING, -HW - 6, LOOP_S - LOOP_HW, HW + 6, 0, 2, ASPHALT, ROAD_MAT, table.clone(ROAD_OPTS))
 
 	-- markings
 	local marks = folder("HighwayMarkings", hwy)
 	local a = Vector3.new(HWY_X0 + 4, 0, 0)
-	local b = Vector3.new(HWY_X1, 0, 0)
+	local b = Vector3.new(SPUR_END, 0, 0)
 	solidLine(marks, a + Vector3.new(0, 0, 0.4), b + Vector3.new(0, 0, 0.4), 0.3, LINE_YELLOW)
 	solidLine(marks, a - Vector3.new(0, 0, 0.4), b - Vector3.new(0, 0, 0.4), 0.3, LINE_YELLOW)
-	for _, z in { -24, -12, 12, 24 } do
+	for _, z in { -2 * C.LaneWidth, -C.LaneWidth, C.LaneWidth, 2 * C.LaneWidth } do
 		dashedLine(marks, a + Vector3.new(0, 0, z), b + Vector3.new(0, 0, z), 0.35, 12, 18, LINE_WHITE)
 	end
 	for _, z in { -HW + 1, HW - 1 } do
@@ -1043,25 +1305,25 @@ local function buildHighway(parent: Instance)
 	-- guard rails + invisible walls
 	for _, s in { -1, 1 } do
 		local x0 = E + RING
-		local len = HWY_X1 - x0
+		local len = SPUR_END - x0
 		for part = 0, 1 do
 			local cx = x0 + len * (part * 0.5 + 0.25)
 			mk(hwy, Vector3.new(len / 2, 1.2, 0.6), CFrame.new(cx, 2.2, s * (HW + 2)), Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.2, name = "GuardRail" })
 			mk(hwy, Vector3.new(len / 2, 60, 2), CFrame.new(cx, 30, s * (HW + 3)), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Wall" })
 		end
-		for x = x0 + 10, HWY_X1, 24 do
+		for x = x0 + 10, SPUR_END, 24 do
 			if x < TUNNEL_X0 - 4 or x > TUNNEL_X1 + 4 then
 				deco(hwy, Vector3.new(0.5, 2.6, 0.5), CFrame.new(x, 1.3, s * (HW + 2.2)), METAL, Enum.Material.Metal)
 			end
 		end
 		-- reflectors (little amber dots)
-		for x = x0 + 22, HWY_X1, 48 do
+		for x = x0 + 22, SPUR_END, 48 do
 			deco(hwy, Vector3.new(0.4, 0.3, 0.2), CFrame.new(x, 2.2, s * (HW + 1.65)), Color3.fromRGB(255, 160, 40), Enum.Material.Neon)
 		end
 	end
 
 	-- highway lights (outside the tunnel)
-	for x = HWY_X0 + 40, HWY_X1, 160 do
+	for x = HWY_X0 + 40, SPUR_END, 160 do
 		if x < TUNNEL_X0 - 20 or x > TUNNEL_X1 + 20 then
 			streetLight(hwy, Vector3.new(x, 0, -(HW + 5)), Vector3.new(0, 0, 1))
 			streetLight(hwy, Vector3.new(x + 80, 0, HW + 5), Vector3.new(0, 0, -1))
@@ -1075,7 +1337,7 @@ local function buildHighway(parent: Instance)
 	end
 	deco(hwy, Vector3.new(1.4, 1.4, HW * 2 + 10), CFrame.new(gx, 25, 0), METAL, Enum.Material.Metal)
 	local gsign = deco(hwy, Vector3.new(0.6, 7, 34), CFrame.new(gx - 0.5, 20, HW / 2), Color3.fromRGB(10, 70, 40), Enum.Material.SmoothPlastic)
-	surfaceText(gsign, Enum.NormalId.Left, "TUNNEL  ➜  1 MI", Color3.new(1, 1, 1), Color3.fromRGB(10, 90, 50), 0, Enum.Font.GothamBold, Vector2.new(800, 160))
+	surfaceText(gsign, Enum.NormalId.Left, "LEGENDS LOOP  ➜  2 MI", Color3.new(1, 1, 1), Color3.fromRGB(10, 90, 50), 0, Enum.Font.GothamBold, Vector2.new(800, 160))
 	local gsign2 = deco(hwy, Vector3.new(0.6, 7, 34), CFrame.new(gx + 0.5, 20, -HW / 2), Color3.fromRGB(10, 70, 40), Enum.Material.SmoothPlastic)
 	surfaceText(gsign2, Enum.NormalId.Right, "DOWNTOWN", Color3.new(1, 1, 1), Color3.fromRGB(10, 90, 50), 0, Enum.Font.GothamBold, Vector2.new(800, 160))
 
@@ -1142,34 +1404,7 @@ local function buildHighway(parent: Instance)
 	-- THE sign
 	cityLegendsSign(tunnel, Vector3.new(mx, tunnelH - 7.5, 0), 58, 10)
 
-	-------------------------------------------------------------
-	-- Turn-around plaza
-	-------------------------------------------------------------
-	local plaza = folder("Plaza", hwy)
-	local R = C.PlazaRadius
-	mk(plaza, Vector3.new(2, R * 2, R * 2), CFrame.new(PLAZA_X, -1, 0) * CFrame.Angles(0, 0, math.pi / 2), ASPHALT, Enum.Material.Asphalt, { shape = Enum.PartType.Cylinder })
-	mk(plaza, Vector3.new(1.2, 64, 64), CFrame.new(PLAZA_X, 0.6, 0) * CFrame.Angles(0, 0, math.pi / 2), SIDEWALK, Enum.Material.Pavement, { shape = Enum.PartType.Cylinder, name = "Island" })
-	local obelisk = mk(plaza, Vector3.new(6, 70, 6), CFrame.new(PLAZA_X, 35, 0), Color3.fromRGB(14, 14, 18), Enum.Material.Glass, { reflectance = 0.3 })
-	for _, s in { -1, 1 } do
-		deco(plaza, Vector3.new(0.4, 66, 0.4), CFrame.new(PLAZA_X + s * 3.1, 35, 3.1), Config.Theme.Accent, Enum.Material.Neon)
-		deco(plaza, Vector3.new(0.4, 66, 0.4), CFrame.new(PLAZA_X + s * 3.1, 35, -3.1), Config.Theme.Accent2, Enum.Material.Neon)
-	end
-	addLight("PointLight", obelisk, Config.Theme.Accent, 30, 0.9)
-	local segs = 32
-	for k = 0, segs - 1 do
-		local a0 = k / segs * math.pi * 2
-		local p = Vector3.new(PLAZA_X + math.cos(a0) * (R + 1), 2.2, math.sin(a0) * (R + 1))
-		-- leave the mouth open where the highway arrives
-		if not (math.cos(a0) < -0.9 and math.abs(math.sin(a0) * R) < HW + 8) then
-			local len = 2 * math.pi * (R + 1) / segs + 0.5
-			mk(plaza, Vector3.new(len, 1.2, 0.6), CFrame.lookAt(p, p + Vector3.new(-math.sin(a0), 0, math.cos(a0))) * CFrame.Angles(0, math.pi / 2, 0), Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.2 })
-			mk(plaza, Vector3.new(len, 60, 2), CFrame.lookAt(p, p + Vector3.new(-math.sin(a0), 0, math.cos(a0))) * CFrame.Angles(0, math.pi / 2, 0) + Vector3.new(0, 28, 0), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
-		end
-	end
-	for k = 0, 7 do
-		local a0 = k / 8 * math.pi * 2 + 0.2
-		streetLight(plaza, Vector3.new(PLAZA_X + math.cos(a0) * (R - 3), 0, math.sin(a0) * (R - 3)), Vector3.new(-math.cos(a0), 0, -math.sin(a0)))
-	end
+	buildLoop(hwy)
 end
 
 ---------------------------------------------------------------------
@@ -1181,12 +1416,25 @@ CityBuilder.kit = {
 	slab = slab,
 	folder = folder,
 	addLight = addLight,
+	dayOff = dayOff,
 	surfaceText = surfaceText,
 	lodGroup = lodGroup,
 	pick = pick,
 	rng = rng,
 	building = building,
 	tree = tree,
+	park = park,
+	fillBuildings = fillBuildings,
+	streetLight = streetLight,
+	dashedLine = dashedLine,
+	solidLine = solidLine,
+	cityLegendsSign = cityLegendsSign,
+	ASPHALT = ASPHALT,
+	ROAD_MAT = ROAD_MAT,
+	ROAD_OPTS = ROAD_OPTS,
+	SIDEWALK = SIDEWALK,
+	LINE_WHITE = LINE_WHITE,
+	LINE_YELLOW = LINE_YELLOW,
 	facadeTier = facadeTier,
 	neonOutline = neonOutline,
 	spire = spire,
@@ -1220,12 +1468,23 @@ function CityBuilder.build(): Folder
 	local ground = folder("Ground", city)
 	slab(ground, -E - RING, -E - RING, E + RING, E + RING, 0, 4, ASPHALT, ROAD_MAT, table.clone(ROAD_OPTS))
 
-	buildRoadMarkings(city)
-	buildBlocks(city)
-	buildSignals(city)
+	for _, ib in CityLayout.GridBases do
+		buildRoadMarkings(city, ib)
+		buildBlocks(city, ib)
+		buildSignals(city, ib)
+	end
 	buildRing(city)
 	buildHighway(city)
 	CityPremium.environment(CityBuilder.kit, city)
+	Mainland.build(CityBuilder.kit, city)
+	West.build(CityBuilder.kit, city)
+	-- the venues on Downtown's sites and the houses on the islands' plots
+	Hotel.buildWorld(CityBuilder.kit, city)
+	Casino.buildWorld(CityBuilder.kit, city)
+	GemShowcase.buildWorld(CityBuilder.kit, city)
+	Houses.buildWorld(CityBuilder.kit, city)
+	-- speed traps, jump ramps and the leaderboard board
+	require(script.Parent:WaitForChild("Challenges")).buildWorld(CityBuilder.kit, city)
 
 	city.Parent = workspace
 	city:SetAttribute("Ready", true)

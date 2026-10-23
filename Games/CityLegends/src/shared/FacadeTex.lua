@@ -42,9 +42,11 @@ export type Style = {
 	frameMetal: number,
 }
 
+-- (2026-10-23: lighter concrete and blue-grey glass, so towers read as real buildings by day;
+-- the night lighting keeps them dark at night)
 FacadeTex.STYLES = {
-	glass = { pier = 1, spandrel = 6, head = 1, wall = { 62, 68, 80 }, wallNoise = 2, frame = { 92, 98, 110 }, glass = { 18, 28, 44 }, sky = 22, pattern = "plain", glassRough = 20, glassMetal = 190, wallRough = 120, frameMetal = 200 },
-	panel = { pier = 3, spandrel = 9, head = 2, wall = { 50, 53, 61 }, wallNoise = 3, frame = { 30, 31, 36 }, glass = { 16, 22, 32 }, sky = 16, pattern = "panel", glassRough = 26, glassMetal = 150, wallRough = 170, frameMetal = 160 },
+	glass = { pier = 1, spandrel = 6, head = 1, wall = { 88, 94, 104 }, wallNoise = 2, frame = { 120, 126, 136 }, glass = { 30, 44, 60 }, sky = 22, pattern = "plain", glassRough = 20, glassMetal = 190, wallRough = 120, frameMetal = 200 },
+	panel = { pier = 3, spandrel = 9, head = 2, wall = { 82, 85, 92 }, wallNoise = 3, frame = { 50, 52, 58 }, glass = { 24, 32, 44 }, sky = 16, pattern = "panel", glassRough = 26, glassMetal = 150, wallRough = 170, frameMetal = 160 },
 	stone = { pier = 7, spandrel = 9, head = 5, wall = { 128, 118, 102 }, wallNoise = 9, frame = { 44, 40, 36 }, glass = { 18, 22, 28 }, sky = 14, pattern = "stone", glassRough = 30, glassMetal = 120, wallRough = 225, frameMetal = 0 },
 	brick = { pier = 7, spandrel = 9, head = 6, wall = { 116, 62, 46 }, wallNoise = 10, frame = { 196, 190, 178 }, glass = { 16, 20, 26 }, sky = 12, pattern = "brick", glassRough = 30, glassMetal = 110, wallRough = 235, frameMetal = 0 },
 }

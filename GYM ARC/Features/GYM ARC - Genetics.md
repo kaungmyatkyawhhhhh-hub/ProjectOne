@@ -76,3 +76,6 @@ The daily login calendar is now also an allowed source: +1 on day 4 and +1 on da
 
 ## Decision (15 Oct)
 The owner keeps the 3D genetics screen (the plates on the bar). The single-panel redesign planned on 14 Oct is dropped.
+
+## Frame shoulder widths (owner, 19 Oct)
+The frame's shoulder width is smaller now: Narrow 0.9x, Average 1.0x, Wide **1.05x** (was 1.1x), V-Taper **1.1x** (was 1.2x). Bonuses and roll chances are unchanged. See [[GYM ARC - Muscles and Bodies]].

@@ -54,3 +54,26 @@ Some old saves had more Growth Spurts than the last one (6, which reaches 7'0") 
 
 ## At 7'0" (15 Oct)
 No Growth Spurt card on the HUD at 7'0" (owner): the top bar's "7'0" MAX" says it. The Stats panel keeps its greyed "Max Growth Spurt reached" button.
+
+## What it needs, READY popup, faster first spurt (21 Oct, prompt 20)
+- First Growth Spurt goal: level 15 -> **9** (about 5 min); spurt 2: 58 -> 56 to keep its 15 min with the new stamina. `GrowthSpurts.Targets` = 5, 15, 25, 35, 45 (tests/pacing passes). The EXP scale stays (level 15 = 50,000 EXP), so the first goal now shows about 24,700 EXP.
+- The card says what's behind: "62% · Needs LEGS" (groups at least 15% behind the best one). A tap opens **Train next**: the machines for those groups with a GO button each (a glowing path to the nearest free one). On a machine a small card at the top left shows the same.
+- On a machine that doesn't train the groups that are behind: one hint, "Your legs are holding you back. Try the Squat Rack."
+- The Body Map colors the needed groups red.
+- When the spurt is ready: a big **READY TO GROW!** popup (sound, glowing TAP TO GROW, Later), over the machine HUD too. Tapping it on a machine gets you off, then grows.
+
+![[GYM ARC/Screenshots/playtest_fixes/train_next_window.jpg]]
+![[GYM ARC/Screenshots/playtest_fixes/ready_to_grow.jpg]]
+
+## Card outline (23 Oct, prompt 58; [[2026-10-23 GYM ARC Growth Spurt card quiet outline]])
+The GROWTH SPURT card (right column) and the machine strip are quiet chrome cards: the HUD cards' own 1.5 px outline tinted in the Growth Spurt gold (the TAP TO GROW gold; the strip uses the next alter's colour in alter mode). READY = the same dark card with TAP TO GROW in gold and the outline doing the ready glow (`Shared/UI/ReadyGlow`); no loud gold button any more. The READY TO GROW popup is unchanged.
+
+## Gym ladder and unlock list (23 Oct, prompt 58; [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]])
+- Gyms: Beach at 1, Pro at **3** (was 2), Powerlifting at **5**; no gym at 2 and 4. The "Growth Spurt!" moment adds a gold line with what opened (`GrowthSpurts.Unlocks`, e.g. "NEW: TRAINERS · ARM WRESTLING · REGIONAL SHOW").
+- The card says "Next: Pro Gym" / "Next: Powerlifting Gym" when the next spurt opens a gym.
+- Spurt 6 goal **216 -> 238** (the Powerlifting tiers had made it 41 min; 45.0 again in tests/pacing).
+
+## Milestone rewards (21 Oct, prompt 11; [[2026-10-21 GYM ARC Funnel fixes]])
+- At 25%, 50% and 75% of the goal bar (the same share the HUD shows): a popup ("Growth Spurt 1: 50%, +14 coins"), a sound and a few coins (half a minute of coins at your stage). At 75%: "Almost there!". Every spurt, not at 7'0" (alters have their own).
+- `Config/GrowthSpurts` Milestones / MilestoneCoinMinutes / Share, `Server/SpurtMilestoneService` (checked after reps, data.spurtMilestones), popup in ProgressClient.
+![[GYM ARC/Screenshots/funnel_fixes/milestone_75.jpg]]

@@ -45,3 +45,6 @@ A wall leaderboard in the starter gym and a marble statue of the strongest playe
 
 ## Avatar headshots (14 Oct)
 Player pictures here are the real Roblox avatar headshot in a plain dark circle (the same look everywhere, see [[GYM ARC - Loading Screen and Menu]]).
+
+## The statue is the real player's body (19 Oct)
+The statue reads the strongest player's save (read-only) and is built with their own widths and muscles, like their real character (before: a generic fully grown body). The posing champion's values are kept from when they won. It rebuilds when the player's widths or muscles change. Studio: Workspace attribute `TestStatueMe` = true makes you the statue. See [[GYM ARC - Bug - Mirror and statue bodies too narrow]].
