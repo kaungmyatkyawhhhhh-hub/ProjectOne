@@ -313,7 +313,7 @@ local function openModal(title: string, height: number): Frame
 	-- clicks inside the box don't close it
 	new("TextButton", { AutoButtonColor = false, Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 21, Parent = box })
 	text({ Text = title, TextSize = 18, Font = Enum.Font.GothamBlack, Position = UDim2.fromOffset(18, 14), Size = UDim2.new(1, -70, 0, 24), ZIndex = 22, Parent = box })
-	local x = pill(box, "✕", C.stroke, false, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0, 12), Size = UDim2.fromOffset(30, 30), ZIndex = 23 })
+	local x = pill(box, "×", C.stroke, false, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0, 12), Size = UDim2.fromOffset(30, 30), ZIndex = 23 })
 	x.Activated:Connect(closeModal)
 	modal = shade
 	return box
@@ -509,7 +509,7 @@ local function build()
 	local leave = pill(c, "", C.stroke, false, { Position = UDim2.fromOffset(16, 14), Size = UDim2.fromOffset(112, 36) })
 	text({ Text = "←  Leave", TextSize = 14, Position = UDim2.fromOffset(12, 0), Size = UDim2.new(1, -40, 1, 0), Parent = leave })
 	local key = new("Frame", { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(22, 18), BackgroundColor3 = C.cardHi, Parent = leave }, { corner(4) })
-	text({ Text = if UI.isTouch then "✕" else "K", Font = MONO, TextSize = 11, TextColor3 = C.sub, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), Parent = key })
+	text({ Text = if UI.isTouch then "×" else "K", Font = MONO, TextSize = 11, TextColor3 = C.sub, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), Parent = key })
 	leave.Activated:Connect(function()
 		MarketUI.close()
 	end)

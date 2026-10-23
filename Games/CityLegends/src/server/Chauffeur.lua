@@ -425,7 +425,7 @@ local function stand(parent: Instance, base: CFrame)
 			l.TextWrapped = true
 			l.Parent = bg
 		end
-		text("♛", 90, 120, 110, GOLD, Enum.Font.GothamBlack)
+		text("★", 90, 120, 110, GOLD, Enum.Font.GothamBlack)
 		text("LEGENDS", 240, 70, 58, Color3.new(1, 1, 1), Enum.Font.GothamBlack)
 		text("CHAUFFEUR", 310, 60, 44, GOLD, Enum.Font.GothamBold)
 		text("Private drivers\nany time, anywhere", 420, 110, 30, Color3.fromRGB(200, 200, 210), Enum.Font.Gotham)

@@ -161,7 +161,7 @@ local function window(title: string, subtitle: string, accent: Color3): (Frame, 
 	label({ Text = title, Font = Enum.Font.Garamond, TextSize = 30, TextColor3 = accent, Position = UDim2.fromOffset(22, 12), Size = UDim2.new(1, -200, 0, 34), Parent = panel })
 	label({ Text = subtitle, Font = Enum.Font.GothamMedium, TextSize = 13, TextColor3 = C.sub, Position = UDim2.fromOffset(22, 46), Size = UDim2.new(1, -200, 0, 18), Parent = panel })
 	local cashLabel = label({ Text = UI.formatCash(cash()), Font = Enum.Font.RobotoMono, TextSize = 18, TextColor3 = Theme.Money, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -66, 0, 18), Size = UDim2.fromOffset(200, 24), Parent = panel })
-	local close = button({ Text = "✕", BackgroundColor3 = C.cardHi, TextColor3 = C.text, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, 14), Size = UDim2.fromOffset(36, 32), Parent = panel })
+	local close = button({ Text = "×", BackgroundColor3 = C.cardHi, TextColor3 = C.text, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, 14), Size = UDim2.fromOffset(36, 32), Parent = panel })
 	close.Activated:Connect(closePanel)
 	local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(16, 76), Size = UDim2.new(1, -32, 1, -92), Parent = panel })
 	openPanel = panel

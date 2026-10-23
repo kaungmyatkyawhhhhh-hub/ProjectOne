@@ -894,7 +894,7 @@ local function sidePanel(title: string, height: number, anchorY: number): Frame
 		Parent = hud,
 	}, { corner(12), stroke(Theme.Stroke, 1.5, 0.1) })
 	label({ Text = title, TextSize = 16, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, 12), Size = UDim2.new(1, -60, 0, 22), ZIndex = 5, Parent = p })
-	local close = button("✕", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -10, 0, 10), Size = UDim2.fromOffset(28, 28), TextSize = 13, ZIndex = 6, Parent = p })
+	local close = button("×", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -10, 0, 10), Size = UDim2.fromOffset(28, 28), TextSize = 13, ZIndex = 6, Parent = p })
 	close.Activated:Connect(function()
 		p.Visible = false
 	end)
@@ -1550,7 +1550,7 @@ end
 
 local skipBtn: TextButton? = nil
 function UI.showSkip(onSkip: () -> ())
-	local b = button("SKIP  ▸", Theme.Accent, {
+	local b = button("SKIP  ▶", Theme.Accent, {
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1, -24, 1, -24),
 		Size = UDim2.fromOffset(120, 38),
@@ -1696,7 +1696,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	})
 	local cashText = label({ Text = formatCash(cash), TextColor3 = Theme.Money, TextSize = 26, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -60, 0, 0), Size = UDim2.new(0.4, 0, 1, 0), ZIndex = 61, Parent = header })
 	if callbacks.close then
-		local close = button("✕", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 4), Size = UDim2.fromOffset(42, 42), TextSize = 18, ZIndex = 61, Parent = header })
+		local close = button("×", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 4), Size = UDim2.fromOffset(42, 42), TextSize = 18, ZIndex = 61, Parent = header })
 		close.Activated:Connect(function()
 			UI.closeGarage();
 			(callbacks.close :: () -> ())()
@@ -1747,8 +1747,10 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local nameText = label({ Text = "", TextSize = 34, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, 24, 0.56, 22), Size = UDim2.new(0.6, 0, 0, 38), ZIndex = 62, Parent = detail })
 	local classText = label({ Text = "", TextSize = 14, TextColor3 = Theme.Accent, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, 24, 0.56, 62), Size = UDim2.new(0.6, 0, 0, 18), ZIndex = 62, Parent = detail })
 
-	local statsHolder = new("Frame", { BackgroundTransparency = 1, Position = UDim2.new(0, 24, 0.56, 92), Size = UDim2.new(0.55, 0, 0, 110), ZIndex = 62, Parent = detail }, {
+	-- (stops short of the DRIVE button, which sits bottom right: on a small screen it hid the numbers)
+	local statsHolder = new("Frame", { BackgroundTransparency = 1, Position = UDim2.new(0, 24, 0.56, 92), Size = UDim2.new(1, -24 - 230 - 24 - 20, 0, 110), ZIndex = 62, Parent = detail }, {
 		new("UIListLayout", { Padding = UDim.new(0, 10) }),
+		new("UISizeConstraint", { MaxSize = Vector2.new(440, math.huge) }),
 	})
 	local function statRow(name: string): (TextLabel, Frame)
 		local row = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 28), ZIndex = 62, Parent = statsHolder })

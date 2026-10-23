@@ -403,7 +403,7 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	local rng = Random.new(7744)
 	if L.GamingFloorDecor then
 		-- banks of slot machines (no lever, no spin: they just glow)
-		local symbols = { "7  7  7", "◆  ★  ◆", "★  7  ★", "♛  ♛  ♛", "◆  ◆  ◆" }
+		local symbols = { "7  7  7", "◆  ★  ◆", "★  7  ★", "★  ★  ★", "◆  ◆  ◆" }
 		for row, z in { -10, 8, 26 } do
 			for _, side in { -1, 1 } do
 				for k = 0, 7 do

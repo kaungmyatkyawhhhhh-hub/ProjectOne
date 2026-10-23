@@ -281,6 +281,10 @@ local function onDrift(player: Player, score: any, seconds: any)
 	if not (car and d and type(score) == "number" and type(seconds) == "number") then
 		return
 	end
+	-- you bank a drift by straightening up, still rolling: a parked car can't send drifts
+	if speedOf(car) < 10 then
+		return
+	end
 	local s = session(player)
 	local now = os.clock()
 	-- a run can't be longer than the time since the last one was banked
@@ -320,8 +324,20 @@ local function onStunt(player: Player, air: any, dist: any)
 	if a < K.StuntMinAir or now - s.lastStunt < a then
 		return
 	end
-	s.lastStunt = now
 	local studs = math.clamp(dist, 0, a * 330)
+	-- only off a ramp: the car has landed within its jump's length of one, and is still rolling
+	local pos = car:GetPivot().Position
+	local nearRamp = false
+	for _, r in ChallengeData.ramps do
+		if (pos - r.cf.Position).Magnitude < studs + 300 then
+			nearRamp = true
+			break
+		end
+	end
+	if not nearRamp or speedOf(car) < 15 then
+		return
+	end
+	s.lastStunt = now
 	local cash = math.min(math.floor(a * K.StuntCashPerSecond + studs * K.StuntCashPerStud), K.StuntCashMax)
 	PlayerData.addCash(player, cash)
 	ctx.grantXp(player, K.StuntXp, "jump")

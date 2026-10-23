@@ -1268,10 +1268,10 @@ buildLoop = function(hwy: Instance)
 	end
 	-- signs for the clockwise traffic: the exit to downtown ahead of the junction, and the
 	-- loop's name past each corner
-	gantry(loop, LOOP_C - 700, "DOWNTOWN  ➜  NEXT EXIT", "KEEP RIGHT")
-	gantry(loop, LOOP_C - 140, "EXIT  ➜  DOWNTOWN")
+	gantry(loop, LOOP_C - 700, "DOWNTOWN  →  NEXT EXIT", "KEEP RIGHT")
+	gantry(loop, LOOP_C - 140, "EXIT  →  DOWNTOWN")
 	for k = 0, 3 do
-		gantry(loop, k * (side + arc) + side + arc + 300, "LEGENDS LOOP", if k % 2 == 0 then "CITY LEGENDS 8 KM" else "NIGHT RUN  ➜")
+		gantry(loop, k * (side + arc) + side + arc + 300, "LEGENDS LOOP", if k % 2 == 0 then "CITY LEGENDS 8 KM" else "NIGHT RUN  →")
 	end
 end
 
@@ -1337,7 +1337,7 @@ local function buildHighway(parent: Instance)
 	end
 	deco(hwy, Vector3.new(1.4, 1.4, HW * 2 + 10), CFrame.new(gx, 25, 0), METAL, Enum.Material.Metal)
 	local gsign = deco(hwy, Vector3.new(0.6, 7, 34), CFrame.new(gx - 0.5, 20, HW / 2), Color3.fromRGB(10, 70, 40), Enum.Material.SmoothPlastic)
-	surfaceText(gsign, Enum.NormalId.Left, "LEGENDS LOOP  ➜  2 MI", Color3.new(1, 1, 1), Color3.fromRGB(10, 90, 50), 0, Enum.Font.GothamBold, Vector2.new(800, 160))
+	surfaceText(gsign, Enum.NormalId.Left, "LEGENDS LOOP  →  2 MI", Color3.new(1, 1, 1), Color3.fromRGB(10, 90, 50), 0, Enum.Font.GothamBold, Vector2.new(800, 160))
 	local gsign2 = deco(hwy, Vector3.new(0.6, 7, 34), CFrame.new(gx + 0.5, 20, -HW / 2), Color3.fromRGB(10, 70, 40), Enum.Material.SmoothPlastic)
 	surfaceText(gsign2, Enum.NormalId.Right, "DOWNTOWN", Color3.new(1, 1, 1), Color3.fromRGB(10, 90, 50), 0, Enum.Font.GothamBold, Vector2.new(800, 160))
 

@@ -403,7 +403,7 @@ local function highway(kit: any, root: Instance)
 		local back = kit.deco(hwy, Vector3.new(0.6, 7, 34), CFrame.new(gx - 0.5, y + 20, HW / 2), Color3.fromRGB(10, 70, 40), Enum.Material.SmoothPlastic)
 		kit.surfaceText(back, Enum.NormalId.Left, sub, Color3.new(1, 1, 1), Color3.fromRGB(10, 90, 50), 0, Enum.Font.GothamBold, Vector2.new(800, 160))
 	end
-	gantry(CITY_EDGE - 160, "DOWNTOWN  ·  ISLANDS  ➜", "CITY CENTRE")
+	gantry(CITY_EDGE - 160, "DOWNTOWN  ·  ISLANDS  →", "CITY CENTRE")
 	gantry(W.Canyon[1] + 200, "LEGENDS BRIDGE  ·  DOWNTOWN", "LEGENDS LOOP  ·  CITY")
 	gantry(W.BridgeDown[2] - 30, "OCEAN DRIVE  ·  ISLANDS", "CITY  ·  LEGENDS LOOP")
 end

@@ -295,11 +295,23 @@ local function cancel(reason: string)
 	UI.toast(reason, Theme.Warning)
 end
 
+-- the race / delivery card sits under the minimap (top right), and on touch under the daily gift too
+local function showCard()
+	local map = player.PlayerGui:FindFirstChild("Minimap")
+	local bottom = if map then map:GetAttribute("Bottom") else nil
+	local y = (if type(bottom) == "number" then bottom else 230) + 12
+	if UI.isTouch then
+		y += 80
+	end
+	card.Position = UDim2.new(1, -24, 0, y)
+	card.Visible = true
+end
+
 local function startRace(r: ActivityData.Race)
 	state = "countdown"
 	race = r
 	cp = 1
-	card.Visible = true
+	showCard()
 	cardTitle.Text = "RACE · " .. string.upper(r.name)
 	cardTime.Text = fmtTime(0)
 	cardSub.Text = `Gold {fmtTime(r.gold)} · Silver {fmtTime(r.silver)}`
@@ -371,7 +383,7 @@ local function startJob(which: number)
 		job = { dest = res.dest, deadline = os.clock() + res.limit }
 		state = "job"
 		local drop = ActivityData.dropPoints[res.dest]
-		card.Visible = true
+		showCard()
 		cardTitle.Text = "DELIVERY"
 		cardSub.Text = "Drop at " .. drop.name
 		cpNow.CFrame = CFrame.new(drop.pos + Vector3.new(0, 30, 0)) * CFrame.Angles(0, 0, math.rad(90))

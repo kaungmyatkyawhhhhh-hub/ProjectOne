@@ -350,7 +350,7 @@ local function showContract()
 		refresh()
 	end)
 	local card = new("Frame", { BackgroundColor3 = Color3.fromRGB(20, 19, 24), Size = UDim2.new(1, -24, 0, 210), LayoutOrder = 1, Parent = screen }, { corner(16), stroke(GOLD_DARK, 1, 0.3) })
-	text({ Text = "♛", TextSize = 40, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.new(1, 0, 0, 56), Position = UDim2.fromOffset(0, 8), Parent = card })
+	text({ Text = "★", TextSize = 40, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.new(1, 0, 0, 56), Position = UDim2.fromOffset(0, 8), Parent = card })
 	text({
 		Text = "A driver in a black suit and this car, whenever you call. Pay once, ride free for good.",
 		TextSize = 13,
@@ -412,7 +412,7 @@ local function showStatus()
 	clearScreen()
 	header("YOUR CHAUFFEUR", if ride then Cars.get(ride.carId).Name else nil)
 	local card = new("Frame", { BackgroundColor3 = Color3.fromRGB(20, 19, 24), Size = UDim2.new(1, -24, 0, 170), LayoutOrder = 1, Parent = screen }, { corner(16), stroke(GOLD_DARK, 1, 0.3) })
-	text({ Text = "♛", TextSize = 36, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.new(1, 0, 0, 50), Position = UDim2.fromOffset(0, 10), Parent = card })
+	text({ Text = "★", TextSize = 36, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.new(1, 0, 0, 50), Position = UDim2.fromOffset(0, 10), Parent = card })
 	text({
 		Name = "Status",
 		Text = statusText,
@@ -534,7 +534,7 @@ local function buildGui()
 	local bar = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 34), Parent = glass })
 	local clock = text({ Text = os.date("%H:%M") :: string, TextSize = 13, Font = Enum.Font.GothamBold, Position = UDim2.fromOffset(24, 8), Size = UDim2.fromOffset(60, 18), Parent = bar })
 	new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 8), Size = UDim2.fromOffset(84, 22), Parent = bar }, { corner(11) })
-	text({ Text = "▮▮▮  5G", TextSize = 11, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -22, 0, 9), Size = UDim2.fromOffset(70, 16), Parent = bar })
+	text({ Text = "•••  5G", TextSize = 11, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -22, 0, 9), Size = UDim2.fromOffset(70, 16), Parent = bar })
 	task.spawn(function()
 		while gui.Parent do
 			clock.Text = os.date("%H:%M") :: string
@@ -543,7 +543,7 @@ local function buildGui()
 	end)
 	local close: TextButton = new("TextButton", {
 		AutoButtonColor = false,
-		Text = "✕",
+		Text = "×",
 		Font = Enum.Font.GothamBlack,
 		TextSize = 13,
 		TextColor3 = Theme.SubText,
@@ -575,7 +575,7 @@ local function buildGui()
 		Visible = false,
 		Parent = gui,
 	}, { corner(18), stroke(GOLD_DARK, 1.5, 0.15) })
-	text({ Text = "♛  LEGENDS CHAUFFEUR", TextSize = 11, Font = Enum.Font.GothamBlack, TextColor3 = GOLD, Position = UDim2.fromOffset(18, 10), Size = UDim2.new(1, -36, 0, 14), Parent = rideCard })
+	text({ Text = "★  LEGENDS CHAUFFEUR", TextSize = 11, Font = Enum.Font.GothamBlack, TextColor3 = GOLD, Position = UDim2.fromOffset(18, 10), Size = UDim2.new(1, -36, 0, 14), Parent = rideCard })
 	rideTitle = text({ Text = "", TextSize = 19, Font = Enum.Font.GothamBlack, Position = UDim2.fromOffset(18, 26), Size = UDim2.new(1, -36, 0, 24), Parent = rideCard })
 	rideSub = text({ Text = "", TextSize = 12, Font = Enum.Font.Gotham, TextColor3 = Theme.SubText, Position = UDim2.fromOffset(18, 50), Size = UDim2.new(1, -36, 0, 16), Parent = rideCard })
 	local track = new("Frame", { BackgroundColor3 = Color3.fromRGB(40, 38, 44), Position = UDim2.fromOffset(18, 70), Size = UDim2.new(1, -36, 0, 3), Parent = rideCard }, { corner(2) })
@@ -1175,7 +1175,7 @@ local function marker(r: Ride, car: Model)
 	b.LightInfluence = 0
 	b.Adornee = car.PrimaryPart
 	local f = new("Frame", { BackgroundColor3 = INK, BackgroundTransparency = 0.15, Size = UDim2.fromScale(1, 1), Parent = b }, { corner(12), stroke(GOLD, 1.5, 0) })
-	text({ Text = "♛ YOUR CHAUFFEUR", TextSize = 13, Font = Enum.Font.GothamBlack, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), Parent = f })
+	text({ Text = "★ YOUR CHAUFFEUR", TextSize = 13, Font = Enum.Font.GothamBlack, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), Parent = f })
 	b.Parent = gui
 	r.marker = b
 end
