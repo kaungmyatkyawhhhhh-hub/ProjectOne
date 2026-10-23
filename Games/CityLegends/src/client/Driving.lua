@@ -182,6 +182,7 @@ type State = {
 	-- driving feel (Config.DrivingFeel)
 	yawRate: number, -- the car's turn now (it follows the wheel with some weight)
 	groundDist: number?, -- last ground ray distance (kerbs and bumps kick the body)
+	groundUp: Vector3, -- the road's slope under the car, smoothed (the body sits along it)
 	fovPunch: number, -- a moment's wider view (launch, flat-out shift, close pass)
 	blurPulse: number,
 	roar: Sound?, -- tyre and road roar that grows with speed
@@ -786,6 +787,7 @@ function Driving.reset()
 	s.vel = Vector3.zero
 	s.yawRate = 0
 	s.groundDist = nil
+	s.groundUp = Vector3.yAxis
 	s.drifting = false
 	s.airT, s.airVy = 0, 0
 	s.skidL, s.skidR = nil, nil
@@ -1592,6 +1594,7 @@ function Driving.attach(model: Model)
 		launchReady = false,
 		yawRate = 0,
 		groundDist = nil,
+		groundUp = Vector3.yAxis,
 		fovPunch = 0,
 		blurPulse = 0,
 		roar = nil,
@@ -1820,6 +1823,12 @@ function Driving.step(dt: number)
 	else
 		s.groundDist = nil
 	end
+	-- the road's slope: the body lies along it. (It was held level, so on the viaduct's climbs and
+	-- the bridge ramps its nose or tail dug into the road, physics shoved it back, that counted as a
+	-- crash and the car jolted and bounced: owner, 2026-10-24, "the car glitches out when randomly
+	-- driving".) Kerb sides and walls (steep normals) don't count; in the air it eases back level.
+	local upNow = if hit and hit.Normal.Y > 0.75 then hit.Normal else Vector3.yAxis
+	s.groundUp = s.groundUp:Lerp(upNow, math.min(1, dt * (if hit then 10 else 2))).Unit
 
 	local actual = root.AssemblyLinearVelocity
 	local actualFlat = Vector3.new(actual.X, 0, actual.Z)
@@ -2168,7 +2177,12 @@ function Driving.step(dt: number)
 	end
 
 	s.lv.PlaneVelocity = Vector2.new(s.vel.X, s.vel.Z)
-	s.ao.CFrame = CFrame.Angles(0, s.yaw, 0) * CFrame.Angles(s.pitch, 0, s.roll)
+	do
+		local look = CFrame.Angles(0, s.yaw, 0).LookVector
+		local n = s.groundUp
+		local along = (look - n * look:Dot(n)).Unit
+		s.ao.CFrame = CFrame.fromMatrix(Vector3.zero, along:Cross(n).Unit, n, -along) * CFrame.Angles(s.pitch, 0, s.roll)
+	end
 	s.lastCommand = s.vel
 
 	-- gears / rpm (cosmetic)
