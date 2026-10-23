@@ -23,3 +23,15 @@ Real car photos for matching clusters and interiors. For looking at only (copyin
 
 ## Other
 - `gallardo_cluster.jpg`: Lamborghini Gallardo Spyder dashboard (Commons calls it Aventador, but it's a Gallardo): rev counter left with red needle and orange-red numbers, speedometer right, small round gauges at both ends, a small screen in the middle. Good for the Gallardo LP570.
+
+## Supercars and hypercars, 2026-10-24 (owner: "make all the supercars and hypercars interior and working cluster a exact 1 to 1 replica of the real one")
+Photos from Wikimedia Commons (licence in brackets), frames from YouTube videos (id in brackets).
+- **Ferrari F430** (`ferrara_f430`, style `F430`): `f430_dash_chicago.jpg` (Commons "Ferrari F430 dash at 2006 Chicago Auto Show", CC BY-SA 2.5): yellow rev counter, small oil temperature / pressure dials left, speedometer right. `f430_cluster_video.jpg` (YouTube p0i_16qXVYY): the lit cluster close up, every scale and angle measured from it. `f430_dash.jpg`, `f430_spider_cockpit.jpg`: cockpit.
+- **Audi R8 type 42** (`audy_r8`, style `R8`): `r8_instrumente.jpg` (Commons "Audi R8 Instrumente", CC BY-SA 3.0), `r8_tacho.jpg` (Commons "Audi R8 V10 Tachymetre", CC BY 2.0), `r8_cluster_video.jpg` (YouTube IpKE1yQnrjU, lit, mph), `r8_v10_cockpit.jpg`.
+- **McLaren 12C** (`mclaran_12c`, style `MP412C`): `12c_cluster_video.jpg` + `_2` (YouTube AexcMMhw-6c): the lit cluster, rev counter angles measured from it. `12c_wheel.jpg`, `12c_interior.jpg` (CC0), `12c_wheel_geneva.jpg`, `12c_mp4int.jpg`: hood shape and cabin.
+- **Ferrari 458** (`ferrara_458`, style `Ferrari458`): `458_italia.jpg` (Commons, CC BY-SA 2.0), `458_cluster_video.jpg` (YouTube vXNhpdzluGQ).
+- **Ferrari California** (`ferrara_california`, style `FerrariCalifornia`): `california_dash.jpg` (Commons "Ferrari California Dashboard", CC BY-SA 3.0): red rev counter, speedometer right. `california_cluster_video.jpg` (YouTube 3ETq0kQbpEA): the left screen. `california_cockpit*.jpg`, `california_wheel.jpg`.
+- **Porsche 911 GT3 991.2** (`porsha_gt3`, style `Porsche991GT3`): `gt3_9912_cluster_video.jpg` + `_2` (YouTube WZvRMBjPdrw): the five dials. `gt3_9912_ir*.jpg`, `gt3_9911_ir1.jpg` (Commons, CC BY-SA 4.0): cabin.
+- **Lamborghini Murcielago LP640** (`lambrini_lp640`, style `MurcielagoLP640`): `lp640_cluster_video.jpg` (YouTube P1czi6CKOgo): the layout. `lp640_innenraum.jpg` (Commons, public domain).
+- **Lamborghini Gallardo LP570-4 Superleggera** (`lambrini_lp570`, style `GallardoSL`): `gallardo_sl_cockpit.jpg` (Commons "Lamborghini Gallardo Superleggera cockpit", CC BY-SA 3.0): white dials. `gallardo_lp560_cockpit.jpg`, `gallardo_cluster.jpg`: layout.
+- **Mercedes SLS** (`bentz_sls`, its own dials with `DialLooks`): `sls_cluster_video.jpg` (YouTube RNHCbpbdSZE).
