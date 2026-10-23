@@ -2142,6 +2142,10 @@ local function aventadorLP700(gui: SurfaceGui): Update
 	local clockText = D.label(clock(), 120, 116, 36, WHITE, Enum.Font.GothamMedium, 3)
 	D.label(os.date("%d.%m.%Y") :: string, 120, 152, 15, GREY, Enum.Font.GothamMedium, 3)
 	D.label(if KMH then "+14 °C" else "+57 °F", 120, 180, 17, WHITE, Enum.Font.GothamMedium, 3)
+	-- thin amber rules between the lines of the screen (refs/aventador_lp700_cluster_lit_crop.jpg)
+	for _, y in { 92, 136, 166, 198 } do
+		D.rect(132, y, 150, 1.5, Color3.fromRGB(196, 120, 30), 2, 0, 0.35)
+	end
 	-- an upright bar gauge of white segments with red tops; returns a setter (0..1)
 	local function column(x: number, name: string, value: number): (number) -> ()
 		local segs: { Frame } = {}
@@ -2218,7 +2222,7 @@ local function aventadorLP700(gui: SurfaceGui): Update
 	local badge = D.rect(CX - 58, CY + 64, 72, 22, LIME, 6)
 	new("UICorner", { CornerRadius = UDim.new(0.25, 0) }, badge)
 	D.label("CORSA", CX - 58, CY + 64, 15, Color3.fromRGB(16, 20, 8), Enum.Font.GothamBlack, 7)
-	D.label(if KMH then "002714 km" else "001686 mi", CX, CY + 160, 16, WHITE, Enum.Font.GothamMedium, 4)
+	D.label(if KMH then "002714 km" else "001686 mi", CX, CY + 160, 16, Color3.fromRGB(90, 220, 220), Enum.Font.GothamMedium, 4) -- cyan, like the real one
 	-- the needle: a white arm with a glowing red tip
 	local arm = D.needle(CX, CY, -24, 150, 7, WHITE, 8)
 	local glow = D.needle(CX, CY, 148, 200, 13, TIP, 8)
@@ -2264,8 +2268,89 @@ local function aventadorLP700(gui: SurfaceGui): Update
 	end
 end
 
+-- Bugatti Veyron 16.4 (2026-10-23, from real photos: imports/refs/veyron_cluster_lit_vitesse.jpg and
+-- veyron_cluster_crop.png): black, five round dials in thin silver rings. The big rev counter in the
+-- middle (white 0-8, "1/min x 1000", a wide blue band, red needle, a small grey screen low inside
+-- with the gear and speed), the power meter left (0-1001 hp, blue band, red needle), the speedometer
+-- right (to 280 mph, km/h inside, blue band, red needle) and two small dials up between them (fuel,
+-- oil temperature). No maker's logo on the faces (owner, 2026-10-17)
+local function veyron(gui: SurfaceGui): Update
+	local D = design(gui, 1000, 436, Color3.fromRGB(5, 5, 7))
+	local SILVER = Color3.fromRGB(200, 204, 212)
+	local FACE = Color3.fromRGB(9, 10, 14)
+	local VBLUE = Color3.fromRGB(46, 70, 210)
+	local NEEDLE = Color3.fromRGB(235, 34, 30)
+	local GREY = Color3.fromRGB(150, 154, 164)
+	-- a dial: silver ring, face, blue band, ticks and numbers from a0 to a1 (degrees clockwise from 12);
+	-- returns a setter (0..1) for its red needle
+	local function vdial(cx: number, cy: number, r: number, labels: { string }, a0: number, a1: number, band: { number }?, numSize: number, minor: number?): (number) -> ()
+		D.round(cx, cy, r, FACE, 2, SILVER, 3)
+		local steps = #labels - 1
+		local function ang(f: number): number
+			return a0 + (a1 - a0) * f
+		end
+		if band then
+			D.arc(cx, cy, ang(band[1]), ang(band[2]), r * 0.62, r * 0.16, VBLUE, 3, 0.1, 2)
+		end
+		local per = minor or 2
+		for i = 0, steps * per do
+			local f = i / (steps * per)
+			local major = i % per == 0
+			D.seg(cx, cy, ang(f), r * (if major then 0.84 else 0.89), r * 0.95, if major then 3.5 else 2, if major then Color3.new(1, 1, 1) else GREY, 4)
+			if major then
+				local t = math.rad(ang(f))
+				D.label(labels[i // per + 1], cx + r * 0.7 * math.sin(t), cy - r * 0.7 * math.cos(t), numSize, Color3.new(1, 1, 1), Enum.Font.GothamMedium, 4)
+			end
+		end
+		local arm = D.needle(cx, cy, -r * 0.14, r * 0.86, math.max(3, r * 0.035), NEEDLE, 8)
+		D.round(cx, cy, r * 0.11, Color3.fromRGB(150, 154, 162), 9, SILVER, 2)
+		local shown = 0
+		return function(v: number)
+			shown += (math.clamp(v, 0, 1) - shown) * 0.35
+			arm.Rotation = ang(shown)
+		end
+	end
+	-- the two small dials up between the big ones (not lit, like the photo)
+	local function small(cx: number, label: string, v: number)
+		D.round(cx, 70, 46, FACE, 2, SILVER, 2.5)
+		D.arc(cx, 70, -120, 120, 38, 2, GREY, 3, 0.4, 6)
+		D.label(label, cx, 98, 10, GREY, Enum.Font.GothamMedium, 4)
+		D.needle(cx, 70, -6, 34, 3, NEEDLE, 5).Rotation = -120 + 240 * v
+	end
+	small(330, "FUEL", 0.7)
+	small(670, "OIL °C", 0.45)
+
+	-- the rev counter: 0 at the bottom left round to 8 at the bottom right
+	local setRpm = vdial(500, 205, 200, numbers(0, 8, 1), -138, 138, { 0.2, 0.82 }, 30, 4)
+	D.label("1/min x 1000", 500, 345, 13, GREY, Enum.Font.GothamMedium, 5)
+	local screen = D.rect(500, 282, 92, 70, Color3.fromRGB(58, 62, 70), 5)
+	new("UICorner", { CornerRadius = UDim.new(0.08, 0) }, screen)
+	local gearText = D.label("P", 500, 268, 34, Color3.new(1, 1, 1), Enum.Font.GothamBold, 6, 1.2)
+	local speedText = D.label("0", 500, 302, 16, Color3.fromRGB(220, 224, 232), Enum.Font.GothamMedium, 6, 4)
+	-- the power meter (left) and the speedometer (right)
+	local setPower = vdial(165, 262, 140, numbers(0, 1000, 100), -150, 120, { 0.1, 0.75 }, 17)
+	D.label("hp", 165, 352, 13, GREY, Enum.Font.GothamMedium, 5)
+	local speedLabels, endMph = speedScale(280, 20)
+	local setSpeed = vdial(835, 262, 140, speedLabels, -125, 130, { 0.05, 0.6 }, if #speedLabels > 10 then 13 else 17)
+	local unitText = D.label(unit(), 835, 352, 13, GREY, Enum.Font.GothamMedium, 5)
+
+	local lastPower = 0
+	return function(mph: number, g: string, rpm: number)
+		setRpm(math.clamp(rpm, 0, 1) * 6.4 / 8) -- the W16's limiter is 6,400 rpm
+		setSpeed(mph / endMph)
+		-- power in use: the revs times how hard it is pulling (more at low speed), 1001 hp flat out
+		local p = math.clamp(rpm, 0, 1) * (if mph > 1 then 1 else 0.2)
+		lastPower += (p - lastPower) * 0.2
+		setPower(lastPower * 1.001)
+		gearText.Text = g
+		speedText.Text = spd(mph) .. " " .. unit()
+		unitText.Text = unit()
+	end
+end
+
 -- the styles by name (the DashCluster panel's Style attribute)
 local STYLES: { [string]: (SurfaceGui) -> Update } = {
+	Veyron = veyron,
 	Maybach57 = maybach,
 	SU7 = function(gui)
 		return evScreen(gui, Color3.fromRGB(255, 105, 0))

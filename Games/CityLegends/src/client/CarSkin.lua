@@ -84,7 +84,7 @@ CarSkin.CLUSTER_STYLE = {
 	astin_dbx = "Aston",
 	lambrini_lp640 = "Murcielago", -- the 2026-10-18 model
 	maseroti_levante = "Modern",
-	bugotti_veyron = "Maybach57",
+	bugotti_veyron = "Veyron", -- 2026-10-23: its own, from real photos (imports/refs)
 } :: { [string]: string }
 
 -- where a car's own cluster screen is (measured on the model): its middle from the middle of the
