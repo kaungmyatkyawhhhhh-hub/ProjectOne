@@ -209,6 +209,7 @@ Pedestrians.start(WorldFx.qualityScale())
 ChauffeurClient.init()
 require(script.Parent:WaitForChild("LuxeClient")).init() -- casino VIP, the gem shop, heist messages
 require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, bottom left (N toggles)
+require(script.Parent:WaitForChild("ChallengesClient")).init() -- drifts, speed traps, jumps, leaderboard (B)
 UI.hideLoading()
 
 ---------------------------------------------------------------------

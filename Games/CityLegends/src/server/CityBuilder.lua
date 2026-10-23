@@ -1470,6 +1470,8 @@ function CityBuilder.build(): Folder
 	Casino.buildWorld(CityBuilder.kit, city)
 	GemShowcase.buildWorld(CityBuilder.kit, city)
 	Houses.buildWorld(CityBuilder.kit, city)
+	-- speed traps, jump ramps and the leaderboard board
+	require(script.Parent:WaitForChild("Challenges")).buildWorld(CityBuilder.kit, city)
 
 	city.Parent = workspace
 	city:SetAttribute("Ready", true)

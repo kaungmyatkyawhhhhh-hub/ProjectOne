@@ -184,6 +184,8 @@ Chauffeur.init(ctx)
 -- Legends Motors: new cars are bought there only (owner, 2026-10-23)
 local Dealership = require(script.Parent:WaitForChild("Dealership"))
 Dealership.init(ctx)
+-- drift scoring, speed traps, jumps and the leaderboard
+require(script.Parent:WaitForChild("Challenges")).init(ctx)
 -- the High-Rollers Casino and the Legends Gem Showcase, Downtown (VIP, flex items, two heists)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
 Luxe.init(ctx)
