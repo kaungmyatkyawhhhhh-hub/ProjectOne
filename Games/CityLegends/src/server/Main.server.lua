@@ -174,8 +174,8 @@ local function startSpawnCFrame(): CFrame?
 		for s = 30, seg.length - 30, 12 do
 			local pos, dir = CityLayout.sample(seg, s)
 			local off = pos - edge
-			-- on this road (not a crossing street), beside the block, not in a junction
-			if math.abs(off:Dot(side)) < Config.City.RoadWidth / 2 and math.abs(off:Dot(along)) < inner * 0.4 and math.abs(dir:Dot(along)) > 0.9 then
+			-- on this road (the lanes on the block's side, not a crossing street), beside the block, not in a junction
+			if off:Dot(side) < 0 and off:Dot(side) > -Config.City.RoadWidth / 2 and math.abs(off:Dot(along)) < inner * 0.4 and math.abs(dir:Dot(along)) > 0.9 then
 				table.insert(spots, CFrame.lookAt(pos, pos + dir))
 			end
 		end
