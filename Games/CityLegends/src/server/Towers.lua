@@ -33,6 +33,7 @@ local Cars = require(Shared:WaitForChild("Cars"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
+local Customs = require(script.Parent:WaitForChild("Customs"))
 
 local Towers = {}
 
@@ -996,11 +997,15 @@ refreshResidents = function()
 	for id, rec in built do
 		local names = {}
 		local carId: string? = nil
+		local carOwner: any = nil
 		for _, p in Players:GetPlayers() do
 			local profile = PlayerData.get(p)
 			if profile and profile.Penthouses[id] then
 				table.insert(names, p.DisplayName)
-				carId = carId or profile.Showcase[id] or profile.Selected
+				if not carId then
+					carId = profile.Showcase[id] or profile.Selected
+					carOwner = profile
+				end
 			end
 		end
 		local text = rec.spec.name .. "\nRESIDENTS: " .. (if #names > 0 then table.concat(names, ", ") else "none yet")
@@ -1008,6 +1013,10 @@ refreshResidents = function()
 			label.Text = text
 		end
 		setShowcase(rec, carId or Cars.CutsceneId)
+		-- the resident's Legends Customs look on it
+		if carOwner and carId and rec.showcaseCar then
+			Customs.setOn(rec.showcaseCar, Customs.lookOf(carOwner, carId))
+		end
 	end
 end
 
@@ -1043,6 +1052,10 @@ local function onShowcasePick(player: Player, id: any, carId: any)
 	profile.Showcase[id] = carId
 	-- this resident's pick goes on show now
 	setShowcase(built[id], carId)
+	local shown = built[id].showcaseCar
+	if shown then
+		Customs.setOn(shown, Customs.lookOf(profile, carId))
+	end
 	task.spawn(PlayerData.save, player)
 end
 

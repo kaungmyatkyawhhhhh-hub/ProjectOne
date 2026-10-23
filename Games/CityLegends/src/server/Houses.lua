@@ -28,6 +28,7 @@ local Cars = require(Shared:WaitForChild("Cars"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
+local Customs = require(script.Parent:WaitForChild("Customs"))
 
 local Houses = {}
 
@@ -518,6 +519,12 @@ local function displayCar(rec: Rec, k: number, carId: string)
 		end
 	end
 	car.Name = "BayCar" .. k
+	-- the owner's Legends Customs look on it
+	local owner = rec.owner
+	local ownerProfile = if owner then PlayerData.get(owner) else nil
+	if ownerProfile then
+		Customs.setOn(car, Customs.lookOf(ownerProfile, carId))
+	end
 	car:SetAttribute("Plot", rec.plot.id)
 	car:SetAttribute("Bay", k)
 	car:SetAttribute("CarId", car:GetAttribute("CarId") or carId)

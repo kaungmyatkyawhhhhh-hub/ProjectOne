@@ -186,6 +186,8 @@ local Dealership = require(script.Parent:WaitForChild("Dealership"))
 Dealership.init(ctx)
 -- drift scoring, speed traps, jumps and the leaderboard
 require(script.Parent:WaitForChild("Challenges")).init(ctx)
+local Customs = require(script.Parent:WaitForChild("Customs"))
+Customs.init(ctx)
 -- the High-Rollers Casino and the Legends Gem Showcase, Downtown (VIP, flex items, two heists)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
 Luxe.init(ctx)
@@ -213,6 +215,7 @@ local function spawnFor(player: Player, carId: string)
 	local spec = Cars.get(carId)
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })
 	model:SetAttribute("Plate", string.upper(player.Name):gsub("[^%w]", ""):sub(1, 7))
+	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (and its own plate)
 	model.Name = player.Name
 	model:SetAttribute("Owner", player.UserId)
 
