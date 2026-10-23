@@ -876,13 +876,44 @@ local function building(parent: Instance, cx: number, cz: number, w: number, dpt
 	return model
 end
 
-local function tree(parent: Instance, pos: Vector3)
-	local h = rng:NextNumber(10, 16)
-	deco(parent, Vector3.new(h, 1.1, 1.1), CFrame.new(pos + Vector3.new(0, h / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(45, 32, 24), Enum.Material.Wood, { shape = Enum.PartType.Cylinder, shadow = true })
-	for _ = 1, 3 do
-		local r = rng:NextNumber(6, 9)
-		deco(parent, Vector3.one * r, CFrame.new(pos + Vector3.new(rng:NextNumber(-2, 2), h + rng:NextNumber(-1, 2), rng:NextNumber(-2, 2))), Color3.fromRGB(46, 78, 40):Lerp(Color3.fromRGB(64, 96, 48), rng:NextNumber()), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
+-- a street / park tree (owner, 2026-10-23: "make the trees better"): a trunk that tapers and leans
+-- a little, two branches forking out under the crown, and a full uneven crown of leaf clusters,
+-- darker inside and underneath, lighter on top. About a dozen parts; `scale` sizes the whole tree
+local BARK = Color3.fromRGB(58, 42, 30)
+local LEAVES = { Color3.fromRGB(40, 68, 32), Color3.fromRGB(52, 86, 40), Color3.fromRGB(64, 100, 46), Color3.fromRGB(82, 118, 54) }
+local function tree(parent: Instance, pos: Vector3, scale: number?)
+	local s = scale or 1
+	local h = rng:NextNumber(9, 12.5) * s
+	local base = CFrame.new(pos) * CFrame.Angles(0, rng:NextNumber(0, 2 * math.pi), 0) * CFrame.Angles(rng:NextNumber(-0.05, 0.05), 0, rng:NextNumber(-0.05, 0.05))
+	local up = CFrame.Angles(0, 0, math.pi / 2) -- a cylinder's axis is X: stand it up
+	local function wood(cf: CFrame, len: number, w: number)
+		deco(parent, Vector3.new(len, w, w), cf * up, BARK, Enum.Material.Wood, { shape = Enum.PartType.Cylinder, shadow = true })
 	end
+	-- the trunk: thick at the foot, thinner up to the crown
+	wood(base * CFrame.new(0, h * 0.3, 0), h * 0.62, 1.25 * s)
+	wood(base * CFrame.new(0, h * 0.78, 0), h * 0.5, 0.8 * s)
+	-- two branches forking out into the crown
+	for b = 0, 1 do
+		local yaw = b * math.pi + rng:NextNumber(-0.5, 0.5)
+		local fork = base * CFrame.new(0, h * 0.62, 0) * CFrame.Angles(0, yaw, 0) * CFrame.Angles(0, 0, -rng:NextNumber(0.55, 0.8))
+		wood(fork * CFrame.new(0, h * 0.2, 0), h * 0.42, 0.55 * s)
+	end
+	-- the crown: a dark core, a ring of clusters round it (some lower, some higher) and a light top
+	local R = rng:NextNumber(5, 6.2) * s
+	local top = base * CFrame.new(0, h + R * 0.15, 0)
+	local function leaf(cf: CFrame, size: number, shade: number)
+		deco(parent, Vector3.one * size, CFrame.new(cf.Position), LEAVES[shade], Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
+	end
+	leaf(top, R * 1.75, 1)
+	local n = 5
+	local a0 = rng:NextNumber(0, 2 * math.pi)
+	for k = 1, n do
+		local a = a0 + k * 2 * math.pi / n + rng:NextNumber(-0.3, 0.3)
+		local r = R * rng:NextNumber(0.6, 0.85)
+		leaf(top * CFrame.new(math.cos(a) * r, R * rng:NextNumber(-0.35, 0.25), math.sin(a) * r), R * rng:NextNumber(1.05, 1.3), if k % 2 == 0 then 2 else 3)
+	end
+	leaf(top * CFrame.new(rng:NextNumber(-1, 1) * s, R * 0.6, rng:NextNumber(-1, 1) * s), R * 1.15, 4)
+	leaf(top * CFrame.new(rng:NextNumber(-2, 2) * s, R * 0.35, rng:NextNumber(-2, 2) * s), R * 0.9, 3)
 end
 
 local function park(parent: Instance, cx: number, cz: number, size: number)
@@ -900,7 +931,7 @@ local function park(parent: Instance, cx: number, cz: number, size: number)
 		local px = cx + rng:NextNumber(-size / 2 + 20, size / 2 - 20)
 		local pz = cz + rng:NextNumber(-size / 2 + 20, size / 2 - 20)
 		if math.abs(px - cx) > 14 and math.abs(pz - cz) > 14 then
-			tree(parent, Vector3.new(px, top + 0.3, pz))
+			tree(parent, Vector3.new(px, top + 0.3, pz), rng:NextNumber(1, 1.25))
 		end
 	end
 	-- warm path lamps

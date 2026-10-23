@@ -255,12 +255,15 @@ local function outer(kit: any, parent: Instance)
 		for _ = 1, rng:NextInteger(14, 26) do
 			local p = center + Vector3.new(rng:NextNumber(-90, 90), 0, rng:NextNumber(-90, 90))
 			if math.max(math.abs(p.X), math.abs(p.Z)) > LOOP_OUT + 30 and not nearLoop(p, 30) and not WestLayout.inCorridor(p, 40) then
-				-- a conifer: trunk and two cones (wedge-less: stacked shrinking blocks read as a fir at night)
+				-- a conifer: trunk and four shrinking tiers, each turned 45° from the one under it, so
+				-- the outline steps in like a real fir (owner, 2026-10-23: better trees)
 				local h = rng:NextNumber(26, 44)
 				kit.deco(group, Vector3.new(1.4, h * 0.3, 1.4), CFrame.new(p + Vector3.new(0, h * 0.15, 0)), Color3.fromRGB(46, 34, 26), Enum.Material.Wood)
-				for k = 0, 1 do
-					local s = (1 - k * 0.4) * h * 0.4
-					kit.deco(group, Vector3.new(s, h * 0.32, s), CFrame.new(p + Vector3.new(0, h * (0.32 + k * 0.22), 0)) * CFrame.Angles(0, rng:NextNumber(0, 1.5), 0), Color3.fromRGB(34, 60, 38):Lerp(Color3.fromRGB(50, 82, 46), rng:NextNumber()), Enum.Material.LeafyGrass, { shadow = true })
+				local green = Color3.fromRGB(30, 54, 34):Lerp(Color3.fromRGB(48, 80, 44), rng:NextNumber())
+				local turn = rng:NextNumber(0, math.pi / 2)
+				for k = 0, 3 do
+					local s = h * 0.44 * (1 - k * 0.23)
+					kit.deco(group, Vector3.new(s, h * 0.2, s), CFrame.new(p + Vector3.new(0, h * (0.3 + k * 0.17), 0)) * CFrame.Angles(0, turn + k * math.pi / 4, 0), green:Lerp(Color3.fromRGB(60, 92, 52), k * 0.12), Enum.Material.LeafyGrass, { shadow = true })
 				end
 			end
 		end

@@ -283,10 +283,7 @@ function CityPremium.streetscape(kit: any, parent: Instance, cx: number, cz: num
 		for _, t in { -0.4, -0.13, 0.13, 0.4 } do
 			local p = base + tangent * (inner * t)
 			kit.mk(folder, Vector3.new(4.5, 1.4, 4.5), CFrame.new(p + Vector3.new(0, 0.7, 0)), Color3.fromRGB(46, 46, 50), Enum.Material.Concrete, { name = "Planter" })
-			local h = rng:NextNumber(9, 13)
-			deco(folder, Vector3.new(0.9, h, 0.9), CFrame.new(p + Vector3.new(0, 1.4 + h / 2, 0)), Color3.fromRGB(48, 34, 26), Enum.Material.Wood, { shadow = true })
-			deco(folder, Vector3.one * rng:NextNumber(7, 9), CFrame.new(p + Vector3.new(0, 1.4 + h, 0)), Color3.fromRGB(48, 82, 42), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
-			deco(folder, Vector3.one * rng:NextNumber(5, 6.5), CFrame.new(p + Vector3.new(rng:NextNumber(-1.5, 1.5), 1.4 + h + 2.5, rng:NextNumber(-1.5, 1.5))), Color3.fromRGB(64, 100, 50), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
+			kit.tree(folder, p + Vector3.new(0, 1.4, 0), 0.85)
 		end
 		-- bench + bin
 		local bp = base + tangent * (inner * 0.03)
