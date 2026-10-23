@@ -674,4 +674,35 @@ Config.Dealership = {
 	Display = { "bnw_m5_e60", "bentz_e63s", "toyoka_supra_mk4", "nisun_r34", "porsha_panamera", "chevo_c7", "astin_vantage", "lexis_lc500" },
 }
 
+---------------------------------------------------------------------
+-- Free-roam challenges (owner, 2026-10-23: "make the game 1000000000x better and cooler"): drift
+-- scoring, speed traps, jump ramps and the leaderboard (Challenges.lua, ChallengeData)
+---------------------------------------------------------------------
+Config.Challenges = {
+	-- drifting: the car's slide angle above DriftMinAngle at DriftMinMph or more builds points
+	DriftMinAngle = 12, -- degrees between where the car points and where it goes
+	DriftMinMph = 30,
+	DriftLinkSeconds = 1.4, -- a pause this short keeps the run going; longer banks it
+	DriftMultStep = 0.25, -- the multiplier grows this much...
+	DriftMultEvery = 1.5, -- ...every this many seconds of drifting
+	DriftMultMax = 5,
+	DriftMaxPerSecond = 900, -- the server's cap on points per second of drifting
+	DriftCashPerPoint = 0.2,
+	DriftCashMax = 25000, -- per banked run
+	DriftXpPerPoint = 1 / 150,
+	DriftXpMax = 120,
+	-- speed traps: medals by mph, cash for a better medal than you had on that trap
+	TrapMedals = { { name = "BRONZE", mph = 100, cash = 750 }, { name = "SILVER", mph = 140, cash = 2000 }, { name = "GOLD", mph = 180, cash = 5000 } },
+	TrapCooldown = 4, -- seconds before the same trap counts you again
+	TrapXp = 25,
+	-- jumps: air time (seconds) and distance (studs) pay out; small hops don't count
+	StuntMinAir = 0.7,
+	StuntCashPerSecond = 900,
+	StuntCashPerStud = 4,
+	StuntCashMax = 12000,
+	StuntXp = 30,
+	BoardKey = Enum.KeyCode.B, -- the leaderboard panel
+	BoardRefresh = 60, -- seconds between leaderboard reads
+}
+
 return Config

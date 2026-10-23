@@ -304,6 +304,16 @@ function Minimap.start()
 			end
 		end
 	end
+	-- challenges: speed traps, jump ramps, the leaderboard board
+	local okCh, ChallengeData = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("ChallengeData")) :: any
+	end)
+	if okCh and ChallengeData then
+		local glyphs = { trap = "S", ramp = "J", board = "★" }
+		for _, pt in ChallengeData.points() do
+			table.insert(fixed, { frame = makeBlip(layer, glyphs[pt.kind] or "•", Color3.fromRGB(255, 204, 60), 12, 21), pos = pt.pos, edge = false })
+		end
+	end
 	local dropBlip = makeBlip(layer, "$", Color3.fromRGB(80, 255, 140), 16, 23)
 	local targetBlip = makeBlip(layer, "", Color3.fromRGB(255, 214, 40), 13, 24)
 	local policePool: { Frame } = {}
