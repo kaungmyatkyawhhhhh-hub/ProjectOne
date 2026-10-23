@@ -1529,6 +1529,13 @@ function CityBuilder.build(mode: string?): Folder
 
 	local existing = workspace:FindFirstChild("City")
 	if existing and existing:GetAttribute("Baked") and not scenery then
+		-- the venues saved in the place as a preview (so their blocks aren't empty grey squares in
+		-- Studio's edit view; owner, 2026-10-24) make way for the live ones
+		for _, d in existing:GetDescendants() do
+			if d:GetAttribute("VenuePreview") and d.Parent then
+				d:Destroy()
+			end
+		end
 		buildVenues(existing, true)
 		existing:SetAttribute("Ready", true)
 		return existing :: Folder
