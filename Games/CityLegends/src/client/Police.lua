@@ -805,6 +805,17 @@ function Police.getWanted(): number
 	return wanted
 end
 
+-- where the police cars are (the minimap's blips)
+function Police.getUnitPositions(): { Vector3 }
+	local out = {}
+	for _, u in units do
+		if u.model.Parent then
+			table.insert(out, u.pos)
+		end
+	end
+	return out
+end
+
 function Police.init()
 	local remotes = ReplicatedStorage:WaitForChild("Remotes")
 	report = remotes:WaitForChild("PoliceReport") :: RemoteEvent

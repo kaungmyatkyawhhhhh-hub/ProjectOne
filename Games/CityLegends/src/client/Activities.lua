@@ -524,6 +524,16 @@ local function update(dt: number)
 	end
 end
 
+-- where the current race checkpoint or delivery drop is (the minimap's target blip)
+function Activities.getTarget(): Vector3?
+	if state == "race" and race then
+		return race.checkpoints[cp]
+	elseif state == "job" and job then
+		return ActivityData.dropPoints[job.dest].pos
+	end
+	return nil
+end
+
 function Activities.init()
 	local remotes = ReplicatedStorage:WaitForChild("Remotes")
 	call = remotes:WaitForChild("ActivityCall") :: RemoteFunction
