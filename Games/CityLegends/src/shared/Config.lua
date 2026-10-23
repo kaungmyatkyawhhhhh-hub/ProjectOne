@@ -182,6 +182,34 @@ Config.Camera = {
 }
 
 ---------------------------------------------------------------------
+-- Driving feel (owner, 2026-10-23: "fix the car physics it doesnt feel real, the players need to
+-- feel the rush when their going fast!"). Top speeds and 0-60 times still come from Cars.
+---------------------------------------------------------------------
+Config.DrivingFeel = {
+	-- physics
+	YawResponse = 6.5, -- how quickly the car's turn follows the wheel (per second): weight, not a rail
+	YawResponseHandling = 5, -- extra response times the car's Handling
+	SlipPeak = 0.14, -- slip angle (radians, about 8 degrees) where the tyres grip hardest
+	SlideGrip = 0.62, -- grip left once a slide goes well past the peak (it keeps sliding)
+	Downforce = { Supercar = 0.35, Hypercar = 0.5 } :: { [string]: number }, -- extra grip at top speed
+	SteerSlowdown = 150, -- the wheel turns half as fast at this many studs/s (calm at speed)
+	PowerOversteer = 0.6, -- traction control off: flooring it lets the rear step out this much more
+	BumpKick = 0.5, -- body pitch kick (radians/s) per stud of sudden ground change (kerbs, ramps)
+	RoadTexture = 0.004, -- fine body shimmy at speed (radians)
+	-- sense of speed: these go by real speed, so every car feels fast when it is
+	RushFrom = 45, -- mph where the speed effects start...
+	RushTo = 190, -- ...and where they're full
+	Vignette = 0.5, -- darkened screen edges at full rush (outside cameras; half in the cabin)
+	ShiftPunchFov = 3, -- a flat-out upshift at high revs: the view kicks wider for a moment
+	ShiftBlur = 3,
+	LaunchKickFov = 7, -- a hard launch
+	LaunchBlur = 6,
+	NearMissFov = 2.5, -- a close pass on traffic
+	RoadRoar = 0.45, -- tyre and road roar at full rush (volume)
+	CabinBuzz = 0.025, -- the driver's head buzzes with the road at speed (studs)
+}
+
+---------------------------------------------------------------------
 -- Sounds
 -- The game ships with a full built-in soundscape (engine, wind, tyres,
 -- cut-ups, crashes, backfires, UI, ambience) made from audio inside the
