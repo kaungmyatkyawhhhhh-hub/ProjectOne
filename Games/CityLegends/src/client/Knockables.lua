@@ -9,11 +9,11 @@
 	head, lamp; branches and leaves; the signal's arm, heads and sign). The concrete plinths and
 	planters stay put.
 
-	While you drive, a prop right in front of your car at speed is knocked: its pieces are welded to
-	the key part, unanchored and pushed the way you're going, so it tips over and rolls with real
-	physics on your screen. The server passes the knock on and every other player's game drops the
-	same prop. After RestoreSeconds, once no car is right beside it, it is put back exactly as it
-	was. All of this is local to each game: the map itself never changes.
+	While you drive, a prop right in front of your car at speed is knocked: the real one is hidden
+	and a copy made on this screen (so this game owns its physics) falls in its place, welded into
+	one body and pushed the way you're going, so it tips over and rolls. The server passes the knock
+	on and every other player's game drops the same prop. After RestoreSeconds, once no car is right
+	beside it, the copy goes and the real one shows again. The map itself never changes.
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -29,8 +29,8 @@ local Knockables = {}
 local K = Config.Knock
 local CELL = 64
 
-type Piece = { part: BasePart, cf: CFrame, anchored: boolean, collide: boolean }
-type Group = { key: BasePart, base: Vector3, radius: number, pieces: { Piece }, down: boolean, downAt: number, welds: { Instance } }
+type Piece = { part: BasePart, transparency: number, collide: boolean, query: boolean }
+type Group = { key: BasePart, base: Vector3, radius: number, pieces: { Piece }, down: boolean, downAt: number, debris: Model?, lights: { [Light]: boolean } }
 
 local groups: { Group } = {}
 local grid: { [string]: { Group } } = {}
@@ -48,9 +48,9 @@ end
 local function add(key: BasePart, base: Vector3, radius: number, parts: { BasePart })
 	local pieces: { Piece } = {}
 	for _, p in parts do
-		table.insert(pieces, { part = p, cf = p.CFrame, anchored = p.Anchored, collide = p.CanCollide })
+		table.insert(pieces, { part = p, transparency = p.Transparency, collide = p.CanCollide, query = p.CanQuery })
 	end
-	local g: Group = { key = key, base = base, radius = radius, pieces = pieces, down = false, downAt = 0, welds = {} }
+	local g: Group = { key = key, base = base, radius = radius, pieces = pieces, down = false, downAt = 0, debris = nil, lights = {} }
 	table.insert(groups, g)
 	local ck = cellKey(base.X, base.Z)
 	grid[ck] = grid[ck] or {}
@@ -143,51 +143,101 @@ end
 
 local remote: RemoteEvent? = nil
 
+local debrisFolder: Folder? = nil
+
+-- the real prop's lights go off while it's down, and back as they were (day or night) after
+local function lightsOff(g: Group, p: BasePart)
+	for _, l in p:GetChildren() do
+		if l:IsA("Light") then
+			g.lights[l] = l.Enabled
+			l.Enabled = false
+		end
+	end
+end
+
 local function knock(g: Group, dir: Vector3, speed: number)
 	if g.down then
 		return
 	end
 	g.down = true
 	g.downAt = os.clock()
-	local key = g.key
-	-- one body, welded to the key part, which is the only piece that collides
+	if not debrisFolder or not debrisFolder.Parent then
+		local f = Instance.new("Folder")
+		f.Name = "KnockedProps"
+		f.Parent = workspace
+		debrisFolder = f
+	end
+	-- the copy: one body welded to its key part, the only piece that collides
+	local model = Instance.new("Model")
+	model.Name = "Knocked"
+	local key: BasePart? = nil
 	for _, pc in g.pieces do
-		local p = pc.part
-		if p ~= key then
+		local orig = pc.part
+		local c = orig:Clone()
+		for _, tagless in c:GetDescendants() do
+			-- (no tags on the copy: the LOD, lamp and traffic light scripts leave it alone)
+			for _, t in tagless:GetTags() do
+				tagless:RemoveTag(t)
+			end
+		end
+		for _, t in c:GetTags() do
+			c:RemoveTag(t)
+		end
+		c.Anchored = false
+		c.CanQuery = false
+		c.CanTouch = false
+		if orig == g.key then
+			key = c
+			c.CanCollide = true
+		else
+			c.CanCollide = false
+			c.Massless = true
+		end
+		c.Parent = model
+		-- the real one hides (lights off) until it comes back
+		orig.Transparency = 1
+		orig.CanCollide = false
+		orig.CanQuery = false
+		lightsOff(g, orig)
+	end
+	if not key then
+		return
+	end
+	for _, c in model:GetChildren() do
+		if c ~= key and c:IsA("BasePart") then
 			local w = Instance.new("WeldConstraint")
 			w.Part0 = key
-			w.Part1 = p
-			w.Parent = key
-			table.insert(g.welds, w)
-			p.CanCollide = false
-			p.Massless = true
+			w.Part1 = c
+			w.Parent = c
 		end
-		p.Anchored = false
 	end
-	key.CanCollide = true
+	model.PrimaryPart = key
+	model.Parent = debrisFolder
+	g.debris = model
 	-- pushed over the way the car was going, hard enough to topple it and slide it along
 	local flat = Vector3.new(dir.X, 0, dir.Z)
 	flat = if flat.Magnitude > 0.01 then flat.Unit else Vector3.xAxis
 	local push = math.clamp(speed, 30, 160)
-	local mass = key.AssemblyMass
-	key:ApplyImpulseAtPosition(flat * mass * push * K.Push, key.Position + Vector3.new(0, key.Size.X * 0.3, 0))
-	key.AssemblyAngularVelocity += flat:Cross(Vector3.yAxis) * -math.clamp(push / 25, 1.5, 5)
+	local k = key :: BasePart
+	k:ApplyImpulseAtPosition(flat * k.AssemblyMass * push * K.Push, k.Position + Vector3.new(0, k.Size.X * 0.3, 0))
+	k.AssemblyAngularVelocity += flat:Cross(Vector3.yAxis) * -math.clamp(push / 25, 1.5, 5)
 end
 
 local function restore(g: Group)
-	for _, w in g.welds do
-		w:Destroy()
+	if g.debris then
+		g.debris:Destroy()
+		g.debris = nil
 	end
-	table.clear(g.welds)
 	for _, pc in g.pieces do
 		local p = pc.part
-		p.Anchored = true
-		p.AssemblyLinearVelocity = Vector3.zero
-		p.AssemblyAngularVelocity = Vector3.zero
-		p.CFrame = pc.cf
+		p.Transparency = pc.transparency
 		p.CanCollide = pc.collide
-		p.Massless = false
+		p.CanQuery = pc.query
 	end
+	for l, on in g.lights do
+		l.Enabled = on
+	end
+	table.clear(g.lights)
 	g.down = false
 end
 
@@ -216,6 +266,21 @@ local function carsNear(p: Vector3, r: number): boolean
 		end
 	end
 	return false
+end
+
+-- knocks the prop nearest `p` (within 6 studs) over towards `dir`; true if there was one
+function Knockables.knockNear(p: Vector3, dir: Vector3, speed: number): boolean
+	local best, bestD = nil, 6
+	for _, g in near(p) do
+		local d = (g.base - p).Magnitude
+		if not g.down and d < bestD then
+			best, bestD = g, d
+		end
+	end
+	if best then
+		knock(best, dir, speed)
+	end
+	return best ~= nil
 end
 
 function Knockables.init()
