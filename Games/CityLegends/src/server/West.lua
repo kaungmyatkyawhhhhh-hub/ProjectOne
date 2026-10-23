@@ -48,8 +48,8 @@ local WARM = Color3.fromRGB(255, 196, 130)
 local CONCRETE = Color3.fromRGB(128, 128, 132)
 local BARRIER = Color3.fromRGB(150, 150, 154)
 local GIRDER = Color3.fromRGB(46, 48, 54)
-local GRASS = Color3.fromRGB(26, 40, 26)
-local ROCK = Color3.fromRGB(40, 38, 38)
+local GRASS = Color3.fromRGB(60, 84, 44)
+local ROCK = Color3.fromRGB(82, 78, 72)
 local SAND = Color3.fromRGB(206, 188, 150)
 local WET_SAND = Color3.fromRGB(150, 134, 106)
 local TRUNK = Color3.fromRGB(112, 92, 70)
@@ -86,34 +86,35 @@ end
 ---------------------------------------------------------------------
 -- a palm: a gently leaning, tapering trunk and a crown of drooping fronds
 local function palm(kit: any, parent: Instance, pos: Vector3, h: number?)
+	-- (2026-10-23: 11 parts instead of 15 -- three trunk pieces, seven fronds, one crown -- the map
+	-- has about 800 palms)
 	local deco = kit.deco
 	local height = h or rng:NextNumber(24, 38)
 	local a = rng:NextNumber(0, math.pi * 2)
 	local lean = Vector3.new(math.cos(a), 0, math.sin(a)) * rng:NextNumber(0.04, 0.2)
 	local p = pos
-	local segs = 4
+	local segs = 3
 	for k = 1, segs do
 		local d = (Vector3.yAxis + lean * (k / segs) * 2).Unit
 		local len = height / segs
 		local q = p + d * len
-		local r = 1.6 - k * 0.15
+		local r = 1.65 - k * 0.2
 		-- (a cylinder runs along X: turned so X looks along the trunk)
-		deco(parent, Vector3.new(len + 0.4, r, r), CFrame.lookAt((p + q) / 2, q) * CFrame.Angles(0, math.pi / 2, 0), TRUNK, Enum.Material.Wood, { shape = Enum.PartType.Cylinder, shadow = true })
+		deco(parent, Vector3.new(len + 0.4, r, r), CFrame.lookAt((p + q) / 2, q) * CFrame.Angles(0, math.pi / 2, 0), TRUNK:Lerp(Color3.fromRGB(150, 132, 104), k / segs * 0.5), Enum.Material.Wood, { shape = Enum.PartType.Cylinder, shadow = true })
 		p = q
 	end
 	local frond = pick(FROND)
-	local n = 8
+	local n = 7
 	local a0 = rng:NextNumber(0, math.pi * 2)
 	for k = 1, n do
 		local ang = a0 + k / n * math.pi * 2
 		local len = rng:NextNumber(11, 15)
-		local droop = rng:NextNumber(0.35, 0.7)
-		deco(parent, Vector3.new(rng:NextNumber(2.6, 3.4), 0.25, len), CFrame.new(p) * CFrame.Angles(0, ang, 0) * CFrame.Angles(-droop, 0, 0) * CFrame.new(0, 0, -len / 2), frond, Enum.Material.Grass, { shadow = true })
+		local droop = rng:NextNumber(0.35, 0.75)
+		local tint = frond:Lerp(Color3.fromRGB(96, 120, 56), rng:NextNumber(0, 0.35)) -- sun-bleached tips vary
+		deco(parent, Vector3.new(rng:NextNumber(2.4, 3.2), 0.22, len), CFrame.new(p) * CFrame.Angles(0, ang, 0) * CFrame.Angles(-droop, 0, 0) * CFrame.new(0, 0, -len / 2), tint, Enum.Material.LeafyGrass, { shadow = true })
 	end
-	for k = 1, 3 do
-		local ang = k / 3 * math.pi * 2
-		deco(parent, Vector3.one * 1.2, CFrame.new(p + Vector3.new(math.cos(ang) * 1, -0.9, math.sin(ang) * 1)), Color3.fromRGB(80, 62, 36), Enum.Material.Wood, { shape = Enum.PartType.Ball })
-	end
+	-- the crown where the fronds meet (it also hides their roots)
+	deco(parent, Vector3.one * 2.4, CFrame.new(p + Vector3.new(0, -0.6, 0)), Color3.fromRGB(70, 74, 40), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball })
 	return p
 end
 
@@ -420,7 +421,7 @@ local function canyon(kit: any, root: Instance)
 			local hgt = rng:NextNumber(110, 240)
 			local depth = hgt * rng:NextNumber(1.1, 1.6)
 			local cz = s * (HW + 16 + depth / 2)
-			local rock = Color3.fromRGB(30, 28, 30):Lerp(Color3.fromRGB(48, 44, 42), rng:NextNumber())
+			local rock = Color3.fromRGB(110, 92, 74):Lerp(Color3.fromRGB(140, 118, 92), rng:NextNumber()) -- (sandstone canyon)
 			-- the slope faces the road: the wedge's -Z looks at it
 			kit.mk(folder, Vector3.new(len, hgt, depth), CFrame.lookAt(Vector3.new(x, hgt / 2 - 6, cz), Vector3.new(x, hgt / 2 - 6, cz - s)), rock, Enum.Material.Slate, { class = "Wedge", name = "CanyonWall" })
 			kit.mk(folder, Vector3.new(len, hgt * 0.8, 300), CFrame.new(x, hgt * 0.4 - 6, s * (HW + 16 + depth + 150)), rock, Enum.Material.Slate, { name = "CanyonWall" })
@@ -556,7 +557,7 @@ local function downtownGround(kit: any, root: Instance)
 				local z = s * (DT_HALFZ + ring + row * 380 + rng:NextNumber(-60, 60))
 				if math.abs(z) < HALFZ + 600 then
 					local p = Vector3.new(x + rng:NextNumber(-30, 30), 0, z)
-					kit.deco(folder, Vector3.new(w, h, w), CFrame.new(p.X, h / 2 - 2, p.Z), Color3.fromRGB(14, 16, 22), Enum.Material.Glass, { reflectance = 0.2 })
+					kit.deco(folder, Vector3.new(w, h, w), CFrame.new(p.X, h / 2 - 2, p.Z), Color3.fromRGB(64, 72, 84), Enum.Material.Glass, { reflectance = 0.2 })
 					for _ = 1, rng:NextInteger(3, 6) do
 						local y = rng:NextNumber(12, h - 8)
 						local fp = p - Vector3.new(0, 0, s * (w / 2 + 0.1))
@@ -576,7 +577,7 @@ local function downtownGround(kit: any, root: Instance)
 	local px0, px1 = DT_EAST, W.River[2] + 16
 	for _, s in { -1, 1 } do
 		local z0, z1 = s * (HW + 14), s * (DT_HALFZ + ring)
-		kit.mk(park, Vector3.new(px1 - px0, 0.4, math.abs(z1 - z0)), CFrame.new((px0 + px1) / 2, 0.2, (z0 + z1) / 2), Color3.fromRGB(30, 52, 32), Enum.Material.Grass, { name = "Lawn" })
+		kit.mk(park, Vector3.new(px1 - px0, 0.4, math.abs(z1 - z0)), CFrame.new((px0 + px1) / 2, 0.2, (z0 + z1) / 2), Color3.fromRGB(66, 98, 50), Enum.Material.Grass, { name = "Lawn" })
 		local g = kit.lodGroup(park, `Park_{s}`, Vector3.new((px0 + px1) / 2, 0, (z0 + z1) / 2), 1100)
 		-- the promenade along the river with lamps and palms
 		kit.deco(g, Vector3.new(16, 0.5, math.abs(z1 - z0)), CFrame.new(px1 - 10, 0.25, (z0 + z1) / 2), Color3.fromRGB(150, 140, 126), Enum.Material.Pavement)
@@ -585,9 +586,7 @@ local function downtownGround(kit: any, root: Instance)
 			palm(kit, g, Vector3.new(px1 - 22, 0.4, z))
 			kit.deco(g, Vector3.new(0.4, 9, 0.4), CFrame.new(px1 - 3, 4.9, z + s * 20), kit.METAL, Enum.Material.Metal)
 			local bulb = kit.deco(g, Vector3.one * 1.3, CFrame.new(px1 - 3, 9.6, z + s * 20), WARM, Enum.Material.Neon, { shape = Enum.PartType.Ball })
-			if math.floor(math.abs(z) / 45) % 2 == 0 then
-				kit.addLight("PointLight", bulb, WARM, 24, 0.9)
-			end
+			kit.dayOff(bulb, if math.floor(math.abs(z) / 45) % 2 == 0 then kit.addLight("PointLight", bulb, WARM, 24, 0.9) else nil)
 			z += s * 45
 		end
 		-- palms dotted over the lawn
@@ -649,7 +648,7 @@ local function beach(kit: any, root: Instance)
 			if math.abs(lz) > 50 then
 				kit.deco(g, Vector3.new(0.5, 13, 0.5), CFrame.new(x0 - 2, CURB + 6.5, lz), kit.METAL, Enum.Material.Metal)
 				local lamp = kit.deco(g, Vector3.new(2.4, 0.5, 1.4), CFrame.new(x0 - 2, CURB + 13, lz), WARM, Enum.Material.Neon)
-				kit.addLight("SpotLight", lamp, WARM, 40, 1.4, Enum.NormalId.Bottom, 120)
+				kit.dayOff(lamp, kit.addLight("SpotLight", lamp, WARM, 40, 1.4, Enum.NormalId.Bottom, 120))
 			end
 			lz += 110
 		end
@@ -752,7 +751,7 @@ local function island(kit: any, root: Instance, isl: any, joins: { number })
 	local r = isl.r
 	-- the island: a sand disc, a lawn inside the beach strip
 	kit.mk(folder, Vector3.new(6, r * 2, r * 2), CFrame.new(c.X, -3, c.Z) * CFrame.Angles(0, 0, math.pi / 2), SAND, Enum.Material.Sand, { shape = Enum.PartType.Cylinder, name = "IslandSand" })
-	kit.mk(folder, Vector3.new(0.4, (r - 24) * 2, (r - 24) * 2), CFrame.new(c.X, 0.05, c.Z) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(34, 60, 36), Enum.Material.Grass, { shape = Enum.PartType.Cylinder, name = "IslandLawn", collide = false })
+	kit.mk(folder, Vector3.new(0.4, (r - 24) * 2, (r - 24) * 2), CFrame.new(c.X, 0.05, c.Z) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(70, 104, 54), Enum.Material.Grass, { shape = Enum.PartType.Cylinder, name = "IslandLawn", collide = false })
 	-- the ring road (straight pieces round the circle), a centre line and kerbs
 	local ring = isl.ring
 	local road = W.IslandRoad

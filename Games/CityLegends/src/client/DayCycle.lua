@@ -14,6 +14,8 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Weather = require(script.Parent:WaitForChild("Weather"))
+local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
+local BuildingSkin = require(script.Parent:WaitForChild("BuildingSkin"))
 
 local DayCycle = {}
 
@@ -102,6 +104,19 @@ function DayCycle.hour(): number
 	return (minutes / c.CycleMinutes * 24 + c.StartHour) % 24
 end
 
+-- how much of the night it is: 1 from late evening to dawn, 0 through the day, smooth between
+function DayCycle.night(hour: number?): number
+	local h = hour or DayCycle.hour()
+	local function ramp(a: number, b: number): number
+		local t = math.clamp((h - a) / (b - a), 0, 1)
+		return t * t * (3 - 2 * t)
+	end
+	if h < 12 then
+		return 1 - ramp(5.6, 7.6) -- dawn
+	end
+	return ramp(17.8, 19.9) -- dusk
+end
+
 -- the part of the day, for the HUD
 function DayCycle.phase(hour: number?): string
 	local h = hour or DayCycle.hour()
@@ -130,6 +145,7 @@ function DayCycle.start()
 		end
 	end
 	local acc = math.huge
+	local lastNight = -1
 	RunService.Heartbeat:Connect(function(dt)
 		acc += dt
 		-- the sun creeps; the rest of the light only needs a few updates a second
@@ -157,8 +173,18 @@ function DayCycle.start()
 		if atmo then
 			atmo.Glare = k.glare
 		end
-		-- haze, exposure and the outdoor light go through Weather, which adds the rain on top
+		-- lit windows and street lamps follow the night
+		local n = DayCycle.night(hour)
+		if math.abs(n - lastNight) > 0.04 or (n == 0 and lastNight ~= 0) or (n == 1 and lastNight ~= 1) then
+			lastNight = n
+			BuildingSkin.setNight(n)
+			WorldFx.setDaylight(1 - n)
+		end
+		-- haze, exposure and the outdoor light go through Weather, which adds the rain on top; clouds
+		-- are white and lighter by day, dark and fuller at night
 		Weather.setBaseLighting({
+			cloudColor = Color3.fromRGB(236, 238, 242):Lerp(Color3.fromRGB(56, 58, 74), n),
+			cover = 0.48 + 0.12 * n,
 			density = k.density,
 			haze = k.haze,
 			atmoColor = k.atmo,

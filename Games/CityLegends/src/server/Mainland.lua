@@ -31,8 +31,9 @@ local LOOP_IN = LOOP_S - HW - 8 -- the loop's inner edge
 local LOOP_OUT = LOOP_S + HW + 8
 local OUT = LOOP_S + 1100 -- the land's outer edge
 local WARM = Color3.fromRGB(255, 196, 130)
-local GRASS = Color3.fromRGB(22, 34, 22)
-local ROCK = Color3.fromRGB(40, 38, 38)
+-- (2026-10-23: natural colours; the night lighting darkens them at night)
+local GRASS = Color3.fromRGB(56, 78, 42)
+local ROCK = Color3.fromRGB(82, 78, 72)
 
 -- the four sides of a square ring: for each, the outward normal and the along direction
 local SIDES = {
@@ -83,9 +84,7 @@ local function shore(kit: any, parent: Instance)
 			local lp = p - sd.n * 6
 			kit.deco(folder, Vector3.new(0.4, 8, 0.4), CFrame.new(lp + Vector3.new(0, 4, 0)), kit.METAL, Enum.Material.Metal)
 			local bulb = kit.deco(folder, Vector3.one * 1.3, CFrame.new(lp + Vector3.new(0, 8.4, 0)), WARM, Enum.Material.Neon, { shape = Enum.PartType.Ball })
-			if math.floor(t / 120) % 3 == 0 then
-				kit.addLight("PointLight", bulb, WARM, 26, 0.9)
-			end
+			kit.dayOff(bulb, if math.floor(t / 120) % 3 == 0 then kit.addLight("PointLight", bulb, WARM, 26, 0.9) else nil)
 		end
 	end
 end
@@ -172,7 +171,7 @@ local function suburbs(kit: any, parent: Instance)
 				local p = a:Lerp(b, l / len) + sd.n * 15
 				local pole = kit.deco(group, Vector3.new(0.5, 14, 0.5), CFrame.new(p + Vector3.new(0, 7, 0)), kit.METAL, Enum.Material.Metal)
 				local lamp = kit.deco(group, Vector3.new(2, 0.4, 1.2), pole.CFrame * CFrame.new(0, 7, 0), WARM, Enum.Material.Neon)
-				kit.addLight("SpotLight", lamp, WARM, 40, 1.6, Enum.NormalId.Bottom, 120)
+				kit.dayOff(lamp, kit.addLight("SpotLight", lamp, WARM, 40, 1.6, Enum.NormalId.Bottom, 120))
 				l += 110
 			end
 			t = t1
@@ -246,7 +245,7 @@ local function outer(kit: any, parent: Instance)
 		if nearLoop(p, r + 30) or WestLayout.inCorridor(p, r + 40) then
 			continue
 		end
-		kit.mk(root, Vector3.new(r * 2, rng:NextNumber(50, 120), r * 2), CFrame.new(p.X, -10, p.Z), GRASS:Lerp(Color3.fromRGB(30, 44, 28), rng:NextNumber()), Enum.Material.Grass, { shape = Enum.PartType.Ball, name = "Hill" })
+		kit.mk(root, Vector3.new(r * 2, rng:NextNumber(50, 120), r * 2), CFrame.new(p.X, -10, p.Z), GRASS:Lerp(Color3.fromRGB(74, 96, 50), rng:NextNumber()), Enum.Material.Grass, { shape = Enum.PartType.Ball, name = "Hill" })
 	end
 	-- forest in clumps (LOD), kept off the road's verge
 	for c = 1, 140 do
@@ -261,7 +260,7 @@ local function outer(kit: any, parent: Instance)
 				kit.deco(group, Vector3.new(1.4, h * 0.3, 1.4), CFrame.new(p + Vector3.new(0, h * 0.15, 0)), Color3.fromRGB(46, 34, 26), Enum.Material.Wood)
 				for k = 0, 1 do
 					local s = (1 - k * 0.4) * h * 0.4
-					kit.deco(group, Vector3.new(s, h * 0.32, s), CFrame.new(p + Vector3.new(0, h * (0.32 + k * 0.22), 0)) * CFrame.Angles(0, rng:NextNumber(0, 1.5), 0), Color3.fromRGB(18, 40, 26):Lerp(Color3.fromRGB(28, 52, 30), rng:NextNumber()), Enum.Material.Grass, { shadow = true })
+					kit.deco(group, Vector3.new(s, h * 0.32, s), CFrame.new(p + Vector3.new(0, h * (0.32 + k * 0.22), 0)) * CFrame.Angles(0, rng:NextNumber(0, 1.5), 0), Color3.fromRGB(34, 60, 38):Lerp(Color3.fromRGB(50, 82, 46), rng:NextNumber()), Enum.Material.LeafyGrass, { shadow = true })
 				end
 			end
 		end
@@ -313,7 +312,7 @@ local function outer(kit: any, parent: Instance)
 				end
 				local d = hgt * rng:NextNumber(1.1, 1.6)
 				local cf = CFrame.lookAt(Vector3.new(p.X, hgt / 2 - 30, p.Z), Vector3.new(p.X, hgt / 2 - 30, p.Z) - sd.n) * CFrame.Angles(0, rng:NextNumber(-0.25, 0.25), 0)
-				local rock = Color3.fromRGB(20, 22, 26):Lerp(Color3.fromRGB(34, 34, 40), rng:NextNumber())
+				local rock = Color3.fromRGB(70, 70, 72):Lerp(Color3.fromRGB(96, 92, 88), rng:NextNumber())
 				kit.mk(root, Vector3.new(w, hgt, d), cf * CFrame.new(0, 0, -d / 2), rock, Enum.Material.Slate, { class = "Wedge", name = "Range" })
 				kit.mk(root, Vector3.new(w, hgt, d), cf * CFrame.new(0, 0, d / 2) * CFrame.Angles(0, math.pi, 0), rock, Enum.Material.Slate, { class = "Wedge", name = "Range" })
 			end
@@ -321,7 +320,7 @@ local function outer(kit: any, parent: Instance)
 		-- the land under the far range
 		local a, b = sd.n * (OUT + 450) - sd.t * (OUT + 1000), sd.n * (OUT + 450) + sd.t * (OUT + 1000)
 		local lo, hi = a:Min(b) - Vector3.new(450, 0, 450) * Vector3.new(math.abs(sd.n.X), 0, math.abs(sd.n.Z)), a:Max(b) + Vector3.new(450, 0, 450) * Vector3.new(math.abs(sd.n.X), 0, math.abs(sd.n.Z))
-		kit.slab(root, lo.X, lo.Z, hi.X, hi.Z, -0.4, 4, Color3.fromRGB(16, 20, 16), Enum.Material.Grass, { name = "Land" })
+		kit.slab(root, lo.X, lo.Z, hi.X, hi.Z, -0.4, 4, Color3.fromRGB(52, 70, 40), Enum.Material.Grass, { name = "Land" })
 	end
 	-- invisible walls round the outside of the land (nobody drives off the world)
 	local o = OUT + 20

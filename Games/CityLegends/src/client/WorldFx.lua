@@ -17,6 +17,29 @@ local CityLayout = require(Shared:WaitForChild("CityLayout"))
 
 local WorldFx = {}
 
+-- 0 at night .. 1 in full day (DayCycle): street lamps (tag "DayOff") switch off by day and their
+-- lamp heads (tag "LampGlow") stop glowing
+WorldFx.daylight = 0
+local lampsLit = true
+function WorldFx.setDaylight(d: number)
+	WorldFx.daylight = d
+	local lit = d < 0.55
+	if lit == lampsLit then
+		return
+	end
+	lampsLit = lit
+	task.spawn(function()
+		for i, p in CollectionService:GetTagged("LampGlow") do
+			if p:IsA("BasePart") then
+				p.Material = if lit then Enum.Material.Neon else Enum.Material.SmoothPlastic
+			end
+			if i % 400 == 0 then
+				task.wait()
+			end
+		end
+	end)
+end
+
 ---------------------------------------------------------------------
 -- Quality: scales LOD distances + traffic density from the player's
 -- Roblox graphics setting (and a little lower on phones/tablets)
@@ -111,7 +134,7 @@ local function startLod(scale: number)
 			local part = l.Parent
 			if part and part:IsA("BasePart") then
 				local dist = (part.Position - camPos).Magnitude
-				local on = dist < lightRange
+				local on = dist < lightRange and (lampsLit or not l:HasTag("DayOff"))
 				if l.Enabled ~= on then
 					l.Enabled = on
 				end

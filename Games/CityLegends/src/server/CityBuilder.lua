@@ -156,6 +156,15 @@ local function addLight(className: string, parent: Instance, color: Color3, rang
 	return l
 end
 
+-- an outdoor lamp: its light switches off and its glowing head goes plain by day (WorldFx, from
+-- DayCycle); the light is optional
+local function dayOff(head: BasePart, light: Light?)
+	CollectionService:AddTag(head, "LampGlow")
+	if light then
+		CollectionService:AddTag(light, "DayOff")
+	end
+end
+
 -- A group of small details the client hides when the camera is far away
 -- (see WorldFx LOD). Engine-wise this removes thousands of parts from the
 -- scene at any one time.
@@ -210,8 +219,9 @@ local WET = Config.Graphics.WetRoads
 local ASPHALT = if WET then Color3.fromRGB(38, 38, 42) else Color3.fromRGB(48, 48, 52)
 local ROAD_MAT = Enum.Material.Asphalt
 local ROAD_OPTS = { reflectance = if WET then 0.05 else 0 }
-local SIDEWALK = Color3.fromRGB(78, 78, 84)
-local CURB_COLOR = Color3.fromRGB(110, 110, 116)
+-- (2026-10-23: natural concrete; the night lighting keeps it dark at night)
+local SIDEWALK = Color3.fromRGB(116, 113, 108)
+local CURB_COLOR = Color3.fromRGB(150, 148, 142)
 local LINE_WHITE = Color3.fromRGB(205, 205, 200)
 local LINE_YELLOW = Color3.fromRGB(230, 170, 30)
 local STREETLIGHT = Color3.fromRGB(255, 202, 146) -- warm sodium-white
@@ -408,6 +418,7 @@ local function streetLight(parent: Instance, base: Vector3, armDir: Vector3)
 	local lamp = deco(parent, Vector3.new(2.2, 0.15, 1), head.CFrame * CFrame.new(0, -0.3, 0), STREETLIGHT, Enum.Material.Neon)
 	-- a bright warm pool on the road; near the camera it also casts shadows (WorldFx)
 	local pool = addLight("SpotLight", lamp, STREETLIGHT, 62, 2.4, Enum.NormalId.Bottom, 130)
+	dayOff(lamp, pool)
 	CollectionService:AddTag(pool, "ShadowLight")
 end
 
@@ -867,13 +878,13 @@ local function tree(parent: Instance, pos: Vector3)
 	deco(parent, Vector3.new(h, 1.1, 1.1), CFrame.new(pos + Vector3.new(0, h / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(45, 32, 24), Enum.Material.Wood, { shape = Enum.PartType.Cylinder, shadow = true })
 	for _ = 1, 3 do
 		local r = rng:NextNumber(6, 9)
-		deco(parent, Vector3.one * r, CFrame.new(pos + Vector3.new(rng:NextNumber(-2, 2), h + rng:NextNumber(-1, 2), rng:NextNumber(-2, 2))), Color3.fromRGB(24, 52, 30), Enum.Material.Grass, { shape = Enum.PartType.Ball, shadow = true })
+		deco(parent, Vector3.one * r, CFrame.new(pos + Vector3.new(rng:NextNumber(-2, 2), h + rng:NextNumber(-1, 2), rng:NextNumber(-2, 2))), Color3.fromRGB(46, 78, 40):Lerp(Color3.fromRGB(64, 96, 48), rng:NextNumber()), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
 	end
 end
 
 local function park(parent: Instance, cx: number, cz: number, size: number)
 	local top = CURB
-	mk(parent, Vector3.new(size - 20, 0.3, size - 20), CFrame.new(cx, top + 0.15, cz), Color3.fromRGB(26, 46, 28), Enum.Material.Grass, { collide = true })
+	mk(parent, Vector3.new(size - 20, 0.3, size - 20), CFrame.new(cx, top + 0.15, cz), Color3.fromRGB(62, 92, 46), Enum.Material.Grass, { collide = true })
 	-- cross paths
 	deco(parent, Vector3.new(size - 20, 0.35, 8), CFrame.new(cx, top + 0.18, cz), Color3.fromRGB(70, 66, 60), Enum.Material.Pavement)
 	deco(parent, Vector3.new(8, 0.35, size - 20), CFrame.new(cx, top + 0.18, cz), Color3.fromRGB(70, 66, 60), Enum.Material.Pavement)
@@ -894,7 +905,7 @@ local function park(parent: Instance, cx: number, cz: number, size: number)
 		local p = Vector3.new(cx + off[1] * size * 0.22, top, cz + off[2] * 7)
 		deco(parent, Vector3.new(0.4, 8, 0.4), CFrame.new(p + Vector3.new(0, 4, 0)), METAL, Enum.Material.Metal)
 		local bulb = deco(parent, Vector3.new(1.2, 1.2, 1.2), CFrame.new(p + Vector3.new(0, 8.4, 0)), STREETLIGHT, Enum.Material.Neon, { shape = Enum.PartType.Ball })
-		addLight("PointLight", bulb, STREETLIGHT, 18, 0.6)
+		dayOff(bulb, addLight("PointLight", bulb, STREETLIGHT, 18, 0.6))
 	end
 end
 
@@ -1268,7 +1279,7 @@ local function buildHighway(parent: Instance)
 	-- the land east of the city, and the mainland all round the harbour (the loop runs on it)
 	local W = E + RING + 1500 -- the harbour's outer edge (CityPremium's water)
 	local OUT = LOOP_S + 1100
-	local grass = Color3.fromRGB(18, 26, 18)
+	local grass = Color3.fromRGB(56, 76, 42)
 	slab(hwy, E + RING, -E - RING, W, E + RING, -0.3, 4, grass, Enum.Material.Grass, { name = "Land" })
 	slab(hwy, -OUT, -OUT, OUT, -W, -0.3, 4, grass, Enum.Material.Grass, { name = "Land" })
 	slab(hwy, -OUT, W, OUT, OUT, -0.3, 4, grass, Enum.Material.Grass, { name = "Land" })
@@ -1404,6 +1415,7 @@ CityBuilder.kit = {
 	slab = slab,
 	folder = folder,
 	addLight = addLight,
+	dayOff = dayOff,
 	surfaceText = surfaceText,
 	lodGroup = lodGroup,
 	pick = pick,

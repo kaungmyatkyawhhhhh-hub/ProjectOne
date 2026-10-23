@@ -285,8 +285,8 @@ function CityPremium.streetscape(kit: any, parent: Instance, cx: number, cz: num
 			kit.mk(folder, Vector3.new(4.5, 1.4, 4.5), CFrame.new(p + Vector3.new(0, 0.7, 0)), Color3.fromRGB(46, 46, 50), Enum.Material.Concrete, { name = "Planter" })
 			local h = rng:NextNumber(9, 13)
 			deco(folder, Vector3.new(0.9, h, 0.9), CFrame.new(p + Vector3.new(0, 1.4 + h / 2, 0)), Color3.fromRGB(48, 34, 26), Enum.Material.Wood, { shadow = true })
-			deco(folder, Vector3.one * rng:NextNumber(7, 9), CFrame.new(p + Vector3.new(0, 1.4 + h, 0)), Color3.fromRGB(24, 54, 32), Enum.Material.Grass, { shape = Enum.PartType.Ball, shadow = true })
-			deco(folder, Vector3.one * rng:NextNumber(5, 6.5), CFrame.new(p + Vector3.new(rng:NextNumber(-1.5, 1.5), 1.4 + h + 2.5, rng:NextNumber(-1.5, 1.5))), Color3.fromRGB(30, 62, 36), Enum.Material.Grass, { shape = Enum.PartType.Ball, shadow = true })
+			deco(folder, Vector3.one * rng:NextNumber(7, 9), CFrame.new(p + Vector3.new(0, 1.4 + h, 0)), Color3.fromRGB(48, 82, 42), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
+			deco(folder, Vector3.one * rng:NextNumber(5, 6.5), CFrame.new(p + Vector3.new(rng:NextNumber(-1.5, 1.5), 1.4 + h + 2.5, rng:NextNumber(-1.5, 1.5))), Color3.fromRGB(64, 100, 50), Enum.Material.LeafyGrass, { shape = Enum.PartType.Ball, shadow = true })
 		end
 		-- bench + bin
 		local bp = base + tangent * (inner * 0.03)
@@ -389,7 +389,8 @@ local function distantSkyline(kit: any, parent: Instance)
 			if WestLayout.inCorridor(p, 80) then
 				continue
 			end
-			kit.deco(folder, Vector3.new(w, h, w), CFrame.new(p.X, h / 2 - 2, p.Z), Color3.fromRGB(12, 14, 20), Enum.Material.SmoothPlastic)
+			-- (2026-10-23: blue-grey glass, so by day they read as far towers, not black blocks)
+			kit.deco(folder, Vector3.new(w, h, w), CFrame.new(p.X, h / 2 - 2, p.Z), Color3.fromRGB(62, 70, 82), Enum.Material.Glass, { reflectance = 0.15 })
 			for _ = 1, rng:NextInteger(2, 4) do
 				local y = rng:NextNumber(10, h - 6)
 				local c = if rng:NextNumber() < 0.6 then WARM else COOL
