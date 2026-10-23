@@ -46,3 +46,8 @@ The heavier Pro tiers made Growth Spurts 5 and 6 about 15% faster (39 and 37 min
 
 ## Tested
 Spurt 3 test save: Pro Flat Bench 355 lb, after a few sets "NEW 375 lb" and it moved up; Pro Squat Rack 515 lb, then "NEW 545 lb" (tier 4 / 8, plates loaded). Pacing test: see the batch note.
+
+## Window view (23 Oct, prompt 62, [[2026-10-23 GYM ARC Powerlifting front and Pro Gym view]])
+- The valley city recoloured (brick, sandstone, terracotta, cream, glass towers), a taller middle skyline and hills on the horizon (`tools/builders/ProGymCity`, backup `ServerStorage.ProGymCityBackup_23Oct_p62`).
+- Inside the gym the haze thins (Atmosphere 0.3 -> 0.12 density) so the city reads clearly (`GymMoodClient`).
+- `Workspace.ProGym.CliffGreenery`: oaks and cypresses hide the backs of the Main Street buildings; bushes and rocks on the cliff rim.
