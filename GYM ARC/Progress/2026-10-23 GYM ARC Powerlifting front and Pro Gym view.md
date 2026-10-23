@@ -32,7 +32,7 @@ Prompt: [[2026-10-23 GYM ARC Prompt - 62 Powerlifting front and Pro Gym view|62 
 
 ## Needs the owner
 - The 6 town buildings are kept in ServerStorage; delete them when you're happy, or tell me to put any back.
-- From high above the town (outside the Pro Gym / east side) the valley still shows bare ground: the city only draws near the Pro Gym to keep phones fast. Say if you want it visible from more of the town.
+- (Answered: [[2026-10-23 GYM ARC Far city and valley ground]]) From high above the town (outside the Pro Gym / east side) the valley still shows bare ground: the city only draws near the Pro Gym to keep phones fast. Say if you want it visible from more of the town.
 
 ![[GYM ARC/Screenshots/p62/pl_front_before.jpg]]
 ![[GYM ARC/Screenshots/p62/gym_row_street.jpg]]

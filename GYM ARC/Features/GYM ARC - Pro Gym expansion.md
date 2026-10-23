@@ -50,4 +50,8 @@ Spurt 3 test save: Pro Flat Bench 355 lb, after a few sets "NEW 375 lb" and it m
 ## Window view (23 Oct, prompt 62, [[2026-10-23 GYM ARC Powerlifting front and Pro Gym view]])
 - The valley city recoloured (brick, sandstone, terracotta, cream, glass towers), a taller middle skyline and hills on the horizon (`tools/builders/ProGymCity`, backup `ServerStorage.ProGymCityBackup_23Oct_p62`).
 - Inside the gym the haze thins (Atmosphere 0.3 -> 0.12 density) so the city reads clearly (`GymMoodClient`).
+
+## Far city and valley ground (23 Oct, prompt 62b; [[2026-10-23 GYM ARC Far city and valley ground]])
+- Away from the Pro Gym a cheap far city shows instead of the detailed one (`ReplicatedStorage.Backdrops.ProGymFarCity`, 149 parts: asphalt ground + road grid, dark blocks, window strips lit at night, river, park, hills; builder `tools/builders/ProGymFarCity`, run after `ProGymCity`). `BackdropClient` never draws both.
+- Both cities stand 6 studs over the valley floor (y -66) so Roblox's low-detail far terrain never covers their ground.
 - `Workspace.ProGym.CliffGreenery`: oaks and cypresses hide the backs of the Main Street buildings; bushes and rocks on the cliff rim.

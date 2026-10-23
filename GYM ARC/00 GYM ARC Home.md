@@ -39,6 +39,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - 23 Oct: tutorial in the new UI and a clean screen (prompts 53a / 53): new Coach Dex dialog, small SKIP pill, Spotlight on buttons, gold marker, only the tutorial on screen; one toast lane at the top centre for every toast; small "+80.5K CHEST" by REP; even machine controls; SHOP never locked. See [[2026-10-23 GYM ARC Tutorial restyle and screen cleanup]].
 - 23 Oct: the Powerlifting Gym has a real street front on Main Street (warehouse facade, lit sign, sawtooth roof, clean UNLOCKS AT GROWTH SPURT 5 door you can tap); the Pro Gym windows now show a colourful city with hills and less haze, trees hide the town building backs (prompt 62). See [[2026-10-23 GYM ARC Powerlifting front and Pro Gym view]].
 - 23 Oct: the Starter Pack, DNA Token x3 and the 4 PUMP SHOP specials (x1 / x5) are on sale with the owner's product IDs, all tested through ProcessReceipt (prompt 63). See [[2026-10-23 GYM ARC Shop product IDs wired]].
+- 23 Oct: the valley city has a cheap far version seen from the rest of town (dark blocks, road grid, lit window strips at night); the valley floor is never bare grey (prompt 62b). See [[2026-10-23 GYM ARC Far city and valley ground]].
 - 23 Oct: Inventory Auras tab in the premium tile style, colour swatches only in the detail panels (aura / alter colours off sale), STYLE tab cut to 15 (your name on the tiles), STOP always above the boost row. See [[2026-10-23 GYM ARC Auras tab, colour swatches, STYLE 15, STOP above boosts]].
 - 23 Oct: gear is just a Lifting Belt (lower body) and Wrist Wraps (upper body), Basic / Pro at Coach Dex, old straps / sleeves moved over or refunded; Shake Bundle + DNA tokens at Coach Dex, PUMP SHOP specials for Robux (SOON until the products exist); Auto Rep chip + one soft offer, DNA x3, one-time Starter Pack; rewards and coin packs grow with your stage, coin boosts capped x8; STYLE tab (name / title / aura / alter colours) and trainer snacks (prompts 57, 59, 60, 61). See [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]].
 - 23 Oct: PUMP SHOP redesigned inside around ONE counter at the back (trophy shelf, menu boards, tall shelves, GEAR and DNA LAB corners, islands, warm + gold light), bigger shopkeeper Mo who leans and looks like Dex, quieter music inside (prompt 51). See [[2026-10-23 GYM ARC Pump Shop redesign]].
@@ -138,6 +139,8 @@ All 21 open bugs and engine limits are in [[GYM ARC - Bugs index]]. The main one
 - [[2026-10-23 GYM ARC Powerlifting front and Pro Gym view]]
 - [[2026-10-23 GYM ARC Shop product IDs wired]]
 - [[2026-10-23 GYM ARC Prompt - 63 Wire the shop product IDs]]
+- [[2026-10-23 GYM ARC Far city and valley ground]]
+- [[2026-10-23 GYM ARC Prompt - 62b Far city and valley ground]]
 - [[2026-10-23 GYM ARC Pro Gym lights and Powerlifting Gym]]
 - [[2026-10-20 GYM ARC Playtest review]]
 - [[2026-10-21 GYM ARC Playtest fixes]]
