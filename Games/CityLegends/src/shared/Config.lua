@@ -753,7 +753,7 @@ Config.Challenges = {
 	StuntCashPerStud = 4,
 	StuntCashMax = 12000,
 	StuntXp = 30,
-	BoardKey = Enum.KeyCode.B, -- the leaderboard panel
+	BoardKey = Enum.KeyCode.J, -- the leaderboard panel (B is nitro)
 	BoardRefresh = 60, -- seconds between leaderboard reads
 }
 
