@@ -43,6 +43,15 @@ Config.City = {
 Config.City.RoadWidth = Config.City.LaneWidth * Config.City.LanesPerSide * 2
 Config.City.HalfExtent = Config.City.Blocks * Config.City.BlockSize / 2
 Config.City.HighwayWidth = Config.City.LaneWidth * Config.City.HighwayLanesPerSide * 2
+
+-- where players start (owner, 2026-10-23: "make block_3_2 near streetscape the players spawn"): a
+-- first car comes out on the street along this side of the block, and a player on foot with no car
+-- stands up on its sidewalk, by the streetscape
+Config.Spawn = {
+	Block = { 3, 2 }, -- the Needle's block
+	Side = Vector3.new(0, 0, 1), -- its edge on the city's middle road
+	FrontRange = 22, -- a car called on foot comes out up to this far in front of you, if there is room
+}
 -- the east highway runs from the city's edge to the loop's inner edge
 Config.City.HighwayLength = Config.City.LoopHalf - Config.City.HighwayWidth / 2 - (Config.City.HalfExtent + Config.City.RoadWidth / 2)
 

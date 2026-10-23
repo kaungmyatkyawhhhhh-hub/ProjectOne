@@ -13,6 +13,7 @@ local OnFoot = {}
 export type Ctx = {
 	remote: (className: string, name: string) -> any,
 	getCar: (player: Player) -> Model?,
+	startFootCFrame: () -> CFrame,
 }
 
 local ctx: Ctx
@@ -57,10 +58,8 @@ local function standUp(player: Player, at: CFrame?)
 		return
 	end
 	local car = ctx.getCar(player)
-	local spot = at or (if car and car.Parent then doorSpot(car) else nil)
-	if spot then
-		character:PivotTo(spot)
-	end
+	local spot = at or (if car and car.Parent then doorSpot(car) else ctx.startFootCFrame())
+	character:PivotTo(spot)
 	player.ReplicationFocus = nil
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if humanoid then

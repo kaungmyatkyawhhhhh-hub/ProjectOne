@@ -148,6 +148,93 @@ local function findSpawnCFrame(): CFrame
 	return CFrame.lookAt(pos, pos + dir)
 end
 
+-- the start block (Config.Spawn): its middle at ground level and the edge players start on
+local function startBlock(): (Vector3, Vector3, number)
+	local bi, bj = Config.Spawn.Block[1], Config.Spawn.Block[2]
+	local c = Vector3.new((CityLayout.roadCoord(bi) + CityLayout.roadCoord(bi + 1)) / 2, 0, (CityLayout.roadCoord(bj) + CityLayout.roadCoord(bj + 1)) / 2)
+	return c, Config.Spawn.Side, Config.City.BlockSize - Config.City.RoadWidth
+end
+
+local function carNear(pos: Vector3, range: number): boolean
+	for _, car in playerCars:GetChildren() do
+		if car:IsA("Model") and (car:GetPivot().Position - pos).Magnitude < range then
+			return true
+		end
+	end
+	return false
+end
+
+-- a first car: on the street along the start block's edge, in a lane clear of other players' cars
+local function startSpawnCFrame(): CFrame?
+	local c, side, inner = startBlock()
+	local edge = c + side * (inner / 2 + Config.City.RoadWidth / 2) -- the road's centre line
+	local along = side:Cross(Vector3.yAxis)
+	local spots = {}
+	for _, seg in graph.lanes do
+		for s = 30, seg.length - 30, 12 do
+			local pos, dir = CityLayout.sample(seg, s)
+			local off = pos - edge
+			-- on this road (not a crossing street), beside the block, not in a junction
+			if math.abs(off:Dot(side)) < Config.City.RoadWidth / 2 and math.abs(off:Dot(along)) < inner * 0.4 and math.abs(dir:Dot(along)) > 0.9 then
+				table.insert(spots, CFrame.lookAt(pos, pos + dir))
+			end
+		end
+	end
+	for _ = 1, #spots do
+		local cf = spots[spawnRng:NextInteger(1, #spots)]
+		if not carNear(cf.Position, 30) then
+			return cf
+		end
+	end
+	return nil
+end
+
+-- the start block's sidewalk, by the streetscape, facing the road (OnFoot: on foot with no car)
+local function startFootCFrame(): CFrame
+	local c, side, inner = startBlock()
+	local along = side:Cross(Vector3.yAxis)
+	-- between the planters and the bench, a few studs in from the curb
+	local pos = c + side * (inner / 2 - 11) - along * (inner * 0.04) + Vector3.new(0, Config.City.CurbHeight + 3.2, 0)
+	return CFrame.lookAt(pos, pos + side)
+end
+
+-- a car called while on foot: on the ground right in front of you when there's room for it
+local function frontSpawnCFrame(player: Player, size: Vector3): CFrame?
+	local character = player.Character
+	local hrp = if character then character:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
+	if not hrp then
+		return nil
+	end
+	local look = Vector3.new(hrp.CFrame.LookVector.X, 0, hrp.CFrame.LookVector.Z)
+	if look.Magnitude < 0.1 then
+		return nil
+	end
+	look = look.Unit
+	local right = look:Cross(Vector3.yAxis)
+	local ray = RaycastParams.new()
+	ray.FilterType = Enum.RaycastFilterType.Exclude
+	ray.FilterDescendantsInstances = { character, playerCars }
+	local overlap = OverlapParams.new()
+	overlap.FilterType = Enum.RaycastFilterType.Exclude
+	overlap.FilterDescendantsInstances = { character }
+	overlap.RespectCanCollide = true
+	-- the car stands across your path (side on), close first, then a little further or to a side
+	for _, d in { size.X / 2 + 5, size.X / 2 + 9, Config.Spawn.FrontRange } do
+		for _, sideOff in { 0, -6, 6 } do
+			local at = hrp.Position + look * d + right * sideOff
+			local hit = workspace:Raycast(at + Vector3.new(0, 6, 0), Vector3.new(0, -14, 0), ray)
+			if hit and hit.Normal.Y > 0.9 then
+				local cf = CFrame.lookAt(hit.Position, hit.Position + right)
+				local blocked = workspace:GetPartBoundsInBox(cf + Vector3.new(0, size.Y / 2 + 0.6, 0), size + Vector3.new(1, 0, 1), overlap)
+				if #blocked == 0 and not carNear(hit.Position, 12) then
+					return cf
+				end
+			end
+		end
+	end
+	return nil
+end
+
 -- one-off spawn spots for a player's next car (the hotel valet brings it round to the door)
 local spawnAt: { [Player]: CFrame } = {}
 
@@ -162,6 +249,8 @@ local ctx = {
 	playerCars = playerCars,
 	-- the next car this player drives out starts here (ground level, facing the way to go)
 	spawnAt = spawnAt,
+	-- the start block's sidewalk (a player on foot with no car stands up there)
+	startFootCFrame = startFootCFrame,
 	setSpawnAt = function(player: Player, cf: CFrame)
 		spawnAt[player] = cf
 	end,
@@ -209,8 +298,22 @@ local function spawnFor(player: Player, carId: string)
 		return
 	end
 	profile.Selected = carId
+	-- swapping cars while driving: the new one comes out where the old one was
+	local oldCar = getSession(player).car
+	local swapCF: CFrame? = nil
+	if oldCar and oldCar.Parent and not player.Character then
+		local at = oldCar:GetPivot()
+		local ray = RaycastParams.new()
+		ray.FilterType = Enum.RaycastFilterType.Exclude
+		ray.FilterDescendantsInstances = { playerCars }
+		local hit = workspace:Raycast(at.Position + Vector3.new(0, 4, 0), Vector3.new(0, -30, 0), ray)
+		local look = Vector3.new(at.LookVector.X, 0, at.LookVector.Z)
+		if hit and look.Magnitude > 0.1 then
+			swapCF = CFrame.lookAt(hit.Position, hit.Position + look.Unit)
+		end
+	end
 	despawn(player)
-	OnFoot.removeCharacter(player) -- a car from the garage: straight in, off your feet
+	local onFoot = player.Character ~= nil
 
 	local spec = Cars.get(carId)
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })
@@ -245,10 +348,12 @@ local function spawnFor(player: Player, carId: string)
 	ao.Responsiveness = 60
 	ao.Parent = root
 
-	-- (a house's "Drive" prompt and the hotel valet ask for their own spot)
-	local spawnCF = spawnAt[player] or findSpawnCFrame()
-	spawnAt[player] = nil
+	-- (a house's "Drive" prompt and the hotel valet ask for their own spot; on foot: in front of
+	-- you; otherwise the street by the start block)
 	local h = model:GetAttribute("Height") :: number
+	local spawnCF = spawnAt[player] or swapCF or (if onFoot then frontSpawnCFrame(player, Vector3.new(model:GetExtentsSize().X, h, model:GetExtentsSize().Z)) else nil) or startSpawnCFrame() or findSpawnCFrame()
+	spawnAt[player] = nil
+	OnFoot.removeCharacter(player) -- a car from the garage: straight in, off your feet
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation
 	-- a big car reaches clients in pieces: they wait for this many before putting the body on
