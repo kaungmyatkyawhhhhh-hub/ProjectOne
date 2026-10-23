@@ -2472,7 +2472,7 @@ local function f430(gui: SurfaceGui): Update
 	end
 	table.insert(labels, { "0", 0, WHITE, 30 })
 	local setRpm = gauge(D, {
-		cx = cx, cy = cy, r = 160, face = Color3.fromRGB(247, 192, 8), z = 4,
+		cx = cx, cy = cy, r = 160, face = Color3.fromRGB(240, 178, 18), z = 4,
 		points = pts,
 		bands = { { 8.5, 10, 150, 14, Color3.fromRGB(214, 34, 26) } },
 		ticks = { { 0, 10, 0.2, 165, 178, 2.5, WHITE, 8.5, Color3.fromRGB(230, 50, 40) }, { 0, 10, 1, 162, 181, 5, WHITE } },
@@ -2513,7 +2513,7 @@ local function f430(gui: SurfaceGui): Update
 		cx = sx, cy = sy, r = 166, face = BLACK, stroke = Color3.fromRGB(58, 60, 64), strokeW = 3, z = 2,
 		points = spts,
 		ticks = speedTicks(220, 20, 40, 2, { 138, 160, 4, WHITE }, { 148, 160, 2, WHITE }),
-		labels = speedLabels(220, 20, 40, WHITE, 30), numR = 116, font = Enum.Font.JosefinSans,
+		labels = speedLabels(220, 20, 40, WHITE, 25), numR = 122, font = Enum.Font.JosefinSans,
 		needle = { -20, 150, 5, Color3.fromRGB(232, 40, 28) }, hub = { 30, Color3.fromRGB(26, 26, 28), Color3.fromRGB(70, 70, 74), 2 },
 	})
 	-- the inner scale in the other unit (yellow)
@@ -2573,7 +2573,7 @@ local function r8(gui: SurfaceGui): Update
 		D.round(x, 196, 146, FACE, 2)
 		D.arc(x, 196, pts[1][2], pts[#pts][2], 136, 3, RRED, 3)
 		if redFrom then
-			D.arc(x, 196, angleOn(pts, redFrom), pts[#pts][2], 127, 12, RRED, 3)
+			D.arc(x, 196, angleOn(pts, redFrom), pts[#pts][2], 129, 7, RRED, 3)
 		end
 		return gauge(D, {
 			cx = x, cy = 196, r = 140, z = 3, points = pts, ticks = ticks,
@@ -2669,7 +2669,7 @@ local function mp412c(gui: SurfaceGui): Update
 		cx = cx, cy = cy, r = 172, face = Color3.fromRGB(12, 12, 14), z = 3,
 		points = pts,
 		bands = { { 8.5, 9.15, 150, 26, Color3.fromRGB(232, 64, 30) } },
-		ticks = { { 1, 9, 1, 132, 162, 4, WHITE }, { 1.5, 8.5, 1, 150, 162, 3, WHITE } },
+		ticks = { { 1.5, 8.5, 1, 128, 160, 3.5, WHITE }, { 1, 9, 1, 152, 162, 3, WHITE } },
 		labels = labels, numR = 108, font = font,
 		needle = { -16, 150, 5, Color3.fromRGB(240, 36, 26) }, hub = { 20, Color3.fromRGB(20, 20, 22), Color3.fromRGB(60, 60, 64), 2 },
 	})
@@ -2696,10 +2696,10 @@ local function mp412c(gui: SurfaceGui): Update
 	D.label("--- km", lx + 96, 302, 16, WHITE, font, 3, 6)
 	-- right screen: modes and the oil, water and fuel bars
 	local rx = 800
-	D.label("HANDLING", rx - 92, 212, 11, WHITE, font, 3, 8)
-	D.label("SPORT", rx - 92, 228, 16, WHITE, font, 3, 5)
-	D.label("POWERTRAIN", rx - 92, 262, 11, WHITE, font, 3, 10)
-	D.label("SPORT", rx - 92, 278, 16, WHITE, font, 3, 5)
+	D.label("HANDLING", rx - 74, 212, 11, WHITE, font, 3, 8)
+	D.label("SPORT", rx - 74, 228, 16, WHITE, font, 3, 5)
+	D.label("POWERTRAIN", rx - 74, 262, 11, WHITE, font, 3, 10)
+	D.label("SPORT", rx - 74, 278, 16, WHITE, font, 3, 5)
 	local bars = {}
 	for i, name in { "OIL", "WATER", "FUEL" } do
 		local y = 200 + (i - 1) * 38
