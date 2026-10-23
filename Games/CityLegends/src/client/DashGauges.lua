@@ -1402,6 +1402,145 @@ local function lexus(gui: SurfaceGui, rpmTop: number, redFrom: number, accent: C
 	end
 end
 
+-- Lexus LFA (owner's photo of the real screen, 2026-10-23): a black screen with one big round rev
+-- counter: a thick white ring with black numbers 0-10 (squeezed below 4000), red from just before
+-- 9, a thin red needle; inside it on black, the speed in big white digits with the unit, a thin
+-- line, the gear and SPORT, "x1000 r/min" bottom right. Either side, arcs following the ring:
+-- coolant and fuel on the left with the temperature read-out, oil temperature and pressure on the
+-- right with the clock. Only the needle, the speed and the gear move.
+local LFA_SCALE = { { 0, -180 }, { 2000, -151 }, { 4000, -123 }, { 5000, -91.5 }, { 6000, -61 }, { 7000, -31 }, { 8000, 0 }, { 9000, 31 }, { 10000, 63 } }
+local function lfaAngle(rpm: number): number
+	rpm = math.clamp(rpm, 0, 10000)
+	for k = 1, #LFA_SCALE - 1 do
+		local a, b = LFA_SCALE[k], LFA_SCALE[k + 1]
+		if rpm <= b[1] then
+			return a[2] + (b[2] - a[2]) * (rpm - a[1]) / (b[1] - a[1])
+		end
+	end
+	return LFA_SCALE[#LFA_SCALE][2]
+end
+
+local function lfa(gui: SurfaceGui): Update
+	local INK = Color3.fromRGB(10, 10, 12)
+	local RING = Color3.fromRGB(236, 236, 232)
+	local LFA_RED = Color3.fromRGB(232, 40, 30)
+	local GREY = Color3.fromRGB(120, 122, 126)
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(0, 0, 0), BorderSizePixel = 0 }, gui)
+	local box = squareBox(bg, UDim2.fromScale(0.5, 0.5), 0.6) -- (as on the real screen: the ring is about 0.6 of its height)
+	local function disc(size: number, color: Color3, z: number)
+		new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, new("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(size, size),
+			BackgroundColor3 = color,
+			BorderSizePixel = 0,
+			ZIndex = z,
+		}, box))
+	end
+	-- something drawn at an angle round the middle (a turned full-size holder)
+	local function spoke(angle: number, z: number): Frame
+		return new("Frame", {
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(1, 1),
+			Rotation = angle,
+			ZIndex = z,
+		}, box)
+	end
+	-- the white ring, its red zone (overlapping wedges on the ring), the black middle
+	disc(1, RING, 1)
+	local r0, r1 = lfaAngle(8750), lfaAngle(9900)
+	for a = r0, r1, 2.5 do
+		new("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromScale(0.5, 0), Size = UDim2.fromScale(0.07, 0.18), BackgroundColor3 = LFA_RED, BorderSizePixel = 0, ZIndex = 2 }, spoke(a, 2))
+	end
+	disc(0.66, Color3.fromRGB(0, 0, 0), 3)
+	-- ticks on the ring's outer edge and the numbers on it
+	for rpm = 0, 10000, 250 do
+		local major = rpm % 1000 == 0
+		if rpm < 4000 and not major and rpm % 500 ~= 0 then
+			continue -- (the squeezed bottom of the scale has fewer ticks)
+		end
+		local red = rpm >= 8750 and rpm < 9900
+		new("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0.004),
+			Size = UDim2.fromScale(if major then 0.01 else 0.006, if major then 0.05 else 0.028),
+			BackgroundColor3 = if red then Color3.fromRGB(255, 255, 255) else INK,
+			BorderSizePixel = 0,
+			ZIndex = 4,
+		}, spoke(lfaAngle(rpm), 4))
+	end
+	for _, v in { 0, 2, 4, 5, 6, 7, 8, 9, 10 } do
+		local ang = math.rad(lfaAngle(v * 1000))
+		local rr = 0.405
+		local num = text(box, tostring(v), UDim2.fromScale(0.5 + math.sin(ang) * rr, 0.5 - math.cos(ang) * rr), UDim2.fromScale(0.09, 0.075), if v == 9 then Color3.fromRGB(255, 255, 255) else INK, Enum.Font.GothamMedium)
+		num.ZIndex = 5
+	end
+	-- the needle: from near the middle out across the ring
+	local needle = spoke(lfaAngle(0), 7)
+	new("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromScale(0.5, 0.05), Size = UDim2.fromScale(0.012, 0.32), BackgroundColor3 = LFA_RED, BorderSizePixel = 0, ZIndex = 7 }, needle)
+	-- inside: speed, unit, line, gear, SPORT, x1000 r/min
+	local speed = text(box, "0", UDim2.fromScale(0.5, 0.32), UDim2.fromScale(0.22, 0.13), WHITE, Enum.Font.GothamMedium)
+	speed.ZIndex = 6
+	local unitText = text(box, unit(), UDim2.fromScale(0.5, 0.41), UDim2.fromScale(0.08, 0.035), WHITE, Enum.Font.Gotham)
+	unitText.ZIndex = 6
+	new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.435), Size = UDim2.fromScale(0.3, 0.005), BackgroundColor3 = Color3.fromRGB(200, 200, 200), BorderSizePixel = 0, ZIndex = 6 }, box)
+	local gear = text(box, "N", UDim2.fromScale(0.5, 0.535), UDim2.fromScale(0.12, 0.11), WHITE, Enum.Font.GothamBold)
+	gear.ZIndex = 6
+	local mode = text(box, "SPORT", UDim2.fromScale(0.5, 0.61), UDim2.fromScale(0.1, 0.035), WHITE, Enum.Font.GothamMedium)
+	mode.ZIndex = 6
+	local x1000 = text(box, "x1000\nr/min", UDim2.fromScale(0.62, 0.87), UDim2.fromScale(0.09, 0.055), WHITE, Enum.Font.Gotham)
+	x1000.ZIndex = 6
+	-- the side arcs round the ring: grey track with a white filled part, end labels
+	local side = squareBox(bg, UDim2.fromScale(0.5, 0.5), 0.93)
+	local function arcPoint(angle: number, rr: number): UDim2
+		local a = math.rad(angle)
+		return UDim2.fromScale(0.5 + math.sin(a) * rr, 0.5 - math.cos(a) * rr)
+	end
+	local function arc(a0: number, a1: number, fill: number, labels: { { number | string } })
+		local n = 16
+		for k = 0, n do
+			local f = k / n
+			local a = a0 + (a1 - a0) * f
+			new("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = arcPoint(a, 0.47),
+				Size = UDim2.fromScale(0.012, 0.012 * 1.6),
+				Rotation = a,
+				BackgroundColor3 = if f <= fill then Color3.fromRGB(220, 222, 226) else GREY,
+				BorderSizePixel = 0,
+			}, side)
+		end
+		for _, l in labels do
+			local a = a0 + (a1 - a0) * (l[1] :: number)
+			text(side, l[2] :: string, arcPoint(a, 0.43), UDim2.fromScale(0.05, 0.022), WHITE, Enum.Font.Gotham)
+		end
+	end
+	-- left: coolant (top, 100-265 F) and fuel (bottom); right: oil temperature and pressure
+	arc(-58, -96, 0.55, { { 0, "265°F" }, { 0.45, "210" }, { 0.75, "160" }, { 1, "100" } })
+	arc(-104, -125, 0.85, { { 0, "1/1" }, { 1, "E" } })
+	arc(58, 96, 0.5, { { 0, "320°F" }, { 0.5, "210" }, { 1, "100" } })
+	arc(104, 125, 0.4, { { 0, "8" }, { 0.5, "4" }, { 1, "0" } })
+	text(side, "x100kPa", arcPoint(122, 0.43) + UDim2.fromScale(0.03, 0.02), UDim2.fromScale(0.05, 0.016), WHITE, Enum.Font.Gotham)
+	text(side, "180°F", arcPoint(-100, 0.36), UDim2.fromScale(0.07, 0.03), WHITE, Enum.Font.GothamMedium)
+	local clockText = text(side, clock(), arcPoint(100, 0.36), UDim2.fromScale(0.07, 0.03), WHITE, Enum.Font.GothamMedium)
+	local shown = 0
+	local last = 0
+	return function(mph: number, g: string, rpm: number)
+		-- rpm is 0..1 of the car's own range; the LFA's scale is 0-10,000 with its limiter at 9,500
+		shown += (math.clamp(rpm, 0, 1) * 9500 - shown) * 0.35
+		needle.Rotation = lfaAngle(shown)
+		speed.Text = spd(mph)
+		unitText.Text = unit()
+		gear.Text = g
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+		end
+	end
+end
+
 -- Porsche 718 Cayman: three round tubes, the rev counter in the middle and biggest (0-8, red from
 -- 7.5) with the gear and the speed in digits inside, the speedometer on the left, a round screen
 -- on the right (range, outside temperature, clock); black faces, white numbers, red needles
@@ -2135,9 +2274,7 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 		return evScreen(gui, Color3.fromRGB(60, 200, 230))
 	end,
 	RX8 = rx8,
-	LFA = function(gui)
-		return lexus(gui, 10, 9, Color3.fromRGB(255, 120, 40))
-	end,
+	LFA = lfa, -- the real LFA screen (owner's photo)
 	LexusLX = function(gui)
 		return lexus(gui, 8, 6, Color3.fromRGB(80, 170, 255))
 	end,
