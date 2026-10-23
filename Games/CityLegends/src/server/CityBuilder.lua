@@ -28,6 +28,7 @@ local West = require(script.Parent:WaitForChild("West"))
 local Hotel = require(script.Parent:WaitForChild("Hotel"))
 local Casino = require(script.Parent:WaitForChild("Casino"))
 local GemShowcase = require(script.Parent:WaitForChild("GemShowcase"))
+local Fountain = require(script.Parent:WaitForChild("Fountain"))
 local Houses = require(script.Parent:WaitForChild("Houses"))
 
 local CityBuilder = {}
@@ -922,15 +923,12 @@ local function park(parent: Instance, cx: number, cz: number, size: number)
 	-- cross paths
 	deco(parent, Vector3.new(size - 20, 0.35, 8), CFrame.new(cx, top + 0.18, cz), Color3.fromRGB(70, 66, 60), Enum.Material.Pavement)
 	deco(parent, Vector3.new(8, 0.35, size - 20), CFrame.new(cx, top + 0.18, cz), Color3.fromRGB(70, 66, 60), Enum.Material.Pavement)
-	-- fountain
-	mk(parent, Vector3.new(1.5, 30, 30), CFrame.new(cx, top + 0.9, cz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(90, 90, 95), Enum.Material.Marble, { shape = Enum.PartType.Cylinder })
-	local water = deco(parent, Vector3.new(0.4, 26, 26), CFrame.new(cx, top + 1.5, cz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(40, 140, 255), Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.45 })
-	addLight("PointLight", water, Color3.fromRGB(60, 150, 255), 22, 0.8)
-	deco(parent, Vector3.new(10, 2, 2), CFrame.new(cx, top + 6, cz) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(150, 210, 255), Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.3 })
+	-- the fountain with its plaza, flower beds and benches
+	Fountain.build(CityBuilder.kit, parent, Vector3.new(cx, top, cz))
 	for _ = 1, 14 do
 		local px = cx + rng:NextNumber(-size / 2 + 20, size / 2 - 20)
 		local pz = cz + rng:NextNumber(-size / 2 + 20, size / 2 - 20)
-		if math.abs(px - cx) > 14 and math.abs(pz - cz) > 14 then
+		if Vector2.new(px - cx, pz - cz).Magnitude > 38 and math.abs(px - cx) > 8 and math.abs(pz - cz) > 8 then
 			tree(parent, Vector3.new(px, top + 0.3, pz), rng:NextNumber(1, 1.25))
 		end
 	end
