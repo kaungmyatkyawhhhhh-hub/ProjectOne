@@ -1230,7 +1230,7 @@ buildLoop = function(hwy: Instance)
 			local a0, a1 = seg[1], seg[2]
 			local cen, len = (a0 + a1) / 2, (a1 - a0).Magnitude + 0.6
 			mk(loop, Vector3.new(0.6, 1.2, len), CFrame.lookAt(cen + Vector3.new(0, 2.2, 0), a1 + Vector3.new(0, 2.2, 0)), Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.2, name = "GuardRail" })
-			mk(loop, Vector3.new(2, 60, len), CFrame.lookAt(cen + Vector3.new(0, 30, 0), a1 + Vector3.new(0, 30, 0)), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Wall" })
+			mk(loop, Vector3.new(2, 30, len), CFrame.lookAt(cen + Vector3.new(0, 15, 0), a1 + Vector3.new(0, 15, 0)), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Wall" })
 		end
 	end
 
@@ -1279,7 +1279,9 @@ buildLoop = function(hwy: Instance)
 					local cen = (q0 + q1) / 2
 					local len = (q1 - q0).Magnitude + 0.4
 					mk(marks, Vector3.new(0.6, 1.2, len), CFrame.lookAt(cen + Vector3.new(0, 2.2, 0), q1 + Vector3.new(0, 2.2, 0)), Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.2, name = "GuardRail" })
-					mk(walls, Vector3.new(2, 60, len), CFrame.lookAt(cen + Vector3.new(0, 30, 0), q1 + Vector3.new(0, 30, 0)), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Wall" })
+					-- (30 high: the coastal highway's viaduct crosses the loop above it; 60 stuck up through
+					-- its deck as two invisible walls across the highway, owner 2026-10-24)
+					mk(walls, Vector3.new(2, 30, len), CFrame.lookAt(cen + Vector3.new(0, 15, 0), q1 + Vector3.new(0, 15, 0)), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "Wall" })
 				end
 			end
 			s += step
