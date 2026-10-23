@@ -378,8 +378,13 @@ Config.Police = {
 	PatrolMph = 38,
 	ChaseMph = { 105, 125, 150, 175, 200 }, -- top chase speed per star
 	SpotRange = 90, -- a patrol sees you speeding this close
-	BustRange = 20,
-	BustSeconds = 3, -- stopped next to a police car this long
+	-- owner (2026-10-24): "make police cars like traffic and not crash into you. just show like a
+	-- text and there will be a zone near the player. if they dont get out of the zone in 10 seconds
+	-- then they get caught"
+	ZoneTrigger = 90, -- a chasing police car this close (and in sight) throws a zone round you
+	ZoneRadius = 70, -- the zone's size (studs from where you were)
+	ZoneSeconds = 10, -- out of it in time or you're caught
+	ZoneCooldown = 5, -- after you get out, this long before the next one
 	LoseRange = 300, -- out of sight and this far from every unit...
 	LoseSeconds = { 9, 11, 13, 15, 18 }, -- ...for this long per star: escaped
 	MinChaseSeconds = 12,

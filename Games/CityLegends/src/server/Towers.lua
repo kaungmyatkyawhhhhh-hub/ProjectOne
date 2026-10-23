@@ -26,6 +26,7 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -1105,7 +1106,10 @@ function Towers.block(kit: any, parent: Instance, bi: number, bj: number, cx: nu
 		return false
 	end
 	buildTower(kit, parent, t, cx, cz, lot)
-	start()
+	-- (the edit-view preview builds the towers without the game running: no remotes to wait for)
+	if RunService:IsRunning() then
+		start()
+	end
 	return true
 end
 

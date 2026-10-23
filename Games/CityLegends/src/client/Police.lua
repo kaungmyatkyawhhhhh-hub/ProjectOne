@@ -2,11 +2,12 @@
 	Police (client)
 	Police cars driven on this client (smooth, like traffic) and the wanted HUD.
 	  * Patrols drive the streets. Speed past one above the limit (120 km/h) and it calls you in.
-	  * Wanted (the server's "Wanted" attribute, 1-5 stars): 1 + stars units hunt you. Far away
-	    they follow the roads towards you; close and in sight they drive straight at you, sirens
-	    and light bars going, and try to box you in.
-	  * Stop next to a police car (or stand still on foot) for a few seconds: BUSTED (a fine, stars
-	    cleared). Get out of sight and far enough away for long enough: ESCAPED (a bounty).
+	  * Wanted (the server's "Wanted" attribute, 1-5 stars): 1 + half the stars units hunt you,
+	    sirens and light bars going. They stay on the roads like traffic, taking the turns that
+	    lead to you, and never drive into you (owner, 2026-10-24).
+	  * When one catches up (close and in sight), a red zone rings the spot you're at: get out of it
+	    within ZoneSeconds or you're BUSTED (a fine, stars cleared). Get out of sight and far enough
+	    away for long enough, or outlast the chase timer: ESCAPED (a bounty).
 	  * Speed cameras flash (white screen, shutter) when they catch you; everyone sees the flash.
 ]]
 
@@ -64,11 +65,17 @@ local rayParams = RaycastParams.new()
 rayParams.FilterType = Enum.RaycastFilterType.Exclude
 
 local wanted = 0
-local bustT, loseT = 0, 0
+local loseT = 0
+-- the police zone round you: where it is and how long you have left to get out of it
+local zone: { center: Vector3, left: number }? = nil
+local zoneCooldown = 0
+local zoneModel: Model
+local zoneText: TextLabel
+local showZone: (at: Vector3?) -> ()
 local reported = false -- busted / escaped sent, waiting for the server
 local chaseT = 0 -- seconds since this chase started
 local chaseLabel: TextLabel
-local spotCooldown, ramCooldown, losTimer = 0, 0, 0
+local spotCooldown, losTimer = 0, 0
 
 ---------------------------------------------------------------------
 -- HUD: stars, the busted bar, banners, the camera flash
@@ -157,9 +164,21 @@ local function buildHud()
 	bustText.Font = Enum.Font.GothamBlack
 	bustText.TextSize = 13
 	bustText.TextColor3 = Color3.new(1, 1, 1)
-	bustText.Text = "MOVE OR GET BUSTED"
+	bustText.Text = "GET OUT OF THE ZONE"
 	bustText.ZIndex = 2
 	bustText.Parent = bustBar
+	-- the zone's countdown over the bar
+	zoneText = Instance.new("TextLabel")
+	zoneText.AnchorPoint = Vector2.new(0.5, 1)
+	zoneText.Position = UDim2.new(0.5, 0, 0, 114)
+	zoneText.Size = UDim2.fromOffset(420, 40)
+	zoneText.BackgroundTransparency = 1
+	zoneText.Font = Enum.Font.GothamBlack
+	zoneText.TextSize = 30
+	zoneText.TextColor3 = Color3.fromRGB(255, 60, 60)
+	zoneText.TextStrokeTransparency = 0.3
+	zoneText.Visible = false
+	zoneText.Parent = gui
 
 	banner = Instance.new("Frame")
 	banner.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -496,95 +515,64 @@ local function stepUnit(u: Unit, dt: number, tPos: Vector3?, tVel: Vector3, tSpe
 	local goal = if chasing and tPos then tPos + tVel * 0.5 else nil
 	local dist = if tPos then Vector3.new(tPos.X - u.pos.X, 0, tPos.Z - u.pos.Z).Magnitude else math.huge
 
-	-- direct (off-road) when close and in sight; back on the roads when far or blocked
-	if chasing and tPos then
-		if not u.direct and dist < 150 and u.los then
-			u.direct = true
-		elseif u.direct and (dist > 200 or u.losT > 1.6) then
-			local seg, s = nearestLane(u.pos)
-			if seg then
-				u.seg, u.s, u.nextSeg = seg, s, nil
-				u.direct = false
-			end
-		end
-	elseif u.direct then
+	-- (owner, 2026-10-24: like traffic, never off the roads, never into you)
+	if u.direct then
 		local seg, s = nearestLane(u.pos)
 		if seg then
 			placeOnLane(u, seg, s)
 		end
+		u.direct = false
 	end
-
 	local top = Config.mphToSps(P.ChaseMph[math.clamp(wanted, 1, 5)])
-	if u.direct and tPos then
-		-- come alongside the target, a little behind, on our side
-		local tf = if tVel.Magnitude > 3 then tVel.Unit else u.fwd
-		local tr = tf:Cross(Vector3.yAxis)
-		local aim = if dist < 45 then tPos + tr * (u.side * 6) - tf * 3 else (goal :: Vector3)
-		local to = Vector3.new(aim.X - u.pos.X, 0, aim.Z - u.pos.Z)
-		if to.Magnitude > 0.5 then
-			local want = to.Unit
-			local ang = math.acos(math.clamp(u.fwd:Dot(want), -1, 1))
-			local maxTurn = 2.6 * dt
-			if ang > 1e-3 then
-				local k = math.min(1, maxTurn / ang)
-				u.fwd = u.fwd:Lerp(want, k).Unit
-			end
-		end
-		local wantSpeed = if dist > 45 then top else math.clamp(tSpeed + (dist - 10) * 1.6, 0, top)
-		local accel = if wantSpeed > u.speed then 55 else 110
-		u.speed += math.clamp(wantSpeed - u.speed, -accel * dt, accel * dt)
-		local nextPos = u.pos + u.fwd * u.speed * dt
-		u.pos = Vector3.new(nextPos.X, groundY(nextPos, u.pos.Y), nextPos.Z)
-	else
-		local seg = u.seg
-		if not seg then
-			return
-		end
-		local want: number
-		if chasing then
-			-- catch up fast when far behind
-			want = if dist > 400 then top * 1.35 else top
-		else
-			want = Config.mphToSps(P.PatrolMph) * seg.speedK
-			-- stop on red like everyone else
-			if seg.signal and seg.kind == "lane" then
-				local state = CityLayout.lightState(seg.i, seg.j, seg.axis, workspace:GetServerTimeNow())
-				local remaining = seg.length - u.s
-				if state ~= "G" and remaining < 40 and remaining > -2 then
-					want = math.min(want, math.max(0, (remaining - 1) * 1.2))
-				end
-			end
-			-- don't drive through the player
-			if tPos then
-				local rel = Vector3.new(tPos.X - u.pos.X, 0, tPos.Z - u.pos.Z)
-				local ahead = rel:Dot(u.fwd)
-				if ahead > 0 and ahead < 30 and math.abs(rel:Dot(u.fwd:Cross(Vector3.yAxis))) < 6 then
-					want = 0
-				end
-			end
-		end
-		local accel = if want > u.speed then 40 else 90
-		u.speed += math.clamp(want - u.speed, -accel * dt, accel * dt)
-		u.s += u.speed * dt
-		while u.seg and u.s >= (u.seg :: CityLayout.Segment).length do
-			local cur = u.seg :: CityLayout.Segment
-			u.s -= cur.length
-			local nxt = u.nextSeg or chooseNext(u, goal)
-			if not nxt then
-				u.s = cur.length
-				u.speed = 0
-				break
-			end
-			u.seg = nxt
-			u.nextSeg = nil
-		end
-		if u.seg and not u.nextSeg and goal == nil then
-			u.nextSeg = chooseNext(u, nil)
-		end
-		local pos, fwd = CityLayout.sample(u.seg :: CityLayout.Segment, u.s)
-		u.pos = Vector3.new(pos.X, pos.Y, pos.Z)
-		u.fwd = fwd
+	local seg = u.seg
+	if not seg then
+		return
 	end
+	local want: number
+	if chasing then
+		-- catch up fast when far behind
+		want = if dist > 400 then top * 1.35 else top
+	else
+		want = Config.mphToSps(P.PatrolMph) * seg.speedK
+		-- stop on red like everyone else
+		if seg.signal and seg.kind == "lane" then
+			local state = CityLayout.lightState(seg.i, seg.j, seg.axis, workspace:GetServerTimeNow())
+			local remaining = seg.length - u.s
+			if state ~= "G" and remaining < 40 and remaining > -2 then
+				want = math.min(want, math.max(0, (remaining - 1) * 1.2))
+			end
+		end
+	end
+	-- never drive into the player: hold back behind you (closer and slower the nearer you are)
+	if tPos then
+		local rel = Vector3.new(tPos.X - u.pos.X, 0, tPos.Z - u.pos.Z)
+		local ahead = rel:Dot(u.fwd)
+		if ahead > 0 and ahead < 60 and math.abs(rel:Dot(u.fwd:Cross(Vector3.yAxis))) < 9 then
+			local gap = ahead - 22
+			want = math.min(want, math.max(0, math.min(tSpeed + gap * 0.8, gap * 2.5)))
+		end
+	end
+	local accel = if want > u.speed then (if chasing then 60 else 40) else 110
+	u.speed += math.clamp(want - u.speed, -accel * dt, accel * dt)
+	u.s += u.speed * dt
+	while u.seg and u.s >= (u.seg :: CityLayout.Segment).length do
+		local cur = u.seg :: CityLayout.Segment
+		u.s -= cur.length
+		local nxt = u.nextSeg or chooseNext(u, goal)
+		if not nxt then
+			u.s = cur.length
+			u.speed = 0
+			break
+		end
+		u.seg = nxt
+		u.nextSeg = nil
+	end
+	if u.seg and not u.nextSeg and goal == nil then
+		u.nextSeg = chooseNext(u, nil)
+	end
+	local pos, fwd = CityLayout.sample(u.seg :: CityLayout.Segment, u.s)
+	u.pos = Vector3.new(pos.X, pos.Y, pos.Z)
+	u.fwd = fwd
 
 	-- light bar
 	if chasing then
@@ -604,11 +592,72 @@ local function stepUnit(u: Unit, dt: number, tPos: Vector3?, tVel: Vector3, tSpe
 end
 
 ---------------------------------------------------------------------
+-- The police zone on the ground: a faint red disc, a glowing ring and a low wall of light
+---------------------------------------------------------------------
+local ZONE_SEGS = 40
+local function buildZone()
+	zoneModel = Instance.new("Model")
+	zoneModel.Name = "PoliceZone"
+	local function piece(name: string, size: Vector3, transparency: number, shape: Enum.PartType?): Part
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.CastShadow = false
+		p.Material = Enum.Material.Neon
+		p.Color = Color3.fromRGB(255, 40, 40)
+		p.Transparency = transparency
+		p.Size = size
+		if shape then
+			p.Shape = shape
+		end
+		p.Parent = zoneModel
+		return p
+	end
+	local R = P.ZoneRadius
+	piece("Disc", Vector3.new(0.2, R * 2, R * 2), 0.88, Enum.PartType.Cylinder)
+	for i = 1, ZONE_SEGS do
+		piece("Ring", Vector3.new(2 * math.pi * R / ZONE_SEGS + 0.3, 0.6, 1.2), 0.2)
+		piece("Wall", Vector3.new(2 * math.pi * R / ZONE_SEGS + 0.3, 6, 0.3), 0.75)
+	end
+end
+
+-- shows the zone round `at` on the ground (nil hides it)
+showZone = function(at: Vector3?)
+	if not at then
+		zoneModel.Parent = nil
+		return
+	end
+	local y = groundY(at, at.Y - 2)
+	local R = P.ZoneRadius
+	local ring, wall = 0, 0
+	for _, p in zoneModel:GetChildren() do
+		local part = p :: BasePart
+		if part.Name == "Disc" then
+			part.CFrame = CFrame.new(at.X, y + 0.12, at.Z) * CFrame.Angles(0, 0, math.pi / 2)
+		else
+			local i = if part.Name == "Ring" then ring else wall
+			local a = (i + 0.5) / ZONE_SEGS * 2 * math.pi
+			local h = if part.Name == "Ring" then 0.3 else 3
+			part.CFrame = CFrame.new(at.X + math.cos(a) * R, y + h, at.Z + math.sin(a) * R) * CFrame.Angles(0, -a + math.pi / 2, 0)
+			if part.Name == "Ring" then
+				ring += 1
+			else
+				wall += 1
+			end
+		end
+	end
+	zoneModel.Parent = workspace
+end
+
+---------------------------------------------------------------------
 -- Main loop
 ---------------------------------------------------------------------
 local function update(dt: number)
 	dt = math.min(dt, 0.1)
-	local tPos, tVel, tSpeed, tHalf = target()
+	local tPos, tVel, tSpeed = target()
 	local level = wanted
 	local focus = tPos or (workspace.CurrentCamera and workspace.CurrentCamera.CFrame.Position) or Vector3.zero
 
@@ -694,28 +743,46 @@ local function update(dt: number)
 	end
 
 	spotCooldown = math.max(0, spotCooldown - dt)
-	ramCooldown = math.max(0, ramCooldown - dt)
 	local kmh = Config.spsToMph(tSpeed) * 1.609
 
 	if level == 0 then
-		bustT, loseT, reported = 0, 0, false
+		loseT, reported = 0, false
 		chaseT = 0
+		if zone then
+			zone = nil
+			showZone(nil)
+		end
 		-- speeding past a patrol that can see you
 		if tPos and Driving.isDriving() and kmh > P.SpeedLimitKmh + 5 and spotCooldown <= 0 and closeNear and closest < P.SpotRange and closeNear.los then
 			spotCooldown = 8
 			report:FireServer("spotted")
 		end
 	elseif tPos and not reported then
-		-- busted: stopped next to a unit that sees you
-		local stopped = tSpeed < 6
-		if stopped and closest < P.BustRange and closeNear and closeNear.los then
-			bustT += dt
+		-- the police zone: a unit that catches up rings you in; out of it in time or busted
+		zoneCooldown = math.max(0, zoneCooldown - dt)
+		if not zone then
+			if zoneCooldown <= 0 and closeNear and closest < P.ZoneTrigger and closeNear.los then
+				zone = { center = tPos, left = P.ZoneSeconds }
+				showZone(tPos)
+				Audio.play("CameraFlash", 0.4)
+			end
 		else
-			bustT = math.max(0, bustT - dt * 2)
-		end
-		if bustT >= P.BustSeconds then
-			reported = true
-			report:FireServer("busted")
+			local z = zone :: { center: Vector3, left: number }
+			local off = Vector3.new(tPos.X - z.center.X, 0, tPos.Z - z.center.Z).Magnitude
+			if off > P.ZoneRadius then
+				zone = nil
+				zoneCooldown = P.ZoneCooldown
+				showZone(nil)
+				showBanner("OUT OF THE ZONE", "Keep going!", Theme.Accent, 1.5)
+			else
+				z.left -= dt
+				if z.left <= 0 then
+					zone = nil
+					showZone(nil)
+					reported = true
+					report:FireServer("busted")
+				end
+			end
 		end
 		-- escaped: no unit sees you for long enough
 		if seen then
@@ -730,11 +797,6 @@ local function update(dt: number)
 			reported = true
 			report:FireServer("escaped")
 		end
-		-- ramming a police car makes it worse
-		if closeNear and closest < tHalf + closeNear.halfLen * 0.8 and tSpeed > 25 and ramCooldown <= 0 then
-			ramCooldown = 6
-			report:FireServer("rammed")
-		end
 	end
 
 	-- HUD
@@ -746,8 +808,19 @@ local function update(dt: number)
 	else
 		chaseLabel.Visible = false
 	end
-	bustBar.Visible = level > 0 and bustT > 0.05
-	bustFill.Size = UDim2.fromScale(math.clamp(bustT / P.BustSeconds, 0, 1), 1)
+	local z = zone
+	bustBar.Visible = z ~= nil
+	zoneText.Visible = z ~= nil
+	if z then
+		bustFill.Size = UDim2.fromScale(math.clamp(z.left / P.ZoneSeconds, 0, 1), 1)
+		zoneText.Text = string.format("POLICE ZONE  ·  %d", math.ceil(z.left))
+		local pulse = (os.clock() * 2) % 1 < 0.5
+		for _, p in zoneModel:GetChildren() do
+			if p:IsA("BasePart") and p.Name == "Ring" then
+				p.Transparency = if pulse then 0.15 else 0.45
+			end
+		end
+	end
 	local glow = edgeGlow:FindFirstChild("Glow") :: UIStroke
 	if level > 0 and closest < 140 then
 		local phase = (os.clock() * 4) % 1 < 0.5
@@ -767,7 +840,11 @@ local function onEvent(info: any)
 		local old = wanted
 		wanted = level
 		reported = false
-		bustT, loseT = 0, 0
+		loseT = 0
+		if level == 0 and zone then
+			zone = nil
+			showZone(nil)
+		end
 		if level > old and level > 0 then
 			local why = if info.reason == "camera" then "SPEED CAMERA"
 				elseif info.reason == "spotted" then "SPOTTED SPEEDING"
@@ -824,6 +901,7 @@ function Police.init()
 	folder.Name = "Police"
 	folder.Parent = workspace
 	buildHud()
+	buildZone()
 	wanted = (player:GetAttribute("Wanted") :: number?) or 0
 	event.OnClientEvent:Connect(onEvent)
 	player:GetAttributeChangedSignal("Wanted"):Connect(function()
