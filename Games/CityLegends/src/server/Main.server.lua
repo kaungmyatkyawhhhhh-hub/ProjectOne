@@ -723,6 +723,20 @@ local function onPlayerAdded(player: Player)
 	watchConsoleUnlock(player)
 	watchConsoleEverything(player)
 	PlayerData.load(player)
+	-- Studio play tests start with everything unlocked and the test cash (owner, 2026-10-23:
+	-- "always make me unlock all in the testing"); never in a live server
+	if RunService:IsStudio() and Config.Testing.StudioUnlockAll then
+		task.spawn(function()
+			local timeout = os.clock() + 15
+			while player.Parent and not PlayerData.get(player) and os.clock() < timeout do
+				task.wait(0.2)
+			end
+			if player.Parent and PlayerData.get(player) then
+				player:SetAttribute("UnlockEverything", true)
+				player:SetAttribute("SetCash", Config.Testing.StudioCash)
+			end
+		end)
+	end
 end
 
 Players.PlayerAdded:Connect(onPlayerAdded)

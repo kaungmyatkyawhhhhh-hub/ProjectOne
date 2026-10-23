@@ -53,6 +53,13 @@ Config.Knock = {
 	RestoreSeconds = 40, -- it stands back up after this, once no car is right beside it
 }
 
+-- Studio play tests only (RunService:IsStudio()): every player starts with everything unlocked
+-- and this much cash (owner, 2026-10-23)
+Config.Testing = {
+	StudioUnlockAll = true,
+	StudioCash = 50000000,
+}
+
 -- the luxury towers' garages (Garages, Parking): paid VIP bays at the entrance and parked cars in
 -- the basement you can steal (owner, 2026-10-23)
 Config.Parking = {
