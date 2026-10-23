@@ -1815,7 +1815,9 @@ local function exteriorOf(id: string, out: Imported, wb: number): { [string]: Te
 		local ey = math.abs(cf.RightVector.Y) * h.X + math.abs(cf.UpVector.Y) * h.Y + math.abs(cf.LookVector.Y) * h.Z
 		local ez = math.abs(cf.RightVector.Z) * h.X + math.abs(cf.UpVector.Z) * h.Y + math.abs(cf.LookVector.Z) * h.Z
 		local inside = math.abs(p.X) + ex < halfW and p.Z - ez > front and p.Z + ez < back and p.Y + ey < top and p.Y - ey > 0.3
-		if not inside or t.part.Transparency >= 0.3 or t.part.Material == Enum.Material.Glass then
+		-- (bolt-sized detail is left off traffic too: nobody sees it on a passing car)
+		local tiny = math.max(t.part.Size.X, t.part.Size.Y, t.part.Size.Z) < 0.3 and t.part.Material ~= Enum.Material.Neon
+		if (not inside or t.part.Transparency >= 0.3 or t.part.Material == Enum.Material.Glass) and not tiny then
 			body[name] = t
 		end
 	end
@@ -2559,6 +2561,25 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			end
 		end)
 	end)
+	-- traffic and parked cars (lite): only their few biggest pieces cast shadows, which is all
+	-- a car's shadow needs (55 traffic cars cast thousands; owner 2026-10-24: optimise)
+	if liteMode then
+		local parts = {}
+		for _, d in skin:GetDescendants() do
+			if d:IsA("BasePart") then
+				d.CastShadow = false
+				if d.Transparency < 0.5 then
+					table.insert(parts, d)
+				end
+			end
+		end
+		table.sort(parts, function(a, b)
+			return a.Size.X * a.Size.Y * a.Size.Z > b.Size.X * b.Size.Y * b.Size.Z
+		end)
+		for i = 1, math.min(4, #parts) do
+			parts[i].CastShadow = true
+		end
+	end
 	model:SetAttribute("Skinned", true)
 	return true
 end

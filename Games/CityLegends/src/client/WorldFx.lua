@@ -100,8 +100,10 @@ local function startLod(scale: number)
 	end
 	-- (lights made later: house galleries, showcase cars, anything streamed in)
 	CollectionService:GetInstanceAddedSignal("LODLight"):Connect(addLight)
-	-- wide enough that lights never visibly pop on/off block by block
-	local lightRange = 900 * scale
+	-- wide enough that lights never visibly pop on/off block by block (560: past that a lamp's
+	-- own glowing head still shows, but its light on the street is too far to see; 900 kept ~360
+	-- lights on at once, owner 2026-10-24: optimise)
+	local lightRange = 560 * scale
 	-- street lamps near the camera cast shadows (poles, cars, people across the road); far ones
 	-- don't, and none do on low graphics or phones
 	local shadowRange = if scale >= 0.85 then 170 else 0
@@ -249,8 +251,41 @@ end
 ---------------------------------------------------------------------
 -- Start
 ---------------------------------------------------------------------
+-- Shadows only from things whose shadow you'd see (owner, 2026-10-24: "optimize the game to not
+-- make it lag but still have the beautiful quality"). The shadow pass drew more than the scene
+-- itself (~2,100 draw calls): flat pieces (roads, sidewalks, markings, slabs: their shadow is a thin
+-- line under them), tiny decoration and the far skyline stop casting; walls, buildings, poles,
+-- trees and cars keep theirs. Done here on this screen only, spread over frames.
+local function trimShadows()
+	local city = workspace:FindFirstChild("City")
+	if not city then
+		return
+	end
+	local far = { Skyline = true, DistantSkyline = true }
+	local n = 0
+	for _, top in city:GetChildren() do
+		local farAway = far[top.Name] == true
+		for _, d in top:GetDescendants() do
+			if d:IsA("BasePart") and d.CastShadow then
+				local cf, h = d.CFrame, d.Size / 2
+				-- its height in the world, whatever way it's turned
+				local ey = math.abs(cf.RightVector.Y) * h.X + math.abs(cf.UpVector.Y) * h.Y + math.abs(cf.LookVector.Y) * h.Z
+				local big = math.max(d.Size.X, d.Size.Y, d.Size.Z)
+				if farAway or ey < 0.35 or big < 1.2 then
+					d.CastShadow = false
+				end
+				n += 1
+				if n % 4000 == 0 then
+					task.wait()
+				end
+			end
+		end
+	end
+end
+
 function WorldFx.start()
 	local lampCache: { [Instance]: boolean } = {}
+	task.spawn(trimShadows)
 	startLod(WorldFx.qualityScale())
 
 	-- lamps + beacons (5 Hz is plenty)

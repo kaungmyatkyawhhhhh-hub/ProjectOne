@@ -314,6 +314,33 @@ if parkedFolder then
 		skinParked(m)
 	end
 	parkedFolder.ChildAdded:Connect(skinParked)
+	-- the parked cars' bodies are only drawn near you (they're down in the towers' basements;
+	-- 24 full car models drawn from across the city cost frames: owner 2026-10-24, optimise)
+	task.spawn(function()
+		local stored: { [Model]: Instance } = {}
+		while true do
+			task.wait(0.5)
+			local cam = workspace.CurrentCamera.CFrame.Position
+			for _, m in parkedFolder:GetChildren() do
+				if m:IsA("Model") then
+					local near = (m:GetPivot().Position - cam).Magnitude < 320
+					local skin = m:FindFirstChild("Skin")
+					if not near and skin then
+						stored[m] = skin
+						skin.Parent = nil
+					elseif near and not skin and stored[m] then
+						stored[m].Parent = m
+						stored[m] = nil
+					end
+				end
+			end
+			for m in stored do
+				if not m.Parent then
+					stored[m] = nil
+				end
+			end
+		end
+	end)
 end
 game:GetService("ProximityPromptService").PromptTriggered:Connect(function(prompt: ProximityPrompt)
 	if prompt.Name ~= "StealCar" or not OnFoot.active then
