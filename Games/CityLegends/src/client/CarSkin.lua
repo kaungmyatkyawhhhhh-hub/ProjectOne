@@ -1206,7 +1206,6 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 
 	local roofTop: number? = nil
-	local generatedWheel = false
 	-- driver's eye: above the driver's seat, at 80% of the roof height there
 	local seatPart = seat or src:FindFirstChildWhichIsA("Seat", true)
 	local sp: Vector3? = if seatPart then frame:PointToObjectSpace(seatPart.Position) else nil
@@ -1325,7 +1324,6 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		local column = piece(Enum.PartType.Cylinder, Vector3.new(0.9, 0.26, 0.26), leather, Enum.Material.SmoothPlastic)
 		table.insert(parts, { part = column :: any, offset = CFrame.new(0, 0, -0.5) * CFrame.Angles(0, math.pi / 2, 0) })
 		out.steer = { mount = mount, parts = parts, radius = R * 0.95 }
-		generatedWheel = true
 	end
 
 	-- the driver sits a real reach behind the wheel (~60 cm): some models' seats put the eye too close
