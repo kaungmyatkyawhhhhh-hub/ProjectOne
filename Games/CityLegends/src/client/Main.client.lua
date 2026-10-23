@@ -32,6 +32,7 @@ local ChauffeurClient = require(script.Parent:WaitForChild("ChauffeurClient"))
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
+require(script.Parent:WaitForChild("UIStyle")).init() -- one studio finish for every screen
 UI.init()
 UI.showLoading("Loading sounds...")
 Audio.init() -- test-loads the Creator Store sounds (falls back to built-in ones)

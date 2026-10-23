@@ -441,18 +441,20 @@ Config.Activities = {
 ---------------------------------------------------------------------
 -- UI theme (dark)
 ---------------------------------------------------------------------
+-- (owner, 2026-10-24: a studio-made look: graphite glass panels, one refined blue, gold for
+-- levels and rewards, a softer money green; it was neon cyan and hot pink)
 Config.Theme = {
-	Background = Color3.fromRGB(10, 11, 15),
-	Panel = Color3.fromRGB(18, 20, 27),
-	PanelLight = Color3.fromRGB(27, 30, 40),
-	Stroke = Color3.fromRGB(45, 50, 66),
-	Text = Color3.fromRGB(236, 238, 245),
-	SubText = Color3.fromRGB(140, 146, 165),
-	Accent = Color3.fromRGB(0, 229, 255),
-	Accent2 = Color3.fromRGB(255, 46, 136),
-	Money = Color3.fromRGB(61, 255, 143),
+	Background = Color3.fromRGB(8, 9, 12),
+	Panel = Color3.fromRGB(15, 16, 21),
+	PanelLight = Color3.fromRGB(28, 30, 38),
+	Stroke = Color3.fromRGB(70, 75, 90),
+	Text = Color3.fromRGB(242, 243, 247),
+	SubText = Color3.fromRGB(150, 155, 170),
+	Accent = Color3.fromRGB(80, 168, 255),
+	Accent2 = Color3.fromRGB(255, 186, 64),
+	Money = Color3.fromRGB(96, 228, 146),
 	Warning = Color3.fromRGB(255, 184, 0),
-	Danger = Color3.fromRGB(255, 64, 64),
+	Danger = Color3.fromRGB(255, 72, 72),
 }
 
 ---------------------------------------------------------------------

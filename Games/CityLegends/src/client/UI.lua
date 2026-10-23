@@ -711,58 +711,79 @@ local function buildSpeedometer()
 	})
 end
 
+-- the level: a glass pill at the top, the level number in a gold badge, the XP bar beside it
+-- (owner, 2026-10-24: studio-made look; it was a big pink "Level 20")
+local levelBadge: TextLabel
 local function buildLevelBar()
-	local barWidth = if UI.isTouch then 240 else 380
+	local barWidth = if UI.isTouch then 250 else 360
+	local h = if UI.isTouch then 40 else 46
 	local top = new("Frame", {
 		Name = "Level",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 8),
-		Size = UDim2.fromOffset(barWidth, 66),
-		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5, 0, 0, 10),
+		Size = UDim2.fromOffset(barWidth, h),
+		BackgroundColor3 = Theme.Panel,
+		BackgroundTransparency = 0.18,
 		Parent = hud,
-	})
-	levelLabel = label({
-		Text = "Level 1",
-		TextSize = if UI.isTouch then 28 else 36,
+	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Stroke, 1, 0.5) })
+	-- the badge
+	local badge = new("Frame", {
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 5, 0.5, 0),
+		Size = UDim2.fromOffset(h - 10, h - 10),
+		BackgroundColor3 = WHITE,
+		Parent = top,
+	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
+	new("UIGradient", { Rotation = 90, Color = ColorSequence.new(Color3.fromRGB(255, 222, 130), Theme.Accent2), Parent = badge })
+	levelBadge = label({
+		Text = "1",
+		TextSize = if UI.isTouch then 17 else 20,
 		Font = Enum.Font.GothamBlack,
-		TextColor3 = WHITE, -- coloured by the gradient below
-		Size = UDim2.new(1, 0, 0, 40),
+		TextColor3 = Color3.fromRGB(28, 20, 6),
+		Size = UDim2.fromScale(1, 1),
+		Parent = badge,
+	})
+	local left = h + 2
+	levelLabel = label({
+		Text = "LEVEL 1",
+		TextSize = 12,
+		Font = Enum.Font.GothamBlack,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.fromOffset(left, 6),
+		Size = UDim2.new(0.5, 0, 0, 16),
 		Parent = top,
 	})
-	new("UIStroke", { Color = Color3.fromRGB(20, 4, 12), Thickness = 2.5, Transparency = 0.1, Parent = levelLabel })
-	new("UIGradient", {
-		Rotation = 90,
-		Color = ColorSequence.new(Color3.fromRGB(255, 120, 170), Theme.Accent2),
-		Parent = levelLabel,
-	})
-	local back = new("Frame", {
-		Position = UDim2.fromOffset(0, 44),
-		Size = UDim2.new(1, 0, 0, 16),
-		BackgroundColor3 = Theme.Background,
-		BackgroundTransparency = 0.25,
-		ClipsDescendants = true,
-		Parent = top,
-	}, { corner(8), stroke(Theme.Stroke, 1.5, 0.1) })
-	xpFill = new("Frame", { Size = UDim2.fromScale(0, 1), BackgroundColor3 = WHITE, BorderSizePixel = 0, Parent = back }, { corner(8) })
-	new("UIGradient", { Color = ColorSequence.new(Theme.Accent2, Color3.fromRGB(255, 92, 92)), Parent = xpFill })
 	xpText = label({
 		Text = "0 / 40 XP",
 		TextSize = 12,
-		Font = Enum.Font.GothamBlack,
-		TextStrokeTransparency = 0.45,
-		Size = UDim2.fromScale(1, 1),
-		ZIndex = 2,
-		Parent = back,
+		Font = Enum.Font.GothamBold,
+		TextColor3 = Theme.SubText,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -16, 0, 6),
+		Size = UDim2.new(0.5, 0, 0, 16),
+		Parent = top,
 	})
+	local back = new("Frame", {
+		Position = UDim2.new(0, left, 1, -15),
+		Size = UDim2.new(1, -left - 16, 0, 6),
+		BackgroundColor3 = WHITE,
+		BackgroundTransparency = 0.88,
+		ClipsDescendants = true,
+		Parent = top,
+	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
+	xpFill = new("Frame", { Size = UDim2.fromScale(0, 1), BackgroundColor3 = WHITE, BorderSizePixel = 0, Parent = back }, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
+	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(255, 214, 110), Theme.Accent2), Parent = xpFill })
 	xpGain = label({
 		Text = "",
 		TextSize = 14,
 		Font = Enum.Font.GothamBlack,
-		TextColor3 = Theme.Accent,
+		TextColor3 = Theme.Accent2,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTransparency = 1,
 		TextStrokeTransparency = 1,
-		Position = UDim2.new(1, 10, 0, 44),
+		Position = UDim2.new(1, 10, 0, 15),
 		Size = UDim2.fromOffset(90, 16),
 		Parent = top,
 	})
@@ -2292,7 +2313,8 @@ function UI.setProgress(level: number, xp: number, need: number, gained: number?
 	progress.level = level
 	progress.xp = xp
 	progress.need = math.max(1, need)
-	levelLabel.Text = "Level " .. level
+	levelLabel.Text = "LEVEL " .. level
+	levelBadge.Text = tostring(level)
 	xpText.Text = string.format("%d / %d XP", math.floor(xp), math.floor(progress.need))
 	local frac = math.clamp(xp / progress.need, 0, 1)
 	xpToken += 1
@@ -2314,8 +2336,8 @@ function UI.setProgress(level: number, xp: number, need: number, gained: number?
 		xpGain.Text = "+" .. gained .. " XP"
 		xpGain.TextTransparency = 0
 		xpGain.TextStrokeTransparency = 0.5
-		xpGain.Position = UDim2.new(1, 10, 0, 50)
-		tween(xpGain, 0.25, { Position = UDim2.new(1, 10, 0, 44) }, Enum.EasingStyle.Back)
+		xpGain.Position = UDim2.new(1, 10, 0, 22)
+		tween(xpGain, 0.25, { Position = UDim2.new(1, 10, 0, 15) }, Enum.EasingStyle.Back)
 		task.delay(0.9, function()
 			if my == xpToken then
 				tween(xpGain, 0.5, { TextTransparency = 1, TextStrokeTransparency = 1 })
@@ -2349,12 +2371,12 @@ function UI.levelUp(level: number, reward: number)
 		Rotation = 90,
 		Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, WHITE),
-			ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 150, 190)),
+			ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 222, 140)),
 			ColorSequenceKeypoint.new(1, Theme.Accent2),
 		}),
 		Parent = title,
 	})
-	local glow = new("UIStroke", { Color = Color3.fromRGB(40, 0, 20), Thickness = 3, Transparency = 0.1, Parent = title })
+	local glow = new("UIStroke", { Color = Color3.fromRGB(30, 20, 0), Thickness = 3, Transparency = 0.1, Parent = title })
 	local sub = label({ Text = "Level " .. level, TextSize = 26, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Text, Position = UDim2.fromOffset(0, 72), Size = UDim2.new(1, 0, 0, 30), ZIndex = 71, Parent = f })
 	local subStroke = new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = sub })
 	local cash = label({ Text = if reward > 0 then "+" .. formatCash(reward) else "", TextSize = 24, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, Position = UDim2.fromOffset(0, 104), Size = UDim2.new(1, 0, 0, 28), ZIndex = 71, Parent = f })
