@@ -612,11 +612,11 @@ Config.Chauffeur = {
 	},
 	-- the order the phone lists them in
 	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urus", "brabos_g63", "bentz_s680", "rolls_wraith", "rolls_cullinan" },
-	CityMph = 44, -- how fast the driver goes in town
-	HighwayMph = 92, -- on the highway and the loop
-	TurnMph = 15, -- round corners (highway ramps use their own speed)
-	Accel = 16, -- studs/s per second
-	Brake = 24,
+	CityMph = 62, -- how fast the driver goes in town (owner, 2026-10-23: "drive faster"; was 44)
+	HighwayMph = 125, -- on the highway and the loop (was 92)
+	TurnMph = 22, -- round corners (highway ramps use their own speed; was 15)
+	Accel = 26, -- studs/s per second (was 16)
+	Brake = 34, -- (was 24)
 	ArriveFrom = 260, -- a called car starts this far back up the road and drives to you
 	PickupRange = 90, -- you must be this close to a road to call a car
 	WaitSeconds = 120, -- a car you called but didn't get into leaves after this

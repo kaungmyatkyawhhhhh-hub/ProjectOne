@@ -804,22 +804,6 @@ end
 ---------------------------------------------------------------------
 -- Driving my chauffeur's car
 ---------------------------------------------------------------------
-local rayParams = RaycastParams.new()
-rayParams.FilterType = Enum.RaycastFilterType.Include
-
-local function groundAt(p: Vector3): number
-	local city = workspace:FindFirstChild("City")
-	if not city then
-		return p.Y
-	end
-	rayParams.FilterDescendantsInstances = { city }
-	local hit = workspace:Raycast(p + Vector3.new(0, 6, 0), Vector3.new(0, -14, 0), rayParams)
-	if hit and math.abs(hit.Position.Y - p.Y) < 4 then
-		return hit.Position.Y
-	end
-	return p.Y
-end
-
 local function smoothstep(t: number): number
 	t = math.clamp(t, 0, 1)
 	return t * t * (3 - 2 * t)
@@ -888,6 +872,8 @@ local function targetSpeed(r: Ride, k: number, pos: Vector3, fwd: Vector3): numb
 	return vt
 end
 
+-- the car rides the lane itself, at the lane's own height, like the traffic cars (owner,
+-- 2026-10-23: a ground ray could catch a bridge or a ramp and send it flying or under the road)
 local function placeCar(r: Ride, pos: Vector3, fwd: Vector3)
 	local car = r.car
 	if not (car and car.PrimaryPart) then
@@ -903,6 +889,12 @@ local function placeCar(r: Ride, pos: Vector3, fwd: Vector3)
 	end
 	if ao and ao:IsA("AlignOrientation") then
 		ao.CFrame = cf.Rotation
+	end
+	-- if physics ever pulls it off the road (owner: it flew up or sank), put it straight back
+	if (root.Position - cf.Position).Magnitude > 6 then
+		car:PivotTo(cf)
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.AssemblyAngularVelocity = Vector3.zero
 	end
 end
 
@@ -925,7 +917,7 @@ local function driveStep(r: Ride, dt: number)
 		r.fwd = dir
 	end
 	r.fwd = r.fwd.Unit
-	placeCar(r, Vector3.new(pos.X, groundAt(pos), pos.Z), r.fwd)
+	placeCar(r, pos, r.fwd)
 end
 
 -- after dropping you off: pull away along the road for a few seconds
@@ -950,7 +942,7 @@ local function leaveStep(r: Ride, dt: number)
 	local pos, dir = CityLayout.sample(seg, r.leaveS)
 	local f = r.fwd:Lerp(dir, 1 - math.exp(-6 * dt))
 	r.fwd = if f.Magnitude > 0.01 then f.Unit else dir
-	placeCar(r, Vector3.new(pos.X, groundAt(pos), pos.Z), r.fwd)
+	placeCar(r, pos, r.fwd)
 end
 
 ---------------------------------------------------------------------
@@ -1123,7 +1115,7 @@ function ChauffeurClient.skip()
 	r.v = 0
 	local pos, dir = routePose(r, r.d)
 	r.fwd = dir
-	placeCar(r, Vector3.new(pos.X, groundAt(pos), pos.Z), dir)
+	placeCar(r, pos, dir)
 	local car = r.car
 	if car then
 		car:PivotTo(CFrame.lookAt(pos, pos + dir) + Vector3.new(0, ((car:GetAttribute("Height") :: number?) or 5) / 2 + 0.05, 0))
