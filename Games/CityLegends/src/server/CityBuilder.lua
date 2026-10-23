@@ -29,6 +29,7 @@ local Hotel = require(script.Parent:WaitForChild("Hotel"))
 local Casino = require(script.Parent:WaitForChild("Casino"))
 local GemShowcase = require(script.Parent:WaitForChild("GemShowcase"))
 local Fountain = require(script.Parent:WaitForChild("Fountain"))
+local Plazas = require(script.Parent:WaitForChild("Plazas"))
 local Houses = require(script.Parent:WaitForChild("Houses"))
 
 local CityBuilder = {}
@@ -1047,6 +1048,8 @@ local function buildBlocks(parent: Instance, ib: number, scenery: boolean)
 				West.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
 			else
 				CityPremium.streetscape(CityBuilder.kit, blockFolder, cx, cz, inner)
+				-- the landmark and venue blocks' open ground: paving and things to see
+				Plazas.fill(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot, CURB)
 			end
 		end
 	end
