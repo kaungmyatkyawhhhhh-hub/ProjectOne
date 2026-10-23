@@ -486,21 +486,23 @@ local function trafficSignal(parent: Instance, i: number, j: number, k: number)
 	local braceA = poleBase + Vector3.new(0, poleH - 6, 0)
 	local braceB = armStart - right * 9
 	deco(parent, Vector3.new(0.35, 0.35, (braceB - braceA).Magnitude), CFrame.lookAt((braceA + braceB) / 2, braceB), SIGNAL_METAL, Enum.Material.Metal)
-	-- a head hanging over the middle of each approach lane, facing the oncoming cars
-	for l = 1, C.LanesPerSide do
-		local headPos = center + dir * (HALF_ROAD + 6) + right * CityLayout.laneOffset(l)
-		headPos = Vector3.new(headPos.X, armStart.Y - 3.4, headPos.Z)
-		deco(parent, Vector3.new(0.25, 0.9, 0.25), CFrame.new(headPos + Vector3.new(0, 3, 0)), SIGNAL_METAL, Enum.Material.Metal)
-		signalHead(parent, CFrame.lookAt(headPos, headPos - dir), i, j, axis)
+	-- one head on the arm, over the inner lane, facing the oncoming cars (owner, 2026-10-23: only
+	-- the lights facing you, no extra heads per lane and no low head on the pole)
+	local inner = 1
+	for l = 2, C.LanesPerSide do
+		if math.abs(CityLayout.laneOffset(l)) < math.abs(CityLayout.laneOffset(inner)) then
+			inner = l
+		end
 	end
+	local headPos = center + dir * (HALF_ROAD + 6) + right * CityLayout.laneOffset(inner)
+	headPos = Vector3.new(headPos.X, armStart.Y - 3.4, headPos.Z)
+	deco(parent, Vector3.new(0.25, 0.9, 0.25), CFrame.new(headPos + Vector3.new(0, 3, 0)), SIGNAL_METAL, Enum.Material.Metal)
+	signalHead(parent, CFrame.lookAt(headPos, headPos - dir), i, j, axis)
 	-- the cross street's name on the arm, near the pole
 	local crossName = if i >= DT then (if axis == "X" then West.NS_NAMES[i - DT + 1] else West.EW_NAMES[j + 1]) elseif axis == "X" then NS_NAMES[i + 1] else EW_NAMES[j + 1]
 	local signPos = armStart - right * (armLen - 4) + Vector3.new(0, 1.6, 0)
 	local sign = deco(parent, Vector3.new(11, 2.2, 0.2), CFrame.lookAt(signPos, signPos - dir), Color3.fromRGB(14, 96, 52), Enum.Material.SmoothPlastic, { name = "StreetSign" })
 	surfaceText(sign, Enum.NormalId.Front, crossName or "", Color3.fromRGB(245, 245, 245), Color3.fromRGB(14, 96, 52), 0, Enum.Font.GothamBold, Vector2.new(550, 110))
-	-- a lower head on the pole for cars at the front of the queue
-	local lowPos = poleBase + Vector3.new(0, 10, 0) - right * 1.4
-	signalHead(parent, CFrame.lookAt(lowPos, lowPos - dir), i, j, axis, true)
 	-- a pedestrian signal box facing across the side street
 	local pedPos = poleBase + Vector3.new(0, 8, 0) + dir * 0.9
 	local ped = deco(parent, Vector3.new(1.3, 1.3, 0.6), CFrame.lookAt(pedPos, pedPos + dir), Color3.fromRGB(22, 23, 26), Enum.Material.Metal)
