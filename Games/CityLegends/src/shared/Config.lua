@@ -207,6 +207,58 @@ Config.DrivingFeel = {
 	NearMissFov = 2.5, -- a close pass on traffic
 	RoadRoar = 0.45, -- tyre and road roar at full rush (volume)
 	CabinBuzz = 0.025, -- the driver's head buzzes with the road at speed (studs)
+
+	-- physics v2 (owner, 2026-10-23: "the car driving physics improve it"): weight and handling by
+	-- class. roll / pitch: body lean; understeer: the nose pushes wide at speed (front-heavy);
+	-- shiftTime / upshift / revRate: the gearbox and how quickly the revs move; brake: stopping
+	-- power (studs/s^2); inertia: how slowly the car's turn builds and settles
+	ClassFeel = {
+		Sedan = { roll = 1, pitch = 1, understeer = 0.12, shiftTime = 0.22, upshift = 0.9, revRate = 12, brake = 150, inertia = 1 },
+		SUV = { roll = 1.45, pitch = 1.3, understeer = 0.22, shiftTime = 0.3, upshift = 0.86, revRate = 9, brake = 135, inertia = 1.35 },
+		Coupe = { roll = 0.85, pitch = 0.9, understeer = 0.07, shiftTime = 0.16, upshift = 0.93, revRate = 15, brake = 160, inertia = 0.9 },
+		Supercar = { roll = 0.6, pitch = 0.7, understeer = 0.04, shiftTime = 0.11, upshift = 0.95, revRate = 19, brake = 178, inertia = 0.8 },
+		Hypercar = { roll = 0.45, pitch = 0.55, understeer = 0.03, shiftTime = 0.08, upshift = 0.96, revRate = 22, brake = 188, inertia = 0.75 },
+	} :: { [string]: { roll: number, pitch: number, understeer: number, shiftTime: number, upshift: number, revRate: number, brake: number, inertia: number } },
+	-- which wheels drive (any car not listed drives the rear wheels)
+	FrontDrive = { suzaki_swift = true, toyoka_belta = true, toyoka_camri = true, toyoka_alfard = true } :: { [string]: boolean },
+	AllDrive = {
+		toyoka_crown = true, kio_ev6 = true, toyoka_lc200 = true, toyoka_lc300 = true, lexis_lx700 = true, bnw_x6 = true, bnw_x7 = true,
+		bentz_gle53 = true, bentz_g63 = true, brabos_g63 = true, bentz_gls = true, bentz_cla45 = true, bentz_e63s = true, bnw_m5_f90 = true,
+		bentz_s680 = true, byt_u8 = true, xiaomo_su7 = true, porsha_panamera = true, nisun_r34 = true, nisun_gtr = true, audy_r8 = true,
+		lambrini_lp570 = true, lambrini_lp640 = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_urus = true,
+		bentlee_contgt = true, bentlee_bentayga = true, rolls_cullinan = true, astin_dbx = true, maseroti_levante = true, bugotti_veyron = true,
+	} :: { [string]: boolean },
+	FwdUndersteer = 0.3, -- front drive: flooring it in a corner pushes the nose wide
+	AwdPowerOversteer = 0.35, -- an all-wheel-drive car gets this share of rear-drive power oversteer
+	-- drifting: hold the handbrake into a corner, then balance it on the throttle and steering
+	DriftMinMph = 22, -- slower than this it's just a slide
+	DriftEnter = 0.2, -- slip angle (radians) that starts a drift
+	DriftExit = 0.07, -- ...and below this for DriftHold seconds, it's over
+	DriftHold = 0.35,
+	DriftGrip = 1.5, -- side grip while drifting on the throttle (lift off and it bites back: x2.2)
+	DriftAssist = 2.4, -- countersteer help: the nose is pulled towards where the car is going
+	DriftMaxAngle = 0.95, -- past this (radians, about 55 degrees) the assist stops a spin
+	-- brakes: anti-lock pulses on a hard stop, and some steering is kept
+	AbsPulse = 0.1,
+	AbsHz = 14,
+	AbsSteer = 0.85,
+	-- crashes, scrapes and landings
+	CrashJolt = 0.6, -- body kick per 40 studs/s of speed lost in a crash
+	ScrapeMinMph = 15, -- rubbing a wall faster than this throws sparks
+	ScrapeDrag = 0.6, -- speed lost per second while scraping (share)
+	LandKick = 0.03, -- body pitch per stud/s of falling speed on landing
+	-- nitro (hold Left Ctrl or B, R1 on a gamepad, the N2O button on a phone)
+	NitroTop = 1.15, -- boost pushes the top speed this much past the car's own
+	NitroAccel = 34, -- extra pull (studs/s^2)
+	NitroDrain = 0.25, -- a full bottle lasts 4 seconds
+	NitroFillSpeed = 0.03, -- per second at 140 mph and up (from 60 mph)
+	NitroFillPass = 0.08, -- per close pass
+	NitroFillDrift = 0.07, -- per second of drifting
+	NitroFov = 10,
+	NitroBlur = 2.5,
+	-- skid marks (scaled down on phones)
+	SkidMax = 140,
+	SkidLife = 7,
 }
 
 ---------------------------------------------------------------------
