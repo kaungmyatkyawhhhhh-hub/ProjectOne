@@ -242,7 +242,7 @@ function Minimap.start()
 	local holder = Instance.new("Frame")
 	holder.Name = "Holder"
 	holder.BackgroundTransparency = 1
-	holder.AnchorPoint = Vector2.new(0, 1)
+	holder.AnchorPoint = Vector2.new(1, 0)
 	holder.Parent = gui
 
 	-- the round window
@@ -368,23 +368,23 @@ function Minimap.start()
 	nk.CornerRadius = UDim.new(0.5, 0)
 	nk.Parent = north
 
-	-- size and place: clear of the side buttons and the touch arrows
+	-- size and place: top right, under Roblox's top bar (owner, 2026-10-23). The gui's "Bottom"
+	-- attribute tells the cards that sit under it where the map ends.
+	local TOP = 64
 	local function layout()
 		local cam = workspace.CurrentCamera
 		local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
-		local size, x, bottom
+		local size, right
 		if isTouch then
 			size = math.clamp(vp.Y * 0.3, 90, 130) * (if big then 1.6 else 1)
-			x, bottom = 76, 140 -- right of the side buttons, above the steering arrows
+			right = 14
 		else
 			size = math.clamp(vp.Y * 0.26, 130, 220) * (if big then 1.5 else 1)
-			-- under the side buttons when there's room, else beside them
-			local sideBottom = vp.Y * 0.5 + 180
-			x = if vp.Y - 20 - size > sideBottom + 8 then 20 else 100
-			bottom = 20
+			right = 20
 		end
 		holder.Size = UDim2.fromOffset(size, size)
-		holder.Position = UDim2.new(0, x, 1, -bottom)
+		holder.Position = UDim2.new(1, -right, 0, TOP)
+		gui:SetAttribute("Bottom", TOP + size)
 		return size
 	end
 	local radius = layout() / 2

@@ -251,6 +251,8 @@ local function spawnFor(player: Player, carId: string)
 	local h = model:GetAttribute("Height") :: number
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation
+	-- a big car reaches clients in pieces: they wait for this many before putting the body on
+	model:SetAttribute("Pieces", #model:GetDescendants())
 	model.Parent = playerCars
 
 	lv.MaxForce = root.AssemblyMass * 400

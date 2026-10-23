@@ -1085,14 +1085,38 @@ local function buildDailyCard()
 		Name = "DailyCard",
 		AutoButtonColor = false,
 		Text = "",
-		AnchorPoint = if UI.isTouch then Vector2.new(1, 0) else Vector2.new(1, 0.5),
-		-- on touch, top-right so it stays clear of the pedals
-		Position = if UI.isTouch then UDim2.new(1, -14, 0, 70) else UDim2.new(1, -20, 0.5, 0),
 		Size = UDim2.fromOffset(w, h),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.08,
 		Parent = hud,
 	}, { corner(14) })
+	-- PC: bottom left, clear of the rev counter (beside the side buttons when they reach that far
+	-- down); touch: top right under the minimap, clear of the pedals
+	local function place()
+		local cam = workspace.CurrentCamera
+		local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
+		if UI.isTouch then
+			local map = player.PlayerGui:FindFirstChild("Minimap")
+			local bottom = if map then map:GetAttribute("Bottom") else nil
+			card.AnchorPoint = Vector2.new(1, 0)
+			card.Position = UDim2.new(1, -14, 0, (if type(bottom) == "number" then bottom else 190) + 10)
+		else
+			local sideBottom = vp.Y * 0.5 + 217
+			card.AnchorPoint = Vector2.new(0, 1)
+			card.Position = UDim2.new(0, if vp.Y - 20 - h > sideBottom + 8 then 20 else 104, 1, -20)
+		end
+	end
+	place()
+	if workspace.CurrentCamera then
+		workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(place)
+	end
+	task.spawn(function()
+		local map = player.PlayerGui:WaitForChild("Minimap", 60)
+		if map then
+			place()
+			map:GetAttributeChangedSignal("Bottom"):Connect(place)
+		end
+	end)
 	new("UIGradient", {
 		Rotation = 0,
 		Color = ColorSequence.new(Theme.Warning:Lerp(Theme.Panel, 0.72), Theme.Panel),

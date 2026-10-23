@@ -208,7 +208,7 @@ Activities.init()
 Pedestrians.start(WorldFx.qualityScale())
 ChauffeurClient.init()
 require(script.Parent:WaitForChild("LuxeClient")).init() -- casino VIP, the gem shop, heist messages
-require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, bottom left (N toggles)
+require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, top right (N toggles)
 require(script.Parent:WaitForChild("ChallengesClient")).init() -- drifts, speed traps, jumps, leaderboard (B)
 UI.hideLoading()
 
@@ -218,11 +218,22 @@ UI.hideLoading()
 local pendingAttach = false
 local playerCars = workspace:WaitForChild("PlayerCars")
 
+-- a car arrives in pieces: wait for all of them (the server counts them), or the body goes on
+-- before the wheel joints are there and the car drives on without wheels
+local function waitWhole(model: Instance)
+	model:WaitForChild("Chassis", 5)
+	local pieces = model:GetAttribute("Pieces")
+	local deadline = os.clock() + 8
+	while type(pieces) == "number" and #model:GetDescendants() < pieces and os.clock() < deadline do
+		task.wait(0.05)
+	end
+	task.wait()
+end
+
 -- every player's car gets the smooth body locally
 local function skinPlayerCar(model: Instance)
 	if model:IsA("Model") then
-		model:WaitForChild("Chassis", 5)
-		task.wait() -- let the whole car replicate
+		waitWhole(model)
 		local okSkin, errSkin = pcall(CarSkin.apply, model, false)
 		if not okSkin then
 			warn("[CityLegends] car skin failed:", errSkin)
@@ -241,8 +252,7 @@ end)
 local function tryAttach(model: Instance)
 	if model:IsA("Model") and model:GetAttribute("Owner") == player.UserId and pendingAttach then
 		pendingAttach = false
-		model:WaitForChild("Chassis", 5)
-		task.wait() -- let the car + its constraints replicate
+		waitWhole(model)
 		local okSkin, errSkin = pcall(CarSkin.apply, model, false)
 		if not okSkin then
 			warn("[CityLegends] car skin failed:", errSkin)
