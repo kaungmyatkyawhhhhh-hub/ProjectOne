@@ -953,7 +953,17 @@ end
 ---------------------------------------------------------------------
 -- City grid
 ---------------------------------------------------------------------
-local function buildBlocks(parent: Instance, ib: number)
+-- the city blocks whose venue keeps live parts (prompts, doors, the vault's carts): never baked
+local function venueBlock(blockFolder: Instance, bi: number, bj: number, cx: number, cz: number, lot: number): boolean
+	return Bank.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Dealership.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Customs.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Towers.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
+end
+local function isVenueBlock(bi: number, bj: number): boolean
+	return Bank.isBlock(bi, bj) or Dealership.isBlock(bi, bj) or Customs.isBlock(bi, bj) or Towers.isBlock(bi, bj)
+end
+
+-- scenery: true when baking the map (the venue blocks get their sidewalk and lamps, the venue
+-- itself is built at start by buildVenues)
+local function buildBlocks(parent: Instance, ib: number, scenery: boolean)
 	local blocks = folder(if ib == 0 then "Blocks" else "DowntownBlocks", parent)
 	local inner = B - C.RoadWidth
 	local downtown = ib ~= 0
@@ -977,7 +987,7 @@ local function buildBlocks(parent: Instance, ib: number)
 			if downtown then
 				landmark = West.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
 			else
-				landmark = Bank.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Dealership.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Customs.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or Towers.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot) or CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
+				landmark = (if scenery then isVenueBlock(bi, bj) else venueBlock(blockFolder, bi, bj, cx, cz, lot)) or CityPremium.landmark(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
 			end
 			local isPark = not landmark and rng:NextNumber() < (if downtown then 0.06 else 0.12)
 			if landmark then
@@ -1446,13 +1456,48 @@ CityBuilder.kit = {
 	BILLBOARDS = BILLBOARDS,
 }
 
+-- what's built at every start, also on a baked map: the west's venues, houses and challenges, and
+-- (blocks: on a baked map, whose blocks were left empty) the city's bank, dealership, customs, towers
+local function buildVenues(city: Instance, blocks: boolean)
+	local inner = B - C.RoadWidth
+	local lot = inner - C.SidewalkWidth * 2
+	local blocksFolder = city:FindFirstChild("Blocks") or folder("Blocks", city)
+	for bi = 0, N - 1 do
+		for bj = 0, N - 1 do
+			if blocks and isVenueBlock(bi, bj) then
+				local cx = (CityLayout.roadCoord(bi) + CityLayout.roadCoord(bi + 1)) / 2
+				local cz = (CityLayout.roadCoord(bj) + CityLayout.roadCoord(bj + 1)) / 2
+				local blockFolder = blocksFolder:FindFirstChild(`Block_{bi}_{bj}`) or folder(`Block_{bi}_{bj}`, blocksFolder)
+				venueBlock(blockFolder, bi, bj, cx, cz, lot)
+			end
+		end
+	end
+	-- the venues on Downtown's sites and the houses on the islands' plots
+	Hotel.buildWorld(CityBuilder.kit, city)
+	Casino.buildWorld(CityBuilder.kit, city)
+	GemShowcase.buildWorld(CityBuilder.kit, city)
+	Houses.buildWorld(CityBuilder.kit, city)
+	-- speed traps, jump ramps and the leaderboard board
+	require(script.Parent:WaitForChild("Challenges")).buildWorld(CityBuilder.kit, city)
+end
+
 ---------------------------------------------------------------------
 -- Entry point
 ---------------------------------------------------------------------
-function CityBuilder.build(): Folder
+-- The map is baked into the place (owner, 2026-10-23): Workspace.City with a "Baked" attribute holds
+-- the scenery, saved in Studio, and only the venues are built here. Without it (a fresh Rojo build)
+-- the whole city is built as before. build("scenery") is what Studio runs to bake it: everything but
+-- the venues, terrain water included, returned unparented.
+function CityBuilder.build(mode: string?): Folder
 	CityBuilder.setupLighting()
+	local scenery = mode == "scenery"
 
 	local existing = workspace:FindFirstChild("City")
+	if existing and existing:GetAttribute("Baked") and not scenery then
+		buildVenues(existing, true)
+		existing:SetAttribute("Ready", true)
+		return existing :: Folder
+	end
 	if existing then
 		existing:Destroy()
 	end
@@ -1470,7 +1515,7 @@ function CityBuilder.build(): Folder
 
 	for _, ib in CityLayout.GridBases do
 		buildRoadMarkings(city, ib)
-		buildBlocks(city, ib)
+		buildBlocks(city, ib, scenery)
 		buildSignals(city, ib)
 	end
 	buildRing(city)
@@ -1478,13 +1523,11 @@ function CityBuilder.build(): Folder
 	CityPremium.environment(CityBuilder.kit, city)
 	Mainland.build(CityBuilder.kit, city)
 	West.build(CityBuilder.kit, city)
-	-- the venues on Downtown's sites and the houses on the islands' plots
-	Hotel.buildWorld(CityBuilder.kit, city)
-	Casino.buildWorld(CityBuilder.kit, city)
-	GemShowcase.buildWorld(CityBuilder.kit, city)
-	Houses.buildWorld(CityBuilder.kit, city)
-	-- speed traps, jump ramps and the leaderboard board
-	require(script.Parent:WaitForChild("Challenges")).buildWorld(CityBuilder.kit, city)
+	if scenery then
+		city:SetAttribute("Baked", true)
+		return city
+	end
+	buildVenues(city, false)
 
 	city.Parent = workspace
 	city:SetAttribute("Ready", true)

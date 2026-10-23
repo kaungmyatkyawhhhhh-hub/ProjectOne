@@ -78,6 +78,11 @@ local function prompt(part: BasePart, action: string, object: string, carId: str
 end
 
 -- builds Legends Motors when (bi, bj) is its block
+-- (CityBuilder asks this when baking the map: this block stays empty and is built at start)
+function Dealership.isBlock(bi: number, bj: number): boolean
+	return bi == D.Block[1] and bj == D.Block[2]
+end
+
 function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _cx: number, _cz: number, lot: number): boolean
 	if not (bi == D.Block[1] and bj == D.Block[2]) then
 		return false

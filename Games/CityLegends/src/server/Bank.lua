@@ -48,6 +48,11 @@ local STEEL = Color3.fromRGB(150, 156, 164)
 -- The building
 ---------------------------------------------------------------------
 -- builds the bank when (bi, bj) is its block; returns true if it did
+-- (CityBuilder asks this when baking the map: this block stays empty and is built at start)
+function Bank.isBlock(bi: number, bj: number): boolean
+	return bi == B.Block[1] and bj == B.Block[2]
+end
+
 function Bank.block(kit: any, parent: Instance, bi: number, bj: number, cx: number, cz: number, lot: number): boolean
 	if not (bi == B.Block[1] and bj == B.Block[2]) then
 		return false

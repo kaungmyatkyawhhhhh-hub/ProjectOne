@@ -237,6 +237,11 @@ local LINE = Color3.fromRGB(226, 226, 220)
 local WARM = Color3.fromRGB(255, 236, 210)
 local BLUE = Color3.fromRGB(28, 52, 92) -- tool chests
 
+-- (CityBuilder asks this when baking the map: this block stays empty and is built at start)
+function Customs.isBlock(bi: number, bj: number): boolean
+	return bi == CU.Block[1] and bj == CU.Block[2]
+end
+
 function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: number, _cz: number, lot: number): boolean
 	if not (bi == CU.Block[1] and bj == CU.Block[2]) then
 		return false

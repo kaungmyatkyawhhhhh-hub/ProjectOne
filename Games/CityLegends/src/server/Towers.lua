@@ -1094,6 +1094,11 @@ local function start()
 end
 
 -- called by CityBuilder for every block; builds a tower where Config.Towers puts one
+-- (CityBuilder asks this when baking the map: this block stays empty and is built at start)
+function Towers.isBlock(bi: number, bj: number): boolean
+	return byBlock[bi .. "," .. bj] ~= nil
+end
+
 function Towers.block(kit: any, parent: Instance, bi: number, bj: number, cx: number, cz: number, lot: number): boolean
 	local t = byBlock[bi .. "," .. bj]
 	if not t then
