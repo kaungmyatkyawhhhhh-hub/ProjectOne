@@ -282,6 +282,98 @@ local function tour(from: Vector3)
 end
 
 ---------------------------------------------------------------------
+-- The showcase turntable's car picker (owner, 2026-10-23: "add a function to change car")
+---------------------------------------------------------------------
+local pickerGui: ScreenGui? = nil
+local function pickShowcase(towerId: string, cars: { any }, current: any)
+	if pickerGui then
+		pickerGui:Destroy()
+	end
+	local Cars = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Cars"))
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "ShowcasePicker"
+	gui.ResetOnSpawn = false
+	gui.IgnoreGuiInset = true
+	gui.DisplayOrder = 30
+	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	pickerGui = gui
+	local panel = Instance.new("Frame")
+	panel.AnchorPoint = Vector2.new(0.5, 0.5)
+	panel.Position = UDim2.fromScale(0.5, 0.5)
+	panel.Size = UDim2.fromOffset(360, 420)
+	panel.BackgroundColor3 = Theme.Panel
+	panel.BackgroundTransparency = 0.05
+	panel.Parent = gui
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 14)
+	corner.Parent = panel
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Theme.Stroke
+	stroke.Thickness = 1.5
+	stroke.Parent = panel
+	local title = Instance.new("TextLabel")
+	title.BackgroundTransparency = 1
+	title.Position = UDim2.fromOffset(18, 12)
+	title.Size = UDim2.new(1, -70, 0, 30)
+	title.Font = Enum.Font.GothamBlack
+	title.Text = "CAR ON SHOW"
+	title.TextSize = 20
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextColor3 = Theme.Text
+	title.Parent = panel
+	local close = Instance.new("TextButton")
+	close.AnchorPoint = Vector2.new(1, 0)
+	close.Position = UDim2.new(1, -12, 0, 12)
+	close.Size = UDim2.fromOffset(30, 30)
+	close.BackgroundColor3 = Theme.PanelLight
+	close.Font = Enum.Font.GothamBlack
+	close.Text = "X"
+	close.TextSize = 16
+	close.TextColor3 = Theme.Text
+	close.Parent = panel
+	local cc = Instance.new("UICorner")
+	cc.CornerRadius = UDim.new(0, 8)
+	cc.Parent = close
+	close.Activated:Connect(function()
+		gui:Destroy()
+	end)
+	local list = Instance.new("ScrollingFrame")
+	list.Position = UDim2.fromOffset(14, 52)
+	list.Size = UDim2.new(1, -28, 1, -66)
+	list.BackgroundTransparency = 1
+	list.BorderSizePixel = 0
+	list.ScrollBarThickness = 4
+	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	list.CanvasSize = UDim2.new()
+	list.Parent = panel
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, 6)
+	layout.Parent = list
+	local pickRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("TowerShowcase") :: RemoteEvent
+	for _, id in cars do
+		local spec = if type(id) == "string" then Cars.ById[id] else nil
+		if spec then
+			local b = Instance.new("TextButton")
+			b.Size = UDim2.new(1, -6, 0, 40)
+			b.BackgroundColor3 = if id == current then Theme.Accent else Theme.PanelLight
+			b.Font = Enum.Font.GothamBold
+			b.Text = spec.Name
+			b.TextSize = 15
+			b.TextColor3 = if id == current then Theme.Background else Theme.Text
+			b.Parent = list
+			local bc = Instance.new("UICorner")
+			bc.CornerRadius = UDim.new(0, 8)
+			bc.Parent = b
+			b.Activated:Connect(function()
+				pickRemote:FireServer(towerId, id)
+				UI.toast(spec.Name .. " is on show", Theme.Accent)
+				gui:Destroy()
+			end)
+		end
+	end
+end
+
+---------------------------------------------------------------------
 -- Server messages
 ---------------------------------------------------------------------
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
@@ -292,7 +384,9 @@ if towerFx then
 			return
 		end
 		local kind = info.kind
-		if kind == "travel" then
+		if kind == "pickShowcase" and type(info.cars) == "table" and type(info.tower) == "string" then
+			pickShowcase(info.tower, info.cars, info.current)
+		elseif kind == "travel" then
 			UI.fade(true, 0.25)
 			task.delay(0.55, function()
 				UI.fade(false, 0.4)

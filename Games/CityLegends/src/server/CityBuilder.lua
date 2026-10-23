@@ -80,6 +80,11 @@ local function mk(parent: Instance, size: Vector3, cf: CFrame, color: Color3, ma
 	p.Anchored = true
 	p.Size = size
 	p.CFrame = cf
+	-- neon is calmed down everywhere: a little less saturated and less bright (owner: too much neon)
+	if material == Enum.Material.Neon then
+		local h, sat, v = color:ToHSV()
+		color = Color3.fromHSV(h, sat * 0.7, v * 0.78)
+	end
 	p.Color = color
 	p.Material = material
 	p.Transparency = opts.transparency or 0
@@ -219,14 +224,16 @@ local WINDOW_COLORS = {
 	Color3.fromRGB(96, 116, 146),
 	Color3.fromRGB(134, 140, 152),
 }
+-- signage colours (owner, 2026-10-23: "it looks like cyberpunk too much with those neon stuffs"):
+-- mostly warm white and amber like real city signs, a few softer colours
 local NEON_COLORS = {
-	Color3.fromRGB(255, 40, 140),
-	Color3.fromRGB(0, 230, 255),
-	Color3.fromRGB(150, 70, 255),
-	Color3.fromRGB(255, 120, 0),
-	Color3.fromRGB(40, 255, 140),
-	Color3.fromRGB(255, 230, 40),
-	Color3.fromRGB(255, 60, 60),
+	Color3.fromRGB(255, 236, 214),
+	Color3.fromRGB(255, 196, 120),
+	Color3.fromRGB(255, 236, 214),
+	Color3.fromRGB(150, 210, 230),
+	Color3.fromRGB(230, 90, 80),
+	Color3.fromRGB(255, 214, 140),
+	Color3.fromRGB(220, 120, 170),
 }
 local SHOP_NAMES = {
 	"NOODLE BAR", "24/7", "HOTEL NOVA", "ARCADE", "SUSHI", "PHARMACY", "NEON CLUB", "PIZZA",
@@ -264,12 +271,12 @@ function CityBuilder.setupLighting()
 	Lighting.Brightness = 2.3 -- owner (2026-10-17): a little brighter
 	Lighting.GlobalShadows = true
 	Lighting.ShadowSoftness = 0.12
-	Lighting.Ambient = Color3.fromRGB(98, 102, 122) -- lifts shadowed and covered spots, like car cabins
-	Lighting.OutdoorAmbient = Color3.fromRGB(116, 124, 164)
+	Lighting.Ambient = Color3.fromRGB(96, 98, 108) -- lifts shadowed and covered spots, like car cabins
+	Lighting.OutdoorAmbient = Color3.fromRGB(108, 114, 136) -- (2026-10-23: less blue, more natural)
 	Lighting.EnvironmentDiffuseScale = 1
 	Lighting.EnvironmentSpecularScale = 1 -- glossy paint and wet roads mirror the city
 	Lighting.ExposureCompensation = 0.75
-	Lighting.ColorShift_Top = Color3.fromRGB(120, 140, 200)
+	Lighting.ColorShift_Top = Color3.fromRGB(150, 160, 190)
 	Lighting.ColorShift_Bottom = Color3.fromRGB(8, 8, 18)
 
 	for _, child in Lighting:GetChildren() do
@@ -288,8 +295,8 @@ function CityBuilder.setupLighting()
 	local atmo = Instance.new("Atmosphere")
 	atmo.Density = 0.3
 	atmo.Offset = 0.12
-	atmo.Color = Color3.fromRGB(86, 100, 148)
-	atmo.Decay = Color3.fromRGB(40, 46, 84)
+	atmo.Color = Color3.fromRGB(96, 104, 128)
+	atmo.Decay = Color3.fromRGB(46, 50, 70)
 	atmo.Glare = 0.25
 	atmo.Haze = 1.2
 	atmo.Parent = Lighting
@@ -297,9 +304,9 @@ function CityBuilder.setupLighting()
 	-- a soft glow round genuinely bright things (lamps, neon, lights), not round paint or the
 	-- dashboard screens (owner, 2026-10-17: the glow made first person hard to see)
 	local bloom = Instance.new("BloomEffect")
-	bloom.Intensity = 0.7
-	bloom.Size = 32
-	bloom.Threshold = 1.45
+	bloom.Intensity = 0.45 -- (2026-10-23: calmer glow, less "cyberpunk")
+	bloom.Size = 28
+	bloom.Threshold = 1.6
 	bloom.Parent = Lighting
 
 	-- faint shafts from the moon through the towers
@@ -311,9 +318,9 @@ function CityBuilder.setupLighting()
 	-- cool shadows, deep blacks, rich colour
 	local cc = Instance.new("ColorCorrectionEffect")
 	cc.Brightness = 0.02
-	cc.Contrast = 0.18
-	cc.Saturation = 0.14
-	cc.TintColor = Color3.fromRGB(236, 242, 255)
+	cc.Contrast = 0.12
+	cc.Saturation = 0.02 -- natural colour, not boosted
+	cc.TintColor = Color3.fromRGB(246, 248, 255)
 	cc.Parent = Lighting
 end
 
@@ -428,11 +435,8 @@ local function signalHead(parent: Instance, cf: CFrame, i: number, j: number, ax
 		lamp:SetAttribute("Axis", axis)
 		lamp:SetAttribute("State", state)
 		CollectionService:AddTag(lamp, "TrafficLamp")
-		-- tunnel visor: a hood over the top and down both sides
+		-- visor: one hood over the top (fewer parts: the whole map got heavy)
 		deco(parent, Vector3.new(1.45, 0.08, 0.9) * sc, cf * CFrame.new(0, y + 0.7 * sc, -1.0 * sc), Color3.fromRGB(14, 14, 16), Enum.Material.SmoothPlastic)
-		for _, sx in { -1, 1 } do
-			deco(parent, Vector3.new(0.08, 0.75, 0.75) * sc, cf * CFrame.new(sx * 0.7 * sc, y + 0.3 * sc, -0.95 * sc), Color3.fromRGB(14, 14, 16), Enum.Material.SmoothPlastic)
-		end
 	end
 	local glowPart = deco(parent, Vector3.new(0.2, 0.2, 0.2), cf * CFrame.new(0, 0, -1.6 * sc), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "SignalGlow" })
 	-- (a LOD light: switched off when the camera is far away)
@@ -496,10 +500,9 @@ end
 local CROWN_COLORS = {
 	Color3.fromRGB(235, 245, 255),
 	Color3.fromRGB(235, 245, 255),
-	Config.Theme.Accent,
-	Config.Theme.Accent2,
+	Color3.fromRGB(255, 226, 190),
 	Color3.fromRGB(255, 190, 90),
-	Color3.fromRGB(150, 70, 255),
+	Color3.fromRGB(200, 220, 240),
 }
 local CORP_NAMES = {
 	"NOVA BANK", "ORION", "HALCYON", "VANTA", "APEX", "AURORA", "MERIDIAN", "KESTREL",
@@ -649,6 +652,10 @@ local function facadeTier(model: Instance, cx: number, cz: number, w: number, dp
 end
 
 local function neonOutline(model: Instance, cx: number, cz: number, w: number, dpt: number, y: number, color: Color3, thick: number?)
+	-- only some roofs get a lit outline (fewer neon lines over the skyline)
+	if rng:NextNumber() > 0.4 then
+		return
+	end
 	local t = thick or 0.5
 	deco(model, Vector3.new(w + t, t, t), CFrame.new(cx, y, cz - dpt / 2), color, Enum.Material.Neon)
 	deco(model, Vector3.new(w + t, t, t), CFrame.new(cx, y, cz + dpt / 2), color, Enum.Material.Neon)

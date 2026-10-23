@@ -26,6 +26,7 @@ export type Profile = {
 	Penthouses: { [string]: boolean }, -- owned luxury tower penthouses (Config.Towers ids)
 	Rent: { [string]: number }, -- os.time() each penthouse's safe was last emptied
 	Home: string, -- penthouse id set as home ("" = none)
+	Showcase: { [string]: string }, -- per penthouse / suite: the car its turntable shows
 	Houses: { [string]: boolean }, -- owned island houses (Config.Houses.Types ids)
 	HouseBays: { [string]: { string } }, -- per house type: the car id in each garage bay ("" = empty)
 	HousePlots: { [string]: string }, -- per house type: the plot it stood on last time
@@ -89,6 +90,7 @@ local function defaultProfile(): Profile
 		Penthouses = {},
 		Rent = {},
 		Home = "",
+		Showcase = {},
 		Houses = {},
 		HouseBays = {},
 		HousePlots = {},
@@ -195,6 +197,13 @@ function PlayerData.load(player: Player): Profile
 			if type(saved.Home) == "string" and profile.Penthouses[saved.Home] then
 				profile.Home = saved.Home
 			end
+			if type(saved.Showcase) == "table" then
+				for id, car in saved.Showcase do
+					if type(id) == "string" and towerIds[id] and type(car) == "string" and Cars.ById[car] then
+						profile.Showcase[id] = car
+					end
+				end
+			end
 			-- island houses (absent in older saves)
 			local houseTypes = Config.Houses.Types
 			if type(saved.Houses) == "table" then
@@ -264,6 +273,7 @@ function PlayerData.save(player: Player)
 		Penthouses = penthouses,
 		Rent = profile.Rent,
 		Home = profile.Home,
+		Showcase = profile.Showcase,
 		Houses = houses,
 		HouseBays = profile.HouseBays,
 		HousePlots = profile.HousePlots,

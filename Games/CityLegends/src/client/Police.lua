@@ -66,6 +66,8 @@ rayParams.FilterType = Enum.RaycastFilterType.Exclude
 local wanted = 0
 local bustT, loseT = 0, 0
 local reported = false -- busted / escaped sent, waiting for the server
+local chaseT = 0 -- seconds since this chase started
+local chaseLabel: TextLabel
 local spotCooldown, ramCooldown, losTimer = 0, 0, 0
 
 ---------------------------------------------------------------------
@@ -121,9 +123,23 @@ local function buildHud()
 		stars[i] = l
 	end
 
+	-- the chase timer under the stars
+	chaseLabel = Instance.new("TextLabel")
+	chaseLabel.Name = "ChaseTimer"
+	chaseLabel.AnchorPoint = Vector2.new(0.5, 0)
+	chaseLabel.Position = UDim2.new(0.5, 0, 0, 92)
+	chaseLabel.Size = UDim2.fromOffset(260, 20)
+	chaseLabel.BackgroundTransparency = 1
+	chaseLabel.Font = Enum.Font.GothamBlack
+	chaseLabel.TextSize = 15
+	chaseLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	chaseLabel.TextStrokeTransparency = 0.5
+	chaseLabel.Visible = false
+	chaseLabel.Parent = gui
+
 	bustBar = Instance.new("Frame")
 	bustBar.AnchorPoint = Vector2.new(0.5, 0)
-	bustBar.Position = UDim2.new(0.5, 0, 0, 98)
+	bustBar.Position = UDim2.new(0.5, 0, 0, 116)
 	bustBar.Size = UDim2.fromOffset(220, 26)
 	bustBar.BackgroundColor3 = Color3.fromRGB(18, 20, 27)
 	bustBar.BackgroundTransparency = 0.15
@@ -597,7 +613,7 @@ local function update(dt: number)
 	local focus = tPos or (workspace.CurrentCamera and workspace.CurrentCamera.CFrame.Position) or Vector3.zero
 
 	-- how many units, and get rid of far ones nobody needs
-	local want = if level > 0 then math.min(1 + level * P.UnitsPerStar, P.MaxUnits) else P.Patrols
+	local want = if level > 0 then math.min(math.floor(1 + level * P.UnitsPerStar), P.MaxUnits) else P.Patrols
 	for i = #units, 1, -1 do
 		local u = units[i]
 		local d = Vector3.new(u.pos.X - focus.X, 0, u.pos.Z - focus.Z).Magnitude
@@ -683,6 +699,7 @@ local function update(dt: number)
 
 	if level == 0 then
 		bustT, loseT, reported = 0, 0, false
+		chaseT = 0
 		-- speeding past a patrol that can see you
 		if tPos and Driving.isDriving() and kmh > P.SpeedLimitKmh + 5 and spotCooldown <= 0 and closeNear and closest < P.SpotRange and closeNear.los then
 			spotCooldown = 8
@@ -706,7 +723,10 @@ local function update(dt: number)
 		else
 			loseT += dt
 		end
-		if loseT >= P.LoseSeconds[math.clamp(level, 1, 5)] then
+		-- ...or the chase runs out of time (owner: a timer when the police stop chasing)
+		chaseT += dt
+		local limit = P.ChaseSeconds[math.clamp(level, 1, 5)]
+		if loseT >= P.LoseSeconds[math.clamp(level, 1, 5)] or chaseT >= limit then
 			reported = true
 			report:FireServer("escaped")
 		end
@@ -719,6 +739,13 @@ local function update(dt: number)
 
 	-- HUD
 	setStars(level, level > 0 and loseT > 0.6)
+	if level > 0 then
+		local left = math.max(0, math.ceil(P.ChaseSeconds[math.clamp(level, 1, 5)] - chaseT))
+		chaseLabel.Text = string.format("POLICE GIVE UP IN %d:%02d", left // 60, left % 60)
+		chaseLabel.Visible = true
+	else
+		chaseLabel.Visible = false
+	end
 	bustBar.Visible = level > 0 and bustT > 0.05
 	bustFill.Size = UDim2.fromScale(math.clamp(bustT / P.BustSeconds, 0, 1), 1)
 	local glow = edgeGlow:FindFirstChild("Glow") :: UIStroke

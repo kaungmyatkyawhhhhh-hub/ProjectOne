@@ -545,6 +545,18 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	part(model, true, 1.2, 24, 24, at(22, yP + 0.9, -22) * CFrame.Angles(0, 0, math.pi / 2), CHARCOAL, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 	local turntable = part(model, true, 0.4, 23, 23, at(22, yP + 1.6, -22) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(56, 56, 62), Enum.Material.DiamondPlate, { shape = Enum.PartType.Cylinder })
 	turntable.Name = "Turntable"
+	-- residents pick the car on show (owner, 2026-10-23: "add a function to change car")
+	local showPrompt = Instance.new("ProximityPrompt")
+	showPrompt.Name = "ChangeCar"
+	showPrompt.ActionText = "Change car"
+	showPrompt.ObjectText = "Car showcase"
+	showPrompt.KeyboardKeyCode = Enum.KeyCode.E
+	showPrompt.MaxActivationDistance = 18
+	showPrompt.RequiresLineOfSight = false
+	showPrompt.Parent = turntable
+	showPrompt.Triggered:Connect(function(player: Player)
+		Towers.pickShowcase(player, t.id)
+	end)
 	part(ph, false, 0.2, 24.4, 24.4, at(22, yP + 1.3, -22) * CFrame.Angles(0, 0, math.pi / 2), accent, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.3 })
 	for k = 0, 2 do
 		local a = k * math.pi * 2 / 3 + 0.5
@@ -988,7 +1000,7 @@ refreshResidents = function()
 			local profile = PlayerData.get(p)
 			if profile and profile.Penthouses[id] then
 				table.insert(names, p.DisplayName)
-				carId = carId or profile.Selected
+				carId = carId or profile.Showcase[id] or profile.Selected
 			end
 		end
 		local text = rec.spec.name .. "\nRESIDENTS: " .. (if #names > 0 then table.concat(names, ", ") else "none yet")
@@ -997,6 +1009,41 @@ refreshResidents = function()
 		end
 		setShowcase(rec, carId or Cars.CutsceneId)
 	end
+end
+
+-- the turntable's "Change car": a resident gets the list of their cars to pick from
+function Towers.pickShowcase(player: Player, id: string)
+	local profile = PlayerData.get(player)
+	if not (profile and built[id]) then
+		return
+	end
+	if not profile.Penthouses[id] then
+		send(player, { kind = "toast", text = "Only residents can change the car on show", color = "warning" })
+		return
+	end
+	local cars = {}
+	for carId in profile.Owned do
+		table.insert(cars, carId)
+	end
+	table.sort(cars, function(a, b)
+		local sa, sb = Cars.ById[a], Cars.ById[b]
+		return (if sa then sa.Price else 0) > (if sb then sb.Price else 0)
+	end)
+	send(player, { kind = "pickShowcase", tower = id, cars = cars, current = profile.Showcase[id] or profile.Selected })
+end
+
+local function onShowcasePick(player: Player, id: any, carId: any)
+	local profile = PlayerData.get(player)
+	if not (profile and type(id) == "string" and type(carId) == "string" and built[id]) then
+		return
+	end
+	if not (profile.Penthouses[id] and profile.Owned[carId]) then
+		return
+	end
+	profile.Showcase[id] = carId
+	-- this resident's pick goes on show now
+	setShowcase(built[id], carId)
+	task.spawn(PlayerData.save, player)
 end
 
 ---------------------------------------------------------------------
@@ -1009,6 +1056,10 @@ local function start()
 	end
 	started = true
 	remoteFx()
+	local pick = Instance.new("RemoteEvent")
+	pick.Name = "TowerShowcase" -- client -> server: the car picked for a turntable
+	pick.Parent = ReplicatedStorage:WaitForChild("Remotes")
+	pick.OnServerEvent:Connect(onShowcasePick)
 	local function watch(player: Player)
 		task.spawn(function()
 			local deadline = os.clock() + 30

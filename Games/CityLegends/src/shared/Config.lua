@@ -240,9 +240,12 @@ Config.Police = {
 	CameraStars = 1,
 	CityCameraEvery = 7, -- one camera per this many long city lanes
 	LoopCameras = 6, -- pairs round the Legends Loop
-	Patrols = 4, -- patrol cars around you when you're not wanted
-	UnitsPerStar = 1, -- chasing units: 1 + stars (max 6)
-	MaxUnits = 6,
+	-- owner (2026-10-23): "there is too many police cars", "add a timer when the police will stop
+	-- chasing and u get like a little bit of money"
+	Patrols = 2, -- patrol cars around you when you're not wanted
+	UnitsPerStar = 0.5, -- chasing units: 1 + half the stars, rounded down (max 3)
+	MaxUnits = 3,
+	ChaseSeconds = { 40, 50, 60, 70, 80 }, -- a chase gives up this long after it started (per star)
 	PatrolMph = 38,
 	ChaseMph = { 105, 125, 150, 175, 200 }, -- top chase speed per star
 	SpotRange = 90, -- a patrol sees you speeding this close
@@ -251,7 +254,7 @@ Config.Police = {
 	LoseRange = 300, -- out of sight and this far from every unit...
 	LoseSeconds = { 9, 11, 13, 15, 18 }, -- ...for this long per star: escaped
 	MinChaseSeconds = 12,
-	EscapeBounty = { 1500, 3500, 7000, 12000, 20000 },
+	EscapeBounty = { 400, 800, 1500, 2500, 4000 }, -- a little money for getting away
 	EscapeXp = 60,
 	BustedFineFrac = 0.1, -- owner (2026-10-22): caught = 10% of the cash you have, no cap
 	BustedFineMin = 0,

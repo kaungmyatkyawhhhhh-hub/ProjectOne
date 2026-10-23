@@ -339,11 +339,13 @@ end
 
 local function water(kit: any, parent: Instance)
 	local terrain = workspace.Terrain
-	terrain.WaterColor = Color3.fromRGB(10, 18, 32)
-	terrain.WaterReflectance = 1
-	terrain.WaterTransparency = 0.25
-	terrain.WaterWaveSize = 0.08
-	terrain.WaterWaveSpeed = 7
+	-- (2026-10-23, owner: "better water"): deeper sea colour, see a little into it, real swell;
+	-- DayCycle tints it through the day
+	terrain.WaterColor = Color3.fromRGB(14, 34, 44)
+	terrain.WaterReflectance = 0.85
+	terrain.WaterTransparency = 0.55
+	terrain.WaterWaveSize = 0.16
+	terrain.WaterWaveSpeed = 9
 	local o = E + RING
 	local far = 1500
 	local regions = {

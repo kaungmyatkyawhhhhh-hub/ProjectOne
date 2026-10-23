@@ -37,6 +37,7 @@ UI.onGearboxChanged = nil :: ((string) -> ())? -- Settings: "Auto" | "Manual"
 UI.onDailyClaim = nil :: (() -> ())? -- asks the server to pay the daily gift
 UI.onMarketButton = nil :: (() -> ())? -- opens the car stock market (MarketUI)
 UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (ChauffeurClient)
+UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -439,6 +440,14 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		box(5, 9, 11, 2.6, 1.3, -32)
 		box(14, 9.5, 9, 2.6, 1.3, 20)
 		box(21, 7, 10, 2.6, 1.3, -38)
+	elseif kind == "despawn" then
+		-- a car seen from the side with a cross over it
+		box(4, 14, 24, 8, 3) -- body
+		box(9, 9, 13, 7, 3) -- cabin
+		box(7, 20, 6, 6, -1) -- wheels
+		box(19, 20, 6, 6, -1)
+		box(14, 1, 3.5, 30, 1.5, 45)
+		box(14, 1, 3.5, 30, 1.5, -45)
 	elseif kind == "phone" then
 		-- a phone with a car key on its screen (the chauffeur service)
 		local body = box(8, 2, 16, 28, 3)
@@ -915,7 +924,7 @@ local function buildSideButtons()
 		AnchorPoint = Vector2.new(0, 0.5),
 		-- on touch, lift it clear of the steering buttons
 		Position = if UI.isTouch then UDim2.new(0, 14, 0.4, 0) else UDim2.new(0, 20, 0.5, 0),
-		Size = UDim2.fromOffset(size, size * 5 + 40),
+		Size = UDim2.fromOffset(size, size * 6 + 50),
 		BackgroundTransparency = 1,
 		Parent = hud,
 	}, {
@@ -958,6 +967,14 @@ local function buildSideButtons()
 		closePanels()
 		if UI.onMarketButton then
 			UI.onMarketButton()
+		end
+	end)
+	-- owner (2026-10-23): "add a function to despawn car"
+	local despawnBtn = sideButton("despawn", "DESPAWN", 6)
+	despawnBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onDespawnButton then
+			UI.onDespawnButton()
 		end
 	end)
 	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)

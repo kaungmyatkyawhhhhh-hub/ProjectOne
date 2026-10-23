@@ -341,12 +341,32 @@ local MarketUI = require(script.Parent:WaitForChild("MarketUI"))
 MarketUI.init()
 UI.onMarketButton = MarketUI.toggle
 
+-- put your car away (owner, 2026-10-23: "add a function to despawn car"): out of it first if
+-- you're in it, then the server removes it; G brings one back from the garage
+local despawnRemote = remotes:WaitForChild("DespawnCar") :: RemoteEvent
+local function despawnCar()
+	if Driving.isDriving() then
+		OnFoot.getOut()
+		if Driving.isDriving() then
+			return -- couldn't get out (too fast): OnFoot said why
+		end
+	end
+	if not OnFoot.active then
+		return
+	end
+	despawnRemote:FireServer()
+	UI.toast("Car put away · G for the garage", Config.Theme.Accent)
+end
+UI.onDespawnButton = despawnCar
+
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
 	end
 	if input.KeyCode == Enum.KeyCode.G and (Driving.isDriving() or OnFoot.active) then
 		toggleGarage()
+	elseif input.KeyCode == Enum.KeyCode.Delete then
+		despawnCar()
 	end
 end)
 

@@ -32,6 +32,7 @@ type Key = {
 	bloom: number,
 	rays: number,
 	tint: Color3,
+	water: Color3,
 }
 
 local function rgb(r: number, g: number, b: number): Color3
@@ -39,22 +40,22 @@ local function rgb(r: number, g: number, b: number): Color3
 end
 
 -- the night matches CityBuilder.setupLighting (the game's rainy neon night)
-local NIGHT: Key = { hour = 0, brightness = 2.3, ambient = rgb(98, 102, 122), outdoor = rgb(116, 124, 164), shiftTop = rgb(120, 140, 200), exposure = 0.75, density = 0.3, haze = 1.2, glare = 0.25, atmo = rgb(86, 100, 148), decay = rgb(40, 46, 84), bloom = 0.7, rays = 0.03, tint = rgb(236, 242, 255) }
+local NIGHT: Key = { hour = 0, brightness = 2.3, ambient = rgb(96, 98, 108), outdoor = rgb(108, 114, 136), shiftTop = rgb(150, 160, 190), exposure = 0.75, density = 0.3, haze = 1.2, glare = 0.25, atmo = rgb(96, 104, 128), decay = rgb(46, 50, 70), bloom = 0.45, rays = 0.03, tint = rgb(246, 248, 255), water = rgb(14, 34, 44) }
 local KEYS: { Key } = {
 	NIGHT,
-	table.freeze({ hour = 4.6, brightness = 2.3, ambient = rgb(98, 102, 122), outdoor = rgb(116, 124, 164), shiftTop = rgb(120, 140, 200), exposure = 0.75, density = 0.3, haze = 1.2, glare = 0.25, atmo = rgb(86, 100, 148), decay = rgb(40, 46, 84), bloom = 0.7, rays = 0.03, tint = rgb(236, 242, 255) }),
+	table.freeze({ hour = 4.6, brightness = 2.3, ambient = rgb(96, 98, 108), outdoor = rgb(108, 114, 136), shiftTop = rgb(150, 160, 190), exposure = 0.75, density = 0.3, haze = 1.2, glare = 0.25, atmo = rgb(96, 104, 128), decay = rgb(46, 50, 70), bloom = 0.45, rays = 0.03, tint = rgb(246, 248, 255), water = rgb(14, 34, 44) }),
 	-- dawn: pink and lilac
-	{ hour = 6, brightness = 2.5, ambient = rgb(112, 100, 108), outdoor = rgb(150, 128, 136), shiftTop = rgb(255, 170, 150), exposure = 0.45, density = 0.34, haze = 1.8, glare = 0.7, atmo = rgb(224, 168, 160), decay = rgb(120, 90, 120), bloom = 0.55, rays = 0.12, tint = rgb(255, 238, 236) },
+	{ hour = 6, brightness = 2.5, ambient = rgb(108, 104, 106), outdoor = rgb(146, 136, 136), shiftTop = rgb(255, 170, 150), exposure = 0.45, density = 0.34, haze = 1.8, glare = 0.7, atmo = rgb(224, 168, 160), decay = rgb(120, 90, 120), bloom = 0.55, rays = 0.12, tint = rgb(255, 238, 236), water = rgb(40, 62, 78) },
 	-- morning: clear and fresh
-	{ hour = 8.5, brightness = 3, ambient = rgb(118, 120, 128), outdoor = rgb(146, 150, 162), shiftTop = rgb(255, 236, 214), exposure = 0.1, density = 0.28, haze = 1.2, glare = 0.35, atmo = rgb(196, 208, 230), decay = rgb(110, 128, 168), bloom = 0.35, rays = 0.08, tint = rgb(255, 252, 246) },
+	{ hour = 8.5, brightness = 3, ambient = rgb(118, 120, 128), outdoor = rgb(146, 150, 162), shiftTop = rgb(255, 236, 214), exposure = 0.1, density = 0.28, haze = 1.2, glare = 0.35, atmo = rgb(196, 208, 230), decay = rgb(110, 128, 168), bloom = 0.35, rays = 0.08, tint = rgb(255, 252, 246), water = rgb(34, 92, 104) },
 	-- day: bright, a little haze over the far towers
-	{ hour = 13, brightness = 3.2, ambient = rgb(124, 124, 130), outdoor = rgb(150, 152, 160), shiftTop = rgb(255, 248, 236), exposure = 0, density = 0.25, haze = 1, glare = 0.2, atmo = rgb(204, 216, 240), decay = rgb(120, 140, 180), bloom = 0.3, rays = 0.05, tint = rgb(255, 255, 252) },
-	{ hour = 16.5, brightness = 3, ambient = rgb(126, 118, 116), outdoor = rgb(156, 146, 140), shiftTop = rgb(255, 222, 180), exposure = 0.08, density = 0.27, haze = 1.2, glare = 0.4, atmo = rgb(226, 206, 190), decay = rgb(130, 120, 150), bloom = 0.35, rays = 0.1, tint = rgb(255, 246, 232) },
+	{ hour = 13, brightness = 3.2, ambient = rgb(124, 124, 130), outdoor = rgb(150, 152, 160), shiftTop = rgb(255, 248, 236), exposure = 0, density = 0.25, haze = 1, glare = 0.2, atmo = rgb(204, 216, 240), decay = rgb(120, 140, 180), bloom = 0.3, rays = 0.05, tint = rgb(255, 255, 252), water = rgb(30, 100, 112) },
+	{ hour = 16.5, brightness = 3, ambient = rgb(126, 118, 116), outdoor = rgb(156, 146, 140), shiftTop = rgb(255, 222, 180), exposure = 0.08, density = 0.27, haze = 1.2, glare = 0.4, atmo = rgb(226, 206, 190), decay = rgb(130, 120, 150), bloom = 0.35, rays = 0.1, tint = rgb(255, 246, 232), water = rgb(34, 88, 100) },
 	-- sunset: gold to orange, long shadows
-	{ hour = 18.3, brightness = 2.6, ambient = rgb(122, 96, 98), outdoor = rgb(172, 122, 108), shiftTop = rgb(255, 150, 90), exposure = 0.25, density = 0.36, haze = 2, glare = 1, atmo = rgb(255, 156, 108), decay = rgb(150, 76, 92), bloom = 0.5, rays = 0.18, tint = rgb(255, 228, 206) },
+	{ hour = 18.3, brightness = 2.6, ambient = rgb(122, 96, 98), outdoor = rgb(172, 122, 108), shiftTop = rgb(255, 150, 90), exposure = 0.25, density = 0.36, haze = 2, glare = 1, atmo = rgb(255, 156, 108), decay = rgb(150, 76, 92), bloom = 0.5, rays = 0.18, tint = rgb(255, 228, 206), water = rgb(52, 60, 70) },
 	-- dusk: violet, the neon coming up
-	{ hour = 19.6, brightness = 2.2, ambient = rgb(92, 86, 116), outdoor = rgb(112, 104, 152), shiftTop = rgb(170, 120, 200), exposure = 0.6, density = 0.33, haze = 1.6, glare = 0.5, atmo = rgb(140, 108, 172), decay = rgb(60, 50, 104), bloom = 0.65, rays = 0.06, tint = rgb(240, 236, 255) },
-	table.freeze({ hour = 21, brightness = 2.3, ambient = rgb(98, 102, 122), outdoor = rgb(116, 124, 164), shiftTop = rgb(120, 140, 200), exposure = 0.75, density = 0.3, haze = 1.2, glare = 0.25, atmo = rgb(86, 100, 148), decay = rgb(40, 46, 84), bloom = 0.7, rays = 0.03, tint = rgb(236, 242, 255) }),
+	{ hour = 19.6, brightness = 2.2, ambient = rgb(92, 86, 116), outdoor = rgb(112, 104, 152), shiftTop = rgb(170, 120, 200), exposure = 0.6, density = 0.33, haze = 1.6, glare = 0.5, atmo = rgb(140, 108, 172), decay = rgb(60, 50, 104), bloom = 0.65, rays = 0.06, tint = rgb(240, 236, 255), water = rgb(26, 36, 56) },
+	table.freeze({ hour = 21, brightness = 2.3, ambient = rgb(96, 98, 108), outdoor = rgb(108, 114, 136), shiftTop = rgb(150, 160, 190), exposure = 0.75, density = 0.3, haze = 1.2, glare = 0.25, atmo = rgb(96, 104, 128), decay = rgb(46, 50, 70), bloom = 0.45, rays = 0.03, tint = rgb(246, 248, 255), water = rgb(14, 34, 44) }),
 }
 
 local function lerp(a: number, b: number, t: number): number
@@ -90,6 +91,7 @@ local function sample(hour: number): Key
 		bloom = lerp(a.bloom, b.bloom, t),
 		rays = lerp(a.rays, b.rays, t),
 		tint = a.tint:Lerp(b.tint, t),
+		water = a.water:Lerp(b.water, t),
 	}
 end
 
@@ -150,6 +152,7 @@ function DayCycle.start()
 		if grade and grade.Parent then
 			grade.TintColor = k.tint
 		end
+		workspace.Terrain.WaterColor = k.water
 		local atmo = Lighting:FindFirstChildOfClass("Atmosphere")
 		if atmo then
 			atmo.Glare = k.glare

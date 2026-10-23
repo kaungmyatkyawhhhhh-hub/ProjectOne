@@ -65,7 +65,6 @@ CarSkin.CLUSTER_STYLE = {
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",
 	lexis_lfa = "LFA",
-	lambrini_lp750 = "AventadorSV", -- its own cluster (owner's photo)
 	lambrini_lp700 = "AventadorLP700", -- owner (2026-10-17): its own, copied from an LP700-4 video
 	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
 	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
@@ -218,6 +217,13 @@ CarSkin.INTERIOR_DONOR = {
 	bentz_cla45 = { from = "bentz_c63c", rear = 1.8 },
 	bentz_gle53 = { from = "bentz_c63c", rear = 1.8 },
 } :: { [string]: { from: string, rear: number } }
+
+-- cars that keep their model's own cluster as it is, with nothing of ours drawn over it (owner,
+-- 2026-10-23: the LP750's drawn cluster sat over the original; "just copy it 1:1 from the model's
+-- cluster")
+CarSkin.KEEP_OWN_CLUSTER = {
+	lambrini_lp750 = true,
+} :: { [string]: boolean }
 
 -- cars that take only another model's steering wheel, put where their own one sits
 CarSkin.STEER_DONOR = {
@@ -2060,7 +2066,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		local cabinId = if swap then swap.from else id
 		local dials = CarSkin.DIAL_NEEDLES[cabinId]
 		local rect = CarSkin.CLUSTER_RECT[id] or CarSkin.CLUSTER_RECT[cabinId]
-		if (rect or (imported.cluster and imported.clusterSize)) and not liteMode and not dials and (ownDesign or not imported.ownGauges) then
+		if (rect or (imported.cluster and imported.clusterSize)) and not liteMode and not dials and (ownDesign or not imported.ownGauges) and not CarSkin.KEEP_OWN_CLUSTER[id] then
 			local cluster = Instance.new("Part")
 			cluster.Name = "DashCluster"
 			local cs = imported.clusterSize or Vector2.new(1, 0.4)
