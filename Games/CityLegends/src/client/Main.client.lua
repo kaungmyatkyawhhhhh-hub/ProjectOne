@@ -290,7 +290,12 @@ task.spawn(HouseClient.init, function(id: string)
 	requestDrive(id)
 end)
 
-local function openGarage(fromMenu: boolean)
+-- Legends Motors, the dealership: its prompts open the buy screen, and cars leave by its bay
+local DealerOpen = remotes:WaitForChild("DealerOpen") :: RemoteEvent
+local DealerCall = remotes:WaitForChild("DealerCall") :: RemoteFunction
+
+-- the garage: "my cars" from the HUD (CARS, G), or every car to buy at the dealership
+local function openGarage(fromMenu: boolean, dealer: boolean?, focus: string?)
 	local fresh = GetData:InvokeServer()
 	if fresh then
 		data = fresh
@@ -305,6 +310,12 @@ local function openGarage(fromMenu: boolean)
 		end,
 		drive = function(id: string)
 			UI.hideMainMenu()
+			if dealer then
+				-- out of the dealership's drive-out bay
+				pcall(function()
+					DealerCall:InvokeServer("door")
+				end)
+			end
 			requestDrive(id)
 		end,
 		close = function()
@@ -312,8 +323,14 @@ local function openGarage(fromMenu: boolean)
 				showMenu()
 			end
 		end,
+		dealer = dealer,
+		focus = focus,
 	})
 end
+
+DealerOpen.OnClientEvent:Connect(function(carId: any)
+	openGarage(false, true, if type(carId) == "string" then carId else nil)
+end)
 
 showMenu = function()
 	UI.showHud(false)

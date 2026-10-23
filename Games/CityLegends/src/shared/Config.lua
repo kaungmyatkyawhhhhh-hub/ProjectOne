@@ -619,4 +619,17 @@ Config.DayCycle = {
 	StartHour = 20, -- where the clock stands at server time 0 (shifts the whole cycle)
 }
 
+---------------------------------------------------------------------
+-- Legends Motors, the car dealership (owner, 2026-10-23: "add a dealership, a real location";
+-- the HUD's SHOP became CARS, your own cars only). New cars are bought here only.
+---------------------------------------------------------------------
+Config.Dealership = {
+	Name = "LEGENDS MOTORS",
+	Block = { 4, 2 }, -- the city block it stands on (east of the city centre)
+	Face = "W", -- the side its showroom looks out of (towards the city centre)
+	BuyRange = 260, -- a player must be this close to the showroom to buy
+	-- cars on the showroom turntables (one per brand zone)
+	Display = { "bnw_m5_e60", "bentz_e63s", "toyoka_supra_mk4", "nisun_r34", "porsha_panamera", "chevo_c7", "astin_vantage", "lexis_lc500" },
+}
+
 return Config

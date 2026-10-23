@@ -55,6 +55,13 @@ function WestLayout.site(name: string): (CFrame, number)
 	return CFrame.lookAt(c, c + SIDE_DIR[s[3]]), LOT
 end
 
+-- the dealership's frame (ground level at its lot's middle, facing out of the showroom) and lot
+function WestLayout.dealership(): (CFrame, number)
+	local d = Config.Dealership
+	local c = WestLayout.blockCenter(d.Block[1], d.Block[2])
+	return CFrame.lookAt(c, c + SIDE_DIR[d.Face]), LOT
+end
+
 -- where a car pulls up outside a site: on the road's right-hand kerb lane, in front of the
 -- entrance, heading so the entrance is on the right
 function WestLayout.kerbFor(frame: CFrame, depth: number): CFrame
@@ -198,6 +205,9 @@ function WestLayout.places(): { Place }
 		local tx = (CityLayout.roadCoord(t.block[1]) + CityLayout.roadCoord(t.block[1] + 1)) / 2
 		add("tower_" .. t.id, t.name, onLane(tx, CityLayout.roadCoord(t.block[2]), Vector3.new(1, 0, 0)))
 	end
+	-- the dealership
+	local dealerFrame, dealerLot = WestLayout.dealership()
+	add("dealership", "Legends Motors", WestLayout.kerbFor(dealerFrame, dealerLot))
 	-- Downtown
 	for _, name in { "hotel", "casino", "gems" } do
 		local frame, lot = WestLayout.site(name)
