@@ -14,8 +14,9 @@
 	Blips (kept upright, on a layer above): police cars, the bank drop-off while you carry loot,
 	the race checkpoint or delivery drop (held on the rim when far), and the landmarks (bank,
 	towers, hotel, casino, gem showcase, chauffeur stands, Downtown, the beach and the islands).
-	The rim flashes red and blue while you're wanted. N shows / hides it; on a phone a tap on it
-	switches to a bigger map.
+	The rim flashes red and blue while you're wanted. N or its X hides it (a MAP pill brings it
+	back); a click or tap on it opens the full map (owner, 2026-10-23): north up, centred on you,
+	scroll or + / - to zoom, drag to move, X or a click outside it to close.
 ]]
 
 local Players = game:GetService("Players")
@@ -219,7 +220,6 @@ local LANDMARKS: { [string]: { glyph: string, color: Color3 } } = {
 ---------------------------------------------------------------------
 local started = false
 local shown = true
-local big = false
 
 function Minimap.setVisible(on: boolean)
 	shown = on
@@ -376,10 +376,10 @@ function Minimap.start()
 		local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
 		local size, right
 		if isTouch then
-			size = math.clamp(vp.Y * 0.3, 90, 130) * (if big then 1.6 else 1)
+			size = math.clamp(vp.Y * 0.3, 90, 130)
 			right = 14
 		else
-			size = math.clamp(vp.Y * 0.26, 130, 220) * (if big then 1.5 else 1)
+			size = math.clamp(vp.Y * 0.26, 130, 220)
 			right = 20
 		end
 		holder.Size = UDim2.fromOffset(size, size)
@@ -403,11 +403,235 @@ function Minimap.start()
 			shown = not shown
 		end
 	end)
-	-- phones: a tap on the map switches to the big one and back
-	clip.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.Touch then
-			big = not big
-			radius = layout() / 2
+
+	-- a small round button (the minimap's close, the full map's close and zoom)
+	local function roundButton(parent: Instance, text: string, size: number, color: Color3, z: number): TextButton
+		local b = Instance.new("TextButton")
+		b.AnchorPoint = Vector2.new(0.5, 0.5)
+		b.Size = UDim2.fromOffset(size, size)
+		b.BackgroundColor3 = Theme.Panel
+		b.Text = text
+		b.TextSize = math.floor(size * 0.55)
+		b.Font = Enum.Font.GothamBlack
+		b.TextColor3 = color
+		b.ZIndex = z
+		b.Parent = parent
+		local k = Instance.new("UICorner")
+		k.CornerRadius = UDim.new(0.5, 0)
+		k.Parent = b
+		local st = Instance.new("UIStroke")
+		st.Color = Theme.Stroke
+		st.Thickness = 1.5
+		st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		st.Parent = b
+		return b
+	end
+	local CLOSE_RED = Color3.fromRGB(255, 120, 120)
+
+	-- its close button, and a small MAP pill in its place to bring it back
+	local closeBtn = roundButton(holder, "X", if isTouch then 26 else 24, CLOSE_RED, 42)
+	closeBtn.Position = UDim2.fromScale(0.86, 0.86)
+	closeBtn.Activated:Connect(function()
+		shown = false
+	end)
+	local pill = roundButton(gui, "MAP", 28, Color3.new(1, 1, 1), 2)
+	pill.AnchorPoint = Vector2.new(1, 0)
+	pill.Size = UDim2.fromOffset(64, 28)
+	pill.TextSize = 13
+	pill.Visible = false
+	pill.Activated:Connect(function()
+		shown = true
+	end)
+
+	-- the full map: its own gui over the HUD, north up, centred on you
+	local fullGui = Instance.new("ScreenGui")
+	fullGui.Name = "FullMap"
+	fullGui.ResetOnSpawn = false
+	fullGui.IgnoreGuiInset = true
+	fullGui.DisplayOrder = 30
+	fullGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	fullGui.Enabled = false
+	fullGui.Parent = pg
+	local backdrop = Instance.new("TextButton") -- a click outside the map closes it
+	backdrop.AutoButtonColor = false
+	backdrop.Text = ""
+	backdrop.Size = UDim2.fromScale(1, 1)
+	backdrop.BackgroundColor3 = Color3.new(0, 0, 0)
+	backdrop.BackgroundTransparency = 0.35
+	backdrop.Parent = fullGui
+	local win = Instance.new("Frame")
+	win.AnchorPoint = Vector2.new(0.5, 0.5)
+	win.Position = UDim2.fromScale(0.5, 0.52)
+	win.BackgroundColor3 = COL.water
+	win.ClipsDescendants = true
+	win.Active = true
+	win.ZIndex = 2
+	win.Parent = fullGui
+	local wk = Instance.new("UICorner")
+	wk.CornerRadius = UDim.new(0, 14)
+	wk.Parent = win
+	local ws = Instance.new("UIStroke")
+	ws.Color = Theme.Stroke
+	ws.Thickness = 2
+	ws.Parent = win
+	local fpivot = Instance.new("Frame")
+	fpivot.BackgroundTransparency = 1
+	fpivot.AnchorPoint = Vector2.new(0.5, 0.5)
+	fpivot.Position = UDim2.fromScale(0.5, 0.5)
+	fpivot.Size = UDim2.fromOffset(0, 0)
+	fpivot.Parent = win
+	local fzoom = Instance.new("UIScale")
+	fzoom.Parent = fpivot
+	local fmap = Instance.new("Frame")
+	fmap.BackgroundTransparency = 1
+	fmap.Size = UDim2.fromOffset(0, 0)
+	fmap.Parent = fpivot
+	drawMap(fmap)
+	local flayer = Instance.new("Frame")
+	flayer.BackgroundTransparency = 1
+	flayer.Size = UDim2.fromScale(1, 1)
+	flayer.ZIndex = 20
+	flayer.Parent = win
+	local fixedFull: { Blip } = {}
+	for _, b in fixed do
+		local glyph = b.frame:FindFirstChildOfClass("TextLabel")
+		table.insert(fixedFull, { frame = makeBlip(flayer, if glyph then glyph.Text else "", b.frame.BackgroundColor3, 18, 21), pos = b.pos, edge = false })
+	end
+	local fTarget = makeBlip(flayer, "", Color3.fromRGB(255, 214, 40), 15, 24)
+	local fArrow = Instance.new("TextLabel")
+	fArrow.AnchorPoint = Vector2.new(0.5, 0.5)
+	fArrow.Size = UDim2.fromOffset(24, 24)
+	fArrow.BackgroundTransparency = 1
+	fArrow.Text = "▲"
+	fArrow.TextScaled = true
+	fArrow.Font = Enum.Font.GothamBlack
+	fArrow.TextColor3 = Theme.Accent
+	fArrow.ZIndex = 30
+	fArrow.Parent = flayer
+	local fas = Instance.new("UIStroke")
+	fas.Thickness = 2
+	fas.Parent = fArrow
+	local title = Instance.new("TextLabel")
+	title.BackgroundTransparency = 1
+	title.Position = UDim2.fromOffset(16, 12)
+	title.Size = UDim2.new(1, -80, 0, 22)
+	title.Text = if isTouch then "MAP  ·  drag to move, + / - to zoom" else "MAP  ·  scroll to zoom, drag to move"
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextSize = 15
+	title.Font = Enum.Font.GothamBlack
+	title.TextColor3 = Color3.new(1, 1, 1)
+	title.TextStrokeTransparency = 0.4
+	title.ZIndex = 40
+	title.Parent = win
+	local fClose = roundButton(win, "X", 36, CLOSE_RED, 41)
+	fClose.Position = UDim2.new(1, -28, 0, 28)
+	local fPlus = roundButton(win, "+", 36, Color3.new(1, 1, 1), 41)
+	fPlus.Position = UDim2.new(1, -28, 1, -72)
+	local fMinus = roundButton(win, "-", 36, Color3.new(1, 1, 1), 41)
+	fMinus.Position = UDim2.new(1, -28, 1, -28)
+
+	local winSize = 600
+	local center = Vector3.zero -- the world point in the middle of the window
+	local fscale = 0.2
+	local function fitWindow()
+		local cam = workspace.CurrentCamera
+		local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
+		winSize = math.floor(math.min(vp.X * 0.92, vp.Y * 0.84))
+		win.Size = UDim2.fromOffset(winSize, winSize)
+	end
+	local function zoomBy(k: number)
+		fscale = math.clamp(fscale * k, winSize / 16000, winSize / 500)
+	end
+	local function myPart(): BasePart?
+		local model = Driving.getModel()
+		if model and model.PrimaryPart then
+			return model.PrimaryPart
+		end
+		local character = player.Character
+		return if character then character:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
+	end
+	local function openFull()
+		fitWindow()
+		local part = myPart()
+		center = if part then part.Position else Vector3.zero
+		fscale = winSize / 2600
+		fullGui.Enabled = true
+	end
+	local function closeFull()
+		fullGui.Enabled = false
+	end
+	fClose.Activated:Connect(closeFull)
+	backdrop.Activated:Connect(closeFull)
+	fPlus.Activated:Connect(function()
+		zoomBy(1.4)
+	end)
+	fMinus.Activated:Connect(function()
+		zoomBy(1 / 1.4)
+	end)
+	-- drag to move, scroll to zoom
+	local dragging: InputObject? = nil
+	local lastPos = Vector2.zero
+	win.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = input
+			lastPos = Vector2.new(input.Position.X, input.Position.Y)
+		end
+	end)
+	win.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseWheel then
+			zoomBy(if input.Position.Z > 0 then 1.2 else 1 / 1.2)
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input == dragging) then
+			local p = Vector2.new(input.Position.X, input.Position.Y)
+			local d = p - lastPos
+			lastPos = p
+			center -= Vector3.new(d.X, 0, d.Y) / fscale
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if dragging and (input == dragging or input.UserInputType == Enum.UserInputType.MouseButton1) then
+			dragging = nil
+		end
+	end)
+	-- a click or tap on the minimap opens it (the close button sits above this)
+	local opener = Instance.new("TextButton")
+	opener.AutoButtonColor = false
+	opener.Text = ""
+	opener.BackgroundTransparency = 1
+	opener.Size = UDim2.fromScale(1, 1)
+	opener.ZIndex = 39
+	opener.Parent = holder
+	opener.Activated:Connect(openFull)
+
+	RunService.RenderStepped:Connect(function()
+		if not fullGui.Enabled then
+			return
+		end
+		fzoom.Scale = fscale
+		fmap.Position = UDim2.fromOffset(-center.X, -center.Z)
+		local function put(f: GuiObject, p: Vector3)
+			local x, y = (p.X - center.X) * fscale, (p.Z - center.Z) * fscale
+			f.Visible = math.abs(x) < winSize / 2 and math.abs(y) < winSize / 2
+			f.Position = UDim2.new(0.5, x, 0.5, y)
+		end
+		for _, b in fixedFull do
+			put(b.frame, b.pos)
+		end
+		local target = Activities.getTarget()
+		if target then
+			put(fTarget, target)
+		else
+			fTarget.Visible = false
+		end
+		local part = myPart()
+		if part then
+			put(fArrow, part.Position)
+			local f = part.CFrame.LookVector
+			fArrow.Rotation = math.deg(math.atan2(f.X, -f.Z))
+		else
+			fArrow.Visible = false
 		end
 	end)
 
@@ -423,8 +647,11 @@ function Minimap.start()
 
 	local scale = MM.ZoomNear
 	RunService.RenderStepped:Connect(function(dt)
-		local on = shown and hudVisible()
+		local hud = hudVisible()
+		local on = shown and hud
 		holder.Visible = on
+		pill.Visible = hud and not shown
+		pill.Position = UDim2.new(1, if isTouch then -14 else -20, 0, TOP)
 		if not on then
 			return
 		end
@@ -453,9 +680,6 @@ function Minimap.start()
 		-- zoom out with speed
 		local mph = Config.spsToMph(Driving.getSpeed())
 		local want = MM.ZoomNear + (MM.ZoomFar - MM.ZoomNear) * math.clamp(mph / MM.FarMph, 0, 1)
-		if big then
-			want *= 0.6
-		end
 		scale += (want - scale) * math.min(1, dt * 2.5)
 		zoom.Scale = scale
 		pivot.Rotation = -math.deg(heading)

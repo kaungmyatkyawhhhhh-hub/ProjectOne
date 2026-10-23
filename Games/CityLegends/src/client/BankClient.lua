@@ -74,6 +74,25 @@ function BankClient.init()
 	hint.TextXAlignment = Enum.TextXAlignment.Left
 	hint.Parent = card
 
+	-- closeable (owner, 2026-10-23): hidden until the next haul; the arrow still points the way
+	local hidden = false
+	local close = Instance.new("TextButton")
+	close.AnchorPoint = Vector2.new(0.5, 0.5)
+	close.Position = UDim2.new(1, -4, 0, 4)
+	close.Size = UDim2.fromOffset(24, 24)
+	close.BackgroundColor3 = Theme.Panel
+	close.Font = Enum.Font.GothamBlack
+	close.Text = "X"
+	close.TextSize = 12
+	close.TextColor3 = Color3.fromRGB(255, 120, 120)
+	close.Parent = card
+	local ck = Instance.new("UICorner")
+	ck.CornerRadius = UDim.new(0.5, 0)
+	ck.Parent = close
+	close.Activated:Connect(function()
+		hidden = true
+	end)
+
 	-- an arrow at the screen edge pointing to the drop-off
 	local arrow = Instance.new("TextLabel")
 	arrow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -93,9 +112,10 @@ function BankClient.init()
 		if amount <= 0 or not drop then
 			card.Visible = false
 			arrow.Visible = false
+			hidden = false
 			return
 		end
-		card.Visible = true
+		card.Visible = not hidden
 		loot.Text = "LOOT  " .. formatCash(amount)
 		local here = camera.CFrame.Position
 		local dist = Vector3.new(drop.X - here.X, 0, drop.Z - here.Z).Magnitude

@@ -179,6 +179,23 @@ local function buildHud()
 	cardTitle = lbl(6, 18, 13, Enum.Font.GothamBlack, Color3.fromRGB(255, 170, 60))
 	cardTime = lbl(24, 36, 32, Enum.Font.GothamBlack, Color3.new(1, 1, 1))
 	cardSub = lbl(60, 20, 13, Enum.Font.GothamBold, Theme.SubText)
+	-- closeable (owner, 2026-10-23): hides the card; the run carries on (the arrow still points)
+	local close = Instance.new("TextButton")
+	close.AnchorPoint = Vector2.new(0.5, 0.5)
+	close.Position = UDim2.new(1, -4, 0, 4)
+	close.Size = UDim2.fromOffset(24, 24)
+	close.BackgroundColor3 = Theme.Panel
+	close.Font = Enum.Font.GothamBlack
+	close.Text = "X"
+	close.TextSize = 12
+	close.TextColor3 = Color3.fromRGB(255, 120, 120)
+	close.Parent = card
+	local ck = Instance.new("UICorner")
+	ck.CornerRadius = UDim.new(0.5, 0)
+	ck.Parent = close
+	close.Activated:Connect(function()
+		card.Visible = false
+	end)
 	big = Instance.new("TextLabel")
 	big.AnchorPoint = Vector2.new(0.5, 0.5)
 	big.Position = UDim2.fromScale(0.5, 0.35)

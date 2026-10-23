@@ -86,6 +86,12 @@ local function buildHud()
 	new("UIStroke", { Color = Theme.Stroke, Thickness = 1.5 }, boardFrame)
 	new("TextLabel", { Position = UDim2.fromOffset(18, 10), Size = UDim2.new(1, -36, 0, 28), BackgroundTransparency = 1, Font = Enum.Font.GothamBlack, Text = "LEADERBOARD", TextSize = 22, TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = GOLD }, boardFrame)
 	new("TextLabel", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -18, 0, 14), Size = UDim2.fromOffset(120, 20), BackgroundTransparency = 1, Font = Enum.Font.GothamBold, Text = "B to close", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Right, TextColor3 = Theme.SubText }, boardFrame)
+	local boardClose = new("TextButton", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -4, 0, 4), Size = UDim2.fromOffset(28, 28), BackgroundColor3 = Theme.Panel, Font = Enum.Font.GothamBlack, Text = "X", TextSize = 14, TextColor3 = Color3.fromRGB(255, 120, 120), ZIndex = 3 }, boardFrame)
+	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, boardClose)
+	new("UIStroke", { Color = Theme.Stroke, Thickness = 1.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, boardClose)
+	boardClose.Activated:Connect(function()
+		boardFrame.Visible = false
+	end)
 	for k = 1, 2 do
 		boardCols[k] = new("TextLabel", {
 			Position = UDim2.new((k - 1) * 0.5, 18, 0, 48),

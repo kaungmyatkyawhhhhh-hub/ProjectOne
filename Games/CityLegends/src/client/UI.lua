@@ -1141,6 +1141,11 @@ local function buildDailyCard()
 		Audio.click()
 		claimDaily()
 	end)
+	-- closeable (owner, 2026-10-23): gone for this visit; the GIFTS button still opens the gift
+	local close = button("X", Theme.Danger, { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -4, 0, 4), Size = UDim2.fromOffset(if UI.isTouch then 24 else 22, if UI.isTouch then 24 else 22), TextSize = 11, ZIndex = 3, Parent = card })
+	close.Activated:Connect(function()
+		card.Visible = false
+	end)
 	card.MouseEnter:Connect(function()
 		tween(card, 0.12, { BackgroundColor3 = Theme.PanelLight })
 	end)
