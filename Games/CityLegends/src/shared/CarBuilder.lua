@@ -186,7 +186,7 @@ local function makeStyles(body: Color3, accent: Color3, ambient: Color3): { [str
 	return {
 		Body = { Color = body, Material = Enum.Material.SmoothPlastic, Reflectance = 0.14 },
 		Accent = { Color = accent, Material = Enum.Material.SmoothPlastic, Reflectance = 0.1 },
-		Glass = { Color = Color3.fromRGB(18, 22, 28), Material = Enum.Material.Glass, Transparency = 0.45, Reflectance = 0.2 },
+		Glass = { Color = Color3.new(0, 0, 0), Material = Enum.Material.SmoothPlastic, Transparency = 0.9, Reflectance = 0 }, -- (owner, 2026-10-23: black SmoothPlastic, 0.9)
 		Trim = { Color = Color3.fromRGB(14, 14, 16), Material = Enum.Material.SmoothPlastic },
 		Carbon = { Color = Color3.fromRGB(26, 26, 29), Material = Enum.Material.Fabric },
 		Chrome = { Color = Color3.fromRGB(205, 208, 214), Material = Enum.Material.Metal, Reflectance = 0.35 },

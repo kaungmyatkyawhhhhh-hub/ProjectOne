@@ -262,7 +262,7 @@ local LOOKS: { [string]: Look } = {
 	Accent = { material = Enum.Material.SmoothPlastic, reflectance = 0.2, transparency = 0, shadow = true },
 	Trim = { material = Enum.Material.SmoothPlastic, color = TRIM, reflectance = 0.05, transparency = 0, shadow = true },
 	Chrome = { material = Enum.Material.SmoothPlastic, color = Color3.fromRGB(196, 200, 208), reflectance = 0.45, transparency = 0, shadow = false },
-	Glass = { material = Enum.Material.Glass, color = Color3.fromRGB(12, 16, 22), reflectance = 0.25, transparency = 0.25, shadow = false },
+	Glass = { material = Enum.Material.SmoothPlastic, color = Color3.new(0, 0, 0), reflectance = 0, transparency = 0.9, shadow = false }, -- (owner, 2026-10-23: every windshield black SmoothPlastic, 0.9)
 	Lamp = { material = Enum.Material.Neon, color = Color3.fromRGB(236, 243, 255), reflectance = 0, transparency = 0, shadow = false },
 	Tail = { material = Enum.Material.Neon, color = Color3.fromRGB(150, 0, 6), reflectance = 0, transparency = 0, shadow = false },
 	Drl = { material = Enum.Material.Neon, reflectance = 0, transparency = 0, shadow = false },
@@ -697,9 +697,10 @@ local function isWindow(d: BasePart): boolean
 	return d.Material == Enum.Material.Glass
 end
 
--- every window the same clear, lightly tinted glass (owner, 2026-10-23: some came out white and
--- milky): the model's own texture and surface look come off, the windshield stays see-through
--- from the driver's seat. Legends Customs' tint works from this ("Window" attribute)
+-- every window the same: black SmoothPlastic at 0.9 transparency (owner, 2026-10-23; before that
+-- a lightly tinted glass, as some came out white and milky): the model's own texture and surface
+-- look come off, the windshield stays see-through from the driver's seat. Legends Customs' tint
+-- works from this ("Window" attribute)
 local function clearGlass(p: BasePart)
 	for _, c in p:GetChildren() do
 		if c:IsA("SurfaceAppearance") or c:IsA("Decal") or c:IsA("Texture") then
@@ -711,10 +712,10 @@ local function clearGlass(p: BasePart)
 			(p :: MeshPart).TextureID = ""
 		end)
 	end
-	p.Color = Color3.fromRGB(22, 27, 34)
-	p.Material = Enum.Material.Glass
-	p.Transparency = 0.72
-	p.Reflectance = 0.06
+	p.Color = Color3.new(0, 0, 0)
+	p.Material = Enum.Material.SmoothPlastic
+	p.Transparency = 0.9
+	p.Reflectance = 0
 	p.CastShadow = false
 	p:SetAttribute("Window", true)
 end
