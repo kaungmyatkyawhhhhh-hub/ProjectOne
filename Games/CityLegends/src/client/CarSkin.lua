@@ -265,6 +265,47 @@ CarSkin.FIREWALL = {
 	lambrini_lp700 = { back = 3.1, front = 4.4, top = 1.0, bottom = 3.2 },
 } :: { [string]: { back: number, front: number, top: number, bottom: number } }
 
+-- steering wheels modelled on each car's real one, without makers' logos or badges (owner,
+-- 2026-10-24: "re model all cars steering wheel to match like the actual real life one"). Made
+-- with Studio's mesh generator from a description of each real wheel and kept in
+-- ReplicatedStorage.SteeringWheels (one MeshPart per design, facing -Z, rim across its width).
+-- STEER_FIT: how much of the car's own wheel diameter the new rim fills.
+CarSkin.STEER_FIT = 1.02
+CarSkin.STEER_MODEL = {
+	-- Lamborghini
+	lambrini_lp700 = "AventadorFlat", lambrini_lp750 = "AventadorFlat", lambrini_urus = "AventadorFlat",
+	lambrini_lp570 = "LamboRound", lambrini_lp640 = "LamboRound",
+	lambrini_countach = "Countach",
+	-- Ferrari
+	ferrara_f430 = "FerrariF430", ferrara_599 = "FerrariF430", ferrara_california = "FerrariF430",
+	ferrara_458 = "Ferrari458",
+	-- the other supercars and hypercars
+	mclaran_12c = "McLaren", audy_r8 = "AudiR8", bugotti_veyron = "Veyron", lexis_lfa = "LexusSport", lexis_lc500 = "LexusSport",
+	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
+	nisun_gtr = "GTR",
+	-- BMW
+	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_330i_g20 = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", bnw_m4_f82 = "BMWM",
+	bnw_m5_e60 = "BMWM", bnw_m6_v10 = "BMWM", bnw_m8gc = "BMWM", bnw_x6 = "BMWM", bnw_x7 = "BMWM", bnw_750li = "BMWM",
+	bnw_m5_f10 = "BMWM", bnw_m5_f90 = "BMWM",
+	-- Mercedes
+	bentz_cla45 = "AMGFlat", bentz_cls63s = "AMGFlat", bentz_gle53 = "AMGFlat", bentz_g63 = "AMGFlat", brabos_g63 = "AMGFlat",
+	bentz_sl65bs = "AMGFlat", bentz_sls = "AMGFlat", bentz_e63s = "AMGFlat", bentz_e400 = "AMGFlat",
+	bentz_e300 = "MercLuxury", bentz_s63 = "MercLuxury", bentz_s680 = "MercLuxury", bentz_gls = "MercLuxury",
+	bentz_190e = "Merc90s", bentz_s65_w221 = "Merc90s",
+	-- luxury
+	rolls_wraith = "Rolls", rolls_cullinan = "Rolls", bentlee_contgt = "Bentley", bentlee_bentayga = "Bentley",
+	astin_db9 = "Aston", astin_vantage = "Aston", astin_dbx = "Aston",
+	-- American
+	chevo_c6 = "AmericanFlat", chevo_c7 = "AmericanFlat", chevo_camaro = "AmericanFlat", dodger_challenger = "Dodge", bentz_gt63s = "Dodge",
+	-- Japanese and the rest
+	toyoka_supra_mk4 = "JDM90s", toyoka_chaser = "JDM90s", nisun_r34 = "JDM90s", mazdo_rx7 = "JDM90s", nisun_350z = "JDM90s",
+	mazdo_rx8 = "RX8",
+	toyoka_camri = "ToyotaModern", toyoka_crown = "ToyotaModern", toyoka_alfard = "ToyotaModern", toyoka_lc200 = "ToyotaModern",
+	toyoka_lc300 = "ToyotaModern", lexis_lx700 = "ToyotaModern",
+	xiaomo_su7 = "EV", byt_u8 = "EV", byt_seal = "EV", kio_ev6 = "EV",
+	suzaki_swift = "Compact", toyoka_belta = "Compact",
+} :: { [string]: string }
+
 CarSkin.CLUSTER_SHIFT = {
 	audy_r8 = { -0.08, 0.26, 0, 0.84 }, -- up into the twin-dial hood, over its own dials
 	mclaran_12c = { 0, 0.13, -0.12, 0.78 }, -- the dial in the round pod, the screens in the wings
@@ -2225,21 +2266,43 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		if steer then
 			local mountRoot = root.CFrame:Inverse() * groundCF * steer.mount
 			model:SetAttribute("SteerMount", mountRoot)
-			local clones: { BasePart } = {}
-			for i, t in steer.parts do
-				local p = t.part:Clone()
-				table.insert(clones, p)
+			-- the steering wheel: the real car's design (STEER_MODEL) when there is one, else the
+			-- model's own wheel
+			local wheelDesign = CarSkin.STEER_MODEL[id]
+			local wheels = ReplicatedStorage:FindFirstChild("SteeringWheels")
+			local src = if wheelDesign and wheels then wheels:FindFirstChild(wheelDesign) else nil
+			local mesh = if src then (if src:IsA("MeshPart") then src else src:FindFirstChildWhichIsA("MeshPart", true)) else nil
+			local function mountPart(p: BasePart, i: number, offset: CFrame)
 				p.Name = "SkinSteer" .. i
-				p.CFrame = groundCF * steer.mount * t.offset
-				p:SetAttribute("SteerOffset", t.offset)
+				p.Anchored = false
+				p.CanCollide = false
+				p.CanQuery = false
+				p.CanTouch = false
+				p.Massless = true
+				p.CFrame = groundCF * steer.mount * offset
+				p:SetAttribute("SteerOffset", offset)
 				p.Parent = skin
 				local w = Instance.new("Weld")
 				w.Part0 = root
 				w.Part1 = p
-				w.C0 = mountRoot * t.offset
+				w.C0 = mountRoot * offset
 				w.Parent = p
 			end
-			restyleSteer(clones)
+			if mesh and not liteMode then
+				local p = (mesh :: MeshPart):Clone()
+				-- sized to the car's own wheel (the rim fills the mesh's width), facing the driver
+				local k = steer.radius * 2 * CarSkin.STEER_FIT / p.Size.X
+				p.Size *= k
+				mountPart(p, 1, CFrame.Angles(0, math.pi, 0) * CFrame.new(0, 0, -p.Size.Z * 0.15))
+			else
+				local clones: { BasePart } = {}
+				for i, t in steer.parts do
+					local p = t.part:Clone()
+					table.insert(clones, p)
+					mountPart(p, i, t.offset)
+				end
+				restyleSteer(clones)
+			end
 			-- where Driving's arms grip (10 and 2) and where the shoulders sit
 			if eyeRoot then
 				local r = steer.radius

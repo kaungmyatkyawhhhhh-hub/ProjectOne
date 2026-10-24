@@ -242,6 +242,11 @@ Config.DrivingFeel = {
 	SteerSlowdown = 150, -- the wheel turns half as fast at this many studs/s (calm at speed)
 	PowerOversteer = 0.6, -- traction control off: flooring it lets the rear step out this much more
 	BumpKick = 0.5, -- body pitch kick (radians/s) per stud of sudden ground change (kerbs, ramps)
+	-- the suspension (owner, 2026-10-24): the body box floats this far above the road on a spring,
+	-- so leaning under braking or over a change of slope never digs it into the road
+	RideClearance = 0.45, -- studs
+	RideSpring = 420, -- (studs/s^2 per stud low)
+	RideDamp = 34, -- (per stud/s)
 	RoadTexture = 0.004, -- fine body shimmy at speed (radians)
 	-- sense of speed: these go by real speed, so every car feels fast when it is
 	RushFrom = 45, -- mph where the speed effects start...

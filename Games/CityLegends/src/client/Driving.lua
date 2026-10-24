@@ -70,6 +70,8 @@ type State = {
 	root: BasePart,
 	spec: Cars.CarSpec,
 	lv: LinearVelocity,
+	ride: VectorForce, -- the suspension: holds the body box just off the road
+	stopT: number, -- seconds stood still with the brake held (reverse waits a moment)
 	ao: AlignOrientation,
 	topSpeed: number,
 	accel: number,
@@ -701,6 +703,7 @@ function Driving.detach()
 	if s.cabinLight then
 		s.cabinLight:Destroy()
 	end
+	s.ride:Destroy()
 	state = nil
 	if blur then
 		blur.Size = 0
@@ -1114,6 +1117,17 @@ function Driving.attach(model: Model)
 	local dims = CarBuilder.getDims(spec.Class, spec.Id)
 	local lv = root:WaitForChild("Drive") :: LinearVelocity
 	local ao = root:WaitForChild("Steer") :: AlignOrientation
+	-- the suspension (owner, 2026-10-24: the car "jerks around like it's driving on rocks" on the
+	-- bridge ramps and bounces under hard braking). The body is a box that used to slide on the road
+	-- on its bottom face: tipped by braking or a change of slope its edge dug into the road and was
+	-- shoved back out. Now a spring holds it a little above the road, so it can lean freely.
+	local ride = Instance.new("VectorForce")
+	ride.Name = "Ride"
+	ride.Attachment0 = lv.Attachment0
+	ride.RelativeTo = Enum.ActuatorRelativeTo.World
+	ride.ApplyAtCenterOfMass = true
+	ride.Force = Vector3.zero
+	ride.Parent = root
 
 	local wheels = {}
 	local arms: { ArmRig } = {}
@@ -1491,6 +1505,8 @@ function Driving.attach(model: Model)
 		root = root,
 		spec = spec,
 		lv = lv,
+		ride = ride,
+		stopT = 0,
 		ao = ao,
 		topSpeed = Config.mphToSps(spec.TopSpeed),
 		accel = Config.mphToSps(60) / spec.ZeroToSixty,
@@ -1779,9 +1795,16 @@ function Driving.step(dt: number)
 	s.launch = math.max(0, s.launch - dt)
 	-- launch control (automatic): hold the brake and floor it at a stop, the revs build; let go of
 	-- the brake and the car launches
-	local standing = math.abs(s.vel:Dot(forwardFromYaw(s.yaw))) < 1.5
-	local holding = not s.manual and s.engineOn and standing and brake > 0.5 and throttle > 0.5
-	if s.launchReady and not holding and throttle > 0.5 and brake < 0.5 then
+	-- It latches: once set at a stop it holds until the brake is let go (it used to drop out whenever
+	-- the car crept, so the revs bounced 1,000-3,000 and the car rolled: owner, 2026-10-24)
+	local standing = math.abs(s.vel:Dot(forwardFromYaw(s.yaw))) < 3
+	local holding
+	if s.launchReady then
+		holding = s.engineOn and brake > 0.3 and throttle > 0.3
+	else
+		holding = not s.manual and s.engineOn and standing and brake > 0.5 and throttle > 0.5
+	end
+	if s.launchReady and not holding and throttle > 0.5 and brake <= 0.3 then
 		s.launch = 0.8
 	end
 	if holding and not s.launchReady then
@@ -1813,7 +1836,7 @@ function Driving.step(dt: number)
 		local last = s.groundDist
 		if last then
 			local jump = last - hit.Distance -- up when the ground rises
-			if math.abs(jump) > 0.08 and math.abs(jump) < 4 then
+			if math.abs(jump) > 0.18 and math.abs(jump) < 4 then -- (the spring smooths small ones)
 				s.pitchVel += jump * DF.BumpKick * 20
 				s.rollVel += jump * DF.BumpKick * 8 * (if math.random() < 0.5 then -1 else 1)
 				s.shake = math.max(s.shake, math.min(math.abs(jump) * 0.5, 0.6))
@@ -1822,6 +1845,16 @@ function Driving.step(dt: number)
 		s.groundDist = hit.Distance
 	else
 		s.groundDist = nil
+	end
+	-- the suspension spring: the box's bottom rides RideClearance above the road
+	if hit then
+		local err = s.halfHeight + DF.RideClearance - hit.Distance -- above zero: too low
+		local vy = root.AssemblyLinearVelocity.Y
+		local g = workspace.Gravity
+		local up = math.clamp(g + err * DF.RideSpring - vy * DF.RideDamp, 0, g * 4)
+		s.ride.Force = Vector3.new(0, root.AssemblyMass * up, 0)
+	else
+		s.ride.Force = Vector3.zero
 	end
 	-- the road's slope: the body lies along it. (It was held level, so on the viaduct's climbs and
 	-- the bridge ramps its nose or tail dug into the road, physics shoved it back, that counted as a
@@ -1933,11 +1966,19 @@ function Driving.step(dt: number)
 			end
 		elseif fwdSpeed > 2 then
 			a -= brakeForce
-		elseif brake > 0 and fwdSpeed > -reverseTop and s.engineOn and not s.launchReady then
-			a -= reversePull * brake -- automatic: hold the brake at a stop to reverse
+		elseif brake > 0 and throttle == 0 and fwdSpeed > -reverseTop and s.engineOn and not s.launchReady and s.stopT > 0.4 then
+			-- automatic: hold the brake at a stop to reverse (not with the throttle down too). It waits
+			-- a moment after stopping, so a hard stop doesn't bounce straight into reverse
+			a -= reversePull * brake
+		end
+		if brake > 0 and math.abs(fwdSpeed) <= 2 then
+			s.stopT += dt
+		elseif brake == 0 or fwdSpeed > 2 then
+			s.stopT = 0
 		end
 		if s.launchReady then
-			a, fwdSpeed = 0, 0 -- launch control: the brakes hold the car while the revs build
+			-- launch control: the brakes hold the car dead still while the revs build
+			a, fwdSpeed, latSpeed = 0, 0, 0
 		end
 		-- rolling resistance + aero drag (each car's own, so it tops out at its real top speed)
 		local drag = 2 + s.dragC * fwdSpeed * fwdSpeed
@@ -2236,7 +2277,8 @@ function Driving.step(dt: number)
 		elseif s.electric then
 			target = 0.1 + 0.85 * frac -- the motor's speed: no gears, no limiter
 		elseif s.launchReady then
-			target = 0.62 -- launch control holds the revs
+			target = 0.62 -- launch control holds the revs, steady
+			s.rpm = target
 		elseif s.gear == "N" then
 			target = 0.12
 		else
