@@ -177,3 +177,19 @@ On join the equipped list was cut to the slots known at that moment, before the 
 
 ## Trainer snacks (23 Oct, prompt 61, [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]])
 - SNACKS at the Agency (Small / Medium / Large: 3 / 10 / 30 min of coins; +120 / 400 / 1,200 trainer EXP), FEED on MY TRAINERS. Levels stop at the max (evolving still needs 3 copies, no coin fee). Trainers' coin boost capped at +100%.
+
+## High rarities much rarer (24 Oct, owner)
+`Config/Trainers` (rarity and per-trainer chances; 200,000 test rolls match):
+
+| Trainer | Rarity | Before (23 Oct) | Now |
+|---|---|---|---|
+| Coach Sam | Common | 30% | **42%** |
+| Coach Nia | Uncommon | 25% | **30%** |
+| Coach Lou | Rare | 20% | **18%** |
+| Coach Rex | Epic | 17% | **7%** |
+| Duke Ironside | Legendary | 5.75% | **2.2%** |
+| Volta | Legendary | 1.5% | **0.6%** |
+| The Shadow | Mythic | 0.6% (1 in 167) | **0.16% (1 in 625)** |
+| Atlas | Secret | 0.15% (1 in 667) | **0.04% (1 in 2,500)** |
+
+Pity unchanged (100 rolls without Epic+ = next one Epic). The odds lists read the config, so they update by themselves.
