@@ -172,3 +172,12 @@ All ON and tested through ProcessReceipt: [[2026-10-23 GYM ARC Shop product IDs 
 - Supp_MassGainer_1 / _5, Supp_ElitePreWorkout_1 / _5, Supp_WheyIsolate_1 / _5, Supp_BcaaRecovery_1 / _5: 25 R$ (x1) / 99 R$ (x5).
 - Coin packs (existing IDs) now scale with the player's stage: Small 20 min / Medium 120 min / Large 360 min of coins, never less than 1,000 / 5,000 / 15,000. New descriptions in the progress note.
 - Coach Dex sells the existing Shake Bundle and DNA Token products too (same IDs and prices).
+
+## Coin packs smaller (24 Oct, owner)
+118,100 coins for one Large pack at 7'0" would break the economy. `Config/Monetization` coinMinutes 20 / 120 / 360 -> **10 / 30 / 60** (old fixed amounts still the floor):
+
+| Pack | Robux | Spurt 0 | Spurt 3 | 7'0" (and all alters) |
+|---|---|---|---|---|
+| Small | 25 | 1,000 | 2,000 | 3,300 (was 6,550) |
+| Medium | 99 | 5,000 | 6,000 | 9,850 (was 39,350) |
+| Large | 249 | 15,000 | 15,000 | 19,700 (was 118,100) |
