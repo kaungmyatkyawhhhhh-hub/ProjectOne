@@ -10,7 +10,7 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 
 ## How it works
 - **Ladder:** 30 alters in 6 tiers of 5 (Human, Stone, Metal, Gem, Elements, Legend). Alter 0 = Natural (the normal skin stages). Only Tier 1 (Pumped, Shredded, Tanned, Vascular, Peak) has textures; later alters show "Coming soon" and can't be reached yet.
-- **Goal:** at 7'0", every muscle group at a level, like a Growth Spurt goal: alter 1 = 140, then +15 per alter (24 Oct; was 95, +10).
+- **Goal:** at 7'0", every muscle group at a level, like a Growth Spurt goal: alter 1 = 205, then +25 per alter (24 Oct; was 95, +10).
 - **Doing it:** BODY ALTER READY popup (also on a machine) with ALTER / Later; the player chooses when. Every muscle keeps 25% of its EXP, height stays, the new skin goes on, gains bonus +15% per alter (stacking, outside the gains cap). A camera / flash / "ALTER 3: TANNED" moment.
 - **Safety:** the save is written before the alter (if it fails nothing changes) and again right after. Old 7'0" saves start at Natural with their muscles.
 - **Tier reward** (every 5th alter): a title (Peak Human, Stone Cold, Heavy Metal, Crown Jewel, Force of Nature, Living Legend), an aura (placeholder looks) and DNA tokens (1/1/2/2/3/3).
@@ -53,8 +53,8 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - A Face accessory with the skin baked in can't be tinted (it keeps its color).
 ![[GYM ARC/Screenshots/alters/alters_bronze_light_dark.jpg]]
 
-## Alters take a lot longer (24 Oct, owner)
-- `Config/Alters`: FirstGoal 95 -> **140**, GoalPer 10 -> **15** (goals 140, 155, 170, 185, 200 ...).
-- About 3x the time: each Tier 1 alter ~30-40 min, Tier 1 ~2.5-3 h (was ~1 h); alter 10 ~1 h.
+## Tier 1 takes 8 hours (24 Oct, owner)
+- `Config/Alters`: FirstGoal 95 -> **205**, GoalPer 10 -> **25** (goals 205, 230, 255, 280, 305).
+- Estimated times: alter 1 ~1 h 50, 2 ~1 h 15, 3 ~1 h 30, 4 ~1 h 40, 5 ~1 h 55 = **~8 h for all of Tier 1** (was ~1 h).
 - Estimate from the EXP curve + the 21 Oct times, not a full sim. Rerun `tests/pacing alters` on the PC with the repo to confirm.
 - Players already close to the old goal now need more levels (nothing lost).
