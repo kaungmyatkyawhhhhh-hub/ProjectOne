@@ -58,3 +58,8 @@ Nothing here changed in the owner's 19 Oct Studio work. What a player can change
 - Only two gear pieces now: LIFTING BELT (+5% / +10% lower body: legs, back, core) and WRIST WRAPS (+5% / +10% upper body: chest, shoulders, arms). Basic 750 / Pro 4,000 at Coach Dex. Elite / Champion off sale (owners keep them).
 - The best level owned counts, worn or not. Straps and knee sleeves are gone: once per player they turned into the matching piece (a higher level) or their coins came back.
 - Colours like the pictures: Basic brown leather, Pro black + silver, Elite purple + silver, Champion gold (Config/PumpShop.GearIcons).
+
+## Players never shirtless (24 Oct, owner)
+- Every player wears the black tank top (`TankBlack`) instead of shirtless. Old saves with "Shirtless" get it too.
+- A bought / tried-on top still wins. NPCs (gym-goers, posing comp, trainers) keep their own look.
+- Code: `Config/Body.PlayerTop = "TankBlack"`, used in `Server/BodyService.PublishData` (players only).
