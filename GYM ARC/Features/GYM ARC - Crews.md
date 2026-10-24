@@ -50,3 +50,8 @@ Tested on the phone layout and the PC layout with the Studio test crews: the ful
 
 ## Top 25 (owner, 23 Oct)
 - TOP CREWS shows the top 25 crews (was 5), `Social.Crew.TopCount`. See [[2026-10-23 GYM ARC Prompt - Top crews to 25]].
+
+## Leader can kick (24 Oct, owner)
+- MY CREW: the leader sees a **Kick** button on every other member's row (officers and members, not themselves). Tap once = red "Sure?" for 3 s, tap again = kicked.
+- `CrewService` action `Kick` (leader only, checked again inside the DataStore update). The kicked player is told "You were removed from <crew> [TAG]" and their tag goes: at once in this server, at the next score refresh in another server, or when they next join if offline.
+- Tested: the button layout with a fake crew (no overlap; none on the leader). Not tested with two real players.
