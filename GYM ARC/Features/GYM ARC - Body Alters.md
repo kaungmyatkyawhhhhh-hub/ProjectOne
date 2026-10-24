@@ -58,3 +58,8 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - Estimated times: alter 1 ~1 h 50, 2 ~1 h 15, 3 ~1 h 30, 4 ~1 h 40, 5 ~1 h 55 = **~8 h for all of Tier 1** (was ~1 h).
 - Estimate from the EXP curve + the 21 Oct times, not a full sim. Rerun `tests/pacing alters` on the PC with the repo to confirm.
 - Players already close to the old goal now need more levels (nothing lost).
+
+## Taller per alter tier (24 Oct, owner)
+- Every finished alter tier (5 alters) adds **4 inches**: Tier 1 done (Peak) = 7'4", Tier 2 = 7'8", ... Tier 6 = 9'0".
+- `Config/GrowthSpurts.AlterTierInches = 4`, `AltersPerTier = 5`, `GrowthSpurts.PlayerHeight(data)` (Growth Spurt height + tiers from `data.alter.highest`).
+- Used for the body (BodyService), top bar, menu, mirror, posing shows, titles, Tallest board. The statue / best physique still use the Growth Spurt height.

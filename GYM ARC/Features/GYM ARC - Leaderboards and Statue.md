@@ -48,3 +48,8 @@ Player pictures here are the real Roblox avatar headshot in a plain dark circle 
 
 ## The statue is the real player's body (19 Oct)
 The statue reads the strongest player's save (read-only) and is built with their own widths and muscles, like their real character (before: a generic fully grown body). The posing champion's values are kept from when they won. It rebuilds when the player's widths or muscles change. Studio: Workspace attribute `TestStatueMe` = true makes you the statue. See [[GYM ARC - Bug - Mirror and statue bodies too narrow]].
+
+## Alters and Level boards (24 Oct, owner)
+- Two new boards: **ALTERS** (highest Body Alter, "Alter 5") and **LEVEL** (the top bar's LVL = average muscle level, "LVL 305"). `Config/Leaderboards` + `Server/LeaderboardService`; stores `LB1_Alters`, `LB1_Level`.
+- On the **Pro Gym wall** and the **town stand** (both now 8 panels, frames / header / trims / posts stretched). The **starter gym wall keeps its 6**: no room (the side wall on one end, the Personal Trainers desk under the other).
+- Note: Level drops after a Growth Spurt or an alter (muscles reset), so that board shows the current LVL, not the best ever.
