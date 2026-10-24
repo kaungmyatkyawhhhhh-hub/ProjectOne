@@ -242,11 +242,19 @@ Config.DrivingFeel = {
 	SteerSlowdown = 150, -- the wheel turns half as fast at this many studs/s (calm at speed)
 	PowerOversteer = 0.6, -- traction control off: flooring it lets the rear step out this much more
 	BumpKick = 0.5, -- body pitch kick (radians/s) per stud of sudden ground change (kerbs, ramps)
-	-- the suspension (owner, 2026-10-24): the body box floats this far above the road on a spring,
-	-- so leaning under braking or over a change of slope never digs it into the road
-	RideClearance = 0.45, -- studs
-	RideSpring = 420, -- (studs/s^2 per stud low)
-	RideDamp = 34, -- (per stud/s)
+	-- realistic suspension (owner, 2026-10-24): a spring per wheel. spring: stiffness (its square
+	-- root sets how fast the body returns to its ride height); damp: the fastest the body moves up or
+	-- down on its springs (studs/s); bump / droop: how far a wheel can move up / down (studs). Soft
+	-- and long-travel on SUVs and limousines, firm and short on supercars. HullLift: the body's
+	-- collision box starts this far above the road.
+	Suspension = {
+		Sedan = { spring = 330, damp = 9, bump = 0.55, droop = 0.6 },
+		SUV = { spring = 240, damp = 7, bump = 0.8, droop = 0.9 },
+		Coupe = { spring = 420, damp = 11, bump = 0.45, droop = 0.5 },
+		Supercar = { spring = 560, damp = 13, bump = 0.35, droop = 0.4 },
+		Hypercar = { spring = 620, damp = 14, bump = 0.3, droop = 0.35 },
+	} :: { [string]: { spring: number, damp: number, bump: number, droop: number } },
+	HullLift = 0.9,
 	RoadTexture = 0.004, -- fine body shimmy at speed (radians)
 	-- sense of speed: these go by real speed, so every car feels fast when it is
 	RushFrom = 45, -- mph where the speed effects start...

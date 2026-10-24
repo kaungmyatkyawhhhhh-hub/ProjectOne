@@ -51,6 +51,8 @@ Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
 Driving.onGearboxChanged = nil :: ((string) -> ())?
 local GEARS = 7
 
+type Corner = { motor: Motor6D, knuckle: Motor6D?, at: Vector3, rest: number, front: boolean, left: boolean, gap: number, travel: number, hit: Vector3? }
+
 type LocalArm = {
 	upper: BasePart, -- the whole arm when fore is nil (R6)
 	fore: BasePart?,
@@ -70,7 +72,11 @@ type State = {
 	root: BasePart,
 	spec: Cars.CarSpec,
 	lv: LinearVelocity,
-	ride: VectorForce, -- the suspension: holds the body box just off the road
+	ride: VectorForce, -- (unused: kept at zero)
+	vyTarget: number?, -- the suspension's vertical speed for the body this frame (nil: in the air)
+	hull: Part, -- the body's collision box, raised clear of the road (the springs hold the car up)
+	corners: { Corner }, -- one per wheel: its spring's state
+	susp: { spring: number, damp: number, bump: number, droop: number },
 	stopT: number, -- seconds stood still with the brake held (reverse waits a moment)
 	ao: AlignOrientation,
 	topSpeed: number,
@@ -704,6 +710,10 @@ function Driving.detach()
 		s.cabinLight:Destroy()
 	end
 	s.ride:Destroy()
+	s.hull:Destroy()
+	if s.root.Parent then
+		s.root.CanCollide = true
+	end
 	state = nil
 	if blur then
 		blur.Size = 0
@@ -1128,6 +1138,28 @@ function Driving.attach(model: Model)
 	ride.ApplyAtCenterOfMass = true
 	ride.Force = Vector3.zero
 	ride.Parent = root
+	-- realistic suspension (owner, 2026-10-24: "add realistic suspension"): each wheel reads the
+	-- road under it and has its own spring. The body sits on them at its real ride height, tilts
+	-- with the road the four wheels are on (one wheel up a kerb tips it), and the wheels move up and
+	-- down under it over bumps. The body box no longer touches the road: a collision hull, raised
+	-- clear of it, keeps walls and other cars out.
+	local DFs = Config.DrivingFeel
+	local hull = Instance.new("Part")
+	hull.Name = "Hull"
+	hull.Size = Vector3.new(root.Size.X, math.max(root.Size.Y - DFs.HullLift, 0.6), root.Size.Z)
+	hull.CFrame = root.CFrame * CFrame.new(0, (root.Size.Y - hull.Size.Y) / 2, 0)
+	hull.Transparency = 1
+	hull.CanCollide = true
+	hull.CanQuery = false
+	hull.CanTouch = true
+	hull.Massless = true
+	hull.CustomPhysicalProperties = root.CustomPhysicalProperties
+	local hw = Instance.new("WeldConstraint")
+	hw.Part0 = root
+	hw.Part1 = hull
+	hw.Parent = hull
+	hull.Parent = model
+	root.CanCollide = false
 
 	local wheels = {}
 	local arms: { ArmRig } = {}
@@ -1135,6 +1167,23 @@ function Driving.attach(model: Model)
 		if j:IsA("Motor6D") and j.Name:sub(1, 6) == "Wheel_" then
 			table.insert(wheels, j)
 		end
+	end
+	local corners: { Corner } = {}
+	for _, j in wheels do
+		-- the wheel centre's height over the road when the car stands at its design ride height
+		local rest = j.C0.Position.Y + root.Size.Y / 2 + 0.025
+		local knuckle = root:FindFirstChild("Knuckle" .. j.Name:sub(6))
+		table.insert(corners, {
+			motor = j,
+			knuckle = if knuckle and knuckle:IsA("Motor6D") then knuckle else nil,
+			at = j.C0.Position,
+			rest = rest,
+			front = j.C0.Position.Z < 0,
+			left = j.C0.Position.X < 0,
+			gap = 0,
+			travel = 0,
+			hit = nil,
+		})
 	end
 	local steerMotor = root:FindFirstChild("SteerMotor") :: Motor6D?
 	for _, side in { "L", "R" } do
@@ -1506,6 +1555,9 @@ function Driving.attach(model: Model)
 		spec = spec,
 		lv = lv,
 		ride = ride,
+		hull = hull,
+		corners = corners,
+		susp = Config.DrivingFeel.Suspension[spec.Class] or Config.DrivingFeel.Suspension.Sedan,
 		stopT = 0,
 		ao = ao,
 		topSpeed = Config.mphToSps(spec.TopSpeed),
@@ -1846,22 +1898,78 @@ function Driving.step(dt: number)
 	else
 		s.groundDist = nil
 	end
-	-- the suspension spring: the box's bottom rides RideClearance above the road
-	if hit then
-		local err = s.halfHeight + DF.RideClearance - hit.Distance -- above zero: too low
-		local vy = root.AssemblyLinearVelocity.Y
-		local g = workspace.Gravity
-		local up = math.clamp(g + err * DF.RideSpring - vy * DF.RideDamp, 0, g * 4)
-		s.ride.Force = Vector3.new(0, root.AssemblyMass * up, 0)
-	else
-		s.ride.Force = Vector3.zero
+	-- the suspension: a ray down from each wheel finds the road under it; how far the wheel sits
+	-- from where it should be is its spring's travel. The springs together carry the body (one
+	-- force through its middle; the tilt comes from the road plane below)
+	local sp = s.susp
+	local up = root.CFrame.UpVector
+	local sum, nOn = 0, 0
+	for _, c in s.corners do
+		local origin = root.CFrame:PointToWorldSpace(c.at) + up * 1
+		local r = workspace:Raycast(origin, -up * (1 + c.rest + sp.droop + 0.6), rayParams)
+		if r and r.Normal.Y > 0.6 then
+			c.gap = (r.Distance - 1) - c.rest -- above zero: the road is lower than the wheel's rest
+			c.hit = r.Position
+			sum += c.gap
+			nOn += 1
+		else
+			c.gap = sp.droop
+			c.hit = nil
+		end
 	end
-	-- the road's slope: the body lies along it. (It was held level, so on the viaduct's climbs and
-	-- the bridge ramps its nose or tail dug into the road, physics shoved it back, that counted as a
-	-- crash and the car jolted and bounced: owner, 2026-10-24, "the car glitches out when randomly
-	-- driving".) Kerb sides and walls (steep normals) don't count; in the air it eases back level.
-	local upNow = if hit and hit.Normal.Y > 0.75 then hit.Normal else Vector3.yAxis
-	s.groundUp = s.groundUp:Lerp(upNow, math.min(1, dt * (if hit then 10 else 2))).Unit
+	-- The springs act as a vertical speed for the body, which the physics holds every physics step
+	-- (a force set once a frame overshot at low frame rates: a dropped car bounced 7 studs high).
+	-- The body rises or sinks back to its ride height at the spring's own rate, plus the road's own
+	-- climb or fall under it, and the damping is the speed limit on the way.
+	if nOn > 0 then
+		local avg = sum / nOn
+		local rate = math.sqrt(sp.spring) * 0.55
+		local vy = -avg * rate
+		-- (fewer wheels on the road: over an edge the car drops away freely)
+		if nOn < #s.corners then
+			vy = math.min(vy, root.AssemblyLinearVelocity.Y)
+		end
+		s.vyTarget = math.clamp(vy, -sp.damp, sp.damp)
+	else
+		s.vyTarget = nil
+	end
+	-- the road plane under the four wheels: the body lies along it (one wheel up a kerb tips it; a
+	-- crest or a dip pitches it). In the air it eases back level.
+	local upNow = Vector3.yAxis
+	do
+		local fl, fr, rl, rr
+		for _, c in s.corners do
+			if c.hit then
+				if c.front then
+					if c.left then
+						fl = c.hit
+					else
+						fr = c.hit
+					end
+				else
+					if c.left then
+						rl = c.hit
+					else
+						rr = c.hit
+					end
+				end
+			end
+		end
+		if fl and fr and rl and rr then
+			local along = (fl + fr) / 2 - (rl + rr) / 2
+			local across = (fr + rr) / 2 - (fl + rl) / 2
+			if along.Magnitude > 0.5 and across.Magnitude > 0.5 then
+				local nrm = across.Unit:Cross(along.Unit)
+				if nrm.Y > 0.6 then
+					upNow = nrm.Unit
+				end
+			end
+		elseif hit and hit.Normal.Y > 0.75 then
+			upNow = hit.Normal
+		end
+	end
+	s.groundUp = s.groundUp:Lerp(upNow, math.min(1, dt * (if nOn > 0 then 12 else 2))).Unit
+	s.grounded = nOn > 0
 
 	local actual = root.AssemblyLinearVelocity
 	local actualFlat = Vector3.new(actual.X, 0, actual.Z)
@@ -2157,6 +2265,7 @@ function Driving.step(dt: number)
 		local newRight = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
 		s.vel = newFwd * fwdSpeed + newRight * latSpeed
 		s.lv.MaxForce = root.AssemblyMass * 400
+		s.lv.MaxAxesForce = Vector3.new(root.AssemblyMass * 400, root.AssemblyMass * 320, root.AssemblyMass * 400)
 	else
 		s.lv.MaxForce = root.AssemblyMass * 8
 		s.steer += (steerIn - s.steer) * math.min(1, dt * 6)
@@ -2217,7 +2326,18 @@ function Driving.step(dt: number)
 		return
 	end
 
-	s.lv.PlaneVelocity = Vector2.new(s.vel.X, s.vel.Z)
+	if s.vyTarget and s.grounded then
+		-- on its wheels: the suspension holds the vertical speed too, following the road's climb
+		local nrm = s.groundUp
+		local climb = if nrm.Y > 0.5 then -(nrm.X * s.vel.X + nrm.Z * s.vel.Z) / nrm.Y else 0
+		s.lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+		s.lv.ForceLimitMode = Enum.ForceLimitMode.PerAxis
+		s.lv.VectorVelocity = Vector3.new(s.vel.X, climb + s.vyTarget, s.vel.Z)
+	else
+		s.lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
+		s.lv.ForceLimitMode = Enum.ForceLimitMode.Magnitude
+		s.lv.PlaneVelocity = Vector2.new(s.vel.X, s.vel.Z)
+	end
 	do
 		local look = CFrame.Angles(0, s.yaw, 0).LookVector
 		local n = s.groundUp
@@ -2326,16 +2446,25 @@ function Driving.render(dt: number)
 	-- wheels
 	s.wheelSpin = (s.wheelSpin - fwdSpeed * dt / 1.1) % (math.pi * 2)
 	local wheelAngle = -s.steer * math.rad(28) / (1 + (math.abs(fwdSpeed) / 90))
-	for _, m in s.wheels do
+	-- each wheel moves up and down on its spring to stay on the road (its travel smoothed a touch)
+	local sp = s.susp
+	for _, c in s.corners do
+		local want = math.clamp(-c.gap, -sp.droop, sp.bump)
+		c.travel += (want - c.travel) * math.min(1, dt * 30)
+		local m = c.motor
+		local lift = CFrame.new(m.C0.Rotation:Inverse() * Vector3.new(0, c.travel, 0))
+		local klift = if c.knuckle then CFrame.new(c.knuckle.C0.Rotation:Inverse() * Vector3.new(0, c.travel, 0)) else CFrame.new()
 		if m:GetAttribute("Front") then
-			m.Transform = CFrame.Angles(0, wheelAngle, 0) * CFrame.Angles(s.wheelSpin, 0, 0)
+			m.Transform = lift * CFrame.Angles(0, wheelAngle, 0) * CFrame.Angles(s.wheelSpin, 0, 0)
 			-- brake caliper rides on a knuckle that steers but doesn't spin
-			local knuckle = s.root:FindFirstChild("Knuckle" .. m.Name:sub(6))
-			if knuckle and knuckle:IsA("Motor6D") then
-				knuckle.Transform = CFrame.Angles(0, wheelAngle, 0)
+			if c.knuckle then
+				c.knuckle.Transform = klift * CFrame.Angles(0, wheelAngle, 0)
 			end
 		else
-			m.Transform = CFrame.Angles(s.wheelSpin, 0, 0)
+			m.Transform = lift * CFrame.Angles(s.wheelSpin, 0, 0)
+			if c.knuckle then
+				c.knuckle.Transform = klift
+			end
 		end
 	end
 
