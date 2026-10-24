@@ -278,6 +278,12 @@ local function roadPieces(x0: number, x1: number): { { number } }
 	while x > x1 + 0.01 do
 		local nx = math.max(x - 40, x1)
 		local level = math.abs(roadY(x) - roadY(nx)) < 1e-3 and math.abs(roadY((x + nx) / 2) - roadY(x)) < 1e-3
+		if not level then
+			-- climbs in 8-stud pieces: the slope then turns by about a degree at each joint (40-stud
+			-- pieces turned it by up to 5 degrees, a kick at every joint on the bridge ramps at
+			-- speed: owner, 2026-10-24, "the legends bridge ... is kinda buggy")
+			nx = math.max(x - 8, x1)
+		end
 		local last = out[#out]
 		if level and last and last[1] - nx <= 800 and math.abs(roadY(last[1]) - roadY(last[2])) < 1e-3 and math.abs(roadY((last[1] + last[2]) / 2) - roadY(last[2])) < 1e-3 then
 			last[2] = nx

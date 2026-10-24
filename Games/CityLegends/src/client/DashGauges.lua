@@ -1420,13 +1420,29 @@ local function lfaAngle(rpm: number): number
 	return LFA_SCALE[#LFA_SCALE][2]
 end
 
-local function lfa(gui: SurfaceGui): Update
+-- fitted: the LFA's own model (owner, 2026-10-24: "the tachometer cluster isn't lined up"): the
+-- panel is sized so the ring fills the model's round pod, and only the model's screen behind it
+-- (a rounded 1.96:1 area, 0.7 of the panel's height) is filled black, not the whole panel
+local function lfa(gui: SurfaceGui, fitted: boolean?): Update
 	local INK = Color3.fromRGB(10, 10, 12)
 	local RING = Color3.fromRGB(236, 236, 232)
 	local LFA_RED = Color3.fromRGB(232, 40, 30)
 	local GREY = Color3.fromRGB(120, 122, 126)
-	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(0, 0, 0), BorderSizePixel = 0 }, gui)
-	local box = squareBox(bg, UDim2.fromScale(0.5, 0.5), 0.6) -- (as on the real screen: the ring is about 0.6 of its height)
+	local bg = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = if fitted then 1 else 0, BorderSizePixel = 0 }, gui)
+	if fitted then
+		local scr = new("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(1, 0.7),
+			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+		}, bg)
+		new("UIAspectRatioConstraint", { AspectRatio = 1.96, DominantAxis = Enum.DominantAxis.Height }, scr)
+		new("UICorner", { CornerRadius = UDim.new(0.14, 0) }, scr)
+	end
+	-- (as on the real screen: the ring is about 0.6 of its height; fitted, the panel is sized to
+	-- the ring, which stays 0.6 of it, and the screen around it is drawn smaller)
+	local box = squareBox(bg, UDim2.fromScale(0.5, 0.5), 0.6)
 	local function disc(size: number, color: Color3, z: number)
 		new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, new("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
@@ -2277,7 +2293,16 @@ end
 -- right (to 280 mph, km/h inside, blue band, red needle) and two small dials up between them (fuel,
 -- oil temperature). No maker's logo on the faces (owner, 2026-10-17)
 local function veyron(gui: SurfaceGui): Update
-	local D = design(gui, 1000, 436, Color3.fromRGB(5, 5, 7))
+	-- laid out on the model's own five dials (owner, 2026-10-24: "the tachometer cluster isn't
+	-- lined up"): the rev counter in the middle, the small fuel and oil dials up at its sides, the
+	-- power meter and speedometer below them, close in; measured from the driver's seat in Studio
+	local D = design(gui, 1100, 546, Color3.fromRGB(5, 5, 7))
+	-- only the dials' area is filled (the panel's spare width stays clear over the dash)
+	local back = D.area.Parent :: Frame
+	back.BackgroundTransparency = 1
+	D.area.BackgroundColor3 = Color3.fromRGB(5, 5, 7)
+	D.area.BackgroundTransparency = 0
+	new("UICorner", { CornerRadius = UDim.new(0.12, 0) }, D.area)
 	local SILVER = Color3.fromRGB(200, 204, 212)
 	local FACE = Color3.fromRGB(9, 10, 14)
 	local VBLUE = Color3.fromRGB(46, 70, 210)
@@ -2314,27 +2339,29 @@ local function veyron(gui: SurfaceGui): Update
 	end
 	-- the two small dials up between the big ones (not lit, like the photo)
 	local function small(cx: number, label: string, v: number)
-		D.round(cx, 70, 46, FACE, 2, SILVER, 2.5)
-		D.arc(cx, 70, -120, 120, 38, 2, GREY, 3, 0.4, 6)
-		D.label(label, cx, 98, 10, GREY, Enum.Font.GothamMedium, 4)
-		D.needle(cx, 70, -6, 34, 3, NEEDLE, 5).Rotation = -120 + 240 * v
+		D.round(cx, 114, 74, FACE, 2, SILVER, 3)
+		D.arc(cx, 114, -120, 120, 60, 3, GREY, 3, 0.4, 6)
+		D.label(label, cx, 150, 15, GREY, Enum.Font.GothamMedium, 4)
+		D.needle(cx, 114, -8, 54, 4, NEEDLE, 5).Rotation = -120 + 240 * v
+		D.round(cx, 114, 9, Color3.fromRGB(150, 154, 162), 6)
 	end
-	small(330, "FUEL", 0.7)
-	small(670, "OIL °C", 0.45)
+	small(215, "FUEL", 0.7)
+	small(885, "OIL °C", 0.45)
 
 	-- the rev counter: 0 at the bottom left round to 8 at the bottom right
-	local setRpm = vdial(500, 205, 200, numbers(0, 8, 1), -138, 138, { 0.2, 0.82 }, 30, 4)
-	D.label("1/min x 1000", 500, 345, 13, GREY, Enum.Font.GothamMedium, 5)
-	local screen = D.rect(500, 282, 92, 70, Color3.fromRGB(58, 62, 70), 5)
-	new("UICorner", { CornerRadius = UDim.new(0.08, 0) }, screen)
-	local gearText = D.label("P", 500, 268, 34, Color3.new(1, 1, 1), Enum.Font.GothamBold, 6, 1.2)
-	local speedText = D.label("0", 500, 302, 16, Color3.fromRGB(220, 224, 232), Enum.Font.GothamMedium, 6, 4)
-	-- the power meter (left) and the speedometer (right)
-	local setPower = vdial(165, 262, 140, numbers(0, 1000, 100), -150, 120, { 0.1, 0.75 }, 17)
-	D.label("hp", 165, 352, 13, GREY, Enum.Font.GothamMedium, 5)
+	-- the power meter (left) and the speedometer (right), low and close in, under the rev counter's
+	-- edge (drawn first so the rev counter sits over them, like the model's)
+	local setPower = vdial(172, 384, 157, numbers(0, 1000, 100), -150, 120, { 0.1, 0.75 }, 19)
+	D.label("hp", 172, 484, 15, GREY, Enum.Font.GothamMedium, 5)
 	local speedLabels, endMph = speedScale(280, 20)
-	local setSpeed = vdial(835, 262, 140, speedLabels, -125, 130, { 0.05, 0.6 }, if #speedLabels > 10 then 13 else 17)
-	local unitText = D.label(unit(), 835, 352, 13, GREY, Enum.Font.GothamMedium, 5)
+	local setSpeed = vdial(928, 384, 157, speedLabels, -125, 130, { 0.05, 0.6 }, if #speedLabels > 10 then 15 else 19)
+	local unitText = D.label(unit(), 928, 484, 15, GREY, Enum.Font.GothamMedium, 5)
+	local setRpm = vdial(550, 210, 200, numbers(0, 8, 1), -138, 138, { 0.2, 0.82 }, 30, 4)
+	D.label("1/min x 1000", 550, 350, 13, GREY, Enum.Font.GothamMedium, 5)
+	local screen = D.rect(550, 287, 92, 70, Color3.fromRGB(58, 62, 70), 5)
+	new("UICorner", { CornerRadius = UDim.new(0.08, 0) }, screen)
+	local gearText = D.label("P", 550, 273, 34, Color3.new(1, 1, 1), Enum.Font.GothamBold, 6, 1.2)
+	local speedText = D.label("0", 550, 307, 16, Color3.fromRGB(220, 224, 232), Enum.Font.GothamMedium, 6, 4)
 
 	local lastPower = 0
 	return function(mph: number, g: string, rpm: number)
@@ -3118,6 +3145,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	end,
 	RX8 = rx8,
 	LFA = lfa, -- the real LFA screen (owner's photo)
+	LFAFitted = function(gui)
+		return lfa(gui, true)
+	end,
 	LexusLX = function(gui)
 		return lexus(gui, 8, 6, Color3.fromRGB(80, 170, 255))
 	end,

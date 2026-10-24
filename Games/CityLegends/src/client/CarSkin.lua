@@ -69,7 +69,7 @@ CarSkin.CLUSTER_STYLE = {
 	bentz_s63 = "W213", -- S 65 W222: wide glass screen
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",
-	lexis_lfa = "LFA",
+	lexis_lfa = "LFAFitted", -- the ring sized to the model's own round pod
 	lambrini_lp700 = "AventadorLP700", -- owner (2026-10-17): its own, copied from an LP700-4 video
 	lambrini_lp750 = "AventadorSV", -- the real SV screen (owner's photo; refs), live, over the model's own
 	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
@@ -116,7 +116,8 @@ CarSkin.CLUSTER_RECT = {
 	-- the GT3 in the 718 cabin: the whole hood (its three dials), with the 991's five dials in it
 	porsha_gt3 = { at = Vector3.new(-0.0058, 0.0501, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), w = 0.3, h = 0.118 },
 	-- the LP750 in its own cabin: the same screen
-	lambrini_lp750 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.334, h = 0.1455 },
+	-- (a little wider than the screen it covers: owner, 2026-10-24, "stretch the LP750 SV cluster a little bit")
+	lambrini_lp750 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.362, h = 0.1455 },
 } :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the
@@ -235,38 +236,55 @@ CarSkin.KEEP_OWN_CLUSTER = {} :: { [string]: boolean }
 
 -- a drawn cluster's line-up over the car's own hood where it isn't measured (CLUSTER_RECT):
 -- { right, up, forward } in studs and a size factor, checked from the driver's eye in Studio
+-- cabin colours by texture, for converted cabins whose plain-colour textures came out wrong (the
+-- Aventador SV's dash, door cards and floor came out white; the real SV cabin is black Alcantara and
+-- leather: owner, 2026-10-24, "fix those white stuffs like dashboard and doors on the lp 700-4 and
+-- lp 750"). Keyed by the cabin's car id (so the LP700, in the SV's cabin, gets it too).
+type CabinLook = { color: Color3, material: Enum.Material, variant: string? }
+CarSkin.CABIN_RECOLOUR = {
+	lambrini_lp750 = {
+		["133052779464309"] = { color = Color3.fromRGB(26, 26, 29), material = Enum.Material.SmoothPlastic }, -- dash, door cards, vents
+		["138771621760894"] = { color = Color3.fromRGB(22, 22, 25), material = Enum.Material.SmoothPlastic }, -- leather
+		["83442883088810"] = { color = Color3.fromRGB(17, 17, 19), material = Enum.Material.Fabric }, -- floor mats
+		["73882896177478"] = { color = Color3.fromRGB(70, 70, 76), material = Enum.Material.Plastic, variant = "CL_Carbon" }, -- trim: carbon, like the real SV
+		["97917365145307"] = { color = Color3.fromRGB(20, 20, 22), material = Enum.Material.SmoothPlastic }, -- "Black": came out light grey
+		["129893661410753"] = { color = Color3.fromRGB(24, 24, 27), material = Enum.Material.SmoothPlastic }, -- dash plastic
+	},
+} :: { [string]: { [string]: CabinLook } }
+
+-- model parts hidden by name, per cabin (the SV's own cluster screen is only a picture: the live
+-- AventadorSV / LP700 designs cover it; owner, 2026-10-24: "hide the old already in cluster")
+CarSkin.HIDE_PARTS = {
+	lambrini_lp750 = { Body_Display = true },
+} :: { [string]: { [string]: boolean } }
+
+-- a matte black panel behind a swapped-in dash, closing gaps where the donor cabin doesn't meet
+-- the car's own body (the LP700 in the SV's cabin: its front wheel showed through the passenger
+-- side of the dash). Studs from the eye: back / front (forward), top / bottom (down).
+CarSkin.FIREWALL = {
+	lambrini_lp700 = { back = 3.1, front = 4.4, top = 1.0, bottom = 3.2 },
+} :: { [string]: { back: number, front: number, top: number, bottom: number } }
+
 CarSkin.CLUSTER_SHIFT = {
 	audy_r8 = { -0.08, 0.26, 0, 0.84 }, -- up into the twin-dial hood, over its own dials
 	mclaran_12c = { 0, 0.13, -0.12, 0.78 }, -- the dial in the round pod, the screens in the wings
+	bugotti_veyron = { 0, 0.15, 0, 0.95 }, -- each drawn dial on the model's own five (owner, 2026-10-24)
+	lexis_lfa = { 0, 0.075, 0, 1.42 }, -- the ring on the model's round pod (owner, 2026-10-24)
 } :: { [string]: { number } }
 
 -- steering wheels (owner, 2026-10-24: "fix all of the steering wheels bad color and if it doesnt
--- match the actual real one fix it"). A converted car whose wheel came into Studio as one part
--- with one texture shows it grey or with the wrong patches of texture (the fixed per-material
--- wheels are in the import packs cars_21-34); until those are in, the whole wheel takes the real
--- car's finish here: black leather, or black Alcantara where the real car has it. Cars built in
--- Roblox keep their wheel's own parts, but plain grey or white plastic on it (wrong on every real
--- wheel in the game) turns to the same black leather; textured, metal and chrome parts stay.
-local LEATHER = { color = Color3.fromRGB(24, 24, 26), material = Enum.Material.Leather }
-local ALCANTARA = { color = Color3.fromRGB(30, 30, 32), material = Enum.Material.SmoothPlastic } -- (Fabric's pattern is blotchy at wheel size)
-CarSkin.STEER_LOOK = {
-	lambrini_lp750 = ALCANTARA, -- Aventador SV: Alcantara rim
-	lambrini_lp570 = ALCANTARA, -- Gallardo Superleggera: Alcantara rim, carbon bottom
-	porsha_gt3 = ALCANTARA, -- 991.2 GT3: Alcantara rim
-	lexis_lfa = LEATHER,
-} :: { [string]: { color: Color3, material: Enum.Material } }
+-- match the actual real one fix it", then "the steering wheels looks too rough make it better like
+-- a mix of carbon and alcantara"). Leather's bumpy texture read as rough, so: the rim is smooth matte
+-- Alcantara, the spokes and trim carbon weave (the "CL_Carbon" material variant in MaterialService:
+-- the Creator Store's "SEAMLESS CARBON FIBER TEXTURE", image 6648098751). A wheel made of several
+-- parts gets both (its biggest plain part is the rim); textured, metal and chrome parts stay. A
+-- converted car whose wheel came in as one part with one texture (grey, or the wrong patches) can
+-- only take one finish, the Alcantara; the per-material wheels in the import packs cars_21-34 then
+-- get the mix.
+local ALCANTARA = { color = Color3.fromRGB(34, 34, 37), material = Enum.Material.SmoothPlastic, variant = "" }
+local CARBON = { color = Color3.fromRGB(62, 62, 68), material = Enum.Material.Plastic, variant = "CL_Carbon" }
 
-local function restyleSteer(p: BasePart, id: string, single: boolean)
-	local look = CarSkin.STEER_LOOK[id] or LEATHER
-	if not single then
-		local mat = p.Material
-		local c = p.Color
-		local plain = not (p:IsA("MeshPart") and p.TextureID ~= "") and not p:FindFirstChildOfClass("SurfaceAppearance")
-		local plastic = mat == Enum.Material.Plastic or mat == Enum.Material.SmoothPlastic or mat == Enum.Material.Sand or mat == Enum.Material.Fabric
-		if not (plain and plastic and math.max(c.R, c.G, c.B) > 0.5 and p.Transparency < 1) then
-			return
-		end
-	end
+local function finish(p: BasePart, look: { color: Color3, material: Enum.Material, variant: string })
 	if p:IsA("MeshPart") then
 		p.TextureID = ""
 	end
@@ -277,6 +295,53 @@ local function restyleSteer(p: BasePart, id: string, single: boolean)
 	end
 	p.Color = look.color
 	p.Material = look.material
+	p.MaterialVariant = look.variant
+end
+
+-- a wheel part that is plain (no texture of its own, not metal, chrome, glass or a light)
+local function plainSteerPart(p: BasePart): boolean
+	local mat = p.Material
+	return not (p:IsA("MeshPart") and p.TextureID ~= "")
+		and not p:FindFirstChildOfClass("SurfaceAppearance")
+		and mat ~= Enum.Material.Metal
+		and mat ~= Enum.Material.Neon
+		and mat ~= Enum.Material.Glass
+		and mat ~= Enum.Material.DiamondPlate
+		and mat ~= Enum.Material.Foil
+		and p.Reflectance < 0.3
+		and p.Transparency < 0.5
+end
+
+-- the steering wheel's clones: one part (a converted single-texture wheel) or several
+local function restyleSteer(parts: { BasePart })
+	local meshes = {}
+	for _, p in parts do
+		if p:IsA("MeshPart") then
+			table.insert(meshes, p)
+		end
+	end
+	if #meshes == 1 then
+		for _, p in parts do
+			finish(p, ALCANTARA)
+		end
+		return
+	end
+	local plain = {}
+	for _, p in parts do
+		if plainSteerPart(p) then
+			table.insert(plain, p)
+		end
+	end
+	local rim, best = nil, 0
+	for _, p in plain do
+		local extent = math.max(p.Size.X, p.Size.Y, p.Size.Z)
+		if extent > best then
+			rim, best = p, extent
+		end
+	end
+	for _, p in plain do
+		finish(p, if p == rim then ALCANTARA else CARBON)
+	end
 end
 
 -- cars that take only another model's steering wheel, put where their own one sits
@@ -2160,15 +2225,10 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		if steer then
 			local mountRoot = root.CFrame:Inverse() * groundCF * steer.mount
 			model:SetAttribute("SteerMount", mountRoot)
-			local meshes = 0
-			for _, t in steer.parts do
-				if t.part:IsA("MeshPart") then
-					meshes += 1
-				end
-			end
+			local clones: { BasePart } = {}
 			for i, t in steer.parts do
 				local p = t.part:Clone()
-				restyleSteer(p, id, meshes == 1)
+				table.insert(clones, p)
 				p.Name = "SkinSteer" .. i
 				p.CFrame = groundCF * steer.mount * t.offset
 				p:SetAttribute("SteerOffset", t.offset)
@@ -2179,6 +2239,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				w.C0 = mountRoot * t.offset
 				w.Parent = p
 			end
+			restyleSteer(clones)
 			-- where Driving's arms grip (10 and 2) and where the shoulders sit
 			if eyeRoot then
 				local r = steer.radius
@@ -2561,6 +2622,63 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			end
 		end)
 	end)
+	-- cabin fixes (see CABIN_RECOLOUR, HIDE_PARTS, FIREWALL)
+	if not liteMode then
+		local swapTo = CarSkin.INTERIOR_DONOR[id]
+		local cabinOf = if swapTo then swapTo.from else id
+		local recolour = CarSkin.CABIN_RECOLOUR[cabinOf]
+		local hideNames = CarSkin.HIDE_PARTS[cabinOf]
+		if recolour or hideNames then
+			local src = (ReplicatedStorage:FindFirstChild("CarModels", true) :: Instance):FindFirstChild(cabinOf, true)
+			-- the source parts' textures that are to be hidden, so their clones can be found
+			local hideTex: { [string]: boolean } = {}
+			if src and hideNames then
+				for _, d in src:GetDescendants() do
+					if d:IsA("MeshPart") and hideNames[d.Name] then
+						hideTex[d.MeshId] = true
+					end
+				end
+			end
+			for _, d in skin:GetDescendants() do
+				if d:IsA("MeshPart") then
+					local look = recolour and recolour[d.TextureID:match("%d+") or ""]
+					if look and d.Name:sub(1, 9) == "SkinWheel" then
+						look = { color = Color3.fromRGB(24, 24, 26), material = Enum.Material.SmoothPlastic }
+					end
+					if look then
+						d.TextureID = ""
+						d.Color = look.color
+						d.Material = look.material
+						d.MaterialVariant = look.variant or ""
+					end
+					if hideTex[d.MeshId] then
+						d.Transparency = 1
+					end
+				end
+			end
+		end
+		local fw = CarSkin.FIREWALL[id]
+		local eyeAt = model:GetAttribute("Eye")
+		local carWidth = model:GetAttribute("Width")
+		if fw and typeof(eyeAt) == "Vector3" and type(carWidth) == "number" then
+			local p = Instance.new("Part")
+			p.Name = "Firewall"
+			p.Color = Color3.fromRGB(14, 14, 16)
+			p.Material = Enum.Material.SmoothPlastic
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.Massless = true
+			p.CastShadow = false
+			p.Size = Vector3.new(carWidth - 0.9, fw.bottom - fw.top, fw.front - fw.back)
+			p.CFrame = root.CFrame * CFrame.new(0, eyeAt.Y - (fw.top + fw.bottom) / 2, eyeAt.Z - (fw.back + fw.front) / 2)
+			p.Parent = skin
+			local w = Instance.new("WeldConstraint")
+			w.Part0 = root
+			w.Part1 = p
+			w.Parent = p
+		end
+	end
 	-- traffic and parked cars (lite): only their few biggest pieces cast shadows, which is all
 	-- a car's shadow needs (55 traffic cars cast thousands; owner 2026-10-24: optimise)
 	if liteMode then
