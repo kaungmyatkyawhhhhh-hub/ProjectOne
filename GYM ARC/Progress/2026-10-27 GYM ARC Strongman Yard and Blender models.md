@@ -40,7 +40,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ## Also 27 Oct
 - **Powerlifting door** stayed shut after walking away and back (streaming); fixed, see [[GYM ARC - Powerlifting Gym]].
 - **Your body looks like Atlas's:** your own muscles use the same stage meshes as Atlas and everyone else (no live meshes, faster on phones). See [[GYM ARC - Muscles and Bodies]].
-- **Biceps** pulled in (only the front of the upper arm piece; now 12% less deep and tipped 6 degrees so the top leads); the arm-width cap tried first was undone. **Trainers** keep their muscles when you zoom out.
+- **Biceps** smaller: the arm meshes' biceps bulge reshaped (half way back), nothing else on the arm changed (earlier tries undone); the arm-width cap tried first was undone. **Trainers** keep their muscles when you zoom out.
+- **Valley city** no longer blocky from the beach / west of town (the real city shows everywhere; low-end phones keep the far city).
 - **VIP 30% OFF pass** id 2052738798 wired in. See [[GYM ARC - Monetization]].
 
 ## Owner rule

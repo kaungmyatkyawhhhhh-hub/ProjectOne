@@ -121,3 +121,6 @@ Your own body was rewritten up to 26 times a second while training (each one a 6
 
 ## Blob shadows and light shadows (20 Oct)
 Bodies cast no real shadow. Each one gets a cheap soft blob shadow instead (BlobShadowClient). Only 5 of the 296 lights cast shadows (the main spots of the starter gym, the pro gym and the posing stage). On a phone or a low-end device all light shadows are turned off (LightShadowsClient). At low graphics quality Roblox draws no shadows anyway. Most shadow draw calls on a PC come from the sun's shadows, which haven't been changed (owner decides). Numbers: [[2026-10-20 GYM ARC Body lag]].
+
+## Pro Gym valley city shows from everywhere (27 Oct)
+Owner: "the Pro Gym valley city becomes blocky". From the beach / west / north of town (outside BackdropClient's area x > 20, z < 200) the cheap far city (dark blocks) showed. The real city is Blender meshes now (1,388 parts, was 3,143; Automatic mesh detail), so `BackdropClient` shows it from everywhere; only low-end phones (`Shared/LowEnd`) still get the far city outside that area. Tried first: full mesh detail (RenderFidelity Precise, ~576k triangles) made no visible difference at that distance, undone. Shot `city_from_beach_real.jpg`.
