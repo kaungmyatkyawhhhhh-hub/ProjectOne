@@ -47,5 +47,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ## Strongman Yard: Alter 2 + new look
 - The yard now unlocks at Alter 2 (kept forever), the back door has its own lock; the yard got a proper floor, weathered containers, light towers, string lights, wall lamps, bleachers and a tent. See [[GYM ARC - Strongman Yard]].
 
+## Powerlifting record board
+- The 1 / 2 / 3 now list only players in this server (gone when they leave); the all-time record moved to the top line. See [[GYM ARC - Powerlifting Gym]].
+
 ## Owner rule
 - From 27 Oct no code export / commits to ClaudeOne: Studio is the only copy, notes only in this vault.

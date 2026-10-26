@@ -66,3 +66,10 @@ Built 23 Oct ([[2026-10-23 GYM ARC Prompt - 58 Pro Gym lights, gym pacing, Power
 
 ## Door fix (27 Oct, owner: "I can't go in the powerlifting gym and I have over Growth Spurt 5")
 Streaming unloaded the loading door's parts when you walked away and brought them back with the server's closed state (the invisible Blocker solid again), while PowerliftingClient still thought the door was open, so it never re-opened. It now re-applies whenever the blocker's collision doesn't match (same for the Strongman Yard gate). Tested: away and back twice, then walked in.
+
+## Record board: IN THIS SERVER (27 Oct)
+Owner: "the server record shows even the old top 1, 2, 3 that already left the server". The 1 / 2 / 3 were the saved ALL-TIME list (all servers, kept forever), easy to read as this server's ranking. Now (PowerliftingService) each lift's column shows:
+- top line **ALL-TIME RECORD**: the saved list's #1 (all servers);
+- **IN THIS SERVER** 1 / 2 / 3: only players in this server now, by their best: their saved PR on the lift's machines (PLSquat / PLMonolift, PLBench, PLDeadlift) as they join, raised by this session's lifts. A player who leaves comes off the list at once.
+- The all-time top 3 is still saved and merged across servers as before (just not listed on the board). NEW SERVER RECORD (board flash, judge lights) now fires when someone beats the best lifter in the server right now.
+- Tested: joining put LuigiRED's PRs (875 / 595 / 875 LB) on IN THIS SERVER with the all-time line above. Not tested with 2 players (needs a team test).
