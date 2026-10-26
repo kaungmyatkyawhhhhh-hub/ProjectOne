@@ -124,3 +124,28 @@ Bodies cast no real shadow. Each one gets a cheap soft blob shadow instead (Blob
 
 ## Pro Gym valley city shows from everywhere (27 Oct)
 Owner: "the Pro Gym valley city becomes blocky". From the beach / west / north of town (outside BackdropClient's area x > 20, z < 200) the cheap far city (dark blocks) showed. The real city is Blender meshes now (1,388 parts, was 3,143; Automatic mesh detail), so `BackdropClient` shows it from everywhere; only low-end phones (`Shared/LowEnd`) still get the far city outside that area. Tried first: full mesh detail (RenderFidelity Precise, ~576k triangles) made no visible difference at that distance, undone. Shot `city_from_beach_real.jpg`.
+
+## Optimization pass, step 0: measured (27 Oct, prompt 67)
+Studio play test on the owner's laptop, graphics quality Level 2, window 871 x 584 (phone-like). Laptop numbers, not a real phone (the owner: a phone will be slower).
+
+| Spot | FPS avg / worst 1% | Render CPU | Parts on device | Lights on | SurfaceGuis on |
+|---|---|---|---|---|---|
+| Starter Gym | 15 / 12 | 31 ms | 32,176 | 282 | 1,498 |
+| Plaza | 15 / 14 | 15 ms (+29 ms GPU) | 32,318 | 282 | 1,502 |
+| Pro Gym (city view) | 15 / 12 | 27 ms | 31,869 | 282 | 1,507 |
+| Powerlifting Gym | 15 / 14 | 32 ms | 32,142 | 282 | 1,507 |
+
+- Client memory ~4.9 GB in Studio (Studio itself counts; LuaHeap 1.3 GB, Gui 1.4 GB, Instances 263 MB, BaseParts 256 MB). Physics 1-2 ms: drawing is the cost, not physics.
+- The same ~32,000 parts in every spot: the streaming radius covers almost the whole map.
+- **Soak test, 35 min**, one player benching on AutoLift: server Lua memory 73-81 MB (flat, no climb), server instances 184,800-185,300 (flat), heartbeat 0.1-0.7 ms; client Lua 70-117 MB (goes up and down with garbage collection, no climb), client instances ~108,500 (flat), PlayerGui 16,117 -> 16,153 (+36 in 35 min: tiny). **No memory leak.**
+- Biggest costs found: (1) everything streamed in everywhere; (2) **1,284 plate number labels** (both faces of every plate showed a number); (3) 282 lights on at midday (gym interior lamps everywhere); (4) the barbell plates: 637 plates x 11 parts = 7,007 parts (23% of the world); (5) buildings 3,357, street 2,818, squat racks ~3,000, palms 1,140, Pump Shop interior 1,166 parts.
+
+## Step 1 done: plate labels (27 Oct)
+The 7 plate templates (ReplicatedStorage.GymAssets.Plates) had both number faces on; MachineService only ever turned the outermost plate's on and never the others off. Templates now off (the outermost plate's FaceRight still turns on, as designed); decor plates (plate trees, racks, loose) keep a number only on the face at the end of each stack (229 kept, 247 off).
+
+## Step 2 in progress: remodel into meshes (owner: "remodel everything listed")
+Tools in `Downloads\gym_arc_modelsemodel`: `export.lua` (Studio: marks every mergeable part with Merge / MergePivot and posts its shapes), `receiver.py`, `build.py` (Blender: each unit's parts become one mesh per material, the parts' exact colours as vertex colours, identical copies share one mesh), `out\*.fbx`.
+- props.fbx: 269 meshes for palms, oaks, benches, street lamps, decor plates, squat racks (5,722 parts). The racks' working parts (bar, posts, prompt...) stay.
+- town.fbx: 288 meshes for buildings, street, plaza, parks, skate park, greenery, Pump Shop interior, Strongman Yard (5,074 parts; only non-colliding, non-glowing, non-sign pieces; textured materials only on pieces under 8 studs, so walls keep their texture).
+- plates.fbx: 21 white meshes (Rim / Hub / Hole per template) so the gold / red recolour still works.
+- After the owner imports the three files: `require(game.ServerStorage._Builders.RemodelInstall).Run()` places the meshes and moves the replaced parts to `ServerStorage.RemodelBackup_27Oct` (`.Undo()` puts them back). Expected: about 10,850 parts -> about 3,000 meshes.
