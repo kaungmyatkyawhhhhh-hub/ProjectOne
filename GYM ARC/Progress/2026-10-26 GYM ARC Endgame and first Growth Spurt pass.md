@@ -39,5 +39,9 @@ Prompt: [[2026-10-26 GYM ARC Prompt - Endgame and the open decisions]] (after [[
 
 ## Needs the owner
 - Tier 1 was set to "8 hours" on 24 Oct from an estimate; the sim says ~2 h. Kept as is (more frequent rewards); say if it should be slower.
-- "Daily reward ready" notifications: Creator Hub > the experience > Engagement > Notifications: make a notification string (e.g. "Your daily reward is ready!"), then tell Claude its id. Sending also needs an Open Cloud API key saved as a secret.
-- Image ownership: check in the Creator Dashboard that the 37 new images belong to the group like the Tier 1 ones, or the skins may not show in the live game.
+- Image ownership: the alter images (Tier 1 too) were on the owner's account, not the group: that is likely why Tier 1 skins never showed in the live game. Owner is importing `Downloads\gym_arc_altersor_group` (56 files: the in-use Tier 1-3 maps + the 5 Tier 1 popup backgrounds) to the group by hand; then the ids go into Config/Alters / AlterThemes and the skins are rebuilt.
+
+## Daily reward notifications (26 Oct)
+- Message id `c7200b38-2ab4-cc40-b4a3-8a0ab40d67fc` (owner). `Config/Notifications`, `Server/NotifyService`, opt-in prompt in `DailyClient` after the daily claim (once a session).
+- A player who leaves is queued for the next UTC reset (+ up to 30 min); any live server sends it through Open Cloud. Not in Studio.
+- **Needs the owner:** an Open Cloud API key (user notifications write, this experience) saved in Creator Hub > Secrets as `notify_key` (domain apis.roblox.com). Until then nothing is sent (one warning per server).
