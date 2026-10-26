@@ -20,7 +20,14 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
   - **AtlasStone** (radius 1, dark granite with chalk on the sides; scale per station), **Yoke** (red frame, steel crossbar, bumpers), **FarmersFrames** (two red frames, steel grips, bumpers).
   - **Shrub** (3.8 x 2.4 x 3.2 like the town bushes), **Flowers** (a clump of 7 stems), **PottedPlant** (clay pot, arching leaves).
 - Files: `C:\Users\kaung\Downloads\gym_arc_models\<Name>.fbx` (+ `.blend` to edit). Previews: `Screenshots/test_2026-10-27/blender_*_preview.png`.
-- **Owner step:** import them in Studio (Avatar/Model tab > Import 3D, one file at a time, keep "vertex colors" on), then tell Claude; Claude swaps them in for the part-built atlas stones, yoke, farmer's frames, the 46 town bushes, 49 flower clumps and 9 potted plants (keeping positions and sizes).
+- **Imported and swapped in (27 Oct):** the owner imported the 6 files; the meshes live in `ServerStorage.ModelMeshes` (white tint shows the vertex colours; the stone tinted #B5B7BA).
+  - Yard: the 3 atlas stones, the yoke and the farmer's frames are now one mesh each in their station's Rides folder. The builder `StrongmanStations` uses the meshes when they are there. Old parts: `ServerStorage.StrongmanPropsBackup_27Oct`.
+  - Town: all 46 bushes, 49 flower clumps and 9 potted plants are meshes (same places and footprints, random turn). Old models: `ServerStorage.PlantsBackup_27Oct` (each keeps a FromPath attribute).
+- **Part 2: trucks and the city** (owner: "model the trucks too, and the city"), script `gymarc_truck_city.py`:
+  - **PickupTruck.fbx**: TruckPaint (white: takes each truck's colour), TruckTrim (tyres, chrome, grille, lights), TruckGlass.
+  - **CityBuildings.fbx**: 3 styles for the Pro Gym valley city (250 box buildings now): Low (storefront, cornice, water tank), Mid (office, setback top), Tall (glass tower, two setbacks, crown). Each is Body + WinLit (glows at night: gets the NightColor attribute) + WinDark (named "Windows": goes dark at night), so BackdropClient's night lights keep working.
+  - Waiting for the owner to import them; then Claude swaps the 2 yard trucks and the 250 city buildings (style picked by height, each scaled to its old box, colours kept).
+- Scripts kept in `Downloads\gym_arc_models\scripts`.
 
 ## Owner rule
 - From 27 Oct no code export / commits to ClaudeOne: Studio is the only copy, notes only in this vault.
