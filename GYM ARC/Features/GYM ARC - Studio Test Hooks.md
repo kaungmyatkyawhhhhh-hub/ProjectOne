@@ -44,3 +44,6 @@ Workspace attribute `TestStatueMe` = true: the first player becomes the statue (
 
 ## TestLowEnd (20 Oct)
 Workspace attribute `TestLowEnd` = true: your own body acts as if on a low-end phone. It shows the low-poly stage meshes when the camera is more than 15 studs away, and the live body nearer than 12. Studio only. See [[2026-10-20 GYM ARC Body lag]].
+
+## TestShowdown (27 Oct)
+Workspace attribute `TestShowdown` = true: starts a Strongman Showdown now (players in the yard only). `TestMachine` = a station name (e.g. "TruckPull1") puts you on that station. Studio only. See [[GYM ARC - Strongman Yard]].

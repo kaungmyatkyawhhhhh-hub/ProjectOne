@@ -91,3 +91,6 @@ The Store's Auras tab and the "new aura" message now open the Inventory.
 
 ## Boosts tab (21 Oct, prompt 14)
 The Inventory has a **Boosts** tab first now (Boosts | Titles | Auras | Items): see [[GYM ARC - Boosts Inventory]]. The Items tab keeps DNA Tokens and the running boosts (the shakes moved to Boosts).
+
+## Yard King (27 Oct)
+**Yard King** (Epic, Social): win a Strongman Showdown (1st place, `stats.yardWins`). See [[GYM ARC - Strongman Yard]].

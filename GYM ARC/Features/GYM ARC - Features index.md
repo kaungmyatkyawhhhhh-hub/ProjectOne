@@ -56,6 +56,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Day and Night]]: 20-minute day in town, lights at night (done)
 - [[GYM ARC - Photo Mode]]: photo mode at the mirrors and the posing stage (done)
 - [[GYM ARC - NPC Rivals]]: Benny, Coral and Dante, one rival per gym with a challenge (done)
+- [[GYM ARC - Strongman Yard]]: outdoor yard behind the Powerlifting Gym, 7 strongman stations, Strongman Showdown (done 27 Oct)
 
 ## Money, sound, tech
 - [[GYM ARC - Monetization]]: OFF today (framework only); turning ON is planned (in progress)

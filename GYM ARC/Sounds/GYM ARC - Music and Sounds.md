@@ -201,3 +201,11 @@ All reused from sounds already in the game (Roblox licensed library), swap freel
 - `GoodLift` 9126073318 (PSE Synth Sparkle Bell Ding 1, lower): judge lights.
 - `PlateDrop` 9116750726 / 9116751108 (Metal Plate Impact, lower pitch): a heavy pull set down.
 - Area music `Powerlifting`: the owner's tracks 139777823649977, 113417603188158, 1840007392 for now.
+
+## Strongman Yard (prompt 63, 27 Oct; [[GYM ARC - Strongman Yard]])
+Claude's picks from Roblox's licensed library (PSE), swap any you don't like.
+- `AirHorn` 9114075649: the showdown starts.
+- `StoneThud` 9114036511: an atlas stone lands on the platform.
+- `ChainRattle` 9113763589: yoke / farmer's walk steps.
+- `TruckCreak` 9113969124: the truck rolls.
+- `RecordCheer` (reused): crowd cheer during the showdown.
