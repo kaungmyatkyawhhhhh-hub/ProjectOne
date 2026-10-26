@@ -55,3 +55,7 @@ Tested on the phone layout and the PC layout with the Studio test crews: the ful
 - MY CREW: the leader sees a **Kick** button on every other member's row (officers and members, not themselves). Tap once = red "Sure?" for 3 s, tap again = kicked.
 - `CrewService` action `Kick` (leader only, checked again inside the DataStore update). The kicked player is told "You were removed from <crew> [TAG]" and their tag goes: at once in this server, at the next score refresh in another server, or when they next join if offline.
 - Tested: the button layout with a fake crew (no overlap; none on the leader). Not tested with two real players.
+
+## Invite friends and Friend Boost (26 Oct; [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]])
+- An "Invite friends" row in the Crew window opens Roblox's invite prompt; one invite prompt also shows once after Growth Spurt 2 (`FriendClient`).
+- Friend Boost: +10% gains per Roblox friend in the server, up to +30% (`Config/Social.Friends`, `Server/FriendService`).

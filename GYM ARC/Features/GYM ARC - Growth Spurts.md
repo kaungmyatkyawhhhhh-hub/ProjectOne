@@ -77,3 +77,6 @@ The GROWTH SPURT card (right column) and the machine strip are quiet chrome card
 - At 25%, 50% and 75% of the goal bar (the same share the HUD shows): a popup ("Growth Spurt 1: 50%, +14 coins"), a sound and a few coins (half a minute of coins at your stage). At 75%: "Almost there!". Every spurt, not at 7'0" (alters have their own).
 - `Config/GrowthSpurts` Milestones / MilestoneCoinMinutes / Share, `Server/SpurtMilestoneService` (checked after reps, data.spurtMilestones), popup in ProgressClient.
 ![[GYM ARC/Screenshots/funnel_fixes/milestone_75.jpg]]
+
+## LVL never drops (26 Oct; [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]])
+- The top bar's LVL = average muscle level + `stats.levelBase` (the levels each Growth Spurt / Body Alter reset), `Muscles.Lvl`. After a spurt it stays where it was instead of going to 0. Auras, guides, crew list and the LEVEL board use the same number.

@@ -62,3 +62,7 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 ![[GYM ARC/Screenshots/ui_v3/tutorial/phone_01_first_step.jpg]]
 ![[GYM ARC/Screenshots/ui_v3/tutorial/phone_04_tap_stop_lvl_up.jpg]]
 - (owner, 23 Oct, option B) The shake step on a machine: "Tap STOP, then tap your free shake to drink it." with the arrow on STOP, then on the shake once off; the safety net waits 25 s.
+
+## GO TRAIN after the tutorial (26 Oct; [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]])
+- Funnel: 54% left between the end of the tutorial and the first Growth Spurt goal. Until the first Growth Spurt a gold GO TRAIN <GROUP> button sits at the bottom centre (off a machine, nothing else open); it teleports you to a machine for the group furthest behind (`ProgressClient`).
+- The stamina step needs 10 reps (was 20). Finish toast: "Tap GO TRAIN for your first Growth Spurt!"

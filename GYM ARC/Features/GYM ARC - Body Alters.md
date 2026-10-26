@@ -9,7 +9,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]], prompt 21, built 21 Oct). Progress: [[2026-10-21 GYM ARC Body alters]].
 
 ## How it works
-- **Ladder:** 30 alters in 6 tiers of 5 (Human, Stone, Metal, Gem, Elements, Legend). Alter 0 = Natural (the normal skin stages). Only Tier 1 (Pumped, Shredded, Tanned, Vascular, Peak) has textures; later alters show "Coming soon" and can't be reached yet.
+- **Ladder:** 30 alters in 6 tiers of 5 (Human, Stone, Metal, Gem, Elements, Legend). Alter 0 = Natural (the normal skin stages). Tiers 1-3 have textures (Tier 1 Pumped..Peak; Tier 2 Stone and Tier 3 Metal since 26 Oct); Tiers 4-6 show "Coming soon" and can't be reached yet.
 - **Goal:** at 7'0", every muscle group at a level, like a Growth Spurt goal: alter 1 = 205, then +25 per alter (24 Oct; was 95, +10).
 - **Doing it:** BODY ALTER READY popup (also on a machine) with ALTER / Later; the player chooses when. Every muscle keeps 25% of its EXP, height stays, the new skin goes on, gains bonus +15% per alter (stacking, outside the gains cap). A camera / flash / "ALTER 3: TANNED" moment.
 - **Safety:** the save is written before the alter (if it fails nothing changes) and again right after. Old 7'0" saves start at Natural with their muscles.
@@ -63,3 +63,8 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - Every finished alter tier (5 alters) adds **4 inches**: Tier 1 done (Peak) = 7'4", Tier 2 = 7'8", ... Tier 6 = 9'0".
 - `Config/GrowthSpurts.AlterTierInches = 4`, `AltersPerTier = 5`, `GrowthSpurts.PlayerHeight(data)` (Growth Spurt height + tiers from `data.alter.highest`).
 - Used for the body (BodyService), top bar, menu, mirror, posing shows, titles, Tallest board. The statue / best physique still use the Growth Spurt height.
+
+## Tiers 2 and 3 (26 Oct; [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]])
+- Stone: Clay, Sandstone, Granite, Marble, Obsidian. Metal: Bronze, Iron, Steel, Chrome, Gold. Our own procedural maps (`tools/alter_textures.py`, `Downloads\gym_arc_alters	ier2_stone`, `tier3_metal`), metalness maps on Obsidian and the metals.
+- `tone = "Raw"` in Config/Alters: their own colours, no skin tint (`Alters.Tint` = white). Popups use the tier colours (no background art yet).
+- Pacing sim (`lune run tests/pacing alters 15`): Tier 1 ~2 h, Tier 2 ~2 h, Tier 3 ~2 h 40 of bot play. The 24 Oct "8 hours" was an estimate; the sim says ~2 h. Goals unchanged.
