@@ -117,3 +117,9 @@ At 7'0" a Body Alter's texture set replaces the 5 skin stages at every muscle si
 - Trainers now wear one solid color per outfit (`Shared/Outfit`, attributes OutfitShirt / OutfitPants / OutfitSleeves / OutfitLegs), so nothing can tear. Their outfit pieces are matte Fabric; the elbow / knee balls take the outfit color under a sleeve.
 - **Players' own classic shirts still tear on other people's screens** (the same meshes). The real fix is re-exporting the stage meshes with clean texture seams (owner's import); not done.
 ![[GYM ARC/Screenshots/trainer_outfits/before_ripped_sam.jpg]]
+
+## Your own body on the stage meshes (27 Oct, owner: "I want my muscles to look like Atlas's muscles, the meshes and the mesh positions on the body")
+- Your own character now wears the same static body stage meshes as Atlas, the NPCs and what other players always saw of you (BodyStages / LimbStages, from your own 18 muscle numbers in ClientData). No live EditableMeshes any more (0 built), so no ~40 ms mesh writes and about a third of the triangles.
+- `MuscleClient` `OWN_STAGES = true`: your rig runs at priority 99 (MuscleRig makes live meshes only at 100+). `false` brings the live muscle v9 meshes back.
+- What stays Atlas's own: his shape (V-taper frame, shoulders x1.3, thicker arms / legs, 7'0") and his marble. Players keep their genetics' frame.
+- Screenshots: `Screenshots/test_2026-10-27/body_01_own_stages_with_atlas.jpg`, `body_02_own_stages_front.jpg`.

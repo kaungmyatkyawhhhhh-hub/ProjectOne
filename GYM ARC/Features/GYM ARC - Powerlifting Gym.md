@@ -63,3 +63,6 @@ Built 23 Oct ([[2026-10-23 GYM ARC Prompt - 58 Pro Gym lights, gym pacing, Power
 - No more alley: the 6 Main Street buildings in front of it went to `ServerStorage.PowerliftingFrontRemoved_23Oct`; its front faces Main Street, lined up with the starter gym (gym row: Powerlifting, Starter, Pro), with a paved forecourt.
 - Facade (`Workspace.PowerliftingGym.Facade`, `tools/builders/PowerliftingFront`): brick base, 8 industrial windows, steel columns, lit POWERLIFTING / GYM ARC sign, wall lamps, side door, sawtooth roof with skylights, vents and AC units, chalk barbell mural on the east wall.
 - Loading door: locked = steel shutter with a black + white "UNLOCKS AT GROWTH SPURT 5" plate and padlock; tapping it (ClickDetector on the `Blocker`) or walking up shows the locked toast with progress. Unlocked = rolled up.
+
+## Door fix (27 Oct, owner: "I can't go in the powerlifting gym and I have over Growth Spurt 5")
+Streaming unloaded the loading door's parts when you walked away and brought them back with the server's closed state (the invisible Blocker solid again), while PowerliftingClient still thought the door was open, so it never re-opened. It now re-applies whenever the blocker's collision doesn't match (same for the Strongman Yard gate). Tested: away and back twice, then walked in.

@@ -37,5 +37,10 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ## Starter Pack popup
 - Every 15 minutes of play and at most 3 a session (was every 5 minutes); the SHOP DEAL tag stays. See [[GYM ARC - Monetization]].
 
+## Also 27 Oct
+- **Powerlifting door** stayed shut after walking away and back (streaming); fixed, see [[GYM ARC - Powerlifting Gym]].
+- **Your body looks like Atlas's:** your own muscles use the same stage meshes as Atlas and everyone else (no live meshes, faster on phones). See [[GYM ARC - Muscles and Bodies]].
+- **VIP 30% OFF pass** id 2052738798 wired in. See [[GYM ARC - Monetization]].
+
 ## Owner rule
 - From 27 Oct no code export / commits to ClaudeOne: Studio is the only copy, notes only in this vault.
