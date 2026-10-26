@@ -202,3 +202,6 @@ Pity unchanged (100 rolls without Epic+ = next one Epic). The odds lists read th
 - Heights x84/90 with the 4-inch spurts: Sam 4'8", Nia 5'1", Lou 5'7", Rex 6'1", Duke 6'4", Volta 6'5", The Shadow 6'8", Atlas 7'0" (`MaxHeightInches` 84).
 - Your own trainer fades to 75% see-through between the camera and you (TrainerFollowClient).
 - Bug fixed: a Trainers change while the models loaded was missed (no trainer that session); it now listens before the first sync.
+
+## Trainers keep their muscles far away (27 Oct)
+Owner: "make it so your trainers' muscles don't disappear when you zoom out too far". Trainers counted as NPCs, which go to the plain body past 60 studs (LOD). Now they are their own kind in `MuscleClient` ("trainer": painted clothes kept like an NPC, no LOD); they keep their muscles out to the normal 180-210 studs every body has. Tested: Atlas showed all 13 muscle pieces from 119 studs.
