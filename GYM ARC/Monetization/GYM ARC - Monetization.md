@@ -181,3 +181,6 @@ All ON and tested through ProcessReceipt: [[2026-10-23 GYM ARC Shop product IDs 
 | Small | 25 | 1,000 | 2,000 | 3,300 (was 6,550) |
 | Medium | 99 | 5,000 | 6,000 | 9,850 (was 39,350) |
 | Large | 249 | 15,000 | 15,000 | 19,700 (was 118,100) |
+
+## Starter Pack popup calmer (27 Oct)
+Owner: "a Starter Pack popup every 5 minutes may annoy kids and push them away; every 15 minutes, or at most 3 times per session, and keep the DEAL tag on SHOP." Now every 15 minutes of play AND at most 3 popups a session (`Monetization.StarterPack.PopupMinutes = 15`, `PopupsPerSession = 3`, StarterPackClient). The red DEAL tag on the SHOP tile stays on the whole time the deal runs (tap = the offer). Still no popups in the tutorial or after Growth Spurt 4 (then it flies into the SHOP).

@@ -34,5 +34,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - All Blender templates: `ServerStorage.ModelMeshes` (truck / city / lift buckle pieces carry an Offset attribute for placing).
 - Scripts kept in `Downloads\gym_arc_models\scripts`.
 
+## Starter Pack popup
+- Every 15 minutes of play and at most 3 a session (was every 5 minutes); the SHOP DEAL tag stays. See [[GYM ARC - Monetization]].
+
 ## Owner rule
 - From 27 Oct no code export / commits to ClaudeOne: Studio is the only copy, notes only in this vault.
