@@ -40,7 +40,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ## Also 27 Oct
 - **Powerlifting door** stayed shut after walking away and back (streaming); fixed, see [[GYM ARC - Powerlifting Gym]].
 - **Your body looks like Atlas's:** your own muscles use the same stage meshes as Atlas and everyone else (no live meshes, faster on phones). See [[GYM ARC - Muscles and Bodies]].
-- **Biceps** no longer a ball on short thick arms (arm stage capped at Atlas's proportions). **Trainers** keep their muscles when you zoom out.
+- **Biceps** pulled in (only the front of the upper arm piece, 20% less deep); the arm-width cap tried first was undone. **Trainers** keep their muscles when you zoom out.
 - **VIP 30% OFF pass** id 2052738798 wired in. See [[GYM ARC - Monetization]].
 
 ## Owner rule
