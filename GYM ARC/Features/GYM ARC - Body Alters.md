@@ -70,4 +70,4 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - Pacing sim (`lune run tests/pacing alters 15`): Tier 1 ~2 h, Tier 2 ~2 h, Tier 3 ~2 h 40 of bot play. The 24 Oct "8 hours" was an estimate; the sim says ~2 h. Goals unchanged.
 
 ## Overhead ALTER pill styled (26 Oct, owner: "like the granite button")
-- The "ALTER n" pill over the nametag looks like that alter's ALTER button in the BODY ALTER READY popup: the alter's accent with a darker bottom edge, a dark outline, chunky white LuckiestGuy letters with a dark stroke, and a faint layer of its popup art (Tier 1) or its own skin texture (Tiers 2-3: granite speckles, gold shine). Your own is still smaller and faded. `OverheadTitleClient`.
+- The "ALTER n" pill over the nametag looks like that alter's ALTER button in the BODY ALTER READY popup: the alter's accent with a darker bottom edge, a dark outline, white letters with a dark stroke in the NEXT alter card's heavy italic font (Montserrat Black Italic), no texture (owner, same day). Your own is still smaller and faded. `OverheadTitleClient`.
