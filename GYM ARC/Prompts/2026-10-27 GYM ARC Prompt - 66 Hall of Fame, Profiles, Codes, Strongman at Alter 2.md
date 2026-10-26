@@ -1,13 +1,11 @@
 ---
 date: 2026-10-27
 tags: [gymarc, prompt]
-status: in progress
+status: todo
 ---
 # 66 Hall of Fame, Profiles, Codes, Strongman at Alter 2
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
-
-Part 4 (Strongman at Alter 2) done 27 Oct: [[GYM ARC - Strongman Yard]]. Parts 1-3 not started.
 
 ```text
 Big endgame + retention update (owner, 27 Oct). The game is live: change carefully, never delete player data (migrate), never undo the owner's manual Studio changes. Follow CLAUDE.md Speed rules. Mobile first. All numbers in Config. Owner rule: Studio is the only copy, so do File > Save to Roblox after each part and remind me to download a backup copy. Work in this order, test each part before the next.
@@ -26,6 +24,8 @@ A) WHEN: after ALTER 15 (end of Tier 3). This requirement NEVER moves in future 
 B) CONFIRM SCREEN (shows exactly what happens before you agree):
 - "YOU KEEP": trainers (levels/evolutions), coins, alter skins (as cosmetics), titles, auras, styles, gear, passes and everything bought with Robux, LVL (keeps counting).
 - "YOU START OVER": height, Growth Spurts, muscle levels, Body Alters 1-15 (their gains).
+- GYMS + FEATURES STAY UNLOCKED (owner, 27 Oct): every gym (Beach, Pro, Powerlifting), the Strongman Yard and every feature already unlocked (trainers + slots, crews, posing shows, arm wrestling, shops, auras, guides) stay open after the reset. Save unlocks separately from the current Growth Spurt ("unlocked forever" flags), so a player at Spurt 0 with ★1 can still walk into the Powerlifting Gym. Weight tiers still unlock by muscle level as normal (so they can't lift the heaviest weights right away), and the gym bonus applies in whatever gym they train. Locked signs / unlock guides never show again for things they already unlocked. Posing show tiers (Local..Universe) follow the CURRENT run's Growth Spurt so matches stay fair.
+- Show "GYMS AND FEATURES STAY UNLOCKED" as its own line in YOU KEEP.
 - "YOU GET": the next star and its perks (table below), your statue in the Hall, a free trainer roll + the star-only aura on the first star.
 - Big gold ENTER THE HALL OF FAME button + "Not yet". Never forced; players can stay at the end forever.
 C) STARS (permanent, saved; Config table):

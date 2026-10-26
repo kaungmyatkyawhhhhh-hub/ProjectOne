@@ -50,5 +50,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ## Powerlifting record board
 - The 1 / 2 / 3 now list only players in this server (gone when they leave); the all-time record moved to the top line. See [[GYM ARC - Powerlifting Gym]].
 
+## Beach gym and skate park expanded
+- Beach gym: a shoreline deck with 5 new exercises under sail shades. Skate park: a north strip with a half pipe, a rail and a kicker. Old looks kept. See [[GYM ARC - Town and Gyms]].
+
 ## Owner rule
 - From 27 Oct no code export / commits to ClaudeOne: Studio is the only copy, notes only in this vault.

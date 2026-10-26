@@ -67,3 +67,15 @@ The starter gym felt packed after prompt 16 (every machine, dumbbells, the Agenc
 ## Beach gym upgrade, city in Studio (26 Oct; [[2026-10-26 GYM ARC Fast spurts, menu, beach and skate park]])
 - Beach gym: mat edging + gold lines, tiki torches, festoon lights, BEACH GYM board, surfboard racks, umbrellas + loungers (`BeachGym.Upgrade`, backup ServerStorage.BeachGymBackup_26Oct).
 - The Pro Gym city is in `Workspace.Backdrops` in Studio; Main moves it into ReplicatedStorage.Backdrops at game start.
+
+## Beach gym expanded (27 Oct, owner: "keep the old beach and skatepark and expand them")
+- The old look kept; the compound grows 18 studs north to the water (`Town.BeachGym.NorthDeck`): the north rope fence, its lamps and the corner flags moved out to z 257, the side fences lengthened, the boardwalk continued to the north opening.
+- New shoreline deck: two speckled rubber mats like the weights mats, two copies of the calisthenics sail shade, and **5 new exercises** the beach didn't have: Deadlift, Overhead Press, Incline Bench, Barbell Row, Crunch Bench (the starter gym's machines, `Gym = Beach`, so they open with the beach gym at Spurt 1; facing south like the other beach stations). Tested: all 5 put the player on and lift.
+- Backup: `ServerStorage.BeachGymBackup_27Oct`.
+
+## Skate park expanded (27 Oct)
+- Old look kept; the concrete slab grows 18 studs north (`Town.SkatePark.NorthExtension`): the north fence, both floodlights, the art wall and the north lamp moved to the water, the side fences lengthened.
+- New: a **half pipe** (two copies of the park's own quarter pipe facing each other across 24 studs of flat), a flat grind rail (tagged GrindRail, grinds like the others) and a kicker.
+- Beach decor that stood in the new strip (2 palms, driftwood, a shell, an umbrella / chair / towel set) moved just outside the fence.
+- Backup: `ServerStorage.SkateParkBackup_27Oct`. Not tested: riding the half pipe on a board (needs a real player).
+- Shots: `beach_expand_top.jpg`, `beach_expand_lift.jpg`, `skate_expand_top.jpg`, `skate_expand_halfpipe.jpg` in `Screenshots/test_2026-10-27`.
