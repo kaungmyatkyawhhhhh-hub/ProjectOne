@@ -80,3 +80,10 @@ Built without screenshots (Studio's capture kept hanging; the owner said go ahea
 - **Barbell holder** (6 upright bars) and two bumper-plate stacks.
 - **Painted slogans** on the brick: NO DAYS OFF (west), LIFT HEAVY (east), EARN IT x2 (back), white, a little worn.
 - 112 new parts; checked: no new solid part overlaps anything.
+- After Studio was restarted the screenshots worked again: the first lighting washed the floor out white, so the lamps went to 1.25 / range 32 and the spotlights to 1.2 / range 24; the medicine balls (buried in their rack) now sit on 3 shelves; foam rollers smooth.
+
+| | Shot | What it shows |
+|---|---|---|
+| 46 | ![[GYM ARC/Screenshots/test_2026-10-26/46_powerlifting_makeover.jpg]] | The whole gym after the makeover |
+| 47 | ![[GYM ARC/Screenshots/test_2026-10-26/47_powerlifting_strongman.jpg]] | Strongman turf: stones, tire, yoke, sled |
+| 48 | ![[GYM ARC/Screenshots/test_2026-10-26/48_powerlifting_warmup.jpg]] | Warm-up corner: ball rack, foam rollers, bumper stacks |
