@@ -54,7 +54,10 @@ Owner's requests in chat after [[2026-10-26 GYM ARC Full test pass with screensh
 - **Alter skin showcase** (Studio only): check the Workspace attribute `TestAlterShowcase` and press Play: 16 max bodies (Natural + every skin) on a platform outside the map, you're taken there.
 
 ## Calisthenics and small UI (27 Oct)
-- **Beach gym calisthenics work:** the decorative dip bars are now a real **Dips** station and the monkey bars a real **Hanging Leg Raise** station (copies of the Pro Gym's machines, beach style, attribute Gym = Beach so they open with the beach gym at Spurt 1). Tested: 3 dips = chest EXP 29 -> 389 and a triceps level; 3 leg raises = Abs 213 -> 219. The two beach pull-up bars already worked. The rings stay decoration. The old decor parts: ServerStorage.BeachCaliDecor_26Oct.
+- **Beach gym calisthenics work:** the decorative dip bars are now a real **Dips** station and the monkey bars a real **Hanging Leg Raise** station (copies of the Pro Gym's machines, beach style, attribute Gym = Beach so they open with the beach gym at Spurt 1). Tested: 3 dips = chest EXP 29 -> 389 and a triceps level; 3 leg raises = Abs 213 -> 219. The two beach pull-up bars already worked. Then the rest (owner: "you haven't done the parabar, lowbar, rings, wall bars"): every piece works, the equipment looks the same (invisible stations whose hand points sit on the real bars: `RingDips`, `BarDips`, `WallLegRaise`, `PushUps` in BeachGym):
+  - **Rings:** ring dips (Dips). **Low bar:** straight-bar dips (Dips). **Wall bars:** hanging leg raises, back to the wall (Hanging Leg Raise).
+  - **Parallettes:** NEW **Push-Ups** machine (chest, triceps, front delts; `Config/Machines` beach entry, pose `PushUp`: placed like a dip, the client tips the body into a plank with the feet on the floor, elbows bend each rep).
+  - Tested by numbers (screenshots were down): hands on the bars / rings (0.00-0.02 studs off), push-up feet on the mat, every station gives EXP. The old decor parts: ServerStorage.BeachCaliDecor_26Oct.
 - **AUTO TRAIN** words centred on the button (the icon at the left). **REP** in the premium heavy italic. **ALTER label** in the username font (Theme.Fonts.Heading).
 - "Hide others' trainers" already exists: Settings > Others' Trainers (On / Off).
 - Studio crashed once during a play test (nothing lost but the two new stations, put back).
