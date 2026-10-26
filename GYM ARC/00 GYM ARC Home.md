@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 26 Oct: retention pass: your body no longer changes with distance (low-end far look off); daily quests paid at reset, streak forgives one missed day, login popup never skipped; Growth Spurts faster (5/10/18/28/38 min); trainers at Spurt 1 with a free first roll; daily playtime gifts; favourite prompt after the first spurt. See [[2026-10-26 GYM ARC Retention pass]].
 - 22 Oct: active boosts row bottom-left, new boost icons everywhere, Agency + MY TRAINERS with the portraits and evo backgrounds, new shop panel, the Pro Gym as one hall with every machine PRO (prompt 47). See [[2026-10-22 GYM ARC Prompt 47 run]].
 - 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
 - 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
@@ -228,6 +229,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Game Feel]]
 - [[GYM ARC - Genetics]]
 - [[GYM ARC - Growth Spurts]]
+- [[GYM ARC - Playtime Gifts]]
 - [[GYM ARC - Gym Lighting]]
 - [[GYM ARC - Leaderboards and Statue]]
 - [[GYM ARC - Legend NPCs]]
@@ -387,6 +389,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bugs index]]
 
 ### Progress
+- [[2026-10-26 GYM ARC Retention pass]]
 - [[2026-10-04 GYM ARC Full game built overnight]]
 - [[2026-10-05 GYM ARC First playtest fixes]]
 - [[2026-10-06 GYM ARC Overnight run town and muscles]]
@@ -405,6 +408,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-26 GYM ARC Prompt - Bugs, appeal, progression and retention]]
 - [[2026-10-04 GYM ARC Prompt - Design brief]]
 - [[2026-10-06 GYM ARC Prompt - Fixes and muscles]]
 - [[2026-10-06 GYM ARC Prompt - Overnight sessions]]

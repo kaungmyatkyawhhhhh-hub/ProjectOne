@@ -16,7 +16,7 @@ One currency: coins. Earned by lifting and playing, spent on weights, shakes, co
   - Re-racking loose plates: up to 3 plates lie around the gym, 5 coins each, a new one every 90 s
   - Rush hour: every 30 minutes (same clock on every server) 3 minutes of 2x coins per rep
   - Seasonal events: x1.25 coins
-- **Login streak (13 Oct, replaces the old automatic streak):** a 7-day calendar. Join each UTC day and press CLAIM: 25 / 35 / 50 / 70 / 90 / 120 / 300 coins. Day 7 also gives a DNA token and (the first time) the title "Dedicated", then the calendar starts over. Missing a day starts again at day 1. The calendar card pops up after Play when today's reward is waiting; the Daily pill opens it too (a dot when unclaimed).
+- **Login streak (13 Oct, replaces the old automatic streak):** a 7-day calendar. Join each UTC day and press CLAIM: 25 / 35 / 50 / 70 / 90 / 120 / 300 coins. Day 7 also gives a DNA token and (the first time) the title "Dedicated", then the calendar starts over. Missing a day starts again at day 1 (26 Oct: one missed UTC day is forgiven, `Economy.StreakGraceDays`; the window shows the current streak and tomorrow's reward). Finished daily quests left unclaimed are paid at the reset (26 Oct). Playtime gifts: [[GYM ARC - Playtime Gifts]]. The calendar card pops up after Play when today's reward is waiting; the Daily pill opens it too (a dot when unclaimed).
 - **Offline coins:** 0.5 coins per minute away, from 10 minutes up to 8 hours.
 - **Spending:** weight tiers (5-600 coins), [[GYM ARC - Energy Shakes|Energy Shakes]] (25), cosmetics (60-900), DNA Tokens (400 at the front desk).
 - **Top bar:** a coins pill on the left and the Daily pill (login calendar) on the right.

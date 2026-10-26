@@ -19,7 +19,7 @@ The rebirth system (never called "sacrifice"): when all 6 muscle groups hit the 
   - 4: 6'0", x2
   - 5: 6'6", x2.5
   - 6: 7'0", x3 (the last one)
-- **Pacing targets:** 8, 15, 25, 35, 45 minutes per spurt (checked by a simulation test).
+- **Pacing targets:** 5, 10, 18, 28, 38 minutes per spurt (26 Oct, was 5/15/25/35/45). Goals 9 / 35 / 68 / 113 / 163 / 197 (tests/pacing tune). Milestone coins at 25/50/75%: 2 minutes of coins. See [[2026-10-26 GYM ARC Retention pass]].
 - **What you get:** taller body, permanent bonus, +1 DNA Token. Muscles reset to 0. A "you grew" moment plays.
 - **7'0" cap (13 Oct):** no spurt ever goes past 7'0". At the cap the button reads "MAX GROWTH SPURT REACHED" (greyed, not pressable, nothing charged), heights show "7'0" (MAX)", and muscles keep growing. Old saves past spurt 6 are shown at 7'0".
 - **Unlocks by spurt:** beach gym at 1, pro gym at 2.
