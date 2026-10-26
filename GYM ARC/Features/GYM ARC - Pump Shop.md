@@ -60,3 +60,12 @@ Coins per minute of active play (`lune run tests/pacing coins`, 60 simulated pla
 - The 4 specials are Robux only (x1 25 R$, x5 99 R$; SOON until the products are made); DNA LAB has the coin token and the Robux x1 / x3, with the DNA token picture.
 - STYLE: name tag and title colours, aura colours, alter tints (Config/Style, StyleService).
 - Coach Dex: SUPPLEMENTS + Shake Bundle, DNA Token (+ x3) for Robux; GEAR = Belt and Wraps rows (Basic / Pro).
+
+## Tubs like the item pictures (27 Oct, owner: "most of the pump shop tubs don't have images like the item picture")
+- All 161 tubs are Blender meshes ([[2026-10-27 GYM ARC Strongman Yard and Blender models]]) and every one now matches its item picture:
+  - Mass Gainer: dark tub, yellow band + lid, black arrow. Elite Pre-Workout: dark tub, purple band, yellow lid, gold bolt.
+  - Whey Isolate: white tub + lid, cyan band, white drop. BCAA Recovery: white tub, green band + lid, white plus.
+- The display tubs (counter case, BEST SELLER, NEW IN, back wall: 65) were plain coloured cylinders; each was given a product from its colour (yellow = Mass Gainer, purple = Elite Pre, cyan = Whey, green = BCAA, white = by its band / lid), a `Product` attribute, a band and the symbol front + back, turned to face into the shop. Their old loose bands are in `ServerStorage.PumpShopBackup_27Oct`.
+- The big spinning ELITE tub keeps its ELITE labels (dark body, purple band) and has the bolt on its two free sides.
+- New: the Whey drop symbol (uploaded 27 Oct, rbxassetid://112939125218985); the 21 Whey shelf tubs had no symbol before.
+- The counter case front (`Interior.Counter.Glass`) is SmoothPlastic now (was Glass, attribute WasMaterial): Roblox's Glass material hides the see-through symbol plates behind it.

@@ -30,6 +30,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
   - Small known look issue: on short wide buildings the rooftop water tank gets squashed.
 - **Part 3: Pump Shop** (owner: "model ALL the tubs in the pump shop too and all the belt pieces"), script `gymarc_pumpshop.py` -> **PumpShopModels.fbx**: TubBody (rounded base, shoulder, neck), TubLid (ribbed), ChampionBelt (leather loop, gold piping, 14 gem side plates, oval front plate with a star), LiftBelt + LiftBuckle (folded over the hook, stitching, holes, prong). **Imported and swapped in:** all 161 tubs and 163 lids are meshes (each keeps its colour, Product attribute, band and symbol plate; any lid / tub turned the same way as before); the championship belt is one mesh (tint #FFD27A, still tilted on its cushion); the 3 lifting belts + buckles on the gear wall (colours kept). Old parts: `ServerStorage.PumpShopBackup_27Oct` (348 parts, each with a FromPath attribute).
 - Screenshots: `Screenshots/test_2026-10-27/mesh_01..04` (Pump Shop belts + tubs, championship belt, city, trucks).
+- **Tub pictures** (owner: "most of the pump shop tubs don't have images like from the item picture"): every tub now matches its item picture (band, lid, symbol), the display tubs got products, a Whey drop symbol was made, the counter glass is plastic so the symbols show. See [[GYM ARC - Pump Shop]].
 - All Blender templates: `ServerStorage.ModelMeshes` (truck / city / lift buckle pieces carry an Offset attribute for placing).
 - Scripts kept in `Downloads\gym_arc_models\scripts`.
 

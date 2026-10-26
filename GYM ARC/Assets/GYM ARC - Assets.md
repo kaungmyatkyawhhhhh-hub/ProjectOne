@@ -220,3 +220,6 @@ Studio can only upload to the owner's account. These work in the game; to use gr
 |---|---|---|
 | gym_arc_thumbnail2_nologo_1920x1080 (menu + loading background) | 124549460345839 | kept by Roblox at 1024x576; replaces menu_art 99238211044120 |
 | gym_arc_logo_3d (menu + loading logo) | 86034269506160 | 432x354 |
+
+## Pump Shop symbols (27 Oct)
+- Whey drop (white, transparent PNG, drawn by Claude): rbxassetid://112939125218985. The arrow / bolt / plus symbols already existed (102878631565166 / 75531954798825 / 118188417466628).
