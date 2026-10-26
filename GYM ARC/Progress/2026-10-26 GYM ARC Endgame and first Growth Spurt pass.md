@@ -45,3 +45,7 @@ Prompt: [[2026-10-26 GYM ARC Prompt - Endgame and the open decisions]] (after [[
 - Message id `c7200b38-2ab4-cc40-b4a3-8a0ab40d67fc` (owner). `Config/Notifications`, `Server/NotifyService`, opt-in prompt in `DailyClient` after the daily claim (once a session).
 - A player who leaves is queued for the next UTC reset (+ up to 30 min); any live server sends it through Open Cloud. Not in Studio.
 - **Needs the owner:** an Open Cloud API key (user notifications write, this experience) saved in Creator Hub > Secrets as `notify_key` (domain apis.roblox.com). Until then nothing is sent (one warning per server).
+
+## Alter images moved to the group (26 Oct)
+- The owner imported `Downloads\gym_arc_altersor_group` (56 images) to the group Myanmar Builders Club; Claude found them in the group inventory by name and swapped every id: 51 skin maps in Config/Alters (Tiers 1-3) and the 5 Tier 1 popup backgrounds in Config/AlterThemes. All 15 skins rebuilt in ReplicatedStorage.SkinStages. Clay checked on the body in a play test.
+- Likely why Tier 1 skins never showed in the live game: the old copies were on the owner's account, not the group that owns the game.
