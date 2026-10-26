@@ -72,6 +72,6 @@ Atlas stone, yoke and farmer's frames modelled in Blender (with the town shrub, 
 Builder `ServerStorage._Builders.StrongmanYardLook` (Run() rebuilds `StrongmanYard.Look`, ~630 parts, no collisions / shadows). Backup of the yard before: `ServerStorage.StrongmanYardBackup_27Oct_look` (plus its terrain).
 - Floor: the slab darker (#6E5A44 Ground) with soft round Mud patches, Pebble gravel under every station, a Concrete walk with a yellow edge along the warehouse. Station mats get yellow edges. (Terrain was tried first: its 4-stud voxels buried the mats and stones, undone.)
 - Containers keep their colours, with a rusted bottom band, rust streaks and stencils (GAX numbers). Chalk buckets dark, with a little chalk dust.
-- Lights (all NightLight: off by day, on at night, no shadows): two steel truss towers with 4 floodlights each by the scoreboard, 8 warm string-light strands across the yard, 7 wall lamps; plus the old floodlights.
+- Lights (all NightLight: off by day, on at night, no shadows): two steel truss towers with 4 floodlights each by the scoreboard, 7 wall lamps; plus the old floodlights. (The string lights were removed by the owner in Studio on 27 Oct; the builder no longer adds them.)
 - Event corner: aluminium bleachers, a red STRONGMAN YARD tent with a table, cooler, towels and bottles, sandbags, a kettlebell row, and two lit wall banners ("STRONGMAN SHOWDOWN · EVERY 15 MINUTES", "LIFT HEAVY").
 - Shots: `yard_look_before.jpg`, `yard_look_after_day.jpg`, `yard_look_after_night.jpg`, `yard_look_after_night2.jpg`, `yard_backdoor_alter2.jpg`.
