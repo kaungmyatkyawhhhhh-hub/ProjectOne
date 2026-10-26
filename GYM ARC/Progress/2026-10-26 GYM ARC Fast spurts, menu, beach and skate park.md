@@ -71,3 +71,12 @@ Owner's requests in chat after [[2026-10-26 GYM ARC Full test pass with screensh
 - **Muscle-up camera** (owner: too high): the station places the body at the top, the animation hangs it much lower, so the camera aimed 2.5 studs above the head; now your camera comes down with the body (Humanoid.CameraOffset, half the travel) and resets when you get off.
 - **Aura toasts on every join (fixed):** the pass flags (Aura Pack / VIP) are set again on every join and each fired "aura unlocked"; now the toast shows only the first time (remembered in the save, `auras.notified`, AuraService). The next join may show each one a last time.
 - **Owner, 27 Oct:** no more code backups to ClaudeOne / GitHub (Studio is the only copy); notes only in this vault.
+
+## Powerlifting Gym makeover (27 Oct, owner: "better lighting and more stuff, it feels like an isolation room")
+Built without screenshots (Studio's capture kept hanging; the owner said go ahead and he'll judge it). All in `PowerliftingGym.Makeover27Oct` (delete to undo the props); the old lights + floor are in ServerStorage.PowerliftingBackup_27Oct.
+- **Lighting:** the 30 ceiling lamps brighter and warmer (1.1 -> 1.9, range 30 -> 42, #FFF1DC); 14 hanging spotlights (fixture + glowing lens) over the stations (squat racks, press, the east platforms, benches, pull-up, crunch, strongman turf, dumbbell rack); a red neon LED strip round the walls at the top of the brick and a white one at the floor; the floor speckled gym rubber (Asphalt, #2B2D31, was flat black).
+- **Strongman area** east of the loading door (the way in stays clear): green turf with white lines, 4 atlas stones on pads, a flat tire, a red yoke, a sled.
+- **Warm-up corner:** 3 stacked plyo boxes, a medicine-ball rack (9 balls), foam rollers, a mat.
+- **Barbell holder** (6 upright bars) and two bumper-plate stacks.
+- **Painted slogans** on the brick: NO DAYS OFF (west), LIFT HEAVY (east), EARN IT x2 (back), white, a little worn.
+- 112 new parts; checked: no new solid part overlaps anything.
