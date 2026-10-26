@@ -29,7 +29,7 @@ Prompt: [[2026-10-26 GYM ARC Prompt - First 15 minutes, deals, invites, performa
 - **BEST EQUIP** button (MY TRAINERS header): your strongest trainers by stats (all boosts added, after stage x level) in your slots. MY TRAINERS sorted by the same stats, best first (`Trainers.CopyValue / BestSet`, TrainerService "BestEquip").
 
 ## Alters: ~27 min each with trainers
-- `Alters.Goals = { 237, 413, 494, 526, 553, 581, 623, 653, 674, 689, 709, 748, 774, ... }` tuned with `lune run tests/pacing tunealters` (players rolling trainers). Alters 14-15 longer (owner: harder after ~8 hours).
+- `Alters.Goals = { 237, 413, 494, 526, 553, 581, 623, 653, 674, 689, 709, 748, 774, 937, 1072 }` tuned with `lune run tests/pacing tunealters` (players rolling trainers): alters 1-13 about 27.5 min each, alter 14 about 46 min and alter 15 about 61 min (owner: harder after ~8 hours of play).
 
 ## Friends
 - **INVITE +50%** button under the left menu's tiles (after the tutorial) and in the Crew window: Roblox's invite screen with launch data `invite:<UserId>`.
