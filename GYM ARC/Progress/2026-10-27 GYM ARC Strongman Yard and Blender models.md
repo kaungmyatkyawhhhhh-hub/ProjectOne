@@ -26,7 +26,9 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - **Part 2: trucks and the city** (owner: "model the trucks too, and the city"), script `gymarc_truck_city.py`:
   - **PickupTruck.fbx**: TruckPaint (white: takes each truck's colour), TruckTrim (tyres, chrome, grille, lights), TruckGlass.
   - **CityBuildings.fbx**: 3 styles for the Pro Gym valley city (250 box buildings now): Low (storefront, cornice, water tank), Mid (office, setback top), Tall (glass tower, two setbacks, crown). Each is Body + WinLit (glows at night: gets the NightColor attribute) + WinDark (named "Windows": goes dark at night), so BackdropClient's night lights keep working.
-  - Waiting for the owner to import them; then Claude swaps the 2 yard trucks and the 250 city buildings (style picked by height, each scaled to its old box, colours kept).
+  - **Imported and swapped in:** both yard trucks are the mesh truck (paint keeps teal / red; builder uses it too). All 250 city buildings: style by the height above the ground (84 Low, 92 Mid, 74 Tall), stretched to the old footprint, wall + window colours kept, lit windows keep NightColor, beacons kept. The city went from 3,143 to 1,388 parts. Old buildings: `ServerStorage.CityBackup_27Oct`; old truck parts in `StrongmanPropsBackup_27Oct`.
+  - Small known look issue: on short wide buildings the rooftop water tank gets squashed.
+- **Part 3: Pump Shop** (owner: "model ALL the tubs in the pump shop too and all the belt pieces"), script `gymarc_pumpshop.py` -> **PumpShopModels.fbx**: TubBody (rounded base, shoulder, neck), TubLid (ribbed), ChampionBelt (leather loop, gold piping, 14 gem side plates, oval front plate with a star), LiftBelt + LiftBuckle (folded over the hook, stitching, holes, prong). Plan: all 161 tubs (5 sizes) keep their own bands, symbols and colours; the championship belt and the 3 lifting belts on the gear wall. Waiting for the owner to import.
 - Scripts kept in `Downloads\gym_arc_models\scripts`.
 
 ## Owner rule
