@@ -70,4 +70,7 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - Pacing sim (`lune run tests/pacing alters 15`): Tier 1 ~2 h, Tier 2 ~2 h, Tier 3 ~2 h 40 of bot play. The 24 Oct "8 hours" was an estimate; the sim says ~2 h. Goals unchanged.
 
 ## Overhead ALTER pill styled (26 Oct, owner: "like the granite button")
-- The "ALTER n" pill over the nametag looks like that alter's ALTER button in the BODY ALTER READY popup: the alter's accent with a darker bottom edge, a dark outline, white letters with a dark stroke in the NEXT alter card's heavy italic font (Montserrat Black Italic), no texture (owner, same day). Your own is still smaller and faded. `OverheadTitleClient`.
+- The "ALTER n" pill over the nametag looks like that alter's ALTER button in the BODY ALTER READY popup: the alter's accent with a darker bottom edge, a dark outline, white letters in the ALTER button's chunky font with a dark stroke, and a faint copy of the alter's popup background art, like the button. Your own is still smaller and faded. `OverheadTitleClient`.
+
+## Popup backgrounds for alters 6-15 (26 Oct)
+- Owner: Tier 1 has background art (popup, ALTER button texture, NEXT pill, overhead pill) and the new alters didn't. `tools/alter_backgrounds.py` draws 10 abstract 1200x480 backgrounds (glowing cracks, dunes, light shards, veins, glass shards, forge sparks, a hot seam, blades, mirror sweeps, a gold burst; no bodies, no text) into `Downloads\gym_arc_altersor_group_bg` for the owner to import to the group; then the ids go into Config/AlterThemes `bg` (themes 6-15).

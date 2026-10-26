@@ -88,3 +88,9 @@ The backgrounds now always cover the whole screen, whatever its size or turn, an
 
 ## Live camera flyover (23 Oct, prompt 60; [[2026-10-23 GYM ARC Menu camera flyover]])
 Behind the title screen the camera glides round the map on a loop of 6 shots (Workspace.MenuCameraPath: one folder per shot with invisible Start / End parts; move / turn them in Studio; `Seconds` attribute), a dip through dark between shots, a light depth of field (off on low graphics / low frame rate) and a soft vignette; your character is hidden. PLAY swoops the camera down to your character in 1 s. Code: `Shared/UI/MenuFlyover`, `MenuClient`.
+
+## Dramatic loading screen (26 Oct, owner: "make it look like a gym game's loading screen")
+- Same art, logo, tip and SKIP. New: the art slowly pushes in (10% over 24 s), a red light behind the character beats like a heart, embers drift up over the art.
+- The bar is a barbell: a steel sleeve at its right end; at 25 / 50 / 75 / 100% a bumper plate slams on (red, blue, yellow, green, heaviest inside, then the collar) with a white flash, a short shake, a plate clank (PSE Metal Plate Impact; a deep boom on the last) and the gold percent punching bigger.
+- A big heavy italic hype line over the tip changes with each plate: WARMING UP, CHALKING UP, LOADING PLATES, GETTING PUMPED, LET'S LIFT!
+- The logo is a bit smaller on phones so the hype line never touches the tagline (checked at 844x390). `ReplicatedFirst/LoadingScreen` (DRAMA table).
