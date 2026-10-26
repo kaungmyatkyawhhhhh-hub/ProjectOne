@@ -49,3 +49,23 @@ Prompt: [[2026-10-26 GYM ARC Prompt - Endgame and the open decisions]] (after [[
 ## Alter images moved to the group (26 Oct)
 - The owner imported `Downloads\gym_arc_altersor_group` (56 images) to the group Myanmar Builders Club; Claude found them in the group inventory by name and swapped every id: 51 skin maps in Config/Alters (Tiers 1-3) and the 5 Tier 1 popup backgrounds in Config/AlterThemes. All 15 skins rebuilt in ReplicatedStorage.SkinStages. Clay checked on the body in a play test.
 - Likely why Tier 1 skins never showed in the live game: the old copies were on the owner's account, not the group that owns the game.
+
+## Alter backgrounds in (26 Oct)
+- The owner imported the 10 backgrounds to the group; their ids are in Config/AlterThemes (`bgs`, alters 6-15). The popup, its ALTER button, the NEXT card and the overhead pill now show them. Checked: the Granite popup.
+
+## Pacing with trainers (26 Oct)
+`lune run tests/pacing trainers`: the sim now rolls trainers (every rep coin, the free first roll, one free roll per hour of play, evolutions, levels, slots 1/2/3, all four boosts). Median of 30 bot players:
+
+| Step | Min | Total | Typical trainers then |
+|---|---|---|---|
+| Spurt 1 | 4.9 | 0h05 | none yet |
+| Spurt 2 | 9.3 | 0h14 | Coach Rex + Coach Lou (BASE) |
+| Spurt 3 | 13.2 | 0h27 | Rex + Lou (IRON-BORN) |
+| Spurt 4 | 20.1 | 0h47 | Duke Ironside + Rex |
+| Spurt 5 | 25.4 | 1h12 | Duke (IRON-BORN) + Rex |
+| Spurt 6 (7'0") | 26.2 | 1h39 | Volta + Duke |
+| Alters 1-5 | 25, 13, 13, 12, 11 | 2h52 | Duke (IRON-BORN), Volta x2 (3rd slot) |
+| Alters 6-10 | ~11 each | 3h46 | Duke x2 (IRON-BORN) + Volta |
+| Alters 11-15 | 11-12 each | 4h45 | Duke (BEAST-MODE), The Shadow, Volta |
+
+With trainers the whole game is ~4 h 45 of perfect play (8 h 53 without). By 7'0" a typical player has +77% EXP and +20% progress; at the end +150% / +40%. Alters take only ~11-13 min each with trainers.
