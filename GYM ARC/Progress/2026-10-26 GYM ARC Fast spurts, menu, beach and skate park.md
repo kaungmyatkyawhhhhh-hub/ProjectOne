@@ -31,7 +31,8 @@ Owner's requests in chat after [[2026-10-26 GYM ARC Full test pass with screensh
 
 ## World
 - **Pro Gym city** is now in `Workspace.Backdrops` in Studio (visible and editable); at game start the server moves it into ReplicatedStorage.Backdrops, so phones still only draw it near the Pro Gym. The far city stays in ReplicatedStorage.
-- **Beach gym** (39 before, 40-42 after): timber edging + gold lines on the mats, 8 tiki torches, festoon lights round the flag poles, a big BEACH GYM board on the arch, 2 surfboard racks, 4 umbrellas with loungers.
+- (Later the same day the owner asked to keep the old beach gym and skate park: the Upgrade models were removed and every part restored from the backups.)
+- **Beach gym** (39 before, 40-42 after, since removed): timber edging + gold lines on the mats, 8 tiki torches, festoon lights round the flag poles, a big BEACH GYM board on the arch, 2 surfboard racks, 4 umbrellas with loungers.
 - **Skate park** (43 before, 44-45 after): each ramp's sides painted (teal / orange / violet / red), a dark plaza with a white outline and coloured corners, bulbs along the fence, two strings of lights between the floodlights, a SKATE PARK arch over the entrance.
 - Both are one `Upgrade` model each (delete to undo), built by `tools/builders/BeachSkateUpgrade` (also in ServerStorage._Builders). Nothing added collides. The whole builds before are in ServerStorage `BeachGymBackup_26Oct` / `SkateParkBackup_26Oct`.
 
@@ -39,3 +40,15 @@ Owner's requests in chat after [[2026-10-26 GYM ARC Full test pass with screensh
 - Phone: item bar size, menu lighting, see-through trainer.
 - New player: Growth Spurts should feel quick (about an hour to Spurt 6).
 - Skate on the park (the ramps are unchanged apart from colour).
+
+## Later the same day
+- **Trainer missing all session (fixed for good):** the server builds the trainer models after the game starts; an early join cloned before the model existed and never retried. Now it waits for the model and retries anyone left without a trainer once a second (tested by hiding the model: he came back 0.2 s after it arrived).
+- **Loading screen / menu:** no prompts over them (the progress mirror prompt showed through); the menu camera also streams the ground it looks at (the beach gym looked like it floated).
+- **ALTER label over heads:** no yellow outline, fully round, a shine sweeps across.
+- **Alter skins for coins** (Coach Dex's ALTERS tab): every skin 25M (Pumped) .. 12B (Gold), tap twice to buy, wear only (the gains, the ALTER label and the posing divisions stay real alters). `Alters.SkinPrices`, `PlayerData.BuyAlterSkin`, `data.alter.bought`. Tested with a fresh test player (30M: Pumped bought, 600M refused, a second buy refused).
+- **Shops keep their scroll** after a buy (PUMP SHOP and Coach Dex). **BEST tag** bigger and readable.
+- **Beach gym:** the dumbbell spots no longer touch the bench presses (benches moved 3.5 studs back). Hex pattern on the mats tried and removed (owner: not beachy); a wave pattern is ready in `Downloads\gym_arc_beacheach_waves.png` (needs a group import).
+- **Night lights:** beach gym 15 lamp posts with warm lanterns; skate park brighter floodlights + 4 lamp poles (`tools/builders/NightLamps`, NightLight tag: on at dusk only, no shadows).
+- **Pump Shop:** shelf tubs look like their item art (Mass Gainer dark + yellow band + arrow, Pre-Workout purple band + bolt, Whey white + teal band, BCAA white + green band + plus); the clothes mannequins removed (ServerStorage.PumpShopRemoved_26Oct); **Mo** the shopkeeper is now placed in Studio (PumpShopService uses him).
+- **Powerlifting Gym lock sign** on its own board in front of the shutter slats.
+- **Alter skin showcase** (Studio only): check the Workspace attribute `TestAlterShowcase` and press Play: 16 max bodies (Natural + every skin) on a platform outside the map, you're taken there.
