@@ -47,3 +47,6 @@ Workspace attribute `TestLowEnd` = true: your own body acts as if on a low-end p
 
 ## TestShowdown (27 Oct)
 Workspace attribute `TestShowdown` = true: starts a Strongman Showdown now (players in the yard only). `TestMachine` = a station name (e.g. "TruckPull1") puts you on that station. Studio only. See [[GYM ARC - Strongman Yard]].
+
+## TestYardLocked (27 Oct)
+Workspace attribute `TestYardLocked` = true: the Strongman Yard is locked for everyone (as if below Alter 2), on the server and the client. Studio only. See [[GYM ARC - Strongman Yard]].

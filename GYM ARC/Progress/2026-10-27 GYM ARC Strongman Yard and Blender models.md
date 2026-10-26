@@ -44,5 +44,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 - **Valley city** no longer blocky from the beach / west of town (the real city shows everywhere; low-end phones keep the far city).
 - **VIP 30% OFF pass** id 2052738798 wired in. See [[GYM ARC - Monetization]].
 
+## Strongman Yard: Alter 2 + new look
+- The yard now unlocks at Alter 2 (kept forever), the back door has its own lock; the yard got a proper floor, weathered containers, light towers, string lights, wall lamps, bleachers and a tent. See [[GYM ARC - Strongman Yard]].
+
 ## Owner rule
 - From 27 Oct no code export / commits to ClaudeOne: Studio is the only copy, notes only in this vault.

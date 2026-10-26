@@ -58,3 +58,20 @@ Atlas stone, yoke and farmer's frames modelled in Blender (with the town shrub, 
 
 ## Screenshots
 `Screenshots/test_2026-10-27`: sm_01_scoreboard, sm_02_street_gate_locked, sm_03_back_door, sm_04_yard_overview, sm_05_atlas_pr.
+
+## Unlocks at ALTER 2 (27 Oct, prompt 66 part 4, owner: "make Strongman at Alter 2 requirement")
+- The yard opens at **Alter 2 (Shredded)**, no longer with the Powerlifting Gym; the gym itself stays at Growth Spurt 5. `Config/Strongman.UnlockAlter` 2, `Strongman.Unlocked(data)`.
+- Kept forever: StrongmanService sets `stats.yardUnlocked = 1` (through PlayerData) once a player is open, so a future Hall of Fame reset keeps it.
+- Server: MachineService refuses the yard's stations before that (event `YardLocked`, the toast). Client: PowerliftingClient locks the street gate AND the gym's back door (new `YardDoor.Blocker` + a roll-down shutter with the lock sign); both signs read UNLOCKS AT ALTER 2. The toast: "STRONGMAN YARD · UNLOCKS AT ALTER 2" + "NEXT: SHREDDED 96%" (or "Grow to 7'0\", then BODY ALTER to get in").
+- At Alter 2: a "STRONGMAN YARD UNLOCKED" reward popup (StrongmanClient, after the alter's title card) and the Coach Dex guide `StrongmanYard` (need `alter = 2`, new Guides condition) with GO TO.
+- Players below Alter 2 can still see the yard, the showdown and the scoreboard through the fence / from the gym.
+- Studio test hook: Workspace `TestYardLocked` = true locks the yard for everyone. Tested: locked -> back door and gate solid, walked into the shutter, station refused with YardLocked; unlocked -> station works, doors open again; the loading door stayed open throughout.
+- Not done from prompt 66 yet: parts 1-3 (codes, Hall of Fame, profiles).
+
+## New look (27 Oct, owner: "the lighting is bad and the quality looks like a cheap roblox game")
+Builder `ServerStorage._Builders.StrongmanYardLook` (Run() rebuilds `StrongmanYard.Look`, ~630 parts, no collisions / shadows). Backup of the yard before: `ServerStorage.StrongmanYardBackup_27Oct_look` (plus its terrain).
+- Floor: the slab darker (#6E5A44 Ground) with soft round Mud patches, Pebble gravel under every station, a Concrete walk with a yellow edge along the warehouse. Station mats get yellow edges. (Terrain was tried first: its 4-stud voxels buried the mats and stones, undone.)
+- Containers keep their colours, with a rusted bottom band, rust streaks and stencils (GAX numbers). Chalk buckets dark, with a little chalk dust.
+- Lights (all NightLight: off by day, on at night, no shadows): two steel truss towers with 4 floodlights each by the scoreboard, 8 warm string-light strands across the yard, 7 wall lamps; plus the old floodlights.
+- Event corner: aluminium bleachers, a red STRONGMAN YARD tent with a table, cooler, towels and bottles, sandbags, a kettlebell row, and two lit wall banners ("STRONGMAN SHOWDOWN · EVERY 15 MINUTES", "LIFT HEAVY").
+- Shots: `yard_look_before.jpg`, `yard_look_after_day.jpg`, `yard_look_after_night.jpg`, `yard_look_after_night2.jpg`, `yard_backdoor_alter2.jpg`.

@@ -1,11 +1,13 @@
 ---
 date: 2026-10-27
 tags: [gymarc, prompt]
-status: todo
+status: in progress
 ---
 # 66 Hall of Fame, Profiles, Codes, Strongman at Alter 2
 
 Back to [[00 GYM ARC Home|GYM ARC Home]]
+
+Part 4 (Strongman at Alter 2) done 27 Oct: [[GYM ARC - Strongman Yard]]. Parts 1-3 not started.
 
 ```text
 Big endgame + retention update (owner, 27 Oct). The game is live: change carefully, never delete player data (migrate), never undo the owner's manual Studio changes. Follow CLAUDE.md Speed rules. Mobile first. All numbers in Config. Owner rule: Studio is the only copy, so do File > Save to Roblox after each part and remind me to download a backup copy. Work in this order, test each part before the next.

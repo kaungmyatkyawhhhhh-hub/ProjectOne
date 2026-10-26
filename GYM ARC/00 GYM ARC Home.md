@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 27 Oct: Strongman Yard now unlocks at ALTER 2 (prompt 66 part 4) and got a full new look (light towers, string lights, weathered containers, bleachers, tent). Prompt 66 parts 1-3 (codes, Hall of Fame, profiles) still to do. See [[GYM ARC - Strongman Yard]].
 - 27 Oct: STRONGMAN YARD behind the Powerlifting Gym (Spurt 5): atlas stones, log press, yoke, farmer's walk, truck pull, tire flip, keg toss, a Strongman Showdown every 15 min with a live scoreboard and the YARD KING title; LVL UP popup only every 10 LVLs; atlas stone, yoke, farmer frames, shrub, flowers and potted plant modelled in Blender (waiting for import). See [[GYM ARC - Strongman Yard]], [[2026-10-27 GYM ARC Strongman Yard and Blender models]].
 - 26 Oct: retention pass: your body no longer changes with distance (low-end far look off); daily quests paid at reset, streak forgives one missed day, login popup never skipped; Growth Spurts faster (5/10/18/28/38 min); trainers at Spurt 1 with a free first roll; daily playtime gifts; favourite prompt after the first spurt. See [[2026-10-26 GYM ARC Retention pass]].
 - 26 Oct: endgame + first spurt: Body Alter Tiers 2-3 (Stone, Metal: 10 new skins); GO TRAIN button until the first Growth Spurt (funnel: 54% left there); LVL never drops; Friend Boost + invite friends. See [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]].
