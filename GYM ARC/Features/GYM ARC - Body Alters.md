@@ -78,3 +78,8 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 ## Alters about 27 min each with trainers (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
 - Each alter has its own goal (`Alters.Goals`), tuned with trainers in the sim (`lune run tests/pacing tunealters`); alters 14-15 take longer (harder after about 8 hours of play).
 - The overhead ALTER pill uses the NEXT card background (the alter art under a dark shade, its colour outline) and the ALTER button font.
+
+## Skins v2 (27 Oct, owner: "do the alter skins") - in progress
+- Looked at all 15 on max bodies: Iron, Obsidian, Clay, Sandstone and Granite read as fur (fine high-contrast normal noise); metals looked like clay; stone / metal skins had an orange skin-coloured head.
+- Done: `Alters.RawPlain` (Config/Alters): stone / metal alters' head and plain parts take the skin's own average colour, not the player's skin. `Lighting.EnvironmentSpecularScale` 0.35 -> **0.7** (owner chose the middle): Chrome / Steel / Gold get real reflections.
+- New maps for the 5 furry ones (`Downloads\gym_arc_alterslter_textures_v2.py` -> `v2\`): calmer, bigger shapes: Clay wide cracks, Sandstone smooth bands, Granite polished, Obsidian faceted glossy glass (no metalness), Iron forged with soft dents. Uploaded once (ids in this session's chat), but maps set on the SkinStages SurfaceAppearances by script rendered as flat colour in play, so it was put back to the v1 maps. Owner imports the v2 PNGs into the SurfaceAppearances himself, then Claude updates Config/Alters and checks.
