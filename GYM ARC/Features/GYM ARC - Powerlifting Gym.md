@@ -73,3 +73,6 @@ Owner: "the server record shows even the old top 1, 2, 3 that already left the s
 - **IN THIS SERVER** 1 / 2 / 3: only players in this server now, by their best: their saved PR on the lift's machines (PLSquat / PLMonolift, PLBench, PLDeadlift) as they join, raised by this session's lifts. A player who leaves comes off the list at once.
 - The all-time top 3 is still saved and merged across servers as before (just not listed on the board). NEW SERVER RECORD (board flash, judge lights) now fires when someone beats the best lifter in the server right now.
 - Tested: joining put LuigiRED's PRs (875 / 595 / 875 LB) on IN THIS SERVER with the all-time line above. Not tested with 2 players (needs a team test).
+
+## Doors: slats / signs left showing (27 Oct)
+Owner: "the slats still appear after unlocking the Powerlifting gym", "the ALTER 2 sign of the Strongman Yard doesn't disappear after unlocking". The shutters' pieces (slats, the lock sign) streamed in one by one after the door had been opened, so the late ones stayed visible. Fix: the three door models (LoadingDoor, YardGate, YardDoor) stream in whole (ModelStreamingMode Atomic), and PowerliftingClient re-checks every shutter piece each tick (and a new Shutter instance). Tested: all three fully open (0 visible parts, 0 signs) after walking away and back twice.

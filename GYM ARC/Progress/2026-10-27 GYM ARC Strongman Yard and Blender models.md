@@ -53,5 +53,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ## Beach gym and skate park expanded
 - Beach gym: a shoreline deck with 5 new exercises under sail shades. Skate park: a north strip with a half pipe, a rail and a kicker. Old looks kept. See [[GYM ARC - Town and Gyms]].
 
+## Fixes
+- Powerlifting / yard doors: slats and the lock sign no longer stay visible once open (streaming). Tire flip: the legs walk when the lifter moves.
+
 ## Owner rule
 - From 27 Oct no code export / commits to ClaudeOne: Studio is the only copy, notes only in this vault.

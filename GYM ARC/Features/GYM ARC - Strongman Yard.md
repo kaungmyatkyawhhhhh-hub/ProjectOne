@@ -75,3 +75,6 @@ Builder `ServerStorage._Builders.StrongmanYardLook` (Run() rebuilds `StrongmanYa
 - Lights (all NightLight: off by day, on at night, no shadows): two steel truss towers with 4 floodlights each by the scoreboard, 7 wall lamps; plus the old floodlights. (The string lights were removed by the owner in Studio on 27 Oct; the builder no longer adds them.)
 - Event corner: aluminium bleachers, a red STRONGMAN YARD tent with a table, cooler, towels and bottles, sandbags, a kettlebell row, and two lit wall banners ("STRONGMAN SHOWDOWN · EVERY 15 MINUTES", "LIFT HEAVY").
 - Shots: `yard_look_before.jpg`, `yard_look_after_day.jpg`, `yard_look_after_night.jpg`, `yard_look_after_night2.jpg`, `yard_backdoor_alter2.jpg`.
+
+## Tire flip legs (27 Oct)
+Owner: "on tire flip, when the player moves forward, the legs don't move". The body slid along the lane. Now the legs stride (YARD.yardWalk, like the carries) while following the tire at the end of each flip, and on the walk back after the last flip the lifter turns round and walks. Tested: hip swing up to 44 degrees while moving.
