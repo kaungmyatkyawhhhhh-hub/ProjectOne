@@ -65,6 +65,6 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - Used for the body (BodyService), top bar, menu, mirror, posing shows, titles, Tallest board. The statue / best physique still use the Growth Spurt height.
 
 ## Tiers 2 and 3 (26 Oct; [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]])
-- Stone: Clay, Sandstone, Granite, Marble, Obsidian. Metal: Bronze, Iron, Steel, Chrome, Gold. Our own procedural maps (`tools/alter_textures.py`, `Downloads\gym_arc_alters	ier2_stone`, `tier3_metal`), metalness maps on Obsidian and the metals.
+- Stone: Clay, Sandstone, Granite, Marble, Obsidian. Metal: Bronze, Iron, Steel, Chrome, Gold. Our own procedural maps (`tools/alter_textures.py`, `Downloads\gym_arc_alters\tier2_stone`, `tier3_metal`), metalness maps on Obsidian and the metals.
 - `tone = "Raw"` in Config/Alters: their own colours, no skin tint (`Alters.Tint` = white). Popups use the tier colours (no background art yet).
 - Pacing sim (`lune run tests/pacing alters 15`): Tier 1 ~2 h, Tier 2 ~2 h, Tier 3 ~2 h 40 of bot play. The 24 Oct "8 hours" was an estimate; the sim says ~2 h. Goals unchanged.
