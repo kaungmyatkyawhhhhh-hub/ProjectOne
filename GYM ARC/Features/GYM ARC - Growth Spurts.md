@@ -80,3 +80,10 @@ The GROWTH SPURT card (right column) and the machine strip are quiet chrome card
 
 ## LVL never drops (26 Oct; [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]])
 - The top bar's LVL = average muscle level + `stats.levelBase` (the levels each Growth Spurt / Body Alter reset), `Muscles.Lvl`. After a spurt it stays where it was instead of going to 0. Auras, guides, crew list and the LEVEL board use the same number.
+
+## 4 inches a Growth Spurt (26 Oct, owner)
+- Heights: 4'0" -> 4'4" -> 4'8" -> 5'0" -> 5'4" -> 5'8" -> **6'0"** (was 6 inches a spurt to 7'0"). Same 6 spurts, goals and bonuses.
+- After 6'0" every finished Body Alter tier adds 4 inches: Tier 1 6'4" ... Tier 6 **8'0"**, the only height that says MAX (`GrowthSpurts.TopHeightInches`).
+- Everyone's height follows (owner chose: shrink everyone): a 7'0" player is 6'0" now; spurts, bonuses and alters unchanged.
+- Posing divisions: Bantam 4'0"-4'4", Middle 4'8"-5'0", Heavy 5'4"-5'8", then Open / alter tiers at 6'0". Skyscraper title and the height aura: reach 6'0". Menu hype line: "Grow to 8 feet tall."
+- Not changed: trainers keep their own heights (Atlas 7'6" now towers over a 6'0" player).

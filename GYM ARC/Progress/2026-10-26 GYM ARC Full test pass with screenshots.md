@@ -87,3 +87,10 @@ Note: the owner's NEXT: GRANITE went from 53% to 18% because the alter goals wer
 - AUTO TRAIN purchase prompt with an account that doesn't own the pass.
 - A real friend joining through an invite (invite boost), and the daily reward notification once `notify_key` is set.
 - The 5-minute Starter Pack popup timing and the real fly-into-SHOP at Growth Spurt 4.
+
+## After the test (owner, same day)
+- 7'0" isn't max any more: alter tiers add 4 inches; MAX only at the very top. Then Growth Spurts became **4 inches** (4'0" -> 6'0", top 8'0" with all alter tiers). See [[GYM ARC - Growth Spurts]].
+| | Shot | What it shows |
+|---|---|---|
+| 32 | ![[GYM ARC/Screenshots/test_2026-10-26/32_height_7ft4_no_max.jpg]] | 7'4" without MAX (before the 4-inch change) |
+| 33 | ![[GYM ARC/Screenshots/test_2026-10-26/33_new_heights_6ft4_white_top.jpg]] | New heights: 6'4" (6'0" + Tier 1), smaller body, white matte top |
