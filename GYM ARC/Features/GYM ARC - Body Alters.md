@@ -74,3 +74,7 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 
 ## Popup backgrounds for alters 6-15 (26 Oct)
 - Owner: Tier 1 has background art (popup, ALTER button texture, NEXT pill, overhead pill) and the new alters didn't. `tools/alter_backgrounds.py` draws 10 abstract 1200x480 backgrounds (glowing cracks, dunes, light shards, veins, glass shards, forge sparks, a hot seam, blades, mirror sweeps, a gold burst; no bodies, no text) into `Downloads\gym_arc_altersor_group_bg` for the owner to import to the group; then the ids go into Config/AlterThemes `bg` (themes 6-15).
+
+## Alters about 27 min each with trainers (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
+- Each alter has its own goal (`Alters.Goals`), tuned with trainers in the sim (`lune run tests/pacing tunealters`); alters 14-15 take longer (harder after about 8 hours of play).
+- The overhead ALTER pill uses the NEXT card background (the alter art under a dark shade, its colour outline) and the ALTER button font.

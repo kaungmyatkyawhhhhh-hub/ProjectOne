@@ -194,3 +194,6 @@ On join the equipped list was cut to the slots known at that moment, before the 
 | Atlas | Secret | 0.15% (1 in 667) | **0.04% (1 in 2,500)** |
 
 Pity unchanged (100 rolls without Epic+ = next one Epic). The odds lists read the config, so they update by themselves.
+
+## Best equip (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
+- BEST EQUIP in the MY TRAINERS header puts your strongest trainers (by stats: all boosts added, after stage x level) in your slots; MY TRAINERS is sorted by the same stats, best first.

@@ -59,3 +59,6 @@ Tested on the phone layout and the PC layout with the Studio test crews: the ful
 ## Invite friends and Friend Boost (26 Oct; [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]])
 - An "Invite friends" row in the Crew window opens Roblox's invite prompt; one invite prompt also shows once after Growth Spurt 2 (`FriendClient`).
 - Friend Boost: +10% gains per Roblox friend in the server, up to +30% (`Config/Social.Friends`, `Server/FriendService`).
+
+## INVITE button and invite boost (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
+- INVITE +50% under the left menu tiles; a friend joining through your invite gives you +50% EXP for 30 min (once per friend per day, saved if offline); new players who joined that way get it as a welcome.

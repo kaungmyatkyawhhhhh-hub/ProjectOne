@@ -66,3 +66,6 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 ## GO TRAIN after the tutorial (26 Oct; [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]])
 - Funnel: 54% left between the end of the tutorial and the first Growth Spurt goal. Until the first Growth Spurt a gold GO TRAIN <GROUP> button sits at the bottom centre (off a machine, nothing else open); it teleports you to a machine for the group furthest behind (`ProgressClient`).
 - The stamina step needs 10 reps (was 20). Finish toast: "Tap GO TRAIN for your first Growth Spurt!"
+
+## First 15 minutes (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
+- NEW PLAYER BOOST 2x EXP and coins for the first 15 min of play, announced by Coach Dex; +100 coins and "FIRST REP! YOU GOT STRONGER" on the first rep; the GROWTH SPURT card shows from the first second; 750 starting coins when the tutorial ends (skipped too).

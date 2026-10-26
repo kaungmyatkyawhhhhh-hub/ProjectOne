@@ -94,3 +94,6 @@ Behind the title screen the camera glides round the map on a loop of 6 shots (Wo
 - The bar is a barbell: a steel sleeve at its right end; at 25 / 50 / 75 / 100% a bumper plate slams on (red, blue, yellow, green, heaviest inside, then the collar) with a white flash, a short shake, a plate clank (PSE Metal Plate Impact; a deep boom on the last) and the gold percent punching bigger.
 - A big heavy italic hype line over the tip changes with each plate: WARMING UP, CHALKING UP, LOADING PLATES, GETTING PUMPED, LET'S LIFT!
 - The logo is a bit smaller on phones so the hype line never touches the tagline (checked at 844x390). `ReplicatedFirst/LoadingScreen` (DRAMA table).
+
+## Dramatic main menu (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
+- The logo slams in (flash, boom, shake), its glow beats like a heart, embers drift up, a red light breathes from the bottom left, the tagline cycles hype lines (Everyone starts tiny. / No days off. / Get HUGE. ...).

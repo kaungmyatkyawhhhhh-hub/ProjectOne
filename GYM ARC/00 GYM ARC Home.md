@@ -19,6 +19,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 ## Current status (21 Oct 2026)
 - 26 Oct: retention pass: your body no longer changes with distance (low-end far look off); daily quests paid at reset, streak forgives one missed day, login popup never skipped; Growth Spurts faster (5/10/18/28/38 min); trainers at Spurt 1 with a free first roll; daily playtime gifts; favourite prompt after the first spurt. See [[2026-10-26 GYM ARC Retention pass]].
 - 26 Oct: endgame + first spurt: Body Alter Tiers 2-3 (Stone, Metal: 10 new skins); GO TRAIN button until the first Growth Spurt (funnel: 54% left there); LVL never drops; Friend Boost + invite friends. See [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]].
+- 26 Oct: first 15 minutes (2x new player boost, first-rep reward, goal shown early, 750 starting coins), limited Starter Pack (79 R$, 24 h, every 5 min, then into the SHOP, +50% for 16 h) + VIP 30% off, Best equip, alters ~27 min with trainers, INVITE + invite boost, dramatic main menu, server memory leaks fixed. See [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]].
 - 22 Oct: active boosts row bottom-left, new boost icons everywhere, Agency + MY TRAINERS with the portraits and evo backgrounds, new shop panel, the Pro Gym as one hall with every machine PRO (prompt 47). See [[2026-10-22 GYM ARC Prompt 47 run]].
 - 22 Oct: trainer levels and evolutions replace Golden (BASE, IRON-BORN, BEAST-MODE, COLOSSUS, LIMITLESS; hidden stages; animated tiles; MY TRAINERS rebuilt) (prompt 33). See [[GYM ARC - Personal Trainers]].
 - 22 Oct: Pro Gym expansion: a new hall with Pro copies of every starter machine and a Pro dumbbell rack (heavier tiers from the starter top, +10% gains in the Pro Gym); Spurt 5-6 goals retuned (prompt 36). See [[GYM ARC - Pro Gym expansion]].
@@ -392,6 +393,8 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 ### Progress
 - [[2026-10-26 GYM ARC Retention pass]]
 - [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]]
+- [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]]
+- [[2026-10-26 GYM ARC Prompt - First 15 minutes, deals, invites, performance]]
 - [[2026-10-26 GYM ARC Prompt - Endgame and the open decisions]]
 - [[2026-10-04 GYM ARC Full game built overnight]]
 - [[2026-10-05 GYM ARC First playtest fixes]]
