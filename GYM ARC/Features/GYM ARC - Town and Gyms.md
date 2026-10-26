@@ -63,3 +63,7 @@ The starter gym felt packed after prompt 16 (every machine, dumbbells, the Agenc
 
 ![[GYM ARC/Screenshots/starter_layout/angle1_from_desk.jpg]]
 ![[GYM ARC/Screenshots/starter_layout/top_after.jpg]]
+
+## Beach gym upgrade, city in Studio (26 Oct; [[2026-10-26 GYM ARC Fast spurts, menu, beach and skate park]])
+- Beach gym: mat edging + gold lines, tiki torches, festoon lights, BEACH GYM board, surfboard racks, umbrellas + loungers (`BeachGym.Upgrade`, backup ServerStorage.BeachGymBackup_26Oct).
+- The Pro Gym city is in `Workspace.Backdrops` in Studio; Main moves it into ReplicatedStorage.Backdrops at game start.

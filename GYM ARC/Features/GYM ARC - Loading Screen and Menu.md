@@ -97,3 +97,8 @@ Behind the title screen the camera glides round the map on a loop of 6 shots (Wo
 
 ## Dramatic main menu (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
 - The logo slams in (flash, boom, shake), its glow beats like a heart, embers drift up, a red light breathes from the bottom left, the tagline cycles hype lines (Everyone starts tiny. / No days off. / Get HUGE. ...).
+
+## Steady camera, lower statue, menu lighting, red plates (26 Oct; [[2026-10-26 GYM ARC Fast spurts, menu, beach and skate park]])
+- Each shot moves at a steady speed and cuts while moving; statue shot lower (camHeight 1, lookHeight 4.5); starter gym window shot removed (ServerStorage.MenuShotsRemoved).
+- While the menu flies: MenuGrade / MenuBloom / MenuRays added to Lighting (contrast, warm tint, glow), faded out on PLAY.
+- Loading screen plates all red (4 shades).

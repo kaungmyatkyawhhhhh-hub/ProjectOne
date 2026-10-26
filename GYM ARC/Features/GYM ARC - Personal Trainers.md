@@ -197,3 +197,8 @@ Pity unchanged (100 rolls without Epic+ = next one Epic). The odds lists read th
 
 ## Best equip (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
 - BEST EQUIP in the MY TRAINERS header puts your strongest trainers (by stats: all boosts added, after stage x level) in your slots; MY TRAINERS is sorted by the same stats, best first.
+
+## Shrunk, see-through, never missing (26 Oct; [[2026-10-26 GYM ARC Fast spurts, menu, beach and skate park]])
+- Heights x84/90 with the 4-inch spurts: Sam 4'8", Nia 5'1", Lou 5'7", Rex 6'1", Duke 6'4", Volta 6'5", The Shadow 6'8", Atlas 7'0" (`MaxHeightInches` 84).
+- Your own trainer fades to 75% see-through between the camera and you (TrainerFollowClient).
+- Bug fixed: a Trainers change while the models loaded was missed (no trainer that session); it now listens before the first sync.

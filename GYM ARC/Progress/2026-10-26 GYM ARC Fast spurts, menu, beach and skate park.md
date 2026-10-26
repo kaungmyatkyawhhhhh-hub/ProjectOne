@@ -1,0 +1,41 @@
+---
+date: 2026-10-26
+tags: [gymarc, progress, pacing, menu, world, ui]
+status: done
+---
+Back to [[00 GYM ARC Home|GYM ARC Home]]
+
+# 2026-10-26 GYM ARC Fast spurts, menu, beach and skate park
+
+Owner's requests in chat after [[2026-10-26 GYM ARC Full test pass with screenshots]]. Shots 34-45 in `Screenshots/test_2026-10-26`.
+
+## Pacing (owner: "growth spurts fast so players get hooked, alters are the real progression")
+- **Growth Spurts: about 1 hour for all six** for a player with the 2x NEW PLAYER BOOST who rolls trainers: 4 / 5 / 8 / 12 / 14 / 17 min (was 5 / 10 / 18 / 28 / 38 / 38 without boosts). Goals 9 / 30 / 53 / 68 / 90 / 119 (were 9 / 35 / 68 / 113 / 163 / 197). `Config/GrowthSpurts`, tuned with `lune run tests/pacing tunespurts 4,5,8,12,15,17`.
+- The pacing sim's players now have the new player boost and roll trainers (like real players), so its normal check matches these targets.
+- **Alters re-tuned** for players who reach Alter 1 with less muscle: still ~27.5 min each with trainers, 14 ~45 min, 15 ~60 min. `Alters.Goals` 218 / 389 / 464 / 519 / 547 / 577 / 621 / 651 / 667 / 688 / 708 / 745 / 769 / 932 / 1070 (were 237 ... 1072).
+- **LVL: not changed** (owner: "keep it as that").
+
+## Trainers
+- **Shrunk with the 4-inch spurts** (owner: "Atlas becomes 7'0""): every trainer x84/90. Sam 4'8", Nia 5'1", Lou 5'7", Rex 6'1", Duke 6'4", Volta 6'5", The Shadow 6'8", Atlas 7'0" (`Config/Trainers`).
+- **See through your own trainer** (owner): when he's between the camera and you (or right at the camera) he fades to 75% see-through (34).
+- **Bug fixed:** sometimes your trainer never showed for a whole session (the Trainers attribute changed while the models were still loading and the change was missed). Now it listens first.
+
+## Main menu and loading screen
+- Menu camera moves at a **steady speed** and cuts while still moving (owner: "each clip slows down and stops").
+- Statue shot **lower**, aimed at the statue's chest (35). **Starter gym window shot removed** (kept in ServerStorage.MenuShotsRemoved).
+- **Cinematic lighting while the menu flies** (37): more contrast and colour, warm tint, stronger glow and sun rays; fades out on PLAY (the game's own lighting is never changed).
+- Loading screen plates **all red** (four shades).
+
+## Item bar
+- Smaller slots with **1 px outlines**, small gaps; on phones never under 44 px (the first try came out tiny on phones with big gaps; fixed) (38).
+
+## World
+- **Pro Gym city** is now in `Workspace.Backdrops` in Studio (visible and editable); at game start the server moves it into ReplicatedStorage.Backdrops, so phones still only draw it near the Pro Gym. The far city stays in ReplicatedStorage.
+- **Beach gym** (39 before, 40-42 after): timber edging + gold lines on the mats, 8 tiki torches, festoon lights round the flag poles, a big BEACH GYM board on the arch, 2 surfboard racks, 4 umbrellas with loungers.
+- **Skate park** (43 before, 44-45 after): each ramp's sides painted (teal / orange / violet / red), a dark plaza with a white outline and coloured corners, bulbs along the fence, two strings of lights between the floodlights, a SKATE PARK arch over the entrance.
+- Both are one `Upgrade` model each (delete to undo), built by `tools/builders/BeachSkateUpgrade` (also in ServerStorage._Builders). Nothing added collides. The whole builds before are in ServerStorage `BeachGymBackup_26Oct` / `SkateParkBackup_26Oct`.
+
+## To test
+- Phone: item bar size, menu lighting, see-through trainer.
+- New player: Growth Spurts should feel quick (about an hour to Spurt 6).
+- Skate on the park (the ramps are unchanged apart from colour).

@@ -87,3 +87,6 @@ The GROWTH SPURT card (right column) and the machine strip are quiet chrome card
 - Everyone's height follows (owner chose: shrink everyone): a 7'0" player is 6'0" now; spurts, bonuses and alters unchanged.
 - Posing divisions: Bantam 4'0"-4'4", Middle 4'8"-5'0", Heavy 5'4"-5'8", then Open / alter tiers at 6'0". Skyscraper title and the height aura: reach 6'0". Menu hype line: "Grow to 8 feet tall."
 - Not changed: trainers keep their own heights (Atlas 7'6" now towers over a 6'0" player).
+
+## About 1 hour for all six (26 Oct, owner: "fast to hook players, alters are the real progression"; [[2026-10-26 GYM ARC Fast spurts, menu, beach and skate park]])
+Goals 9 / 30 / 53 / 68 / 90 / 119: 4 / 5 / 8 / 12 / 14 / 17 min with the 2x new player boost and trainers (`Targets` 4,5,8,12,15,17; `lune run tests/pacing tunespurts`).

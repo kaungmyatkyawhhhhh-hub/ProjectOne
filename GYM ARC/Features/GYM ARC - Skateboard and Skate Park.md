@@ -46,3 +46,6 @@ A skateboard for getting around town, and a big skate park with ramps and grind 
 
 ## Animated button (21 Oct)
 - Idle bob + shine every 4.5 s (off with Reduced Motion), squash and bounce on tap, spinning wheels and a soft gold glow while skating (`SkateClient` MOTION table; the wheel spots are measured on the art). See [[2026-10-21 GYM ARC Hotbar and skate button]].
+
+## Park upgrade (26 Oct, owner: "make the skatepark way better"; [[2026-10-26 GYM ARC Fast spurts, menu, beach and skate park]])
+Ramp sides painted (teal / orange / violet / red), dark plaza with white outline, fence bulbs, light strings, SKATE PARK arch. `SkatePark.Upgrade` (delete to undo), `tools/builders/BeachSkateUpgrade`. Backup: ServerStorage.SkateParkBackup_26Oct.
