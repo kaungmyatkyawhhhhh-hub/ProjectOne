@@ -25,3 +25,5 @@ Owner, 28 Oct: "the notes are overlapping, i have already done all that". Done b
 - Extra Trainer price (now the 3rd slot): decided.
 
 - (owner: "remove the server notification too for rolling trainers") `TrainerService` no longer fires "Pulled" to everyone: no banner, chat line or chime for anyone when The Shadow / Atlas is rolled. Your own reveal and the beam nearby players see stay.
+
+- (owner: "keep strongest lifter leaderboard and remove level leaderboard") The **LEVEL board is gone**; STRONGEST LIFTER (best LVL ever) now writes its own scores (`LB2_Strongest`, `LeaderboardService.valueOf` = `PlayerData.NoteBestLevel`; no more `store = "Level"`). Town and Pro Gym rows: the 2 LEVEL panels (+ frames) moved to `ServerStorage._Removed_LevelBoards_28Oct` (tag removed, `WasTag` kept), the other 7 boards spread evenly over the same backing. Starter Gym unchanged (it never had LEVEL). Checked in play: the Town row looks even, STRONGEST LIFTER shows "LVL n".

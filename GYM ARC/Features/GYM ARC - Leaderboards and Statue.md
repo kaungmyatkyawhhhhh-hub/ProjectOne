@@ -57,3 +57,4 @@ The statue reads the strongest player's save (read-only) and is built with their
 ## Reset and top 25 (28 Oct, prompt 79; [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]])
 - All boards reset: stores are now `LB2_<board>` (fresh). Players reappear as they play.
 - Every board shows the **top 25**, scrollable (10 rows visible; the extra rows are added on the client by `LeaderboardClient.scrollRows`).
+- (28 Oct) **LEVEL board removed** (it duplicated STRONGEST LIFTER). Boards now: Biggest, Strongest lifter (best LVL ever), Tallest, Most reps today, Posing wins, Arm wrestling, Alters. The Town / Pro Gym rows have 7 panels, evenly spaced; the old LEVEL panels are in `ServerStorage._Removed_LevelBoards_28Oct`.
