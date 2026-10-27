@@ -24,3 +24,5 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. Prompt: [[2026-10-27 GYM ARC Prompt - 
 - See-through parts: window glass on the far city buildings and the Powerlifting front, the Pro gym's light beam parts (Lights58), skate park glass.
 - 301 lights, 1,036 Glass parts, Lighting.EnvironmentSpecularScale 0.7.
 - Part of the profile was the Studio plugin "Superbullet AI Game Builder" (not in the real game).
+- (owner: "make the far city and powerlifting windows swap glass for a cheaper material") Glass -> SmoothPlastic: far city (`Backdrops`, 500), Powerlifting front (45) and shell (14). Panes at 0.1-0.3 transparency made solid, the clearer 0.5 ones keep a little see-through; reflectance at least 0.15 so they still read as windows. Each part keeps `WasGlass` / `WasTransparency` attributes (one Ctrl+Z step "Perf: glass windows to SmoothPlastic"). Looks the same from the street.
+- Correction: the Pro gym "light beam parts" (ProGym.Lights58) are its big tinted window panes (FrontGlassUpper x2, EastGlass 85 studs long; SmoothPlastic, 82% see-through), not light beams.
