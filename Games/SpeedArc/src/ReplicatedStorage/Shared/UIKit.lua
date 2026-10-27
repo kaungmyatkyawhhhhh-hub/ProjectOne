@@ -427,7 +427,8 @@ function UIKit.window(props)
 		AutoButtonColor = false,
 		BackgroundColor3 = Palette.SpeedBlack,
 		BackgroundTransparency = 0.35,
-		Size = UDim2.fromScale(1, 1),
+		Position = UDim2.fromOffset(0, -80), -- also dims the strip under Roblox's top bar
+		Size = UDim2.new(1, 0, 1, 80),
 		Visible = false,
 		ZIndex = 20,
 		Parent = canvas,
@@ -436,7 +437,7 @@ function UIKit.window(props)
 	local panel = UIKit.panel({
 		Name = props.Name or "Window",
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0.5, 8),
+		Position = UDim2.new(0.5, 0, 0.5, 48),
 		Size = UDim2.fromOffset(w, h),
 		AccentColor = props.Accent or Palette.ElectricBlue,
 		ZIndex = 21,

@@ -25,8 +25,13 @@ function CoachService.rollPrice(data)
 	return math.max(Coaches.RollMinPrice, Formulas.minutesOfCoins(Coaches.RollMinutes, data.League))
 end
 
--- one draw, honouring pity
+-- one draw, honouring pity (Studio: Workspace attribute TestRollCoach = "Zephyr" forces the next roll)
 local function draw(data)
+	local test = IS_STUDIO and workspace:GetAttribute("TestRollCoach")
+	if type(test) == "string" and Boosts.coach(test) then
+		workspace:SetAttribute("TestRollCoach", nil)
+		return Boosts.coach(test), nil
+	end
 	local minIdx = 1
 	local forced = nil
 	for _, p in Coaches.Pity do

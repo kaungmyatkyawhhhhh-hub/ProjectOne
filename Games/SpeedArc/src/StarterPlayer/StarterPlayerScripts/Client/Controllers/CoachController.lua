@@ -50,7 +50,7 @@ end
 ----------------------------------------------------------------------------
 local overlay
 local function buildOverlay()
-	overlay = make("Frame", { Name = "CoachReveal", BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.15, Size = UDim2.fromScale(1, 1), Visible = false, ZIndex = 40, Parent = ctx.Hud.canvas })
+	overlay = make("Frame", { Name = "CoachReveal", BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.15, Position = UDim2.fromOffset(0, -80), Size = UDim2.new(1, 0, 1, 80), Visible = false, ZIndex = 40, Parent = ctx.Hud.canvas })
 	overlay.Active = true
 end
 

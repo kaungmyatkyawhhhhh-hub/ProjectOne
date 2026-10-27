@@ -129,11 +129,11 @@ local function viewport(shoe, parent, dark)
 		Parent = parent,
 	})
 	local m = Art.shoeModel(shoe, 1, dark)
-	m:PivotTo(CFrame.new(0, 0, 0) * CFrame.Angles(0, math.rad(-120), 0))
+	m:PivotTo(CFrame.new(0, 0, 0) * CFrame.Angles(0, math.rad(-28), 0))
 	m.Parent = vp
 	local cam = Instance.new("Camera")
-	cam.FieldOfView = 34
-	cam.CFrame = CFrame.lookAt(Vector3.new(3.2, 2.2, 1.8), Vector3.new(0, 0.45, 0))
+	cam.FieldOfView = 30
+	cam.CFrame = CFrame.lookAt(Vector3.new(4.6, 2.0, 0.6), Vector3.new(0, 0.45, 0)) -- the side of the shoe, toe to the left
 	cam.Parent = vp
 	vp.CurrentCamera = cam
 	return vp
