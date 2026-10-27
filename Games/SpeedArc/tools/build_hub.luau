@@ -506,7 +506,7 @@ for k = 1, rows do
 			-- Blender fans: A blue, B gold with a flag (arm on +X), C white; body is 1.7 wide
 			local pick = ({ "Crowd_Fan_A", "Crowd_Fan_B", "Crowd_Fan_C", "Crowd_Fan_A" })[rng:NextInteger(1, 4)]
 			local t = meshTemplate(pick)
-			local fan = mesh(pick, crowdF, CFrame.new(x, h, z), { Offset = Vector3.new(t.Size.X / 2 - 0.85, 0, 0), Scale = rng:NextNumber(0.95, 1.06), CanCollide = false, Name = "Fan" })
+			local fan = mesh(pick, crowdF, CFrame.new(x, h, z) * CFrame.Angles(0, rng:NextNumber(-0.12, 0.12), 0), { Offset = Vector3.new(t.Size.X / 2 - 0.85, 0, 0), Scale = rng:NextNumber(0.95, 1.06), CanCollide = false, Name = "Fan" })
 			fan:SetAttribute("Phase", rng:NextNumber(0, 6.28))
 			count += 1
 		elseif rng:NextNumber() < 0.82 then
@@ -658,7 +658,8 @@ for i = 1, 3 do
 		part({ Class = "WedgePart", Parent = sprint, Name = "Block", Size = Vector3.new(1.6, 0.7, 1.2), CFrame = CFrame.new(spX0 + 4.2, 0.65, z) * CFrame.Angles(0, -math.pi / 2, 0), Color = Palette.SpeedBlack })
 	end
 	-- cones at the far end
-	if not mesh("Cone", sprint, CFrame.new(spX1 - 1, 0.3, z)) then
+	-- repeated props get a small random turn so no two look placed by a machine
+	if not mesh("Cone", sprint, CFrame.new(spX1 - 1, 0.3, z) * CFrame.Angles(0, rng:NextNumber(-0.5, 0.5), 0)) then
 		cyl(sprint, "ConeBase", 0.9, 0.2, Vector3.new(spX1 - 1, 0.4, z), Palette.SpeedBlack)
 		cyl(sprint, "Cone", 0.55, 1.4, Vector3.new(spX1 - 1, 1.1, z), W.Cone)
 		cyl(sprint, "ConeBand", 0.6, 0.3, Vector3.new(spX1 - 1, 1.2, z), Palette.White)
@@ -679,9 +680,10 @@ for i = 1, 4 do
 		-- Blender deck runs y -3.5..3.5 with the console past -3.5; lifted 0.08 so the belt meets the slot
 		mesh("Treadmill", m, CFrame.new(x, 0.08, trZ), { Offset = Vector3.new(0, 0, 3.5 - tm.Size.Z / 2) })
 		-- glowing belt stripes and screen (Neon) laid just over the mesh's painted ones
-		block(m, "BeltStripe", Vector3.new(0.26, 0.04, 6.2), Vector3.new(x - 1.1, 0.975, trZ), Palette.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
-		block(m, "BeltStripe", Vector3.new(0.26, 0.04, 6.2), Vector3.new(x + 1.1, 0.975, trZ), Palette.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
-		block(m, "Screen", Vector3.new(2.2, 0.7, 0.05), Vector3.new(x, 4.78, trZ - 2.97), Palette.BrightBlue, { Material = Enum.Material.Neon, CanCollide = false })
+		-- v2 mesh: belt recessed in the deck (top 0.83), screen recessed in the console (face at -3.0)
+		block(m, "BeltStripe", Vector3.new(0.2, 0.03, 6.0), Vector3.new(x - 1.12, 0.08 + 0.85, trZ + 0.15), Palette.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
+		block(m, "BeltStripe", Vector3.new(0.2, 0.03, 6.0), Vector3.new(x + 1.12, 0.08 + 0.85, trZ + 0.15), Palette.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
+		block(m, "Screen", Vector3.new(2.1, 0.66, 0.04), Vector3.new(x, 0.08 + 4.77, trZ - 3.04), Palette.BrightBlue, { Material = Enum.Material.Neon, CanCollide = false })
 	else
 		block(m, "Deck", Vector3.new(3.6, 0.8, 7), Vector3.new(x, 0.55, trZ), Palette.Graphite)
 		block(m, "Belt", Vector3.new(2.8, 0.82, 6.2), Vector3.new(x, 0.58, trZ), Palette.SpeedBlack)
@@ -694,7 +696,8 @@ for i = 1, 4 do
 		block(m, "Console", Vector3.new(3.4, 1.4, 0.6), Vector3.new(x, 4.6, trZ - 3.3), Palette.Carbon)
 		block(m, "Screen", Vector3.new(2.2, 0.7, 0.62), Vector3.new(x, 4.7, trZ - 3.32), Palette.BrightBlue, { Material = Enum.Material.Neon })
 	end
-	local cf = CFrame.lookAt(Vector3.new(x, 0.95, trZ + 0.6), Vector3.new(x, 0.95, trZ - 10))
+	local slotY = if meshTemplate("Treadmill") then 0.91 else 0.95 -- stand on the belt
+	local cf = CFrame.lookAt(Vector3.new(x, slotY, trZ + 0.6), Vector3.new(x, slotY, trZ - 10))
 	slot(m, "Treadmill", cf, i)
 end
 -- canopy
@@ -786,7 +789,8 @@ for _, lx in { -44, -22, 22, 44 } do
 	if lt then
 		-- the Blender pole stands at the origin; its head reaches out to -Z
 		mesh("Lamp_Post", props, CFrame.new(lx, 0.3, 64), { Offset = Vector3.new(0, 0, 0.6 - lt.Size.Z / 2) })
-		block(props, "LampGlow", Vector3.new(1.04, 0.12, 1.44), Vector3.new(lx, 8.75, 62.4), W.WindowLit, { Material = Enum.Material.Neon, CanCollide = false })
+		-- glow panel inside the recess under the v2 head
+		block(props, "LampGlow", Vector3.new(0.84, 0.04, 1.26), Vector3.new(lx, 0.3 + 8.53, 62.35), W.WindowLit, { Material = Enum.Material.Neon, CanCollide = false })
 	else
 		cyl(props, "LampPole", 0.3, 9, Vector3.new(lx, 4.5, 64), Palette.SpeedBlack)
 		block(props, "LampArm", Vector3.new(0.3, 0.3, 2), Vector3.new(lx, 9, 63.2), Palette.SpeedBlack)

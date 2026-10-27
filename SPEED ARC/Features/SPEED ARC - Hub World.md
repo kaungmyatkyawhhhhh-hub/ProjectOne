@@ -37,12 +37,9 @@ New props: Studio 3D Importer, keep "Scale unit: Stud", import as model, then Cl
 ## Rebuilding
 `Games/SpeedArc/tools/build_hub.luau` builds the whole hub. Running it again on the same day replaces it; on another day it moves the old hub to ServerStorage as a dated backup first.
 
-## Previews
-![[Tree_Round_A.png]]
-![[Bleacher_Section.png]]
-![[Treadmill.png]]
-![[Start_Arch.png]]
-![[Crowd_Fan_B.png]]
+## Props v2 (28 Oct, "Modelling like a human artist" rule)
+All 13 props remade in `Games/SpeedArc/blender/hub_kit_v2.py`, exported to `Downloads\speed_arc_models\hub2\` with the same names, sizes and pivots as v1 (checked: every bounding box within 0.005 studs). Previews (before / after, same 3/4 camera) in `SPEED ARC\Screenshots\models\`. See [[2026-10-28 SPEED ARC Progress - Hub props v2]].
+When v2 is imported, the builder already puts the Neon glows into the new recesses (treadmill belt and screen, lamp head) and gives cones and fans a small random turn.
 
 ## Related
 [[SPEED ARC - World, Map and Buildings]], [[SPEED ARC - Lighting]]

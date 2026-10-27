@@ -533,7 +533,7 @@ def crowd_fan(name, rnd):
     cap = active()
     cap.scale = (1.0, 1.0, 1.04)
     bpy.ops.object.transform_apply(scale=True)
-    cut(cap, cutter_box((2, 1, 0.8), hc + Vector((0, 0.56, -0.16)))(),  # the face
+    cut(cap, cutter_box((2, 1.2, 0.9), hc + Vector((0, 0.5, -0.2)), rot=(math.radians(-28), 0, 0))(),  # the face, hairline sloping back
         cutter_box((2, 2, 1), hc + Vector((0, 0, -0.52)))())  # side hair ends above the ears
     cap.data.shade_smooth()
     parts.append(paint(cap, hair))
