@@ -8,6 +8,7 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 
 ## Start here
 - **Design plan:** [[SPEED ARC - Design plan]]
+- **Lessons from GYM ARC (read before every big prompt):** [[SPEED ARC - Lessons from GYM ARC]]
 - **Prompts:** in `Prompts/` (numbered, newest last)
 - **Progress notes:** in `Progress/` (Claude Code writes one per prompt)
 - **Features:** in `Features/` (one note per system, Claude Code keeps them up to date)
