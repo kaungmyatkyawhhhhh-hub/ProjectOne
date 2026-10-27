@@ -769,7 +769,7 @@ local function tree(pos, scale)
 end
 local treeSpots = {
 	{ -130, -120 }, { -110, -132 }, { -80, -128 }, { 80, -126 }, { 108, -134 }, { 132, -118 },
-	{ -134, -80 }, { -136, -40 }, { -132, 0 }, { -136, 40 }, { -130, 82 }, { -128, 120 },
+	{ -134, -80 }, { -140, -62 }, { -140, 24 }, { -130, 82 }, { -128, 120 }, -- west side keeps room for the shops
 	{ 134, -80 }, { 136, -38 }, { 132, 2 }, { 136, 42 }, { 130, 84 }, { 128, 122 },
 	{ -78, 130 }, { 78, 130 }, { -96, 100 }, { 96, 100 }, { -60, -100 }, { 60, -100 },
 }
@@ -817,6 +817,197 @@ for _, bx in { -33, 33 } do
 end
 bench(CFrame.new(-60, 0, -66) * CFrame.Angles(0, 0, 0))
 bench(CFrame.new(60, 0, -66) * CFrame.Angles(0, 0, 0))
+
+----------------------------------------------------------------------------
+-- M2 shops on the west side: Shoe Shop, Trail Booth, Coach Corner (all face the track, +X)
+-- Blender versions come later (Downloads\speed_arc_models\hub\v3); these are the part builds.
+----------------------------------------------------------------------------
+local Coaches = require(ReplicatedStorage.Shared.Config.Coaches)
+local shops = folder("Shops")
+
+local function prompt(parent, opens, action, object, pos)
+	local anchor = block(parent, "PromptSpot", Vector3.new(1, 1, 1), pos, Palette.Gold, { Transparency = 1, CanCollide = false })
+	local pp = Instance.new("ProximityPrompt")
+	pp.ActionText = action
+	pp.ObjectText = object
+	pp.HoldDuration = 0
+	pp.MaxActivationDistance = 14
+	pp.RequiresLineOfSight = false
+	pp:SetAttribute("Opens", opens)
+	pp.Parent = anchor
+	return pp
+end
+
+local function signBoard(parent, name, size, cf, lines, trim)
+	local board = part({ Parent = parent, Name = name, Size = size, CFrame = cf, Color = Palette.SpeedBlack })
+	-- the board faces +X (towards the track); trim sits behind it, glow strip along the bottom front
+	part({ Parent = parent, Name = name .. "Trim", Size = size + Vector3.new(0.1, 0.4, 0.4), CFrame = cf * CFrame.new(-0.2, 0, 0), Color = trim or Palette.Gold })
+	part({ Parent = parent, Name = name .. "Glow", Size = Vector3.new(0.1, 0.18, size.Z + 0.2), CFrame = cf * CFrame.new(size.X / 2 + 0.05, -size.Y / 2 + 0.2, 0), Color = Palette.BrightBlue, Material = Enum.Material.Neon, CanCollide = false })
+	surfaceText(board, Enum.NormalId.Right, lines, { PPS = 20, Brightness = 2, MaxDistance = 220, Padding = 0 })
+	return board
+end
+
+-- Shoe Shop: open-front sports store, six turning pedestals inside
+do
+	local m = folder("ShoeShop", shops)
+	local x0, zc = -126, -38
+	block(m, "Floor", Vector3.new(16.4, 0.4, 24.4), Vector3.new(x0, 0.2, zc), Palette.Graphite)
+	block(m, "FloorTrim", Vector3.new(0.3, 0.45, 24.4), Vector3.new(x0 + 8.1, 0.22, zc), Palette.Gold)
+	block(m, "BackWall", Vector3.new(1, 12, 24), Vector3.new(x0 - 7.5, 6, zc), Palette.Carbon)
+	block(m, "BackPanel", Vector3.new(0.3, 7, 21), Vector3.new(x0 - 6.9, 5.2, zc), Palette.DeepBlue)
+	for i = 0, 2 do
+		block(m, "Shelf", Vector3.new(1.2, 0.25, 20), Vector3.new(x0 - 6.4, 3 + i * 2.2, zc), W.Aluminium)
+	end
+	for _, side in { -1, 1 } do
+		block(m, "SideWall", Vector3.new(16, 12, 1), Vector3.new(x0, 6, zc + side * 11.5), Palette.Carbon)
+		block(m, "SideStripe", Vector3.new(16.1, 0.5, 1.05), Vector3.new(x0, 9.5, zc + side * 11.5), Palette.ElectricBlue)
+		block(m, "Pillar", Vector3.new(1.4, 12.4, 1.4), Vector3.new(x0 + 7.6, 6.2, zc + side * 11.5), Palette.SpeedBlack)
+	end
+	block(m, "Roof", Vector3.new(17, 1, 25), Vector3.new(x0, 12.5, zc), Palette.SpeedBlack)
+	block(m, "RoofGold", Vector3.new(17.2, 0.35, 25.2), Vector3.new(x0, 12.05, zc), Palette.Gold)
+	-- striped awning over the open front
+	for i = 0, 7 do
+		local z = zc - 10.5 + i * 3
+		part({ Class = "WedgePart", Parent = m, Name = "Awning", Size = Vector3.new(3, 1.4, 4), CFrame = CFrame.new(x0 + 10, 10.6, z) * CFrame.Angles(0, math.pi / 2, 0), Color = if i % 2 == 0 then Palette.ElectricBlue else Palette.White })
+	end
+	signBoard(m, "Sign", Vector3.new(0.6, 3, 16), CFrame.new(x0 + 8.6, 14.6, zc), {
+		{ Text = "SHOE SHOP", Height = 0.62, Color = Palette.Gold },
+		{ Text = "RUN FASTER IN BETTER SHOES", Height = 0.25, Color = Palette.White, Font = BODY },
+	})
+	-- pedestals (the client puts a turning shoe on each, dark if it's still locked)
+	local ped = folder("ShoePedestals", m)
+	for i = 1, 6 do
+		local z = zc - 8 + (i - 1) * 3.2
+		cyl(m, "PedestalBase", 1.15, 0.3, Vector3.new(x0 - 2, 0.55, z), Palette.SpeedBlack)
+		local top = cyl(ped, "Pedestal" .. i, 0.9, 2.2, Vector3.new(x0 - 2, 1.8, z), W.Aluminium)
+		top:SetAttribute("ShoeIndex", i)
+		cyl(m, "PedestalRing", 0.95, 0.15, Vector3.new(x0 - 2, 2.88, z), Palette.Gold)
+		local tag = block(m, "Tag" .. i, Vector3.new(0.2, 0.7, 2.6), Vector3.new(x0 - 0.9, 1.2, z), Palette.SpeedBlack)
+		tag.CFrame = tag.CFrame * CFrame.Angles(0, 0, math.rad(-20))
+		local g = surfaceText(tag, Enum.NormalId.Right, { { Name = "Label", Text = "SHOES", Height = 0.8, Color = Palette.White, Font = BODY } }, { PPS = 40, MaxDistance = 60 })
+		local ref = Instance.new("ObjectValue") -- the client writes the pair's name / unlock here
+		ref.Name = "LabelRef"
+		ref.Value = g:FindFirstChild("Label")
+		ref.Parent = top
+	end
+	prompt(m, "ShoeShop", "SHOP", "Shoe Shop", Vector3.new(x0 + 6, 3, zc))
+end
+
+-- Trail Booth: a neon carnival stand with a demo trail looping behind a glass-look panel
+do
+	local m = folder("TrailBooth", shops)
+	local x0, zc = -128, 4
+	block(m, "Base", Vector3.new(10, 0.5, 14), Vector3.new(x0, 0.25, zc), Palette.Graphite)
+	block(m, "Counter", Vector3.new(2.2, 3.4, 12), Vector3.new(x0 + 3.6, 2.2, zc), Palette.Carbon)
+	block(m, "CounterTop", Vector3.new(2.6, 0.3, 12.4), Vector3.new(x0 + 3.6, 4.05, zc), Palette.Gold)
+	block(m, "CounterGlow", Vector3.new(0.12, 0.25, 12), Vector3.new(x0 + 4.75, 3.7, zc), Palette.BrightBlue, { Material = Enum.Material.Neon, CanCollide = false })
+	block(m, "Back", Vector3.new(0.8, 9, 14), Vector3.new(x0 - 4.6, 4.5, zc), Palette.SpeedBlack)
+	block(m, "DemoPanel", Vector3.new(0.2, 5.5, 10), Vector3.new(x0 - 4, 5, zc), W.Window, { Transparency = 0.55, CanCollide = false })
+	for _, side in { -1, 1 } do
+		block(m, "Post", Vector3.new(0.8, 10, 0.8), Vector3.new(x0 + 4.4, 5, zc + side * 6.6), Palette.SpeedBlack)
+		block(m, "PostNeon", Vector3.new(0.15, 9.6, 0.15), Vector3.new(x0 + 4.85, 5, zc + side * 6.6), Palette.Gold, { Material = Enum.Material.Neon, CanCollide = false })
+	end
+	block(m, "TopNeon", Vector3.new(0.15, 0.15, 13.4), Vector3.new(x0 + 4.85, 9.9, zc), Palette.Gold, { Material = Enum.Material.Neon, CanCollide = false })
+	for i = 0, 6 do
+		part({ Class = "WedgePart", Parent = m, Name = "Canopy", Size = Vector3.new(2, 1.6, 10), CFrame = CFrame.new(x0, 10.8, zc - 6 + i * 2) * CFrame.Angles(0, math.pi / 2, 0) * CFrame.new(0, 0, 0), Color = if i % 2 == 0 then Palette.Gold else Palette.SpeedBlack })
+	end
+	signBoard(m, "Sign", Vector3.new(0.6, 2.6, 12), CFrame.new(x0 + 5.2, 12.8, zc), {
+		{ Text = "TRAIL BOOTH", Height = 0.6, Color = Palette.BrightBlue },
+		{ Text = "LEAVE A STREAK BEHIND YOU", Height = 0.25, Color = Palette.White, Font = BODY },
+	}, Palette.ElectricBlue)
+	-- the demo runner the client moves in a loop (a Trail between two attachments)
+	local demo = block(m, "Demo", Vector3.new(0.4, 0.4, 0.4), Vector3.new(x0 - 3.2, 5, zc), Palette.Gold, { Transparency = 1, CanCollide = false })
+	local a0 = Instance.new("Attachment")
+	a0.Position = Vector3.new(0, 0.7, 0)
+	a0.Parent = demo
+	local a1 = Instance.new("Attachment")
+	a1.Position = Vector3.new(0, -0.7, 0)
+	a1.Parent = demo
+	local tr = Instance.new("Trail")
+	tr.Attachment0 = a0
+	tr.Attachment1 = a1
+	tr.Lifetime = 0.6
+	tr.LightEmission = 1
+	tr.FaceCamera = true
+	tr.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromHex("#FFE38C")), ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FF7A1F")), ColorSequenceKeypoint.new(1, Color3.fromHex("#4FC3FF")) })
+	tr.Transparency = NumberSequence.new(0, 1)
+	tr.Parent = demo
+	prompt(m, "TrailBooth", "SHOP", "Trail Booth", Vector3.new(x0 + 6, 3, zc))
+end
+
+-- Coach Corner: bench, whiteboard with the coach cards, stopwatch, whistle on a hook, COACHES sign
+do
+	local m = folder("CoachCorner", shops)
+	local x0, zc = -126, 44
+	block(m, "Pad", Vector3.new(16, 0.3, 18), Vector3.new(x0, 0.15, zc), Color3.fromHex("#9DA6B5"))
+	bench(CFrame.new(x0 + 2, 0.3, zc + 4) * CFrame.Angles(0, math.pi / 2, 0))
+	-- whiteboard on legs, facing the track
+	local board = block(m, "Whiteboard", Vector3.new(0.3, 5, 9), Vector3.new(x0 - 4, 5.2, zc - 2), Palette.White)
+	block(m, "BoardFrame", Vector3.new(0.35, 5.4, 9.4), Vector3.new(x0 - 4.05, 5.2, zc - 2), W.Aluminium)
+	for _, s in { -1, 1 } do
+		block(m, "BoardLeg", Vector3.new(0.3, 7.6, 0.3), Vector3.new(x0 - 4.1, 3.8, zc - 2 + s * 4.3), W.Aluminium)
+	end
+	local g = Instance.new("SurfaceGui")
+	g.Face = Enum.NormalId.Right
+	g.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	g.PixelsPerStud = 24
+	g.MaxDistance = 90
+	g.LightInfluence = 0.4
+	g.Parent = board
+	local grid = Instance.new("UIGridLayout")
+	grid.CellSize = UDim2.new(0.25, -8, 0.5, -10)
+	grid.CellPadding = UDim2.fromOffset(8, 10)
+	grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	grid.VerticalAlignment = Enum.VerticalAlignment.Center
+	grid.Parent = g
+	for _, c in Coaches.List do
+		local cardF = Instance.new("Frame")
+		cardF.BackgroundColor3 = Palette.Carbon
+		cardF.BorderSizePixel = 0
+		local cr = Instance.new("UICorner")
+		cr.CornerRadius = UDim.new(0, 8)
+		cr.Parent = cardF
+		local st = Instance.new("UIStroke")
+		st.Color = Coaches.RarityColors[c.Rarity]
+		st.Thickness = 3
+		st.Parent = cardF
+		local t = Instance.new("TextLabel")
+		t.BackgroundTransparency = 1
+		t.Size = UDim2.fromScale(1, 0.62)
+		t.TextScaled = true
+		t.FontFace = MONTSERRAT
+		t.Text = string.upper(c.Name)
+		t.TextColor3 = Palette.White
+		t.Parent = cardF
+		local r = t:Clone()
+		r.Position = UDim2.fromScale(0, 0.62)
+		r.Size = UDim2.fromScale(1, 0.34)
+		r.FontFace = BODY
+		r.Text = string.upper(c.Rarity)
+		r.TextColor3 = Coaches.RarityColors[c.Rarity]
+		r.Parent = cardF
+		cardF.Parent = g
+	end
+	-- table with a stopwatch, a post with the whistle on a hook
+	block(m, "Table", Vector3.new(2.4, 0.25, 3), Vector3.new(x0 + 1, 2.6, zc - 6), W.Wood)
+	block(m, "TableLeg", Vector3.new(0.3, 2.5, 0.3), Vector3.new(x0 + 1, 1.3, zc - 6), Palette.SpeedBlack)
+	local sw = cyl(m, "Stopwatch", 0.55, 0.22, Vector3.new(x0 + 1, 2.85, zc - 6), Palette.Gold)
+	sw.CFrame = CFrame.new(x0 + 1, 3.1, zc - 6) * CFrame.Angles(0, 0, math.rad(70))
+	cyl(m, "StopwatchFace", 0.42, 0.24, Vector3.new(x0 + 1.05, 3.12, zc - 6), Palette.White).CFrame = CFrame.new(x0 + 1.06, 3.12, zc - 6) * CFrame.Angles(0, 0, math.rad(70))
+	block(m, "HookPost", Vector3.new(0.35, 6, 0.35), Vector3.new(x0 - 1.5, 3, zc + 9), Palette.SpeedBlack)
+	block(m, "Hook", Vector3.new(0.8, 0.12, 0.12), Vector3.new(x0 - 1.1, 5.6, zc + 9), W.Aluminium)
+	block(m, "Lanyard", Vector3.new(0.06, 1.2, 0.5), Vector3.new(x0 - 0.75, 5, zc + 9), Palette.ElectricBlue, { CanCollide = false })
+	block(m, "Whistle", Vector3.new(0.3, 0.25, 0.45), Vector3.new(x0 - 0.75, 4.35, zc + 9), Palette.Gold, { CanCollide = false })
+	-- big sign on two posts
+	for _, s in { -1, 1 } do
+		block(m, "SignPost", Vector3.new(0.5, 11, 0.5), Vector3.new(x0 - 6, 5.5, zc - 2 + s * 5), Palette.SpeedBlack)
+	end
+	signBoard(m, "Sign", Vector3.new(0.6, 3, 11), CFrame.new(x0 - 6, 11.4, zc - 2), {
+		{ Text = "COACHES", Height = 0.62, Color = Palette.Gold },
+		{ Text = "ROLL A COACH  -  THEY FOLLOW YOU", Height = 0.25, Color = Palette.White, Font = BODY },
+	})
+	prompt(m, "CoachCorner", "ROLL", "Coach Corner", Vector3.new(x0 + 2, 3, zc - 2))
+end
 
 ----------------------------------------------------------------------------
 -- finish

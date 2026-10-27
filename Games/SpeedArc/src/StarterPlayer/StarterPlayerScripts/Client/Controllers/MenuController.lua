@@ -18,6 +18,7 @@ local player = Players.LocalPlayer
 local Menu = {}
 local ctx
 local pedestals = {} -- { shoe, model, base CFrame, sign label, wasUnlocked }
+local demo, demoBase -- the Trail Booth's looping demo trail
 
 local function buildMenu()
 	local holder = make("Frame", { Name = "LeftMenu", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 14, 0.5, -10), Size = UDim2.fromOffset(124, 112), Parent = ctx.Hud.canvas })
@@ -46,7 +47,8 @@ local function buildPedestals()
 		local idx = spot:GetAttribute("ShoeIndex")
 		local shoe = idx and Shoes.List[idx]
 		if shoe then
-			local entry = { shoe = shoe, spot = spot, model = nil, label = spot:FindFirstChild("Label", true), unlocked = nil }
+			local ref = spot:FindFirstChild("LabelRef")
+			local entry = { shoe = shoe, spot = spot, model = nil, label = ref and ref.Value, unlocked = nil }
 			table.insert(pedestals, entry)
 		end
 	end
@@ -103,6 +105,9 @@ function Menu.start(c)
 		-- turn the shoes slowly, only when you're near the shop
 		local camera = workspace.CurrentCamera
 		local acc = 0
+		local booth = workspace.Hub:FindFirstChild("Shops") and workspace.Hub.Shops:FindFirstChild("TrailBooth")
+		demo = booth and booth:FindFirstChild("Demo")
+		demoBase = demo and demo.CFrame
 		RunService.Heartbeat:Connect(function(dt)
 			acc += dt
 			if acc < 1 / 30 or #pedestals == 0 then
@@ -115,6 +120,9 @@ function Menu.start(c)
 				return
 			end
 			local t = os.clock()
+			if demo then
+				demo.CFrame = demoBase * CFrame.new(0, math.sin(t * 2.4) * 1.6, math.cos(t * 2.4) * 3.6)
+			end
 			for i, e in pedestals do
 				if e.model and e.base then
 					e.model:PivotTo(e.base * CFrame.new(0, 0.15 + math.sin(t * 1.5 + i) * 0.08, 0) * CFrame.Angles(0, t * 0.6 + i, 0))

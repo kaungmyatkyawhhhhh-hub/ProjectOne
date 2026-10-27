@@ -1,5 +1,15 @@
 [
  {
+  "file": "ReplicatedStorage/Shared/Config/Coaches.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Coaches"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/Config/GameConfig.lua",
   "class": "ModuleScript",
   "path": [
@@ -40,6 +50,26 @@
   ]
  },
  {
+  "file": "ReplicatedStorage/Shared/Config/Ranks.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Ranks"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Config/Shoes.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Shoes"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/Config/Sounds.lua",
   "class": "ModuleScript",
   "path": [
@@ -60,12 +90,42 @@
   ]
  },
  {
+  "file": "ReplicatedStorage/Shared/Config/Trails.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Trails"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/UIKit.lua",
   "class": "ModuleScript",
   "path": [
    "ReplicatedStorage",
    "Shared",
    "UIKit"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Util/Art.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Util",
+   "Art"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Util/Boosts.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Util",
+   "Boosts"
   ]
  },
  {
@@ -118,6 +178,16 @@
   ]
  },
  {
+  "file": "ServerScriptService/Server/Services/CoachService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "CoachService"
+  ]
+ },
+ {
   "file": "ServerScriptService/Server/Services/DataTemplate.lua",
   "class": "ModuleScript",
   "path": [
@@ -125,6 +195,16 @@
    "Server",
    "Services",
    "DataTemplate"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Services/LockerService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "LockerService"
   ]
  },
  {
@@ -169,6 +249,28 @@
   ]
  },
  {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/CoachController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "CoachController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/CosmeticsController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "CosmeticsController"
+  ]
+ },
+ {
   "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/HudController.lua",
   "class": "ModuleScript",
   "path": [
@@ -191,6 +293,28 @@
   ]
  },
  {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/LockerController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "LockerController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/MenuController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "MenuController"
+  ]
+ },
+ {
   "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/RaceController.lua",
   "class": "ModuleScript",
   "path": [
@@ -210,6 +334,17 @@
    "Client",
    "Controllers",
    "SoundController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/SpeedFeelController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "SpeedFeelController"
   ]
  },
  {
