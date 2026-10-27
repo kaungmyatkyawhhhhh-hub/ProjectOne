@@ -10,7 +10,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. Brief: [[2026-10-27 GYM ARC Prompt - 6
 ## What it is
 The rebirth after Alter 15 (`Config/HallOfFame.RequiredAlter`, never moves). Never forced.
 - **Start over:** height, Growth Spurts (start at the new star's `startSpurts`), muscle levels, Body Alters and their gains. Heavy weights lock again by themselves (every lift checks the main muscle's level, same as after a spurt).
-- **Keep:** trainers, coins, alter skins (all reached ones become owned looks, `data.alter.bought`; the worn one stays worn), titles, auras, styles, gear, passes, Robux buys, LVL (the muscle levels go into `stats.levelBase`).
+- **Keep:** trainers, coins, alter skins (all reached ones become owned looks, `data.alter.bought`; the worn one stays worn; owner, 28 Oct: it never comes off at the Hall of Fame), titles, auras, styles, gear, passes, Robux buys, LVL (the muscle levels go into `stats.levelBase`).
 - **Stays unlocked:** every gym (`data.gymAccess` Beach / Pro / Powerlifting) and every feature that opens up to Alter 15: `Config/Guides.Met`, `Strongman.Unlocked`, `Court.Unlocked`, AuraService height / alter auras, PumpShopService sections + gear, GearPanel all pass when `HallOfFame.Unlocked(data)`.
 - **Stars** (`Config/HallOfFame.Stars`): 1 +25% EXP + start at GS 2; 2 +50%; 3 +75%, +10% coins, GS 3; 4 +100%; 5 +125%, +20% coins, GS 4; 6-9 +15% a star; 10 +200% + LEGEND; then +10% a star. EXP outside the gains cap (`Config/Gains.PerRep`, next to the alter bonus); coins = boost source "HallOfFame". First star: a free trainer roll + the HALL OF FAMER title; 10: the LEGEND title.
 - Save: `data.fame = { stars, peak = { spurts, alter, equipped, muscles }, enteredAt }` (never inside `data.alter`).
