@@ -33,6 +33,16 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 
 ## Prompts
 - [[2026-10-28 SPEED ARC Prompt - 1 Project setup and core loop]] (done: [[2026-10-28 SPEED ARC Progress - 1 Project setup and core loop|progress]])
+- [[2026-10-28 SPEED ARC Prompt - 2 Shoes, coaches, trails, speed feel]] (M2)
+- [[2026-10-28 SPEED ARC Prompt - 3 Ranks, Go Pro, City Park, Big Stadium]] (M3)
+- [[2026-10-28 SPEED ARC Prompt - 4 First 15 minutes, daily, quests, social]] (M4)
+- [[2026-10-28 SPEED ARC Prompt - 5 Store, passes, Starter Pack, Locker cosmetics]] (M5)
+- [[2026-10-28 SPEED ARC Prompt - 6 Look, sound and launch check]] (M6, then soft launch)
+- After launch (one every 1-2 weeks, only after checking the numbers):
+  - [[2026-10-28 SPEED ARC Prompt - 7 Update 1 Mountain Trail]]
+  - [[2026-10-28 SPEED ARC Prompt - 8 Update 2 World Games]]
+  - [[2026-10-28 SPEED ARC Prompt - 9 Update 3 Legend Laps]]
+  - [[2026-10-28 SPEED ARC Prompt - 10 Update 4 Relay, crews, weekly events]]
 
 ## Features
 - [[SPEED ARC - Code and Sync]]
