@@ -29,6 +29,7 @@ function LockerService.snapshot(data)
 		EquippedCoaches = data.EquippedCoaches,
 		Pity = data.Pity,
 		CoachRolls = data.CoachRolls,
+		FreeRolls = data.FreeRolls or 0,
 		SeenCutscenes = data.SeenCutscenes,
 		Slots = Boosts.slotCount(data),
 		League = data.League,

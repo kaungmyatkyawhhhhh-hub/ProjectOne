@@ -104,5 +104,8 @@ return {
 		ChallengeAskSeconds = 15,
 	},
 
+	-- Analytics funnel (GDD 26), in order; each fires once per player
+	Funnel = { "loaded", "menu_play", "first_tap", "first_race_joined", "first_race_finished", "first_shoes", "first_coach_roll", "silver", "gold", "go_pro_1", "day2_return", "go_pro_2" },
+
 	-- Studio: a fake clock for testing days (Workspace attribute TestDayOffset = days to add)
 }

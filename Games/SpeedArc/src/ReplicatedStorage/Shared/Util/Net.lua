@@ -15,6 +15,10 @@ local EVENTS = {
 	"Collection", -- server -> client: owned shoes / trails / coaches snapshot
 	"CoachReveal", -- server -> client: roll results to reveal
 	"Moment", -- server -> client: big moments (rank up, go pro...)
+	"Retention", -- server -> client: daily / quests / gifts state, gift paid, notices (M4)
+	"Tutorial", -- server -> client: tutorial step changed (M4)
+	"Social", -- server -> client: friend boost, race requests, profile (M4)
+	"Funnel", -- client -> server: client-side funnel steps (menu PLAY)
 }
 local FUNCTIONS = {
 	"Action", -- client -> server: Action:InvokeServer(name, ...) -> ok, result
