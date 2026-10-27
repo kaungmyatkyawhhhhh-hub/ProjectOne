@@ -72,6 +72,29 @@ end
 -- Used on the shop pedestals and in Locker previews.
 function Art.shoeModel(shoe, scale, dark)
 	scale = scale or 1
+	local assets = game:GetService("ReplicatedStorage"):FindFirstChild("Assets")
+	local lib = assets and assets:FindFirstChild("Shoes")
+	local meshModel = lib and lib:FindFirstChild("Shoe_" .. shoe.Id)
+	local template = meshModel and (if meshModel:IsA("MeshPart") then meshModel else meshModel:FindFirstChildWhichIsA("MeshPart"))
+	if template then
+		-- the Blender pair (1.55 long); the part version below is 2.2 long, so match its size
+		local m = Instance.new("Model")
+		m.Name = "Shoe_" .. shoe.Id
+		local p = template:Clone()
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.Size = template.Size * (2.2 / template.Size.Z) * scale
+		p.Color = if dark then P.SpeedBlack else Color3.new(1, 1, 1)
+		if dark then
+			p.Material = Enum.Material.SmoothPlastic
+		end
+		p.CFrame = CFrame.new(0, p.Size.Y / 2, 0)
+		p.PivotOffset = CFrame.new(0, -p.Size.Y / 2, 0) -- pivot at the sole, like the part version
+		p.Parent = m
+		m.PrimaryPart = p
+		return m
+	end
 	local c = shoe.Colors
 	local m = Instance.new("Model")
 	m.Name = "Shoe_" .. shoe.Id

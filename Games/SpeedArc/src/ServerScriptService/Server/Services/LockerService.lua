@@ -2,6 +2,7 @@
 -- Also: the collection snapshot each client gets, the boost attributes the HUD reads,
 -- and the shoes / trail attached to every character.
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local Shared = game:GetService("ReplicatedStorage").Shared
@@ -63,11 +64,35 @@ local function clearShoes(char)
 	end
 end
 
+local function shoeLibrary()
+	local assets = ReplicatedStorage:FindFirstChild("Assets")
+	return assets and assets:FindFirstChild("Shoes")
+end
+
+-- the owner imports Shoe_<Id> meshes into ServerStorage.Meshes; move them where clients can see them
+local function moveShoeMeshes()
+	local lib = ServerStorage:FindFirstChild("Meshes")
+	if not lib then
+		return
+	end
+	local assets = ReplicatedStorage:FindFirstChild("Assets") or Instance.new("Folder")
+	assets.Name = "Assets"
+	assets.Parent = ReplicatedStorage
+	local shoes = assets:FindFirstChild("Shoes") or Instance.new("Folder")
+	shoes.Name = "Shoes"
+	shoes.Parent = assets
+	for _, m in lib:GetChildren() do
+		if string.find(m.Name, "^Shoe_") then
+			m:Clone().Parent = shoes
+		end
+	end
+end
+
 local function makeShoePart(foot, shoe, side)
 	local holder = Instance.new("Model")
 	holder.Name = "Shoe_" .. side
 	holder:SetAttribute("SpeedArcShoe", true)
-	local lib = ServerStorage:FindFirstChild("Meshes")
+	local lib = shoeLibrary()
 	local meshModel = lib and lib:FindFirstChild("Shoe_" .. shoe.Id)
 	local fs = foot.Size
 	local function weld(p, offset)
@@ -87,9 +112,10 @@ local function makeShoePart(foot, shoe, side)
 	local template = meshModel and (if meshModel:IsA("MeshPart") then meshModel else meshModel:FindFirstChildWhichIsA("MeshPart"))
 	if template then
 		local m = template:Clone()
-		local s = math.max(fs.X / 1.0, 0.6)
+		local s = math.max(fs.X * 1.12 / template.Size.X, 0.5) -- a little wider than the foot
 		m.Size = template.Size * s
-		weld(m, CFrame.new(0, -fs.Y / 2 + m.Size.Y / 2 - 0.05, -0.08))
+		m.Color = Color3.new(1, 1, 1)
+		weld(m, CFrame.new(0, -fs.Y / 2 + m.Size.Y / 2 - 0.08, -0.06))
 	else
 		local c = shoe.Colors
 		local sole = Instance.new("Part")
@@ -283,6 +309,7 @@ local function equipTrail(player, id)
 end
 
 function LockerService.start()
+	moveShoeMeshes()
 	Net.on("BuyShoe", buyShoe)
 	Net.on("EquipShoe", equipShoe)
 	Net.on("BuyTrail", buyTrail)

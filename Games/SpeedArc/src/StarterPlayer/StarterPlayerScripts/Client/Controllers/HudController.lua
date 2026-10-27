@@ -57,7 +57,7 @@ local function buildSpeed()
 	local plate = UIKit.make("Frame", {
 		Name = "Plate",
 		BackgroundColor3 = P.SpeedBlack,
-		BackgroundTransparency = 0.35,
+		BackgroundTransparency = 0.12,
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.new(0.5, 0, 0, 4),
 		Size = UDim2.new(1, 0, 0, 92),

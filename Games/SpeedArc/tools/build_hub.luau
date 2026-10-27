@@ -853,6 +853,11 @@ do
 	local x0, zc = -126, -38
 	block(m, "Floor", Vector3.new(16.4, 0.4, 24.4), Vector3.new(x0, 0.2, zc), Palette.Graphite)
 	block(m, "FloorTrim", Vector3.new(0.3, 0.45, 24.4), Vector3.new(x0 + 8.1, 0.22, zc), Palette.Gold)
+	local shell = meshTemplate("ShoeShop_Shell")
+	if shell then
+		mesh("ShoeShop_Shell", m, CFrame.new(x0, 0, zc), { Offset = Vector3.new(-8 + shell.Size.X / 2, 0, 0) })
+	end
+	if not shell then
 	block(m, "BackWall", Vector3.new(1, 12, 24), Vector3.new(x0 - 7.5, 6, zc), Palette.Carbon)
 	block(m, "BackPanel", Vector3.new(0.3, 7, 21), Vector3.new(x0 - 6.9, 5.2, zc), Palette.DeepBlue)
 	for i = 0, 2 do
@@ -870,6 +875,7 @@ do
 		local z = zc - 10.5 + i * 3
 		part({ Class = "WedgePart", Parent = m, Name = "Awning", Size = Vector3.new(3, 1.4, 4), CFrame = CFrame.new(x0 + 10, 10.6, z) * CFrame.Angles(0, math.pi / 2, 0), Color = if i % 2 == 0 then Palette.ElectricBlue else Palette.White })
 	end
+	end -- part build
 	signBoard(m, "Sign", Vector3.new(0.6, 3, 16), CFrame.new(x0 + 8.6, 14.6, zc), {
 		{ Text = "SHOE SHOP", Height = 0.62, Color = Palette.Gold },
 		{ Text = "RUN FASTER IN BETTER SHOES", Height = 0.25, Color = Palette.White, Font = BODY },
@@ -898,17 +904,25 @@ do
 	local m = folder("TrailBooth", shops)
 	local x0, zc = -128, 4
 	block(m, "Base", Vector3.new(10, 0.5, 14), Vector3.new(x0, 0.25, zc), Palette.Graphite)
+	local shell = meshTemplate("TrailBooth_Shell")
+	if shell then
+		mesh("TrailBooth_Shell", m, CFrame.new(x0, 0, zc), { Offset = Vector3.new(-5.0 + shell.Size.X / 2, 0, 0) })
+	end
+	if not shell then
 	block(m, "Counter", Vector3.new(2.2, 3.4, 12), Vector3.new(x0 + 3.6, 2.2, zc), Palette.Carbon)
 	block(m, "CounterTop", Vector3.new(2.6, 0.3, 12.4), Vector3.new(x0 + 3.6, 4.05, zc), Palette.Gold)
-	block(m, "CounterGlow", Vector3.new(0.12, 0.25, 12), Vector3.new(x0 + 4.75, 3.7, zc), Palette.BrightBlue, { Material = Enum.Material.Neon, CanCollide = false })
 	block(m, "Back", Vector3.new(0.8, 9, 14), Vector3.new(x0 - 4.6, 4.5, zc), Palette.SpeedBlack)
+	end -- part build (counter + back)
+	block(m, "CounterGlow", Vector3.new(0.12, 0.25, 12), Vector3.new(x0 + 4.75, 3.7, zc), Palette.BrightBlue, { Material = Enum.Material.Neon, CanCollide = false })
 	block(m, "DemoPanel", Vector3.new(0.2, 5.5, 10), Vector3.new(x0 - 4, 5, zc), W.Window, { Transparency = 0.55, CanCollide = false })
 	for _, side in { -1, 1 } do
-		block(m, "Post", Vector3.new(0.8, 10, 0.8), Vector3.new(x0 + 4.4, 5, zc + side * 6.6), Palette.SpeedBlack)
+		if not shell then
+			block(m, "Post", Vector3.new(0.8, 10, 0.8), Vector3.new(x0 + 4.4, 5, zc + side * 6.6), Palette.SpeedBlack)
+		end
 		block(m, "PostNeon", Vector3.new(0.15, 9.6, 0.15), Vector3.new(x0 + 4.85, 5, zc + side * 6.6), Palette.Gold, { Material = Enum.Material.Neon, CanCollide = false })
 	end
 	block(m, "TopNeon", Vector3.new(0.15, 0.15, 13.4), Vector3.new(x0 + 4.85, 9.9, zc), Palette.Gold, { Material = Enum.Material.Neon, CanCollide = false })
-	for i = 0, 6 do
+	for i = 0, if shell then -1 else 6 do
 		part({ Class = "WedgePart", Parent = m, Name = "Canopy", Size = Vector3.new(2, 1.6, 10), CFrame = CFrame.new(x0, 10.8, zc - 6 + i * 2) * CFrame.Angles(0, math.pi / 2, 0) * CFrame.new(0, 0, 0), Color = if i % 2 == 0 then Palette.Gold else Palette.SpeedBlack })
 	end
 	signBoard(m, "Sign", Vector3.new(0.6, 2.6, 12), CFrame.new(x0 + 5.2, 12.8, zc), {
@@ -943,9 +957,11 @@ do
 	bench(CFrame.new(x0 + 2, 0.3, zc + 4) * CFrame.Angles(0, math.pi / 2, 0))
 	-- whiteboard on legs, facing the track
 	local board = block(m, "Whiteboard", Vector3.new(0.3, 5, 9), Vector3.new(x0 - 4, 5.2, zc - 2), Palette.White)
-	block(m, "BoardFrame", Vector3.new(0.35, 5.4, 9.4), Vector3.new(x0 - 4.05, 5.2, zc - 2), W.Aluminium)
-	for _, s in { -1, 1 } do
-		block(m, "BoardLeg", Vector3.new(0.3, 7.6, 0.3), Vector3.new(x0 - 4.1, 3.8, zc - 2 + s * 4.3), W.Aluminium)
+	if not mesh("CoachBoard", m, CFrame.new(x0 - 4.06, 0, zc - 2)) then
+		block(m, "BoardFrame", Vector3.new(0.35, 5.4, 9.4), Vector3.new(x0 - 4.05, 5.2, zc - 2), W.Aluminium)
+		for _, s in { -1, 1 } do
+			block(m, "BoardLeg", Vector3.new(0.3, 7.6, 0.3), Vector3.new(x0 - 4.1, 3.8, zc - 2 + s * 4.3), W.Aluminium)
+		end
 	end
 	local g = Instance.new("SurfaceGui")
 	g.Face = Enum.NormalId.Right
