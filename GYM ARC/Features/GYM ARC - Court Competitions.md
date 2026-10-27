@@ -11,11 +11,11 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 ## How it plays
 - **Join:** the PLAY 1V1 prompt on the sign by the court gate (from Growth Spurt 4; earlier: "opens at Growth Spurt 4"). Two players in the queue get a match; alone for 12 s, a rival NPC (a gym regular's look, a name like Rico / Dash) steps in.
-- **Two games at once:** each half of the court is its own match (South / North).
+- **Full court** (27 Oct, owner: "the basketball match should be full court not a half court"): one game at a time on the whole court (the next pair waits in the queue). Player 1 attacks the north basket, player 2 the south (`Court.AttackHalf`). After a basket or a turnover, play restarts at centre court: the one with the ball just on their side of the centre circle, the defender between them and the basket (`Court.CenterSpots`). Out = past the court's lines (`Court.InCourt`). The replicated folder is `Matches.Full`.
 - **Score:** first to 5 (2 inside the arc, 3 beyond it), or the most points when the 2:30 clock ends; a tie: the next basket wins.
 - **Controls, no button:** press anywhere that isn't a button (a click, a tap; key F too). With the ball: hold, let go when the gold marker is in the teal green (stronger arms + shoulders = a wider green). Near the rim and 6'0" or taller: a DUNK at once (shorter players take a close shot). Defending: a tap steals (a block while they wind up). On a phone a sliding finger turns the camera and never shoots.
 - **Shots:** the server decides every shot: distance (close / mid / three), the timing (perfect / good / off), a defender close in front (contested). A miss bounces off the rim: the first one close to the ball has the rebound.
-- **Rules:** the ball handler out of their half = a turnover; after every basket both go back to a check (the scorer defends).
+- **Rules:** the ball handler out of the court = a turnover; after every basket play restarts at centre court (the scorer defends).
 - **Rewards:** win 4 min of coins at your stage (at least 200), lose 1 min (at least 50); vs the rival 60%; a win under 2 points (a quick forfeit) pays like a loss; leaving = nothing. `stats.courtWins` counts wins. A one-time "1V1 COURT OPEN!" toast at Growth Spurt 4 (`stats.courtUnlocked`).
 
 ## What players see
@@ -44,3 +44,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 - **Fixed from the owner's playtest:** a click near the sign right after a game started a new one (6 s lockout, the prompt hides in and after a match); the start toast covered the countdown; the daily reward window opened over a match; the camera after a basket faced the other player (now behind you, facing the rim, at every check); the idle scoreboard said "opens at Growth Spurt 4" to everyone (now the last result).
 - Studio: Workspace `CourtLog` = true prints every play in the Output.
 - (27 Oct) The 8 VFX textures are in (the owner imported them to the Myanmar Builders Club group) and set in `Config/Court.VFX`: CourtGlow 133239390087541, CourtSpark 120114519049039, CourtRing 135405721436283, CourtPuff 105919056943791, CourtStar 81083299144841, CourtImpact 126616960430184, CourtSwoosh 96262080134290, CourtConfetti 108985583024524. All 8 load in play; the floor shockwaves are real rings now.
+- (27 Oct) Full court tested vs the rival: one "Full" game, each side scoring on its own basket (my close shot and dunk at the north basket, the rival's baskets at the south), the camera facing your own basket at every restart. The sign reads "FULL COURT · FIRST TO 5".
