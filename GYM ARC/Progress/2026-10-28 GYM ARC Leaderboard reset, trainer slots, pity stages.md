@@ -86,3 +86,6 @@ See [[GYM ARC - Hall of Fame]]. Tested on FreshPlayer (GS 6, Alter 15, muscles 4
 
 ## Calm ceremony reveal (prompt 85) - see [[GYM ARC - Hall of Fame]]
 - HallOfFameClient: the reveal's spinning rays, big slam, double shockwave and sparkle explosion replaced by a calm layout (band, kicker, gold title + shine, rule, perks, name, breathing light, one ring, drifting sparkles). Tested with TestCutscene 1: no errors.
+
+## Statue by itself (prompt 86) - see [[GYM ARC - Hall of Fame]]
+- Your statue goes up on the round stage when the ceremony ends and on every join with a star, client side, and stays; prompt hidden and the stage shows your name + stars for you.
