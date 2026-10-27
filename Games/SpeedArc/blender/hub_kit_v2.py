@@ -533,8 +533,8 @@ def crowd_fan(name, rnd):
     cap = active()
     cap.scale = (1.0, 1.0, 1.04)
     bpy.ops.object.transform_apply(scale=True)
-    cut(cap, cutter_box((2, 1, 0.75), hc + Vector((0, 0.62, -0.18)))(),  # the face
-        cutter_box((2, 2, 1), hc + Vector((0, 0, -0.62)))())  # below the ears
+    cut(cap, cutter_box((2, 1, 0.8), hc + Vector((0, 0.56, -0.16)))(),  # the face
+        cutter_box((2, 2, 1), hc + Vector((0, 0, -0.52)))())  # side hair ends above the ears
     cap.data.shade_smooth()
     parts.append(paint(cap, hair))
     # arms (rounded tubes): pose per fan
@@ -711,15 +711,18 @@ def tree_round(name, seed):
     for sx in (1, -1):
         tip = path[4] + Vector((sx * 1.6, rnd.uniform(-0.6, 0.6), 2.2))
         parts.append(tube("branch", [path[4], (path[4] + tip) / 2 + Vector((0, 0, 0.2)), tip], [0.3, 0.22, 0.14], P["trunk"], sides=6))
-    # crown: three sculpted lobes (no plain balls)
-    lobes = [((0, 0, 8.8), 3.85, 1.0), ((1.9 * (1 if seed % 2 else -1), 0.9, 10.5), 2.7, 0.9), ((-1.8 * (1 if seed % 2 else -1), -1.1, 8.1), 2.5, 0.85)]
-    for i, (c, r, s) in enumerate(lobes):
-        parts.append(blob(f"lobe{i}", c, r, P["leaf_d"], P["leaf_l"], seed * 10 + i, subdiv=2 if i == 0 else 2, rough=0.2, scale=(1.0, 0.92, s)))
+    # crown: a lumpy sculpted main mass with smaller clumps breaking up the outline (no plain balls)
+    m = 1 if seed % 2 else -1
+    parts.append(blob("crown", (0, 0, 8.9), 3.5, P["leaf_d"], P["leaf_l"], seed * 10, subdiv=2, rough=0.3, freq=2.1, scale=(1.1, 1.12, 0.9)))
+    clumps = [((2.3 * m, 0.6, 10.2), 2.0), ((-2.2 * m, -0.9, 8.4), 1.9), ((0.4, 2.3, 9.6), 1.7), ((-0.6, -2.1, 10.6), 1.8), ((0.2, 0.2, 11.4), 1.6)]
+    for i, (c, r) in enumerate(clumps):
+        c = Vector(c) + Vector((rnd.uniform(-0.2, 0.2), rnd.uniform(-0.2, 0.2), rnd.uniform(-0.2, 0.2)))
+        parts.append(blob(f"clump{i}", c, r * rnd.uniform(0.92, 1.08), P["leaf"], P["leaf_l"], seed * 10 + i + 1, subdiv=1, rough=0.25, freq=2.4))
     o = join(parts, name)
     v = V1[name]
     hx, hy = (v["max"][0] - v["min"][0]) / 2, (v["max"][1] - v["min"][1]) / 2
     fit(o, name, (-hx, -hy, 0), (hx, hy, v["max"][2] - v["min"][2]))
-    shade(o, ao_dist=2.2, highlight=0.18, cavity=0.3, ao=0.5, wear=0.08, seed=seed)
+    shade(o, ao_dist=2.0, highlight=0.2, cavity=0.22, ao=0.4, wear=0.08, seed=seed)
     return o
 
 
@@ -754,13 +757,13 @@ def tree_pine(seed):
         def grad(co, z0=z0, top_z=top_z, r=r):
             t = max(0.0, min(1.0, (co.z - z0 + 0.4) / (top_z - z0 + 0.4)))
             outer = min(1.0, math.hypot(co.x, co.y) / r)
-            return lerp(P["pine"] * 0.75, P["pine_l"], 0.25 + 0.45 * outer + 0.3 * t)
+            return lerp(P["pine"], P["pine_l"] * 1.1, 0.2 + 0.5 * outer + 0.3 * t)
         parts.append(paint(o, None, grad))
     o = join(parts, "Tree_Pine")
     v = V1["Tree_Pine"]
     hx = (v["max"][0] - v["min"][0]) / 2
     fit(o, "Tree_Pine", (-hx, -hx, 0), (hx, hx, v["max"][2] - v["min"][2]))
-    shade(o, ao_dist=1.8, highlight=0.15, cavity=0.3, ao=0.5, wear=0.08, seed=seed)
+    shade(o, ao_dist=1.5, highlight=0.15, cavity=0.2, ao=0.35, wear=0.08, seed=seed)
     return o
 
 
