@@ -9,6 +9,7 @@ local Shared = ReplicatedStorage.Shared
 local Race = require(Shared.Config.Race)
 local Palette = require(Shared.Config.Palette)
 local Formulas = require(Shared.Util.Formulas)
+local Boosts = require(Shared.Util.Boosts)
 local TrackPath = require(Shared.Util.TrackPath)
 local Net = require(Shared.Util.Net)
 local PlayerData = require(script.Parent.PlayerData)
@@ -200,6 +201,7 @@ local function buildRunners(raceType)
 				root = root,
 				hum = hum,
 				speed = PlayerData.get(player).Speed,
+				paceMult = Boosts.compute(PlayerData.get(player)).Pace, -- shoes + coaches (capped)
 				returnCFrame = root.CFrame,
 				returnSlot = slot,
 			}
@@ -317,7 +319,7 @@ local function simulate(raceType)
 				r.nextBoostAt = t + 1.5 + math.random() * 2.5
 			end
 
-			local pace = Formulas.pace(r.speed, 1)
+			local pace = Formulas.pace(r.speed, 1) * (r.paceMult or 1)
 			local mult = 1
 			if t < r.boostUntil then
 				mult += Race.Boost.Mult
@@ -389,7 +391,7 @@ local function reward(raceType, list)
 		if firstOfDay then
 			minutes *= 1 + Race.FirstRaceOfDayBonus
 		end
-		local coins = Formulas.minutesOfCoins(minutes, data.League)
+		local coins = math.floor(Formulas.minutesOfCoins(minutes, data.League) * Boosts.compute(data).Coins + 0.5)
 		data.LastRaceDay = day
 		data.Stats.Races += 1
 		local medal = nil

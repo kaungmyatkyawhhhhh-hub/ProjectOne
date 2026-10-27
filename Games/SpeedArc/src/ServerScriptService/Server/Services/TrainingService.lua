@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local Shared = game:GetService("ReplicatedStorage").Shared
 local GameConfig = require(Shared.Config.GameConfig)
 local Formulas = require(Shared.Util.Formulas)
+local Boosts = require(Shared.Util.Boosts)
 local Net = require(Shared.Util.Net)
 local PlayerData = require(script.Parent.PlayerData)
 
@@ -135,11 +136,12 @@ local function onTap(player)
 	if not data then
 		return
 	end
-	local gain = s.station.Gain * combo
+	local b = Boosts.compute(data)
+	local gain = s.station.Gain * combo * b.Train
 	PlayerData.set(player, "Speed", data.Speed + gain)
 	data.Stats.Taps += 1
 
-	s.coinFrac += Formulas.coinsPerTap(data.League)
+	s.coinFrac += Formulas.coinsPerTap(data.League) * b.Coins
 	if s.coinFrac >= 1 then
 		local whole = math.floor(s.coinFrac)
 		s.coinFrac -= whole

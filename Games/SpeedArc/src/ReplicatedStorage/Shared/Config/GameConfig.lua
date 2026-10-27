@@ -1,6 +1,7 @@
 -- SPEED ARC main numbers (GDD sections 6, 19). Every number lives in Config.
 return {
-	League = 1, -- M1 only has League 1 (School Track)
+	League = 1, -- the league new players start in
+	LeagueTrainMult = 8, -- Go Pro: x8 training gains per league (GDD 9.2)
 
 	Speed = {
 		StartSpeed = 0, -- MPH a new runner starts with
@@ -31,6 +32,7 @@ return {
 		CoinsPerMinute = { 60, 400, 3000, 25000, 200000 }, -- by league
 		TrainingShare = 0.2, -- training taps give about 20% of coins
 		AssumedTapsPerSecond = 5, -- used to turn the training share into coins per tap
+		CoinMultCap = 8, -- all coin multipliers together never pass x8 (lesson)
 	},
 
 	Data = {
@@ -40,6 +42,6 @@ return {
 		LockExpireSeconds = 180,
 		LockWaitSeconds = 60,
 		LockRetrySeconds = 6,
-		Version = 1,
+		Version = 2,
 	},
 }

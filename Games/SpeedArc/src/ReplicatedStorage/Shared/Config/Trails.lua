@@ -1,0 +1,28 @@
+-- Trails (GDD 13). One equipped. Look = colour gradient + width, Emit = small emitter at the feet.
+-- Built-in engine textures only (rbxasset://), so nothing needs uploading.
+return {
+	Default = "Dust",
+	ShowAboveWalkSpeed = 22,
+	OthersMaxDistance = 80,
+	List = {
+		{ Id = "Dust", Name = "Dust", Price = 0, Source = "Start",
+			Colors = { "#C9CFD9", "#8A93A3" }, Width = { 1.2, 0.2 }, Life = 0.35, Transparency = { 0.55, 1 },
+			Emit = { Texture = "rbxasset://textures/particles/smoke_main.dds", Color = "#C9CFD9", Rate = 8, Size = 0.9, Life = 0.6 } },
+		{ Id = "Chalk", Name = "Chalk Lines", Price = 2000, Source = "Trail Booth", Coins = 0.02,
+			Colors = { "#FFFFFF", "#DDE3EC" }, Width = { 0.5, 0.1 }, Life = 0.5, Transparency = { 0.1, 1 } },
+		{ Id = "Leaf", Name = "Leaf Swirl", Price = 40000, Source = "Trail Booth", Train = 0.03, League = 2,
+			Colors = { "#79C25C", "#2F6B33" }, Width = { 1.0, 0.2 }, Life = 0.5, Transparency = { 0.3, 1 },
+			Emit = { Texture = "rbxasset://textures/particles/sparkles_main.dds", Color = "#79C25C", Rate = 10, Size = 0.5, Life = 0.8, Spin = true } },
+		{ Id = "Fire", Name = "Fire Streak", Price = 300000, Source = "Trail Booth", Train = 0.05,
+			Colors = { "#FFE38C", "#FF7A1F", "#C0391B" }, Width = { 1.6, 0.2 }, Life = 0.45, Transparency = { 0.05, 1 }, Light = 1,
+			Emit = { Texture = "rbxasset://textures/particles/fire_main.dds", Color = "#FFB347", Rate = 18, Size = 0.9, Life = 0.4 } },
+		{ Id = "Ice", Name = "Ice Streak", Price = 300000, Source = "Trail Booth", Coins = 0.05,
+			Colors = { "#F4F6FA", "#4FC3FF", "#1E7BFF" }, Width = { 1.4, 0.2 }, Life = 0.5, Transparency = { 0.1, 1 }, Light = 0.8,
+			Emit = { Texture = "rbxasset://textures/particles/sparkles_main.dds", Color = "#BFE9FF", Rate = 14, Size = 0.45, Life = 0.6 } },
+		{ Id = "Lightning", Name = "Lightning", Price = nil, Source = "Trail Pack", Train = 0.06, Pass = "TrailPack",
+			Colors = { "#F4F6FA", "#4FC3FF", "#1E7BFF" }, Width = { 1.2, 0.4 }, Life = 0.25, Transparency = { 0, 1 }, Light = 1,
+			Emit = { Texture = "rbxasset://textures/particles/sparkles_main.dds", Color = "#4FC3FF", Rate = 22, Size = 0.5, Life = 0.25 } },
+		{ Id = "Rainbow", Name = "Rainbow", Price = nil, Source = "Trail Pack", Coins = 0.06, Pass = "TrailPack",
+			Colors = { "#FF4A4A", "#FFC83D", "#3FA34D", "#1E7BFF", "#9B6BFF" }, Width = { 1.4, 0.3 }, Life = 0.6, Transparency = { 0.15, 1 } },
+	},
+}

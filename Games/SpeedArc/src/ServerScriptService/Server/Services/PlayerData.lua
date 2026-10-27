@@ -25,7 +25,9 @@ local storeOk = true
 local ATTRIBUTES = { "Speed", "Coins", "League" }
 
 -- Migrations: [fromVersion] = function(data) ... end. Each one moves data to the next version.
-local MIGRATIONS = {}
+local MIGRATIONS = {
+	[1] = function(data) end, -- v2 (M2) only adds fields: the template fill does it
+}
 
 local function deepCopy(t)
 	local c = {}
