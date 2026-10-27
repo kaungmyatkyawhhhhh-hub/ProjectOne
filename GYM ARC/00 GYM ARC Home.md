@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 27 Oct: prompt 77: variants only after their alter (Store SKINS tab off), no coin alter looks, premium fonts on alter buttons, skating in the alley, bigger INVITE, taller Inventory, held items are real tub / shaker models. See [[2026-10-27 GYM ARC Variants after unlock, fonts, alley, held items]].
 - 27 Oct: prompt 76, alter variants (Robux skins for 6 alters, Halloween Zombie on Vascular): LIVE in the Store SKINS tab, Inventory > Alters and Coach Dex (Zombie waits for Halloween). See [[2026-10-27 GYM ARC Alter variants]].
 - 27 Oct: prompt 75, tank top colours: the clothing store's mirror sells 10 tank top colours (try on, buy, wear, MINE = your own shirt). See [[2026-10-27 GYM ARC Tank top colours]].
 - 27 Oct: prompt 74, map pass: no reachable holes; floating lamps / speakers / ladder rungs / lantern bars fixed; 522 flickering overlaps fixed; 4 blank walls dressed; fences, road barriers and buoys mark the town's edges. See [[2026-10-27 GYM ARC Map pass]].
@@ -406,6 +407,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bugs index]]
 
 ### Progress
+- [[2026-10-27 GYM ARC Variants after unlock, fonts, alley, held items]]
 - [[2026-10-27 GYM ARC Alter variants]]
 - [[2026-10-27 GYM ARC Tank top colours]]
 - [[2026-10-27 GYM ARC Map pass]]
@@ -441,6 +443,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-27 GYM ARC Prompt - 77 Variants after unlock, fonts, alley skating, invite, inventory]]
 - [[2026-10-27 GYM ARC Prompt - 76 Alter variants]]
 - [[2026-10-27 GYM ARC Prompt - 75 Tank top colours]]
 - [[2026-10-27 GYM ARC Prompt - 74 Map]]
