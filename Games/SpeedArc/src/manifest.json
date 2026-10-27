@@ -1,5 +1,15 @@
 [
  {
+  "file": "ReplicatedStorage/Shared/Config/Areas.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Areas"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/Config/Coaches.lua",
   "class": "ModuleScript",
   "path": [
@@ -178,6 +188,16 @@
   ]
  },
  {
+  "file": "ServerScriptService/Server/Services/AreaService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "AreaService"
+  ]
+ },
+ {
   "file": "ServerScriptService/Server/Services/CoachService.lua",
   "class": "ModuleScript",
   "path": [
@@ -195,6 +215,16 @@
    "Server",
    "Services",
    "DataTemplate"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Services/LeagueService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "LeagueService"
   ]
  },
  {
@@ -312,6 +342,28 @@
    "Client",
    "Controllers",
    "MenuController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/MomentController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "MomentController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/MusicController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "MusicController"
   ]
  },
  {

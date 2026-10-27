@@ -1025,6 +1025,74 @@ do
 	prompt(m, "CoachCorner", "ROLL", "Coach Corner", Vector3.new(x0 + 2, 3, zc - 2))
 end
 
+
+----------------------------------------------------------------------------
+-- M3 Portal Plaza (behind the stands): 5 league gates on a round platform. Unlocked gates teleport
+-- (AreaService), locked ones go dark on the client with their requirement; 4-5 are COMING SOON.
+----------------------------------------------------------------------------
+do
+	local plaza = folder("PortalPlaza")
+	local pc = Vector3.new(0, 0, -114)
+	cyl(plaza, "Platform", 30, 0.6, pc + Vector3.new(0, 0.3, 0), Color3.fromHex("#A9B1BF"))
+	cyl(plaza, "PlatformEdge", 30.6, 0.45, pc + Vector3.new(0, 0.22, 0), Palette.Graphite)
+	cyl(plaza, "Ring", 12, 0.66, pc + Vector3.new(0, 0.33, 0), Palette.Gold)
+	cyl(plaza, "RingInner", 11, 0.68, pc + Vector3.new(0, 0.34, 0), Palette.DeepBlue)
+	for _, x in { -58, 58 } do
+		block(plaza, "Path", Vector3.new(10, 0.24, 40), Vector3.new(x, 0.12, -78), W.Path)
+	end
+	block(plaza, "PathBack", Vector3.new(126, 0.24, 10), Vector3.new(0, 0.12, -98), W.Path)
+	local gates = {
+		{ "HOMETOWN TRACK", "LEAGUE 1  -  YOU ARE HERE", Palette.ElectricBlue, nil, false },
+		{ "CITY PARK RUN", "LEAGUE 2", Palette.BrightBlue, "Park", false },
+		{ "BIG STADIUM", "LEAGUE 3", Color3.fromHex("#C9D8FF"), "Stadium", false },
+		{ "MOUNTAIN TRAIL", "COMING SOON", Color3.fromHex("#3F8F55"), "Soon", true },
+		{ "WORLD GAMES", "COMING SOON", Palette.Gold, "Soon", true },
+	}
+	for i, g in gates do
+		local a = math.rad(-64 + (i - 1) * 32)
+		local pos = pc + Vector3.new(math.sin(a) * 22, 0.6, -math.cos(a) * 22)
+		local cf = CFrame.lookAt(pos, Vector3.new(pc.X, pos.Y, pc.Z))
+		local m = Instance.new("Model")
+		m.Name = "Gate" .. i
+		m:SetAttribute("League", i)
+		m.Parent = plaza
+		for _, s in { -1, 1 } do
+			part({ Parent = m, Name = "Pillar", Size = Vector3.new(1.8, 12, 1.8), CFrame = cf * CFrame.new(s * 5.2, 6, 0), Color = Palette.SpeedBlack })
+			part({ Parent = m, Name = "PillarGlow", Size = Vector3.new(0.3, 11, 0.3), CFrame = cf * CFrame.new(s * 4.25, 6, -0.75), Color = g[3], Material = Enum.Material.Neon, CanCollide = false })
+		end
+		part({ Parent = m, Name = "Beam", Size = Vector3.new(12.6, 2, 2.2), CFrame = cf * CFrame.new(0, 12.6, 0), Color = Palette.Carbon })
+		part({ Parent = m, Name = "BeamGold", Size = Vector3.new(12.8, 0.4, 2.4), CFrame = cf * CFrame.new(0, 13.7, 0), Color = Palette.Gold })
+		local portal = part({ Parent = m, Name = "Portal", Size = Vector3.new(8.4, 11, 0.2), CFrame = cf * CFrame.new(0, 6, 0), Color = g[3], Material = Enum.Material.Neon, Transparency = 0.45, CanCollide = false })
+		portal:SetAttribute("Accent", g[3]:ToHex())
+		local board = part({ Parent = m, Name = "Board", Size = Vector3.new(11, 2.8, 0.4), CFrame = cf * CFrame.new(0, 12.6, -1.25), Color = Palette.SpeedBlack, CanCollide = false })
+		surfaceText(board, Enum.NormalId.Front, {
+			{ Name = "Title", Text = g[1], Height = 0.55, Color = Palette.White },
+			{ Name = "Sub", Text = g[2], Height = 0.3, Color = Palette.Gold, Font = BODY },
+		}, { PPS = 22, MaxDistance = 160, Padding = 0 })
+		if g[4] then
+			local trigger = part({ Parent = m, Name = "Trigger", Size = Vector3.new(8, 10, 2), CFrame = cf * CFrame.new(0, 5.5, 0), Transparency = 1, CanCollide = false })
+			trigger.CanTouch = true
+			trigger:SetAttribute("GateArea", g[4])
+		end
+		if g[5] then
+			local spot = part({ Parent = m, Name = "NotifySpot", Size = Vector3.new(1, 1, 1), CFrame = cf * CFrame.new(0, 2.5, -2.5), Transparency = 1, CanCollide = false })
+			local pp = Instance.new("ProximityPrompt")
+			pp.ActionText = "NOTIFY ME"
+			pp.ObjectText = g[1]
+			pp.HoldDuration = 0
+			pp.MaxActivationDistance = 12
+			pp.RequiresLineOfSight = false
+			pp:SetAttribute("Opens", "NotifyMe")
+			pp.Parent = spot
+		end
+	end
+	local sign = block(plaza, "PlazaSign", Vector3.new(22, 3.4, 0.6), Vector3.new(0, 4.5, -88), Palette.SpeedBlack)
+	surfaceText(sign, Enum.NormalId.Back, { -- faces the players coming round the stands
+		{ Text = "PORTAL PLAZA", Height = 0.55, Color = Palette.Gold },
+		{ Text = "GO PRO TO OPEN THE NEXT LEAGUE", Height = 0.3, Color = Palette.White, Font = BODY },
+	}, { PPS = 20, MaxDistance = 200, Padding = 0 })
+end
+
 ----------------------------------------------------------------------------
 -- finish
 ----------------------------------------------------------------------------

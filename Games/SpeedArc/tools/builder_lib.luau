@@ -372,7 +372,8 @@ function L.fans(parent, seatLines, density, lib)
 			if L.rng:NextNumber() < density then
 				local pick = ({ "Crowd_Fan_A", "Crowd_Fan_B", "Crowd_Fan_C", "Crowd_Fan_A" })[L.rng:NextInteger(1, 4)]
 				local pos = a + dir * d
-				local cf = CFrame.lookAt(pos, pos + line[3]) * CFrame.Angles(0, L.rng:NextNumber(-0.12, 0.12), 0)
+				-- fans face +Z (their face side): point +Z at the track
+				local cf = CFrame.lookAt(pos, pos - line[3]) * CFrame.Angles(0, L.rng:NextNumber(-0.12, 0.12), 0)
 				local t = L.meshTemplate(pick, lib)
 				if t then
 					local f = L.mesh(pick, parent, cf, { Lib = lib, Scale = L.rng:NextNumber(0.95, 1.06), CanCollide = false, Name = "Fan", Offset = Vector3.new(t.Size.X / 2 - 0.85, 0, 0) })

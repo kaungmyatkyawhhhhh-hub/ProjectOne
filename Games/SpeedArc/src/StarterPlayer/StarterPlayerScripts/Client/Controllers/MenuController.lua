@@ -80,6 +80,33 @@ local function refreshPedestals()
 	end
 end
 
+-- Portal Plaza: locked gates go dark with their requirement, open ones say WALK IN
+local function refreshGates()
+	local coll = ctx.Locker.collection()
+	local hub = workspace:FindFirstChild("Hub")
+	local plaza = hub and hub:FindFirstChild("PortalPlaza")
+	if not plaza or not coll then
+		return
+	end
+	local best = coll.BestLeague or 1
+	for _, gate in plaza:GetChildren() do
+		local league = gate:GetAttribute("League")
+		local portal = gate:FindFirstChild("Portal")
+		local board = gate:FindFirstChild("Board")
+		local sub = board and board:FindFirstChild("Sub", true)
+		local trigger = gate:FindFirstChild("Trigger")
+		if league and league >= 2 and portal and trigger and trigger:GetAttribute("GateArea") ~= "Soon" then
+			local open = best >= league
+			portal.Color = if open then Color3.fromHex(portal:GetAttribute("Accent") or "1E7BFF") else P.Graphite
+			portal.Transparency = if open then 0.45 else 0.15
+			if sub then
+				sub.Text = if open then ("LEAGUE %d  -  WALK IN"):format(league) else ("GO PRO FROM LEAGUE %d"):format(league - 1)
+				sub.TextColor3 = if open then P.BrightBlue else P.Gold
+			end
+		end
+	end
+end
+
 function Menu.start(c)
 	ctx = c
 	buildMenu()
@@ -120,8 +147,10 @@ function Menu.start(c)
 	task.spawn(function()
 		buildPedestals()
 		refreshPedestals()
+		refreshGates()
 		ctx.Net.get("Collection").OnClientEvent:Connect(function()
 			task.defer(refreshPedestals)
+			task.defer(refreshGates)
 		end)
 		player:GetAttributeChangedSignal("Speed"):Connect(refreshPedestals)
 		-- turn the shoes slowly, only when you're near the shop
