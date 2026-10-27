@@ -158,6 +158,20 @@ function TutorialService.start()
 			return false
 		elseif action == "race" then
 			return startRace(player)
+		elseif action == "skip" then
+			-- the client's safety timeout ran out twice: move on (never stuck)
+			local step = data.Tutorial
+			if type(arg) ~= "number" or arg ~= step or step < S.FirstTap or step > S.Roll then
+				return false
+			end
+			if step == S.Race then
+				return startRace(player) -- the race is never skipped, it starts by itself
+			elseif step == S.Silver then
+				data.FreeRolls = (data.FreeRolls or 0) + T.SilverRoll
+				LockerService.push(player)
+			end
+			setStep(player, if step == S.Roll then S.Done else step + 1)
+			return true
 		end
 		return false
 	end)

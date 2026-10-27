@@ -9,12 +9,13 @@ return {
 		FirstTapSpeed = 10, -- "+10 MPH burst"
 		ComboHintSeconds = 20, -- the combo hint shows until x1.2 or this many seconds of tapping
 		RaceAfterSeconds = 30, -- tutorial race offered this long after the combo hint
-		RaceAutoStart = 40, -- safety: the race starts by itself after this (only while it's possible)
 		RaceNpcSpeed = { 0.55, 0.75 }, -- x the player's speed (slow NPCs, a close win)
 		RacePace = 1.45, -- the tutorial race runs faster than normal so it's short and exciting
 		ShoeId = "CanvasRunners", -- coins topped up to its price for the first shoes
 		SilverRoll = 1, -- free coach rolls at Silver rank
-		StepTimeout = 90, -- safety for every other step (counted only while possible)
+		-- safety per step (seconds, counted only while the step is possible): first the game does the
+		-- GO TO for the player, after twice this the step is skipped so nobody is ever stuck
+		StepTimeouts = { [1] = 6, [2] = 45, [3] = 25, [4] = 55, [5] = 6, [6] = 75, [7] = 600, [8] = 75 },
 	},
 	NewRunnerBoost = { Mult = 2, Seconds = 15 * 60 }, -- 2x training for 15 min of play
 
