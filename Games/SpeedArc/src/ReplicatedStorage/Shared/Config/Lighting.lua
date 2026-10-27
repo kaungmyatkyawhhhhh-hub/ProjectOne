@@ -30,7 +30,7 @@ return {
 		Atmosphere = { Density = 0.3, Offset = 0.2, Color = Color3.fromHex("#BFD8FF"), Decay = Color3.fromHex("#9FB8DD"), Glare = 0.15, Haze = 1.2 },
 	},
 	Stadium = {
-		ClockTime = 18.0,
+		ClockTime = 17.3, -- golden hour (18.0 was already dusk with the moon up)
 		GeographicLatitude = 35,
 		Brightness = 2.0,
 		Ambient = Color3.fromHex("#5A6484"),

@@ -1042,7 +1042,7 @@ do
 	end
 	block(plaza, "PathBack", Vector3.new(126, 0.24, 10), Vector3.new(0, 0.12, -98), W.Path)
 	local gates = {
-		{ "HOMETOWN TRACK", "LEAGUE 1  -  YOU ARE HERE", Palette.ElectricBlue, nil, false },
+		{ "HOMETOWN TRACK", "LEAGUE 1  -  THIS TRACK", Palette.ElectricBlue, nil, false },
 		{ "CITY PARK RUN", "LEAGUE 2", Palette.BrightBlue, "Park", false },
 		{ "BIG STADIUM", "LEAGUE 3", Color3.fromHex("#C9D8FF"), "Stadium", false },
 		{ "MOUNTAIN TRAIL", "COMING SOON", Color3.fromHex("#3F8F55"), "Soon", true },

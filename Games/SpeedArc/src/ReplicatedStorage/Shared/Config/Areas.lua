@@ -21,7 +21,7 @@ return {
 	},
 	Stadium = {
 		Id = "Stadium", Name = "BIG STADIUM", League = 3, Model = "Stadium",
-		Spawn = Vector3.new(4000, 3, 168), SpawnLook = Vector3.new(4000, 3, 100), -- inside the players' tunnel
+		Spawn = Vector3.new(4000, 3, 150), SpawnLook = Vector3.new(4000, 3, 90), -- inside the players' tunnel
 		Lighting = "Stadium", Music = "Stadium", RaceOffset = 120,
 		Track = { Center = Vector3.new(4000, 0, 0), Straight = 100, InnerRadius = 34, LaneWidth = 4, Lanes = 8, StartX = 20, SurfaceY = 0.4, HipY = 3.05 },
 		Types = { "Lap", "Sprint", "Hurdles" },

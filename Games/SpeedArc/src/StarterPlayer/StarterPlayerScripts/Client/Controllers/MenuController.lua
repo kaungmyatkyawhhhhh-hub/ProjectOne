@@ -152,6 +152,16 @@ function Menu.start(c)
 			task.defer(refreshPedestals)
 			task.defer(refreshGates)
 		end)
+		-- the collection can arrive before the plaza streams in, and Go Pro changes the league
+		player:GetAttributeChangedSignal("League"):Connect(function()
+			task.delay(0.5, refreshGates)
+		end)
+		workspace.Hub.DescendantAdded:Connect(function(d)
+			if d.Name == "Sub" then
+				task.defer(refreshGates)
+			end
+		end)
+		task.delay(3, refreshGates)
 		player:GetAttributeChangedSignal("Speed"):Connect(refreshPedestals)
 		-- turn the shoes slowly, only when you're near the shop
 		local camera = workspace.CurrentCamera

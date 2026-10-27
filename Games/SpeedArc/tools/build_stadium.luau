@@ -121,7 +121,7 @@ local mouth = block(tunnel, "MouthSign", Vector3.new(16, 3, 0.6), Vector3.new(C.
 L.surfaceText(mouth, Enum.NormalId.Back, { { Text = "PLAYERS' TUNNEL", Height = 0.8, Color = P.Gold } }, { PPS = 24, MaxDistance = 200 })
 local inner = block(tunnel, "WelcomeSign", Vector3.new(14, 2.4, 0.4), Vector3.new(C.X, 9, tz0 + 20), P.SpeedBlack, { CanCollide = false })
 L.surfaceText(inner, Enum.NormalId.Back, { { Text = "WELCOME TO THE BIG STADIUM", Height = 0.7, Color = P.White } }, { PPS = 24, MaxDistance = 120 })
-L.gate(props, "BackToHub", CFrame.lookAt(Vector3.new(C.X, 0, tz1 - 4), Vector3.new(C.X, 0, tz1 - 30)), P.ElectricBlue, "BACK TO HUB", "HOMETOWN TRACK", "Hub")
+L.gate(props, "BackToHub", CFrame.lookAt(Vector3.new(C.X, 0, tz1 - 2), Vector3.new(C.X, 0, tz1 - 30)), P.ElectricBlue, "BACK TO HUB", "HOMETOWN TRACK", "Hub")
 
 -- training in the infield: Block Starts, Hurdles, Parachute Run, Bungee Sprint
 local iz = C.Z
