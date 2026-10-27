@@ -50,14 +50,13 @@ Still to do: check FPS and memory on a real cheap phone (F9 Developer Console), 
 
 ## What I need from you
 1. **Save:** in the SPEED ARC Studio, File > Save to Roblox, then File > Save to File as `SPEED ARC 2026-10-28.rbxl` (backup).
-2. **Import the meshes** (when you have time): Studio > 3D Importer > pick a file in `Downloads\speed_arc_models\hub\`, keep "Scale unit: Stud", import as a model, put them in `ServerStorage/Meshes`. Then tell me and I'll swap them into the hub.
+2. ~~Import the meshes~~ (done 28 Oct).
 3. **Sounds:** the ids are in [[SPEED ARC - Sound]]. Listen in a play test and tell me any you don't like.
 4. Test once on your phone and send me the F9 numbers.
 
 ## Known issues
 - New players don't get an arrow to the Sprint Lane yet (that's the M4 tutorial).
 - NPC runners are plain block avatars with name tags.
-- The hub still uses smooth parts; the Blender props aren't imported yet.
 
 ## Screenshots (phone size: Samsung Galaxy A06)
 ![[2026-10-28 phone 1 hub.jpg]]
@@ -72,3 +71,11 @@ Still to do: check FPS and memory on a real cheap phone (F9 Developer Console), 
 ![[2026-10-28 lap race start.jpg]]
 ![[2026-10-28 results card pc.jpg]]
 ![[2026-10-28 training pc.jpg]]
+
+## Update: Blender props imported (28 Oct)
+- The owner imported all 13 props. They're now in `ServerStorage/Meshes` and the hub uses them: stands, 129 fans, arch, treadmills, trees, lamps, benches, cones, starting blocks. See [[SPEED ARC - Hub World]].
+- Hub parts: **575** (was 878). Training on the mesh treadmills tested in play: works.
+- Fix: the HUD now rounds numbers down (it showed "150 MPH" at 149.6 while the goal still said "Reach 150").
+
+![[2026-10-28 meshes training area.jpg]]
+![[2026-10-28 meshes treadmill play.jpg]]

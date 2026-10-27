@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [speedarc, feature]
-status: done (parts version); Blender props ready to import
+status: done (Blender meshes in)
 ---
 # SPEED ARC - Hub World (Hometown Track)
 
@@ -18,11 +18,21 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 - **Lighting (Hub preset):** 16:30 afternoon sun, Atmosphere, ColorCorrection (warm tint), light Bloom and SunRays (both off on low graphics), ShadowMap, 0 lights.
 
 ## Numbers
-878 parts, 0 lights, 0 Glass, 32 Neon, 11 SurfaceGuis (all with MaxDistance). The hub model is "Persistent" for streaming.
+575 parts with the meshes (878 before), 0 lights, 0 Glass, 11 SurfaceGuis (all with MaxDistance). The hub model is "Persistent" for streaming.
 
-## Blender props (ready, not imported yet)
+## Blender props (imported 28 Oct)
+In use: 5 bleacher sections, 129 crowd fans (3 kinds), start arch, 4 treadmills, 24 trees (2 round + pine), lamps, benches, cones, starting blocks. Glows stay as thin Neon parts on top of the meshes (arch bands, seat edges, treadmill stripes and screens, lamp glow).
+The owner's imports live in `ServerStorage/Meshes/<Name>` (anchored, SmoothPlastic, white so the vertex colours show). The builder uses them when they're there, and falls back to parts when they aren't.
+Blender X = Roblox X, Blender Y = Roblox Z (no turning needed except the arch and starting blocks).
+
 `Downloads\speed_arc_models\hub\`: Tree_Round_A/B, Tree_Pine, Bleacher_Section, Crowd_Fan_A/B/C, Start_Arch, Treadmill, Bench, Cone, Lamp_Post, Starting_Block (.fbx + .blend + previews). Bevelled, vertex colours from the palette, soft shading baked in (ambient occlusion). 144-1,692 triangles each. Script: `hub_kit.py` (also in `Games/SpeedArc/blender`).
-Import: Studio 3D Importer, keep "Scale unit: Stud", import as model, put in `ServerStorage/Meshes`. Then Claude swaps them in.
+New props: Studio 3D Importer, keep "Scale unit: Stud", import as model, then Claude moves them into `ServerStorage/Meshes` and rebuilds.
+
+## Screenshots (with meshes)
+![[2026-10-28 meshes training area.jpg]]
+![[2026-10-28 meshes arch.jpg]]
+![[2026-10-28 meshes sprint lane.jpg]]
+![[2026-10-28 meshes treadmill play.jpg]]
 
 ## Rebuilding
 `Games/SpeedArc/tools/build_hub.luau` builds the whole hub. Running it again on the same day replaces it; on another day it moves the old hub to ServerStorage as a dated backup first.

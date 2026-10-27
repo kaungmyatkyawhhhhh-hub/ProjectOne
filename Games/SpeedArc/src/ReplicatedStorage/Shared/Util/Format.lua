@@ -4,7 +4,7 @@ local Format = {}
 local SUFFIXES = { "", "K", "M", "B", "T", "Qa", "Qi" }
 
 function Format.short(n)
-	n = math.floor(n + 0.5)
+	n = math.floor(n) -- round down: never show "150" while you're still at 149.6 and the goal says 150
 	if n < 10000 then
 		return Format.commas(n)
 	end
