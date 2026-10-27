@@ -1,7 +1,7 @@
 ---
 date: 2026-10-27
 tags: [gymarc, progress]
-status: waiting on owner
+status: done
 ---
 # Alter variants (prompt 76)
 
@@ -13,3 +13,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. Prompt: [[2026-10-27 GYM ARC Prompt - 
 - Waiting on the owner: the 6 colour maps imported to the group + 6 developer product ids.
 - Sold in three places (owner chose all 3): a new Store SKINS tab (TRY ON + Robux), Inventory > Alters, Coach Dex > ALTERS. Tested with a temporary Inferno; test values removed.
 - The owner imported the 6 colour maps; their ids are needed (Asset Manager > Copy Asset ID) - images imported that way leave nothing in the place to read.
+- LIVE: colour maps and products in, 6 skins built and checked on a body; Store / Inventory / Coach Dex show them. Halloween: set `Alters.Events.Halloween = true` in Config/Alters to put Zombie on sale.
