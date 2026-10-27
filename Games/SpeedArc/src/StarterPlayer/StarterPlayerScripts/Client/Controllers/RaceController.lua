@@ -40,6 +40,26 @@ local function now()
 	return workspace:GetServerTimeNow()
 end
 
+-- Runner models may stream in after the race starts: find them lazily
+local function resolveRoot(r)
+	if r.root and r.root.Parent then
+		return r.root
+	end
+	local model = r.model
+	if not (model and model.Parent) then
+		if r.npc then
+			local runtime = workspace:FindFirstChild("Runtime")
+			model = runtime and runtime:FindFirstChild(r.modelName or "")
+		else
+			local p = r.userId and Players:GetPlayerByUserId(r.userId)
+			model = p and p.Character
+		end
+		r.model = model
+	end
+	r.root = model and model:FindFirstChild("HumanoidRootPart")
+	return r.root
+end
+
 ----------------------------------------------------------------------------
 -- UI
 ----------------------------------------------------------------------------
@@ -318,13 +338,14 @@ local function render()
 	local order = {}
 	for i, r in race.runners do
 		local p = prog[i]
-		if p and r.root and r.root.Parent then
+		local root = resolveRoot(r)
+		if p and root then
 			local v = math.min(1, p.cur + (p.cur - p.prev) * alpha)
 			if p.cur >= 1 then
 				v = 1
 			end
 			p.shown = v
-			r.root.CFrame = TrackPath.runnerCFrame(r.lane, v, race.laps)
+			root.CFrame = TrackPath.runnerCFrame(r.lane, v, race.laps)
 			table.insert(order, i)
 		end
 	end
@@ -376,7 +397,7 @@ local function render()
 	local me = race.runners[race.me]
 	if me.root and me.root.Parent then
 		local cf = me.root.CFrame
-		local pos = cf.Position - cf.LookVector * 10 + cf.RightVector * 7 + Vector3.new(0, 3.5, 0)
+		local pos = cf.Position - cf.LookVector * 9 + cf.RightVector * 3 + Vector3.new(0, 4.5, 0)
 		local target = cf.Position + cf.LookVector * 9 + Vector3.new(0, 0.5, 0)
 		camera.CFrame = camera.CFrame:Lerp(CFrame.lookAt(pos, target), 0.25)
 		local fov = if os.clock() < fovKickUntil then 84 else 72
@@ -400,8 +421,7 @@ local function onStart(info)
 	}
 	table.clear(prog)
 	for i, r in info.runners do
-		local root = r.model and r.model:FindFirstChild("HumanoidRootPart")
-		race.runners[i] = { id = r.id, name = r.name, lane = r.lane, model = r.model, root = root, npc = r.npc, userId = r.userId }
+		race.runners[i] = { id = r.id, name = r.name, lane = r.lane, model = r.model, modelName = r.modelName, npc = r.npc, userId = r.userId }
 		prog[i] = { prev = 0, cur = 0, shown = 0 }
 		if r.userId == player.UserId then
 			race.me = i
@@ -627,6 +647,14 @@ function RaceController.start(c)
 			updatePips()
 		elseif kind == "results" then
 			onResults(info)
+		elseif kind == "return" then
+			endRace() -- stop drawing runners first, or the next frame puts us back on the track
+			local char = player.Character
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+			if root then
+				root.AssemblyLinearVelocity = Vector3.zero
+				root.CFrame = info.cframe
+			end
 		elseif kind == "ended" then
 			endRace()
 		end

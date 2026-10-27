@@ -243,6 +243,7 @@ local function rosterForClients(raceType)
 			userId = r.userId,
 			npc = r.npc == true,
 			model = r.model,
+			modelName = r.model and r.model.Name,
 		}
 	end
 	return {
@@ -419,6 +420,9 @@ local function cleanup()
 				r.root.CFrame = r.returnCFrame
 				if r.returnSlot then
 					TrainingService.enter(r.player, r.returnSlot)
+				else
+					-- the client owns its character's physics once unanchored: it moves itself back
+					RaceEvent:FireClient(r.player, "return", { cframe = r.returnCFrame })
 				end
 			end
 		end
