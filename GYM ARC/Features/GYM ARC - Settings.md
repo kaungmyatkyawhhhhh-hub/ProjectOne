@@ -31,3 +31,4 @@ The Settings panel (top bar pill or the menu). All choices are saved per player.
 ![[GYM ARC/Screenshots/fonts_after_settings_phone.png]]
 
 - (28 Oct, [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]]) **Trainers Near You:** 1 / 2 / 3 / 4, how many of your equipped trainers follow you (`settings.trainersShown`).
+- (28 Oct) **Height:** pick the height your body shows, any you have reached (4'0" .. your real height, 4" steps; up to 8'0" at the last alter tier). Body only; boards and titles use the real height. `settings.height`.
