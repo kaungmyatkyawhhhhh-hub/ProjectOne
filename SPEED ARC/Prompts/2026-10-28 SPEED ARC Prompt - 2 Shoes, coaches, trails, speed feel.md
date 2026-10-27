@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [speedarc, prompt]
-status: todo
+status: done
 ---
 # 2 Shoes, coaches, trails, speed feel (M2)
 
