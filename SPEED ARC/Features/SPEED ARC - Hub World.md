@@ -10,7 +10,7 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 ## What's there
 - **Track:** blue 6-lane oval (smooth curves made with CSG), white lane lines, aluminium inner curb, darker apron, gold start/finish line with a Neon glow, painted lane numbers 1-6.
 - **Start/finish arch:** black steel towers with blue Neon bands, gold top beam, LED screens on both sides (SPEED ARC + race countdown), two waving flags.
-- **Stands:** 6 rows along the back straight, 115 low-poly fans in team colours (some holding little flags) who bob, and cheer at the start and the finish. A big screen on the back wall: SPEED ARC / NEXT RACE / EVERYONE STARTS SLOW.
+- **Stands:** 5 Blender bleacher sections (6 rows) along the back straight, 129 low-poly fans in team colours (some holding little flags) who bob, and cheer at the start and the finish. A big screen on the back wall: SPEED ARC / NEXT RACE / EVERYONE STARTS SLOW.
 - **School:** brick front with two floors of windows (some lit warm), blue doors under a canopy, steps (spawn), two banners (SPEED ARC HOMETOWN TRACK, EVERYONE STARTS SLOW), a clock tower whose face shows the next race, flags on the roof.
 - **Plaza:** tiled, with the SPEED ARC emblem painted in the middle, flower planters, benches, lamp posts.
 - **Training:** Sprint Lane, Treadmill canopy, Stair Run, each with a sign (name, +MPH per tap, NEEDS ... MPH).
