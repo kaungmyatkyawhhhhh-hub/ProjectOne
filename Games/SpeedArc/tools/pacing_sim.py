@@ -13,15 +13,15 @@ LEAGUE_TRAIN_MULT = 8
 CPM = [60, 400, 3000, 25000, 200000]
 TRAINING_SHARE, ASSUMED_TPS = 0.2, 5
 COMBO_MAX, COMBO_BUILD = 1.5, 10
-STATIONS = {  # league: [(gain, minSpeed)]  (GDD 7.2 base numbers)
-    1: [(1, 0), (3, 40), (8, 150)],
-    2: [(40, 0), (90, 3000), (200, 10000), (450, 30000)],
-    3: [(900, 0), (2000, 150000), (4500, 500000), (10000, 1500000)],
+STATIONS = {  # league: [(gain, minSpeed)]  (GDD 7.2 gains; MinSpeed from Config after prompt 3)
+    1: [(1, 0), (3, 550), (8, 2000)],
+    2: [(40, 0), (90, 900000), (200, 3000000), (450, 9000000)],
+    3: [(900, 0), (2000, 520000000), (4500, 1750000000), (10000, 5200000000)],
 }
-RANKS = {  # Bronze, Silver, Gold, Platinum, Champion
-    1: [0, 100, 400, 1000, 2000],
-    2: [0, 10000, 40000, 100000, 200000],
-    3: [0, 500000, 2000000, 5000000, 10000000],
+RANKS = {  # Bronze, Silver, Gold, Platinum, Champion (Config after prompt 3)
+    1: [0, 1500, 5000, 14000, 28000],
+    2: [0, 3000000, 12000000, 30000000, 60000000],
+    3: [0, 1750000000, 7000000000, 17500000000, 35000000000],
 }
 RANK_REWARD_MIN = [0, 1, 2, 3, 5]
 WINS_NEEDED = {1: 1, 2: 2, 3: 3}
@@ -115,7 +115,7 @@ def run(scale, seed=1, verbose=False):
                 coins -= price
                 shoe += 1
         roll_price = max(50, ROLL_MIN * CPM[league - 1])
-        saving = shoe + 1 < len(SHOES) and SHOES[shoe + 1][2] <= league and SHOES[shoe + 1][1] < 6 * CPM[league - 1]
+        saving = shoe + 1 < len(SHOES) and SHOES[shoe + 1][2] <= league and SHOES[shoe + 1][1] < 40 * CPM[league - 1]  # kids save up for shoes they can see
         if free_roll:
             free_roll -= 1
             roll()
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     if "--solve" in sys.argv:
         scale = {1: 1.0, 2: 1.0, 3: 1.0}
         for lg in (1, 2, 3):  # leagues in order: a later league depends on the earlier ones' coaches
-            lo, hi = 0.2, 200.0
+            lo, hi = 0.2, 20000.0
             for _ in range(40):
                 mid = (lo * hi) ** 0.5
                 scale[lg] = mid
@@ -162,8 +162,8 @@ if __name__ == "__main__":
             scale[lg] = round((lo * hi) ** 0.5, 2)
         print("scales", scale)
     else:
-        scale = {1: float(a) for a in sys.argv[1:2]} or {1: 1.0}
-        scale = {1: 1.0, 2: 1.0, 3: 1.0}
+        a = [float(x) for x in sys.argv[1:4]] or [1.0, 1.0, 1.0]
+        scale = {1: a[0], 2: a[1], 3: a[2]}
     res = average(scale)
     print("League | target min | sim min")
     for k in (1, 2, 3):

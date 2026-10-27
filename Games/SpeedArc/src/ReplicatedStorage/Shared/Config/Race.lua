@@ -14,11 +14,11 @@ return {
 	NpcNames = { "Dash", "Milo", "Zara", "Kofi", "Rina", "Theo", "Ivy", "Bo" },
 
 	-- Pace (GDD 6.4): basePace x (1 + 0.6 x clamp(log2(speed / leagueMid), -1, 1.5))
-	-- Tuned in prompt 1: at the League 1 middle (80 MPH) a Sprint takes ~18 s and a Lap Race ~27 s;
-	-- a brand-new runner (~40 MPH) needs ~28 s / ~43 s.
+	-- Tuned in prompt 1: at the league middle a Sprint takes ~18 s and a Lap Race ~27 s;
+	-- a brand-new runner (half the middle or less) needs ~28 s / ~43 s.
 	-- Low clamp is -0.6 (GDD says -1) so brand-new runners aren't painfully slow in their first race.
 	BasePace = 22, -- studs a second at the league middle
-	LeagueMid = { 80, 3000, 150000, 8000000, 400000000 },
+	LeagueMid = { 1100, 925000, 520000000, 3e11, 1.5e14 }, -- scaled with the rank thresholds (prompt 3)
 	PaceFactor = 0.6,
 	PaceClampLow = -0.6,
 	PaceClampHigh = 1.5,

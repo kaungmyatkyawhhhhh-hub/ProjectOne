@@ -9,11 +9,13 @@ return {
 		Champion = Color3.fromHex("#F4F6FA"),
 	},
 	-- [league] = { Bronze, Silver, Gold, Platinum, Champion } minimum MPH
+	-- Leagues 1-3 tuned by the pacing sim (prompt 3): ~15 / 35 / 60 min each. 4-5 are placeholders
+	-- (scaled like league 3) until their update prompts tune them.
 	Thresholds = {
-		{ 0, 100, 400, 1000, 2000 },
-		{ 0, 10000, 40000, 100000, 200000 },
-		{ 0, 500000, 2000000, 5000000, 10000000 },
-		{ 0, 25000000, 100000000, 250000000, 500000000 },
-		{ 0, 1000000000, 4000000000, 10000000000, 20000000000 },
+		{ 0, 1500, 5000, 14000, 28000 },
+		{ 0, 3000000, 12000000, 30000000, 60000000 },
+		{ 0, 1750000000, 7000000000, 17500000000, 35000000000 },
+		{ 0, 1e12, 4e12, 1e13, 2e13 },
+		{ 0, 5e14, 2e15, 5e15, 1e16 },
 	},
 }
