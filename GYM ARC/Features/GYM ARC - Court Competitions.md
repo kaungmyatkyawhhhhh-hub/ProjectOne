@@ -56,3 +56,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 - A swoosh on every make: CourtSwoosh (PSE Rising Whoosh Swooshing In 3, short and pitched up), loud for the two players, 3D for watchers, on top of the net swish.
 - Backboards are SmoothPlastic (were Glass); `CourtInstall` too. The 1V1 sign's face turned 180 degrees to face the court (Studio).
 - "Ball missing" seen in a test was the ball dribbling in front of the player behind their body from the restart camera, not a bug.
+## Stuck dunk fixed (27 Oct; owner: "i tried to dunk and then the ball disappeared and the match just could not continue")
+- Likely cause: the client decided "dunk" while the server, seeing the player a step behind (still running), started a normal windup that waits for a release that a dunk tap never sends: frozen with the ball overhead. Now a dunk tap sends its own `Dunk` request; the server allows `DUNK_SLACK` 2.5 extra studs, and if it's still too far it takes a quick jump shot, never a held windup. Tested: dunks tapped while running at the rim never froze.
+- Safety nets: the shot result step can't fail silently (reported, then a centre-court restart); a ball still in the air 1.5 s past its landing is freed in front of the rim; the replicated characters follow a rebuilt character (the ball and moves kept drawing on the old one); the client's ball loop recovers from any error.
+- A contested dunk miss now says "DUNK DENIED!" (it said "BLOCKED!" with no name and played the block effect in the wrong place).
