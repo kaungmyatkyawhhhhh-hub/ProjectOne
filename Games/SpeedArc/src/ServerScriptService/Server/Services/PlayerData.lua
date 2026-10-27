@@ -28,6 +28,11 @@ local ATTRIBUTES = { "Speed", "Coins", "League" }
 local MIGRATIONS = {
 	[1] = function(data) end, -- v2 (M2) only adds fields: the template fill does it
 	[2] = function(data) end, -- v3 (M3) only adds fields too
+	[3] = function(data) -- v4 (M4): players who already played skip the tutorial
+		if (data.Stats and (data.Stats.Taps or 0) > 0) or (data.Speed or 0) > 0 then
+			data.Tutorial = 99
+		end
+	end,
 }
 
 local function deepCopy(t)

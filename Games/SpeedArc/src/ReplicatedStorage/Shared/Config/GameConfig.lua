@@ -42,6 +42,6 @@ return {
 		LockExpireSeconds = 180,
 		LockWaitSeconds = 60,
 		LockRetrySeconds = 6,
-		Version = 3,
+		Version = 4,
 	},
 }

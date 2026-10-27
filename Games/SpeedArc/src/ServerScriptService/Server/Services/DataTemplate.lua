@@ -12,6 +12,10 @@ return {
 		Races = 0,
 		Wins = 0,
 		PlaySeconds = 0,
+		PBs = 0, -- M4 (quests / titles)
+		Podiums = 0,
+		Boosts = 0,
+		Challenges = 0,
 	},
 	BestTimes = {}, -- [raceType] = seconds
 	LastRaceDay = 0, -- day number of the last race (first race of the day bonus)
@@ -39,4 +43,18 @@ return {
 	SeenGoPro = {}, -- [league] = true (SKIP on the cutscene after the first time)
 	FirstJoin = 0,
 	LastJoin = 0,
+
+	-- M4: first 15 minutes, daily, quests, social
+	Tutorial = 0, -- step (Retention.Tutorial steps); 99 = done
+	Funnel = {}, -- [step] = true (analytics steps fire once)
+	Boost = { NewRunner = 0, Gift = 0, Invite = 0 }, -- seconds of play left
+	Daily = { LastClaimDay = 0, Streak = 0, GotTrail = false },
+	Quests = { Day = 0, List = {}, BonusClaimed = false }, -- List = { { Id, Base, Claimed } }
+	Gifts = { Day = 0, Seconds = 0, Next = 1 },
+	Codes = {}, -- [CODE] = true
+	Title = "", -- worn title ("" = newest earned)
+	TopSpeed = {}, -- [league] = best SPEED reached there
+	Challenge = { Day = 0, Paid = 0 },
+	Weekly = { Week = 0, Wins = 0, Best = 0 }, -- Best = fastest Hometown Sprint this week (s)
+	Prompted = {}, -- [Favourite / Notify] = true
 }

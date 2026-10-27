@@ -187,7 +187,7 @@ local function card(item, isShoe)
 			end
 		end)
 	elseif not unlocked then
-		local why = if isShoe then Boosts.unlockText(item.Unlock) elseif item.Pass then "TRAIL PACK (SOON)" else ("UNLOCKS IN LEAGUE %d"):format(item.League or 1)
+		local why = if isShoe then Boosts.unlockText(item.Unlock) elseif item.Pass then "TRAIL PACK (SOON)" elseif item.Price == nil and item.Source then item.Source else ("UNLOCKS IN LEAGUE %d"):format(item.League or 1)
 		UIKit.text({ Text = why, Font = F.BodyBold, TextSize = 13, Color = P.Gold, Wrapped = true, Position = UDim2.fromOffset(6, 116), Size = UDim2.new(1, -12, 0, 30), Parent = c })
 		local lock = actionButton(c, "LOCKED", "Dark", function()
 			ctx.Hud.toast(why, "Denied")
@@ -303,6 +303,27 @@ function Locker.start(c)
 			end
 		end
 	end)
+end
+
+-- the tutorial points at one card: a pulsing gold ring round it
+function Locker.highlight(id)
+	local c = grid and grid:FindFirstChild(id)
+	if not c or c:FindFirstChild("Highlight") then
+		return
+	end
+	local ring = make("UIStroke", { Name = "Highlight", Color = P.Gold, Thickness = 4, Parent = c })
+	task.spawn(function()
+		while ring.Parent and win.isOpen() do
+			UIKit.tween(ring, 0.4, { Thickness = 7 }, Enum.EasingStyle.Sine)
+			task.wait(0.4)
+			UIKit.tween(ring, 0.4, { Thickness = 4 }, Enum.EasingStyle.Sine)
+			task.wait(0.4)
+		end
+	end)
+end
+
+function Locker.isOpen()
+	return win ~= nil and win.isOpen()
 end
 
 function Locker.collection()

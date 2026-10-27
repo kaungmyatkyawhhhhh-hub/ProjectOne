@@ -7,12 +7,16 @@ local GameConfig = require(Shared.Config.GameConfig)
 local Formulas = require(Shared.Util.Formulas)
 local Boosts = require(Shared.Util.Boosts)
 local Net = require(Shared.Util.Net)
+local Format = require(Shared.Util.Format)
 local PlayerData = require(script.Parent.PlayerData)
+local SessionBoosts = require(script.Parent.SessionBoosts)
 
 local TrainingService = {}
+TrainingService.Tapped = Instance.new("BindableEvent") -- (player, totalTaps, combo)
 
 local active = {} -- [player] = { station, slot, lastTap, streakStart, recent = {}, coinFrac, bucket, bucketAt }
 local slotOwner = {} -- [slot] = player
+local allSlots = {} -- [slot] = true
 
 local TrainState = Net.get("TrainState")
 local Toast = Net.get("Toast")
@@ -30,6 +34,20 @@ end
 local function standCFrame(slot, hum, root)
 	local up = slot.Size.Y / 2 + hum.HipHeight + root.Size.Y / 2
 	return slot.CFrame * CFrame.new(0, up, 0)
+end
+
+-- a free spot of a station (GO TO / GO TRAIN buttons), nearest first to `near`
+function TrainingService.freeSlot(stationId, near)
+	local best, bestD = nil, math.huge
+	for slot in allSlots do
+		if slot:GetAttribute("StationId") == stationId and not slotOwner[slot] and slot.Parent then
+			local d = if near then (slot.Position - near).Magnitude else slot:GetAttribute("Index") or 1
+			if d < bestD then
+				best, bestD = slot, d
+			end
+		end
+	end
+	return best
 end
 
 function TrainingService.current(player)
@@ -73,7 +91,7 @@ function TrainingService.enter(player, slot)
 		return false
 	end
 	if data.Speed < station.MinSpeed then
-		Toast:FireClient(player, ("Reach %d MPH to use the %s"):format(station.MinSpeed, station.Name), "Denied")
+		Toast:FireClient(player, ("Reach %s MPH to use the %s"):format(Format.short(station.MinSpeed), station.Name), "Denied")
 		return false
 	end
 	if slotOwner[slot] and slotOwner[slot] ~= player then
@@ -137,9 +155,10 @@ local function onTap(player)
 		return
 	end
 	local b = Boosts.compute(data)
-	local gain = s.station.Gain * combo * b.Train
+	local gain = s.station.Gain * combo * b.Train * SessionBoosts.trainMult(player, data)
 	PlayerData.set(player, "Speed", data.Speed + gain)
 	data.Stats.Taps += 1
+	TrainingService.Tapped:Fire(player, data.Stats.Taps, combo)
 
 	s.coinFrac += Formulas.coinsPerTap(data.League) * b.Coins
 	if s.coinFrac >= 1 then
@@ -154,6 +173,7 @@ local function setupSlot(slot)
 	if not station then
 		return
 	end
+	allSlots[slot] = true
 	local prompt = slot:FindFirstChildOfClass("ProximityPrompt")
 	if not prompt then
 		prompt = Instance.new("ProximityPrompt")
@@ -161,7 +181,7 @@ local function setupSlot(slot)
 	end
 	prompt.ActionText = "TRAIN"
 	prompt.ObjectText = if station.MinSpeed > 0
-		then ("%s  (%d MPH)"):format(station.Name, station.MinSpeed)
+		then ("%s  (%s MPH)"):format(station.Name, Format.short(station.MinSpeed))
 		else station.Name
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10
