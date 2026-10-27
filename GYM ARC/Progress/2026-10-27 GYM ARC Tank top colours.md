@@ -14,3 +14,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. Prompt: [[2026-10-27 GYM ARC Prompt - 
 - New colours in `Config/Body.Tops`: TankGreen, TankTeal, TankPurple, TankPink, TankOrange, TankGrey.
 - Tested on LuigiRED: try red (shows over the knit shirt), buy red (1,000 coins, saved, WEARING), MINE (own shirt back), close (camera, HUD and turning restored). The test save now owns the red tank top.
 - Note: the shop is small next to a very big body, so the camera can't back far away there.
+- (owner: "the proximityprompt is still showing even when in the customization screen") all world prompts are hidden on your screen while the TANK TOP screen is open (ProximityPromptService off, back as it was on close). Tested.

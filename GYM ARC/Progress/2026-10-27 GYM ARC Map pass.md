@@ -34,3 +34,7 @@ All done in Studio Edit (each step one Ctrl+Z step). Scans ran over the whole to
 
 ## Worth walking to: the edges
 - The town's invisible boundary walls had nothing visible in front of them: the streets ran straight into open hills and an invisible wall, the beach into the sea. Now every edge a player can reach shows where the town ends (`Town.EdgeMarkers`): a low wooden post-and-rope fence on grass and sand (185 posts), red and white striped barriers where a road meets the edge (22 boards), and a red / white buoy line in the sea (135 buoys). All anchored, no collision (the boundary still stops players).
+
+## Strongman Yard light pole (owner: "the lightpole is directly in front of the strongman yard entrance (from the alley)")
+- The pole just inside the yard gate is part of one imported mesh (`StrongmanYard.Look.LightTower.Remodel_mtown275`) together with the bleachers' frame, a bench and the north light tower, so it can't be moved alone (splitting the mesh would upload new assets). The whole set (that mesh, the bleachers, the gate light's lens and that tower's lenses) moved 11 studs west: from the alley the gate is clear, the pole now stands behind the gym's corner. One Ctrl+Z step ("Yard: light pole out of the gate").
+- Side effect: the orange container's ribbed side (behind where the bleachers stood) is now in view; its last ribs stick out at an angle.
