@@ -1,6 +1,7 @@
 -- TrainingController: on a station, tap anywhere to run (GDD 7.1).
 -- Each tap = stride (run animation speeds up), +MPH popup (pooled), layered sound with pitch rising
 -- with the combo, a small bounce of the MPH number. The server decides the real gain.
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -28,19 +29,23 @@ local lastComboStep = 0
 local tapsThisVisit = 0
 local controls = nil
 
+-- The place may not have the default PlayerModule, so never wait for it.
+-- The server anchors you on a station / in a race anyway; this just hides the stick and jump button.
 local function getControls()
 	if not controls then
-		local ok, module = pcall(function()
-			return require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"))
-		end)
-		if ok then
-			controls = module:GetControls()
+		local module = player:FindFirstChild("PlayerScripts") and player.PlayerScripts:FindFirstChild("PlayerModule")
+		if module then
+			local ok, m = pcall(require, module)
+			if ok then
+				controls = m:GetControls()
+			end
 		end
 	end
 	return controls
 end
 
 function Training.setControls(enabled)
+	GuiService.TouchControlsEnabled = enabled
 	local c = getControls()
 	if c then
 		if enabled then
