@@ -1,7 +1,7 @@
 ---
 date: 2026-10-27
 tags: [gymarc, prompt]
-status: todo
+status: in progress (part 2 + 4 done)
 ---
 # 66 Hall of Fame, Profiles, Codes, Strongman at Alter 2
 
