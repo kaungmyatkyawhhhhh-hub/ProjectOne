@@ -78,7 +78,7 @@ local function buildUI()
 		StrokeThickness = 4,
 		StrokeTransparency = 0,
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.42),
+		Position = UDim2.fromScale(0.5, 0.3), -- above the runner's head in the race camera
 		Size = UDim2.fromOffset(600, 110),
 		ZIndex = 8,
 		Parent = canvas,
