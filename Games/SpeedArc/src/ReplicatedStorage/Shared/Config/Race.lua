@@ -4,7 +4,7 @@ return {
 	JoinSeconds = 10, -- gold JOIN button window (prompt 1 says 10 s; GDD 8.1 says 15 s)
 	CountdownSeconds = 3,
 	ResultsSeconds = 6,
-	MaxRaceSeconds = 40, -- unfinished runners are placed by distance after this
+	MaxRaceSeconds = 45, -- unfinished runners are placed by distance after this
 	FirstRaceDelay = 45, -- first race after a server starts
 
 	MaxRunners = 8,
@@ -14,9 +14,10 @@ return {
 	NpcNames = { "Dash", "Milo", "Zara", "Kofi", "Rina", "Theo", "Ivy", "Bo" },
 
 	-- Pace (GDD 6.4): basePace x (1 + 0.6 x clamp(log2(speed / leagueMid), -1, 1.5))
-	-- Tuned in prompt 1: at the League 1 middle (80 MPH) a Sprint takes ~17 s and a Lap Race ~33 s.
+	-- Tuned in prompt 1: at the League 1 middle (80 MPH) a Sprint takes ~18 s and a Lap Race ~27 s;
+	-- a brand-new runner (~40 MPH) needs ~28 s / ~43 s.
 	-- Low clamp is -0.6 (GDD says -1) so brand-new runners aren't painfully slow in their first race.
-	BasePace = 24, -- studs a second at the league middle
+	BasePace = 22, -- studs a second at the league middle
 	LeagueMid = { 80, 3000, 150000, 8000000, 400000000 },
 	PaceFactor = 0.6,
 	PaceClampLow = -0.6,
@@ -39,8 +40,9 @@ return {
 	FirstRaceOfDayBonus = 0.5,
 
 	Types = {
-		Lap = { Name = "LAP RACE", Laps = 2 }, -- about 33 s at the league middle
-		Sprint = { Name = "SPRINT", Laps = 1 }, -- about 17 s
+		-- Laps can be fractional: the race then starts part-way round so it still finishes on the gold line
+		Lap = { Name = "LAP RACE", Laps = 1.5 }, -- starts on the back straight in front of the stands
+		Sprint = { Name = "SPRINT", Laps = 1 },
 	},
 	Rotation = { "Lap", "Sprint" },
 

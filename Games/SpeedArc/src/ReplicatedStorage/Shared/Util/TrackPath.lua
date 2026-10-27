@@ -47,9 +47,11 @@ end
 
 -- CFrame of a runner in a lane at race progress p (0..1) for a race of `laps` laps.
 -- Every lane uses the same progress, so all lanes finish on the same line at the same time.
+-- A fractional race (1.5 laps) starts part-way round so it still ends on the gold line.
 function TrackPath.runnerCFrame(lane, progress, laps)
 	local r = TrackPath.laneRadius(lane)
-	local s = progress * laps * TrackPath.lapLength(r)
+	local startOffset = (-laps) % 1
+	local s = (startOffset + progress * laps) * TrackPath.lapLength(r)
 	local pos, dir = TrackPath.at(r, s, T.SurfaceY + T.HipY)
 	return CFrame.lookAt(pos, pos + dir)
 end
