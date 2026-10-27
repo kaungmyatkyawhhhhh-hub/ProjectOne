@@ -36,7 +36,7 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 - Hub props v2 (modelling rule): [[2026-10-28 SPEED ARC Progress - Hub props v2|progress]]
 - [[2026-10-28 SPEED ARC Prompt - 2 Shoes, coaches, trails, speed feel]] (done: [[2026-10-28 SPEED ARC Progress - 2 Shoes, coaches, trails, speed feel|progress]])
 - [[2026-10-28 SPEED ARC Prompt - 2 Shoes, coaches, trails, speed feel]] (M2)
-- [[2026-10-28 SPEED ARC Prompt - 3 Ranks, Go Pro, City Park, Big Stadium]] (M3)
+- [[2026-10-28 SPEED ARC Prompt - 3 Ranks, Go Pro, City Park, Big Stadium]] (M3, done: [[2026-10-28 SPEED ARC Progress - 3 Ranks, Go Pro, City Park, Big Stadium|progress]])
 - [[2026-10-28 SPEED ARC Prompt - 4 First 15 minutes, daily, quests, social]] (M4)
 - [[2026-10-28 SPEED ARC Prompt - 5 Store, passes, Starter Pack, Locker cosmetics]] (M5)
 - [[2026-10-28 SPEED ARC Prompt - 6 Look, sound and launch check]] (M6, then soft launch)
@@ -47,6 +47,9 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
   - [[2026-10-28 SPEED ARC Prompt - 10 Update 4 Relay, crews, weekly events]]
 
 ## Features
+- [[SPEED ARC - Leagues and Go Pro]]
+- [[SPEED ARC - City Park]]
+- [[SPEED ARC - Big Stadium]]
 - [[SPEED ARC - Code and Sync]]
 - [[SPEED ARC - Player Data and Saving]]
 - [[SPEED ARC - UI Kit and HUD]]
