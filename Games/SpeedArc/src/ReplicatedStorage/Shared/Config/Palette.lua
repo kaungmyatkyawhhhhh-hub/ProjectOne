@@ -17,8 +17,8 @@ return {
 
 	-- World colours (cool-tinted naturals, inside the palette's mood)
 	World = {
-		TrackBlue = hex("#1F5FD6"),
-		TrackBlueDark = hex("#1A4FB3"),
+		TrackBlue = hex("#1C57C8"),
+		TrackBlueDark = hex("#17489F"),
 		LaneWhite = hex("#EEF2FA"),
 		Grass = hex("#5DAA4E"),
 		GrassDark = hex("#4A9442"),
@@ -29,7 +29,7 @@ return {
 		BrickDark = hex("#A9553F"),
 		Roof = hex("#2A2F3A"),
 		Window = hex("#9FD4FF"),
-		WindowLit = hex("#FFE6A6"),
+		WindowLit = hex("#FFE3A0"),
 		Steel = hex("#3A4150"),
 		Aluminium = hex("#C9D1DD"),
 		Wood = hex("#B9824F"),

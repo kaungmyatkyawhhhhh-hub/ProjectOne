@@ -180,10 +180,15 @@ end
 -- setup
 ----------------------------------------------------------------------------
 local stamp = os.date("!%Y%m%d_%H%M")
+local today = os.date("!%Y%m%d")
 local old = workspace:FindFirstChild("Hub")
 if old then
-	old.Name = "HubBackup_" .. stamp
-	old.Parent = ServerStorage
+	if old:GetAttribute("BuildDay") == today then
+		old:Destroy() -- a rebuild from the same day's builder run: nothing hand-made to keep
+	else
+		old.Name = "HubBackup_" .. stamp
+		old.Parent = ServerStorage
+	end
 end
 for _, name in { "Baseplate", "SpawnLocation" } do
 	local o = workspace:FindFirstChild(name)
@@ -195,6 +200,7 @@ end
 
 local hub = Instance.new("Model")
 hub.Name = "Hub"
+hub:SetAttribute("BuildDay", today)
 local tmp = Instance.new("Folder")
 tmp.Name = "_tmp"
 tmp.Parent = workspace
@@ -220,6 +226,15 @@ local crowdF = folder("Crowd", life)
 -- ground: grass with mowing stripes, plaza, paths
 ----------------------------------------------------------------------------
 block(ground, "Grass", Vector3.new(300, 4, 320), Vector3.new(0, -2, 10), W.Grass)
+block(ground, "Outskirts", Vector3.new(1600, 4, 1600), Vector3.new(0, -2.25, 10), Color3.fromHex("#4E9446"))
+-- low hills on the horizon (half buried balls) so the world never ends in empty sky
+local hillCols = { Color3.fromHex("#5BA04F"), Color3.fromHex("#4A8C43"), Color3.fromHex("#6AAE57") }
+for i = 0, 15 do
+	local a = i / 16 * math.pi * 2 + rng:NextNumber(-0.1, 0.1)
+	local d = rng:NextNumber(420, 560)
+	local size = rng:NextNumber(150, 260)
+	ball(ground, "Hill", size, Vector3.new(math.cos(a) * d, -size * 0.32, 10 + math.sin(a) * d), hillCols[i % 3 + 1], { CanCollide = false, CanQuery = false })
+end
 for i = 0, 14 do
 	local x = -140 + i * 20
 	if i % 2 == 0 then
@@ -236,12 +251,52 @@ for i = 0, 9 do
 	end
 end
 -- plaza between school and track + path
-block(ground, "Plaza", Vector3.new(96, 0.3, 46), Vector3.new(0, 0.15, 86), W.Concrete)
+block(ground, "Plaza", Vector3.new(96, 0.3, 46), Vector3.new(0, 0.15, 86), Color3.fromHex("#A9B1BF"))
+for i = 1, 11 do
+	block(ground, "PlazaJoint", Vector3.new(0.25, 0.32, 46), Vector3.new(-48 + i * 8, 0.16, 86), Color3.fromHex("#959DAB"), { CanCollide = false })
+end
+for i = 1, 5 do
+	block(ground, "PlazaJoint", Vector3.new(96, 0.32, 0.25), Vector3.new(0, 0.16, 63 + i * 7.66), Color3.fromHex("#959DAB"), { CanCollide = false })
+end
+-- the SPEED ARC emblem painted in the plaza
+cyl(ground, "EmblemGold", 10, 0.36, Vector3.new(0, 0.18, 84), Palette.Gold, { CanCollide = false })
+cyl(ground, "Emblem", 9.2, 0.38, Vector3.new(0, 0.19, 84), Palette.DeepBlue, { CanCollide = false })
+local emblemTop = block(ground, "EmblemText", Vector3.new(16, 0.05, 16), Vector3.new(0, 0.4, 84), Palette.DeepBlue, { Transparency = 1, CanCollide = false })
+local eg = Instance.new("SurfaceGui")
+eg.Face = Enum.NormalId.Top
+eg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+eg.PixelsPerStud = 16
+eg.MaxDistance = 160
+eg.LightInfluence = 1
+eg.Parent = emblemTop
+for i, l in { { "SPEED", Palette.White, 0.64 }, { "ARC", Palette.Gold, 0.36 } } do
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.AnchorPoint = Vector2.new(0.5, 0.5)
+	t.Position = UDim2.fromScale(l[3], 0.5)
+	t.Size = UDim2.fromScale(0.8, 0.28)
+	t.Rotation = 90
+	t.Text = l[1]
+	t.TextScaled = true
+	t.FontFace = MONTSERRAT
+	t.TextColor3 = l[2]
+	t.Parent = eg
+end
+-- planters with flowers on both sides of the plaza
+local FLOWERS = { Palette.Gold, Palette.White, Palette.BrightBlue, Color3.fromHex("#FF8FB1") }
+for side = -1, 1, 2 do
+	for j = 0, 1 do
+		local px, pz = side * 34, 78 + j * 16
+		block(ground, "Planter", Vector3.new(14, 1.6, 6), Vector3.new(px, 0.8, pz), Palette.Graphite)
+		block(ground, "PlanterTrim", Vector3.new(14.4, 0.3, 6.4), Vector3.new(px, 1.65, pz), W.Concrete)
+		block(ground, "Soil", Vector3.new(13, 0.2, 5), Vector3.new(px, 1.62, pz), W.GrassDark)
+		for f = 1, 7 do
+			ball(ground, "Flower", rng:NextNumber(0.8, 1.3), Vector3.new(px - 5.5 + f * 1.4 + rng:NextNumber(-0.3, 0.3), 2.1, pz + rng:NextNumber(-1.6, 1.6)), FLOWERS[rng:NextInteger(1, #FLOWERS)], { CanCollide = false })
+		end
+	end
+end
 block(ground, "PlazaEdge", Vector3.new(98, 0.22, 48), Vector3.new(0, 0.11, 86), Palette.Graphite)
 block(ground, "Path", Vector3.new(14, 0.24, 10), Vector3.new(0, 0.12, 60), W.Path)
-for i = -1, 1, 2 do
-	block(ground, "PathSide", Vector3.new(82, 0.22, 8), Vector3.new(i * 110, 0.11, 70), W.Path)
-end
 
 ----------------------------------------------------------------------------
 -- track: blue oval, white lane lines, curbs, gold start/finish, lane numbers
@@ -432,7 +487,7 @@ for floor = 0, 1 do
 		local x = -55 + i * 12.2
 		if math.abs(x) > 12 then
 			block(school, "WinFrame", Vector3.new(7.2, 6.4, 0.5), Vector3.new(x, y, sFront - 0.1), Palette.White)
-			block(school, "Win", Vector3.new(6.2, 5.4, 0.5), Vector3.new(x, y, sFront - 0.2), if (i + floor) % 3 == 0 then W.WindowLit else W.Window, { Material = if (i + floor) % 3 == 0 then Enum.Material.Neon else Enum.Material.SmoothPlastic, Transparency = 0 })
+			block(school, "Win", Vector3.new(6.2, 5.4, 0.5), Vector3.new(x, y, sFront - 0.2), if (i + floor) % 3 == 0 then W.WindowLit else W.Window)
 			block(school, "WinBar", Vector3.new(0.4, 5.4, 0.6), Vector3.new(x, y, sFront - 0.25), Palette.White)
 			block(school, "Sill", Vector3.new(7.8, 0.5, 1.2), Vector3.new(x, y - 3.4, sFront - 0.4), W.Concrete)
 		end
@@ -467,8 +522,8 @@ local tz = sFront + 6
 block(school, "Tower", Vector3.new(16, 40, 12), Vector3.new(0, 20, tz), W.BrickDark)
 block(school, "TowerBand", Vector3.new(16.6, 1, 12.6), Vector3.new(0, 25, tz), W.Concrete)
 block(school, "TowerTop", Vector3.new(17.2, 1.6, 13.2), Vector3.new(0, 40.6, tz), Palette.Graphite)
-part({ Class = "WedgePart", Parent = school, Name = "Roof", Size = Vector3.new(17, 7, 6.8), CFrame = CFrame.new(0, 44.9, tz - 3.4) * CFrame.Angles(0, math.pi, 0), Color = Palette.ElectricBlue })
-part({ Class = "WedgePart", Parent = school, Name = "Roof", Size = Vector3.new(17, 7, 6.8), CFrame = CFrame.new(0, 44.9, tz + 3.4), Color = Palette.DeepBlue })
+part({ Class = "WedgePart", Parent = school, Name = "Roof", Size = Vector3.new(17, 7, 6.8), CFrame = CFrame.new(0, 44.9, tz - 3.4), Color = Palette.ElectricBlue })
+part({ Class = "WedgePart", Parent = school, Name = "Roof", Size = Vector3.new(17, 7, 6.8), CFrame = CFrame.new(0, 44.9, tz + 3.4) * CFrame.Angles(0, math.pi, 0), Color = Palette.DeepBlue })
 ball(school, "Spire", 1.4, Vector3.new(0, 48.8, tz), Palette.Gold)
 local clockFace = cyl(school, "ClockRim", 5.6, 0.8, Vector3.new(0, 32.5, tz - 6.2), Palette.Gold)
 clockFace.CFrame = CFrame.new(0, 32.5, tz - 6.2) * CFrame.Angles(0, math.pi / 2, 0)
@@ -580,7 +635,7 @@ end
 block(tread, "CanopyRoof", Vector3.new(3 * 6.5 + 9, 0.8, 12), Vector3.new(cx, 9.4, trZ), Palette.ElectricBlue)
 block(tread, "CanopyTrim", Vector3.new(3 * 6.5 + 9.4, 0.4, 12.4), Vector3.new(cx, 8.9, trZ), Palette.Gold)
 block(tread, "CanopyGlow", Vector3.new(3 * 6.5 + 8, 0.2, 10.8), Vector3.new(cx, 8.95, trZ), Palette.BrightBlue, { Material = Enum.Material.Neon })
-sign(tread, Stations[2], CFrame.lookAt(Vector3.new(cx, 0, trZ + 9), Vector3.new(cx, 0, trZ + 30)))
+sign(tread, Stations[2], CFrame.lookAt(Vector3.new(trX0 + 3 * 6.5 + 10, 0, trZ + 6), Vector3.new(trX0 + 3 * 6.5 + 14, 0, trZ + 30)))
 
 -- Stair Run: a wide flight of stairs to a platform, runners face up the stairs (-Z)
 local stair = folder("StairRun", training)
@@ -591,6 +646,10 @@ for i = 1, steps do
 	block(stair, "Nose", Vector3.new(10.02, 0.12, 0.3), Vector3.new(stX, h + 0.01, stZ0 - (i - 1) * 2 - 0.15), Palette.Gold, { CanCollide = false })
 end
 local topH = steps * 0.8
+for side = -1, 1, 2 do
+	local wall = part({ Class = "WedgePart", Parent = stair, Name = "SideWall", Size = Vector3.new(0.8, topH + 0.6, steps * 2), CFrame = CFrame.new(stX + side * 5.4, (topH + 0.6) / 2, stZ0 - steps) * CFrame.Angles(0, math.pi, 0), Color = Palette.ElectricBlue })
+	block(stair, "SideCap", Vector3.new(0.9, topH + 0.6, 6), Vector3.new(stX + side * 5.4, (topH + 0.6) / 2, stZ0 - steps * 2 - 3), Palette.DeepBlue)
+end
 block(stair, "Platform", Vector3.new(12, topH, 6), Vector3.new(stX, topH / 2, stZ0 - steps * 2 - 3), W.Concrete)
 for side = -1, 1, 2 do
 	local rx = stX + side * 5.4
