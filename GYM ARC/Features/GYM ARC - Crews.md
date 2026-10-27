@@ -62,3 +62,5 @@ Tested on the phone layout and the PC layout with the Studio test crews: the ful
 
 ## INVITE button and invite boost (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
 - INVITE +50% under the left menu tiles; a friend joining through your invite gives you +50% EXP for 30 min (once per friend per day, saved if offline); new players who joined that way get it as a welcome.
+## Invite boost 50% -> 10% (27 Oct; [[2026-10-27 GYM ARC Basketball block, VFX, SFX, music resume, mirror fix]])
+- Owner: "lower the friend boost from 50% to 10% for every friend". `Config/Social.Friends.InviteGains` 1.5 -> 1.1 (the INVITE button now reads "+10%"); friends in the same server were already +10% each (up to 3).

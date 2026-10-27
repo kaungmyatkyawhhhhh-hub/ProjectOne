@@ -228,3 +228,9 @@ Picked from Roblox's licensed library (Pro Sound Effects) by their description, 
 - CourtSteal: 9126228629 (PSE Whoosh Fast Camera In And Out 1), steals, blocks, the shot leaving the hand
 - CourtDunk: 9116750726 (PSE Metal Plate Impact), the rim on a dunk
 - Reused: ArmGo (referee whistle) at tip-off, AirHorn + RecordCheer at the final buzzer
+
+## Court sounds v2 + court music + music resume (27 Oct, prompt 71; [[2026-10-27 GYM ARC Basketball block, VFX, SFX, music resume, mirror fix]])
+Picked from the licensed library by description, not heard: swap any id in `Config/Sounds`.
+- CourtShot 9126228629 (PSE Whoosh Fast, pitched up), CourtSteal 9119335569 (PSE Soccer Goalie Deflection 201), CourtBlock 9114771792 / 9114772106 (PSE Hand Slap Claps 3 / 10), CourtRattle 9125434836 (PSE Chain-Link Fence Rattle 2), CourtCheer 9120974378 / 9120974507 (PSE Wrestling Crowd surges), CourtOoh 9114010169 (PSE Crowd Disappointment "oh"s), CourtBeep 9113938822 (PSE cordless phone beep), CourtWhistle 9117259942 (PSE referee whistle short double).
+- **Court music** (`AreaMusic.Court`, APM, full length): Undisputed a 1841599024, Battle Ready (b) 9048069905, Warm Up! 1844550885, Freeway Shuffle (A) 1840285743. Area "Court" in SettingsClient: x 57..113, z 93..143.
+- **Resume** (owner: "if the player moves to another zone and goes back to the original zone in 5 seconds, the music will still be at the part where the player left off"): `Shared/Audio` remembers each list's track and spot when you leave it; back within 5 s it carries on from there (else from its first track). The area is now checked every 0.5 s (was 2 s).

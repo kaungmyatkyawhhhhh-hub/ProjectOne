@@ -35,3 +35,11 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 ## COURT KING title (27 Oct, owner: "add a COURT KING title for wins")
 - `Config/Titles` CourtKing: Epic, Social, "Win 5 games of 1v1 basketball on the town court" (stat `courtWins` >= 5; wins against the rival count too). CourtService checks titles after every win.
+
+## Prompt 71: block, new moves, effects, sounds, music ([[2026-10-27 GYM ARC Basketball block, VFX, SFX, music resume, mirror fix]])
+- **Block:** a tap while the shooter winds up, or in the first 0.32 s after the ball leaves their hand, within 5 studs: a jump with both arms up. 45% on the windup / 30% in flight, +12% when taller, half on a dunk; a blocked ball pops loose by the shooter. The rival blocks too. Hint: "TAP TO BLOCK!". `Config/Court.Block`.
+- **Moves reworked:** a crossover dribble (the ball changes hands every 2 bounces, guard arm out, low when standing), the gather, the jump shot with a held goose-neck follow-through, the dunk (gather, knee drive, slam, hang on the rim, landing), the block jump, the steal lunge + sweep (also on a miss), defence, a fist pump after scoring.
+- **Effects reworked** (textures from `Downloads/gym_arc_models/vfx`, `Config/Court.VFX`; Roblox built-ins until imported): dust + floor ring per bounce, release streaks + flash (gold stars on a perfect release), ball trail, net star burst (bigger on a three), rim sparks, dunk impact + floor shockwave + rim ring + shake, block impact + swoosh + stars, steal swoosh, winner confetti + gold glow.
+- **Sounds:** CourtShot (release), CourtSwish, CourtRim, CourtDunk + CourtRattle, CourtBlock, CourtSteal, CourtCheer (dunks, blocks, threes), CourtOoh (misses), CourtBeep (3-2-1), CourtWhistle (out), plus the tip-off whistle and the final horn ([[GYM ARC - Music and Sounds]]).
+- **Fixed from the owner's playtest:** a click near the sign right after a game started a new one (6 s lockout, the prompt hides in and after a match); the start toast covered the countdown; the daily reward window opened over a match; the camera after a basket faced the other player (now behind you, facing the rim, at every check); the idle scoreboard said "opens at Growth Spurt 4" to everyone (now the last result).
+- Studio: Workspace `CourtLog` = true prints every play in the Output.

@@ -45,3 +45,6 @@ A mirror near the gym door with a before / after card. (Since 15 Oct the mirror 
 
 ## Same body shape as you (19 Oct)
 The "Now" body gets your real widths (genetics shoulders, widths from height and muscle), so it matches your character. "Day one" stays the plain starting body. See [[GYM ARC - Bug - Mirror and statue bodies too narrow]].
+
+## "Now" body fixed (27 Oct, prompt 71; [[2026-10-27 GYM ARC Basketball block, VFX, SFX, music resume, mirror fix]])
+- Owner: "the progress mirror 'after' muscles are bugged". The "Now" body had no torso, upper arms or thighs: your own body wears the stage meshes since this session (MuscleClient OWN_STAGES), and the card only copied live meshes. `MirrorClient` now copies the visible stage pieces (with their skin copy and skin texture) in place. Checked on the owner's save.
