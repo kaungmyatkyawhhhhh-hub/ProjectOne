@@ -13,3 +13,8 @@ This repo is my Obsidian vault. It syncs to my PC with the Obsidian Git plugin (
   - Ask before restructuring or deleting anything.
 - **Don't announce it:** never say that you read the vault.
 - **Leave `.obsidian/` alone:** it is Obsidian's own settings and plugins.
+- **Roblox Studio (two Studios open):**
+  - Only ever work in the Studio named "SPEED ARC".
+  - Call `list_roblox_studios` before your first Studio edit each session and pick the SPEED ARC Studio by name.
+  - Never touch the GYM ARC Studio (placeId 80031260599632).
+  - If the SPEED ARC Studio has no name, stop and ask me.
