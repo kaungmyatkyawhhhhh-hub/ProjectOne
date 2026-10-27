@@ -32,3 +32,6 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 ## Related
 [[GYM ARC - Town and Gyms]], [[GYM ARC - Strongman Yard]], [[GYM ARC - Posing Competition]], [[2026-10-27 GYM ARC 1v1 court and court model]]
+
+## COURT KING title (27 Oct, owner: "add a COURT KING title for wins")
+- `Config/Titles` CourtKing: Epic, Social, "Win 5 games of 1v1 basketball on the town court" (stat `courtWins` >= 5; wins against the rival count too). CourtService checks titles after every win.

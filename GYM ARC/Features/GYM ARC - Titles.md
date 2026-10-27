@@ -94,3 +94,6 @@ The Inventory has a **Boosts** tab first now (Boosts | Titles | Auras | Items): 
 
 ## Yard King (27 Oct)
 **Yard King** (Epic, Social): win a Strongman Showdown (1st place, `stats.yardWins`). See [[GYM ARC - Strongman Yard]].
+
+## Court King (27 Oct, prompt 70)
+- Epic, Social: win 5 games of 1v1 basketball on the town court (`courtWins` >= 5). See [[GYM ARC - Court Competitions]].
