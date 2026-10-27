@@ -218,6 +218,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[00 GYM ARC Home]]
 
 ### Features
+- [[GYM ARC - Court Competitions]] (planned)
 - [[GYM ARC - Analytics]]
 - [[GYM ARC - Arm Wrestling]]
 - [[GYM ARC - Aura]]
@@ -426,6 +427,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-27 GYM ARC Prompt - 70 Playable court competitions]]
 - [[2026-10-27 GYM ARC Prompt - 69 Tires, NPC waists, rerack coins, plates, court]]
 - [[2026-10-27 GYM ARC Prompt - 68 Tutorial fix and genetics at join]]
 - [[2026-10-27 GYM ARC Prompt - 63 Strongman Yard]]
