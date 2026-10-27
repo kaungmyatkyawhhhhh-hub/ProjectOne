@@ -86,3 +86,6 @@ The endless progression after 7'0" (owner's [[2026-10-20 GYM ARC Gameplay plan]]
 - **Why Claude's uploads rendered grey:** they weren't owned by the group that owns the place; SurfaceAppearance maps must belong to the place's creator (Myanmar Builders Club). The owner imported the 16 v2 PNGs into the group (decals kept in `ServerStorage.AlterMapsV2_GroupImages`); each checked against the source PNG. Ids now in Config/Alters and the SkinStages SurfaceAppearances:
   - Clay 111377035465967 / 94434595808584 / 95510333365247; Sandstone 92399925894287 / 134089560150506 / 73529013070921; Granite 82803887369076 / 98831725213571 / 86557093389409; Obsidian 116060486444251 / 102861573559689 / 96472928361338 (no metalness); Iron 133443749485829 / 75095035934589 / 119090568302532 / metal 85492534663638 (color / normal / roughness).
 - Rule for future textures: upload them to the group (owner), never with Claude's upload tool, if they go on SurfaceAppearances.
+
+## Cutscene title font (27 Oct)
+Owner: "during the cutscene the ALTER text needs the premium font". The transformation's title card ("ALTER 8: GRANITE", AlterFX) uses Montserrat Black Italic (`UIFonts.Display`, the REP / titles font) instead of Luckiest Guy; the popup and the trainer screens keep theirs. Shot `alter_title_premium_font.jpg`.
