@@ -12,7 +12,7 @@ function Formulas.walkSpeed(mph)
 end
 
 function Formulas.pace(speed, league)
-	local mid = Race.LeagueMid[league or 1]
+	local mid = Race.LeagueMid[league or 1] or Race.LeagueMid[1]
 	local x = math.log(math.max(speed, 1) / mid, 2)
 	x = math.clamp(x, Race.PaceClampLow, Race.PaceClampHigh)
 	return Race.BasePace * (1 + Race.PaceFactor * x)
@@ -47,25 +47,38 @@ function Formulas.station(id)
 	return nil
 end
 
--- The next station the player can't use yet (the HUD goal), or nil
-function Formulas.nextStation(speed)
+-- The next station of your league you can't use yet (the HUD goal), or nil
+function Formulas.nextStation(speed, league)
+	league = league or 1
 	for _, s in Stations do
-		if speed < s.MinSpeed then
+		if s.League == league and speed < s.MinSpeed then
 			return s
 		end
 	end
 	return nil
 end
 
--- The best station the player can use
-function Formulas.bestStation(speed)
-	local best = Stations[1]
+-- The best station of your league you can use
+function Formulas.bestStation(speed, league)
+	league = league or 1
+	local best = nil
 	for _, s in Stations do
-		if speed >= s.MinSpeed then
+		if s.League == league and speed >= s.MinSpeed then
 			best = s
 		end
 	end
 	return best
+end
+
+-- previous threshold of the league's stations below speed (for the HUD progress bar)
+function Formulas.stationFloor(speed, league)
+	local v = 0
+	for _, s in Stations do
+		if s.League == (league or 1) and s.MinSpeed <= speed then
+			v = s.MinSpeed
+		end
+	end
+	return v
 end
 
 return Formulas

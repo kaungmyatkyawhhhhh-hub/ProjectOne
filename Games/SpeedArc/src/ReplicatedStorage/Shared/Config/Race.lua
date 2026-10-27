@@ -43,6 +43,16 @@ return {
 		-- Laps can be fractional: the race then starts part-way round so it still finishes on the gold line
 		Lap = { Name = "LAP RACE", Laps = 1.5 }, -- starts on the back straight in front of the stands
 		Sprint = { Name = "SPRINT", Laps = 1 },
+		-- League 3+: hurdles across every lane; JUMP when one comes, a miss = a short slowdown
+		Hurdles = { Name = "HURDLES", Laps = 1, Hurdles = 8 },
+	},
+	Hurdle = {
+		Window = 5, -- studs before a hurdle where a JUMP counts
+		LateWindow = 0.6, -- studs after it still counts (kind)
+		MissMult = 0.7, -- pace x0.7 ...
+		MissSeconds = 0.6, -- ... for this long (never a stop)
+		NpcCleanChance = 0.85,
+		JumpHeight = 2.4,
 	},
 	Rotation = { "Lap", "Sprint" },
 
