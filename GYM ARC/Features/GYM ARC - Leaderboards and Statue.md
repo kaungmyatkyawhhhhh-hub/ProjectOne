@@ -59,3 +59,4 @@ The statue reads the strongest player's save (read-only) and is built with their
 - Every board shows the **top 25**, scrollable (10 rows visible; the extra rows are added on the client by `LeaderboardClient.scrollRows`).
 - (28 Oct) **LEVEL board removed** (it duplicated STRONGEST LIFTER). Boards now: Biggest, Strongest lifter (best LVL ever), Tallest, Most reps today, Posing wins, Arm wrestling, Alters. The Town / Pro Gym rows have 7 panels, evenly spaced; the old LEVEL panels are in `ServerStorage._Removed_LevelBoards_28Oct`.
 - (28 Oct) **The statue = #1 on STRONGEST LIFTER** (best LVL ever), the same player the boards show; it updates whenever the boards do. (The posing champion still stands there until the next round.)
+- (28 Oct) Bug fix: boards no longer show two overlapping lists after walking away and back (the scroll list uses copies; the built rows stay hidden).
