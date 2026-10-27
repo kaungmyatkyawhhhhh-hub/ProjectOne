@@ -28,6 +28,8 @@ local joinedRaceId = nil
 
 -- current race (everyone draws the runners; only racers get the race HUD)
 local race = nil -- { raceId, laps, runners = { {id,name,lane,model,root,npc,userId} }, me = index or nil }
+local privateConn = nil
+local lastCount = nil
 local prog = {} -- [i] = { prev, cur }
 local tickAt, tickGap = 0, 1 / Race.TickRate
 local renderConn = nil
@@ -529,6 +531,9 @@ local function onStart(info)
 	end
 	local area = Areas[info.areaId] or Areas.Hub
 	race = {
+		-- private races (tutorial, RACE THEM) count down on their own state folder
+		state = if info.private then stateRoot:WaitForChild(info.stateName, 5) else nil,
+		kind = info.kind,
 		raceId = info.raceId,
 		laps = info.laps,
 		runners = {},
@@ -572,10 +577,26 @@ local function onStart(info)
 		stretchShown = false
 		finishedShown = false
 		ctx.Sound.stop("CrowdMurmur")
+		if race.state then
+			privateConn = race.state:GetAttributeChangedSignal("Phase"):Connect(function()
+				if race and race.state and race.state:GetAttribute("Phase") == "Running" then
+					lastCount = nil
+					showCenter("GO!", P.Gold, 0.8)
+					ctx.Sound.play("StartGun")
+				end
+			end)
+		end
+		if RaceController.onMyStart then
+			RaceController.onMyStart(info)
+		end
 	end
 end
 
 local function endRace()
+	if privateConn then
+		privateConn:Disconnect()
+		privateConn = nil
+	end
 	if renderConn then
 		RunService:UnbindFromRenderStep("SpeedArcRace")
 		renderConn = nil
@@ -719,14 +740,14 @@ local function updatePill()
 	end
 end
 
-local lastCount = nil
 local function countdownTick()
 	if not race or not race.me then
 		return
 	end
-	local phase = state:GetAttribute("Phase")
+	local st = race.state or state
+	local phase = st:GetAttribute("Phase")
 	if phase == "Countdown" then
-		local left = math.ceil((state:GetAttribute("EndsAt") or 0) - now())
+		local left = math.ceil((st:GetAttribute("EndsAt") or 0) - now())
 		if left ~= lastCount and left >= 1 and left <= 3 then
 			lastCount = left
 			showCenter(tostring(left), P.White, 0.7)
@@ -820,7 +841,7 @@ function RaceController.start(c)
 			if not race then
 				ctx.Hud.toast("A RACE IS STARTING!  Tap JOIN", "Gold")
 			end
-		elseif phase == "Running" and race and race.me then
+		elseif phase == "Running" and race and race.me and not race.state then
 			lastCount = nil
 			showCenter("GO!", P.Gold, 0.8)
 			ctx.Sound.play("StartGun")

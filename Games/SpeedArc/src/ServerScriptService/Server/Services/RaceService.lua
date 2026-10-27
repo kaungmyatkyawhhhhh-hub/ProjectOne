@@ -14,11 +14,14 @@ local Formulas = require(Shared.Util.Formulas)
 local Boosts = require(Shared.Util.Boosts)
 local TrackPath = require(Shared.Util.TrackPath)
 local Net = require(Shared.Util.Net)
+local Retention = require(Shared.Config.Retention)
 local PlayerData = require(script.Parent.PlayerData)
 local TrainingService = require(script.Parent.TrainingService)
 
 local RaceService = {}
-RaceService.Won = Instance.new("BindableEvent") -- (player, area, place)
+RaceService.Won = Instance.new("BindableEvent") -- (player, area, place, info) info = { pb, time, raceType, kind }
+RaceService.Joined = Instance.new("BindableEvent") -- (player, area) a scheduled race was joined
+RaceService.Skipped = Instance.new("BindableEvent") -- (player, area) a JOIN window passed without joining
 
 local IS_STUDIO = RunService:IsStudio()
 local LANE_ORDER = { 3, 4, 2, 5, 1, 6, 7, 8 }
@@ -37,6 +40,15 @@ local function now()
 end
 
 local function playersIn(A)
+	if A.members then
+		local list = {}
+		for _, p in A.members do
+			if p.Parent then
+				table.insert(list, p)
+			end
+		end
+		return list
+	end
 	local list = {}
 	for _, p in Players:GetPlayers() do
 		if (p:GetAttribute("Area") or "Hub") == A.area.Id then
@@ -219,8 +231,8 @@ local function buildRunners(A, raceType)
 	end
 	-- NPCs fill up to MinRunners, at speeds around the joined players' middle speed
 	table.sort(speeds)
-	local mid = math.max(Race.NpcMinSpeed, speeds[math.ceil(#speeds / 2)])
-	local npcCount = math.max(0, math.min(Race.MinRunners, maxRunners) - #A.runners)
+	local mid = math.max(if A.npcRange then 1 else Race.NpcMinSpeed, speeds[math.ceil(#speeds / 2)])
+	local npcCount = if A.npcCount then A.npcCount else math.max(0, math.min(Race.MinRunners, maxRunners) - #A.runners)
 	local used = {}
 	for _ = 1, npcCount do
 		local idx
@@ -230,7 +242,8 @@ local function buildRunners(A, raceType)
 		used[idx] = true
 		local model = getNpc(A, idx)
 		if model then
-			local lo, hi = Race.NpcSpeedRange[1], Race.NpcSpeedRange[2]
+			local range = A.npcRange or Race.NpcSpeedRange
+			local lo, hi = range[1], range[2]
 			model.Parent = workspace.Runtime
 			table.insert(A.runners, {
 				id = "n" .. idx,
@@ -246,7 +259,8 @@ local function buildRunners(A, raceType)
 		end
 	end
 	for i, r in A.runners do
-		r.lane = LANE_ORDER[i] or i
+		-- private races use the outside lanes so they don't sit on top of the area race
+		r.lane = if A.members then math.max(1, A.area.Track.Lanes + 1 - i) else LANE_ORDER[i] or i
 		r.laps = laps
 		r.progress = 0
 		r.finished = false
@@ -313,7 +327,7 @@ local function rosterForClients(A, raceType, hurdles)
 	for i, r in A.runners do
 		list[i] = { id = r.id, name = r.name, lane = r.lane, userId = r.userId, npc = r.npc == true, model = r.model, modelName = r.model and r.model.Name }
 	end
-	return { raceId = A.raceId, areaId = A.area.Id, type = raceType, name = Race.Types[raceType].Name, laps = Race.Types[raceType].Laps, runners = list, hurdles = hurdles, length = A.path.raceLength(Race.Types[raceType].Laps) }
+	return { raceId = A.raceId, areaId = A.area.Id, private = A.members ~= nil, stateName = A.state.Name, kind = A.kind, type = raceType, name = Race.Types[raceType].Name, laps = Race.Types[raceType].Laps, runners = list, hurdles = hurdles, length = A.path.raceLength(Race.Types[raceType].Laps) }
 end
 
 local function simulate(A, raceType, hurdles)
@@ -350,7 +364,7 @@ local function simulate(A, raceType, hurdles)
 				r.boostUntil = math.max(t, r.boostUntil) + Race.Boost.Seconds
 				r.nextBoostAt = t + 1.5 + math.random() * 2.5
 			end
-			local pace = Formulas.pace(r.speed, A.area.League) * (r.paceMult or 1)
+			local pace = Formulas.pace(r.speed, A.area.League) * (r.paceMult or 1) * (A.paceMult or 1)
 			local mult = 1
 			if t < r.boostUntil then
 				mult += Race.Boost.Mult
@@ -387,6 +401,12 @@ local function simulate(A, raceType, hurdles)
 					end
 					r.nextHurdle += 1
 				end
+			end
+			-- tutorial: a close race the new runner always wins (NPCs stay near, never ahead at the end)
+			if A.rigFor and r.npc and not A.rigFor.finished then
+				local me = A.rigFor.progress
+				local ahead = if me < 0.75 then 0.025 else -0.004 * (r.rigIndex or 1)
+				r.progress = math.clamp(r.progress, me - 0.05, me + ahead)
 			end
 			if r.progress >= 1 then
 				local frac = (1 - before) / (r.progress - before)
@@ -438,9 +458,23 @@ local function reward(A, raceType, list)
 			continue
 		end
 		local minutes = (Race.RewardMinutes[place] or 0) + Race.FinishMinutes
-		local firstOfDay = data.LastRaceDay ~= day
+		local firstOfDay = data.LastRaceDay ~= day and A.kind ~= "challenge"
 		if firstOfDay then
 			minutes *= 1 + Race.FirstRaceOfDayBonus
+		end
+		if A.kind == "challenge" then
+			-- RACE THEM: coins only for the first few a day, no medals or league wins (no farming)
+			local c = data.Challenge
+			if c.Day ~= day then
+				c.Day, c.Paid = day, 0
+			end
+			if c.Paid < Retention.Social.ChallengePaidPerDay then
+				c.Paid += 1
+				minutes = Retention.Social.ChallengeMinutes[place] or 0
+			else
+				minutes = 0
+			end
+			data.Stats.Challenges = (data.Stats.Challenges or 0) + 1
 		end
 		-- a lower league's area pays at that league's rate, and less (visiting friends is fine)
 		local lower = A.area.League < (data.League or 1)
@@ -449,14 +483,21 @@ local function reward(A, raceType, list)
 			coins *= Areas.LowerLeagueRewardMult
 		end
 		coins = math.floor(coins + 0.5)
-		data.LastRaceDay = day
+		if A.kind ~= "challenge" then
+			data.LastRaceDay = day
+		end
 		data.Stats.Races += 1
+		if place <= 3 and A.kind ~= "challenge" then
+			data.Stats.Podiums = (data.Stats.Podiums or 0) + 1
+		end
 		local medal = nil
-		if place == 1 then
+		if A.kind == "challenge" then
+			medal = nil
+		elseif place == 1 then
 			data.Medals.Gold += 1
 			data.Stats.Wins += 1
 			medal = "Gold"
-			if not lower then
+			if not lower and A.kind ~= "tutorial" then -- the tutorial win doesn't count for Go Pro
 				data.LeagueWins = (data.LeagueWins or 0) + 1
 			end
 		elseif place == 2 then
@@ -472,6 +513,7 @@ local function reward(A, raceType, list)
 			local best = data.BestTimes[key]
 			if best and r.finishTime < best then
 				pb = true
+				data.Stats.PBs = (data.Stats.PBs or 0) + 1
 			end
 			if not best or r.finishTime < best then
 				data.BestTimes[key] = r.finishTime
@@ -479,7 +521,7 @@ local function reward(A, raceType, list)
 		end
 		PlayerData.set(player, "Coins", data.Coins + coins)
 		PlayerData.refresh(player)
-		RaceService.Won:Fire(player, A.area, place)
+		RaceService.Won:Fire(player, A.area, place, { pb = pb, time = r.finishTime, raceType = raceType, kind = A.kind or "race" })
 		RaceEvent:FireClient(player, "results", {
 			raceId = A.raceId,
 			areaId = A.area.Id,
@@ -493,6 +535,8 @@ local function reward(A, raceType, list)
 			lower = lower,
 			rows = rows,
 			youId = r.id,
+			kind = A.kind,
+			capped = A.kind == "challenge" and coins == 0,
 		})
 	end
 end
@@ -501,7 +545,11 @@ local function cleanup(A)
 	for _, r in A.runners do
 		stopRun(r)
 		if r.npc then
-			r.model.Parent = A.npcPool
+			if A.members then
+				r.model:Destroy()
+			else
+				r.model.Parent = A.npcPool
+			end
 		elseif r.player then
 			playerRunner[r.player] = nil
 			r.player:SetAttribute("InRace", nil)
@@ -520,7 +568,14 @@ local function cleanup(A)
 		A.hurdleFolder:Destroy()
 		A.hurdleFolder = nil
 	end
-	RaceEvent:FireAllClients("ended", { raceId = A.raceId, areaId = A.area.Id })
+	if A.members then
+		for _, p in playersIn(A) do
+			RaceEvent:FireClient(p, "ended", { raceId = A.raceId, areaId = A.area.Id })
+		end
+		A.state:Destroy()
+	else
+		RaceEvent:FireAllClients("ended", { raceId = A.raceId, areaId = A.area.Id })
+	end
 end
 
 local function waitUntil(A, t)
@@ -553,6 +608,15 @@ local function runRace(A)
 	table.clear(A.joined)
 	setPhase(A, "Join", Race.JoinSeconds)
 	task.wait(Race.JoinSeconds)
+	for _, p in playersIn(A) do
+		if PlayerData.get(p) and not playerRunner[p] then
+			if A.joined[p] then
+				RaceService.Joined:Fire(p, A.area)
+			else
+				RaceService.Skipped:Fire(p, A.area)
+			end
+		end
+	end
 	if not next(A.joined) or not buildRunners(A, raceType) then
 		table.clear(A.joined)
 		return
@@ -632,7 +696,7 @@ function RaceService.start()
 
 	Net.get("RaceJoin").OnServerEvent:Connect(function(player)
 		local A = areas[player:GetAttribute("Area") or "Hub"]
-		if not A or A.state:GetAttribute("Phase") ~= "Join" or A.joined[player] or not PlayerData.get(player) then
+		if not A or A.state:GetAttribute("Phase") ~= "Join" or A.joined[player] or playerRunner[player] or not PlayerData.get(player) then
 			return
 		end
 		local count = 0
@@ -674,6 +738,10 @@ function RaceService.start()
 			r.chargeAt = raceT
 		end
 		r.boostUntil = math.max(raceT, r.boostUntil) + Race.Boost.Seconds
+		local data = PlayerData.get(player)
+		if data then
+			data.Stats.Boosts = (data.Stats.Boosts or 0) + 1
+		end
 		RaceEvent:FireClient(player, "boost", { charges = r.charges, ok = true })
 	end)
 
@@ -692,6 +760,87 @@ function RaceService.start()
 	for _, id in Areas.Order do
 		startArea(Areas[id])
 	end
+end
+
+-- A private race on the members' area track: the tutorial race (vs slow NPCs, a close win) or
+-- RACE THEM (1v1 sprint). opts = { kind, raceType, npcs, npcRange, paceMult, rig }
+function RaceService.private(members, opts)
+	local first = members[1]
+	local base = areas[first:GetAttribute("Area") or "Hub"]
+	if not base then
+		return false
+	end
+	for _, p in members do
+		if playerRunner[p] or not p.Character or (p:GetAttribute("Area") or "Hub") ~= base.area.Id then
+			return false
+		end
+	end
+	nextRaceId += 1
+	local A = {
+		area = base.area,
+		path = base.path,
+		state = Instance.new("Folder"),
+		joined = {},
+		runners = {},
+		npcs = {},
+		raceId = nextRaceId,
+		raceStartClock = 0,
+		members = members,
+		kind = opts.kind,
+		npcCount = opts.npcs or 0,
+		npcRange = opts.npcRange,
+		paceMult = opts.paceMult,
+		npcPool = Instance.new("Folder"),
+	}
+	A.state.Name = "Private" .. A.raceId
+	A.state:SetAttribute("Private", true)
+	A.state.Parent = stateRoot
+	A.npcPool.Name = "PrivateNpcs" .. A.raceId
+	A.npcPool.Parent = ServerStorage
+	local raceType = opts.raceType or "Sprint"
+	for _, p in members do
+		A.joined[p] = true
+	end
+	if not buildRunners(A, raceType) then
+		A.state:Destroy()
+		A.npcPool:Destroy()
+		return false
+	end
+	if opts.rig then
+		local n = 0
+		for _, r in A.runners do
+			if r.player == first then
+				A.rigFor = r
+			elseif r.npc then
+				n += 1
+				r.rigIndex = n
+			end
+		end
+	end
+	task.spawn(function()
+		local ok, err = pcall(function()
+			for _, p in playersIn(A) do
+				RaceEvent:FireClient(p, "start", rosterForClients(A, raceType, nil))
+			end
+			setPhase(A, "Countdown", Race.CountdownSeconds)
+			task.wait(Race.CountdownSeconds)
+			setPhase(A, "Running", Race.MaxRaceSeconds)
+			for _, r in A.runners do
+				playRun(r)
+			end
+			simulate(A, raceType, nil)
+			local list = standings(A)
+			setPhase(A, "Results", Race.ResultsSeconds)
+			reward(A, raceType, list)
+			task.wait(3)
+		end)
+		if not ok then
+			warn("[RaceService] private race error:", err)
+		end
+		pcall(cleanup, A)
+		A.npcPool:Destroy()
+	end)
+	return true
 end
 
 function RaceService.inRace(player)
