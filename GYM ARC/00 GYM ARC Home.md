@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 28 Oct: prompt 82: Hall of Fame ARE YOU SURE? confirm; VIEW MY STATUE on the round stage in the middle.
 - 28 Oct: prompt 81: plaza clock removed for good in the place (originals restored), Hall auras on the pedestals, a cleaner modern Hall look; the v2 Hall model (no flicker) is in. See [[GYM ARC - Hall of Fame]].
 - 28 Oct: HALL OF FAME built (prompt 66 part 2) for the 31 Oct event: rebirth at Alter 15, stars, the gold screen + ceremony, the Hall at the east beach with statues and a board. See [[GYM ARC - Hall of Fame]]. Still open: profiles, codes.
 - 28 Oct: the owner's to-do list (court + VFX import, yard props, variant maps / products, LEVEL board, PR flash, Extra Trainer price) is all done; still open: prompt 66 parts 1-3 (codes, Hall of Fame, profiles).
@@ -453,6 +454,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 ### Prompts
 - [[2026-10-28 GYM ARC Prompt - 80 Hall of Fame redesign, test stats, cutscenes]]
 - [[2026-10-28 GYM ARC Prompt - 81 Hall of Fame fixes, clock spike, test stats on]]
+- [[2026-10-28 GYM ARC Prompt - 82 Hall of Fame are you sure]]
 - [[2026-10-28 GYM ARC Prompt - 79 Leaderboard reset, trainer slots, pity stages]]
 - [[2026-10-27 GYM ARC Prompt - 78 FPS lag check]]
 - [[2026-10-27 GYM ARC Prompt - 77 Variants after unlock, fonts, alley skating, invite, inventory]]

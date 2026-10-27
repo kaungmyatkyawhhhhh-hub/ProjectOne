@@ -25,7 +25,7 @@ The rebirth after Alter 15 (`Config/HallOfFame.RequiredAlter`, never moves). Nev
 - Built by `ServerStorage._Builders.HallOfFameHall` -> `Workspace.Town.HallOfFame`. At the east end of the beach (x 182..195, z 180..222), back to the town's east edge, open front facing west over the sand to the Posing Stage (owner: the plaza spot hid the leaderboards -> "Move the Hall away"; the plaza is back exactly as it was). Two palms moved just past its ends.
 - White marble floor / walls / 6 columns with neon gold bands, a gold-edged roof, the HALL OF FAME sign with a warm glow, gold dust drifting inside, warm spotlights.
 - Pedestals 2 / 1 / MINE / 3 and the gold board (TOP 10 ALL TIME + LEGENDS IN THIS SERVER, client-drawn); the ceremony stage in front of the middle.
-- **Statues:** the top 3 by stars (OrderedDataStore `LB2_HallOfFame`, refreshed every 180 s, `ReplicatedStorage.HallOfFameData`) as marble statues of their peak body. **VIEW MY STATUE** (prompt on the middle pedestal): your peak statue there, your screen only, 60 s.
+- **Statues:** the top 3 by stars (OrderedDataStore `LB2_HallOfFame`, refreshed every 180 s, `ReplicatedStorage.HallOfFameData`) as marble statues of their peak body. **VIEW MY STATUE** (prompt on the round stage in the middle, `PedestalMine` marker): your peak statue there, your screen only, 60 s.
 
 ## Console
 `game.ServerStorage.Admin:Invoke("stars", "<player or all>", n)` sets stars (title / tag / boost follow).
@@ -39,3 +39,6 @@ The Hall is now on the park block behind the plaza (Blender model + builder), wi
 
 ## Fixes (28 Oct, prompt 81)
 [[2026-10-28 GYM ARC Prompt - 81 Hall of Fame fixes, clock spike, test stats on]]. Statue auras stand on the pedestal tops (they floated in the niches). New look: polished marble (`GymArc_HallMarble`), smooth shiny gold (no Foil), dark roof (`GymArc_HallRoof`). v2 Blender model (`HallOfFame_v2.fbx`: rounded edges, no stacked faces, a real roof, glass, light lines) is installed (v1 in `ServerStorage._Removed_HallV1_28Oct`); walls + columns smooth bright white. The builder makes roof slabs only for v1 (no `HallNeon` part).
+
+## Confirm (28 Oct, prompt 82)
+ENTER opens ARE YOU SURE? (what starts over, what you keep), GO BACK / red YES, ENTER; only YES enters. [[2026-10-28 GYM ARC Prompt - 82 Hall of Fame are you sure]]
