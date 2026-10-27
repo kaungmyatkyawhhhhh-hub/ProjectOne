@@ -1,7 +1,7 @@
 ---
 date: 2026-10-27
 tags: [gymarc, prompt]
-status: in progress
+status: done
 ---
 # 73 Sound and music
 
