@@ -206,4 +206,4 @@ Product ids (owner, 27 Oct): VariantInferno 3722938194, VariantFrostbite 3722938
 | Item | Type | What | Robux | ID | Status |
 |---|---|---|---|---|---|
 | Extra Trainer | Game pass | now the 3rd trainer slot (everyone has 2) | 99 | 2032496303 | ON |
-| 4th Trainer (`ExtraTrainer2`) | Game pass | the 4th trainer slot (needs the 3rd first in the + button order) | 149 suggested | none yet | waiting on owner |
+| 4th Trainer (`ExtraTrainer2`) | Game pass | the 4th trainer slot (needs the 3rd first in the + button order) | 149 | 2058298970 | ON (28 Oct) |

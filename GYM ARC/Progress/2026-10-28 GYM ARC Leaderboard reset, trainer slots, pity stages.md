@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [gymarc, progress]
-status: waiting on owner
+status: done
 ---
 # Leaderboard reset, trainer slots, pity stages (prompt 79)
 
@@ -13,4 +13,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. Prompt: [[2026-10-28 GYM ARC Prompt - 
 - **Trainers near you:** Settings "Trainers Near You" 1 / 2 / 3 / 4 (`settings.trainersShown`, default 1) -> player attribute `TrainersShown` -> `TrainerFollowClient.bestEntries` draws that many of your equipped trainers (rarest first); the rest stay portrait chips. Other players see your choice too (unless Others' Trainers is off / Low Graphics).
 - **Pity stages:** `Trainers.PityStages` = Legendary 50, Mythic 100, Secret 150; saved `trainers.pityStage`. A stage ends when you get its rarity or better (luck or pity), then the next stage starts at 0; after Secret, Legendary again. The pill reads "MYTHIC GUARANTEED IN 87 ROLLS". Old saves: stage 1 with their count kept (anyone at 50+ gets a Legendary on the next roll).
 - Tested: pity sequence 50 / 150 / 300 rolls, lucky Legendary moves on, old save pity 70; slots 2 -> 3 -> 4 with the passes; followers 1 / 3 / 4 / 2 from the setting (FreshPlayer).
-- **Owner:** create the 4th-slot game pass and send its id.
+- The owner sent the 4th-slot pass id: `ExtraTrainer2` = 2058298970 (on sale: the + in the Trainers panel after the 3rd slot, and the Store's pass list). Each slot pass adds one slot, so buying them in any order works.
