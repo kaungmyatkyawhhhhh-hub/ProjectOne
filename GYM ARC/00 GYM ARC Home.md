@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 27 Oct: 1v1 BASKETBALL on the town court (prompt 70): from Growth Spurt 4, first to 5, tap anywhere to shoot / steal, dunks at 6'0"+, a rival NPC if you're alone, two games at once, moves + sounds + effects. The whole court modelled in Blender (waiting for the import); the scoreboard moved across from the bleachers. See [[GYM ARC - Court Competitions]], [[2026-10-27 GYM ARC 1v1 court and court model]].
 - 27 Oct: prompt 69. Strongman Yard tire stacks use the tread tire model. NPC waists no longer show skin. Re-racking pays 5 + 1 per LVL (max 405 at LVL 400). Starter gym plates are shiny metal. The tutorial can't be skipped and hides your trainer. The basketball court is a real matte court with full markings. See [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]].
 - 27 Oct: tutorial fixed (prompt 68). No genetics popup on join (new players start at x1.00). GO TO COACH no longer drops you on the desk. Steps never skip while you lift or have a window open, and the hint comes back. Gold chevron arrows on the floor, plus an edge arrow when the target is off screen. The goal step points at the GROWTH SPURT card. No popups during the tutorial. See [[2026-10-27 GYM ARC Tutorial fix and genetics at join]].
 - 27 Oct: Strongman Yard now unlocks at ALTER 2 (prompt 66 part 4) and got a full new look (light towers, string lights, weathered containers, bleachers, tent). Prompt 66 parts 1-3 (codes, Hall of Fame, profiles) still to do. See [[GYM ARC - Strongman Yard]].
@@ -218,7 +219,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[00 GYM ARC Home]]
 
 ### Features
-- [[GYM ARC - Court Competitions]] (planned)
+- [[GYM ARC - Court Competitions]]
 - [[GYM ARC - Analytics]]
 - [[GYM ARC - Arm Wrestling]]
 - [[GYM ARC - Aura]]
@@ -399,6 +400,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bugs index]]
 
 ### Progress
+- [[2026-10-27 GYM ARC 1v1 court and court model]]
 - [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]]
 - [[2026-10-27 GYM ARC Tutorial fix and genetics at join]]
 - [[2026-10-27 GYM ARC Strongman Yard and Blender models]]

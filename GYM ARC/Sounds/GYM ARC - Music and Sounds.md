@@ -219,3 +219,12 @@ Owner: "make strongman yard music good". The yard had no music of its own (it pl
 - 9045550245 **Bottleneck** underscore (Crazy Train: gritty garage rock)
 - 1844502076 **Rage Machine**
 All checked to load (99-138 s each). Tested: in the yard 110 Percent plays, the Powerlifting gym switches back to its own list, and back again.
+
+## 1v1 court sounds (27 Oct, prompt 70; [[GYM ARC - Court Competitions]])
+Picked from Roblox's licensed library (Pro Sound Effects) by their description, not heard: listen and swap any id in `Config/Sounds`.
+- CourtDribble: 9113262444, 9113262361 (PSE Ball Bounce Exterior 3 / 2, basketball floor bounces), 0.3 s each
+- CourtRim: 9125782644 (PSE Pot Clank Hit Metal Pan 10), a miss off the rim
+- CourtSwish: 9125715121 (PSE Robe Swish, cloth flap, pitched up), the net on a make
+- CourtSteal: 9126228629 (PSE Whoosh Fast Camera In And Out 1), steals, blocks, the shot leaving the hand
+- CourtDunk: 9116750726 (PSE Metal Plate Impact), the rim on a dunk
+- Reused: ArmGo (referee whistle) at tip-off, AirHorn + RecordCheer at the final buzzer
