@@ -35,6 +35,16 @@ Train (tap) -> race every 3 min -> coins -> shoes / coaches / trails -> Go Pro t
 9. **Config:** every number in `Shared/Config`. Rewards = minutes of coins at your league.
 10. **Report:** short progress note + phone-size screenshots + FPS numbers. List anything needed from the owner (imports, IDs).
 
+## Modelling like a human artist (owner, 28 Oct)
+Every Blender mesh must look hand-made, not like stacked default cubes:
+- **Round every edge:** Bevel modifier on everything (2-3 segments, width scaled to the object: ~0.03-0.08 studs on props, more on big shapes), Weighted Normal / Auto Smooth so flat faces stay flat and edges catch light. No razor-sharp default-cube edges anywhere.
+- **Cutouts and detail cuts:** inset panels, grooves, panel lines, chamfered corners, recessed screens, holes in frames (e.g. the arch truss has real cut-out triangles, benches have slats with gaps, shop fronts have window frames and sills, treadmills have a recessed belt and side rails).
+- **Natural look:** nothing perfectly straight or identical: tiny random rotation/scale on repeated props (trees, rocks, fans, cones), slightly uneven rocks and tree trunks, soft wear on corners, small asymmetry. Organic things (trees, rocks, bushes, hills) are sculpted / displaced shapes, never spheres or cubes.
+- **Shading with vertex colours:** 2-3 tones per material (base, lighter edge highlight on bevels, darker ambient occlusion in corners and gaps), baked, so it reads well without real lights.
+- **Silhouette first:** every object must be recognizable as a black shape. Add the details that change the outline (rails, handles, overhangs, trims), skip tiny details that cost triangles but don't show.
+- **Still light:** keep triangle budgets (props ~200-2,000 tris, buildings ~3-8K), merge small parts into one mesh, reuse the shared kit. Detail comes from bevels, insets and colour, not from millions of triangles.
+- Before handing over .fbx files: render a quick preview of each model (3/4 view) and look at it. If it looks blocky, plain or "AI generated", improve it first. Put the previews in `SPEED ARC\Screenshots\models\`.
+
 ## Code
 - Source of truth is on disk: `Games\SpeedArc\src\` (this vault). Studio gets it by the sync step in `Games\SpeedArc\README.md`. Edit the files, then sync; never edit only in Studio.
 - Structure: `ReplicatedStorage/Shared/Config/*` (all numbers), `Shared/UIKit`, `Shared/Util/*`; `ServerScriptService/Server/Services/*Service`; `StarterPlayerScripts/Client/Controllers/*Controller`.
