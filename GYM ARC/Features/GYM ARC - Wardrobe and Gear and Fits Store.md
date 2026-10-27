@@ -63,3 +63,6 @@ Nothing here changed in the owner's 19 Oct Studio work. What a player can change
 - Every player wears the black tank top (`TankBlack`) instead of shirtless. Old saves with "Shirtless" get it too.
 - A bought / tried-on top still wins. NPCs (gym-goers, posing comp, trainers) keep their own look.
 - Code: `Config/Body.PlayerTop = "TankBlack"`, used in `Server/BodyService.PublishData` (players only).
+
+## Tank top colours (27 Oct, prompt 75, [[2026-10-27 GYM ARC Tank top colours]])
+- The clothing store's left mirror: MINE, white (free), 9 colours at 1,000 and gold at 1,500 coins; try on, buy once, wear. A tank top picked there is worn over your own Roblox shirt (MINE brings it back). `TankTopClient`, CosmeticService "TankTop", `Config/Body.TankShop`.

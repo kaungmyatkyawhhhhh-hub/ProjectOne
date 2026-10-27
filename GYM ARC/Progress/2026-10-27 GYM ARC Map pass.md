@@ -1,0 +1,36 @@
+---
+date: 2026-10-27
+tags: [gymarc, progress]
+status: done
+---
+# Map pass (prompt 74)
+
+Back to [[00 GYM ARC Home|GYM ARC Home]]. Prompt: [[2026-10-27 GYM ARC Prompt - 74 Map]].
+
+All done in Studio Edit (each step one Ctrl+Z step). Scans ran over the whole town and the gyms.
+
+## Holes
+- Rays every 2 studs over the whole playable area (also through roofs to the lowest floor): no hole anywhere a player can walk. The only empty spot is the cliff strip east of the Pro gym (x 160-200, z -98..-11): the valley-city view, walled in by the Pro gym, the tree line and the boundary, so nobody can get in.
+
+## Floating props (fixed)
+- Pendant lamps in the Powerlifting gym (1.0-1.6 studs under the ceiling / purlins) and the Pro gym makeover (0.4 short): 59 rods lengthened to the ceiling.
+- Corner / wall speakers in the Starter gym (4) and Pro gym (3): their brackets stretched to the wall or corner (they hung 1.5-2.4 studs off it).
+- Lifeguard tower ladders (2): the rungs had no side rails: rails added from the sand to the deck.
+- Beach night lamps (2, at x 5.65 and 33.75, z 238.35): the lamps had been moved, two frame bars each were left floating over the sea at z 257: moved onto their lanterns (4 bars each now).
+- A doubled string-light bulb on the plaza removed.
+
+## Overlapping parts (owner: "also fix every overlapping parts")
+- Coplanar faces of different colour / material that a player can see (z-fighting flicker): 522 pairs found, fixed by making the smaller part 0.03 studs thicker toward the visible side (its face in front, its back where it was), repeated until none were left (5 passes, 542 faces). Hidden ones (bottoms on a floor, faces buried in walls) left alone.
+- Note: a first attempt had a bug in the same-plane test (it compared a face with itself) and resized many parts that weren't flickering; it was undone with Ctrl+Z (checked: planter box 1.4, soil 0.1, curb 0.7 back to their sizes) before the real pass.
+- Exact duplicates: 7; the push-up handle on the parallettes is the invisible station on purpose (kept).
+
+## Blank walls (fixed)
+- Green building beside the Pro gym (side facing the gym-front street): painted mural, kettlebell + TRAIN. EAT. GROW. (white paint, like the alley mural), raised clear of the topiary.
+- Beige building at the west end (beside the Powerlifting gym): painted dumbbell + ONE MORE REP. (dark paint).
+- Posing stage backdrop's back (a plain grey frame facing the beach): graphite panel, gold POSING SHOW, STRIKE A POSE · WIN THE CROWD, STAGE ON THE OTHER SIDE (SurfaceGui on BackdropFrame).
+- Town leaderboard stand's back: the caption was half hidden by the middle post: now GYM ARC | LEADERBOARDS either side of it, plus TOP 10 (BIGGEST · STRONGEST · TALLEST) and MAKE THE BOARD (TRAIN, GROW, POSE AND WIN) panels between the posts.
+- Checked and fine: Pro gym back wall (mirror, mural, panels), Powerlifting record board and facade sign, Pump Shop, clothing store back, the gym alley (mural + windows, leads to the Strongman Yard).
+- New parts live in `Town.Murals` (two invisible sheets with SurfaceGuis).
+
+## Worth walking to: the edges
+- The town's invisible boundary walls had nothing visible in front of them: the streets ran straight into open hills and an invisible wall, the beach into the sea. Now every edge a player can reach shows where the town ends (`Town.EdgeMarkers`): a low wooden post-and-rope fence on grass and sand (185 posts), red and white striped barriers where a road meets the edge (22 boards), and a red / white buoy line in the sea (135 buoys). All anchored, no collision (the boundary still stops players).
