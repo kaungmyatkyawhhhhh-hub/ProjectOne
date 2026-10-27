@@ -136,7 +136,7 @@ def cut(target, *cutters, op="DIFFERENCE"):
     return target
 
 
-def box(name, size, loc, color, bev=0.06, seg=3, rot=(0, 0, 0), cutters=(), angle=35):
+def box(name, size, loc, color, bev=0.06, seg=2, rot=(0, 0, 0), cutters=(), angle=35):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc, rotation=rot)
     o = active()
     o.name = name
@@ -236,10 +236,16 @@ def tube(name, pts, radii, color, sides=8, caps=True, smooth=True, jitter=0.0, s
     bm = bmesh.new()
     rings = []
     pts = [Vector(p) for p in pts]
+    prev_a = None
     for i, p in enumerate(pts):
         d = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
-        ref = Vector((0, 0, 1)) if abs(d.z) < 0.9 else Vector((1, 0, 0))
-        a = d.cross(ref).normalized()
+        if prev_a is None:
+            ref = Vector((0, 0, 1)) if abs(d.z) < 0.9 else Vector((1, 0, 0))
+            a = d.cross(ref).normalized()
+        else:  # carry the previous ring's frame along the curve so the tube never twists
+            a = prev_a - d * prev_a.dot(d)
+            a = a.normalized() if a.length > 1e-6 else d.cross(Vector((1, 0, 0))).normalized()
+        prev_a = a
         b = d.cross(a).normalized()
         r = radii[i] if isinstance(radii, (list, tuple)) else radii
         ring = []
@@ -424,11 +430,11 @@ def bench(rnd):
     # cast-iron side frames: front leg, rear leg that rises into the back support, seat rail, armrest
     for x in (-2.62, 2.62):
         parts.append(box("legF", (0.26, 0.3, 1.5), (x, -0.62, 0.75), P["black"], bev=0.07, rot=(math.radians(-4), 0, 0)))
-        parts.append(tube("back", [(x, 0.55, 0.0), (x, 0.6, 1.4), (x, 0.72, 2.3), (x, 0.86, 3.1)], [0.15, 0.14, 0.13, 0.12], P["black"], sides=8))
-        parts.append(box("rail", (0.24, 1.55, 0.2), (x, -0.02, 1.45), P["black"], bev=0.06))
-        parts.append(tube("arm", [(x, -0.75, 2.05), (x, -0.4, 2.2), (x, 0.3, 2.25), (x, 0.66, 2.2)], 0.08, P["black"], sides=8))
-        parts.append(box("foot", (0.34, 0.44, 0.08), (x, -0.62, 0.04), P["rubber"], bev=0.03, seg=2))
-        parts.append(box("foot", (0.34, 0.44, 0.08), (x, 0.55, 0.04), P["rubber"], bev=0.03, seg=2))
+        parts.append(tube("back", [(x, 0.55, 0.0), (x, 0.6, 1.4), (x, 0.72, 2.3), (x, 0.86, 3.1)], [0.15, 0.14, 0.13, 0.12], P["black"], sides=6))
+        parts.append(box("rail", (0.24, 1.55, 0.2), (x, -0.02, 1.45), P["black"], bev=0.05, seg=1))
+        parts.append(tube("arm", [(x, -0.75, 2.05), (x, -0.4, 2.2), (x, 0.3, 2.25), (x, 0.66, 2.2)], 0.08, P["black"], sides=6))
+        parts.append(box("foot", (0.34, 0.44, 0.08), (x, -0.62, 0.04), P["rubber"], bev=0))
+        parts.append(box("foot", (0.34, 0.44, 0.08), (x, 0.55, 0.04), P["rubber"], bev=0))
     # seat: 4 slats with gaps, each a slightly different wood tone and a hair out of line
     tones = [P["wood"], P["wood_l"], P["wood_d"], P["wood"]]
     for i in range(4):
@@ -454,24 +460,20 @@ def bleacher_section(rnd):
         h = 1 + 1.3 * k
         y = -1.5 - depth * (k - 1)
         tone = (P["graphite"] if k % 2 == 0 else P["carbon"]) * (1 + rnd.uniform(-0.04, 0.04))
-        front = y + depth / 2
-        # riser with a panel groove along the front and vertical panel joints (cut in)
-        cutters = [cutter_box((width + 1, 0.16, 0.1), (0, front, h - 0.42))]
-        for gx in (-5, 0, 5):
-            cutters.append(cutter_box((0.08, 0.16, 1.3), (gx, front, h - 0.65)))
-        parts.append(box(f"step{k}", (width, depth, h), (0, y, h / 2), tone, bev=0.08, seg=2, cutters=cutters))
-        # rounded aluminium plank with a blue lip under its front edge
-        parts.append(box(f"seat{k}", (width - 0.6, 1.3, 0.42), (0, y + 0.6, h + 0.21), P["alu"], bev=0.13, seg=3))
-        parts.append(box(f"lip{k}", (width - 0.8, 0.12, 0.2), (0, y + 1.2, h + 0.06), P["blue"], bev=0.04, seg=2))
-        # two brackets so the plank sits on something
+        # riser, set back a little under a bull-nose cap that overhangs it (a real shadow groove)
+        parts.append(box(f"step{k}", (width, depth - 0.12, h - 0.3), (0, y - 0.06, (h - 0.3) / 2), tone, bev=0.06, seg=1))
+        parts.append(box(f"nose{k}", (width, depth, 0.3), (0, y, h - 0.15), tone * 1.15, bev=0.1, seg=2))
+        # rounded aluminium plank with a blue lip under its front edge, on two brackets
+        parts.append(box(f"seat{k}", (width - 0.6, 1.3, 0.42), (0, y + 0.6, h + 0.27), P["alu"], bev=0.13, seg=2))
+        parts.append(box(f"lip{k}", (width - 0.8, 0.12, 0.2), (0, y + 1.2, h + 0.12), P["blue"], bev=0.03, seg=1))
         for bx in (-6.5, 6.5):
-            parts.append(box("bracket", (0.22, 0.8, 0.12), (bx + rnd.uniform(-0.1, 0.1), y + 0.55, h + 0.02), P["steel"], bev=0.03, seg=1))
+            parts.append(box("bracket", (0.22, 0.8, 0.08), (bx + rnd.uniform(-0.1, 0.1), y + 0.55, h + 0.03), P["steel"], bev=0))
     # front rail: posts + top rail + mid rail, rounded tubes
     for x in (-9.7, -3.2, 3.2, 9.7):
-        parts.append(tube("post", [(x, 0.6, 0), (x, 0.6, 3.15)], 0.13, P["alu"], sides=8))
-        parts.append(cyl("postfoot", 0.24, 0.12, (x, 0.6, 0.06), P["steel"], verts=8, bev=0.03))
-    parts.append(tube("toprail", [(-10, 0.6, 3.2), (10, 0.6, 3.2)], 0.15, P["alu"], sides=10))
-    parts.append(tube("midrail", [(-10, 0.6, 1.8), (10, 0.6, 1.8)], 0.09, P["alu_d"], sides=8))
+        parts.append(tube("post", [(x, 0.6, 0), (x, 0.6, 3.15)], 0.13, P["alu"], sides=6))
+        parts.append(cyl("postfoot", 0.24, 0.12, (x, 0.6, 0.06), P["steel"], verts=6, bev=0))
+    parts.append(tube("toprail", [(-10, 0.6, 3.2), (10, 0.6, 3.2)], 0.15, P["alu"], sides=8))
+    parts.append(tube("midrail", [(-10, 0.6, 1.8), (10, 0.6, 1.8)], 0.09, P["alu_d"], sides=6))
     o = join(parts, "Bleacher_Section")
     fit(o, "Bleacher_Section", (-10, -18, 0), (10, 0.75, 9.3))
     shade(o, ao_dist=1.6, cavity=0.45, seed=2)
@@ -481,20 +483,20 @@ def bleacher_section(rnd):
 def cone(rnd):
     parts = [rounded_slab("base", 1.76, 1.76, 0.16, 0.3, 0, P["rubber"])]
     # recessed ring in the base where the cone sits
-    parts.append(cyl("seat", 0.72, 0.06, (0, 0, 0.19), P["graphite"], verts=16, bev=0.02))
-    body = cyl("body", 0.64, 1.56, (0, 0, 0.98), P["cone"], verts=16, r2=0.14, bev=0.03,
+    parts.append(cyl("seat", 0.72, 0.06, (0, 0, 0.19), P["graphite"], verts=14, bev=0))
+    body = cyl("body", 0.64, 1.56, (0, 0, 0.98), P["cone"], verts=14, r2=0.14, bev=0.03, seg=1,
                cutters=[cutter_cyl(0.085, 0.5, (0, 0, 1.76), verts=12)])  # hollow top
     parts.append(body)
     # two reflective bands, sitting just proud of the cone
     for z0, z1 in ((0.72, 0.92), (1.12, 1.27)):
         r0 = lerp(0.64, 0.14, (z0 - 0.2) / 1.56) + 0.015
         r1 = lerp(0.64, 0.14, (z1 - 0.2) / 1.56) + 0.015
-        parts.append(cyl("band", r0, z1 - z0, (0, 0, (z0 + z1) / 2), P["white"], verts=16, r2=r1, bev=0))
-    parts.append(cyl("lip", 0.17, 0.05, (0, 0, 1.765), P["cone"] * 0.8, verts=12, bev=0.015,
+        parts.append(cyl("band", r0, z1 - z0, (0, 0, (z0 + z1) / 2), P["white"], verts=14, r2=r1, bev=0))
+    parts.append(cyl("lip", 0.17, 0.05, (0, 0, 1.765), P["cone"] * 0.8, verts=12, bev=0,
                      cutters=[cutter_cyl(0.09, 0.3, (0, 0, 1.765), verts=12)]))
     o = join(parts, "Cone")
     fit(o, "Cone", (-0.89, -0.89, 0), (0.89, 0.89, 1.8))
-    shade(o, ao_dist=0.35, seed=3)
+    shade(o, ao_dist=0.35, ao=0.45, seed=3)
     return o
 
 
@@ -511,42 +513,50 @@ def crowd_fan(name, rnd):
     trim = P["white"] if look["shirt"] != "white" else P["blue"]
     parts = []
     # seated hips/shorts, a soft rounded torso (wider at the shoulders), a collar trim
-    parts.append(box("hips", (1.4, 0.95, 0.5), (0, 0, 0.25), P["shorts"], bev=0.18))
-    torso = box("torso", (1.42, 0.9, 1.55), (0, 0, 1.25), shirt, bev=0.32, seg=3, angle=30)
+    parts.append(box("hips", (1.4, 0.95, 0.5), (0, 0, 0.25), P["shorts"], bev=0.16, seg=1))
+    torso = box("torso", (1.42, 0.9, 1.55), (0, 0, 1.25), shirt, bev=0.3, seg=2, angle=30)
     for v in torso.data.vertices:  # shoulders a little wider than the waist
         t = max(0.0, min(1.0, (v.co.z + 0.775) / 1.55))
         v.co.x *= 0.92 + 0.12 * t
     parts.append(torso)
-    parts.append(cyl("collar", 0.36, 0.12, (0, 0, 2.03), trim, verts=12, bev=0.03))
-    parts.append(cyl("neck", 0.2, 0.25, (0, 0, 2.12), skin, verts=8, bev=0))
-    # head + hair cap (slightly back and up) so the silhouette isn't a ball on a box
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.6, location=(0, 0, 2.72))
+    parts.append(cyl("collar", 0.36, 0.1, (0, 0, 2.03), trim, verts=8, bev=0))
+    parts.append(cyl("neck", 0.2, 0.25, (0, 0, 2.12), skin, verts=6, bev=0))
+    # head + a hair shell with a clean hairline (cut with booleans), so it isn't a ball on a box
+    hc = Vector((0, 0, 2.74))
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=7, radius=0.62, location=hc)
     head = active()
-    head.scale = (1.0, 0.95, 1.06)
+    head.scale = (1.0, 1.0, 1.06)
+    bpy.ops.object.transform_apply(scale=True)
     head.data.shade_smooth()
     parts.append(paint(head, skin))
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.63, location=(0, -0.06, 2.84))
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=7, radius=0.665, location=hc + Vector((0, -0.03, 0.03)))
     cap = active()
-    cap.scale = (1.0, 0.98, 0.78)
+    cap.scale = (1.0, 1.0, 1.04)
+    bpy.ops.object.transform_apply(scale=True)
+    cut(cap, cutter_box((2, 1, 0.75), hc + Vector((0, 0.62, -0.18)))(),  # the face
+        cutter_box((2, 2, 1), hc + Vector((0, 0, -0.62)))())  # below the ears
     cap.data.shade_smooth()
     parts.append(paint(cap, hair))
     # arms (rounded tubes): pose per fan
     sh = 0.66
+    down = [(0.6, 0.0, 1.92), (0.76, 0.06, 1.4), (0.64, 0.34, 0.98)]  # resting on the knees
+
+    def side(pts, sx):
+        return [(x * sx, y, z) for x, y, z in pts]
     if look["pose"] == "cheer":
-        parts.append(tube("armL", [(-sh, 0.0, 1.9), (-0.74, 0.1, 1.35), (-0.6, 0.32, 0.95)], 0.17, shirt, sides=8))
-        parts.append(tube("armR", [(sh, 0.0, 1.9), (0.74, 0.1, 1.35), (0.6, 0.32, 0.95)], 0.17, shirt, sides=8))
-        parts.append(cyl("handL", 0.14, 0.2, (-0.58, 0.36, 0.88), skin, verts=8, bev=0.03))
-        parts.append(cyl("handR", 0.14, 0.2, (0.58, 0.36, 0.88), skin, verts=8, bev=0.03))
+        for sx in (-1, 1):
+            parts.append(tube("arm", side(down, sx), [0.18, 0.16, 0.15], shirt, sides=6))
+            parts.append(cyl("hand", 0.14, 0.18, (0.62 * sx, 0.4, 0.92), skin, verts=6, bev=0))
     elif look["pose"] == "wave":
-        parts.append(tube("armL", [(-sh, 0.0, 1.9), (-0.74, 0.05, 2.45), (-0.7, 0.05, 3.0)], 0.16, shirt, sides=8))
-        parts.append(cyl("handL", 0.14, 0.24, (-0.7, 0.05, 3.15), skin, verts=8, bev=0.03))
-        parts.append(tube("armR", [(sh, 0.0, 1.9), (0.74, 0.1, 1.35), (0.6, 0.32, 0.95)], 0.17, shirt, sides=8))
+        parts.append(tube("armL", [(-0.6, 0.0, 1.92), (-0.8, 0.05, 2.45), (-0.72, 0.08, 2.95)], [0.18, 0.16, 0.15], shirt, sides=6))
+        parts.append(cyl("handL", 0.15, 0.24, (-0.72, 0.08, 3.12), skin, verts=6, bev=0))
+        parts.append(tube("armR", side(down, 1), [0.18, 0.16, 0.15], shirt, sides=6))
     else:  # flag: right arm up holding a waving team flag
-        parts.append(tube("armL", [(-sh, 0.0, 1.9), (-0.74, 0.1, 1.35), (-0.6, 0.32, 0.95)], 0.17, shirt, sides=8))
-        parts.append(tube("armR", [(sh, 0.0, 1.9), (0.98, 0.0, 2.45), (1.18, 0.0, 2.95)], 0.16, shirt, sides=8))
-        parts.append(tube("pole", [(1.2, 0.0, 2.6), (1.22, 0.0, 3.7)], 0.04, P["alu"], sides=6))
+        parts.append(tube("armL", side(down, -1), [0.18, 0.16, 0.15], shirt, sides=6))
+        parts.append(tube("armR", [(0.6, 0.0, 1.92), (0.98, 0.0, 2.45), (1.18, 0.0, 2.95)], [0.18, 0.16, 0.15], shirt, sides=6))
+        parts.append(tube("pole", [(1.2, 0.0, 2.6), (1.22, 0.0, 3.7)], 0.04, P["alu"], sides=5))
         bm = bmesh.new()  # cloth: a subdivided strip with a soft wave
-        cols, rows_ = 6, 2
+        cols, rows_ = 4, 1
         verts = [[bm.verts.new((1.24 + 0.71 * i / cols, 0.07 * math.sin(i * 1.3), 3.1 + 0.55 * j / rows_ - 0.04 * i / cols)) for j in range(rows_ + 1)] for i in range(cols + 1)]
         for i in range(cols):
             for j in range(rows_):
@@ -556,7 +566,7 @@ def crowd_fan(name, rnd):
         sol.thickness = 0.05
         flag.data.shade_smooth()
         parts.append(paint(flag, P["blue"]))
-        parts.append(cyl("hand", 0.14, 0.24, (1.2, 0.0, 3.05), skin, verts=8, bev=0.03))
+        parts.append(cyl("hand", 0.15, 0.24, (1.2, 0.0, 3.05), skin, verts=6, bev=0))
     o = join(parts, name)
     fit(o, name, look["box"][0], look["box"][1])
     shade(o, ao_dist=0.5, highlight=0.25, seed=4)
@@ -568,8 +578,8 @@ def lamp_post(rnd):
         cyl("plinth", 0.6, 0.42, (0, 0, 0.21), P["graphite"], verts=8, bev=0.05),
         cyl("plinth2", 0.44, 0.32, (0, 0, 0.58), P["black"], verts=8, bev=0.05),
         cyl("pole", 0.25, 7.9, (0, 0, 4.68), P["black"], verts=12, r2=0.17, bev=0.02, seg=1),
-        cyl("collar", 0.31, 0.14, (0, 0, 1.25), P["steel"], verts=12, bev=0.03),
-        cyl("collar2", 0.24, 0.12, (0, 0, 8.45), P["steel"], verts=12, bev=0.03),
+        cyl("collar", 0.31, 0.14, (0, 0, 1.25), P["steel"], verts=12, bev=0.03, seg=1),
+        cyl("collar2", 0.24, 0.12, (0, 0, 8.45), P["steel"], verts=12, bev=0.03, seg=1),
     ]
     # curved arm reaching out to -Y
     arc = [(0, 0.0, 8.5), (0, -0.25, 8.95), (0, -0.7, 9.08), (0, -1.2, 9.05), (0, -1.6, 8.98)]
@@ -589,35 +599,35 @@ def lamp_post(rnd):
 def start_arch(rnd):
     parts = []
     for lx in (-15.0, 15.0):
-        parts.append(box("foot", (4, 4, 1), (lx, 0, 0.5), P["graphite"], bev=0.16, seg=2,
+        parts.append(box("foot", (4, 4, 1), (lx, 0, 0.5), P["graphite"], bev=0.16, seg=1,
                          cutters=[cutter_box((3.0, 4.2, 0.12), (lx, 0, 0.62)), cutter_box((4.2, 3.0, 0.12), (lx, 0, 0.62))]))
         parts.append(box("cap", (2.7, 2.7, 0.3), (lx, 0, 1.12), P["black"], bev=0.06))
         # open truss tower: 4 corner posts, rungs and zig-zag braces (real holes you can see through)
         c = 1.02
         corners = [(lx - c, -c), (lx + c, -c), (lx + c, c), (lx - c, c)]
         for (x, y) in corners:
-            parts.append(tube("post", [(x, y, 1.2), (x, y, 17.6)], 0.17, P["black"], sides=8))
+            parts.append(tube("post", [(x, y, 1.2), (x, y, 17.6)], 0.17, P["black"], sides=6))
         levels = [1.3 + i * 2.72 for i in range(7)]
         for zi, z in enumerate(levels):
             for i in range(4):
                 a, b = corners[i], corners[(i + 1) % 4]
-                parts.append(tube("rung", [(a[0], a[1], z), (b[0], b[1], z)], 0.08, P["steel"], sides=6, caps=False))
+                parts.append(tube("rung", [(a[0], a[1], z), (b[0], b[1], z)], 0.09, P["steel"], sides=4, caps=False, smooth=False))
                 if zi < len(levels) - 1:
                     z2 = levels[zi + 1]
                     if zi % 2 == 0:
-                        parts.append(tube("brace", [(a[0], a[1], z), (b[0], b[1], z2)], 0.07, P["steel"], sides=6, caps=False))
+                        parts.append(tube("brace", [(a[0], a[1], z), (b[0], b[1], z2)], 0.08, P["steel"], sides=4, caps=False, smooth=False))
                     else:
-                        parts.append(tube("brace", [(b[0], b[1], z), (a[0], a[1], z2)], 0.07, P["steel"], sides=6, caps=False))
+                        parts.append(tube("brace", [(b[0], b[1], z), (a[0], a[1], z2)], 0.08, P["steel"], sides=4, caps=False, smooth=False))
         # solid collars where the glowing bands go
         for z in (6, 12):
-            parts.append(box("collar", (2.5, 2.5, 0.6), (lx, 0, z), P["carbon"], bev=0.08, seg=2))
+            parts.append(box("collar", (2.5, 2.5, 0.6), (lx, 0, z), P["carbon"], bev=0.08, seg=1))
         # triangular gusset plates where the beam meets the tower, each with a round lightening hole
         s = -1 if lx > 0 else 1  # towards the middle of the arch
         xin = lx + s * 1.2
         for gy in (-1.02, 1.02):
             g = prism("gusset", [(xin, 17.55), (xin, 15.0), (xin + s * 2.5, 17.55)], 0.22, gy, P["black"])
             cut(g, cutter_cyl(0.36, 1.0, (xin + s * 0.8, gy, 16.7), rot=(math.radians(90), 0, 0))())
-            bevel(g, 0.04, 2, 30)
+            bevel(g, 0.04, 1, 30)
             weighted(g)
             parts.append(paint(g, P["black"]))
     # beam: rounded, with panel grooves along both faces and chamfered ends
@@ -637,18 +647,16 @@ def start_arch(rnd):
 
 
 def starting_block(rnd):
-    teeth = [cutter_box((0.4, 0.09, 0.09), (0, -0.9 + i * 0.3, 0.2)) for i in range(7)]
-    parts = [box("rail", (0.3, 2.2, 0.2), (0, 0, 0.1), P["alu"], bev=0.04, seg=2, cutters=teeth)]
+    teeth = [cutter_box((0.4, 0.1, 0.09), (0, -0.8 + i * 0.4, 0.2)) for i in range(5)]
+    parts = [box("rail", (0.3, 2.2, 0.2), (0, 0, 0.1), P["alu"], bev=0.04, seg=1, cutters=teeth)]
     for y in (-1.0, 1.0):
-        parts.append(box("crossbar", (1.6, 0.18, 0.1), (0, y, 0.05), P["steel"], bev=0.03, seg=2))
-        for x in (-0.75, 0.75):
-            parts.append(cyl("spike", 0.05, 0.08, (x, y, 0.01), P["alu_d"], verts=6, bev=0))
+        parts.append(box("crossbar", (1.6, 0.18, 0.1), (0, y, 0.05), P["steel"], bev=0.03, seg=1))
     for (px, py) in ((-0.48, -0.42), (0.48, 0.48)):
-        grooves = [cutter_box((0.9, 0.07, 0.07), (px, py, 0.32 + i * 0.12), rot=(math.radians(-35), 0, 0)) for i in range(3)]
-        parts.append(box("pad", (0.72, 0.16, 0.56), (px, py + 0.05, 0.43), P["rubber"], bev=0.05, rot=(math.radians(-35), 0, 0), cutters=grooves))
+        grooves = [cutter_box((0.9, 0.06, 0.06), (px, py + 0.01, 0.42 + i * 0.16), rot=(math.radians(-35), 0, 0)) for i in range(2)]
+        parts.append(box("pad", (0.72, 0.18, 0.7), (px, py + 0.05, 0.5), P["rubber"], bev=0.05, rot=(math.radians(-35), 0, 0), cutters=grooves))
         for sx in (-0.39, 0.39):
-            parts.append(box("cheek", (0.06, 0.5, 0.5), (px + sx, py, 0.32), P["alu"], bev=0.025, seg=2))
-        parts.append(box("clamp", (0.28, 0.36, 0.12), (px * 0.45, py, 0.22), P["steel"], bev=0.03, seg=2))
+            parts.append(box("cheek", (0.06, 0.55, 0.55), (px + sx, py, 0.36), P["alu"], bev=0.02, seg=1))
+        parts.append(box("clamp", (0.28, 0.36, 0.12), (px * 0.45, py, 0.22), P["steel"], bev=0.03, seg=1))
     o = join(parts, "Starting_Block")
     fit(o, "Starting_Block", (-0.95, -1.1, 0), (0.95, 1.1, 0.85))
     shade(o, ao_dist=0.25, seed=7)
@@ -667,17 +675,17 @@ def treadmill(rnd):
     for x in (-1.55, 1.55):
         parts.append(box("footrail", (0.36, 6.4, 0.07), (x, 0.2, 0.9), P["alu"], bev=0.03, seg=2))
     for (x, y) in ((-1.55, -3.2), (1.55, -3.2), (-1.55, 3.2), (1.55, 3.2)):
-        parts.append(cyl("foot", 0.18, 0.06, (x, y, 0.03), P["rubber"], verts=8, bev=0.02))
-    parts.append(cyl("roller", 0.2, 3.0, (0, 3.3, 0.66), P["steel"], verts=10, rot=(0, math.radians(90), 0), bev=0.03))
+        parts.append(cyl("foot", 0.18, 0.06, (x, y, 0.03), P["rubber"], verts=6, bev=0))
+    parts.append(cyl("roller", 0.2, 3.0, (0, 3.3, 0.66), P["steel"], verts=8, rot=(0, math.radians(90), 0), bev=0))
     # motor hood over the front of the belt, with a gold accent groove
     parts.append(box("hood", (3.4, 1.0, 0.5), (0, -3.05, 1.08), P["carbon"], bev=0.22, seg=3,
                      cutters=[cutter_box((3.6, 0.08, 0.06), (0, -2.55, 1.15))]))
     parts.append(box("hoodstripe", (3.3, 0.05, 0.05), (0, -2.56, 1.15), P["gold"], bev=0))
     # uprights + handrails: curved tubes
     for x in (-1.5, 1.5):
-        parts.append(tube("upright", [(x, -2.95, 1.0), (x * 1.02, -3.12, 2.6), (x, -3.25, 4.2)], 0.13, P["alu"], sides=10))
-        parts.append(tube("handrail", [(x, -3.2, 4.12), (x, -2.4, 4.1), (x, -1.4, 4.02), (x, -1.15, 3.85)], 0.1, P["alu"], sides=10))
-        parts.append(box("grip", (0.26, 0.7, 0.26), (x, -2.2, 4.1), P["rubber"], bev=0.1, seg=2))
+        parts.append(tube("upright", [(x, -2.95, 1.0), (x * 1.02, -3.12, 2.6), (x, -3.25, 4.2)], 0.13, P["alu"], sides=8))
+        parts.append(tube("handrail", [(x, -3.2, 4.12), (x, -2.4, 4.1), (x, -1.4, 4.02), (x, -1.15, 3.85)], 0.1, P["alu"], sides=8))
+        parts.append(box("grip", (0.26, 0.7, 0.26), (x, -2.2, 4.1), P["rubber"], bev=0.1, seg=1))
     # console: rounded, with a recessed screen and three buttons on the ledge
     console = box("console", (3.3, 0.6, 1.25), (0, -3.3, 4.62), P["carbon"], bev=0.18, seg=3,
                   cutters=[cutter_box((2.2, 0.2, 0.74), (0, -3.0, 4.75))])
@@ -685,7 +693,7 @@ def treadmill(rnd):
     parts.append(box("screen", (2.18, 0.04, 0.72), (0, -3.07, 4.75), P["screen"], bev=0))
     parts.append(box("ledge", (2.6, 0.32, 0.1), (0, -2.92, 4.18), P["graphite"], bev=0.04, seg=2))
     for i, c in enumerate(("gold", "blue", "bright")):
-        parts.append(cyl("button", 0.07, 0.06, (-0.4 + i * 0.4, -2.88, 4.25), P[c], verts=8, bev=0.015))
+        parts.append(cyl("button", 0.07, 0.06, (-0.4 + i * 0.4, -2.88, 4.25), P[c], verts=6, bev=0))
     o = join(parts, "Treadmill")
     fit(o, "Treadmill", (-1.8, -3.63, 0), (1.8, 3.5, 5.3))
     shade(o, ao_dist=0.7, seed=8)
