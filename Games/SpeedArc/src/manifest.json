@@ -1,0 +1,247 @@
+[
+ {
+  "file": "ReplicatedStorage/Shared/Config/GameConfig.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "GameConfig"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Config/Lighting.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Lighting"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Config/Palette.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Palette"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Config/Race.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Race"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Config/Sounds.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Sounds"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Config/Stations.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Stations"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/UIKit.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "UIKit"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Util/Format.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Util",
+   "Format"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Util/Formulas.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Util",
+   "Formulas"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Util/Net.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Util",
+   "Net"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Util/TrackPath.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Util",
+   "TrackPath"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Main.server.lua",
+  "class": "Script",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Main"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Services/DataTemplate.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "DataTemplate"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Services/PlayerData.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "PlayerData"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Services/RaceService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "RaceService"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Services/TrainingService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "TrainingService"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/CameraController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "CameraController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/HudController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "HudController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/LightingController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "LightingController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/RaceController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "RaceController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/SoundController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "SoundController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/TrainingController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "TrainingController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/WorldLifeController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "WorldLifeController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Main.client.lua",
+  "class": "LocalScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Main"
+  ]
+ }
+]
