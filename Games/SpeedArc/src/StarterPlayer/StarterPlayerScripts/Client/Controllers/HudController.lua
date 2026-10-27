@@ -42,8 +42,8 @@ local function buildCoins()
 	})
 	refs.coinsScale = UIKit.make("UIScale", { Parent = pill })
 	refs.coins = pill
-	-- rank badge (league + rank) next to the coins
-	local rank = UIKit.pill({ Name = "Rank", Size = UDim2.fromOffset(128, 44), Position = UDim2.fromOffset(192, 10), Parent = canvas })
+	-- rank badge (league + rank) under the coins (next to them it hid behind the speed plate on phones)
+	local rank = UIKit.pill({ Name = "Rank", Size = UDim2.fromOffset(150, 44), Position = UDim2.fromOffset(14, 60), Parent = canvas })
 	local dot = UIKit.make("Frame", { Name = "Dot", BackgroundColor3 = P.White, Position = UDim2.fromOffset(8, 8), Size = UDim2.fromOffset(28, 28), Parent = rank })
 	UIKit.corner(dot, UDim.new(0.5, 0))
 	UIKit.stroke(dot, P.White, 2, 0.3)
