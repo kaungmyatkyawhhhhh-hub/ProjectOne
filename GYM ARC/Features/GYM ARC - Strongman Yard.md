@@ -102,3 +102,6 @@ Owner: "have the light on but a bit dimmed only, and at night the real lights sh
 
 ## Tire stacks (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
 - The 3 decor tire stacks by the oil drums (12 plain cylinder tires, merged into `Remodel_mtown284` by the remodel) are now the Blender tread tire (`ServerStorage.ModelMeshes.StrongmanTire`) at 4.4 x 1.1 x 4.4, each turned a little: `StrongmanYard.TireStacks`. The old mesh is in `ServerStorage.TiresBackup_27Oct`.
+
+## Yard regulars: 3 strongmen in Alter skins (27 Oct; owner: "the npcs shirt look ripped through and skin is showing" / "the npcs in strongman yard should have alter 2+ skins and also there should be atleast 3 npcs in there")
+- The yard's regulars (Gym = "Strongman") are shirtless (a classic shirt image tore open on the giant body) and wear Alter skins: Bruno Granite (8), Magnus Iron (12), and a new regular **Gunnar** (100", Bronze, 11), a copy of a starter regular with his own hair and face. `GymGoerService` YARD_ALTERS / GYM_GIANTS.
