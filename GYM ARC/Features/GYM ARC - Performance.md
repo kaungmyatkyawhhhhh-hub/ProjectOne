@@ -144,8 +144,21 @@ Studio play test on the owner's laptop, graphics quality Level 2, window 871 x 5
 The 7 plate templates (ReplicatedStorage.GymAssets.Plates) had both number faces on; MachineService only ever turned the outermost plate's on and never the others off. Templates now off (the outermost plate's FaceRight still turns on, as designed); decor plates (plate trees, racks, loose) keep a number only on the face at the end of each stack (229 kept, 247 off).
 
 ## Step 2 in progress: remodel into meshes (owner: "remodel everything listed")
-Tools in `Downloads\gym_arc_modelsemodel`: `export.lua` (Studio: marks every mergeable part with Merge / MergePivot and posts its shapes), `receiver.py`, `build.py` (Blender: each unit's parts become one mesh per material, the parts' exact colours as vertex colours, identical copies share one mesh), `out\*.fbx`.
+Tools in `Downloads\gym_arc_models
+emodel`: `export.lua` (Studio: marks every mergeable part with Merge / MergePivot and posts its shapes), `receiver.py`, `build.py` (Blender: each unit's parts become one mesh per material, the parts' exact colours as vertex colours, identical copies share one mesh), `out\*.fbx`.
 - props.fbx: 269 meshes for palms, oaks, benches, street lamps, decor plates, squat racks (5,722 parts). The racks' working parts (bar, posts, prompt...) stay.
 - town.fbx: 288 meshes for buildings, street, plaza, parks, skate park, greenery, Pump Shop interior, Strongman Yard (5,074 parts; only non-colliding, non-glowing, non-sign pieces; textured materials only on pieces under 8 studs, so walls keep their texture).
 - plates.fbx: 21 white meshes (Rim / Hub / Hole per template) so the gold / red recolour still works.
 - After the owner imports the three files: `require(game.ServerStorage._Builders.RemodelInstall).Run()` places the meshes and moves the replaced parts to `ServerStorage.RemodelBackup_27Oct` (`.Undo()` puts them back). Expected: about 10,850 parts -> about 3,000 meshes.
+
+## Step 2 done: remodel installed (27 Oct)
+The owner imported props / town / plates (578 meshes, now templates in `ServerStorage.RemodelMeshes`); `RemodelInstall.Run()` placed **1,391 meshes in place of 10,852 parts**: world 27,239 -> 17,235 parts. Replaced parts: `ServerStorage.RemodelBackup_27Oct` (`RemodelInstall.Undo()` puts them back). Before / after screenshots look the same (`remodel_town_before/after.jpg`); Pro Gym plates still turn gold, only the outer plate shows its number (`remodel_pro_rack_plates.jpg`). Known: standing inside a merged object (e.g. a palm) shows nothing from inside (mesh faces are one-sided); not visible in normal play.
+
+| Spot (quality 2, same laptop) | Before FPS avg / worst | After FPS avg / worst | Parts on device |
+|---|---|---|---|
+| Starter Gym | 15 / 12 | **43 / 25** | 32,176 -> 20,704 |
+| Plaza | 15 / 14 | **51 / 29** | 32,318 -> 20,850 |
+| Pro Gym (city) | 15 / 12 | **53 / 27** | 31,869 -> 20,569 |
+| Powerlifting Gym | 15 / 14 | **45 / 24** | 32,142 -> 20,758 |
+
+SurfaceGuis on: ~1,500 -> ~590 (plate labels). Caveat: "after" was measured in a fresh Studio session (the owner restarted Studio), which also helps a little; render CPU 27-32 ms -> ~16 ms. Still to do: streaming radius, lights (282 on at midday), the Gui memory (~1.4 GB), Graphics Auto/Low/High.

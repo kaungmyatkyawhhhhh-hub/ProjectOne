@@ -56,5 +56,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]
 ## Fixes
 - Powerlifting / yard doors: slats and the lock sign no longer stay visible once open (streaming). Tire flip: the legs walk when the lifter moves.
 
+## Optimization (prompt 67)
+- Measured (15 FPS everywhere on the laptop at quality 2), soak 35 min: no leak. Plate labels fixed; 10,852 parts remodelled into 1,391 meshes: 43-53 FPS. See [[GYM ARC - Performance]].
+
 ## Owner rule
 - From 27 Oct no code export / commits to ClaudeOne: Studio is the only copy, notes only in this vault.
