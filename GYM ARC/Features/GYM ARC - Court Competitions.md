@@ -49,3 +49,10 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 ## Smoother moves (27 Oct, owner: "the basketball animations feel very laggy")
 - Every joint now eases toward each move's pose and back into the walk / idle animation (no more snapping between dribble, gather, shot, block...). Your own moves start the instant you tap (the server only confirms): the gather on press, the jump shot on release, the dunk, the block jump and the steal swipe. The standing crouch has hysteresis (it no longer flickers on and off as you slow down). The server checks the game 20 times a second (was 7).
 - The "Internal server error." lines seen once in Output: no script prints that text, and cloning the rival on the server didn't produce it; it didn't come back in later runs. Most likely a Roblox web request hiccup in Studio. The "ContentId 203785492 ... asset type" warning isn't from any script, model or avatar in the place (likely the TopbarPlus library).
+
+## Owner fixes (27 Oct, later)
+- No guard pose: defending is the normal walk / idle ("remove the hands spreading out to guard animation").
+- Your trainer is fully hidden in a game: body, evolution tag (StageTag), glow, light and aura (`TrainerFollowClient` hideOwnTrainer). Checked in play.
+- A swoosh on every make: CourtSwoosh (PSE Rising Whoosh Swooshing In 3, short and pitched up), loud for the two players, 3D for watchers, on top of the net swish.
+- Backboards are SmoothPlastic (were Glass); `CourtInstall` too. The 1V1 sign's face turned 180 degrees to face the court (Studio).
+- "Ball missing" seen in a test was the ball dribbling in front of the player behind their body from the restart camera, not a bug.
