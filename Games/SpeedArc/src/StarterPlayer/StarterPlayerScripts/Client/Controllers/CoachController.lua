@@ -252,6 +252,24 @@ local function clearPage()
 	end
 end
 
+function CoachUI.rollNow()
+	if rolling then
+		return
+	end
+	rolling = true
+	local ok, result = ctx.Net.call("RollCoach")
+	if ok then
+		win.hide(true)
+		CoachUI.reveal(result)
+		win.show()
+		setTab("MY COACHES")
+	elseif result == "coins" then
+		ctx.Sound.play("Denied")
+		ctx.Hud.toast("Not enough coins to roll yet", "Denied")
+	end
+	rolling = false
+end
+
 local function rollPage()
 	clearPage()
 	-- left: roll button + pity
@@ -263,21 +281,7 @@ local function rollPage()
 	local ci = UIKit.coinIcon(22, btn.Face)
 	ci.Position = UDim2.new(1, -36, 0.5, -11)
 	btn.Activated:Connect(function()
-		if rolling then
-			return
-		end
-		rolling = true
-		local ok, result = ctx.Net.call("RollCoach")
-		if ok then
-			win.hide(true)
-			CoachUI.reveal(result)
-			win.show()
-			setTab("MY COACHES")
-		elseif result == "coins" then
-			ctx.Sound.play("Denied")
-			ctx.Hud.toast("Not enough coins to roll yet", "Denied")
-		end
-		rolling = false
+		CoachUI.rollNow()
 	end)
 	local y = 132
 	for _, p in Coaches.Pity do

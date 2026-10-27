@@ -84,6 +84,28 @@ function Menu.start(c)
 	ctx = c
 	buildMenu()
 
+	-- Studio test switch (the Device Simulator can miss taps): Workspace attribute
+	-- TestOpenWindow = "Locker:SHOES" / "Locker:TRAILS" / "Coaches:ROLL" / "Coaches:MY COACHES" / "close"
+	if RunService:IsStudio() then
+		workspace:GetAttributeChangedSignal("TestOpenWindow"):Connect(function()
+			local v = workspace:GetAttribute("TestOpenWindow")
+			if type(v) ~= "string" or v == "" then
+				return
+			end
+			local which, tabName = string.match(v, "^(%w+):?(.*)$")
+			if which == "Locker" then
+				ctx.Locker.open(tabName ~= "" and tabName or "SHOES")
+			elseif which == "Coaches" and tabName == "ROLLNOW" then
+				ctx.Coaches.open("ROLL")
+				task.spawn(ctx.Coaches.rollNow)
+			elseif which == "Coaches" then
+				ctx.Coaches.open(tabName ~= "" and tabName or "ROLL")
+			elseif which == "close" then
+				UIKit.closeWindows()
+			end
+		end)
+	end
+
 	ProximityPromptService.PromptTriggered:Connect(function(prompt)
 		local open = prompt:GetAttribute("Opens")
 		if open == "ShoeShop" then
