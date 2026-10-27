@@ -16,7 +16,6 @@ local CoachService = {}
 
 local IS_STUDIO = RunService:IsStudio()
 local rng = Random.new()
-local Reveal = Net.get("CoachReveal")
 
 local function rarityIndex(r)
 	return table.find(Coaches.Rarities, r) or 1

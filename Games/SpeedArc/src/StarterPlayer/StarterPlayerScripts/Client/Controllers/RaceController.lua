@@ -326,6 +326,9 @@ local function boost()
 	updatePips()
 	ctx.Sound.play("Boost")
 	fovKickUntil = os.clock() + Race.Boost.Seconds
+	if ctx.SpeedFeel then
+		ctx.SpeedFeel.boost()
+	end
 	ctx.Net.get("RaceBoost"):FireServer()
 end
 
@@ -405,7 +408,9 @@ local function render()
 		camCF = if camCF then camCF:Lerp(want, 0.25) else want
 		camera.CameraType = Enum.CameraType.Scriptable
 		camera.CFrame = camCF
-		local fov = if os.clock() < fovKickUntil then 84 else 72
+		local paceNorm = math.clamp(((player:GetAttribute("Speed") or 0) / 80) ^ 0.3, 0.6, 1.5) -- League 1 middle = 80
+		local fov = 70 + 10 * paceNorm + (if os.clock() < fovKickUntil then 5 else 0)
+		fov = math.min(fov, 90)
 		camFov += (fov - camFov) * 0.15
 		camera.FieldOfView = camFov
 	end

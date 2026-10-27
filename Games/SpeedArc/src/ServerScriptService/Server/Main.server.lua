@@ -9,6 +9,8 @@ local Services = script.Parent.Services
 local PlayerData = require(Services.PlayerData)
 local TrainingService = require(Services.TrainingService)
 local RaceService = require(Services.RaceService)
+local LockerService = require(Services.LockerService)
+local CoachService = require(Services.CoachService)
 
 Net.get("Toast") -- creates the remotes before any client asks for them
 
@@ -43,3 +45,5 @@ end
 PlayerData.start()
 TrainingService.start()
 RaceService.start()
+LockerService.start()
+CoachService.start()

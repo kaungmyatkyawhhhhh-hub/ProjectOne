@@ -321,5 +321,4 @@ function LockerService.start()
 	end)
 end
 
-LockerService.Toast = Toast
 return LockerService

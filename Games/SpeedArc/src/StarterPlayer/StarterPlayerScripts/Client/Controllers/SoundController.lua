@@ -62,6 +62,9 @@ function SoundController.start(ctx)
 	UIKit.setClickHook(function(name)
 		SoundController.play(name or "Click")
 	end)
+	UIKit.windowSound = function(kind)
+		SoundController.play(if kind == "open" then "WindowOpen" else "WindowClose")
+	end
 end
 
 -- opts: Pitch (multiplier), Volume (multiplier)

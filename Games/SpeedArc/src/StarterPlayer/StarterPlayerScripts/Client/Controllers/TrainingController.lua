@@ -109,7 +109,7 @@ local function tap()
 	ctx.Net.get("TrainTap"):FireServer()
 
 	local combo, frac = currentCombo(now)
-	local gain = station.Gain * combo
+	local gain = station.Gain * combo * (player:GetAttribute("TrainMult") or 1)
 	ctx.Hud.popup("+" .. Format.short(math.max(1, math.floor(gain + 0.5))), if combo >= 1.25 then Palette.Gold else nil)
 	ctx.Hud.bounce()
 	ctx.Sound.play("Tap", { Pitch = 1 + 0.16 * (combo - 1) })
@@ -161,8 +161,23 @@ local function onStep()
 	end
 end
 
+-- the treadmill canopy fades while you train under it (it covered the top of the view)
+local function setCanopyFade(on)
+	local hub = workspace:FindFirstChild("Hub")
+	local tread = hub and hub:FindFirstChild("Training") and hub.Training:FindFirstChild("Treadmill")
+	if not tread then
+		return
+	end
+	for _, p in tread:GetChildren() do
+		if p:IsA("BasePart") and string.find(p.Name, "^Canopy") then
+			p.LocalTransparencyModifier = if on then 0.85 else 0
+		end
+	end
+end
+
 local function enter(stationId)
 	local s = Formulas.station(stationId)
+	setCanopyFade(stationId == "Treadmill")
 	station = s
 	enteredAt = os.clock()
 	leaving = false
@@ -184,6 +199,7 @@ local function exit()
 		return
 	end
 	station = nil
+	setCanopyFade(false)
 	ctx.Hud.setTraining(nil)
 	ctx.Hud.setHint(false)
 	stopAnim()

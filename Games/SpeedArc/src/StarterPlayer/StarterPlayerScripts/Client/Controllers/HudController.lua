@@ -53,6 +53,18 @@ local function buildSpeed()
 		Parent = canvas,
 	})
 	refs.speedBlock = block
+	-- dark plate behind the number: busy world text behind (stand screens) never mixes into it
+	local plate = UIKit.make("Frame", {
+		Name = "Plate",
+		BackgroundColor3 = P.SpeedBlack,
+		BackgroundTransparency = 0.35,
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 4),
+		Size = UDim2.new(1, 0, 0, 92),
+		Parent = block,
+	})
+	UIKit.corner(plate, 16)
+	UIKit.gradient(plate, P.Carbon, P.SpeedBlack, 90)
 
 	local row = UIKit.make("Frame", { Name = "Row", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 54), Parent = block })
 	UIKit.make("UIListLayout", {
@@ -425,6 +437,9 @@ end
 function Hud.setRaceMode(on)
 	refs.speedBlock.Visible = not on
 	refs.raceHolder.Visible = not on
+	if refs.menu then
+		refs.menu.Visible = not on
+	end
 	if on then
 		refs.training.Visible = false
 		refs.hint.Visible = false

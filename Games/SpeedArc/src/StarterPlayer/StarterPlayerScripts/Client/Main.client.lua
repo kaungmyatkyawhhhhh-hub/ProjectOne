@@ -11,6 +11,11 @@ local ORDER = {
 	"TrainingController",
 	"RaceController",
 	"WorldLifeController",
+	"LockerController",
+	"CoachController",
+	"MenuController",
+	"CosmeticsController",
+	"SpeedFeelController",
 }
 
 local ctx = { Net = Net }
