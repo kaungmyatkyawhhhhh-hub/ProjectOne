@@ -14,3 +14,12 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. Prompt: [[2026-10-28 GYM ARC Prompt - 
 - **Pity stages:** `Trainers.PityStages` = Legendary 50, Mythic 100, Secret 150; saved `trainers.pityStage`. A stage ends when you get its rarity or better (luck or pity), then the next stage starts at 0; after Secret, Legendary again. The pill reads "MYTHIC GUARANTEED IN 87 ROLLS". Old saves: stage 1 with their count kept (anyone at 50+ gets a Legendary on the next roll).
 - Tested: pity sequence 50 / 150 / 300 rolls, lucky Legendary moves on, old save pity 70; slots 2 -> 3 -> 4 with the passes; followers 1 / 3 / 4 / 2 from the setting (FreshPlayer).
 - The owner sent the 4th-slot pass id: `ExtraTrainer2` = 2058298970 (on sale: the + in the Trainers panel after the 3rd slot, and the Store's pass list). Each slot pass adds one slot, so buying them in any order works.
+
+## Owner's to-do list closed (28 Oct)
+Owner, 28 Oct: "the notes are overlapping, i have already done all that". Done by the owner, don't list them again:
+- Basketball court model + court VFX textures imported.
+- Strongman yard props without the pole (`YardProps_NoPole`) imported.
+- Alter variant colour maps + product ids.
+- LEVEL board: decided (it stays in the world: 2 panels, next to STRONGEST LIFTER which reads its scores).
+- PR screen flash: decided.
+- Extra Trainer price (now the 3rd slot): decided.

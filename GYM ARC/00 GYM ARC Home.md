@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 28 Oct: the owner's to-do list (court + VFX import, yard props, variant maps / products, LEVEL board, PR flash, Extra Trainer price) is all done; still open: prompt 66 parts 1-3 (codes, Hall of Fame, profiles).
 - 28 Oct: prompt 79: leaderboards reset (LB2_) and top 25 scrollable; 2 trainer slots + 2 slot passes (4th = 2058298970); Settings "Trainers Near You" 1-4; pity stages Legendary 50 > Mythic 100 > Secret 150. See [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]].
 - 27 Oct: prompt 78, FPS lag: render-bound; far NPCs hidden, machine loop and prompt sweep cut, shadows / far muscles cheaper, signs capped. See [[2026-10-27 GYM ARC FPS lag pass]].
 - 27 Oct: prompt 77: variants only after their alter (Store SKINS tab off), no coin alter looks, premium fonts on alter buttons, skating in the alley, bigger INVITE, taller Inventory, held items are real tub / shaker models. See [[2026-10-27 GYM ARC Variants after unlock, fonts, alley, held items]].
