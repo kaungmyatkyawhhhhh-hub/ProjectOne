@@ -93,3 +93,6 @@ Owner: "always turn on the light in the strongman yard, even when it's daytime".
 
 ## Giant regulars (27 Oct)
 Owner: "in the powerlifting gym make almost every NPC like Dante (wide shoulders, huge, tall), and in the strongman yard even bigger". GymGoerService `GYM_GIANTS`: Tank 7'10", Hank 8'0" (Powerlifting), Bruno 8'8", Magnus 9'0" (yard) get Dante's mass monster body and V-taper, keeping their own clothes and hair; Vera stays a normal regular ("almost every"). Their feet are put back on the floor after the body grows (an anchored NPC isn't stood up by physics: without it the yard giants fell out of the world). Tested: all 4 keep their bodies, walk and train (Hank PLPress, Bruno LogPress1 + AtlasStone2, Magnus FarmersWalk + YokeCarry). Note: NPCs only move while a player is near (parked otherwise). Shot `yard_giant_magnus.jpg`.
+
+## Music (27 Oct)
+The yard has its own playlist now (heavy sports rock from APM): see [[GYM ARC - Music and Sounds]].

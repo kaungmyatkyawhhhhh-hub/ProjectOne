@@ -209,3 +209,13 @@ Claude's picks from Roblox's licensed library (PSE), swap any you don't like.
 - `ChainRattle` 9113763589: yoke / farmer's walk steps.
 - `TruckCreak` 9113969124: the truck rolls.
 - `RecordCheer` (reused): crowd cheer during the showdown.
+
+## Strongman Yard music (27 Oct)
+Owner: "make strongman yard music good". The yard had no music of its own (it played the town's list). New area `Strongman` (`Config/Sounds.AreaMusic`, SettingsClient picks it inside the yard: x -176..-45.5, z -163..-96.6). Claude's picks from Roblox's licensed library (APM), heavy sports rock, in this order (swap freely):
+- 9046270168 **110 Percent E** (Sonoton, FIGHT TO VICTORY: "hard-hitting epic sports rock, modern gladiators")
+- 1840980493 **Iron Warriors (A)**
+- 9044604772 **Face Full Of Courage** underscore (Pedal To The Metal 3: hard rock / metal, no lead guitar)
+- 1841896301 **Thunderdome (b)**
+- 9045550245 **Bottleneck** underscore (Crazy Train: gritty garage rock)
+- 1844502076 **Rage Machine**
+All checked to load (99-138 s each). Tested: in the yard 110 Percent plays, the Powerlifting gym switches back to its own list, and back again.
