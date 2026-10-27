@@ -45,3 +45,8 @@ ENTER opens ARE YOU SURE? (what starts over, what you keep), GO BACK / red YES, 
 
 ## Soul sounds (28 Oct, prompt 84)
 The soul's flight has its own 3D sounds (Config/Sounds HofSoul*: pull, breath, shimmer, rise, wind, fly-by, dive) and the burst bangs. List: [[GYM ARC - Music and Sounds]].
+
+## Calm reveal (28 Oct, prompt 85)
+[[2026-10-28 GYM ARC Prompt - 85 Ceremony reveal look]] (owner: "make the circus spinny looking thingy after the soul goes in hall of fame look better"). The reveal after the soul lands no longer has the turning sunburst (12 rays), the 2.4x slam, two shockwaves or the sparkle explosion. Now: a soft dark band behind the words, the kicker THE HIGHEST HONOUR, "★N HALL OF FAME" in gold with a shine passing over it now and then, a thin gold rule, the perks, your name; it fades in and settles (CanvasGroup, 1.15 -> 1), one soft gold light breathing behind it, one soft ring, a few sparkles drifting up (18; Legend 30). LEGEND (10+ stars) fades in above it. The unused ray frames are gone from the script.
+![[GYM ARC/Screenshots/2026-10-28 Loading screen and codes/6 Ceremony reveal before (spinning rays).jpg]]
+![[GYM ARC/Screenshots/2026-10-28 Loading screen and codes/7 Ceremony reveal after.jpg]]

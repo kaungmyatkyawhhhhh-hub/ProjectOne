@@ -83,3 +83,6 @@ See [[GYM ARC - Hall of Fame]]. Tested on FreshPlayer (GS 6, Alter 15, muscles 4
 
 ## Soul sounds (prompt 84)
 - HallOfFameClient soulFlight: 7 new 3D sounds on the soul (Config/Sounds HofSoul*, listed in [[GYM ARC - Music and Sounds]]) at the pull, the rise, the flight, a mid-flight swoop and the dive; the burst plays HofFirework. myCeremony's two "Whoosh" (robe swish) calls removed. Tested: TestCutscene 1, every sound plays on time, no errors.
+
+## Calm ceremony reveal (prompt 85) - see [[GYM ARC - Hall of Fame]]
+- HallOfFameClient: the reveal's spinning rays, big slam, double shockwave and sparkle explosion replaced by a calm layout (band, kicker, gold title + shine, rule, perks, name, breathing light, one ring, drifting sparkles). Tested with TestCutscene 1: no errors.
