@@ -91,6 +91,29 @@ local function makeNpc(i)
 			p.CastShadow = false
 		end
 	end
+	-- name tag (original characters, never real people)
+	local head = model:FindFirstChild("Head")
+	if head then
+		local tag = Instance.new("BillboardGui")
+		tag.Name = "NameTag"
+		tag.Size = UDim2.fromOffset(120, 26)
+		tag.StudsOffset = Vector3.new(0, 2.2, 0)
+		tag.MaxDistance = 70
+		tag.AlwaysOnTop = false
+		local label = Instance.new("TextLabel")
+		label.BackgroundTransparency = 1
+		label.Size = UDim2.fromScale(1, 1)
+		label.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
+		label.Text = string.upper(Race.NpcNames[i])
+		label.TextScaled = true
+		label.TextColor3 = Palette.White
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Palette.SpeedBlack
+		stroke.Thickness = 2
+		stroke.Parent = label
+		label.Parent = tag
+		tag.Parent = head
+	end
 	model.PrimaryPart = model:FindFirstChild("HumanoidRootPart")
 	model.PrimaryPart.Anchored = true
 	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic

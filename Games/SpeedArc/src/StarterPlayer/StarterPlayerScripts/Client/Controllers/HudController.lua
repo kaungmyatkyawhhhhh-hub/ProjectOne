@@ -182,14 +182,18 @@ local function buildToast()
 		Parent = canvas,
 	})
 	toast.Visible = false
+	toast.AutomaticSize = Enum.AutomaticSize.X
+	toast.Size = UDim2.fromOffset(0, 40)
+	UIKit.make("UIPadding", { PaddingLeft = UDim.new(0, 22), PaddingRight = UDim.new(0, 18), Parent = toast })
+	toast.Accent.Position = UDim2.fromOffset(-16, 8) -- padding moves children; keep the accent on the edge
 	refs.toast = toast
 	refs.toastText = UIKit.text({
 		Font = F.BodyBold,
 		TextSize = 17,
-		Size = UDim2.new(1, -28, 1, 0),
-		Position = UDim2.fromOffset(18, 0),
+		Size = UDim2.fromOffset(200, 40),
 		Parent = toast,
 	})
+	refs.toastText.AutomaticSize = Enum.AutomaticSize.X
 end
 
 local function buildPopups()
@@ -373,8 +377,6 @@ function Hud.toast(text, kind)
 		while #toastQueue > 0 do
 			local item = table.remove(toastQueue, 1)
 			refs.toastText.Text = item.text
-			local bounds = refs.toastText.TextBounds.X
-			refs.toast.Size = UDim2.fromOffset(math.max(240, bounds / math.max(0.01, canvas.UIScale.Scale) + 50), 40)
 			refs.toast.Accent.BackgroundColor3 = if item.kind == "Denied"
 				then P.DangerRed
 				elseif item.kind == "Unlock" or item.kind == "Gold" then P.Gold

@@ -14,10 +14,12 @@ return {
 	NpcNames = { "Dash", "Milo", "Zara", "Kofi", "Rina", "Theo", "Ivy", "Bo" },
 
 	-- Pace (GDD 6.4): basePace x (1 + 0.6 x clamp(log2(speed / leagueMid), -1, 1.5))
-	BasePace = 27, -- studs a second at the league middle
-	LeagueMid = { 50, 3000, 150000, 8000000, 400000000 },
+	-- Tuned in prompt 1: at the League 1 middle (80 MPH) a Sprint takes ~17 s and a Lap Race ~33 s.
+	-- Low clamp is -0.6 (GDD says -1) so brand-new runners aren't painfully slow in their first race.
+	BasePace = 24, -- studs a second at the league middle
+	LeagueMid = { 80, 3000, 150000, 8000000, 400000000 },
 	PaceFactor = 0.6,
-	PaceClampLow = -1,
+	PaceClampLow = -0.6,
 	PaceClampHigh = 1.5,
 
 	-- Boost: tap = +25% pace for 0.8 s, 3 charges, 1 charge back every 2.5 s
@@ -37,8 +39,8 @@ return {
 	FirstRaceOfDayBonus = 0.5,
 
 	Types = {
-		Lap = { Name = "LAP RACE", Laps = 2 }, -- about 30 s at the league middle
-		Sprint = { Name = "SPRINT", Laps = 1 }, -- about 15 s
+		Lap = { Name = "LAP RACE", Laps = 2 }, -- about 33 s at the league middle
+		Sprint = { Name = "SPRINT", Laps = 1 }, -- about 17 s
 	},
 	Rotation = { "Lap", "Sprint" },
 
