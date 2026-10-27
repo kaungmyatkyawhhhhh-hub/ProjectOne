@@ -44,6 +44,9 @@ Daily streak, playtime gifts, daily quests, codes, profiles, weekly leaderboards
 ## Monetization (fair, no paid random rewards)
 Passes: 2x Speed, Auto Train, VIP, Extra Coach Slot, Trail Pack. Products: coin packs (scale with league), Starter Pack, boosts. Coaches only from coin rolls.
 
+## SOUND RULE (owner)
+Sound quality is a core feature: it makes players feel the speed and the rewards. Every action gets a designed, layered sound before it counts as done; every milestone has a sound pass. Details: [[SPEED ARC - Audio (SFX and Music)]].
+
 ## PERFORMANCE RULES (the most important part)
 - **Target: 60 FPS on cheap phones.** Check FPS + memory after every prompt.
 - **Low-poly, bright, flat colours.** Few textures, no realistic materials.
@@ -54,6 +57,18 @@ Passes: 2x Speed, Auto Train, VIP, Extra Coach Slot, Trail Pack. Products: coin 
 - **Part budget:** each area under ~3,000 parts; merge static decoration into meshes.
 - **Scripts:** nothing runs every frame unless it must; no objects created per tap without pooling/cleanup.
 - **UI:** clean and simple, few animations at once.
+
+
+## ART QUALITY RULES (light on devices, but it must look PREMIUM, never cheap or "AI slop")
+Owner, 28 Oct: "easy-going for devices but it gotta look quality".
+- **One clear art style:** stylized low-poly, like a polished cartoon sports game. Clean shapes, strong silhouettes, chunky rounded edges, no default Roblox plastic/studs look, no random free models.
+- **One colour palette** in Config (black, electric blue, gold, white: see the GDD section 3) used everywhere: world, UI, effects. Every area has its own accent colour but follows the palette.
+- **Hand-made Blender meshes** for everything important (track, bleachers, trees, buildings, props): low-poly but well shaped, bevelled edges, vertex colours / gradients instead of big textures, baked soft shading (ambient occlusion) in vertex colours so it looks lit without real lights.
+- **Lighting that does the heavy lifting cheaply:** a tuned Atmosphere + sky, a soft ColorCorrection, light Bloom, sun angle chosen per area, Neon for glow instead of many lights.
+- **Details that make it feel real:** painted track lines, lane numbers, banners, flags that wave, crowds as simple animated silhouettes/sprites, birds, clouds moving. Cheap but alive.
+- **UI made properly:** custom icons (not emoji or generic clip art), consistent spacing, real hierarchy, smooth animations, satisfying sounds. Same quality bar as GYM ARC's best screens.
+- **Effects:** few particles but well designed (custom textures, good colours, speed lines, trails with gradients).
+- **Quality check every milestone:** screenshots from the player's view at phone size; if anything looks generic, placeholder or messy, fix it before moving on.
 
 ## What we reuse from GYM ARC (copy, never change GYM ARC)
 UI kit (black + gold, adapted colours), data saving, monetization/receipts, trainers -> coaches, daily rewards, playtime gifts, codes, profiles, admin console, analytics, unlock guides, settings.
@@ -66,5 +81,5 @@ UI kit (black + gold, adapted colours), data saving, monetization/receipts, trai
 5. **Polish + soft launch**, watch the first 15 minutes and day-1 return.
 
 ## Open questions for the owner
-- Final name (SPEED ARC is the working title).
-- Colour theme (suggestion: dark navy + electric cyan, so it doesn't look like GYM ARC).
+- Name: DECIDED, SPEED ARC.
+- Colour theme: DECIDED black + blue + gold (see the GDD).

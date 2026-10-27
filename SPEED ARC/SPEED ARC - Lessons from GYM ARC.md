@@ -82,4 +82,17 @@ Everything GYM ARC learned the hard way (from its vault notes, 4-28 Oct). Build 
 - The owner's manual Studio changes are never undone.
 - Keep one living design plan and update it when decisions change, so old prompts don't contradict new rules.
 
+## 10. The owner's own process mistakes (owner, 28 Oct: "never make the same mistakes I made with GYM ARC")
+- **Deciding the look too late.** GYM ARC's UI was redesigned many times (clean minimal -> chunky -> black + gold -> premium), and the whole game had to be redone each time. SPEED ARC: lock the art style, palette, fonts and UI kit in M1 with mockups, then build everything with them.
+- **Adding then removing features.** Sneakers, 4 gear pieces x 4 levels, the Garage Gym, apparel, alter colour variants, the starter gym layout... were built and then cut. SPEED ARC: decide in the GDD first, keep systems SMALL (few items that each matter), add more only when players ask for it.
+- **Too many systems at once.** Shops, gear, auras, alters, trainers, titles, styles, skins, boosts all competed. SPEED ARC: one main loop (train -> race -> shoes/coaches -> Go Pro) and a few clear collections.
+- **No endgame at launch.** Players finished GYM ARC in a few hours and left; the Hall of Fame came later. SPEED ARC: Legend Laps planned from the start and shipped within the first updates.
+- **The first 15 minutes came last.** GYM ARC fixed onboarding after launch when only 26% reached the first goal. SPEED ARC: the first 15 minutes (GDD 21) are part of M4 and tested with fresh players before launch.
+- **Performance came last.** GYM ARC ran at ~31 FPS on phones before the lag passes. SPEED ARC: budgets from day one, checked after every prompt.
+- **Pushy offers.** A Starter Pack popup every 5 minutes. SPEED ARC: calm offers only (GDD 20.3).
+- **Moderation risk.** Realistic body images got the account warned and banned for a day. SPEED ARC: only cartoon, safe images; the owner approves each upload.
+- **Only one copy of the game.** "Studio is the only copy" + a lost day of work. SPEED ARC: daily backup files and saved code.
+- **Prompt chaos.** Duplicate prompt numbers, old prompts contradicting new decisions. SPEED ARC: one numbered prompt list, check the vault before numbering, keep the GDD updated.
+- **Sound as an afterthought.** Screams/grunts/music were changed several times. SPEED ARC: sound designed with each feature (see the sound rule).
+
 ## New lessons (add below)

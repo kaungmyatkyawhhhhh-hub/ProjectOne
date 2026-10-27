@@ -8,7 +8,8 @@ status: todo
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ```text
-NEW GAME: SPEED ARC (a Roblox running simulator). Read "SPEED ARC\SPEED ARC - Design plan.md" (especially PERFORMANCE RULES and ART QUALITY RULES) and "SPEED ARC\SPEED ARC - Lessons from GYM ARC.md" in the Obsidian vault first. Put the key lessons into SPEED ARC's CLAUDE.md so every session follows them.
+NEW GAME: SPEED ARC (a Roblox running simulator). Read "SPEED ARC\SPEED ARC - Game Design Document.md" (the main reference, all numbers), "SPEED ARC\SPEED ARC - Design plan.md" (especially PERFORMANCE RULES and ART QUALITY RULES) and "SPEED ARC\SPEED ARC - Lessons from GYM ARC.md" in the Obsidian vault first. Put the key lessons into SPEED ARC's CLAUDE.md so every session follows them (owner: never repeat GYM ARC's mistakes, section 10). Also read the detail plans linked from the home note (World/Map, Lighting, Audio, VFX, Customization, Roadmap) and use them for the hub.
+- SOUND IS A CORE FEATURE (owner): every action in M1 (taps, combo, race countdown/gun/boost/finish, coins, UI) gets a designed, layered sound from the Audio plan before it counts as done; do a 10-minute listening pass.
 
 VERY IMPORTANT
 - This is a SEPARATE game. Never open, change or publish the GYM ARC place, and never write in the vault's GYM ARC folder. All notes go in the vault's "SPEED ARC" folder (Progress\, Features\).
@@ -21,9 +22,9 @@ VERY IMPORTANT
 1) SETUP
 - A CLAUDE.md for SPEED ARC (rules above + the performance rules + folder/note rules), a Config folder (all numbers there), a clean script structure (Shared/Config, Server services, Client controllers).
 - Data saving (copy + adapt GYM ARC's PlayerData approach: session lock, autosave, save on leave, migrations).
-- A simple UI kit: dark navy panels, electric cyan + white accents, one chunky title font + one clean body font, chunky buttons with press animation. Mobile first.
+- A UI kit in the GDD palette: speed-black/carbon panels, electric blue accents, GOLD for coins/rewards/premium, white text, one chunky title font + one clean body font, chunky buttons with press animation. Mobile first.
 
-2) CORE LOOP (milestone 1)
+2) CORE LOOP (milestone 1 = GDD section 27 M1; use the GDD numbers for stations, races, pace, combo, coins)
 - HUB: a small school-themed starting area (track field with painted lanes + lane numbers, bleachers with a simple animated crowd, school building front, trees, flags that wave, clouds moving), stylized low-poly from Blender meshes, bright and polished.
 - SPEED stat (shown as MPH on the HUD) + COINS. Hub walk speed grows slowly with SPEED and is capped (config) so it's easy to control.
 - TRAINING (School Track): 3 training spots: treadmill, sprint lane, stair run. Walk up, tap to train (tap = +speed with a small bounce + sound; numbers float up and are pooled). Each spot has a minimum SPEED to use it and gives more per tap.

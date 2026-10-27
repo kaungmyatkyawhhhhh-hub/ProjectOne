@@ -63,7 +63,13 @@ All numbers here are STARTING values. They live in Config and get tuned with a p
 ## 3. Art direction
 (Full rules: ART QUALITY RULES in the design plan.)
 - **Style:** stylized low-poly cartoon sports. Chunky bevelled shapes, strong silhouettes, flat colours with baked soft shading (vertex colours), no realistic textures.
-- **Palette (Config/Palette):** Night Navy #141B2D (UI base), Track Red #D9483B, Electric Cyan #25D9F0 (speed, highlights), Sun Yellow #FFC93C (coins, rewards), Grass #5BC46A, White #F4F6FA. Each league has an accent colour (see 9).
+- **Palette (owner, 28 Oct: BLACK + BLUE + GOLD, "that's what speed looks like"; Config/Palette):**
+  - Speed Black #0B0D12 (UI base, night skies), Carbon #171A22 (panels), Graphite #2A2F3A (borders)
+  - Electric Blue #1E7BFF (main accent, speed, buttons), Bright Blue #4FC3FF (glows, highlights), Deep Blue #0E3A8A (shadows/gradients)
+  - Gold #FFC83D (coins, rewards, winners, premium), Deep Gold #E09A12 (gold gradients)
+  - White #F4F6FA (text), Danger Red #FF4A4A (only for warnings/timers)
+  - Tracks are BLUE (real modern tracks are), lane lines white, start/finish gold. World greens/skies stay natural but cool-tinted.
+  - Each league keeps an accent inside this palette (see 9).
 - **Fonts:** one heavy display font (titles, numbers, buttons, italic for speed feel), one clean sans for body text. Minimum text size = the smallest HUD label.
 - **Speed language:** slanted shapes, speed lines, motion blur streaks in UI and VFX. Numbers tick up fast.
 - **Characters:** normal Roblox avatars (no live meshes). Progress shows through SHOES (on the feet), TRAILS, a speed aura at high speed, titles and medals.
@@ -174,10 +180,10 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 ### 9.1 Leagues
 | League | Area | Accent | Speed range (MPH) | Ranks | Go Pro goal |
 |---|---|---|---|---|---|
-| 1 | School Track | Track Red | 0 - 2K | Bronze, Silver, Gold, Platinum, Champion | Champion rank + win 1 race |
-| 2 | City Park Run | Grass Green | 0 - 200K | same | Champion + win 2 races |
-| 3 | Big Stadium | Electric Cyan | 0 - 10M | same | Champion + win 3 races |
-| 4 | Mountain Trail | Pine Orange | 0 - 500M | same | Champion + win 3 races |
+| 1 | School Track | Electric Blue | 0 - 2K | Bronze, Silver, Gold, Platinum, Champion | Champion rank + win 1 race |
+| 2 | City Park Run | Bright Blue + green | 0 - 200K | same | Champion + win 2 races |
+| 3 | Big Stadium | Deep Blue + white | 0 - 10M | same | Champion + win 3 races |
+| 4 | Mountain Trail | Blue + pine | 0 - 500M | same | Champion + win 3 races |
 | 5 | World Games | Gold | 0 - 20B | same | Champion = "WORLD CHAMPION" -> Legend Laps unlock |
 
 - **Ranks** are SPEED thresholds inside a league (e.g. League 1: Bronze 0, Silver 100, Gold 400, Platinum 1K, Champion 2K). Rank up = popup, sound, small coin reward, rank badge next to your name.
@@ -221,17 +227,20 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 - Pity: guarantees by stage (Rare at 30, Epic 80, Legendary 150...).
 - Roll reveal: name roller + small cutscene for Legendary+ (GYM ARC lesson: themed per coach).
 
-| Coach | Rarity | Chance | Boost (BASE) |
-|---|---|---|---|
-| Coach Benji (gym teacher with whistle) | Common | 40% | +5% training |
-| Coach Rae (park runner) | Uncommon | 28% | +8% coins |
-| Coach Ivo (sprint coach, stopwatch) | Rare | 18% | +12% training |
-| Coach Mara (hurdle champ) | Epic | 9.5% | +20% training, +10% coins |
-| Coach Bolt-ish NO: **Coach Zephyr** (wind-themed legend) | Legendary | 3.5% | +35% training, +3% race pace |
-| **Nova** (space-suit runner) | Mythic | 0.8% | +50% training, +5% race pace |
-| **Shadow Step** (ninja runner) | Secret | 0.17% | +65% training, +6% pace |
-| **Mercury** (winged-sandals god of speed) | Secret+ | 0.03% | +80% training, +8% pace, golden trail |
-(All original characters; the Greek-god idea is a generic myth, no real brands/athletes.)
+Owner, 28 Oct: coaches are INSPIRED BY famous kinds of runners, never copies. Rule: no real names, no real faces/likeness, no signature poses or nicknames that point to one real person (Roblox rules on real people + their rights). Each coach = an original character built from a running archetype.
+
+| Coach | Inspired by (archetype only) | Rarity | Chance | Boost (BASE) |
+|---|---|---|---|---|
+| **Coach Benji** | the school PE teacher with a whistle | Common | 40% | +5% training |
+| **Rae Miles** | the city marathon runner, headband + water bottle | Uncommon | 28% | +8% coins |
+| **Ivo Dash** | the old-school sprint coach, stopwatch + clipboard | Rare | 18% | +12% training |
+| **Mara Leap** | the hurdles champion, long braid, big stride | Epic | 9.5% | +20% training, +10% coins |
+| **Zephyr Reign** | the showman 100 m world-record sprinter: tall, relaxed, fastest ever | Legendary | 3.5% | +35% training, +3% race pace |
+| **Kai Highland** | the highland distance legend who ran a marathon barefoot | Mythic | 0.8% | +50% training, +5% race pace |
+| **The Flying Ghost** | the 1920s distance legend in vintage kit, pocket watch | Secret | 0.17% | +65% training, +6% pace |
+| **Mercury** | the winged-sandals god of speed (myth) | Secret+ | 0.03% | +80% training, +8% pace, golden trail |
+- Each coach gets an ORIGINAL signature pose and outfit in the palette (e.g. Zephyr: wind-swoosh arm pose; Kai: hands on knees then sunrise stretch). Themed roll cutscenes for Legendary+ (Zephyr = storm wind tunnel, Kai = sunrise over highlands, Flying Ghost = old film-grain race, Mercury = golden sky temple).
+
 - Total coach boost caps: training +300%, race pace +15% (keeps races fair).
 
 ## 13. Trails
@@ -312,7 +321,7 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 
 ### 20.2 Developer products
 - Coins (scale with league): Small 25 R$ = 20 min, Medium 99 = 2 h, Large 249 = 6 h.
-- Boosts: 2x Speed 15 min (25 R$), Lucky Roll Boost? NO (no paid luck). Instant Boost refill? NO (no paid race wins).
+- Boosts: 2x Speed 15 min (25 R$). Never sold: paid luck on rolls, or anything that helps you win a race directly.
 - Starter Pack (49-79 R$, once): coins (60 min), 2x Speed 30 min, Canvas Runners skin, STARTER title.
 ### 20.3 Rules
 - Robux never decides a race. No paid random rewards. No fake timers. Offers only at calm moments (after a race, never in one), max one small card per 10 min, none in the tutorial.
@@ -377,10 +386,18 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 6. **M6 Polish + soft launch:** pacing sim, phone tests, funnel, fix the first 15 min.
 7. **M7 Leagues 4-5, Legend Laps, events.**
 
-## 28. Open decisions (owner)
-- Final name (working title SPEED ARC).
-- Colour theme OK? (navy + cyan + red track + yellow coins)
-- Coach names/looks OK? Any to change?
-- Combo mechanic (rewards active tapping) OK?
-- Races every 3 min OK, or 2 min?
-- Prices (passes/products) OK?
+## 28. Decisions (owner, 28 Oct)
+- Name: **SPEED ARC** (final).
+- Colours: **black + blue + gold** (section 3).
+- Coaches: inspired by real runner archetypes, original characters (section 12).
+- Races: every **3 minutes**.
+- Tap combo: **yes**, as in 6.2 (x1.0 -> x1.5 over 10 s of steady tapping; Auto Train gets a fixed x1.2) - Claude's call, keep unless playtests say otherwise.
+- Prices: as in section 20 - Claude's call, tune after launch data.
+
+## 29. Detail plans
+- [[SPEED ARC - World, Map and Buildings]]
+- [[SPEED ARC - Lighting]]
+- [[SPEED ARC - Audio (SFX and Music)]]
+- [[SPEED ARC - VFX]]
+- [[SPEED ARC - Customization]]
+- [[SPEED ARC - Update Roadmap]]
