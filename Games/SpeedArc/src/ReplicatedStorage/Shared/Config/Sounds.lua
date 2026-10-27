@@ -36,5 +36,21 @@ return {
 		CoinShower = { Ids = { "rbxassetid://9113849583" }, Volume = 0.25, Pitch = { 1.1, 1.2 }, Group = "SFX", Pool = 1 },
 		Click = { Ids = { "rbxassetid://9114215780" }, Volume = 0.45, Pitch = { 1.0, 1.08 }, Group = "UI", Pool = 3 },
 		Toast = { Ids = { "rbxassetid://75594243553477" }, Volume = 0.35, Pitch = { 1.0, 1.0 }, Group = "UI", Pool = 1 },
+		Tab = { Ids = { "rbxassetid://9114215780" }, Volume = 0.3, Pitch = { 1.25, 1.3 }, Group = "UI", Pool = 2 },
+		WindowOpen = { Ids = { "rbxassetid://9120704978" }, Volume = 0.25, Pitch = { 1.0, 1.06 }, Group = "UI", Pool = 1 },
+		WindowClose = { Ids = { "rbxassetid://9120704978" }, Volume = 0.2, Pitch = { 0.8, 0.85 }, Group = "UI", Pool = 1 },
+
+		-- Shops and collecting (Audio note)
+		KaChing = { Ids = { "rbxassetid://91609406292294" }, Volume = 0.5, Pitch = { 0.98, 1.02 }, Group = "SFX", Pool = 1, Layers = { "CoinShower" } },
+		ShoeSqueak = { Ids = { "rbxassetid://72827234719643" }, Volume = 0.45, Pitch = { 0.95, 1.08 }, Group = "SFX", Pool = 2 },
+		LacePull = { Ids = { "rbxassetid://9117720867" }, Volume = 0.18, Pitch = { 1.6, 1.7 }, Group = "SFX", Pool = 1 },
+		Equip = { Layers = { "ShoeSqueak", "LacePull" } },
+		TrailEquip = { Ids = { "rbxassetid://9126228631" }, Volume = 0.35, Pitch = { 1.05, 1.12 }, Group = "SFX", Pool = 1 },
+		RollTick = { Ids = { "rbxassetid://9114215780" }, Volume = 0.3, Pitch = { 1.4, 1.45 }, Group = "UI", Pool = 4 },
+		RevealCommon = { Ids = { "rbxassetid://75594243553477" }, Volume = 0.5, Pitch = { 1.0, 1.0 }, Group = "SFX", Pool = 1 },
+		RevealRare = { Ids = { "rbxassetid://132574644259001" }, Volume = 0.55, Pitch = { 1.0, 1.0 }, Group = "SFX", Pool = 1, Layers = { "RevealCommon" } },
+		RevealEpic = { Ids = { "rbxassetid://132574644259001" }, Volume = 0.7, Pitch = { 0.9, 0.9 }, Group = "SFX", Pool = 1, Layers = { "CrowdOoh", "ComboUp" } },
+		RevealLegend = { Ids = { "rbxassetid://1841800152" }, Volume = 0.6, Pitch = { 1.0, 1.0 }, Group = "Music", Pool = 1, Layers = { "FinishCheer", "RevealRare" } },
+		Wind = { Ids = { "rbxassetid://9126228631" }, Volume = 0.5, Pitch = { 0.55, 0.6 }, Group = "SFX", Pool = 2 },
 	},
 }

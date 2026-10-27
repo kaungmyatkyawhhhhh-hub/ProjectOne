@@ -413,6 +413,138 @@ function UIKit.speedIcon(size, parent, color)
 end
 
 ----------------------------------------------------------------------------
+-- Windows: one modal panel over a dimmed screen, a title, tabs, a close button.
+-- Only one is open at a time (UIKit.openWindow closes the last one).
+----------------------------------------------------------------------------
+local openWin = nil
+UIKit.windowSound = nil -- set by the SoundController (open / close swoosh)
+
+function UIKit.window(props)
+	local canvas = props.Parent
+	local backdrop = make("TextButton", {
+		Name = (props.Name or "Window") .. "Backdrop",
+		Text = "",
+		AutoButtonColor = false,
+		BackgroundColor3 = Palette.SpeedBlack,
+		BackgroundTransparency = 0.35,
+		Size = UDim2.fromScale(1, 1),
+		Visible = false,
+		ZIndex = 20,
+		Parent = canvas,
+	})
+	local w, h = props.Size.X, props.Size.Y
+	local panel = UIKit.panel({
+		Name = props.Name or "Window",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 8),
+		Size = UDim2.fromOffset(w, h),
+		AccentColor = props.Accent or Palette.ElectricBlue,
+		ZIndex = 21,
+		Parent = backdrop,
+	})
+	local scale = make("UIScale", { Parent = panel })
+	-- slanted title tab (speed language)
+	local tab = make("Frame", {
+		Name = "TitleTab",
+		BackgroundColor3 = Palette.White,
+		Position = UDim2.fromOffset(18, -18),
+		Size = UDim2.fromOffset(math.max(170, #props.Title * 17 + 40), 38),
+		ZIndex = 23,
+		Parent = panel,
+	})
+	UIKit.corner(tab, 10)
+	UIKit.gradient(tab, Palette.BrightBlue, Palette.ElectricBlue, 0)
+	UIKit.stroke(tab, Palette.DeepBlue, 2)
+	UIKit.text({ Text = props.Title, TextSize = 22, StrokeColor = Palette.DeepBlue, StrokeTransparency = 0, ZIndex = 24, Parent = tab })
+	local close = UIKit.button({
+		Name = "Close",
+		Style = "Dark",
+		Text = "X",
+		TextSize = 20,
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, 12, 0, -14),
+		Size = UDim2.fromOffset(46, 44),
+		ZIndex = 24,
+		Parent = panel,
+	})
+	local content = make("Frame", {
+		Name = "Content",
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(18, 30),
+		Size = UDim2.new(1, -36, 1, -44),
+		ZIndex = 22,
+		Parent = panel,
+	})
+	local win = { backdrop = backdrop, panel = panel, content = content, onClose = nil }
+	function win.show()
+		if openWin and openWin ~= win then
+			openWin.hide(true)
+		end
+		openWin = win
+		backdrop.Visible = true
+		scale.Scale = 0.86
+		UIKit.tween(scale, 0.18, { Scale = 1 }, Enum.EasingStyle.Back)
+		if UIKit.windowSound then
+			UIKit.windowSound("open")
+		end
+		if win.onOpen then
+			win.onOpen()
+		end
+	end
+	function win.hide(silent)
+		if not backdrop.Visible then
+			return
+		end
+		backdrop.Visible = false
+		if openWin == win then
+			openWin = nil
+		end
+		if UIKit.windowSound and not silent then
+			UIKit.windowSound("close")
+		end
+		if win.onClose then
+			win.onClose()
+		end
+	end
+	function win.isOpen()
+		return backdrop.Visible
+	end
+	close.Activated:Connect(function()
+		win.hide()
+	end)
+	return win
+end
+
+function UIKit.closeWindows()
+	if openWin then
+		openWin.hide()
+	end
+end
+
+-- a row of tab buttons; returns setTab(name)
+function UIKit.tabs(parent, names, onPick, zindex)
+	local row = make("Frame", { Name = "Tabs", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 40), ZIndex = zindex, Parent = parent })
+	make("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = row })
+	local buttons = {}
+	local function set(name)
+		for n, b in buttons do
+			UIKit.setButtonStyle(b, if n == name then "Blue" else "Dark")
+		end
+		onPick(name)
+	end
+	for i, n in names do
+		local b = UIKit.button({ Name = n, Style = "Dark", Text = n, TextSize = 17, Size = UDim2.fromOffset(130, 38), ZIndex = zindex, ClickSound = "Tab" })
+		b.LayoutOrder = i
+		b.Parent = row
+		b.Activated:Connect(function()
+			set(n)
+		end)
+		buttons[n] = b
+	end
+	return set, row
+end
+
+----------------------------------------------------------------------------
 -- Root ScreenGui with one UIScale (design pixels -> real screen)
 ----------------------------------------------------------------------------
 function UIKit.root(name, playerGui, displayOrder)
