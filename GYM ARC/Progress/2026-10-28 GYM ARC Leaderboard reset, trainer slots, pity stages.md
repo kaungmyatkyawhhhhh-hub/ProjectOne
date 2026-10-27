@@ -76,3 +76,7 @@ See [[GYM ARC - Hall of Fame]]. Tested on FreshPlayer (GS 6, Alter 15, muscles 4
 - Config/Codes (RELEASE, GYMARC, HALLOFFAME, STRONGMAN), CodeService (DataStore "Codes", refresh 5 min, 5 tries a minute, saved before paying, Code_Redeemed_<CODE>), AdminService "code" list / add / disable / enable / remove, CodesClient (window + CODES button under INVITE), Settings "Codes" row, MenuClient lets the Codes screen show on the main menu, UIBus.OpenCodes.
 - Tested in Studio (see the feature note). The test codes TESTOLD / TESTGROUP were added to the live DataStore and removed again; the stored list is empty (only the 4 starting codes).
 - Screenshots on request: `Screenshots/2026-10-28 Pro Gym gold alter/` (Pro Gym wide; gold alter at 7'0" aesthetic = the next alter's goal level 1,095; 2x = mass monster). At 7'0" the body is measured against the NEXT alter's goal (Muscles.LookGoal), not the spurt goal.
+
+## Loading screen upgrade (prompt 83) - [[GYM ARC - Loading Screen and Menu]]
+- Light version (tweens only): rotating background (Config/UI.LoadingArt), gold bar + 3 step lines, one tip line every 3 s, NEW: HALL OF FAME badge behind Config/UI.LoadingBadge (off), quiet menu music rising at the menu, body meshes loading alongside the world. PLAY at 20.3 s on a first load at phone size (Studio). Waiting on the owner's two thumbnail image ids (not uploaded by Claude: body art).
+- Codes window: the result line now sits between the box and REDEEM (it fell off the panel's bottom).

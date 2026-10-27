@@ -102,3 +102,15 @@ Behind the title screen the camera glides round the map on a loop of 6 shots (Wo
 - Each shot moves at a steady speed and cuts while moving; statue shot lower (camHeight 1, lookHeight 4.5); starter gym window shot removed (ServerStorage.MenuShotsRemoved).
 - While the menu flies: MenuGrade / MenuBloom / MenuRays added to Lighting (contrast, warm tint, glow), faded out on PLAY.
 - Loading screen plates all red (4 shades).
+
+## Light loading screen (28 Oct, prompt 83; [[2026-10-28 GYM ARC Prompt - 83 Loading screen upgrade]])
+Owner: "keep it light for phones ... no particles and no blur, just tweens". Replaces the 26 Oct drama (embers, heartbeat light, red barbell plates, flash + shake, the big hype line, the tip tile + dots). Old script: `ServerStorage._Backups_28Oct.LoadingScreen_Before83`.
+- **Background:** `Config/UI.LoadingArt` (now only the menu art; add the owner's Hall of Fame + giant thumbnail ids there) take turns every 4 s: a slow zoom 1.0 -> 1.06 and a 0.6 s crossfade (one picture: it zooms in over 20 s). The first picture is preloaded before anything else. Dark gradients on the left and along the bottom.
+- **Bottom:** step line LOADING THE GYM... (to 60%) -> WARMING UP... -> LET'S LIFT!, the percent in gold, a gold bar on a dark track, one tip line under it (Config/UI.LoadingTips: the owner's 5 first + 5 older ones, a new one every 3 s, faded). Between steps the bar creeps toward the next checkpoint (never sits still).
+- **Top right:** the gold NEW: HALL OF FAME badge when `Config/UI.LoadingBadge.Enabled` (false until the owner launches it); SKIP (80x44) under it / in its place after 5 s.
+- **Music:** the menu track starts at 0.25 and rises to 0.7 over 2 s as the menu appears.
+- **Faster:** after the menu is ready, the other players' body meshes now load at the same time as the world (5 s cap) + windows (3 s) instead of before them (up to 16 s -> at most 8 s).
+- **Timing marks** (player attributes, os.clock): LoadStart, LoadSkipShown, LoadMenuStart, LoadData, LoadCharacter, LoadStreamed, LoadFlyover, LoadDone.
+- **Measured** (Studio, TestPhoneSize 844x390, FreshPlayer first load): SKIP 5.0 s, save data 12.4 s, menu ready 13.0 s, PLAY 20.3 s. Two earlier runs: 31-33 s (Studio's server slow to start that time; menu ready at 20.7 / 24.9 s). Most of the wait is the server sending the save.
+![[GYM ARC/Screenshots/2026-10-28 Loading screen and codes/1 Loading phone 844x390 mid-load.jpg]]
+![[GYM ARC/Screenshots/2026-10-28 Loading screen and codes/2 Loading phone with Hall of Fame badge (preview).jpg]]

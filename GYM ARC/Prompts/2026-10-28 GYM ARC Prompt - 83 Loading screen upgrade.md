@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [gymarc, prompt]
-status: in progress
+status: done (waiting on the 2 image ids)
 ---
 # 83 Loading screen upgrade
 
