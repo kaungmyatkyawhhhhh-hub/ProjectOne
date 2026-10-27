@@ -55,3 +55,7 @@ Day 7 of the login calendar no longer gives a DNA token (only coins and, the fir
 ## Economy rework (23 Oct, prompt 61, [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]])
 - Every reward is minutes of coins at the player's stage (Config/Economy.Rewards, Economy.Minutes), never less than its old amount. Table at Spurt 0 / 3 / 7'0" in the progress note.
 - Offline coins: 2% of the stage's coins a minute, 8 h cap. Coin packs scale (20 / 120 / 360 min). All coin boosts capped at x8 (trainers' coins +100%); Stats shows COIN BOOST.
+
+## Re-racking pays by LVL (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
+- Owner: "make reracking plate coins scale with level and then stop scaling at some point like the coin packs".
+- `Economy.RerackCoins(data)` = 5 + 1 per LVL, counting LVL only up to 400 (about 7'0"): LVL 0 = 5, LVL 26 (after the tutorial) = 31, LVL 100 = 105, LVL 400+ = 405 (the most). `Config/Economy.Rerack` Coins / PerLvl / MaxLvl. It used to be 0.1 min of coins by Growth Spurt (5 to 33).

@@ -99,3 +99,6 @@ The yard has its own playlist now (heavy sports rock from APM): see [[GYM ARC - 
 
 ## Lights dimmed by day, full at night (27 Oct, replaces "always on")
 Owner: "have the light on but a bit dimmed only, and at night the real lights show up; you can revert my spotlight changes". The owner's hand changes to the spotlights were reverted (towers back to brightness 2.6 / range 75 / angle 65 / no shadows, the old floodlights to 2.2 / 55 / 75 white). Every yard lamp is a NightLight again with attribute `DayDim` 0.3: NightLightService keeps it lit by day at 30% of its `NightBrightness` (lens a softer glow) and at full at night. The look builder makes its lamps this way. Tested: day 0.78 / 0.66 / 0.48, night 2.6 / 2.2 / 1.6 (`yard_lights_night_full.jpg`).
+
+## Tire stacks (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
+- The 3 decor tire stacks by the oil drums (12 plain cylinder tires, merged into `Remodel_mtown284` by the remodel) are now the Blender tread tire (`ServerStorage.ModelMeshes.StrongmanTire`) at 4.4 x 1.1 x 4.4, each turned a little: `StrongmanYard.TireStacks`. The old mesh is in `ServerStorage.TiresBackup_27Oct`.

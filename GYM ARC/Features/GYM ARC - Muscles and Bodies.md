@@ -128,3 +128,7 @@ At 7'0" a Body Alter's texture set replaces the 5 skin stages at every muscle si
 
 ## NPCs in your area keep their muscles (27 Oct)
 Owner: "if you're in the same area as NPCs, don't make their muscle meshes disappear even when you zoom out". MuscleClient: NPCs go to the plain body past 60 studs from the camera (LOD) and are dropped past 210; now an NPC in the same area as your character (Starter Gym, Pro Gym, Powerlifting Gym, Strongman Yard, beach: the music areas) is never lowered or dropped, whatever the camera does. The town is excluded (too big). Tested in the Powerlifting Gym with the camera 96-141 studs away: Tank / Hank / Vera 26/26 muscle pieces; the yard's NPCs (another area) still go plain.
+
+## NPC waists showed skin (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
+- Owner: "most npcs lower waist is showing their skin and not clothes". A classic Pants image leaves see-through gaps on the waist and upper-thigh stage meshes (a band at the belt line, a patch at the crotch), and the plain copy under a clothed piece was skin coloured.
+- `BodyStages`: under a Pants image on the "shorts" pieces (waist, tops of the thighs) that copy is now dark cloth (`PANTS_GAP` #25262B), so the gaps read as a belt line or shadow. Arms, torso and lower thighs are unchanged.

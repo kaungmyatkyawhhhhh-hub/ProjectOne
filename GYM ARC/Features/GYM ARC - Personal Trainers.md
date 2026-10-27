@@ -205,3 +205,6 @@ Pity unchanged (100 rolls without Epic+ = next one Epic). The odds lists read th
 
 ## Trainers keep their muscles far away (27 Oct)
 Owner: "make it so your trainers' muscles don't disappear when you zoom out too far". Trainers counted as NPCs, which go to the plain body past 60 studs (LOD). Now they are their own kind in `MuscleClient` ("trainer": painted clothes kept like an NPC, no LOD); they keep their muscles out to the normal 180-210 studs every body has. Tested: Atlas showed all 13 muscle pieces from 119 studs.
+
+## Hidden during the tutorial (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
+- Your own trainer is fully hidden while the tutorial runs (`TrainerFollowClient`, checked twice a second). His cheer bubbles were already quiet during it (prompt 68).

@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 27 Oct: prompt 69. Strongman Yard tire stacks use the tread tire model. NPC waists no longer show skin. Re-racking pays 5 + 1 per LVL (max 405 at LVL 400). Starter gym plates are shiny metal. The tutorial can't be skipped and hides your trainer. The basketball court is a real matte court with full markings. See [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]].
 - 27 Oct: tutorial fixed (prompt 68). No genetics popup on join (new players start at x1.00). GO TO COACH no longer drops you on the desk. Steps never skip while you lift or have a window open, and the hint comes back. Gold chevron arrows on the floor, plus an edge arrow when the target is off screen. The goal step points at the GROWTH SPURT card. No popups during the tutorial. See [[2026-10-27 GYM ARC Tutorial fix and genetics at join]].
 - 27 Oct: Strongman Yard now unlocks at ALTER 2 (prompt 66 part 4) and got a full new look (light towers, string lights, weathered containers, bleachers, tent). Prompt 66 parts 1-3 (codes, Hall of Fame, profiles) still to do. See [[GYM ARC - Strongman Yard]].
 - 27 Oct: STRONGMAN YARD behind the Powerlifting Gym (Spurt 5): atlas stones, log press, yoke, farmer's walk, truck pull, tire flip, keg toss, a Strongman Showdown every 15 min with a live scoreboard and the YARD KING title; LVL UP popup only every 10 LVLs; atlas stone, yoke, farmer frames, shrub, flowers and potted plant modelled in Blender (waiting for import). See [[GYM ARC - Strongman Yard]], [[2026-10-27 GYM ARC Strongman Yard and Blender models]].
@@ -397,6 +398,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bugs index]]
 
 ### Progress
+- [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]]
 - [[2026-10-27 GYM ARC Tutorial fix and genetics at join]]
 - [[2026-10-27 GYM ARC Strongman Yard and Blender models]]
 - [[2026-10-26 GYM ARC Retention pass]]
@@ -424,6 +426,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-27 GYM ARC Prompt - 69 Tires, NPC waists, rerack coins, plates, court]]
 - [[2026-10-27 GYM ARC Prompt - 68 Tutorial fix and genetics at join]]
 - [[2026-10-27 GYM ARC Prompt - 63 Strongman Yard]]
 - [[2026-10-26 GYM ARC Prompt - Bugs, appeal, progression and retention]]

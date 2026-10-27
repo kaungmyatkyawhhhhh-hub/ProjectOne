@@ -67,3 +67,6 @@ One reusable machine system: every machine is a config entry with the muscles it
 
 ## Starter gym re-layout (21 Oct, prompt 26; UNDONE by prompt 32)
 - The starter gym now has 2 Flat Benches and 2 Squat Racks, 1 of every other machine (the extra Overhead Press, Incline Bench, Deadlift, Barbell Row, Leg Press, Hack Squat, Crunch Bench and Pull-Up Bar copies, and the third Flat Bench / Squat Rack, are in `ServerStorage.StarterGymBackup.Removed`). Zones and rows: [[GYM ARC - Town and Gyms]].
+
+## Shiny starter plates (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
+- Owner: "make the starter gym weight plates shiny like pro gym too". `MachineService`: plates loaded on a machine in `workspace.Gym` keep their colours with Metal on the body, rim and hub (the Pro Gym's gold plates are Metal too). The display plates already standing in the starter gym (racks, trees, floor: 111 parts) were set to Metal in Studio.

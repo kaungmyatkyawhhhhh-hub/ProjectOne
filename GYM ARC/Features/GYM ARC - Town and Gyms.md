@@ -79,3 +79,8 @@ The starter gym felt packed after prompt 16 (every machine, dumbbells, the Agenc
 - Beach decor that stood in the new strip (2 palms, driftwood, a shell, an umbrella / chair / towel set) moved just outside the fence.
 - Backup: `ServerStorage.SkateParkBackup_27Oct`. Not tested: riding the half pipe on a board (needs a real player).
 - Shots: `beach_expand_top.jpg`, `beach_expand_lift.jpg`, `skate_expand_top.jpg`, `skate_expand_halfpipe.jpg` in `Screenshots/test_2026-10-27`.
+
+## Basketball court (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
+- Owner: "make the basketball court look like an actual court and not look plasticky". `Town.SportsCourt.Markings` (built in Studio): a matte Concrete playing surface (muted blue, #3C5D79) on the green surround (#4D6C51), painted lanes (#7F3A35), and thin flush white lines (boundary, centre line, centre circle, free throw lines and circles with the inside half dashed, corner threes and the three-point arcs, restricted arcs). The old raised SmoothPlastic lines and discs are gone.
+- Hoops: glass backboards with a white edge and shooter's square, dark grey poles, navy pads. The balls are pebbled leather.
+- Backup: `ServerStorage.CourtBackup_27Oct` (the whole court as it was).

@@ -83,3 +83,7 @@ Tester: "confusing, breaks midway, should show everything with pathways and arro
 - **Popup clutter:** during the tutorial these stay quiet: LVL UP, NEW WEIGHT UNLOCKED, NEW PERSONAL RECORD, Growth Spurt milestones, plain toasts and trainer cheer bubbles. Purchases and gifts still show. After the tutorial, unlock guides wait 45 s so "Tap GO TRAIN" gets the screen.
 - Files: `Config/Onboarding`, `TutorialClient`, `Shared/UI/GuidePath`, `Shared/GoTo`, `GoToService`, `ActionService` (TutorialStart), `ProgressClient` (UIBus.SpurtTile / NeedsIsOpen), `Shared/UI/Notify`, `MachineClient`, `TrainerFollowClient`, `GuideClient`.
 - Note: the gold marker over the target and the Talk prompt draw on top of everything. Studio's screenshot tool can't see those, so check them by eye.
+
+## No skipping, no trainer (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
+- Owner: "dont let players skip tutorial". The SKIP pill is gone, and the server ignores "SkipTutorial" (ActionService). Every step still has its arrows and a safety timeout, so nobody gets stuck.
+- Owner: "yes, hide it during tutorial". Your own trainer is fully hidden while the tutorial runs (`TrainerFollowClient`: it stood between the camera and the bench on the first lift) and comes back after.
