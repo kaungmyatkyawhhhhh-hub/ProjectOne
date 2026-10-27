@@ -78,3 +78,9 @@ Builder `ServerStorage._Builders.StrongmanYardLook` (Run() rebuilds `StrongmanYa
 
 ## Tire flip legs (27 Oct)
 Owner: "on tire flip, when the player moves forward, the legs don't move". The body slid along the lane. Now the legs stride (YARD.yardWalk, like the carries) while following the tire at the end of each flip, and on the walk back after the last flip the lifter turns round and walks. Tested: hip swing up to 44 degrees while moving.
+
+## Atlas stone size follows the weight (27 Oct)
+Owner: "make the atlas stone small if the weight is lower and bigger if the weight is higher". MachineClient `YARD.fitStone`: the stone's radius goes from 0.95 studs at the lightest weight (330 LB) to 1.65 at the heaviest (540), from the station's Tier attribute (set by the server, so every player sees the same). Its rest point rises with the radius (sits on the floor); the lift, the platform landing and the hands use the new radius (local attribute StoneR). Tested: radius 0.95 / 1.65 on switching weights, the heavy stone's bottom at 0.06 (the floor).
+
+## Log, tire and keg modelled (27 Oct)
+Owner: "model the log press and tire", "model the keg in kegtoss too". `Downloads\gym_arc_models\StrongmanImplements.fbx` (script `scripts\gymarc_log_tire.py`): StrongmanLog (bark with ridges, growth-ring ends, two hand cut-outs with steel grips; 7.2 x 1.25, same as the old), StrongmanTire (tractor tire with V-pattern lugs; 6 across, 1.6 thick, 3-stud hole), StrongmanKeg (steel keg with ribs, rolled rims with handle slots, red valve; 1.8 tall, 1.5 across). Waiting for the owner's import, then they replace the part-built ones in LogPress1-2, TireFlip and KegToss.
