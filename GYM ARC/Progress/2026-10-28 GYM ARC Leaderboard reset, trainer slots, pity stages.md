@@ -23,3 +23,5 @@ Owner, 28 Oct: "the notes are overlapping, i have already done all that". Done b
 - LEVEL board: decided (it stays in the world: 2 panels, next to STRONGEST LIFTER which reads its scores).
 - PR screen flash: decided.
 - Extra Trainer price (now the 3rd slot): decided.
+
+- (owner: "remove the server notification too for rolling trainers") `TrainerService` no longer fires "Pulled" to everyone: no banner, chat line or chime for anyone when The Shadow / Atlas is rolled. Your own reveal and the beam nearby players see stay.

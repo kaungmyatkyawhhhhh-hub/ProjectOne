@@ -219,3 +219,4 @@ Owner: "make it so your trainers' muscles don't disappear when you zoom out too 
 - **Slots:** 2 for everyone, the Extra Trainer pass = 3rd, the 4th Trainer pass (`ExtraTrainer2`, 2058298970) = 4th. No more free slots from spurts / alters. (Replaces the slot rules above.)
 - **Trainers near you:** Settings "Trainers Near You" 1-4 = how many of your equipped trainers follow you (rarest first). Attribute `TrainersShown`.
 - **Pity stages:** Legendary in 50, then Mythic in 100, then Secret (Atlas) in 150, then Legendary again (`Trainers.PityStages`, saved `pityStage`). Getting the stage's rarity or better by luck also finishes the stage. (Replaces the single 100-roll pity above.)
+- (28 Oct) **No server announcement** for rolls any more (the Mythic / Secret banner + chat line are gone). The beam beside you for nearby players stays.
