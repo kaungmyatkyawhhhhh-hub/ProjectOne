@@ -1,7 +1,7 @@
 ---
 date: 2026-10-27
 tags: [gymarc, prompt]
-status: in progress (parts 1, 2, 4 done; part 3 Profiles open)
+status: done (all 4 parts built; Profiles' two-player parts to test)
 ---
 # 66 Hall of Fame, Profiles, Codes, Strongman at Alter 2
 

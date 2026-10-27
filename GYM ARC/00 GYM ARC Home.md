@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 28 Oct: PROFILES (prompt 66 part 3): tap a player for their card (stats, trainers, collection, badges, ADD FRIEND / INVITE TO CREW / CHALLENGE / VIEW STATUE). Prompt 66 is fully built. See [[GYM ARC - Profiles]].
 - 28 Oct: prompt 86: after the Hall of Fame your statue stands on the round stage by itself (your screen), no button needed.
 - 28 Oct: prompt 85: the Hall of Fame reveal after the soul lands is calm and grand (no spinning rays).
 - 28 Oct: prompt 84: the Hall of Fame soul now has its own layered sounds (pulled out, rising, flying, the dive). See [[GYM ARC - Music and Sounds]].
@@ -465,6 +466,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-28 GYM ARC Prompt - 85 Ceremony reveal look]]
 - [[2026-10-28 GYM ARC Prompt - 86 Statue shows by itself]]
 - [[GYM ARC - Codes]]
+- [[GYM ARC - Profiles]]
 - [[2026-10-28 GYM ARC Prompt - 79 Leaderboard reset, trainer slots, pity stages]]
 - [[2026-10-27 GYM ARC Prompt - 78 FPS lag check]]
 - [[2026-10-27 GYM ARC Prompt - 77 Variants after unlock, fonts, alley skating, invite, inventory]]

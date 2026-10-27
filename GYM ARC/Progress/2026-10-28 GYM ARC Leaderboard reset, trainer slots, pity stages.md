@@ -89,3 +89,7 @@ See [[GYM ARC - Hall of Fame]]. Tested on FreshPlayer (GS 6, Alter 15, muscles 4
 
 ## Statue by itself (prompt 86) - see [[GYM ARC - Hall of Fame]]
 - Your statue goes up on the round stage when the ceremony ends and on every join with a star, client side, and stays; prompt hidden and the stage shows your name + stars for you.
+
+## PROFILES (prompt 66 part 3) - [[GYM ARC - Profiles]]
+- Config/Profiles, ProfileService (card RemoteFunction, ProfileAction: challenge / accept / view statue), ProfileClient (card window, tap on a player, challenge popup), ArmWrestleService.Challenge, HallOfFameService.ShowFor (+ client: someone else's statue stands in for yours for 60 s), CrewService.CrewOf, Settings "Profile" row (openRow shared with Codes), menu card opens your profile.
+- Tested with one player (own card); the two-player parts still need a test.
