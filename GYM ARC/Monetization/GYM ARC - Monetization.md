@@ -199,3 +199,5 @@ Developer products, bought once in Inventory > Alters (not in the Store). Ids go
 | Black Marble | 9 Marble | black stone, gold veins | 249 | VariantBlackMarble | map + product needed |
 | Patina | 11 Bronze | green verdigris over bronze | 199 | VariantPatina | map + product needed |
 | Rose Gold | 15 Gold | pink gold | 299 | VariantRoseGold | map + product needed |
+
+Product ids (owner, 27 Oct): VariantInferno 3722938194, VariantFrostbite 3722938311, VariantZombie 3722938374, VariantBlackMarble 3722938401, VariantPatina 3722938453, VariantRoseGold 3722938509. All checked for sale.

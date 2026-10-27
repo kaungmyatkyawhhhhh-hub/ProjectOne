@@ -119,3 +119,6 @@ Owner: "add alter variants in some of the alters. and it will cost robux. in the
 2. **Inventory > Looks > Alters**: the swatch row in the alter's detail (wear / switch / buy).
 3. **Coach Dex > ALTERS**: the same swatch row above the buttons; a picked variant's button is BUY R$ / WEAR / WORN / SOON (`AltersPanel` shop mode).
 - Tested all three with a temporary Inferno (fake product id): the SKINS tab and card, TRY ON (on the body, back to Granite after 6 s), Coach Dex's row and BUY R$ 149. Test values removed after.
+- (27 Oct) **Products created by the owner** and in `Config/Products` (checked with GetProductInfo, all for sale): Inferno 3722938194 (149), Frostbite 3722938311 (149), Zombie (Halloween) 3722938374 (199), Black Marble 3722938401 (249), Patina 3722938453 (199), Rose Gold 3722938509 (299).
+- (27 Oct, owner: "the alter variant circle should have like a texture image to it") the circles (Inventory / Coach Dex) and the Store tile show a crop of the skin's own colour map (variant: its map; the first circle: the alter's own map) over its average colour.
+- Still needed: the 6 colour map image ids (the owner imported them through the Asset Manager, which leaves nothing in the place to read).
