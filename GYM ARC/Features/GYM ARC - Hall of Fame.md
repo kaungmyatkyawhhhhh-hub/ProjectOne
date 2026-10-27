@@ -33,3 +33,6 @@ The rebirth after Alter 15 (`Config/HallOfFame.RequiredAlter`, never moves). Nev
 ## Not done yet (brief items)
 - The star-only aura on the first star; the Coach Dex line; analytics "SecondRun_Done"; pacing check of run 2 (+25% EXP and GS 2 start).
 - Profiles (part 3) and Codes (part 1).
+
+## Redesign (28 Oct, prompt 80)
+The Hall is now on the park block behind the plaza (Blender model + builder), with its own flipbook VFX, torches and a gold light pillar; soul cutscenes per star count (never skipped); a calm prestigious confirm screen; the HUD pill wears the gold alter art. Studio testing: Workspace `TestHallOfFame`, `TestStars`, `TestCutscene`, `TestCutsceneFreeze`. See [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]].

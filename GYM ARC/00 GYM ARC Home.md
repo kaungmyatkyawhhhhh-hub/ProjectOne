@@ -450,6 +450,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-28 GYM ARC Prompt - 80 Hall of Fame redesign, test stats, cutscenes]]
 - [[2026-10-28 GYM ARC Prompt - 79 Leaderboard reset, trainer slots, pity stages]]
 - [[2026-10-27 GYM ARC Prompt - 78 FPS lag check]]
 - [[2026-10-27 GYM ARC Prompt - 77 Variants after unlock, fonts, alley skating, invite, inventory]]

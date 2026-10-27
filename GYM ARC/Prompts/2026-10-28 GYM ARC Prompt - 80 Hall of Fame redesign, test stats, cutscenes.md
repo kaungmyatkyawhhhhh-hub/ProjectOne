@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [gymarc, prompt]
-status: in progress
+status: done (owner to test)
 ---
 # 80 Hall of Fame redesign, test stats, cutscenes
 
