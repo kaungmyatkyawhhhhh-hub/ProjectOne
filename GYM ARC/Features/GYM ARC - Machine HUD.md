@@ -90,3 +90,6 @@ REP (150 x 46) sits right above Roblox's jump button on phones, PUMP right above
 - The card keeps its own layout (- and + at the ends, the weight in the middle), scaled to that width (`placePanel`), with its outline and gold line as thick as PUMP's. It shrinks further only if the stack wouldn't fit under the top bar.
 - "Set done" / BIG REP: a small "+80.5K CHEST" line rising beside REP (`POPUP.ScreenText` in MachineClient). Your own overhead title hides while you're on a machine.
 ![[GYM ARC/Screenshots/ui_v3/tutorial/phone_02_bench_toast_stack.jpg]]
+
+## Feedback on every rep (27 Oct, prompt 72; [[2026-10-27 GYM ARC Feedback on every action]])
+- REP punches on every rep (auto reps too; a tap already punched it). Heavy (tier 7+) and BIG reps: the bar wobbles for 0.35 s after lockout (`MachineClient` barShake), on top of the clank and plate knock. A PR banner at most once every 20 s.

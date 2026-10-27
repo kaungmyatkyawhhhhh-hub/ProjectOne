@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 27 Oct: prompt 72, feedback on every action: REP punch every rep, bar shake on heavy reps, coins fly to the counter before it counts up, PR banner throttled, every button presses and clicks. See [[2026-10-27 GYM ARC Feedback on every action]].
 - 27 Oct: prompt 71. Basketball BLOCKS; new moves (crossover dribble, jump shot, hanging dunk, block jump, steal lunge, fist pump); every effect redone (8 textures for the owner to import); a full set of court sounds; court music; music resumes where you left off if you're back within 5 s; mirror "Now" body fixed; invite boost 10%; COURT KING title; tutorial locked on the server. See [[2026-10-27 GYM ARC Basketball block, VFX, SFX, music resume, mirror fix]].
 - 27 Oct: 1v1 BASKETBALL on the town court (prompt 70): from Growth Spurt 4, first to 5, tap anywhere to shoot / steal, dunks at 6'0"+, a rival NPC if you're alone, two games at once, moves + sounds + effects. The whole court modelled in Blender (waiting for the import); the scoreboard moved across from the bleachers. See [[GYM ARC - Court Competitions]], [[2026-10-27 GYM ARC 1v1 court and court model]].
 - 27 Oct: prompt 69. Strongman Yard tire stacks use the tread tire model. NPC waists no longer show skin. Re-racking pays 5 + 1 per LVL (max 405 at LVL 400). Starter gym plates are shiny metal. The tutorial can't be skipped and hides your trainer. The basketball court is a real matte court with full markings. See [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]].
@@ -401,6 +402,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bugs index]]
 
 ### Progress
+- [[2026-10-27 GYM ARC Feedback on every action]]
 - [[2026-10-27 GYM ARC Basketball block, VFX, SFX, music resume, mirror fix]]
 - [[2026-10-27 GYM ARC 1v1 court and court model]]
 - [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]]
@@ -431,6 +433,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-27 GYM ARC Prompt - 72 Feedback on every action]]
 - [[2026-10-27 GYM ARC Prompt - 71 Mirror, basketball block, VFX, SFX, court music, music resume]]
 - [[2026-10-27 GYM ARC Prompt - 70 Playable court competitions]]
 - [[2026-10-27 GYM ARC Prompt - 69 Tires, NPC waists, rerack coins, plates, court]]
