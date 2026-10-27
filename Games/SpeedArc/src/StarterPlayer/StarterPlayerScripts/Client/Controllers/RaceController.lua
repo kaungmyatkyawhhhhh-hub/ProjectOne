@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage.Shared
 local Race = require(Shared.Config.Race)
+local Areas = require(Shared.Config.Areas)
 local UIKit = require(Shared.UIKit)
 local Format = require(Shared.Util.Format)
 local TrackPath = require(Shared.Util.TrackPath)
@@ -19,7 +20,9 @@ local camera = workspace.CurrentCamera
 local RaceController = {}
 
 local ctx
-local state -- ReplicatedStorage.RaceState
+local state -- ReplicatedStorage.RaceState.<your area>
+local stateRoot
+local phaseConn
 local ui = {}
 local joinedRaceId = nil
 
@@ -169,6 +172,23 @@ local function buildUI()
 		ui.pips[i] = pip
 	end
 	ui.boost = boost
+
+	-- JUMP button with a timing ring (hurdle races)
+	local jump = UIKit.make("TextButton", {
+		Name = "Jump", Text = "", AutoButtonColor = false, BackgroundColor3 = P.White,
+		AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -150, 1, -26), Size = UDim2.fromOffset(96, 96),
+		Visible = false, Parent = canvas,
+	})
+	UIKit.corner(jump, UDim.new(0.5, 0))
+	UIKit.gradient(jump, Color3.fromHex("#FFE38C"), P.DeepGold, 120)
+	UIKit.stroke(jump, P.White, 3, 0.25)
+	UIKit.text({ Text = "JUMP", TextSize = 24, Color = P.SpeedBlack, Stroke = false, Parent = jump })
+	ui.jumpScale = UIKit.make("UIScale", { Parent = jump })
+	local ring = UIKit.make("Frame", { Name = "Ring", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1.8, 1.8), Visible = false, Parent = jump })
+	UIKit.corner(ring, UDim.new(0.5, 0))
+	ui.ringStroke = UIKit.make("UIStroke", { Color = P.Gold, Thickness = 4, Parent = ring })
+	ui.ring = ring
+	ui.jump = jump
 
 	-- results card
 	local card = UIKit.panel({
@@ -333,6 +353,75 @@ local function boost()
 end
 
 ----------------------------------------------------------------------------
+-- Hurdles: you JUMP; everyone else (and NPCs) is drawn clearing them
+----------------------------------------------------------------------------
+local function myShown()
+	local p = race and race.me and prog[race.me]
+	return p and p.shown or 0
+end
+
+function RaceController.jump()
+	if not race or not race.me or not race.hurdles or state:GetAttribute("Phase") ~= "Running" then
+		return
+	end
+	local v = myShown()
+	table.insert(race.jumps, v)
+	ctx.Net.get("RaceBoost"):FireServer("jump")
+	ctx.Sound.play("Jump")
+	ui.jumpScale.Scale = 0.88
+	UIKit.tween(ui.jumpScale, 0.15, { Scale = 1 }, Enum.EasingStyle.Back)
+end
+
+-- height above the lane for runner i at progress v (a smooth arc over each hurdle)
+function RaceController.hurdleLift(i, v)
+	local H = Race.Hurdle
+	local len = race.length or 400
+	for _, hp in race.hurdles do
+		local u = (v - hp) * len -- studs past the hurdle (negative = before it)
+		if u > -3.5 and u < 3 then
+			if i == race.me then
+				local jumped = false
+				for _, j in race.jumps do
+					if j >= hp - H.Window / len and j <= hp + H.LateWindow / len then
+						jumped = true
+					end
+				end
+				if not jumped then
+					return 0
+				end
+			end
+			local t = (u + 3.5) / 6.5
+			return H.JumpHeight * math.sin(math.pi * t)
+		end
+	end
+	return 0
+end
+
+local function updateRing()
+	if not race or not race.me or not race.hurdles then
+		return
+	end
+	local v = myShown()
+	local len = race.length or 400
+	local nextD = nil
+	for _, hp in race.hurdles do
+		local d = (hp - v) * len
+		if d > -0.5 then
+			nextD = d
+			break
+		end
+	end
+	if nextD and nextD < 16 then
+		ui.ring.Visible = true
+		local s = 1 + math.clamp((nextD - Race.Hurdle.Window * 0.5) / 12, 0, 1) * 0.9
+		ui.ring.Size = UDim2.fromScale(s, s)
+		ui.ringStroke.Color = if nextD <= Race.Hurdle.Window then P.Gold else P.White
+	else
+		ui.ring.Visible = false
+	end
+end
+
+----------------------------------------------------------------------------
 -- Drawing runners
 ----------------------------------------------------------------------------
 local function render()
@@ -350,7 +439,11 @@ local function render()
 				v = 1
 			end
 			p.shown = v
-			root.CFrame = TrackPath.runnerCFrame(r.lane, v, race.laps)
+			local lift = 0
+			if race.hurdles then
+				lift = RaceController.hurdleLift(i, v)
+			end
+			root.CFrame = race.path.runnerCFrame(r.lane, v, race.laps, lift)
 			table.insert(order, i)
 		end
 	end
@@ -365,6 +458,7 @@ local function render()
 		updatePips()
 	end
 
+	updateRing()
 	-- position bar + place
 	table.sort(order, function(a, b)
 		return (prog[a].shown or 0) > (prog[b].shown or 0)
@@ -424,11 +518,25 @@ local function clearMarkers()
 end
 
 local function onStart(info)
+	local mine = false
+	for _, r in info.runners do
+		if r.userId == player.UserId then
+			mine = true
+		end
+	end
+	if not mine and info.areaId ~= (player:GetAttribute("Area") or "Hub") then
+		return -- someone else's race in another area
+	end
+	local area = Areas[info.areaId] or Areas.Hub
 	race = {
 		raceId = info.raceId,
 		laps = info.laps,
 		runners = {},
 		me = nil,
+		path = TrackPath.for_(area.Track),
+		hurdles = info.hurdles,
+		length = info.length,
+		jumps = {},
 	}
 	table.clear(prog)
 	for i, r in info.runners do
@@ -457,6 +565,7 @@ local function onStart(info)
 		end
 		ui.bar.Visible = true
 		ui.boost.Visible = true
+		ui.jump.Visible = race.hurdles ~= nil
 		charges = Race.Boost.Charges
 		updatePips()
 		lastPlace = 0
@@ -477,12 +586,16 @@ local function endRace()
 	if wasRacing then
 		ui.bar.Visible = false
 		ui.boost.Visible = false
+		ui.jump.Visible = false
 		clearMarkers()
 		camera.CameraType = Enum.CameraType.Custom
 		camera.FieldOfView = 70
 		ctx.Hud.setRaceMode(false)
 		if not ctx.Training.isTraining() then
 			ctx.Training.setControls(true)
+		end
+		if RaceController.rebind then
+			task.defer(RaceController.rebind)
 		end
 	end
 end
@@ -626,7 +739,8 @@ end
 function RaceController.start(c)
 	ctx = c
 	ctx.Race = RaceController
-	state = ReplicatedStorage:WaitForChild("RaceState")
+	stateRoot = ReplicatedStorage:WaitForChild("RaceState")
+	state = stateRoot:WaitForChild(player:GetAttribute("Area") or "Hub")
 	buildUI()
 
 	ctx.Hud.refs.join.Activated:Connect(function()
@@ -636,6 +750,7 @@ function RaceController.start(c)
 	end)
 
 	ui.boost.Activated:Connect(boost)
+	ui.jump.Activated:Connect(RaceController.jump)
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or not race or not race.me then
 			return
@@ -644,6 +759,8 @@ function RaceController.start(c)
 		if t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch
 			or (t == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.Space) then
 			boost()
+		elseif t == Enum.UserInputType.Keyboard and (input.KeyCode == Enum.KeyCode.J or input.KeyCode == Enum.KeyCode.Up) then
+			RaceController.jump()
 		end
 	end)
 
@@ -658,6 +775,13 @@ function RaceController.start(c)
 		elseif kind == "boost" then
 			charges = info.charges
 			updatePips()
+		elseif kind == "hurdle" then
+			if info.clean then
+				ctx.Sound.play("HurdleLand")
+			else
+				ctx.Sound.play("HurdleKnock")
+				showCenter("CLIP!", P.White, 0.4)
+			end
 		elseif kind == "results" then
 			onResults(info)
 		elseif kind == "return" then
@@ -689,7 +813,7 @@ function RaceController.start(c)
 		end
 	end)
 
-	state:GetAttributeChangedSignal("Phase"):Connect(function()
+	local function onPhase()
 		local phase = state:GetAttribute("Phase")
 		if phase == "Join" then
 			UIKit.setButtonStyle(ctx.Hud.refs.join, "Gold")
@@ -701,7 +825,25 @@ function RaceController.start(c)
 			showCenter("GO!", P.Gold, 0.8)
 			ctx.Sound.play("StartGun")
 		end
-	end)
+	end
+	-- follow the race of the area you're in (not while you're racing)
+	local function bindArea()
+		if race and race.me then
+			return
+		end
+		local s2 = stateRoot:WaitForChild(player:GetAttribute("Area") or "Hub", 10)
+		if not s2 then
+			return
+		end
+		state = s2
+		if phaseConn then
+			phaseConn:Disconnect()
+		end
+		phaseConn = state:GetAttributeChangedSignal("Phase"):Connect(onPhase)
+	end
+	bindArea()
+	player:GetAttributeChangedSignal("Area"):Connect(bindArea)
+	RaceController.rebind = bindArea
 
 	-- pill text + countdown checks a few times a second (cheap)
 	task.spawn(function()
