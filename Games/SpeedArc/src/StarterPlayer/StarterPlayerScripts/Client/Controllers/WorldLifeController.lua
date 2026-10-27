@@ -49,9 +49,9 @@ local function collectCrowd(folder)
 		if p:IsA("BasePart") then
 			table.insert(crowd.parts, p)
 			table.insert(crowd.base, p.CFrame)
-			-- people in the same model share a phase
-			local model = p:FindFirstAncestorWhichIsA("Model")
-			local seed = model and model:GetAttribute("Phase") or math.random() * 6
+			-- a fan mesh has its own phase; parts of a part-built fan share their model's
+			local model = p.Parent
+			local seed = p:GetAttribute("Phase") or (model and model:GetAttribute("Phase")) or math.random() * 6
 			table.insert(crowd.phase, seed)
 			sum += p.Position
 		end

@@ -120,6 +120,35 @@ local function subtract(main, cutters, name, parent, color)
 	return u
 end
 
+-- Blender props imported by the owner live in ServerStorage.Meshes.<Name> (one MeshPart each).
+-- Blender X = Roblox X, Blender Y = Roblox Z, up = Y; each mesh's bottom sits on y = 0 of its CFrame.
+local MeshLib = ServerStorage:FindFirstChild("Meshes")
+local function meshTemplate(name)
+	local m = MeshLib and MeshLib:FindFirstChild(name)
+	return m and (if m:IsA("MeshPart") then m else m:FindFirstChildWhichIsA("MeshPart"))
+end
+-- place a mesh with its bottom-centre at cf (offset = bounding-box centre relative to the Blender origin)
+local function mesh(name, parent, cf, opts)
+	local t = meshTemplate(name)
+	if not t then
+		return nil
+	end
+	opts = opts or {}
+	local m = t:Clone()
+	local scale = opts.Scale or 1
+	m.Size = t.Size * scale
+	local off = (opts.Offset or Vector3.zero) * scale
+	m.CFrame = cf * CFrame.new(off.X, m.Size.Y / 2 + off.Y, off.Z)
+	m.Anchored = true
+	m.CanTouch = false
+	m.CastShadow = opts.CastShadow or false
+	m.CanCollide = opts.CanCollide ~= false
+	m.CanQuery = opts.CanCollide ~= false
+	m.Name = opts.Name or name
+	m.Parent = parent
+	return m
+end
+
 -- solid oval ("stadium") of the track's shape, radius r, from y0 to y0 + h
 local function stadium(r, h, y0, color, tmp)
 	local c = T.Center
@@ -357,17 +386,24 @@ end
 ----------------------------------------------------------------------------
 local arch = folder("Arch", track)
 local z1, z2 = T.InnerRadius - 3, outerR + 3
+local span = z2 - z1 + 2.4
+-- the Blender arch spans its X axis: turn it to span the lanes (world Z)
+local archMesh = mesh("Start_Arch", arch, CFrame.new(T.StartX, 0, (z1 + z2) / 2) * CFrame.Angles(0, math.pi / 2, 0))
 local function tower(z)
-	block(arch, "Leg", Vector3.new(2.4, 18, 2.4), Vector3.new(T.StartX, 9, z), Palette.SpeedBlack)
-	block(arch, "LegTrim", Vector3.new(2.6, 0.5, 2.6), Vector3.new(T.StartX, 6, z), Palette.ElectricBlue, { Material = Enum.Material.Neon })
-	block(arch, "LegTrim", Vector3.new(2.6, 0.5, 2.6), Vector3.new(T.StartX, 12, z), Palette.ElectricBlue, { Material = Enum.Material.Neon })
-	block(arch, "Foot", Vector3.new(4, 1, 4), Vector3.new(T.StartX, 0.5, z), Palette.Graphite)
+	if not archMesh then
+		block(arch, "Leg", Vector3.new(2.4, 18, 2.4), Vector3.new(T.StartX, 9, z), Palette.SpeedBlack)
+		block(arch, "Foot", Vector3.new(4, 1, 4), Vector3.new(T.StartX, 0.5, z), Palette.Graphite)
+	end
+	-- glowing bands stay as Neon parts (just outside the mesh's blue bands)
+	block(arch, "LegTrim", Vector3.new(2.7, 0.5, 2.7), Vector3.new(T.StartX, 6, z), Palette.ElectricBlue, { Material = Enum.Material.Neon })
+	block(arch, "LegTrim", Vector3.new(2.7, 0.5, 2.7), Vector3.new(T.StartX, 12, z), Palette.ElectricBlue, { Material = Enum.Material.Neon })
 end
 tower(z1)
 tower(z2)
-local span = z2 - z1 + 2.4
-block(arch, "Beam", Vector3.new(3, 4, span), Vector3.new(T.StartX, 19.5, (z1 + z2) / 2), Palette.SpeedBlack)
-block(arch, "BeamGold", Vector3.new(3.2, 1, span + 0.2), Vector3.new(T.StartX, 21.7, (z1 + z2) / 2), Palette.Gold)
+if not archMesh then
+	block(arch, "Beam", Vector3.new(3, 4, span), Vector3.new(T.StartX, 19.5, (z1 + z2) / 2), Palette.SpeedBlack)
+	block(arch, "BeamGold", Vector3.new(3.2, 1, span + 0.2), Vector3.new(T.StartX, 21.7, (z1 + z2) / 2), Palette.Gold)
+end
 block(arch, "BeamGlow", Vector3.new(3.25, 0.35, span + 0.25), Vector3.new(T.StartX, 17.6, (z1 + z2) / 2), Palette.BrightBlue, { Material = Enum.Material.Neon })
 for _, face in { Enum.NormalId.Left, Enum.NormalId.Right } do
 	local screen = block(arch, "Screen", Vector3.new(0.2, 3.2, span - 6), Vector3.new(T.StartX + (if face == Enum.NormalId.Left then -1.6 else 1.6), 19.5, (z1 + z2) / 2), Palette.SpeedBlack)
@@ -408,13 +444,25 @@ flag(Vector3.new(T.StartX, 22.2, z2), Palette.Gold, Palette.ElectricBlue, 5)
 ----------------------------------------------------------------------------
 local sz0 = -(outerR + 6) -- front of the stands
 local rows = 6
-local standLen = 110
+local bleacherMesh = meshTemplate("Bleacher_Section")
+local standLen = if bleacherMesh then 100 else 110
 for k = 1, rows do
 	local h = 1 + 1.3 * k
 	local z = sz0 - 1.5 - 3 * (k - 1)
-	block(stands, "Step" .. k, Vector3.new(standLen, h, 3), Vector3.new(0, h / 2, z), if k % 2 == 0 then Palette.Graphite else Color3.fromHex("#323846"))
-	block(stands, "Seat" .. k, Vector3.new(standLen - 2, 0.5, 1.3), Vector3.new(0, h + 0.25, z + 0.6), W.Aluminium)
-	block(stands, "SeatEdge" .. k, Vector3.new(standLen - 2, 0.15, 0.2), Vector3.new(0, h + 0.4, z + 1.25), Palette.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
+	if not bleacherMesh then
+		block(stands, "Step" .. k, Vector3.new(standLen, h, 3), Vector3.new(0, h / 2, z), if k % 2 == 0 then Palette.Graphite else Color3.fromHex("#323846"))
+		block(stands, "Seat" .. k, Vector3.new(standLen - 2, 0.5, 1.3), Vector3.new(0, h + 0.25, z + 0.6), W.Aluminium)
+	end
+	-- the blue seat edges glow (Neon), just in front of the mesh's painted edge
+	block(stands, "SeatEdge" .. k, Vector3.new(standLen - 2, 0.15, 0.2), Vector3.new(0, h + 0.42, z + 1.3), Palette.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
+end
+if bleacherMesh then
+	-- 5 sections of 20; the section's front rail is at Blender y = +0.75, its back at -18
+	local sections = standLen / 20
+	for i = 1, sections do
+		local x = -standLen / 2 + 10 + (i - 1) * 20
+		mesh("Bleacher_Section", stands, CFrame.new(x, 0, sz0), { Offset = Vector3.new(0, 0, 0.75 - bleacherMesh.Size.Z / 2) })
+	end
 end
 local backZ = sz0 - 3 * rows - 1
 block(stands, "BackWall", Vector3.new(standLen + 2, 16, 2), Vector3.new(0, 8, backZ), Palette.Carbon)
@@ -424,10 +472,12 @@ for side = -1, 1, 2 do
 	wedge.Size = Vector3.new(1.5, 1 + 1.3 * rows + 1, 3 * rows)
 	wedge.CFrame = CFrame.new(side * (standLen / 2 + 0.75), wedge.Size.Y / 2, sz0 - 1.5 * rows) * CFrame.Angles(0, math.pi, 0)
 end
--- front rail
-block(stands, "Rail", Vector3.new(standLen, 0.3, 0.3), Vector3.new(0, 3.2, sz0 + 0.6), W.Aluminium)
-for i = 0, 10 do
-	block(stands, "RailPost", Vector3.new(0.3, 3.2, 0.3), Vector3.new(-standLen / 2 + 1 + i * (standLen - 2) / 10, 1.6, sz0 + 0.6), W.Aluminium)
+-- front rail (the mesh sections have their own)
+if not bleacherMesh then
+	block(stands, "Rail", Vector3.new(standLen, 0.3, 0.3), Vector3.new(0, 3.2, sz0 + 0.6), W.Aluminium)
+	for i = 0, 10 do
+		block(stands, "RailPost", Vector3.new(0.3, 3.2, 0.3), Vector3.new(-standLen / 2 + 1 + i * (standLen - 2) / 10, 1.6, sz0 + 0.6), W.Aluminium)
+	end
 end
 -- big screen on the back wall (visible from the spawn across the track)
 local screenFrame = block(stands, "ScreenFrame", Vector3.new(40, 13, 1), Vector3.new(0, 23, backZ + 0.2), Palette.SpeedBlack)
@@ -451,7 +501,15 @@ for k = 1, rows do
 	local z = sz0 - 1.5 - 3 * (k - 1) + 0.2
 	local x = -standLen / 2 + 3 + rng:NextNumber(0, 2)
 	while x < standLen / 2 - 3 do
-		if rng:NextNumber() < 0.82 then
+		local fanMesh = meshTemplate("Crowd_Fan_A")
+		if rng:NextNumber() < 0.82 and fanMesh then
+			-- Blender fans: A blue, B gold with a flag (arm on +X), C white; body is 1.7 wide
+			local pick = ({ "Crowd_Fan_A", "Crowd_Fan_B", "Crowd_Fan_C", "Crowd_Fan_A" })[rng:NextInteger(1, 4)]
+			local t = meshTemplate(pick)
+			local fan = mesh(pick, crowdF, CFrame.new(x, h, z), { Offset = Vector3.new(t.Size.X / 2 - 0.85, 0, 0), Scale = rng:NextNumber(0.95, 1.06), CanCollide = false, Name = "Fan" })
+			fan:SetAttribute("Phase", rng:NextNumber(0, 6.28))
+			count += 1
+		elseif rng:NextNumber() < 0.82 then
 			local m = Instance.new("Model")
 			m.Name = "Fan"
 			m:SetAttribute("Phase", rng:NextNumber(0, 6.28))
@@ -595,12 +653,16 @@ for i = 1, 3 do
 	local z = spZ + (i - 1) * 4
 	local cf = CFrame.lookAt(Vector3.new(spX0 + 6, 0.3, z), Vector3.new(spX0 + 20, 0.3, z))
 	slot(sprint, "SprintLane", cf, i)
-	-- starting block
-	part({ Class = "WedgePart", Parent = sprint, Name = "Block", Size = Vector3.new(1.6, 0.7, 1.2), CFrame = CFrame.new(spX0 + 4.2, 0.65, z) * CFrame.Angles(0, -math.pi / 2, 0), Color = Palette.SpeedBlack })
+	-- starting block (the Blender block's rail runs along its Z: turn it to run along the lane)
+	if not mesh("Starting_Block", sprint, CFrame.new(spX0 + 4.2, 0.3, z) * CFrame.Angles(0, math.pi / 2, 0), { Name = "Block" }) then
+		part({ Class = "WedgePart", Parent = sprint, Name = "Block", Size = Vector3.new(1.6, 0.7, 1.2), CFrame = CFrame.new(spX0 + 4.2, 0.65, z) * CFrame.Angles(0, -math.pi / 2, 0), Color = Palette.SpeedBlack })
+	end
 	-- cones at the far end
-	cyl(sprint, "ConeBase", 0.9, 0.2, Vector3.new(spX1 - 1, 0.4, z), Palette.SpeedBlack)
-	cyl(sprint, "Cone", 0.55, 1.4, Vector3.new(spX1 - 1, 1.1, z), W.Cone)
-	cyl(sprint, "ConeBand", 0.6, 0.3, Vector3.new(spX1 - 1, 1.2, z), Palette.White)
+	if not mesh("Cone", sprint, CFrame.new(spX1 - 1, 0.3, z)) then
+		cyl(sprint, "ConeBase", 0.9, 0.2, Vector3.new(spX1 - 1, 0.4, z), Palette.SpeedBlack)
+		cyl(sprint, "Cone", 0.55, 1.4, Vector3.new(spX1 - 1, 1.1, z), W.Cone)
+		cyl(sprint, "ConeBand", 0.6, 0.3, Vector3.new(spX1 - 1, 1.2, z), Palette.White)
+	end
 end
 sign(sprint, Stations[1], CFrame.lookAt(Vector3.new(spX0 + 12, 0, spZ + 12.5), Vector3.new(spX0 + 12, 0, spZ + 30)))
 
@@ -612,16 +674,26 @@ for i = 1, 4 do
 	local m = Instance.new("Model")
 	m.Name = "Treadmill" .. i
 	m.Parent = tread
-	block(m, "Deck", Vector3.new(3.6, 0.8, 7), Vector3.new(x, 0.55, trZ), Palette.Graphite)
-	block(m, "Belt", Vector3.new(2.8, 0.82, 6.2), Vector3.new(x, 0.58, trZ), Palette.SpeedBlack)
-	block(m, "BeltStripe", Vector3.new(0.25, 0.84, 6.2), Vector3.new(x - 1.1, 0.59, trZ), Palette.ElectricBlue, { Material = Enum.Material.Neon })
-	block(m, "BeltStripe", Vector3.new(0.25, 0.84, 6.2), Vector3.new(x + 1.1, 0.59, trZ), Palette.ElectricBlue, { Material = Enum.Material.Neon })
-	for side = -1, 1, 2 do
-		block(m, "Upright", Vector3.new(0.35, 4, 0.35), Vector3.new(x + side * 1.6, 2.6, trZ - 3.2), W.Aluminium)
-		block(m, "Rail", Vector3.new(0.3, 0.3, 3.2), Vector3.new(x + side * 1.6, 4.2, trZ - 1.8), W.Aluminium)
+	local tm = meshTemplate("Treadmill")
+	if tm then
+		-- Blender deck runs y -3.5..3.5 with the console past -3.5; lifted 0.08 so the belt meets the slot
+		mesh("Treadmill", m, CFrame.new(x, 0.08, trZ), { Offset = Vector3.new(0, 0, 3.5 - tm.Size.Z / 2) })
+		-- glowing belt stripes and screen (Neon) laid just over the mesh's painted ones
+		block(m, "BeltStripe", Vector3.new(0.26, 0.04, 6.2), Vector3.new(x - 1.1, 0.975, trZ), Palette.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
+		block(m, "BeltStripe", Vector3.new(0.26, 0.04, 6.2), Vector3.new(x + 1.1, 0.975, trZ), Palette.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
+		block(m, "Screen", Vector3.new(2.2, 0.7, 0.05), Vector3.new(x, 4.78, trZ - 2.97), Palette.BrightBlue, { Material = Enum.Material.Neon, CanCollide = false })
+	else
+		block(m, "Deck", Vector3.new(3.6, 0.8, 7), Vector3.new(x, 0.55, trZ), Palette.Graphite)
+		block(m, "Belt", Vector3.new(2.8, 0.82, 6.2), Vector3.new(x, 0.58, trZ), Palette.SpeedBlack)
+		block(m, "BeltStripe", Vector3.new(0.25, 0.84, 6.2), Vector3.new(x - 1.1, 0.59, trZ), Palette.ElectricBlue, { Material = Enum.Material.Neon })
+		block(m, "BeltStripe", Vector3.new(0.25, 0.84, 6.2), Vector3.new(x + 1.1, 0.59, trZ), Palette.ElectricBlue, { Material = Enum.Material.Neon })
+		for side = -1, 1, 2 do
+			block(m, "Upright", Vector3.new(0.35, 4, 0.35), Vector3.new(x + side * 1.6, 2.6, trZ - 3.2), W.Aluminium)
+			block(m, "Rail", Vector3.new(0.3, 0.3, 3.2), Vector3.new(x + side * 1.6, 4.2, trZ - 1.8), W.Aluminium)
+		end
+		block(m, "Console", Vector3.new(3.4, 1.4, 0.6), Vector3.new(x, 4.6, trZ - 3.3), Palette.Carbon)
+		block(m, "Screen", Vector3.new(2.2, 0.7, 0.62), Vector3.new(x, 4.7, trZ - 3.32), Palette.BrightBlue, { Material = Enum.Material.Neon })
 	end
-	block(m, "Console", Vector3.new(3.4, 1.4, 0.6), Vector3.new(x, 4.6, trZ - 3.3), Palette.Carbon)
-	block(m, "Screen", Vector3.new(2.2, 0.7, 0.62), Vector3.new(x, 4.7, trZ - 3.32), Palette.BrightBlue, { Material = Enum.Material.Neon })
 	local cf = CFrame.lookAt(Vector3.new(x, 0.95, trZ + 0.6), Vector3.new(x, 0.95, trZ - 10))
 	slot(m, "Treadmill", cf, i)
 end
@@ -676,6 +748,11 @@ sign(stair, Stations[3], CFrame.lookAt(Vector3.new(stX - 9, 0, stZ0 + 1), Vector
 -- trees (round low-poly), hedges at the edges, lamps, benches
 ----------------------------------------------------------------------------
 local function tree(pos, scale)
+	if meshTemplate("Tree_Round_A") then
+		local r = rng:NextNumber()
+		local name = if r < 0.4 then "Tree_Round_A" elseif r < 0.8 then "Tree_Round_B" else "Tree_Pine"
+		return mesh(name, props, CFrame.new(pos) * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0), { Scale = (scale or 1) * (if name == "Tree_Pine" then 1.25 else 1), CastShadow = true, Name = "Tree" })
+	end
 	local m = Instance.new("Model")
 	m.Name = "Tree"
 	m.Parent = props
@@ -705,13 +782,23 @@ block(props, "Hedge", Vector3.new(84, 4, 4), Vector3.new(-104, 2, 152), hedgeC)
 block(props, "Hedge", Vector3.new(84, 4, 4), Vector3.new(104, 2, 152), hedgeC)
 -- lamps along the plaza (Neon heads, no real lights)
 for _, lx in { -44, -22, 22, 44 } do
-	cyl(props, "LampPole", 0.3, 9, Vector3.new(lx, 4.5, 64), Palette.SpeedBlack)
-	block(props, "LampArm", Vector3.new(0.3, 0.3, 2), Vector3.new(lx, 9, 63.2), Palette.SpeedBlack)
-	block(props, "LampHead", Vector3.new(1.2, 0.5, 1.6), Vector3.new(lx, 8.8, 62.4), Palette.SpeedBlack)
-	block(props, "LampGlow", Vector3.new(1, 0.15, 1.4), Vector3.new(lx, 8.5, 62.4), W.WindowLit, { Material = Enum.Material.Neon })
+	local lt = meshTemplate("Lamp_Post")
+	if lt then
+		-- the Blender pole stands at the origin; its head reaches out to -Z
+		mesh("Lamp_Post", props, CFrame.new(lx, 0.3, 64), { Offset = Vector3.new(0, 0, 0.6 - lt.Size.Z / 2) })
+		block(props, "LampGlow", Vector3.new(1.04, 0.12, 1.44), Vector3.new(lx, 8.75, 62.4), W.WindowLit, { Material = Enum.Material.Neon, CanCollide = false })
+	else
+		cyl(props, "LampPole", 0.3, 9, Vector3.new(lx, 4.5, 64), Palette.SpeedBlack)
+		block(props, "LampArm", Vector3.new(0.3, 0.3, 2), Vector3.new(lx, 9, 63.2), Palette.SpeedBlack)
+		block(props, "LampHead", Vector3.new(1.2, 0.5, 1.6), Vector3.new(lx, 8.8, 62.4), Palette.SpeedBlack)
+		block(props, "LampGlow", Vector3.new(1, 0.15, 1.4), Vector3.new(lx, 8.5, 62.4), W.WindowLit, { Material = Enum.Material.Neon })
+	end
 end
 -- benches
 local function bench(cf)
+	if mesh("Bench", props, cf, { Offset = Vector3.new(0, 0, 0.05) }) then
+		return
+	end
 	local m = Instance.new("Model")
 	m.Name = "Bench"
 	m.Parent = props
