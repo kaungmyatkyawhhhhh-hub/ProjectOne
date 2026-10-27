@@ -1,7 +1,6 @@
 -- TrainingController: on a station, tap anywhere to run (GDD 7.1).
 -- Each tap = stride (run animation speeds up), +MPH popup (pooled), layered sound with pitch rising
 -- with the combo, a small bounce of the MPH number. The server decides the real gain.
-local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -28,9 +27,11 @@ local recent = {}
 local lastComboStep = 0
 local tapsThisVisit = 0
 local controls = nil
+local enteredAt = 0
+local leaving = false
 
--- The place may not have the default PlayerModule, so never wait for it.
--- The server anchors you on a station / in a race anyway; this just hides the stick and jump button.
+-- The place may not have the default PlayerModule, so never wait for it. The server anchors you on a
+-- station / in a race anyway. (Don't touch GuiService.TouchControlsEnabled: on phones it also froze the camera.)
 local function getControls()
 	if not controls then
 		local module = player:FindFirstChild("PlayerScripts") and player.PlayerScripts:FindFirstChild("PlayerModule")
@@ -45,7 +46,6 @@ local function getControls()
 end
 
 function Training.setControls(enabled)
-	GuiService.TouchControlsEnabled = enabled
 	local c = getControls()
 	if c then
 		if enabled then
@@ -149,6 +149,12 @@ local function onStep()
 		ctx.Hud.setCombo(1, 0)
 		ctx.Sound.play("ComboBreak")
 	end
+	-- pushing the stick / keys walks you off the station (phones have no STOP key)
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if hum and hum.MoveDirection.Magnitude > 0.5 and now - enteredAt > 0.6 and not leaving then
+		leaving = true
+		ctx.Net.get("TrainLeave"):FireServer()
+	end
 	-- the run slows to a jog when you stop tapping
 	if track and idle > 0.35 then
 		track:AdjustSpeed(math.max(0.15, track.Speed - 0.05))
@@ -158,6 +164,8 @@ end
 local function enter(stationId)
 	local s = Formulas.station(stationId)
 	station = s
+	enteredAt = os.clock()
+	leaving = false
 	tapsThisVisit = 0
 	lastComboStep = 0
 	table.clear(recent)
