@@ -438,7 +438,7 @@ function CoachUI.start(c)
 			end
 		end)
 	end
-	chips = make("Frame", { Name = "CoachChips", BackgroundTransparency = 1, Position = UDim2.fromOffset(16, 60), Size = UDim2.fromOffset(170, 40), Parent = ctx.Hud.canvas })
+	chips = make("Frame", { Name = "CoachChips", BackgroundTransparency = 1, Position = UDim2.fromOffset(16, 108), Size = UDim2.fromOffset(170, 40), Parent = ctx.Hud.canvas })
 	make("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = chips })
 	ctx.Hud.refs.coachChips = chips
 
