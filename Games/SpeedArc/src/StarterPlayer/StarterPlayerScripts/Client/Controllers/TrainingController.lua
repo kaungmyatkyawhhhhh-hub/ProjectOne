@@ -255,7 +255,7 @@ function Training.start(c)
 	player:GetAttributeChangedSignal("Speed"):Connect(function()
 		local v = player:GetAttribute("Speed") or 0
 		for _, s in Stations do
-			if s.MinSpeed > 0 and lastSpeed < s.MinSpeed and v >= s.MinSpeed then
+			if s.MinSpeed > 0 and s.League == (player:GetAttribute("League") or 1) and lastSpeed < s.MinSpeed and v >= s.MinSpeed then
 				ctx.Hud.toast(("%s UNLOCKED!  +%d MPH a tap"):format(string.upper(s.Name), s.Gain), "Unlock")
 			end
 		end

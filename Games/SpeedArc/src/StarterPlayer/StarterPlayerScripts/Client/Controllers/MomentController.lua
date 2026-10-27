@@ -157,11 +157,12 @@ local function cutscene(info)
 	stage:Destroy()
 end
 
+local goBusy = false
 function Moment.goPro()
-	if busy then
+	if goBusy then
 		return
 	end
-	busy = true
+	goBusy = true
 	confirmWin.hide(true)
 	local ok, info = ctx.Net.call("GoPro")
 	if ok then
@@ -173,7 +174,7 @@ function Moment.goPro()
 	else
 		ctx.Hud.toast("Not ready to GO PRO yet", "Denied")
 	end
-	busy = false
+	goBusy = false
 end
 
 local function arrive(info)

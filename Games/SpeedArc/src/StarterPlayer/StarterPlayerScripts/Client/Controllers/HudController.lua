@@ -7,6 +7,7 @@ local UIKit = require(Shared.UIKit)
 local Format = require(Shared.Util.Format)
 local Formulas = require(Shared.Util.Formulas)
 local Stations = require(Shared.Config.Stations)
+local Ranks = require(Shared.Config.Ranks)
 
 local P = UIKit.Palette
 local F = UIKit.Fonts
@@ -41,6 +42,16 @@ local function buildCoins()
 	})
 	refs.coinsScale = UIKit.make("UIScale", { Parent = pill })
 	refs.coins = pill
+	-- rank badge (league + rank) next to the coins
+	local rank = UIKit.pill({ Name = "Rank", Size = UDim2.fromOffset(128, 44), Position = UDim2.fromOffset(192, 10), Parent = canvas })
+	local dot = UIKit.make("Frame", { Name = "Dot", BackgroundColor3 = P.White, Position = UDim2.fromOffset(8, 8), Size = UDim2.fromOffset(28, 28), Parent = rank })
+	UIKit.corner(dot, UDim.new(0.5, 0))
+	UIKit.stroke(dot, P.White, 2, 0.3)
+	refs.rankDot = dot
+	refs.rankLetter = UIKit.text({ Text = "B", TextSize = 16, Color = P.SpeedBlack, Stroke = false, Parent = dot })
+	refs.rankText = UIKit.text({ Text = "BRONZE", TextSize = 15, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(42, 4), Size = UDim2.new(1, -46, 0, 20), Parent = rank })
+	refs.leagueText = UIKit.text({ Text = "LEAGUE 1", Font = F.BodyBold, TextSize = 13, Color = P.BrightBlue, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(42, 22), Size = UDim2.new(1, -46, 0, 16), Parent = rank })
+	refs.rank = rank
 end
 
 local function buildSpeed()
@@ -319,18 +330,43 @@ end
 -- Updates
 ----------------------------------------------------------------------------
 local function goalFor(speed)
-	local nextS = Formulas.nextStation(speed)
+	local league = player:GetAttribute("League") or 1
+	local nextS = Formulas.nextStation(speed, league)
+	local thresholds = Ranks.Thresholds[league] or Ranks.Thresholds[1]
+	local rankIdx = math.max(player:GetAttribute("Rank") or 1, 1)
+	local nextRankMin = thresholds[rankIdx + 1]
+	local candidates = {}
 	if nextS then
-		local prevMin = 0
-		for _, s in Stations do
-			if s.MinSpeed <= speed then
-				prevMin = s.MinSpeed
-			end
-		end
-		local frac = (speed - prevMin) / math.max(1, nextS.MinSpeed - prevMin)
-		return ('Reach <font color="#FFC83D">%d MPH</font> to unlock the %s'):format(nextS.MinSpeed, nextS.Name), frac
+		table.insert(candidates, { at = nextS.MinSpeed, floor = Formulas.stationFloor(speed, league), text = ('Reach <font color="#FFC83D">%s MPH</font> to unlock the %s'):format(Format.short(nextS.MinSpeed), nextS.Name) })
 	end
-	return 'Win races to earn <font color="#FFC83D">coins</font>', 1
+	if nextRankMin and nextRankMin > speed then
+		table.insert(candidates, { at = nextRankMin, floor = thresholds[rankIdx] or 0, text = ('Reach <font color="#FFC83D">%s MPH</font> for %s rank'):format(Format.short(nextRankMin), string.upper(Ranks.Names[rankIdx + 1])) })
+	end
+	table.sort(candidates, function(a, b)
+		return a.at < b.at
+	end)
+	local c = candidates[1]
+	if c then
+		return c.text, (speed - c.floor) / math.max(1, c.at - c.floor)
+	end
+	-- Champion: the Go Pro goal
+	local wins, need = player:GetAttribute("LeagueWins") or 0, player:GetAttribute("WinsNeeded") or 1
+	if player:GetAttribute("GoProReady") then
+		return '<font color="#FFC83D">GO PRO</font> is ready!', 1
+	elseif league >= (player:GetAttribute("MaxLeague") or 3) then
+		return 'Top league for now: win races for <font color="#FFC83D">coins</font>', 1
+	end
+	return ('Win <font color="#FFC83D">%d more race%s</font> to GO PRO'):format(need - wins, if need - wins == 1 then "" else "s"), wins / math.max(1, need)
+end
+
+local function renderRank()
+	local name = player:GetAttribute("RankName") or "Bronze"
+	local color = Ranks.Colors[name] or P.White
+	refs.rankText.Text = string.upper(name)
+	refs.rankText.TextColor3 = color
+	refs.rankDot.BackgroundColor3 = color
+	refs.rankLetter.Text = string.sub(name, 1, 1)
+	refs.leagueText.Text = ("LEAGUE %d"):format(player:GetAttribute("League") or 1)
 end
 
 local function renderSpeed(v)
@@ -440,6 +476,7 @@ function Hud.setRaceMode(on)
 	if refs.menu then
 		refs.menu.Visible = not on
 	end
+	refs.rank.Visible = not on
 	if on then
 		refs.training.Visible = false
 		refs.hint.Visible = false
@@ -487,6 +524,13 @@ function Hud.start(ctx)
 		end
 	end
 	player:GetAttributeChangedSignal("Speed"):Connect(onSpeed)
+	for _, a in { "Rank", "RankName", "League", "LeagueWins", "GoProReady" } do
+		player:GetAttributeChangedSignal(a):Connect(function()
+			renderRank()
+			renderSpeed(player:GetAttribute("Speed") or 0)
+		end)
+	end
+	renderRank()
 	player:GetAttributeChangedSignal("Coins"):Connect(onCoins)
 	shownSpeed = player:GetAttribute("Speed") or 0
 	shownCoins = player:GetAttribute("Coins") or 0

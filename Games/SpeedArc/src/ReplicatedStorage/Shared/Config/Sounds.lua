@@ -2,6 +2,16 @@
 -- Ids = one or more clips (never the same clip twice in a row). Pitch = random range. Layers = other keys played together.
 -- Group: SFX, UI, Crowd, Music, Voice. Pool = how many copies can play at once.
 return {
+	-- Music (APM library via the Creator Store; owner picks the final ids). Crossfade 1.5 s between areas,
+	-- race music from GO to the finish, everything ducks to 40% in the countdown.
+	Music = {
+		Hub = { Id = "rbxassetid://1846273376", Volume = 0.35 },
+		Park = { Id = "rbxassetid://1846810919", Volume = 0.35 },
+		Stadium = { Id = "rbxassetid://128683938011405", Volume = 0.35, Bed = "rbxassetid://9120974378" },
+		Race = { Id = "rbxassetid://1842057947", Volume = 0.42 },
+		Fade = 1.5,
+		Duck = 0.4,
+	},
 	Groups = { SFX = 0.8, UI = 0.6, Crowd = 0.55, Music = 0.4, Voice = 0.8 },
 
 	Sounds = {
@@ -51,6 +61,12 @@ return {
 		RevealRare = { Ids = { "rbxassetid://132574644259001" }, Volume = 0.55, Pitch = { 1.0, 1.0 }, Group = "SFX", Pool = 1, Layers = { "RevealCommon" } },
 		RevealEpic = { Ids = { "rbxassetid://132574644259001" }, Volume = 0.7, Pitch = { 0.9, 0.9 }, Group = "SFX", Pool = 1, Layers = { "CrowdOoh", "ComboUp" } },
 		RevealLegend = { Ids = { "rbxassetid://1841800152" }, Volume = 0.6, Pitch = { 1.0, 1.0 }, Group = "Music", Pool = 1, Layers = { "FinishCheer", "RevealRare" } },
+		RankUp = { Ids = { "rbxassetid://9125648149" }, Volume = 0.6, Pitch = { 0.8, 0.82 }, Group = "SFX", Pool = 1, Layers = { "CrowdOoh", "RevealRare" } },
+		GoPro = { Ids = { "rbxassetid://1841800152" }, Volume = 0.7, Pitch = { 0.95, 0.95 }, Group = "Music", Pool = 1, Layers = { "FinishCheer", "Wind" } },
+		Arrive = { Ids = { "rbxassetid://9126228631" }, Volume = 0.45, Pitch = { 0.9, 0.95 }, Group = "SFX", Pool = 1, Layers = { "CrowdMurmur" } },
+		Jump = { Ids = { "rbxassetid://9120704978" }, Volume = 0.5, Pitch = { 0.9, 1.0 }, Group = "SFX", Pool = 2 },
+		HurdleLand = { Ids = { "rbxassetid://87061775498714" }, Volume = 0.6, Pitch = { 0.85, 0.95 }, Group = "SFX", Pool = 2 },
+		HurdleKnock = { Ids = { "rbxassetid://9120914426" }, Volume = 0.6, Pitch = { 0.95, 1.05 }, Group = "SFX", Pool = 2 },
 		Wind = { Ids = { "rbxassetid://9126228631" }, Volume = 0.5, Pitch = { 0.55, 0.6 }, Group = "SFX", Pool = 2 },
 	},
 }

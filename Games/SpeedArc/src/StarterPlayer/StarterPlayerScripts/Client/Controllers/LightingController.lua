@@ -63,13 +63,43 @@ function LightingController.apply(areaName)
 	rays.Enabled = not low
 end
 
+-- only the area you're in has its lights on (GYM ARC lesson): lights elsewhere are switched off locally
+local Players = game:GetService("Players")
+local Areas = require(Shared.Config.Areas)
+local function areaLights(areaId)
+	for _, id in Areas.Order do
+		local model = workspace:FindFirstChild(Areas[id].Model)
+		if model then
+			for _, l in model:GetDescendants() do
+				if l:IsA("Light") then
+					l.Enabled = id == areaId
+				end
+			end
+		end
+	end
+end
+
 function LightingController.start(ctx)
 	ctx.Lighting = LightingController
-	LightingController.apply("Hub")
-	local gs = UserSettings_:GetService("UserGameSettings")
-	gs:GetPropertyChangedSignal("SavedQualityLevel"):Connect(function()
-		LightingController.apply("Hub")
+	local player = Players.LocalPlayer
+	local function current()
+		local id = player:GetAttribute("Area") or "Hub"
+		return Areas[id] and Areas[id].Lighting or "Hub", id
+	end
+	local function refresh()
+		local preset, id = current()
+		LightingController.apply(preset)
+		areaLights(id)
+	end
+	refresh()
+	player:GetAttributeChangedSignal("Area"):Connect(function()
+		refresh()
+		task.delay(2, function()
+			areaLights(select(2, current())) -- again once the area has streamed in
+		end)
 	end)
+	local gs = UserSettings_:GetService("UserGameSettings")
+	gs:GetPropertyChangedSignal("SavedQualityLevel"):Connect(refresh)
 end
 
 return LightingController
