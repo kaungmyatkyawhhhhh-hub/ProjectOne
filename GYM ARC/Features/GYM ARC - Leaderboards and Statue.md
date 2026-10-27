@@ -53,3 +53,7 @@ The statue reads the strongest player's save (read-only) and is built with their
 - Two new boards: **ALTERS** (highest Body Alter, "Alter 5") and **LEVEL** (the best top bar LVL ever = average muscle level, "LVL 305"; sub "Best ever"). `Config/Leaderboards` + `Server/LeaderboardService`; stores `LB1_Alters`, `LB1_Level`.
 - On the **Pro Gym wall** and the **town stand** (both now 8 panels, frames / header / trims / posts stretched). The **starter gym wall keeps its 6**: no room (the side wall on one end, the Personal Trainers desk under the other).
 - Best ever (owner, 24 Oct): `stats.bestLevel`, noted by `PlayerData.NoteBestLevel` before a Growth Spurt / alter resets the muscles and on every board write. Old saves start from their current LVL.
+
+## Reset and top 25 (28 Oct, prompt 79; [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]])
+- All boards reset: stores are now `LB2_<board>` (fresh). Players reappear as they play.
+- Every board shows the **top 25**, scrollable (10 rows visible; the extra rows are added on the client by `LeaderboardClient.scrollRows`).

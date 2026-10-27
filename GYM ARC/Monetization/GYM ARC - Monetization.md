@@ -201,3 +201,9 @@ Developer products, bought once in Inventory > Alters (not in the Store). Ids go
 | Rose Gold | 15 Gold | pink gold | 299 | VariantRoseGold | map + product needed |
 
 Product ids (owner, 27 Oct): VariantInferno 3722938194, VariantFrostbite 3722938311, VariantZombie 3722938374, VariantBlackMarble 3722938401, VariantPatina 3722938453, VariantRoseGold 3722938509. All checked for sale.
+
+## 4th trainer slot (28 Oct, prompt 79; [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]])
+| Item | Type | What | Robux | ID | Status |
+|---|---|---|---|---|---|
+| Extra Trainer | Game pass | now the 3rd trainer slot (everyone has 2) | 99 | 2032496303 | ON |
+| 4th Trainer (`ExtraTrainer2`) | Game pass | the 4th trainer slot (needs the 3rd first in the + button order) | 149 suggested | none yet | waiting on owner |

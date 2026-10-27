@@ -29,3 +29,5 @@ The Settings panel (top bar pill or the menu). All choices are saved per player.
 ## Screenshots
 ![[GYM ARC/Screenshots/fonts_after_settings_pc.png]]
 ![[GYM ARC/Screenshots/fonts_after_settings_phone.png]]
+
+- (28 Oct, [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]]) **Trainers Near You:** 1 / 2 / 3 / 4, how many of your equipped trainers follow you (`settings.trainersShown`).

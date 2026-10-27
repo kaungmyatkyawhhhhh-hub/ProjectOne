@@ -214,3 +214,8 @@ Owner: "make it so your trainers' muscles don't disappear when you zoom out too 
 - Atlas's dark band at the waist: the dark "pants gap" colour (BodyStages, prompt 69) only applies under classic Pants now, never under a trainer's outfit or on marble.
 ## Muscles gone after a respawn (27 Oct; owner: "why does the trainer dont have any muscle mesh rn")
 - Reproduced: after the player respawns (a reset, LoadCharacter) the trainer came back as a plain body. His muscle pieces were removed while he was briefly out of the world, but MuscleClient still had him as tracked, so it never rebuilt them. `MuscleClient` scan: a trainer whose MuscleMeshes folder is gone is tracked again from scratch. Tested: 17 pieces right after a respawn.
+
+## Slots, trainers near you, pity stages (28 Oct, prompt 79; [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]])
+- **Slots:** 2 for everyone, the Extra Trainer pass = 3rd, the 4th Trainer pass (`ExtraTrainer2`, no id yet) = 4th. No more free slots from spurts / alters. (Replaces the slot rules above.)
+- **Trainers near you:** Settings "Trainers Near You" 1-4 = how many of your equipped trainers follow you (rarest first). Attribute `TrainersShown`.
+- **Pity stages:** Legendary in 50, then Mythic in 100, then Secret (Atlas) in 150, then Legendary again (`Trainers.PityStages`, saved `pityStage`). Getting the stage's rarity or better by luck also finishes the stage. (Replaces the single 100-roll pity above.)
