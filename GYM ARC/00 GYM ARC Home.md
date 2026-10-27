@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 27 Oct: tutorial fixed (prompt 68). No genetics popup on join (new players start at x1.00). GO TO COACH no longer drops you on the desk. Steps never skip while you lift or have a window open, and the hint comes back. Gold chevron arrows on the floor, plus an edge arrow when the target is off screen. The goal step points at the GROWTH SPURT card. No popups during the tutorial. See [[2026-10-27 GYM ARC Tutorial fix and genetics at join]].
 - 27 Oct: Strongman Yard now unlocks at ALTER 2 (prompt 66 part 4) and got a full new look (light towers, string lights, weathered containers, bleachers, tent). Prompt 66 parts 1-3 (codes, Hall of Fame, profiles) still to do. See [[GYM ARC - Strongman Yard]].
 - 27 Oct: STRONGMAN YARD behind the Powerlifting Gym (Spurt 5): atlas stones, log press, yoke, farmer's walk, truck pull, tire flip, keg toss, a Strongman Showdown every 15 min with a live scoreboard and the YARD KING title; LVL UP popup only every 10 LVLs; atlas stone, yoke, farmer frames, shrub, flowers and potted plant modelled in Blender (waiting for import). See [[GYM ARC - Strongman Yard]], [[2026-10-27 GYM ARC Strongman Yard and Blender models]].
 - 26 Oct: retention pass: your body no longer changes with distance (low-end far look off); daily quests paid at reset, streak forgives one missed day, login popup never skipped; Growth Spurts faster (5/10/18/28/38 min); trainers at Spurt 1 with a free first roll; daily playtime gifts; favourite prompt after the first spurt. See [[2026-10-26 GYM ARC Retention pass]].
@@ -396,6 +397,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bugs index]]
 
 ### Progress
+- [[2026-10-27 GYM ARC Tutorial fix and genetics at join]]
 - [[2026-10-27 GYM ARC Strongman Yard and Blender models]]
 - [[2026-10-26 GYM ARC Retention pass]]
 - [[2026-10-26 GYM ARC Endgame and first Growth Spurt pass]]
@@ -422,6 +424,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-27 GYM ARC Prompt - 68 Tutorial fix and genetics at join]]
 - [[2026-10-27 GYM ARC Prompt - 63 Strongman Yard]]
 - [[2026-10-26 GYM ARC Prompt - Bugs, appeal, progression and retention]]
 - [[2026-10-04 GYM ARC Prompt - Design brief]]

@@ -7,7 +7,7 @@ status: done
 
 Back to [[00 GYM ARC Home|GYM ARC Home]].
 
-Rolled on first join: a grade for each muscle group plus a body frame and body type, shown as bumper plates loading onto a barbell in a real 3D gym scene.
+(27 Oct, prompt 68) New players start at x1.00 on everything (grade B on every group, a "Standard" frame and body with no bonus) and never see the reveal on join. Their first roll is the free reroll from the Genetics menu. Before that: rolled on first join, a grade for each muscle group plus a body frame and body type, shown as bumper plates loading onto a barbell in a real 3D gym scene.
 
 ## How it works
 - **Grades per group:** D 0.75x (15%), C 0.9x (25%), B 1.0x (30%), A 1.2x (20%), S 1.5x (10%).
@@ -20,7 +20,7 @@ Rolled on first join: a grade for each muscle group plus a body frame and body t
 - **Plates:** competition-style, "M WEIGHTS" printed around the hub, grade letter at 9 and 3 o'clock, grade colors made deeper. Loaded best grade first.
 - **Reveal (under 3 s):** plates slide on one by one with a clank, S plates shine, the collar closes, the overall plate drops with a thud. Tap or Space skips.
 - **Labels:** one row under the plates on a shared dark panel: group name, grade circle, multiplier. Tap a plate for a small card ("Your chest grows 20% faster").
-- Opens from the Genetics tile and automatically on first join; movement freezes and the HUD steps aside.
+- Opens from the Genetics tile (no longer automatically on first join, prompt 68); movement freezes and the HUD steps aside.
 
 ## Where it lives
 - `Config/Genetics`, `Theme.GradePlates`
@@ -79,3 +79,10 @@ The owner keeps the 3D genetics screen (the plates on the bar). The single-panel
 
 ## Frame shoulder widths (owner, 19 Oct)
 The frame's shoulder width is smaller now: Narrow 0.9x, Average 1.0x, Wide **1.05x** (was 1.1x), V-Taper **1.1x** (was 1.2x). Bonuses and roll chances are unchanged. See [[GYM ARC - Muscles and Bodies]].
+
+## x1.00 at join, no reveal (27 Oct, prompt 68; [[2026-10-27 GYM ARC Tutorial fix and genetics at join]])
+- Owner: "when player join first all genetics are 1X and it doesnt show".
+- `Config/Genetics`: `Genetics.Starter()` = grade B everywhere, plus frame "Standard" (shoulders 1.0, no bonus) and body "Standard" (no bonus, abs at the normal level). These aren't in the roll lists, so rerolls and the odds screen never show them.
+- `PlayerData` (on load): a save that never kept a roll gets the starter genetics and is marked revealed. A player already past the tutorial keeps whatever they rolled (checked on the owner's save: unchanged).
+- The free reroll is still there, used from the Genetics menu when it unlocks.
+- `ReplayTutorial` no longer resets the reveal, so it can't wipe a real save's genetics.

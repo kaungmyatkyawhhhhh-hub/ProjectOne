@@ -10,8 +10,8 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 The first 5 minutes, taught with glowing floor paths and one-line coach messages.
 
 ## How it works
-- **Steps:** genetics reveal, first lift on the bench, Beginner Gains title, stamina + a free shake, squat rack, stats, first quest from Coach Dex, the Growth Spurt goal shown.
-- **Guidance:** a glowing path on the floor to the next machine, a glowing machine outline, one coach line at a time ("tap Occupy").
+- **Steps:** (no genetics reveal since 27 Oct) first lift on the bench, Beginner Gains title, stamina + a free shake, squat rack, stats, first quest from Coach Dex, the GROWTH SPURT card tapped (its "Train next" window), the SKATE button.
+- **Guidance:** a gold path of chevron arrows on the floor to the next machine, a big gold arrow at the screen edge when the target is off screen, a glowing machine outline, one coach line at a time ("tap Occupy").
 - **No shop or purchase prompts** in the first 5 minutes.
 - **Replay:** Workspace attribute `ReplayTutorial` replays it on your own save; `FreshPlayer` plays as a new player.
 
@@ -69,3 +69,17 @@ The first 5 minutes, taught with glowing floor paths and one-line coach messages
 
 ## First 15 minutes (26 Oct; [[2026-10-26 GYM ARC First 15 minutes, deals, invites, memory]])
 - NEW PLAYER BOOST 2x EXP and coins for the first 15 min of play, announced by Coach Dex; +100 coins and "FIRST REP! YOU GOT STRONGER" on the first rep; the GROWTH SPURT card shows from the first second; 750 starting coins when the tutorial ends (skipped too).
+
+## Prompt 68: clear and never stuck (27 Oct; [[2026-10-27 GYM ARC Tutorial fix and genetics at join]])
+Tester: "confusing, breaks midway, should show everything with pathways and arrows". I played the whole tutorial as a new player first. What broke, and the fix:
+- **Genetics reroll popped up on join:** gone. New players start at x1.00 genetics and PLAY goes straight into the tutorial (see [[GYM ARC - Genetics]]). The server puts them at the start spot on "TutorialStart".
+- **GO TO COACH DEX put the player ON the front desk**, so his Talk button never showed. This was the "breaks midway". Now the spot is on the floor straight in front of him, past the desk (`Shared/GoTo` coachSpot). GO TO never stands you on furniture (`GoToService`). The Coach step also has a 60 s safety timeout.
+- **Steps skipped themselves:** OpenStats and Goal timed out while the player was still lifting (reps go on their own), and the last steps ran behind an open window. Now a timeout or a "seconds" step only counts while the step can be done: the tutorial is on screen, no window is open, the player isn't teleporting, and they're off a machine unless the step is about the machine.
+- **The hint vanished after 4 s:** the step's line now comes back in the top band every 12 s until it's done (on a machine too).
+- **Coach box lost:** a step reached on a machine now shows its coach box once you step off.
+- **"Open Muscles to see your Growth Spurt goal" didn't explain anything:** the Goal step now points at the GROWTH SPURT card ("TAP IT"). Its window says which muscles are furthest behind, with GO buttons. SKIP hides during that step, because the arrow sat on it.
+- **Arrows:** the floor dots are now gold chevrons pointing the way, on a wider ribbon, snapped to the floor (they floated 1.6 studs up). While the target is off screen, a big gold arrow at the screen edge points at it; when it's behind you the arrow goes left or right ("turn this way"). It stays clear of the left nav, the right cards and the top bar.
+- **First look:** the camera starts high behind the player so the arrow path to the Flat Bench shows (from the normal angle the player's body hid it).
+- **Popup clutter:** during the tutorial these stay quiet: LVL UP, NEW WEIGHT UNLOCKED, NEW PERSONAL RECORD, Growth Spurt milestones, plain toasts and trainer cheer bubbles. Purchases and gifts still show. After the tutorial, unlock guides wait 45 s so "Tap GO TRAIN" gets the screen.
+- Files: `Config/Onboarding`, `TutorialClient`, `Shared/UI/GuidePath`, `Shared/GoTo`, `GoToService`, `ActionService` (TutorialStart), `ProgressClient` (UIBus.SpurtTile / NeedsIsOpen), `Shared/UI/Notify`, `MachineClient`, `TrainerFollowClient`, `GuideClient`.
+- Note: the gold marker over the target and the Talk prompt draw on top of everything. Studio's screenshot tool can't see those, so check them by eye.
