@@ -629,12 +629,12 @@ end
 local cx = trX0 + 1.5 * 6.5
 for _, px in { trX0 - 3.5, trX0 + 3 * 6.5 + 3.5 } do
 	for _, pz in { trZ - 5, trZ + 5 } do
-		block(tread, "CanopyPost", Vector3.new(0.6, 9, 0.6), Vector3.new(px, 4.5, pz), Palette.SpeedBlack)
+		block(tread, "CanopyPost", Vector3.new(0.6, 12, 0.6), Vector3.new(px, 6, pz), Palette.SpeedBlack)
 	end
 end
-block(tread, "CanopyRoof", Vector3.new(3 * 6.5 + 9, 0.8, 12), Vector3.new(cx, 9.4, trZ), Palette.ElectricBlue)
-block(tread, "CanopyTrim", Vector3.new(3 * 6.5 + 9.4, 0.4, 12.4), Vector3.new(cx, 8.9, trZ), Palette.Gold)
-block(tread, "CanopyGlow", Vector3.new(3 * 6.5 + 8, 0.2, 10.8), Vector3.new(cx, 8.95, trZ), Palette.BrightBlue, { Material = Enum.Material.Neon })
+block(tread, "CanopyRoof", Vector3.new(3 * 6.5 + 9, 0.8, 12), Vector3.new(cx, 12.4, trZ), Palette.ElectricBlue)
+block(tread, "CanopyTrim", Vector3.new(3 * 6.5 + 9.4, 0.4, 12.4), Vector3.new(cx, 11.9, trZ), Palette.Gold)
+block(tread, "CanopyGlow", Vector3.new(3 * 6.5 + 8, 0.2, 10.8), Vector3.new(cx, 11.95, trZ), Palette.BrightBlue, { Material = Enum.Material.Neon })
 sign(tread, Stations[2], CFrame.lookAt(Vector3.new(trX0 + 3 * 6.5 + 10, 0, trZ + 6), Vector3.new(trX0 + 3 * 6.5 + 14, 0, trZ + 30)))
 
 -- Stair Run: a wide flight of stairs to a platform, runners face up the stairs (-Z)

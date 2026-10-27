@@ -35,6 +35,8 @@ local lastBurst = 0
 local stretchShown = false
 local finishedShown = false
 local fovKickUntil = 0
+local camCF = nil -- our own camera state, so the default camera can't pull it back each frame
+local camFov = 72
 
 local function now()
 	return workspace:GetServerTimeNow()
@@ -399,9 +401,13 @@ local function render()
 		local cf = me.root.CFrame
 		local pos = cf.Position - cf.LookVector * 9 + cf.RightVector * 3 + Vector3.new(0, 4.5, 0)
 		local target = cf.Position + cf.LookVector * 9 + Vector3.new(0, 0.5, 0)
-		camera.CFrame = camera.CFrame:Lerp(CFrame.lookAt(pos, target), 0.25)
+		local want = CFrame.lookAt(pos, target)
+		camCF = if camCF then camCF:Lerp(want, 0.25) else want
+		camera.CameraType = Enum.CameraType.Scriptable
+		camera.CFrame = camCF
 		local fov = if os.clock() < fovKickUntil then 84 else 72
-		camera.FieldOfView += (fov - camera.FieldOfView) * 0.15
+		camFov += (fov - camFov) * 0.15
+		camera.FieldOfView = camFov
 	end
 end
 
@@ -437,6 +443,8 @@ local function onStart(info)
 		ctx.Hud.setRaceMode(true)
 		ctx.Training.setControls(false)
 		camera.CameraType = Enum.CameraType.Scriptable
+		camCF = nil
+		camFov = 72
 		ui.raceName.Text = info.name
 		clearMarkers()
 		for i, r in race.runners do

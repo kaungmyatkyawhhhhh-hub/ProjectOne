@@ -420,10 +420,9 @@ local function cleanup()
 				r.root.CFrame = r.returnCFrame
 				if r.returnSlot then
 					TrainingService.enter(r.player, r.returnSlot)
-				else
-					-- the client owns its character's physics once unanchored: it moves itself back
-					RaceEvent:FireClient(r.player, "return", { cframe = r.returnCFrame })
 				end
+				-- the client drew itself on the track; tell it where it really is now
+				RaceEvent:FireClient(r.player, "return", { cframe = r.root.CFrame })
 			end
 		end
 	end
