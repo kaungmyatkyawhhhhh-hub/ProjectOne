@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 27 Oct: prompt 76, alter variants (Robux skins for 6 alters, Halloween Zombie on Vascular): system built and tested; waiting on the owner's 6 colour map imports + 6 developer products. See [[2026-10-27 GYM ARC Alter variants]].
 - 27 Oct: prompt 75, tank top colours: the clothing store's mirror sells 10 tank top colours (try on, buy, wear, MINE = your own shirt). See [[2026-10-27 GYM ARC Tank top colours]].
 - 27 Oct: prompt 74, map pass: no reachable holes; floating lamps / speakers / ladder rungs / lantern bars fixed; 522 flickering overlaps fixed; 4 blank walls dressed; fences, road barriers and buoys mark the town's edges. See [[2026-10-27 GYM ARC Map pass]].
 - 27 Oct: prompt 73, sound and music balance: every track and sound measured; music levelled per track, too-loud effects lowered, no clip twice in a row, areas continue their playlist instead of restarting. See [[2026-10-27 GYM ARC Sound and music balance]].
@@ -405,6 +406,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bugs index]]
 
 ### Progress
+- [[2026-10-27 GYM ARC Alter variants]]
 - [[2026-10-27 GYM ARC Tank top colours]]
 - [[2026-10-27 GYM ARC Map pass]]
 - [[2026-10-27 GYM ARC Sound and music balance]]
@@ -439,6 +441,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-27 GYM ARC Prompt - 76 Alter variants]]
 - [[2026-10-27 GYM ARC Prompt - 75 Tank top colours]]
 - [[2026-10-27 GYM ARC Prompt - 74 Map]]
 - [[2026-10-27 GYM ARC Prompt - 73 Sound and music]]

@@ -187,3 +187,15 @@ Owner: "a Starter Pack popup every 5 minutes may annoy kids and push them away; 
 
 ## VIP 30% OFF pass (27 Oct)
 The owner made it: id **2052738798** (209 R$), in `Config/Monetization` (key VIPDeal, grants VIP). Offered after buying the Starter Pack (StarterPackClient).
+
+## Alter variants (27 Oct, prompt 76; [[2026-10-27 GYM ARC Alter variants]])
+Developer products, bought once in Inventory > Alters (not in the Store). Ids go in `Config/Products`; 0 = SOON.
+
+| Variant | Base alter | Look | Robux (suggested) | Product key | Status |
+|---|---|---|---|---|---|
+| Inferno | 1 Pumped | deep crimson, orange in the folds | 149 | VariantInferno | map + product needed |
+| Frostbite | 2 Shredded | icy blue-white, frosty speckle | 149 | VariantFrostbite | map + product needed |
+| Zombie (HALLOWEEN) | 4 Vascular | grey-green skin, dark blotches (no gore) | 199 | VariantZombie | map + product needed; on sale only while `Alters.Events.Halloween = true` |
+| Black Marble | 9 Marble | black stone, gold veins | 249 | VariantBlackMarble | map + product needed |
+| Patina | 11 Bronze | green verdigris over bronze | 199 | VariantPatina | map + product needed |
+| Rose Gold | 15 Gold | pink gold | 299 | VariantRoseGold | map + product needed |
