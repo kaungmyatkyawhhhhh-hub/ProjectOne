@@ -96,3 +96,6 @@ Everything GYM ARC learned the hard way (from its vault notes, 4-28 Oct). Build 
 - **Sound as an afterthought.** Screams/grunts/music were changed several times. SPEED ARC: sound designed with each feature (see the sound rule).
 
 ## New lessons (add below)
+- **28 Oct (prompt 1):** the SPEED ARC place has no default PlayerModule. Never `WaitForChild("PlayerModule")` (it froze training); and hiding touch controls (`GuiService.TouchControlsEnabled`) also froze the camera on phones. Anchor the character on the server instead.
+- **28 Oct:** a client that draws itself (race camera, runner positions) keeps its own position after the server moves it: always tell the client where it really is when a race ends.
+- **28 Oct:** Studio FPS on this PC is limited by Studio itself (same FPS looking at the sky); judge performance by draw calls / triangles / CPU ms and a real phone (F9).

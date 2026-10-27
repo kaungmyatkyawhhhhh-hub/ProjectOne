@@ -393,6 +393,7 @@ Owner, 28 Oct: coaches are INSPIRED BY famous kinds of runners, never copies. Ru
 - Races: every **3 minutes**.
 - Tap combo: **yes**, as in 6.2 (x1.0 -> x1.5 over 10 s of steady tapping; Auto Train gets a fixed x1.2) - Claude's call, keep unless playtests say otherwise.
 - Prices: as in section 20 - Claude's call, tune after launch data.
+- M1 tuning (prompt 1, 28 Oct): JOIN window **10 s**; race pace BasePace 22, League 1 middle 80 MPH, low clamp -0.6 (not -1) so new runners aren't too slow; **Lap Race = 1.5 laps** starting on the back straight (~27 s at 80 MPH), Sprint = 1 lap (~18 s); races stop at 45 s and the rest are placed by distance; NPC speed = joined players' middle x 0.7-1.15. Station 1 is called **Sprint Lane** (the GDD's Jog Lane numbers). See [[SPEED ARC - Races]].
 
 ## 29. Detail plans
 - [[SPEED ARC - World, Map and Buildings]]

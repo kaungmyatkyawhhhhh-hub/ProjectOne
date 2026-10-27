@@ -11,6 +11,7 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 - **Game Design Document (full details, the main reference):** [[SPEED ARC - Game Design Document]]
 - **Design plan (one-page summary + art/performance rules):** [[SPEED ARC - Design plan]]
 - **Lessons from GYM ARC (read before every big prompt):** [[SPEED ARC - Lessons from GYM ARC]]
+- **Rules for Claude:** [[SPEED ARC/CLAUDE|SPEED ARC CLAUDE.md]] (Studio "SPEED ARC", placeId 134701616695802; code in `Games/SpeedArc`)
 - **Prompts:** in `Prompts/` (numbered, newest last)
 - **Progress notes:** in `Progress/` (Claude Code writes one per prompt)
 - **Features:** in `Features/` (one note per system, Claude Code keeps them up to date)
@@ -31,4 +32,13 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 - [[SPEED ARC - Update Roadmap]]
 
 ## Prompts
-- [[2026-10-28 SPEED ARC Prompt - 1 Project setup and core loop]]
+- [[2026-10-28 SPEED ARC Prompt - 1 Project setup and core loop]] (done: [[2026-10-28 SPEED ARC Progress - 1 Project setup and core loop|progress]])
+
+## Features
+- [[SPEED ARC - Code and Sync]]
+- [[SPEED ARC - Player Data and Saving]]
+- [[SPEED ARC - UI Kit and HUD]]
+- [[SPEED ARC - Hub World]]
+- [[SPEED ARC - Training]]
+- [[SPEED ARC - Races]]
+- [[SPEED ARC - Sound]]

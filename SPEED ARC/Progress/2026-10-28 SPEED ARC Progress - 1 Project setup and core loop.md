@@ -8,7 +8,7 @@ prompt: "[[2026-10-28 SPEED ARC Prompt - 1 Project setup and core loop]]"
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ## What's done
-- **Setup:** [[CLAUDE|SPEED ARC CLAUDE.md]] (rules + performance + folders), code in the vault at `Games/SpeedArc/src` with a sync tool into Studio, all numbers in `Shared/Config`. See [[SPEED ARC - Code and Sync]].
+- **Setup:** [[SPEED ARC/CLAUDE|SPEED ARC CLAUDE.md]] (rules + performance + folders), code in the vault at `Games/SpeedArc/src` with a sync tool into Studio, all numbers in `Shared/Config`. See [[SPEED ARC - Code and Sync]].
 - **Data saving:** session lock, autosave every 60 s, save on leave and on shutdown, migrations, Studio test save. See [[SPEED ARC - Player Data and Saving]].
 - **UI kit:** black/carbon panels, electric blue, gold for coins and wins, Montserrat Heavy Italic + Builder Sans, chunky buttons with a press animation, coin/medal/speed icons drawn from shapes. See [[SPEED ARC - UI Kit and HUD]].
 - **Hub (Hometown Track):** blue 6-lane oval with lane numbers, gold start/finish arch with countdown screens, bleachers with 115 fans that bob and cheer, school front with clock tower countdown, banners, waving flags, moving clouds, hills, trees, plaza with the SPEED ARC emblem. See [[SPEED ARC - Hub World]].
@@ -41,7 +41,7 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 Still to do: check FPS and memory on a real cheap phone (F9 Developer Console), and a 30-60 min server soak test.
 
 ## Changes from the plan (please check)
-- **Race pace tuned:** BasePace 22, League 1 middle 80 MPH, low clamp -0.6 (GDD says -1) so brand-new runners aren't painfully slow. Sprint about 18 s and Lap Race about 27 s at 80 MPH; about 26 s / 38 s for a 0 MPH runner.
+- **Race pace tuned:** BasePace 22, League 1 middle 80 MPH, low clamp -0.6 (GDD says -1) so brand-new runners aren't painfully slow. Sprint about 18 s and Lap Race about 27 s at 80 MPH; about 26 s / 38 s for a 0 MPH runner who uses BOOST.
 - **Lap Race = 1.5 laps** that start on the back straight in front of the stands, so the race still ends at the gold arch.
 - **JOIN window 10 s** (this prompt) instead of the GDD's 15 s.
 - **NPC speed** = the joined players' middle speed x 0.7-1.15, so races stay close.

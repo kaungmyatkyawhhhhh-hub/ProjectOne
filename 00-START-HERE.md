@@ -12,6 +12,7 @@ This vault is my personal context for Claude: who I am, what I'm working on and 
 - [[City Legends/City Legends]]: my Roblox driving game
 - [[Break A Bed/Project Overview]]: my Roblox bed-breaking clicker game
 - [[GYM ARC/00 GYM ARC Home]]: my Roblox gym game (GYM ARC)
+- [[SPEED ARC/00 SPEED ARC Home]]: my Roblox running simulator (SPEED ARC)
 - [[Tools/Token-Saving-Plugins]]: token-saving plugins (what is installed, what was skipped)
 
 ## Rules for Claude
