@@ -8,8 +8,8 @@ status: todo
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ```text
-NEW GAME: SPEED ARC (a Roblox running simulator). Read "SPEED ARC\SPEED ARC - Game Design Document.md" (the main reference, all numbers), "SPEED ARC\SPEED ARC - Design plan.md" (especially PERFORMANCE RULES and ART QUALITY RULES) and "SPEED ARC\SPEED ARC - Lessons from GYM ARC.md" in the Obsidian vault first. Put the key lessons into SPEED ARC's CLAUDE.md so every session follows them (owner: never repeat GYM ARC's mistakes, section 10). Also read the detail plans linked from the home note (World/Map, Lighting, Audio, VFX, Customization, Roadmap) and use them for the hub.
-- SOUND IS A CORE FEATURE (owner): every action in M1 (taps, combo, race countdown/gun/boost/finish, coins, UI) gets a designed, layered sound from the Audio plan before it counts as done; do a 10-minute listening pass.
+NEW GAME: SPEED ARC (a Roblox running simulator).
+READ (keep it quick, only these): "SPEED ARC\SPEED ARC - Quick Rules.md" fully; in "SPEED ARC - Game Design Document.md" only sections 3, 5-8, 19 and 21-25; in "SPEED ARC - World, Map and Buildings.md" only section 1 (Hub) and 7 (building kit); in "SPEED ARC - Lighting.md" only the Hub row; in "SPEED ARC - Audio (SFX and Music).md" only "Why sound matters", Rules and the Training/Races/UI SFX; in "SPEED ARC - Lessons from GYM ARC.md" only sections 1, 2 and 10. Nothing else. Copy the Quick Rules into SPEED ARC's CLAUDE.md so later sessions only need that.
 
 VERY IMPORTANT
 - This is a SEPARATE game. Never open, change or publish the GYM ARC place, and never write in the vault's GYM ARC folder. All notes go in the vault's "SPEED ARC" folder (Progress\, Features\).

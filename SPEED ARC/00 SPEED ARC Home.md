@@ -7,6 +7,7 @@ A Roblox running simulator. Tagline: **"Everyone starts slow."**
 Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 
 ## Start here
+- **Quick Rules (the ONLY note every session must read):** [[SPEED ARC - Quick Rules]]
 - **Game Design Document (full details, the main reference):** [[SPEED ARC - Game Design Document]]
 - **Design plan (one-page summary + art/performance rules):** [[SPEED ARC - Design plan]]
 - **Lessons from GYM ARC (read before every big prompt):** [[SPEED ARC - Lessons from GYM ARC]]
