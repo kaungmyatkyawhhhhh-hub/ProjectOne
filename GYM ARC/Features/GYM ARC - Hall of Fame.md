@@ -42,3 +42,6 @@ The Hall is now on the park block behind the plaza (Blender model + builder), wi
 
 ## Confirm (28 Oct, prompt 82)
 ENTER opens ARE YOU SURE? (what starts over, what you keep), GO BACK / red YES, ENTER; only YES enters. [[2026-10-28 GYM ARC Prompt - 82 Hall of Fame are you sure]]
+
+## Soul sounds (28 Oct, prompt 84)
+The soul's flight has its own 3D sounds (Config/Sounds HofSoul*: pull, breath, shimmer, rise, wind, fly-by, dive) and the burst bangs. List: [[GYM ARC - Music and Sounds]].

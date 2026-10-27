@@ -241,3 +241,16 @@ Picked from the licensed library by description, not heard: swap any id in `Conf
 - **Too-loud effects lowered:** Clank (every rep) 0.5->0.3, StoneThud 0.5->0.25, PlateDrop 0.6->0.35, GeneticsClank 0.6->0.35, CourtDunk 0.45->0.35, FloorThud 0.45->0.35, TruckCreak 0.4->0.3, ChainRattle 0.3->0.22, BigRep 0.3->0.25, CourtDribble 0.35->0.25, GeneticsExplode 0.5->0.4.
 - **No annoying repeats:** a sound with several clips never plays the same clip twice in a row (all sounds). Music: the first visit to an area starts its own first track, later visits go on with the next track of that list (it used to restart the same song every time); back within 5 s resumes the same spot.
 - **Every area has music:** Starter, Pro, Powerlifting, Strongman Yard, Court, Beach (also the posing stage and skate park), Town, Pump Shop (the town's, quieter), the genetics stage (Starter's).
+
+## Hall of Fame: the soul's flight (28 Oct, prompt 84; [[2026-10-28 GYM ARC Prompt - 84 Soul sounds]])
+Owner: "put sfx even on the soul part too like the soul flying up". Claude's picks from Roblox's licensed library, 3D on the soul (everyone near hears it; the player's camera chases it). Config/Sounds, swap any id there:
+| Key | When | Sound |
+|---|---|---|
+| HofSoulPull | sucked out of the body | PSE Air Fingers Short Swooshing Bursts, Sucking, Hissing Build Up (9113069142) |
+| HofSoulBreath | as it leaves | PSE Lung Wind Whoosh, Breathy Blasts, Arctic Chill (9125632802) |
+| HofSoulShimmer | rising, gold | APM Harp Glissando (B) (1840525338) |
+| HofSoulRise | flying up | PSE Whoosh, Rising Swish, Airy (9120733948) |
+| HofSoulWind | the flight | APM Powerful Wave, white-noise whoosh with a rumble (9040280284) |
+| HofSoulFlyBy | swooping over the town | PSE Slowed Whip Swishes, Whomping Airy Whoosh Bys (9125959352) |
+| HofSoulDive | the dive into the Hall | PSE Slowed Whip Swishes, Whoosh Bys, pitched down 0.85 (9125960015) |
+The burst on the stage now bangs (HofFirework). The player's two cloth-swish "Whoosh" sounds at the flight and the dive are gone (replaced). Tested with TestCutscene 1: each plays on the soul at its moment, no errors.

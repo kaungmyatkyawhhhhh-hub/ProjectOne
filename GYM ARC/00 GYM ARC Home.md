@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 28 Oct: prompt 84: the Hall of Fame soul now has its own layered sounds (pulled out, rising, flying, the dive). See [[GYM ARC - Music and Sounds]].
 - 28 Oct: prompt 83: a light loading screen (3 rotating pictures, gold bar, tips, Hall of Fame badge switch). See [[GYM ARC - Loading Screen and Menu]].
 - 28 Oct: CODES (prompt 66 part 1): a CODES window (left menu + Settings), 4 starting codes, codes added from the console without publishing. See [[GYM ARC - Codes]].
 - 28 Oct: prompt 82: Hall of Fame ARE YOU SURE? confirm; VIEW MY STATUE on the round stage in the middle.
@@ -458,6 +459,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-28 GYM ARC Prompt - 81 Hall of Fame fixes, clock spike, test stats on]]
 - [[2026-10-28 GYM ARC Prompt - 82 Hall of Fame are you sure]]
 - [[2026-10-28 GYM ARC Prompt - 83 Loading screen upgrade]]
+- [[2026-10-28 GYM ARC Prompt - 84 Soul sounds]]
 - [[GYM ARC - Codes]]
 - [[2026-10-28 GYM ARC Prompt - 79 Leaderboard reset, trainer slots, pity stages]]
 - [[2026-10-27 GYM ARC Prompt - 78 FPS lag check]]

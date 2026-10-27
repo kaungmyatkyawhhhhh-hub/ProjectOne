@@ -80,3 +80,6 @@ See [[GYM ARC - Hall of Fame]]. Tested on FreshPlayer (GS 6, Alter 15, muscles 4
 ## Loading screen upgrade (prompt 83) - [[GYM ARC - Loading Screen and Menu]]
 - Light version (tweens only): rotating background (Config/UI.LoadingArt), gold bar + 3 step lines, one tip line every 3 s, NEW: HALL OF FAME badge behind Config/UI.LoadingBadge (off), quiet menu music rising at the menu, body meshes loading alongside the world. PLAY at 20.3 s on a first load at phone size (Studio). Waiting on the owner's two thumbnail image ids (not uploaded by Claude: body art).
 - Codes window: the result line now sits between the box and REDEEM (it fell off the panel's bottom).
+
+## Soul sounds (prompt 84)
+- HallOfFameClient soulFlight: 7 new 3D sounds on the soul (Config/Sounds HofSoul*, listed in [[GYM ARC - Music and Sounds]]) at the pull, the rise, the flight, a mid-flight swoop and the dive; the burst plays HofFirework. myCeremony's two "Whoosh" (robe swish) calls removed. Tested: TestCutscene 1, every sound plays on time, no errors.
