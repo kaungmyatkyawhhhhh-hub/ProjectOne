@@ -11,6 +11,8 @@ local TrainingService = require(Services.TrainingService)
 local RaceService = require(Services.RaceService)
 local LockerService = require(Services.LockerService)
 local CoachService = require(Services.CoachService)
+local LeagueService = require(Services.LeagueService)
+local AreaService = require(Services.AreaService)
 
 Net.get("Toast") -- creates the remotes before any client asks for them
 
@@ -47,3 +49,5 @@ TrainingService.start()
 RaceService.start()
 LockerService.start()
 CoachService.start()
+LeagueService.start()
+AreaService.start()

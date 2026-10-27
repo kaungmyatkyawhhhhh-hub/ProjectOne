@@ -29,6 +29,14 @@ return {
 	Pity = {}, -- [rarity] = rolls since last coach of at least that rarity
 	SeenCutscenes = {}, -- [coachId] = true (SKIP shows after the first time)
 	Passes = {}, -- [passName] = true (M5)
+
+	-- M3: leagues
+	Rank = 1, -- rank index inside the current league (1 Bronze .. 5 Champion)
+	BestRank = {}, -- [league] = best rank index reached there (unlocks keep after Go Pro)
+	LeagueWins = 0, -- race wins in your own league since your last Go Pro
+	Titles = {}, -- [title] = true
+	FreeRolls = 0, -- free coach rolls (Go Pro gives one)
+	SeenGoPro = {}, -- [league] = true (SKIP on the cutscene after the first time)
 	FirstJoin = 0,
 	LastJoin = 0,
 }

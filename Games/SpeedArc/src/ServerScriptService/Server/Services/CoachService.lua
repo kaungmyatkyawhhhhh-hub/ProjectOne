@@ -22,6 +22,9 @@ local function rarityIndex(r)
 end
 
 function CoachService.rollPrice(data)
+	if (data.FreeRolls or 0) > 0 then
+		return 0 -- a free roll from Go Pro
+	end
 	return math.max(Coaches.RollMinPrice, Formulas.minutesOfCoins(Coaches.RollMinutes, data.League))
 end
 
@@ -313,7 +316,11 @@ local function roll(player)
 	if data.Coins < price then
 		return false, "coins"
 	end
-	PlayerData.set(player, "Coins", data.Coins - price)
+	if price == 0 then
+		data.FreeRolls -= 1
+	else
+		PlayerData.set(player, "Coins", data.Coins - price)
+	end
 	local pick, forced = draw(data)
 	data.CoachRolls += 1
 	local entry = addCoach(data, pick.Id, 1)

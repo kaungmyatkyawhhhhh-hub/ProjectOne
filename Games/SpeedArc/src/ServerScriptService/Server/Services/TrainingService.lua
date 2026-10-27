@@ -173,10 +173,17 @@ local function setupSlot(slot)
 end
 
 function TrainingService.start()
-	local training = workspace:WaitForChild("Hub"):WaitForChild("Training")
-	for _, d in training:GetDescendants() do
-		if d:IsA("BasePart") and d.Name == "Slot" then
-			setupSlot(d)
+	-- stations in every area (hub, City Park, Stadium ...)
+	local Areas = require(Shared.Config.Areas)
+	for _, id in Areas.Order do
+		local model = workspace:FindFirstChild(Areas[id].Model)
+		local training = model and model:FindFirstChild("Training")
+		if training then
+			for _, d in training:GetDescendants() do
+				if d:IsA("BasePart") and d.Name == "Slot" then
+					setupSlot(d)
+				end
+			end
 		end
 	end
 
