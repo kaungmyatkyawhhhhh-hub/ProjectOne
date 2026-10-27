@@ -64,8 +64,7 @@ end
 local Cutscenes = {}
 
 function Cutscenes.Storm(stage, t)
-	stage.BackgroundColor3 = Color3.fromHex("#0A1830")
-	UIKit.gradient(stage, Color3.fromHex("#14325E"), Color3.fromHex("#05080F"), 90)
+	UIKit.gradient(stage, Color3.fromHex("#2C5FA8"), Color3.fromHex("#0A1426"), 90) -- stage stays white so the gradient shows
 	local lines = {}
 	for i = 1, 26 do
 		local l = make("Frame", { BackgroundColor3 = P.White, BackgroundTransparency = 0.4 + math.random() * 0.4, BorderSizePixel = 0, Size = UDim2.new(0, math.random(80, 220), 0, math.random(2, 4)), Position = UDim2.fromScale(math.random(), math.random()), Parent = stage })
@@ -89,7 +88,7 @@ function Cutscenes.Sunrise(stage)
 	local sun = make("Frame", { BackgroundColor3 = Color3.fromHex("#FFE38C"), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.95), Size = UDim2.fromOffset(170, 170), Parent = stage })
 	UIKit.corner(sun, UDim.new(0.5, 0))
 	for i, h in { 0.38, 0.3, 0.22 } do
-		local hill = make("Frame", { BackgroundColor3 = Color3.fromHex("#1F3B2B"):Lerp(Color3.fromHex("#3F6B4A"), i / 3), AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.fromScale(0.2 + i * 0.3, 1.18), Size = UDim2.fromScale(0.9, h * 1.6), Parent = stage })
+		local hill = make("Frame", { BackgroundColor3 = Color3.fromHex("#1F3B2B"):Lerp(Color3.fromHex("#3F6B4A"), i / 3), AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.fromScale(0.15 + i * 0.35, 1.1), Size = UDim2.fromScale(0.8, h * 0.9), Parent = stage })
 		UIKit.corner(hill, UDim.new(0.5, 0))
 	end
 	return function(_, age)
@@ -98,8 +97,7 @@ function Cutscenes.Sunrise(stage)
 end
 
 function Cutscenes.FilmGrain(stage)
-	stage.BackgroundColor3 = Color3.fromHex("#4A3A28")
-	UIKit.gradient(stage, Color3.fromHex("#B8A27E"), Color3.fromHex("#3A2D1F"), 90)
+	UIKit.gradient(stage, Color3.fromHex("#C9B38C"), Color3.fromHex("#4A3A28"), 90)
 	local grain = {}
 	for i = 1, 60 do
 		grain[i] = make("Frame", { BackgroundColor3 = if i % 2 == 0 then Color3.fromHex("#F1E6CF") else Color3.fromHex("#1D150D"), BorderSizePixel = 0, Size = UDim2.fromOffset(2, 2), Parent = stage })
@@ -149,15 +147,19 @@ local function playCutscene(coach, canSkip)
 	local portrait = Art.portrait(coach, 150, stage)
 	portrait.AnchorPoint = Vector2.new(0.5, 0.5)
 	portrait.Position = UDim2.fromScale(0.5, 0.45)
+	portrait.ZIndex = 10 -- always above the cutscene's world
 	local ps = make("UIScale", { Scale = 0, Parent = portrait })
 	local name = UIKit.text({ Text = string.upper(coach.Name), TextSize = 44, Color = Coaches.RarityColors[coach.Rarity], StrokeColor = P.SpeedBlack, StrokeThickness = 3, StrokeTransparency = 0, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0.45, 92), Size = UDim2.fromOffset(600, 50), Parent = stage })
 	name.TextTransparency = 1
+	name.ZIndex = 10
+	local started = false
 	local start = os.clock()
 	local conn
 	conn = RunService.RenderStepped:Connect(function(dt)
 		local age = os.clock() - start
 		step(dt, age)
-		if age > 1.4 and ps.Scale == 0 then
+		if age > 1.4 and not started then
+			started = true
 			UIKit.tween(ps, 0.35, { Scale = 1 }, Enum.EasingStyle.Back)
 			UIKit.tween(name, 0.4, { TextTransparency = 0 })
 			ctx.Sound.play("RevealLegend")
