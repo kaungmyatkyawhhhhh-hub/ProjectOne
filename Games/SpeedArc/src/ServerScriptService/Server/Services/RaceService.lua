@@ -93,6 +93,7 @@ local function makeNpc(i)
 	end
 	model.PrimaryPart = model:FindFirstChild("HumanoidRootPart")
 	model.PrimaryPart.Anchored = true
+	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	model:SetAttribute("Npc", true)
 	model.Parent = npcPool
 	return model

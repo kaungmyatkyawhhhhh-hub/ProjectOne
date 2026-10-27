@@ -2,7 +2,7 @@
 -- Pulls every script listed in src/manifest.json from http://127.0.0.1:8765 and writes it into the place.
 -- HTTP is switched on only for the sync and switched back off after.
 local HttpService = game:GetService("HttpService")
-local BASE = "http://127.0.0.1:8765/"
+local BASE = "http://127.0.0.1:8765/src/"
 
 local was = HttpService.HttpEnabled
 HttpService.HttpEnabled = true
