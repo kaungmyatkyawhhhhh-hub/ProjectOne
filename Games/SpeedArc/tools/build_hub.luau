@@ -7,9 +7,9 @@ local Lighting = game:GetService("Lighting")
 local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Palette = require(ReplicatedStorage.Shared.Config.Palette)
-local Race = require(ReplicatedStorage.Shared.Config.Race)
-local Stations = require(ReplicatedStorage.Shared.Config.Stations)
+local Palette = require(ReplicatedStorage.Shared.Config.Palette:Clone())
+local Race = require(ReplicatedStorage.Shared.Config.Race:Clone())
+local Stations = require(ReplicatedStorage.Shared.Config.Stations:Clone())
 local W = Palette.World
 local T = Race.Track
 local rng = Random.new(28)
@@ -822,7 +822,7 @@ bench(CFrame.new(60, 0, -66) * CFrame.Angles(0, 0, 0))
 -- M2 shops on the west side: Shoe Shop, Trail Booth, Coach Corner (all face the track, +X)
 -- Blender versions come later (Downloads\speed_arc_models\hub\v3); these are the part builds.
 ----------------------------------------------------------------------------
-local Coaches = require(ReplicatedStorage.Shared.Config.Coaches)
+local Coaches = require(ReplicatedStorage.Shared.Config.Coaches:Clone())
 local shops = folder("Shops")
 
 local function prompt(parent, opens, action, object, pos)
@@ -1101,7 +1101,7 @@ hub.ModelStreamingMode = Enum.ModelStreamingMode.Persistent -- the home area is 
 hub.Parent = workspace
 
 -- lighting preset (the client applies the same values; this is for the edit view)
-local L = require(ReplicatedStorage.Shared.Config.Lighting).Hub
+local L = require(ReplicatedStorage.Shared.Config.Lighting:Clone()).Hub
 Lighting.ClockTime = L.ClockTime
 Lighting.GeographicLatitude = L.GeographicLatitude
 Lighting.Brightness = L.Brightness

@@ -5,9 +5,9 @@ local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local L = {}
-L.Palette = require(ReplicatedStorage.Shared.Config.Palette)
-L.Stations = require(ReplicatedStorage.Shared.Config.Stations)
-L.Areas = require(ReplicatedStorage.Shared.Config.Areas)
+L.Palette = require(ReplicatedStorage.Shared.Config.Palette:Clone())
+L.Stations = require(ReplicatedStorage.Shared.Config.Stations:Clone())
+L.Areas = require(ReplicatedStorage.Shared.Config.Areas:Clone())
 local Palette = L.Palette
 local W = Palette.World
 L.W = W
@@ -221,7 +221,7 @@ function L.sign(parent, station, cf)
 	L.part({ Parent = m, Name = "Trim", Size = Vector3.new(9.4, 5, 0.3), CFrame = cf * CFrame.new(0, 5.6, 0.15), Color = if station.MinSpeed > 0 then Palette.Gold else Palette.ElectricBlue })
 	L.part({ Parent = m, Name = "Post", Size = Vector3.new(0.5, 3.4, 0.5), CFrame = cf * CFrame.new(-3.4, 1.7, 0.2), Color = Palette.SpeedBlack })
 	L.part({ Parent = m, Name = "Post", Size = Vector3.new(0.5, 3.4, 0.5), CFrame = cf * CFrame.new(3.4, 1.7, 0.2), Color = Palette.SpeedBlack })
-	local fmt = require(ReplicatedStorage.Shared.Util.Format)
+	local fmt = require(ReplicatedStorage.Shared.Util.Format:Clone())
 	L.surfaceText(board, Enum.NormalId.Front, {
 		{ Text = string.upper(station.Name), Height = 0.36, Color = Palette.White },
 		{ Text = ("+%s MPH / TAP"):format(fmt.short(station.Gain)), Height = 0.24, Color = Palette.BrightBlue, Font = L.BODY },

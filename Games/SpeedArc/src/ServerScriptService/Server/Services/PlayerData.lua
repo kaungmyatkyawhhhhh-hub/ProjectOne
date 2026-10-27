@@ -219,6 +219,15 @@ local function onPlayerAdded(player)
 		if type(tc) == "number" then
 			data.Coins = tc
 		end
+		local tl = workspace:GetAttribute("TestLeague")
+		if type(tl) == "number" then
+			data.League = tl
+			data.BestLeague = math.max(data.BestLeague or 1, tl)
+		end
+		local tw = workspace:GetAttribute("TestLeagueWins")
+		if type(tw) == "number" then
+			data.LeagueWins = tw
+		end
 	end
 
 	profiles[player] = { data = data, temp = temp, joined = os.clock() }
