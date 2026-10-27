@@ -212,3 +212,5 @@ Owner: "make it so your trainers' muscles don't disappear when you zoom out too 
 ## On machines: behind the lifter (27 Oct; owner: "in some of the machine, the trainer is right in front of the player and not behind")
 - `machineSpot` scores every free hype spot (and the ring round the lifter) by how far behind the lifter it is (the lifter's own facing, or the machine's when lying down) and takes the best, instead of the first free hype spot. Checked at a squat rack: about 4 studs, mostly behind.
 - Atlas's dark band at the waist: the dark "pants gap" colour (BodyStages, prompt 69) only applies under classic Pants now, never under a trainer's outfit or on marble.
+## Muscles gone after a respawn (27 Oct; owner: "why does the trainer dont have any muscle mesh rn")
+- Reproduced: after the player respawns (a reset, LoadCharacter) the trainer came back as a plain body. His muscle pieces were removed while he was briefly out of the world, but MuscleClient still had him as tracked, so it never rebuilt them. `MuscleClient` scan: a trainer whose MuscleMeshes folder is gone is tracked again from scratch. Tested: 17 pieces right after a respawn.
