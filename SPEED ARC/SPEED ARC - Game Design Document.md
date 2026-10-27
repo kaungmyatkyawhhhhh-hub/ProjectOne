@@ -1,0 +1,386 @@
+---
+date: 2026-10-28
+tags: [speedarc, design, gdd]
+status: living document (v1)
+---
+# SPEED ARC - Game Design Document (v1)
+
+Back to [[00 SPEED ARC Home|SPEED ARC Home]] · Short version: [[SPEED ARC - Design plan]] · Lessons: [[SPEED ARC - Lessons from GYM ARC]]
+
+All numbers here are STARTING values. They live in Config and get tuned with a pacing sim (like GYM ARC's `tests/pacing`). If this document and a prompt disagree, the newest owner decision wins; update this document.
+
+---
+
+## 0. Contents
+1. Vision and pillars
+2. Audience and devices
+3. Art direction
+4. The world (areas, layouts)
+5. Core loop (minute by minute)
+6. Stats and formulas
+7. Training
+8. Races
+9. Leagues, ranks and Go Pro
+10. Endless loop: Legend Laps
+11. Shoes
+12. Coaches
+13. Trails
+14. Titles, medals and profile
+15. Quests, daily and playtime
+16. Events
+17. Leaderboards
+18. Social
+19. Economy (coins in and out)
+20. Monetization
+21. First 15 minutes (tutorial, minute by minute)
+22. UI screens
+23. Audio
+24. Performance budget
+25. Tech architecture
+26. Analytics
+27. Milestones and order of work
+28. Open decisions
+
+---
+
+## 1. Vision and pillars
+**One line:** start as the slowest kid on the school track, train and race until you win the World Games.
+**Tagline:** "Everyone starts slow."
+
+**Pillars (every feature must serve at least one):**
+1. **Feel fast.** Speed must be FELT: camera FOV widens, wind lines, footstep rhythm speeds up, trails grow. Getting faster is visible every few minutes.
+2. **Race together.** Every few minutes everyone on the server races. Short, loud, fair, fun to lose too.
+3. **Always a next goal.** The next rank, the next shoes, the next league, the next coach are always on screen.
+4. **Light and polished.** 60 FPS on cheap phones, but looks premium (stylized low-poly, clean UI).
+
+**Not this game:** no combat, no realistic bodies, no stamina walls that stop play, no pay-to-win racing (Robux never wins a race by itself; coaches/shoes are earnable).
+
+## 2. Audience and devices
+- Roblox players 8-14, mostly phones (target ~70% mobile), short sessions (10-25 min), come back daily.
+- Must work on low-end Android: 60 FPS goal, 30 FPS floor at graphics quality 1.
+- Controls: one-thumb play. Training = tap. Races = auto-run + tap to BOOST. Desktop: click / Space.
+
+## 3. Art direction
+(Full rules: ART QUALITY RULES in the design plan.)
+- **Style:** stylized low-poly cartoon sports. Chunky bevelled shapes, strong silhouettes, flat colours with baked soft shading (vertex colours), no realistic textures.
+- **Palette (Config/Palette):** Night Navy #141B2D (UI base), Track Red #D9483B, Electric Cyan #25D9F0 (speed, highlights), Sun Yellow #FFC93C (coins, rewards), Grass #5BC46A, White #F4F6FA. Each league has an accent colour (see 9).
+- **Fonts:** one heavy display font (titles, numbers, buttons, italic for speed feel), one clean sans for body text. Minimum text size = the smallest HUD label.
+- **Speed language:** slanted shapes, speed lines, motion blur streaks in UI and VFX. Numbers tick up fast.
+- **Characters:** normal Roblox avatars (no live meshes). Progress shows through SHOES (on the feet), TRAILS, a speed aura at high speed, titles and medals.
+- **World life (cheap):** waving flags (cloth via bones or animated texture), crowds as low-poly billboard groups that bob and cheer, moving clouds, birds (small looping meshes), confetti on wins.
+- **Lighting per area:** tuned sky, Atmosphere, ColorCorrection, light Bloom; Neon for glow; 1 sun; max ~20 small lights per area, no shadows from props.
+
+## 4. The world
+Small separate areas linked by teleports (no giant open map). Each area streams on its own.
+
+### 4.1 Areas
+| Area | What's there | Size target |
+|---|---|---|
+| **Hub: Hometown Track** | Spawn, School Track League 1 (training + race track), Coach Corner (coach rolls), Shoe Shop, Trail Booth, Daily board, Leaderboard wall, Portal Plaza (teleports to leagues), Legend Wall (top players) | ~250 x 250 studs, < 3,000 parts |
+| **League 2: City Park Run** | Park paths, fountain, training spots, a looping park race route | ~300 x 300 |
+| **League 3: Big Stadium** | A real stadium oval (8 lanes), stands with crowd, scoreboard, hurdles training | ~300 x 300 |
+| **League 4: Mountain Trail** | Dirt trail with switchbacks, wooden bridges, pine trees, uphill training | ~300 x 350 |
+| **League 5: World Games** | Night stadium, flags of made-up countries, fireworks, gold podium | ~300 x 300 |
+| **Legend Track** (endless) | Floating track in the clouds, unlocked by Legend Laps | ~250 x 250 |
+
+### 4.2 Hub layout (Hometown Track)
+- **Spawn** on the school steps, facing the track. The first training spot (Jog Lane) is 15 studs ahead with a glowing arrow.
+- **Track** in the middle: 6-lane oval, painted lanes and numbers, start/finish arch with a big countdown screen.
+- **Left side:** Shoe Shop (small sports store front), Trail Booth (neon booth), Coach Corner (bench + clipboard board with coach cards).
+- **Right side:** bleachers with crowd, Daily Board, Leaderboard Wall, Codes sign.
+- **Back:** Portal Plaza with 5 league gates (locked ones show their requirement).
+- Every spot reachable in < 10 s of walking; GO TO buttons teleport.
+
+## 5. Core loop
+**Every 30 seconds:** tap-train, watch MPH go up, combo counter.
+**Every 3 minutes:** a race (join, 30 s run, results, coins/medal).
+**Every 5-10 minutes:** a new rank, new shoes, a coach roll, a new training spot.
+**Every 30-60 minutes:** Go Pro to the next league (new area, new music, new races).
+**Every day:** daily streak, quests, playtime gifts, weekly board.
+**Forever:** Legend Laps (stars), collection (coaches, trails, shoes), weekly events.
+
+## 6. Stats and formulas
+### 6.1 Stats
+- **SPEED** (main stat, shown as MPH). Grows by training. Resets on Go Pro.
+- **Coins.** Earned by training (small), races (main), quests, gifts.
+- **Medals** (lifetime counts: gold/silver/bronze). Never reset.
+- **Go Pro count / League** and **Legend stars**.
+- (Later, optional) **Boost Power:** how strong your race boost is; upgraded with coins.
+
+### 6.2 Speed number
+- Internally SPEED is a big number (`speed`), displayed as MPH with K/M suffixes later (e.g. 12.4K MPH in League 5): kids love big numbers.
+- **Per tap gain** = stationBase x shoeMult x coachMult x trailMult x goProMult x comboMult x eventMult (+ pass 2x).
+- **Combo:** tapping steadily (at least 3 taps a second, no gap > 0.6 s) builds a combo x1.0 -> x1.5 over 10 s; shows a flame meter. Breaks on pause. Rewards active play over autoclickers (Auto Train pass = fixed x1.2 combo).
+- Total multiplier cap: x50 (config) so late game doesn't explode.
+
+### 6.3 Walking speed in the hub/areas
+- WalkSpeed = 16 + 6 x log10(1 + MPH / 10), capped at 30 (config). You feel faster but stay controllable.
+- Camera FOV 70 -> 80 with walk speed; light wind lines past 24.
+
+### 6.4 Race pace
+- Every race track has a fixed length L (studs) and a target time of ~30 s.
+- Each runner's pace (studs/s) = basePace(league) x (1 + 0.6 x clamp(log2(speed / leagueMid), -1, 1.5)), so a player 2x faster than the league middle is clearly faster, but nobody is 10x faster (still a race).
+- **BOOST:** tap during the race = +25% pace for 0.8 s; a boost bar holds 3 charges, refills 1 per 2.5 s. Smart tapping matters, spam doesn't.
+- Slipstream: within 6 studs behind someone = +5% pace (keeps races close and exciting).
+- Finish: places by time; ties by distance.
+
+## 7. Training
+### 7.1 How a station works
+- Walk up -> prompt TRAIN -> you're placed on it (treadmill, lane, stairs...). Tap anywhere to train; each tap = one stride/step animation + MPH gain popup (pooled) + sound.
+- Each station has a **minimum SPEED** to use it and a **base gain per tap**. Better stations unlock as you get faster (the next one is always marked "NEXT: 120 MPH").
+- Leave anytime (STOP button / move).
+- Auto Train pass: hold-free automatic training at 3 taps/s with a fixed x1.2 combo, only while on a station and not AFK (AFK check every 15 min with a tap prompt).
+
+### 7.2 Stations per league (base gain per tap / min MPH)
+| League | Station 1 | Station 2 | Station 3 | Station 4 |
+|---|---|---|---|---|
+| 1 School Track | Jog Lane 1 / 0 | Treadmill 3 / 40 | Stair Run 8 / 150 | Sprint Sled 20 / 500 |
+| 2 City Park | Park Loop 40 / 0* | Hill Sprint 90 / 3K | Bench Step-Ups 200 / 10K | Bike Drafting 450 / 30K |
+| 3 Stadium | Block Starts 900 / 0* | Hurdles 2K / 150K | Parachute Run 4.5K / 500K | Bungee Sprint 10K / 1.5M |
+| 4 Mountain | Uphill Trail 20K / 0* | Log Steps 45K / 8M | Rope Pull Run 100K / 25M | Altitude Tent 220K / 80M |
+| 5 World Games | Pro Track 450K / 0* | Wind Tunnel 1M / 400M | Laser Lanes 2.2M / 1.3B | Champion Sled 5M / 4B |
+*0 = open as soon as you're in that league (after Go Pro your SPEED resets; the league's multiplier makes station 1 feel fast again).
+
+## 8. Races
+### 8.1 Schedule
+- Each league area has its own race every **3 minutes** (config), offset so the server doesn't run all at once.
+- **Join window 15 s:** a gold JOIN button pops on the HUD (and a ring on the start line). Players who don't join keep training; no penalty.
+- Max 8 runners. If fewer than 4 players join, **NPC runners** fill to 4 (named original characters, speeds set around the league middle so they're beatable but not free).
+- Countdown 3-2-1-GO with a starting gun sound; false start = no penalty (just starts on GO).
+
+### 8.2 During the race
+- Auto-run along the lane; the player only taps BOOST (big round button bottom right, 3 charge pips).
+- Camera: low side-follow, FOV kick on boost, wind lines; other runners visible with their trails.
+- Live **position bar** at the top (runner heads on a line), "1ST" place tag next to you.
+- Crowd cheers rise when someone overtakes; last 20% = "FINAL STRETCH" text + music swell.
+
+### 8.3 Results
+- Podium moment: top 3 on a podium for 3 s (medals, confetti), everyone else gets their place card.
+- Rewards (coins = minutes of coins at your league, see 19): 1st 6 min, 2nd 4 min, 3rd 3 min, finish 1.5 min. First race of the day: +50%.
+- Medal counts saved (gold/silver/bronze). New personal best time = "NEW PB!" banner (once per race).
+- Back where you were before the race (teleport back to your station if you were training).
+
+### 8.4 Race types (unlock over time, rotate)
+| Type | League | What's different |
+|---|---|---|
+| Sprint | 1+ | Straight 100 m-style, ~20 s |
+| Lap Race | 1+ | One oval lap, ~30 s |
+| Hurdles | 3+ | Tap JUMP on hurdles (timing ring), a miss = small slowdown |
+| Trail Run | 4+ | Uphill/downhill sections change pace |
+| Relay | Event | Teams of 2-4, baton handoff zones |
+| Final | 5 | The big one: longer, fireworks, bigger rewards, every 10 min |
+
+## 9. Leagues, ranks and Go Pro
+### 9.1 Leagues
+| League | Area | Accent | Speed range (MPH) | Ranks | Go Pro goal |
+|---|---|---|---|---|---|
+| 1 | School Track | Track Red | 0 - 2K | Bronze, Silver, Gold, Platinum, Champion | Champion rank + win 1 race |
+| 2 | City Park Run | Grass Green | 0 - 200K | same | Champion + win 2 races |
+| 3 | Big Stadium | Electric Cyan | 0 - 10M | same | Champion + win 3 races |
+| 4 | Mountain Trail | Pine Orange | 0 - 500M | same | Champion + win 3 races |
+| 5 | World Games | Gold | 0 - 20B | same | Champion = "WORLD CHAMPION" -> Legend Laps unlock |
+
+- **Ranks** are SPEED thresholds inside a league (e.g. League 1: Bronze 0, Silver 100, Gold 400, Platinum 1K, Champion 2K). Rank up = popup, sound, small coin reward, rank badge next to your name.
+- Races put you against players in the same league (race in your league's area). A player can visit lower league areas (to hang with friends) but races there give reduced rewards.
+
+### 9.2 Go Pro (rebirth)
+- When the Go Pro goal is met: big gold "GO PRO" button + Coach line. Confirm screen shows **YOU KEEP / YOU RESET / YOU GET** (GYM ARC Hall of Fame lesson).
+- **Resets:** SPEED to 0, ranks.
+- **Keeps:** coins, shoes, coaches, trails, titles, medals, passes, everything bought.
+- **Gets:** the next league area (teleport + intro cutscene), its training stations and races, a permanent **League multiplier** (x8 per league, config) on training gains, a free coach roll, the league's title.
+- Target times (first run, normal player): League 1 ~15 min, League 2 ~35 min, League 3 ~60 min, League 4 ~90 min, League 5 ~2 h. Total ~5 h to World Champion.
+
+## 10. Endless loop: Legend Laps
+- After World Champion: **LEGEND LAP** (like GYM ARC's Hall of Fame). Back to League 1 with SPEED 0, keep everything, get a **Legend star** (★).
+- Each star: +50% training gains, start with League 2 already unlocked from ★2, League 3 from ★4; stars shown over your head; Legend Wall top 3 statues (fixed slots, own statue local only).
+- Run time targets: ~5 h, then ~2.5 h, ~1.5 h, never under ~1 h.
+- **Legend Track** (cloud area) unlocks at ★1: its own races vs other legends, Legend-only trails.
+- Gyms-style rule: areas stay unlocked after a Legend Lap; race matchmaking uses your current league.
+
+## 11. Shoes
+- Bought with coins at the Shoe Shop, owned forever, one pair worn (shows on the feet as a simple mesh + colour).
+- Each pair: a training multiplier + a small race pace bonus (+1-5%).
+
+| # | Shoes | Training x | Race pace | Price | Unlocks |
+|---|---|---|---|---|---|
+| 1 | Worn Sneakers | x1.0 | +0% | free | start |
+| 2 | Canvas Runners | x1.3 | +1% | 250 | L1 |
+| 3 | Track Trainers | x1.7 | +1% | 1,500 | L1 Silver |
+| 4 | Light Racers | x2.3 | +2% | 8K | L1 Gold |
+| 5 | Park Pacers | x3.2 | +2% | 60K | L2 |
+| 6 | Spike Shoes | x4.5 | +3% | 400K | L3 |
+| 7 | Trail Grippers | x6.5 | +3% | 3M | L4 |
+| 8 | Carbon Flyers | x9.5 | +4% | 25M | L5 |
+| 9 | Golden Wings | x14 | +5% | 200M | World Champion |
+| 10+ | Legend shoes | cosmetic + small x | | stars | Legend Laps |
+- Shoe Shop UI: a row of shoes on a rotating pedestal, locked ones as silhouettes with "UNLOCKS AT ..."; try-on preview on your character.
+
+## 12. Coaches (like GYM ARC trainers, lighter)
+- Rolled at **Coach Corner** with coins (price = ~1.5 min of coins at your league, min 50). Follow you (1 shown by default; others as portrait chips), give boosts, evolve with 3 duplicates (BASE -> PRO -> ELITE -> LEGEND, 4 stages).
+- Slots: 2 free, +1 pass, +1 second pass.
+- Pity: guarantees by stage (Rare at 30, Epic 80, Legendary 150...).
+- Roll reveal: name roller + small cutscene for Legendary+ (GYM ARC lesson: themed per coach).
+
+| Coach | Rarity | Chance | Boost (BASE) |
+|---|---|---|---|
+| Coach Benji (gym teacher with whistle) | Common | 40% | +5% training |
+| Coach Rae (park runner) | Uncommon | 28% | +8% coins |
+| Coach Ivo (sprint coach, stopwatch) | Rare | 18% | +12% training |
+| Coach Mara (hurdle champ) | Epic | 9.5% | +20% training, +10% coins |
+| Coach Bolt-ish NO: **Coach Zephyr** (wind-themed legend) | Legendary | 3.5% | +35% training, +3% race pace |
+| **Nova** (space-suit runner) | Mythic | 0.8% | +50% training, +5% race pace |
+| **Shadow Step** (ninja runner) | Secret | 0.17% | +65% training, +6% pace |
+| **Mercury** (winged-sandals god of speed) | Secret+ | 0.03% | +80% training, +8% pace, golden trail |
+(All original characters; the Greek-god idea is a generic myth, no real brands/athletes.)
+- Total coach boost caps: training +300%, race pace +15% (keeps races fair).
+
+## 13. Trails
+- The effect behind you when you run (walk faster than 22 or in races). Cheap: one Trail instance or a short beam strip + a few particles.
+- Sources: Trail Booth (coins), quests, events, passes (Trail Pack), Legend Laps.
+- Each trail: look + small bonus (+2-10% coins OR training), one equipped.
+
+| Trail | Source | Bonus |
+|---|---|---|
+| Dust | start | - |
+| Chalk Lines | 2K coins | +2% coins |
+| Leaf Swirl (L2) | 40K | +3% training |
+| Fire Streak | 300K | +5% training |
+| Ice Streak | 300K | +5% coins |
+| Lightning | Trail Pack | +6% training |
+| Rainbow | Trail Pack | +6% coins |
+| Comet (L5) | 50M | +8% training |
+| Star Dust | ★1 | +10% coins |
+| Event trails | events | cosmetic + small |
+
+## 14. Titles, medals and profile
+- Titles: First Race, First Win, 10/100/1000 Wins, Rank titles per league ("PARK CHAMPION"), WORLD CHAMPION, LEGEND, event titles, PB titles. Shown over the head in its style.
+- Medals shown on the profile and as a small count next to the name.
+- Profile (tap a player -> quick menu: VIEW PROFILE / RACE THEM / ADD FRIEND): stars, title, league + rank, top speed, best race times per league, medals, coaches, trails, playtime.
+
+## 15. Quests, daily and playtime
+- **Daily quests (3/day):** "Win 1 race", "Train 300 taps", "Get a new PB", "Race 5 times"... reward 3 min of coins each, all 3 = 10 min + 1 coach roll. Unclaimed ones pay before reset.
+- **Daily streak (7 days):** coins, a coach roll on day 4, a trail on day 7 (first time). One missed day allowed.
+- **Playtime gifts:** 3/8/15/25/40/60 min: coins, boosts, a coach roll last.
+- **Codes:** in Settings + a CODES button (DataStore list, admin console commands).
+
+## 16. Events (rotate weekly, run themselves)
+- **Relay Weekend:** relay races with friends, team rewards.
+- **Hurdle Week:** hurdle races everywhere, Hurdle trail.
+- **Double Coins Weekend.**
+- **Seasonal:** Halloween Night Run (fog, pumpkin trail), Winter Snow Dash (snow track, sled race), Summer Beach Sprint.
+- Event-only titles/trails never come back (collection value).
+
+## 17. Leaderboards
+- In the hub (Leaderboard Wall) + a panel: Top SPEED, Most Wins, Fastest Lap per league, Legend Stars. Top 25 scrollable.
+- **Weekly boards** reset Monday: Most Wins This Week, Best Time This Week -> top 3 get a title + coins.
+- Versioned store prefix so boards can be reset (lesson).
+
+## 18. Social
+- Friend Boost: +10% training per friend in server (max +30%).
+- Invite: invite button, +10% for 30 min when a friend joins from your invite.
+- Race challenges: "RACE THEM" from a profile = a private 1v1 sprint (no rewards farming: coins only first 3 a day).
+- Crews (later milestone): crew tag, crew weekly wins board.
+
+## 19. Economy
+### 19.1 Coins per minute (base, active play, by league; tune with sim)
+| League | Coins/min |
+|---|---|
+| 1 | 60 |
+| 2 | 400 |
+| 3 | 3K |
+| 4 | 25K |
+| 5 | 200K |
+- Every reward = "minutes of coins at your league" (lesson), never fixed numbers that become worthless.
+- Coin sources split (target): races 55%, training taps 20%, quests/daily/gifts 20%, other 5%.
+
+### 19.2 Coin sinks
+- Shoes (main, one-time per pair), coach rolls (repeatable, the main sink), trails, boost upgrades (later), cosmetic name colours (later).
+- Coin multipliers capped at x8 total (lesson).
+
+## 20. Monetization (fair, kids' game)
+### 20.1 Game passes
+| Pass | Price (suggested) | What |
+|---|---|---|
+| Auto Train | 249 R$ | Trains for you on a station (hero item) |
+| 2x Speed | 249 | x2 training gains |
+| 2x Coins | 149 | x2 coins |
+| VIP | 299 | +10% coins, VIP tag, VIP trail, VIP chat colour |
+| Extra Coach Slot | 99 | +1 slot |
+| Extra Coach Slot 2 | 149 | +1 more |
+| Trail Pack | 199 | Lightning + Rainbow + 2 more trails |
+| Faster Rolls | 99 | skip roll animation, x3 roll button |
+
+### 20.2 Developer products
+- Coins (scale with league): Small 25 R$ = 20 min, Medium 99 = 2 h, Large 249 = 6 h.
+- Boosts: 2x Speed 15 min (25 R$), Lucky Roll Boost? NO (no paid luck). Instant Boost refill? NO (no paid race wins).
+- Starter Pack (49-79 R$, once): coins (60 min), 2x Speed 30 min, Canvas Runners skin, STARTER title.
+### 20.3 Rules
+- Robux never decides a race. No paid random rewards. No fake timers. Offers only at calm moments (after a race, never in one), max one small card per 10 min, none in the tutorial.
+- Prices in-game match Roblox's (lesson).
+
+## 21. First 15 minutes (minute by minute)
+| Time | What happens | Why |
+|---|---|---|
+| 0:00 | Loading screen preloads everything (fast feel later). Short main menu: PLAY. | no freezes later |
+| 0:05 | Spawn on the school steps; Coach Benji: "Everyone starts slow. Let's fix that!" NEW RUNNER BOOST 2x for 15 min starts. | instant reward |
+| 0:10 | Gold arrow + GO TO teleports you onto the Jog Lane. "TAP TO RUN!" | first action in < 15 s |
+| 0:15 | First tap: +10 MPH burst, "FIRST STEP!" +100 coins | first tap reward |
+| 0:45 | Combo meter explained by a tiny hint ("keep tapping = FASTER"). | skill hook |
+| 1:00 | "A RACE IS STARTING!" Tutorial race vs 3 slow NPCs, guaranteed close win. BOOST taught with one big prompt. | the fun moment early |
+| 1:40 | WIN: podium, confetti, +coins, GOLD MEDAL. "Buy your first shoes!" | win + spend |
+| 2:30 | GO TO Shoe Shop: buy Canvas Runners (exact coins given). Feel faster right away. | first purchase |
+| 3:30 | Treadmill unlocks (40 MPH) -> NEXT goal shown. | next goal |
+| 5:00 | SILVER RANK popup. Free coach roll (Coach Corner GO TO) -> roll reveal. | collection hook |
+| 6-10 | Races every 3 min; daily quests shown; playtime gift 1 + 2. | rhythm |
+| 10-15 | Gold rank, Track Trainers, GO PRO goal visible ("Champion + win a race"). Favourite prompt after the first Go Pro. | session goal |
+| ~15 | Go Pro 1 -> City Park Run cutscene. | the "I'll come back" moment |
+- Tutorial cannot be skipped in the first 60 s; hints never vanish while needed; no popups stacked on hints; never a shop push before minute 5.
+
+## 22. UI screens
+- **HUD:** top bar = coins, league + rank badge, MPH big in the middle-top with a speed bar to the next rank; right = race timer pill (JOIN when open); bottom right = TRAIN/BOOST button; left = menu (SHOP, SHOES, COACHES, TRAILS, QUESTS, PROFILE); top centre = one toast lane.
+- **Windows:** Shoes, Coaches (inventory + detail + evolve), Coach Corner roll screen, Trails, Quests (Daily / Streak / Weekly), Store (Passes / Coins / Boosts), Settings, Profile, Codes, Go Pro confirm, Legend Lap confirm, Race results.
+- Layout rule: nothing in the middle of the screen except race moments; one toast at a time; everything fits 667x375 without overlap.
+
+## 23. Audio
+- Music per area (upbeat electronic/sports; owner picks IDs): hub chill-hype, park sunny, stadium big drums, mountain adventurous, World Games epic. Race music separate with a final-stretch swell.
+- SFX: taps (pitch rises with combo), footsteps by surface, whoosh on boost, starting gun, crowd cheer layers, rank up, coins, roll reveal, podium fanfare.
+- Mix: music ducks during races' countdown; nothing ear-piercing; settings sliders.
+
+## 24. Performance budget
+| Thing | Budget |
+|---|---|
+| FPS | 60 target, 30 floor at quality 1 |
+| Parts per area | < 3,000 (meshes merged) |
+| Lights per area | < 20, only your area on |
+| Particles on screen | < 300 total, own trail full, others' simplified |
+| Runners drawn | all 8 in a race; outside races others beyond 120 studs hidden |
+| SurfaceGuis | MaxDistance always set |
+| Client memory | < 600 MB on phones |
+| Server memory | flat in a 60 min soak test |
+| Per-frame scripts | only active things; no per-tap Instance creation without pooling |
+
+## 25. Tech architecture
+- Folders: `Shared/Config/*` (all numbers), `Shared/UIKit`, `Server/*Service`, `Client/*Controller`.
+- Services: PlayerData (session lock, autosave, migrations), TrainingService, RaceService (one per area, server authoritative timing and positions; clients only send BOOST taps, rate limited), LeagueService (ranks, Go Pro, Legend), ShopService (shoes, trails), CoachService (rolls, pity, evolve), RewardService (minutes-of-coins), QuestService, DailyService, PlaytimeService, CodesService, MonetizationService (receipts), LeaderboardService, AnalyticsService, AdminConsole.
+- Anti-cheat: server checks tap rate (max ~12/s counted), race positions computed on the server, coins only granted by the server.
+- Reuse from GYM ARC by copying + adapting (never editing GYM ARC).
+
+## 26. Analytics (funnel steps)
+01 loaded, 02 menu PLAY, 03 first tap, 04 first race joined, 05 first race finished, 06 first shoes, 07 first coach roll, 08 Silver, 09 Gold, 10 Go Pro 1, 11 day-2 return, 12 Go Pro 2. Plus offers shown/tapped/bought, race joins vs skips, average races per session.
+
+## 27. Milestones and order of work
+1. **M1 Core:** setup, data, UI kit, hub look, Jog Lane + Treadmill, SPEED, coins, races (Sprint + Lap) with NPCs, results. Quality + FPS check.
+2. **M2 Collect:** shoes shop, coaches (rolls, reveal, follow, evolve), trails.
+3. **M3 Leagues:** ranks, Go Pro, League 2 + 3 areas, Hurdles race.
+4. **M4 Retention:** tutorial (section 21), daily, quests, playtime, codes, leaderboards, profile, friend/invite boosts.
+5. **M5 Money:** passes, products, Starter Pack, store, offers.
+6. **M6 Polish + soft launch:** pacing sim, phone tests, funnel, fix the first 15 min.
+7. **M7 Leagues 4-5, Legend Laps, events.**
+
+## 28. Open decisions (owner)
+- Final name (working title SPEED ARC).
+- Colour theme OK? (navy + cyan + red track + yellow coins)
+- Coach names/looks OK? Any to change?
+- Combo mechanic (rewards active tapping) OK?
+- Races every 3 min OK, or 2 min?
+- Prices (passes/products) OK?
