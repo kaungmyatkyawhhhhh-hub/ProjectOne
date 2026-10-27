@@ -17,7 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
-- 28 Oct: prompt 83: a light loading screen (rotating art, gold bar, tips, Hall of Fame badge switch). Waiting on the thumbnail ids. See [[GYM ARC - Loading Screen and Menu]].
+- 28 Oct: prompt 83: a light loading screen (3 rotating pictures, gold bar, tips, Hall of Fame badge switch). See [[GYM ARC - Loading Screen and Menu]].
 - 28 Oct: CODES (prompt 66 part 1): a CODES window (left menu + Settings), 4 starting codes, codes added from the console without publishing. See [[GYM ARC - Codes]].
 - 28 Oct: prompt 82: Hall of Fame ARE YOU SURE? confirm; VIEW MY STATUE on the round stage in the middle.
 - 28 Oct: prompt 81: plaza clock removed for good in the place (originals restored), Hall auras on the pedestals, a cleaner modern Hall look; the v2 Hall model (no flicker) is in. See [[GYM ARC - Hall of Fame]].

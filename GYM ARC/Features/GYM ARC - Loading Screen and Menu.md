@@ -114,3 +114,6 @@ Owner: "keep it light for phones ... no particles and no blur, just tweens". Rep
 - **Measured** (Studio, TestPhoneSize 844x390, FreshPlayer first load): SKIP 5.0 s, save data 12.4 s, menu ready 13.0 s, PLAY 20.3 s. Two earlier runs: 31-33 s (Studio's server slow to start that time; menu ready at 20.7 / 24.9 s). Most of the wait is the server sending the save.
 ![[GYM ARC/Screenshots/2026-10-28 Loading screen and codes/1 Loading phone 844x390 mid-load.jpg]]
 ![[GYM ARC/Screenshots/2026-10-28 Loading screen and codes/2 Loading phone with Hall of Fame badge (preview).jpg]]
+- **The owner's pictures (28 Oct):** `Config/UI.LoadingArt` = the menu art, 121657248990310 (the giant in the gym), 127076461526234 (Hall of Fame statue); owner: "also include the current one image too". The two thumbnails carry their own title top left (GYM ARC logo / HALL OF FAME): while one shows, our logo, its glow, the tagline and the left darkening fade out; they're sized to the full width at 16:9 from the top-left corner (Crop always crops round the middle, which cut their titles), so a wide phone only trims the bottom (behind the bar).
+![[GYM ARC/Screenshots/2026-10-28 Loading screen and codes/4 Loading phone giant picture.jpg]]
+![[GYM ARC/Screenshots/2026-10-28 Loading screen and codes/5 Loading phone Hall of Fame picture.jpg]]

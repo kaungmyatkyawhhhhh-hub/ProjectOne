@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [gymarc, prompt]
-status: done (waiting on the 2 image ids)
+status: done
 ---
 # 83 Loading screen upgrade
 
@@ -19,3 +19,9 @@ Loading screen upgrade (keep it light for phones):
 Test at phone size on a first load. Tell me the seconds until PLAY and send a screenshot.
 ```
 (Attached: two thumbnails, a gold Hall of Fame statue and a giant in the gym. Waiting for their image IDs; not uploaded by Claude.)
+```text
+here [121657248990310,127076461526234]
+```
+```text
+also include the current one image too
+```
