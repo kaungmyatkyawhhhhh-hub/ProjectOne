@@ -1,11 +1,9 @@
 -- AreaService: separate areas linked by teleports (GDD 4). Portal Plaza gates in the hub, a
--- BACK TO HUB gate in every league area, the player's current area (attribute "Area"), and each
--- area's leaderboard board (top runners in this server, every 10 s).
+-- BACK TO HUB gate in every league area and the player's current area (attribute "Area").
 local Players = game:GetService("Players")
 
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Areas = require(Shared.Config.Areas)
-local Format = require(Shared.Util.Format)
 local Net = require(Shared.Util.Net)
 local PlayerData = require(script.Parent.PlayerData)
 local TrainingService = require(script.Parent.TrainingService)
@@ -66,35 +64,6 @@ local function hookGate(trigger)
 	end)
 end
 
-local function updateBoards()
-	for _, id in Areas.Order do
-		local area = Areas[id]
-		local model = workspace:FindFirstChild(area.Model)
-		local board = model and model:FindFirstChild("Leaderboard", true)
-		local gui = board and board:FindFirstChildOfClass("SurfaceGui")
-		local list = gui and gui:FindFirstChild("Rows", true)
-		if list then
-			local rows = {}
-			for _, p in Players:GetPlayers() do
-				local data = PlayerData.get(p)
-				if data and data.League == area.League then
-					table.insert(rows, { name = p.DisplayName, speed = data.Speed })
-				end
-			end
-			table.sort(rows, function(a, b)
-				return a.speed > b.speed
-			end)
-			for i = 1, 5 do
-				local label = list:FindFirstChild("Row" .. i)
-				if label then
-					local r = rows[i]
-					label.Text = if r then ("%d.  %s   %s MPH"):format(i, r.name, Format.short(r.speed)) else ("%d.  -"):format(i)
-				end
-			end
-		end
-	end
-end
-
 function AreaService.start()
 	Net.on("TeleportArea", function(player, areaId)
 		if type(areaId) ~= "string" or not AreaService.canEnter(player, areaId) then
@@ -120,12 +89,7 @@ function AreaService.start()
 	Players.PlayerRemoving:Connect(function(p)
 		cooldown[p] = nil
 	end)
-	task.spawn(function()
-		while true do
-			pcall(updateBoards)
-			task.wait(10)
-		end
-	end)
+	-- the area boards are filled by LeaderboardService (global boards, M4)
 end
 
 return AreaService

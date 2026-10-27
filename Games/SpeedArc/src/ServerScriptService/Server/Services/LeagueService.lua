@@ -43,33 +43,7 @@ function LeagueService.refresh(player)
 	player:SetAttribute("WinsNeeded", Areas.GoPro.WinsNeeded[data.League] or 0)
 	player:SetAttribute("GoProReady", ready(data))
 	player:SetAttribute("MaxLeague", Areas.MaxLeague)
-	-- the rank tag over the head
-	local head = player.Character and player.Character:FindFirstChild("Head")
-	if head then
-		local tag = head:FindFirstChild("RankTag")
-		if not tag then
-			tag = Instance.new("BillboardGui")
-			tag.Name = "RankTag"
-			tag.Size = UDim2.fromOffset(110, 22)
-			tag.StudsOffset = Vector3.new(0, 3.1, 0)
-			tag.MaxDistance = 60
-			local label = Instance.new("TextLabel")
-			label.Name = "Label"
-			label.BackgroundTransparency = 1
-			label.Size = UDim2.fromScale(1, 1)
-			label.TextScaled = true
-			label.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
-			local s = Instance.new("UIStroke")
-			s.Thickness = 2
-			s.Color = Color3.fromHex("#0B0D12")
-			s.Parent = label
-			label.Parent = tag
-			tag.Parent = head
-		end
-		local name = Ranks.Names[data.Rank]
-		tag.Label.Text = ("%s  -  L%d"):format(string.upper(name), data.League)
-		tag.Label.TextColor3 = Ranks.Colors[name]
-	end
+	-- the tag over the head (title, rank, medals) is drawn by SocialService
 end
 
 local function checkRank(player)
@@ -122,6 +96,8 @@ local function goPro(player)
 	local title = Areas.GoPro.Titles[to]
 	if title then
 		data.Titles[title] = true
+		data.Title = title -- worn right away (the tag updates when League changes)
+		player:SetAttribute("Title", title)
 	end
 	PlayerData.set(player, "Speed", 0)
 	PlayerData.set(player, "League", to)
