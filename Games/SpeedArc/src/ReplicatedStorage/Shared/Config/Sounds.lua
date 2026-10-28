@@ -7,10 +7,13 @@ Sounds = {
 	-- race music from GO to the finish, everything ducks to 40% in the countdown.
 	Music = {
 		-- Bed = a quiet ambience loop under the music (Audio note: World ambience). Pro Sound Effects library.
-		Hub = { Id = "rbxassetid://1846273376", Volume = 0.35, Bed = "rbxassetid://9112831284" }, -- morning birds loop
-		Park = { Id = "rbxassetid://1846810919", Volume = 0.35, Bed = "rbxassetid://9116969962" }, -- birds + distant dogs
-		Stadium = { Id = "rbxassetid://128683938011405", Volume = 0.35, Bed = "rbxassetid://9120974378" },
-		Race = { Id = "rbxassetid://1842057947", Volume = 0.42 },
+		Hub = { Id = "rbxassetid://1839850159", Volume = 0.35, -- "Aim High" (APM, high energy pop)
+			 Bed = "rbxassetid://9112831284" }, -- morning birds loop
+		Park = { Id = "rbxassetid://9043824305", Volume = 0.35, -- "Summer Memories" (APM, City Breeze)
+			 Bed = "rbxassetid://9116969962" }, -- birds + distant dogs
+		Stadium = { Id = "rbxassetid://1837843290", Volume = 0.35, -- "No Time To Think (Long Perc)" (APM, drums)
+			 Bed = "rbxassetid://9120974378" },
+		Race = { Id = "rbxassetid://9048541013", Volume = 0.42 }, -- "Battleground" (APM)
 		Fade = 1.5,
 		Duck = 0.4,
 	},
@@ -44,10 +47,10 @@ Sounds = {
 		["rbxassetid://1841800152"] = 91, -- fanfare
 		["rbxassetid://9120974378"] = 96, -- crowd murmur / stadium bed
 		-- music
-		["rbxassetid://1846273376"] = 83, -- Hub
-		["rbxassetid://1846810919"] = 157, -- Park
-		["rbxassetid://128683938011405"] = 132, -- Stadium
-		["rbxassetid://1842057947"] = 111, -- Race
+		["rbxassetid://1839850159"] = 231, -- Hub: Aim High
+		["rbxassetid://9043824305"] = 65, -- Park: Summer Memories
+		["rbxassetid://1837843290"] = 252, -- Stadium: No Time To Think
+		["rbxassetid://9048541013"] = 102, -- Race: Battleground
 	},
 
 	Sounds = {
