@@ -387,6 +387,8 @@ Owner, 28 Oct: coaches are INSPIRED BY famous kinds of runners, never copies. Ru
 
 - **No more pivots (owner, 28 Oct):** the game is "+1 SPEED every step" + the wall course + LIVE RACES every 3 min (our difference from other +1 games). The race is the star: the race card and the podium are the most exciting moments, race wins give the best rewards.
 
+- **Game page name (owner, 28 Oct): "+1 Speed Evolution"**; SPEED ARC stays the brand underneath (logo, loading screen, in the game).
+
 ## 29. Detail plans
 - [[SPEED ARC - World, Map and Buildings]]
 - [[SPEED ARC - Lighting]]
