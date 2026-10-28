@@ -41,6 +41,7 @@ Before, then after:
 - Every player-side script was checked so nothing breaks when something isn't loaded yet or leaves: the pro gym door, the machines, the mirror, the tutorial's guide path, the machine signs, the rival tags and the arm wrestling tables were fixed.
 - Before the server moves a player out of the locked pro gym, it makes sure the spot is loaded on their device.
 - **Owner to do (Studio, Properties panel; scripts can't change these):** select Workspace, then under Streaming set StreamingTargetRadius 256, StreamingMinRadius 64, StreamOutBehavior Opportunistic, StreamingIntegrityMode PauseOutsideLoadedArea. Until then the whole map still loads at once.
+- **28 Oct: change StreamOutBehavior to LowMemory** (the Opportunistic advice above was wrong for this game). Opportunistic unloads everything past 256 studs even with free memory, so walking away and back reloads whole gyms; the big machines (Atomic, up to 838 parts each) arrive in one frame: 130-270 ms on a PC in Studio, about 1 s on a phone (the owner's "1 fps when something comes back"). LowMemory keeps what was loaded and only unloads when the device runs low. See [[2026-10-28 GYM ARC Lag spikes when things reappear]].
 - Tested: machines in the starter gym, pro gym and beach gym (sit, HUD, REP), both arm tables, the posing stage, the smoothie bars, the mirror, the pro gym door; no errors.
 
 ## Before and after (same view)

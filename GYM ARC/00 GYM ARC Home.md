@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 28 Oct: prompt 87, lag spike when things come back: the place's StreamOutBehavior is Opportunistic (unloads everything past 256 studs, then whole gyms reload in one frame, ~1 s on phones). Owner to set it to LowMemory. Two per-frame machine loops (rings, treadmills) made cheap. See [[2026-10-28 GYM ARC Lag spikes when things reappear]].
 - 28 Oct: PROFILES (prompt 66 part 3): tap a player for their card (stats, trainers, collection, badges, ADD FRIEND / INVITE TO CREW / CHALLENGE / VIEW STATUE). Prompt 66 is fully built. See [[GYM ARC - Profiles]].
 - 28 Oct: prompt 86: after the Hall of Fame your statue stands on the round stage by itself (your screen), no button needed.
 - 28 Oct: prompt 85: the Hall of Fame reveal after the soul lands is calm and grand (no spinning rays).
@@ -420,6 +421,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[GYM ARC - Bugs index]]
 
 ### Progress
+- [[2026-10-28 GYM ARC Lag spikes when things reappear]]
 - [[2026-10-28 GYM ARC Leaderboard reset, trainer slots, pity stages]]
 - [[2026-10-27 GYM ARC FPS lag pass]]
 - [[2026-10-27 GYM ARC Variants after unlock, fonts, alley, held items]]
@@ -458,6 +460,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
 ### Prompts
+- [[2026-10-28 GYM ARC Prompt - 87 Lag spike when things reappear]]
 - [[2026-10-28 GYM ARC Prompt - 80 Hall of Fame redesign, test stats, cutscenes]]
 - [[2026-10-28 GYM ARC Prompt - 81 Hall of Fame fixes, clock spike, test stats on]]
 - [[2026-10-28 GYM ARC Prompt - 82 Hall of Fame are you sure]]
