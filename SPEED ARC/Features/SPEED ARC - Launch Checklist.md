@@ -25,7 +25,18 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 
 ## 3. Game page
 - [ ] **Name (owner, 28 Oct): "+1 Speed Evolution"**. SPEED ARC stays the brand underneath (logo, loading screen, in the game).
-- [ ] **Description (suggested, 28 Oct):** "+1 SPEED every step! Run, get faster and SMASH through walls. Every 3 minutes a LIVE RACE starts: race real players on the track, climb the podium and win the biggest prizes in the game (huge coins + 2x SPEED!). Collect shoes, trails and coaches, smash the last wall and GO PRO to new worlds: City Park and the Big Stadium. Quiet server? Runner bots fill the lanes, so a race always starts."
+- [ ] **Description (written 28 Oct for "+1 Speed Evolution"):**
+  > +1 SPEED with every step! Run, get faster and SMASH through giant walls.
+  >
+  > LIVE RACES every 3 minutes: race real players on the track, climb the podium and win the biggest prizes in the game - huge coins and 2x SPEED!
+  >
+  > EVOLVE your runner: collect shoes and trails, roll coaches at the Coach Agency and evolve them to boost every step. Smash the last wall to GO PRO and open new worlds: City Park and the Big Stadium.
+  >
+  > Daily rewards, quests and weekly leaderboards. Quiet server? Runner bots fill the lanes, so a race always starts.
+  >
+  > CODES: SPEEDARC, FIRSTRACE, RELEASE
+  >
+  > by SPEED ARC
 - [ ] **Icon + 3-5 thumbnails** (you make them): a wall smash (pieces flying, a big number), the candy spawn, the Coach Agency, a race start.
 - [ ] **Genre:** Sports (subgenre: Racing / Simulator).
 - [ ] **Age rating questionnaire:** no violence, no blood, no gambling (coach rolls are coins only, no Robux), no realistic people. Has in-experience purchases.
