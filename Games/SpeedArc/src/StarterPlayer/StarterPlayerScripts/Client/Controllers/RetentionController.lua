@@ -181,6 +181,8 @@ local function renderQuests()
 			local done = e.Progress >= e.Goal
 			row.claim.Visible = done and not e.Claimed
 			row.got.Visible = e.Claimed
+			row.reward.Visible = not done and not e.Claimed
+			row.reward.Text = "+" .. Format.short(Formulas.minutesOfCoins(Retention.Quests.RewardMinutes, player:GetAttribute("League") or 1))
 		end
 	end
 	questBonus.Visible = q.BonusReady
@@ -243,7 +245,8 @@ local function buildWindows()
 			end
 		end })
 		local got = UIKit.text({ Text = "DONE", TextSize = 16, Color = P.BrightBlue, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -20, 0.5, 0), Size = UDim2.fromOffset(90, 30), Parent = f })
-		questRows[i] = { frame = f, text = text, fill = fill, count = count, claim = claim, got = got }
+		local reward = UIKit.text({ Text = "", TextSize = 16, Color = P.Gold, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -16, 0.5, 0), Size = UDim2.fromOffset(100, 30), XAlign = Enum.TextXAlignment.Right, Parent = f })
+		questRows[i] = { frame = f, text = text, fill = fill, count = count, claim = claim, got = got, reward = reward }
 	end
 	questBonus = UIKit.button({ Name = "Bonus", Style = "Gold", Text = "ALL 3 DONE! CLAIM BONUS", TextSize = 16, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 40 + 3 * 58), Size = UDim2.fromOffset(300, 40), Parent = questsWin.content, OnClick = function()
 		local ok, res = ctx.Net.call("ClaimQuestBonus")

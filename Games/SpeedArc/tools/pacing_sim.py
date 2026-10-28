@@ -36,6 +36,16 @@ REWARD_MIN = [6, 4, 3]  # 1st, 2nd, 3rd
 FINISH_MIN = 1.5
 PLACE_ODDS = [0.30, 0.28, 0.22, 0.20]  # a normal kid vs NPCs set around their own speed
 
+# ---- M4: first 15 minutes, gifts, daily, quests -----------------------------------------------
+NEW_RUNNER = (2, 900)  # x2 training for the first 15 min of play
+GIFTS = [(180, 'min', 1), (480, 'min', 2), (900, 'boost', 300), (1500, 'min', 4), (2400, 'min', 6), (3600, 'roll', 1)]
+DAILY_DAY1_MIN = 2
+FIRST_TAP_COINS = 100
+TUTORIAL_RACE_AT = 60  # a guaranteed win that doesn't count for Go Pro
+QUESTS_DONE_AT = 1200  # a normal player finishes the 3 quests about 20 min in
+QUEST_MIN, QUEST_BONUS_MIN = 3, 10
+M4 = True
+
 # ---- normal player -----------------------------------------------------------------------------
 TAPS_PER_SEC = 4.5  # kids on phones: 4-6
 BREAK_EVERY, BREAK_LEN = 50, 6  # walk to a new station, look around, open the Locker...
@@ -65,9 +75,14 @@ def run(scale, seed=1, verbose=False):
     free_roll = 0
     next_race = 45
 
+    gift_boost_until = -1
+
     def train_mult():
         c = sum(sorted(coaches, reverse=True)[:2])
-        return SHOES[shoe][0] * (1 + min(c, 3.0)) * LEAGUE_TRAIN_MULT ** (league - 1)
+        timed = 1
+        if M4 and (t < NEW_RUNNER[1] or t < gift_boost_until):
+            timed = 2
+        return SHOES[shoe][0] * (1 + min(c, 3.0)) * LEAGUE_TRAIN_MULT ** (league - 1) * timed
 
     def roll():
         nonlocal coin_boost
@@ -81,8 +96,30 @@ def run(scale, seed=1, verbose=False):
                     coin_boost = max(coin_boost, co)
                 return
 
+    gifts = list(GIFTS) if M4 else []
+    tut_race_done = not M4
+    quests_done = not M4
+    if M4:
+        coins += DAILY_DAY1_MIN * CPM[0] + FIRST_TAP_COINS
     while t < 4 * 3600:
         t += 1
+        while gifts and t >= gifts[0][0]:
+            _, kind, v = gifts.pop(0)
+            if kind == 'min':
+                coins += v * CPM[league - 1]
+            elif kind == 'boost':
+                gift_boost_until = t + v
+            else:
+                free_roll += v
+        if not quests_done and t >= QUESTS_DONE_AT:
+            quests_done = True
+            coins += (3 * QUEST_MIN + QUEST_BONUS_MIN) * CPM[league - 1]
+            free_roll += 1
+        if not tut_race_done and t >= TUTORIAL_RACE_AT:
+            tut_race_done = True
+            coins += (REWARD_MIN[0] + FINISH_MIN) * 1.5 * CPM[0]  # first race of the day bonus
+            t += 30
+            continue
         if t >= next_race:  # the race (no training while it runs)
             next_race = t + RACE_EVERY
             place = rnd.choices(range(4), PLACE_ODDS)[0]
@@ -108,6 +145,8 @@ def run(scale, seed=1, verbose=False):
         while best_rank < r:
             best_rank += 1
             coins += RANK_REWARD_MIN[best_rank] * CPM[league - 1]
+            if M4 and league == 1 and best_rank == 1:
+                free_roll += 1  # the tutorial's Silver roll
         # shopping: next shoe first, then coaches with spare coins
         if shoe + 1 < len(SHOES):
             tr, price, lg, rk = SHOES[shoe + 1]
@@ -148,6 +187,9 @@ def average(scale, n=60):
 TARGET = {1: 15, 2: 35, 3: 60}
 
 if __name__ == "__main__":
+    if "--m3" in sys.argv:
+        M4 = False
+        sys.argv.remove("--m3")
     if "--solve" in sys.argv:
         scale = {1: 1.0, 2: 1.0, 3: 1.0}
         for lg in (1, 2, 3):  # leagues in order: a later league depends on the earlier ones' coaches
