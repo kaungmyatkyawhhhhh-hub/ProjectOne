@@ -24,7 +24,7 @@ A second rebirth after **Alter 15** (≈ 1 h of Growth Spurts + 15 alters × ~27
 - Bad prestige = unclear reward, punishing reset, redoing the same chores.
 
 Our weak spots:
-1. **It takes away the HEIGHT, the main fantasy.** After 8 hours of growing to 8'0", you're small again. Everything else is kept, but the thing they worked for is gone.
+1. **It takes away the HEIGHT, the main fantasy.** After 8 hours of growing to 7'0" (Alter 15), you're small again. Everything else is kept, but the thing they worked for is gone.
 2. **Run 2 isn't fast enough.** +25% EXP and starting at Spurt 2 is a small speed-up; run 2 will feel like the same ~8 hours.
 3. **The update is aimed at the few.** A Saturday launch + thumbnails about the Hall of Fame promise something new players can't reach for ~8 hours (icon/thumbnail "overpromise" risk).
 
@@ -35,7 +35,7 @@ Keep the Hall of Fame for Saturday (it's built, opt-in, and it won't hurt new pl
 
 ## Fixes before / right after Saturday (small, Config only)
 1. **Run 2 must FEEL fast:** ★1 = **x2 EXP** and start at **Spurt 3**, so the 6 spurts take ~15-20 min instead of ~1 h. Each star a bit faster (keep the gains cap rules).
-2. **Keep the height as status:** show "PEAK 8'0" ★1" on the overhead tag and profile; the statue shows the peak body (already). Optional: a "Legend Form" look that lets ★ players wear their peak height as a cosmetic in the Hall and posing stage.
+2. **Keep the height as status:** show "PEAK 7'0" ★1" (their real peak) on the overhead tag and profile; the statue shows the peak body (already). Optional: a "Legend Form" look that lets ★ players wear their peak height as a cosmetic in the Hall and posing stage.
 3. **Say it clearly on the ENTER screen:** "Run 2 is 3x faster. You keep everything except your height and muscles."
 4. **Thumbnails/announcement:** lead with GROW (the first-minute promise) and use the Hall of Fame as the "goal" ("Become a LEGEND"), not as the whole update.
 5. **Measure it:** HallOfFame_Entered, sessions and days played in the 7 days after entering vs. players at Alter 15 who didn't enter, SecondRun_Done (already planned). Keep the star bonuses in Configs so they can be changed live.
@@ -45,7 +45,7 @@ Keep the Hall of Fame for Saturday (it's built, opt-in, and it won't hurt new pl
   - beating the top of the Champion Ladder, Strongman records, winning posing shows / showdowns, weekly Hall of Fame challenges ("lift the most this week").
 - Stars give the same visible status: ★ tag, statue, top-10 board, a small boost, titles.
 - An **optional** "Rebirth for x2" button stays for players who like resets (their choice, never needed for stars).
-- This is "status without loss": the best players keep their 8'0" body AND keep climbing. Two paths serve two kinds of players: a reset layer for number-chasers, records/boards for show-offs.
+- This is "status without loss": the best players keep their tall body AND keep climbing. Two paths serve two kinds of players: a reset layer for number-chasers, records/boards for show-offs.
 
 ## Sources
 - [Prestige and Ascension in Idle Games Explained (idlegames.win)](https://idlegames.win/article/prestige-and-ascension-idle-games-explained/): clear rewards, fast reruns, preserved effort; punishing resets drive players away.

@@ -26,3 +26,12 @@ GYM ARC: make the reason to grind OBVIOUS from the first minute. Follow CLAUDE.m
 
 TEST: fresh player in Studio: the NEXT YOU card shows in the first 30 s, the Dante moment, the Road at Spurt 0 / 3 / 6'0" / alter. Phone-size screenshots. Analytics: custom events Road_Opened, FutureYou_Tapped. Progress note + update the feature notes.
 ```
+
+## Added 29 Oct: the ladder unlock map + shorter tutorial
+Plan: [[2026-10-29 GYM ARC Master plan - one ladder]]
+
+```text
+5) UNLOCK MAP (one Config table that the Road, locks, guides and the Growth Spurt moment all read): set what opens at each step to match the master plan table (Start: machines + Shop; Spurt 1: Beach Gym, posing shows; Spurt 2: trainers, arm wrestling, crews stay at 2 or later; Spurt 3: Pro Gym, genetics; Spurt 4: National Show, crews; Spurt 5: Powerlifting Gym; Spurt 6: Body Alters; Alter 2: Strongman Yard; Alter 15: Hall of Fame). Show me a before/after table first and wait for my OK on anything that would LOCK something a current player already uses (existing players keep everything they have).
+6) TUTORIAL = train → grow → next goal only. Remove the skate tip step (skateboard stays usable, its guide waits until Spurt 2). Keep the funnel step names stable (add, don't renumber). Check first-spurt time stays ~4 min.
+7) Basketball court and boost types: do NOT change yet, list what they touch (UI, guides, sounds, performance) so I can decide.
+```
