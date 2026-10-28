@@ -254,5 +254,8 @@ for i, x in { -20, 20 } do
 	L.flag(flags, Vector3.new(C.X + x, 0, C.Z + 146), if i == 1 then P.ElectricBlue else Color3.fromHex("#3FA34D"), P.Gold, 9)
 end
 
+-- the COACH AGENCY (28 Oct): west of the spawn plaza, facing it
+L.agency(props, CFrame.lookAt(Vector3.new(C.X - 50, 0, C.Z + 132), Vector3.new(C.X, 0, C.Z + 132)))
+
 local parts, lights = L.finish(m, tmp)
 return ("City Park built: %d parts, %d lights"):format(parts, lights)

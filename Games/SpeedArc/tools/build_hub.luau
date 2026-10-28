@@ -773,7 +773,7 @@ do
 end
 -- Coach Corner: the coach cards on a board on the back wall
 do
-	local _, _, kp = kiosk("CoachCorner", Vector3.new(KX, 0, 156), Palette.Mint, Palette.Gold, "ROLL A COACH - THEY FOLLOW YOU", "COACHES", "CoachCorner", "ROLL")
+	local _, _, kp = kiosk("CoachCorner", Vector3.new(KX, 0, 156), Palette.Mint, Palette.Gold, "ROLL COACHES HERE", "COACH AGENCY", "CoachCorner", "ROLL")
 	local board = kp("Whiteboard", Vector3.new(16, 6, 0.3), 0, 7.4, 14.2, Palette.White)
 	local g = Instance.new("SurfaceGui")
 	g.Face = Enum.NormalId.Front

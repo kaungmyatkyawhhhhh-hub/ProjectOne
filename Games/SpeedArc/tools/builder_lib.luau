@@ -309,6 +309,79 @@ function L.gate(parent, name, cf, accent, title, subtitle, gateArea, notify)
 	return m
 end
 
+-- the COACH AGENCY stand (28 Oct, owner: one in each world; rolls only happen here). cf = the
+-- front-centre on the ground, facing the players. A candy desk under a canopy, a board of eight
+-- coach cards in the rarity colours, a giant floating name, the ROLL prompt (Opens = "CoachCorner").
+function L.agency(parent, cf)
+	local Coaches = require(ReplicatedStorage.Shared.Config.Coaches:Clone())
+	local m = Instance.new("Model")
+	m.Name = "CoachAgency"
+	m.Parent = parent
+	local pink, white = Palette.Pink, Palette.White
+	local function p(name, size, x, y, z, color, extra)
+		extra = extra or {}
+		extra.Parent = m
+		extra.Name = name
+		extra.Size = size
+		extra.CFrame = cf * CFrame.new(x, y, z) * (extra.Turn or CFrame.new())
+		extra.Turn = nil
+		extra.Color = color
+		return L.part(extra)
+	end
+	p("Pad", Vector3.new(18, 0.5, 10), 0, 0.25, 3.5, Palette.Cream)
+	p("PadEdge", Vector3.new(18.6, 0.45, 10.6), 0, 0.22, 3.5, pink)
+	p("Board", Vector3.new(16, 9, 0.8), 0, 5.6, 6.6, white)
+	p("BoardTrim", Vector3.new(16.6, 9.6, 0.6), 0, 5.6, 6.9, pink)
+	for i, c in Coaches.List do
+		local x = -5.25 + ((i - 1) % 4) * 3.5
+		local y = 7.4 - math.floor((i - 1) / 4) * 3.4
+		p("Card", Vector3.new(2.8, 2.8, 0.2), x, y, 6.15, Coaches.RarityColors[c.Rarity], { CanCollide = false })
+		p("CardFace", Vector3.new(1.4, 1.4, 1.4), x, y + 0.2, 6.0, Color3.fromHex(c.Look.Skin), { CanCollide = false, Shape = Enum.PartType.Ball })
+	end
+	p("Counter", Vector3.new(14, 3.4, 2.6), 0, 1.95, 2.2, pink)
+	p("CounterTop", Vector3.new(14.6, 0.5, 3.2), 0, 3.9, 2.2, white)
+	for _, s in { -1, 1 } do
+		p("Pole", Vector3.new(11, 1.2, 1.2), s * 8.2, 5.9, 0.6, white, { Shape = Enum.PartType.Cylinder, Turn = CFrame.Angles(0, 0, math.pi / 2) })
+		p("PoleCap", Vector3.new(1.8, 1.8, 1.8), s * 8.2, 11.6, 0.6, Palette.Gold, { Shape = Enum.PartType.Ball })
+	end
+	p("Canopy", Vector3.new(18, 1, 9), 0, 11.6, 3.4, pink)
+	for i = 0, 5 do
+		p("Awning", Vector3.new(3.02, 1.4, 3), -7.5 + i * 3, 10.5, -0.6, if i % 2 == 0 then white else pink, { Class = "WedgePart" })
+	end
+	local band = p("Facade", Vector3.new(18, 2, 0.5), 0, 13.1, -0.6, white)
+	L.surfaceText(band, Enum.NormalId.Front, { { Text = "ROLL COACHES HERE", Height = 0.8, Color = pink, Font = L.BODY } }, { PPS = 20, MaxDistance = 200, Padding = 0 })
+	-- a giant floating name
+	local anchor = p("LabelAnchor", Vector3.new(1, 1, 1), 0, 19, 3, white, { Transparency = 1, CanCollide = false, CanQuery = false })
+	local bb = Instance.new("BillboardGui")
+	bb.Size = UDim2.fromScale(30, 7)
+	bb.LightInfluence = 0
+	bb.MaxDistance = 600
+	bb.Parent = anchor
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.Size = UDim2.fromScale(1, 1)
+	t.Text = "COACH AGENCY"
+	t.TextScaled = true
+	t.FontFace = L.MONTSERRAT
+	t.TextColor3 = white
+	t.Parent = bb
+	local st = Instance.new("UIStroke")
+	st.Color = pink:Lerp(Color3.new(0, 0, 0), 0.45)
+	st.Thickness = 3
+	st.Parent = t
+	-- the prompt: its RightVector points out of the front (TutorialService stands you there)
+	local spot = p("PromptSpot", Vector3.new(1, 1, 1), 0, 3, -2.5, Palette.Gold, { Transparency = 1, CanCollide = false, Turn = CFrame.Angles(0, math.pi / 2, 0) })
+	local pp = Instance.new("ProximityPrompt")
+	pp.ActionText = "ROLL"
+	pp.ObjectText = "Coach Agency"
+	pp.HoldDuration = 0
+	pp.MaxActivationDistance = 14
+	pp.RequiresLineOfSight = false
+	pp:SetAttribute("Opens", "CoachCorner")
+	pp.Parent = spot
+	return m
+end
+
 -- a leaderboard board with 5 rows the server fills (AreaService)
 function L.leaderboard(parent, cf, title)
 	local m = Instance.new("Model")

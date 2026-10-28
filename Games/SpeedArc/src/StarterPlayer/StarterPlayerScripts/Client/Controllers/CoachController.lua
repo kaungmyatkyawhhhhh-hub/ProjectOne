@@ -1,5 +1,6 @@
--- CoachController: the COACHES window (ROLL / MY COACHES), the roll reveal (name roller with rising
--- ticks, a hit scaled by rarity, themed cutscenes for Legendary and up), portrait chips on the HUD.
+-- CoachController: MY COACHES (inventory, anywhere) and the COACH AGENCY (rolls, at the agency stand
+-- in each world), the roll reveal (name roller with rising ticks, a hit scaled by rarity, themed
+-- cutscenes for Legendary and up), portrait chips on the HUD.
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -10,6 +11,7 @@ local Boosts = require(Shared.Util.Boosts)
 local Format = require(Shared.Util.Format)
 local Store = require(Shared.Config.Store)
 local Coaches = require(Shared.Config.Coaches)
+local CoachView = require(Shared.Util.CoachView)
 
 local P = UIKit.Palette
 local F = UIKit.Fonts
@@ -18,8 +20,7 @@ local player = Players.LocalPlayer
 
 local CoachUI = {}
 
-local ctx, win, setTab, page, chips
-local tab = "ROLL"
+local ctx, chips
 local coll = nil
 local rolling = false
 local price = 50
@@ -187,9 +188,9 @@ local function revealCard(coach, forced)
 	end
 	local card = UIKit.panel({ Name = "RevealCard", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromOffset(300, 300), AccentColor = rc, StrokeColor = rc, StrokeThickness = 3, Parent = overlay })
 	local cs = make("UIScale", { Scale = 0.3, Parent = card })
-	local portrait = Art.portrait(coach, 120, card)
-	portrait.AnchorPoint = Vector2.new(0.5, 0)
-	portrait.Position = UDim2.new(0.5, 0, 0, 18)
+	local bust = make("Frame", { Name = "Bust", BackgroundColor3 = rc:Lerp(P.White, 0.3), BackgroundTransparency = 0.55, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(130, 126), Parent = card })
+	UIKit.corner(bust, UDim.new(0.5, 0))
+	CoachView.make(bust, coach.Id, { Zoom = 1.1 })
 	UIKit.text({ Text = string.upper(coach.Rarity), TextSize = 18, Color = rc, Position = UDim2.fromOffset(0, 146), Size = UDim2.new(1, 0, 0, 22), Parent = card })
 	UIKit.text({ Text = string.upper(coach.Name), TextSize = 28, Position = UDim2.fromOffset(0, 170), Size = UDim2.new(1, 0, 0, 34), Parent = card })
 	UIKit.text({ Text = boostText(coach.Id, 1), Font = F.BodyBold, TextSize = 15, Color = P.BrightBlue, Position = UDim2.fromOffset(0, 206), Size = UDim2.new(1, 0, 0, 20), Parent = card })
@@ -247,10 +248,19 @@ function CoachUI.reveal(result)
 end
 
 ----------------------------------------------------------------------------
--- window pages
+-- windows (28 Oct, owner: like GYM ARC's Trainer Agency + My Trainers)
+--   MY COACHES (the COACHES button, anywhere): every coach you own as a 3D tile, a detail panel
+--   with EQUIP / EVOLVE, pages of 8.
+--   COACH AGENCY (only at the agency stand in each world): the 8 coaches as rarity tiles (black
+--   silhouettes until you own one), the chance, the pity line, ROLL / X3 / MY COACHES.
 ----------------------------------------------------------------------------
-local function clearPage()
-	for _, ch in page:GetChildren() do
+local agencyWin, myWin, agencyPage, myPage, fasterRolls
+local selectedUid = nil
+local myPageIndex = 1
+local PER_PAGE = 8
+
+local function clear(f)
+	for _, ch in f:GetChildren() do
 		ch:Destroy()
 	end
 end
@@ -259,8 +269,327 @@ local function rarityIndex(r)
 	return table.find(Coaches.Rarities, r) or 1
 end
 
--- Faster Rolls pass: no roll animation, and ROLL x3 (same odds, same coin price per roll)
-local function fasterRolls()
+local function stageColor(stage)
+	return Color3.fromHex(Coaches.StageColors[stage] or Coaches.StageColors[1])
+end
+
+-- a small gold check badge (two white bars, no font glyph needed)
+local function checkBadge(parent)
+	local b = make("Frame", { Name = "Check", BackgroundColor3 = P.Gold, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -4, 0, 4), Size = UDim2.fromOffset(20, 20), ZIndex = 6, Parent = parent })
+	UIKit.corner(b, UDim.new(0.5, 0))
+	UIKit.stroke(b, P.SpeedBlack, 2, 0)
+	make("Frame", { BackgroundColor3 = P.SpeedBlack, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.36, 0.58), Size = UDim2.fromOffset(7, 3), Rotation = 45, ZIndex = 7, Parent = b })
+	make("Frame", { BackgroundColor3 = P.SpeedBlack, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.6, 0.48), Size = UDim2.fromOffset(12, 3), Rotation = -50, ZIndex = 7, Parent = b })
+	return b
+end
+
+-- one tile (both windows): a colour glow, the coach's 3D bust, the name on top, a big label and a
+-- small line under it, a gold check when owned / equipped, "x2" for copies
+local function tile(parent, o)
+	local t = make("TextButton", { Name = "Tile", Text = "", AutoButtonColor = false, BackgroundColor3 = P.White, Size = o.Size, Position = o.Position or UDim2.new(), LayoutOrder = o.LayoutOrder or 0, Parent = parent })
+	UIKit.corner(t, 12)
+	UIKit.gradient(t, o.Color:Lerp(P.White, 0.08), o.Color:Lerp(P.SpeedBlack, 0.66), 90)
+	UIKit.stroke(t, if o.Selected then P.White else o.Color:Lerp(P.White, 0.25), if o.Selected then 4 else 3, 0)
+	local glow = make("Frame", { Name = "Glow", BackgroundColor3 = o.Color:Lerp(P.White, 0.45), BackgroundTransparency = 0.6, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.44), Size = UDim2.fromScale(0.8, 0.62), ZIndex = 2, Parent = t })
+	UIKit.corner(glow, UDim.new(0.5, 0))
+	if o.Rays then
+		for i = 1, 6 do
+			local ray = make("Frame", { BackgroundColor3 = o.Color:Lerp(P.White, 0.5), BackgroundTransparency = 0.78, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.44), Size = UDim2.new(0, 6, 0.9, 0), Rotation = i * 30, ZIndex = 2, Parent = t })
+			UIKit.corner(ray, 3)
+		end
+	end
+	local holder = make("Frame", { Name = "Bust", BackgroundTransparency = 1, Position = UDim2.fromScale(0.06, 0.13), Size = UDim2.fromScale(0.88, 0.6), ZIndex = 3, Parent = t })
+	CoachView.make(holder, o.CoachId, { Silhouette = o.Silhouette, ZIndex = 3 })
+	if o.Hidden then
+		UIKit.text({ Text = "?", TextSize = 40, Color = o.Color, StrokeTransparency = 0, Position = UDim2.fromScale(0, 0.13), Size = UDim2.fromScale(1, 0.6), ZIndex = 4, Parent = t })
+	end
+	UIKit.text({ Text = o.Name, TextSize = o.NameSize or 13, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(4, 3), Size = UDim2.new(1, -8, 0, 16), ZIndex = 5, Parent = t })
+	UIKit.text({ Text = o.Big, TextSize = o.BigSize or 17, Color = o.BigColor or P.White, StrokeThickness = 2.5, StrokeTransparency = 0, Position = UDim2.fromScale(0, 0.66), Size = UDim2.new(1, 0, 0.17, 0), ZIndex = 5, Parent = t })
+	if o.Small then
+		UIKit.text({ Text = o.Small, TextSize = o.SmallSize or 13, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromScale(0, 0.82), Size = UDim2.new(1, 0, 0.15, 0), ZIndex = 5, Parent = t })
+	end
+	if o.Check then
+		checkBadge(t)
+	end
+	if o.Count then
+		UIKit.text({ Text = o.Count, TextSize = 13, XAlign = Enum.TextXAlignment.Right, StrokeThickness = 2, StrokeTransparency = 0, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -6, 1, -4), Size = UDim2.fromOffset(40, 16), ZIndex = 6, Parent = t })
+	end
+	if o.OnClick then
+		t.Activated:Connect(o.OnClick)
+	end
+	return t
+end
+
+-- a dark pill in a window header: a coloured dot and a line of text
+local function headerPill(parent, text, dot, x, w)
+	local p = make("Frame", { BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.1, Position = UDim2.fromOffset(x, 0), Size = UDim2.fromOffset(w, 30), Parent = parent })
+	UIKit.corner(p, UDim.new(0.5, 0))
+	UIKit.stroke(p, P.Graphite, 2, 0)
+	local d = make("Frame", { BackgroundColor3 = dot, Position = UDim2.new(0, 12, 0.5, -5), Size = UDim2.fromOffset(10, 10), Parent = p })
+	UIKit.corner(d, UDim.new(0.5, 0))
+	UIKit.text({ Text = text, TextSize = 15, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(28, 0), Size = UDim2.new(1, -32, 1, 0), Parent = p })
+	return p
+end
+
+-- boost lines of one coach at a stage: { text, colour }
+local function boostLines(id, stage)
+	local t, p, c = Boosts.coachValues(id, stage)
+	local out = {}
+	if t > 0 then
+		table.insert(out, { ("+%d%% SPEED"):format(math.floor(t * 100 + 0.5)), P.Sky })
+	end
+	if c > 0 then
+		table.insert(out, { ("+%d%% COINS"):format(math.floor(c * 100 + 0.5)), P.Gold })
+	end
+	if p > 0 then
+		table.insert(out, { ("+%g%% RACE PACE"):format(math.floor(p * 1000 + 0.5) / 10), P.Mint })
+	end
+	return out
+end
+
+local function coachCounts()
+	local byId, byStage = {}, {}
+	for _, e in (coll and coll.Coaches) or {} do
+		byId[e.Id] = (byId[e.Id] or 0) + 1
+		local k = e.Id .. "_" .. e.Stage
+		byStage[k] = (byStage[k] or 0) + 1
+	end
+	return byId, byStage
+end
+
+-- the nearest pity line: "EPIC GUARANTEED IN 37 ROLLS" and how full its bar is
+local function pityLine()
+	local best, bestLeft, bestFrac = nil, math.huge, 0
+	for _, p in Coaches.Pity do
+		local done = (coll and coll.Pity and coll.Pity[p.Rarity]) or 0
+		local left = math.max(1, p.Rolls - done)
+		if left < bestLeft then
+			best, bestLeft, bestFrac = p, left, done / p.Rolls
+		end
+	end
+	return best, bestLeft, bestFrac
+end
+
+local function goAgency()
+	myWin.hide(true)
+	local ok = ctx.Net.call("GoTo", "CoachCorner")
+	if ok then
+		task.wait(0.3)
+		agencyWin.show()
+	end
+end
+
+----------------------------------------------------------------------------
+-- COACH AGENCY
+----------------------------------------------------------------------------
+function agencyPage()
+	local page = agencyWin.page
+	clear(page)
+	local byId = coachCounts()
+	local grid = make("Frame", { Name = "Odds", BackgroundTransparency = 1, Size = UDim2.fromOffset(440, 216), Parent = page })
+	make("UIGridLayout", { CellSize = UDim2.fromOffset(104, 104), CellPadding = UDim2.fromOffset(8, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = grid })
+	local right = make("Frame", { Name = "Actions", BackgroundTransparency = 1, Position = UDim2.fromOffset(452, 0), Size = UDim2.fromOffset(152, 216), Parent = page })
+	local info = UIKit.text({ Name = "Info", Text = "Tap a coach to see the boost.", Font = F.BodyBold, TextSize = 13, Wrapped = true, Color = P.BrightBlue, Position = UDim2.fromOffset(0, 176), Size = UDim2.new(1, 0, 0, 40), Parent = right })
+	for i, c in Coaches.List do
+		local n = byId[c.Id] or 0
+		local rc = Coaches.RarityColors[c.Rarity]
+		local hidden = n == 0 and rarityIndex(c.Rarity) >= rarityIndex("Secret")
+		tile(grid, {
+			Size = UDim2.fromOffset(104, 104), LayoutOrder = i, Color = rc, CoachId = c.Id,
+			Silhouette = n == 0, Hidden = hidden, Rays = rarityIndex(c.Rarity) >= rarityIndex("Epic"),
+			Name = if hidden then "???" else string.upper(c.Name), NameSize = 12,
+			Big = string.upper(c.Rarity), BigColor = rc, BigSize = 15, Small = pct(c.Chance),
+			Check = n > 0, Count = if n > 1 then "x" .. n else nil,
+			OnClick = function()
+				local lines = {}
+				for _, l in boostLines(c.Id, 1) do
+					table.insert(lines, l[1])
+				end
+				info.Text = (if hidden then "???" else string.upper(c.Name)) .. ":  " .. table.concat(lines, "  ")
+				ctx.Sound.play("Tab")
+			end,
+		})
+	end
+	-- coins, the pity line, ROLL / X3 / MY COACHES
+	local coinsRow = make("Frame", { BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.1, Size = UDim2.new(1, 0, 0, 30), Parent = right })
+	UIKit.corner(coinsRow, UDim.new(0.5, 0))
+	UIKit.stroke(coinsRow, P.Graphite, 2, 0)
+	local ci = UIKit.coinIcon(20, coinsRow)
+	ci.Position = UDim2.fromOffset(8, 5)
+	UIKit.text({ Name = "Coins", Text = Format.short(player:GetAttribute("Coins") or 0), TextSize = 17, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(34, 0), Size = UDim2.new(1, -40, 1, 0), Parent = coinsRow })
+	local tier, left, frac = pityLine()
+	if tier then
+		local pity = make("Frame", { BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.1, Position = UDim2.fromOffset(0, 36), Size = UDim2.new(1, 0, 0, 34), Parent = right })
+		UIKit.corner(pity, 10)
+		UIKit.text({ Text = ("%s IN %d ROLLS"):format(string.upper(tier.Rarity), left), Font = F.BodyBold, TextSize = 13, Color = Coaches.RarityColors[tier.Rarity], Position = UDim2.fromOffset(0, 2), Size = UDim2.new(1, 0, 0, 18), Parent = pity })
+		local barBack = make("Frame", { BackgroundColor3 = P.Graphite, Position = UDim2.new(0, 10, 0, 22), Size = UDim2.new(1, -20, 0, 6), Parent = pity })
+		UIKit.corner(barBack, 3)
+		local fill = make("Frame", { BackgroundColor3 = Coaches.RarityColors[tier.Rarity], Size = UDim2.fromScale(math.clamp(frac, 0.03, 1), 1), Parent = barBack })
+		UIKit.corner(fill, 3)
+	end
+	local roll, label = UIKit.button({ Name = "Roll", Style = "Gold", Text = "ROLL", TextSize = 24, Position = UDim2.fromOffset(0, 76), Size = UDim2.new(1, 0, 0, 52), Parent = right, OnClick = function()
+		CoachUI.rollNow(1)
+	end })
+	label.Text = if price == 0 then "FREE ROLL!" else "ROLL  " .. Format.short(price)
+	label.Size = UDim2.new(1, -40, 1, 0)
+	if price > 0 then
+		local rci = UIKit.coinIcon(20, roll.Face)
+		rci.Position = UDim2.new(1, -30, 0.5, -10)
+	end
+	UIKit.button({ Name = "Roll3", Style = if fasterRolls() then "Blue" else "Dark", Text = "X3", TextSize = 18, Position = UDim2.fromOffset(0, 134), Size = UDim2.fromOffset(60, 38), Parent = right, OnClick = function()
+		if fasterRolls() then
+			CoachUI.rollNow(Store.FasterRolls.Count)
+		else
+			ctx.Hud.toast("The Faster Rolls pass rolls 3 at once (same odds)", "Gold")
+			agencyWin.hide(true)
+			ctx.Store.open("PASSES")
+		end
+	end })
+	UIKit.button({ Name = "Mine", Style = "Dark", Text = "MY COACHES", TextSize = 13, Position = UDim2.fromOffset(66, 134), Size = UDim2.fromOffset(86, 38), Parent = right, OnClick = function()
+		agencyWin.hide(true)
+		myWin.show()
+	end })
+end
+
+----------------------------------------------------------------------------
+-- MY COACHES
+----------------------------------------------------------------------------
+function myPage()
+	local page = myWin.page
+	clear(page)
+	if not coll then
+		return
+	end
+	local slots = coll.Slots or 2
+	local equipped = coll.EquippedCoaches or {}
+	local list = table.clone(coll.Coaches)
+	table.sort(list, function(a, b)
+		local ea, eb = table.find(equipped, a.Uid) ~= nil, table.find(equipped, b.Uid) ~= nil
+		if ea ~= eb then
+			return ea
+		end
+		local ra, rb = rarityIndex(Boosts.coach(a.Id).Rarity), rarityIndex(Boosts.coach(b.Id).Rarity)
+		if ra ~= rb then
+			return ra > rb
+		end
+		if a.Stage ~= b.Stage then
+			return a.Stage > b.Stage
+		end
+		return a.Uid < b.Uid
+	end)
+	local _, byStage = coachCounts()
+	-- header: EQUIPPED / OWNED, BEST EQUIP, the way to the agency
+	local header = make("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 32), Parent = page })
+	headerPill(header, ("EQUIPPED %d/%d"):format(math.min(#equipped, slots), slots), P.Mint, 0, 150)
+	headerPill(header, ("OWNED %d"):format(#list), P.Sky, 158, 110)
+	UIKit.button({ Name = "Best", Style = "Gold", Text = "BEST EQUIP", TextSize = 14, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -148, 0, -2), Size = UDim2.fromOffset(120, 34), Parent = header, OnClick = function()
+		if ctx.Net.call("BestEquip") then
+			ctx.Sound.play("Equip")
+		end
+	end })
+	UIKit.button({ Name = "Agency", Style = "Pink", Text = "COACH AGENCY", TextSize = 13, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, -2), Size = UDim2.fromOffset(140, 34), Parent = header, OnClick = goAgency })
+	if #list == 0 then
+		UIKit.text({ Text = "No coaches yet.", TextSize = 24, Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 30), Parent = page })
+		UIKit.text({ Text = "Roll your first coach at the COACH AGENCY. Coaches follow you and make every step count more.", Font = F.BodyBold, TextSize = 15, Wrapped = true, Color = P.BrightBlue, Position = UDim2.new(0.5, -220, 0, 116), Size = UDim2.fromOffset(440, 40), Parent = page })
+		UIKit.button({ Style = "Pink", Text = "GO TO THE AGENCY", TextSize = 18, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 170), Size = UDim2.fromOffset(240, 50), Parent = page, OnClick = goAgency })
+		return
+	end
+	local pages = math.max(1, math.ceil(#list / PER_PAGE))
+	myPageIndex = math.clamp(myPageIndex, 1, pages)
+	local selected = nil
+	for _, e in list do
+		if e.Uid == selectedUid then
+			selected = e
+		end
+	end
+	selected = selected or list[(myPageIndex - 1) * PER_PAGE + 1] or list[1]
+	selectedUid = selected.Uid
+	-- the grid (8 a page)
+	local grid = make("Frame", { Name = "Grid", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 40), Size = UDim2.fromOffset(424, 208), Parent = page })
+	make("UIGridLayout", { CellSize = UDim2.fromOffset(100, 100), CellPadding = UDim2.fromOffset(8, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = grid })
+	for i = (myPageIndex - 1) * PER_PAGE + 1, math.min(#list, myPageIndex * PER_PAGE) do
+		local e = list[i]
+		local coach = Boosts.coach(e.Id)
+		local lines = boostLines(e.Id, e.Stage)
+		tile(grid, {
+			Size = UDim2.fromOffset(100, 100), LayoutOrder = i, Color = stageColor(e.Stage), CoachId = e.Id,
+			Name = string.upper(coach.Name), NameSize = 12, Big = Coaches.Stages[e.Stage], BigColor = P.White, BigSize = 16,
+			Small = lines[1] and lines[1][1] or nil, Check = table.find(equipped, e.Uid) ~= nil, Selected = e.Uid == selectedUid,
+			OnClick = function()
+				selectedUid = e.Uid
+				ctx.Sound.play("Tab")
+				myPage()
+			end,
+		})
+	end
+	-- pages
+	local pager = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 250), Size = UDim2.fromOffset(424, 28), Parent = page })
+	UIKit.button({ Style = "Dark", Text = "PREV", TextSize = 14, Size = UDim2.fromOffset(90, 28), Parent = pager, OnClick = function()
+		myPageIndex = math.max(1, myPageIndex - 1)
+		selectedUid = nil
+		myPage()
+	end })
+	UIKit.text({ Text = ("PAGE %d / %d"):format(myPageIndex, pages), TextSize = 16, Position = UDim2.fromOffset(100, 0), Size = UDim2.fromOffset(224, 28), Parent = pager })
+	UIKit.button({ Style = "Dark", Text = "NEXT", TextSize = 14, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.fromOffset(90, 28), Parent = pager, OnClick = function()
+		myPageIndex = math.min(pages, myPageIndex + 1)
+		selectedUid = nil
+		myPage()
+	end })
+	-- the detail panel
+	local coach = Boosts.coach(selected.Id)
+	local sc = stageColor(selected.Stage)
+	local isEq = table.find(equipped, selected.Uid) ~= nil
+	local detail = UIKit.panel({ Name = "Detail", Position = UDim2.fromOffset(436, 40), Size = UDim2.fromOffset(228, 238), Parent = page })
+	tile(detail, {
+		Size = UDim2.fromOffset(118, 112), Position = UDim2.new(0.5, -59, 0, 8), Color = sc, CoachId = selected.Id,
+		Name = string.upper(coach.Name), Big = Coaches.Stages[selected.Stage], BigSize = 18, BigColor = P.White,
+		Small = string.upper(coach.Rarity), Check = isEq, Rays = selected.Stage >= 3,
+	})
+	local y = 126
+	for _, l in boostLines(selected.Id, selected.Stage) do
+		local dot = make("Frame", { BackgroundColor3 = l[2], Position = UDim2.fromOffset(16, y + 4), Size = UDim2.fromOffset(10, 10), Parent = detail })
+		UIKit.corner(dot, UDim.new(0.5, 0))
+		UIKit.text({ Text = l[1], TextSize = 15, Color = l[2], XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(32, y), Size = UDim2.new(1, -40, 0, 18), Parent = detail })
+		y += 18
+	end
+	-- the next stage: 3 of the same coach at the same stage
+	local have = byStage[selected.Id .. "_" .. selected.Stage] or 0
+	local maxed = selected.Stage >= #Coaches.Stages
+	UIKit.text({ Text = if maxed then "MAX STAGE" else ("NEEDS 3x %s  %d/3"):format(Coaches.Stages[selected.Stage], math.min(have, 3)), Font = F.BodyBold, TextSize = 13, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(14, 180), Size = UDim2.new(1, -90, 0, 18), Parent = detail })
+	if not maxed then
+		for k = 1, 3 do
+			local sq = make("Frame", { BackgroundColor3 = if k <= have then sc else P.SpeedBlack, Position = UDim2.new(1, -78 + (k - 1) * 22, 0, 180), Size = UDim2.fromOffset(18, 18), Parent = detail })
+			UIKit.corner(sq, 4)
+			UIKit.stroke(sq, sc, 2, 0)
+		end
+	end
+	UIKit.button({ Name = "Equip", Style = if isEq then "Dark" else "Green", Text = if isEq then "UNEQUIP" else "EQUIP", TextSize = 16, Position = UDim2.fromOffset(10, 202), Size = UDim2.fromOffset(100, 32), Parent = detail, OnClick = function()
+		local ok, why = ctx.Net.call("EquipCoach", selected.Uid)
+		if ok then
+			ctx.Sound.play("Equip")
+		elseif why == "slots" then
+			ctx.Hud.toast("Your coach slots are full. Unequip one first.", "Denied")
+		end
+	end })
+	local canEvolve = not maxed and have >= Coaches.EvolveCost
+	UIKit.button({ Name = "Evolve", Style = if canEvolve then "Pink" else "Dark", Text = if maxed then "MAX" else "EVOLVE", TextSize = 16, Position = UDim2.fromOffset(118, 202), Size = UDim2.fromOffset(100, 32), Parent = detail, OnClick = function()
+		if not canEvolve then
+			ctx.Hud.toast(if maxed then "This coach is at the top stage." else ("Get 3 %s %s to evolve."):format(coach.Name, Coaches.Stages[selected.Stage]), "Denied")
+			return
+		end
+		local ok, res = ctx.Net.call("EvolveCoach", selected.Id, selected.Stage)
+		if ok then
+			selectedUid = res and res.Uid or selectedUid
+			ctx.Sound.play("RevealEpic")
+			ctx.Hud.toast(("%s evolved to %s!"):format(coach.Name, Coaches.Stages[selected.Stage + 1]), "Gold")
+		end
+	end })
+end
+
+----------------------------------------------------------------------------
+-- rolling (only at an agency: the server checks)
+----------------------------------------------------------------------------
+function fasterRolls()
 	return coll ~= nil and coll.Passes ~= nil and coll.Passes.FasterRolls == true
 end
 
@@ -276,165 +605,47 @@ function CoachUI.rollNow(count)
 		if ok then
 			table.insert(got, result)
 			if not fasterRolls() then
-				win.hide(true)
+				agencyWin.hide(true)
 				CoachUI.reveal(result)
-				win.show()
+				agencyWin.show()
 			end
 		else
+			ctx.Sound.play("Denied")
 			if result == "coins" then
-				ctx.Sound.play("Denied")
 				ctx.Hud.toast(if i == 1 then "Not enough coins to roll yet" else ("Rolled %d - not enough coins for more"):format(i - 1), "Denied")
+			elseif result == "agency" then
+				ctx.Hud.toast("Rolls happen at the COACH AGENCY", "Denied")
 			end
 			break
 		end
 	end
-	if #got > 0 then
-		if fasterRolls() then
-			local names = {}
-			local best = got[1]
-			for _, r in got do
-				local c = Boosts.coach(r.Id)
-				table.insert(names, c and c.Name or r.Id)
-				if rarityIndex(r.Rarity) > rarityIndex(best.Rarity) then
-					best = r
-				end
-			end
-			ctx.Sound.play("KaChing")
-			ctx.Hud.toast("You got: " .. table.concat(names, ", "), "Gold")
-			-- big pulls still get their moment
-			if rarityIndex(best.Rarity) >= rarityIndex("Legendary") then
-				win.hide(true)
-				CoachUI.reveal(best)
-				win.show()
+	if #got > 0 and fasterRolls() then
+		local names = {}
+		local best = got[1]
+		for _, r in got do
+			local c = Boosts.coach(r.Id)
+			table.insert(names, c and c.Name or r.Id)
+			if rarityIndex(r.Rarity) > rarityIndex(best.Rarity) then
+				best = r
 			end
 		end
-		setTab("MY COACHES")
+		ctx.Sound.play("KaChing")
+		ctx.Hud.toast("You got: " .. table.concat(names, ", "), "Gold")
+		-- big pulls still get their moment
+		if rarityIndex(best.Rarity) >= rarityIndex("Legendary") then
+			agencyWin.hide(true)
+			CoachUI.reveal(best)
+			agencyWin.show()
+		end
 	end
 	rolling = false
 end
 
-local function rollPage()
-	clearPage()
-	-- left: roll button + pity
-	local left = UIKit.panel({ Name = "RollBox", Size = UDim2.fromOffset(250, 230), Position = UDim2.fromOffset(0, 4), Accent = false, Parent = page })
-	UIKit.text({ Text = "ROLL A COACH", TextSize = 22, Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 26), Parent = left })
-	UIKit.text({ Text = "Coaches follow you and boost you.", Font = F.Body, TextSize = 13, Position = UDim2.fromOffset(10, 36), Size = UDim2.new(1, -20, 0, 18), Parent = left })
-	local btn, label = UIKit.button({ Name = "Roll", Style = "Gold", Text = "ROLL", TextSize = 24, Position = UDim2.new(0.5, -95, 0, 62), Size = UDim2.fromOffset(190, 60), Parent = left })
-	label.Text = if price == 0 then "FREE ROLL!" else "ROLL   " .. Format.short(price)
-	if price > 0 then
-		local ci = UIKit.coinIcon(22, btn.Face)
-		ci.Position = UDim2.new(1, -36, 0.5, -11)
-	end
-	btn.Activated:Connect(function()
-		CoachUI.rollNow(1)
-	end)
-	if fasterRolls() and price > 0 then
-		btn.Size = UDim2.fromOffset(120, 60)
-		btn.Position = UDim2.new(0.5, -122, 0, 62)
-		label.Text = "ROLL"
-		UIKit.button({ Name = "Roll3", Style = "Blue", Text = "ROLL x3", TextSize = 20, Position = UDim2.new(0.5, 4, 0, 62), Size = UDim2.fromOffset(118, 60), Parent = left, OnClick = function()
-			CoachUI.rollNow(Store.FasterRolls.Count)
-		end })
-	end
-	local y = 132
-	for _, p in Coaches.Pity do
-		local left_ = p.Rolls - ((coll and coll.Pity and coll.Pity[p.Rarity]) or 0)
-		UIKit.text({ Text = ("%s GUARANTEED IN %d"):format(string.upper(p.Rarity), math.max(1, left_)), Font = F.BodyBold, TextSize = 13, Color = Coaches.RarityColors[p.Rarity], Position = UDim2.fromOffset(16, y), Size = UDim2.new(1, -32, 0, 18), XAlign = Enum.TextXAlignment.Left, Parent = left })
-		y += 22
-	end
-	-- right: odds
-	local right = UIKit.panel({ Name = "Odds", Size = UDim2.new(1, -262, 0, 230), Position = UDim2.fromOffset(262, 4), Accent = false, Parent = page })
-	UIKit.text({ Text = "ODDS", TextSize = 18, Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, 0, 0, 22), Parent = right })
-	for i, c in Coaches.List do
-		local row = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(14, 30 + (i - 1) * 24), Size = UDim2.new(1, -28, 0, 22), Parent = right })
-		local dot = make("Frame", { BackgroundColor3 = Coaches.RarityColors[c.Rarity], Size = UDim2.fromOffset(12, 12), Position = UDim2.fromOffset(0, 5), Parent = row })
-		UIKit.corner(dot, UDim.new(0.5, 0))
-		UIKit.text({ Text = c.Name, Font = F.BodyBold, TextSize = 14, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(20, 0), Size = UDim2.new(0.5, 0, 1, 0), Parent = row })
-		UIKit.text({ Text = c.Rarity, Font = F.Body, TextSize = 13, Color = Coaches.RarityColors[c.Rarity], XAlign = Enum.TextXAlignment.Left, Position = UDim2.new(0.5, 0, 0, 0), Size = UDim2.new(0.3, 0, 1, 0), Parent = row })
-		UIKit.text({ Text = pct(c.Chance), TextSize = 14, Color = P.Gold, XAlign = Enum.TextXAlignment.Right, Position = UDim2.new(0.8, 0, 0, 0), Size = UDim2.new(0.2, 0, 1, 0), Parent = row })
-	end
-end
-
-local function myPage()
-	clearPage()
-	if not coll then
-		return
-	end
-	local slots = coll.Slots or 2
-	local equipped = coll.EquippedCoaches or {}
-	local top = make("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 40), Parent = page })
-	UIKit.text({ Text = ("SLOTS  %d / %d"):format(math.min(#equipped, slots), slots), TextSize = 18, XAlign = Enum.TextXAlignment.Left, Size = UDim2.fromOffset(200, 40), Parent = top })
-	UIKit.button({ Style = "Gold", Text = "BEST EQUIP", TextSize = 16, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.fromOffset(150, 40), Parent = top, OnClick = function()
-		if ctx.Net.call("BestEquip") then
-			ctx.Sound.play("Equip")
-		end
-	end })
-	local grid = make("ScrollingFrame", { BackgroundTransparency = 1, BorderSizePixel = 0, Position = UDim2.fromOffset(0, 46), Size = UDim2.new(1, 0, 1, -46), CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y, ScrollBarThickness = 6, ScrollBarImageColor3 = P.ElectricBlue, Parent = page })
-	make("UIGridLayout", { CellSize = UDim2.fromOffset(150, 176), CellPadding = UDim2.fromOffset(10, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = grid })
-	if #coll.Coaches == 0 then
-		UIKit.text({ Text = "No coaches yet. Roll one!", Font = F.BodyBold, TextSize = 16, Size = UDim2.fromOffset(300, 40), Parent = grid })
-	end
-	-- duplicates per coach + stage (for EVOLVE)
-	local counts = {}
-	for _, e in coll.Coaches do
-		local k = e.Id .. "_" .. e.Stage
-		counts[k] = (counts[k] or 0) + 1
-	end
-	local list = table.clone(coll.Coaches)
-	table.sort(list, function(a, b)
-		local ea, eb = table.find(equipped, a.Uid) ~= nil, table.find(equipped, b.Uid) ~= nil
-		if ea ~= eb then
-			return ea
-		end
-		local ra = table.find(Coaches.Rarities, Boosts.coach(a.Id).Rarity)
-		local rb = table.find(Coaches.Rarities, Boosts.coach(b.Id).Rarity)
-		if ra ~= rb then
-			return ra > rb
-		end
-		return a.Stage > b.Stage
-	end)
-	for i, e in list do
-		local coach = Boosts.coach(e.Id)
-		local isEq = table.find(equipped, e.Uid) ~= nil
-		local rc = Coaches.RarityColors[coach.Rarity]
-		local c = make("Frame", { BackgroundColor3 = P.White, LayoutOrder = i, Parent = grid })
-		UIKit.corner(c, 12)
-		UIKit.gradient(c, if isEq then P.DeepBlue else P.Graphite, P.Carbon, 90)
-		UIKit.stroke(c, if isEq then P.Gold else rc, 2)
-		local portrait = Art.portrait(coach, 64, c)
-		portrait.Position = UDim2.new(0.5, -32, 0, 6)
-		UIKit.text({ Text = string.upper(coach.Name), TextSize = 14, Position = UDim2.fromOffset(4, 72), Size = UDim2.new(1, -8, 0, 18), Parent = c })
-		UIKit.text({ Text = ("%s  -  %s"):format(string.upper(coach.Rarity), Coaches.Stages[e.Stage]), Font = F.BodyBold, TextSize = 13, Color = rc, Position = UDim2.fromOffset(4, 90), Size = UDim2.new(1, -8, 0, 16), Parent = c })
-		UIKit.text({ Text = boostText(e.Id, e.Stage), Font = F.Body, TextSize = 13, Color = P.BrightBlue, Wrapped = true, Position = UDim2.fromOffset(4, 106), Size = UDim2.new(1, -8, 0, 28), Parent = c })
-		local dup = counts[e.Id .. "_" .. e.Stage] or 0
-		if dup >= Coaches.EvolveCost and e.Stage < #Coaches.Stages then
-			UIKit.button({ Style = "Gold", Text = ("EVOLVE %d/%d"):format(math.min(dup, 3), Coaches.EvolveCost), TextSize = 13, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6), Size = UDim2.new(1, -12, 0, 32), Parent = c, OnClick = function()
-				local ok = ctx.Net.call("EvolveCoach", e.Id, e.Stage)
-				if ok then
-					ctx.Sound.play("RevealEpic")
-					ctx.Hud.toast(("%s evolved to %s!"):format(coach.Name, Coaches.Stages[e.Stage + 1]), "Gold")
-				end
-			end })
-		else
-			UIKit.button({ Style = if isEq then "Blue" else "Dark", Text = if isEq then "EQUIPPED" else "EQUIP", TextSize = 14, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6), Size = UDim2.new(1, -12, 0, 32), Parent = c, OnClick = function()
-				local ok, why = ctx.Net.call("EquipCoach", e.Uid)
-				if ok then
-					ctx.Sound.play("Equip")
-				elseif why == "slots" then
-					ctx.Hud.toast("Your coach slots are full. Unequip one first.", "Denied")
-				end
-			end })
-		end
-	end
-end
-
 local function refresh()
-	if not win.isOpen() then
-		return
+	if agencyWin.isOpen() then
+		agencyPage()
 	end
-	if tab == "ROLL" then
-		rollPage()
-	else
+	if myWin.isOpen() then
 		myPage()
 	end
 end
@@ -462,32 +673,37 @@ local function updateChips()
 	end
 end
 
+-- "ROLL" = the agency, anything else = MY COACHES
 function CoachUI.open(which)
-	tab = which or tab
-	win.show()
-	setTab(tab)
+	if which == "ROLL" then
+		agencyWin.show()
+	else
+		myWin.show()
+	end
 end
 
 function CoachUI.start(c)
 	ctx = c
 	ctx.Coaches = CoachUI
 	buildOverlay()
-	win = UIKit.window({ Name = "Coaches", Title = "COACHES", Size = Vector2.new(700, 330), Accent = P.Gold, Parent = ctx.Hud.canvas })
-	setTab = UIKit.tabs(win.content, { "ROLL", "MY COACHES" }, function(name)
-		tab = name
-		refresh()
-	end)
-	page = make("Frame", { Name = "Page", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 46), Size = UDim2.new(1, 0, 1, -46), Parent = win.content })
-	win.onOpen = function()
+	agencyWin = UIKit.window({ Name = "CoachAgency", Title = "COACH AGENCY", Size = Vector2.new(640, 290), Accent = P.Pink, Parent = ctx.Hud.canvas })
+	agencyWin.page = make("Frame", { Name = "Page", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 1, -4), Parent = agencyWin.content })
+	myWin = UIKit.window({ Name = "Coaches", Title = "MY COACHES", Size = Vector2.new(700, 330), Accent = P.Gold, Parent = ctx.Hud.canvas })
+	myWin.page = make("Frame", { Name = "Page", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 1, -4), Parent = myWin.content })
+	agencyWin.onOpen = function()
+		agencyPage()
 		task.spawn(function()
 			local ok, p = ctx.Net.call("RollPrice")
 			if ok and p then
 				price = p
-				if tab == "ROLL" then
-					rollPage()
+				if agencyWin.isOpen() then
+					agencyPage()
 				end
 			end
 		end)
+	end
+	myWin.onOpen = function()
+		myPage()
 	end
 	chips = make("Frame", { Name = "CoachChips", BackgroundTransparency = 1, Position = UDim2.fromOffset(16, 108), Size = UDim2.fromOffset(170, 40), Parent = ctx.Hud.canvas })
 	make("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = chips })

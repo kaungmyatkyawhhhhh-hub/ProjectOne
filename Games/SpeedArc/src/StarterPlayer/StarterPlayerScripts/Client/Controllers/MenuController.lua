@@ -29,7 +29,7 @@ local function buildMenu()
 	locker.LayoutOrder = 1
 	locker.Parent = holder
 	local coaches = UIKit.button({ Name = "Coaches", Style = "Gold", Text = "COACHES", TextSize = 18, Size = UDim2.fromOffset(124, 48), OnClick = function()
-		ctx.Coaches.open("ROLL")
+		ctx.Coaches.open("MY COACHES") -- your coaches anywhere; rolling is at the COACH AGENCY
 	end })
 	coaches.LayoutOrder = 2
 	coaches.Parent = holder

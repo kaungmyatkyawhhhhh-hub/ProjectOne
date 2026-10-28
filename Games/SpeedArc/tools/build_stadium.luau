@@ -202,5 +202,8 @@ for i, n in nations do
 end
 L.leaderboard(props, CFrame.lookAt(Vector3.new(C.X + 22, 0, C.Z - frontN - 6), Vector3.new(C.X + 22, 0, C.Z)), "STADIUM - FASTEST HERE")
 
+-- the COACH AGENCY (28 Oct): inside the bowl by the tunnel, across from the leaderboard
+L.agency(props, CFrame.lookAt(Vector3.new(C.X - 24, 0, C.Z - frontN - 8), Vector3.new(C.X - 24, 0, C.Z)))
+
 local parts, lights = L.finish(m, tmp)
 return ("Big Stadium built: %d parts, %d lights, %d fans"):format(parts, lights, fanCount)
