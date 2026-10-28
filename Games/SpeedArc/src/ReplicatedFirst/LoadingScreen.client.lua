@@ -18,11 +18,11 @@ local BODY = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWei
 local BLACK, CARBON, BLUE, GOLD, WHITE = Color3.fromHex("#0B0D12"), Color3.fromHex("#161A22"), Color3.fromHex("#1E7BFF"), Color3.fromHex("#FFC83D"), Color3.fromHex("#F4F6FA")
 local STEPS = { "Painting the lanes...", "Lacing up the shoes...", "Filling the stands...", "Warming up the coaches...", "Starting the clock..." }
 local TIPS = {
-	"Tap steadily: a steady rhythm builds your combo to x1.5!",
+	"Every step = +1 SPEED. Keep running!",
 	"A race starts every 3 minutes. Tap JOIN when you see it!",
-	"Shoes make every tap count for more.",
+	"Shoes make every step count for more.",
 	"Coaches follow you and boost your training.",
-	"Champion rank + a race win = GO PRO to a new league.",
+	"Smash the last wall = GO PRO to a new world.",
 	"Use BOOST in races - you get 3 and they refill.",
 	"Come back every day for your streak reward!",
 }

@@ -5,14 +5,14 @@
 -- Id = 0 means "not created in Creator Hub yet": the card shows SOON and can't be bought.
 return {
 	Passes = {
-		{ Key = "AutoTrain", Name = "AUTO TRAIN", Price = 249, Id = 2058077302, Hero = true,
-			Desc = "Trains for you on any station: 3 taps a second with a steady x1.2 combo.",
+		{ Key = "AutoTrain", Name = "AUTO RUN", Price = 249, Id = 2058077302, Hero = true,
+			Desc = "Treadmills step for you 3x faster, all by themselves.",
 			Icon = { "AUTO", "#1E7BFF" } },
 		{ Key = "Speed2x", Name = "2x SPEED", Price = 249, Id = 2057303279,
-			Desc = "Double SPEED from every training tap, forever.",
+			Desc = "Double SPEED from every step, forever.",
 			Icon = { "2x", "#FFC83D" } },
 		{ Key = "Coins2x", Name = "2x COINS", Price = 149, Id = 2056799285,
-			Desc = "Double coins from races, training and rewards (all coin boosts together stop at x8).",
+			Desc = "Double coins from walls, races, steps and rewards (all coin boosts together stop at x8).",
 			Icon = { "2x", "#3FA34D" } },
 		{ Key = "VIP", Name = "VIP", Price = 299, Id = 2057831240,
 			Desc = "+10% coins, VIP tag, VIP kit, VIP trail, VIP name style and a gold chat name.",
@@ -44,7 +44,7 @@ return {
 
 	StarterWindowHours = 24, -- the Starter Pack is only offered in the first 24 h after you first joined
 	OfferGapSeconds = 600, -- at most one small offer card per 10 min
-	AutoTrainOfferAfter = 10 * 60, -- the Auto Train card after 10 min of tapping in a session (once)
+	AutoTrainOfferAfter = 10 * 60, -- the Auto Run card after 10 min on a treadmill in a session (once)
 	SpeedBoostMult = 2, -- the 2x SPEED product (stacks with the New Runner / gift boost)
 
 	AutoTrain = { TapsPerSecond = 3, Combo = 1.2, AfkCheckSeconds = 15 * 60, AfkAnswerSeconds = 60 },

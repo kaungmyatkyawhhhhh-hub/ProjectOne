@@ -13,6 +13,8 @@ local Formulas = require(Shared.Util.Formulas)
 local Net = require(Shared.Util.Net)
 local PlayerData = require(script.Parent.PlayerData)
 local TrainingService = require(script.Parent.TrainingService)
+local StepService = require(script.Parent.StepService)
+local WallService = require(script.Parent.WallService)
 local RaceService = require(script.Parent.RaceService)
 local AreaService = require(script.Parent.AreaService)
 local LockerService = require(script.Parent.LockerService)
@@ -101,8 +103,13 @@ local function goTo(player, target)
 	if not data or not root or RaceService.inRace(player) then
 		return false
 	end
-	if target == "SprintLane" or target == "Train" then
-		local station = if target == "SprintLane" then Formulas.station("SprintLane") else Formulas.bestStation(data.Speed, data.League)
+	if target == "Course" or target == "SprintLane" then
+		-- the start of your area's wall course (28 Oct pivot; "SprintLane" is the old name)
+		TrainingService.leave(player)
+		return WallService.toStart(player), "Course"
+	end
+	if target == "Train" then
+		local station = Formulas.bestStation(data.Speed, data.League)
 		if not station then
 			return false
 		end
@@ -157,7 +164,7 @@ function TutorialService.start()
 			return true, data.Tutorial
 		elseif action == "advance" then
 			-- only the steps the client judges (the welcome line, the combo hint, the podium)
-			if type(arg) == "number" and data.Tutorial == arg and (arg == S.Welcome or arg == S.Combo or arg == S.Podium) then
+			if type(arg) == "number" and data.Tutorial == arg and (arg == S.Welcome or arg == S.Podium) then
 				setStep(player, arg + 1)
 				return true
 			end
@@ -185,10 +192,7 @@ function TutorialService.start()
 	-- where the GO HERE marker points (the client may not have those parts streamed in)
 	Net.on("TutorialTargets", function()
 		local out = {}
-		local slot = TrainingService.freeSlot("SprintLane", nil)
-		if slot then
-			out.SprintLane = slot.Position
-		end
+		out.Course = WallService.wallPosition("Hub", 1)
 		for _, id in { "ShoeShop", "CoachCorner", "TrailBooth" } do
 			local spot = promptSpot(id)
 			if spot then
@@ -212,9 +216,10 @@ function TutorialService.start()
 		end)
 	end)
 
-	TrainingService.Tapped.Event:Connect(function(player, taps)
+	-- the first steps: FirstTap is "take your first step" since the 28 Oct pivot, Combo is "smash the first wall"
+	StepService.Stepped.Event:Connect(function(player, total, n)
 		local data = PlayerData.get(player)
-		if taps == 1 or (data and data.Tutorial == S.FirstTap) then
+		if total == n or (data and data.Tutorial == S.FirstTap) then
 			Analytics.step(player, "first_tap")
 		end
 		if data and data.Tutorial == S.FirstTap then
@@ -242,7 +247,9 @@ function TutorialService.start()
 					continue
 				end
 				local step = data.Tutorial
-				if step == S.Shoes and data.OwnedShoes[T.ShoeId] then
+				if step == S.Combo and Formulas.wallsIn(data, 1) >= 1 then
+					setStep(player, S.Race)
+				elseif step == S.Shoes and data.OwnedShoes[T.ShoeId] then
 					setStep(player, S.Silver)
 				elseif step == S.Silver and (data.Rank or 1) >= 2 then
 					data.FreeRolls = (data.FreeRolls or 0) + T.SilverRoll

@@ -15,7 +15,7 @@ return {
 		SilverRoll = 1, -- free coach rolls at Silver rank
 		-- safety per step (seconds, counted only while the step is possible): first the game does the
 		-- GO TO for the player, after twice this the step is skipped so nobody is ever stuck
-		StepTimeouts = { [1] = 6, [2] = 45, [3] = 25, [4] = 55, [5] = 6, [6] = 75, [7] = 600, [8] = 75 },
+		StepTimeouts = { [1] = 6, [2] = 30, [3] = 90, [4] = 55, [5] = 6, [6] = 75, [7] = 600, [8] = 75 }, -- 2 = first step, 3 = first wall
 	},
 	NewRunnerBoost = { Mult = 2, Seconds = 15 * 60 }, -- 2x training for 15 min of play
 
@@ -44,8 +44,8 @@ return {
 			{ Id = "Win1", Text = "Win 1 race", Stat = "Wins", Goal = 1 },
 			{ Id = "Race5", Text = "Race 5 times", Stat = "Races", Goal = 5 },
 			{ Id = "Race3", Text = "Race 3 times", Stat = "Races", Goal = 3 },
-			{ Id = "Taps300", Text = "Train 300 taps", Stat = "Taps", Goal = 300 },
-			{ Id = "Taps800", Text = "Train 800 taps", Stat = "Taps", Goal = 800 },
+			{ Id = "Taps300", Text = "Take 500 steps", Stat = "Steps", Goal = 500 }, -- ids kept from the tap days (old saves)
+			{ Id = "Taps800", Text = "Take 1,500 steps", Stat = "Steps", Goal = 1500 },
 			{ Id = "PB1", Text = "Get a new personal best", Stat = "PBs", Goal = 1 },
 			{ Id = "Podium2", Text = "Finish top 3 twice", Stat = "Podiums", Goal = 2 },
 			{ Id = "Boost15", Text = "Use BOOST 15 times", Stat = "Boosts", Goal = 15 },
@@ -57,7 +57,7 @@ return {
 	Gifts = {
 		{ At = 3, Minutes = 1 },
 		{ At = 8, Minutes = 2 },
-		{ At = 15, TrainBoost = 5 * 60 }, -- 2x training for 5 min of play
+		{ At = 15, TrainBoost = 5 * 60 }, -- 2x SPEED per step for 5 min of play
 		{ At = 25, Minutes = 4 },
 		{ At = 40, Minutes = 6 },
 		{ At = 60, Rolls = 1 },

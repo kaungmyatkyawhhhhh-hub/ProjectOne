@@ -1,20 +1,20 @@
--- TrainingService: walk up to a station, TRAIN, tap to gain SPEED (GDD 7).
--- Stations live in workspace.Hub.Training.<StationId>; each spot is a part named "Slot".
+-- TrainingService: AFK step machines (28 Oct pivot; tapping is gone). Walk up to a machine, press
+-- TRAIN and it steps for you: Course.AfkStepsPerSecond steps a second (x3 with the Auto Run pass),
+-- each paid like a running step x the machine's Mult (StepService.pay).
+-- Stations live in workspace.<Area>.Training.<StationId>; each spot is a part named "Slot".
 local Players = game:GetService("Players")
 
 local Shared = game:GetService("ReplicatedStorage").Shared
-local GameConfig = require(Shared.Config.GameConfig)
 local Formulas = require(Shared.Util.Formulas)
-local Boosts = require(Shared.Util.Boosts)
 local Net = require(Shared.Util.Net)
 local Format = require(Shared.Util.Format)
 local PlayerData = require(script.Parent.PlayerData)
-local SessionBoosts = require(script.Parent.SessionBoosts)
+local StepService = require(script.Parent.StepService)
+local Course = require(Shared.Config.Course)
 
 local TrainingService = {}
-TrainingService.Tapped = Instance.new("BindableEvent") -- (player, totalTaps, combo)
 
-local active = {} -- [player] = { station, slot, lastTap, streakStart, recent = {}, coinFrac, bucket, bucketAt }
+local active = {} -- [player] = { station, slot, auto, autoSince, afkAsked }
 local slotOwner = {} -- [slot] = player
 local allSlots = {} -- [slot] = true
 
@@ -110,12 +110,6 @@ function TrainingService.enter(player, slot)
 	active[player] = {
 		station = station,
 		slot = slot,
-		lastTap = 0,
-		streakStart = 0,
-		recent = {},
-		coinFrac = 0,
-		bucket = GameConfig.Speed.MaxTapsPerSecond,
-		bucketAt = os.clock(),
 		auto = data.AutoTrain == true and data.Passes.AutoTrain == true,
 		autoSince = os.clock(),
 	}
@@ -123,63 +117,7 @@ function TrainingService.enter(player, slot)
 	return true
 end
 
-local applyGain
 local AUTO = require(Shared.Config.Store).AutoTrain
-
-local function onTap(player)
-	local s = active[player]
-	if not s then
-		return
-	end
-	local now = os.clock()
-	-- token bucket: at most MaxTapsPerSecond counted
-	local maxRate = GameConfig.Speed.MaxTapsPerSecond
-	s.bucket = math.min(maxRate, s.bucket + (now - s.bucketAt) * maxRate)
-	s.bucketAt = now
-	if s.bucket < 1 then
-		return
-	end
-	s.bucket -= 1
-
-	-- combo: steady = at least MinTapsPerSecond, no gap over MaxGap
-	local c = GameConfig.Combo
-	if now - s.lastTap > c.MaxGap then
-		s.streakStart = now
-		table.clear(s.recent)
-	end
-	s.lastTap = now
-	table.insert(s.recent, now)
-	if #s.recent > c.MinTapsPerSecond then
-		table.remove(s.recent, 1)
-	end
-	local steady = #s.recent >= c.MinTapsPerSecond and now - s.recent[1] <= 1
-	local combo = if steady then Formulas.combo(now - s.streakStart) else 1
-
-	if s.auto then
-		return -- Auto Train is tapping for you (your own taps don't add on top)
-	end
-	applyGain(player, s, combo)
-end
-
--- one tap's worth of SPEED and coins (a real tap or an Auto Train tap)
-function applyGain(player, s, combo)
-	local data = PlayerData.get(player)
-	if not data then
-		return
-	end
-	local b = Boosts.compute(data)
-	local gain = s.station.Gain * combo * b.Train * SessionBoosts.trainMult(player, data)
-	PlayerData.set(player, "Speed", data.Speed + gain)
-	data.Stats.Taps += 1
-	TrainingService.Tapped:Fire(player, data.Stats.Taps, combo)
-
-	s.coinFrac += Formulas.coinsPerTap(data.League) * b.Coins
-	if s.coinFrac >= 1 then
-		local whole = math.floor(s.coinFrac)
-		s.coinFrac -= whole
-		PlayerData.set(player, "Coins", data.Coins + whole)
-	end
-end
 
 local function setupSlot(slot)
 	local station = Formulas.station(slot:GetAttribute("StationId"))
@@ -220,9 +158,7 @@ function TrainingService.start()
 		end
 	end
 
-	Net.get("TrainTap").OnServerEvent:Connect(onTap)
-
-	-- Auto Train (pass): toggled by the player, works on any station, checks you're still there
+	-- Auto Run (pass, Store key AutoTrain): toggled by the player, machines step x3 faster, checks you're still there
 	local StoreEvent = Net.get("StoreEvent")
 	Net.on("SetAutoTrain", function(player, on)
 		local data = PlayerData.get(player)
@@ -247,13 +183,16 @@ function TrainingService.start()
 		return true
 	end)
 	task.spawn(function()
-		local step = 1 / AUTO.TapsPerSecond
+		local step = 1 / Course.AfkStepsPerSecond
 		while true do
 			task.wait(step)
 			local now = os.clock()
 			for player, s in active do
+				local data = PlayerData.get(player)
+				if data then
+					StepService.pay(player, data, if s.auto then Course.AutoRunMult else 1, s.station.Mult)
+				end
 				if s.auto then
-					applyGain(player, s, AUTO.Combo)
 					if not s.afkAsked and now - (s.autoSince or now) > AUTO.AfkCheckSeconds then
 						s.afkAsked = now
 						StoreEvent:FireClient(player, "afk", { Seconds = AUTO.AfkAnswerSeconds })

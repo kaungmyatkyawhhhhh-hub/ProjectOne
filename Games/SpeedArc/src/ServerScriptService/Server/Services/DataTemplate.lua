@@ -9,6 +9,7 @@ return {
 	Medals = { Gold = 0, Silver = 0, Bronze = 0 },
 	Stats = {
 		Taps = 0,
+		Steps = 0, -- 28 Oct pivot: steps run (and AFK machine steps)
 		Races = 0,
 		Wins = 0,
 		PlaySeconds = 0,
@@ -71,6 +72,9 @@ return {
 	ShoeSkins = {}, -- [skinId] = true
 	ShoeSkin = {}, -- [shoeId] = skinId worn
 	AutoTrain = false,
+
+	-- 28 Oct pivot: the wall course
+	Walls = {}, -- [league] = best wall smashed there
 
 	-- M6
 	Settings = { Music = 0.8, Sounds = 0.8, Low = "Auto", Reduced = false },

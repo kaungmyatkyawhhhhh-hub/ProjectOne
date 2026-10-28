@@ -55,10 +55,11 @@ local function smash(player, data, league, k)
 	local coins = math.floor(Formulas.minutesOfCoins(minutes, data.League) * Boosts.compute(data).Coins + 0.5)
 	PlayerData.set(player, "Coins", data.Coins + coins)
 	if first then
+		local wasReady = LeagueService.ready(data)
 		data.Walls[key] = k
 		player:SetAttribute("BestWall", k)
 		Analytics.event(player, "WallSmashed_" .. k)
-		LeagueService.refresh(player)
+		LeagueService.wallsChanged(player, wasReady)
 	end
 	WallEvent:FireClient(player, "smash", { Index = k, Coins = coins, First = first, Last = k == Formulas.wallCount() })
 	WallService.Smashed:Fire(player, league, k, first)

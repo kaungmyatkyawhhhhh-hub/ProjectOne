@@ -7,6 +7,7 @@ local Net = require(Shared.Util.Net)
 
 local Services = script.Parent.Services
 local PlayerData = require(Services.PlayerData)
+local StepService = require(Services.StepService)
 local TrainingService = require(Services.TrainingService)
 local RaceService = require(Services.RaceService)
 local LockerService = require(Services.LockerService)
@@ -20,6 +21,7 @@ local SocialService = require(Services.SocialService)
 local LeaderboardService = require(Services.LeaderboardService)
 local StoreService = require(Services.StoreService)
 local CosmeticsService = require(Services.CosmeticsService)
+local WallService = require(Services.WallService)
 
 Net.get("Toast") -- creates the remotes before any client asks for them
 
@@ -61,11 +63,13 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 PlayerData.start()
+StepService.start()
 TrainingService.start()
 RaceService.start()
 LockerService.start()
 CoachService.start()
 LeagueService.start()
+WallService.start()
 AreaService.start()
 RetentionService.start()
 Analytics.start()

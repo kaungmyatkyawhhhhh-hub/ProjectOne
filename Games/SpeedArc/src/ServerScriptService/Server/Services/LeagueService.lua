@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Areas = require(Shared.Config.Areas)
 local Ranks = require(Shared.Config.Ranks)
+local Course = require(Shared.Config.Course)
 local Formulas = require(Shared.Util.Formulas)
 local Boosts = require(Shared.Util.Boosts)
 local Net = require(Shared.Util.Net)
@@ -26,9 +27,18 @@ local function areaForLeague(league)
 end
 LeagueService.areaForLeague = areaForLeague
 
+-- Go Pro (28 Oct pivot): smash your league's last wall. A league whose area has no wall course yet
+-- keeps the old rule (Champion rank + race wins).
 local function ready(data)
+	if data.League >= Areas.MaxLeague then
+		return false
+	end
+	local area = areaForLeague(data.League)
+	if area and Course.Areas[area.Id] then
+		return Formulas.wallsIn(data, data.League) >= Formulas.wallCount()
+	end
 	local need = Areas.GoPro.WinsNeeded[data.League] or 99
-	return data.Rank >= #Ranks.Names and (data.LeagueWins or 0) >= need and data.League < Areas.MaxLeague
+	return data.Rank >= #Ranks.Names and (data.LeagueWins or 0) >= need
 end
 
 function LeagueService.refresh(player)
@@ -106,6 +116,19 @@ local function goPro(player)
 	local area = areaForLeague(to)
 	return true, { From = from, To = to, Area = area and area.Id, AreaName = area and area.Name, Title = title, FirstTime = firstTime }
 end
+
+-- a wall was smashed for the first time: refresh, and the GO PRO moment when the last one fell
+function LeagueService.wallsChanged(player, wasReady)
+	local data = PlayerData.get(player)
+	if not data then
+		return
+	end
+	LeagueService.refresh(player)
+	if not wasReady and ready(data) then
+		Moment:FireClient(player, "GoProReady", { League = data.League })
+	end
+end
+LeagueService.ready = ready
 
 function LeagueService.start()
 	Net.on("GoPro", goPro)
