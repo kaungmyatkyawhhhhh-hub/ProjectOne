@@ -110,7 +110,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 |---|---|
 | 6+ boost kinds | CHANGE: **3 kinds** (Stamina, Gains, Luck), owned items converted at equal or better value (prompt 97) |
 | Gear: belt + wraps with % per body half | KEEP + gear ladder by gym (above) |
-| Auras (13; earned, coins, passes) with stats | KEEP; future auras come from the skill tree and champions; keep effects under budget |
+| Auras (13; earned, coins, passes) | CHANGE: **Aura Altar** (coin spins, odds, pity, ~24 auras in 5 rarities with coin multipliers x1.05-x2), earned **signature** auras (alters, champions, stars), much STRONGER visuals by rarity, walking at 50%+ power (prompt 102, [[2026-10-29 GYM ARC Auras rework]]) |
 | Looks (tank tops 12 colours, name/title colours, alter tints, variants) | KEEP (no stats) |
 | Wardrobe tops (old fits) | KEEP OFF (already off) |
 | Apparel at Pump Shop | KEEP OFF |
@@ -265,6 +265,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 - **MOW ARC:** on hold.
 
 ## 23. When (prompt queue)
+**Updated 29 Oct:** the order now has decision gates; the current schedule is in [[2026-10-29 GYM ARC Master plan - one ladder]] and [[2026-10-29 GYM ARC Rescue plan - if the game is dying]]. The table below is the first version.
 | Date (Sat) | Update | Prompt |
 |---|---|---|
 | before 31 Oct | Hall of Fame fixes + fairness checks (trainer slots kept, Starter Pack price) | 95 |

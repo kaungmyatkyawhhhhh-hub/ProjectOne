@@ -43,7 +43,7 @@ Always on (quiet, small UI): daily rewards, quests, streaks, codes, titles, lead
 | Start | 4'0" | ● Starter Gym machines + dumbbells, ● Shop, ● Stats + muscles panels, ● daily rewards / streak / quests, ● skateboard (no tutorial tip), ● Benny (first champion), ★ Future You card |
 | Spurt 1 | 4'4" | ● Beach Gym + poses + Local posing shows, ● Trainers (free first roll), ● Inventory |
 | Spurt 2 | 4'8" | ● Arm wrestling + Regional Show, ★ Champion Ladder (Coral), ★ Power Jump |
-| Spurt 3 | 5'0" | ● Pro Gym (+10%), ★ Skill tree (its Aura + Gear branches open ● Auras and ● Gear), ★ champion Dante |
+| Spurt 3 | 5'0" | ● Pro Gym (+10%), ★ Skill tree (opens ● Gear), ★ **Aura Altar** (opens ● Auras), ★ champion Dante |
 | Spurt 4 | 5'4" | ● National Show, ● Genetics, ★ Ground Stomp |
 | Spurt 5 | 5'8" | ● Powerlifting Gym (+20%), ★ Iron Grip Throw + "NEEDS X STRENGTH" objects, ● Crews |
 | Spurt 6 | 6'0" | ● Body Alters, ★ "Fully grown, now TRANSFORM" moment, ★ Server crown |
@@ -143,10 +143,11 @@ Fix (added to prompt 96, and it moves UP in the plan):
 | 31 Oct | Hall of Fame launch | (90 + 88 done) |
 | 7 Nov | Future You, Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default + new thumbnail/icon test | **91** |
 | 8-14 Nov | Small ad test ($20-50) to get enough new players to measure | - |
-| 14 Nov | Alter phase fix (quick parts first) | 96 |
+| 14 Nov | Alter phase fix (quick parts first) + stronger aura visuals | 96, 102 part A |
 | 21 Nov | **GATE 1**: read the numbers ([[2026-10-29 GYM ARC Rescue plan - if the game is dying]]) + star track if anyone reached star 2 | 101 |
 If Gate 1 is "working", continue:
 | 28 Nov | Golden Era Gym (+ Elite/Champion gear) | 98 |
+| (with 98 or the next week) | Aura Altar + rarities | 102 part B |
 | 5 Dec | Champion Ladder | 92 |
 | 12 Dec | Strongman Feats (3), strength objects, rooftop gym, crown + Winter Lifts cosmetic + code | 93 |
 | 19 Dec | Skill tree | 94 |
