@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [speedarc, feature]
-status: first pass (owner to listen)
+status: M6 pass done (owner to listen + pick music)
 ---
 # SPEED ARC - Sound
 
@@ -32,10 +32,16 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 | Coins + CoinShower | coins reward | 139825402019264, 9113849583 |
 | Toast | toast pop | 75594243553477 |
 
+## M6 sound pass
+- **Loudness measured** for every clip (PlaybackLoudness while it plays; music at 15/35/55/75%). Each play is scaled by `Target[group] / Loudness` (clamped x0.5 - x3), so quiet and loud clips at the same Volume sound equally loud. Targets: SFX 90, UI 35, Crowd 110, Music 110. The table is in [[2026-10-28 SPEED ARC Progress - 6 Look, sound and launch check|Progress 6]].
+- **Settings:** MUSIC and SOUNDS 0-100% (steps of 10), saved.
+- **Music:** Hub, Park, Stadium (+ crowd bed), Race. The race music swells at FINAL STRETCH (louder + a touch faster) and stops at the finish. The menu plays the hub music quietly (35%).
+- **Ambience beds:** Hub = morning birds loop (9112831284), Park = birds + distant dogs (9116969962), Stadium = crowd (9120974378).
+- New sounds on: overtaking (a pitched boost whoosh + crowd burst), coins flying to the counter (coin shower).
+
 ## To do
-- The owner listens in a play test; any id that doesn't fit gets swapped.
-- Music per area, hub ambience (birds, distant kids) and footsteps by surface come in a later prompt.
-- Measure loudness of each sound (GYM ARC method) once the ids are final.
+- The owner picks the final music (candidates in Progress 6) and listens in a play test.
+- Footsteps by surface (grass / track / metal) - later.
 
 ## Where it lives
 `Client/Controllers/SoundController`, `Config/Sounds`.
