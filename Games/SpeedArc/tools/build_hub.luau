@@ -700,7 +700,7 @@ for i = 1, 3 do
 	end
 end
 -- runners face south, the start line is at the front of the bay
-place(sprint, Vector3.new((spX0 + spX1) / 2, 0, spZ + 4), Vector3.new(-48, 0, 188), Vector3.zAxis)
+place(sprint, Vector3.new((spX0 + spX1) / 2, 0, spZ + 4), Vector3.new(-48, 0.32, 188), Vector3.zAxis) -- 0.32 = on top of the bay mat
 
 -- Treadmills: 4 under a canopy, runners face -Z (towards the stands)
 local tread = modelIn("Treadmill", training)
@@ -746,7 +746,7 @@ block(tread, "CanopyRoof", Vector3.new(3 * 6.5 + 9, 0.8, 12), Vector3.new(cx, 12
 block(tread, "CanopyTrim", Vector3.new(3 * 6.5 + 9.4, 0.4, 12.4), Vector3.new(cx, 11.9, trZ), Palette.Gold)
 block(tread, "CanopyGlow", Vector3.new(3 * 6.5 + 8, 0.2, 10.8), Vector3.new(cx, 11.95, trZ), Palette.BrightBlue, { Material = Enum.Material.Neon })
 -- runners face north, towards the plaza and the track
-place(tread, Vector3.new(cx, 0, trZ), Vector3.new(0, 0, 184), Vector3.xAxis)
+place(tread, Vector3.new(cx, 0, trZ), Vector3.new(0, 0.32, 184), Vector3.xAxis)
 
 -- Stair Run: a wide flight of stairs to a platform, runners face up the stairs (-Z)
 local stair = modelIn("StairRun", training)
@@ -782,7 +782,7 @@ for i = 1, 2 do
 end
 flag(Vector3.new(stX + 5, topH, stZ0 - steps * 2 - 5), Palette.ElectricBlue, Palette.Gold, 6, stair)
 -- the stairs climb south, away from the plaza
-place(stair, Vector3.new(stX, 0, stZ0), Vector3.new(48, 0, 166), -Vector3.xAxis)
+place(stair, Vector3.new(stX, 0, stZ0), Vector3.new(48, 0.32, 166), -Vector3.xAxis)
 -- each bay's sign stands at its front-left corner, facing the plaza
 for _, s in { { sprint, Stations[1], -48 }, { tread, Stations[2], 0 }, { stair, Stations[3], 48 } } do
 	sign(s[1], s[2], CFrame.lookAt(Vector3.new(s[3] - 13, 0.3, YARD_Z0 + 8), Vector3.new(s[3] - 13, 0.3, YARD_Z0 - 40)))
@@ -1584,7 +1584,7 @@ do
 	floorLabel(PLAZA + Vector3.new(23, 0.4, 0), Vector3.xAxis, "PORTALS", Palette.ElectricBlue)
 	floorLabel(PLAZA + Vector3.new(0, 0.4, 23), Vector3.zAxis, "TRAINING", Palette.ElectricBlue)
 	floorLabel(PLAZA + Vector3.new(0, 0.4, -23), -Vector3.zAxis, "RACES", Palette.DeepBlue)
-	floorLabel(STAGE + Vector3.new(0, 1.2, 0), -Vector3.xAxis, "PORTALS", Palette.White)
+	floorLabel(STAGE + Vector3.new(0, 1.2, 0), Vector3.xAxis, "PORTALS", Palette.White)
 
 	-- grass colour patches on the open fields (clear of every district)
 	local function onField(x, z)
