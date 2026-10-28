@@ -47,6 +47,33 @@ Always on (quiet, small UI): daily rewards, quests, streaks, codes, titles, lead
 6. **Plan B (only if entered players quit):** "Fame without reset": stars from legend feats (top champions, records, weekly Hall challenges), keep your body; the reset stays optional for x2.
 7. **Marketing:** lead with GROW; Hall of Fame = "Become a LEGEND" goal.
 
+## The Alter 8-9 wall (owner, 29 Oct: "most players quit at alter 8/9")
+Why it happens (from the Body Alters note):
+1. **A 13-alter desert:** after the Strongman Yard (Alter 2) nothing new opens until the Hall of Fame (Alter 15). At Alter 8 the next big thing is 7 alters (~3+ hours) away.
+2. **Height stops:** height only grows at the END of a tier (+4" at Alter 5, 10, 15). During alters 6-9 you don't get taller at all, and taller is the whole fantasy.
+3. **Same loop, smaller reward:** every alter = same machines, keep 25%, goal +25 levels. Only the skin changes, and the Stone skins (Clay, Sandstone, Granite, Marble) are grey/brown and earlier "read as fur"; the exciting ones (Chrome, Gold) are far away.
+4. **No acceleration:** +15% gains per alter, but each goal is bigger, so alters never feel faster.
+
+Fix: **something every alter, height every alter, a big reward exactly at Alter 8, and the next big goal never more than ~2 alters away** (prompt 96).
+
+| Alter | Height (+0.8"/alter) | New thing (● exists, ★ new) |
+|---|---|---|
+| 1 Pumped | 6'1" | ★ skill point, ★ champion |
+| 2 Shredded | 6'2" | ● Strongman Yard |
+| 3 Tanned | 6'2" | ★ Yard champion, ★ aura node |
+| 4 Vascular | 6'3" | ★ Hype Roar |
+| 5 Peak | 6'4" | ● tier title + aura, ★ gear piece |
+| 6 Clay | 6'5" | ★ Stone-era champion |
+| 7 Sandstone | 6'6" | ★ secret rooftop gym (reach with Power Jump) |
+| **8 Granite** | 6'6" | **★ Golden Era Gym opens** (the planned 70s gym, heavier tiers, +gains) |
+| **9 Marble** | 6'7" | **★ "Stone Titan" aura + statue on the plaza board** |
+| 10 Obsidian | 6'8" | ● tier title, ★ Hall of Fame preview (walk in, see the stars, can't enter yet) |
+| 11-14 Metal | 6'9"-6'11" | ★ a champion or gear piece each, ★ Champion Arena at 12 |
+| 15 Gold | 7'0" | ● Hall of Fame |
+- Also: keep alter goals FLAT inside a tier (no +25 each), so they feel faster with the +15% bonus; Future You shows the NEXT alter's skin on you; the HUD always shows the next big thing ("Golden Era Gym in 2 alters").
+- Owner decisions: (a) height +0.8" per alter instead of +4" per tier (same 7'0" at Alter 15); (b) optional: Hall of Fame at Alter 10 instead of 15 (the note says it "never moves", so only if you want).
+- Measure first: log every alter as a progression event (prompt 88 item 6) to confirm WHERE players stop and how long alters 6-9 really take for real players (the sim says ~24 min each with trainers; players without trainers are slower).
+
 ## Weekly plan (Saturday 15:00 UTC = 21:30 Myanmar)
 | Saturday | Update | Prompts |
 |---|---|---|
@@ -55,6 +82,7 @@ Always on (quiet, small UI): daily rewards, quests, streaks, codes, titles, lead
 | 14 Nov | Champion Ladder | 92 |
 | 21 Nov | Strongman Feats + strength objects + server crown | 93 |
 | 28 Nov | Skill tree + equip preview | 94 |
+| 5 Dec | Alter 8-9 wall fix (Golden Era Gym, height per alter, flat goals) | 96 |
 | Dec | Collection book, real-player arm wrestling, Winter event | later |
 - Mid-November: look at the Hall of Fame numbers → keep or Plan B.
 - Each week: check first-spurt funnel + D1 the day after. If a change hurts, undo it with Configs.
