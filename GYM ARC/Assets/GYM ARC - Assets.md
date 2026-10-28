@@ -223,3 +223,15 @@ Studio can only upload to the owner's account. These work in the game; to use gr
 
 ## Pump Shop symbols (27 Oct)
 - Whey drop (white, transparent PNG, drawn by Claude): rbxassetid://112939125218985. The arrow / bolt / plus symbols already existed (102878631565166 / 75531954798825 / 118188417466628).
+
+## Hall of Fame launch storefront art (28 Oct)
+Made from real Studio captures (the covered Hall, the open Hall at night with the game's own fireworks, the launch cutscene's title frame) plus the game's 3D logo; the icon is the current icon with three gold Hall of Fame stars added over the head (no words). Files: [[GYM ARC/Assets/HallOfFame launch art/preview_phone_size.jpg|folder]] `GYM ARC/Assets/HallOfFame launch art/` (also `Downloads/GYMARC_HallOfFame_launch_art`). Script to remake them: `compose_thumbnails.py` there.
+| File | Use | When |
+|---|---|---|
+| GYMARC_thumb_HallOfFame_opens_saturday.jpg | Home thumbnail + the Experience Event's image | now until the launch |
+| GYMARC_thumb_HallOfFame_now_open_night.jpg | Home thumbnail | from the launch (Sat 31 Oct 15:00 UTC) |
+| GYMARC_thumb_HallOfFame_now_open_day.jpg | Home thumbnail | from the launch |
+| GYMARC_icon_HallOfFame.png | game icon (512x512) | from Fri / Sat morning (moderation time) |
+Keep the current winner (the giant in the gym, thumb 1 on the page) in every set. Leave a set 7+ days.
+
+![[GYM ARC/Assets/HallOfFame launch art/preview_phone_size.jpg]]
