@@ -29,13 +29,16 @@ SHOES = [  # (train, price, league, rank needed: 0 Bronze .. 4 Champion)
 ROLL_MIN = 1.5
 COACHES = [(40, 0.05), (28, 0), (18, 0.12), (9.5, 0.20), (3.5, 0.35), (0.8, 0.5), (0.17, 0.65), (0.03, 0.8)]
 RACE_EVERY, RACE_BUSY = 180, 55
-RACE_MIN = 0.30 * 6 + 0.28 * 4 + 0.22 * 3 + 1.5  # expected minutes of coins a race (places + finishing)
+RACE_REWARD = [10, 6, 4]  # Config/Race RewardMinutes (races are the star, owner 28 Oct)
+FINISH_MIN = 2
+WIN_BOOST = [120, 60, 30]  # seconds of x2 SPEED per step for 1st / 2nd / 3rd
+PLACE_ODDS = [0.30, 0.28, 0.22]  # a normal kid vs NPCs set around their own speed (4th+ = the rest)
 NEW_RUNNER = (2, 900)
 GIFT_BOOST_AT, GIFT_BOOST_LEN = 900, 300
 GIFT_MIN = [(180, 1), (480, 2), (1500, 4), (2400, 6)]
 QUESTS_AT, QUEST_MIN = 1200, 3 * 3 + 10
 FIRST_STEP = (10, 100)  # +10 SPEED, +100 coins
-TUTORIAL_RACE_WIN_MIN = 6
+TUTORIAL_RACE_WIN_MIN = 10 + 2
 # a normal kid in a 3-minute cycle: 55 s race, then mostly running, a bit of AFK and menus
 RUN_SHARE, AFK_SHARE = 0.78, 0.12  # of the non-race time (the rest = menus, looking around)
 RUN_EFFICIENCY = 0.85  # turns, bounces, standing at a wall
@@ -48,9 +51,9 @@ TARGETS = {
 }
 # current needs (Config/Course Walls) - the table run uses these
 WALLS = {
-    1: [310, 1600, 3200, 4700, 8600, 15000, 18000, 28000, 34000, 53000],
-    2: [410000, 1600000, 2800000, 4200000, 7700000, 11000000, 17000000, 26000000, 37000000, 55000000],
-    3: [130000000, 630000000, 1200000000, 2100000000, 3400000000, 5700000000, 9100000000, 13000000000, 20000000000, 30000000000],
+    1: [310, 1600, 3200, 6100, 15000, 26000, 29000, 49000, 62000, 89000],
+    2: [1100000, 3400000, 5600000, 9000000, 14000000, 24000000, 34000000, 50000000, 64000000, 93000000],
+    3: [180000000, 710000000, 1500000000, 3100000000, 4800000000, 8500000000, 13000000000, 21000000000, 31000000000, 51000000000],
 }
 
 
@@ -82,6 +85,7 @@ def simulate(walls, solve=False, seed=7, leagues=3):
     needs = {k: list(v) for k, v in walls.items()}
     shoe_bought_at = {}
     rate_log = {}
+    race_boost_until = -1
     dt = 1.0
     while league <= leagues:
         cpm = CPM[league - 1]
@@ -92,6 +96,8 @@ def simulate(walls, solve=False, seed=7, leagues=3):
             boost = NEW_RUNNER[0]
         elif GIFT_BOOST_AT <= t < GIFT_BOOST_AT + GIFT_BOOST_LEN:
             boost = 2
+        if t < race_boost_until:
+            boost *= 2  # a top-3 race finish
         coach_train = sum(sorted(coaches, reverse=True)[:2])
         gain = STEP_GAIN[league - 1] * LEAGUE_MULT ** (league - 1) * SHOES[shoe][0] * (1 + coach_train) * boost * WALL_BONUS ** smashed
         steps = 0.0
@@ -106,8 +112,19 @@ def simulate(walls, solve=False, seed=7, leagues=3):
                     if not tut_race_done:
                         tut_race_done = True
                         coins += TUTORIAL_RACE_WIN_MIN * cpm
+                        race_boost_until = t + RACE_BUSY + WIN_BOOST[0]
                     else:
-                        coins += RACE_MIN * cpm
+                        r = rng.random()
+                        place = 4
+                        acc = 0
+                        for i, odd in enumerate(PLACE_ODDS):
+                            acc += odd
+                            if r < acc:
+                                place = i + 1
+                                break
+                        coins += ((RACE_REWARD[place - 1] if place <= 3 else 0) + FINISH_MIN) * cpm
+                        if place <= 3:
+                            race_boost_until = t + RACE_BUSY + WIN_BOOST[place - 1]
             else:
                 run_sps = walk_speed(speed) / STUDS_PER_STEP * RUN_EFFICIENCY
                 steps = run_sps * RUN_SHARE + AFK_STEPS * AFK_SHARE

@@ -7,13 +7,13 @@ return {
 	MaxStepsPerSecond = 12, -- anti-cheat: more than this a second is never counted
 	StepGain = { 1, 40, 900, 20000, 500000 }, -- base SPEED per step by league (the x8 per league is on top, Boosts)
 	WallBonus = 1.25, -- every wall you've smashed in your league: x1.25 SPEED per step (multiplies)
-	-- SPEED each wall needs, per league (tools/step_pacing_sim.py --solve, prompt 11): a normal player
+	-- SPEED each wall needs, per league (tools/step_pacing_sim.py --solve, prompt 11 + races-first rewards): a normal player
 	-- smashes wall 1 ~35 s after PLAY, wall 2 ~2 min, wall 5 ~7 min, the last wall (Go Pro) at ~15 /
 	-- 35 / 60 min in leagues 1 / 2 / 3. Ranks (Config/Ranks) sit on walls 4 / 6 / 8 / 10.
 	Walls = {
-		{ 310, 1600, 3200, 4700, 8600, 15000, 18000, 28000, 34000, 53000 },
-		{ 410000, 1600000, 2800000, 4200000, 7700000, 11000000, 17000000, 26000000, 37000000, 55000000 },
-		{ 130000000, 630000000, 1200000000, 2100000000, 3400000000, 5700000000, 9100000000, 13000000000, 20000000000, 30000000000 },
+		{ 310, 1600, 3200, 6100, 15000, 26000, 29000, 49000, 62000, 89000 },
+		{ 1100000, 3400000, 5600000, 9000000, 14000000, 24000000, 34000000, 50000000, 64000000, 93000000 },
+		{ 180000000, 710000000, 1500000000, 3100000000, 4800000000, 8500000000, 13000000000, 21000000000, 31000000000, 51000000000 },
 	},
 	-- leagues 4-5 (no course yet): a share of the league's Champion SPEED
 	WallShares = { 0.006, 0.03, 0.06, 0.09, 0.16, 0.28, 0.34, 0.53, 0.64, 1.0 },

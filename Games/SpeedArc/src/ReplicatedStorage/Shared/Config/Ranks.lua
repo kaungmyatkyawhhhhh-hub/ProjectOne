@@ -12,9 +12,9 @@ return {
 	-- Leagues 1-3 tuned by the pacing sim (prompts 3 + 4): ~15 / 35 / 60 min each, Silver at ~5 min. 4-5 are placeholders
 	-- (scaled like league 3) until their update prompts tune them.
 	Thresholds = {
-		{ 0, 4700, 15000, 28000, 53000 }, -- prompt 11: on walls 4 / 6 / 8 / 10 (Config/Course Walls)
-		{ 0, 4200000, 11000000, 26000000, 55000000 },
-		{ 0, 2100000000, 5700000000, 13000000000, 30000000000 },
+		{ 0, 6100, 26000, 49000, 89000 }, -- on walls 4 / 6 / 8 / 10 (Config/Course Walls)
+		{ 0, 9000000, 24000000, 50000000, 93000000 },
+		{ 0, 3100000000, 8500000000, 21000000000, 51000000000 },
 		{ 0, 1e12, 4e12, 1e13, 2e13 },
 		{ 0, 5e14, 2e15, 5e15, 1e16 },
 	},

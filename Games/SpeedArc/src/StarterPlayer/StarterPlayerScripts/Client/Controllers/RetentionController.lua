@@ -207,10 +207,11 @@ local function updateBadge()
 	local nr = player:GetAttribute("BoostNewRunner") or 0
 	local gift = player:GetAttribute("BoostGift") or 0
 	local paid = player:GetAttribute("BoostSpeed") or 0
-	local secs = math.max(nr, gift, paid)
+	local raceWin = player:GetAttribute("BoostRace") or 0
+	local secs = math.max(nr, gift, paid, raceWin)
 	badge.Visible = secs > 0
 	if secs > 0 then
-		local mult = (if math.max(nr, gift) > 0 then 2 else 1) * (if paid > 0 then 2 else 1)
+		local mult = (if math.max(nr, gift) > 0 then 2 else 1) * (if paid > 0 then 2 else 1) * (if raceWin > 0 then 2 else 1)
 		badgeText.Text = ("%dx  %s"):format(mult, Format.clock(secs))
 	end
 end
