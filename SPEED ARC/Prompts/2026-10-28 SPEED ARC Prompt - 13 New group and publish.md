@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [speedarc, prompt]
-status: todo
+status: in progress (plan done 28 Oct; waiting for the new group + transfer)
 ---
 # 13 New group and publish
 
