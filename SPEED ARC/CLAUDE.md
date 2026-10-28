@@ -13,7 +13,7 @@ This folder is ONLY for SPEED ARC, a Roblox running simulator. It holds the same
 - Never read the GYM ARC folder unless a prompt says to copy a specific system.
 
 ## The game
-Train (tap) -> race every 3 min -> coins -> shoes / coaches / trails -> Go Pro to the next league -> Legend Laps (endless). Kids 8-14, mostly phones.
+**Since 28 Oct (owner pivot): "+1 SPEED every step".** Run -> every step +1 SPEED -> smash walls on the wall course for coins -> shoes / coaches / trails -> smash the last wall = Go Pro to the next world. Treadmills = AFK steps, races every 3 min stay as an event. See [[SPEED ARC - Wall Course and Steps]]. Kids 8-14, mostly phones.
 
 ## Must-follow rules
 1. **Separate game.** Notes go in `SPEED ARC\Progress\` (one per prompt) and `SPEED ARC\Features\` (one per system, kept up to date). Screenshots in `SPEED ARC\Screenshots\`.
@@ -26,7 +26,7 @@ Train (tap) -> race every 3 min -> coins -> shoes / coaches / trails -> Go Pro t
    - After any `task.wait`/yield, check the player is still here. Disconnect what you connect. Cap caches.
    - Check FPS + memory + part count after every prompt.
 3. **Premium look, not cheap / not "AI slop":** one stylized low-poly style. Blender meshes (bevelled, vertex colours, baked soft shading) for everything important; scripts + .fbx go to `Downloads\speed_arc_models\<area>\` for the owner to import. Tuned sky / Atmosphere / ColorCorrection / Bloom, Neon instead of many lights. No default plastic look, no free models.
-   - Palette (Config/Palette): Speed Black #0B0D12, Carbon #171A22, Graphite #2A2F3A, Electric Blue #1E7BFF, Bright Blue #4FC3FF, Deep Blue #0E3A8A, Gold #FFC83D, Deep Gold #E09A12, White #F4F6FA, Danger Red #FF4A4A (warnings/timers only). Tracks BLUE, lane lines white, start/finish gold.
+   - Palette (Config/Palette), **bright candy look since 28 Oct (owner)**: Speed Black #1C2A7A (deep indigo), Carbon #3557E8 (royal blue panels), Graphite #2A3FA8, Electric Blue #24A8FF, Bright Blue #6FDDFF, Deep Blue #1B3E9E, Gold #FFD23F, Deep Gold #FF9F1C, White #FFFFFF, Danger Red #FF4D6D (warnings/timers only), plus Mint #3DDC97, Pink #FF6FB5, Purple #9B5DE5, Orange #FF8A3D, Sky #4DB8FF, Lime #7ED957, Cream #FFF3DC. No black or dark-grey walls. Big open spaces, giant floating zone names, few small props. Tracks BLUE, lane lines white, start/finish gold.
 4. **Sound is a core feature:** every action gets a designed, layered sound before it's done; pitch variation ±4-6%; pooled sounds; balanced volumes; all in Config/Sounds.
 5. **First 15 minutes matter most:** first tap < 15 s, first race win ~1:30, nothing confusing, no stacked popups, no shop push early.
 6. **Fair kids' game:** Robux never wins a race, no paid luck, calm offers only, no real brands/people, no emojis in the UI, safe cartoon images only, owner approves every upload (upload to the GROUP).

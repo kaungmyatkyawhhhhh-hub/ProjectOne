@@ -17,7 +17,7 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 ## Passes (Config/Store.Passes)
 | Pass | R$ | What |
 |---|---|---|
-| Auto Train (hero) | 249 | AUTO button on the training panel: 3 taps a second, steady x1.2 combo, any station. "STILL TRAINING?" every 15 min; no answer in 60 s = off |
+| Auto Run (hero; was Auto Train, same id) | 249 | AFK treadmills step 3x faster (6 a second instead of 2). "STILL TRAINING?" every 15 min; no answer in 60 s = off. Owner: rename the pass in Creator Hub |
 | 2x Speed | 249 | training x2 |
 | 2x Coins | 149 | coins x2 (all coin boosts together stop at x8) |
 | VIP | 299 | +10% coins, VIP before your name, VIP kit, VIP Gold trail, VIP name style, [VIP] in chat |

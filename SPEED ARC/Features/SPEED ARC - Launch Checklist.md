@@ -47,3 +47,9 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 
 ## 6. Codes for launch
 SPEEDARC (5 min coins), FIRSTRACE (a coach roll), RELEASE (10 min coins + a roll). Put them in the game description or your socials.
+
+## After the 28 Oct pivot
+- [ ] Rename the "Auto Train" pass to "Auto Run" in Creator Hub (same id 2058077302).
+- [ ] Wall course + candy rebuild for City Park and Big Stadium.
+- [ ] Pacing pass for steps and walls (first-guess numbers now).
+- [ ] Game page text: "+1 SPEED every step", smash walls.

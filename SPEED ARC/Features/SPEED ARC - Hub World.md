@@ -1,11 +1,17 @@
 ---
 date: 2026-10-28
 tags: [speedarc, feature]
-status: done (map v2: central plaza layout, 28 Oct)
+status: done (map v3: open spawn + wall course + candy look, 28 Oct)
 ---
 # SPEED ARC - Hub World (Hometown Track)
 
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
+
+## Layout v3 (28 Oct, current): "+1 SPEED every step" + candy look
+A big open spawn plaza facing south down the **wall course** ([[SPEED ARC - Wall Course and Steps]]). Behind the spawn is the race track (north). To the west, **SHOPS**: 4 candy kiosks in a row (Shoes, Trails, Coaches, Locker). To the east, **PORTALS**: 5 big gates in a row, each with a sky beam. South-west, the **AFK TREADMILLS** (6 under a canopy); south-east, the **LEADERBOARDS** (4 boards). Every zone has a giant floating name. No benches, lamps, flower beds or signposts. 922 parts, 0 lights. Details: [[2026-10-28 SPEED ARC Progress - Pivot to +1 SPEED every step]].
+![[2026-10-28 v3 top.jpg]]
+
+The sections below describe map v2 (replaced).
 
 ## Layout (map v2, 28 Oct)
 You spawn in the **Central Plaza** facing the track and can see every district from there. North: race track. West: **Shop Street** (shops only). East: **Portals** avenue and stage. South: **Training Yard** (training only), the school behind it. Each district has a named arch at the plaza, its own paving, and a neon kerb line in its colour (gold shops, blue portals and training). A signpost and floor labels point the way. Details and before/after: [[2026-10-28 SPEED ARC Progress - Hub map redesign]].
