@@ -99,6 +99,10 @@ local function refreshGates()
 			local open = best >= league
 			portal.Color = if open then Color3.fromHex(portal:GetAttribute("Accent") or "1E7BFF") else P.Graphite
 			portal.Transparency = if open then 0.45 else 0.15
+			local beacon = gate:FindFirstChild("Beacon")
+			if beacon then
+				beacon.Transparency = if open then 0.62 else 0.88
+			end
 			if sub then
 				sub.Text = if open then ("LEAGUE %d  -  WALK IN"):format(league) else ("GO PRO FROM LEAGUE %d"):format(league - 1)
 				sub.TextColor3 = if open then P.BrightBlue else P.Gold
@@ -141,6 +145,8 @@ function Menu.start(c)
 			ctx.Locker.open("TRAILS")
 		elseif open == "CoachCorner" then
 			ctx.Coaches.open("ROLL")
+		elseif open == "Locker" then
+			ctx.Locker.open("KITS")
 		end
 	end)
 

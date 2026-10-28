@@ -7,7 +7,7 @@ return {
 
 	Hub = {
 		Id = "Hub", Name = "HOMETOWN TRACK", League = 1, Model = "Hub",
-		Spawn = Vector3.new(0, 3, 99), SpawnLook = Vector3.new(0, 3, 40),
+		Spawn = Vector3.new(0, 3, 118), SpawnLook = Vector3.new(0, 3, 40), -- the central plaza, facing the track
 		Lighting = "Hub", Music = "Hub", RaceOffset = 0,
 		Track = { Center = Vector3.new(0, 0, 0), Straight = 100, InnerRadius = 30, LaneWidth = 4, Lanes = 6, StartX = 20, SurfaceY = 0.4, HipY = 3.05 },
 		Types = { "Lap", "Sprint" },

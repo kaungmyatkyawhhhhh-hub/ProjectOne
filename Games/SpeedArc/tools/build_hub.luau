@@ -252,22 +252,51 @@ local flagsF = folder("Flags", life)
 local crowdF = folder("Crowd", life)
 
 ----------------------------------------------------------------------------
--- ground: grass with mowing stripes, plaza, paths
+-- layout (28 Oct redesign): you spawn in the round CENTRAL PLAZA and every district is in view.
+-- North: the race track. West: SHOP STREET (only shops). East: the PORTALS avenue to the portal
+-- stage. South: the TRAINING YARD (only training), the school behind it. Each district has its own
+-- paving, a neon line in its colour along the kerbs and an arch with its name at the plaza.
 ----------------------------------------------------------------------------
-block(ground, "Grass", Vector3.new(300, 4, 320), Vector3.new(0, -2, 10), W.Grass)
-block(ground, "Outskirts", Vector3.new(1600, 4, 1600), Vector3.new(0, -2.25, 10), Color3.fromHex("#4E9446"))
+local PLAZA = Vector3.new(0, 0, 104)
+local PLAZA_R = 26
+local AVE_W = 22
+local SHOP_END = -134 -- shop street runs from the plaza to the fountain
+local STAGE = Vector3.new(140, 0, 104) -- portal stage centre
+local STAGE_R = 36
+local YARD_Z0, YARD_Z1, YARD_W = 150, 222, 144
+local DISTRICT = {
+	Shops = { Paving = Color3.fromHex("#D9CDB5"), Joint = Color3.fromHex("#C5B89E"), Accent = Palette.Gold },
+	Portals = { Paving = Color3.fromHex("#BCC7D8"), Joint = Color3.fromHex("#A8B3C6"), Accent = Palette.BrightBlue },
+	Training = { Paving = Color3.fromHex("#C9D0DB"), Joint = Color3.fromHex("#B4BCC8"), Accent = Palette.ElectricBlue },
+	Track = { Paving = Color3.fromHex("#C9D0DB"), Joint = Color3.fromHex("#B4BCC8"), Accent = Palette.White },
+}
+
+local function modelIn(name, parent)
+	local m = Instance.new("Model")
+	m.Name = name
+	m.Parent = parent
+	return m
+end
+-- a build made facing +X around 'from' is moved so that point sits at 'to', facing 'facing'
+local function place(model, from, to, facing)
+	model.WorldPivot = CFrame.lookAt(from, from + Vector3.xAxis)
+	model:PivotTo(CFrame.lookAt(to, to + facing))
+end
+
+block(ground, "Grass", Vector3.new(400, 4, 410), Vector3.new(0, -2, 84), W.Grass)
+block(ground, "Outskirts", Vector3.new(1600, 4, 1600), Vector3.new(0, -2.25, 84), Color3.fromHex("#4E9446"))
 -- low hills on the horizon (half buried balls) so the world never ends in empty sky
 local hillCols = { Color3.fromHex("#5BA04F"), Color3.fromHex("#4A8C43"), Color3.fromHex("#6AAE57") }
 for i = 0, 15 do
 	local a = i / 16 * math.pi * 2 + rng:NextNumber(-0.1, 0.1)
-	local d = rng:NextNumber(420, 560)
+	local d = rng:NextNumber(450, 590)
 	local size = rng:NextNumber(150, 260)
-	ball(ground, "Hill", size, Vector3.new(math.cos(a) * d, -size * 0.32, 10 + math.sin(a) * d), hillCols[i % 3 + 1], { CanCollide = false, CanQuery = false })
+	ball(ground, "Hill", size, Vector3.new(math.cos(a) * d, -size * 0.32, 84 + math.sin(a) * d), hillCols[i % 3 + 1], { CanCollide = false, CanQuery = false })
 end
-for i = 0, 14 do
-	local x = -140 + i * 20
+for i = 0, 19 do
+	local x = -200 + i * 20
 	if i % 2 == 0 then
-		block(ground, "Stripe", Vector3.new(10, 0.06, 300), Vector3.new(x + 5, 0.03, 0), W.GrassDark, { CanCollide = false })
+		block(ground, "Stripe", Vector3.new(10, 0.06, 404), Vector3.new(x + 5, 0.03, 84), W.GrassDark, { CanCollide = false })
 	end
 end
 -- infield (lighter, with its own stripes)
@@ -279,18 +308,37 @@ for i = 0, 9 do
 		block(ground, "InfieldStripe", Vector3.new(10, 0.04, (T.InnerRadius - 0.5) * 2), Vector3.new(-50 + i * 10 + 5, 0.14, 0), W.TreeLeafLight, { CanCollide = false })
 	end
 end
--- plaza between school and track + path
-block(ground, "Plaza", Vector3.new(96, 0.3, 46), Vector3.new(0, 0.15, 86), Color3.fromHex("#A9B1BF"))
-for i = 1, 11 do
-	block(ground, "PlazaJoint", Vector3.new(0.25, 0.32, 46), Vector3.new(-48 + i * 8, 0.16, 86), Color3.fromHex("#959DAB"), { CanCollide = false })
+
+-- a paved avenue from a to b with kerbs and a neon line in its district's colour
+local function avenue(name, a, b, width, d)
+	local len = (b - a).Magnitude
+	local cf = CFrame.lookAt((a + b) / 2, b)
+	part({ Parent = ground, Name = name, Size = Vector3.new(width, 0.25, len), CFrame = cf * CFrame.new(0, 0.125, 0), Color = d.Paving })
+	for s = 6, len - 3, 6 do
+		part({ Parent = ground, Name = "Joint", Size = Vector3.new(width - 0.2, 0.26, 0.2), CFrame = cf * CFrame.new(0, 0.13, len / 2 - s), Color = d.Joint, CanCollide = false })
+	end
+	for side = -1, 1, 2 do
+		part({ Parent = ground, Name = "Kerb", Size = Vector3.new(0.9, 0.45, len), CFrame = cf * CFrame.new(side * (width / 2 + 0.45), 0.225, 0), Color = W.Concrete })
+		part({ Parent = ground, Name = "KerbLine", Size = Vector3.new(0.3, 0.27, len), CFrame = cf * CFrame.new(side * (width / 2 - 1), 0.135, 0), Color = d.Accent, Material = Enum.Material.Neon, CanCollide = false })
+	end
 end
-for i = 1, 5 do
-	block(ground, "PlazaJoint", Vector3.new(96, 0.32, 0.25), Vector3.new(0, 0.16, 63 + i * 7.66), Color3.fromHex("#959DAB"), { CanCollide = false })
+avenue("ShopStreet", PLAZA + Vector3.new(-23, 0, 0), Vector3.new(SHOP_END, 0, PLAZA.Z), AVE_W, DISTRICT.Shops)
+avenue("PortalAvenue", PLAZA + Vector3.new(23, 0, 0), STAGE - Vector3.new(STAGE_R - 2, 0, 0), AVE_W, DISTRICT.Portals)
+avenue("YardPath", PLAZA + Vector3.new(0, 0, 23), Vector3.new(0, 0, YARD_Z0 + 1), 20, DISTRICT.Training)
+avenue("TrackPath", PLAZA + Vector3.new(0, 0, -23), Vector3.new(0, 0, 57.8), 18, DISTRICT.Track)
+
+-- the plaza: light paving with a darker band and radial joints
+cyl(ground, "PlazaEdge", PLAZA_R + 1, 0.34, PLAZA + Vector3.new(0, 0.17, 0), Palette.Graphite)
+cyl(ground, "Plaza", PLAZA_R, 0.36, PLAZA + Vector3.new(0, 0.18, 0), Color3.fromHex("#C9D0DB"))
+cyl(ground, "PlazaBand", 20, 0.37, PLAZA + Vector3.new(0, 0.185, 0), Color3.fromHex("#AEB7C5"))
+cyl(ground, "PlazaInner", 18.8, 0.38, PLAZA + Vector3.new(0, 0.19, 0), Color3.fromHex("#D3D9E2"))
+for i = 0, 7 do
+	part({ Parent = ground, Name = "PlazaJoint", Size = Vector3.new(0.22, 0.385, PLAZA_R * 2 - 0.6), CFrame = CFrame.new(PLAZA + Vector3.new(0, 0.1925, 0)) * CFrame.Angles(0, i * math.pi / 8, 0), Color = Color3.fromHex("#B4BCC8"), CanCollide = false })
 end
--- the SPEED ARC emblem painted in the plaza
-cyl(ground, "EmblemGold", 10, 0.36, Vector3.new(0, 0.18, 84), Palette.Gold, { CanCollide = false })
-cyl(ground, "Emblem", 9.2, 0.38, Vector3.new(0, 0.19, 84), Palette.DeepBlue, { CanCollide = false })
-local emblemTop = block(ground, "EmblemText", Vector3.new(16, 0.05, 16), Vector3.new(0, 0.4, 84), Palette.DeepBlue, { Transparency = 1, CanCollide = false })
+-- the SPEED ARC emblem painted in the middle
+cyl(ground, "EmblemGold", 10, 0.4, PLAZA + Vector3.new(0, 0.2, 0), Palette.Gold, { CanCollide = false })
+cyl(ground, "Emblem", 9.2, 0.42, PLAZA + Vector3.new(0, 0.21, 0), Palette.DeepBlue, { CanCollide = false })
+local emblemTop = block(ground, "EmblemText", Vector3.new(16, 0.05, 16), PLAZA + Vector3.new(0, 0.44, 0), Palette.DeepBlue, { Transparency = 1, CanCollide = false })
 local eg = Instance.new("SurfaceGui")
 eg.Face = Enum.NormalId.Top
 eg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
@@ -311,21 +359,6 @@ for i, l in { { "SPEED", Palette.White, 0.64 }, { "ARC", Palette.Gold, 0.36 } } 
 	t.TextColor3 = l[2]
 	t.Parent = eg
 end
--- planters with flowers on both sides of the plaza
-local FLOWERS = { Palette.Gold, Palette.White, Palette.BrightBlue, Color3.fromHex("#FF8FB1") }
-for side = -1, 1, 2 do
-	for j = 0, 1 do
-		local px, pz = side * 34, 78 + j * 16
-		block(ground, "Planter", Vector3.new(14, 1.6, 6), Vector3.new(px, 0.8, pz), Palette.Graphite)
-		block(ground, "PlanterTrim", Vector3.new(14.4, 0.3, 6.4), Vector3.new(px, 1.65, pz), W.Concrete)
-		block(ground, "Soil", Vector3.new(13, 0.2, 5), Vector3.new(px, 1.62, pz), W.GrassDark)
-		for f = 1, 7 do
-			ball(ground, "Flower", rng:NextNumber(0.8, 1.3), Vector3.new(px - 5.5 + f * 1.4 + rng:NextNumber(-0.3, 0.3), 2.1, pz + rng:NextNumber(-1.6, 1.6)), FLOWERS[rng:NextInteger(1, #FLOWERS)], { CanCollide = false })
-		end
-	end
-end
-block(ground, "PlazaEdge", Vector3.new(98, 0.22, 48), Vector3.new(0, 0.11, 86), Palette.Graphite)
-block(ground, "Path", Vector3.new(14, 0.24, 10), Vector3.new(0, 0.12, 60), W.Path)
 
 ----------------------------------------------------------------------------
 -- track: blue oval, white lane lines, curbs, gold start/finish, lane numbers
@@ -416,10 +449,10 @@ end
 ----------------------------------------------------------------------------
 -- flags (segment chains that wave on the client)
 ----------------------------------------------------------------------------
-local function flag(base, color, accent, poleH)
+local function flag(base, color, accent, poleH, parent)
 	local m = Instance.new("Model")
 	m.Name = "Flag"
-	m.Parent = flagsF
+	m.Parent = parent or flagsF
 	poleH = poleH or 6
 	cyl(m, "Pole", 0.2, poleH, base + Vector3.new(0, poleH / 2, 0), W.Aluminium)
 	ball(m, "Tip", 0.6, base + Vector3.new(0, poleH + 0.2, 0), Palette.Gold)
@@ -531,7 +564,7 @@ end
 ----------------------------------------------------------------------------
 -- school building (front + sides only, it's the backdrop) with the clock tower and banner
 ----------------------------------------------------------------------------
-local sx0, sFront, sDepth, sW = 0, 112, 22, 124
+local sx0, sFront, sDepth, sW = 0, YARD_Z1 + 14, 22, 124 -- behind the Training Yard
 local fz = sFront + sDepth / 2
 block(school, "Body", Vector3.new(sW, 24, sDepth), Vector3.new(sx0, 12, fz), W.Brick)
 block(school, "Base", Vector3.new(sW + 1, 2, sDepth + 1), Vector3.new(sx0, 1, fz), W.Concrete)
@@ -595,12 +628,12 @@ surfaceText(clock, Enum.NormalId.Front, {
 flag(Vector3.new(-sW / 2 + 4, 25.6, sFront + 2), Palette.ElectricBlue, Palette.Gold, 7)
 flag(Vector3.new(sW / 2 - 8, 25.6, sFront + 2), Palette.Gold, Palette.ElectricBlue, 7)
 
--- spawn on the school steps
+-- spawn in the plaza, facing the track: every district is in view from here
 local spawn = Instance.new("SpawnLocation")
 spawn.Name = "Spawn"
 spawn.Anchored = true
 spawn.Size = Vector3.new(12, 0.4, 6)
-spawn.CFrame = CFrame.new(0, 0.5, sFront - 13) * CFrame.Angles(0, 0, 0)
+spawn.CFrame = CFrame.new(PLAZA + Vector3.new(0, 0.5, 14))
 spawn.Transparency = 1
 spawn.CanCollide = false
 spawn.Duration = 0
@@ -612,7 +645,8 @@ end
 spawn.Parent = hub
 
 ----------------------------------------------------------------------------
--- training spots (infield): Sprint Lane, Treadmills, Stair Run
+-- TRAINING YARD (south of the plaza): Sprint Lane, Treadmills, Stair Run, one bay each. Each
+-- station is built where it used to stand and then placed in its bay.
 ----------------------------------------------------------------------------
 local function slot(parent, stationId, cf, i)
 	local s = part({ Parent = parent, Name = "Slot", Size = Vector3.new(2.5, 0.2, 2.5), CFrame = cf, Color = Palette.Gold, Transparency = 1, CanCollide = false })
@@ -642,7 +676,7 @@ local function sign(parent, station, cf)
 end
 
 -- Sprint Lane: 3 painted lanes with starting blocks and cones (runners face +X)
-local sprint = folder("SprintLane", training)
+local sprint = modelIn("SprintLane", training)
 local spX0, spX1, spZ = -42, -12, 14
 block(sprint, "Strip", Vector3.new(spX1 - spX0, 0.2, 12.4), Vector3.new((spX0 + spX1) / 2, 0.2, spZ + 4), W.TrackBlue)
 for i = 0, 3 do
@@ -665,10 +699,11 @@ for i = 1, 3 do
 		cyl(sprint, "ConeBand", 0.6, 0.3, Vector3.new(spX1 - 1, 1.2, z), Palette.White)
 	end
 end
-sign(sprint, Stations[1], CFrame.lookAt(Vector3.new(spX0 + 12, 0, spZ + 12.5), Vector3.new(spX0 + 12, 0, spZ + 30)))
+-- runners face south, the start line is at the front of the bay
+place(sprint, Vector3.new((spX0 + spX1) / 2, 0, spZ + 4), Vector3.new(-48, 0, 188), Vector3.zAxis)
 
 -- Treadmills: 4 under a canopy, runners face -Z (towards the stands)
-local tread = folder("Treadmill", training)
+local tread = modelIn("Treadmill", training)
 local trX0, trZ = -10, -6
 for i = 1, 4 do
 	local x = trX0 + (i - 1) * 6.5
@@ -710,10 +745,11 @@ end
 block(tread, "CanopyRoof", Vector3.new(3 * 6.5 + 9, 0.8, 12), Vector3.new(cx, 12.4, trZ), Palette.ElectricBlue)
 block(tread, "CanopyTrim", Vector3.new(3 * 6.5 + 9.4, 0.4, 12.4), Vector3.new(cx, 11.9, trZ), Palette.Gold)
 block(tread, "CanopyGlow", Vector3.new(3 * 6.5 + 8, 0.2, 10.8), Vector3.new(cx, 11.95, trZ), Palette.BrightBlue, { Material = Enum.Material.Neon })
-sign(tread, Stations[2], CFrame.lookAt(Vector3.new(trX0 + 3 * 6.5 + 10, 0, trZ + 6), Vector3.new(trX0 + 3 * 6.5 + 14, 0, trZ + 30)))
+-- runners face north, towards the plaza and the track
+place(tread, Vector3.new(cx, 0, trZ), Vector3.new(0, 0, 184), Vector3.xAxis)
 
 -- Stair Run: a wide flight of stairs to a platform, runners face up the stairs (-Z)
-local stair = folder("StairRun", training)
+local stair = modelIn("StairRun", training)
 local stX, stZ0, steps = 36, 12, 10
 for i = 1, steps do
 	local h = i * 0.8
@@ -744,11 +780,48 @@ for i = 1, 2 do
 	local cf = CFrame.lookAt(Vector3.new(x, y, stZ0 - (stepI - 0.5) * 2), Vector3.new(x, y, stZ0 - 30))
 	slot(stair, "StairRun", cf, i)
 end
-flag(Vector3.new(stX + 5, topH, stZ0 - steps * 2 - 5), Palette.ElectricBlue, Palette.Gold, 6)
-sign(stair, Stations[3], CFrame.lookAt(Vector3.new(stX - 9, 0, stZ0 + 1), Vector3.new(stX - 9, 0, stZ0 + 30)))
+flag(Vector3.new(stX + 5, topH, stZ0 - steps * 2 - 5), Palette.ElectricBlue, Palette.Gold, 6, stair)
+-- the stairs climb south, away from the plaza
+place(stair, Vector3.new(stX, 0, stZ0), Vector3.new(48, 0, 166), -Vector3.xAxis)
+-- each bay's sign stands at its front-left corner, facing the plaza
+for _, s in { { sprint, Stations[1], -48 }, { tread, Stations[2], 0 }, { stair, Stations[3], 48 } } do
+	sign(s[1], s[2], CFrame.lookAt(Vector3.new(s[3] - 13, 0.3, YARD_Z0 + 8), Vector3.new(s[3] - 13, 0.3, YARD_Z0 - 40)))
+end
+-- the yard: light floor, a blue mat with white lines per bay, a fence round three sides
+do
+	local yard = modelIn("TrainingYard", ground)
+	local yc = Vector3.new(0, 0, (YARD_Z0 + YARD_Z1) / 2)
+	local yd = YARD_Z1 - YARD_Z0
+	block(yard, "Floor", Vector3.new(YARD_W, 0.3, yd), yc + Vector3.new(0, 0.15, 0), DISTRICT.Training.Paving)
+	block(yard, "FloorEdge", Vector3.new(YARD_W + 1.2, 0.26, yd + 1.2), yc + Vector3.new(0, 0.13, 0), Palette.Graphite)
+	for _, bx in { -48, 0, 48 } do
+		local mz, md = yc.Z + 1, yd - 8
+		block(yard, "Mat", Vector3.new(42, 0.32, md), Vector3.new(bx, 0.16, mz), Palette.DeepBlue)
+		for s = -1, 1, 2 do
+			block(yard, "MatLine", Vector3.new(0.3, 0.34, md), Vector3.new(bx + s * 20.4, 0.17, mz), W.LaneWhite, { CanCollide = false })
+			block(yard, "MatLine", Vector3.new(41, 0.34, 0.3), Vector3.new(bx, 0.17, mz + s * (md / 2 - 0.4)), W.LaneWhite, { CanCollide = false })
+		end
+	end
+	local function fence(a, b)
+		local len = (b - a).Magnitude
+		local cf = CFrame.lookAt((a + b) / 2, b)
+		local n = math.max(1, math.floor(len / 6 + 0.5))
+		for i = 0, n do
+			part({ Parent = yard, Name = "FencePost", Size = Vector3.new(0.5, 3.4, 0.5), CFrame = cf * CFrame.new(0, 1.7, len / 2 - i * len / n), Color = Palette.Graphite })
+		end
+		for _, y in { 1.4, 2.9 } do
+			part({ Parent = yard, Name = "FenceRail", Size = Vector3.new(0.3, 0.3, len), CFrame = cf * CFrame.new(0, y, 0), Color = Palette.ElectricBlue })
+		end
+	end
+	local hx = YARD_W / 2
+	fence(Vector3.new(-hx, 0, YARD_Z0), Vector3.new(-hx, 0, YARD_Z1))
+	fence(Vector3.new(hx, 0, YARD_Z0), Vector3.new(hx, 0, YARD_Z1))
+	fence(Vector3.new(-hx, 0, YARD_Z1), Vector3.new(hx, 0, YARD_Z1))
+end
+
 
 ----------------------------------------------------------------------------
--- trees (round low-poly), hedges at the edges, lamps, benches
+-- trees (round low-poly), hedges at the edges, street lamps with banners, benches
 ----------------------------------------------------------------------------
 local function tree(pos, scale)
 	if meshTemplate("Tree_Round_A") then
@@ -768,59 +841,79 @@ local function tree(pos, scale)
 	return m
 end
 local treeSpots = {
-	{ -130, -120 }, { -110, -132 }, { -80, -128 }, { 80, -126 }, { 108, -134 }, { 132, -118 },
-	{ -134, -80 }, { -140, -62 }, { -140, 24 }, { -130, 82 }, { -128, 120 }, -- west side keeps room for the shops
-	{ 134, -80 }, { 136, -38 }, { 132, 2 }, { 136, 42 }, { 130, 84 }, { 128, 122 },
-	{ -78, 130 }, { 78, 130 }, { -96, 100 }, { 96, 100 }, { -60, -100 }, { 60, -100 },
+	-- behind the stands
+	{ -150, -96 }, { -122, -104 }, { -94, -98 }, { -66, -104 }, { -36, -99 }, { 36, -100 }, { 66, -104 }, { 94, -97 }, { 122, -104 }, { 150, -96 },
+	-- either side of the track
+	{ -164, -62 }, { -174, -24 }, { -160, 16 }, { -172, 52 }, { 164, -62 }, { 176, -22 }, { 160, 18 }, { 174, 50 },
+	-- behind both rows of shops and round the fountain
+	{ -84, 68 }, { -122, 66 }, { -84, 142 }, { -124, 144 }, { -48, 156 }, { -170, 82 }, { -172, 126 }, { -160, 152 },
+	-- round the portal stage (beside and behind it, never in front)
+	{ 184, 74 }, { 188, 104 }, { 184, 134 }, { 116, 64 }, { 116, 144 }, { 70, 68 }, { 70, 140 },
+	-- the south fields beside the yard and the school
+	{ -92, 162 }, { -96, 198 }, { -90, 234 }, { -128, 180 }, { -150, 214 }, { -140, 254 }, { -172, 186 },
+	{ 92, 162 }, { 96, 198 }, { 90, 234 }, { 128, 176 }, { 152, 210 }, { 140, 254 }, { 172, 180 },
+	{ -80, 266 }, { 80, 266 },
 }
 for _, s in treeSpots do
-	tree(Vector3.new(s[1] + rng:NextNumber(-3, 3), 0, s[2] + rng:NextNumber(-3, 3)), rng:NextNumber(0.85, 1.2))
+	tree(Vector3.new(s[1] + rng:NextNumber(-3, 3), 0, s[2] + rng:NextNumber(-3, 3)), rng:NextNumber(0.9, 1.3))
 end
 -- hedges: the edges of the hub show why they end
 local hedgeC = W.TreeLeafDark
-block(props, "Hedge", Vector3.new(4, 4, 290), Vector3.new(-146, 2, 10), hedgeC)
-block(props, "Hedge", Vector3.new(4, 4, 290), Vector3.new(146, 2, 10), hedgeC)
-block(props, "Hedge", Vector3.new(296, 4, 4), Vector3.new(0, 2, -146), hedgeC)
-block(props, "Hedge", Vector3.new(84, 4, 4), Vector3.new(-104, 2, 152), hedgeC)
-block(props, "Hedge", Vector3.new(84, 4, 4), Vector3.new(104, 2, 152), hedgeC)
--- lamps along the plaza (Neon heads, no real lights)
-for _, lx in { -44, -22, 22, 44 } do
+block(props, "Hedge", Vector3.new(4, 4, 404), Vector3.new(-196, 2, 84), hedgeC)
+block(props, "Hedge", Vector3.new(4, 4, 404), Vector3.new(196, 2, 84), hedgeC)
+block(props, "Hedge", Vector3.new(396, 4, 4), Vector3.new(0, 2, -116), hedgeC)
+block(props, "Hedge", Vector3.new(396, 4, 4), Vector3.new(0, 2, 284), hedgeC)
+-- street lamps along the avenues (Neon heads, no real lights) with a banner in the district colour
+local function lamp(pos, look, bannerColor)
+	local cf = CFrame.lookAt(pos, Vector3.new(look.X, pos.Y, look.Z)) -- the head reaches over the street
 	local lt = meshTemplate("Lamp_Post")
 	if lt then
-		-- the Blender pole stands at the origin; its head reaches out to -Z
-		mesh("Lamp_Post", props, CFrame.new(lx, 0.3, 64), { Offset = Vector3.new(0, 0, 0.6 - lt.Size.Z / 2) })
+		mesh("Lamp_Post", props, cf, { Offset = Vector3.new(0, 0, 0.6 - lt.Size.Z / 2) })
 		-- glow panel inside the recess under the v2 head
-		block(props, "LampGlow", Vector3.new(0.84, 0.04, 1.26), Vector3.new(lx, 0.3 + 8.53, 62.35), W.WindowLit, { Material = Enum.Material.Neon, CanCollide = false })
+		part({ Parent = props, Name = "LampGlow", Size = Vector3.new(0.84, 0.04, 1.26), CFrame = cf * CFrame.new(0, 8.53, -1.65), Color = W.WindowLit, Material = Enum.Material.Neon, CanCollide = false })
 	else
-		cyl(props, "LampPole", 0.3, 9, Vector3.new(lx, 4.5, 64), Palette.SpeedBlack)
-		block(props, "LampArm", Vector3.new(0.3, 0.3, 2), Vector3.new(lx, 9, 63.2), Palette.SpeedBlack)
-		block(props, "LampHead", Vector3.new(1.2, 0.5, 1.6), Vector3.new(lx, 8.8, 62.4), Palette.SpeedBlack)
-		block(props, "LampGlow", Vector3.new(1, 0.15, 1.4), Vector3.new(lx, 8.5, 62.4), W.WindowLit, { Material = Enum.Material.Neon })
+		part({ Parent = props, Name = "LampPole", Shape = Enum.PartType.Cylinder, Size = Vector3.new(9, 0.6, 0.6), CFrame = cf * CFrame.new(0, 4.5, 0) * CFrame.Angles(0, 0, math.pi / 2), Color = Palette.SpeedBlack })
+		part({ Parent = props, Name = "LampHead", Size = Vector3.new(1.2, 0.5, 2.2), CFrame = cf * CFrame.new(0, 8.8, -1), Color = Palette.SpeedBlack })
+		part({ Parent = props, Name = "LampGlow", Size = Vector3.new(1, 0.15, 1.4), CFrame = cf * CFrame.new(0, 8.5, -1.4), Color = W.WindowLit, Material = Enum.Material.Neon, CanCollide = false })
+	end
+	if bannerColor then
+		part({ Parent = props, Name = "BannerArm", Size = Vector3.new(0.15, 0.15, 1.8), CFrame = cf * CFrame.new(0, 7.0, -0.9), Color = Palette.Graphite, CanCollide = false })
+		part({ Parent = props, Name = "Banner", Size = Vector3.new(0.1, 2.8, 1.3), CFrame = cf * CFrame.new(0, 5.5, -1.1), Color = bannerColor, CanCollide = false })
+		part({ Parent = props, Name = "BannerTip", Size = Vector3.new(0.11, 0.5, 1.3), CFrame = cf * CFrame.new(0, 3.85, -1.1), Color = Palette.SpeedBlack, CanCollide = false })
 	end
 end
--- benches
-local function bench(cf)
-	if mesh("Bench", props, cf, { Offset = Vector3.new(0, 0, 0.05) }) then
+for _, x in { -46, -88, -124 } do
+	for side = -1, 1, 2 do
+		lamp(Vector3.new(x, 0.25, PLAZA.Z + side * 12.6), Vector3.new(x, 0, PLAZA.Z), Palette.Gold)
+	end
+end
+for _, x in { 44, 62, 80, 98 } do
+	for side = -1, 1, 2 do
+		lamp(Vector3.new(x, 0.25, PLAZA.Z + side * 12.6), Vector3.new(x, 0, PLAZA.Z), Palette.BrightBlue)
+	end
+end
+-- benches (local -Z = the way you face when you sit)
+local function bench(cf, parent)
+	if mesh("Bench", parent or props, cf, { Offset = Vector3.new(0, 0, 0.05) }) then
 		return
 	end
 	local m = Instance.new("Model")
 	m.Name = "Bench"
-	m.Parent = props
+	m.Parent = parent or props
 	part({ Parent = m, Name = "Seat", Size = Vector3.new(6, 0.4, 1.6), CFrame = cf * CFrame.new(0, 1.6, 0), Color = W.Wood })
 	part({ Parent = m, Name = "Back", Size = Vector3.new(6, 1.2, 0.3), CFrame = cf * CFrame.new(0, 2.6, 0.75) * CFrame.Angles(math.rad(-10), 0, 0), Color = W.Wood })
 	for s = -1, 1, 2 do
 		part({ Parent = m, Name = "Leg", Size = Vector3.new(0.3, 1.6, 1.6), CFrame = cf * CFrame.new(s * 2.6, 0.8, 0), Color = Palette.SpeedBlack })
 	end
 end
-for _, bx in { -33, 33 } do
-	bench(CFrame.new(bx, 0.3, 70) * CFrame.Angles(0, math.pi, 0))
+-- benches by the track to watch the races from
+for _, x in { -40, -26, 26, 40 } do
+	bench(CFrame.lookAt(Vector3.new(x, 0, 66), Vector3.new(x, 0, 0)))
 end
-bench(CFrame.new(-60, 0, -66) * CFrame.Angles(0, 0, 0))
-bench(CFrame.new(60, 0, -66) * CFrame.Angles(0, 0, 0))
 
 ----------------------------------------------------------------------------
--- M2 shops on the west side: Shoe Shop, Trail Booth, Coach Corner (all face the track, +X)
--- Blender versions come later (Downloads\speed_arc_models\hub\v3); these are the part builds.
+-- SHOP STREET (west of the plaza): Shoe Shop + Trail Booth on the north side, Coach Corner + Locker
+-- Room on the south side. Each is built facing +X where it used to stand, then placed on the street.
 ----------------------------------------------------------------------------
 local Coaches = require(ReplicatedStorage.Shared.Config.Coaches:Clone())
 local shops = folder("Shops")
@@ -849,7 +942,7 @@ end
 
 -- Shoe Shop: open-front sports store, six turning pedestals inside
 do
-	local m = folder("ShoeShop", shops)
+	local m = modelIn("ShoeShop", shops)
 	local x0, zc = -126, -38
 	block(m, "Floor", Vector3.new(16.4, 0.4, 24.4), Vector3.new(x0, 0.2, zc), Palette.Graphite)
 	block(m, "FloorTrim", Vector3.new(0.3, 0.45, 24.4), Vector3.new(x0 + 8.1, 0.22, zc), Palette.Gold)
@@ -897,11 +990,12 @@ do
 		ref.Parent = top
 	end
 	prompt(m, "ShoeShop", "SHOP", "Shoe Shop", Vector3.new(x0 + 6, 3, zc))
+	place(m, Vector3.new(x0 + 8, 0, zc), Vector3.new(-62, 0, PLAZA.Z - 12.5), Vector3.zAxis)
 end
 
 -- Trail Booth: a neon carnival stand with a demo trail looping behind a glass-look panel
 do
-	local m = folder("TrailBooth", shops)
+	local m = modelIn("TrailBooth", shops)
 	local x0, zc = -128, 4
 	block(m, "Base", Vector3.new(10, 0.5, 14), Vector3.new(x0, 0.25, zc), Palette.Graphite)
 	local shell = meshTemplate("TrailBooth_Shell")
@@ -947,14 +1041,15 @@ do
 	tr.Transparency = NumberSequence.new(0, 1)
 	tr.Parent = demo
 	prompt(m, "TrailBooth", "SHOP", "Trail Booth", Vector3.new(x0 + 6, 3, zc))
+	place(m, Vector3.new(x0 + 5, 0, zc), Vector3.new(-100, 0, PLAZA.Z - 12.5), Vector3.zAxis)
 end
 
 -- Coach Corner: bench, whiteboard with the coach cards, stopwatch, whistle on a hook, COACHES sign
 do
-	local m = folder("CoachCorner", shops)
+	local m = modelIn("CoachCorner", shops)
 	local x0, zc = -126, 44
 	block(m, "Pad", Vector3.new(16, 0.3, 18), Vector3.new(x0, 0.15, zc), Color3.fromHex("#9DA6B5"))
-	bench(CFrame.new(x0 + 2, 0.3, zc + 4) * CFrame.Angles(0, math.pi / 2, 0))
+	bench(CFrame.new(x0 + 2, 0.3, zc + 4) * CFrame.Angles(0, math.pi / 2, 0), m)
 	-- whiteboard on legs, facing the track
 	local board = block(m, "Whiteboard", Vector3.new(0.3, 5, 9), Vector3.new(x0 - 4, 5.2, zc - 2), Palette.White)
 	if not mesh("CoachBoard", m, CFrame.new(x0 - 4.06, 0, zc - 2)) then
@@ -1023,24 +1118,72 @@ do
 		{ Text = "ROLL A COACH  -  THEY FOLLOW YOU", Height = 0.25, Color = Palette.White, Font = BODY },
 	})
 	prompt(m, "CoachCorner", "ROLL", "Coach Corner", Vector3.new(x0 + 2, 3, zc - 2))
+	place(m, Vector3.new(x0 + 8, 0, zc), Vector3.new(-62, 0, PLAZA.Z + 12.5), -Vector3.zAxis)
+end
+
+-- Locker Room: open-front changing room, a row of lockers, a bench and two kit stands (opens KITS)
+do
+	local m = modelIn("LockerRoom", shops)
+	local x0, zc = 0, 0
+	block(m, "Floor", Vector3.new(16.4, 0.4, 20.4), Vector3.new(x0, 0.2, zc), Palette.Graphite)
+	block(m, "FloorTrim", Vector3.new(0.3, 0.45, 20.4), Vector3.new(x0 + 8.1, 0.22, zc), Palette.Gold)
+	block(m, "BackWall", Vector3.new(1, 12, 20), Vector3.new(x0 - 7.5, 6, zc), Palette.Carbon)
+	for _, side in { -1, 1 } do
+		block(m, "SideWall", Vector3.new(16, 12, 1), Vector3.new(x0, 6, zc + side * 9.5), Palette.Carbon)
+		block(m, "SideStripe", Vector3.new(16.1, 0.5, 1.05), Vector3.new(x0, 9.5, zc + side * 9.5), Palette.ElectricBlue)
+		block(m, "Pillar", Vector3.new(1.4, 12.4, 1.4), Vector3.new(x0 + 7.6, 6.2, zc + side * 9.5), Palette.SpeedBlack)
+	end
+	block(m, "Roof", Vector3.new(17, 1, 21), Vector3.new(x0, 12.5, zc), Palette.SpeedBlack)
+	block(m, "RoofGold", Vector3.new(17.2, 0.35, 21.2), Vector3.new(x0, 12.05, zc), Palette.Gold)
+	block(m, "CeilingGlow", Vector3.new(10, 0.15, 14), Vector3.new(x0, 11.95, zc), Palette.BrightBlue, { Material = Enum.Material.Neon, CanCollide = false })
+	-- six lockers: inset doors, vent slots, a gold handle and number each
+	for k = 1, 6 do
+		local z = zc - 7.5 + (k - 1) * 3
+		block(m, "Locker", Vector3.new(1.8, 8.4, 2.9), Vector3.new(x0 - 6.1, 4.6, z), Palette.DeepBlue)
+		block(m, "LockerDoor", Vector3.new(0.12, 7.6, 2.5), Vector3.new(x0 - 5.16, 4.7, z), Palette.ElectricBlue)
+		for v = 0, 2 do
+			block(m, "Vent", Vector3.new(0.14, 0.14, 1.6), Vector3.new(x0 - 5.08, 7.6 - v * 0.4, z), Palette.DeepBlue, { CanCollide = false })
+		end
+		block(m, "Handle", Vector3.new(0.2, 0.9, 0.2), Vector3.new(x0 - 5.02, 4.6, z + 0.9), Palette.Gold, { CanCollide = false })
+		local plate = block(m, "Number", Vector3.new(0.1, 0.7, 0.9), Vector3.new(x0 - 5.05, 6.4, z), Palette.White, { CanCollide = false })
+		surfaceText(plate, Enum.NormalId.Right, { { Text = tostring(k), Height = 0.9, Color = Palette.DeepBlue } }, { PPS = 40, MaxDistance = 60, Padding = 0 })
+	end
+	block(m, "LockerTop", Vector3.new(2.1, 0.3, 18.2), Vector3.new(x0 - 6.1, 8.95, zc), Palette.Gold)
+	bench(CFrame.new(x0 - 1.5, 0.4, zc) * CFrame.Angles(0, -math.pi / 2, 0), m)
+	-- two kit stands at the front: a Blue Singlet and a VIP kit
+	for i, kit in { { Palette.ElectricBlue, Palette.DeepBlue, -6 }, { Palette.Gold, Palette.SpeedBlack, 6 } } do
+		local z = zc + kit[3]
+		cyl(m, "StandBase", 1.1, 0.3, Vector3.new(x0 + 5, 0.55, z), Palette.SpeedBlack)
+		cyl(m, "StandPole", 0.12, 3.2, Vector3.new(x0 + 5, 2.2, z), W.Aluminium)
+		block(m, "StandTop", Vector3.new(1.1, 2.2, 2.2), Vector3.new(x0 + 5, 4.9, z), kit[1])
+		block(m, "StandStripe", Vector3.new(1.12, 0.35, 2.22), Vector3.new(x0 + 5, 4.9, z), Palette.White)
+		block(m, "StandShorts", Vector3.new(1.0, 1.0, 2.1), Vector3.new(x0 + 5, 3.3, z), kit[2])
+		ball(m, "StandHead", 1.1, Vector3.new(x0 + 5, 6.6, z), W.Aluminium)
+	end
+	signBoard(m, "Sign", Vector3.new(0.6, 3, 15), CFrame.new(x0 + 8.6, 14.6, zc), {
+		{ Text = "LOCKER ROOM", Height = 0.62, Color = Palette.Gold },
+		{ Text = "KITS, HATS AND NAME STYLES", Height = 0.25, Color = Palette.White, Font = BODY },
+	})
+	prompt(m, "Locker", "OPEN", "Locker Room", Vector3.new(x0 + 6, 3, zc))
+	place(m, Vector3.new(x0 + 8, 0, zc), Vector3.new(-100, 0, PLAZA.Z + 12.5), -Vector3.zAxis)
 end
 
 
 ----------------------------------------------------------------------------
--- M3 Portal Plaza (behind the stands): 5 league gates on a round platform. Unlocked gates teleport
--- (AreaService), locked ones go dark on the client with their requirement; 4-5 are COMING SOON.
+-- Portal stage at the end of the PORTALS avenue (east): 5 league gates in a shallow arc that faces
+-- the plaza, nothing in front of them, a light beam over each so you can find them from anywhere.
+-- Unlocked gates teleport (AreaService), locked ones go dark on the client with their requirement;
+-- 4-5 are COMING SOON (NOTIFY ME).
 ----------------------------------------------------------------------------
 do
 	local plaza = folder("PortalPlaza")
-	local pc = Vector3.new(0, 0, -114)
-	cyl(plaza, "Platform", 30, 0.6, pc + Vector3.new(0, 0.3, 0), Color3.fromHex("#A9B1BF"))
-	cyl(plaza, "PlatformEdge", 30.6, 0.45, pc + Vector3.new(0, 0.22, 0), Palette.Graphite)
-	cyl(plaza, "Ring", 12, 0.66, pc + Vector3.new(0, 0.33, 0), Palette.Gold)
-	cyl(plaza, "RingInner", 11, 0.68, pc + Vector3.new(0, 0.34, 0), Palette.DeepBlue)
-	for _, x in { -58, 58 } do
-		block(plaza, "Path", Vector3.new(10, 0.24, 40), Vector3.new(x, 0.12, -78), W.Path)
-	end
-	block(plaza, "PathBack", Vector3.new(126, 0.24, 10), Vector3.new(0, 0.12, -98), W.Path)
+	local pc = STAGE
+	local top = 1.1
+	cyl(plaza, "Step", STAGE_R + 2, 0.5, pc + Vector3.new(0, 0.25, 0), Palette.Graphite)
+	cyl(plaza, "Platform", STAGE_R, top, pc + Vector3.new(0, top / 2, 0), DISTRICT.Portals.Paving)
+	cyl(plaza, "PlatformGlow", STAGE_R + 0.15, 0.2, pc + Vector3.new(0, top - 0.2, 0), Palette.BrightBlue, { Material = Enum.Material.Neon, CanCollide = false })
+	cyl(plaza, "Ring", 12, top + 0.06, pc + Vector3.new(0, (top + 0.06) / 2, 0), Palette.Gold)
+	cyl(plaza, "RingInner", 11, top + 0.08, pc + Vector3.new(0, (top + 0.08) / 2, 0), Palette.DeepBlue)
 	local gates = {
 		{ "HOMETOWN TRACK", "LEAGUE 1  -  THIS TRACK", Palette.ElectricBlue, nil, false },
 		{ "CITY PARK RUN", "LEAGUE 2", Palette.BrightBlue, "Park", false },
@@ -1048,29 +1191,33 @@ do
 		{ "MOUNTAIN TRAIL", "COMING SOON", Color3.fromHex("#3F8F55"), "Soon", true },
 		{ "WORLD GAMES", "COMING SOON", Palette.Gold, "Soon", true },
 	}
+	local arcC = pc - Vector3.new(16, 0, 0) -- the gates face this point (towards the avenue)
 	for i, g in gates do
-		local a = math.rad(-64 + (i - 1) * 32)
-		local pos = pc + Vector3.new(math.sin(a) * 22, 0.6, -math.cos(a) * 22)
-		local cf = CFrame.lookAt(pos, Vector3.new(pc.X, pos.Y, pc.Z))
+		local a = math.rad(-50 + (i - 1) * 25)
+		local pos = arcC + Vector3.new(math.cos(a) * 40, top, math.sin(a) * 40)
+		local cf = CFrame.lookAt(pos, Vector3.new(arcC.X, pos.Y, arcC.Z))
 		local m = Instance.new("Model")
 		m.Name = "Gate" .. i
 		m:SetAttribute("League", i)
 		m.Parent = plaza
 		for _, s in { -1, 1 } do
-			part({ Parent = m, Name = "Pillar", Size = Vector3.new(1.8, 12, 1.8), CFrame = cf * CFrame.new(s * 5.2, 6, 0), Color = Palette.SpeedBlack })
-			part({ Parent = m, Name = "PillarGlow", Size = Vector3.new(0.3, 11, 0.3), CFrame = cf * CFrame.new(s * 4.25, 6, -0.75), Color = g[3], Material = Enum.Material.Neon, CanCollide = false })
+			part({ Parent = m, Name = "Pillar", Size = Vector3.new(2.2, 17, 2.2), CFrame = cf * CFrame.new(s * 6.4, 8.5, 0), Color = Palette.SpeedBlack })
+			part({ Parent = m, Name = "PillarFoot", Size = Vector3.new(3, 1, 3), CFrame = cf * CFrame.new(s * 6.4, 0.5, 0), Color = Palette.Graphite })
+			part({ Parent = m, Name = "PillarGlow", Size = Vector3.new(0.3, 15.6, 0.3), CFrame = cf * CFrame.new(s * 5.25, 8.5, -0.9), Color = g[3], Material = Enum.Material.Neon, CanCollide = false })
 		end
-		part({ Parent = m, Name = "Beam", Size = Vector3.new(12.6, 2, 2.2), CFrame = cf * CFrame.new(0, 12.6, 0), Color = Palette.Carbon })
-		part({ Parent = m, Name = "BeamGold", Size = Vector3.new(12.8, 0.4, 2.4), CFrame = cf * CFrame.new(0, 13.7, 0), Color = Palette.Gold })
-		local portal = part({ Parent = m, Name = "Portal", Size = Vector3.new(8.4, 11, 0.2), CFrame = cf * CFrame.new(0, 6, 0), Color = g[3], Material = Enum.Material.Neon, Transparency = 0.45, CanCollide = false })
+		part({ Parent = m, Name = "Beam", Size = Vector3.new(15.4, 2.6, 2.6), CFrame = cf * CFrame.new(0, 17.6, 0), Color = Palette.Carbon })
+		part({ Parent = m, Name = "BeamGold", Size = Vector3.new(15.6, 0.4, 2.8), CFrame = cf * CFrame.new(0, 19.0, 0), Color = Palette.Gold })
+		local portal = part({ Parent = m, Name = "Portal", Size = Vector3.new(10.4, 15.6, 0.2), CFrame = cf * CFrame.new(0, 8.2, 0), Color = g[3], Material = Enum.Material.Neon, Transparency = 0.45, CanCollide = false })
 		portal:SetAttribute("Accent", g[3]:ToHex())
-		local board = part({ Parent = m, Name = "Board", Size = Vector3.new(11, 2.8, 0.4), CFrame = cf * CFrame.new(0, 12.6, -1.25), Color = Palette.SpeedBlack, CanCollide = false })
+		-- the light beam into the sky (Neon, no real light): you can see where the portals are from the whole hub
+		part({ Parent = m, Name = "Beacon", Size = Vector3.new(1.4, 80, 1.4), CFrame = cf * CFrame.new(0, 19.2 + 40, 0), Color = g[3], Material = Enum.Material.Neon, Transparency = 0.62, CanCollide = false, CanQuery = false })
+		local board = part({ Parent = m, Name = "Board", Size = Vector3.new(13, 3.2, 0.4), CFrame = cf * CFrame.new(0, 17.6, -1.5), Color = Palette.SpeedBlack, CanCollide = false })
 		surfaceText(board, Enum.NormalId.Front, {
 			{ Name = "Title", Text = g[1], Height = 0.55, Color = Palette.White },
 			{ Name = "Sub", Text = g[2], Height = 0.3, Color = Palette.Gold, Font = BODY },
-		}, { PPS = 22, MaxDistance = 160, Padding = 0 })
+		}, { PPS = 22, MaxDistance = 320, Padding = 0 })
 		if g[4] then
-			local trigger = part({ Parent = m, Name = "Trigger", Size = Vector3.new(8, 10, 2), CFrame = cf * CFrame.new(0, 5.5, 0), Transparency = 1, CanCollide = false })
+			local trigger = part({ Parent = m, Name = "Trigger", Size = Vector3.new(10, 14, 2), CFrame = cf * CFrame.new(0, 7.5, 0), Transparency = 1, CanCollide = false })
 			trigger.CanTouch = true
 			trigger:SetAttribute("GateArea", g[4])
 		end
@@ -1086,157 +1233,390 @@ do
 			pp.Parent = spot
 		end
 	end
-	local sign = block(plaza, "PlazaSign", Vector3.new(22, 3.4, 0.6), Vector3.new(0, 4.5, -88), Palette.SpeedBlack)
-	surfaceText(sign, Enum.NormalId.Back, { -- faces the players coming round the stands
-		{ Text = "PORTAL PLAZA", Height = 0.55, Color = Palette.Gold },
-		{ Text = "GO PRO TO OPEN THE NEXT LEAGUE", Height = 0.3, Color = Palette.White, Font = BODY },
-	}, { PPS = 20, MaxDistance = 200, Padding = 0 })
+	flag(Vector3.new(pc.X - STAGE_R + 3, top, pc.Z - 14), Palette.BrightBlue, Palette.Gold, 9)
+	flag(Vector3.new(pc.X - STAGE_R + 3, top, pc.Z + 14), Palette.Gold, Palette.BrightBlue, 9)
 end
 
 
 ----------------------------------------------------------------------------
--- M4 Leaderboard Wall (left of the school, facing the plaza): 4 global boards, filled by
--- LeaderboardService (parts with a "Board" attribute, rows Row1..Row5)
+-- M4 leaderboards: two walls on the south side of the plaza (either side of the Training Yard path),
+-- facing the plaza. Filled by LeaderboardService (parts with a "Board" attribute, rows Row1..Row5)
 ----------------------------------------------------------------------------
 do
 	local wall = folder("LeaderboardWall")
-	local wx = -74
 	local boardsList = {
 		{ "Speed", "TOP SPEED", Palette.Gold },
 		{ "Wins", "MOST WINS", Palette.ElectricBlue },
 		{ "WeeklyWins", "WINS THIS WEEK", Palette.Gold },
 		{ "WeeklyTime", "FASTEST SPRINT THIS WEEK", Palette.BrightBlue },
 	}
-	block(wall, "Back", Vector3.new(1.2, 13, 49), Vector3.new(wx - 0.9, 6.5, 86), Palette.Carbon)
-	block(wall, "Cap", Vector3.new(2.2, 0.8, 50), Vector3.new(wx - 0.6, 13.4, 86), Palette.Gold)
-	block(wall, "Base", Vector3.new(3, 1, 50), Vector3.new(wx - 0.4, 0.5, 86), Palette.Graphite)
-	local sign = block(wall, "Sign", Vector3.new(0.4, 2.2, 22), Vector3.new(wx - 0.2, 15.2, 86), Palette.SpeedBlack)
-	surfaceText(sign, Enum.NormalId.Right, { { Text = "LEADERBOARDS", Height = 0.85, Color = Palette.Gold } }, { PPS = 20, MaxDistance = 200 })
-	for i, b in boardsList do
-		local z = 86 - 18 + (i - 1) * 12
-		local board = block(wall, "Board", Vector3.new(0.4, 9, 11), Vector3.new(wx, 6.8, z), Palette.SpeedBlack)
-		board:SetAttribute("Board", b[1])
-		block(wall, "Trim", Vector3.new(0.3, 9.4, 11.4), Vector3.new(wx - 0.15, 6.8, z), b[3])
-		local gui = Instance.new("SurfaceGui")
-		gui.Face = Enum.NormalId.Right
-		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-		gui.PixelsPerStud = 24
-		gui.MaxDistance = 110
-		gui.LightInfluence = 0.2
-		gui.Brightness = 1.4
-		gui.Parent = board
-		local t = Instance.new("TextLabel")
-		t.BackgroundTransparency = 1
-		t.Size = UDim2.fromScale(1, 0.18)
-		t.Position = UDim2.fromScale(0, 0.02)
-		t.TextScaled = true
-		t.FontFace = MONTSERRAT
-		t.Text = b[2]
-		t.TextColor3 = b[3]
-		t.Parent = gui
-		local rows = Instance.new("Frame")
-		rows.Name = "Rows"
-		rows.BackgroundTransparency = 1
-		rows.Position = UDim2.fromScale(0.05, 0.22)
-		rows.Size = UDim2.fromScale(0.9, 0.74)
-		rows.Parent = gui
-		local layout = Instance.new("UIListLayout")
-		layout.SortOrder = Enum.SortOrder.LayoutOrder
-		layout.Parent = rows
-		for r = 1, 5 do
-			local l = Instance.new("TextLabel")
-			l.Name = "Row" .. r
-			l.LayoutOrder = r
-			l.BackgroundTransparency = 1
-			l.Size = UDim2.fromScale(1, 0.2)
-			l.TextScaled = true
-			l.FontFace = BODY
-			l.TextXAlignment = Enum.TextXAlignment.Left
-			l.Text = r .. ".  -"
-			l.TextColor3 = if r == 1 then Palette.Gold else Palette.White
-			l.Parent = rows
+	local function boardWall(centre, list)
+		local cf = CFrame.lookAt(centre, centre - Vector3.zAxis) -- faces north, towards the plaza
+		part({ Parent = wall, Name = "Back", Size = Vector3.new(27, 12.4, 1.2), CFrame = cf * CFrame.new(0, 6.2, 0.9), Color = Palette.Carbon })
+		part({ Parent = wall, Name = "Cap", Size = Vector3.new(28, 0.8, 2.4), CFrame = cf * CFrame.new(0, 12.8, 0.6), Color = Palette.Gold })
+		part({ Parent = wall, Name = "Base", Size = Vector3.new(28, 1, 3), CFrame = cf * CFrame.new(0, 0.5, 0.4), Color = Palette.Graphite })
+		local sign = part({ Parent = wall, Name = "Sign", Size = Vector3.new(17, 2.4, 0.5), CFrame = cf * CFrame.new(0, 14.4, 0.6), Color = Palette.SpeedBlack })
+		surfaceText(sign, Enum.NormalId.Front, { { Text = "LEADERBOARDS", Height = 0.85, Color = Palette.Gold } }, { PPS = 20, MaxDistance = 220 })
+		for i, b in list do
+			local x = (i - 1.5) * 12.6
+			local board = part({ Parent = wall, Name = "Board", Size = Vector3.new(11.6, 9, 0.4), CFrame = cf * CFrame.new(x, 6.6, 0), Color = Palette.SpeedBlack })
+			board:SetAttribute("Board", b[1])
+			part({ Parent = wall, Name = "Trim", Size = Vector3.new(12, 9.4, 0.3), CFrame = cf * CFrame.new(x, 6.6, 0.15), Color = b[3] })
+			local gui = Instance.new("SurfaceGui")
+			gui.Face = Enum.NormalId.Front
+			gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+			gui.PixelsPerStud = 24
+			gui.MaxDistance = 110
+			gui.LightInfluence = 0.2
+			gui.Brightness = 1.4
+			gui.Parent = board
+			local t = Instance.new("TextLabel")
+			t.BackgroundTransparency = 1
+			t.Size = UDim2.fromScale(1, 0.18)
+			t.Position = UDim2.fromScale(0, 0.02)
+			t.TextScaled = true
+			t.FontFace = MONTSERRAT
+			t.Text = b[2]
+			t.TextColor3 = b[3]
+			t.Parent = gui
+			local rows = Instance.new("Frame")
+			rows.Name = "Rows"
+			rows.BackgroundTransparency = 1
+			rows.Position = UDim2.fromScale(0.05, 0.22)
+			rows.Size = UDim2.fromScale(0.9, 0.74)
+			rows.Parent = gui
+			local layout = Instance.new("UIListLayout")
+			layout.SortOrder = Enum.SortOrder.LayoutOrder
+			layout.Parent = rows
+			for r = 1, 5 do
+				local l = Instance.new("TextLabel")
+				l.Name = "Row" .. r
+				l.LayoutOrder = r
+				l.BackgroundTransparency = 1
+				l.Size = UDim2.fromScale(1, 0.2)
+				l.TextScaled = true
+				l.FontFace = BODY
+				l.TextXAlignment = Enum.TextXAlignment.Left
+				l.Text = r .. ".  -"
+				l.TextColor3 = if r == 1 then Palette.Gold else Palette.White
+				l.Parent = rows
+			end
 		end
 	end
+	boardWall(Vector3.new(-30, 0, 139), { boardsList[1], boardsList[2] })
+	boardWall(Vector3.new(30, 0, 139), { boardsList[3], boardsList[4] })
 end
 
 
 ----------------------------------------------------------------------------
--- M6 look pass: the flat fields get detail - grass colour patches, gravel paths, flower beds,
--- bushes along the hedges, benches and lamps on the paths. Seeded, so every rebuild looks the same.
+-- look pass (28 Oct): real flowers in raised planters, wayfinding (district arches, a signpost and
+-- floor labels on the plaza), the fountain at the end of Shop Street, grass patches, bushes along
+-- the hedges. Seeded, so every rebuild looks the same.
 ----------------------------------------------------------------------------
 do
 	local dress = folder("Dressing")
 	local rnd = Random.new(606)
 	local greens = { Color3.fromHex("#66B356"), Color3.fromHex("#549C47"), Color3.fromHex("#6FBB5C"), Color3.fromHex("#4F9443") }
-	local function onField(x, z)
-		-- the two side fields and the back corners (clear of the track, school, plaza and shops)
-		local track = math.abs(x) < 112 and math.abs(z - 0) < 62
-		local school = math.abs(x) < 72 and z > 56
-		local plaza = math.abs(x) < 40 and z < -84
-		local shops = x < -100 and math.abs(z) < 70
-		return not (track or school or plaza or shops) and math.abs(x) < 140 and z > -140 and z < 146
+	local LIP = Color3.fromHex("#DDE2EA")
+	local SOIL = Color3.fromHex("#5C4030")
+
+	-- flowers: stem, two leaves and a bloom built from small parts, unioned once per kind and
+	-- cloned, so each flower is one part (clones share the mesh)
+	local PINK, ORANGE = Color3.fromHex("#FF8FB1"), Color3.fromHex("#FF9A3D")
+	local stemC, leafC = Color3.fromHex("#3E8A3A"), Color3.fromHex("#58A84A")
+	local function p(props)
+		props.Parent = tmp
+		return part(props)
 	end
-	-- grass patches (just above the mowing stripes, so they never flicker)
-	local n = 0
-	while n < 34 do
-		local x, z = rnd:NextNumber(-138, 138), rnd:NextNumber(-138, 144)
-		if onField(x, z) then
-			n += 1
-			local p = block(dress, "GrassPatch", Vector3.new(rnd:NextNumber(5, 13), 0.04, rnd:NextNumber(4, 10)), Vector3.new(x, 0.1, z), greens[rnd:NextInteger(1, #greens)], { CanCollide = false })
-			p.CFrame = CFrame.new(x, 0.1, z) * CFrame.Angles(0, rnd:NextNumber(0, math.pi), 0)
+	local function stemAndLeaves(ps, h)
+		table.insert(ps, p({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(h, 0.14, 0.14), CFrame = CFrame.new(0, h / 2, 0) * CFrame.Angles(0, 0, math.pi / 2), Color = stemC }))
+		for s = -1, 1, 2 do
+			table.insert(ps, p({ Size = Vector3.new(0.55, 0.07, 0.24), CFrame = CFrame.new(s * 0.24, h * 0.3 + (s + 1) * 0.1, 0) * CFrame.Angles(0, 0, s * math.rad(28)), Color = leafC }))
 		end
 	end
-	-- gravel paths: one down each side field, joined to the plaza in front of the school
-	local gravel = Color3.fromHex("#C2B9A6")
-	block(dress, "PathEast", Vector3.new(7, 0.2, 230), Vector3.new(124, 0.1, 5), gravel, { CanCollide = false })
-	block(dress, "PathEastLink", Vector3.new(52, 0.2, 7), Vector3.new(98, 0.1, 96), gravel, { CanCollide = false })
-	block(dress, "PathWest", Vector3.new(7, 0.2, 120), Vector3.new(-96, 0.1, 10), gravel, { CanCollide = false })
-	block(dress, "PathWestLink", Vector3.new(30, 0.2, 7), Vector3.new(-82, 0.1, 82), gravel, { CanCollide = false })
-	for _, z in { -90, -30, 30, 90 } do
-		block(dress, "PathEdge", Vector3.new(7.6, 0.24, 0.5), Vector3.new(124, 0.12, z), Color3.fromHex("#A69C88"), { CanCollide = false })
+	local function daisy(petal, heart)
+		local ps, h = {}, 1.5
+		stemAndLeaves(ps, h)
+		for i = 0, 6 do
+			local a = i / 7 * math.pi * 2
+			-- round petal discs around the heart, the outer edge tipped up
+			table.insert(ps, p({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.07, 0.42, 0.42), CFrame = CFrame.new(0, h, 0) * CFrame.Angles(0, a, 0) * CFrame.new(0.27, 0, 0) * CFrame.Angles(0, 0, math.pi / 2 + math.rad(18)), Color = petal }))
+		end
+		table.insert(ps, p({ Shape = Enum.PartType.Ball, Size = Vector3.new(0.3, 0.3, 0.3), CFrame = CFrame.new(0, h + 0.05, 0), Color = heart }))
+		return ps
 	end
-	-- flower beds: soil + a few flowers each, in palette-friendly colours
-	local petals = { Palette.Gold, Palette.White, Color3.fromHex("#FF8FB1"), Palette.BrightBlue, Color3.fromHex("#FF4A4A") }
-	local beds = { Vector3.new(112, 0, -110), Vector3.new(136, 0, -60), Vector3.new(112, 0, 40), Vector3.new(136, 0, 120), Vector3.new(84, 0, 120),
-		Vector3.new(-84, 0, 120), Vector3.new(-136, 0, 120), Vector3.new(-120, 0, -112), Vector3.new(-70, 0, -126), Vector3.new(70, 0, -126) }
-	for i, c in beds do
-		local r = rnd:NextNumber(2.4, 3.4)
-		cyl(dress, "Soil", r, 0.5, c + Vector3.new(0, 0.25, 0), Color3.fromHex("#6B4A32"))
-		cyl(dress, "Rim", r + 0.25, 0.36, c + Vector3.new(0, 0.18, 0), W.Concrete)
-		local col = petals[(i - 1) % #petals + 1]
-		for k = 1, 7 do
-			local a = k / 7 * math.pi * 2 + rnd:NextNumber(-0.3, 0.3)
-			local d = rnd:NextNumber(0.4, r - 0.6)
-			ball(dress, "Flower", rnd:NextNumber(0.55, 0.85), c + Vector3.new(math.cos(a) * d, 0.75, math.sin(a) * d), if k % 3 == 0 then W.TreeLeafLight else col, { CanCollide = false })
+	local function tulip(col)
+		local ps, h = {}, 1.35
+		stemAndLeaves(ps, h)
+		table.insert(ps, p({ Shape = Enum.PartType.Ball, Size = Vector3.new(0.46, 0.46, 0.46), CFrame = CFrame.new(0, h + 0.12, 0), Color = col }))
+		for i = 0, 2 do
+			local a = i / 3 * math.pi * 2
+			-- three upright petals round the cup, leaning out a little at the top
+			table.insert(ps, p({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.06, 0.5, 0.5), CFrame = CFrame.new(0, h + 0.3, 0) * CFrame.Angles(0, a, 0) * CFrame.new(0.17, 0, 0) * CFrame.Angles(0, 0, math.rad(-12)), Color = col:Lerp(Palette.White, 0.12) }))
+		end
+		return ps
+	end
+	local function spike(col)
+		local ps, h = {}, 1.3
+		stemAndLeaves(ps, h)
+		for k = 0, 4 do
+			local d = 0.42 - k * 0.05
+			table.insert(ps, p({ Shape = Enum.PartType.Ball, Size = Vector3.new(d, d, d), CFrame = CFrame.new(0, h - 0.2 + k * 0.24, 0), Color = col:Lerp(Palette.White, k * 0.07) }))
+		end
+		return ps
+	end
+	local kinds = {
+		DaisyWhite = daisy(Palette.White, Palette.Gold),
+		DaisyGold = daisy(Palette.Gold, Palette.DeepGold),
+		DaisyPink = daisy(PINK, Palette.Gold),
+		TulipPink = tulip(PINK),
+		TulipGold = tulip(Palette.Gold),
+		TulipOrange = tulip(ORANGE),
+		SpikeBlue = spike(Palette.BrightBlue),
+		SpikeWhite = spike(Palette.White),
+	}
+	local flowerT = {}
+	for kind, ps in kinds do
+		local ok, res = pcall(function()
+			return GeometryService:UnionAsync(ps[1], table.move(ps, 2, #ps, 1, {}), { CollisionFidelity = Enum.CollisionFidelity.Box, RenderFidelity = Enum.RenderFidelity.Precise, SplitApart = false })
+		end)
+		for _, q in ps do
+			q:Destroy()
+		end
+		if ok then
+			local u = res[1]
+			u.Name = "Flower"
+			u.UsePartColor = false -- keep each piece's colour
+			u.Anchored = true
+			u.CanCollide = false
+			u.CanQuery = false
+			u.CanTouch = false
+			u.CastShadow = false
+			u.Parent = tmp
+			flowerT[kind] = { u = u, off = u.Position }
+		else
+			warn("flower union failed", kind, res)
+		end
+	end
+	local function flower(parent, pos, kind, scale)
+		local t = flowerT[kind]
+		if not t then
+			return
+		end
+		local f = t.u:Clone()
+		f.Size = t.u.Size * scale
+		f.CFrame = CFrame.new(pos) * CFrame.Angles(rnd:NextNumber(-0.12, 0.12), rnd:NextNumber(0, math.pi * 2), rnd:NextNumber(-0.12, 0.12)) * CFrame.new(t.off * scale)
+		f.Parent = parent
+	end
+	-- fill a bed: leafy mounds first, then flowers in drifts of one kind (not random confetti)
+	local function fillBed(sample, area, topY, mix)
+		for _ = 1, math.floor(area / 3) do
+			local x, z = sample()
+			local d = rnd:NextNumber(0.8, 1.3)
+			ball(dress, "Leaves", d, Vector3.new(x, topY + d * 0.12, z), greens[rnd:NextInteger(1, #greens)], { CanCollide = false, CanQuery = false })
+		end
+		for _ = 1, math.floor(area * 0.55) do
+			local x, z, u = sample()
+			flower(dress, Vector3.new(x, topY, z), mix[math.clamp(math.floor(u * #mix) + 1, 1, #mix)], rnd:NextNumber(0.85, 1.2))
+		end
+	end
+	local function planter(cf, sx, sz, mix)
+		part({ Parent = dress, Name = "Planter", Size = Vector3.new(sx, 1.1, sz), CFrame = cf * CFrame.new(0, 0.55, 0), Color = W.Concrete })
+		part({ Parent = dress, Name = "PlanterLip", Size = Vector3.new(sx + 0.3, 0.22, sz + 0.3), CFrame = cf * CFrame.new(0, 1.12, 0), Color = LIP })
+		part({ Parent = dress, Name = "Soil", Size = Vector3.new(sx - 0.5, 0.1, sz - 0.5), CFrame = cf * CFrame.new(0, 1.22, 0), Color = SOIL, CanCollide = false })
+		local ix, iz = sx / 2 - 0.6, sz / 2 - 0.6
+		fillBed(function()
+			local lx = rnd:NextNumber(-ix, ix)
+			local w = cf * Vector3.new(lx, 0, rnd:NextNumber(-iz, iz))
+			return w.X, w.Z, (lx + ix) / (2 * ix)
+		end, sx * sz, cf.Position.Y + 1.27, mix)
+	end
+	local function roundPlanter(pos, r, mix, treeScale)
+		cyl(dress, "Planter", r, 1.1, pos + Vector3.new(0, 0.55, 0), W.Concrete)
+		cyl(dress, "PlanterLip", r + 0.18, 0.22, pos + Vector3.new(0, 1.12, 0), LIP)
+		cyl(dress, "Soil", r - 0.25, 0.1, pos + Vector3.new(0, 1.22, 0), SOIL, { CanCollide = false })
+		local inner = if treeScale then 1.2 else 0
+		fillBed(function()
+			local a = rnd:NextNumber(0, math.pi * 2)
+			local d = math.sqrt(rnd:NextNumber((inner / (r - 0.5)) ^ 2, 1)) * (r - 0.5)
+			return pos.X + math.cos(a) * d, pos.Z + math.sin(a) * d, a / (math.pi * 2)
+		end, math.pi * r * r, pos.Y + 1.27, mix)
+		if treeScale then
+			tree(pos + Vector3.new(0, 1.2, 0), treeScale)
+		end
+	end
+
+	-- the plaza: four round planters with a small tree on the diagonals, benches facing the middle
+	local plazaY = PLAZA + Vector3.new(0, 0.38, 0)
+	local plazaMixes = { { "DaisyWhite", "TulipPink" }, { "TulipGold", "SpikeBlue" }, { "DaisyPink", "SpikeWhite" }, { "TulipOrange", "DaisyWhite" } }
+	for i, deg in { 45, 135, 225, 315 } do
+		local a = math.rad(deg)
+		roundPlanter(plazaY + Vector3.new(math.cos(a) * 21, 0, math.sin(a) * 21), 3.4, plazaMixes[i], 0.5)
+		for _, da in { -16, 16 } do
+			local b = math.rad(deg + da)
+			local pos = plazaY + Vector3.new(math.cos(b) * 21.5, 0, math.sin(b) * 21.5)
+			bench(CFrame.lookAt(pos, plazaY), dress)
+		end
+	end
+	-- Shop Street planters between the shops, Portal avenue planters between the lamps
+	for _, x in { -40, -81, -117 } do
+		for side = -1, 1, 2 do
+			planter(CFrame.new(x, 0, PLAZA.Z + side * 13.6), 8, 2.4, { "TulipGold", "DaisyWhite", "TulipPink" })
+		end
+	end
+	for _, x in { 53, 89 } do
+		for side = -1, 1, 2 do
+			planter(CFrame.new(x, 0, PLAZA.Z + side * 13.6), 8, 2.4, { "SpikeBlue", "DaisyWhite", "SpikeWhite" })
+		end
+	end
+	-- Training Yard: planters between the bays
+	for _, x in { -24, 24 } do
+		planter(CFrame.new(x, 0.3, YARD_Z0 + 16), 2.4, 20, { "SpikeBlue", "SpikeWhite" })
+	end
+	-- flower beds in the fields by the track (where the race benches are) and behind the shops
+	for i, c in { Vector3.new(-33, 0, 74), Vector3.new(33, 0, 74), Vector3.new(-66, 0, 146), Vector3.new(62, 0, 150), Vector3.new(-150, 0, 70), Vector3.new(130, 0, 150) } do
+		roundPlanter(c, rnd:NextNumber(2.6, 3.2), plazaMixes[(i - 1) % #plazaMixes + 1])
+	end
+
+	-- the fountain at the end of Shop Street
+	do
+		local F = Vector3.new(SHOP_END - 8, 0, PLAZA.Z)
+		cyl(dress, "FountainPlazaEdge", 14.8, 0.32, F + Vector3.new(0, 0.16, 0), Palette.Graphite)
+		cyl(dress, "FountainPlaza", 14, 0.34, F + Vector3.new(0, 0.17, 0), DISTRICT.Shops.Paving)
+		cyl(dress, "BasinGold", 6.8, 0.36, F + Vector3.new(0, 0.18, 0), Palette.Gold)
+		cyl(dress, "Basin", 6.4, 1.5, F + Vector3.new(0, 0.75, 0), W.Concrete)
+		cyl(dress, "Water", 5.9, 0.12, F + Vector3.new(0, 1.5, 0), Palette.BrightBlue, { Transparency = 0.15, CanCollide = false })
+		cyl(dress, "Column", 0.9, 3.4, F + Vector3.new(0, 3.2, 0), W.Concrete)
+		cyl(dress, "Bowl", 2.6, 0.5, F + Vector3.new(0, 5.0, 0), LIP)
+		cyl(dress, "BowlWater", 2.3, 0.1, F + Vector3.new(0, 5.26, 0), Palette.BrightBlue, { Transparency = 0.15, CanCollide = false })
+		local jet = cyl(dress, "Jet", 0.22, 1.6, F + Vector3.new(0, 6.1, 0), Palette.White, { Material = Enum.Material.Neon, Transparency = 0.35, CanCollide = false })
+		local at = Instance.new("Attachment")
+		at.Position = Vector3.new(0.8, 0, 0) -- the jet's axis is its X (cylinder)
+		at.Parent = jet
+		local spray = Instance.new("ParticleEmitter")
+		spray.Rate = 30
+		spray.Lifetime = NumberRange.new(0.7, 1)
+		spray.Speed = NumberRange.new(5, 7)
+		spray.SpreadAngle = Vector2.new(28, 28)
+		spray.EmissionDirection = Enum.NormalId.Right
+		spray.Acceleration = Vector3.new(0, -26, 0)
+		spray.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(1, 0.05) })
+		spray.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1) })
+		spray.Color = ColorSequence.new(Color3.fromHex("#DFF4FF"))
+		spray.LightEmission = 0.3
+		spray.Parent = at
+		for _, deg in { 45, 135, 225, 315 } do
+			local a = math.rad(deg)
+			local pos = F + Vector3.new(math.cos(a) * 10, 0.34, math.sin(a) * 10)
+			bench(CFrame.lookAt(pos, F + Vector3.new(0, 0.34, 0)), dress)
+		end
+	end
+
+	-- district arches at the plaza exits: the name faces you as you leave the plaza
+	local function districtArch(pos, out, span, title, sub, accent)
+		local cf = CFrame.lookAt(pos, pos + out)
+		for _, s in { -1, 1 } do
+			local x = s * (span / 2 + 1.2)
+			part({ Parent = dress, Name = "ArchPillar", Size = Vector3.new(2.4, 14, 2.4), CFrame = cf * CFrame.new(x, 7, 0), Color = Palette.Carbon })
+			part({ Parent = dress, Name = "ArchFoot", Size = Vector3.new(3.4, 1, 3.4), CFrame = cf * CFrame.new(x, 0.5, 0), Color = Palette.Graphite })
+			part({ Parent = dress, Name = "ArchGlow", Size = Vector3.new(0.25, 12, 2.5), CFrame = cf * CFrame.new(x - s * 1.2, 7.4, 0), Color = accent, Material = Enum.Material.Neon, CanCollide = false })
+		end
+		local beam = part({ Parent = dress, Name = "ArchBeam", Size = Vector3.new(span + 6, 3.6, 1.8), CFrame = cf * CFrame.new(0, 15.2, 0), Color = Palette.SpeedBlack })
+		part({ Parent = dress, Name = "ArchTrim", Size = Vector3.new(span + 6.4, 0.45, 2.2), CFrame = cf * CFrame.new(0, 17.2, 0), Color = Palette.Gold })
+		part({ Parent = dress, Name = "ArchGlowBeam", Size = Vector3.new(span + 5.6, 0.25, 1.9), CFrame = cf * CFrame.new(0, 13.3, 0), Color = accent, Material = Enum.Material.Neon, CanCollide = false })
+		surfaceText(beam, Enum.NormalId.Back, {
+			{ Text = title, Height = 0.56, Color = accent },
+			{ Text = sub, Height = 0.26, Color = Palette.White, Font = BODY },
+		}, { PPS = 18, MaxDistance = 320, Padding = 0, Brightness = 1.6 })
+		surfaceText(beam, Enum.NormalId.Front, {
+			{ Text = "CENTRAL PLAZA", Height = 0.5, Color = Palette.White },
+		}, { PPS = 18, MaxDistance = 200, Padding = 0 })
+	end
+	districtArch(PLAZA + Vector3.new(-31, 0, 0), -Vector3.xAxis, AVE_W + 2, "SHOP STREET", "SHOES  -  TRAILS  -  COACHES  -  KITS", Palette.Gold)
+	districtArch(PLAZA + Vector3.new(31, 0, 0), Vector3.xAxis, AVE_W + 2, "PORTALS", "GO PRO TO OPEN NEW LEAGUES", Palette.BrightBlue)
+	districtArch(PLAZA + Vector3.new(0, 0, 31), Vector3.zAxis, 22, "TRAINING YARD", "TAP TO GET FASTER", Palette.BrightBlue)
+
+	-- the signpost by the spawn: one arrow board per district
+	do
+		local fp = PLAZA + Vector3.new(9, 0.38, 9)
+		cyl(dress, "SignPole", 0.32, 13.4, fp + Vector3.new(0, 6.7, 0), Palette.Graphite)
+		cyl(dress, "SignPoleFoot", 0.8, 0.6, fp + Vector3.new(0, 0.3, 0), Palette.SpeedBlack)
+		ball(dress, "SignPoleTop", 0.9, fp + Vector3.new(0, 13.6, 0), Palette.Gold)
+		for i, d in {
+			{ -Vector3.zAxis, "RACE TRACK", Palette.White },
+			{ Vector3.xAxis, "PORTALS", Palette.BrightBlue },
+			{ -Vector3.xAxis, "SHOP STREET", Palette.Gold },
+			{ Vector3.zAxis, "TRAINING", Palette.BrightBlue },
+		} do
+			local yaw = math.atan2(-d[1].Z, d[1].X)
+			local cf = CFrame.new(fp + Vector3.new(0, 13 - i * 1.65, 0)) * CFrame.Angles(0, yaw, 0) * CFrame.new(3.7, 0, 0)
+			local board = part({ Parent = dress, Name = "SignArrow", Size = Vector3.new(6.6, 1.4, 0.3), CFrame = cf, Color = Palette.SpeedBlack })
+			part({ Parent = dress, Name = "SignTip", Size = Vector3.new(0.99, 0.99, 0.3), CFrame = cf * CFrame.new(3.3, 0, 0) * CFrame.Angles(0, 0, math.rad(45)), Color = d[3] })
+			part({ Parent = dress, Name = "SignEdge", Size = Vector3.new(6.6, 0.14, 0.32), CFrame = cf * CFrame.new(0, -0.64, 0), Color = d[3] })
+			-- the back face reads towards the tip, the front face away from it
+			surfaceText(board, Enum.NormalId.Back, { { Text = d[2] .. "  >", Height = 0.8, Color = d[3] } }, { PPS = 30, MaxDistance = 140, Padding = 0 })
+			surfaceText(board, Enum.NormalId.Front, { { Text = "<  " .. d[2], Height = 0.8, Color = d[3] } }, { PPS = 30, MaxDistance = 140, Padding = 0 })
+		end
+	end
+
+	-- floor labels painted at the plaza exits (the text's top points the way you go)
+	local function floorLabel(pos, out, text, color)
+		local lbl = part({ Parent = dress, Name = "FloorLabel", Size = Vector3.new(3.2, 0.05, 12), CFrame = CFrame.fromMatrix(pos, -out, Vector3.yAxis), Color = Palette.White, Transparency = 1, CanCollide = false, CanQuery = false })
+		local g = Instance.new("SurfaceGui")
+		g.Face = Enum.NormalId.Top
+		g.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		g.PixelsPerStud = 20
+		g.MaxDistance = 120
+		g.LightInfluence = 1
+		g.Parent = lbl
+		local t = Instance.new("TextLabel")
+		t.BackgroundTransparency = 1
+		t.Size = UDim2.fromScale(1, 1)
+		t.Text = text
+		t.TextScaled = true
+		t.FontFace = MONTSERRAT
+		t.TextColor3 = color
+		t.Parent = g
+		return t
+	end
+	floorLabel(PLAZA + Vector3.new(-23, 0.4, 0), -Vector3.xAxis, "SHOPS", Palette.DeepGold)
+	floorLabel(PLAZA + Vector3.new(23, 0.4, 0), Vector3.xAxis, "PORTALS", Palette.ElectricBlue)
+	floorLabel(PLAZA + Vector3.new(0, 0.4, 23), Vector3.zAxis, "TRAINING", Palette.ElectricBlue)
+	floorLabel(PLAZA + Vector3.new(0, 0.4, -23), -Vector3.zAxis, "RACES", Palette.DeepBlue)
+	floorLabel(STAGE + Vector3.new(0, 1.2, 0), -Vector3.xAxis, "PORTALS", Palette.White)
+
+	-- grass colour patches on the open fields (clear of every district)
+	local function onField(x, z)
+		local trackArea = math.abs(x) < 112 and z > -86 and z < 62
+		local plazaArea = (Vector3.new(x, 0, z) - PLAZA).Magnitude < 32
+		local shopArea = x < -20 and x > -160 and math.abs(z - PLAZA.Z) < 32
+		local portalArea = x > 20 and math.abs(z - PLAZA.Z) < 42
+		local yardArea = math.abs(x) < 80 and z > 126 and z < 228
+		local schoolArea = math.abs(x) < 70 and z > 226 and z < 264
+		return not (trackArea or plazaArea or shopArea or portalArea or yardArea or schoolArea) and math.abs(x) < 188 and z > -108 and z < 276
+	end
+	local n = 0
+	while n < 46 do
+		local x, z = rnd:NextNumber(-188, 188), rnd:NextNumber(-108, 276)
+		if onField(x, z) then
+			n += 1
+			local gp = block(dress, "GrassPatch", Vector3.new(rnd:NextNumber(5, 13), 0.04, rnd:NextNumber(4, 10)), Vector3.new(x, 0.1, z), greens[rnd:NextInteger(1, #greens)], { CanCollide = false })
+			gp.CFrame = CFrame.new(x, 0.1, z) * CFrame.Angles(0, rnd:NextNumber(0, math.pi), 0)
 		end
 	end
 	-- bushes along the hedges (small tree crowns)
-	for i = 0, 11 do
-		local z = -120 + i * 22
-		for _, x in { -138, 138 } do
-			if onField(x, z) or math.abs(z) > 70 then
-				tree(Vector3.new(x + rnd:NextNumber(-2, 2), 0, z + rnd:NextNumber(-4, 4)), rnd:NextNumber(0.42, 0.55))
-			end
+	for i = 0, 12 do
+		local z = -100 + i * 30
+		for _, x in { -190, 190 } do
+			tree(Vector3.new(x + rnd:NextNumber(-2, 2), 0, z + rnd:NextNumber(-4, 4)), rnd:NextNumber(0.42, 0.55))
 		end
 	end
-	-- benches + lamps along the east path, a drinking fountain where the paths meet
-	for _, z in { -70, -10, 50 } do
-		local b = mesh("Bench", dress, CFrame.new(118.5, 0, z) * CFrame.Angles(0, math.pi / 2, 0))
-		if not b then
-			block(dress, "BenchSeat", Vector3.new(1.6, 0.3, 5), Vector3.new(118.5, 1.4, z), W.Wood)
-			block(dress, "BenchBack", Vector3.new(0.3, 1.2, 5), Vector3.new(117.8, 2.1, z), W.Wood)
-			for _, dz in { -2, 2 } do
-				block(dress, "BenchLeg", Vector3.new(1.4, 1.3, 0.3), Vector3.new(118.5, 0.65, z + dz), Palette.Graphite)
-			end
+	for i = 0, 12 do
+		local x = -180 + i * 30
+		for _, z in { -110, 278 } do
+			tree(Vector3.new(x + rnd:NextNumber(-4, 4), 0, z + rnd:NextNumber(-2, 2)), rnd:NextNumber(0.42, 0.55))
 		end
 	end
-	for _, z in { -100, -40, 20, 80 } do
-		cyl(dress, "LampPole", 0.22, 8, Vector3.new(129, 4, z), Palette.Graphite)
-		ball(dress, "LampGlow", 1.1, Vector3.new(129, 8.3, z), Color3.fromHex("#FFE3A0"), { Material = Enum.Material.Neon, CanCollide = false })
-	end
-	cyl(dress, "FountainBase", 1.1, 2.6, Vector3.new(124, 1.3, 96), W.Concrete)
-	cyl(dress, "FountainBowl", 1.5, 0.4, Vector3.new(124, 2.7, 96), Palette.Graphite)
-	cyl(dress, "FountainWater", 1.3, 0.12, Vector3.new(124, 2.92, 96), Palette.BrightBlue, { Transparency = 0.2, CanCollide = false })
 end
 
 ----------------------------------------------------------------------------

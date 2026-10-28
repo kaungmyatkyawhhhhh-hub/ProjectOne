@@ -126,7 +126,7 @@ local function goTo(player, target)
 		return false
 	end
 	TrainingService.leave(player)
-	local stand = spot.Position + Vector3.new(7, 0, 0)
+	local stand = spot.Position + spot.CFrame.RightVector * 7 -- shops are built facing their local +X
 	root.AssemblyLinearVelocity = Vector3.zero
 	root.CFrame = CFrame.lookAt(Vector3.new(stand.X, 3.2, stand.Z), Vector3.new(spot.Position.X, 3.2, spot.Position.Z))
 	return true, target

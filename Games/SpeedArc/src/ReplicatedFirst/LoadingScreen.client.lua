@@ -223,9 +223,9 @@ local camera = workspace.CurrentCamera
 local flyStart = os.clock()
 RunService:BindToRenderStep("SpeedArcMenuCamera", Enum.RenderPriority.Camera.Value + 2, function()
 	local a = (os.clock() - flyStart) * 0.06 + 2.2
-	local pos = Vector3.new(math.cos(a) * 165, 70 + math.sin(a * 0.7) * 8, math.sin(a) * 135) -- high enough to clear the stands
+	local pos = Vector3.new(math.cos(a) * 190, 78 + math.sin(a * 0.7) * 8, 84 + math.sin(a) * 170) -- high enough to clear the stands
 	camera.CameraType = Enum.CameraType.Scriptable
-	camera.CFrame = CFrame.lookAt(pos, Vector3.new(0, 6, 10))
+	camera.CFrame = CFrame.lookAt(pos, Vector3.new(0, 6, 84))
 end)
 TweenService:Create(bg, TweenInfo.new(1.2), { BackgroundTransparency = 1 }):Play()
 for _, s in streaks do
