@@ -35,3 +35,9 @@ Owner, 28 Oct: "add like and favourite game for 1000 coins and join group for ex
 - Non-member: door shut, prompt on, put back outside when placed inside, machines refuse.
 - Member at Spurt 3: the bench became the Pro Flat Bench; back to normal after getting off. At Spurt 5: the squat became the Powerlifting squat.
 - Free coins: first claim +1,000, second refused.
+
+## Ruby theme (28 Oct, owner: "make every machine in members gym ruby theme")
+- Every Members Gym machine: deep ruby frames, dark ruby leather pads with gold piping, gold horns / caps / collars, dark ruby clamps and spotter steps, cherry platforms with gold seams, dumbbell pads dark ruby.
+- The plates on the bars are ruby with a gold hub, whatever version the machine turns into (MachineService.updatePlates: models with the Members attribute; RUBY_PLATE #9B111E).
+- The small storage plates on the racks keep their dark printed look (their meshes carry their own colours).
+![[GYM ARC/Screenshots/members_gym_ruby.jpg]]
