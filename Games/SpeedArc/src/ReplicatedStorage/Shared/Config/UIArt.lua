@@ -9,7 +9,7 @@ return {
 		Icons = "", -- ui_icons.png: 15 icons
 	},
 	LocalFolder = "rbxasset://textures/SpeedArcKit/",
-	Files = { Buttons = "ui_buttons.png", Tiles = "ui_tiles.png", Icons = "ui_icons.png" },
+	-- (the local file names are in Config/UIArtSprites: they change with every build)
 	-- the colour-glow tiles (UIKit.tile picks the nearest one for any colour)
 	TileColors = {
 		blue = "#1E90FF",

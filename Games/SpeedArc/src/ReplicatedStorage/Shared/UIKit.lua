@@ -10,7 +10,8 @@ local TweenService = game:GetService("TweenService")
 
 local Palette = require(script.Parent.Config.Palette)
 local UIArt = require(script.Parent.Config.UIArt)
-local Sprites = require(script.Parent.Config.UIArtSprites)
+local Generated = require(script.Parent.Config.UIArtSprites)
+local Sprites = Generated.Sprites
 
 local UIKit = {}
 
@@ -43,7 +44,7 @@ local function sheetImage(sheet)
 	if id and id ~= "" then
 		return "rbxassetid://" .. id
 	end
-	return UIArt.LocalFolder .. UIArt.Files[sheet]
+	return UIArt.LocalFolder .. Generated.Files[sheet]
 end
 
 -- Point an ImageLabel / ImageButton at a sprite. `height` (design px) sizes "auto" slices (pills, bars).

@@ -39,7 +39,7 @@ end
 
 local function render()
 	for _, ch in list:GetChildren() do
-		if ch:IsA("Frame") or ch:IsA("TextLabel") then
+		if ch:IsA("GuiObject") then
 			ch:Destroy()
 		end
 	end
