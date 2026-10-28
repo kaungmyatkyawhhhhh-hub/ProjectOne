@@ -5,6 +5,9 @@ status: done (M3)
 ---
 # SPEED ARC - Big Stadium (League 3)
 
+> **Prompt 11 (28 Oct):** candy rebuild: light concrete, white / sky stands, a bright purple tunnel, the tents / coolers / camera crane removed, BACK TO HUB moved beside the tunnel exit. The **wall course** runs straight out of the players' tunnel between low stands with a crowd that cheers on every smash; walls in purples / pinks / blues. 885 parts, 4 lights (the floodlights), 296 fans.
+![[2026-10-28 p11 stadium course.jpg]]
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ## Look

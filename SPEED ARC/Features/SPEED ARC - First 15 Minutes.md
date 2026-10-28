@@ -5,6 +5,8 @@ status: done (M4)
 ---
 # SPEED ARC - First 15 Minutes (tutorial)
 
+> **Prompt 11 (28 Oct):** the steps are now Welcome -> FIRST STEP (walk: +10 SPEED, +100 coins) -> FIRST WALL (smash wall 1) -> tutorial race -> podium -> shoes -> Silver -> coach roll at the COACH AGENCY. The step ids are `FirstStep` / `FirstWall` (saves keep their numbers). The race card is a small card top right under NEXT RACE. Test: first step 4.7 s, wall 1 34 s after PLAY. GDD 21 has the new minute-by-minute. The rest of this note is the tap version.
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 GDD 21, built in M4. The server keeps the step (saved, so a rejoin carries on); the client draws it.

@@ -5,6 +5,9 @@ status: done (M3)
 ---
 # SPEED ARC - City Park Run (League 2)
 
+> **Prompt 11 (28 Oct):** candy rebuild: bright grass, a pastel skyline, the food carts / blankets / lamps / benches removed. The **wall course** starts south of the spawn plaza (you spawn facing it): hedges and trees both sides, stage 4 is a bridge over water, walls in greens / blues / yellows. Floating names: RACE TRACK, AFK MACHINES, BACK TO HUB, COACH AGENCY. 719 parts, 0 lights.
+![[2026-10-28 p11 park course bridge and strip.jpg]]
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ## Look

@@ -5,6 +5,8 @@ status: live (ids set 28 Oct)
 ---
 # SPEED ARC - Store and Monetization
 
+> **Prompt 11 (28 Oct):** Auto Run = AFK machines step x2.4 (still slower than running); 2x SPEED 15 MIN = double SPEED per step. Shoe prices lowered so each league's shoes are bought inside that league: Track Trainers 900, Light Racers 3,000, Park Pacers 15,000, Spike Shoes 150,000.
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ## Fair rules (never break)

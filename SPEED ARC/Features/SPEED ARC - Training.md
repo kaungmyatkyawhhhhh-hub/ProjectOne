@@ -5,6 +5,8 @@ status: done (M1)
 ---
 # SPEED ARC - Training
 
+> **Prompt 11 (28 Oct):** AFK machines step 1.6 times a second (Auto Run x2.4); running is ~3x faster. The prompt says AFK STEPS, the panel says "AFK STEPS xN" and has no combo meter.
+
 > **28 Oct pivot:** tapping is gone. Running gives SPEED (every step, see [[SPEED ARC - Wall Course and Steps]]). The machines (hub treadmills, Park and Stadium stations) are now **AFK step machines**: 2 steps a second x the machine's Mult, 6 a second with the Auto Run pass. Sprint Lane and Stair Run left the hub. The rest of this note is the old tap design.
 
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]

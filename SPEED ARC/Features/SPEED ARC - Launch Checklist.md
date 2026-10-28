@@ -24,8 +24,8 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 
 ## 3. Game page
 - [ ] **Name:** SPEED ARC
-- [ ] **Description (short):** "Tap to train, race every 3 minutes and GO PRO! Start slow on the Hometown Track, win races, collect shoes and coaches, and run your way to the Big Stadium. New leagues coming soon!"
-- [ ] **Icon + 3-5 thumbnails** (you make them): the gold logo, a race start, the Big Stadium tunnel, a coach reveal.
+- [ ] **Description (short):** "+1 SPEED every step! Run, smash walls, GO PRO to new worlds. Race every 3 minutes, collect shoes and coaches." (prompt 11)
+- [ ] **Icon + 3-5 thumbnails** (you make them): a wall smash (pieces flying, a big number), the candy spawn, the Coach Agency, a race start.
 - [ ] **Genre:** Sports (subgenre: Racing / Simulator).
 - [ ] **Age rating questionnaire:** no violence, no blood, no gambling (coach rolls are coins only, no Robux), no realistic people. Has in-experience purchases.
 - [ ] **Devices:** phone, tablet, computer, console (the UI is touch-first; console not tested).
@@ -50,6 +50,6 @@ SPEEDARC (5 min coins), FIRSTRACE (a coach roll), RELEASE (10 min coins + a roll
 
 ## After the 28 Oct pivot
 - [ ] Rename the "Auto Train" pass to "Auto Run" in Creator Hub (same id 2058077302).
-- [ ] Wall course + candy rebuild for City Park and Big Stadium.
-- [ ] Pacing pass for steps and walls (first-guess numbers now).
-- [ ] Game page text: "+1 SPEED every step", smash walls.
+- [x] (prompt 11) Wall course + candy rebuild for City Park and Big Stadium.
+- [x] (prompt 11) Pacing pass for steps and walls (`tools/step_pacing_sim.py`).
+- [x] (prompt 11) Game page text written (section 3).

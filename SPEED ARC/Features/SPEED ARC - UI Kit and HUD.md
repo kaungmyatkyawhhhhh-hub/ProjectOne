@@ -5,6 +5,8 @@ status: done (M1)
 ---
 # SPEED ARC - UI Kit and HUD
 
+> **28 Oct:** dark navy panels like GYM ARC (Palette SpeedBlack #11152E / Carbon #20274F / Graphite #353F78), the title on the panel edge with a coloured underline, Green and Pink button styles. HUD (prompt 11): "N SPEED" (no MPH), the wall strip under the SPEED panel while on the course, the toast lane under it, the AFK machine panel (no combo meter), the race card top right.
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 The look is decided in M1 (Lessons section 10). Every new screen reuses this kit.

@@ -5,6 +5,8 @@ status: done (M4)
 ---
 # SPEED ARC - Analytics
 
+> **Prompt 11 (28 Oct):** the funnel is now loaded, menu_play, **first_step**, **first_wall**, first_race_joined, first_race_finished, first_shoes, first_coach_roll, silver, **wall_5**, gold, **last_wall**, go_pro_1, day2_return, go_pro_2. Custom event `WallSmashed_<k>` on every first smash.
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 GDD 26, built in M4.

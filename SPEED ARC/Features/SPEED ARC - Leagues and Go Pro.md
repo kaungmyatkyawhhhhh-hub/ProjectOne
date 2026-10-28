@@ -5,6 +5,8 @@ status: done (M3)
 ---
 # SPEED ARC - Leagues and Go Pro
 
+> **Prompt 11 (28 Oct):** Go Pro = smash the last wall of your league, in every league. The old rule (Champion rank + race wins) is gone; ranks now sit on walls 4 / 6 / 8 / 10. Test switches: `TestWalls` (walls already smashed) replaces `TestLeagueWins`.
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ## Leagues

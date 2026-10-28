@@ -100,26 +100,26 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 - Every spot reachable in < 10 s of walking; GO TO buttons teleport.
 
 ## 5. Core loop
-**Every 30 seconds:** tap-train, watch MPH go up, combo counter.
-**Every 3 minutes:** a race (join, 30 s run, results, coins/medal).
-**Every 5-10 minutes:** a new rank, new shoes, a coach roll, a new training spot.
-**Every 30-60 minutes:** Go Pro to the next league (new area, new music, new races).
-**Every day:** daily streak, quests, playtime gifts, weekly board.
-**Forever:** Legend Laps (stars), collection (coaches, trails, shoes), weekly events.
+(Rewritten 28 Oct, prompt 11: the "+1 SPEED every step" game. See [[SPEED ARC - Wall Course and Steps]].)
+**Every second:** every step you run = +1 SPEED (times your boosts), a "+N" popup and a soft tick.
+**Every 1-2 minutes:** smash the next wall on the wall course: coins, and every later step is worth more.
+**Every 3 minutes:** a race event (JOIN, ~30 s run, coins and medals).
+**Every 5-10 minutes:** a new rank, new shoes, a coach roll at the COACH AGENCY.
+**Every 15-60 minutes:** smash your league's last wall = Go Pro to the next world (new course, new music, new races).
+**Every day:** daily streak, quests, playtime gifts, the weekly board.
+**Forever:** collection (coaches, trails, shoes), weekly events, later leagues.
 
 ## 6. Stats and formulas
 ### 6.1 Stats
-- **SPEED** (main stat, shown as MPH). Grows by training. Resets on Go Pro.
-- **Coins.** Earned by training (small), races (main), quests, gifts.
-- **Medals** (lifetime counts: gold/silver/bronze). Never reset.
-- **Go Pro count / League** and **Legend stars**.
-- (Later, optional) **Boost Power:** how strong your race boost is; upgraded with coins.
+- **SPEED** (the main stat). Grows with every step. Resets on Go Pro.
+- **Coins.** From walls (main), races, steps (small), quests, gifts.
+- **Walls smashed** per league (best ever, saved). **Medals** (lifetime). **League**.
 
-### 6.2 Speed number
-- Internally SPEED is a big number (`speed`), displayed as MPH with K/M suffixes later (e.g. 12.4K MPH in League 5): kids love big numbers.
-- **Per tap gain** = stationBase x shoeMult x coachMult x trailMult x goProMult x comboMult x eventMult (+ pass 2x).
-- **Combo:** tapping steadily (at least 3 taps a second, no gap > 0.6 s) builds a combo x1.0 -> x1.5 over 10 s; shows a flame meter. Breaks on pause. Rewards active play over autoclickers (Auto Train pass = fixed x1.2 combo).
-- Total multiplier cap: x50 (config) so late game doesn't explode.
+### 6.2 SPEED per step
+- **One step** = 3 studs of running on the ground (the server measures it; teleports, races, anchored players and more than 12 steps a second don't count).
+- **Per step** = league base (1 / 40 / 900) x 8^(league-1) x shoes x coaches x trail x passes x session boosts (New Runner, gift, friends) x **1.25 per wall smashed in your league**.
+- **AFK machines** (treadmills in the hub, the stations in Park / Stadium): 1.6 steps a second x the machine's Mult; the Auto Run pass makes it x2.4, still slower than running (~5 steps a second).
+- Wall needs and ranks are tuned by `tools/step_pacing_sim.py` (numbers in Config/Course `Walls`; ranks sit on walls 4 / 6 / 8 / 10).
 
 ### 6.3 Walking speed in the hub/areas
 - WalkSpeed = 16 + 6 x log10(1 + MPH / 10), capped at 30 (config). You feel faster but stay controllable.
@@ -132,22 +132,12 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 - Slipstream: within 6 studs behind someone = +5% pace (keeps races close and exciting).
 - Finish: places by time; ties by distance.
 
-## 7. Training
-### 7.1 How a station works
-- Walk up -> prompt TRAIN -> you're placed on it (treadmill, lane, stairs...). Tap anywhere to train; each tap = one stride/step animation + MPH gain popup (pooled) + sound.
-- Each station has a **minimum SPEED** to use it and a **base gain per tap**. Better stations unlock as you get faster (the next one is always marked "NEXT: 120 MPH").
-- Leave anytime (STOP button / move).
-- Auto Train pass: hold-free automatic training at 3 taps/s with a fixed x1.2 combo, only while on a station and not AFK (AFK check every 15 min with a tap prompt).
-
-### 7.2 Stations per league (base gain per tap / min MPH)
-| League | Station 1 | Station 2 | Station 3 | Station 4 |
-|---|---|---|---|---|
-| 1 School Track | Jog Lane 1 / 0 | Treadmill 3 / 40 | Stair Run 8 / 150 | Sprint Sled 20 / 500 |
-| 2 City Park | Park Loop 40 / 0* | Hill Sprint 90 / 3K | Bench Step-Ups 200 / 10K | Bike Drafting 450 / 30K |
-| 3 Stadium | Block Starts 900 / 0* | Hurdles 2K / 150K | Parachute Run 4.5K / 500K | Bungee Sprint 10K / 1.5M |
-| 4 Mountain | Uphill Trail 20K / 0* | Log Steps 45K / 8M | Rope Pull Run 100K / 25M | Altitude Tent 220K / 80M |
-| 5 World Games | Pro Track 450K / 0* | Wind Tunnel 1M / 400M | Laser Lanes 2.2M / 1.3B | Champion Sled 5M / 4B |
-*0 = open as soon as you're in that league (after Go Pro your SPEED resets; the league's multiplier makes station 1 feel fast again).
+## 7. The wall course and AFK machines
+- One long straight course per world, 10 stages of 90 studs, each stage its own candy colour; a wall at the end of each. The wall shows WALL k, the SPEED it needs, and for your next wall "214 / 420 - about 40 more steps" with a bar; cracks from 70%, glowing edges and SMASH IT! when you have enough.
+- **Smash:** chunky pieces, a camera kick and FOV punch, crack + boom + crowd sound, coins fly to the counter (x3 the first time ever). **Too slow:** a soft bounce.
+- Walls go in order; back behind the start (or a respawn) = a new run, every wall stands again. After the last wall: a gold finish stage, then back to the start.
+- A strip under the SPEED panel shows walls 1-10 (passed ones filled, the best one gold) while you're on the course.
+- **AFK machines** step for you (see 6.2). There's no tapping any more.
 
 ## 8. Races
 ### 8.1 Schedule
@@ -182,7 +172,7 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 ### 9.1 Leagues
 | League | Area | Accent | Speed range (MPH) | Ranks | Go Pro goal |
 |---|---|---|---|---|---|
-| 1 | School Track | Electric Blue | 0 - 2K | Bronze, Silver, Gold, Platinum, Champion | Champion rank + win 1 race |
+| 1 | School Track | Electric Blue | 0 - 53K | Bronze, Silver, Gold, Platinum, Champion | smash the last wall (since prompt 11, every league) |
 | 2 | City Park Run | Bright Blue + green | 0 - 200K | same | Champion + win 2 races |
 | 3 | Big Stadium | Deep Blue + white | 0 - 10M | same | Champion + win 3 races |
 | 4 | Mountain Trail | Blue + pine | 0 - 500M | same | Champion + win 3 races |
@@ -330,22 +320,20 @@ Owner, 28 Oct: coaches are INSPIRED BY famous kinds of runners, never copies. Ru
 - Prices in-game match Roblox's (lesson).
 
 ## 21. First 15 minutes (minute by minute)
+(Rewritten 28 Oct, prompt 11. Times from the pacing sim and a FreshPlayer test.)
 | Time | What happens | Why |
 |---|---|---|
-| 0:00 | Loading screen preloads everything (fast feel later). Short main menu: PLAY. | no freezes later |
-| 0:05 | Spawn on the school steps; Coach Benji: "Everyone starts slow. Let's fix that!" NEW RUNNER BOOST 2x for 15 min starts. | instant reward |
-| 0:10 | Gold arrow + GO TO teleports you onto the Jog Lane. "TAP TO RUN!" | first action in < 15 s |
-| 0:15 | First tap: +10 MPH burst, "FIRST STEP!" +100 coins | first tap reward |
-| 0:45 | Combo meter explained by a tiny hint ("keep tapping = FASTER"). | skill hook |
-| 1:00 | "A RACE IS STARTING!" Tutorial race vs 3 slow NPCs, guaranteed close win. BOOST taught with one big prompt. | the fun moment early |
-| 1:40 | WIN: podium, confetti, +coins, GOLD MEDAL. "Buy your first shoes!" | win + spend |
-| 2:30 | GO TO Shoe Shop: buy Canvas Runners (exact coins given). Feel faster right away. | first purchase |
-| 3:30 | Treadmill unlocks (40 MPH) -> NEXT goal shown. | next goal |
-| 5:00 | SILVER RANK popup. Free coach roll (Coach Corner GO TO) -> roll reveal. | collection hook |
-| 6-10 | Races every 3 min; daily quests shown; playtime gift 1 + 2. | rhythm |
-| 10-15 | Gold rank, Track Trainers, GO PRO goal visible ("Champion + win a race"). Favourite prompt after the first Go Pro. | session goal |
-| ~15 | Go Pro 1 -> City Park Run cutscene. | the "I'll come back" moment |
-- Tutorial cannot be skipped in the first 60 s; hints never vanish while needed; no popups stacked on hints; never a shop push before minute 5.
+| 0:00 | Loading screen, main menu: PLAY. | no freezes later |
+| 0:03 | Spawn on the plaza facing the wall course. Coach Benji: "Every step = +1 SPEED. Let's go!" NEW RUNNER BOOST 2x for 15 min. | instant reward |
+| 0:05 | "Walk! Every step gives you SPEED." First step: +10 SPEED, +100 coins (test: 4.7 s after PLAY). | first action in < 15 s |
+| 0:35 | WALL 1 smashed (test: 34 s): pieces, coins, the strip fills. | the core moment, early |
+| 0:40 | "A RACE IS STARTING!" (a small card top right). Tutorial race vs 3 slow NPCs, a close win. | the race event |
+| 1:40 | Podium, then "Buy your first shoes!" (GO TO the Shoe Shop). | win + spend |
+| 2:00 | Wall 2. | rhythm |
+| 4:30 | SILVER rank (wall 4): a free coach roll at the COACH AGENCY. | collection hook |
+| 6-8 | Wall 5, Track Trainers, races every 3 min, quests, gifts. | rhythm |
+| ~15 | The last wall: GO PRO -> City Park Run. | the "I'll come back" moment |
+- The tutorial can't be skipped in the first 60 s; hints never vanish while needed; nothing stacks on a hint; no shop push before minute 5.
 
 ## 22. UI screens
 - **HUD:** top bar = coins, league + rank badge, MPH big in the middle-top with a speed bar to the next rank; right = race timer pill (JOIN when open); bottom right = TRAIN/BOOST button; left = menu (SHOP, SHOES, COACHES, TRAILS, QUESTS, PROFILE); top centre = one toast lane.

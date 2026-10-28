@@ -5,6 +5,8 @@ status: done (M4)
 ---
 # SPEED ARC - Daily, Quests and Gifts
 
+> **Prompt 11 (28 Oct):** quests "Take 500 steps", "Take 1,500 steps", "Smash 5 walls", "Smash 12 walls" replace the tap quests (the stats are `Steps` and `Smashes`). Gift and invite boosts say "2x SPEED" / "+10% SPEED".
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 GDD 15, built in M4. Days are UTC days. All numbers in `Config/Retention`.
