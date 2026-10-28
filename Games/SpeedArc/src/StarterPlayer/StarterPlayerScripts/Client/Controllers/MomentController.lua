@@ -52,7 +52,7 @@ end
 
 local function rankUp(info)
 	local color = Ranks.Colors[info.Rank] or P.Gold
-	local card = UIKit.panel({ Name = "RankUp", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 120), Size = UDim2.fromOffset(380, 120), AccentColor = color, StrokeColor = color, StrokeThickness = 3, ZIndex = 30, Parent = canvas })
+	local card = UIKit.panel({ Name = "RankUp", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 156), Size = UDim2.fromOffset(380, 120), AccentColor = color, StrokeColor = color, StrokeThickness = 3, ZIndex = 30, Parent = canvas })
 	local s = make("UIScale", { Scale = 0.4, Parent = card })
 	local badge = make("Frame", { BackgroundColor3 = P.White, Position = UDim2.fromOffset(24, 18), Size = UDim2.fromOffset(84, 84), Parent = card })
 	UIKit.corner(badge, UDim.new(0.5, 0))

@@ -233,6 +233,10 @@ local function onPlayerAdded(player)
 		if type(tw) == "number" then
 			data.LeagueWins = tw
 		end
+		local tt = workspace:GetAttribute("TestTutStep")
+		if type(tt) == "number" then
+			data.Tutorial = tt
+		end
 	end
 
 	profiles[player] = { data = data, temp = temp, joined = os.clock() }
@@ -304,6 +308,19 @@ function PlayerData.start()
 	Players.PlayerRemoving:Connect(onPlayerRemoving)
 	for _, p in Players:GetPlayers() do
 		task.spawn(onPlayerAdded, p)
+	end
+
+	-- Studio test switch: Workspace TestAddSpeed = n adds n MPH to everyone right now
+	if IS_STUDIO then
+		workspace:GetAttributeChangedSignal("TestAddSpeed"):Connect(function()
+			local n = workspace:GetAttribute("TestAddSpeed")
+			if type(n) == "number" and n ~= 0 then
+				for player, profile in profiles do
+					PlayerData.set(player, "Speed", profile.data.Speed + n)
+				end
+				workspace:SetAttribute("TestAddSpeed", nil)
+			end
+		end)
 	end
 
 	-- Autosave

@@ -58,14 +58,14 @@ end
 -- UI
 ----------------------------------------------------------------------------
 local function buildCard(canvas)
-	card = UIKit.panel({ Name = "TutorialCard", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -82), Size = UDim2.fromOffset(360, 78), AccentColor = P.Gold, StrokeColor = P.Gold, StrokeThickness = 2, ZIndex = 12, Parent = canvas })
+	card = UIKit.panel({ Name = "TutorialCard", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -82), Size = UDim2.fromOffset(376, 78), AccentColor = P.Gold, StrokeColor = P.Gold, StrokeThickness = 2, ZIndex = 12, Parent = canvas })
 	card.Visible = false
 	cardScale = make("UIScale", { Parent = card })
 	local face = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(14, 9), Size = UDim2.fromOffset(60, 60), ZIndex = 13, Parent = card })
 	pcall(Art.portrait, benji(), 60, face, false)
 	cardText = UIKit.text({ Text = "", TextSize = 17, Wrapped = true, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(84, 8), Size = UDim2.new(1, -96, 0, 40), ZIndex = 13, Parent = card })
 	cardSub = UIKit.text({ Text = "", Font = F.BodyBold, TextSize = 13, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(84, 50), Size = UDim2.new(1, -96, 0, 20), ZIndex = 13, Parent = card })
-	cardBtn, cardBtnLabel = UIKit.button({ Name = "GoTo", Style = "Gold", Text = "GO TO", TextSize = 17, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.fromOffset(118, 46), ZIndex = 14, Parent = card })
+	cardBtn, cardBtnLabel = UIKit.button({ Name = "GoTo", Style = "Gold", Text = "GO TO", TextSize = 17, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.fromOffset(104, 46), ZIndex = 14, Parent = card })
 	cardBtn.Visible = false
 
 	-- after the tutorial: a GO TRAIN button (bottom centre) whenever you're not training or racing
@@ -95,8 +95,8 @@ local function showCard(text, sub, btnText, action)
 	if btnText then
 		cardBtnLabel.Text = btnText
 	end
-	cardText.Size = UDim2.new(1, if btnText then -224 else -96, 0, 40)
-	cardSub.Size = UDim2.new(1, if btnText then -224 else -96, 0, 20)
+	cardText.Size = UDim2.new(1, if btnText then -206 else -96, 0, 40)
+	cardSub.Size = UDim2.new(1, if btnText then -206 else -96, 0, 20)
 	if not card.Visible then
 		card.Visible = true
 		cardScale.Scale = 0.6
@@ -310,7 +310,7 @@ local function render(dt)
 			hideCard() -- the big TAP ANYWHERE TO RUN! hint is showing
 		else
 			target = targetPart("SprintLane")
-			showCard("Let's run! Go to the Sprint Lane.", "Then tap to run.", "GO TO", function()
+			showCard("Let's run! Go to the Sprint Lane.", "Then tap to run!", "GO TO", function()
 				goTo("SprintLane")
 			end)
 		end
@@ -339,7 +339,7 @@ local function render(dt)
 		showCard("GOLD MEDAL! You won your first race!", "Now let's get you some real shoes.", nil)
 	elseif step == S.Shoes then
 		target = targetPart("ShoeShop")
-		showCard("Buy your first shoes!", ("Canvas Runners: %s coins - you have enough!"):format(Format.short(shoePrice(T.ShoeId))), "GO TO", function()
+		showCard("Buy your first shoes!", ("%s coins - you have enough!"):format(Format.short(shoePrice(T.ShoeId))), "GO TO", function()
 			goTo("ShoeShop", openShop)
 		end)
 	elseif step == S.Silver then

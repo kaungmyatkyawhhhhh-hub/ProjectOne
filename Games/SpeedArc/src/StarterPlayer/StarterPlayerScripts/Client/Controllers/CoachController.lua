@@ -280,8 +280,10 @@ local function rollPage()
 	UIKit.text({ Text = "Coaches follow you and boost you.", Font = F.Body, TextSize = 13, Position = UDim2.fromOffset(10, 36), Size = UDim2.new(1, -20, 0, 18), Parent = left })
 	local btn, label = UIKit.button({ Name = "Roll", Style = "Gold", Text = "ROLL", TextSize = 24, Position = UDim2.new(0.5, -95, 0, 62), Size = UDim2.fromOffset(190, 60), Parent = left })
 	label.Text = if price == 0 then "FREE ROLL!" else "ROLL   " .. Format.short(price)
-	local ci = UIKit.coinIcon(22, btn.Face)
-	ci.Position = UDim2.new(1, -36, 0.5, -11)
+	if price > 0 then
+		local ci = UIKit.coinIcon(22, btn.Face)
+		ci.Position = UDim2.new(1, -36, 0.5, -11)
+	end
 	btn.Activated:Connect(function()
 		CoachUI.rollNow()
 	end)

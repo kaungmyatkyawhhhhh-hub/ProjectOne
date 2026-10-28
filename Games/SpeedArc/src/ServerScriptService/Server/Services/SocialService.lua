@@ -74,7 +74,7 @@ function SocialService.refreshTag(player)
 	tag.Title.Visible = title ~= nil
 	local name = Ranks.Names[data.Rank] or "Bronze"
 	local medals = medalCount(data)
-	tag.Rank.Text = ("%s - L%d%s"):format(string.upper(name), data.League, if medals > 0 then ("   %d MEDALS"):format(medals) else "")
+	tag.Rank.Text = ("%s - L%d%s"):format(string.upper(name), data.League, if medals > 0 then ("   %d MEDAL%s"):format(medals, if medals == 1 then "" else "S") else "")
 	tag.Rank.TextColor3 = Ranks.Colors[name]
 end
 

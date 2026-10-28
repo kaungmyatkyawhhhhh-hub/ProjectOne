@@ -55,7 +55,7 @@ function R.queue(fn)
 end
 
 local function card(title, text, sub, color)
-	local c = UIKit.panel({ Name = "RetentionPopup", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 120), Size = UDim2.fromOffset(400, 104), AccentColor = color or P.Gold, StrokeColor = color or P.Gold, StrokeThickness = 3, ZIndex = 30, Parent = canvas })
+	local c = UIKit.panel({ Name = "RetentionPopup", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 156), Size = UDim2.fromOffset(400, 104), AccentColor = color or P.Gold, StrokeColor = color or P.Gold, StrokeThickness = 3, ZIndex = 30, Parent = canvas })
 	local s = make("UIScale", { Scale = 0.5, Parent = c })
 	UIKit.text({ Text = title, TextSize = 24, Color = color or P.Gold, Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, 0, 0, 30), ZIndex = 31, Parent = c })
 	UIKit.text({ Text = text, Font = F.BodyBold, TextSize = 16, Wrapped = true, Position = UDim2.fromOffset(16, 40), Size = UDim2.new(1, -32, 0, 36), ZIndex = 31, Parent = c })
@@ -380,6 +380,7 @@ function R.start(c)
 		while true do
 			task.wait(0.4)
 			updateBadge()
+			row.Visible = not player:GetAttribute("InRace") -- the race HUD owns the top right
 			if not showing and #queue > 0 and free() then
 				showing = true
 				local fn = table.remove(queue, 1)
