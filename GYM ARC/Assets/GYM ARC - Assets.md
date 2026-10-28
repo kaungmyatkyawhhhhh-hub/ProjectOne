@@ -235,3 +235,8 @@ Made from real Studio captures (the covered Hall, the open Hall at night with th
 Keep the current winner (the giant in the gym, thumb 1 on the page) in every set. Leave a set 7+ days.
 
 ![[GYM ARC/Assets/HallOfFame launch art/preview_phone_size.jpg]]
+
+## Blender thumbnails from the real character (28 Oct)
+- `GYMARC_thumb_get_huge.jpg` (7'0" Gold, front double biceps, "GET HUGE") and `GYMARC_thumb_4ft_to_7ft.jpg` (4'0" level 0 → 7'0" Gold). Rendered in Blender 5.2 from the real in-game character, on a real Pro Gym capture. Same folders as the launch art. They aren't tied to the launch: keep them in the set all the time.
+- **Exporting the character:** Studio's Export Selection crashes on the character (the upper arm muscles are live editable meshes). The way that works: in a Studio test, read the meshes the group owns (all muscle / body stage meshes + the skin textures) with AssetService:CreateEditableMeshAsync / EditableImage (the live arm meshes straight from the part), write OBJ in world studs, sent through a temporary RemoteEvent → the test server's HttpService → a local receiver (`blender/receiver.py`, port 34998). Head, hair, hands and feet aren't the group's files (no permission): copy just those parts into a plain anchored model and Studio-export only that (doesn't crash). `blender/place_headhair.py` moves those pieces onto each body by the part positions; `blender/render_scene.py` renders (EEVEE, transparent); `blender/compose_blender.py` puts them on the gym shot. Raw exports: `Downloads/gymarc_export`.
+![[GYM ARC/Assets/HallOfFame launch art/preview_blender_phone_size.jpg]]
