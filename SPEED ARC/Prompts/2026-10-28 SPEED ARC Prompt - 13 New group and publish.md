@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [speedarc, prompt]
-status: in progress (plan done 28 Oct; waiting for the new group + transfer)
+status: in progress (owner chose COPY 28 Oct; waiting for the new group, new experience and the 13 new ids)
 ---
 # 13 New group and publish
 

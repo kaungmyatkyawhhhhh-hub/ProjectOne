@@ -6,7 +6,7 @@ tags: [speedarc, progress]
 
 Back to [[00 SPEED ARC Home|SPEED ARC Home]] · Prompt: [[2026-10-28 SPEED ARC Prompt - 13 New group and publish]] · Before: [[2026-10-28 SPEED ARC Progress - 12 UI art kit applied]]
 
-**Status: plan only, nothing changed. Waiting for the owner.** Every id below was checked with Roblox (`MarketplaceService:GetProductInfo`) on 28 Oct.
+**Decision (owner, 28 Oct): COPY** (route B: Save to File, then Publish As a new experience owned by the new group; the old one stays in Myanmar Builders Club, set to private, not deleted). Nothing changed in the game yet. Every id below was checked with Roblox (`MarketplaceService:GetProductInfo`) on 28 Oct.
 
 ## 1. Every asset the game uses, and who owns it
 
@@ -49,3 +49,35 @@ Either way the **images and meshes** are re-uploaded into the new group (your ru
 - [Experience ownership transfer (Creator Hub docs)](https://create.roblox.com/docs/en-us/projects/experience-ownership-transfer.md)
 - [Group-to-group transfers announcement, 3 Dec 2025](https://devforum.roblox.com/t/managing-your-group-revenue-and-experience-ownerships-just-became-a-lot-easier/4114133)
 - [Asset privacy (Creator Hub docs)](https://create.roblox.com/docs/en-us/projects/assets/privacy)
+
+## Route B (chosen): the owner's checklist
+1. [ ] Create the new group (Communities > Create). Price shown: ____
+2. [ ] Studio (SPEED ARC): File > Save to File > `SPEED ARC 2026-10-28 before group move.rbxl` (backup).
+3. [ ] File > Publish to Roblox As > **Create new experience** > Owner = the new group > name it SPEED ARC (the game page name comes later) > Create. Then send me the new place id.
+4. [ ] Create the 8 passes in the NEW experience (Creator Hub > the new experience > Monetization > Passes), each with its icon from `Downloads\speed_arc_models\icons\`, price set, on sale:
+
+| Pass | Price | Icon | Description |
+|---|---|---|---|
+| Auto Run | 249 | Pass_AutoTrain.png | Treadmills step for you 3x faster, all by themselves. |
+| 2x Speed | 249 | Pass_2xSpeed.png | Double SPEED from every step, forever. |
+| 2x Coins | 149 | Pass_2xCoins.png | Double coins from walls, races, steps and rewards. |
+| VIP | 299 | Pass_VIP.png | +10% coins, VIP tag, VIP kit, VIP trail, VIP name style and a gold chat name. |
+| Extra Coach Slot | 99 | Pass_ExtraCoachSlot.png | Equip one more coach (3 slots). |
+| Extra Coach Slot 2 | 149 | Pass_ExtraCoachSlot2.png | Equip one more coach again (4 slots). |
+| Trail Pack | 199 | Pass_TrailPack.png | 4 trails: Lightning, Rainbow, Comet and Neon Wave. |
+| Faster Rolls | 99 | Pass_FasterRolls.png | Skip the roll animation and roll 3 coaches at once (same odds). |
+
+5. [ ] Create the 5 developer products (Monetization > Developer Products):
+
+| Product | Price | Icon | Description |
+|---|---|---|---|
+| Small Coins | 25 | Product_CoinsSmall.png | 20 minutes of coins |
+| Medium Coins | 99 | Product_CoinsMedium.png | 2 hours of coins |
+| Large Coins | 249 | Product_CoinsLarge.png | 6 hours of coins |
+| 2x Speed 15 min | 25 | Product_2xSpeed15.png | Double SPEED per step for 15 minutes of play |
+| Starter Pack | 49 | Product_StarterPack.png | 1 hour of coins + 2x SPEED for 30 min + gold Canvas Runners + the STARTER title. Once! |
+
+6. [ ] Send me the 13 new ids.
+7. [ ] The 3 notification strings (new experience > Engagement > Notifications): `daily_ready` "Your day {streak} streak reward is waiting in SPEED ARC!", `new_league` "A new league just opened in SPEED ARC. Come race!", `weekly_top` "You finished top 3 this week! Your title is waiting."
+8. [ ] Uploads to the new group, one at a time (I list each first, you approve): 3 UI sheets, 8 clothing images, then the meshes (Studio > Asset Manager > Bulk Import, Upload to = the new group). Send me the ids.
+9. [ ] Old experience (Myanmar Builders Club): Configure > set to **Private**. Don't delete it.
