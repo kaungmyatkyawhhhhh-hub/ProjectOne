@@ -1,18 +1,19 @@
 -- Lighting presets per area (Lighting note). LightingController applies the area you are in.
 return {
+	-- 28 Oct candy look: a high sunny midday, bright soft shadows, extra colour
 	Hub = {
-		ClockTime = 16.5,
-		GeographicLatitude = 35,
-		Brightness = 2.4,
-		Ambient = Color3.fromHex("#6B7A99"),
-		OutdoorAmbient = Color3.fromHex("#8C9BB8"),
-		EnvironmentDiffuseScale = 0.6,
-		EnvironmentSpecularScale = 0.25,
-		ExposureCompensation = 0.1,
-		ColorCorrection = { Contrast = 0.08, Saturation = 0.12, Brightness = 0.02, TintColor = Color3.fromHex("#FFF6E8") },
-		Bloom = { Intensity = 0.4, Size = 24, Threshold = 1.4 },
-		SunRays = { Intensity = 0.04, Spread = 0.6 },
-		Atmosphere = { Density = 0.28, Offset = 0.15, Color = Color3.fromHex("#C9DCF5"), Decay = Color3.fromHex("#8FA7CC"), Glare = 0.2, Haze = 1.1 },
+		ClockTime = 13.5,
+		GeographicLatitude = 30,
+		Brightness = 2.2,
+		Ambient = Color3.fromHex("#6E7BA0"),
+		OutdoorAmbient = Color3.fromHex("#8F9EC4"),
+		EnvironmentDiffuseScale = 0.5,
+		EnvironmentSpecularScale = 0.15,
+		ExposureCompensation = -0.15,
+		ColorCorrection = { Contrast = 0.14, Saturation = 0.22, Brightness = 0, TintColor = Color3.fromHex("#FFFFFF") },
+		Bloom = { Intensity = 0.18, Size = 20, Threshold = 2.2 },
+		SunRays = { Intensity = 0.02, Spread = 0.5 },
+		Atmosphere = { Density = 0.14, Offset = 0.05, Color = Color3.fromHex("#CFE6FF"), Decay = Color3.fromHex("#9EC3EE"), Glare = 0, Haze = 0.4 },
 		Clouds = { Cover = 0.55, Density = 0.6, Color = Color3.fromHex("#FFFFFF") },
 	},
 	Park = {

@@ -89,6 +89,11 @@ local function check(player)
 	local stage = runs[player] or 0
 	local nextK = stage + 1
 	if nextK > Formulas.wallCount() then
+		-- on the finish stage: back to the start for the next run
+		if along > stage * Course.StageLength + 30 then
+			Net.get("Toast"):FireClient(player, "COURSE DONE!  Back to the start", "Unlock")
+			WallService.toStart(player)
+		end
 		return
 	end
 	local wallAt = nextK * Course.StageLength

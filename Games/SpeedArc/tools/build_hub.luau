@@ -342,7 +342,7 @@ end
 local function path(name, a, b, width, color)
 	local len = (b - a).Magnitude
 	local cf = CFrame.lookAt((a + b) / 2, b)
-	part({ Parent = ground, Name = name, Size = Vector3.new(width, 0.3, len), CFrame = cf * CFrame.new(0, 0.15, 0), Color = Palette.Cream })
+	part({ Parent = ground, Name = name, Size = Vector3.new(width, 0.3, len), CFrame = cf * CFrame.new(0, 0.15, 0), Color = Color3.fromHex("#F3DFB8") })
 	for side = -1, 1, 2 do
 		part({ Parent = ground, Name = "Kerb", Size = Vector3.new(1.2, 0.5, len), CFrame = cf * CFrame.new(side * (width / 2 + 0.6), 0.25, 0), Color = color })
 	end
@@ -354,9 +354,9 @@ path("CoursePath", PLAZA + Vector3.new(0, 0, PLAZA_R - 2), C.Start + Vector3.new
 
 -- the spawn plaza: big, round and empty, a sky-blue band and the SPEED ARC emblem
 cyl(ground, "PlazaEdge", PLAZA_R + 1.2, 0.5, PLAZA + Vector3.new(0, 0.25, 0), Palette.Sky)
-cyl(ground, "Plaza", PLAZA_R, 0.56, PLAZA + Vector3.new(0, 0.28, 0), Color3.fromHex("#FBFBFF"))
-cyl(ground, "PlazaBand", 26, 0.57, PLAZA + Vector3.new(0, 0.285, 0), Color3.fromHex("#BFE6FF"))
-cyl(ground, "PlazaInner", 24.5, 0.58, PLAZA + Vector3.new(0, 0.29, 0), Color3.fromHex("#FBFBFF"))
+cyl(ground, "Plaza", PLAZA_R, 0.56, PLAZA + Vector3.new(0, 0.28, 0), Color3.fromHex("#E4EAF6"))
+cyl(ground, "PlazaBand", 26, 0.57, PLAZA + Vector3.new(0, 0.285, 0), Palette.Sky)
+cyl(ground, "PlazaInner", 24.5, 0.58, PLAZA + Vector3.new(0, 0.29, 0), Color3.fromHex("#E4EAF6"))
 cyl(ground, "EmblemGold", 12, 0.6, PLAZA + Vector3.new(0, 0.3, 0), Palette.Gold, { CanCollide = false })
 cyl(ground, "Emblem", 11, 0.62, PLAZA + Vector3.new(0, 0.31, 0), Palette.Carbon, { CanCollide = false })
 local emblemTop = block(ground, "EmblemText", Vector3.new(20, 0.05, 20), PLAZA + Vector3.new(0, 0.64, 0), Palette.Carbon, { Transparency = 1, CanCollide = false })
@@ -613,7 +613,7 @@ do
 		local z0 = C.Start.Z + (k - 1) * L
 		local z1 = z0 + L
 		local zc = (z0 + z1) / 2
-		block(courseF, "Stage" .. k, Vector3.new(Wd, 0.6, L), Vector3.new(x0, 0.3, zc), col:Lerp(Palette.White, 0.72))
+		block(courseF, "Stage" .. k, Vector3.new(Wd, 0.6, L), Vector3.new(x0, 0.3, zc), col:Lerp(Palette.White, 0.45))
 		for side = -1, 1, 2 do
 			block(courseF, "Kerb", Vector3.new(2, 1.6, L), Vector3.new(x0 + side * (Wd / 2 + 1), 0.8, zc), col)
 			block(courseF, "KerbTop", Vector3.new(2.2, 0.3, L), Vector3.new(x0 + side * (Wd / 2 + 1), 1.65, zc), Palette.White)
@@ -675,7 +675,7 @@ end
 local Coaches = require(ReplicatedStorage.Shared.Config.Coaches:Clone())
 local shops = folder("Shops")
 block(shops, "ShopPadEdge", Vector3.new(68, 0.5, 136), Vector3.new(-118, 0.25, PLAZA.Z), Palette.Orange)
-block(shops, "ShopPad", Vector3.new(66, 0.56, 134), Vector3.new(-118, 0.28, PLAZA.Z), Palette.Cream)
+block(shops, "ShopPad", Vector3.new(66, 0.56, 134), Vector3.new(-118, 0.28, PLAZA.Z), Color3.fromHex("#FFE2B8"))
 floatLabel(shops, Vector3.new(-122, 36, PLAZA.Z), "SHOPS", "SHOES - TRAILS - COACHES - KITS", Palette.Orange, 44, 12)
 
 local function kiosk(name, front, a, b, sub, label, opens, action)
@@ -839,7 +839,7 @@ end
 do
 	local plaza = folder("PortalPlaza")
 	block(plaza, "PortalPadEdge", Vector3.new(68, 0.5, 158), Vector3.new(118, 0.25, PLAZA.Z), Palette.Purple)
-	block(plaza, "PortalPad", Vector3.new(66, 0.56, 156), Vector3.new(118, 0.28, PLAZA.Z), Color3.fromHex("#EFE6FF"))
+	block(plaza, "PortalPad", Vector3.new(66, 0.56, 156), Vector3.new(118, 0.28, PLAZA.Z), Color3.fromHex("#D9C8FF"))
 	floatLabel(plaza, Vector3.new(104, 40, PLAZA.Z), "PORTALS", "GO PRO TO OPEN NEW WORLDS", Palette.Purple, 46, 12)
 	local gates = {
 		{ "HOMETOWN TRACK", "LEAGUE 1  -  YOU ARE HERE", Palette.Sky, nil, false },
@@ -947,7 +947,7 @@ do
 		{ "WeeklyTime", "FASTEST SPRINT THIS WEEK", Palette.Mint },
 	}
 	block(wall, "PadEdge", Vector3.new(60, 0.5, 18), Vector3.new(56, 0.25, 214), Palette.Gold)
-	block(wall, "Pad", Vector3.new(58, 0.56, 16), Vector3.new(56, 0.28, 214), Palette.Cream)
+	block(wall, "Pad", Vector3.new(58, 0.56, 16), Vector3.new(56, 0.28, 214), Color3.fromHex("#FFE9A8"))
 	floatLabel(wall, Vector3.new(56, 22, 216), "LEADERBOARDS", nil, Palette.Gold, 30, 6)
 	for i, b in boardsList do
 		local pos = Vector3.new(35 + (i - 1) * 14, 0.56, 216)

@@ -38,6 +38,16 @@
   ]
  },
  {
+  "file": "ReplicatedStorage/Shared/Config/Course.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Course"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/Config/GameConfig.lua",
   "class": "ModuleScript",
   "path": [
@@ -366,6 +376,16 @@
   ]
  },
  {
+  "file": "ServerScriptService/Server/Services/StepService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "StepService"
+  ]
+ },
+ {
   "file": "ServerScriptService/Server/Services/StoreService.lua",
   "class": "ModuleScript",
   "path": [
@@ -393,6 +413,16 @@
    "Server",
    "Services",
    "TutorialService"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Services/WallService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "WallService"
   ]
  },
  {
@@ -572,6 +602,17 @@
   ]
  },
  {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/StepController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "StepController"
+  ]
+ },
+ {
   "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/StoreController.lua",
   "class": "ModuleScript",
   "path": [
@@ -602,6 +643,17 @@
    "Client",
    "Controllers",
    "TutorialController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/WallController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "WallController"
   ]
  },
  {
