@@ -381,6 +381,31 @@ function RetentionService.start()
 	Net.on("RedeemCode", function(player, text)
 		return redeem(player, text)
 	end)
+	-- settings (M6): volumes 0-1, Low = Auto / On / Off, Reduced = true / false
+	Net.on("GetSettings", function(player)
+		local data = PlayerData.get(player)
+		return data ~= nil, data and data.Settings
+	end)
+	Net.on("SaveSettings", function(player, t)
+		local data = PlayerData.get(player)
+		if not data or type(t) ~= "table" then
+			return false
+		end
+		local s = data.Settings
+		if type(t.Music) == "number" then
+			s.Music = math.clamp(t.Music, 0, 1)
+		end
+		if type(t.Sounds) == "number" then
+			s.Sounds = math.clamp(t.Sounds, 0, 1)
+		end
+		if t.Low == "Auto" or t.Low == "On" or t.Low == "Off" then
+			s.Low = t.Low
+		end
+		if type(t.Reduced) == "boolean" then
+			s.Reduced = t.Reduced
+		end
+		return true
+	end)
 
 	PlayerData.Loaded.Event:Connect(function(player)
 		local data = PlayerData.get(player)

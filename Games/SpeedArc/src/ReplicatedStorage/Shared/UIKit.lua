@@ -437,7 +437,7 @@ function UIKit.window(props)
 	local panel = UIKit.panel({
 		Name = props.Name or "Window",
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0.5, 48),
+		Position = UDim2.new(0.5, 0, 0.5, 30), -- under the top bar, and the bottom still fits a phone
 		Size = UDim2.fromOffset(w, h),
 		AccentColor = props.Accent or Palette.ElectricBlue,
 		ZIndex = 21,

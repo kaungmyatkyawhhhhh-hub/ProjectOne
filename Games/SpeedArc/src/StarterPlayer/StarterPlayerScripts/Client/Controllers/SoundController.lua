@@ -6,6 +6,7 @@ local ContentProvider = game:GetService("ContentProvider")
 local Shared = game:GetService("ReplicatedStorage").Shared
 local SoundConfig = require(Shared.Config.Sounds)
 local UIKit = require(Shared.UIKit)
+local ClientSettings = require(Shared.Util.ClientSettings)
 
 local SoundController = {}
 
@@ -58,6 +59,10 @@ function SoundController.start(ctx)
 	task.spawn(function()
 		ContentProvider:PreloadAsync(preload)
 	end)
+
+	-- the player's saved volumes / graphics / motion settings (M6)
+	ctx.Settings = ClientSettings
+	task.spawn(ClientSettings.load, ctx.Net)
 
 	UIKit.setClickHook(function(name)
 		SoundController.play(name or "Click")

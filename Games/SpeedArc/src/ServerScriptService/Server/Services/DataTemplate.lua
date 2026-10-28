@@ -71,4 +71,7 @@ return {
 	ShoeSkins = {}, -- [skinId] = true
 	ShoeSkin = {}, -- [shoeId] = skinId worn
 	AutoTrain = false,
+
+	-- M6
+	Settings = { Music = 0.8, Sounds = 0.8, Low = "Auto", Reduced = false },
 }

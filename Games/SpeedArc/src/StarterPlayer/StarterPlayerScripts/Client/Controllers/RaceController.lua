@@ -504,9 +504,13 @@ local function render()
 		camCF = if camCF then camCF:Lerp(want, 0.25) else want
 		camera.CameraType = Enum.CameraType.Scriptable
 		camera.CFrame = camCF
-		local paceNorm = math.clamp(((player:GetAttribute("Speed") or 0) / 80) ^ 0.3, 0.6, 1.5) -- League 1 middle = 80
+		local mid = Race.LeagueMid[player:GetAttribute("League") or 1] or Race.LeagueMid[1]
+		local paceNorm = math.clamp(((player:GetAttribute("Speed") or 0) / mid) ^ 0.3, 0.6, 1.5)
 		local fov = 70 + 10 * paceNorm + (if os.clock() < fovKickUntil then 5 else 0)
 		fov = math.min(fov, 90)
+		if ctx.Settings and ctx.Settings.reduced() then
+			fov = 74 -- reduced motion: no FOV swings or kicks
+		end
 		camFov += (fov - camFov) * 0.15
 		camera.FieldOfView = camFov
 	end

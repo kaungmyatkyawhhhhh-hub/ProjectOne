@@ -5,7 +5,6 @@
 -- window is open and no tutorial hint is up (lesson: a popup that can't show waits, never skipped).
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local SoundService = game:GetService("SoundService")
 local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
 
 local Shared = game:GetService("ReplicatedStorage").Shared
@@ -14,7 +13,6 @@ local Format = require(Shared.Util.Format)
 local Formulas = require(Shared.Util.Formulas)
 local Retention = require(Shared.Config.Retention)
 local Trails = require(Shared.Config.Trails)
-local SoundConfig = require(Shared.Config.Sounds)
 
 local P = UIKit.Palette
 local F = UIKit.Fonts
@@ -259,14 +257,15 @@ local function buildWindows()
 	end })
 	questsWin.onOpen = renderQuests
 
-	-- Settings (codes, music, sounds)
-	settingsWin = UIKit.window({ Name = "Settings", Title = "SETTINGS", Size = Vector2.new(520, 280), Parent = canvas })
-	UIKit.text({ Text = "CODES", TextSize = 18, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(4, 8), Size = UDim2.fromOffset(200, 24), Parent = settingsWin.content })
-	local boxFrame = make("Frame", { BackgroundColor3 = P.SpeedBlack, Position = UDim2.fromOffset(0, 38), Size = UDim2.new(1, -150, 0, 46), Parent = settingsWin.content })
+	-- Settings (M6): codes, Music / Sounds volume, Low graphics, Reduced motion
+	settingsWin = UIKit.window({ Name = "Settings", Title = "SETTINGS", Size = Vector2.new(580, 290), Parent = canvas })
+	local box0 = settingsWin.content
+	UIKit.text({ Text = "CODES", TextSize = 16, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(4, 6), Size = UDim2.fromOffset(200, 22), Parent = box0 })
+	local boxFrame = make("Frame", { BackgroundColor3 = P.SpeedBlack, Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, -150, 0, 44), Parent = box0 })
 	UIKit.corner(boxFrame, 10)
 	UIKit.stroke(boxFrame, P.Graphite, 2)
 	local box = make("TextBox", { Name = "Code", BackgroundTransparency = 1, ClearTextOnFocus = false, PlaceholderText = "Type a code", PlaceholderColor3 = P.Graphite, Text = "", TextColor3 = P.White, FontFace = F.BodyBold, TextSize = 18, Position = UDim2.fromOffset(12, 0), Size = UDim2.new(1, -24, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, Parent = boxFrame })
-	UIKit.button({ Name = "Redeem", Style = "Gold", Text = "REDEEM", TextSize = 16, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 36), Size = UDim2.fromOffset(138, 50), Parent = settingsWin.content, OnClick = function()
+	UIKit.button({ Name = "Redeem", Style = "Gold", Text = "REDEEM", TextSize = 16, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 28), Size = UDim2.fromOffset(138, 48), Parent = box0, OnClick = function()
 		local ok, res = ctx.Net.call("RedeemCode", box.Text)
 		if ok then
 			ctx.Sound.play("KaChing")
@@ -276,26 +275,57 @@ local function buildWindows()
 			ctx.Hud.toast(if res == "used" then "You already used that code" else "That code doesn't work", "Denied")
 		end
 	end })
-	UIKit.text({ Text = "New codes come with updates - check the game page!", Font = F.BodyBold, TextSize = 13, Color = P.BrightBlue, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(4, 90), Size = UDim2.new(1, 0, 0, 18), Parent = settingsWin.content })
-	local function toggle(y, label, groupName)
-		UIKit.text({ Text = label, TextSize = 18, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(4, y), Size = UDim2.fromOffset(200, 44), Parent = settingsWin.content })
-		local on = true
+	UIKit.text({ Text = "New codes come with updates - check the game page!", Font = F.BodyBold, TextSize = 13, Color = P.BrightBlue, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(4, 78), Size = UDim2.new(1, 0, 0, 18), Parent = box0 })
+
+	local S = ctx.Settings
+	-- a volume row: [-] 80% [+]
+	local function volume(x, y, label, key)
+		UIKit.text({ Text = label, TextSize = 16, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(100, 44), Parent = box0 })
+		local value = UIKit.text({ Text = "", TextSize = 18, Color = P.Gold, Position = UDim2.fromOffset(x + 150, y), Size = UDim2.fromOffset(64, 44), Parent = box0 })
+		local function show()
+			value.Text = ("%d%%"):format(math.floor((S.get(key) or 0) * 100 + 0.5))
+		end
+		local function step(d)
+			S.set(key, math.clamp(math.floor((S.get(key) + d) * 10 + 0.5) / 10, 0, 1))
+			show()
+			ctx.Sound.play("Tab")
+		end
+		UIKit.button({ Style = "Dark", Text = "-", TextSize = 22, Position = UDim2.fromOffset(x + 100, y), Size = UDim2.fromOffset(48, 44), Parent = box0, OnClick = function()
+			step(-0.1)
+		end })
+		UIKit.button({ Style = "Dark", Text = "+", TextSize = 22, Position = UDim2.fromOffset(x + 216, y), Size = UDim2.fromOffset(48, 44), Parent = box0, OnClick = function()
+			step(0.1)
+		end })
+		S.Changed.Event:Connect(show)
+		show()
+	end
+	volume(0, 106, "MUSIC", "Music")
+	volume(286, 106, "SOUNDS", "Sounds")
+	-- a choice row: label + one button that cycles
+	local function choice(x, y, label, key, options, names)
+		UIKit.text({ Text = label, TextSize = 15, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(150, 44), Parent = box0 })
 		local b, l
-		b, l = UIKit.button({ Name = groupName, Style = "Blue", Text = "ON", TextSize = 16, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, y), Size = UDim2.fromOffset(110, 44), Parent = settingsWin.content, OnClick = function()
-			on = not on
-			l.Text = if on then "ON" else "OFF"
-			UIKit.setButtonStyle(b, if on then "Blue" else "Dark")
-			local groups = if groupName == "Music" then { "Music" } else { "SFX", "UI", "Crowd", "Voice" }
-			for _, g in groups do
-				local sg = SoundService:FindFirstChild(g)
-				if sg and sg:IsA("SoundGroup") then
-					sg.Volume = if on then (SoundConfig.Groups[g] or 0.5) else 0
+		local function show()
+			local v = S.get(key)
+			for i, o in options do
+				if o == v then
+					l.Text = names[i]
 				end
 			end
+			UIKit.setButtonStyle(b, if v == options[1] then "Blue" else "Gold")
+		end
+		b, l = UIKit.button({ Style = "Blue", Text = "", TextSize = 15, Position = UDim2.fromOffset(x + 150, y), Size = UDim2.fromOffset(114, 44), Parent = box0, OnClick = function()
+			local v = S.get(key)
+			local i = table.find(options, v) or 1
+			S.set(key, options[i % #options + 1])
+			show()
 		end })
+		S.Changed.Event:Connect(show)
+		show()
 	end
-	toggle(124, "MUSIC", "Music")
-	toggle(176, "SOUNDS", "Sounds")
+	choice(0, 162, "LOW GRAPHICS", "Low", { "Auto", "On", "Off" }, { "AUTO", "ON", "OFF" })
+	choice(286, 162, "REDUCED MOTION", "Reduced", { false, true }, { "OFF", "ON" })
+	UIKit.text({ Text = "Low graphics = fewer effects for older phones. Reduced motion = no camera kicks or flashes.", Font = F.BodyBold, TextSize = 13, Color = P.BrightBlue, Wrapped = true, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(4, 212), Size = UDim2.new(1, 0, 0, 32), Parent = box0 })
 end
 
 function R.start(c)

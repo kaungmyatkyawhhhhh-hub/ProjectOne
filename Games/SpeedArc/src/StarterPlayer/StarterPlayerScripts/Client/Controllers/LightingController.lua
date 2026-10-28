@@ -4,6 +4,7 @@ local Lighting = game:GetService("Lighting")
 local UserSettings_ = UserSettings()
 
 local Shared = game:GetService("ReplicatedStorage").Shared
+local ClientSettings = require(Shared.Util.ClientSettings)
 local LightingConfig = require(Shared.Config.Lighting)
 
 local LightingController = {}
@@ -19,6 +20,9 @@ local function ensure(class, name)
 end
 
 local function qualityLevel()
+	if ClientSettings.low() then
+		return 1 -- the Low graphics setting (or Auto on a low quality level)
+	end
 	local gs = UserSettings_:GetService("UserGameSettings")
 	local q = gs.SavedQualityLevel.Value
 	if q == 0 then
@@ -100,6 +104,11 @@ function LightingController.start(ctx)
 	end)
 	local gs = UserSettings_:GetService("UserGameSettings")
 	gs:GetPropertyChangedSignal("SavedQualityLevel"):Connect(refresh)
+	ClientSettings.Changed.Event:Connect(function(key)
+		if key == "Low" then
+			refresh()
+		end
+	end)
 end
 
 return LightingController

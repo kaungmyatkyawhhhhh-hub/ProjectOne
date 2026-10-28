@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local UserSettings_ = UserSettings()
 
 local Shared = game:GetService("ReplicatedStorage").Shared
+local ClientSettings = require(Shared.Util.ClientSettings)
 local UIKit = require(Shared.UIKit)
 
 local P = UIKit.Palette
@@ -25,8 +26,7 @@ local GRASS = { Grass = true, Stripe = true, Infield = true, InfieldStripe = tru
 local TRACK = { Surface = true, Apron = true, Strip = true, StartFinish = true }
 
 local function lowGraphics()
-	local q = UserSettings_:GetService("UserGameSettings").SavedQualityLevel.Value
-	return q ~= 0 and q <= 3
+	return ClientSettings.low()
 end
 
 local function buildLines()
@@ -116,6 +116,9 @@ local function update(dt)
 	end
 	if low then
 		target *= 0.5
+	end
+	if ClientSettings.reduced() then
+		target *= 0.35 -- reduced motion: just a hint of speed lines
 	end
 	intensity += (target - intensity) * math.min(1, dt * 6)
 

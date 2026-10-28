@@ -7,6 +7,7 @@ local UserSettings_ = UserSettings()
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Trails = require(Shared.Config.Trails)
 local CosmeticsConfig = require(Shared.Config.Cosmetics)
+local ClientSettings = require(Shared.Util.ClientSettings)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -14,8 +15,7 @@ local camera = workspace.CurrentCamera
 local Cosmetics = {}
 
 local function lowGraphics()
-	local q = UserSettings_:GetService("UserGameSettings").SavedQualityLevel.Value
-	return q ~= 0 and q <= 3
+	return ClientSettings.low()
 end
 
 local function step()

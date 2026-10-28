@@ -10,6 +10,7 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local CameraController = {}
+local ctx
 
 local function fovFor(walkSpeed)
 	local w = GameConfig.Walk
@@ -23,13 +24,15 @@ local function hook(char)
 		if player:GetAttribute("InRace") then
 			return
 		end
-		UIKit.tween(camera, 0.6, { FieldOfView = fovFor(hum.WalkSpeed) }, Enum.EasingStyle.Sine)
+		local reduced = ctx and ctx.Settings and ctx.Settings.reduced()
+		UIKit.tween(camera, 0.6, { FieldOfView = if reduced then 70 else fovFor(hum.WalkSpeed) }, Enum.EasingStyle.Sine)
 	end
 	hum:GetPropertyChangedSignal("WalkSpeed"):Connect(update)
 	update()
 end
 
-function CameraController.start(ctx)
+function CameraController.start(c)
+	ctx = c
 	ctx.Camera = CameraController
 	player.CharacterAdded:Connect(hook)
 	if player.Character then

@@ -177,6 +177,16 @@
   ]
  },
  {
+  "file": "ReplicatedStorage/Shared/Util/ClientSettings.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Util",
+   "ClientSettings"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/Util/Format.lua",
   "class": "ModuleScript",
   "path": [
