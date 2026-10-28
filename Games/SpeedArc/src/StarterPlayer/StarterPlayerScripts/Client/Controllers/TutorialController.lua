@@ -22,7 +22,7 @@ local F = UIKit.Fonts
 local make = UIKit.make
 local player = Players.LocalPlayer
 local T = Retention.Tutorial
-local S = { Welcome = 1, FirstTap = 2, Combo = 3, Race = 4, Podium = 5, Shoes = 6, Silver = 7, Roll = 8, Done = 99 }
+local S = { Welcome = 1, FirstStep = 2, FirstWall = 3, Race = 4, Podium = 5, Shoes = 6, Silver = 7, Roll = 8, Done = 99 }
 
 local Tutorial = {}
 local ctx
@@ -269,7 +269,7 @@ local function safety()
 	-- first the GO TO is done for the player, then the step moves on (never stuck)
 	timeoutsUsed += 1
 	if timeoutsUsed == 1 then
-		if step == S.FirstTap or step == S.Combo then
+		if step == S.FirstStep or step == S.FirstWall then
 			goTo("Course")
 		elseif step == S.Race then
 			task.spawn(ctx.Net.call, "Tutorial", "race")
@@ -315,9 +315,9 @@ local function render(dt)
 	local target = nil
 	if step == S.Welcome then
 		showCard("Every step = +1 SPEED. Let's go!", "NEW RUNNER BOOST: 2x SPEED for 15 min!", nil)
-	elseif step == S.FirstTap then
+	elseif step == S.FirstStep then
 		showCard("Walk! Every step gives you SPEED.", "Use the stick (or W A S D) to run.", nil)
-	elseif step == S.Combo then
+	elseif step == S.FirstWall then
 		-- 28 Oct pivot: this step is "smash the first wall"
 		target = targetPart("Course")
 		showCard("Smash the first wall!", ("Walls need SPEED. Wall 1 needs %s."):format(Format.short(firstWallNeed())), "GO TO", function()

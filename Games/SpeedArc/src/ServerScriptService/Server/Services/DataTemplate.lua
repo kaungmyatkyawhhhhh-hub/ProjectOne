@@ -8,8 +8,9 @@ return {
 	League = 1,
 	Medals = { Gold = 0, Silver = 0, Bronze = 0 },
 	Stats = {
-		Taps = 0,
+		Taps = 0, -- from the tap days (old saves)
 		Steps = 0, -- 28 Oct pivot: steps run (and AFK machine steps)
+		Smashes = 0, -- walls smashed (every smash, for the quests)
 		Races = 0,
 		Wins = 0,
 		PlaySeconds = 0,

@@ -57,8 +57,8 @@ local function renderProfile(p)
 	UIKit.text({ Text = if p.Title ~= "" then p.Title else "NO TITLE YET", TextSize = 15, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(0, 28), Size = UDim2.new(1, 0, 0, 20), Parent = inner })
 	local rankColor = Ranks.Colors[p.Rank] or P.White
 	line(inner, 60, "LEAGUE", ("%d  -  %s"):format(p.League, string.upper(p.Rank)), rankColor)
-	line(inner, 82, "SPEED", Format.short(p.Speed) .. " MPH")
-	line(inner, 104, "TOP HERE", Format.short(p.TopSpeed and p.TopSpeed[tostring(p.League)] or p.Speed) .. " MPH")
+	line(inner, 82, "SPEED", Format.short(p.Speed))
+	line(inner, 104, "TOP HERE", Format.short(p.TopSpeed and p.TopSpeed[tostring(p.League)] or p.Speed))
 	line(inner, 126, "WINS", ("%d of %d races"):format(p.Wins, p.Races))
 	line(inner, 148, "PLAYED", ("%d min"):format(p.PlayMinutes))
 	if mine and #p.Titles > 1 then

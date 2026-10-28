@@ -30,15 +30,10 @@ function Formulas.minutesOfCoins(minutes, league)
 	return math.floor(Formulas.coinsPerMinute(league) * minutes + 0.5)
 end
 
-function Formulas.coinsPerTap(league)
+-- coins for one step (steps give about StepShare of the coins)
+function Formulas.coinsPerStep(league)
 	local e = GameConfig.Economy
-	return Formulas.coinsPerMinute(league) * e.TrainingShare / (60 * e.AssumedTapsPerSecond)
-end
-
--- Combo multiplier from how long the player has tapped steadily
-function Formulas.combo(steadySeconds)
-	local c = GameConfig.Combo
-	return 1 + (c.Max - 1) * math.clamp(steadySeconds / c.BuildSeconds, 0, 1)
+	return Formulas.coinsPerMinute(league) * e.StepShare / (60 * e.AssumedStepsPerSecond)
 end
 
 -- walls smashed in a league (best ever, the save keeps them per league)

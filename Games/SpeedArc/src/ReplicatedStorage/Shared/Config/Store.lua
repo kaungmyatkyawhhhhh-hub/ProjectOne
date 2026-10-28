@@ -36,7 +36,7 @@ return {
 		{ Key = "CoinsSmall", Tab = "COINS", Name = "SMALL COINS", Price = 25, Id = 3723179071, Minutes = 20, Desc = "20 minutes of coins" },
 		{ Key = "CoinsMedium", Tab = "COINS", Name = "MEDIUM COINS", Price = 99, Id = 3723179142, Minutes = 120, Desc = "2 hours of coins" },
 		{ Key = "CoinsLarge", Tab = "COINS", Name = "LARGE COINS", Price = 249, Id = 3723179202, Minutes = 360, Desc = "6 hours of coins" },
-		{ Key = "Speed15", Tab = "BOOSTS", Name = "2x SPEED 15 MIN", Price = 25, Id = 3723179279, SpeedBoost = 15 * 60, Desc = "Double training for 15 minutes of play" },
+		{ Key = "Speed15", Tab = "BOOSTS", Name = "2x SPEED 15 MIN", Price = 25, Id = 3723179279, SpeedBoost = 15 * 60, Desc = "Double SPEED per step for 15 minutes of play" },
 		{ Key = "StarterPack", Tab = "BOOSTS", Name = "STARTER PACK", Price = 49, Id = 3723179367, Once = true,
 			Minutes = 60, SpeedBoost = 30 * 60, ShoeSkin = "CanvasRunners_Starter", Title = "STARTER",
 			Desc = "1 hour of coins + 2x SPEED for 30 min + gold Canvas Runners + the STARTER title. Once!" },
@@ -47,7 +47,7 @@ return {
 	AutoTrainOfferAfter = 10 * 60, -- the Auto Run card after 10 min on a treadmill in a session (once)
 	SpeedBoostMult = 2, -- the 2x SPEED product (stacks with the New Runner / gift boost)
 
-	AutoTrain = { TapsPerSecond = 3, Combo = 1.2, AfkCheckSeconds = 15 * 60, AfkAnswerSeconds = 60 },
+	AutoTrain = { AfkCheckSeconds = 15 * 60, AfkAnswerSeconds = 60 }, -- the Auto Run pass: the "still there?" check (its steps: Config/Course)
 	VIP = { Coins = 0.10, ChatColor = "#FFC83D" },
 	FasterRolls = { Count = 3 },
 }

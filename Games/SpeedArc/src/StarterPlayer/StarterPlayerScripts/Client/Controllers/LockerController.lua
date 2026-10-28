@@ -38,10 +38,10 @@ end
 local function statText(item, isShoe)
 	if isShoe then
 		local pace = item.Pace > 0 and ("  +%d%% pace"):format(math.floor(item.Pace * 100 + 0.5)) or ""
-		return ("x%s training%s"):format(tostring(item.Train), pace)
+		return ("x%s SPEED%s"):format(tostring(item.Train), pace)
 	end
 	if item.Train then
-		return ("+%d%% training"):format(math.floor(item.Train * 100 + 0.5))
+		return ("+%d%% SPEED"):format(math.floor(item.Train * 100 + 0.5))
 	elseif item.Coins then
 		return ("+%d%% coins"):format(math.floor(item.Coins * 100 + 0.5))
 	end
@@ -448,7 +448,7 @@ function rebuild()
 			c.LayoutOrder = i
 			c.Parent = grid
 		end
-		header.Text = if tab == "SHOES" then "Shoes boost your training. Wear one pair." else "Trails show when you run fast and in races. Small bonus each."
+		header.Text = if tab == "SHOES" then "Shoes make every step worth more. Wear one pair." else "Trails show when you run fast and in races. Small bonus each."
 	elseif tab == "KITS" then
 		for i, item in Cosmetics.Kits do
 			cosmeticCard(item, "Kit", i)

@@ -64,9 +64,9 @@ end
 local function valueText(kind, v)
 	if kind == "speedAll" then
 		local league = math.floor(v / LEAGUE_STEP)
-		return ("L%d  %s MPH"):format(league, Format.short(v - league * LEAGUE_STEP))
+		return ("L%d  %s SPEED"):format(league, Format.short(v - league * LEAGUE_STEP))
 	elseif kind == "speed" then
-		return Format.short(v) .. " MPH"
+		return Format.short(v) .. " SPEED"
 	elseif kind == "time" then
 		return ("%.2f s"):format(v / 1000)
 	end

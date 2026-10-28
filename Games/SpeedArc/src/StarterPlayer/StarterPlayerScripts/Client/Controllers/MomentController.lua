@@ -106,7 +106,7 @@ local function buildConfirm()
 		block(body, 1, "YOU RESET", P.DangerRed, { "SPEED back to 0", "Rank back to Bronze" })
 		block(body, 2, "YOU GET", P.Gold, {
 			area and area.Name or ("League " .. next_),
-			"x8 training forever",
+			"x8 SPEED per step forever",
 			"A free coach roll",
 			"Title: " .. (Areas.GoPro.Titles[next_] or "PRO"),
 		})

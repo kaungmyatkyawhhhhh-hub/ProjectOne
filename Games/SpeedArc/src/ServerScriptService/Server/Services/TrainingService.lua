@@ -130,7 +130,7 @@ local function setupSlot(slot)
 		prompt = Instance.new("ProximityPrompt")
 		prompt.Parent = slot
 	end
-	prompt.ActionText = "TRAIN"
+	prompt.ActionText = "AFK STEPS"
 	prompt.ObjectText = if station.MinSpeed > 0
 		then ("%s  (%s MPH)"):format(station.Name, Format.short(station.MinSpeed))
 		else station.Name

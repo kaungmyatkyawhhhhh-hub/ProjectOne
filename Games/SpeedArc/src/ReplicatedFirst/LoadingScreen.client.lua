@@ -22,7 +22,7 @@ local TIPS = {
 	"Every step = +1 SPEED. Keep running!",
 	"A race starts every 3 minutes. Tap JOIN when you see it!",
 	"Shoes make every step count for more.",
-	"Coaches follow you and boost your training.",
+	"Coaches follow you and boost every step.",
 	"Smash the last wall = GO PRO to a new world.",
 	"Use BOOST in races - you get 3 and they refill.",
 	"Come back every day for your streak reward!",

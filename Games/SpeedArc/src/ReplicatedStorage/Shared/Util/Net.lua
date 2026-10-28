@@ -5,7 +5,6 @@ local RunService = game:GetService("RunService")
 local Net = {}
 
 local EVENTS = {
-	"TrainTap", -- client -> server: one tap while on a station
 	"TrainLeave", -- client -> server: STOP / moved
 	"TrainState", -- server -> client: station id or nil
 	"RaceJoin", -- client -> server

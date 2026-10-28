@@ -61,7 +61,7 @@ function RetentionService.give(player, reward)
 	end
 	if reward.TrainBoost then
 		data.Boost.Gift = (data.Boost.Gift or 0) + reward.TrainBoost
-		table.insert(parts, ("2x training for %d min"):format(reward.TrainBoost // 60))
+		table.insert(parts, ("2x SPEED for %d min"):format(reward.TrainBoost // 60))
 	end
 	if reward.Title then
 		data.Titles[reward.Title] = true

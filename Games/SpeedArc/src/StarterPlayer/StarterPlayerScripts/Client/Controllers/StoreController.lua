@@ -262,7 +262,7 @@ local function buildAuto()
 
 	afkCard = UIKit.panel({ Name = "AfkCheck", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.55), Size = UDim2.fromOffset(360, 110), AccentColor = P.Gold, StrokeColor = P.Gold, ZIndex = 35, Parent = canvas })
 	afkCard.Visible = false
-	UIKit.text({ Text = "STILL TRAINING?", TextSize = 22, Color = P.Gold, Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, 0, 0, 28), ZIndex = 36, Parent = afkCard })
+	UIKit.text({ Text = "STILL THERE?", TextSize = 22, Color = P.Gold, Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, 0, 0, 28), ZIndex = 36, Parent = afkCard })
 	UIKit.button({ Style = "Gold", Text = "YES, KEEP GOING", TextSize = 16, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 46), Size = UDim2.fromOffset(220, 48), ZIndex = 36, Parent = afkCard, OnClick = function()
 		afkCard.Visible = false
 		task.spawn(ctx.Net.call, "AfkOk")
@@ -328,7 +328,7 @@ function StoreUI.start(c)
 			ctx.Sound.play("Join")
 		elseif kind == "afkStopped" then
 			afkCard.Visible = false
-			ctx.Hud.toast("Auto Train stopped (no answer). Tap AUTO to start again.", "Denied")
+			ctx.Hud.toast("Auto Run stopped (no answer). Tap AUTO to start again.", "Denied")
 		end
 	end)
 	ctx.Net.get("Collection").OnClientEvent:Connect(function(snap)

@@ -256,7 +256,7 @@ local function onJoinedFriends(player)
 		local d = PlayerData.get(inviter)
 		if d then
 			d.Boost.Invite = S.InviteBoostSeconds
-			Toast:FireClient(inviter, ("%s joined from your invite! +%d%% training for %d min"):format(player.DisplayName, S.InviteBoost * 100, S.InviteBoostSeconds // 60), "Gold")
+			Toast:FireClient(inviter, ("%s joined from your invite! +%d%% SPEED for %d min"):format(player.DisplayName, S.InviteBoost * 100, S.InviteBoostSeconds // 60), "Gold")
 		end
 	end
 end

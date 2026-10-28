@@ -1,5 +1,5 @@
--- HudController: the main HUD (GDD 22). Coins top left, MPH big top centre with the goal line,
--- race timer pill + JOIN top right, one toast lane, pooled "+MPH" popups, training bar bottom right.
+-- HudController: the main HUD (GDD 22). Coins top left, SPEED big top centre with the goal line,
+-- race timer pill + JOIN top right, one toast lane, pooled "+N" popups, the AFK machine bar bottom right.
 local Players = game:GetService("Players")
 
 local Shared = game:GetService("ReplicatedStorage").Shared
@@ -311,7 +311,7 @@ local function buildTraining()
 
 	refs.hint = UIKit.text({
 		Name = "Hint",
-		Text = "TAP ANYWHERE TO RUN!",
+		Text = "STEPPING FOR YOU!",
 		TextSize = 30,
 		Color = P.White,
 		StrokeColor = P.DeepBlue,
@@ -455,7 +455,9 @@ function Hud.setTraining(station)
 	if station then
 		refs.stationName.Text = string.upper(station.Name)
 		refs.stationGain.Text = ("AFK STEPS  x%g"):format(station.Mult or 1)
-		Hud.setCombo(1, 1)
+		-- no combo any more (prompt 11): the machine steps for you
+		refs.comboText.Visible = false
+		refs.comboFill.Parent.Visible = false
 	end
 end
 

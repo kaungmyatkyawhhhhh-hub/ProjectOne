@@ -1,5 +1,5 @@
 -- Every multiplier in one place, worked out from a player's save. Server uses it for real gains;
--- the HUD uses the same maths to show "+x per tap" and the Locker / Coaches numbers.
+-- the HUD uses the same maths to show "+x per step" and the Locker / Coaches numbers.
 local Shared = script.Parent.Parent
 local Shoes = require(Shared.Config.Shoes)
 local Trails = require(Shared.Config.Trails)
@@ -74,7 +74,7 @@ function Boosts.compute(data)
 	local trail = trailById[data.Trail] or trailById[Trails.Default]
 	local cTrain, cPace, cCoins = coachTotals(data)
 	local leagueMult = (GameConfig.LeagueTrainMult or 8) ^ ((data.League or 1) - 1)
-	-- passes (M5): 2x Speed doubles training, 2x Coins doubles coins, VIP +10% coins. Nothing for races.
+	-- passes (M5): 2x Speed doubles SPEED per step, 2x Coins doubles coins, VIP +10% coins. Nothing for races.
 	local passes = data.Passes or {}
 	local passTrain = if passes.Speed2x then 2 else 1
 	local passCoins = (if passes.Coins2x then 2 else 1) * (if passes.VIP then 1 + Store.VIP.Coins else 1)

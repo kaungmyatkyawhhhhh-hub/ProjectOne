@@ -1,7 +1,7 @@
 -- TutorialService (M4, GDD 21): the first 15 minutes, step by step. The server keeps the step
--- (saved, so a rejoin carries on) and judges every step it can see: the first tap, the tutorial
+-- (saved, so a rejoin carries on) and judges every step it can see: the first step, the first wall, the tutorial
 -- race, the first shoes, Silver rank and the first coach roll. The client draws the hints.
--- Also the GO TO / GO TRAIN teleports, used by the tutorial and after it.
+-- Also the GO TO teleports (the course start, a treadmill, a shop), used by the tutorial and after it.
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -26,7 +26,7 @@ local Event = Net.get("Tutorial")
 local Moment = Net.get("Moment")
 
 -- step numbers (the client has the same list)
-local S = { Welcome = 1, FirstTap = 2, Combo = 3, Race = 4, Podium = 5, Shoes = 6, Silver = 7, Roll = 8, Done = 99 }
+local S = { Welcome = 1, FirstStep = 2, FirstWall = 3, Race = 4, Podium = 5, Shoes = 6, Silver = 7, Roll = 8, Done = 99 }
 TutorialService.Steps = S
 local rollsAtStart = {} -- [player] = CoachRolls when the Roll step began
 local startedAt = {} -- [player] = os.clock() at PLAY (Studio timing log)
@@ -174,7 +174,7 @@ function TutorialService.start()
 		elseif action == "skip" then
 			-- the client's safety timeout ran out twice: move on (never stuck)
 			local step = data.Tutorial
-			if type(arg) ~= "number" or arg ~= step or step < S.FirstTap or step > S.Roll then
+			if type(arg) ~= "number" or arg ~= step or step < S.FirstStep or step > S.Roll then
 				return false
 			end
 			if step == S.Race then
@@ -219,14 +219,14 @@ function TutorialService.start()
 	-- the first steps: FirstTap is "take your first step" since the 28 Oct pivot, Combo is "smash the first wall"
 	StepService.Stepped.Event:Connect(function(player, total, n)
 		local data = PlayerData.get(player)
-		if total == n or (data and data.Tutorial == S.FirstTap) then
-			Analytics.step(player, "first_tap")
+		if total == n or (data and data.Tutorial == S.FirstStep) then
+			Analytics.step(player, "first_step")
 		end
-		if data and data.Tutorial == S.FirstTap then
+		if data and data.Tutorial == S.FirstStep then
 			PlayerData.set(player, "Coins", data.Coins + T.FirstTapCoins)
 			PlayerData.set(player, "Speed", data.Speed + T.FirstTapSpeed)
 			Moment:FireClient(player, "FirstStep", { Coins = T.FirstTapCoins, Speed = T.FirstTapSpeed })
-			setStep(player, S.Combo)
+			setStep(player, S.FirstWall)
 		end
 	end)
 
@@ -247,7 +247,7 @@ function TutorialService.start()
 					continue
 				end
 				local step = data.Tutorial
-				if step == S.Combo and Formulas.wallsIn(data, 1) >= 1 then
+				if step == S.FirstWall and Formulas.wallsIn(data, 1) >= 1 then
 					setStep(player, S.Race)
 				elseif step == S.Shoes and data.OwnedShoes[T.ShoeId] then
 					setStep(player, S.Silver)

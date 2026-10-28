@@ -504,7 +504,7 @@ end
 --       Bridge (stage number that crosses water), Title / Sub (the start arch), Accent
 function L.course(parent, areaId, opts)
 	local Course = require(ReplicatedStorage.Shared.Config.Course:Clone())
-	local Formulas = require(ReplicatedStorage.Shared.Util.Formulas:Clone())
+	local Formulas = require(ReplicatedStorage.Shared.Util.Formulas) -- not a clone: it requires its Config siblings
 	local C = Course.Areas[areaId]
 	local walls = #Course.WallShares
 	local L_, Wd, H = Course.StageLength, Course.Width, Course.WallHeight

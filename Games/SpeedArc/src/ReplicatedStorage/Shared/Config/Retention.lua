@@ -6,9 +6,8 @@ return {
 	Tutorial = {
 		HintRepeat = 12,
 		FirstTapCoins = 100,
-		FirstTapSpeed = 10, -- "+10 MPH burst"
-		ComboHintSeconds = 20, -- the combo hint shows until x1.2 or this many seconds of tapping
-		RaceAfterSeconds = 30, -- tutorial race offered this long after the combo hint
+		FirstTapSpeed = 10, -- the first step: "+10 SPEED burst" (the key keeps its old name)
+		RaceAfterSeconds = 30, -- tutorial race offered this long after the first wall
 		RaceNpcSpeed = { 0.55, 0.75 }, -- x the player's speed (slow NPCs, a close win)
 		RacePace = 1.45, -- the tutorial race runs faster than normal so it's short and exciting
 		ShoeId = "CanvasRunners", -- coins topped up to its price for the first shoes
@@ -17,7 +16,7 @@ return {
 		-- GO TO for the player, after twice this the step is skipped so nobody is ever stuck
 		StepTimeouts = { [1] = 6, [2] = 30, [3] = 90, [4] = 55, [5] = 6, [6] = 75, [7] = 600, [8] = 75 }, -- 2 = first step, 3 = first wall
 	},
-	NewRunnerBoost = { Mult = 2, Seconds = 15 * 60 }, -- 2x training for 15 min of play
+	NewRunnerBoost = { Mult = 2, Seconds = 15 * 60 }, -- 2x SPEED per step for 15 min of play
 
 	-- Daily streak (GDD 15): one missed day allowed (lesson: UTC days change in the US afternoon)
 	Daily = {
@@ -46,6 +45,8 @@ return {
 			{ Id = "Race3", Text = "Race 3 times", Stat = "Races", Goal = 3 },
 			{ Id = "Taps300", Text = "Take 500 steps", Stat = "Steps", Goal = 500 }, -- ids kept from the tap days (old saves)
 			{ Id = "Taps800", Text = "Take 1,500 steps", Stat = "Steps", Goal = 1500 },
+			{ Id = "Walls5", Text = "Smash 5 walls", Stat = "Smashes", Goal = 5 },
+			{ Id = "Walls12", Text = "Smash 12 walls", Stat = "Smashes", Goal = 12 },
 			{ Id = "PB1", Text = "Get a new personal best", Stat = "PBs", Goal = 1 },
 			{ Id = "Podium2", Text = "Finish top 3 twice", Stat = "Podiums", Goal = 2 },
 			{ Id = "Boost15", Text = "Use BOOST 15 times", Stat = "Boosts", Goal = 15 },
@@ -106,7 +107,7 @@ return {
 	},
 
 	-- Analytics funnel (GDD 26), in order; each fires once per player
-	Funnel = { "loaded", "menu_play", "first_tap", "first_race_joined", "first_race_finished", "first_shoes", "first_coach_roll", "silver", "gold", "go_pro_1", "day2_return", "go_pro_2" },
+	Funnel = { "loaded", "menu_play", "first_step", "first_wall", "first_race_joined", "first_race_finished", "first_shoes", "first_coach_roll", "silver", "wall_5", "gold", "last_wall", "go_pro_1", "day2_return", "go_pro_2" },
 
 	-- Studio: a fake clock for testing days (Workspace attribute TestDayOffset = days to add)
 }

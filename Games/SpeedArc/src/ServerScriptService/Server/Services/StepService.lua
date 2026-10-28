@@ -39,7 +39,7 @@ function StepService.pay(player, data, n, mult)
 	data.Stats.Steps = (data.Stats.Steps or 0) + n
 	local s = state[player]
 	if s then
-		s.coinFrac += Formulas.coinsPerTap(data.League) * b.Coins * n
+		s.coinFrac += Formulas.coinsPerStep(data.League) * b.Coins * n
 		if s.coinFrac >= 1 then
 			local whole = math.floor(s.coinFrac)
 			s.coinFrac -= whole

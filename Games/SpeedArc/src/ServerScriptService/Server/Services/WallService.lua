@@ -52,6 +52,15 @@ local function smash(player, data, league, k)
 		minutes *= Areas.LowerLeagueRewardMult
 	end
 	local coins = math.floor(Formulas.minutesOfCoins(minutes, data.League) * Boosts.compute(data).Coins + 0.5)
+	data.Stats.Smashes = (data.Stats.Smashes or 0) + 1 -- the "Smash 5 walls" quests
+	-- funnel steps (each fires once per player)
+	if k == 1 then
+		Analytics.step(player, "first_wall")
+	elseif k == 5 then
+		Analytics.step(player, "wall_5")
+	elseif k == Formulas.wallCount() then
+		Analytics.step(player, "last_wall")
+	end
 	PlayerData.set(player, "Coins", data.Coins + coins)
 	if first then
 		local wasReady = LeagueService.ready(data)
