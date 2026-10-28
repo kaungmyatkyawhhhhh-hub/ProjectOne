@@ -197,6 +197,16 @@
   ]
  },
  {
+  "file": "ReplicatedStorage/Shared/Util/CoachView.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Util",
+   "CoachView"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/Util/Format.lua",
   "class": "ModuleScript",
   "path": [

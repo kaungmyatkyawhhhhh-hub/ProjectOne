@@ -133,7 +133,7 @@ function UIKit.panel(props)
 	UIKit.corner(frame, props.Radius or 14)
 	UIKit.gradient(frame, Palette.Carbon, Palette.SpeedBlack, 90)
 	UIKit.stroke(frame, props.StrokeColor or Palette.Graphite, props.StrokeThickness or 2)
-	if props.Accent == true or props.AccentColor ~= nil and props.Accent ~= false then
+	if props.Accent ~= false then -- windows switch it off (Accent = false)
 		local accent = make("Frame", {
 			Name = "Accent",
 			BackgroundColor3 = props.AccentColor or Palette.ElectricBlue,

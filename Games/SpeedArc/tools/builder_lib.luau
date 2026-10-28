@@ -224,8 +224,8 @@ function L.sign(parent, station, cf)
 	local fmt = require(ReplicatedStorage.Shared.Util.Format:Clone())
 	L.surfaceText(board, Enum.NormalId.Front, {
 		{ Text = string.upper(station.Name), Height = 0.36, Color = Palette.White },
-		{ Text = ("+%s MPH / TAP"):format(fmt.short(station.Gain)), Height = 0.24, Color = Palette.BrightBlue, Font = L.BODY },
-		{ Text = if station.MinSpeed > 0 then ("NEEDS %s MPH"):format(fmt.short(station.MinSpeed)) else "OPEN IN THIS LEAGUE", Height = 0.2, Color = Palette.Gold, Font = L.BODY },
+		{ Text = ("AFK STEPS  x%g"):format(station.Mult or 1), Height = 0.24, Color = Palette.BrightBlue, Font = L.BODY },
+		{ Text = if station.MinSpeed > 0 then ("NEEDS %s SPEED"):format(fmt.short(station.MinSpeed)) else "OPEN IN THIS LEAGUE", Height = 0.2, Color = Palette.Gold, Font = L.BODY },
 	}, { PPS = 26, MaxDistance = 120, Padding = 2 })
 	return m
 end

@@ -303,7 +303,10 @@ local function tile(parent, o)
 	if o.Hidden then
 		UIKit.text({ Text = "?", TextSize = 40, Color = o.Color, StrokeTransparency = 0, Position = UDim2.fromScale(0, 0.13), Size = UDim2.fromScale(1, 0.6), ZIndex = 4, Parent = t })
 	end
-	UIKit.text({ Text = o.Name, TextSize = o.NameSize or 13, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(4, 3), Size = UDim2.new(1, -8, 0, 16), ZIndex = 5, Parent = t })
+	local nameLabel = UIKit.text({ Text = o.Name, TextSize = o.NameSize or 13, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(4, 3), Size = UDim2.new(1, -8, 0, 16), ZIndex = 5, Parent = t })
+	-- long names shrink to fit instead of being cut
+	nameLabel.TextScaled = true
+	make("UITextSizeConstraint", { MaxTextSize = o.NameSize or 13, MinTextSize = 8, Parent = nameLabel })
 	UIKit.text({ Text = o.Big, TextSize = o.BigSize or 17, Color = o.BigColor or P.White, StrokeThickness = 2.5, StrokeTransparency = 0, Position = UDim2.fromScale(0, 0.66), Size = UDim2.new(1, 0, 0.17, 0), ZIndex = 5, Parent = t })
 	if o.Small then
 		UIKit.text({ Text = o.Small, TextSize = o.SmallSize or 13, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromScale(0, 0.82), Size = UDim2.new(1, 0, 0.15, 0), ZIndex = 5, Parent = t })
@@ -539,7 +542,7 @@ function myPage()
 	local coach = Boosts.coach(selected.Id)
 	local sc = stageColor(selected.Stage)
 	local isEq = table.find(equipped, selected.Uid) ~= nil
-	local detail = UIKit.panel({ Name = "Detail", Position = UDim2.fromOffset(436, 40), Size = UDim2.fromOffset(228, 238), Parent = page })
+	local detail = UIKit.panel({ Name = "Detail", Accent = false, Position = UDim2.fromOffset(436, 40), Size = UDim2.fromOffset(228, 238), Parent = page })
 	tile(detail, {
 		Size = UDim2.fromOffset(118, 112), Position = UDim2.new(0.5, -59, 0, 8), Color = sc, CoachId = selected.Id,
 		Name = string.upper(coach.Name), Big = Coaches.Stages[selected.Stage], BigSize = 18, BigColor = P.White,
