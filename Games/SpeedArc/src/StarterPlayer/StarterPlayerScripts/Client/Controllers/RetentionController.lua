@@ -11,6 +11,7 @@ local ExperienceNotificationService = game:GetService("ExperienceNotificationSer
 local Shared = game:GetService("ReplicatedStorage").Shared
 local UIKit = require(Shared.UIKit)
 local Format = require(Shared.Util.Format)
+local Formulas = require(Shared.Util.Formulas)
 local Retention = require(Shared.Config.Retention)
 local Trails = require(Shared.Config.Trails)
 local SoundConfig = require(Shared.Config.Sounds)
@@ -88,7 +89,7 @@ end
 local function rewardText(r)
 	local parts = {}
 	if r.Minutes then
-		table.insert(parts, ("%d min coins"):format(r.Minutes))
+		table.insert(parts, ("%s coins"):format(Format.short(Formulas.minutesOfCoins(r.Minutes, player:GetAttribute("League") or 1))))
 	end
 	if r.Rolls then
 		table.insert(parts, if r.Rolls == 1 then "coach roll" else ("%d rolls"):format(r.Rolls))
@@ -224,7 +225,7 @@ local function buildWindows()
 
 	-- Quests
 	questsWin = UIKit.window({ Name = "Quests", Title = "DAILY QUESTS", Size = Vector2.new(560, 300), Accent = P.ElectricBlue, Parent = canvas })
-	UIKit.text({ Text = ("3 new quests every day. Each pays %d min of coins; all 3 = %d min + a coach roll."):format(Retention.Quests.RewardMinutes, Retention.Quests.AllBonusMinutes), Font = F.BodyBold, TextSize = 13, Wrapped = true, Position = UDim2.fromOffset(0, 6), Size = UDim2.new(1, 0, 0, 30), Parent = questsWin.content })
+	UIKit.text({ Text = "3 new quests every day. Finish all 3 for a bonus + a free coach roll!", Font = F.BodyBold, TextSize = 13, Wrapped = true, Position = UDim2.fromOffset(0, 6), Size = UDim2.new(1, 0, 0, 30), Parent = questsWin.content })
 	questRows = {}
 	for i = 1, Retention.Quests.PerDay do
 		local f = UIKit.panel({ Name = "Quest" .. i, Position = UDim2.fromOffset(0, 40 + (i - 1) * 58), Size = UDim2.new(1, 0, 0, 52), Accent = false, Parent = questsWin.content })
@@ -394,7 +395,7 @@ function R.start(c)
 		end
 	end)
 
-	-- Studio test switch: TestOpenWindow = "Daily" / "Quests" / "Settings"
+	-- Studio test switch: TestOpenWindow = "Daily" / "Quests" / "Settings" / "Top" / "Profile"
 	if RunService:IsStudio() then
 		workspace:GetAttributeChangedSignal("TestOpenWindow"):Connect(function()
 			local v = workspace:GetAttribute("TestOpenWindow")
@@ -404,6 +405,10 @@ function R.start(c)
 				questsWin.show()
 			elseif v == "Settings" then
 				settingsWin.show()
+			elseif v == "Top" and ctx.Leaderboards then
+				ctx.Leaderboards.open()
+			elseif v == "Profile" and ctx.Social then
+				ctx.Social.openProfile(player.UserId)
 			end
 		end)
 	end
