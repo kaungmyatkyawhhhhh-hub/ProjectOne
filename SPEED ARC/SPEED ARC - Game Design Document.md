@@ -7,6 +7,8 @@ status: living document (v1)
 
 Back to [[00 SPEED ARC Home|SPEED ARC Home]] · Short version: [[SPEED ARC - Design plan]] · Lessons: [[SPEED ARC - Lessons from GYM ARC]]
 
+> **28 Oct PIVOT (owner): "+1 SPEED every step".** Tap training is gone: every step you run = +SPEED, you smash walls on a wall course for coins, the last wall = Go Pro, treadmills are AFK step machines, races stay as an event every 3 min, bright candy colours. Where this document still talks about tapping, stations per tap or the dark palette, [[SPEED ARC - Wall Course and Steps]] and CLAUDE.md win. Everything else (leagues, shoes, coaches, trails, economy, monetization rules, Legend Laps) still applies.
+
 All numbers here are STARTING values. They live in Config and get tuned with a pacing sim (like GYM ARC's `tests/pacing`). If this document and a prompt disagree, the newest owner decision wins; update this document.
 
 ---

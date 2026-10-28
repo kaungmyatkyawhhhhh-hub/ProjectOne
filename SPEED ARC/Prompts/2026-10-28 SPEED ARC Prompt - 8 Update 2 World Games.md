@@ -7,6 +7,8 @@ status: todo (after launch)
 
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
+> **After the 28 Oct pivot:** this world also gets its OWN WALL COURSE (its last wall = Go Pro), its training stations are AFK step machines (no tapping), and it uses the bright candy palette. Read [[SPEED ARC - Wall Course and Steps]] first. Where this prompt says "training stations" or "tap", use AFK machines and steps.
+
 Run 1-2 weeks after Update 1, after checking its numbers.
 
 ```text

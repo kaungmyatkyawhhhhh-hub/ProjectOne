@@ -36,13 +36,13 @@ local function boostText(id, stage)
 	local t, p, c = Boosts.coachValues(id, stage)
 	local parts = {}
 	if t > 0 then
-		table.insert(parts, ("+%d%% training"):format(math.floor(t * 100 + 0.5)))
+		table.insert(parts, ("+%d%% SPEED"):format(math.floor(t * 100 + 0.5)))
 	end
 	if c > 0 then
-		table.insert(parts, ("+%d%% coins"):format(math.floor(c * 100 + 0.5)))
+		table.insert(parts, ("+%d%% COINS"):format(math.floor(c * 100 + 0.5)))
 	end
 	if p > 0 then
-		table.insert(parts, ("+%g%% pace"):format(math.floor(p * 1000 + 0.5) / 10))
+		table.insert(parts, ("+%g%% RACE PACE"):format(math.floor(p * 1000 + 0.5) / 10))
 	end
 	return table.concat(parts, "  ")
 end
@@ -689,7 +689,7 @@ function CoachUI.start(c)
 	ctx = c
 	ctx.Coaches = CoachUI
 	buildOverlay()
-	agencyWin = UIKit.window({ Name = "CoachAgency", Title = "COACH AGENCY", Size = Vector2.new(640, 290), Accent = P.Pink, Parent = ctx.Hud.canvas })
+	agencyWin = UIKit.window({ Name = "CoachAgency", Title = "COACH AGENCY", Size = Vector2.new(640, 270), Accent = P.Pink, Parent = ctx.Hud.canvas })
 	agencyWin.page = make("Frame", { Name = "Page", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 1, -4), Parent = agencyWin.content })
 	myWin = UIKit.window({ Name = "Coaches", Title = "MY COACHES", Size = Vector2.new(700, 330), Accent = P.Gold, Parent = ctx.Hud.canvas })
 	myWin.page = make("Frame", { Name = "Page", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 1, -4), Parent = myWin.content })
