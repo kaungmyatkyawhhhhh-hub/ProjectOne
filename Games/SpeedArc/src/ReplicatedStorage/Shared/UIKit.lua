@@ -1,6 +1,6 @@
 -- SPEED ARC UI kit (decided in M1, reuse everywhere). Mobile first: layouts are built in
 -- 844 x 390 "design pixels" (a landscape phone) and scaled by one UIScale on the root.
--- Black/carbon panels, electric blue accents, GOLD for coins/rewards/premium, white text.
+-- Dark navy panels (GYM ARC-style windows, 28 Oct), candy tiles and buttons, GOLD for coins/rewards/premium, white text.
 -- One chunky display font (italic, numbers/titles/buttons) + one clean body font.
 local TweenService = game:GetService("TweenService")
 
@@ -23,7 +23,9 @@ UIKit.MinTextSize = 13 -- smallest HUD label; nothing smaller anywhere
 UIKit.ButtonStyles = {
 	Blue = { Base = Palette.ElectricBlue, Light = Palette.BrightBlue, Edge = Palette.DeepBlue, Text = Palette.White, TextStroke = Palette.DeepBlue },
 	Gold = { Base = Palette.Gold, Light = Color3.fromHex("#FFE38C"), Edge = Palette.DeepGold, Text = Palette.SpeedBlack, TextStroke = nil },
-	Dark = { Base = Palette.Graphite, Light = Color3.fromHex("#4A63D9"), Edge = Palette.SpeedBlack, Text = Palette.White, TextStroke = Palette.SpeedBlack },
+	Dark = { Base = Palette.Graphite, Light = Color3.fromHex("#4A5596"), Edge = Palette.SpeedBlack, Text = Palette.White, TextStroke = Palette.SpeedBlack },
+	Green = { Base = Color3.fromHex("#34C759"), Light = Color3.fromHex("#7CF08F"), Edge = Color3.fromHex("#1D7A35"), Text = Palette.White, TextStroke = Color3.fromHex("#145227") },
+	Pink = { Base = Palette.Pink, Light = Color3.fromHex("#FFA6D2"), Edge = Color3.fromHex("#B8306F"), Text = Palette.White, TextStroke = Color3.fromHex("#7A1E4A") },
 }
 
 local clickHook = nil
@@ -131,7 +133,7 @@ function UIKit.panel(props)
 	UIKit.corner(frame, props.Radius or 14)
 	UIKit.gradient(frame, Palette.Carbon, Palette.SpeedBlack, 90)
 	UIKit.stroke(frame, props.StrokeColor or Palette.Graphite, props.StrokeThickness or 2)
-	if props.Accent ~= false then
+	if props.Accent == true or props.AccentColor ~= nil and props.Accent ~= false then
 		local accent = make("Frame", {
 			Name = "Accent",
 			BackgroundColor3 = props.AccentColor or Palette.ElectricBlue,
@@ -459,24 +461,24 @@ function UIKit.window(props)
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0.5, 0, 0.5, 30), -- under the top bar, and the bottom still fits a phone
 		Size = UDim2.fromOffset(w, h),
-		AccentColor = props.Accent or Palette.ElectricBlue,
+		Accent = false,
 		ZIndex = 21,
 		Parent = backdrop,
 	})
 	local scale = make("UIScale", { Parent = panel })
-	-- slanted title tab (speed language)
+	-- the title sits on the panel's top edge: big white italic letters with a dark outline and a
+	-- short gold underline (GYM ARC window style, owner 28 Oct)
 	local tab = make("Frame", {
 		Name = "TitleTab",
-		BackgroundColor3 = Palette.White,
-		Position = UDim2.fromOffset(18, -18),
-		Size = UDim2.fromOffset(math.max(170, #props.Title * 17 + 40), 38),
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(20, -24),
+		Size = UDim2.fromOffset(math.max(170, #props.Title * 21 + 20), 40),
 		ZIndex = 23,
 		Parent = panel,
 	})
-	UIKit.corner(tab, 10)
-	UIKit.gradient(tab, Palette.BrightBlue, Palette.ElectricBlue, 0)
-	UIKit.stroke(tab, Palette.DeepBlue, 2)
-	UIKit.text({ Text = props.Title, TextSize = 22, StrokeColor = Palette.DeepBlue, StrokeTransparency = 0, ZIndex = 24, Parent = tab })
+	UIKit.text({ Text = props.Title, TextSize = 32, XAlign = Enum.TextXAlignment.Left, StrokeColor = Palette.SpeedBlack, StrokeThickness = 3, StrokeTransparency = 0, ZIndex = 24, Parent = tab })
+	local underline = make("Frame", { Name = "Underline", BackgroundColor3 = props.Accent or Palette.Gold, BorderSizePixel = 0, Position = UDim2.fromOffset(2, 38), Size = UDim2.fromOffset(64, 5), ZIndex = 24, Parent = tab })
+	UIKit.corner(underline, 3)
 	local close = UIKit.button({
 		Name = "Close",
 		Style = "Dark",

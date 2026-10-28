@@ -4,11 +4,11 @@ local function hex(h)
 end
 
 return {
-	-- 28 Oct: the owner picked the bright "candy" simulator look. The keys keep their jobs (UI base,
-	-- panels, borders ...) but are colourful now: deep indigo instead of black, royal blue panels.
-	SpeedBlack = hex("#1C2A7A"), -- UI base, text outlines (deep indigo)
-	Carbon = hex("#3557E8"), -- panels (royal blue)
-	Graphite = hex("#2A3FA8"), -- borders, dark buttons
+	-- 28 Oct: the owner picked the bright "candy" simulator look for the world. The UI keeps dark
+	-- navy panels (like GYM ARC's windows, owner) with the candy colours on tiles and buttons.
+	SpeedBlack = hex("#11152E"), -- UI base, text outlines (deep navy)
+	Carbon = hex("#20274F"), -- panels (navy, lighter at the top of the gradient)
+	Graphite = hex("#353F78"), -- borders, dark buttons
 	ElectricBlue = hex("#24A8FF"), -- main accent, speed, buttons (sky blue)
 	BrightBlue = hex("#6FDDFF"), -- glows, highlights (aqua)
 	DeepBlue = hex("#1B3E9E"), -- shadows, gradients

@@ -1,5 +1,8 @@
 -- CoachService: roll coaches with coins (odds + pity), evolve with 3 duplicates, 2 free slots,
 -- BEST EQUIP, and the first equipped coach follows you (GDD 12). Server decides every roll.
+-- 28 Oct (owner): rolls happen only at a COACH AGENCY (a stand in each world: a ProximityPrompt
+-- with Opens = "CoachCorner"); MY COACHES works anywhere. ReplicatedStorage.CoachPreviews holds one
+-- still model per coach for the 3D tiles in the windows.
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -307,10 +310,38 @@ local function changed(player)
 	CoachService.refreshFollower(player)
 end
 
+-- the agency stands (their prompt parts), found once and kept up to date
+local agencies = {}
+local function watchAgency(d)
+	if d:IsA("ProximityPrompt") and d:GetAttribute("Opens") == "CoachCorner" and d.Parent and d.Parent:IsA("BasePart") then
+		agencies[d.Parent] = true
+		d.Parent.Destroying:Connect(function()
+			agencies[d.Parent] = nil
+		end)
+	end
+end
+
+function CoachService.nearAgency(player)
+	local char = player.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return false
+	end
+	for spot in agencies do
+		if spot.Parent and (spot.Position - root.Position).Magnitude <= Coaches.AgencyRange then
+			return true
+		end
+	end
+	return false
+end
+
 local function roll(player)
 	local data = PlayerData.get(player)
 	if not data then
 		return false, "missing"
+	end
+	if not CoachService.nearAgency(player) then
+		return false, "agency"
 	end
 	local price = CoachService.rollPrice(data)
 	if data.Coins < price then
@@ -427,7 +458,37 @@ local function adminGive(text)
 	end
 end
 
+-- one still model per coach (BASE) for the windows' 3D tiles (ViewportFrames on the client)
+local function makePreviews()
+	local folder = Instance.new("Folder")
+	folder.Name = "CoachPreviews"
+	for _, coach in Coaches.List do
+		local m = buildCoachModel(coach, 1)
+		if m then
+			local tag = m:FindFirstChild("NameTag", true)
+			if tag then
+				tag:Destroy()
+			end
+			for _, d in m:GetDescendants() do
+				if d:IsA("BasePart") then
+					d.Anchored = true
+				elseif d:IsA("Script") or d:IsA("LocalScript") then
+					d:Destroy()
+				end
+			end
+			m.Name = coach.Id
+			m.Parent = folder
+		end
+	end
+	folder.Parent = game:GetService("ReplicatedStorage")
+end
+
 function CoachService.start()
+	task.spawn(makePreviews)
+	for _, d in workspace:GetDescendants() do
+		watchAgency(d)
+	end
+	workspace.DescendantAdded:Connect(watchAgency)
 	Net.on("RollCoach", roll)
 	Net.on("EquipCoach", equip)
 	Net.on("BestEquip", bestEquip)
