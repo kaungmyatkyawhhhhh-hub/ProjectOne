@@ -8,11 +8,11 @@ Sounds = {
 	Music = {
 		-- Bed = a quiet ambience loop under the music (Audio note: World ambience). Pro Sound Effects library.
 		Hub = { Id = "rbxassetid://1839850159", Volume = 0.35, -- "Aim High" (APM, high energy pop)
-			 Bed = "rbxassetid://9112831284" }, -- morning birds loop
+			Bed = "rbxassetid://9112831284" }, -- morning birds loop
 		Park = { Id = "rbxassetid://9043824305", Volume = 0.35, -- "Summer Memories" (APM, City Breeze)
-			 Bed = "rbxassetid://9116969962" }, -- birds + distant dogs
+			Bed = "rbxassetid://9116969962" }, -- birds + distant dogs
 		Stadium = { Id = "rbxassetid://1837843290", Volume = 0.35, -- "No Time To Think (Long Perc)" (APM, drums)
-			 Bed = "rbxassetid://9120974378" },
+			Bed = "rbxassetid://9120974378" },
 		Race = { Id = "rbxassetid://9048541013", Volume = 0.42 }, -- "Battleground" (APM)
 		Fade = 1.5,
 		Duck = 0.4,

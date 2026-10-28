@@ -35,12 +35,12 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 ## M6 sound pass
 - **Loudness measured** for every clip (PlaybackLoudness while it plays; music at 15/35/55/75%). Each play is scaled by `Target[group] / Loudness` (clamped x0.5 - x3), so quiet and loud clips at the same Volume sound equally loud. Targets: SFX 90, UI 35, Crowd 110, Music 110. The table is in [[2026-10-28 SPEED ARC Progress - 6 Look, sound and launch check|Progress 6]].
 - **Settings:** MUSIC and SOUNDS 0-100% (steps of 10), saved.
-- **Music:** Hub, Park, Stadium (+ crowd bed), Race. The race music swells at FINAL STRETCH (louder + a touch faster) and stops at the finish. The menu plays the hub music quietly (35%).
+- **Music (picked 28 Oct, APM):** Hub "Aim High" 1839850159 (loudness 231), Park "Summer Memories" 9043824305 (65), Stadium "No Time To Think (Long Perc)" 1837843290 (252) + crowd bed, Race "Battleground" 9048541013 (102). The race music swells at FINAL STRETCH (louder + a touch faster) and stops at the finish. The menu plays the hub music quietly (35%).
 - **Ambience beds:** Hub = morning birds loop (9112831284), Park = birds + distant dogs (9116969962), Stadium = crowd (9120974378).
 - New sounds on: overtaking (a pitched boost whoosh + crowd burst), coins flying to the counter (coin shower).
 
 ## To do
-- The owner picks the final music (candidates in Progress 6) and listens in a play test.
+- The owner listens in a play test (music is picked).
 - Footsteps by surface (grass / track / metal) - later.
 
 ## Where it lives

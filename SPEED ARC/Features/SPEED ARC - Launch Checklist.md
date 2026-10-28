@@ -10,18 +10,16 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 Everything you need to do before publishing the soft launch. Tick them off here.
 
 ## 1. Imports (Studio, into `ServerStorage/Meshes`)
-- [ ] `Downloads\speed_arc_models\hub\v3\` - 6 shoes + 3 shop shells (prompt 2)
-- [ ] `Downloads\speed_arc_models\locker\` - 6 kit pieces + 6 headwear (prompt 5)
-- [ ] `Downloads\speed_arc_models\areas\` - Park_Fountain, Park_FoodCart, Park_Gazebo, Stadium_FloodTower (prompt 6)
-- [ ] After importing: tell me, I rebuild the hub / park / stadium so the meshes replace the part builds, and check the fit on a few avatars.
+- [x] All 25 meshes imported (28 Oct). They landed in Workspace; moved into `ServerStorage/Meshes`, hub / park / stadium rebuilt with them.
+- [x] Fit checked: shoes, tee, shorts, bib OK. Worn items now sit outside the character (layered clothing was hiding them).
 
 ## 2. Creator Hub (all in the GROUP that owns the game)
 - [ ] Move the place to the group (it's on your account now: creatorType "User").
 - [ ] 8 game passes + 5 developer products with the exact prices from [[2026-10-28 SPEED ARC Progress - 5 Store, passes, Starter Pack, Locker cosmetics|Progress 5]] -> send me the IDs.
-- [ ] Pass / product icons: you make them (cartoon, no people), approve, upload to the group.
+- [ ] Pass / product icons: **made** (13 PNGs in `Downloads\speed_arc_models\icons\`, preview `Screenshots/models/icons/icon_sheet.png`). You approve, then add each one when you create its pass / product (in the group).
 - [ ] 3 notification strings (`daily_ready`, `new_league`, `weekly_top`) - text in [[2026-10-28 SPEED ARC Progress - 4 First 15 minutes, daily, quests, social|Progress 4]].
 - [ ] Open Cloud API key in Secrets (only when we wire the daily notification sender).
-- [ ] Music: pick the final tracks (candidates in [[2026-10-28 SPEED ARC Progress - 6 Look, sound and launch check|Progress 6]]).
+- [x] Music picked (APM library, licensed): Hub "Aim High" 1839850159, Park "Summer Memories" 9043824305, Stadium "No Time To Think (Long Perc)" 1837843290, Race "Battleground" 9048541013. Loudness measured and balanced. Listen and tell me if one is wrong.
 
 ## 3. Game page
 - [ ] **Name:** SPEED ARC

@@ -25,7 +25,7 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 - Tap WEARING to take an item off.
 
 ## How worn items work
-- The server welds them onto the character, so everyone sees them. Each is one mesh from `ServerStorage/Meshes` (`Kit_*`, `Head_*` from `blender/locker_kit.py`), sized to the body part (works on different avatar sizes). Until a mesh is imported, a simple part stand-in shows.
+- The server welds them onto the character, so everyone sees them. They live in `workspace.Runtime.Cosmetics.<UserId>`, not inside the character: Roblox hides parts inside a character that are under layered clothing (found 28 Oct, a jacket hid the tee). Each is one mesh from `ServerStorage/Meshes` (`Kit_*`, `Head_*` from `blender/locker_kit.py`), sized to the body part (works on different avatar sizes). Until a mesh is imported, a simple part stand-in shows.
 - The meshes are light grey: the game tints each one with the item's colour, so one mesh serves several items.
 - Other players' worn items hide past 150 studs.
 
