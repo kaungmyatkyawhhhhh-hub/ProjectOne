@@ -70,7 +70,8 @@ SETTINGS (CODES button): codes, MUSIC %, SOUNDS %, LOW GRAPHICS (Auto / On / Off
 - Particles in a full race: about 8 emitters/trails on at once, a few dozen particles (budget 300).
 - Studio FPS is 60 (Studio limits itself; judge by the numbers above + your phone).
 - **Player-left check:** went through every service. Fixed: the tutorial timing table, RACE THEM requests from a player who left, the friend cache and the leaderboard name cache (now capped), and characters of players who left are destroyed.
-- **Soak test:** SOAK_RESULT
+- **Soak test (60 min, Studio):** a race every 30 s with 8 runners (me + NPCs, auto-join) and Auto Train between races: **68 races**. Instance count **flat at 58,577** from minute 4 to minute 60. Memory went **down** (2,332 MB -> 1,239 MB; Studio counts itself in this number, so only the trend matters). No script errors.
+- The soak found one real problem: leaderboard reads went over Roblox's budget with 1 player ("request was added to queue"). Fixed: reads now pace themselves to the budget (5 + 2 per player a minute).
 
 ## 6. Launch check
 **Pacing sim (M1-M5, 60 runs):**
@@ -84,7 +85,17 @@ SETTINGS (CODES button): codes, MUSIC %, SOUNDS %, LOW GRAPHICS (Auto / On / Off
 | Go Pro 2 | 49 min (42 - 59) |
 | League 3 Champion (Go Pro 3 opens with Mountain Trail) | 110 min (101 - 119) |
 
-**Fresh player, one last time:** FRESH_RUN
+**Fresh player, one last time** (real menu, no test switches):
+| Step | Time after PLAY |
+|---|---|
+| Benji card + 2x boost | 0:00 |
+| GO TO Sprint Lane | 0:04 |
+| First tap (FIRST STEP!) | 0:07.5 |
+| Combo hint done | 0:11 |
+| Tutorial race won (gold medal) | 1:10 |
+| First shoes | 1:17 |
+| Silver + free coach roll | ~5:00 (bot sim) |
+| Go Pro 1 | ~14.7 min (bot sim) |
 
 **Launch to-do for you:** [[SPEED ARC - Launch Checklist]] (imports, group, passes, icons, notification strings, music, game page, age questionnaire, phone test).
 

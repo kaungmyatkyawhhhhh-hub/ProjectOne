@@ -20,7 +20,7 @@ Game based on Chop A Brick: train to gain Strength and Level, then karate-chop b
 Train (tap) -> race every 3 min -> coins -> shoes / coaches -> Go Pro. Sister game of GYM ARC, built light for cheap phones.
 - **Details:** [[SPEED ARC/00 SPEED ARC Home]] (all SPEED ARC notes go in the `SPEED ARC` folder)
 - **Code:** this vault, `Games/SpeedArc`. Studio place "SPEED ARC" (placeId 134701616695802).
-- **Now:** M1 core loop is in and tested: data saving, UI kit, Hometown Track hub, 3 training spots, races with NPCs and results ([[2026-10-28 SPEED ARC Progress - 1 Project setup and core loop|progress 1]]). Blender props imported and in the hub (575 parts). Next: owner saves, phone F9 test, then M2 (shoes, coaches, trails).
+- **Now:** M1-M6 built and tested in Studio (core loop, shoes/coaches/trails, leagues + City Park + Big Stadium, tutorial/daily/quests/social, store + locker, look/sound/launch check). Next: owner imports the .fbx kits, creates passes/products (IDs), picks music, phone test, then soft launch ([[SPEED ARC/Features/SPEED ARC - Launch Checklist|launch checklist]]).
 - **Last updated:** 2026-10-28
 
 ## Obsidian + Claude setup: active

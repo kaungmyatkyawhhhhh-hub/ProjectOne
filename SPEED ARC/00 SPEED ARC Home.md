@@ -39,7 +39,7 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 - [[2026-10-28 SPEED ARC Prompt - 3 Ranks, Go Pro, City Park, Big Stadium]] (M3, done: [[2026-10-28 SPEED ARC Progress - 3 Ranks, Go Pro, City Park, Big Stadium|progress]])
 - [[2026-10-28 SPEED ARC Prompt - 4 First 15 minutes, daily, quests, social]] (M4, done: [[2026-10-28 SPEED ARC Progress - 4 First 15 minutes, daily, quests, social|progress]])
 - [[2026-10-28 SPEED ARC Prompt - 5 Store, passes, Starter Pack, Locker cosmetics]] (M5, done: [[2026-10-28 SPEED ARC Progress - 5 Store, passes, Starter Pack, Locker cosmetics|progress]])
-- [[2026-10-28 SPEED ARC Prompt - 6 Look, sound and launch check]] (M6, then soft launch)
+- [[2026-10-28 SPEED ARC Prompt - 6 Look, sound and launch check]] (M6, done: [[2026-10-28 SPEED ARC Progress - 6 Look, sound and launch check|progress]]; next: [[SPEED ARC - Launch Checklist]], then soft launch)
 - After launch (one every 1-2 weeks, only after checking the numbers):
   - [[2026-10-28 SPEED ARC Prompt - 7 Update 1 Mountain Trail]]
   - [[2026-10-28 SPEED ARC Prompt - 8 Update 2 World Games]]
@@ -57,6 +57,7 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 - [[SPEED ARC - Social and Profiles]]
 - [[SPEED ARC - Analytics]]
 - [[SPEED ARC - Store and Monetization]]
+- [[SPEED ARC - Launch Checklist]]
 - [[SPEED ARC - Code and Sync]]
 - [[SPEED ARC - Player Data and Saving]]
 - [[SPEED ARC - UI Kit and HUD]]
