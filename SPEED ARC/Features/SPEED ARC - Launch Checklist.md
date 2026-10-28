@@ -11,7 +11,7 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 
 ## 1. Imports (Studio, into `ServerStorage/Meshes`)
 - [x] All 25 meshes imported (28 Oct). They landed in Workspace; moved into `ServerStorage/Meshes`, hub / park / stadium rebuilt with them.
-- [x] Fit checked: shoes, tee, shorts, bib OK. Worn items now sit outside the character (layered clothing was hiding them).
+- [x] Fit checked: shoes, tee, shorts, bib OK. Worn items now sit outside the character (inside it, the tee did not draw).
 
 ## 2. Creator Hub (all in the GROUP that owns the game)
 - [ ] Move the place to the group (it's on your account now: creatorType "User").
