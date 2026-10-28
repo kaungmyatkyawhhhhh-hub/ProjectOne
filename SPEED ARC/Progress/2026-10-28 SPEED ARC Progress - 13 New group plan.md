@@ -85,3 +85,25 @@ Either way the **images and meshes** are re-uploaded into the new group (your ru
 ## 28 Oct: the new group
 - The owner made it: **P&L Studios XP**, group id **947215423** (roblox.com/communities/947215423). (The 100 Robux create page and an emblem draft, `Downloads\speed_arc_models\group\SpeedArc_Group_Emblem.png`, are no longer needed.)
 - Game name (owner, 28 Oct, final): **SPEED ARC** (the "+1 Speed Evolution" idea was dropped).
+
+## 28 Oct: the new experience (done by Claude in Chrome)
+- Owner published the copy: **place 83449409428509, experience 10773471333**, owner P&L Studios XP (947215423).
+- Claude created all 13 in Creator Hub (same names, prices, descriptions, icons; on sale; managed pricing OFF) and put the ids in `Config/Store.lua`:
+
+| Item | Price | Old id | New id |
+|---|---|---|---|
+| Auto Run (pass) | 249 | 2058077302 | 2057153424 |
+| 2x Speed (pass) | 249 | 2057303279 | 2057219448 |
+| 2x Coins (pass) | 149 | 2056799285 | 2058959396 |
+| VIP (pass) | 299 | 2057831240 | 2057411383 |
+| Extra Coach Slot (pass) | 99 | 2058899277 | 2060902573 |
+| Extra Coach Slot 2 (pass) | 149 | 2058089261 | 2060123319 |
+| Trail Pack (pass) | 199 | 2057681285 | 2057909409 |
+| Faster Rolls (pass) | 99 | 2057165273 | 2060464692 |
+| Small Coins | 25 | 3723179071 | 3723249429 |
+| Medium Coins | 99 | 3723179142 | 3723249545 |
+| Large Coins | 249 | 3723179202 | 3723249708 |
+| 2x Speed 15 min | 25 | 3723179279 | 3723249845 |
+| Starter Pack | 49 | 3723179367 | 3723249962 |
+
+- Still to do: the 3 notification strings (the browser extension disconnected on that page), the uploads (3 UI sheets, 8 clothing images: owner approves first), the meshes (owner, Bulk Import), sync + Studio purchase test, old experience to Private.
