@@ -20,6 +20,7 @@ local ORDER = {
 	"MusicController",
 	"TutorialController",
 	"RetentionController",
+	"StoreController",
 	"SocialController",
 	"LeaderboardController",
 }

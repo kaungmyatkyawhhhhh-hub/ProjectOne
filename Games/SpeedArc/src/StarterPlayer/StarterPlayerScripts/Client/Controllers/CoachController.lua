@@ -8,6 +8,7 @@ local UIKit = require(Shared.UIKit)
 local Art = require(Shared.Util.Art)
 local Boosts = require(Shared.Util.Boosts)
 local Format = require(Shared.Util.Format)
+local Store = require(Shared.Config.Store)
 local Coaches = require(Shared.Config.Coaches)
 
 local P = UIKit.Palette
@@ -254,20 +255,60 @@ local function clearPage()
 	end
 end
 
-function CoachUI.rollNow()
+local function rarityIndex(r)
+	return table.find(Coaches.Rarities, r) or 1
+end
+
+-- Faster Rolls pass: no roll animation, and ROLL x3 (same odds, same coin price per roll)
+local function fasterRolls()
+	return coll ~= nil and coll.Passes ~= nil and coll.Passes.FasterRolls == true
+end
+
+function CoachUI.rollNow(count)
 	if rolling then
 		return
 	end
 	rolling = true
-	local ok, result = ctx.Net.call("RollCoach")
-	if ok then
-		win.hide(true)
-		CoachUI.reveal(result)
-		win.show()
+	count = count or 1
+	local got = {}
+	for i = 1, count do
+		local ok, result = ctx.Net.call("RollCoach")
+		if ok then
+			table.insert(got, result)
+			if not fasterRolls() then
+				win.hide(true)
+				CoachUI.reveal(result)
+				win.show()
+			end
+		else
+			if result == "coins" then
+				ctx.Sound.play("Denied")
+				ctx.Hud.toast(if i == 1 then "Not enough coins to roll yet" else ("Rolled %d - not enough coins for more"):format(i - 1), "Denied")
+			end
+			break
+		end
+	end
+	if #got > 0 then
+		if fasterRolls() then
+			local names = {}
+			local best = got[1]
+			for _, r in got do
+				local c = Boosts.coach(r.Id)
+				table.insert(names, c and c.Name or r.Id)
+				if rarityIndex(r.Rarity) > rarityIndex(best.Rarity) then
+					best = r
+				end
+			end
+			ctx.Sound.play("KaChing")
+			ctx.Hud.toast("You got: " .. table.concat(names, ", "), "Gold")
+			-- big pulls still get their moment
+			if rarityIndex(best.Rarity) >= rarityIndex("Legendary") then
+				win.hide(true)
+				CoachUI.reveal(best)
+				win.show()
+			end
+		end
 		setTab("MY COACHES")
-	elseif result == "coins" then
-		ctx.Sound.play("Denied")
-		ctx.Hud.toast("Not enough coins to roll yet", "Denied")
 	end
 	rolling = false
 end
@@ -285,8 +326,16 @@ local function rollPage()
 		ci.Position = UDim2.new(1, -36, 0.5, -11)
 	end
 	btn.Activated:Connect(function()
-		CoachUI.rollNow()
+		CoachUI.rollNow(1)
 	end)
+	if fasterRolls() and price > 0 then
+		btn.Size = UDim2.fromOffset(120, 60)
+		btn.Position = UDim2.new(0.5, -122, 0, 62)
+		label.Text = "ROLL"
+		UIKit.button({ Name = "Roll3", Style = "Blue", Text = "ROLL x3", TextSize = 20, Position = UDim2.new(0.5, 4, 0, 62), Size = UDim2.fromOffset(118, 60), Parent = left, OnClick = function()
+			CoachUI.rollNow(Store.FasterRolls.Count)
+		end })
+	end
 	local y = 132
 	for _, p in Coaches.Pity do
 		local left_ = p.Rolls - ((coll and coll.Pity and coll.Pity[p.Rarity]) or 0)
