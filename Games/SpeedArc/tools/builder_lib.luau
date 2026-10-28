@@ -541,7 +541,7 @@ function L.course(parent, areaId, opts)
 			p("Side", Vector3.new(1, 40, L_), side * (Wd / 2 + 2.5), 20, mid, col, { Transparency = 1 })
 			if water then
 				-- a bridge over the lake: water both sides, white posts and a rail
-				p("Water", Vector3.new(60, 0.3, L_ + 20), side * (Wd / 2 + 32), -0.2, mid, Color3.fromHex("#4FB6F0"), { Transparency = 0.1, CanCollide = false })
+				p("Water", Vector3.new(60, 0.3, L_ + 20), side * (Wd / 2 + 32), 0.1, mid, Color3.fromHex("#4FB6F0"), { Transparency = 0.1, CanCollide = false })
 				for j = 0, 6 do
 					p("BridgePost", Vector3.new(0.8, 3.6, 0.8), side * (Wd / 2 + 1), 3.4, a0 + 6 + j * 13, Palette.White)
 				end
