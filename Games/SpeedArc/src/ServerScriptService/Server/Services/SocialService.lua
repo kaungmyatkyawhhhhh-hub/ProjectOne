@@ -384,6 +384,19 @@ function SocialService.start()
 	Players.PlayerRemoving:Connect(function(player)
 		requests[player] = nil
 		sessionStart[player] = nil
+		for target, r in requests do
+			if r.from == player then
+				requests[target] = nil
+			end
+		end
+		-- the friend cache only keeps pairs of players who are still here
+		local id = tostring(player.UserId)
+		for key in friendCache do
+			local a, b = string.match(key, "^(%d+):(%d+)$")
+			if a == id or b == id then
+				friendCache[key] = nil
+			end
+		end
 		SessionBoosts.clear(player)
 		for _, other in Players:GetPlayers() do
 			if other ~= player and areFriends(player, other) then

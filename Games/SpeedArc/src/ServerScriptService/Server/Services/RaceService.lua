@@ -232,7 +232,12 @@ local function buildRunners(A, raceType)
 	-- NPCs fill up to MinRunners, at speeds around the joined players' middle speed
 	table.sort(speeds)
 	local mid = math.max(if A.npcRange then 1 else Race.NpcMinSpeed, speeds[math.ceil(#speeds / 2)])
-	local npcCount = if A.npcCount then A.npcCount else math.max(0, math.min(Race.MinRunners, maxRunners) - #A.runners)
+	local minRunners = Race.MinRunners
+	local testRunners = IS_STUDIO and workspace:GetAttribute("TestRaceRunners") -- Studio: full 8-runner races
+	if type(testRunners) == "number" then
+		minRunners = testRunners
+	end
+	local npcCount = if A.npcCount then A.npcCount else math.max(0, math.min(minRunners, maxRunners) - #A.runners)
 	local used = {}
 	for _ = 1, npcCount do
 		local idx

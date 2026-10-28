@@ -121,7 +121,12 @@ local function writePlayer(player)
 	end
 end
 
+local nameCount = 0
 local function fillNames(ids)
+	if nameCount > 600 then
+		table.clear(names) -- a cap: names are cheap to ask for again
+		nameCount = 0
+	end
 	local missing = {}
 	for _, id in ids do
 		if not names[id] then
@@ -140,6 +145,7 @@ local function fillNames(ids)
 		if ok then
 			for _, info in infos do
 				names[info.Id] = info.DisplayName
+				nameCount += 1
 			end
 		end
 	end

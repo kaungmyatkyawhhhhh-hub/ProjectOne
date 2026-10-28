@@ -1159,6 +1159,86 @@ do
 	end
 end
 
+
+----------------------------------------------------------------------------
+-- M6 look pass: the flat fields get detail - grass colour patches, gravel paths, flower beds,
+-- bushes along the hedges, benches and lamps on the paths. Seeded, so every rebuild looks the same.
+----------------------------------------------------------------------------
+do
+	local dress = folder("Dressing")
+	local rnd = Random.new(606)
+	local greens = { Color3.fromHex("#66B356"), Color3.fromHex("#549C47"), Color3.fromHex("#6FBB5C"), Color3.fromHex("#4F9443") }
+	local function onField(x, z)
+		-- the two side fields and the back corners (clear of the track, school, plaza and shops)
+		local track = math.abs(x) < 112 and math.abs(z - 0) < 62
+		local school = math.abs(x) < 72 and z > 56
+		local plaza = math.abs(x) < 40 and z < -84
+		local shops = x < -100 and math.abs(z) < 70
+		return not (track or school or plaza or shops) and math.abs(x) < 140 and z > -140 and z < 146
+	end
+	-- grass patches (just above the mowing stripes, so they never flicker)
+	local n = 0
+	while n < 34 do
+		local x, z = rnd:NextNumber(-138, 138), rnd:NextNumber(-138, 144)
+		if onField(x, z) then
+			n += 1
+			local p = block(dress, "GrassPatch", Vector3.new(rnd:NextNumber(5, 13), 0.04, rnd:NextNumber(4, 10)), Vector3.new(x, 0.1, z), greens[rnd:NextInteger(1, #greens)], { CanCollide = false })
+			p.CFrame = CFrame.new(x, 0.1, z) * CFrame.Angles(0, rnd:NextNumber(0, math.pi), 0)
+		end
+	end
+	-- gravel paths: one down each side field, joined to the plaza in front of the school
+	local gravel = Color3.fromHex("#C2B9A6")
+	block(dress, "PathEast", Vector3.new(7, 0.2, 230), Vector3.new(124, 0.1, 5), gravel, { CanCollide = false })
+	block(dress, "PathEastLink", Vector3.new(52, 0.2, 7), Vector3.new(98, 0.1, 96), gravel, { CanCollide = false })
+	block(dress, "PathWest", Vector3.new(7, 0.2, 120), Vector3.new(-96, 0.1, 10), gravel, { CanCollide = false })
+	block(dress, "PathWestLink", Vector3.new(30, 0.2, 7), Vector3.new(-82, 0.1, 82), gravel, { CanCollide = false })
+	for _, z in { -90, -30, 30, 90 } do
+		block(dress, "PathEdge", Vector3.new(7.6, 0.24, 0.5), Vector3.new(124, 0.12, z), Color3.fromHex("#A69C88"), { CanCollide = false })
+	end
+	-- flower beds: soil + a few flowers each, in palette-friendly colours
+	local petals = { Palette.Gold, Palette.White, Color3.fromHex("#FF8FB1"), Palette.BrightBlue, Color3.fromHex("#FF4A4A") }
+	local beds = { Vector3.new(112, 0, -110), Vector3.new(136, 0, -60), Vector3.new(112, 0, 40), Vector3.new(136, 0, 120), Vector3.new(84, 0, 120),
+		Vector3.new(-84, 0, 120), Vector3.new(-136, 0, 120), Vector3.new(-120, 0, -112), Vector3.new(-70, 0, -126), Vector3.new(70, 0, -126) }
+	for i, c in beds do
+		local r = rnd:NextNumber(2.4, 3.4)
+		cyl(dress, "Soil", r, 0.5, c + Vector3.new(0, 0.25, 0), Color3.fromHex("#6B4A32"))
+		cyl(dress, "Rim", r + 0.25, 0.36, c + Vector3.new(0, 0.18, 0), W.Concrete)
+		local col = petals[(i - 1) % #petals + 1]
+		for k = 1, 7 do
+			local a = k / 7 * math.pi * 2 + rnd:NextNumber(-0.3, 0.3)
+			local d = rnd:NextNumber(0.4, r - 0.6)
+			ball(dress, "Flower", rnd:NextNumber(0.55, 0.85), c + Vector3.new(math.cos(a) * d, 0.75, math.sin(a) * d), if k % 3 == 0 then W.TreeLeafLight else col, { CanCollide = false })
+		end
+	end
+	-- bushes along the hedges (small tree crowns)
+	for i = 0, 11 do
+		local z = -120 + i * 22
+		for _, x in { -138, 138 } do
+			if onField(x, z) or math.abs(z) > 70 then
+				tree(Vector3.new(x + rnd:NextNumber(-2, 2), 0, z + rnd:NextNumber(-4, 4)), rnd:NextNumber(0.42, 0.55))
+			end
+		end
+	end
+	-- benches + lamps along the east path, a drinking fountain where the paths meet
+	for _, z in { -70, -10, 50 } do
+		local b = mesh("Bench", dress, CFrame.new(118.5, 0, z) * CFrame.Angles(0, math.pi / 2, 0))
+		if not b then
+			block(dress, "BenchSeat", Vector3.new(1.6, 0.3, 5), Vector3.new(118.5, 1.4, z), W.Wood)
+			block(dress, "BenchBack", Vector3.new(0.3, 1.2, 5), Vector3.new(117.8, 2.1, z), W.Wood)
+			for _, dz in { -2, 2 } do
+				block(dress, "BenchLeg", Vector3.new(1.4, 1.3, 0.3), Vector3.new(118.5, 0.65, z + dz), Palette.Graphite)
+			end
+		end
+	end
+	for _, z in { -100, -40, 20, 80 } do
+		cyl(dress, "LampPole", 0.22, 8, Vector3.new(129, 4, z), Palette.Graphite)
+		ball(dress, "LampGlow", 1.1, Vector3.new(129, 8.3, z), Color3.fromHex("#FFE3A0"), { Material = Enum.Material.Neon, CanCollide = false })
+	end
+	cyl(dress, "FountainBase", 1.1, 2.6, Vector3.new(124, 1.3, 96), W.Concrete)
+	cyl(dress, "FountainBowl", 1.5, 0.4, Vector3.new(124, 2.7, 96), Palette.Graphite)
+	cyl(dress, "FountainWater", 1.3, 0.12, Vector3.new(124, 2.92, 96), Palette.BrightBlue, { Transparency = 0.2, CanCollide = false })
+end
+
 ----------------------------------------------------------------------------
 -- finish
 ----------------------------------------------------------------------------

@@ -256,6 +256,7 @@ function TutorialService.start()
 	end)
 	Players.PlayerRemoving:Connect(function(p)
 		rollsAtStart[p] = nil
+		startedAt[p] = nil
 	end)
 end
 

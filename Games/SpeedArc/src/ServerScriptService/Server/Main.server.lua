@@ -50,6 +50,15 @@ Players.PlayerAdded:Connect(onPlayer)
 for _, p in Players:GetPlayers() do
 	onPlayer(p)
 end
+-- lesson: destroy the character of a player who left (old characters kept memory growing)
+Players.PlayerRemoving:Connect(function(player)
+	task.defer(function()
+		local char = player.Character
+		if char and char.Parent then
+			char:Destroy()
+		end
+	end)
+end)
 
 PlayerData.start()
 TrainingService.start()
@@ -65,3 +74,18 @@ SocialService.start()
 LeaderboardService.start()
 StoreService.start()
 CosmeticsService.start()
+
+-- Studio soak test: Workspace TestSoak = true logs server memory every 2 min into the attribute SoakLog
+if game:GetService("RunService"):IsStudio() then
+	task.spawn(function()
+		local Stats = game:GetService("Stats")
+		local started = os.clock()
+		while true do
+			task.wait(120)
+			if workspace:GetAttribute("TestSoak") then
+				local line = ("%dmin %.0fMB inst=%d"):format((os.clock() - started) // 60, Stats:GetTotalMemoryUsageMb(), Stats.InstanceCount)
+				workspace:SetAttribute("SoakLog", (workspace:GetAttribute("SoakLog") or "") .. line .. "; ")
+			end
+		end
+	end)
+end
