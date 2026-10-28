@@ -185,11 +185,17 @@ local function drawPath(target)
 	local dots = pathFolder:GetChildren()
 	local spacing = math.max(2.5, dist / #dots)
 	local phase = (os.clock() * 6) % spacing
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { player.Character, pathFolder }
 	for i, dot in dots do
 		local d = phase + (i - 1) * spacing
 		if d < dist - 1.5 then
 			local pos = a:Lerp(b, d / dist)
-			dot.CFrame = CFrame.new(pos.X, a.Y + 0.08, pos.Z) * CFrame.Angles(0, 0, math.pi / 2)
+			-- sit on whatever floor is there (plaza tiles, track, grass)
+			local hit = workspace:Raycast(pos + Vector3.new(0, 4, 0), Vector3.new(0, -10, 0), params)
+			local y = if hit then hit.Position.Y else a.Y
+			dot.CFrame = CFrame.new(pos.X, y + 0.08, pos.Z) * CFrame.Angles(0, 0, math.pi / 2)
 			dot.Transparency = 0.15
 		else
 			dot.Transparency = 1

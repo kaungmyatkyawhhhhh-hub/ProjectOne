@@ -1093,6 +1093,72 @@ do
 	}, { PPS = 20, MaxDistance = 200, Padding = 0 })
 end
 
+
+----------------------------------------------------------------------------
+-- M4 Leaderboard Wall (left of the school, facing the plaza): 4 global boards, filled by
+-- LeaderboardService (parts with a "Board" attribute, rows Row1..Row5)
+----------------------------------------------------------------------------
+do
+	local wall = folder("LeaderboardWall")
+	local wx = -74
+	local boardsList = {
+		{ "Speed", "TOP SPEED", Palette.Gold },
+		{ "Wins", "MOST WINS", Palette.ElectricBlue },
+		{ "WeeklyWins", "WINS THIS WEEK", Palette.Gold },
+		{ "WeeklyTime", "FASTEST SPRINT THIS WEEK", Palette.BrightBlue },
+	}
+	block(wall, "Back", Vector3.new(1.2, 13, 49), Vector3.new(wx - 0.9, 6.5, 86), Palette.Carbon)
+	block(wall, "Cap", Vector3.new(2.2, 0.8, 50), Vector3.new(wx - 0.6, 13.4, 86), Palette.Gold)
+	block(wall, "Base", Vector3.new(3, 1, 50), Vector3.new(wx - 0.4, 0.5, 86), Palette.Graphite)
+	local sign = block(wall, "Sign", Vector3.new(0.4, 2.2, 22), Vector3.new(wx - 0.2, 15.2, 86), Palette.SpeedBlack)
+	surfaceText(sign, Enum.NormalId.Right, { { Text = "LEADERBOARDS", Height = 0.85, Color = Palette.Gold } }, { PPS = 20, MaxDistance = 200 })
+	for i, b in boardsList do
+		local z = 86 - 18 + (i - 1) * 12
+		local board = block(wall, "Board", Vector3.new(0.4, 9, 11), Vector3.new(wx, 6.8, z), Palette.SpeedBlack)
+		board:SetAttribute("Board", b[1])
+		block(wall, "Trim", Vector3.new(0.3, 9.4, 11.4), Vector3.new(wx - 0.15, 6.8, z), b[3])
+		local gui = Instance.new("SurfaceGui")
+		gui.Face = Enum.NormalId.Right
+		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		gui.PixelsPerStud = 24
+		gui.MaxDistance = 110
+		gui.LightInfluence = 0.2
+		gui.Brightness = 1.4
+		gui.Parent = board
+		local t = Instance.new("TextLabel")
+		t.BackgroundTransparency = 1
+		t.Size = UDim2.fromScale(1, 0.18)
+		t.Position = UDim2.fromScale(0, 0.02)
+		t.TextScaled = true
+		t.FontFace = MONTSERRAT
+		t.Text = b[2]
+		t.TextColor3 = b[3]
+		t.Parent = gui
+		local rows = Instance.new("Frame")
+		rows.Name = "Rows"
+		rows.BackgroundTransparency = 1
+		rows.Position = UDim2.fromScale(0.05, 0.22)
+		rows.Size = UDim2.fromScale(0.9, 0.74)
+		rows.Parent = gui
+		local layout = Instance.new("UIListLayout")
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Parent = rows
+		for r = 1, 5 do
+			local l = Instance.new("TextLabel")
+			l.Name = "Row" .. r
+			l.LayoutOrder = r
+			l.BackgroundTransparency = 1
+			l.Size = UDim2.fromScale(1, 0.2)
+			l.TextScaled = true
+			l.FontFace = BODY
+			l.TextXAlignment = Enum.TextXAlignment.Left
+			l.Text = r .. ".  -"
+			l.TextColor3 = if r == 1 then Palette.Gold else Palette.White
+			l.Parent = rows
+		end
+	end
+end
+
 ----------------------------------------------------------------------------
 -- finish
 ----------------------------------------------------------------------------
