@@ -186,6 +186,44 @@ def badge(colour):
     return shrink(img, (W, H))
 
 
+# ---------------------------------------------------------------- reveal fx (white, the game tints them)
+def orb():
+    W = 200
+    size = (W * SS, W * SS)
+    img = Image.new("RGBA", size, (0, 0, 0, 0))
+    halo = mask(size, lambda d: d.ellipse(S(10, 10, 190, 190), fill=255)).filter(ImageFilter.GaussianBlur(14 * SS))
+    paint(img, halo, (255, 255, 255, 150))
+    for k in range(40):  # the sphere: rings from the dim edge to the bright core
+        t = k / 39
+        r = 64 * (1 - t) + 6
+        c = int(170 + 85 * t)
+        paint(img, mask(size, lambda d, r=r: d.ellipse(S(100 - r - 6 * t, 100 - r - 8 * t, 100 + r - 6 * t, 100 + r - 8 * t), fill=255)), (c, c, c, 255))
+    paint(img, mask(size, lambda d: d.ellipse(S(62, 50, 104, 80), fill=255)).filter(ImageFilter.GaussianBlur(3 * SS)), (255, 255, 255, 220))
+    return shrink(img, (W, W))
+
+
+def burst():
+    import math
+    W = 200
+    size = (W * SS, W * SS)
+    rays = Image.new("L", size, 0)
+    d = ImageDraw.Draw(rays)
+    n = 16
+    for k in range(n):
+        a0 = (k / n) * 2 * math.pi
+        a1 = a0 + math.pi / n * 0.8
+        pts = [(100 * SS, 100 * SS)] + [((100 + 100 * math.cos(a)) * SS, (100 + 100 * math.sin(a)) * SS) for a in (a0, a1)]
+        d.polygon(pts, fill=255)
+    fade = Image.new("L", size, 0)
+    fd = ImageDraw.Draw(fade)
+    for k in range(50):
+        r = 100 * (1 - k / 50)
+        fd.ellipse(S(100 - r, 100 - r, 100 + r, 100 + r), fill=int(255 * (k / 50) ** 0.7))
+    img = Image.new("RGBA", size, (255, 255, 255, 0))
+    img.putalpha(ImageChops.multiply(rays.filter(ImageFilter.GaussianBlur(2 * SS)), fade))
+    return shrink(img, (W, W))
+
+
 # ---------------------------------------------------------------- icons (128 x 128, navy outline)
 def icon(parts, details=None, outline=7):
     """parts: list of (draw_fn(d) in 1x coords via S, colour). details: fn(d) drawn on top."""
@@ -342,6 +380,8 @@ def build():
     spr["badge_red"] = save("badge_red", badge("#FF3B3B"), None, None, "notification dot")
     spr["badge_bronze"] = save("badge_bronze", badge("#D9822B"), None, None, "rank badge")
     spr["badge_white"] = save("badge_white", badge("#F4F6FA"), None, None, "badge the game tints (ImageColor3), e.g. the rank colour")
+    spr["fx_orb"] = save("fx_orb", orb(), None, None, "coach roll reveal: the orb (tinted by rarity)")
+    spr["fx_burst"] = save("fx_burst", burst(), None, None, "coach roll reveal: the burst rays (tinted by rarity)")
     for k, v in ICONS().items():
         spr["icon_" + k] = save("icon_" + k, v, None, None, "icon")
     with open(os.path.join(OUT_SPR, "kit.json"), "w") as f:
@@ -562,7 +602,7 @@ GUTTER = 4
 
 
 def sheet_of(name):
-    return "Tiles" if name.startswith("tile_") else "Icons" if name.startswith("icon_") else "Buttons"
+    return "Tiles" if name.startswith(("tile_", "fx_")) else "Icons" if name.startswith("icon_") else "Buttons"
 
 
 def pack():

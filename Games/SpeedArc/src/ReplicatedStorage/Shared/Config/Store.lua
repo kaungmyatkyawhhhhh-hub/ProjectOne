@@ -19,7 +19,7 @@ return {
 			Icon = { "VIP", "#FFC83D" } },
 		{ Key = "ExtraCoachSlot", Name = "EXTRA COACH SLOT", Price = 99, Id = 2058899277,
 			Desc = "Equip one more coach (3 slots).",
-			Icon = { "+1", "#9B6BFF" } },
+			Icon = { "+1", "#1EC8FF" } },
 		{ Key = "ExtraCoachSlot2", Name = "EXTRA COACH SLOT 2", Price = 149, Id = 2058089261, Needs = "ExtraCoachSlot",
 			Desc = "Equip one more coach again (4 slots).",
 			Icon = { "+1", "#FF7A1F" } },

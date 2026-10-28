@@ -19,6 +19,8 @@ return {
 	btn_red_down = { "Buttons", 328, 196, 160, 112, Slice = { 40, 40, 120, 72 }, SliceScale = 0.33 },
 	btn_yellow = { "Buttons", 852, 0, 160, 112, Slice = { 40, 40, 120, 72 }, SliceScale = 0.33 },
 	btn_yellow_down = { "Buttons", 0, 196, 160, 112, Slice = { 40, 40, 120, 72 }, SliceScale = 0.33 },
+	fx_burst = { "Tiles", 368, 204, 200, 200 },
+	fx_orb = { "Tiles", 164, 204, 200, 200 },
 	icon_close = { "Icons", 264, 132, 128, 128 },
 	icon_coaches = { "Icons", 264, 0, 128, 128 },
 	icon_codes = { "Icons", 396, 0, 128, 128 },

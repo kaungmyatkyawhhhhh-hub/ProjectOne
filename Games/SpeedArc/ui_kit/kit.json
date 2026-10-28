@@ -418,6 +418,24 @@
   "sliceScale": null,
   "use": "badge the game tints (ImageColor3), e.g. the rank colour"
  },
+ "fx_orb": {
+  "size": [
+   200,
+   200
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "coach roll reveal: the orb (tinted by rarity)"
+ },
+ "fx_burst": {
+  "size": [
+   200,
+   200
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "coach roll reveal: the burst rays (tinted by rarity)"
+ },
  "icon_store": {
   "size": [
    128,

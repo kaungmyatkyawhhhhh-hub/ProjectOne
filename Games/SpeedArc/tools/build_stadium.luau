@@ -182,7 +182,7 @@ L.sign(bungee, L.station("BungeeSprint"), CFrame.lookAt(Vector3.new(C.X + 20, 0,
 -- props: a press box and flags of made-up nations (the tents, coolers and camera crane went with the candy pass)
 block(props, "PressBox", Vector3.new(30, 6, 8), Vector3.new(C.X, 13, C.Z + frontN - 22), P.White)
 block(props, "PressGlass", Vector3.new(28, 3, 0.3), Vector3.new(C.X, 13.5, C.Z + frontN - 17.9), W.Window, { Transparency = 0.3 })
-local nations = { { "#1E7BFF", "#FFC83D" }, { "#FF4A4A", "#F4F6FA" }, { "#3FA34D", "#F4F6FA" }, { "#0E3A8A", "#FF4A4A" }, { "#FFC83D", "#0B0D12" }, { "#9B6BFF", "#F4F6FA" }, { "#4FC3FF", "#0E3A8A" }, { "#FF7A1F", "#3FA34D" } }
+local nations = { { "#1E7BFF", "#FFC83D" }, { "#FF4A4A", "#F4F6FA" }, { "#3FA34D", "#F4F6FA" }, { "#0E3A8A", "#FF4A4A" }, { "#FFC83D", "#0B0D12" }, { "#1EC8FF", "#F4F6FA" }, { "#4FC3FF", "#0E3A8A" }, { "#FF7A1F", "#3FA34D" } }
 for i, n in nations do
 	L.flag(flags, Vector3.new(C.X - 70 + (i - 1) * 20, 9.3, C.Z + frontN - 18.6), Color3.fromHex(n[1]), Color3.fromHex(n[2]), 7)
 end

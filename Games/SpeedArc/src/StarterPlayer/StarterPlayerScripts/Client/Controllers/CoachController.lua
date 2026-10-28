@@ -180,23 +180,19 @@ end
 local function revealCard(coach, forced)
 	local rc = Coaches.RarityColors[coach.Rarity]
 	local rank = table.find(Coaches.Rarities, coach.Rarity)
-	-- rays behind the card scale with rarity
-	local rays = make("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromOffset(420, 420), Parent = overlay })
-	for i = 1, 4 + rank * 2 do
-		local ray = make("Frame", { BackgroundColor3 = rc, BackgroundTransparency = 0.65, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(0, 26, 1, 0), Rotation = i * (180 / (4 + rank * 2)), Parent = rays })
-		UIKit.corner(ray, UDim.new(0.5, 0))
-	end
-	local card = UIKit.panel({ Name = "RevealCard", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromOffset(300, 300), AccentColor = rc, StrokeColor = rc, StrokeThickness = 3, Parent = overlay })
+	-- the burst keeps turning behind the card (bigger for rarer coaches)
+	local rays = UIKit.sprite("fx_burst", { Name = "Rays", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromOffset(360 + rank * 30, 360 + rank * 30), Color = rc, ImageTransparency = 0.25, Parent = overlay })
+	local card = UIKit.tile({ Name = "RevealCard", Color = rc, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromOffset(290, 320), Parent = overlay })
 	local cs = make("UIScale", { Scale = 0.3, Parent = card })
-	local bust = make("Frame", { Name = "Bust", BackgroundColor3 = rc:Lerp(P.White, 0.3), BackgroundTransparency = 0.55, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(130, 126), Parent = card })
-	UIKit.corner(bust, UDim.new(0.5, 0))
+	local bust = make("Frame", { Name = "Bust", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(150, 136), Parent = card })
 	CoachView.make(bust, coach.Id, { Zoom = 1.1 })
-	UIKit.text({ Text = string.upper(coach.Rarity), TextSize = 18, Color = rc, Position = UDim2.fromOffset(0, 146), Size = UDim2.new(1, 0, 0, 22), Parent = card })
-	UIKit.text({ Text = string.upper(coach.Name), TextSize = 28, Position = UDim2.fromOffset(0, 170), Size = UDim2.new(1, 0, 0, 34), Parent = card })
-	UIKit.text({ Text = boostText(coach.Id, 1), Font = F.BodyBold, TextSize = 15, Color = P.BrightBlue, Position = UDim2.fromOffset(0, 206), Size = UDim2.new(1, 0, 0, 20), Parent = card })
-	UIKit.text({ Text = '"' .. coach.Line .. '"', Font = F.Body, TextSize = 14, Wrapped = true, Position = UDim2.fromOffset(20, 228), Size = UDim2.new(1, -40, 0, 36), Parent = card })
+	local tag = UIKit.pill({ Kind = "navy", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 150), Size = UDim2.fromOffset(150, 28), Parent = card })
+	UIKit.text({ Text = string.upper(coach.Rarity), TextSize = 16, Color = rc, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, Parent = tag })
+	UIKit.text({ Text = string.upper(coach.Name), TextSize = 28, StrokeColor = P.Navy, StrokeThickness = 3, StrokeTransparency = 0, Position = UDim2.fromOffset(0, 182), Size = UDim2.new(1, 0, 0, 34), Parent = card })
+	UIKit.text({ Text = boostText(coach.Id, 1), Font = F.BodyBold, TextSize = 15, Color = P.Gold, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(0, 218), Size = UDim2.new(1, 0, 0, 20), Parent = card })
+	UIKit.text({ Text = '"' .. coach.Line .. '"', Font = F.BodyBold, TextSize = 14, Wrapped = true, Position = UDim2.fromOffset(22, 242), Size = UDim2.new(1, -44, 0, 40), Parent = card })
 	if forced then
-		UIKit.text({ Text = "PITY: " .. string.upper(forced) .. " GUARANTEED", Font = F.BodyBold, TextSize = 13, Color = P.Gold, Position = UDim2.fromOffset(0, 266), Size = UDim2.new(1, 0, 0, 18), Parent = card })
+		UIKit.text({ Text = "PITY: " .. string.upper(forced) .. " GUARANTEED", Font = F.BodyBold, TextSize = 13, Color = P.Gold, Position = UDim2.fromOffset(0, 286), Size = UDim2.new(1, 0, 0, 18), Parent = card })
 	end
 	UIKit.tween(cs, 0.35, { Scale = 1 }, Enum.EasingStyle.Back)
 	ctx.Sound.play(if rank >= 5 then "RevealLegend" elseif rank >= 4 then "RevealEpic" elseif rank >= 3 then "RevealRare" else "RevealCommon")
@@ -206,7 +202,7 @@ local function revealCard(coach, forced)
 			task.wait(1 / 30)
 		end
 	end)
-	local okBtn = UIKit.button({ Style = "Blue", Text = "NICE!", TextSize = 20, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0.46, 160), Size = UDim2.fromOffset(170, 48), Parent = overlay })
+	local okBtn = UIKit.button({ Style = "Green", Text = "NICE!", TextSize = 20, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0.46, 174), Size = UDim2.fromOffset(170, 50), Parent = overlay })
 	local closed = false
 	okBtn.Activated:Connect(function()
 		closed = true
@@ -221,24 +217,48 @@ function CoachUI.reveal(result)
 	local coach = Boosts.coach(result.Id)
 	overlay.Visible = true
 	clearOverlay()
-	-- name roller: names flick past with rising ticks, slowing down, landing on the coach
-	local roller = UIKit.text({ Text = "", TextSize = 40, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.45), Size = UDim2.fromOffset(600, 60), Parent = overlay })
-	local glow = make("Frame", { BackgroundColor3 = P.ElectricBlue, BackgroundTransparency = 0.6, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.45), Size = UDim2.fromOffset(460, 70), Parent = overlay })
-	UIKit.corner(glow, 16)
-	roller.ZIndex = 2
-	local steps = 18
+	-- 1) THE ORB (GYM ARC-style reveal, prompt 12): it pops in, shakes harder and flickers through
+	-- the rarities up to the real one while the ticks speed up
+	local rank = table.find(Coaches.Rarities, coach.Rarity) or 1
+	local rc = Coaches.RarityColors[coach.Rarity]
+	local halo = UIKit.sprite("fx_burst", { Name = "Halo", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.45), Size = UDim2.fromOffset(300, 300), Color = P.White, ImageTransparency = 0.7, Parent = overlay })
+	local orb = UIKit.sprite("fx_orb", { Name = "Orb", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.45), Size = UDim2.fromOffset(170, 170), Parent = overlay })
+	local orbScale = make("UIScale", { Scale = 0.2, Parent = orb })
+	UIKit.tween(orbScale, 0.35, { Scale = 1 }, Enum.EasingStyle.Back)
+	local hint = UIKit.text({ Text = "ROLLING...", TextSize = 24, StrokeColor = P.Navy, StrokeThickness = 3, StrokeTransparency = 0, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0.45, 110), Size = UDim2.fromOffset(300, 30), Parent = overlay })
+	task.wait(0.3)
+	local steps = 16
 	for i = 1, steps do
-		local c = Coaches.List[math.random(1, #Coaches.List)]
-		if i == steps then
-			c = coach
+		local r = if i == steps then coach.Rarity else Coaches.Rarities[math.random(1, rank)]
+		orb.ImageColor3 = Coaches.RarityColors[r]:Lerp(P.White, 0.15)
+		halo.ImageColor3 = Coaches.RarityColors[r]
+		halo.Rotation += 9
+		local shake = i * 0.5
+		orb.Position = UDim2.new(0.5, (math.random() * 2 - 1) * shake, 0.45, (math.random() * 2 - 1) * shake)
+		orbScale.Scale = 1 + i * 0.015
+		ctx.Sound.play("RollTick", { Pitch = 0.9 + i * 0.04 })
+		task.wait(0.05 + (i / steps) ^ 3 * 0.22)
+		if not overlay.Parent then
+			return
 		end
-		roller.Text = string.upper(c.Name)
-		roller.TextColor3 = Coaches.RarityColors[c.Rarity]
-		ctx.Sound.play("RollTick", { Pitch = 0.9 + i * 0.035 })
-		task.wait(0.04 + (i / steps) ^ 3 * 0.25)
 	end
-	task.wait(0.35) -- the silent beat before the reveal
+	hint.Text = string.upper(coach.Rarity) .. "!"
+	hint.TextColor3 = rc
+	task.wait(0.35) -- the silent beat before the burst
+	-- 2) THE BURST: a white flash, the orb pops, rays fly out in the coach's colour
+	local flash = make("Frame", { Name = "Flash", BackgroundColor3 = P.White, BackgroundTransparency = 0.05, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ZIndex = 6, Parent = overlay })
+	UIKit.tween(flash, 0.45, { BackgroundTransparency = 1 })
+	UIKit.tween(orbScale, 0.18, { Scale = 2.4 })
+	UIKit.tween(orb, 0.18, { ImageTransparency = 1 })
+	halo.ImageColor3 = rc
+	halo.ImageTransparency = 0.05
+	local haloScale = make("UIScale", { Scale = 0.5, Parent = halo })
+	UIKit.tween(haloScale, 0.45, { Scale = 1.6 + rank * 0.1 })
+	UIKit.tween(halo, 0.45, { ImageTransparency = 0.6 })
+	ctx.Sound.play(if rank >= 4 then "RevealEpic" else "RevealRare")
+	task.wait(0.45)
 	clearOverlay()
+	-- 3) THE CARD (revealCard below)
 	if coach.Cutscene then
 		playCutscene(coach, not result.FirstCutscene)
 	end
@@ -275,28 +295,24 @@ end
 
 -- a small gold check badge (two white bars, no font glyph needed)
 local function checkBadge(parent)
-	local b = make("Frame", { Name = "Check", BackgroundColor3 = P.Gold, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -4, 0, 4), Size = UDim2.fromOffset(20, 20), ZIndex = 6, Parent = parent })
-	UIKit.corner(b, UDim.new(0.5, 0))
-	UIKit.stroke(b, P.SpeedBlack, 2, 0)
-	make("Frame", { BackgroundColor3 = P.SpeedBlack, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.36, 0.58), Size = UDim2.fromOffset(7, 3), Rotation = 45, ZIndex = 7, Parent = b })
-	make("Frame", { BackgroundColor3 = P.SpeedBlack, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.6, 0.48), Size = UDim2.fromOffset(12, 3), Rotation = -50, ZIndex = 7, Parent = b })
+	local b = UIKit.sprite("badge_white", { Name = "Check", Color = P.Gold, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -2, 0, 2), Size = UDim2.fromOffset(26, 26), ZIndex = 6, Parent = parent })
+	make("Frame", { BackgroundColor3 = P.SpeedBlack, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.4, 0.56), Size = UDim2.fromOffset(7, 3), Rotation = 45, ZIndex = 7, Parent = b })
+	make("Frame", { BackgroundColor3 = P.SpeedBlack, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.6, 0.47), Size = UDim2.fromOffset(10, 3), Rotation = -50, ZIndex = 7, Parent = b })
 	return b
 end
 
 -- one tile (both windows): a colour glow, the coach's 3D bust, the name on top, a big label and a
 -- small line under it, a gold check when owned / equipped, "x2" for copies
 local function tile(parent, o)
-	local t = make("TextButton", { Name = "Tile", Text = "", AutoButtonColor = false, BackgroundColor3 = P.White, Size = o.Size, Position = o.Position or UDim2.new(), LayoutOrder = o.LayoutOrder or 0, Parent = parent })
-	UIKit.corner(t, 12)
-	UIKit.gradient(t, o.Color:Lerp(P.White, 0.08), o.Color:Lerp(P.SpeedBlack, 0.66), 90)
-	UIKit.stroke(t, if o.Selected then P.White else o.Color:Lerp(P.White, 0.25), if o.Selected then 4 else 3, 0)
-	local glow = make("Frame", { Name = "Glow", BackgroundColor3 = o.Color:Lerp(P.White, 0.45), BackgroundTransparency = 0.6, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.44), Size = UDim2.fromScale(0.8, 0.62), ZIndex = 2, Parent = t })
-	UIKit.corner(glow, UDim.new(0.5, 0))
+	local t = make("TextButton", { Name = "Tile", Text = "", AutoButtonColor = false, BackgroundTransparency = 1, Size = o.Size, Position = o.Position or UDim2.new(), LayoutOrder = o.LayoutOrder or 0, Parent = parent })
+	UIKit.tile({ Name = "Art", Color = o.Color, Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = t })
+	if o.Selected then
+		local ring = make("Frame", { Name = "Selected", BackgroundTransparency = 1, Position = UDim2.fromOffset(-3, -3), Size = UDim2.new(1, 6, 1, 3), ZIndex = 1, Parent = t })
+		UIKit.corner(ring, 14)
+		UIKit.stroke(ring, P.White, 3, 0)
+	end
 	if o.Rays then
-		for i = 1, 6 do
-			local ray = make("Frame", { BackgroundColor3 = o.Color:Lerp(P.White, 0.5), BackgroundTransparency = 0.78, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.44), Size = UDim2.new(0, 6, 0.9, 0), Rotation = i * 30, ZIndex = 2, Parent = t })
-			UIKit.corner(ray, 3)
-		end
+		UIKit.sprite("fx_burst", { Name = "Rays", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.44), Size = UDim2.fromScale(1.1, 0.95), Color = o.Color:Lerp(P.White, 0.4), ImageTransparency = 0.55, ZIndex = 2, Parent = t })
 	end
 	local holder = make("Frame", { Name = "Bust", BackgroundTransparency = 1, Position = UDim2.fromScale(0.06, 0.13), Size = UDim2.fromScale(0.88, 0.6), ZIndex = 3, Parent = t })
 	CoachView.make(holder, o.CoachId, { Silhouette = o.Silhouette, ZIndex = 3 })
@@ -325,12 +341,9 @@ end
 
 -- a dark pill in a window header: a coloured dot and a line of text
 local function headerPill(parent, text, dot, x, w)
-	local p = make("Frame", { BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.1, Position = UDim2.fromOffset(x, 0), Size = UDim2.fromOffset(w, 30), Parent = parent })
-	UIKit.corner(p, UDim.new(0.5, 0))
-	UIKit.stroke(p, P.Graphite, 2, 0)
-	local d = make("Frame", { BackgroundColor3 = dot, Position = UDim2.new(0, 12, 0.5, -5), Size = UDim2.fromOffset(10, 10), Parent = p })
-	UIKit.corner(d, UDim.new(0.5, 0))
-	UIKit.text({ Text = text, TextSize = 15, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(28, 0), Size = UDim2.new(1, -32, 1, 0), Parent = p })
+	local p = UIKit.pill({ Position = UDim2.fromOffset(x, 0), Size = UDim2.fromOffset(w, 32), Parent = parent })
+	UIKit.sprite("badge_white", { Color = dot, AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 8, 0.5, 0), Size = UDim2.fromOffset(18, 18), Parent = p })
+	UIKit.text({ Text = text, TextSize = 15, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(30, 0), Size = UDim2.new(1, -34, 1, 0), Parent = p })
 	return p
 end
 
@@ -414,21 +427,16 @@ function agencyPage()
 		})
 	end
 	-- coins, the pity line, ROLL / X3 / MY COACHES
-	local coinsRow = make("Frame", { BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.1, Size = UDim2.new(1, 0, 0, 30), Parent = right })
-	UIKit.corner(coinsRow, UDim.new(0.5, 0))
-	UIKit.stroke(coinsRow, P.Graphite, 2, 0)
-	local ci = UIKit.coinIcon(20, coinsRow)
-	ci.Position = UDim2.fromOffset(8, 5)
+	local coinsRow = UIKit.pill({ Size = UDim2.new(1, 0, 0, 32), Height = 32, Parent = right })
+	local ci = UIKit.coinIcon(30, coinsRow)
+	ci.Position = UDim2.fromOffset(-2, 1)
 	UIKit.text({ Name = "Coins", Text = Format.short(player:GetAttribute("Coins") or 0), TextSize = 17, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(34, 0), Size = UDim2.new(1, -40, 1, 0), Parent = coinsRow })
 	local tier, left, frac = pityLine()
 	if tier then
-		local pity = make("Frame", { BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.1, Position = UDim2.fromOffset(0, 36), Size = UDim2.new(1, 0, 0, 34), Parent = right })
-		UIKit.corner(pity, 10)
+		local pity = UIKit.pill({ Position = UDim2.fromOffset(0, 36), Size = UDim2.new(1, 0, 0, 36), Parent = right })
 		UIKit.text({ Text = ("%s IN %d ROLLS"):format(string.upper(tier.Rarity), left), Font = F.BodyBold, TextSize = 13, Color = Coaches.RarityColors[tier.Rarity], Position = UDim2.fromOffset(0, 2), Size = UDim2.new(1, 0, 0, 18), Parent = pity })
-		local barBack = make("Frame", { BackgroundColor3 = P.Graphite, Position = UDim2.new(0, 10, 0, 22), Size = UDim2.new(1, -20, 0, 6), Parent = pity })
-		UIKit.corner(barBack, 3)
-		local fill = make("Frame", { BackgroundColor3 = Coaches.RarityColors[tier.Rarity], Size = UDim2.fromScale(math.clamp(frac, 0.03, 1), 1), Parent = barBack })
-		UIKit.corner(fill, 3)
+		local _, fill = UIKit.bar({ Kind = "gold", Position = UDim2.new(0, 12, 0, 21), Size = UDim2.new(1, -24, 0, 9), Parent = pity })
+		fill.Size = UDim2.fromScale(math.clamp(frac, 0.03, 1), 1)
 	end
 	local roll, label = UIKit.button({ Name = "Roll", Style = "Green", Text = "ROLL", TextSize = 24, Position = UDim2.fromOffset(0, 76), Size = UDim2.new(1, 0, 0, 52), Parent = right, OnClick = function()
 		CoachUI.rollNow(1)
@@ -436,8 +444,8 @@ function agencyPage()
 	label.Text = if price == 0 then "FREE ROLL!" else "ROLL  " .. Format.short(price)
 	label.Size = UDim2.new(1, -40, 1, 0)
 	if price > 0 then
-		local rci = UIKit.coinIcon(20, roll.Face)
-		rci.Position = UDim2.new(1, -30, 0.5, -10)
+		local rci = UIKit.coinIcon(28, roll.Face)
+		rci.Position = UDim2.new(1, -36, 0.42, -14)
 	end
 	UIKit.button({ Name = "Roll3", Style = if fasterRolls() then "Blue" else "Dark", Text = "X3", TextSize = 18, Position = UDim2.fromOffset(0, 134), Size = UDim2.fromOffset(60, 38), Parent = right, OnClick = function()
 		if fasterRolls() then
@@ -542,7 +550,7 @@ function myPage()
 	local coach = Boosts.coach(selected.Id)
 	local sc = stageColor(selected.Stage)
 	local isEq = table.find(equipped, selected.Uid) ~= nil
-	local detail = UIKit.panel({ Name = "Detail", Accent = false, Position = UDim2.fromOffset(436, 40), Size = UDim2.fromOffset(228, 238), Parent = page })
+	local detail = UIKit.tile({ Name = "Detail", Color = "blue", Position = UDim2.fromOffset(436, 40), Size = UDim2.fromOffset(228, 238), Parent = page })
 	tile(detail, {
 		Size = UDim2.fromOffset(118, 112), Position = UDim2.new(0.5, -59, 0, 8), Color = sc, CoachId = selected.Id,
 		Name = string.upper(coach.Name), Big = Coaches.Stages[selected.Stage], BigSize = 18, BigColor = P.White,
@@ -550,8 +558,7 @@ function myPage()
 	})
 	local y = 126
 	for _, l in boostLines(selected.Id, selected.Stage) do
-		local dot = make("Frame", { BackgroundColor3 = l[2], Position = UDim2.fromOffset(16, y + 4), Size = UDim2.fromOffset(10, 10), Parent = detail })
-		UIKit.corner(dot, UDim.new(0.5, 0))
+		UIKit.sprite("badge_white", { Color = l[2], Position = UDim2.fromOffset(13, y + 1), Size = UDim2.fromOffset(16, 16), Parent = detail })
 		UIKit.text({ Text = l[1], TextSize = 15, Color = l[2], XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(32, y), Size = UDim2.new(1, -40, 0, 18), Parent = detail })
 		y += 18
 	end
