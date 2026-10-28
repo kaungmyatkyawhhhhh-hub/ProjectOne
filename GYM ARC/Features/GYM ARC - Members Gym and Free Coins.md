@@ -41,3 +41,12 @@ Owner, 28 Oct: "add like and favourite game for 1000 coins and join group for ex
 - The plates on the bars are ruby with a gold hub, whatever version the machine turns into (MachineService.updatePlates: models with the Members attribute; RUBY_PLATE #9B111E).
 - The small storage plates on the racks keep their dark printed look (their meshes carry their own colours).
 ![[GYM ARC/Screenshots/members_gym_ruby.jpg]]
+
+## Second door from the Starter Gym (28 Oct, owner: "raise the +10% gains sign higher and make a doorway that connects to the starter gym below the sign ... same with the first one so that it still need the member requirement")
+- The +10% GAINS sign is higher (Y 9.2 to 11.6, over the gym's windows) and centred over the new doorway.
+- A doorway through the Starter Gym's front wall, between its two front windows (under the LEADERBOARDS wall inside). Same glass door as the street one: gold frame, gold handles, the **Join group** prompt, shut for non-members, open for members. Both doors are children named `Door` of `workspace.Town.MembersGym` (MembersClient handles every one).
+- Kept, not deleted, in `ServerStorage.MembersGymMoved`: the solid wall piece the doorway was cut from and the skirting strip across it.
+- Moved inside the Starter Gym to clear the way: the bench (and its NPC rest spot) 8.5 studs left, two gym bags and the plant 5 studs right. Outside: the wall light that sat where the sign is now, 10 studs left.
+- Tested: a member walks from the Starter Gym through it into the Members Gym; a non-member is stopped at it (prompt on), and one placed inside is put back on the street.
+![[GYM ARC/Screenshots/members_gym_door2_inside.jpg]]
+![[GYM ARC/Screenshots/members_gym_door2_from_starter.jpg]]
