@@ -33,7 +33,7 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 - Training multiplier = 8 ^ (league - 1), on top of shoes, coaches and trails.
 
 ## Portal Plaza
-- Behind the hub stands. 5 gates on a round platform, each in its league's colour.
+- At the end of the PORTALS avenue, east of the plaza (map v2). 5 gates in a shallow arc on a raised round stage, all facing the plaza, nothing in front of them. Each is in its league's colour, with a light beam into the sky (dimmed while locked).
 - Open gate = "LEAGUE X - WALK IN", walk through to teleport. Locked = dark grey with "GO PRO FROM LEAGUE X".
 - Leagues 4-5: COMING SOON + NOTIFY ME prompt (Roblox experience notifications).
 - Every area has a BACK TO HUB gate. You can visit a lower league; races there pay 25%.
