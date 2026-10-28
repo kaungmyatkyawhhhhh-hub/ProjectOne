@@ -1,8 +1,10 @@
--- SPEED ARC: builds the Hub (Hometown Track) in Studio. Run in edit mode (MCP or command bar via sync).
+-- SPEED ARC: builds the Hub (Hometown Track) in Studio. Run in edit mode as loadstring(this)(builder_lib)
+-- (the wall course comes from the shared builder library).
 -- v3 (28 Oct): "+1 SPEED every step" + the bright candy look: an open spawn plaza, the wall course,
 -- kiosks, a row of portals, AFK treadmills. Smooth parts + CSG for the curved track; Blender meshes
 -- (ServerStorage.Meshes) for trees, treadmills, bleachers and the crowd when they're imported.
 -- Re-running replaces workspace.Hub (the old one is moved to ServerStorage as a dated backup).
+local L = assert(..., "run as loadstring(build_hub)(builder_lib)")
 local GeometryService = game:GetService("GeometryService")
 local Lighting = game:GetService("Lighting")
 local ServerStorage = game:GetService("ServerStorage")
@@ -600,72 +602,16 @@ spawn.Parent = hub
 floatLabel(props, Vector3.new(0, 28, 40), "RACE TRACK", "A RACE EVERY 3 MINUTES", Palette.Sky, 44, 12)
 
 ----------------------------------------------------------------------------
--- WALL COURSE (south): one stage per wall, each stage its own candy colour. Walls are Models
--- "Wall<k>" (Index / League attributes; the part "Block" is the wall) for WallController /
--- WallService. Invisible side walls keep you on the course; the walls reach high so you can't hop over.
+-- WALL COURSE (south): the shared builder (builder_lib L.course, same in every world). Hedges along
+-- the course strip and a closed end show where it stops.
 ----------------------------------------------------------------------------
 do
-	local courseF = folder("Course")
-	local L, Wd, H = Course.StageLength, Course.Width, Course.WallHeight
-	local x0 = C.Start.X
-	for k = 1, WALLS do
-		local col = Color3.fromHex(Course.Colors[k])
-		local z0 = C.Start.Z + (k - 1) * L
-		local z1 = z0 + L
-		local zc = (z0 + z1) / 2
-		block(courseF, "Stage" .. k, Vector3.new(Wd, 0.6, L), Vector3.new(x0, 0.3, zc), col:Lerp(Palette.White, 0.45))
-		for side = -1, 1, 2 do
-			block(courseF, "Kerb", Vector3.new(2, 1.6, L), Vector3.new(x0 + side * (Wd / 2 + 1), 0.8, zc), col)
-			block(courseF, "KerbTop", Vector3.new(2.2, 0.3, L), Vector3.new(x0 + side * (Wd / 2 + 1), 1.65, zc), Palette.White)
-			block(courseF, "Side", Vector3.new(1, 40, L), Vector3.new(x0 + side * (Wd / 2 + 2.5), 20, zc), col, { Transparency = 1 })
-		end
-		-- chevrons down the middle point the way
-		for j = 0, 3 do
-			local cz = z0 + 14 + j * 18
-			for s = -1, 1, 2 do
-				part({ Parent = courseF, Name = "Chevron", Size = Vector3.new(6, 0.62, 1.4), CFrame = CFrame.new(x0 + s * 2.2, 0.31, cz) * CFrame.Angles(0, s * math.rad(35), 0), Color = Palette.White, CanCollide = false })
-			end
-		end
-		-- the wall
-		local m = modelIn("Wall" .. k, courseF)
-		m:SetAttribute("Index", k)
-		m:SetAttribute("League", 1)
-		local wallBlock = block(m, "Block", Vector3.new(Wd, H, 3), Vector3.new(x0, 0.6 + H / 2, z1), col)
-		block(m, "Top", Vector3.new(Wd, 26, 3), Vector3.new(x0, 0.6 + H + 13, z1), col, { Transparency = 1 })
-		block(m, "Cap", Vector3.new(Wd + 1, 1.2, 3.6), Vector3.new(x0, 0.6 + H + 0.6, z1), Palette.White)
-		for r = 1, 4 do -- brick courses: lighter bands across the wall
-			block(m, "Band", Vector3.new(Wd + 0.04, 0.35, 3.08), Vector3.new(x0, 0.6 + r * H / 5, z1), col:Lerp(Palette.White, 0.35), { CanCollide = false })
-		end
-		local need = Formulas.wallNeed(1, k)
-		for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
-			surfaceText(wallBlock, face, {
-				{ Name = "Title", Text = "WALL " .. k, Height = 0.16, Color = Palette.White, Stroke = col:Lerp(Color3.new(0, 0, 0), 0.5), StrokeThickness = 3 },
-				{ Name = "Need", Text = Format.short(need), Height = 0.42, Color = Palette.White, Stroke = col:Lerp(Color3.new(0, 0, 0), 0.5), StrokeThickness = 6 },
-				{ Name = "Sub", Text = "SPEED NEEDED", Height = 0.16, Color = Palette.White, Stroke = col:Lerp(Color3.new(0, 0, 0), 0.5), StrokeThickness = 3 },
-			}, { PPS = 12, Brightness = 1.4, MaxDistance = 320, Padding = 0 })
-		end
+	L.course(hub, "Hub", { League = 1, Theme = "hub", Accent = Palette.Pink })
+	local stripZ0, stripZ1 = 292, COURSE_END + 60
+	for _, x in { -88, 88 } do
+		block(props, "CourseHedge", Vector3.new(4, 5, stripZ1 - stripZ0), Vector3.new(x, 2.5, (stripZ0 + stripZ1) / 2), W.TreeLeafDark)
 	end
-	-- the finish: a gold stage after the last wall (WallService sends you back to the start from here)
-	block(courseF, "Finish", Vector3.new(Wd, 0.6, 40), Vector3.new(x0, 0.3, COURSE_END + 20), Palette.Gold)
-	for side = -1, 1, 2 do
-		block(courseF, "Side", Vector3.new(1, 40, 40), Vector3.new(x0 + side * (Wd / 2 + 2.5), 20, COURSE_END + 20), Palette.Gold, { Transparency = 1 })
-	end
-	block(courseF, "EndWall", Vector3.new(Wd + 6, 40, 2), Vector3.new(x0, 20, COURSE_END + 41), Palette.Gold, { Transparency = 1 })
-	floatLabel(courseF, Vector3.new(x0, 18, COURSE_END + 22), "YOU DID IT!", "GO PRO TO OPEN A NEW WORLD", Palette.Gold, 40, 11)
-	-- the start arch
-	local cf = CFrame.lookAt(C.Start, C.Start + C.Dir)
-	for _, s in { -1, 1 } do
-		local x = s * (Wd / 2 + 1.6)
-		part({ Parent = courseF, Name = "ArchPillar", Shape = Enum.PartType.Cylinder, Size = Vector3.new(20, 3.2, 3.2), CFrame = cf * CFrame.new(x, 10, 0) * CFrame.Angles(0, 0, math.pi / 2), Color = Palette.Pink })
-		ball(courseF, "ArchCap", 4.4, (cf * CFrame.new(x, 20.6, 0)).Position, Palette.Gold)
-	end
-	local beam = part({ Parent = courseF, Name = "ArchBeam", Size = Vector3.new(Wd + 6, 5, 2.4), CFrame = cf * CFrame.new(0, 17.5, 0), Color = Palette.White })
-	part({ Parent = courseF, Name = "ArchTrim", Size = Vector3.new(Wd + 6.4, 0.8, 2.8), CFrame = cf * CFrame.new(0, 15, 0), Color = Palette.Pink })
-	surfaceText(beam, Enum.NormalId.Back, {
-		{ Text = "WALL RUN", Height = 0.6, Color = Palette.Pink, Stroke = Palette.White, StrokeThickness = 3 },
-		{ Text = "EVERY STEP = +1 SPEED", Height = 0.3, Color = Palette.SpeedBlack, Font = BODY },
-	}, { PPS = 14, MaxDistance = 400, Padding = 0, Brightness = 1.2 })
-	floatLabel(courseF, C.Start + Vector3.new(0, 30, 0), "SMASH WALLS", "RUN, GET FASTER, BREAK THROUGH", Palette.Pink, 48, 13)
+	block(props, "CourseHedge", Vector3.new(180, 5, 4), Vector3.new(0, 2.5, stripZ1), W.TreeLeafDark)
 end
 
 ----------------------------------------------------------------------------
@@ -1052,15 +998,15 @@ hub.ModelStreamingMode = Enum.ModelStreamingMode.Persistent -- the home area is 
 hub.Parent = workspace
 
 -- lighting preset (the client applies the same values; this is for the edit view)
-local L = require(ReplicatedStorage.Shared.Config.Lighting:Clone()).Hub
-Lighting.ClockTime = L.ClockTime
-Lighting.GeographicLatitude = L.GeographicLatitude
-Lighting.Brightness = L.Brightness
-Lighting.Ambient = L.Ambient
-Lighting.OutdoorAmbient = L.OutdoorAmbient
-Lighting.EnvironmentDiffuseScale = L.EnvironmentDiffuseScale
-Lighting.EnvironmentSpecularScale = L.EnvironmentSpecularScale
-Lighting.ExposureCompensation = L.ExposureCompensation
+local LP = require(ReplicatedStorage.Shared.Config.Lighting:Clone()).Hub
+Lighting.ClockTime = LP.ClockTime
+Lighting.GeographicLatitude = LP.GeographicLatitude
+Lighting.Brightness = LP.Brightness
+Lighting.Ambient = LP.Ambient
+Lighting.OutdoorAmbient = LP.OutdoorAmbient
+Lighting.EnvironmentDiffuseScale = LP.EnvironmentDiffuseScale
+Lighting.EnvironmentSpecularScale = LP.EnvironmentSpecularScale
+Lighting.ExposureCompensation = LP.ExposureCompensation
 Lighting.GlobalShadows = true
 pcall(function()
 	Lighting.Technology = Enum.Technology.ShadowMap
@@ -1072,19 +1018,19 @@ local function ensure(class, name)
 	return i
 end
 local cc = ensure("ColorCorrectionEffect", "AreaGrade")
-for k, v in L.ColorCorrection do
+for k, v in LP.ColorCorrection do
 	cc[k] = v
 end
 local bl = ensure("BloomEffect", "AreaBloom")
-for k, v in L.Bloom do
+for k, v in LP.Bloom do
 	bl[k] = v
 end
 local sr = ensure("SunRaysEffect", "AreaSunRays")
-for k, v in L.SunRays do
+for k, v in LP.SunRays do
 	sr[k] = v
 end
 local atmo = Lighting:FindFirstChildOfClass("Atmosphere") or ensure("Atmosphere", "Atmosphere")
-for k, v in L.Atmosphere do
+for k, v in LP.Atmosphere do
 	atmo[k] = v
 end
 for _, o in Lighting:GetChildren() do
@@ -1093,9 +1039,9 @@ for _, o in Lighting:GetChildren() do
 	end
 end
 local clouds = workspace.Terrain:FindFirstChildOfClass("Clouds") or Instance.new("Clouds")
-clouds.Cover = L.Clouds.Cover
-clouds.Density = L.Clouds.Density
-clouds.Color = L.Clouds.Color
+clouds.Cover = LP.Clouds.Cover
+clouds.Density = LP.Clouds.Density
+clouds.Color = LP.Clouds.Color
 clouds.Parent = workspace.Terrain
 
 -- streaming: small radius, separate areas (performance rules)

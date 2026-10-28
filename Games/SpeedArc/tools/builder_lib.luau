@@ -146,6 +146,12 @@ function L.surfaceText(parent, face, lines, opts)
 		t.FontFace = l.Font or L.MONTSERRAT
 		t.TextColor3 = l.Color or Palette.White
 		t.Parent = gui
+		if l.Stroke then
+			local s = Instance.new("UIStroke")
+			s.Color = l.Stroke
+			s.Thickness = l.StrokeThickness or 3
+			s.Parent = t
+		end
 	end
 	return gui
 end
@@ -255,13 +261,13 @@ function L.arch(parent, T)
 	local span = z2 - z1
 	local x = c.X + T.StartX
 	local scale = math.max(1, (span + 4) / 30)
-	local archMesh = L.mesh("Start_Arch", parent, CFrame.new(x, 0, midZ) * CFrame.Angles(0, math.pi / 2, 0), { Scale = scale })
-	if not archMesh then
-		for _, z in { z1, z2 } do
-			L.block(parent, "Leg", Vector3.new(2.4, 18, 2.4), Vector3.new(x, 9, z), Palette.SpeedBlack)
-		end
-		L.block(parent, "Beam", Vector3.new(3, 4, span + 2.4), Vector3.new(x, 19.5, midZ), Palette.SpeedBlack)
+	-- candy look (prompt 11): the part arch, white legs and a sky-blue beam (the imported arch mesh is dark steel)
+	for _, z in { z1, z2 } do
+		L.block(parent, "Leg", Vector3.new(2.4 * scale, 18 * scale, 2.4 * scale), Vector3.new(x, 9 * scale, z), Palette.White)
+		L.block(parent, "Foot", Vector3.new(4 * scale, 1, 4 * scale), Vector3.new(x, 0.5, z), Palette.Sky)
 	end
+	L.block(parent, "Beam", Vector3.new(3 * scale, 4 * scale, span + 2.4), Vector3.new(x, 19.5 * scale, midZ), Palette.Sky)
+	L.block(parent, "BeamGold", Vector3.new(3.2 * scale, 1, span + 2.6), Vector3.new(x, 21.7 * scale, midZ), Palette.Gold)
 	local beamY = 19.5 * scale
 	for _, side in { -1, 1 } do
 		local screen = L.block(parent, "Screen", Vector3.new(0.2, 3.2 * scale, span - 4), Vector3.new(x + side * 1.6 * scale, beamY, midZ), Palette.SpeedBlack)
@@ -380,6 +386,245 @@ function L.agency(parent, cf)
 	pp:SetAttribute("Opens", "CoachCorner")
 	pp.Parent = spot
 	return m
+end
+
+-- a giant floating name (BillboardGui sized in studs, so it reads like a sign in the world)
+function L.floatLabel(parent, pos, text, sub, color, w, h)
+	local anchor = L.part({ Parent = parent, Name = "LabelAnchor", Size = Vector3.new(1, 1, 1), CFrame = CFrame.new(pos), Transparency = 1, CanCollide = false, CanQuery = false })
+	local bb = Instance.new("BillboardGui")
+	bb.Name = "FloatLabel"
+	bb.Size = UDim2.fromScale(w, h)
+	bb.LightInfluence = 0
+	bb.MaxDistance = 700
+	bb.Parent = anchor
+	local dark = color:Lerp(Color3.new(0, 0, 0), 0.45)
+	local function line(t, y, hgt, col, stroke)
+		local l = Instance.new("TextLabel")
+		l.BackgroundTransparency = 1
+		l.Position = UDim2.fromScale(0, y)
+		l.Size = UDim2.fromScale(1, hgt)
+		l.Text = t
+		l.TextScaled = true
+		l.FontFace = L.MONTSERRAT
+		l.TextColor3 = col
+		l.Parent = bb
+		local s = Instance.new("UIStroke")
+		s.Color = stroke
+		s.Thickness = 3
+		s.Parent = l
+	end
+	line(text, 0, if sub then 0.68 else 1, Palette.White, dark)
+	if sub then
+		line(sub, 0.7, 0.3, color, Palette.White)
+	end
+	return anchor
+end
+
+-- the wall's face (both sides): WALL k, the big number, and (filled live by WallController for the
+-- next wall of your run) a bar with "214 / 420", "about 40 more steps", cracks when you're close
+local function wallGui(blockPart, face, k, need, col)
+	local fmt = require(ReplicatedStorage.Shared.Util.Format:Clone())
+	local g = Instance.new("SurfaceGui")
+	g.Name = "WallGui"
+	g.Face = face
+	g.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	g.PixelsPerStud = 12
+	g.MaxDistance = 320
+	g.LightInfluence = 0.2
+	g.Brightness = 1.4
+	g.ZOffset = 0.1
+	g.Parent = blockPart
+	local dark = col:Lerp(Color3.new(0, 0, 0), 0.5)
+	local function label(name, text, y, h, stroke)
+		local l = Instance.new("TextLabel")
+		l.Name = name
+		l.BackgroundTransparency = 1
+		l.Position = UDim2.fromScale(0.05, y)
+		l.Size = UDim2.fromScale(0.9, h)
+		l.Text = text
+		l.TextScaled = true
+		l.FontFace = L.MONTSERRAT
+		l.TextColor3 = Palette.White
+		l.ZIndex = 3
+		l.Parent = g
+		local s = Instance.new("UIStroke")
+		s.Color = dark
+		s.Thickness = stroke
+		s.Parent = l
+		return l
+	end
+	-- cracks (behind the text): thin dark lines from the middle, shown when you're close
+	local cracks = Instance.new("Frame")
+	cracks.Name = "Cracks"
+	cracks.BackgroundTransparency = 1
+	cracks.Size = UDim2.fromScale(1, 1)
+	cracks.Visible = false
+	cracks.Parent = g
+	local crng = Random.new(k * 7)
+	for i = 1, 9 do
+		local c = Instance.new("Frame")
+		c.BackgroundColor3 = dark
+		c.BorderSizePixel = 0
+		c.AnchorPoint = Vector2.new(0, 0.5)
+		c.Position = UDim2.fromScale(crng:NextNumber(0.3, 0.7), crng:NextNumber(0.3, 0.7))
+		c.Size = UDim2.new(0, crng:NextInteger(60, 160), 0, crng:NextInteger(3, 5))
+		c.Rotation = crng:NextNumber(0, 360)
+		c.ZIndex = 2
+		c.Parent = cracks
+	end
+	label("Title", "WALL " .. k, 0.04, 0.14, 3)
+	label("Need", fmt.short(need), 0.17, 0.38, 6)
+	label("Sub", "SPEED NEEDED", 0.55, 0.12, 3)
+	local bar = Instance.new("Frame")
+	bar.Name = "Bar"
+	bar.BackgroundColor3 = dark
+	bar.Position = UDim2.fromScale(0.18, 0.71)
+	bar.Size = UDim2.fromScale(0.64, 0.08)
+	bar.Visible = false
+	bar.ZIndex = 3
+	bar.Parent = g
+	local bc = Instance.new("UICorner")
+	bc.CornerRadius = UDim.new(0.5, 0)
+	bc.Parent = bar
+	local fill = Instance.new("Frame")
+	fill.Name = "Fill"
+	fill.BackgroundColor3 = Palette.White
+	fill.Size = UDim2.fromScale(0, 1)
+	fill.ZIndex = 4
+	fill.Parent = bar
+	bc:Clone().Parent = fill
+	local have = label("Have", "", 0.81, 0.14, 3)
+	have.Visible = false
+end
+
+-- the wall course of an area (28 Oct pivot, prompt 11: one builder for every world). Config/Course
+-- Areas[areaId] gives the start line and the direction. Walls are Models "Wall<k>" (Index / League
+-- attributes; "Block" is the wall, "Glow" parts light up on your screen when you have the SPEED).
+-- opts: League, Theme ("hub" | "hedge" | "stands"), Colors (10 hex), Crowd (folder for fans),
+--       Bridge (stage number that crosses water), Title / Sub (the start arch), Accent
+function L.course(parent, areaId, opts)
+	local Course = require(ReplicatedStorage.Shared.Config.Course:Clone())
+	local Formulas = require(ReplicatedStorage.Shared.Util.Formulas:Clone())
+	local C = Course.Areas[areaId]
+	local walls = #Course.WallShares
+	local L_, Wd, H = Course.StageLength, Course.Width, Course.WallHeight
+	local colors = opts.Colors or Course.Colors
+	local accent = opts.Accent or Palette.Pink
+	local m = Instance.new("Model")
+	m.Name = "Course"
+	m.Parent = parent
+	-- local frame: x across, z = distance down the course (the frame looks down -Z, so z is negative)
+	local F = CFrame.lookAt(C.Start, C.Start + C.Dir)
+	local function at(x, y, along)
+		return F * CFrame.new(x, y, -along)
+	end
+	local function p(name, size, x, y, along, color, extra, into)
+		extra = extra or {}
+		extra.Parent = into or m
+		extra.Name = name
+		extra.Size = size
+		extra.CFrame = at(x, y, along) * (extra.Turn or CFrame.new())
+		extra.Turn = nil
+		extra.Color = color
+		return L.part(extra)
+	end
+	local seatLines = {}
+	for k = 1, walls do
+		local col = Color3.fromHex(colors[(k - 1) % #colors + 1])
+		local a0 = (k - 1) * L_
+		local mid = a0 + L_ / 2
+		local water = opts.Bridge == k
+		p("Stage" .. k, Vector3.new(Wd, 0.6, L_), 0, 0.3, mid, col:Lerp(Palette.White, 0.45))
+		for side = -1, 1, 2 do
+			p("Kerb", Vector3.new(2, 1.6, L_), side * (Wd / 2 + 1), 0.8, mid, col)
+			p("KerbTop", Vector3.new(2.2, 0.3, L_), side * (Wd / 2 + 1), 1.65, mid, Palette.White)
+			p("Side", Vector3.new(1, 40, L_), side * (Wd / 2 + 2.5), 20, mid, col, { Transparency = 1 })
+			if water then
+				-- a bridge over the lake: water both sides, white posts and a rail
+				p("Water", Vector3.new(60, 0.3, L_ + 20), side * (Wd / 2 + 32), -0.2, mid, Color3.fromHex("#4FB6F0"), { Transparency = 0.1, CanCollide = false })
+				for j = 0, 6 do
+					p("BridgePost", Vector3.new(0.8, 3.6, 0.8), side * (Wd / 2 + 1), 3.4, a0 + 6 + j * 13, Palette.White)
+				end
+				p("BridgeRail", Vector3.new(0.6, 0.6, L_), side * (Wd / 2 + 1), 5.1, mid, Palette.White)
+			elseif opts.Theme == "hedge" then
+				p("Hedge", Vector3.new(3, 3.6, L_), side * (Wd / 2 + 4), 1.8, mid, W.TreeLeafDark)
+				for j = 0, 4 do
+					p("Bush", Vector3.new(4.6, 4.6, 4.6), side * (Wd / 2 + 4.4), 3.2, a0 + 9 + j * 18, if j % 2 == 0 then W.TreeLeaf else W.TreeLeafLight, { Shape = Enum.PartType.Ball, CanCollide = false })
+				end
+			elseif opts.Theme == "stands" then
+				-- low stands with a crowd along the course (they cheer on every smash)
+				for row = 1, 3 do
+					local h = row * 1.4
+					p("StandStep", Vector3.new(4, h, L_ - 2), side * (Wd / 2 + 2 + row * 4), h / 2, mid, if row % 2 == 0 then Palette.White else Palette.Sky)
+				end
+				if k % 2 == 1 then
+					local x = side * (Wd / 2 + 2 + 2 * 4)
+					table.insert(seatLines, { (at(x, 2 * 1.4, a0 + 4)).Position, (at(x, 2 * 1.4, a0 + L_ - 4)).Position, (F.RightVector * -side) })
+				end
+			end
+		end
+		-- chevrons point the way
+		for j = 0, 3 do
+			for s = -1, 1, 2 do
+				p("Chevron", Vector3.new(6, 0.62, 1.4), s * 2.2, 0.31, a0 + 14 + j * 18, Palette.White, { CanCollide = false, Turn = CFrame.Angles(0, -s * math.rad(35), 0) })
+			end
+		end
+		-- the wall
+		local wm = Instance.new("Model")
+		wm.Name = "Wall" .. k
+		wm:SetAttribute("Index", k)
+		wm:SetAttribute("League", opts.League)
+		wm.Parent = m
+		local wallAt = k * L_
+		local blockPart = p("Block", Vector3.new(Wd, H, 3), 0, 0.6 + H / 2, wallAt, col, nil, wm)
+		p("Top", Vector3.new(Wd, 26, 3), 0, 0.6 + H + 13, wallAt, col, { Transparency = 1 }, wm)
+		p("Cap", Vector3.new(Wd + 1, 1.2, 3.6), 0, 0.6 + H + 0.6, wallAt, Palette.White, nil, wm)
+		for r = 1, 4 do
+			p("Band", Vector3.new(Wd + 0.04, 0.35, 3.08), 0, 0.6 + r * H / 5, wallAt, col:Lerp(Palette.White, 0.35), { CanCollide = false }, wm)
+		end
+		-- glowing edges (your screen lights them when you have enough SPEED)
+		local glow = col:Lerp(Palette.White, 0.5)
+		for _, s in { -1, 1 } do
+			p("Glow", Vector3.new(0.6, H + 0.4, 3.3), s * (Wd / 2 - 0.2), 0.6 + H / 2, wallAt, glow, { Material = Enum.Material.Neon, Transparency = 1, CanCollide = false }, wm)
+		end
+		p("Glow", Vector3.new(Wd, 0.6, 3.3), 0, 0.6 + H - 0.2, wallAt, glow, { Material = Enum.Material.Neon, Transparency = 1, CanCollide = false }, wm)
+		local need = Formulas.wallNeed(opts.League, k)
+		wallGui(blockPart, Enum.NormalId.Front, k, need, col)
+		wallGui(blockPart, Enum.NormalId.Back, k, need, col)
+	end
+	-- the finish: a gold stage, a FINISH arch and a closed end (WallService sends you back to the start)
+	local endAt = walls * L_
+	p("Finish", Vector3.new(Wd, 0.6, 40), 0, 0.3, endAt + 20, Palette.Gold)
+	for side = -1, 1, 2 do
+		p("Side", Vector3.new(1, 40, 40), side * (Wd / 2 + 2.5), 20, endAt + 20, Palette.Gold, { Transparency = 1 })
+		p("FinishKerb", Vector3.new(2, 1.6, 40), side * (Wd / 2 + 1), 0.8, endAt + 20, Palette.Gold)
+		p("FinishPillar", Vector3.new(16, 3, 3), side * (Wd / 2 + 1.6), 8, endAt + 30, Palette.White, { Shape = Enum.PartType.Cylinder, Turn = CFrame.Angles(0, 0, math.pi / 2) })
+		p("FinishCap", Vector3.new(4, 4, 4), side * (Wd / 2 + 1.6), 16.4, endAt + 30, Palette.Gold, { Shape = Enum.PartType.Ball })
+	end
+	local fb = p("FinishBeam", Vector3.new(Wd + 6, 4, 2.4), 0, 14, endAt + 30, Palette.Gold)
+	L.surfaceText(fb, Enum.NormalId.Back, { { Text = "FINISH", Height = 0.8, Color = Palette.White, Stroke = Palette.DeepGold, StrokeThickness = 3 } }, { PPS = 14, MaxDistance = 400, Padding = 0 })
+	p("EndWall", Vector3.new(Wd + 8, 10, 2), 0, 5, endAt + 41, Palette.White)
+	p("EndStripe", Vector3.new(Wd + 8.2, 1.2, 2.2), 0, 7, endAt + 41, accent)
+	p("EndBlock", Vector3.new(Wd + 6, 40, 2), 0, 20, endAt + 41, Palette.White, { Transparency = 1 })
+	L.floatLabel(m, (at(0, 20, endAt + 24)).Position, "YOU DID IT!", "GO PRO TO OPEN A NEW WORLD", Palette.Gold, 40, 11)
+	-- the start arch
+	for _, s in { -1, 1 } do
+		p("ArchPillar", Vector3.new(20, 3.2, 3.2), s * (Wd / 2 + 1.6), 10, 0, accent, { Shape = Enum.PartType.Cylinder, Turn = CFrame.Angles(0, 0, math.pi / 2) })
+		p("ArchCap", Vector3.new(4.4, 4.4, 4.4), s * (Wd / 2 + 1.6), 20.6, 0, Palette.Gold, { Shape = Enum.PartType.Ball })
+	end
+	local beam = p("ArchBeam", Vector3.new(Wd + 6, 5, 2.4), 0, 17.5, 0, Palette.White)
+	p("ArchTrim", Vector3.new(Wd + 6.4, 0.8, 2.8), 0, 15, 0, accent)
+	-- the back face looks at you as you come up to the start
+	L.surfaceText(beam, Enum.NormalId.Back, {
+		{ Text = opts.Title or "WALL RUN", Height = 0.6, Color = accent, Stroke = Palette.White, StrokeThickness = 3 },
+		{ Text = opts.Sub or "EVERY STEP = +1 SPEED", Height = 0.3, Color = Palette.SpeedBlack, Font = L.BODY },
+	}, { PPS = 14, MaxDistance = 400, Padding = 0, Brightness = 1.2 })
+	L.floatLabel(m, C.Start + Vector3.new(0, 30, 0), "SMASH WALLS", "RUN, GET FASTER, BREAK THROUGH", accent, 48, 13)
+	local fans = 0
+	if #seatLines > 0 and opts.Crowd then
+		fans = L.fans(opts.Crowd, seatLines, 0.45, "MeshesV1_Backup")
+	end
+	return m, fans
 end
 
 -- a leaderboard board with 5 rows the server fills (AreaService)
