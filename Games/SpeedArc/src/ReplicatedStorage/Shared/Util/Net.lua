@@ -20,6 +20,7 @@ local EVENTS = {
 	"Social", -- server -> client: friend boost, race requests, profile (M4)
 	"Funnel", -- client -> server: client-side funnel steps (menu PLAY)
 	"StoreEvent", -- server -> client: bought, Auto Train AFK check (M5)
+	"WallEvent", -- server -> client: wall smashed; client -> server: bounced off a wall (28 Oct pivot)
 }
 local FUNCTIONS = {
 	"Action", -- client -> server: Action:InvokeServer(name, ...) -> ok, result

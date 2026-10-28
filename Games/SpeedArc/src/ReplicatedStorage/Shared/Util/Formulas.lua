@@ -3,6 +3,8 @@ local Shared = script.Parent.Parent
 local GameConfig = require(Shared.Config.GameConfig)
 local Race = require(Shared.Config.Race)
 local Stations = require(Shared.Config.Stations)
+local Course = require(Shared.Config.Course)
+local Ranks = require(Shared.Config.Ranks)
 
 local Formulas = {}
 
@@ -36,6 +38,30 @@ end
 function Formulas.combo(steadySeconds)
 	local c = GameConfig.Combo
 	return 1 + (c.Max - 1) * math.clamp(steadySeconds / c.BuildSeconds, 0, 1)
+end
+
+-- walls smashed in a league (best ever, the save keeps them per league)
+function Formulas.wallsIn(data, league)
+	return (data.Walls or {})[tostring(league or data.League or 1)] or 0
+end
+
+-- SPEED per step before Boosts.compute(...).Train and the session boosts: the league's base gain x
+-- the wall bonus of the walls you've smashed in your league
+function Formulas.stepBase(data)
+	local league = data.League or 1
+	return (Course.StepGain[league] or 1) * Course.WallBonus ^ Formulas.wallsIn(data, league)
+end
+
+-- SPEED wall k of a league needs (rounded to 2 significant figures so the number reads well)
+function Formulas.wallNeed(league, k)
+	local champ = (Ranks.Thresholds[league] or Ranks.Thresholds[1])[#Ranks.Names]
+	local v = champ * (Course.WallShares[k] or 1)
+	local p = 10 ^ math.max(0, math.floor(math.log10(math.max(v, 1))) - 1)
+	return math.floor(v / p + 0.5) * p
+end
+
+function Formulas.wallCount()
+	return #Course.WallShares
 end
 
 function Formulas.station(id)
