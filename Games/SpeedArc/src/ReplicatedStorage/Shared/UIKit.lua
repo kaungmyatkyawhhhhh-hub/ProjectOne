@@ -78,6 +78,9 @@ function UIKit.sprite(name, props)
 	end
 	local h = props.Height or (img.Size.Y.Scale == 0 and img.Size.Y.Offset) or nil
 	UIKit.applySprite(img, name, h)
+	if props.SliceScale then -- big cards want a thicker outline and rim
+		img.SliceScale = props.SliceScale
+	end
 	img.Parent = props.Parent
 	return img
 end
