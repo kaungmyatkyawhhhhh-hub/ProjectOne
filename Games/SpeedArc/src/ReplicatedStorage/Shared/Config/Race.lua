@@ -34,9 +34,13 @@ return {
 	Slipstream = { Distance = 6, Mult = 0.05 },
 	FinalStretch = 0.8, -- last 20%
 
-	-- Rewards in minutes of coins at your league (GDD 8.3)
-	RewardMinutes = { 6, 4, 3 },
-	FinishMinutes = 1.5,
+	-- Rewards in minutes of coins at your league (GDD 8.3). Races are the star (owner, 28 Oct): a race
+	-- win is the biggest coin payout in the game (12 min with finishing; the best first-time wall
+	-- smash is 7.5), and the top 3 get a 2x SPEED per step boost for a while.
+	RewardMinutes = { 10, 6, 4 },
+	FinishMinutes = 2,
+	WinBoostSeconds = { 120, 60, 30 }, -- 1st / 2nd / 3rd: seconds of play with x2 SPEED per step
+	WinBoostMult = 2,
 	FirstRaceOfDayBonus = 0.5,
 
 	Types = {

@@ -450,11 +450,22 @@ local function standings(A)
 	return list
 end
 
+-- the LIVE RACE card shows the real players who joined: their user ids on the area's race state
+function RaceService.showJoined(A)
+	local ids = {}
+	for p in A.joined do
+		if p.Parent then
+			table.insert(ids, tostring(p.UserId))
+		end
+	end
+	A.state:SetAttribute("Joined", table.concat(ids, ","))
+end
+
 local function reward(A, raceType, list)
 	local day = math.floor(os.time() / 86400)
 	local rows = {}
 	for place, r in list do
-		rows[place] = { name = r.name, id = r.id, time = r.finishTime, npc = r.npc == true }
+		rows[place] = { name = r.name, id = r.id, time = r.finishTime, npc = r.npc == true, userId = r.userId }
 	end
 	for place, r in list do
 		local player = r.player
@@ -524,6 +535,12 @@ local function reward(A, raceType, list)
 				data.BestTimes[key] = r.finishTime
 			end
 		end
+		-- the top 3 get a 2x SPEED per step boost (not in RACE THEM challenges)
+		local winBoost = nil
+		if A.kind ~= "challenge" and Race.WinBoostSeconds[place] then
+			winBoost = Race.WinBoostSeconds[place]
+			data.Boost.Race = math.max(data.Boost.Race or 0, winBoost)
+		end
 		PlayerData.set(player, "Coins", data.Coins + coins)
 		PlayerData.refresh(player)
 		RaceService.Won:Fire(player, A.area, place, { pb = pb, time = r.finishTime, raceType = raceType, kind = A.kind or "race" })
@@ -542,6 +559,8 @@ local function reward(A, raceType, list)
 			youId = r.id,
 			kind = A.kind,
 			capped = A.kind == "challenge" and coins == 0,
+			winBoost = winBoost,
+			raceName = Race.Types[raceType] and Race.Types[raceType].Name,
 		})
 	end
 end
@@ -611,6 +630,7 @@ local function runRace(A)
 	A.state:SetAttribute("Type", raceType)
 	A.state:SetAttribute("TypeName", Race.Types[raceType].Name)
 	table.clear(A.joined)
+	A.state:SetAttribute("Joined", "")
 	setPhase(A, "Join", Race.JoinSeconds)
 	if IS_STUDIO and workspace:GetAttribute("TestAutoJoin") then
 		for _, p in playersIn(A) do
@@ -631,9 +651,11 @@ local function runRace(A)
 	end
 	if not next(A.joined) or not buildRunners(A, raceType) then
 		table.clear(A.joined)
+		A.state:SetAttribute("Joined", "")
 		return
 	end
 	table.clear(A.joined)
+	A.state:SetAttribute("Joined", "")
 	local hurdles = nil
 	local def = Race.Types[raceType]
 	if def.Hurdles then
@@ -720,6 +742,7 @@ function RaceService.start()
 			return
 		end
 		A.joined[player] = true
+		RaceService.showJoined(A)
 		RaceEvent:FireClient(player, "joined", { raceId = A.raceId, areaId = A.area.Id })
 	end)
 

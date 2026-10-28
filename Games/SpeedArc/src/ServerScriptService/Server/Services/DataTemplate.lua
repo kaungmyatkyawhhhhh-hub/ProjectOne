@@ -49,7 +49,7 @@ return {
 	-- M4: first 15 minutes, daily, quests, social
 	Tutorial = 0, -- step (Retention.Tutorial steps); 99 = done
 	Funnel = {}, -- [step] = true (analytics steps fire once)
-	Boost = { NewRunner = 0, Gift = 0, Invite = 0, Speed = 0 }, -- seconds of play left (Speed = 2x SPEED product)
+	Boost = { NewRunner = 0, Gift = 0, Invite = 0, Speed = 0, Race = 0 }, -- seconds of play left (Speed = 2x SPEED product, Race = a top-3 finish)
 	Daily = { LastClaimDay = 0, Streak = 0, GotTrail = false },
 	Quests = { Day = 0, List = {}, BonusClaimed = false }, -- List = { { Id, Base, Claimed } }
 	Gifts = { Day = 0, Seconds = 0, Next = 1 },

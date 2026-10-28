@@ -47,7 +47,7 @@ local function smash(player, data, league, k)
 	local key = tostring(league)
 	data.Walls = data.Walls or {}
 	local first = own and k > (data.Walls[key] or 0)
-	local minutes = (Course.RewardMinutes[k] or 1) * (if first then Course.FirstSmashMult else 1)
+	local minutes = (Course.RewardMinutes[k] or 1) * (if first then Course.FirstSmashMult else Course.RepeatSmashMult)
 	if not own then
 		minutes *= Areas.LowerLeagueRewardMult
 	end

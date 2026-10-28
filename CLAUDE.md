@@ -18,3 +18,8 @@ This repo is my Obsidian vault. It syncs to my PC with the Obsidian Git plugin (
   - Call `list_roblox_studios` before your first Studio edit each session and pick the SPEED ARC Studio by name.
   - Never touch the GYM ARC Studio (placeId 80031260599632).
   - If the SPEED ARC Studio has no name, stop and ask me.
+- **Game UI (permanent rule):**
+  - Every new button, window, card, pill and popup MUST use the existing designed UI kit (Theme.Button, Kit.Modal, the existing card/pill styles and their images). Never make a new plain button (coded rectangle + gold gradient + UIStroke). That is a placeholder and I don't accept it.
+  - Before adding UI, find the closest existing screen (Store, Pump Shop, Coach Dex, Physique, Trainers) and copy its components and sizes.
+  - If a needed component doesn't exist in the kit yet, build it in the same style (same corners, outline, lip, shine, fonts) as a reusable kit component, then use it.
+  - After building, take a phone-size screenshot next to an existing screen and check they look like the same game. If anything looks like a placeholder, fix it before reporting.

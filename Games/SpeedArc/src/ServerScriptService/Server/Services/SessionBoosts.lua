@@ -3,6 +3,7 @@
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Retention = require(Shared.Config.Retention)
 local Store = require(Shared.Config.Store)
+local Race = require(Shared.Config.Race)
 
 local SessionBoosts = {}
 local friend = {} -- [player] = 0 .. FriendBoostMax
@@ -32,6 +33,10 @@ function SessionBoosts.trainMult(player, data)
 	-- the 2x SPEED product (M5) stacks on top: you always get what you paid for
 	if (b.Speed or 0) > 0 then
 		timed *= Store.SpeedBoostMult
+	end
+	-- a top-3 race finish (earned in the race, so it stacks too)
+	if (b.Race or 0) > 0 then
+		timed *= Race.WinBoostMult
 	end
 	local add = (friend[player] or 0) + (if (b.Invite or 0) > 0 then Retention.Social.InviteBoost else 0)
 	return timed * (1 + add)

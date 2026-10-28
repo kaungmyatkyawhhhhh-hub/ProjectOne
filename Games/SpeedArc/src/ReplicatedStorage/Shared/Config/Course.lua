@@ -19,6 +19,7 @@ return {
 	WallShares = { 0.006, 0.03, 0.06, 0.09, 0.16, 0.28, 0.34, 0.53, 0.64, 1.0 },
 	RewardMinutes = { 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.8, 2.5 }, -- coins for smashing wall k
 	FirstSmashMult = 3, -- the first time ever you smash a wall it pays x3
+	RepeatSmashMult = 0.05, -- smashing a wall again (a new run) pays 5%: walls never out-earn the races
 	AfkStepsPerSecond = 1.6, -- steps a second on an AFK machine (running is ~3x this)
 	AutoRunMult = 2.4, -- the Auto Run pass (Store key AutoTrain): machines step x2.4 (still slower than running)
 	StageLength = 90, -- studs from one wall to the next (the first wall is one stage after the start)
