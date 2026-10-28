@@ -15,6 +15,27 @@ local SocialService = require(script.Parent.SocialService)
 
 local CosmeticsService = {}
 
+-- Worn items live in workspace.Runtime.Cosmetics.<UserId>, welded to the body - NOT inside the
+-- character: Roblox hides parts inside a character that sit under layered clothing (a jacket on the
+-- avatar made our tee vanish). Cleaned up when the character goes and when the player leaves.
+local function folderFor(player, create)
+	local runtime = workspace:FindFirstChild("Runtime")
+	local root = runtime and runtime:FindFirstChild("Cosmetics")
+	if not root and create and runtime then
+		root = Instance.new("Folder")
+		root.Name = "Cosmetics"
+		root.Parent = runtime
+	end
+	local f = root and root:FindFirstChild(tostring(player.UserId))
+	if not f and create and root then
+		f = Instance.new("Folder")
+		f.Name = tostring(player.UserId)
+		f:SetAttribute("UserId", player.UserId)
+		f.Parent = root
+	end
+	return f
+end
+
 local byId = { Kit = {}, Head = {}, Name = {}, Bib = {} }
 for _, k in Cosmetics.Kits do
 	byId.Kit[k.Id] = k
@@ -37,12 +58,12 @@ local FIT = { -- sizes match the Blender kit (blender/locker_kit.py) proportions
 	Kit_Shorts = { On = "LowerTorso", Size = Vector3.new(1.135, 3.0, 1.385), Offset = Vector3.new(0, -0.85, 0) },
 	Kit_SplitShorts = { On = "LowerTorso", Size = Vector3.new(1.135, 2.4, 1.385), Offset = Vector3.new(0, -0.6, 0) },
 	Kit_Tights = { On = "LowerTorso", Size = Vector3.new(1.12, 3.6, 1.325), Offset = Vector3.new(0, -1.15, 0) },
-	Head_Headband = { On = "Head", Size = Vector3.new(1.1, 0.24, 1.12), Offset = Vector3.new(0, 0.18, 0) },
-	Head_Cap = { On = "Head", Size = Vector3.new(1.1, 0.62, 1.48), Offset = Vector3.new(0, 0.33, -0.24) },
-	Head_Visor = { On = "Head", Size = Vector3.new(1.08, 0.21, 1.41), Offset = Vector3.new(0, 0.2, -0.22) },
+	Head_Headband = { On = "Head", Size = Vector3.new(1.1, 0.24, 1.12), Offset = Vector3.new(0, 0.22, 0) },
+	Head_Cap = { On = "Head", Size = Vector3.new(1.1, 0.62, 1.48), Offset = Vector3.new(0, 0.48, -0.22) },
+	Head_Visor = { On = "Head", Size = Vector3.new(1.08, 0.21, 1.41), Offset = Vector3.new(0, 0.3, -0.22) },
 	Head_Shades = { On = "Head", Size = Vector3.new(1.04, 0.24, 0.62), Offset = Vector3.new(0, 0.08, -0.3) },
-	Head_BucketHat = { On = "Head", Size = Vector3.new(1.44, 0.49, 1.44), Offset = Vector3.new(0, 0.42, 0) },
-	Head_Beanie = { On = "Head", Size = Vector3.new(1.12, 0.89, 1.12), Offset = Vector3.new(0, 0.4, 0) },
+	Head_BucketHat = { On = "Head", Size = Vector3.new(1.44, 0.49, 1.44), Offset = Vector3.new(0, 0.55, 0) },
+	Head_Beanie = { On = "Head", Size = Vector3.new(1.12, 0.89, 1.12), Offset = Vector3.new(0, 0.48, 0) },
 }
 
 local function priceOf(item, data)
@@ -124,7 +145,7 @@ local function standIn(meshName, size, color)
 	return m
 end
 
-local function wear(char, meshName, color, tag)
+local function wear(char, meshName, color, tag, into)
 	local fit = FIT[meshName]
 	local base = fit and char:FindFirstChild(fit.On)
 	if not base then
@@ -151,10 +172,10 @@ local function wear(char, meshName, color, tag)
 			p.Parent = holder
 		end
 	end
-	holder.Parent = char
+	holder.Parent = into
 end
 
-local function bib(char, data)
+local function bib(char, data, into)
 	local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
 	if not torso or not data.Bib.On or data.Bib.Number <= 0 then
 		return
@@ -192,7 +213,7 @@ local function bib(char, data)
 	n.TextColor3 = Color3.fromHex("#0B0D12")
 	n.Text = tostring(data.Bib.Number)
 	n.Parent = gui
-	holder.Parent = char
+	holder.Parent = into
 end
 
 function CosmeticsService.dress(player)
@@ -203,20 +224,25 @@ function CosmeticsService.dress(player)
 	end
 	for _, d in char:GetChildren() do
 		if d:GetAttribute("SpeedArcCosmetic") then
-			d:Destroy()
+			d:Destroy() -- an older build put them inside the character
 		end
 	end
+	local into = folderFor(player, true)
+	if not into then
+		return
+	end
+	into:ClearAllChildren()
 	for slot, id in data.Kit do
 		local k = byId.Kit[id]
 		if k and ownsItem(data, "Kit", k) then
-			wear(char, k.Mesh, Color3.fromHex(k.Color), "Kit_" .. slot)
+			wear(char, k.Mesh, Color3.fromHex(k.Color), "Kit_" .. slot, into)
 		end
 	end
 	local h = byId.Head[data.Head]
 	if h and ownsItem(data, "Head", h) then
-		wear(char, h.Mesh, Color3.fromHex(h.Color), "Headwear")
+		wear(char, h.Mesh, Color3.fromHex(h.Color), "Headwear", into)
 	end
-	bib(char, data)
+	bib(char, data, into)
 	-- the name style is drawn in the tag over the head
 	player:SetAttribute("NameStyle", data.NameStyle)
 	SocialService.refreshTag(player)
@@ -331,11 +357,23 @@ function CosmeticsService.start()
 		player.CharacterAdded:Connect(function(char)
 			onCharacter(player, char)
 		end)
+		player.CharacterRemoving:Connect(function()
+			local f = folderFor(player, false)
+			if f then
+				f:ClearAllChildren()
+			end
+		end)
 	end
 	Players.PlayerAdded:Connect(onPlayer)
 	for _, p in Players:GetPlayers() do
 		onPlayer(p)
 	end
+	Players.PlayerRemoving:Connect(function(player)
+		local f = folderFor(player, false)
+		if f then
+			f:Destroy()
+		end
+	end)
 	PlayerData.Loaded.Event:Connect(function(player)
 		if player.Character then
 			task.spawn(onCharacter, player, player.Character)

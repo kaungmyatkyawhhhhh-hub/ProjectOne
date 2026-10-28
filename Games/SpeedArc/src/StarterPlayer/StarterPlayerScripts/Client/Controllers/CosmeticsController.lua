@@ -50,15 +50,25 @@ local function step()
 	end
 end
 
--- other players' worn meshes (kits, headwear, bib, shoes) hide far away (M5); checked once a second
+-- other players' worn meshes (kits, headwear, bib, shoes) hide far away (M5); checked once a second.
+-- Kits / headwear / bib are in workspace.Runtime.Cosmetics.<UserId> (outside the character).
 local function hideFar()
 	local camPos = camera.CFrame.Position
+	local runtime = workspace:FindFirstChild("Runtime")
+	local cosmetics = runtime and runtime:FindFirstChild("Cosmetics")
 	for _, p in Players:GetPlayers() do
 		local char = p.Character
 		local root = char and char:FindFirstChild("HumanoidRootPart")
 		if root and p ~= player then
 			local far = (root.Position - camPos).Magnitude > CosmeticsConfig.HideOthersBeyond
-			for _, m in char:GetChildren() do
+			local items = char:GetChildren()
+			local worn = cosmetics and cosmetics:FindFirstChild(tostring(p.UserId))
+			if worn then
+				for _, m in worn:GetChildren() do
+					table.insert(items, m)
+				end
+			end
+			for _, m in items do
 				if m:IsA("Model") and (m:GetAttribute("SpeedArcCosmetic") or m:GetAttribute("SpeedArcShoe")) and m:GetAttribute("Far") ~= far then
 					m:SetAttribute("Far", far)
 					for _, d in m:GetDescendants() do
