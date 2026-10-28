@@ -47,7 +47,7 @@ return {
 	-- M4: first 15 minutes, daily, quests, social
 	Tutorial = 0, -- step (Retention.Tutorial steps); 99 = done
 	Funnel = {}, -- [step] = true (analytics steps fire once)
-	Boost = { NewRunner = 0, Gift = 0, Invite = 0 }, -- seconds of play left
+	Boost = { NewRunner = 0, Gift = 0, Invite = 0, Speed = 0 }, -- seconds of play left (Speed = 2x SPEED product)
 	Daily = { LastClaimDay = 0, Streak = 0, GotTrail = false },
 	Quests = { Day = 0, List = {}, BonusClaimed = false }, -- List = { { Id, Base, Claimed } }
 	Gifts = { Day = 0, Seconds = 0, Next = 1 },
@@ -57,4 +57,18 @@ return {
 	Challenge = { Day = 0, Paid = 0 },
 	Weekly = { Week = 0, Wins = 0, Best = 0 }, -- Best = fastest Hometown Sprint this week (s)
 	Prompted = {}, -- [Favourite / Notify] = true
+
+	-- M5: store + locker cosmetics
+	Receipts = {}, -- [purchaseId] = os.time() (never grant a product twice)
+	Purchases = {}, -- [productKey] = count
+	OwnedKits = {}, -- [kitId] = true
+	Kit = { Top = "", Bottom = "" },
+	OwnedHead = {},
+	Head = "",
+	Bib = { Number = 0, Color = "Blue", On = false },
+	OwnedNameStyles = {},
+	NameStyle = "",
+	ShoeSkins = {}, -- [skinId] = true
+	ShoeSkin = {}, -- [shoeId] = skinId worn
+	AutoTrain = false,
 }

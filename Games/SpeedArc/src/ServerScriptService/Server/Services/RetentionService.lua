@@ -409,6 +409,7 @@ function RetentionService.start()
 					player:SetAttribute("BoostNewRunner", b.NewRunner)
 					player:SetAttribute("BoostGift", b.Gift)
 					player:SetAttribute("BoostInvite", b.Invite)
+					player:SetAttribute("BoostSpeed", b.Speed or 0)
 					if today ~= lastDay or n % 5 == 0 then
 						push(player) -- quest progress, the gift timer, a new day
 					end

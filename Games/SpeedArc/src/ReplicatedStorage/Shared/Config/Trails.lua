@@ -27,5 +27,13 @@ return {
 			Emit = { Texture = "rbxasset://textures/particles/sparkles_main.dds", Color = "#4FC3FF", Rate = 22, Size = 0.5, Life = 0.25 } },
 		{ Id = "Rainbow", Name = "Rainbow", Price = nil, Source = "Trail Pack", Coins = 0.06, Pass = "TrailPack",
 			Colors = { "#FF4A4A", "#FFC83D", "#3FA34D", "#1E7BFF", "#9B6BFF" }, Width = { 1.4, 0.3 }, Life = 0.6, Transparency = { 0.15, 1 } },
+		{ Id = "Comet", Name = "Comet", Price = nil, Source = "Trail Pack", Train = 0.04, Pass = "TrailPack",
+			Colors = { "#F4F6FA", "#9B6BFF", "#0E3A8A" }, Width = { 1.0, 0.1 }, Life = 0.7, Transparency = { 0, 1 }, Light = 0.6,
+			Emit = { Texture = "rbxasset://textures/particles/sparkles_main.dds", Color = "#C9B6FF", Rate = 16, Size = 0.4, Life = 0.7 } },
+		{ Id = "NeonWave", Name = "Neon Wave", Price = nil, Source = "Trail Pack", Coins = 0.04, Pass = "TrailPack",
+			Colors = { "#4FC3FF", "#3FA34D", "#4FC3FF" }, Width = { 1.6, 0.6 }, Life = 0.45, Transparency = { 0.2, 1 }, Light = 0.5 },
+		{ Id = "VipGold", Name = "VIP Gold", Price = nil, Source = "VIP", Coins = 0.03, Pass = "VIP",
+			Colors = { "#FFE38C", "#FFC83D", "#C99A1E" }, Width = { 1.5, 0.2 }, Life = 0.5, Transparency = { 0, 1 }, Light = 0.5,
+			Emit = { Texture = "rbxasset://textures/particles/sparkles_main.dds", Color = "#FFE38C", Rate = 18, Size = 0.5, Life = 0.6 } },
 	},
 }

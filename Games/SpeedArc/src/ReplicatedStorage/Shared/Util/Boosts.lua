@@ -5,6 +5,7 @@ local Shoes = require(Shared.Config.Shoes)
 local Trails = require(Shared.Config.Trails)
 local Coaches = require(Shared.Config.Coaches)
 local Ranks = require(Shared.Config.Ranks)
+local Store = require(Shared.Config.Store)
 local GameConfig = require(Shared.Config.GameConfig)
 
 local Boosts = {}
@@ -73,10 +74,14 @@ function Boosts.compute(data)
 	local trail = trailById[data.Trail] or trailById[Trails.Default]
 	local cTrain, cPace, cCoins = coachTotals(data)
 	local leagueMult = (GameConfig.LeagueTrainMult or 8) ^ ((data.League or 1) - 1)
+	-- passes (M5): 2x Speed doubles training, 2x Coins doubles coins, VIP +10% coins. Nothing for races.
+	local passes = data.Passes or {}
+	local passTrain = if passes.Speed2x then 2 else 1
+	local passCoins = (if passes.Coins2x then 2 else 1) * (if passes.VIP then 1 + Store.VIP.Coins else 1)
 	return {
-		Train = shoe.Train * (1 + cTrain) * (1 + (trail.Train or 0)) * leagueMult,
+		Train = shoe.Train * (1 + cTrain) * (1 + (trail.Train or 0)) * leagueMult * passTrain,
 		Pace = 1 + shoe.Pace + cPace,
-		Coins = math.min(GameConfig.Economy.CoinMultCap or 8, (1 + cCoins) * (1 + (trail.Coins or 0))),
+		Coins = math.min(GameConfig.Economy.CoinMultCap or 8, (1 + cCoins) * (1 + (trail.Coins or 0)) * passCoins),
 		CoachTrain = cTrain,
 		CoachPace = cPace,
 		CoachCoins = cCoins,

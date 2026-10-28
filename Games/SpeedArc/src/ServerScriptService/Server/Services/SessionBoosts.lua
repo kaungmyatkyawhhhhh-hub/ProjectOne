@@ -2,6 +2,7 @@
 -- playtime-gift boost (timed, the bigger one counts), Friend Boost and the invite reward (added).
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Retention = require(Shared.Config.Retention)
+local Store = require(Shared.Config.Store)
 
 local SessionBoosts = {}
 local friend = {} -- [player] = 0 .. FriendBoostMax
@@ -27,6 +28,10 @@ function SessionBoosts.trainMult(player, data)
 	end
 	if (b.Gift or 0) > 0 then
 		timed = math.max(timed, Retention.GiftBoostMult)
+	end
+	-- the 2x SPEED product (M5) stacks on top: you always get what you paid for
+	if (b.Speed or 0) > 0 then
+		timed *= Store.SpeedBoostMult
 	end
 	local add = (friend[player] or 0) + (if (b.Invite or 0) > 0 then Retention.Social.InviteBoost else 0)
 	return timed * (1 + add)
