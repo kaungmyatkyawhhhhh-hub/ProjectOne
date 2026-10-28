@@ -22,6 +22,7 @@ GYM ARC: players quit during Alters 1-5 and again at 8-9. Fix the whole alter ph
 - After an alter the body never looks smaller than the best look you reached (a floor from the best physique) while the EXP numbers reset as now; the new skin + inches are the visible change. The body only grows again past that floor.
 - Re-tune alter goals so the time per alter stays as in item 5 (the look change must not make alters longer). Show me before/after screenshots at Alter 1, 5, 9 (right before and right after altering) and the pacing table.
 7) CALL IT GROWTH: at 6'0" a clear moment: "You're fully grown. Now TRANSFORM: 15 new bodies, each stronger and taller." HUD/cards can say "GROWTH SPURT 7: PUMPED BODY" style (ask me before renaming).
+7b) COINS KEEP GROWING: coins per minute +5% for every alter and +10% per Hall of Fame star (rewards and prices that use minutes of coins follow). Check the coin packs' floors/caps still make sense.
 8) Stone skins: check Clay/Sandstone/Granite/Marble look good on a max body (no fur look); suggest improvements, don't change textures without asking.
 
 TEST: an advanced save at Alter 6-10, every unlock fires once, nothing lost, phone screenshots. Progress note + update Body Alters note.

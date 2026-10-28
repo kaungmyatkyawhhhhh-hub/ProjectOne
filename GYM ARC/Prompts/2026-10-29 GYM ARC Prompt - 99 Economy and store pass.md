@@ -16,6 +16,7 @@ GYM ARC: economy and store pass. Follow CLAUDE.md and the Playbook rules (fair m
 4) DUPLICATES ALWAYS USEFUL: evolution copies 3, 3, 2, 2 (BASE→IRON-BORN→BEAST-MODE→COLOSSUS→LIMITLESS) or feeding duplicates gives trainer EXP; show me both options with numbers, I pick.
 5) POLICY AUDIT: PolicyService (ArePaidRandomItemsRestricted) respected for DNA token Robux purchases and anything that turns Robux into a random result; odds shown everywhere; one source of truth for trainer rarity names (boards, odds panel, notes).
 6) CLEANUP: remove dead monetization entries (Server Boost, Gene Lock, Iron Lungs, Fast Recovery, Shake Fridge) from Config if nothing uses them; list what you removed.
+6b) VIP: build a small VIP lounge in the Pro Gym (mirror, smoothie cart, a VIP chest every 6 h: coins + a Stamina boost) so VIP matches its description; Aura Pack card shows each aura's exact stat; Legend gear ~3 h of coins at star 1. Prices: [[2026-10-29 GYM ARC Prices - every coin and Robux item]].
 7) SANITY CHECKS: leaderboards, top crews and the Hall of Fame board refuse impossible values (log for me in the Admin console).
 TEST: store on phone size, a purchase test receipt per hero item, gear ladder buys, old saves keep owned items. Progress note + feature notes.
 ```

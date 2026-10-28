@@ -141,7 +141,7 @@ Fix (added to prompt 96, and it moves UP in the plan):
 |---|---|---|
 | before 31 Oct | Hall of Fame fixes + fairness checks | **95** |
 | 31 Oct | Hall of Fame launch | (90 + 88 done) |
-| 7 Nov | Future You, Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default + new thumbnail/icon test | **91** |
+| 7 Nov | Future You, Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default + new thumbnail/icon test + fixed coin values | **91**, 103 |
 | 8-14 Nov | Small ad test ($20-50) to get enough new players to measure | - |
 | 14 Nov | Alter phase fix (quick parts first) + stronger aura visuals | 96, 102 part A |
 | 21 Nov | **GATE 1**: read the numbers ([[2026-10-29 GYM ARC Rescue plan - if the game is dying]]) + star track if anyone reached star 2 | 101 |

@@ -72,7 +72,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 ## 4. Economy (coins)
 | Item | Decision |
 |---|---|
-| One currency, rewards = "minutes of coins at your stage" | KEEP |
+| One currency | KEEP. **Prices and rewards are FIXED numbers** (owner 29 Oct; no more "minutes of coins"); earning speed grows instead (prompt 103, table in [[2026-10-29 GYM ARC Prices - every coin and Robux item]]) |
 | Offline coins 2%/min up to 8 h, login calendar, daily quests, playtime gifts, re-racking, spotting | KEEP |
 | Gear: only Basic/Pro on sale | CHANGE: **gear ladder by gym**: Basic (Starter) → Pro (Pro Gym) → Elite (Powerlifting) → Champion (Golden Era) → Legend (Hall of Fame); owners of Elite/Champion keep them |
 | Coin supplements at Coach Dex, Robux specials at Pump Shop | CHANGE with prompt 97 (3 boost kinds) |
