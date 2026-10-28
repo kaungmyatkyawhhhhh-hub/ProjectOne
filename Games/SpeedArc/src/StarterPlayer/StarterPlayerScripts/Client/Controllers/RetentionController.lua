@@ -234,7 +234,7 @@ local function buildWindows()
 	UIKit.text({ Text = "3 new quests every day. Finish all 3 for a bonus + a free coach roll!", Font = F.BodyBold, TextSize = 13, Wrapped = true, Position = UDim2.fromOffset(0, 6), Size = UDim2.new(1, 0, 0, 30), Parent = questsWin.content })
 	questRows = {}
 	for i = 1, Retention.Quests.PerDay do
-		local f = UIKit.tile({ Name = "Quest" .. i, Color = "blue", Position = UDim2.fromOffset(0, 40 + (i - 1) * 58), Size = UDim2.new(1, 0, 0, 54), Parent = questsWin.content })
+		local f = UIKit.tile({ Name = "Quest" .. i, Color = "blue", SliceScale = 0.62, Position = UDim2.fromOffset(0, 40 + (i - 1) * 58), Size = UDim2.new(1, 0, 0, 54), Parent = questsWin.content })
 		UIKit.icon("quests", 34, f, { Position = UDim2.fromOffset(10, 9) })
 		local text = UIKit.text({ Text = "", TextSize = 16, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(52, 5), Size = UDim2.new(1, -190, 0, 22), Parent = f })
 		local _, fill = UIKit.bar({ Position = UDim2.fromOffset(52, 30), Size = UDim2.new(1, -270, 0, 12), Parent = f })
@@ -366,8 +366,13 @@ function R.start(c)
 		end)
 	end
 
-	smallButton("Settings", "", "Dark", canvas, UDim2.fromOffset(194, 10), UDim2.fromOffset(46, 44), "settings").Activated:Connect(function()
+	local gear = smallButton("Settings", "", "Dark", canvas, UDim2.fromOffset(194, 10), UDim2.fromOffset(46, 44), "settings")
+	gear.Activated:Connect(function()
 		settingsWin.show()
+	end)
+	-- the race position bar sits there during a race
+	player:GetAttributeChangedSignal("InRace"):Connect(function()
+		gear.Visible = not player:GetAttribute("InRace")
 	end)
 
 	-- timed boost badge, right of the rank badge (on the MPH plate it covered "MPH")

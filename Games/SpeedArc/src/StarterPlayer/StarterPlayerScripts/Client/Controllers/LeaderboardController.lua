@@ -34,7 +34,7 @@ local function row(parent, r, order)
 	f.LayoutOrder = order
 	UIKit.text({ Text = tostring(r.Rank), TextSize = 16, Color = if r.Rank <= 3 then P.Gold else P.White, Size = UDim2.fromOffset(40, 30), Parent = f })
 	UIKit.text({ Text = r.Name, Font = F.BodyBold, TextSize = 15, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(46, 0), Size = UDim2.new(0.55, -46, 1, 0), Parent = f })
-	UIKit.text({ Text = r.Text, TextSize = 15, Color = P.BrightBlue, XAlign = Enum.TextXAlignment.Right, Position = UDim2.new(0.55, 0, 0, 0), Size = UDim2.new(0.45, -12, 1, 0), Parent = f })
+	UIKit.text({ Text = r.Text, TextSize = 15, Color = if mine then P.White else P.BrightBlue, XAlign = Enum.TextXAlignment.Right, Position = UDim2.new(0.55, 0, 0, 0), Size = UDim2.new(0.45, -12, 1, 0), Parent = f })
 end
 
 local function render()

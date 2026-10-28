@@ -125,7 +125,9 @@ function UIKit.tile(props)
 end
 
 function UIKit.setTileColor(tile, color)
+	local keep = tile.SliceScale
 	UIKit.applySprite(tile, "tile_" .. UIKit.tileKey(color))
+	tile.SliceScale = keep
 end
 
 local clickHook = nil

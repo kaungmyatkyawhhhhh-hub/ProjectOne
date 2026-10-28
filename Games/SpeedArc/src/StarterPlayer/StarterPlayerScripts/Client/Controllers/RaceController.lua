@@ -291,7 +291,7 @@ local function headIcon(parent, size, userId, name, ring, z)
 end
 
 local function buildLive(canvas)
-	local live = UIKit.panel({ Name = "LiveRace", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 106), Size = UDim2.fromOffset(300, 136), StrokeColor = P.Gold, StrokeThickness = 3, Accent = false, ZIndex = 8, Parent = canvas })
+	local live = UIKit.panel({ Name = "LiveRace", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 126), Size = UDim2.fromOffset(300, 136), StrokeColor = P.Gold, StrokeThickness = 3, Accent = false, ZIndex = 8, Parent = canvas })
 	live.Visible = false
 	ui.live = live
 	ui.liveScale = UIKit.make("UIScale", { Parent = live })
