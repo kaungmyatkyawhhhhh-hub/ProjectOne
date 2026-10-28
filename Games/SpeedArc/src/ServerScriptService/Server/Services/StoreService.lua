@@ -181,6 +181,7 @@ end
 
 -- Roblox's real prices (lesson: the price in the game must be the one Roblox asks)
 local realPrice = {}
+local icons = {} -- [key] = the icon image id from Creator Hub
 local function fetchPrices()
 	for _, p in Store.Passes do
 		if p.Id > 0 then
@@ -189,6 +190,9 @@ local function fetchPrices()
 			end)
 			if ok and info and info.PriceInRobux then
 				realPrice[p.Key] = info.PriceInRobux
+			end
+			if ok and info and (info.IconImageAssetId or 0) > 0 then
+				icons[p.Key] = info.IconImageAssetId
 			end
 		end
 	end
@@ -199,6 +203,9 @@ local function fetchPrices()
 			end)
 			if ok and info and info.PriceInRobux then
 				realPrice[p.Key] = info.PriceInRobux
+			end
+			if ok and info and (info.IconImageAssetId or 0) > 0 then
+				icons[p.Key] = info.IconImageAssetId
 			end
 		end
 	end
@@ -212,6 +219,7 @@ function StoreService.start()
 		local st = StoreService.state(player)
 		if st then
 			st.Prices = realPrice
+			st.Icons = icons
 		end
 		return st ~= nil, st
 	end)

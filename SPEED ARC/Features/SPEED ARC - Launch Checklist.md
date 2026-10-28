@@ -14,9 +14,9 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 - [x] Fit checked: shoes, tee, shorts, bib OK. Worn items now sit outside the character (inside it, the tee did not draw).
 
 ## 2. Creator Hub (all in the GROUP that owns the game)
-- [ ] Move the place to the group (it's on your account now: creatorType "User").
-- [ ] 8 game passes + 5 developer products with the exact prices from [[2026-10-28 SPEED ARC Progress - 5 Store, passes, Starter Pack, Locker cosmetics|Progress 5]] -> send me the IDs.
-- [ ] Pass / product icons: **made** (13 PNGs in `Downloads\speed_arc_models\icons\`, preview `Screenshots/models/icons/icon_sheet.png`). You approve, then add each one when you create its pass / product (in the group).
+- [x] The place is in the group (group 33151111).
+- [x] (28 Oct) 8 game passes + 5 developer products created, ids in `Config/Store`, all 13 checked with Roblox: names, prices and on-sale match. Exact prices were from [[2026-10-28 SPEED ARC Progress - 5 Store, passes, Starter Pack, Locker cosmetics|Progress 5]] -> send me the IDs.
+- [x] Pass / product icons: **made** and uploaded; the in-game store shows them. (13 PNGs in `Downloads\speed_arc_models\icons\`, preview `Screenshots/models/icons/icon_sheet.png`). You approve, then add each one when you create its pass / product (in the group).
 - [x] Kit clothing: 8 templates uploaded, ids in the game (28 Oct). (If the place moves to the group later, re-upload them in the group and send the new ids.)
 - [ ] 3 notification strings (`daily_ready`, `new_league`, `weekly_top`) - text in [[2026-10-28 SPEED ARC Progress - 4 First 15 minutes, daily, quests, social|Progress 4]].
 - [ ] Open Cloud API key in Secrets (only when we wire the daily notification sender).

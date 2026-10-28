@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [speedarc, feature]
-status: done (M5) - waiting for pass / product IDs
+status: live (ids set 28 Oct)
 ---
 # SPEED ARC - Store and Monetization
 
@@ -41,8 +41,20 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 ## Receipts
 One `ProcessReceipt` on the server. The receipt id is saved with the grant and the save is written **before** Roblox is told PurchaseGranted. A repeated receipt (Roblox retry, rejoin) is never granted twice. If the save fails, Roblox is told "not yet" and retries later.
 
-## Setup still needed
-Create the passes and products in Creator Hub with the exact prices, then put their IDs in `Config/Store.lua` (`Id = 0` now = card says SOON). The list with icon ideas is in [[2026-10-28 SPEED ARC Progress - 5 Store, passes, Starter Pack, Locker cosmetics|Progress 5]].
+## IDs (28 Oct, in the group)
+| Pass | Id | | Product | Id |
+|---|---|---|---|---|
+| Auto Train | 2058077302 | | Small Coins | 3723179071 |
+| 2x Speed | 2057303279 | | Medium Coins | 3723179142 |
+| 2x Coins | 2056799285 | | Large Coins | 3723179202 |
+| VIP | 2057831240 | | 2x Speed 15 min | 3723179279 |
+| Extra Coach Slot | 2058899277 | | Starter Pack | 3723179367 |
+| Extra Coach Slot 2 | 2058089261 | | | |
+| Trail Pack | 2057681285 | | | |
+| Faster Rolls | 2057165273 | | | |
+All 13 checked with Roblox (name, price, on sale). The store cards show the Creator Hub icons and Roblox's live prices.
+
+![[2026-10-28 store live icons.jpg]]
 
 ## Studio test switches
 `TestGrantPass` = "AutoTrain" ..., `TestBuyProduct` = "CoinsSmall" or "CoinsSmall:receiptId", `TestOffer` = "StarterPack", `TestOpenWindow` = "Store" / "Store:COINS".

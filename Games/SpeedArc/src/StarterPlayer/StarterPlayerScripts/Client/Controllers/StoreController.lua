@@ -64,7 +64,12 @@ local function card(item, isPass)
 	local isOwned = isPass and owned(item.Key)
 	UIKit.gradient(c, if item.Hero then P.DeepBlue else P.Graphite, P.Carbon, 90)
 	UIKit.stroke(c, if isOwned then P.ElectricBlue elseif item.Hero or item.Key == "StarterPack" then P.Gold else P.Graphite, 2)
-	if isPass then
+	local iconId = st and st.Icons and st.Icons[item.Key]
+	if iconId then
+		-- the icon you uploaded in Creator Hub (same as on the Roblox pass page)
+		local img = make("ImageLabel", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 4), Size = UDim2.fromOffset(58, 58), Image = "rbxassetid://" .. iconId, Parent = c })
+		UIKit.corner(img, 12)
+	elseif isPass then
 		icon(c, item.Icon, 54)
 	elseif item.Tab == "COINS" then
 		local ci = UIKit.coinIcon(50, c)
