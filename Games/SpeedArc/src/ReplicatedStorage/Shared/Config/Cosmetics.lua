@@ -2,17 +2,20 @@
 -- your league (long goals). Each worn item = 1 light mesh from the Blender kit ("Kit_*" / "Head_*" in
 -- ServerStorage.Meshes); until it's imported a simple part stands in. One mesh shape can be used
 -- by several items in different colours (the mesh is one plain material, tinted by Color).
+-- Kits with a Template (an uploaded IMAGE id of tools/make_clothing.py's PNG) are worn as the
+-- character's classic Shirt / Pants instead: they wrap the body and move with the arms and legs.
+-- Template = 0 = not uploaded yet (the mesh is used).
 return {
 	Kits = {
-		{ Id = "SingletBlue", Name = "Blue Singlet", Slot = "Top", Mesh = "Kit_Singlet", Color = "#1E7BFF", Minutes = 5 },
-		{ Id = "TeeGold", Name = "Gold Race Tee", Slot = "Top", Mesh = "Kit_Tee", Color = "#FFC83D", Minutes = 15 },
-		{ Id = "ZipBlack", Name = "Black Zip Top", Slot = "Top", Mesh = "Kit_ZipTop", Color = "#1A1F29", Minutes = 30 },
-		{ Id = "ShortsBlue", Name = "Blue Race Shorts", Slot = "Bottom", Mesh = "Kit_Shorts", Color = "#0E3A8A", Minutes = 5 },
-		{ Id = "SplitBlack", Name = "Black Split Shorts", Slot = "Bottom", Mesh = "Kit_SplitShorts", Color = "#161A22", Minutes = 15 },
-		{ Id = "TightsGold", Name = "Gold Run Tights", Slot = "Bottom", Mesh = "Kit_Tights", Color = "#E0A92A", Minutes = 30 },
+		{ Id = "SingletBlue", Name = "Blue Singlet", Slot = "Top", Mesh = "Kit_Singlet", Color = "#1E7BFF", Minutes = 5, Template = 0 }, -- Shirt_SingletBlue.png
+		{ Id = "TeeGold", Name = "Gold Race Tee", Slot = "Top", Mesh = "Kit_Tee", Color = "#FFC83D", Minutes = 15, Template = 0 }, -- Shirt_TeeGold.png
+		{ Id = "ZipBlack", Name = "Black Zip Top", Slot = "Top", Mesh = "Kit_ZipTop", Color = "#1A1F29", Minutes = 30, Template = 0 }, -- Shirt_ZipBlack.png
+		{ Id = "ShortsBlue", Name = "Blue Race Shorts", Slot = "Bottom", Mesh = "Kit_Shorts", Color = "#0E3A8A", Minutes = 5, Template = 0 }, -- Pants_ShortsBlue.png
+		{ Id = "SplitBlack", Name = "Black Split Shorts", Slot = "Bottom", Mesh = "Kit_SplitShorts", Color = "#161A22", Minutes = 15, Template = 0 }, -- Pants_SplitBlack.png
+		{ Id = "TightsGold", Name = "Gold Run Tights", Slot = "Bottom", Mesh = "Kit_Tights", Color = "#E0A92A", Minutes = 30, Template = 0 }, -- Pants_TightsGold.png
 		-- VIP kit (the VIP pass)
-		{ Id = "VipTop", Name = "VIP Singlet", Slot = "Top", Mesh = "Kit_Singlet", Color = "#FFC83D", Pass = "VIP" },
-		{ Id = "VipShorts", Name = "VIP Shorts", Slot = "Bottom", Mesh = "Kit_Shorts", Color = "#0B0D12", Pass = "VIP" },
+		{ Id = "VipTop", Name = "VIP Singlet", Slot = "Top", Mesh = "Kit_Singlet", Color = "#FFC83D", Pass = "VIP", Template = 0 }, -- Shirt_VipTop.png
+		{ Id = "VipShorts", Name = "VIP Shorts", Slot = "Bottom", Mesh = "Kit_Shorts", Color = "#0B0D12", Pass = "VIP", Template = 0 }, -- Pants_VipShorts.png
 	},
 	Headwear = {
 		{ Id = "Headband", Name = "Headband", Mesh = "Head_Headband", Color = "#1E7BFF", Minutes = 5 },

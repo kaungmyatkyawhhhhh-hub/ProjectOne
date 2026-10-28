@@ -175,6 +175,64 @@ local function wear(char, meshName, color, tag, into)
 	holder.Parent = into
 end
 
+----------------------------------------------------------------------------
+-- classic clothing kits: the character's own Shirt / Pants is swapped for the kit's template (the
+-- original id is kept on the instance and put back when the kit comes off). Layered clothing that
+-- would cover the kit (a jacket over the top, layered pants over the bottom) is set aside while the
+-- kit is worn, so you can see what you bought; it's back on the next respawn or when you take it off.
+----------------------------------------------------------------------------
+local LAYER_TYPES = {
+	Top = { [Enum.AccessoryType.Shirt] = true, [Enum.AccessoryType.TShirt] = true, [Enum.AccessoryType.Jacket] = true, [Enum.AccessoryType.Sweater] = true },
+	Bottom = { [Enum.AccessoryType.Pants] = true, [Enum.AccessoryType.Shorts] = true, [Enum.AccessoryType.DressSkirt] = true },
+}
+local setAside = {} -- [player] = Folder in ServerStorage
+
+local function classic(player, char, slot, templateId)
+	local className = if slot == "Top" then "Shirt" else "Pants"
+	local prop = if slot == "Top" then "ShirtTemplate" else "PantsTemplate"
+	local inst = char:FindFirstChildOfClass(className)
+	if templateId then
+		if not inst then
+			inst = Instance.new(className)
+			inst:SetAttribute("SpeedArcMade", true)
+			inst.Parent = char
+		end
+		if inst:GetAttribute("Original") == nil then
+			inst:SetAttribute("Original", inst[prop])
+		end
+		inst[prop] = "rbxassetid://" .. templateId
+	elseif inst and inst:GetAttribute("Original") ~= nil then
+		if inst:GetAttribute("SpeedArcMade") then
+			inst:Destroy()
+		else
+			inst[prop] = inst:GetAttribute("Original")
+			inst:SetAttribute("Original", nil)
+		end
+	end
+	-- layered clothing on that part of the body
+	local folder = setAside[player]
+	if templateId then
+		if not folder then
+			folder = Instance.new("Folder")
+			folder.Name = "SetAside_" .. player.UserId
+			folder.Parent = ServerStorage
+			setAside[player] = folder
+		end
+		for _, a in char:GetChildren() do
+			if a:IsA("Accessory") and a:FindFirstChildWhichIsA("WrapLayer", true) and LAYER_TYPES[slot][a.AccessoryType] then
+				a:SetAttribute("SetAsideSlot", slot)
+				a.Parent = folder
+			end
+		end
+	elseif folder then
+		for _, a in folder:GetChildren() do
+			if a:GetAttribute("SetAsideSlot") == slot then
+				a.Parent = char
+			end
+		end
+	end
+end
+
 local function bib(char, data, into)
 	local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
 	if not torso or not data.Bib.On or data.Bib.Number <= 0 then
@@ -232,9 +290,12 @@ function CosmeticsService.dress(player)
 		return
 	end
 	into:ClearAllChildren()
-	for slot, id in data.Kit do
-		local k = byId.Kit[id]
-		if k and ownsItem(data, "Kit", k) then
+	for _, slot in { "Top", "Bottom" } do
+		local k = byId.Kit[data.Kit[slot] or ""]
+		local worn = k and ownsItem(data, "Kit", k)
+		local template = worn and (k.Template or 0) > 0 and k.Template or nil
+		classic(player, char, slot, template)
+		if worn and not template then
 			wear(char, k.Mesh, Color3.fromHex(k.Color), "Kit_" .. slot, into)
 		end
 	end
@@ -362,6 +423,15 @@ function CosmeticsService.start()
 			if f then
 				f:ClearAllChildren()
 			end
+			if setAside[player] then
+				setAside[player]:ClearAllChildren() -- the new character gets its own clothes again
+			end
+		end)
+		-- the avatar's clothes can arrive after CharacterAdded: dress again once they're in
+		player.CharacterAppearanceLoaded:Connect(function()
+			if player.Parent and PlayerData.get(player) then
+				CosmeticsService.dress(player)
+			end
 		end)
 	end
 	Players.PlayerAdded:Connect(onPlayer)
@@ -372,6 +442,10 @@ function CosmeticsService.start()
 		local f = folderFor(player, false)
 		if f then
 			f:Destroy()
+		end
+		if setAside[player] then
+			setAside[player]:Destroy()
+			setAside[player] = nil
 		end
 	end)
 	PlayerData.Loaded.Event:Connect(function(player)
