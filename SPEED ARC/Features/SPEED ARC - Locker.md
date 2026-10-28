@@ -25,7 +25,8 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 - Tap WEARING to take an item off.
 
 ## How worn items work
-- The server welds them onto the character, so everyone sees them. They live in `workspace.Runtime.Cosmetics.<UserId>`, not inside the character: Roblox hides parts inside a character that are under layered clothing (found 28 Oct, a jacket hid the tee). Each is one mesh from `ServerStorage/Meshes` (`Kit_*`, `Head_*` from `blender/locker_kit.py`), sized to the body part (works on different avatar sizes). Until a mesh is imported, a simple part stand-in shows.
+- The server welds them onto the character, so everyone sees them. They live in `workspace.Runtime.Cosmetics.<UserId>`, not inside the character: on 28 Oct the tee did not draw when it was inside the character (the same mesh drew fine outside it; the exact Roblox reason is not confirmed). Each is one mesh from `ServerStorage/Meshes` (`Kit_*`, `Head_*` from `blender/locker_kit.py`), sized to the body part (works on different avatar sizes). Until a mesh is imported, a simple part stand-in shows.
+- **Kits as real clothes (28 Oct):** each kit also has a classic Shirt / Pants template (`tools/make_clothing.py`, PNGs in `Downloads\speed_arc_models\clothing\`, preview `Screenshots/models/clothing/`). Once its image id is in `Config/Cosmetics` (`Template`), the kit is worn as the character's Shirt / Pants: it wraps the body and moves with the arms and legs, and the avatar's own shirt / pants come back when it's taken off. Layered clothing on that part of the body is set aside while the kit is worn (not tested yet: no test avatar with layered clothing). `Template = 0` = the mesh is used.
 - The meshes are light grey: the game tints each one with the item's colour, so one mesh serves several items.
 - Other players' worn items hide past 150 studs.
 

@@ -17,6 +17,7 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 - [ ] Move the place to the group (it's on your account now: creatorType "User").
 - [ ] 8 game passes + 5 developer products with the exact prices from [[2026-10-28 SPEED ARC Progress - 5 Store, passes, Starter Pack, Locker cosmetics|Progress 5]] -> send me the IDs.
 - [ ] Pass / product icons: **made** (13 PNGs in `Downloads\speed_arc_models\icons\`, preview `Screenshots/models/icons/icon_sheet.png`). You approve, then add each one when you create its pass / product (in the group).
+- [ ] Kit clothing: upload the 8 PNGs in `Downloads\speed_arc_models\clothing\` as **images** (in the group) and send me the image ids.
 - [ ] 3 notification strings (`daily_ready`, `new_league`, `weekly_top`) - text in [[2026-10-28 SPEED ARC Progress - 4 First 15 minutes, daily, quests, social|Progress 4]].
 - [ ] Open Cloud API key in Secrets (only when we wire the daily notification sender).
 - [x] Music picked (APM library, licensed): Hub "Aim High" 1839850159, Park "Summer Memories" 9043824305, Stadium "No Time To Think (Long Perc)" 1837843290, Race "Battleground" 9048541013. Loudness measured and balanced. Listen and tell me if one is wrong.
