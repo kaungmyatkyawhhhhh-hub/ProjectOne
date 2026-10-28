@@ -24,8 +24,8 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 - [x] Music picked (APM library, licensed): Hub "Aim High" 1839850159, Park "Summer Memories" 9043824305, Stadium "No Time To Think (Long Perc)" 1837843290, Race "Battleground" 9048541013. Loudness measured and balanced. Listen and tell me if one is wrong.
 
 ## 3. Game page
-- [ ] **Name (owner, 28 Oct): "+1 Speed Evolution"**. SPEED ARC stays the brand underneath (logo, loading screen, in the game).
-- [ ] **Description (written 28 Oct for "+1 Speed Evolution"):**
+- [ ] **Name (owner, 28 Oct, final): SPEED ARC**
+- [ ] **Description (written 28 Oct):**
   > +1 SPEED with every step! Run, get faster and SMASH through giant walls.
   >
   > LIVE RACES every 3 minutes: race real players on the track, climb the podium and win the biggest prizes in the game - huge coins and 2x SPEED!
@@ -35,8 +35,7 @@ Everything you need to do before publishing the soft launch. Tick them off here.
   > Daily rewards, quests and weekly leaderboards. Quiet server? Runner bots fill the lanes, so a race always starts.
   >
   > CODES: SPEEDARC, FIRSTRACE, RELEASE
-  >
-  > by SPEED ARC
+
 - [ ] **Icon + 3-5 thumbnails** (you make them): a wall smash (pieces flying, a big number), the candy spawn, the Coach Agency, a race start.
 - [ ] **Genre:** Sports (subgenre: Racing / Simulator).
 - [ ] **Age rating questionnaire:** no violence, no blood, no gambling (coach rolls are coins only, no Robux), no realistic people. Has in-experience purchases.

@@ -53,7 +53,7 @@ Either way the **images and meshes** are re-uploaded into the new group (your ru
 ## Route B (chosen): the owner's checklist
 1. [ ] Create the new group (Communities > Create). Price shown: ____
 2. [ ] Studio (SPEED ARC): File > Save to File > `SPEED ARC 2026-10-28 before group move.rbxl` (backup).
-3. [ ] File > Publish to Roblox As > **Create new experience** > Owner = the new group > name it **+1 Speed Evolution** (owner, 28 Oct; SPEED ARC stays the brand underneath) > Create. Then send me the new place id.
+3. [ ] File > Publish to Roblox As > **Create new experience** > Owner = the new group > name it **SPEED ARC** > Create. Then send me the new place id.
 4. [ ] Create the 8 passes in the NEW experience (Creator Hub > the new experience > Monetization > Passes), each with its icon from `Downloads\speed_arc_models\icons\`, price set, on sale:
 
 | Pass | Price | Icon | Description |
@@ -84,4 +84,4 @@ Either way the **images and meshes** are re-uploaded into the new group (your ru
 
 ## 28 Oct: the new group
 - The owner made it: **P&L Studios XP**, group id **947215423** (roblox.com/communities/947215423). (The 100 Robux create page and an emblem draft, `Downloads\speed_arc_models\group\SpeedArc_Group_Emblem.png`, are no longer needed.)
-- Game name (owner, 28 Oct): **+1 Speed Evolution**, SPEED ARC as the brand underneath.
+- Game name (owner, 28 Oct, final): **SPEED ARC** (the "+1 Speed Evolution" idea was dropped).
