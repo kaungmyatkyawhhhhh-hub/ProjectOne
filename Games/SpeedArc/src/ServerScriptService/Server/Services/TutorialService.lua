@@ -176,6 +176,21 @@ function TutorialService.start()
 		return false
 	end)
 	Net.on("GoTo", goTo)
+	-- where the GO HERE marker points (the client may not have those parts streamed in)
+	Net.on("TutorialTargets", function()
+		local out = {}
+		local slot = TrainingService.freeSlot("SprintLane", nil)
+		if slot then
+			out.SprintLane = slot.Position
+		end
+		for _, id in { "ShoeShop", "CoachCorner", "TrailBooth" } do
+			local spot = promptSpot(id)
+			if spot then
+				out[id] = spot.Position
+			end
+		end
+		return true, out
+	end)
 
 	PlayerData.Loaded.Event:Connect(function(player)
 		local data = PlayerData.get(player)

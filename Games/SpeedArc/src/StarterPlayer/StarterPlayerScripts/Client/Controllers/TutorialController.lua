@@ -58,7 +58,7 @@ end
 -- UI
 ----------------------------------------------------------------------------
 local function buildCard(canvas)
-	card = UIKit.panel({ Name = "TutorialCard", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -82), Size = UDim2.fromOffset(392, 78), AccentColor = P.Gold, StrokeColor = P.Gold, StrokeThickness = 2, ZIndex = 12, Parent = canvas })
+	card = UIKit.panel({ Name = "TutorialCard", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -82), Size = UDim2.fromOffset(360, 78), AccentColor = P.Gold, StrokeColor = P.Gold, StrokeThickness = 2, ZIndex = 12, Parent = canvas })
 	card.Visible = false
 	cardScale = make("UIScale", { Parent = card })
 	local face = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(14, 9), Size = UDim2.fromOffset(60, 60), ZIndex = 13, Parent = card })
@@ -123,27 +123,22 @@ local function clearPath()
 	end
 end
 
+local targets = nil -- [name] = Vector3 from the server (parts far away may not be streamed in)
+local anchors = {}
 local function targetPart(which)
-	local hub = workspace:FindFirstChild("Hub")
-	if not hub then
+	if not targets then
 		return nil
 	end
-	if which == "SprintLane" then
-		local best
-		for _, d in hub:GetDescendants() do
-			if d.Name == "Slot" and d:GetAttribute("StationId") == "SprintLane" then
-				if not best or (d:GetAttribute("Index") or 9) < (best:GetAttribute("Index") or 9) then
-					best = d
-				end
-			end
-		end
-		return best
+	local pos = targets[which]
+	if not pos then
+		return nil
 	end
-	for _, d in hub:GetDescendants() do
-		if d:IsA("ProximityPrompt") and d:GetAttribute("Opens") == which then
-			return d.Parent
-		end
+	local a = anchors[which]
+	if not a or not a.Parent then
+		a = make("Part", { Name = "Target_" .. which, Anchored = true, CanCollide = false, CanQuery = false, CanTouch = false, Transparency = 1, Size = Vector3.new(1, 1, 1), Position = pos, Parent = workspace.CurrentCamera })
+		anchors[which] = a
 	end
+	return a
 end
 
 local function drawPath(target)
@@ -156,7 +151,7 @@ local function drawPath(target)
 		if marker then
 			marker:Destroy()
 		end
-		marker = make("BillboardGui", { Name = "GoHere", Adornee = target, Size = UDim2.fromOffset(120, 70), StudsOffset = Vector3.new(0, 5, 0), AlwaysOnTop = true, MaxDistance = 400, Parent = player.PlayerGui })
+		marker = make("BillboardGui", { Name = "GoHere", Adornee = target, Size = UDim2.fromOffset(120, 70), StudsOffset = Vector3.new(0, 5, 0), AlwaysOnTop = true, MaxDistance = 400, Parent = target })
 		local pill = make("Frame", { BackgroundColor3 = P.Gold, Size = UDim2.fromOffset(120, 34), Parent = marker })
 		UIKit.corner(pill, UDim.new(0.5, 0))
 		UIKit.stroke(pill, P.SpeedBlack, 2)
@@ -419,6 +414,12 @@ function Tutorial.start(c)
 		end
 	end)
 
+	task.spawn(function()
+		local ok, t = ctx.Net.call("TutorialTargets")
+		if ok then
+			targets = t
+		end
+	end)
 	ctx.Net.get("Tutorial").OnClientEvent:Connect(onStep)
 	player:GetAttributeChangedSignal("Tut"):Connect(function()
 		onStep(player:GetAttribute("Tut") or 0)
