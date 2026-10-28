@@ -163,8 +163,10 @@ function LockerService.dressShoes(player)
 	end
 	clearShoes(char)
 	local shoe = Boosts.shoe(data.Shoe)
-	if not shoe or shoe.Id == Shoes.Default then
-		return -- worn sneakers = the avatar's own feet
+	-- worn sneakers = the avatar's own feet, unless a kit bottom is on (its pants leave the feet bare)
+	local kitBottom = data.Kit and data.Kit.Bottom ~= nil and data.Kit.Bottom ~= ""
+	if not shoe or (shoe.Id == Shoes.Default and not kitBottom) then
+		return
 	end
 	-- a shoe skin (colourway, M5) tints the worn pair
 	local skinId = data.ShoeSkin and data.ShoeSkin[shoe.Id]

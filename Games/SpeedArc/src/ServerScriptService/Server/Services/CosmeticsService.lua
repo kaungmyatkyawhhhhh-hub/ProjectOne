@@ -340,6 +340,7 @@ local function buy(player, kind, id)
 		data.NameStyle = id
 	end
 	CosmeticsService.dress(player)
+	LockerService.dressShoes(player) -- a kit bottom can change which feet show
 	LockerService.push(player)
 	return true
 end
@@ -379,6 +380,7 @@ local function equip(player, kind, id)
 		return false
 	end
 	CosmeticsService.dress(player)
+	LockerService.dressShoes(player)
 	LockerService.push(player)
 	return true
 end
