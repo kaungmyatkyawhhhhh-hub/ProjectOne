@@ -838,7 +838,8 @@ function RaceController.start(c)
 		local phase = state:GetAttribute("Phase")
 		if phase == "Join" then
 			UIKit.setButtonStyle(ctx.Hud.refs.join, "Gold")
-			if not race then
+			-- not during the tutorial before its own race (no toasts over a tutorial hint)
+			if not race and not (ctx.Tutorial and ctx.Tutorial.active() and (player:GetAttribute("Tut") or 0) < 5) then
 				ctx.Hud.toast("A RACE IS STARTING!  Tap JOIN", "Gold")
 			end
 		elseif phase == "Running" and race and race.me and not race.state then

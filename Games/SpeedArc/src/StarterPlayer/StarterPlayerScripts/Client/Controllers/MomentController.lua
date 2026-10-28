@@ -223,7 +223,7 @@ function Moment.start(c)
 	ctx.Moment = Moment
 	canvas = ctx.Hud.canvas
 	buildConfirm()
-	goProBtn = UIKit.button({ Name = "GoProButton", Style = "Gold", Text = "GO PRO!", TextSize = 24, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 124), Size = UDim2.fromOffset(196, 60), Parent = canvas, OnClick = function()
+	goProBtn = UIKit.button({ Name = "GoProButton", Style = "Gold", Text = "GO PRO!", TextSize = 24, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 164), Size = UDim2.fromOffset(196, 54), Parent = canvas, OnClick = function()
 		confirmWin.show()
 	end })
 	goProBtn.Visible = false
