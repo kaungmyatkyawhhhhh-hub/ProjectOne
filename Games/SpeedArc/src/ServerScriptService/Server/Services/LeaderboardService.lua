@@ -354,7 +354,10 @@ function LeaderboardService.start()
 				task.spawn(payWeek, lastWeek)
 				lastWeek = w
 			end
-			task.wait(math.max(6, C.ReadSeconds / #list))
+			-- GetSortedAsync budget is 5 + 2 per player a minute: stay 2 under it (the soak test
+			-- showed queued requests at one read every 6 s with one player)
+			local perMinute = math.max(1, 5 + 2 * #Players:GetPlayers() - 2)
+			task.wait(math.max(6, C.ReadSeconds / #list, 60 / perMinute))
 		end
 	end)
 end
