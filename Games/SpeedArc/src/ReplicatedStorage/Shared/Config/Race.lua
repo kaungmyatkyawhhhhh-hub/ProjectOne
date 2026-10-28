@@ -18,7 +18,7 @@ return {
 	-- a brand-new runner (half the middle or less) needs ~28 s / ~43 s.
 	-- Low clamp is -0.6 (GDD says -1) so brand-new runners aren't painfully slow in their first race.
 	BasePace = 22, -- studs a second at the league middle
-	LeagueMid = { 1100, 925000, 520000000, 3e11, 1.5e14 }, -- scaled with the rank thresholds (prompt 3)
+	LeagueMid = { 2800, 1280000, 550000000, 3e11, 1.5e14 }, -- scaled with the rank thresholds (prompts 3 + 4)
 	PaceFactor = 0.6,
 	PaceClampLow = -0.6,
 	PaceClampHigh = 1.5,

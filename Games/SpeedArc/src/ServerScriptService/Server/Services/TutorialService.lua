@@ -3,6 +3,7 @@
 -- race, the first shoes, Silver rank and the first coach roll. The client draws the hints.
 -- Also the GO TO / GO TRAIN teleports, used by the tutorial and after it.
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Retention = require(Shared.Config.Retention)
@@ -26,6 +27,7 @@ local Moment = Net.get("Moment")
 local S = { Welcome = 1, FirstTap = 2, Combo = 3, Race = 4, Podium = 5, Shoes = 6, Silver = 7, Roll = 8, Done = 99 }
 TutorialService.Steps = S
 local rollsAtStart = {} -- [player] = CoachRolls when the Roll step began
+local startedAt = {} -- [player] = os.clock() at PLAY (Studio timing log)
 
 local function setStep(player, n)
 	local data = PlayerData.get(player)
@@ -34,6 +36,9 @@ local function setStep(player, n)
 	end
 	data.Tutorial = n
 	player:SetAttribute("Tut", n)
+	if RunService:IsStudio() then
+		print(("[Tutorial] %s -> step %d at %.1f s"):format(player.Name, n, os.clock() - (startedAt[player] or os.clock())))
+	end
 	if n == S.Shoes then
 		-- "exact coins given" for the first shoes
 		local price = 0
@@ -63,6 +68,7 @@ local function begin(player)
 		return
 	end
 	data.Boost.NewRunner = Retention.NewRunnerBoost.Seconds
+	startedAt[player] = os.clock()
 	setStep(player, S.Welcome)
 end
 

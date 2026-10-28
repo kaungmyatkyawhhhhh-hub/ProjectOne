@@ -13,15 +13,15 @@ LEAGUE_TRAIN_MULT = 8
 CPM = [60, 400, 3000, 25000, 200000]
 TRAINING_SHARE, ASSUMED_TPS = 0.2, 5
 COMBO_MAX, COMBO_BUILD = 1.5, 10
-STATIONS = {  # league: [(gain, minSpeed)]  (GDD 7.2 gains; MinSpeed from Config after prompt 3)
-    1: [(1, 0), (3, 550), (8, 2000)],
-    2: [(40, 0), (90, 900000), (200, 3000000), (450, 9000000)],
-    3: [(900, 0), (2000, 520000000), (4500, 1750000000), (10000, 5200000000)],
+STATIONS = {  # league: [(gain, minSpeed)]  (GDD 7.2 gains; MinSpeed from Config after prompt 4)
+    1: [(1, 0), (3, 1400), (8, 5000)],
+    2: [(40, 0), (90, 1250000), (200, 4000000), (450, 12000000)],
+    3: [(900, 0), (2000, 550000000), (4500, 1800000000), (10000, 5500000000)],
 }
-RANKS = {  # Bronze, Silver, Gold, Platinum, Champion (Config after prompt 3)
-    1: [0, 1500, 5000, 14000, 28000],
-    2: [0, 3000000, 12000000, 30000000, 60000000],
-    3: [0, 1750000000, 7000000000, 17500000000, 35000000000],
+RANKS = {  # Bronze, Silver, Gold, Platinum, Champion (Config after prompt 4)
+    1: [0, 3800, 20000, 36000, 70000],
+    2: [0, 4000000, 16000000, 40000000, 80000000],
+    3: [0, 1800000000, 7500000000, 18000000000, 36000000000],
 }
 RANK_REWARD_MIN = [0, 1, 2, 3, 5]
 WINS_NEEDED = {1: 1, 2: 2, 3: 3}
@@ -57,6 +57,13 @@ def rank_index(league, speed, scale):
         if speed >= v * scale[league]:
             idx = i
     return idx
+
+
+MILESTONES = {}  # (league, what) -> list of minutes, filled by run()
+
+
+def mark(key, t):
+    MILESTONES.setdefault(key, []).append(t / 60)
 
 
 def run(scale, seed=1, verbose=False):
@@ -144,6 +151,7 @@ def run(scale, seed=1, verbose=False):
         r = rank_index(league, speed, scale)
         while best_rank < r:
             best_rank += 1
+            mark((league, "rank" + str(best_rank + 1)), t - start)
             coins += RANK_REWARD_MIN[best_rank] * CPM[league - 1]
             if M4 and league == 1 and best_rank == 1:
                 free_roll += 1  # the tutorial's Silver roll
@@ -153,6 +161,7 @@ def run(scale, seed=1, verbose=False):
             if (league > lg or (league == lg and best_rank >= rk)) and coins >= price:
                 coins -= price
                 shoe += 1
+                mark((league, "shoe" + str(shoe)), t - start)
         roll_price = max(50, ROLL_MIN * CPM[league - 1])
         saving = shoe + 1 < len(SHOES) and SHOES[shoe + 1][2] <= league and SHOES[shoe + 1][1] < 40 * CPM[league - 1]  # kids save up for shoes they can see
         if free_roll:
@@ -206,7 +215,12 @@ if __name__ == "__main__":
     else:
         a = [float(x) for x in sys.argv[1:4]] or [1.0, 1.0, 1.0]
         scale = {1: a[0], 2: a[1], 3: a[2]}
+    MILESTONES.clear()
     res = average(scale)
+    import statistics
+    print("Milestones (average minutes into the league):")
+    for key in sorted(MILESTONES):
+        print("  L%d %-6s %5.1f" % (key[0], key[1], statistics.mean(MILESTONES[key])))
     print("League | target min | sim min")
     for k in (1, 2, 3):
         print(f"  {k}    |   {TARGET[k]:3d}      | {res[k]:5.1f}")
