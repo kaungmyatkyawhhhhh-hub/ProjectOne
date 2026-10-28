@@ -17,6 +17,7 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 - [x] The place is in the group (group 33151111).
 - [x] (28 Oct) 8 game passes + 5 developer products created, ids in `Config/Store`, all 13 checked with Roblox: names, prices and on-sale match. Exact prices were from [[2026-10-28 SPEED ARC Progress - 5 Store, passes, Starter Pack, Locker cosmetics|Progress 5]] -> send me the IDs.
 - [x] Pass / product icons: **made** and uploaded; the in-game store shows them. (13 PNGs in `Downloads\speed_arc_models\icons\`, preview `Screenshots/models/icons/icon_sheet.png`). You approve, then add each one when you create its pass / product (in the group).
+- [ ] **UI art kit (prompt 12, approved 28 Oct):** upload the 3 sheets in `Games/SpeedArc/ui_kit/sheets/` (`ui_buttons.png`, `ui_tiles.png`, `ui_icons.png`) to the NEW group (after prompt 13), then paste the 3 ids into `Config/UIArt.lua`. **Must be done before publishing**: with no ids the live game has no buttons/panels art.
 - [x] Kit clothing: 8 templates uploaded, ids in the game (28 Oct). (If the place moves to the group later, re-upload them in the group and send the new ids.)
 - [x] (28 Oct) 3 notification strings made in Creator Hub (`daily_ready`, `new_league`, `weekly_top`) - text in [[2026-10-28 SPEED ARC Progress - 4 First 15 minutes, daily, quests, social|Progress 4]].
 - [ ] Open Cloud API key in Secrets (only when we wire the daily notification sender).

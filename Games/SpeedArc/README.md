@@ -22,6 +22,10 @@ File names: `Name.server.lua` = Script, `Name.client.lua` = LocalScript, `Name.l
 
 (Claude does the same through the Studio MCP.)
 
+## UI art kit (prompt 12)
+- `python tools/make_ui_kit.py` draws every UI sprite (`ui_kit/*.png`), packs them into 3 sheets (`ui_kit/sheets/ui_buttons.png`, `ui_tiles.png`, `ui_icons.png`), writes `Config/UIArtSprites.lua` and copies the sheets into Studio's `content/textures/SpeedArcKit/` so Studio shows them before they're uploaded. Run it after any kit change, then sync. (A Studio update makes a new version folder: run it again.)
+- Before publishing: upload the 3 sheets to the GROUP and put the ids in `Config/UIArt.lua` (`Ids`). With empty ids a live server shows no kit images.
+
 ## Studio test switches (Workspace attributes, Studio only)
 - `FreshPlayer` = true: play as a brand-new player on temporary data (never saved)
 - `TestSpeed` / `TestCoins` (numbers): start with that much

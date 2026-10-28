@@ -49,6 +49,8 @@ Every Blender mesh must look hand-made, not like stacked default cubes:
 - Plain coded buttons (rectangle + gold gradient + UIStroke) are placeholders and NOT accepted.
 - The UI kit is 9-slice PNG art: buttons with meaning-colours (green buy/go, blue normal, yellow claim, red close, grey locked) + pressed state, panels, tabs, tiles, pills, badges; 3D lip, inner highlight, soft shadow, navy outline, an icon on every main button.
 - Mockup at 667x375 shown to the owner before applying. Once approved the kit is LOCKED: every new screen reuses it.
+- **LOCKED (owner OK, 28 Oct, prompt 12).** The art is made by `Games\SpeedArc\tools\make_ui_kit.py` (3 sheets, `Config/UIArt` + generated `Config/UIArtSprites`). New UI only uses `UIKit.button` (Style Green / Blue / Gold / Red / Grey / Dark + `Icon`), `UIKit.window`, `UIKit.panel`, `UIKit.tile` (colour-glow cards), `UIKit.pill` (navy / red / lime / gold / blue), `UIKit.bar`, `UIKit.icon`, `UIKit.sprite` (badges, fx). A missing piece gets drawn in `make_ui_kit.py` in the same style, then used. Never `make("Frame")` + UICorner + UIGradient + UIStroke as a button, card or pill.
+- After changing the kit, run `python tools/make_ui_kit.py` (it also copies the sheets into Studio's content folder for testing; Studio caches textures, so each build gets a new local file name).
 - No pink, purple, cream or pastels: bold sporty colours (prompt 12).
 
 ## Code
