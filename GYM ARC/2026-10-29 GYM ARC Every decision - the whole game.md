@@ -50,6 +50,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Alter skins tiers 1-3 | KEEP; review Stone skins on max bodies (fur look) |
 | Alters 16-20 (Gem) | ADD in January; 21-30 later |
 | Hall of Fame at Alter 15 | KEEP + fixes (run 2 x2 EXP from Spurt 3, peak height kept, no cheater statues, analytics); preview at Alter 10; Plan B (no reset) if entered players quit (prompt 95) |
+| 2nd+ Hall of Fame (star 2, 3...) | ADD a STAR TRACK: each run faster (8 h → 3 h → ... → 1 h floor), something visible every star, pick 1 of 3 star perks from star 2, star-only trainers/gear/champions, fastest-run board, Alters 16+ open after 15 so entering is a free choice (prompt 101) |
 | Champion Ladder (rivals + legends) | ADD (prompt 92) |
 | Strongman Feats | ADD 3 first (Power Jump, Ground Stomp, Iron Grip Throw), 3 more as alter rewards (prompt 93) |
 | Strength objects ("NEEDS X STRENGTH") + server crown | ADD (prompt 93) |
@@ -276,4 +277,5 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | 19 Dec | Boosts merged into 3 | 97 |
 | 26 Dec | Sound, music and VFX polish pass | 100 |
 | 2 Jan | Economy and store pass (gear ladder, store front, trainer pools start, PolicyService audit, dead config cleanup) | 99 |
+| when the first player reaches star 2, latest 28 Nov (with 92) | Hall of Fame star track | 101 |
 | Jan | Gem alters 16-20, Champion Arena, Collection book, real-player arm wrestling | later |

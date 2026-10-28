@@ -141,16 +141,21 @@ Fix (added to prompt 96, and it moves UP in the plan):
 |---|---|---|
 | before 31 Oct | Hall of Fame fixes + fairness checks | **95** |
 | 31 Oct | Hall of Fame launch | (90 + 88 done) |
-| 7 Nov | Future You, Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default | **91** |
-| 14 Nov | Alter phase fix | 96 |
-| 21 Nov | Golden Era Gym (+ Elite/Champion gear) | 98 |
-| 28 Nov | Champion Ladder | 92 |
-| 5 Dec | Strongman Feats (3), strength objects, rooftop gym, crown | 93 |
-| 12 Dec | Skill tree + Winter Lifts cosmetic + code | 94 |
-| 19 Dec | Boosts merged into 3 | 97 |
-| 26 Dec | Sound, music and VFX polish | 100 |
-| 2 Jan | Economy and store pass | 99 |
-| Jan | Gem alters 16-20, Champion Arena, Collection book, real-player arm wrestling | later |
+| 7 Nov | Future You, Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default + new thumbnail/icon test | **91** |
+| 8-14 Nov | Small ad test ($20-50) to get enough new players to measure | - |
+| 14 Nov | Alter phase fix (quick parts first) | 96 |
+| 21 Nov | **GATE 1**: read the numbers ([[2026-10-29 GYM ARC Rescue plan - if the game is dying]]) + star track if anyone reached star 2 | 101 |
+If Gate 1 is "working", continue:
+| 28 Nov | Golden Era Gym (+ Elite/Champion gear) | 98 |
+| 5 Dec | Champion Ladder | 92 |
+| 12 Dec | Strongman Feats (3), strength objects, rooftop gym, crown + Winter Lifts cosmetic + code | 93 |
+| 19 Dec | Skill tree | 94 |
+| 26 Dec | Boosts merged into 3 | 97 |
+| 2 Jan | Sound, music and VFX polish | 100 |
+| 9 Jan | Economy and store pass | 99 |
+| Jan-Feb | Gem alters 16-20, Champion Arena, Collection book, real-player arm wrestling | later |
+If Gate 1 is "not working": fix the worst funnel step + new thumbnail, Gate 2 ~5 Dec; still not working = maintenance mode + next game (see the rescue plan).
+
 Everything decided for every system: [[2026-10-29 GYM ARC Every decision - the whole game]].
 - Mid-November: look at the Hall of Fame numbers → keep or Plan B.
 - Each week: check first-spurt funnel + D1 the day after. If a change hurts, undo it with Configs.
