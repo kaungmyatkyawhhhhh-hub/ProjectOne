@@ -17,6 +17,8 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 28 Oct: Growth Spurt transformation: after every spurt the camera turns to you, your body glows gold and grows to the new height while the height counts up, then "4'0" → 4'4"" and one short line. Owner: keep it clean (no screen flashes, no extra text; HUD hides meanwhile). See [[GYM ARC - Growth Spurts]].
+- 28 Oct: MEMBERS GYM (group only, next to the Starter Gym's door, +10% gains, weights up to your best gym's) and FREE 1,000 coins for like + favourite. See [[GYM ARC - Members Gym and Free Coins]].
 - 28 Oct: prompt 87, lag spike when things come back: the place's StreamOutBehavior is Opportunistic (unloads everything past 256 studs, then whole gyms reload in one frame, ~1 s on phones). Owner to set it to LowMemory. Two per-frame machine loops (rings, treadmills) made cheap. Console `level` command sets anyone's LVL. See [[2026-10-28 GYM ARC Lag spikes when things reappear]].
 - 28 Oct: PROFILES (prompt 66 part 3): tap a player for their card (stats, trainers, collection, badges, ADD FRIEND / INVITE TO CREW / CHALLENGE / VIEW STATUE). Prompt 66 is fully built. See [[GYM ARC - Profiles]].
 - 28 Oct: prompt 86: after the Hall of Fame your statue stands on the round stage by itself (your screen), no button needed.
@@ -470,6 +472,7 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-28 GYM ARC Prompt - 86 Statue shows by itself]]
 - [[GYM ARC - Codes]]
 - [[GYM ARC - Profiles]]
+- [[GYM ARC - Members Gym and Free Coins]]
 - [[2026-10-28 GYM ARC Prompt - 79 Leaderboard reset, trainer slots, pity stages]]
 - [[2026-10-27 GYM ARC Prompt - 78 FPS lag check]]
 - [[2026-10-27 GYM ARC Prompt - 77 Variants after unlock, fonts, alley skating, invite, inventory]]

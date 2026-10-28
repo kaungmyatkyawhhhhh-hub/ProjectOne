@@ -90,3 +90,13 @@ The GROWTH SPURT card (right column) and the machine strip are quiet chrome card
 
 ## About 1 hour for all six (26 Oct, owner: "fast to hook players, alters are the real progression"; [[2026-10-26 GYM ARC Fast spurts, menu, beach and skate park]])
 Goals 9 / 30 / 53 / 68 / 90 / 119: 4 / 5 / 8 / 12 / 14 / 17 min with the 2x new player boost and trainers (`Targets` 4,5,8,12,15,17; `lune run tests/pacing tunespurts`).
+
+## Transformation scene (28 Oct, owner: "show the body transforming and getting taller, some players don't know")
+- Every Growth Spurt (TAP TO GROW, READY popup, Stats button) plays a short scene, about 6 s (a tap shortens it):
+  1. The camera turns to your front; gold energy pulls into your body.
+  2. Your body becomes a glowing gold figure and grows to the new height in 3 pushes, feet on the ground, up through a gold ring at your old head height. The height number counts up inch by inch.
+  3. The real new body appears (taller, muscles back to the start) with a gold burst. The number becomes "4'0" → 4'4"" with one line under it: "Muscles start fresh · Gains x1.25".
+- Owner, same day: "so many things take over the screen ... so many texts". So: no black bars, no white flashes, no screen darkening, the rest of the HUD hides while it plays, and the old "Growth Spurt!" banner, +1 DNA toast and "You grew!" message don't show after it. The only text is the height.
+- Players nearby see a gold flash on you. Offers and popups after a spurt wait until the scene is over.
+- `Shared/VFX/GrowthFX` (the scene), `ProgressClient` + `StatsClient` (start it), `Server/ActionService` (the flash for others).
+- Studio test hook added: Workspace attribute `TestSkipMenu = true` presses PLAY on the menu by itself (MenuClient).
