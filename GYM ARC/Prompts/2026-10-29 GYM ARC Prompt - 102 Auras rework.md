@@ -16,7 +16,7 @@ PART A (visual, small, can ship first):
 3) Performance: own aura full; others full within 40 studs for the nearest 6, glow-only further, off past 90; Mythic/Signature max ~60 particles on phones; Reduced Motion calm. Phone-size screenshots of each rarity idle / lifting, FPS with 8 auras.
 
 PART B (system, after my OK on the list):
-4) AURA ALTAR in the town plaza (opens at Growth Spurt 3): SPIN for coins only (~2 min of coins), odds always shown, pity (Epic 30 / Legendary 100 / Mythic 300), auto-delete duplicates option, reveal like trainer rolls (rarity ladder sounds), a beam others see (no server message).
+4) AURA ALTAR in the town plaza (opens at Growth Spurt 3): SPIN for coins only (500 coins, fixed), odds always shown, pity (Epic 30 / Legendary 100 / Mythic 300), auto-delete duplicates option, reveal like trainer rolls (rarity ladder sounds), a beam others see (no server message).
 5) ~24 auras, 5 rarities, ORIGINAL names (no anime/brand names): Common 60% x1.05 coins, Rare 27% x1.15, Epic 10% x1.35, Legendary 2.7% x1.6, Mythic 0.3% x2. Show me the full list (names, looks, odds) before building.
 6) SIGNATURE auras are earned only (Golden at 6'0", Stone Titan at Alter 9, alter tier auras, champion auras, Hall of Fame star auras) and are the best-looking ones.
 7) Existing auras get a rarity + coin stat; Aura Pack and VIP Royal cards show the exact stat. Stats breakdown shows "AURA x1.35 coins".
