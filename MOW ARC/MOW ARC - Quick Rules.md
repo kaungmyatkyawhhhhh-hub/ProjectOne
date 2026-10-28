@@ -25,3 +25,9 @@ MOW ARC: a Roblox incremental. Walk your mower over the field -> cut grass -> GR
 8. **Fair kids' game:** no paid luck on random rewards, calm offers only (never in the tutorial, max one card per 10 min), real Roblox prices shown, safe cartoon images only, the owner approves every upload (to the GROUP).
 9. **Keep it small:** build only what the prompt and the design note say. No pivots after launch without data.
 10. **Save + report:** File > Save to Roblox after each task, dated backup reminder, test on a test save. Short progress note + phone-size screenshots + FPS/part numbers + what the owner must do.
+11. **UI is designed, not placeholder (owner: "the UI looks like placeholders, I kept having to tell Claude Code to redesign the buttons").**
+   - NO plain coded rectangles with a gold gradient + UIStroke as the final look. That is a placeholder.
+   - The UI kit is made as real ART first: button, panel, tab, card, pill and badge images (PNG, 9-slice with SliceCenter), each with depth: a darker bottom edge (3D lip), an inner top highlight, a soft drop shadow, rounded corners, a thick navy outline, and an icon on every main button. Pressed state = the lip shrinks.
+   - Several button colours with a clear meaning (green = buy/go, blue = normal, yellow = reward/claim, red = close/danger, grey = locked), not one gold button for everything.
+   - Before building screens: a MOCKUP image of the HUD + one window + the button set at phone size (667x375), shown to the owner for approval. After approval the kit is LOCKED and every screen reuses it. No redesigns later unless the owner asks.
+   - Reference the look of top Roblox simulators (chunky, glossy, icon-led, readable on a phone), never generic flat web UI.
