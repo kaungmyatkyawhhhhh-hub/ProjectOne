@@ -1,0 +1,519 @@
+{
+ "btn_green": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button green"
+ },
+ "btn_green_down": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button green pressed"
+ },
+ "btn_blue": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button blue"
+ },
+ "btn_blue_down": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button blue pressed"
+ },
+ "btn_yellow": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button yellow"
+ },
+ "btn_yellow_down": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button yellow pressed"
+ },
+ "btn_red": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button red"
+ },
+ "btn_red_down": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button red pressed"
+ },
+ "btn_grey": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button grey"
+ },
+ "btn_grey_down": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button grey pressed"
+ },
+ "btn_navy": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button navy"
+ },
+ "btn_navy_down": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button navy pressed"
+ },
+ "panel": {
+  "size": [
+   192,
+   192
+  ],
+  "slice": [
+   56,
+   56,
+   136,
+   136
+  ],
+  "sliceScale": 0.33,
+  "use": "every window"
+ },
+ "tile_blue": {
+  "size": [
+   160,
+   200
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   160
+  ],
+  "sliceScale": 0.33,
+  "use": "store / locker / quest / coach tile"
+ },
+ "tile_lime": {
+  "size": [
+   160,
+   200
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   160
+  ],
+  "sliceScale": 0.33,
+  "use": "store / locker / quest / coach tile"
+ },
+ "tile_orange": {
+  "size": [
+   160,
+   200
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   160
+  ],
+  "sliceScale": 0.33,
+  "use": "store / locker / quest / coach tile"
+ },
+ "tile_gold": {
+  "size": [
+   160,
+   200
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   160
+  ],
+  "sliceScale": 0.33,
+  "use": "store / locker / quest / coach tile"
+ },
+ "tile_red": {
+  "size": [
+   160,
+   200
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   160
+  ],
+  "sliceScale": 0.33,
+  "use": "store / locker / quest / coach tile"
+ },
+ "tile_cyan": {
+  "size": [
+   160,
+   200
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   160
+  ],
+  "sliceScale": 0.33,
+  "use": "store / locker / quest / coach tile"
+ },
+ "tile_grey": {
+  "size": [
+   160,
+   200
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   160
+  ],
+  "sliceScale": 0.33,
+  "use": "store / locker / quest / coach tile"
+ },
+ "pill_navy": {
+  "size": [
+   96,
+   48
+  ],
+  "slice": [
+   24,
+   20,
+   72,
+   28
+  ],
+  "sliceScale": 1,
+  "use": "counters, HUD plates"
+ },
+ "pill_red": {
+  "size": [
+   96,
+   48
+  ],
+  "slice": [
+   24,
+   20,
+   72,
+   28
+  ],
+  "sliceScale": 1,
+  "use": "LIVE, warnings"
+ },
+ "pill_lime": {
+  "size": [
+   96,
+   48
+  ],
+  "slice": [
+   24,
+   20,
+   72,
+   28
+  ],
+  "sliceScale": 1,
+  "use": "status: equipped, new"
+ },
+ "bar_track": {
+  "size": [
+   96,
+   32
+  ],
+  "slice": [
+   16,
+   15,
+   80,
+   17
+  ],
+  "sliceScale": 1,
+  "use": "progress track"
+ },
+ "bar_blue": {
+  "size": [
+   96,
+   32
+  ],
+  "slice": [
+   16,
+   15,
+   80,
+   17
+  ],
+  "sliceScale": 1,
+  "use": "progress fill"
+ },
+ "bar_gold": {
+  "size": [
+   96,
+   32
+  ],
+  "slice": [
+   16,
+   15,
+   80,
+   17
+  ],
+  "sliceScale": 1,
+  "use": "progress fill (rewards)"
+ },
+ "badge_red": {
+  "size": [
+   64,
+   64
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "notification dot"
+ },
+ "badge_bronze": {
+  "size": [
+   64,
+   64
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "rank badge"
+ },
+ "icon_store": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_locker": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_coaches": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_codes": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_invite": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_daily": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_quests": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_top": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_settings": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_close": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_coin": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_speed": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_crown": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_race": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ },
+ "icon_shoe2x": {
+  "size": [
+   128,
+   128
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "icon"
+ }
+}
