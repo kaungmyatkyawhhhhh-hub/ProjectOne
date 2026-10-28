@@ -58,6 +58,7 @@ Back to [[00 Roblox Playbook]]. Short, must-follow version of the three Playbook
 - Admin tools: server-checked permissions, every action logged, Ban API, test switches never in the live game.
 
 ## 9. Storefront
+- Art (from studying the 32 biggest games, see [[Playbook notes - Top games art study (Oct 2026)]]): ONE subject filling the frame, a face with clear emotion, tight crop breaking the edges, simple background, text = logo or one big number only, thumbnails tell a tiny story (threat vs you / before→after / huge reward), all thumbnails use ONE template and change one thing. Never copy a current hit's look.
 - Icon ≥512x512, readable at 150 px, one bold subject. Thumbnails 1920x1080, 2-5 different ones in Thumbnail Personalization (keep each test ≥7 days), real gameplay video if possible. Refresh art with every big update.
 - Name: short, easy to type, says the genre, never renamed after launch. Max 1-2 emojis. Genre set before launch (only changeable every 3 months).
 - Description: first sentence = what you do in the game; then how to play, features, update notes, codes.

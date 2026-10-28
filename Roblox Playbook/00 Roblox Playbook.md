@@ -43,6 +43,7 @@ How to make Roblox games better in every way, researched 28 Oct 2026 for GYM ARC
 - [[Playbook notes - Admin panels and live tools]]
 - [[Playbook notes - Thumbnails]]
 - [[Playbook notes - Icons and titles]]
+- [[Playbook notes - Top games art study (Oct 2026)]]: real icons/thumbnails of the 32 biggest games + 9 gym games, the 4 styles, rules, GYM ARC art direction and prompts
 - [[Playbook notes - Names and descriptions]]
 - [[Playbook notes - Logos]]
 - [[Playbook notes - Passes and products catalogue]]
