@@ -46,6 +46,9 @@ local function sound(key)
 end
 
 local function fadeTo(s, vol)
+	if player:GetAttribute("InMenu") then
+		vol *= 0.35 -- the main menu: music starts quietly
+	end
 	TweenService:Create(s, TweenInfo.new(M.Fade), { Volume = vol }):Play()
 	local bed = s:FindFirstChild("Bed")
 	if bed then
@@ -101,6 +104,12 @@ end
 function Music.start(ctx)
 	ctx.Music = Music
 	Music.play(areaKey())
+	player:GetAttributeChangedSignal("InMenu"):Connect(function()
+		local s = current and tracks[current]
+		if s then
+			fadeTo(s, M[current].Volume * duck * SoundConfig.norm(M[current].Id, "Music"))
+		end
+	end)
 	player:GetAttributeChangedSignal("Area"):Connect(function()
 		if not player:GetAttribute("InRace") then
 			Music.play(areaKey())

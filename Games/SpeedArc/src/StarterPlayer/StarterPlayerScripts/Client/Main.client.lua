@@ -35,3 +35,25 @@ for _, name in ORDER do
 		warn("[SPEED ARC] " .. name .. " failed to start: " .. tostring(err))
 	end
 end
+
+-- build every window once behind the loading screen / menu (lesson: the first open must not freeze)
+task.spawn(function()
+	local UIKit = require(Shared.UIKit)
+	local player = game:GetService("Players").LocalPlayer
+	task.wait(1)
+	if not player:GetAttribute("InMenu") then
+		return
+	end
+	local sound = UIKit.windowSound
+	UIKit.windowSound = nil
+	for _, open in {
+		function() ctx.Locker.open("SHOES") end,
+		function() ctx.Coaches.open("ROLL") end,
+		function() ctx.Store.open("PASSES") end,
+	} do
+		pcall(open)
+		task.wait(0.1)
+		UIKit.closeWindows()
+	end
+	UIKit.windowSound = sound
+end)

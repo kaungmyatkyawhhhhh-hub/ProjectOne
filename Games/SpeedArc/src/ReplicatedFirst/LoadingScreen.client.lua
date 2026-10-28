@@ -1,17 +1,31 @@
--- SPEED ARC loading screen (M4, GDD 21 at 0:00): shows at once, preloads the hub's meshes and
--- sounds (so nothing freezes later), then a short menu with one big PLAY button. PLAY starts the
--- tutorial for new runners and fires the "menu_play" funnel step.
+-- SPEED ARC loading screen + main menu (M4/M6, GDD 21 at 0:00).
+-- Loading: logo, a moving bar with changing steps, a new tip every 3 s, preloads the hub's meshes,
+-- textures and sounds. SKIP shows after 5 s (loading carries on in the background).
+-- Menu: the screen clears to a slow camera fly over the hub, the logo stays, one big PLAY, the music
+-- starts quietly. PLAY starts the tutorial for new runners and fires the "menu_play" funnel step.
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local Players = game:GetService("Players")
 local ContentProvider = game:GetService("ContentProvider")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 ReplicatedFirst:RemoveDefaultLoadingScreen()
+player:SetAttribute("InMenu", true) -- (local only) the music plays quietly while this is set
 
 local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
 local BODY = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Bold)
 local BLACK, CARBON, BLUE, GOLD, WHITE = Color3.fromHex("#0B0D12"), Color3.fromHex("#161A22"), Color3.fromHex("#1E7BFF"), Color3.fromHex("#FFC83D"), Color3.fromHex("#F4F6FA")
+local STEPS = { "Painting the lanes...", "Lacing up the shoes...", "Filling the stands...", "Warming up the coaches...", "Starting the clock..." }
+local TIPS = {
+	"Tap steadily: a steady rhythm builds your combo to x1.5!",
+	"A race starts every 3 minutes. Tap JOIN when you see it!",
+	"Shoes make every tap count for more.",
+	"Coaches follow you and boost your training.",
+	"Champion rank + a race win = GO PRO to a new league.",
+	"Use BOOST in races - you get 3 and they refill.",
+	"Come back every day for your streak reward!",
+}
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "SpeedArcLoading"
@@ -29,7 +43,8 @@ grad.Color = ColorSequence.new(CARBON, BLACK)
 grad.Rotation = 90
 grad.Parent = bg
 
--- speed streaks
+-- speed streaks that slide across while loading
+local streaks = {}
 for i = 1, 6 do
 	local s = Instance.new("Frame")
 	s.BackgroundColor3 = if i % 2 == 0 then GOLD else BLUE
@@ -40,6 +55,7 @@ for i = 1, 6 do
 	s.Size = UDim2.new(1.4, 0, 0, 3 + i % 3 * 2)
 	s.Rotation = -8
 	s.Parent = bg
+	streaks[i] = s
 end
 
 local scale = Instance.new("UIScale")
@@ -48,7 +64,7 @@ holder.BackgroundTransparency = 1
 holder.AnchorPoint = Vector2.new(0.5, 0.5)
 holder.Position = UDim2.fromScale(0.5, 0.5)
 holder.Size = UDim2.fromOffset(600, 300)
-holder.Parent = bg
+holder.Parent = gui
 scale.Parent = holder
 local function fit()
 	local s = math.min(gui.AbsoluteSize.X / 700, gui.AbsoluteSize.Y / 390)
@@ -57,28 +73,29 @@ end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
 fit()
 
-local function label(text, font, size, color, y, h)
+local function label(text, font, size, color, y, h, parent)
 	local t = Instance.new("TextLabel")
 	t.BackgroundTransparency = 1
 	t.Text = text
 	t.FontFace = font
 	t.TextSize = size
 	t.TextColor3 = color
+	t.TextWrapped = true
 	t.Position = UDim2.fromOffset(0, y)
 	t.Size = UDim2.new(1, 0, 0, h)
 	local st = Instance.new("UIStroke")
 	st.Thickness = 3
 	st.Color = BLACK
 	st.Parent = t
-	t.Parent = holder
+	t.Parent = parent or holder
 	return t
 end
 label("SPEED ARC", MONTSERRAT, 86, GOLD, 10, 100)
-local tip = label("Everyone starts slow.", BODY, 22, WHITE, 112, 30)
+local stepText = label(STEPS[1], BODY, 20, WHITE, 112, 26)
 
 local barBack = Instance.new("Frame")
 barBack.BackgroundColor3 = BLACK
-barBack.Position = UDim2.fromOffset(100, 170)
+barBack.Position = UDim2.fromOffset(100, 146)
 barBack.Size = UDim2.fromOffset(400, 16)
 barBack.Parent = holder
 Instance.new("UICorner", barBack).CornerRadius = UDim.new(0.5, 0)
@@ -88,31 +105,68 @@ barStroke.Thickness = 2
 barStroke.Parent = barBack
 local bar = Instance.new("Frame")
 bar.BackgroundColor3 = BLUE
-bar.Size = UDim2.fromScale(0, 1)
+bar.Size = UDim2.fromScale(0.02, 1)
 bar.Parent = barBack
 Instance.new("UICorner", bar).CornerRadius = UDim.new(0.5, 0)
+local tipText = label(TIPS[math.random(1, #TIPS)], BODY, 16, Color3.fromHex("#4FC3FF"), 172, 40)
 
-local play = Instance.new("TextButton")
-play.Name = "Play"
-play.Text = "PLAY"
-play.FontFace = MONTSERRAT
-play.TextSize = 40
-play.TextColor3 = BLACK
-play.BackgroundColor3 = GOLD
-play.AutoButtonColor = true
-play.AnchorPoint = Vector2.new(0.5, 0)
-play.Position = UDim2.new(0.5, 0, 0, 205)
-play.Size = UDim2.fromOffset(240, 74)
-play.Visible = false
-play.Parent = holder
-Instance.new("UICorner", play).CornerRadius = UDim.new(0, 16)
-local playStroke = Instance.new("UIStroke")
-playStroke.Color = Color3.fromHex("#C99A1E")
-playStroke.Thickness = 3
-playStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-playStroke.Parent = play
+local function bigButton(text, y, w, h, color, textColor, textSize)
+	local b = Instance.new("TextButton")
+	b.Text = text
+	b.FontFace = MONTSERRAT
+	b.TextSize = textSize
+	b.TextColor3 = textColor
+	b.BackgroundColor3 = color
+	b.AutoButtonColor = true
+	b.AnchorPoint = Vector2.new(0.5, 0)
+	b.Position = UDim2.new(0.5, 0, 0, y)
+	b.Size = UDim2.fromOffset(w, h)
+	b.Visible = false
+	b.Parent = holder
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 16)
+	local st = Instance.new("UIStroke")
+	st.Color = BLACK
+	st.Thickness = 3
+	st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	st.Parent = b
+	return b
+end
+local play = bigButton("PLAY", 218, 240, 74, GOLD, BLACK, 40)
+local skip = bigButton("SKIP", 222, 140, 44, Color3.fromHex("#2A303C"), WHITE, 22)
 
--- preload (never more than ~10 s, so a slow phone still gets in)
+-- moving bits: streaks slide, tips change every 3 s
+local loading = true
+task.spawn(function()
+	local t = 0
+	while gui.Parent do
+		t += task.wait(0.03)
+		for i, s in streaks do
+			local x = ((t * (0.12 + i * 0.03)) % 1.6) - 0.3
+			s.Position = UDim2.fromScale(x, 0.18 + i * 0.1)
+		end
+	end
+end)
+task.spawn(function()
+	while gui.Parent do
+		task.wait(3)
+		tipText.Text = TIPS[math.random(1, #TIPS)]
+	end
+end)
+
+----------------------------------------------------------------------------
+-- preload (keeps going after SKIP)
+----------------------------------------------------------------------------
+local skipped = false
+task.delay(5, function()
+	if loading then
+		skip.Visible = true
+	end
+end)
+skip.Activated:Connect(function()
+	skipped = true
+	skip.Visible = false
+end)
+
 if not game:IsLoaded() then
 	game.Loaded:Wait()
 end
@@ -122,7 +176,7 @@ local function collect(root)
 		return
 	end
 	for _, d in root:GetDescendants() do
-		if d:IsA("MeshPart") or d:IsA("Sound") or d:IsA("Decal") then
+		if d:IsA("MeshPart") or d:IsA("Sound") or d:IsA("Decal") or d:IsA("Texture") or d:IsA("ParticleEmitter") then
 			table.insert(assets, d)
 		end
 	end
@@ -131,28 +185,66 @@ collect(workspace:WaitForChild("Hub", 10))
 collect(game:GetService("ReplicatedStorage"):FindFirstChild("Assets"))
 collect(game:GetService("SoundService"))
 local total = math.max(1, #assets)
-local done = 0
-local started = os.clock()
-local batch = 20
-for i = 1, #assets, batch do
-	if os.clock() - started > 10 then
-		break
+local preloadDone = false
+task.spawn(function()
+	local done = 0
+	local batch = 20
+	for i = 1, #assets, batch do
+		local slice = {}
+		for j = i, math.min(#assets, i + batch - 1) do
+			table.insert(slice, assets[j])
+		end
+		pcall(function()
+			ContentProvider:PreloadAsync(slice)
+		end)
+		done += #slice
+		local f = done / total
+		TweenService:Create(bar, TweenInfo.new(0.2), { Size = UDim2.fromScale(math.max(0.02, f), 1) }):Play()
+		stepText.Text = STEPS[math.clamp(math.ceil(f * #STEPS), 1, #STEPS)]
 	end
-	local slice = {}
-	for j = i, math.min(#assets, i + batch - 1) do
-		table.insert(slice, assets[j])
-	end
-	pcall(function()
-		ContentProvider:PreloadAsync(slice)
-	end)
-	done += #slice
-	bar.Size = UDim2.fromScale(done / total, 1)
+	preloadDone = true
+end)
+local t0 = os.clock()
+while not (preloadDone or skipped or os.clock() - t0 > 12) do
+	task.wait(0.1)
 end
-bar.Size = UDim2.fromScale(1, 1)
 while not player:GetAttribute("DataLoaded") do
 	player:GetAttributeChangedSignal("DataLoaded"):Wait()
 end
-tip.Text = "Train. Race. Go Pro."
+loading = false
+skip.Visible = false
+
+----------------------------------------------------------------------------
+-- main menu: the screen clears to a slow fly over the hub
+----------------------------------------------------------------------------
+local camera = workspace.CurrentCamera
+local flyStart = os.clock()
+RunService:BindToRenderStep("SpeedArcMenuCamera", Enum.RenderPriority.Camera.Value + 2, function()
+	local a = (os.clock() - flyStart) * 0.06 + 2.2
+	local pos = Vector3.new(math.cos(a) * 150, 48 + math.sin(a * 0.7) * 6, math.sin(a) * 120)
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.CFrame = CFrame.lookAt(pos, Vector3.new(0, 6, 10))
+end)
+TweenService:Create(bg, TweenInfo.new(1.2), { BackgroundTransparency = 1 }):Play()
+for _, s in streaks do
+	TweenService:Create(s, TweenInfo.new(1.2), { BackgroundTransparency = 1 }):Play()
+end
+TweenService:Create(barBack, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
+TweenService:Create(bar, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
+TweenService:Create(barStroke, TweenInfo.new(0.5), { Transparency = 1 }):Play()
+stepText.Text = "Train. Race. Go Pro."
+local shade = Instance.new("Frame") -- a soft dark band behind the menu text so it reads over the world
+shade.BackgroundColor3 = BLACK
+shade.BackgroundTransparency = 1
+shade.BorderSizePixel = 0
+shade.Size = UDim2.fromScale(1, 1)
+shade.ZIndex = 0
+shade.Parent = gui
+local shadeGrad = Instance.new("UIGradient")
+shadeGrad.Rotation = 90
+shadeGrad.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(0.45, 0.85), NumberSequenceKeypoint.new(0.7, 0.85), NumberSequenceKeypoint.new(1, 0.2) })
+shadeGrad.Parent = shade
+TweenService:Create(shade, TweenInfo.new(1.2), { BackgroundTransparency = 0 }):Play()
 play.Visible = true
 task.spawn(function()
 	while play.Parent and play.Visible do
@@ -164,12 +256,19 @@ task.spawn(function()
 end)
 
 -- Studio test switch: Workspace TestAutoPlay = true presses PLAY by itself
-if game:GetService("RunService"):IsStudio() and workspace:GetAttribute("TestAutoPlay") then
+if RunService:IsStudio() and workspace:GetAttribute("TestAutoPlay") then
 	task.wait(0.5)
 else
 	play.Activated:Wait()
 end
 play.Visible = false
+RunService:UnbindFromRenderStep("SpeedArcMenuCamera")
+camera.CameraType = Enum.CameraType.Custom
+local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+if hum then
+	camera.CameraSubject = hum
+end
+player:SetAttribute("InMenu", nil)
 local remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
 remotes:WaitForChild("Funnel"):FireServer("menu_play")
 task.spawn(function()
@@ -177,16 +276,13 @@ task.spawn(function()
 		remotes:WaitForChild("Action"):InvokeServer("Tutorial", "play")
 	end)
 end)
-local fade = TweenService:Create(bg, TweenInfo.new(0.35), { BackgroundTransparency = 1 })
-for _, d in bg:GetDescendants() do
+for _, d in gui:GetDescendants() do
 	if d:IsA("TextLabel") or d:IsA("TextButton") then
-		TweenService:Create(d, TweenInfo.new(0.3), { TextTransparency = 1 }):Play()
-	elseif d:IsA("Frame") then
-		TweenService:Create(d, TweenInfo.new(0.3), { BackgroundTransparency = 1 }):Play()
+		TweenService:Create(d, TweenInfo.new(0.3), { TextTransparency = 1, BackgroundTransparency = 1 }):Play()
 	elseif d:IsA("UIStroke") then
 		TweenService:Create(d, TweenInfo.new(0.3), { Transparency = 1 }):Play()
 	end
 end
-fade:Play()
-fade.Completed:Wait()
+TweenService:Create(shade, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
+task.wait(0.4)
 gui:Destroy()

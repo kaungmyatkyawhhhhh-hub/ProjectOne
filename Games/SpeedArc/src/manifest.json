@@ -517,6 +517,17 @@
   ]
  },
  {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/RaceFxController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "RaceFxController"
+  ]
+ },
+ {
   "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/RetentionController.lua",
   "class": "ModuleScript",
   "path": [

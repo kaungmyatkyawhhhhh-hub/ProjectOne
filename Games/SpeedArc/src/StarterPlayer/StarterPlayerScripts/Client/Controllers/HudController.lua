@@ -493,6 +493,12 @@ function Hud.start(ctx)
 	Hud.gui = gui
 	Hud.canvas = canvas
 
+	-- the HUD hides while the main menu is up
+	gui.Enabled = not player:GetAttribute("InMenu")
+	player:GetAttributeChangedSignal("InMenu"):Connect(function()
+		gui.Enabled = not player:GetAttribute("InMenu")
+	end)
+
 	buildCoins()
 	buildSpeed()
 	buildRacePill()
@@ -517,6 +523,9 @@ function Hud.start(ctx)
 		shownCoins = v
 		if v > from and v - from >= 10 then
 			animateNumber(from, v, 0.8, renderCoins)
+			if v - from >= 50 and Hud.coinFly then
+				Hud.coinFly(if v - from >= 1000 then 8 else 5)
+			end
 			refs.coinsScale.Scale = 1.15
 			UIKit.tween(refs.coinsScale, 0.3, { Scale = 1 }, Enum.EasingStyle.Back)
 		else
@@ -536,6 +545,57 @@ function Hud.start(ctx)
 	shownCoins = player:GetAttribute("Coins") or 0
 	renderSpeed(shownSpeed)
 	renderCoins(shownCoins)
+
+	-- coins fly to the counter when a reward lands (pooled icons)
+	local flyers = {}
+	for i = 1, 8 do
+		local c = UIKit.coinIcon(22, canvas)
+		c.Name = "CoinFly"
+		c.Visible = false
+		c.ZIndex = 40
+		for _, d in c:GetDescendants() do
+			if d:IsA("GuiObject") then
+				d.ZIndex = 41
+			end
+		end
+		flyers[i] = c
+	end
+	Hud.coinFly = function(n)
+		local target = refs.coins.AbsolutePosition - canvas.AbsolutePosition
+		local scale = canvas.AbsoluteSize.X / math.max(1, canvas.Size.X.Offset)
+		local tx, ty = target.X / scale + 24, target.Y / scale + 22
+		local w, h = canvas.Size.X.Offset, canvas.Size.Y.Offset
+		for i = 1, math.min(n, #flyers) do
+			local c = flyers[i]
+			local sx, sy = w * 0.5 + math.random(-70, 70), h * 0.55 + math.random(-30, 30)
+			c.Position = UDim2.fromOffset(sx, sy)
+			c.Visible = true
+			task.delay((i - 1) * 0.05, function()
+				UIKit.tween(c, 0.5, { Position = UDim2.fromOffset(tx, ty) }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+				task.delay(0.5, function()
+					c.Visible = false
+				end)
+			end)
+		end
+	end
+
+	-- the gold buttons' shine sweep: every 3.5 s, only the ones on screen
+	task.spawn(function()
+		while true do
+			task.wait(3.5)
+			if not (ctx.Settings and ctx.Settings.reduced()) then
+				for i = #UIKit.sweeps, 1, -1 do
+					local s = UIKit.sweeps[i]
+					if not s.Parent then
+						table.remove(UIKit.sweeps, i)
+					elseif s.Parent.AbsoluteSize.X > 0 and s:FindFirstAncestorWhichIsA("GuiObject").Visible then
+						s.Position = UDim2.new(-0.3, 0, 0.5, 0)
+						UIKit.tween(s, 0.7, { Position = UDim2.new(1.3, 0, 0.5, 0) }, Enum.EasingStyle.Sine)
+					end
+				end
+			end
+		end
+	end)
 
 	-- the hint gently pulses while it shows (only one tween loop, only while visible)
 	task.spawn(function()

@@ -166,6 +166,8 @@ end
 ----------------------------------------------------------------------------
 -- Chunky button with a darker bottom edge and a press animation
 ----------------------------------------------------------------------------
+UIKit.sweeps = {} -- the gold buttons' shine sweeps (HudController runs them)
+
 function UIKit.button(props)
 	local style = UIKit.ButtonStyles[props.Style or "Blue"]
 	local edgeH = props.EdgeHeight or 5
@@ -222,6 +224,24 @@ function UIKit.button(props)
 		Parent = face,
 	})
 	UIKit.corner(shine, radius - 4)
+	-- primary (gold) buttons: a light sweep runs across now and then (VFX note); one loop drives all
+	if (props.Style or "Blue") == "Gold" then
+		face.ClipsDescendants = true
+		local sweep = make("Frame", {
+			Name = "Sweep",
+			BackgroundColor3 = Palette.White,
+			BackgroundTransparency = 0.55,
+			BorderSizePixel = 0,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.new(-0.3, 0, 0.5, 0),
+			Size = UDim2.new(0, 18, 1.6, 0),
+			Rotation = 20,
+			ZIndex = root.ZIndex + 2,
+			Parent = face,
+		})
+		make("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.2), NumberSequenceKeypoint.new(1, 1) }), Parent = sweep })
+		table.insert(UIKit.sweeps, sweep)
+	end
 
 	local label = UIKit.text({
 		Name = "Label",
