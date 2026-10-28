@@ -1,11 +1,13 @@
 ---
 date: 2026-10-28
 tags: [gymarc, prompt, liveops]
-status: todo (run BEFORE Saturday's Hall of Fame launch, after 80-87)
+status: done
 ---
 # 90 Update countdown and live launch event
 
 Back to [[00 GYM ARC Home|GYM ARC Home]] · Playbook: [[Roblox Playbook - Updates, storefront and analytics]] (updates section)
+
+**Done 28 Oct:** see [[2026-10-28 GYM ARC Update countdown and live launch event]] and [[GYM ARC - Live Update Events]]. Owner added: log the update in the in-game NEWS once the Hall of Fame switch is on (done).
 
 Owner, 28 Oct: "there should be a cutscene during update and a countdown like the other big games." First use: the HALL OF FAME launch (Sat 31 Oct). Build it as a reusable system for every future update.
 

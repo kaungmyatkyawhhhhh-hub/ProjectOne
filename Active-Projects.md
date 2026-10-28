@@ -6,6 +6,7 @@ Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongm
 - **Studio place:** "GYM ARC" (placeId 80031260599632), owned by the group Myanmar Builders Club.
 - **Now:** Hall of Fame being finished (prompt 80). Launch event Sat 31 Oct with a new icon, thumbnails and title `[🎃🏆 HALL OF FAME] GYM ARC 💪`. Before it: loading screen SKIP at 5 s, kit-only UI (no placeholder buttons).
 - **Numbers (to 26 Oct):** a traffic boost on 23-25 Oct (Home recommendations + ads) faded; day-1 retention 4.5-6.5%, ~33% still playing at 5 min. First-15-minute fixes went in 26-27 Oct: check the funnel and retention 3-4 days after the update. No ads until day-1 retention is ~10%+.
+- **28 Oct, prompt 90 done:** the Hall of Fame launches by itself Sat 31 Oct 15:00 UTC (countdown, live cutscene, Launch Day reward, NEWS entry). Publish early, restart outdated servers hours before. See [[GYM ARC/Features/GYM ARC - Live Update Events]].
 - **28 Oct, prompt 88 done:** Playbook fixes; launch switches now live in Creator Hub > Configs (`HallOfFame_Enabled`, `LoadingBadge_Enabled`, `Event_Enabled`...). See [[GYM ARC/Progress/2026-10-28 GYM ARC Playbook audit and fixes]].
 - **Owner to do:** Starter Pack price (79 R$), VIP 30% OFF pass (209 R$) + its ID, `notify_key` in Creator Hub Secrets. Make the Configs keys; Maturity questionnaire + Kids and Select trial; 3-5 thumbnails; Genre; Experience Event for the Hall of Fame.
 - **Last updated:** 2026-10-28
