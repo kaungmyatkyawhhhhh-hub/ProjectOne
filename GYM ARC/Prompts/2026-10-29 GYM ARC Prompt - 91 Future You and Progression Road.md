@@ -33,5 +33,5 @@ Plan: [[2026-10-29 GYM ARC Master plan - one ladder]]
 ```text
 5) UNLOCK MAP (one Config table that the Road, locks, guides and the Growth Spurt moment all read): set what opens at each step to match the master plan table (Start: machines + Shop; Spurt 1: Beach Gym, posing shows; Spurt 2: trainers, arm wrestling, crews stay at 2 or later; Spurt 3: Pro Gym, genetics; Spurt 4: National Show, crews; Spurt 5: Powerlifting Gym; Spurt 6: Body Alters; Alter 2: Strongman Yard; Alter 15: Hall of Fame). Show me a before/after table first and wait for my OK on anything that would LOCK something a current player already uses (existing players keep everything they have).
 6) TUTORIAL = train → grow → next goal only. Remove the skate tip step (skateboard stays usable, its guide waits until Spurt 2). Keep the funnel step names stable (add, don't renumber). Check first-spurt time stays ~4 min.
-7) Basketball court and boost types: do NOT change yet, list what they touch (UI, guides, sounds, performance) so I can decide.
+7) BASKETBALL COURT (owner decided 29 Oct): hide it until Growth Spurt 4: no guides, no HUD, no tutorial mention before that; the court stays in the world and opens at Spurt 4 as a side activity on the Road (players who already used it keep access). Boost types: don't touch here (prompt 97).
 ```

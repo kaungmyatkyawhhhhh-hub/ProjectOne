@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, plan, roadmap]
-status: proposal (owner to OK)
+status: agreed 29 Oct (decisions below)
 ---
 # Master plan: Hall of Fame + new features + old features as ONE ladder
 
@@ -9,6 +9,16 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Built from: [[2026-10-29 GYM ARC Why
 
 ## The idea in one sentence
 **"Lift to grow taller, from 4 feet to 8 feet, and enter the Hall of Fame."** Every feature (old and new) hangs on that one ladder, and each step of the ladder unlocks 1-2 things. Nothing is deleted; things are just shown at the right time.
+
+## Decisions (29 Oct, owner + research)
+| Question | Decision | Why (research) |
+|---|---|---|
+| Mass monster + height per alter | **Yes, both**: alter is ready when you're a full MASS MONSTER; your body never looks smaller after an alter; +0.8" every alter (7'0" at Alter 15) | Owner's choice. Loss aversion: shrinking after every alter is a likely reason for the Alter 1-5 and 8-9 quits |
+| Hall of Fame | **Stay at Alter 15 for Saturday, with prompt 95 fixes** (run 2 fast, peak height kept, no cheater statues, analytics). Hall of Fame preview at Alter 10. Re-decide mid-November from the numbers: if players who enter stop playing, switch to Plan B (no reset); if most quitters stop before Alter 10 even after prompt 96, move it to Alter 10 | Moving a launch 2 days before is risky; very few players reach either alter today; it's opt-in. Fisch/Grow a Garden: don't change big things blind, measure then change |
+| Basketball court | **Hide, don't delete**: no guides, no HUD, no tutorial; it opens at Growth Spurt 4 as a small side activity on the Road | Too many buttons early drives 30-second exits; Grow a Garden lost its identity when a side system took over; but optional side activities make a world feel richer once players are settled (Game Developer, feature fatigue) |
+| Boost types (6+) | **Merge into 3: STAMINA, GAINS, LUCK.** Everything owned is converted 1:1 or better (nobody loses), old names stay as item skins | Kids can't track 6 timers; rule "never weaken what players own" (PS99 nerf backlash) |
+| SPEED ARC | **Paused** (owner) | All time on GYM ARC; survivors in the genre win by weekly updates |
+| Money / ads | No ad money until D1 ~10% and 5-min ~45%. Brother's first test $20-50 after 7 Nov; deal option A | Playbook rule; Break A Bed spent 12K Robux on ads |
 
 ## The ladder (who you become → what opens)
 | Step | You become | Opens (old = ●, new = ★) | Main goal shown |
@@ -32,8 +42,8 @@ Always on (quiet, small UI): daily rewards, quests, streaks, codes, titles, lead
 | Rivals (3) + Legends (8) | Become the **Champion Ladder** (prompt 92). Same characters, one board, visible rewards. |
 | Tutorial | Only train → grow → next goal. **Remove the skate tip step** (and anything not about growing). |
 | Skate park / skateboard | Stays, no guide until Spurt 2. |
-| Basketball court | **Owner decides:** hide (gate it at Alter 5 as a side game, no HUD/guides) or cut. Recommended: hide. |
-| Boosts (shakes, coconut water, creatine, protein, supplements...) | **Owner decides:** merge into 3 kinds: Stamina (shakes), Gains (supplements), Luck (rolls). Recommended. |
+| Basketball court | Hidden until Growth Spurt 4 (no guides/HUD before). |
+| Boosts (shakes, coconut water, creatine, protein, supplements...) | Merge into 3: Stamina, Gains, Luck (prompt 97), owned items converted. |
 | Auras + gear | Keep their stats; unlocked through the skill tree (prompt 94), equip menu shows Current → New. |
 | Looks + Alters | Unchanged (looks no stats). Shown on the Progression Road. |
 | Titles, coins | Become the bonus, not the main reward. |
@@ -71,18 +81,34 @@ Fix: **something every alter, height every alter, a big reward exactly at Alter 
 | 11-14 Metal | 6'9"-6'11" | ★ a champion or gear piece each, ★ Champion Arena at 12 |
 | 15 Gold | 7'0" | ● Hall of Fame |
 - Also: keep alter goals FLAT inside a tier (no +25 each), so they feel faster with the +15% bonus; Future You shows the NEXT alter's skin on you; the HUD always shows the next big thing ("Golden Era Gym in 2 alters").
-- Owner decisions: (a) height +0.8" per alter instead of +4" per tier (same 7'0" at Alter 15); (b) optional: Hall of Fame at Alter 10 instead of 15 (the note says it "never moves", so only if you want).
+- Decided 29 Oct: height +0.8" per alter (same 7'0" at Alter 15); Hall of Fame stays at 15 for now (see Decisions).
 - Measure first: log every alter as a progression event (prompt 88 item 6) to confirm WHERE players stop and how long alters 6-9 really take for real players (the sim says ~24 min each with trainers; players without trainers are slower).
+
+## Alters 1-5 too (owner, 29 Oct: "people quit at alter 1-5 too")
+So the whole alter phase (after 6'0") leaks, not one alter. Extra reasons at the START of alters:
+1. **Difficulty cliff:** Growth Spurts are fast (4, 5, 8, 12, 14, 17 min), then Alter 1 needs every group at level 205 (~27 min WITH trainers by the sim, much longer without). The game suddenly slows down right after the fastest, most exciting part.
+2. **You shrink:** an alter keeps only 25% of muscle EXP, so your body gets visibly SMALLER after every alter. Losing your muscles feels much worse than a new skin feels good (loss aversion).
+3. **New word, new rules:** "Body Alter" is a new idea right when players expect "more Growth Spurts". Kids may not get what it is or why to do it.
+4. **Weak first rewards:** Tier 1 skins (Pumped, Shredded, Tanned, Vascular, Peak) are subtle human skins (Tanned is mostly a colour); no height (until Alter 5), nothing new opens except the Strongman Yard at 2.
+
+Fix (added to prompt 96, and it moves UP in the plan):
+- **Smooth the curve:** Alter 1 ≈ the last spurt (~17-20 min), then a gentle rise; flat goals inside a tier.
+- **Never look smaller:** your body shows your BEST physique (or keep 50%+ of muscles), the alter is shown as "your body transforms" not "start over".
+- **Call it growth:** present alters as the next Growth Spurts ("GROWTH SPURT 7: PUMPED BODY") with +0.8" height every alter, so the fantasy never stops.
+- **A reward every alter** (table above) and a clear "what is this" moment at 6'0": "You're fully grown. Now TRANSFORM your body: 15 new bodies, each stronger and taller."
+- **Count the drop per step:** some players leave at every step in every game; what matters is a step that loses MORE than the others. Build a step funnel (players who reached Spurt 1..6, Alter 1..15) and fix the biggest drop first.
 
 ## Weekly plan (Saturday 15:00 UTC = 21:30 Myanmar)
 | Saturday | Update | Prompts |
 |---|---|---|
-| 31 Oct | Hall of Fame launch | 90 (live event) + **95** (HoF fixes, test first) |
-| 7 Nov | Future You + Progression Road + the ladder unlock map + short tutorial | 88, **91** |
-| 14 Nov | Champion Ladder | 92 |
-| 21 Nov | Strongman Feats + strength objects + server crown | 93 |
-| 28 Nov | Skill tree + equip preview | 94 |
-| 5 Dec | Alter 8-9 wall fix (Golden Era Gym, height per alter, flat goals) | 96 |
+| 31 Oct | Hall of Fame launch | 90 + 88 done; **95** (HoF fixes) before Saturday, test first |
+| 7 Nov | Future You + Progression Road + the ladder unlock map + short tutorial + basketball hidden | **91** |
+| 14 Nov | Alter phase fix (smooth curve, never shrink, height + reward every alter) | 96 |
+| 21 Nov | Champion Ladder | 92 |
+| 28 Nov | Strongman Feats + strength objects + server crown | 93 |
+| 5 Dec | Skill tree + equip preview | 94 |
+| 12 Dec | Boosts merged into 3 | 97 |
+
 | Dec | Collection book, real-player arm wrestling, Winter event | later |
 - Mid-November: look at the Hall of Fame numbers → keep or Plan B.
 - Each week: check first-spurt funnel + D1 the day after. If a change hurts, undo it with Configs.
