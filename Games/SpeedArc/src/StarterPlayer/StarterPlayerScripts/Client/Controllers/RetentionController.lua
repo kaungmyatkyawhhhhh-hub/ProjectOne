@@ -72,11 +72,13 @@ end
 ----------------------------------------------------------------------------
 -- small top buttons with a red dot
 ----------------------------------------------------------------------------
-local function smallButton(name, text, style, parent, pos, size)
-	local b = UIKit.button({ Name = name, Style = style or "Dark", Text = text, TextSize = 14, Position = pos, Size = size or UDim2.fromOffset(62, 36), EdgeHeight = 4, Radius = 10, Parent = parent })
-	local dot = make("Frame", { Name = "Dot", BackgroundColor3 = P.DangerRed, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -4, 0, 4), Size = UDim2.fromOffset(14, 14), Visible = false, ZIndex = 5, Parent = b })
-	UIKit.corner(dot, UDim.new(0.5, 0))
-	UIKit.stroke(dot, P.White, 1.5)
+-- an icon button with its name under it (UI kit, prompt 12); a red badge dot when something waits
+local function smallButton(name, text, style, parent, pos, size, icon)
+	size = size or UDim2.fromOffset(60, 46)
+	local b = UIKit.button({ Name = name, Style = style or "Dark", Icon = icon, Position = pos, Size = size, Parent = parent })
+	UIKit.text({ Name = "Caption", Text = text, TextSize = 13, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 1, -2), Size = UDim2.fromOffset(80, 16), ZIndex = 4, Parent = b })
+	local dot = UIKit.sprite("badge_red", { Name = "Dot", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -5, 0, 5), Size = UDim2.fromOffset(20, 20), ZIndex = 5, Parent = b })
+	dot.Visible = false
 	dots[name] = dot
 	return b
 end
@@ -335,37 +337,41 @@ function R.start(c)
 	canvas = ctx.Hud.canvas
 
 	-- buttons under the race timer (the JOIN button moves down under them)
-	local row = make("Frame", { Name = "TopButtons", BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 58), Size = UDim2.fromOffset(196, 38), Parent = canvas })
-	smallButton("Daily", "DAILY", "Gold", row, UDim2.fromOffset(0, 0)).Activated:Connect(function()
+	local row = make("Frame", { Name = "TopButtons", BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 58), Size = UDim2.fromOffset(196, 62), Parent = canvas })
+	smallButton("Daily", "DAILY", "Gold", row, UDim2.fromOffset(0, 0), nil, "daily").Activated:Connect(function()
 		dailyWin.show()
 	end)
-	smallButton("Quests", "QUESTS", "Blue", row, UDim2.fromOffset(67, 0)).Activated:Connect(function()
+	smallButton("Quests", "QUESTS", "Blue", row, UDim2.fromOffset(68, 0), nil, "quests").Activated:Connect(function()
 		questsWin.show()
 	end)
-	smallButton("Top", "TOP", "Dark", row, UDim2.fromOffset(134, 0)).Activated:Connect(function()
+	smallButton("Top", "TOP", "Blue", row, UDim2.fromOffset(136, 0), nil, "top").Activated:Connect(function()
 		if ctx.Leaderboards then
 			ctx.Leaderboards.open()
 		end
 	end)
 	local refs = ctx.Hud.refs
-	refs.raceHolder.Size = UDim2.fromOffset(196, 160)
-	refs.join.Position = UDim2.fromOffset(0, 92)
+	refs.raceHolder.Size = UDim2.fromOffset(196, 184)
+	refs.join.Position = UDim2.fromOffset(0, 118)
 
 	-- CODES + INVITE under the left menu
 	local menu = refs.menu
 	if menu then
-		menu.Size = UDim2.fromOffset(124, 152)
-		menu.Position = UDim2.new(0, 14, 0.5, 30) -- stays clear of the coach chips under the rank badge
-		local sub = make("Frame", { Name = "Small", BackgroundTransparency = 1, Size = UDim2.fromOffset(124, 36), LayoutOrder = 3, Parent = menu })
-		smallButton("Codes", "CODES", "Dark", sub, UDim2.fromOffset(0, 0), UDim2.fromOffset(59, 36)).Activated:Connect(function()
+		menu.Size = UDim2.fromOffset(140, 220)
+		menu.Position = UDim2.new(0, 14, 0.5, 36) -- stays clear of the coach chips under the rank badge
+		local sub = make("Frame", { Name = "Small", BackgroundTransparency = 1, Size = UDim2.fromOffset(140, 58), LayoutOrder = 4, Parent = menu })
+		smallButton("Codes", "CODES", "Dark", sub, UDim2.fromOffset(4, 0), UDim2.fromOffset(60, 42), "codes").Activated:Connect(function()
 			settingsWin.show()
 		end)
-		smallButton("Invite", "INVITE", "Dark", sub, UDim2.fromOffset(65, 0), UDim2.fromOffset(59, 36)).Activated:Connect(function()
+		smallButton("Invite", "INVITE", "Dark", sub, UDim2.fromOffset(74, 0), UDim2.fromOffset(60, 42), "invite").Activated:Connect(function()
 			if ctx.Social then
 				ctx.Social.invite()
 			end
 		end)
 	end
+
+	smallButton("Settings", "", "Dark", canvas, UDim2.fromOffset(194, 10), UDim2.fromOffset(46, 44), "settings").Activated:Connect(function()
+		settingsWin.show()
+	end)
 
 	-- timed boost badge, right of the rank badge (on the MPH plate it covered "MPH")
 	badge = make("Frame", { Name = "BoostBadge", BackgroundColor3 = P.Gold, Position = UDim2.fromOffset(170, 71), Size = UDim2.fromOffset(84, 22), Visible = false, ZIndex = 4, Parent = canvas })

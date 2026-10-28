@@ -66,11 +66,11 @@ local function buildCard(canvas)
 	pcall(Art.portrait, benji(), 60, face, false)
 	cardText = UIKit.text({ Text = "", TextSize = 17, Wrapped = true, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(84, 8), Size = UDim2.new(1, -96, 0, 40), ZIndex = 13, Parent = card })
 	cardSub = UIKit.text({ Text = "", Font = F.BodyBold, TextSize = 13, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(84, 50), Size = UDim2.new(1, -96, 0, 20), ZIndex = 13, Parent = card })
-	cardBtn, cardBtnLabel = UIKit.button({ Name = "GoTo", Style = "Gold", Text = "GO TO", TextSize = 17, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.fromOffset(104, 46), ZIndex = 14, Parent = card })
+	cardBtn, cardBtnLabel = UIKit.button({ Name = "GoTo", Style = "Green", Text = "GO TO", TextSize = 17, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.fromOffset(104, 46), ZIndex = 14, Parent = card })
 	cardBtn.Visible = false
 
 	-- after the tutorial: a TO START button (bottom centre, back to the wall course) whenever you're not training or racing
-	goTrain = UIKit.button({ Name = "GoTrain", Style = "Gold", Text = "TO START", TextSize = 18, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -14), Size = UDim2.fromOffset(150, 46), Parent = canvas })
+	goTrain = UIKit.button({ Name = "GoTrain", Style = "Green", Text = "TO START", TextSize = 18, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -14), Size = UDim2.fromOffset(150, 46), Parent = canvas })
 	goTrain.Visible = false
 	goTrain.Activated:Connect(function()
 		local ok, why = ctx.Net.call("GoTo", "Course") -- 28 Oct pivot: back to the start of the wall course

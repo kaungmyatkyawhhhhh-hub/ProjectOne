@@ -38,15 +38,22 @@ local function owned(key)
 	return st ~= nil and st.Passes[key] == true
 end
 
-local function icon(parent, spec, size)
-	local c = make("Frame", { BackgroundColor3 = P.White, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 6), Size = UDim2.fromOffset(size, size), Parent = parent })
-	UIKit.corner(c, UDim.new(0.5, 0))
-	local color = Color3.fromHex(spec[2])
-	UIKit.gradient(c, color:Lerp(P.White, 0.3), color:Lerp(P.SpeedBlack, 0.35), 135)
-	UIKit.stroke(c, P.White, 2, 0.3)
-	UIKit.text({ Text = spec[1], TextSize = if #spec[1] > 4 then 13 else 22, Color = P.White, StrokeThickness = 2, StrokeTransparency = 0, Parent = c })
-	return c
-end
+-- each item's tile colour, kit icon and a small tag on the icon (UI kit, prompt 12)
+local LOOK = {
+	AutoTrain = { "blue", "speed" },
+	Speed2x = { "lime", "shoe2x", "2x" },
+	Coins2x = { "gold", "coin", "2x" },
+	VIP = { "orange", "crown" },
+	ExtraCoachSlot = { "cyan", "coaches", "+1" },
+	ExtraCoachSlot2 = { "cyan", "coaches", "+2" },
+	TrailPack = { "blue", "race" },
+	FasterRolls = { "lime", "coaches", "FAST" },
+	CoinsSmall = { "gold", "coin" },
+	CoinsMedium = { "gold", "coin", "x6" },
+	CoinsLarge = { "gold", "coin", "x18" },
+	Speed15 = { "lime", "shoe2x", "2x" },
+	StarterPack = { "orange", "store", "START" },
+}
 
 ----------------------------------------------------------------------------
 -- buying
@@ -59,30 +66,19 @@ local function buy(item, isPass)
 end
 
 local function card(item, isPass)
-	local c = make("Frame", { Name = item.Key, BackgroundColor3 = P.White, Size = UDim2.fromOffset(160, 196) })
-	UIKit.corner(c, 12)
+	local look = LOOK[item.Key] or { "blue", "store" }
+	local c = UIKit.tile({ Name = item.Key, Color = look[1], Size = UDim2.fromOffset(160, 200) })
 	local isOwned = isPass and owned(item.Key)
-	UIKit.gradient(c, if item.Hero then P.DeepBlue else P.Graphite, P.Carbon, 90)
-	UIKit.stroke(c, if isOwned then P.ElectricBlue elseif item.Hero or item.Key == "StarterPack" then P.Gold else P.Graphite, 2)
-	local iconId = st and st.Icons and st.Icons[item.Key]
-	if iconId then
-		-- the icon you uploaded in Creator Hub (same as on the Roblox pass page)
-		local img = make("ImageLabel", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 4), Size = UDim2.fromOffset(58, 58), Image = "rbxassetid://" .. iconId, Parent = c })
-		UIKit.corner(img, 12)
-	elseif isPass then
-		icon(c, item.Icon, 54)
-	elseif item.Tab == "COINS" then
-		local ci = UIKit.coinIcon(50, c)
-		ci.Position = UDim2.new(0.5, -25, 0, 8)
-	else
-		icon(c, if item.Key == "StarterPack" then { "START", "#FFC83D" } else { "2x", "#1E7BFF" }, 54)
+	UIKit.icon(look[2], 64, c, { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 8) })
+	if look[3] then
+		UIKit.text({ Text = look[3], TextSize = 18, Color = P.Gold, StrokeColor = P.Navy, StrokeThickness = 2.5, StrokeTransparency = 0, AnchorPoint = Vector2.new(0, 0), Position = UDim2.new(0.5, 10, 0, 52), Size = UDim2.fromOffset(50, 20), XAlign = Enum.TextXAlignment.Left, Parent = c })
 	end
-	UIKit.text({ Text = item.Name, TextSize = 15, Wrapped = true, Position = UDim2.fromOffset(6, 64), Size = UDim2.new(1, -12, 0, 20), Parent = c })
+	UIKit.text({ Text = item.Name, TextSize = 15, Wrapped = true, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(10, 74), Size = UDim2.new(1, -20, 0, 20), Parent = c })
 	local desc = item.Desc
 	if item.Tab == "COINS" then
 		desc = ("%s coins (%s)"):format(Format.short(Formulas.minutesOfCoins(item.Minutes, player:GetAttribute("League") or 1)), item.Desc)
 	end
-	UIKit.text({ Text = desc, Font = F.BodyBold, TextSize = 13, Color = P.BrightBlue, Wrapped = true, YAlign = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(8, 86), Size = UDim2.new(1, -16, 0, 62), Parent = c })
+	UIKit.text({ Text = desc, Font = F.BodyBold, TextSize = 13, Color = Color3.fromHex("#D6E6FF"), Wrapped = true, YAlign = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(12, 96), Size = UDim2.new(1, -24, 0, 56), Parent = c })
 	local soon = item.Id <= 0
 	local label
 	if isOwned or (item.Once and st and (st.Purchases[item.Key] or 0) > 0) then
@@ -95,8 +91,8 @@ local function card(item, isPass)
 	else
 		label = ("R$ %d"):format(price(item))
 	end
-	local style = if isOwned or label == "GONE" or soon then "Dark" else "Gold"
-	UIKit.button({ Name = "Buy", Style = style, Text = label, TextSize = 16, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6), Size = UDim2.new(1, -14, 0, 36), Parent = c, OnClick = function()
+	local style = if isOwned then "Dark" elseif label == "GONE" or soon then "Grey" else "Green"
+	UIKit.button({ Name = "Buy", Style = style, Text = label, TextSize = 16, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -12), Size = UDim2.new(1, -24, 0, 42), Parent = c, OnClick = function()
 		if not isOwned and label ~= "GONE" then
 			buy(item, isPass)
 		end
@@ -109,7 +105,7 @@ local function rebuild()
 		return
 	end
 	for _, ch in grid:GetChildren() do
-		if ch:IsA("Frame") then
+		if ch:IsA("GuiObject") then
 			ch:Destroy()
 		end
 	end
@@ -209,7 +205,7 @@ local function buildOffer()
 	offer.Visible = false
 	offerTitle = UIKit.text({ Text = "", TextSize = 17, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(18, 6), Size = UDim2.new(1, -180, 0, 22), ZIndex = 15, Parent = offer })
 	offerText = UIKit.text({ Text = "", Font = F.BodyBold, TextSize = 13, Wrapped = true, XAlign = Enum.TextXAlignment.Left, YAlign = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(18, 30), Size = UDim2.new(1, -180, 0, 50), ZIndex = 15, Parent = offer })
-	offerBuy, offerBuyLabel = UIKit.button({ Style = "Gold", Text = "BUY", TextSize = 16, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -58, 0.5, 0), Size = UDim2.fromOffset(104, 44), ZIndex = 15, Parent = offer, OnClick = function()
+	offerBuy, offerBuyLabel = UIKit.button({ Style = "Green", Text = "BUY", TextSize = 16, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -58, 0.5, 0), Size = UDim2.fromOffset(104, 44), ZIndex = 15, Parent = offer, OnClick = function()
 		local key = offerKey
 		offer.Visible = false
 		offerKey = nil
@@ -224,7 +220,7 @@ local function buildOffer()
 			end
 		end
 	end })
-	UIKit.button({ Style = "Dark", Text = "X", TextSize = 16, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(42, 42), ZIndex = 15, Parent = offer, OnClick = function()
+	UIKit.button({ Style = "Red", Icon = "close", AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(42, 42), ZIndex = 15, Parent = offer, OnClick = function()
 		offer.Visible = false
 		offerKey = nil
 	end })
@@ -240,7 +236,7 @@ local function updateAuto()
 	local has = owned("AutoTrain")
 	local on = player:GetAttribute("AutoTrain") == true
 	autoLabel.Text = if not has then "AUTO" elseif on then "AUTO ON" else "AUTO OFF"
-	UIKit.setButtonStyle(autoBtn, if on then "Gold" else "Blue")
+	UIKit.setButtonStyle(autoBtn, if on then "Green" else "Blue")
 end
 
 local function buildAuto()
@@ -263,7 +259,7 @@ local function buildAuto()
 	afkCard = UIKit.panel({ Name = "AfkCheck", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.55), Size = UDim2.fromOffset(360, 110), AccentColor = P.Gold, StrokeColor = P.Gold, ZIndex = 35, Parent = canvas })
 	afkCard.Visible = false
 	UIKit.text({ Text = "STILL THERE?", TextSize = 22, Color = P.Gold, Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, 0, 0, 28), ZIndex = 36, Parent = afkCard })
-	UIKit.button({ Style = "Gold", Text = "YES, KEEP GOING", TextSize = 16, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 46), Size = UDim2.fromOffset(220, 48), ZIndex = 36, Parent = afkCard, OnClick = function()
+	UIKit.button({ Style = "Green", Text = "YES, KEEP GOING", TextSize = 16, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 46), Size = UDim2.fromOffset(220, 48), ZIndex = 36, Parent = afkCard, OnClick = function()
 		afkCard.Visible = false
 		task.spawn(ctx.Net.call, "AfkOk")
 	end })
@@ -275,20 +271,20 @@ function StoreUI.start(c)
 	ctx.Store = StoreUI
 	canvas = ctx.Hud.canvas
 
-	win = UIKit.window({ Name = "Store", Title = "STORE", Size = Vector2.new(720, 330), Accent = P.Gold, Parent = canvas })
+	win = UIKit.window({ Name = "Store", Title = "STORE", Size = Vector2.new(720, 336), Parent = canvas })
 	setTab = UIKit.tabs(win.content, { "PASSES", "COINS", "BOOSTS" }, function(name)
 		tab = name
 		rebuild()
 	end)
-	header = UIKit.text({ Text = "", Font = F.Body, TextSize = 14, XAlign = Enum.TextXAlignment.Right, Position = UDim2.new(1, -330, 0, 8), Size = UDim2.fromOffset(330, 22), Parent = win.content })
-	grid = make("ScrollingFrame", { Name = "Grid", BackgroundTransparency = 1, BorderSizePixel = 0, Position = UDim2.fromOffset(0, 48), Size = UDim2.new(1, 0, 1, -48), CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.X, ScrollingDirection = Enum.ScrollingDirection.X, ScrollBarThickness = 6, ScrollBarImageColor3 = P.Gold, Parent = win.content })
+	header = UIKit.text({ Text = "", Font = F.BodyBold, TextSize = 14, Color = Color3.fromHex("#B9D3FF"), XAlign = Enum.TextXAlignment.Right, Position = UDim2.new(1, -330, 0, 8), Size = UDim2.fromOffset(330, 22), Parent = win.content })
+	grid = make("ScrollingFrame", { Name = "Grid", BackgroundTransparency = 1, BorderSizePixel = 0, Position = UDim2.fromOffset(0, 46), Size = UDim2.new(1, 0, 1, -46), CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.X, ScrollingDirection = Enum.ScrollingDirection.X, ScrollBarThickness = 6, ScrollBarImageColor3 = P.Gold, Parent = win.content })
 	make("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = grid })
 	make("UIPadding", { PaddingBottom = UDim.new(0, 8), Parent = grid })
 
 	-- the STORE button (left menu, under COACHES) and a "+" on the coins pill
 	local menu = ctx.Hud.refs.menu
 	if menu then
-		local storeBtn = UIKit.button({ Name = "Store", Style = "Gold", Text = "STORE", TextSize = 18, Size = UDim2.fromOffset(124, 44), Parent = menu, OnClick = function()
+		local storeBtn = UIKit.button({ Name = "Store", Style = "Green", Icon = "store", Text = "STORE", TextSize = 18, Size = UDim2.fromOffset(140, 48), Parent = menu, OnClick = function()
 			StoreUI.open("PASSES")
 		end })
 		storeBtn.LayoutOrder = 3
@@ -298,10 +294,10 @@ function StoreUI.start(c)
 		end
 		for _, b in menu:GetChildren() do
 			if b:IsA("GuiButton") then
-				b.Size = UDim2.fromOffset(124, 44)
+				b.Size = UDim2.fromOffset(140, 48)
 			end
 		end
-		menu.Size = UDim2.fromOffset(124, 44 * 3 + 36 + 30)
+		menu.Size = UDim2.fromOffset(140, 48 * 3 + 58 + 24)
 		menu.AnchorPoint = Vector2.new(0, 0)
 		menu.Position = UDim2.fromOffset(14, 154)
 		local layout = menu:FindFirstChildOfClass("UIListLayout")
@@ -311,7 +307,7 @@ function StoreUI.start(c)
 	end
 	local coins = ctx.Hud.refs.coins
 	if coins then
-		UIKit.button({ Name = "Plus", Style = "Gold", Text = "+", TextSize = 22, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -5, 0.5, 0), Size = UDim2.fromOffset(34, 34), Radius = 17, EdgeHeight = 3, Parent = coins, OnClick = function()
+		UIKit.button({ Name = "Plus", Style = "Green", Text = "+", TextSize = 22, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -5, 0.5, 0), Size = UDim2.fromOffset(40, 40), Parent = coins, OnClick = function()
 			StoreUI.open("COINS")
 		end })
 	end

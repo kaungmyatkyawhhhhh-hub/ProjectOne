@@ -182,7 +182,7 @@ local function build()
 			end)
 		end
 	end
-	UIKit.button({ Style = "Gold", Text = "RACE!", TextSize = 17, Position = UDim2.fromOffset(40, 38), Size = UDim2.fromOffset(150, 44), ZIndex = 17, Parent = askCard, OnClick = function()
+	UIKit.button({ Style = "Green", Text = "RACE!", TextSize = 17, Position = UDim2.fromOffset(40, 38), Size = UDim2.fromOffset(150, 44), ZIndex = 17, Parent = askCard, OnClick = function()
 		answer(true)
 	end })
 	UIKit.button({ Style = "Dark", Text = "NOT NOW", TextSize = 17, Position = UDim2.fromOffset(210, 38), Size = UDim2.fromOffset(150, 44), ZIndex = 17, Parent = askCard, OnClick = function()

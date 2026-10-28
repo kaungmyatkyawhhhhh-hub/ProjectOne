@@ -21,14 +21,14 @@ local pedestals = {} -- { shoe, model, base CFrame, sign label, wasUnlocked }
 local demo, demoBase -- the Trail Booth's looping demo trail
 
 local function buildMenu()
-	local holder = make("Frame", { Name = "LeftMenu", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 14, 0.5, 22), Size = UDim2.fromOffset(124, 112), Parent = ctx.Hud.canvas })
-	make("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = holder })
-	local locker = UIKit.button({ Name = "Locker", Style = "Blue", Text = "LOCKER", TextSize = 18, Size = UDim2.fromOffset(124, 48), OnClick = function()
+	local holder = make("Frame", { Name = "LeftMenu", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 14, 0.5, 22), Size = UDim2.fromOffset(140, 112), Parent = ctx.Hud.canvas })
+	make("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = holder })
+	local locker = UIKit.button({ Name = "Locker", Style = "Blue", Icon = "locker", Text = "LOCKER", TextSize = 18, Size = UDim2.fromOffset(140, 48), OnClick = function()
 		ctx.Locker.open("SHOES")
 	end })
 	locker.LayoutOrder = 1
 	locker.Parent = holder
-	local coaches = UIKit.button({ Name = "Coaches", Style = "Gold", Text = "COACHES", TextSize = 18, Size = UDim2.fromOffset(124, 48), OnClick = function()
+	local coaches = UIKit.button({ Name = "Coaches", Style = "Gold", Icon = "coaches", Text = "COACHES", TextSize = 17, Size = UDim2.fromOffset(140, 48), OnClick = function()
 		ctx.Coaches.open("MY COACHES") -- your coaches anywhere; rolling is at the COACH AGENCY
 	end })
 	coaches.LayoutOrder = 2

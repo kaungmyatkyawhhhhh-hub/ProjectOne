@@ -155,7 +155,7 @@ local function buildRacePill()
 
 	local join, joinLabel = UIKit.button({
 		Name = "Join",
-		Style = "Gold",
+		Style = "Green",
 		Text = "JOIN RACE",
 		TextSize = 22,
 		Size = UDim2.fromOffset(196, 58),

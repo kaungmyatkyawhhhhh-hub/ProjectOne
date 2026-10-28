@@ -392,7 +392,7 @@ local function buildBibPage()
 		onLabel.Text = if bibOn then "BIB ON" else "BIB OFF"
 		UIKit.setButtonStyle(onBtn, if bibOn then "Blue" else "Dark")
 	end })
-	UIKit.button({ Name = "Save", Style = "Gold", Text = "SAVE", TextSize = 16, Position = UDim2.fromOffset(320, 152), Size = UDim2.fromOffset(130, 44), Parent = bibPage, OnClick = function()
+	UIKit.button({ Name = "Save", Style = "Green", Text = "SAVE", TextSize = 16, Position = UDim2.fromOffset(320, 152), Size = UDim2.fromOffset(130, 44), Parent = bibPage, OnClick = function()
 		local ok, why = ctx.Net.call("SetBib", tonumber(bibBox.Text) or 0, bibColor, bibOn)
 		if ok then
 			ctx.Sound.play("Equip")

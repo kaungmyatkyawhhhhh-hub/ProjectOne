@@ -110,7 +110,7 @@ local function buildConfirm()
 			"A free coach roll",
 			"Title: " .. (Areas.GoPro.Titles[next_] or "PRO"),
 		})
-		local go = UIKit.button({ Name = "Confirm", Style = "Gold", Text = "GO PRO!", TextSize = 26, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 90, 1, -2), Size = UDim2.fromOffset(220, 52), Parent = body })
+		local go = UIKit.button({ Name = "Confirm", Style = "Green", Text = "GO PRO!", TextSize = 26, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 90, 1, -2), Size = UDim2.fromOffset(220, 52), Parent = body })
 		go.Activated:Connect(function()
 			Moment.goPro()
 		end)
@@ -223,7 +223,7 @@ function Moment.start(c)
 	ctx.Moment = Moment
 	canvas = ctx.Hud.canvas
 	buildConfirm()
-	goProBtn = UIKit.button({ Name = "GoProButton", Style = "Gold", Text = "GO PRO!", TextSize = 24, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 164), Size = UDim2.fromOffset(196, 54), Parent = canvas, OnClick = function()
+	goProBtn = UIKit.button({ Name = "GoProButton", Style = "Green", Text = "GO PRO!", TextSize = 24, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 164), Size = UDim2.fromOffset(196, 54), Parent = canvas, OnClick = function()
 		confirmWin.show()
 	end })
 	goProBtn.Visible = false

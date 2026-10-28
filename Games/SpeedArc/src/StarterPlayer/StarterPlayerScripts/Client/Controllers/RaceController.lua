@@ -1136,7 +1136,7 @@ function RaceController.start(c)
 	local function onPhase()
 		local phase = state:GetAttribute("Phase")
 		if phase == "Join" then
-			UIKit.setButtonStyle(ctx.Hud.refs.join, "Gold")
+			UIKit.setButtonStyle(ctx.Hud.refs.join, "Green")
 			-- not during the tutorial before its own race (no toasts over a tutorial hint)
 			-- the LIVE RACE card is the call (no toast on top of it)
 		elseif phase == "Running" and race and race.me and not race.state then

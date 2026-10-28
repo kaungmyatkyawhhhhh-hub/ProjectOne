@@ -430,7 +430,7 @@ function agencyPage()
 		local fill = make("Frame", { BackgroundColor3 = Coaches.RarityColors[tier.Rarity], Size = UDim2.fromScale(math.clamp(frac, 0.03, 1), 1), Parent = barBack })
 		UIKit.corner(fill, 3)
 	end
-	local roll, label = UIKit.button({ Name = "Roll", Style = "Gold", Text = "ROLL", TextSize = 24, Position = UDim2.fromOffset(0, 76), Size = UDim2.new(1, 0, 0, 52), Parent = right, OnClick = function()
+	local roll, label = UIKit.button({ Name = "Roll", Style = "Green", Text = "ROLL", TextSize = 24, Position = UDim2.fromOffset(0, 76), Size = UDim2.new(1, 0, 0, 52), Parent = right, OnClick = function()
 		CoachUI.rollNow(1)
 	end })
 	label.Text = if price == 0 then "FREE ROLL!" else "ROLL  " .. Format.short(price)
@@ -485,7 +485,7 @@ function myPage()
 	local header = make("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 32), Parent = page })
 	headerPill(header, ("EQUIPPED %d/%d"):format(math.min(#equipped, slots), slots), P.Lime, 0, 150)
 	headerPill(header, ("OWNED %d"):format(#list), P.Sky, 158, 110)
-	UIKit.button({ Name = "Best", Style = "Gold", Text = "BEST EQUIP", TextSize = 14, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -148, 0, -2), Size = UDim2.fromOffset(120, 34), Parent = header, OnClick = function()
+	UIKit.button({ Name = "Best", Style = "Green", Text = "BEST EQUIP", TextSize = 14, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -148, 0, -2), Size = UDim2.fromOffset(120, 34), Parent = header, OnClick = function()
 		if ctx.Net.call("BestEquip") then
 			ctx.Sound.play("Equip")
 		end
