@@ -235,7 +235,7 @@ end
 TweenService:Create(barBack, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
 TweenService:Create(bar, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
 TweenService:Create(barStroke, TweenInfo.new(0.5), { Transparency = 1 }):Play()
-stepText.Text = "Train. Race. Go Pro."
+stepText.Text = "Run. Race. Go Pro."
 local shade = Instance.new("Frame") -- a soft dark band behind the menu text so it reads over the world
 shade.BackgroundColor3 = BLACK
 shade.BackgroundTransparency = 1
