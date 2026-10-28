@@ -54,11 +54,8 @@ local function rankUp(info)
 	local color = Ranks.Colors[info.Rank] or P.Gold
 	local card = UIKit.panel({ Name = "RankUp", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 156), Size = UDim2.fromOffset(380, 120), AccentColor = color, StrokeColor = color, StrokeThickness = 3, ZIndex = 30, Parent = canvas })
 	local s = make("UIScale", { Scale = 0.4, Parent = card })
-	local badge = make("Frame", { BackgroundColor3 = P.White, Position = UDim2.fromOffset(24, 18), Size = UDim2.fromOffset(84, 84), Parent = card })
-	UIKit.corner(badge, UDim.new(0.5, 0))
-	UIKit.gradient(badge, color:Lerp(P.White, 0.35), color:Lerp(P.SpeedBlack, 0.35), 135)
-	UIKit.stroke(badge, P.White, 3, 0.2)
-	UIKit.text({ Text = string.sub(info.Rank, 1, 1), TextSize = 44, Color = P.SpeedBlack, Stroke = false, Parent = badge })
+	local badge = UIKit.sprite("badge_white", { Color = color, Position = UDim2.fromOffset(20, 14), Size = UDim2.fromOffset(92, 92), Parent = card })
+	UIKit.text({ Text = string.sub(info.Rank, 1, 1), TextSize = 44, Color = P.Navy, Stroke = false, Parent = badge })
 	UIKit.text({ Text = "RANK UP!", TextSize = 16, Color = P.BrightBlue, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(124, 14), Size = UDim2.fromOffset(240, 20), Parent = card })
 	UIKit.text({ Text = string.upper(info.Rank), TextSize = 40, Color = color, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(124, 34), Size = UDim2.fromOffset(240, 46), Parent = card })
 	if info.Coins and info.Coins > 0 then
@@ -79,7 +76,7 @@ end
 -- go pro
 ----------------------------------------------------------------------------
 local function block(parent, x, title, color, lines)
-	local b = UIKit.panel({ Size = UDim2.new(1 / 3, -10, 1, -60), Position = UDim2.new(x / 3, 5, 0, 0), AccentColor = color, StrokeColor = color, Parent = parent })
+	local b = UIKit.tile({ Color = color, Size = UDim2.new(1 / 3, -10, 1, -60), Position = UDim2.new(x / 3, 5, 0, 0), Parent = parent })
 	UIKit.text({ Text = title, TextSize = 22, Color = color, Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 28), Parent = b })
 	for i, line in lines do
 		UIKit.text({ Text = line, Font = F.BodyBold, TextSize = 15, Wrapped = true, Position = UDim2.fromOffset(16, 40 + (i - 1) * 24), Size = UDim2.new(1, -28, 0, 22), XAlign = Enum.TextXAlignment.Left, Parent = b })
@@ -88,7 +85,7 @@ local function block(parent, x, title, color, lines)
 end
 
 local function buildConfirm()
-	confirmWin = UIKit.window({ Name = "GoPro", Title = "GO PRO", Size = Vector2.new(700, 320), Accent = P.Gold, Parent = canvas })
+	confirmWin = UIKit.window({ Name = "GoPro", Title = "GO PRO", Size = Vector2.new(700, 320), Parent = canvas })
 	local body = make("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = confirmWin.content })
 	confirmWin.onOpen = function()
 		for _, c in body:GetChildren() do
@@ -178,10 +175,7 @@ function Moment.goPro()
 end
 
 local function arrive(info)
-	local banner = make("Frame", { Name = "Arrive", BackgroundColor3 = P.White, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.34), Size = UDim2.fromOffset(520, 110), ZIndex = 30, Parent = canvas })
-	UIKit.corner(banner, 14)
-	UIKit.gradient(banner, P.Carbon, P.SpeedBlack, 90)
-	UIKit.stroke(banner, P.Gold, 3)
+	local banner = UIKit.panel({ Name = "Arrive", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.34), Size = UDim2.fromOffset(520, 116), ZIndex = 30, Parent = canvas })
 	UIKit.text({ Text = ("LEAGUE %d"):format(info.League), TextSize = 18, Color = P.BrightBlue, Position = UDim2.fromOffset(0, 12), Size = UDim2.new(1, 0, 0, 22), Parent = banner })
 	UIKit.text({ Text = info.Name, TextSize = 44, Color = P.Gold, Position = UDim2.fromOffset(0, 36), Size = UDim2.new(1, 0, 0, 56), Parent = banner })
 	local s = make("UIScale", { Scale = 0.5, Parent = banner })

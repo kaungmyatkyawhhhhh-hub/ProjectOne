@@ -112,15 +112,13 @@ local function buildUI()
 		Size = UDim2.fromOffset(200, 18),
 		Parent = bar,
 	})
-	local line = UIKit.make("Frame", {
+	local line = UIKit.sprite("bar_track", {
 		Name = "Line",
-		BackgroundColor3 = P.Graphite,
-		BorderSizePixel = 0,
-		Position = UDim2.new(0, 22, 0, 36),
-		Size = UDim2.new(1, -72, 0, 6),
+		Position = UDim2.new(0, 22, 0, 33),
+		Size = UDim2.new(1, -72, 0, 12),
+		Height = 12,
 		Parent = bar,
 	})
-	UIKit.corner(line, UDim.new(0.5, 0))
 	ui.line = line
 	-- gold finish post
 	local post = UIKit.make("Frame", {
@@ -149,43 +147,39 @@ local function buildUI()
 		Name = "Boost",
 		Text = "",
 		AutoButtonColor = false,
-		BackgroundColor3 = P.White,
+		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.new(1, -22, 1, -22),
-		Size = UDim2.fromOffset(118, 118),
+		Position = UDim2.new(1, -22, 1, -18),
+		Size = UDim2.fromOffset(120, 128),
 		Visible = false,
 		Parent = canvas,
 	})
-	UIKit.corner(boost, UDim.new(0.5, 0))
-	UIKit.gradient(boost, P.BrightBlue, P.DeepBlue, 120)
-	UIKit.stroke(boost, P.White, 3, 0.25)
-	UIKit.text({ Text = "BOOST", TextSize = 26, StrokeColor = P.DeepBlue, StrokeTransparency = 0, Size = UDim2.new(1, 0, 0, 40), Position = UDim2.fromOffset(0, 30), Parent = boost })
+	UIKit.sprite("round_blue", { Name = "Art", Size = UDim2.fromScale(1, 1), Parent = boost })
+	UIKit.icon("speed", 34, boost, { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 10), ZIndex = 2 })
+	UIKit.text({ Text = "BOOST", TextSize = 24, StrokeColor = P.Navy, StrokeThickness = 2.5, StrokeTransparency = 0, Size = UDim2.new(1, 0, 0, 30), Position = UDim2.fromOffset(0, 44), ZIndex = 2, Parent = boost })
 	ui.boostScale = UIKit.make("UIScale", { Parent = boost })
 	ui.pips = {}
 	for i = 1, Race.Boost.Charges do
-		local pip = UIKit.make("Frame", {
-			BackgroundColor3 = P.Gold,
+		local pip = UIKit.sprite("badge_white", {
+			Color = P.Gold,
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, (i - 2) * 20, 0, 82),
-			Size = UDim2.fromOffset(14, 14),
+			Position = UDim2.new(0.5, (i - 2) * 22, 0, 86),
+			Size = UDim2.fromOffset(20, 20),
+			ZIndex = 2,
 			Parent = boost,
 		})
-		UIKit.corner(pip, UDim.new(0.5, 0))
-		UIKit.stroke(pip, P.SpeedBlack, 1.5, 0.3)
 		ui.pips[i] = pip
 	end
 	ui.boost = boost
 
 	-- JUMP button with a timing ring (hurdle races)
 	local jump = UIKit.make("TextButton", {
-		Name = "Jump", Text = "", AutoButtonColor = false, BackgroundColor3 = P.White,
-		AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -150, 1, -26), Size = UDim2.fromOffset(96, 96),
+		Name = "Jump", Text = "", AutoButtonColor = false, BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -152, 1, -22), Size = UDim2.fromOffset(96, 102),
 		Visible = false, Parent = canvas,
 	})
-	UIKit.corner(jump, UDim.new(0.5, 0))
-	UIKit.gradient(jump, Color3.fromHex("#FFE38C"), P.DeepGold, 120)
-	UIKit.stroke(jump, P.White, 3, 0.25)
-	UIKit.text({ Text = "JUMP", TextSize = 24, Color = P.SpeedBlack, Stroke = false, Parent = jump })
+	UIKit.sprite("round_yellow", { Name = "Art", Size = UDim2.fromScale(1, 1), Parent = jump })
+	UIKit.text({ Text = "JUMP", TextSize = 24, Color = P.Navy, Stroke = false, Size = UDim2.new(1, 0, 0.84, 0), ZIndex = 2, Parent = jump })
 	ui.jumpScale = UIKit.make("UIScale", { Parent = jump })
 	local ring = UIKit.make("Frame", { Name = "Ring", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1.8, 1.8), Visible = false, Parent = jump })
 	UIKit.corner(ring, UDim.new(0.5, 0))
@@ -230,11 +224,9 @@ local function buildUI()
 		end,
 		Parent = card,
 	})
-	ui.pbBanner = UIKit.text({ Text = "NEW PB!", TextSize = 22, Color = P.SpeedBlack, Stroke = false, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -60, 0, 44), Size = UDim2.fromOffset(110, 30), ZIndex = 13, Parent = card })
-	ui.pbBanner.BackgroundTransparency = 0
-	ui.pbBanner.BackgroundColor3 = P.Gold
+	ui.pbBanner = UIKit.pill({ Kind = "gold", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -60, 0, 44), Size = UDim2.fromOffset(116, 34), ZIndex = 13, Parent = card })
 	ui.pbBanner.Rotation = 10
-	UIKit.corner(ui.pbBanner, 6)
+	UIKit.text({ Text = "NEW PB!", TextSize = 20, Color = P.Navy, Stroke = false, ZIndex = 14, Parent = ui.pbBanner })
 	ui.continue = cont
 
 	-- confetti (pooled UI pieces, only for a win)
@@ -303,12 +295,11 @@ local function buildLive(canvas)
 	live.Visible = false
 	ui.live = live
 	ui.liveScale = UIKit.make("UIScale", { Parent = live })
-	local pill = UIKit.make("Frame", { BackgroundColor3 = P.Red, Position = UDim2.fromOffset(10, 9), Size = UDim2.fromOffset(62, 24), ZIndex = 9, Parent = live })
-	UIKit.corner(pill, UDim.new(0.5, 0))
-	ui.liveDot = UIKit.make("Frame", { BackgroundColor3 = P.White, Position = UDim2.new(0, 9, 0.5, -4), Size = UDim2.fromOffset(8, 8), ZIndex = 10, Parent = pill })
+	local pill = UIKit.pill({ Kind = "red", Position = UDim2.fromOffset(12, 10), Size = UDim2.fromOffset(70, 28), ZIndex = 9, Parent = live })
+	ui.liveDot = UIKit.make("Frame", { BackgroundColor3 = P.White, Position = UDim2.new(0, 11, 0.5, -4), Size = UDim2.fromOffset(8, 8), ZIndex = 10, Parent = pill })
 	UIKit.corner(ui.liveDot, UDim.new(0.5, 0))
-	UIKit.text({ Text = "LIVE", TextSize = 15, Position = UDim2.fromOffset(20, 0), Size = UDim2.new(1, -24, 1, 0), ZIndex = 10, Parent = pill })
-	ui.liveType = UIKit.text({ Text = "RACE", TextSize = 20, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(80, 6), Size = UDim2.fromOffset(140, 30), ZIndex = 9, Parent = live })
+	UIKit.text({ Text = "LIVE", TextSize = 15, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(22, 0), Size = UDim2.new(1, -26, 1, 0), ZIndex = 10, Parent = pill })
+	ui.liveType = UIKit.text({ Text = "RACE", TextSize = 20, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(90, 8), Size = UDim2.fromOffset(140, 30), ZIndex = 9, Parent = live })
 	ui.liveTime = UIKit.text({ Text = "0:10", TextSize = 26, Color = P.Gold, XAlign = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0, 4), Size = UDim2.fromOffset(70, 32), ZIndex = 9, Parent = live })
 	ui.liveHeads = UIKit.make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(10, 40), Size = UDim2.fromOffset(280, 26), ZIndex = 9, Parent = live })
 	UIKit.make("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 4), VerticalAlignment = Enum.VerticalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Parent = ui.liveHeads })
@@ -384,7 +375,7 @@ local function winPrize()
 end
 
 -- the podium: 2nd, 1st, 3rd on blocks with heads, your place big, coins, medal, the SPEED boost
-local PODIUM = { { place = 2, x = -140, h = 82, color = Color3.fromHex("#C9D1DD") }, { place = 1, x = 0, h = 116, color = Color3.fromHex("#FFD23F") }, { place = 3, x = 140, h = 58, color = Color3.fromHex("#E0965A") } }
+local PODIUM = { { place = 2, x = -140, h = 82, color = Color3.fromHex("#C9D1DD"), sprite = "btn_grey" }, { place = 1, x = 0, h = 116, color = Color3.fromHex("#FFD21F"), sprite = "btn_yellow" }, { place = 3, x = 140, h = 58, color = Color3.fromHex("#FF7A1A"), sprite = "btn_orange" } }
 
 local function buildPodium(canvas)
 	local pod = UIKit.make("TextButton", { Name = "Podium", Text = "", AutoButtonColor = false, BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.08, Position = UDim2.fromOffset(0, -80), Size = UDim2.new(1, 0, 1, 80), Visible = false, ZIndex = 30, Parent = canvas })
@@ -418,10 +409,13 @@ local function showPodium(info)
 		local r = info.rows[spot.place]
 		if r then
 			local isMe = r.id == info.youId
-			local block = UIKit.make("Frame", { BackgroundColor3 = spot.color, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, spot.x, 1, 0), Size = UDim2.fromOffset(124, 0), ZIndex = 33, Parent = stage })
-			UIKit.corner(block, 10)
-			UIKit.gradient(block, spot.color:Lerp(P.White, 0.25), spot.color:Lerp(P.SpeedBlack, 0.2), 90)
-			UIKit.stroke(block, if isMe then P.White else spot.color:Lerp(P.SpeedBlack, 0.4), if isMe then 4 else 2, 0)
+			-- the podium blocks are the kit's button art (gold / silver / bronze), stretched tall
+			local block = UIKit.sprite(spot.sprite, { Name = "Block", AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, spot.x, 1, 0), Size = UDim2.fromOffset(124, 0), ZIndex = 33, Parent = stage })
+			if isMe then
+				local ring = UIKit.make("Frame", { Name = "You", BackgroundTransparency = 1, Position = UDim2.fromOffset(-2, -2), Size = UDim2.new(1, 4, 1, -2), ZIndex = 33, Parent = block })
+				UIKit.corner(ring, 12)
+				UIKit.stroke(ring, P.White, 4, 0)
+			end
 			UIKit.text({ Text = tostring(spot.place), TextSize = 40, StrokeThickness = 3, StrokeTransparency = 0, Size = UDim2.new(1, 0, 0, 50), ZIndex = 34, Parent = block })
 			task.delay(0.15 * i, function()
 				UIKit.tween(block, 0.4, { Size = UDim2.fromOffset(124, spot.h) }, Enum.EasingStyle.Back)
@@ -563,7 +557,7 @@ end
 
 local function updatePips()
 	for i, pip in ui.pips do
-		pip.BackgroundColor3 = if i <= charges then P.Gold else P.Graphite
+		pip.ImageColor3 = if i <= charges then P.Gold else P.Graphite
 	end
 end
 

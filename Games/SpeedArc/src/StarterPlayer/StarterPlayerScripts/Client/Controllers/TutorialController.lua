@@ -163,12 +163,10 @@ local function drawPath(target)
 			marker:Destroy()
 		end
 		marker = make("BillboardGui", { Name = "GoHere", Adornee = target, Size = UDim2.fromOffset(120, 70), StudsOffset = Vector3.new(0, 5, 0), AlwaysOnTop = false, LightInfluence = 0, MaxDistance = 400, Parent = target })
-		local pill = make("Frame", { BackgroundColor3 = P.Gold, Size = UDim2.fromOffset(120, 34), Parent = marker })
-		UIKit.corner(pill, UDim.new(0.5, 0))
-		UIKit.stroke(pill, P.SpeedBlack, 2)
-		UIKit.text({ Text = "GO HERE", TextSize = 18, Color = P.SpeedBlack, Stroke = false, Parent = pill })
-		local tip = make("Frame", { BackgroundColor3 = P.Gold, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(60, 40), Size = UDim2.fromOffset(18, 18), Rotation = 45, Parent = marker })
-		UIKit.stroke(tip, P.SpeedBlack, 2)
+		local tip = make("Frame", { BackgroundColor3 = P.Gold, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(60, 38), Size = UDim2.fromOffset(18, 18), Rotation = 45, Parent = marker })
+		UIKit.stroke(tip, P.Navy, 3)
+		local pill = UIKit.pill({ Kind = "gold", Size = UDim2.fromOffset(120, 36), ZIndex = 2, Parent = marker })
+		UIKit.text({ Text = "GO HERE", TextSize = 18, Color = P.Navy, Stroke = false, ZIndex = 3, Parent = pill })
 		task.spawn(function()
 			local m = marker
 			while m and m.Parent do

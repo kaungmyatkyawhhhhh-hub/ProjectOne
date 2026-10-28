@@ -30,8 +30,8 @@ end
 
 local function row(parent, r, order)
 	local mine = r.UserId == player.UserId
-	local f = make("Frame", { BackgroundColor3 = if mine then P.DeepBlue else P.Carbon, BackgroundTransparency = 0.1, Size = UDim2.new(1, -10, 0, 30), LayoutOrder = order, Parent = parent })
-	UIKit.corner(f, 8)
+	local f = UIKit.pill({ Kind = if mine then "blue" else "navy", Size = UDim2.new(1, -10, 0, 32), Parent = parent })
+	f.LayoutOrder = order
 	UIKit.text({ Text = tostring(r.Rank), TextSize = 16, Color = if r.Rank <= 3 then P.Gold else P.White, Size = UDim2.fromOffset(40, 30), Parent = f })
 	UIKit.text({ Text = r.Name, Font = F.BodyBold, TextSize = 15, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(46, 0), Size = UDim2.new(0.55, -46, 1, 0), Parent = f })
 	UIKit.text({ Text = r.Text, TextSize = 15, Color = P.BrightBlue, XAlign = Enum.TextXAlignment.Right, Position = UDim2.new(0.55, 0, 0, 0), Size = UDim2.new(0.45, -12, 1, 0), Parent = f })

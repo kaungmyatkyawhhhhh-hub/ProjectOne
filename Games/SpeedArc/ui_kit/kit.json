@@ -167,6 +167,34 @@
   "sliceScale": 0.33,
   "use": "button navy pressed"
  },
+ "btn_orange": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button orange"
+ },
+ "btn_orange_down": {
+  "size": [
+   160,
+   112
+  ],
+  "slice": [
+   40,
+   40,
+   120,
+   72
+  ],
+  "sliceScale": 0.33,
+  "use": "button orange pressed"
+ },
  "panel": {
   "size": [
    192,
@@ -180,6 +208,24 @@
   ],
   "sliceScale": 0.33,
   "use": "every window"
+ },
+ "round_blue": {
+  "size": [
+   128,
+   136
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "race BOOST button"
+ },
+ "round_yellow": {
+  "size": [
+   128,
+   136
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "race JUMP button"
  },
  "tile_blue": {
   "size": [

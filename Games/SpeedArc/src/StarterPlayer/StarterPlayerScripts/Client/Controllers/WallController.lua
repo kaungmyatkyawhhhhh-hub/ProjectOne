@@ -200,11 +200,14 @@ local function buildStrip()
 	UIKit.make("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 4), HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Parent = strip })
 	for k = 1, n do
 		local col = Color3.fromHex(Course.Colors[(k - 1) % #Course.Colors + 1])
-		local cell = UIKit.make("Frame", { Name = "Wall" .. k, BackgroundColor3 = Palette.SpeedBlack, BackgroundTransparency = 0.15, LayoutOrder = k, Size = UDim2.fromOffset(26, 26), Parent = strip })
-		UIKit.corner(cell, 7)
-		local stroke = UIKit.stroke(cell, col, 2, 0)
-		local label = UIKit.text({ Text = tostring(k), TextSize = 14, Parent = cell })
-		stripCells[k] = { cell = cell, stroke = stroke, label = label, color = col }
+		-- a small kit tile in the wall's colour; a ring marks the next wall (white) and your best (gold)
+		local cell = UIKit.tile({ Name = "Wall" .. k, Color = col, Size = UDim2.fromOffset(26, 26), Parent = strip })
+		cell.LayoutOrder = k
+		local ring = UIKit.make("Frame", { Name = "Ring", BackgroundTransparency = 1, Position = UDim2.fromOffset(-2, -2), Size = UDim2.new(1, 4, 1, 4), Visible = false, Parent = cell })
+		UIKit.corner(ring, 9)
+		local stroke = UIKit.stroke(ring, Palette.White, 2, 0)
+		local label = UIKit.text({ Text = tostring(k), TextSize = 14, StrokeColor = Palette.Navy, StrokeThickness = 2, StrokeTransparency = 0, ZIndex = 2, Parent = cell })
+		stripCells[k] = { cell = cell, ring = ring, stroke = stroke, label = label, color = col }
 	end
 end
 
@@ -216,10 +219,10 @@ local function updateStrip(onCourse, stage)
 	local best = player:GetAttribute("BestWall") or 0
 	for k, c in stripCells do
 		local passed = k <= stage
-		c.cell.BackgroundColor3 = if passed then c.color else Palette.SpeedBlack
-		c.cell.BackgroundTransparency = if passed then 0 else 0.15
-		c.stroke.Color = if k == best then Palette.Gold elseif k == stage + 1 then Palette.White else c.color
-		c.stroke.Thickness = if k == best or k == stage + 1 then 3 else 2
+		c.cell.ImageTransparency = if passed then 0 else 0.45
+		c.ring.Visible = k == best or k == stage + 1
+		c.stroke.Color = if k == best then Palette.Gold else Palette.White
+		c.stroke.Thickness = 3
 		c.label.TextColor3 = if k == best then Palette.Gold else Palette.White
 	end
 end

@@ -34,6 +34,7 @@ BUTTONS = {
     "red": ("#FF3B3B", "#FF8A7A", "#B81F1F", "#FFFFFF"),  # close / stop
     "grey": ("#8C97AD", "#C3CBDA", "#5B6478", "#FFFFFF"),  # locked
     "navy": ("#2C4499", "#4A68CF", "#17296B", "#FFFFFF"),  # tab off / small HUD buttons
+    "orange": ("#FF7A1A", "#FFB070", "#C2530A", "#FFFFFF"),  # the bronze podium block
 }
 TILES = {"blue": "#1E90FF", "lime": "#6BE33B", "orange": "#FF7A1A", "gold": "#FFB300", "red": "#FF3B3B", "cyan": "#1EC8FF", "grey": "#8C97AD"}
 
@@ -110,6 +111,24 @@ def button(style, pressed=False):
     paint(img, ImageChops.multiply(fm, rr(size, (face[0], face[1] + fy * 0.62, face[2], face[3]), 24)), grad(size, (face[0], face[1] + fy * 0.62, face[2], face[3]), mix(edge, edge, 0)[:3] + (0,), mix(edge, edge, 0)[:3] + (70,)))
     hl = (face[0] + 8, face[1] + 4, face[2] - 8, face[1] + fy * 0.42)
     paint(img, ImageChops.multiply(fm, rr(size, hl, 16)), grad(size, hl, (255, 255, 255, 150), (255, 255, 255, 25)))
+    return shrink(img, (W, H))
+
+
+def round_button(style):
+    """the big round race buttons (BOOST, JUMP): a circle face on a 3D lip"""
+    base, light, edge, _ = BUTTONS[style]
+    W, H = 128, 136
+    size = (W * SS, H * SS)
+    img = Image.new("RGBA", size, (0, 0, 0, 0))
+    def capsule(x0, y0, x1, y1, lip):
+        return mask(size, lambda d: (d.ellipse(S(x0, y0, x1, y1 - lip), fill=255), d.ellipse(S(x0, y0 + lip, x1, y1), fill=255), d.rectangle(S(x0, (y0 + y1 - lip) / 2, x1, (y0 + y1 + lip) / 2), fill=255)))
+    paint(img, capsule(8, 14, 120, 134, 10).filter(ImageFilter.GaussianBlur(4 * SS)), rgba(OUTLINE, 120))
+    paint(img, capsule(4, 2, 124, 130, 10), OUTLINE)
+    paint(img, capsule(10, 8, 118, 124, 10), edge)
+    fm = mask(size, lambda d: d.ellipse(S(10, 8, 118, 114), fill=255))
+    paint(img, fm, grad(size, (10, 8, 118, 114), light, base))
+    gl = mask(size, lambda d: d.ellipse(S(24, 13, 104, 58), fill=255))
+    paint(img, ImageChops.multiply(fm, gl), grad(size, (24, 13, 104, 58), (255, 255, 255, 150), (255, 255, 255, 20)))
     return shrink(img, (W, H))
 
 
@@ -367,6 +386,8 @@ def build():
         spr["btn_" + st] = save("btn_" + st, button(st), [40, 40, 120, 72], 0.33, "button " + st)
         spr["btn_" + st + "_down"] = save("btn_" + st + "_down", button(st, True), [40, 40, 120, 72], 0.33, "button " + st + " pressed")
     spr["panel"] = save("panel", panel(), [56, 56, 136, 136], 0.33, "every window")
+    spr["round_blue"] = save("round_blue", round_button("blue"), None, None, "race BOOST button")
+    spr["round_yellow"] = save("round_yellow", round_button("yellow"), None, None, "race JUMP button")
     for c, h in TILES.items():
         spr["tile_" + c] = save("tile_" + c, tile(h), [40, 40, 120, 160], 0.33, "store / locker / quest / coach tile")
     spr["pill_navy"] = save("pill_navy", pill("#24409A", "#14276A", "#3B5CC8"), [24, 20, 72, 28], "auto", "counters, HUD plates (SliceScale = height / 48)")
@@ -561,7 +582,7 @@ def sheet(c):
     c.text(20, 18, "SPEED ARC UI KIT", 17, anchor="lm")
     c.text(208, 19, "9-slice PNG sprites, navy outline, 3D lip, top highlight", 8.5, "#B9D3FF", stroke=None, anchor="lm", italic=False, weight=700)
     labels = {"green": "BUY / GO", "blue": "NORMAL", "yellow": "CLAIM", "red": "CLOSE", "grey": "LOCKED", "navy": "TAB OFF"}
-    for i, st in enumerate(BUTTONS):
+    for i, st in enumerate(labels):
         bx = 20 + i * 106
         c.button(st, bx, 34, 98, 38, labels[st], None, 12)
         c.button(st, bx, 78, 98, 38, "PRESSED", None, 11, down=True)

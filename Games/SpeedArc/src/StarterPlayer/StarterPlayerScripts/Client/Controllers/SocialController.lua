@@ -51,7 +51,7 @@ local function renderProfile(p)
 		ch:Destroy()
 	end
 	local mine = p.UserId == player.UserId
-	local left = UIKit.panel({ Position = UDim2.fromOffset(0, 0), Size = UDim2.new(0.38, -6, 1, 0), Parent = profileBody })
+	local left = UIKit.tile({ Color = "blue", Position = UDim2.fromOffset(0, 0), Size = UDim2.new(0.38, -6, 1, 0), Parent = profileBody })
 	local inner = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(18, 10), Size = UDim2.new(1, -28, 1, -20), Parent = left })
 	UIKit.text({ Text = string.upper(p.Name), TextSize = 22, XAlign = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 26), Parent = inner })
 	UIKit.text({ Text = if p.Title ~= "" then p.Title else "NO TITLE YET", TextSize = 15, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(0, 28), Size = UDim2.new(1, 0, 0, 20), Parent = inner })
@@ -72,7 +72,7 @@ local function renderProfile(p)
 		end })
 	end
 
-	local mid = UIKit.panel({ Position = UDim2.new(0.38, 0, 0, 0), Size = UDim2.new(0.31, -6, 1, 0), AccentColor = P.Gold, Parent = profileBody })
+	local mid = UIKit.tile({ Color = "gold", Position = UDim2.new(0.38, 0, 0, 0), Size = UDim2.new(0.31, -6, 1, 0), Parent = profileBody })
 	local m = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(18, 10), Size = UDim2.new(1, -28, 1, -20), Parent = mid })
 	UIKit.text({ Text = "MEDALS", TextSize = 16, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 20), Parent = m })
 	local medals = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 24), Size = UDim2.new(1, 0, 0, 40), Parent = m })
@@ -93,7 +93,7 @@ local function renderProfile(p)
 		UIKit.text({ Text = "No races yet", Font = F.BodyBold, TextSize = 13, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(0, 96), Size = UDim2.new(1, 0, 0, 20), Parent = m })
 	end
 
-	local right = UIKit.panel({ Position = UDim2.new(0.69, 0, 0, 0), Size = UDim2.new(0.31, 0, 1, 0), AccentColor = P.BrightBlue, Parent = profileBody })
+	local right = UIKit.tile({ Color = "cyan", Position = UDim2.new(0.69, 0, 0, 0), Size = UDim2.new(0.31, 0, 1, 0), Parent = profileBody })
 	local r = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(18, 10), Size = UDim2.new(1, -28, 1, -20), Parent = right })
 	UIKit.text({ Text = "COACHES", TextSize = 16, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 20), Parent = r })
 	for i, c in p.Coaches do
