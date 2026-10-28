@@ -14,7 +14,7 @@ GYM ARC: build the GOLDEN ERA GYM, the big reward at Alter 8. Follow CLAUDE.md, 
 2) WHERE: a new building in town (or a door off the Pro Gym), locked with the usual "UNLOCKS AT ALTER 8" sign + your % and the Unlock Guides toast; visible from outside before it opens.
 3) GAMEPLAY: copies of the key machines with the heaviest tiers so far, +gains bonus (next step after Powerlifting), its own feature: the POSING ROOM (practice poses for bonus show score) and a "Golden Era" photo board where your peak physique gets a black-and-white frame.
 4) THE MOMENT: at Alter 8 a short unlock scene (doors open, warm light), a guide with GO TO, and it shows on the Progression Road ("Golden Era Gym in 2 alters" from Alter 6).
-4b) GEAR: Champion belt + wraps (gold) on sale for coins here (price = the gear ladder in the decisions note); Elite belt + wraps on sale at the Powerlifting Gym at the same time. Owners keep theirs.
+4b) GEAR: Champion belt + wraps (gold) on sale for coins here (propose prices with the "minutes of coins at your stage" rule, show me first); Elite belt + wraps on sale at the Powerlifting Gym at the same time. Owners keep theirs.
 5) Performance: streaming, culling, LOD like the other gyms; check FPS on a phone-size test.
 TEST: locked below Alter 8, opens at 8 (test hook), machines + bonus work, phone screenshots, FPS numbers. Progress note + Town and Gyms note.
 ```
