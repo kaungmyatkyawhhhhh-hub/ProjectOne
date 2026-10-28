@@ -148,10 +148,10 @@ local function actionButton(card, text, style, onClick)
 		Text = text,
 		TextSize = 15,
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -6),
-		Size = UDim2.new(1, -14, 0, 34),
+		Position = UDim2.new(0.5, 0, 1, -10),
+		Size = UDim2.new(1, -22, 0, 38),
 		OnClick = onClick,
-		ClickSound = if style == "Dark" then "Denied" else "Click",
+		ClickSound = if style == "Grey" then "Denied" else "Click",
 		Parent = card,
 	})
 	return b
@@ -166,24 +166,22 @@ local function card(item, isShoe)
 	else
 		unlocked = item.Price ~= nil and (not item.League or (coll.BestLeague or 1) >= item.League)
 	end
-	local c = make("Frame", { Name = item.Id, BackgroundColor3 = P.White, Size = UDim2.fromOffset(150, 178) })
-	UIKit.corner(c, 12)
-	UIKit.gradient(c, if equipped then P.DeepBlue else P.Graphite, P.Carbon, 90)
-	UIKit.stroke(c, if equipped then P.Gold elseif owned then P.ElectricBlue else P.Graphite, 2)
-	local art = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 0, 74), Parent = c })
 	local dark = not owned and not unlocked
+	-- tile colour = state (UI kit): gold worn, blue owned, lime can buy, grey locked
+	local c = UIKit.tile({ Name = item.Id, Color = if equipped then "gold" elseif owned then "blue" elseif dark then "grey" else "lime", Size = UDim2.fromOffset(150, 188) })
+	local art = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 72), Parent = c })
 	if isShoe then
 		viewport(item, art, dark)
 	else
 		Art.trailSwatch(item, art, dark)
 	end
-	UIKit.text({ Text = string.upper(item.Name), TextSize = 15, Position = UDim2.fromOffset(6, 80), Size = UDim2.new(1, -12, 0, 18), Parent = c })
-	UIKit.text({ Text = statText(item, isShoe), Font = F.BodyBold, TextSize = 13, Color = P.BrightBlue, Position = UDim2.fromOffset(6, 99), Size = UDim2.new(1, -12, 0, 16), Parent = c })
+	UIKit.text({ Text = string.upper(item.Name), TextSize = 15, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(10, 84), Size = UDim2.new(1, -20, 0, 18), Parent = c })
+	UIKit.text({ Text = statText(item, isShoe), Font = F.BodyBold, TextSize = 13, Color = Color3.fromHex("#D6E6FF"), Position = UDim2.fromOffset(10, 103), Size = UDim2.new(1, -20, 0, 16), Parent = c })
 
 	if equipped then
-		actionButton(c, "EQUIPPED", "Blue", nil)
+		actionButton(c, "EQUIPPED", "Dark", nil)
 	elseif owned then
-		actionButton(c, "EQUIP", "Blue", function()
+		actionButton(c, "EQUIP", "Green", function()
 			local ok = ctx.Net.call(if isShoe then "EquipShoe" else "EquipTrail", item.Id)
 			if ok then
 				ctx.Sound.play(if isShoe then "Equip" else "TrailEquip")
@@ -191,18 +189,18 @@ local function card(item, isShoe)
 		end)
 	elseif not unlocked then
 		local why = if isShoe then Boosts.unlockText(item.Unlock) elseif item.Pass then "TRAIL PACK (SOON)" elseif item.Price == nil and item.Source then item.Source else ("UNLOCKS IN LEAGUE %d"):format(item.League or 1)
-		UIKit.text({ Text = why, Font = F.BodyBold, TextSize = 13, Color = P.Gold, Wrapped = true, Position = UDim2.fromOffset(6, 116), Size = UDim2.new(1, -12, 0, 30), Parent = c })
-		local lock = actionButton(c, "LOCKED", "Dark", function()
+		UIKit.text({ Text = why, Font = F.BodyBold, TextSize = 13, Color = P.Gold, Wrapped = true, Position = UDim2.fromOffset(10, 120), Size = UDim2.new(1, -20, 0, 30), Parent = c })
+		local lock = actionButton(c, "LOCKED", "Grey", function()
 			ctx.Hud.toast(why, "Denied")
 		end)
-		lock.Size = UDim2.new(1, -14, 0, 26)
+		lock.Size = UDim2.new(1, -22, 0, 30)
 	else
 		local price = item.Price or 0
-		local row = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 116), Size = UDim2.new(1, 0, 0, 22), Parent = c })
-		local ci = UIKit.coinIcon(18, row)
-		ci.Position = UDim2.new(0.5, -46, 0, 2)
+		local row = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 120), Size = UDim2.new(1, 0, 0, 22), Parent = c })
+		local ci = UIKit.coinIcon(24, row)
+		ci.Position = UDim2.new(0.5, -50, 0, -1)
 		UIKit.text({ Text = Format.short(price), TextSize = 17, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.new(0.5, -24, 0, 0), Size = UDim2.fromOffset(90, 22), Parent = row })
-		local buy = actionButton(c, "BUY", "Gold", function()
+		local buy = actionButton(c, "BUY", "Green", function()
 			local ok, why = ctx.Net.call(if isShoe then "BuyShoe" else "BuyTrail", item.Id)
 			if ok then
 				ctx.Sound.play("KaChing")
@@ -215,10 +213,10 @@ local function card(item, isShoe)
 			end
 		end)
 		if isShoe then
-			buy.Size = UDim2.new(0.62, -8, 0, 34)
+			buy.Size = UDim2.new(0.6, -12, 0, 38)
 			buy.AnchorPoint = Vector2.new(0, 1)
-			buy.Position = UDim2.new(0, 7, 1, -6)
-			local try = UIKit.button({ Style = "Dark", Text = "TRY", TextSize = 14, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -7, 1, -6), Size = UDim2.new(0.38, -6, 0, 34), Parent = c,
+			buy.Position = UDim2.new(0, 11, 1, -10)
+			local try = UIKit.button({ Style = "Blue", Text = "TRY", TextSize = 14, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -11, 1, -10), Size = UDim2.new(0.4, -8, 0, 38), Parent = c,
 				OnClick = function()
 					doTryOn(item)
 				end })
@@ -264,12 +262,11 @@ end
 function cosmeticCard(item, kind, order)
 	local owned = isOwned(kind, item)
 	local worn = isWorn(kind, item)
-	local c = make("Frame", { Name = item.Id, BackgroundColor3 = P.White, Size = UDim2.fromOffset(132, 168), LayoutOrder = order, Parent = grid })
-	UIKit.corner(c, 12)
-	UIKit.gradient(c, if worn then P.DeepBlue else P.Graphite, P.Carbon, 90)
-	UIKit.stroke(c, if worn then P.Gold elseif owned then P.ElectricBlue else P.Graphite, 2)
+	local c = UIKit.tile({ Name = item.Id, Color = if worn then "gold" elseif owned then "blue" elseif item.Pass then "orange" else "lime", Size = UDim2.fromOffset(136, 178) })
+	c.LayoutOrder = order
+	c.Parent = grid
 	-- the swatch: the item's colour (a name style shows your name in it)
-	local sw = make("Frame", { BackgroundColor3 = P.White, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 8), Size = UDim2.fromOffset(if kind == "Name" then 116 else 64, 52), Parent = c })
+	local sw = make("Frame", { BackgroundColor3 = P.White, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(if kind == "Name" then 108 else 64, 50), Parent = c })
 	UIKit.corner(sw, 10)
 	if kind == "Name" then
 		sw.BackgroundColor3 = P.SpeedBlack
@@ -281,30 +278,30 @@ function cosmeticCard(item, kind, order)
 		UIKit.stroke(sw, P.White, 2, 0.4)
 		UIKit.text({ Text = if kind == "Kit" then string.upper(item.Slot) elseif kind == "Skin" then "SHOES" else "HEAD", TextSize = 13, Color = P.White, Parent = sw })
 	end
-	UIKit.text({ Text = string.upper(item.Name), TextSize = 14, Wrapped = true, Position = UDim2.fromOffset(6, 64), Size = UDim2.new(1, -12, 0, 34), Parent = c })
+	UIKit.text({ Text = string.upper(item.Name), TextSize = 14, Wrapped = true, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(10, 68), Size = UDim2.new(1, -20, 0, 34), Parent = c })
 	local function act(text, style, fn)
-		UIKit.button({ Style = style, Text = text, TextSize = 14, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6), Size = UDim2.new(1, -14, 0, 34), Parent = c, OnClick = fn })
+		UIKit.button({ Style = style, Text = text, TextSize = 14, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -10), Size = UDim2.new(1, -22, 0, 38), Parent = c, OnClick = fn })
 	end
 	if owned then
-		act(if worn then "WEARING" else "WEAR", if worn then "Gold" else "Blue", function()
+		act(if worn then "WEARING" else "WEAR", if worn then "Dark" else "Green", function()
 			if ctx.Net.call("EquipCosmetic", kind, item.Id) then
 				ctx.Sound.play("Equip")
 			end
 		end)
 	elseif item.Pass then
 		UIKit.text({ Text = item.Pass .. " PASS", Font = F.BodyBold, TextSize = 13, Color = P.Gold, Position = UDim2.fromOffset(6, 100), Size = UDim2.new(1, -12, 0, 18), Parent = c })
-		act("STORE", "Dark", function()
+		act("STORE", "Blue", function()
 			if ctx.Store then
 				ctx.Store.open("PASSES")
 			end
 		end)
 	else
 		local price = Formulas.minutesOfCoins(item.Minutes or 0, player:GetAttribute("League") or 1)
-		local row = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 100), Size = UDim2.new(1, 0, 0, 22), Parent = c })
-		local ci = UIKit.coinIcon(18, row)
-		ci.Position = UDim2.new(0.5, -40, 0, 2)
+		local row = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 104), Size = UDim2.new(1, 0, 0, 22), Parent = c })
+		local ci = UIKit.coinIcon(24, row)
+		ci.Position = UDim2.new(0.5, -44, 0, -1)
 		UIKit.text({ Text = Format.short(price), TextSize = 16, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.new(0.5, -18, 0, 0), Size = UDim2.fromOffset(80, 22), Parent = row })
-		act("BUY", "Gold", function()
+		act("BUY", "Green", function()
 			local ok, why = ctx.Net.call("BuyCosmetic", kind, item.Id)
 			if ok then
 				ctx.Sound.play("KaChing")
@@ -360,9 +357,7 @@ local function buildBibPage()
 	UIKit.corner(band, 10)
 	local num = UIKit.text({ Name = "Num", Text = "7", TextSize = 64, Color = P.SpeedBlack, Stroke = false, Position = UDim2.fromOffset(0, 36), Size = UDim2.new(1, 0, 1, -36), Parent = preview })
 	UIKit.text({ Text = "NUMBER (1-999)", TextSize = 14, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(180, 4), Size = UDim2.fromOffset(200, 20), Parent = bibPage })
-	local boxFrame = make("Frame", { BackgroundColor3 = P.SpeedBlack, Position = UDim2.fromOffset(180, 26), Size = UDim2.fromOffset(120, 42), Parent = bibPage })
-	UIKit.corner(boxFrame, 10)
-	UIKit.stroke(boxFrame, P.Graphite, 2)
+	local boxFrame = UIKit.pill({ Position = UDim2.fromOffset(180, 26), Size = UDim2.fromOffset(120, 42), Parent = bibPage })
 	bibBox = make("TextBox", { BackgroundTransparency = 1, Text = "7", PlaceholderText = "7", TextColor3 = P.White, FontFace = F.BodyBold, TextSize = 22, Size = UDim2.fromScale(1, 1), ClearTextOnFocus = false, Parent = boxFrame })
 	bibBox:GetPropertyChangedSignal("Text"):Connect(function()
 		local clean = bibBox.Text:gsub("%D", ""):sub(1, 3)

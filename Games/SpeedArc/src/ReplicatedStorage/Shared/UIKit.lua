@@ -112,7 +112,10 @@ end
 
 -- A tile / card with a colour glow rising from the bottom (Store, Locker, Quests, Coaches, Daily)
 function UIKit.tile(props)
-	local img = UIKit.sprite("tile_" .. UIKit.tileKey(props.Color or "blue"), props)
+	local key = UIKit.tileKey(props.Color or "blue")
+	local p = table.clone(props)
+	p.Color = nil -- the colour picks the tile; it doesn't tint it
+	local img = UIKit.sprite("tile_" .. key, p)
 	img.Name = props.Name or "Tile"
 	return img
 end

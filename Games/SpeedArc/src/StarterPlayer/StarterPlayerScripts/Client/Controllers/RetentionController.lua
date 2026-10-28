@@ -109,7 +109,7 @@ local function renderDaily()
 		return
 	end
 	for _, ch in dailyGrid:GetChildren() do
-		if ch:IsA("Frame") then
+		if ch:IsA("GuiObject") then
 			ch:Destroy()
 		end
 	end
@@ -117,20 +117,20 @@ local function renderDaily()
 	for i, r in state.DailyRewards do
 		local isNext = i == d.Day
 		local done = (not d.Claimable and i <= d.Streak) or (d.Claimable and not d.Broken and i < d.Day)
-		local tile = make("Frame", { Name = "Day" .. i, BackgroundColor3 = P.White, Size = UDim2.fromOffset(84, 150), LayoutOrder = i, Parent = dailyGrid })
-		UIKit.corner(tile, 12)
-		UIKit.gradient(tile, if isNext then P.DeepBlue elseif done then P.Graphite else P.Carbon, P.SpeedBlack, 90)
-		UIKit.stroke(tile, if isNext then P.Gold elseif done then P.ElectricBlue else P.Graphite, if isNext then 3 else 2)
-		UIKit.text({ Text = "DAY " .. i, TextSize = 16, Color = if isNext then P.Gold else P.White, Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, 0, 0, 20), Parent = tile })
-		if r.Trail or r.Rolls then
-			UIKit.text({ Text = if r.Trail then "TRAIL" else "ROLL", TextSize = 18, Color = P.Gold, Position = UDim2.fromOffset(0, 40), Size = UDim2.new(1, 0, 0, 24), Parent = tile })
+		-- tile colour = state (UI kit): gold = today, lime = got it, blue = coming
+		local tile = UIKit.tile({ Name = "Day" .. i, Color = if isNext then "gold" elseif done then "lime" else "blue", Size = UDim2.fromOffset(86, 154), Parent = dailyGrid })
+		tile.LayoutOrder = i
+		UIKit.text({ Text = "DAY " .. i, TextSize = 16, Color = if isNext then P.Gold else P.White, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 20), Parent = tile })
+		if r.Trail then
+			UIKit.icon("race", 40, tile, { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 32) })
+		elseif r.Rolls then
+			UIKit.icon("coaches", 40, tile, { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 32) })
 		else
-			local ci = UIKit.coinIcon(30, tile)
-			ci.Position = UDim2.new(0.5, -15, 0, 36)
+			UIKit.coinIcon(40, tile).Position = UDim2.new(0.5, -20, 0, 32)
 		end
-		UIKit.text({ Text = rewardText(r), Font = F.BodyBold, TextSize = 13, Wrapped = true, Position = UDim2.fromOffset(4, 74), Size = UDim2.new(1, -8, 0, 46), Parent = tile })
+		UIKit.text({ Text = rewardText(r), Font = F.BodyBold, TextSize = 13, Wrapped = true, Position = UDim2.fromOffset(8, 76), Size = UDim2.new(1, -16, 0, 46), Parent = tile })
 		if done then
-			UIKit.text({ Text = "GOT IT", TextSize = 14, Color = P.BrightBlue, Position = UDim2.fromOffset(0, 124), Size = UDim2.new(1, 0, 0, 18), Parent = tile })
+			UIKit.text({ Text = "GOT IT", TextSize = 14, Color = P.Lime, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, Position = UDim2.fromOffset(0, 124), Size = UDim2.new(1, 0, 0, 18), Parent = tile })
 		end
 	end
 	dailyClaim.Visible = d.Claimable
@@ -179,6 +179,7 @@ local function renderQuests()
 			row.count.Text = ("%s / %s"):format(Format.short(e.Progress), Format.short(e.Goal))
 			row.fill.Size = UDim2.fromScale(math.clamp(e.Progress / e.Goal, 0, 1), 1)
 			local done = e.Progress >= e.Goal
+			UIKit.setTileColor(row.tile, if e.Claimed then "lime" elseif done then "gold" else "blue")
 			row.claim.Visible = done and not e.Claimed
 			row.got.Visible = e.Claimed
 			row.reward.Visible = not done and not e.Claimed
@@ -221,25 +222,23 @@ end
 ----------------------------------------------------------------------------
 local function buildWindows()
 	-- Daily
-	dailyWin = UIKit.window({ Name = "Daily", Title = "DAILY STREAK", Size = Vector2.new(700, 300), Accent = P.Gold, Parent = canvas })
-	dailyGrid = make("Frame", { Name = "Days", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 152), Parent = dailyWin.content })
+	dailyWin = UIKit.window({ Name = "Daily", Title = "DAILY STREAK", Size = Vector2.new(700, 300), Parent = canvas })
+	dailyGrid = make("Frame", { Name = "Days", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 156), Parent = dailyWin.content })
 	make("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Center, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = dailyGrid })
 	dailyNote = UIKit.text({ Text = "", Font = F.BodyBold, TextSize = 15, Position = UDim2.fromOffset(0, 170), Size = UDim2.new(1, 0, 0, 22), Parent = dailyWin.content })
 	dailyClaim, dailyClaimLabel = UIKit.button({ Name = "Claim", Style = "Gold", Text = "CLAIM", TextSize = 20, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 198), Size = UDim2.fromOffset(220, 50), Parent = dailyWin.content, OnClick = claimDaily })
 	dailyWin.onOpen = renderDaily
 
 	-- Quests
-	questsWin = UIKit.window({ Name = "Quests", Title = "DAILY QUESTS", Size = Vector2.new(560, 300), Accent = P.ElectricBlue, Parent = canvas })
+	questsWin = UIKit.window({ Name = "Quests", Title = "DAILY QUESTS", Size = Vector2.new(560, 300), Parent = canvas })
 	UIKit.text({ Text = "3 new quests every day. Finish all 3 for a bonus + a free coach roll!", Font = F.BodyBold, TextSize = 13, Wrapped = true, Position = UDim2.fromOffset(0, 6), Size = UDim2.new(1, 0, 0, 30), Parent = questsWin.content })
 	questRows = {}
 	for i = 1, Retention.Quests.PerDay do
-		local f = UIKit.panel({ Name = "Quest" .. i, Position = UDim2.fromOffset(0, 40 + (i - 1) * 58), Size = UDim2.new(1, 0, 0, 52), Accent = false, Parent = questsWin.content })
-		local text = UIKit.text({ Text = "", TextSize = 16, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(14, 4), Size = UDim2.new(1, -150, 0, 22), Parent = f })
-		local bar = make("Frame", { BackgroundColor3 = P.SpeedBlack, Position = UDim2.fromOffset(14, 30), Size = UDim2.new(1, -230, 0, 12), Parent = f })
-		UIKit.corner(bar, UDim.new(0.5, 0))
-		local fill = make("Frame", { BackgroundColor3 = P.ElectricBlue, Size = UDim2.fromScale(0, 1), Parent = bar })
-		UIKit.corner(fill, UDim.new(0.5, 0))
-		local count = UIKit.text({ Text = "", Font = F.BodyBold, TextSize = 13, Color = P.BrightBlue, XAlign = Enum.TextXAlignment.Left, Position = UDim2.new(1, -208, 0, 26), Size = UDim2.fromOffset(80, 20), Parent = f })
+		local f = UIKit.tile({ Name = "Quest" .. i, Color = "blue", Position = UDim2.fromOffset(0, 40 + (i - 1) * 58), Size = UDim2.new(1, 0, 0, 54), Parent = questsWin.content })
+		UIKit.icon("quests", 34, f, { Position = UDim2.fromOffset(10, 9) })
+		local text = UIKit.text({ Text = "", TextSize = 16, StrokeColor = P.Navy, StrokeThickness = 2, StrokeTransparency = 0, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(52, 5), Size = UDim2.new(1, -190, 0, 22), Parent = f })
+		local _, fill = UIKit.bar({ Position = UDim2.fromOffset(52, 30), Size = UDim2.new(1, -270, 0, 12), Parent = f })
+		local count = UIKit.text({ Text = "", Font = F.BodyBold, TextSize = 13, Color = Color3.fromHex("#D6E6FF"), XAlign = Enum.TextXAlignment.Left, Position = UDim2.new(1, -210, 0, 26), Size = UDim2.fromOffset(80, 20), Parent = f })
 		local claim = UIKit.button({ Name = "Claim", Style = "Gold", Text = "CLAIM", TextSize = 15, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(110, 40), Parent = f, OnClick = function()
 			local ok, res = ctx.Net.call("ClaimQuest", i)
 			if ok then
@@ -247,9 +246,9 @@ local function buildWindows()
 				ctx.Hud.toast("Quest done! " .. res.Text, "Gold")
 			end
 		end })
-		local got = UIKit.text({ Text = "DONE", TextSize = 16, Color = P.BrightBlue, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -20, 0.5, 0), Size = UDim2.fromOffset(90, 30), Parent = f })
+		local got = UIKit.text({ Text = "DONE", TextSize = 16, Color = P.Lime, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -20, 0.5, 0), Size = UDim2.fromOffset(90, 30), Parent = f })
 		local reward = UIKit.text({ Text = "", TextSize = 16, Color = P.Gold, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -16, 0.5, 0), Size = UDim2.fromOffset(100, 30), XAlign = Enum.TextXAlignment.Right, Parent = f })
-		questRows[i] = { frame = f, text = text, fill = fill, count = count, claim = claim, got = got, reward = reward }
+		questRows[i] = { frame = f, text = text, fill = fill, count = count, claim = claim, got = got, reward = reward, tile = f }
 	end
 	questBonus = UIKit.button({ Name = "Bonus", Style = "Gold", Text = "ALL 3 DONE! CLAIM BONUS", TextSize = 16, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 40 + 3 * 58), Size = UDim2.fromOffset(300, 40), Parent = questsWin.content, OnClick = function()
 		local ok, res = ctx.Net.call("ClaimQuestBonus")
@@ -264,10 +263,8 @@ local function buildWindows()
 	settingsWin = UIKit.window({ Name = "Settings", Title = "SETTINGS", Size = Vector2.new(580, 290), Parent = canvas })
 	local box0 = settingsWin.content
 	UIKit.text({ Text = "CODES", TextSize = 16, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(4, 6), Size = UDim2.fromOffset(200, 22), Parent = box0 })
-	local boxFrame = make("Frame", { BackgroundColor3 = P.SpeedBlack, Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, -150, 0, 44), Parent = box0 })
-	UIKit.corner(boxFrame, 10)
-	UIKit.stroke(boxFrame, P.Graphite, 2)
-	local box = make("TextBox", { Name = "Code", BackgroundTransparency = 1, ClearTextOnFocus = false, PlaceholderText = "Type a code", PlaceholderColor3 = P.Graphite, Text = "", TextColor3 = P.White, FontFace = F.BodyBold, TextSize = 18, Position = UDim2.fromOffset(12, 0), Size = UDim2.new(1, -24, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, Parent = boxFrame })
+	local boxFrame = UIKit.pill({ Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, -150, 0, 44), Parent = box0 })
+	local box = make("TextBox", { Name = "Code", BackgroundTransparency = 1, ClearTextOnFocus = false, PlaceholderText = "Type a code", PlaceholderColor3 = Color3.fromHex("#8FA6D9"), Text = "", TextColor3 = P.White, FontFace = F.BodyBold, TextSize = 18, Position = UDim2.fromOffset(18, 0), Size = UDim2.new(1, -36, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, Parent = boxFrame })
 	UIKit.button({ Name = "Redeem", Style = "Gold", Text = "REDEEM", TextSize = 16, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 28), Size = UDim2.fromOffset(138, 48), Parent = box0, OnClick = function()
 		local ok, res = ctx.Net.call("RedeemCode", box.Text)
 		if ok then
@@ -374,9 +371,9 @@ function R.start(c)
 	end)
 
 	-- timed boost badge, right of the rank badge (on the MPH plate it covered "MPH")
-	badge = make("Frame", { Name = "BoostBadge", BackgroundColor3 = P.Gold, Position = UDim2.fromOffset(170, 71), Size = UDim2.fromOffset(84, 22), Visible = false, ZIndex = 4, Parent = canvas })
-	UIKit.corner(badge, UDim.new(0.5, 0))
-	badgeText = UIKit.text({ Text = "2x", TextSize = 13, Color = P.SpeedBlack, Stroke = false, ZIndex = 5, Parent = badge })
+	badge = UIKit.pill({ Name = "BoostBadge", Kind = "gold", Position = UDim2.fromOffset(170, 68), Size = UDim2.fromOffset(92, 28), ZIndex = 4, Parent = canvas })
+	badge.Visible = false
+	badgeText = UIKit.text({ Text = "2x", TextSize = 14, Color = P.Navy, Stroke = false, ZIndex = 5, Parent = badge })
 
 	buildWindows()
 

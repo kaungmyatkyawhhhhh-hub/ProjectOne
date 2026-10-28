@@ -307,6 +307,34 @@
   "sliceScale": "auto",
   "use": "LIVE, warnings"
  },
+ "pill_gold": {
+  "size": [
+   96,
+   48
+  ],
+  "slice": [
+   24,
+   20,
+   72,
+   28
+  ],
+  "sliceScale": "auto",
+  "use": "boost badge, reward tags"
+ },
+ "pill_blue": {
+  "size": [
+   96,
+   48
+  ],
+  "slice": [
+   24,
+   20,
+   72,
+   28
+  ],
+  "sliceScale": "auto",
+  "use": "info tags"
+ },
  "pill_lime": {
   "size": [
    96,
@@ -380,6 +408,15 @@
   "slice": null,
   "sliceScale": null,
   "use": "rank badge"
+ },
+ "badge_white": {
+  "size": [
+   64,
+   64
+  ],
+  "slice": null,
+  "sliceScale": null,
+  "use": "badge the game tints (ImageColor3), e.g. the rank colour"
  },
  "icon_store": {
   "size": [

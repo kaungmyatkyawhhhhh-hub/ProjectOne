@@ -158,6 +158,26 @@
   ]
  },
  {
+  "file": "ReplicatedStorage/Shared/Config/UIArt.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "UIArt"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Config/UIArtSprites.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "UIArtSprites"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/UIKit.lua",
   "class": "ModuleScript",
   "path": [

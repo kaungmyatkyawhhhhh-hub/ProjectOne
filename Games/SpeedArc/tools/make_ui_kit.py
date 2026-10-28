@@ -333,6 +333,8 @@ def build():
         spr["tile_" + c] = save("tile_" + c, tile(h), [40, 40, 120, 160], 0.33, "store / locker / quest / coach tile")
     spr["pill_navy"] = save("pill_navy", pill("#24409A", "#14276A", "#3B5CC8"), [24, 20, 72, 28], "auto", "counters, HUD plates (SliceScale = height / 48)")
     spr["pill_red"] = save("pill_red", pill("#FF7A7A", "#E02828", "#FFB0A8"), [24, 20, 72, 28], "auto", "LIVE, warnings")
+    spr["pill_gold"] = save("pill_gold", pill("#FFF07A", "#FFB300", "#FFF7C0"), [24, 20, 72, 28], "auto", "boost badge, reward tags")
+    spr["pill_blue"] = save("pill_blue", pill("#6CC0FF", "#1E90FF", "#B8E0FF"), [24, 20, 72, 28], "auto", "info tags")
     spr["pill_lime"] = save("pill_lime", pill("#9BF27A", "#3FB52B", "#C8FFB0"), [24, 20, 72, 28], "auto", "status: equipped, new")
     spr["bar_track"] = save("bar_track", bar(), [16, 15, 80, 17], "auto", "progress track")
     spr["bar_blue"] = save("bar_blue", bar("#1E90FF"), [16, 15, 80, 17], "auto", "progress fill")
