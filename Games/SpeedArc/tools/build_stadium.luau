@@ -73,7 +73,7 @@ for _, side in { -1, 1 } do
 		section(CFrame.lookAt(pos, pos - dir))
 	end
 end
-local fanCount = L.fans(crowdF, seatLines, 0.55, "MeshesV1_Backup")
+local fanCount = L.fans(crowdF, seatLines, 0.55, "MeshesV1")
 
 -- giant scoreboard above the west end
 local sbX = C.X - T.Straight / 2 - outerR - 40

@@ -628,7 +628,7 @@ function L.course(parent, areaId, opts)
 	L.floatLabel(m, C.Start + Vector3.new(0, 30, 0), "SMASH WALLS", "RUN, GET FASTER, BREAK THROUGH", accent, 48, 13)
 	local fans = 0
 	if #seatLines > 0 and opts.Crowd then
-		fans = L.fans(opts.Crowd, seatLines, 0.45, "MeshesV1_Backup")
+		fans = L.fans(opts.Crowd, seatLines, 0.45, "MeshesV1")
 	end
 	return m, fans
 end
