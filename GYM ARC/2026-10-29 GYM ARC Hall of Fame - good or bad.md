@@ -34,7 +34,7 @@ Our weak spots:
 Keep the Hall of Fame for Saturday (it's built, opt-in, and it won't hurt new players), but **make it a reward, not a punishment**, and watch the numbers. If top players stop playing after entering, switch to Plan B.
 
 ## Fixes before / right after Saturday (small, Config only)
-1. **Run 2 must FEEL fast:** ★1 = **x2 EXP** and start at **Spurt 3**, so the 6 spurts take ~15-20 min instead of ~1 h. Each star a bit faster (keep the gains cap rules).
+1. **Run 2 must FEEL fast:** ★1 = **x2 EXP** and start at **Spurt 3**, so the 6 spurts take ~15-20 min instead of ~1 h. Each star a bit faster (soft stacking since 29 Oct, no hard cap).
 2. **Keep the height as status:** show "PEAK 7'0" ★1" (their real peak) on the overhead tag and profile; the statue shows the peak body (already). Optional: a "Legend Form" look that lets ★ players wear their peak height as a cosmetic in the Hall and posing stage.
 3. **Say it clearly on the ENTER screen:** "Run 2 is 3x faster. You keep everything except your height and muscles."
 4. **Thumbnails/announcement:** lead with GROW (the first-minute promise) and use the Hall of Fame as the "goal" ("Become a LEGEND"), not as the whole update.

@@ -21,7 +21,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 3. **First 5 minutes = train → grow → next goal.** About half of new players leave before the first Growth Spurt; that's the #1 problem.
 4. **3-4 new things per ladder step.** No floods, no empty stretches.
 5. **Never take away:** no wiping, no weakening owned items, no moving old goals further (Fisch, PS99, Grow a Garden).
-6. **No paid power that wins competitions; no paying for nothing (MAX BOOST).**
+6. **No paid power that wins competitions; no paying for nothing: no hard MAX BOOST cap, soft stacking instead (29 Oct).**
 7. **Weekly small update every Saturday 15:00 UTC (21:30 Myanmar).** Measure after every update; undo with Configs if numbers drop.
 8. **Kids first:** clothed, calm wording, no fake timers, filtered text, no links in game, Reduced Motion respected.
 9. **Phones first:** cheap Android, ~1,000 draw calls, ~300 particles on screen, 60 FPS target.
@@ -35,8 +35,8 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Tap reps on machines, dumbbells, weight tiers, MAX button | KEEP | Simple, mobile-friendly, the genre standard |
 | Weighty rep feel, clanks, REP punch, bar shake, coin fly | KEEP | "Feedback on every action" is done and good |
 | 18 muscles in 6 groups, "Needs LEGS", Train next, Body Map | KEEP + CHANGE: make the BALANCED +10% bonus visible ("BALANCED x1.1" chip) | Turns the chore into a reward |
-| ~10 hidden multipliers + caps (x5, +400% trainers, x8 coins) | CHANGE: one **GAINS** number with 4 parts (Body, Trainers, Boosts, Gear); raise caps per stage instead of a wall | Kids can't read 10 layers; caps waste boosts |
-| MAX BOOST wasting boosts/purchases | CHANGE: "MAXED: no effect right now" on items/offers; no Robux offer when maxed | Paying for nothing kills trust |
+| ~10 hidden multipliers + caps (x5, +400% trainers, x8 coins) | CHANGE: one **GAINS** number with 4 parts (Body, Trainers, Boosts, Gear); NO hard caps (owner 29 Oct): bonuses add inside a part, the 4 parts multiply, soft line (extra above x10 counts half, x20 a quarter, +x1 per alter tier and star) | Kids can't read 10 layers; caps waste boosts |
+| MAX BOOST wasting boosts/purchases | REMOVED (owner 29 Oct): no MAX BOOST and no MAXED state; soft stacking means every boost/purchase always adds something | Paying for nothing kills trust |
 | Stamina pacing, recovering, shake button, treadmills (max stamina) | KEEP | Tuned 21 Oct; fine |
 | Free auto reps at 40% / Auto Rep pass 100% | KEEP | Fair, standard |
 | PUMPED / BIG REP | KEEP | Good "juice" moments |
@@ -87,7 +87,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Passes: 2x EXP 249, 2x Coins 149, VIP 299 (deal 209), Aura Pack 199, Auto Rep 249, Extra Trainer 99, 4th Trainer | KEEP prices | Inside the genre range; first pass under 400 |
 | Store front | CHANGE: **6 heroes** (Starter Pack, Auto Rep, 2x EXP, VIP, Extra Trainer, cosmetic of the week); everything else one tab deeper | 25+ tiny items = choice overload |
 | Starter Pack | KEEP; one price everywhere (notes say both 49 and 79: fix) | Consistency |
-| Coin packs (scaled, 10/30/60 min), Shake Bundle, Endless Stamina, Quest Reroll | KEEP; hidden when MAXED would waste them | Fairness |
+| Coin packs (scaled, 10/30/60 min), Shake Bundle, Endless Stamina, Quest Reroll | KEEP (soft stacking: never wasted) | Fairness |
 | DNA tokens (99 / x3 249) | KEEP + **PolicyService** check (paid random results blocked where required) | Roblox rule on paid random items |
 | Trainer rolls paid with bought coins | KEEP coins-only rolls + odds + pity; PolicyService check | Same rule |
 | Trainer slots (2 free, 3rd/4th paid since 28 Oct) | CHANGE: anyone who had a free 3rd slot keeps it | Never take away |
@@ -285,7 +285,7 @@ Filter: does it make you taller/stronger, let you USE strength, or SHOW IT OFF? 
 | Date (Sat) | Update | Prompt |
 |---|---|---|
 | before 31 Oct | Hall of Fame fixes + fairness checks (trainer slots kept, Starter Pack price) | 95 |
-| 7 Nov | Future You, Progression Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default | 91 |
+| 7 Nov | Future You, Progression Road, unlock map, short tutorial, basketball hidden, GAINS number + soft stacking (no cap), tank top default | 91 |
 | 14 Nov | Alter phase fix | 96 |
 | 21 Nov | Golden Era Gym | 98 |
 | 28 Nov | Champion Ladder | 92 |

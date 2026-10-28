@@ -36,7 +36,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Research behind it: [[Playbook notes
 | 6 | Deepwoken-style cards? | **Yes, small: "Run Cards"** (prompt 105, with the alter fix 21 Nov). Pick 1 of 3 at every alter, reset at the Hall of Fame, 1 Legacy card kept per star (replaces Star Perks: one system, not two). |
 | 7 | Do we need notifications? | Yes but small: 13+ only, 2 personal messages ("rested", "a friend passed your height"). The main come-back hooks are in-game. |
 | 8 | Weekly event like "Admin Abuse"? | **Yes: POWER HOUR, twice every Saturday: 12:00 UTC (Asia evening, 18:30 Myanmar) and 19:00 UTC (Americas/Europe)**, automatic on all servers, no countdown pressure, its cosmetics come back in rotation. Replaces the removed rush hour. |
-| 9 | Rested bonus? | **Yes**: away 8 h+ → "WELL RESTED: x2 EXP for 15 min", never wasted by caps. Positive framing (like WoW's rested XP). |
+| 9 | Rested bonus? | **Yes**: away 8 h+ → "WELL RESTED: x2 EXP for 15 min", applied in full after the soft line. Positive framing (like WoW's rested XP). |
 | 10 | Ads now? | Only the **$20-50 measuring test after 7 Nov** (also collects Kids & Select's 250 plays if needed). Each paid player must later spend ~2.6-7.1 R$ just to break even; no scaling before Gate 2 passes. |
 | 11 | New Robux products (subscription, rewarded ads)? | **No** until Gate 2 passes (D1 8%+) and we see payer % (Home now wants retention AND spending, so the existing fair store must be easy to find, but no new items). Rewarded ads need 2,000 visitors/month and can't show to under-13s. Subscription idea "Gym Club 99 R$/month" decided at Gate 2 at the earliest. |
 | 12 | Paid random items legal? | Coins can be bought with Robux, so trainer/aura rolls count. Odds button must say **"Odds"**, and players where PolicyService says restricted get **no Robux coin packs, DNA products or Starter Pack (it contains a DNA token)**; their coins are earn-only. The Robux "Luck" supplement is removed (it broke our own no-paid-luck rule). Prompt 108, 7 Nov. |
@@ -46,7 +46,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Research behind it: [[Playbook notes
 | 16 | Re-rack coins (open question): fixed 50 or the owner's LVL scaling? | **Keep the owner's version** (5 + 1 per LVL, capped at LVL 400). It IS a fixed number for each level, not "minutes", and we never undo the owner's changes. Prompt 103 must not change it. |
 | 17 | Is our Saturday 15:00 UTC slot right? | Yes: Saturday play starts rising then and peaks ~19:00 UTC, so there's time to hotfix before the peak. Keep. |
 | 18 | Music licence safe? | New tracks only from Creator Store partner music (Monstercat, DistroKid, Too Lost) or the existing licensed library; nothing we don't own. No lyrics (kids, video rules). |
-| 19 | Too many features again? | Every addition here is small and sits on an existing moment (alter = card pick, Saturday = Power Hour, rejoin = rested). Nothing new on the HUD. Cut list from 29 Oct stays. Multipliers are counted: Power Hour and rested sit outside the cap like PUMPED; Run/Legacy cards inside it, max 3 Legacy cards active. |
+| 19 | Too many features again? | Every addition here is small and sits on an existing moment (alter = card pick, Saturday = Power Hour, rejoin = rested). Nothing new on the HUD. Cut list from 29 Oct stays. Multipliers are counted: no hard cap any more (owner, 29 Oct) but soft stacking: 4 parts multiply, bonuses add inside a part, extra above x10 counts half; Power Hour and rested apply after that like PUMPED; max 3 Legacy cards active. |
 | 20 | What if the game is dying anyway by January? | The rescue gates stay (21 Nov, ~5 Dec). If both fail: maintenance mode (weekly code + Power Hour keep running by themselves) and the next game. |
 | 21 | Should we copy the "realistic" trend (Project Iron, Power Lifters)? | No. Our hook is **height** and a fun stylised world; realism needs a different game. We copy their habits (named weekly versions, a code each, apology codes, showing bodies off), not their style. |
 | 22 | Translations? | Yes, cheap: owner adds manual Spanish, Portuguese (BR), Indonesian and Thai name + description in Creator Hub. In-game text uses Roblox's automatic translation. |
@@ -120,17 +120,22 @@ Every update week: one code, the name tag, an Update Announcement, a Community a
 
 ### Progression, alters, Hall of Fame
 - Alters: prompt 96 as written (measure, +0.8" each, mass monster goal, never shrink, flat goals, a reward every alter).
-- **Run Cards (prompt 105):** at every alter pick 1 of 3 cards (muscle gains, trainer, coins, feat, stamina; Common/Rare/Epic/Legendary with odds shown; Epic+ appear once you hold 2 of the same type = builds; one free reroll per pick, **never for Robux**). Count inside the GAINS cap (BODY bucket, shown in "My Build"), switched off in shows, Showdown and arm wrestling. Reset at the Hall of Fame; **1 Legacy card kept per star** (this replaces the planned "Star Perks"; max 3 Legacy cards active, the rest stored). Veterans' missed picks are exempt from the Hall of Fame cheat check. On/off Config switch.
+- **Run Cards (prompt 105):** at every alter pick 1 of 3 cards (muscle gains, trainer, coins, feat, stamina; Common/Rare/Epic/Legendary with odds shown; Epic+ appear once you hold 2 of the same type = builds; one free reroll per pick, **never for Robux**). Go in the BODY part of the GAINS number (soft stacking, shown in "My Build"), switched off in shows, Showdown and arm wrestling. Reset at the Hall of Fame; **1 Legacy card kept per star** (this replaces the planned "Star Perks"; max 3 Legacy cards active, the rest stored). Veterans' missed picks are exempt from the Hall of Fame cheat check. On/off Config switch.
 - Hall of Fame: prompt 95 + star track 101 (Star Perks → Legacy cards).
 - Prestige check (Pecorella): a reset should feel worth it when it gives +50% to +200% power, and run 2 must go further faster. Star 1 = x2 EXP + start at Spurt 3 fits; check the real run-2 time after launch.
 
 ### Come-back hooks (prompt 107, 28 Nov)
-- **POWER HOUR** every Saturday at **12:00 and 19:00 UTC** (one hour each) on every server, automatic: x2 gains (outside the cap, and the server's gains-per-minute check knows about it), a golden "Power Rack" in the plaza, an earned cosmetic from a rotating list that comes back later (never sold, no fear of missing out), listed as a recurring Experience Event. No countdown card: just a "POWER HOUR NOW" pill while it's on. Runs even if nobody touches the game (maintenance mode friendly).
+- **POWER HOUR** every Saturday at **12:00 and 19:00 UTC** (one hour each) on every server, automatic: x2 gains (applied after the soft line, and the server's gains-per-minute check knows about it), a golden "Power Rack" in the plaza, an earned cosmetic from a rotating list that comes back later (never sold, no fear of missing out), listed as a recurring Experience Event. No countdown card: just a "POWER HOUR NOW" pill while it's on. Runs even if nobody touches the game (maintenance mode friendly).
 - **Rested gains:** away 8 h+ → x2 EXP for 15 min, shown on the Welcome back card with the offline coins; uses today's boost tile system (97 converts it later).
 - **Streak:** milestone animation on day 3 and day 7 (grace day exists).
 - **Friends:** invite with launch data (friend spawns next to you), Party members land in the same server, the "train together +10%" bonus gets a visible chip.
 - **Notifications (13+ opted in, max 1/day):** "Your muscles are rested: x2 gains waiting" and "<friend> passed your height!". Ask for opt-in after the first Growth Spurt (in the one-per-minute queue), never before. Sending needs Open Cloud: Claude Code checks it can be sent from our servers; if not, notifications are dropped (they're a small part).
 - **Wellbeing:** after 2 hours in one session, one calm optional line "Great training! Water break?" (setting to turn off). Fits the UK Children's Code; costs nothing.
+
+### Gains and the MAX BOOST cap (owner, 29 Oct: "there shouldn't be any max boost cap")
+- **No hard cap and no MAXED state any more.** Soft stacking instead: BODY x TRAINERS x BOOSTS x GEAR multiply; bonuses inside one part add; the total counts fully up to x10, extra above x10 counts half, above x20 a quarter (line +x1 per alter tier and per star). Moment boosts (PUMPED, BIG REP, Power Hour, rested) apply after, in full. Coins work the same way.
+- Why not no limit at all: multipliers multiply each other (x40+ possible), so stages would take seconds, the fixed prices would become pocket change and boards would go to whoever paid most.
+- Never weaker than today for any existing player; pacing checked for a free player vs a heavy payer (prompt 91 item 9, 14 Nov).
 
 ### Economy and prices
 - Fixed values (103) stay; re-rack stays the owner's LVL formula.
@@ -223,7 +228,7 @@ An independent reviewer read the plan, the prompts and the current feature notes
 | 3 | Order was wrong (105 needed 108; 106 changes run-2 pacing) | 108 on 7 Nov, not slippable; 95's pacing re-run on 14 Nov; rested uses today's boost tiles |
 | 4 | Weeks over-full (5 prompts on 7 Nov), Audio API migration in December | ~2 prompts a week, no-release weeks 26 Dec, 23 Jan, 20 Feb, Audio API in January, Golden Era mockups 2 weeks early |
 | 5 | Starter Pack (has a DNA token) and a Robux Luck item escaped the paid-random fix | Both handled in 108; Luck removed |
-| 6 | Multipliers piling up; server gain cap could cut Power Hour | Power Hour/rested outside the cap and known to the server check; max 3 Legacy cards active |
+| 6 | Multipliers piling up; server gain cap could cut Power Hour | Power Hour/rested applied after the soft line (the hard cap itself was later removed by the owner) and known to the server check; max 3 Legacy cards active |
 | 7 | Power Hour at 01:30 Myanmar/Indonesia/Thailand; countdown = pressure on kids | Two Power Hours (12:00 and 19:00 UTC), no countdown, rotating cosmetics come back |
 | 8 | Tutorial contradictions (Dante step), funnel would show fake drops, popups pile up after Spurt 1 | Dante step dropped, new funnel Onboarding_v2, one thing per minute after Spurt 1, mid-tutorial saves migrate |
 | 9 | Older notes still mention the skill tree, rush hour, Star Perks, Champion Arena, 8 feet | Clean-up pass on those notes (same day) |

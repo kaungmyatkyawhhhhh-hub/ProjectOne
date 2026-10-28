@@ -55,7 +55,7 @@ Total of all passes: ~1,393 R$ (fine for a kids' game).
 | Quest Reroll | 19 | KEEP | |
 | Endless Stamina | 49 per 15 min (max 60) | KEEP; hidden when it would do nothing | |
 | Shake Bundle (3) | 49 | CHANGE with the merge (97): "Stamina x3" 49 | |
-| Robux supplements | 25 x1 / 99 x5 | CHANGE with the merge: Gains / Stamina / Luck x1 25, x5 99; hidden when MAXED | |
+| Robux supplements | 25 x1 / 99 x5 | CHANGE with the merge: Gains / Stamina / Luck x1 25, x5 99 (no cap: always adds something) | |
 | Alter variants | 149-299 | KEEP + one new cosmetic each update | Fair money |
 
 ## 400 / 800 bundle fits (good combos to show in the Store)
@@ -66,7 +66,7 @@ Total of all passes: ~1,393 R$ (fine for a kids' game).
 - Show prices from Roblox (GetProductInfo), never typed in (already).
 - Every boost/pass says its exact number ("+100% EXP", "+15% gains").
 - No fake discounts or timers; "SAVE n%" only when it's really cheaper.
-- Nothing sold that wins a competition; nothing sold that does nothing (MAXED).
+- Nothing sold that wins a competition; nothing sold that does nothing (no hard cap since 29 Oct: soft stacking, extra above x10 counts half).
 - No new products until D1 ~10%.
 
 ## When

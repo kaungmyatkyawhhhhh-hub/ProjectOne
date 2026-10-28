@@ -16,7 +16,7 @@ Read on 29 Oct from the vault: Gains and EXP, Stamina, Machines, Economy and Dai
 - **"Needs LEGS" chores:** 6 groups must all reach the goal, and diminishing returns make the top group crawl. Good for variety, but it's the main "grind" feeling.
 **Fixes:**
 1. **One GAINS number** on the HUD/Stats ("GAINS x3.4") with a simple breakdown: BODY (spurts/alters/genetics), TRAINERS, BOOSTS, GEAR. Four buckets, not ten.
-2. **Never waste a boost or a purchase:** if a boost/supplement/pass wouldn't add anything because of the cap, the button says "MAXED: no effect right now" and the Robux offer doesn't show. Long term: raise the cap per stage instead of a hard wall.
+2. **[Replaced 29 Oct by SOFT STACKING, no cap at all: see the whole game plan.]** **Never waste a boost or a purchase:** if a boost/supplement/pass wouldn't add anything because of the cap, the button says "MAXED: no effect right now" and the Robux offer doesn't show. Long term: raise the cap per stage instead of a hard wall.
 3. Keep "Train next" + Body Map red groups (already); add "BALANCED +10%" more visibly so switching machines feels rewarded, not forced.
 
 ## 2. Economy (coins)
@@ -65,7 +65,7 @@ Read on 29 Oct from the vault: Gains and EXP, Stamina, Machines, Economy and Dai
 | When | What |
 |---|---|
 | With prompt 95 (before Sat) | Fairness checks: existing players keep free trainer slots; Starter Pack price consistent |
-| With 91 (7 Nov) | One GAINS number + "MAXED: no effect" on boosts/offers |
+| With 91 (14 Nov) | One GAINS number + soft stacking (no cap, no MAXED) |
 | With 96/98 (14-21 Nov) | Gear ladder tied to gyms (Elite at Powerlifting, Champion at Golden Era) |
 | With 92 (28 Nov) | Trainer pools per gym start (Beach + Pro agencies) |
 | Dec | Store front of 6, a cosmetic each week, PolicyService audit, duplicates always useful |
