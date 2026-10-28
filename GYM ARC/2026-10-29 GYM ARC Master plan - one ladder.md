@@ -101,6 +101,7 @@ Why it happens (from the Body Alters note):
 3. **Same loop, smaller reward:** every alter = same machines, keep 25%, goal +25 levels. Only the skin changes, and the Stone skins (Clay, Sandstone, Granite, Marble) are grey/brown and earlier "read as fur"; the exciting ones (Chrome, Gold) are far away.
 4. **No acceleration:** +15% gains per alter, but each goal is bigger, so alters never feel faster.
 
+(The final per-alter list is the "Full feature list" table above; this table was the first draft.)
 Fix: **something every alter, height every alter, a big reward exactly at Alter 8, and the next big goal never more than ~2 alters away** (prompt 96).
 
 | Alter | Height (+0.8"/alter) | New thing (● exists, ★ new) |
@@ -138,15 +139,19 @@ Fix (added to prompt 96, and it moves UP in the plan):
 ## Weekly plan (Saturday 15:00 UTC = 21:30 Myanmar)
 | Saturday | Update | Prompts |
 |---|---|---|
-| 31 Oct | Hall of Fame launch | 90 + 88 done; **95** (HoF fixes) before Saturday, test first |
-| 7 Nov | Future You + Progression Road + the new unlock map + short tutorial + basketball hidden | **91** |
-| 14 Nov | Alter phase fix (mass monster goal, never shrink, height + reward every alter, smooth curve) | 96 |
-| 21 Nov | Golden Era Gym at Alter 8 | 98 |
+| before 31 Oct | Hall of Fame fixes + fairness checks | **95** |
+| 31 Oct | Hall of Fame launch | (90 + 88 done) |
+| 7 Nov | Future You, Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default | **91** |
+| 14 Nov | Alter phase fix | 96 |
+| 21 Nov | Golden Era Gym (+ Elite/Champion gear) | 98 |
 | 28 Nov | Champion Ladder | 92 |
-| 5 Dec | Strongman Feats (first 3) + strength objects + rooftop gym + server crown | 93 |
-| 12 Dec | Skill tree + equip preview | 94 |
+| 5 Dec | Strongman Feats (3), strength objects, rooftop gym, crown | 93 |
+| 12 Dec | Skill tree + Winter Lifts cosmetic + code | 94 |
 | 19 Dec | Boosts merged into 3 | 97 |
-| Jan | Winter update: Tier 4 Gem alters (16-20), Champion Arena, collection book, real-player arm wrestling | later |
+| 26 Dec | Sound, music and VFX polish | 100 |
+| 2 Jan | Economy and store pass | 99 |
+| Jan | Gem alters 16-20, Champion Arena, Collection book, real-player arm wrestling | later |
+Everything decided for every system: [[2026-10-29 GYM ARC Every decision - the whole game]].
 - Mid-November: look at the Hall of Fame numbers → keep or Plan B.
 - Each week: check first-spurt funnel + D1 the day after. If a change hurts, undo it with Configs.
 

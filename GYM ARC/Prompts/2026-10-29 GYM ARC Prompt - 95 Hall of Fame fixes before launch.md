@@ -15,5 +15,6 @@ GYM ARC: make the Hall of Fame feel like a REWARD, not a punishment, before Satu
 3) CLEAR ENTER SCREEN: one big line "Run 2 is 3x faster" (use the real number), then YOU KEEP / START OVER as now, plus "Your peak height stays on your name and statue".
 4) NO CHEATERS AS STATUES: before the top-10 board / statue / LB2_HallOfFame accept a player, the server checks the save is possible (stars vs alters reached vs time played, no impossible EXP jumps). Suspicious = left off the board and logged for me in the Admin console.
 5) ANALYTICS: HallOfFame_Entered (stars), HallOfFame_Declined (pressed Not yet), SecondRun_Done (minutes), and a custom event each day a star player plays (so I can compare 7-day playtime of players who entered vs. Alter-15 players who didn't).
-6) TEST with TestLaunchIn / TestHallOfFame: enter at Alter 15, run 2 speed, tag text, Legend Form, a fake impossible save gets refused. Phone-size screenshots. Progress note + update the Hall of Fame feature note.
+6) FAIRNESS CHECKS (from [[2026-10-29 GYM ARC Every decision - the whole game]]): (a) any player who had a free 3rd trainer slot before the 28 Oct slot change keeps it (check the saves/logic, fix if not, tell me how many were affected); (b) the Starter Pack price is the same everywhere (Creator Hub, Config fallback, Store, offers, notes): tell me what it is.
+7) TEST with TestLaunchIn / TestHallOfFame: enter at Alter 15, run 2 speed, tag text, Legend Form, a fake impossible save gets refused. Phone-size screenshots. Progress note + update the Hall of Fame feature note.
 ```
