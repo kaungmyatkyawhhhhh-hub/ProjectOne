@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, auras]
-status: todo (visual part with 96 on 14 Nov; spin system 28 Nov after Gate 1)
+status: todo (part A visuals 28 Nov with 107; part B Aura Altar 2 Jan)
 ---
 # 102 Auras rework (stronger, Aura Altar, rarities)
 
@@ -20,7 +20,7 @@ PART B (system, after my OK on the list):
 5) ~24 auras, 5 rarities, ORIGINAL names (no anime/brand names): Common 60% x1.05 coins, Rare 27% x1.15, Epic 10% x1.35, Legendary 2.7% x1.6, Mythic 0.3% x2. Show me the full list (names, looks, odds) before building.
 6) SIGNATURE auras are earned only (Golden at 6'0", Stone Titan at Alter 9, alter tier auras, champion auras, Hall of Fame star auras) and are the best-looking ones.
 7) Existing auras get a rarity + coin stat; Aura Pack and VIP Royal cards show the exact stat. Stats breakdown shows "AURA x1.35 coins".
-8) Remove the AURA branch from the skill tree plan (prompt 94 keeps UPGRADES, GEAR, FEATS).
+8) EQUIP PREVIEW (moved from the cancelled skill tree): in the Aura, Gear and Trainer menus, selecting an item shows "Current → New" in green/red numbers before equipping (text only).
 9) Analytics: AuraSpin (rarity), AuraEquip, pity hits.
 TEST: spins with TestRollRarity-style hook, pity, odds panel, owned auras kept, phone screenshots, FPS. Progress note + Aura note.
 ```

@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, simplify]
-status: todo (7 Nov, with 91 and 103)
+status: todo (7 Nov, with 106 and 108)
 ---
 # 104 Remove extra features
 

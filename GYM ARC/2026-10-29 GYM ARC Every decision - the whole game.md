@@ -6,6 +6,7 @@ status: decided (owner asked Claude to decide everything, 29 Oct)
 # GYM ARC: every decision, the whole game
 
 Back to [[00 GYM ARC Home|GYM ARC Home]] · Ladder + schedule: [[2026-10-29 GYM ARC Master plan - one ladder]]
+**Newest layer (29 Oct, research loop):** [[2026-10-29 GYM ARC The whole game plan (research loop)]] adds Kids & Select, the first 3 minutes, Run Cards, Power Hour, rested gains, notifications, safety/data/policy, and the schedule to February. Where they differ, that note wins.
 
 Owner, 29 Oct: "use ALL the research since the start and decide what to do for everything in the game: current, future, past, features, removal, add, change, music, sounds, VFX, everything."
 Built from: the Roblox Playbook (rules, making games better, craft deep dive, updates/storefront/analytics, 24 research notes), [[Playbook notes - Top games art study (Oct 2026)]], [[Playbook notes - Costly mistakes of big games]], [[2026-10-29 GYM ARC Why players stop grinding - research]], [[2026-10-29 GYM ARC Abilities - research]], [[2026-10-29 GYM ARC Gym genre research]], [[2026-10-29 GYM ARC Hall of Fame - good or bad]], [[2026-10-29 GYM ARC Systems review - training, economy, money, trainers]], and the GYM ARC feature notes.
@@ -15,7 +16,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 ---
 
 ## 0. The rules every decision follows
-1. **One sentence:** "Lift to grow taller, from 4 feet to 8 feet, and enter the Hall of Fame." Height is our hook; nobody else in the gym genre has it.
+1. **One sentence:** "Lift to grow taller, from 4 feet to 7 feet, and enter the Hall of Fame." Height is our hook; nobody else in the gym genre has it.
 2. **Every feature must** make you taller/stronger, let you USE strength, or let you SHOW IT OFF. Otherwise it's hidden or cut.
 3. **First 5 minutes = train → grow → next goal.** About half of new players leave before the first Growth Spurt; that's the #1 problem.
 4. **3-4 new things per ladder step.** No floods, no empty stretches.
@@ -39,7 +40,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Stamina pacing, recovering, shake button, treadmills (max stamina) | KEEP | Tuned 21 Oct; fine |
 | Free auto reps at 40% / Auto Rep pass 100% | KEEP | Fair, standard |
 | PUMPED / BIG REP | KEEP | Good "juice" moments |
-| Muscle of the Day, rush hour, workout together +10% | KEEP (quiet) | Small daily reasons; social nudge |
+| Muscle of the Day, workout together +10% (rush hour REMOVED, see 21b; weekly Power Hour instead) | KEEP (quiet) | Small daily reasons; social nudge |
 | EXP numbers "+1.2K" | KEEP | Big numbers feel good (genre) |
 
 ## 2. Progression (full table in the master plan)
@@ -50,11 +51,11 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Alter skins tiers 1-3 | KEEP; review Stone skins on max bodies (fur look) |
 | Alters 16-20 (Gem) | ADD in January; 21-30 later |
 | Hall of Fame at Alter 15 | KEEP + fixes (run 2 x2 EXP from Spurt 3, peak height kept, no cheater statues, analytics); preview at Alter 10; Plan B (no reset) if entered players quit (prompt 95) |
-| 2nd+ Hall of Fame (star 2, 3...) | ADD a STAR TRACK: each run faster (8 h → 3 h → ... → 1 h floor), something visible every star, pick 1 of 3 star perks from star 2, star-only trainers/gear/champions, fastest-run board, Alters 16+ open after 15 so entering is a free choice (prompt 101) |
+| 2nd+ Hall of Fame (star 2, 3...) | ADD a STAR TRACK: each run faster (8 h → 3 h → ... → 1 h floor), something visible every star, 1 Legacy card kept per star (Run Cards, prompt 105; replaces star perks), star-only trainers/gear/champions, fastest-run board, Alters 16+ open after 15 so entering is a free choice (prompt 101) |
 | Champion Ladder (rivals + legends) | ADD (prompt 92) |
 | Strongman Feats | ADD 3 first (Power Jump, Ground Stomp, Iron Grip Throw), 3 more as alter rewards (prompt 93) |
 | Strength objects ("NEEDS X STRENGTH") + server crown | ADD (prompt 93) |
-| Skill tree (upgrades, aura, gear, feats branches) | ADD at Spurt 3 (prompt 94) |
+| Skill tree | CANCELLED (see cut list 21b) |
 | Progression Road + Future You | ADD (prompt 91) |
 | Collection book (trainers, auras, titles, alters, champions) | ADD in January |
 
@@ -64,7 +65,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Loading screen with SKIP at 5 s, world load capped | KEEP | Playbook rule |
 | Cinematic menu + PLAY | KEEP, but PLAY must be first thing tappable in <2 s | Every second before play bleeds players |
 | Tutorial | CHANGE: only train → grow → next goal; remove the skate tip; Dante "this could be you" moment (no longer total) | Funnel: half leave before the first spurt |
-| First spurt ~4 min, 2x new player boost, first-rep reward, 750 coins | KEEP | Already tuned |
+| First spurt ~4 min, 2x new player boost, first-rep reward, 750 coins | CHANGE: first spurt ~2 min, bar starts 20% full, 4-step tutorial (prompt 106) | Bounce windows <60 s and 61-180 s count against us |
 | Genetics on join | KEEP OFF (start x1.00); genetics opens at Spurt 4 | Less to understand in minute 1 |
 | Popups in the first 5 min (shop, offers, starter pack) | KEEP OFF | Playbook: no offers in the tutorial |
 | **Default look: shirtless** | CHANGE: **new players start in the white tank top** (MINE / shirtless stays a choice) | Owner's account was hit once over a muscle-body image; thumbnails/video show clothed bodies; Kids & Select rating; looks like our thumbnails |
@@ -132,7 +133,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Profiles, photo mode, mirror before/after card | KEEP |
 | Server crown (strongest in server) | ADD (prompt 93) |
 | Friend boost, invites (both get rewards) | KEEP |
-| Court competitions / basketball | HIDE until Alter 1 (side game) |
+| Court competitions / basketball | REMOVED (cut list 21b) |
 
 ## 9. World
 | Item | Decision |
@@ -140,7 +141,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Town hub, Starter / Beach / Pro / Powerlifting gyms, Strongman Yard | KEEP |
 | Golden Era Gym | ADD at Alter 8 (prompt 98) |
 | Secret rooftop gym | ADD at Alter 7 with Power Jump (prompt 93) |
-| Champion Arena | ADD in January (Alter 12) |
+| Champion Arena | CANCELLED (cut list 21b) |
 | Garage Gym (old plan) | REMOVE from the plan (no slot on the ladder) |
 | NPC regulars, Dante, Coach Dex, Plates the cat | KEEP |
 | Rivals + legends | CHANGE into the Champion Ladder |
@@ -223,7 +224,7 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 | Icon | CHANGE: the giant's confident face + flexed gold arm, flat bright blue, no text, clothed (height/face rule from the art study); event frame for events |
 | Thumbnails | CHANGE: one template (tiny shocked player left, giant right breaking the top, one number/word, blue sky, gold glow); swap one thing per update; 3-5 in Thumbnail Personalization 7+ days |
 | Gameplay video | KEEP the 30 s cut (first in the gallery); re-record after big visual updates |
-| Description | CHANGE: first line = "Lift to grow taller, from 4 feet to 8 feet, and enter the Hall of Fame!" then how to play, features, codes |
+| Description | CHANGE: first line = "Lift to grow taller, from 4 feet to 7 feet, and enter the Hall of Fame!" then how to play, features, codes |
 | Genre / maturity / Kids & Select | DO (owner): Simulation genre, full questionnaire (Minimal/Mild), ID + 2-Step, Kids & Select trial |
 
 ## 18. Live ops and community
@@ -259,6 +260,21 @@ Built from: the Roblox Playbook (rules, making games better, craft deep dive, up
 - HIDE: basketball court (until Alter 1), skate guide (until Spurt 2), genetics/crews/auras/gear until their ladder step (existing players keep access).
 - REMOVE: old dead monetization entries (Server Boost, Gene Lock, Iron Lungs, Fast Recovery, Shake Fridge), the Garage Gym from the plan, the skate tip from the tutorial, the screams (already), the 6 separate boost kinds (merged).
 - KEEP REMOVED: smoothie stands, apparel shop, wardrobe tops, mirror reflection, roll server announcements, Skip Growth Cooldown.
+
+
+## 21b. CUT LIST (owner 29 Oct: "we can remove some features if the game has too much")
+Filter: does it make you taller/stronger, let you USE strength, or SHOW IT OFF? Does a kid need it? Research: too many systems = 30-second exits and Grow a Garden's "too complex now"; presentation matters more than count, but every extra system costs UI, guides, sounds, tests and performance.
+| Cut | What happens | Why |
+|---|---|---|
+| **Skill tree** (planned, prompt 94) | CANCELLED. Gear opens on the gym ladder, feats on the Growth Spurt ladder, auras at the Aura Altar. The "Current → New" equip preview moves to prompt 102/99 | A 5th power layer (with trainers, auras, gear, boosts, genetics, alters, stars) that duplicates them |
+| **Basketball court + court competitions** | REMOVED (moved to ServerStorage, not deleted); COURT KING title owners keep the title | Off-theme, its own UI/sounds/guides, competes with the gym |
+| **Rush hour** (2x coins 3 min every 30 min) | REMOVED | Another pill/multiplier; fixed-value economy is simpler without it |
+| **Membership card** (Bronze-Diamond by reps) | REMOVED; "lifetime reps" stays as a profile stat | Duplicates LVL, titles, stars |
+| **Coconut Stand** | REMOVED with the boost merge (prompt 97); owned Coconut Water converts to Stamina | 3rd shop for one item |
+| **Aura colour purchases** (STYLE) | STOP SELLING; owners keep them working | Clashes with aura rarities (prompt 102) |
+| **Champion Arena** (planned) | CANCELLED | Golden Era Gym + Hall of Fame + rooftop are enough gyms |
+| Dead monetization entries | REMOVE (prompt 99) | Confusing config |
+**Kept on purpose:** skateboard (cheap fun travel, coin cosmetics), photo mode, mirror before/after (shows "who you became"), spotting, crews, re-racking, Plates the cat, Muscle of the Day, genetics (opens at Spurt 4), titles, day/night, codes.
 
 ## 22. Other games
 - **SPEED ARC:** paused (owner, 29 Oct). Resume at prompts 12-13 only after GYM ARC's D1 reaches ~8%+.

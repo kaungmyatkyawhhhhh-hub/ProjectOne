@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, simplify]
-status: todo (19 Dec)
+status: todo (16 Jan, with 99)
 ---
 # 97 Boosts merged into 3
 

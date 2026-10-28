@@ -32,7 +32,7 @@ Order changed to put the things that move retention numbers first and push big b
 | Still playing at 5 min | 33% | 40%+ |
 | Come back day 2 (D1) | ~4% | 6%+ and rising |
 | Session length | ? | rising |
-- **Working →** continue the plan (98 Golden Era, 92 Ladder, 93 Feats, 94 Skill tree...), bigger ad budget from the brother (deal option A), Winter Lifts in December.
+- **Working →** continue the plan (the schedule in [[2026-10-29 GYM ARC The whole game plan (research loop)]]: 96+105, 107, 98, 92, 93...), bigger ad budget from the brother (deal option A), Winter Lifts in December.
 - **Not working →** don't build big things. Look at the step funnel, fix the ONE worst step, change the thumbnail/icon, run one more small test (Gate 2, ~5 Dec).
 
 ## Gate 2 (~5-6 Dec)
@@ -46,4 +46,4 @@ Order changed to put the things that move retention numbers first and push big b
 - No long silence: even in maintenance, something small every week.
 
 ## Why this order
-Every big feature (Golden Era Gym, Ladder, Feats, Skill tree) only helps players who already stay past minute 5 and come back. If the top of the funnel doesn't improve, those builds are wasted weeks. If it does, they're what keeps players for months.
+Every big feature (Golden Era Gym, Ladder, Feats, Run Cards) only helps players who already stay past minute 5 and come back. If the top of the funnel doesn't improve, those builds are wasted weeks. If it does, they're what keeps players for months.

@@ -67,3 +67,11 @@ Back to [[00 Roblox Playbook]]. Short, must-follow version of the three Playbook
 - Weekly: D1/D7, first-session 5-minute retention, onboarding funnel, session time, payer %, errors, FPS/crashes by version. Compare to "similar experiences" benchmarks (need 100+ DAU).
 - Real benchmarks (big games, median): D1 10.3%, D7 1.6%, sessions 9.8 min, 3.8% payers. Top 1%: D1 22%, D7 9%.
 - Small games are noisy: read weekly cohorts, not single days. Fix ONE biggest leak per update. No ads until D1 is ~10%+ and 5-minute retention ~45%+.
+
+## 11. Platform rules added 29 Oct 2026 ([[Playbook notes - Whole-game research (Oct 2026)]])
+- **Kids & Select:** a game only reaches under-16s if the owner is ID-verified + 2-Step + Plus (2 months) or the refundable 1,000 R$ fee, and the game gets 250 engaged plays from age-checked 16+ players in 60 days. Check Creator Hub > Audience Reach before launching any kids' game.
+- Ranking reads day 1, days 2-7 and days 8-28; quits under 60 s and 61-180 s count against you; co-play days and spending count too. Needs at least one custom thumbnail.
+- Experience Notifications only reach opted-in 13+; build come-back hooks inside the game.
+- Paid random items (including things bought with Robux-bought currency): an "Odds" button with numbers summing to 100% + PolicyService alternative.
+- Saves: a version number, forward-safe loading, never roll a place back past a save-version bump; handle Right to Erasure requests.
+- Max ~2 prompts per weekly update and one no-release week a month (a solo owner must test everything).

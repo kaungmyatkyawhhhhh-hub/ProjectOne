@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, sound, music, vfx]
-status: todo (26 Dec)
+status: todo (9 Jan; Audio API migration here, not in December)
 ---
 # 100 Sound, music and VFX polish
 

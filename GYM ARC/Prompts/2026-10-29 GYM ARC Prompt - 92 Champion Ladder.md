@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, retention]
-status: todo (28 Nov)
+status: todo (12 Dec)
 ---
 # 92 Champion Ladder ("become THAT person")
 

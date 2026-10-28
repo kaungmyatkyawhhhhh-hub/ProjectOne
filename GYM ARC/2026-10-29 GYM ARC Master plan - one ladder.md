@@ -8,7 +8,7 @@ status: agreed 29 Oct (decisions below)
 Back to [[00 GYM ARC Home|GYM ARC Home]] · Built from: [[2026-10-29 GYM ARC Why players stop grinding - research]], [[2026-10-29 GYM ARC Abilities - research]], [[2026-10-29 GYM ARC Gym genre research]], [[2026-10-29 GYM ARC Hall of Fame - good or bad]], [[Playbook notes - Costly mistakes of big games]]
 
 ## The idea in one sentence
-**"Lift to grow taller, from 4 feet to 8 feet, and enter the Hall of Fame."** Every feature (old and new) hangs on that one ladder, and each step of the ladder unlocks 1-2 things. Nothing is deleted; things are just shown at the right time.
+**"Lift to grow taller, from 4 feet to 7 feet, and enter the Hall of Fame."** (7 feet since 29 Oct: 7'0" is the real top until more alters exist.) **** Every feature (old and new) hangs on that one ladder, and each step of the ladder unlocks 1-2 things. Nothing is deleted; things are just shown at the right time.
 
 ## Decisions (29 Oct, owner + research)
 | Question | Decision | Why (research) |
@@ -21,11 +21,12 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Built from: [[2026-10-29 GYM ARC Why
 | Money / ads | No ad money until D1 ~10% and 5-min ~45%. Brother's first test $20-50 after 7 Nov; deal option A | Playbook rule; Break A Bed spent 12K Robux on ads |
 
 ## The ladder (who you become → what opens)
+(First draft: the **Full feature list** table below is the final version where they differ.)
 | Step | You become | Opens (old = ●, new = ★) | Main goal shown |
 |---|---|---|---|
-| **Start (0-5 min)** | 4'0" | ● Machines, ● Shop, ★ Future You card | First Growth Spurt (~4 min) |
+| **Start (0-5 min)** | 4'0" | ● Machines, ● Shop, ★ Future You card | First Growth Spurt (~2 min after prompt 106) |
 | **Spurt 1** | 4'4" | ● Beach Gym + posing shows, ★ Power Jump | "Next: Trainers" |
-| **Spurt 2** | 4'8" | ● Trainers (free roll), ● Arm wrestling, ★ Champion Ladder (first 3: Benny, Coral...), ★ Skill tree (first points) | Next champion + Spurt 3 |
+| **Spurt 2** | 4'8" | ● Trainers (free roll), ● Arm wrestling, ★ Champion Ladder (first 3: Benny, Coral...) | Next champion + Spurt 3 |
 | **Spurt 3** | 5'0" | ● Pro Gym, ● Genetics, ★ Ground Stomp | Pro Gym champion (Dante) |
 | **Spurt 4** | 5'4" | ● National Show, ● Crews, ★ Iron Grip Throw + first "NEEDS X STRENGTH" objects | Lift the plaza boulder |
 | **Spurt 5** | 5'8" | ● Powerlifting Gym, ★ Sprint Charge, ★ Server crown | Powerlifting champion |
@@ -37,17 +38,17 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Built from: [[2026-10-29 GYM ARC Why
 Always on (quiet, small UI): daily rewards, quests, streaks, codes, titles, leaderboards, profiles, photo mode, settings, skate board (fun movement, no tutorial step).
 
 ## Full feature list, Start → Alter 15 (decided 29 Oct)
-● = in the game today (some moved), ★ = new. Rule: **3-4 new things per step**, never a flood. Every Growth Spurt and alter from Spurt 2 also gives +1 skill point.
+● = in the game today (some moved), ★ = new. Rule: **3-4 new things per step**, never a flood. (Skill tree cancelled 29 Oct: see the cut list in the decisions note.)
 | Step | Height | Opens |
 |---|---|---|
 | Start | 4'0" | ● Starter Gym machines + dumbbells, ● Shop, ● Stats + muscles panels, ● daily rewards / streak / quests, ● skateboard (no tutorial tip), ● Benny (first champion), ★ Future You card |
 | Spurt 1 | 4'4" | ● Beach Gym + poses + Local posing shows, ● Trainers (free first roll), ● Inventory |
 | Spurt 2 | 4'8" | ● Arm wrestling + Regional Show, ★ Champion Ladder (Coral), ★ Power Jump |
-| Spurt 3 | 5'0" | ● Pro Gym (+10%), ★ Skill tree (opens ● Gear), ★ **Aura Altar** (opens ● Auras), ★ champion Dante |
+| Spurt 3 | 5'0" | ● Pro Gym (+10%) + ● Pro gear, ★ **Aura Altar** (opens ● Auras), ★ champion Dante |
 | Spurt 4 | 5'4" | ● National Show, ● Genetics, ★ Ground Stomp |
 | Spurt 5 | 5'8" | ● Powerlifting Gym (+20%), ★ Iron Grip Throw + "NEEDS X STRENGTH" objects, ● Crews |
 | Spurt 6 | 6'0" | ● Body Alters, ★ "Fully grown, now TRANSFORM" moment, ★ Server crown |
-| Alter 1 Pumped | 6'1" | ★ Sprint Charge, ● Basketball court (side game) |
+| Alter 1 Pumped | 6'1" | ★ Sprint Charge, ★ champion |
 | Alter 2 Shredded | 6'2" | ● Strongman Yard + Showdown |
 | Alter 3 Tanned | 6'2" | ★ Yard champion, ★ aura node |
 | Alter 4 Vascular | 6'3" | ★ Hype Roar |
@@ -58,19 +59,19 @@ Always on (quiet, small UI): daily rewards, quests, streaks, codes, titles, lead
 | Alter 9 Marble | 6'7" | ★ "Stone Titan" aura + your statue on the plaza |
 | Alter 10 Obsidian | 6'8" | ● Tier 2 title + aura + DNA, ★ Hall of Fame preview |
 | Alter 11 Bronze | 6'9" | ★ champion |
-| Alter 12 Iron | 6'10" | ★ gear piece (Champion Arena comes here in January) |
+| Alter 12 Iron | 6'10" | ★ gear piece |
 | Alter 13 Steel | 6'10" | ★ champion |
 | Alter 14 Chrome | 6'11" | ★ last champion (top of the ladder) |
 | Alter 15 Gold | 7'0" | ● Tier 3 title + aura + DNA, ● Hall of Fame |
 | Alters 16-20 (January) | to 7'4" | ★ Tier 4 GEM alters (the winter update) |
 Always available: ● visiting legends (they ARE the ladder champions), ● codes, ● leaderboards, ● titles, ● photo mode, ● profiles.
-Moved later (existing players keep access): Genetics (LVL 5 → Spurt 4), Crews (Spurt 1 → Spurt 5), Basketball (→ Alter 1), Auras/Gear (via the skill tree at Spurt 3).
+Moved later (existing players keep access): Genetics (LVL 5 → Spurt 4), Crews (Spurt 1 → Spurt 5), Basketball (→ Alter 1), Auras (Spurt 3: today's auras, the Aura Altar from 2 Jan), Gear (gym ladder). Skill tree, Champion Arena, rush hour and Star Perks are cancelled (29 Oct).
 
 Decisions behind it (29 Oct):
 - Spurt 1 was a flood (5 things); the first spurts now get 3 each and the alters get the extra feats, so the quiet alter phase gets something every alter.
 - Feats: build **3 first** (Power Jump, Ground Stomp, Iron Grip Throw); Sprint Charge, Hype Roar and Flex Shockwave come with the alter rewards.
 - Champions: ~12, almost all reused (Benny, Coral, Dante + the 8 legends), so only 1-2 new characters.
-- New builds by priority: Golden Era Gym (Alter 8, where players quit) first; the rooftop gym is small (goes with the feats); Champion Arena waits for January.
+- New builds by priority: Golden Era Gym (Alter 8, where players quit) first; the rooftop gym is small (goes with the feats); Champion Arena cancelled (29 Oct).
 - Alters 16-20 (Tier 4 Gem) are the January winter update, so Alter-15 players who don't want to reset still have more to do.
 
 ## Old features: what changes
@@ -81,7 +82,7 @@ Decisions behind it (29 Oct):
 | Skate park / skateboard | Stays, no guide until Spurt 2. |
 | Basketball court | Hidden until Growth Spurt 4 (no guides/HUD before). |
 | Boosts (shakes, coconut water, creatine, protein, supplements...) | Merge into 3: Stamina, Gains, Luck (prompt 97), owned items converted. |
-| Auras + gear | Keep their stats; unlocked through the skill tree (prompt 94), equip menu shows Current → New. |
+| Auras + gear | Keep their stats; auras at Spurt 3 (Aura Altar from 2 Jan), gear on the gym ladder; equip menu shows Current → New (prompt 102). |
 | Looks + Alters | Unchanged (looks no stats). Shown on the Progression Road. |
 | Titles, coins | Become the bonus, not the main reward. |
 
@@ -116,7 +117,7 @@ Fix: **something every alter, height every alter, a big reward exactly at Alter 
 | **8 Granite** | 6'6" | **★ Golden Era Gym opens** (the planned 70s gym, heavier tiers, +gains) |
 | **9 Marble** | 6'7" | **★ "Stone Titan" aura + statue on the plaza board** |
 | 10 Obsidian | 6'8" | ● tier title, ★ Hall of Fame preview (walk in, see the stars, can't enter yet) |
-| 11-14 Metal | 6'9"-6'11" | ★ a champion or gear piece each, ★ Champion Arena at 12 |
+| 11-14 Metal | 6'9"-6'11" | ★ a champion or gear piece each |
 | 15 Gold | 7'0" | ● Hall of Fame |
 - Also: keep alter goals FLAT inside a tier (no +25 each), so they feel faster with the +15% bonus; Future You shows the NEXT alter's skin on you; the HUD always shows the next big thing ("Golden Era Gym in 2 alters").
 - Decided 29 Oct: height +0.8" per alter (same 7'0" at Alter 15); Hall of Fame stays at 15 for now (see Decisions).
@@ -137,11 +138,13 @@ Fix (added to prompt 96, and it moves UP in the plan):
 - **Count the drop per step:** some players leave at every step in every game; what matters is a step that loses MORE than the others. Build a step funnel (players who reached Spurt 1..6, Alter 1..15) and fix the biggest drop first.
 
 ## Weekly plan (Saturday 15:00 UTC = 21:30 Myanmar)
+**Updated 29 Oct (research loop): the current schedule is in [[2026-10-29 GYM ARC The whole game plan (research loop)]]** (adds 105 Run Cards, 106 First 3 minutes, 107 Come-back hooks, 108 Safety pass; Aura Altar 19 Dec, polish 26 Dec, store 2 Jan, boosts 9 Jan, Gem alters 23 Jan). The table below is the earlier version.
+
 | Saturday | Update | Prompts |
 |---|---|---|
 | before 31 Oct | Hall of Fame fixes + fairness checks | **95** |
 | 31 Oct | Hall of Fame launch | (90 + 88 done) |
-| 7 Nov | Future You, Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default + new thumbnail/icon test + fixed coin values | **91**, 103 |
+| 7 Nov | Future You, Road, unlock map, short tutorial, basketball hidden, GAINS number + MAXED, tank top default + new thumbnail/icon test + fixed coin values + cuts (court, rush hour, membership card) | **91**, 103, 104 |
 | 8-14 Nov | Small ad test ($20-50) to get enough new players to measure | - |
 | 14 Nov | Alter phase fix (quick parts first) + stronger aura visuals | 96, 102 part A |
 | 21 Nov | **GATE 1**: read the numbers ([[2026-10-29 GYM ARC Rescue plan - if the game is dying]]) + star track if anyone reached star 2 | 101 |
@@ -150,11 +153,10 @@ If Gate 1 is "working", continue:
 | (with 98 or the next week) | Aura Altar + rarities | 102 part B |
 | 5 Dec | Champion Ladder | 92 |
 | 12 Dec | Strongman Feats (3), strength objects, rooftop gym, crown + Winter Lifts cosmetic + code | 93 |
-| 19 Dec | Skill tree | 94 |
 | 26 Dec | Boosts merged into 3 | 97 |
 | 2 Jan | Sound, music and VFX polish | 100 |
 | 9 Jan | Economy and store pass | 99 |
-| Jan-Feb | Gem alters 16-20, Champion Arena, Collection book, real-player arm wrestling | later |
+| Jan-Feb | Gem alters 16-20, Collection book, real-player arm wrestling | later |
 If Gate 1 is "not working": fix the worst funnel step + new thumbnail, Gate 2 ~5 Dec; still not working = maintenance mode + next game (see the rescue plan).
 
 Everything decided for every system: [[2026-10-29 GYM ARC Every decision - the whole game]].

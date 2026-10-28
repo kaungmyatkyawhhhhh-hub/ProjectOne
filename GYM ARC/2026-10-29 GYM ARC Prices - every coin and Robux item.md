@@ -76,3 +76,44 @@ Total of all passes: ~1,393 R$ (fine for a kids' game).
 - Prompt 98: Elite (Powerlifting) and Champion (Golden Era) gear prices.
 - Prompt 97: merged boosts and their prices.
 - Prompt 99: Legend gear, VIP lounge + chest, store front, aura card numbers.
+
+
+## UPDATE 29 Oct (owner): FIXED coin values, no "minutes of coins"
+Owner: "make the coins fixed values, not like 2 minutes, because it's gonna confuse players." Decided: **every price and reward is one fixed number that never changes.** Players get richer because they EARN faster as they grow (rep coins by weight tier, gym bonuses, +5% per alter, +10% per star), not because prices move. This is how most simulators do it (eggs per zone have fixed prices). Older "minutes" numbers in this note are replaced by this table.
+
+### Prices (fixed)
+| Item | Fixed price |
+|---|---|
+| Trainer roll (Starter agency, until gym pools) | **150** (first roll free) |
+| Trainer rolls in later gym agencies (January) | Beach 400 · Pro 1,000 · Powerlifting 2,500 · Golden Era 6,000 · Hall of Fame 15,000 |
+| Aura spin (Aura Altar) | **500** |
+| Trainer snacks S / M / L | 150 / 500 / 1,500 |
+| Coin boosts at Coach Dex (until the merge) | Protein Shake 100 · Coconut Water 100 · Supplements 300 · Pre-Workout 300 · Creatine 400 · Protein Powder 400 |
+| Boosts after the merge (prompt 97) | Stamina 100 · Gains 400 · Luck 400 |
+| Gear | Basic 750 · Pro 4,000 · Elite 25,000 · Champion 70,000 · Legend 200,000 |
+| DNA token | **25,000** flat (the +10%-per-week rise is removed) |
+| Tank tops, STYLE colours, aura colours, alter tints, coin auras, skate parts | already fixed: keep |
+
+### Rewards (fixed)
+| Reward | Fixed coins |
+|---|---|
+| Login calendar days 1-7 | 100 · 150 · 200 · 300 (+DNA) · 400 · 500 · 1,500 (+DNA) |
+| Daily quest each / all 3 done | 300 / 1,000 |
+| Coach Dex quest chain | a fixed number per quest, rising along the chain (Config) |
+| Posing show 1st / entry | Local 500/50 · Regional 1,500/150 · National 4,000/400 · Open & alter divisions 8,000/800 |
+| Strongman Showdown 1st / 2nd / 3rd / entry | 5,000 / 3,000 / 1,500 / 200 |
+| Arm wrestling win | Rocco 50 · Tess 100 · Big Lou 250 · a player 150 |
+| Champions (ladder) | a fixed number per champion, rising up the ladder |
+| Legends | 500 each |
+| Re-racking a plate / spotting | owner's formula 5 + 1 per LVL (max 405 at LVL 400), kept 29 Oct / 50 |
+| Growth Spurt milestones 25/50/75% | 100 / 200 / 300 × spurt number (shown as the number) |
+| Group gift | 1,000 |
+| Offline coins | stays "what you'd earn": shown as one number "+3,400 coins while you were away" |
+
+### Robux coin packs (fixed)
+| Pack | Robux | Coins | Value |
+|---|---|---|---|
+| Small | 25 | 2,000 | |
+| Medium | 99 | 9,000 | +14% per Robux |
+| Large | 249 | 25,000 | +25% per Robux, BEST VALUE |
+(Replaces the "10 / 45 / 130 minutes" idea above.)

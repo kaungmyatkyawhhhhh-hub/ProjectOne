@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, retention]
-status: todo (12 Dec)
+status: CANCELLED 29 Oct (too many systems; see the cut list). The equip preview (part 2) moved to prompt 102 part B.
 ---
 # 94 Skill tree and equip stat preview
 

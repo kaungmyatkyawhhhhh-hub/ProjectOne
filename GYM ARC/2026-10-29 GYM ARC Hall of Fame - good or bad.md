@@ -52,3 +52,31 @@ Keep the Hall of Fame for Saturday (it's built, opt-in, and it won't hurt new pl
 - [I Built 7 Idle Games in 30 Days (dev.to)](https://dev.to/aguier/i-built-7-idle-games-in-30-days-what-i-learned-about-incremental-design-5d3f): "prestige must feel like acceleration, not punishment"; next run noticeably faster within ~30 s.
 - [Understanding the Player Brain: Loss Avoidance (Bottom Feeder)](https://bottomfeeder.substack.com/p/understanding-the-player-brain-pt): players hate losing things; framing changes how a mechanic feels (WoW "rested" vs fatigue).
 - GYM ARC vault: [[GYM ARC - Hall of Fame]], [[GYM ARC - Body Alters]] (alters ~27 min each, 14-15 longer), analytics (about half leave before the first spurt).
+
+
+## The 2nd, 3rd... Hall of Fame (owner, 29 Oct: "think about their 2nd hall of fame too")
+The risk after star 1: every new run is the SAME content again. Prestige research: later resets must add **new choices and new things**, not just a bigger %, and each run must be **faster** (idlegames.win; "acceleration, not punishment").
+
+**Rules for every star:**
+1. **Each run is faster** (target, tune with tests/pacing): run 1 ~8 h → run 2 ~3 h → run 3 ~2.5 h → run 4 ~2 h → ~1.5 h by star 6 → ~1 h floor by star 10. Never slower than the run before.
+2. **Each star gives something you can SEE**, not only %: a star tag colour, pedestal, aura, Legend Form colour, title.
+3. **Each star (from 2) lets you pick 1 of 3 STAR PERKS** (permanent, mostly quality-of-life, never competition power): auto-claim Growth Spurts, start with Power Jump/feats unlocked, start at a higher spurt, quick transform (skip alter popups), +trainer EXP, keep 1 skill-tree branch. Choices = depth, not a repeat.
+4. **Nothing is re-taught:** no tutorial, no guides, every gym/feature stays open (already true), Road shows only what's new.
+5. **The next star's reward is always shown** (star track on the Hall of Fame screen).
+6. **Alters 16+ (Gem, January) stay open after Alter 15**: entering the Hall of Fame is a choice you can make at Alter 15 or later; entering from a higher alter (e.g. 20) gives a bonus (an extra star perk pick), so nobody has to pick blindly.
+
+| Star | Run time (target) | You get (visible) | Perk / boost |
+|---|---|---|---|
+| 1 | ~3 h for run 2 | Bronze ★ tag, HALL OF FAMER title, statue on a bronze pedestal, free trainer roll | x2 EXP, start at Spurt 3 |
+| 2 | ~2.5 h | Silver ★, bronze star aura, Legend Form colour 1 | Pick 1 of 3 star perks |
+| 3 | ~2 h | Hall of Fame trainer agency (star-only trainer pool), silver pedestal | +coins, perk pick |
+| 4 | ~2 h | Silver star aura, a star-only gear piece | Start at Spurt 4, perk pick |
+| 5 | ~1.5 h | Gold ★, gold pedestal, Legend Form colour 2, title | +coins, perk pick |
+| 6-9 | ~1.5 h | One cosmetic each (pose, statue frame, tag effect) + Hall of Fame champions (star-only ladder) | Perk pick each |
+| 10 | ~1 h | LEGEND title, gold star aura, diamond pedestal, name on the permanent LEGENDS wall | Big bonus (as now) |
+| 11+ | ~1 h | A cosmetic every 5 stars | Small % per star (as now) |
+
+**Status for repeat players:** the stars board (exists), a weekly **fastest run** board (speed-run race for star players), and the LEGENDS wall.
+**Measure:** run time per star, how many start run 3 after run 2, days played per star. If players stop after star 2-3, add more perk choices before adding more %.
+Prompt: [[2026-10-29 GYM ARC Prompt - 101 Hall of Fame star track]].
+**Update 29 Oct:** the Star Perks become **Legacy cards** from the Run Cards system ([[2026-10-29 GYM ARC Prompt - 105 Run Cards]]): run cards reset at every Hall of Fame (a new life, like Deepwoken), and each star keeps 1 card for good. Quality-of-life perks become fixed star rewards on the track.
