@@ -92,8 +92,8 @@ local buttonAction = nil
 local function showCard(text, sub, btnText, action, corner)
 	if corner then
 		card.AnchorPoint = Vector2.new(1, 0)
-		card.Position = UDim2.new(1, -14, 0, 112)
-		card.Size = UDim2.fromOffset(330, 74)
+		card.Position = UDim2.new(1, -14, 0, 142) -- under the DAILY row and clear of the wall strip
+		card.Size = UDim2.fromOffset(300, 74)
 	else
 		card.AnchorPoint = Vector2.new(0.5, 1)
 		card.Position = UDim2.new(0.5, 0, 1, -82)

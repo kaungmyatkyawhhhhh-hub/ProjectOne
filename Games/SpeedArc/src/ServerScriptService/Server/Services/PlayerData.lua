@@ -230,9 +230,11 @@ local function onPlayerAdded(player)
 			data.League = tl
 			data.BestLeague = math.max(data.BestLeague or 1, tl)
 		end
-		local tw = workspace:GetAttribute("TestLeagueWins")
+		-- TestWalls = n: walls already smashed in your league (prompt 11; was TestLeagueWins)
+		local tw = workspace:GetAttribute("TestWalls")
 		if type(tw) == "number" then
-			data.LeagueWins = tw
+			data.Walls = data.Walls or {}
+			data.Walls[tostring(data.League or 1)] = tw
 		end
 		local tt = workspace:GetAttribute("TestTutStep")
 		if type(tt) == "number" then
