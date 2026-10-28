@@ -948,7 +948,8 @@ do
 	block(m, "FloorTrim", Vector3.new(0.3, 0.45, 24.4), Vector3.new(x0 + 8.1, 0.22, zc), Palette.Gold)
 	local shell = meshTemplate("ShoeShop_Shell")
 	if shell then
-		mesh("ShoeShop_Shell", m, CFrame.new(x0, 0, zc), { Offset = Vector3.new(-8 + shell.Size.X / 2, 0, 0) })
+		-- the imported shell came in turned round (open side at its -X): turn it back so it opens to the front
+		mesh("ShoeShop_Shell", m, CFrame.new(x0, 0, zc) * CFrame.Angles(0, math.pi, 0), { Offset = Vector3.new(8 - shell.Size.X / 2, 0, 0) })
 	end
 	if not shell then
 	block(m, "BackWall", Vector3.new(1, 12, 24), Vector3.new(x0 - 7.5, 6, zc), Palette.Carbon)
@@ -1000,7 +1001,7 @@ do
 	block(m, "Base", Vector3.new(10, 0.5, 14), Vector3.new(x0, 0.25, zc), Palette.Graphite)
 	local shell = meshTemplate("TrailBooth_Shell")
 	if shell then
-		mesh("TrailBooth_Shell", m, CFrame.new(x0, 0, zc), { Offset = Vector3.new(-5.0 + shell.Size.X / 2, 0, 0) })
+		mesh("TrailBooth_Shell", m, CFrame.new(x0, 0, zc) * CFrame.Angles(0, math.pi, 0), { Offset = Vector3.new(5.0 - shell.Size.X / 2, 0, 0) }) -- turned round too
 	end
 	if not shell then
 	block(m, "Counter", Vector3.new(2.2, 3.4, 12), Vector3.new(x0 + 3.6, 2.2, zc), Palette.Carbon)
