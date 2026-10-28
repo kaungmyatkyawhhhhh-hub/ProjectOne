@@ -85,15 +85,9 @@ def tee():
         K.cutter_cyl(0.32, 0.7, (0, d / 2, h + 0.12), rot=(math.radians(90), 0, 0), verts=16),
     ])
     parts = [body]
-    # short sleeves: open tubes angled down off the shoulders
-    for s in (-1, 1):
-        sl = K.cyl("sleeve", 0.42, 0.42, (s * (w / 2 + 0.14), 0, h - 0.42), CLOTH, verts=12, bev=0.04,
-                   rot=(0, math.radians(90 + s * 18), 0), cutters=[
-                       K.cutter_cyl(0.36, 0.6, (s * (w / 2 + 0.14), 0, h - 0.42), rot=(0, math.radians(90 + s * 18), 0), verts=12)])
-        parts.append(sl)
-        parts.append(K.cyl("cuff", 0.44, 0.07, (s * (w / 2 + 0.33), 0, h - 0.48), SEAM, verts=12, bev=0.02,
-                           rot=(0, math.radians(90 + s * 18), 0), cutters=[
-                               K.cutter_cyl(0.37, 0.3, (s * (w / 2 + 0.33), 0, h - 0.48), rot=(0, math.radians(90 + s * 18), 0), verts=12)]))
+    # shoulder caps instead of sleeves (a rigid sleeve would stick out while the arms swing)
+    for sx in (-1, 1):
+        parts.append(K.box("cap", (0.5, d + 0.06, 0.2), (sx * (w / 2 - 0.2), 0, h - 0.06), SEAM, bev=0.08, seg=2))
     # crew collar ring
     parts.append(K.cyl("collar", 0.4, 0.08, (0, -0.02, h - 0.02), SEAM, verts=16, bev=0.02, cutters=[
         K.cutter_cyl(0.33, 0.3, (0, -0.02, h - 0.02), verts=16)]))
@@ -111,10 +105,8 @@ def zip_top():
         K.cutter_box((w - 0.12, d - 0.12, h + 1), (0, 0, h / 2)),
     ])
     parts = [body]
-    for s in (-1, 1):
-        parts.append(K.cyl("sleeve", 0.44, 0.46, (s * (w / 2 + 0.16), 0, h - 0.44), CLOTH, verts=16, bev=0.04,
-                           rot=(0, math.radians(90 + s * 14), 0), cutters=[
-                               K.cutter_cyl(0.38, 0.7, (s * (w / 2 + 0.16), 0, h - 0.44), rot=(0, math.radians(90 + s * 14), 0), verts=16)]))
+    for sx in (-1, 1):
+        parts.append(K.box("cap", (0.52, d + 0.06, 0.22), (sx * (w / 2 - 0.21), 0, h - 0.07), SEAM, bev=0.08, seg=2))
     # stand-up collar, a zip down the middle with a pull, two pocket seams, a ribbed hem
     parts.append(K.cyl("collar", 0.46, 0.26, (0, 0, h + 0.08), SEAM, verts=24, bev=0.03, r2=0.42, cutters=[
         K.cutter_cyl(0.38, 0.6, (0, 0, h + 0.08), verts=24)]))

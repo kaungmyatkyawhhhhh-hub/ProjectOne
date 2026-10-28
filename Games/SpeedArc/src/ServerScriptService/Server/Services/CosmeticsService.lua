@@ -30,19 +30,19 @@ for _, b in Cosmetics.Bib.Colors do
 end
 
 -- how each mesh sits on the body: part it rides on, size as a multiple of that part, offset (x part size)
-local FIT = {
-	Kit_Singlet = { On = "UpperTorso", Size = Vector3.new(1.07, 1.03, 1.22), Offset = Vector3.new(0, -0.01, 0) },
-	Kit_Tee = { On = "UpperTorso", Size = Vector3.new(1.3, 1.04, 1.24), Offset = Vector3.new(0, 0.02, 0) },
-	Kit_ZipTop = { On = "UpperTorso", Size = Vector3.new(1.32, 1.08, 1.28), Offset = Vector3.new(0, 0.03, 0) },
-	Kit_Shorts = { On = "LowerTorso", Size = Vector3.new(1.12, 3.0, 1.3), Offset = Vector3.new(0, -0.75, 0) },
-	Kit_SplitShorts = { On = "LowerTorso", Size = Vector3.new(1.1, 2.4, 1.26), Offset = Vector3.new(0, -0.5, 0) },
-	Kit_Tights = { On = "LowerTorso", Size = Vector3.new(1.1, 3.6, 1.28), Offset = Vector3.new(0, -1.0, 0) },
-	Head_Headband = { On = "Head", Size = Vector3.new(1.08, 0.24, 1.08), Offset = Vector3.new(0, 0.18, 0) },
-	Head_Cap = { On = "Head", Size = Vector3.new(1.1, 0.55, 1.45), Offset = Vector3.new(0, 0.42, -0.14) },
-	Head_Visor = { On = "Head", Size = Vector3.new(1.1, 0.3, 1.4), Offset = Vector3.new(0, 0.22, -0.14) },
-	Head_Shades = { On = "Head", Size = Vector3.new(1.04, 0.24, 0.5), Offset = Vector3.new(0, 0.08, -0.36) },
-	Head_BucketHat = { On = "Head", Size = Vector3.new(1.45, 0.6, 1.45), Offset = Vector3.new(0, 0.45, 0) },
-	Head_Beanie = { On = "Head", Size = Vector3.new(1.08, 0.62, 1.08), Offset = Vector3.new(0, 0.36, 0) },
+local FIT = { -- sizes match the Blender kit (blender/locker_kit.py) proportions
+	Kit_Singlet = { On = "UpperTorso", Size = Vector3.new(1.085, 1.01, 1.255), Offset = Vector3.new(0, 0, 0) },
+	Kit_Tee = { On = "UpperTorso", Size = Vector3.new(1.1, 1.05, 1.305), Offset = Vector3.new(0, 0.01, 0) },
+	Kit_ZipTop = { On = "UpperTorso", Size = Vector3.new(1.11, 1.18, 1.37), Offset = Vector3.new(0, 0.07, 0) },
+	Kit_Shorts = { On = "LowerTorso", Size = Vector3.new(1.135, 3.0, 1.385), Offset = Vector3.new(0, -0.85, 0) },
+	Kit_SplitShorts = { On = "LowerTorso", Size = Vector3.new(1.135, 2.4, 1.385), Offset = Vector3.new(0, -0.6, 0) },
+	Kit_Tights = { On = "LowerTorso", Size = Vector3.new(1.12, 3.6, 1.325), Offset = Vector3.new(0, -1.15, 0) },
+	Head_Headband = { On = "Head", Size = Vector3.new(1.1, 0.24, 1.12), Offset = Vector3.new(0, 0.18, 0) },
+	Head_Cap = { On = "Head", Size = Vector3.new(1.1, 0.62, 1.48), Offset = Vector3.new(0, 0.33, -0.24) },
+	Head_Visor = { On = "Head", Size = Vector3.new(1.08, 0.21, 1.41), Offset = Vector3.new(0, 0.2, -0.22) },
+	Head_Shades = { On = "Head", Size = Vector3.new(1.04, 0.24, 0.62), Offset = Vector3.new(0, 0.08, -0.3) },
+	Head_BucketHat = { On = "Head", Size = Vector3.new(1.44, 0.49, 1.44), Offset = Vector3.new(0, 0.42, 0) },
+	Head_Beanie = { On = "Head", Size = Vector3.new(1.12, 0.89, 1.12), Offset = Vector3.new(0, 0.4, 0) },
 }
 
 local function priceOf(item, data)
