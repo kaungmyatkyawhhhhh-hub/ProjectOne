@@ -3,7 +3,7 @@
 This folder is ONLY for SPEED ARC, a Roblox running simulator. It holds the same rules as [[SPEED ARC - Quick Rules]], so later sessions only need this file plus the notes the prompt names.
 
 ## Studio
-- Two Studios may be open. Only ever work in the Studio named "SPEED ARC" (placeId 134701616695802, old copy in the GYM ARC group; the new copy goes to the group **P&L Studios XP, id 947215423** - prompt 13).
+- Two Studios may be open. Only ever work in the Studio named "SPEED ARC". **Since 28 Oct (prompt 13): placeId 83449409428509, experience 10773471333, owned by the group P&L Studios XP (947215423).** The old copy (placeId 134701616695802, experience 10773332055, in the GYM ARC group 33151111) is private: never publish to it. All assets must belong to group 947215423.
 - Call `list_roblox_studios` before the first Studio edit each session and pick SPEED ARC by name. If it has no name, stop and ask.
 - Never open, change or publish the GYM ARC place (placeId 80031260599632). Never write in the vault's GYM ARC folder.
 

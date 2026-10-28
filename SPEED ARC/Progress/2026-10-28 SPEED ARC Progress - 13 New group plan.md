@@ -106,4 +106,26 @@ Either way the **images and meshes** are re-uploaded into the new group (your ru
 | 2x Speed 15 min | 25 | 3723179279 | 3723249845 |
 | Starter Pack | 49 | 3723179367 | 3723249962 |
 
-- Still to do: the 3 notification strings (the browser extension disconnected on that page), the uploads (3 UI sheets, 8 clothing images: owner approves first), the meshes (owner, Bulk Import), sync + Studio purchase test, old experience to Private.
+
+## 28 Oct: assets moved (all checked with Roblox)
+- **Notification strings** made in the new experience: `daily_ready`, `new_league`, `weekly_top`.
+- **Images uploaded to P&L Studios XP** (owner OK), image ids in `Config/UIArt.lua` / `Config/Cosmetics.lua` / `ServerStorage.ClothingImages`:
+
+| Image | Old id | New image id |
+|---|---|---|
+| ui_buttons | - | 83935751108134 |
+| ui_tiles | - | 131954584345503 |
+| ui_icons | - | 98928878835456 |
+| Shirt SingletBlue | 99631717826184 | 105867826418062 |
+| Shirt TeeGold | 110110801068527 | 128739508239261 |
+| Shirt ZipBlack | 119304957804331 | 132752046580674 |
+| Shirt VipTop | 86834133066485 | 79074603555775 |
+| Pants ShortsBlue | 113958498390803 | 119512359385842 |
+| Pants SplitBlack | 108060921209924 | 134595670047956 |
+| Pants TightsGold | 109385336401252 | 116570593833265 |
+| Pants VipShorts | 93141831322409 | 76176998230693 |
+
+- **Meshes:** the owner bulk-imported the 38 models into the group. They replaced `ServerStorage/Meshes` (same names and sizes, settings copied from the old parts); the old set is kept as `ServerStorage/Meshes_OldGroup_Backup_20261028`. Hub, Park and Stadium rebuilt.
+- **Check:** every pass / product = right name, price, on sale, group 947215423 (13/13). A scan of the whole place: 38 mesh ids owned by the new group; left on the old group: **only the Stadium's far-crowd light fans** (3 meshes from `ServerStorage/MeshesV1_Backup`: needs `Downloads\speed_arc_models\hub\Crowd_Fan_A/B/C.fbx`, the v1 files, imported into the group).
+- **Studio test:** the HUD and Store draw from the uploaded sheets, a coin pack and the VIP pass grant correctly, the Store shows Roblox's prices, the new clothing images load. No console errors.
+- The old experience (10773332055) is already **Private**.
