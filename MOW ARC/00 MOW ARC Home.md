@@ -4,7 +4,7 @@ tags: [mowarc, home]
 # MOW ARC (working title)
 
 A Roblox **incremental** game: mow grass, watch numbers go up, upgrade, REGROW (prestige), unlock new layers. Light on devices, short to build, grows with updates.
-Replaces SPEED ARC (archived 28 Oct, its code is reused).
+> **ON HOLD (owner, 28 Oct): not started.** SPEED ARC gets finished and published first. Nothing here has been built yet.
 
 ## Start here
 - **Quick Rules (the ONLY note every session must read, copied into CLAUDE.md):** [[MOW ARC - Quick Rules]]

@@ -16,7 +16,7 @@ This repo is my Obsidian vault. It syncs to my PC with the Obsidian Git plugin (
 - **Folders:** each game has its own folder; notes go only there. `Archive/` holds old games: read-only.
 - **Roblox Studio (several Studios may be open):**
   - Call `list_roblox_studios` before your first Studio edit each session and pick the Studio of the game you're working on BY NAME. If it has no name, stop and ask me.
-  - GYM ARC = placeId 80031260599632. SPEED ARC (archived, never edit) = placeId 134701616695802. MOW ARC = its own place (see `MOW ARC/CLAUDE.md`).
+  - GYM ARC = placeId 80031260599632. SPEED ARC = placeId 134701616695802 (being moved to a new group, see its prompt 13). MOW ARC = on hold, no place yet.
   - Never touch another game's Studio.
 - **Game UI (permanent rule, GYM ARC; MOW ARC has its own UI kit rule in its folder):**
   - Every new button, window, card, pill and popup MUST use the existing designed UI kit (Theme.Button, Kit.Modal, the existing card/pill styles and their images). Never make a new plain button (coded rectangle + gold gradient + UIStroke). That is a placeholder and I don't accept it.

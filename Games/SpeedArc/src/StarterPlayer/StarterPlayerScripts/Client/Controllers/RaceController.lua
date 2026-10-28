@@ -387,8 +387,9 @@ end
 local PODIUM = { { place = 2, x = -140, h = 82, color = Color3.fromHex("#C9D1DD") }, { place = 1, x = 0, h = 116, color = Color3.fromHex("#FFD23F") }, { place = 3, x = 140, h = 58, color = Color3.fromHex("#E0965A") } }
 
 local function buildPodium(canvas)
-	local pod = UIKit.make("TextButton", { Name = "Podium", Text = "", AutoButtonColor = false, BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.2, Position = UDim2.fromOffset(0, -80), Size = UDim2.new(1, 0, 1, 80), Visible = false, ZIndex = 30, Parent = canvas })
-	UIKit.make("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(1, 0) }), Parent = pod })
+	local pod = UIKit.make("TextButton", { Name = "Podium", Text = "", AutoButtonColor = false, BackgroundColor3 = P.SpeedBlack, BackgroundTransparency = 0.08, Position = UDim2.fromOffset(0, -80), Size = UDim2.new(1, 0, 1, 80), Visible = false, ZIndex = 30, Parent = canvas })
+	-- a soft spotlight from the top so the podium glows
+	UIKit.make("UIGradient", { Rotation = 90, Color = ColorSequence.new(Color3.fromHex("#3557E8"), P.SpeedBlack), Parent = pod })
 	ui.podium = pod
 	ui.podiumContent = UIKit.make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 1, -80), ZIndex = 31, Parent = pod })
 end

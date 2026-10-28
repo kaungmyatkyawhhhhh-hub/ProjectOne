@@ -9,12 +9,15 @@ Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongm
 - **Owner to do:** Starter Pack price (79 R$), VIP 30% OFF pass (209 R$) + its ID, `notify_key` in Creator Hub Secrets.
 - **Last updated:** 2026-10-28
 
-## MOW ARC (Roblox incremental): new, in build
-Mow grass -> GRASS -> upgrades -> REGROW (prestige) -> SEASON. Small launch in ~1 week, grows with updates. Replaces SPEED ARC.
-- **Details:** [[MOW ARC/00 MOW ARC Home]] (all MOW ARC notes go in the `MOW ARC` folder)
-- **Code:** this vault, `Games/MowArc` (copies systems from `Games/SpeedArc`).
-- **Now:** prompt 1 (UI kit mockup first, then the field + upgrades). The UI kit must be approved by the owner before screens are built.
+## SPEED ARC (Roblox running simulator): finishing, then publish
+"+1 SPEED every step": run, smash walls for coins, the last wall = Go Pro to the next world, races every 3 min, shoes / coaches / trails.
+- **Details:** [[SPEED ARC/00 SPEED ARC Home]] (all SPEED ARC notes go in the `SPEED ARC` folder)
+- **Code:** this vault, `Games/SpeedArc`. Studio place "SPEED ARC" (placeId 134701616695802).
+- **Now:** prompts 1-11 done (3 worlds with wall courses, pacing, store with IDs). Next: prompt 12 (bold sporty colours, no pink/pastel; UI as real art, mockup approval first), then prompt 13 (move to a NEW group, owner doesn't want it in the GYM ARC group; re-create passes/products and re-upload assets there) and publish.
 - **Last updated:** 2026-10-28
+
+## MOW ARC (Roblox incremental): on hold
+Idea only, not started: mow grass -> upgrades -> REGROW / SEASON prestige. Notes and 3 prompts ready in [[MOW ARC/00 MOW ARC Home]].
 
 ## City Legends (Roblox game): active
 Night-city driving game: earn money by driving and cutting up traffic, buy cars, level up.
@@ -24,7 +27,6 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **Last updated:** 2026-10-10
 
 ## Archived (not worked on, nothing deleted)
-- **SPEED ARC** (running simulator, archived 28 Oct): built to M6 + a "+1 SPEED" pivot, never published. Its code `Games/SpeedArc` is reused by MOW ARC. Notes: [[Archive/SPEED ARC/00 SPEED ARC Home]].
 - **Break A Bed** (bed-breaking clicker, archived 28 Oct): released as "[🎉 RELEASE] Break a Bed", 12K Robux spent on ads, ~500 Robux a day (mid Oct). Notes: [[Archive/Break A Bed/Project Overview]].
 
 ## Obsidian + Claude setup: active

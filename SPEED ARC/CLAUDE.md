@@ -45,6 +45,12 @@ Every Blender mesh must look hand-made, not like stacked default cubes:
 - **Still light:** keep triangle budgets (props ~200-2,000 tris, buildings ~3-8K), merge small parts into one mesh, reuse the shared kit. Detail comes from bevels, insets and colour, not from millions of triangles.
 - Before handing over .fbx files: render a quick preview of each model (3/4 view) and look at it. If it looks blocky, plain or "AI generated", improve it first. Put the previews in `SPEED ARC\Screenshots\models\`.
 
+## UI is designed art, not placeholders (owner, 28 Oct)
+- Plain coded buttons (rectangle + gold gradient + UIStroke) are placeholders and NOT accepted.
+- The UI kit is 9-slice PNG art: buttons with meaning-colours (green buy/go, blue normal, yellow claim, red close, grey locked) + pressed state, panels, tabs, tiles, pills, badges; 3D lip, inner highlight, soft shadow, navy outline, an icon on every main button.
+- Mockup at 667x375 shown to the owner before applying. Once approved the kit is LOCKED: every new screen reuses it.
+- No pink, purple, cream or pastels: bold sporty colours (prompt 12).
+
 ## Code
 - Source of truth is on disk: `Games\SpeedArc\src\` (this vault). Studio gets it by the sync step in `Games\SpeedArc\README.md`. Edit the files, then sync; never edit only in Studio.
 - Structure: `ReplicatedStorage/Shared/Config/*` (all numbers), `Shared/UIKit`, `Shared/Util/*`; `ServerScriptService/Server/Services/*Service`; `StarterPlayerScripts/Client/Controllers/*Controller`.

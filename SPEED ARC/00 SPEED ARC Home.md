@@ -3,7 +3,7 @@ tags: [speedarc, home]
 ---
 # SPEED ARC
 
-> **ARCHIVED (owner, 28 Oct):** SPEED ARC is not published and not worked on. The new game is [[00 MOW ARC Home|MOW ARC]] (an incremental). Its code here (`Games\SpeedArc\src`) is kept so MOW ARC can copy systems from it. Don't change or delete anything.
+> **Status (owner, 28 Oct): finish, polish and publish in a NEW group** (not the GYM ARC group). Next: prompt 12 (sporty colours + UI art kit), then prompt 13 (new group + publish). MOW ARC is on hold.
 
 A Roblox running simulator: **"+1 SPEED every step"**, smash walls, Go Pro to new worlds. Tagline: **"Everyone starts slow."**
 Sister game of GYM ARC, built light so it runs smooth on cheap phones.
@@ -44,6 +44,8 @@ Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 - [[2026-10-28 SPEED ARC Prompt - 6 Look, sound and launch check]] (M6, done: [[2026-10-28 SPEED ARC Progress - 6 Look, sound and launch check|progress]]; next: [[SPEED ARC - Launch Checklist]], then soft launch)
 - **28 Oct pivot to "+1 SPEED every step"** (walls, AFK treadmills, candy colours): [[2026-10-28 SPEED ARC Progress - Pivot to +1 SPEED every step|progress]] · [[SPEED ARC - Wall Course and Steps]]
 - [[2026-10-28 SPEED ARC Prompt - 11 Finish the +1 SPEED pivot]] (NEXT, before launch: smash feel, Park + Stadium courses, pacing, tap leftovers, screen fixes)
+- [[2026-10-28 SPEED ARC Prompt - 12 Sporty colours, UI art kit, final polish]] (NEXT)
+- [[2026-10-28 SPEED ARC Prompt - 13 New group and publish]]
 - After launch (one every 1-2 weeks, only after checking the numbers):
   - [[2026-10-28 SPEED ARC Prompt - 7 Update 1 Mountain Trail]]
   - [[2026-10-28 SPEED ARC Prompt - 8 Update 2 World Games]]
