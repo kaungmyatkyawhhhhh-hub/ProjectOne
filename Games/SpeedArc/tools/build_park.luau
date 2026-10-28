@@ -108,7 +108,7 @@ for i = 0, 22 do
 	local x = C.X - 240 + i * 22 + rng:NextNumber(-4, 4)
 	local h = rng:NextNumber(40, 120)
 	local w = rng:NextNumber(14, 22)
-	local col = ({ Color3.fromHex("#8FA8FF"), Color3.fromHex("#B9A6FF"), Color3.fromHex("#7FD1FF"), Color3.fromHex("#FFB3D9") })[i % 4 + 1] -- pastel candy towers
+	local col = ({ Color3.fromHex("#2152D9"), Color3.fromHex("#1E90FF"), Color3.fromHex("#0F1E4A"), Color3.fromHex("#1EC8FF") })[i % 4 + 1] -- bold blue towers
 	local z = -230 - rng:NextNumber(0, 40)
 	block(skyline, "Tower", Vector3.new(w, h, 16), Vector3.new(x, h / 2, z), col, { CanCollide = false })
 	for k = 1, math.floor(h / 18) do
@@ -227,8 +227,8 @@ end
 L.agency(props, CFrame.lookAt(Vector3.new(C.X - 50, 0, C.Z + 132), Vector3.new(C.X, 0, C.Z + 132)))
 
 -- the WALL COURSE (prompt 11): south of the spawn plaza, hedges both sides, stage 4 crosses water
-L.course(m, "Park", { League = 2, Theme = "hedge", Bridge = 4, Accent = P.Mint, Title = "PARK WALL RUN",
-	Colors = { "#7ED957", "#3DDC97", "#4DB8FF", "#FFD23F", "#9BE15D", "#2EC4B6", "#6FDDFF", "#FFC83D", "#5DD39E", "#FFE066" } })
+L.course(m, "Park", { League = 2, Theme = "hedge", Bridge = 4, Accent = P.Lime, Title = "PARK WALL RUN",
+	Colors = { "#6BE33B", "#1E90FF", "#FFD21F", "#FF7A1A", "#1EC8FF", "#FF3B3B", "#6BE33B", "#1E90FF", "#FFD21F", "#FFB300" } })
 local Course = require(game:GetService("ReplicatedStorage").Shared.Config.Course:Clone())
 local cs = Course.Areas.Park.Start
 local cEnd = cs.Z + #Course.WallShares * Course.StageLength + 60
@@ -244,7 +244,7 @@ for z = 260, cEnd - 20, 70 do
 end
 -- giant floating names
 L.floatLabel(props, C + Vector3.new(0, 26, 30), "RACE TRACK", "A RACE EVERY 3 MINUTES", P.Sky, 44, 12)
-L.floatLabel(props, Vector3.new(C.X, 22, C.Z + 100), "AFK MACHINES", "THEY STEP FOR YOU", P.Mint, 36, 10)
+L.floatLabel(props, Vector3.new(C.X, 22, C.Z + 100), "AFK MACHINES", "THEY STEP FOR YOU", P.Lime, 36, 10)
 L.floatLabel(props, Vector3.new(C.X + 34, 22, C.Z + 140), "BACK TO HUB", nil, P.Sky, 22, 5)
 
 local parts, lights = L.finish(m, tmp)

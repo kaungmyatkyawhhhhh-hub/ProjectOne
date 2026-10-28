@@ -255,7 +255,7 @@ local function buildAuto()
 		end
 		local ok, on = ctx.Net.call("SetAutoTrain", player:GetAttribute("AutoTrain") ~= true)
 		if ok then
-			ctx.Hud.toast(if on then "Auto Train ON: it taps for you" else "Auto Train OFF", "Gold")
+			ctx.Hud.toast(if on then "Auto Run ON: your treadmill steps faster" else "Auto Run OFF", "Gold")
 		end
 	end })
 	player:GetAttributeChangedSignal("AutoTrain"):Connect(updateAuto)
@@ -328,7 +328,7 @@ function StoreUI.start(c)
 			ctx.Sound.play("Join")
 		elseif kind == "afkStopped" then
 			afkCard.Visible = false
-			ctx.Hud.toast("Auto Run stopped (no answer). Tap AUTO to start again.", "Denied")
+			ctx.Hud.toast("Auto Run stopped (no answer). Press AUTO to start again.", "Denied")
 		end
 	end)
 	ctx.Net.get("Collection").OnClientEvent:Connect(function(snap)

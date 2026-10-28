@@ -15,8 +15,8 @@ player:SetAttribute("InMenu", true) -- (local only) the music plays quietly whil
 
 local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
 local BODY = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Bold)
--- candy palette (28 Oct; same values as Config/Palette, which isn't loaded yet in ReplicatedFirst)
-local BLACK, CARBON, BLUE, GOLD, WHITE = Color3.fromHex("#1C2A7A"), Color3.fromHex("#3557E8"), Color3.fromHex("#24A8FF"), Color3.fromHex("#FFD23F"), Color3.fromHex("#FFFFFF")
+-- sporty palette (prompt 12; same values as Config/Palette, which isn't loaded yet in ReplicatedFirst)
+local BLACK, CARBON, BLUE, GOLD, WHITE = Color3.fromHex("#0F1E4A"), Color3.fromHex("#2152D9"), Color3.fromHex("#1E90FF"), Color3.fromHex("#FFD21F"), Color3.fromHex("#FFFFFF")
 local STEPS = { "Painting the lanes...", "Lacing up the shoes...", "Filling the stands...", "Warming up the coaches...", "Starting the clock..." }
 local TIPS = {
 	"Every step = +1 SPEED. Keep running!",
@@ -101,7 +101,7 @@ barBack.Size = UDim2.fromOffset(400, 16)
 barBack.Parent = holder
 Instance.new("UICorner", barBack).CornerRadius = UDim.new(0.5, 0)
 local barStroke = Instance.new("UIStroke")
-barStroke.Color = Color3.fromHex("#2A3FA8")
+barStroke.Color = Color3.fromHex("#2C4499")
 barStroke.Thickness = 2
 barStroke.Parent = barBack
 local bar = Instance.new("Frame")
@@ -109,7 +109,7 @@ bar.BackgroundColor3 = BLUE
 bar.Size = UDim2.fromScale(0.02, 1)
 bar.Parent = barBack
 Instance.new("UICorner", bar).CornerRadius = UDim.new(0.5, 0)
-local tipText = label(TIPS[math.random(1, #TIPS)], BODY, 16, Color3.fromHex("#6FDDFF"), 172, 40)
+local tipText = label(TIPS[math.random(1, #TIPS)], BODY, 16, Color3.fromHex("#5AB4FF"), 172, 40)
 
 local function bigButton(text, y, w, h, color, textColor, textSize)
 	local b = Instance.new("TextButton")
@@ -134,7 +134,7 @@ local function bigButton(text, y, w, h, color, textColor, textSize)
 end
 local play = bigButton("PLAY", 218, 240, 74, GOLD, BLACK, 40)
 play.Name = "Play"
-local skip = bigButton("SKIP", 222, 140, 44, Color3.fromHex("#2A3FA8"), WHITE, 22)
+local skip = bigButton("SKIP", 222, 140, 44, Color3.fromHex("#2C4499"), WHITE, 22)
 skip.Name = "Skip"
 
 -- moving bits: streaks slide, tips change every 3 s

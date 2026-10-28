@@ -82,7 +82,7 @@ local function buildCard(canvas)
 	-- the one big BOOST prompt in the tutorial race (over the BOOST button, bottom right)
 	boostCallout = UIKit.panel({ Name = "BoostCallout", AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -16, 1, -130), Size = UDim2.fromOffset(230, 64), AccentColor = P.Gold, StrokeColor = P.Gold, StrokeThickness = 3, ZIndex = 30, Parent = canvas })
 	boostCallout.Visible = false
-	UIKit.text({ Text = "TAP BOOST!", TextSize = 26, Color = P.Gold, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 0, 32), ZIndex = 31, Parent = boostCallout })
+	UIKit.text({ Text = "HIT BOOST!", TextSize = 26, Color = P.Gold, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 0, 32), ZIndex = 31, Parent = boostCallout })
 	UIKit.text({ Text = "a burst of speed - use it!", Font = F.BodyBold, TextSize = 13, Position = UDim2.fromOffset(0, 36), Size = UDim2.new(1, 0, 0, 20), ZIndex = 31, Parent = boostCallout })
 	make("UIScale", { Name = "Pulse", Parent = boostCallout })
 end
@@ -427,7 +427,7 @@ function Tutorial.start(c)
 		if kind == "FirstStep" then
 			ctx.Hud.popup("FIRST STEP!", P.Gold)
 			task.delay(0.35, function()
-				ctx.Hud.popup(("+%d coins  +%d MPH"):format(info.Coins, info.Speed), P.White)
+				ctx.Hud.popup(("+%d coins  +%d SPEED"):format(info.Coins, info.Speed), P.White)
 			end)
 			ctx.Sound.play("Unlock")
 		end

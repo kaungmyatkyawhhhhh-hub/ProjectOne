@@ -8,7 +8,7 @@ return {
 	Caps = { Train = 3.0, Pace = 0.15, Coins = 3.0 }, -- totals across equipped coaches (+300% / +15%)
 
 	Stages = { "BASE", "PRO", "ELITE", "LEGEND" },
-	StageColors = { "#4DB8FF", "#3DDC97", "#FF8A3D", "#FF6FB5" }, -- tile colours in MY COACHES (28 Oct)
+	StageColors = { "#1E90FF", "#6BE33B", "#FF7A1A", "#FFB300" }, -- tile colours in MY COACHES (BASE blue, PRO lime, ELITE orange, LEGEND gold)
 	AgencyRange = 30, -- studs: rolls only near a Coach Agency stand (one in each world)
 	StageMult = { 1, 1.5, 2.2, 3.0 },
 	EvolveCost = 3, -- three of the same coach at the same stage -> one at the next stage

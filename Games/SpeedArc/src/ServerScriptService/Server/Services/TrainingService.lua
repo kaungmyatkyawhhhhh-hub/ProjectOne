@@ -91,7 +91,7 @@ function TrainingService.enter(player, slot)
 		return false
 	end
 	if data.Speed < station.MinSpeed then
-		Toast:FireClient(player, ("Reach %s MPH to use the %s"):format(Format.short(station.MinSpeed), station.Name), "Denied")
+		Toast:FireClient(player, ("Reach %s SPEED to use the %s"):format(Format.short(station.MinSpeed), station.Name), "Denied")
 		return false
 	end
 	if slotOwner[slot] and slotOwner[slot] ~= player then
@@ -132,7 +132,7 @@ local function setupSlot(slot)
 	end
 	prompt.ActionText = "AFK STEPS"
 	prompt.ObjectText = if station.MinSpeed > 0
-		then ("%s  (%s MPH)"):format(station.Name, Format.short(station.MinSpeed))
+		then ("%s  (%s SPEED)"):format(station.Name, Format.short(station.MinSpeed))
 		else station.Name
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10

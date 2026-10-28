@@ -37,8 +37,8 @@ end
 
 local function statText(item, isShoe)
 	if isShoe then
-		local pace = item.Pace > 0 and ("  +%d%% pace"):format(math.floor(item.Pace * 100 + 0.5)) or ""
-		return ("x%s SPEED%s"):format(tostring(item.Train), pace)
+		local race = item.Pace > 0 and ("  +%d%% in races"):format(math.floor(item.Pace * 100 + 0.5)) or ""
+		return ("x%s SPEED%s"):format(tostring(item.Train), race)
 	end
 	if item.Train then
 		return ("+%d%% SPEED"):format(math.floor(item.Train * 100 + 0.5))
@@ -460,7 +460,7 @@ function rebuild()
 				cosmeticCard({ Id = id, Name = skin.Name .. " Canvas Runners", Color = skin.Color, Skin = true }, "Skin", n)
 			end
 		end
-		header.Text = "Kits are just for looks: one top + one bottom. Tap WEARING to take it off."
+		header.Text = "Kits are just for looks: one top + one bottom. Press WEARING to take it off."
 	elseif tab == "HEAD" then
 		for i, item in Cosmetics.Headwear do
 			cosmeticCard(item, "Head", i)

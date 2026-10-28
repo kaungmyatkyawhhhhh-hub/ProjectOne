@@ -323,7 +323,7 @@ function L.agency(parent, cf)
 	local m = Instance.new("Model")
 	m.Name = "CoachAgency"
 	m.Parent = parent
-	local pink, white = Palette.Pink, Palette.White
+	local pink, white = Palette.Red, Palette.White -- the agency stands are red and white
 	local function p(name, size, x, y, z, color, extra)
 		extra = extra or {}
 		extra.Parent = m
@@ -334,7 +334,7 @@ function L.agency(parent, cf)
 		extra.Color = color
 		return L.part(extra)
 	end
-	p("Pad", Vector3.new(18, 0.5, 10), 0, 0.25, 3.5, Palette.Cream)
+	p("Pad", Vector3.new(18, 0.5, 10), 0, 0.25, 3.5, Palette.Light)
 	p("PadEdge", Vector3.new(18.6, 0.45, 10.6), 0, 0.22, 3.5, pink)
 	p("Board", Vector3.new(16, 9, 0.8), 0, 5.6, 6.6, white)
 	p("BoardTrim", Vector3.new(16.6, 9.6, 0.6), 0, 5.6, 6.9, pink)
@@ -509,7 +509,7 @@ function L.course(parent, areaId, opts)
 	local walls = #Course.WallShares
 	local L_, Wd, H = Course.StageLength, Course.Width, Course.WallHeight
 	local colors = opts.Colors or Course.Colors
-	local accent = opts.Accent or Palette.Pink
+	local accent = opts.Accent or Palette.Orange
 	local m = Instance.new("Model")
 	m.Name = "Course"
 	m.Parent = parent
@@ -534,7 +534,10 @@ function L.course(parent, areaId, opts)
 		local a0 = (k - 1) * L_
 		local mid = a0 + L_ / 2
 		local water = opts.Bridge == k
-		p("Stage" .. k, Vector3.new(Wd, 0.6, L_), 0, 0.3, mid, col:Lerp(Palette.White, 0.45))
+		p("Stage" .. k, Vector3.new(Wd, 0.6, L_), 0, 0.3, mid, W.TrackBlue) -- a blue track road (prompt 12)
+		for _, s in { -1, 1 } do
+			p("Lane", Vector3.new(0.6, 0.62, L_), s * (Wd / 2 - 2), 0.31, mid, W.LaneWhite, { CanCollide = false })
+		end
 		for side = -1, 1, 2 do
 			p("Kerb", Vector3.new(2, 1.6, L_), side * (Wd / 2 + 1), 0.8, mid, col)
 			p("KerbTop", Vector3.new(2.2, 0.3, L_), side * (Wd / 2 + 1), 1.65, mid, Palette.White)
@@ -578,14 +581,17 @@ function L.course(parent, areaId, opts)
 		local wallAt = k * L_
 		local blockPart = p("Block", Vector3.new(Wd, H, 3), 0, 0.6 + H / 2, wallAt, col, nil, wm)
 		p("Top", Vector3.new(Wd, 26, 3), 0, 0.6 + H + 13, wallAt, col, { Transparency = 1 }, wm)
-		p("Cap", Vector3.new(Wd + 1, 1.2, 3.6), 0, 0.6 + H + 0.6, wallAt, Palette.White, nil, wm)
+		p("Cap", Vector3.new(Wd + 1, 1.2, 3.6), 0, 0.6 + H + 0.6, wallAt, Palette.Navy, nil, wm)
+		for _, s in { -1, 1 } do -- the navy edge round the wall
+			p("Edge", Vector3.new(1.2, H, 3.2), s * (Wd / 2 - 0.4), 0.6 + H / 2, wallAt, Palette.Navy, nil, wm)
+		end
 		for r = 1, 4 do
 			p("Band", Vector3.new(Wd + 0.04, 0.35, 3.08), 0, 0.6 + r * H / 5, wallAt, col:Lerp(Palette.White, 0.35), { CanCollide = false }, wm)
 		end
 		-- glowing edges (your screen lights them when you have enough SPEED)
 		local glow = col:Lerp(Palette.White, 0.5)
 		for _, s in { -1, 1 } do
-			p("Glow", Vector3.new(0.6, H + 0.4, 3.3), s * (Wd / 2 - 0.2), 0.6 + H / 2, wallAt, glow, { Material = Enum.Material.Neon, Transparency = 1, CanCollide = false }, wm)
+			p("Glow", Vector3.new(0.6, H + 0.4, 3.3), s * (Wd / 2 - 1.2), 0.6 + H / 2, wallAt, glow, { Material = Enum.Material.Neon, Transparency = 1, CanCollide = false }, wm)
 		end
 		p("Glow", Vector3.new(Wd, 0.6, 3.3), 0, 0.6 + H - 0.2, wallAt, glow, { Material = Enum.Material.Neon, Transparency = 1, CanCollide = false }, wm)
 		local need = Formulas.wallNeed(opts.League, k)

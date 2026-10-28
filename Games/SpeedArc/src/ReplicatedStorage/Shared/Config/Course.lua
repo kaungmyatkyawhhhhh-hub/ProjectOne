@@ -26,7 +26,7 @@ return {
 	Width = 44,
 	WallHeight = 18,
 	BounceSpeed = 20, -- not enough SPEED: a soft bounce back (never a fling)
-	Colors = { "#FF6FB5", "#FF8A3D", "#FFD23F", "#7ED957", "#3DDC97", "#4DB8FF", "#6C8CFF", "#9B5DE5", "#FF5DA2", "#FFC83D" },
+	Colors = { "#1E90FF", "#FF7A1A", "#6BE33B", "#FFD21F", "#FF3B3B", "#1EC8FF", "#2152D9", "#FF7A1A", "#6BE33B", "#FFB300" }, -- blue / orange / lime / yellow / red / cyan
 	-- each area's course: Start = the start line (centre, ground level), Dir = the way it runs
 	Areas = {
 		Hub = { Start = Vector3.new(0, 0, 196), Dir = Vector3.new(0, 0, 1) },

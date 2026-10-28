@@ -24,8 +24,8 @@ UIKit.ButtonStyles = {
 	Blue = { Base = Palette.ElectricBlue, Light = Palette.BrightBlue, Edge = Palette.DeepBlue, Text = Palette.White, TextStroke = Palette.DeepBlue },
 	Gold = { Base = Palette.Gold, Light = Color3.fromHex("#FFE38C"), Edge = Palette.DeepGold, Text = Palette.SpeedBlack, TextStroke = nil },
 	Dark = { Base = Palette.Graphite, Light = Color3.fromHex("#4A5596"), Edge = Palette.SpeedBlack, Text = Palette.White, TextStroke = Palette.SpeedBlack },
-	Green = { Base = Color3.fromHex("#34C759"), Light = Color3.fromHex("#7CF08F"), Edge = Color3.fromHex("#1D7A35"), Text = Palette.White, TextStroke = Color3.fromHex("#145227") },
-	Pink = { Base = Palette.Pink, Light = Color3.fromHex("#FFA6D2"), Edge = Color3.fromHex("#B8306F"), Text = Palette.White, TextStroke = Color3.fromHex("#7A1E4A") },
+	Green = { Base = Color3.fromHex("#3FCB2B"), Light = Color3.fromHex("#8BF26A"), Edge = Color3.fromHex("#22861A"), Text = Palette.White, TextStroke = Palette.Navy },
+	Red = { Base = Palette.Red, Light = Color3.fromHex("#FF7A7A"), Edge = Color3.fromHex("#B81F1F"), Text = Palette.White, TextStroke = Palette.Navy },
 }
 
 local clickHook = nil

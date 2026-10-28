@@ -174,7 +174,7 @@ local function setupLeaderstats(player, data)
 	local ls = Instance.new("Folder")
 	ls.Name = "leaderstats"
 	local mph = Instance.new("IntValue")
-	mph.Name = "MPH"
+	mph.Name = "SPEED"
 	mph.Value = math.floor(data.Speed)
 	mph.Parent = ls
 	local coins = Instance.new("IntValue")
@@ -291,7 +291,7 @@ function PlayerData.set(player, key, value)
 	local ls = player:FindFirstChild("leaderstats")
 	if ls then
 		if key == "Speed" then
-			ls.MPH.Value = math.floor(value)
+			ls.SPEED.Value = math.floor(value)
 		elseif key == "Coins" then
 			ls.Coins.Value = math.floor(value)
 		end

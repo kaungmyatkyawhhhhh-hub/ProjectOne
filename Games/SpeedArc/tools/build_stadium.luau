@@ -119,7 +119,7 @@ local tlen = tz1 - tz0
 local tmid = (tz0 + tz1) / 2
 block(tunnel, "Floor", Vector3.new(16, 0.4, tlen), Vector3.new(C.X, 0.2, tmid), Color3.fromHex("#E4EAF6"))
 for _, s in { -1, 1 } do
-	block(tunnel, "Wall", Vector3.new(1.5, 11, tlen), Vector3.new(C.X + s * 8.6, 5.5, tmid), P.Purple)
+	block(tunnel, "Wall", Vector3.new(1.5, 11, tlen), Vector3.new(C.X + s * 8.6, 5.5, tmid), P.Royal)
 	block(tunnel, "EdgeGlow", Vector3.new(0.3, 0.2, tlen - 2), Vector3.new(C.X + s * 7.6, 0.45, tmid), P.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
 end
 block(tunnel, "Ceiling", Vector3.new(18.6, 1.2, tlen), Vector3.new(C.X, 11.4, tmid), P.White)
@@ -192,16 +192,16 @@ L.leaderboard(props, CFrame.lookAt(Vector3.new(C.X + 22, 0, C.Z - frontN - 6), V
 L.agency(props, CFrame.lookAt(Vector3.new(C.X - 24, 0, C.Z - frontN - 8), Vector3.new(C.X - 24, 0, C.Z)))
 
 -- the WALL COURSE (prompt 11): straight out of the players' tunnel, low stands with a crowd both sides
-local _, courseFans = L.course(m, "Stadium", { League = 3, Theme = "stands", Crowd = crowdF, Accent = P.Purple, Title = "STADIUM WALL RUN",
-	Colors = { "#9B5DE5", "#4DB8FF", "#FF6FB5", "#FFD23F", "#6C8CFF", "#3DDC97", "#FF8A3D", "#C77DFF", "#24A8FF", "#FFC83D" } })
+local _, courseFans = L.course(m, "Stadium", { League = 3, Theme = "stands", Crowd = crowdF, Accent = P.Royal, Title = "STADIUM WALL RUN",
+	Colors = { "#2152D9", "#FF3B3B", "#FFD21F", "#1EC8FF", "#FF7A1A", "#6BE33B", "#1E90FF", "#FF3B3B", "#FFD21F", "#FFB300" } })
 fanCount += courseFans
 local Course = require(game:GetService("ReplicatedStorage").Shared.Config.Course:Clone())
 local cs = Course.Areas.Stadium.Start
 local cEnd = cs.Z + #Course.WallShares * Course.StageLength + 60
 block(ground, "CourseGround", Vector3.new(120, 4, cEnd - cs.Z + 20), Vector3.new(cs.X, -2, (cs.Z + cEnd) / 2), Color3.fromHex("#DCE3EE"))
 -- giant floating names
-L.floatLabel(props, C + Vector3.new(0, 30, 0), "RACE TRACK", "HURDLES TODAY", P.Purple, 44, 12)
-L.floatLabel(props, C + Vector3.new(0, 18, 0), "AFK MACHINES", "IN THE INFIELD", P.Mint, 30, 8)
+L.floatLabel(props, C + Vector3.new(0, 30, 0), "RACE TRACK", "HURDLES TODAY", P.Royal, 44, 12)
+L.floatLabel(props, C + Vector3.new(0, 18, 0), "AFK MACHINES", "IN THE INFIELD", P.Lime, 30, 8)
 
 local parts, lights = L.finish(m, tmp)
 return ("Big Stadium built: %d parts, %d lights, %d fans"):format(parts, lights, fanCount)

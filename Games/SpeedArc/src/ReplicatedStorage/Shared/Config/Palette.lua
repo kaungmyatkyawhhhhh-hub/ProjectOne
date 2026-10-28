@@ -1,40 +1,42 @@
--- SPEED ARC palette (GDD section 3; candy look since 28 Oct). Use these everywhere: world, UI, effects.
+-- SPEED ARC palette (GDD section 3; bright but sporty since prompt 12). Use these everywhere: world, UI, effects.
 local function hex(h)
 	return Color3.fromHex(h)
 end
 
 return {
-	-- 28 Oct: the owner picked the bright "candy" simulator look for the world. The UI keeps dark
-	-- navy panels (like GYM ARC's windows, owner) with the candy colours on tiles and buttons.
-	SpeedBlack = hex("#11152E"), -- UI base, text outlines (deep navy)
-	Carbon = hex("#20274F"), -- panels (navy, lighter at the top of the gradient)
-	Graphite = hex("#353F78"), -- borders, dark buttons
-	ElectricBlue = hex("#24A8FF"), -- main accent, speed, buttons (sky blue)
-	BrightBlue = hex("#6FDDFF"), -- glows, highlights (aqua)
-	DeepBlue = hex("#1B3E9E"), -- shadows, gradients
-	Gold = hex("#FFD23F"), -- coins, rewards, winners (sunny yellow)
-	DeepGold = hex("#FF9F1C"), -- gold gradients (orange)
+	-- Prompt 12 (owner, 28 Oct): BRIGHT BUT SPORTY. Saturated, bold, high contrast, never pastel; no
+	-- pink, purple or cream anywhere. Navy is the outline / text stroke / panel colour.
+	SpeedBlack = hex("#0F1E4A"), -- Navy: UI base, outlines, text stroke
+	Carbon = hex("#1A2E6E"), -- panels (navy, lighter at the top of the gradient)
+	Graphite = hex("#2C4499"), -- borders, dark buttons
+	ElectricBlue = hex("#1E90FF"), -- main accent, speed, buttons
+	BrightBlue = hex("#5AB4FF"), -- glows, highlights
+	DeepBlue = hex("#2152D9"), -- Royal Blue: shadows, gradients
+	Gold = hex("#FFD21F"), -- Sunny Yellow: coins, rewards, winners
+	DeepGold = hex("#FFB300"), -- Gold: gold gradients
 	White = hex("#FFFFFF"), -- text
-	DangerRed = hex("#FF4D6D"), -- warnings and timers only
-	-- candy accents (zones, walls, kiosks)
-	Mint = hex("#3DDC97"),
-	Pink = hex("#FF6FB5"),
-	Purple = hex("#9B5DE5"),
-	Orange = hex("#FF8A3D"),
-	Sky = hex("#4DB8FF"),
-	Lime = hex("#7ED957"),
-	Cream = hex("#FFF3DC"),
+	DangerRed = hex("#FF3B3B"), -- Red: warnings, timers, LIVE, close
+	-- sporty accents (zones, walls, kiosks)
+	Navy = hex("#0F1E4A"),
+	Royal = hex("#2152D9"),
+	Sky = hex("#1E90FF"),
+	Cyan = hex("#1EC8FF"),
+	Yellow = hex("#FFD21F"),
+	Orange = hex("#FF7A1A"),
+	Lime = hex("#6BE33B"),
+	Red = hex("#FF3B3B"),
+	Light = hex("#E3E7EE"), -- light grey for roads, pads, plazas
 
-	-- World colours (bright candy naturals)
+	-- World colours (bright, saturated naturals)
 	World = {
-		TrackBlue = hex("#2D7CF6"),
-		TrackBlueDark = hex("#2366D1"),
+		TrackBlue = hex("#1E6FE8"),
+		TrackBlueDark = hex("#1A5BC4"),
 		LaneWhite = hex("#EEF2FA"),
-		Grass = hex("#7ED957"),
-		GrassDark = hex("#70CC4B"),
-		Infield = hex("#8BE06A"),
-		Path = hex("#FFF3DC"),
-		Concrete = hex("#F2F4F8"),
+		Grass = hex("#4CC23A"),
+		GrassDark = hex("#3FAE2F"),
+		Infield = hex("#5ACF3F"),
+		Path = hex("#E3E7EE"),
+		Concrete = hex("#E8ECF2"),
 		Brick = hex("#C7694F"),
 		BrickDark = hex("#A9553F"),
 		Roof = hex("#2A2F3A"),
@@ -43,10 +45,10 @@ return {
 		Steel = hex("#3A4150"),
 		Aluminium = hex("#C9D1DD"),
 		Wood = hex("#B9824F"),
-		TreeLeaf = hex("#5BC236"),
-		TreeLeafLight = hex("#8BE06A"),
-		TreeLeafDark = hex("#43A62E"),
+		TreeLeaf = hex("#3FAE2F"),
+		TreeLeafLight = hex("#5ACF3F"),
+		TreeLeafDark = hex("#2F8F24"),
 		Trunk = hex("#7A5236"),
-		Cone = hex("#FF8A2B"),
+		Cone = hex("#FF7A1A"),
 	},
 }

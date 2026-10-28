@@ -303,7 +303,7 @@ local function buildLive(canvas)
 	live.Visible = false
 	ui.live = live
 	ui.liveScale = UIKit.make("UIScale", { Parent = live })
-	local pill = UIKit.make("Frame", { BackgroundColor3 = P.Pink, Position = UDim2.fromOffset(10, 9), Size = UDim2.fromOffset(62, 24), ZIndex = 9, Parent = live })
+	local pill = UIKit.make("Frame", { BackgroundColor3 = P.Red, Position = UDim2.fromOffset(10, 9), Size = UDim2.fromOffset(62, 24), ZIndex = 9, Parent = live })
 	UIKit.corner(pill, UDim.new(0.5, 0))
 	ui.liveDot = UIKit.make("Frame", { BackgroundColor3 = P.White, Position = UDim2.new(0, 9, 0.5, -4), Size = UDim2.fromOffset(8, 8), ZIndex = 10, Parent = pill })
 	UIKit.corner(ui.liveDot, UDim.new(0.5, 0))
@@ -459,11 +459,11 @@ local function showPodium(info)
 	local coins = UIKit.text({ Text = "+0", TextSize = 28, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(34, 0), Size = UDim2.fromOffset(136, 34), ZIndex = 35, Parent = coinRow })
 	local y = 112
 	if info.winBoost then
-		UIKit.text({ Text = ("2x SPEED  %s"):format(Format.clock(info.winBoost)), TextSize = 17, Color = P.Pink, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(0, y), Size = UDim2.fromOffset(170, 22), ZIndex = 34, Parent = rw })
+		UIKit.text({ Text = ("2x SPEED  %s"):format(Format.clock(info.winBoost)), TextSize = 17, Color = P.Orange, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(0, y), Size = UDim2.fromOffset(170, 22), ZIndex = 34, Parent = rw })
 		y += 24
 	end
 	if info.pb then
-		UIKit.text({ Text = "NEW PB!", TextSize = 17, Color = P.Mint, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(0, y), Size = UDim2.fromOffset(170, 22), ZIndex = 34, Parent = rw })
+		UIKit.text({ Text = "NEW PB!", TextSize = 17, Color = P.Lime, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(0, y), Size = UDim2.fromOffset(170, 22), ZIndex = 34, Parent = rw })
 		y += 24
 	end
 	if info.firstOfDay then

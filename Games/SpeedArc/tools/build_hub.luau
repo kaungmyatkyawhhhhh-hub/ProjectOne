@@ -344,15 +344,15 @@ end
 local function path(name, a, b, width, color)
 	local len = (b - a).Magnitude
 	local cf = CFrame.lookAt((a + b) / 2, b)
-	part({ Parent = ground, Name = name, Size = Vector3.new(width, 0.3, len), CFrame = cf * CFrame.new(0, 0.15, 0), Color = Color3.fromHex("#F3DFB8") })
+	part({ Parent = ground, Name = name, Size = Vector3.new(width, 0.3, len), CFrame = cf * CFrame.new(0, 0.15, 0), Color = Palette.Light })
 	for side = -1, 1, 2 do
 		part({ Parent = ground, Name = "Kerb", Size = Vector3.new(1.2, 0.5, len), CFrame = cf * CFrame.new(side * (width / 2 + 0.6), 0.25, 0), Color = color })
 	end
 end
 path("TrackPath", PLAZA - Vector3.new(0, 0, PLAZA_R - 2), Vector3.new(0, 0, 57.8), 30, Palette.Sky)
 path("ShopPath", PLAZA - Vector3.new(PLAZA_R - 2, 0, 0), Vector3.new(-86, 0, PLAZA.Z), 26, Palette.Orange)
-path("PortalPath", PLAZA + Vector3.new(PLAZA_R - 2, 0, 0), Vector3.new(86, 0, PLAZA.Z), 26, Palette.Purple)
-path("CoursePath", PLAZA + Vector3.new(0, 0, PLAZA_R - 2), C.Start + Vector3.new(0, 0, 1), 30, Palette.Pink)
+path("PortalPath", PLAZA + Vector3.new(PLAZA_R - 2, 0, 0), Vector3.new(86, 0, PLAZA.Z), 26, Palette.Royal)
+path("CoursePath", PLAZA + Vector3.new(0, 0, PLAZA_R - 2), C.Start + Vector3.new(0, 0, 1), 30, Palette.Orange)
 
 -- the spawn plaza: big, round and empty, a sky-blue band and the SPEED ARC emblem
 cyl(ground, "PlazaEdge", PLAZA_R + 1.2, 0.5, PLAZA + Vector3.new(0, 0.25, 0), Palette.Sky)
@@ -606,7 +606,7 @@ floatLabel(props, Vector3.new(0, 28, 40), "RACE TRACK", "A RACE EVERY 3 MINUTES"
 -- the course strip and a closed end show where it stops.
 ----------------------------------------------------------------------------
 do
-	L.course(hub, "Hub", { League = 1, Theme = "hub", Accent = Palette.Pink })
+	L.course(hub, "Hub", { League = 1, Theme = "hub", Accent = Palette.Orange })
 	local stripZ0, stripZ1 = 292, COURSE_END + 60
 	for _, x in { -88, 88 } do
 		block(props, "CourseHedge", Vector3.new(4, 5, stripZ1 - stripZ0), Vector3.new(x, 2.5, (stripZ0 + stripZ1) / 2), W.TreeLeafDark)
@@ -621,7 +621,7 @@ end
 local Coaches = require(ReplicatedStorage.Shared.Config.Coaches:Clone())
 local shops = folder("Shops")
 block(shops, "ShopPadEdge", Vector3.new(68, 0.5, 136), Vector3.new(-118, 0.25, PLAZA.Z), Palette.Orange)
-block(shops, "ShopPad", Vector3.new(66, 0.56, 134), Vector3.new(-118, 0.28, PLAZA.Z), Color3.fromHex("#FFE2B8"))
+block(shops, "ShopPad", Vector3.new(66, 0.56, 134), Vector3.new(-118, 0.28, PLAZA.Z), Palette.Light)
 floatLabel(shops, Vector3.new(-122, 36, PLAZA.Z), "SHOPS", "SHOES - TRAILS - COACHES - KITS", Palette.Orange, 44, 12)
 
 local function kiosk(name, front, a, b, sub, label, opens, action)
@@ -699,7 +699,7 @@ do
 end
 -- Trail Booth: a demo streak loops behind the counter (MenuController moves "Demo")
 do
-	local m, cf = kiosk("TrailBooth", Vector3.new(KX, 0, 124), Palette.Pink, Palette.Purple, "LEAVE A STREAK BEHIND YOU", "TRAILS", "TrailBooth", "SHOP")
+	local m, cf = kiosk("TrailBooth", Vector3.new(KX, 0, 124), Palette.Royal, Palette.Cyan, "LEAVE A STREAK BEHIND YOU", "TRAILS", "TrailBooth", "SHOP")
 	local demo = part({ Parent = m, Name = "Demo", Size = Vector3.new(0.4, 0.4, 0.4), CFrame = cf * CFrame.new(0, 7.6, 9) * CFrame.Angles(0, math.pi / 2, 0), Color = Palette.Gold, Transparency = 1, CanCollide = false })
 	local a0 = Instance.new("Attachment")
 	a0.Position = Vector3.new(0, 0.7, 0)
@@ -713,13 +713,13 @@ do
 	tr.Lifetime = 0.6
 	tr.LightEmission = 1
 	tr.FaceCamera = true
-	tr.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromHex("#FFE38C")), ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FF6FB5")), ColorSequenceKeypoint.new(1, Color3.fromHex("#6FDDFF")) })
+	tr.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromHex("#FFE38C")), ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FF7A1A")), ColorSequenceKeypoint.new(1, Color3.fromHex("#6FDDFF")) })
 	tr.Transparency = NumberSequence.new(0, 1)
 	tr.Parent = demo
 end
 -- Coach Corner: the coach cards on a board on the back wall
 do
-	local _, _, kp = kiosk("CoachCorner", Vector3.new(KX, 0, 156), Palette.Mint, Palette.Gold, "ROLL COACHES HERE", "COACH AGENCY", "CoachCorner", "ROLL")
+	local _, _, kp = kiosk("CoachCorner", Vector3.new(KX, 0, 156), Palette.Red, Palette.Gold, "ROLL COACHES HERE", "COACH AGENCY", "CoachCorner", "ROLL")
 	local board = kp("Whiteboard", Vector3.new(16, 6, 0.3), 0, 7.4, 14.2, Palette.White)
 	local g = Instance.new("SurfaceGui")
 	g.Face = Enum.NormalId.Front
@@ -784,13 +784,13 @@ end
 ----------------------------------------------------------------------------
 do
 	local plaza = folder("PortalPlaza")
-	block(plaza, "PortalPadEdge", Vector3.new(68, 0.5, 158), Vector3.new(118, 0.25, PLAZA.Z), Palette.Purple)
-	block(plaza, "PortalPad", Vector3.new(66, 0.56, 156), Vector3.new(118, 0.28, PLAZA.Z), Color3.fromHex("#D9C8FF"))
-	floatLabel(plaza, Vector3.new(104, 40, PLAZA.Z), "PORTALS", "GO PRO TO OPEN NEW WORLDS", Palette.Purple, 46, 12)
+	block(plaza, "PortalPadEdge", Vector3.new(68, 0.5, 158), Vector3.new(118, 0.25, PLAZA.Z), Palette.Royal)
+	block(plaza, "PortalPad", Vector3.new(66, 0.56, 156), Vector3.new(118, 0.28, PLAZA.Z), Palette.Light)
+	floatLabel(plaza, Vector3.new(104, 40, PLAZA.Z), "PORTALS", "GO PRO TO OPEN NEW WORLDS", Palette.Royal, 46, 12)
 	local gates = {
 		{ "HOMETOWN TRACK", "LEAGUE 1  -  YOU ARE HERE", Palette.Sky, nil, false },
-		{ "CITY PARK RUN", "LEAGUE 2", Palette.Mint, "Park", false },
-		{ "BIG STADIUM", "LEAGUE 3", Palette.Purple, "Stadium", false },
+		{ "CITY PARK RUN", "LEAGUE 2", Palette.Lime, "Park", false },
+		{ "BIG STADIUM", "LEAGUE 3", Palette.Royal, "Stadium", false },
 		{ "MOUNTAIN TRAIL", "COMING SOON", Palette.Orange, "Soon", true },
 		{ "WORLD GAMES", "COMING SOON", Palette.Gold, "Soon", true },
 	}
@@ -844,7 +844,7 @@ local tread = modelIn("Treadmill", training)
 do
 	local cx, tz = -55, 214
 	block(tread, "MatEdge", Vector3.new(52, 0.5, 36), Vector3.new(cx, 0.25, tz), Palette.White)
-	block(tread, "Mat", Vector3.new(50, 0.56, 34), Vector3.new(cx, 0.28, tz), Palette.Mint)
+	block(tread, "Mat", Vector3.new(50, 0.56, 34), Vector3.new(cx, 0.28, tz), W.TrackBlue)
 	for i = 1, 6 do
 		local x = cx - 16.25 + (i - 1) * 6.5
 		local m = modelIn("Treadmill" .. i, tread)
@@ -877,7 +877,7 @@ do
 	end
 	block(tread, "CanopyRoof", Vector3.new(48, 1, 18), Vector3.new(cx, 12.8, tz), Palette.Sky)
 	block(tread, "CanopyTrim", Vector3.new(48.4, 0.5, 18.4), Vector3.new(cx, 12.1, tz), Palette.Gold)
-	floatLabel(tread, Vector3.new(cx, 22, tz), "AFK TREADMILLS", "THEY STEP FOR YOU", Palette.Mint, 36, 10)
+	floatLabel(tread, Vector3.new(cx, 22, tz), "AFK TREADMILLS", "THEY STEP FOR YOU", Palette.Lime, 36, 10)
 end
 
 ----------------------------------------------------------------------------
@@ -889,11 +889,11 @@ do
 	local boardsList = {
 		{ "Speed", "TOP SPEED", Palette.Gold },
 		{ "Wins", "MOST WINS", Palette.Sky },
-		{ "WeeklyWins", "WINS THIS WEEK", Palette.Pink },
-		{ "WeeklyTime", "FASTEST SPRINT THIS WEEK", Palette.Mint },
+		{ "WeeklyWins", "WINS THIS WEEK", Palette.Orange },
+		{ "WeeklyTime", "FASTEST SPRINT THIS WEEK", Palette.Lime },
 	}
 	block(wall, "PadEdge", Vector3.new(60, 0.5, 18), Vector3.new(56, 0.25, 214), Palette.Gold)
-	block(wall, "Pad", Vector3.new(58, 0.56, 16), Vector3.new(56, 0.28, 214), Color3.fromHex("#FFE9A8"))
+	block(wall, "Pad", Vector3.new(58, 0.56, 16), Vector3.new(56, 0.28, 214), Palette.Light)
 	floatLabel(wall, Vector3.new(56, 22, 216), "LEADERBOARDS", nil, Palette.Gold, 30, 6)
 	for i, b in boardsList do
 		local pos = Vector3.new(35 + (i - 1) * 14, 0.56, 216)

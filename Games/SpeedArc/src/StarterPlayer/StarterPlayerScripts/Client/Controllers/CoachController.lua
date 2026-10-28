@@ -42,7 +42,7 @@ local function boostText(id, stage)
 		table.insert(parts, ("+%d%% COINS"):format(math.floor(c * 100 + 0.5)))
 	end
 	if p > 0 then
-		table.insert(parts, ("+%g%% RACE PACE"):format(math.floor(p * 1000 + 0.5) / 10))
+		table.insert(parts, ("+%g%% IN RACES"):format(math.floor(p * 1000 + 0.5) / 10))
 	end
 	return table.concat(parts, "  ")
 end
@@ -345,7 +345,7 @@ local function boostLines(id, stage)
 		table.insert(out, { ("+%d%% COINS"):format(math.floor(c * 100 + 0.5)), P.Gold })
 	end
 	if p > 0 then
-		table.insert(out, { ("+%g%% RACE PACE"):format(math.floor(p * 1000 + 0.5) / 10), P.Mint })
+		table.insert(out, { ("+%g%% IN RACES"):format(math.floor(p * 1000 + 0.5) / 10), P.Lime })
 	end
 	return out
 end
@@ -392,7 +392,7 @@ function agencyPage()
 	local grid = make("Frame", { Name = "Odds", BackgroundTransparency = 1, Size = UDim2.fromOffset(440, 216), Parent = page })
 	make("UIGridLayout", { CellSize = UDim2.fromOffset(104, 104), CellPadding = UDim2.fromOffset(8, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = grid })
 	local right = make("Frame", { Name = "Actions", BackgroundTransparency = 1, Position = UDim2.fromOffset(452, 0), Size = UDim2.fromOffset(152, 216), Parent = page })
-	local info = UIKit.text({ Name = "Info", Text = "Tap a coach to see the boost.", Font = F.BodyBold, TextSize = 13, Wrapped = true, Color = P.BrightBlue, Position = UDim2.fromOffset(0, 176), Size = UDim2.new(1, 0, 0, 40), Parent = right })
+	local info = UIKit.text({ Name = "Info", Text = "Pick a coach to see the boost.", Font = F.BodyBold, TextSize = 13, Wrapped = true, Color = P.BrightBlue, Position = UDim2.fromOffset(0, 176), Size = UDim2.new(1, 0, 0, 40), Parent = right })
 	for i, c in Coaches.List do
 		local n = byId[c.Id] or 0
 		local rc = Coaches.RarityColors[c.Rarity]
@@ -483,18 +483,18 @@ function myPage()
 	local _, byStage = coachCounts()
 	-- header: EQUIPPED / OWNED, BEST EQUIP, the way to the agency
 	local header = make("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 32), Parent = page })
-	headerPill(header, ("EQUIPPED %d/%d"):format(math.min(#equipped, slots), slots), P.Mint, 0, 150)
+	headerPill(header, ("EQUIPPED %d/%d"):format(math.min(#equipped, slots), slots), P.Lime, 0, 150)
 	headerPill(header, ("OWNED %d"):format(#list), P.Sky, 158, 110)
 	UIKit.button({ Name = "Best", Style = "Gold", Text = "BEST EQUIP", TextSize = 14, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -148, 0, -2), Size = UDim2.fromOffset(120, 34), Parent = header, OnClick = function()
 		if ctx.Net.call("BestEquip") then
 			ctx.Sound.play("Equip")
 		end
 	end })
-	UIKit.button({ Name = "Agency", Style = "Pink", Text = "COACH AGENCY", TextSize = 13, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, -2), Size = UDim2.fromOffset(140, 34), Parent = header, OnClick = goAgency })
+	UIKit.button({ Name = "Agency", Style = "Green", Text = "COACH AGENCY", TextSize = 13, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, -2), Size = UDim2.fromOffset(140, 34), Parent = header, OnClick = goAgency })
 	if #list == 0 then
 		UIKit.text({ Text = "No coaches yet.", TextSize = 24, Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 30), Parent = page })
 		UIKit.text({ Text = "Roll your first coach at the COACH AGENCY. Coaches follow you and make every step count more.", Font = F.BodyBold, TextSize = 15, Wrapped = true, Color = P.BrightBlue, Position = UDim2.new(0.5, -220, 0, 116), Size = UDim2.fromOffset(440, 40), Parent = page })
-		UIKit.button({ Style = "Pink", Text = "GO TO THE AGENCY", TextSize = 18, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 170), Size = UDim2.fromOffset(240, 50), Parent = page, OnClick = goAgency })
+		UIKit.button({ Style = "Green", Text = "GO TO THE AGENCY", TextSize = 18, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 170), Size = UDim2.fromOffset(240, 50), Parent = page, OnClick = goAgency })
 		return
 	end
 	local pages = math.max(1, math.ceil(#list / PER_PAGE))
@@ -575,7 +575,7 @@ function myPage()
 		end
 	end })
 	local canEvolve = not maxed and have >= Coaches.EvolveCost
-	UIKit.button({ Name = "Evolve", Style = if canEvolve then "Pink" else "Dark", Text = if maxed then "MAX" else "EVOLVE", TextSize = 16, Position = UDim2.fromOffset(118, 202), Size = UDim2.fromOffset(100, 32), Parent = detail, OnClick = function()
+	UIKit.button({ Name = "Evolve", Style = if canEvolve then "Gold" else "Dark", Text = if maxed then "MAX" else "EVOLVE", TextSize = 16, Position = UDim2.fromOffset(118, 202), Size = UDim2.fromOffset(100, 32), Parent = detail, OnClick = function()
 		if not canEvolve then
 			ctx.Hud.toast(if maxed then "This coach is at the top stage." else ("Get 3 %s %s to evolve."):format(coach.Name, Coaches.Stages[selected.Stage]), "Denied")
 			return
@@ -689,7 +689,7 @@ function CoachUI.start(c)
 	ctx = c
 	ctx.Coaches = CoachUI
 	buildOverlay()
-	agencyWin = UIKit.window({ Name = "CoachAgency", Title = "COACH AGENCY", Size = Vector2.new(640, 270), Accent = P.Pink, Parent = ctx.Hud.canvas })
+	agencyWin = UIKit.window({ Name = "CoachAgency", Title = "COACH AGENCY", Size = Vector2.new(640, 270), Accent = P.Red, Parent = ctx.Hud.canvas })
 	agencyWin.page = make("Frame", { Name = "Page", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 1, -4), Parent = agencyWin.content })
 	myWin = UIKit.window({ Name = "Coaches", Title = "MY COACHES", Size = Vector2.new(700, 330), Accent = P.Gold, Parent = ctx.Hud.canvas })
 	myWin.page = make("Frame", { Name = "Page", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 1, -4), Parent = myWin.content })
