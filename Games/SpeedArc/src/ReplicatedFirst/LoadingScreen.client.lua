@@ -132,7 +132,9 @@ local function bigButton(text, y, w, h, color, textColor, textSize)
 	return b
 end
 local play = bigButton("PLAY", 218, 240, 74, GOLD, BLACK, 40)
+play.Name = "Play"
 local skip = bigButton("SKIP", 222, 140, 44, Color3.fromHex("#2A303C"), WHITE, 22)
+skip.Name = "Skip"
 
 -- moving bits: streaks slide, tips change every 3 s
 local loading = true
@@ -221,7 +223,7 @@ local camera = workspace.CurrentCamera
 local flyStart = os.clock()
 RunService:BindToRenderStep("SpeedArcMenuCamera", Enum.RenderPriority.Camera.Value + 2, function()
 	local a = (os.clock() - flyStart) * 0.06 + 2.2
-	local pos = Vector3.new(math.cos(a) * 150, 48 + math.sin(a * 0.7) * 6, math.sin(a) * 120)
+	local pos = Vector3.new(math.cos(a) * 165, 70 + math.sin(a * 0.7) * 8, math.sin(a) * 135) -- high enough to clear the stands
 	camera.CameraType = Enum.CameraType.Scriptable
 	camera.CFrame = CFrame.lookAt(pos, Vector3.new(0, 6, 10))
 end)
