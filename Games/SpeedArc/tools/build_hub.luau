@@ -1393,7 +1393,7 @@ do
 			u.CanTouch = false
 			u.CastShadow = false
 			u.Parent = tmp
-			flowerT[kind] = { u = u, off = u.Position }
+			flowerT[kind] = { u = u, cf = u.CFrame } -- the union keeps the stem's turn: place it with it
 		else
 			warn("flower union failed", kind, res)
 		end
@@ -1405,7 +1405,7 @@ do
 		end
 		local f = t.u:Clone()
 		f.Size = t.u.Size * scale
-		f.CFrame = CFrame.new(pos) * CFrame.Angles(rnd:NextNumber(-0.12, 0.12), rnd:NextNumber(0, math.pi * 2), rnd:NextNumber(-0.12, 0.12)) * CFrame.new(t.off * scale)
+		f.CFrame = CFrame.new(pos) * CFrame.Angles(rnd:NextNumber(-0.12, 0.12), rnd:NextNumber(0, math.pi * 2), rnd:NextNumber(-0.12, 0.12)) * CFrame.new(t.cf.Position * scale) * t.cf.Rotation
 		f.Parent = parent
 	end
 	-- fill a bed: leafy mounds first, then flowers in drifts of one kind (not random confetti)
@@ -1519,7 +1519,7 @@ do
 			local x = s * (span / 2 + 1.2)
 			part({ Parent = dress, Name = "ArchPillar", Size = Vector3.new(2.4, 14, 2.4), CFrame = cf * CFrame.new(x, 7, 0), Color = Palette.Carbon })
 			part({ Parent = dress, Name = "ArchFoot", Size = Vector3.new(3.4, 1, 3.4), CFrame = cf * CFrame.new(x, 0.5, 0), Color = Palette.Graphite })
-			part({ Parent = dress, Name = "ArchGlow", Size = Vector3.new(0.25, 12, 2.5), CFrame = cf * CFrame.new(x - s * 1.2, 7.4, 0), Color = accent, Material = Enum.Material.Neon, CanCollide = false })
+			part({ Parent = dress, Name = "ArchGlow", Size = Vector3.new(0.2, 12, 0.5), CFrame = cf * CFrame.new(x - s * 1.2, 7.4, 0), Color = accent, Material = Enum.Material.Neon, CanCollide = false })
 		end
 		local beam = part({ Parent = dress, Name = "ArchBeam", Size = Vector3.new(span + 6, 3.6, 1.8), CFrame = cf * CFrame.new(0, 15.2, 0), Color = Palette.SpeedBlack })
 		part({ Parent = dress, Name = "ArchTrim", Size = Vector3.new(span + 6.4, 0.45, 2.2), CFrame = cf * CFrame.new(0, 17.2, 0), Color = Palette.Gold })
