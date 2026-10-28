@@ -23,7 +23,7 @@ UIKit.MinTextSize = 13 -- smallest HUD label; nothing smaller anywhere
 UIKit.ButtonStyles = {
 	Blue = { Base = Palette.ElectricBlue, Light = Palette.BrightBlue, Edge = Palette.DeepBlue, Text = Palette.White, TextStroke = Palette.DeepBlue },
 	Gold = { Base = Palette.Gold, Light = Color3.fromHex("#FFE38C"), Edge = Palette.DeepGold, Text = Palette.SpeedBlack, TextStroke = nil },
-	Dark = { Base = Palette.Graphite, Light = Color3.fromHex("#3E4555"), Edge = Palette.SpeedBlack, Text = Palette.White, TextStroke = Palette.SpeedBlack },
+	Dark = { Base = Palette.Graphite, Light = Color3.fromHex("#4A63D9"), Edge = Palette.SpeedBlack, Text = Palette.White, TextStroke = Palette.SpeedBlack },
 }
 
 local clickHook = nil
