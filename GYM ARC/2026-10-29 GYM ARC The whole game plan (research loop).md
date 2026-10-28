@@ -65,7 +65,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Research behind it: [[Playbook notes
 7. **Translations:** name + description in Spanish, Portuguese (BR), Indonesian, Thai (Creator Hub > Localization). Description's first line: "Lift to grow taller, from 4 feet to 7 feet, and enter the Hall of Fame!" (**7, not 8**: 7'0" is the real top until more alters exist; promising 8 feet is an overpromise).
 8. **Brother's deal on paper** before any money moves (checklist below).
 9. **Still open from 28 Oct:** Workspace StreamOutBehavior → **LowMemory** (stops the ~1 s lag spike when gyms reload on phones).
-10. **Your call (I recommend removing):** the "free 1,000 coins for like + favourite" reward. Asking for likes is fine (forum), but the game can't check who liked, so it pays anyone who taps, and likes/favourites feed ranking signals. Recommendation: turn it into a plain "Like the game? Tap the thumb!" reminder with no coins; the group gift stays as the reward. I won't change it without your OK (it's your 28 Oct feature).
+10. **Like + favourite reward: KEPT (owner, 29 Oct).** The "free 1,000 coins for like + favourite" stays as it is; don't make it bigger and don't add more rewards for likes.
 11. **DevEx from Myanmar:** before the brother's deal, check in Creator Hub > DevEx that cashing out works for your country/tax form, so nobody signs a deal that can't be paid.
 
 **Claude Code before Saturday:** prompt **95** (Hall of Fame fixes, fairness, fixed coin packs).
@@ -250,3 +250,7 @@ Not changed: fixed coin packs stay fixed (owner's rule); if they feel small late
 - [[2026-10-29 GYM ARC Prompt - 106 First 3 minutes]] (7 Nov)
 - [[2026-10-29 GYM ARC Prompt - 107 Come-back hooks]] (28 Nov)
 - [[2026-10-29 GYM ARC Prompt - 108 Safety, data and policy pass]] (7 Nov, not slippable)
+
+## Progress 29 Oct (later)
+- Prompt 95 done in Studio by Claude (not published): [[2026-10-29 GYM ARC Prompt 95 done - Hall of Fame fixes]]. Starter Pack is 49 R$ on Roblox now.
+- Playtest of the first 6 minutes: [[2026-10-29 GYM ARC Playtest - first 6 minutes]] (21 problems; the fixes are added to prompt 106).

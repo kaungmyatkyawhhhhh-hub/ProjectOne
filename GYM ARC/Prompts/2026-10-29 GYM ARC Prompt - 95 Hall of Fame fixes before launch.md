@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, hall-of-fame]
-status: todo (run with 90, BEFORE Saturday 31 Oct)
+status: DONE 29 Oct by Claude in Studio (not published) - see [[2026-10-29 GYM ARC Prompt 95 done - Hall of Fame fixes]]
 ---
 # 95 Hall of Fame fixes before launch
 

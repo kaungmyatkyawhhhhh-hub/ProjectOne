@@ -21,3 +21,16 @@ GYM ARC: make the first 3 minutes fast, clear and rewarding. Follow CLAUDE.md an
 7b) SWITCH: Config/Experience Config FastStart_Enabled (false = old tutorial and old first goal), so it can be undone live. Write before/after in the progress note so I can compare next Sunday.
 TEST: 3 fresh players in Studio (phone size): time to first rep, time to first Growth Spurt, hint after 10 s idle, no popups before Spurt 1. Screenshots. Progress note + update Tutorial, Growth Spurts and Analytics notes.
 ```
+
+## Added 29 Oct from the playtest ([[2026-10-29 GYM ARC Playtest - first 6 minutes]])
+```text
+8) NEVER INTERRUPT THE BAR: no tutorial step may make the player STOP a machine or open a menu while the first Growth Spurt bar is filling (today it stops them at 50% and 83%).
+9) SPURT BAR ON THE MACHINE: a slim Growth Spurt progress bar on the machine HUD (the right column collapses there today, so the goal is invisible while lifting).
+10) SEE YOUR BODY: the machine cameras (flat bench first) frame the lifter's upper body, not the plates.
+11) QUIET UI IN MINUTE ONE: max one line of text on screen; no 2-page Coach Dex dialogs; hide every locked left-menu tile except the next unlock; your own title tag hides near machines (it covers OCCUPY).
+12) STATS: no floating giant numbers over the world for new players; the Stats tip comes after Spurt 1 and shows the 6 group bars.
+13) READY TO GROW = ONE MESSAGE: while a Growth Spurt is ready, mute PR / weight-unlocked / personal-best toasts; only one TAP TO GROW (today 3 buttons + 6 messages).
+14) CLEAN TRANSFORMATION: during the Growth Spurt moment hide machine signs, ProximityPrompts, trainers and over-head tags.
+15) AFTER THE TUTORIAL: the SKIP pill disappears (bug: it stays); quests window, free trainer roll, DEAL badge, FREE 1,000, INVITE, CODES wait until after Spurt 1 and come one per minute; the first session's quests point at the Growth Spurt (not "run 1 km").
+16) MENU: the line under the logo says "Lift to grow taller." and the menu flyover camera never passes through walls.
+```
