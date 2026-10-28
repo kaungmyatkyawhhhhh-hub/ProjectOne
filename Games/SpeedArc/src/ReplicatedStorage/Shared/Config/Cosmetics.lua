@@ -7,15 +7,15 @@
 -- Template = 0 = not uploaded yet (the mesh is used).
 return {
 	Kits = {
-		{ Id = "SingletBlue", Name = "Blue Singlet", Slot = "Top", Mesh = "Kit_Singlet", Color = "#1E7BFF", Minutes = 5, Template = 99631717826184 }, -- Shirt_SingletBlue.png
-		{ Id = "TeeGold", Name = "Gold Race Tee", Slot = "Top", Mesh = "Kit_Tee", Color = "#FFC83D", Minutes = 15, Template = 110110801068527 }, -- Shirt_TeeGold.png
-		{ Id = "ZipBlack", Name = "Black Zip Top", Slot = "Top", Mesh = "Kit_ZipTop", Color = "#1A1F29", Minutes = 30, Template = 119304957804331 }, -- Shirt_ZipBlack.png
-		{ Id = "ShortsBlue", Name = "Blue Race Shorts", Slot = "Bottom", Mesh = "Kit_Shorts", Color = "#0E3A8A", Minutes = 5, Template = 113958498390803 }, -- Pants_ShortsBlue.png
-		{ Id = "SplitBlack", Name = "Black Split Shorts", Slot = "Bottom", Mesh = "Kit_SplitShorts", Color = "#161A22", Minutes = 15, Template = 108060921209924 }, -- Pants_SplitBlack.png
-		{ Id = "TightsGold", Name = "Gold Run Tights", Slot = "Bottom", Mesh = "Kit_Tights", Color = "#E0A92A", Minutes = 30, Template = 109385336401252 }, -- Pants_TightsGold.png
+		{ Id = "SingletBlue", Name = "Blue Singlet", Slot = "Top", Mesh = "Kit_Singlet", Color = "#1E7BFF", Minutes = 5, Template = 105867826418062 }, -- Shirt_SingletBlue.png
+		{ Id = "TeeGold", Name = "Gold Race Tee", Slot = "Top", Mesh = "Kit_Tee", Color = "#FFC83D", Minutes = 15, Template = 128739508239261 }, -- Shirt_TeeGold.png
+		{ Id = "ZipBlack", Name = "Black Zip Top", Slot = "Top", Mesh = "Kit_ZipTop", Color = "#1A1F29", Minutes = 30, Template = 132752046580674 }, -- Shirt_ZipBlack.png
+		{ Id = "ShortsBlue", Name = "Blue Race Shorts", Slot = "Bottom", Mesh = "Kit_Shorts", Color = "#0E3A8A", Minutes = 5, Template = 119512359385842 }, -- Pants_ShortsBlue.png
+		{ Id = "SplitBlack", Name = "Black Split Shorts", Slot = "Bottom", Mesh = "Kit_SplitShorts", Color = "#161A22", Minutes = 15, Template = 134595670047956 }, -- Pants_SplitBlack.png
+		{ Id = "TightsGold", Name = "Gold Run Tights", Slot = "Bottom", Mesh = "Kit_Tights", Color = "#E0A92A", Minutes = 30, Template = 116570593833265 }, -- Pants_TightsGold.png
 		-- VIP kit (the VIP pass)
-		{ Id = "VipTop", Name = "VIP Singlet", Slot = "Top", Mesh = "Kit_Singlet", Color = "#FFC83D", Pass = "VIP", Template = 86834133066485 }, -- Shirt_VipTop.png
-		{ Id = "VipShorts", Name = "VIP Shorts", Slot = "Bottom", Mesh = "Kit_Shorts", Color = "#0B0D12", Pass = "VIP", Template = 93141831322409 }, -- Pants_VipShorts.png
+		{ Id = "VipTop", Name = "VIP Singlet", Slot = "Top", Mesh = "Kit_Singlet", Color = "#FFC83D", Pass = "VIP", Template = 79074603555775 }, -- Shirt_VipTop.png
+		{ Id = "VipShorts", Name = "VIP Shorts", Slot = "Bottom", Mesh = "Kit_Shorts", Color = "#0B0D12", Pass = "VIP", Template = 76176998230693 }, -- Pants_VipShorts.png
 	},
 	Headwear = {
 		{ Id = "Headband", Name = "Headband", Mesh = "Head_Headband", Color = "#1E7BFF", Minutes = 5 },
