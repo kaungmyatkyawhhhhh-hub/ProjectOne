@@ -81,3 +81,7 @@ Either way the **images and meshes** are re-uploaded into the new group (your ru
 7. [ ] The 3 notification strings (new experience > Engagement > Notifications): `daily_ready` "Your day {streak} streak reward is waiting in SPEED ARC!", `new_league` "A new league just opened in SPEED ARC. Come race!", `weekly_top` "You finished top 3 this week! Your title is waiting."
 8. [ ] Uploads to the new group, one at a time (I list each first, you approve): 3 UI sheets, 8 clothing images, then the meshes (Studio > Asset Manager > Bulk Import, Upload to = the new group). Send me the ids.
 9. [ ] Old experience (Myanmar Builders Club): Configure > set to **Private**. Don't delete it.
+
+## 28 Oct: group creation
+- The Create Community page shows **100 Robux**. The signed-in account (LuigiRED) has 92 Robux: 8 short. The owner buys Robux; Claude fills the form, the owner presses the pay button.
+- Emblem made for approval: `Downloads\speed_arc_models\group\SpeedArc_Group_Emblem.png` (512x512, kit style: gold bolt, SPEED ARC). Suggested name: "SPEED ARC Studio".
