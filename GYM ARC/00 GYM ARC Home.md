@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 28 Oct: prompt 89, VIDEO RECORDING MODE (Studio only, Workspace attribute RecordingMode): a showcase save, keys 1-6 = 6 shots (bench, Growth Spurt, Legendary roll, Gold alter, Strongman Yard, Hall of Fame), R = film. See [[2026-10-28 GYM ARC Video recording mode]].
 - 28 Oct: prompt 90, LIVE UPDATE EVENTS: the Hall of Fame is covered and locked until Sat 31 Oct 15:00 UTC (9:30 PM Myanmar), then opens by itself on every server with a countdown card, a banner on the Hall, 10..1, a live cutscene, a Launch Day title + 30 min boost, a NEW popup for later joiners, and its NEWS entry. Time can be moved in Creator Hub Configs (`Launch_HallOfFame_Time`). See [[GYM ARC - Live Update Events]].
 - 28 Oct: prompt 88, Playbook fixes: Camera.Focus in every cutscene, calmer Reduced Motion, Starter Pack = "New Player Pack" (no countdown, no fake crossed-out price), LIVE SWITCHES in Creator Hub Configs (Hall of Fame on/off, loading badge, Halloween, event boost), restart countdown + saves, economy / progression analytics, live skin prices. See [[2026-10-28 GYM ARC Playbook audit and fixes]], [[GYM ARC - Analytics events]].
 - 28 Oct: UI rule (CLAUDE.md): kit only, no plain coded buttons. Audit: Store / Pump Shop slim buttons (PremiumKit.SlimButton), Trainers Agency row + snacks + FEED, aura EQUIP + Show effect, DEAL tag all moved onto the kit. See [[2026-10-28 GYM ARC Placeholder button audit]].

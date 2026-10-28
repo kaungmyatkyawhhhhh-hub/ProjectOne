@@ -1,11 +1,13 @@
 ---
 date: 2026-10-28
 tags: [gymarc, prompt, video]
-status: todo (after 88)
+status: done
 ---
 # 89 Video recording mode (for the game page video)
 
 Back to [[00 GYM ARC Home|GYM ARC Home]] · Why: [[Roblox Playbook - Updates, storefront and analytics]] (real gameplay video autoplays in Recommended For You, up to +39% playtime from that row)
+
+**Done 28 Oct:** see [[2026-10-28 GYM ARC Video recording mode]].
 
 Roblox rules for game-page videos: **real, current gameplay only**. No trailer edits, no voiceover, no promo text on top. So the video must be recorded from the real game, not made by AI.
 
