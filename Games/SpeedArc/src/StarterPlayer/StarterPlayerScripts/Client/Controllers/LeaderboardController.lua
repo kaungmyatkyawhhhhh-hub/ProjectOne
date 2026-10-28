@@ -71,7 +71,7 @@ local function render()
 	if #keys > 1 then
 		title.Text = "THIS WEEK"
 	end
-	sub.Text = if tab == "THIS WEEK" then "Resets every Monday. The top 3 for wins get a title + coins!" elseif tab == "SPRINT" then "Tap the title to switch tracks" else "The whole game, every server"
+	sub.Text = if tab == "THIS WEEK" then "Resets every Monday. The top 3 for wins get a title + coins!" elseif tab == "SPRINT" then "Press the title to switch tracks" else "The whole game, every server"
 end
 
 function Leaderboards.open()
