@@ -23,7 +23,7 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]] · Why: [[2026-10-28 SPEED ARC Prog
 - Fast enough: your own client opens the wall when you run into it (pieces fly, layered sound). The server checks where you are and pays: wall k after wall k-1 in this run.
 - Too slow: a soft bounce; the wall itself shows how close you are.
 - Going back behind the start line, or respawning, starts a new run: every wall stands again.
-- Coins for wall k: 0.3 ... 2.5 minutes of coins at your league; **the first time ever x3**. In a lower league's area, a quarter.
+- Coins for wall k: 0.3 ... 2.5 minutes of coins at your league; **the first time ever x3**, again later only 5% (races are the best way to earn). In a lower league's area, a quarter.
 - The TO START button (bottom centre after the tutorial) takes you to the start.
 
 ## AFK treadmills

@@ -142,7 +142,7 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 ## 8. Races
 ### 8.1 Schedule
 - Each league area has its own race every **3 minutes** (config), offset so the server doesn't run all at once.
-- **Join window 15 s:** a gold JOIN button pops on the HUD (and a ring on the start line). Players who don't join keep training; no penalty.
+- **Join window 15 s:** the LIVE RACE card (top right: LIVE, the race type, the countdown, the heads of the real players who joined, the prize, JOIN) and a ring on the start line. Players who don't join keep running; no penalty.
 - Max 8 runners. If fewer than 4 players join, **NPC runners** fill to 4 (named original characters, speeds set around the league middle so they're beatable but not free).
 - Countdown 3-2-1-GO with a starting gun sound; false start = no penalty (just starts on GO).
 
@@ -153,8 +153,8 @@ Small separate areas linked by teleports (no giant open map). Each area streams 
 - Crowd cheers rise when someone overtakes; last 20% = "FINAL STRETCH" text + music swell.
 
 ### 8.3 Results
-- Podium moment: top 3 on a podium for 3 s (medals, confetti), everyone else gets their place card.
-- Rewards (coins = minutes of coins at your league, see 19): 1st 6 min, 2nd 4 min, 3rd 3 min, finish 1.5 min. First race of the day: +50%.
+- **The podium is the big moment** (races are the star, owner 28 Oct): a full-screen podium (2nd / 1st / 3rd blocks rise, real players' headshots, NPC initials, YOU), "YOU WON!" / "2ND PLACE!" / "4TH - SO CLOSE!", how many real players raced, the medal, coins counting up and flying to the counter, the SPEED boost, confetti (twice for a win), fanfare.
+- **Race wins give the best rewards** (coins = minutes of coins at your league, see 19): 1st 10 min, 2nd 6, 3rd 4, finish 2 (a win = 12 min, the biggest payout in the game; the best first-time wall smash is 7.5). Top 3 also get **2x SPEED per step** for 2 min / 1 min / 30 s. First race of the day: +50%. Smashing a wall again pays only 5%, so walls never out-earn races.
 - Medal counts saved (gold/silver/bronze). New personal best time = "NEW PB!" banner (once per race).
 - Back where you were before the race (teleport back to your station if you were training).
 
@@ -384,6 +384,8 @@ Owner, 28 Oct: coaches are INSPIRED BY famous kinds of runners, never copies. Ru
 - Tap combo: **yes**, as in 6.2 (x1.0 -> x1.5 over 10 s of steady tapping; Auto Train gets a fixed x1.2) - Claude's call, keep unless playtests say otherwise.
 - Prices: as in section 20 - Claude's call, tune after launch data.
 - M1 tuning (prompt 1, 28 Oct): JOIN window **10 s**; race pace BasePace 22, League 1 middle 80 MPH, low clamp -0.6 (not -1) so new runners aren't too slow; **Lap Race = 1.5 laps** starting on the back straight (~27 s at 80 MPH), Sprint = 1 lap (~18 s); races stop at 45 s and the rest are placed by distance; NPC speed = joined players' middle x 0.7-1.15. Station 1 is called **Sprint Lane** (the GDD's Jog Lane numbers). See [[SPEED ARC - Races]].
+
+- **No more pivots (owner, 28 Oct):** the game is "+1 SPEED every step" + the wall course + LIVE RACES every 3 min (our difference from other +1 games). The race is the star: the race card and the podium are the most exciting moments, race wins give the best rewards.
 
 ## 29. Detail plans
 - [[SPEED ARC - World, Map and Buildings]]

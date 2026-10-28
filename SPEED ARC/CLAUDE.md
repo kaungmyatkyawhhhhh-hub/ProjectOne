@@ -13,7 +13,7 @@ This folder is ONLY for SPEED ARC, a Roblox running simulator. It holds the same
 - Never read the GYM ARC folder unless a prompt says to copy a specific system.
 
 ## The game
-**Since 28 Oct (owner pivot): "+1 SPEED every step".** Run -> every step +1 SPEED -> smash walls on the wall course for coins -> shoes / coaches / trails -> smash the last wall = Go Pro to the next world. Treadmills = AFK steps, races every 3 min stay as an event. See [[SPEED ARC - Wall Course and Steps]]. Kids 8-14, mostly phones.
+**Final (owner, 28 Oct): no more pivots.** "+1 SPEED every step" + the wall course + **LIVE RACES every 3 min** (our difference from other +1 games, and the star of the game). Run -> every step +1 SPEED -> smash walls for coins -> shoes / coaches / trails -> smash the last wall = Go Pro to the next world. The race card and the podium are the most exciting moments, and race wins give the best rewards. Treadmills = AFK steps. See [[SPEED ARC - Wall Course and Steps]], [[SPEED ARC - Races]]. Kids 8-14, mostly phones.
 
 ## Must-follow rules
 1. **Separate game.** Notes go in `SPEED ARC\Progress\` (one per prompt) and `SPEED ARC\Features\` (one per system, kept up to date). Screenshots in `SPEED ARC\Screenshots\`.

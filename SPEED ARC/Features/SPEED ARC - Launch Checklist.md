@@ -23,8 +23,8 @@ Everything you need to do before publishing the soft launch. Tick them off here.
 - [x] Music picked (APM library, licensed): Hub "Aim High" 1839850159, Park "Summer Memories" 9043824305, Stadium "No Time To Think (Long Perc)" 1837843290, Race "Battleground" 9048541013. Loudness measured and balanced. Listen and tell me if one is wrong.
 
 ## 3. Game page
-- [ ] **Name:** SPEED ARC
-- [ ] **Description (short):** "+1 SPEED every step! Run, smash walls, GO PRO to new worlds. Race every 3 minutes, collect shoes and coaches." (prompt 11)
+- [ ] **Name (suggested, 28 Oct):** "+1 Speed Every Step: LIVE RACES"  (others: "+1 Speed Race vs Real Players", "SPEED ARC: +1 Speed Race"; "SPEED ARC" stays the brand on the logo and in the game)
+- [ ] **Description (suggested, 28 Oct):** "+1 SPEED every step! Run, get faster and SMASH through walls. Every 3 minutes a LIVE RACE starts: race real players on the track, climb the podium and win the biggest prizes in the game (huge coins + 2x SPEED!). Collect shoes, trails and coaches, smash the last wall and GO PRO to new worlds: City Park and the Big Stadium. Quiet server? Runner bots fill the lanes, so a race always starts."
 - [ ] **Icon + 3-5 thumbnails** (you make them): a wall smash (pieces flying, a big number), the candy spawn, the Coach Agency, a race start.
 - [ ] **Genre:** Sports (subgenre: Racing / Simulator).
 - [ ] **Age rating questionnaire:** no violence, no blood, no gambling (coach rolls are coins only, no Robux), no realistic people. Has in-experience purchases.

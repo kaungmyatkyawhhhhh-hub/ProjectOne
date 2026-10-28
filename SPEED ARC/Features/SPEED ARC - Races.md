@@ -5,11 +5,22 @@ status: done (M1, areas + hurdles M3)
 ---
 # SPEED ARC - Races
 
+## Races are the star (owner, 28 Oct)
+- **LIVE RACE card** (top right, the 15 s join window, replaces the toast and the plain JOIN button): a blinking LIVE pill, the race type, the countdown (red in the last 3 s), the heads of the real players who joined ("BE THE FIRST TO JOIN!" / "3 RUNNERS IN"), the prize ("WIN +720 COINS + 2x SPEED" at your league), and the gold JOIN button ("JOINED!" once you're in). It stays hidden during the tutorial until its podium (the tutorial has its own race card). The server puts the joined user ids on `RaceState.<Area>` attribute `Joined`.
+- **The podium** (full screen after every race): 2nd / 1st / 3rd blocks rise, headshots of real players (NPCs show an initial), YOU marked in gold, the title by place, "LAP RACE - 6 RUNNERS - 1 REAL PLAYER", the 4th-8th list, the medal, the time, coins counting up then flying to the counter, the 2x SPEED boost, NEW PB!, first race today, confetti (twice for a win), fanfare, CONTINUE.
+- **Rewards:** 1st 10 min of coins, 2nd 6, 3rd 4, finish 2 (+50% first race of the day). Top 3: **2x SPEED per step** for 120 / 60 / 30 s of play (`Race.WinBoostSeconds`, `data.Boost.Race`, shown on the boost badge). Repeat wall smashes pay 5% (`Course.RepeatSmashMult`), so racing well is the best way to earn.
+- Tested in Studio: the card (empty and with my head), a 6-runner Lap Race to the podium (2ND PLACE, +720 coins, 2x SPEED 1:00, the badge counting down).
+
+![[2026-10-28 race live card.jpg]]
+![[2026-10-28 race live card joined.jpg]]
+![[2026-10-28 race podium.jpg]]
+
+
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ## How it works
 - **Every 3 minutes** (first one 45 s after a server starts) a race on the School Track for everyone in the server.
-- **JOIN:** a 10 s window with a pulsing gold JOIN RACE button, a toast, a gold ring at the start, and JOIN NOW on the arch and stand screens. If nobody joins, no race. Players who don't join keep training.
+- **JOIN:** a 15 s window with the LIVE RACE card (above), a gold ring at the start, and JOIN NOW on the arch and stand screens. If nobody joins, no race. Players who don't join keep training.
 - **Runners:** up to 8 players. NPC runners (Dash, Milo, Zara, Kofi, Rina, Theo, Ivy, Bo: original names with name tags) fill up to 4, at 0.7-1.15 x the joined players' middle speed, and use boosts too.
 - **Start:** everyone lines up in lanes, 3-2-1 beeps, starting gun + crowd on GO.
 - **Running:** the server moves every runner (clients only send BOOST taps). Pace = 22 x (1 + 0.6 x clamp(log2(MPH / league middle), -0.6, 1.5)) studs a second.

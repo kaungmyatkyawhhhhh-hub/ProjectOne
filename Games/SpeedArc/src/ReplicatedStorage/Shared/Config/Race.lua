@@ -1,7 +1,7 @@
 -- Races (GDD sections 6.4 and 8).
 return {
 	IntervalSeconds = 180, -- a race every 3 minutes
-	JoinSeconds = 10, -- gold JOIN button window (prompt 1 says 10 s; GDD 8.1 says 15 s)
+	JoinSeconds = 15, -- the LIVE RACE card is up this long (GDD 8.1; races are the star, 28 Oct)
 	CountdownSeconds = 3,
 	ResultsSeconds = 6,
 	MaxRaceSeconds = 45, -- unfinished runners are placed by distance after this
