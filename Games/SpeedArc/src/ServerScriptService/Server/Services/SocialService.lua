@@ -292,6 +292,15 @@ function SocialService.start()
 		SocialService.refreshTag(player)
 		return true
 	end)
+	-- one-time prompts (the favourite prompt after the first Go Pro): returns true the first time only
+	Net.on("Prompted", function(player, which)
+		local data = PlayerData.get(player)
+		if not data or type(which) ~= "string" or data.Prompted[which] then
+			return true, false
+		end
+		data.Prompted[which] = true
+		return true, true
+	end)
 	Net.on("RaceThem", ask)
 	Net.on("RaceAnswer", answer)
 
