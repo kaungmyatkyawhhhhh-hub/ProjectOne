@@ -85,7 +85,7 @@ local function card(item, isPass)
 	elseif item.Key == "StarterPack" and st and not st.StarterEligible then
 		label = "GONE"
 	elseif soon then
-		label = "SOON"
+		label = ("SOON  R$ %d"):format(price(item)) -- not created in Creator Hub yet
 	else
 		label = ("R$ %d"):format(price(item))
 	end

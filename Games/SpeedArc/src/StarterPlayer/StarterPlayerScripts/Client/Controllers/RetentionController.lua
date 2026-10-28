@@ -336,8 +336,8 @@ function R.start(c)
 		end)
 	end
 
-	-- timed boost badge on the MPH plate
-	badge = make("Frame", { Name = "BoostBadge", BackgroundColor3 = P.Gold, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -8, 0, 12), Size = UDim2.fromOffset(74, 22), Visible = false, ZIndex = 4, Parent = refs.speedBlock })
+	-- timed boost badge, right of the rank badge (on the MPH plate it covered "MPH")
+	badge = make("Frame", { Name = "BoostBadge", BackgroundColor3 = P.Gold, Position = UDim2.fromOffset(170, 71), Size = UDim2.fromOffset(84, 22), Visible = false, ZIndex = 4, Parent = canvas })
 	UIKit.corner(badge, UDim.new(0.5, 0))
 	badgeText = UIKit.text({ Text = "2x", TextSize = 13, Color = P.SpeedBlack, Stroke = false, ZIndex = 5, Parent = badge })
 

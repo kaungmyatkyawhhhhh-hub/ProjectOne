@@ -1,11 +1,12 @@
 -- CosmeticsController: switches every character's trail on/off locally. Your own trail runs full;
 -- other players' are simplified (no emitter) and off past 80 studs. On low graphics, emitters halve.
--- A short list (players in the server), checked 5 times a second.
+-- A short list (players in the server), checked 5 times a second. Worn meshes hide past 150 studs.
 local Players = game:GetService("Players")
 local UserSettings_ = UserSettings()
 
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Trails = require(Shared.Config.Trails)
+local CosmeticsConfig = require(Shared.Config.Cosmetics)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -49,11 +50,38 @@ local function step()
 	end
 end
 
+-- other players' worn meshes (kits, headwear, bib, shoes) hide far away (M5); checked once a second
+local function hideFar()
+	local camPos = camera.CFrame.Position
+	for _, p in Players:GetPlayers() do
+		local char = p.Character
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+		if root and p ~= player then
+			local far = (root.Position - camPos).Magnitude > CosmeticsConfig.HideOthersBeyond
+			for _, m in char:GetChildren() do
+				if m:IsA("Model") and (m:GetAttribute("SpeedArcCosmetic") or m:GetAttribute("SpeedArcShoe")) and m:GetAttribute("Far") ~= far then
+					m:SetAttribute("Far", far)
+					for _, d in m:GetDescendants() do
+						if d:IsA("BasePart") then
+							d.LocalTransparencyModifier = if far then 1 else 0
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 function Cosmetics.start(ctx)
 	ctx.Cosmetics = Cosmetics
 	task.spawn(function()
+		local n = 0
 		while true do
 			step()
+			n += 1
+			if n % 5 == 0 then
+				hideFar()
+			end
 			task.wait(0.2)
 		end
 	end)

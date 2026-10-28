@@ -8,6 +8,9 @@ local UIKit = require(Shared.UIKit)
 local Art = require(Shared.Util.Art)
 local Boosts = require(Shared.Util.Boosts)
 local Format = require(Shared.Util.Format)
+local Cosmetics = require(Shared.Config.Cosmetics)
+local Retention = require(Shared.Config.Retention)
+local Formulas = require(Shared.Util.Formulas)
 local Shoes = require(Shared.Config.Shoes)
 local Trails = require(Shared.Config.Trails)
 
@@ -225,22 +228,256 @@ local function card(item, isShoe)
 	return c
 end
 
-local function rebuild()
+local cosmeticCard, titleList, bibRefresh, rebuild
+----------------------------------------------------------------------------
+-- M5: kits, headwear, name styles, bib, titles
+----------------------------------------------------------------------------
+local bibPage, bibBox, bibColor, bibOn, bibColorButtons = nil, nil, nil, true, {}
+
+local function isWorn(kind, item)
+	if kind == "Kit" then
+		return coll.Kit and coll.Kit[item.Slot] == item.Id
+	elseif kind == "Head" then
+		return coll.Head == item.Id
+	elseif kind == "Name" then
+		return coll.NameStyle == item.Id
+	elseif kind == "Skin" then
+		return coll.ShoeSkin and coll.ShoeSkin.CanvasRunners == item.Id
+	end
+end
+
+local function isOwned(kind, item)
+	if item.Pass then
+		return coll.Passes and coll.Passes[item.Pass] == true
+	end
+	if kind == "Kit" then
+		return coll.OwnedKits and coll.OwnedKits[item.Id]
+	elseif kind == "Head" then
+		return coll.OwnedHead and coll.OwnedHead[item.Id]
+	elseif kind == "Name" then
+		return coll.OwnedNameStyles and coll.OwnedNameStyles[item.Id]
+	elseif kind == "Skin" then
+		return true
+	end
+end
+
+function cosmeticCard(item, kind, order)
+	local owned = isOwned(kind, item)
+	local worn = isWorn(kind, item)
+	local c = make("Frame", { Name = item.Id, BackgroundColor3 = P.White, Size = UDim2.fromOffset(132, 168), LayoutOrder = order, Parent = grid })
+	UIKit.corner(c, 12)
+	UIKit.gradient(c, if worn then P.DeepBlue else P.Graphite, P.Carbon, 90)
+	UIKit.stroke(c, if worn then P.Gold elseif owned then P.ElectricBlue else P.Graphite, 2)
+	-- the swatch: the item's colour (a name style shows your name in it)
+	local sw = make("Frame", { BackgroundColor3 = P.White, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 8), Size = UDim2.fromOffset(if kind == "Name" then 116 else 64, 52), Parent = c })
+	UIKit.corner(sw, 10)
+	if kind == "Name" then
+		sw.BackgroundColor3 = P.SpeedBlack
+		local nameText = UIKit.text({ Text = player.DisplayName, TextSize = 18, Color = P.White, Parent = sw })
+		make("UIGradient", { Rotation = 90, Color = ColorSequence.new(Color3.fromHex(item.Colors[1]), Color3.fromHex(item.Colors[2])), Parent = nameText })
+	else
+		local col = Color3.fromHex(item.Color)
+		UIKit.gradient(sw, col:Lerp(P.White, 0.25), col:Lerp(P.SpeedBlack, 0.3), 90)
+		UIKit.stroke(sw, P.White, 2, 0.4)
+		UIKit.text({ Text = if kind == "Kit" then string.upper(item.Slot) elseif kind == "Skin" then "SHOES" else "HEAD", TextSize = 13, Color = P.White, Parent = sw })
+	end
+	UIKit.text({ Text = string.upper(item.Name), TextSize = 14, Wrapped = true, Position = UDim2.fromOffset(6, 64), Size = UDim2.new(1, -12, 0, 34), Parent = c })
+	local function act(text, style, fn)
+		UIKit.button({ Style = style, Text = text, TextSize = 14, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6), Size = UDim2.new(1, -14, 0, 34), Parent = c, OnClick = fn })
+	end
+	if owned then
+		act(if worn then "WEARING" else "WEAR", if worn then "Gold" else "Blue", function()
+			if ctx.Net.call("EquipCosmetic", kind, item.Id) then
+				ctx.Sound.play("Equip")
+			end
+		end)
+	elseif item.Pass then
+		UIKit.text({ Text = item.Pass .. " PASS", Font = F.BodyBold, TextSize = 13, Color = P.Gold, Position = UDim2.fromOffset(6, 100), Size = UDim2.new(1, -12, 0, 18), Parent = c })
+		act("STORE", "Dark", function()
+			if ctx.Store then
+				ctx.Store.open("PASSES")
+			end
+		end)
+	else
+		local price = Formulas.minutesOfCoins(item.Minutes or 0, player:GetAttribute("League") or 1)
+		local row = make("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 100), Size = UDim2.new(1, 0, 0, 22), Parent = c })
+		local ci = UIKit.coinIcon(18, row)
+		ci.Position = UDim2.new(0.5, -40, 0, 2)
+		UIKit.text({ Text = Format.short(price), TextSize = 16, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.new(0.5, -18, 0, 0), Size = UDim2.fromOffset(80, 22), Parent = row })
+		act("BUY", "Gold", function()
+			local ok, why = ctx.Net.call("BuyCosmetic", kind, item.Id)
+			if ok then
+				ctx.Sound.play("KaChing")
+				ctx.Hud.toast(item.Name .. " is yours!", "Gold")
+			elseif why == "coins" then
+				ctx.Hud.toast("Not enough coins yet: win races to earn more", "Denied")
+			end
+		end)
+	end
+	return c
+end
+
+function titleList()
+	local titles = {}
+	for _, t in Retention.Titles.Order do
+		if coll.Titles and coll.Titles[t] then
+			table.insert(titles, t)
+		end
+	end
+	for t in coll.Titles or {} do
+		if not table.find(titles, t) then
+			table.insert(titles, t)
+		end
+	end
+	if #titles == 0 then
+		UIKit.text({ Text = "No titles yet - win your first race!", TextSize = 16, Size = UDim2.fromOffset(400, 40), Parent = grid })
+		return
+	end
+	for i, t in titles do
+		local worn = coll.Title == t
+		local b = UIKit.button({ Style = if worn then "Gold" else "Dark", Text = t, TextSize = 14, Size = UDim2.fromOffset(150, 46), Parent = grid, OnClick = function()
+			if ctx.Net.call("SetTitle", if worn then "" else t) then
+				ctx.Sound.play("Equip")
+				task.spawn(function()
+					local ok, snap = ctx.Net.call("GetCollection")
+					if ok then
+						coll = snap
+						rebuild()
+					end
+				end)
+			end
+		end })
+		b.LayoutOrder = i
+	end
+end
+
+local function buildBibPage()
+	bibPage = make("Frame", { Name = "BibPage", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 66), Size = UDim2.new(1, 0, 1, -66), Visible = false, Parent = win.content })
+	-- the preview card
+	local preview = make("Frame", { Name = "Preview", BackgroundColor3 = P.White, Position = UDim2.fromOffset(10, 6), Size = UDim2.fromOffset(150, 150), Parent = bibPage })
+	UIKit.corner(preview, 10)
+	local band = make("Frame", { Name = "Band", BackgroundColor3 = P.ElectricBlue, Size = UDim2.new(1, 0, 0, 36), Parent = preview })
+	UIKit.corner(band, 10)
+	local num = UIKit.text({ Name = "Num", Text = "7", TextSize = 64, Color = P.SpeedBlack, Stroke = false, Position = UDim2.fromOffset(0, 36), Size = UDim2.new(1, 0, 1, -36), Parent = preview })
+	UIKit.text({ Text = "NUMBER (1-999)", TextSize = 14, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(180, 4), Size = UDim2.fromOffset(200, 20), Parent = bibPage })
+	local boxFrame = make("Frame", { BackgroundColor3 = P.SpeedBlack, Position = UDim2.fromOffset(180, 26), Size = UDim2.fromOffset(120, 42), Parent = bibPage })
+	UIKit.corner(boxFrame, 10)
+	UIKit.stroke(boxFrame, P.Graphite, 2)
+	bibBox = make("TextBox", { BackgroundTransparency = 1, Text = "7", PlaceholderText = "7", TextColor3 = P.White, FontFace = F.BodyBold, TextSize = 22, Size = UDim2.fromScale(1, 1), ClearTextOnFocus = false, Parent = boxFrame })
+	bibBox:GetPropertyChangedSignal("Text"):Connect(function()
+		local clean = bibBox.Text:gsub("%D", ""):sub(1, 3)
+		if clean ~= bibBox.Text then
+			bibBox.Text = clean
+		end
+		num.Text = if clean == "" then "-" else clean
+	end)
+	UIKit.text({ Text = "COLOUR", TextSize = 14, Color = P.Gold, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(180, 76), Size = UDim2.fromOffset(200, 20), Parent = bibPage })
+	for i, c in Cosmetics.Bib.Colors do
+		local b, l = UIKit.button({ Name = c.Id, Style = "Dark", Text = c.Name, TextSize = 13, Position = UDim2.fromOffset(180 + (i - 1) * 118, 98), Size = UDim2.fromOffset(112, 40), Parent = bibPage, OnClick = function()
+			if (coll.BestLeague or 1) < c.League then
+				ctx.Hud.toast(("Unlocks in League %d"):format(c.League), "Denied")
+				return
+			end
+			bibColor = c.Id
+			band.BackgroundColor3 = Color3.fromHex(c.Color)
+			for id, bb in bibColorButtons do
+				UIKit.setButtonStyle(bb.button, if id == bibColor then "Blue" else "Dark")
+			end
+		end })
+		bibColorButtons[c.Id] = { button = b, label = l, def = c }
+	end
+	local onBtn, onLabel
+	onBtn, onLabel = UIKit.button({ Name = "On", Style = "Blue", Text = "BIB ON", TextSize = 15, Position = UDim2.fromOffset(180, 152), Size = UDim2.fromOffset(130, 44), Parent = bibPage, OnClick = function()
+		bibOn = not bibOn
+		onLabel.Text = if bibOn then "BIB ON" else "BIB OFF"
+		UIKit.setButtonStyle(onBtn, if bibOn then "Blue" else "Dark")
+	end })
+	UIKit.button({ Name = "Save", Style = "Gold", Text = "SAVE", TextSize = 16, Position = UDim2.fromOffset(320, 152), Size = UDim2.fromOffset(130, 44), Parent = bibPage, OnClick = function()
+		local ok, why = ctx.Net.call("SetBib", tonumber(bibBox.Text) or 0, bibColor, bibOn)
+		if ok then
+			ctx.Sound.play("Equip")
+			ctx.Hud.toast("Bib saved!", "Gold")
+		else
+			ctx.Hud.toast(if why == "number" then "Pick a number from 1 to 999" else "That colour isn't open yet", "Denied")
+		end
+	end })
+	bibPage:SetAttribute("Built", true)
+end
+
+function bibRefresh()
+	if not bibPage then
+		buildBibPage()
+	end
+	bibPage.Visible = true
+	local b = coll.Bib or { Number = 0, Color = "Blue", On = false }
+	bibColor = b.Color
+	bibOn = b.On or b.Number == 0
+	if b.Number > 0 then
+		bibBox.Text = tostring(b.Number)
+	end
+	for id, bb in bibColorButtons do
+		local open = (coll.BestLeague or 1) >= bb.def.League
+		UIKit.setButtonStyle(bb.button, if id == bibColor then "Blue" else "Dark")
+		bb.label.Text = if open then bb.def.Name else ("LEAGUE %d"):format(bb.def.League)
+	end
+	local preview = bibPage.Preview
+	for _, c in Cosmetics.Bib.Colors do
+		if c.Id == bibColor then
+			preview.Band.BackgroundColor3 = Color3.fromHex(c.Color)
+		end
+	end
+end
+
+function rebuild()
 	if not win or not coll then
 		return
 	end
 	for _, ch in grid:GetChildren() do
-		if ch:IsA("Frame") then
+		if ch:IsA("GuiObject") then
 			ch:Destroy()
 		end
 	end
-	local list = if tab == "SHOES" then Shoes.List else Trails.List
-	for i, item in list do
-		local c = card(item, tab == "SHOES")
-		c.LayoutOrder = i
-		c.Parent = grid
+	if bibPage then
+		bibPage.Visible = tab == "BIB"
 	end
-	header.Text = if tab == "SHOES" then "Shoes boost your training. Wear one pair." else "Trails show when you run fast and in races. Small bonus each."
+	grid.Visible = tab ~= "BIB"
+	if tab == "SHOES" or tab == "TRAILS" then
+		local list = if tab == "SHOES" then Shoes.List else Trails.List
+		for i, item in list do
+			local c = card(item, tab == "SHOES")
+			c.LayoutOrder = i
+			c.Parent = grid
+		end
+		header.Text = if tab == "SHOES" then "Shoes boost your training. Wear one pair." else "Trails show when you run fast and in races. Small bonus each."
+	elseif tab == "KITS" then
+		for i, item in Cosmetics.Kits do
+			cosmeticCard(item, "Kit", i)
+		end
+		local n = #Cosmetics.Kits
+		for id, skin in Cosmetics.ShoeSkins do
+			if coll.ShoeSkins and coll.ShoeSkins[id] then
+				n += 1
+				cosmeticCard({ Id = id, Name = skin.Name .. " Canvas Runners", Color = skin.Color, Skin = true }, "Skin", n)
+			end
+		end
+		header.Text = "Kits are just for looks: one top + one bottom. Tap WEARING to take it off."
+	elseif tab == "HEAD" then
+		for i, item in Cosmetics.Headwear do
+			cosmeticCard(item, "Head", i)
+		end
+		header.Text = "Headwear is just for looks. One at a time."
+	elseif tab == "NAME" then
+		for i, item in Cosmetics.NameStyles do
+			cosmeticCard(item, "Name", i)
+		end
+		header.Text = "The colour of your name over your head. Long coin goals!"
+	elseif tab == "TITLE" then
+		titleList()
+		header.Text = "Titles you earned. Win races, rank up and Go Pro for more."
+	elseif tab == "BIB" then
+		bibRefresh()
+		header.Text = "Your race number on your chest. Free! More colours unlock in new leagues."
+	end
 end
 
 function Locker.open(which)
@@ -253,17 +490,17 @@ function Locker.start(c)
 	ctx = c
 	ctx.Locker = Locker
 	win = UIKit.window({ Name = "Locker", Title = "LOCKER", Size = Vector2.new(700, 330), Parent = ctx.Hud.canvas })
-	setTab = UIKit.tabs(win.content, { "SHOES", "TRAILS" }, function(name)
+	setTab = UIKit.tabs(win.content, { "SHOES", "TRAILS", "KITS", "HEAD", "BIB", "NAME", "TITLE" }, function(name)
 		tab = name
 		rebuild()
-	end)
-	header = UIKit.text({ Text = "", Font = F.Body, TextSize = 14, Color = P.White, XAlign = Enum.TextXAlignment.Right, Position = UDim2.new(1, -400, 0, 8), Size = UDim2.fromOffset(400, 22), Parent = win.content })
+	end, nil, 88)
+	header = UIKit.text({ Text = "", Font = F.Body, TextSize = 13, Color = P.BrightBlue, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(2, 44), Size = UDim2.new(1, 0, 0, 18), Parent = win.content })
 	grid = make("ScrollingFrame", {
 		Name = "Grid",
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(0, 48),
-		Size = UDim2.new(1, 0, 1, -48),
+		Position = UDim2.fromOffset(0, 64),
+		Size = UDim2.new(1, 0, 1, -64),
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.X,
 		ScrollingDirection = Enum.ScrollingDirection.X,

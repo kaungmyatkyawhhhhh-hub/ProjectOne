@@ -28,6 +28,16 @@
   ]
  },
  {
+  "file": "ReplicatedStorage/Shared/Config/Cosmetics.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Cosmetics"
+  ]
+ },
+ {
   "file": "ReplicatedStorage/Shared/Config/GameConfig.lua",
   "class": "ModuleScript",
   "path": [
@@ -115,6 +125,16 @@
    "Shared",
    "Config",
    "Stations"
+  ]
+ },
+ {
+  "file": "ReplicatedStorage/Shared/Config/Store.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ReplicatedStorage",
+   "Shared",
+   "Config",
+   "Store"
   ]
  },
  {
@@ -236,6 +256,16 @@
   ]
  },
  {
+  "file": "ServerScriptService/Server/Services/CosmeticsService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "CosmeticsService"
+  ]
+ },
+ {
   "file": "ServerScriptService/Server/Services/DataTemplate.lua",
   "class": "ModuleScript",
   "path": [
@@ -323,6 +353,16 @@
    "Server",
    "Services",
    "SocialService"
+  ]
+ },
+ {
+  "file": "ServerScriptService/Server/Services/StoreService.lua",
+  "class": "ModuleScript",
+  "path": [
+   "ServerScriptService",
+   "Server",
+   "Services",
+   "StoreService"
   ]
  },
  {
@@ -508,6 +548,17 @@
    "Client",
    "Controllers",
    "SpeedFeelController"
+  ]
+ },
+ {
+  "file": "StarterPlayer/StarterPlayerScripts/Client/Controllers/StoreController.lua",
+  "class": "ModuleScript",
+  "path": [
+   "StarterPlayer",
+   "StarterPlayerScripts",
+   "Client",
+   "Controllers",
+   "StoreController"
   ]
  },
  {

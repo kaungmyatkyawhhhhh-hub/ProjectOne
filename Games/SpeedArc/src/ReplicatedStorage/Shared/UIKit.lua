@@ -523,7 +523,7 @@ function UIKit.closeWindows()
 end
 
 -- a row of tab buttons; returns setTab(name)
-function UIKit.tabs(parent, names, onPick, zindex)
+function UIKit.tabs(parent, names, onPick, zindex, width)
 	local row = make("Frame", { Name = "Tabs", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 40), ZIndex = zindex, Parent = parent })
 	make("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = row })
 	local buttons = {}
@@ -534,7 +534,7 @@ function UIKit.tabs(parent, names, onPick, zindex)
 		onPick(name)
 	end
 	for i, n in names do
-		local b = UIKit.button({ Name = n, Style = "Dark", Text = n, TextSize = 17, Size = UDim2.fromOffset(130, 38), ZIndex = zindex, ClickSound = "Tab" })
+		local b = UIKit.button({ Name = n, Style = "Dark", Text = n, TextSize = if width and width < 110 then 15 else 17, Size = UDim2.fromOffset(width or 130, 38), ZIndex = zindex, ClickSound = "Tab" })
 		b.LayoutOrder = i
 		b.Parent = row
 		b.Activated:Connect(function()
