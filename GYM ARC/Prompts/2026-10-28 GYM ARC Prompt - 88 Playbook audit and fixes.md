@@ -1,11 +1,13 @@
 ---
 date: 2026-10-28
 tags: [gymarc, prompt]
-status: todo
+status: done
 ---
 # 88 Playbook audit and fixes (only what's NOT done yet)
 
 Back to [[00 GYM ARC Home|GYM ARC Home]] · Rules: [[Roblox Playbook - Rules for every game]]
+
+**Done 28 Oct:** see [[2026-10-28 GYM ARC Playbook audit and fixes]].
 
 Run AFTER the Hall of Fame work (80-87) is stable; don't break Saturday's launch. Checked against the vault on 28 Oct so it doesn't repeat finished work.
 

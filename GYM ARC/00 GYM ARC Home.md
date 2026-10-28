@@ -17,6 +17,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
 
 ## Current status (21 Oct 2026)
+- 28 Oct: prompt 88, Playbook fixes: Camera.Focus in every cutscene, calmer Reduced Motion, Starter Pack = "New Player Pack" (no countdown, no fake crossed-out price), LIVE SWITCHES in Creator Hub Configs (Hall of Fame on/off, loading badge, Halloween, event boost), restart countdown + saves, economy / progression analytics, live skin prices. See [[2026-10-28 GYM ARC Playbook audit and fixes]], [[GYM ARC - Analytics events]].
 - 28 Oct: UI rule (CLAUDE.md): kit only, no plain coded buttons. Audit: Store / Pump Shop slim buttons (PremiumKit.SlimButton), Trainers Agency row + snacks + FEED, aura EQUIP + Show effect, DEAL tag all moved onto the kit. See [[2026-10-28 GYM ARC Placeholder button audit]].
 - 28 Oct: Growth Spurt transformation: after every spurt the camera turns to you, your body glows gold and grows to the new height while the height counts up, then "4'0" → 4'4"" and one short line. Owner: keep it clean (no screen flashes, no extra text; HUD hides meanwhile). See [[GYM ARC - Growth Spurts]].
 - 28 Oct: MEMBERS GYM (group only, next to the Starter Gym's door, +10% gains, weights up to your best gym's) and FREE 1,000 coins for like + favourite. See [[GYM ARC - Members Gym and Free Coins]].
