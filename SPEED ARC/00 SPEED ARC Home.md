@@ -3,6 +3,8 @@ tags: [speedarc, home]
 ---
 # SPEED ARC
 
+> **ARCHIVED (owner, 28 Oct):** SPEED ARC is not published and not worked on. The new game is [[00 MOW ARC Home|MOW ARC]] (an incremental). Its code here (`Games\SpeedArc\src`) is kept so MOW ARC can copy systems from it. Don't change or delete anything.
+
 A Roblox running simulator: **"+1 SPEED every step"**, smash walls, Go Pro to new worlds. Tagline: **"Everyone starts slow."**
 Sister game of GYM ARC, built light so it runs smooth on cheap phones.
 
