@@ -9,6 +9,8 @@ local ORDER = {
 	"HudController",
 	"CameraController",
 	"TrainingController",
+	"StepController",
+	"WallController",
 	"RaceController",
 	"RaceFxController",
 	"WorldLifeController",

@@ -5,6 +5,7 @@ local Race = require(Shared.Config.Race)
 local Stations = require(Shared.Config.Stations)
 local Course = require(Shared.Config.Course)
 local Ranks = require(Shared.Config.Ranks)
+local Areas = require(Shared.Config.Areas)
 
 local Formulas = {}
 
@@ -62,6 +63,16 @@ end
 
 function Formulas.wallCount()
 	return #Course.WallShares
+end
+
+-- does this league's area have a wall course yet? (Park and Stadium get theirs later)
+function Formulas.hasCourse(league)
+	for _, id in Areas.Order do
+		if Areas[id].League == league and Course.Areas[id] then
+			return true
+		end
+	end
+	return false
 end
 
 function Formulas.station(id)

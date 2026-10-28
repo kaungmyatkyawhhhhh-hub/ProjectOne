@@ -11,6 +11,7 @@ local Shared = game:GetService("ReplicatedStorage").Shared
 local UIKit = require(Shared.UIKit)
 local Art = require(Shared.Util.Art)
 local Format = require(Shared.Util.Format)
+local Formulas = require(Shared.Util.Formulas)
 local Retention = require(Shared.Config.Retention)
 local Coaches = require(Shared.Config.Coaches)
 local Ranks = require(Shared.Config.Ranks)
@@ -68,11 +69,11 @@ local function buildCard(canvas)
 	cardBtn, cardBtnLabel = UIKit.button({ Name = "GoTo", Style = "Gold", Text = "GO TO", TextSize = 17, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.fromOffset(104, 46), ZIndex = 14, Parent = card })
 	cardBtn.Visible = false
 
-	-- after the tutorial: a GO TRAIN button (bottom centre) whenever you're not training or racing
-	goTrain = UIKit.button({ Name = "GoTrain", Style = "Gold", Text = "GO TRAIN", TextSize = 18, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -14), Size = UDim2.fromOffset(150, 46), Parent = canvas })
+	-- after the tutorial: a TO START button (bottom centre, back to the wall course) whenever you're not training or racing
+	goTrain = UIKit.button({ Name = "GoTrain", Style = "Gold", Text = "TO START", TextSize = 18, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -14), Size = UDim2.fromOffset(150, 46), Parent = canvas })
 	goTrain.Visible = false
 	goTrain.Activated:Connect(function()
-		local ok, why = ctx.Net.call("GoTo", "Train")
+		local ok, why = ctx.Net.call("GoTo", "Course") -- 28 Oct pivot: back to the start of the wall course
 		if not ok and why == "full" then
 			ctx.Hud.toast("Every spot is busy. Try again in a moment!", "Denied")
 		end
@@ -245,9 +246,8 @@ local function openCoaches()
 	ctx.Coaches.open("ROLL")
 end
 
-local function comboNow()
-	local t = ctx.Hud.refs.comboText and ctx.Hud.refs.comboText.Text or "x1.0"
-	return tonumber(string.match(t, "[%d%.]+")) or 1
+local function firstWallNeed()
+	return Formulas.wallNeed(player:GetAttribute("League") or 1, 1)
 end
 
 local function silverMph()
@@ -260,7 +260,7 @@ local function safety()
 	timeoutsUsed += 1
 	if timeoutsUsed == 1 then
 		if step == S.FirstTap or step == S.Combo then
-			goTo("SprintLane")
+			goTo("Course")
 		elseif step == S.Race then
 			task.spawn(ctx.Net.call, "Tutorial", "race")
 		elseif step == S.Shoes then
@@ -272,7 +272,7 @@ local function safety()
 		elseif step == S.Welcome or step == S.Podium then
 			advance(step)
 		end
-	elseif step == S.Combo or step == S.Welcome or step == S.Podium then
+	elseif step == S.Welcome or step == S.Podium then
 		advance(step)
 	else
 		task.spawn(ctx.Net.call, "Tutorial", "skip", step)
@@ -304,29 +304,15 @@ local function render(dt)
 
 	local target = nil
 	if step == S.Welcome then
-		showCard("Everyone starts slow. Let's fix that!", "NEW RUNNER BOOST: 2x training for 15 min!", nil)
+		showCard("Every step = +1 SPEED. Let's go!", "NEW RUNNER BOOST: 2x SPEED for 15 min!", nil)
 	elseif step == S.FirstTap then
-		if training then
-			hideCard() -- the big TAP ANYWHERE TO RUN! hint is showing
-		else
-			target = targetPart("SprintLane")
-			showCard("Let's run! Go to the Sprint Lane.", "Then tap to run!", "GO TO", function()
-				goTo("SprintLane")
-			end)
-		end
+		showCard("Walk! Every step gives you SPEED.", "Use the stick (or W A S D) to run.", nil)
 	elseif step == S.Combo then
-		if training then
-			showCard("Keep tapping = FASTER!", ("Steady taps build your combo: x%.1f of x1.5"):format(comboNow()), nil)
-			if comboNow() >= 1.2 then
-				advance(S.Combo)
-				step = -S.Combo -- wait for the server
-			end
-		else
-			target = targetPart("SprintLane")
-			showCard("Back to the Sprint Lane!", "Keep tapping to build your combo.", "GO TO", function()
-				goTo("SprintLane")
-			end)
-		end
+		-- 28 Oct pivot: this step is "smash the first wall"
+		target = targetPart("Course")
+		showCard("Smash the first wall!", ("Walls need SPEED. Wall 1 needs %s."):format(Format.short(firstWallNeed())), "GO TO", function()
+			goTo("Course")
+		end)
 	elseif step == S.Race then
 		if stepStarted < T.RaceAfterSeconds and training then
 			hideCard()
@@ -346,8 +332,8 @@ local function render(dt)
 		if training then
 			hideCard() -- the goal line on top says how far to Silver
 		else
-			showCard(("Train to %s MPH for SILVER rank!"):format(Format.short(silverMph())), "Silver gives you a free coach roll.", "GO TRAIN", function()
-				goTo("Train")
+			showCard(("Run to %s SPEED for SILVER rank!"):format(Format.short(silverMph())), "Smash walls on the way. Silver gives a free coach roll.", "GO RUN", function()
+				goTo("Course")
 			end)
 		end
 	elseif step == S.Roll then

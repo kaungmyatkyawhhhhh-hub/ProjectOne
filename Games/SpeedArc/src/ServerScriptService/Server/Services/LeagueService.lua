@@ -6,7 +6,6 @@ local Players = game:GetService("Players")
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Areas = require(Shared.Config.Areas)
 local Ranks = require(Shared.Config.Ranks)
-local Course = require(Shared.Config.Course)
 local Formulas = require(Shared.Util.Formulas)
 local Boosts = require(Shared.Util.Boosts)
 local Net = require(Shared.Util.Net)
@@ -33,8 +32,7 @@ local function ready(data)
 	if data.League >= Areas.MaxLeague then
 		return false
 	end
-	local area = areaForLeague(data.League)
-	if area and Course.Areas[area.Id] then
+	if Formulas.hasCourse(data.League) then
 		return Formulas.wallsIn(data, data.League) >= Formulas.wallCount()
 	end
 	local need = Areas.GoPro.WinsNeeded[data.League] or 99

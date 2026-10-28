@@ -105,7 +105,7 @@ local function buildSpeed()
 	refs.speedScale = UIKit.make("UIScale", { Parent = row })
 	local unit = UIKit.text({
 		Name = "Unit",
-		Text = "MPH",
+		Text = "SPEED",
 		TextSize = 20,
 		Color = P.BrightBlue,
 		StrokeColor = P.SpeedBlack,
@@ -261,7 +261,7 @@ local function buildTraining()
 		Parent = card,
 	})
 	refs.stationGain = UIKit.text({
-		Text = "+1 MPH / TAP",
+		Text = "AFK STEPS",
 		Font = F.BodyBold,
 		TextSize = 14,
 		Color = P.BrightBlue,
@@ -331,16 +331,24 @@ end
 ----------------------------------------------------------------------------
 local function goalFor(speed)
 	local league = player:GetAttribute("League") or 1
-	local nextS = Formulas.nextStation(speed, league)
 	local thresholds = Ranks.Thresholds[league] or Ranks.Thresholds[1]
 	local rankIdx = math.max(player:GetAttribute("Rank") or 1, 1)
 	local nextRankMin = thresholds[rankIdx + 1]
 	local candidates = {}
-	if nextS then
-		table.insert(candidates, { at = nextS.MinSpeed, floor = Formulas.stationFloor(speed, league), text = ('Reach <font color="#FFC83D">%s MPH</font> to unlock the %s'):format(Format.short(nextS.MinSpeed), nextS.Name) })
+	-- the next wall you haven't smashed yet (28 Oct pivot: the main goal)
+	local best = player:GetAttribute("BestWall") or 0
+	local hasCourse = Formulas.hasCourse(league)
+	if hasCourse and best < Formulas.wallCount() then
+		local need = Formulas.wallNeed(league, best + 1)
+		local floor = if best > 0 then Formulas.wallNeed(league, best) else 0
+		if speed < need then
+			table.insert(candidates, { at = need, floor = floor, text = ('Reach <font color="#FFC83D">%s SPEED</font> to smash wall %d'):format(Format.short(need), best + 1) })
+		else
+			return ('<font color="#7ED957">SMASH WALL %d!</font>  Run down the course'):format(best + 1), 1
+		end
 	end
 	if nextRankMin and nextRankMin > speed then
-		table.insert(candidates, { at = nextRankMin, floor = thresholds[rankIdx] or 0, text = ('Reach <font color="#FFC83D">%s MPH</font> for %s rank'):format(Format.short(nextRankMin), string.upper(Ranks.Names[rankIdx + 1])) })
+		table.insert(candidates, { at = nextRankMin, floor = thresholds[rankIdx] or 0, text = ('Reach <font color="#FFC83D">%s SPEED</font> for %s rank'):format(Format.short(nextRankMin), string.upper(Ranks.Names[rankIdx + 1])) })
 	end
 	table.sort(candidates, function(a, b)
 		return a.at < b.at
@@ -355,6 +363,9 @@ local function goalFor(speed)
 		return '<font color="#FFC83D">GO PRO</font> is ready!', 1
 	elseif league >= (player:GetAttribute("MaxLeague") or 3) then
 		return 'Top league for now: win races for <font color="#FFC83D">coins</font>', 1
+	end
+	if hasCourse and best < Formulas.wallCount() then
+		return ('Smash the <font color="#FFC83D">last wall</font> to GO PRO'), best / Formulas.wallCount()
 	end
 	return ('Win <font color="#FFC83D">%d more race%s</font> to GO PRO'):format(need - wins, if need - wins == 1 then "" else "s"), wins / math.max(1, need)
 end
@@ -447,8 +458,8 @@ function Hud.setTraining(station)
 	refs.training.Visible = station ~= nil
 	if station then
 		refs.stationName.Text = string.upper(station.Name)
-		refs.stationGain.Text = ("+%d MPH / TAP"):format(station.Gain)
-		Hud.setCombo(1, 0)
+		refs.stationGain.Text = ("AFK STEPS  x%g"):format(station.Mult or 1)
+		Hud.setCombo(1, 1)
 	end
 end
 
@@ -536,7 +547,7 @@ function Hud.start(ctx)
 		end
 	end
 	player:GetAttributeChangedSignal("Speed"):Connect(onSpeed)
-	for _, a in { "Rank", "RankName", "League", "LeagueWins", "GoProReady" } do
+	for _, a in { "Rank", "RankName", "League", "LeagueWins", "GoProReady", "BestWall" } do
 		player:GetAttributeChangedSignal(a):Connect(function()
 			renderRank()
 			renderSpeed(player:GetAttribute("Speed") or 0)
