@@ -3,20 +3,28 @@
 -- Smashing pays coins (minutes of coins at your league) and makes every later step in that league
 -- worth more. Smashing the league's last wall = GO PRO ready. Races stay as an event.
 return {
-	StudsPerStep = 3.5, -- this much running on the ground = one step
+	StudsPerStep = 3, -- this much running on the ground = one step
 	MaxStepsPerSecond = 12, -- anti-cheat: more than this a second is never counted
 	StepGain = { 1, 40, 900, 20000, 500000 }, -- base SPEED per step by league (the x8 per league is on top, Boosts)
 	WallBonus = 1.25, -- every wall you've smashed in your league: x1.25 SPEED per step (multiplies)
-	-- the walls of a league as a share of that league's Champion SPEED (Config/Ranks); the last one = Go Pro
-	WallShares = { 0.0015, 0.006, 0.017, 0.043, 0.086, 0.17, 0.31, 0.5, 0.71, 1.0 },
+	-- SPEED each wall needs, per league (tools/step_pacing_sim.py --solve, prompt 11): a normal player
+	-- smashes wall 1 ~35 s after PLAY, wall 2 ~2 min, wall 5 ~7 min, the last wall (Go Pro) at ~15 /
+	-- 35 / 60 min in leagues 1 / 2 / 3. Ranks (Config/Ranks) sit on walls 4 / 6 / 8 / 10.
+	Walls = {
+		{ 310, 1600, 3200, 4700, 8600, 15000, 18000, 28000, 34000, 53000 },
+		{ 410000, 1600000, 2800000, 4200000, 7700000, 11000000, 17000000, 26000000, 37000000, 55000000 },
+		{ 130000000, 630000000, 1200000000, 2100000000, 3400000000, 5700000000, 9100000000, 13000000000, 20000000000, 30000000000 },
+	},
+	-- leagues 4-5 (no course yet): a share of the league's Champion SPEED
+	WallShares = { 0.006, 0.03, 0.06, 0.09, 0.16, 0.28, 0.34, 0.53, 0.64, 1.0 },
 	RewardMinutes = { 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.8, 2.5 }, -- coins for smashing wall k
 	FirstSmashMult = 3, -- the first time ever you smash a wall it pays x3
-	AfkStepsPerSecond = 2, -- steps a second on an AFK machine (Config/Stations)
-	AutoRunMult = 3, -- the Auto Run pass (Store key AutoTrain): machines step x3 faster
+	AfkStepsPerSecond = 1.6, -- steps a second on an AFK machine (running is ~3x this)
+	AutoRunMult = 2.4, -- the Auto Run pass (Store key AutoTrain): machines step x2.4 (still slower than running)
 	StageLength = 90, -- studs from one wall to the next (the first wall is one stage after the start)
 	Width = 44,
 	WallHeight = 18,
-	BounceSpeed = 45, -- not enough SPEED: you bounce back this fast
+	BounceSpeed = 20, -- not enough SPEED: a soft bounce back (never a fling)
 	Colors = { "#FF6FB5", "#FF8A3D", "#FFD23F", "#7ED957", "#3DDC97", "#4DB8FF", "#6C8CFF", "#9B5DE5", "#FF5DA2", "#FFC83D" },
 	-- each area's course: Start = the start line (centre, ground level), Dir = the way it runs
 	Areas = {

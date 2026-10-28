@@ -12,19 +12,19 @@ import random
 import sys
 
 # ---- Config copy ------------------------------------------------------------------------------
-STUDS_PER_STEP = 3.5
+STUDS_PER_STEP = 3
 STEP_GAIN = [1, 40, 900]  # Config/Course StepGain
 WALL_BONUS = 1.25  # x per wall smashed in your league
 LEAGUE_MULT = 8
-AFK_STEPS, AUTO_RUN_MULT = 2, 3
+AFK_STEPS, AUTO_RUN_MULT = 1.6, 2.4
 CPM = [60, 400, 3000]
 TRAINING_SHARE, ASSUMED_SPS = 0.2, 5  # coins per step = CPM x share / (60 x 5)
 WALL_REWARD_MIN = [0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.8, 2.5]
 FIRST_SMASH_MULT = 3
 WALK = (16, 6, 10, 30)  # base, factor, divider, cap
 SHOES = [  # (train, price, league, rank needed: 0 Bronze .. 4 Champion)
-    (1.0, 0, 1, 0), (1.3, 250, 1, 0), (1.7, 1500, 1, 1), (2.3, 8000, 1, 2),
-    (3.2, 60000, 2, 0), (4.5, 400000, 3, 0),
+    (1.0, 0, 1, 0), (1.3, 250, 1, 0), (1.7, 900, 1, 1), (2.3, 3000, 1, 2),
+    (3.2, 15000, 2, 0), (4.5, 150000, 3, 0),
 ]
 ROLL_MIN = 1.5
 COACHES = [(40, 0.05), (28, 0), (18, 0.12), (9.5, 0.20), (3.5, 0.35), (0.8, 0.5), (0.17, 0.65), (0.03, 0.8)]
@@ -48,9 +48,9 @@ TARGETS = {
 }
 # current needs (Config/Course Walls) - the table run uses these
 WALLS = {
-    1: [110, 420, 1200, 3000, 6000, 12000, 22000, 35000, 50000, 70000],
-    2: [120000, 480000, 1400000, 3400000, 6900000, 14000000, 25000000, 40000000, 57000000, 80000000],
-    3: [54000000, 220000000, 610000000, 1500000000, 3100000000, 6100000000, 11000000000, 18000000000, 26000000000, 36000000000],
+    1: [310, 1600, 3200, 4700, 8600, 15000, 18000, 28000, 34000, 53000],
+    2: [410000, 1600000, 2800000, 4200000, 7700000, 11000000, 17000000, 26000000, 37000000, 55000000],
+    3: [130000000, 630000000, 1200000000, 2100000000, 3400000000, 5700000000, 9100000000, 13000000000, 20000000000, 30000000000],
 }
 
 
@@ -124,9 +124,13 @@ def simulate(walls, solve=False, seed=7, leagues=3):
         lt = (t - league_start) / 60
         if smashed < 10:
             k = smashed
-            if solve and lt >= TARGETS[league][k] and speed > 0:
-                needs[league][k] = max(two_sig(speed), (needs[league][k - 1] + 1) if k > 0 else 1)
-            if speed >= needs[league][k]:
+            ready = speed >= needs[league][k]
+            if solve:
+                # solving: the wall falls exactly at its target time, its need = the SPEED then
+                ready = lt >= TARGETS[league][k] and speed > 0
+                if ready:
+                    needs[league][k] = max(two_sig(speed), (needs[league][k - 1] + 1) if k > 0 else 1)
+            if ready:
                 smashed += 1
                 coins += WALL_REWARD_MIN[k] * FIRST_SMASH_MULT * cpm
                 log.append((league, "wall %d" % smashed, lt, speed))

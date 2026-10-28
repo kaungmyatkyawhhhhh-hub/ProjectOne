@@ -55,6 +55,10 @@ end
 
 -- SPEED wall k of a league needs (rounded to 2 significant figures so the number reads well)
 function Formulas.wallNeed(league, k)
+	local list = Course.Walls[league]
+	if list and list[k] then
+		return list[k]
+	end
 	local champ = (Ranks.Thresholds[league] or Ranks.Thresholds[1])[#Ranks.Names]
 	local v = champ * (Course.WallShares[k] or 1)
 	local p = 10 ^ math.max(0, math.floor(math.log10(math.max(v, 1))) - 1)
