@@ -10,6 +10,7 @@ local ORDER = {
 	"CameraController",
 	"TrainingController",
 	"RaceController",
+	"RaceFxController",
 	"WorldLifeController",
 	"LockerController",
 	"CoachController",

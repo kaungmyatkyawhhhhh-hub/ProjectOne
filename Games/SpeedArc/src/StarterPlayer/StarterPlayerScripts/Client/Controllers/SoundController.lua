@@ -93,7 +93,7 @@ function SoundController.play(key, opts)
 		pool.nextIndex = pool.nextIndex % #pool.sounds + 1
 		local lo, hi = def.Pitch[1], def.Pitch[2]
 		s.PlaybackSpeed = (lo + (hi - lo) * math.random()) * (opts.Pitch or 1)
-		s.Volume = (def.Volume or 0.5) * (opts.Volume or 1)
+		s.Volume = (def.Volume or 0.5) * (opts.Volume or 1) * SoundConfig.norm(id, def.Group)
 		s.TimePosition = 0
 		s:Play()
 	end

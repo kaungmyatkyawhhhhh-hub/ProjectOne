@@ -81,13 +81,21 @@ function Music.play(key)
 				bed:Play()
 			end
 		end
-		fadeTo(s, M[key].Volume * duck)
+		fadeTo(s, M[key].Volume * duck * SoundConfig.norm(M[key].Id, "Music"))
 	end
 end
 
 local function areaKey()
 	local id = player:GetAttribute("Area") or "Hub"
 	return Areas[id] and Areas[id].Music or "Hub"
+end
+
+-- FINAL STRETCH: the race music swells (louder, a touch faster) until the finish
+function Music.swell()
+	local s = current == "Race" and tracks.Race
+	if s then
+		TweenService:Create(s, TweenInfo.new(1.2), { Volume = M.Race.Volume * 1.3 * SoundConfig.norm(M.Race.Id, "Music"), PlaybackSpeed = 1.04 }):Play()
+	end
 end
 
 function Music.start(ctx)
@@ -111,7 +119,7 @@ function Music.start(ctx)
 				duck = M.Duck
 				local s = current and tracks[current]
 				if s then
-					fadeTo(s, M[current].Volume * duck)
+					fadeTo(s, M[current].Volume * duck * SoundConfig.norm(M[current].Id, "Music"))
 				end
 				task.delay(3, function()
 					duck = 1
@@ -120,6 +128,9 @@ function Music.start(ctx)
 			end
 		elseif kind == "results" or kind == "ended" then
 			duck = 1
+			if tracks.Race then
+				tracks.Race.PlaybackSpeed = 1
+			end
 			if current == "Race" then
 				Music.play(areaKey())
 			end

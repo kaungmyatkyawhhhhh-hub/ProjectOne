@@ -478,6 +478,9 @@ local function render()
 	if lastPlace ~= 0 and place ~= lastPlace and os.clock() - lastBurst > 1.2 then
 		lastBurst = os.clock()
 		ctx.Sound.play("CrowdBurst")
+		if ctx.RaceFx then
+			ctx.RaceFx.onOvertake(place, lastPlace)
+		end
 	end
 	lastPlace = place
 
@@ -487,6 +490,9 @@ local function render()
 		stretchShown = true
 		showCenter("FINAL STRETCH", P.Gold, 1.0)
 		ctx.Sound.play("FinalStretch")
+		if ctx.RaceFx then
+			ctx.RaceFx.onFinalStretch()
+		end
 	end
 	if not finishedShown and myShown >= 1 then
 		finishedShown = true
@@ -538,6 +544,7 @@ local function onStart(info)
 		-- private races (tutorial, RACE THEM) count down on their own state folder
 		state = if info.private then stateRoot:WaitForChild(info.stateName, 5) else nil,
 		kind = info.kind,
+		areaId = info.areaId,
 		raceId = info.raceId,
 		laps = info.laps,
 		runners = {},
@@ -587,6 +594,9 @@ local function onStart(info)
 					lastCount = nil
 					showCenter("GO!", P.Gold, 0.8)
 					ctx.Sound.play("StartGun")
+					if ctx.RaceFx then
+						ctx.RaceFx.onGo(race)
+					end
 				end
 			end)
 		end
@@ -636,6 +646,9 @@ function RaceController.hideResults()
 end
 
 local function onResults(info)
+	if ctx.RaceFx and race and race.me then
+		ctx.RaceFx.onFinish(info.place, race)
+	end
 	ui.cardPlace.Text = Format.place(info.place)
 	ui.cardPlace.TextColor3 = if info.place == 1 then P.Gold elseif info.place <= 3 then P.White else P.BrightBlue
 	ui.cardTitle.Text = ("RACE RESULTS  -  %s OF %d"):format(Format.place(info.place), info.total)
@@ -850,6 +863,9 @@ function RaceController.start(c)
 			lastCount = nil
 			showCenter("GO!", P.Gold, 0.8)
 			ctx.Sound.play("StartGun")
+			if ctx.RaceFx then
+				ctx.RaceFx.onGo(race)
+			end
 		end
 	end
 	-- follow the race of the area you're in (not while you're racing)
