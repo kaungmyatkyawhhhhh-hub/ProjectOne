@@ -908,7 +908,7 @@ do
 		gui.Face = Enum.NormalId.Front
 		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 		gui.PixelsPerStud = 24
-		gui.MaxDistance = 110
+		gui.MaxDistance = 220
 		gui.LightInfluence = 0.2
 		gui.Brightness = 1.4
 		gui.Parent = board
@@ -939,7 +939,7 @@ do
 			l.TextScaled = true
 			l.FontFace = BODY
 			l.TextXAlignment = Enum.TextXAlignment.Left
-			l.Text = r .. ".  -"
+			l.Text = if r == 1 then "LOADING..." else "" -- LeaderboardService fills the rows
 			l.TextColor3 = if r == 1 then Palette.Gold else Palette.White
 			l.Parent = rows
 		end

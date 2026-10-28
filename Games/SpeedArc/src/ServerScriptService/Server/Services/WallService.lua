@@ -22,7 +22,6 @@ WallService.Smashed = Instance.new("BindableEvent") -- (player, league, k, first
 
 local TICK = 0.15
 local runs = {} -- [player] = stage (walls passed in this run)
-local lastNeed = {} -- [player] = os.clock() of the last "need more SPEED" line
 local WallEvent = Net.get("WallEvent")
 
 local function courseOf(player)
@@ -140,7 +139,6 @@ function WallService.start()
 	end
 	Players.PlayerRemoving:Connect(function(p)
 		runs[p] = nil
-		lastNeed[p] = nil
 	end)
 	PlayerData.Loaded.Event:Connect(function(player)
 		local data = PlayerData.get(player)
@@ -162,23 +160,7 @@ function WallService.start()
 		end
 		return WallService.toStart(player)
 	end)
-	-- not enough SPEED: tell the player how much is missing (the client bounces you off the wall)
-	WallEvent.OnServerEvent:Connect(function(player, kind, k)
-		if kind ~= "bounce" or type(k) ~= "number" then
-			return
-		end
-		local now = os.clock()
-		if now - (lastNeed[player] or 0) < 2.5 then
-			return
-		end
-		lastNeed[player] = now
-		local data = PlayerData.get(player)
-		local _, league = courseOf(player)
-		if data then
-			local need = Formulas.wallNeed(league, math.clamp(math.floor(k), 1, Formulas.wallCount()))
-			Net.get("Toast"):FireClient(player, ("Need %s SPEED. Keep running!"):format(Format.short(need)), "Denied")
-		end
-	end)
+	-- not enough SPEED: the wall itself shows how close you are (WallController), no toast (prompt 11)
 	task.spawn(function()
 		while true do
 			task.wait(TICK)

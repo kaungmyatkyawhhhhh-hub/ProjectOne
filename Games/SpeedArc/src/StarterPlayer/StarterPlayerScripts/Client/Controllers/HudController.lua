@@ -199,7 +199,7 @@ local function buildToast()
 	local toast = UIKit.panel({
 		Name = "Toast",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 104),
+		Position = UDim2.new(0.5, 0, 0, 132), -- under the wall strip (prompt 11)
 		Size = UDim2.fromOffset(360, 40),
 		Radius = 12,
 		Parent = canvas,

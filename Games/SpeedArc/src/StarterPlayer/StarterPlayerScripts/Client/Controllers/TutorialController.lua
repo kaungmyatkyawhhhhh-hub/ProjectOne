@@ -88,7 +88,17 @@ local function buildCard(canvas)
 end
 
 local buttonAction = nil
-local function showCard(text, sub, btnText, action)
+-- corner = a small card top right under the NEXT RACE pill (the race card, prompt 11), else bottom centre
+local function showCard(text, sub, btnText, action, corner)
+	if corner then
+		card.AnchorPoint = Vector2.new(1, 0)
+		card.Position = UDim2.new(1, -14, 0, 112)
+		card.Size = UDim2.fromOffset(330, 74)
+	else
+		card.AnchorPoint = Vector2.new(0.5, 1)
+		card.Position = UDim2.new(0.5, 0, 1, -82)
+		card.Size = UDim2.fromOffset(376, 78)
+	end
 	cardText.Text = text
 	cardSub.Text = sub or ""
 	buttonAction = action
@@ -317,9 +327,9 @@ local function render(dt)
 		if stepStarted < T.RaceAfterSeconds and training then
 			hideCard()
 		else
-			showCard("A RACE IS STARTING!", "Beat the other runners. Ready?", "RACE!", function()
+			showCard("A RACE IS STARTING!", "Beat the other runners!", "RACE!", function()
 				task.spawn(ctx.Net.call, "Tutorial", "race")
-			end)
+			end, true)
 		end
 	elseif step == S.Podium then
 		showCard("GOLD MEDAL! You won your first race!", "Now let's get you some real shoes.", nil)

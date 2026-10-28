@@ -641,7 +641,7 @@ function L.leaderboard(parent, cf, title)
 	gui.Face = Enum.NormalId.Front
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	gui.PixelsPerStud = 24
-	gui.MaxDistance = 90
+	gui.MaxDistance = 200
 	gui.LightInfluence = 0.2
 	gui.Brightness = 1.4
 	gui.Parent = board
@@ -671,7 +671,7 @@ function L.leaderboard(parent, cf, title)
 		r.TextScaled = true
 		r.FontFace = L.BODY
 		r.TextXAlignment = Enum.TextXAlignment.Left
-		r.Text = i .. ".  -"
+		r.Text = if i == 1 then "LOADING..." else "" -- LeaderboardService fills the rows
 		r.TextColor3 = if i == 1 then Palette.Gold else Palette.White
 		r.Parent = rows
 	end

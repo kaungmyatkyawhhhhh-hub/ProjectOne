@@ -58,7 +58,7 @@ Sounds = {
 		Step = { Ids = { "rbxassetid://87061775498714", "rbxassetid://140594308250996" }, Volume = 0.55, Pitch = { 0.95, 1.05 }, Group = "SFX", Pool = 6 },
 		TapAir = { Ids = { "rbxassetid://9120704978" }, Volume = 0.12, Pitch = { 1.15, 1.3 }, Group = "SFX", Pool = 4 },
 		Tap = { Layers = { "Step", "TapAir" } },
-		WallSmash = { Layers = { "HurdleKnock", "Boost", "CrowdBurst" } }, -- 28 Oct pivot: a wall breaks
+		WallSmash = { Layers = { "HurdleKnock", "Boost", "CrowdOoh" } }, -- a wall breaks: crack + boom + the crowd "ooh" (the coin shower plays when the server pays)
 		WallBounce = { Layers = { "HurdleLand", "BoostEmpty" } }, -- not enough SPEED for a wall
 		ComboUp = { Ids = { "rbxassetid://9125648149" }, Volume = 0.3, Pitch = { 1.0, 1.04 }, Group = "SFX", Pool = 2 },
 		ComboMax = { Ids = { "rbxassetid://132574644259001" }, Volume = 0.35, Pitch = { 1.1, 1.14 }, Group = "SFX", Pool = 1 },

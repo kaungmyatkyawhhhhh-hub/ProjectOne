@@ -28,8 +28,14 @@ function StepService.pay(player, data, n, mult)
 		return
 	end
 	local b = Boosts.compute(data)
-	local gain = Formulas.stepBase(data) * b.Train * SessionBoosts.trainMult(player, data) * (mult or 1)
+	local per = Formulas.stepBase(data) * b.Train * SessionBoosts.trainMult(player, data)
+	local gain = per * (mult or 1)
 	PlayerData.set(player, "Speed", data.Speed + gain * n)
+	-- what one running step is worth now (the next wall shows "about N more steps")
+	local shown = player:GetAttribute("StepGain") or 0
+	if math.abs(shown - per) > per * 0.01 then
+		player:SetAttribute("StepGain", per)
+	end
 	data.Stats.Steps = (data.Stats.Steps or 0) + n
 	local s = state[player]
 	if s then

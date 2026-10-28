@@ -223,7 +223,8 @@ function paintTargets(targets)
 				local label = rowsFrame:FindFirstChild("Row" .. i)
 				local r = c.Rows[i]
 				if label then
-					label.Text = if r then ("%d.  %s   %s"):format(i, r.Name, r.Text) else ("%d.  -"):format(i)
+					-- never a blank board: an empty one asks to be the first (prompt 11)
+					label.Text = if r then ("%d.  %s   %s"):format(i, r.Name, r.Text) elseif i == 1 and #c.Rows == 0 then "BE THE FIRST!" else ""
 				end
 			end
 		end
