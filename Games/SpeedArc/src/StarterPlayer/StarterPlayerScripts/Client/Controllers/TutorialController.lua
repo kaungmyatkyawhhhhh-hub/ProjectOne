@@ -151,7 +151,7 @@ local function drawPath(target)
 		if marker then
 			marker:Destroy()
 		end
-		marker = make("BillboardGui", { Name = "GoHere", Adornee = target, Size = UDim2.fromOffset(120, 70), StudsOffset = Vector3.new(0, 5, 0), AlwaysOnTop = true, MaxDistance = 400, Parent = target })
+		marker = make("BillboardGui", { Name = "GoHere", Adornee = target, Size = UDim2.fromOffset(120, 70), StudsOffset = Vector3.new(0, 5, 0), AlwaysOnTop = false, LightInfluence = 0, MaxDistance = 400, Parent = target })
 		local pill = make("Frame", { BackgroundColor3 = P.Gold, Size = UDim2.fromOffset(120, 34), Parent = marker })
 		UIKit.corner(pill, UDim.new(0.5, 0))
 		UIKit.stroke(pill, P.SpeedBlack, 2)
