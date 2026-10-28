@@ -20,9 +20,9 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 | Station | Gain / tap | Needs |
 |---|---|---|
 | Block Starts | +900 | open in League 3 |
-| Hurdles | +2,000 | 520M MPH |
-| Parachute Run | +4,500 | 1.75B MPH |
-| Bungee Sprint | +10,000 | 5.2B MPH |
+| Hurdles | +2,000 | 550M MPH |
+| Parachute Run | +4,500 | 1.8B MPH |
+| Bungee Sprint | +10,000 | 5.5B MPH |
 (x64 League 3 multiplier on top.)
 
 ## Races

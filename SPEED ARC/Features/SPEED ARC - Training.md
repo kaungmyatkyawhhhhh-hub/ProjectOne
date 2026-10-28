@@ -20,8 +20,8 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 | Spot | Needs | Per tap | Places |
 |---|---|---|---|
 | Sprint Lane (GDD's Jog Lane) | 0 MPH | +1 | 3 lanes with starting blocks |
-| Treadmill | 550 MPH (was 40 before the prompt 3 pacing) | +3 | 4 under a canopy |
-| Stair Run | 2,000 MPH (was 150) | +8 | 2 on the stairs |
+| Treadmill | 1,400 MPH (40 in the GDD; pacing prompts 3 + 4) | +3 | 4 under a canopy |
+| Stair Run | 5,000 MPH (150 in the GDD) | +8 | 2 on the stairs |
 Sprint Sled (500 MPH) comes later.
 
 ## Where it lives

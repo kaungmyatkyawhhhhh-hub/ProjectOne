@@ -18,7 +18,7 @@ The look is decided in M1 (Lessons section 10). Every new screen reuses this kit
 
 ## The HUD
 - Top left: coins pill.
-- Top centre: big MPH number (bounces on each tap), a bar to the next station, and the goal line ("Reach 550 MPH to unlock the Treadmill"; after that the next rank or "GO PRO is ready!"). Rank badge under the coins (M3).
+- Top centre: big MPH number (bounces on each tap), a bar to the next station, and the goal line ("Reach 1,400 MPH to unlock the Treadmill"; after that the next rank or "GO PRO is ready!"). Rank badge under the coins (M3).
 - Top right: race timer pill (NEXT RACE 2:31 / JOIN NOW 0:08 / RACE ON) and the pulsing gold JOIN RACE button.
 - One toast lane under the MPH (one message at a time; gold for unlocks, red for "can't").
 - Training: card bottom right (station, +MPH per tap, combo meter, x1.3), STOP button, "TAP ANYWHERE TO RUN!" hint until your 4th tap.

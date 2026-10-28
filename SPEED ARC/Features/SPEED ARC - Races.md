@@ -22,7 +22,8 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ## Areas and hurdles (M3)
 - Every area runs its own race: Hub at 0 s, City Park +60 s, Big Stadium +120 s in the 3 min cycle. Only players in that area see its JOIN button and ticks.
-- Pace middles per league (Config `LeagueMid`): 1,100 / 925K / 520M MPH, so races stay ~18 s / ~27 s in every league.
+- Pace middles per league (Config `LeagueMid`): 2,800 / 1.28M / 550M MPH, so races stay ~18 s / ~27 s in every league.
+- Private races (M4): the tutorial race and RACE THEM run on the outside lanes with their own countdown.
 - Racing in a lower league's area pays 25% (`LowerLeagueRewardMult`).
 - **Hurdles** (League 3+, Stadium): see [[SPEED ARC - Big Stadium]]. Wins count toward Go Pro ([[SPEED ARC - Leagues and Go Pro]]).
 

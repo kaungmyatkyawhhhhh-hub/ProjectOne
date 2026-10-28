@@ -17,9 +17,10 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 
 ## Ranks
 - Bronze, Silver, Gold, Platinum, Champion in every league. SPEED thresholds are in `Config/Ranks`:
-  - L1: 0 / 1.5K / 5K / 14K / 28K MPH
-  - L2: 0 / 3M / 12M / 30M / 60M
-  - L3: 0 / 1.75B / 7B / 17.5B / 35B
+  - L1: 0 / 3.8K / 20K / 36K / 70K MPH
+  - L2: 0 / 4M / 16M / 40M / 80M
+  - L3: 0 / 1.8B / 7.5B / 18B / 36B
+  - (re-tuned in prompt 4 with the New Runner boost, gifts, daily and quests; Silver at ~5 min)
 - Badge under the coins (rank letter + LEAGUE X) and a tag over your head.
 - Rank up: popup, rising sound, gold ring on the ground, coins = 1 / 2 / 3 / 5 minutes of coins (Silver / Gold / Platinum / Champion), only the first time you reach a rank in a league.
 

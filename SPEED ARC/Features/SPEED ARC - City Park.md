@@ -19,9 +19,9 @@ Back to [[00 SPEED ARC Home|SPEED ARC Home]]
 | Station | Gain / tap | Needs |
 |---|---|---|
 | Park Loop | +40 | open in League 2 |
-| Hill Sprint | +90 | 900K MPH |
-| Bench Step-Ups | +200 | 3M MPH |
-| Bike Drafting | +450 | 9M MPH |
+| Hill Sprint | +90 | 1.25M MPH |
+| Bench Step-Ups | +200 | 4M MPH |
+| Bike Drafting | +450 | 12M MPH |
 (x8 League 2 multiplier on top.)
 
 ## Spawn plaza
