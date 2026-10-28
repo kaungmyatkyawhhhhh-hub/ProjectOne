@@ -72,6 +72,18 @@ local function hideFar()
 	end
 end
 
+-- your own tag over your head hides in races (it covered the track and the scoreboard)
+local function ownTag()
+	local head = player.Character and player.Character:FindFirstChild("Head")
+	local tag = head and head:FindFirstChild("Overhead")
+	if tag then
+		local want = not player:GetAttribute("InRace")
+		if tag.Enabled ~= want then
+			tag.Enabled = want
+		end
+	end
+end
+
 function Cosmetics.start(ctx)
 	ctx.Cosmetics = Cosmetics
 	task.spawn(function()
@@ -81,6 +93,7 @@ function Cosmetics.start(ctx)
 			n += 1
 			if n % 5 == 0 then
 				hideFar()
+				ownTag()
 			end
 			task.wait(0.2)
 		end

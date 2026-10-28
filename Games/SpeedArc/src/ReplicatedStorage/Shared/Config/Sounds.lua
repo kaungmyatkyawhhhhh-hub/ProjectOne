@@ -6,8 +6,9 @@ Sounds = {
 	-- Music (APM library via the Creator Store; owner picks the final ids). Crossfade 1.5 s between areas,
 	-- race music from GO to the finish, everything ducks to 40% in the countdown.
 	Music = {
-		Hub = { Id = "rbxassetid://1846273376", Volume = 0.35 },
-		Park = { Id = "rbxassetid://1846810919", Volume = 0.35 },
+		-- Bed = a quiet ambience loop under the music (Audio note: World ambience). Pro Sound Effects library.
+		Hub = { Id = "rbxassetid://1846273376", Volume = 0.35, Bed = "rbxassetid://9112831284" }, -- morning birds loop
+		Park = { Id = "rbxassetid://1846810919", Volume = 0.35, Bed = "rbxassetid://9116969962" }, -- birds + distant dogs
 		Stadium = { Id = "rbxassetid://128683938011405", Volume = 0.35, Bed = "rbxassetid://9120974378" },
 		Race = { Id = "rbxassetid://1842057947", Volume = 0.42 },
 		Fade = 1.5,

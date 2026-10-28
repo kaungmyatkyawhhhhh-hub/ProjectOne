@@ -612,6 +612,13 @@ local function runRace(A)
 	A.state:SetAttribute("TypeName", Race.Types[raceType].Name)
 	table.clear(A.joined)
 	setPhase(A, "Join", Race.JoinSeconds)
+	if IS_STUDIO and workspace:GetAttribute("TestAutoJoin") then
+		for _, p in playersIn(A) do
+			if not playerRunner[p] then
+				A.joined[p] = true -- Studio soak test: everyone joins every race
+			end
+		end
+	end
 	task.wait(Race.JoinSeconds)
 	for _, p in playersIn(A) do
 		if PlayerData.get(p) and not playerRunner[p] then

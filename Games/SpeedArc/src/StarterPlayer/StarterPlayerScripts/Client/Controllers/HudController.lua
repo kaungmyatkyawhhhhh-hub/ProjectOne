@@ -525,6 +525,9 @@ function Hud.start(ctx)
 			animateNumber(from, v, 0.8, renderCoins)
 			if v - from >= 50 and Hud.coinFly then
 				Hud.coinFly(if v - from >= 1000 then 8 else 5)
+				task.delay(0.45, function()
+					ctx.Sound.play("CoinShower", { Volume = 0.7 })
+				end)
 			end
 			refs.coinsScale.Scale = 1.15
 			UIKit.tween(refs.coinsScale, 0.3, { Scale = 1 }, Enum.EasingStyle.Back)

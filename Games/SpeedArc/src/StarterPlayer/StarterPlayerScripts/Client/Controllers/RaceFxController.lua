@@ -72,6 +72,7 @@ function Fx.onOvertake(newPlace, oldPlace)
 	if root then
 		burst(blue, root.Position - Vector3.new(0, 1.5, 0), 14)
 	end
+	ctx.Sound.play("Boost", { Volume = 0.5, Pitch = 1.15 })
 	-- a blue streak across the screen
 	swoosh.Position = UDim2.new(-0.4, 0, 0.62, 0)
 	swoosh.Visible = true
