@@ -26,17 +26,12 @@ local function areaForLeague(league)
 end
 LeagueService.areaForLeague = areaForLeague
 
--- Go Pro (28 Oct pivot): smash your league's last wall. A league whose area has no wall course yet
--- keeps the old rule (Champion rank + race wins).
+-- Go Pro (prompt 11): smash your league's last wall, in every league (race wins don't count for it)
 local function ready(data)
 	if data.League >= Areas.MaxLeague then
 		return false
 	end
-	if Formulas.hasCourse(data.League) then
-		return Formulas.wallsIn(data, data.League) >= Formulas.wallCount()
-	end
-	local need = Areas.GoPro.WinsNeeded[data.League] or 99
-	return data.Rank >= #Ranks.Names and (data.LeagueWins or 0) >= need
+	return Formulas.wallsIn(data, data.League) >= Formulas.wallCount()
 end
 
 function LeagueService.refresh(player)
@@ -47,8 +42,6 @@ function LeagueService.refresh(player)
 	player:SetAttribute("Rank", data.Rank)
 	player:SetAttribute("RankName", Ranks.Names[data.Rank])
 	player:SetAttribute("League", data.League)
-	player:SetAttribute("LeagueWins", data.LeagueWins or 0)
-	player:SetAttribute("WinsNeeded", Areas.GoPro.WinsNeeded[data.League] or 0)
 	player:SetAttribute("GoProReady", ready(data))
 	player:SetAttribute("MaxLeague", Areas.MaxLeague)
 	-- the tag over the head (title, rank, medals) is drawn by SocialService

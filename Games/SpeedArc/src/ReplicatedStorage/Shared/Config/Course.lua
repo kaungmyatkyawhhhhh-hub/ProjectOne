@@ -29,5 +29,7 @@ return {
 	-- each area's course: Start = the start line (centre, ground level), Dir = the way it runs
 	Areas = {
 		Hub = { Start = Vector3.new(0, 0, 196), Dir = Vector3.new(0, 0, 1) },
+		Park = { Start = Vector3.new(2000, 0, 165), Dir = Vector3.new(0, 0, 1) }, -- south of the spawn plaza
+		Stadium = { Start = Vector3.new(4000, 0, 192), Dir = Vector3.new(0, 0, 1) }, -- out of the players' tunnel
 	},
 }

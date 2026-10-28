@@ -14,7 +14,7 @@ return {
 	},
 	Park = {
 		Id = "Park", Name = "CITY PARK RUN", League = 2, Model = "Park",
-		Spawn = Vector3.new(2000, 3, 128), SpawnLook = Vector3.new(2000, 3, 60),
+		Spawn = Vector3.new(2000, 3, 132), SpawnLook = Vector3.new(2000, 3, 200), -- facing the wall course
 		Lighting = "Park", Music = "Park", RaceOffset = 60,
 		Track = { Center = Vector3.new(2000, 0, 0), Straight = 130, InnerRadius = 44, LaneWidth = 4, Lanes = 4, StartX = 25, SurfaceY = 0.4, HipY = 3.05 },
 		Types = { "Lap", "Sprint" },
@@ -29,7 +29,6 @@ return {
 
 	-- Go Pro (GDD 9.2)
 	GoPro = {
-		WinsNeeded = { 1, 2, 3, 3 }, -- race wins in your league (Champion rank too)
 		Titles = { [2] = "PARK RUNNER", [3] = "STADIUM STAR", [4] = "TRAIL LEGEND", [5] = "WORLD CHAMPION" },
 		FreeRolls = 1,
 	},

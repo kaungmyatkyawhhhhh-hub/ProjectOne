@@ -1,6 +1,7 @@
 -- SPEED ARC: League 2 City Park Run (World note section 2). Run as loadstring(this)(builder_lib).
--- Bright morning park: a looping running path round a lake with a big fountain, a stone bridge the
--- race runs under, food carts, a gazebo, ducks, and a city skyline behind. 4 training stations.
+-- Bright morning park (candy look, prompt 11): a looping running path round a lake with a big fountain,
+-- a stone bridge the race runs under, ducks, a pastel city skyline, 4 AFK step machines, the COACH
+-- AGENCY, and the hedge-lined WALL COURSE south of the spawn (with a bridge over the water).
 local L = ...
 local P, W = L.Palette, L.W
 local area = L.Areas.Park
@@ -19,11 +20,11 @@ local crowd = L.folder("Crowd", life) -- the ducks bob like a crowd
 local flags = L.folder("Flags", life)
 
 -- ground, outskirts, path ring under the lanes
-block(ground, "Grass", Vector3.new(330, 4, 340), C + Vector3.new(0, -2, 10), Color3.fromHex("#66B85A"))
-block(ground, "Outskirts", Vector3.new(900, 4, 900), C + Vector3.new(0, -2.25, 0), Color3.fromHex("#55A24C"))
+block(ground, "Grass", Vector3.new(330, 4, 340), C + Vector3.new(0, -2, 10), W.Grass)
+block(ground, "Outskirts", Vector3.new(2600, 4, 2600), C + Vector3.new(0, -2.25, 400), Color3.fromHex("#6CC94A"))
 for i = 0, 15 do
 	if i % 2 == 0 then
-		block(ground, "Stripe", Vector3.new(10, 0.06, 320), C + Vector3.new(-160 + i * 20 + 5, 0.03, 0), Color3.fromHex("#5DAE52"), { CanCollide = false })
+		block(ground, "Stripe", Vector3.new(10, 0.06, 320), C + Vector3.new(-160 + i * 20 + 5, 0.03, 0), W.GrassDark, { CanCollide = false })
 	end
 end
 local outerR = T.InnerRadius + T.LaneWidth * T.Lanes
@@ -107,40 +108,17 @@ for i = 0, 22 do
 	local x = C.X - 240 + i * 22 + rng:NextNumber(-4, 4)
 	local h = rng:NextNumber(40, 120)
 	local w = rng:NextNumber(14, 22)
-	local col = ({ Color3.fromHex("#2A3550"), Color3.fromHex("#33415F"), Color3.fromHex("#1F2A42"), Color3.fromHex("#3A4A6E") })[i % 4 + 1]
+	local col = ({ Color3.fromHex("#8FA8FF"), Color3.fromHex("#B9A6FF"), Color3.fromHex("#7FD1FF"), Color3.fromHex("#FFB3D9") })[i % 4 + 1] -- pastel candy towers
 	local z = -230 - rng:NextNumber(0, 40)
 	block(skyline, "Tower", Vector3.new(w, h, 16), Vector3.new(x, h / 2, z), col, { CanCollide = false })
 	for k = 1, math.floor(h / 18) do
 		if rng:NextNumber() < 0.7 then
-			block(skyline, "Windows", Vector3.new(w - 3, 1.2, 0.2), Vector3.new(x, k * 16, z + 8.1), Color3.fromHex("#FFE3A0"), { Material = Enum.Material.Neon, Transparency = 0.25, CanCollide = false })
+			block(skyline, "Windows", Vector3.new(w - 3, 1.2, 0.2), Vector3.new(x, k * 16, z + 8.1), P.White, { Transparency = 0.15, CanCollide = false })
 		end
 	end
 end
 
--- food carts, gazebo, picnic blankets
-local function cart(pos, color, label)
-	local c = Instance.new("Model")
-	c.Name = "FoodCart"
-	c.Parent = props
-	local m = L.mesh("Park_FoodCart", c, CFrame.new(pos - Vector3.new(0, 0.3, 0)), { Name = "CartMesh" })
-	if m then
-		m.Color = Color3.new(1, 1, 1)
-		local sign = block(c, "Sign", Vector3.new(5, 1.4, 0.2), pos + Vector3.new(0, 3.2, -1.82), P.SpeedBlack)
-		L.surfaceText(sign, Enum.NormalId.Front, { { Text = label, Height = 0.8, Color = P.White } }, { PPS = 30, MaxDistance = 80 })
-		return
-	end
-	block(c, "Body", Vector3.new(6, 3, 3.4), pos + Vector3.new(0, 2.5, 0), color)
-	block(c, "Counter", Vector3.new(6.4, 0.3, 3.8), pos + Vector3.new(0, 4.15, 0), P.White)
-	for _, s in { -1, 1 } do
-		cyl(c, "Wheel", 0.9, 0.4, pos + Vector3.new(s * 2, 0.9, 1.8), P.SpeedBlack).CFrame = CFrame.new(pos + Vector3.new(s * 2, 0.9, 1.8)) * CFrame.Angles(0, math.pi / 2, 0)
-	end
-	cyl(c, "UmbrellaPole", 0.15, 5, pos + Vector3.new(0, 6.5, 0), W.Aluminium)
-	part({ Parent = c, Name = "Umbrella", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.6, 8, 8), CFrame = CFrame.new(pos + Vector3.new(0, 9, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color = P.Gold })
-	local sign = block(c, "Sign", Vector3.new(5, 1.4, 0.2), pos + Vector3.new(0, 3.2, -1.8), P.SpeedBlack)
-	L.surfaceText(sign, Enum.NormalId.Front, { { Text = label, Height = 0.8, Color = P.White } }, { PPS = 30, MaxDistance = 80 })
-end
-cart(C + Vector3.new(-60, 0.3, 90), Color3.fromHex("#FF8FB1"), "ICE CREAM")
-cart(C + Vector3.new(60, 0.3, 90), Color3.fromHex("#79C25C"), "SMOOTHIES")
+-- the gazebo (a landmark; the food carts and picnic blankets went with the candy pass)
 local gz = Instance.new("Model")
 gz.Name = "Gazebo"
 gz.Parent = props
@@ -156,13 +134,7 @@ if not gzMesh then
 	cyl(gz, "RoofTop", 6, 1.2, gzp + Vector3.new(0, 10, 0), P.DeepBlue)
 	ball(gz, "Finial", 1.2, gzp + Vector3.new(0, 11, 0), P.Gold)
 end
-for i, pos in { C + Vector3.new(-100, 0.32, 70), C + Vector3.new(-80, 0.32, -90), C + Vector3.new(95, 0.32, -95) } do
-	block(props, "Blanket", Vector3.new(7, 0.1, 5), pos, if i % 2 == 0 then Color3.fromHex("#FF4A4A") else P.ElectricBlue, { CanCollide = false })
-	block(props, "BlanketCheck", Vector3.new(7, 0.12, 1), pos, P.White, { CanCollide = false })
-	block(props, "BlanketCheck", Vector3.new(1, 0.12, 5), pos, P.White, { CanCollide = false })
-end
-
--- trees, lamps and benches round the park
+-- trees round the park
 for i = 0, 27 do
 	local a = i / 28 * math.pi * 2
 	local pos = C + Vector3.new(math.cos(a) * 150 + rng:NextNumber(-6, 6), 0, math.sin(a) * 140 + 10 + rng:NextNumber(-6, 6))
@@ -170,13 +142,10 @@ for i = 0, 27 do
 		L.tree(props, pos, rng:NextNumber(0.9, 1.3))
 	end
 end
-for _, x in { -90, -30, 30, 90 } do
-	L.mesh("Lamp_Post", props, CFrame.new(C.X + x, 0.3, C.Z + outerR + 9) * CFrame.Angles(0, math.pi, 0), { Offset = Vector3.new(0, 0, 0.6 - (L.meshTemplate("Lamp_Post") and L.meshTemplate("Lamp_Post").Size.Z or 2.98) / 2) })
-	L.mesh("Bench", props, CFrame.new(C.X + x + 12, 0.3, C.Z + outerR + 10) * CFrame.Angles(0, math.pi, 0))
-end
 -- edges: railings and hedges show why the park ends
-for _, z in { -165, 175 } do
-	block(props, "Hedge", Vector3.new(330, 4, 4), C + Vector3.new(0, 2, z), W.TreeLeafDark)
+block(props, "Hedge", Vector3.new(330, 4, 4), C + Vector3.new(0, 2, -165), W.TreeLeafDark)
+for _, s in { -1, 1 } do -- the south hedge leaves a gap for the wall course
+	block(props, "Hedge", Vector3.new(138, 4, 4), C + Vector3.new(s * 96, 2, 175), W.TreeLeafDark)
 end
 for _, x in { -163, 163 } do
 	block(props, "Hedge", Vector3.new(4, 4, 340), C + Vector3.new(x, 2, 5), W.TreeLeafDark)
@@ -247,7 +216,7 @@ end
 L.sign(bike, L.station("BikeDrafting"), CFrame.lookAt(Vector3.new(C.X + 70, 0, tz + 9), Vector3.new(C.X + 70, 0, tz + 30)))
 
 -- spawn plaza, BACK TO HUB gate, leaderboard, flags
-block(ground, "Plaza", Vector3.new(60, 0.3, 30), Vector3.new(C.X, 0.15, C.Z + 132), Color3.fromHex("#B8BFCB"))
+block(ground, "Plaza", Vector3.new(60, 0.3, 30), Vector3.new(C.X, 0.15, C.Z + 132), Color3.fromHex("#E4EAF6"))
 L.gate(props, "BackToHub", CFrame.lookAt(Vector3.new(C.X + 34, 0, C.Z + 140), Vector3.new(C.X + 34, 0, C.Z + 120)), P.ElectricBlue, "BACK TO HUB", "HOMETOWN TRACK", "Hub")
 L.leaderboard(props, CFrame.lookAt(Vector3.new(C.X - 34, 0, C.Z + 140), Vector3.new(C.X - 34, 0, C.Z + 120)), "CITY PARK - FASTEST HERE")
 for i, x in { -20, 20 } do
@@ -256,6 +225,27 @@ end
 
 -- the COACH AGENCY (28 Oct): west of the spawn plaza, facing it
 L.agency(props, CFrame.lookAt(Vector3.new(C.X - 50, 0, C.Z + 132), Vector3.new(C.X, 0, C.Z + 132)))
+
+-- the WALL COURSE (prompt 11): south of the spawn plaza, hedges both sides, stage 4 crosses water
+L.course(m, "Park", { League = 2, Theme = "hedge", Bridge = 4, Accent = P.Mint, Title = "PARK WALL RUN",
+	Colors = { "#7ED957", "#3DDC97", "#4DB8FF", "#FFD23F", "#9BE15D", "#2EC4B6", "#6FDDFF", "#FFC83D", "#5DD39E", "#FFE066" } })
+local Course = require(game:GetService("ReplicatedStorage").Shared.Config.Course:Clone())
+local cs = Course.Areas.Park.Start
+local cEnd = cs.Z + #Course.WallShares * Course.StageLength + 60
+block(ground, "CourseGrass", Vector3.new(180, 4, cEnd - cs.Z + 20), Vector3.new(cs.X, -2, (cs.Z + cEnd) / 2), W.Grass)
+for _, s in { -1, 1 } do
+	block(props, "CourseHedge", Vector3.new(4, 5, cEnd - 177), Vector3.new(cs.X + s * 88, 2.5, (177 + cEnd) / 2), W.TreeLeafDark)
+end
+block(props, "CourseHedge", Vector3.new(180, 5, 4), Vector3.new(cs.X, 2.5, cEnd), W.TreeLeafDark)
+for z = 260, cEnd - 20, 70 do
+	for _, s in { -1, 1 } do
+		L.tree(props, Vector3.new(cs.X + s * (58 + rng:NextNumber(-6, 6)), 0, z + rng:NextNumber(-10, 10)), rng:NextNumber(1, 1.3))
+	end
+end
+-- giant floating names
+L.floatLabel(props, C + Vector3.new(0, 26, 30), "RACE TRACK", "A RACE EVERY 3 MINUTES", P.Sky, 44, 12)
+L.floatLabel(props, Vector3.new(C.X, 22, C.Z + 100), "AFK MACHINES", "THEY STEP FOR YOU", P.Mint, 36, 10)
+L.floatLabel(props, Vector3.new(C.X + 34, 22, C.Z + 140), "BACK TO HUB", nil, P.Sky, 22, 5)
 
 local parts, lights = L.finish(m, tmp)
 return ("City Park built: %d parts, %d lights"):format(parts, lights)

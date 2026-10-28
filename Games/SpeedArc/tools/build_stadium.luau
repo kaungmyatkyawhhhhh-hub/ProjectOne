@@ -1,6 +1,7 @@
 -- SPEED ARC: League 3 Big Stadium (World note section 3). Run as loadstring(this)(builder_lib).
--- Pro athletics stadium at golden hour: 8-lane oval, stands all round with a big crowd, a giant
--- scoreboard, 4 floodlight towers (the only lights), and a dark players' tunnel into the bright bowl.
+-- Pro athletics stadium at golden hour (candy look, prompt 11): 8-lane oval, stands all round with a
+-- big crowd, a giant scoreboard, 4 floodlight towers (the only lights), a bright players' tunnel, and
+-- the WALL COURSE straight out of the tunnel between cheering stands.
 local L = ...
 local P, W = L.Palette, L.W
 local area = L.Areas.Stadium
@@ -20,8 +21,8 @@ local crowdF = L.folder("Crowd", life)
 local flags = L.folder("Flags", life)
 
 local outerR = T.InnerRadius + T.LaneWidth * T.Lanes -- 66
-block(ground, "Base", Vector3.new(360, 4, 400), C + Vector3.new(0, -2, 20), Color3.fromHex("#8E97A8"))
-block(ground, "Outskirts", Vector3.new(900, 4, 900), C + Vector3.new(0, -2.25, 0), Color3.fromHex("#4E9446"))
+block(ground, "Base", Vector3.new(360, 4, 400), C + Vector3.new(0, -2, 20), Color3.fromHex("#DCE3EE"))
+block(ground, "Outskirts", Vector3.new(2600, 4, 2600), C + Vector3.new(0, -2.25, 400), Color3.fromHex("#6CC94A"))
 local infield = L.stadium(T, T.InnerRadius - 0.3, 0.12, 0, Color3.fromHex("#4FA34A"), tmp)
 infield.Name = "Infield"
 infield.Parent = ground
@@ -43,7 +44,7 @@ local function section(cfToTrack)
 	if not s then
 		for k = 1, 6 do
 			local h = 1 + 1.3 * k
-			part({ Parent = stands, Name = "Step", Size = Vector3.new(20, h, 3), CFrame = cf * CFrame.new(0, h / 2, -1.5 - 3 * (k - 1)), Color = if k % 2 == 0 then P.Graphite else P.Carbon })
+			part({ Parent = stands, Name = "Step", Size = Vector3.new(20, h, 3), CFrame = cf * CFrame.new(0, h / 2, -1.5 - 3 * (k - 1)), Color = if k % 2 == 0 then P.White else P.Sky })
 		end
 	end
 	for k = 1, 6, 2 do -- every other row has fans (the far crowd uses the light v1 fans)
@@ -116,17 +117,19 @@ local tunnel = L.folder("Tunnel", props, true)
 local tz0, tz1 = C.Z - frontN - 2, C.Z + 182
 local tlen = tz1 - tz0
 local tmid = (tz0 + tz1) / 2
-block(tunnel, "Floor", Vector3.new(16, 0.4, tlen), Vector3.new(C.X, 0.2, tmid), P.Graphite)
+block(tunnel, "Floor", Vector3.new(16, 0.4, tlen), Vector3.new(C.X, 0.2, tmid), Color3.fromHex("#E4EAF6"))
 for _, s in { -1, 1 } do
-	block(tunnel, "Wall", Vector3.new(1.5, 11, tlen), Vector3.new(C.X + s * 8.6, 5.5, tmid), P.Carbon)
+	block(tunnel, "Wall", Vector3.new(1.5, 11, tlen), Vector3.new(C.X + s * 8.6, 5.5, tmid), P.Purple)
 	block(tunnel, "EdgeGlow", Vector3.new(0.3, 0.2, tlen - 2), Vector3.new(C.X + s * 7.6, 0.45, tmid), P.ElectricBlue, { Material = Enum.Material.Neon, CanCollide = false })
 end
-block(tunnel, "Ceiling", Vector3.new(18.6, 1.2, tlen), Vector3.new(C.X, 11.4, tmid), P.SpeedBlack)
+block(tunnel, "Ceiling", Vector3.new(18.6, 1.2, tlen), Vector3.new(C.X, 11.4, tmid), P.White)
 local mouth = block(tunnel, "MouthSign", Vector3.new(16, 3, 0.6), Vector3.new(C.X, 13.4, tz0), P.SpeedBlack)
 L.surfaceText(mouth, Enum.NormalId.Back, { { Text = "PLAYERS' TUNNEL", Height = 0.8, Color = P.Gold } }, { PPS = 24, MaxDistance = 200 })
 local inner = block(tunnel, "WelcomeSign", Vector3.new(14, 2.4, 0.4), Vector3.new(C.X, 9, tz0 + 20), P.SpeedBlack, { CanCollide = false })
 L.surfaceText(inner, Enum.NormalId.Back, { { Text = "WELCOME TO THE BIG STADIUM", Height = 0.7, Color = P.White } }, { PPS = 24, MaxDistance = 120 })
-L.gate(props, "BackToHub", CFrame.lookAt(Vector3.new(C.X, 0, tz1 - 2), Vector3.new(C.X, 0, tz1 - 30)), P.ElectricBlue, "BACK TO HUB", "HOMETOWN TRACK", "Hub")
+-- BACK TO HUB beside the tunnel's south end (the wall course starts straight out of the tunnel)
+L.gate(props, "BackToHub", CFrame.lookAt(Vector3.new(C.X + 40, 0, tz1 + 8), Vector3.new(C.X, 0, tz1 + 8)), P.ElectricBlue, "BACK TO HUB", "HOMETOWN TRACK", "Hub")
+L.floatLabel(props, Vector3.new(C.X + 40, 22, tz1 + 8), "BACK TO HUB", nil, P.Sky, 22, 5)
 
 -- training in the infield: Block Starts, Hurdles, Parachute Run, Bungee Sprint
 local iz = C.Z
@@ -176,26 +179,9 @@ end
 block(bungee, "Lane", Vector3.new(18, 0.2, 8), Vector3.new(C.X + 20, 0.25, iz - 18), W.TrackBlue)
 L.sign(bungee, L.station("BungeeSprint"), CFrame.lookAt(Vector3.new(C.X + 20, 0, iz - 9), Vector3.new(C.X + 20, 0, iz + 20)))
 
--- props: team tents, water coolers, a press box, a camera crane, flags of made-up nations
-for i, x in { -40, 40 } do
-	local tp = Vector3.new(C.X + x, 0, C.Z + outerR + 8)
-	for _, dx in { -3, 3 } do
-		for _, dz in { -2.5, 2.5 } do
-			block(props, "TentLeg", Vector3.new(0.3, 7, 0.3), tp + Vector3.new(dx, 3.5, dz), W.Aluminium)
-		end
-	end
-	block(props, "TentTop", Vector3.new(7, 0.5, 6), tp + Vector3.new(0, 7.2, 0), if i == 1 then P.ElectricBlue else P.Gold)
-	cyl(props, "Cooler", 0.8, 1.6, tp + Vector3.new(0, 0.8, 0), P.ElectricBlue)
-	cyl(props, "CoolerLid", 0.85, 0.3, tp + Vector3.new(0, 1.75, 0), P.White)
-end
-block(props, "PressBox", Vector3.new(30, 6, 8), Vector3.new(C.X, 13, C.Z + frontN - 22), P.Carbon)
+-- props: a press box and flags of made-up nations (the tents, coolers and camera crane went with the candy pass)
+block(props, "PressBox", Vector3.new(30, 6, 8), Vector3.new(C.X, 13, C.Z + frontN - 22), P.White)
 block(props, "PressGlass", Vector3.new(28, 3, 0.3), Vector3.new(C.X, 13.5, C.Z + frontN - 17.9), W.Window, { Transparency = 0.3 })
-local crane = Vector3.new(C.X + 60, 0, C.Z + outerR + 9)
-block(props, "CraneBase", Vector3.new(4, 1, 4), crane + Vector3.new(0, 0.5, 0), P.Graphite)
-cyl(props, "CraneMast", 0.5, 8, crane + Vector3.new(0, 5, 0), P.SpeedBlack)
-local arm = block(props, "CraneArm", Vector3.new(0.6, 0.6, 16), crane + Vector3.new(0, 9, -6), P.SpeedBlack)
-arm.CFrame = CFrame.lookAt(crane + Vector3.new(0, 9, 0), crane + Vector3.new(0, 11, -16)) * CFrame.new(0, 0, -8)
-block(props, "Camera", Vector3.new(1.4, 1.2, 2), (arm.CFrame * CFrame.new(0, -0.6, -8)).Position, P.SpeedBlack)
 local nations = { { "#1E7BFF", "#FFC83D" }, { "#FF4A4A", "#F4F6FA" }, { "#3FA34D", "#F4F6FA" }, { "#0E3A8A", "#FF4A4A" }, { "#FFC83D", "#0B0D12" }, { "#9B6BFF", "#F4F6FA" }, { "#4FC3FF", "#0E3A8A" }, { "#FF7A1F", "#3FA34D" } }
 for i, n in nations do
 	L.flag(flags, Vector3.new(C.X - 70 + (i - 1) * 20, 9.3, C.Z + frontN - 18.6), Color3.fromHex(n[1]), Color3.fromHex(n[2]), 7)
@@ -204,6 +190,18 @@ L.leaderboard(props, CFrame.lookAt(Vector3.new(C.X + 22, 0, C.Z - frontN - 6), V
 
 -- the COACH AGENCY (28 Oct): inside the bowl by the tunnel, across from the leaderboard
 L.agency(props, CFrame.lookAt(Vector3.new(C.X - 24, 0, C.Z - frontN - 8), Vector3.new(C.X - 24, 0, C.Z)))
+
+-- the WALL COURSE (prompt 11): straight out of the players' tunnel, low stands with a crowd both sides
+local _, courseFans = L.course(m, "Stadium", { League = 3, Theme = "stands", Crowd = crowdF, Accent = P.Purple, Title = "STADIUM WALL RUN",
+	Colors = { "#9B5DE5", "#4DB8FF", "#FF6FB5", "#FFD23F", "#6C8CFF", "#3DDC97", "#FF8A3D", "#C77DFF", "#24A8FF", "#FFC83D" } })
+fanCount += courseFans
+local Course = require(game:GetService("ReplicatedStorage").Shared.Config.Course:Clone())
+local cs = Course.Areas.Stadium.Start
+local cEnd = cs.Z + #Course.WallShares * Course.StageLength + 60
+block(ground, "CourseGround", Vector3.new(120, 4, cEnd - cs.Z + 20), Vector3.new(cs.X, -2, (cs.Z + cEnd) / 2), Color3.fromHex("#DCE3EE"))
+-- giant floating names
+L.floatLabel(props, C + Vector3.new(0, 30, 0), "RACE TRACK", "HURDLES TODAY", P.Purple, 44, 12)
+L.floatLabel(props, C + Vector3.new(0, 18, 0), "AFK MACHINES", "IN THE INFIELD", P.Mint, 30, 8)
 
 local parts, lights = L.finish(m, tmp)
 return ("Big Stadium built: %d parts, %d lights, %d fans"):format(parts, lights, fanCount)

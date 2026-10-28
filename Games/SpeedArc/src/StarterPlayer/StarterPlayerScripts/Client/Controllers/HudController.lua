@@ -357,17 +357,13 @@ local function goalFor(speed)
 	if c then
 		return c.text, (speed - c.floor) / math.max(1, c.at - c.floor)
 	end
-	-- Champion: the Go Pro goal
-	local wins, need = player:GetAttribute("LeagueWins") or 0, player:GetAttribute("WinsNeeded") or 1
+	-- the Go Pro goal
 	if player:GetAttribute("GoProReady") then
 		return '<font color="#FFC83D">GO PRO</font> is ready!', 1
 	elseif league >= (player:GetAttribute("MaxLeague") or 3) then
 		return 'Top league for now: win races for <font color="#FFC83D">coins</font>', 1
 	end
-	if hasCourse and best < Formulas.wallCount() then
-		return ('Smash the <font color="#FFC83D">last wall</font> to GO PRO'), best / Formulas.wallCount()
-	end
-	return ('Win <font color="#FFC83D">%d more race%s</font> to GO PRO'):format(need - wins, if need - wins == 1 then "" else "s"), wins / math.max(1, need)
+	return ('Smash the <font color="#FFC83D">last wall</font> to GO PRO'), best / Formulas.wallCount()
 end
 
 local function renderRank()
@@ -547,7 +543,7 @@ function Hud.start(ctx)
 		end
 	end
 	player:GetAttributeChangedSignal("Speed"):Connect(onSpeed)
-	for _, a in { "Rank", "RankName", "League", "LeagueWins", "GoProReady", "BestWall" } do
+	for _, a in { "Rank", "RankName", "League", "GoProReady", "BestWall" } do
 		player:GetAttributeChangedSignal(a):Connect(function()
 			renderRank()
 			renderSpeed(player:GetAttribute("Speed") or 0)
