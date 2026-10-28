@@ -7,9 +7,11 @@ created: 2026-10-28
 How to make Roblox games better in every way, researched 28 Oct 2026 for GYM ARC, SPEED ARC and future games. Use it before planning any update, launch or new game.
 
 ## Read this first
+- [[Roblox Playbook - Rules for every game]]: **the short must-follow version. Every game's Claude Code reads this.**
 - [[Roblox Playbook - Making games better]]: the full guide (discovery, first session, retention, live ops, social, money, performance, data, security, UI, game feel, art, sound, analytics, ads, rules, community, genres, trends) with checklists and a "numbers to remember" table.
 
 - [[Roblox Playbook - Game craft deep dive]]: the craft guide (sound, VFX, UI, optimization, quality and QA, core loop, incremental math) with recipes, formulas, budgets and ready prompts for Claude Code.
+- [[Roblox Playbook - Updates, storefront and analytics]]: updates and live ops (Configs, server restarts, admin tools, Saturday schedule in Myanmar time), thumbnails, icons, names, descriptions, logos, passes and products with prices, lighting, cameras, cutscenes, analytics playbooks.
 
 ## The 8 biggest things right now
 1. **Home algorithm (since 15 Jun 2026)** judges a game over **28 days**: play-through rate, players leaving in the first 60 s / 3 min, days played and playtime per player (day 1, days 2-7, days 8-28), playing with friends, spending days. Clickbait thumbnails now hurt.
@@ -37,6 +39,15 @@ How to make Roblox games better in every way, researched 28 Oct 2026 for GYM ARC
 - [[Playbook notes - Game quality and QA]]
 - [[Playbook notes - Core loop design]]
 - [[Playbook notes - Incremental games]]
+- [[Playbook notes - Updates and live ops]]
+- [[Playbook notes - Admin panels and live tools]]
+- [[Playbook notes - Thumbnails]]
+- [[Playbook notes - Icons and titles]]
+- [[Playbook notes - Names and descriptions]]
+- [[Playbook notes - Logos]]
+- [[Playbook notes - Passes and products catalogue]]
+- [[Playbook notes - Lighting, cameras and cutscenes]]
+- [[Playbook notes - Analytics in practice]]
 
 ## For Claude Code
 When planning a feature, launch or update for any game, read the matching section of [[Roblox Playbook - Making games better]] (strategy) or [[Roblox Playbook - Game craft deep dive]] (sound, VFX, UI, performance, quality, loops, incrementals) first (search inside it, don't read it all).

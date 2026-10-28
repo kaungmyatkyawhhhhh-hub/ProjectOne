@@ -31,3 +31,4 @@ MOW ARC: a Roblox incremental. Walk your mower over the field -> cut grass -> GR
    - Several button colours with a clear meaning (green = buy/go, blue = normal, yellow = reward/claim, red = close/danger, grey = locked), not one gold button for everything.
    - Before building screens: a MOCKUP image of the HUD + one window + the button set at phone size (667x375), shown to the owner for approval. After approval the kit is LOCKED and every screen reuses it. No redesigns later unless the owner asks.
    - Reference the look of top Roblox simulators (chunky, glossy, icon-led, readable on a phone), never generic flat web UI.
+12. **Roblox Playbook:** read `Roblox Playbook/Roblox Playbook - Rules for every game.md` at the start of every prompt and follow it; search the Playbook guides for details (incrementals: the "Game craft deep dive" guide).

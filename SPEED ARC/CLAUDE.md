@@ -54,6 +54,9 @@ Every Blender mesh must look hand-made, not like stacked default cubes:
 - After changing the kit, run `python tools/make_ui_kit.py` (it also copies the sheets into Studio's content folder for testing; Studio caches textures, so each build gets a new local file name).
 - No pink, purple, cream or pastels: bold sporty colours (prompt 12).
 
+## Roblox Playbook
+Read `Roblox Playbook/Roblox Playbook - Rules for every game.md` (vault root) at the start of every milestone/update and follow it. Search the three Playbook guides for details.
+
 ## Code
 - Source of truth is on disk: `Games\SpeedArc\src\` (this vault). Studio gets it by the sync step in `Games\SpeedArc\README.md`. Edit the files, then sync; never edit only in Studio.
 - Structure: `ReplicatedStorage/Shared/Config/*` (all numbers), `Shared/UIKit`, `Shared/Util/*`; `ServerScriptService/Server/Services/*Service`; `StarterPlayerScripts/Client/Controllers/*Controller`.

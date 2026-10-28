@@ -13,6 +13,7 @@ This repo is my Obsidian vault. It syncs to my PC with the Obsidian Git plugin (
   - Ask before restructuring or deleting anything.
 - **Don't announce it:** never say that you read the vault.
 - **Leave `.obsidian/` alone:** it is Obsidian's own settings and plugins.
+- **Roblox Playbook (every game):** before planning or building any feature, update, launch, store item, thumbnail/icon or new game, read `Roblox Playbook/Roblox Playbook - Rules for every game.md` and follow it. For details, search inside the three Playbook guides in that folder (never read them whole).
 - **Folders:** each game has its own folder; notes go only there. `Archive/` holds old games: read-only.
 - **Roblox Studio (several Studios may be open):**
   - Call `list_roblox_studios` before your first Studio edit each session and pick the Studio of the game you're working on BY NAME. If it has no name, stop and ask me.

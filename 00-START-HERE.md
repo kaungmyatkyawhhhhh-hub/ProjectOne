@@ -18,6 +18,7 @@ This vault is my personal context for Claude: who I am, what I'm working on and 
 | Break A Bed | archived 28 Oct | [[Archive/Break A Bed/Project Overview]] |
 
 ## Other notes
+- [[Roblox Playbook/Roblox Playbook - Rules for every game]]: the must-follow rules every game reads (short).
 - [[Roblox Playbook/00 Roblox Playbook]]: how to make Roblox games better (discovery, retention, money, performance, rules, trends). Read the matching part before planning any update, launch or new game.
 - [[Tools/Token-Saving-Plugins]]: token-saving plugins (what is installed, what was skipped)
 
