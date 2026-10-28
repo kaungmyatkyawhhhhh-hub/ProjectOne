@@ -172,12 +172,10 @@ function StoreService.state(player)
 	if not data then
 		return nil
 	end
-	local prices = {}
 	return {
 		Passes = data.Passes,
 		Purchases = data.Purchases,
 		StarterEligible = StoreService.starterEligible(data),
-		Prices = prices,
 	}
 end
 

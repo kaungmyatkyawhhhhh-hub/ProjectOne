@@ -7,6 +7,7 @@ local Retention = require(Shared.Config.Retention)
 local Ranks = require(Shared.Config.Ranks)
 local Coaches = require(Shared.Config.Coaches)
 local Trails = require(Shared.Config.Trails)
+local Cosmetics = require(Shared.Config.Cosmetics)
 local Net = require(Shared.Util.Net)
 local PlayerData = require(script.Parent.PlayerData)
 local SessionBoosts = require(script.Parent.SessionBoosts)
@@ -42,11 +43,15 @@ function SocialService.refreshTag(player)
 		old:Destroy() -- the M3 tag, replaced by this one
 	end
 	local tag = head:FindFirstChild("Overhead")
+	if tag and not tag:FindFirstChild("NameLabel") then
+		tag:Destroy() -- an older tag layout
+		tag = nil
+	end
 	if not tag then
 		tag = Instance.new("BillboardGui")
 		tag.Name = "Overhead"
-		tag.Size = UDim2.fromOffset(170, 40)
-		tag.StudsOffset = Vector3.new(0, 3.3, 0)
+		tag.Size = UDim2.fromOffset(190, 62)
+		tag.StudsOffset = Vector3.new(0, 3.6, 0)
 		tag.MaxDistance = 60
 		tag.ResetOnSpawn = false
 		local function label(name, y, h)
@@ -64,9 +69,39 @@ function SocialService.refreshTag(player)
 			l.Parent = tag
 			return l
 		end
-		label("Title", 0, 0.45)
-		label("Rank", 0.48, 0.52)
+		label("Title", 0, 0.28)
+		label("NameLabel", 0.29, 0.38)
+		label("Rank", 0.68, 0.32)
 		tag.Parent = head
+		local hum = player.Character:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- our tag shows the name
+		end
+	end
+	-- the name, in its name style (M5) and with VIP
+	local style = nil
+	for _, n in Cosmetics.NameStyles do
+		if n.Id == data.NameStyle then
+			style = n
+		end
+	end
+	local vip = data.Passes and data.Passes.VIP
+	local nameLabel = tag:FindFirstChild("NameLabel")
+	nameLabel.Text = (if vip then "VIP  " else "") .. player.DisplayName
+	local grad = nameLabel:FindFirstChildOfClass("UIGradient")
+	if style then
+		nameLabel.TextColor3 = Color3.new(1, 1, 1)
+		if not grad then
+			grad = Instance.new("UIGradient")
+			grad.Rotation = 90
+			grad.Parent = nameLabel
+		end
+		grad.Color = ColorSequence.new(Color3.fromHex(style.Colors[1]), Color3.fromHex(style.Colors[2]))
+	else
+		if grad then
+			grad:Destroy()
+		end
+		nameLabel.TextColor3 = if vip then Color3.fromHex("#FFC83D") else Color3.fromHex("#F4F6FA")
 	end
 	local title = data.Title ~= "" and data.Title or nil
 	tag.Title.Text = title or ""

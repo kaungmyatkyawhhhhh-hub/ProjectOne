@@ -116,10 +116,15 @@ function TrainingService.enter(player, slot)
 		coinFrac = 0,
 		bucket = GameConfig.Speed.MaxTapsPerSecond,
 		bucketAt = os.clock(),
+		auto = data.AutoTrain == true and data.Passes.AutoTrain == true,
+		autoSince = os.clock(),
 	}
 	TrainState:FireClient(player, station.Id)
 	return true
 end
+
+local applyGain
+local AUTO = require(Shared.Config.Store).AutoTrain
 
 local function onTap(player)
 	local s = active[player]
@@ -150,6 +155,14 @@ local function onTap(player)
 	local steady = #s.recent >= c.MinTapsPerSecond and now - s.recent[1] <= 1
 	local combo = if steady then Formulas.combo(now - s.streakStart) else 1
 
+	if s.auto then
+		return -- Auto Train is tapping for you (your own taps don't add on top)
+	end
+	applyGain(player, s, combo)
+end
+
+-- one tap's worth of SPEED and coins (a real tap or an Auto Train tap)
+function applyGain(player, s, combo)
 	local data = PlayerData.get(player)
 	if not data then
 		return
@@ -208,6 +221,57 @@ function TrainingService.start()
 	end
 
 	Net.get("TrainTap").OnServerEvent:Connect(onTap)
+
+	-- Auto Train (pass): toggled by the player, works on any station, checks you're still there
+	local StoreEvent = Net.get("StoreEvent")
+	Net.on("SetAutoTrain", function(player, on)
+		local data = PlayerData.get(player)
+		if not data or not data.Passes.AutoTrain then
+			return false, "pass"
+		end
+		data.AutoTrain = on == true
+		player:SetAttribute("AutoTrain", data.AutoTrain)
+		local s = active[player]
+		if s then
+			s.auto = data.AutoTrain
+			s.autoSince = os.clock()
+		end
+		return true, data.AutoTrain
+	end)
+	Net.on("AfkOk", function(player)
+		local s = active[player]
+		if s then
+			s.autoSince = os.clock()
+			s.afkAsked = nil
+		end
+		return true
+	end)
+	task.spawn(function()
+		local step = 1 / AUTO.TapsPerSecond
+		while true do
+			task.wait(step)
+			local now = os.clock()
+			for player, s in active do
+				if s.auto then
+					applyGain(player, s, AUTO.Combo)
+					if not s.afkAsked and now - (s.autoSince or now) > AUTO.AfkCheckSeconds then
+						s.afkAsked = now
+						StoreEvent:FireClient(player, "afk", { Seconds = AUTO.AfkAnswerSeconds })
+					elseif s.afkAsked and now - s.afkAsked > AUTO.AfkAnswerSeconds then
+						-- no answer: stop (the station stays yours, just no more auto taps)
+						s.auto = false
+						s.afkAsked = nil
+						local data = PlayerData.get(player)
+						if data then
+							data.AutoTrain = false
+						end
+						player:SetAttribute("AutoTrain", false)
+						StoreEvent:FireClient(player, "afkStopped", {})
+					end
+				end
+			end
+		end
+	end)
 	Net.get("TrainLeave").OnServerEvent:Connect(function(player)
 		TrainingService.leave(player)
 	end)

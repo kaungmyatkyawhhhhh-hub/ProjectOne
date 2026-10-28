@@ -18,6 +18,8 @@ local Analytics = require(Services.Analytics)
 local TutorialService = require(Services.TutorialService)
 local SocialService = require(Services.SocialService)
 local LeaderboardService = require(Services.LeaderboardService)
+local StoreService = require(Services.StoreService)
+local CosmeticsService = require(Services.CosmeticsService)
 
 Net.get("Toast") -- creates the remotes before any client asks for them
 
@@ -61,3 +63,5 @@ Analytics.start()
 TutorialService.start()
 SocialService.start()
 LeaderboardService.start()
+StoreService.start()
+CosmeticsService.start()

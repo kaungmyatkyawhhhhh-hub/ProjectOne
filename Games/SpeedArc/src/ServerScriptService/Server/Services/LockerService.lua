@@ -7,6 +7,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Shoes = require(Shared.Config.Shoes)
+local Cosmetics = require(Shared.Config.Cosmetics)
 local Trails = require(Shared.Config.Trails)
 local Boosts = require(Shared.Util.Boosts)
 local Net = require(Shared.Util.Net)
@@ -36,6 +37,19 @@ function LockerService.snapshot(data)
 		BestLeague = data.BestLeague,
 		BestRank = data.BestRank,
 		Passes = data.Passes,
+		-- M5 locker
+		OwnedKits = data.OwnedKits,
+		Kit = data.Kit,
+		OwnedHead = data.OwnedHead,
+		Head = data.Head,
+		Bib = data.Bib,
+		OwnedNameStyles = data.OwnedNameStyles,
+		NameStyle = data.NameStyle,
+		ShoeSkins = data.ShoeSkins,
+		ShoeSkin = data.ShoeSkin,
+		Titles = data.Titles,
+		Title = data.Title,
+		AutoTrain = data.AutoTrain,
 	}
 end
 
@@ -152,10 +166,21 @@ function LockerService.dressShoes(player)
 	if not shoe or shoe.Id == Shoes.Default then
 		return -- worn sneakers = the avatar's own feet
 	end
+	-- a shoe skin (colourway, M5) tints the worn pair
+	local skinId = data.ShoeSkin and data.ShoeSkin[shoe.Id]
+	local skin = skinId and data.ShoeSkins[skinId] and Cosmetics.ShoeSkins[skinId]
 	for _, side in { "Left", "Right" } do
 		local foot = char:FindFirstChild(side .. "Foot")
 		if foot then
-			makeShoePart(foot, shoe, side).Parent = char
+			local holder = makeShoePart(foot, shoe, side)
+			if skin then
+				for _, p in holder:GetDescendants() do
+					if p:IsA("BasePart") and p.Name ~= "Sole" then
+						p.Color = Color3.fromHex(skin.Color)
+					end
+				end
+			end
+			holder.Parent = char
 		end
 	end
 end
