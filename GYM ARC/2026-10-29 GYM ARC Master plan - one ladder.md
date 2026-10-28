@@ -36,6 +36,43 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Built from: [[2026-10-29 GYM ARC Why
 
 Always on (quiet, small UI): daily rewards, quests, streaks, codes, titles, leaderboards, profiles, photo mode, settings, skate board (fun movement, no tutorial step).
 
+## Full feature list, Start → Alter 15 (decided 29 Oct)
+● = in the game today (some moved), ★ = new. Rule: **3-4 new things per step**, never a flood. Every Growth Spurt and alter from Spurt 2 also gives +1 skill point.
+| Step | Height | Opens |
+|---|---|---|
+| Start | 4'0" | ● Starter Gym machines + dumbbells, ● Shop, ● Stats + muscles panels, ● daily rewards / streak / quests, ● skateboard (no tutorial tip), ● Benny (first champion), ★ Future You card |
+| Spurt 1 | 4'4" | ● Beach Gym + poses + Local posing shows, ● Trainers (free first roll), ● Inventory |
+| Spurt 2 | 4'8" | ● Arm wrestling + Regional Show, ★ Champion Ladder (Coral), ★ Power Jump |
+| Spurt 3 | 5'0" | ● Pro Gym (+10%), ★ Skill tree (its Aura + Gear branches open ● Auras and ● Gear), ★ champion Dante |
+| Spurt 4 | 5'4" | ● National Show, ● Genetics, ★ Ground Stomp |
+| Spurt 5 | 5'8" | ● Powerlifting Gym (+20%), ★ Iron Grip Throw + "NEEDS X STRENGTH" objects, ● Crews |
+| Spurt 6 | 6'0" | ● Body Alters, ★ "Fully grown, now TRANSFORM" moment, ★ Server crown |
+| Alter 1 Pumped | 6'1" | ★ Sprint Charge, ● Basketball court (side game) |
+| Alter 2 Shredded | 6'2" | ● Strongman Yard + Showdown |
+| Alter 3 Tanned | 6'2" | ★ Yard champion, ★ aura node |
+| Alter 4 Vascular | 6'3" | ★ Hype Roar |
+| Alter 5 Peak | 6'4" | ● Tier 1 title + aura + DNA, ★ gear piece |
+| Alter 6 Clay | 6'5" | ★ Flex Shockwave, ★ Stone-era champion |
+| Alter 7 Sandstone | 6'6" | ★ Secret rooftop gym (Power Jump) |
+| Alter 8 Granite | 6'6" | ★ **Golden Era Gym** |
+| Alter 9 Marble | 6'7" | ★ "Stone Titan" aura + your statue on the plaza |
+| Alter 10 Obsidian | 6'8" | ● Tier 2 title + aura + DNA, ★ Hall of Fame preview |
+| Alter 11 Bronze | 6'9" | ★ champion |
+| Alter 12 Iron | 6'10" | ★ gear piece (Champion Arena comes here in January) |
+| Alter 13 Steel | 6'10" | ★ champion |
+| Alter 14 Chrome | 6'11" | ★ last champion (top of the ladder) |
+| Alter 15 Gold | 7'0" | ● Tier 3 title + aura + DNA, ● Hall of Fame |
+| Alters 16-20 (January) | to 7'4" | ★ Tier 4 GEM alters (the winter update) |
+Always available: ● visiting legends (they ARE the ladder champions), ● codes, ● leaderboards, ● titles, ● photo mode, ● profiles.
+Moved later (existing players keep access): Genetics (LVL 5 → Spurt 4), Crews (Spurt 1 → Spurt 5), Basketball (→ Alter 1), Auras/Gear (via the skill tree at Spurt 3).
+
+Decisions behind it (29 Oct):
+- Spurt 1 was a flood (5 things); the first spurts now get 3 each and the alters get the extra feats, so the quiet alter phase gets something every alter.
+- Feats: build **3 first** (Power Jump, Ground Stomp, Iron Grip Throw); Sprint Charge, Hype Roar and Flex Shockwave come with the alter rewards.
+- Champions: ~12, almost all reused (Benny, Coral, Dante + the 8 legends), so only 1-2 new characters.
+- New builds by priority: Golden Era Gym (Alter 8, where players quit) first; the rooftop gym is small (goes with the feats); Champion Arena waits for January.
+- Alters 16-20 (Tier 4 Gem) are the January winter update, so Alter-15 players who don't want to reset still have more to do.
+
 ## Old features: what changes
 | Feature | Change |
 |---|---|
@@ -102,14 +139,14 @@ Fix (added to prompt 96, and it moves UP in the plan):
 | Saturday | Update | Prompts |
 |---|---|---|
 | 31 Oct | Hall of Fame launch | 90 + 88 done; **95** (HoF fixes) before Saturday, test first |
-| 7 Nov | Future You + Progression Road + the ladder unlock map + short tutorial + basketball hidden | **91** |
-| 14 Nov | Alter phase fix (smooth curve, never shrink, height + reward every alter) | 96 |
-| 21 Nov | Champion Ladder | 92 |
-| 28 Nov | Strongman Feats + strength objects + server crown | 93 |
-| 5 Dec | Skill tree + equip preview | 94 |
-| 12 Dec | Boosts merged into 3 | 97 |
-
-| Dec | Collection book, real-player arm wrestling, Winter event | later |
+| 7 Nov | Future You + Progression Road + the new unlock map + short tutorial + basketball hidden | **91** |
+| 14 Nov | Alter phase fix (mass monster goal, never shrink, height + reward every alter, smooth curve) | 96 |
+| 21 Nov | Golden Era Gym at Alter 8 | 98 |
+| 28 Nov | Champion Ladder | 92 |
+| 5 Dec | Strongman Feats (first 3) + strength objects + rooftop gym + server crown | 93 |
+| 12 Dec | Skill tree + equip preview | 94 |
+| 19 Dec | Boosts merged into 3 | 97 |
+| Jan | Winter update: Tier 4 Gem alters (16-20), Champion Arena, collection book, real-player arm wrestling | later |
 - Mid-November: look at the Hall of Fame numbers → keep or Plan B.
 - Each week: check first-spurt funnel + D1 the day after. If a change hurts, undo it with Configs.
 

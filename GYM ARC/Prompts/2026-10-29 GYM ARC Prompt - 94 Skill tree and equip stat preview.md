@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, retention]
-status: todo (after 93)
+status: todo (12 Dec)
 ---
 # 94 Skill tree and equip stat preview
 
@@ -11,7 +11,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Owner, 29 Oct: auras and gear give s
 GYM ARC: a 2D skill tree + clear stat previews. Follow CLAUDE.md and the Playbook rules. Only the GYM ARC Studio. Read first: Aura, Wardrobe and Gear, Boosts Inventory, Body Alters, Growth Spurts. Don't move or rebuild Looks or Alters. Never undo my manual Studio changes.
 
 1) SKILL TREE (flat 2D UI, locked UI kit, no 3D, light on phones):
-- Points: +1 per Growth Spurt and per alter (and from champions).
+- Opens at Growth Spurt 3. Points: +1 per Growth Spurt from Spurt 2 and per alter (and from champions). Its AURA and GEAR branches are how Auras and Gear open (players who already own auras/gear keep them).
 - Branches: UPGRADES (permanent: +gains %, stamina, rep speed, Strongman lifts), AURAS (nodes unlock auras), GEAR (nodes unlock gear pieces), FEATS (the Strongman Feats from prompt 93).
 - Every node shows: its stats ("Gold Aura · Gains +15%"), its cost and need ("Growth Spurt 4 + 2 points"), locked/unlocked/owned. Existing owned auras/gear stay owned and show as unlocked.
 2) EQUIPPING stays in the Aura / Gear menus. Selecting an item shows "Current → New" stats in green/red numbers (e.g. Gains x2.0 → x2.3) before equipping. Text only, no 3D preview.
