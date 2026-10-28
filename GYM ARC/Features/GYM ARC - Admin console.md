@@ -20,7 +20,9 @@ game.ServerStorage.Admin:Invoke("trainer", "LuigiRED", "Atlas")    -- BASE
 game.ServerStorage.Admin:Invoke("trainer", "LuigiRED", "Lou", 3)   -- stage 1 BASE, 2 IRON-BORN, 3 BEAST-MODE, 4 COLOSSUS, 5 LIMITLESS
 game.ServerStorage.Admin:Invoke("trainers")                        -- list the trainers
 game.ServerStorage.Admin:Invoke("shirtless", "HEINHEIN1922")       -- take off a top left over from the old wardrobe
+game.ServerStorage.Admin:Invoke("level", "LuigiRED", 250)          -- set LVL (28 Oct); "lvl" works too, "all" for everyone
 ```
+- `level` (28 Oct): sets the top bar LVL to the number (0 or more, up or down); the muscles stay. It moves `stats.levelBase` (`PlayerData.AdminSetLevel`) and sets the LEVEL / Strongest board's best to the same number, so lowering someone shows on the board at its next update. The top bar changes at once. `info` now shows LVL first. Passes, muscles, spurts, alters, genetics and stars: see the AdminService header (`("help")` lists every command).
 - Player: name or display name, any case; the start is enough when only one player matches; `"all"` = everyone in the server. Only players in the **same server** as the console.
 - Trainer: id (`AeonCoach`), name (`Atlas`, `Coach Lou`) or the name without "Coach" (`Lou`).
 - The answer prints in the console (`[Admin] ...`): who got what, or why not.

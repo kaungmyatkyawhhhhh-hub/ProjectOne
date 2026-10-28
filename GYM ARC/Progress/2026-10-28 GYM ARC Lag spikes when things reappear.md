@@ -24,3 +24,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. Prompt: [[2026-10-28 GYM ARC Prompt - 
 - The beach rings' sway loop and the treadmill loop each walked every Machine (GetTagged + an attribute read on each) every frame. They now keep their own lists from the tag's added / removed signals. Profile over 3 s at the beach: ring loop 50-76 ms -> 4 ms; the treadmill loop no longer shows up.
 - The ring sway also drops its saved ring positions when a ring part streams out, so the rings aren't moved from stale positions when they come back.
 - Tested: rings still sway near the camera; no errors in the output.
+
+## Console: set anyone's LVL
+- (owner: "also make it so that i can change levels of any player too") `game.ServerStorage.Admin:Invoke("level", "<player or all>", 250)` (or `"lvl"`). New `PlayerData.AdminSetLevel`: LVL = levelBase + the average muscle level, so it moves `stats.levelBase` (muscles stay) and sets `stats.bestLevel` to the same number (the LEVEL / Strongest board follows, also when lowering). `info` shows LVL. `TopBarClient` now also refreshes on a `stats.levelBase` change (it only watched coins / muscles / spurts / alter). See [[GYM ARC - Admin console]].
+- Tested: 5646 -> 250 -> 3 -> 120 -> 321, the top bar showed each at once; a non-number and an unknown player answered with a message; `"all"` works. No errors.
