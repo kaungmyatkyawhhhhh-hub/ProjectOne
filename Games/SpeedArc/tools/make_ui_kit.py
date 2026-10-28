@@ -655,14 +655,15 @@ def pack():
            "-- Files: the Studio test copies (Studio caches textures, so each build has its own name).",
            "-- Sprites: name = { Sheet, X, Y, W, H, Slice = {l, t, r, b} (inside the sprite), SliceScale (\"auto\" = height / sprite height) }",
            "return {",
-           "	Files = { " + ", ".join('%s = "%s"' % (k, hashed[k]) for k in SHEETS) + " },",
-           "	Sprites = {"]
+           "\tFiles = { " + ", ".join('%s = "%s"' % (k, hashed[k]) for k in SHEETS) + " },",
+           "\tSprites = {"]
     for n in sorted(table):
         sheet, x, y, w, h, sl, sc = table[n]
         extra = ""
         if sl:
             extra = ", Slice = { %d, %d, %d, %d }, SliceScale = %s" % (*sl, '"auto"' if sc == "auto" else sc)
-        lua.append('\t%s = { "%s", %d, %d, %d, %d%s },' % (n, sheet, x, y, w, h, extra))
+        lua.append('\t\t%s = { "%s", %d, %d, %d, %d%s },' % (n, sheet, x, y, w, h, extra))
+    lua.append("\t},")
     lua.append("}")
     p = os.path.join(GAME, "src", "ReplicatedStorage", "Shared", "Config", "UIArtSprites.lua")
     open(p, "w", newline="\n").write("\n".join(lua) + "\n")
