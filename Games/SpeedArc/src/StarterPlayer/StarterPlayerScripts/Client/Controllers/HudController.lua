@@ -29,8 +29,8 @@ local shownCoins = 0
 ----------------------------------------------------------------------------
 local function buildCoins()
 	local pill = UIKit.pill({ Name = "Coins", Size = UDim2.fromOffset(172, 44), Position = UDim2.fromOffset(14, 10), Parent = canvas })
-	local icon = UIKit.coinIcon(30, pill)
-	icon.Position = UDim2.fromOffset(7, 7)
+	local icon = UIKit.coinIcon(48, pill)
+	icon.Position = UDim2.fromOffset(-8, -2)
 	refs.coinsText = UIKit.text({
 		Text = "0",
 		TextSize = 24,
@@ -44,9 +44,7 @@ local function buildCoins()
 	refs.coins = pill
 	-- rank badge (league + rank) under the coins (next to them it hid behind the speed plate on phones)
 	local rank = UIKit.pill({ Name = "Rank", Size = UDim2.fromOffset(150, 44), Position = UDim2.fromOffset(14, 60), Parent = canvas })
-	local dot = UIKit.make("Frame", { Name = "Dot", BackgroundColor3 = P.White, Position = UDim2.fromOffset(8, 8), Size = UDim2.fromOffset(28, 28), Parent = rank })
-	UIKit.corner(dot, UDim.new(0.5, 0))
-	UIKit.stroke(dot, P.White, 2, 0.3)
+	local dot = UIKit.sprite("badge_white", { Name = "Dot", Position = UDim2.fromOffset(2, 2), Size = UDim2.fromOffset(40, 40), Parent = rank })
 	refs.rankDot = dot
 	refs.rankLetter = UIKit.text({ Text = "B", TextSize = 16, Color = P.SpeedBlack, Stroke = false, Parent = dot })
 	refs.rankText = UIKit.text({ Text = "BRONZE", TextSize = 15, XAlign = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(42, 4), Size = UDim2.new(1, -46, 0, 20), Parent = rank })
@@ -65,17 +63,7 @@ local function buildSpeed()
 	})
 	refs.speedBlock = block
 	-- dark plate behind the number: busy world text behind (stand screens) never mixes into it
-	local plate = UIKit.make("Frame", {
-		Name = "Plate",
-		BackgroundColor3 = P.SpeedBlack,
-		BackgroundTransparency = 0.12,
-		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 4),
-		Size = UDim2.new(1, 0, 0, 92),
-		Parent = block,
-	})
-	UIKit.corner(plate, 16)
-	UIKit.gradient(plate, P.Carbon, P.SpeedBlack, 90)
+	UIKit.panel({ Name = "Plate", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 2), Size = UDim2.new(1, 0, 0, 98), Parent = block })
 
 	local row = UIKit.make("Frame", { Name = "Row", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 54), Parent = block })
 	UIKit.make("UIListLayout", {
@@ -86,16 +74,16 @@ local function buildSpeed()
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Parent = row,
 	})
-	local icon = UIKit.speedIcon(26, row)
+	local icon = UIKit.speedIcon(40, row)
 	icon.LayoutOrder = 1
 	local num = UIKit.text({
 		Name = "Number",
 		Text = "0",
 		TextSize = 46,
 		Color = P.White,
-		StrokeColor = P.DeepBlue,
-		StrokeThickness = 2.5,
-		StrokeTransparency = 0.1,
+		StrokeColor = P.Navy,
+		StrokeThickness = 3,
+		StrokeTransparency = 0,
 		Size = UDim2.fromOffset(0, 54),
 		Parent = row,
 	})
@@ -115,20 +103,7 @@ local function buildSpeed()
 	unit.LayoutOrder = 3
 
 	-- progress to the next station
-	local bar = UIKit.make("Frame", {
-		Name = "Bar",
-		BackgroundColor3 = P.SpeedBlack,
-		BackgroundTransparency = 0.25,
-		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 58),
-		Size = UDim2.fromOffset(250, 9),
-		Parent = block,
-	})
-	UIKit.corner(bar, UDim.new(0.5, 0))
-	UIKit.stroke(bar, P.Graphite, 1.5)
-	local fill = UIKit.make("Frame", { Name = "Fill", BackgroundColor3 = P.White, Size = UDim2.fromScale(0, 1), Parent = bar })
-	UIKit.corner(fill, UDim.new(0.5, 0))
-	UIKit.gradient(fill, P.ElectricBlue, P.BrightBlue, 0)
+	local _, fill = UIKit.bar({ Name = "Bar", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 56), Size = UDim2.fromOffset(256, 14), Parent = block })
 	refs.barFill = fill
 
 	refs.goalText = UIKit.text({
@@ -156,8 +131,7 @@ local function buildRacePill()
 		Parent = canvas,
 	})
 	local pill = UIKit.pill({ Name = "Timer", Size = UDim2.fromOffset(196, 44), Parent = holder })
-	local flag = UIKit.speedIcon(22, pill, P.Gold)
-	flag.Position = UDim2.fromOffset(14, 11)
+	UIKit.icon("race", 38, pill, { Position = UDim2.fromOffset(4, 3) })
 	refs.raceLabel = UIKit.text({
 		Text = "NEXT RACE",
 		Font = F.BodyBold,
@@ -201,7 +175,7 @@ local function buildToast()
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.new(0.5, 0, 0, 144), -- under the wall strip (prompt 11)
 		Size = UDim2.fromOffset(360, 40),
-		Radius = 12,
+		Accent = true,
 		Parent = canvas,
 	})
 	toast.Visible = false
@@ -271,18 +245,7 @@ local function buildTraining()
 		Parent = card,
 	})
 	-- combo meter
-	local meter = UIKit.make("Frame", {
-		Name = "Combo",
-		BackgroundColor3 = P.SpeedBlack,
-		Position = UDim2.fromOffset(18, 56),
-		Size = UDim2.new(1, -94, 0, 14),
-		Parent = card,
-	})
-	UIKit.corner(meter, UDim.new(0.5, 0))
-	UIKit.stroke(meter, P.Graphite, 1.5)
-	local fill = UIKit.make("Frame", { Name = "Fill", BackgroundColor3 = P.White, Size = UDim2.fromScale(0, 1), Parent = meter })
-	UIKit.corner(fill, UDim.new(0.5, 0))
-	UIKit.gradient(fill, P.DeepGold, P.Gold, 0)
+	local _, fill = UIKit.bar({ Name = "Combo", Kind = "gold", Position = UDim2.fromOffset(18, 56), Size = UDim2.new(1, -94, 0, 14), Parent = card })
 	refs.comboFill = fill
 	refs.comboText = UIKit.text({
 		Text = "x1.0",
@@ -371,7 +334,7 @@ local function renderRank()
 	local color = Ranks.Colors[name] or P.White
 	refs.rankText.Text = string.upper(name)
 	refs.rankText.TextColor3 = color
-	refs.rankDot.BackgroundColor3 = color
+	refs.rankDot.ImageColor3 = color
 	refs.rankLetter.Text = string.sub(name, 1, 1)
 	refs.leagueText.Text = ("LEAGUE %d"):format(player:GetAttribute("League") or 1)
 end

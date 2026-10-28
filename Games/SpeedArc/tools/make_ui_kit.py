@@ -339,6 +339,7 @@ def build():
     spr["bar_gold"] = save("bar_gold", bar("#FFB300"), [16, 15, 80, 17], "auto", "progress fill (rewards)")
     spr["badge_red"] = save("badge_red", badge("#FF3B3B"), None, None, "notification dot")
     spr["badge_bronze"] = save("badge_bronze", badge("#D9822B"), None, None, "rank badge")
+    spr["badge_white"] = save("badge_white", badge("#F4F6FA"), None, None, "badge the game tints (ImageColor3), e.g. the rank colour")
     for k, v in ICONS().items():
         spr["icon_" + k] = save("icon_" + k, v, None, None, "icon")
     with open(os.path.join(OUT_SPR, "kit.json"), "w") as f:

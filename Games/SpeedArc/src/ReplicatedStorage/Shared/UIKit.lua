@@ -1,10 +1,16 @@
 -- SPEED ARC UI kit (decided in M1, reuse everywhere). Mobile first: layouts are built in
 -- 844 x 390 "design pixels" (a landscape phone) and scaled by one UIScale on the root.
--- Dark navy panels (GYM ARC-style windows, 28 Oct), candy tiles and buttons, GOLD for coins/rewards/premium, white text.
--- One chunky display font (italic, numbers/titles/buttons) + one clean body font.
+-- Prompt 12 (owner OK, 28 Oct): the kit is ART. Buttons, panels, tiles, pills, bars, badges and icons
+-- are 9-slice PNG sprites (tools/make_ui_kit.py -> 3 sheets, Config/UIArt + UIArtSprites). LOCKED:
+-- every new screen reuses these functions; never build a coded rectangle + gradient + stroke button.
+-- Button colours mean something: Green = buy / go / equip, Blue = normal, Gold = claim / reward,
+-- Red = close, Grey = locked, Dark = tabs off and small HUD buttons.
+-- One chunky display font (italic, numbers/titles/buttons) with a navy stroke + one clean body font.
 local TweenService = game:GetService("TweenService")
 
 local Palette = require(script.Parent.Config.Palette)
+local UIArt = require(script.Parent.Config.UIArt)
+local Sprites = require(script.Parent.Config.UIArtSprites)
 
 local UIKit = {}
 
@@ -21,12 +27,99 @@ UIKit.Fonts = {
 UIKit.MinTextSize = 13 -- smallest HUD label; nothing smaller anywhere
 
 UIKit.ButtonStyles = {
-	Blue = { Base = Palette.ElectricBlue, Light = Palette.BrightBlue, Edge = Palette.DeepBlue, Text = Palette.White, TextStroke = Palette.DeepBlue },
-	Gold = { Base = Palette.Gold, Light = Color3.fromHex("#FFE38C"), Edge = Palette.DeepGold, Text = Palette.SpeedBlack, TextStroke = nil },
-	Dark = { Base = Palette.Graphite, Light = Color3.fromHex("#4A5596"), Edge = Palette.SpeedBlack, Text = Palette.White, TextStroke = Palette.SpeedBlack },
-	Green = { Base = Color3.fromHex("#3FCB2B"), Light = Color3.fromHex("#8BF26A"), Edge = Color3.fromHex("#22861A"), Text = Palette.White, TextStroke = Palette.Navy },
-	Red = { Base = Palette.Red, Light = Color3.fromHex("#FF7A7A"), Edge = Color3.fromHex("#B81F1F"), Text = Palette.White, TextStroke = Palette.Navy },
+	Green = { Sprite = "btn_green", Text = Palette.White, TextStroke = Palette.Navy }, -- buy / go / equip
+	Blue = { Sprite = "btn_blue", Text = Palette.White, TextStroke = Palette.Navy }, -- normal, tab on
+	Gold = { Sprite = "btn_yellow", Text = Palette.Navy, TextStroke = nil }, -- claim / reward
+	Red = { Sprite = "btn_red", Text = Palette.White, TextStroke = Palette.Navy }, -- close
+	Grey = { Sprite = "btn_grey", Text = Palette.White, TextStroke = Palette.Navy }, -- locked
+	Dark = { Sprite = "btn_navy", Text = Palette.White, TextStroke = Palette.Navy }, -- tab off, small HUD buttons
 }
+
+----------------------------------------------------------------------------
+-- Sprites (the art kit)
+----------------------------------------------------------------------------
+local function sheetImage(sheet)
+	local id = UIArt.Ids[sheet]
+	if id and id ~= "" then
+		return "rbxassetid://" .. id
+	end
+	return UIArt.LocalFolder .. UIArt.Files[sheet]
+end
+
+-- Point an ImageLabel / ImageButton at a sprite. `height` (design px) sizes "auto" slices (pills, bars).
+function UIKit.applySprite(img, name, height)
+	local sp = Sprites[name]
+	assert(sp, "UIKit: no sprite " .. tostring(name))
+	img.Image = sheetImage(sp[1])
+	img.ImageRectOffset = Vector2.new(sp[2], sp[3])
+	img.ImageRectSize = Vector2.new(sp[4], sp[5])
+	if sp.Slice then
+		img.ScaleType = Enum.ScaleType.Slice
+		img.SliceCenter = Rect.new(sp.Slice[1], sp.Slice[2], sp.Slice[3], sp.Slice[4])
+		img.SliceScale = if sp.SliceScale == "auto" then math.max(0.05, (height or sp[5]) / sp[5]) else sp.SliceScale
+	else
+		img.ScaleType = Enum.ScaleType.Fit
+	end
+end
+
+function UIKit.sprite(name, props)
+	props = props or {}
+	local img = Instance.new("ImageLabel")
+	img.Name = props.Name or name
+	img.BackgroundTransparency = 1
+	img.Size = props.Size or UDim2.fromOffset(40, 40)
+	img.Position = props.Position or UDim2.new()
+	img.AnchorPoint = props.AnchorPoint or Vector2.zero
+	img.ZIndex = props.ZIndex or 1
+	img.ImageTransparency = props.ImageTransparency or 0
+	if props.Color then
+		img.ImageColor3 = props.Color
+	end
+	local h = props.Height or (img.Size.Y.Scale == 0 and img.Size.Y.Offset) or nil
+	UIKit.applySprite(img, name, h)
+	img.Parent = props.Parent
+	return img
+end
+
+-- An icon from the kit (store, locker, coaches, codes, invite, daily, quests, top, settings, close,
+-- coin, speed, crown, race, shoe2x)
+function UIKit.icon(name, size, parent, props)
+	props = props or {}
+	props.Size = props.Size or UDim2.fromOffset(size, size)
+	props.Parent = parent
+	props.Name = props.Name or "Icon"
+	return UIKit.sprite("icon_" .. name, props)
+end
+
+-- nearest colour-glow tile for any colour (Color3 or hex)
+function UIKit.tileKey(color)
+	if typeof(color) == "string" then
+		if UIArt.TileColors[color] then
+			return color
+		end
+		color = Color3.fromHex(color)
+	end
+	local best, bd = "blue", math.huge
+	for k, hex in UIArt.TileColors do
+		local c = Color3.fromHex(hex)
+		local d = (c.R - color.R) ^ 2 + (c.G - color.G) ^ 2 + (c.B - color.B) ^ 2
+		if d < bd then
+			best, bd = k, d
+		end
+	end
+	return best
+end
+
+-- A tile / card with a colour glow rising from the bottom (Store, Locker, Quests, Coaches, Daily)
+function UIKit.tile(props)
+	local img = UIKit.sprite("tile_" .. UIKit.tileKey(props.Color or "blue"), props)
+	img.Name = props.Name or "Tile"
+	return img
+end
+
+function UIKit.setTileColor(tile, color)
+	UIKit.applySprite(tile, "tile_" .. UIKit.tileKey(color))
+end
 
 local clickHook = nil
 function UIKit.setClickHook(fn)
@@ -118,62 +211,68 @@ end
 ----------------------------------------------------------------------------
 -- Panels and pills
 ----------------------------------------------------------------------------
--- Dark carbon panel: gradient, graphite border, a thin electric-blue accent on the left edge
+-- The window panel sprite (navy, bright rim, thick outline, soft shadow). `Accent` adds a small
+-- coloured strip on the left (toasts use it for their colour).
 function UIKit.panel(props)
-	local frame = make("Frame", {
+	local frame = UIKit.sprite("panel", {
 		Name = props.Name or "Panel",
-		BackgroundColor3 = Palette.White,
-		BackgroundTransparency = props.Transparency or 0.04,
 		Size = props.Size or UDim2.fromOffset(200, 100),
-		Position = props.Position or UDim2.new(),
-		AnchorPoint = props.AnchorPoint or Vector2.zero,
+		Position = props.Position,
+		AnchorPoint = props.AnchorPoint,
 		ZIndex = props.ZIndex or 1,
+		ImageTransparency = if props.Transparency and props.Transparency > 0.2 then props.Transparency else 0,
 		Parent = props.Parent,
 	})
-	UIKit.corner(frame, props.Radius or 14)
-	UIKit.gradient(frame, Palette.Carbon, Palette.SpeedBlack, 90)
-	UIKit.stroke(frame, props.StrokeColor or Palette.Graphite, props.StrokeThickness or 2)
-	if props.Accent ~= false then -- windows switch it off (Accent = false)
+	if props.Accent == true or props.AccentColor then
 		local accent = make("Frame", {
 			Name = "Accent",
 			BackgroundColor3 = props.AccentColor or Palette.ElectricBlue,
 			BorderSizePixel = 0,
-			Size = UDim2.new(0, 4, 1, -16),
-			Position = UDim2.fromOffset(6, 8),
+			Size = UDim2.new(0, 5, 1, -22),
+			Position = UDim2.fromOffset(9, 10),
 			ZIndex = (props.ZIndex or 1) + 1,
 			Parent = frame,
 		})
-		UIKit.corner(accent, 2)
+		UIKit.corner(accent, 3)
 	end
 	return frame
 end
 
--- Rounded pill used on the top bar (coins, race timer)
+-- Rounded navy pill (coins, race timer, counters); Kind = "navy" | "red" | "lime"
 function UIKit.pill(props)
-	local frame = make("Frame", {
+	local size = props.Size or UDim2.fromOffset(160, 40)
+	return UIKit.sprite("pill_" .. (props.Kind or "navy"), {
 		Name = props.Name or "Pill",
-		BackgroundColor3 = Palette.White,
-		BackgroundTransparency = 0.08,
-		Size = props.Size or UDim2.fromOffset(160, 40),
-		Position = props.Position or UDim2.new(),
-		AnchorPoint = props.AnchorPoint or Vector2.zero,
+		Size = size,
+		Height = size.Y.Offset > 0 and size.Y.Offset or 40,
+		Position = props.Position,
+		AnchorPoint = props.AnchorPoint,
+		ZIndex = props.ZIndex or 1,
 		Parent = props.Parent,
 	})
-	UIKit.corner(frame, UDim.new(0.5, 0))
-	UIKit.gradient(frame, Palette.Carbon, Palette.SpeedBlack, 90)
-	UIKit.stroke(frame, props.StrokeColor or Palette.Graphite, 2)
-	return frame
+end
+
+-- Progress bar: a track sprite + a fill sprite (blue or gold). Returns track, fill; set fill.Size scale X.
+function UIKit.bar(props)
+	local size = props.Size or UDim2.fromOffset(200, 12)
+	local h = size.Y.Offset > 0 and size.Y.Offset or 12
+	local track = UIKit.sprite("bar_track", { Name = props.Name or "Bar", Size = size, Height = h, Position = props.Position, AnchorPoint = props.AnchorPoint, ZIndex = props.ZIndex or 1, Parent = props.Parent })
+	local fill = UIKit.sprite("bar_" .. (props.Kind or "blue"), { Name = "Fill", Size = UDim2.fromScale(0, 1), Height = h, ZIndex = (props.ZIndex or 1) + 1, Parent = track })
+	return track, fill
 end
 
 ----------------------------------------------------------------------------
 -- Chunky button with a darker bottom edge and a press animation
 ----------------------------------------------------------------------------
-UIKit.sweeps = {} -- the gold buttons' shine sweeps (HudController runs them)
+UIKit.sweeps = {} -- (the coded buttons' shine sweeps; the art buttons have their own highlight)
 
+-- the face of the art sprite: the label sits on it, and drops with it when pressed
+local LABEL_UP, LABEL_DOWN = 0.42, 0.49
+
+-- Props: Style, Text, TextSize, Icon (kit icon name, drawn on the left), Size, Position, ...
 function UIKit.button(props)
-	local style = UIKit.ButtonStyles[props.Style or "Blue"]
-	local edgeH = props.EdgeHeight or 5
-	local radius = props.Radius or 14
+	local styleName = props.Style or "Blue"
+	local style = UIKit.ButtonStyles[styleName] or UIKit.ButtonStyles.Blue
 
 	local root = make("TextButton", {
 		Name = props.Name or "Button",
@@ -186,65 +285,23 @@ function UIKit.button(props)
 		ZIndex = props.ZIndex or 1,
 		Parent = props.Parent,
 	})
+	root:SetAttribute("Style", styleName)
 	local scale = make("UIScale", { Parent = root })
 
-	local edge = make("Frame", {
-		Name = "Edge",
-		BackgroundColor3 = style.Edge,
-		Size = UDim2.new(1, 0, 1, -2),
-		Position = UDim2.fromOffset(0, 2),
-		ZIndex = root.ZIndex,
-		Parent = root,
-	})
-	UIKit.corner(edge, radius)
+	local face = UIKit.sprite(style.Sprite, { Name = "Face", Size = UDim2.fromScale(1, 1), ZIndex = root.ZIndex + 1, Parent = root })
 
-	local face = make("Frame", {
-		Name = "Face",
-		BackgroundColor3 = Palette.White,
-		Size = UDim2.new(1, 0, 1, -edgeH),
-		Position = UDim2.fromOffset(0, 0),
-		ZIndex = root.ZIndex + 1,
-		Parent = root,
-	})
-	UIKit.corner(face, radius)
-	UIKit.gradient(face, style.Light, style.Base, 90)
-	make("UIStroke", {
-		Color = style.Light,
-		Thickness = 2,
-		Transparency = 0.2,
-		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-		Parent = face,
-	})
-	-- glossy top highlight
-	local shine = make("Frame", {
-		Name = "Shine",
-		BackgroundColor3 = Palette.White,
-		BackgroundTransparency = 0.82,
-		Size = UDim2.new(1, -12, 0.42, 0),
-		Position = UDim2.fromOffset(6, 3),
-		ZIndex = root.ZIndex + 2,
-		Parent = face,
-	})
-	UIKit.corner(shine, radius - 4)
-	-- primary (gold) buttons: a light sweep runs across now and then (VFX note); one loop drives all
-	if (props.Style or "Blue") == "Gold" then
-		face.ClipsDescendants = true
-		local sweep = make("Frame", {
-			Name = "Sweep",
-			BackgroundColor3 = Palette.White,
-			BackgroundTransparency = 0.55,
-			BorderSizePixel = 0,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(-0.3, 0, 0.5, 0),
-			Size = UDim2.new(0, 18, 1.6, 0),
-			Rotation = 20,
+	local icon
+	local h = root.Size.Y.Offset > 0 and root.Size.Y.Offset or 48
+	local hasText = props.Text ~= nil and props.Text ~= ""
+	if props.Icon then
+		local isz = if hasText then math.floor(h * 0.78) else math.floor(h * 0.6)
+		icon = UIKit.icon(props.Icon, isz, face, {
+			AnchorPoint = if hasText then Vector2.new(0, 0.5) else Vector2.new(0.5, 0.5),
+			Position = if hasText then UDim2.new(0, 2, LABEL_UP, 0) else UDim2.fromScale(0.5, LABEL_UP),
 			ZIndex = root.ZIndex + 2,
-			Parent = face,
 		})
-		make("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.2), NumberSequenceKeypoint.new(1, 1) }), Parent = sweep })
-		table.insert(UIKit.sweeps, sweep)
 	end
-
+	local inset = if icon and hasText then math.floor(h * 0.78) else 0
 	local label = UIKit.text({
 		Name = "Label",
 		Text = props.Text or "",
@@ -253,32 +310,44 @@ function UIKit.button(props)
 		Font = props.Font or UIKit.Fonts.Display,
 		Stroke = style.TextStroke ~= nil,
 		StrokeColor = style.TextStroke,
-		StrokeTransparency = 0.5,
-		Size = UDim2.new(1, -16, 1, 0),
-		Position = UDim2.fromOffset(8, 0),
+		StrokeThickness = 2,
+		StrokeTransparency = 0,
+		AnchorPoint = Vector2.new(0, 0.5),
+		Size = UDim2.new(1, -16 - inset, 0.7, 0),
+		Position = UDim2.new(0, 8 + inset, LABEL_UP, 0),
 		ZIndex = root.ZIndex + 3,
 		Parent = face,
 	})
 
 	local function press(down)
+		local st = UIKit.ButtonStyles[root:GetAttribute("Style")] or style
+		UIKit.applySprite(face, st.Sprite .. (if down then "_down" else ""))
+		local y = if down then LABEL_DOWN else LABEL_UP
+		label.Position = UDim2.new(0, 8 + inset, y, 0)
+		if icon then
+			icon.Position = UDim2.new(icon.Position.X.Scale, icon.Position.X.Offset, y, 0)
+		end
 		if down then
-			UIKit.tween(face, 0.06, { Position = UDim2.fromOffset(0, edgeH - 1) })
-			UIKit.tween(scale, 0.06, { Scale = 0.96 })
+			UIKit.tween(scale, 0.06, { Scale = 0.97 })
 		else
-			UIKit.tween(face, 0.12, { Position = UDim2.fromOffset(0, 0) }, Enum.EasingStyle.Back)
 			UIKit.tween(scale, 0.12, { Scale = 1 }, Enum.EasingStyle.Back)
 		end
 	end
+	local isDown = false
 	root.MouseButton1Down:Connect(function()
+		isDown = true
 		press(true)
 	end)
-	root.MouseButton1Up:Connect(function()
-		press(false)
-	end)
-	root.MouseLeave:Connect(function()
-		press(false)
-	end)
+	local function up()
+		if isDown then
+			isDown = false
+			press(false)
+		end
+	end
+	root.MouseButton1Up:Connect(up)
+	root.MouseLeave:Connect(up)
 	root.Activated:Connect(function()
+		up()
 		if clickHook and props.Silent ~= true then
 			clickHook(props.ClickSound)
 		end
@@ -293,10 +362,9 @@ end
 -- Restyle a button made by UIKit.button
 function UIKit.setButtonStyle(button, styleName)
 	local style = UIKit.ButtonStyles[styleName]
-	button.Edge.BackgroundColor3 = style.Edge
+	button:SetAttribute("Style", styleName)
 	local face = button.Face
-	face.UIGradient.Color = ColorSequence.new(style.Light, style.Base)
-	face.UIStroke.Color = style.Light
+	UIKit.applySprite(face, style.Sprite)
 	face.Label.TextColor3 = style.Text
 	local s = face.Label:FindFirstChildOfClass("UIStroke")
 	if s then
@@ -311,49 +379,7 @@ end
 -- Icons (built from shapes: no emoji, no clip art)
 ----------------------------------------------------------------------------
 function UIKit.coinIcon(size, parent)
-	local coin = make("Frame", {
-		Name = "Coin",
-		BackgroundColor3 = Palette.White,
-		Size = UDim2.fromOffset(size, size),
-		Parent = parent,
-	})
-	UIKit.corner(coin, UDim.new(0.5, 0))
-	UIKit.gradient(coin, Color3.fromHex("#FFE38C"), Palette.DeepGold, 135)
-	make("UIStroke", { Color = Color3.fromHex("#9C6508"), Thickness = math.max(1, size / 14), Parent = coin })
-	local inner = make("Frame", {
-		Name = "Inner",
-		BackgroundTransparency = 1,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.64, 0.64),
-		Parent = coin,
-	})
-	UIKit.corner(inner, UDim.new(0.5, 0))
-	make("UIStroke", { Color = Color3.fromHex("#FFF1BF"), Thickness = math.max(1, size / 16), Transparency = 0.15, Parent = inner })
-	-- slanted speed bars in the middle
-	for i = 0, 1 do
-		local bar = make("Frame", {
-			BackgroundColor3 = Color3.fromHex("#A86A06"),
-			BorderSizePixel = 0,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromScale(0.42 + i * 0.18, 0.5),
-			Size = UDim2.fromScale(0.1, 0.42),
-			Rotation = 18,
-			Parent = coin,
-		})
-		UIKit.corner(bar, 2)
-	end
-	-- highlight
-	local hl = make("Frame", {
-		BackgroundColor3 = Palette.White,
-		BackgroundTransparency = 0.45,
-		Position = UDim2.fromScale(0.2, 0.12),
-		Size = UDim2.fromScale(0.3, 0.14),
-		Rotation = -30,
-		Parent = coin,
-	})
-	UIKit.corner(hl, UDim.new(0.5, 0))
-	return coin
+	return UIKit.icon("coin", size, parent, { Name = "Coin" })
 end
 
 local MEDAL_COLORS = {
@@ -415,23 +441,9 @@ function UIKit.medalIcon(kind, size, parent, number)
 	return holder
 end
 
--- Two slanted chevrons: the "speed" mark next to MPH
-function UIKit.speedIcon(size, parent, color)
-	local holder = make("Frame", { Name = "SpeedIcon", BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = parent })
-	for i = 0, 2 do
-		local bar = make("Frame", {
-			BackgroundColor3 = color or Palette.BrightBlue,
-			BackgroundTransparency = i * 0.3,
-			BorderSizePixel = 0,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromScale(0.75 - i * 0.28, 0.5),
-			Size = UDim2.fromScale(0.16, 0.9),
-			Rotation = 22,
-			Parent = holder,
-		})
-		UIKit.corner(bar, 2)
-	end
-	return holder
+-- the speed bolt (HUD SPEED panel, race cards); `color` is ignored (the art is gold)
+function UIKit.speedIcon(size, parent, _color)
+	return UIKit.icon("speed", size, parent, { Name = "SpeedIcon" })
 end
 
 ----------------------------------------------------------------------------
@@ -447,8 +459,8 @@ function UIKit.window(props)
 		Name = (props.Name or "Window") .. "Backdrop",
 		Text = "",
 		AutoButtonColor = false,
-		BackgroundColor3 = Palette.SpeedBlack,
-		BackgroundTransparency = 0.35,
+		BackgroundColor3 = Color3.fromHex("#060C22"),
+		BackgroundTransparency = 0.42,
 		Position = UDim2.fromOffset(0, -80), -- also dims the strip under Roblox's top bar
 		Size = UDim2.new(1, 0, 1, 80),
 		Visible = false,
@@ -477,16 +489,14 @@ function UIKit.window(props)
 		Parent = panel,
 	})
 	UIKit.text({ Text = props.Title, TextSize = 32, XAlign = Enum.TextXAlignment.Left, StrokeColor = Palette.SpeedBlack, StrokeThickness = 3, StrokeTransparency = 0, ZIndex = 24, Parent = tab })
-	local underline = make("Frame", { Name = "Underline", BackgroundColor3 = props.Accent or Palette.Gold, BorderSizePixel = 0, Position = UDim2.fromOffset(2, 38), Size = UDim2.fromOffset(64, 5), ZIndex = 24, Parent = tab })
-	UIKit.corner(underline, 3)
+	UIKit.sprite("bar_gold", { Name = "Underline", Position = UDim2.fromOffset(2, 38), Size = UDim2.fromOffset(64, 8), ZIndex = 24, Parent = tab })
 	local close = UIKit.button({
 		Name = "Close",
-		Style = "Dark",
-		Text = "X",
-		TextSize = 20,
+		Style = "Red",
+		Icon = "close",
 		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.new(1, 12, 0, -14),
-		Size = UDim2.fromOffset(46, 44),
+		Position = UDim2.new(1, 14, 0, -18),
+		Size = UDim2.fromOffset(54, 50),
 		ZIndex = 24,
 		Parent = panel,
 	})
