@@ -80,8 +80,9 @@ local function card(item, isPass)
 	UIKit.text({ Text = desc, Font = F.BodyBold, TextSize = 13, Color = P.BrightBlue, Wrapped = true, YAlign = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(8, 86), Size = UDim2.new(1, -16, 0, 62), Parent = c })
 	local soon = item.Id <= 0
 	local label
-	if isOwned then
+	if isOwned or (item.Once and st and (st.Purchases[item.Key] or 0) > 0) then
 		label = "OWNED"
+		isOwned = true
 	elseif item.Key == "StarterPack" and st and not st.StarterEligible then
 		label = "GONE"
 	elseif soon then
@@ -348,6 +349,9 @@ function StoreUI.start(c)
 			task.wait(1)
 			if ctx.Training.isTraining() then
 				tapSeconds += 1
+				if player:GetAttribute("AutoTrain") then
+					ctx.Hud.setHint(true, "AUTO TRAIN IS TAPPING FOR YOU")
+				end
 			end
 			if not pending and not autoOffered and tapSeconds >= Store.AutoTrainOfferAfter and not owned("AutoTrain") then
 				autoOffered = true
