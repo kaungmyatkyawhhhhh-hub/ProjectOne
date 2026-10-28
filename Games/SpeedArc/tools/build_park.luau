@@ -40,13 +40,17 @@ L.ring(T, "Shore", ground, T.InnerRadius - 8, T.InnerRadius - 3, 0.22, 0, Color3
 cyl(ground, "LakeBed", T.InnerRadius - 8, 0.2, C + Vector3.new(0, -0.6, 0), Color3.fromHex("#22507F"), { CanCollide = false })
 local fountain = L.folder("Fountain", props, true)
 cyl(fountain, "Island", 11, 0.8, C + Vector3.new(0, 0.2, 0), Color3.fromHex("#9DA6B5"))
-cyl(fountain, "Basin", 8.5, 1.6, C + Vector3.new(0, 1.2, 0), Color3.fromHex("#E6E8EE"))
-cyl(fountain, "BasinWater", 7.8, 1.7, C + Vector3.new(0, 1.25, 0), Color3.fromHex("#4FC3FF"), { Transparency = 0.25, CanCollide = false })
-cyl(fountain, "Column", 1.6, 7, C + Vector3.new(0, 5, 0), Color3.fromHex("#E6E8EE"))
-cyl(fountain, "Bowl", 4.2, 0.8, C + Vector3.new(0, 7.2, 0), Color3.fromHex("#E6E8EE"))
-cyl(fountain, "BowlGold", 4.35, 0.25, C + Vector3.new(0, 7.65, 0), P.Gold)
-cyl(fountain, "TopColumn", 0.8, 3, C + Vector3.new(0, 9.1, 0), Color3.fromHex("#E6E8EE"))
-ball(fountain, "TopBall", 1.6, C + Vector3.new(0, 10.8, 0), P.Gold)
+-- the Blender fountain (blender/areas_kit.py) when it's imported, else the part build
+local fountainMesh = L.mesh("Park_Fountain", fountain, CFrame.new(C + Vector3.new(0, 0.4, 0)), { Name = "FountainMesh" })
+if not fountainMesh then
+	cyl(fountain, "Basin", 8.5, 1.6, C + Vector3.new(0, 1.2, 0), Color3.fromHex("#E6E8EE"))
+	cyl(fountain, "BasinWater", 7.8, 1.7, C + Vector3.new(0, 1.25, 0), Color3.fromHex("#4FC3FF"), { Transparency = 0.25, CanCollide = false })
+	cyl(fountain, "Column", 1.6, 7, C + Vector3.new(0, 5, 0), Color3.fromHex("#E6E8EE"))
+	cyl(fountain, "Bowl", 4.2, 0.8, C + Vector3.new(0, 7.2, 0), Color3.fromHex("#E6E8EE"))
+	cyl(fountain, "BowlGold", 4.35, 0.25, C + Vector3.new(0, 7.65, 0), P.Gold)
+	cyl(fountain, "TopColumn", 0.8, 3, C + Vector3.new(0, 9.1, 0), Color3.fromHex("#E6E8EE"))
+end
+ball(fountain, "TopBall", 1.6, C + Vector3.new(0, 10.8, 0), P.Gold, { Transparency = if fountainMesh then 1 else 0 })
 for i = 0, 5 do
 	local a = i / 6 * math.pi * 2
 	local jet = cyl(fountain, "Jet", 0.25, 5, C + Vector3.new(math.cos(a) * 5.5, 3.6, math.sin(a) * 5.5), P.BrightBlue, { Material = Enum.Material.Neon, Transparency = 0.35, CanCollide = false })
@@ -118,6 +122,13 @@ local function cart(pos, color, label)
 	local c = Instance.new("Model")
 	c.Name = "FoodCart"
 	c.Parent = props
+	local m = L.mesh("Park_FoodCart", c, CFrame.new(pos - Vector3.new(0, 0.3, 0)), { Name = "CartMesh" })
+	if m then
+		m.Color = Color3.new(1, 1, 1)
+		local sign = block(c, "Sign", Vector3.new(5, 1.4, 0.2), pos + Vector3.new(0, 3.2, -1.82), P.SpeedBlack)
+		L.surfaceText(sign, Enum.NormalId.Front, { { Text = label, Height = 0.8, Color = P.White } }, { PPS = 30, MaxDistance = 80 })
+		return
+	end
 	block(c, "Body", Vector3.new(6, 3, 3.4), pos + Vector3.new(0, 2.5, 0), color)
 	block(c, "Counter", Vector3.new(6.4, 0.3, 3.8), pos + Vector3.new(0, 4.15, 0), P.White)
 	for _, s in { -1, 1 } do
@@ -134,14 +145,17 @@ local gz = Instance.new("Model")
 gz.Name = "Gazebo"
 gz.Parent = props
 local gzp = C + Vector3.new(115, 0, 100)
-cyl(gz, "Floor", 9, 0.8, gzp + Vector3.new(0, 0.4, 0), Color3.fromHex("#E6E8EE"))
-for i = 0, 5 do
-	local a = i / 6 * math.pi * 2
-	cyl(gz, "Post", 0.4, 8, gzp + Vector3.new(math.cos(a) * 7.5, 4.6, math.sin(a) * 7.5), P.White)
+local gzMesh = L.mesh("Park_Gazebo", gz, CFrame.new(gzp), { Name = "GazeboMesh" })
+if not gzMesh then
+	cyl(gz, "Floor", 9, 0.8, gzp + Vector3.new(0, 0.4, 0), Color3.fromHex("#E6E8EE"))
+	for i = 0, 5 do
+		local a = i / 6 * math.pi * 2
+		cyl(gz, "Post", 0.4, 8, gzp + Vector3.new(math.cos(a) * 7.5, 4.6, math.sin(a) * 7.5), P.White)
+	end
+	cyl(gz, "Roof", 9.5, 1, gzp + Vector3.new(0, 9, 0), P.ElectricBlue)
+	cyl(gz, "RoofTop", 6, 1.2, gzp + Vector3.new(0, 10, 0), P.DeepBlue)
+	ball(gz, "Finial", 1.2, gzp + Vector3.new(0, 11, 0), P.Gold)
 end
-cyl(gz, "Roof", 9.5, 1, gzp + Vector3.new(0, 9, 0), P.ElectricBlue)
-cyl(gz, "RoofTop", 6, 1.2, gzp + Vector3.new(0, 10, 0), P.DeepBlue)
-ball(gz, "Finial", 1.2, gzp + Vector3.new(0, 11, 0), P.Gold)
 for i, pos in { C + Vector3.new(-100, 0.32, 70), C + Vector3.new(-80, 0.32, -90), C + Vector3.new(95, 0.32, -95) } do
 	block(props, "Blanket", Vector3.new(7, 0.1, 5), pos, if i % 2 == 0 then Color3.fromHex("#FF4A4A") else P.ElectricBlue, { CanCollide = false })
 	block(props, "BlanketCheck", Vector3.new(7, 0.12, 1), pos, P.White, { CanCollide = false })

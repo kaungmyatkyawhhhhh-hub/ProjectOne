@@ -91,8 +91,13 @@ L.surfaceText(screen, Enum.NormalId.Right, {
 -- floodlight towers: Neon heads + 4 SpotLights (no shadows), the only lights in this area
 for _, corner in { Vector3.new(-1, 0, -1), Vector3.new(1, 0, -1), Vector3.new(-1, 0, 1), Vector3.new(1, 0, 1) } do
 	local base = C + Vector3.new(corner.X * (T.Straight / 2 + outerR + 18), 0, corner.Z * (outerR + 40))
-	cyl(props, "TowerPole", 1.4, 46, base + Vector3.new(0, 23, 0), P.Graphite)
-	local head = block(props, "FloodHead", Vector3.new(10, 5, 2), base + Vector3.new(0, 47, 0), P.SpeedBlack)
+	-- the Blender lattice mast (blender/areas_kit.py) when it's imported; its lamps face -Z (the track)
+	local faceTrack = CFrame.lookAt(base, Vector3.new(C.X, base.Y, C.Z))
+	local tower = L.mesh("Stadium_FloodTower", props, faceTrack, { Name = "FloodTower" })
+	if not tower then
+		cyl(props, "TowerPole", 1.4, 46, base + Vector3.new(0, 23, 0), P.Graphite)
+	end
+	local head = block(props, "FloodHead", Vector3.new(10, 5, 2), base + Vector3.new(0, 47, 0), P.SpeedBlack, { Transparency = if tower then 1 else 0 })
 	head.CFrame = CFrame.lookAt(head.Position, C + Vector3.new(0, 0, 0)) * CFrame.Angles(math.rad(-20), 0, 0)
 	local lamps = block(props, "FloodLamps", Vector3.new(9, 4, 0.3), head.Position, Color3.fromHex("#FFF4D6"), { Material = Enum.Material.Neon, CanCollide = false })
 	lamps.CFrame = head.CFrame * CFrame.new(0, 0, -1.1)
