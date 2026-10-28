@@ -240,9 +240,8 @@ def ICONS():
     W, GOLD, LIME, BLUE, RED, ORANGE, ROYAL = "#FFFFFF", "#FFD21F", "#6BE33B", "#1E90FF", "#FF3B3B", "#FF7A1A", "#2152D9"
 
     def d_store(d):
-        d.rounded_rectangle(S(30, 56, 98, 63), 3 * SS, fill=rgba("#E09600"))
-        d.ellipse(S(40, 66, 50, 76), fill=N)
-        d.ellipse(S(78, 66, 88, 76), fill=N)
+        for x in (54, 72, 90):
+            d.line([tuple(S(x, 50)), tuple(S(x - 3, 76))], fill=rgba("#E09600"), width=5 * SS)
 
     def d_shoe(d):
         d.line([tuple(S(*p)) for p in ((34, 78), (60, 70), (98, 78))], fill=rgba(ROYAL), width=8 * SS, joint="curve")
@@ -253,8 +252,11 @@ def ICONS():
         d.ellipse(S(44, 62, 64, 82), fill=N)
 
     def d_ticket(d):
-        for x in range(24, 104, 12):
-            d.rounded_rectangle(S(x, 63, x + 6, 67), 2 * SS, fill=rgba("#2A8A18"))
+        for cx in (12, 116):  # the bites out of the sides
+            d.ellipse(S(cx - 10, 55, cx + 10, 75), fill=rgba(OUTLINE))
+        for y in range(44, 88, 10):
+            d.rounded_rectangle(S(40, y, 45, y + 6), 2 * SS, fill=rgba("#2A8A18"))
+        d.polygon([tuple(S(x, y)) for x, y in ((80, 48), (84, 60), (96, 60), (86, 67), (90, 80), (80, 72), (70, 80), (74, 67), (64, 60), (76, 60))], fill=rgba("#FFFFFF"))
 
     def d_cal(d):
         for i in range(3):
@@ -294,7 +296,7 @@ def ICONS():
         gear_teeth.append(line([(64 + math.cos(a) * 30, 64 + math.sin(a) * 30), (cx, cy)], 18))
 
     return {
-        "store": icon([(rect(26, 46, 102, 114, 12), GOLD), (ring(42, 18, 86, 70, 10), W)], d_store),
+        "store": icon([(poly([(28, 40), (114, 40), (102, 84), (40, 84)]), GOLD), (line([(8, 24), (24, 24), (40, 94), (102, 94)], 10), W), (ell(34, 96, 56, 118), W), (ell(84, 96, 106, 118), W)], d_store),
         "locker": icon([(poly([(14, 86), (18, 48), (44, 40), (60, 58), (88, 64), (110, 72), (116, 88)]), W), (rect(10, 82, 120, 102, 9), BLUE)], d_shoe),
         "coaches": icon([(ell(26, 44, 82, 100), GOLD), (rect(50, 44, 116, 66, 8), GOLD), (ring(12, 14, 44, 46, 8), W)], d_whistle),
         "codes": icon([(rect(12, 38, 116, 92, 12), LIME)], d_ticket),
@@ -329,12 +331,12 @@ def build():
     spr["panel"] = save("panel", panel(), [56, 56, 136, 136], 0.33, "every window")
     for c, h in TILES.items():
         spr["tile_" + c] = save("tile_" + c, tile(h), [40, 40, 120, 160], 0.33, "store / locker / quest / coach tile")
-    spr["pill_navy"] = save("pill_navy", pill("#24409A", "#14276A", "#3B5CC8"), [24, 20, 72, 28], 1, "counters, HUD plates")
-    spr["pill_red"] = save("pill_red", pill("#FF7A7A", "#E02828", "#FFB0A8"), [24, 20, 72, 28], 1, "LIVE, warnings")
-    spr["pill_lime"] = save("pill_lime", pill("#9BF27A", "#3FB52B", "#C8FFB0"), [24, 20, 72, 28], 1, "status: equipped, new")
-    spr["bar_track"] = save("bar_track", bar(), [16, 15, 80, 17], 1, "progress track")
-    spr["bar_blue"] = save("bar_blue", bar("#1E90FF"), [16, 15, 80, 17], 1, "progress fill")
-    spr["bar_gold"] = save("bar_gold", bar("#FFB300"), [16, 15, 80, 17], 1, "progress fill (rewards)")
+    spr["pill_navy"] = save("pill_navy", pill("#24409A", "#14276A", "#3B5CC8"), [24, 20, 72, 28], "auto", "counters, HUD plates (SliceScale = height / 48)")
+    spr["pill_red"] = save("pill_red", pill("#FF7A7A", "#E02828", "#FFB0A8"), [24, 20, 72, 28], "auto", "LIVE, warnings")
+    spr["pill_lime"] = save("pill_lime", pill("#9BF27A", "#3FB52B", "#C8FFB0"), [24, 20, 72, 28], "auto", "status: equipped, new")
+    spr["bar_track"] = save("bar_track", bar(), [16, 15, 80, 17], "auto", "progress track")
+    spr["bar_blue"] = save("bar_blue", bar("#1E90FF"), [16, 15, 80, 17], "auto", "progress fill")
+    spr["bar_gold"] = save("bar_gold", bar("#FFB300"), [16, 15, 80, 17], "auto", "progress fill (rewards)")
     spr["badge_red"] = save("badge_red", badge("#FF3B3B"), None, None, "notification dot")
     spr["badge_bronze"] = save("badge_bronze", badge("#D9822B"), None, None, "rank badge")
     for k, v in ICONS().items():
@@ -384,7 +386,7 @@ class Canvas:
 
     def put(self, name, x, y, w, h):
         k = self.kit[name]
-        sc = (k["sliceScale"] or 1) * K
+        sc = (h * K / k["size"][1]) if k["sliceScale"] == "auto" else (k["sliceScale"] or 1) * K
         self.img.alpha_composite(nine(self.spr[name], k["slice"], int(w * K), int(h * K), sc), (int(x * K), int(y * K)))
 
     def text(self, x, y, s, size, fill="#FFFFFF", stroke=NAVY, sw=None, anchor="mm", italic=True, weight=900, shadow=True):
@@ -527,16 +529,16 @@ def sheet(c):
         c.put("tile_" + col, tx, 140, 56, 76)
         c.put("icon_" + ic, tx + 8, 150, 40, 40)
     c.text(462, 130, "PANEL + PILLS", 9, "#FFD21F", anchor="lm")
-    c.put("panel", 462, 140, 186, 76)
-    c.text(476, 140, "WINDOW", 15, anchor="lm")
-    c.put("pill_navy", 474, 160, 74, 26)
-    c.put("icon_coin", 470, 157, 30, 30)
-    c.text(524, 173, "720", 11)
-    c.put("pill_red", 554, 160, 52, 26)
-    c.text(580, 173, "LIVE", 10)
-    c.put("badge_red", 610, 158, 22, 22)
-    c.put("bar_track", 474, 192, 160, 12)
-    c.put("bar_gold", 474, 192, 96, 12)
+    c.put("panel", 462, 146, 186, 72)
+    c.text(476, 147, "WINDOW", 13, anchor="lm")
+    c.put("pill_navy", 474, 164, 74, 26)
+    c.put("icon_coin", 470, 161, 30, 30)
+    c.text(524, 177, "720", 11)
+    c.put("pill_red", 554, 164, 52, 26)
+    c.text(580, 177, "LIVE", 10)
+    c.put("badge_red", 612, 166, 22, 22)
+    c.put("bar_track", 474, 196, 160, 12)
+    c.put("bar_gold", 474, 196, 96, 12)
     c.text(20, 232, "ICONS (one on every main button)", 9, "#FFD21F", anchor="lm")
     names = ["store", "locker", "coaches", "codes", "invite", "daily", "quests", "top", "settings", "close", "coin", "speed", "crown", "race"]
     for i, n in enumerate(names):

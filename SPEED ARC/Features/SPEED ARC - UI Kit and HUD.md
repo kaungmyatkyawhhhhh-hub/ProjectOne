@@ -5,6 +5,8 @@ status: done (M1)
 ---
 # SPEED ARC - UI Kit and HUD
 
+> **Prompt 12 (28 Oct): the UI becomes ART.** Sporty palette (no pink / purple / pastels; the Pink button style is gone, Red = close, Grey = locked). 43 PNG sprites made by `Games/SpeedArc/tools/make_ui_kit.py` into `Games/SpeedArc/ui_kit/` (+ `kit.json` with SliceCenter and SliceScale): 6 button styles x normal/pressed (green buy/go/equip, blue normal, yellow claim, red close, grey locked, navy tab off), panel, 7 colour-glow tiles, 3 pills, progress bar, 2 badges, 15 icons. Mockups in `Screenshots/ui_kit/`. **Status: waiting for the owner's OK**, then applied to every window and locked (later UI must reuse it). Images upload only after the new group exists (prompt 13).
+
 > **28 Oct:** dark navy panels like GYM ARC (Palette SpeedBlack #11152E / Carbon #20274F / Graphite #353F78), the title on the panel edge with a coloured underline, Green and Pink button styles. HUD (prompt 11): "N SPEED" (no MPH), the wall strip under the SPEED panel while on the course, the toast lane under it, the AFK machine panel (no combo meter), the race card top right.
 
 Back to [[00 SPEED ARC Home|SPEED ARC Home]]

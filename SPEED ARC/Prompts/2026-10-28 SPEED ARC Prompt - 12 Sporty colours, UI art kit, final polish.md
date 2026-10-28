@@ -1,7 +1,7 @@
 ---
 date: 2026-10-28
 tags: [speedarc, prompt]
-status: todo
+status: in progress (colours + cleanup done; UI kit mockup waiting for the owner OK)
 ---
 # 12 Sporty colours, UI art kit, final polish (before launch)
 
