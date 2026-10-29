@@ -664,12 +664,12 @@ local function joinRing(all: { Segment }, join: RingJoin, spurIn: { { Segment } 
 	end
 end
 
--- an island road (IsleLayout.Roads): straight legs between its corners, one lane each way, the
--- legs level near each corner and joined by turns there. Returns the lanes along the corners' order
--- and back, as oneWay does (one lane: { { first .. last } }).
+-- an island road (IsleLayout.Roads): straight legs between its corners, one lane each way, joined
+-- by turns (the climbs' arcs bend a little at each corner and keep climbing through it; the
+-- hairpins are level). Returns the lanes along the corners' order and back, as oneWay does (one
+-- lane: { { first .. last } }).
 local function isleRoad(all: { Segment }, lanes: { Segment }, rd: IsleLayout.Road, code: number): ({ { Segment } }, { { Segment } })
-	local T = IsleLayout.Trim
-	local function build(pts: { Vector3 }, c: number): { Segment }
+	local function build(pts: { Vector3 }, level: { boolean }, c: number): { Segment }
 		local chainAll: { Segment } = {}
 		local prevLast: Segment? = nil
 		for k = 1, #pts - 1 do
@@ -677,11 +677,10 @@ local function isleRoad(all: { Segment }, lanes: { Segment }, rd: IsleLayout.Roa
 			local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
 			local len = flat.Magnitude
 			local dir = flat.Unit
-			local t0 = if k > 1 then T else 0
-			local t1 = if k < #pts - 1 then T else 0
-			local y0, y1 = a.Y, b.Y
+			local t0, t1 = IsleLayout.trim(pts, k), IsleLayout.trim(pts, k + 1)
+			local y0, y1, f0, f1 = a.Y, b.Y, level[k], level[k + 1]
 			local out = oneWay(all, lanes, Vector3.new(a.X, 0, a.Z) + dir * t0, Vector3.new(b.X, 0, b.Z) - dir * t1, 1, function(d)
-				return IsleLayout.legY(y0, y1, len, d + t0)
+				return IsleLayout.legY(y0, y1, len, d + t0, f0, f1)
 			end, c, 0.8)
 			local chainL = out[1]
 			if prevLast then
@@ -694,11 +693,12 @@ local function isleRoad(all: { Segment }, lanes: { Segment }, rd: IsleLayout.Roa
 		end
 		return chainAll
 	end
-	local back: { Vector3 } = {}
+	local back, backLevel = {}, {}
 	for k = #rd.pts, 1, -1 do
 		table.insert(back, rd.pts[k])
+		table.insert(backLevel, rd.level[k])
 	end
-	return { build(rd.pts, code) }, { build(back, code + 1) }
+	return { build(rd.pts, rd.level, code) }, { build(back, backLevel, code + 1) }
 end
 
 -- The west's lanes (owner, 2026-10-22): the coastal highway from the city's west edge to

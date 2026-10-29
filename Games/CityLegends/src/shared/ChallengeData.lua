@@ -78,7 +78,7 @@ do
 	local isle = W.Isle
 	-- (on the low ground north of the low tier's houses, jumping round the island)
 	local ia = -1.3
-	add("legends_isle", Vector3.new(isle.x + math.cos(ia) * 835, 0.05, isle.z + math.sin(ia) * 835), Vector3.new(-math.sin(ia), 0, math.cos(ia)))
+	add("legends_isle", Vector3.new(isle.x + math.cos(ia) * 1118, 0.05, isle.z + math.sin(ia) * 1118), Vector3.new(-math.sin(ia), 0, math.cos(ia)))
 end
 
 -- the leaderboard board: on the sidewalk corner by the city's middle junction

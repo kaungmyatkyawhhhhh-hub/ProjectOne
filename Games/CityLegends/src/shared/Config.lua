@@ -592,15 +592,18 @@ Config.West = {
 	Isle = {
 		x = -10700,
 		z = 0,
-		r = 1050, -- the shore (sand out to here)
-		lawn = 960, -- grass inside this
-		Ring = 900, -- the island ring road's middle
+		r = 1300, -- the shore: sand runs into the water here
+		Ring = 1180, -- the island ring road's middle (on the low ground)
 		Road = 34, -- every island road: one lane each way
-		Foot = 760, -- the mountain starts here
-		Mid = { y = 100, inner = 460, outer = 620, ring = 475, lots = 14, lotWidth = 104, lotDepth = 110 },
-		Top = { y = 240, r = 280, ring = 150, lotWidth = 118, lotDepth = 106 },
-		Peak = { y = 312, r = 72 }, -- the rocky summit in the middle of the top
-		Low = { arc = 1.05, skip = 0.33, width = 60, depth = 60 }, -- street lots either side of the causeway
+		Foot = 1050, -- the mountain's lower slopes start here
+		-- the mid terrace (a shelf cut round the mountain), its ring road and the lots outside it
+		Mid = { y = 200, inner = 540, outer = 690, ring = 560, lots = 14, lotWidth = 104, lotDepth = 100 },
+		-- the flat top (the gated Summit), its ring road and the lots round it
+		Top = { y = 400, r = 300, ring = 160, lotWidth = 118, lotDepth = 110 },
+		Low = { arc = 1.1, skip = 0.33, width = 60, depth = 60 }, -- street lots by the causeway
+		-- the switchbacks: curved legs round the mountain (radius of each, length of each)
+		Lower = { radii = { 1010, 935, 860, 790, 720 }, length = 440, center = 0 }, -- east face
+		Upper = { radii = { 505, 455, 405, 355, 305 }, length = 400, center = math.pi }, -- west face
 	},
 }
 

@@ -767,6 +767,8 @@ local function islands(kit: any, root: Instance)
 	seaRoad(kit, cw, a, b, lanes * 2 + 12, seaA, seaB, { -0.4, 0.4 })
 	Isle.build(kit, folder, palm)
 end
+-- (Studio rebuilds just the causeway and the island on the baked map with this)
+West.buildIslands = islands
 
 ---------------------------------------------------------------------
 -- Boundaries

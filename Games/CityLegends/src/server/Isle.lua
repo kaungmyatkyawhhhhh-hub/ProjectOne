@@ -1,17 +1,20 @@
 --[[
 	Isle
-	Builds Legends Isle (IsleLayout has the plan; owner, 2026-10-29: "one big island" with a
-	mountain, a beach all round, real roads up the mountain and three neighbourhoods by height).
+	Builds Legends Isle (IsleLayout has the plan; owner, 2026-10-29: "one big island" with a big
+	mountain, a sand beach all round, a real road winding up in switchbacks and three
+	neighbourhoods by height).
 
-	  * the ground and the mountain are terrain: sand and grass discs, the lower slope, the mid
-	    terrace, the upper face, the top plateau and a rocky summit, with rock bumps on the slopes;
-	    every road gets rock filled in under it and air carved out above it
+	  * the island and the mountain are terrain only, written voxel by voxel from
+	    IsleLayout.surface (so the ground sits exactly where it's asked: flat under every road,
+	    terrace and lot), with grass, ground, rock and sand blended by slope and height, and the
+	    sand running down under the sea
 	  * the roads are parts like the city's: asphalt, a yellow centre line, white edge lines, kerbs
 	    on the rings, guard rails and invisible walls along the climbs, lamps
-	  * the beach: palms, a pier on the west side, lifeguard towers and beach huts
-	  * the neighbourhoods: the low tier's sidewalk, mailboxes and street trees; pines and palms on
-	    the mountain; the helipad and the lookout on top; the fountain at the causeway's landing; the
-	    gate's guard house (Gate builds the barrier and the guards at start)
+	  * trees all over the slopes (pines up high, broadleaf trees and palms lower down), palms on
+	    the beach, a pier on the west side, lifeguard towers and beach huts
+	  * the low tier's sidewalk, mailboxes and street trees; the helipad and the lookout on top; the
+	    fountain at the causeway's landing; the gate's guard house (Gate builds the barrier and
+	    the guards at start)
 	Built by West.build (in the scenery: baked into the place).
 ]]
 
@@ -23,13 +26,13 @@ local IsleLayout = require(Shared:WaitForChild("IsleLayout"))
 local ChallengeData = require(Shared:WaitForChild("ChallengeData"))
 
 local Isle = {}
+Isle.skipTerrain = false -- (the Lune map test can't make terrain)
 
 local I = Config.West.Isle
 local C = Config.City
 local ROAD = IsleLayout.Road
 local HALF = ROAD / 2
 local CURB = C.CurbHeight
-local GROUND = -0.8 -- the terrain's top on level ground (the roads' tops are at 0, 100, 240)
 
 local rng = Random.new(20261029)
 
@@ -47,138 +50,137 @@ local CENTER = IsleLayout.Center
 local UP = CFrame.Angles(0, 0, math.pi / 2) -- a cylinder's axis is X: stand it up
 
 ---------------------------------------------------------------------
--- Where roads are (to keep trees and bumps off them)
+-- Terrain: written from the height map in 128-stud columns
 ---------------------------------------------------------------------
-type Leg = { a: Vector3, b: Vector3 }
-local legs: { Leg } = {}
-for _, rd in IsleLayout.Roads do
-	for k = 1, #rd.pts - 1 do
-		table.insert(legs, { a = rd.pts[k], b = rd.pts[k + 1] })
-	end
-end
-
-local function flatDist(p: Vector3, a: Vector3, b: Vector3): number
-	local pa = Vector3.new(p.X - a.X, 0, p.Z - a.Z)
-	local ab = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
-	local t = math.clamp(pa:Dot(ab) / ab:Dot(ab), 0, 1)
-	return (pa - ab * t).Magnitude
-end
-
--- is p this far clear of every island road (rings and climbs)?
-local function clearOfRoads(p: Vector3, margin: number): boolean
-	for _, l in legs do
-		if flatDist(p, l.a, l.b) < HALF + margin then
-			return false
-		end
-	end
-	local r = Vector3.new(p.X - CENTER.X, 0, p.Z - CENTER.Z).Magnitude
-	for _, ring in IsleLayout.Rings do
-		if math.abs(r - ring.radius) < HALF + margin and math.abs(p.Y - ring.y) < 40 then
-			return false
-		end
-	end
-	return true
-end
-
-local function clearOfLots(p: Vector3, lots: { IsleLayout.Lot }, margin: number): boolean
-	for _, l in lots do
-		local rel = l.frame:PointToObjectSpace(Vector3.new(p.X, l.frame.Position.Y, p.Z))
-		if math.abs(rel.X) < l.width / 2 + margin and math.abs(rel.Z) < l.depth / 2 + margin and math.abs(p.Y - l.frame.Position.Y) < 30 then
-			return false
-		end
-	end
-	return true
-end
-
----------------------------------------------------------------------
--- Terrain: the ground, the mountain, the sea floor
----------------------------------------------------------------------
-local function radiusAt(y: number): number
-	-- the mountain's radius at height y (inverse of IsleLayout.groundY, outer edge of each band)
-	local M, T = I.Mid, I.Top
-	if y <= 0 then
-		return I.Foot
-	elseif y <= M.y then
-		return I.Foot - (I.Foot - M.outer) * y / M.y
-	elseif y <= T.y then
-		return M.inner - (M.inner - T.r) * (y - M.y) / (T.y - M.y)
-	end
-	return T.r
-end
+local RES = 4
+local HALF_SIZE = IsleLayout.MaxShore + 200
 
 local function terrain(t: Terrain)
-	local c = CENTER
-	local function disc(r: number, top: number, h: number, mat: Enum.Material)
-		t:FillCylinder(CFrame.new(c.X, top - h / 2, c.Z), h, r, mat)
-	end
-	-- the sea floor slopes up to the beach, the beach, the lawn
-	disc(I.r + 260, -9, 6, Enum.Material.Sand)
-	disc(I.r + 150, -5, 6, Enum.Material.Sand)
-	disc(I.r + 60, -2.6, 6, Enum.Material.Sand)
-	disc(I.r, GROUND, 10, Enum.Material.Sand)
-	disc(I.lawn, GROUND, 6, Enum.Material.Grass)
-	-- the mountain, in 4-stud layers: rock sides, a grassy terrace and top
-	local layer = 4
-	local y = GROUND
-	while y < I.Top.y + GROUND - 0.01 do
-		local top = y + layer
-		local r = radiusAt(top - GROUND)
-		disc(r, top, layer, Enum.Material.Rock)
-		y = top
-	end
-	-- the mid terrace and the top plateau: grass on the flats
-	disc(I.Mid.outer - 6, I.Mid.y + GROUND, 3, Enum.Material.Grass)
-	disc(I.Top.r - 4, I.Top.y + GROUND, 3, Enum.Material.Grass)
-	-- the mid terrace's flat (the layers above it are narrower: fill the shelf flat)
-	disc(I.Mid.outer, I.Mid.y + GROUND - 3, 6, Enum.Material.Ground)
-	disc(I.Mid.outer - 6, I.Mid.y + GROUND, 3, Enum.Material.Grass)
-	-- the summit: a rocky knoll with a few crags
-	local P = I.Peak
-	t:FillBall(Vector3.new(c.X, I.Top.y, c.Z), P.r, Enum.Material.Rock)
-	for k = 1, 5 do
-		local a = k / 5 * math.pi * 2 + rng:NextNumber(-0.3, 0.3)
-		t:FillBall(Vector3.new(c.X + math.cos(a) * P.r * 0.55, I.Top.y + P.r * 0.45, c.Z + math.sin(a) * P.r * 0.55), P.r * rng:NextNumber(0.3, 0.45), Enum.Material.Slate)
-	end
-	-- rock bumps on the slopes (not on the roads: they're carved out again below)
-	local lots = IsleLayout.lots()
-	for _ = 1, 140 do
-		local a = rng:NextNumber(0, math.pi * 2)
-		local upper = rng:NextNumber() < 0.45
-		local r = if upper then rng:NextNumber(I.Top.r + 30, I.Mid.inner - 10) else rng:NextNumber(I.Mid.outer + 15, I.Foot - 25)
-		local gy = IsleLayout.groundY(r)
-		local p = Vector3.new(c.X + math.cos(a) * r, gy, c.Z + math.sin(a) * r)
-		local size = rng:NextNumber(14, 34)
-		if clearOfRoads(p, size + 10) and clearOfLots(p, lots, size) then
-			t:FillBall(p, size, if rng:NextNumber() < 0.7 then Enum.Material.Rock else Enum.Material.Slate)
+	local n = math.ceil(HALF_SIZE * 2 / RES)
+	local x0 = math.floor((CENTER.X - HALF_SIZE) / RES) * RES
+	local z0 = math.floor((CENTER.Z - HALF_SIZE) / RES) * RES
+	-- the height of every column (cell centres)
+	local H: { { number } } = table.create(n + 2)
+	for i = 0, n + 1 do
+		local row = table.create(n + 2, 0)
+		local x = x0 + (i - 1) * RES + RES / 2 - CENTER.X
+		for j = 0, n + 1 do
+			row[j + 1] = IsleLayout.surface(x, z0 + (j - 1) * RES + RES / 2 - CENTER.Z)
+		end
+		H[i + 1] = row
+		if i % 24 == 0 then
+			task.wait()
 		end
 	end
-end
-
--- rock in under a road piece (from its surface down into the ground) and air above it
-local function fillUnder(t: Terrain, a: Vector3, b: Vector3, width: number)
-	local mid = (a + b) / 2
-	local len = (b - a).Magnitude
-	local h = math.max(a.Y, b.Y) + 12
-	local cf = CFrame.lookAt(mid, b) * CFrame.new(0, -0.8 - h / 2, 0)
-	t:FillBlock(cf, Vector3.new(width + 14, h, len + 2), Enum.Material.Rock)
-	-- a wider skirt lower down, so a raised road reads as a built-up bank, not a wall
-	t:FillBlock(cf * CFrame.new(0, -h * 0.25, 0), Vector3.new(width + 50, h * 0.5, len + 2), Enum.Material.Rock)
-end
-local function carveAbove(t: Terrain, a: Vector3, b: Vector3, width: number)
-	local mid = (a + b) / 2
-	local len = (b - a).Magnitude
-	t:FillBlock(CFrame.lookAt(mid, b) * CFrame.new(0, -0.6 + 26, 0), Vector3.new(width + 2, 52, len + 6), Enum.Material.Air)
+	local function h(i: number, j: number): number
+		return H[i + 1][j + 1]
+	end
+	local SEA = IsleLayout.SeaLevel
+	local Mat = Enum.Material
+	-- the surface material of a column: sand by the sea, rock where it's steep, grass on the gentle
+	-- ground, with ground and leafy patches mixed in
+	local function surfaceMat(i: number, j: number, y: number): Enum.Material
+		local x = x0 + (i - 1) * RES + RES / 2
+		local z = z0 + (j - 1) * RES + RES / 2
+		local lx, lz = x - CENTER.X, z - CENTER.Z
+		local r = math.sqrt(lx * lx + lz * lz)
+		local s = math.max(math.abs(h(i + 1, j) - h(i - 1, j)), math.abs(h(i, j + 1) - h(i, j - 1))) / (RES * 2)
+		local nz = math.noise(x / 60, z / 60, 3.3)
+		if y < SEA or (y < 3 and r > IsleLayout.shore(math.atan2(lz, lx)) - 110) then
+			return Mat.Sand
+		elseif s < 0.22 then
+			-- flat ground stays grass (with leafy patches)
+			return if nz < -0.35 then Mat.LeafyGrass else Mat.Grass
+		elseif s > 1.0 then
+			return if nz > 0.25 then Mat.Slate else Mat.Rock -- bare cliffs
+		elseif y > 380 then
+			return if s > 0.4 or nz > 0 then Mat.Rock else Mat.Ground -- the bare top
+		elseif y > 200 then
+			if s > 0.5 then
+				return if nz > 0.3 then Mat.Slate else Mat.Rock
+			end
+			return if nz > -0.1 then Mat.Ground else Mat.Rock
+		elseif y > 60 then
+			if s > 0.6 then
+				return Mat.Rock
+			elseif s > 0.4 then
+				return if nz > 0 then Mat.Ground else Mat.Grass
+			end
+			return if nz < -0.3 then Mat.LeafyGrass else Mat.Grass
+		end
+		if s > 0.7 then
+			return Mat.Rock
+		end
+		return if nz < -0.35 then Mat.LeafyGrass else Mat.Grass
+	end
+	local CH = 32 -- columns per chunk side
+	local yLow = -24
+	for ci = 1, n, CH do
+		for cj = 1, n, CH do
+			local ni, nj = math.min(CH, n - ci + 1), math.min(CH, n - cj + 1)
+			-- (chunks out in the open sea are left as they are)
+			local cxm = x0 + (ci - 1 + ni / 2) * RES - CENTER.X
+			local czm = z0 + (cj - 1 + nj / 2) * RES - CENTER.Z
+			if math.sqrt(cxm * cxm + czm * czm) - CH * RES * 0.71 < IsleLayout.MaxShore + 160 then
+				local top = SEA
+				for i = ci, ci + ni - 1 do
+					for j = cj, cj + nj - 1 do
+						top = math.max(top, h(i, j))
+					end
+				end
+				local ny = math.ceil((top + 8 - yLow) / RES)
+				local mats = table.create(ni)
+				local occ = table.create(ni)
+				for a = 1, ni do
+					local i = ci + a - 1
+					local mcol = table.create(ny)
+					local ocol = table.create(ny)
+					for b = 1, ny do
+						mcol[b] = table.create(nj, Mat.Air)
+						ocol[b] = table.create(nj, 0)
+					end
+					for c = 1, nj do
+						local j = cj + c - 1
+						local y = h(i, j)
+						local surf = surfaceMat(i, j, y)
+						-- (Roblox draws the surface about half a cell above where the occupancy
+						-- says: measured 2 studs on flat ground, so it's asked for 2 lower)
+						y -= 2
+						local deep = if surf == Mat.Sand then Mat.Sand else Mat.Rock
+						for b = 1, ny do
+							local yb = yLow + (b - 1) * RES
+							local o = math.clamp((y - yb) / RES, 0, 1)
+							if o > 0 then
+								mcol[b][c] = if yb + RES >= y - 6 then surf else deep
+								ocol[b][c] = o
+							elseif yb < SEA then
+								mcol[b][c] = Mat.Water
+								ocol[b][c] = math.clamp((SEA - yb) / RES, 0, 1)
+							end
+						end
+					end
+					mats[a] = mcol
+					occ[a] = ocol
+				end
+				local lo = Vector3.new(x0 + (ci - 1) * RES, yLow, z0 + (cj - 1) * RES)
+				local region = Region3.new(lo, lo + Vector3.new(ni * RES, ny * RES, nj * RES))
+				t:WriteVoxels(region, RES, mats, occ)
+				task.wait()
+			end
+		end
+	end
 end
 
 ---------------------------------------------------------------------
 -- Road parts
 ---------------------------------------------------------------------
 -- a straight road piece from a to b (surface points), with its markings
-local function roadPiece(kit: any, parent: Instance, a: Vector3, b: Vector3, opts: { centre: boolean, edges: boolean })
+local function roadPiece(kit: any, parent: Instance, a: Vector3, b: Vector3, opts: { centre: boolean, edges: boolean, extra: number? })
 	local mid = (a + b) / 2
 	local len = (b - a).Magnitude
 	local cf = CFrame.lookAt(mid, b)
-	kit.mk(parent, Vector3.new(ROAD, 1.2, len + 2), cf * CFrame.new(0, -0.6, 0), kit.ASPHALT, kit.ROAD_MAT, { reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
+	local extra = opts.extra or 2
+	kit.mk(parent, Vector3.new(ROAD, 2, len + extra), cf * CFrame.new(0, -1, 0), kit.ASPHALT, kit.ROAD_MAT, { reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
 	if opts.centre then
 		kit.deco(parent, Vector3.new(0.35, 0.05, len), cf * CFrame.new(-0.3, 0.02, 0), kit.LINE_YELLOW, Enum.Material.SmoothPlastic)
 		kit.deco(parent, Vector3.new(0.35, 0.05, len), cf * CFrame.new(0.3, 0.02, 0), kit.LINE_YELLOW, Enum.Material.SmoothPlastic)
@@ -191,27 +193,25 @@ local function roadPiece(kit: any, parent: Instance, a: Vector3, b: Vector3, opt
 end
 
 -- a ring road: pieces round the circle, kerbs (open at the junctions), lamps outside
-local function ringRoad(kit: any, parent: Instance, ring: IsleLayout.Ring, t: Terrain)
+local function ringRoad(kit: any, parent: Instance, ring: IsleLayout.Ring)
 	local folder = kit.folder("Ring_" .. ring.id, parent)
 	local joins = IsleLayout.joins(ring.id)
-	local n = math.clamp(math.floor(ring.radius * 2 * math.pi / 40), 64, 160) -- (small rings: short pieces, no gaps at the corners)
+	local n = math.clamp(math.floor(ring.radius * 2 * math.pi / 40), 64, 180)
 	local function inGap(a: number, extra: number): boolean
 		for _, j in joins do
-			local d = (a - j.angle) % (2 * math.pi)
-			if math.min(d, 2 * math.pi - d) < j.gap + extra then
+			if IsleLayout.angDiff(a, j.angle) < j.gap + extra then
 				return true
 			end
 		end
 		return false
 	end
-	local lampEvery = math.max(2, math.floor(n / 24))
+	local lampEvery = math.max(2, math.floor(n / 28))
 	for k = 0, n - 1 do
 		local a0, a1 = k / n * math.pi * 2, (k + 1) / n * math.pi * 2
 		local p0 = IsleLayout.polar(ring.radius, a0, ring.y)
 		local p1 = IsleLayout.polar(ring.radius, a1, ring.y)
 		local am = (a0 + a1) / 2
 		roadPiece(kit, folder, p0, p1, { centre = k % 2 == 0, edges = not inGap(am, 0) })
-		carveAbove(t, p0, p1, ROAD + 6)
 		local cf = CFrame.lookAt((p0 + p1) / 2, p1)
 		local len = (p1 - p0).Magnitude
 		if not inGap(am, 0.01) then
@@ -226,43 +226,56 @@ local function ringRoad(kit: any, parent: Instance, ring: IsleLayout.Ring, t: Te
 	end
 end
 
--- a climb (IsleLayout.Roads): each leg in pieces following its slope, a pad at each corner,
--- guard rails and invisible walls along the sides, lamps
-local function climb(kit: any, parent: Instance, rd: IsleLayout.Road, t: Terrain)
+-- a climb: each leg in pieces following its slope (stretched past the bends so they close),
+-- level pads at the hairpins, guard rails and invisible walls along the sides, lamps
+local function climb(kit: any, parent: Instance, rd: IsleLayout.Road)
 	local folder = kit.folder("Road_" .. rd.id, parent)
-	local T = IsleLayout.Trim
 	local pts = rd.pts
+	local lampAt = 0
 	for k = 1, #pts - 1 do
 		local a, b = pts[k], pts[k + 1]
 		local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
 		local len = flat.Magnitude
 		local dir = flat.Unit
 		local side = dir:Cross(Vector3.yAxis)
+		local f0, f1 = rd.level[k], rd.level[k + 1]
 		local function at(d: number, off: number?): Vector3
 			local p = a + dir * d + side * (off or 0)
-			return Vector3.new(p.X, IsleLayout.legY(a.Y, b.Y, len, d), p.Z)
+			return Vector3.new(p.X, IsleLayout.legY(a.Y, b.Y, len, d, f0, f1), p.Z)
 		end
-		-- pieces: the level ends, the slope in 30-stud pieces
-		local cuts = { 0 }
-		if len > T * 2 + 1 then
-			table.insert(cuts, T)
-			local n = math.max(1, math.ceil((len - T * 2) / 30))
-			for q = 1, n - 1 do
-				table.insert(cuts, T + (len - T * 2) * q / n)
+		-- how far past each end the asphalt runs, to close the outside of the bend
+		local function past(q: number): number
+			if q <= 1 or q >= #pts then
+				return 0
 			end
-			table.insert(cuts, len - T)
+			local turn = IsleLayout.turnAt(pts, q)
+			if turn > 1 then
+				return 0 -- a hairpin: its pad closes it
+			end
+			return math.min(14, HALF * math.tan(turn / 2) + 1)
+		end
+		local e0, e1 = past(k), past(k + 1)
+		local cuts = { 0 }
+		local nPieces = math.max(1, math.ceil(len / 30))
+		for q = 1, nPieces - 1 do
+			table.insert(cuts, len * q / nPieces)
 		end
 		table.insert(cuts, len)
 		local detail = kit.lodGroup(folder, "Detail", (a + b) / 2, 700 + len / 2)
 		for q = 1, #cuts - 1 do
 			local d0, d1 = cuts[q], cuts[q + 1]
+			if q == 1 then
+				d0 -= e0
+			end
+			if q == #cuts - 1 then
+				d1 += e1
+			end
 			local p0, p1 = at(d0), at(d1)
 			roadPiece(kit, folder, p0, p1, { centre = true, edges = true })
-			fillUnder(t, p0, p1, ROAD)
-			-- rails and walls, not into the corners (the turn sweeps across there)
-			local first, last = k == 1 and q == 1, k == #pts - 1 and q == #cuts - 1
-			local nearCorner = (q == 1 and k > 1) or (q == #cuts - 1 and k < #pts - 1)
-			if rd.rails and not nearCorner and not first and not last then
+			-- rails and walls along the sides, not across the stubs at the rings or the hairpins
+			local nearHairpin = (q == 1 and f0) or (q == #cuts - 1 and f1)
+			local atRing = k == 1 or k == #pts - 1
+			if rd.rails and not nearHairpin and not atRing then
 				local cf = CFrame.lookAt((p0 + p1) / 2, p1)
 				local plen = (p1 - p0).Magnitude
 				for _, s in { -1, 1 } do
@@ -275,44 +288,26 @@ local function climb(kit: any, parent: Instance, rd: IsleLayout.Road, t: Terrain
 				end
 			end
 		end
-		-- lamps every 90 studs on the outer side
-		local l = 45
-		local s = if k % 2 == 0 then 1 else -1
-		while l < len - 30 do
-			kit.streetLight(detail, at(l, s * (HALF + 2.5)), -side * s)
-			l += 90
+		-- lamps every ~110 studs, on the outside of the mountain
+		lampAt += len
+		if lampAt > 110 and len > 20 then
+			lampAt = 0
+			local mid = at(len / 2)
+			local outward = Vector3.new(mid.X - CENTER.X, 0, mid.Z - CENTER.Z).Unit
+			local s = if side:Dot(outward) > 0 then 1 else -1
+			kit.streetLight(detail, at(len / 2, s * (HALF + 2.5)), -side * s)
 		end
 	end
-	-- the corners: level pads the turns sweep across (a square along each leg, just under them)
+	-- the hairpins: level pads the turns sweep across (a square along each leg)
 	for k = 2, #pts - 1 do
-		local p = pts[k]
-		for _, q in { pts[k - 1], pts[k + 1] } do
-			local look = Vector3.new(q.X - p.X, 0, q.Z - p.Z).Unit
-			local cf = CFrame.lookAt(Vector3.new(p.X, p.Y - 0.62, p.Z), Vector3.new(p.X, p.Y - 0.62, p.Z) + look)
-			kit.mk(folder, Vector3.new(ROAD + 6, 1.2, ROAD + 6), cf, kit.ASPHALT, kit.ROAD_MAT, { reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
+		if IsleLayout.turnAt(pts, k) > 1 then
+			local p = pts[k]
+			for _, q in { pts[k - 1], pts[k + 1] } do
+				local look = Vector3.new(q.X - p.X, 0, q.Z - p.Z).Unit
+				local base = Vector3.new(p.X, p.Y - 1.02, p.Z)
+				kit.mk(folder, Vector3.new(ROAD + 6, 2, ROAD + 6), CFrame.lookAt(base, base + look), kit.ASPHALT, kit.ROAD_MAT, { reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
+			end
 		end
-		fillUnder(t, p - Vector3.new(HALF, 0, 0), p + Vector3.new(HALF, 0, 0), ROAD + 10)
-	end
-end
-
-local function carveRoad(rd: IsleLayout.Road, t: Terrain)
-	local pts = rd.pts
-	for k = 1, #pts - 1 do
-		local a, b = pts[k], pts[k + 1]
-		local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
-		local len = flat.Magnitude
-		local dir = flat.Unit
-		local n = math.max(1, math.ceil(len / 30))
-		for q = 0, n - 1 do
-			local d0, d1 = len * q / n, len * (q + 1) / n
-			local p0 = a + dir * d0
-			local p1 = a + dir * d1
-			carveAbove(t, Vector3.new(p0.X, IsleLayout.legY(a.Y, b.Y, len, d0), p0.Z), Vector3.new(p1.X, IsleLayout.legY(a.Y, b.Y, len, d1), p1.Z), ROAD + 6)
-		end
-	end
-	for k = 2, #pts - 1 do
-		local p = pts[k]
-		t:FillBlock(CFrame.new(p.X, p.Y - 0.6 + 26, p.Z), Vector3.new(ROAD + 18, 52, ROAD + 18), Enum.Material.Air)
 	end
 end
 
@@ -320,7 +315,7 @@ end
 -- Scenery
 ---------------------------------------------------------------------
 local function pine(kit: any, parent: Instance, pos: Vector3)
-	local h = rng:NextNumber(18, 30)
+	local h = rng:NextNumber(20, 34)
 	kit.deco(parent, Vector3.new(h * 0.5, 1.4, 1.4), CFrame.new(pos + Vector3.new(0, h * 0.25, 0)) * UP, BARK, Enum.Material.Wood, { shape = Enum.PartType.Cylinder, shadow = true })
 	local green = PINE[rng:NextInteger(1, #PINE)]
 	for q = 0, 2 do
@@ -356,20 +351,18 @@ local function pier(kit: any, parent: Instance, from: Vector3, dir: Vector3, len
 	local n = math.floor(len / 20)
 	for k = 0, n do
 		for _, sx in { -6, 6 } do
-			kit.mk(parent, Vector3.new(1.2, 14, 1.2), cf * CFrame.new(sx, -5, -k * len / n), WOOD, Enum.Material.Wood)
+			kit.mk(parent, Vector3.new(1.2, 16, 1.2), cf * CFrame.new(sx, -6, -k * len / n), WOOD, Enum.Material.Wood)
 		end
 	end
 	for _, sx in { -6.6, 6.6 } do
 		kit.mk(parent, Vector3.new(0.3, 3, len), cf * CFrame.new(sx, 3.5, -len / 2), WOOD, Enum.Material.Wood, { name = "Rail" })
 	end
-	-- a T at the end and two lamps
 	kit.mk(parent, Vector3.new(44, 1, 14), cf * CFrame.new(0, 1.5, -len - 6), WOOD, Enum.Material.WoodPlanks, { name = "Pier" })
 	for _, sx in { -18, 18 } do
 		local base = (cf * CFrame.new(sx, 2, -len - 6)).Position
-		local post = kit.mk(parent, Vector3.new(10, 0.5, 0.5), CFrame.new(base + Vector3.new(0, 5, 0)) * UP, Color3.fromRGB(40, 40, 44), Enum.Material.Metal)
+		kit.mk(parent, Vector3.new(10, 0.5, 0.5), CFrame.new(base + Vector3.new(0, 5, 0)) * UP, Color3.fromRGB(40, 40, 44), Enum.Material.Metal)
 		local lamp = kit.deco(parent, Vector3.one * 1.4, CFrame.new(base + Vector3.new(0, 10.6, 0)), WARM, Enum.Material.Neon, { shape = Enum.PartType.Ball })
 		kit.dayOff(lamp, kit.addLight("PointLight", lamp, WARM, 30, 1.4))
-		local _ = post
 	end
 end
 
@@ -406,7 +399,7 @@ local function helipad(kit: any, parent: Instance, p: Vector3)
 end
 
 local function lookout(kit: any, parent: Instance, p: Vector3)
-	-- a stone deck at the plateau's edge looking back over the bay to Downtown (east)
+	-- a stone deck at the top's edge looking back over the bay to Downtown (east)
 	local face = Vector3.new(p.X - CENTER.X, 0, p.Z - CENTER.Z).Unit
 	local cf = CFrame.lookAt(p, p + face)
 	kit.mk(parent, Vector3.new(60, 1, 40), cf * CFrame.new(0, 0.5, -6), STONE, Enum.Material.Limestone, { name = "Lookout" })
@@ -441,7 +434,6 @@ local function gateHouse(kit: any, parent: Instance)
 	kit.mk(folder, Vector3.new(16, 1, 14), h * CFrame.new(0, 10, 0), Color3.fromRGB(40, 42, 48), Enum.Material.Metal, { name = "GuardRoof" })
 	local light = kit.deco(folder, Vector3.new(6, 0.2, 2), h * CFrame.new(0, 9.4, 0), WARM, Enum.Material.Neon)
 	kit.dayOff(light, kit.addLight("PointLight", light, WARM, 22, 1.2))
-	-- the community's name over the way in
 	local sign = kit.mk(folder, Vector3.new(30, 4, 1), g * CFrame.new(-(HALF + 26), 3, -4) * CFrame.Angles(0, math.pi / 2, 0), STONE, Enum.Material.Limestone, { name = "GateSign" })
 	kit.surfaceText(sign, Enum.NormalId.Front, "THE SUMMIT · RESIDENTS ONLY", Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 120))
 	kit.surfaceText(sign, Enum.NormalId.Back, "THE SUMMIT · RESIDENTS ONLY", Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 120))
@@ -453,11 +445,49 @@ local function lowStreet(kit: any, parent: Instance, lots: { IsleLayout.Lot })
 	for _, l in lots do
 		if l.zone == "low" then
 			local f = l.frame
-			local front = f * CFrame.new(0, 0, -l.depth / 2 - 4) -- the sidewalk in front of the lot
+			local front = f * CFrame.new(0, 0, -l.depth / 2 - 4)
 			kit.mk(folder, Vector3.new(l.width + 14, 0.4, 8), front * CFrame.new(0, 0.2, 0), kit.SIDEWALK, Enum.Material.Concrete, { name = "Sidewalk" })
 			kit.mk(folder, Vector3.new(0.3, 3.4, 0.3), front * CFrame.new(l.width / 2 - 6, 2.1, 2.5), Color3.fromRGB(60, 60, 64), Enum.Material.Metal)
 			kit.mk(folder, Vector3.new(1.2, 1, 1.8), front * CFrame.new(l.width / 2 - 6, 4.2, 2.5), Color3.fromRGB(40, 70, 130), Enum.Material.Metal, { name = "Mailbox" })
 			kit.tree(folder, (front * CFrame.new(-l.width / 2 + 4, 0.4, 1)).Position, 0.8)
+		end
+	end
+end
+
+-- trees: a forest on the lower slopes, fewer higher up, none on the cliffs
+local function trees(kit: any, parent: Instance, palm: (any, Instance, Vector3, number?) -> Vector3)
+	local folder = kit.folder("Trees", parent)
+	local placed = 0
+	for _ = 1, 6000 do
+		if placed >= 640 then
+			break
+		end
+		local a = rng:NextNumber(0, math.pi * 2)
+		local r = rng:NextNumber(60, I.Ring - HALF - 16)
+		local x, z = math.cos(a) * r, math.sin(a) * r
+		if not IsleLayout.inZone(x, z, 12) then
+			local y = IsleLayout.surface(x, z)
+			local s = math.max(math.abs(IsleLayout.surface(x + 4, z) - IsleLayout.surface(x - 4, z)), math.abs(IsleLayout.surface(x, z + 4) - IsleLayout.surface(x, z - 4))) / 8
+			local keep = if y < 160 then 1 elseif y < 280 then 0.35 else 0.1
+			local clearRamps = true
+			for _, rp in ChallengeData.ramps do
+				if (Vector3.new(CENTER.X + x, 0, CENTER.Z + z) - Vector3.new(rp.cf.X, 0, rp.cf.Z)).Magnitude < 90 then
+					clearRamps = false
+				end
+			end
+			if s < 0.8 and y > 2 and clearRamps and rng:NextNumber() < keep then
+				placed += 1
+				local p = CENTER + Vector3.new(x, y - 0.6, z)
+				local group = kit.lodGroup(folder, "Detail", p, 1000)
+				local pick = rng:NextNumber()
+				if y > 180 or (y > 50 and pick < 0.55) then
+					pine(kit, group, p)
+				elseif y > 15 or pick < 0.5 then
+					kit.tree(group, p, rng:NextNumber(1.1, 1.6))
+				else
+					palm(kit, group, p)
+				end
+			end
 		end
 	end
 end
@@ -467,88 +497,52 @@ end
 ---------------------------------------------------------------------
 function Isle.build(kit: any, parent: Instance, palm: (any, Instance, Vector3, number?) -> Vector3)
 	local folder = kit.folder("LegendsIsle", parent)
-	local t = workspace.Terrain
-	terrain(t)
-	-- the roads (rock in under the climbs as they're built), then air carved out above them all
+	if not Isle.skipTerrain then
+		terrain(workspace.Terrain)
+	end
 	for _, ring in IsleLayout.Rings do
-		ringRoad(kit, folder, ring, t)
+		ringRoad(kit, folder, ring)
 	end
 	for _, rd in IsleLayout.Roads do
-		climb(kit, folder, rd, t)
+		climb(kit, folder, rd)
 	end
-	for _, rd in IsleLayout.Roads do
-		carveRoad(rd, t)
-	end
-	-- room round the gate for the guard house and the guards (the climb's first stub is cut into
-	-- the foot of the upper face)
-	t:FillBlock(IsleLayout.GateCFrame * CFrame.new(0, 16 - 0.6, 6), Vector3.new(96, 32, 60), Enum.Material.Air)
 
 	local lots = IsleLayout.lots()
-	-- the beach: palms all round, lifeguard towers and huts on the west and south, the pier
+	-- the beach: palms along the top of the sand, lifeguard towers and huts on the west and
+	-- south, the pier
 	local beach = kit.folder("Beach", folder)
-	local nb = 64
+	local nb = 72
 	for k = 0, nb - 1 do
 		local a = (k + rng:NextNumber(-0.3, 0.3)) / nb * math.pi * 2
-		local p = IsleLayout.polar(rng:NextNumber(I.lawn - 30, I.lawn + 20), a, GROUND + 0.2)
-		if math.abs(a) > 0.12 and clearOfRoads(p, 10) and clearOfLots(p, lots, 4) then
-			palm(kit, beach, p)
+		local r = IsleLayout.shore(a) - rng:NextNumber(96, 120)
+		local x, z = math.cos(a) * r, math.sin(a) * r
+		if IsleLayout.angDiff(a, 0) > 0.1 and not IsleLayout.inZone(x, z, 8) then
+			palm(kit, beach, CENTER + Vector3.new(x, IsleLayout.surface(x, z) - 0.5, z))
 		end
 	end
-	local sandR = (I.lawn + I.r) / 2 + 10
+	local function onSand(r: number, a: number): Vector3
+		r += IsleLayout.shore(a) - I.r
+		local x, z = math.cos(a) * r, math.sin(a) * r
+		return CENTER + Vector3.new(x, IsleLayout.surface(x, z), z)
+	end
 	for _, a in { math.pi * 0.85, math.pi, math.pi * 1.15, math.pi * 0.5, math.pi * 0.62 } do
-		local p = IsleLayout.polar(sandR, a, GROUND + 0.6)
+		local p = onSand(I.r - 55, a)
 		lifeguardTower(kit, beach, p, (p - CENTER) * Vector3.new(1, 0, 1))
 	end
 	for k = 0, 7 do
-		local a = math.pi * 0.7 + k * 0.09
-		local p = IsleLayout.polar(I.lawn + 6, a, GROUND + 0.4)
+		local p = onSand(I.r - 80, math.pi * 0.7 + k * 0.07)
 		beachHut(kit, beach, p, (p - CENTER) * Vector3.new(1, 0, 1))
 	end
-	pier(kit, beach, IsleLayout.polar(I.r - 30, math.pi, 0), Vector3.new(-1, 0, 0), 220)
+	pier(kit, beach, IsleLayout.polar(IsleLayout.shore(math.pi) - 40, math.pi, 0.4), Vector3.new(-1, 0, 0), 220)
 
-	-- trees: pines up the mountain, palms on the low ground and the terrace's edge
-	local trees = kit.folder("Trees", folder)
-	local placed = 0
-	for _ = 1, 600 do
-		if placed >= 230 then
-			break
-		end
-		local a = rng:NextNumber(0, math.pi * 2)
-		local band = rng:NextNumber()
-		local r
-		if band < 0.4 then
-			r = rng:NextNumber(I.Mid.outer + 10, I.Foot + 30)
-		elseif band < 0.75 then
-			r = rng:NextNumber(I.Top.r + 15, I.Mid.inner - 5)
-		else
-			r = rng:NextNumber(I.Foot + 30, I.Ring - HALF - 12)
-		end
-		local p = IsleLayout.polar(r, a, IsleLayout.groundY(r) + GROUND)
-		local clearRamps = true
-		for _, rp in ChallengeData.ramps do
-			if (Vector3.new(p.X, 0, p.Z) - Vector3.new(rp.cf.X, 0, rp.cf.Z)).Magnitude < 90 then
-				clearRamps = false
-			end
-		end
-		if clearRamps and clearOfRoads(p, 14) and clearOfLots(p, lots, 6) and (p - IsleLayout.fountain()).Magnitude > 60 then
-			placed += 1
-			local group = kit.lodGroup(trees, "Detail", p, 900)
-			if r > I.Foot + 20 then
-				palm(kit, group, p)
-			else
-				pine(kit, group, p)
-			end
-		end
-	end
-
-	-- the neighbourhoods
+	trees(kit, folder, palm)
 	lowStreet(kit, folder, lots)
 	fountain(kit, folder, IsleLayout.fountain())
 	helipad(kit, folder, IsleLayout.helipad())
 	lookout(kit, folder, IsleLayout.lookout())
 	gateHouse(kit, folder)
 	-- the island's name where the causeway lands
-	local sp = IsleLayout.polar(I.Ring + HALF + 40, 0.08, 0)
+	local sp = IsleLayout.polar(I.Ring + HALF + 40, 0.075, 0)
 	local wall = kit.mk(folder, Vector3.new(50, 9, 3), CFrame.lookAt(sp + Vector3.new(0, 4.5, 0), sp + Vector3.new(0, 4.5, 0) + Vector3.new(0, 0, 1)), STONE, Enum.Material.Limestone, { name = "IslandSign" })
 	kit.surfaceText(wall, Enum.NormalId.Front, "LEGENDS ISLE", Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 170))
 	kit.surfaceText(wall, Enum.NormalId.Back, "LEGENDS ISLE", Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 170))

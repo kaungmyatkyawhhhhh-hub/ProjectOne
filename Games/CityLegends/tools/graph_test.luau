@@ -62,7 +62,8 @@ end
 check(dead == 0, `no dead ends ({dead})`)
 local jumps = 0
 for _, seg in graph.all do
-	if seg.kind == "turn" and math.abs(seg.p0.Y - seg.p2.Y) > 1 then
+	-- (a turn on Legends Isle's climbs may keep climbing gently through a bend)
+	if seg.kind == "turn" and math.abs(seg.p0.Y - seg.p2.Y) > math.max(1, seg.length * 0.15) then
 		jumps += 1
 		print("  turn jumps", seg.p0, seg.p2)
 	end
