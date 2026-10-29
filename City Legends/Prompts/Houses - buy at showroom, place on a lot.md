@@ -147,7 +147,13 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This **replaces*
 12. **House income:** a small "rental" income while you're in the game (like the hotel suites), more for bigger houses, paid into a house safe you collect at home.
 13. **House value goes up:** each house slowly gains value the longer you own it (up to +20%), so selling later pays a little more. Upgrades add to the value.
 14. **Car lift and turntable** in High tier garages: one car on a spinning display, the rest on lifts. Press E to drive any out.
-15. **Driveway car show:** park up to 2 cars in your driveway to show off. Others see them when driving past.
+15. **Driveway car show:** show off your cars on the driveway; others see them when driving past or visiting. How many:
+    - most houses: 2 cars;
+    - bigger Mid and High houses: 4–6 cars;
+    - **the 5 most expensive houses: 10 cars** (owner, 2026-10-29). These 5 get a big driveway or front court built for it: 10 marked bays laid out nicely (a curved row or a fan round a fountain), lit at night, with space to drive in and out.
+    - Pick the cars in the Garage setup screen (same as the garage bays). Press E on a driveway car to drive it.
+    - Only owned cars. The server checks it.
+    - Show them as light display models (no physics) until someone drives one, to keep FPS up: 10 cars × several mansions can be heavy. Report the FPS with all 10 filled.
 16. **Weekly open-house event:** for one hour each week, all houses can be visited, and players vote for the best house. The winner gets a trophy at their house plus cash.
 17. **Neighbour quests from the agent:**
     - "Tour 3 Mid houses";
