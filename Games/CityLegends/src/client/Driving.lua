@@ -2557,13 +2557,16 @@ function Driving.render(dt: number)
 					-- 2026-10-22: the hands on the wheel disappeared when it was hidden)
 					local from = arm.shoulder
 					if Driving.cameraMode == "Interior" then
-						from = handPos + (arm.shoulder - handPos) * 0.45
+						from = handPos + (arm.shoulder - handPos) * DF.CockpitArm
 					end
-					local len = (handPos - from).Magnitude
+					-- the hand runs on past the grip, over and round the rim, so its flat end doesn't
+					-- show beside the wheel when the hands come up in a turn (owner, 2026-10-29)
+					local tip = handPos + (handPos - from).Unit * DF.HandPastGrip
+					local len = (tip - from).Magnitude
 					if math.abs(arm.upper.Size.Y - len) > 0.02 then
 						arm.upper.Size = Vector3.new(arm.upper.Size.X, len, arm.upper.Size.Z)
 					end
-					arm.upper.CFrame = root.CFrame * CFrame.lookAt((from + handPos) / 2, handPos) * arm.rot
+					arm.upper.CFrame = root.CFrame * CFrame.lookAt((from + tip) / 2, tip) * arm.rot
 				end
 				-- jointed arms: in first person the upper arm (next to the camera) hides, the
 				-- forearm and glove stay on the wheel

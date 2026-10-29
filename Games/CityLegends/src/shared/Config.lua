@@ -320,6 +320,13 @@ Config.DrivingFeel = {
 	LockFadeMph = 40,
 	HandReach = 100,
 	WheelWobble = 1.2, -- small corrections on the straight at speed (degrees)
+	-- the driver's arms: in the cockpit only this share of each arm shows, from the hand back
+	-- towards the shoulder (the whole arm came past the camera as a slab, owner 2026-10-17; at
+	-- 0.45 its cut end showed in turns, 2026-10-29)...
+	CockpitArm = 0.8,
+	-- ...and the hand runs this many studs past its grip, round the rim (owner, 2026-10-29: the
+	-- end of the hand showed when turning)
+	HandPastGrip = 0.3,
 	-- sense of speed: these go by real speed, so every car feels fast when it is
 	RushFrom = 45, -- mph where the speed effects start...
 	RushTo = 190, -- ...and where they're full
