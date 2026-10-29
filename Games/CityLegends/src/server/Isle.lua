@@ -182,7 +182,7 @@ end
 -- Road parts
 ---------------------------------------------------------------------
 -- a straight road piece from a to b (surface points), with its markings
-local function roadPiece(kit: any, parent: Instance, a: Vector3, b: Vector3, opts: { centre: boolean, edges: boolean, extra: number? })
+local function roadPiece(kit: any, parent: Instance, a: Vector3, b: Vector3, opts: { centre: boolean, edges: boolean, extra: number?, lineExtra: number? })
 	local mid = (a + b) / 2
 	local len = (b - a).Magnitude
 	local cf = CFrame.lookAt(mid, b)
@@ -194,7 +194,8 @@ local function roadPiece(kit: any, parent: Instance, a: Vector3, b: Vector3, opt
 	end
 	if opts.edges then
 		for _, s in { -1, 1 } do
-			kit.deco(parent, Vector3.new(0.35, 0.05, len), cf * CFrame.new(s * (HALF - 1.4), 0.02, 0), kit.LINE_WHITE, Enum.Material.SmoothPlastic)
+			-- (on a curve the edge lines run on a little, so they meet round the outside)
+			kit.deco(parent, Vector3.new(0.35, 0.05, len + (opts.lineExtra or 0)), cf * CFrame.new(s * (HALF - 1.4), 0.02, 0), kit.LINE_WHITE, Enum.Material.SmoothPlastic)
 		end
 	end
 end
@@ -228,7 +229,7 @@ local function ringRoad(kit: any, parent: Instance, ring: IsleLayout.Ring)
 		local p0 = IsleLayout.polar(ring.radius, a0, ring.y)
 		local p1 = IsleLayout.polar(ring.radius, a1, ring.y)
 		local am = (a0 + a1) / 2
-		roadPiece(kit, folder, p0, p1, { centre = k % 2 == 0, edges = not inGap(am, 0) })
+		roadPiece(kit, folder, p0, p1, { centre = k % 2 == 0, edges = not inGap(am, 0), lineExtra = 2 * (HALF - 1.4) * math.tan(math.pi / n) + 0.2 })
 		local cf = CFrame.lookAt((p0 + p1) / 2, p1)
 		local len = (p1 - p0).Magnitude
 		if not inGap(am, 0.01) then
@@ -365,6 +366,12 @@ function climb(kit: any, parent: Instance, rd: IsleLayout.Road)
 				local sideA, sideB = dirA:Cross(Vector3.yAxis), dirB:Cross(Vector3.yAxis)
 				local s = if (sideB - sideA):Dot(dirA) > 0 then 1 else -1
 				flatTriangle(kit, folder, p, p + sideA * s * HALF, p + sideB * s * HALF)
+				-- the outside edge line carried across the bend, so it doesn't break there
+				local la, lb = p + sideA * s * (HALF - 1.4), p + sideB * s * (HALF - 1.4)
+				local gap = (lb - la).Magnitude
+				if gap > 0.05 then
+					kit.deco(folder, Vector3.new(0.35, 0.05, gap + 0.35), CFrame.lookAt((la + lb) / 2, lb) * CFrame.new(0, 0.02, 0), kit.LINE_WHITE, Enum.Material.SmoothPlastic)
+				end
 			end
 		end
 	end
@@ -500,15 +507,41 @@ local function lookout(kit: any, parent: Instance, p: Vector3)
 	end
 end
 
--- the gate's guard house and pillars (Gate adds the barrier arm and the guards at start)
+-- the Summit's gated entrance (owner, 2026-10-29: stone pillars and walls, a big metal gate with
+-- the name in plain lettering, a guard house with a light, cameras on poles). Gate adds the two
+-- sliding gate leaves and the guards at start. GateCFrame looks up the climb; +Z is the way in.
+local GATE_STONE = Color3.fromRGB(176, 168, 152)
+local GATE_IRON = Color3.fromRGB(30, 31, 34)
 local function gateHouse(kit: any, parent: Instance)
 	local g = IsleLayout.GateCFrame
 	local folder = kit.folder("Gate", parent)
+	local wallZ = -1.5 -- the line of the pillars and walls (the leaves slide just inside it)
 	for _, s in { -1, 1 } do
-		kit.mk(folder, Vector3.new(4, 12, 4), g * CFrame.new(s * (HALF + 3), 6, 0), STONE, Enum.Material.Limestone, { name = "GatePillar" })
-		kit.deco(folder, Vector3.new(4.6, 1, 4.6), g * CFrame.new(s * (HALF + 3), 12.5, 0), Color3.fromRGB(180, 150, 90), Enum.Material.Metal)
-		local lamp = kit.deco(folder, Vector3.one * 1.6, g * CFrame.new(s * (HALF + 3), 13.8, 0), WARM, Enum.Material.Neon, { shape = Enum.PartType.Ball })
-		kit.dayOff(lamp, kit.addLight("PointLight", lamp, WARM, 28, 1.3))
+		-- a tall stone pillar with a cap and a lantern
+		local px = s * (HALF + 3)
+		kit.mk(folder, Vector3.new(5, 16, 5), g * CFrame.new(px, 8, wallZ), GATE_STONE, Enum.Material.Limestone, { name = "GatePillar" })
+		kit.mk(folder, Vector3.new(6, 1.2, 6), g * CFrame.new(px, 16.6, wallZ), GATE_STONE, Enum.Material.Limestone)
+		kit.deco(folder, Vector3.new(1.6, 2.4, 1.6), g * CFrame.new(px, 18.4, wallZ), GATE_IRON, Enum.Material.Metal)
+		local lamp = kit.deco(folder, Vector3.new(1.2, 1.8, 1.2), g * CFrame.new(px, 18.4, wallZ), WARM, Enum.Material.Neon)
+		kit.dayOff(lamp, kit.addLight("PointLight", lamp, WARM, 30, 1.4))
+		-- a stone wall out to the side, with a cap, and an invisible high fence above it so nobody
+		-- drives or jumps round the gate
+		local x0, x1 = HALF + 5.5, 48
+		local wx = s * (x0 + x1) / 2
+		kit.mk(folder, Vector3.new(x1 - x0, 9, 2.4), g * CFrame.new(wx, 4.5, wallZ), GATE_STONE, Enum.Material.Limestone, { name = "GateWall" })
+		kit.mk(folder, Vector3.new(x1 - x0, 0.8, 3), g * CFrame.new(wx, 9.4, wallZ), GATE_STONE, Enum.Material.Slate)
+		kit.mk(folder, Vector3.new(x1 - x0, 30, 1), g * CFrame.new(wx, 24, wallZ), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1, name = "GateFence" })
+		-- a camera on a short pole on the wall, looking out at the way in
+		local cam = g * CFrame.new(s * (HALF + 12), 9.8, wallZ)
+		kit.deco(folder, Vector3.new(0.4, 4, 0.4), cam * CFrame.new(0, 2, 0), GATE_IRON, Enum.Material.Metal)
+		kit.deco(folder, Vector3.new(1.1, 1, 2.2), cam * CFrame.new(0, 4.3, 0.6) * CFrame.Angles(math.rad(-12), s * math.rad(-15), 0), Color3.fromRGB(226, 226, 222), Enum.Material.SmoothPlastic, { name = "GateCamera" })
+		local led = kit.deco(folder, Vector3.new(0.25, 0.25, 0.1), cam * CFrame.new(0.3, 4.6, 1.75), Color3.fromRGB(255, 50, 40), Enum.Material.Neon)
+		led.Name = "CameraLight"
+	end
+	-- the arch over the road with the name in plain metal letters, both sides
+	local arch = kit.mk(folder, Vector3.new(2 * (HALF + 5.5), 2.6, 3), g * CFrame.new(0, 17.4, wallZ), GATE_IRON, Enum.Material.Metal, { name = "GateArch" })
+	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+		kit.surfaceText(arch, face, "THE SUMMIT", Color3.fromRGB(232, 214, 168), nil, nil, Enum.Font.GothamBold, Vector2.new(1100, 70))
 	end
 	-- the guard house, left of the road coming in
 	local h = g * CFrame.new(-(HALF + 13), 0, 6)
@@ -521,7 +554,7 @@ local function gateHouse(kit: any, parent: Instance)
 	kit.mk(folder, Vector3.new(16, 1, 14), h * CFrame.new(0, 10, 0), Color3.fromRGB(40, 42, 48), Enum.Material.Metal, { name = "GuardRoof" })
 	local light = kit.deco(folder, Vector3.new(6, 0.2, 2), h * CFrame.new(0, 9.4, 0), WARM, Enum.Material.Neon)
 	kit.dayOff(light, kit.addLight("PointLight", light, WARM, 22, 1.2))
-	local sign = kit.mk(folder, Vector3.new(30, 4, 1), g * CFrame.new(-(HALF + 26), 3, -4) * CFrame.Angles(0, math.pi / 2, 0), STONE, Enum.Material.Limestone, { name = "GateSign" })
+	local sign = kit.mk(folder, Vector3.new(24, 4, 1), g * CFrame.new(HALF + 22, 3, 9), STONE, Enum.Material.Limestone, { name = "GateSign" }) -- outside, facing the way in
 	kit.surfaceText(sign, Enum.NormalId.Front, "THE SUMMIT · RESIDENTS ONLY", Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 120))
 	kit.surfaceText(sign, Enum.NormalId.Back, "THE SUMMIT · RESIDENTS ONLY", Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 120))
 end

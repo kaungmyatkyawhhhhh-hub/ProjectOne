@@ -4,12 +4,14 @@
 	with police guards and a barrier that opens only for residents).
 
 	  * residents: players who own a top tier house (Config.Houses.Types with tier >= Resident)
-	  * the barrier lifts for a car that a resident drives, rides in (passenger seat) or is driven
-	    in by the chauffeur, and for a resident walking up; wanted players are refused
+	  * the two steel gates slide open (about 3 s, a motor hum and a clunk) for a car that a
+	    resident drives, rides in (passenger seat) or is driven in by the chauffeur, and for a
+	    resident walking up; they close again behind them; wanted players are refused
 	  * anyone else who gets inside (tailgating, on foot over the rocks) is put back outside the
 	    gate with a message; police chases can't follow because nobody wanted gets in
 	  * two guards: one at the guard house, one walking his beat by the gate
-	The guard house and pillars are scenery (Isle); the arm and the guards are built here at start.
+	The guard house, pillars, walls, arch and cameras are scenery (Isle); the gates and the guards are
+built here at start.
 ]]
 
 local Players = game:GetService("Players")
@@ -24,14 +26,15 @@ local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local Gate = {}
 
 local RESIDENT_TIER = 2 -- the house tier that lives on the Summit
-local OPEN_RANGE = 46 -- studs from the gate where an allowed car lifts the barrier
+local OPEN_RANGE = 70 -- studs from the gate where an allowed car opens it (it takes 3 s)
+local SLIDE_TIME = 3
 local HALF = IsleLayout.Road / 2
 
 local ctx: any
 local fx: RemoteEvent?
-local arm: BasePart? = nil
-local armClosed: CFrame
-local armOpen: CFrame
+local leaves: { { part: BasePart, closed: CFrame, open: CFrame } } = {}
+local motor: Sound? = nil
+local clunk: Sound? = nil
 local isOpen = false
 local lastAllowed = 0
 local warned: { [Player]: number } = {}
@@ -111,53 +114,131 @@ local function carAllowed(car: Model): (boolean, Player?)
 end
 
 ---------------------------------------------------------------------
--- The barrier arm and the guards
+-- The gates and the guards
 ---------------------------------------------------------------------
-local function buildArm(parent: Instance)
+-- the two gate leaves: black steel frames with bars, each covering half the road, sliding out
+-- behind the walls to open (owner, 2026-10-29: "a sliding or swinging metal gate")
+local function buildGates(parent: Instance)
 	local g = IsleLayout.GateCFrame
-	-- hinged at the right-hand pillar, across the road; it swings up to open
-	local hinge = g * CFrame.new(HALF + 1, 3.6, 0)
-	local len = IsleLayout.Road + 2
-	local p = Instance.new("Part")
-	p.Name = "GateArm"
-	p.Anchored = true
-	p.Size = Vector3.new(len, 0.9, 0.9)
-	p.Color = Color3.fromRGB(236, 236, 230)
-	p.Material = Enum.Material.SmoothPlastic
-	p.TopSurface = Enum.SurfaceType.Smooth
-	p.BottomSurface = Enum.SurfaceType.Smooth
-	armClosed = hinge * CFrame.new(-len / 2, 0, 0)
-	armOpen = hinge * CFrame.Angles(0, 0, math.rad(-82)) * CFrame.new(-len / 2, 0, 0)
-	p.CFrame = armClosed
-	p.CanCollide = true
-	p.Parent = parent
-	-- red stripes
-	for k = 1, 5 do
-		local s = Instance.new("Part")
-		s.Anchored = false
-		s.CanCollide = false
-		s.Massless = true
-		s.Size = Vector3.new(len / 11, 0.95, 0.95)
-		s.Color = Color3.fromRGB(200, 40, 40)
-		s.Material = Enum.Material.SmoothPlastic
-		s.CFrame = p.CFrame * CFrame.new(-len / 2 + (k * 2 - 0.5) * len / 11, 0, 0)
-		local w = Instance.new("WeldConstraint")
-		w.Part0 = p
-		w.Part1 = s
-		w.Parent = s
-		s.Parent = p
+	local half = HALF + 0.5 -- each leaf covers half the road and a little more
+	local height = 10
+	local z = -4.6 -- just inside the pillars and walls
+	for _, s in { -1, 1 } do
+		local closed = g * CFrame.new(s * half / 2, 0.5, z)
+		local open = closed * CFrame.new(s * (half + 3), 0, 0)
+		local rail = Instance.new("Part")
+		rail.Name = "GateLeaf"
+		rail.Anchored = true
+		rail.Size = Vector3.new(half, 0.8, 0.6)
+		rail.Color = Color3.fromRGB(30, 31, 34)
+		rail.Material = Enum.Material.Metal
+		rail.CFrame = closed
+		rail.CanCollide = true
+		-- the frame and the bars, welded to the bottom rail so they move with it
+		local function piece(size: Vector3, offset: CFrame, collide: boolean)
+			local p = Instance.new("Part")
+			p.Anchored = false
+			p.Massless = true
+			p.CanCollide = collide
+			p.Size = size
+			p.Color = Color3.fromRGB(30, 31, 34)
+			p.Material = Enum.Material.Metal
+			p.CFrame = closed * offset
+			local w = Instance.new("WeldConstraint")
+			w.Part0 = rail
+			w.Part1 = p
+			w.Parent = p
+			p.Parent = rail
+		end
+		piece(Vector3.new(half, 0.6, 0.6), CFrame.new(0, height, 0), false)
+		piece(Vector3.new(half, 0.4, 0.5), CFrame.new(0, height * 0.45, 0), false)
+		piece(Vector3.new(0.6, height, 0.6), CFrame.new(-half / 2 + 0.3, height / 2, 0), false)
+		piece(Vector3.new(0.6, height, 0.6), CFrame.new(half / 2 - 0.3, height / 2, 0), false)
+		local bars = math.floor(half / 1.5)
+		for k = 1, bars - 1 do
+			piece(Vector3.new(0.25, height, 0.25), CFrame.new(-half / 2 + k * half / bars, height / 2, 0), false)
+		end
+		-- one solid panel inside the bars that stops cars (the bars alone are thin)
+		piece(Vector3.new(half, height, 0.3), CFrame.new(0, height / 2, 0), true)
+		for _, c in rail:GetChildren() do
+			if c:IsA("BasePart") and c.Size.Z == 0.3 then
+				c.Transparency = 1 -- (invisible: you see the bars)
+			end
+		end
+		rail.Parent = parent
+		table.insert(leaves, { part = rail, closed = closed, open = open })
 	end
-	arm = p
+	-- the gate motor's hum while they move, and a clunk when they stop
+	local box = Instance.new("Part")
+	box.Name = "GateMotor"
+	box.Anchored = true
+	box.CanCollide = false
+	box.Transparency = 1
+	box.Size = Vector3.new(1, 1, 1)
+	box.CFrame = g * CFrame.new(0, 3, z)
+	box.Parent = parent
+	local m = Instance.new("Sound")
+	m.SoundId = "rbxasset://sounds/action_falling.ogg"
+	m.PlaybackSpeed = 0.32
+	m.Volume = 0.7
+	m.Looped = true
+	m.RollOffMaxDistance = 160
+	m.Parent = box
+	motor = m
+	local c = Instance.new("Sound")
+	c.SoundId = "rbxasset://sounds/action_jump_land.mp3"
+	c.PlaybackSpeed = 0.55
+	c.Volume = 0.9
+	c.RollOffMaxDistance = 160
+	c.Parent = box
+	clunk = c
 end
 
+local slideId = 0
 local function setOpen(open: boolean)
-	if open == isOpen or not arm then
+	if open == isOpen or #leaves == 0 then
 		return
 	end
 	isOpen = open
-	local a = arm :: BasePart
-	a.CanCollide = not open
-	TweenService:Create(a, TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { CFrame = if open then armOpen else armClosed }):Play()
+	slideId += 1
+	local id = slideId
+	local info = TweenInfo.new(SLIDE_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+	for _, l in leaves do
+		-- (they stop blocking as soon as they start opening, and block again once shut)
+		if open then
+			l.part.CanCollide = false
+			for _, c in l.part:GetChildren() do
+				if c:IsA("BasePart") and c.Transparency == 1 then
+					c.CanCollide = false
+				end
+			end
+		end
+		TweenService:Create(l.part, info, { CFrame = if open then l.open else l.closed }):Play()
+	end
+	if motor then
+		motor:Play()
+	end
+	task.delay(SLIDE_TIME, function()
+		if id ~= slideId then
+			return
+		end
+		if motor then
+			motor:Stop()
+		end
+		if clunk then
+			clunk:Play()
+		end
+		if not open then
+			for _, l in leaves do
+				l.part.CanCollide = true
+				for _, c in l.part:GetChildren() do
+					if c:IsA("BasePart") and c.Transparency == 1 then
+						c.CanCollide = true
+					end
+				end
+			end
+		end
+	end)
 end
 
 -- a police guard (Roblox's default avatar in uniform), standing or walking a beat
@@ -344,7 +425,7 @@ function Gate.init(c: any)
 	local folder = Instance.new("Folder")
 	folder.Name = "SummitGate"
 	folder.Parent = workspace
-	buildArm(folder)
+	buildGates(folder)
 	local g = IsleLayout.GateCFrame
 	-- one at the guard house door, one walking along the road's edge outside the barrier
 	guard(folder, "GateGuard", g * CFrame.new(-(HALF + 6), 0, 4) * CFrame.Angles(0, math.rad(90), 0), nil)
