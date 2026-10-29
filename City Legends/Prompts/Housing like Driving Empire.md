@@ -53,6 +53,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This builds on `
   - Mid (medium plots) halfway up;
   - High (large plots) on the summit, behind the gate.
 - **Make the houses close to Driving Empire's style.** Include our own versions of each of their kinds (cottage, small family house, modern box, stone villa, barn-style house / barndominium, classic mansion, Italian-style mansion, big estate), then add more of our own to reach 30+:
+  - **Don't make the NASCAR / racing-themed house** (owner, 2026-10-29). Leave that one out completely.
   - Low: beach shack, townhouse, bungalow, ranch house;
   - Mid: glass house, cliff house, lodge, Spanish villa;
   - High: Miami white mansion, hilltop estate like `imports/refs/houses/high_tier_hilltop.webp`, mega-mansion with an infinity pool and helipad.
