@@ -61,8 +61,24 @@ local running = false
 local recycleTimer = 0
 local focusGetter: (() -> Vector3?)? = nil
 
+-- (the gated community's lanes are private: traffic never turns in; graph_test checks there is
+-- always a public way on)
+local function isPrivate(s: CityLayout.Segment): boolean
+	return s.private == true or (s.kind == "turn" and s.next[1] ~= nil and s.next[1].private == true)
+end
+local publicNext: { [CityLayout.Segment]: { CityLayout.Segment } } = {}
+
 local function chooseNext(seg: CityLayout.Segment): CityLayout.Segment?
-	local options = seg.next
+	local options = publicNext[seg]
+	if not options then
+		options = {}
+		for _, o in seg.next do
+			if seg.private or not isPrivate(o) then
+				table.insert(options, o)
+			end
+		end
+		publicNext[seg] = options
+	end
 	if #options == 0 then
 		return nil
 	end
@@ -112,13 +128,17 @@ end
 -- each lane's bounding box (its three control points), to pick lanes near a point quickly: the
 -- highway lanes are few but very long, so a plain random pick rarely lands near a driver out there
 local laneBox: { [CityLayout.Segment]: { Vector3 } } = {}
+local publicLanes: { CityLayout.Segment } = {}
 for _, seg in graph.lanes do
 	laneBox[seg] = { seg.p0:Min(seg.p1):Min(seg.p2), seg.p0:Max(seg.p1):Max(seg.p2) }
+	if not seg.private then
+		table.insert(publicLanes, seg)
+	end
 end
 local nearby: { CityLayout.Segment } = {}
 local function lanesNear(center: Vector3, maxDist: number): { CityLayout.Segment }
 	table.clear(nearby)
-	for _, seg in graph.lanes do
+	for _, seg in publicLanes do
 		local b = laneBox[seg]
 		local dx = math.max(b[1].X - center.X, 0, center.X - b[2].X)
 		local dz = math.max(b[1].Z - center.Z, 0, center.Z - b[2].Z)
@@ -132,7 +152,7 @@ end
 -- Lane position near "center" (or anywhere if center == nil)
 local function findSpot(center: Vector3?, minDist: number, maxDist: number, ignore: Npc?, avoidView: boolean?): (CityLayout.Segment?, number)
 	local camera = workspace.CurrentCamera
-	local pool = if center and maxDist < 5000 then lanesNear(center, maxDist) else graph.lanes
+	local pool = if center and maxDist < 5000 then lanesNear(center, maxDist) else publicLanes
 	if #pool == 0 then
 		return nil, 0
 	end

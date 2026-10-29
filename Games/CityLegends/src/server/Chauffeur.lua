@@ -30,6 +30,7 @@ local ActivityData = require(Shared:WaitForChild("ActivityData"))
 local ChauffeurRoute = require(Shared:WaitForChild("ChauffeurRoute"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
+local Gate = require(script.Parent:WaitForChild("Gate"))
 
 local CH = Config.Chauffeur
 
@@ -233,6 +234,10 @@ handlers.call = function(player, carId, placeId)
 	local place = if type(placeId) == "string" then placeById[placeId] else nil
 	if not place then
 		return { ok = false, message = "Unknown place" }
+	end
+	-- (the Summit is gated: residents only)
+	if place.id == "isle_top" and not Gate.mayEnter(player) then
+		return { ok = false, message = "The Summit is residents only" }
 	end
 	if player:GetAttribute("Riding") then
 		return { ok = false, message = "You're already riding" }

@@ -1,8 +1,8 @@
 --[[
 	Houses
 	Miami-style houses on the private islands (owner, 2026-10-22: "add houses which u can buy and
-	show case your car garage"). Every plot in WestLayout.housePlots gets one: villas on Palm Isle
-	and Coral Cay, mansions on Legends Key.
+	show case your car garage"). Every plot in WestLayout.housePlots of a house type's tier gets one:
+	villas on Legends Isle's mid terrace, mansions in the gated community on top.
 
 	Each house: white walls, long glass, a cantilevered upper floor with warm cove lights, a roof
 	terrace, a pool with a lit deck behind, palms, a walled front with an open sliding gate and a lit
@@ -484,7 +484,10 @@ end
 function Houses.buildWorld(kit: any, parent: Instance)
 	local root = kit.folder("IslandHouses", parent)
 	for _, plot in WestLayout.housePlots() do
-		buildHouse(kit, root, plot)
+		-- (the low tier's lots wait for their house designs: only the villa and mansion types so far)
+		if plot.tier >= 1 then
+			buildHouse(kit, root, plot)
+		end
 	end
 end
 

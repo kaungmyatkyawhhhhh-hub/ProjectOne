@@ -85,6 +85,7 @@ local paths = {
 	Config = "src/shared/Config.lua",
 	CityLayout = "src/shared/CityLayout.lua",
 	WestLayout = "src/shared/WestLayout.lua",
+	IsleLayout = "src/shared/IsleLayout.lua",
 	Flex = "src/shared/Flex.lua",
 	Casino = "src/server/Casino.lua",
 	GemShowcase = "src/server/GemShowcase.lua",
@@ -97,7 +98,7 @@ env.require = function(x)
 	end
 	local path = paths[name] or error("require " .. tostring(name))
 	local menv = table.clone(env)
-	menv.script = { Parent = { Config = { name = "Config" }, CityLayout = { name = "CityLayout" }, WestLayout = { name = "WestLayout" }, WaitForChild = function(_, n)
+	menv.script = { Parent = { Config = { name = "Config" }, CityLayout = { name = "CityLayout" }, WestLayout = { name = "WestLayout" }, IsleLayout = { name = "IsleLayout" }, WaitForChild = function(_, n)
 		return { name = n }
 	end } }
 	local m = luau.load(fs.readFile(root .. "/" .. path), { debugName = path, environment = menv })()

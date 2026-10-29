@@ -17,6 +17,7 @@
 
 local Config = require(script.Parent.Config)
 local CityLayout = require(script.Parent.CityLayout)
+local IsleLayout = require(script.Parent.IsleLayout)
 
 local C = Config.City
 local W = Config.West
@@ -96,92 +97,28 @@ end
 WestLayout.roadY = CityLayout.westRoadY
 
 ---------------------------------------------------------------------
--- Islands: ring roads, the causeway and the bridges between them, and house plots
+-- Legends Isle (IsleLayout): the causeway's end and the house plots
 ---------------------------------------------------------------------
-WestLayout.Islands = W.Islands
-WestLayout.IslandById = {} :: { [string]: any }
-for _, isl in W.Islands do
-	WestLayout.IslandById[isl.id] = isl
-end
-
-function WestLayout.islandCenter(isl: any): Vector3
-	return Vector3.new(isl.x, 0, isl.z)
-end
-
--- the causeway: from Ocean Drive straight out along z = 0 to Legends Key's ring road
-local KEY = W.Islands[1]
 WestLayout.CausewayStart = WestLayout.DowntownWest
-WestLayout.CausewayEnd = KEY.x + KEY.ring + W.IslandRoad / 2
-
--- the bridges from Legends Key's ring road to the other two (north and south)
-WestLayout.IslandBridges = {} :: { { from: Vector3, to: Vector3, island: string } }
-for k = 2, #W.Islands do
-	local isl = W.Islands[k]
-	local sgn = if isl.z < KEY.z then -1 else 1
-	table.insert(WestLayout.IslandBridges, {
-		from = Vector3.new(KEY.x, 0, KEY.z + sgn * (KEY.ring + W.IslandRoad / 2)),
-		to = Vector3.new(isl.x, 0, isl.z - sgn * (isl.ring + W.IslandRoad / 2)),
-		island = isl.id,
-	})
-end
-
--- angles (round the island, 0 = +X, towards +Z) where a road joins the ring: no plot there
-local function joins(isl: any): { number }
-	if isl.id == KEY.id then
-		return { 0, math.pi / 2, -math.pi / 2 }
-	end
-	return { if isl.z < KEY.z then math.pi / 2 else -math.pi / 2 }
-end
-
-local function angleGap(a: number, b: number): number
-	local d = (a - b) % (2 * math.pi)
-	return math.min(d, 2 * math.pi - d)
-end
+WestLayout.CausewayEnd = IsleLayout.CausewayEnd
 
 export type Plot = {
 	id: string,
 	island: string,
-	frame: CFrame, -- ground level, middle of the lot, LookVector towards the ring road
+	zone: string, -- "low" | "mid" | "high" (IsleLayout's neighbourhoods)
+	frame: CFrame, -- ground level, middle of the lot, LookVector towards the road
 	width: number, -- along the road
 	depth: number, -- away from the road
-	tier: number, -- 1 = Palm Isle / Coral Cay villas, 2 = Legends Key mansions
+	tier: number, -- the house type's tier (Config.Houses.Types): 1 mid (villas), 2 high (mansions), 0 low (no type yet)
 }
 
--- house plots: between each island's ring road and its shore, facing the road
+local TIER = { low = 0, mid = 1, high = 2 }
+
+-- house plots: the island's lots in each neighbourhood, facing their road
 function WestLayout.housePlots(): { Plot }
 	local plots: { Plot } = {}
-	for _, isl in W.Islands do
-		local c = WestLayout.islandCenter(isl)
-		local inner = isl.ring + W.IslandRoad / 2 + 8 -- the lot's road side
-		local outer = isl.r - 22 -- keep a beach strip
-		local depth = outer - inner
-		local rMid = (inner + outer) / 2
-		local isKey = isl.id == KEY.id
-		local count = if isKey then 10 else 7
-		local width = if isKey then 110 else 96
-		local n = 0
-		for k = 0, count - 1 do
-			local a = (k + 0.5) / count * 2 * math.pi
-			local clear = true
-			for _, j in joins(isl) do
-				if angleGap(a, j) < 0.32 then
-					clear = false
-				end
-			end
-			if clear then
-				n += 1
-				local radial = Vector3.new(math.cos(a), 0, math.sin(a))
-				local p = c + radial * rMid
-				table.insert(plots, {
-					id = `{isl.id}_{n}`,
-					island = isl.id,
-					frame = CFrame.lookAt(p, p - radial),
-					width = width,
-					depth = depth,
-					tier = if isKey then 2 else 1,
-				})
-			end
-		end
+	for _, l in IsleLayout.lots() do
+		table.insert(plots, { id = l.id, island = "isle", zone = l.zone, frame = l.frame, width = l.width, depth = l.depth, tier = TIER[l.zone] })
 	end
 	return plots
 end
@@ -225,14 +162,9 @@ function WestLayout.places(): { Place }
 	end
 	add("downtown", "Downtown", onLane(W.DowntownX + C.BlockSize / 2, 0, Vector3.new(-1, 0, 0)))
 	add("beach", "Ocean Drive Beach", onLane(CityLayout.roadCoord(BASE), C.BlockSize * 1.5, Vector3.new(0, 0, -1)))
-	-- the islands (at the ring road where you arrive)
-	add("island_key", "Legends Key", onLane(WestLayout.CausewayEnd + 40, 0, Vector3.new(-1, 0, 0)))
-	for _, b in WestLayout.IslandBridges do
-		local isl = WestLayout.IslandById[b.island]
-		local dir = (b.to - b.from).Unit
-		add("island_" .. isl.id, (string.gsub(isl.name, "(%a)(%w*)", function(a, r)
-			return a .. string.lower(r)
-		end)), onLane(b.to.X, b.to.Z - dir.Z * 40, dir))
+	-- Legends Isle: the ring road by the causeway, the mid terrace and the summit
+	for _, pl in IsleLayout.places() do
+		add(pl.id, pl.name, pl.cf)
 	end
 	return list
 end

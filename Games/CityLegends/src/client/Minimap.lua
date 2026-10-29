@@ -28,6 +28,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
+local IsleLayout = require(Shared:WaitForChild("IsleLayout"))
 local ActivityData = require(Shared:WaitForChild("ActivityData"))
 
 local Driving = require(script.Parent:WaitForChild("Driving"))
@@ -155,18 +156,23 @@ local function drawMap(map: Frame)
 		end
 		s += arc
 	end
-	-- the coastal highway west to Downtown, the causeway and the island bridges
+	-- the coastal highway west to Downtown and the causeway
 	line(map, Vector3.new(-E, 0, zH), Vector3.new(WestLayout.DowntownEast, 0, zH), C.HighwayWidth, COL.highway, 6)
 	line(map, Vector3.new(WestLayout.DowntownWest, 0, zH), Vector3.new(WestLayout.CausewayEnd, 0, zH), C.LaneWidth * C.LanesPerSide * 2 + 12, COL.road, 6)
-	for _, b in WestLayout.IslandBridges do
-		line(map, b.from, b.to, C.LaneWidth * C.LanesPerSide * 2 + 12, COL.road, 6)
+	-- Legends Isle: sand, lawn, the mountain (darker the higher), its ring roads and climbs
+	local I = W.Isle
+	local c = IsleLayout.Center
+	disc(map, c, I.r, COL.sand, 3)
+	disc(map, c, I.lawn, COL.island, 4)
+	disc(map, c, I.Foot, COL.island:Lerp(Color3.new(0, 0, 0), 0.25), 4)
+	disc(map, c, I.Mid.inner, COL.island:Lerp(Color3.new(0, 0, 0), 0.45), 4)
+	for _, ring in IsleLayout.Rings do
+		ringRoad(map, c, ring.radius + IsleLayout.Road / 2, IsleLayout.Road, COL.road, 6)
 	end
-	-- the islands: sand, lawn, ring road
-	for _, isl in W.Islands do
-		local c = Vector3.new(isl.x, 0, isl.z)
-		disc(map, c, isl.r, COL.sand, 3)
-		disc(map, c, isl.r - 24, COL.island, 4)
-		ringRoad(map, c, isl.ring + W.IslandRoad / 2, W.IslandRoad, COL.road, 6)
+	for _, rd in IsleLayout.Roads do
+		for k = 1, #rd.pts - 1 do
+			line(map, rd.pts[k], rd.pts[k + 1], IsleLayout.Road, COL.road, 6)
+		end
 	end
 	local _ = HW
 end

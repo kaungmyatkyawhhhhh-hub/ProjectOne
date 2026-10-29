@@ -110,11 +110,40 @@ for _, pl in places do
 end
 
 -- heights: the bridge deck and the viaduct are up, Downtown is on the ground
-local maxY = 0
+-- heights: off the island the bridge deck is the highest; on it the summit's ring
+local IsleLayout = load("IsleLayout")
+local isleX = load("Config").West.Isle.x + load("Config").West.Isle.r
+local maxY, isleMax = 0, 0
 for _, seg in graph.all do
-	maxY = math.max(maxY, seg.p0.Y, seg.p2.Y)
+	if seg.p0.X < isleX and seg.p2.X < isleX then
+		isleMax = math.max(isleMax, seg.p0.Y, seg.p2.Y)
+	else
+		maxY = math.max(maxY, seg.p0.Y, seg.p2.Y)
+	end
 end
-check(maxY > 39 and maxY < 41, `highest lane is the bridge deck ({maxY})`)
+check(maxY > 39 and maxY < 41, `highest lane off the island is the bridge deck ({maxY})`)
+check(math.abs(isleMax - load("Config").West.Isle.Top.y) < 1, `the island's highest lane is the summit ring ({isleMax})`)
+local grade = IsleLayout.maxGrade()
+check(grade <= 0.12, `the island's climbs are drivable (steepest {math.floor(grade * 1000) / 10}%)`)
+-- the gated community: private lanes, and traffic can always go on somewhere public
+local private, trapped = 0, 0
+for _, seg in graph.all do
+	if seg.private then
+		private += 1
+	elseif seg.kind ~= "turn" then
+		local public = false
+		for _, n in seg.next do
+			if not n.private then
+				public = true
+			end
+		end
+		if not public then
+			trapped += 1
+		end
+	end
+end
+check(private > 20, `the gated community's lanes are private ({private})`)
+check(trapped == 0, `public lanes always lead on somewhere public ({trapped})`)
 check(#WestLayout.housePlots() > 15, `house plots ({#WestLayout.housePlots()})`)
 print(`{#graph.all} segments, {#graph.lanes} lanes`)
 if fails > 0 then

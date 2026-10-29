@@ -9,6 +9,7 @@
 ]]
 
 local Config = require(script.Parent.Config)
+local IsleLayout = require(script.Parent.IsleLayout)
 
 local CityLayout = {}
 
@@ -199,6 +200,7 @@ export type Segment = {
 	turning: boolean, -- connector that changes direction
 	signal: boolean, -- a traffic light stands at its end (city lanes)
 	speedK: number, -- traffic's speed on it, times its normal speed (highway: faster)
+	private: boolean?, -- in the gated community (traffic keeps out)
 	turnSpeed: number?, -- mph for this connector (highway ramps), else the city's turn speed
 	next: { Segment },
 	samples: { number }, -- cumulative arc length per sample (for turns)
@@ -662,9 +664,46 @@ local function joinRing(all: { Segment }, join: RingJoin, spurIn: { { Segment } 
 	end
 end
 
+-- an island road (IsleLayout.Roads): straight legs between its corners, one lane each way, the
+-- legs level near each corner and joined by turns there. Returns the lanes along the corners' order
+-- and back, as oneWay does (one lane: { { first .. last } }).
+local function isleRoad(all: { Segment }, lanes: { Segment }, rd: IsleLayout.Road, code: number): ({ { Segment } }, { { Segment } })
+	local T = IsleLayout.Trim
+	local function build(pts: { Vector3 }, c: number): { Segment }
+		local chainAll: { Segment } = {}
+		local prevLast: Segment? = nil
+		for k = 1, #pts - 1 do
+			local a, b = pts[k], pts[k + 1]
+			local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+			local len = flat.Magnitude
+			local dir = flat.Unit
+			local t0 = if k > 1 then T else 0
+			local t1 = if k < #pts - 1 then T else 0
+			local y0, y1 = a.Y, b.Y
+			local out = oneWay(all, lanes, Vector3.new(a.X, 0, a.Z) + dir * t0, Vector3.new(b.X, 0, b.Z) - dir * t1, 1, function(d)
+				return IsleLayout.legY(y0, y1, len, d + t0)
+			end, c, 0.8)
+			local chainL = out[1]
+			if prevLast then
+				connector(all, prevLast, chainL[1], cornerOf(prevLast, chainL[1]), 18)
+			end
+			for _, sg in chainL do
+				table.insert(chainAll, sg)
+			end
+			prevLast = chainL[#chainL]
+		end
+		return chainAll
+	end
+	local back: { Vector3 } = {}
+	for k = #rd.pts, 1, -1 do
+		table.insert(back, rd.pts[k])
+	end
+	return { build(rd.pts, code) }, { build(back, code + 1) }
+end
+
 -- The west's lanes (owner, 2026-10-22): the coastal highway from the city's west edge to
 -- Downtown's east edge (two lanes each way, joining both grids' lights), the causeway from Ocean
--- Drive to Legends Key, the islands' ring roads and the bridges between them (two lanes each way)
+-- Drive to Legends Isle and the island's ring roads and climbs (IsleLayout)
 function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [string]: Segment })
 	local j = CityLayout.HighwayJ
 	local nL = C.LanesPerSide
@@ -690,19 +729,17 @@ function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [stri
 		el.i, el.j, el.dir, el.signal = 0, j, 1, true
 	end
 
-	-- the causeway, Ocean Drive -> Legends Key (and back)
-	local islands = WEST.Islands
-	local key = islands[1]
-	local road = WEST.IslandRoad
+	-- the causeway, Ocean Drive -> Legends Isle's ring road (and back)
+	local I = WEST.Isle
 	local beachEdge = Vector3.new(CityLayout.roadCoord(DT_BASE) - HALF_ROAD, 0, CityLayout.roadCoord(j))
-	local keyEnd = Vector3.new(key.x + key.ring + road / 2, 0, CityLayout.roadCoord(j))
-	local cLen = beachEdge.X - keyEnd.X
+	local isleEnd = Vector3.new(IsleLayout.CausewayEnd, 0, CityLayout.roadCoord(j))
+	local cLen = beachEdge.X - isleEnd.X
 	local seaA = beachEdge.X - WEST.BeachWest -- the beach, then the sea
-	local seaB = (key.x + key.r) - keyEnd.X -- the island's shore to the ring road
-	local cwW = oneWay(all, lanes, beachEdge, keyEnd, nL, function(d)
+	local seaB = (I.x + I.r) - isleEnd.X -- the island's shore to the ring road
+	local cwW = oneWay(all, lanes, beachEdge, isleEnd, nL, function(d)
 		return CityLayout.seaRoadY(d, cLen, seaA, seaB)
 	end, 21, 1.1)
-	local cwE = oneWay(all, lanes, keyEnd, beachEdge, nL, function(d)
+	local cwE = oneWay(all, lanes, isleEnd, beachEdge, nL, function(d)
 		return CityLayout.seaRoadY(d, cLen, seaB, seaA)
 	end, 22, 1.1, gap)
 	for l = 1, nL do
@@ -711,37 +748,38 @@ function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [stri
 		last.i, last.j, last.dir, last.signal = DT_BASE, j, 1, true
 	end
 
-	-- the islands' ring roads; Legends Key joins the causeway (east) and the two bridges
-	local keyC = Vector3.new(key.x, 0, key.z)
-	local keyJoins, keyGaps = { 0 }, { (HALF_ROAD + 12) / key.ring }
-	local bridgeIdx = {}
-	for k = 2, #islands do
-		local isl = islands[k]
-		table.insert(keyJoins, if isl.z < key.z then -math.pi / 2 else math.pi / 2)
-		-- (the bridges are as wide as the causeway: two lanes each way, owner 2026-10-29)
-		table.insert(keyGaps, (HALF_ROAD + 12) / key.ring)
-		bridgeIdx[k] = #keyJoins
+	-- Legends Isle (IsleLayout): its ring roads and the climbs between them. The gated community's
+	-- roads are private (traffic stays out; Gate checks who drives in).
+	local function markPrivate(from: number)
+		for k = from + 1, #all do
+			all[k].private = true
+		end
 	end
-	local keyRing = islandRing(all, lanes, keyC, key.ring, keyJoins, keyGaps)
-	joinRing(all, keyRing[1], cwW, cwE)
-	for k = 2, #islands do
-		local isl = islands[k]
-		local sgn = if isl.z < key.z then -1 else 1
-		local c = Vector3.new(isl.x, 0, isl.z)
-		local ring = islandRing(all, lanes, c, isl.ring, { -sgn * math.pi / 2 }, { (HALF_ROAD + 12) / isl.ring })
-		local a = keyC + Vector3.new(0, 0, sgn * (key.ring + road / 2))
-		local b = c - Vector3.new(0, 0, sgn * (isl.ring + road / 2))
-		local len = math.abs(b.Z - a.Z)
-		local landA = key.r - key.ring - road / 2
-		local landB = isl.r - isl.ring - road / 2
-		local out = oneWay(all, lanes, a, b, nL, function(d)
-			return CityLayout.seaRoadY(d, len, landA, landB)
-		end, 23, 0.9)
-		local back = oneWay(all, lanes, b, a, nL, function(d)
-			return CityLayout.seaRoadY(d, len, landB, landA)
-		end, 24, 0.9)
-		joinRing(all, keyRing[bridgeIdx[k]], back, out)
-		joinRing(all, ring[1], out, back)
+	local rings: { [string]: { RingJoin } } = {}
+	local joinIdx: { [string]: { [string]: number } } = {}
+	for id, ring in IsleLayout.Rings do
+		local js = IsleLayout.joins(id)
+		local angles, gaps = {}, {}
+		joinIdx[id] = {}
+		for k, jn in js do
+			angles[k], gaps[k] = jn.angle, jn.gap
+			joinIdx[id][jn.road] = k
+		end
+		local before = #all
+		rings[id] = islandRing(all, lanes, ring.center, ring.radius, angles, gaps)
+		if ring.private then
+			markPrivate(before)
+		end
+	end
+	joinRing(all, rings.isle[joinIdx.isle.causeway], cwW, cwE)
+	for k, rd in IsleLayout.Roads do
+		local before = #all
+		local fwd, back = isleRoad(all, lanes, rd, 40 + k * 2)
+		joinRing(all, rings[rd.from][joinIdx[rd.from][rd.id]], back, fwd)
+		joinRing(all, rings[rd.to][joinIdx[rd.to][rd.id]], fwd, back)
+		if rd.private then
+			markPrivate(before)
+		end
 	end
 end
 

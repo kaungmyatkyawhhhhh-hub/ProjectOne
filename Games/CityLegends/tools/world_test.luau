@@ -30,8 +30,19 @@ local workspace = game:GetService("Workspace")
 local terrain = Instance.new("Terrain")
 terrain.Parent = workspace
 local water: { { CFrame | Vector3 } } = {}
-roblox.implementMethod("Terrain", "FillBlock", function(_, cf, size)
-	table.insert(water, { cf, size })
+local terrainOps = 0
+roblox.implementMethod("Terrain", "FillBlock", function(_, cf, size, material)
+	terrainOps += 1
+	if material == roblox.Enum.Material.Water then
+		table.insert(water, { cf, size })
+	end
+end)
+-- (Legends Isle's mountain is terrain: Lune can't make it, the calls are just counted)
+roblox.implementMethod("Terrain", "FillCylinder", function()
+	terrainOps += 1
+end)
+roblox.implementMethod("Terrain", "FillBall", function()
+	terrainOps += 1
 end)
 local tags: { [string]: number } = {}
 roblox.implementMethod("CollectionService", "AddTag", function(_, _inst, tag)
@@ -408,6 +419,7 @@ for path, info in byName do
 end
 check(blocked == 0, `lanes clear of solid parts ({blocked} points blocked)`)
 check(#water >= 4, `water filled ({#water} blocks)`)
+check(terrainOps > 200, `Legends Isle's terrain built ({terrainOps} fills)`)
 print(`tags: LOD {tags.LOD or 0}, LODLight {tags.LODLight or 0}`)
 if fails > 0 then
 	print(`{fails} FAILED`)

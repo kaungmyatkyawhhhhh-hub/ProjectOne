@@ -587,14 +587,21 @@ Config.West = {
 		casino = { 100, 3, "N" }, -- across the boulevard from the hotel
 		gems = { 102, 3, "N" }, -- the gem showcase, up the boulevard
 	},
-	-- private islands offshore (centre x, z, radius); Legends Key is on the causeway, the other two
-	-- hang off it by bridges north and south
-	Islands = {
-		{ id = "key", name = "LEGENDS KEY", x = -9760, z = 0, r = 440, ring = 300 },
-		{ id = "palm", name = "PALM ISLE", x = -9760, z = -1500, r = 340, ring = 225 },
-		{ id = "coral", name = "CORAL CAY", x = -9760, z = 1500, r = 340, ring = 225 },
+	-- Legends Isle (owner, 2026-10-29: one big island with a mountain, in place of the three small
+	-- ones): the causeway lands on its east side. IsleLayout turns this into roads, lots and places.
+	Isle = {
+		x = -10700,
+		z = 0,
+		r = 1050, -- the shore (sand out to here)
+		lawn = 960, -- grass inside this
+		Ring = 900, -- the island ring road's middle
+		Road = 34, -- every island road: one lane each way
+		Foot = 760, -- the mountain starts here
+		Mid = { y = 100, inner = 460, outer = 620, ring = 475, lots = 14, lotWidth = 104, lotDepth = 110 },
+		Top = { y = 240, r = 280, ring = 150, lotWidth = 118, lotDepth = 106 },
+		Peak = { y = 312, r = 72 }, -- the rocky summit in the middle of the top
+		Low = { arc = 1.05, skip = 0.33, width = 60, depth = 60 }, -- street lots either side of the causeway
 	},
-	IslandRoad = 30, -- island ring roads' width
 }
 
 ---------------------------------------------------------------------

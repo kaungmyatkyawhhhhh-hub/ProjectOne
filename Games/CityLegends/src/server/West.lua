@@ -12,8 +12,8 @@
 	    a riverside park facing the bridge
 	  * Ocean Drive: pastel art deco hotels with neon along the beachfront, the promenade, the beach
 	    and the sea
-	  * the causeway to Legends Key, and the bridges on to Palm Isle and Coral Cay: island ring
-	    roads, beaches, palms, parks (the houses on the plots are built by Houses)
+	  * the causeway to Legends Isle (one big island with a mountain, built by Isle; the houses
+	    on its plots are built by Houses)
 	The hotel, casino and gem showcase sites are left as bare blocks here; their own modules build
 	them.
 ]]
@@ -25,6 +25,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
+local Isle = require(script.Parent:WaitForChild("Isle"))
 
 local West = {}
 
@@ -751,137 +752,20 @@ local function seaRoad(kit: any, parent: Instance, a: Vector3, b: Vector3, width
 	end
 end
 
--- a bridge from Legends Key's ring road to another island's: two lanes each way like the causeway
--- (owner, 2026-10-29; was one). Public so Studio can rebuild just the bridges on the baked map.
-function West.islandBridge(kit: any, parent: Instance, from: Vector3, to: Vector3, key: any, isl: any)
-	local road = W.IslandRoad
-	seaRoad(kit, parent, from, to, C.LaneWidth * C.LanesPerSide * 2 + 12, key.r - key.ring - road / 2, isl.r - isl.ring - road / 2, { -0.4, 0.4 })
-end
-
--- where an island's name sign stands: beside the road coming in (clear of the 2+2 lane deck)
-function West.islandSignCFrame(isl: any, ja: number): CFrame
-	local c = Vector3.new(isl.x, 0, isl.z)
-	local out = Vector3.new(math.cos(ja), 0, math.sin(ja))
-	local tangent = out:Cross(Vector3.yAxis)
-	local sp = c + out * (isl.ring + W.IslandRoad / 2 + 30) + tangent * (C.LaneWidth * C.LanesPerSide + 6 + 26)
-	return CFrame.lookAt(sp + Vector3.new(0, 4.5, 0), sp + Vector3.new(0, 4.5, 0) + tangent)
-end
-
-local function island(kit: any, root: Instance, isl: any, joins: { number })
-	local folder = kit.folder("Island_" .. isl.id, root)
-	local c = Vector3.new(isl.x, 0, isl.z)
-	local r = isl.r
-	-- the island: a sand disc, a lawn inside the beach strip (both just under the roads' tops, so
-	-- the ring road and the bridge ends show: the lawn's top was above them, 2026-10-29)
-	kit.mk(folder, Vector3.new(6, r * 2, r * 2), CFrame.new(c.X, -3.15, c.Z) * CFrame.Angles(0, 0, math.pi / 2), SAND, Enum.Material.Sand, { shape = Enum.PartType.Cylinder, name = "IslandSand" })
-	kit.mk(folder, Vector3.new(0.4, (r - 24) * 2, (r - 24) * 2), CFrame.new(c.X, -0.25, c.Z) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(70, 104, 54), Enum.Material.Grass, { shape = Enum.PartType.Cylinder, name = "IslandLawn", collide = false })
-	-- the ring road (straight pieces round the circle), a centre line and kerbs
-	local ring = isl.ring
-	local road = W.IslandRoad
-	local n = 64
-	for k = 0, n - 1 do
-		local a0, a1 = k / n * math.pi * 2, (k + 1) / n * math.pi * 2
-		local p0 = c + Vector3.new(math.cos(a0), 0, math.sin(a0)) * ring
-		local p1 = c + Vector3.new(math.cos(a1), 0, math.sin(a1)) * ring
-		local mid = (p0 + p1) / 2
-		local len = (p1 - p0).Magnitude + 1.2
-		local cf = CFrame.lookAt(mid, p1)
-		kit.mk(folder, Vector3.new(road, 0.5, len), cf * CFrame.new(0, 0.1 - 0.25, 0), kit.ASPHALT, kit.ROAD_MAT, { reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
-		if k % 2 == 0 then
-			kit.deco(folder, Vector3.new(0.35, 0.05, len * 0.6), cf * CFrame.new(0, 0.13, 0), kit.LINE_YELLOW, Enum.Material.SmoothPlastic)
-		end
-		for _, s in { -1, 1 } do
-			kit.mk(folder, Vector3.new(1, CURB, len), cf * CFrame.new(s * (road / 2 + 0.5), CURB / 2 + 0.1, 0), Color3.fromRGB(200, 198, 190), Enum.Material.Concrete, { name = "Kerb" })
-		end
-		-- lamps on the outer kerb
-		if k % 4 == 0 then
-			local out = Vector3.new(math.cos(a0), 0, math.sin(a0))
-			kit.streetLight(folder, p0 + out * (road / 2 + 2) + Vector3.new(0, 0.1, 0), -out)
-		end
-	end
-	-- palms round the beach strip, not where roads come in
-	local np = math.floor(2 * math.pi * (r - 12) / 34)
-	for k = 0, np - 1 do
-		local a = k / np * math.pi * 2
-		local clear = true
-		for _, j in joins do
-			local d = (a - j) % (2 * math.pi)
-			if math.min(d, 2 * math.pi - d) < 0.16 then
-				clear = false
-			end
-		end
-		if clear then
-			palm(kit, folder, c + Vector3.new(math.cos(a), 0, math.sin(a)) * (r - 12) + Vector3.new(0, 0, 0))
-		end
-	end
-	-- the middle: a lawn with a fountain plaza and palms (Legends Key: a helipad and the island sign)
-	local inner = ring - road / 2 - 12
-	kit.mk(folder, Vector3.new(1.4, 36, 36), CFrame.new(c.X, 0.7, c.Z) * CFrame.Angles(0, 0, math.pi / 2), STONE, Enum.Material.Marble, { shape = Enum.PartType.Cylinder })
-	local water = kit.deco(folder, Vector3.new(0.4, 31, 31), CFrame.new(c.X, 1.3, c.Z) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(60, 170, 255), Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.45 })
-	kit.addLight("PointLight", water, Color3.fromRGB(80, 170, 255), 26, 0.9)
-	kit.deco(folder, Vector3.new(12, 2.4, 2.4), CFrame.new(c.X, 7, c.Z) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(170, 220, 255), Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.3 })
-	for k = 1, 10 do
-		local a = k / 10 * math.pi * 2 + 0.3
-		palm(kit, folder, c + Vector3.new(math.cos(a), 0, math.sin(a)) * rng:NextNumber(40, inner - 20) + Vector3.new(0, 0.2, 0))
-	end
-	if isl.id == "key" then
-		local hp = c + Vector3.new(-inner * 0.55, 0, 0)
-		kit.mk(folder, Vector3.new(1, 50, 50), CFrame.new(hp + Vector3.new(0, 0.5, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(40, 42, 48), Enum.Material.Concrete, { shape = Enum.PartType.Cylinder, name = "Helipad" })
-		kit.deco(folder, Vector3.new(0.1, 40, 40), CFrame.new(hp + Vector3.new(0, 1.02, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(240, 240, 240), Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder, transparency = 0.6 })
-		local hLetter = kit.deco(folder, Vector3.new(16, 0.1, 22), CFrame.new(hp + Vector3.new(0, 1.06, 0)), Color3.fromRGB(240, 240, 240), Enum.Material.SmoothPlastic, { transparency = 1 })
-		local gui = Instance.new("SurfaceGui")
-		gui.Face = Enum.NormalId.Top
-		gui.CanvasSize = Vector2.new(160, 220)
-		gui.LightInfluence = 1
-		gui.Parent = hLetter
-		local t = Instance.new("TextLabel")
-		t.Size = UDim2.fromScale(1, 1)
-		t.BackgroundTransparency = 1
-		t.Text = "H"
-		t.TextScaled = true
-		t.Font = Enum.Font.GothamBlack
-		t.TextColor3 = Color3.fromRGB(240, 240, 240)
-		t.Parent = gui
-		for k = 0, 11 do
-			local a = k / 12 * math.pi * 2
-			local l = kit.deco(folder, Vector3.one * 1.2, CFrame.new(hp + Vector3.new(math.cos(a) * 25, 1.2, math.sin(a) * 25)), Color3.fromRGB(80, 255, 140), Enum.Material.Neon, { shape = Enum.PartType.Ball })
-			local _ = l
-		end
-	end
-	-- the island's name on a lit stone wall where its road comes in
-	local wall = kit.mk(folder, Vector3.new(44, 9, 3), West.islandSignCFrame(isl, joins[1]), STONE, Enum.Material.Limestone, { name = "IslandSign" })
-	kit.surfaceText(wall, Enum.NormalId.Front, isl.name, Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 170))
-	kit.surfaceText(wall, Enum.NormalId.Back, isl.name, Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 170))
-	local lightPart = kit.deco(folder, Vector3.new(0.5, 0.5, 0.5), wall.CFrame * CFrame.new(0, -5, -3), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
-	kit.addLight("SpotLight", lightPart, WARM, 24, 2, Enum.NormalId.Top, 80)
-end
-
+-- the causeway from Ocean Drive to Legends Isle, and the island itself (Isle)
 local function islands(kit: any, root: Instance)
 	local folder = kit.folder("Islands", root)
-	local key = W.Islands[1]
-	local road = W.IslandRoad
+	local I = W.Isle
 	local j = CityLayout.HighwayJ
 	local z0 = CityLayout.roadCoord(j)
-	-- the causeway from Ocean Drive to Legends Key's ring road
 	local a = Vector3.new(DT_WEST, 0, z0)
 	local b = Vector3.new(WestLayout.CausewayEnd, 0, z0)
 	local seaA = DT_WEST - W.BeachWest
-	local seaB = (key.x + key.r) - WestLayout.CausewayEnd
+	local seaB = (I.x + I.r) - WestLayout.CausewayEnd
 	local cw = kit.folder("Causeway", folder)
 	local lanes = C.LaneWidth * C.LanesPerSide
 	seaRoad(kit, cw, a, b, lanes * 2 + 12, seaA, seaB, { -0.4, 0.4 })
-	local joinsKey = { 0 }
-	for k = 2, #W.Islands do
-		local isl = W.Islands[k]
-		local sgn = if isl.z < key.z then -1 else 1
-		table.insert(joinsKey, sgn * math.pi / 2)
-		local from = Vector3.new(key.x, 0, key.z + sgn * (key.ring + road / 2))
-		local to = Vector3.new(isl.x, 0, isl.z - sgn * (isl.ring + road / 2))
-		local bf = kit.folder("IslandBridge_" .. isl.id, folder)
-		West.islandBridge(kit, bf, from, to, key, isl)
-		island(kit, folder, isl, { -sgn * math.pi / 2 })
-	end
-	island(kit, folder, key, joinsKey)
+	Isle.build(kit, folder, palm)
 end
 
 ---------------------------------------------------------------------

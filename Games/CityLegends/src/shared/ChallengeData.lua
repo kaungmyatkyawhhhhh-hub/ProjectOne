@@ -74,8 +74,11 @@ do
 	add("beach_north", Vector3.new(sand, 0.2, -760), Vector3.zAxis)
 	add("beach_south", Vector3.new(sand, 0.2, 940), -Vector3.zAxis)
 	add("riverside", Vector3.new((W.River[2] + CityLayout.roadCoord(W.IndexBase + C.Blocks) + HALF_ROAD) / 2, 0.4, -620), Vector3.zAxis)
-	local key = W.Islands[1]
-	add("legends_key", Vector3.new(key.x + 90, 0.05, key.z - 190), Vector3.zAxis)
+	-- Legends Isle: on the lawn inside the ring road, north of the causeway's landing
+	local isle = W.Isle
+	-- (on the low ground north of the low tier's houses, jumping round the island)
+	local ia = -1.3
+	add("legends_isle", Vector3.new(isle.x + math.cos(ia) * 835, 0.05, isle.z + math.sin(ia) * 835), Vector3.new(-math.sin(ia), 0, math.cos(ia)))
 end
 
 -- the leaderboard board: on the sidewalk corner by the city's middle junction
