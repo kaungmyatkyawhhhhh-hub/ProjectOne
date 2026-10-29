@@ -137,6 +137,29 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This **replaces*
     - the summit helipad (helicopter tour);
     - a private lookout;
     - their name on the gate's resident board.
+12. **House income:** a small "rental" income while you're in the game (like the hotel suites), more for bigger houses, paid into a house safe you collect at home.
+13. **House value goes up:** each house slowly gains value the longer you own it (up to +20%), so selling later pays a little more. Upgrades add to the value.
+14. **Car lift and turntable** in High tier garages: one car on a spinning display, the rest on lifts. Press E to drive any out.
+15. **Driveway car show:** park up to 2 cars in your driveway to show off. Others see them when driving past.
+16. **Weekly open-house event:** for one hour each week, all houses can be visited, and players vote for the best house. The winner gets a trophy at their house plus cash.
+17. **Neighbour quests from the agent:**
+    - "Tour 3 Mid houses";
+    - "Drive to the summit lookout";
+    - "Buy your first house".
+    Small rewards that guide new players to the houses.
+18. **Starter goal for new players:** the $150K cottage is the first big money goal, shown on the HUD ("Save for your first home: $43K / $150K").
+19. **Moving truck:** when you place or move a house, a moving truck drives up to the lot and the house builds piece by piece (short, skippable).
+20. **Night look:** each house has warm interior lights, garden lights and lit pools at night. High tier mansions glow on the mountain top, seen from Downtown.
+21. **Weather on the island:** fog rolls over the summit in the early morning, and rain makes the driveways shiny.
+22. **Pets** (cosmetic): a dog or cat that wanders your garden and greets you at the door.
+23. **Photo spot:** a "Take house photo" button that sets up a nice camera angle of your house with your best car in front. Players share these, which brings new players.
+24. **Mountain life:** deer near the forest roads, birds, a lookout bench, a hiking path to the top for on-foot players, and a picnic spot.
+25. **Real estate badges:**
+    - First Home;
+    - Mid-Life (first Mid house);
+    - Summit Club (first High house);
+    - Tycoon (own all 3 tiers).
+26. **Helicopter to the summit:** High owners can call the helicopter from the showroom roof to fly to their mansion (a short cutscene, skippable).
 
 ## 6. Check before you say done
 - 2-player test in Studio:
