@@ -159,7 +159,7 @@ local function drawMap(map: Frame)
 	line(map, Vector3.new(-E, 0, zH), Vector3.new(WestLayout.DowntownEast, 0, zH), C.HighwayWidth, COL.highway, 6)
 	line(map, Vector3.new(WestLayout.DowntownWest, 0, zH), Vector3.new(WestLayout.CausewayEnd, 0, zH), C.LaneWidth * C.LanesPerSide * 2 + 12, COL.road, 6)
 	for _, b in WestLayout.IslandBridges do
-		line(map, b.from, b.to, C.LaneWidth * 2 + 12, COL.road, 6)
+		line(map, b.from, b.to, C.LaneWidth * C.LanesPerSide * 2 + 12, COL.road, 6)
 	end
 	-- the islands: sand, lawn, ring road
 	for _, isl in W.Islands do

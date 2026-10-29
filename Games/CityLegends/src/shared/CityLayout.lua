@@ -654,11 +654,17 @@ local function joinRing(all: { Segment }, join: RingJoin, spurIn: { { Segment } 
 	local outR, outL = spurOut[#spurOut][1], spurOut[1][1]
 	connector(all, join.cwIn, outR, cornerOf(join.cwIn, outR), 18).speedK = 1
 	connector(all, join.ccwIn, outL, cornerOf(join.ccwIn, outL), 18).speedK = 1
+	-- (and from the ring into the other lane too: lanes never change elsewhere, so with every spur
+	-- two lanes wide the network would split in two, the inside lanes' and the outside lanes')
+	if outL ~= outR then
+		connector(all, join.cwIn, outL, cornerOf(join.cwIn, outL), 18).speedK = 1
+		connector(all, join.ccwIn, outR, cornerOf(join.ccwIn, outR), 18).speedK = 1
+	end
 end
 
 -- The west's lanes (owner, 2026-10-22): the coastal highway from the city's west edge to
 -- Downtown's east edge (two lanes each way, joining both grids' lights), the causeway from Ocean
--- Drive to Legends Key, the islands' ring roads and the bridges between them
+-- Drive to Legends Key, the islands' ring roads and the bridges between them (two lanes each way)
 function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [string]: Segment })
 	local j = CityLayout.HighwayJ
 	local nL = C.LanesPerSide
@@ -712,7 +718,8 @@ function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [stri
 	for k = 2, #islands do
 		local isl = islands[k]
 		table.insert(keyJoins, if isl.z < key.z then -math.pi / 2 else math.pi / 2)
-		table.insert(keyGaps, (C.LaneWidth + 14) / key.ring)
+		-- (the bridges are as wide as the causeway: two lanes each way, owner 2026-10-29)
+		table.insert(keyGaps, (HALF_ROAD + 12) / key.ring)
 		bridgeIdx[k] = #keyJoins
 	end
 	local keyRing = islandRing(all, lanes, keyC, key.ring, keyJoins, keyGaps)
@@ -721,16 +728,16 @@ function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [stri
 		local isl = islands[k]
 		local sgn = if isl.z < key.z then -1 else 1
 		local c = Vector3.new(isl.x, 0, isl.z)
-		local ring = islandRing(all, lanes, c, isl.ring, { -sgn * math.pi / 2 }, { (C.LaneWidth + 14) / isl.ring })
+		local ring = islandRing(all, lanes, c, isl.ring, { -sgn * math.pi / 2 }, { (HALF_ROAD + 12) / isl.ring })
 		local a = keyC + Vector3.new(0, 0, sgn * (key.ring + road / 2))
 		local b = c - Vector3.new(0, 0, sgn * (isl.ring + road / 2))
 		local len = math.abs(b.Z - a.Z)
 		local landA = key.r - key.ring - road / 2
 		local landB = isl.r - isl.ring - road / 2
-		local out = oneWay(all, lanes, a, b, 1, function(d)
+		local out = oneWay(all, lanes, a, b, nL, function(d)
 			return CityLayout.seaRoadY(d, len, landA, landB)
 		end, 23, 0.9)
-		local back = oneWay(all, lanes, b, a, 1, function(d)
+		local back = oneWay(all, lanes, b, a, nL, function(d)
 			return CityLayout.seaRoadY(d, len, landB, landA)
 		end, 24, 0.9)
 		joinRing(all, keyRing[bridgeIdx[k]], back, out)

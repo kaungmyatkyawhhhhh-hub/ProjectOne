@@ -14,7 +14,8 @@
 	    shake and blur
 	  * update the HUD + the live gauge cluster on the dashboard
 	Car controls (keyboard): F start / stop the engine, Q / E shift down / up (the
-	gearbox turns manual on the first shift, or from Settings), Left Shift clutch, P handbrake,
+	gearbox turns manual on the first shift, or from Settings), M automatic / sequential,
+	Left Shift clutch, P handbrake,
 	T traction control, L lights, Z / X / C left blinker / hazards / right blinker, V camera,
 	(nitro is in but switched off: Config.DrivingFeel.NitroEnabled).
 	Touch and gamepad players start with the engine running and an automatic gearbox.
@@ -48,7 +49,7 @@ Driving.inputEnabled = true
 Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings; Q / E switch to manual too)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
-Driving.onGearboxChanged = nil :: ((string) -> ())?
+Driving.onGearboxChanged = nil :: ((string) -> ())? -- Q / E or M changed the gearbox
 local GEARS = 7
 
 type Corner = { motor: Motor6D, knuckle: Motor6D?, at: Vector3, rest: number, front: boolean, left: boolean, gap: number, travel: number, hit: Vector3? }
@@ -984,7 +985,7 @@ local function setCarPower(s: State, on: boolean)
 	remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn })
 end
 
--- F / Q / E / P / T / L / Z / X / C
+-- F / Q / E / M / P / T / L / Z / X / C
 local function carKey(s: State, key: Enum.KeyCode)
 	if key == Enum.KeyCode.F then
 		if s.engineOn then
@@ -1025,6 +1026,18 @@ local function carKey(s: State, key: Enum.KeyCode)
 		if s.mgear ~= before and s.mgear > 0 and not s.clutch then
 			s.shiftT = 0.1 -- a quick shift: the drive drops for a moment, then kicks back in
 			s.nextGear = s.mgear
+		end
+	elseif key == Enum.KeyCode.M then
+		-- automatic <-> sequential (owner, 2026-10-29)
+		if s.electric then
+			UI.toast("Electric: one gear, just drive")
+		else
+			local mode = if s.manual then "Auto" else "Manual"
+			Driving.setGearbox(mode)
+			if Driving.onGearboxChanged then
+				Driving.onGearboxChanged(mode)
+			end
+			UI.toast(if mode == "Manual" then "Sequential: Q / E to shift" else "Automatic")
 		end
 	elseif key == Enum.KeyCode.P then
 		s.parkBrake = not s.parkBrake

@@ -3,6 +3,8 @@
 	Y (or the action button) gets you out of your car when it's nearly stopped, and back in when
 	you walk up to it. On foot you are your own Roblox avatar with the normal walking camera; the
 	car stays parked where you left it.
+	Beside another player's car, Y rides along in its free seat nearest you (the server picks it);
+	Y again (or jump) gets out.
 ]]
 
 local Players = game:GetService("Players")
@@ -36,6 +38,32 @@ local function myCar(): Model?
 	local cars = workspace:FindFirstChild("PlayerCars")
 	local car = if cars then cars:FindFirstChild(player.Name) else nil
 	return if car and car:IsA("Model") then car else nil
+end
+
+-- the passenger seat you're in, if any
+local function rideSeat(): BasePart?
+	local character = player.Character
+	local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
+	local seat = if humanoid then humanoid.SeatPart else nil
+	return if seat and seat.Name:match("^RideSeat") then seat else nil
+end
+
+-- another player's car within reach (the nearest)
+local function rideCar(root: BasePart): Model?
+	local cars = workspace:FindFirstChild("PlayerCars")
+	if not cars then
+		return nil
+	end
+	local best, bestD = nil, Config.Passengers.Range + 2
+	for _, car in cars:GetChildren() do
+		if car:IsA("Model") and car.Name ~= player.Name then
+			local d = (car:GetPivot().Position - root.Position).Magnitude
+			if d < bestD then
+				best, bestD = car, d
+			end
+		end
+	end
+	return best
 end
 
 local function hrp(): BasePart?
@@ -105,13 +133,40 @@ function OnFoot.reset()
 	UI.setOnFoot(false)
 end
 
+-- Y beside another player's car: ride along; Y in their car: get out
+function OnFoot.ride()
+	if busy then
+		return
+	end
+	local root = hrp()
+	local car = if rideSeat() then nil elseif root then rideCar(root) else nil
+	if not (rideSeat() or car) then
+		return
+	end
+	busy = true
+	local ok, result = pcall(function()
+		return (remotes:WaitForChild("RideCar") :: RemoteFunction):InvokeServer(car)
+	end)
+	busy = false
+	if car and not (ok and result) then
+		UI.toast("No free seat here", Config.Theme.Warning)
+	end
+end
+
 function OnFoot.toggle()
-	if Driving.isDriving() and driveActionFn then
+	if OnFoot.active and rideSeat() then
+		OnFoot.ride()
+	elseif Driving.isDriving() and driveActionFn then
 		driveActionFn()
 	elseif Driving.isDriving() then
 		OnFoot.getOut()
 	elseif OnFoot.active then
-		OnFoot.getIn()
+		local car, root = myCar(), hrp()
+		if car and root and (car:GetPivot().Position - root.Position).Magnitude <= ENTER_RANGE then
+			OnFoot.getIn()
+		else
+			OnFoot.ride()
+		end
 	end
 end
 
@@ -144,8 +199,12 @@ function OnFoot.init()
 			end
 		elseif OnFoot.active then
 			local car, root = myCar(), hrp()
-			if car and root and (car:GetPivot().Position - root.Position).Magnitude <= ENTER_RANGE then
+			if rideSeat() then
+				UI.setAction("GET OUT", "Y")
+			elseif car and root and (car:GetPivot().Position - root.Position).Magnitude <= ENTER_RANGE then
 				UI.setAction("GET IN", "Y")
+			elseif root and rideCar(root) then
+				UI.setAction("RIDE", "Y")
 			else
 				UI.setAction(nil)
 			end

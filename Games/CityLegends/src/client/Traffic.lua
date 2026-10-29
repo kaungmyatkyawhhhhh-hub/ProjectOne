@@ -42,6 +42,8 @@ export type Npc = {
 	stuck: number,
 	ghost: number,
 	braking: boolean,
+	wanderPhase: number, -- the speed drift (Config.Traffic.Wander)
+	wanderRate: number,
 	tails: { BasePart },
 	wheels: { Motor6D },
 	spin: number,
@@ -203,6 +205,8 @@ local function spawnNpc(center: Vector3?): Npc?
 		stuck = 0,
 		ghost = 0,
 		braking = false,
+		wanderPhase = rng:NextNumber(0, math.pi * 2),
+		wanderRate = math.pi * 2 / rng:NextNumber(T.WanderPeriod[1], T.WanderPeriod[2]),
 		tails = tails,
 		wheels = wheels,
 		spin = 0,
@@ -378,8 +382,9 @@ function Traffic.update(dt: number)
 
 	for _idx, npc in Traffic.cars do
 		local seg = npc.seg
-		-- (the highway is driven faster)
-		local target = npc.maxSpeed * seg.speedK
+		-- (the highway is driven faster, the inside lane too; each car drifts a little)
+		local laneK = if seg.kind == "turn" then 1 else T.LaneSpeedK[math.clamp(seg.lane or 1, 1, #T.LaneSpeedK)]
+		local target = npc.maxSpeed * seg.speedK * laneK * (1 + T.Wander * math.sin(now * npc.wanderRate + npc.wanderPhase))
 		local remaining = seg.length - npc.s
 
 		if seg.kind == "turn" then

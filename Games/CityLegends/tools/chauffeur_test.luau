@@ -6,7 +6,21 @@ local roblox = require("@lune/roblox")
 local process = require("@lune/process")
 
 local root = process.args[1]
-local env = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, CFrame = roblox.CFrame, Enum = roblox.Enum }
+-- Lune's CFrame.lookAt flips some directions (facing -Z comes out facing +Z); Roblox's is right.
+-- The modules get a correct one here (as in world_test), so the places face the way they do in game.
+local CFrameFixed = setmetatable({
+	lookAt = function(at, target, up)
+		local look = (target - at).Unit
+		local upV = up or roblox.Vector3.new(0, 1, 0)
+		if math.abs(look:Dot(upV)) > 0.9999 then
+			upV = roblox.Vector3.new(0, 0, 1)
+		end
+		local right = look:Cross(upV).Unit
+		local realUp = right:Cross(look)
+		return roblox.CFrame.fromMatrix(at, right, realUp, -look)
+	end,
+}, { __index = roblox.CFrame })
+local env = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, CFrame = CFrameFixed, Enum = roblox.Enum }
 local loaded = {}
 local function load(name: string): any
 	if loaded[name] then

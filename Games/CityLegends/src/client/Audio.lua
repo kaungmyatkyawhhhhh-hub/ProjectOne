@@ -53,6 +53,7 @@ local function pickCustom(key: string): string?
 	return nil
 end
 Audio.pickCustom = pickCustom
+Audio.musicKeyBlocked = nil :: (() -> boolean)?
 
 local function newSound(id: string, parent: Instance, volume: number, looped: boolean?): Sound
 	local s = Instance.new("Sound")
@@ -172,7 +173,8 @@ function Audio.startMusic()
 	end)
 	m:Play()
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if not processed and input.KeyCode == Enum.KeyCode.M then
+		-- in a car M switches the gearbox instead (Audio.musicKeyBlocked, set by Main)
+		if not processed and input.KeyCode == Enum.KeyCode.M and not (Audio.musicKeyBlocked and Audio.musicKeyBlocked()) then
 			Audio.toggleMusic()
 		end
 	end)

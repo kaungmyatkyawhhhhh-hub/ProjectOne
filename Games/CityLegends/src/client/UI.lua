@@ -864,7 +864,7 @@ local function buildCashTab()
 		{ "Y", "Get out / get in" },
 		{ "G", "My cars" },
 		{ "K", "Car stock market" },
-		{ "M", "Music on / off" },
+		{ "M", "Automatic / sequential (in a car) · music on foot" },
 	}
 	local panel = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -1049,7 +1049,7 @@ local function buildSideButtons()
 			UI.onUnitsChanged(units)
 		end
 	end)
-	gearboxToggle = settingRow("Gearbox", "Q/E", 184)
+	gearboxToggle = settingRow("Gearbox", "M", 184)
 	gearboxToggle.Text = "AUTO"
 	gearboxToggle.Activated:Connect(function()
 		local mode = if gearboxToggle.Text == "AUTO" then "Manual" else "Auto"

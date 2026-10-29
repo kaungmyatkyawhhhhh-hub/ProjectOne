@@ -751,13 +751,30 @@ local function seaRoad(kit: any, parent: Instance, a: Vector3, b: Vector3, width
 	end
 end
 
+-- a bridge from Legends Key's ring road to another island's: two lanes each way like the causeway
+-- (owner, 2026-10-29; was one). Public so Studio can rebuild just the bridges on the baked map.
+function West.islandBridge(kit: any, parent: Instance, from: Vector3, to: Vector3, key: any, isl: any)
+	local road = W.IslandRoad
+	seaRoad(kit, parent, from, to, C.LaneWidth * C.LanesPerSide * 2 + 12, key.r - key.ring - road / 2, isl.r - isl.ring - road / 2, { -0.4, 0.4 })
+end
+
+-- where an island's name sign stands: beside the road coming in (clear of the 2+2 lane deck)
+function West.islandSignCFrame(isl: any, ja: number): CFrame
+	local c = Vector3.new(isl.x, 0, isl.z)
+	local out = Vector3.new(math.cos(ja), 0, math.sin(ja))
+	local tangent = out:Cross(Vector3.yAxis)
+	local sp = c + out * (isl.ring + W.IslandRoad / 2 + 30) + tangent * (C.LaneWidth * C.LanesPerSide + 6 + 26)
+	return CFrame.lookAt(sp + Vector3.new(0, 4.5, 0), sp + Vector3.new(0, 4.5, 0) + tangent)
+end
+
 local function island(kit: any, root: Instance, isl: any, joins: { number })
 	local folder = kit.folder("Island_" .. isl.id, root)
 	local c = Vector3.new(isl.x, 0, isl.z)
 	local r = isl.r
-	-- the island: a sand disc, a lawn inside the beach strip
-	kit.mk(folder, Vector3.new(6, r * 2, r * 2), CFrame.new(c.X, -3, c.Z) * CFrame.Angles(0, 0, math.pi / 2), SAND, Enum.Material.Sand, { shape = Enum.PartType.Cylinder, name = "IslandSand" })
-	kit.mk(folder, Vector3.new(0.4, (r - 24) * 2, (r - 24) * 2), CFrame.new(c.X, 0.05, c.Z) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(70, 104, 54), Enum.Material.Grass, { shape = Enum.PartType.Cylinder, name = "IslandLawn", collide = false })
+	-- the island: a sand disc, a lawn inside the beach strip (both just under the roads' tops, so
+	-- the ring road and the bridge ends show: the lawn's top was above them, 2026-10-29)
+	kit.mk(folder, Vector3.new(6, r * 2, r * 2), CFrame.new(c.X, -3.15, c.Z) * CFrame.Angles(0, 0, math.pi / 2), SAND, Enum.Material.Sand, { shape = Enum.PartType.Cylinder, name = "IslandSand" })
+	kit.mk(folder, Vector3.new(0.4, (r - 24) * 2, (r - 24) * 2), CFrame.new(c.X, -0.25, c.Z) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(70, 104, 54), Enum.Material.Grass, { shape = Enum.PartType.Cylinder, name = "IslandLawn", collide = false })
 	-- the ring road (straight pieces round the circle), a centre line and kerbs
 	local ring = isl.ring
 	local road = W.IslandRoad
@@ -832,11 +849,7 @@ local function island(kit: any, root: Instance, isl: any, joins: { number })
 		end
 	end
 	-- the island's name on a lit stone wall where its road comes in
-	local ja = joins[1]
-	local out = Vector3.new(math.cos(ja), 0, math.sin(ja))
-	local tangent = out:Cross(Vector3.yAxis)
-	local sp = c + out * (ring + road / 2 + 30) + tangent * 34
-	local wall = kit.mk(folder, Vector3.new(44, 9, 3), CFrame.lookAt(sp + Vector3.new(0, 4.5, 0), sp + Vector3.new(0, 4.5, 0) + tangent), STONE, Enum.Material.Limestone, { name = "IslandSign" })
+	local wall = kit.mk(folder, Vector3.new(44, 9, 3), West.islandSignCFrame(isl, joins[1]), STONE, Enum.Material.Limestone, { name = "IslandSign" })
 	kit.surfaceText(wall, Enum.NormalId.Front, isl.name, Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 170))
 	kit.surfaceText(wall, Enum.NormalId.Back, isl.name, Color3.fromRGB(255, 214, 140), nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 170))
 	local lightPart = kit.deco(folder, Vector3.new(0.5, 0.5, 0.5), wall.CFrame * CFrame.new(0, -5, -3), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
@@ -865,7 +878,7 @@ local function islands(kit: any, root: Instance)
 		local from = Vector3.new(key.x, 0, key.z + sgn * (key.ring + road / 2))
 		local to = Vector3.new(isl.x, 0, isl.z - sgn * (isl.ring + road / 2))
 		local bf = kit.folder("IslandBridge_" .. isl.id, folder)
-		seaRoad(kit, bf, from, to, C.LaneWidth * 2 + 12, key.r - key.ring - road / 2, isl.r - isl.ring - road / 2, { 0 })
+		West.islandBridge(kit, bf, from, to, key, isl)
 		island(kit, folder, isl, { -sgn * math.pi / 2 })
 	end
 	island(kit, folder, key, joinsKey)

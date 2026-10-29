@@ -78,6 +78,8 @@ type Ride = {
 	leaveS: number,
 	leaveT: number,
 	marker: BillboardGui?,
+	split: number?, -- studs off the lane's centre while lane splitting (+ right)
+	splitTo: number?,
 }
 local ride: Ride? = nil
 
@@ -859,11 +861,13 @@ local function targetSpeed(r: Ride, k: number, pos: Vector3, fwd: Vector3): numb
 	if flatFwd.Magnitude > 0.01 then
 		flatFwd = flatFwd.Unit
 		local flatPos = Vector3.new(pos.X, 0, pos.Z)
+		local myHalfW = ((r.car and r.car:GetAttribute("Width") :: number?) or 6) / 2
 		for _, npc in Traffic.near(pos + flatFwd * 24, 30) do
 			local rel = npc.pos - flatPos
 			local along = rel:Dot(flatFwd)
 			local side = (rel - flatFwd * along).Magnitude
-			if along > 0 and side < Config.City.LaneWidth * 0.45 then
+			-- (only what's on the car's own line: lane splitting passes cars a half lane over)
+			if along > 0 and side < myHalfW + npc.width / 2 + 0.8 then
 				local gap = along - npc.halfLen - 9
 				vt = math.min(vt, math.max(0, math.min(npc.speed + gap * 0.5, math.sqrt(2 * B * math.max(0, gap)))))
 			end
@@ -898,12 +902,89 @@ local function placeCar(r: Ride, pos: Vector3, fwd: Vector3)
 	end
 end
 
+-- Lane splitting (owner, 2026-10-29: "make the chauffeur split lanes instead of going through npc
+-- cars"): stuck behind slower traffic, the driver eases onto the line between two lanes (the left
+-- one first, the centre line from the inside lane) and passes; back into the lane once it's clear
+local SPLIT_RATE = 7 -- studs a second sideways
+
+-- the nearest traffic car on the line `off` studs right of the lane, between `from` and `to` along
+local function carOnLine(pos: Vector3, fwd: Vector3, right: Vector3, off: number, from: number, to: number, halfW: number): Traffic.Npc?
+	local flatPos = Vector3.new(pos.X, 0, pos.Z)
+	local best, bestA = nil, math.huge
+	for _, npc in Traffic.near(flatPos + fwd * ((from + to) / 2), (to - from) / 2 + 16) do
+		local rel = npc.pos - flatPos
+		local along = rel:Dot(fwd)
+		local lat = rel:Dot(right) - off
+		if along > from and along < to and math.abs(lat) < halfW + npc.width / 2 + 0.8 and along < bestA then
+			best, bestA = npc, along
+		end
+	end
+	return best
+end
+
+-- where across the lane the driver wants to be (0 = its centre)
+local function splitTarget(r: Ride, k: number, pos: Vector3, dir: Vector3): number
+	local route = r.route :: ChauffeurRoute.Route
+	local seg = route.legs[k].seg
+	if seg.kind == "turn" or r.stopAt then
+		return 0
+	end
+	local fwd = Vector3.new(dir.X, 0, dir.Z)
+	if fwd.Magnitude < 0.01 then
+		return 0
+	end
+	fwd = fwd.Unit
+	local right = fwd:Cross(Vector3.yAxis)
+	local car = r.car
+	local halfW = ((car and car:GetAttribute("Width") :: number?) or 6) / 2
+	local halfL = ((car and car:GetAttribute("Length") :: number?) or 14) / 2
+	local cur = r.splitTo or 0
+	if cur ~= 0 then
+		-- someone still beside us in the lane: stay on the line (braking if it's blocked too)
+		if carOnLine(pos, fwd, right, 0, -(halfL + 6), halfL + 8, halfW) then
+			return cur
+		end
+		-- passed: back in, unless another slow car is just ahead and the line stays clear
+		local ahead = carOnLine(pos, fwd, right, 0, 0, 45, halfW)
+		if ahead and ahead.speed < r.v - 2 and not carOnLine(pos, fwd, right, cur, -6, 50, halfW) then
+			return cur
+		end
+		return 0
+	end
+	local blocker = carOnLine(pos, fwd, right, 0, 0, 60, halfW)
+	if not (blocker and blocker.speed < ChauffeurRoute.speedOf(seg) - 4) then
+		return 0
+	end
+	local half = Config.City.LaneWidth / 2
+	local hasRight = false
+	local beside: { CityLayout.Segment } = ChauffeurRoute.graph().lanesBeside[seg] or {}
+	for _, other in beside do
+		if other.lane == seg.lane + 1 then
+			hasRight = true
+		end
+	end
+	local sides = if seg.lane > 1 then { -half, half } else { half, -half }
+	for _, off in sides do
+		if (off < 0 or hasRight) and not carOnLine(pos, fwd, right, off, -12, 60, halfW) then
+			return off
+		end
+	end
+	return 0
+end
+
 local function driveStep(r: Ride, dt: number)
 	if not r.route then
 		return
 	end
 	local route = r.route :: ChauffeurRoute.Route
 	local pos, dir, k = routePose(r, r.d)
+	r.splitTo = splitTarget(r, k, pos, dir)
+	local split = r.split or 0
+	split += math.clamp((r.splitTo or 0) - split, -SPLIT_RATE * dt, SPLIT_RATE * dt)
+	r.split = split
+	local right = Vector3.new(dir.X, 0, dir.Z):Cross(Vector3.yAxis)
+	right = if right.Magnitude > 0.01 then right.Unit else Vector3.zero
+	pos += right * split
 	local vt = targetSpeed(r, k, pos, dir)
 	if r.v < vt then
 		r.v = math.min(vt, r.v + CH.Accel * dt)
@@ -912,6 +993,8 @@ local function driveStep(r: Ride, dt: number)
 	end
 	r.d = math.min(r.d + r.v * dt, r.stopAt or route.length)
 	pos, dir = routePose(r, r.d)
+	right = Vector3.new(dir.X, 0, dir.Z):Cross(Vector3.yAxis)
+	pos += (if right.Magnitude > 0.01 then right.Unit else Vector3.zero) * split
 	r.fwd = r.fwd:Lerp(dir, 1 - math.exp(-9 * dt))
 	if r.fwd.Magnitude < 0.01 then
 		r.fwd = dir

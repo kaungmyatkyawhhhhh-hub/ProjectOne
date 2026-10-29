@@ -119,8 +119,14 @@ Config.Lights.Cycle = (Config.Lights.Green + Config.Lights.Yellow + Config.Light
 ---------------------------------------------------------------------
 Config.Traffic = {
 	CarCount = 55,
-	MinSpeedMph = 28,
-	MaxSpeedMph = 48,
+	-- every car has its own pace, the inside lane runs faster than the outside ones, and each car's
+	-- speed drifts up and down a little, so cars never sit side by side for long and there are gaps
+	-- to split (owner, 2026-10-29; was 28-48 mph, all lanes alike)
+	MinSpeedMph = 24,
+	MaxSpeedMph = 54,
+	LaneSpeedK = { 1.12, 0.95, 0.85 }, -- lane 1 (inside) .. 3 (outside)
+	Wander = 0.14, -- each car's speed drifts this share up and down
+	WanderPeriod = { 14, 34 }, -- seconds per drift, per car
 	TurnSpeedMph = 22,
 	Accel = 28, -- studs/s^2
 	Brake = 70,
@@ -863,6 +869,23 @@ Config.Customs = {
 		white = { 255, 250, 240 },
 		warm = { 255, 212, 150 },
 		ice = { 196, 222, 255 },
+	},
+}
+
+-- riding along in another player's car (owner, 2026-10-29): Y beside it takes the free seat
+-- nearest you. Every car has a front passenger seat; sedans, SUVs and coupes have two rear seats
+-- too, except the two-seat coupes below (supercars and hypercars are all two-seaters)
+Config.Passengers = {
+	Range = 14, -- studs from your feet to the seat
+	RearClasses = { Sedan = true, SUV = true, Coupe = true },
+	TwoSeaters = {
+		nisun_350z = true,
+		mazdo_rx7 = true,
+		porsha_boxster = true,
+		chevo_c6 = true,
+		chevo_c7 = true,
+		astin_vantage = true,
+		bentz_sl65bs = true,
 	},
 }
 
