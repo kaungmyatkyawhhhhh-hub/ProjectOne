@@ -91,7 +91,14 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This **replaces*
 2. The player can also drive or walk to any FOR SALE sign of the right tier and press E: "Place my house here".
 3. Show a **ghost preview** of the house on the lot first, so they can see how it fits. Then confirm.
 4. The house builds on the lot, the FOR SALE sign is replaced by a name plaque with the owner's name, and the garage setup works as before.
-5. **Moving:** the owner can move their house to another free lot of the same tier (from the house menu or a FOR SALE sign). The old lot goes back to FOR SALE.
+5. **A small gate for each home:** every lot gets its own small driveway gate (Low: a simple wooden or metal swing gate; Mid: a modern sliding gate with a low wall; High: a big iron or stone-pillar gate at the bottom of the private driveway, inside the Summit). Each house gate:
+   - opens automatically (animated, with a sound) for the owner, their passengers, and visitors the owner allows (Open / Friends only / Locked, see the extras);
+   - stays closed for others, with a doorbell / intercom on the gate post;
+   - has the house number and the owner's name plaque on the post;
+   - shows a FOR SALE sign on the gate while the lot is empty;
+   - takes the colour chosen in the house upgrades;
+   - lets nobody drive round it: a fence or hedge along the lot edge.
+6. **Moving:** the owner can move their house to another free lot of the same tier (from the house menu or a FOR SALE sign). The old lot goes back to FOR SALE.
 
 ### Saving and servers
 - Saved per player:
@@ -162,7 +169,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This **replaces*
 26. **Helicopter to the summit:** High owners can call the helicopter from the showroom roof to fly to their mansion (a short cutscene, skippable).
 
 ## 6. Check before you say done
-- 2-player test in Studio:
+- 2-player test in Studio (also: B can't get through A's house gate unless A allows it):
   - player A buys a Low house and places it;
   - player B can't place on that lot;
   - B's High house can't be placed on a Low lot;
