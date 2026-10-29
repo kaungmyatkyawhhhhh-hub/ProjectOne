@@ -338,6 +338,24 @@ for _, p in parts do
 		end
 	end
 end
+-- a wedge lying flat (its thickness up, as the island's bend fillers): its top over pos, if
+-- pos is over its triangle
+local function flatWedgeTop(p: BasePart, pos: Vector3): number?
+	if not p:IsA("WedgePart") or math.abs(p.CFrame.RightVector.Y) < 0.99 then
+		return nil
+	end
+	local l = p.CFrame:PointToObjectSpace(pos)
+	local s = p.Size
+	if math.abs(l.Y) > s.Y / 2 + 0.05 or math.abs(l.Z) > s.Z / 2 + 0.05 then
+		return nil
+	end
+	-- solid where (y + h/2) / h <= (z + l/2) / l
+	if (l.Y + s.Y / 2) / s.Y > (l.Z + s.Z / 2) / s.Z + 0.02 then
+		return nil
+	end
+	return p.CFrame.Position.Y + s.X / 2
+end
+
 -- the top surface of the parts under a point, nearest to y (nil when nothing's there)
 local function groundAt(pos: Vector3): number?
 	local list = grid[math.floor(pos.X / CELL) .. "," .. math.floor(pos.Z / CELL)]
@@ -348,7 +366,9 @@ local function groundAt(pos: Vector3): number?
 		if math.abs(l.X) <= s.X / 2 + 0.05 and math.abs(l.Z) <= s.Z / 2 + 0.05 then
 			-- the top face's height at this point (a block part; tilted decks too)
 			local top = p.CFrame:PointToWorldSpace(roblox.Vector3.new(l.X, s.Y / 2, l.Z)).Y
-			if p:IsA("WedgePart") or (p:IsA("Part") and (p :: Part).Shape ~= roblox.Enum.PartType.Block) then
+			if p:IsA("WedgePart") then
+				top = flatWedgeTop(p, pos) or math.huge
+			elseif p:IsA("Part") and (p :: Part).Shape ~= roblox.Enum.PartType.Block then
 				continue
 			end
 			if math.abs(top - pos.Y) < 3 and (not best or math.abs(top - pos.Y) < math.abs((best :: number) - pos.Y)) then
@@ -376,6 +396,52 @@ for _, seg in graph.all do
 	end
 end
 check(bad == 0, `road under every lane ({bad} of {checked} points missing, {badWest} in the west)`)
+
+-- the island's climbs are smooth: no ledge a car would hit (owner, 2026-10-29: the car jerked
+-- going up and down). Walks every island lane a stud at a time and takes the highest road top
+-- under it (what the wheels touch); a jump of more than 0.35 studs is a ledge.
+local IsleLayout = load("IsleLayout", "shared")
+local function highestAt(pos: Vector3): number?
+	local best: number? = nil
+	for _, p in grid[math.floor(pos.X / CELL) .. "," .. math.floor(pos.Z / CELL)] or {} do
+		local wtop = flatWedgeTop(p, pos)
+		if wtop and math.abs(wtop - pos.Y) < 2.5 and (not best or wtop > (best :: number)) then
+			best = wtop
+		end
+		if p:IsA("WedgePart") or (p:IsA("Part") and (p :: Part).Shape ~= roblox.Enum.PartType.Block) then
+			continue
+		end
+		local l = p.CFrame:PointToObjectSpace(pos)
+		local s = p.Size
+		if math.abs(l.X) <= s.X / 2 and math.abs(l.Z) <= s.Z / 2 then
+			local top = p.CFrame:PointToWorldSpace(roblox.Vector3.new(l.X, s.Y / 2, l.Z)).Y
+			if math.abs(top - pos.Y) < 2.5 and (not best or top > (best :: number)) then
+				best = top
+			end
+		end
+	end
+	return best
+end
+local ledges, walked = 0, 0
+for _, seg in graph.all do
+	local m = (seg.p0 + seg.p2) / 2
+	if (roblox.Vector3.new(m.X, 0, m.Z) - IsleLayout.Center).Magnitude < IsleLayout.MaxShore and math.abs(seg.p2.Y - seg.p0.Y) + math.abs(seg.p0.Y) > 1 then
+		local prev: number? = nil
+		for d = 0, math.floor(seg.length) do
+			local pos = CityLayout.sample(seg, d)
+			local top = highestAt(pos)
+			walked += 1
+			if top and prev and math.abs(top - prev) > 0.35 then
+				ledges += 1
+				if ledges <= 8 then
+					print(string.format("  ledge %.2f at %.0f, %.0f, %.0f", top - prev, pos.X, pos.Y, pos.Z))
+				end
+			end
+			prev = top
+		end
+	end
+end
+check(ledges == 0, `island climbs smooth ({ledges} ledges in {walked} points)`)
 -- nothing solid stands in a lane: colliding parts (not road surfaces) whose box takes in a point
 -- 2 to 7 studs above the lane
 local function blockedAt(pos: Vector3): BasePart?

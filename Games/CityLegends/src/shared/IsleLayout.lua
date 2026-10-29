@@ -43,7 +43,11 @@ IsleLayout.polar = polar
 
 local HALF = I.Road / 2
 IsleLayout.Road = I.Road
-IsleLayout.Flat = 14 -- how far a leg stays level next to a hairpin
+IsleLayout.Flat = 14 -- how far a leg stays level next to a hairpin at its low end
+-- ... and at its high end: more than half the road's width, so the level run between the two
+-- hairpins (which crosses the leg's end) never stands above the leg (owner, 2026-10-29: the car
+-- jerked going up and down; it was 14 there too and the corner stood up to a stud proud)
+IsleLayout.FlatHigh = 20
 IsleLayout.SeaLevel = -2
 
 ---------------------------------------------------------------------
@@ -95,7 +99,7 @@ local function switchbacks(id: string, spec: any, from: Ring, fromOut: boolean, 
 		-- the climb shared out over the run (the first and last pieces are level next to the
 		-- hairpins), so every piece climbs at the same grade
 		local piece = 2 * r * math.sin(span / steps / 2)
-		local run = piece * steps - 2 * IsleLayout.Flat
+		local run = piece * steps - IsleLayout.Flat - IsleLayout.FlatHigh
 		local function yAt(q: number): number
 			local done = math.clamp(piece * q - IsleLayout.Flat, 0, run)
 			return y + rise * done / run
@@ -156,10 +160,17 @@ function IsleLayout.trim(pts: { Vector3 }, k: number): number
 	return 4 + 8 * math.clamp(turnAt(pts, k) / (math.pi / 2), 0, 1)
 end
 
--- a leg's height at distance d along it: an even slope, level for Flat next to a hairpin
+-- how far a leg stays level at each end (next to a hairpin: Flat at its low end, FlatHigh at
+-- its high end; elsewhere 0)
+function IsleLayout.flats(y0: number, y1: number, flat0: boolean, flat1: boolean): (number, number)
+	local f0 = if flat0 then (if y0 > y1 then IsleLayout.FlatHigh else IsleLayout.Flat) else 0
+	local f1 = if flat1 then (if y1 > y0 then IsleLayout.FlatHigh else IsleLayout.Flat) else 0
+	return f0, f1
+end
+
+-- a leg's height at distance d along it: an even slope, level next to a hairpin
 function IsleLayout.legY(y0: number, y1: number, len: number, d: number, flat0: boolean, flat1: boolean): number
-	local f0 = if flat0 then IsleLayout.Flat else 0
-	local f1 = if flat1 then IsleLayout.Flat else 0
+	local f0, f1 = IsleLayout.flats(y0, y1, flat0, flat1)
 	if len <= f0 + f1 + 1 then
 		return y0
 	end
@@ -173,7 +184,8 @@ function IsleLayout.maxGrade(): number
 		for k = 1, #rd.pts - 1 do
 			local a, b = rd.pts[k], rd.pts[k + 1]
 			local len = Vector3.new(b.X - a.X, 0, b.Z - a.Z).Magnitude
-			local run = len - (if rd.level[k] then IsleLayout.Flat else 0) - (if rd.level[k + 1] then IsleLayout.Flat else 0)
+			local f0, f1 = IsleLayout.flats(a.Y, b.Y, rd.level[k], rd.level[k + 1])
+			local run = len - f0 - f1
 			if run > 1 then
 				worst = math.max(worst, math.abs(b.Y - a.Y) / run)
 			end
