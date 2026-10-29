@@ -1138,8 +1138,12 @@ function Driving.attach(model: Model)
 	local root = model.PrimaryPart :: BasePart
 	local spec = Cars.get(model:GetAttribute("CarId") :: string)
 	local dims = CarBuilder.getDims(spec.Class, spec.Id)
-	local lv = root:WaitForChild("Drive") :: LinearVelocity
-	local ao = root:WaitForChild("Steer") :: AlignOrientation
+	local lv = root:WaitForChild("Drive", 10) :: LinearVelocity?
+	local ao = root:WaitForChild("Steer", 10) :: AlignOrientation?
+	if not (lv and ao) then
+		warn("[CityLegends] car never got its drive parts, not attaching")
+		return
+	end
 	-- the suspension (owner, 2026-10-24: the car "jerks around like it's driving on rocks" on the
 	-- bridge ramps and bounces under hard braking). The body is a box that used to slide on the road
 	-- on its bottom face: tipped by braking or a change of slope its edge dug into the road and was

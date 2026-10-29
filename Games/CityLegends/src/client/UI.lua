@@ -1313,8 +1313,17 @@ end
 ---------------------------------------------------------------------
 -- Loading / fades / cinematic
 ---------------------------------------------------------------------
+-- Safety net (Playbook: SKIP after ~5 s): a SKIP button shows after 5 seconds and the screen
+-- always goes after 10, even if something is still loading behind it. Once skipped, it stays away
+-- until the startup step that showed it is over (the next hideLoading).
 local loadingFrame: Frame? = nil
+local loadingSkipped = false
+local LOADING_SKIP_AFTER = 5
+local LOADING_MAX = 10
 function UI.showLoading(text: string)
+	if loadingSkipped then
+		return
+	end
 	if loadingFrame then
 		(loadingFrame:FindFirstChild("Status") :: TextLabel).Text = text
 		return
@@ -1332,9 +1341,32 @@ function UI.showLoading(text: string)
 		end
 	end)
 	loadingFrame = f
+	local function skip()
+		if loadingFrame == f then
+			f:Destroy()
+			loadingFrame = nil
+			loadingSkipped = true
+		end
+	end
+	task.delay(LOADING_SKIP_AFTER, function()
+		if loadingFrame ~= f then
+			return
+		end
+		local b = button("SKIP", Theme.Accent, {
+			Name = "Skip",
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.68),
+			Size = UDim2.fromOffset(140, 42),
+			ZIndex = 101,
+		})
+		b.Parent = f
+		b.Activated:Connect(skip)
+	end)
+	task.delay(LOADING_MAX, skip)
 end
 
 function UI.hideLoading()
+	loadingSkipped = false
 	if loadingFrame then
 		loadingFrame:Destroy()
 		loadingFrame = nil

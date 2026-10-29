@@ -159,12 +159,22 @@ local function drawMap(map: Frame)
 	-- the coastal highway west to Downtown and the causeway
 	line(map, Vector3.new(-E, 0, zH), Vector3.new(WestLayout.DowntownEast, 0, zH), C.HighwayWidth, COL.highway, 6)
 	line(map, Vector3.new(WestLayout.DowntownWest, 0, zH), Vector3.new(WestLayout.CausewayEnd, 0, zH), C.LaneWidth * C.LanesPerSide * 2 + 12, COL.road, 6)
-	-- Legends Isle: sand, lawn, the mountain (darker the higher), its ring roads and climbs
+	-- Legends Isle: its uneven shore (wedges out to the beach), the mountain (darker the higher),
+	-- its ring roads and climbs
 	local I = W.Isle
 	local c = IsleLayout.Center
-	disc(map, c, I.r, COL.sand, 3)
-	disc(map, c, I.lawn, COL.island, 4)
-	disc(map, c, I.Foot, COL.island:Lerp(Color3.new(0, 0, 0), 0.25), 4)
+	local WEDGES = 72
+	local wedge = 2 * math.pi * IsleLayout.MaxShore / WEDGES * 1.15
+	for k = 0, WEDGES - 1 do
+		local a = k / WEDGES * 2 * math.pi
+		local sh = IsleLayout.shore(a)
+		local dir = Vector3.new(math.cos(a), 0, math.sin(a))
+		-- line() runs a quarter width past each end: pull the ends in by that
+		local w = wedge * sh / IsleLayout.MaxShore
+		line(map, c, c + dir * (sh - w / 4), w, COL.sand, 3)
+		line(map, c, c + dir * (sh - 90 - w / 4), w, COL.island, 4)
+	end
+	disc(map, c, I.Foot * 0.7, COL.island:Lerp(Color3.new(0, 0, 0), 0.25), 4)
 	disc(map, c, I.Mid.inner, COL.island:Lerp(Color3.new(0, 0, 0), 0.45), 4)
 	for _, ring in IsleLayout.Rings do
 		ringRoad(map, c, ring.radius + IsleLayout.Road / 2, IsleLayout.Road, COL.road, 6)

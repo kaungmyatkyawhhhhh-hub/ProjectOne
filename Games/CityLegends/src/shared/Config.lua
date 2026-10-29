@@ -118,7 +118,9 @@ Config.Lights.Cycle = (Config.Lights.Green + Config.Lights.Yellow + Config.Light
 -- NPC traffic
 ---------------------------------------------------------------------
 Config.Traffic = {
-	CarCount = 55,
+	CarCount = 32, -- in the city's streets (owner, 2026-10-29: fewer; was 55 in all)
+	HighwayCars = 18, -- on the highways and the loop, well spaced to split lanes and speed past
+	HighwayGap = 60, -- studs kept free round a highway car when one is placed (city: 22)
 	-- every car has its own pace, the inside lane runs faster than the outside ones, and each car's
 	-- speed drifts up and down a little, so cars never sit side by side for long and there are gaps
 	-- to split (owner, 2026-10-29; was 28-48 mph, all lanes alike)

@@ -47,6 +47,7 @@ export type Npc = {
 	tails: { BasePart },
 	wheels: { Motor6D },
 	spin: number,
+	highway: boolean, -- a highway car: spawns and comes back on the highways, with wider gaps
 }
 
 type Obstacle = { pos: Vector3, fwd: Vector3, speed: number, halfLen: number, width: number, self: Npc? }
@@ -127,18 +128,21 @@ end
 
 -- each lane's bounding box (its three control points), to pick lanes near a point quickly: the
 -- highway lanes are few but very long, so a plain random pick rarely lands near a driver out there
+-- (city cars and highway cars keep to their own lanes when placed: fewer cars in the city's
+-- streets, and well spaced cars on the highways to split and race past; owner, 2026-10-29)
 local laneBox: { [CityLayout.Segment]: { Vector3 } } = {}
-local publicLanes: { CityLayout.Segment } = {}
+local cityLanes: { CityLayout.Segment } = {}
+local highwayLanes: { CityLayout.Segment } = {}
 for _, seg in graph.lanes do
 	laneBox[seg] = { seg.p0:Min(seg.p1):Min(seg.p2), seg.p0:Max(seg.p1):Max(seg.p2) }
 	if not seg.private then
-		table.insert(publicLanes, seg)
+		table.insert(if seg.speedK >= Config.City.HighwaySpeedK - 0.01 then highwayLanes else cityLanes, seg)
 	end
 end
 local nearby: { CityLayout.Segment } = {}
-local function lanesNear(center: Vector3, maxDist: number): { CityLayout.Segment }
+local function lanesNear(lanes: { CityLayout.Segment }, center: Vector3, maxDist: number): { CityLayout.Segment }
 	table.clear(nearby)
-	for _, seg in publicLanes do
+	for _, seg in lanes do
 		local b = laneBox[seg]
 		local dx = math.max(b[1].X - center.X, 0, center.X - b[2].X)
 		local dz = math.max(b[1].Z - center.Z, 0, center.Z - b[2].Z)
@@ -150,9 +154,11 @@ local function lanesNear(center: Vector3, maxDist: number): { CityLayout.Segment
 end
 
 -- Lane position near "center" (or anywhere if center == nil)
-local function findSpot(center: Vector3?, minDist: number, maxDist: number, ignore: Npc?, avoidView: boolean?): (CityLayout.Segment?, number)
+local function findSpot(center: Vector3?, minDist: number, maxDist: number, ignore: Npc?, avoidView: boolean?, highway: boolean?): (CityLayout.Segment?, number)
 	local camera = workspace.CurrentCamera
-	local pool = if center and maxDist < 5000 then lanesNear(center, maxDist) else publicLanes
+	local lanes = if highway then highwayLanes else cityLanes
+	local pool = if center and maxDist < 5000 then lanesNear(lanes, center, maxDist) else lanes
+	local gap = if highway then T.HighwayGap else 22
 	if #pool == 0 then
 		return nil, 0
 	end
@@ -171,7 +177,7 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 				end
 			end
 		end
-		if ok and isFree(pos, 22, ignore) then
+		if ok and isFree(pos, gap, ignore) then
 			return seg, s
 		end
 	end
@@ -188,8 +194,11 @@ local function setBrake(npc: Npc, on: boolean)
 	end
 end
 
-local function spawnNpc(center: Vector3?): Npc?
-	local seg, s = findSpot(center, 0, if center then 700 else math.huge, nil, false)
+local function spawnNpc(center: Vector3?, highway: boolean): Npc?
+	local seg, s = findSpot(center, 0, if center then 700 else math.huge, nil, false, highway)
+	if not seg and center then
+		seg, s = findSpot(nil, 0, math.huge, nil, false, highway) -- none near: anywhere on its roads
+	end
 	if not seg then
 		return nil
 	end
@@ -230,6 +239,7 @@ local function spawnNpc(center: Vector3?): Npc?
 		tails = tails,
 		wheels = wheels,
 		spin = 0,
+		highway = highway,
 	}
 	placeNpc(npc, seg, s)
 	npc.speed = npc.maxSpeed * 0.7
@@ -288,9 +298,12 @@ function Traffic.start(count: number?, focus: (() -> Vector3?)?)
 	refreshPlayerCars()
 	local center = if focus then focus() else nil
 	local total = count or T.CarCount
-	for k = 1, total do
-		-- most cars around the player, some spread through the city
-		spawnNpc(if k % 4 ~= 0 then center else nil)
+	-- the highways get their share at the same quality scale
+	local highway = math.floor(T.HighwayCars * total / T.CarCount + 0.5)
+	for k = 1, total + highway do
+		-- most cars around the player, some spread through the city; then the highway cars
+		local onHighway = k > total
+		spawnNpc(if k % 4 ~= 0 then center else nil, onHighway)
 		if k % 10 == 0 then
 			task.wait()
 		end
@@ -486,8 +499,15 @@ function Traffic.update(dt: number)
 		end
 
 		-- advance along the path
+		-- (a few hops at most: a run of very short connectors can't spin this forever)
 		npc.s += npc.speed * dt
+		local hops = 0
 		while npc.s >= npc.seg.length do
+			hops += 1
+			if hops > 8 then
+				npc.s = npc.seg.length
+				break
+			end
 			npc.s -= npc.seg.length
 			local nxt = npc.nextSeg
 			if not nxt then
@@ -539,7 +559,7 @@ function Traffic.update(dt: number)
 					break
 				end
 				if (npc.pos - flatFocus).Magnitude > T.RecycleDistance then
-					local seg, s = findSpot(flatFocus, T.RespawnMin, T.RespawnMax, npc, true)
+					local seg, s = findSpot(flatFocus, T.RespawnMin, T.RespawnMax, npc, true, npc.highway)
 					if seg then
 						placeNpc(npc, seg, s)
 						npc.speed = npc.maxSpeed * 0.8
@@ -556,7 +576,7 @@ function Traffic.clearAround(pos: Vector3, radius: number)
 	local flat = Vector3.new(pos.X, 0, pos.Z)
 	for _, npc in Traffic.cars do
 		if (npc.pos - flat).Magnitude < radius then
-			local seg, s = findSpot(flat, T.RespawnMin, T.RespawnMax, npc, true)
+			local seg, s = findSpot(flat, T.RespawnMin, T.RespawnMax, npc, true, npc.highway)
 			if seg then
 				placeNpc(npc, seg, s)
 			end

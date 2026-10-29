@@ -50,9 +50,13 @@ Driving.init()
 OnFoot.init()
 
 -- wait for the server to finish building the city
-local city = workspace:WaitForChild("City", 120)
-while city and not city:GetAttribute("Ready") do
+local city = workspace:WaitForChild("City", 60)
+local readyBy = os.clock() + 60
+while city and not city:GetAttribute("Ready") and os.clock() < readyBy do
 	task.wait(0.2)
+end
+if not city then
+	warn("[CityLegends] no City in Workspace after 60 s, going on without it")
 end
 UI.showLoading("Shaping the cars...")
 CarSkin.preload({ Cars.CutsceneId })
@@ -205,22 +209,59 @@ end
 startOrbit()
 UI.showLoading("Filling the streets with traffic...")
 UI.fade(false, 0.01)
-Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualityScale(), 0.6, 1)), focusPoint)
-Police.init()
-BankClient.init()
-Activities.init()
-Pedestrians.start(WorldFx.qualityScale())
-ChauffeurClient.init()
-require(script.Parent:WaitForChild("LuxeClient")).init() -- casino VIP, the gem shop, heist messages
-require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, top right (N toggles)
-require(script.Parent:WaitForChild("ChallengesClient")).init() -- drifts, speed traps, jumps, leaderboard (B)
+-- each step runs on its own and is timed: one that errors or hangs is reported in the Output and
+-- the rest still start (a crash in one of them used to leave the loading screen up for good)
+local stepTimes = {}
+local function startStep(name: string, fn: () -> ())
+	local t0 = os.clock()
+	local done, ok, err = false, true, nil
+	task.spawn(function()
+		ok, err = pcall(fn)
+		done = true
+	end)
+	while not done and os.clock() - t0 < 8 do
+		task.wait()
+	end
+	local took = os.clock() - t0
+	table.insert(stepTimes, string.format("%s %.2fs", name, took))
+	if not done then
+		warn(string.format("[CityLegends] startup: %s still busy after %.1f s, going on", name, took))
+	elseif not ok then
+		warn(string.format("[CityLegends] startup: %s failed: %s", name, tostring(err)))
+	end
+end
+startStep("Traffic", function()
+	Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualityScale(), 0.6, 1)), focusPoint)
+end)
+startStep("Police", Police.init)
+startStep("Bank", BankClient.init)
+startStep("Activities", Activities.init)
+startStep("Pedestrians", function()
+	Pedestrians.start(WorldFx.qualityScale())
+end)
+startStep("Chauffeur", ChauffeurClient.init)
+startStep("Luxe", function()
+	require(script.Parent:WaitForChild("LuxeClient")).init() -- casino VIP, the gem shop, heist messages
+end)
+startStep("Minimap", function()
+	require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, top right (N toggles)
+end)
+startStep("Challenges", function()
+	require(script.Parent:WaitForChild("ChallengesClient")).init() -- drifts, speed traps, jumps, leaderboard (B)
+end)
+print("[CityLegends] startup: " .. table.concat(stepTimes, ", "))
 UI.hideLoading()
 
 ---------------------------------------------------------------------
 -- Spawning / garage
 ---------------------------------------------------------------------
 local pendingAttach = false
-local playerCars = workspace:WaitForChild("PlayerCars")
+-- (after loading; the cars need it, so keep asking, with a warning each time it's late)
+local playerCars = workspace:WaitForChild("PlayerCars", 30) :: Folder?
+while not playerCars do
+	warn("[CityLegends] no PlayerCars folder in Workspace yet")
+	playerCars = workspace:WaitForChild("PlayerCars", 30) :: Folder?
+end
 
 -- a car arrives in pieces: wait for all of them (the server counts them), or the body goes on
 -- before the wheel joints are there and the car drives on without wheels

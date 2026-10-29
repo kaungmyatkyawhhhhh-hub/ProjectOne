@@ -48,7 +48,7 @@ local INK = Color3.fromRGB(8, 8, 11)
 
 local remotes: Folder
 local callRemote: RemoteFunction
-local folder: Folder
+local folder: Folder? = nil
 
 local contracts: { [string]: boolean } = {}
 local places: { WestLayout.Place } = WestLayout.places()
@@ -1305,7 +1305,8 @@ callCar = function(carId: string, placeId: string)
 	ride = r
 	refresh()
 	setStatus("Your " .. Cars.get(carId).Name .. " is on its way")
-	local car = folder:WaitForChild(result.car, 10)
+	local home = folder or workspace:WaitForChild("Chauffeurs", 10) :: Folder?
+	local car = home and home:WaitForChild(result.car, 10)
 	if not (car and car:IsA("Model")) or ride ~= r then
 		if ride == r then
 			ChauffeurClient.stop()
@@ -1402,22 +1403,30 @@ function ChauffeurClient.init()
 	remotes = ReplicatedStorage:WaitForChild("Remotes") :: Folder
 	callRemote = remotes:WaitForChild("ChauffeurCall") :: RemoteFunction
 	local pushRemote = remotes:WaitForChild("ChauffeurPush") :: RemoteEvent
-	folder = workspace:WaitForChild("Chauffeurs") :: Folder
 	lookHolder = Instance.new("Folder")
 	lookHolder.Name = "ChauffeurDrivers"
 	lookHolder.Parent = workspace
 	buildGui()
 	task.spawn(ChauffeurRoute.graph) -- the parallel-lane table, ready before the first call
 
-	for _, car in folder:GetChildren() do
-		if car:IsA("Model") then
-			task.spawn(setupLook, car)
+	-- the server's car folder: waited for in the background, so loading never hangs on it
+	task.spawn(function()
+		local f = workspace:WaitForChild("Chauffeurs", 60) :: Folder?
+		if not f then
+			warn("[CityLegends] no Chauffeurs folder in Workspace")
+			return
 		end
-	end
-	folder.ChildAdded:Connect(function(car)
-		if car:IsA("Model") then
-			setupLook(car)
+		folder = f
+		for _, car in f:GetChildren() do
+			if car:IsA("Model") then
+				task.spawn(setupLook, car)
+			end
 		end
+		f.ChildAdded:Connect(function(car)
+			if car:IsA("Model") then
+				setupLook(car)
+			end
+		end)
 	end)
 
 	pushRemote.OnClientEvent:Connect(function(msg: any)
