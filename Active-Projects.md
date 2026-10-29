@@ -28,8 +28,8 @@ Idea only, not started: mow grass -> upgrades -> REGROW / SEASON prestige. Notes
 Night-city driving game: earn money by driving and cutting up traffic, buy cars, level up.
 - **Details:** [[City Legends/City Legends]] (all City Legends notes go in the `City Legends` folder)
 - **Code:** this vault, folder `Games/CityLegends`.
-- **Now:** Daily Quests, Boost Inventory and OP Day 7 are in and tested. Next: save, publish, check the funnels in Creator Hub, then the AFK Zone.
-- **Last updated:** 2026-10-10
+- **Now (29 Oct):** play-test done in Studio. New: passenger seats (Y beside a friend's car), M = automatic / sequential, varied traffic speeds, chauffeur lane splitting, island bridges 2 lanes each way. Open: a better Suzaki Swift model, Camri badge, a few blocked car meshes. Next: save, publish, check the funnels in Creator Hub, then the AFK Zone.
+- **Last updated:** 2026-10-29
 
 ## Archived (not worked on, nothing deleted)
 - **Break A Bed** (bed-breaking clicker, archived 28 Oct): released as "[🎉 RELEASE] Break a Bed", 12K Robux spent on ads, ~500 Robux a day (mid Oct). Notes: [[Archive/Break A Bed/Project Overview]].
