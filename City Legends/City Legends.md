@@ -21,6 +21,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - Claude sends the game as a place file (`CityLegends.rbxlx`) after each change.
 - Never share Roblox or alt account logins or cookies with Claude (offered once, declined).
 - Car looks can be inspired by real cars, but names and badges stay fictional.
+- One big island (2026-10-29, owner): the three islands become one big island with a mountain and a beach, real roads (no grass roads), and house tiers by height: Low at the bottom near the bridge, Mid halfway up, High on top in a police-gated community. Plus a real estate office with 25+ house designs (1-story to mansions). Prompt for Claude Code: `Prompts/One big island and real estate.md`.
 
 ## How cars are picked (in order)
 1. A model in `ReplicatedStorage/CarModels/<car id>` (any Creator Store model works; add a `Reverse` attribute if it faces backwards).
