@@ -63,12 +63,13 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
    - On success: a short celebration (sound + confetti + "NEW CAR"), and a **"Drive it now"** button that spawns it outside.
 5. **Showroom:** the turntable has spotlights and a polished floor; the car turns slowly. The other cars on show in the building stay as they are (`Config.Dealership.Display`).
 
-## Ask the owner first (decisions that change the game)
-- **The car market rule:** right now cars from $600K up (`Cars.MarketFromPrice`, F430 and above) can **only** be bought on the car market, and each car in a series needs the one before it owned. With this dealer:
-  - should top trims be buyable at the dealer with a high level,
-  - or stay market-only (shown in the dealer with "Get it on the Car Market" and a waypoint)?
-  - **Default until the owner answers: keep them market-only, but show them in the dealer list** so players can see and dream.
-- **The "own the previous trim first" rule:** keep it, or allow buying any unlocked trim directly? Default: levels only, no need to own the previous one.
+## Owner's decisions (2026-10-29)
+- **The car market rule changes (owner chose B):** cars from $600K up (`Cars.MarketFromPrice`, F430 and above) are **no longer market-only**. Every car and trim can be **bought at the dealer once you reach its level**:
+  - top cars and top trims need high levels;
+  - suggest a level ladder that puts the most expensive cars around levels 40–60, and show the owner before setting it.
+  - **The car market stays** as a second way to get cars (buying and selling between the market's listings, flips, deals). It just isn't the only way any more.
+  - Update `Cars.isMarketOnly`, everything that uses it, the Market, the garage text, the `market_test`, and the notes.
+- **Owning the previous trim first:** not needed. **Levels only**, unless the owner says otherwise.
 
 ## Our ideas to make it better
 1. **Compare:** hold a button to compare the selected trim with the car you're driving (green / red arrows on each stat).
@@ -96,4 +97,4 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
 - the car → trims list with the level for each;
 - how the menu works;
 - what's untested;
-- the answers you still need: the market rule and the previous-trim rule.
+- the new level for every car and trim (top cars now at the dealer).
