@@ -57,7 +57,7 @@ end
 
 -- splits a flat axis-aligned slab into the pieces round a hole (x0..x1, z0..z1); returns them
 function Garages.cut(part: BasePart, x0: number, x1: number, z0: number, z1: number): { BasePart }
-	local p, s = part.Position, part.Size
+	local p, s = part.CFrame.Position, part.Size
 	local ax, bx = p.X - s.X / 2, p.X + s.X / 2
 	local az, bz = p.Z - s.Z / 2, p.Z + s.Z / 2
 	x0, x1 = math.max(x0, ax), math.min(x1, bx)
@@ -158,7 +158,7 @@ function Garages.build(kit: any, city: Instance)
 		local dx0, dx1 = span(inner / 2 - 12, inner / 2 + 10)
 		for _, d in block:GetDescendants() do
 			if d:IsA("BasePart") and d.Name ~= "Sidewalk" and d.Parent ~= garage then
-				local p = d.Position
+				local p = d.CFrame.Position
 				if p.X > dx0 and p.X < dx1 and p.Z > cz + APRON_Z0 - 1 and p.Z < cz + APRON_Z1 + 1 and p.Y < 30 and math.max(d.Size.X, d.Size.Z) < 40 then
 					d:Destroy()
 				end

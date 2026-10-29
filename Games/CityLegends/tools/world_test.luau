@@ -120,6 +120,8 @@ end, IsClient = function()
 	return false
 end, IsStudio = function()
 	return false
+end, IsRunning = function()
+	return false
 end }
 local gameProxy = { GetService = function(_, n)
 	if n == "CollectionService" then
