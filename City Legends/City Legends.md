@@ -22,6 +22,7 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - Never share Roblox or alt account logins or cookies with Claude (offered once, declined).
 - Car looks can be inspired by real cars, but names and badges stay fictional.
 - One big island (2026-10-29, owner): the three islands become one big island with a mountain and a beach, real roads (no grass roads), and house tiers by height: Low at the bottom near the bridge, Mid halfway up, High on top in a police-gated community. Plus a real estate office with 25+ house designs (1-story to mansions). Prompt for Claude Code: `Prompts/One big island and real estate.md`.
+- Neon only at sunset and night (2026-10-29, owner): city neon signs and strips are off by day, fade on from sunset, full at night; traffic, car and police lights unchanged. Plus more realistic lighting and environment. Prompt: `Prompts/Neon at night and realistic environment.md`.
 
 ## How cars are picked (in order)
 1. A model in `ReplicatedStorage/CarModels/<car id>` (any Creator Store model works; add a `Reverse` attribute if it faces backwards).
