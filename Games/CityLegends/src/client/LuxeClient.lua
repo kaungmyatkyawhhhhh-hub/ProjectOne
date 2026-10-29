@@ -128,6 +128,12 @@ local function setState(s: any)
 		end
 	end
 end
+-- (streaming: the gate can arrive after the state did)
+CollectionService:GetInstanceAddedSignal("VipGate"):Connect(function(g)
+	if g:IsA("BasePart") then
+		g.CanCollide = (state.vip or 0) < 1
+	end
+end)
 
 local function priceOf(it: Flex.Item): number
 	return math.floor(it.price * (1 - (state.discount or 0)))

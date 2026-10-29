@@ -45,7 +45,28 @@ local function idOf(p: Vector3): string
 	return string.format("%d,%d,%d", math.round(p.X), math.round(p.Y), math.round(p.Z))
 end
 
+local function drop(g: Group)
+	local i = table.find(groups, g)
+	if i then
+		table.remove(groups, i)
+	end
+	local list = grid[cellKey(g.base.X, g.base.Z)]
+	local j = if list then table.find(list, g) else nil
+	if list and j then
+		table.remove(list, j)
+	end
+end
+
 local function add(key: BasePart, base: Vector3, radius: number, parts: { BasePart })
+	-- (with streaming, a prop's parts go when you drive away and come back as new ones: a group
+	-- whose key part has gone is replaced; one that's down waits until it's back up)
+	local old = byKey[idOf(base)]
+	if old then
+		if old.down or old.key.Parent then
+			return
+		end
+		drop(old)
+	end
 	local pieces: { Piece } = {}
 	for _, p in parts do
 		table.insert(pieces, { part = p, transparency = p.Transparency, collide = p.CanCollide, query = p.CanQuery })
@@ -82,63 +103,98 @@ local function piecesAround(parent: Instance, foot: Vector3, reach: number, heig
 	return out
 end
 
+-- a street light or a city tree, keyed on its pole / lower trunk
+local function considerPart(d: BasePart)
+	if d.Name == "LampPost" and upright(d) then
+		-- a street light: the pole, its arm, head and lamp
+		local foot = footOf(d)
+		local parts = piecesAround(d.Parent :: Instance, foot, 8.5, d.Size.X + 3, function(p)
+			return p == d or not (p.Material == Enum.Material.Metal or p.Material == Enum.Material.Neon)
+		end)
+		table.insert(parts, 1, d)
+		add(d, foot, 1.2, parts)
+	elseif d.Material == Enum.Material.Wood and upright(d) and d.Size.Y >= 0.99 and d.Size.Y <= 1.7 and d.Size.X > 4 and d.Size.X < 12 then
+		-- a city tree: the lower trunk is the key; its upper trunk, branches and crown ride on it
+		local foot = footOf(d)
+		if foot.Y < 3 then
+			local parts = piecesAround(d.Parent :: Instance, foot, 9, 24, function(p)
+				return p == d or (p.Material ~= Enum.Material.Wood and p.Material ~= Enum.Material.LeafyGrass)
+			end)
+			table.insert(parts, 1, d)
+			add(d, foot, 1.6, parts)
+		end
+	end
+end
+
+-- traffic lights: one group per pole (its arm, head, sign and walk box), the plinth stays
+local function considerSignal(m: Model)
+	local poles: { BasePart } = {}
+	for _, c in m:GetChildren() do
+		if c:IsA("BasePart") and c.Name == "SignalPole" then
+			table.insert(poles, c)
+		end
+	end
+	local members: { [BasePart]: { BasePart } } = {}
+	for _, pole in poles do
+		members[pole] = { pole }
+	end
+	for _, c in m:GetChildren() do
+		if c:IsA("BasePart") and c.Name ~= "SignalPole" and c.Name ~= "SignalBase" then
+			local best, bestD = nil, math.huge
+			for _, pole in poles do
+				local d = Vector2.new(c.Position.X - pole.Position.X, c.Position.Z - pole.Position.Z).Magnitude
+				if d < bestD then
+					best, bestD = pole, d
+				end
+			end
+			if best and bestD < 45 then
+				table.insert(members[best], c)
+			end
+		end
+	end
+	for _, pole in poles do
+		add(pole, footOf(pole), 1.4, members[pole])
+	end
+end
+
 local function scan(city: Instance)
-	local signals: { Model } = {}
 	for _, d in city:GetDescendants() do
 		if d:IsA("Model") and string.sub(d.Name, 1, 7) == "Signal_" then
-			table.insert(signals, d)
+			considerSignal(d)
 		elseif d:IsA("BasePart") then
-			if d.Name == "LampPost" and upright(d) then
-				-- a street light: the pole, its arm, head and lamp
-				local foot = footOf(d)
-				local parts = piecesAround(d.Parent :: Instance, foot, 8.5, d.Size.X + 3, function(p)
-					return p == d or not (p.Material == Enum.Material.Metal or p.Material == Enum.Material.Neon)
-				end)
-				table.insert(parts, 1, d)
-				add(d, foot, 1.2, parts)
-			elseif d.Material == Enum.Material.Wood and upright(d) and d.Size.Y >= 0.99 and d.Size.Y <= 1.7 and d.Size.X > 4 and d.Size.X < 12 then
-				-- a city tree: the lower trunk is the key; its upper trunk, branches and crown ride on it
-				local foot = footOf(d)
-				if foot.Y < 3 then
-					local parts = piecesAround(d.Parent :: Instance, foot, 9, 24, function(p)
-						return p == d or (p.Material ~= Enum.Material.Wood and p.Material ~= Enum.Material.LeafyGrass)
-					end)
-					table.insert(parts, 1, d)
-					add(d, foot, 1.6, parts)
-				end
-			end
+			considerPart(d)
 		end
 	end
-	-- traffic lights: one group per pole (its arm, head, sign and walk box), the plinth stays
-	for _, m in signals do
-		local poles: { BasePart } = {}
-		for _, c in m:GetChildren() do
-			if c:IsA("BasePart") and c.Name == "SignalPole" then
-				table.insert(poles, c)
+end
+
+-- streaming: props that arrive later are taken in a moment after their key part (so the pieces
+-- on them have arrived too)
+local function watch(city: Instance)
+	local pending: { [Instance]: boolean } = {}
+	city.DescendantAdded:Connect(function(d)
+		local target: Instance? = nil
+		if d:IsA("BasePart") then
+			if d.Name == "SignalPole" and d.Parent and d.Parent:IsA("Model") then
+				target = d.Parent
+			elseif d.Name == "LampPost" or d.Material == Enum.Material.Wood then
+				target = d
 			end
 		end
-		local members: { [BasePart]: { BasePart } } = {}
-		for _, pole in poles do
-			members[pole] = { pole }
-		end
-		for _, c in m:GetChildren() do
-			if c:IsA("BasePart") and c.Name ~= "SignalPole" and c.Name ~= "SignalBase" then
-				local best, bestD = nil, math.huge
-				for _, pole in poles do
-					local d = Vector2.new(c.Position.X - pole.Position.X, c.Position.Z - pole.Position.Z).Magnitude
-					if d < bestD then
-						best, bestD = pole, d
+		if target and not pending[target] then
+			pending[target] = true
+			task.delay(1.5, function()
+				pending[target :: Instance] = nil
+				local t = target :: Instance
+				if t.Parent then
+					if t:IsA("Model") then
+						considerSignal(t)
+					elseif t:IsA("BasePart") then
+						considerPart(t)
 					end
 				end
-				if best and bestD < 45 then
-					table.insert(members[best], c)
-				end
-			end
+			end)
 		end
-		for _, pole in poles do
-			add(pole, footOf(pole), 1.4, members[pole])
-		end
-	end
+	end)
 end
 
 local remote: RemoteEvent? = nil
@@ -253,7 +309,9 @@ local function near(p: Vector3): { Group }
 			local list = grid[x .. "," .. z]
 			if list then
 				for _, g in list do
-					table.insert(out, g)
+					if g.down or g.key.Parent then -- (not one that streamed away)
+						table.insert(out, g)
+					end
 				end
 			end
 		end
@@ -296,6 +354,7 @@ function Knockables.init()
 	end
 	local t0 = os.clock()
 	scan(city)
+	watch(city)
 	print(("[CityLegends] %d knockable props (%.2fs)"):format(#groups, os.clock() - t0))
 
 	local r = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Knock", 10)

@@ -531,6 +531,7 @@ local function displayCar(rec: Rec, k: number, carId: string)
 	car:SetAttribute("Plot", rec.plot.id)
 	car:SetAttribute("Bay", k)
 	car:SetAttribute("CarId", car:GetAttribute("CarId") or carId)
+	car.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	car.Parent = rec.model
 	CollectionService:AddTag(car, "HouseShowcase")
 	-- the owner drives it out: the car comes out on the driveway

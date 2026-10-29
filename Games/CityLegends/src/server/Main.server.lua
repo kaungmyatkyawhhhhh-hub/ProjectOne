@@ -368,6 +368,11 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 	local spawnCF = spawnAt[player] or swapCF or (if onFoot then frontSpawnCFrame(player, Vector3.new(model:GetExtentsSize().X, h, model:GetExtentsSize().Z)) else nil) or startSpawnCFrame() or findSpawnCFrame()
 	spawnAt[player] = nil
 	OnFoot.removeCharacter(player) -- a car from the garage: straight in, off your feet
+	-- (streaming: the ground there reaches the player's game before the car does)
+	pcall(function()
+		player:RequestStreamAroundAsync(spawnCF.Position, 6)
+	end)
+	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic -- the whole car arrives at once
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation
 	-- a big car reaches clients in pieces: they wait for this many before putting the body on
@@ -719,7 +724,30 @@ local function watchConsoleEverything(player: Player)
 	end)
 end
 
+-- Streaming (owner, 2026-10-29: "i cant even load it up"): players get the map around them, not
+-- all of it. Until their car or avatar is out, the city's middle streams in, where the menu and
+-- the intro fly.
+local focusFolder = Instance.new("Folder")
+focusFolder.Name = "StreamFocus"
+focusFolder.Parent = workspace
+local function menuFocus(player: Player)
+	local p = Instance.new("Part")
+	p.Name = player.Name
+	p.Anchored = true
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.Transparency = 1
+	p.Size = Vector3.one
+	p.Position = Vector3.new(500, 30, 0)
+	p.Parent = focusFolder
+	if not player.ReplicationFocus then
+		player.ReplicationFocus = p
+	end
+end
+
 local function onPlayerAdded(player: Player)
+	menuFocus(player)
 	getSession(player)
 	watchConsoleCash(player)
 	watchConsoleUnlock(player)
@@ -747,6 +775,10 @@ for _, p in Players:GetPlayers() do
 end
 
 Players.PlayerRemoving:Connect(function(player)
+	local f = focusFolder:FindFirstChild(player.Name)
+	if f then
+		f:Destroy()
+	end
 	despawn(player)
 	sessions[player] = nil
 	PlayerData.release(player)

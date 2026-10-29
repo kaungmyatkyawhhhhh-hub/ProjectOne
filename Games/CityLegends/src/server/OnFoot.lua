@@ -59,6 +59,12 @@ end
 
 -- the player's avatar beside their car (or at `at` when given)
 local function standUp(player: Player, at: CFrame?)
+	if at then
+		-- (streaming: the floor there reaches the player's game first)
+		pcall(function()
+			player:RequestStreamAroundAsync(at.Position, 5)
+		end)
+	end
 	player:LoadCharacterAsync()
 	local character = player.Character
 	if not character then

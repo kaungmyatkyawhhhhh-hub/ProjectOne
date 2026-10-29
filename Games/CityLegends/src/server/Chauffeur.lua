@@ -287,6 +287,7 @@ handlers.call = function(player, carId, placeId)
 	prompt.RequiresLineOfSight = false
 	-- (each client hides it; the rider's shows it once the car has stopped)
 	prompt.Parent = root
+	car.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	car.Parent = folder
 	root:SetNetworkOwner(player)
 
