@@ -17,7 +17,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This builds on `
   - https://drivingempire.fandom.com/wiki/Neighborhood
   - each house page (for example https://drivingempire.fandom.com/wiki/The_Delaney)
   - YouTube tours of the houses if you can.
-  The cloud assistant couldn't open these (its network blocks fandom.com), so you check the details there.
+  The cloud assistant has now read the Housing page (see 'From the Driving Empire wiki' below). Still look at the house pictures yourself.
 - **What the owner wants:**
   - the **system works like Driving Empire's**;
   - the **UI looks different**: our own fonts, layout, colours and text sizes;
@@ -35,6 +35,39 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This builds on `
    - small and medium plots come with **3** free spaces, large ones with **5**;
    - more spaces can be bought (in game cash, and also Robux there).
 5. **Inside:** you can use doors, lights, beds, sinks and other items.
+
+## From the Driving Empire wiki (read 2026-10-29, now that the network allows it)
+- **Plots:** 25 small, 8 medium and 16 large, 49 in total. You claim **one plot**, with a **30-second cooldown** before claiming another (stops plot-hopping). Use the same idea: one placed house, a 30 s cooldown.
+- **Housing button** on the HUD opens a Housing menu:
+  - **teleport to the neighbourhood**;
+  - **spawn your last house** (on a free plot);
+  - settings.
+  Ours: a house button on our HUD (our own icon) with Teleport home / Place last house / Settings / Realty.
+- **Blueprint shop prices** (wiki; the video showed newer prices):
+  - Small: Delaney $450K, Auburn $600K, Everett $650K, Apollo $750K;
+  - Medium: Stonehurst Villa $1.45M, Richford Barndominium $1.9M;
+  - Large: Cambridge Mansion $4.95M, Fiorenza Mansion $9.3M.
+  Ours run $150K – $100M.
+- **Interactions** (E or tap):
+  - doors: outside, inside, **sliding patio**, garage;
+  - **swimming pool**;
+  - **doorbell**;
+  - lights;
+  - **TV**;
+  - **stove**;
+  - **sink**;
+  - **bathtub**;
+  - **shower** (water particles);
+  - toilet (theirs plays a joke sound: skip that);
+  - beds;
+  - chairs (sit);
+  - **curtains** (only their top villa; give ours to all Mid and High houses).
+  Build all of these.
+- **TVs** play a looping video with Roblox **VideoFrame** (a free Roblox-owned landscape video from the Creator Store, inserted by hand by the owner, never loaded by script).
+- **Pools** use Roblox **Smooth Terrain water**, so you can really swim. Do the same, and keep the water inside the pool edges (theirs leaks at one house).
+- **Roommates:** friends can be invited as roommates to hang out in your house.
+- **Garage:** you can **spawn your car inside your own garage**.
+- **Avoid their old bug:** when a house is removed or swapped, move any player or car inside it out to the driveway first, so nobody gets stuck.
 
 ## The owner's reference video: `Games/CityLegends/imports/Houses.mp4`
 A 20-minute Driving Empire tour of every house (640x360). The cloud assistant went through it frame by frame. **Open it yourself** and pause on each house. Below is what's in it, with times, and **our version of each**: close to the look the owner likes, but changed (colours, proportions, roof, details, name).
