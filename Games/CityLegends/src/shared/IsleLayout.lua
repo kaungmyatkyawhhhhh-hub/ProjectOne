@@ -236,7 +236,7 @@ function IsleLayout.helipad(): Vector3
 	return polar(I.Top.ring - HALF - 42, IsleLayout.HelipadAngle, I.Top.y)
 end
 function IsleLayout.lookout(): Vector3
-	return polar(I.Top.r - 26, IsleLayout.LookoutAngle, I.Top.y)
+	return polar(I.Top.ring + HALF + 97, IsleLayout.LookoutAngle, I.Top.y)
 end
 IsleLayout.FountainAngle = -0.12
 function IsleLayout.fountain(): Vector3
@@ -244,9 +244,22 @@ function IsleLayout.fountain(): Vector3
 end
 
 ---------------------------------------------------------------------
--- House lots by tier (WestLayout.housePlots passes these on)
+-- House lots by tier (WestLayout.housePlots passes these on). Owner, 2026-10-29: High lots spread
+-- over the top, each on its own spot with its own curved private driveway, about 150+ studs
+-- apart; waterfront lots with a dock; Mid and Low along their roads but not in a perfect row.
 ---------------------------------------------------------------------
-export type Lot = { id: string, zone: string, frame: CFrame, width: number, depth: number }
+export type Lot = {
+	id: string,
+	zone: string, -- "low" | "mid" | "high"
+	tier: number, -- 0 low, 1 mid, 2 high
+	number: number, -- the lot number on its sign
+	water: boolean, -- on the beach, with a dock out the back
+	frame: CFrame, -- the pad's middle, looking out of the front (towards the drive)
+	width: number,
+	depth: number,
+	drive: { Vector3 }, -- the private driveway, road edge to the front of the lot (surface points)
+	driveWidth: number,
+}
 
 local function angleClear(a: number, list: { number }, gap: number): boolean
 	for _, j in list do
@@ -257,12 +270,71 @@ local function angleClear(a: number, list: { number }, gap: number): boolean
 	return true
 end
 
--- a lot at radius r (middle) and angle a, facing its ring road
-local function lot(id: string, zone: string, ring: Ring, r: number, a: number, width: number, depth: number): Lot
-	local p = polar(r, a, ring.y)
-	local towardRoad = (polar(ring.radius, a, ring.y) - p).Unit
-	return { id = id, zone = zone, frame = CFrame.lookAt(p, p + towardRoad), width = width, depth = depth }
+-- the same jitter every server (and in the tests): a small hash of the lot's id
+local function wobble(id: string, salt: number): number
+	local h = salt * 131
+	for i = 1, #id do
+		h = (h * 31 + string.byte(id, i)) % 100003
+	end
+	return (h / 100003) * 2 - 1
 end
+
+-- a curve from a to b leaving a towards `aim` (both surface points); the height changes evenly
+-- along its length, so every piece has the same grade
+local function curve(a: Vector3, aim: Vector3, b: Vector3, steps: number): { Vector3 }
+	local flatPts = {}
+	local lens = { 0 }
+	for k = 0, steps do
+		local t = k / steps
+		local u = 1 - t
+		local p = a * (u * u) + aim * (2 * u * t) + b * (t * t)
+		table.insert(flatPts, Vector3.new(p.X, 0, p.Z))
+		if k > 0 then
+			table.insert(lens, lens[k] + (flatPts[k + 1] - flatPts[k]).Magnitude)
+		end
+	end
+	local total = lens[#lens]
+	local pts = {}
+	for k, p in flatPts do
+		table.insert(pts, Vector3.new(p.X, a.Y + (b.Y - a.Y) * lens[k] / total, p.Z))
+	end
+	return pts
+end
+
+-- a lot whose front looks at `toward` (turned a little by `turn`), with its driveway
+local function lot(id: string, zone: string, tier: number, center: Vector3, toward: Vector3, width: number, depth: number, drive: { Vector3 }, driveWidth: number, water: boolean?, turn: number?): Lot
+	local look = Vector3.new(toward.X - center.X, 0, toward.Z - center.Z).Unit
+	return {
+		id = id,
+		zone = zone,
+		tier = tier,
+		number = 0,
+		water = water == true,
+		frame = CFrame.lookAt(center, center + look) * CFrame.Angles(0, turn or 0, 0),
+		width = width,
+		depth = depth,
+		drive = drive,
+		driveWidth = driveWidth,
+	}
+end
+
+-- the summit lots: {angle, radius of the lot's middle, pad height, how far round the drive starts}
+-- (no lot reaches past about 388 from the middle: beyond that the mid ring's banks cut the ridge
+-- down towards its terrace, and a lot would end at a cliff)
+IsleLayout.SummitLots = {
+	-- (every drive on the north side bends one way and on the south side the other, so no drive
+	-- crosses another one or a lot; none starts in the gap where the high climb joins, at 2.45)
+	{ -2.05, 300, 400, 0.32 },
+	{ -1.6, 320, 406, 0.18 }, -- up on the north ridge
+	{ -1.05, 300, 400, 0.32 },
+	{ -0.55, 285, 392, 0.32 }, -- looking back over the bay to Downtown
+	{ 0.4, 285, 392, -0.32 },
+	{ 0.95, 300, 400, -0.32 },
+	{ 1.45, 320, 404, -0.18 }, -- out on the south ridge
+	{ 2.05, 300, 400, -0.32 },
+}
+-- the waterfront lots: {angle, tier}
+IsleLayout.WaterLots = { { -1.85, 2 }, { -1.35, 2 }, { 1.35, 2 }, { 1.85, 2 }, { -2.4, 1 }, { 2.4, 1 }, { 0.9, 1 } }
 
 local lotsCache: { Lot }? = nil
 function IsleLayout.lots(): { Lot }
@@ -270,7 +342,8 @@ function IsleLayout.lots(): { Lot }
 		return lotsCache
 	end
 	local out: { Lot } = {}
-	-- low tier: inside the island ring either side of the causeway (street houses)
+	-- low tier: inside the island ring either side of the causeway (street houses), the gaps,
+	-- setbacks and angles a little uneven like a real street
 	local isleJoins = {}
 	for _, j in IsleLayout.joins("isle") do
 		table.insert(isleJoins, j.angle)
@@ -278,41 +351,80 @@ function IsleLayout.lots(): { Lot }
 	table.insert(isleJoins, IsleLayout.FountainAngle)
 	local L = I.Low
 	local rLow = I.Ring - HALF - 8 - L.depth / 2
-	local step = (L.width + 14) / rLow
 	local n = 0
 	local a = -L.arc
 	while a <= L.arc + 1e-6 do
+		local step = (L.width + 14 + 6 * (wobble(`lowgap{n}`, 1) + 1)) / rLow
 		if math.abs(a) > L.skip and angleClear(a, isleJoins, step * 0.9) then
 			n += 1
-			table.insert(out, lot(`low_{n}`, "low", R.isle, rLow, a, L.width, L.depth))
+			local id = `low_{n}`
+			local r = rLow - 3 * (wobble(id, 2) + 1) -- set back 0 to 6 studs
+			local c = polar(r, a, 0)
+			table.insert(out, lot(id, "low", 0, c, polar(I.Ring, a, 0), L.width, L.depth, {}, 0, false, math.rad(4) * wobble(id, 3)))
 		end
 		a += step
 	end
-	-- mid tier: outside the mid ring on the terrace, looking out to sea
+	-- mid tier: outside the mid ring on the terrace, looking out to sea, unevenly spaced
 	local midJoins = {}
 	for _, j in IsleLayout.joins("mid") do
 		table.insert(midJoins, j.angle)
 	end
 	local M = I.Mid
-	local rMid = M.ring + HALF + 6 + M.lotDepth / 2
 	for k = 0, M.lots - 1 do
-		local am = (k + 0.5) / M.lots * 2 * math.pi
-		if angleClear(am, midJoins, (M.lotWidth / 2 + HALF + 20) / rMid) then
-			table.insert(out, lot(`mid_{k + 1}`, "mid", R.mid, rMid, am, M.lotWidth, M.lotDepth))
+		local id = `mid_{k + 1}`
+		local am = (k + 0.5) / M.lots * 2 * math.pi + 0.07 * wobble(id, 4)
+		local rMid = M.ring + HALF + 10 + M.lotDepth / 2 + 6 * wobble(id, 5)
+		-- (and none where the low climb's last bend runs along under the terrace's edge)
+		if angleClear(am, midJoins, (M.lotWidth / 2 + HALF + 20) / rMid) and math.abs(angDiff(am, 0)) > 0.42 then
+			local c = polar(rMid, am, M.y)
+			local frontAt = polar(M.ring + HALF, am, M.y)
+			local frontEdge = polar(rMid - M.lotDepth / 2, am, M.y)
+			table.insert(out, lot(id, "mid", 1, c, frontAt, M.lotWidth, M.lotDepth, { frontAt, frontEdge }, 16, false, math.rad(4) * wobble(id, 6)))
 		end
 	end
-	-- high tier: round the top ring, clear of the high climb's face, the lookout and the helipad
+	-- high tier on the summit: each on its own spot round the top (two out on the ridge), at
+	-- different heights, with a curved private drive off the summit ring
 	local T = I.Top
-	local rTop = T.ring + HALF + 6 + T.lotDepth / 2
-	local half = (T.lotWidth / 2 + 10) / rTop
-	local free = math.pi - UPPER_SPAN - half - 0.08 -- either side of east
-	local slots = math.floor(2 * free * rTop / (T.lotWidth + 22)) + 1
-	local h = 0
-	for k = 0, slots - 1 do
-		local at = -free + (if slots > 1 then 2 * free * k / (slots - 1) else 0)
-		if angDiff(at, IsleLayout.LookoutAngle) > half + 0.12 and angDiff(at, IsleLayout.HelipadAngle) > half + 0.1 then
-			h += 1
-			table.insert(out, lot(`high_{h}`, "high", R.top, rTop, at, T.lotWidth, T.lotDepth))
+	for i, s in IsleLayout.SummitLots do
+		local am, r, y, bend = s[1], s[2], s[3], s[4]
+		local c = polar(r, am, y)
+		local frontEdge = polar(r - T.lotDepth / 2, am, y)
+		local start = polar(T.ring + HALF, am + bend, T.y)
+		local aim = polar((T.ring + HALF + r - T.lotDepth / 2) / 2, am + bend, (T.y + y) / 2)
+		local pts = curve(start, aim, frontEdge, 8)
+		table.insert(out, lot(`high_{i}`, "high", 2, c, polar(T.ring, am, y), T.lotWidth, T.lotDepth, pts, 18))
+	end
+	-- the waterfront: on the beach side of the island ring at the long ends, a short drive in from
+	-- the ring, the back of the lot at the top of the sand (a dock goes on into the water)
+	local wl, wm = 0, 0
+	for _, s in IsleLayout.WaterLots do
+		local am, tier = s[1], s[2]
+		local W = if tier == 2 then T else M
+		local depth = if tier == 2 then T.lotDepth else M.lotDepth
+		-- (the back at the top of the sand, or if the beach is narrow, the front kept off the road)
+		local r = math.max(IsleLayout.shore(am) - 92 - depth / 2, I.Ring + HALF + 16 + depth / 2)
+		local id
+		if tier == 2 then
+			wl += 1
+			id = `high_w{wl}`
+		else
+			wm += 1
+			id = `mid_w{wm}`
+		end
+		local y = 0.6
+		local c = polar(r, am, y)
+		local start = polar(I.Ring + HALF, am, 0)
+		local frontEdge = polar(r - depth / 2, am, y)
+		table.insert(out, lot(id, if tier == 2 then "high" else "mid", tier, c, start, W.lotWidth, depth, { start, frontEdge }, 18, true))
+	end
+	-- numbers on the signs: low first, then mid, then high
+	local num = 0
+	for _, tier in { 0, 1, 2 } do
+		for _, l in out do
+			if l.tier == tier then
+				num += 1
+				l.number = num
+			end
 		end
 	end
 	lotsCache = out
@@ -418,11 +530,15 @@ end
 
 -- the flattening: a flat zone at height y (out to `flat` from its line), with banks no steeper
 -- than k (rise per run) out from there
-type Zone = { kind: string, y: number, flat: number, k: number, a: Vector3?, b: Vector3?, y1: number?, r0: number?, r1: number?, frame: CFrame?, w: number?, d: number?, f0: boolean?, f1: boolean?, box: { number } }
+type Zone = { kind: string, y: number, flat: number, k: number, a: Vector3?, b: Vector3?, y1: number?, r0: number?, r1: number?, frame: CFrame?, w: number?, d: number?, f0: boolean?, f1: boolean?, reach: number?, box: { number } }
 local zones: { Zone }? = nil
 local CELL = 96
 local grid: { [number]: { Zone } } = {}
 local REACH = 150 -- how far a zone's banks can reach
+-- (a house lot's banks reach less far: a summit lot 200 studs above a terrace lot must not tilt
+-- the ground of the one below, nor the other way round)
+local LOT_REACH = 100
+local LOT_SLOPE = 0.8 -- its banks: gentle enough to read as a garden slope, not a cliff
 
 local function key(gx: number, gz: number): number
 	return gx * 65536 + gz
@@ -447,6 +563,12 @@ local function buildZones()
 	addZone({ kind = "annulus", y = M.y - 0.3, flat = 0, k = 1.3, r0 = M.inner, r1 = M.outer, box = { -M.outer - REACH, -M.outer - REACH, M.outer + REACH, M.outer + REACH } })
 	addZone({ kind = "top", y = T.y - 0.3, flat = 0, k = 1.3, r0 = 0, r1 = T.r, box = { -T.r - REACH, -T.r - REACH, T.r + REACH, T.r + REACH } })
 	addZone({ kind = "annulus", y = -0.3, flat = 0, k = 0.6, r0 = I.Foot + 20, r1 = I.r - 95, box = { -I.r, -I.r, I.r, I.r } })
+	-- the lookout's own flat (out on the east edge of the top) and the path to it
+	do
+		local p = IsleLayout.lookout()
+		local f = CFrame.lookAt(p, Vector3.new(CX, p.Y, CZ))
+		addZone({ kind = "lot", y = p.Y - 0.3, flat = 4, k = LOT_SLOPE, reach = LOT_REACH, frame = f * CFrame.new(0, 0, -30), w = 60, d = 120, box = { p.X - CX - 220, p.Z - CZ - 220, p.X - CX + 220, p.Z - CZ + 220 } })
+	end
 	-- the gate's yard (the guard house and the guards stand beside the road)
 	do
 		local g = IsleLayout.GateCFrame
@@ -456,7 +578,14 @@ local function buildZones()
 	for _, l in IsleLayout.lots() do
 		local p = l.frame.Position
 		local rad = math.max(l.width, l.depth) / 2 + REACH
-		addZone({ kind = "lot", y = p.Y - 0.3, flat = 4, k = 1.2, frame = l.frame, w = l.width, d = l.depth, box = { p.X - CX - rad, p.Z - CZ - rad, p.X - CX + rad, p.Z - CZ + rad } })
+		addZone({ kind = "lot", y = p.Y - 0.3, flat = 4, k = LOT_SLOPE, reach = LOT_REACH, frame = l.frame, w = l.width, d = l.depth, box = { p.X - CX - rad, p.Z - CZ - rad, p.X - CX + rad, p.Z - CZ + rad } })
+		-- its private driveway, flat across like a road
+		for k = 1, #l.drive - 1 do
+			local a, b = l.drive[k], l.drive[k + 1]
+			local reach = l.driveWidth / 2 + REACH
+			addZone({ kind = "leg", y = a.Y - 0.4, y1 = b.Y - 0.4, flat = l.driveWidth / 2 + 3, k = 1.5, a = a, b = b, f0 = false, f1 = false,
+				box = { math.min(a.X, b.X) - CX - reach, math.min(a.Z, b.Z) - CZ - reach, math.max(a.X, b.X) - CX + reach, math.max(a.Z, b.Z) - CZ + reach } })
+		end
 	end
 	-- the roads: rings and the climbs' legs, low to high
 	for _, ring in { R.isle, R.mid, R.top } do
@@ -525,8 +654,17 @@ function IsleLayout.surface(x: number, z: number): number
 	-- parts of the roads again on top (so a bank never lifts or buries a road)
 	for _, zn in list do
 		local y, e = zoneAt(zn, x, z, r, a)
-		if e < REACH then
+		if e < (zn.reach or REACH) then
 			h = math.clamp(h, y - zn.k * e, y + zn.k * e)
+		end
+	end
+	-- a lot's pad is flat whatever banks reach over it
+	for _, zn in list do
+		if zn.kind == "lot" then
+			local y, e = zoneAt(zn, x, z, r, a)
+			if e <= 0 then
+				h = y
+			end
 		end
 	end
 	-- (where two pieces' flats overlap at a bend, the nearer piece's line decides)

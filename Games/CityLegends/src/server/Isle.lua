@@ -115,6 +115,7 @@ local function terrain(t: Terrain)
 	end
 	local CH = 32 -- columns per chunk side
 	local yLow = -24
+	local CLEAR_TO = 640 -- above the highest peak
 	for ci = 1, n, CH do
 		for cj = 1, n, CH do
 			local ni, nj = math.min(CH, n - ci + 1), math.min(CH, n - cj + 1)
@@ -165,6 +166,12 @@ local function terrain(t: Terrain)
 				local lo = Vector3.new(x0 + (ci - 1) * RES, yLow, z0 + (cj - 1) * RES)
 				local region = Region3.new(lo, lo + Vector3.new(ni * RES, ny * RES, nj * RES))
 				t:WriteVoxels(region, RES, mats, occ)
+				-- (and the air above it cleared: a rebuild with lower ground there, like a lot cut
+				-- into the ridge, mustn't leave the old ground standing over it)
+				local above = lo + Vector3.new(0, ny * RES, 0)
+				if above.Y < CLEAR_TO then
+					t:FillRegion(Region3.new(above, Vector3.new(above.X + ni * RES, CLEAR_TO, above.Z + nj * RES)), RES, Enum.Material.Air)
+				end
 				task.wait()
 			end
 		end
@@ -196,6 +203,16 @@ end
 local function ringRoad(kit: any, parent: Instance, ring: IsleLayout.Ring)
 	local folder = kit.folder("Ring_" .. ring.id, parent)
 	local joins = IsleLayout.joins(ring.id)
+	-- (and an opening in the kerb wherever a lot's driveway leaves this ring)
+	for _, l in IsleLayout.lots() do
+		local s = l.drive[1]
+		if s then
+			local rel = Vector3.new(s.X - CENTER.X, 0, s.Z - CENTER.Z)
+			if math.abs(rel.Magnitude - ring.radius - HALF) < 3 and math.abs(s.Y - ring.y) < 2 then
+				table.insert(joins, { angle = math.atan2(rel.Z, rel.X), gap = (l.driveWidth / 2 + 6) / ring.radius } :: any)
+			end
+		end
+	end
 	local n = math.clamp(math.floor(ring.radius * 2 * math.pi / 40), 64, 180)
 	local function inGap(a: number, extra: number): boolean
 		for _, j in joins do
@@ -227,7 +244,7 @@ local function ringRoad(kit: any, parent: Instance, ring: IsleLayout.Ring)
 end
 
 -- a flat triangle of road (a, b, c at the same height: the surface), as two wedges
-local function flatTriangle(kit: any, parent: Instance, a: Vector3, b: Vector3, c: Vector3)
+local function flatTriangle(kit: any, parent: Instance, a: Vector3, b: Vector3, c: Vector3, color: Color3?, material: Enum.Material?)
 	-- split at the foot of the height from a, so each half has its right angle there
 	local bc = c - b
 	local m = b + bc * math.clamp((a - b):Dot(bc) / bc:Dot(bc), 0, 1)
@@ -238,7 +255,7 @@ local function flatTriangle(kit: any, parent: Instance, a: Vector3, b: Vector3, 
 			-- WedgePart: right angle at local (y -h/2, z +l/2); its x is the thickness (vertical here)
 			local y, z = ey.Unit, -ez.Unit
 			local cf = CFrame.fromMatrix(m + ey / 2 + ez / 2 - Vector3.new(0, 1, 0), y:Cross(z), y, z)
-			kit.mk(parent, Vector3.new(2, h, l), cf, kit.ASPHALT, kit.ROAD_MAT, { class = "Wedge", reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
+			kit.mk(parent, Vector3.new(2, h, l), cf, color or kit.ASPHALT, material or kit.ROAD_MAT, { class = "Wedge", reflectance = if color then 0 else kit.ROAD_OPTS.reflectance, name = "Road" })
 		end
 	end
 end
@@ -348,6 +365,34 @@ function climb(kit: any, parent: Instance, rd: IsleLayout.Road)
 				local sideA, sideB = dirA:Cross(Vector3.yAxis), dirB:Cross(Vector3.yAxis)
 				local s = if (sideB - sideA):Dot(dirA) > 0 then 1 else -1
 				flatTriangle(kit, folder, p, p + sideA * s * HALF, p + sideB * s * HALF)
+			end
+		end
+	end
+end
+
+-- a lot's private driveway: pale pavers along its curve (no kerb, no lines), pieces meeting edge to
+-- edge with a flat triangle closing the outside of each bend, the same way as the climbs
+local PAVERS = Color3.fromRGB(196, 190, 178)
+local function driveway(kit: any, parent: Instance, l: IsleLayout.Lot)
+	local pts = l.drive
+	local w = l.driveWidth
+	for k = 1, #pts - 1 do
+		local a, b = pts[k], pts[k + 1]
+		local len = (b - a).Magnitude
+		if len > 0.2 then
+			local cf = CFrame.lookAt((a + b) / 2, b)
+			-- (the last piece runs on onto the lot a little, under the pad's edge)
+			local extra = if k == #pts - 1 then 6 else 0.4
+			kit.mk(parent, Vector3.new(w, 2, len + extra), cf * CFrame.new(0, -1, -extra / 2 + 0.2), PAVERS, Enum.Material.Pavement, { name = "Driveway" })
+		end
+		if k > 1 then
+			local p = pts[k - 1]
+			local dirA = Vector3.new(a.X - p.X, 0, a.Z - p.Z).Unit
+			local dirB = Vector3.new(b.X - a.X, 0, b.Z - a.Z).Unit
+			if math.abs(dirA:Cross(dirB).Y) > 0.001 then
+				local sideA, sideB = dirA:Cross(Vector3.yAxis), dirB:Cross(Vector3.yAxis)
+				local s = if (sideB - sideA):Dot(dirA) > 0 then 1 else -1
+				flatTriangle(kit, parent, a, a + sideA * s * w / 2, a + sideB * s * w / 2, PAVERS, Enum.Material.Pavement)
 			end
 		end
 	end
@@ -534,6 +579,30 @@ local function trees(kit: any, parent: Instance, palm: (any, Instance, Vector3, 
 	end
 end
 
+-- the summit's grove: pines between the High lots, so from one house you can't see the next one
+-- up close (owner, 2026-10-29), none on the pads, drives or roads
+local function summitGrove(kit: any, parent: Instance)
+	local folder = kit.folder("SummitGrove", parent)
+	local placed = 0
+	for _ = 1, 4000 do
+		if placed >= 170 then
+			break
+		end
+		local a = rng:NextNumber(0, math.pi * 2)
+		local r = rng:NextNumber(I.Top.ring + HALF + 14, 500)
+		local x, z = math.cos(a) * r, math.sin(a) * r
+		if not IsleLayout.inZone(x, z, 9) then
+			local y = IsleLayout.surface(x, z)
+			local s = math.max(math.abs(IsleLayout.surface(x + 4, z) - IsleLayout.surface(x - 4, z)), math.abs(IsleLayout.surface(x, z + 4) - IsleLayout.surface(x, z - 4))) / 8
+			if s < 0.9 and y > 330 then
+				placed += 1
+				local p = CENTER + Vector3.new(x, y - 0.6, z)
+				pine(kit, kit.lodGroup(folder, "Detail", p, 1100), p)
+			end
+		end
+	end
+end
+
 ---------------------------------------------------------------------
 -- The build
 ---------------------------------------------------------------------
@@ -581,14 +650,41 @@ function Isle.build(kit: any, parent: Instance, palm: (any, Instance, Vector3, n
 		local p = onSand(I.r - 55, a)
 		lifeguardTower(kit, beach, p, (p - CENTER) * Vector3.new(1, 0, 1))
 	end
+	local function nearWaterLot(a: number): boolean
+		for _, s in IsleLayout.WaterLots do
+			if IsleLayout.angDiff(a, s[1]) < 0.1 then
+				return true
+			end
+		end
+		return false
+	end
 	for k = 0, 7 do
-		local p = onSand(I.r - 80, math.pi * 0.7 + k * 0.07)
-		beachHut(kit, beach, p, (p - CENTER) * Vector3.new(1, 0, 1))
+		local a = math.pi * 0.7 + k * 0.07
+		if not nearWaterLot(a) then
+			local p = onSand(I.r - 80, a)
+			beachHut(kit, beach, p, (p - CENTER) * Vector3.new(1, 0, 1))
+		end
+	end
+	-- each waterfront lot's own dock, from the back of the lot over the sand into the water
+	for _, l in lots do
+		if l.water then
+			local a = math.atan2(l.frame.Z - CENTER.Z, l.frame.X - CENTER.X)
+			local out = Vector3.new(math.cos(a), 0, math.sin(a))
+			local from = l.frame.Position + out * (l.depth / 2 - 4)
+			pier(kit, beach, Vector3.new(from.X, 0.4, from.Z), out, IsleLayout.shore(a) - (from - CENTER).Magnitude + 70)
+		end
 	end
 	pier(kit, beach, IsleLayout.polar(IsleLayout.shore(math.pi) - 40, math.pi, 0.4), Vector3.new(-1, 0, 0), 220)
 
 	trees(kit, folder, palm)
+	summitGrove(kit, folder)
 	lowStreet(kit, folder, lots)
+	local drives = kit.folder("Driveways", folder)
+	for _, l in lots do
+		if #l.drive >= 2 then
+			driveway(kit, drives, l)
+		end
+	end
 	fountain(kit, folder, IsleLayout.fountain())
 	helipad(kit, folder, IsleLayout.helipad())
 	lookout(kit, folder, IsleLayout.lookout())

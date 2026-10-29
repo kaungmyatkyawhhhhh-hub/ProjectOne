@@ -662,9 +662,11 @@ Config.West = {
 		Road = 34, -- every island road: one lane each way
 		Foot = 1050, -- the mountain's lower slopes start here
 		-- the mid terrace (a shelf cut round the mountain), its ring road and the lots outside it
-		Mid = { y = 200, inner = 540, outer = 690, ring = 560, lots = 14, lotWidth = 104, lotDepth = 100 },
+		Mid = { y = 200, inner = 540, outer = 690, ring = 560, lots = 12, lotWidth = 104, lotDepth = 100 },
 		-- the flat top (the gated Summit), its ring road and the lots round it
-		Top = { y = 400, r = 300, ring = 160, lotWidth = 118, lotDepth = 110 },
+		-- (r: the flat top is just the ring road and the helipad now; each High lot is its own pad cut
+		-- into the ridge round it, owner 2026-10-29: "each on its own spot")
+		Top = { y = 400, r = 215, ring = 160, lotWidth = 120, lotDepth = 130 }, -- High lots (summit and waterfront)
 		Low = { arc = 1.1, skip = 0.33, width = 60, depth = 60 }, -- street lots by the causeway
 		-- the switchbacks: curved legs round the mountain (radius of each, length of each)
 		Lower = { radii = { 1010, 935, 860, 790, 720 }, length = 440, center = 0 }, -- east face
