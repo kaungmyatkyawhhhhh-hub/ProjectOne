@@ -215,6 +215,50 @@ Every house is a **real house you walk into**, not a shell or a fake front:
 11. **Real estate quests:** "Tour 3 houses", "Claim your first plot", "Own a High house". Small rewards, and they point new players to the system.
 12. **Estate value leaderboard:** house + upgrades + garage cars.
 
+### 8. More house features (owner, 2026-10-29: "add more stuff for the houses, like big opening gates")
+**Gates and entrances**
+1. **Big opening gates on Mid and High houses:**
+   - Mid: tall black-steel sliding gates between rendered pillars, each pillar topped with a lamp.
+   - High: **huge double iron gates** that swing open slowly and smoothly (about 3 s, with a deep motor sound and a soft clunk), between big stone or render pillars with lanterns, with the house name in metal letters on the wall beside them.
+   - They open by themselves for the owner, roommates, allowed visitors and their cars. They close again about 5 s after the car passes. Others get the intercom.
+   - Low houses get a small swing gate or a low picket / ranch fence with an open drive.
+2. **Intercom / video doorbell** on the gate post: visitors press it, the owner gets a pop-up with a small camera view of who it is, and taps **Let in** or **Ignore**. The visitor gets an answer either way.
+3. **Gate light-up:** at night the pillar lamps, path lights and fountain switch on as you drive in (a short welcome-home sequence).
+4. **Garage doors** that roll or tilt up as your car comes near, with lights inside switching on. **Glass garage doors** on modern houses so the cars inside are seen from the drive.
+
+**Outside**
+5. **Driveway types by style:** herringbone pavers, stone, gravel, or white concrete. A **turning circle round a fountain or a planter with a tree** on High houses. **Lit driveway edge lights.**
+6. **Pools:** a lit pool with sun loungers and umbrellas. A **hot tub** on Mid and High. An **infinity pool over the view** on summit houses. A **pool slide** on one family house. You can swim (Roblox water or a swim-zone).
+7. **Garden:** palms, hedges, flower beds with rocks (like the owner's pictures), a lawn with stripes, garden lights, a pergola with a dining table, an outdoor **BBQ kitchen**, a **fire pit** with seats.
+8. **Sports:** a **basketball half-court** on some Mid houses; a **tennis court** on a High estate; a **putting green** on the biggest.
+9. **Helipad** on the top High houses with a parked helicopter (as scenery, or the helicopter tour). A **boat dock with a parked boat** on the low lots by the water.
+10. **Outdoor cinema screen** in the garden of one High house, playing the house's TV.
+
+**Inside**
+11. **Lights:** a switch per room, plus a "whole house" light button on the mailbox menu (on / off / party colours are NOT allowed: no party mode in houses, so just warm or cool white).
+12. **Fireplaces** that turn on and off (flame + glow + crackle).
+13. **Kitchen:** fridge, oven light, coffee machine (a small steam puff).
+14. **TV:** turns on and shows a moving picture (for example a looping city / car video texture), with a remote prompt.
+15. **Home gym** (treadmill, weights) in Mid / High: sitting on it plays a simple animation.
+16. **Home cinema room** with recliners in big houses.
+17. **Walk-in wardrobe:** opens the outfit / Flex menu.
+18. **Glass lift** between floors in the biggest houses, plus stairs.
+19. **Secret room** in the most expensive houses: a bookcase that slides open to a vault room with the house safe (the rent / daily cash).
+20. **Wine-free bar / juice bar** corner (no alcohol anywhere, game rule): coffee, juice and snacks only.
+
+**Garage / showroom**
+21. **Underground showroom** (top houses): a car lift from the driveway down to a dark glossy showroom floor with spotlights, numbered car pads, and a turntable in the middle for the best car.
+22. **Car wash bay** at the garage: drive in, and the car gets clean and shiny (a short spray effect).
+23. **Garage wall:** a tool wall, tyre racks and your car count on a neon-free display ("7 / 10 cars").
+
+**Fun and social**
+24. **Roommates** (like their game): add friends as roommates; they can open the gates, use the house and spawn there.
+25. **Guest book** at the door: visitors leave a ⭐ and their name. The house's star count shows on the mailbox.
+26. **House name plate:** the owner can rename the house (filtered text), shown on the gate wall.
+27. **Weather and time:** lights come on at dusk, the pool glows at night, and the fireplace looks best on rainy nights.
+
+**Keep it fast:** gates, doors and lifts move only when someone is near (tweens on the client, state on the server). Inside detail loads only near or inside the house. Count the parts per house and report the FPS on a phone-size screen.
+
 ## Check before you say done
 - 2-player test in Studio:
   - buy blueprints, claim plots, swap houses, garage spaces, driveway cars;
