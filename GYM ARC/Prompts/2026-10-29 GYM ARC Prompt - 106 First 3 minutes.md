@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, retention, onboarding]
-status: todo (7 Nov, with 104 and 108)
+status: mostly done 29 Oct (see progress note); left: Next BEACH GYM moment, timed hints, tests/pacing
 ---
 # 106 First 3 minutes
 
@@ -21,6 +21,8 @@ GYM ARC: make the first 3 minutes fast, clear and rewarding. Follow CLAUDE.md an
 7b) SWITCH: Config/Experience Config FastStart_Enabled (false = old tutorial and old first goal), so it can be undone live. Write before/after in the progress note so I can compare next Sunday.
 TEST: 3 fresh players in Studio (phone size): time to first rep, time to first Growth Spurt, hint after 10 s idle, no popups before Spurt 1. Screenshots. Progress note + update Tutorial, Growth Spurts and Analytics notes.
 ```
+
+Progress: [[2026-10-29 GYM ARC First minutes fixes (investor build)]]
 
 ## Added 29 Oct from the playtest ([[2026-10-29 GYM ARC Playtest - first 6 minutes]])
 ```text
