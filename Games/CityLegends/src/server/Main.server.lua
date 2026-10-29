@@ -36,6 +36,12 @@ Players.CharacterAutoLoads = false
 local remotes = Instance.new("Folder")
 remotes.Name = "Remotes"
 local function remote(className: string, name: string): any
+	-- (one remote per name: several systems share some, like HouseFx for Houses, Realty and the
+	-- Summit gate; a second one of the same name would never reach the client's listener)
+	local existing = remotes:FindFirstChild(name)
+	if existing and existing:IsA(className) then
+		return existing
+	end
 	local r = Instance.new(className)
 	r.Name = name
 	r.Parent = remotes
@@ -269,6 +275,7 @@ Police.init(ctx)
 Bank.init(ctx, Police)
 Activities.init(ctx)
 Houses.init(ctx)
+require(script.Parent:WaitForChild("Realty")).init(ctx) -- Legends Realty: the house catalogue
 -- the Summit's gate on Legends Isle (residents only)
 require(script.Parent:WaitForChild("Gate")).init(ctx)
 Hotel.init(ctx)

@@ -675,18 +675,71 @@ Config.West = {
 }
 
 ---------------------------------------------------------------------
--- Island houses (owner, 2026-10-22: "add houses which u can buy and show case your car garage").
--- Miami-style villas and mansions on the private islands (WestLayout.housePlots). You buy a house
--- type; in each server you get a free plot of that type (the one you had last time if it's free).
--- The ground floor is a glass car gallery: you pick which of your cars stand in its bays.
+-- Houses (owner, 2026-10-29: "a housing system like Driving Empire's", our own look). You buy a
+-- house's blueprint at Legends Realty (it's yours for good), then claim a FOR SALE lot of its
+-- tier on Legends Isle and the house builds there. One house stands at a time; swap any time.
+-- Tier = lot = place on the mountain: 0 Low (by the bridge), 1 Mid (the terrace and the beach),
+-- 2 High (the Summit behind the gate, and the beach). The list was OK'd by the owner (mood board
+-- https://claude.ai/artifact/AYdvAfttk8rEcELnGbufgd). bays: garage spaces that come free; maxBays:
+-- the most you can buy up to (BayPrices); drive: cars on show on the driveway; level: the player
+-- level needed to buy. look: how HouseBuilder draws it (footprint, colours, roof, extras).
 ---------------------------------------------------------------------
+local function design(id: string, name: string, tier: number, style: string, floors: number, beds: number, baths: number, sqft: number, bays: number, maxBays: number, price: number, level: number, desc: string, look: { [string]: any })
+	return { id = id, name = name, tier = tier, style = style, floors = floors, beds = beds, baths = baths, sqft = sqft, bays = bays, maxBays = maxBays, drive = if bays >= 10 then 3 else 2, price = price, level = level, desc = desc, look = look }
+end
+local C3 = Color3.fromRGB
 Config.Houses = {
-	Types = {
-		villa = { tier = 1, name = "Island Villa", price = 4000000, bays = 4 },
-		mansion = { tier = 2, name = "Legends Key Mansion", price = 15000000, bays = 6 },
+	Designs = {
+		-- LOW (small lots by the bridge)
+		design("harlow", "The Harlow", 0, "Small modern, timber slats", 2, 3, 2, 1450, 3, 4, 150000, 1, "A warm white starter home with timber slats and big black windows.", { w = 34, d = 30, wall = C3(241, 236, 226), trim = C3(36, 36, 38), accent = C3(169, 119, 74), roof = "mono", roofColor = C3(52, 54, 58) }),
+		design("bayview", "Bayview", 0, "Modern, sand render", 2, 3, 2, 1550, 3, 4, 240000, 1, "Sand-coloured modern house with a hip roof and a sunny balcony.", { w = 36, d = 30, wall = C3(222, 205, 176), trim = C3(250, 248, 242), roof = "hip", roofColor = C3(86, 88, 92), balcony = true }),
+		design("linden", "Linden", 0, "Single-floor modern", 1, 2, 2, 1300, 3, 4, 330000, 2, "A low sage-green modern home with a flat roof and a covered patio.", { w = 40, d = 30, wall = C3(152, 170, 146), trim = C3(244, 242, 236), roof = "flat", roofColor = C3(60, 62, 66) }),
+		design("corsa_lane", "Corsa Lane", 0, "White and grey modern", 2, 3, 3, 1800, 3, 4, 450000, 2, "Crisp white and grey two-storey with a balcony and a double garage.", { w = 38, d = 32, wall = C3(246, 246, 244), trim = C3(70, 72, 76), accent = C3(120, 124, 130), roof = "flat", roofColor = C3(58, 60, 64), balcony = true }),
+		design("driftwood", "Driftwood Beach Shack", 0, "Timber shack on stilts", 1, 1, 1, 850, 3, 4, 520000, 3, "A weathered timber shack with a big deck, made for the beach life.", { w = 28, d = 24, wall = C3(166, 140, 112), trim = C3(240, 236, 226), roof = "gable", roofColor = C3(110, 96, 84), deck = true }),
+		design("meadow_cottage", "Meadow Cottage", 0, "Beige cottage, hip roof", 1, 2, 1, 1100, 3, 4, 600000, 3, "A cosy single-storey cottage with a low hip roof and a garden path.", { w = 36, d = 28, wall = C3(226, 210, 182), trim = C3(250, 246, 236), roof = "hip", roofColor = C3(120, 92, 70) }),
+		design("harbour_townhouse", "Harbour Townhouse", 0, "Narrow brick townhouse", 3, 3, 2, 1700, 3, 4, 750000, 4, "Three tall floors of red brick with white sash windows.", { w = 26, d = 32, wall = C3(150, 78, 60), trim = C3(246, 242, 234), roof = "gable", roofColor = C3(62, 62, 66) }),
+		design("juniper", "Juniper Bungalow", 0, "Craftsman bungalow", 1, 3, 2, 1600, 3, 4, 900000, 4, "A craftsman bungalow with a deep front porch on stone posts.", { w = 40, d = 32, wall = C3(116, 128, 104), trim = C3(240, 234, 220), accent = C3(150, 140, 128), roof = "gable", roofColor = C3(70, 62, 56), porch = true }),
+		design("sandpiper", "Sandpiper Ranch", 0, "Long ranch house", 1, 4, 2, 2000, 3, 4, 1100000, 5, "A long, low ranch house with a wide garage and a lawn all round.", { w = 48, d = 30, wall = C3(232, 222, 204), trim = C3(96, 80, 64), roof = "hip", roofColor = C3(98, 84, 72) }),
+		design("fernbrook", "Fernbrook House", 0, "Family house, bay windows", 2, 4, 3, 2200, 3, 4, 1400000, 5, "A family house with bay windows and a gabled roof.", { w = 40, d = 34, wall = C3(198, 210, 220), trim = C3(250, 250, 248), roof = "gable", roofColor = C3(64, 70, 80) }),
+		design("aspen", "Aspen A-Frame", 0, "Log A-frame cabin", 2, 3, 2, 1500, 3, 4, 1800000, 6, "A log A-frame with a glass gable end looking out over the water.", { w = 32, d = 34, wall = C3(132, 96, 64), trim = C3(36, 34, 32), roof = "aframe", roofColor = C3(52, 48, 44) }),
+		design("brookside", "Brookside House", 0, "Craftsman, stone porch", 2, 4, 3, 2500, 3, 4, 2400000, 6, "Craftsman house with a stone-based porch and a big family kitchen.", { w = 42, d = 34, wall = C3(208, 196, 170), trim = C3(250, 248, 240), accent = C3(150, 140, 128), roof = "gable", roofColor = C3(84, 76, 70), porch = true }),
+		-- MID (the terrace halfway up, and the beach)
+		design("maple_hollow", "Maple Hollow", 1, "Gabled family house, gazebo", 2, 4, 3, 2600, 3, 6, 3000000, 8, "Sage-green gabled house with a stone base, a porch and a gazebo.", { w = 50, d = 40, wall = C3(143, 165, 138), trim = C3(246, 243, 236), accent = C3(124, 116, 104), roof = "gable", roofColor = C3(70, 72, 76), porch = true, gazebo = true }),
+		design("ridgeback_barn", "Ridgeback Barn", 1, "Barn house, wrap porch", 2, 3, 3, 2400, 4, 6, 3800000, 8, "A forest-green barn house with a metal roof, a cupola and a wrap-around porch.", { w = 48, d = 40, wall = C3(47, 61, 51), trim = C3(220, 214, 200), accent = C3(85, 73, 61), roof = "barn", roofColor = C3(170, 172, 168), porch = true, cupola = true }),
+		design("the_laurel", "The Laurel", 1, "Warm modern", 2, 4, 3, 2900, 3, 6, 4600000, 9, "Warm modern: white render, cedar and big glass, a pool out the back.", { w = 52, d = 40, wall = C3(244, 240, 232), trim = C3(40, 40, 42), accent = C3(160, 112, 72), roof = "flat", roofColor = C3(52, 54, 58), pool = true, balcony = true }),
+		design("kingsridge", "Kingsridge Villa", 1, "White and slate stone, waterfall pool", 2, 3, 3, 3100, 4, 6, 5500000, 10, "White render and dark slate stone, timber soffits and a waterfall pool.", { w = 54, d = 42, wall = C3(245, 245, 242), trim = C3(30, 30, 32), accent = C3(75, 79, 83), roof = "flat", roofColor = C3(48, 50, 54), pool = true }),
+		design("casa_solana", "Casa Solana", 1, "Spanish villa, courtyard", 2, 4, 4, 3400, 4, 6, 6500000, 10, "A Spanish villa with clay tile roofs, arches and a shady courtyard.", { w = 54, d = 44, wall = C3(240, 226, 200), trim = C3(120, 72, 44), roof = "tile", roofColor = C3(178, 84, 50), arches = true, pool = true }),
+		design("clearwater", "Clearwater Glass House", 1, "Glass pavilion", 1, 3, 3, 3000, 4, 6, 7800000, 11, "A single-floor glass pavilion: you see right through it to the view.", { w = 58, d = 40, wall = C3(236, 236, 234), trim = C3(26, 26, 28), roof = "flat", roofColor = C3(40, 40, 44), glassy = true, pool = true }),
+		design("cedar_lodge", "Cedar Lake Lodge", 1, "Timber lodge, hot tub", 2, 5, 4, 3800, 4, 6, 9000000, 12, "A big timber lodge with stone chimneys, a hot tub and a deck.", { w = 56, d = 44, wall = C3(126, 88, 58), trim = C3(40, 36, 32), accent = C3(140, 134, 124), roof = "gable", roofColor = C3(58, 52, 46), deck = true, hottub = true }),
+		design("cliffside", "Cliffside House", 1, "Cantilever over the cliff", 3, 4, 4, 4000, 4, 6, 10500000, 13, "Concrete and glass stepping out over the slope, a floor that hangs in the air.", { w = 50, d = 44, wall = C3(200, 200, 196), trim = C3(30, 30, 32), accent = C3(150, 110, 76), roof = "flat", roofColor = C3(56, 58, 62), cantilever = true, pool = true }),
+		design("whitmore_hall", "Whitmore Hall", 1, "Double verandas, tennis court", 2, 6, 5, 5200, 4, 6, 12500000, 14, "A grand white house with two floors of verandas, a pool and a tennis court.", { w = 62, d = 46, wall = C3(250, 249, 245), trim = C3(250, 249, 245), accent = C3(47, 74, 59), roof = "hip", roofColor = C3(93, 107, 120), verandas = true, pool = true }),
+		design("ocean_terrace", "Ocean Terrace", 1, "Glass waterfront, lit pool", 3, 5, 5, 5000, 4, 6, 15000000, 15, "Glass boxes over a lit pool, a solar roof and a private dock.", { w = 58, d = 46, wall = C3(246, 246, 244), trim = C3(36, 36, 38), roof = "flat", roofColor = C3(40, 42, 46), glassy = true, pool = true, solar = true }),
+		-- HIGH (the Summit, behind the gate, and the beach)
+		design("skyline_loft", "Skyline Loft House", 2, "Modern, underground showroom", 3, 3, 4, 4000, 5, 8, 20000000, 20, "Warm wood and bronze glass, a fire-pit lounge and a car showroom underground.", { w = 64, d = 52, wall = C3(232, 226, 216), trim = C3(30, 28, 26), accent = C3(122, 90, 58), roof = "flat", roofColor = C3(44, 44, 46), cantilever = true, pool = true }),
+		design("palm_crest", "Palm Crest Estate", 2, "Waterfront villa, tile roofs", 2, 6, 6, 7400, 5, 8, 26000000, 21, "White villa with grey tile hip roofs, a wide pool terrace and palms.", { w = 72, d = 54, wall = C3(250, 250, 247), trim = C3(250, 250, 247), accent = C3(217, 205, 184), roof = "hip", roofColor = C3(110, 114, 120), pool = true, palms = true }),
+		design("hillcrest_manor", "Hillcrest Manor", 2, "White terraces, winding drive", 3, 7, 6, 8200, 5, 8, 32000000, 22, "A white house stepping down the slope with grass-roof terraces and a pool between.", { w = 72, d = 56, wall = C3(248, 246, 240), trim = C3(70, 70, 74), roof = "hip", roofColor = C3(80, 84, 90), terraces = true, pool = true }),
+		design("coral_bay", "Coral Bay Mansion", 2, "White palace, blue arched windows", 3, 8, 7, 9000, 5, 8, 40000000, 24, "White palace style with blue arched windows and balustrade terraces on every floor.", { w = 76, d = 56, wall = C3(250, 248, 240), trim = C3(64, 112, 168), roof = "hip", roofColor = C3(60, 64, 72), arches = true, balustrades = true, pool = true, palms = true }),
+		design("villa_serena", "Villa Serena", 2, "Mediterranean, fountain drive, tower", 2, 6, 6, 10500, 10, 10, 48000000, 25, "Pale stone, clay tile roofs, a round tower and a lit fountain in the round drive.", { w = 78, d = 58, wall = C3(234, 223, 202), trim = C3(180, 84, 47), roof = "tile", roofColor = C3(180, 84, 47), tower = true, fountain = true, arches = true, pool = true }),
+		design("blackstone_lodge", "Blackstone Lodge", 2, "Granite and timber lodge", 3, 7, 7, 11000, 10, 10, 58000000, 26, "Granite and black timber under copper-trimmed roofs, with a huge glass wall to the view.", { w = 78, d = 60, wall = C3(138, 133, 128), trim = C3(42, 36, 32), accent = C3(184, 115, 51), roof = "gable", roofColor = C3(52, 50, 48), stoneArch = true, pool = true }),
+		design("summit_crown", "Summit Crown Estate", 2, "Ultra-modern, round car court, observatory", 4, 6, 8, 12500, 10, 10, 70000000, 27, "Ultra-modern on four levels: a round car court, an observatory dome and a pool over the cliff.", { w = 80, d = 60, wall = C3(247, 247, 245), trim = C3(90, 70, 50), roof = "flat", roofColor = C3(50, 50, 54), dome = true, carCourt = true, pool = true, solar = true }),
+		design("legends_palace", "Legends Palace", 2, "Classical palace, columns, towers", 3, 10, 9, 14000, 10, 10, 84000000, 28, "A white classical palace: tall columns, round corner towers and a chandelier porch.", { w = 84, d = 60, wall = C3(246, 242, 232), trim = C3(214, 190, 130), roof = "hip", roofColor = C3(70, 72, 78), columns = true, towers = true, balustrades = true, fountain = true, pool = true }),
+		design("the_pinnacle", "The Pinnacle", 2, "Glass hilltop, infinity pool, helipad", 4, 8, 10, 16000, 10, 10, 100000000, 30, "The biggest house in the game: glass and stone on the highest lot, an infinity pool with a spa, a helipad and a glass lift.", { w = 86, d = 62, wall = C3(236, 234, 228), trim = C3(26, 26, 28), accent = C3(150, 146, 136), roof = "flat", roofColor = C3(40, 40, 44), glassy = true, pool = true, helipad = true }),
 	},
+	-- extra garage spaces, bought one at a time up to the house's maxBays (in-game cash only)
+	BayPrices = { 50000, 100000, 200000, 400000, 800000 },
+	SellBack = 0.7, -- selling a blueprint at Legends Realty gives this share of its price back
+	ClaimCooldown = 30, -- seconds before you can claim another lot (stops lot-hopping)
+	-- old saves (2026-10-29): the old house types become these designs (worth as much or more)
+	Renamed = { villa = "the_laurel", mansion = "skyline_loft" } :: { [string]: string },
 	DriveTimeout = 12, -- seconds a "drive this car" spawn point waits for the car
 }
+-- the designs by id, and the old shape (Types) other code reads: tier, name, price, bays
+Config.Houses.ById = {}
+Config.Houses.Types = {}
+for _, d in Config.Houses.Designs do
+	Config.Houses.ById[d.id] = d
+	Config.Houses.Types[d.id] = { tier = d.tier, name = d.name, price = d.price, bays = d.maxBays }
+end
 
 ---------------------------------------------------------------------
 -- Pedestrians (client): people walking the sidewalks, crossing on red, strolling the beach

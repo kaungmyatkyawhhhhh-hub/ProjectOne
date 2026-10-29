@@ -27,9 +27,14 @@ export type Profile = {
 	Rent: { [string]: number }, -- os.time() each penthouse's safe was last emptied
 	Home: string, -- penthouse id set as home ("" = none)
 	Showcase: { [string]: string }, -- per penthouse / suite: the car its turntable shows
-	Houses: { [string]: boolean }, -- owned island houses (Config.Houses.Types ids)
-	HouseBays: { [string]: { string } }, -- per house type: the car id in each garage bay ("" = empty)
-	HousePlots: { [string]: string }, -- per house type: the plot it stood on last time
+	Houses: { [string]: boolean }, -- owned house blueprints (Config.Houses.Designs ids)
+	HouseBays: { [string]: { string } }, -- per design: the car in each garage bay, then each driveway spot ("" = empty)
+	HousePlots: { [string]: string }, -- (old: per house type, the plot it stood on; read once to move old saves)
+	HomeLot: string?, -- the lot your house stood on last (it goes back there when you join, if free)
+	HomeDesign: string?, -- the house that stood there
+	HouseExtraBays: { [string]: number }, -- per design: garage spaces bought on top of the free ones
+	HouseAccess: string, -- who can come in: "nobody" | "friends" | "everyone"
+	Roommates: { number }, -- user ids who can use your house
 	Chauffeur: { [string]: boolean }, -- chauffeur contracts (car ids from Config.Chauffeur.Fleet)
 	Luxe: { [string]: any }, -- VIP card, owned and worn flex items (Luxe.lua checks it)
 	Challenges: { [string]: any }, -- speed trap bests, drift and jump bests (Challenges.lua checks it)
@@ -97,6 +102,11 @@ local function defaultProfile(): Profile
 		Houses = {},
 		HouseBays = {},
 		HousePlots = {},
+		HomeLot = nil,
+		HomeDesign = nil,
+		HouseExtraBays = {},
+		HouseAccess = "friends",
+		Roommates = {},
 		Chauffeur = {},
 		Luxe = {},
 		Challenges = {},
@@ -215,32 +225,70 @@ function PlayerData.load(player: Player): Profile
 					end
 				end
 			end
-			-- island houses (absent in older saves)
+			-- houses (absent in older saves). Old house types (villa, mansion) become the designs
+			-- that replaced them, worth as much or more: nobody loses anything (2026-10-29)
 			local houseTypes = Config.Houses.Types
+			local renamed = Config.Houses.Renamed
+			local function design(id: any): string?
+				if type(id) ~= "string" then
+					return nil
+				end
+				local d = renamed[id] or id
+				return if houseTypes[d] then d else nil
+			end
 			if type(saved.Houses) == "table" then
 				for _, id in saved.Houses do
-					if type(id) == "string" and houseTypes[id] then
-						profile.Houses[id] = true
+					local d = design(id)
+					if d then
+						profile.Houses[d] = true
 					end
 				end
 			end
 			if type(saved.HouseBays) == "table" then
 				for id, bays in saved.HouseBays do
-					local spec = if type(id) == "string" then houseTypes[id] else nil
-					if spec and type(bays) == "table" then
+					local d = design(id)
+					if d and type(bays) == "table" then
+						local spec = Config.Houses.ById[d]
 						local list = {}
-						for k = 1, spec.bays do
+						for k = 1, spec.maxBays + spec.drive do
 							local carId = bays[k]
 							list[k] = if type(carId) == "string" and Cars.ById[carId] then carId else ""
 						end
-						profile.HouseBays[id] = list
+						profile.HouseBays[d] = list
 					end
 				end
 			end
-			if type(saved.HousePlots) == "table" then
-				for id, plot in saved.HousePlots do
-					if type(id) == "string" and houseTypes[id] and type(plot) == "string" then
-						profile.HousePlots[id] = plot
+			if type(saved.HomeLot) == "string" then
+				profile.HomeLot = saved.HomeLot
+			end
+			local home = design(saved.HomeDesign)
+			if home then
+				profile.HomeDesign = home
+			elseif type(saved.HousePlots) == "table" then
+				-- an old save: its house type's plot (the High one first)
+				for _, old in { "mansion", "villa" } do
+					local plot = saved.HousePlots[old]
+					if not profile.HomeDesign and type(plot) == "string" and design(old) then
+						profile.HomeDesign = design(old)
+						profile.HomeLot = plot
+					end
+				end
+			end
+			if type(saved.HouseExtraBays) == "table" then
+				for id, n in saved.HouseExtraBays do
+					local d = design(id)
+					if d and type(n) == "number" then
+						profile.HouseExtraBays[d] = math.clamp(math.floor(n), 0, 10)
+					end
+				end
+			end
+			if saved.HouseAccess == "nobody" or saved.HouseAccess == "friends" or saved.HouseAccess == "everyone" then
+				profile.HouseAccess = saved.HouseAccess
+			end
+			if type(saved.Roommates) == "table" then
+				for _, uid in saved.Roommates do
+					if type(uid) == "number" and #profile.Roommates < 6 then
+						table.insert(profile.Roommates, uid)
 					end
 				end
 			end
@@ -287,7 +335,11 @@ function PlayerData.save(player: Player)
 		Showcase = profile.Showcase,
 		Houses = houses,
 		HouseBays = profile.HouseBays,
-		HousePlots = profile.HousePlots,
+		HomeLot = profile.HomeLot,
+		HomeDesign = profile.HomeDesign,
+		HouseExtraBays = profile.HouseExtraBays,
+		HouseAccess = profile.HouseAccess,
+		Roommates = profile.Roommates,
 		Chauffeur = profile.Chauffeur,
 		Luxe = profile.Luxe,
 		Challenges = profile.Challenges,

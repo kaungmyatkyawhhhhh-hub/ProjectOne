@@ -40,6 +40,7 @@ UI.onDailyClaim = nil :: (() -> ())? -- asks the server to pay the daily gift
 UI.onMarketButton = nil :: (() -> ())? -- opens the car stock market (MarketUI)
 UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (ChauffeurClient)
 UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
+UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -468,6 +469,14 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		box(11.5, 11, 9, 9, -1) -- key head
 		box(15, 19, 2.6, 7, 0.6) -- key blade
 		box(17, 23, 2.6, 1.8, 0.4)
+	elseif kind == "house" then
+		-- a house: a pitched roof over a body with a door (housing)
+		box(2.5, 9, 17, 3.4, 1.7, -38) -- roof
+		box(12.5, 9, 17, 3.4, 1.7, 38)
+		local body = box(7, 14, 18, 15, 1.5)
+		body.BackgroundTransparency = 1
+		new("UIStroke", { Color = col, Thickness = math.max(1.5, 3 * k), Parent = body })
+		box(13.5, 20, 5, 9, 1) -- door
 	end
 	return canvas
 end
@@ -1009,6 +1018,14 @@ local function buildSideButtons()
 		closePanels()
 		if UI.onDespawnButton then
 			UI.onDespawnButton()
+		end
+	end)
+	-- (owner, 2026-10-29: housing like Driving Empire's, a house button on the HUD)
+	local houseBtn = sideButton("house", "HOUSE", 7)
+	houseBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onHouseButton then
+			UI.onHouseButton()
 		end
 	end)
 	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)
@@ -2554,6 +2571,20 @@ function UI.popup(text: string, amount: number, color: Color3)
 	task.delay(1.5, function()
 		holder:Destroy()
 	end)
+end
+
+-- the UI kit for other screens (housing): the same buttons, labels, corners and strokes as here
+UI.kit = {
+	new = new,
+	label = label,
+	button = button,
+	corner = corner,
+	stroke = stroke,
+	tween = tween,
+	icon = icon,
+}
+function UI.screen(): ScreenGui
+	return gui
 end
 
 return UI

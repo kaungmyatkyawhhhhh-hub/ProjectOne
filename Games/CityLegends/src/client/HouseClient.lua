@@ -60,11 +60,14 @@ local function word(p: Instance)
 		p.HoldDuration = if moving then 0.4 else 1.5
 	elseif p:HasTag("HouseOwner") then
 		p.Enabled = owner == player.UserId
+	elseif p:HasTag("HouseVisitor") then
+		-- the doorbell: for everyone but the owner
+		p.Enabled = owner ~= player.UserId
 	end
 end
 
 local function rewordAll()
-	for _, tag in { "HouseBuy", "HouseOwner" } do
+	for _, tag in { "HouseBuy", "HouseOwner", "HouseVisitor" } do
 		for _, p in CollectionService:GetTagged(tag) do
 			word(p)
 		end
@@ -242,7 +245,9 @@ local function openPanel(plotId: string)
 	end
 
 	for k = 1, #bays do
-		local b = row(left, k, string.format("%02d", k), "", Theme.Accent)
+		-- (the garage's bays first, then the driveway spots: D1, D2...)
+		local tag = if type(state.garage) == "number" and k > state.garage then "D" .. (k - state.garage) else string.format("%02d", k)
+		local b = row(left, k, tag, "", Theme.Accent)
 		bayButtons[k] = b
 		b.Activated:Connect(function()
 			selected = k
@@ -298,7 +303,7 @@ function HouseClient.init(onDrive: (string) -> ())
 		addHouse(m)
 	end
 	CollectionService:GetInstanceAddedSignal("IslandHouse"):Connect(addHouse)
-	for _, tag in { "HouseBuy", "HouseOwner" } do
+	for _, tag in { "HouseBuy", "HouseOwner", "HouseVisitor" } do
 		CollectionService:GetInstanceAddedSignal(tag):Connect(word)
 	end
 	player:GetAttributeChangedSignal("Houses"):Connect(rewordAll)
