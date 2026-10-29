@@ -133,7 +133,9 @@ Config.Traffic = {
 	Accel = 28, -- studs/s^2
 	Brake = 70,
 	EmergencyBrake = 140,
-	StopGap = 4, -- studs left between bumpers in a queue
+	StopGap = 4, -- studs left between bumpers in a stopped queue
+	FollowGap = 16, -- ...and at least a car length once moving (owner, 2026-10-29)...
+	Headway = 0.5, -- ...plus this many seconds of travel
 	LookAhead = 70,
 	RecycleDistance = 700,
 	RespawnMin = 220,
@@ -202,37 +204,83 @@ end
 ---------------------------------------------------------------------
 -- Camera
 ---------------------------------------------------------------------
+-- (owner, 2026-10-29: "camera and car movement like the video". The sense of speed comes from
+-- the camera's lag, distance, sway, shake and blur, not a big FOV stretch; the cockpit FOV never
+-- changes; the driver's head moves on a spring.)
 Config.Camera = {
-	ChaseFov = 70,
+	ChaseFov = 70, -- the far chase camera (the Settings FOV slider sets this and Immersive.Fov)
+	FovMin = 60, -- the Settings slider's range (outside cameras only)
+	FovMax = 90,
 	InteriorFov = 64, -- from the driver's seat: 74 + the speed boost made the cabin look stretched (fish-eye)
-	InteriorFovBoost = 0, -- owner: the same view in every car at every speed (the outside camera still widens)
-	MaxFovBoost = 32,
+	InteriorFovBoost = 0, -- owner: the same view in every car at every speed
+	MaxFovBoost = 12, -- the far chase camera at top speed (was 32: too fish-eyed)
 	ChaseDistance = 17,
 	ChaseHeight = 5.2,
 	-- the immersive camera (default): low and close behind the car (studs)
 	Immersive = {
 		Fov = 74,
-		FovBoost = 38, -- added at top speed: the view stretches the faster you go
+		FovBoost = 11, -- added at top speed (was 38: up to 112 degrees, fish-eye)
 		Distance = 11.5,
 		Height = 3.4,
-		SpeedPull = 2.5, -- pulled back a little more at speed
-		Lag = 3.2, -- thrown back on hard launches, forward under braking (studs per g)
+		SpeedPull = 4.5, -- falls back this much more at top speed
+		Lag = 4.5, -- the car pulls away on a hard launch, comes closer braking (studs per g)...
+		LagResponse = 2.2, -- ...and how fast the camera catches up (per second; lower = more lag)
 		Swing = 0.3, -- looks into turns (radians at full lock)
 		Buzz = 0.09, -- road shake at top speed
 		LookAhead = 22,
 		LookHeight = 1.6,
-		Blur = 4,
+		Blur = 7, -- motion blur at top speed (Settings: Motion blur Off turns it off)
+		BlurFrom = 0.3, -- share of the rush where it starts
 	},
-	-- the g-forces on the camera (owner, 2026-10-23: dramatic turns, launches and stops)
+	-- the low camera (V cycle): about wheel-top height, close, a little to the side, lots of blur
+	Low = {
+		Fov = 78,
+		FovBoost = 8,
+		Distance = 10.5,
+		Height = 2.1,
+		Side = 3.4, -- studs off to the left of the car's centre line
+		SpeedPull = 2,
+		LookAhead = 26,
+		LookHeight = 1.1,
+		Blur = 11,
+		BlurFrom = 0.15,
+	},
+	-- the g-forces on the outside cameras (owner, 2026-10-23: dramatic turns, launches and stops)
 	Drama = {
-		Response = 4, -- how fast it follows the g (per second)
-		Side = 1.6, -- studs the outside camera slides out of a full-lock turn (more with speed)
-		Roll = 0.1, -- bank into the turn (radians per g)...
-		MaxRoll = 0.15, -- ...up to about 9 degrees
-		Pitch = 0.04, -- tips up pulling away, down braking (radians per g)
-		AccelFov = 8, -- degrees wider at 1 g of pull...
-		BrakeFov = 6, -- ...and tighter at 1 g of braking
-		Cabin = 0.3, -- how much of it the driver's-seat view gets (kept steady and readable)
+		Response = 3, -- how fast it follows the g (per second): back to centre in about half a second
+		Side = 2.6, -- studs the camera slides in a hard corner, so the car moves out in the frame...
+		SideSpeed = 1.5, -- ...plus this much more at top speed
+		Roll = 0.07, -- the camera rolls with the corner (radians per g)...
+		MaxRoll = 0.08, -- ...up to about 4.5 degrees
+		Pitch = 0.035, -- tips up pulling away, down braking (radians per g)
+		AccelFov = 4.5, -- degrees wider at 1 g of pull...
+		BrakeFov = 4, -- ...and tighter at 1 g of braking
+	},
+	-- the driver's head in the cockpit: on a spring, from the real g (Settings: Head movement)
+	Head = {
+		Response = 6.5, -- spring speed (radians per second, about 1 Hz)...
+		Bounce = 0.55, -- ...and its damping (lower bounces more; 1 = none)
+		Lean = 0.4, -- studs the head slides to the outside of a turn at 1 g
+		Tilt = 0.105, -- the horizon tilts up to about 6 degrees in a hard corner (radians)
+		TiltPerG = 0.09,
+		Brake = 0.4, -- studs forward and down at full braking...
+		BrakePitch = 0.09, -- ...and about 5 degrees nose down (radians)
+		Launch = 0.3, -- studs pushed back pulling away
+		LookInto = 9, -- degrees the view turns towards where the road goes, at full lock
+		-- breathing when slow or parked: a tiny slow rise and fall, gone above FadeMph
+		Breath = 0.04,
+		BreathPeriod = 3.5,
+		BreathFadeMph = 20,
+	},
+	-- high-speed shake, every camera (Settings: Camera shake): a slow sway built from smooth noise
+	-- plus a fine vibration, growing from FromMph to ToMph
+	Shake = {
+		FromMph = 100,
+		ToMph = 190,
+		Roll = 0.045, -- up to about 2.5 degrees of slow roll...
+		Bob = 0.12, -- ...and this many studs up and down...
+		Rate = 0.4, -- ...about every 2.5 s
+		Buzz = 0.03, -- the fine fast vibration (studs)
 	},
 }
 
@@ -264,6 +312,14 @@ Config.DrivingFeel = {
 	} :: { [string]: { spring: number, damp: number, bump: number, droop: number } },
 	HullLift = 0.9,
 	RoadTexture = 0.004, -- fine body shimmy at speed (radians)
+	BodyRoll = 3.4, -- body lean in a corner (degrees per g, times the class's roll)
+	BodyPitch = 3.0, -- nose dive braking / squat pulling away (degrees per g, times the class's pitch)
+	-- the steering wheel turns further at parking speeds (degrees each way) and the car's own lock
+	-- from LockFadeMph up; the hands re-grip (cross over) past HandReach degrees
+	WheelLockSlow = 300,
+	LockFadeMph = 40,
+	HandReach = 100,
+	WheelWobble = 1.2, -- small corrections on the straight at speed (degrees)
 	-- sense of speed: these go by real speed, so every car feels fast when it is
 	RushFrom = 45, -- mph where the speed effects start...
 	RushTo = 190, -- ...and where they're full
@@ -285,7 +341,7 @@ Config.DrivingFeel = {
 		SUV = { roll = 1.45, pitch = 1.3, understeer = 0.22, shiftTime = 0.3, upshift = 0.86, revRate = 9, brake = 135, inertia = 1.35 },
 		Coupe = { roll = 0.85, pitch = 0.9, understeer = 0.07, shiftTime = 0.16, upshift = 0.93, revRate = 15, brake = 160, inertia = 0.9 },
 		Supercar = { roll = 0.6, pitch = 0.7, understeer = 0.04, shiftTime = 0.11, upshift = 0.95, revRate = 19, brake = 178, inertia = 0.8 },
-		Hypercar = { roll = 0.45, pitch = 0.55, understeer = 0.03, shiftTime = 0.08, upshift = 0.96, revRate = 22, brake = 188, inertia = 0.75 },
+		Hypercar = { roll = 0.6, pitch = 0.55, understeer = 0.03, shiftTime = 0.08, upshift = 0.96, revRate = 22, brake = 188, inertia = 0.75 },
 	} :: { [string]: { roll: number, pitch: number, understeer: number, shiftTime: number, upshift: number, revRate: number, brake: number, inertia: number } },
 	-- which wheels drive (any car not listed drives the rear wheels)
 	FrontDrive = { suzaki_swift = true, toyoka_belta = true, toyoka_camri = true, toyoka_alfard = true } :: { [string]: boolean },

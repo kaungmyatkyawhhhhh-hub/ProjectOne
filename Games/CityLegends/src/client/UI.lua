@@ -34,6 +34,8 @@ UI.onGarageButton = nil :: (() -> ())?
 UI.onCameraButton = nil :: (() -> ())?
 UI.onUnitsChanged = nil :: ((string) -> ())? -- Settings: "mph" | "kmh"
 UI.onGearboxChanged = nil :: ((string) -> ())? -- Settings: "Auto" | "Manual"
+-- Settings > Camera: shake / head 0, 0.5, 1; blur on or off; the outside cameras' FOV
+UI.onCamFxChanged = nil :: (({ shake: number, head: number, blur: boolean, fov: number }) -> ())?
 UI.onDailyClaim = nil :: (() -> ())? -- asks the server to pay the daily gift
 UI.onMarketButton = nil :: (() -> ())? -- opens the car stock market (MarketUI)
 UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (ChauffeurClient)
@@ -168,6 +170,9 @@ local parkLamp: TextLabel
 local tcLamp: TextLabel
 local lightsLamp: TextLabel
 local settingsPanel: Frame
+local camFxPanel: Frame
+local camFx = { shake = 1, head = 1, blur = true, fov = Config.Camera.Immersive.Fov }
+local refreshCamFx: () -> () = function() end
 local dailyPanel: Frame
 local controlsPanel: Frame? = nil
 local controlsArrow: TextLabel? = nil
@@ -924,6 +929,7 @@ end
 
 local function closePanels()
 	settingsPanel.Visible = false
+	camFxPanel.Visible = false
 	dailyPanel.Visible = false
 end
 
@@ -1023,14 +1029,69 @@ local function buildSideButtons()
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Background, 2, 0) })
 
 	-- settings: camera + music toggles (same actions as C and M)
-	settingsPanel = sidePanel("SETTINGS", 236, if UI.isTouch then 0.4 else 0.5)
-	local function settingRow(name: string, key: string, y: number): TextButton
-		label({ Text = name, TextSize = 14, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, y), Size = UDim2.fromOffset(110, 32), ZIndex = 5, Parent = settingsPanel })
+	settingsPanel = sidePanel("SETTINGS", 280, if UI.isTouch then 0.4 else 0.5)
+	local function settingRow(name: string, key: string, y: number, panel: Frame?): TextButton
+		local parent = panel or settingsPanel
+		label({ Text = name, TextSize = 14, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, y), Size = UDim2.fromOffset(110, 32), ZIndex = 5, Parent = parent })
 		if not UI.isTouch and key ~= "" then
-			label({ Text = "[" .. key .. "]", TextSize = 11, Font = Enum.Font.GothamBold, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(84, y), Size = UDim2.fromOffset(40, 32), ZIndex = 5, Parent = settingsPanel })
+			label({ Text = "[" .. key .. "]", TextSize = 11, Font = Enum.Font.GothamBold, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(84, y), Size = UDim2.fromOffset(40, 32), ZIndex = 5, Parent = parent })
 		end
-		return button("", Theme.Accent, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, y), Size = UDim2.fromOffset(120, 32), TextSize = 13, TextColor3 = Theme.Accent, ZIndex = 6, Parent = settingsPanel })
+		return button("", Theme.Accent, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, y), Size = UDim2.fromOffset(120, 32), TextSize = 13, TextColor3 = Theme.Accent, ZIndex = 6, Parent = parent })
 	end
+
+	-- Settings > Camera (owner, 2026-10-29): its own panel, opened from the settings
+	camFxPanel = sidePanel("CAMERA", 236, if UI.isTouch then 0.4 else 0.5)
+	local LEVELS = { [0] = "OFF", [0.5] = "LOW", [1] = "NORMAL" }
+	local function nextLevel(v: number): number
+		return if v >= 1 then 0 elseif v >= 0.5 then 1 else 0.5
+	end
+	local shakeBtn = settingRow("Shake", "", 52, camFxPanel)
+	local headBtn = settingRow("Head move", "", 96, camFxPanel)
+	local blurBtn = settingRow("Motion blur", "", 140, camFxPanel)
+	label({ Text = "FOV", TextSize = 14, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, 184), Size = UDim2.fromOffset(110, 32), ZIndex = 5, Parent = camFxPanel })
+	local fovMinus = button("-", Theme.Accent, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -104, 0, 184), Size = UDim2.fromOffset(32, 32), TextSize = 16, TextColor3 = Theme.Accent, ZIndex = 6, Parent = camFxPanel })
+	local fovValue = label({ Text = "", TextSize = 14, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Accent, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -52, 0, 184), Size = UDim2.fromOffset(52, 32), ZIndex = 6, Parent = camFxPanel })
+	local fovPlus = button("+", Theme.Accent, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, 184), Size = UDim2.fromOffset(32, 32), TextSize = 16, TextColor3 = Theme.Accent, ZIndex = 6, Parent = camFxPanel })
+	refreshCamFx = function()
+		shakeBtn.Text = LEVELS[camFx.shake] or "NORMAL"
+		headBtn.Text = LEVELS[camFx.head] or "NORMAL"
+		blurBtn.Text = if camFx.blur then "ON" else "OFF"
+		fovValue.Text = tostring(camFx.fov)
+		for _, b in { shakeBtn, headBtn, blurBtn } do
+			b.TextColor3 = if b.Text == "OFF" then Theme.SubText else Theme.Accent
+		end
+	end
+	local function changed()
+		refreshCamFx()
+		if UI.onCamFxChanged then
+			UI.onCamFxChanged(table.clone(camFx))
+		end
+	end
+	shakeBtn.Activated:Connect(function()
+		camFx.shake = nextLevel(camFx.shake)
+		changed()
+	end)
+	headBtn.Activated:Connect(function()
+		camFx.head = nextLevel(camFx.head)
+		changed()
+	end)
+	blurBtn.Activated:Connect(function()
+		camFx.blur = not camFx.blur
+		changed()
+	end)
+	for _, pair in { { fovMinus, -2 }, { fovPlus, 2 } } do
+		(pair[1] :: TextButton).Activated:Connect(function()
+			camFx.fov = math.clamp(camFx.fov + (pair[2] :: number), Config.Camera.FovMin, Config.Camera.FovMax)
+			changed()
+		end)
+	end
+	refreshCamFx()
+	local camFxOpen = settingRow("Camera FX", "", 228)
+	camFxOpen.Text = "SET UP"
+	camFxOpen.Activated:Connect(function()
+		settingsPanel.Visible = false
+		camFxPanel.Visible = true
+	end)
 	camToggle = settingRow("Camera", "V", 52)
 	camToggle.Text = "IMMERSIVE"
 	musicToggle = settingRow("Music", "M", 96)
@@ -2322,6 +2383,12 @@ function UI.setSpeedLines(k: number)
 		f.Rotation = math.deg(a)
 		f.BackgroundTransparency = 1 - k * speedRng:NextNumber(0.15, 0.45)
 	end
+end
+
+-- Settings > Camera: show the saved values (no callback)
+function UI.setCamFx(fx: { shake: number, head: number, blur: boolean, fov: number })
+	camFx = table.clone(fx)
+	refreshCamFx()
 end
 
 function UI.setCameraLabel(mode: string)

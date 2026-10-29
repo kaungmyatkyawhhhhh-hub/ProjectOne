@@ -110,6 +110,24 @@ Driving.onGearboxChanged = function(mode: string) -- Q / E switched to manual
 	UI.setGearboxLabel(mode)
 	SaveSettings:FireServer(settings)
 end
+-- Settings > Camera. A player with Reduced Motion on starts with shake and head movement off
+-- (Playbook); what they pick is saved with the profile
+do
+	local calm = game:GetService("GuiService").ReducedMotionEnabled
+	local saved = if type(settings.CamFx) == "table" then settings.CamFx else {}
+	Driving.setCamFx({
+		shake = if type(saved.shake) == "number" then saved.shake elseif calm then 0 else 1,
+		head = if type(saved.head) == "number" then saved.head elseif calm then 0 else 1,
+		blur = if type(saved.blur) == "boolean" then saved.blur else true,
+		fov = if type(saved.fov) == "number" then saved.fov else nil,
+	})
+	UI.setCamFx(Driving.camFx)
+	UI.onCamFxChanged = function(fx)
+		Driving.setCamFx(fx)
+		settings.CamFx = table.clone(Driving.camFx)
+		SaveSettings:FireServer(settings)
+	end
+end
 
 -- XP / level updates pushed by the server
 Progress.OnClientEvent:Connect(function(info)

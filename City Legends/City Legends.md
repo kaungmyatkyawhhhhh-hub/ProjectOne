@@ -64,6 +64,17 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 - Steering a little slower than before.
 - Less grip, closer to real life; slightly slippery on hard launches.
 - Outside camera shakes a little; first-person view stays steady (only crashes jolt it).
+- **Camera like the reference video (2026-10-29, `Prompts/Camera and car movement like the video.md`):**
+  - Cameras (V cycles): Immersive -> **Low** (new: wheel-top height, off to the side, strong blur) -> Chase -> Cockpit.
+  - Outside cameras: much calmer FOV (+11 at top speed, was +38); speed shows through lag (the car pulls away flooring it, comes closer braking), falling back at speed, more motion blur. In corners the car slides out in the frame and the camera rolls up to about 4.5 degrees, back to centre in half a second.
+  - Cockpit: the FOV never changes. The driver's head is on a spring: slides out and tilts the horizon (up to 6 degrees) in corners, dips forward and down braking, pushed back pulling away, looks into turns. Breathing when slow or parked.
+  - High-speed sway and shake from 100 mph (every camera), growing to 190.
+  - Steering wheel turns up to 300 degrees each way at parking speed, less at speed; small corrections on the straight; hands re-grip (cross over) past 100 degrees.
+  - **Settings > Camera FX:** Shake (Off / Low / Normal), Head move (Off / Low / Normal), Motion blur (On / Off), FOV 60 to 90 (outside cameras). Saved with the profile. Reduced Motion players start with shake and head movement off.
+  - All the numbers: `Config.Camera` (Immersive, Low, Drama, Head, Shake) and `Config.DrivingFeel` (BodyRoll, BodyPitch, WheelLockSlow, LockFadeMph, HandReach, WheelWobble).
+  - Body lean still tilts the whole car (physics box too), not only the visual model.
+- **McLaren steering wheel (2026-10-29, owner's photo):** flat-bottom carbon-look wheel, orange top stripe, suede grips, paddles, plain hub (no logo). Made with Studio's mesh generator: `ReplicatedStorage.SteeringWheels.McLaren` (old one kept as `McLaren_Old`). In the place only.
+- **NPC gaps (2026-10-29, owner: "NPC cars on each other's tail"):** moving NPCs keep at least a car length plus half a second (`Config.Traffic` FollowGap / Headway); stopped queues still close up to 4 studs.
 - **Dashboards built (2026-10-11):** LP700 Aventador (Sport screen), Ferrari 458, 330i (BMW digital Live Cockpit), M3 E92 (classic BMW like M5/M6), CLA 45 (AMG twin dials + PRNDM screen), Supra MK4 (TRD triple), Toyota (Camry, Crown, Land Cruiser, Alphard: power meter + km/h speedo). Other cars use their own needles or the generic dashboard.
 - **Roster changes (2026-10-11):** E-Class W212 removed; W213 renamed to plain E200 / E300 / E400 (`bentz_e200/300/400`). Rolls Phantom replaced by Cullinan (`rolls_cullinan`, SUV). LP570 shares the LP560 model and interior (`CarBuilder.MODEL_ALIAS`). EVs changed to what the store has: BYT Dolphin EV (`byt_dolphin`), Kio EV6 (`kio_ev6`), BYT Seal EV (`byt_seal`). 52 cars now. Added 9 (2026-10-11, RX-7 in Starter): S63 W222, Maybach S680, Boxster 718, Murcielago LP640, RX-7, AMG GT63 S, Corvette C7, Corvette C6, Camaro SS: 61 cars.
 - **Cars with models (2026-10-11):** 29: the first 16 plus CLS 63 S, Challenger, LX570, Panamera, LP570 (own model now), F430, R8, 12C, SLS, 911 GT3, Urus, Brabus G63, Wraith.

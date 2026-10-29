@@ -466,7 +466,10 @@ function Traffic.update(dt: number)
 			local gap, otherSpeed, align = lookAheadGap(npc, obstacleList)
 			crossBlocked = gap < math.huge and align < 0.7
 			if gap < math.huge then
-				local safe = gap - T.StopGap
+				-- (owner, 2026-10-29: "NPC cars on each other's tail, make space for at least one
+				-- car"): once moving, keep a car length plus a time gap; a stopped queue closes up
+				local keep = T.StopGap + (T.FollowGap - T.StopGap) * math.min(npc.speed / 8, 1) + npc.speed * T.Headway
+				local safe = gap - keep
 				if safe <= 0 then
 					target = 0
 				else

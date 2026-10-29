@@ -40,6 +40,7 @@ export type Profile = {
 export type Settings = {
 	Units: string, -- "mph" | "kmh"
 	Gearbox: string, -- "Auto" | "Manual"
+	CamFx: { shake: number, head: number, blur: boolean, fov: number }?, -- Settings > Camera
 }
 
 export type Snapshot = {
@@ -381,7 +382,7 @@ function PlayerData.snapshot(player: Player): Snapshot?
 		XP = profile.XP,
 		XPNeed = Config.xpForLevel(profile.Level),
 		DailyIn = PlayerData.dailyReadyIn(player),
-		Settings = { Units = profile.Settings.Units, Gearbox = profile.Settings.Gearbox },
+		Settings = { Units = profile.Settings.Units, Gearbox = profile.Settings.Gearbox, CamFx = profile.Settings.CamFx },
 		Penthouses = penthouses,
 		Home = profile.Home,
 	}
@@ -398,6 +399,20 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 	if raw.Gearbox == "Auto" or raw.Gearbox == "Manual" then
 		profile.Settings.Gearbox = raw.Gearbox
+	end
+	-- Settings > Camera: only the known fields, in range
+	local fx = raw.CamFx
+	if type(fx) == "table" then
+		local function level(v: any): number?
+			return if v == 0 or v == 0.5 or v == 1 then v else nil
+		end
+		local fov = tonumber(fx.fov)
+		profile.Settings.CamFx = {
+			shake = level(fx.shake) or 1,
+			head = level(fx.head) or 1,
+			blur = fx.blur ~= false,
+			fov = if fov and fov == fov then math.clamp(math.floor(fov + 0.5), Config.Camera.FovMin, Config.Camera.FovMax) else Config.Camera.Immersive.Fov,
+		}
 	end
 end
 
