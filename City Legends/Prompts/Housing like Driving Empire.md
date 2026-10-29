@@ -124,6 +124,33 @@ A 20-minute Driving Empire tour of every house (640x360). The cloud assistant we
   - leaving frees the lot.
 - High plots are inside the Summit gate. Every house has its own small gate (last prompt).
 
+### 3b. The FOR SALE sign (owner, 2026-10-29)
+- **Reference:** Driving Empire's sign, in `Games/CityLegends/imports/refs/houses/de_forsale_small.webp`, `..._medium.webp` and `..._large.webp`. A wide board on two wooden posts:
+  - a coloured top band with big white "FOR SALE";
+  - a white middle with the plot size in the band colour and "Get near to claim this plot!";
+  - a coloured bottom band with "EMPIRE PROPERTIES";
+  - green Small, gold Medium, red Large;
+  - a skyline / house logo top right.
+- **Ours: the same idea, changed a bit:**
+  - **Tiers, not sizes:** the middle says **LOW**, **MID** or **HIGH** (with "TIER" in smaller letters).
+  - **Name:** the bottom band says **LEGENDS PROPERTIES**.
+  - **Our own colours:**
+    - Low = teal (about #0E8C86);
+    - Mid = deep blue (about #1F4FA3);
+    - High = black with gold lettering (about #111111 / #D4AF37), so High feels luxury.
+  - **Shape and material:**
+    - slightly rounded corners and a thin white keyline border inside the board;
+    - on **dark metal posts** with a small base plate (not wooden posts);
+    - High tier signs also get two small ground lights shining up at night.
+  - **Text:**
+    - "FOR SALE" in our display font (not theirs), bold;
+    - the middle line "**Walk up to claim this lot**";
+    - a small line with the **lot number and price range of the tier** (for example "Lot 7 · $150K – $2.5M");
+    - pick font sizes different from theirs.
+  - **No logo or emblem** (the owner's no-logos rule). Use only a simple line drawing of a roof shape, or nothing. Never copy their skyline / house icon.
+- **When a player is near:** the sign shows a prompt (E / tap) "Claim this lot" if they own a house of that tier, or "Buy a LOW house at Legends Realty" with a waypoint if they don't.
+- **When the lot is claimed:** the sign is replaced by the house's mailbox with "[Name]'s Home", and comes back when the lot is free.
+
 ### 4. Garage spaces (like theirs, but fair)
 - Free spaces: **Low 3, Mid 3–4, High 5**.
 - **The 5 most expensive houses: a 10-car garage plus 3 driveway spots** (owner decision).
