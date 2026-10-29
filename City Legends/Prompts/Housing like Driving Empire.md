@@ -82,7 +82,18 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This builds on `
 - No Robux garage spaces for now. Ask the owner first: Playbook money rules apply (read prices from Roblox, grant only in ProcessReceipt).
 - Pick which cars stand in the bays and on the driveway in Garage setup. Press E on any car to drive it.
 
-### 5. Inside the house: things you can use
+### 5. You can actually go inside every house
+Every house is a **real house you walk into**, not a shell or a fake front:
+- The front door opens and you walk in.
+- Every floor is real, with stairs between them, to the roof terrace where there is one.
+- Every room is furnished: living room, kitchen, bedrooms, bathrooms. Size and furniture match the price, so bigger houses have more and nicer rooms.
+- Windows look out at the real view. At night the lights inside show through the windows from outside.
+- Go from inside straight into the **garage** (an inside door) and from the garage out to the driveway.
+- High tier houses also get the pool deck, balconies and the helipad you can walk out to.
+- The camera works indoors: it doesn't clip through walls or ceilings, and the third-person camera zooms in when the room is tight.
+- To keep FPS up, the inside builds or switches on only when you're near or inside (streaming / LOD). Outside you see the shell and lit windows.
+
+**Things you can use inside:**
 - Doors open and close, every room's lights switch on and off, curtains / blinds, TV on and off with a picture, shower and taps with water, fridge opens, and beds.
 - "Sleep" on the bed: a fade to black, skip to morning or evening (just for you, the camera only), and set as home spawn.
 - Wardrobe: opens the existing Flex / outfit menu.
@@ -126,7 +137,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This builds on `
   - the gates;
   - leave and rejoin.
 - No console errors.
-- Every interaction works (doors, lights, TV, taps, bed).
+- Every house can be walked into: all floors, stairs, garage door. Every interaction works (doors, lights, TV, taps, bed).
 - Screenshots:
   - the catalogue;
   - the plot map;
