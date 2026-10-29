@@ -109,7 +109,36 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This **replaces*
   - nobody loses money.
   - `UnlockEverything` owns every design.
 
-## 5. Check before you say done
+## 5. Extra ideas to make it better (do after 1–4; show the owner first, skip any they say no to)
+1. **Housewarming:** the first time you place a house, a short camera fly-in to it, confetti, and a one-time gift (5% of the price back, capped at $250K).
+2. **Upgrades per house**, bought at the house:
+   - bigger garage (+2 bays);
+   - pool or infinity pool;
+   - helipad (High only);
+   - solar roof;
+   - garden lights;
+   - wall and paint colours;
+   - gate colour.
+   Each upgrade shows on the house and is saved.
+3. **Furniture shop in the showroom:** a few interior themes per house (Modern White, Warm Wood, Dark Luxury, Beach). One click restyles the inside, with no fiddly placing.
+4. **Doorbell and visits:**
+   - anyone can ring;
+   - the owner sets the house to Open / Friends only / Locked;
+   - visitors can see the garage cars.
+   - No party mode in houses: the DJ booth stays in penthouses only.
+5. **Daily mailbox:** a small daily cash gift at your house's mailbox, bigger for higher tiers. This gives players a reason to come home on day 2, 7 and 20 (Playbook).
+6. **"Set as home":** spawn at your house when you join.
+7. **Estate leaderboard** at the showroom: the most valuable homes in the server (house + upgrades), with the owner's name.
+8. **Show homes:** each tier has one show house always open to visit, so new players see what they can earn.
+9. **Lot perks:** a few special lots are worth more and cost a lot fee to claim (cliff edge, ocean view, next to the lookout), so players compete for the best spots in a server.
+10. **Security:** owners get a CCTV screen in the house showing the driveway, and a ding when someone rings.
+11. **Tier perks** that feel worth it:
+    - High owners get through the gate;
+    - the summit helipad (helicopter tour);
+    - a private lookout;
+    - their name on the gate's resident board.
+
+## 6. Check before you say done
 - 2-player test in Studio:
   - player A buys a Low house and places it;
   - player B can't place on that lot;
