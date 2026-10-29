@@ -226,12 +226,38 @@ local function ringRoad(kit: any, parent: Instance, ring: IsleLayout.Ring)
 	end
 end
 
--- a climb: each leg in pieces following its slope (stretched past the bends so they close),
--- level pads at the hairpins, guard rails and invisible walls along the sides, lamps
-local function climb(kit: any, parent: Instance, rd: IsleLayout.Road)
+-- a flat triangle of road (a, b, c at the same height: the surface), as two wedges
+local function flatTriangle(kit: any, parent: Instance, a: Vector3, b: Vector3, c: Vector3)
+	-- split at the foot of the height from a, so each half has its right angle there
+	local bc = c - b
+	local m = b + bc * math.clamp((a - b):Dot(bc) / bc:Dot(bc), 0, 1)
+	for _, far in { b, c } do
+		local ey, ez = a - m, far - m
+		local h, l = ey.Magnitude, ez.Magnitude
+		if h > 0.05 and l > 0.05 then
+			-- WedgePart: right angle at local (y -h/2, z +l/2); its x is the thickness (vertical here)
+			local y, z = ey.Unit, -ez.Unit
+			local cf = CFrame.fromMatrix(m + ey / 2 + ez / 2 - Vector3.new(0, 1, 0), y:Cross(z), y, z)
+			kit.mk(parent, Vector3.new(2, h, l), cf, kit.ASPHALT, kit.ROAD_MAT, { class = "Wedge", reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
+		end
+	end
+end
+
+-- rebuild just the climbs (in Studio, on a built island): Isle.rebuildClimbs(CityBuilder.kit, isleFolder)
+local climb: (any, Instance, IsleLayout.Road) -> ()
+
+-- a climb: each leg in pieces following its slope, flat triangles closing the outside of each
+-- bend, one level pad per hairpin, guard rails and invisible walls along the sides, lamps.
+-- (owner, 2026-10-29: the car jerked going up and down. The hairpin pads reached 23 studs into
+-- the legs, which only stay level for 14, so their edge stood a stud above the road; and pieces
+-- stretched past the bends overlapped at different heights. Now every join is flush.)
+function climb(kit: any, parent: Instance, rd: IsleLayout.Road)
 	local folder = kit.folder("Road_" .. rd.id, parent)
 	local pts = rd.pts
 	local lampAt = 0
+	local function isHairpin(q: number): boolean
+		return q > 1 and q < #pts and IsleLayout.turnAt(pts, q) > 1
+	end
 	for k = 1, #pts - 1 do
 		local a, b = pts[k], pts[k + 1]
 		local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
@@ -243,35 +269,31 @@ local function climb(kit: any, parent: Instance, rd: IsleLayout.Road)
 			local p = a + dir * d + side * (off or 0)
 			return Vector3.new(p.X, IsleLayout.legY(a.Y, b.Y, len, d, f0, f1), p.Z)
 		end
-		-- how far past each end the asphalt runs, to close the outside of the bend
-		local function past(q: number): number
-			if q <= 1 or q >= #pts then
-				return 0
-			end
-			local turn = IsleLayout.turnAt(pts, q)
-			if turn > 1 then
-				return 0 -- a hairpin: its pad closes it
-			end
-			return math.min(14, HALF * math.tan(turn / 2) + 1)
+		-- cut where the level ends begin and end, so each piece is wholly level or wholly on the
+		-- slope (one piece across both sagged below the level end and left a ledge)
+		local fl0, fl1 = IsleLayout.flats(a.Y, b.Y, f0, f1)
+		if len <= fl0 + fl1 + 1 then
+			fl0, fl1 = 0, 0
 		end
-		local e0, e1 = past(k), past(k + 1)
 		local cuts = { 0 }
-		local nPieces = math.max(1, math.ceil(len / 30))
+		if fl0 > 0 then
+			table.insert(cuts, fl0)
+		end
+		local s0, s1 = fl0, len - fl1
+		local nPieces = math.max(1, math.ceil((s1 - s0) / 30))
 		for q = 1, nPieces - 1 do
-			table.insert(cuts, len * q / nPieces)
+			table.insert(cuts, s0 + (s1 - s0) * q / nPieces)
+		end
+		if fl1 > 0 then
+			table.insert(cuts, s1)
 		end
 		table.insert(cuts, len)
 		local detail = kit.lodGroup(folder, "Detail", (a + b) / 2, 700 + len / 2)
 		for q = 1, #cuts - 1 do
 			local d0, d1 = cuts[q], cuts[q + 1]
-			if q == 1 then
-				d0 -= e0
-			end
-			if q == #cuts - 1 then
-				d1 += e1
-			end
 			local p0, p1 = at(d0), at(d1)
-			roadPiece(kit, folder, p0, p1, { centre = true, edges = true })
+			-- (a sliver of overlap: more would stand above the next piece, which climbs another way)
+			roadPiece(kit, folder, p0, p1, { centre = true, edges = true, extra = 0.4 })
 			-- rails and walls along the sides, not across the stubs at the rings or the hairpins
 			local nearHairpin = (q == 1 and f0) or (q == #cuts - 1 and f1)
 			local atRing = k == 1 or k == #pts - 1
@@ -298,14 +320,34 @@ local function climb(kit: any, parent: Instance, rd: IsleLayout.Road)
 			kit.streetLight(detail, at(len / 2, s * (HALF + 2.5)), -side * s)
 		end
 	end
-	-- the hairpins: level pads the turns sweep across (a square along each leg)
 	for k = 2, #pts - 1 do
-		if IsleLayout.turnAt(pts, k) > 1 then
-			local p = pts[k]
-			for _, q in { pts[k - 1], pts[k + 1] } do
-				local look = Vector3.new(q.X - p.X, 0, q.Z - p.Z).Unit
-				local base = Vector3.new(p.X, p.Y - 1.02, p.Z)
-				kit.mk(folder, Vector3.new(ROAD + 6, 2, ROAD + 6), CFrame.lookAt(base, base + look), kit.ASPHALT, kit.ROAD_MAT, { reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
+		local p = pts[k]
+		local prev, nxt = pts[k - 1], pts[k + 1]
+		local dirA = Vector3.new(p.X - prev.X, 0, p.Z - prev.Z).Unit
+		local dirB = Vector3.new(nxt.X - p.X, 0, nxt.Z - p.Z).Unit
+		if isHairpin(k) then
+			-- one level pad, square to the level leg (the short run between the two hairpins). It
+			-- reaches into the sloped leg only as far as that stays level (Flat, less a little for
+			-- the leg's angle), so its edge never stands above the road
+			local levelIsB = math.abs(nxt.Y - p.Y) < 0.01
+			local v = if levelIsB then dirB else -dirA -- along the level leg, away from the corner
+			local u = if levelIsB then -dirA else dirB -- into the sloped leg
+			local across = v:Cross(Vector3.yAxis)
+			if across:Dot(u) < 0 then
+				across = -across
+			end
+			local back, fwd = HALF + 3, IsleLayout.Flat - 2
+			local along = HALF + 3
+			local centre = Vector3.new(p.X, p.Y - 1.02, p.Z) + across * ((fwd - back) / 2)
+			kit.mk(folder, Vector3.new(back + fwd, 2, 2 * along), CFrame.fromMatrix(centre, across, Vector3.yAxis, across:Cross(Vector3.yAxis)), kit.ASPHALT, kit.ROAD_MAT, { reflectance = kit.ROAD_OPTS.reflectance, name = "Road" })
+		else
+			-- a bend: close the outside with a flat triangle at the corner's height (both legs'
+			-- end edges are level there)
+			local turn = dirA:Cross(dirB).Y
+			if math.abs(turn) > 0.001 then
+				local sideA, sideB = dirA:Cross(Vector3.yAxis), dirB:Cross(Vector3.yAxis)
+				local s = if (sideB - sideA):Dot(dirA) > 0 then 1 else -1
+				flatTriangle(kit, folder, p, p + sideA * s * HALF, p + sideB * s * HALF)
 			end
 		end
 	end
@@ -495,6 +537,16 @@ end
 ---------------------------------------------------------------------
 -- The build
 ---------------------------------------------------------------------
+function Isle.rebuildClimbs(kit: any, isle: Instance)
+	for _, rd in IsleLayout.Roads do
+		local old = isle:FindFirstChild("Road_" .. rd.id)
+		if old then
+			old:Destroy()
+		end
+		climb(kit, isle, rd)
+	end
+end
+
 function Isle.build(kit: any, parent: Instance, palm: (any, Instance, Vector3, number?) -> Vector3)
 	local folder = kit.folder("LegendsIsle", parent)
 	if not Isle.skipTerrain then
