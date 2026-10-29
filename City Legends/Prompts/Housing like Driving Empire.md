@@ -36,6 +36,54 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). This builds on `
    - more spaces can be bought (in game cash, and also Robux there).
 5. **Inside:** you can use doors, lights, beds, sinks and other items.
 
+## The owner's reference video: `Games/CityLegends/imports/Houses.mp4`
+A 20-minute Driving Empire tour of every house (640x360). The cloud assistant went through it frame by frame. **Open it yourself** and pause on each house. Below is what's in it, with times, and **our version of each**: close to the look the owner likes, but changed (colours, proportions, roof, details, name).
+
+**Leave out:**
+- the **NASCAR Pit House** (owner);
+- their **loading screens** between teleports (owner: not needed);
+- the themed / event houses (gas station "Speedway Convenience", "Rooftop Cafe", car dealership, Gingerbread, Igloo, "Classic Roblox", Spooky Manor), unless the owner asks for them later.
+
+### Houses in the video, and what we build from each
+| Video time | Their house (plot, price) | What it looks like | Our version (new name, changes) |
+|---|---|---|---|
+| 0:00–0:50, 1:20–2:15 | The Delaney (Small, $300K: 1,588 sq ft, 3 bed, 2.5 bath, 1 garage) | Modern 2-storey box: dark grey and white panels, big black-framed windows, flat roofs, 1 dark garage door, small lawn, a path to the door. Inside: open plan, light wood floors, white walls, a floating wood staircase with a black rail, a bedroom with a big rug and wall art. | **"The Harlow"** (Low, our $150K starter). Same idea, but warm white render with timber slats instead of dark panels, and a single-pitch roof. |
+| 0:15, 2:50–3:50 | Small modern 2-storey (The Auburn / Everett / Apollo, $450K–$750K) | Grey / white modern with a tall glass entrance, a paver driveway, an open kitchen with an island, a dining area under pendant lights, stairs with an open rail, a balcony. | 3 Low houses: **"Bayview"**, **"Linden"**, **"Corsa Lane"**. Vary the stories (1 / 2), colours (sand, sage, white), and a flat or hip roof. |
+| 5:25–6:20 | The Tuckertown Way (Medium, $1.45M) | Blue-grey colonial / craftsman family house: white trim, steep gables, a big arched upstairs window, a front porch with steps, dark garage doors with window panes, a long curved concrete driveway, a white gazebo, flower beds. Inside: dark wood floors, white stair rails, a round dining table. | **"Maple Hollow"** (Mid). Keep the gables and porch, but sage-green or cream siding, a stone base, and a different window layout. |
+| 6:35–7:10 | Richford Barndominium (Medium, $1.9M: 2,311 sq ft, 3 bed, 4 garages) | A charcoal / black barn-style house: metal roof, a wrap-around porch on dark posts, a cupola on top, a herringbone paver driveway, a timber ranch fence. Inside: a stone fireplace, ceiling fans, exposed beams, a studio room. | **"Ridgeback Barn"** (Mid). Keep the barn shape and porch, but a dark-green or red-brown barn colour, a different cupola, and a big glass gable end. |
+| 7:30–8:00 | The Carrington (Medium, $3.45M) | A big white / grey Southern plantation house: two storeys of wrap-around **arched balconies**, white columns, a white fence, a tennis court, a large lawn. | **"Whitmore Hall"** (Mid-High). Keep the double verandas, but straight columns instead of arches on one floor, a blue-grey roof, and a pool instead of the tennis court (or both on the biggest). |
+| 8:15–9:15 | Stonehurst Villa (Medium, $4.25M: 2 bed, 4 garages) | Modern luxury: white render plus stacked-stone walls, dark window frames, low-pitched and flat roofs at different heights, a double garage, a wide paver drive, the mailbox by the path. Inside: marble floors, glass stair rails, an infinity-style pool, a rock waterfall feature into the pool. | **"Kingsridge Villa"** (Mid). Keep stone plus white, but a darker slate stone, timber soffits, and a different roof stack. Keep the waterfall pool. |
+| 11:35–12:45 | Penthouse-style medium house ($6M: 3,853 sq ft, 3 bed, 7 showoff garages) | Modern glass and white: a fire pit lounge, a big TV wall, a pool with a rock waterfall, an indoor basketball court, a mezzanine with a black steel stair and bookshelves, a content-creator studio with a green screen, and an **underground car showroom** (dark glossy floor, spotlights, glowing round car pads). | **"Skyline Loft House"** (High, entry). Keep the underground showroom idea and the fire-pit lounge; change the shapes and colours (warm wood, bronze glass). |
+| 13:10–14:35 | Cambridge Mansion (Large, $9M) | A white Florida mansion: beige hip roofs, several garages with glass-panel doors, columns at the entry, a huge paver forecourt, palms and flower beds, a rectangular pool with loungers and a tiled edge. Inside: all white, marble, a big kitchen, bedrooms with wood floors. | **"Palm Crest Estate"** (High). Same white luxury feel, but a grey flat-tile roof, a curved front, and a different garage row. |
+| 14:40–16:05 | Fiorenza Mansion (Large, $12M: 9,943 sq ft, 5 bed, 5 bath, 7 garages) | A Mediterranean / Italian villa: cream walls, **red clay tile roofs**, arches, a round driveway with a **tiered fountain** in front, palms, a grand pool with a spa. Inside: a double-height foyer with a **chandelier**, arched windows, a curved bar, a marble bathroom with a round tub, a dining room. | **"Villa Serena"** (High). Keep the fountain drive and tile roofs, but terracotta-orange walls or pale stone, different arches, and a tower. |
+| 16:20–17:40 | Somerset Cottage (Large, about $13M) | A huge dark **stone and black-timber mountain lodge / manor**: steep roofs, stone walls, a big paver turning circle, a stone archway into the garage court. Inside: a vaulted ceiling with beams, a big fireplace, ceiling fans, a studio room, a pool. | **"Blackstone Lodge"** (High, a perfect fit for the **mountain top**). Keep the stone and timber, but lighter granite, copper roof accents, and bigger glass to the view. |
+| 17:55–19:55 | Modern Mega Mansion (Large, $20M: 10,021 sq ft, 3 bed, 12 garages) | A huge ultra-modern white mansion over several levels: a **round drive round a big round planter with palms**, a sweeping curved wall, **solar panels** on a pergola, an **observatory dome** on the roof, a rooftop lounge, a basketball court, an **underground garage showroom** (many glowing car pads), a home cinema with a waterfall on the screen, glass walls to the sea. | **"Summit Crown"** (High, near the top of our price list). Keep the curved drive, dome, pergola and underground showroom, but a different layout (stepped down the mountain), dark-bronze accents, and an infinity pool over the cliff. |
+
+**Our top houses go further** (up to the $100M one): **"The Pinnacle"**, the biggest house in the game, on the highest summit lot:
+- the observatory;
+- a helipad;
+- an infinity pool over the cliff;
+- the 10-car underground showroom plus 3 driveway spots;
+- a glass lift between floors;
+- the cinema, gym and spa.
+
+### What the video shows about the system (copy how it works, not how it looks)
+- **House Shop** (at the dealership):
+  - sort by Price / Plot / Garages;
+  - a grid of house cards;
+  - the right side shows 2 photos (outside + inside), the name, a 1-line description, the plot type (Small / Medium / Large, colour-coded), sq ft, bedrooms, bathrooms, "showoff garages", the price, and a "Spawn House" button.
+- **At your plot:** a "Spawn House – Medium Plot" / "Swap House" panel lists **only houses that fit that plot size** (others show "Medium plot required"), with ★ favourites at the top, and an "Are you sure? This will despawn your house" confirm.
+- **Empty plot:** a **FOR SALE sign** with the plot size; walk to it to claim.
+- **Mailbox** at the path with "[Name]'s Home" above it. Press E for the **Your House** menu:
+  - teleport home;
+  - **who can enter: Nobody / Friends / Everyone**;
+  - **Manage Roommates**;
+  - Change House;
+  - Remove.
+  Add all of these to ours: roommates can enter, use the house, and spawn there.
+- **Green glowing rings** on the ground mark interact spots (garage car pads, doors). Ours: our own marker style, for example a soft white or brand-colour ring.
+- **Everything inside is interactive:** doors (E), lights, TVs, the fireplace, pools you can swim in.
+
 ## Our version (City Legends)
 
 ### 1. The Realty showroom = our "Houses Dealership"
