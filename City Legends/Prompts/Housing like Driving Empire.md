@@ -67,6 +67,14 @@ A 20-minute Driving Empire tour of every house (640x360). The cloud assistant we
 - a glass lift between floors;
 - the cinema, gym and spa.
 
+### Owner's design pictures (2026-10-29), in `Games/CityLegends/imports/refs/houses/`
+Use these as the main look references, together with the video:
+- **`design_villa_fountain.webp`** (High, our "Villa Serena"): a cream Mediterranean villa with red clay tile roofs at several heights, a round tower, a chimney, a big arched entry, a **round driveway round a lit 3-tier fountain**, palms, and planting beds with white rocks, grasses and flowers, edged into the lawn. A mailbox at the road, a black street lamp. **The lot is wide and open**, set back from the road, with big lawns. Copy this lot layout for all High lots: deep setback, curved drive, landscaped beds.
+- **`design_small_cottage.png`** (Low, a starter house like "The Harlow" / a bungalow): a single-storey beige cottage, a low hip roof, a straight path from the road, small bushes, a big empty lawn round it.
+- **`design_modern_two_storey.png`** (Low-Mid modern, like "Bayview" / "Linden"): a white and grey 2-storey modern house, dark trim, flat and low roofs, a balcony, a double garage, a straight drive, a lawn.
+- **`design_dark_farmhouse.png`** (Mid, our "Ridgeback Barn"): a dark-grey 2-storey farmhouse / barn, a covered front porch, a **dark wooden ranch fence** along the road, a gravel drive, trees.
+- **What all of them share** (keep this): neat lawns, a sidewalk and road in front, a mailbox by the drive, a street lamp, landscaped beds with rocks and plants, lots of space between houses, mountains and water behind.
+
 ### What the video shows about the system (copy how it works, not how it looks)
 - **House Shop** (at the dealership):
   - sort by Price / Plot / Garages;
