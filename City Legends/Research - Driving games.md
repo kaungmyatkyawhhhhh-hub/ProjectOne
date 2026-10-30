@@ -800,3 +800,16 @@ Sources:
 14. Bodykits by part (MR:T): needs parts made per car; later.
 
 **Owner 2026-10-30: "All but No number 3 yet for now".** Build 1, 2, 4, 5, 6, 7, 8, 9, 10 one at a time; performance tuning (3) waits. With no tuning yet, brand levels (9) work on what exists: cheaper Legends Customs and a brand's trims a few levels sooner.
+
+**Built (2026-10-30):** all 9 picks are in the game and synced to Studio.
+- Play-tested in Studio:
+  - Goals (1, 2, 5);
+  - race lobby and solo race (4);
+  - live map marker for an open bank (6);
+  - the LEGENDS MEET sign and car count, and photo mode (7);
+  - radio stations (8);
+  - test drive start (10).
+- Not tested yet:
+  - the duel and the shared pot, which need 2 players;
+  - the end of a test drive (5 minutes);
+  - brand level-ups (9), which need long drives.
