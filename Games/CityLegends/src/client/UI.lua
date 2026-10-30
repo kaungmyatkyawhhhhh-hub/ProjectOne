@@ -1459,11 +1459,11 @@ local function addLoadingMap(f: Frame)
 	end
 	local fit = math.min(screen.X / size.X, screen.Y / size.Y) * 1.05
 	zoom.Scale = fit
-	-- a slow push in while it loads, and a shade so the title reads
-	tween(zoom, 24, { Scale = fit * 1.25 }, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-	local shade = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.25, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ZIndex = 50, Parent = holder })
+	-- a slow push in while it loads, and a shade along the bottom so the title reads
+	tween(zoom, 24, { Scale = fit * 1.2 }, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+	local shade = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.15, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ZIndex = 50, Parent = holder })
 	new("UIGradient", {
-		Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(0.5, 0.05), NumberSequenceKeypoint.new(1, 0.55) }),
+		Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.85), NumberSequenceKeypoint.new(0.55, 0.8), NumberSequenceKeypoint.new(1, 0) }),
 		Rotation = 90,
 		Parent = shade,
 	})
@@ -1486,9 +1486,10 @@ function UI.showLoading(text: string)
 	end
 	local f = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), Size = UDim2.fromScale(1, 1), ZIndex = 100, Parent = gui })
 	addLoadingMap(f)
-	label({ Text = "CITY LEGENDS", TextSize = 46, Font = Enum.Font.GothamBlack, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.45), Size = UDim2.fromOffset(600, 60), ZIndex = 101, Parent = f })
-	label({ Name = "Status", Text = text, TextSize = 14, TextColor3 = Theme.SubText, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.53), Size = UDim2.fromOffset(600, 20), ZIndex = 101, Parent = f })
-	local bar = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.58), Size = UDim2.fromOffset(220, 3), BackgroundColor3 = Theme.Stroke, BorderSizePixel = 0, ZIndex = 101, Parent = f })
+	-- (the title sits low, under the map)
+	label({ Text = "CITY LEGENDS", TextSize = 46, Font = Enum.Font.GothamBlack, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -86), Size = UDim2.fromOffset(600, 60), ZIndex = 101, Parent = f })
+	label({ Name = "Status", Text = text, TextSize = 14, TextColor3 = Theme.SubText, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -60), Size = UDim2.fromOffset(600, 20), ZIndex = 101, Parent = f })
+	local bar = new("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -44), Size = UDim2.fromOffset(220, 3), BackgroundColor3 = Theme.Stroke, BorderSizePixel = 0, ZIndex = 101, Parent = f })
 	local fill = new("Frame", { Size = UDim2.fromScale(0.3, 1), BackgroundColor3 = Theme.Accent, BorderSizePixel = 0, ZIndex = 102, Parent = bar })
 	task.spawn(function()
 		while fill.Parent do
@@ -1511,8 +1512,8 @@ function UI.showLoading(text: string)
 		end
 		local b = button("SKIP", Theme.Accent, {
 			Name = "Skip",
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromScale(0.5, 0.68),
+			AnchorPoint = Vector2.new(1, 1),
+			Position = UDim2.new(1, -20, 1, -20),
 			Size = UDim2.fromOffset(140, 42),
 			ZIndex = 101,
 		})
