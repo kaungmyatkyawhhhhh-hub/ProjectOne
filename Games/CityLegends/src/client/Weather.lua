@@ -49,7 +49,11 @@ local RAIN_VOLUME = 0.32
 
 -- wet look
 local WET_TINT = Color3.fromRGB(6, 7, 10)
-local ROAD_WET_REFLECTANCE = 0.16
+-- (2026-10-30, owner: "fix that black thing ... on the roads": shiny smooth plastic mirrored the dark
+-- night sky and the roads went black; now they keep their asphalt and only darken and shine a little)
+local ROAD_WET_REFLECTANCE = 0.06
+local ROAD_WET_DARKEN = 0.12
+local SIDEWALK_WET_DARKEN = 0.18
 -- rain mood
 local RAIN_ATMO_COLOR = Color3.fromRGB(84, 92, 116)
 local RAIN_ATMO_DECAY = Color3.fromRGB(40, 44, 64)
@@ -237,12 +241,12 @@ local function applyRoads(level: number)
 			p.Reflectance = s.reflectance
 			p.Material = s.material
 		elseif s.road then
-			p.Color = s.color:Lerp(WET_TINT, 0.3 * q)
+			p.Color = s.color:Lerp(WET_TINT, ROAD_WET_DARKEN * q)
 			p.Reflectance = lerp(s.reflectance, math.max(s.reflectance, ROAD_WET_REFLECTANCE), q)
-			p.Material = if q >= 0.5 then Enum.Material.SmoothPlastic else s.material
+			p.Material = s.material
 		else
-			p.Color = s.color:Lerp(WET_TINT, 0.35 * q)
-			p.Reflectance = s.reflectance + 0.06 * q
+			p.Color = s.color:Lerp(WET_TINT, SIDEWALK_WET_DARKEN * q)
+			p.Reflectance = s.reflectance + 0.03 * q
 		end
 	end
 end

@@ -69,6 +69,8 @@ task.wait(1) -- let the world finish replicating
 if city then
 	UI.showLoading("Painting the skyline...")
 	BuildingSkin.apply(city)
+	-- our own far stand-ins for streamed-out buildings (Roblox's showed as black shapes)
+	require(script.Parent:WaitForChild("Standins")).init(city)
 end
 -- knockable street lights, trees and traffic poles (scanned before the LOD system hides far ones)
 require(script.Parent:WaitForChild("Knockables")).init()
