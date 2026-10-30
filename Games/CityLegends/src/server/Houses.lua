@@ -57,6 +57,7 @@ type Rec = {
 	guests: { [number]: number }, -- user id -> until when the owner let them in (the doorbell)
 	gateOpen: boolean,
 	gateSeen: number, -- last time someone allowed was at the gate
+	dug: { { region: Region3, mats: any, occ: any } }?, -- the terrain an underground garage took out
 }
 
 local friendCache: { [string]: { at: number, yes: boolean } } = {}
@@ -399,7 +400,7 @@ local function clearOut(rec: Rec)
 		local root = if char then char:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
 		if root then
 			local rel = lot.frame:PointToObjectSpace(root.Position)
-			if math.abs(rel.X) < lot.width / 2 and math.abs(rel.Z) < lot.depth / 2 and rel.Y < 60 and rel.Y > -6 then
+			if math.abs(rel.X) < lot.width / 2 and math.abs(rel.Z) < lot.depth / 2 and rel.Y < 60 and rel.Y > -14 then
 				char:PivotTo(out * CFrame.new(6, 3, 0))
 			end
 		end
@@ -408,7 +409,7 @@ local function clearOut(rec: Rec)
 	for _, car in (if cars then cars:GetChildren() else {}) do
 		if car:IsA("Model") and car.PrimaryPart then
 			local rel = lot.frame:PointToObjectSpace(car.PrimaryPart.Position)
-			if math.abs(rel.X) < lot.width / 2 and math.abs(rel.Z) < lot.depth / 2 and rel.Y < 60 and rel.Y > -6 then
+			if math.abs(rel.X) < lot.width / 2 and math.abs(rel.Z) < lot.depth / 2 and rel.Y < 60 and rel.Y > -14 then
 				local h = (car:GetAttribute("Height") :: number?) or 4
 				car:PivotTo(out * CFrame.new(0, h / 2 + 0.6, -8))
 			end
@@ -432,8 +433,55 @@ local function publish(player: Player)
 	player:SetAttribute("HouseDesign", if rec then rec.design else nil)
 end
 
+-- an underground garage: dig its ground out of the terrain (keeping what was there to put back)
+local function dig(rec: Rec)
+	local info = rec.info
+	if not (info and info.dig and #info.dig > 0) then
+		return
+	end
+	local terrain = workspace.Terrain
+	local saved = {}
+	for _, box in info.dig do
+		local cf, size = box.cf, box.size
+		local lo, hi = Vector3.new(math.huge, math.huge, math.huge), Vector3.new(-math.huge, -math.huge, -math.huge)
+		for _, sx in { -1, 1 } do
+			for _, sy in { -1, 1 } do
+				for _, sz in { -1, 1 } do
+					local p = cf:PointToWorldSpace(Vector3.new(sx * size.X / 2, sy * size.Y / 2, sz * size.Z / 2))
+					lo, hi = lo:Min(p), hi:Max(p)
+				end
+			end
+		end
+		local region = Region3.new(lo, hi):ExpandToGrid(4)
+		local ok, mats, occ = pcall(function()
+			return terrain:ReadVoxels(region, 4)
+		end)
+		if ok then
+			table.insert(saved, { region = region, mats = mats, occ = occ })
+		end
+		terrain:FillBlock(cf, size, Enum.Material.Air)
+	end
+	rec.dug = saved
+end
+
+local function undig(rec: Rec)
+	local saved = rec.dug
+	rec.dug = nil
+	if not saved then
+		return
+	end
+	local terrain = workspace.Terrain
+	for i = #saved, 1, -1 do
+		local s = saved[i]
+		pcall(function()
+			terrain:WriteVoxels(s.region, 4, s.mats, s.occ)
+		end)
+	end
+end
+
 local function takeDown(rec: Rec)
 	clearOut(rec)
+	undig(rec)
 	if rec.model then
 		rec.model:Destroy()
 	end
@@ -803,6 +851,7 @@ local function build(rec: Rec, player: Player, id: string)
 	rec.owner = player
 	rec.design = id
 	rec.sign.Parent = nil
+	dig(rec)
 	mailbox(rec, player)
 	-- the owner's garage setup, at the first bay
 	local first = info.bays[1]

@@ -105,7 +105,17 @@ export type Info = {
 	size: Vector3,
 	gates: { Gate },
 	gateAt: CFrame?,
+	-- boxes of ground to clear for an underground garage (the server digs them out of the terrain)
+	dig: { { cf: CFrame, size: Vector3 } },
 }
+
+-- the underground garage on High lots (owner, 2026-10-30: "make the garage under ground"):
+-- a ramp UG_RUN long down the lot's left side from just inside the gate, to a basement hall
+-- UG_DEEP below the lot with the cars on show in two rows beside its aisle
+local UG_W = 14
+local UG_DEEP = 9.5
+local UG_RUN = 50
+local UG_APRON = 14
 
 -- a part maker bound to one model (ghost: see-through and not solid)
 local function maker(model: Model, ghost: boolean)
@@ -944,6 +954,7 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 	-- the garage: in the front of the ground floor on Low houses; a wing on bigger ones
 	local maxBays = design.maxBays
 	local integrated = tier == 0 and not body
+	local under = tier == 2 and lotW >= 110 and lotD >= 120
 	local cols = if integrated then maxBays elseif maxBays > 5 then math.ceil(maxBays / 2) else maxBays
 	local rows = math.ceil(maxBays / cols)
 	local garageW = cols * BAY_W + 2
@@ -955,28 +966,43 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 	if body then
 		-- scaled to fit the design's footprint
 		local fw, fd = body:GetAttribute("FootW") :: number, body:GetAttribute("FootD") :: number
-		bodyScale = math.min(look.w / fw, look.d / fd, 1.2)
+		bodyScale = math.min((look.fitW or look.w) / fw, (look.fitD or look.d) / fd, 1.2)
 		w, d = fw * bodyScale, fd * bodyScale
 	end
 	if integrated then
 		w = math.max(w, garageW + 2)
 	end
 	-- wing beside the house if it fits, else in front of it
-	local wingBeside = not integrated and (w + garageW + 10) <= lotW - 6
+	local wingBeside = not integrated and not under and (w + garageW + 10) <= lotW - 6
 	if not integrated and not wingBeside then
-		w = math.min(w, lotW - 10)
+		w = math.min(w, if under then lotW - 20 else lotW - 10)
 	end
 	local houseX = if wingBeside then garageW / 2 + 3 else 0
 	-- towards the back, leaving a garden behind for the pool where there is one
 	local backGarden = if look.pool or look.hottub then 20 else 6
 	local houseZ = lotD / 2 - d / 2 - math.min(backGarden, math.max(6, lotD - d - (if integrated then 16 elseif wingBeside then 24 else garageD + 24)))
+	-- the underground garage's ramp runs down the left side: the house keeps clear of it, at the back
+	local ugX = -lotW / 2 + 2.5 + UG_W / 2
+	local ugTop = -lotD / 2 + UG_APRON
+	if under then
+		houseX = math.clamp(w / 2 + ugX + UG_W / 2 + 1.5, 0, math.max(0, lotW / 2 - 2 - w / 2))
+		houseZ = lotD / 2 - 3 - d / 2
+	end
 	local hcf = lot * CFrame.new(houseX, 0, houseZ)
 	-- the stairs run up the back wall on this side (the side a cantilevered top floor hangs out to)
 	local side = if houseX > 0 then -1 else 1
 	local shiftTop = if look.cantilever and floors > 1 then side * w * 0.18 else 0
 
-	-- the lot: lawn
-	mk(Vector3.new(lotW, 0.4, lotD), lot * CFrame.new(0, 0.2, 0), LAWN, Enum.Material.Grass, { name = "Lawn" })
+	-- the lot: lawn (round the open ramp down to an underground garage)
+	if under then
+		local rx1 = ugX + UG_W / 2 + 1
+		local rz1 = ugTop + UG_RUN
+		mk(Vector3.new(lotW, 0.4, UG_APRON), lot * CFrame.new(0, 0.2, -lotD / 2 + UG_APRON / 2), LAWN, Enum.Material.Grass, { name = "Lawn" })
+		mk(Vector3.new(lotW / 2 - rx1, 0.4, UG_RUN), lot * CFrame.new((rx1 + lotW / 2) / 2, 0.2, ugTop + UG_RUN / 2), LAWN, Enum.Material.Grass, { name = "Lawn" })
+		mk(Vector3.new(lotW, 0.4, lotD / 2 - rz1), lot * CFrame.new(0, 0.2, (rz1 + lotD / 2) / 2), LAWN, Enum.Material.Grass, { name = "Lawn" })
+	else
+		mk(Vector3.new(lotW, 0.4, lotD), lot * CFrame.new(0, 0.2, 0), LAWN, Enum.Material.Grass, { name = "Lawn" })
+	end
 
 	-- the passage door from a wing garage into the house: where the garage and house overlap
 	local passageZ: number? = nil
@@ -1108,7 +1134,14 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 	local front = hcf * CFrame.new(0, 0, -d / 2)
 	if body then
 		look = table.clone(look)
-		for _, k in { "porch", "balcony", "verandas", "columns", "towers", "tower", "dome", "cupola", "solar", "helipad", "deck" } do
+		for _, k in { "porch", "balcony", "verandas", "columns", "towers", "tower", "dome", "cupola", "solar", "helipad", "deck", "pool", "hottub" } do
+			look[k] = nil
+		end
+	end
+	if under then
+		-- (no room left in the front court for these: the ramp and the house fill it)
+		look = table.clone(look)
+		for _, k in { "pool", "hottub", "fountain", "carCourt", "palms", "gazebo" } do
 			look[k] = nil
 		end
 	end
@@ -1185,10 +1218,71 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		mk(Vector3.new(w, 0.8, 8), front * CFrame.new(0, 1, -4), Color3.fromRGB(150, 120, 90), Enum.Material.WoodPlanks)
 	end
 
-	-- the garage wing (or the bays in the house's front on small houses)
+	-- the garage wing (or the bays in the house's front on small houses, or underground on High lots)
 	local bays: { CFrame } = {}
+	local dig: { { cf: CFrame, size: Vector3 } } = {}
 	local gcf: CFrame
-	if integrated then
+	if under then
+		local per = math.ceil(maxBays / 2)
+		local x0 = ugX - UG_W / 2 -- the ramp's and the aisle's left edge
+		local hallW = UG_W + 2 * BAY_D + 1
+		local hallD = per * BAY_W + 2
+		local hz0 = ugTop + UG_RUN -- where the ramp meets the floor and the hall begins
+		local hcx, hcz = x0 + hallW / 2, hz0 + hallD / 2
+		local fy = -UG_DEEP
+		local wallC = Color3.fromRGB(196, 194, 188)
+		local floorC = Color3.fromRGB(72, 74, 80)
+		gcf = lot * CFrame.new(ugX, 0, ugTop + UG_APRON / 2)
+		-- the ramp: one sloping slab between retaining walls, a low wall along the lawn side
+		local rise = 0.4 - fy
+		local slope = math.atan2(rise, UG_RUN)
+		local len = math.sqrt(UG_RUN * UG_RUN + rise * rise)
+		local mid = lot * CFrame.new(ugX, (0.4 + fy) / 2, ugTop + UG_RUN / 2) * CFrame.Angles(slope, 0, 0)
+		mk(Vector3.new(UG_W, 1, len + 0.6), mid * CFrame.new(0, -0.5, 0), floorC, Enum.Material.Concrete, { name = "Ramp" })
+		for _, s in { -1, 1 } do
+			local top = if s == 1 then 1.8 else 0.4
+			mk(Vector3.new(1, top - (fy - 1), UG_RUN), lot * CFrame.new(ugX + s * (UG_W / 2 + 0.5), (top + fy - 1) / 2, ugTop + UG_RUN / 2), wallC, Enum.Material.Concrete)
+		end
+		-- a strip of light down each side of the ramp
+		for _, s in { -1, 1 } do
+			mk(Vector3.new(0.3, 0.3, len), mid * CFrame.new(s * (UG_W / 2 - 0.3), 0.15, 0), WARM, Enum.Material.Neon, { collide = false, shadow = false })
+		end
+		-- the hall: floor, ceiling (the lawn and the house stand on it), walls round it
+		mk(Vector3.new(hallW, 1, hallD), lot * CFrame.new(hcx, fy - 0.5, hcz), floorC, Enum.Material.Concrete, { name = "GarageFloor" })
+		mk(Vector3.new(hallW + 2, 1.4, hallD + 2), lot * CFrame.new(hcx, -0.5, hcz), wallC, Enum.Material.Concrete)
+		local wh = UG_DEEP + 0.3
+		local wy = (fy - 1 - 1.2) / 2 + 0.5
+		mk(Vector3.new(1, wh, hallD + 2), lot * CFrame.new(x0 - 0.5, wy, hcz), wallC, Enum.Material.Concrete)
+		mk(Vector3.new(1, wh, hallD + 2), lot * CFrame.new(x0 + hallW + 0.5, wy, hcz), wallC, Enum.Material.Concrete)
+		mk(Vector3.new(hallW + 2, wh, 1), lot * CFrame.new(hcx, wy, hz0 + hallD + 0.5), wallC, Enum.Material.Concrete)
+		mk(Vector3.new(hallW - UG_W, wh, 1), lot * CFrame.new(x0 + UG_W + (hallW - UG_W) / 2, wy, hz0 - 0.5), wallC, Enum.Material.Concrete)
+		-- a lit header over the way in, and light strips along the ceiling
+		mk(Vector3.new(UG_W, 0.4, 0.4), lot * CFrame.new(ugX, -1.5, hz0), WARM, Enum.Material.Neon, { collide = false, shadow = false })
+		for _, sx in { UG_W / 2, UG_W + BAY_D / 2, UG_W + BAY_D * 1.5 } do
+			local strip = mk(Vector3.new(0.6, 0.2, hallD - 4), lot * CFrame.new(x0 + sx, -1.3, hcz), Color3.fromRGB(236, 240, 255), Enum.Material.Neon, { collide = false, shadow = false })
+			if sx == UG_W + BAY_D / 2 then
+				local gl = Instance.new("PointLight")
+				gl.Color = Color3.fromRGB(236, 240, 255)
+				gl.Range = 40
+				gl.Brightness = 1.2
+				gl.Parent = strip
+			end
+		end
+		-- the bays: two rows beside the aisle, the cars' noses to it
+		for k = 1, maxBays do
+			local col = if k <= per then 1 else 2
+			local i = if col == 1 then k else k - per
+			local x = x0 + UG_W + (col - 0.5) * BAY_D + 0.5
+			local z = hz0 + 1 + (i - 0.5) * BAY_W
+			table.insert(bays, lot * CFrame.new(x, fy, z) * CFrame.Angles(0, math.pi / 2, 0))
+			mk(Vector3.new(BAY_D - 2, 0.05, 0.2), lot * CFrame.new(x, fy + 0.03, z - BAY_W / 2), Color3.fromRGB(240, 240, 236), Enum.Material.SmoothPlastic, { collide = false })
+		end
+		-- the ground to clear: the ramp's trench and the hall
+		local dy = (0.3 + fy - 1.6) / 2
+		local dh = 0.3 - (fy - 1.6)
+		table.insert(dig, { cf = lot * CFrame.new(ugX, dy, ugTop + UG_RUN / 2), size = Vector3.new(UG_W + 4, dh, UG_RUN + 2) })
+		table.insert(dig, { cf = lot * CFrame.new(hcx, dy, hcz), size = Vector3.new(hallW + 4, dh, hallD + 4) })
+	elseif integrated then
 		gcf = hcf * CFrame.new(0, 0.4, -d / 2 + (BAY_D + 1) / 2)
 		for k = 1, maxBays do
 			local x = -(cols * BAY_W) / 2 + (k - 0.5) * BAY_W
@@ -1250,11 +1344,11 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		end
 	end
 
-	-- the driveway: from the lot's front edge to the garage doors, and the show-car spots on it
-	local doorZ = (lot:ToObjectSpace(gcf)).Position.Z - (if integrated then (BAY_D + 1) / 2 else garageD / 2)
+	-- the driveway: from the lot's front edge to the garage doors (or the ramp), and the show-car spots on it
+	local doorZ = (lot:ToObjectSpace(gcf)).Position.Z - (if under then UG_APRON / 2 elseif integrated then (BAY_D + 1) / 2 else garageD / 2)
 	local gxLocal = (lot:ToObjectSpace(gcf)).Position.X
 	local driveLen = doorZ + lotD / 2
-	local driveW = math.max(14, if integrated then garageW else math.min(garageW, 24))
+	local driveW = if under then UG_W else math.max(14, if integrated then garageW else math.min(garageW, 24))
 	if driveLen > 1 then
 		mk(Vector3.new(driveW, 0.3, driveLen), lot * CFrame.new(gxLocal, 0.55, -lotD / 2 + driveLen / 2), PAVERS, Enum.Material.Pavement, { name = "Driveway" })
 	end
@@ -1267,7 +1361,21 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		mk(Vector3.new(x1 - x0, 0.3, 14), lot * CFrame.new((x0 + x1) / 2, 0.56, -lotD / 2 + 7), PAVERS, Enum.Material.Pavement, { name = "Driveway" })
 	end
 	local drive: { CFrame } = {}
+	local houseFront = houseZ - d / 2
 	for k = 1, design.drive do
+		if under then
+			-- in the front court if there is room before the house, else beside the gate, side on
+			local spot: CFrame
+			if houseFront - ugTop >= 20 then
+				spot = lot * CFrame.new(ugX + UG_W / 2 + 9 + (k - 1) * 10, 0.75, ugTop + (houseFront - ugTop) / 2)
+				mk(Vector3.new(9, 0.3, 16), spot * CFrame.new(0, -0.19, 0), PAVERS, Enum.Material.Pavement)
+			else
+				spot = lot * CFrame.new(lotW / 2 - 12 - (k - 1) * 17, 0.75, -lotD / 2 + UG_APRON / 2 + 0.5) * CFrame.Angles(0, math.pi / 2, 0)
+				mk(Vector3.new(9, 0.3, 16), spot * CFrame.new(0, -0.19, 0), PAVERS, Enum.Material.Pavement)
+			end
+			table.insert(drive, spot)
+			continue
+		end
 		-- side by side on the drive near the front
 		local z = -lotD / 2 + math.max(6, math.min(driveLen - 8, 10))
 		local x = gxLocal + (k - (design.drive + 1) / 2) * math.max(7, driveW / design.drive)
@@ -1331,6 +1439,7 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		size = Vector3.new(lotW, topY + 12, lotD),
 		gates = gates,
 		gateAt = gateAt,
+		dig = dig,
 	}
 	return model, info
 end
