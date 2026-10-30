@@ -2,6 +2,8 @@
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
+Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
+
 ## Features so far
 - **City:** a big night city with traffic that stops at red lights, and a tunnel intro cutscene ("CITY LEGENDS").
 - **Driving and money:** you earn money by driving and by cutting up traffic, with combos. You buy cars in the garage.
