@@ -618,8 +618,13 @@ local function beach(kit: any, root: Instance)
 	local sea = W.BeachWest
 	workspace.Terrain:FillBlock(CFrame.new((sea + W.SeaWest) / 2 - 10, -9, 0), Vector3.new(sea - W.SeaWest + 60, 14, (HALFZ + 1600) * 2), Enum.Material.Water)
 	-- promenade (a raised sidewalk with a low white wall), sand, wet sand sloping into the sea
-	kit.slab(folder, x0, -HALFZ - 200, prom, HALFZ + 200, CURB, CURB + 2, Color3.fromRGB(176, 166, 150), Enum.Material.Pavement, { name = "Promenade" })
-	kit.slab(folder, prom, -HALFZ - 200, sea + 30, HALFZ + 200, 0.2, 4, SAND, Enum.Material.Sand, { name = "Sand" })
+	-- (both stop either side of the causeway: the sand covered its landing, owner 2026-10-30)
+	local zc = CityLayout.roadCoord(CityLayout.HighwayJ)
+	local gapHalf = C.LaneWidth * C.LanesPerSide + 6
+	for _, span in { { -HALFZ - 200, zc - gapHalf }, { zc + gapHalf, HALFZ + 200 } } do
+		kit.slab(folder, x0, span[1], prom, span[2], CURB, CURB + 2, Color3.fromRGB(176, 166, 150), Enum.Material.Pavement, { name = "Promenade" })
+		kit.slab(folder, prom, span[1], sea + 30, span[2], 0.2, 4, SAND, Enum.Material.Sand, { name = "Sand" })
+	end
 	local z = -HALFZ - 200
 	while z < HALFZ + 200 do
 		local len = math.min(600, HALFZ + 200 - z)
@@ -693,7 +698,7 @@ end
 ---------------------------------------------------------------------
 -- a straight deck over the sea from a to b (y from CityLayout.seaRoadY), with rails, walls,
 -- lamps, piers and markings; nLanes each way
-local function seaRoad(kit: any, parent: Instance, a: Vector3, b: Vector3, width: number, landA: number, landB: number, laneOffsets: { number })
+local function seaRoad(kit: any, parent: Instance, a: Vector3, b: Vector3, width: number, landA: number, landB: number, laneOffsets: { number }, dividers: { number })
 	local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
 	local len = flat.Magnitude
 	local dir = flat.Unit
@@ -734,6 +739,14 @@ local function seaRoad(kit: any, parent: Instance, a: Vector3, b: Vector3, width
 		for _, off in laneOffsets do
 			piece(d0, d1, off, 0.3, 0.05, 0.05, kit.LINE_YELLOW, Enum.Material.SmoothPlastic, { collide = false })
 		end
+		-- dashed lines between the lanes (owner, 2026-10-30: "no road lines ... it needs to be 2+2")
+		for _, off in dividers do
+			local dd = d0 + 4
+			while dd + 10 <= d1 - 2 do
+				piece(dd, dd + 10, off, 0.35, 0.05, 0.05, kit.LINE_WHITE, Enum.Material.SmoothPlastic, { collide = false, name = "LaneDash" })
+				dd += 24
+			end
+		end
 	end
 	-- lamps and piers
 	local l = 20
@@ -764,7 +777,7 @@ local function islands(kit: any, root: Instance)
 	local seaB = (I.x + I.r) - WestLayout.CausewayEnd
 	local cw = kit.folder("Causeway", folder)
 	local lanes = C.LaneWidth * C.LanesPerSide
-	seaRoad(kit, cw, a, b, lanes * 2 + 12, seaA, seaB, { -0.4, 0.4 })
+	seaRoad(kit, cw, a, b, lanes * 2 + 12, seaA, seaB, { -0.4, 0.4 }, { -C.LaneWidth, C.LaneWidth })
 	Isle.build(kit, folder, palm)
 end
 -- (Studio rebuilds just the causeway and the island on the baked map with this)
