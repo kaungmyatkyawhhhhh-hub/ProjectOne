@@ -22,6 +22,8 @@ export type CarSpec = {
 	Order: number,
 	Electric: boolean?, -- one gear, no engine sound
 	Model: string?, -- uses another car's imported model (a trim without its own model yet)
+	Trim: string?, -- BASE / SPORT / TOP on a line that got the extra trims
+	BaseId: string?, -- a SPORT / TOP trim: the car it is built on
 }
 
 local Cars = {}
@@ -141,69 +143,174 @@ function Cars.modelOf(id: string): string
 end
 
 ---------------------------------------------------------------------
--- Series and how you get each car (owner, 2026-10-22)
---   * the dealer groups cars into series; the first car of a series is open from the start and
---     each next one needs 5 more levels (level 5, 10, 15 ...)
---   * from the Ferrara F430 up (dealer price $600k and over), cars come only from the car market,
---     and a car in a series can only be taken delivery of when you own the one before it
+-- Series, trims and levels (owner, 2026-10-30: "dealership with trims like Midnight Racing")
+--   * a series is one car line; its cars are the trims, cheapest first (the dealer's trim chips)
+--   * every car is sold at Legends Motors once you reach its level (Cars.Levels); no car is market
+--     only any more and you don't need the trim before (levels only). The car market is a second
+--     way to get cars.
+--   * a line with one car gets a SPORT and a TOP trim (owner: "add extra trims"): the same body,
+--     a little faster and dearer, 5 and 10 levels on
 ---------------------------------------------------------------------
 export type Series = { Name: string, Ids: { string }, Brand: string? }
 
-Cars.MarketFromPrice = 600000
-Cars.LevelsPerTrim = 5
+Cars.TrimSteps = {
+	{ Key = "sport", Trim = "SPORT", Label = "Sport", Levels = 5, Price = 1.3, Speed = 1.05, Accel = 0.92, Grip = 0.03, FreePrice = 8000 },
+	{ Key = "top", Trim = "TOP", Label = "Top", Levels = 10, Price = 1.7, Speed = 1.1, Accel = 0.85, Grip = 0.06, FreePrice = 15000 },
+}
+
+-- the level each car opens at the dealer (by price; each better trim at least 5 levels on; the top
+-- cars at 40 - 60)
+Cars.Levels = {
+	suzaki_swift = 1, toyoka_belta = 1, toyoka_camri = 1, toyoka_crown = 1, toyoka_alfard = 1,
+	toyoka_lc200 = 1, toyoka_lc300 = 6, toyoka_chaser = 3, toyoka_supra_mk4 = 6,
+	kio_ev6 = 1, byt_seal = 1, byt_u8 = 10,
+	nisun_350z = 1, nisun_r34 = 6, nisun_gtr = 15,
+	mazdo_rx7 = 1, mazdo_rx8 = 1,
+	bnw_330i_g20 = 3, bnw_m3_f80 = 8, bnw_m3_e92 = 3, bnw_m4_f82 = 8,
+	bnw_530i = 3, bnw_540i = 8, bnw_m5_e60 = 13, bnw_m5_f10 = 18, bnw_m5_f90 = 23,
+	bnw_m6_v10 = 6, bnw_m8gc = 11, bnw_750li = 6, bnw_x6 = 6, bnw_x7 = 6,
+	bentz_190e = 3, bentz_cla45 = 3, bentz_cls63s = 6,
+	bentz_e300 = 3, bentz_e400 = 8, bentz_e63s = 13,
+	bentz_s65_w221 = 6, bentz_s63 = 11, bentz_s680 = 32,
+	bentz_gle53 = 10, bentz_g63 = 10, brabos_g63 = 32, bentz_gls = 25, bentz_sl65bs = 20, bentz_sls = 25,
+	dodger_challenger = 6, bentz_gt63s = 10,
+	chevo_camaro = 3, chevo_c6 = 3, chevo_c7 = 8,
+	xiaomo_su7 = 6,
+	lexis_lc500 = 10, lexis_lx700 = 10, lexis_lfa = 40,
+	maseroti_levante = 6,
+	porsha_boxster = 3, porsha_panamera = 10, porsha_gt3 = 25,
+	astin_dbx = 15, astin_db9 = 15, astin_vantage = 15,
+	audy_r8 = 15,
+	ferrara_f430 = 20, ferrara_california = 20, ferrara_599 = 20, ferrara_458 = 25,
+	lambrini_lp570 = 20, lambrini_lp640 = 32, lambrini_lp700 = 37, lambrini_lp750 = 48,
+	lambrini_urus = 32, lambrini_countach = 40,
+	mclaran_12c = 20,
+	bentlee_contgt = 25, bentlee_bentayga = 25,
+	rolls_wraith = 32, rolls_cullinan = 40,
+	bugotti_veyron = 60,
+} :: { [string]: number }
 
 Cars.Series = {
 	{ Name = "SUZAKI SWIFF", Ids = { "suzaki_swift" } },
 	{ Name = "TOYOKA BELTO", Ids = { "toyoka_belta" } },
-	{ Name = "KIO EV6", Ids = { "kio_ev6" } },
-	{ Name = "BYT", Ids = { "byt_seal", "byt_u8" } },
 	{ Name = "TOYOKA CAMRI", Ids = { "toyoka_camri" } },
 	{ Name = "TOYOKA CROWNE", Ids = { "toyoka_crown" } },
 	{ Name = "TOYOKA ALFARD", Ids = { "toyoka_alfard" } },
 	{ Name = "TOYOKA LAND CRUZER", Ids = { "toyoka_lc200", "toyoka_lc300" } },
-	{ Name = "NISUN Z & GT-R", Ids = { "nisun_350z", "nisun_r34", "nisun_gtr" } },
-	{ Name = "MAZDO RX", Ids = { "mazdo_rx7", "mazdo_rx8" } },
-	{ Name = "BNW 5 SERIES", Ids = { "bnw_530i", "bnw_540i", "bnw_m5_e60", "bnw_m5_f10", "bnw_m5_f90" } },
-	{ Name = "BNW 3 & 4 SERIES", Ids = { "bnw_330i_g20", "bnw_m3_e92", "bnw_m3_f80", "bnw_m4_f82" } },
-	{ Name = "BNW 6 & 8 SERIES", Ids = { "bnw_m6_v10", "bnw_m8gc" } },
-	{ Name = "BNW 7 SERIES", Ids = { "bnw_750li" } },
-	{ Name = "BNW X", Ids = { "bnw_x6", "bnw_x7" } },
-	{ Name = "MERCER E SERIES", Ids = { "bentz_e300", "bentz_e400", "bentz_e63s" } },
-	{ Name = "MERCER 190E", Ids = { "bentz_190e" } },
-	{ Name = "MERCER CLA & CLS", Ids = { "bentz_cla45", "bentz_cls63s" } },
-	{ Name = "MERCER S-CLASS", Ids = { "bentz_s65_w221", "bentz_s63", "bentz_s680" } },
-	{ Name = "MERCER SUV", Ids = { "bentz_gle53", "bentz_g63", "bentz_gls", "brabos_g63" } },
-	{ Name = "MERCER SL & SLS", Ids = { "bentz_sl65bs", "bentz_sls" } },
-	{ Name = "TOYOKA SUPRO", Ids = { "toyoka_supra_mk4" } },
 	{ Name = "TOYOKA CHASOR", Ids = { "toyoka_chaser" } },
-	{ Name = "DODGER", Ids = { "dodger_challenger", "bentz_gt63s" } },
-	{ Name = "XIAOMO SU7", Ids = { "xiaomo_su7" } },
-	{ Name = "LEXIS", Ids = { "lexis_lc500", "lexis_lx700", "lexis_lfa" } },
-	{ Name = "MASEROTI LEVANTO", Ids = { "maseroti_levante" } },
+	{ Name = "TOYOKA SUPRO", Ids = { "toyoka_supra_mk4" } },
+	{ Name = "KIO EV6", Ids = { "kio_ev6" } },
+	{ Name = "BYT SEAL", Ids = { "byt_seal" } },
+	{ Name = "BYT YANGWONG U8", Ids = { "byt_u8" } },
+	{ Name = "NISUN 350Z", Ids = { "nisun_350z" } },
+	{ Name = "NISUN GT-R", Ids = { "nisun_r34", "nisun_gtr" } },
+	{ Name = "MAZDO RX-7", Ids = { "mazdo_rx7" } },
+	{ Name = "MAZDO RX-8", Ids = { "mazdo_rx8" } },
+	{ Name = "BNW 3 SERIES", Ids = { "bnw_330i_g20", "bnw_m3_f80" } },
+	{ Name = "BNW M3 COUPE & M4", Ids = { "bnw_m3_e92", "bnw_m4_f82" } },
+	{ Name = "BNW 5 SERIES", Ids = { "bnw_530i", "bnw_540i", "bnw_m5_e60", "bnw_m5_f10", "bnw_m5_f90" } },
+	{ Name = "BNW M6 & M8", Ids = { "bnw_m6_v10", "bnw_m8gc" } },
+	{ Name = "BNW 7 SERIES", Ids = { "bnw_750li" } },
+	{ Name = "BNW X6", Ids = { "bnw_x6" } },
+	{ Name = "BNW X7", Ids = { "bnw_x7" } },
+	{ Name = "MERCER 190E", Ids = { "bentz_190e" } },
+	{ Name = "MERCER CLA", Ids = { "bentz_cla45" } },
+	{ Name = "MERCER CLS", Ids = { "bentz_cls63s" } },
+	{ Name = "MERCER E-CLASS", Ids = { "bentz_e300", "bentz_e400", "bentz_e63s" } },
+	{ Name = "MERCER S-CLASS", Ids = { "bentz_s65_w221", "bentz_s63", "bentz_s680" } },
+	{ Name = "MERCER GLE", Ids = { "bentz_gle53" } },
+	{ Name = "MERCER G-CLASS", Ids = { "bentz_g63", "brabos_g63" } },
+	{ Name = "MERCER MAYBECH GLS", Ids = { "bentz_gls" } },
+	{ Name = "MERCER SL", Ids = { "bentz_sl65bs" } },
+	{ Name = "MERCER SLS", Ids = { "bentz_sls" } },
+	{ Name = "DODGER CHALLENJER", Ids = { "dodger_challenger" } },
+	{ Name = "DODGER SRT", Ids = { "bentz_gt63s" } },
 	{ Name = "CHEVO CAMARO", Ids = { "chevo_camaro" } },
 	{ Name = "CHEVO CORVETTE", Ids = { "chevo_c6", "chevo_c7" } },
-	{ Name = "PORSHA", Ids = { "porsha_boxster", "porsha_panamera", "porsha_gt3" } },
-	{ Name = "ASTIN MARLIN", Ids = { "astin_dbx", "astin_db9", "astin_vantage" } },
+	{ Name = "XIAOMO SU7", Ids = { "xiaomo_su7" } },
+	{ Name = "LEXIS LC500", Ids = { "lexis_lc500" } },
+	{ Name = "LEXIS LX700", Ids = { "lexis_lx700" } },
+	{ Name = "LEXIS LFA", Ids = { "lexis_lfa" } },
+	{ Name = "MASEROTI LEVANTO", Ids = { "maseroti_levante" } },
+	{ Name = "PORSHA BOXSTER", Ids = { "porsha_boxster" } },
+	{ Name = "PORSHA PANAMERA", Ids = { "porsha_panamera" } },
+	{ Name = "PORSHA 911 GT3", Ids = { "porsha_gt3" } },
+	{ Name = "ASTIN MARLIN DBX", Ids = { "astin_dbx" } },
+	{ Name = "ASTIN MARLIN VANQUISH", Ids = { "astin_db9" } },
+	{ Name = "ASTIN MARLIN VANTAGE", Ids = { "astin_vantage" } },
 	{ Name = "AUDY R8", Ids = { "audy_r8" } },
-	{ Name = "FERRARA", Ids = { "ferrara_f430", "ferrara_california", "ferrara_599", "ferrara_458" } },
-	{ Name = "LAMBRINI", Ids = { "lambrini_lp570", "lambrini_lp640", "lambrini_lp700", "lambrini_lp750" } },
+	{ Name = "FERRARA F430", Ids = { "ferrara_f430" } },
+	{ Name = "FERRARA CALIFORNA", Ids = { "ferrara_california" } },
+	{ Name = "FERRARA 599", Ids = { "ferrara_599" } },
+	{ Name = "FERRARA 458", Ids = { "ferrara_458" } },
+	{ Name = "LAMBRINI GALLARDO", Ids = { "lambrini_lp570" } },
+	{ Name = "LAMBRINI MURCIELAGO", Ids = { "lambrini_lp640" } },
+	{ Name = "LAMBRINI AVENTADOR", Ids = { "lambrini_lp700", "lambrini_lp750" } },
 	{ Name = "LAMBRINI URUS", Ids = { "lambrini_urus" } },
 	{ Name = "LAMBRINI COUNTACH", Ids = { "lambrini_countach" } },
-	{ Name = "MCLARAN", Ids = { "mclaran_12c" } },
-	{ Name = "BENTLEE", Ids = { "bentlee_contgt", "bentlee_bentayga" } },
-	{ Name = "ROLLS ROYAL", Ids = { "rolls_wraith", "rolls_cullinan" } },
-	{ Name = "BUGOTTI", Ids = { "bugotti_veyron" } },
+	{ Name = "MCLARAN 12C", Ids = { "mclaran_12c" } },
+	{ Name = "BENTLEE CONTINENTAL", Ids = { "bentlee_contgt" } },
+	{ Name = "BENTLEE BENTAYGA", Ids = { "bentlee_bentayga" } },
+	{ Name = "ROLLS ROYAL WRAITH", Ids = { "rolls_wraith" } },
+	{ Name = "ROLLS ROYAL PHANTOM", Ids = { "rolls_cullinan" } },
+	{ Name = "BUGOTTI VEYRUN", Ids = { "bugotti_veyron" } },
 } :: { Series }
 
--- each series' brand (owner, 2026-10-22: "fit each car into the brands"): the make in its first
--- car's name; the garage lists brands, then their series
-local TWO_WORD_BRANDS = { Rolls = "ROLLS ROYAL", Astin = "ASTIN MARLIN" }
-local byIdEarly: { [string]: CarSpec } = {}
+-- a car left out of the series list gets one of its own
 for _, spec in list do
-	byIdEarly[spec.Id] = spec
+	local found = false
+	for _, series in Cars.Series do
+		if table.find(series.Ids, spec.Id) then
+			found = true
+			break
+		end
+	end
+	if not found then
+		table.insert(Cars.Series, { Name = string.upper(spec.Name), Ids = { spec.Id } })
+	end
+end
+
+-- the SPORT and TOP trims of every one-car line (the same body: Model is the base car's)
+local function round(n: number, step: number): number
+	return math.floor(n / step + 0.5) * step
 end
 for _, series in Cars.Series do
-	local first = byIdEarly[series.Ids[1]]
+	if #series.Ids ~= 1 then
+		continue
+	end
+	local base = Cars.ById[series.Ids[1]]
+	base.Trim = "BASE"
+	local baseLevel = Cars.Levels[base.Id] or 1
+	for i, step in Cars.TrimSteps do
+		local spec: CarSpec = {
+			Id = base.Id .. "_" .. step.Key,
+			Name = base.Name .. " " .. step.Label,
+			Class = base.Class,
+			Tier = base.Tier,
+			TopSpeed = math.floor(base.TopSpeed * step.Speed + 0.5),
+			ZeroToSixty = math.max(2, round(base.ZeroToSixty * step.Accel, 0.1)),
+			Handling = math.min(0.98, base.Handling + step.Grip),
+			Price = if base.Price > 0 then round(base.Price * step.Price, 1000) else step.FreePrice,
+			Color = base.Color,
+			Accent = base.Accent,
+			Order = base.Order + i / 10,
+			Electric = base.Electric,
+			Model = base.Model or base.Id,
+			Trim = step.Trim,
+			BaseId = base.Id,
+		}
+		table.insert(list, spec)
+		Cars.ById[spec.Id] = spec
+		Cars.Levels[spec.Id] = baseLevel + step.Levels
+		table.insert(series.Ids, spec.Id)
+	end
+end
+
+-- each series' brand (owner, 2026-10-22: "fit each car into the brands"): the make in its first
+-- car's name; the garage and the dealer list brands, then their series
+local TWO_WORD_BRANDS = { Rolls = "ROLLS ROYAL", Astin = "ASTIN MARLIN" }
+for _, series in Cars.Series do
+	local first = Cars.ById[series.Ids[1]]
 	local word = if first then string.match(first.Name, "^(%S+)") or first.Name else series.Name
 	series.Brand = TWO_WORD_BRANDS[word] or string.upper(word)
 end
@@ -214,33 +321,42 @@ for _, series in Cars.Series do
 		Cars.SeriesOf[id] = { series = series, index = i }
 	end
 end
--- any car left out gets a series of its own
-for _, spec in list do
-	if not Cars.SeriesOf[spec.Id] then
-		local word = string.match(spec.Name, "^(%S+)") or spec.Name
-		local series = { Name = string.upper(spec.Name), Ids = { spec.Id }, Brand = TWO_WORD_BRANDS[word] or string.upper(word) }
-		table.insert(Cars.Series, series)
-		Cars.SeriesOf[spec.Id] = { series = series, index = 1 }
-	end
-end
 
--- from the F430 up: only from the car market
-function Cars.isMarketOnly(id: string): boolean
+-- the short name of a car's trim for the dealer's trim chips (BASE / SPORT / TOP, or what its
+-- name adds to the brand: "M5 F90", "AVENTADOR SV LP750-4")
+function Cars.trimLabel(id: string): string
 	local spec = Cars.ById[id]
-	return spec ~= nil and spec.Price >= Cars.MarketFromPrice
+	if not spec then
+		return ""
+	end
+	if spec.Trim then
+		return spec.Trim
+	end
+	local at = Cars.SeriesOf[id]
+	local brand = if at and at.series.Brand then at.series.Brand else ""
+	local name = string.upper(spec.Name)
+	if string.sub(name, 1, #brand + 1) == brand .. " " then
+		name = string.sub(name, #brand + 2)
+	end
+	return name
 end
 
--- the level a dealer car opens at: the series' first car at once, each next one 5 levels on
--- (`bonus`: levels off for the player's brand level, Config.brandTrimBonus)
+-- every car is sold at the dealer now (kept so old callers still work)
+function Cars.isMarketOnly(_id: string): boolean
+	return false
+end
+
+-- the level a car opens at the dealer (`bonus`: levels off for the player's brand level,
+-- Config.brandTrimBonus; never below 1)
 function Cars.requiredLevel(id: string, bonus: number?): number
-	local at = Cars.SeriesOf[id]
-	if not at or at.index <= 1 then
+	local need = Cars.Levels[id] or 1
+	if need <= 1 then
 		return 1
 	end
-	return math.max(1, (at.index - 1) * Cars.LevelsPerTrim - (bonus or 0))
+	return math.max(1, need - (bonus or 0))
 end
 
--- the car before this one in its series (nil for the first)
+-- the trim before this one in its series (nil for the first)
 function Cars.previous(id: string): string?
 	local at = Cars.SeriesOf[id]
 	if not at or at.index <= 1 then

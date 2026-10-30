@@ -656,7 +656,8 @@ Config.Market = {
 	-- listings, rarely in Showroom condition (the only one that can be delivered), mostly over value
 	UnlockListingChance = 0.08,
 	UnlockShowroomChance = 0.15,
-	HighShowroomKeep = 0.2, -- of the Showroom rolls a market-only car gets, this share stays Showroom
+	HighFromPrice = 600000, -- high-end cars (the dealer sells them too since 2026-10-30; rare here)
+	HighShowroomKeep = 0.2, -- of the Showroom rolls a high-end car gets, this share stays Showroom
 	HighListingSpread = { 0.95, 1.6 },
 }
 

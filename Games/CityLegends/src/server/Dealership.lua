@@ -224,7 +224,7 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 		local topPos = (at(x, tableTop, z)).Position
 		displayCar(model, carId, topPos, base)
 		local stand = deco(detail, Vector3.new(1.2, 3.4, 0.3), at(x + 9, FLOOR_T + 1.7, z - 12), Color3.fromRGB(20, 20, 24), Enum.Material.SmoothPlastic, { name = "InfoStand" })
-		kit.surfaceText(stand, Enum.NormalId.Front, spec.Name .. "\n" .. (if Cars.isMarketOnly(carId) then "MARKET ONLY" else "$" .. tostring(spec.Price)), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(160, 160))
+		kit.surfaceText(stand, Enum.NormalId.Front, spec.Name .. "\n$" .. tostring(spec.Price) .. "  ·  LV " .. Cars.requiredLevel(carId), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(160, 160))
 		prompt(stand, "View cars", spec.Name, carId)
 	end
 

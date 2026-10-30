@@ -444,10 +444,7 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any)
 	if not Dealership.near(player, ctx.getCar) then
 		return { ok = false, message = "Buy new cars at " .. Config.Dealership.Name }
 	end
-	-- from the F430 up only the car market sells them; in a series each car opens 5 levels on
-	if Cars.isMarketOnly(carId) then
-		return { ok = false, message = "Only on the car market" }
-	end
+	-- every car is sold here once you reach its level (Cars.Levels; levels only, 2026-10-30)
 	local need = Cars.requiredLevel(carId, Config.brandTrimBonus(Brands.levelFor(player, carId)))
 	if (profile.Level or 1) < need then
 		return { ok = false, message = "Unlocks at level " .. need }
@@ -475,9 +472,6 @@ TestDrive.OnServerInvoke = function(player: Player, carId: any)
 	end
 	if profile.Owned[carId] then
 		return { ok = false, message = "You own it: drive it" }
-	end
-	if Cars.isMarketOnly(carId) then
-		return { ok = false, message = "Market cars can't be test driven" }
 	end
 	if not Dealership.near(player, ctx.getCar) then
 		return { ok = false, message = "Test drives start at " .. Config.Dealership.Name }

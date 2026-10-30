@@ -81,7 +81,7 @@ function Parking.init(ctx: any, Police: any, Towers: any)
 		return
 	end
 	for _, spec in Cars.List do
-		if table.find(P.Tiers, spec.Tier) and not Cars.isMarketOnly(spec.Id) then
+		if table.find(P.Tiers, spec.Tier) and not spec.BaseId then
 			table.insert(pool, spec.Id)
 		end
 	end

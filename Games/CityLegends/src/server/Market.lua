@@ -309,16 +309,19 @@ end
 ---------------------------------------------------------------------
 -- Sessions: listings, offers, flip-off
 ---------------------------------------------------------------------
--- the market-only cars a player could take delivery of next (the first of a series, or the one
--- after a car they own)
+-- the high-end cars (Config.Market.HighFromPrice and up): the dealer sells them too since
+-- 2026-10-30, but the market keeps them rare and pricey
+local function isHigh(c: string): boolean
+	local spec = Cars.ById[c]
+	return spec ~= nil and spec.Price >= M.HighFromPrice
+end
+
+-- the high-end cars a player doesn't own yet (some listings are these)
 local function nextUnlocks(owned: { [string]: boolean }): { string }
 	local out = {}
 	for _, spec in Cars.List do
-		if Cars.isMarketOnly(spec.Id) and not owned[spec.Id] then
-			local prev = Cars.previous(spec.Id)
-			if not prev or owned[prev] then
-				table.insert(out, spec.Id)
-			end
+		if isHigh(spec.Id) and not owned[spec.Id] then
+			table.insert(out, spec.Id)
 		end
 	end
 	return out
@@ -328,11 +331,11 @@ local function newListing(s: Session, cash: number, owned: { [string]: boolean }
 	s.nextLid += 1
 	local c = pickCar(cash)
 	local k = pickCond()
-	-- a market-only car is hardly ever a Showroom unit
-	if Cars.isMarketOnly(c) and k == "Showroom" and rng:NextNumber() > M.HighShowroomKeep then
+	-- a high-end car is hardly ever a Showroom unit
+	if isHigh(c) and k == "Showroom" and rng:NextNumber() > M.HighShowroomKeep then
 		k = "Clean"
 	end
-	-- some listings are the high-end cars only the market sells, often in Showroom condition
+	-- some listings are high-end cars you don't own yet, often in Showroom condition
 	if owned and rng:NextNumber() < M.UnlockListingChance then
 		local options = nextUnlocks(owned)
 		if #options > 0 then
@@ -340,7 +343,7 @@ local function newListing(s: Session, cash: number, owned: { [string]: boolean }
 			k = if rng:NextNumber() < M.UnlockShowroomChance then "Showroom" else pickCond()
 		end
 	end
-	local spread = if Cars.isMarketOnly(c) then M.HighListingSpread else M.ListingSpread
+	local spread = if isHigh(c) then M.HighListingSpread else M.ListingSpread
 	return {
 		lid = s.nextLid,
 		c = c,
@@ -613,12 +616,6 @@ local function redeem(player: Player, d: Data, args: any): Result
 	end
 	if profile.Owned[it.c] then
 		return { ok = false, msg = "You already own this car" }
-	end
-	-- a car in a series comes after the one before it (owner, 2026-10-22)
-	local prev = Cars.previous(it.c)
-	if prev and not profile.Owned[prev] then
-		local ps = Cars.ById[prev]
-		return { ok = false, msg = "Own the " .. (if ps then ps.Name else prev) .. " first" }
 	end
 	table.remove(d.Stash, i)
 	profile.Owned[it.c] = true

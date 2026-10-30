@@ -236,7 +236,7 @@ end
 local function streakCar(profile: any): string?
 	local pick = {}
 	for _, spec in Cars.List do
-		if spec.Tier == "Mid" and spec.Price <= G.StreakCarMaxPrice and not profile.Owned[spec.Id] and not Cars.isMarketOnly(spec.Id) then
+		if spec.Tier == "Mid" and spec.Price <= G.StreakCarMaxPrice and not profile.Owned[spec.Id] then
 			table.insert(pick, spec.Id)
 		end
 	end
