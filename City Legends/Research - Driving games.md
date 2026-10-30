@@ -799,4 +799,4 @@ Sources:
 13. Nitro: a small free daily fuel with a flame and sound (Jailbreak). (Careful: it could make cut-ups too easy.)
 14. Bodykits by part (MR:T): needs parts made per car; later.
 
-**Top 10 shown to the owner 2026-10-30; nothing built yet. Waiting for their pick.**
+**Owner 2026-10-30: "All but No number 3 yet for now".** Build 1, 2, 4, 5, 6, 7, 8, 9, 10 one at a time; performance tuning (3) waits. With no tuning yet, brand levels (9) work on what exists: cheaper Legends Customs and a brand's trims a few levels sooner.
