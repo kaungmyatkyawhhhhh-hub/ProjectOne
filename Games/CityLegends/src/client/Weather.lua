@@ -34,10 +34,13 @@ local FADE_TIME = 12 -- seconds for the rain to build up / clear away
 local SPELL_MIN, SPELL_MAX = 240, 480 -- each clear / rainy spell lasts 4-8 minutes
 local RAIN_SPEED = 105 -- studs/s
 local NEAR_HALF = 32 -- dense curtain around the camera (half size)
+-- (owner, 2026-10-30: "it looks like the camera is glitching": drops falling right past the lens
+-- showed as big white flashes) no drops this close to the camera; the curtain starts beyond it
+local CLEAR_HALF = 11
 local RING_HALF = 76 -- lighter outer ring (half size), higher quality only
 local NEAR_UP = 26 -- spawn height above the camera
 local RING_UP = 34
-local NEAR_DENSITY = 0.12 -- particles per stud^2 per second at full quality
+local NEAR_DENSITY = 0.1 -- particles per stud^2 per second at full quality
 local RING_DENSITY = 0.026
 local SPLASH_HALF = 28
 local SPLASH_RATE = 150
@@ -109,9 +112,9 @@ local function rainEmitter(part: BasePart, size: number): ParticleEmitter
 	e.Size = NumberSequence.new(size)
 	e.Squash = NumberSequence.new(3)
 	e.Rotation = NumberRange.new(0)
-	e.Transparency = NumberSequence.new({ kp(0, 1), kp(0.12, 0.45), kp(1, 0.5) })
+	e.Transparency = NumberSequence.new({ kp(0, 1), kp(0.2, 0.62), kp(0.85, 0.66), kp(1, 1) })
 	e.Color = ColorSequence.new(Color3.fromRGB(196, 208, 232))
-	e.LightEmission = 0.15
+	e.LightEmission = 0.05
 	e.LightInfluence = 0.35
 	e.Brightness = 1.3
 	e.Parent = part
@@ -375,25 +378,28 @@ function Weather.init()
 	folder.Name = "WeatherFx"
 	folder.Parent = workspace
 
-	local near: Emitter
-	do
-		local size = Vector3.new(NEAR_HALF * 2, 1, NEAR_HALF * 2)
-		local part = emitterPart(folder, "RainNear", size)
-		near = { part = part, emitter = rainEmitter(part, 0.34), offset = Vector3.zero, rate = NEAR_DENSITY * size.X * size.Z * quality, on = false }
+	-- a square frame of four slabs between `inner` and `outer` (half sizes): size, offset
+	local function frame(inner: number, outer: number): { { Vector3 } }
+		local mid = (inner + outer) / 2
+		local depth = outer - inner
+		return {
+			{ Vector3.new(outer * 2, 1, depth), Vector3.new(0, 0, -mid) },
+			{ Vector3.new(outer * 2, 1, depth), Vector3.new(0, 0, mid) },
+			{ Vector3.new(depth, 1, inner * 2), Vector3.new(-mid, 0, 0) },
+			{ Vector3.new(depth, 1, inner * 2), Vector3.new(mid, 0, 0) },
+		}
+	end
+	-- the dense curtain, with a clear square round the camera
+	local nears: { Emitter } = {}
+	for i, l in frame(CLEAR_HALF, NEAR_HALF) do
+		local part = emitterPart(folder, "RainNear" .. i, l[1])
+		table.insert(nears, { part = part, emitter = rainEmitter(part, 0.2), offset = l[2], rate = NEAR_DENSITY * l[1].X * l[1].Z * quality, on = false })
 	end
 	local ring: { Emitter } = {}
 	if quality >= 0.6 then
-		local mid = (NEAR_HALF + RING_HALF) / 2
-		local depth = RING_HALF - NEAR_HALF
-		local layout = {
-			{ Vector3.new(RING_HALF * 2, 1, depth), Vector3.new(0, 0, -mid) },
-			{ Vector3.new(RING_HALF * 2, 1, depth), Vector3.new(0, 0, mid) },
-			{ Vector3.new(depth, 1, NEAR_HALF * 2), Vector3.new(-mid, 0, 0) },
-			{ Vector3.new(depth, 1, NEAR_HALF * 2), Vector3.new(mid, 0, 0) },
-		}
-		for i, l in layout do
+		for i, l in frame(NEAR_HALF, RING_HALF) do
 			local part = emitterPart(folder, "RainRing" .. i, l[1])
-			table.insert(ring, { part = part, emitter = rainEmitter(part, 0.46), offset = l[2], rate = RING_DENSITY * l[1].X * l[1].Z * quality, on = false })
+			table.insert(ring, { part = part, emitter = rainEmitter(part, 0.3), offset = l[2], rate = RING_DENSITY * l[1].X * l[1].Z * quality, on = false })
 		end
 	end
 	local splash: Emitter
@@ -401,7 +407,10 @@ function Weather.init()
 		local part = emitterPart(folder, "Splashes", Vector3.new(SPLASH_HALF * 2, 0.2, SPLASH_HALF * 2))
 		splash = { part = part, emitter = splashEmitter(part), offset = Vector3.zero, rate = SPLASH_RATE * quality, on = false }
 	end
-	local all: { Emitter } = { near, splash }
+	local all: { Emitter } = { splash }
+	for _, e in nears do
+		table.insert(all, e)
+	end
 	for _, e in ring do
 		table.insert(all, e)
 	end
@@ -460,7 +469,9 @@ function Weather.init()
 		local ln = math.clamp((pos.Y + NEAR_UP - groundY) / RAIN_SPEED, 0.2, 1.6)
 		if math.abs(ln - lifeNear) > 0.03 then
 			lifeNear = ln
-			near.emitter.Lifetime = NumberRange.new(ln)
+			for _, e in nears do
+				e.emitter.Lifetime = NumberRange.new(ln)
+			end
 		end
 		local lr = math.clamp((pos.Y + RING_UP - groundY) / RAIN_SPEED, 0.2, 1.6)
 		if math.abs(lr - lifeRing) > 0.03 then
@@ -507,7 +518,9 @@ function Weather.init()
 		end
 		local open = active and not covered
 		local interior = Driving.isDriving() and Driving.cameraMode == "Interior"
-		setOn(near, open and not interior)
+		for _, e in nears do
+			setOn(e, open and not interior)
+		end
 		setOn(splash, open)
 		for _, e in ring do
 			setOn(e, open)
@@ -532,7 +545,15 @@ function Weather.init()
 			lead = lead.Unit * 70
 		end
 		local c = pos + ahead + lead
-		near.part.CFrame = CFrame.new(c.X, pos.Y + NEAR_UP, c.Z)
+		-- (the curtain's clear square is round where the camera will be when these drops reach
+		-- its height, so none fall past the lens)
+		local hole = camVel * (NEAR_UP / RAIN_SPEED)
+		if hole.Magnitude > 40 then
+			hole = hole.Unit * 40
+		end
+		for _, e in nears do
+			e.part.CFrame = CFrame.new(pos.X + hole.X + e.offset.X, pos.Y + NEAR_UP, pos.Z + hole.Z + e.offset.Z)
+		end
 		for _, e in ring do
 			e.part.CFrame = CFrame.new(c.X + e.offset.X, pos.Y + RING_UP, c.Z + e.offset.Z)
 		end
