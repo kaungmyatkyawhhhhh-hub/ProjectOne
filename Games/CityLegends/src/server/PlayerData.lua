@@ -39,6 +39,7 @@ export type Profile = {
 	Luxe: { [string]: any }, -- VIP card, owned and worn flex items (Luxe.lua checks it)
 	Challenges: { [string]: any }, -- speed trap bests, drift and jump bests (Challenges.lua checks it)
 	Customs: { [string]: { [string]: any } }, -- per car id: its Legends Customs look (Customs.lua checks it)
+	Goals: { [string]: any }, -- Legends Path, the daily streak and today's tasks (Goals.lua checks it)
 	Loaded: boolean,
 }
 
@@ -111,6 +112,7 @@ local function defaultProfile(): Profile
 		Luxe = {},
 		Challenges = {},
 		Customs = {},
+		Goals = {},
 		Loaded = false,
 	}
 end
@@ -192,6 +194,9 @@ function PlayerData.load(player: Player): Profile
 			end
 			if type(saved.Customs) == "table" then
 				profile.Customs = saved.Customs -- (Customs.lua cleans each look when it's read)
+			end
+			if type(saved.Goals) == "table" then
+				profile.Goals = saved.Goals -- (Goals.lua cleans it when it's read)
 			end
 			-- luxury towers (absent in older saves)
 			local towerIds = {}
@@ -344,6 +349,7 @@ function PlayerData.save(player: Player)
 		Luxe = profile.Luxe,
 		Challenges = profile.Challenges,
 		Customs = profile.Customs,
+		Goals = profile.Goals,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)

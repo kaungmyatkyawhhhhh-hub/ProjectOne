@@ -199,6 +199,7 @@ handlers.buy = function(player, raw)
 		return { ok = false, message = "Not enough cash" }
 	end
 	PlayerData.addCash(player, -cost)
+	ctx.note(player, "customs", 1)
 	local all = (profile :: any).Customs
 	if type(all) ~= "table" then
 		all = {}

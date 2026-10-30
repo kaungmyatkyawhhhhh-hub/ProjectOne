@@ -1019,4 +1019,82 @@ Config.Passengers = {
 	},
 }
 
+---------------------------------------------------------------------
+-- Goals (owner, 2026-10-30, from the driving games research: Midnight Racing's milestones and
+-- daily rewards, Car Dealership Tycoon's daily tasks):
+--   * Legends Path: one-off goals in order, from the first minute; the next one is always on the
+--     HUD and each pays when done
+--   * the daily streak (replaces the flat daily gift): come back each day for more, day 7 a free
+--     Mid car; miss more than StreakGrace and it starts again at day 1
+--   * 3 daily tasks, new each day (UTC), each paying cash and XP
+-- Stat names (Goals.note / Goals.value): miles, cuts, combo (best), races, gold (race golds),
+-- traps (speed trap medals), trapgold, drifts, jumps, jobs, chips, customs, escapes, bank, house,
+-- pvp (races finished against players), pvpwins, level, cars (owned), brands (owned brands)
+---------------------------------------------------------------------
+Config.Goals = {
+	-- Legends Path, in order: { id, text, stat, need, cash, xp }
+	Path = {
+		{ id = "mile1", text = "Drive your first mile", stat = "miles", need = 1, cash = 1500, xp = 50 },
+		{ id = "cut10", text = "Cut up 10 cars", stat = "cuts", need = 10, cash = 2000, xp = 60 },
+		{ id = "combo5", text = "Hit a x5 combo", stat = "combo", need = 5, cash = 3000, xp = 80 },
+		{ id = "lvl3", text = "Reach level 3", stat = "level", need = 3, cash = 3000, xp = 0 },
+		{ id = "trap1", text = "Get a medal at a speed trap", stat = "traps", need = 1, cash = 3000, xp = 80 },
+		{ id = "race1", text = "Finish a race", stat = "races", need = 1, cash = 4000, xp = 100 },
+		{ id = "drift1", text = "Bank a drift", stat = "drifts", need = 1, cash = 3000, xp = 80 },
+		{ id = "jump1", text = "Land a jump", stat = "jumps", need = 1, cash = 3000, xp = 80 },
+		{ id = "car2", text = "Buy your second car", stat = "cars", need = 2, cash = 5000, xp = 120 },
+		{ id = "custom1", text = "Restyle a car at Legends Customs", stat = "customs", need = 1, cash = 4000, xp = 100 },
+		{ id = "job1", text = "Finish a delivery job", stat = "jobs", need = 1, cash = 4000, xp = 100 },
+		{ id = "lvl5", text = "Reach level 5", stat = "level", need = 5, cash = 6000, xp = 0 },
+		{ id = "pvp1", text = "Race against another player", stat = "pvp", need = 1, cash = 6000, xp = 150 },
+		{ id = "cut200", text = "Cut up 200 cars", stat = "cuts", need = 200, cash = 8000, xp = 200 },
+		{ id = "escape1", text = "Get away from the police", stat = "escapes", need = 1, cash = 8000, xp = 200 },
+		{ id = "trapgold", text = "Get gold at a speed trap", stat = "trapgold", need = 1, cash = 8000, xp = 200 },
+		{ id = "gold1", text = "Win gold in a race", stat = "gold", need = 1, cash = 8000, xp = 200 },
+		{ id = "combo12", text = "Hit a x12 combo", stat = "combo", need = 12, cash = 12000, xp = 250 },
+		{ id = "car5", text = "Own 5 cars", stat = "cars", need = 5, cash = 15000, xp = 300 },
+		{ id = "lvl10", text = "Reach level 10", stat = "level", need = 10, cash = 15000, xp = 0 },
+		{ id = "pvpwin1", text = "Win a race against a player", stat = "pvpwins", need = 1, cash = 15000, xp = 300 },
+		{ id = "chips10", text = "Collect 10 chips", stat = "chips", need = 10, cash = 10000, xp = 200 },
+		{ id = "mile100", text = "Drive 100 miles", stat = "miles", need = 100, cash = 20000, xp = 400 },
+		{ id = "house1", text = "Buy a house", stat = "house", need = 1, cash = 25000, xp = 400 },
+		{ id = "bank1", text = "Rob the bank and get away", stat = "bank", need = 1, cash = 25000, xp = 400 },
+		{ id = "lvl20", text = "Reach level 20", stat = "level", need = 20, cash = 50000, xp = 0 },
+		{ id = "car10", text = "Own 10 cars", stat = "cars", need = 10, cash = 50000, xp = 600 },
+		{ id = "pvpwin10", text = "Win 10 races against players", stat = "pvpwins", need = 10, cash = 60000, xp = 800 },
+		{ id = "brands10", text = "Own cars from 10 brands", stat = "brands", need = 10, cash = 100000, xp = 1000 },
+		{ id = "lvl40", text = "Reach level 40", stat = "level", need = 40, cash = 150000, xp = 0 },
+		{ id = "car25", text = "Own 25 cars", stat = "cars", need = 25, cash = 250000, xp = 2000 },
+		{ id = "mile1000", text = "Drive 1,000 miles", stat = "miles", need = 1000, cash = 250000, xp = 2000 },
+		{ id = "allcars", text = "King of the City: own every car", stat = "cars", need = -1, cash = 1000000, xp = 5000 }, -- (need -1: every car)
+	},
+	-- the daily streak: day 1..6 cash, day 7 a free Mid car you don't own (or StreakCarCash)
+	Streak = { 5000, 8000, 12000, 18000, 25000, 35000 },
+	StreakCarMaxPrice = 120000, -- the day-7 car: a Mid car at or under this price
+	StreakCarCash = 60000, -- ...or this, when you own them all
+	StreakCooldown = 20 * 60 * 60, -- a claim opens this long after the last one
+	StreakGrace = 48 * 60 * 60, -- more than this since the last claim: back to day 1
+	-- daily tasks: 3 a day from this pool; cash grows with level (x1 at level 1 .. x3 at level 41+)
+	TasksPerDay = 3,
+	Tasks = {
+		{ id = "cuts", text = "Cut up %d cars", stat = "cuts", need = 40, cash = 6000, xp = 150 },
+		{ id = "combo", text = "Hit a x%d combo", stat = "combo", need = 8, cash = 6000, xp = 150, best = true },
+		{ id = "miles", text = "Drive %d miles", stat = "miles", need = 10, cash = 5000, xp = 150 },
+		{ id = "drifts", text = "Bank %d drifts", stat = "drifts", need = 3, cash = 6000, xp = 150 },
+		{ id = "traps", text = "Get %d speed trap medals", stat = "traps", need = 3, cash = 6000, xp = 150 },
+		{ id = "jumps", text = "Land %d jumps", stat = "jumps", need = 3, cash = 5000, xp = 150 },
+		{ id = "races", text = "Finish %d races", stat = "races", need = 2, cash = 6000, xp = 150 },
+		{ id = "jobs", text = "Finish %d delivery jobs", stat = "jobs", need = 2, cash = 6000, xp = 150 },
+		{ id = "pvp", text = "Race against players %d times", stat = "pvp", need = 2, cash = 8000, xp = 200 },
+		{ id = "escapes", text = "Get away from the police %d time", stat = "escapes", need = 1, cash = 8000, xp = 200 },
+	},
+	TaskLevelBoost = 0.05, -- task cash x(1 + this per level above 1), at most x3
+}
+
+-- a daily task's cash at this level
+function Config.taskCash(base: number, level: number): number
+	local k = math.min(3, 1 + Config.Goals.TaskLevelBoost * (math.max(1, level) - 1))
+	return math.floor(base * k / 100 + 0.5) * 100
+end
+
 return Config

@@ -27,6 +27,7 @@ local Houses = require(script.Parent:WaitForChild("Houses"))
 local Hotel = require(script.Parent:WaitForChild("Hotel"))
 local Towers = require(script.Parent:WaitForChild("Towers"))
 local Chauffeur = require(script.Parent:WaitForChild("Chauffeur"))
+local Goals = require(script.Parent:WaitForChild("Goals"))
 
 Players.CharacterAutoLoads = false
 
@@ -82,13 +83,14 @@ type Session = {
 	cutTimes: { number },
 	incomeCarry: number,
 	xpCarry: number,
+	milesCarry: number,
 }
 local sessions: { [Player]: Session } = {}
 
 local function getSession(player: Player): Session
 	local s = sessions[player]
 	if not s then
-		s = { car = nil, combo = 0, lastCut = 0, cutTimes = {}, incomeCarry = 0, xpCarry = 0 }
+		s = { car = nil, combo = 0, lastCut = 0, cutTimes = {}, incomeCarry = 0, xpCarry = 0, milesCarry = 0 }
 		sessions[player] = s
 	end
 	return s
@@ -269,7 +271,10 @@ local ctx = {
 		s.combo = 0
 		return if car and car.Parent then car else nil
 	end,
+	-- something a goal counts happened (Goals: Legends Path, daily tasks)
+	note = Goals.note,
 }
+Goals.init(ctx)
 OnFoot.init(ctx)
 Police.init(ctx)
 Bank.init(ctx, Police)
@@ -400,17 +405,18 @@ GetData.OnServerInvoke = function(player: Player)
 	while not PlayerData.get(player) and os.clock() < timeout do
 		task.wait(0.1)
 	end
-	return PlayerData.snapshot(player)
+	local snap = PlayerData.snapshot(player) :: any
+	if snap then
+		local day, readyIn = Goals.streak(player)
+		snap.DailyIn = readyIn
+		snap.StreakDay = day
+	end
+	return snap
 end
 
+-- the daily streak (it replaced the flat daily gift, 2026-10-30): Goals pays it
 ClaimDaily.OnServerInvoke = function(player: Player)
-	local ok, amount = PlayerData.claimDaily(player)
-	local readyIn = PlayerData.dailyReadyIn(player)
-	if not ok then
-		return { ok = false, message = "Your next gift isn't ready yet", amount = 0, readyIn = readyIn }
-	end
-	task.spawn(PlayerData.save, player)
-	return { ok = true, message = "Daily gift claimed", amount = amount, readyIn = readyIn }
+	return Goals.claimStreak(player)
 end
 
 BuyCar.OnServerInvoke = function(player: Player, carId: any)
@@ -583,6 +589,8 @@ CutUp.OnServerEvent:Connect(function(player: Player, info: any)
 
 	local label = if thread then "THREAD THE NEEDLE" elseif oncoming then "ONCOMING CUT" elseif closeness > 0.75 then "INSANE CUT" elseif closeness > 0.4 then "CLOSE CUT" else "CUT UP"
 	Earned:FireClient(player, { amount = amount, combo = s.combo, kind = "cut", label = label })
+	Goals.note(player, "cuts", 1)
+	Goals.note(player, "combo", s.combo)
 
 	local P = Config.Progression
 	grantXp(player, math.clamp(math.floor(amount * P.CutXpPerCash + 0.5), 1, P.CutXpMax), "cut")
@@ -610,6 +618,12 @@ RunService.Heartbeat:Connect(function(dt)
 				if whole >= 1 then
 					s.incomeCarry -= whole
 					PlayerData.addCash(player, whole)
+				end
+				-- miles driven (Goals), a tenth of a mile at a time
+				s.milesCarry += mph * step / 3600
+				if s.milesCarry >= 0.1 then
+					Goals.note(player, "miles", s.milesCarry)
+					s.milesCarry = 0
 				end
 				-- driving XP mirrors the driving income
 				s.xpCarry += mph * Config.Progression.DriveXpPerSecond * step

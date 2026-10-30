@@ -41,6 +41,7 @@ UI.onMarketButton = nil :: (() -> ())? -- opens the car stock market (MarketUI)
 UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (ChauffeurClient)
 UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
+UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -192,6 +193,10 @@ local REDLINE = 6
 
 local progress = { level = 1, xp = 0, need = Config.xpForLevel(1) }
 local daily = { known = false, readyAt = 0, claiming = false, shown = -1 }
+-- the daily streak (owner, 2026-10-30: it replaced the flat daily gift): the day you'd claim next
+-- and what it gives ("" until the server says)
+local streak = { day = 1, reward = "" }
+local dailyCardTitle: TextLabel
 
 -- 0..RPM_MAX -> gauge angle in degrees (maths convention, 0 = right, CCW);
 -- the dial sweeps 270 degrees clockwise from bottom-left to bottom-right
@@ -469,6 +474,17 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		box(11.5, 11, 9, 9, -1) -- key head
 		box(15, 19, 2.6, 7, 0.6) -- key blade
 		box(17, 23, 2.6, 1.8, 0.4)
+	elseif kind == "flag" then
+		-- a chequered flag on a pole (goals)
+		box(5, 3, 3, 27, 1.5) -- pole
+		for r = 0, 2 do
+			for c = 0, 3 do
+				local cell = box(8 + c * 5.5, 4 + r * 5, 5.5, 5, 0)
+				if (r + c) % 2 == 1 then
+					cell.BackgroundTransparency = 0.75
+				end
+			end
+		end
 	elseif kind == "house" then
 		-- a house: a pitched roof over a body with a door (housing)
 		box(2.5, 9, 17, 3.4, 1.7, -38) -- roof
@@ -1004,7 +1020,8 @@ local function buildSideButtons()
 	local settingsBtn = sideButton("gear", "SETTINGS", 1)
 	-- (owner, 2026-10-23: the SHOP became CARS, your own cars; new ones are sold at the dealership)
 	local shopBtn = sideButton("car", "CARS", 2)
-	local giftBtn = sideButton("gift", "GIFTS", 3)
+	-- (owner, 2026-10-30: GIFTS became GOALS: Legends Path, daily tasks and the daily streak)
+	local giftBtn = sideButton("flag", "GOALS", 3)
 	local marketBtn = sideButton("chart", "MARKET", 4)
 	marketBtn.Activated:Connect(function()
 		closePanels()
@@ -1172,7 +1189,12 @@ local function buildSideButtons()
 		end
 	end)
 	giftBtn.Activated:Connect(function()
-		togglePanel(dailyPanel)
+		closePanels()
+		if UI.onGoalsButton then
+			UI.onGoalsButton()
+		else
+			togglePanel(dailyPanel)
+		end
 	end)
 end
 
@@ -1233,7 +1255,7 @@ local function buildDailyCard()
 	}, { corner(10) })
 	icon("gift", iconBox, (h - 22) * 0.62, Theme.Warning)
 	local textX = h - 2
-	label({ Text = "DAILY GIFT", TextSize = if UI.isTouch then 11 else 13, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Warning, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, textX, 0, 8), Size = UDim2.new(1, -textX - 8, 0, 16), Parent = card })
+	dailyCardTitle = label({ Text = "DAILY STREAK", TextSize = if UI.isTouch then 11 else 13, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Warning, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, textX, 0, 8), Size = UDim2.new(1, -textX - 8, 0, 16), Parent = card })
 	dailyCardTime = label({ Text = "--:--", TextSize = if UI.isTouch then 22 else 28, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, textX, 0.5, -14), Size = UDim2.new(1, -textX - 8, 0, 30), Parent = card })
 	dailyCardSub = label({ Text = "", TextSize = if UI.isTouch then 10 else 12, Font = Enum.Font.GothamBold, TextColor3 = Theme.Money, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, textX, 1, -22), Size = UDim2.new(1, -textX - 8, 0, 16), Parent = card })
 	card.Activated:Connect(function()
@@ -1263,7 +1285,8 @@ local function refreshDaily(force: boolean?)
 		return
 	end
 	daily.shown = shown
-	local amount = formatCash(Config.dailyReward(progress.level))
+	local amount = if streak.reward ~= "" then streak.reward else formatCash(Config.dailyReward(progress.level))
+	dailyCardTitle.Text = "DAILY STREAK  ·  DAY " .. streak.day
 	dailyPanelAmount.Text = amount
 	giftDot.Visible = ready
 	if ready then
@@ -1275,7 +1298,7 @@ local function refreshDaily(force: boolean?)
 	else
 		dailyCardTime.Text = if daily.known then formatClock(left) else "--:--"
 		dailyCardTime.TextColor3 = Theme.Text
-		dailyCardSub.Text = "+" .. amount .. " cash"
+		dailyCardSub.Text = "NEXT  " .. amount
 		dailyClaimBtn.Text = if daily.known then "READY IN " .. formatClock(left) else "..."
 		dailyClaimBtn.TextColor3 = Theme.SubText
 	end
@@ -1287,7 +1310,7 @@ claimDaily = function()
 	end
 	local left = dailyLeft()
 	if not daily.known or left > 0 then
-		UI.toast(if daily.known then "Next daily gift in " .. formatClock(left) else "Daily gift not available yet", Theme.SubText)
+		UI.toast(if daily.known then "Day " .. streak.day .. " of your streak opens in " .. formatClock(left) else "Your streak isn't ready yet", Theme.SubText)
 		return
 	end
 	local cb = UI.onDailyClaim
@@ -2521,6 +2544,13 @@ function UI.levelUp(level: number, reward: number)
 			end
 		end)
 	end)
+end
+
+-- the daily streak: the day you'd claim next, its reward ("$12,000" / "FREE CAR"), seconds until then
+function UI.setStreak(day: number, reward: string, readyIn: number)
+	streak.day = day
+	streak.reward = reward
+	UI.setDaily(readyIn)
 end
 
 -- seconds until the next daily gift (0 = ready now)

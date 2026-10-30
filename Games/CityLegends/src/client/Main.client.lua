@@ -157,9 +157,15 @@ UI.onDailyClaim = function()
 		UI.setDaily(result.readyIn)
 	end
 	if result.ok then
-		UI.toast("Daily gift claimed  +" .. UI.formatCash(tonumber(result.amount) or 0), Config.Theme.Money)
+		-- the daily streak (Goals): day 1..6 cash, day 7 a free car
+		if type(result.car) == "string" then
+			UI.popup("DAY 7: FREE CAR", 0, Config.Theme.Accent2)
+			UI.toast("Day " .. tostring(result.day) .. " streak: the " .. result.car .. " is yours! It's in your CARS", Config.Theme.Accent2)
+		else
+			UI.popup("DAY " .. tostring(result.day) .. " STREAK", tonumber(result.amount) or 0, Config.Theme.Accent2)
+		end
 	else
-		UI.toast(tostring(result.message or "Gift not ready yet"), Config.Theme.Warning)
+		UI.toast(tostring(result.message or "Your streak isn't ready yet"), Config.Theme.Warning)
 	end
 end
 
@@ -263,6 +269,9 @@ startStep("Luxe", function()
 end)
 startStep("Minimap", function()
 	require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, top right (N toggles)
+end)
+startStep("Goals", function()
+	require(script.Parent:WaitForChild("GoalsClient")).init()
 end)
 startStep("Housing", function()
 	require(script.Parent:WaitForChild("HousingClient")).init() -- Legends Realty, claiming lots, the house menu

@@ -249,6 +249,12 @@ local function onTrap(player: Player, id: any, clientMph: any)
 	local newBest = mph > old
 	local oldRank = medalFor(old)
 	local rank, medal = medalFor(mph)
+	if rank >= 1 then
+		ctx.note(player, "traps", 1)
+		if rank >= #K.TrapMedals then
+			ctx.note(player, "trapgold", 1)
+		end
+	end
 	local cash = 0
 	if newBest then
 		d.traps[trap.id] = mph
@@ -300,6 +306,7 @@ local function onDrift(player: Player, score: any, seconds: any)
 	local cash = math.min(math.floor(points * K.DriftCashPerPoint), K.DriftCashMax)
 	PlayerData.addCash(player, cash)
 	ctx.grantXp(player, math.clamp(math.floor(points * K.DriftXpPerPoint), 1, K.DriftXpMax), "drift")
+	ctx.note(player, "drifts", 1)
 	local newBest = points > d.drift
 	if newBest then
 		d.drift = points
@@ -341,6 +348,7 @@ local function onStunt(player: Player, air: any, dist: any)
 	local cash = math.min(math.floor(a * K.StuntCashPerSecond + studs * K.StuntCashPerStud), K.StuntCashMax)
 	PlayerData.addCash(player, cash)
 	ctx.grantXp(player, K.StuntXp, "jump")
+	ctx.note(player, "jumps", 1)
 	local newBest = a > d.air
 	if newBest then
 		d.air = math.floor(a * 100) / 100

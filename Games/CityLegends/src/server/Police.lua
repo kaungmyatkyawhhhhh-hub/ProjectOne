@@ -208,6 +208,7 @@ local function escaped(player: Player)
 	local reward = P.EscapeBounty[stars] or 0
 	PlayerData.addCash(player, reward)
 	ctx.grantXp(player, P.EscapeXp * stars, "escape")
+	ctx.note(player, "escapes", 1)
 	Police.setWanted(player, 0, "escaped")
 	PoliceEvent:FireClient(player, { kind = "escaped", reward = reward, stars = stars })
 end

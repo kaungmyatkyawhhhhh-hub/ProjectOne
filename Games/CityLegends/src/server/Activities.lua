@@ -114,6 +114,10 @@ handlers.raceFinish = function(player, clientTime)
 	local cash = A.RaceRewards[medal]
 	PlayerData.addCash(player, cash)
 	ctx.grantXp(player, A.RaceXp[medal], "race")
+	ctx.note(player, "races", 1)
+	if medal == "Gold" then
+		ctx.note(player, "gold", 1)
+	end
 	task.spawn(PlayerData.save, player)
 	return { ok = true, time = t, medal = medal, cash = cash, best = if act then act.races[race.id] else t, newBest = newBest }
 end
@@ -168,6 +172,7 @@ handlers.jobFinish = function(player)
 	local cash = math.floor((run.dist :: number) * A.JobPayPerStud + math.max(0, left) * A.JobTimeBonus)
 	PlayerData.addCash(player, cash)
 	ctx.grantXp(player, 80, "job")
+	ctx.note(player, "jobs", 1)
 	return { ok = true, cash = cash, left = left }
 end
 
@@ -189,6 +194,7 @@ handlers.chip = function(player, index)
 	end
 	local cash = A.ChipCash + (if count >= #ActivityData.chips then A.ChipAllBonus else 0)
 	PlayerData.addCash(player, cash)
+	ctx.note(player, "chips", 1)
 	task.spawn(PlayerData.save, player)
 	return { ok = true, cash = cash, count = count, total = #ActivityData.chips }
 end
