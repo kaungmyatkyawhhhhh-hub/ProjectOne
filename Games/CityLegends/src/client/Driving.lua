@@ -2090,8 +2090,10 @@ function Driving.step(dt: number)
 			if rev > 1.02 then
 				a -= 30 * (rev - 1) -- shifted down too early: the engine holds the car back
 			end
-		elseif throttle > 0 and fwdSpeed < -2 then
-			a += 140 * throttle -- braking out of reverse
+		elseif throttle > 0 and fwdSpeed < -2 and not (s.manual and gearNow < 0) then
+			-- braking out of reverse (not in a manual's R gear: there the throttle drives it backwards;
+			-- owner, 2026-10-30: manual reverse crawled at ~5 km/h because this braked it)
+			a += 140 * throttle
 		end
 		-- brakes by class; a hard stop at speed pulses the anti-lock (keeps some steering)
 		local brakeForce = s.cls.brake * s.brakeIn
