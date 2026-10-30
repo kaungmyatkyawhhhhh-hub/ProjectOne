@@ -35,7 +35,7 @@ local new, label, button, corner, stroke = kit.new, kit.label, kit.button, kit.c
 
 local TIER_NAME = { [0] = "LOW", [1] = "MID", [2] = "HIGH" }
 local TIER_COLOR = { [0] = Color3.fromRGB(14, 140, 134), [1] = Color3.fromRGB(31, 79, 163), [2] = Color3.fromRGB(212, 175, 55) }
-local LOT_SIZE = { [0] = { 60, 60 }, [1] = { 104, 100 }, [2] = { 120, 130 } }
+local LOT_SIZE = { [0] = { 60, 72 }, [1] = { 104, 100 }, [2] = { 120, 130 } }
 
 local call: RemoteFunction? = nil
 local lotsById: { [string]: IsleLayout.Lot } = {}
@@ -671,6 +671,68 @@ function HousingClient.openRoommates(lotId: string, current: { { id: number, nam
 end
 
 ---------------------------------------------------------------------
+-- In the house: sleeping, the doorbell, the TVs' moving picture
+---------------------------------------------------------------------
+local sleeping = false
+local function sleep()
+	if sleeping then
+		return
+	end
+	sleeping = true
+	UI.fade(true, 0.7)
+	task.wait(1.8)
+	UI.fade(false, 0.9)
+	UI.toast("You had a good sleep", Theme.Accent)
+	sleeping = false
+end
+
+-- someone rang your bell: let them in (two minutes) or ignore them
+function HousingClient.openBell(fromId: number, name: string)
+	local f, body = panel("DOORBELL", string.upper(name) .. " IS AT YOUR GATE", 420, 200)
+	f.AnchorPoint = Vector2.new(1, 0)
+	f.Position = UDim2.new(1, -20, 0, 90)
+	local yes = button("LET IN", Theme.Money, { Position = UDim2.fromOffset(0, 20), Size = UDim2.new(0.5, -6, 0, 52), TextSize = 18, ZIndex = 73, Parent = body })
+	local no = button("IGNORE", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 20), Size = UDim2.new(0.5, -6, 0, 52), TextSize = 18, ZIndex = 73, Parent = body })
+	yes.Activated:Connect(function()
+		invoke("letIn", { from = fromId, yes = true })
+		close()
+	end)
+	no.Activated:Connect(function()
+		invoke("letIn", { from = fromId, yes = false })
+		close()
+	end)
+	-- (it goes away by itself after a while)
+	task.delay(20, function()
+		if f.Parent and screen and f:IsDescendantOf(screen) then
+			close()
+		end
+	end)
+end
+
+-- the TVs that are on and near you: a slowly moving sunset-drive picture
+local function animateTVs()
+	local acc = 0
+	RunService.Heartbeat:Connect(function(dt)
+		acc += dt
+		if acc < 0.08 then
+			return
+		end
+		acc = 0
+		local t = os.clock()
+		local at = camera.CFrame.Position
+		for _, screenPart in CollectionService:GetTagged("HouseTV") do
+			if screenPart:IsA("BasePart") and screenPart:GetAttribute("On") and (screenPart.Position - at).Magnitude < 120 then
+				local g = screenPart:FindFirstChildWhichIsA("UIGradient", true)
+				if g then
+					g.Offset = Vector2.new(math.sin(t * 0.5) * 0.45, 0)
+					g.Rotation = (t * 8) % 360
+				end
+			end
+		end
+	end)
+end
+
+---------------------------------------------------------------------
 -- The FOR SALE signs' prompts, worded for this player
 ---------------------------------------------------------------------
 local function word(p: Instance)
@@ -707,9 +769,14 @@ function HousingClient.init()
 				HousingClient.openCatalog(info.focus)
 			elseif info.kind == "placed" then
 				UI.toast(tostring(info.text or "Welcome home"), Theme.Money)
+			elseif info.kind == "sleep" then
+				task.spawn(sleep)
+			elseif info.kind == "bell" and type(info.from) == "number" then
+				HousingClient.openBell(info.from, tostring(info.name or "Someone"))
 			end
 		end)
 	end
+	animateTVs()
 	UI.onHouseButton = function()
 		if screen then
 			close()

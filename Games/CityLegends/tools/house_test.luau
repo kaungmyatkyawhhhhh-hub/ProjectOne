@@ -27,6 +27,11 @@ local env = {
 	Vector3 = roblox.Vector3,
 	Vector2 = roblox.Vector2,
 	UDim2 = roblox.UDim2,
+	UDim = roblox.UDim,
+	ColorSequence = roblox.ColorSequence,
+	ColorSequenceKeypoint = roblox.ColorSequenceKeypoint,
+	NumberSequence = roblox.NumberSequence,
+	NumberRange = roblox.NumberRange,
 	Enum = roblox.Enum,
 	CFrame = CFrameFixed,
 	Instance = roblox.Instance,
@@ -120,14 +125,14 @@ end
 check(topOk, "the 5 most expensive houses have a 10-car garage and 3 driveway spots")
 
 -- every design built on a lot of its tier
-local LOT = { [0] = { 60, 60 }, [1] = { 104, 100 }, [2] = { 120, 130 } }
+local LOT = { [0] = { 60, 72 }, [1] = { 104, 100 }, [2] = { 120, 130 } }
 local worstSpill, worstId = 0, ""
 local maxParts, maxId = 0, ""
 local missing = {}
 for _, d in designs do
 	local size = LOT[d.tier]
 	local lot = roblox.CFrame.new(1000, 50, -300) -- a lot looking out along -Z
-	local ok, model, info = pcall(HouseBuilder.build, d, lot, size[1], size[2], {})
+	local ok, model, info = pcall(HouseBuilder.build, d, lot, size[1], size[2], { interior = true })
 	if not ok then
 		check(false, d.id .. " builds: " .. tostring(model))
 		continue
@@ -161,12 +166,91 @@ for _, d in designs do
 			break
 		end
 	end
+	-- walking in (owner, 2026-10-29: every house is a real house you walk into)
+	local solids: { BasePart } = {}
+	local uses: { [string]: number } = {}
+	local steps: { BasePart } = {}
+	local doors: { BasePart } = {}
+	for _, p in model:GetDescendants() do
+		if p:IsA("BasePart") then
+			if p.Name == "Step" then
+				table.insert(steps, p)
+			elseif p.Name == "Door" then
+				table.insert(doors, p)
+			elseif p.CanCollide and p.Name ~= "Lawn" and p.Name ~= "Driveway" then
+				table.insert(solids, p)
+			end
+		elseif p:IsA("ProximityPrompt") then
+			local k = p:GetAttribute("Use")
+			if k then
+				uses[k] = (uses[k] or 0) + 1
+			end
+		end
+	end
+	-- is a point inside a solid part (other than the ones in `skip`)?
+	local function blocked(pt: any, skip: { [BasePart]: boolean }?): BasePart?
+		for _, q in solids do
+			if not (skip and skip[q]) then
+				local l = q.CFrame:PointToObjectSpace(pt)
+				if math.abs(l.X) < q.Size.X / 2 and math.abs(l.Y) < q.Size.Y / 2 and math.abs(l.Z) < q.Size.Z / 2 then
+					return q
+				end
+			end
+		end
+		return nil
+	end
+	local problems = {}
+	if #doors == 0 then
+		table.insert(problems, "no door")
+	end
+	for _, dr in doors do
+		-- through the doorway: a line of points from 2 studs outside to 2 inside, 1 to 6 up
+		local closed = dr:GetAttribute("ClosedCF") :: any
+		for _, dz in { -2, -1, 0, 1, 2 } do
+			for _, dy in { -3, 0, 2 } do
+				local pt = (closed * roblox.CFrame.new(0, dy, dz)).Position
+				local q = blocked(pt)
+				if q then
+					table.insert(problems, "door blocked by " .. q.Name .. string.format(" (%.1f up, %.1f through)", dy, dz))
+					break
+				end
+			end
+		end
+	end
+	if #steps < 11 * (d.floors - 1) then
+		table.insert(problems, `{#steps} steps for {d.floors} floors`)
+	end
+	-- headroom over every step (a player is about 5 studs tall)
+	for _, st in steps do
+		local top = st.CFrame.Position + roblox.Vector3.new(0, st.Size.Y / 2, 0)
+		for _, up in { 1, 3, 5 } do
+			local q = blocked(top + roblox.Vector3.new(0, up, 0))
+			if q then
+				table.insert(problems, "no headroom on the stairs: " .. q.Name)
+				break
+			end
+		end
+		if #problems > 4 then
+			break
+		end
+	end
+	for _, k in { "door", "light", "tv", "tap", "bed", "fridge", "stove" } do
+		if not uses[k] then
+			table.insert(problems, "nothing to use: " .. k)
+		end
+	end
+	if d.tier >= 1 and #info.gates == 0 then
+		table.insert(problems, "no gate")
+	end
+	if #problems > 0 then
+		table.insert(missing, d.id .. ": " .. table.concat(problems, ", "))
+	end
 	local ghostOk = pcall(HouseBuilder.build, d, lot, size[1], size[2], { ghost = true })
 	if not ghostOk then
 		table.insert(missing, d.id .. ": the ghost doesn't build")
 	end
 end
-check(#missing == 0, "bays, driveway spots and ghosts " .. table.concat(missing, "; "))
+check(#missing == 0, "bays, drive spots, ghosts, doors, stairs, things to use, gates " .. table.concat(missing, "; "))
 check(worstSpill <= 3, string.format("every house stays on its lot (worst %.1f studs over at %s)", worstSpill, worstId))
 print(string.format("  most parts: %d (%s)", maxParts, maxId))
 check(maxParts < 1500, "no house over 1,500 parts")

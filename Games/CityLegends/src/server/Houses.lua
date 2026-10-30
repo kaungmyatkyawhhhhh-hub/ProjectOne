@@ -24,6 +24,7 @@
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -53,7 +54,12 @@ type Rec = {
 	info: any?,
 	slotCars: { [number]: Model? },
 	slotIds: { [number]: string },
+	guests: { [number]: number }, -- user id -> until when the owner let them in (the doorbell)
+	gateOpen: boolean,
+	gateSeen: number, -- last time someone allowed was at the gate
 }
+
+local friendCache: { [string]: { at: number, yes: boolean } } = {}
 
 local ctx: any
 local fx: RemoteEvent? = nil
@@ -498,15 +504,287 @@ local function mailbox(rec: Rec, player: Player)
 	bell.Triggered:Connect(function(who: Player)
 		local owner = rec.owner
 		if owner and owner ~= who then
-			toast(owner, who.DisplayName .. " rang your doorbell")
-			toast(who, "You rang " .. owner.DisplayName .. "'s bell")
+			if Houses.mayEnter(who, rec.lot.id) then
+				toast(who, "Come in: the gate and the door open for you")
+				return
+			end
+			-- the owner gets a pop-up: LET IN or IGNORE (the intercom)
+			send(owner, { kind = "bell", lot = rec.lot.id, from = who.UserId, name = who.DisplayName })
+			toast(who, "You rang " .. owner.DisplayName .. "'s bell: wait for an answer")
 		end
 	end)
 end
 
+---------------------------------------------------------------------
+-- Things in the house you can use (HouseBuilder's "Use" prompts)
+---------------------------------------------------------------------
+local Luxe: any = nil
+
+local function setLights(folder: Instance, on: boolean)
+	folder:SetAttribute("LightsOff", not on)
+	for _, d in folder:GetDescendants() do
+		if d:IsA("BasePart") and d.Name == "CeilingLight" then
+			d.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+			d.Color = if on then Color3.fromRGB(255, 214, 160) else Color3.fromRGB(70, 68, 64)
+		elseif d:IsA("PointLight") and d.Parent and d.Parent.Name == "CeilingLight" then
+			d.Enabled = on
+		end
+	end
+end
+
+-- a door or the fridge's door: between its closed and open CFrames
+local function swing(part: BasePart, open: boolean, time: number, solid: boolean)
+	local target = part:GetAttribute(if open then "OpenCF" else "ClosedCF")
+	if typeof(target) ~= "CFrame" then
+		return
+	end
+	part:SetAttribute("Open", open)
+	part.CanCollide = solid or not open
+	TweenService:Create(part, TweenInfo.new(time, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { CFrame = target }):Play()
+end
+
+local USE: { [string]: (Rec, ProximityPrompt, Player) -> () } = {}
+USE.door = function(_rec, p, _who)
+	local leaf = p.Parent :: BasePart
+	local open = not leaf:GetAttribute("Open")
+	swing(leaf, open, 0.45, false)
+	-- (its handle is a separate part that stays: hide it while the door is open)
+	local model = leaf.Parent
+	if model then
+		for _, h in model:GetChildren() do
+			if h:IsA("BasePart") and h.Name == "Handle" and (h.Position - (leaf:GetAttribute("ClosedCF") :: CFrame).Position).Magnitude < 3.2 then
+				h.Transparency = if open then 1 else 0
+			end
+		end
+	end
+	p.ActionText = if open then "Close" else "Open"
+end
+USE.fridge = function(_rec, p, _who)
+	local leaf = p.Parent :: BasePart
+	local open = not leaf:GetAttribute("Open")
+	swing(leaf, open, 0.35, true)
+	p.ActionText = if open then "Close" else "Open"
+end
+USE.light = function(_rec, p, _who)
+	local folder = p:FindFirstAncestorWhichIsA("Model")
+	if folder then
+		local on = folder:GetAttribute("LightsOff") == true
+		setLights(folder, on)
+		p.ActionText = if on then "Lights off" else "Lights on"
+	end
+end
+USE.tv = function(_rec, p, _who)
+	local screen = p.Parent :: BasePart
+	local on = not screen:GetAttribute("On")
+	screen:SetAttribute("On", on)
+	local pic = screen:FindFirstChild("Picture", true)
+	if pic and pic:IsA("GuiObject") then
+		pic.Visible = on
+	end
+	p.ActionText = if on then "Turn off" else "Turn on"
+end
+local WATER_TEXT = { tap = { "Tap on", "Tap off" }, shower = { "Shower on", "Shower off" }, bath = { "Run a bath", "Turn off" } }
+local function waterUse(kind: string)
+	return function(_rec: Rec, p: ProximityPrompt, _who: Player)
+		local part = p.Parent :: BasePart
+		local e = part:FindFirstChild("Water") :: ParticleEmitter?
+		if not e then
+			return
+		end
+		e.Enabled = not e.Enabled
+		p.ActionText = WATER_TEXT[kind][if e.Enabled then 2 else 1]
+		if kind == "bath" then
+			-- the bath fills up after a moment, and empties when turned off
+			local folder = p:FindFirstAncestorWhichIsA("Model")
+			local bw = folder and folder:FindFirstChild("BathWater", true) :: BasePart?
+			if bw and e.Enabled then
+				task.delay(2.5, function()
+					if e.Enabled then
+						TweenService:Create(bw, TweenInfo.new(2), { Transparency = 0.3 }):Play()
+					end
+				end)
+			elseif bw then
+				TweenService:Create(bw, TweenInfo.new(2), { Transparency = 1 }):Play()
+			end
+		end
+	end
+end
+USE.tap = waterUse("tap")
+USE.shower = waterUse("shower")
+USE.bath = waterUse("bath")
+USE.stove = function(_rec, p, _who)
+	local stove = p.Parent :: BasePart
+	local on = not stove:GetAttribute("On")
+	stove:SetAttribute("On", on)
+	stove.Color = if on then Color3.fromRGB(255, 80, 30) else Color3.fromRGB(20, 20, 22)
+	stove.Material = if on then Enum.Material.Neon else Enum.Material.Glass
+	p.ActionText = if on then "Turn off" else "Turn on"
+end
+USE.fireplace = function(_rec, p, _who)
+	local box = p.Parent :: BasePart
+	local fire = box:FindFirstChildOfClass("Fire")
+	local glow = box:FindFirstChildOfClass("PointLight")
+	local on = not (fire and fire.Enabled)
+	if fire then
+		fire.Enabled = on
+	end
+	if glow then
+		glow.Enabled = on
+	end
+	p.ActionText = if on then "Put it out" else "Light the fire"
+end
+USE.curtain = function(_rec, p, _who)
+	local folder = p:FindFirstAncestorWhichIsA("Model")
+	if not folder then
+		return
+	end
+	local closing = p.ActionText == "Close curtains"
+	for _, c in folder:GetDescendants() do
+		if c:IsA("BasePart") and c.Name == "Curtain" then
+			TweenService:Create(c, TweenInfo.new(0.6), { Transparency = if closing then 0 else 1 }):Play()
+		end
+	end
+	p.ActionText = if closing then "Open curtains" else "Close curtains"
+end
+USE.bed = function(_rec, _p, who)
+	send(who, { kind = "sleep" })
+end
+USE.wardrobe = function(_rec, _p, who)
+	-- your outfit: the Flex pieces you own, worn or taken off (the Gem Showcase's screen)
+	if Luxe == nil then
+		local ok, m = pcall(function()
+			return require(script.Parent:WaitForChild("Luxe")) :: any
+		end)
+		Luxe = if ok then m else false
+	end
+	if Luxe then
+		Luxe.fire(who, { kind = "openShop" })
+	end
+end
+
+local function bindUses(rec: Rec, model: Model)
+	local last: { [ProximityPrompt]: number } = {}
+	for _, p in model:GetDescendants() do
+		if p:IsA("ProximityPrompt") and p:GetAttribute("Use") then
+			local kind = p:GetAttribute("Use") :: string
+			local fn = USE[kind]
+			if fn then
+				p.Triggered:Connect(function(who: Player)
+					if last[p] and os.clock() - last[p] < 0.3 then
+						return
+					end
+					last[p] = os.clock()
+					if not Houses.mayEnter(who, rec.lot.id) then
+						toast(who, if kind == "door" then "Locked: ring the bell at the gate" else "You need to be let in first", "warning")
+						return
+					end
+					fn(rec, p, who)
+				end)
+			end
+		end
+	end
+end
+
+---------------------------------------------------------------------
+-- The house gates: open for the owner, roommates, let-in guests and the owner's access setting;
+-- they close again about 5 s after the last of them has gone through
+---------------------------------------------------------------------
+local GATE_RANGE = 30
+local GATE_TIME = 3
+
+local function moveGate(rec: Rec, open: boolean)
+	local info = rec.info
+	if not info or rec.gateOpen == open then
+		return
+	end
+	rec.gateOpen = open
+	for _, g in info.gates do
+		local part = g.part
+		if part.Parent then
+			for _, c in part:GetDescendants() do
+				if c:IsA("BasePart") and c.Name == "GatePanel" then
+					c.CanCollide = not open
+				end
+			end
+			part.CanCollide = not open
+			TweenService:Create(part, TweenInfo.new(GATE_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { CFrame = if open then g.open else g.closed }):Play()
+		end
+	end
+	-- a motor hum while they move
+	local first = info.gates[1] and info.gates[1].part
+	if first then
+		local motor = first:FindFirstChild("GateMotor") :: Sound?
+		if not motor then
+			local m = Instance.new("Sound")
+			m.Name = "GateMotor"
+			m.SoundId = "rbxasset://sounds/action_falling.ogg"
+			m.PlaybackSpeed = 0.3
+			m.Volume = 0.5
+			m.Looped = true
+			m.RollOffMaxDistance = 120
+			m.Parent = first
+			motor = m
+		end
+		local snd = motor :: Sound
+		snd:Play()
+		task.delay(GATE_TIME, function()
+			snd:Stop()
+		end)
+	end
+end
+
+local function gateStep()
+	local cars = workspace:FindFirstChild("PlayerCars")
+	for _, rec in order do
+		local info = rec.info
+		if rec.owner and info and info.gateAt and #info.gates > 0 then
+			local at = info.gateAt.Position
+			local allowed = false
+			-- people on foot
+			for _, p in Players:GetPlayers() do
+				local char = p.Character
+				local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+				if root and (root.Position - at).Magnitude < GATE_RANGE and Houses.mayEnter(p, rec.lot.id) then
+					allowed = true
+					break
+				end
+			end
+			-- cars: the driver (the owner of a car nobody has got out of) and riders
+			if not allowed and cars then
+				for _, car in cars:GetChildren() do
+					local root = car:IsA("Model") and car.PrimaryPart
+					if root and (root.Position - at).Magnitude < GATE_RANGE + 10 then
+						local owner = Players:GetPlayerByUserId((car:GetAttribute("Owner") :: number?) or 0)
+						if owner and not owner.Character and Houses.mayEnter(owner, rec.lot.id) then
+							allowed = true
+						end
+						for _, s in car:GetChildren() do
+							if s:IsA("Seat") and s.Occupant then
+								local rider = Players:GetPlayerFromCharacter(s.Occupant.Parent)
+								if rider and Houses.mayEnter(rider, rec.lot.id) then
+									allowed = true
+								end
+							end
+						end
+					end
+					if allowed then
+						break
+					end
+				end
+			end
+			if allowed then
+				rec.gateSeen = os.clock()
+				moveGate(rec, true)
+			elseif rec.gateOpen and os.clock() - rec.gateSeen > 5 then
+				moveGate(rec, false)
+			end
+		end
+	end
+end
+
 local function build(rec: Rec, player: Player, id: string)
 	local d = H.ById[id]
-	local model, info = HouseBuilder.build(d, rec.lot.frame, rec.lot.width, rec.lot.depth, {})
+	local model, info = HouseBuilder.build(d, rec.lot.frame, rec.lot.width, rec.lot.depth, { interior = true })
 	model.Name = "House_" .. rec.lot.id
 	model:SetAttribute("Plot", rec.lot.id)
 	model:SetAttribute("Design", id)
@@ -539,6 +817,10 @@ local function build(rec: Rec, player: Player, id: string)
 			end
 		end)
 	end
+	bindUses(rec, model)
+	rec.guests = {}
+	rec.gateOpen = false
+	rec.gateSeen = 0
 	model.Parent = houseFolder
 	CollectionService:AddTag(model, "IslandHouse")
 	refreshCars(rec)
@@ -626,14 +908,25 @@ function Houses.mayEnter(player: Player, lotId: string): boolean
 	local rec = recs[lotId]
 	local owner = rec and rec.owner
 	local profile = owner and PlayerData.get(owner)
+	if rec and rec.guests and (rec.guests[player.UserId] or 0) > os.clock() then
+		return true -- let in at the doorbell
+	end
 	local access = profile and profile.HouseAccess or "friends"
 	if access == "everyone" then
 		return true
 	elseif access == "friends" and owner then
+		-- (asked once a minute: the gates check several times a second)
+		local key = player.UserId .. ":" .. owner.UserId
+		local hit = friendCache[key]
+		if hit and os.clock() - hit.at < 60 then
+			return hit.yes
+		end
 		local ok, friends = pcall(function()
 			return player:IsFriendsWithAsync(owner.UserId)
 		end)
-		return ok and friends == true
+		local yes = ok and friends == true
+		friendCache[key] = { at = os.clock(), yes = yes }
+		return yes
 	end
 	return false
 end
@@ -804,6 +1097,28 @@ handlers.menu = function(player, lotId)
 		maxGarage = d.maxBays,
 		bayPrice = nextPrice,
 	}
+end
+
+-- the owner answers the doorbell: let them in for two minutes
+handlers.letIn = function(player, arg)
+	if type(arg) ~= "table" or type(arg.from) ~= "number" then
+		return { ok = false }
+	end
+	local lotId = placed[player]
+	local rec = lotId and recs[lotId]
+	if not rec then
+		return { ok = false }
+	end
+	local guest = Players:GetPlayerByUserId(arg.from)
+	if arg.yes then
+		rec.guests[arg.from] = os.clock() + 120
+		if guest then
+			toast(guest, player.DisplayName .. " let you in: the gate and the door open for you")
+		end
+	elseif guest then
+		toast(guest, player.DisplayName .. " did not answer the door", "warning")
+	end
+	return { ok = true }
 end
 
 handlers.access = function(player, value)
@@ -985,7 +1300,7 @@ function Houses.init(c: any)
 	signFolder.Name = "IslandLots"
 	signFolder.Parent = workspace
 	for _, lot in IsleLayout.lots() do
-		local rec: Rec = { lot = lot, sign = buildSign(lot), owner = nil, design = nil, model = nil, info = nil, slotCars = {}, slotIds = {} }
+		local rec: Rec = { lot = lot, sign = buildSign(lot), owner = nil, design = nil, model = nil, info = nil, slotCars = {}, slotIds = {}, guests = {}, gateOpen = false, gateSeen = 0 }
 		recs[lot.id] = rec
 		table.insert(order, rec)
 	end
@@ -1004,6 +1319,15 @@ function Houses.init(c: any)
 	for _, p in Players:GetPlayers() do
 		watch(p)
 	end
+	task.spawn(function()
+		while true do
+			task.wait(0.3)
+			local ok, err = pcall(gateStep)
+			if not ok then
+				warn("[CityLegends] house gates:", err)
+			end
+		end
+	end)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		local lotId = placed[player]
 		if lotId then

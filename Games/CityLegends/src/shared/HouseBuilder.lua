@@ -10,13 +10,28 @@
 	front of it when the lot is too narrow), with its doors facing the driveway. Each design's
 	`look` picks the footprint, colours, roof and extras (porch, balcony, pool, fountain, tower...).
 
+	Housing Part 5 (owner, 2026-10-29: "every house is a real house you walk into"):
+	  * a front door that opens (and a door from the garage into the house), stairs up to every
+	    floor through a stairwell, a rail round the stairwell
+	  * furnished rooms: kitchen (fridge, stove, sink, island and stools), living room (sofa, TV,
+	    rug, coffee table), dining table, fireplace on the bigger houses, bedrooms (bed, nightstands,
+	    wardrobe), a bathroom (shower, sink, a bath on Mid and High), curtains on Mid and High, a
+	    gym or a cinema on the third floor of the big ones, a light switch on every floor
+	  * a fence or wall round the lot with a gate where the drive comes in: Low a picket front and
+	    hedges (an open drive), Mid a rendered wall with a sliding steel gate between lamp pillars,
+	    High a stone wall with big iron gates that swing open between lantern pillars and the
+	    house's name on the wall
+	Things you can use carry a ProximityPrompt with a "Use" attribute (door, light, tv, tap,
+	shower, stove, fridge, fireplace, curtain, bed, wardrobe); Houses.lua makes them work.
+
 	HouseBuilder.build(design, lotFrame, lotWidth, lotDepth, opts) -> (Model, info)
 	  opts.ghost: see-through, no collisions (the claim preview)
+	  opts.interior: build the rooms and the prompts (the real house; not the ghost or preview)
 	  info.bays: a CFrame per garage bay (where a car stands, facing out of its door)
 	  info.drive: CFrames of the driveway spots for show cars
-	  info.door: just outside the front door, facing in; info.mailbox: by the drive at the front
+	  info.door: just outside the front door, facing in; info.mailbox: by the gate, outside
 	  info.spawn: where a car driven out of the garage appears (on the driveway, facing the road)
-	The rooms inside come later (housing Part 5); the ground floor already has an open front door.
+	  info.gates: the gate leaves ({ part, closed, open }) and info.gateAt where they are
 ]]
 
 local HouseBuilder = {}
@@ -24,13 +39,31 @@ local HouseBuilder = {}
 local FLOOR = 11 -- storey height
 local BAY_W = 11 -- garage bay width
 local BAY_D = 20 -- garage bay depth
+local STEP_RISE = 1 -- stairs: 11 steps a floor
+local STEP_RUN = 1.5
+local STAIR_W = 5
+local RUN = FLOOR / STEP_RISE * STEP_RUN -- 16.5: the length of one flight
+local SILL, HEAD = 2.5, 8.6 -- the window band
+local DOOR_W = 5.2
+
 local WINDOW = Color3.fromRGB(70, 92, 110)
 local WARM = Color3.fromRGB(255, 214, 160)
 local LAWN = Color3.fromRGB(64, 112, 52)
 local PAVERS = Color3.fromRGB(196, 190, 178)
 local WATER = Color3.fromRGB(40, 170, 215)
 local DARK = Color3.fromRGB(32, 32, 36)
+local HEDGE = Color3.fromRGB(46, 92, 46)
+local IRON = Color3.fromRGB(28, 29, 32)
+local STONE = Color3.fromRGB(176, 168, 152)
+local SOFA = Color3.fromRGB(96, 98, 104)
+local OAK = Color3.fromRGB(150, 112, 76)
+local COUNTER = Color3.fromRGB(232, 230, 224)
+local CABINET = Color3.fromRGB(64, 66, 72)
+local LINEN = Color3.fromRGB(238, 234, 226)
+local STEEL = Color3.fromRGB(196, 198, 202)
+local CURTAIN = Color3.fromRGB(214, 204, 186)
 
+export type Gate = { part: BasePart, closed: CFrame, open: CFrame }
 export type Info = {
 	bays: { CFrame },
 	drive: { CFrame },
@@ -38,6 +71,8 @@ export type Info = {
 	mailbox: CFrame,
 	spawn: CFrame,
 	size: Vector3,
+	gates: { Gate },
+	gateAt: CFrame?,
 }
 
 -- a part maker bound to one model (ghost: see-through and not solid)
@@ -49,6 +84,8 @@ local function maker(model: Model, ghost: boolean)
 			p = Instance.new("WedgePart")
 		elseif o.corner then
 			p = Instance.new("CornerWedgePart")
+		elseif o.seat and not ghost then
+			p = Instance.new("Seat")
 		else
 			local part = Instance.new("Part")
 			if o.shape then
@@ -75,9 +112,24 @@ local function maker(model: Model, ghost: boolean)
 			p.CastShadow = false
 			p.Material = Enum.Material.SmoothPlastic
 		end
-		p.Parent = model
+		p.Parent = o.parent or model
 		return p
 	end
+end
+
+-- something you can use: a prompt with a "Use" kind (Houses.lua answers it)
+local function use(part: Instance, kind: string, action: string, object: string, dist: number?)
+	local p = Instance.new("ProximityPrompt")
+	p.Name = "Use"
+	p.ActionText = action
+	p.ObjectText = object
+	p.KeyboardKeyCode = Enum.KeyCode.E
+	p.HoldDuration = 0
+	p.MaxActivationDistance = dist or 8
+	p.RequiresLineOfSight = false
+	p:SetAttribute("Use", kind)
+	p.Parent = part
+	return p
 end
 
 -- a gable (or A-frame) roof over a box of width w (along X) and depth d, ridge along X
@@ -108,49 +160,116 @@ local function hip(mk: any, base: CFrame, w: number, d: number, rise: number, co
 	end
 end
 
--- a storey's walls with a band of windows on each side and a door gap on the front
-local function storey(mk: any, cf: CFrame, w: number, d: number, look: any, ground: boolean, glassy: boolean)
-	local wall = look.wall
-	local t = 1 -- wall thickness
-	local sill, head = 2.5, 8.6 -- the window band
-	local function side(len: number, at: CFrame, isFront: boolean)
-		-- solid below and above the windows
-		mk(Vector3.new(len, sill, t), at * CFrame.new(0, sill / 2, 0), wall, Enum.Material.Concrete)
-		mk(Vector3.new(len, FLOOR - head, t), at * CFrame.new(0, (head + FLOOR) / 2, 0), wall, Enum.Material.Concrete)
-		-- windows between piers (a big glass wall on glassy designs)
-		local panes = math.max(1, math.floor(len / (if glassy then 9 else 7)))
-		local pier = if glassy then 0.5 else 1.6
-		local pane = (len - pier * (panes + 1)) / panes
-		for k = 0, panes do
-			local x = -len / 2 + pier / 2 + k * (pane + pier)
-			mk(Vector3.new(pier, head - sill, t), at * CFrame.new(x, (sill + head) / 2, 0), if glassy then look.trim else wall, Enum.Material.Concrete)
+-- a flat slab of size w x d at cf, with an optional rectangular hole (local x0..x1, z0..z1)
+local function plate(mk: any, cf: CFrame, w: number, d: number, thick: number, color: Color3, material: Enum.Material, hole: { number }?, parent: Instance?)
+	local function rect(x0: number, x1: number, z0: number, z1: number)
+		if x1 - x0 > 0.05 and z1 - z0 > 0.05 then
+			mk(Vector3.new(x1 - x0, thick, z1 - z0), cf * CFrame.new((x0 + x1) / 2, 0, (z0 + z1) / 2), color, material, { parent = parent })
 		end
+	end
+	if not hole then
+		rect(-w / 2, w / 2, -d / 2, d / 2)
+		return
+	end
+	local hx0, hx1 = math.max(-w / 2, hole[1]), math.min(w / 2, hole[2])
+	local hz0, hz1 = math.max(-d / 2, hole[3]), math.min(d / 2, hole[4])
+	rect(-w / 2, hx0, -d / 2, d / 2)
+	rect(hx1, w / 2, -d / 2, d / 2)
+	rect(hx0, hx1, -d / 2, hz0)
+	rect(hx0, hx1, hz1, d / 2)
+end
+
+-- a door leaf in a wall frame `at` (local +Z is inside), hinged at its left edge, swinging in
+local function door(mk: any, at: CFrame, x: number, color: Color3, interior: boolean, parent: Instance?, label: string)
+	local leafCF = at * CFrame.new(x, HEAD / 2 + 0.05, 0)
+	local leaf = mk(Vector3.new(DOOR_W - 0.5, HEAD - 0.1, 0.3), leafCF, color, Enum.Material.Wood, { name = "Door", parent = parent })
+	if not interior then
+		return
+	end
+	local hinge = at * CFrame.new(x - DOOR_W / 2 + 0.25, HEAD / 2 + 0.05, 0)
+	local open = hinge * CFrame.Angles(0, -math.pi / 2, 0) * hinge:ToObjectSpace(leafCF)
+	leaf:SetAttribute("ClosedCF", leafCF)
+	leaf:SetAttribute("OpenCF", open)
+	-- a handle
+	mk(Vector3.new(0.3, 0.3, 0.7), leafCF * CFrame.new(DOOR_W / 2 - 1, -0.4, 0), STEEL, Enum.Material.Metal, { collide = false, name = "Handle", parent = parent })
+	use(leaf, "door", "Open", label, 9)
+end
+
+-- one wall with its band of windows; doorAt (local x) puts a door in the pane nearest it.
+-- Returns the door's local x (nil without a door).
+local function wall(mk: any, len: number, at: CFrame, look: any, glassy: boolean, doorAt: number?, interior: boolean, parent: Instance?, doorLabel: string?): number?
+	local wallC = look.wall
+	local t = 1
+	local pier = if glassy then 0.5 else 1.6
+	local panes = math.max(1, math.floor(len / (if glassy then 9 else 7)))
+	if doorAt then
+		-- (a wall with a door gets panes wide enough for it)
+		panes = math.max(1, math.min(panes, math.floor((len - pier) / (DOOR_W + 0.8 + pier))))
+	end
+	local pane = (len - pier * (panes + 1)) / panes
+	local doorK: number? = nil
+	if doorAt then
+		local best = math.huge
 		for k = 1, panes do
 			local x = -len / 2 + pier + (k - 0.5) * pane + (k - 1) * pier
-			if isFront and ground and k == math.ceil(panes / 2) then
-				-- the front door: an opening with a dark frame
-				mk(Vector3.new(0.4, head, t + 0.2), at * CFrame.new(x - 2.6, head / 2, 0), look.trim, Enum.Material.Wood)
-				mk(Vector3.new(0.4, head, t + 0.2), at * CFrame.new(x + 2.6, head / 2, 0), look.trim, Enum.Material.Wood)
-				mk(Vector3.new((pane - 5.2) / 2 + 0.1, head - sill, t), at * CFrame.new(x - 2.6 - (pane - 5.2) / 4, (sill + head) / 2, 0), WINDOW, Enum.Material.Glass, { transparency = 0.35 })
-				mk(Vector3.new((pane - 5.2) / 2 + 0.1, head - sill, t), at * CFrame.new(x + 2.6 + (pane - 5.2) / 4, (sill + head) / 2, 0), WINDOW, Enum.Material.Glass, { transparency = 0.35 })
-			else
-				mk(Vector3.new(pane, head - sill, t * 0.4), at * CFrame.new(x, (sill + head) / 2, 0), WINDOW, Enum.Material.Glass, { transparency = 0.35 })
+			if math.abs(x - doorAt) < best and pane >= DOOR_W + 0.4 then
+				best = math.abs(x - doorAt)
+				doorK = k
 			end
 		end
 	end
-	side(w, cf * CFrame.new(0, 0, -d / 2 + 0.5), true) -- front
-	side(w, cf * CFrame.new(0, 0, d / 2 - 0.5) * CFrame.Angles(0, math.pi, 0), false) -- back
-	side(d - 2, cf * CFrame.new(-w / 2 + 0.5, 0, 0) * CFrame.Angles(0, math.pi / 2, 0), false)
-	side(d - 2, cf * CFrame.new(w / 2 - 0.5, 0, 0) * CFrame.Angles(0, -math.pi / 2, 0), false)
-	-- the floor, and a warm light inside (lit windows at night)
-	mk(Vector3.new(w - 1, 0.6, d - 1), cf * CFrame.new(0, 0.3, 0), Color3.fromRGB(206, 196, 180), Enum.Material.WoodPlanks)
-	local lamp = mk(Vector3.new(1, 0.2, 1), cf * CFrame.new(0, FLOOR - 0.6, 0), WARM, Enum.Material.Neon, { collide = false, shadow = false, name = "CeilingLight" })
+	local doorX: number? = if doorK then -len / 2 + pier + (doorK - 0.5) * pane + (doorK - 1) * pier else nil
+	-- solid below the windows (split round the door), and above them
+	if doorX then
+		local a, b = doorX - DOOR_W / 2, doorX + DOOR_W / 2
+		mk(Vector3.new(a + len / 2, SILL, t), at * CFrame.new((-len / 2 + a) / 2, SILL / 2, 0), wallC, Enum.Material.Concrete, { parent = parent })
+		mk(Vector3.new(len / 2 - b, SILL, t), at * CFrame.new((b + len / 2) / 2, SILL / 2, 0), wallC, Enum.Material.Concrete, { parent = parent })
+	else
+		mk(Vector3.new(len, SILL, t), at * CFrame.new(0, SILL / 2, 0), wallC, Enum.Material.Concrete, { parent = parent })
+	end
+	mk(Vector3.new(len, FLOOR - HEAD, t), at * CFrame.new(0, (HEAD + FLOOR) / 2, 0), wallC, Enum.Material.Concrete, { parent = parent })
+	for k = 0, panes do
+		local x = -len / 2 + pier / 2 + k * (pane + pier)
+		mk(Vector3.new(pier, HEAD - SILL, t), at * CFrame.new(x, (SILL + HEAD) / 2, 0), if glassy then look.trim else wallC, Enum.Material.Concrete, { parent = parent })
+	end
+	for k = 1, panes do
+		local x = -len / 2 + pier + (k - 0.5) * pane + (k - 1) * pier
+		if k == doorK then
+			-- the door's frame, glass either side of it, and the door
+			for _, s in { -1, 1 } do
+				mk(Vector3.new(0.4, HEAD, t + 0.2), at * CFrame.new(x + s * DOOR_W / 2, HEAD / 2, 0), look.trim, Enum.Material.Wood, { parent = parent })
+				local gw = (pane - DOOR_W) / 2 - 0.1
+				if gw > 0.2 then
+					mk(Vector3.new(gw, HEAD - SILL, t * 0.4), at * CFrame.new(x + s * (DOOR_W / 2 + 0.2 + gw / 2), (SILL + HEAD) / 2, 0), WINDOW, Enum.Material.Glass, { transparency = 0.35, parent = parent })
+				end
+			end
+			door(mk, at, x, look.trim, interior, parent, doorLabel or "Door")
+		else
+			mk(Vector3.new(pane, HEAD - SILL, t * 0.4), at * CFrame.new(x, (SILL + HEAD) / 2, 0), WINDOW, Enum.Material.Glass, { transparency = 0.35, parent = parent })
+		end
+	end
+	return doorX
+end
+
+-- a storey: four walls (doors where asked), its floor (with the stairwell's hole) and a ceiling
+-- light. doors.front / doors.left are local x / z positions; returns where they went
+local function storey(mk: any, cf: CFrame, w: number, d: number, look: any, glassy: boolean, doors: { front: number?, left: number? }, hole: { number }?, interior: boolean, parent: Instance?): { front: number?, left: number? }
+	local out = {}
+	out.front = wall(mk, w, cf * CFrame.new(0, 0, -d / 2 + 0.5), look, glassy, doors.front, interior, parent, "Front door")
+	wall(mk, w, cf * CFrame.new(0, 0, d / 2 - 0.5) * CFrame.Angles(0, math.pi, 0), look, glassy, nil, interior, parent)
+	-- the left wall's local x runs along -Z of the storey (its +Z faces in)
+	local left = wall(mk, d - 2, cf * CFrame.new(-w / 2 + 0.5, 0, 0) * CFrame.Angles(0, math.pi / 2, 0), look, glassy, if doors.left then -doors.left else nil, interior, parent, "Garage door")
+	out.left = if left then -left else nil
+	wall(mk, d - 2, cf * CFrame.new(w / 2 - 0.5, 0, 0) * CFrame.Angles(0, -math.pi / 2, 0), look, glassy, nil, interior, parent)
+	plate(mk, cf * CFrame.new(0, 0.3, 0), w - 1, d - 1, 0.6, Color3.fromRGB(206, 196, 180), Enum.Material.WoodPlanks, hole, parent)
+	local lamp = mk(Vector3.new(1.4, 0.2, 1.4), cf * CFrame.new(0, FLOOR - 0.6, 0), WARM, Enum.Material.Neon, { collide = false, shadow = false, name = "CeilingLight", parent = parent })
 	local light = Instance.new("PointLight")
 	light.Color = WARM
 	light.Range = math.min(40, math.max(w, d) * 0.7)
 	light.Brightness = 0.9
 	light.Shadows = false
 	light.Parent = lamp
+	return out
 end
 
 local function palm(mk: any, base: CFrame, h: number)
@@ -163,12 +282,531 @@ local function palm(mk: any, base: CFrame, h: number)
 	end
 end
 
-function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number, opts: { ghost: boolean? }?): (Model, Info)
+---------------------------------------------------------------------
+-- Inside: the rooms (only on the real house)
+---------------------------------------------------------------------
+-- a TV on a wall: a dark frame and a screen that Houses turns on (HouseClient moves its picture)
+local function tv(mk: any, cf: CFrame, w: number, parent: Instance)
+	mk(Vector3.new(w + 0.4, w * 0.58 + 0.4, 0.3), cf, DARK, Enum.Material.SmoothPlastic, { parent = parent })
+	local screen = mk(Vector3.new(w, w * 0.58, 0.1), cf * CFrame.new(0, 0, -0.2), Color3.fromRGB(10, 12, 16), Enum.Material.Glass, { name = "TVScreen", parent = parent })
+	local sg = Instance.new("SurfaceGui")
+	sg.Face = Enum.NormalId.Front
+	sg.CanvasSize = Vector2.new(320, 180)
+	sg.LightInfluence = 0
+	sg.MaxDistance = 90
+	sg.Parent = screen
+	local pic = Instance.new("Frame")
+	pic.Name = "Picture"
+	pic.Size = UDim2.fromScale(1, 1)
+	pic.BorderSizePixel = 0
+	pic.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	pic.Visible = false
+	pic.Parent = sg
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 60, 140)),
+		ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 120, 80)),
+		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 190, 110)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 30, 70)),
+	})
+	g.Parent = pic
+	local cap = Instance.new("TextLabel")
+	cap.BackgroundTransparency = 1
+	cap.Size = UDim2.new(1, 0, 0.22, 0)
+	cap.Position = UDim2.fromScale(0, 0.74)
+	cap.Text = "LEGENDS TV  ·  NIGHT DRIVE"
+	cap.TextColor3 = Color3.fromRGB(255, 255, 255)
+	cap.Font = Enum.Font.GothamBlack
+	cap.TextScaled = true
+	cap.Parent = pic
+	screen:AddTag("HouseTV")
+	use(screen, "tv", "Turn on", "TV", 14)
+end
+
+-- water from a tap or a shower head (off until used)
+local function water(part: BasePart, spread: number, rate: number)
+	local e = Instance.new("ParticleEmitter")
+	e.Name = "Water"
+	e.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	e.Color = ColorSequence.new(Color3.fromRGB(190, 225, 255))
+	e.LightEmission = 0.3
+	e.Size = NumberSequence.new(0.12)
+	e.Transparency = NumberSequence.new(0.2, 0.8)
+	e.Speed = NumberRange.new(10, 14)
+	e.Acceleration = Vector3.new(0, -60, 0)
+	e.Lifetime = NumberRange.new(0.25, 0.4)
+	e.SpreadAngle = Vector2.new(spread, spread)
+	e.EmissionDirection = Enum.NormalId.Bottom
+	e.Rate = rate
+	e.Enabled = false
+	e.Parent = part
+end
+
+-- the floor's light switch (all its lights)
+local function switch(mk: any, cf: CFrame, parent: Instance)
+	local s = mk(Vector3.new(0.6, 0.9, 0.15), cf, Color3.fromRGB(240, 240, 236), Enum.Material.SmoothPlastic, { collide = false, name = "LightSwitch", parent = parent })
+	use(s, "light", "Lights", "Light switch", 7)
+end
+
+local function chair(mk: any, cf: CFrame, color: Color3, parent: Instance)
+	-- a Seat you can sit on, its back behind it (cf faces the way you sit)
+	mk(Vector3.new(2, 0.4, 2), cf * CFrame.new(0, 1.8, 0), color, Enum.Material.Fabric, { seat = true, name = "Chair", parent = parent })
+	mk(Vector3.new(2, 2.2, 0.3), cf * CFrame.new(0, 3, 0.9), color, Enum.Material.Fabric, { parent = parent })
+	mk(Vector3.new(0.3, 1.6, 0.3), cf * CFrame.new(0, 0.8, 0), DARK, Enum.Material.Metal, { parent = parent })
+end
+
+-- the rooms of one storey. cf: the storey's floor level, w x d inside it; s: the stairs' side
+-- (they run along the back wall there); role: "ground", "upper", "third", "fourth", "single"
+local function furnish(mk: any, cf: CFrame, w: number, d: number, s: number, role: string, design: any, look: any, parent: Instance, stairs: boolean)
+	local fs = -s -- the free side, away from the stairs
+	local y = 0.6 -- the floor's top, from the storey's base
+	local base = cf * CFrame.new(0, y, 0)
+	local tier = design.tier
+	local accent = look.accent or OAK
+	local compact = d < 18
+	-- the light switch: by the front door on the ground, at the top of the stairs above
+	if role == "ground" or role == "single" then
+		switch(mk, base * CFrame.new(fs * 3.6, 4.5, -d / 2 + 1.1), parent)
+	else
+		switch(mk, base * CFrame.new(s * (w / 2 - 1 - RUN - 1.2), 4.5, d / 2 - 1.1) * CFrame.Angles(0, math.pi, 0), parent)
+	end
+	local backZ = d / 2 - 1 -- the back wall's inner face
+	local frontZ = -d / 2 + 1
+
+	local function kitchen()
+		-- cabinets along the back wall on the free side, the fridge at the end
+		local x0, x1 = fs * 3, fs * (w / 2 - 4.5)
+		local len = math.abs(x1 - x0)
+		local cx = (x0 + x1) / 2
+		mk(Vector3.new(len, 3.1, 2.6), base * CFrame.new(cx, 1.55, backZ - 1.3), CABINET, Enum.Material.Wood, { parent = parent })
+		mk(Vector3.new(len, 0.3, 2.8), base * CFrame.new(cx, 3.25, backZ - 1.4), COUNTER, Enum.Material.Marble, { parent = parent })
+		mk(Vector3.new(len, 2.6, 1.4), base * CFrame.new(cx, 7.4, backZ - 0.7), CABINET, Enum.Material.Wood, { parent = parent })
+		-- the stove (its rings glow when it's on) and the sink with a tap
+		local sx = x0 + (x1 - x0) * 0.3
+		local stove = mk(Vector3.new(2.6, 0.1, 2), base * CFrame.new(sx, 3.45, backZ - 1.4), Color3.fromRGB(20, 20, 22), Enum.Material.Glass, { name = "Stove", parent = parent })
+		use(stove, "stove", "Turn on", "Stove")
+		local kx = x0 + (x1 - x0) * 0.72
+		mk(Vector3.new(2.4, 0.15, 1.6), base * CFrame.new(kx, 3.42, backZ - 1.4), STEEL, Enum.Material.Metal, { parent = parent })
+		local tap = mk(Vector3.new(0.3, 1.2, 0.3), base * CFrame.new(kx, 4, backZ - 0.5), STEEL, Enum.Material.Metal, { name = "Tap", parent = parent })
+		water(tap, 4, 60)
+		use(tap, "tap", "Tap on", "Kitchen sink")
+		-- the fridge
+		local fz = backZ - 1.5
+		local fx = fs * (w / 2 - 2.6)
+		mk(Vector3.new(3, 7.6, 3), base * CFrame.new(fx, 3.8, fz), STEEL, Enum.Material.Metal, { parent = parent })
+		local fd = mk(Vector3.new(2.9, 7.4, 0.25), base * CFrame.new(fx, 3.8, fz - 1.6), Color3.fromRGB(214, 216, 220), Enum.Material.Metal, { name = "FridgeDoor", parent = parent })
+		local hingeSide = fs
+		local hinge = base * CFrame.new(fx + hingeSide * 1.45, 3.8, fz - 1.6)
+		fd:SetAttribute("ClosedCF", fd.CFrame)
+		fd:SetAttribute("OpenCF", hinge * CFrame.Angles(0, hingeSide * math.pi * 0.55, 0) * hinge:ToObjectSpace(fd.CFrame))
+		use(fd, "fridge", "Open", "Fridge")
+		-- the island and two stools
+		if not compact then
+			local iw = math.min(10, len)
+			mk(Vector3.new(iw, 3.2, 3), base * CFrame.new(cx, 1.6, backZ - 8), CABINET, Enum.Material.Wood, { parent = parent })
+			mk(Vector3.new(iw + 0.6, 0.3, 3.6), base * CFrame.new(cx, 3.35, backZ - 8), COUNTER, Enum.Material.Marble, { parent = parent })
+			for _, k in { -0.25, 0.25 } do
+				chair(mk, base * CFrame.new(cx + k * iw, 0.6, backZ - 10.6) * CFrame.Angles(0, math.pi, 0), DARK, parent)
+			end
+		end
+	end
+
+	local function living()
+		-- the sofa faces the TV on the free side wall; a rug and a low table between
+		local tvX = fs * (w / 2 - 1.3)
+		local z = if compact then frontZ + 3 else -d / 4
+		local sofaX = fs * math.max(3.5, w / 2 - 13)
+		local face = CFrame.Angles(0, fs * math.pi / 2, 0) -- looking at the TV
+		local sofa = base * CFrame.new(sofaX, 0, z) * face
+		mk(Vector3.new(8, 1.6, 3), sofa * CFrame.new(0, 1.2, 0), SOFA, Enum.Material.Fabric, { seat = true, name = "Sofa", parent = parent })
+		mk(Vector3.new(8, 2.4, 0.8), sofa * CFrame.new(0, 2.2, 1.5), SOFA, Enum.Material.Fabric, { parent = parent })
+		for _, a in { -1, 1 } do
+			mk(Vector3.new(0.8, 2, 3), sofa * CFrame.new(a * 4.2, 1.4, 0), SOFA, Enum.Material.Fabric, { parent = parent })
+		end
+		local mid = (sofaX + tvX) / 2
+		mk(Vector3.new(math.abs(tvX - sofaX) - 2, 0.1, 9), base * CFrame.new(mid, 0.05, z), accent:Lerp(Color3.new(1, 1, 1), 0.55), Enum.Material.Fabric, { collide = false, parent = parent })
+		mk(Vector3.new(2.6, 1.2, 4.4), base * CFrame.new(mid, 0.6, z), OAK, Enum.Material.Wood, { parent = parent })
+		tv(mk, base * CFrame.new(tvX, 5, z) * CFrame.Angles(0, -fs * math.pi / 2, 0), if tier == 2 then 7 else 5, parent)
+	end
+
+	local function dining()
+		local cx = s * math.min(w / 4 + 1, w / 2 - 8)
+		local z = -d / 4 + 1
+		mk(Vector3.new(7, 0.3, 3.6), base * CFrame.new(cx, 3, z), OAK, Enum.Material.Wood, { parent = parent })
+		mk(Vector3.new(1, 2.8, 1), base * CFrame.new(cx, 1.45, z), DARK, Enum.Material.Metal, { parent = parent })
+		for _, k in { -2, 2 } do
+			chair(mk, base * CFrame.new(cx + k, 0, z - 2.6), accent, parent)
+			chair(mk, base * CFrame.new(cx + k, 0, z + 2.6) * CFrame.Angles(0, math.pi, 0), accent, parent)
+		end
+		-- a pendant light over it
+		mk(Vector3.new(2.4, 0.6, 2.4), base * CFrame.new(cx, FLOOR - 3, z), WARM, Enum.Material.Neon, { collide = false, shadow = false, name = "CeilingLight", parent = parent })
+	end
+
+	local function fireplace()
+		local at = base * CFrame.new(s * (w / 2 - 1.8), 0, -d / 4 - 4) * CFrame.Angles(0, s * math.pi / 2, 0)
+		mk(Vector3.new(7, 6, 1.6), at * CFrame.new(0, 3, 0), STONE, Enum.Material.Slate, { parent = parent })
+		local box = mk(Vector3.new(3.6, 2.4, 1), at * CFrame.new(0, 1.6, -0.4), Color3.fromRGB(18, 16, 14), Enum.Material.Slate, { name = "Fireplace", parent = parent })
+		local fire = Instance.new("Fire")
+		fire.Heat = 4
+		fire.Size = 3
+		fire.Enabled = false
+		fire.Parent = box
+		local glow = Instance.new("PointLight")
+		glow.Color = Color3.fromRGB(255, 150, 70)
+		glow.Range = 14
+		glow.Brightness = 1.5
+		glow.Enabled = false
+		glow.Parent = box
+		use(box, "fireplace", "Light the fire", "Fireplace")
+	end
+
+	local function bedroom(side: number, z: number)
+		-- the bed's head against the back wall
+		local bx = side * math.min(w / 4 + 1, w / 2 - 6)
+		local bed = base * CFrame.new(bx, 0, z)
+		mk(Vector3.new(6.4, 1.6, 8.6), bed * CFrame.new(0, 0.8, 0), OAK, Enum.Material.Wood, { parent = parent })
+		local mattress = mk(Vector3.new(6, 1, 8), bed * CFrame.new(0, 2, -0.2), LINEN, Enum.Material.Fabric, { name = "Bed", parent = parent })
+		mk(Vector3.new(6.6, 3.6, 0.6), bed * CFrame.new(0, 2.6, 4.2), accent, Enum.Material.Fabric, { parent = parent })
+		mk(Vector3.new(5, 0.6, 1.4), bed * CFrame.new(0, 2.8, 3), Color3.fromRGB(250, 250, 248), Enum.Material.Fabric, { parent = parent })
+		use(mattress, "bed", "Sleep", "Bed", 9)
+		for _, k in { -1, 1 } do
+			mk(Vector3.new(1.8, 2.2, 1.8), bed * CFrame.new(k * 4.4, 1.1, 3.2), OAK, Enum.Material.Wood, { parent = parent })
+			local lamp = mk(Vector3.new(0.8, 1, 0.8), bed * CFrame.new(k * 4.4, 2.8, 3.2), WARM, Enum.Material.Neon, { collide = false, shadow = false, parent = parent })
+			lamp.Name = "CeilingLight"
+		end
+	end
+
+	local function wardrobe(z: number)
+		local wx = fs * (w / 2 - 2.6)
+		local wd = mk(Vector3.new(3, 8, 6), base * CFrame.new(wx, 4, z), OAK:Lerp(DARK, 0.4), Enum.Material.Wood, { name = "Wardrobe", parent = parent })
+		use(wd, "wardrobe", "Change outfit", "Wardrobe")
+	end
+
+	local function bathroom()
+		-- the front corner on the stairs' side, walled off with a doorway
+		local x0 = s * (w / 2 - 1)
+		local x1 = s * (w / 2 - 12)
+		local z1 = frontZ + 11
+		local wallC = look.wall:Lerp(Color3.new(1, 1, 1), 0.3)
+		-- the wall along x (with a 4-stud doorway at its inner end) and the wall along z
+		mk(Vector3.new(7, FLOOR - 0.6, 0.6), base * CFrame.new(x0 - s * 3.5, (FLOOR - 0.6) / 2, z1), wallC, Enum.Material.Plaster, { parent = parent })
+		mk(Vector3.new(0.6, FLOOR - 0.6, 11), base * CFrame.new(x1, (FLOOR - 0.6) / 2, frontZ + 5.5), wallC, Enum.Material.Plaster, { parent = parent })
+		mk(Vector3.new(11, 0.1, 10), base * CFrame.new((x0 + x1) / 2, 0.06, frontZ + 5.5), Color3.fromRGB(226, 228, 230), Enum.Material.Marble, { collide = false, parent = parent })
+		-- the shower in the outer front corner: a tray, two glass sides, a head with water
+		local sx, sz = x0 - s * 2.1, frontZ + 2.1
+		mk(Vector3.new(4, 0.3, 4), base * CFrame.new(sx, 0.15, sz), Color3.fromRGB(240, 240, 240), Enum.Material.Marble, { parent = parent })
+		mk(Vector3.new(0.2, 7, 4), base * CFrame.new(sx - s * 2, 3.5, sz), Color3.fromRGB(200, 225, 235), Enum.Material.Glass, { transparency = 0.6, parent = parent })
+		mk(Vector3.new(2.2, 7, 0.2), base * CFrame.new(sx - s * 0.9, 3.5, sz + 2), Color3.fromRGB(200, 225, 235), Enum.Material.Glass, { transparency = 0.6, parent = parent })
+		local head = mk(Vector3.new(1, 0.2, 1), base * CFrame.new(sx, 7.6, sz), STEEL, Enum.Material.Metal, { collide = false, name = "ShowerHead", parent = parent })
+		water(head, 18, 140)
+		use(head, "shower", "Shower on", "Shower", 9)
+		-- the basin with a tap on the front wall
+		local bx = x0 - s * 7.5
+		mk(Vector3.new(3.6, 3, 1.8), base * CFrame.new(bx, 1.5, frontZ + 0.9), CABINET, Enum.Material.Wood, { parent = parent })
+		mk(Vector3.new(2.4, 0.3, 1.4), base * CFrame.new(bx, 3.15, frontZ + 1), Color3.fromRGB(248, 248, 248), Enum.Material.Marble, { parent = parent })
+		local btap = mk(Vector3.new(0.25, 0.9, 0.25), base * CFrame.new(bx, 3.6, frontZ + 0.4), STEEL, Enum.Material.Metal, { name = "Tap", parent = parent })
+		water(btap, 4, 50)
+		use(btap, "tap", "Tap on", "Basin")
+		mk(Vector3.new(3, 4, 0.15), base * CFrame.new(bx, 5.6, frontZ + 0.1), Color3.fromRGB(200, 214, 220), Enum.Material.Glass, { parent = parent })
+		-- a bath on the Mid and High houses
+		if tier >= 1 then
+			local tx = x0 - s * 2.4
+			local tz = frontZ + 7.4
+			mk(Vector3.new(4, 2.2, 6), base * CFrame.new(tx, 1.1, tz), Color3.fromRGB(248, 248, 246), Enum.Material.Marble, { parent = parent })
+			local bw = mk(Vector3.new(3.2, 0.2, 5.2), base * CFrame.new(tx, 1.9, tz), WATER, Enum.Material.Glass, { transparency = 0.3, collide = false, name = "BathWater", parent = parent })
+			bw.Transparency = 1
+			local spout = mk(Vector3.new(0.3, 0.6, 0.6), base * CFrame.new(tx, 2.6, tz + 2.7), STEEL, Enum.Material.Metal, { name = "Tap", parent = parent })
+			water(spout, 6, 80)
+			use(spout, "bath", "Run a bath", "Bath")
+		end
+	end
+
+	local function curtains()
+		if tier < 1 then
+			return
+		end
+		for _, k in { -1, 1 } do
+			local c = mk(Vector3.new(w / 2 - 3, HEAD - SILL + 0.6, 0.2), base * CFrame.new(k * (w / 4), (SILL + HEAD) / 2 - 0.6, frontZ + 0.5), CURTAIN, Enum.Material.Fabric, { name = "Curtain", parent = parent })
+			c.Transparency = 1
+			c.CanCollide = false
+			if k == 1 then
+				use(c, "curtain", "Close curtains", "Curtains", 12)
+			end
+		end
+	end
+
+	local function gym()
+		-- a treadmill and a bench you can sit on, weights on a rack
+		local gx = fs * (w / 4)
+		mk(Vector3.new(3, 0.8, 7), base * CFrame.new(gx, 0.4, -d / 4), DARK, Enum.Material.Metal, { parent = parent })
+		mk(Vector3.new(2.6, 0.1, 6.4), base * CFrame.new(gx, 0.85, -d / 4), Color3.fromRGB(40, 40, 44), Enum.Material.Rubber, { seat = true, name = "Treadmill", parent = parent })
+		mk(Vector3.new(3, 4, 0.4), base * CFrame.new(gx, 2.8, -d / 4 - 3.4), DARK, Enum.Material.Metal, { parent = parent })
+		mk(Vector3.new(1.6, 1.8, 5), base * CFrame.new(gx + fs * 5, 0.9, -d / 4), DARK, Enum.Material.Metal, { seat = true, name = "WeightBench", parent = parent })
+		mk(Vector3.new(4, 4, 1), base * CFrame.new(fs * (w / 2 - 2.5), 2, -d / 4 + 6), STEEL, Enum.Material.Metal, { parent = parent })
+	end
+
+	local function cinema()
+		-- a big screen on the free side wall and two rows of recliners facing it
+		tv(mk, base * CFrame.new(fs * (w / 2 - 1.3), 5.5, -d / 4) * CFrame.Angles(0, -fs * math.pi / 2, 0), 12, parent)
+		for row = 0, 1 do
+			for k = -1, 1 do
+				local at = base * CFrame.new(fs * (w / 2 - 14 - row * 5), 0, -d / 4 + k * 3.4) * CFrame.Angles(0, fs * math.pi / 2, 0)
+				mk(Vector3.new(2.8, 1.4, 2.8), at * CFrame.new(0, 1.2 + row * 0.6, 0), Color3.fromRGB(70, 30, 36), Enum.Material.Fabric, { seat = true, name = "Recliner", parent = parent })
+				mk(Vector3.new(2.8, 2.6, 0.7), at * CFrame.new(0, 2.6 + row * 0.6, 1.3), Color3.fromRGB(70, 30, 36), Enum.Material.Fabric, { parent = parent })
+				if row == 1 then
+					mk(Vector3.new(3, 0.6, 3), at * CFrame.new(0, 0.3, 0), DARK, Enum.Material.Wood, { parent = parent })
+				end
+			end
+		end
+	end
+
+	if role == "ground" then
+		kitchen()
+		living()
+		if not compact then
+			dining()
+		end
+		if not compact and (tier == 2 or look.roof == "gable" or look.roof == "barn" or look.roof == "aframe") and w >= 40 then
+			fireplace()
+		end
+	elseif role == "single" then
+		-- one floor: kitchen, living room, the bedroom at the back and the bathroom at the front
+		kitchen()
+		living()
+		bedroom(s, backZ - 5)
+		bathroom()
+	elseif role == "third" and tier >= 1 then
+		if tier == 2 then
+			cinema()
+		else
+			gym()
+		end
+		bedroom(fs, backZ - 5)
+		curtains()
+	else
+		-- a bedroom floor: the bed by the back wall on the free side, the wardrobe, the bathroom
+		bedroom(fs, backZ - 5)
+		wardrobe(-d / 4 + 1)
+		bathroom()
+		curtains()
+	end
+	local _ = stairs
+end
+
+-- a flight of stairs from a storey's floor up to the next, along the back wall on side s
+-- (it starts by the side wall and climbs inwards); a rail along the stairwell above
+local function stairsUp(mk: any, cf: CFrame, w: number, d: number, s: number, color: Color3, parent: Instance)
+	local z = d / 2 - 1 - STAIR_W / 2
+	local x0 = s * (w / 2 - 1)
+	for i = 1, FLOOR / STEP_RISE do
+		local h = i * STEP_RISE
+		local x = x0 - s * (i - 0.5) * STEP_RUN
+		mk(Vector3.new(STEP_RUN + 0.02, h, STAIR_W), cf * CFrame.new(x, 0.6 + h / 2, z), color, Enum.Material.WoodPlanks, { name = "Step", parent = parent })
+	end
+end
+
+-- the stairwell's hole in a storey's floor (local coords of that storey), on side s
+local function stairHole(w: number, d: number, s: number, shift: number): { number }
+	local a = s * (w / 2 - 1) - shift
+	local b = a - s * RUN
+	return { math.min(a, b), math.max(a, b), d / 2 - 1 - STAIR_W, d / 2 }
+end
+
+local function stairRail(mk: any, cf: CFrame, w: number, d: number, s: number, shift: number, parent: Instance)
+	local hole = stairHole(w, d, s, shift)
+	local z = hole[3] - 0.2
+	mk(Vector3.new(hole[2] - hole[1], 3.2, 0.3), cf * CFrame.new((hole[1] + hole[2]) / 2, 0.6 + 1.6, z), Color3.fromRGB(200, 220, 230), Enum.Material.Glass, { transparency = 0.4, name = "Rail", parent = parent })
+	mk(Vector3.new(hole[2] - hole[1], 0.25, 0.4), cf * CFrame.new((hole[1] + hole[2]) / 2, 0.6 + 3.3, z), IRON, Enum.Material.Metal, { parent = parent })
+end
+
+---------------------------------------------------------------------
+-- The lot's fence or wall, and its gate
+---------------------------------------------------------------------
+-- runs a fence along x at z from x0 to x1 (lot coords), leaving gaps; kind by tier
+local function fenceRun(mk: any, lot: CFrame, tier: number, look: any, a: Vector3, b: Vector3)
+	local len = (b - a).Magnitude
+	if len < 0.5 then
+		return
+	end
+	local mid = (a + b) / 2
+	local cf = lot * CFrame.lookAt(mid, b)
+	if tier == 0 then
+		mk(Vector3.new(2.4, 3.6, len), cf * CFrame.new(0, 1.8 + 0.4, 0), HEDGE, Enum.Material.LeafyGrass, { name = "Hedge" })
+	elseif tier == 1 then
+		mk(Vector3.new(1.2, 3.6, len), cf * CFrame.new(0, 1.8 + 0.4, 0), look.wall, Enum.Material.Plaster, { name = "LotWall" })
+		mk(Vector3.new(1.6, 0.4, len + 0.4), cf * CFrame.new(0, 3.8 + 0.4, 0), look.trim, Enum.Material.Concrete)
+	else
+		mk(Vector3.new(1.6, 5, len), cf * CFrame.new(0, 2.5 + 0.4, 0), STONE, Enum.Material.Limestone, { name = "LotWall" })
+		mk(Vector3.new(2, 0.5, len + 0.4), cf * CFrame.new(0, 5.15 + 0.4, 0), STONE:Lerp(Color3.new(1, 1, 1), 0.2), Enum.Material.Limestone)
+	end
+end
+
+-- a white picket front for the Low houses (posts and two rails)
+local function picket(mk: any, lot: CFrame, x0: number, x1: number, z: number)
+	local len = x1 - x0
+	if len < 1 then
+		return
+	end
+	local cx = (x0 + x1) / 2
+	for _, h in { 1.2, 2.6 } do
+		mk(Vector3.new(len, 0.3, 0.2), lot * CFrame.new(cx, 0.4 + h, z), Color3.fromRGB(246, 246, 242), Enum.Material.Wood)
+	end
+	local n = math.max(1, math.floor(len / 2.4))
+	for k = 0, n do
+		mk(Vector3.new(0.35, 3.4, 0.35), lot * CFrame.new(x0 + k * len / n, 0.4 + 1.7, z), Color3.fromRGB(246, 246, 242), Enum.Material.Wood, { name = "Picket" })
+	end
+end
+
+-- a pillar by a gate, with a lamp on Mid and a lantern on High
+local function pillar(mk: any, at: CFrame, tier: number, look: any)
+	if tier == 1 then
+		mk(Vector3.new(2.4, 6, 2.4), at * CFrame.new(0, 3.4, 0), look.wall, Enum.Material.Plaster, { name = "GatePillar" })
+		local lamp = mk(Vector3.new(1.2, 1.2, 1.2), at * CFrame.new(0, 7, 0), WARM, Enum.Material.Neon, { collide = false, shadow = false, name = "PillarLamp" })
+		local l = Instance.new("PointLight")
+		l.Color = WARM
+		l.Range = 16
+		l.Brightness = 1
+		l.Parent = lamp
+	else
+		mk(Vector3.new(3.4, 8, 3.4), at * CFrame.new(0, 4.4, 0), STONE, Enum.Material.Limestone, { name = "GatePillar" })
+		mk(Vector3.new(4, 0.8, 4), at * CFrame.new(0, 8.8, 0), STONE:Lerp(Color3.new(1, 1, 1), 0.2), Enum.Material.Limestone)
+		mk(Vector3.new(1.4, 2.2, 1.4), at * CFrame.new(0, 10.3, 0), IRON, Enum.Material.Metal)
+		local lamp = mk(Vector3.new(1, 1.6, 1), at * CFrame.new(0, 10.3, 0), WARM, Enum.Material.Neon, { collide = false, shadow = false, name = "PillarLamp" })
+		local l = Instance.new("PointLight")
+		l.Color = WARM
+		l.Range = 22
+		l.Brightness = 1.3
+		l.Parent = lamp
+	end
+end
+
+-- a gate leaf: a solid (see-through) panel with bars, all welded to its bottom rail
+local function leaf(mk: any, cf: CFrame, w: number, h: number, ghost: boolean): BasePart
+	local rail = mk(Vector3.new(w, 0.6, 0.5), cf * CFrame.new(0, 0.7, 0), IRON, Enum.Material.Metal, { name = "GateLeaf" })
+	local function bit(size: Vector3, at: CFrame, opts: { [string]: any }?)
+		local p = mk(size, at, IRON, Enum.Material.Metal, opts)
+		if not ghost then
+			p.Anchored = false
+			p.Massless = true
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0 = rail
+			weld.Part1 = p
+			weld.Parent = p
+		end
+		p.Parent = rail
+		return p
+	end
+	bit(Vector3.new(w, 0.5, 0.5), cf * CFrame.new(0, h, 0))
+	bit(Vector3.new(w, 0.3, 0.4), cf * CFrame.new(0, h * 0.55, 0))
+	for _, e in { -1, 1 } do
+		bit(Vector3.new(0.5, h, 0.5), cf * CFrame.new(e * (w / 2 - 0.25), h / 2 + 0.4, 0))
+	end
+	local bars = math.max(2, math.floor(w / 1.2))
+	for k = 1, bars - 1 do
+		bit(Vector3.new(0.22, h - 0.6, 0.22), cf * CFrame.new(-w / 2 + k * w / bars, h / 2 + 0.6, 0))
+	end
+	-- (an invisible panel inside the bars stops cars and people)
+	bit(Vector3.new(w, h, 0.3), cf * CFrame.new(0, h / 2 + 0.4, 0), { transparency = 1, name = "GatePanel" })
+	return rail
+end
+
+local function fenceAndGate(mk: any, lot: CFrame, lotW: number, lotD: number, tier: number, look: any, design: any, entryX: number, gateW: number, pathX: number, ghost: boolean): ({ Gate }, CFrame?)
+	local z = -lotD / 2 + 1
+	local hw, hd = lotW / 2 - 1, lotD / 2 - 1
+	local gates: { Gate } = {}
+	local g0, g1 = entryX - gateW / 2, entryX + gateW / 2
+	-- the walk-in gap by the path (merged with the drive's gap when they meet)
+	local p0, p1 = pathX - 2.5, pathX + 2.5
+	local gaps = { { g0, g1 } }
+	if p1 < g0 - 1 or p0 > g1 + 1 then
+		table.insert(gaps, { p0, p1 })
+	end
+	table.sort(gaps, function(a, b)
+		return a[1] < b[1]
+	end)
+	-- the front, between the gaps
+	local x = -hw
+	for _, gp in gaps do
+		if tier == 0 then
+			picket(mk, lot, x, gp[1], z)
+		else
+			fenceRun(mk, lot, tier, look, Vector3.new(x, 0, z), Vector3.new(gp[1], 0, z))
+		end
+		x = gp[2]
+	end
+	if tier == 0 then
+		picket(mk, lot, x, hw, z)
+	else
+		fenceRun(mk, lot, tier, look, Vector3.new(x, 0, z), Vector3.new(hw, 0, z))
+	end
+	-- the sides, and the back with a garden gap in the middle (the dock, the view)
+	for _, s in { -1, 1 } do
+		fenceRun(mk, lot, tier, look, Vector3.new(s * hw, 0, z), Vector3.new(s * hw, 0, hd))
+		fenceRun(mk, lot, tier, look, Vector3.new(s * hw, 0, hd), Vector3.new(s * 4, 0, hd))
+	end
+	if tier == 0 then
+		-- an open drive on the small houses (owner: a small gate or an open drive)
+		return gates, nil
+	end
+	-- the pillars either side of the drive and the path
+	for _, e in { g0, g1 } do
+		pillar(mk, lot * CFrame.new(e, 0, z), tier, look)
+	end
+	local gateAt = lot * CFrame.new(entryX, 0, z)
+	if tier == 1 then
+		-- one sliding leaf, just inside the wall, sliding along it to open
+		local closed = lot * CFrame.new(entryX, 0, z + 1.4)
+		local part = leaf(mk, closed, gateW - 2.4, 6, ghost)
+		local slide = if entryX <= 0 then 1 else -1
+		table.insert(gates, { part = part, closed = part.CFrame, open = part.CFrame * CFrame.new(slide * (gateW - 1), 0, 0) })
+	else
+		-- two big leaves swinging in from the pillars, and the house's name on the wall beside
+		local half = (gateW - 3.4) / 2
+		for _, e in { -1, 1 } do
+			local hingeX = entryX + e * (gateW / 2 - 1.7)
+			local closed = lot * CFrame.new(hingeX - e * half / 2, 0, z)
+			local part = leaf(mk, closed, half, 8, ghost)
+			local hinge = lot * CFrame.new(hingeX, part.CFrame.Y - lot.Y, z)
+			local rel = hinge:ToObjectSpace(part.CFrame)
+			table.insert(gates, { part = part, closed = part.CFrame, open = hinge * CFrame.Angles(0, e * math.pi / 2, 0) * rel })
+		end
+		local plateX = entryX + gateW / 2 + 6
+		if plateX + 4 < hw then
+			local namePlate = mk(Vector3.new(9, 1.6, 0.2), lot * CFrame.new(plateX, 3.6, z - 0.9), STONE, Enum.Material.Limestone, { collide = false })
+			local sg = Instance.new("SurfaceGui")
+			sg.Face = Enum.NormalId.Back
+			sg.CanvasSize = Vector2.new(450, 80)
+			sg.LightInfluence = 0.4
+			sg.Parent = namePlate
+			local t = Instance.new("TextLabel")
+			t.BackgroundTransparency = 1
+			t.Size = UDim2.fromScale(1, 1)
+			t.Text = string.upper(design.name)
+			t.Font = Enum.Font.GothamBold
+			t.TextColor3 = Color3.fromRGB(70, 66, 58)
+			t.TextScaled = true
+			t.Parent = sg
+		end
+	end
+	-- a small walk-in gate by the path
+	if #gaps > 1 then
+		local pl = lot * CFrame.new(pathX, 0, z)
+		mk(Vector3.new(4.6, 0.3, 0.3), pl * CFrame.new(0, 0.4 + 3.6, 0), IRON, Enum.Material.Metal, { collide = false })
+	end
+	return gates, gateAt
+end
+
+---------------------------------------------------------------------
+-- The house
+---------------------------------------------------------------------
+function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number, opts: { ghost: boolean?, interior: boolean? }?): (Model, Info)
 	local o = opts or {}
+	local ghost = o.ghost == true
+	local interior = o.interior == true and not ghost
 	local look = design.look
 	local model = Instance.new("Model")
 	model.Name = "House_" .. design.id
-	local mk = maker(model, o.ghost == true)
+	local mk = maker(model, ghost)
 	local tier = design.tier
 	local floors = design.floors
 
@@ -195,39 +833,75 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 	local backGarden = if look.pool or look.hottub then 20 else 6
 	local houseZ = lotD / 2 - d / 2 - math.min(backGarden, math.max(6, lotD - d - (if integrated then 16 elseif wingBeside then 24 else garageD + 24)))
 	local hcf = lot * CFrame.new(houseX, 0, houseZ)
+	-- the stairs run up the back wall on this side (the side a cantilevered top floor hangs out to)
+	local side = if houseX > 0 then -1 else 1
+	local shiftTop = if look.cantilever and floors > 1 then side * w * 0.18 else 0
 
-	-- the lot: lawn, a path to the door, the driveway to the garage
+	-- the lot: lawn
 	mk(Vector3.new(lotW, 0.4, lotD), lot * CFrame.new(0, 0.2, 0), LAWN, Enum.Material.Grass, { name = "Lawn" })
 
+	-- the passage door from a wing garage into the house: where the garage and house overlap
+	local passageZ: number? = nil
+	if wingBeside then
+		passageZ = -d / 2 + math.min(garageD, d) / 2
+	end
+
 	-- the house, floor by floor (a cantilever shifts the top floor over)
+	local doorsOut: { front: number?, left: number? } = {}
 	for f = 1, floors do
-		local fw, fd, shift = w, d, 0
-		if look.cantilever and f == floors and floors > 1 then
-			-- (it hangs out towards the middle of the lot, over the garage wing, never off the lot)
-			shift = (if houseX > 0 then -1 else 1) * w * 0.18
+		local folder = Instance.new("Model")
+		folder.Name = "Floor" .. f
+		folder.Parent = model
+		local fw, fd, shift, zoff = w, d, 0, 0
+		if f == floors then
+			shift = shiftTop
 		end
 		if integrated and f == 1 then
-			-- the garage takes the front of the ground floor
+			-- the garage takes the front of the ground floor: its back wall is the house's front wall
+			-- (the door into the house from the garage); its sides and lintel round it
 			fd = d - BAY_D - 1
+			zoff = (BAY_D + 1) / 2
 			local gcf = hcf * CFrame.new(0, 0.4, -d / 2 + (BAY_D + 1) / 2)
-			mk(Vector3.new(fw, FLOOR, 1), gcf * CFrame.new(0, FLOOR / 2, (BAY_D + 1) / 2), look.wall, Enum.Material.Concrete)
 			for _, s in { -1, 1 } do
 				mk(Vector3.new(1, FLOOR, BAY_D + 1), gcf * CFrame.new(s * (fw / 2 - 0.5), FLOOR / 2, 0), look.wall, Enum.Material.Concrete)
 			end
 			mk(Vector3.new(fw, 0.6, BAY_D + 1), gcf * CFrame.new(0, 0.3, 0), Color3.fromRGB(150, 150, 150), Enum.Material.Concrete)
 			mk(Vector3.new(fw, 1.6, 1), gcf * CFrame.new(0, FLOOR - 0.8, -(BAY_D + 1) / 2), look.wall, Enum.Material.Concrete)
-			storey(mk, hcf * CFrame.new(0, 0.4, (BAY_D + 1) / 2), fw, fd, look, true, look.glassy == true)
-		else
-			storey(mk, hcf * CFrame.new(shift, 0.4 + (f - 1) * FLOOR, 0), fw, fd, look, f == 1 and not integrated, look.glassy == true)
 		end
-		-- a slab between floors (and the roof deck on top)
-		mk(Vector3.new(fw + 1, 0.8, fd + 1), hcf * CFrame.new(shift, 0.4 + f * FLOOR, if integrated and f == 1 then (BAY_D + 1) / 2 else 0), look.trim, Enum.Material.Concrete)
+		local scf = hcf * CFrame.new(shift, 0.4 + (f - 1) * FLOOR, zoff)
+		-- the hole for the stairs coming up from below
+		local hole = if f > 1 then stairHole(fw, fd, side, shift) else nil
+		local doors: { front: number?, left: number? } = {}
+		if f == 1 then
+			doors.front = if integrated then -side * (fw / 2 - 6) else 0
+			if passageZ then
+				doors.left = passageZ
+			end
+		end
+		local got = storey(mk, scf, fw, fd, look, look.glassy == true, doors, hole, interior, folder)
+		if f == 1 then
+			doorsOut = got
+		end
+		if f < floors then
+			stairsUp(mk, scf, fw, fd, side, look.accent or OAK, folder)
+		end
+		if f > 1 then
+			stairRail(mk, scf, fw, fd, side, shift, folder)
+		end
+		-- the slab above this floor (with the next floor's stairwell hole)
+		local above = hcf * CFrame.new(shift, 0.4 + f * FLOOR, zoff)
+		local nextHole = if f < floors then stairHole(fw, fd, side, shift) else nil
+		plate(mk, above, fw + 1, fd + 1, 0.8, look.trim, Enum.Material.Concrete, nextHole, folder)
 		if integrated and f == 1 then
 			mk(Vector3.new(fw + 1, 0.8, BAY_D + 2), hcf * CFrame.new(0, 0.4 + FLOOR, -d / 2 + (BAY_D + 1) / 2), look.trim, Enum.Material.Concrete)
 		end
+		if interior then
+			local role = if floors == 1 then "single" elseif f == 1 then "ground" elseif f == 3 then "third" else "upper"
+			furnish(mk, scf, fw, fd, side, role, design, look, folder, f < floors)
+		end
 	end
 	local topY = 0.4 + floors * FLOOR + 0.4
-	local roofBase = hcf * CFrame.new(if look.cantilever and floors > 1 then (if houseX > 0 then -1 else 1) * w * 0.18 else 0, topY, 0)
+	local roofBase = hcf * CFrame.new(shiftTop, topY, 0)
 
 	-- the roof
 	local roof = look.roof
@@ -251,7 +925,8 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 			mk(Vector3.new(w + 2, 5, d * 0.2 + 1), roofBase * CFrame.new(0, 2.5, s * (d * 0.4 + 0.5)) * CFrame.Angles(0, if s > 0 then 0 else math.pi, 0), rc, Enum.Material.Metal, { wedge = true })
 		end
 	elseif roof == "aframe" then
-		gable(mk, hcf * CFrame.new(0, 0.4 + FLOOR * 0.6, 0), w, d, topY + 8, rc, 2)
+		-- a steep roof (on top of the floors, so the rooms stay free under it)
+		gable(mk, roofBase, w, d, d * 0.8, rc, 2.5)
 	end
 
 	-- extras
@@ -347,8 +1022,33 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		local gh = FLOOR + 1
 		mk(Vector3.new(garageW, 0.6, garageD), gcf * CFrame.new(0, 0.7, 0), Color3.fromRGB(150, 150, 150), Enum.Material.Concrete)
 		mk(Vector3.new(garageW, gh, 1), gcf * CFrame.new(0, gh / 2 + 0.4, garageD / 2 - 0.5), look.wall, Enum.Material.Concrete)
+		-- the side walls; the one by the house has the doorway into the passage
+		local passageG: number? = nil
+		if wingBeside and doorsOut.left then
+			passageG = gcf:PointToObjectSpace((hcf * CFrame.new(-w / 2, 0, doorsOut.left)).Position).Z
+		end
 		for _, s in { -1, 1 } do
-			mk(Vector3.new(1, gh, garageD), gcf * CFrame.new(s * (garageW / 2 - 0.5), gh / 2 + 0.4, 0), look.wall, Enum.Material.Concrete)
+			local wx = s * (garageW / 2 - 0.5)
+			if s == 1 and passageG then
+				local a, b = passageG - 3, passageG + 3
+				local function seg(z0: number, z1: number)
+					if z1 - z0 > 0.1 then
+						mk(Vector3.new(1, gh, z1 - z0), gcf * CFrame.new(wx, gh / 2 + 0.4, (z0 + z1) / 2), look.wall, Enum.Material.Concrete)
+					end
+				end
+				seg(-garageD / 2, a)
+				seg(b, garageD / 2)
+				mk(Vector3.new(1, gh - HEAD - 1, 6), gcf * CFrame.new(wx, (HEAD + 1 + gh) / 2 + 0.4, passageG), look.wall, Enum.Material.Concrete)
+				-- the covered passage to the house's side door
+				local px = garageW / 2 + 1.5
+				mk(Vector3.new(4, 0.6, 6), gcf * CFrame.new(px, 0.7, passageG), Color3.fromRGB(206, 196, 180), Enum.Material.WoodPlanks)
+				mk(Vector3.new(4, 0.6, 7), gcf * CFrame.new(px, gh - 0.4, passageG), look.trim, Enum.Material.Concrete)
+				for _, e in { -1, 1 } do
+					mk(Vector3.new(4, gh - 0.6, 0.6), gcf * CFrame.new(px, gh / 2 + 0.4, passageG + e * 3.3), look.wall, Enum.Material.Concrete)
+				end
+			else
+				mk(Vector3.new(1, gh, garageD), gcf * CFrame.new(wx, gh / 2 + 0.4, 0), look.wall, Enum.Material.Concrete)
+			end
 		end
 		mk(Vector3.new(garageW + 1, 1, garageD + 1), gcf * CFrame.new(0, gh + 0.9, 0), look.roofColor, Enum.Material.Slate)
 		mk(Vector3.new(garageW, 1.8, 1), gcf * CFrame.new(0, gh - 0.5, -garageD / 2 + 0.5), look.wall, Enum.Material.Concrete)
@@ -377,6 +1077,14 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 	if driveLen > 1 then
 		mk(Vector3.new(driveW, 0.3, driveLen), lot * CFrame.new(gxLocal, 0.55, -lotD / 2 + driveLen / 2), PAVERS, Enum.Material.Pavement, { name = "Driveway" })
 	end
+	-- the island's drive comes in at the middle of a Mid or High lot's front: an apron joins it
+	local entryX = if tier == 0 then gxLocal else 0
+	local gateW = if tier == 0 then driveW else 20
+	if tier > 0 then
+		local x0 = math.min(entryX - gateW / 2, gxLocal - driveW / 2)
+		local x1 = math.max(entryX + gateW / 2, gxLocal + driveW / 2)
+		mk(Vector3.new(x1 - x0, 0.3, 14), lot * CFrame.new((x0 + x1) / 2, 0.56, -lotD / 2 + 7), PAVERS, Enum.Material.Pavement, { name = "Driveway" })
+	end
 	local drive: { CFrame } = {}
 	for k = 1, design.drive do
 		-- side by side on the drive near the front
@@ -385,18 +1093,20 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		if design.drive >= 3 then
 			-- a front court for three: across the yard beside the drive
 			x = gxLocal + driveW / 2 + 6 + (k - 1) * 10
-			z = -lotD / 2 + 12
+			z = -lotD / 2 + 22
 			mk(Vector3.new(9, 0.3, 16), lot * CFrame.new(x, 0.56, z), PAVERS, Enum.Material.Pavement)
+		elseif tier > 0 then
+			z = -lotD / 2 + math.max(18, math.min(driveLen - 8, 22))
 		end
 		table.insert(drive, lot * CFrame.new(x, 0.75, z))
 	end
 	-- the path from the front edge to the door
-	local doorLocal = (lot:ToObjectSpace(front)).Position
+	local doorLocal = (lot:ToObjectSpace(hcf * CFrame.new(doorsOut.front or 0, 0, -d / 2))).Position
 	mk(Vector3.new(4, 0.3, math.max(1, doorLocal.Z + lotD / 2)), lot * CFrame.new(doorLocal.X, 0.55, (-lotD / 2 + doorLocal.Z) / 2), PAVERS, Enum.Material.Pavement)
 
 	-- the front court's fountain on the grand houses
 	if look.fountain or look.carCourt then
-		local fc = lot * CFrame.new(gxLocal + driveW / 2 + 22, 0, -lotD / 2 + 26)
+		local fc = lot * CFrame.new(gxLocal + driveW / 2 + 22, 0, -lotD / 2 + 30)
 		mk(Vector3.new(1, 26, 26), fc * CFrame.new(0, 0.6, 0) * CFrame.Angles(0, 0, math.pi / 2), PAVERS, Enum.Material.Pavement, { shape = Enum.PartType.Cylinder })
 		if look.fountain then
 			mk(Vector3.new(1.4, 12, 12), fc * CFrame.new(0, 1.4, 0) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(226, 220, 206), Enum.Material.Marble, { shape = Enum.PartType.Cylinder })
@@ -409,8 +1119,8 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		end
 	end
 	if look.palms then
-		for _, x in { -0.45, 0.45 } do
-			palm(mk, lot * CFrame.new(x * lotW, 0.4, -lotD / 2 + 6), 18)
+		for _, x in { -0.42, 0.42 } do
+			palm(mk, lot * CFrame.new(x * lotW, 0.4, -lotD / 2 + 8), 18)
 		end
 	end
 	if look.gazebo then
@@ -423,18 +1133,23 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		hip(mk, gz * CFrame.new(0, 8, 0), 10, 10, 3, look.roofColor, 0.5)
 	end
 
-	-- the mailbox at the front, by the drive
-	local mailbox = lot * CFrame.new(gxLocal + driveW / 2 + 3, 0.4, -lotD / 2 + 2)
+	-- the fence or wall round the lot and the gate where the drive comes in
+	local gates, gateAt = fenceAndGate(mk, lot, lotW, lotD, tier, look, design, entryX, gateW, doorLocal.X, ghost)
+
+	-- the mailbox outside, beside the gate
+	local mailbox = lot * CFrame.new(entryX + gateW / 2 + 3, 0.4, -lotD / 2 - 0.8)
 	mk(Vector3.new(0.4, 3.6, 0.4), mailbox * CFrame.new(0, 1.8, 0), DARK, Enum.Material.Metal)
 	mk(Vector3.new(1.4, 1.1, 2), mailbox * CFrame.new(0, 4, 0), Color3.fromRGB(38, 40, 46), Enum.Material.Metal, { name = "Mailbox" })
 
 	local info: Info = {
 		bays = bays,
 		drive = drive,
-		door = front * CFrame.new(0, 0.4, -3) * CFrame.Angles(0, math.pi, 0),
+		door = hcf * CFrame.new(doorsOut.front or 0, 0.4, -d / 2 - 3) * CFrame.Angles(0, math.pi, 0),
 		mailbox = mailbox,
 		spawn = lot * CFrame.new(gxLocal, 0.6, -lotD / 2 + 8),
 		size = Vector3.new(lotW, topY + 12, lotD),
+		gates = gates,
+		gateAt = gateAt,
 	}
 	return model, info
 end
