@@ -204,10 +204,15 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 	for _, p in { { -78, -40 }, { -24, -40 }, { -78, 14 }, { -24, 14 } } do
 		local y = if p[2] < STEP then HF else HB
 		local panel = deco(detail, Vector3.new(18, 0.3, 6), at(p[1], y - 0.3 + FLOOR_T, p[2]), CANOPY, Enum.Material.SmoothPlastic)
-		kit.addLight("SurfaceLight", panel, WARM, 40, 1.3, Enum.NormalId.Bottom, 120)
+		kit.addLight("SurfaceLight", panel, WARM, 44, 2.2, Enum.NormalId.Bottom, 120)
 	end
 
-	-- a stand sign by a car: its name and price
+	-- a stand sign by a car: its name, price and level
+	local function money(n: number): string
+		local s = tostring(math.floor(n))
+		local out = s:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+		return (out:gsub("^,", ""))
+	end
 	local function stand(parent2: Instance, carId: string, p: CFrame)
 		local spec = Cars.ById[carId]
 		if not spec then
@@ -215,7 +220,7 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 		end
 		mk(parent2, Vector3.new(0.4, 3.2, 0.4), p * CFrame.new(0, 1.6, 0), BRUSHED, Enum.Material.Metal, { name = "StandPost" })
 		local plate = mk(parent2, Vector3.new(3.4, 2.2, 0.25), p * CFrame.new(0, 3.6, 0) * CFrame.Angles(math.rad(-20), 0, 0), DARK, Enum.Material.Metal, { name = "InfoStand" })
-		kit.surfaceText(plate, Enum.NormalId.Front, spec.Name .. "\n$" .. tostring(spec.Price) .. "  ·  LV " .. Cars.requiredLevel(carId), LETTER, nil, nil, Enum.Font.GothamBold, Vector2.new(240, 150))
+		kit.surfaceText(plate, Enum.NormalId.Front, spec.Name .. "\n$" .. money(spec.Price) .. "  ·  LV " .. Cars.requiredLevel(carId), LETTER, nil, nil, Enum.Font.GothamBold, Vector2.new(240, 150))
 		prompt(plate, "View car", spec.Name, carId)
 	end
 
@@ -227,7 +232,7 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 		local a = k * math.pi / 2 + math.pi / 4
 		local lp = at(stageX + math.cos(a) * 16, HF - 1.2, stageZ + math.sin(a) * 16)
 		local lamp = deco(detail, Vector3.new(1.6, 2, 1.6), lp, DARK, Enum.Material.Metal, { name = "StageLamp" })
-		kit.addLight("SpotLight", lamp, WARM, 48, 2.2, Enum.NormalId.Bottom, 40)
+		kit.addLight("SpotLight", lamp, WARM, 48, 3, Enum.NormalId.Bottom, 40)
 	end
 	if D.DisplayHero then
 		displayCar(model, D.DisplayHero, (at(stageX, FLOOR_T + 1.2, stageZ)).Position, base)
