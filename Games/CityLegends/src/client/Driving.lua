@@ -2103,9 +2103,9 @@ function Driving.step(dt: number)
 			brakeForce *= 1 - DF.AbsPulse * (0.5 + 0.5 * math.sin(s.absT * math.pi * 2 * DF.AbsHz))
 			s.shake = math.max(s.shake, 0.05)
 		end
-		-- reverse: up to half the top speed (60 mph at most), pulling away hard (owner, 2026-10-29
-		-- and again 2026-10-30: "most cars reverse is too slow"; was 40% / 45 mph and a softer pull)
-		local reverseTop = Config.mphToSps(math.min(60, s.spec.TopSpeed * 0.5))
+		-- reverse: 25 mph at most, pulling away hard (owner, 2026-10-30: "make the reverse top speed
+		-- like 20 or 25"; the slow reverse before was the manual R gear braking itself)
+		local reverseTop = Config.mphToSps(math.min(25, s.spec.TopSpeed * 0.5))
 		local reversePull = math.max(s.accel * s.powerK * 2.2, 52)
 		if s.manual then
 			if engaged and gearNow < 0 and throttle > 0 and fwdSpeed > -reverseTop then
