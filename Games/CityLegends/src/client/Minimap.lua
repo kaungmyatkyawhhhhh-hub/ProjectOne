@@ -193,6 +193,27 @@ end
 -- showing (Legends Isle in the west to the Legends Loop in the east), in world studs
 function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
 	drawMap(frame)
+	-- the places' names, in world studs like the map (so they scale with it)
+	local function name(text: string, x: number, z: number)
+		local l = Instance.new("TextLabel")
+		l.BackgroundTransparency = 1
+		l.AnchorPoint = Vector2.new(0.5, 0.5)
+		l.Position = UDim2.fromOffset(x, z)
+		l.Size = UDim2.fromOffset(1500, 190)
+		l.Font = Enum.Font.GothamBlack
+		l.Text = text
+		l.TextScaled = true
+		l.TextColor3 = Color3.fromRGB(236, 226, 200)
+		l.TextTransparency = 0.1
+		l.ZIndex = 8
+		l.Parent = frame
+	end
+	local z0, z1 = CityLayout.roadCoord(0), CityLayout.roadCoord(N)
+	local above = z0 - 330
+	name("THE CITY", (CityLayout.roadCoord(0) + CityLayout.roadCoord(N)) / 2, above)
+	name("DOWNTOWN", (WestLayout.DowntownWest + WestLayout.DowntownEast) / 2, above)
+	name("LEGENDS ISLE", IsleLayout.Center.X, IsleLayout.Center.Z - IsleLayout.MaxShore - 260)
+	name("LEGENDS LOOP", (CityLayout.roadCoord(0) + CityLayout.roadCoord(N)) / 2, z1 + 520)
 	local x0 = IsleLayout.Center.X - IsleLayout.MaxShore - 200
 	local x1 = C.LoopHalf + 200
 	local zr = math.max(C.LoopHalf, W.HalfZ) + 200
