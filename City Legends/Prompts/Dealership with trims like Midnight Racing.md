@@ -98,3 +98,9 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
 - how the menu works;
 - what's untested;
 - the new level for every car and trim (top cars now at the dealer).
+
+## Owner answers (2026-10-30)
+- Trims list: OK.
+- Lambrini: split into Gallardo, Murcielago and Aventador (LP700 -> LP750).
+- Extra trims: yes. Every one-car line gets SPORT (+5 levels) and TOP (+10 levels), same body, a bit faster and dearer.
+- Done so far: car data in `Cars.lua` (63 lines, 183 trims, levels only, no market-only), Market/garage/server rules. Still to build: the Midnight Racing-style dealer menu.
