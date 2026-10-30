@@ -9,7 +9,7 @@
 	  * Legends chips: spinning gold chips hidden on the sidewalks; touch one (on foot or driving)
 	  * racing other players (owner, 2026-10-30): stopping in a race ring joins its lobby (the ring's
 	    sign shows who's waiting); it starts for everyone in it together, and with 2+ racers the
-	    places share a pot. Next to another driver, G (or the RACE pill) challenges them to a duel:
+	    places share a pot. Next to another driver, U (or the RACE pill) challenges them to a duel:
 	    a sprint to a junction across town
 ]]
 
@@ -165,6 +165,7 @@ local function buildHud()
 	gui.DisplayOrder = 11
 	gui.Parent = player:WaitForChild("PlayerGui")
 	card = Instance.new("Frame")
+	card.Name = "RunCard" -- (GoalsClient hides its tracker while this shows: same spot)
 	card.AnchorPoint = Vector2.new(1, 0)
 	card.Position = UDim2.new(1, -24, 0, 170)
 	card.Size = UDim2.fromOffset(250, 86)
@@ -648,7 +649,7 @@ local function buildDuelPill()
 	b.Activated:Connect(challenge)
 	duelPill = b
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if not processed and input.KeyCode == Enum.KeyCode.G and b.Visible then
+		if not processed and input.KeyCode == Enum.KeyCode.U and b.Visible then
 			challenge()
 		end
 	end)
@@ -707,7 +708,7 @@ local function update(dt: number)
 		duelTarget = who
 		duelPill.Visible = who ~= nil
 		if who then
-			duelPill.Text = (if UI.isTouch then "RACE " else "G   RACE ") .. string.upper(who.DisplayName)
+			duelPill.Text = (if UI.isTouch then "RACE " else "U   RACE ") .. string.upper(who.DisplayName)
 		end
 	end
 	if state == "lobby" then
@@ -809,6 +810,18 @@ local function update(dt: number)
 	end
 end
 
+-- the race lobbies waiting or racing now (the minimap's live markers)
+function Activities.getLive(): { { pos: Vector3, racing: boolean, count: number } }
+	local list = {}
+	for id, l in lobbies do
+		local r = ActivityData.raceById[id]
+		if r then
+			table.insert(list, { pos = r.start, racing = l.racing, count = l.count })
+		end
+	end
+	return list
+end
+
 -- where the current race checkpoint or delivery drop is (the minimap's target blip)
 function Activities.getTarget(): Vector3?
 	if state == "race" and race then
@@ -834,6 +847,13 @@ function Activities.init()
 				return
 			end
 			if msg.kind == "lobbies" and type(msg.list) == "table" then
+				-- a new race forming: say so (unless it's yours)
+				for id, l in msg.list do
+					local r = ActivityData.raceById[id]
+					if r and not lobbies[id] and not l.racing and lobbyRace ~= r and state == "idle" then
+						UI.toast("RACE FORMING · " .. string.upper(r.name) .. " · " .. math.ceil(l.startsIn) .. " s to join (orange R on the map)", Color3.fromRGB(255, 170, 60))
+					end
+				end
 				lobbies = msg.list
 				lobbiesAt = os.clock()
 				refreshLabels()

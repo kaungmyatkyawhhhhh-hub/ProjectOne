@@ -97,8 +97,14 @@ local function sample(hour: number): Key
 	}
 end
 
+-- photo mode can hold the time of day (nil: the shared clock)
+DayCycle.override = nil :: number?
+
 -- the hour now (0 - 24), the same for everyone
 function DayCycle.hour(): number
+	if DayCycle.override then
+		return DayCycle.override
+	end
 	local c = Config.DayCycle
 	local minutes = workspace:GetServerTimeNow() / 60
 	return (minutes / c.CycleMinutes * 24 + c.StartHour) % 24

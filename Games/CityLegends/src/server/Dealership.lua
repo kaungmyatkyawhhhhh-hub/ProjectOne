@@ -25,6 +25,7 @@ local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local Dealership = {}
 
 local D = Config.Dealership
+local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local C = Config.City
 local CURB = C.CurbHeight
 
@@ -38,6 +39,8 @@ local WARM = Color3.fromRGB(255, 226, 180)
 -- what the dealership built (server state the remotes use)
 local frame: CFrame? = nil -- ground level at the lot's middle, -Z out of the showroom
 local doorCF: CFrame? = nil -- where a car driven out starts (ground level, facing the street)
+-- the LEGENDS MEET car park behind the showroom (set when the block is built)
+local meet: { cf: CFrame, size: Vector3 }? = nil
 local prompts: { ProximityPrompt } = {}
 
 -- a display car's model id for each turntable (built on the server, skinned on the client)
@@ -264,6 +267,24 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 	for _, px in { parkX0 + 10, parkX1 - 10 } do
 		kit.streetLight(model, (at(px, 0.15, backZ0 + 6)).Position, base.LookVector)
 	end
+	-- the car park is the LEGENDS MEET: a lit sign on the showroom's back wall, coloured light
+	-- strips between the bays
+	local meetSign = mk(model, Vector3.new(parkX1 - parkX0 - 10, 6, 0.8), at((parkX0 + parkX1) / 2, 20, Z1 + 1.1), Color3.fromRGB(14, 14, 18), Enum.Material.SmoothPlastic, { name = "MeetSign" })
+	kit.surfaceText(meetSign, Enum.NormalId.Back, "LEGENDS MEET", Color3.fromRGB(255, 120, 220), nil, nil, Enum.Font.GothamBlack, Vector2.new(1000, 140))
+	deco(model, Vector3.new(parkX1 - parkX0 - 9.6, 0.4, 0.9), at((parkX0 + parkX1) / 2, 16.8, Z1 + 1.1), Color3.fromRGB(80, 220, 255), Enum.Material.Neon)
+	local meetGlow = deco(model, Vector3.new(0.5, 0.5, 0.5), at((parkX0 + parkX1) / 2, 14, Z1 + 6), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
+	kit.addLight("SpotLight", meetGlow, Color3.fromRGB(255, 140, 230), 40, 1.6, Enum.NormalId.Bottom, 100)
+	local sx = parkX0 + 4 + bayW / 2
+	local stripCol = { Color3.fromRGB(255, 80, 200), Color3.fromRGB(70, 210, 255) }
+	local k = 0
+	while sx + bayW / 2 <= parkX1 do
+		k += 1
+		deco(detail, Vector3.new(0.3, 0.06, 16), at(sx - bayW / 2 + 0.6, 0.18, backZ1 - 11), stripCol[k % 2 + 1], Enum.Material.Neon, { transparency = 0.3 })
+		sx += bayW
+	end
+	local meetCF = at((parkX0 + parkX1) / 2, 0, (backZ0 + backZ1) / 2)
+	meet = { cf = meetCF, size = Vector3.new(parkX1 - parkX0, 30, backZ1 - backZ0) }
+	workspace:SetAttribute("MeetSpot", meetCF.Position)
 	return true
 end
 
@@ -310,6 +331,46 @@ function Dealership.init(ctx: any)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		if ctx.spawnAt then
 			ctx.spawnAt[player] = nil
+		end
+	end)
+	-- the meet: how many players' cars are parked there (the map shows it), and a small bonus each
+	-- minute for each other car there while yours is parked too
+	local minuteAt: { [Player]: number } = {}
+	task.spawn(function()
+		while true do
+			task.wait(5)
+			local m = meet
+			if not m then
+				continue
+			end
+			local inside: { Player } = {}
+			for _, p in Players:GetPlayers() do
+				local car = ctx.getCar(p)
+				local root = car and car.PrimaryPart
+				if root and not p.Character then
+					local rel = m.cf:PointToObjectSpace(root.Position)
+					if math.abs(rel.X) < m.size.X / 2 and math.abs(rel.Z) < m.size.Z / 2 and math.abs(rel.Y) < 15 and root.AssemblyLinearVelocity.Magnitude < 4 then
+						table.insert(inside, p)
+					end
+				end
+			end
+			workspace:SetAttribute("MeetCount", #inside)
+			local now = os.clock()
+			for _, p in inside do
+				if #inside >= 2 then
+					minuteAt[p] = minuteAt[p] or now
+					if now - minuteAt[p] >= 60 then
+						minuteAt[p] = now
+						local others = math.min(#inside - 1, D.MeetBonusMax)
+						PlayerData.addCash(p, others * D.MeetBonusPerCar)
+					end
+				end
+			end
+			for p in minuteAt do
+				if not table.find(inside, p) or #inside < 2 then
+					minuteAt[p] = nil
+				end
+			end
 		end
 	end)
 end

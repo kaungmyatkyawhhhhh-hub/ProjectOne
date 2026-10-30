@@ -427,6 +427,18 @@ function GoalsClient.init()
 			setState(st)
 		end
 	end)
+	-- a race / delivery / duel card takes the tracker's spot under the minimap while it shows
+	task.spawn(function()
+		while true do
+			task.wait(0.4)
+			local t = tracker
+			local hudGui = player.PlayerGui:FindFirstChild("ActivitiesHUD")
+			local card = hudGui and hudGui:FindFirstChild("RunCard")
+			if t then
+				t.Visible = not (card and (card :: Frame).Visible)
+			end
+		end
+	end)
 end
 
 return GoalsClient

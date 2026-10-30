@@ -785,6 +785,7 @@ end
 
 local function setVaultOpen(open: boolean)
 	vault.open = open
+	workspace:SetAttribute("LiveCasino", open) -- (the live map markers: Minimap)
 	local door = vault.door
 	local hinge = vault.hinge
 	if door and hinge then

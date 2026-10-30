@@ -231,12 +231,13 @@ function Cars.isMarketOnly(id: string): boolean
 end
 
 -- the level a dealer car opens at: the series' first car at once, each next one 5 levels on
-function Cars.requiredLevel(id: string): number
+-- (`bonus`: levels off for the player's brand level, Config.brandTrimBonus)
+function Cars.requiredLevel(id: string, bonus: number?): number
 	local at = Cars.SeriesOf[id]
 	if not at or at.index <= 1 then
 		return 1
 	end
-	return (at.index - 1) * Cars.LevelsPerTrim
+	return math.max(1, (at.index - 1) * Cars.LevelsPerTrim - (bonus or 0))
 end
 
 -- the car before this one in its series (nil for the first)

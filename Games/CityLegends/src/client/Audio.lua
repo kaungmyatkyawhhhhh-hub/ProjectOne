@@ -147,31 +147,91 @@ end
 -- One-shots
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
--- Music: shuffled night-drive playlist, M to mute
+-- Music: the radio (owner, 2026-10-30: stations by genre, Config.Radio), M to mute
 ---------------------------------------------------------------------
 local musicSound: Sound? = nil
 local musicMuted = false
-function Audio.startMusic()
-	local tracks = custom.Music
-	if not tracks or #tracks == 0 or musicSound then
+local station = 1
+local order: { string } = {}
+local index = 1
+
+local function stationTracks(i: number): { string }
+	if i == 1 then
+		return custom.Music or {}
+	end
+	local st = Config.Radio.Stations[i]
+	return if st then st.tracks else {}
+end
+
+-- the next track (a track that won't load in a few seconds is skipped)
+local function playIndex(m: Sound)
+	if #order == 0 then
+		m:Stop()
 		return
 	end
-	local order = table.clone(tracks)
-	for i = #order, 2, -1 do
-		local j = math.random(1, i)
-		order[i], order[j] = order[j], order[i]
+	local id = order[index]
+	m.SoundId = id
+	m.TimePosition = 0
+	m:Play()
+	task.delay(10, function()
+		if m.SoundId == id and not m.IsLoaded and #order > 1 then
+			index = index % #order + 1
+			playIndex(m)
+		end
+	end)
+end
+
+local function tune(i: number)
+	station = i
+	order = table.clone(stationTracks(i))
+	for k = #order, 2, -1 do
+		local j = math.random(1, k)
+		order[k], order[j] = order[j], order[k]
 	end
-	local index = 1
-	local m = newSound(order[1], SoundService, Config.Sounds.MusicVolume or 0.22)
+	index = 1
+	if musicSound then
+		playIndex(musicSound)
+	end
+end
+
+function Audio.stationName(): string
+	if musicMuted then
+		return "OFF"
+	end
+	local st = Config.Radio.Stations[station]
+	return if st then st.name else "OFF"
+end
+
+-- the next station (after the last: off; then the first again)
+function Audio.nextStation(): string
+	if musicMuted then
+		musicMuted = false
+		if musicSound then
+			musicSound.Volume = Config.Sounds.MusicVolume or 0.22
+		end
+		tune(1)
+	elseif station >= #Config.Radio.Stations then
+		Audio.toggleMusic()
+	else
+		tune(station + 1)
+	end
+	return Audio.stationName()
+end
+
+function Audio.startMusic()
+	if musicSound then
+		return
+	end
+	local m = newSound("", SoundService, Config.Sounds.MusicVolume or 0.22)
 	m.Name = "Music"
 	musicSound = m
 	m.Ended:Connect(function()
-		index = index % #order + 1
-		m.SoundId = order[index]
-		m.TimePosition = 0
-		m:Play()
+		if #order > 0 then
+			index = index % #order + 1
+			playIndex(m)
+		end
 	end)
-	m:Play()
+	tune(1)
 	UserInputService.InputBegan:Connect(function(input, processed)
 		-- in a car M switches the gearbox instead (Audio.musicKeyBlocked, set by Main)
 		if not processed and input.KeyCode == Enum.KeyCode.M and not (Audio.musicKeyBlocked and Audio.musicKeyBlocked()) then

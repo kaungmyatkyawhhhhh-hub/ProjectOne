@@ -34,6 +34,7 @@ local ActivityData = require(Shared:WaitForChild("ActivityData"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local Activities = require(script.Parent:WaitForChild("Activities"))
+local UI = require(script.Parent:WaitForChild("UI"))
 
 local Minimap = {}
 
@@ -330,6 +331,11 @@ function Minimap.start()
 			table.insert(fixed, { frame = makeBlip(layer, glyphs[pt.kind] or "•", Color3.fromRGB(255, 204, 60), 12, 21), pos = pt.pos, edge = false })
 		end
 	end
+	-- the LEGENDS MEET car park behind Legends Motors
+	local meetAt = workspace:GetAttribute("MeetSpot")
+	if typeof(meetAt) == "Vector3" then
+		table.insert(fixed, { frame = makeBlip(layer, "M", Color3.fromRGB(255, 110, 220), 13, 21), pos = meetAt, edge = false })
+	end
 	local dropBlip = makeBlip(layer, "$", Color3.fromRGB(80, 255, 140), 16, 23)
 	local targetBlip = makeBlip(layer, "", Color3.fromRGB(255, 214, 40), 13, 24)
 	local policePool: { Frame } = {}
@@ -338,6 +344,78 @@ function Minimap.start()
 		f.Visible = false
 		table.insert(policePool, f)
 	end
+
+	-- live markers (owner, 2026-10-30, from the research: Jailbreak's flashing robbery icons, Driving
+	-- Empire's race counts): an open vault, a race forming or on, another player the police are
+	-- after. They pulse, and hang on the rim when far, so you know which way to go
+	local landmarkPos: { [string]: Vector3 } = {}
+	for _, pl in WestLayout.places() do
+		landmarkPos[pl.id] = pl.cf.Position
+	end
+	local function liveEvents(): { { pos: Vector3, glyph: string, color: Color3 } }
+		local list = {}
+		if workspace:GetAttribute("LiveBank") == true and landmarkPos.bank then
+			table.insert(list, { pos = landmarkPos.bank, glyph = "$", color = Color3.fromRGB(80, 255, 140) })
+		end
+		if workspace:GetAttribute("LiveCasino") == true and landmarkPos.casino then
+			table.insert(list, { pos = landmarkPos.casino, glyph = "♠", color = Color3.fromRGB(255, 90, 170) })
+		end
+		local meetCount = workspace:GetAttribute("MeetCount")
+		local meetPos = workspace:GetAttribute("MeetSpot")
+		if type(meetCount) == "number" and meetCount >= 2 and typeof(meetPos) == "Vector3" then
+			table.insert(list, { pos = meetPos, glyph = "M", color = Color3.fromRGB(255, 110, 220) })
+		end
+		for _, l in Activities.getLive() do
+			table.insert(list, { pos = l.pos, glyph = "R", color = if l.racing then Color3.fromRGB(255, 120, 40) else Color3.fromRGB(255, 180, 60) })
+		end
+		local cars = workspace:FindFirstChild("PlayerCars")
+		for _, p in Players:GetPlayers() do
+			if p ~= player and ((p:GetAttribute("Wanted") :: number?) or 0) > 0 then
+				local car = cars and cars:FindFirstChild(p.Name)
+				local character = p.Character
+				local at = if car and car:IsA("Model") then car:GetPivot().Position elseif character and character.PrimaryPart then character.PrimaryPart.Position else nil
+				if at then
+					table.insert(list, { pos = at, glyph = "★", color = Color3.fromRGB(255, 60, 60) })
+				end
+			end
+		end
+		return list
+	end
+	local livePool: { Frame } = {}
+	for _ = 1, 10 do
+		local f = makeBlip(layer, "!", Color3.fromRGB(255, 160, 40), 16, 26)
+		f.Visible = false
+		table.insert(livePool, f)
+	end
+	local function showLive(pool: { Frame }, events: { any }, put: (GuiObject, Vector3) -> (), base: number)
+		local pulse = 1 + 0.25 * math.sin(os.clock() * 6)
+		local flash = math.floor(os.clock() * 4) % 2 == 0
+		for i, f in pool do
+			local e = events[i]
+			if e then
+				local glyph = f:FindFirstChildOfClass("TextLabel")
+				if glyph then
+					glyph.Text = e.glyph
+				end
+				f.BackgroundColor3 = if e.glyph == "★" and not flash then Color3.fromRGB(60, 120, 255) else e.color
+				f.Size = UDim2.fromOffset(base * pulse, base * pulse)
+				put(f, e.pos)
+			else
+				f.Visible = false
+			end
+		end
+	end
+	-- a vault opening is news for everyone
+	workspace:GetAttributeChangedSignal("LiveBank"):Connect(function()
+		if workspace:GetAttribute("LiveBank") == true then
+			UI.toast("LIVE · The bank vault is open: green $ on the map", Color3.fromRGB(80, 255, 140))
+		end
+	end)
+	workspace:GetAttributeChangedSignal("LiveCasino"):Connect(function()
+		if workspace:GetAttribute("LiveCasino") == true then
+			UI.toast("LIVE · The casino vault is open: pink ♠ on the map", Color3.fromRGB(255, 90, 170))
+		end
+	end)
 
 	-- the player's arrow in the middle
 	local arrow = Instance.new("TextLabel")
@@ -514,6 +592,12 @@ function Minimap.start()
 		table.insert(fixedFull, { frame = makeBlip(flayer, if glyph then glyph.Text else "", b.frame.BackgroundColor3, 18, 21), pos = b.pos, edge = false })
 	end
 	local fTarget = makeBlip(flayer, "", Color3.fromRGB(255, 214, 40), 15, 24)
+	local liveFull: { Frame } = {}
+	for _ = 1, 10 do
+		local f = makeBlip(flayer, "!", Color3.fromRGB(255, 160, 40), 20, 26)
+		f.Visible = false
+		table.insert(liveFull, f)
+	end
 	local fArrow = Instance.new("TextLabel")
 	fArrow.AnchorPoint = Vector2.new(0.5, 0.5)
 	fArrow.Size = UDim2.fromOffset(24, 24)
@@ -641,6 +725,7 @@ function Minimap.start()
 		else
 			fTarget.Visible = false
 		end
+		showLive(liveFull, liveEvents(), put, 20)
 		local part = myPart()
 		if part then
 			put(fArrow, part.Position)
@@ -744,6 +829,10 @@ function Minimap.start()
 		else
 			targetBlip.Visible = false
 		end
+		-- live markers: far ones on the rim
+		showLive(livePool, liveEvents(), function(f, p)
+			place(f, p, true)
+		end, 16)
 		-- police cars, flashing red and blue
 		local flash = math.floor(os.clock() * 4) % 2 == 0
 		local cops = Police.getUnitPositions()

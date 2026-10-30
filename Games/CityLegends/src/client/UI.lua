@@ -42,6 +42,7 @@ UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (Chauffeu
 UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
+UI.onPhotoButton = nil :: (() -> ())? -- photo mode (PhotoMode)
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -1063,7 +1064,7 @@ local function buildSideButtons()
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Background, 2, 0) })
 
 	-- settings: camera + music toggles (same actions as C and M)
-	settingsPanel = sidePanel("SETTINGS", 280, if UI.isTouch then 0.4 else 0.5)
+	settingsPanel = sidePanel("SETTINGS", 324, if UI.isTouch then 0.4 else 0.5)
 	local function settingRow(name: string, key: string, y: number, panel: Frame?): TextButton
 		local parent = panel or settingsPanel
 		label({ Text = name, TextSize = 14, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, y), Size = UDim2.fromOffset(110, 32), ZIndex = 5, Parent = parent })
@@ -1122,16 +1123,26 @@ local function buildSideButtons()
 	refreshCamFx()
 	local camFxOpen = settingRow("Camera FX", "", 228)
 	camFxOpen.Text = "SET UP"
+	-- photo mode (owner, 2026-10-30, from the research)
+	local photoOpen = settingRow("Photo mode", "O", 272)
+	photoOpen.Text = "OPEN"
+	photoOpen.Activated:Connect(function()
+		closePanels()
+		if UI.onPhotoButton then
+			UI.onPhotoButton()
+		end
+	end)
 	camFxOpen.Activated:Connect(function()
 		settingsPanel.Visible = false
 		camFxPanel.Visible = true
 	end)
 	camToggle = settingRow("Camera", "V", 52)
 	camToggle.Text = "IMMERSIVE"
-	musicToggle = settingRow("Music", "M", 96)
+	-- the radio (owner, 2026-10-30: stations by genre): tap for the next station, M turns it off and on
+	musicToggle = settingRow("Radio", "M", 96)
 	local function refreshMusic()
 		local on = musicOn()
-		musicToggle.Text = if on then "ON" else "OFF"
+		musicToggle.Text = if on then Audio.stationName() else "OFF"
 		musicToggle.TextColor3 = if on then Theme.Accent else Theme.SubText
 	end
 	refreshMusic()
@@ -1159,8 +1170,9 @@ local function buildSideButtons()
 		end
 	end)
 	musicToggle.Activated:Connect(function()
-		Audio.toggleMusic()
+		local name = Audio.nextStation()
 		refreshMusic()
+		UI.toast(if name == "OFF" then "Radio off" else "RADIO · " .. name, Theme.Accent)
 	end)
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if not processed and input.KeyCode == Enum.KeyCode.M then
@@ -1782,6 +1794,8 @@ end
 export type GarageData = { Cash: number, Owned: { string }, Selected: string, Level: number? }
 export type GarageCallbacks = {
 	buy: (string) -> { ok: boolean, message: string, data: GarageData? },
+	-- a 5-minute test drive of a car you don't own (dealer only)
+	testDrive: ((string) -> { ok: boolean, message: string? })?,
 	drive: (string) -> (),
 	close: (() -> ())?,
 	-- true at the dealership: every car, to buy; otherwise "my cars": only the ones you own
@@ -1825,11 +1839,29 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		selectedId = data.Owned[1] or Cars.StarterId
 	end
 	-- how a car not owned yet can be had: "buy", "level" (opens at a higher level) or "market"
+	-- the player's brand levels (Brands on the server: the "BrandLevels" attribute)
+	local brandLevels: { [string]: number } = {}
+	do
+		local raw = player:GetAttribute("BrandLevels")
+		if type(raw) == "string" then
+			local ok, t = pcall(function()
+				return game:GetService("HttpService"):JSONDecode(raw)
+			end)
+			if ok and type(t) == "table" then
+				brandLevels = t
+			end
+		end
+	end
+	local function brandLevel(id: string): number
+		local at = Cars.SeriesOf[id]
+		local b = at and at.series.Brand
+		return if b then tonumber(brandLevels[b]) or 1 else 1
+	end
 	local function access(id: string): (string, number)
 		if Cars.isMarketOnly(id) then
 			return "market", 0
 		end
-		local need = Cars.requiredLevel(id)
+		local need = Cars.requiredLevel(id, Config.brandTrimBonus(brandLevel(id)))
 		if level < need then
 			return "level", need
 		end
@@ -1929,6 +1961,8 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local priceText = label({ Text = "", TextSize = 28, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -24, 0.56, 24), Size = UDim2.new(0.35, 0, 0, 34), ZIndex = 62, Parent = detail })
 	local actionBtn = button("DRIVE", Theme.Accent, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -24, 1, -24), Size = UDim2.fromOffset(230, 56), TextSize = 22, ZIndex = 62, Parent = detail })
 	local msgText = label({ Text = "", TextSize = 14, TextColor3 = Theme.Danger, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -24, 1, -88), Size = UDim2.new(0.4, 0, 0, 18), ZIndex = 62, Parent = detail })
+	-- (owner, 2026-10-30: test drives at the dealership, from the research)
+	local testBtn = button("TEST DRIVE", Theme.Accent2, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -266, 1, -24), Size = UDim2.fromOffset(170, 56), TextSize = 16, TextColor3 = Theme.Accent2, Visible = false, ZIndex = 62, Parent = detail })
 
 	local previewModel: Model? = nil
 	local previewLen = 14
@@ -1972,6 +2006,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		hanVal.Text = math.floor(spec.Handling * 100) .. " / 100"
 		hanFill.Size = UDim2.fromScale(spec.Handling, 1)
 		msgText.Text = ""
+		testBtn.Visible = dealer == true and callbacks.testDrive ~= nil and not owned[id] and not Cars.isMarketOnly(id)
 		if owned[id] then
 			priceText.Text = "OWNED"
 			priceText.TextColor3 = Theme.Accent
@@ -2006,6 +2041,24 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 			end
 		end
 	end
+
+	testBtn.Activated:Connect(function()
+		local id = selectedId
+		local fn = callbacks.testDrive
+		if not fn or owned[id] then
+			return
+		end
+		testBtn.Text = "..."
+		local result = fn(id)
+		testBtn.Text = "TEST DRIVE"
+		if result.ok then
+			UI.closeGarage()
+			UI.toast("Test drive: 5 minutes in the " .. Cars.get(id).Name .. " (it pays less)", Theme.Accent2)
+		else
+			msgText.Text = result.message or "No test drive right now"
+			msgText.TextColor3 = Theme.Danger
+		end
+	end)
 
 	actionBtn.Activated:Connect(function()
 		local id = selectedId
@@ -2097,9 +2150,10 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 				if not brandShown then
 					brandShown = true
 					order += 1
+					local bl = tonumber(brandLevels[brand.name]) or 1
 					label({
 						Name = "SeriesHeader",
-						Text = brand.name,
+						Text = brand.name .. (if bl > 1 then "  ·  BRAND LV " .. bl else ""),
 						TextSize = 18,
 						Font = Enum.Font.GothamBlack,
 						TextColor3 = Theme.Accent,
@@ -2590,6 +2644,7 @@ function UI.popup(text: string, amount: number, color: Color3)
 	local main = label({ Text = text, TextSize = 34, Font = Enum.Font.GothamBlack, TextColor3 = color, Size = UDim2.new(1, 0, 0, 40), Parent = holder })
 	new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = main })
 	local money = label({ Text = "+" .. formatCash(amount), TextSize = 24, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, Position = UDim2.fromOffset(0, 38), Size = UDim2.new(1, 0, 0, 28), Parent = holder })
+	money.Visible = amount > 0 -- (a popup with nothing paid: just the words)
 	new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = money })
 	main.TextSize = 50
 	tween(main, 0.25, { TextSize = 34 }, Enum.EasingStyle.Back)

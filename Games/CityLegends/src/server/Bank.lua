@@ -311,6 +311,7 @@ end
 -- The robbery
 ---------------------------------------------------------------------
 local function setVaultOpen(open: boolean)
+	workspace:SetAttribute("LiveBank", open) -- (the live map markers: Minimap)
 	local door = vault.door
 	local hinge = vault.hinge
 	if not (door and hinge) then

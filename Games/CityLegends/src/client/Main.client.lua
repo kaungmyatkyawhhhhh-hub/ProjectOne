@@ -270,6 +270,9 @@ end)
 startStep("Minimap", function()
 	require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, top right (N toggles)
 end)
+startStep("PhotoMode", function()
+	require(script.Parent:WaitForChild("PhotoMode")).init()
+end)
 startStep("Goals", function()
 	require(script.Parent:WaitForChild("GoalsClient")).init()
 end)
@@ -456,6 +459,20 @@ local function openGarage(fromMenu: boolean, dealer: boolean?, focus: string?)
 			end
 			return result or { ok = false, message = "Server did not respond" }
 		end,
+		testDrive = if dealer
+			then function(id: string)
+				pcall(function()
+					DealerCall:InvokeServer("door")
+				end)
+				local ok, result = pcall(function()
+					return (remotes:WaitForChild("TestDrive") :: RemoteFunction):InvokeServer(id)
+				end)
+				if ok and type(result) == "table" then
+					return result
+				end
+				return { ok = false, message = "Server did not respond" }
+			end
+			else nil,
 		drive = function(id: string)
 			UI.hideMainMenu()
 			if dealer then
@@ -475,6 +492,59 @@ local function openGarage(fromMenu: boolean, dealer: boolean?, focus: string?)
 		focus = focus,
 	})
 end
+
+-- a brand level up (Brands): what it gives
+do
+	local HttpService = game:GetService("HttpService")
+	local function read(): { [string]: number }
+		local raw = player:GetAttribute("BrandLevels")
+		local ok, t = pcall(function()
+			return HttpService:JSONDecode(raw)
+		end)
+		return if ok and type(t) == "table" then t else {}
+	end
+	local known = read()
+	player:GetAttributeChangedSignal("BrandLevels"):Connect(function()
+		local now = read()
+		for brand, lvl in now do
+			if type(lvl) == "number" and lvl > (tonumber(known[brand]) or 1) then
+				local off = math.floor((1 - Config.brandCustomsMult(lvl)) * 100 + 0.5)
+				local trims = Config.brandTrimBonus(lvl)
+				UI.popup(brand .. " BRAND LV " .. lvl, 0, Config.Theme.Accent2)
+				UI.toast(off .. "% off at Legends Customs" .. (if trims > 0 then ", its trims " .. trims .. " level" .. (if trims > 1 then "s" else "") .. " sooner" else ""), Config.Theme.Accent2)
+			end
+		end
+		known = now
+	end)
+end
+
+-- a test drive's time running out: a word at 1 minute, 30 and 10 seconds, and when it's over
+task.spawn(function()
+	local said: { [number]: boolean } = {}
+	local lastEnds: number? = nil
+	while true do
+		task.wait(0.5)
+		local model = Driving.getModel()
+		local ends = if model then model:GetAttribute("TestEnds") else nil
+		if type(ends) == "number" then
+			if ends ~= lastEnds then
+				lastEnds = ends
+				table.clear(said)
+			end
+			local left = ends - workspace:GetServerTimeNow()
+			for _, mark in { 60, 30, 10 } do
+				if left <= mark and left > mark - 2 and not said[mark] then
+					said[mark] = true
+					UI.toast("Test drive: " .. mark .. " seconds left", Config.Theme.Accent2)
+				end
+			end
+			if left <= 0 and not said[0] then
+				said[0] = true
+				UI.toast("Test drive over: back in your own car", Config.Theme.Accent2)
+			end
+		end
+	end
+end)
 
 DealerOpen.OnClientEvent:Connect(function(carId: any)
 	openGarage(false, true, if type(carId) == "string" then carId else nil)

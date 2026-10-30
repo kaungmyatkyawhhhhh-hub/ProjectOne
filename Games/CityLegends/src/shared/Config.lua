@@ -440,6 +440,43 @@ Config.Sounds = {
 	Alarm = "rbxassetid://9113084849", -- Alarm Bell Constant Ring (SFX)
 }
 
+-- Radio stations (owner, 2026-10-30, from the research: Midnight Racing's stations by genre). The
+-- first plays Sounds.Music; the others are Roblox's licensed music library (DistroKid / APM).
+-- Settings > Radio (or the HUD's toast) switches; M turns the radio off and on
+Config.Radio = {
+	Stations = {
+		{ name = "MIDNIGHT FM", tracks = {} }, -- (Sounds.Music)
+		{
+			name = "LO-FI CITY",
+			tracks = {
+				"rbxassetid://100001805913571", -- Lofi Jazz Hip Hop Abstract Chill Beat
+				"rbxassetid://119721983234750", -- Neon Sidewalks with Chillhop and Midnight Lofi
+				"rbxassetid://136228570470406", -- Apartment Windows with Modern Chill Jazz
+				"rbxassetid://89402602954424", -- Pastel Corner Life
+			},
+		},
+		{
+			name = "DRIFT PHONK",
+			tracks = {
+				"rbxassetid://85735197482652", -- Drift Night Phonk
+				"rbxassetid://78571301330361", -- Nightmare (Drift Phonk)
+				"rbxassetid://114152684566510", -- Dead Yesterdays (Drift Phonk)
+				"rbxassetid://128825897988432", -- Pieces (Drift Phonk)
+				"rbxassetid://83420704049320", -- Everything Nothing (Drift Phonk)
+			},
+		},
+		{
+			name = "CLUB RUSH",
+			tracks = {
+				"rbxassetid://9042578586", -- Night To Remember (APM)
+				"rbxassetid://9042581323", -- Neon Nights (APM)
+				"rbxassetid://9041811979", -- Born A Winner (APM)
+				"rbxassetid://1841526682", -- Flashing Lights (APM)
+			},
+		},
+	},
+}
+
 ---------------------------------------------------------------------
 -- Police and speed cameras (owner, 2026-10-22: limit 120 km/h, the police chase you)
 ---------------------------------------------------------------------
@@ -530,7 +567,7 @@ Config.Activities = {
 	PotPerRacer = 4000,
 	PotShares = { 1, 0.5, 0.25, 0.125 },
 	FriendBonus = 1.5,
-	-- duels: G (or the RACE pill) next to another driver challenges them to a sprint to a junction
+	-- duels: U (or the RACE pill) next to another driver challenges them to a sprint to a junction
 	-- across town
 	DuelRange = 120, -- studs between the cars
 	DuelAskSeconds = 12,
@@ -948,6 +985,15 @@ Config.Dealership = {
 	BuyRange = 260, -- a player must be this close to the showroom to buy
 	-- cars on the showroom turntables (one per brand zone)
 	Display = { "bnw_m5_e60", "bentz_e63s", "toyoka_supra_mk4", "nisun_r34", "porsha_panamera", "chevo_c7", "astin_vantage", "lexis_lc500" },
+	-- test drives (owner, 2026-10-30, from the research: Vehicle Legends): any dealer car you don't
+	-- own, for a few minutes, once per car each visit; it pays less while you test it
+	TestSeconds = 300,
+	TestPay = 0.25, -- cut-ups and driving cash in a test car
+	TestCooldown = 20, -- seconds between test drives
+	-- the car park behind is the LEGENDS MEET (owner, 2026-10-30, from the research: Midnight
+	-- Racing's parking-area meets): park there with other players for a small bonus each minute
+	MeetBonusPerCar = 300, -- each minute, per other player's car parked there (up to MeetBonusMax cars)
+	MeetBonusMax = 5,
 }
 
 ---------------------------------------------------------------------
@@ -1109,6 +1155,36 @@ Config.Goals = {
 	},
 	TaskLevelBoost = 0.05, -- task cash x(1 + this per level above 1), at most x3
 }
+
+-- Brand levels (owner, 2026-10-30, from the research: Midnight Racing's manufacturer levels):
+-- driving a brand's cars levels the brand up; each level takes CustomsOff off Legends Customs on
+-- its cars, and every TrimEvery levels opens its trims one player level sooner
+Config.Brands = {
+	XpPerMile = 12,
+	XpPerCut = 3,
+	Levels = { 0, 150, 400, 900, 1800, 3200, 5200, 8000, 12000, 18000 }, -- brand XP for level 1..10
+	CustomsOff = 0.05, -- per brand level above 1 (at most 45% off)
+	TrimEvery = 2, -- brand levels per player level off a trim's requirement
+	TrimMax = 5,
+}
+
+function Config.brandLevel(xp: number): number
+	local lvl = 1
+	for k, need in Config.Brands.Levels do
+		if xp >= need then
+			lvl = k
+		end
+	end
+	return lvl
+end
+
+function Config.brandCustomsMult(level: number): number
+	return 1 - math.min(0.45, (math.max(1, level) - 1) * Config.Brands.CustomsOff)
+end
+
+function Config.brandTrimBonus(level: number): number
+	return math.min(Config.Brands.TrimMax, math.floor((math.max(1, level) - 1) / Config.Brands.TrimEvery))
+end
 
 -- a daily task's cash at this level
 function Config.taskCash(base: number, level: number): number

@@ -122,13 +122,19 @@ function Customs.applyTo(player: Player, model: Model, carId: string)
 	end
 end
 
-local function tierMult(carId: string): number
+-- the car's class price and, for this player, their brand level's discount (Brands)
+local function tierMult(carId: string, player: Player?): number
 	local spec = Cars.ById[carId]
-	return (if spec then CU.TierMult[spec.Tier] else nil) or 1
+	local base = (if spec then CU.TierMult[spec.Tier] else nil) or 1
+	if player then
+		local Brands = require(script.Parent:WaitForChild("Brands")) :: any
+		base *= Config.brandCustomsMult(Brands.levelFor(player, carId))
+	end
+	return base
 end
 
 -- what changing `from` into `to` costs on this car, and which parts changed
-function Customs.cost(carId: string, from: Look, to: Look): (number, { string })
+function Customs.cost(carId: string, from: Look, to: Look, player: Player?): (number, { string })
 	local total, changed = 0, {}
 	for _, k in KEYS do
 		if not same((from :: any)[k], (to :: any)[k]) then
@@ -136,7 +142,7 @@ function Customs.cost(carId: string, from: Look, to: Look): (number, { string })
 			table.insert(changed, k)
 		end
 	end
-	return math.floor(total * tierMult(carId)), changed
+	return math.floor(total * tierMult(carId, player)), changed
 end
 
 ---------------------------------------------------------------------
@@ -163,7 +169,7 @@ handlers.state = function(player)
 	if type(carId) ~= "string" then
 		return { ok = false }
 	end
-	return { ok = true, carId = carId, look = Customs.lookOf(profile, carId), mult = tierMult(carId), cash = profile.Cash, inBay = inBay(car) }
+	return { ok = true, carId = carId, look = Customs.lookOf(profile, carId), mult = tierMult(carId, player), cash = profile.Cash, inBay = inBay(car) }
 end
 
 handlers.buy = function(player, raw)
@@ -191,7 +197,7 @@ handlers.buy = function(player, raw)
 			return { ok = false, message = "That plate isn't allowed" }
 		end
 	end
-	local cost, changed = Customs.cost(carId, old, new)
+	local cost, changed = Customs.cost(carId, old, new, player)
 	if #changed == 0 then
 		return { ok = false, message = "Nothing changed" }
 	end
