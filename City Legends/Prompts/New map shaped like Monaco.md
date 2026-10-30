@@ -34,6 +34,25 @@ The owner thinks the current map looks bad and wants the **map shaped like Monac
   - yachts in the harbours.
   - Low poly but with real-looking textures (game-ready, not cartoon).
 
+## The night look and the roads (owner, 2026-10-30): like `imports/refs/map/monaco_night_look.webp`
+- **No neon at all any more.** Remove the city's neon signs, neon strips and coloured neon trims everywhere, not just by day (this replaces the "neon at sunset and night" idea). Police, traffic and car lights stay.
+- **Night = warm, golden, elegant**, like the photo (Monaco at blue hour):
+  - **Sky:** deep blue twilight / blue hour (not black), mountains as dark silhouettes against it.
+  - **Street lamps:** **warm golden / sodium-orange light** (about 2,700–3,000 K), many of them, lining every road. Roads glow orange-gold and you can follow their curves up the hills by their lamps.
+  - **Buildings:** **warm-lit windows** (yellow-white), lots of them, plus soft warm floodlights on the fronts of the big buildings (cream and ochre walls glowing gold). Terracotta roofs catch the light.
+  - **Harbour:** rows of white yachts with small lights, a big lit cruise ship, lit piers, and **the lights reflecting on the dark-blue water**.
+  - **The hills:** the hillside roads and houses make chains of little golden lights going up the mountain.
+  - **Colour mood:** gold and orange against deep blue. No pink, purple or cyan neon.
+- **Roads like the photo:**
+  - curving roads that wrap round the harbour edge and wind up the hill between buildings;
+  - lined with **ornate street lamps** (dark metal posts with warm lanterns);
+  - trees and palms along them;
+  - stone walls on the hill side;
+  - smooth dark asphalt with white lines;
+  - a few roads raised on walls / short viaducts where the hill is steep.
+  - Sidewalks on both sides in town. Low railings along the harbour.
+- Update the lighting setup and `DayCycle` night keyframes to this look. Remove the neon systems and tags (`NightNeon` and similar) and the neon prompt's work. Show the owner a screenshot of the harbour at blue hour and at full night, next to the reference photo.
+
 ## Before you start
 - Read:
   - `CLAUDE.md`;
@@ -76,7 +95,7 @@ The owner thinks the current map looks bad and wants the **map shaped like Monac
 **Phase 2: districts and buildings**
 6. Fill each district with Riviera-style buildings: reuse and restyle our building generators where they fit, plus a few landmark models.
 7. Keep it light for phones: LOD, streaming, `LOD` tags, a part count close to the old map's.
-8. Night: lit windows, street lamps, and neon only at sunset and night (see the neon prompt). Harbour lights reflect on the water.
+8. Night: the warm golden look above (lit windows, golden street lamps, harbour lights reflecting on the water). No neon.
 
 **Phase 3: move the game's places onto the new map**
 9. Place everything in the right district and fix their code to use the new positions:

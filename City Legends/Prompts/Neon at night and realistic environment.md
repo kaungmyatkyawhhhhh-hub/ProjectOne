@@ -2,6 +2,8 @@
 
 _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this first, then do it in parts. Owner: talk short and simple (caveman mode, see `Preferences.md`)._
 
+> **Changed by the owner (2026-10-30): no neon at all any more.** Skip Part 1 (neon at night) and remove the city neon instead. The night look is now warm and golden (see `New map shaped like Monaco.md`, "The night look"). Parts 2–4 (realistic lighting, environment, performance) still apply.
+
 ## Before you start
 - Read `CLAUDE.md`, `Games/CityLegends/CLAUDE.md` and `City Legends/City Legends.md`. Pay attention to "Map baked into the place", "Map ownership" and the lighting / day cycle notes.
 - **The map is baked.** `CityLegends.rbxl` is the master. Never `rojo build` over it. The owner asked for this, so you may edit the baked `Workspace.City` in the open Studio place (tags, materials, lights).
