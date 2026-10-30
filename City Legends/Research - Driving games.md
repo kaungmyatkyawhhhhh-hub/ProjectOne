@@ -17,7 +17,36 @@ Anything marked *(general knowledge)* comes from what was known about the game b
 Screenshots: `Games/CityLegends/imports/refs/games/<game>/` (the games' own Roblox page images, 768x432 JPG).
 
 ## What the top driving games do (the 15 lessons, ranked)
-_Filled in at the end, after all 10 games._
+Ranked by how much they matter for players (Playbook: first 3 minutes, reasons to come back on day 2 and day 7, phones).
+1. **A goal ladder from minute one.** MR:T's milestones (first car → first event → first win → first mod → tiers → 5/10/25/50 cars → King of Cars) and CDT's completion % hand the player every next goal, each paying well.
+2. **Daily streak that ends in a car.** MR:T: ¥100K rising to ¥1 M, **day 7 a free Tier-2 car**. CDT: a 30-day ladder with a car every 5 days. Missing a day resets it (CDT forgives 48 h).
+3. **Tuning that changes the feel, not just the look** (MR:T's heart):
+   - engine and turbo stages (with blow-off sound);
+   - brakes, tyres (drift / street / race), weight, gearing with a dyno graph, suspension, camber and fitment;
+   - unlocked by level, and explained in-game.
+4. **Races against other players with real stakes:**
+   - MR:T lobbies (up to 8, pot 100/50/25%);
+   - PlayerVS duels to any player;
+   - SWFL races that cycle every 30-60 s with random rules;
+   - VL pays more than 2x for racing with others.
+5. **Small daily tasks:** CDT's 3 random challenges a day, DE's speed traps and Miles. There's always something quick to do.
+6. **Each car must feel different.** MR:T: weight, power curve, drive layout, gearbox, TCS. Manual with clutch for fans, simple buttons for phones.
+7. **Interiors with live clusters** (Driving Empire): needles, digital screens, blinker lights in the dash, a good first-person camera. Hands real-size (owner).
+8. **Night mood is the brand:**
+   - sodium highway lights, neon, wet roads, tail-light streaks;
+   - radio stations by genre (MR:T: Eurobeat, lo-fi / phonk, city-pop, trance…).
+9. **Places made for meeting and photos:** MR:T parking areas (Daikoku / Tatsumi), DE car meets and photo mode (time, FOV, depth of field, hide UI).
+10. **Long progress tied to *your* car:**
+    - MR:T brand levels make a brand's parts cheaper the more you drive it;
+    - part stages open up to Level 76;
+    - Greenville trims.
+11. **Live updates and events keep a game alive.** DE weekly icon and Spookfest, CDT seasons and story events, CC2 numbered updates. Driving Simulator stopped updating in May 2026 and now has 15 players.
+12. **Co-play is rewarded.** CDT Friends Rally (50 laps with a friend = a car), VL x2 race pay with others, DE roommates. Roblox ranks co-play.
+13. **Show what's happening on the map:** Jailbreak's flashing robbery icons, bounty board and server messages; DE's race waiting counts. There's always somewhere exciting to drive.
+14. **Fair shop:** fun and convenience passes (MR:T lights 300, toll 49, boombox; DE radio 15). Paid random cars were removed from DE after backlash. Whole car classes behind passes (Highway Legends, Greenville) and pay-to-earn paints feel greedy.
+15. **Fictional brands only.** Ford cars were pulled from CDT and Greenville by licence or copyright. Our look-alike names are safe.
+
+**Midnight Racing's way wins** when lessons disagree (owner), except interiors, clusters and the in-car view, where **Driving Empire's way wins**, with real-size hands.
 
 ## Numbers (Roblox pages, 2026-10-30)
 
@@ -716,3 +745,58 @@ Sources:
   - **property gives a spawn point and a reason to come home**.
 
 ---
+
+## City Legends vs the top games (2026-10-30)
+
+| Feature | Top games | City Legends | Verdict |
+|---|---|---|---|
+| Money loop while driving | HL cut-ups, DE drive cash + speed traps, FH skill chains | cut-ups with combos (oncoming, threading), drive cash | **ours is better** (combo kinds) |
+| First-session goal ladder | MR:T milestones, CDT completion % | none (only levels and the daily gift) | **missing** |
+| Daily streak | MR:T 7 days → free car; CDT 30-day ladder, car every 5 days | flat daily gift (cash by level) | **ours is worse** |
+| Daily / weekly tasks | CDT 3 random tasks a day; Jailbreak contracts | none | **missing** |
+| Performance tuning | MR:T engine / turbo / brakes / tyres / weight / gears / suspension / fitment, by level | Legends Customs is looks only (paint, finish, tint, glow, rims, plate, headlights) | **missing** |
+| Brand levels | MR:T manufacturer levels | none | missing |
+| Trims | Greenville 16 trims a model, MR:T tiers | trims every 5 levels in the dealer (owner's MR-style dealer) | have |
+| Bodykits | MR:T 6,000+ parts | none | missing (needs per-car parts) |
+| Races vs players | MR:T lobbies and PlayerVS, SWFL cycling races, VL x2 with others | solo medal races (Activities), drift / trap / jump challenges, leaderboard | **ours is worse** |
+| Police | DE bounty, Jailbreak bounty board | wanted stars, chases, speed cameras, escape bounty, bank robbery | have (good) |
+| Map events shown | Jailbreak flashing icons, DE race waiting counts | minimap, but no live event markers | ours is worse |
+| Houses | DE blueprints + claim, SWFL buy type + claim | 31 blueprints, claim a lot, walk-in, gates, roommates, underground garage | **ours is better** |
+| Interiors / clusters | DE live clusters with blinkers | imported cabins, live needles on some cars, real-size hands | have (blinker lights in the cluster to check) |
+| Cameras | MR:T chase / hood / bumper, DE first person, FH lag | Immersive / Low / Chase / Interior, camera FX settings | have |
+| Night mood | MR:T, HL sodium / neon / wet roads | night city, rain, wet roads, neon at night, day cycle | have |
+| Radio stations | MR:T 7 stations by genre | music on/off (M) | ours is worse |
+| Meet spots + photo mode | MR:T parking areas, DE photo mode | none | missing |
+| Test drive | VL 5 min free | none | missing |
+| Co-play rewards | CDT Friends Rally, VL x2 | passengers, roommates (no money bonus) | ours is worse |
+| Live events / limited cars | DE, CDT, CC2 weekly | none yet | missing (Playbook: Saturday 15:00 UTC slot) |
+| Fair shop | MR:T, DE | none yet (no passes) | n/a |
+| Phones | HL "500 MB", MR:T mobile overhaul | streaming on, the islands are heavy | check FPS |
+
+## Improvement list (biggest player win first)
+1. **Legends Path (milestones).** A ladder of one-off goals from the first minute:
+   - first drive, first 5x combo, first car bought, first race, first mod;
+   - level 5 / 10 / 20, own 3 / 5 / 10 cars, first house, a car from every brand…;
+   - each pays cash and XP, and the next goal is always shown on the HUD.
+   - (MR:T milestones, CDT completion %.) First 3 minutes plus session goals.
+2. **7-day streak with a car on day 7** (cash rising each day, day 7 a free Mid-tier car; after that the car's value in cash). Replaces the flat daily gift. (MR:T, CDT.) Day-2 / day-7 return. *Money change: owner OK needed.*
+3. **Performance tuning at Legends Customs (MR:T way):**
+   - engine stages 1-3, turbo with its own spool and blow-off sound;
+   - brakes, tyres (drift / street / race), weight reduction, final drive;
+   - each opened by level, each changing real handling numbers, with a small "what it does" line and a power graph.
+4. **Race lobbies and duels with other players:**
+   - race pads show who's waiting, start with 2+, pay a pot (1st 100%, 2nd 50%, 3rd 25%);
+   - challenge any nearby player to a point-to-point duel (PlayerVS);
+   - x2 pay when racing a friend.
+5. **3 daily tasks** (cut up 20 cars, a 5,000 drift, gold at a speed trap, 2 deliveries, a race…), refreshed every 24 h, for cash and XP. (CDT.)
+6. **Live map markers:** bank robbery open, race lobby forming, police chase near you, drift zone hot, flashing on the minimap and big map. (Jailbreak, DE.)
+7. **Car meet spot plus photo mode:** a lit rooftop or harbour parking area made for meets. Photo mode with time of day, FOV, depth of field and hide UI. (MR:T Daikoku, DE photo mode.)
+8. **Radio stations by genre:** 3-4 stations from free / owned music ids (night drive synth, lo-fi / phonk, city-pop-style, Eurobeat-style), with a station name on the HUD. (MR:T.)
+9. **Brand levels:** driving a brand's cars levels it; higher brand levels make its tuning cheaper and open its top trims sooner. (MR:T.)
+10. **5-minute test drive** at Legends Motors before buying (lower pay while testing). (VL.)
+11. Weekly event framework: a Config switch, a limited car, a timed goal, Saturday 15:00 UTC (Playbook).
+12. Cluster blinker lights and a gear / speed screen on every imported cabin (DE).
+13. Nitro: a small free daily fuel with a flame and sound (Jailbreak). (Careful: it could make cut-ups too easy.)
+14. Bodykits by part (MR:T): needs parts made per car; later.
+
+**Top 10 shown to the owner 2026-10-30; nothing built yet. Waiting for their pick.**
