@@ -526,7 +526,8 @@ local function setLights(folder: Instance, on: boolean)
 		if d:IsA("BasePart") and d.Name == "CeilingLight" then
 			d.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
 			d.Color = if on then Color3.fromRGB(255, 214, 160) else Color3.fromRGB(70, 68, 64)
-		elseif d:IsA("PointLight") and d.Parent and d.Parent.Name == "CeilingLight" then
+		elseif d:IsA("Light") and d.Parent and d.Parent.Name ~= "TVScreen" and not d.Parent:FindFirstChildOfClass("Fire") then
+			-- (every lamp in this floor, or in a ready-made house; not a fireplace's or a TV's glow)
 			d.Enabled = on
 		end
 	end
@@ -566,7 +567,11 @@ USE.fridge = function(_rec, p, _who)
 	p.ActionText = if open then "Close" else "Open"
 end
 USE.light = function(_rec, p, _who)
-	local folder = p:FindFirstAncestorWhichIsA("Model")
+	-- (the floor's group, or the whole ready-made body)
+	local folder: Instance? = p.Parent
+	while folder and not (folder:IsA("Model") and (folder.Name == "Body" or folder.Name:match("^Floor%d"))) do
+		folder = folder.Parent
+	end
 	if folder then
 		local on = folder:GetAttribute("LightsOff") == true
 		setLights(folder, on)
@@ -577,9 +582,12 @@ USE.tv = function(_rec, p, _who)
 	local screen = p.Parent :: BasePart
 	local on = not screen:GetAttribute("On")
 	screen:SetAttribute("On", on)
-	local pic = screen:FindFirstChild("Picture", true)
-	if pic and pic:IsA("GuiObject") then
-		pic.Visible = on
+	for _, pic in screen:GetDescendants() do
+		if pic.Name == "Picture" and pic:IsA("GuiObject") then
+			pic.Visible = on
+		elseif pic:IsA("SurfaceLight") then
+			pic.Enabled = on -- (a ready-made TV's glow)
+		end
 	end
 	p.ActionText = if on then "Turn off" else "Turn on"
 end

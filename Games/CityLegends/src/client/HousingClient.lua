@@ -722,10 +722,11 @@ local function animateTVs()
 		local at = camera.CFrame.Position
 		for _, screenPart in CollectionService:GetTagged("HouseTV") do
 			if screenPart:IsA("BasePart") and screenPart:GetAttribute("On") and (screenPart.Position - at).Magnitude < 120 then
-				local g = screenPart:FindFirstChildWhichIsA("UIGradient", true)
-				if g then
-					g.Offset = Vector2.new(math.sin(t * 0.5) * 0.45, 0)
-					g.Rotation = (t * 8) % 360
+				for _, g in screenPart:GetDescendants() do
+					if g:IsA("UIGradient") then
+						g.Offset = Vector2.new(math.sin(t * 0.5) * 0.45, 0)
+						g.Rotation = (t * 8) % 360
+					end
 				end
 			end
 		end

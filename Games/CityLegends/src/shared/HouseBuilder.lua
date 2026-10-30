@@ -36,6 +36,38 @@
 
 local HouseBuilder = {}
 
+-- a ready-made house body (owner, 2026-10-30: "import some houses from the toolbox to get better
+-- quality"): Creator Store houses kept in ReplicatedStorage.HouseBodies, cleaned (no scripts, no
+-- brand names), facing -Z with their pivot at the bottom middle, FootW / FootD / Height attributes,
+-- and door panels marked BodyDoor (HingeSide -1 / 1). A design with look.body uses one in place of
+-- the walls, rooms and roof built here; the lot, garage, drive, fence, gate and mailbox stay ours.
+-- (None in the Lune tests: the house is then built the usual way.)
+local function bodyTemplate(name: string?): Model?
+	if not name then
+		return nil
+	end
+	local ok, found = pcall(function()
+		local folder = (game :: any):GetService("ReplicatedStorage"):FindFirstChild("HouseBodies")
+		return if folder then folder:FindFirstChild(name) else nil
+	end)
+	return if ok and found and found:IsA("Model") then found else nil
+end
+
+-- see-through and not solid, like the rest of the ghost
+local function ghostify(m: Instance)
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Transparency = math.max(d.Transparency, 0.55)
+			d.CanCollide = false
+			d.CanQuery = false
+			d.CastShadow = false
+			d.Material = Enum.Material.SmoothPlastic
+		elseif d:IsA("Light") or d:IsA("Decal") or d:IsA("Texture") or d:IsA("SurfaceGui") or d:IsA("ParticleEmitter") then
+			d:Destroy()
+		end
+	end
+end
+
 local FLOOR = 11 -- storey height
 local BAY_W = 11 -- garage bay width
 local BAY_D = 20 -- garage bay depth
@@ -286,11 +318,9 @@ end
 -- Inside: the rooms (only on the real house)
 ---------------------------------------------------------------------
 -- a TV on a wall: a dark frame and a screen that Houses turns on (HouseClient moves its picture)
-local function tv(mk: any, cf: CFrame, w: number, parent: Instance)
-	mk(Vector3.new(w + 0.4, w * 0.58 + 0.4, 0.3), cf, DARK, Enum.Material.SmoothPlastic, { parent = parent })
-	local screen = mk(Vector3.new(w, w * 0.58, 0.1), cf * CFrame.new(0, 0, -0.2), Color3.fromRGB(10, 12, 16), Enum.Material.Glass, { name = "TVScreen", parent = parent })
+local function tvPicture(screen: BasePart, face: Enum.NormalId)
 	local sg = Instance.new("SurfaceGui")
-	sg.Face = Enum.NormalId.Front
+	sg.Face = face
 	sg.CanvasSize = Vector2.new(320, 180)
 	sg.LightInfluence = 0
 	sg.MaxDistance = 90
@@ -321,6 +351,12 @@ local function tv(mk: any, cf: CFrame, w: number, parent: Instance)
 	cap.Parent = pic
 	screen:AddTag("HouseTV")
 	use(screen, "tv", "Turn on", "TV", 14)
+end
+
+local function tv(mk: any, cf: CFrame, w: number, parent: Instance)
+	mk(Vector3.new(w + 0.4, w * 0.58 + 0.4, 0.3), cf, DARK, Enum.Material.SmoothPlastic, { parent = parent })
+	local screen = mk(Vector3.new(w, w * 0.58, 0.1), cf * CFrame.new(0, 0, -0.2), Color3.fromRGB(10, 12, 16), Enum.Material.Glass, { name = "TVScreen", parent = parent })
+	tvPicture(screen, Enum.NormalId.Front)
 end
 
 -- water from a tap or a shower head (off until used)
@@ -797,6 +833,100 @@ local function fenceAndGate(mk: any, lot: CFrame, lotW: number, lotD: number, ti
 end
 
 ---------------------------------------------------------------------
+-- A ready-made body's things, made to work (owner, 2026-10-30: "make the house work too"):
+-- its TV gets a picture, its light switches (or one of ours by the front door) switch all its
+-- lights, its shower runs, a ring on its oven glows, its wardrobes open the outfit screen, its
+-- beds let you sleep, its sinks run
+---------------------------------------------------------------------
+local function biggest(m: Instance): BasePart?
+	local best: BasePart? = nil
+	for _, p in m:GetDescendants() do
+		if p:IsA("BasePart") and (not best or p.Size.Magnitude > (best :: BasePart).Size.Magnitude) then
+			best = p
+		end
+	end
+	return best
+end
+
+-- the face of a flat part that looks into the house (where a TV's screen faces)
+local function faceInto(p: BasePart, center: Vector3): Enum.NormalId
+	local s = p.Size
+	local axis = if s.X <= s.Y and s.X <= s.Z then "X" elseif s.Y <= s.Z then "Y" else "Z"
+	local v = if axis == "X" then p.CFrame.RightVector elseif axis == "Y" then p.CFrame.UpVector else p.CFrame.LookVector
+	local toward = (center - p.Position):Dot(v) > 0
+	if axis == "X" then
+		return if toward then Enum.NormalId.Right else Enum.NormalId.Left
+	elseif axis == "Y" then
+		return if toward then Enum.NormalId.Top else Enum.NormalId.Bottom
+	end
+	-- (LookVector is the Front face's normal)
+	return if toward then Enum.NormalId.Front else Enum.NormalId.Back
+end
+
+local function wireBody(mk: any, bm: Model, hcf: CFrame, frontDoorX: number?, d: number)
+	local center = hcf.Position + Vector3.new(0, 5, 0)
+	local switches = 0
+	for _, m in bm:GetDescendants() do
+		if m:IsA("Model") then
+			local nm = m.Name:lower()
+			local part = biggest(m)
+			if part then
+				if nm == "tv" or nm:find("^tv[%s_]") or nm:find("television") or nm:find("led screen") then
+					-- the screen is the glass with the TV's own picture decal on it (its face is the one
+					-- you watch), or a part named Screen, or else the biggest part; on the side facing in
+					local screen = part :: BasePart
+					local face: Enum.NormalId? = nil
+					for _, x in m:GetDescendants() do
+						if x:IsA("Decal") and x.Parent and x.Parent:IsA("BasePart") then
+							screen = x.Parent :: BasePart
+							face = x.Face
+							x:Destroy()
+						elseif x:IsA("BasePart") and not face and x.Name:lower():find("screen") then
+							screen = x
+						elseif x:IsA("Sound") then
+							x:Destroy() -- (a sound this game can't use)
+						end
+					end
+					screen.Name = "TVScreen"
+					tvPicture(screen, face or faceInto(screen, center))
+				elseif nm:find("lightswitch") or nm:find("light switch") then
+					switches += 1
+					use(part, "light", "Lights", "Light switch", 7)
+				elseif nm:find("shower") and not m:FindFirstAncestorWhichIsA("Model"):GetAttribute("Wired") then
+					m:SetAttribute("Wired", true)
+					local head: BasePart = part
+					for _, x in m:GetDescendants() do
+						if x:IsA("Sound") then
+							x:Destroy() -- (a sound this game can't use)
+						elseif x:IsA("BasePart") and x.Name:lower():find("head") then
+							head = x
+						end
+					end
+					water(head, 18, 140)
+					use(head, "shower", "Shower on", "Shower", 9)
+				elseif nm:find("stove") or nm:find("oven") then
+					local cf, size = m:GetBoundingBox()
+					local ring = mk(Vector3.new(math.min(2.6, size.X * 0.6), 0.08, math.min(2, size.Z * 0.6)), cf * CFrame.new(0, size.Y / 2 + 0.04, 0), Color3.fromRGB(20, 20, 22), Enum.Material.Glass, { name = "Stove", parent = m })
+					use(ring, "stove", "Turn on", "Stove")
+				elseif nm:find("wardrobe") or nm:find("closet") then
+					use(part, "wardrobe", "Change outfit", "Wardrobe")
+				elseif (nm:find("bed") and not nm:find("bedside")) or nm:find("blanket") then
+					use(part, "bed", "Sleep", "Bed", 9)
+				elseif nm:find("sink") or nm:find("faucet") then
+					water(part, 4, 60)
+					use(part, "tap", "Tap on", "Sink")
+				end
+			end
+		end
+	end
+	-- no switches of its own: one of ours just inside the front door
+	if switches == 0 then
+		local x = (frontDoorX or 0) + 3.6
+		switch(mk, hcf * CFrame.new(x, 0.4 + 4.6, -d / 2 + 1.6), bm)
+	end
+end
+
+---------------------------------------------------------------------
 -- The house
 ---------------------------------------------------------------------
 function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number, opts: { ghost: boolean?, interior: boolean? }?): (Model, Info)
@@ -810,9 +940,10 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 	local tier = design.tier
 	local floors = design.floors
 
+	local body = bodyTemplate(look.body)
 	-- the garage: in the front of the ground floor on Low houses; a wing on bigger ones
 	local maxBays = design.maxBays
-	local integrated = tier == 0
+	local integrated = tier == 0 and not body
 	local cols = if integrated then maxBays elseif maxBays > 5 then math.ceil(maxBays / 2) else maxBays
 	local rows = math.ceil(maxBays / cols)
 	local garageW = cols * BAY_W + 2
@@ -820,6 +951,13 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 
 	local w = look.w
 	local d = look.d
+	local bodyScale = 1
+	if body then
+		-- scaled to fit the design's footprint
+		local fw, fd = body:GetAttribute("FootW") :: number, body:GetAttribute("FootD") :: number
+		bodyScale = math.min(look.w / fw, look.d / fd, 1.2)
+		w, d = fw * bodyScale, fd * bodyScale
+	end
 	if integrated then
 		w = math.max(w, garageW + 2)
 	end
@@ -848,7 +986,44 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 
 	-- the house, floor by floor (a cantilever shifts the top floor over)
 	local doorsOut: { front: number?, left: number? } = {}
-	for f = 1, floors do
+	local bodyTop: number? = nil
+	if body then
+		local bm = body:Clone()
+		bm.Name = "Body"
+		if bodyScale ~= 1 then
+			bm:ScaleTo(bodyScale)
+		end
+		bm:PivotTo(hcf * CFrame.new(0, 0.4, 0))
+		bodyTop = 0.4 + (body:GetAttribute("Height") :: number) * bodyScale
+		if ghost then
+			ghostify(bm)
+		end
+		-- its doors swing on a hinge with E; the front one (nearest the front) is the front door
+		local frontZ = math.huge
+		for _, p in bm:GetDescendants() do
+			if p:IsA("BasePart") and p:GetAttribute("BodyDoor") then
+				local closed = p.CFrame
+				local hingeSide = (p:GetAttribute("HingeSide") :: number?) or -1
+				local hinge = closed * CFrame.new(hingeSide * p.Size.X / 2, 0, 0)
+				p:SetAttribute("ClosedCF", closed)
+				p:SetAttribute("OpenCF", hinge * CFrame.Angles(0, hingeSide * math.pi / 2, 0) * hinge:ToObjectSpace(closed))
+				p.Name = "Door"
+				if interior then
+					use(p, "door", "Open", "Door", 9)
+				end
+				local rel = hcf:PointToObjectSpace(p.Position)
+				if rel.Z < frontZ then
+					frontZ = rel.Z
+					doorsOut.front = rel.X
+				end
+			end
+		end
+		if interior then
+			wireBody(mk, bm, hcf, doorsOut.front, d)
+		end
+		bm.Parent = model
+	end
+	for f = 1, (if body then 0 else floors) do
 		local folder = Instance.new("Model")
 		folder.Name = "Floor" .. f
 		folder.Parent = model
@@ -900,11 +1075,11 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 			furnish(mk, scf, fw, fd, side, role, design, look, folder, f < floors)
 		end
 	end
-	local topY = 0.4 + floors * FLOOR + 0.4
+	local topY = bodyTop or (0.4 + floors * FLOOR + 0.4)
 	local roofBase = hcf * CFrame.new(shiftTop, topY, 0)
 
-	-- the roof
-	local roof = look.roof
+	-- the roof (a ready-made body brings its own, and its porch and the rest)
+	local roof = if body then "none" else look.roof
 	local rc = look.roofColor
 	if roof == "flat" then
 		for _, s in { -1, 1 } do
@@ -931,6 +1106,12 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 
 	-- extras
 	local front = hcf * CFrame.new(0, 0, -d / 2)
+	if body then
+		look = table.clone(look)
+		for _, k in { "porch", "balcony", "verandas", "columns", "towers", "tower", "dome", "cupola", "solar", "helipad", "deck" } do
+			look[k] = nil
+		end
+	end
 	if look.porch then
 		mk(Vector3.new(w * 0.7, 0.8, 8), front * CFrame.new(0, 0.8, -4), look.accent or look.trim, Enum.Material.WoodPlanks)
 		for _, x in { -0.33, 0, 0.33 } do
