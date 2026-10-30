@@ -30,6 +30,20 @@ The owner respects **Midnight Racing: Tokyo** the most of all driving games. So:
 - **When lessons from different games disagree, Midnight Racing's way wins**, unless it breaks our rules or the Playbook.
 - Still never copy its names, UI art, logos or assets exactly: make our own version.
 
+### Exception: interiors, clusters and the in-car view come from Driving Empire (owner, 2026-10-30)
+- Midnight Racing doesn't have a proper interior view for most cars. **The best interiors and gauge clusters are in Driving Empire**, so for these, **Driving Empire's way wins**:
+  - the in-car / first-person camera;
+  - detailed cabins;
+  - live clusters (needles, screens, lights);
+  - the steering wheel.
+  - Study it closely: videos in the driver's seat, how the camera sits, the FOV, how the cluster reads at night, mirrors.
+- **But not the hands:** the owner finds Driving Empire's driver hands **too big**. Ours stay **real-size**:
+  - real proportions against the wheel (a normal adult hand, about the width of the steering wheel's rim grip);
+  - sitting at 9 and 3 o'clock;
+  - turning with the wheel;
+  - never covering the cluster.
+  - Check them in a first-person screenshot next to a real car photo.
+
 ## The games (play or study these 10)
 1. **Highway Legends** (our target look)
 2. **Driving Empire**
