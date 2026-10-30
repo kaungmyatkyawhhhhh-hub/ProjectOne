@@ -11,10 +11,29 @@ _For Claude Code on the PC. Read all of this first. Owner: talk short and simple
 - **Never type, ask for, or handle the owner's Roblox password, cookies or 2-step codes.** If a game needs a login, stop and ask the owner to log in themselves.
 - **Never buy anything** with Robux or real money. Don't chat with other players. Don't join groups or accept friend requests.
 
+## The owner's favourite: Midnight Racing: Tokyo (2026-10-30)
+The owner respects **Midnight Racing: Tokyo** the most of all driving games. So:
+- Study it **first and deepest**: wiki pages (https://robloxmidnightracing.fandom.com), at least 5 videos, update logs, and what players love about it.
+- Cover:
+  - driving physics and camera;
+  - car sounds;
+  - the dealership and trims;
+  - tuning and customisation;
+  - the highway / Tokyo maps;
+  - traffic;
+  - police;
+  - races and meets;
+  - levels;
+  - the UI;
+  - night lighting.
+- In the research note, give it its own long section and a **"What makes Midnight Racing great"** list.
+- **When lessons from different games disagree, Midnight Racing's way wins**, unless it breaks our rules or the Playbook.
+- Still never copy its names, UI art, logos or assets exactly: make our own version.
+
 ## The games (play or study these 10)
 1. **Highway Legends** (our target look)
 2. **Driving Empire**
-3. **Midnight Racing: Tokyo**
+3. **Midnight Racing: Tokyo** (the owner's favourite: study first, see above)
 4. **Car Dealership Tycoon**
 5. **Greenville**
 6. **Southwest Florida**
