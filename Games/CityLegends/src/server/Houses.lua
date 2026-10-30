@@ -58,6 +58,7 @@ type Rec = {
 	gateOpen: boolean,
 	gateSeen: number, -- last time someone allowed was at the gate
 	dug: { { region: Region3, mats: any, occ: any } }?, -- the terrain an underground garage took out
+	hidden: { { part: BasePart, parent: Instance? } }?, -- the map's rocks and trees it took away
 }
 
 local friendCache: { [string]: { at: number, yes: boolean } } = {}
@@ -433,7 +434,8 @@ local function publish(player: Player)
 	player:SetAttribute("HouseDesign", if rec then rec.design else nil)
 end
 
--- an underground garage: dig its ground out of the terrain (keeping what was there to put back)
+-- an underground garage: dig its ground out of the terrain (keeping what was there to put back),
+-- and take away the map's rocks and trees in the way until the house comes down
 local function dig(rec: Rec)
 	local info = rec.info
 	if not (info and info.dig and #info.dig > 0) then
@@ -462,6 +464,23 @@ local function dig(rec: Rec)
 		terrain:FillBlock(cf, size, Enum.Material.Air)
 	end
 	rec.dug = saved
+	local city = workspace:FindFirstChild("City")
+	local moved = {}
+	if city then
+		for _, box in info.dig do
+			for _, p in workspace:GetPartBoundsInBox(box.cf, box.size + Vector3.new(0, 30, 0)) do
+				if p:IsDescendantOf(city) and p.Parent and not table.find(moved, p) then
+					table.insert(moved, p)
+				end
+			end
+		end
+	end
+	local back = {}
+	for _, p in moved do
+		table.insert(back, { part = p, parent = p.Parent })
+		p.Parent = nil
+	end
+	rec.hidden = back
 end
 
 local function undig(rec: Rec)
@@ -477,6 +496,12 @@ local function undig(rec: Rec)
 			terrain:WriteVoxels(s.region, 4, s.mats, s.occ)
 		end)
 	end
+	if rec.hidden then
+		for _, h in rec.hidden do
+			h.part.Parent = h.parent
+		end
+	end
+	rec.hidden = nil
 end
 
 local function takeDown(rec: Rec)

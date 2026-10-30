@@ -1241,17 +1241,18 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		mk(Vector3.new(UG_W, 1, len + 0.6), mid * CFrame.new(0, -0.5, 0), floorC, Enum.Material.Concrete, { name = "Ramp" })
 		for _, s in { -1, 1 } do
 			local top = if s == 1 then 1.8 else 0.4
-			mk(Vector3.new(1, top - (fy - 1), UG_RUN), lot * CFrame.new(ugX + s * (UG_W / 2 + 0.5), (top + fy - 1) / 2, ugTop + UG_RUN / 2), wallC, Enum.Material.Concrete)
+			mk(Vector3.new(1, top - (fy - 3), UG_RUN), lot * CFrame.new(ugX + s * (UG_W / 2 + 0.5), (top + fy - 3) / 2, ugTop + UG_RUN / 2), wallC, Enum.Material.Concrete)
 		end
-		-- a strip of light down each side of the ramp
+		-- a soft strip of light down each side of the ramp
 		for _, s in { -1, 1 } do
-			mk(Vector3.new(0.3, 0.3, len), mid * CFrame.new(s * (UG_W / 2 - 0.3), 0.15, 0), WARM, Enum.Material.Neon, { collide = false, shadow = false })
+			mk(Vector3.new(0.2, 0.2, len), mid * CFrame.new(s * (UG_W / 2 - 0.3), 0.1, 0), Color3.fromRGB(120, 96, 70), Enum.Material.Neon, { collide = false, shadow = false })
 		end
-		-- the hall: floor, ceiling (the lawn and the house stand on it), walls round it
-		mk(Vector3.new(hallW, 1, hallD), lot * CFrame.new(hcx, fy - 0.5, hcz), floorC, Enum.Material.Concrete, { name = "GarageFloor" })
+		-- the hall: floor (thick, so no ground shows through), ceiling (the lawn and the house stand on
+		-- it), walls round it
+		mk(Vector3.new(hallW, 2, hallD), lot * CFrame.new(hcx, fy - 1, hcz), floorC, Enum.Material.Concrete, { name = "GarageFloor" })
 		mk(Vector3.new(hallW + 2, 1.4, hallD + 2), lot * CFrame.new(hcx, -0.5, hcz), wallC, Enum.Material.Concrete)
-		local wh = UG_DEEP + 0.3
-		local wy = (fy - 1 - 1.2) / 2 + 0.5
+		local wh = UG_DEEP + 2.5
+		local wy = (fy - 3 - 0.5) / 2
 		mk(Vector3.new(1, wh, hallD + 2), lot * CFrame.new(x0 - 0.5, wy, hcz), wallC, Enum.Material.Concrete)
 		mk(Vector3.new(1, wh, hallD + 2), lot * CFrame.new(x0 + hallW + 0.5, wy, hcz), wallC, Enum.Material.Concrete)
 		mk(Vector3.new(hallW + 2, wh, 1), lot * CFrame.new(hcx, wy, hz0 + hallD + 0.5), wallC, Enum.Material.Concrete)
@@ -1259,7 +1260,7 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		-- a lit header over the way in, and light strips along the ceiling
 		mk(Vector3.new(UG_W, 0.4, 0.4), lot * CFrame.new(ugX, -1.5, hz0), WARM, Enum.Material.Neon, { collide = false, shadow = false })
 		for _, sx in { UG_W / 2, UG_W + BAY_D / 2, UG_W + BAY_D * 1.5 } do
-			local strip = mk(Vector3.new(0.6, 0.2, hallD - 4), lot * CFrame.new(x0 + sx, -1.3, hcz), Color3.fromRGB(236, 240, 255), Enum.Material.Neon, { collide = false, shadow = false })
+			local strip = mk(Vector3.new(0.5, 0.2, hallD - 4), lot * CFrame.new(x0 + sx, -1.3, hcz), Color3.fromRGB(150, 156, 172), Enum.Material.Neon, { collide = false, shadow = false })
 			if sx == UG_W + BAY_D / 2 then
 				local gl = Instance.new("PointLight")
 				gl.Color = Color3.fromRGB(236, 240, 255)
@@ -1277,11 +1278,13 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 			table.insert(bays, lot * CFrame.new(x, fy, z) * CFrame.Angles(0, math.pi / 2, 0))
 			mk(Vector3.new(BAY_D - 2, 0.05, 0.2), lot * CFrame.new(x, fy + 0.03, z - BAY_W / 2), Color3.fromRGB(240, 240, 236), Enum.Material.SmoothPlastic, { collide = false })
 		end
-		-- the ground to clear: the ramp's trench and the hall
-		local dy = (0.3 + fy - 1.6) / 2
-		local dh = 0.3 - (fy - 1.6)
-		table.insert(dig, { cf = lot * CFrame.new(ugX, dy, ugTop + UG_RUN / 2), size = Vector3.new(UG_W + 4, dh, UG_RUN + 2) })
-		table.insert(dig, { cf = lot * CFrame.new(hcx, dy, hcz), size = Vector3.new(hallW + 4, dh, hallD + 4) })
+		-- the ground to clear: the ramp's trench and the hall (well past the walls and the floor: the
+		-- terrain's edge voxels are only partly cleared and would show through; and above the lot, for
+		-- any bank or boulder reaching over its edge)
+		local dy = (10 + fy - 6) / 2
+		local dh = 10 - (fy - 6)
+		table.insert(dig, { cf = lot * CFrame.new(ugX, dy, ugTop + UG_RUN / 2), size = Vector3.new(UG_W + 6, dh, UG_RUN + 2) })
+		table.insert(dig, { cf = lot * CFrame.new(hcx, dy, hcz), size = Vector3.new(hallW + 8, dh, hallD + 8) })
 	elseif integrated then
 		gcf = hcf * CFrame.new(0, 0.4, -d / 2 + (BAY_D + 1) / 2)
 		for k = 1, maxBays do
