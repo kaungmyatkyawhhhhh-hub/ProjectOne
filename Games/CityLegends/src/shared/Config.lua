@@ -989,8 +989,11 @@ Config.Dealership = {
 	Block = { 4, 2 }, -- the city block it stands on (east of the city centre)
 	Face = "W", -- the side its showroom looks out of (towards the city centre)
 	BuyRange = 260, -- a player must be this close to the showroom to buy
-	-- cars on the showroom turntables (one per brand zone)
-	Display = { "bnw_m5_e60", "bentz_e63s", "toyoka_supra_mk4", "nisun_r34", "porsha_panamera", "chevo_c7", "astin_vantage", "lexis_lc500" },
+	-- the display cars (2026-10-30 redesign): a top car on the turntable stage, four on plinths in
+	-- the hall, the budget cars out on the lot
+	DisplayHero = "lambrini_lp750",
+	Display = { "porsha_gt3", "ferrara_458", "bnw_m5_f90", "bentlee_contgt" },
+	DisplayLot = { "toyoka_camri", "nisun_350z", "mazdo_rx7", "chevo_camaro", "kio_ev6", "bnw_330i_g20" },
 	-- test drives (owner, 2026-10-30, from the research: Vehicle Legends): any dealer car you don't
 	-- own, for a few minutes, once per car each visit; it pays less while you test it
 	TestSeconds = 300,

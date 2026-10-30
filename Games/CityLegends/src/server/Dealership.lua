@@ -3,10 +3,14 @@
 	Legends Motors, the city's car dealership (owner, 2026-10-23: "add a dealership, a real
 	location"; the HUD's SHOP became CARS and shows only the cars you have). New cars are bought
 	here, nowhere else:
-	  * a glass showroom on its own city block (Config.Dealership), facing the city centre: a
-	    white polished floor with lit strips, brand zones (a turntable with a car under a hanging
-	    brand sign), a sales desk, a lit drive-out bay with a door onto the street
-	  * a service building and a car park behind, a pylon sign on the forecourt corner
+	  * (redesigned 2026-10-30) a dark-glass showroom on its own city block (Config.Dealership),
+	    facing the city centre: a tall front hall and a lower back hall under a stepped roof, the
+	    name on a brushed-metal fascia, a canopy over the customer doors, a light stone floor,
+	    a turntable stage under spotlights (D.DisplayHero), display plinths (D.Display), the sales
+	    counter, a drive-out bay with its own door and lane to the street
+	  * an outdoor lot with painted bays and the budget cars (D.DisplayLot), a stone pylon sign
+	  * a service building and the LEGENDS MEET car park behind
+	Every display car has a stand sign (name, price, level) that opens the buy screen on it.
 	Walking up to the sales desk or a turntable opens the buy screen (DealerOpen); a car bought or
 	picked there is driven out of the drive-out bay (DealerCall "door" sets the spawn spot).
 	The turntable cars are tagged like the towers' showcase cars, so the client skins and turns them.
@@ -29,12 +33,17 @@ local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local C = Config.City
 local CURB = C.CurbHeight
 
-local GLASS = Color3.fromRGB(150, 180, 205)
-local FRAME = Color3.fromRGB(32, 34, 40)
-local WHITE = Color3.fromRGB(236, 236, 232)
-local FLOOR = Color3.fromRGB(226, 226, 230)
-local ACCENT = Config.Theme.Accent
-local WARM = Color3.fromRGB(255, 226, 180)
+-- (2026-10-30 redesign: dark glass, brushed metal, light stone, warm light; no neon)
+local GLASS = Color3.fromRGB(46, 56, 66)
+local BRUSHED = Color3.fromRGB(150, 152, 156)
+local DARK = Color3.fromRGB(28, 28, 32)
+local STONE = Color3.fromRGB(222, 216, 204)
+local STONE_DARK = Color3.fromRGB(168, 160, 148)
+local CANOPY = Color3.fromRGB(238, 234, 226)
+local LETTER = Color3.fromRGB(255, 238, 210)
+local WARM = Color3.fromRGB(255, 214, 160)
+local PAINT_YELLOW = Color3.fromRGB(226, 182, 48)
+local PAINT_WHITE = Color3.fromRGB(230, 230, 226)
 
 -- what the dealership built (server state the remotes use)
 local frame: CFrame? = nil -- ground level at the lot's middle, -Z out of the showroom
@@ -44,7 +53,7 @@ local meet: { cf: CFrame, size: Vector3 }? = nil
 local prompts: { ProximityPrompt } = {}
 
 -- a display car's model id for each turntable (built on the server, skinned on the client)
-local function displayCar(parent: Instance, carId: string, top: Vector3, facing: CFrame)
+local function displayCar(parent: Instance, carId: string, top: Vector3, facing: CFrame, turn: number?)
 	local spec = Cars.ById[carId]
 	if not spec then
 		return
@@ -55,7 +64,7 @@ local function displayCar(parent: Instance, carId: string, top: Vector3, facing:
 		return
 	end
 	local h = (car:GetAttribute("Height") :: number?) or 4
-	car:PivotTo(CFrame.new(top + Vector3.new(0, h / 2 + 0.05, 0)) * facing.Rotation * CFrame.Angles(0, math.rad(35), 0))
+	car:PivotTo(CFrame.new(top + Vector3.new(0, h / 2 + 0.05, 0)) * facing.Rotation * CFrame.Angles(0, math.rad(turn or 35), 0))
 	for _, d in car:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.Anchored = true
@@ -100,188 +109,217 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 	model.Name = "LegendsMotors"
 	model.Parent = parent
 	local half = lot / 2
-	-- the showroom: x from -SW to +SW, z from Z0 (front glass) to Z1 (back wall), H tall; the
-	-- drive-out bay is its right end (x > BX)
-	local SW = half - 8
-	local Z0, Z1 = -half + 40, half - 72
-	local H = 30
-	local BX = SW - 40
-	local FLOOR_T = 0.25
-
-	-- forecourt: pale paving with a dark border, from the showroom to the sidewalk
-	mk(model, Vector3.new(lot, 0.12, Z0 + half), at(0, 0.06, (-half + Z0) / 2), Color3.fromRGB(150, 146, 140), Enum.Material.Pavement, { name = "Forecourt" })
-	-- the showroom floor: white polished stone
-	mk(model, Vector3.new(SW * 2, FLOOR_T, Z1 - Z0), at(0, FLOOR_T / 2, (Z0 + Z1) / 2), FLOOR, Enum.Material.Marble, { reflectance = 0.18, name = "ShowroomFloor" })
 	local detail = kit.lodGroup(model, "Detail", (base * CFrame.new(0, 10, 0)).Position, 520)
-	-- lit strips in the floor running to the windows
-	for x = -SW + 18, BX - 10, 36 do
-		deco(detail, Vector3.new(0.6, 0.05, Z1 - Z0 - 8), at(x, FLOOR_T + 0.03, (Z0 + Z1) / 2), ACCENT, Enum.Material.Neon, { transparency = 0.35 })
-	end
-	-- roof slab with a lit fascia band all round
-	mk(model, Vector3.new(SW * 2 + 6, 2.4, Z1 - Z0 + 6), at(0, H + 1.2, (Z0 + Z1) / 2), WHITE, Enum.Material.SmoothPlastic, { name = "Roof" })
-	deco(model, Vector3.new(SW * 2 + 6.2, 0.6, 0.3), at(0, H + 0.4, Z0 - 3.1), ACCENT, Enum.Material.Neon)
-	deco(model, Vector3.new(SW * 2 + 6.2, 0.6, 0.3), at(0, H + 0.4, Z1 + 3.1), ACCENT, Enum.Material.Neon)
-	-- glass walls between dark steel mullions (front, sides; the back wall is solid)
-	local function glassRun(x0: number, z0: number, x1: number, z1: number)
+
+	-- the showroom (2026-10-30 redesign): x from SX0 to SX1, front glass at SZ0, back wall at SZ1;
+	-- a tall front hall (HF) and a lower back hall (HB) under a stepped roof; the drive-out bay is
+	-- its right end (x > BAYX); the outdoor lot is right of it, the LEGENDS MEET car park behind
+	local SX0, SX1 = -half + 8, 28
+	local SZ0, SZ1 = -62, 40
+	local STEP = -6 -- where the tall front hall meets the lower back hall
+	local HF, HB = 40, 28
+	local FLOOR_T = 0.3
+	local BAYX = 4
+	local DOOR0, DOOR1 = -48, -34 -- the customer doors in the front glass
+
+	-- forecourt: light stone paving from the street to the showroom; the lot: dark asphalt
+	mk(model, Vector3.new(SX1 + 6 + half, 0.12, SZ0 + half), at((SX1 + 6 - half) / 2, 0.06, (-half + SZ0) / 2), Color3.fromRGB(196, 190, 178), Enum.Material.Pavement, { name = "Forecourt" })
+	-- the showroom floor: light polished stone
+	mk(model, Vector3.new(SX1 - SX0, FLOOR_T, SZ1 - SZ0), at((SX0 + SX1) / 2, FLOOR_T / 2, (SZ0 + SZ1) / 2), STONE, Enum.Material.Marble, { reflectance = 0.12, name = "ShowroomFloor" })
+
+	-- the stepped roof: dark metal slabs, a thick front fascia with the name, a glass clerestory where
+	-- the tall hall steps down
+	mk(model, Vector3.new(SX1 - SX0 + 4, 2.4, STEP - SZ0 + 4), at((SX0 + SX1) / 2, HF + 1.2, (SZ0 + STEP) / 2 - 1), DARK, Enum.Material.Metal, { name = "Roof" })
+	mk(model, Vector3.new(SX1 - SX0 + 4, 2.4, SZ1 - STEP + 2), at((SX0 + SX1) / 2, HB + 1.2, (STEP + SZ1) / 2 + 1), DARK, Enum.Material.Metal, { name = "Roof" })
+	mk(model, Vector3.new(SX1 - SX0, HF - HB, 0.4), at((SX0 + SX1) / 2, (HF + HB) / 2 + 1, STEP), GLASS, Enum.Material.Glass, { transparency = 0.45, reflectance = 0.3, name = "Clerestory" })
+	local fascia = mk(model, Vector3.new(SX1 - SX0 + 4.4, 8, 2), at((SX0 + SX1) / 2, HF + 4, SZ0 - 3), BRUSHED, Enum.Material.Metal, { name = "Fascia" })
+	kit.surfaceText(fascia, Enum.NormalId.Front, D.Name, LETTER, nil, nil, Enum.Font.GothamBlack, Vector2.new(1700, 110))
+	local fasciaLamp = deco(model, Vector3.new(0.5, 0.5, 0.5), at((SX0 + SX1) / 2, HF - 1, SZ0 - 8), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
+	kit.addLight("SpotLight", fasciaLamp, WARM, 24, 1.6, Enum.NormalId.Top, 100)
+
+	-- tall dark-glass walls between brushed-metal mullions
+	local function glassRun(x0: number, z0: number, x1: number, z1: number, h: number, y0: number?)
+		local bottom = y0 or 0
 		local a, b = Vector3.new(x0, 0, z0), Vector3.new(x1, 0, z1)
 		local len = (b - a).Magnitude
-		local n = math.max(1, math.floor(len / 20))
+		local n = math.max(1, math.floor(len / 14))
+		local mid0 = bottom + (h - bottom) / 2 + FLOOR_T
 		for k = 0, n - 1 do
 			local p0, p1 = a:Lerp(b, k / n), a:Lerp(b, (k + 1) / n)
 			local mid = (p0 + p1) / 2
 			local dir = (p1 - p0).Unit
-			local cf = base * CFrame.lookAt(Vector3.new(mid.X, H / 2 + FLOOR_T, mid.Z), Vector3.new(mid.X, H / 2 + FLOOR_T, mid.Z) + dir)
-			mk(model, Vector3.new(0.4, H, (p1 - p0).Magnitude), cf, GLASS, Enum.Material.Glass, { transparency = 0.72, reflectance = 0.25, name = "ShowroomGlass" })
-			mk(model, Vector3.new(0.9, H, 0.9), base * CFrame.new(p0.X, H / 2 + FLOOR_T, p0.Z), FRAME, Enum.Material.Metal, { name = "Mullion" })
+			local cf = base * CFrame.lookAt(Vector3.new(mid.X, mid0, mid.Z), Vector3.new(mid.X, mid0, mid.Z) + dir)
+			mk(model, Vector3.new(0.4, h - bottom, (p1 - p0).Magnitude), cf, GLASS, Enum.Material.Glass, { transparency = 0.55, reflectance = 0.3, name = "ShowroomGlass" })
+			mk(model, Vector3.new(0.7, h - bottom, 1.4), base * CFrame.new(p0.X, mid0, p0.Z), BRUSHED, Enum.Material.Metal, { name = "Mullion" })
 		end
-		mk(model, Vector3.new(0.9, H, 0.9), base * CFrame.new(b.X, H / 2 + FLOOR_T, b.Z), FRAME, Enum.Material.Metal, { name = "Mullion" })
+		mk(model, Vector3.new(0.7, h - bottom, 1.4), base * CFrame.new(b.X, mid0, b.Z), BRUSHED, Enum.Material.Metal, { name = "Mullion" })
 	end
-	glassRun(-SW, Z0, BX - 6, Z0) -- front (the bay's door is open glass)
-	glassRun(-SW, Z0, -SW, Z1)
-	glassRun(SW, Z0, SW, Z1)
-	mk(model, Vector3.new(SW * 2, H, 1.2), at(0, H / 2 + FLOOR_T, Z1), Color3.fromRGB(44, 46, 52), Enum.Material.SmoothPlastic, { name = "BackWall" })
-	-- the bay's door: a frame with a lit DRIVE OUT header, a wall between bay and showroom
-	mk(model, Vector3.new(0.9, H, Z1 - Z0 - 2), at(BX - 6, H / 2 + FLOOR_T, (Z0 + Z1) / 2 + 1), FRAME, Enum.Material.Metal, { name = "BayWall" })
-	local header = mk(model, Vector3.new(SW - BX + 6, 5, 1.4), at((BX - 6 + SW) / 2, H - 2.5 + FLOOR_T, Z0), FRAME, Enum.Material.Metal, { name = "BayHeader" })
-	kit.surfaceText(header, Enum.NormalId.Front, "DRIVE OUT", Color3.new(1, 1, 1), nil, nil, Enum.Font.GothamBlack, Vector2.new(600, 110))
-	for _, x in { BX - 4, SW - 2 } do
-		deco(model, Vector3.new(0.5, H - 6, 0.5), at(x, (H - 6) / 2 + FLOOR_T, Z0 - 0.8), ACCENT, Enum.Material.Neon)
+	glassRun(SX0, SZ0, DOOR0, SZ0, HF)
+	glassRun(DOOR0, SZ0, DOOR1, SZ0, HF, 11) -- (over the doors)
+	glassRun(DOOR1, SZ0, BAYX, SZ0, HF)
+	glassRun(SX0, SZ0, SX0, STEP, HF)
+	glassRun(SX0, STEP, SX0, SZ1, HB)
+	-- over the drive-out door, and its right side: a solid stone wall
+	mk(model, Vector3.new(SX1 - BAYX, HF - 16, 1.2), at((BAYX + SX1) / 2, 16 + (HF - 16) / 2 + FLOOR_T, SZ0), STONE_DARK, Enum.Material.Limestone, { name = "BayHeader" })
+	mk(model, Vector3.new(1.2, HF, STEP - SZ0), at(SX1, HF / 2 + FLOOR_T, (SZ0 + STEP) / 2), STONE_DARK, Enum.Material.Limestone, { name = "SideWall" })
+	mk(model, Vector3.new(1.2, HB, SZ1 - STEP), at(SX1, HB / 2 + FLOOR_T, (STEP + SZ1) / 2), STONE_DARK, Enum.Material.Limestone, { name = "SideWall" })
+	-- the back wall: warm stone inside
+	mk(model, Vector3.new(SX1 - SX0, HB, 1.2), at((SX0 + SX1) / 2, HB / 2 + FLOOR_T, SZ1), STONE_DARK, Enum.Material.Limestone, { name = "BackWall" })
+	-- between the bay and the hall: a brushed-metal wall, open at the back so a car rolls round
+	mk(model, Vector3.new(0.8, HF, 30), at(BAYX, HF / 2 + FLOOR_T, SZ0 + 15), BRUSHED, Enum.Material.Metal, { name = "BayWall" })
+
+	-- the customer doors: a metal frame and two glass leaves you walk through
+	mk(model, Vector3.new(DOOR1 - DOOR0 + 1.4, 1.2, 1.6), at((DOOR0 + DOOR1) / 2, 11 + FLOOR_T, SZ0), BRUSHED, Enum.Material.Metal, { name = "DoorHead" })
+	for _, s in { 0.25, 0.75 } do
+		deco(model, Vector3.new((DOOR1 - DOOR0) / 2 - 0.4, 10.6, 0.3), at(DOOR0 + (DOOR1 - DOOR0) * s, 5.5 + FLOOR_T, SZ0 - 0.4), GLASS, Enum.Material.Glass, { transparency = 0.6, reflectance = 0.25, name = "EntranceDoor" })
 	end
-	-- the bay: dark floor with yellow guide lines; the car starts here facing the street
-	deco(model, Vector3.new(SW - BX - 4, 0.05, Z1 - Z0 - 10), at((BX + SW) / 2 - 1, FLOOR_T + 0.03, (Z0 + Z1) / 2), Color3.fromRGB(36, 38, 44), Enum.Material.SmoothPlastic)
-	for _, dx in { -8, 8 } do
-		deco(model, Vector3.new(0.4, 0.06, Z1 - Z0 - 14), at((BX + SW) / 2 - 1 + dx, FLOOR_T + 0.05, (Z0 + Z1) / 2), Color3.fromRGB(240, 196, 40), Enum.Material.Neon, { transparency = 0.2 })
+	-- the canopy over the entrance: a thin stone-white slab on two slim columns, warm downlights
+	local CAN0, CAN1 = DOOR0 - 26, DOOR1 + 26
+	local canDepth = 26
+	local canopy = mk(model, Vector3.new(CAN1 - CAN0, 1.6, canDepth), at((CAN0 + CAN1) / 2, 24, SZ0 - canDepth / 2), CANOPY, Enum.Material.SmoothPlastic, { name = "Canopy" })
+	deco(model, Vector3.new(CAN1 - CAN0 + 0.2, 1.8, 0.4), at((CAN0 + CAN1) / 2, 24, SZ0 - canDepth), BRUSHED, Enum.Material.Metal)
+	for _, x in { CAN0 + 6, CAN1 - 6 } do
+		mk(model, Vector3.new(1.2, 23.2, 1.2), at(x, 11.6, SZ0 - canDepth + 4), BRUSHED, Enum.Material.Metal, { shape = Enum.PartType.Block, name = "CanopyColumn" })
 	end
-	local bayX = (BX + SW) / 2 - 1
-	local bayP = (base * CFrame.new(bayX, FLOOR_T, (Z0 + Z1) / 2 + 6)).Position
+	kit.addLight("SurfaceLight", canopy, WARM, 26, 1.2, Enum.NormalId.Bottom, 110)
+
+	-- the drive-out bay: dark floor, painted guide lines; the car starts here facing the street
+	local bayX = (BAYX + SX1) / 2
+	deco(model, Vector3.new(SX1 - BAYX - 2, 0.05, 44), at(bayX, FLOOR_T + 0.03, SZ0 + 24), Color3.fromRGB(46, 46, 50), Enum.Material.Concrete)
+	for _, dx in { -7, 7 } do
+		deco(detail, Vector3.new(0.4, 0.06, 40), at(bayX + dx, FLOOR_T + 0.06, SZ0 + 24), PAINT_YELLOW, Enum.Material.SmoothPlastic)
+	end
+	local bayP = (base * CFrame.new(bayX, FLOOR_T, SZ0 + 22)).Position
 	doorCF = CFrame.lookAt(bayP, bayP + base.LookVector)
-	-- kerb ramps where the bay's lane crosses the sidewalk and meets the road
-	-- (a wedge's slope faces its -Z: down towards the street; the road is CURB below the frame)
+	local exitSign = deco(model, Vector3.new(14, 2.6, 0.3), at(bayX, 17.6 + FLOOR_T, SZ0 - 0.75), DARK, Enum.Material.Metal, { name = "ExitSign" })
+	kit.surfaceText(exitSign, Enum.NormalId.Front, "DRIVE OUT", LETTER, nil, nil, Enum.Font.GothamBlack, Vector2.new(500, 90))
+	-- the lane from the bay door to the street, and a kerb ramp down to the road
+	for _, dx in { -7, 7 } do
+		deco(detail, Vector3.new(0.4, 0.05, SZ0 + half - 2), at(bayX + dx, 0.15, (SZ0 - half) / 2), PAINT_YELLOW, Enum.Material.SmoothPlastic)
+	end
 	local kerbZ = -half - C.SidewalkWidth
-	mk(model, Vector3.new(SW - BX + 2, CURB, 5), at(bayX, -CURB / 2, kerbZ - 2.5), Color3.fromRGB(110, 110, 114), Enum.Material.Concrete, { class = "Wedge", name = "KerbRamp" })
+	mk(model, Vector3.new(SX1 - BAYX + 2, CURB, 5), at(bayX, -CURB / 2, kerbZ - 2.5), Color3.fromRGB(110, 110, 114), Enum.Material.Concrete, { class = "Wedge", name = "KerbRamp" })
 
-	-- big LEGENDS MOTORS sign on the roof edge over the front glass
-	local sign = mk(model, Vector3.new(SW * 1.3, 8, 1.2), at(-12, H + 6.5, Z0 - 1), Color3.fromRGB(14, 14, 18), Enum.Material.SmoothPlastic, { name = "DealerSign" })
-	kit.surfaceText(sign, Enum.NormalId.Front, D.Name, Color3.new(1, 1, 1), nil, nil, Enum.Font.GothamBlack, Vector2.new(1400, 170))
-	deco(model, Vector3.new(SW * 1.3 + 0.4, 0.4, 1.4), at(-12, H + 2.4, Z0 - 1), ACCENT, Enum.Material.Neon)
-	local glow = deco(model, Vector3.new(0.5, 0.5, 0.5), at(-12, H + 6.5, Z0 - 6), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
-	kit.addLight("SpotLight", glow, Color3.fromRGB(200, 240, 255), 30, 2, Enum.NormalId.Back, 90)
-
-	-- the pylon sign on the forecourt's left corner, listing the brands
-	local brands: { string } = {}
-	local seen: { [string]: boolean } = {}
-	for _, series in Cars.Series do
-		local b = series.Brand or series.Name
-		if not seen[b] then
-			seen[b] = true
-			table.insert(brands, b)
-		end
-	end
-	local pylonP = at(-half + 10, 0, -half + 12)
-	mk(model, Vector3.new(7, 44, 3), pylonP * CFrame.new(0, 22, 0), Color3.fromRGB(20, 20, 24), Enum.Material.SmoothPlastic, { name = "Pylon" })
-	local pylonFace = deco(model, Vector3.new(6, 30, 0.2), pylonP * CFrame.new(0, 26, -1.6), Color3.fromRGB(20, 20, 24), Enum.Material.SmoothPlastic)
-	kit.surfaceText(pylonFace, Enum.NormalId.Front, table.concat(brands, "\n"), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(260, 1300))
-	local pylonTop = deco(model, Vector3.new(7.4, 4, 3.4), pylonP * CFrame.new(0, 42, 0), ACCENT, Enum.Material.Neon, { transparency = 0.1 })
-	kit.addLight("PointLight", pylonTop, ACCENT, 30, 1.2)
-
-	-- ceiling lights: long warm panels (a few real lights; the panels glow)
-	for x = -SW + 20, BX - 10, 40 do
-		for z = Z0 + 18, Z1 - 12, 34 do
-			local panel = deco(detail, Vector3.new(14, 0.3, 4), at(x, H - 0.3 + FLOOR_T, z), WARM, Enum.Material.Neon, { transparency = 0.2 })
-			kit.addLight("SurfaceLight", panel, WARM, 34, 1.4, Enum.NormalId.Bottom, 120)
-		end
+	-- inside: warm ceiling panels (a few real lights), the turntable stage, display plinths, the desk
+	for _, p in { { -78, -40 }, { -24, -40 }, { -78, 14 }, { -24, 14 } } do
+		local y = if p[2] < STEP then HF else HB
+		local panel = deco(detail, Vector3.new(18, 0.3, 6), at(p[1], y - 0.3 + FLOOR_T, p[2]), CANOPY, Enum.Material.SmoothPlastic)
+		kit.addLight("SurfaceLight", panel, WARM, 40, 1.3, Enum.NormalId.Bottom, 120)
 	end
 
-	-- brand zones: a turntable with a car under a hanging brand sign and a spotlight
-	local zoneCols = 4
-	local spanX = (BX - 10) - (-SW + 10)
-	local idx = 0
-	for _, carId in D.Display do
+	-- a stand sign by a car: its name and price
+	local function stand(parent2: Instance, carId: string, p: CFrame)
 		local spec = Cars.ById[carId]
 		if not spec then
-			continue
+			return
 		end
-		idx += 1
-		local col = (idx - 1) % zoneCols
-		local row = math.floor((idx - 1) / zoneCols)
-		local x = -SW + 10 + spanX * (col + 0.5) / zoneCols
-		local z = Z0 + 26 + row * 40
-		local tableTop = FLOOR_T + 1
-		mk(model, Vector3.new(1, 26, 26), at(x, FLOOR_T + 0.5, z) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(28, 28, 32), Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder, reflectance = 0.15, name = "Turntable" })
-		deco(model, Vector3.new(0.3, 26.6, 26.6), at(x, FLOOR_T + 0.2, z) * CFrame.Angles(0, 0, math.pi / 2), ACCENT, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.3 })
-		local series = Cars.SeriesOf[carId]
-		local brand = if series then series.series.Brand or series.series.Name else spec.Name
-		local plate = deco(detail, Vector3.new(16, 3.2, 0.4), at(x, H - 7, z - 2), Color3.fromRGB(16, 16, 20), Enum.Material.SmoothPlastic, { name = "BrandSign" })
-		kit.surfaceText(plate, Enum.NormalId.Front, brand, WHITE, nil, nil, Enum.Font.GothamBlack, Vector2.new(640, 128))
-		kit.surfaceText(plate, Enum.NormalId.Back, brand, WHITE, nil, nil, Enum.Font.GothamBlack, Vector2.new(640, 128))
-		deco(detail, Vector3.new(16.2, 0.25, 0.5), at(x, H - 8.75, z - 2), ACCENT, Enum.Material.Neon)
-		for _, dx in { -6, 6 } do
-			deco(detail, Vector3.new(0.12, 5.4, 0.12), at(x + dx, H - 2.7 - 0.3, z - 2), FRAME, Enum.Material.Metal)
-		end
-		local spot = deco(detail, Vector3.new(1.4, 0.6, 1.4), at(x, H - 1, z), Color3.fromRGB(255, 250, 240), Enum.Material.Neon)
-		kit.addLight("SpotLight", spot, Color3.fromRGB(255, 246, 232), 40, 2.4, Enum.NormalId.Bottom, 50)
-		-- the car, and a prompt by its front to open the buy screen on it
-		local topPos = (at(x, tableTop, z)).Position
-		displayCar(model, carId, topPos, base)
-		local stand = deco(detail, Vector3.new(1.2, 3.4, 0.3), at(x + 9, FLOOR_T + 1.7, z - 12), Color3.fromRGB(20, 20, 24), Enum.Material.SmoothPlastic, { name = "InfoStand" })
-		kit.surfaceText(stand, Enum.NormalId.Front, spec.Name .. "\n$" .. tostring(spec.Price) .. "  ·  LV " .. Cars.requiredLevel(carId), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(160, 160))
-		prompt(stand, "View cars", spec.Name, carId)
+		mk(parent2, Vector3.new(0.4, 3.2, 0.4), p * CFrame.new(0, 1.6, 0), BRUSHED, Enum.Material.Metal, { name = "StandPost" })
+		local plate = mk(parent2, Vector3.new(3.4, 2.2, 0.25), p * CFrame.new(0, 3.6, 0) * CFrame.Angles(math.rad(-20), 0, 0), DARK, Enum.Material.Metal, { name = "InfoStand" })
+		kit.surfaceText(plate, Enum.NormalId.Front, spec.Name .. "\n$" .. tostring(spec.Price) .. "  ·  LV " .. Cars.requiredLevel(carId), LETTER, nil, nil, Enum.Font.GothamBold, Vector2.new(240, 150))
+		prompt(plate, "View car", spec.Name, carId)
 	end
 
-	-- the sales desk at the back: a long white counter with a dark top, screens and a lit sign
-	local deskZ = Z1 - 14
-	local deskX = (-SW + BX) / 2
-	local desk = mk(model, Vector3.new(26, 4, 4), at(deskX, FLOOR_T + 2, deskZ), WHITE, Enum.Material.Marble, { name = "SalesDesk" })
-	mk(model, Vector3.new(27, 0.4, 5), at(deskX, FLOOR_T + 4.2, deskZ), Color3.fromRGB(20, 20, 24), Enum.Material.Granite)
-	deco(model, Vector3.new(26.2, 0.3, 0.2), at(deskX, FLOOR_T + 0.4, deskZ - 2.05), ACCENT, Enum.Material.Neon)
-	for _, dx in { -7, 0, 7 } do
-		deco(model, Vector3.new(3.2, 2, 0.15), at(deskX + dx, FLOOR_T + 5.6, deskZ + 0.8) * CFrame.Angles(math.rad(-10), 0, 0), Color3.fromRGB(30, 120, 200), Enum.Material.Neon, { transparency = 0.25 })
+	-- the turntable stage in the middle of the tall hall, under four spotlights
+	local stageX, stageZ = (SX0 + BAYX) / 2, (SZ0 + STEP) / 2 - 2
+	mk(model, Vector3.new(1.2, 38, 38), at(stageX, FLOOR_T + 0.6, stageZ) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(34, 34, 38), Enum.Material.Granite, { shape = Enum.PartType.Cylinder, reflectance = 0.1, name = "Turntable" })
+	deco(model, Vector3.new(0.9, 39.2, 39.2), at(stageX, FLOOR_T + 0.45, stageZ) * CFrame.Angles(0, 0, math.pi / 2), BRUSHED, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+	for k = 0, 3 do
+		local a = k * math.pi / 2 + math.pi / 4
+		local lp = at(stageX + math.cos(a) * 16, HF - 1.2, stageZ + math.sin(a) * 16)
+		local lamp = deco(detail, Vector3.new(1.6, 2, 1.6), lp, DARK, Enum.Material.Metal, { name = "StageLamp" })
+		kit.addLight("SpotLight", lamp, WARM, 48, 2.2, Enum.NormalId.Bottom, 40)
 	end
-	local salesSign = deco(model, Vector3.new(30, 4, 0.4), at(deskX, FLOOR_T + 13, Z1 - 0.9), Color3.fromRGB(16, 16, 20), Enum.Material.SmoothPlastic, { name = "SalesSign" })
-	kit.surfaceText(salesSign, Enum.NormalId.Front, "SALES  ·  NEW CARS", WHITE, nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 120))
+	if D.DisplayHero then
+		displayCar(model, D.DisplayHero, (at(stageX, FLOOR_T + 1.2, stageZ)).Position, base)
+		stand(model, D.DisplayHero, at(stageX + 14, FLOOR_T, stageZ - 19))
+	end
+
+	-- display plinths round the hall
+	local spots = { { SX0 + 18, SZ0 + 16 }, { SX0 + 18, SZ1 - 30 }, { BAYX - 16, SZ1 - 30 }, { stageX, SZ1 - 30 } }
+	for i, carId in D.Display do
+		local s = spots[i]
+		if not s then
+			break
+		end
+		mk(model, Vector3.new(16, 0.5, 24), at(s[1], FLOOR_T + 0.25, s[2]), STONE_DARK, Enum.Material.Limestone, { name = "Plinth" })
+		displayCar(model, carId, (at(s[1], FLOOR_T + 0.5, s[2])).Position, base)
+		stand(model, carId, at(s[1] + 10, FLOOR_T, s[2] - 12))
+	end
+
+	-- the sales counter at the back (the buy screen opens here), with a lounge in front
+	local deskX, deskZ = stageX, SZ1 - 8
+	local desk = mk(model, Vector3.new(30, 4, 4), at(deskX, FLOOR_T + 2, deskZ), STONE, Enum.Material.Marble, { name = "SalesDesk" })
+	mk(model, Vector3.new(31, 0.4, 5), at(deskX, FLOOR_T + 4.2, deskZ), DARK, Enum.Material.Granite)
+	local deskSign = deco(model, Vector3.new(32, 4, 0.4), at(deskX, FLOOR_T + 14, SZ1 - 0.9), DARK, Enum.Material.Metal, { name = "SalesSign" })
+	kit.surfaceText(deskSign, Enum.NormalId.Front, "SALES  ·  NEW CARS", LETTER, nil, nil, Enum.Font.GothamBlack, Vector2.new(900, 110))
 	prompt(desk, "Browse cars", D.Name)
-	-- lounge: two sofas and a low table by the desk
-	for _, dx in { -20, 20 } do
-		mk(model, Vector3.new(10, 2.2, 4), at(deskX + dx, FLOOR_T + 1.1, deskZ - 14), Color3.fromRGB(46, 46, 52), Enum.Material.Fabric, { name = "Sofa" })
-		mk(model, Vector3.new(10, 3, 1), at(deskX + dx, FLOOR_T + 2.5, deskZ - 12), Color3.fromRGB(46, 46, 52), Enum.Material.Fabric)
+	for _, dx in { -24, 24 } do
+		mk(model, Vector3.new(10, 2.2, 4), at(deskX + dx, FLOOR_T + 1.1, deskZ - 2), Color3.fromRGB(70, 60, 52), Enum.Material.Leather, { name = "Sofa" })
+		mk(model, Vector3.new(10, 3, 1), at(deskX + dx, FLOOR_T + 2.5, deskZ), Color3.fromRGB(70, 60, 52), Enum.Material.Leather)
 	end
 
-	-- behind: the service building and a car park
-	local backZ0 = Z1 + 6
-	local backZ1 = half - 4
-	mk(model, Vector3.new(SW, 22, backZ1 - backZ0), at(-SW / 2, 11, (backZ0 + backZ1) / 2), Color3.fromRGB(70, 74, 80), Enum.Material.SmoothPlastic, { name = "ServiceBuilding" })
-	local servSign = deco(model, Vector3.new(SW * 0.6, 3.4, 0.3), at(-SW / 2, 17, backZ0 - 0.2), Color3.fromRGB(16, 16, 20), Enum.Material.SmoothPlastic)
-	kit.surfaceText(servSign, Enum.NormalId.Front, "SERVICE", WHITE, nil, nil, Enum.Font.GothamBlack, Vector2.new(600, 70))
-	for k = 0, 2 do
-		deco(detail, Vector3.new(14, 12, 0.2), at(-SW + 16 + k * (SW - 20) / 2.6, 6, backZ0 - 0.15), Color3.fromRGB(150, 154, 160), Enum.Material.DiamondPlate)
+	-- the outdoor lot right of the showroom: dark asphalt, painted bays in two rows facing the
+	-- aisle, the budget cars in them
+	local LX0, LX1 = SX1 + 6, half - 4
+	mk(model, Vector3.new(LX1 - LX0, 0.15, SZ1 + half - 4), at((LX0 + LX1) / 2, 0.08, (SZ1 - half + 4) / 2), Color3.fromRGB(44, 44, 48), Enum.Material.Asphalt, { name = "Lot" })
+	local rows = { -half + 14, SZ0 + 30 } -- each row's middle (z)
+	local bayW = 14
+	local nBays = math.floor((LX1 - LX0 - 4) / bayW)
+	local lotIdx = 0
+	for r, rz in rows do
+		for b = 0, nBays do
+			local x = LX0 + 2 + b * bayW
+			deco(detail, Vector3.new(0.35, 0.05, 20), at(x, 0.17, rz), PAINT_WHITE, Enum.Material.SmoothPlastic)
+			if b < nBays then
+				lotIdx += 1
+				local carId = D.DisplayLot and D.DisplayLot[lotIdx]
+				if carId then
+					-- (front row noses to the street, back row to the aisle)
+					local facing = if r == 1 then base else base * CFrame.Angles(0, math.pi, 0)
+					local cx = x + bayW / 2
+					displayCar(model, carId, (at(cx, 0.16, rz)).Position, facing, 0)
+					stand(model, carId, at(cx + 5.5, 0.16, rz + (if r == 1 then 11 else -11)))
+				end
+			end
+		end
 	end
-	-- the car park: dark asphalt, painted bays, two lamps
-	local parkX0, parkX1 = 4, SW
+	for _, lp in { { LX0 + 8, -half + 30 }, { LX1 - 8, -half + 30 }, { LX1 - 8, SZ0 + 50 } } do
+		kit.streetLight(model, (at(lp[1], 0.15, lp[2])).Position, -base.RightVector)
+	end
+
+	-- the pylon sign on the forecourt's left corner: a tall stone blade with the name
+	local pylonP = at(-half + 9, 0, -half + 10)
+	mk(model, Vector3.new(6, 48, 3), pylonP * CFrame.new(0, 24, 0), STONE, Enum.Material.Limestone, { name = "Pylon" })
+	local pylonFace = deco(model, Vector3.new(4.6, 38, 0.3), pylonP * CFrame.new(0, 26, -1.6), DARK, Enum.Material.Metal)
+	kit.surfaceText(pylonFace, Enum.NormalId.Front, "L\nE\nG\nE\nN\nD\nS\n\nM\nO\nT\nO\nR\nS", LETTER, nil, nil, Enum.Font.GothamBlack, Vector2.new(120, 1000))
+	local pylonLamp = deco(model, Vector3.new(0.5, 0.5, 0.5), pylonP * CFrame.new(0, 2, -6), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
+	kit.addLight("SpotLight", pylonLamp, WARM, 50, 1.4, Enum.NormalId.Top, 30)
+
+	-- behind: the service building and the LEGENDS MEET car park
+	local backZ0 = SZ1 + 8
+	local backZ1 = half - 4
+	local servX1 = -40
+	mk(model, Vector3.new(servX1 - SX0, 20, backZ1 - backZ0), at((SX0 + servX1) / 2, 10, (backZ0 + backZ1) / 2), STONE_DARK, Enum.Material.Limestone, { name = "ServiceBuilding" })
+	local servSign = deco(model, Vector3.new(26, 3.4, 0.3), at((SX0 + servX1) / 2, 15, backZ0 - 0.2), DARK, Enum.Material.Metal)
+	kit.surfaceText(servSign, Enum.NormalId.Front, "SERVICE", LETTER, nil, nil, Enum.Font.GothamBlack, Vector2.new(600, 70))
+	for k = 0, 2 do
+		deco(detail, Vector3.new(12, 12, 0.2), at(SX0 + 10 + k * 16, 6, backZ0 - 0.15), Color3.fromRGB(150, 154, 160), Enum.Material.DiamondPlate)
+	end
+	local parkX0, parkX1 = servX1 + 6, half - 4
 	mk(model, Vector3.new(parkX1 - parkX0, 0.15, backZ1 - backZ0), at((parkX0 + parkX1) / 2, 0.08, (backZ0 + backZ1) / 2), Color3.fromRGB(40, 40, 44), Enum.Material.Asphalt, { name = "CarPark" })
-	local bayW = 12
 	local x = parkX0 + 4
 	while x + bayW <= parkX1 do
-		deco(detail, Vector3.new(0.35, 0.05, 18), at(x, 0.17, backZ1 - 11), Color3.fromRGB(230, 230, 226), Enum.Material.SmoothPlastic)
+		deco(detail, Vector3.new(0.35, 0.05, 18), at(x, 0.17, backZ1 - 11), PAINT_WHITE, Enum.Material.SmoothPlastic)
 		x += bayW
 	end
 	for _, px in { parkX0 + 10, parkX1 - 10 } do
 		kit.streetLight(model, (at(px, 0.15, backZ0 + 6)).Position, base.LookVector)
 	end
-	-- the car park is the LEGENDS MEET: a lit sign on the showroom's back wall, coloured light
-	-- strips between the bays
-	local meetSign = mk(model, Vector3.new(parkX1 - parkX0 - 10, 6, 0.8), at((parkX0 + parkX1) / 2, 20, Z1 + 1.1), Color3.fromRGB(14, 14, 18), Enum.Material.SmoothPlastic, { name = "MeetSign" })
-	kit.surfaceText(meetSign, Enum.NormalId.Back, "LEGENDS MEET", Color3.fromRGB(255, 120, 220), nil, nil, Enum.Font.GothamBlack, Vector2.new(1000, 140))
-	deco(model, Vector3.new(parkX1 - parkX0 - 9.6, 0.4, 0.9), at((parkX0 + parkX1) / 2, 16.8, Z1 + 1.1), Color3.fromRGB(80, 220, 255), Enum.Material.Neon)
-	local meetGlow = deco(model, Vector3.new(0.5, 0.5, 0.5), at((parkX0 + parkX1) / 2, 14, Z1 + 6), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
-	kit.addLight("SpotLight", meetGlow, Color3.fromRGB(255, 140, 230), 40, 1.6, Enum.NormalId.Bottom, 100)
-	local sx = parkX0 + 4 + bayW / 2
-	local stripCol = { Color3.fromRGB(255, 80, 200), Color3.fromRGB(70, 210, 255) }
-	local k = 0
-	while sx + bayW / 2 <= parkX1 do
-		k += 1
-		deco(detail, Vector3.new(0.3, 0.06, 16), at(sx - bayW / 2 + 0.6, 0.18, backZ1 - 11), stripCol[k % 2 + 1], Enum.Material.Neon, { transparency = 0.3 })
-		sx += bayW
-	end
+	-- the car park is the LEGENDS MEET: its name on the showroom's back wall, warm floodlight
+	local meetSign = mk(model, Vector3.new(44, 6, 0.8), at((parkX0 + SX1) / 2, 20, SZ1 + 1.1), DARK, Enum.Material.Metal, { name = "MeetSign" })
+	kit.surfaceText(meetSign, Enum.NormalId.Back, "LEGENDS MEET", LETTER, nil, nil, Enum.Font.GothamBlack, Vector2.new(1000, 140))
+	local meetGlow = deco(model, Vector3.new(0.5, 0.5, 0.5), at((parkX0 + parkX1) / 2, 16, SZ1 + 6), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
+	kit.addLight("SpotLight", meetGlow, WARM, 44, 1.4, Enum.NormalId.Bottom, 100)
 	local meetCF = at((parkX0 + parkX1) / 2, 0, (backZ0 + backZ1) / 2)
 	meet = { cf = meetCF, size = Vector3.new(parkX1 - parkX0, 30, backZ1 - backZ0) }
 	workspace:SetAttribute("MeetSpot", meetCF.Position)
