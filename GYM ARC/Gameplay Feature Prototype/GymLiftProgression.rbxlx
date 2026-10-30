@@ -1,0 +1,1153 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4"><Item class="Workspace" referent="RBX0000000B"><Properties><string name="Name">Workspace</string></Properties></Item><Item class="Lighting" referent="RBX0000000C"><Properties><string name="Name">Lighting</string></Properties></Item><Item class="ReplicatedStorage" referent="RBX00000003"><Properties><string name="Name">ReplicatedStorage</string></Properties><Item class="ModuleScript" referent="RBX00000001"><Properties><string name="Name">GymConfig</string><ProtectedString name="Source"><![CDATA[--[[
+	GymConfig
+	All tuning numbers for the lifting progression loop live here,
+	so balance can be changed without touching any logic.
+]]
+
+local Config = {}
+
+-- Weight upgrades (bought with Cash). "mult" = Strength gained per rep.
+Config.Weights = {
+	{ name = "5 kg", mult = 1, cost = 0, plate = 1.4, color = Color3.fromRGB(150, 150, 160) },
+	{ name = "10 kg", mult = 2, cost = 60, plate = 1.8, color = Color3.fromRGB(70, 160, 255) },
+	{ name = "20 kg", mult = 4, cost = 300, plate = 2.2, color = Color3.fromRGB(80, 210, 110) },
+	{ name = "40 kg", mult = 8, cost = 1500, plate = 2.6, color = Color3.fromRGB(255, 200, 40) },
+	{ name = "80 kg", mult = 16, cost = 7500, plate = 3.0, color = Color3.fromRGB(255, 110, 40) },
+	{ name = "160 kg", mult = 32, cost = 37500, plate = 3.4, color = Color3.fromRGB(190, 80, 255) },
+}
+
+-- Ranks unlocked by total Strength (never spent, so progress is never lost).
+Config.Ranks = {
+	{ name = "Twig", min = 0, color = Color3.fromRGB(200, 200, 200) },
+	{ name = "Rookie", min = 100, color = Color3.fromRGB(120, 200, 255) },
+	{ name = "Gym Rat", min = 600, color = Color3.fromRGB(110, 230, 120) },
+	{ name = "Beast", min = 3000, color = Color3.fromRGB(255, 200, 40) },
+	{ name = "Titan", min = 15000, color = Color3.fromRGB(255, 110, 40) },
+	{ name = "Olympian", min = 75000, color = Color3.fromRGB(200, 110, 255) },
+}
+
+Config.Rep = {
+	cooldown = 0.3, -- seconds between reps (server enforced)
+	perfectMult = 2, -- a rep inside the green zone counts double
+	comboStep = 0.1, -- each perfect in a row adds +10%...
+	comboMax = 1.0, -- ...up to +100%
+	needleSpeed = 0.9, -- needle sweeps per second at 5 kg
+	needleSpeedPerTier = 0.15, -- heavier weights = faster needle = harder timing
+	zoneWidth = 0.18, -- green zone size (0..1 of the bar)
+	tapTolerance = 0.6, -- max seconds between the client's tap time and the server receiving it
+}
+
+-- Body growth driven by total Strength (R15 body scale values).
+Config.Body = {
+	strengthForMax = 75000,
+	maxExtraWidth = 0.9,
+	maxExtraDepth = 0.7,
+	maxExtraHeight = 0.25,
+}
+
+Config.StationCount = 6
+Config.DataStoreName = "GymProgress_v1"
+
+return Config
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000002"><Properties><string name="Name">GymUtil</string><ProtectedString name="Source"><![CDATA[--[[
+	GymUtil
+	Small pure helpers shared by the server and the client.
+	The needle function is shared on purpose: the server re-computes where the
+	needle was when the player tapped, so "perfect" reps can't be faked.
+]]
+
+local Config = require(script.Parent:WaitForChild("GymConfig"))
+
+local Util = {}
+
+local SUFFIXES = { "", "K", "M", "B", "T" }
+
+function Util.format(n: number): string
+	n = math.floor(n)
+	local i = 1
+	local v = n
+	while v >= 1000 and i < #SUFFIXES do
+		v /= 1000
+		i += 1
+	end
+	if i == 1 then
+		return tostring(n)
+	end
+	return string.format(v < 10 and "%.2f%s" or (v < 100 and "%.1f%s" or "%.0f%s"), v, SUFFIXES[i])
+end
+
+-- Returns the rank index and the rank table for a Strength value.
+function Util.rankFor(strength: number)
+	local index = 1
+	for i, rank in ipairs(Config.Ranks) do
+		if strength >= rank.min then
+			index = i
+		end
+	end
+	return index, Config.Ranks[index]
+end
+
+-- Needle position 0..1 that ping-pongs across the timing bar.
+function Util.needle(elapsed: number, speed: number): number
+	local x = (elapsed * speed) % 2
+	return if x <= 1 then x else 2 - x
+end
+
+function Util.needleSpeed(tier: number): number
+	return Config.Rep.needleSpeed + (tier - 1) * Config.Rep.needleSpeedPerTier
+end
+
+-- Body scale values for a Strength value (log curve: fast early, slower later).
+function Util.bodyScale(strength: number)
+	local t = math.clamp(math.log10(1 + strength) / math.log10(1 + Config.Body.strengthForMax), 0, 1)
+	return 1 + Config.Body.maxExtraWidth * t, 1 + Config.Body.maxExtraDepth * t, 1 + Config.Body.maxExtraHeight * t
+end
+
+return Util
+]]></ProtectedString></Properties></Item></Item><Item class="ServerScriptService" referent="RBX00000007"><Properties><string name="Name">ServerScriptService</string></Properties><Item class="Script" referent="RBX00000006"><Properties><string name="Name">GymServer</string><ProtectedString name="Source"><![CDATA[--[[
+	GymServer
+	Server side of the lifting progression loop:
+	  Train at a station -> timed reps earn Strength + Cash -> buy heavier
+	  weights (bigger gains per rep) -> body grows and rank rises, visible to all.
+	The server owns every number: it validates rep timing, cooldowns and purchases.
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local Config = require(ReplicatedStorage:WaitForChild("GymConfig"))
+local Util = require(ReplicatedStorage:WaitForChild("GymUtil"))
+local GymWorld = require(script:WaitForChild("GymWorld"))
+local PlayerData = require(script:WaitForChild("PlayerData"))
+
+---------------------------------------------------------------------------
+-- Remotes
+---------------------------------------------------------------------------
+local remotes = Instance.new("Folder")
+remotes.Name = "GymRemotes"
+remotes.Parent = ReplicatedStorage
+
+local function makeRemote(name: string): RemoteEvent
+	local r = Instance.new("RemoteEvent")
+	r.Name = name
+	r.Parent = remotes
+	return r
+end
+
+local StartTraining = makeRemote("StartTraining") -- server -> client
+local StopTraining = makeRemote("StopTraining") -- both ways
+local Rep = makeRemote("Rep") -- client -> server (tap time)
+local RepResult = makeRemote("RepResult") -- server -> client
+local BuyWeight = makeRemote("BuyWeight") -- client -> server
+local StatsChanged = makeRemote("StatsChanged") -- server -> client
+local Announce = makeRemote("Announce") -- server -> all clients
+local RequestStats = makeRemote("RequestStats") -- client -> server (on join)
+
+---------------------------------------------------------------------------
+-- State
+---------------------------------------------------------------------------
+local stations = GymWorld.build(Config.StationCount)
+local sessions = {} -- [Player] = { station, zone, startTime, speed, lastRep, combo }
+
+local function now(): number
+	return workspace:GetServerTimeNow()
+end
+
+local function newZone(): number
+	local half = Config.Rep.zoneWidth / 2
+	return half + math.random() * (1 - Config.Rep.zoneWidth)
+end
+
+---------------------------------------------------------------------------
+-- Visible-to-others feedback: leaderstats, overhead tag, body size
+---------------------------------------------------------------------------
+local function setupLeaderstats(player: Player)
+	local ls = Instance.new("Folder")
+	ls.Name = "leaderstats"
+	local strength = Instance.new("StringValue")
+	strength.Name = "Strength"
+	strength.Parent = ls
+	local rank = Instance.new("StringValue")
+	rank.Name = "Rank"
+	rank.Parent = ls
+	ls.Parent = player
+end
+
+local function overheadFor(character: Model): BillboardGui?
+	local head = character:FindFirstChild("Head")
+	if not head then
+		return nil
+	end
+	local existing = head:FindFirstChild("GymTag")
+	if existing then
+		return existing :: BillboardGui
+	end
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "GymTag"
+	gui.Size = UDim2.fromOffset(220, 72)
+	gui.StudsOffset = Vector3.new(0, 2.8, 0)
+	gui.MaxDistance = 90
+	gui.Parent = head
+	local function label(name: string, y: number, h: number, font: Enum.Font): TextLabel
+		local l = Instance.new("TextLabel")
+		l.Name = name
+		l.BackgroundTransparency = 1
+		l.Position = UDim2.fromScale(0, y)
+		l.Size = UDim2.fromScale(1, h)
+		l.Font = font
+		l.TextScaled = true
+		l.TextColor3 = Color3.new(1, 1, 1)
+		l.TextStrokeTransparency = 0.2
+		l.Parent = gui
+		return l
+	end
+	label("Rank", 0, 0.42, Enum.Font.GothamBlack)
+	label("Info", 0.42, 0.3, Enum.Font.GothamBold)
+	local combo = label("Combo", 0.72, 0.28, Enum.Font.GothamBlack)
+	combo.TextColor3 = Color3.fromRGB(255, 150, 40)
+	return gui
+end
+
+local function refreshVisuals(player: Player)
+	local data = PlayerData.get(player)
+	if not data then
+		return
+	end
+	local _, rank = Util.rankFor(data.strength)
+	local ls = player:FindFirstChild("leaderstats")
+	if ls then
+		(ls :: any).Strength.Value = Util.format(data.strength)
+		;(ls :: any).Rank.Value = rank.name
+	end
+	local character = player.Character
+	if not character then
+		return
+	end
+	local tag = overheadFor(character)
+	if tag then
+		local rankLabel = tag:FindFirstChild("Rank") :: TextLabel
+		rankLabel.Text = string.upper(rank.name)
+		rankLabel.TextColor3 = rank.color
+		;(tag:FindFirstChild("Info") :: TextLabel).Text = "💪 " .. Util.format(data.strength) .. "   🏋 " .. Config.Weights[data.tier].name
+		local session = sessions[player]
+		local combo = session and session.combo or 0
+		;(tag:FindFirstChild("Combo") :: TextLabel).Text = if combo >= 3 then ("🔥 x" .. combo .. " COMBO") else ""
+	end
+	-- body grows with Strength (R15). Tweened so other players see a smooth "pump".
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid and humanoid.RigType == Enum.HumanoidRigType.R15 then
+		local w, d, h = Util.bodyScale(data.strength)
+		for name, value in pairs({ BodyWidthScale = w, BodyDepthScale = d, BodyHeightScale = h }) do
+			local scale = humanoid:FindFirstChild(name)
+			if scale and scale:IsA("NumberValue") and math.abs(scale.Value - value) > 0.005 then
+				TweenService:Create(scale, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Value = value }):Play()
+			end
+		end
+	end
+end
+
+local function pushStats(player: Player)
+	local data = PlayerData.get(player)
+	if data then
+		StatsChanged:FireClient(player, data)
+	end
+end
+
+---------------------------------------------------------------------------
+-- Training sessions
+---------------------------------------------------------------------------
+local function stopTraining(player: Player)
+	local session = sessions[player]
+	if not session then
+		return
+	end
+	sessions[player] = nil
+	local station = session.station
+	station.occupant = nil
+	station.prompt.Enabled = true
+	station.signText.Text = "FREE"
+	station.signText.TextColor3 = Color3.fromRGB(120, 255, 140)
+	GymWorld.placeBarbell(station.barbell, station.restCFrame)
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if root then
+		(root :: BasePart).Anchored = false
+	end
+	StopTraining:FireClient(player)
+	refreshVisuals(player)
+end
+
+local function startTraining(player: Player, station)
+	if station.occupant or sessions[player] then
+		return
+	end
+	local data = PlayerData.get(player)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not (data and humanoid and root and humanoid.Health > 0) then
+		return
+	end
+	station.occupant = player
+	station.prompt.Enabled = false
+	station.signText.Text = player.DisplayName
+	station.signText.TextColor3 = Color3.fromRGB(255, 220, 80)
+
+	-- stand the player on the platform, facing the bar
+	root.CFrame = station.standCFrame * CFrame.new(0, humanoid.HipHeight + root.Size.Y / 2, 0)
+	root.Anchored = true
+
+	local weight = Config.Weights[data.tier]
+	GymWorld.setPlates(station.barbell, weight.plate, weight.color)
+	GymWorld.placeBarbell(station.barbell, station.restCFrame)
+
+	local session = {
+		station = station,
+		zone = newZone(),
+		startTime = now(),
+		speed = Util.needleSpeed(data.tier),
+		lastRep = 0,
+		combo = 0,
+	}
+	sessions[player] = session
+	StartTraining:FireClient(player, {
+		startTime = session.startTime,
+		speed = session.speed,
+		zone = session.zone,
+		zoneWidth = Config.Rep.zoneWidth,
+	})
+end
+
+-- Barbell goes up and back down: everyone nearby sees the rep happen.
+local function animateRep(station)
+	local barbell = station.barbell
+	local lift = Instance.new("CFrameValue")
+	lift.Value = station.restCFrame
+	local conn = lift.Changed:Connect(function(cf)
+		GymWorld.placeBarbell(barbell, cf)
+	end)
+	local up = TweenService:Create(lift, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{ Value = station.restCFrame * CFrame.new(0, 2.6, 0.4) })
+	up:Play()
+	up.Completed:Once(function()
+		local down = TweenService:Create(lift, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{ Value = station.restCFrame })
+		down:Play()
+		down.Completed:Once(function()
+			conn:Disconnect()
+			lift:Destroy()
+		end)
+	end)
+end
+
+Rep.OnServerEvent:Connect(function(player: Player, tapTime: any)
+	local session = sessions[player]
+	local data = PlayerData.get(player)
+	if not (session and data) then
+		return
+	end
+	local t = now()
+	if t - session.lastRep < Config.Rep.cooldown then
+		return
+	end
+	-- trust the client's tap time only if it's believable (network delay window)
+	if type(tapTime) ~= "number" or tapTime ~= tapTime or math.abs(t - tapTime) > Config.Rep.tapTolerance then
+		tapTime = t
+	end
+	session.lastRep = t
+
+	local needle = Util.needle(tapTime - session.startTime, session.speed)
+	local perfect = math.abs(needle - session.zone) <= Config.Rep.zoneWidth / 2
+	session.combo = if perfect then session.combo + 1 else 0
+
+	local comboBonus = math.min(Config.Rep.comboMax, math.max(0, session.combo - 1) * Config.Rep.comboStep)
+	local gain = Config.Weights[data.tier].mult * (if perfect then Config.Rep.perfectMult else 1) * (1 + comboBonus)
+	gain = math.max(1, math.floor(gain + 0.5))
+
+	local _, oldRank = Util.rankFor(data.strength)
+	data.strength += gain
+	data.cash += gain
+	local _, newRankTable = Util.rankFor(data.strength)
+
+	session.zone = newZone()
+	RepResult:FireClient(player, {
+		gain = gain,
+		perfect = perfect,
+		combo = session.combo,
+		zone = session.zone,
+	})
+
+	local station = session.station
+	animateRep(station)
+	station.sound.PlaybackSpeed = 0.9 + math.random() * 0.2
+	station.sound:Play()
+	if perfect then
+		station.perfectSound:Play()
+		station.sparkles:Emit(14)
+	end
+
+	if newRankTable ~= oldRank then
+		Announce:FireAllClients(player.DisplayName, newRankTable.name, newRankTable.color, player.UserId)
+	end
+	refreshVisuals(player)
+	pushStats(player)
+end)
+
+StopTraining.OnServerEvent:Connect(stopTraining)
+RequestStats.OnServerEvent:Connect(pushStats)
+
+BuyWeight.OnServerEvent:Connect(function(player: Player)
+	local data = PlayerData.get(player)
+	if not data then
+		return
+	end
+	local nextTier = data.tier + 1
+	local weight = Config.Weights[nextTier]
+	if not weight or data.cash < weight.cost then
+		return
+	end
+	data.cash -= weight.cost
+	data.tier = nextTier
+	local session = sessions[player]
+	if session then
+		-- heavier plates show up right away, and the timing gets a bit faster
+		GymWorld.setPlates(session.station.barbell, weight.plate, weight.color)
+		session.speed = Util.needleSpeed(nextTier)
+		session.startTime = now()
+		StartTraining:FireClient(player, {
+			startTime = session.startTime,
+			speed = session.speed,
+			zone = session.zone,
+			zoneWidth = Config.Rep.zoneWidth,
+		})
+	end
+	refreshVisuals(player)
+	pushStats(player)
+end)
+
+for _, station in ipairs(stations) do
+	station.prompt.Triggered:Connect(function(player)
+		startTraining(player, station)
+	end)
+end
+
+---------------------------------------------------------------------------
+-- Player lifecycle
+---------------------------------------------------------------------------
+local function onCharacter(player: Player, character: Model)
+	local humanoid = character:WaitForChild("Humanoid") :: Humanoid
+	character:WaitForChild("Head")
+	refreshVisuals(player)
+	humanoid.Died:Connect(function()
+		stopTraining(player)
+	end)
+end
+
+local function onPlayerAdded(player: Player)
+	PlayerData.load(player)
+	setupLeaderstats(player)
+	player.CharacterAdded:Connect(function(character)
+		onCharacter(player, character)
+	end)
+	if player.Character then
+		task.spawn(onCharacter, player, player.Character)
+	end
+	pushStats(player)
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+for _, player in ipairs(Players:GetPlayers()) do
+	task.spawn(onPlayerAdded, player)
+end
+
+Players.PlayerRemoving:Connect(function(player)
+	stopTraining(player)
+	PlayerData.release(player)
+end)
+
+game:BindToClose(function()
+	for _, player in ipairs(Players:GetPlayers()) do
+		PlayerData.save(player)
+	end
+end)
+
+-- autosave every 2 minutes
+task.spawn(function()
+	while true do
+		task.wait(120)
+		for _, player in ipairs(Players:GetPlayers()) do
+			PlayerData.save(player)
+		end
+	end
+end)
+]]></ProtectedString></Properties><Item class="ModuleScript" referent="RBX00000004"><Properties><string name="Name">GymWorld</string><ProtectedString name="Source"><![CDATA[--[[
+	GymWorld
+	Builds the small gym (floor, spawn, lifting stations) from code so the
+	whole prototype lives in scripts. Each station has a barbell that moves on
+	the server, so every player sees reps happen.
+]]
+
+local GymWorld = {}
+
+local function part(props): Part
+	local p = Instance.new("Part")
+	p.Anchored = true
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	for k, v in pairs(props) do
+		(p :: any)[k] = v
+	end
+	return p
+end
+
+local function buildBarbell(parent: Instance): Model
+	local model = Instance.new("Model")
+	model.Name = "Barbell"
+	local bar = part({
+		Name = "Bar",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(7, 0.3, 0.3),
+		Material = Enum.Material.Metal,
+		Color = Color3.fromRGB(190, 190, 200),
+		CanCollide = false,
+	})
+	bar.Parent = model
+	for _, side in ipairs({ -1, 1 }) do
+		local plate = part({
+			Name = side < 0 and "PlateL" or "PlateR",
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(0.45, 1.4, 1.4),
+			Material = Enum.Material.SmoothPlastic,
+			Color = Color3.fromRGB(150, 150, 160),
+			CanCollide = false,
+		})
+		plate:SetAttribute("Side", side)
+		plate.Parent = model
+	end
+	model.PrimaryPart = bar
+	model.Parent = parent
+	return model
+end
+
+-- Places the barbell (and its plates) at a CFrame. Plates sit at the bar's ends.
+function GymWorld.placeBarbell(barbell: Model, cf: CFrame)
+	local bar = barbell:FindFirstChild("Bar") :: BasePart
+	bar.CFrame = cf
+	for _, plate in ipairs(barbell:GetChildren()) do
+		local side = plate:GetAttribute("Side")
+		if side then
+			(plate :: BasePart).CFrame = cf * CFrame.new(side * 2.9, 0, 0)
+		end
+	end
+end
+
+function GymWorld.setPlates(barbell: Model, size: number, color: Color3)
+	for _, plate in ipairs(barbell:GetChildren()) do
+		if plate:GetAttribute("Side") then
+			(plate :: BasePart).Size = Vector3.new(0.45, size, size)
+			;(plate :: BasePart).Color = color
+		end
+	end
+end
+
+function GymWorld.build(stationCount: number)
+	local folder = Instance.new("Folder")
+	folder.Name = "Gym"
+	folder.Parent = workspace
+
+	part({ Name = "Floor", Size = Vector3.new(140, 1, 140), Position = Vector3.new(0, -0.5, 0),
+		Material = Enum.Material.Concrete, Color = Color3.fromRGB(60, 62, 70) }).Parent = folder
+	part({ Name = "Mat", Size = Vector3.new(70, 0.2, 34), Position = Vector3.new(0, 0.1, -8),
+		Material = Enum.Material.Fabric, Color = Color3.fromRGB(35, 36, 42) }).Parent = folder
+
+	local spawn = Instance.new("SpawnLocation")
+	spawn.Anchored = true
+	spawn.Size = Vector3.new(10, 1, 10)
+	spawn.Position = Vector3.new(0, 0.5, 26)
+	spawn.Color = Color3.fromRGB(255, 200, 40)
+	spawn.Material = Enum.Material.Neon
+	spawn.Duration = 0
+	spawn.Parent = folder
+
+	local stations = {}
+	for i = 1, stationCount do
+		local row = (i - 1) // 3
+		local col = (i - 1) % 3
+		local center = Vector3.new((col - 1) * 20, 0, -2 - row * 16)
+		local look = CFrame.lookAt(center, center + Vector3.new(0, 0, -1)) -- players face -Z
+
+		local model = Instance.new("Model")
+		model.Name = "Station" .. i
+		model.Parent = folder
+
+		local platform = part({ Name = "Platform", Size = Vector3.new(9, 0.6, 7), CFrame = look * CFrame.new(0, 0.3, 0),
+			Material = Enum.Material.WoodPlanks, Color = Color3.fromRGB(150, 105, 60) })
+		platform.Parent = model
+		for _, side in ipairs({ -1, 1 }) do
+			part({ Name = "Rack", Size = Vector3.new(0.5, 6, 0.5), CFrame = look * CFrame.new(side * 3.9, 3, -2.2),
+				Material = Enum.Material.Metal, Color = Color3.fromRGB(40, 40, 45) }).Parent = model
+		end
+
+		-- the player stands here; HumanoidRootPart height is added when they step on
+		local standCFrame = look * CFrame.new(0, 0.6, 0.6)
+
+		local barbell = buildBarbell(model)
+		local restCFrame = look * CFrame.new(0, 4.2, -1.1)
+		GymWorld.placeBarbell(barbell, restCFrame)
+
+		local promptPart = part({ Name = "PromptPart", Size = Vector3.new(1, 1, 1), CFrame = look * CFrame.new(0, 3, 0),
+			Transparency = 1, CanCollide = false })
+		promptPart.Parent = model
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.ActionText = "Train"
+		prompt.ObjectText = "Overhead Press"
+		prompt.HoldDuration = 0
+		prompt.MaxActivationDistance = 9
+		prompt.RequiresLineOfSight = false
+		prompt.Parent = promptPart
+
+		-- sound + sparkles on the station, so nearby players hear and see each rep
+		local sound = Instance.new("Sound")
+		sound.SoundId = "rbxasset://sounds/swoosh.wav"
+		sound.Volume = 0.5
+		sound.RollOffMaxDistance = 60
+		sound.Parent = promptPart
+		local perfectSound = Instance.new("Sound")
+		perfectSound.Name = "Perfect"
+		perfectSound.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+		perfectSound.Volume = 0.6
+		perfectSound.RollOffMaxDistance = 60
+		perfectSound.Parent = promptPart
+
+		local sparkleAttachment = Instance.new("Attachment")
+		sparkleAttachment.Parent = barbell:FindFirstChild("Bar")
+		local sparkles = Instance.new("ParticleEmitter")
+		sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		sparkles.Rate = 0
+		sparkles.Lifetime = NumberRange.new(0.4, 0.8)
+		sparkles.Speed = NumberRange.new(6, 12)
+		sparkles.SpreadAngle = Vector2.new(180, 180)
+		sparkles.Color = ColorSequence.new(Color3.fromRGB(255, 220, 80))
+		sparkles.Size = NumberSequence.new(0.5, 0)
+		sparkles.LightEmission = 1
+		sparkles.Parent = sparkleAttachment
+
+		-- "FREE / In use" sign above the station, visible to everyone
+		local sign = Instance.new("BillboardGui")
+		sign.Size = UDim2.fromOffset(180, 40)
+		sign.StudsOffset = Vector3.new(0, 4.5, 0)
+		sign.MaxDistance = 70
+		sign.Parent = promptPart
+		local signText = Instance.new("TextLabel")
+		signText.Size = UDim2.fromScale(1, 1)
+		signText.BackgroundTransparency = 1
+		signText.Font = Enum.Font.GothamBlack
+		signText.TextScaled = true
+		signText.TextColor3 = Color3.fromRGB(120, 255, 140)
+		signText.TextStrokeTransparency = 0.3
+		signText.Text = "FREE"
+		signText.Parent = sign
+
+		table.insert(stations, {
+			id = i,
+			model = model,
+			standCFrame = standCFrame,
+			restCFrame = restCFrame,
+			barbell = barbell,
+			prompt = prompt,
+			sound = sound,
+			perfectSound = perfectSound,
+			sparkles = sparkles,
+			signText = signText,
+			occupant = nil,
+		})
+	end
+	return stations
+end
+
+return GymWorld
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000005"><Properties><string name="Name">PlayerData</string><ProtectedString name="Source"><![CDATA[--[[
+	PlayerData
+	Loads / saves each player's progress. Falls back to session-only data when
+	DataStores are unavailable (e.g. Studio without API access), and never saves
+	over a profile that failed to load.
+]]
+
+local DataStoreService = game:GetService("DataStoreService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("GymConfig"))
+
+local PlayerData = {}
+
+local store = nil
+pcall(function()
+	store = DataStoreService:GetDataStore(Config.DataStoreName)
+end)
+
+local profiles = {} -- [Player] = { data = {...}, canSave = bool }
+
+local function defaults()
+	return { strength = 0, cash = 0, tier = 1 }
+end
+
+function PlayerData.load(player: Player)
+	local data = defaults()
+	local canSave = false
+	if store then
+		local ok, saved = pcall(function()
+			return store:GetAsync("p_" .. player.UserId)
+		end)
+		if ok then
+			canSave = true
+			if type(saved) == "table" then
+				data.strength = tonumber(saved.strength) or 0
+				data.cash = tonumber(saved.cash) or 0
+				data.tier = math.clamp(tonumber(saved.tier) or 1, 1, #Config.Weights)
+			end
+		end
+	end
+	profiles[player] = { data = data, canSave = canSave }
+	return data
+end
+
+function PlayerData.get(player: Player)
+	local profile = profiles[player]
+	return profile and profile.data
+end
+
+function PlayerData.save(player: Player)
+	local profile = profiles[player]
+	if not (profile and profile.canSave and store) then
+		return
+	end
+	pcall(function()
+		store:SetAsync("p_" .. player.UserId, profile.data)
+	end)
+end
+
+function PlayerData.release(player: Player)
+	PlayerData.save(player)
+	profiles[player] = nil
+end
+
+return PlayerData
+]]></ProtectedString></Properties></Item></Item></Item><Item class="StarterPlayer" referent="RBX0000000A"><Properties><string name="Name">StarterPlayer</string></Properties><Item class="StarterPlayerScripts" referent="RBX00000008"><Properties><string name="Name">StarterPlayerScripts</string></Properties><Item class="LocalScript" referent="RBX00000009"><Properties><string name="Name">GymClient</string><ProtectedString name="Source"><![CDATA[--[[
+	GymClient
+	Client side: HUD (Strength, Cash, rank progress), the weight upgrade panel,
+	and the timing mini-game while training. All rewards come from the server;
+	the client only shows them and sends the moment the player tapped.
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+
+local Config = require(ReplicatedStorage:WaitForChild("GymConfig"))
+local Util = require(ReplicatedStorage:WaitForChild("GymUtil"))
+local remotes = ReplicatedStorage:WaitForChild("GymRemotes")
+
+local player = Players.LocalPlayer
+
+---------------------------------------------------------------------------
+-- UI helpers
+---------------------------------------------------------------------------
+local gui = Instance.new("ScreenGui")
+gui.Name = "GymUI"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local DARK = Color3.fromRGB(28, 30, 40)
+
+local function corner(parent: Instance, radius: number)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, radius)
+	c.Parent = parent
+end
+
+local function stroke(parent: Instance, color: Color3, thickness: number)
+	local s = Instance.new("UIStroke")
+	s.Color = color
+	s.Thickness = thickness
+	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	s.Parent = parent
+	return s
+end
+
+local function text(parent: Instance, props): TextLabel
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.Font = Enum.Font.GothamBlack
+	l.TextColor3 = Color3.new(1, 1, 1)
+	l.TextScaled = true
+	for k, v in pairs(props) do
+		(l :: any)[k] = v
+	end
+	local s = Instance.new("UIStroke")
+	s.Thickness = 2
+	s.Color = Color3.new(0, 0, 0)
+	s.Parent = l
+	l.Parent = parent
+	return l
+end
+
+local function button(parent: Instance, props, color: Color3): TextButton
+	local b = Instance.new("TextButton")
+	b.AutoButtonColor = true
+	b.BackgroundColor3 = color
+	b.Font = Enum.Font.GothamBlack
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.TextScaled = true
+	for k, v in pairs(props) do
+		(b :: any)[k] = v
+	end
+	corner(b, 10)
+	stroke(b, Color3.new(0, 0, 0), 3)
+	local pad = Instance.new("UIPadding")
+	pad.PaddingTop = UDim.new(0.18, 0)
+	pad.PaddingBottom = UDim.new(0.18, 0)
+	pad.Parent = b
+	b.Parent = parent
+	return b
+end
+
+local function sfx(id: string, volume: number, pitch: number?)
+	local s = Instance.new("Sound")
+	s.SoundId = id
+	s.Volume = volume
+	s.PlaybackSpeed = pitch or 1
+	SoundService:PlayLocalSound(s)
+	task.delay(3, function()
+		s:Destroy()
+	end)
+end
+
+local function pop(obj: GuiObject)
+	local scale = obj:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
+	scale.Parent = obj
+	scale.Scale = 1.25
+	TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+end
+
+---------------------------------------------------------------------------
+-- HUD: stats card (top-left)
+---------------------------------------------------------------------------
+local card = Instance.new("Frame")
+card.Size = UDim2.fromScale(0.24, 0.17)
+card.Position = UDim2.fromScale(0.015, 0.03)
+card.BackgroundColor3 = DARK
+card.BackgroundTransparency = 0.15
+corner(card, 14)
+stroke(card, Color3.new(0, 0, 0), 3)
+local cardRatio = Instance.new("UIAspectRatioConstraint")
+cardRatio.AspectRatio = 2.6
+cardRatio.Parent = card
+card.Parent = gui
+
+local strengthLabel = text(card, { Size = UDim2.fromScale(0.92, 0.3), Position = UDim2.fromScale(0.04, 0.05),
+	TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = Color3.fromRGB(255, 200, 40), Text = "💪 0" })
+local cashLabel = text(card, { Size = UDim2.fromScale(0.92, 0.24), Position = UDim2.fromScale(0.04, 0.36),
+	TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = Color3.fromRGB(110, 230, 120), Text = "$0" })
+
+local rankBar = Instance.new("Frame")
+rankBar.Size = UDim2.fromScale(0.92, 0.24)
+rankBar.Position = UDim2.fromScale(0.04, 0.68)
+rankBar.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+corner(rankBar, 8)
+rankBar.Parent = card
+local rankFill = Instance.new("Frame")
+rankFill.Size = UDim2.fromScale(0, 1)
+rankFill.BackgroundColor3 = Color3.fromRGB(255, 200, 40)
+corner(rankFill, 8)
+rankFill.Parent = rankBar
+local rankLabel = text(rankBar, { Size = UDim2.fromScale(0.96, 0.8), Position = UDim2.fromScale(0.02, 0.1),
+	Font = Enum.Font.GothamBold, Text = "Twig", ZIndex = 2 })
+
+---------------------------------------------------------------------------
+-- Weights upgrade panel (bottom-right)
+---------------------------------------------------------------------------
+local weightsButton = button(gui, { Size = UDim2.fromScale(0.16, 0.08), Position = UDim2.fromScale(0.82, 0.88),
+	AnchorPoint = Vector2.new(0, 0.5), Text = "🏋 WEIGHTS" }, Color3.fromRGB(70, 140, 255))
+
+local panel = Instance.new("Frame")
+panel.Size = UDim2.fromScale(0.3, 0.32)
+panel.AnchorPoint = Vector2.new(1, 1)
+panel.Position = UDim2.fromScale(0.98, 0.82)
+panel.BackgroundColor3 = DARK
+panel.Visible = false
+corner(panel, 16)
+stroke(panel, Color3.new(0, 0, 0), 3)
+local panelRatio = Instance.new("UIAspectRatioConstraint")
+panelRatio.AspectRatio = 1.5
+panelRatio.Parent = panel
+panel.Parent = gui
+
+text(panel, { Size = UDim2.fromScale(0.9, 0.16), Position = UDim2.fromScale(0.05, 0.05), Text = "UPGRADE WEIGHTS" })
+local currentLabel = text(panel, { Size = UDim2.fromScale(0.9, 0.14), Position = UDim2.fromScale(0.05, 0.25),
+	Font = Enum.Font.GothamBold, Text = "" })
+local nextLabel = text(panel, { Size = UDim2.fromScale(0.9, 0.16), Position = UDim2.fromScale(0.05, 0.42),
+	TextColor3 = Color3.fromRGB(110, 230, 120), Text = "" })
+local effectLabel = text(panel, { Size = UDim2.fromScale(0.9, 0.11), Position = UDim2.fromScale(0.05, 0.6),
+	Font = Enum.Font.GothamBold, TextColor3 = Color3.fromRGB(200, 200, 210), Text = "" })
+local buyButton = button(panel, { Size = UDim2.fromScale(0.8, 0.2), Position = UDim2.fromScale(0.1, 0.75), Text = "BUY" },
+	Color3.fromRGB(60, 190, 80))
+
+weightsButton.Activated:Connect(function()
+	panel.Visible = not panel.Visible
+	if panel.Visible then
+		pop(panel)
+	end
+	sfx("rbxasset://sounds/button.wav", 0.5)
+end)
+buyButton.Activated:Connect(function()
+	remotes.BuyWeight:FireServer()
+end)
+
+---------------------------------------------------------------------------
+-- Training panel (bottom-center): timing bar
+---------------------------------------------------------------------------
+local train = Instance.new("Frame")
+train.Size = UDim2.fromScale(0.5, 0.2)
+train.AnchorPoint = Vector2.new(0.5, 1)
+train.Position = UDim2.fromScale(0.5, 0.97)
+train.BackgroundTransparency = 1
+train.Visible = false
+train.Parent = gui
+
+text(train, { Size = UDim2.fromScale(1, 0.22), Text = "TAP / CLICK / SPACE when the line is in the green!" ,
+	Font = Enum.Font.GothamBold })
+local bar = Instance.new("Frame")
+bar.Size = UDim2.fromScale(1, 0.26)
+bar.Position = UDim2.fromScale(0, 0.26)
+bar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+corner(bar, 10)
+stroke(bar, Color3.new(0, 0, 0), 3)
+bar.ClipsDescendants = true
+bar.Parent = train
+local zone = Instance.new("Frame")
+zone.AnchorPoint = Vector2.new(0.5, 0)
+zone.Size = UDim2.fromScale(Config.Rep.zoneWidth, 1)
+zone.BackgroundColor3 = Color3.fromRGB(70, 220, 90)
+zone.Parent = bar
+local needle = Instance.new("Frame")
+needle.AnchorPoint = Vector2.new(0.5, 0)
+needle.Size = UDim2.new(0, 6, 1, 0)
+needle.BackgroundColor3 = Color3.new(1, 1, 1)
+needle.ZIndex = 3
+needle.Parent = bar
+
+local comboLabel = text(train, { Size = UDim2.fromScale(0.5, 0.2), Position = UDim2.fromScale(0, 0.56),
+	TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = Color3.fromRGB(255, 150, 40), Text = "" })
+local leaveButton = button(train, { Size = UDim2.fromScale(0.22, 0.24), Position = UDim2.fromScale(0.78, 0.56), Text = "LEAVE" },
+	Color3.fromRGB(220, 60, 60))
+
+local tapButton -- big TAP button for touch screens
+if UserInputService.TouchEnabled then
+	tapButton = button(gui, { Size = UDim2.fromScale(0.16, 0.16), AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.fromScale(0.97, 0.72), Text = "LIFT!", Visible = false }, Color3.fromRGB(255, 170, 40))
+	local r = Instance.new("UIAspectRatioConstraint")
+	r.Parent = tapButton
+end
+
+---------------------------------------------------------------------------
+-- Feedback: floating +gains, PERFECT text, rank-up feed
+---------------------------------------------------------------------------
+local function floatText(msg: string, color: Color3, size: number)
+	local l = text(gui, { Text = msg, TextColor3 = color, AnchorPoint = Vector2.new(0.5, 0.5),
+		Size = UDim2.fromScale(0.2 * size, 0.07 * size), Position = UDim2.fromScale(0.5 + (math.random() - 0.5) * 0.12, 0.7) })
+	pop(l)
+	local tween = TweenService:Create(l, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = l.Position - UDim2.fromScale(0, 0.14),
+		TextTransparency = 1,
+	})
+	tween:Play()
+	tween.Completed:Once(function()
+		l:Destroy()
+	end)
+end
+
+local feed = Instance.new("Frame")
+feed.Size = UDim2.fromScale(0.5, 0.2)
+feed.AnchorPoint = Vector2.new(0.5, 0)
+feed.Position = UDim2.fromScale(0.5, 0.02)
+feed.BackgroundTransparency = 1
+feed.Parent = gui
+local feedLayout = Instance.new("UIListLayout")
+feedLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+feedLayout.Padding = UDim.new(0, 4)
+feedLayout.Parent = feed
+
+remotes.Announce.OnClientEvent:Connect(function(name: string, rankName: string, color: Color3, userId: number)
+	local mine = userId == player.UserId
+	local l = text(feed, { Size = UDim2.fromScale(1, mine and 0.36 or 0.24),
+		Text = (mine and "🏆 YOU reached " or ("🏆 " .. name .. " reached ")) .. string.upper(rankName) .. "!",
+		TextColor3 = color })
+	pop(l)
+	if mine then
+		sfx("rbxasset://sounds/electronicpingshort.wav", 0.8, 0.7)
+	end
+	task.delay(3.5, function()
+		local t = TweenService:Create(l, TweenInfo.new(0.5), { TextTransparency = 1 })
+		t:Play()
+		t.Completed:Once(function()
+			l:Destroy()
+		end)
+	end)
+end)
+
+---------------------------------------------------------------------------
+-- Stats updates
+---------------------------------------------------------------------------
+local stats = { strength = 0, cash = 0, tier = 1 }
+
+local function render()
+	strengthLabel.Text = "💪 " .. Util.format(stats.strength)
+	cashLabel.Text = "$" .. Util.format(stats.cash)
+	local index, rank = Util.rankFor(stats.strength)
+	local nextRank = Config.Ranks[index + 1]
+	rankFill.BackgroundColor3 = rank.color
+	if nextRank then
+		local p = (stats.strength - rank.min) / (nextRank.min - rank.min)
+		rankFill.Size = UDim2.fromScale(math.clamp(p, 0, 1), 1)
+		rankLabel.Text = rank.name .. " → " .. nextRank.name .. "  " .. Util.format(stats.strength) .. "/" .. Util.format(nextRank.min)
+	else
+		rankFill.Size = UDim2.fromScale(1, 1)
+		rankLabel.Text = rank.name .. " (MAX RANK)"
+	end
+
+	local current = Config.Weights[stats.tier]
+	local nextWeight = Config.Weights[stats.tier + 1]
+	currentLabel.Text = "Now: " .. current.name .. "  (x" .. current.mult .. " per rep)"
+	if nextWeight then
+		nextLabel.Text = "Next: " .. nextWeight.name .. "  (x" .. nextWeight.mult .. " per rep)"
+		effectLabel.Text = "Every rep gives " .. (nextWeight.mult // current.mult) .. "x more. Timing gets faster!"
+		buyButton.Text = "BUY  $" .. Util.format(nextWeight.cost)
+		local affordable = stats.cash >= nextWeight.cost
+		buyButton.BackgroundColor3 = if affordable then Color3.fromRGB(60, 190, 80) else Color3.fromRGB(90, 90, 100)
+		weightsButton.Text = if affordable then "🏋 WEIGHTS  ⬆" else "🏋 WEIGHTS"
+	else
+		nextLabel.Text = "MAX WEIGHT!"
+		effectLabel.Text = "You lift the heaviest weight."
+		buyButton.Text = "MAXED"
+		buyButton.BackgroundColor3 = Color3.fromRGB(90, 90, 100)
+		weightsButton.Text = "🏋 WEIGHTS"
+	end
+end
+
+remotes.StatsChanged.OnClientEvent:Connect(function(data)
+	local boughtWeight = data.tier > stats.tier
+	stats = data
+	render()
+	if boughtWeight then
+		pop(panel)
+		floatText("NEW WEIGHT: " .. Config.Weights[stats.tier].name .. "!", Config.Weights[stats.tier].color, 1.4)
+		sfx("rbxasset://sounds/electronicpingshort.wav", 0.7, 1.3)
+	end
+end)
+remotes.RequestStats:FireServer()
+render()
+
+---------------------------------------------------------------------------
+-- Training mini-game
+---------------------------------------------------------------------------
+local training = nil -- { startTime, speed, zone }
+local lastTap = 0
+local renderConn: RBXScriptConnection? = nil
+
+local function setTraining(info)
+	training = info
+	train.Visible = info ~= nil
+	if tapButton then
+		tapButton.Visible = info ~= nil
+	end
+	comboLabel.Text = ""
+	if info then
+		zone.Position = UDim2.fromScale(info.zone, 0)
+		zone.Size = UDim2.fromScale(info.zoneWidth, 1)
+		if not renderConn then
+			renderConn = RunService.RenderStepped:Connect(function()
+				if training then
+					local x = Util.needle(workspace:GetServerTimeNow() - training.startTime, training.speed)
+					needle.Position = UDim2.fromScale(x, 0)
+				end
+			end)
+		end
+	elseif renderConn then
+		renderConn:Disconnect()
+		renderConn = nil
+	end
+end
+
+local function tap()
+	if not training then
+		return
+	end
+	local t = os.clock()
+	if t - lastTap < Config.Rep.cooldown then
+		return
+	end
+	lastTap = t
+	remotes.Rep:FireServer(workspace:GetServerTimeNow())
+end
+
+remotes.StartTraining.OnClientEvent:Connect(function(info)
+	setTraining(info)
+	pop(train)
+end)
+remotes.StopTraining.OnClientEvent:Connect(function()
+	setTraining(nil)
+end)
+
+remotes.RepResult.OnClientEvent:Connect(function(result)
+	if not training then
+		return
+	end
+	training.zone = result.zone
+	TweenService:Create(zone, TweenInfo.new(0.15), { Position = UDim2.fromScale(result.zone, 0) }):Play()
+	floatText("+" .. Util.format(result.gain) .. " 💪", if result.perfect then Color3.fromRGB(255, 220, 60) else Color3.new(1, 1, 1),
+		if result.perfect then 1.2 else 0.9)
+	if result.perfect then
+		floatText("PERFECT!", Color3.fromRGB(110, 255, 120), 1.5)
+		sfx("rbxasset://sounds/electronicpingshort.wav", 0.4, 1 + math.min(result.combo, 10) * 0.05)
+	else
+		sfx("rbxasset://sounds/clickfast.wav", 0.4)
+	end
+	comboLabel.Text = if result.combo >= 2 then ("🔥 COMBO x" .. result.combo .. "  (+" .. math.floor(math.min(Config.Rep.comboMax, (result.combo - 1) * Config.Rep.comboStep) * 100 + 0.5) .. "%)") else ""
+	if result.combo >= 2 then
+		pop(comboLabel)
+	end
+	-- small camera kick
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.CameraOffset = Vector3.new(0, -0.25, 0)
+		TweenService:Create(humanoid, TweenInfo.new(0.15), { CameraOffset = Vector3.zero }):Play()
+	end
+end)
+
+leaveButton.Activated:Connect(function()
+	remotes.StopTraining:FireServer()
+end)
+if tapButton then
+	tapButton.Activated:Connect(tap)
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if not training then
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+		tap()
+	elseif input.UserInputType == Enum.UserInputType.MouseButton1 and not processed then
+		tap()
+	elseif input.KeyCode == Enum.KeyCode.Q or input.KeyCode == Enum.KeyCode.ButtonB then
+		remotes.StopTraining:FireServer()
+	end
+end)
+]]></ProtectedString></Properties></Item></Item></Item></roblox>
