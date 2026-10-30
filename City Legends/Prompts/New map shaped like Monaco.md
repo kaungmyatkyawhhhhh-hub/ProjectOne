@@ -66,7 +66,7 @@ The owner thinks the current map looks bad and wants the **map shaped like Monac
   - only replace `CityLegends.rbxl` when the owner says the new map is better.
   - Never save over `CityLegendsCars.rbxl`.
 - **Using real map data (allowed, recommended):** OpenStreetMap has Monaco's coastline and road lines for free. You may use it **only as a shape guide** (coast outline, main road curves, harbour shapes): download it from the Overpass API or a Monaco `.osm` extract, scale it, and simplify it. Add "Map shape based on © OpenStreetMap contributors (ODbL)" to the game's credits. Don't copy real building names or signs.
-- **Keep the scale playable:** fit the strip to about the current map's size (studs). Roads stay **wide enough for our cars and 2+2 lanes on main roads** (`Config.City.LaneWidth` = 16). Real Monaco streets are too narrow, so widen them. Fewer, bigger roads beat many tiny alleys.
+- **Keep the roads the SAME SIZE as now** (owner, 2026-10-30): every road uses today's sizes: `Config.City.LaneWidth` = 16 studs per lane, `LanesPerSide` = 2 (so 2+2 lanes, `RoadWidth` = 64), `SidewalkWidth` = 10, and the highway's 3+3 lanes where there's a highway. Don't make roads narrower or wider. Real Monaco streets are much narrower; ours keep our size, so fit the strip to about the current map's size and use fewer, bigger roads instead of many tiny alleys.
 
 ## How to build it (phases: show the owner after each)
 **Phase 1: shape and roads (the base)**
