@@ -562,3 +562,157 @@ Every job has 4-5 ranks with rising pay:
 3. A long-delayed revamp: big rewrites stall a game.
 
 ---
+## 7. Vehicle Legends
+By QuadraTech, since 2020. Place 4566572536. **858 playing, 1.96 B visits, 94.5% likes (the highest of the 10)**, 16-player servers.
+
+Sources:
+- wiki (vehicle-legends.fandom.com, 354 pages): Test driving, Race Zone, Paint Materials, French Alps, Downtown, Mercury Tuning, Penthouse garage, Mileage rewards;
+- Roblox page and passes.
+
+### What it is
+Drive, race and explore. Cars, motorcycles, ATVs, planes, helicopters and boats. "The more you drive, race and explore, the more money you make."
+- Fictional brands: Cavalla (Ferrari), Bolt (Dodge), Crosser (Ford), Bevor (BMW).
+- **Several maps:** the main city plus French Alps (a mountain track with tunnels, snow, a village).
+
+### Learnable bits
+- **Test drive any car for 5 minutes** from the dealer before buying. It's free, but racing in a test car pays little.
+- **Race Zone** by the dealer: Bloxywood Circuit, Around the Map, Circuit, Highway, Drag, Offroad, Tropical Dash, Desert, Beach Dash.
+  - Checkpoints: miss one and you go back.
+  - **Racing with a friend or another player pays more than twice as much.**
+  - Wins pay $27-32K.
+- **Paint materials that boost driving money:** Rust x1.10, Silver x1.15, Gold x1.30, sold as passes (29 / 79 / 299). Cosmetic plus a small boost.
+- Car shows (players show off cars), a penthouse garage in the tallest tower.
+- Premium players +20% money, group +10%.
+- Passes: VIP 400, Gold 299, Radio 80, Nitro Customisation 80, Portable Garage 80, Silver 79, Rust 29.
+
+### Best 3 to learn
+1. **Free 5-minute test drives** at the dealer: no regret purchases.
+2. **More money for racing with others** (x2+): pushes co-play.
+3. A second map with a different mood (Alps).
+
+### Worst 3 to avoid
+1. Paid paint that boosts money (pay-to-earn).
+2. Too many vehicle kinds (planes, boats) spread thin.
+3. An old tuning shop and a penthouse garage left in the map with no real use (the wiki calls the penthouse garage "pointless").
+
+---
+
+## 8. Driving Simulator
+By Nocturne Entertainment, since 2019. Place 4410049285. **Only 15 playing now** (387 M visits, 88.8% likes, last update May 2026). 80-player servers.
+
+Sources:
+- wiki (roblox-driving-simulator.fandom.com, 20 pages): main, Race Areas, Races and Money/Race, Mega Box;
+- Roblox page and passes.
+
+### What it is
+Drive, race and customise supercars in an open-world city with jumps. Level up "to the top of the racing world".
+- **12 race areas:**
+  - drag: Area 52 Quarter Mile, Dock Quarter Mile, Main Street;
+  - sprint: Into the Mountains, Northern Rally, Midtown, Frenzy, Coastline Cruise;
+  - circuit: Downtown, Around the World, City Roundabout, Wall of Death, Madness City.
+- Pay scales with distance (about $500 a mile for 1st) and with the number of racers.
+- Passes: VIP 790, Radio 179, All Paints 179, Incognito 99.
+
+### Lesson
+**A once-big game that stopped updating (May 2026) has almost no players left.** Updates and live events keep games alive.
+
+### Best 3 to learn
+1. Race pay per mile, scaled by the number of racers.
+2. Clear race kinds (drag / sprint / circuit) named after places.
+3. Jumps and stunts across the open city.
+
+### Worst 3 to avoid
+1. No updates, so the player count collapses.
+2. An expensive VIP (790) with little in it.
+3. A thin wiki and no community hub.
+
+---
+
+## 9. Jailbreak (driving, police and robbery side)
+By Badimo, since 2017. Place 606849621. **4,013 playing, 8.08 B visits (the most), 87.7% likes**, 30-player servers.
+
+Sources:
+- wiki (jailbreak.fandom.com): main, Robberies, Season Pass, Contracts, Trading, Bounty, Rocket Fuel (Nitro);
+- Roblox page and passes.
+
+### Learnable bits
+- **Cops and robbers:** criminals escape the prison and rob; police arrest.
+  - **Dynamic robberies:** the bank, jewelry store, museum, power plant, cargo plane / ship / train, mansion, plus small stores (gas, donut, grocery).
+  - Moving heists (bank truck, cargo ship) police can "protect".
+  - **Robbery icons flash on the map when one is open.**
+- **Bounty:** rises with crimes, capped at 25,000. The top 6 bounties show on a **Bounty Board**. Police earn the bounty by arresting.
+  - Road spikes give police the bounty.
+  - Server chat announces "X collected Y's $N bounty!".
+- **Rocket Fuel (nitro):**
+  - 10 free a day (VIP 100); first join gives 60;
+  - Q or the flame button;
+  - purple-blue flame and a thruster sound;
+  - Robux top-ups at gas stations.
+- **Seasons and contracts** (XP, weekly contracts, limited cars) ran for years, then were **paused in Oct 2026 after Season 33**: even the biggest games rethink battle passes.
+- **Trading** only on a separate Trading Island, with phone/ID checks and a 30-day minimum (safety).
+- Passes: VIP 750, Pro Garage 450, Crime Boss 400, SWAT 400, Duffel Bag 345, VIP Trading 350, Car Stereo 200.
+
+### Best 3 to learn
+1. **Flashing map icons** for open robberies and events: always somewhere exciting to drive to.
+2. **Bounty board and server-wide messages:** the chase becomes a story everyone sees.
+3. **Nitro** as a daily free resource with a big flame and sound.
+
+### Worst 3 to avoid
+1. Guns and killing police (not our game).
+2. Seasons with XP grinds that became a chore (paused).
+3. Trading that needs heavy safety rules and checks: a big moderation load.
+
+---
+
+## 10. Car Crushers 2
+By the Car Crushers Community (Panwellz), since 2017. Place 654732683. **1,309 playing, 1.38 B visits, 93.5% likes**, 20-player servers.
+
+Sources:
+- wiki (car-crushers-2.fandom.com): main, Crushers, Money, Parts;
+- Roblox page (Update 91 Part 2 changelog) and passes.
+
+### Learnable bits
+- **Destroy cars for money:** 68 crushers in rows. Row 1 is free; more rows open by **Parts broken** (Row 2 at 1,250 parts...).
+- Car value is shared across its parts, so expensive cars pay more to wreck.
+- Bonus crushers, frenzy, a facility meltdown escape (huge payouts), Demolition Derby, races, monster invasion events.
+- **Money per mile** when driving outside.
+- **"FREE exclusive car after 2 M likes"**: a like goal for the whole community.
+- **Numbered updates** (Update 91) with a changelog in the description.
+- Passes: Rocket Booster 320, VIP 165, Energy Core 350, Rocket Launcher 750, Premium Crushers 190, Exotic Crushers 240, Gold / Platinum / Neon materials, private-server admin panel 390.
+
+### Best 3 to learn
+1. **Spectacle:** physics damage, parts flying, sounds. Satisfying to watch and to clip.
+2. **A community goal** ("free car at 2 M likes").
+3. Progress by a simple visible count (parts broken), not just cash.
+
+### Worst 3 to avoid
+1. Many passes that unlock the fun bits (crushers, launcher).
+2. Little driving skill needed.
+3. Damage physics is heavy on phones.
+
+---
+
+## Console games (feel and camera only; videos and general knowledge)
+- **Forza Horizon 5:**
+  - a festival map;
+  - **skill chains** (near miss, drift, air, speed, draft) that build a multiplier and bank when you stop crashing; our cut-up combo is the same idea;
+  - **Horizon Tour / Playlist** goals that change weekly;
+  - wheelspins for rewards (we avoid paid random);
+  - photo mode;
+  - **barn finds** (hidden classic cars to find on the map).
+  - Camera: a chase cam with gentle lag and FOV that grows a little with speed; cockpit, hood and bumper views.
+- **Need for Speed Heat / Unbound:**
+  - **day = legal races for money, night = illegal races for REP with police heat**; you must reach a safehouse to bank the night's rep;
+  - heat level multiplies rewards and risk;
+  - car meets;
+  - Unbound adds a weekly qualifier and **"takeovers" (style points in an area)**.
+  - Strong **neon, wet streets, light trails**. Exhaust pops and turbo flutter are loud on purpose.
+- **GTA V:**
+  - wanted stars with a search circle that shrinks when you hide;
+  - police radio chatter;
+  - garages you own inside your house (the car lift and display floors in the big apartments);
+  - first-person car interiors with working clusters;
+  - radio stations by genre;
+  - **property gives a spawn point and a reason to come home**.
+
+---
