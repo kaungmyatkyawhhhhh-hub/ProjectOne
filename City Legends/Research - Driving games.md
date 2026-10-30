@@ -448,3 +448,117 @@ A **tycoon + driving** hybrid:
 3. AFK auto-drive and pay-to-skip everything (days, events, challenges).
 
 ---
+## 5. Greenville
+By the group "Greenville, Wisconsin" (founder Milk74180), since 2017. Place 891852901. **3,498 playing, 1.48 B visits, 87.9% likes**, 30-player servers.
+
+Sources:
+- wiki (greenville-wisconsin.fandom.com, 2,133 articles): Greenville, Jobs, Houses, Roadmap Used Cars, DMV, Lane Keep Assist, Gamepass, Ignition Motor Parts, the 2023 Century Active car page, the old Fox Valley police page;
+- Roblox page and passes;
+- web guides (Deltia's Gaming beginner guide; a fandomwire article "top 5 most realistic Roblox car games").
+
+### What it is
+A **realistic small-town Wisconsin** driving and role-play game:
+- Greenville, Horton and Brookmere, joined by Interstate 41, with rural roads in between.
+- You live as a citizen: drive, work, own a house.
+- Guides quote 400+ base cars with **2,300+ trims** from about 108 brands, mostly fictional look-alikes (Bayro, Century, Meisterklassen, Wolfsburg, Shizuoka). Some are licensed (Audi, Land Rover…). **The Ford-based police cars and the whole Fox Valley police department were removed when the Ford licence ended**: the same Ford lesson as CDT.
+
+### First 3 minutes
+- Spawn near **Roadmap Used Cars** (the main dealer).
+- Buy a cheap starter car and explore.
+- A **DMV** next door does driving tests, licences and plate registration, with a ticket queue and a chime.
+- The realism *is* the game.
+
+### Cars and trims (the deepest trim system of the 10)
+- **Each car has many real-style trims.** The 2023 Century Active (a Lexus IS look-alike) alone has 16: 300 RWD/AWD, 350, 400h hybrid, 500 Performance, Sport, Premium, Ivy (package)…
+  - Each trim has its own 0-60 (5.4 → 3.2 s), top speed (144 / 166 mph) and price (from $41,235).
+- Trims are sorted by type (regular / luxury / sports): base trims are free, luxury trims need the Luxury pass, the 500 needs the Sports pass.
+- **Real car features:** Lane Keep Assist on modern cars (it keeps you in lane and changes lane with the blinker), interior quirks, accessories ("Ivy Accessories").
+- Customisation at the dealer and at Ignition Motor Parts: paint, plates, wheels, suspension.
+
+### Money and progress
+- **Jobs:**
+  - interactive: fire department (put out random fires for cash per flame), food shop, Burger Knight cashier, car wash, taxi, dealership job;
+  - **role-play jobs** pay **$650 every 5 minutes** wherever you are (even while driving).
+- No levels or races found: progress means buying cars and houses.
+
+### World
+- Realistic town:
+  - schools, shops, motel, DMV, gas, lake, interstate;
+  - police (state patrol);
+  - fire department;
+  - seasons (autumn now, Halloween limited cars, egg hunt, an April Fools "gRenVile" joke version).
+- **Houses:** 24+ styles across neighbourhoods (Lakeville, Greenhills…): mobile homes, 90s houses, farmhouses, lake lodges, modern, mid-century, mansions. A free apartment option.
+
+### Shop
+- Passes:
+  - Sports Vehicles 500, Luxury 250, Zero Emissions 125, Classic 75, Public Services 75 (fire/EMS jobs);
+  - Premium Customise 110, More Vehicle Storage 150, Stronger Flashlight 35.
+- Mostly car-class passes, like Highway Legends.
+
+### Best 3 to learn
+1. **Trims with real differences** (engine, hybrid, AWD, price, 0-60) inside one model: depth without new models.
+2. **Small real-life details** players love: DMV and licence, lane keep assist, blinkers that change lanes, a chime in the waiting room.
+3. Role-play jobs that pay on a timer while you drive: easy income for casual players.
+
+### Worst 3 to avoid
+1. Licensed brands vanish (the Ford police removal).
+2. No races or levels: little challenge for racers.
+3. Car classes behind Robux passes.
+
+---
+
+## 6. Southwest Florida (SWFL)
+By Strigid, since 2020. Place 5104202731. **364 playing, 782 M visits, 90.1% likes**, **50-player servers**.
+
+Sources:
+- official wiki (strigid.miraheze.org): Main Page, Driver's Club, Revamp, Tuning, Houses, Police, Criminal, Rift Driver;
+- Roblox page and passes.
+
+### What it is
+Role play in the Bonita Springs area, with jobs and fictional look-alike brands (Naan, Pohrse, Furai, Muaraci-Bens, Chavy, Fard). Its own warning: "a large game, lower-end PCs, phones and tablets may have performance issues". **Also has guns** (police, criminals). A big revamp is delayed; it promises to refund all cars and houses at 100%.
+
+### Jobs with ranks (the best job system here)
+Every job has 4-5 ranks with rising pay:
+- **Police:** Officer $220 → Captain $1,375.
+  - Radar gun, traffic cones, taser.
+  - Alerted when a robbery starts.
+- **Criminal:** rob businesses; more rob spots unlock by rank.
+- **Rift Driver (rideshare):** carry AI and real passengers. Partner $250 → Diamond $1,025. The faster you deliver, the more you earn; leave the car and you fail.
+- Firefighter, paramedic, hospital, dealership employee, mechanic shops, cafe, pizza, bank, gym…
+- **Dealer and mechanic job ranks unlock tuning:** rank 2+ for stage 2 engine, forced induction, brakes, weight reduction, transmission and **drivetrain swaps**; rank 3+ for stage 3.
+
+### Racing: the Driver's Club
+- A job with no salary: you **earn by racing**, and payouts rise with your club rank.
+- **14 race types; races cycle every 30-60 s with random rules** ("classics only", "rental kart only").
+- Drive into a blue circle and press REGISTER.
+- **Custom races** (99 R$ pass): layout, car / type / mod limits, laps, max players, time limit, friends-only.
+
+### Tuning
+- Three tuning shops.
+- Paint: factory (+ optional liveries), custom HSL colour (pass), reflectance (pass).
+- An Advanced Tuning pass (49 R$) for suspension, differential, steering and gearing.
+
+### Houses
+- **Buy a house type once, then claim any lot of that type for free.**
+- A house icon on the left side of the screen: Unclaim / Sell / **Manage** (add owners, **change the interior colour**).
+- Bungalows $475-487K (2 garage spaces + EV charger, caged patio), two-storey $725K (3 bed, 2 offices), mansions, condos.
+
+### Shop
+- Passes:
+  - Double Job Earnings 399, Double Pay Speed 399, Double Promotion Speed 299;
+  - Advanced Tuning 49, Custom Races 99;
+  - Increase Garage 199, Car Colours+ 49, Reflectance 19, Plate 49, Radio 19;
+  - weapons packs (rifles 249, shotgun 149), Law Enforcement+ 149.
+- Cheap tuning passes are friendly. The weapon passes don't fit our game.
+
+### Best 3 to learn
+1. **Job ranks with rising pay** that also unlock things (tuning stages from mechanic ranks, rob spots from criminal ranks).
+2. **A racing club with races that cycle every 30-60 s with random rules** (car type, one model only): always a race about to start, and every car has a race it can win.
+3. **Rideshare job** with real and AI passengers, paid by speed.
+
+### Worst 3 to avoid
+1. Guns and PvP: not for our game or audience.
+2. Heavy map that warns phones off.
+3. A long-delayed revamp: big rewrites stall a game.
+
+---
