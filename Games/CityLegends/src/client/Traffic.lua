@@ -67,6 +67,13 @@ local focusGetter: (() -> Vector3?)? = nil
 local function isPrivate(s: CityLayout.Segment): boolean
 	return s.private == true or (s.kind == "turn" and s.next[1] ~= nil and s.next[1].private == true)
 end
+
+-- Legends Isle's mountain roads (the climbs and the mid ring): only a few cars at a time
+-- (owner, 2026-10-30: "reduce traffic on the mountain"; Config.Traffic.Mountain*)
+local mountainCars = 0
+local function isMountain(s: CityLayout.Segment): boolean
+	return s.mountain == true or (s.kind == "turn" and s.next[1] ~= nil and s.next[1].mountain == true)
+end
 local publicNext: { [CityLayout.Segment]: { CityLayout.Segment } } = {}
 
 local function chooseNext(seg: CityLayout.Segment): CityLayout.Segment?
@@ -86,14 +93,25 @@ local function chooseNext(seg: CityLayout.Segment): CityLayout.Segment?
 	if seg.kind == "turn" then
 		return options[1]
 	end
-	-- prefer going straight (weight 3) over turning (weight 1)
+	-- prefer going straight (weight 3) over turning (weight 1); onto the mountain seldom, and not
+	-- at all while it already has its few cars
+	local function weight(o: CityLayout.Segment): number
+		local w = if o.dir == seg.dir then 3 else 1
+		if not seg.mountain and isMountain(o) then
+			w *= if mountainCars >= T.MountainMax then 0 else T.MountainTurnK
+		end
+		return w
+	end
 	local total = 0
 	for _, o in options do
-		total += if o.dir == seg.dir then 3 else 1
+		total += weight(o)
+	end
+	if total <= 0 then
+		return options[rng:NextInteger(1, #options)]
 	end
 	local r = rng:NextNumber() * total
 	for _, o in options do
-		r -= if o.dir == seg.dir then 3 else 1
+		r -= weight(o)
 		if r <= 0 then
 			return o
 		end
@@ -164,6 +182,9 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 	end
 	for _ = 1, 40 do
 		local seg = pool[rng:NextInteger(1, #pool)]
+		if seg.mountain and (mountainCars >= T.MountainMax or rng:NextNumber() > T.MountainShare) then
+			continue
+		end
 		local s = rng:NextNumber(8, math.max(9, seg.length - 25))
 		local pos = CityLayout.sample(seg, s)
 		local ok = true
@@ -178,6 +199,9 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 			end
 		end
 		if ok and isFree(pos, gap, ignore) then
+			if seg.mountain then
+				mountainCars += 1 -- (counted again each frame; this covers several placed at once)
+			end
 			return seg, s
 		end
 	end
@@ -391,6 +415,13 @@ function Traffic.update(dt: number)
 	refreshPlayerCars()
 	local now = workspace:GetServerTimeNow()
 
+	mountainCars = 0
+	for _, npc in Traffic.cars do
+		if npc.seg.mountain then
+			mountainCars += 1
+		end
+	end
+
 	-- reuse one obstacle record per NPC instead of allocating every frame
 	table.clear(obstacleList)
 	for _, npc in Traffic.cars do
@@ -431,10 +462,11 @@ function Traffic.update(dt: number)
 				local turnV = if nxt.turnSpeed then Config.mphToSps(nxt.turnSpeed) else TURN_SPEED
 				target = math.min(target, math.sqrt(turnV * turnV + 2 * T.Brake * 0.5 * math.max(remaining, 0)))
 			end
-			-- traffic light at the end of this lane
+			-- traffic light at the end of this lane: the front bumper stops behind the stop line
+			-- (owner, 2026-10-30: some cars stopped past it; the lane ends at the line's near edge)
 			local state = if seg.signal then CityLayout.lightState(seg.i, seg.j, seg.axis, now) else "G"
 			if state ~= "G" then
-				local stopDist = remaining - 0.5
+				local stopDist = remaining - npc.halfLen - T.StopLineMargin
 				local mustStop = state == "R"
 				if state == "Y" then
 					-- stop only if we can do it comfortably, otherwise clear the junction
@@ -454,8 +486,8 @@ function Traffic.update(dt: number)
 		-- yield before turning left across oncoming traffic
 		if seg.kind == "lane" then
 			local nxt = npc.nextSeg
-			if nxt and nxt.turning and nxt.dir == leftOf(seg.dir) and remaining < 30 and mustYieldLeft(npc, seg) then
-				local stopDist = remaining - 0.5
+			if nxt and nxt.turning and nxt.dir == leftOf(seg.dir) and remaining < 30 + npc.halfLen and mustYieldLeft(npc, seg) then
+				local stopDist = remaining - npc.halfLen - T.StopLineMargin
 				target = if stopDist < 0.3 then 0 else math.min(target, math.sqrt(2 * T.Brake * 0.6 * stopDist))
 			end
 		end

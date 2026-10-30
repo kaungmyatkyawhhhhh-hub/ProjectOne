@@ -134,6 +134,11 @@ Config.Traffic = {
 	Brake = 70,
 	EmergencyBrake = 140,
 	StopGap = 4, -- studs left between bumpers in a stopped queue
+	StopLineMargin = 1.2, -- studs between the front bumper and the stop line at a red light
+	-- Legends Isle's mountain roads (owner, 2026-10-30: "reduce traffic on the mountain")
+	MountainMax = 3, -- cars on the climbs and the mid ring at once
+	MountainShare = 0.2, -- of the spots picked there, this share is used
+	MountainTurnK = 0.25, -- how often a car turns up onto the mountain (vs other ways on)
 	FollowGap = 16, -- ...and at least a car length once moving (owner, 2026-10-29)...
 	Headway = 0.5, -- ...plus this many seconds of travel
 	LookAhead = 70,

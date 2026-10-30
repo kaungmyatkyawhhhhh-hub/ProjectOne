@@ -2101,10 +2101,10 @@ function Driving.step(dt: number)
 			brakeForce *= 1 - DF.AbsPulse * (0.5 + 0.5 * math.sin(s.absT * math.pi * 2 * DF.AbsHz))
 			s.shake = math.max(s.shake, 0.05)
 		end
-		-- reverse: up to 40% of top speed (45 mph at most), pulling away hard (owner, 2026-10-29:
-		-- "every car's reverse is too slow"; was a third, 35 mph at most, and a gentler pull)
-		local reverseTop = Config.mphToSps(math.min(45, s.spec.TopSpeed * 0.4))
-		local reversePull = math.max(s.accel * s.powerK * 1.5, 34)
+		-- reverse: up to half the top speed (60 mph at most), pulling away hard (owner, 2026-10-29
+		-- and again 2026-10-30: "most cars reverse is too slow"; was 40% / 45 mph and a softer pull)
+		local reverseTop = Config.mphToSps(math.min(60, s.spec.TopSpeed * 0.5))
+		local reversePull = math.max(s.accel * s.powerK * 2.2, 52)
 		if s.manual then
 			if engaged and gearNow < 0 and throttle > 0 and fwdSpeed > -reverseTop then
 				a -= if fwdSpeed > 2 then 140 * throttle else reversePull * throttle
@@ -2116,7 +2116,7 @@ function Driving.step(dt: number)
 			end
 		elseif fwdSpeed > 2 then
 			a -= brakeForce
-		elseif brake > 0 and throttle == 0 and fwdSpeed > -reverseTop and s.engineOn and not s.launchReady and s.stopT > 0.25 then
+		elseif brake > 0 and throttle == 0 and fwdSpeed > -reverseTop and s.engineOn and not s.launchReady and s.stopT > 0.12 then
 			-- automatic: hold the brake at a stop to reverse (not with the throttle down too). It waits
 			-- a moment after stopping, so a hard stop doesn't bounce straight into reverse
 			a -= reversePull * brake

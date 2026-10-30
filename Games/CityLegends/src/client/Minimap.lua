@@ -188,6 +188,17 @@ local function drawMap(map: Frame)
 	local _ = HW
 end
 
+-- the whole world drawn into `frame` for the loading screen (owner, 2026-10-30: "remove the intro
+-- instead just add a loading screen of the map"): returns the middle and size of what's worth
+-- showing (Legends Isle in the west to the Legends Loop in the east), in world studs
+function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
+	drawMap(frame)
+	local x0 = IsleLayout.Center.X - IsleLayout.MaxShore - 200
+	local x1 = C.LoopHalf + 200
+	local zr = math.max(C.LoopHalf, W.HalfZ) + 200
+	return Vector2.new((x0 + x1) / 2, 0), Vector2.new(x1 - x0, zr * 2)
+end
+
 ---------------------------------------------------------------------
 -- Blips
 ---------------------------------------------------------------------

@@ -1433,6 +1433,49 @@ local loadingFrame: Frame? = nil
 local loadingSkipped = false
 local LOADING_SKIP_AFTER = 5
 local LOADING_MAX = 10
+-- the loading screen shows the whole map behind the title (owner, 2026-10-30, in place of the intro
+-- film); Minimap draws it: returns the middle and size of the part to fit on screen
+local loadingMap: ((Frame) -> (Vector2, Vector2))? = nil
+local LOADING_WATER = Color3.fromRGB(14, 34, 58)
+
+local function addLoadingMap(f: Frame)
+	local draw = loadingMap
+	if not draw then
+		return
+	end
+	local holder = new("Frame", { Name = "Map", BackgroundColor3 = LOADING_WATER, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ClipsDescendants = true, ZIndex = 100, Parent = f })
+	local pivot = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(0, 0), Parent = holder })
+	local zoom = new("UIScale", { Parent = pivot })
+	local map = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 0), Parent = pivot })
+	local ok, middle, size = pcall(draw, map)
+	if not ok or typeof(middle) ~= "Vector2" or typeof(size) ~= "Vector2" then
+		holder:Destroy()
+		return
+	end
+	map.Position = UDim2.fromOffset(-middle.X, -middle.Y)
+	local screen = holder.AbsoluteSize
+	if screen.X < 10 then
+		screen = Vector2.new(1280, 720)
+	end
+	local fit = math.min(screen.X / size.X, screen.Y / size.Y) * 1.05
+	zoom.Scale = fit
+	-- a slow push in while it loads, and a shade so the title reads
+	tween(zoom, 24, { Scale = fit * 1.25 }, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+	local shade = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.25, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ZIndex = 50, Parent = holder })
+	new("UIGradient", {
+		Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(0.5, 0.05), NumberSequenceKeypoint.new(1, 0.55) }),
+		Rotation = 90,
+		Parent = shade,
+	})
+end
+
+-- what draws the map behind the loading screen (Main.client gives Minimap.drawWhole)
+function UI.setLoadingMap(draw: (Frame) -> (Vector2, Vector2))
+	loadingMap = draw
+	if loadingFrame and not loadingFrame:FindFirstChild("Map") then
+		addLoadingMap(loadingFrame)
+	end
+end
 function UI.showLoading(text: string)
 	if loadingSkipped then
 		return
@@ -1442,6 +1485,7 @@ function UI.showLoading(text: string)
 		return
 	end
 	local f = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), Size = UDim2.fromScale(1, 1), ZIndex = 100, Parent = gui })
+	addLoadingMap(f)
 	label({ Text = "CITY LEGENDS", TextSize = 46, Font = Enum.Font.GothamBlack, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.45), Size = UDim2.fromOffset(600, 60), ZIndex = 101, Parent = f })
 	label({ Name = "Status", Text = text, TextSize = 14, TextColor3 = Theme.SubText, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.53), Size = UDim2.fromOffset(600, 20), ZIndex = 101, Parent = f })
 	local bar = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.58), Size = UDim2.fromOffset(220, 3), BackgroundColor3 = Theme.Stroke, BorderSizePixel = 0, ZIndex = 101, Parent = f })

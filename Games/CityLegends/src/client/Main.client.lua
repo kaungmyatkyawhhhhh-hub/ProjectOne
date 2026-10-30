@@ -1,6 +1,7 @@
 --[[
 	CITY LEGENDS - client entry point
-	loading -> intro cutscene -> main menu (orbiting city camera) -> garage -> drive
+	loading (over the whole map) -> main menu (orbiting city camera) -> garage -> drive
+	(the intro film is off since 2026-10-30, owner: "remove the intro")
 ]]
 
 local Players = game:GetService("Players")
@@ -10,12 +11,10 @@ local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
-local Cars = require(Shared:WaitForChild("Cars"))
 
 local UI = require(script.Parent:WaitForChild("UI"))
 local Traffic = require(script.Parent:WaitForChild("Traffic"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
-local Cutscene = require(script.Parent:WaitForChild("Cutscene"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local BuildingSkin = require(script.Parent:WaitForChild("BuildingSkin"))
@@ -34,6 +33,7 @@ local camera = workspace.CurrentCamera
 
 require(script.Parent:WaitForChild("UIStyle")).init() -- one studio finish for every screen
 UI.init()
+UI.setLoadingMap(require(script.Parent:WaitForChild("Minimap")).drawWhole)
 UI.showLoading("Loading sounds...")
 Audio.musicKeyBlocked = Driving.isDriving -- in a car M is the gearbox
 Audio.init() -- test-loads the Creator Store sounds (falls back to built-in ones)
@@ -59,7 +59,6 @@ if not city then
 	warn("[CityLegends] no City in Workspace after 60 s, going on without it")
 end
 UI.showLoading("Shaping the cars...")
-CarSkin.preload({ Cars.CutsceneId })
 UI.showLoading("Starting engines...")
 task.wait(1) -- let the world finish replicating
 
@@ -183,11 +182,6 @@ local function bindCash()
 	end
 end
 task.spawn(bindCash)
-
----------------------------------------------------------------------
--- Intro cutscene
----------------------------------------------------------------------
-Cutscene.play()
 
 ---------------------------------------------------------------------
 -- Traffic (runs for the rest of the session)

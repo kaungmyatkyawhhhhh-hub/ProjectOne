@@ -201,6 +201,7 @@ export type Segment = {
 	signal: boolean, -- a traffic light stands at its end (city lanes)
 	speedK: number, -- traffic's speed on it, times its normal speed (highway: faster)
 	private: boolean?, -- in the gated community (traffic keeps out)
+	mountain: boolean?, -- Legends Isle's climbs and mid ring (traffic keeps it quiet)
 	turnSpeed: number?, -- mph for this connector (highway ramps), else the city's turn speed
 	next: { Segment },
 	samples: { number }, -- cumulative arc length per sample (for turns)
@@ -755,6 +756,11 @@ function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [stri
 			all[k].private = true
 		end
 	end
+	local function markMountain(from: number)
+		for k = from + 1, #all do
+			all[k].mountain = true
+		end
+	end
 	local rings: { [string]: { RingJoin } } = {}
 	local joinIdx: { [string]: { [string]: number } } = {}
 	for id, ring in IsleLayout.Rings do
@@ -770,11 +776,15 @@ function CityLayout.addWest(all: { Segment }, lanes: { Segment }, byKey: { [stri
 		if ring.private then
 			markPrivate(before)
 		end
+		if id ~= "isle" then
+			markMountain(before)
+		end
 	end
 	joinRing(all, rings.isle[joinIdx.isle.causeway], cwW, cwE)
 	for k, rd in IsleLayout.Roads do
 		local before = #all
 		local fwd, back = isleRoad(all, lanes, rd, 40 + k * 2)
+		markMountain(before)
 		joinRing(all, rings[rd.from][joinIdx[rd.from][rd.id]], back, fwd)
 		joinRing(all, rings[rd.to][joinIdx[rd.to][rd.id]], fwd, back)
 		if rd.private then
