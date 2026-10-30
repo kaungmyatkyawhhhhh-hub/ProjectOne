@@ -199,7 +199,7 @@ function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
 		l.BackgroundTransparency = 1
 		l.AnchorPoint = Vector2.new(0.5, 0.5)
 		l.Position = UDim2.fromOffset(x, z)
-		l.Size = UDim2.fromOffset(1500, 190)
+		l.Size = UDim2.fromOffset(2400, 300)
 		l.Font = Enum.Font.GothamBlack
 		l.Text = text
 		l.TextScaled = true
@@ -208,12 +208,12 @@ function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
 		l.ZIndex = 8
 		l.Parent = frame
 	end
-	local z0, z1 = CityLayout.roadCoord(0), CityLayout.roadCoord(N)
-	local above = z0 - 330
+	local z0 = CityLayout.roadCoord(0)
+	local above = z0 - 400
 	name("THE CITY", (CityLayout.roadCoord(0) + CityLayout.roadCoord(N)) / 2, above)
 	name("DOWNTOWN", (WestLayout.DowntownWest + WestLayout.DowntownEast) / 2, above)
-	name("LEGENDS ISLE", IsleLayout.Center.X, IsleLayout.Center.Z - IsleLayout.MaxShore - 260)
-	name("LEGENDS LOOP", (CityLayout.roadCoord(0) + CityLayout.roadCoord(N)) / 2, z1 + 520)
+	name("LEGENDS ISLE", IsleLayout.Center.X, IsleLayout.Center.Z - IsleLayout.MaxShore - 330)
+	name("LEGENDS LOOP", (CityLayout.roadCoord(0) + CityLayout.roadCoord(N)) / 2, C.LoopHalf - 330)
 	local x0 = IsleLayout.Center.X - IsleLayout.MaxShore - 200
 	local x1 = C.LoopHalf + 200
 	local zr = math.max(C.LoopHalf, W.HalfZ) + 200
