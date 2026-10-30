@@ -222,3 +222,94 @@ This makes players stay loyal to a brand.
 3. Very expensive tuning before brand levels (¥1.5-3.5 M per option) can feel like a paywall for new players.
 
 ---
+## 2. Driving Empire (the biggest; its way wins for interiors, clusters and the in-car view)
+Voldex (also owns Brookhaven). Started as Wayfort in 2019, renamed Driving Empire in 2020, bought by Voldex in Dec 2022. Place 3351674303. **33,700 playing, 3.4 B visits, 93% likes**, 22-player servers.
+
+Sources:
+- wiki pages: main, Customization, Customization Garage, Currencies, Jobs, Housing, Homes, Gamepasses, Police Station, Speed Traps, Photo Mode, Crates, Locations, Interstate 10, Leaderboards, and the player-made list "Cars with Interior graphic that include Light indicators";
+- videos (titles and descriptions):
+  - "The BEST CAR PROGRESSION (Starter Guide 2026)" (Dema);
+  - "Starting Over From $0" (Dema, 130K views);
+  - "FULL GUIDE To Make MILLIONS FAST 2026" (EJ Yoo);
+  - "I Tried Driving Empire WITH SOUNDS!" (CarterPlays);
+  - "Spookfest 2026" official;
+  - "2 NEW LIMITEDS & Scooters Update".
+
+### First 3 minutes
+- A join song plays ("Love In Space").
+- You spawn by the dealership in Wayfort and drive a free starter car right away.
+- You earn **cash and Miles just by driving**. Speed traps pay too.
+- The **Locations** button teleports you to every dealer, race, garage and the neighbourhood, and shows how many people are waiting at each race.
+- The first goal is set by the guides: save for a better car. "Starting from $0" videos are popular, so the climb from nothing is the fun.
+
+### Driving feel, camera, interiors (the owner's reference)
+- **Licensed real cars:** Lamborghini, McLaren, Porsche, Audi, Dodge and more, 300+ cars and boats. (We stay fictional.)
+- **In-car view:** first person on most cars, with **detailed cabins**: seats, dashboards, steering wheels that turn, and **live clusters**.
+  - The community keeps a wiki list of cars whose **interior blinkers flash in the cluster** ("bright cluster indicators", "clean analog dash signals", "modern digital indicators", "police dash indicators").
+  - Players care about this for role play: the cluster is part of the fun.
+- *(general knowledge)* The first-person camera sits at the driver's eye height with a normal FOV, so you see the cluster under the wheel rim and the road over the bonnet.
+- *(general knowledge)* The driver's hands grip the rim. The owner says they are **too big**; ours stay real-size.
+- **Photo mode:** time of day slider, FOV, depth of field, hide character. A cinematic free camera on PC (Shift+P).
+- Sound: engine sounds per car. A popular video is literally "I tried Driving Empire WITH SOUNDS", a mod-style video with better engine sounds, which shows players want **better engine audio**.
+- Car radio pass for 15 R$ (very cheap).
+
+### Cars and customisation
+- **Dealers:** Cars & Motorcycles, Boats, Planes & Helicopters, Houses. Selling a car gives cash back, plus the value of its performance upgrades.
+- **Customisation Garage** (drive into a bay, "Vine Hill Customs"). Mobile Customisation costs $50,000 in-game or a 50 R$ pass.
+  - **Looks:** primary paint (colour wheel + RGB + reflectance), secondary, chrome, rims (type + paint), body kits, calipers, interior colour, spoilers, wraps, licence plate, police mode.
+  - **Performance:** the separate tab.
+- **Limited cars and events:** Spookfest 2026 (candy, smash pumpkins, Halloween race, limited cars, trailers and parts), Winterfest presents, Easter, a LEGO Batman event (big brand collabs).
+- **Crates** (random cars for cash or Robux, odds shown) were **removed in Nov 2023 after player backlash**. A lesson: players hate paid random cars.
+
+### Money and progress
+- **Cash:** from driving, speed traps (pay more the faster you go), races, selling cars, and arrests for police.
+  - Group members +15% while driving, VIP +50%, 2x cash events.
+- **Miles:** a progress counter for badges and the leaderboard by the dealer.
+- **Bounty:** speeding past a trap, or driving on the wrong side (−$150, +15 bounty).
+- Cash packs: $2,500 for 20 R$ up to $1 M for 2,450 R$.
+- **Races:** sprint, circuit, highway, drag and cross country, at fixed race pads. There are leaderboards and community world records (highway race laps, drift scores).
+
+### World
+- **One big map:** city (Wayfort / Vine Hill), Interstate 10 and 410 (a long highway "into nowhere" for top speed), farm, beach, Laguna Heights neighbourhood, airport, water.
+- Knockable street lamps and signs.
+- Speed traps flash with a camera sound.
+- **Police:**
+  - teams: Citizens, Outlaws (rob ATMs; the cash comes when a timer ends or you reach the hideout), Security / police (the red circle under the car fills up to arrest).
+  - Jail is 60 s or bail; a Free Bail pass exists.
+  - Citizens get bounty only for speeding at traps or driving the wrong way.
+- **Jobs:** delivery driver (a pass for more), taxi event, bus.
+- **Houses (the model for our housing):**
+  - **8 blueprints** bought in the Houses Dealership: small $450K-750K, medium $1.45-1.9 M, large mansions $4.95-9.3 M.
+  - Claim **one plot** in Laguna Heights, with a **30 s cooldown** between claims.
+  - Interactive doors, lights, beds and sinks; **roommates**.
+  - Free garage spaces: 3 on small / medium plots, 5 on large; more cost cash or Robux.
+
+### Social
+- Car meets and community events, a Discord.
+- Races with waiting counts.
+- Roommates.
+- Police vs outlaws.
+
+### Shop and passes
+- Track Pass 450, VIP 500 (+50% driving cash), Luxury 399, Delivery 399, Water Fun 199, Premium Boost 125, Car Radio 15, Bus 25.
+- Cash packs.
+- Mostly fair: no random boxes since 2023. VIP's +50% cash is the strongest buy.
+
+### UI
+- Rounded white / grey panels with bright accent buttons.
+- Icon buttons bottom left (Jobs, Locations, Shop in yellow).
+- Landscape teleport menu with tabs on the left.
+- Photo mode button top left.
+- Weekly changing game icon (a new car each update).
+
+### Best 3 to learn
+1. **Interiors with live clusters** (needles, digital screens, blinker lights) plus a good first-person camera: players notice and make lists of them.
+2. **Many small reasons to drive:** speed traps that pay more the faster you go, Miles, police and outlaws, jobs, races with waiting counts, all on one big map.
+3. **Weekly updates plus big seasonal events** (Spookfest, Winterfest, collabs) with limited cars, so the game always has something new.
+
+### Worst 3 to avoid
+1. Paid random cars (crates): removed after backlash.
+2. Real-brand licensing is out of reach for us (and against our rules). We copy the *detail*, not the names.
+3. The driver's hands in first person are too big (owner).
+
+---
