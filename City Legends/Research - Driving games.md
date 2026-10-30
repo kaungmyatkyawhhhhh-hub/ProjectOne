@@ -374,3 +374,77 @@ Sources:
 3. Stage 4 tuning paywalled.
 
 ---
+## 4. Car Dealership Tycoon (CDT)
+By Foxzie, since 2018. Place 1554960397. **2,433 playing, 2.54 B visits, 92.9% likes**, 15-player servers.
+
+Sources:
+- wiki (car-dealership-tycoon.fandom.com, 882 articles): Main Page, Dealerships, Driver Reputation, Challenge System, Daily Rewards, Daily Spin, 7-Day Streak, Fusion System, Auto Drive, Houses, Map Mastery Quests, Customization, Highway Hijack, Cops and Crims, Friends Rally;
+- Roblox page and passes.
+
+### What it is
+A **tycoon + driving** hybrid:
+- you build your own car dealership on a plot;
+- buying cars and showing them on platforms earns **passive income every few seconds**;
+- you finish a dealership at 100% to unlock the next (Regular 1-3 → Fire, Police, Moto, Race, Hyper, Monster Jam).
+- 600+ vehicles, many licensed: Audi, Lamborghini, Pagani, Monster Jam. **Ford cars were removed in May 2025 after a copyright strike**: a warning about real brands.
+
+### First 3 minutes
+- Claim a plot, place the first car platforms, and **earn money while you stand there**.
+- Drive the open world (city, highway, airport, docks, mountains).
+- The first goal is the completion % at the bottom of the screen.
+- Offline earnings bring you back.
+
+### Money and progress (the most systems of any game here)
+- **Passive dealership income** and offline earnings.
+- **Daily rewards:** a 30-day ladder (cash, upgrade kits, boosts), with **a car every 5 days** (R32 GT-R + bodykit, E63, DBS…). The streak breaks after 48 h; you can pay 99 R$ to skip a day.
+- **Daily Spin:** a wheel every 8 h with **odds shown** (cars at 1%). A **Hyper Wheel after 25 spins** (cars at 25%).
+- **Challenges:** 3 random tasks a day (server time, driving, jobs, racing), 100-400 Stars each, spent in a Star Shop (cars, wraps, kits, decor).
+- **Driver Reputation** (2026): points from weekly events, season cars, race laps, daily rewards and spins, toward milestone rewards that reset each season.
+- **Trophy Seasons** (season 33 in 2026): a battle-pass style season every few weeks.
+- **Fusion:** "chop" unwanted cars for Fusion Coins; fuse cars up 5 tiers for NOS and tyre glow.
+- **Map Mastery Quests:**
+  - fly 20 min;
+  - 20 laps at the airport race;
+  - reach a speed total in the speed traps;
+  - 20 docks collectibles;
+  - 50K drift points…
+  - Each pays cars or kits.
+- **Auto Drive / AFK mode** (Nov 2025): an AI drives your car around an oval for cash, +0.1x after 15 min, plus a friends bonus. It keeps people online; the Playbook warns against AFK farming, so we don't copy it.
+- **Trading hub** (after finishing one dealership), Limited Museum.
+
+### World and activities
+- Open world: city, highway, airport, docks, mountains.
+- Races: champion times, custom races, records.
+- Drift events, drag, speed traps, deliveries.
+- **Houses:** Small $100K, Big $1 M with a garage, Mansion (VIP), Suburban. Spawned at a mailbox on a plot; the garage shows 3 cars like a dealership.
+- **Events nonstop:**
+  - Halloween, Christmas, Easter;
+  - licensed collabs (Coldplay, KIDZ BOP, FIFA, Monster Jam, Brawlhalla);
+  - **story events** like "Highway Hijack" (Act 1 meet the contact, Act 2 earn street cred in races, Act 3 chase the stolen shipment; skippable for 899 R$);
+  - "Cops and Crims" (rob the bank, ram criminals);
+  - **"Friends Rally": 50 laps raced with a Roblox friend wins a car**;
+  - a 7-Day Streak event with a car.
+
+### Customisation
+13 types:
+- paint (100+ colours, colour wall, gloss), wraps;
+- tyres, rims, spoilers, tyre smoke, underglow, bodykits, horns;
+- engine, turbo, brakes, suspension, alignment, **drivetrain swaps**.
+- Prices scale by class: body paint $600 / $2,400 / $5,400.
+
+### Shop and passes
+- VIP 500, 3x Vehicles 299, Special Colours 80; dealership unlocks 99 each.
+- Season pass, 2x money, day skips 99, challenge refresh for Robux, event skip 899.
+- **A lot of things to buy.** The spin odds are shown (good), but there are many monetised shortcuts.
+
+### Best 3 to learn
+1. **A pile of small daily loops:** daily reward ladder with cars every 5 days, 3 daily challenges, a spin wheel every 8 h, seasons. There's always something to claim when you log in.
+2. **Friend rewards:** the Friends Rally gives a car for racing laps *with a friend* (Roblox ranks co-play), plus a friends bonus.
+3. **Story events with acts** (meet the contact → street cred → the chase): turns driving into a short mission chain.
+
+### Worst 3 to avoid
+1. Licensed brands can be pulled overnight (Ford removed by copyright strike). We stay fictional.
+2. Too many currencies and systems (cash, Stars, Fusion Coins, Rep, tokens): confusing for new players.
+3. AFK auto-drive and pay-to-skip everything (days, events, challenges).
+
+---
