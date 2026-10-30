@@ -313,3 +313,64 @@ Sources:
 3. The driver's hands in first person are too big (owner).
 
 ---
+## 3. Highway Legends (our target look)
+By osddxx, since Nov 2023. Place 15288629078. **457 playing, 139 M visits, 92.6% likes, 9.0 M favourites** (a huge favourite count for its size: people save it and come back). 10-player servers.
+
+Sources:
+- wiki (highway-legends.fandom.com, "up to date as of the 04.09.2026 update"): main, Vehicle types, Gamepasses, Green Ring Map, Race Records, Stage 4 Tuning, Livery guide, Limited / VIP / Hyper / Group lists;
+- Roblox page and passes;
+- videos:
+  - "FIRST TIME PLAYING ROBLOX HIGHWAY LEGENDS" (ProjectSupreme, 49K);
+  - "PHYSICS + SOUNDS" (Inspiredside);
+  - "HOW TO GET MONEY, XP, FAST & CODES" (ZCSMK, 45K);
+  - "Only 500 MB?! Highway Legends Is INSANE!" (13 days ago).
+
+### What it is
+"The ultimate **highway cut-up simulator**: swerve in and out of traffic" at night.
+- **Cars:** 280+ wiki pages. Fictional brands close to real ones: Karen (McLaren), Furrocco (Ferrari), Purba (Porsche), Mercury EMG (Mercedes-AMG), Baguette (Bugatti), Konada (Koenigsegg), Naxon (Nissan), Donk (Dodge).
+- Car types: Classic, Luxury, Sports, Super, Hyper, Track, VIP, Tuner, Group, Special, **Limited** (60+).
+
+### First 3 minutes
+- Spawn at the highway dealership and garage, take a starter car, and drive straight into dense traffic.
+- **Money comes from close passes at speed (cut-ups).** It's the same loop as ours. The first video titles are all "first time playing… buying a Hellcat": the first big goal is the first fast muscle car.
+
+### Driving feel, camera, sound
+- Highway at night under **sodium lamps**, wet-looking concrete, tyre smoke, dense mixed traffic (promo art).
+- First person (V), handbrake, clutch (L Ctrl), lights, blinkers, hazards, gearbox mode (M): realistic controls like MR:T.
+- "PHYSICS + SOUNDS" videos show its engine sounds and physics are a selling point.
+- A small download ("Only 500 MB?!" video): it runs on phones.
+
+### Cars, tuning
+- Performance stages 1-3; **Stage 4 needs a pass** (199 R$). The wiki notes stage 4 tyres add grip, but stage 3 tyres are better for cutting up.
+- Extra Customisation pass 299.
+- **Livery pass** 149: preset liveries plus **community liveries by code** (a Top ID and Side ID shared in Discord).
+- Car classes behind passes: Tuner 249, Hyper 399, Track 349, VIP 399. "Passes get new cars without the price going up."
+- Group cars for joining the group; 60+ limited cars.
+
+### Money and progress
+- Cut-ups pay. 2x Money pass 249, 2x XP pass 299.
+- **Green Ring:** a teleport to a long Nürburgring-like track with its own dealer and garage. The race pays $75K ($150K with 2x).
+- Race records are kept by video proof on the wiki (Highway Race 1:32, Green Ring lap 3:17).
+
+### World
+- **A highway map** (no city) plus the Green Ring track.
+- No police, no houses: pure driving.
+
+### Shop
+- 10 passes: Tuner 249, Hyper 399, Track 349, VIP 399, Stage 4 Tuning 199, Extra Customisation 299, Livery 149, 2x Money 249, 2x XP 299, Car Radio 99.
+- Car classes behind passes feel a bit pay-to-own, but the passes keep growing in value.
+
+### UI
+- A clean dark HUD: bold italic gold and white logo, level bar, analog rev counter. This is our current HUD style (our earlier owner choice).
+
+### Best 3 to learn
+1. **One clear, skill-based money loop:** close passes in dense night traffic. Easy to learn, hard to master.
+2. **Night highway mood:** sodium lights, wet concrete, tyre smoke, light streaks. Small download, runs on phones.
+3. **Community liveries by code** and a race-records culture on the wiki and Discord.
+
+### Worst 3 to avoid
+1. Whole car classes (Hyper, Track, Tuner) locked behind Robux passes.
+2. Nothing to do off the highway (no city, houses or jobs): fewer reasons to come back.
+3. Stage 4 tuning paywalled.
+
+---
