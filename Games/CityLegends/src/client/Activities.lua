@@ -7,12 +7,17 @@
 	    it fainter); the clock and the checkpoint count are on screen; a medal by time
 	  * jobs: a drop point somewhere across town against a time limit
 	  * Legends chips: spinning gold chips hidden on the sidewalks; touch one (on foot or driving)
+	  * racing other players (owner, 2026-10-30): stopping in a race ring joins its lobby (the ring's
+	    sign shows who's waiting); it starts for everyone in it together, and with 2+ racers the
+	    places share a pot. Next to another driver, G (or the RACE pill) challenges them to a duel:
+	    a sprint to a junction across town
 ]]
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -30,7 +35,7 @@ local Activities = {}
 
 local call: RemoteFunction
 local folder: Folder
-local state: string = "idle" -- idle | countdown | race | job
+local state: string = "idle" -- idle | countdown | race | job | lobby | duel
 local still = 0
 local race: ActivityData.Race? = nil
 local cp = 1
@@ -41,6 +46,16 @@ local collected: { [number]: boolean } = {}
 local chipParts: { [number]: BasePart } = {}
 local startLabels: { [string]: TextLabel } = {}
 local busy = false
+-- racing other players
+local lobbies: { [string]: { count: number, startsIn: number, racing: boolean } } = {}
+local lobbiesAt = 0 -- os.clock() when `lobbies` came
+local lobbyRace: ActivityData.Race? = nil
+local lobbyStartsAt = 0
+local racers = 1
+local duel: { finish: Vector3, vs: string }? = nil
+local duelPill: TextButton? = nil
+local duelTarget: Player? = nil
+local askFrame: Frame? = nil
 
 local gui: ScreenGui
 local card: Frame
@@ -257,8 +272,15 @@ local function refreshLabels()
 	for _, r in ActivityData.races do
 		local b = bests[r.id]
 		local label = startLabels[r.id]
+		local l = lobbies[r.id]
 		if label then
-			label.Text = (if b then "Best " .. fmtTime(b) .. " · " else "") .. "Gold " .. fmtTime(r.gold) .. " · stop here"
+			if l and l.racing then
+				label.Text = "RACING NOW · " .. l.count .. " racers"
+			elseif l then
+				label.Text = l.count .. " waiting · starts in " .. math.max(0, math.ceil(l.startsIn - (os.clock() - lobbiesAt))) .. " · stop here to join"
+			else
+				label.Text = (if b then "Best " .. fmtTime(b) .. " · " else "") .. "Gold " .. fmtTime(r.gold) .. " · stop here"
+			end
 		end
 	end
 	for k, chip in chipParts do
@@ -294,6 +316,9 @@ local function endRun()
 	state = "idle"
 	race = nil
 	job = nil
+	duel = nil
+	lobbyRace = nil
+	racers = 1
 	card.Visible = false
 	arrow.Visible = false
 	showCheckpoints()
@@ -324,40 +349,80 @@ local function showCard()
 	card.Visible = true
 end
 
-local function startRace(r: ActivityData.Race)
-	state = "countdown"
-	race = r
-	cp = 1
-	showCard()
-	cardTitle.Text = "RACE · " .. string.upper(r.name)
-	cardTime.Text = fmtTime(0)
-	cardSub.Text = `Gold {fmtTime(r.gold)} · Silver {fmtTime(r.silver)}`
-	showCheckpoints()
+-- 3-2-1-GO, the last beat on the server's start time
+local function countdown(t0in: number, onGo: () -> ())
+	local goAt = os.clock() + t0in
 	task.spawn(function()
-		for _, n in { "3", "2", "1" } do
+		for k, n in { "3", "2", "1" } do
 			if state ~= "countdown" then
 				return
 			end
 			flashBig(n, Color3.new(1, 1, 1), 0.7)
 			Audio.play("tick", 0.6, 1)
-			task.wait(0.85)
+			local beat = goAt - (3 - k)
+			task.wait(math.max(0, beat - os.clock() - 1 + 0.001))
 		end
+		task.wait(math.max(0, goAt - os.clock()))
 		if state ~= "countdown" then
-			return
-		end
-		local ok, res = pcall(function()
-			return call:InvokeServer("raceStart", r.id)
-		end)
-		if not (ok and type(res) == "table" and res.ok) then
-			endRun()
-			UI.toast(if ok and type(res) == "table" and res.message then res.message else "Couldn't start the race", Theme.Warning)
 			return
 		end
 		flashBig("GO!", Theme.Money, 0.8)
 		Audio.play("tick", 0.8, 1.6)
 		t0 = os.clock()
+		onGo()
+	end)
+end
+
+local function startRace(r: ActivityData.Race, t0in: number, count: number)
+	state = "countdown"
+	race = r
+	cp = 1
+	racers = count
+	showCard()
+	cardTitle.Text = (if count >= 2 then "RACE · " .. count .. " RACERS · " else "RACE · ") .. string.upper(r.name)
+	cardTime.Text = fmtTime(0)
+	cardSub.Text = `Gold {fmtTime(r.gold)} · Silver {fmtTime(r.silver)}`
+	showCheckpoints()
+	countdown(t0in, function()
 		state = "race"
 	end)
+end
+
+-- stopped in a race ring: join its lobby and wait for the start
+local function joinLobby(r: ActivityData.Race)
+	busy = true
+	task.spawn(function()
+		local ok, res = pcall(function()
+			return call:InvokeServer("raceJoin", r.id)
+		end)
+		busy = false
+		if not (ok and type(res) == "table" and res.ok) then
+			UI.toast(if ok and type(res) == "table" and res.message then res.message else "Couldn't join the race", Theme.Warning)
+			return
+		end
+		state = "lobby"
+		lobbyRace = r
+		lobbyStartsAt = os.clock() + (tonumber(res.startsIn) or A.LobbySeconds)
+		showCard()
+		cardTitle.Text = "RACE · " .. string.upper(r.name)
+		cardTime.TextColor3 = Color3.new(1, 1, 1)
+		Audio.play("tick", 0.6, 1.2)
+	end)
+end
+
+local function leaveLobby(reason: string?)
+	if state ~= "lobby" then
+		return
+	end
+	endRun()
+	task.spawn(function()
+		pcall(function()
+			call:InvokeServer("raceLeave")
+		end)
+	end)
+	if reason then
+		UI.toast(reason, Theme.Warning)
+	end
 end
 
 local function finishRace()
@@ -375,8 +440,15 @@ local function finishRace()
 			bests[r.id] = res.best
 			refreshLabels()
 			local color = if res.medal == "Gold" then Color3.fromRGB(255, 205, 60) elseif res.medal == "Silver" then Color3.fromRGB(210, 215, 225) elseif res.medal == "Bronze" then Color3.fromRGB(205, 130, 70) else Color3.new(1, 1, 1)
-			flashBig(string.upper(res.medal), color, 3)
-			UI.popup(fmtTime(res.time) .. (if res.newBest then "  NEW BEST" else ""), res.cash, Theme.Money)
+			if type(res.place) == "number" and (tonumber(res.racers) or 1) >= 2 then
+				-- a race against players: the place first
+				local suffix = ({ "ST", "ND", "RD" })[res.place] or "TH"
+				flashBig(res.place .. suffix .. " OF " .. res.racers, if res.place == 1 then Color3.fromRGB(255, 205, 60) else Color3.new(1, 1, 1), 3)
+				UI.popup(string.upper(res.medal) .. " · " .. fmtTime(res.time) .. (if res.friend then "  · FRIEND BONUS" else ""), res.cash, Theme.Money)
+			else
+				flashBig(string.upper(res.medal), color, 3)
+				UI.popup(fmtTime(res.time) .. (if res.newBest then "  NEW BEST" else ""), res.cash, Theme.Money)
+			end
 			Audio.cutUp(4, "RACE")
 		else
 			UI.toast(if ok and type(res) == "table" and res.message then res.message else "Race not counted", Theme.Warning)
@@ -431,6 +503,157 @@ local function finishJob()
 	end)
 end
 
+---------------------------------------------------------------------
+-- Duels
+---------------------------------------------------------------------
+local function startDuel(finish: Vector3, vs: string, t0in: number)
+	if askFrame then
+		askFrame:Destroy()
+		askFrame = nil
+	end
+	state = "countdown"
+	duel = { finish = finish, vs = vs }
+	showCard()
+	cardTitle.Text = "DUEL · VS " .. string.upper(vs)
+	cardTime.Text = fmtTime(0)
+	cardSub.Text = "First to the yellow column wins " .. UI.formatCash(A.DuelPot)
+	cpNow.CFrame = CFrame.new(finish + Vector3.new(0, 30, 0)) * CFrame.Angles(0, 0, math.rad(90))
+	cpNow.Transparency = 0.6
+	countdown(t0in, function()
+		state = "duel"
+	end)
+end
+
+local function finishDuel()
+	state = "idle"
+	busy = true
+	task.spawn(function()
+		local ok, res = pcall(function()
+			return call:InvokeServer("duelFinish")
+		end)
+		busy = false
+		endRun()
+		if ok and type(res) == "table" and res.ok then
+			if res.place == 1 then
+				flashBig("YOU WIN", Color3.fromRGB(255, 205, 60), 3)
+				UI.popup("DUEL WON · " .. fmtTime(res.time), res.cash, Theme.Money)
+				Audio.cutUp(10, "DUEL")
+			else
+				flashBig("2ND", Color3.new(1, 1, 1), 2.5)
+				UI.popup("DUEL · " .. fmtTime(res.time), res.cash, Theme.Money)
+			end
+		end
+	end)
+end
+
+-- someone challenged you: ACCEPT or NO (it goes after a few seconds)
+local function showAsk(from: string, seconds: number)
+	if askFrame then
+		askFrame:Destroy()
+	end
+	local kit = UI.kit
+	local f: Frame = kit.new("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 120),
+		Size = UDim2.fromOffset(360, 132),
+		BackgroundColor3 = Theme.Panel,
+		BackgroundTransparency = 0.04,
+		ZIndex = 30,
+		Parent = gui,
+	}, { kit.corner(14), kit.stroke(Color3.fromRGB(255, 160, 40), 1.5, 0.1) })
+	askFrame = f
+	kit.label({ Text = "RACE CHALLENGE", TextSize = 13, Font = Enum.Font.GothamBlack, TextColor3 = Color3.fromRGB(255, 170, 60), Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 16), ZIndex = 31, Parent = f })
+	kit.label({ Text = string.upper(from) .. " WANTS TO RACE YOU", TextSize = 18, Font = Enum.Font.GothamBlack, Position = UDim2.fromOffset(10, 28), Size = UDim2.new(1, -20, 0, 24), TextScaled = true, ZIndex = 31, Parent = f })
+	local yes = kit.button("ACCEPT", Theme.Money, { Position = UDim2.new(0, 14, 1, -58), Size = UDim2.new(0.5, -20, 0, 46), TextSize = 17, ZIndex = 31, Parent = f })
+	local no = kit.button("NO", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 1, -58), Size = UDim2.new(0.5, -20, 0, 46), TextSize = 17, ZIndex = 31, Parent = f })
+	local function answer(v: boolean)
+		if askFrame ~= f then
+			return
+		end
+		f:Destroy()
+		askFrame = nil
+		task.spawn(function()
+			local ok, res = pcall(function()
+				return call:InvokeServer("duelAnswer", v)
+			end)
+			if v and not (ok and type(res) == "table" and res.ok) then
+				UI.toast(if ok and type(res) == "table" and res.message then res.message else "The race couldn't start", Theme.Warning)
+			end
+		end)
+	end
+	yes.Activated:Connect(function()
+		answer(true)
+	end)
+	no.Activated:Connect(function()
+		answer(false)
+	end)
+	Audio.play("tick", 0.8, 1.4)
+	task.delay(seconds, function()
+		if askFrame == f then
+			f:Destroy()
+			askFrame = nil
+		end
+	end)
+end
+
+-- the nearest other driver close enough to challenge (nil: none)
+local function nearestDriver(pos: Vector3): Player?
+	local cars = workspace:FindFirstChild("PlayerCars")
+	local best: Player? = nil
+	local bestD = A.DuelRange
+	for _, car in (if cars then cars:GetChildren() else {}) do
+		local uid = car:GetAttribute("Owner")
+		if car:IsA("Model") and type(uid) == "number" and uid ~= player.UserId and not car:GetAttribute("Stolen") then
+			local d = (car:GetPivot().Position - pos).Magnitude
+			local owner = Players:GetPlayerByUserId(uid)
+			if d < bestD and owner and owner.Character == nil then
+				best, bestD = owner, d
+			end
+		end
+	end
+	return best
+end
+
+local function challenge()
+	local target = duelTarget
+	if not target or state ~= "idle" or busy then
+		return
+	end
+	busy = true
+	task.spawn(function()
+		local ok, res = pcall(function()
+			return call:InvokeServer("duelAsk", target.UserId)
+		end)
+		busy = false
+		if ok and type(res) == "table" and res.ok then
+			UI.toast("Challenge sent to " .. target.DisplayName, Color3.fromRGB(255, 170, 60))
+		else
+			UI.toast(if ok and type(res) == "table" and res.message then res.message else "Couldn't send the challenge", Theme.Warning)
+		end
+	end)
+end
+
+local function buildDuelPill()
+	local kit = UI.kit
+	local b: TextButton = kit.button("", Color3.fromRGB(255, 160, 40), {
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -112),
+		Size = UDim2.fromOffset(if UI.isTouch then 210 else 250, 40),
+		TextSize = 14,
+		TextColor3 = Color3.fromRGB(255, 190, 90),
+		Visible = false,
+		ZIndex = 12,
+		Parent = gui,
+	})
+	b.Activated:Connect(challenge)
+	duelPill = b
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if not processed and input.KeyCode == Enum.KeyCode.G and b.Visible then
+			challenge()
+		end
+	end)
+end
+
 local function myPos(): (Vector3?, number)
 	local root = Driving.getRoot()
 	if root then
@@ -478,6 +701,31 @@ local function update(dt: number)
 
 	local wanted = (player:GetAttribute("Wanted") :: number?) or 0
 	local driving = Driving.isDriving()
+	-- the duel pill: another driver close by, you free to race
+	if duelPill then
+		local who = if state == "idle" and driving and wanted == 0 and pos and not busy then nearestDriver(pos) else nil
+		duelTarget = who
+		duelPill.Visible = who ~= nil
+		if who then
+			duelPill.Text = (if UI.isTouch then "RACE " else "G   RACE ") .. string.upper(who.DisplayName)
+		end
+	end
+	if state == "lobby" then
+		local r = lobbyRace
+		if not (r and driving and pos) or wanted > 0 then
+			leaveLobby("You left the race lobby")
+			return
+		end
+		if Vector3.new(pos.X - r.start.X, 0, pos.Z - r.start.Z).Magnitude > 28 then
+			leaveLobby("You drove out of the race ring")
+			return
+		end
+		local l = lobbies[r.id]
+		local count = if l then l.count else 1
+		cardTime.Text = fmtTime(math.max(0, lobbyStartsAt - os.clock()))
+		cardSub.Text = (if count >= 2 then count .. " racers" else "Waiting for racers") .. " · stay in the ring"
+		return
+	end
 	if state == "idle" then
 		if not (pos and driving and wanted == 0 and speed < 5 and not busy) then
 			still = 0
@@ -501,7 +749,7 @@ local function update(dt: number)
 			if still > 1.2 then
 				still = 0
 				if found then
-					startRace(found)
+					joinLobby(found)
 				elseif dispatch then
 					startJob(dispatch)
 				end
@@ -524,7 +772,7 @@ local function update(dt: number)
 		local r = race
 		local t = os.clock() - t0
 		cardTime.Text = fmtTime(t)
-		cardSub.Text = `CP {cp - 1}/{#r.checkpoints} · Gold {fmtTime(r.gold)}`
+		cardSub.Text = (if racers >= 2 then `{racers} RACERS · ` else "") .. `CP {cp - 1}/{#r.checkpoints} · Gold {fmtTime(r.gold)}`
 		local target = r.checkpoints[cp]
 		pointArrow(target)
 		if target and Vector3.new(pos.X - target.X, 0, pos.Z - target.Z).Magnitude < A.CheckpointRadius then
@@ -538,6 +786,14 @@ local function update(dt: number)
 		end
 		if t > r.bronze * 3 then
 			cancel("Race timed out")
+		end
+	elseif mode == "duel" and duel and pos then
+		local d = duel
+		cardTime.Text = fmtTime(os.clock() - t0)
+		pointArrow(d.finish)
+		if Vector3.new(pos.X - d.finish.X, 0, pos.Z - d.finish.Z).Magnitude < A.CheckpointRadius * 1.5 then
+			finishDuel()
+			return
 		end
 	elseif mode == "job" and job and pos then
 		local drop = ActivityData.dropPoints[job.dest]
@@ -557,6 +813,8 @@ end
 function Activities.getTarget(): Vector3?
 	if state == "race" and race then
 		return race.checkpoints[cp]
+	elseif (state == "duel" or state == "countdown") and duel then
+		return duel.finish
 	elseif state == "job" and job then
 		return ActivityData.dropPoints[job.dest].pos
 	end
@@ -568,6 +826,50 @@ function Activities.init()
 	call = remotes:WaitForChild("ActivityCall") :: RemoteFunction
 	buildWorld()
 	buildHud()
+	buildDuelPill()
+	local push = remotes:WaitForChild("RacePush", 30) :: RemoteEvent?
+	if push then
+		push.OnClientEvent:Connect(function(msg: any)
+			if type(msg) ~= "table" then
+				return
+			end
+			if msg.kind == "lobbies" and type(msg.list) == "table" then
+				lobbies = msg.list
+				lobbiesAt = os.clock()
+				refreshLabels()
+			elseif msg.kind == "go" then
+				local r = ActivityData.raceById[msg.id]
+				if r and (state == "lobby" or state == "idle") then
+					startRace(r, tonumber(msg.t0in) or 3, tonumber(msg.racers) or 1)
+				end
+			elseif msg.kind == "finished" then
+				local suffix = ({ "st", "nd", "rd" })[msg.place] or "th"
+				UI.toast(tostring(msg.name) .. " finished " .. tostring(msg.place) .. suffix, Color3.fromRGB(255, 170, 60))
+			elseif msg.kind == "duelAsk" then
+				showAsk(tostring(msg.from), tonumber(msg.seconds) or A.DuelAskSeconds)
+			elseif msg.kind == "duelNo" then
+				UI.toast(tostring(msg.name) .. " said no", Theme.SubText)
+			elseif msg.kind == "duelGo" and typeof(msg.finish) == "Vector3" then
+				startDuel(msg.finish, tostring(msg.vs), tonumber(msg.t0in) or 3)
+			elseif msg.kind == "duelLost" then
+				UI.toast(tostring(msg.name) .. " won the duel: finish for second place", Theme.Warning)
+			elseif msg.kind == "duelEnd" then
+				if duel then
+					endRun()
+					UI.toast("The duel timed out", Theme.Warning)
+				end
+			end
+		end)
+	end
+	-- the lobby countdowns on the ring signs tick down
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			if next(lobbies) then
+				refreshLabels()
+			end
+		end
+	end)
 	task.spawn(function()
 		local ok, res = pcall(function()
 			return call:InvokeServer("state")

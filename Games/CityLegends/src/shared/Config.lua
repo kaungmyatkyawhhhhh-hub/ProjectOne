@@ -520,6 +520,25 @@ Config.Activities = {
 	ChipCount = 25,
 	ChipCash = 2500,
 	ChipAllBonus = 100000,
+	-- racing other players (owner, 2026-10-30, from the research: Midnight Racing's race lobbies and
+	-- PlayerVS duels, Vehicle Legends' more pay with others): stop in a race ring and you join its
+	-- lobby; it starts LobbySeconds after the first racer (sooner when full). With 2+ racers the
+	-- finishers share a pot (1st all of its share, then half each place down); a friend in the race
+	-- multiplies your share. Alone, it's the time trial as before.
+	LobbySeconds = 15,
+	LobbyMax = 6,
+	PotPerRacer = 4000,
+	PotShares = { 1, 0.5, 0.25, 0.125 },
+	FriendBonus = 1.5,
+	-- duels: G (or the RACE pill) next to another driver challenges them to a sprint to a junction
+	-- across town
+	DuelRange = 120, -- studs between the cars
+	DuelAskSeconds = 12,
+	DuelMinDist = 1100,
+	DuelMaxDist = 2200,
+	DuelTimeout = 180,
+	DuelPot = 10000,
+	DuelSecondCash = 1500,
 }
 
 ---------------------------------------------------------------------

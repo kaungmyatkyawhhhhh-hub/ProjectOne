@@ -273,6 +273,7 @@ local ctx = {
 	end,
 	-- something a goal counts happened (Goals: Legends Path, daily tasks)
 	note = Goals.note,
+	goals = Goals,
 }
 Goals.init(ctx)
 OnFoot.init(ctx)
