@@ -159,7 +159,7 @@ Cars.TrimSteps = {
 }
 
 -- the level each car opens at the dealer (by price; each better trim at least 5 levels on; the top
--- cars at 40 - 60)
+-- cars at 40 - 60, nothing above 60 for now: the owner will add cars above the Veyrun later)
 Cars.Levels = {
 	suzaki_swift = 1, toyoka_belta = 1, toyoka_camri = 1, toyoka_crown = 1, toyoka_alfard = 1,
 	toyoka_lc200 = 1, toyoka_lc300 = 6, toyoka_chaser = 3, toyoka_supra_mk4 = 6,
@@ -187,7 +187,7 @@ Cars.Levels = {
 	mclaran_12c = 20,
 	bentlee_contgt = 25, bentlee_bentayga = 25,
 	rolls_wraith = 32, rolls_cullinan = 40,
-	bugotti_veyron = 60,
+	bugotti_veyron = 50, -- (its SPORT is 55 and TOP 60: owner, 2026-10-31, "cap it at 60")
 } :: { [string]: number }
 
 Cars.Series = {

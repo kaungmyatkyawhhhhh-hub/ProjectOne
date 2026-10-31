@@ -110,3 +110,4 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
 - Lambrini: split into Gallardo, Murcielago and Aventador (LP700 -> LP750).
 - Extra trims: yes. Every one-car line gets SPORT (+5 levels) and TOP (+10 levels), same body, a bit faster and dearer.
 - Done so far: car data in `Cars.lua` (63 lines, 183 trims, levels only, no market-only), Market/garage/server rules. Still to build: the Midnight Racing-style dealer menu.
+- 2026-10-31: list OK again. Veyrun capped: BASE L50 -> SPORT L55 -> TOP L60 (owner will add cars above it later). Levels made easier: XP per level is now 32 x level^1.3 (was 40 x level^1.35), about a third less XP to level 60.

@@ -172,8 +172,10 @@ Config.Economy = {
 -- Progression: XP + levels (earned alongside cash) and the daily gift
 ---------------------------------------------------------------------
 Config.Progression = {
-	XpBase = 40, -- XP needed for level 1 -> 2
-	XpExponent = 1.35, -- XP needed = XpBase * level ^ XpExponent
+	-- (owner, 2026-10-31: "make the game a little bit easier to get levels"; was 40 and 1.35,
+	-- level 60 now takes about a third less XP)
+	XpBase = 32, -- XP needed for level 1 -> 2
+	XpExponent = 1.3, -- XP needed = XpBase * level ^ XpExponent
 	MaxLevel = 999,
 	DriveXpPerSecond = 1 / 90, -- XP per mph per second ( 90mph -> 1 XP/s )
 	CutXpPerCash = 1 / 30, -- a cut-up gives this much XP per $ it paid
