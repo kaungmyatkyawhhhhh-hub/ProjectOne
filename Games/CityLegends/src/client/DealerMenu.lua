@@ -191,7 +191,7 @@ local function buildStage(): Folder
 		local l = Instance.new("SurfaceLight")
 		l.Face = Enum.NormalId.Bottom
 		l.Color = Color3.fromRGB(255, 240, 222)
-		l.Brightness = 1.4
+		l.Brightness = 0.9
 		l.Range = 48
 		l.Angle = 110
 		l.Parent = panelPart
@@ -204,7 +204,7 @@ local function buildStage(): Folder
 		local s = Instance.new("SpotLight")
 		s.Face = Enum.NormalId.Front
 		s.Color = Color3.fromRGB(255, 240, 220)
-		s.Brightness = 3
+		s.Brightness = 1.5
 		s.Range = 45
 		s.Angle = 40
 		s.Parent = lamp
@@ -232,6 +232,7 @@ local car: Model? = nil
 local carLen = 14
 local yaw, pitch, dist = -0.6, 0.18, 30
 local zoomK = 1
+local uiScale = 1
 local refreshAll: () -> () = function() end
 
 local function levelNow(): number
@@ -270,9 +271,11 @@ local function showCar(id: string, colour: number?)
 	carLen = (m:GetAttribute("Length") :: number?) or 14
 	m:PivotTo(CFrame.new(STAGE + Vector3.new(0, 0.6 + h / 2, 0)) * CFrame.Angles(0, math.rad(20), 0))
 	m.Parent = stage
-	pcall(CustomsClient.paintCar, m, lookFor(id, colour))
+	if colour then
+		pcall(CustomsClient.paintCar, m, lookFor(id, colour))
+	end
 	car = m
-	dist = carLen * 1.45 + 6
+	dist = carLen * 1.9 + 8
 end
 
 ---------------------------------------------------------------------
@@ -442,7 +445,7 @@ local function build(root: Frame)
 	local wVal = fact("Weight")
 	local seatsVal = fact("Seats")
 	label({ Text = "Vehicle colour", TextSize = 13, TextColor3 = GREY, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -6, 0, 16), LayoutOrder = nextOrder(), Parent = rscroll })
-	local swatches = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, -6, 0, 66), LayoutOrder = nextOrder(), Parent = rscroll }, {
+	local swatches = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, -6, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = nextOrder(), Parent = rscroll }, {
 		new("UIGridLayout", { CellSize = UDim2.fromOffset(30, 30), CellPadding = UDim2.fromOffset(6, 6) }),
 	})
 	local swatchStrokes: { [number]: UIStroke } = {}
@@ -451,7 +454,7 @@ local function build(root: Frame)
 	label({ Text = "★", TextSize = 13, TextColor3 = Color3.new(0, 0, 0), Size = UDim2.fromScale(1, 1), Parent = stockSwatch })
 	for i, sw in PALETTE do
 		local b: TextButton = new("TextButton", { Text = "", AutoButtonColor = false, BackgroundColor3 = Color3.fromRGB(sw[2], sw[3], sw[4]), LayoutOrder = i, Parent = swatches }, { corner(15) })
-		swatchStrokes[i] = new("UIStroke", { Thickness = 2, Color = WHITE, Transparency = 1, Parent = b })
+		swatchStrokes[i] = new("UIStroke", { Thickness = 2, Color = WHITE, Transparency = 0.6, Parent = b })
 		b.Activated:Connect(function()
 			s.colour = i
 			Audio.click()
@@ -462,11 +465,10 @@ local function build(root: Frame)
 		end)
 	end
 	stockSwatch.Activated:Connect(function()
+		-- (the factory look: the car rebuilt as it comes, livery and all)
 		s.colour = nil
+		showCar(s.id, nil)
 		refreshAll()
-		if car then
-			pcall(CustomsClient.paintCar, car, lookFor(s.id, nil))
-		end
 	end)
 	local colourName = label({ Text = "", TextSize = 12, TextColor3 = GREY, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -6, 0, 14), LayoutOrder = nextOrder(), Parent = rscroll })
 	label({ Text = "Trims", TextSize = 13, TextColor3 = GREY, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -6, 0, 16), LayoutOrder = nextOrder(), Parent = rscroll })
@@ -498,8 +500,8 @@ local function build(root: Frame)
 	-----------------------------------------------------------------
 	-- bottom: brand bar; bottom left: your level
 	-----------------------------------------------------------------
-	local brandBar = new("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 70, 1, -14), Size = UDim2.new(1, -330, 0, 80), BackgroundColor3 = PANEL, BackgroundTransparency = 0.25, Parent = root }, { corner(10) })
-	new("UISizeConstraint", { MaxSize = Vector2.new(900, 80), Parent = brandBar })
+	-- (right of the level box)
+	local brandBar = new("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 304, 1, -14), Size = UDim2.new(1, -324, 0, 80), BackgroundColor3 = PANEL, BackgroundTransparency = 0.25, Parent = root }, { corner(10) })
 	local bPrev = flatButton("<", { Position = UDim2.fromOffset(6, 12), Size = UDim2.fromOffset(44, 56), BackgroundTransparency = 1, TextSize = 30, Parent = brandBar })
 	local bNext = flatButton(">", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -6, 0, 12), Size = UDim2.fromOffset(44, 56), BackgroundTransparency = 1, TextSize = 30, Parent = brandBar })
 	local tiles: ScrollingFrame = new("ScrollingFrame", {
@@ -706,8 +708,12 @@ local function build(root: Frame)
 		torqueVal.Text = stats.torqueNm .. " Nm"
 		wVal.Text = string.format("%.1f t", stats.weightKg / 1000)
 		seatsVal.Text = tostring(stats.seats)
+		-- (the picked one gets a bright ring; the others a faint one, so black still shows)
 		for k, strokeInst in swatchStrokes do
-			strokeInst.Transparency = if (s.colour or 0) == k then 0 else 1
+			local on = (s.colour or 0) == k
+			strokeInst.Color = if on then WHITE else GREY
+			strokeInst.Transparency = if on then 0 else 0.55
+			strokeInst.Thickness = if on then 3 else 1
 		end
 		stockSwatch.BackgroundColor3 = spec.Color
 		colourName.Text = if s.colour and PALETTE[s.colour] then PALETTE[s.colour][1] else "Factory colour"
@@ -747,7 +753,10 @@ local function build(root: Frame)
 		fuelSub.Text = stats.fuel
 		boxTop.Text = if stats.gearbox == "1" then "1-SPD" elseif stats.gearbox == "M/A" then "M / A" else "AUTO"
 		mpgTop.Text = stats.mpg
-		-- brand tiles
+		-- brand tiles (the picked one scrolled into view)
+		local bi = table.find(s.brands, s.brand) or 1
+		local view = tiles.AbsoluteSize.X / math.max(uiScale, 0.01)
+		tiles.CanvasPosition = Vector2.new(math.max(0, (bi - 1) * 136 - (view / 2 - 64)), 0)
 		for b, t in tileByBrand do
 			local on = b == s.brand
 			t.BackgroundColor3 = if on then Color3.fromRGB(70, 22, 26) else Color3.fromRGB(34, 35, 42)
@@ -1044,6 +1053,7 @@ function DealerMenu.open(data: any, callbacks: Callbacks, focus: string?)
 		local vp = camera.ViewportSize
 		local k = math.clamp(math.min(vp.X / 1220, vp.Y / 640), 0.5, 1.25)
 		scale.Scale = k
+		uiScale = k
 		root.Size = UDim2.fromOffset(vp.X / k, vp.Y / k)
 	end
 	fit()
