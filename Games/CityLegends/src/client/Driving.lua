@@ -791,8 +791,29 @@ function Driving.park()
 end
 
 local CAMERA_ORDER = { Immersive = "Low", Low = "Chase", Chase = "Interior", Interior = "Immersive" }
+-- set by OnFoot: what F does in a running car (get out when slow enough)
+Driving.onExitKey = nil :: (() -> ())?
+
+local applyCamera: () -> ()
 function Driving.toggleCamera()
 	Driving.cameraMode = CAMERA_ORDER[Driving.cameraMode] or "Immersive"
+	applyCamera()
+end
+
+-- V: first person and back to the outside view you had (Driving Empire's V); Shift + V cycles the
+-- outside views
+local lastOutside = "Immersive"
+function Driving.toggleFirstPerson()
+	if Driving.cameraMode == "Interior" then
+		Driving.cameraMode = lastOutside
+	else
+		lastOutside = Driving.cameraMode
+		Driving.cameraMode = "Interior"
+	end
+	applyCamera()
+end
+
+applyCamera = function()
 	UI.setCameraLabel(Driving.cameraMode)
 	local s = state
 	if s then
@@ -1006,14 +1027,14 @@ local function setCarPower(s: State, on: boolean)
 	remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn })
 end
 
--- F / Q / E / M / P / T / L / Z / X / C
+-- F / Q / E / M / P / T / L / Z / X / C (owner, 2026-10-31: the keys of Driving Empire; F starts
+-- the car, and once it's running F gets you out, like Y)
 local function carKey(s: State, key: Enum.KeyCode)
 	if key == Enum.KeyCode.F then
 		if s.engineOn then
-			s.engineOn = false
-			s.engine:setRunning(false)
-			setCarPower(s, false)
-			UI.toast(if s.electric then "Power off" else "Engine off")
+			if Driving.onExitKey then
+				Driving.onExitKey()
+			end
 		elseif s.cranking <= 0 then
 			if s.electric then
 				s.cranking = 0.3 -- an electric car is just ready, silently
@@ -1060,7 +1081,8 @@ local function carKey(s: State, key: Enum.KeyCode)
 			end
 			UI.toast(if mode == "Manual" then "Sequential: Q / E to shift" else "Automatic")
 		end
-	elseif key == Enum.KeyCode.P then
+	elseif key == Enum.KeyCode.P and not UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+		-- (Shift + P is the free camera, PhotoMode)
 		s.parkBrake = not s.parkBrake
 		UI.toast(if s.parkBrake then "Handbrake on" else "Handbrake off")
 	elseif key == Enum.KeyCode.T then
@@ -2103,10 +2125,10 @@ function Driving.step(dt: number)
 			brakeForce *= 1 - DF.AbsPulse * (0.5 + 0.5 * math.sin(s.absT * math.pi * 2 * DF.AbsHz))
 			s.shake = math.max(s.shake, 0.05)
 		end
-		-- reverse: 25 mph at most, pulling away hard (owner, 2026-10-30: "make the reverse top speed
-		-- like 20 or 25"; the slow reverse before was the manual R gear braking itself)
-		local reverseTop = Config.mphToSps(math.min(25, s.spec.TopSpeed * 0.5))
-		local reversePull = math.max(s.accel * s.powerK * 2.2, 52)
+		-- reverse: 10 km/h at most for every car (owner, 2026-10-31: "make the top speed like 10 kmh";
+		-- it was 25 mph), with a gentle pull so it creeps back rather than jumping
+		local reverseTop = Config.mphToSps(10 / 1.609)
+		local reversePull = 24
 		if s.manual then
 			if engaged and gearNow < 0 and throttle > 0 and fwdSpeed > -reverseTop then
 				a -= if fwdSpeed > 2 then 140 * throttle else reversePull * throttle
@@ -2933,9 +2955,18 @@ function Driving.init()
 		if processed or not state then
 			return
 		end
-		if input.KeyCode == Enum.KeyCode.V or input.KeyCode == Enum.KeyCode.ButtonY then
+		if input.KeyCode == Enum.KeyCode.V then
+			if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+				Driving.toggleCamera()
+			else
+				Driving.toggleFirstPerson()
+			end
+		elseif input.KeyCode == Enum.KeyCode.ButtonY then
 			Driving.toggleCamera()
-		elseif input.KeyCode == Enum.KeyCode.R or input.KeyCode == Enum.KeyCode.ButtonSelect then
+		elseif input.KeyCode == Enum.KeyCode.R then
+			-- the radio's next station (Driving Empire's R)
+			UI.toast("Radio: " .. Audio.nextStation())
+		elseif input.KeyCode == Enum.KeyCode.Backspace or input.KeyCode == Enum.KeyCode.ButtonSelect then
 			Driving.reset()
 		elseif Driving.inputEnabled and not UI.isGarageOpen() then
 			carKey(state, input.KeyCode)

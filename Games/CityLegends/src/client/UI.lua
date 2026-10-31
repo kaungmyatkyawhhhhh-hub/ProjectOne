@@ -882,7 +882,7 @@ local function buildCashTab()
 	local rows = {
 		{ "W / S", "Throttle  ·  brake / reverse" },
 		{ "A / D", "Steer" },
-		{ "F", "Start / stop the engine" },
+		{ "F", "Start the car · get out / get in" },
 		{ "Q / E", "Shift down / up (manual)" },
 		{ "L SHIFT", "Clutch" },
 		{ "P", "Handbrake on / off" },
@@ -890,9 +890,10 @@ local function buildCashTab()
 		{ "T", "Traction control on / off" },
 		{ "L", "Lights on / off" },
 		{ "Z / X / C", "Left blinker · hazards · right blinker" },
-		{ "V", "Camera  (hold RMB to look)" },
-		{ "R", "Reset car to road" },
-		{ "Y", "Get out / get in" },
+		{ "V", "First person  (SHIFT + V: other views)" },
+		{ "R", "Radio: next station" },
+		{ "BACKSPACE", "Reset car to road" },
+		{ "SHIFT + P", "Free camera (also O)" },
 		{ "G", "My cars" },
 		{ "K", "Car stock market" },
 		{ "M", "Automatic / sequential (in a car) · music on foot" },
@@ -2447,7 +2448,7 @@ function UI.setAction(text: string?, key: string?)
 			Parent = gui,
 		}, { corner(12), stroke(Theme.Accent, 1.5, 0.1) })
 		actionKey = label({
-			Text = "Y",
+			Text = "F",
 			TextSize = 18,
 			Font = Enum.Font.GothamBlack,
 			TextColor3 = Theme.Panel,
@@ -2484,7 +2485,7 @@ function UI.setAction(text: string?, key: string?)
 	end
 	pill.Visible = true;
 	(actionText :: TextLabel).Text = text;
-	(actionKey :: TextLabel).Text = if UI.isTouch then "▶" else (key or "Y")
+	(actionKey :: TextLabel).Text = if UI.isTouch then "▶" else (key or "F")
 end
 
 -- speed lines: thin streaks rushing in from the screen edges at speed (0 = off .. 1 = flat out)

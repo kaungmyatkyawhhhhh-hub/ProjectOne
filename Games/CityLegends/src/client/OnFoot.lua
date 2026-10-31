@@ -178,8 +178,18 @@ function OnFoot.init()
 		end
 		if input.KeyCode == Enum.KeyCode.Y or input.KeyCode == Enum.KeyCode.DPadUp then
 			OnFoot.toggle()
+		elseif input.KeyCode == Enum.KeyCode.F and not Driving.isDriving() then
+			-- F gets you in too (in a car, Driving's F starts it, then gets you out: onExitKey)
+			OnFoot.toggle()
 		end
 	end)
+	Driving.onExitKey = function()
+		if Driving.getSpeed() <= EXIT_SPEED then
+			OnFoot.toggle()
+		else
+			UI.toast("Slow down to get out")
+		end
+	end
 	UI.onAction = OnFoot.toggle
 	-- the action pill: "GET OUT" when slow enough, "GET IN" beside your car
 	RunService.Heartbeat:Connect(function()
@@ -191,20 +201,20 @@ function OnFoot.init()
 			end
 			if label and fn then
 				driveActionFn = fn
-				UI.setAction(label, "Y")
+				UI.setAction(label, "F")
 			elseif Driving.getSpeed() <= EXIT_SPEED and not UI.isGarageOpen() then
-				UI.setAction("GET OUT", "Y")
+				UI.setAction("GET OUT", "F")
 			else
 				UI.setAction(nil)
 			end
 		elseif OnFoot.active then
 			local car, root = myCar(), hrp()
 			if rideSeat() then
-				UI.setAction("GET OUT", "Y")
+				UI.setAction("GET OUT", "F")
 			elseif car and root and (car:GetPivot().Position - root.Position).Magnitude <= ENTER_RANGE then
-				UI.setAction("GET IN", "Y")
+				UI.setAction("GET IN", "F")
 			elseif root and rideCar(root) then
-				UI.setAction("RIDE", "Y")
+				UI.setAction("RIDE", "F")
 			else
 				UI.setAction(nil)
 			end

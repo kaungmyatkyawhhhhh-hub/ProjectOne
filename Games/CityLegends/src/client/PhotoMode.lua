@@ -264,7 +264,9 @@ end
 
 function PhotoMode.init()
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if not processed and not open and input.KeyCode == Enum.KeyCode.O and UserInputService:GetFocusedTextBox() == nil and os.clock() - closedAt > 0.3 then
+		-- O, or Shift + P (Driving Empire's free camera)
+		local key = input.KeyCode == Enum.KeyCode.O or (input.KeyCode == Enum.KeyCode.P and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift))
+		if not processed and not open and key and UserInputService:GetFocusedTextBox() == nil and os.clock() - closedAt > 0.3 then
 			PhotoMode.open()
 		end
 	end)
