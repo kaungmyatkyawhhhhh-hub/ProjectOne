@@ -29,7 +29,11 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
 1. **The dealership works like Midnight Racing's.** Walk to the counter in Legends Motors and press E (or tap) to open a full-screen menu. The camera moves to a **showroom turntable**, and the selected car appears there in 3D, slowly turning (drag to spin, scroll to zoom).
 2. **Layout** (like `mr_dealer_menu.webp`, in our style):
    - **Top bar:** EXIT (left), the car name + year and **COST** (middle), **BUY** (right; greyed with the reason when locked).
-   - **Left: "Vehicles" list** of the selected brand's cars, scrolling with up / down arrows. Each row: a small photo, the name, the price, and tags ("★ Bodykits" if it has customs parts, "◉ Trims" if it has trims).
+   - **Left: "Vehicles" list, in two levels** (owner, 2026-10-31):
+     - **Level 1, models:** the brand's **car models** (our series), each shown as its **base model**. For example BNW shows "5 Series", "3 & 4 Series", "7 Series", "X"; each row has a small photo of the base car, the model name, "from $XX", and "◉ N trims".
+     - **Level 2, trims:** **press a model** and the list opens into its **trims, worst to best** (for example 5 Series: 530i → 540i → M5 E60 → M5 F10 → M5 F90). Each row has a photo, the name, the price, the level needed (🔒 Level 15 if locked, ✔ OWNED if owned), and "★ Bodykits" if it has customs parts. A **Back** row at the top (or tap the model again) goes back to the models.
+     - Selecting a trim shows it on the turntable, and the trim selector `< NAME >` over the car steps through the same trims.
+     - Scroll with up / down arrows on PC; swipe on phone.
    - **Bottom: brand bar** with < > arrows, one tile per brand (our names as text, in our style).
    - **Right: stats bars:**
      - **Max speed** (km/h and mph);
