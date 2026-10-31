@@ -1,4 +1,4 @@
-# Prompt: Legends Motors dealership menu with trims (like Midnight Racing)
+# Prompt: Legends Motors dealership UI (the buy menu) with trims, like Midnight Racing
 
 _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`)._
 
@@ -26,13 +26,15 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
   - the server checks every purchase and level.
 
 ## What the owner wants
-1. **The dealership works like Midnight Racing's.** Walk to the counter in Legends Motors and press E (or tap) to open a full-screen menu. The camera moves to a **showroom turntable**, and the selected car appears there in 3D, slowly turning (drag to spin, scroll to zoom).
+> **This is about the UI only** (owner, 2026-10-31): the **buy menu on screen**, not the dealership building. **Don't change the building**, its shape, or the cars standing in it (the building is a separate job: `Dealership model 86483010946222.md`). The only thing in the world you may add is a small spot where the selected car is shown while the menu is open (see 1).
+
+1. **The menu works like Midnight Racing's.** Walk to the counter in Legends Motors and press E (or tap) to open a full-screen menu. The selected car is shown in 3D behind the menu, slowly turning (drag to spin, scroll to zoom). Use a small display spot in the existing building (or an out-of-sight preview stage, or a ViewportFrame): no building changes.
 2. **Layout** (like `mr_dealer_menu.webp`, in our style):
    - **Top bar:** EXIT (left), the car name + year and **COST** (middle), **BUY** (right; greyed with the reason when locked).
    - **Left: "Vehicles" list, in two levels** (owner, 2026-10-31):
      - **Level 1, models:** the brand's **car models** (our series), each shown as its **base model**. For example BNW shows "5 Series", "3 & 4 Series", "7 Series", "X"; each row has a small photo of the base car, the model name, "from $XX", and "◉ N trims".
      - **Level 2, trims:** **press a model** and the list opens into its **trims, worst to best** (for example 5 Series: 530i → 540i → M5 E60 → M5 F10 → M5 F90). Each row has a photo, the name, the price, the level needed (🔒 Level 15 if locked, ✔ OWNED if owned), and "★ Bodykits" if it has customs parts. A **Back** row at the top (or tap the model again) goes back to the models.
-     - Selecting a trim shows it on the turntable, and the trim selector `< NAME >` over the car steps through the same trims.
+     - Selecting a trim shows it in the 3D preview, and the trim selector `< NAME >` over the car steps through the same trims.
      - Scroll with up / down arrows on PC; swipe on phone.
    - **Bottom: brand bar** with < > arrows, one tile per brand (our names as text, in our style).
    - **Right: stats bars:**
@@ -65,7 +67,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
    - the server checks money, level and that the car isn't already owned;
    - one purchase per click, so spam clicking can't charge twice (Midnight Racing's bug).
    - On success: a short celebration (sound + confetti + "NEW CAR"), and a **"Drive it now"** button that spawns it outside.
-5. **Showroom:** the turntable has spotlights and a polished floor; the car turns slowly. The other cars on show in the building stay as they are (`Config.Dealership.Display`).
+5. **No building changes:** keep the dealership building and its displayed cars exactly as they are (`Config.Dealership.Display`).
 
 ## Owner's decisions (2026-10-29)
 - **The car market rule changes (owner chose B):** cars from $600K up (`Cars.MarketFromPrice`, F430 and above) are **no longer market-only**. Every car and trim can be **bought at the dealer once you reach its level**:
