@@ -117,7 +117,7 @@ local function initials(id: string): string
 	return string.upper(a .. b)
 end
 local function brandColor(id: string): Color3
-	local brand = carName(id):match("^(%S+)") or id
+	local brand = Cars.makeOf(carName(id))
 	local h = 0
 	for i = 1, #brand do
 		h = (h * 31 + brand:byte(i)) % 360

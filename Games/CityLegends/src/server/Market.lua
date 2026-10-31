@@ -81,7 +81,7 @@ end
 
 local function brandOf(id: string): string
 	local spec = Cars.ById[id]
-	return if spec then (spec.Name:match("^(%S+)") or spec.Name) else id
+	return if spec then Cars.makeOf(spec.Name) else id
 end
 
 local function stepPrice(id: string)

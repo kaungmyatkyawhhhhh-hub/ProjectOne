@@ -25,6 +25,14 @@ local function xpTable(profile: any): { [string]: number }
 	if type(profile.Brands) ~= "table" then
 		profile.Brands = {}
 	end
+	-- XP saved under a brand's old name moves to its new one (owner, 2026-10-31: new brand names)
+	for old, new in Cars.OldBrands do
+		local xp = profile.Brands[old]
+		if type(xp) == "number" then
+			profile.Brands[new] = (profile.Brands[new] or 0) + xp
+			profile.Brands[old] = nil
+		end
+	end
 	return profile.Brands
 end
 

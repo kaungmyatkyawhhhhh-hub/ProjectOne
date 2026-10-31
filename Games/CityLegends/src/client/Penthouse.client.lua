@@ -429,7 +429,9 @@ player.CharacterRemoving:Connect(endView)
 ---------------------------------------------------------------------
 -- Party lights, the showcase car and the TV (only near the camera)
 ---------------------------------------------------------------------
-local TICKERS = { "BNW", "MERCER", "LAMBRINI", "FERRARA", "TOYOKA", "NISUN", "PORSHA", "BUGOTTI", "ASTIN", "LEXIS" }
+-- stock symbols of the makes (Bavarica Werkz, Tri-Star Silber, Enfurecido, Rosso Rampante, Apex, Horizon,
+-- Stuttgart, Velocité Noir, British Vanguard, Stealth-Apex): short so the rows fit the TV
+local TICKERS = { "BVWZ", "TRSS", "ENFU", "ROSSO", "APEX", "HRZN", "STGT", "VNOIR", "BRVG", "STAX" }
 local HEADLINES = {
 	"SPEED CAMERAS GO LIVE ON THE LEGENDS LOOP",
 	"LUXURY TOWERS: PENTHOUSE PRICES HIT RECORD HIGHS",

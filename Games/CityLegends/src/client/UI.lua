@@ -2045,7 +2045,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		selectedId = id
 		local spec = Cars.get(id)
 		setPreview(spec)
-		nameText.Text = spec.Name:upper()
+		nameText.Text = Cars.upper(spec.Name)
 		classText.Text = Cars.ClassLabels[spec.Class]
 		topVal.Text = spec.TopSpeed .. " MPH"
 		topFill.Size = UDim2.fromScale(spec.TopSpeed / 290, 1)
