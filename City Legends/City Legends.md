@@ -474,3 +474,9 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - Owner chose option C: the shape and layout of Creator Store dealership 86483010946222 in our own colours, named LEGENDS MOTORS. The model hid malware (a fake "copy this code" popup) and real-brand cars; all scripts, cars, logos and decals were removed. Saved in the place as `ServerStorage.DealerBody`.
 - Inside: turntable stage with the Aventador SV, 4 display cars, the counter (E opens the buy screen), a side drive-through bay where bought cars drive out. The front car park stays empty for players to park (owner). The Legends Meet car park is behind.
 - Tested in Studio Play: walk in, buy a car, drive it out.
+
+## Dealer menu (2026-10-31)
+- E at the Legends Motors counter opens a Midnight Racing-style menu: the car on a turntable in a showroom (made on your screen only), Vehicles list (models, then their trims), trim selector, stats, trim card with colours, brand bar, your level and next unlock.
+- Pick a colour, BUY, confirm: the server checks money and level and charges once; the car comes in that colour. NEW CAR + DRIVE IT NOW. TEST DRIVE for cars you don't own.
+- Veyrun capped at level 60 (BASE 50, SPORT 55, TOP 60); levels need about a third less XP (owner, 2026-10-31).
+- Not done yet: compare, wishlist, sort/search, swipe to change trim, interior colour, real years.

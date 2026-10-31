@@ -433,10 +433,10 @@ local function build(root: Frame)
 	-- the trim card
 	new("Frame", { BackgroundColor3 = LINE, BorderSizePixel = 0, Size = UDim2.new(1, -6, 0, 1), LayoutOrder = nextOrder(), Parent = rscroll })
 	local facts = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, -6, 0, 50), LayoutOrder = nextOrder(), Parent = rscroll }, {
-		new("UIGridLayout", { CellSize = UDim2.new(0.25, -6, 0, 50), CellPadding = UDim2.fromOffset(6, 0) }),
+		new("UIGridLayout", { CellSize = UDim2.new(0.25, -6, 0, 50), CellPadding = UDim2.fromOffset(6, 0), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
 	local function fact(name: string): TextLabel
-		local cell = new("Frame", { BackgroundColor3 = PANEL2, BackgroundTransparency = 0.1, Parent = facts }, { corner(6) })
+		local cell = new("Frame", { BackgroundColor3 = PANEL2, BackgroundTransparency = 0.1, LayoutOrder = nextOrder(), Parent = facts }, { corner(6) })
 		label({ Text = name, TextSize = 11, TextColor3 = GREY, Position = UDim2.fromOffset(0, 5), Size = UDim2.new(1, 0, 0, 14), Parent = cell })
 		return label({ Text = "", TextSize = 14, Font = Enum.Font.GothamBlack, Position = UDim2.fromOffset(0, 22), Size = UDim2.new(1, 0, 0, 20), Parent = cell })
 	end
@@ -446,7 +446,7 @@ local function build(root: Frame)
 	local seatsVal = fact("Seats")
 	label({ Text = "Vehicle colour", TextSize = 13, TextColor3 = GREY, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -6, 0, 16), LayoutOrder = nextOrder(), Parent = rscroll })
 	local swatches = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, -6, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = nextOrder(), Parent = rscroll }, {
-		new("UIGridLayout", { CellSize = UDim2.fromOffset(30, 30), CellPadding = UDim2.fromOffset(6, 6) }),
+		new("UIGridLayout", { CellSize = UDim2.fromOffset(30, 30), CellPadding = UDim2.fromOffset(6, 6), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
 	local swatchStrokes: { [number]: UIStroke } = {}
 	local stockSwatch: TextButton = new("TextButton", { Text = "", AutoButtonColor = false, LayoutOrder = 0, Parent = swatches }, { corner(15) })
@@ -477,10 +477,10 @@ local function build(root: Frame)
 	})
 	local descText = label({ Text = "", TextSize = 14, TextWrapped = true, TextColor3 = WHITE, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -6, 0, 36), LayoutOrder = nextOrder(), Parent = rscroll })
 	local icons = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, -6, 0, 52), LayoutOrder = nextOrder(), Parent = rscroll }, {
-		new("UIGridLayout", { CellSize = UDim2.new(1 / 6, -5, 0, 52), CellPadding = UDim2.fromOffset(5, 0) }),
+		new("UIGridLayout", { CellSize = UDim2.new(1 / 6, -5, 0, 52), CellPadding = UDim2.fromOffset(5, 0), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
 	local function featureIcon(sym: string, name: string): (TextLabel, TextLabel)
-		local cell = new("Frame", { BackgroundColor3 = PANEL2, BackgroundTransparency = 0.1, Parent = icons }, { corner(6) })
+		local cell = new("Frame", { BackgroundColor3 = PANEL2, BackgroundTransparency = 0.1, LayoutOrder = nextOrder(), Parent = icons }, { corner(6) })
 		local top2 = label({ Text = sym, TextSize = 15, Font = Enum.Font.GothamBlack, Position = UDim2.fromOffset(0, 6), Size = UDim2.new(1, 0, 0, 20), Parent = cell })
 		local sub = label({ Text = name, TextSize = 10, TextColor3 = GREY, Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, 0, 0, 14), Parent = cell })
 		return top2, sub
@@ -490,7 +490,7 @@ local function build(root: Frame)
 	local fuelTop, fuelSub = featureIcon("⛽", "")
 	local boxTop = featureIcon("", "gearbox")
 	local mpgTop = featureIcon("", "MPG")
-	local soundBtn: TextButton = new("TextButton", { Text = "", AutoButtonColor = false, BackgroundColor3 = PANEL2, BackgroundTransparency = 0.1, Parent = icons }, { corner(6) })
+	local soundBtn: TextButton = new("TextButton", { Text = "", AutoButtonColor = false, BackgroundColor3 = PANEL2, BackgroundTransparency = 0.1, LayoutOrder = nextOrder(), Parent = icons }, { corner(6) })
 	label({ Text = "🔊", TextSize = 15, Position = UDim2.fromOffset(0, 6), Size = UDim2.new(1, 0, 0, 20), Parent = soundBtn })
 	label({ Text = "sound", TextSize = 10, TextColor3 = GREY, Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, 0, 0, 14), Parent = soundBtn })
 	soundBtn.Activated:Connect(function()
@@ -832,13 +832,20 @@ local function build(root: Frame)
 		label({ Text = Cars.get(id).Name, TextSize = 20, Font = Enum.Font.GothamBold, Position = UDim2.fromOffset(0, 74), Size = UDim2.new(1, 0, 0, 26), ZIndex = 102, Parent = card })
 		local driveNow = flatButton("DRIVE IT NOW", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 24, 1, -22), Size = UDim2.new(0.5, -30, 0, 52), BackgroundColor3 = RED, ZIndex = 102, Parent = card })
 		local keep = flatButton("KEEP LOOKING", { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -24, 1, -22), Size = UDim2.new(0.5, -30, 0, 52), TextSize = 16, ZIndex = 102, Parent = card })
+		-- (a moment before these work: the clicks that bought the car mustn't close this too)
+		local readyAt = os.clock() + 0.8
 		driveNow.Activated:Connect(function()
+			if os.clock() < readyAt then
+				return
+			end
 			local cb = s.callbacks
 			DealerMenu.close()
 			cb.drive(id)
 		end)
 		keep.Activated:Connect(function()
-			over:Destroy()
+			if os.clock() >= readyAt then
+				over:Destroy()
+			end
 		end)
 	end
 
