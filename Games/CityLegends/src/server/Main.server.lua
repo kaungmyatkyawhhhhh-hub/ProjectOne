@@ -428,9 +428,18 @@ ClaimDaily.OnServerInvoke = function(player: Player)
 	return Goals.claimStreak(player)
 end
 
-BuyCar.OnServerInvoke = function(player: Player, carId: any)
+-- (the dealer menu, 2026-10-31: `colour` is a Config.Customs.Palette index picked before buying;
+-- the new car gets it as its Customs paint. `buying` stops a second charge from a spam click)
+local buying: { [Player]: boolean } = {}
+Players.PlayerRemoving:Connect(function(player)
+	buying[player] = nil
+end)
+BuyCar.OnServerInvoke = function(player: Player, carId: any, colour: any)
 	if type(carId) ~= "string" or not Cars.ById[carId] then
 		return { ok = false, message = "Unknown car" }
+	end
+	if buying[player] then
+		return { ok = false, message = "One moment..." }
 	end
 	local profile = PlayerData.get(player)
 	if not profile then
@@ -452,8 +461,21 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any)
 	if profile.Cash < spec.Price then
 		return { ok = false, message = "Not enough cash" }
 	end
+	buying[player] = true
 	PlayerData.addCash(player, -spec.Price)
 	profile.Owned[carId] = true
+	local swatch = if type(colour) == "number" then Config.Customs.Palette[math.floor(colour)] else nil
+	if swatch then
+		local all = profile.Customs
+		if type(all) ~= "table" then
+			all = {}
+			profile.Customs = all
+		end
+		local look = if type(all[carId]) == "table" then all[carId] else {}
+		look.paint = { swatch[2], swatch[3], swatch[4] }
+		all[carId] = look
+	end
+	buying[player] = nil
 	task.spawn(PlayerData.save, player)
 	return { ok = true, message = "Purchased " .. spec.Name, data = PlayerData.snapshot(player) }
 end

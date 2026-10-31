@@ -542,8 +542,45 @@ task.spawn(function()
 	end
 end)
 
+-- the dealer menu (owner, 2026-10-31: like Midnight Racing's, DealerMenu)
+local DealerMenu = require(script.Parent:WaitForChild("DealerMenu"))
 DealerOpen.OnClientEvent:Connect(function(carId: any)
-	openGarage(false, true, if type(carId) == "string" then carId else nil)
+	if DealerMenu.isOpen() or UI.isGarageOpen() then
+		return
+	end
+	local fresh = GetData:InvokeServer()
+	if fresh then
+		data = fresh
+	end
+	DealerMenu.open(data, {
+		buy = function(id: string, colour: number?)
+			local result = BuyCar:InvokeServer(id, colour)
+			if result and result.data then
+				data = result.data
+			end
+			return result or { ok = false, message = "Server did not respond" }
+		end,
+		testDrive = function(id: string)
+			pcall(function()
+				DealerCall:InvokeServer("door")
+			end)
+			local ok, result = pcall(function()
+				return (remotes:WaitForChild("TestDrive") :: RemoteFunction):InvokeServer(id)
+			end)
+			if ok and type(result) == "table" then
+				return result
+			end
+			return { ok = false, message = "Server did not respond" }
+		end,
+		drive = function(id: string)
+			UI.hideMainMenu()
+			-- out of the dealership's drive-out bay
+			pcall(function()
+				DealerCall:InvokeServer("door")
+			end)
+			requestDrive(id)
+		end,
+	}, if type(carId) == "string" then carId else nil)
 end)
 
 showMenu = function()

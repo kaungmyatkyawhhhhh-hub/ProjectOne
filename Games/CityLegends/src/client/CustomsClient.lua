@@ -833,6 +833,9 @@ local function open()
 	changed()
 end
 
+-- (the dealer menu paints its preview car in the colour picked before buying)
+CustomsClient.paintCar = paintCar
+
 function CustomsClient.init()
 	task.spawn(function()
 		call = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CustomsCall", 120) :: RemoteFunction?

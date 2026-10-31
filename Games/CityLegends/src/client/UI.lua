@@ -1851,8 +1851,10 @@ export type GarageCallbacks = {
 local garageFrame: Frame? = nil
 local previewConn: RBXScriptConnection? = nil
 
+-- (also true while the dealer menu is open: driving and walking keys stay off behind it)
+UI.modalOpen = false
 function UI.isGarageOpen(): boolean
-	return garageFrame ~= nil
+	return garageFrame ~= nil or UI.modalOpen == true
 end
 
 function UI.closeGarage()
@@ -2548,6 +2550,11 @@ end
 
 -- Level + XP bar. `gained` (optional) flashes "+N XP" next to the bar.
 local xpToken = 0
+-- the level, XP and XP needed shown in the HUD (the dealer menu's level box reads it)
+function UI.getProgress(): (number, number, number)
+	return progress.level, progress.xp, progress.need
+end
+
 function UI.setProgress(level: number, xp: number, need: number, gained: number?)
 	local levelChanged = level ~= progress.level
 	progress.level = level
