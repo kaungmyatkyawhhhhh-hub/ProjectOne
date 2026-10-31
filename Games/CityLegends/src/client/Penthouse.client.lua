@@ -600,7 +600,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 				end
 			end)
 		end
-		if d < 260 then
+		if d < 260 and not car:GetAttribute("NoSpin") then
 			car:PivotTo(car:GetPivot() * CFrame.Angles(0, dt * 0.25, 0))
 		end
 	end

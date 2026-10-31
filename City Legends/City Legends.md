@@ -469,3 +469,8 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
   - **Blocked assets:** 7 car textures failed to load in this place ("not approved"): Seal wheels and underbody, Crown wheels, M8 plastics, 330i suede and carbon, LP750 headlight glass. They're now plain colours; the old ids are kept on each part (`BlockedTexture` attribute). Missing meshes still to replace: BNW M3 E92 (2 body parts, a door part), a small Nisun 350Z piece and a Panamera piece. The `videoplayback` sound in Workspace is blocked too.
   - **Still open:** the Suzaki Swift model is a low-detail block car (send a better `.glb` to `imports`). The Toyoka Camri shows its real badge and name on the back. In Studio, Mesh / Image APIs are off (Game Settings → Security), so the runtime meshes and facade textures fall back.
   - Save the place (Ctrl+S): the map and script changes are in Studio.
+
+## Legends Motors building (2026-10-31)
+- Owner chose option C: the shape and layout of Creator Store dealership 86483010946222 in our own colours, named LEGENDS MOTORS. The model hid malware (a fake "copy this code" popup) and real-brand cars; all scripts, cars, logos and decals were removed. Saved in the place as `ServerStorage.DealerBody`.
+- Inside: turntable stage with the Aventador SV, 4 display cars, the counter (E opens the buy screen), a side drive-through bay where bought cars drive out. The front car park stays empty for players to park (owner). The Legends Meet car park is behind.
+- Tested in Studio Play: walk in, buy a car, drive it out.
