@@ -195,15 +195,17 @@ function OnFoot.init()
 	RunService.Heartbeat:Connect(function()
 		driveActionFn = nil
 		if Driving.isDriving() then
+			-- (with the engine off F starts it, so the pill shows Y; once it runs F gets you out)
+			local key = if Driving.isEngineOn() then "F" else "Y"
 			local label: string?, fn: (() -> ())? = nil, nil
 			if OnFoot.driveAction and Driving.getSpeed() <= EXIT_SPEED and not UI.isGarageOpen() then
 				label, fn = OnFoot.driveAction()
 			end
 			if label and fn then
 				driveActionFn = fn
-				UI.setAction(label, "F")
+				UI.setAction(label, key)
 			elseif Driving.getSpeed() <= EXIT_SPEED and not UI.isGarageOpen() then
-				UI.setAction("GET OUT", "F")
+				UI.setAction("GET OUT", key)
 			else
 				UI.setAction(nil)
 			end

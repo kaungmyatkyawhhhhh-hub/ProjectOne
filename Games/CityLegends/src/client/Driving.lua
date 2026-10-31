@@ -791,6 +791,11 @@ function Driving.park()
 end
 
 local CAMERA_ORDER = { Immersive = "Low", Low = "Chase", Chase = "Interior", Interior = "Immersive" }
+-- is the engine running? (F starts it; once it runs F gets you out)
+function Driving.isEngineOn(): boolean
+	return state ~= nil and state.engineOn == true
+end
+
 -- set by OnFoot: what F does in a running car (get out when slow enough)
 Driving.onExitKey = nil :: (() -> ())?
 

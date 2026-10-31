@@ -472,7 +472,14 @@ local function build(layer: CarMesh.Layer): Template
 	return { part = part, offset = CFrame.new(center) }
 end
 
+-- (2026-10-31 bug hunt: when the place doesn't allow EditableMesh, every new car tried again,
+-- built its whole mesh for nothing and filled the Output with errors; now the first "not
+-- accessible" switches runtime meshes off for the session)
+local meshesBlocked = false
 local function fail(err: any)
+	if string.find(tostring(err), "not accessible", 1, true) then
+		meshesBlocked = true
+	end
 	if not warned then
 		warned = true
 		warn("[CityLegends] Runtime car meshes unavailable (allow Mesh / Image APIs, or import CarModels):", err)
@@ -484,6 +491,9 @@ local function bodyFor(id: string, class: string, lite: boolean): { [string]: Te
 	local cached = bodyCache[key]
 	if cached ~= nil then
 		return if cached then cached else nil
+	end
+	if meshesBlocked then
+		return nil
 	end
 	local ok, result = pcall(function()
 		local layers, meta = CarMesh.build(id, class, CarBuilder.getDims(class, id) :: any, lite)
@@ -508,6 +518,9 @@ local function wheelFor(style: string, R: number, width: number, rimFrac: number
 	local cached = wheelCache[key]
 	if cached ~= nil then
 		return if cached then cached else nil
+	end
+	if meshesBlocked then
+		return nil
 	end
 	local ok, result = pcall(function()
 		local out = {}
