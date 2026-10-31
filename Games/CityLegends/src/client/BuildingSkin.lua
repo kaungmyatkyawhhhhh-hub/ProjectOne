@@ -30,6 +30,9 @@ local textures: { Texture } = {}
 local NIGHT_GLOW = 1.4
 local DAY_GLOW = 0.1 -- by day the rooms read as dark glass, not glowing
 local glow = NIGHT_GLOW
+-- Studio (2026-10-31) can refuse scripts writing a Texture's emissive map ("lacking capability
+-- Plugin"); then the facades keep their colour maps without the glow
+local canGlow = true
 
 local function image(buf: buffer): any
 	local N = FacadeTex.SIZE
@@ -59,6 +62,9 @@ end
 -- night 1 .. day 0 (DayCycle): how brightly the lit rooms glow
 function BuildingSkin.setNight(n: number)
 	glow = DAY_GLOW + (NIGHT_GLOW - DAY_GLOW) * math.clamp(n, 0, 1)
+	if not canGlow then
+		return
+	end
 	for _, tex in textures do
 		tex.EmissiveStrength = glow
 	end
@@ -69,6 +75,35 @@ function BuildingSkin.apply(city: Instance): boolean
 	if not ok then
 		warn("[CityLegends] Facade textures unavailable, keeping part facades:", moods)
 		return false
+	end
+
+	-- Studio (2026-10-31) can refuse scripts putting runtime images on a Texture ("lacking capability
+	-- Plugin"): try one first; without the maps keep the part facades, without the glow skip it
+	local anyMaps: Maps?, anySurf: Surface? = nil, nil
+	for style, surf in surfaces do
+		anyMaps, anySurf = moods[style .. "truetrue"], surf
+		break
+	end
+	if anyMaps and anySurf then
+		local probe = Instance.new("Texture")
+		local mapsOk, why = pcall(function()
+			probe.ColorMapContent = anyMaps.color
+			probe.NormalMapContent = anySurf.normal
+			probe.RoughnessMapContent = anySurf.rough
+			probe.MetalnessMapContent = anySurf.metal
+		end)
+		canGlow = pcall(function()
+			probe.EmissiveMaskContent = anyMaps.emissive
+			probe.EmissiveStrength = glow
+		end)
+		probe:Destroy()
+		if not mapsOk then
+			warn("[CityLegends] Facade textures not allowed, keeping part facades:", why)
+			return false
+		end
+		if not canGlow then
+			warn("[CityLegends] Facade glow not allowed, windows won't light up")
+		end
 	end
 
 	local towers: { BasePart } = {}
@@ -100,9 +135,11 @@ function BuildingSkin.apply(city: Instance): boolean
 					local tex = Instance.new("Texture")
 					tex.Face = face
 					tex.ColorMapContent = maps.color
-					tex.EmissiveMaskContent = maps.emissive
-					tex.EmissiveStrength = glow
-					tex.EmissiveTint = Color3.new(1, 1, 1)
+					if canGlow then
+						tex.EmissiveMaskContent = maps.emissive
+						tex.EmissiveStrength = glow
+						tex.EmissiveTint = Color3.new(1, 1, 1)
+					end
 					tex.NormalMapContent = surf.normal
 					tex.RoughnessMapContent = surf.rough
 					tex.MetalnessMapContent = surf.metal

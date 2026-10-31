@@ -67,7 +67,12 @@ task.wait(1) -- let the world finish replicating
 ---------------------------------------------------------------------
 if city then
 	UI.showLoading("Painting the skyline...")
-	BuildingSkin.apply(city)
+	-- a failed skin must never stop the start (2026-10-31: a locked Texture property did, and
+	-- players were left with no menu and no character)
+	local skinned, err = pcall(BuildingSkin.apply, city)
+	if not skinned then
+		warn("[CityLegends] BuildingSkin failed:", err)
+	end
 	-- our own far stand-ins for streamed-out buildings (Roblox's showed as black shapes)
 	require(script.Parent:WaitForChild("Standins")).init(city)
 end
