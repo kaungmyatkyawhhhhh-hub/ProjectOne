@@ -11,9 +11,12 @@ Tools that make Claude use fewer tokens. Set up 2026-10-10 for cloud sessions on
 - **RTK** ([rtk-ai/rtk](https://github.com/rtk-ai/rtk), version 0.51.0): shortens long command output (like `git status`) before Claude reads it. Installs itself at the start of each cloud session.
 - **Codebase Memory MCP** ([DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp), version 0.11.0): builds a map of a codebase so Claude reads fewer files. Most useful on code repos, less on this vault.
 
+- **Claude Code Setup** (`claude-code-setup@claude-plugins-official`, added 2026-10-31 from a TikTok the owner sent): scans the project and suggests skills, hooks, MCP servers and subagents for the work you repeat. Run it by asking "set up Claude Code for this project". Enabled in `.claude/settings.json`. If it doesn't load, type `/plugin install claude-code-setup@claude-plugins-official`.
+
 ## Not installed, and why
+- **OmniRoute** (from the same TikTok, 2026-10-31): it doesn't give more Claude. It swaps Claude for other free AI models through a local gateway, which are much weaker at game code, send the vault and code to unknown third-party companies, and need Claude Code's connection settings changed (it can break sessions).
 - **Token Optimizer MCP**: the package is marked "no longer supported", and it adds 67 tools, which can cost more tokens than it saves.
-- **Headroom**: sends all traffic to Claude through itself. If it breaks, cloud sessions stop working.
+- **Headroom**: sends all traffic to Claude through itself. If it breaks, cloud sessions stop working. (Asked again 2026-10-31 from a TikTok: still skipped.)
 - **PromptThrift MCP**, **DensePack**: couldn't find a real download.
 
 ## Where the setup lives

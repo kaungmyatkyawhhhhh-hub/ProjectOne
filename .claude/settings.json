@@ -1,23 +1,38 @@
 {
   "extraKnownMarketplaces": {
     "caveman": {
-      "source": { "source": "github", "repo": "JuliusBrussee/caveman" }
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
     },
     "thedotmack": {
-      "source": { "source": "github", "repo": "thedotmack/claude-mem" }
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
     }
   },
   "enabledPlugins": {
     "caveman@caveman": true,
-    "claude-mem@thedotmack": true
+    "claude-mem@thedotmack": true,
+    "claude-code-setup@claude-plugins-official": true
   },
   "enableAllProjectMcpServers": true,
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/install-rtk.sh", "timeout": 120 },
-          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/install-watch.sh", "timeout": 120 }
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/install-rtk.sh",
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/install-watch.sh",
+            "timeout": 120
+          }
         ]
       }
     ],
@@ -25,7 +40,10 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "command -v rtk >/dev/null 2>&1 && rtk hook claude || exit 0" }
+          {
+            "type": "command",
+            "command": "command -v rtk >/dev/null 2>&1 && rtk hook claude || exit 0"
+          }
         ]
       }
     ]
