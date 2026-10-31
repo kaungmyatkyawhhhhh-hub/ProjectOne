@@ -480,3 +480,6 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - Pick a colour, BUY, confirm: the server checks money and level and charges once; the car comes in that colour. NEW CAR + DRIVE IT NOW. TEST DRIVE for cars you don't own.
 - Veyrun capped at level 60 (BASE 50, SPORT 55, TOP 60); levels need about a third less XP (owner, 2026-10-31).
 - Not done yet: compare, wishlist, sort/search, swipe to change trim, interior colour, real years.
+
+## Waiting on the owner (2026-10-31)
+- New uploads for the car models whose files won't load in this place ("not approved"): Nisun 350Z, Porsha Panamera, Toyoka LC300, Maseroti Levanto, BNW M4 F82, Ferrara 458; plus sound 109026241087535 and assets 203785492, 95884642135866, 106936712445907. Owner: "I'll upload new models for that soon".
