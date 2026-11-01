@@ -94,6 +94,8 @@ The owner thinks the current map looks bad and wants the **map shaped like Monac
    - update `world_test`, `graph_test` and `bake_check` for the new roads: no dead ends, no gaps, road under every lane, nothing in the lanes, turns stay level;
    - drive every road in Studio.
 
+**Realism:** for how every street, lamp, building and tree should look, follow `Make the Monaco map look real (from the drive video).md` (from the owner's Monaco drive video).
+
 **Phase 2: districts and buildings**
 6. Fill each district with Riviera-style buildings: reuse and restyle our building generators where they fit, plus a few landmark models.
 7. Keep it light for phones: LOD, streaming, `LOD` tags, a part count close to the old map's.
