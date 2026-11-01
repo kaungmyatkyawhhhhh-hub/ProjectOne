@@ -2,8 +2,9 @@
 	TrafficBodies (client)
 	Traffic cars from ReplicatedStorage.TrafficModels (owner, 2026-11-01: the "Low Poly cars pack"
 	by matisosanimation, CC BY 4.0, split by tools/split_cars.py and brought in with Import 3D).
-	Each model is Traffic_<type><n>: a Body plus FL / FR / RL / RR wheels (a part or a model each),
-	facing -Z. The first time a model is used it is scaled to its real length
+	Each model is Traffic_<type><n>: a Body plus FL / FR / RL / RR wheels. Import 3D renames them
+	"Body2_Node", "FL2_Node" ... (a model of mesh parts each) and turns the car round: its front is
+	+Z, its left +X. The first time a model is used it is scaled to its real length
 	(Config.Traffic.ModelLengths, by type letter) and given what Traffic expects: an anchored
 	"Chassis" root (the hitbox), Wheel_* Motor6Ds on the root, brake lights tagged TailLight, and
 	Length / Width / Height attributes. Every car after that is a clone of the ready one.
@@ -18,8 +19,23 @@ local TrafficBodies = {}
 
 local BRAKE_OFF = Color3.fromRGB(150, 0, 6)
 local WHEELS = { "FL", "FR", "RL", "RR" }
+local UNTEXTURED = Color3.fromRGB(26, 26, 28)
 
 local ready: { [Model]: Model } = {}
+
+-- "FL2_Node" -> "FL", "Body29" -> "Body"
+local function key(name: string): string
+	return string.match(name, "^(%a+)%d*_Node$") or string.match(name, "^(%a+)%d*$") or name
+end
+
+local function partOf(m: Instance, k: string): Instance?
+	for _, c in m:GetChildren() do
+		if key(c.Name) == k then
+			return c
+		end
+	end
+	return nil
+end
 
 local function folder(): Instance?
 	return ReplicatedStorage:FindFirstChild("TrafficModels")
@@ -30,7 +46,7 @@ local function templates(): { Model }
 	local f = folder()
 	if f then
 		for _, m in f:GetChildren() do
-			if m:IsA("Model") and m:FindFirstChild("Body", true) then
+			if m:IsA("Model") and partOf(m, "Body") then
 				table.insert(out, m)
 			end
 		end
@@ -82,7 +98,7 @@ local function prepare(template: Model): Model
 	local _, size = m:GetBoundingBox()
 	m:ScaleTo(m:GetScale() * target / math.max(size.Z, 0.1))
 	local cf, box = m:GetBoundingBox()
-	cf = CFrame.new(cf.Position) -- square to the car: front -Z, right +X
+	cf = CFrame.new(cf.Position) * CFrame.Angles(0, math.pi, 0) -- the root's front (-Z) is the car's +Z
 
 	local root = Instance.new("Part")
 	root.Name = "Chassis"
@@ -99,7 +115,7 @@ local function prepare(template: Model): Model
 
 	local wheelParts: { [BasePart]: boolean } = {}
 	for _, name in WHEELS do
-		local w = m:FindFirstChild(name, true)
+		local w = partOf(m, name)
 		local parts = if w then partsOf(w) else {}
 		if #parts > 0 then
 			local main = parts[1]
@@ -127,6 +143,10 @@ local function prepare(template: Model): Model
 			p.CanTouch = false
 			p.Massless = true
 			p.CastShadow = false
+			-- Import 3D drops the plain colours: the untextured pieces (tyres, trim, glass) are near-black
+			if p:IsA("MeshPart") and p.TextureID == "" then
+				p.Color = UNTEXTURED
+			end
 			if not wheelParts[p] then
 				weld(root, p)
 			end
