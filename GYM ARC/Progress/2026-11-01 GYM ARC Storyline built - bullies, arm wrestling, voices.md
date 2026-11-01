@@ -62,3 +62,9 @@ Roblox TTS can't sound like real actors. The code now plays a **real recording**
 - The old shared arm wrestling tables (Starter Gym, Pro Gym) stay: players can still 1v1 each other.
 - **Also:** Coach Dex's ARM WRESTLING intro removed (the bullies introduce it). Coach Dex's guides, offers, the Starter Pack card and the invite popups all wait for any story moment (UIBus.StoryBusy). Hall of Fame popup off (`popupDays = 0`). The Trainer Agency GO TO always goes to the Starter Gym desk.
 - **Tested:** your six bullies + tables appear after PLAY, Benny walks up, the call-out shot (chapter card shows), VICTORY! title, no script errors. **Not yet checked:** the match view camera, his fall, the cliffhanger look: Studio's 3D view stopped drawing after the crash (grey everywhere, even on the menu), so those need a Studio restart and another look.
+
+## Cutscenes can't be skipped (owner, 2 Nov: "make it so that u cant skip cutscenes so u know the full story")
+- `Config/Story` `Story.Skippable = false`: a bully's call-out shot, the cliffhangers and his defeat (VICTORY + the fall) play to the end; the "Tap to skip" text is gone. They stay 5 s or less each (`Story.SceneMax`). `true` brings tap-to-skip back.
+- Tested in Studio: 12 taps during Dante's defeat + cliffhanger, both ran their full length (~4.5 s and ~4 s), same as with no taps. No errors.
+- Not changed: the trainer stories (Atlas / Solaris, skippable after 3 s) and the Hall of Fame launch cutscene (after 3 s). Note: the Roblox Playbook says cutscenes should be skippable after ~1 s; this is the owner's call for the story.
+- Studio, not published.
