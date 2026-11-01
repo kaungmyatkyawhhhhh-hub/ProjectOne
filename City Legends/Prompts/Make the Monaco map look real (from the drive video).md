@@ -139,6 +139,51 @@ Watch it yourself too. It starts at blue hour and goes into full night (0:00–1
   - warm sodium orange as the main light colour, with white-warm in the shopping and casino streets.
   - Show the owner the same street at blue hour and full night, next to frames from this video (2:13, 3:02, 5:36, 13:25, 14:35).
 
+## Supercar nightlife: from the owner's cars video (`Games/CityLegends/imports/cars.mp4`, 15 min, 2026-11-01)
+A night car-spotting video round the **casino square and the hotel / café area**. Watch it yourself. What makes the scene:
+- **The casino square at night:**
+  - a big curving square with **painted red-and-white kerbs** (racing-style stripes, 1:30, 5:42, 6:30, 11:18);
+  - smooth dark asphalt;
+  - a **roundabout / turning loop** in front of the casino and hotel;
+  - a **rough stone retaining wall** with a **stone balustrade staircase** going up (4:06–4:18, 11:12, 12:24);
+  - palms, agaves and flower beds;
+  - warm lamps.
+- **Valet parking:**
+  - a "Valet / Service" stand with a sign by the hotel / café entrance (5:24, 7:12);
+  - valets taking cars;
+  - **a row of the best supercars parked right in front** (5:48–5:54).
+- **Bollards:** short **dark green cast-iron bollards** with round tops (5:18, 7:18) and black ones round the square. Red-and-white striped poles at the edges.
+- **Crowds:**
+  - groups of people standing on the sidewalks and steps **filming cars on their phones**;
+  - people waving;
+  - tourists in summer clothes.
+  - Busy and lively, mostly between 22:00 and 02:00.
+- **The cars:**
+  - an endless parade of hypercars and supercars rolling slowly round the square;
+  - revving and popping exhausts;
+  - doors opening;
+  - mixed with luxury SUVs, a few taxis (white with a roof sign), vans, scooters.
+  - (In our game: our own fictional supercars and hypercars, no real badges.)
+- **The underpass** next to the square (0:30–0:42, 12:00–12:12):
+  - a covered road with **white-lit walls**, round pillars with posters, yellow centre lines;
+  - people watching from the side walkway.
+- **Light:**
+  - shiny dark asphalt reflecting headlights and the red tail lights;
+  - warm lamps;
+  - white-lit shop windows;
+  - **hoarding walls with the event / place name** (fictional) at one corner (14:24).
+
+**Turn it into gameplay (City Legends ideas):**
+1. **Casino Square car show at night:** from 22:00 to 02:00 game time, NPC crowds gather on the sidewalks and steps of the casino square, and **film and cheer** when a player drives by slowly in a nice car.
+   - A "Show-off" meter fills with revving, slow rolls and parking in front of the casino.
+   - The reward is cash and XP that grow with the car's price.
+   - A daily cap, server-checked.
+2. **Valet:** the casino and hotel valet takes your car (the existing hotel valet idea), and parks it **on show in the front row** for others to see.
+3. **NPC parade:** a few NPC supercars and hypercars cruise slowly round the square at night (in the traffic system), plus luxury SUVs and taxis.
+4. **Crowd look:** simple, light NPCs (no physics) holding up phones, with a camera-flash effect now and then. Few on low graphics.
+5. Keep the **red-white kerbs**, green cast-iron bollards, the stone wall and balustrade stairs, and the lit underpass next to the square.
+6. No real car brands, badges or names, and no alcohol at the café terraces (coffee, juice, snacks only).
+
 ## How to do it
 1. **Make a "Riviera kit":** reusable pieces with shared materials (textures 512 px or smaller):
    - road, red sidewalk, granite kerb, zebra crossing;
