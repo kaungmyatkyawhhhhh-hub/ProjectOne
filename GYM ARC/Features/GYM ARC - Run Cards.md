@@ -33,6 +33,7 @@ Every Body Alter gives a **card pick**: keep 1 of 3 cards. Cards stack for this 
   - The card back: a lattice and a gold dumbbell seal.
   - A picture per type (512x512): an engraved bone-and-gold emblem over a glowing seal in the type's colour. Chest, Shoulders, Back, Arms (a flexed arm), Legs, Core (six-pack), All (a star), Trainers (whistle + clipboard), Coins, Stamina (a bolt).
 - **Uploaded:** to Roblox with Studio's image upload; ids in `Config/RunCards.Art` (plus where the window and banner sit on a face).
+- **Owner's own pictures (2 Nov, later):** the 6 muscle cards plus All and Coins now use the owner's set from `GYM ARC/Assets/icons_2026-11-02` (chest, shoulders, back, bicep = Arms, legs, abs = Core, star = All, coins; 512x512). Uploaded and swapped in `Config/RunCards.Art.Types`. Trainers and Stamina keep the drawn pictures (no new ones for them). Tested on the hand and the keep window: `Screenshots/runcards/hand_owner_icons.jpg`.
 - **Loading:** every image is preloaded when the game starts.
 - **Sheets:** `GYM ARC/Art/RunCards/_sheet_faces.jpg`, `_sheet_pictures.jpg`.
 
