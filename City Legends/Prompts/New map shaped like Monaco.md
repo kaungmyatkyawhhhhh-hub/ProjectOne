@@ -2,6 +2,8 @@
 
 _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this first. This is a big job: work in phases, save and push after each. Owner: talk short and simple (caveman mode, see `Preferences.md`)._
 
+> **Owner, 2026-11-01 (wins over anything below):** NO yachts in the harbours (quays and breakwaters only, so also no yacht lights or cruise ship). A big loop with **3 routes** (coast, town, mountain) joined at both ends. Must look realistic: real Terrain for hills, cliffs and beach, smooth curved roads, nothing blocky. The Phase 1 plan is `City Legends/Riviera map - Phase 1 plan.png`, made by `Games/CityLegends/tools/map_plan/` (read its README).
+
 ## What the owner wants
 The owner thinks the current map looks bad and wants the **map shaped like Monaco**. Reference: `Games/CityLegends/imports/refs/map/monaco_shape.webp`. What that means:
 - **The land:** a long, thin strip of coast, running about south-west to north-east, with the sea on the south-east side and hills / the border on the north-west side.
