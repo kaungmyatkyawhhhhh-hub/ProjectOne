@@ -47,3 +47,6 @@ Every alter also opens its skin. New features get a slot by adding them to their
 - Cheap on phones: the silhouettes are the avatar thumbnail (fetched once) as flat images, no live 3D; redrawn only when the save changes.
 - UI kit only (Kit.Modal, Theme.Button chrome, PremiumKit backgrounds and slim buttons, ReadyGlow). No emojis.
 - No menu tile yet (the left menu is already crowded): the card is the way in.
+
+## Reached stops show you (2 Nov, owner: "after the player reaches the goal, the characters are still dark and they are suppose to appear")
+Every stop's figure was always a dark silhouette. Now (RoadClient `revealColor`): a stop you've reached (YOU ARE HERE too) shows your avatar in its own colours; an alter stop gets a light wash of that alter's colour. NEXT and everything after stay dark silhouettes (the mystery). Same in the strip under the row. Tested on an Alter 7 save: start + 6 spurts in colour, Alters 1-7 tinted, Alter 8+ dark. Screenshot: `Screenshots/road/road_reached_in_colour.jpg`. Studio, needs a publish.
