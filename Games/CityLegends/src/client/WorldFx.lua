@@ -37,8 +37,32 @@ function WorldFx.setDaylight(d: number)
 				task.wait()
 			end
 		end
+		for i, p in CollectionService:GetTagged("Window") do
+			WorldFx.setWindow(p)
+			if i % 600 == 0 then
+				task.wait()
+			end
+		end
 	end)
 end
+
+-- the Riviera's windows (tag "Window"): about 4 in 10 glow warm at night, picked by position so
+-- every player sees the same ones; streamed-in windows are set as they arrive
+local WINDOW_DARK = Color3.fromRGB(44, 52, 58)
+local WINDOW_LIT = Color3.fromRGB(214, 140, 64)
+function WorldFx.setWindow(p: Instance)
+	if not p:IsA("BasePart") then
+		return
+	end
+	local pos = p.Position
+	local h = math.abs(math.sin(pos.X * 12.9898 + pos.Y * 78.233 + pos.Z * 37.719) * 43758.5453) % 1
+	local on = lampsLit and h < 0.42
+	p.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+	p.Color = if on then WINDOW_LIT:Lerp(Color3.fromRGB(236, 182, 110), h / 0.42) else WINDOW_DARK
+end
+CollectionService:GetInstanceAddedSignal("Window"):Connect(function(p)
+	WorldFx.setWindow(p)
+end)
 
 ---------------------------------------------------------------------
 -- Quality: scales LOD distances + traffic density from the player's

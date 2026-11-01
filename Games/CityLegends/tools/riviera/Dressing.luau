@@ -109,9 +109,9 @@ local function lamp(base: Vector3, toRoad: Vector3, parent: Instance)
 	cap.CanCollide = false
 	local light = Instance.new("SpotLight")
 	light.Face = Enum.NormalId.Bottom
-	light.Angle = 120
-	light.Range = 48
-	light.Brightness = 2.4
+	light.Angle = 135
+	light.Range = 62
+	light.Brightness = 3.6
 	light.Color = Color3.fromRGB(255, 178, 104)
 	light.Shadows = false
 	light.Parent = head

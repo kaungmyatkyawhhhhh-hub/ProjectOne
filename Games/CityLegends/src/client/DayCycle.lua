@@ -60,12 +60,36 @@ local KEYS: { Key } = {
 	table.freeze({ hour = 21, brightness = 2.3, ambient = rgb(96, 98, 108), outdoor = rgb(108, 114, 136), shiftTop = rgb(150, 160, 190), exposure = 0.75, density = 0.3, haze = 1.2, glare = 0.25, atmo = rgb(96, 104, 128), decay = rgb(46, 50, 70), bloom = 0.45, rays = 0.03, tint = rgb(246, 248, 255), water = rgb(14, 34, 44) }),
 }
 
+-- the Riviera (the Monaco-shaped map east of X 9000, owner 2026-11-01 from his drive videos): a
+-- crisp clear day with a deep blue sky and no haze, a gold sunset, a navy-blue "blue hour" and a
+-- warm night lit by sodium lamps and windows. No neon. Blended in by the camera's position.
+local function with(k: Key, hour: number): Key
+	local c = table.clone(k)
+	c.hour = hour
+	return c
+end
+local R_NIGHT: Key = { hour = 0, brightness = 1.6, ambient = rgb(62, 68, 92), outdoor = rgb(72, 82, 120), shiftTop = rgb(120, 130, 170), exposure = 0.55, density = 0.22, haze = 0.6, glare = 0.1, atmo = rgb(40, 52, 92), decay = rgb(22, 30, 64), bloom = 0.6, rays = 0, tint = rgb(255, 244, 228), water = rgb(8, 22, 42) }
+local RIVIERA_KEYS: { Key } = {
+	R_NIGHT,
+	table.freeze(with(R_NIGHT, 4.6)),
+	{ hour = 6, brightness = 2.4, ambient = rgb(110, 104, 110), outdoor = rgb(150, 138, 140), shiftTop = rgb(255, 190, 150), exposure = 0.3, density = 0.24, haze = 1, glare = 0.6, atmo = rgb(230, 190, 170), decay = rgb(140, 110, 140), bloom = 0.45, rays = 0.1, tint = rgb(255, 240, 230), water = rgb(40, 80, 110) },
+	{ hour = 8.5, brightness = 3.2, ambient = rgb(120, 122, 130), outdoor = rgb(150, 154, 165), shiftTop = rgb(255, 240, 220), exposure = 0.05, density = 0.18, haze = 0.25, glare = 0.3, atmo = rgb(190, 210, 240), decay = rgb(100, 130, 190), bloom = 0.25, rays = 0.06, tint = rgb(255, 252, 246), water = rgb(20, 110, 150) },
+	{ hour = 13, brightness = 3.4, ambient = rgb(126, 126, 132), outdoor = rgb(152, 154, 164), shiftTop = rgb(255, 250, 238), exposure = 0, density = 0.16, haze = 0.2, glare = 0.2, atmo = rgb(200, 218, 245), decay = rgb(110, 140, 200), bloom = 0.25, rays = 0.04, tint = rgb(255, 255, 250), water = rgb(18, 112, 155) },
+	{ hour = 16.5, brightness = 3.1, ambient = rgb(130, 122, 118), outdoor = rgb(160, 148, 138), shiftTop = rgb(255, 226, 186), exposure = 0.05, density = 0.18, haze = 0.4, glare = 0.4, atmo = rgb(230, 210, 190), decay = rgb(140, 130, 160), bloom = 0.3, rays = 0.1, tint = rgb(255, 246, 230), water = rgb(24, 100, 140) },
+	{ hour = 18.3, brightness = 2.6, ambient = rgb(128, 100, 92), outdoor = rgb(176, 128, 104), shiftTop = rgb(255, 160, 100), exposure = 0.2, density = 0.25, haze = 0.9, glare = 0.9, atmo = rgb(255, 170, 120), decay = rgb(150, 90, 90), bloom = 0.45, rays = 0.15, tint = rgb(255, 232, 206), water = rgb(40, 70, 100) },
+	-- blue hour: a navy sky over the dark mountain, the lamps and windows coming on
+	{ hour = 19.6, brightness = 1.9, ambient = rgb(70, 78, 108), outdoor = rgb(84, 96, 140), shiftTop = rgb(110, 130, 200), exposure = 0.45, density = 0.22, haze = 0.6, glare = 0.3, atmo = rgb(52, 70, 128), decay = rgb(30, 40, 90), bloom = 0.6, rays = 0.02, tint = rgb(250, 244, 236), water = rgb(14, 34, 66) },
+	table.freeze(with(R_NIGHT, 21)),
+}
+DayCycle.RIVIERA_X = 9000 -- east of this the camera is on the Riviera map
+
 local function lerp(a: number, b: number, t: number): number
 	return a + (b - a) * t
 end
 
 -- the light at an hour: the two keyframes round it, blended smoothly
-local function sample(hour: number): Key
+local function sample(hour: number, keys: { Key }?): Key
+	local KEYS = keys or KEYS
 	local a, b = KEYS[#KEYS], KEYS[1]
 	local ha, hb = a.hour - 24, b.hour
 	for k = 1, #KEYS do
@@ -162,6 +186,20 @@ function DayCycle.start()
 		end
 		acc = 0
 		local k = sample(hour)
+		-- on the Riviera map its own light (blended over 1500 studs so it never pops)
+		local cam = workspace.CurrentCamera
+		local w = if cam then math.clamp((cam.CFrame.Position.X - (DayCycle.RIVIERA_X - 1500)) / 1500, 0, 1) else 0
+		if w > 0 then
+			local r = sample(hour, RIVIERA_KEYS)
+			for key, v in r do
+				local base = (k :: any)[key]
+				if typeof(v) == "Color3" then
+					(k :: any)[key] = base:Lerp(v, w)
+				elseif type(v) == "number" and key ~= "hour" then
+					(k :: any)[key] = base + (v - base) * w
+				end
+			end
+		end
 		Lighting.Brightness = k.brightness
 		Lighting.Ambient = k.ambient
 		Lighting.ColorShift_Top = k.shiftTop
