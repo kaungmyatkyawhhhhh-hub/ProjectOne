@@ -148,6 +148,16 @@ Config.Traffic = {
 	StuckTime = 6,
 	-- Weighted pick of classes used for NPCs
 	ClassWeights = { Sedan = 40, SUV = 25, Coupe = 18, Supercar = 6, Hypercar = 2 },
+	-- the imported low-poly traffic cars (ReplicatedStorage.TrafficModels, TrafficBodies): length in
+	-- studs by type letter (real lengths at 3 studs a metre): A hatch, B people carrier, C small
+	-- van, D minibus, E saloon, F pickup
+	ModelLengths = { A = 12, B = 12.6, C = 13.2, D = 14.7, E = 13.8, F = 15.9 },
+}
+
+-- shown at the bottom of Settings (assets that ask for credit)
+Config.Credits = {
+	"Traffic cars: \"Low Poly cars pack\" by matisosanimation (CC BY 4.0)",
+	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
 
 ---------------------------------------------------------------------

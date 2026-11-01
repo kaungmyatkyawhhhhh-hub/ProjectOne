@@ -58,7 +58,7 @@ for name, pts, col, opts in STREETS:
     line = catmull(pts, 8, opts.get("closed", False))
     sea_check(name, line)
     road(line, col, width=RW * opts.get("w", 1))
-    ss, rr, hh = profile(el, line, None, VS, SPM, 0.10, {0: max(el.at(*line[0]), 2) * VS, -1: max(el.at(*line[-1]), 2) * VS} if not opts.get("closed") else None)
+    ss, rr, hh = profile(el, line, None, VS, SPM, opts.get("grade", 0.10), {0: max(el.at(*line[0]), 2) * VS, -1: max(el.at(*line[-1]), 2) * VS} if not opts.get("closed") else None)
     g = max(abs(hh[i] - hh[i - 1]) / max(ss[i] - ss[i - 1], 1e-6) for i in range(1, len(hh)))
     cut = max(rr[i] - hh[i] for i in range(len(hh))); fill = max(hh[i] - rr[i] for i in range(len(hh)))
     print("%-16s len %5.0f  h %4.0f-%4.0f  grade %4.1f%%  cut %4.0f fill %4.0f  ends %4.0f/%4.0f" % (name, ss[-1], min(hh), max(hh), g * 100, cut, fill, hh[0], hh[-1]))
@@ -83,6 +83,39 @@ for name, pts, col, opts in ROUTES:
     for i in range(0, len(line), 70):
         x, y = P(line[i])
         o.append(f'<text x="{x:.0f}" y="{y+4:.0f}" font-size="11" fill="#111" text-anchor="middle" font-weight="700">{int(h[i])}</text>')
+ALL = [(n, catmull(pts, 8, op.get("closed", False))) for n, pts, c, op in ROUTES + STREETS]
+def seg_x(a, b, c, d):
+    den = (b[0]-a[0])*(d[1]-c[1]) - (b[1]-a[1])*(d[0]-c[0])
+    if abs(den) < 1e-9: return None
+    t = ((c[0]-a[0])*(d[1]-c[1]) - (c[1]-a[1])*(d[0]-c[0])) / den
+    u = ((c[0]-a[0])*(b[1]-a[1]) - (c[1]-a[1])*(b[0]-a[0])) / den
+    return (a[0]+t*(b[0]-a[0]), a[1]+t*(b[1]-a[1])) if 0 <= t <= 1 and 0 <= u <= 1 else None
+JUNCS = []
+for ni, (na, la) in enumerate(ALL):
+    for nb, lb in ALL[ni+1:]:
+        for i in range(0, len(la)-1, 2):
+            for k in range(0, len(lb)-1, 2):
+                if abs(la[i][0]-lb[k][0]) > 40 or abs(la[i][1]-lb[k][1]) > 40: continue
+                x = seg_x(la[i], la[min(i+2, len(la)-1)], lb[k], lb[min(k+2, len(lb)-1)])
+                if x and all(math.hypot(x[0]-j[0], x[1]-j[1]) > 30 for j in JUNCS): JUNCS.append(x)
+for n, pts, c, op in ROUTES + STREETS:
+    if op.get("closed"): continue
+    for e in (pts[0], pts[-1]):
+        if all(math.hypot(e[0]-j[0], e[1]-j[1]) > 30 for j in JUNCS): JUNCS.append(e)
+# roads running too close side by side (not at a junction)
+for ni, (na, la) in enumerate(ALL):
+    for nb, lb in ALL[ni+1:]:
+        worst = None
+        for p in la[::4]:
+            if any(math.hypot(p[0]-j[0], p[1]-j[1]) < 90 for j in JUNCS): continue
+            for q in lb[::4]:
+                d = math.hypot(p[0]-q[0], p[1]-q[1])
+                if d < 52 and (worst is None or d < worst[0]): worst = (d, p)
+        if worst: print("TOO CLOSE: %s / %s  %.0f m at %.0f,%.0f" % (na, nb, worst[0], worst[1][0], worst[1][1]))
+for jx in JUNCS:
+    x, y = P(jx)
+    o.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="7" fill="#fff" stroke="#000" stroke-width="2"/>')
+print("junctions", len(JUNCS), " street length total %.0f studs" % (sum(sum(math.hypot(l[i][0]-l[i-1][0], l[i][1]-l[i-1][1]) for i in range(1, len(l))) for n, l in ALL) * SPM))
 for kind, p, label in MARKS:
     x, y = P(p)
     if kind == "junction":

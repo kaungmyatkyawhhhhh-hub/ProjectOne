@@ -20,6 +20,7 @@ local Cars = require(Shared:WaitForChild("Cars"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
+local TrafficBodies = require(script.Parent:WaitForChild("TrafficBodies"))
 
 local T = Config.Traffic
 local TURN_SPEED = Config.mphToSps(T.TurnSpeedMph)
@@ -226,10 +227,15 @@ local function spawnNpc(center: Vector3?, highway: boolean): Npc?
 	if not seg then
 		return nil
 	end
-	local spec = CarBuilder.randomTrafficSpec(rng)
-	local color = Cars.TrafficColors[rng:NextInteger(1, #Cars.TrafficColors)]
-	local model = CarBuilder.build(spec, { anchored = true, driver = true, simpleWheels = true, lite = true, color = color })
-	CarSkin.apply(model, true, true)
+	-- the imported low-poly traffic cars when the place has them, else our own built ones
+	local model = TrafficBodies.build(rng)
+	if not model then
+		local spec = CarBuilder.randomTrafficSpec(rng)
+		local color = Cars.TrafficColors[rng:NextInteger(1, #Cars.TrafficColors)]
+		model = CarBuilder.build(spec, { anchored = true, driver = true, simpleWheels = true, lite = true, color = color })
+		CarSkin.apply(model :: Model, true, true)
+	end
+	assert(model)
 	local tails = {}
 	local wheels: { Motor6D } = {}
 	for _, j in (model.PrimaryPart :: BasePart):GetChildren() do

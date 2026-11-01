@@ -1065,7 +1065,8 @@ local function buildSideButtons()
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Background, 2, 0) })
 
 	-- settings: camera + music toggles (same actions as C and M)
-	settingsPanel = sidePanel("SETTINGS", 324, if UI.isTouch then 0.4 else 0.5)
+	settingsPanel = sidePanel("SETTINGS", 360, if UI.isTouch then 0.4 else 0.5)
+	label({ Text = table.concat(Config.Credits, "\n"), TextSize = 10, Font = Enum.Font.GothamMedium, TextColor3 = Theme.SubText, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(16, 314), Size = UDim2.new(1, -32, 0, 38), ZIndex = 5, Parent = settingsPanel })
 	local function settingRow(name: string, key: string, y: number, panel: Frame?): TextButton
 		local parent = panel or settingsPanel
 		label({ Text = name, TextSize = 14, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(16, y), Size = UDim2.fromOffset(110, 32), ZIndex = 5, Parent = parent })
