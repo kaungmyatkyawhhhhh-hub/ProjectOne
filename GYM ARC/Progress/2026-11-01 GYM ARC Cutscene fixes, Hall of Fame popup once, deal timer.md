@@ -32,3 +32,8 @@ The "29:47" pill on the deal card: turned -6 degrees, 5 px corners (was a full p
 ## Not done / owner
 - Phone-size screenshots (the Studio window can't be resized from here).
 - Save to Roblox, then publish.
+
+## 6. Right-side drawer opens on a machine (owner, 1 Nov night: "while in machine, that thing isnt expandable")
+- On a machine the right drawer (the GROWTH SPURT card) folds by itself, and its "<" tab did nothing: the fold was forced while training, so a tap only changed the saved choice.
+- Now (`Shared/UI/RightColumn`) a tap on a machine opens it, a second tap folds it. That's not saved: getting on or off a machine goes back to the player's own choice.
+- Tested in Studio on the Starter Gym Flat Bench: tap = the GROWTH SPURT card slides in, arrow flips; tap again = folded. No errors.
