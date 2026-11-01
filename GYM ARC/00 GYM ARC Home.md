@@ -15,6 +15,13 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 
 ## Rules
 - No growth spurt cooldown. See [[GYM ARC - Growth Spurts]].
+- Saved data: follow the save-version rules in [[GYM ARC - Player Data and Saving]] (bump + migration step, ids never renamed without a mapping, "Migrate to latest update", never roll back past a bump).
+
+## Weekly backup (every Sunday, ~5 min; prompt 108)
+1. Studio, GYM ARC open: **File > Save to File As...** -> `GYM ARC YYYY-MM-DD.rbxl`. (Or from the published game: Creator Hub > the place > **Version History** > the latest > **Open Local Copy**, then Save to File.)
+2. Put the .rbxl in the cloud (Google Drive / OneDrive folder `GYM ARC backups`); keep the last 8 weeks.
+3. Scripts and notes are in git already (this vault); after a big update also export the scripts: select ServerScriptService, StarterPlayer, ReplicatedStorage > right-click > **Save to File** (.rbxmx) into the same backup folder.
+4. Before a risky publish (a save-version bump): make one extra backup first.
 
 ## Current status (21 Oct 2026)
 - 1 Nov: **STORYLINE built in Studio** (not published): 6 bullies, one per gym, arm wrestle them to open the next gym (strength decides), TTS voices + captions, 5 s max shots, cliffhangers. Switch `Story_Enabled`. [[2026-11-01 GYM ARC Storyline built - bullies, arm wrestling, voices]] · voice lines to record: [[GYM ARC - Storyline voice lines to record]]
