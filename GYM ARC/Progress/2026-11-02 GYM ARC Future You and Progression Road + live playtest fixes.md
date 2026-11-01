@@ -72,3 +72,5 @@ Left as is (owner decisions or not bugs): the Starter Pack's always-on card (31 
   - Centre titles: FredokaOne, pure white (no gradient), bigger (66).
   - Holes at elbows / knees: softer bends in the cry, laugh and fist poses (R15 opens gaps at sharp bends).
   - Street props in front of the opening camera and the canopy post in front of the poster removed from the set.
+- **Tutorial: leave the machine mid-reps -> the way back (owner, 2 Nov):** on the bench steps (first rep, 8 reps) and the squat step (5 reps), getting off the machine brings back the gold path, the marker + arrow and GO TO FLAT BENCH / SQUAT RACK, with the line "Get back on the Flat Bench and finish your reps!". They hide again once you're back on it. (TutorialClient `repsHome`.) Tested on the bench (screenshot `tutorial_back_to_bench.jpg`).
+- **"This is your max potential" scene removed (owner, 2 Nov):** it no longer plays after the tutorial. The code stays (Studio test: Workspace `TestPotential`).
