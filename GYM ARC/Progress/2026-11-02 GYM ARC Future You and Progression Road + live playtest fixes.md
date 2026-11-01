@@ -67,3 +67,8 @@ Left as is (owner decisions or not bugs): the Starter Pack's always-on card (31 
 - **Sound on everything + better music** (all licensed or Roblox built-in): street bed APM "Leaving the City" -> tension sting when Benny comes -> his footsteps (Roblox's own, heavier) and yours -> grunt + whoosh + hit + your gasp on the shove -> body fall thud (+ low layer, dust) -> sad piano APM "Reflection" + PSE boy sniffles while you cry -> PSE evil laugh on "Go home, punk" -> glass door as he goes in -> APM "Brave" rises at the poster (+ shimmer), getting up, deep breath, fist -> title boom. Only the music group is muted meanwhile (the game's SFX stay audible); everything fades out after. The intro music no longer plays twice. Tested: every licensed sound loaded and played.
 - **Removed NPCs (owner):** no errors; 17 NPCs at run time.
 - Screenshots: `GYM ARC/Screenshots/road/intro_1..4`.
+- **More owner feedback on the intro (2 Nov, later):**
+  - Sounds were too quiet (the game's own clips come out near silent there): the cutscene now has its own sound channel at full volume and its own licensed clips: PSE whoosh + grunt + hand/body thud + gasp on the shove, PSE "Body Fall Concrete 2" + low thud on the fall, PSE boy sniffles x3 (volume 6, the piano dips under each), evil laugh, glass door, APM thump/boom. Footsteps (Roblox's built-in) at volume 2 / 2.6 (Benny heavier). Tested: all load and play at the right beats.
+  - Centre titles: FredokaOne, pure white (no gradient), bigger (66).
+  - Holes at elbows / knees: softer bends in the cry, laugh and fist poses (R15 opens gaps at sharp bends).
+  - Street props in front of the opening camera and the canopy post in front of the poster removed from the set.
