@@ -56,3 +56,14 @@ Left as is (owner decisions or not bugs): the Starter Pack's always-on card (31 
 - **Tutorial REP CARD:** on a "do N reps" step (the bench: 8 reps; the squat rack: 5) a card above the stamina bar: the machine, "2 / 8 REPS", a gold bar with one notch per rep that fills each rep (a small pop), and the step's line. So the tutorial never looks like it ended. Tested (screenshot `tutorial_rep_card_8.jpg`).
 - **Leaderboard sorts by Strength:** the leaderstats Strength is a NumberValue again (it was text "2.3T" since 1 Nov, which Roblox can't sort). Most strength on top. Trade-off: Roblox shortens it itself, so past a trillion it reads "2,333B".
 - Queued, not done yet: the "Train next" list per gym you're in (owner's screenshot), the broken faces on NPCs (4 screenshots).
+
+## Intro cutscene fixes (2 Nov, owner feedback, Studio)
+- **Black screen on a real first join:** MenuClient's HUD fade-in (a frame after PLAY) faded in every screen's pieces, the cutscene's black cover too. Screens marked `NoHudFade` are skipped now; the cutscene also waits for the menu's camera swoop to finish.
+- **Couldn't turn the camera after it:** the menu's swoop finished mid-scene and kept the camera; and cleanup now always restores the camera, even if it already ran. Tested: CameraType Custom, the arrow keys turn it, the tutorial starts.
+- **Outlined "EVERYONE STARTS TINY" stuck on screen:** text faded but its outline didn't; text + outline fade together now. The bottom line "...Everyone starts tiny." (a repeat) is now "A membership... I could get strong too."
+- **Centre titles:** FredokaOne, white with a soft silver gradient, dark outline (owner tried serif, said it looked bad).
+- **Poster blocked by a pole / opening shot blocked:** the canopy post and the street-side props in front of the cameras removed from `ReplicatedStorage.IntroSet` only (the real town keeps them).
+- **Crying pose:** hands to the face, head down (it read as a flex).
+- **Sound on everything + better music** (all licensed or Roblox built-in): street bed APM "Leaving the City" -> tension sting when Benny comes -> his footsteps (Roblox's own, heavier) and yours -> grunt + whoosh + hit + your gasp on the shove -> body fall thud (+ low layer, dust) -> sad piano APM "Reflection" + PSE boy sniffles while you cry -> PSE evil laugh on "Go home, punk" -> glass door as he goes in -> APM "Brave" rises at the poster (+ shimmer), getting up, deep breath, fist -> title boom. Only the music group is muted meanwhile (the game's SFX stay audible); everything fades out after. The intro music no longer plays twice. Tested: every licensed sound loaded and played.
+- **Removed NPCs (owner):** no errors; 17 NPCs at run time.
+- Screenshots: `GYM ARC/Screenshots/road/intro_1..4`.
