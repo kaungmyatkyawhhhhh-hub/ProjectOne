@@ -17,6 +17,7 @@ Every game system, one note each. "planned" = from the owner's two new prompts (
 - [[GYM ARC - Energy Shakes]]: bag shakes and the smoothie bar's timed boosts (done)
 - [[GYM ARC - Genetics]]: grades, frame and body type, the 3D reveal and reroll (done)
 - [[GYM ARC - Growth Spurts]]: rebirth, taller and stronger, capped at 7'0" (done)
+- [[GYM ARC - Run Cards]]: a card pick every alter, legacy cards from the Hall of Fame (built, opens with the GEM update)
 
 ## Screens and feel
 - [[GYM ARC - Stats and Muscles Panel]]: world stat labels, "Your muscles" panel, body-map widget (done)

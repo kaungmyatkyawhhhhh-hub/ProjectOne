@@ -50,3 +50,6 @@ Workspace attribute `TestShowdown` = true: starts a Strongman Showdown now (play
 
 ## TestYardLocked (27 Oct)
 Workspace attribute `TestYardLocked` = true: the Strongman Yard is locked for everyone (as if below Alter 2), on the server and the client. Studio only. See [[GYM ARC - Strongman Yard]].
+
+## Run Cards (2 Nov)
+`TestRunCards` = true turns Run Cards on in Studio. `TestKeepCard` (set on the client during Play) opens the Hall of Fame "keep 1 card" window. `TestNewLife` = a card id (on the server during Play) starts a new life keeping that card. Studio only. See [[GYM ARC - Run Cards]].

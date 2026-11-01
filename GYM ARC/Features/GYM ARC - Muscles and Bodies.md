@@ -132,3 +132,6 @@ Owner: "if you're in the same area as NPCs, don't make their muscle meshes disap
 ## NPC waists showed skin (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
 - Owner: "most npcs lower waist is showing their skin and not clothes". A classic Pants image leaves see-through gaps on the waist and upper-thigh stage meshes (a band at the belt line, a patch at the crotch), and the plain copy under a clothed piece was skin coloured.
 - `BodyStages`: under a Pants image on the "shorts" pieces (waist, tops of the thighs) that copy is now dark cloth (`PANTS_GAP` #25262B), so the gaps read as a belt line or shadow. Arms, torso and lower thighs are unchanged.
+
+## Arm stage meshes were empty (2 Nov)
+The 14 arm stage templates (`ReplicatedStorage.BodyStages.BS_*Arm_Arm_g*`) had lost their meshes (empty MeshId), so every run printed "[BodyStages] biceps reshape skipped ... Failed to load mesh" 14 times and players far away had plain arms. Restored from `Config/StageMeshBackup` (the 19 Oct reshape meshes, g000 the 15 Oct low-poly one). The biceps reshape works again, no warnings. Only `ServerStorage._Leftovers` (unused) still has 2 empty mesh parts.
