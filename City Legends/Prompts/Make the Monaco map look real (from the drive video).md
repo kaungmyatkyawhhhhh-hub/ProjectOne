@@ -98,6 +98,47 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Use this with `N
 - **People:** walkers on every sidewalk, cyclists on the coast road, people sitting at café terraces.
 - Use our own fictional cars and liveries. No real logos.
 
+## Night: from the owner's night drive video (`Games/CityLegends/imports/videoplayback (1).mp4`, 20 min, 2026-11-01)
+Watch it yourself too. It starts at blue hour and goes into full night (0:00–16:00), then a daytime part (16:20–19:40) that matches the morning video. What it shows:
+- **Blue hour sky:** a deep blue sky with **the dark mountain silhouette** above the city, and the hillside dotted with small lit windows (0:28–1:03, 6:11–6:25, 10:37). Many scenes are at this time: the sky is never black, it's dark navy.
+- **Street lamps:**
+  - mostly **warm orange-yellow (sodium) lights** on tall curved poles; roads and sidewalks glow orange-gold (0:07–2:13, 5:22–5:43, 9:20–9:55);
+  - in shopping streets and the casino quarter, **white-warm globe lamps** and lanterns (3:44–4:05);
+  - pools of light on the road with darker gaps between them. Not evenly bright.
+- **Buildings at night:**
+  - the cream and ochre walls are lit **warm gold by the street lamps from below** (3:02, 3:23, 9:06);
+  - some fronts are **floodlit** (white classical buildings, 4:40, 5:36);
+  - shop windows glow bright white-warm along the shopping streets (3:02–4:05);
+  - about **30–50% of apartment windows lit**, warm yellow;
+  - **stone walls, arches and gates lit orange** (9:55–10:51).
+- **Signs at night:**
+  - the **white stacked arrow sign boards glow** (lit from inside, 4:47, 5:22, 8:45);
+  - **digital parking boards** with orange numbers (8:45);
+  - pharmacy-style green crosses (keep them, as a plain green cross with no text);
+  - lit blue pedestrian signs;
+  - **green / red traffic lights** reflecting on the road.
+  - Bus shelters are lit with glowing ad panels (1:10).
+- **The tunnels at night** (the signature):
+  - the **long seaside tunnel** with rows of **warm yellow-orange lights** on the ceiling, **grey ribbed metal walls**, a yellow centre line, curves, and pillars opening to the dark sea (13:04–13:32);
+  - **newer white-lit tunnels** with **cool white LED lights in rows** and **amber reflector studs** along the walls, a grey wall finish and a green stripe at the bottom (14:21–15:24, 16:13);
+  - **stone-arch tunnel mouths** cut into the cliff (15:10, 15:31);
+  - short **orange-lit concrete underpasses** (15:52–15:59).
+  - Build at least one of each: they make the night drive feel real.
+- **Roads at night:**
+  - white lines and zebra crossings shine in the headlights;
+  - **red-white striped bollards and barriers**, orange traffic cones and **white crash barriers with red reflectors** on the curves (13:04–13:46, 15:38);
+  - curving viaducts with sea views (7:07, 8:31–8:38).
+- **Life at night:**
+  - few cars, many **scooters and delivery bikes**, cyclists, people walking past cafés;
+  - a police car with blue lights now and then (7:21);
+  - café terraces lit warm (4:05).
+- **Still no neon.** The only coloured light is from traffic lights, a green pharmacy cross, police lights and shop windows.
+- **Set `DayCycle` night and dusk keyframes from this:**
+  - dusk / blue hour: navy-blue sky, mountain silhouette, lamps on, warm gold walls;
+  - full night: darker navy, more contrast between lit and unlit areas;
+  - warm sodium orange as the main light colour, with white-warm in the shopping and casino streets.
+  - Show the owner the same street at blue hour and full night, next to frames from this video (2:13, 3:02, 5:36, 13:25, 14:35).
+
 ## How to do it
 1. **Make a "Riviera kit":** reusable pieces with shared materials (textures 512 px or smaller):
    - road, red sidewalk, granite kerb, zebra crossing;
