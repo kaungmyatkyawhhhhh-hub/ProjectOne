@@ -324,8 +324,13 @@ function Dressing.tunnel(data, parent: Instance): number
 			local W = HALF + WALK
 			-- ceiling and the land-side wall (cream-yellow lower half)
 			part({ Name = "Ceiling", Size = Vector3.new(W * 2 + 6, 3, len), CFrame = cf * CFrame.new(0, 27.5, 0), Material = Enum.Material.Concrete, Color = Color3.fromRGB(150, 146, 136) }, group :: Model)
-			part({ Name = "Wall", Size = Vector3.new(2, 14, len), CFrame = cf * CFrame.new(-sea * (W + 1), 7, 0), Material = Enum.Material.Plaster, Color = Color3.fromRGB(226, 200, 120) }, group :: Model)
+			part({ Name = "Wall", Size = Vector3.new(2, 14, len), CFrame = cf * CFrame.new(-sea * (W + 1), 7, 0), Material = Enum.Material.Plaster, Color = Color3.fromRGB(236, 198, 112) }, group :: Model)
 			part({ Name = "WallUpper", Size = Vector3.new(2, 13, len), CFrame = cf * CFrame.new(-sea * (W + 1), 20.5, 0), Material = Enum.Material.Concrete, Color = Color3.fromRGB(160, 156, 146) }, group :: Model)
+			-- raised walkways both sides (the tunnel has no pavements of its own)
+			for _, sd in { -1, 1 } do
+				part({ Name = "Walkway", Size = Vector3.new(W - HALF, 6, len), CFrame = cf * CFrame.new(sd * (HALF + (W - HALF) / 2), 0.5 - 3, 0), Material = Enum.Material.Concrete, Color = Color3.fromRGB(176, 172, 162) }, group :: Model)
+			end
+			workspace.Terrain:FillBlock(cf * CFrame.new(0, 14, 0), Vector3.new(W * 2, 26, len + 2), Enum.Material.Air)
 			-- low wall + pillars on the sea side
 			part({ Name = "SeaKerbWall", Size = Vector3.new(2, 3.4, len), CFrame = cf * CFrame.new(sea * (W + 1), 1.7, 0), Material = Enum.Material.Concrete, Color = Color3.fromRGB(214, 210, 200) }, group :: Model)
 			acc += (b.pos - a.pos).Magnitude
@@ -349,6 +354,183 @@ function Dressing.tunnel(data, parent: Instance): number
 			end
 			-- open the terrain on the sea side so the pillars look out over the water
 			workspace.Terrain:FillBlock(cf * CFrame.new(sea * (W + 34), 16, 0), Vector3.new(60, 30, len + 2), Enum.Material.Air)
+		end
+	end
+	return n
+end
+
+---------------------------------------------------------------------
+-- street furniture (video: bollards, blue crossing signs, scooters parked in rows, planters,
+-- palms, bus shelters)
+---------------------------------------------------------------------
+local function bollard(pos: Vector3, striped: boolean, parent: Instance)
+	local col = if striped then Color3.fromRGB(196, 32, 36) else Color3.fromRGB(34, 36, 38)
+	part({ Name = "Bollard", Shape = Enum.PartType.Cylinder, Size = Vector3.new(3, 0.8, 0.8), CFrame = CFrame.new(pos + Vector3.new(0, 1.5, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Metal, Color = col, CastShadow = false }, parent)
+	if striped then
+		part({ Name = "Stripe", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.6, 0.84, 0.84), CFrame = CFrame.new(pos + Vector3.new(0, 2.2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.SmoothPlastic, Color = Color3.fromRGB(240, 240, 236), CastShadow = false }, parent)
+	end
+end
+
+local function crossingSign(pos: Vector3, face: Vector3, parent: Instance)
+	part({ Name = "SignPole", Shape = Enum.PartType.Cylinder, Size = Vector3.new(10, 0.4, 0.4), CFrame = CFrame.new(pos + Vector3.new(0, 5, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Metal, Color = Color3.fromRGB(150, 152, 156), CastShadow = false }, parent)
+	local cf = CFrame.lookAt(pos + Vector3.new(0, 9.2, 0), pos + Vector3.new(0, 9.2, 0) + face)
+	part({ Name = "CrossingSign", Size = Vector3.new(2.6, 2.6, 0.15), CFrame = cf, Material = Enum.Material.SmoothPlastic, Color = Color3.fromRGB(28, 82, 168), CastShadow = false }, parent)
+	part({ Name = "SignTriangle", Size = Vector3.new(1.7, 1.5, 0.05), CFrame = cf * CFrame.new(0, 0, -0.1), Material = Enum.Material.SmoothPlastic, Color = Color3.fromRGB(240, 240, 240), CastShadow = false }, parent)
+end
+
+local SCOOTER = { Color3.fromRGB(230, 230, 226), Color3.fromRGB(30, 30, 32), Color3.fromRGB(150, 30, 34), Color3.fromRGB(40, 70, 120), Color3.fromRGB(170, 172, 176) }
+local function scooter(cf: CFrame, rng: Random, parent: Instance)
+	local col = SCOOTER[rng:NextInteger(1, #SCOOTER)]
+	local m = Instance.new("Model")
+	m.Name = "Scooter"
+	for _, z in { -2.1, 2.1 } do
+		part({ Name = "Wheel", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.6, 1.9, 1.9), CFrame = cf * CFrame.new(0, 0.95, z), Material = Enum.Material.Rubber, Color = Color3.fromRGB(24, 24, 24), CastShadow = false }, m)
+	end
+	part({ Name = "Floor", Size = Vector3.new(1.2, 0.5, 2.6), CFrame = cf * CFrame.new(0, 1.3, 0), Material = Enum.Material.SmoothPlastic, Color = col, CastShadow = false }, m)
+	part({ Name = "Rear", Size = Vector3.new(1.4, 1.5, 2.2), CFrame = cf * CFrame.new(0, 2, 1.4), Material = Enum.Material.SmoothPlastic, Color = col, CastShadow = false }, m)
+	part({ Name = "Seat", Size = Vector3.new(1.2, 0.35, 2.2), CFrame = cf * CFrame.new(0, 2.9, 1.3), Material = Enum.Material.Leather, Color = Color3.fromRGB(26, 26, 26), CastShadow = false }, m)
+	part({ Name = "Front", Size = Vector3.new(1.2, 3, 0.6), CFrame = cf * CFrame.new(0, 2.6, -2) * CFrame.Angles(-0.25, 0, 0), Material = Enum.Material.SmoothPlastic, Color = col, CastShadow = false }, m)
+	part({ Name = "Bars", Size = Vector3.new(2.2, 0.25, 0.25), CFrame = cf * CFrame.new(0, 4.1, -2.35), Material = Enum.Material.Metal, Color = Color3.fromRGB(40, 40, 42), CastShadow = false }, m)
+	m.Parent = parent
+end
+
+local function planter(pos: Vector3, rng: Random, parent: Instance)
+	part({ Name = "Planter", Size = Vector3.new(5, 2.6, 5), CFrame = CFrame.new(pos + Vector3.new(0, 1.3, 0)), Material = Enum.Material.WoodPlanks, Color = Color3.fromRGB(122, 92, 64) }, parent)
+	local green = Color3.fromRGB(64, 104, 52):Lerp(Color3.fromRGB(96, 130, 64), rng:NextNumber())
+	part({ Name = "Shrub", Shape = Enum.PartType.Ball, Size = Vector3.new(5.6, 5.6, 5.6), CFrame = CFrame.new(pos + Vector3.new(0, 4.4, 0)), Material = Enum.Material.Grass, Color = green, CanCollide = false }, parent)
+	if rng:NextNumber() < 0.4 then -- bougainvillea
+		part({ Name = "Flowers", Shape = Enum.PartType.Ball, Size = Vector3.new(3.2, 3.2, 3.2), CFrame = CFrame.new(pos + Vector3.new(rng:NextNumber(-1, 1), 6, rng:NextNumber(-1, 1))), Material = Enum.Material.Grass, Color = Color3.fromRGB(206, 64, 140), CanCollide = false, CastShadow = false }, parent)
+	end
+end
+
+local function busShelter(cf: CFrame, parent: Instance)
+	local m = Instance.new("Model")
+	m.Name = "BusShelter"
+	part({ Name = "Roof", Size = Vector3.new(4.5, 0.4, 14), CFrame = cf * CFrame.new(0, 9, 0), Material = Enum.Material.Metal, Color = Color3.fromRGB(70, 72, 76) }, m)
+	part({ Name = "Back", Size = Vector3.new(0.3, 8, 13), CFrame = cf * CFrame.new(2, 4.6, 0), Material = Enum.Material.Glass, Color = Color3.fromRGB(190, 210, 220), Transparency = 0.55 }, m)
+	local ad = part({ Name = "AdPanel", Size = Vector3.new(0.6, 7, 4), CFrame = cf * CFrame.new(0, 4.4, 6.6), Material = Enum.Material.Neon, Color = Color3.fromRGB(250, 236, 210) }, m)
+	ad.CastShadow = false
+	part({ Name = "Bench", Size = Vector3.new(1.4, 0.4, 9), CFrame = cf * CFrame.new(1, 2, 0), Material = Enum.Material.Wood, Color = Color3.fromRGB(120, 90, 60) }, m)
+	for _, z in { -6.5, 6.5 } do
+		part({ Name = "Post", Size = Vector3.new(0.4, 9, 0.4), CFrame = cf * CFrame.new(2, 4.5, z), Material = Enum.Material.Metal, Color = Color3.fromRGB(70, 72, 76) }, m)
+	end
+	m.Parent = parent
+end
+
+function Dressing.furniture(data, box, parent: Instance, rng: Random, palms: Model?): { [string]: number }
+	local roads = roadsIn(data, box)
+	local n = { bollards = 0, signs = 0, scooters = 0, planters = 0, palms = 0, shelters = 0 }
+	local group: Model? = nil
+	local function grp(at: Vector3): Model
+		if group == nil or (group:GetAttribute("Center") - at).Magnitude > 220 then
+			group = lodGroup("Furniture", at, 600, parent)
+		end
+		return group :: Model
+	end
+	for _, r in roads do
+		local town = r.kind == "street" or r.name == "Town Road" or r.name == "Coast Road"
+		if not town then
+			continue
+		end
+		local inJ = {}
+		for i, p in r.pts do
+			inJ[i] = nearestOther(roads, r, p.pos) < HALF + 6
+		end
+		local acc, palmAcc, shelterAcc = 0, 0, 0
+		local scooterRun = 0
+		local casino = string.find(r.name, "Casino") ~= nil
+		for i = 2, #r.pts do
+			local a, b = r.pts[i - 1], r.pts[i]
+			if not inBox(box, b.pos) or b.tunnel then
+				continue
+			end
+			local right = Vector3.new(-b.dir.Z, 0, b.dir.X).Unit
+			local step = (b.pos - a.pos).Magnitude
+			acc += step
+			palmAcc += step
+			shelterAcc += step
+			-- at a junction approach: red-white bollards on the corners and a blue crossing sign
+			local leaving = inJ[i - 1] and not inJ[i]
+			local arriving = i < #r.pts and inJ[i + 1] and not inJ[i]
+			if leaving or arriving then
+				for _, side in { -1, 1 } do
+					local kerb = b.pos + right * side * (HALF + 1.5) + Vector3.new(0, 0.5, 0)
+					if nearestOther(roads, r, kerb) > HALF + 3 then
+						for k = 0, 2 do
+							bollard(kerb + b.dir * (k * 3 - 3), true, grp(kerb))
+							n.bollards += 1
+						end
+						crossingSign(b.pos + right * side * (HALF + 3.5) + Vector3.new(0, 0.5, 0), -b.dir, grp(kerb))
+						n.signs += 1
+					end
+				end
+			end
+			if inJ[i] then
+				continue
+			end
+			local seaRight = seaAt(b.pos + right * (HALF + WALK + 60))
+			-- black bollards along the kerb in the casino quarter
+			if casino and acc > 9 then
+				acc = 0
+				for _, side in { -1, 1 } do
+					bollard(b.pos + right * side * (HALF + 1.4) + Vector3.new(0, 0.5, 0), false, grp(b.pos))
+					n.bollards += 1
+				end
+			end
+			-- scooters parked in a row against the kerb (a few runs per street)
+			if scooterRun > 0 then
+				scooterRun -= 1
+				local side = if seaRight then -1 else 1
+				local base = b.pos + right * side * (HALF + 3) + Vector3.new(0, 0.5, 0)
+				for k = 0, 1 do
+					local p = base + b.dir * (k * 3.2)
+					scooter(CFrame.lookAt(p, p - right * side), rng, grp(p))
+					n.scooters += 1
+				end
+			elseif r.kind == "street" and rng:NextNumber() < 0.025 then
+				scooterRun = rng:NextInteger(3, 6)
+			end
+			-- planters and palms on the pavements' outer edge, alternating sides
+			if palmAcc > 52 then
+				palmAcc = 0
+				local side = if rng:NextNumber() < 0.5 then 1 else -1
+				if seaAt(b.pos + right * side * (HALF + WALK + 60)) then
+					side = -side
+				end
+				local spot = b.pos + right * side * (HALF + WALK - 3) + Vector3.new(0, 0.5, 0)
+				if nearestOther(roads, r, spot) > HALF + WALK then
+					if palms and (casino or r.name == "Beach Avenue" or r.name == "Coast Road") then
+						local pm = palms:Clone()
+						pm:ScaleTo(pm:GetScale() * rng:NextNumber(1.1, 1.5))
+						local cf, size = pm:GetBoundingBox()
+						pm:PivotTo(pm:GetPivot() + (spot - Vector3.new(cf.Position.X, cf.Position.Y - size.Y / 2, cf.Position.Z)))
+						pm:PivotTo(pm:GetPivot() * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0))
+						for _, d in pm:GetDescendants() do
+							if d:IsA("BasePart") then
+								d.CanCollide = false
+							end
+						end
+						pm.Parent = grp(spot)
+						n.palms += 1
+					else
+						planter(spot, rng, grp(spot))
+						n.planters += 1
+					end
+				end
+			end
+			-- a bus shelter now and then on the Coast and Town roads
+			if (r.name == "Coast Road" or r.name == "Town Road") and shelterAcc > 420 then
+				shelterAcc = 0
+				local side = if seaRight then -1 else 1
+				local spot = b.pos + right * side * (HALF + WALK - 3) + Vector3.new(0, 0.5, 0)
+				if nearestOther(roads, r, spot) > HALF + WALK + 10 then
+					busShelter(CFrame.lookAt(spot, spot + b.dir) * CFrame.Angles(0, if side > 0 then 0 else math.pi, 0), grp(spot))
+					n.shelters += 1
+				end
+			end
+			if i % 40 == 0 then
+				task.wait()
+			end
 		end
 	end
 	return n

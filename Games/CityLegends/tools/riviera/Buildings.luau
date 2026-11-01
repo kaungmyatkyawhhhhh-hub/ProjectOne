@@ -258,6 +258,9 @@ function Buildings.build(data, box, parent: Instance, rng: Random, opts): number
 		if r.kind ~= "street" and r.name ~= "Coast Road" and r.name ~= "Town Road" then
 			continue
 		end
+		if opts.skip and opts.skip(r.name) then
+			continue -- (the hillside lanes are kept for the players' house lots)
+		end
 		for _, side in { -1, 1 } do
 			local acc = 0
 			local nextGap = rng:NextNumber(4, 12)
