@@ -86,6 +86,7 @@ The owner asked to "play until u get first hall of fame". Not possible in one si
 8. **Too many HUD buttons:** the left column = 8 tiles + INVITE, CODES, FREE 1,000, PLUS = 12 buttons, plus the Starter Pack card, quest card, spurt card, posing timer, DAILY and a SKIP pill. On a phone this covers the game.
 
 ## FIX LIST (for Studio; check each against tonight's Studio build first)
+**2 Nov: fixed in Studio (not published), see [[2026-11-02 GYM ARC Future You and Progression Road + live playtest fixes]] for each fix and what was left as is.**
 **P0, before the ads**
 - [ ] Benny / bully arm wrestle can't be started live: test tonight's client-side story build on a FRESH save in a crowded server; ship it.
 - [ ] Character invisible + teleports dead after THE RUNWAY (restore the real body, camera and Anchored after the show, even if the player leaves the stage).
