@@ -74,3 +74,23 @@ Left as is (owner decisions or not bugs): the Starter Pack's always-on card (31 
   - Street props in front of the opening camera and the canopy post in front of the poster removed from the set.
 - **Tutorial: leave the machine mid-reps -> the way back (owner, 2 Nov):** on the bench steps (first rep, 8 reps) and the squat step (5 reps), getting off the machine brings back the gold path, the marker + arrow and GO TO FLAT BENCH / SQUAT RACK, with the line "Get back on the Flat Bench and finish your reps!". They hide again once you're back on it. (TutorialClient `repsHome`.) Tested on the bench (screenshot `tutorial_back_to_bench.jpg`).
 - **"This is your max potential" scene removed (owner, 2 Nov):** it no longer plays after the tutorial. The code stays (Studio test: Workspace `TestPotential`).
+
+## Intro cutscene v2 (owner, 2 Nov: "build all of them", from [[2026-11-02 Become a Gladiator - loading screen and intro cutscene]])
+Studio, not published. ~47 s, can't be skipped (`Story.Skippable = false`; the Playbook says skippable after ~1 s: owner's call).
+1. EVERYONE STARTS TINY (street shot), you walk up.
+2. **Benny walks in carrying his barbell on his shoulders** (a carry pose: hands on the bar; a low tracking shot first), blocks the door: "Where do you think YOU'RE going, twig? Lift THIS first." and drops it in front of you (owner: a bar lying outside a gym made no sense, so it's his).
+3. **You try to lift it:** bent over the bar, straining (shaking, sweat drops), it comes up a little, drops: **"CLANK!"** (comic word) + metal clank; Benny laughs.
+4. The shove + fall (as before), 5. you cry, he laughs (as before).
+6. **At the door he turns back:** "Wanna beat me? Get strong first. I'll be waiting, twig." (the goal), then goes in.
+7. The poster: "A membership... I could get strong too."
+8. **The vision:** riser + gold flash -> your **max-size future self** (the server builds it: MirrorService "IntroPotential", the same body as the removed full-potential scene) flexing over a **knocked-out Benny**, turning gold light rays, a warm gold tint, sparkles, choir + crowd cheer: "One day, **YOU'LL** be the big one." (YOU'LL in gold). White flash back.
+9. Fist, "I'll show him." -> PROVE HIM WRONG.
+10. **Flyover of the real town:** white flash, from the beach up to above the town; each gym pops up in order with a gold light beam: GYM 1 STARTER GYM (YOU ARE HERE), GYM 2 BEACH GYM (BEAT BENNY), GYM 3 PRO GYM (BEAT CORAL · x1.1 GAINS), GYM 4 POWERLIFTING GYM (BEAT DANTE · x1.2), GYM 5 STRONGMAN YARD (BEAT HANK), GYM 6 GOLDEN ERA GYM (BEAT MAGNUS · x1.2), THE END GOAL HALL OF FAME (THE TOP). Gains read from the configs. Then **BECOME THE STRONGEST IN TOWN**.
+11. **The camera drops behind you**, the letterbox slides away, the tutorial's gold path is already on the floor.
+- Fixes on the way: Benny's held poses were undone by his walk animation (poses are now applied again after the animations each frame); "always on top" billboards don't draw here (the CLANK word and labels aren't). Cleanup bug found and fixed (the set copy was left in the sky).
+- Tested: full run 46.7 s, no errors, camera / body / tutorial back, nothing left over. Studio test switch: Workspace `TestIntroHold` = a beat name (carry, block, lift, clank, door, vision, fist, labels, title, drop) pauses the scene there.
+- Not done: a phone-size check of the flyover labels; Benny's carry is a held pose on top of his walk (not a real animation asset).
+- Screenshots: `GYM ARC/Screenshots/road/intro2_1..8`.
+
+## Tutorial arrow only in the Starter Gym (owner, 2 Nov)
+"the tutorial is pointing at the flat bench in the members gym": while the tutorial runs (`onboarding.tutorialStep` < Done), `Shared/GoTo.Find` only picks machines inside the Starter Gym (Workspace.Gym), for the gold path and the GO TO teleport. Tested: the path goes into the Starter Gym (`intro2_8_after.jpg`). Old saves (no step = done) aren't affected.
