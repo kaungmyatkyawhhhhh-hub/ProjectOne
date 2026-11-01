@@ -27,6 +27,30 @@ Every Body Alter gives a **card pick**: keep 1 of 3 cards. Cards stack for this 
 - **Old players:** on the first join with this build, a save gets 1 pick per alter already reached (save version 2).
 - **When it's on:** from the GEM event (Config/LiveEvents "Gem", unlocks RunCards). Creator Hub switch `RunCards_Enabled`. Studio: `TestRunCards`.
 
+## Art (2 Nov, owner: "create icons or images for the cards")
+- **Drawn by** `GYM ARC/Art/RunCards/make_runcards_art.py` (Python + Pillow, no outside images; 4 s to run; `python make_runcards_art.py Legs` redraws one picture).
+  - A face per rarity (384x576): dark aged parchment, an ornate frame in the rarity colour, the art window, a name ribbon, a glowing gem.
+  - The card back: a lattice and a gold dumbbell seal.
+  - A picture per type (512x512): an engraved bone-and-gold emblem over a glowing seal in the type's colour. Chest, Shoulders, Back, Arms (a flexed arm), Legs, Core (six-pack), All (a star), Trainers (whistle + clipboard), Coins, Stamina (a bolt).
+- **Uploaded:** to Roblox with Studio's image upload; ids in `Config/RunCards.Art` (plus where the window and banner sit on a face).
+- **Loading:** every image is preloaded when the game starts.
+- **Sheets:** `GYM ARC/Art/RunCards/_sheet_faces.jpg`, `_sheet_pictures.jpg`.
+
+## The pick screen (2 Nov, owner: "make the card selection look like deepwoken's talent card selection as close as possible")
+- **The screen:** the world blurs and darkens, with a gold serif "CHOOSE A CARD" between ornaments and "Alter 7 · Keep 1 of 3 · 6 more waiting" under it.
+- **The deal:** 3 tall cards come face down from below (a whoosh each), then turn over one by one, with the flip sound and a chord by rarity. Epic and Legendary glow.
+- **Choosing:** pointing at a card lifts it and lights its rim; tapping keeps it. The chosen card rises and shines, the others fall away, and the next hand is dealt.
+- **REROLL** burns the hand (ember orange, fades) and deals 3 new ones.
+- **Buttons:** ODDS, REROLL and LATER at the bottom. Tapping outside or Escape also closes it (the picks wait).
+- **Card text** (Merriweather serif): the rarity at the top, the name on the ribbon, the bonus big, a line under it ("Chest EXP from every rep").
+- The keep window and MY BUILD's legacy cards use the same cards (compact).
+- **Sharp text:** the cards are plain frames, not CanvasGroups (the owner saw the text blurry: a CanvasGroup draws text into a texture), and they stand straight.
+- **Under it:** a `Kit.Modal` with its panel hidden (one window at a time, the blur, Escape). The buttons are kit buttons.
+- **Reduced Motion:** no deal or flip motion.
+- **Screenshots:** `runcards/hand_hover.jpg`, `hand_after_reroll.jpg`, `hand_picked.jpg`, `keep_1_card_v2.jpg`.
+
+![[GYM ARC/Screenshots/runcards/hand_hover.jpg]]
+
 ## Screenshots
 `GYM ARC/Screenshots/runcards/`: pick.jpg, reroll_used.jpg, odds.jpg, tracker.jpg, my_build.jpg, keep_1_card.jpg, my_build_legacy.jpg (PC size; the Studio window can't be resized to a phone from here).
 

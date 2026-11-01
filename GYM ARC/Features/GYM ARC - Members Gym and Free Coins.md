@@ -50,3 +50,8 @@ Owner, 28 Oct: "add like and favourite game for 1000 coins and join group for ex
 - Tested: a member walks from the Starter Gym through it into the Members Gym; a non-member is stopped at it (prompt on), and one placed inside is put back on the street.
 ![[GYM ARC/Screenshots/members_gym_door2_inside.jpg]]
 ![[GYM ARC/Screenshots/members_gym_door2_from_starter.jpg]]
+
+## Special look and a VIP-style doorway (2 Nov, owner: "make the members gym better and look special like the vip gym and make it more prominent" / "make the doorway bigger like the vip doorway and look good like the vip doorway")
+- Ruby + gold front: a taller sign ("MEMBERS GYM", "GROUP MEMBERS ONLY · +10% GAINS", big rubies), a MEMBERS ENTRANCE canopy, a glowing ruby door frame, a red carpet, and a 24-stud MEMBERS blade sign with a lit ruby on the corner. Ruby gems inside, ruby floor light. All in `MembersGym.Showcase`.
+- A third door: a 9.7-wide doorway from the Starter Gym entrance hall (left wall, the mirror of the VIP doorway), with a gold frame, double glass doors and a "MEMBERS GYM" sign with rubies. It's a `Door` like the others (members walk through, others get Join group). Cut pieces kept in `ServerStorage.MembersGymMoved`.
+- Details and screenshots: [[2026-11-02 GYM ARC Members Gym, statue, Vince fix, card art]].

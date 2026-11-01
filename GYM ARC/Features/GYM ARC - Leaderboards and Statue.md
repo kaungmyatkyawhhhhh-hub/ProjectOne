@@ -21,7 +21,7 @@ A wall leaderboard in the starter gym and a marble statue of the strongest playe
 ## How it works
 - **Wall board:** above the front desk. One column per muscle group, top 5 each, a crown for #1. Updated every 2 minutes, shared by every server.
 - **Ranking:** a higher Growth Spurt always ranks above any level from an earlier spurt.
-- **Statue:** a marble statue of the strongest player (highest total), as tall as that player, in the entrance hall's back-left corner. It wears the static body stage meshes and can hold a pose.
+- **Statue:** a marble statue of the strongest player (highest total), as tall as that player, outside in the plaza, on the compass rose in front of the leaderboard stand, facing the street (moved 2 Nov; was the entrance hall's back-left corner). It wears the static body stage meshes and can hold a pose.
 - **Fresh start:** leaderboards were reset for the 9 Oct release (new stores), so test scores don't show.
 
 ## Where it lives
@@ -60,3 +60,6 @@ The statue reads the strongest player's save (read-only) and is built with their
 - (28 Oct) **LEVEL board removed** (it duplicated STRONGEST LIFTER). Boards now: Biggest, Strongest lifter (best LVL ever), Tallest, Most reps today, Posing wins, Arm wrestling, Alters. The Town / Pro Gym rows have 7 panels, evenly spaced; the old LEVEL panels are in `ServerStorage._Removed_LevelBoards_28Oct`.
 - (28 Oct) **The statue = #1 on STRONGEST LIFTER** (best LVL ever), the same player the boards show; it updates whenever the boards do. (The posing champion still stands there until the next round.)
 - (28 Oct) Bug fix: boards no longer show two overlapping lists after walking away and back (the scroll list uses copies; the built rows stay hidden).
+
+## Statue moved outside (2 Nov, owner: "move the strongest lifter statue outside near the leaderboard")
+`Config/ShowOff.Statue.Spot = (0, 0.2, 71)` (the plaza's compass rose, on the leaderboard stand's axis) and the new `Facing = (0, 0, -1)` (the street and the gyms' doors; ShowOffService reads it, +X before). `Workspace.StatuePedestal` moved with it, plaque toward the street (old spot in its `OldCFrame` attribute). The hall corner it left is where the Members Gym's new doorway is. Screenshot: `Screenshots/2026-11-02/statue_plaza.jpg`.

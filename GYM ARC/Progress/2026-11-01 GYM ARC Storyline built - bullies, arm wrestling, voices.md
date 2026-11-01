@@ -68,3 +68,6 @@ Roblox TTS can't sound like real actors. The code now plays a **real recording**
 - Tested in Studio: 12 taps during Dante's defeat + cliffhanger, both ran their full length (~4.5 s and ~4 s), same as with no taps. No errors.
 - Not changed: the trainer stories (Atlas / Solaris, skippable after 3 s) and the Hall of Fame launch cutscene (after 3 s). Note: the Roblox Playbook says cutscenes should be skippable after ~1 s; this is the owner's call for the story.
 - Studio, not published.
+
+## After beating Vince the cutscene stayed on screen (owner, 2 Nov; fixed)
+A shot cleaned up with `ipairs({ grade, dof, rim, motes, gui })`, which stops at the first empty slot. Vince's cliffhanger shows Vince, who is gone after his fall, so no rim light and the bars + caption (`StoryScene`) were never removed. Every slot is cleared now (StoryClient). Tested with `TestStoryBeat = "Vince"`. Details: [[2026-11-02 GYM ARC Members Gym, statue, Vince fix, card art]].
