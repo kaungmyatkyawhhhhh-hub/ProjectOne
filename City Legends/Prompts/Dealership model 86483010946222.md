@@ -13,6 +13,16 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
   - **change it a lot, not a little**: a ripped build that is only tweaked can still be reported, and can make our game look like a copy (the Playbook says copycat games get hidden from Home).
   - Keep only the general idea (a showroom with glass, a lot, a counter) and make the building clearly ours.
 
+## The look the owner wants (2026-11-01): a Monaco showroom
+Reference photo: `Games/CityLegends/imports/refs/dealership/monaco_showroom_front.jpg` (a real luxury car showroom in Monaco). Build ours in this style, with our own name and no logo:
+- the showroom is the **ground floor of a tall apartment block** (balconies with dark railings and plants above);
+- a **curved light-grey concrete band** over the front, with **big raised gold serif letters "LEGENDS MOTORS"**, lit warm at night;
+- a **black awning** under it with thin gold lettering and a gold line;
+- a **wide floor-to-ceiling glass front** in thin dark frames: dark inside, warm spotlights and track lights in the ceiling, cars lined up behind the glass with small info stands;
+- a **light stone base** with metal vents below the windows, a stone-paved sidewalk, steel bollards, and a glass door at the corner;
+- calm and classy, no neon (the owner's no-neon rule). Gold and warm white only.
+- **Never** copy their name, crest or text.
+
 ## Steps
 1. **Test place only.**
    - Use the Studio named **"Dealer Test"** (not City Legends). Call `list_roblox_studios` and pick it by name. If it isn't open, ask the owner to open a new place and save it as `Dealer Test.rbxl`.
