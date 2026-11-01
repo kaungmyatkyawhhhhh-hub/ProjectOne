@@ -74,8 +74,8 @@ local ok, result = pcall(function()
 			local dir = Vector3.new(t[4], 0, t[5])
 			if dir.Magnitude > 0 then
 				local cf = CFrame.lookAt(pos, pos + dir)
-				T:FillBlock(cf * CFrame.new(0, 16, 0), Vector3.new(80, 32, 10), Enum.Material.Air)
-				T:FillBlock(cf * CFrame.new(0, -3, 0), Vector3.new(72, 6, 10), Enum.Material.Asphalt)
+				T:FillBlock(cf * CFrame.new(0, 16, 0), Vector3.new(84, 34, 10), Enum.Material.Air)
+				T:FillBlock(cf * CFrame.new(0, -4.5, 0), Vector3.new(84, 6, 10), Enum.Material.Rock) -- under the road parts
 			end
 		end
 	end

@@ -17,6 +17,8 @@ def path(pts, close=False):
     return "M" + " L".join("%.1f,%.1f" % P(p) for p in pts) + (" Z" if close else "")
 
 exec(open(sys.argv[4], encoding="utf-8").read())  # ROUTES, STREETS, DISTRICTS, MARKS
+from square import square
+STREETS = square(ROUTES, STREETS)
 
 o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" font-family="Segoe UI, Arial">',
      '<defs><clipPath id="fr"><rect x="0" y="0" width="%d" height="%d"/></clipPath></defs>' % (W, int((Y1 - Y0) * SC)),

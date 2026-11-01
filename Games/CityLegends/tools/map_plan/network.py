@@ -87,7 +87,9 @@ def build(d, iters=300):
     exec(open(os.path.join(d, "layout.py"), encoding="utf-8").read(), ns)
     dem = Dem(d)
     R = []
-    for kind, group in (("route", ns["ROUTES"]), ("street", ns["STREETS"])):
+    from square import square
+    sq_streets, depends = square(ns["ROUTES"], ns["STREETS"], True)
+    for kind, group in (("route", ns["ROUTES"]), ("street", sq_streets)):
         for name, pts, col, opts in group:
             line = catmull(pts, STEP, opts.get("closed", False))
             s = [0.0]
@@ -104,7 +106,13 @@ def build(d, iters=300):
                 while hi < len(line) - 1 and s[hi + 1] - s[i] <= 75:
                     hi += 1
                 sm.append((pref[hi + 1] - pref[lo]) / (hi - lo + 1))
-            R.append({"name": name, "kind": kind, "opts": opts, "line": line, "s": s, "raw": raw, "target": sm, "h": sm[:],
+            hi_cap = [1e9] * len(line)
+            for x0, x1, ymax in opts.get("low", []):
+                for i, p in enumerate(line):
+                    if x0 <= p[0] <= x1:
+                        hi_cap[i] = ymax
+                        sm[i] = min(sm[i], ymax)
+            R.append({"name": name, "kind": kind, "opts": opts, "line": line, "s": s, "raw": raw, "target": sm, "h": sm[:], "cap": hi_cap,
                       "g": opts.get("grade", 0.08 if kind == "route" else 0.10),
                       # junction weight: the loop (routes and the switchbacks) wins, then the rest
                       "w": 50 if kind == "route" else (20 if "Switchbacks" in name else 1)})
@@ -146,6 +154,10 @@ def build(d, iters=300):
             for i in range(n - 2, -1, -1):
                 dd = s[i + 1] - s[i]
                 h[i] = min(max(h[i], h[i + 1] - g * dd), h[i + 1] + g * dd)
+            cap = r["cap"]
+            for i in range(n):
+                if h[i] > cap[i]:
+                    h[i] = cap[i]
         for grp in groups:
             # the main routes win at their junctions (weight 50)
             wsum = sum(R[ri]["w"] for ri, k in grp)
@@ -168,13 +180,141 @@ def build(d, iters=300):
                 if i not in fx:
                     dd = s[i + 1] - s[i]
                     h[i] = min(max(h[i], h[i + 1] - g * dd), h[i + 1] + g * dd)
-    # spread any small step left at a junction over the next few samples
+    # where a road joins a bigger one it runs level across that road: every sample of the smaller
+    # road on the bigger road's carriageway takes the bigger road's (final) height there, the bigger
+    # road being flat side to side, so the two surfaces meet with no step or bump. Roads are
+    # finished one by one, biggest first, so a road only ever copies heights that won't change.
+    # the switchbacks run straight through their junctions (the routes end on them), then the
+    # routes, then the streets in layout order
+    order = sorted(range(len(R)), key=lambda i: (0 if R[i]["w"] == 20 else 1 if R[i]["w"] == 50 else 2, i))
+    # a street that ends on another street comes after it (it gives way there)
+    names = {r["name"]: i for i, r in enumerate(R)}
+    streets = [i for i in order if R[i]["w"] == 1]
+    placed, done = [i for i in order if R[i]["w"] != 1], set(i for i in order if R[i]["w"] != 1)
+    while streets:
+        for i in streets:
+            if all(names[d] in done or names[d] == i for d in depends.get(R[i]["name"], ())):
+                break
+        else:
+            i = streets[0]  # a loop of dependencies: take the first
+        streets.remove(i); placed.append(i); done.add(i)
+    order = placed
+    rank = {ri: n for n, ri in enumerate(order)}
+    grid = {}
     for ri, r in enumerate(R):
-        h, fx = r["h"], fixed[ri]
-        nearj = [i for i in range(1, len(h) - 1) if i not in fx and any(abs(i - f) <= 10 for f in fx)]
+        for k, p in enumerate(r["line"]):
+            grid.setdefault((int(p[0] // 30), int(p[1] // 30)), []).append((ri, k))
+
+    def clamp(h, s, g, fx, passes, cap=None):
+        n = len(h)
+        for _ in range(passes):
+            if cap:
+                for i in range(n):
+                    if h[i] > cap[i] and i not in fx:
+                        h[i] = cap[i]
+            for i in range(1, n):
+                if i not in fx:
+                    dd = s[i] - s[i - 1]
+                    h[i] = min(max(h[i], h[i - 1] - g * dd), h[i - 1] + g * dd)
+            for i in range(n - 2, -1, -1):
+                if i not in fx:
+                    dd = s[i + 1] - s[i]
+                    h[i] = min(max(h[i], h[i + 1] - g * dd), h[i + 1] + g * dd)
+
+    # every junction is flat: where a smaller road meets this one, this road is held level for FLAT
+    # studs either side of the meeting point, so both surfaces are one flat plane at the junction
+    # (no step at the corners). Junctions should be near right angles (layout.py) for this to hold.
+    FLAT = 40   # studs, at least
+    def tangent(line, k):
+        a = line[max(k - 2, 0)]; b = line[min(k + 2, len(line) - 1)]
+        L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1
+        return ((b[0] - a[0]) / L, (b[1] - a[1]) / L)
+    zones = {ri: {} for ri in range(len(R))}   # centre sample -> half length (studs)
+    for grp in groups:
+        for (ra, ka) in grp:
+            for (rb, kb) in grp:
+                if rank[ra] < rank[rb]:
+                    # long enough that the smaller road's whole width crosses flat road even when
+                    # it meets at an angle
+                    ta, tb = tangent(R[ra]["line"], ka), tangent(R[rb]["line"], kb)
+                    sn = max(abs(ta[0] * tb[1] - ta[1] * tb[0]), 0.5)
+                    cs = math.sqrt(max(0.0, 1 - sn * sn))
+                    half = min(96.0, max(FLAT, 34 * cs / sn + 34 / sn))
+                    zones[ra][ka] = max(zones[ra].get(ka, 0), half)
+    FLAT = 40   # studs, at least
+    REACH = 46 / SPM  # metres: smaller-road samples this close copy the bigger road's height
+    HALF_W = 34       # studs: and these (on its carriageway) are held there
+    for ri in order:
+        r = R[ri]
+        # only what this pass decides is held: its flat junction spots and where it meets bigger roads
+        fixed[ri] = set()
+        h, s, g, fx = r["h"], r["s"], r["g"], fixed[ri]
+        n = len(h)
+        def near_bigger(k):
+            p = r["line"][k]
+            cx, cy = int(p[0] // 30), int(p[1] // 30)
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for rj, kj in grid.get((cx + dx, cy + dy), []):
+                        if rank[rj] < rank[ri]:
+                            q = R[rj]["line"][kj]
+                            if math.hypot(p[0] - q[0], p[1] - q[1]) < REACH:
+                                return True
+            return False
+        for kc in sorted(zones[ri]):
+            if kc in fx or near_bigger(kc):
+                continue  # already flat, or the junction sits on a bigger road (that one is flat there)
+            hc, half = h[kc], zones[ri][kc]
+            i = kc
+            while i >= 0 and s[kc] - s[i] <= half:
+                h[i] = hc; fx.add(i); i -= 1
+            i = kc + 1
+            while i < n and s[i] - s[kc] <= half:
+                h[i] = hc; fx.add(i); i += 1
+        for k, p in enumerate(r["line"]):
+            best = None
+            cx, cy = int(p[0] // 30), int(p[1] // 30)
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for rj, kj in grid.get((cx + dx, cy + dy), []):
+                        if rank[rj] >= rank[ri]:
+                            continue
+                        q = R[rj]["line"][kj]
+                        dd = math.hypot(p[0] - q[0], p[1] - q[1])
+                        if dd < REACH and (best is None or (rank[rj], dd) < (best[0], best[1])):
+                            best = (rank[rj], dd, rj, kj)
+            if best:
+                # the bigger road's height where this point meets it square-on (between its samples)
+                rj, kj = best[2], best[3]
+                L, H = R[rj]["line"], R[rj]["h"]
+                y = H[kj]
+                for a2, b2 in ((kj - 1, kj), (kj, kj + 1)):
+                    if 0 <= a2 and b2 < len(L):
+                        ax, ay = L[a2]; bx, by = L[b2]
+                        vx, vy = bx - ax, by - ay
+                        t = ((p[0] - ax) * vx + (p[1] - ay) * vy) / max(vx * vx + vy * vy, 1e-9)
+                        if 0 <= t <= 1:
+                            y = H[a2] + (H[b2] - H[a2]) * t
+                            break
+                h[k] = y
+                if best[1] < (HALF_W / SPM):
+                    fx.add(k)  # on the bigger road's carriageway: held; on its pavement: free
+        clamp(h, s, g, fx, 40, r["cap"])
+        # spread any small step left at a junction over the next few samples
+        nearj = [i for i in range(1, n - 1) if i not in fx and any(abs(i - f) <= 10 for f in fx)]
         for _ in range(12):
             for i in nearj:
                 h[i] = (h[i - 1] + h[i] + h[i + 1]) / 3
+        # round every crest and dip (held samples kept), so the grade never changes sharply from one
+        # sample to the next: sharp changes are felt as bumps
+        for _ in range(6):
+            src = h[:]
+            for i in range(1, n - 1):
+                if i in fx:
+                    continue
+                lo, hi = max(0, i - 4), min(n - 1, i + 4)
+                h[i] = sum(src[lo:hi + 1]) / (hi - lo + 1)
+            clamp(h, s, g, fx, 8, r["cap"])
     roads = []
     for r in R:
         line, h, s, raw = r["line"], r["h"], r["s"], r["raw"]
@@ -188,7 +328,7 @@ def build(d, iters=300):
             samples.append({"x": X, "z": Z, "y": h[i], "ground": raw[i], "dx": dx / L, "dz": -dy / L,
                             "tunnel": bool(tunnel and tunnel[0] <= p[0] <= tunnel[1])})
         grades = [abs(h[i] - h[i - 1]) / max(s[i] - s[i - 1], 1e-6) for i in range(1, len(h))]
-        roads.append({"name": r["name"], "kind": r["kind"], "closed": r["opts"].get("closed", False), "samples": samples,
+        roads.append({"name": r["name"], "kind": r["kind"], "closed": r["opts"].get("closed", False), "samples": samples, "rank": rank[R.index(r)],
                       "length": s[-1], "maxGrade": max(grades) if grades else 0,
                       "maxCut": max(raw[i] - h[i] for i in range(len(h))), "maxFill": max(h[i] - raw[i] for i in range(len(h)))})
     return roads

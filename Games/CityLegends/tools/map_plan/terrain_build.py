@@ -134,6 +134,21 @@ for w in ways:
             mat[r][sel] = "S"
             height[r][sel] = np.minimum(height[r][sel], 1.5 + d_sea[r][sel] * 0.8)
 
+# ---- flat quays round the harbours (layout QUAYS)
+from geo import Elev as _E
+_ns = {"el": _E(os.path.join(D, "data", "elev.json"))}
+exec(open(os.path.join(D, "layout.py"), encoding="utf-8").read(), _ns)
+for pts, qh in _ns.get("QUAYS", []):
+    Q = np.array(pts); qx1, qy1 = Q[:, 0], Q[:, 1]; qx2, qy2 = np.roll(qx1, -1), np.roll(qy1, -1)
+    for r, y in enumerate(PY):
+        m = (qy1 > y) != (qy2 > y)
+        if not m.any():
+            continue
+        xc = np.sort(qx1[m] + (y - qy1[m]) * (qx2[m] - qx1[m]) / (qy2[m] - qy1[m]))
+        inside = ((np.searchsorted(xc, PX) % 2) == 1) & land[r]
+        height[r][inside] = np.minimum(height[r][inside], qh)
+        mat[r][inside & (mat[r] != "C")] = "C"
+
 # ---- districts (town ground is paved)
 from geo import Elev
 ns = {"el": Elev(os.path.join(D, "data", "elev.json"))}
@@ -184,7 +199,10 @@ bank = np.minimum(np.abs(diff) * 1.3 + 6, 130)       # how far the bank reaches 
 t = np.clip((best - WALK) / bank, 0, 1)
 t = t * t * (3 - 2 * t)                                 # smoothstep
 blend = np.where(best <= WALK, 1.0, 1.0 - t)
-newh = road_y * blend + height * (1 - blend)
+# under the carriageway and pavements the ground sits 1.5 studs below the road: the road surface is
+# made of parts (tools/riviera/roads.luau) and the terrain must never poke through them (bumps)
+bed = np.where(best <= WALK + 4, road_y - 1.5, road_y)
+newh = bed * blend + height * (1 - blend)
 apply = near & (blend > 0)
 height = np.where(apply, newh, height)
 # town ground is paved only along its streets (buildings stand there); further off it stays natural
