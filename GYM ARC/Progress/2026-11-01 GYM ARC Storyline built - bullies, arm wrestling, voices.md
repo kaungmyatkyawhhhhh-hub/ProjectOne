@@ -44,3 +44,9 @@ Roblox TTS can't sound like real actors. The code now plays a **real recording**
 
 ## Where it lives
 `Config/Story` (bullies, lines, voices, spots, rules), `Server/StoryService`, `StoryClient`, `ArmWrestleService.StartStory`, `Machines.GymLevel` / `GymLockText`, `Strongman.Unlocked`, `GoldenEra.Unlocked`, `Guides` (gym guides wait for the real gym), `PlayerData` (storyV), `GymGoerService` (heights, bullies stand still), `NpcCullingClient` (bullies never hidden by area).
+
+## Changes later on 1 Nov (owner)
+- **Voices off for now** ("remove voiceovers in the storyline for now"): `Config/Story` `Story.VoicesOn = false`. Captions and bubbles stay. `true` brings the TTS voices (and any recordings) back.
+- **Lock labels say "Beat {name} to unlock"** (was "Opens / Unlocks at Growth Spurt N / Alter N"): the Beach and Pro signs, the Powerlifting door, Strongman Yard gate and back door plates, the Golden Era plate, and the locked toasts. Beach = Benny, Pro = Coral, Powerlifting = Dante, Strongman Yard = Hank, Golden Era = Magnus. The bully himself tells you the Growth Spurt / Alter he wrestles at. With `Story_Enabled` off the old labels come back.
+- **Dante was sunk into the floor** ("dante is in the ground"): as a bully he stands still (anchored), so his giant body was never stood up. GymGoerService now puts every giant's feet on the floor, Dante included.
+- Not play-tested yet: Studio got stuck starting a play-test.
