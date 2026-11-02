@@ -37,12 +37,7 @@ The owner respects **Midnight Racing: Tokyo** the most of all driving games. So:
   - live clusters (needles, screens, lights);
   - the steering wheel.
   - Study it closely: videos in the driver's seat, how the camera sits, the FOV, how the cluster reads at night, mirrors.
-- **But not the hands:** the owner finds Driving Empire's driver hands **too big**. Ours stay **real-size**:
-  - real proportions against the wheel (a normal adult hand, about the width of the steering wheel's rim grip);
-  - sitting at 9 and 3 o'clock;
-  - turning with the wheel;
-  - never covering the cluster.
-  - Check them in a first-person screenshot next to a real car photo.
+- **But not the hands:** the owner finds Driving Empire's driver hands too big. Ours are the **player's own Roblox R6 avatar arms / hands** (owner, 2026-11-02), sitting at 9 and 3, turning with the wheel, never covering the cluster.
 
 ## The games (play or study these 10)
 1. **Highway Legends** (our target look)

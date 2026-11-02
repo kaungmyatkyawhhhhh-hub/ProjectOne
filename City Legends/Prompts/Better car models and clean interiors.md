@@ -11,7 +11,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender if it
 - **Rules:**
   - fictional names;
   - **no logos or emblems** anywhere (badges, steering-wheel hub, wheel caps, the cluster): cover them;
-  - **driver hands real-size**;
+  - **driver hands are the player's own Roblox R6 avatar arms / hands** (owner, 2026-11-02), not separate realistic hands;
   - interiors and clusters as good as Driving Empire's.
 
 ## Why cars look worse here than on Sketchfab (the owner asked)
@@ -62,7 +62,7 @@ Every car's cabin must look clean and real from the driver's seat and from outsi
    - clean, the right size and tilt;
    - no logo on the hub (covered);
    - turns with the steering;
-   - hands at 9 and 3, real-size, never covering the cluster.
+   - the player's **R6 avatar hands** on the wheel at 9 and 3, turning with it, never covering the cluster.
 4. **Cluster and screens:**
    - live needles or digital screens matching the real car (`DialLooks` / `DIAL_NEEDLES`), sharp and readable at night, no logos;
    - the centre screen shows something simple (map or music), not a blank grey box.
