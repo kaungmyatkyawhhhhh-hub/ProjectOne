@@ -1,7 +1,7 @@
 ---
 date: 2026-11-02
 tags: [galaxy, progress, friends-test, economy, ui, tutorial]
-status: built + tested in Studio; NOT ready for friends yet (3 owner steps below)
+status: built + tested in Studio, group images + saving checked; needs one more publish, then friends can test
 ---
 # Galaxy Incremental - friends test build: the first 15 minutes (2 Nov, Claude Code)
 
@@ -100,3 +100,14 @@ For the **Sun 8 Nov friends-only test** ([[2026-11-02 Galaxy Incremental - Launc
    - File > Publish to Roblox (the group's place).
    - Leave the experience **Private** in Creator Hub. For friends who aren't in the group, give the testers a group role that can play the private experience (check Creator Hub > Permissions). Don't make it Public.
 4. After 1-3: friends can test.
+
+## Owner steps done (2 Nov, later)
+- **Group images:** the owner uploaded the 20 images to P&L Studios XP.
+  - The ids are in `UIAssets`; the decals were moved to `ServerStorage.UIUploads`.
+  - All 20 load in Play.
+  - Group ownership was confirmed for icon_stardust + ui_mote; the rest of the same batch couldn't be checked (Roblox's 429 limit).
+- **Saving works:** Studio API access is on.
+  - Test: bought an asteroid + First Light, stopped, played again.
+  - Came back with 2 asteroids, First Light, tutorial step 2, Essence 2, and the Stardust earned before stopping. Loaded at once (the lock was released on shutdown).
+  - Studio test saves use `studio_u_` keys, never the real ones.
+- **Republish needed:** the image swap happened after the owner's publish, so File > Publish to Roblox once more. Then friends can test.

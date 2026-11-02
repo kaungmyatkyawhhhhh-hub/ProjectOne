@@ -1,27 +1,27 @@
 -- UIAssets (Galaxy Incremental): every UI image id in one place. Files: Downloads\galaxy_ui_upload\ (icons rendered in
 -- Blender: Icons\rendered, UI\supernova_icons_blender.py + UI\galaxy_icons_extra.py; textures: UI\make_ui_textures.py).
--- TEST COPIES under the owner's user account until the P&L Studios XP uploads are in: then replace the ids here (only here).
+-- P&L Studios XP uploads (2 Nov; decals kept in ServerStorage.UIUploads). Replace ids here only.
 return {
 	icon = {
-		stardust = "rbxassetid://109107679931583",
-		shard = "rbxassetid://77680422362283",
-		sun = "rbxassetid://112860878775802",
-		planet = "rbxassetid://133290229248358",
-		comet = "rbxassetid://85673118469992",
-		forge = "rbxassetid://98889639207497",
-		gear = "rbxassetid://79087144389118",
-		asteroid = "rbxassetid://129141008030208",
-		moon = "rbxassetid://106695833366261",
-		gasgiant = "rbxassetid://118029704111132",
-		essence = "rbxassetid://107229872113034",
-		lock = "rbxassetid://95914627805214",
+		stardust = "rbxassetid://93985102473923",
+		shard = "rbxassetid://110263397705097",
+		sun = "rbxassetid://122559700198678",
+		planet = "rbxassetid://89305471713718",
+		comet = "rbxassetid://93755418339111",
+		forge = "rbxassetid://117529477019033",
+		gear = "rbxassetid://81402585488835",
+		asteroid = "rbxassetid://91552050312107",
+		moon = "rbxassetid://134915759247424",
+		gasgiant = "rbxassetid://115501670650344",
+		essence = "rbxassetid://76524340395639",
+		lock = "rbxassetid://116845939092136",
 	},
-	stripes = "rbxassetid://104954398949351", -- 512x128, white diagonal stripes (v12 .stripes)
-	glow9 = "rbxassetid://98412591455916", -- 128 px 9-slice soft glow (window breathe)
-	softglow = "rbxassetid://129526107652147", -- round glow behind icons
-	sparkle = "rbxassetid://75004014830885",
-	mote = "rbxassetid://101002810546023",
-	plate = "rbxassetid://73860597149065", -- the top counter's slanted plate (white, tinted)
-	header = "rbxassetid://120658610557707", -- 900x80 orange header texture
-	arrow = "rbxassetid://96461989852989", -- tutorial arrow (points down)
+	stripes = "rbxassetid://123710673700412", -- 512x128, white diagonal stripes (v12 .stripes)
+	glow9 = "rbxassetid://109052962777294", -- 128 px 9-slice soft glow (window breathe)
+	softglow = "rbxassetid://113034099262576", -- round glow behind icons
+	sparkle = "rbxassetid://94034532317377",
+	mote = "rbxassetid://70545138129350",
+	plate = "rbxassetid://126195526088194", -- the top counter's slanted plate (white, tinted)
+	header = "rbxassetid://98206491746323", -- 900x80 orange header texture
+	arrow = "rbxassetid://138731187772172", -- tutorial arrow (points down)
 }
