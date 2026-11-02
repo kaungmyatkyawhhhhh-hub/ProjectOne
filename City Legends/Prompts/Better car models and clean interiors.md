@@ -102,6 +102,32 @@ For each new model the owner sends (a `.glb` / `.fbx` in `Games/CityLegends/impo
    - delete the import file from `imports/` (it's done).
 - Large files: if a model is over 100 MB, shrink it with `shrink_model.py` first, or have the owner zip it into parts.
 
+## Part 4: doors that open (owner, 2026-11-02)
+- **What's needed:** the door must be its **own separate piece** in the model (most good Sketchfab cars have this; some are one solid body). When checking a new model (Part 3, step 1), say whether its doors are separate.
+  - If they aren't, they can be cut out in Blender, but that's harder and may leave holes: tell the owner first.
+- **The converter:**
+  - keep each door as its own part group (`Door_FL`, `Door_FR`, and the rears on 4-door cars), with the door glass, handle and inner door card inside it;
+  - find the **hinge point and axis** (front edge for normal doors; near the A-pillar going up and forward for scissor doors; the roof for gullwings);
+  - write them into the conversion report.
+- **Door styles, matched to the real car:**
+  - **normal** (swing out about 60–70°);
+  - **scissor / lambo** (swing up about 80–90°, the Lambrini cars);
+  - **butterfly** (up and out, some hypercars);
+  - **gullwing** (from the roof, like the old SLS);
+  - **sliding** (vans like the Alfard's rear doors).
+- **When they open:**
+  - when you get in or out (a short animation, about 0.6–1 s, with a door sound and a thunk on close);
+  - press a key / tap a button to open or close while parked;
+  - in showrooms, the dealership preview, house garages and the night car show (doors up looks great);
+  - passengers' doors open when they get in.
+- **Rules:**
+  - doors only move when the car is stopped or very slow (they close automatically above about 5 km/h);
+  - they don't change the car's physics (visual only, no collision when open), so they can't be used to glitch or push others;
+  - the open / closed state is synced to other players (server-checked, rate-limited).
+- **Inside:** the inner door card, handle, window switches and speaker look clean (Part 2).
+- **Performance:** a simple tween on the client, only for cars near the camera.
+- **Test:** each door type on one car (a normal sedan, a Lambrini scissor, a van), then roll out to every car whose model has separate doors. List the cars without separate doors for the owner.
+
 ## When done, tell the owner (short)
 - what changed for car looks;
 - the interior checklist result per car;
