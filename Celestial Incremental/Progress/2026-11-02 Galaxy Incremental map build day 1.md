@@ -1,7 +1,7 @@
 ---
 date: 2026-11-02
 tags: [galaxy, map, progress]
-status: pass 2 done in Studio (kit meshes, concept look); sky Up/Dn to re-upload; not published
+status: pass 3 done in Studio (floating-island cones, floor tiles, thin beam, new colours); sky Up/Dn still the old images; not published
 ---
 # Galaxy Incremental - map build, day 1 (2 Nov, Claude Code)
 
@@ -132,3 +132,46 @@ Screenshots: `Map/screens/2026-11-02-pass2/`. They include the same set as day 1
 2. Save the place in Studio (File > Save to Roblox). Pass 2 is in the open place only.
 3. Run the 2-player test above, or tell me to walk you through it.
 4. The 8 test images I uploaded to your user account (6 coloured test faces + 2 sky copies) can be deleted from Creator Hub; nothing in the place uses them.
+
+---
+## Pass 3 (2 Nov, later, Claude Code): owner's review points 1-6
+The prompt pointed to a "Review of pass 2" section in the design note, but that section doesn't exist, so the prompt's points were used.
+Screenshots: `Map/screens/2026-11-02-pass3/`. They include the same set as before (wide, tier0..tier6, supernova_shockwave, sector2_bridge_ignition), plus `side_by_side_concept_vs_studio.jpg` and 2 phone crops (667x375, made the same way as pass 2).
+
+1. **Floating islands:**
+   - Every island from tier 1, and the centre, has the kit's IslandUnder rock cone.
+     - Islands: ~1.1x the radius deep. Each one is turned, tipped up to ±0.06 rad and stretched 0.92-1.12 by its slot, so they're uneven.
+     - Centre: 30 deep.
+   - The rock is lighter, Rock 128,104,150. The old dark violet disappeared into the black sky.
+   - Each island has 3 crystals hanging point-down (`Kit.HangingCrystals`). Their tops sit inside the cone so they grow out of the rock. They're soft violet Neon, because the underside is in shadow. A full-colour Neon version looked like magenta blocks.
+2. **Floors** (`Kit.TileRing`):
+   - Wedge tiles in the second stone tone (Stone2 204,188,162). Each tile is a flat trapezoid: a block plus 2 wedges.
+   - Islands: 6 tiles between 0.6R and 0.93R from tier 1. Centre: 12 tiles between the brass inlay and the lamps.
+   - A brass inlay ring at 0.55R comes with the tier 2 brass rim.
+   - The disc is cream from tier 1 (the old darker-stone tier 1 is gone).
+3. **Far nebula shapes:** removed; the skybox only.
+4. **Star-system beam:**
+   - Now a Beam: 0.12 wide, violet 175,120,255, fully see-through at the bottom and almost solid at the top.
+   - It replaces the 0.2 white Neon bar. In the phone view it's a thin line now.
+5. **Colours:** Stone #E8DCC8, Brass #C9902E.
+6. **Sky Up/Dn: still not done.**
+   - The prompt had `<paste>` instead of ids.
+   - `Workspace.sky_Up` / `sky_Dn` are still the first upload (assets 135820268253128 / 83207744137596, created 03:37, before the face fix).
+   - The fixed files are in `Downloads\sky_Up_v2.png` + `sky_Dn_v2.png`. The renamed copies are so Studio doesn't reuse the old assets.
+   - The screenshots again use the fixed Up/Dn through test copies under the owner's user account.
+
+- **Counts + checks:**
+  - static map 272 parts (+36 centre tiles), 550 in play with 8 islands, 4 lights;
+  - no script errors;
+  - Supernova shockwave fine;
+  - Ignition 3/4: 14 of 18 lit, gate shut.
+- **FPS: not measured this pass.** Studio ran at a steady 14-15 FPS, and still 14 with the whole map moved out of Workspace. So Studio itself was capped (window/power), not the map. Pass 2 measured 60 with 407 parts. Measure again with Studio focused.
+- **Side-by-side vs concept, still different:**
+  - the concept's background is a lighter violet with big soft nebula spheres; ours is the darker skybox (the owner chose to drop the shapes);
+  - the concept has a thin glowing ring round the whole map;
+  - the concept's stone has a fine grain.
+
+### Owner to do
+1. Upload `Downloads\sky_Up_v2.png` + `sky_Dn_v2.png` to P&L Studios XP and send the 2 ids.
+2. Save the place (File > Save to Roblox).
+3. 2-player test: Test > Clients and Servers > 2 players.
