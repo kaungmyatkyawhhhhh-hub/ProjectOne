@@ -3153,8 +3153,173 @@ local function aventadorSV(gui: SurfaceGui): Update
 	end
 end
 
+-- the gearbox the driver has picked (Driving sets it): the SVJ screen's drive mode follows it
+DashGauges.gearbox = "Auto"
+
+-- Aventador SVJ (owner, 2026-11-02: "the SVJ comes with the cluster, make it work"): the model's own
+-- screen picture, drawn live in its layout and colours (measured from the model's texture, laid out
+-- in its pixels x5: 1110 x 400 is the whole hood, side screens included). Navy screen, a thin amber
+-- outer arc with the rev band of tick blocks inside it (red from 8.5), the amber line through the
+-- numbers 0-10 (9 and 10 red), the big outlined gear letter, the drive mode and odometer either
+-- side, a hex grid below with the car picture and the outlined speed; left screen: clock, radio and
+-- the oil bars; right screen: range, fuel and the car from above. No maker's marks.
+local function aventadorSVJ(gui: SurfaceGui): Update
+	local W, H = 1110, 400
+	local NAVY = Color3.fromRGB(15, 25, 42)
+	local BEZEL = Color3.fromRGB(4, 5, 7)
+	local AMBER = Color3.fromRGB(217, 165, 42)
+	local ORANGE = Color3.fromRGB(255, 106, 30)
+	local INK = Color3.fromRGB(220, 230, 242)
+	local SOFT = Color3.fromRGB(150, 168, 192)
+	local HEX = Color3.fromRGB(35, 57, 90)
+	local LAMBO_RED = Color3.fromRGB(255, 48, 48)
+	local D = design(gui, W, H, BEZEL)
+	local italic = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Bold, Enum.FontStyle.Italic)
+	local heavy = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
+	local function lbl(t: string, x: number, y: number, h: number, color: Color3, z: number?, chars: number?, face: Font?): TextLabel
+		local l = D.label(t, x, y, h, color, Enum.Font.GothamBold, z or 5, chars)
+		l.FontFace = face or italic
+		return l
+	end
+	-- an outlined letter (the gear and the speed are drawn as outlines on the real screen)
+	local function outlined(t: string, x: number, y: number, h: number, chars: number): TextLabel
+		local l = lbl(t, x, y, h, NAVY, 7, chars, heavy)
+		new("UIStroke", { Color = Color3.fromRGB(184, 200, 220), Thickness = 2.2, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual }, l)
+		return l
+	end
+
+	-- the three screens
+	local cx, cy = 579, 248
+	rounded(D.rect(cx, 196, 790, 392, NAVY, 1), 0.22)
+	rounded(D.rect(98, 266, 190, 250, NAVY, 1), 0.12)
+	rounded(D.rect(1040, 266, 150, 250, NAVY, 1), 0.12)
+	-- hex grid under the arc (thin blue lines)
+	for row = 0, 2 do
+		local y = 268 + row * 40
+		for col = -6, 6 do
+			local x = cx + col * 64 + (row % 2) * 32
+			if math.abs(x - cx) < 380 then
+				D.line(x - 32, y, x - 16, y - 20, 2, HEX, 2, 0.2)
+				D.line(x - 16, y - 20, x + 16, y - 20, 2, HEX, 2, 0.2)
+				D.line(x + 16, y - 20, x + 32, y, 2, HEX, 2, 0.2)
+			end
+		end
+	end
+	-- the rev scale: values 0-10 along an oval round (cx, cy)
+	local rx, ry = 296, 208
+	local function tFor(v: number): number
+		return -84 + 16.8 * v
+	end
+	local function at(t: number, k: number): (number, number)
+		local a = math.rad(t)
+		return cx + math.sin(a) * rx * k, cy - math.cos(a) * ry * k
+	end
+	-- outer amber arc
+	local prevX, prevY = at(tFor(-0.35), 1.2)
+	for i = 1, 60 do
+		local x, y = at(tFor(-0.35 + 10.7 * i / 60), 1.2)
+		D.line(prevX, prevY, x, y, 3, AMBER, 3)
+		prevX, prevY = x, y
+	end
+	-- the rev band: tick blocks between the outer arc and the number line
+	local bars: { { frame: Frame, v: number } } = {}
+	local n = 70
+	for i = 0, n - 1 do
+		local v = 10 * (i + 0.5) / n
+		local x0, y0 = at(tFor(v), 1.12)
+		local x1, y1 = at(tFor(v), 1.19)
+		table.insert(bars, { frame = D.line(x0, y0, x1, y1, 7, Color3.fromRGB(42, 49, 64), 3), v = v })
+	end
+	-- the amber line through the numbers, orange-red from 8, a small marker at each number
+	prevX, prevY = at(tFor(0), 1.08)
+	for i = 1, 80 do
+		local v = 10 * i / 80
+		local x, y = at(tFor(v), 1.08)
+		D.line(prevX, prevY, x, y, 3, if v > 8 then ORANGE else AMBER, 4)
+		prevX, prevY = x, y
+	end
+	for v = 0, 10 do
+		local x, y = at(tFor(v), 1.08)
+		rounded(D.rect(x, y, 12, 12, if v >= 8 then ORANGE else AMBER, 5, tFor(v)), 0.3)
+		local nx, ny = at(tFor(v), 0.95)
+		lbl(tostring(v), nx, ny, 40, if v >= 9 then LAMBO_RED else INK, 5, if v == 10 then 1.6 else 1)
+	end
+	-- the gear, the drive mode and the odometer
+	local gear = outlined("N", cx, 128, 190, 1)
+	local mode = lbl("CITTÀ", 420, 196, 22, SOFT, 5, 6)
+	local odo = lbl("000297 km", 735, 196, 22, SOFT, 5, 9)
+	-- the shift light: a green arrow above the odometer when it's time to change up
+	local shift = lbl("▲", 776, 122, 26, Color3.fromRGB(150, 220, 60), 6, 1)
+	shift.Visible = false
+	-- the headlights lamp (green, top right) and a seat-belt lamp (red, off once moving)
+	rounded(D.rect(880, 60, 26, 14, Color3.fromRGB(40, 190, 70), 5), 0.4)
+	local belt = rounded(D.rect(312, 60, 14, 22, LAMBO_RED, 5), 0.4)
+	-- below: the fuel triangle, the car picture, the speed
+	D.line(355, 312, 395, 252, 10, SOFT, 5)
+	D.line(395, 252, 435, 312, 10, SOFT, 5)
+	D.rect(395, 300, 60, 12, SOFT, 5)
+	rounded(D.rect(588, 296, 200, 44, Color3.fromRGB(200, 214, 232), 5), 0.45)
+	rounded(D.rect(600, 274, 92, 26, Color3.fromRGB(200, 214, 232), 5), 0.5)
+	D.rect(608, 276, 60, 14, Color3.fromRGB(40, 52, 72), 6)
+	D.round(530, 318, 14, Color3.fromRGB(30, 36, 48), 6)
+	D.round(650, 318, 14, Color3.fromRGB(30, 36, 48), 6)
+	local speed = outlined("0", 880, 286, 84, 3)
+	speed.TextXAlignment = Enum.TextXAlignment.Right
+	local unitTag = lbl(unit(), 900, 336, 18, SOFT, 5, 4)
+	-- left screen: the clock, the radio and the oil temperature and pressure bars (slanted, red tops)
+	local clockText = lbl(clock(), 98, 172, 30, INK, 5, 5)
+	lbl("FM  88.6", 98, 204, 18, SOFT, 5, 8)
+	for i = 0, 1 do
+		local bx = 62 + i * 54
+		D.line(bx, 230, bx + 46, 380, 16, Color3.fromRGB(38, 46, 60), 3)
+		D.line(bx + 2, 236, bx + 10, 262, 16, LAMBO_RED, 4)
+		D.line(bx + 12, 270, bx + 40, 370 - i * 30, 10, Color3.fromRGB(200, 214, 232), 4)
+	end
+	-- right screen: range and fuel, the car from above with its doors up
+	local range = lbl("450 km", 1052, 176, 24, INK, 5, 6)
+	rounded(D.rect(1040, 300, 52, 116, Color3.fromRGB(232, 236, 242), 4), 0.4)
+	D.rect(1040, 274, 38, 26, Color3.fromRGB(40, 52, 72), 5)
+	D.line(1012, 262, 990, 236, 6, LAMBO_RED, 5)
+	D.line(1068, 262, 1090, 236, 6, LAMBO_RED, 5)
+	local fuel = D.rect(1040, 384, 120, 8, AMBER, 4)
+
+	local shown, last, lastMode = 0, 0, ""
+	local unlit, lit = Color3.fromRGB(42, 49, 64), Color3.fromRGB(205, 225, 255)
+	local redUnlit, redLit = Color3.fromRGB(90, 24, 28), Color3.fromRGB(255, 52, 40)
+	local fuelLeft = 0.8
+	return function(mph: number, g: string, rpm: number)
+		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+		local v = 0.9 + shown * 7.9 -- 900 at idle up to the 8,800 limiter
+		local flash = shown > 0.93 and (os.clock() * 8) % 2 < 1
+		for _, b in bars do
+			local red = b.v >= 8.5
+			b.frame.BackgroundColor3 = if b.v <= v then (if red or flash then redLit else lit) else (if red then redUnlit else unlit)
+		end
+		gear.Text = g
+		gear.TextColor3 = if flash then Color3.fromRGB(90, 20, 24) else NAVY
+		shift.Visible = shown > 0.86 and tonumber(g) ~= nil
+		speed.Text = spd(mph)
+		unitTag.Text = unit()
+		belt.Visible = mph < 3
+		local m = if DashGauges.gearbox == "Manual" then "PISTA" else "CITTÀ"
+		if m ~= lastMode then
+			mode.Text = m
+			lastMode = m
+		end
+		if os.clock() - last > 5 then
+			last = os.clock()
+			clockText.Text = clock()
+			odo.Text = if KMH then "000297 km" else "000185 mi"
+			fuelLeft = math.max(0.15, fuelLeft - 0.0005)
+			fuel.Size = UDim2.fromScale(120 * fuelLeft / W, fuel.Size.Y.Scale)
+			range.Text = if KMH then string.format("%d km", math.floor(560 * fuelLeft)) else string.format("%d mi", math.floor(348 * fuelLeft))
+		end
+	end
+end
+
 -- the styles by name (the DashCluster panel's Style attribute)
 local STYLES: { [string]: (SurfaceGui) -> Update } = {
+	AventadorSVJ = aventadorSVJ,
 	Veyron = veyron,
 	Maybach57 = maybach,
 	SU7 = function(gui)

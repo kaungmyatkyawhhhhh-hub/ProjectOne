@@ -1,0 +1,40 @@
+[
+ {
+  "part": "Body_BLACK_PAINT_001",
+  "box": [
+   0.76,
+   1.18,
+   0.74,
+   1.0,
+   1.87,
+   0.87
+  ],
+  "mirror": true,
+  "into": "Body_MAIN_PINT"
+ },
+ {
+  "part": "Body_RED_PAINT_001",
+  "box": [
+   0.76,
+   1.18,
+   0.74,
+   1.0,
+   1.87,
+   0.87
+  ],
+  "mirror": true,
+  "into": "Body_MAIN_PINT"
+ },
+ {
+  "rename": {
+   "Body_MAIN_PINT": "Body_MAIN_PAINT",
+   "Body_Lamborghini_AventadorSVJ.002": "Body_Trim_Black",
+   "Body_Lamborghini_AventadorSVJ.009": "Body_Paint_Inner",
+   "Body_RED_PAINT": "Body_Stripe_Red",
+   "Body_RED_PAINT_001": "Body_Stripe_Red2"
+  }
+ },
+ {
+  "clean_names": "Lamborghini_AventadorSVJ(Roadster)?RewardRecycled_20[0-9][0-9]_?(_3D_3D)?"
+ }
+]

@@ -1095,6 +1095,7 @@ local function carKey(s: State, key: Enum.KeyCode)
 			s.manual = true
 			s.mgear = tonumber(s.gear) or (if s.gear == "R" then -1 else 0)
 			Driving.gearbox = "Manual"
+			DashGauges.gearbox = "Manual"
 			if Driving.onGearboxChanged then
 				Driving.onGearboxChanged("Manual")
 			end
@@ -2990,6 +2991,7 @@ end
 -- Settings: "Auto" | "Manual" gearbox
 function Driving.setGearbox(mode: string)
 	Driving.gearbox = if mode == "Manual" then "Manual" else "Auto"
+	DashGauges.gearbox = Driving.gearbox
 	local s = state
 	if s then
 		s.manual = Driving.gearbox == "Manual" and not s.electric

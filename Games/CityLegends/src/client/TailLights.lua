@@ -192,6 +192,20 @@ return {
 		shells = { { name = "Body_Brake_Light" }, { name = "Body_Taillights" } },
 		spots = {},
 	},
+	-- (added by hand, 2026-11-02: the SVJ's lamps share a part with the headlights, so spots
+	-- measured through its lens glass; the SVJ 63 has its own red lens part)
+	lambrini_svj = {
+		shells = {},
+		wb = 2.7,
+		spots = {
+			{ at = Vector3.new(-0.6054, 0.4027, 2.0501), face = Vector3.new(-0.2464, 0, 0.9692), w = 0.4867, h = 0.112 },
+			{ at = Vector3.new(0.6054, 0.4027, 2.0501), face = Vector3.new(0.2464, 0, 0.9692), w = 0.4867, h = 0.112 },
+		},
+	},
+	lambrini_svj63 = {
+		shells = { { name = "SeeThrough_RED_GLASS" } },
+		spots = {},
+	},
 	lambrini_urus = {
 		shells = {},
 		wb = 3.003,

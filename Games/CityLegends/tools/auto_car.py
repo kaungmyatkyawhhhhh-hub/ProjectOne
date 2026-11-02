@@ -16,7 +16,8 @@ spinning, arch liners and body bits stay on the body), texture transforms and se
 baked into the first layer, solid alpha in opaque textures, no metal / roughness maps.
 
     python tools/auto_car.py imports/car.glb <real wheelbase in metres> out.blend ['{"tilt": 20}']
-Hints: "front", "tilt", "steer" (see main) and "budget" (triangles for the whole car, default
+Hints: "front", "tilt", "steer" (see main), "wheel_depth" (how far inwards a wheel piece may reach,
+in wheel radii, default 0.6), "wheel_reach" (out from the axle, default 1.04) and "budget" (triangles for the whole car, default
 160,000: more for a detailed cabin that would crumple when thinned).
 Writes a .blend (for checking renders) and a JSON report; tools/pack_cars.py puts several
 .blend cars into one .fbx, one group per car id, for a single Import 3D in Studio.
@@ -531,7 +532,7 @@ def find_steering(parts, scale, up, la, sa, centre, ground, wb, near=None):
 
 
 def main():
-    args = sys.argv[1:]
+    args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
     src, real_wb, out = args[0], float(args[1]), args[2]
     # hand-set help for a car the search gets wrong: {"front": 1 or -1 (along the model's length
     # axis), "tilt": degrees, "steer": [side, up, along] in metres, near the right DEBUG candidate}
@@ -709,12 +710,16 @@ def main():
         name = ("F" if p[1] < 0 else "R") + ("L" if p[0] > 0 else "R")
         centres[name] = (p, r * scale)
     groups = {k: [] for k in centres}
+    # how far in from the tyre's middle a wheel piece may reach, in wheel radii (deep-dished rims and
+    # hub faces behind the brake disc need more: hint "wheel_depth")
+    wheel_depth = float(hint.get("wheel_depth", 0.6))
+    wheel_reach = float(hint.get("wheel_reach", 1.04))  # out from the axle (treads standing proud)
     for o in [o for o in meshes() if o != wheel]:
         # one corner at a time: splitting renumbers the mesh's vertices
         for key, (p, r) in centres.items():
             pick = set()
             for idx, cc, _ in object_parts(o, 1e-5):
-                if np.all(np.hypot(cc[:, 1] - p[1], cc[:, 2] - p[2]) <= r * 1.04) and np.all(np.abs(cc[:, 0] - p[0]) <= r * 0.6):
+                if np.all(np.hypot(cc[:, 1] - p[1], cc[:, 2] - p[2]) <= r * wheel_reach) and np.all(np.abs(cc[:, 0] - p[0]) <= r * wheel_depth):
                     if "calip" not in o.name.lower():
                         pick.update(idx.tolist())
             if pick:

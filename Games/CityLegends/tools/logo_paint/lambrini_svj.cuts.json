@@ -1,0 +1,18 @@
+[
+ {
+  "part": "Body_A_PLAS_BLACK",
+  "box": [
+   0.78,
+   1.2,
+   0.75,
+   1.0,
+   1.86,
+   0.87
+  ],
+  "mirror": true,
+  "into": "Body_A_CAR_PAINT"
+ },
+ {
+  "clean_names": "Lamborghini_AventadorSVJ(Roadster)?RewardRecycled_20[0-9][0-9]_?(_3D_3D)?"
+ }
+]

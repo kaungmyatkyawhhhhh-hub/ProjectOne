@@ -32,7 +32,7 @@ local SEATS = { Sedan = 5, Coupe = 4, SUV = 5, Supercar = 2, Hypercar = 2 }
 
 -- the drive of each car line (by the base car's id); the rest is RWD
 local AWD = {
-	nisun_gtr = true, audy_r8 = true, lambrini_lp640 = true, lambrini_lp700 = true, lambrini_lp750 = true,
+	nisun_gtr = true, audy_r8 = true, lambrini_lp640 = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_svj = true, lambrini_svj63 = true,
 	lambrini_urus = true, bugotti_veyron = true, porsha_panamera = true, bentlee_contgt = true,
 	bentlee_bentayga = true, bentz_gle53 = true, bentz_g63 = true, brabos_g63 = true, bentz_gls = true,
 	bentz_e63s = true, bnw_m5_f90 = true, bnw_m8gc = true, bnw_x6 = true, bnw_x7 = true, toyoka_lc200 = true,

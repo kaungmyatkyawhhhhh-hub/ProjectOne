@@ -1,0 +1,11 @@
+{
+  "src": "imports/2020_lamborghini_aventador_svj_63_roadster.glb",
+  "images": {
+    "4": [{"rect": [462, 102, 488, 126]}],
+    "14": [{"rect": [282, 88, 392, 206]}],
+    "17": [{"rect": [20, 80, 490, 160]}],
+    "19": [{"ring": [256, 256, 128, 194]}],
+    "20": [{"rect": [8, 15, 128, 152]}, {"ring": [256, 256, 124, 197]}]
+  },
+  "drop": ["Badge_Geo_lodA", "ManufacturerPlate_Geo_lodA"]
+}
