@@ -74,3 +74,42 @@ Screenshot after the fix: `GYM ARC/Screenshots/freeze/progym_after_fix_2nov.jpg`
    - Memory should level off after the first lap.
    - No `ProGymClient` errors in F9.
    - No holes at the gym you screenshotted.
+
+## FPS cost measurement (2 Nov, after the fix, Studio on the owner's PC)
+Method:
+- 5 fixed camera spots: spawn, Starter Gym, Pro Gym, town from above, beach.
+- At each spot, one thing switched off at a time; render CPU, draw calls and triangles averaged over 2.5 s each.
+
+**World counts:**
+- 18,850 small parts (<6 studs), 3,580 medium, 975 big.
+- 1,929 SurfaceGuis (only 4 without a MaxDistance).
+- 641 lights, but only 69 actually light anything (the area system works); 2 lights with shadows.
+- 92 effects.
+
+**Studio floor:** about 17 ms of every Studio frame is Studio itself. Looking only at the sky (0 draw calls) still gave 16.7 ms render CPU. On this PC the game's world costs only about 5 ms on top of that.
+
+**Saved by switching each one off** (render CPU, ms):
+
+| Thing off | Spawn | Starter Gym | Pro Gym | Town | Beach | Other effect |
+|---|---|---|---|---|---|---|
+| World shadows | 2.7 | 2.8 | 1.6 | 2.2 | 1.7 | shadow draw calls 500-700 → 0 |
+| Small parts | 1.2 | 2.3 | 0.6 | 1.5 | 0.4 | triangles -28% (spawn) to -46% (town) |
+| Signs (Surface/Billboard) | 0.9 | 1.9 | 0.5 | 0.6 | 0.3 | |
+| NPCs | 0 | 1.7 | 0.2 | 0 | 0.5 | |
+| Medium parts | 0.2 | 0.5 | 0.4 | 0.6 | 0.7 | |
+| Lights | 0 | 0.3 | 0 | 0 | 0.2 | |
+| Effects / screen UI | ~0 | ~0 | ~0 | ~0 | ~0 | |
+
+**Scene size vs the Playbook targets (~1,000 draw calls, ~1M triangles):**
+- spawn: 1,130 draw calls, 850k triangles;
+- town: 1,050 draw calls, 880k triangles;
+- whole map from above: 910 draw calls, 1.12M triangles.
+
+**Client scripts while standing still** (Starter Gym, 10 s): 2.2 ms per frame in total. The biggest:
+- MuscleRig 0.50 ms;
+- Loader 0.31 ms;
+- TrainerFollowClient 0.17 ms;
+- GuidePath 0.16 ms;
+- MuscleClient, MachineSignsClient and MachineClient 0.13 ms each.
+
+Phones are roughly 3-5x slower than this PC.
