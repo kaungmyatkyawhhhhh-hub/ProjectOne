@@ -384,6 +384,9 @@ local function laneSpot(center: Vector3, minD: number, maxD: number): (CityLayou
 end
 
 local function spawnUnit(near: Vector3, minD: number, maxD: number): Unit?
+	if P.Cars == false then
+		return nil -- (switched off: Config.Police.Cars)
+	end
 	local seg, s = laneSpot(near, minD, maxD)
 	if not seg then
 		return nil

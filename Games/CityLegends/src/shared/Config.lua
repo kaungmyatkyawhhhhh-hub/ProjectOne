@@ -547,6 +547,7 @@ Config.Police = {
 	LoopCameras = 6, -- pairs round the Legends Loop
 	-- owner (2026-10-23): "there is too many police cars", "add a timer when the police will stop
 	-- chasing and u get like a little bit of money"
+	Cars = false, -- police cars on the roads (owner, 2026-11-02: "remove the police cars for now"; true brings them back)
 	Patrols = 2, -- patrol cars around you when you're not wanted
 	UnitsPerStar = 0.5, -- chasing units: 1 + half the stars, rounded down (max 3)
 	MaxUnits = 3,
