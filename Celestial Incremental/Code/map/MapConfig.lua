@@ -110,8 +110,10 @@ MapConfig.Islands = {
 -- from the island). Their screens are live SurfaceGuis (GalaxyBoards, canvas 745 x 512 = the v12 board PNGs / 2) with real
 -- buttons: no prompt, no ClickDetector. Buying from a board: the server checks the island's owner + within BuyRange.
 -- (The spec's +-14 deg puts two 16-wide panels at radius 26 into each other: 18.5 deg is the closest they stand apart.)
+-- Boards fix 2 (owner): Angle 25 = a ~6 stud gap between the two frames; Tilt 18 = the screens lean back and face up toward
+-- the player like Regrowth's; the legs lean with them (bottom edge still Bottom above the floor).
 MapConfig.Boards = {
-	Radius = 26, Angle = 18.5, Tilt = 8, Bottom = 2.5,
+	Radius = 26, Angle = 25, Tilt = 18, Bottom = 2.5,
 	Width = 16, Height = 11,                        -- (16 / 11 = 1.4545 = the canvas 745 / 512)
 	Frame = 0.8, Depth = 0.8,
 	Canvas = Vector2.new(745, 512), Window = Vector2.new(30, 32), -- (the v12 window's place on the canvas)

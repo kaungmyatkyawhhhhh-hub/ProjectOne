@@ -94,13 +94,14 @@ local function makeBoards(island: Model)
 			Builder.part(brass({ Name = "FrameBar", Size = Vector3.new(bar[3], bar[4], B.Depth), CFrame = cf * CFrame.new(bar[1], bar[2], 0.1), CanCollide = true, Parent = panel }))
 		end
 		Builder.part(brass({ Name = "BackPlate", Size = Vector3.new(B.Width + 2 * f, B.Height + 2 * f, 0.3), CFrame = cf * CFrame.new(0, 0, -B.Depth / 2 + 0.1), CanCollide = true, Parent = panel }))
-		-- two posts from the floor up the back to the bottom bar
-		local foot = cf * CFrame.new(0, -B.Height / 2, 0)
+		-- two legs up the back, leaning with the board (boards fix 2): from the floor to 3 studs under the top, + a foot block
+		local up = cf.UpVector
 		for _, sx in ipairs({ -1, 1 }) do
-			local base = foot * CFrame.new(sx * (B.Width / 2 - 2), 0, -B.Depth / 2 - 0.3)
-			local top = base.Position
-			local bottom = Vector3.new(top.X, c.Y, top.Z)
-			Builder.part(brass({ Name = "Post", Size = Vector3.new(0.9, (top - bottom).Magnitude + 0.6, 0.9), CFrame = CFrame.new((top + bottom) / 2), CanCollide = true, Parent = panel }))
+			local top = (cf * CFrame.new(sx * (B.Width / 2 - 2), B.Height / 2 - 3, -B.Depth / 2 - 0.5)).Position
+			local reach = (top.Y - c.Y) / up.Y -- (along the board down to the floor)
+			local bottom = top - up * reach
+			Builder.part(brass({ Name = "Post", Size = Vector3.new(0.9, reach + 0.6, 0.9), CFrame = CFrame.fromMatrix((top + bottom) / 2, cf.RightVector, up), CanCollide = true, Parent = panel }))
+			Builder.part(brass({ Name = "Foot", Size = Vector3.new(1.6, 0.5, 2.4), CFrame = CFrame.lookAt(bottom + Vector3.new(0, 0.2, 0), bottom + Vector3.new(0, 0.2, 0) + Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z)), CanCollide = true, Parent = panel }))
 		end
 		local beacon = Kit.Make("LampOrb", { Name = "Beacon", Fit = { "Y", 1.8 }, CFrame = cf * CFrame.new(0, B.Height / 2 + f + 1.2, 0), Color = Color3.fromRGB(255, 200, 80), Material = Enum.Material.Neon, Parent = panel })
 		local _ = beacon

@@ -4,7 +4,9 @@
 -- Ring 1 = EconConfig.Ring1 (the same table the Upgrades window sells; one source of truth). The node places are the v12
 -- diamonds'. A node: bought = green edge, can be bought (its `requires` owned) = gold edge, locked = dark with "?". Click a
 -- node -> the bottom bar shows it; its BUY button buys it (ring 1 is paid in STARDUST, design note section 2).
--- TreePanel.new(parent, opts): opts like UpgradesPanel (subject, origin, chip, canAct, buy, sound, toast).
+-- TreePanel.new(parent, opts): opts like UpgradesPanel (subject, origin, chip, canAct, buy, sound, toast, pointer).
+-- The constellation sits in a sideways scroll area (Kit.scroller "X"): it scrolls only once the ring is wider than the panel
+-- (owner, boards fix 2).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
@@ -71,39 +73,47 @@ function Tree.new(parent: Instance, opts)
 	Kit.text(win, 470, 33, 70, 12, "SHARDS", 9, { ZIndex = 8, stroke = 1, TextColor3 = hex("#e6dcff"), TextXAlignment = Enum.TextXAlignment.Center })
 	Kit.icon(win, "shard", 548, 2, 50, Color3.fromRGB(170, 110, 255), { ZIndex = 8 })
 
-	-- the constellation panel (17,75 666x298)
+	-- the constellation panel (17,75 666x298): the nodes / links go in its scroll area (window coordinates - G)
 	local graph = Kit.box(win, 17, 75, 666, 298, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 4 })
 	Kit.corner(graph, 6)
 	Kit.stroke(graph, hex("#2a2433"), 1.5)
+	local G = Vector2.new(17, 75)
+	local area, scroll = Kit.scroller(win, G.X, G.Y, 666, 298, "X", { ZIndex = 4, pointer = opts.pointer })
+	self.scroll = scroll
+	local right = 0
+	for _, spec in ipairs(Tree.NODES) do right = math.max(right, spec.at.X) end
+	area.CanvasSize = UDim2.fromOffset(math.max(666, right - G.X + 36), 0)
 	self.links = {}
 	for i, l in ipairs(Tree.LINKS) do
-		local a, b = Tree.NODES[l[1]].at, Tree.NODES[l[2]].at
+		local a, b = Tree.NODES[l[1]].at - G, Tree.NODES[l[2]].at - G
 		local mid, d = (a + b) / 2, (b - a)
-		local holder = Kit.box(win, mid.X, mid.Y, d.Magnitude - 40, 6, { AnchorPoint = Vector2.new(0.5, 0.5), Rotation = math.deg(math.atan2(d.Y, d.X)), ZIndex = 5 })
+		local holder = Kit.box(area, mid.X, mid.Y, d.Magnitude - 40, 6, { AnchorPoint = Vector2.new(0.5, 0.5), Rotation = math.deg(math.atan2(d.Y, d.X)), ZIndex = 5 })
 		self.links[i] = holder
 	end
 	self.nodeUI = {}
 	for i, spec in ipairs(Tree.NODES) do
 		local node = spec.id and Econ.Ring1ById[spec.id]
-		local d = Kit.box(win, spec.at.X, spec.at.Y, 54, 54, { AnchorPoint = Vector2.new(0.5, 0.5), Rotation = 45, BackgroundTransparency = 0, BackgroundColor3 = hex("#16131b"), ZIndex = 6 })
+		local at = spec.at - G
+		local d = Kit.box(area, at.X, at.Y, 54, 54, { AnchorPoint = Vector2.new(0.5, 0.5), Rotation = 45, BackgroundTransparency = 0, BackgroundColor3 = hex("#16131b"), ZIndex = 6 })
 		local stroke = Kit.stroke(d, DARK, 3)
-		local _, icon = Kit.icon(win, node and node.icon or "lock", spec.at.X - 26, spec.at.Y - 26, 52, nil, { ZIndex = 7 })
-		local q = Kit.text(win, spec.at.X - 20, spec.at.Y - 18, 40, 36, "?", 30, { ZIndex = 9, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#8a8296") })
-		local name = Kit.text(win, spec.at.X - 80, spec.at.Y + 36, 160, 18, if node then node.name else "?", 13, { ZIndex = 8, TextXAlignment = Enum.TextXAlignment.Center })
-		local hit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, Position = UDim2.fromOffset(spec.at.X - 36, spec.at.Y - 36), Size = UDim2.fromOffset(72, 72), ZIndex = 10 }, win)
+		local _, icon = Kit.icon(area, node and node.icon or "lock", at.X - 26, at.Y - 26, 52, nil, { ZIndex = 7 })
+		local q = Kit.text(area, at.X - 20, at.Y - 18, 40, 36, "?", 30, { ZIndex = 9, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#8a8296") })
+		local name = Kit.text(area, at.X - 80, at.Y + 36, 160, 18, if node then node.name else "?", 13, { ZIndex = 8, TextXAlignment = Enum.TextXAlignment.Center })
+		local hit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, Position = UDim2.fromOffset(at.X - 36, at.Y - 36), Size = UDim2.fromOffset(72, 72), ZIndex = 10 }, area)
 		hit.MouseEnter:Connect(function() Kit.tween(d, { Size = UDim2.fromOffset(60, 60) }, 0.1) end)
 		hit.MouseLeave:Connect(function() Kit.tween(d, { Size = UDim2.fromOffset(54, 54) }, 0.1) end)
 		hit.MouseButton1Click:Connect(function()
-			if node then
+			if node and not scroll.moved then
 				if self.opts.sound then self.opts.sound("tab") end
 				self.selected = node.id
+				self.userPicked = true -- (a tapped node stays shown, even one already bought)
 				self:refresh()
 			end
 		end)
 		self.nodeUI[i] = { diamond = d, stroke = stroke, icon = icon, q = q, name = name, node = node }
 	end
-	Kit.sparkle(win, 120, 196, 10, 0.3)
-	Kit.sparkle(win, 410, 260, 8, 1.1)
+	Kit.sparkle(area, 120 - G.X, 196 - G.Y, 10, 0.3)
+	Kit.sparkle(area, 410 - G.X, 260 - G.Y, 8, 1.1)
 
 	-- the bottom bar (17,385 666x70, gold edge): the selected node, its value chip, BUY
 	local bar = Kit.box(win, 17, 385, 666, 70, { BackgroundTransparency = 0, BackgroundColor3 = hex("#14111a"), ZIndex = 4 })
@@ -177,6 +187,7 @@ function Tree:setBuy(state: string, cost: number?)
 		local ok = self.opts.buy("BuyNode", self.selected)
 		self.busy = false
 		if ok then
+			self.userPicked = false -- (after a buy the bar moves on to the next node you can buy)
 			if self.opts.sound then self.opts.sound("buy") end
 			local main, _, holder = Kit.text(self.root, 522, 370, 148, 26, "BOUGHT!", 20, { ZIndex = 12, TextColor3 = hex("#7dff6b"), TextXAlignment = Enum.TextXAlignment.Center })
 			local _2 = main

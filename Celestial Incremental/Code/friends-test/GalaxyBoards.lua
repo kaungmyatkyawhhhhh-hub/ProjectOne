@@ -7,6 +7,8 @@
 --  * built only for your own island and islands within MapConfig.Boards.DrawRange (others are dropped again)
 --  * the beacon on top of a panel shows only while something on it can be bought
 --  * the frame edge's light runs round (rotating UIGradient); textures never move; icons never move
+--  * the rows scroll (owner, boards fix 2: no pages): mouse wheel, touch and a mouse drag on the screen (the drag needs
+--    the mouse ray projected onto the screen part: pointerFor). A refresh never resets where a list is scrolled to.
 --  * shared.GalaxyBoardTarget(key) -> the world position of a button on YOUR Upgrades board (the tutorial arrow points there)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -38,6 +40,25 @@ local function partsOf(x: Instance): { BasePart }
 end
 
 local boards = {} -- [island] = { guis, panels = { Upgrades = panel, Tree = panel }, beacons, conns, subject }
+
+-- a screen position (mouse / finger) -> the point on a board's canvas in pixels, or nil if it isn't on that screen
+local function pointerFor(screen: BasePart)
+	return function(pos: Vector2): Vector2?
+		local cam = workspace.CurrentCamera
+		if not cam or not screen.Parent then return nil end
+		local ray = cam:ScreenPointToRay(pos.X, pos.Y)
+		local cf = screen.CFrame
+		local n = -cf.LookVector -- (the Back face, +Z, faces the island)
+		local den = ray.Direction:Dot(n)
+		if den > -1e-4 then return nil end
+		local t = (cf.Position + n * (screen.Size.Z / 2) - ray.Origin):Dot(n) / den
+		if t <= 0 then return nil end
+		local p = cf:PointToObjectSpace(ray.Origin + ray.Direction * t)
+		local u, v = p.X / screen.Size.X + 0.5, 0.5 - p.Y / screen.Size.Y
+		if u < 0 or u > 1 or v < 0 or v > 1 then return nil end
+		return Vector2.new(u * B.Canvas.X, v * B.Canvas.Y)
+	end
+end
 
 local function clear(island)
 	local b = boards[island]
@@ -87,7 +108,7 @@ local function build(island)
 		g.Color = if spec.id == "Tree" then ColorSequence.new(Kit.hex("#0f2a16"), Kit.hex("#08100a")) else ColorSequence.new(Kit.hex("#3a1a0c"), Kit.hex("#120a08"))
 		g.Parent = bg
 		local opts = {
-			subject = subject, origin = B.Window, chip = "SHARDS", close = false, paged = true, edgeGlow = true,
+			subject = subject, origin = B.Window, chip = "SHARDS", close = false, edgeGlow = true, pointer = pointerFor(screen),
 			canAct = function() return mine end,
 			buy = function(kind, arg) return request:InvokeServer(kind, arg, slot) end,
 			sound = sound,
@@ -168,6 +189,7 @@ shared.GalaxyBoardTarget = function(key: string, tab: string?): (Vector3?, Vecto
 			if not panel then return nil end
 			if tab and panel.currentTab ~= tab then panel:selectTab(tab) end
 			local btn = panel.targets[key]
+			panel:reveal(btn)
 			local gui = b.guis[1]
 			local screen = gui and gui.Adornee
 			if not btn or not btn.Parent or not screen then return nil end

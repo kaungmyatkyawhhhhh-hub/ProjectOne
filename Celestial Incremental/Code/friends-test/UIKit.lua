@@ -6,6 +6,8 @@
 --  * Reduced Motion: the moving VFX stop (GuiService.ReducedMotionEnabled)
 local GuiService = game:GetService("GuiService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local A = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("UIAssets"))
@@ -232,6 +234,174 @@ function Kit.button(parent, x, y, w, h, c1: Color3, c2: Color3, props)
 	b.MouseLeave:Connect(up)
 	return b, inner, g, shadow
 end
+-- a v12 scroll area (owner, boards fix 2: "a scrollingframe and not pages"): a see-through ScrollingFrame at x, y, w, h (put
+-- the content inside it) with a 10 px gold thumb on a dark track (right edge for dir "Y", bottom for "X"; the track shows
+-- only when there is something to scroll). The thumb is drawn here (gold gradient, ink outline): Roblox's own bar picture is
+-- grey, so tinted gold it came out brown; it stays hidden. Mouse wheel and touch drag are Roblox's own; a MOUSE drag is
+-- added here (Roblox has none). On a SurfaceGui pass props.pointer(screenPos) -> the point in the gui's own pixels (or nil if off it): Roblox
+-- doesn't wheel-scroll a SurfaceGui, so then the wheel is handled here too (and the camera doesn't zoom while over the list).
+-- Returns the ScrollingFrame and its state: state.moved = this press dragged (buttons inside skip their click then).
+local scrollerN = 0
+-- while the mouse is over a board's list the camera's zoom is held where it is (the wheel scrolls the list instead)
+local zoomHeld = nil
+local function holdZoom(on: boolean)
+	local plr = game:GetService("Players").LocalPlayer
+	if not plr then return end
+	if on and not zoomHeld then
+		zoomHeld = { plr.CameraMinZoomDistance, plr.CameraMaxZoomDistance }
+		local cam = workspace.CurrentCamera
+		local d = math.clamp(if cam then (cam.CFrame.Position - cam.Focus.Position).Magnitude else 15, zoomHeld[1], zoomHeld[2])
+		plr.CameraMinZoomDistance = d
+		plr.CameraMaxZoomDistance = d
+	elseif not on and zoomHeld then
+		plr.CameraMaxZoomDistance = zoomHeld[2]
+		plr.CameraMinZoomDistance = zoomHeld[1]
+		zoomHeld = nil
+	end
+end
+local function shown(o: Instance): boolean
+	while o and not o:IsA("LayerCollector") do
+		if o:IsA("GuiObject") and not o.Visible then return false end
+		o = o.Parent
+	end
+	return o ~= nil and (o :: any).Enabled ~= false
+end
+function Kit.scroller(parent, x, y, w, h, dir: string, props)
+	local z = (props and props.ZIndex) or 4
+	local vertical = dir ~= "X"
+	local track = Kit.box(parent, if vertical then x + w - 10 else x, if vertical then y else y + h - 10, if vertical then 10 else w, if vertical then h else 10,
+		{ Name = "ScrollTrack", BackgroundTransparency = 0, BackgroundColor3 = Kit.hex("#221d2a"), ZIndex = z + 2, Visible = false })
+	Kit.corner(track, 5)
+	Kit.stroke(track, INK, 1.5)
+	local thumb = Kit.box(track, 0, 0, 10, 10, { Name = "Thumb", BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = z + 3 })
+	Kit.corner(thumb, 5)
+	Kit.stroke(thumb, INK, 1)
+	Kit.grad(thumb, Kit.hex("#ffe08a"), Kit.hex("#ff9a1a"), if vertical then 0 else 90)
+	local sf = new("ScrollingFrame", { Name = "Scroll", Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(w, h), BackgroundTransparency = 1,
+		BorderSizePixel = 0, ScrollBarThickness = 10, ScrollBarImageTransparency = 1,
+		ScrollingDirection = if vertical then Enum.ScrollingDirection.Y else Enum.ScrollingDirection.X, ElasticBehavior = Enum.ElasticBehavior.Always,
+		VerticalScrollBarInset = Enum.ScrollBarInset.None, HorizontalScrollBarInset = Enum.ScrollBarInset.None,
+		CanvasSize = UDim2.fromOffset(if vertical then 0 else w, if vertical then h else 0), ZIndex = z + 1 }, parent)
+	local function canScroll(): boolean
+		local c, win = sf.AbsoluteCanvasSize, sf.AbsoluteWindowSize
+		return if vertical then c.Y > win.Y + 1 else c.X > win.X + 1
+	end
+	local function updateTrack()
+		track.Visible = canScroll()
+		if not track.Visible then return end
+		local c, win, pos = sf.AbsoluteCanvasSize, sf.AbsoluteWindowSize, sf.CanvasPosition
+		local len = if vertical then h else w
+		local k = (if vertical then sf.AbsoluteSize.Y / math.max(1, h) else sf.AbsoluteSize.X / math.max(1, w))
+		local full, seen = (if vertical then c.Y else c.X) / k, (if vertical then win.Y else win.X) / k
+		local size = math.max(30, len * seen / full)
+		local at = math.clamp((if vertical then pos.Y else pos.X) / math.max(1, full - seen), 0, 1) * (len - size)
+		thumb.Size = if vertical then UDim2.fromOffset(10, size) else UDim2.fromOffset(size, 10)
+		thumb.Position = if vertical then UDim2.fromOffset(0, at) else UDim2.fromOffset(at, 0)
+	end
+	sf:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(updateTrack)
+	sf:GetPropertyChangedSignal("AbsoluteWindowSize"):Connect(updateTrack)
+	sf:GetPropertyChangedSignal("CanvasPosition"):Connect(updateTrack)
+	updateTrack()
+
+	-- the mouse (and touch, if Roblox doesn't scroll it itself) drag
+	local state = { moved = false, frame = sf, track = track }
+	local pointer = (props and props.pointer) or function(p: Vector2) return p end
+	local press, startAt, startCanvas, lastSet
+	local function inside(q: Vector2?): boolean
+		if not q then return false end
+		local a, s = sf.AbsolutePosition, sf.AbsoluteSize
+		return q.X >= a.X and q.X <= a.X + s.X and q.Y >= a.Y and q.Y <= a.Y + s.Y
+	end
+	local conns = {}
+	table.insert(conns, UserInputService.InputBegan:Connect(function(input)
+		local t = input.UserInputType
+		if t ~= Enum.UserInputType.MouseButton1 and t ~= Enum.UserInputType.Touch then return end
+		if not shown(sf) then return end
+		local q = pointer(Vector2.new(input.Position.X, input.Position.Y))
+		if not inside(q) then return end
+		press, startAt, startCanvas, lastSet = input, q, sf.CanvasPosition, sf.CanvasPosition
+		state.moved = false
+	end))
+	table.insert(conns, UserInputService.InputChanged:Connect(function(input)
+		if not press then return end
+		if press.UserInputType == Enum.UserInputType.Touch then
+			if input ~= press then return end
+		elseif input.UserInputType ~= Enum.UserInputType.MouseMovement then
+			return
+		end
+		local q = pointer(Vector2.new(input.Position.X, input.Position.Y))
+		if not q then return end
+		-- Roblox is scrolling this touch itself: leave it to Roblox
+		if (sf.CanvasPosition - lastSet).Magnitude > 1 then
+			state.moved, press = true, nil
+			return
+		end
+		-- (gui pixels -> canvas pixels: a UIScale on a 2D window)
+		local k = if vertical then sf.AbsoluteSize.Y / math.max(1, sf.Size.Y.Offset) else sf.AbsoluteSize.X / math.max(1, sf.Size.X.Offset)
+		local d = (q - startAt) / k
+		if not state.moved and d.Magnitude < 6 then return end
+		state.moved = true
+		if not canScroll() then return end
+		local room = (sf.AbsoluteCanvasSize - sf.AbsoluteWindowSize) / k
+		sf.CanvasPosition = if vertical then Vector2.new(startCanvas.X, math.clamp(startCanvas.Y - d.Y, 0, math.max(0, room.Y)))
+			else Vector2.new(math.clamp(startCanvas.X - d.X, 0, math.max(0, room.X)), startCanvas.Y)
+		lastSet = sf.CanvasPosition
+	end))
+	table.insert(conns, UserInputService.InputEnded:Connect(function(input)
+		if press and (input == press or (press.UserInputType == Enum.UserInputType.MouseButton1 and input.UserInputType == Enum.UserInputType.MouseButton1)) then
+			press = nil
+		end
+	end))
+	-- the wheel on a SurfaceGui: bound (above the camera's zoom) only while the mouse is over the list
+	local wheelAction, bound = nil, false
+	if props and props.pointer then
+		scrollerN += 1
+		wheelAction = "KitScrollWheel" .. scrollerN
+		local goal = nil
+		local function hovering(p: Vector2): boolean return shown(sf) and canScroll() and inside(pointer(p)) end
+		table.insert(conns, UserInputService.InputChanged:Connect(function(input)
+			if input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
+			local want = hovering(Vector2.new(input.Position.X, input.Position.Y))
+			if want == bound then return end
+			bound = want
+			holdZoom(want)
+			if want then
+				ContextActionService:BindActionAtPriority(wheelAction, function(_, _, input2)
+					if not hovering(Vector2.new(input2.Position.X, input2.Position.Y)) then return Enum.ContextActionResult.Pass end
+					local step = -input2.Position.Z * 90
+					local k = if vertical then sf.AbsoluteSize.Y / math.max(1, h) else sf.AbsoluteSize.X / math.max(1, w)
+					local room = (sf.AbsoluteCanvasSize - sf.AbsoluteWindowSize) / k
+					local from = goal or sf.CanvasPosition
+					goal = if vertical then Vector2.new(from.X, math.clamp(from.Y + step, 0, math.max(0, room.Y)))
+						else Vector2.new(math.clamp(from.X + step, 0, math.max(0, room.X)), from.Y)
+					local tw = Kit.tween(sf, { CanvasPosition = goal }, 0.15)
+					tw.Completed:Connect(function(s) if s == Enum.PlaybackState.Completed then goal = nil end end)
+					return Enum.ContextActionResult.Sink
+				end, false, Enum.ContextActionPriority.High.Value + 10, Enum.UserInputType.MouseWheel)
+			else
+				ContextActionService:UnbindAction(wheelAction)
+			end
+		end))
+	end
+	sf.Destroying:Connect(function()
+		for _, c in ipairs(conns) do c:Disconnect() end
+		if wheelAction then ContextActionService:UnbindAction(wheelAction) end
+		if wheelAction and bound then holdZoom(false) end
+	end)
+	-- scrolls so a child (a row's button) is fully on show
+	function state.reveal(obj: GuiObject)
+		local k = sf.AbsoluteSize.Y / math.max(1, sf.Size.Y.Offset)
+		local top = (obj.AbsolutePosition.Y - sf.AbsolutePosition.Y) / k
+		local bottom = top + obj.AbsoluteSize.Y / k
+		local winH = sf.AbsoluteWindowSize.Y / k
+		if top >= 0 and bottom <= winH then return end
+		local room = (sf.AbsoluteCanvasSize.Y - sf.AbsoluteWindowSize.Y) / k
+		local want = if top < 0 then sf.CanvasPosition.Y + top - 12 else sf.CanvasPosition.Y + bottom - winH + 12
+		sf.CanvasPosition = Vector2.new(sf.CanvasPosition.X, math.clamp(want, 0, math.max(0, room)))
+	end
+	return sf, state
+end
+
 function Kit.recolour(button, c1: Color3, c2: Color3)
 	local g = button:FindFirstChildOfClass("UIGradient")
 	if g then g.Color = ColorSequence.new(c1, c2) end

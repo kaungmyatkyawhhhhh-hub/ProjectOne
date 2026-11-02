@@ -11,16 +11,19 @@
 --   opts.origin       Vector2: the window's top-left inside `parent` (default 0, 0)
 --   opts.chip         "ESSENCE" | "SHARDS" (the header currency pill)
 --   opts.close        true = the pink X (2D window only)
---   opts.paged        true = 3 rows per page + page arrows (boards); false = a scrolling list (2D window)
+--   opts.pointer      a SurfaceGui (boards): screen position -> the point in the gui's pixels (Kit.scroller's mouse drag)
 --   opts.edgeGlow     true = a rotating UIGradient on the frame edge (boards); false = the breathing 9-slice glow
 --   opts.canAct()     false = a visitor: every buy button grey "VISIT"
 --   opts.buy(kind, arg) -> ok     ("BuyBody", k | "BuyNode", id)
 --   opts.onBought(rowFrame, incomeBefore), opts.toast(text, colour), opts.sound(name)
 -- panel: .root, .tabUI, .targets (tutorial: "Body0", "Unlock1", "Node_FirstLight" -> the button), .currentTab,
---        :selectTab(id), :refresh(), .closeButton, .chipText, :destroy()
+--        :selectTab(id), :refresh(), :reveal(button), .closeButton, .chipText, :destroy()
+-- The rows are ONE scrolling list per tab, on the boards too (owner, boards fix 2: no pages). A refresh only updates the
+-- rows' text and buttons; the list (and where it is scrolled to) is rebuilt only when the tab changes.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextService = game:GetService("TextService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
@@ -62,7 +65,6 @@ function Panel.new(parent: Instance, opts)
 	self.subject = opts.subject
 	self.targets = {}
 	self.rows = {}
-	self.page = 1
 	self.currentTab = opts.startTab or "PLANETS"
 	local o = opts.origin or Vector2.zero
 	local win = Kit.box(parent, o.X, o.Y, 700, 470, { Name = "UpgradesWindow" })
@@ -162,31 +164,12 @@ function Panel.new(parent: Instance, opts)
 	Kit.sparkle(win, 30, 82, 10, 0.4)
 	Kit.sparkle(win, 180, 128, 8, 1.2)
 
-	------------------------------------------------------------------ rows panel (218,74 466x380; rows 10, 12 + i*120, 446x110)
-	if opts.paged then
-		self.rowsPanel = Kit.box(win, 218, 74, 466, 380, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 4, ClipsDescendants = true })
-	else
-		self.rowsPanel = Kit.new("ScrollingFrame", { Position = UDim2.fromOffset(218, 74), Size = UDim2.fromOffset(466, 380), BackgroundColor3 = hex("#0b090e"),
-			BorderSizePixel = 0, ScrollBarThickness = 4, ScrollBarImageColor3 = hex("#3a3346"), CanvasSize = UDim2.fromOffset(0, 380),
-			ScrollingDirection = Enum.ScrollingDirection.Y, ZIndex = 4, ElasticBehavior = Enum.ElasticBehavior.Never }, win)
-	end
-	Kit.corner(self.rowsPanel, 6)
-	Kit.stroke(self.rowsPanel, hex("#2a2433"), 1.5)
-	if opts.paged then
-		-- page arrows (only shown when the tab has more than 3 rows): small striped buttons under the list
-		self.pageUI = {}
-		for _, spec in ipairs({ { -1, 22 }, { 1, 156 } }) do
-			local b, inner = Kit.button(win, spec[2], 412, 40, 34, hex("#6a6474"), hex("#3f3a48"), { ZIndex = 6 })
-			Kit.text(inner, 0, 2, 40, 28, if spec[1] < 0 then "<" else ">", 24, { ZIndex = inner.ZIndex, TextXAlignment = Enum.TextXAlignment.Center })
-			b.MouseButton1Click:Connect(function()
-				self:sound("tab")
-				self.page = math.max(1, self.page + spec[1])
-				self:buildTab(self.currentTab)
-			end)
-			self.pageUI[spec[1]] = b
-		end
-		self.pageText = Kit.text(win, 66, 416, 86, 26, "", 16, { ZIndex = 8, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
-	end
+	------------------------------------------------------------------ rows panel (218,74 466x380; rows 8, 12 + i*120, 446x110)
+	-- one scrolling list (Kit.scroller: the gold thumb on its dark track at the right edge, 3 px in from top and bottom)
+	local rowsBg = Kit.box(win, 218, 74, 466, 380, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 4 })
+	Kit.corner(rowsBg, 6)
+	Kit.stroke(rowsBg, hex("#2a2433"), 1.5)
+	self.rowsPanel, self.scroll = Kit.scroller(win, 218, 77, 464, 374, "Y", { ZIndex = 4, pointer = opts.pointer })
 
 	self.busy = false
 	self:selectTab(self.currentTab)
@@ -214,6 +197,10 @@ function Panel:canAct(): boolean
 end
 function Panel:sound(name: string)
 	if self.opts.sound then self.opts.sound(name) end
+end
+-- this press turned into a scroll (a drag on the list): its button must not buy
+function Panel:dragged(): boolean
+	return self.scroll.moved
 end
 
 ------------------------------------------------------------------------ rows
@@ -268,8 +255,8 @@ function Panel:setButton(row, state: string, price: number?, label: string?)
 end
 
 function Panel:newRowFrame(i, borderHex)
-	local y = 12 + (i - 1) * 120
-	local f = Kit.box(self.rowsPanel, 10, y, 446, 110, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
+	local y = 9 + (i - 1) * 120
+	local f = Kit.box(self.rowsPanel, 8, y, 446, 110, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
 	Kit.corner(f, 5)
 	Kit.stroke(f, hex(borderHex), 2)
 	Kit.grad(f, hex("#17141c"), hex("#0e0c12"), 90)
@@ -295,19 +282,34 @@ function Panel:chip(row, from: string, to: string?)
 	end
 end
 
--- hold-to-buy (bodies): one buy at press, then every 0.12 s after 0.4 s while held
-local function holdBuy(b: GuiButton, buyOnce: () -> boolean)
-	local holding = false
+-- hold-to-buy (bodies): a tap buys once (on release); held 0.4 s it buys every 0.12 s while held. A press that turns into
+-- a scroll of the list (drag) buys nothing (the boards and phones scroll by dragging over the rows). The hold ends when the
+-- mouse / finger is let go (not on the button: a buy changes the price, which rebuilds the button under the finger).
+local function holdBuy(b: GuiButton, buyOnce: () -> boolean, dragged: () -> boolean)
+	local holding, repeated, presses = false, false, 0
+	local function stop() holding = false end
 	b.MouseButton1Down:Connect(function()
-		holding = true
-		if not buyOnce() then return end
+		presses += 1
+		local id = presses
+		holding, repeated = true, false
+		local released
+		released = UserInputService.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				if id == presses then stop() end
+				released:Disconnect()
+			end
+		end)
 		task.wait(0.4)
-		while holding and b.Parent do
+		if not holding or id ~= presses or dragged() then return end
+		repeated = true
+		while holding and id == presses and not dragged() do
 			if not buyOnce() then break end
 			task.wait(0.12)
 		end
 	end)
-	local function stop() holding = false end
+	b.MouseButton1Click:Connect(function()
+		if not repeated and not dragged() then buyOnce() end
+	end)
 	b.MouseButton1Up:Connect(stop)
 	b.MouseLeave:Connect(stop)
 	b.InputEnded:Connect(function(input)
@@ -370,7 +372,7 @@ function Panel:bodyRow(i, k: number)
 			end
 			if self:stardust() < Econ.Cost(k, o[k + 1]) then self:sound("no") return false end
 			return self:try(row, "BuyBody", k)
-		end)
+		end, function() return self:dragged() end)
 	end
 	row.refresh = function()
 		local o, n = self:owned(), self:nodes()
@@ -423,6 +425,7 @@ function Panel:nodeRow(i, node, look)
 	end
 	row.onButton = function(b)
 		b.MouseButton1Click:Connect(function()
+			if self:dragged() then return end
 			local n = self:nodes()
 			if n[node.id] then return end
 			if node.requires and not n[node.requires] then return end
@@ -447,7 +450,7 @@ function Panel:nodeRow(i, node, look)
 end
 
 function Panel:lockedPanel(t)
-	local f = Kit.box(self.rowsPanel, 10, 12, 446, 356, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
+	local f = Kit.box(self.rowsPanel, 8, 9, 446, 356, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
 	Kit.corner(f, 5)
 	Kit.stroke(f, hex("#5a5562"), 2)
 	Kit.grad(f, hex("#17141c"), hex("#0e0c12"), 90)
@@ -478,27 +481,18 @@ function Panel:buildTab(id: string)
 			end
 		end
 	end
-	local first, last = 1, #list
-	if self.opts.paged then
-		local pages = math.max(1, math.ceil(#list / 3))
-		self.page = math.clamp(self.page, 1, pages)
-		first, last = (self.page - 1) * 3 + 1, math.min(#list, self.page * 3)
-		local show = pages > 1
-		for _, b in pairs(self.pageUI) do b.Visible = show end
-		for _, sh in ipairs(self.root:GetChildren()) do
-			if sh:IsA("Frame") and sh.Position.Y.Offset == 414 and sh.Size.X.Offset == 40 then sh.Visible = show end -- (the arrows' shadows)
-		end
-		Kit.setText(self.pageText, if show then self.page .. " / " .. pages else "")
-	end
-	for i = first, last do
-		local row = list[i](i - first + 1)
+	for i = 1, #list do
+		local row = list[i](i)
 		table.insert(self.rows, row)
 		row.refresh()
 	end
-	if not self.opts.paged then
-		self.rowsPanel.CanvasSize = UDim2.fromOffset(0, math.max(380, 12 + #list * 120))
-		self.rowsPanel.CanvasPosition = Vector2.zero
-	end
+	-- all the tab's rows in one list (a new tab starts at the top)
+	self.rowsPanel.CanvasSize = UDim2.fromOffset(0, math.max(374, 9 + #list * 120))
+	self.rowsPanel.CanvasPosition = Vector2.zero
+end
+-- scrolls the list so a row's button is on show (the tutorial arrow points at it on the board)
+function Panel:reveal(button: GuiObject?)
+	if button and button:IsDescendantOf(self.rowsPanel) then self.scroll.reveal(button) end
 end
 function Panel:refresh()
 	for _, row in ipairs(self.rows) do row.refresh() end
@@ -518,7 +512,6 @@ function Panel:anyBuyable(): boolean
 end
 
 function Panel:selectTab(id: string)
-	if id ~= self.currentTab then self.page = 1 end
 	self.currentTab = id
 	if self.selRing then self.selRing:Destroy() end
 	if self.selPulse then self.selPulse:Cancel() end

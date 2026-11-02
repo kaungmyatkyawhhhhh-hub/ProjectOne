@@ -195,7 +195,7 @@ local function afterBuy(_, incomeBefore: number)
 	task.delay(0.08, function() Kit.tween(topScale, { Scale = screenScale() }, 0.2, Enum.EasingStyle.Back) end)
 end
 local panel = UpgradesPanel.new(win, {
-	subject = player, chip = "ESSENCE", close = true, paged = false, edgeGlow = false,
+	subject = player, chip = "ESSENCE", close = true, edgeGlow = false,
 	buy = function(kind, arg) return request:InvokeServer(kind, arg) end,
 	onBought = afterBuy, toast = toast, sound = Kit.sound,
 })
