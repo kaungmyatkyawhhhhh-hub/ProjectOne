@@ -27,6 +27,22 @@ game.ServerStorage.Admin:Invoke("level", "LuigiRED", 250)          -- set LVL (2
 - Trainer: id (`AeonCoach`), name (`Atlas`, `Coach Lou`) or the name without "Coach" (`Lou`).
 - The answer prints in the console (`[Admin] ...`): who got what, or why not.
 
+## EXP: strength, lifetime and best ever (2 Nov)
+Three different numbers:
+- **Strength** (current EXP) = the EXP the 18 muscles have now. The top bar shows it.
+- **Lifetime EXP** (total) = strength plus what Growth Spurts and alters took away (`stats.levelBase`). It never drops by itself. The EXP auras use it.
+- **Best ever** (`stats.bestExp`) = the STRONGEST LIFTER board and the statue. It is never lower than the lifetime EXP.
+
+```lua
+game.ServerStorage.Admin:Invoke("exp", "LuigiRED", "10B")      -- strength (the lifetime moves with it)
+game.ServerStorage.Admin:Invoke("current", "LuigiRED", "1B")   -- strength only; lifetime and best ever stay
+game.ServerStorage.Admin:Invoke("best", "LuigiRED", "5B")      -- best ever, up or down
+```
+- `current`: the lifetime stays the same unless the new strength is higher; then the lifetime rises to it.
+- `best`: a lower best also lowers the lifetime EXP (the game would otherwise put the best back up), but never below the strength. The board takes it at its next write (within 90 s; SetAsync, so lowering works).
+- Tested in Studio (temporary data): exp 10B → current 1B (lifetime stays 10B) → best 5B (lifetime 5B) → best 500M gives 1B (the strength) → best 20B (lifetime stays 3B).
+- Code: `PlayerData.AdminSetCurrentExp` / `AdminSetBestExp`, commands in `AdminService`. The old `level` command is gone (1 Nov).
+
 ## What the player sees
 - Coins: toast "A GIFT FOR YOU! +5,000 coins".
 - Trainer: toast "A GIFT FOR YOU! COACH LOU · IRON-BORN", then the normal roll reveal (NEW! or a dupe line that counts toward the next stage). It goes into a free trainer slot if there is one. If the player is still on the menu or in the tutorial, it waits until they are playing.
