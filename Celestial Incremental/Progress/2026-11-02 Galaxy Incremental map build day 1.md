@@ -1,7 +1,7 @@
 ---
 date: 2026-11-02
 tags: [galaxy, map, progress]
-status: pass 3 done in Studio (floating-island cones, floor tiles, thin beam, new colours); sky Up/Dn still the old images; not published
+status: pass 3 done in Studio (floating-island cones, floor tiles, thin beam, new colours); sky complete and seamless; not published
 ---
 # Galaxy Incremental - map build, day 1 (2 Nov, Claude Code)
 
@@ -171,7 +171,10 @@ Screenshots: `Map/screens/2026-11-02-pass3/`. They include the same set as befor
   - the concept has a thin glowing ring round the whole map;
   - the concept's stone has a fine grain.
 
+- **Sky done (after pass 3):**
+  - The owner uploaded sky_Up_v2 (118744463737898) and sky_Dn_v2 (90521387144464) to P&L Studios XP. They're in `MapConfig.Sky` + `Lighting.Sky`, and the decals are in `ServerStorage.SkyUploads`.
+  - Checked in Play with the group images only (no test copies): looking up and down, no seams.
+
 ### Owner to do
-1. Upload `Downloads\sky_Up_v2.png` + `sky_Dn_v2.png` to P&L Studios XP and send the 2 ids.
-2. Save the place (File > Save to Roblox).
-3. 2-player test: Test > Clients and Servers > 2 players.
+1. Save the place (File > Save to Roblox).
+2. 2-player test: Test > Clients and Servers > 2 players.
