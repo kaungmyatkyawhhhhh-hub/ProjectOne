@@ -229,3 +229,39 @@ Screenshots: `Map/screens/2026-11-02-centre-v2/` (wide_centre, bridge1..8_view, 
   - It now faces the CORE / plaza too. The anvil, padlock and the "STAR FORGE / SUPERNOVA 3" sign are on the plaza side.
   - Screenshot `starforge_faces_plaza.jpg`.
   - **Rule from now on:** the things you walk up to on the plaza (Forge, Black Hole) face the Core. The boards, leaderboard, Sector 2 name and IGNITION are double-sided.
+
+---
+## Fixes from "Studio check by Claude" (2 Nov night, Claude Code)
+Screenshots: `Map/screens/2026-11-02-studio-check-fixes/` (playtest wide + free slot, Black Hole / Star Forge / IGNITION + arch / leaderboard from ~30 studs, bridges 1, 3, 5, 7).
+
+1. **Star Forge + Black Hole signs:**
+   - Kept facing the Core.
+   - 2x size (14 x 4.4 and 14 x 4.2, from 7.4 x ~2.2).
+   - The same text on the back (players arriving from the nearest bridges).
+   - Both read clearly from 30 studs.
+2. **Star Forge padlock:** now hangs on the anvil's front face (0.9 up, touching the face), no longer 5.6 studs above it.
+3. **Black Hole void:**
+   - 3 spiral arms (pink in the middle to violet outside, 14 pieces each) turning slowly round the ring's axis.
+   - A glowing pink inner ring, and a soft violet PointLight (range 16).
+   - Arms and glow show on both faces. The old thin white arc is gone.
+4. **Readable from ~30 studs:**
+   - IGNITION sign 10 x 11.5, rows wrap at ~0.75-stud text. It's narrow enough to stay off island 5's walkway.
+   - "SECTOR 2: COMET REACH": a 15 x 2.6 sign on top of the arch, ~1.6-stud letters.
+   - Leaderboard wall 24 x 12 (titles ~1.3 studs, rows ~0.85), moved out to 40 so it still clears both walkways.
+   - All checked in screenshots from ~30 studs.
+5. **MapConfig.Centre.Radius:**
+   - It was already **47** in the place (floor 94 studs). The check read 27.5 because the Studio command runner keeps its own cache of required modules (a fresh require gives 47).
+   - Searched the map scripts: no hard-coded centre size; every centre position reads `MapConfig.Centre` (zones, details, lamp ring, bridges from `CR.Radius`).
+6. **Unclaimed slots:**
+   - Every slot is built with its dim bare rock + landing (`Pieces.T0`), so even in Edit mode no bridge leads into space. GalaxyMapService reuses the same pieces at tier 0.
+   - Play test (1 real player; 2 players can't be run from here): my island 1 lit, islands 2-8 free = dim bridge -> dim landing -> dim rock (`playtest_free_slot_rock.jpg`).
+7. **Plaza details** (the 3 open gaps at 0 / 90 / 270 deg, `MapConfig.Centre.Details`):
+   - a star-chart inlay (brass ring, 7 neon stars joined by brass lines, mirrored in every other gap);
+   - 2 benches facing the Core (stone seat, brass legs);
+   - 2 small crystal clusters by the rim + the bigger one;
+   - all off the walkways.
+- **Numbers:**
+  - static map 433 parts; in play 464 parts, 3 lights (the Black Hole glow is new); no script errors.
+  - **FPS not measured this time:** Studio was capped at 15 FPS again (the same cap seen earlier with the whole map removed). The last valid reading was 60 FPS at 587 parts.
+- **Code copy:** `Code\map\MapBuilder.lua`.
+- **Republish needed.**

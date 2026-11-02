@@ -168,11 +168,42 @@ function Builder.Build()
 			Kit.Make("LampOrb", { Name = "Lamp", Size = Vector3.new(1.1, 1.1, 1.1), CFrame = CFrame.new(p + Vector3.new(0, 4.5, 0)), Color = C.Lamp, Material = Enum.Material.Neon, Parent = centre })
 		end
 	end
-	-- small crystal accents in the open gaps (near the rim, out of the walkways)
-	for _, angle in ipairs(CR.Accents) do
-		local at = O + MapConfig.ZoneDir(angle) * (CR.Radius - 6)
+	-- the open gaps (CR.Accents): a star-chart inlay in the floor, two benches facing the Core, crystals by the rim; all
+	-- off the walkways (the walkways run from each bridge landing to the Core)
+	local D = CR.Details
+	local details = Instance.new("Model")
+	details.Name = "Details"
+	details.Parent = centre
+	local CHART = { { -4, -2 }, { -2, -0.8 }, { 0, -1.5 }, { 2, 0 }, { 3.6, 2.2 }, { 1.4, 3.2 }, { -0.6, 2.4 } } -- (along the rim, outward) studs
+	for gi, angle in ipairs(CR.Accents) do
+		local out = MapConfig.ZoneDir(angle)
+		local frame = CFrame.lookAt(O + out * D.Chart, O + out * D.Chart - out) -- (+Z out, +X along the rim)
+		Kit.Make("RimRing", brass({ Name = "ChartRing", Size = Vector3.new(D.ChartRadius * 2, 0.1, D.ChartRadius * 2), CFrame = frame * CFrame.new(0, 0.05, 0), Parent = details }))
+		local pts = {}
+		local flip = if gi % 2 == 0 then -1 else 1 -- (mirrored in every other gap, so they're not stamped)
+		for i, pt in ipairs(CHART) do
+			pts[i] = (frame * CFrame.new(pt[1] * flip, 0, pt[2])).Position
+			part({ Name = "ChartStar", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.12, 1, 1) * (if i == 4 then 1.4 else 1),
+				CFrame = CFrame.new(pts[i] + Vector3.new(0, 0.06, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = C.Lamp, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = details })
+			if i > 1 then
+				local a, b = pts[i - 1], pts[i]
+				part(brass({ Name = "ChartLine", Size = Vector3.new(0.22, 0.06, (b - a).Magnitude), CFrame = CFrame.lookAt((a + b) / 2, b) + Vector3.new(0, 0.03, 0),
+					CanCollide = false, CanQuery = false, Parent = details }))
+			end
+		end
+		for _, side in ipairs({ -1, 1 }) do
+			local bf = CFrame.lookAt(O + out * D.Benches, O) * CFrame.new(side * D.BenchSpread, 0, 0)
+			part({ Name = "BenchSeat", Size = Vector3.new(4.6, 0.5, 1.5), CFrame = bf * CFrame.new(0, 1.55, 0), Color = C.Stone2, Parent = details })
+			for _, leg in ipairs({ -1.7, 1.7 }) do
+				part(brass({ Name = "BenchLeg", Size = Vector3.new(0.45, 1.3, 1.1), CFrame = bf * CFrame.new(leg, 0.65, 0), Parent = details }))
+			end
+			local cr = O + out * D.RimCrystals + MapConfig.ZoneDir(angle + 90) * side * 7
+			Kit.Make("CrystalCluster", { Size = Vector3.new(2.4, 3.2, 2.4), CFrame = CFrame.new(cr + Vector3.new(0, 1.6, 0)) * CFrame.Angles(0, math.rad(angle + side * 40), 0),
+				Color = C.Crystal, Reflectance = 0.15, Parent = details })
+		end
+		local at = O + out * (CR.Radius - 6)
 		Kit.Make("CrystalCluster", { Size = Vector3.new(3, 4, 3), CFrame = CFrame.new(at + Vector3.new(0, 2, 0)) * CFrame.Angles(0, math.rad(angle), 0),
-			Color = C.Crystal, Reflectance = 0.15, Parent = centre })
+			Color = C.Crystal, Reflectance = 0.15, Parent = details })
 	end
 	-- the hidden spawn (everyone is moved to their own island right away)
 	local spawnPad = Instance.new("SpawnLocation")
@@ -296,8 +327,10 @@ function Builder.Build()
 	Kit.Make("Dais", { Name = "Platform", Size = Vector3.new(16, stepH, 16), CFrame = zf * CFrame.new(0, stepH / 2, 0), Color = C.Stone2, Collide = true, Parent = forge })
 	Kit.Make("RimRing", { Name = "Rim", Size = Vector3.new(10, 0.4, 10), CFrame = zf * CFrame.new(0, stepH + 0.1, 0), Color = C.ForgeRim, Parent = forge })
 	Kit.Make("Anvil", { Name = "Anvil", Size = Vector3.new(6, 4, 2.4), CFrame = zf * CFrame.new(0, stepH + 2, -0.5), Color = C.Steel, Reflectance = 0.1, Collide = true, Parent = forge })
-	Kit.Make("Padlock", { Name = "Padlock", Size = Vector3.new(2.2, 3, 0.9), CFrame = zf * CFrame.new(0, stepH + 7.6, -0.5), Color = C.Lock, Reflectance = 0.1, Parent = forge })
-	sign(forge, "Sign", zf * CFrame.new(0, 0, 9.4), Vector3.new(7.4, 2.3, 0.3), 1.4, { "STAR FORGE", "SUPERNOVA 3" }, nil, false)
+	-- the padlock hangs on the anvil's front face (the face toward the Core: the anvil's +Z face is at -0.5 + 1.2)
+	Kit.Make("Padlock", { Name = "Padlock", Size = Vector3.new(1.6, 2.2, 0.5), CFrame = zf * CFrame.new(0, stepH + 2.9, 0.7 + 0.25), Color = C.Lock, Reflectance = 0.1, Parent = forge })
+	-- the sign: 2x (reads from across the plaza), facing the Core, the same text on its back (the nearest bridges)
+	sign(forge, "Sign", zf * CFrame.new(0, 0, 8.8), Vector3.new(14, 4.4, 0.3), 1.2, { "STAR FORGE", "SUPERNOVA 3" }, nil, true)
 
 	------------------------------------------------------------------ BACK: the Black Hole gate (x1.5) on its dais
 	-- (a brass ring round a violet void; locked; the client swirls the disk). It faces the CORE (owner, 2 Nov): a gate you
@@ -316,11 +349,38 @@ function Builder.Build()
 	Kit.Make("VoidDisc", { Name = "VoidBack", Size = Vector3.new(15.4 * k, 0.2, 15.4 * k), CFrame = ringCf * CFrame.Angles(math.pi, 0, 0), Color = C.Void, Parent = hole })
 	local disk = Kit.Make("OrbitRing", { Name = "Disk", Size = Vector3.new(12 * k, 0.3, 12 * k), CFrame = ringCf * CFrame.new(0, 0.25, 0), Color = C.VoidGlow, Material = Enum.Material.Neon, Parent = hole })
 	disk:SetAttribute("Swirl", 0.9)
-	local swirl = Kit.Make("OrbitRing", { Name = "Swirl", Size = Vector3.new(7.5 * k, 0.3, 7.5 * k), CFrame = ringCf * CFrame.new(0, 0.3, 0) * CFrame.Angles(0, 0, math.rad(8)),
-		Color = Color3.fromRGB(200, 140, 255), Material = Enum.Material.Neon, Parent = hole })
-	swirl:SetAttribute("Swirl", -1.6)
+	-- the swirl: 3 spiral arms (pink near the middle to violet outside) round a soft glowing inner ring, all on both faces
+	-- (each piece goes through the void plane); the client turns them slowly round the ring's axis
+	local arms = Instance.new("Model")
+	arms.Name = "Arms"
+	arms:SetAttribute("Swirl", -0.35)
+	arms.Parent = hole
+	local inner, outerR, steps = 2.6, 15.4 * k / 2 - 1.4, 14
+	for arm = 0, 2 do
+		local prev
+		for j = 0, steps do
+			local t = j / steps
+			local rr = inner + (outerR - inner) * t
+			local th = arm * math.pi * 2 / 3 + t * math.pi * 1.5
+			local pt = (ringCf * CFrame.new(math.cos(th) * rr, 0, math.sin(th) * rr)).Position
+			if prev then
+				local w = 1.1 - 0.75 * t
+				part({ Name = "Arm", Size = Vector3.new(w, 0.5, (pt - prev).Magnitude + 0.25), CFrame = CFrame.lookAt((prev + pt) / 2, pt, ringCf.UpVector),
+					Color = Color3.fromRGB(255, 130, 225):Lerp(Color3.fromRGB(140, 70, 255), t), Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = arms })
+			end
+			prev = pt
+		end
+	end
+	local glow = Kit.Make("OrbitRing", { Name = "InnerGlow", Size = Vector3.new(inner * 2 + 0.6, 0.55, inner * 2 + 0.6), CFrame = ringCf, Color = Color3.fromRGB(255, 160, 235),
+		Material = Enum.Material.Neon, Parent = hole })
+	glow:SetAttribute("Swirl", 0.8)
+	local glowHost = part({ Name = "GlowLight", Size = Vector3.new(1, 1, 1), CFrame = ringCf, Transparency = 1, CanCollide = false, CanQuery = false, Parent = hole })
+	local gl = Instance.new("PointLight")
+	gl.Color, gl.Range, gl.Brightness, gl.Shadows = Color3.fromRGB(190, 110, 255), 16, 1.3, false
+	gl.Parent = glowHost
 	hole:SetAttribute("RingCF", ringCf)
-	sign(hole, "Sign", zh * CFrame.new(0, 0, 10.2), Vector3.new(7.4, 2.1, 0.3), 1.2, { "BLACK HOLE", "LOCKED" }, Color3.fromRGB(200, 150, 255), false)
+	-- the sign: 2x, facing the Core, the same text on its back
+	sign(hole, "Sign", zh * CFrame.new(0, 0, 10.2), Vector3.new(14, 4.2, 0.3), 1, { "BLACK HOLE", "LOCKED" }, Color3.fromRGB(200, 150, 255), true)
 
 	------------------------------------------------------------------ LEFT: the leaderboard wall (both sides)
 	-- TOP SUPERNOVAS (filled by GalaxyLeaderboardService) + PLAYERS NEAR YOU (each screen fills its own, from the server)
@@ -328,7 +388,7 @@ function Builder.Build()
 	lb.Name = "Leaderboard"
 	lb.Parent = centre
 	local zl = zoneCf(Z.Leaderboard.angle, Z.Leaderboard.dist)
-	local LW, LH, lift = 20, 10.5, 2.4
+	local LW, LH, lift = 24, 12, 2.2 -- (titles ~1.3 studs, rows ~0.85: readable from ~30 studs)
 	local wallCf = zl * CFrame.new(0, lift + LH / 2, 0)
 	local wall = part({ Name = "Wall", Size = Vector3.new(LW, LH, 0.6), CFrame = wallCf, Color = Color3.fromRGB(22, 17, 30), Parent = lb })
 	part(brass({ Name = "WallEdge", Size = Vector3.new(LW + 0.6, LH + 0.6, 0.4), CFrame = wallCf, Parent = lb }))
@@ -382,6 +442,17 @@ function Builder.Build()
 		local pieces = Instance.new("Folder")
 		pieces.Name = "Pieces"
 		pieces.Parent = island
+		-- the free slot's dim rock + landing (the same pieces as GalaxyMapService's tier 0, which reuses them): a bridge
+		-- never leads into empty space, not even in Edit mode
+		local R = I.Radius
+		local t0 = Instance.new("Model")
+		t0.Name = "T0"
+		Kit.Make("RockBare", { Name = "Rock", Size = Vector3.new(R, R * 0.62, R), CFrame = CFrame.new(center - Vector3.new(0, R * 0.29, 0)) * CFrame.Angles(0, slot * 0.7, 0),
+			Color = C.BareRock:Lerp(Color3.new(0, 0, 0), 0.45), Collide = true, Parent = t0 })
+		local la, lb2 = center - dir * 9.6 + Vector3.new(0, 0.05, 0), center - dir * 3 + Vector3.new(0, 0.05, 0)
+		Kit.Make("BridgeSegment", { Name = "Landing", Size = Vector3.new(I.Bridge.Width, 0.4, (lb2 - la).Magnitude), CFrame = CFrame.lookAt((la + lb2) / 2, lb2),
+			Color = C.BridgeDim, Collide = true, Parent = t0 })
+		t0.Parent = pieces
 		island.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	end
 
@@ -423,27 +494,30 @@ function Builder.Build()
 	local gatePos = O + nsDir * (CR.Radius - 3)
 	local gateCf = CFrame.lookAt(gatePos, gatePos + nsDir) -- (its -Z points out along the bridge; +Z faces the Core)
 	Kit.Make("GateArch", brass({ Name = "Arch", Size = Vector3.new(NS.BridgeWidth + 4, 13, 1.6), CFrame = gateCf * CFrame.new(0, 6.5, 0), Collide = true, Parent = nextS }))
-	local archSign = part({ Name = "ArchSign", Size = Vector3.new(NS.BridgeWidth + 3, 1.6, 0.3), CFrame = gateCf * CFrame.new(0, 11.6, 0.9), Color = Color3.fromRGB(26, 20, 34),
+	-- (the name: 15 x 2.6 on top of the arch, letters ~1.6 studs, readable from ~30 studs)
+	local archSign = part({ Name = "ArchSign", Size = Vector3.new(15, 2.6, 0.3), CFrame = gateCf * CFrame.new(0, 14.5, 0), Color = Color3.fromRGB(26, 20, 34),
 		CanCollide = false, CanQuery = false, Parent = nextS })
 	for _, face in ipairs({ Enum.NormalId.Back, Enum.NormalId.Front }) do
 		label(surface(archSign, face), NS.Name, UDim2.fromScale(0.04, 0.1), UDim2.fromScale(0.92, 0.8), Color3.fromRGB(150, 220, 255))
 	end
-	part(brass({ Name = "ArchSignEdge", Size = archSign.Size + Vector3.new(0.3, 0.3, -0.1), CFrame = archSign.CFrame * CFrame.new(0, 0, -0.08), CanCollide = false, CanQuery = false, Parent = nextS }))
+	part(brass({ Name = "ArchSignEdge", Size = archSign.Size + Vector3.new(0.4, 0.4, -0.1), CFrame = archSign.CFrame, CanCollide = false, CanQuery = false, Parent = nextS }))
 	-- IGNITION: on its posts on the plaza beside the gate, facing out, the checklist on both sides (islands and the plaza)
-	local signPos = gatePos - nsDir * 3.5 + gateCf.RightVector * (NS.BridgeWidth / 2 + 7.5)
+	-- (10 x 11.5, rows wrapped at ~0.75 studs: readable from ~30 studs; narrow enough to stay off the next walkway)
+	local signPos = gatePos - nsDir * 4.5 + gateCf.RightVector * (NS.BridgeWidth / 2 + 7.2)
 	local signBase = CFrame.lookAt(signPos, signPos - nsDir) * CFrame.Angles(0, math.rad(12), 0)
-	local ign = sign(nextS, "IgnitionSign", signBase, Vector3.new(8, 7.2, 0.3), 1, { "IGNITION" }, Color3.fromRGB(255, 200, 110), true)
+	local ign = sign(nextS, "IgnitionSign", signBase, Vector3.new(10, 11.5, 0.3), 0.6, { "IGNITION" }, Color3.fromRGB(255, 200, 110), true)
 	-- (the client fills the checklist rows for the local player, on every face)
 	for _, gui in ipairs(ign:GetChildren()) do
 		if not gui:IsA("SurfaceGui") then continue end
 		local title = gui:FindFirstChildOfClass("TextLabel")
-		if title then title.Size = UDim2.fromScale(0.92, 0.16) title.Position = UDim2.fromScale(0.04, 0.04) end
+		if title then title.Size = UDim2.fromScale(0.92, 0.13) title.Position = UDim2.fromScale(0.04, 0.03) end
 		for i, item in ipairs(MapConfig.Ignition) do
-			local row = label(gui, "[  ]  " .. item.text, UDim2.fromScale(0.05, 0.22 + (i - 1) * 0.18), UDim2.fromScale(0.9, 0.15), Color3.fromRGB(200, 190, 220), FONT_B, Enum.TextXAlignment.Left)
+			local row = label(gui, "[  ]  " .. item.text, UDim2.fromScale(0.05, 0.19 + (i - 1) * 0.2), UDim2.fromScale(0.9, 0.18), Color3.fromRGB(200, 190, 220), FONT_B, Enum.TextXAlignment.Left)
 			row.Name = "Row" .. i
-			-- (one text size for every row: TextScaled alone made the short rows bigger)
+			row.TextWrapped = true
+			-- (one text size for every row, ~0.75 studs: TextScaled alone made the short rows bigger)
 			local cap = Instance.new("UITextSizeConstraint")
-			cap.MaxTextSize = 15
+			cap.MaxTextSize = 30
 			cap.Parent = row
 		end
 	end
