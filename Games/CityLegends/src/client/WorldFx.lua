@@ -48,17 +48,54 @@ end
 
 -- the Riviera's windows (tag "Window"): about 4 in 10 glow warm at night, picked by position so
 -- every player sees the same ones; streamed-in windows are set as they arrive
+-- (2026-11-02, realistic lighting: rooms lit from inside, not neon strips) soft warm interiors,
+-- a few cool-white rooms and the odd blue TV glow; how many are lit follows the night (DayCycle
+-- sets the share: most at dusk, fewer after midnight)
 local WINDOW_DARK = Color3.fromRGB(44, 52, 58)
-local WINDOW_LIT = Color3.fromRGB(214, 140, 64)
+local WINDOW_WARM_A = Color3.fromRGB(150, 110, 70)
+local WINDOW_WARM_B = Color3.fromRGB(170, 132, 92)
+local WINDOW_WHITE = Color3.fromRGB(150, 146, 134)
+local WINDOW_TV = Color3.fromRGB(64, 84, 136)
+local windowShare = 0.42
 function WorldFx.setWindow(p: Instance)
 	if not p:IsA("BasePart") then
 		return
 	end
 	local pos = p.Position
 	local h = math.abs(math.sin(pos.X * 12.9898 + pos.Y * 78.233 + pos.Z * 37.719) * 43758.5453) % 1
-	local on = lampsLit and h < 0.42
+	local on = lampsLit and h < windowShare
 	p.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
-	p.Color = if on then WINDOW_LIT:Lerp(Color3.fromRGB(236, 182, 110), h / 0.42) else WINDOW_DARK
+	if not on then
+		p.Color = WINDOW_DARK
+		return
+	end
+	local kind = (h * 97.31) % 1
+	local size = p.Size
+	local long = math.max(size.X, size.Z) > 14 -- a whole balcony band of glass: dimmer, never one bright bar
+	local big = size.X * size.Y > 60 or size.Z * size.Y > 60 -- shopfronts: always warm
+	local c = if kind < 0.08 and not big then WINDOW_TV elseif kind < 0.2 and not big then WINDOW_WHITE else WINDOW_WARM_A:Lerp(WINDOW_WARM_B, kind)
+	p.Color = if long then c:Lerp(Color3.new(0, 0, 0), 0.3) else c
+end
+-- the share of windows lit (0..1); re-sets them all, spread over frames, when it moves
+local windowJob = 0
+function WorldFx.setWindowShare(share: number)
+	if math.abs(share - windowShare) < 0.02 then
+		return
+	end
+	windowShare = share
+	windowJob += 1
+	local job = windowJob
+	task.spawn(function()
+		for i, p in CollectionService:GetTagged("Window") do
+			if job ~= windowJob then
+				return
+			end
+			WorldFx.setWindow(p)
+			if i % 600 == 0 then
+				task.wait()
+			end
+		end
+	end)
 end
 CollectionService:GetInstanceAddedSignal("Window"):Connect(function(p)
 	WorldFx.setWindow(p)
@@ -128,6 +165,7 @@ local function startLod(scale: number)
 	-- own glowing head still shows, but its light on the street is too far to see; 900 kept ~360
 	-- lights on at once, owner 2026-10-24: optimise)
 	local lightRange = 560 * scale
+	local rivieraLightRange = 300 * scale
 	-- street lamps near the camera cast shadows (poles, cars, people across the road); far ones
 	-- don't, and none do on low graphics or phones
 	local shadowRange = if scale >= 0.85 then 170 else 0
@@ -160,7 +198,9 @@ local function startLod(scale: number)
 			local part = l.Parent
 			if part and part:IsA("BasePart") then
 				local dist = (part.Position - camPos).Magnitude
-				local on = dist < lightRange and (lampsLit or not l:HasTag("DayOff"))
+				-- the Riviera's dense lamps: only those near the camera light the street (phones)
+				local range = if part.Position.X > 9000 then rivieraLightRange else lightRange
+				local on = dist < range and (lampsLit or not l:HasTag("DayOff"))
 				if l.Enabled ~= on then
 					l.Enabled = on
 				end

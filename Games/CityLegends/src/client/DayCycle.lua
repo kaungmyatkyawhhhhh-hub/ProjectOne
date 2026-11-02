@@ -35,6 +35,8 @@ type Key = {
 	rays: number,
 	tint: Color3,
 	water: Color3,
+	sat: number?, -- colour grade saturation / contrast (the Riviera's keys; the old map keeps the place's)
+	con: number?,
 }
 
 local function rgb(r: number, g: number, b: number): Color3
@@ -68,20 +70,55 @@ local function with(k: Key, hour: number): Key
 	c.hour = hour
 	return c
 end
-local R_NIGHT: Key = { hour = 0, brightness = 1.6, ambient = rgb(62, 68, 92), outdoor = rgb(72, 82, 120), shiftTop = rgb(120, 130, 170), exposure = 0.55, density = 0.22, haze = 0.6, glare = 0.1, atmo = rgb(40, 52, 92), decay = rgb(22, 30, 64), bloom = 0.6, rays = 0, tint = rgb(255, 244, 228), water = rgb(8, 22, 42) }
+-- (2026-11-02, "Realistic graphics, lighting and buildings" prompt, from the owner's two Monaco videos:
+-- the morning drive and the blue-hour / night drive) a crisp deep-blue day with strong sun, a warm
+-- golden hour, a long navy blue hour with the lamps just on, and a navy (never black) night under
+-- warm sodium lamps. Grade kept subtle: a touch more saturation and contrast, warm by day.
+local R_NIGHT: Key = { hour = 0, brightness = 1.3, ambient = rgb(56, 66, 100), outdoor = rgb(64, 78, 122), shiftTop = rgb(110, 124, 170), exposure = 0.6, density = 0.2, haze = 0.4, glare = 0, atmo = rgb(34, 50, 96), decay = rgb(18, 28, 66), bloom = 0.32, rays = 0, tint = rgb(255, 242, 226), water = rgb(8, 22, 44), sat = 0.06, con = 0.1 }
 local RIVIERA_KEYS: { Key } = {
 	R_NIGHT,
 	table.freeze(with(R_NIGHT, 4.6)),
-	{ hour = 6, brightness = 2.4, ambient = rgb(110, 104, 110), outdoor = rgb(150, 138, 140), shiftTop = rgb(255, 190, 150), exposure = 0.3, density = 0.24, haze = 1, glare = 0.6, atmo = rgb(230, 190, 170), decay = rgb(140, 110, 140), bloom = 0.45, rays = 0.1, tint = rgb(255, 240, 230), water = rgb(40, 80, 110) },
-	{ hour = 8.5, brightness = 3.2, ambient = rgb(120, 122, 130), outdoor = rgb(150, 154, 165), shiftTop = rgb(255, 240, 220), exposure = 0.05, density = 0.18, haze = 0.25, glare = 0.3, atmo = rgb(190, 210, 240), decay = rgb(100, 130, 190), bloom = 0.25, rays = 0.06, tint = rgb(255, 252, 246), water = rgb(20, 110, 150) },
-	{ hour = 13, brightness = 3.4, ambient = rgb(126, 126, 132), outdoor = rgb(152, 154, 164), shiftTop = rgb(255, 250, 238), exposure = 0, density = 0.16, haze = 0.2, glare = 0.2, atmo = rgb(200, 218, 245), decay = rgb(110, 140, 200), bloom = 0.25, rays = 0.04, tint = rgb(255, 255, 250), water = rgb(18, 112, 155) },
-	{ hour = 16.5, brightness = 3.1, ambient = rgb(130, 122, 118), outdoor = rgb(160, 148, 138), shiftTop = rgb(255, 226, 186), exposure = 0.05, density = 0.18, haze = 0.4, glare = 0.4, atmo = rgb(230, 210, 190), decay = rgb(140, 130, 160), bloom = 0.3, rays = 0.1, tint = rgb(255, 246, 230), water = rgb(24, 100, 140) },
-	{ hour = 18.3, brightness = 2.6, ambient = rgb(128, 100, 92), outdoor = rgb(176, 128, 104), shiftTop = rgb(255, 160, 100), exposure = 0.2, density = 0.25, haze = 0.9, glare = 0.9, atmo = rgb(255, 170, 120), decay = rgb(150, 90, 90), bloom = 0.45, rays = 0.15, tint = rgb(255, 232, 206), water = rgb(40, 70, 100) },
-	-- blue hour: a navy sky over the dark mountain, the lamps and windows coming on
-	{ hour = 19.6, brightness = 1.9, ambient = rgb(70, 78, 108), outdoor = rgb(84, 96, 140), shiftTop = rgb(110, 130, 200), exposure = 0.45, density = 0.22, haze = 0.6, glare = 0.3, atmo = rgb(52, 70, 128), decay = rgb(30, 40, 90), bloom = 0.6, rays = 0.02, tint = rgb(250, 244, 236), water = rgb(14, 34, 66) },
+	-- dawn
+	{ hour = 6, brightness = 2.4, ambient = rgb(110, 104, 110), outdoor = rgb(150, 138, 140), shiftTop = rgb(255, 190, 150), exposure = 0.3, density = 0.24, haze = 1, glare = 0.6, atmo = rgb(230, 190, 170), decay = rgb(140, 110, 140), bloom = 0.35, rays = 0.1, tint = rgb(255, 240, 230), water = rgb(40, 80, 110), sat = 0.08, con = 0.08 },
+	-- morning: crisp, clear blue, strong sun
+	{ hour = 8.5, brightness = 3.3, ambient = rgb(118, 122, 132), outdoor = rgb(148, 154, 168), shiftTop = rgb(255, 242, 222), exposure = 0.05, density = 0.2, haze = 0.2, glare = 0.25, atmo = rgb(186, 208, 242), decay = rgb(96, 130, 196), bloom = 0.2, rays = 0.06, tint = rgb(255, 251, 242), water = rgb(18, 104, 150), sat = 0.1, con = 0.08 },
+	-- day
+	{ hour = 13, brightness = 3.5, ambient = rgb(124, 126, 134), outdoor = rgb(152, 156, 168), shiftTop = rgb(255, 250, 236), exposure = 0, density = 0.2, haze = 0.15, glare = 0.2, atmo = rgb(192, 214, 246), decay = rgb(104, 140, 204), bloom = 0.2, rays = 0.04, tint = rgb(255, 252, 244), water = rgb(16, 108, 156), sat = 0.1, con = 0.08 },
+	-- afternoon, warming
+	{ hour = 16.5, brightness = 3.2, ambient = rgb(130, 122, 118), outdoor = rgb(162, 148, 136), shiftTop = rgb(255, 226, 184), exposure = 0.05, density = 0.22, haze = 0.35, glare = 0.4, atmo = rgb(232, 210, 186), decay = rgb(150, 132, 156), bloom = 0.25, rays = 0.1, tint = rgb(255, 245, 228), water = rgb(22, 98, 140), sat = 0.1, con = 0.08 },
+	-- golden hour / sunset: warm, long shadows (the sun just above the sea: see sunClock)
+	{ hour = 18.3, brightness = 2.8, ambient = rgb(132, 104, 96), outdoor = rgb(184, 132, 104), shiftTop = rgb(255, 162, 98), exposure = 0.25, density = 0.26, haze = 1, glare = 0.8, atmo = rgb(255, 166, 112), decay = rgb(168, 92, 84), bloom = 0.35, rays = 0.15, tint = rgb(255, 230, 204), water = rgb(44, 74, 104), sat = 0.12, con = 0.1 },
+	-- blue hour: a navy sky, buildings still readable, the lamps and windows coming on
+	{ hour = 19.6, brightness = 1.7, ambient = rgb(78, 90, 130), outdoor = rgb(92, 108, 160), shiftTop = rgb(120, 140, 210), exposure = 0.65, density = 0.22, haze = 0.5, glare = 0.2, atmo = rgb(62, 86, 152), decay = rgb(36, 52, 112), bloom = 0.35, rays = 0, tint = rgb(246, 244, 255), water = rgb(14, 36, 72), sat = 0.08, con = 0.1 },
 	table.freeze(with(R_NIGHT, 21)),
 }
+-- On the Riviera the sun follows a stretched evening clock, so the golden hour and the blue hour
+-- last (in Roblox the sun sets at 18:00 and it is dark by 18:40): game hour -> sun clock
+local SUN_CLOCK = { { 0, 0 }, { 16.5, 16.5 }, { 18.3, 17.72 }, { 19.6, 18.32 }, { 21, 19.3 }, { 24, 24 } }
+local function sunClock(hour: number): number
+	for i = 2, #SUN_CLOCK do
+		local a, b = SUN_CLOCK[i - 1], SUN_CLOCK[i]
+		if hour <= b[1] then
+			return a[2] + (b[2] - a[2]) * (hour - a[1]) / (b[1] - a[1])
+		end
+	end
+	return hour
+end
+-- the Riviera's skyboxes (ReplicatedStorage.RivieraSkies: Day, Dusk, Night; Creator Store skies,
+-- only their textures kept, 2026-11-02), picked by the hour
+-- (the clear blue Day sky also makes the navy blue hour and night once the sun is down: the
+-- Night box is near black, kept for later)
+local function rivieraSky(hour: number): string
+	if (hour >= 17.6 and hour < 19.2) or (hour >= 5 and hour < 6.8) then
+		return "Dusk"
+	end
+	return "Day"
+end
+local SKY_FACES = { "SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp" }
 DayCycle.RIVIERA_X = 9000 -- east of this the camera is on the Riviera map
+
+-- the old map's grade (the place's ColorCorrection)
+local BASE_SAT, BASE_CON = 0.02, 0.12
 
 local function lerp(a: number, b: number, t: number): number
 	return a + (b - a) * t
@@ -118,6 +155,8 @@ local function sample(hour: number, keys: { Key }?): Key
 		rays = lerp(a.rays, b.rays, t),
 		tint = a.tint:Lerp(b.tint, t),
 		water = a.water:Lerp(b.water, t),
+		sat = lerp(a.sat or BASE_SAT, b.sat or BASE_SAT, t),
+		con = lerp(a.con or BASE_CON, b.con or BASE_CON, t),
 	}
 end
 
@@ -128,6 +167,11 @@ DayCycle.override = nil :: number?
 function DayCycle.hour(): number
 	if DayCycle.override then
 		return DayCycle.override
+	end
+	-- Studio previews (Claude's lighting screenshots): a test script holds the hour
+	local preview = workspace:GetAttribute("PreviewHour")
+	if type(preview) == "number" and RunService:IsStudio() then
+		return preview
 	end
 	local c = Config.DayCycle
 	local minutes = workspace:GetServerTimeNow() / 60
@@ -176,11 +220,39 @@ function DayCycle.start()
 	end
 	local acc = math.huge
 	local lastNight = -1
+	local w = 0
+	-- the place's own sky (the old map) and the Riviera's three
+	local sky = Lighting:FindFirstChildOfClass("Sky")
+	local baseSky: { [string]: any } = {}
+	if sky then
+		for _, f in SKY_FACES do
+			baseSky[f] = (sky :: any)[f]
+		end
+		baseSky.MoonAngularSize = sky.MoonAngularSize
+		baseSky.StarCount = sky.StarCount
+	end
+	local skies = ReplicatedStorage:FindFirstChild("RivieraSkies")
+	local skyNow = "base"
+	local function setSky(name: string)
+		if name == skyNow or not sky then
+			return
+		end
+		local src = if name == "base" then nil else (skies and skies:FindFirstChild(name))
+		if name ~= "base" and not src then
+			return
+		end
+		skyNow = name
+		for _, f in SKY_FACES do
+			(sky :: any)[f] = if src then (src :: any)[f] else baseSky[f]
+		end
+		sky.MoonAngularSize = if src then 7 else baseSky.MoonAngularSize
+		sky.StarCount = if src then 2000 else baseSky.StarCount
+	end
 	RunService.Heartbeat:Connect(function(dt)
 		acc += dt
 		-- the sun creeps; the rest of the light only needs a few updates a second
 		local hour = DayCycle.hour()
-		Lighting.ClockTime = hour
+		Lighting.ClockTime = hour + (sunClock(hour) - hour) * w
 		if acc < 0.25 then
 			return
 		end
@@ -188,7 +260,8 @@ function DayCycle.start()
 		local k = sample(hour)
 		-- on the Riviera map its own light (blended over 1500 studs so it never pops)
 		local cam = workspace.CurrentCamera
-		local w = if cam then math.clamp((cam.CFrame.Position.X - (DayCycle.RIVIERA_X - 1500)) / 1500, 0, 1) else 0
+		w = if cam then math.clamp((cam.CFrame.Position.X - (DayCycle.RIVIERA_X - 1500)) / 1500, 0, 1) else 0
+		setSky(if w >= 0.5 then rivieraSky(hour) else "base")
 		if w > 0 then
 			local r = sample(hour, RIVIERA_KEYS)
 			for key, v in r do
@@ -211,12 +284,17 @@ function DayCycle.start()
 		end
 		if grade and grade.Parent then
 			grade.TintColor = k.tint
+			grade.Saturation = k.sat or BASE_SAT
+			grade.Contrast = k.con or BASE_CON
 		end
 		workspace.Terrain.WaterColor = k.water
 		local atmo = Lighting:FindFirstChildOfClass("Atmosphere")
 		if atmo then
 			atmo.Glare = k.glare
 		end
+		-- how many windows are lit: most through the evening, fewer after midnight
+		local share = if hour >= 12 then 0.45 elseif hour < 0.5 then 0.45 elseif hour < 3 then 0.45 - (hour - 0.5) / 2.5 * 0.22 else 0.23
+		WorldFx.setWindowShare(share)
 		-- lit windows and street lamps follow the night
 		local n = DayCycle.night(hour)
 		if math.abs(n - lastNight) > 0.04 or (n == 0 and lastNight ~= 0) or (n == 1 and lastNight ~= 1) then

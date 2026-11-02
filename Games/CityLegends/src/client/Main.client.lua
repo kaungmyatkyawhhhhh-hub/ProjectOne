@@ -216,6 +216,14 @@ local function startOrbit()
 	local travel = 0
 	local span = Config.City.HalfExtent * 1.7
 	orbitConn = RunService.RenderStepped:Connect(function(dt: number)
+		-- Studio previews (Claude's lighting screenshots): a test script parks the menu camera
+		local preview = workspace:GetAttribute("PreviewCam")
+		if typeof(preview) == "CFrame" and RunService:IsStudio() then
+			camera.CFrame = preview
+			camera.Focus = preview * CFrame.new(0, 0, -40)
+			camera.FieldOfView = 70
+			return
+		end
 		travel = (travel + dt * 22) % span
 		local x = -span / 2 + travel
 		local sway = math.sin(travel / 90) * 6

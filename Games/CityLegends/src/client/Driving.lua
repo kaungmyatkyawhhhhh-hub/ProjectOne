@@ -262,6 +262,11 @@ local function readInput(): (number, number, number, boolean, boolean)
 	end
 	local throttle, brake, steer = 0, 0, 0
 	local handbrake, clutch = false, false
+	-- Studio test drives (Claude's road checks): a test script drives through player attributes
+	local tester = Players.LocalPlayer
+	if RunService:IsStudio() and tester:GetAttribute("TestDrive") then
+		return tester:GetAttribute("TestThrottle") or 0, tester:GetAttribute("TestBrake") or 0, tester:GetAttribute("TestSteer") or 0, false, false
+	end
 	if UserInputService:GetFocusedTextBox() == nil then
 		clutch = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
 		if UserInputService:IsKeyDown(Enum.KeyCode.W) or UserInputService:IsKeyDown(Enum.KeyCode.Up) then

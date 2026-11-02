@@ -568,7 +568,14 @@ function Weather.init()
 	task.spawn(function()
 		while true do
 			task.wait(1)
-			if os.clock() >= nextToggle then
+			-- Studio previews (Claude's lighting screenshots): a test script holds the weather
+			local preview = workspace:GetAttribute("PreviewRain")
+			if type(preview) == "boolean" and game:GetService("RunService"):IsStudio() then
+				if preview ~= raining then
+					Weather.setRaining(preview, true)
+				end
+				nextToggle = math.huge
+			elseif os.clock() >= nextToggle then
 				Weather.setRaining(not raining)
 			end
 		end

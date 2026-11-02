@@ -137,9 +137,9 @@ local function lamp(base: Vector3, toRoad: Vector3, parent: Instance)
 	local light = Instance.new("SpotLight")
 	light.Face = Enum.NormalId.Bottom
 	light.Angle = 135
-	light.Range = 62
-	light.Brightness = 3.6
-	light.Color = Color3.fromRGB(255, 178, 104)
+	light.Range = 72
+	light.Brightness = 6
+	light.Color = Color3.fromRGB(255, 166, 86)
 	light.Shadows = false
 	light.Parent = head
 	CollectionService:AddTag(light, "LODLight")
@@ -588,16 +588,27 @@ function Dressing.furniture(data, box, parent: Instance, rng: Random, palms: Mod
 				local spot = b.pos + right * side * (HALF + WALK - 3) + Vector3.new(0, 0.5, 0)
 				if nearestOther(roads, r, spot) > HALF + WALK then
 					if palms and (casino or r.name == "Beach Avenue" or r.name == "Coast Road") then
-						local pm = palms:Clone()
-						pm:ScaleTo(pm:GetScale() * rng:NextNumber(1.1, 1.5))
-						local cf, size = pm:GetBoundingBox()
-						pm:PivotTo(pm:GetPivot() + (spot - Vector3.new(cf.Position.X, cf.Position.Y - size.Y / 2, cf.Position.Z)))
-						pm:PivotTo(pm:GetPivot() * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0))
-						for _, d in pm:GetDescendants() do
-							if d:IsA("BasePart") then
-								d.CanCollide = false
+						-- one palm of the imported group (the group is 60 studs wide: whole, it stood
+						-- on the road, owner 2026-11-02 "why is there trees on the road")
+						local meshes = {}
+						for _, d in palms:GetDescendants() do
+							if d:IsA("MeshPart") then
+								table.insert(meshes, d)
 							end
 						end
+						local mesh = meshes[rng:NextInteger(1, #meshes)]:Clone()
+						mesh.Size *= rng:NextNumber(30, 40) / mesh.Size.Y
+						-- the trunk's foot on the spot (palms lean: attribute TrunkBase, the foot's place in
+						-- the mesh box as fractions, measured from the mesh's vertices)
+						local foot = mesh:GetAttribute("TrunkBase") or Vector3.new(0, -0.5, 0)
+						mesh.CFrame = CFrame.new(spot - Vector3.new(0, 0.3, 0)) * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0) * CFrame.new(-foot * mesh.Size)
+						mesh.Anchored = true
+						mesh.CanCollide = false
+						mesh.CanQuery = false
+						mesh.Name = "Palm"
+						local pm = Instance.new("Model")
+						pm.Name = "Palm"
+						mesh.Parent = pm
 						pm.Parent = grp(spot)
 						n.palms += 1
 					else
