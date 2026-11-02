@@ -89,6 +89,14 @@ Config.RivieraVenues = {
 		hotel = { x = 11673.7, z = 1020.9, fx = 0.998, fz = 0.065, y = 12.37 }, -- Riviera Bay, by the sea
 		casino = { x = 14378.5, z = 31.2, fx = -0.134, fz = 0.991, y = 72.9 }, -- Casino Heights, on the Town Road
 		gems = { x = 14779.9, z = 64, fx = -0.022, fz = 1, y = 69.72 }, -- up the Town Road from the casino
+		-- (owner, 2026-11-02: "move rest of the venue to monaco")
+		bank = { x = 12491, z = 983.6, fx = -0.927, fz = 0.376, y = 10.97 }, -- Riviera Bay, east of the stadium
+		-- the luxury towers: square to the world axes (their plaza and facade tiers are), entrance -Z
+		tower_aurum = { x = 15457.2, z = 1111.1, fx = 0, fz = -1, y = 1.72 }, -- the waterfront, on the Coast Road
+		tower_skyline = { x = 16261.7, z = 799.3, fx = 0, fz = -1, y = 13.23 }, -- Larvotto, on the Coast Road
+		tower_crown = { x = 14260.5, z = -574.5, fx = 0, fz = -1, y = 161.15 }, -- high on the Mountain Road over the city
+		-- the bank heist drop-off: a lot at the far east end
+		dropoff = { x = 17176.4, z = 891, fx = -0.376, fz = -0.927, y = 20.73 },
 	},
 }
 

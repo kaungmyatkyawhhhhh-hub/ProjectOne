@@ -58,6 +58,20 @@ type Unit = {
 
 local units: { Unit } = {}
 local graph = CityLayout.buildGraph()
+-- (owner, 2026-11-02: everything moved to Monaco) the Riviera's lanes too, when it is in the place,
+-- so police patrol and chase there
+if workspace:FindFirstChild("Riviera") then
+	local ok, riv = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RivieraTraffic")).build()
+	end)
+	if ok and riv then
+		local merged = table.clone(graph.lanes)
+		for _, seg in riv.lanes do
+			table.insert(merged, seg)
+		end
+		graph = { lanes = merged, all = graph.all }
+	end
+end
 local rng = Random.new()
 local folder: Folder
 local report: RemoteEvent
@@ -343,8 +357,19 @@ end
 local function laneSpot(center: Vector3, minD: number, maxD: number): (CityLayout.Segment?, number)
 	local cam = workspace.CurrentCamera
 	local best: CityLayout.Segment?, bestS = nil, 0
+	-- (the lanes within reach first: picking from all of them rarely lands near a far-off map)
+	local pool = {}
+	for _, seg in graph.lanes do
+		local mid = (seg.p0 + seg.p2) / 2
+		if math.abs(mid.X - center.X) < maxD + 40 and math.abs(mid.Z - center.Z) < maxD + 40 then
+			table.insert(pool, seg)
+		end
+	end
+	if #pool == 0 then
+		pool = graph.lanes
+	end
 	for _ = 1, 60 do
-		local seg = graph.lanes[rng:NextInteger(1, #graph.lanes)]
+		local seg = pool[rng:NextInteger(1, #pool)]
 		local s = rng:NextNumber(5, math.max(6, seg.length - 5))
 		local pos = CityLayout.sample(seg, s)
 		local d = Vector3.new(pos.X - center.X, 0, pos.Z - center.Z).Magnitude

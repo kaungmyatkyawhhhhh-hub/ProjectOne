@@ -17,6 +17,7 @@ local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local B = Config.Bank
@@ -65,6 +66,8 @@ function Bank.block(kit: any, parent: Instance, bi: number, bj: number, cx: numb
 	-- the front looks at the city centre along X
 	local front = if cx < 0 then Vector3.new(1, 0, 0) else Vector3.new(-1, 0, 0)
 	local base = CFrame.lookAt(Vector3.new(cx, ground, cz), Vector3.new(cx, ground, cz) + front)
+	-- (in Monaco when the Riviera is in the place: Config.RivieraVenues.Sites.bank)
+	base = WestLayout.rivieraSite("bank") or base
 	local function at(x: number, y: number, z: number): CFrame
 		return base * CFrame.new(x, y, z) -- -z is the front
 	end
@@ -261,6 +264,12 @@ local function buildDropoff(parent: Instance)
 	-- on the sidewalk at the block's corner, inside the grid
 	local inward = Vector3.new(if i == 0 then 1 else -1, 0, if j == 0 then 1 else -1)
 	local pos = corner + inward * (C.RoadWidth / 2 + 14)
+	-- (in Monaco: a lot of its own at the far east end, Config.RivieraVenues.Sites.dropoff; the
+	-- marker's height is added below as the kerb's, so the floor height comes off it here)
+	local riv = WestLayout.rivieraSite("dropoff")
+	if riv then
+		pos = riv.Position - Vector3.new(0, C.CurbHeight, 0)
+	end
 	dropoff = pos
 	local m = Instance.new("Model")
 	m.Name = "Dropoff"

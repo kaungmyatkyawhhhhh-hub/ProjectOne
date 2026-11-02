@@ -168,10 +168,12 @@ function WestLayout.places(): { Place }
 	add("city", "City Centre", onLane(mid + C.BlockSize / 2, mid, Vector3.new(1, 0, 0)))
 	local bank = Config.Bank.Block
 	local bx = (CityLayout.roadCoord(bank[1]) + CityLayout.roadCoord(bank[1] + 1)) / 2
-	add("bank", "Legends Reserve Bank", onLane(bx, CityLayout.roadCoord(bank[2]), Vector3.new(1, 0, 0)))
+	local bankRiv = WestLayout.rivieraSite("bank")
+	add("bank", "Legends Reserve Bank", if bankRiv then WestLayout.kerbFor(bankRiv, LOT) else onLane(bx, CityLayout.roadCoord(bank[2]), Vector3.new(1, 0, 0)))
 	for _, t in Config.Towers.List do
 		local tx = (CityLayout.roadCoord(t.block[1]) + CityLayout.roadCoord(t.block[1] + 1)) / 2
-		add("tower_" .. t.id, t.name, onLane(tx, CityLayout.roadCoord(t.block[2]), Vector3.new(1, 0, 0)))
+		local riv = WestLayout.rivieraSite("tower_" .. t.id)
+		add("tower_" .. t.id, t.name, if riv then WestLayout.kerbFor(riv, LOT) else onLane(tx, CityLayout.roadCoord(t.block[2]), Vector3.new(1, 0, 0)))
 	end
 	-- the dealership
 	local dealerFrame, dealerLot = WestLayout.dealership()

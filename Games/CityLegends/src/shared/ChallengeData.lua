@@ -56,6 +56,15 @@ do
 	local bx = (W.BridgeTowers[1] + W.BridgeTowers[2]) / 2
 	add("bridge", "LEGENDS BRIDGE", Vector3.new(bx, CityLayout.westRoadY(bx), 0), Vector3.xAxis, DECK_HALF - 2)
 	add("ocean", "OCEAN DRIVE", Vector3.new(CityLayout.roadCoord(W.IndexBase), 0, C.BlockSize * 1.5), Vector3.zAxis, HALF_ROAD + 2)
+	-- Monaco (owner, 2026-11-02: "move rest of the venue to monaco"): on the straightest stretch of
+	-- each main road, well away from junctions and the tunnel (from build/riviera/roads.json)
+	if workspace:FindFirstChild("Riviera") then
+		add("riv_coast", "COAST ROAD", Vector3.new(12438.4, 13.1, 760.1), Vector3.new(0.998, 0, 0.056), 34)
+		add("riv_town", "TOWN ROAD", Vector3.new(14307.2, 74.06, 172.3), Vector3.new(0.989, 0, 0.149), 34)
+		add("riv_mountain", "MOUNTAIN ROAD", Vector3.new(13861.5, 127.95, -751.8), Vector3.new(1, 0, 0.011), 34)
+		add("riv_casino", "CASINO AVENUE", Vector3.new(15287.7, 37.73, 485.8), Vector3.new(0.998, 0, 0.068), 34)
+		add("riv_upper", "UPPER STREET", Vector3.new(12730.4, 40.41, 511.2), Vector3.new(0.994, 0, -0.111), 34)
+	end
 end
 
 ChallengeData.trapById = {} :: { [string]: Trap }
@@ -83,6 +92,10 @@ end
 
 -- the leaderboard board: on the sidewalk corner by the city's middle junction
 ChallengeData.boardPos = ActivityData.corner(C.Blocks / 2, C.Blocks / 2, 1, -1)
+-- (in Monaco: on the Old Rock's palace square)
+if workspace:FindFirstChild("Riviera") then
+	ChallengeData.boardPos = Vector3.new(13088, 52, 1232)
+end
 
 -- everything the minimap shows
 function ChallengeData.points(): { { kind: string, pos: Vector3 } }

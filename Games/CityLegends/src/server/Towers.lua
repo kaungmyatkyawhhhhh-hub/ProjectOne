@@ -33,6 +33,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local Customs = require(script.Parent:WaitForChild("Customs"))
 
@@ -181,9 +182,15 @@ end
 local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, cz: number, lot: number, suite: SuiteOpts?): Built
 	local mk, deco = kit.mk, kit.deco
 	local frame: CFrame
+	-- (in Monaco when the Riviera is in the place: Config.RivieraVenues.Sites.tower_<id>, square to the
+	-- world axes like the city's blocks)
+	local riv = if suite then nil else WestLayout.rivieraSite("tower_" .. t.id)
 	if suite then
 		frame = suite.frame
 		cx, cz = frame.Position.X, frame.Position.Z
+	elseif riv then
+		frame = riv
+		cx, cz = riv.Position.X, riv.Position.Z
 	else
 		-- the entrance faces the city centre along the block's longer offset
 		local front = if math.abs(cx) >= math.abs(cz) then Vector3.new(-math.sign(cx), 0, 0) else Vector3.new(0, 0, -math.sign(cz))
@@ -365,7 +372,7 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	if withStreet then
 		---------------------------------------------------------------- street level
 		local plaza = kit.lodGroup(model, "Plaza", base + Vector3.new(0, 20, 0), 520)
-		deco(plaza, Vector3.new(lot, 0.12, lot), CFrame.new(cx, CURB + 0.06, cz), Color3.fromRGB(56, 56, 62), Enum.Material.Granite)
+		deco(plaza, Vector3.new(lot, 0.12, lot), CFrame.new(cx, groundY + 0.06, cz), Color3.fromRGB(56, 56, 62), Enum.Material.Granite)
 		-- glowing paving lines leading to the door
 		for _, sx in { -1, 1 } do
 			dbox(plaza, 0.5, 0.14, lot / 2 - HF - 4, sx * 12, 0.08, -HF - (lot / 2 - HF) / 2 - 2, accent, Enum.Material.Neon, { transparency = 0.35 })
@@ -478,7 +485,7 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		pal.body = Color3.fromRGB(16, 22, 32)
 		pal.warm = true
 		pal.lit = 0.5
-		kit.facadeTier(model, cx, cz, F, F, CURB + LH + 1.2, CURB + yP - 1.6, pal, true, nil, fine)
+		kit.facadeTier(model, cx, cz, F, F, groundY + LH + 1.2, groundY + yP - 1.6, pal, true, nil, fine)
 		-- corner light columns in the tower's accent
 		for _, sx in { -1, 1 } do
 			for _, sz in { -1, 1 } do
@@ -486,7 +493,7 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 			end
 		end
 		-- the tower's name in a band below the penthouse, on every side
-		local band = deco(model, Vector3.new(F + 0.8, 9, F + 0.8), CFrame.new(cx, CURB + yP - 7, cz), BLACK, Enum.Material.SmoothPlastic)
+		local band = deco(model, Vector3.new(F + 0.8, 9, F + 0.8), CFrame.new(cx, groundY + yP - 7, cz), BLACK, Enum.Material.SmoothPlastic)
 		for _, face in { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right } do
 			local _, _, label = kit.surfaceText(band, face, t.name, Color3.new(1, 1, 1), BLACK, 0, Enum.Font.GothamMedium, Vector2.new(1100, 120))
 			local grad = Instance.new("UIGradient")
