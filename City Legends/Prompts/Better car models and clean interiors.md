@@ -21,7 +21,8 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender if it
 4. Vertex colours, some glass / alpha, and smoothing are lost on import.
 5. Weak reflections without Future lighting.
 
-## Part 1: fix the look of every car (do one car first: the LP750)
+## Part 1: the look of every car
+> The owner will replace almost all the cars with new, better models, one by one (Part 3). So don't polish the old models: build Parts 1, 2 and 4 into the **conversion pipeline and the game code**, so every new model comes out right automatically. Use the **first new model the owner sends** as the test car.
 1. **PBR back on:** use `SurfaceAppearance` with **ColorMap + NormalMap + RoughnessMap + MetalnessMap** (512–1024 px) on paint, chrome, rims, calipers, carbon, leather and Alcantara.
    - Change `fix_models.py` / `auto_car.py` so they **keep** these maps (pack them into each material's textures) instead of throwing them away.
    - Keep solid alpha except glass.
