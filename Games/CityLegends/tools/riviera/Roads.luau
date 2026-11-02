@@ -43,6 +43,9 @@ local PATTERNS = {
 local function newPart(props: { [string]: any }, parent: Instance): BasePart
 	local p = Instance.new("Part")
 	p.Anchored = true
+	-- flat on the ground: its shadow never shows, and ~64k shadow casters cost every frame
+	-- (performance pass 2026-11-02)
+	p.CastShadow = false
 	p.TopSurface = Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	for k, v in props do

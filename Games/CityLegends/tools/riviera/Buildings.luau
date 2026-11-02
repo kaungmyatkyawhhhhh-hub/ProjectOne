@@ -108,7 +108,9 @@ local function small(p: BasePart): BasePart
 	return p
 end
 
+-- the skin (bands, piers, foot, parapets): the core just behind it casts the building's shadow
 local function quiet(p: BasePart): BasePart
+	p.CastShadow = false
 	p.CanCollide = false
 	p.CanQuery = false
 	p.CanTouch = false
@@ -399,7 +401,7 @@ local function belle(cf: CFrame, W: number, D: number, gnd: { number }, rng: Ran
 		small(part({ Name = "Chimney", Size = Vector3.new(2.2, 6, 2.2), CFrame = cf * CFrame.new(rng:NextNumber(-W / 2 + 3, W / 2 - 3), roofY + 5, rng:NextNumber(D * 0.3, D * 0.7)), Material = Enum.Material.Plaster, Color = trim }, det))
 	end
 	det:SetAttribute("Center", (cf * CFrame.new(0, H / 2, D / 2)).Position)
-	det:SetAttribute("Range", 800)
+	det:SetAttribute("Range", 650)
 	CollectionService:AddTag(det, "LOD")
 	det.Parent = m
 	m.Parent = parent
@@ -506,7 +508,7 @@ local function block(cf: CFrame, W: number, D: number, gnd: { number }, rng: Ran
 	end
 	roofTop(cf, W, D, H, wall, rng, m, det, modern)
 	det:SetAttribute("Center", (cf * CFrame.new(0, H / 2, D / 2)).Position)
-	det:SetAttribute("Range", 900)
+	det:SetAttribute("Range", 700)
 	CollectionService:AddTag(det, "LOD")
 	det.Parent = m
 	m.Parent = parent
@@ -693,6 +695,72 @@ function Buildings.build(data, box, parent: Instance, rng: Random, opts): number
 		end
 	end
 	return count
+end
+
+-- café tables on the pavement in front of some ground-floor shops (Creator Store sets in
+-- ServerStorage.RivieraAssets.Props: CafeA, CafeB, cleaned); never on the street furniture, lamps,
+-- trees or the doors. Into each building's Detail (hidden far away). chance(position) -> 0..1
+function Buildings.cafes(buildings: Instance, dressing: Instance, roads: Instance, rng: Random, chance: (Vector3) -> number): number
+	local lib = game:GetService("ServerStorage"):FindFirstChild("RivieraAssets")
+	local props = lib and lib:FindFirstChild("Props")
+	local sets = {}
+	for _, name in { "CafeA", "CafeB" } do
+		local m = props and props:FindFirstChild(name)
+		if m then
+			table.insert(sets, m)
+		end
+	end
+	if #sets == 0 then
+		return 0
+	end
+	local busy = OverlapParams.new()
+	busy.FilterType = Enum.RaycastFilterType.Include
+	busy.FilterDescendantsInstances = { dressing, buildings }
+	local down = RaycastParams.new()
+	down.FilterType = Enum.RaycastFilterType.Include
+	down.FilterDescendantsInstances = { roads }
+	local n = 0
+	for k, b in buildings:GetChildren() do
+		local shell = b:GetAttribute("Shell")
+		local size = b:GetAttribute("ShellSize")
+		local det = b:FindFirstChild("Detail")
+		if b.Name ~= "BelleEpoque" or typeof(shell) ~= "CFrame" or not det or rng:NextNumber() >= chance(shell.Position) then
+			continue
+		end
+		local front = shell * CFrame.new(0, 0, -size.Z / 2)
+		local door = det:FindFirstChild("Door")
+		local pick = sets[rng:NextInteger(1, #sets)]
+		for _ = 1, rng:NextInteger(1, 2) do
+			local off = rng:NextNumber(-size.X / 2 + 5, size.X / 2 - 5)
+			local spot = (front * CFrame.new(off, 0, -4.6)).Position
+			if door and (Vector2.new(door.Position.X - spot.X, door.Position.Z - spot.Z)).Magnitude < 7 then
+				continue
+			end
+			local hit = workspace:Raycast(spot + Vector3.new(0, 200, 0), Vector3.new(0, -400, 0), down)
+			if not hit or hit.Instance.Name ~= "Pavement" then
+				continue
+			end
+			local ground = hit.Position
+			local m = pick:Clone()
+			m:ScaleTo(m:GetScale() * 0.8)
+			local _, sz = m:GetBoundingBox()
+			local cf = CFrame.lookAt(ground, ground + front.LookVector) * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0)
+			if #workspace:GetPartBoundsInBox(cf * CFrame.new(0, sz.Y / 2 + 0.6, 0), Vector3.new(sz.X, sz.Y - 1, sz.Z), busy) > 0 then
+				m:Destroy()
+				continue
+			end
+			m:PivotTo(cf)
+			local box, bs = m:GetBoundingBox()
+			m:PivotTo(m:GetPivot() + Vector3.new(ground.X - box.Position.X, ground.Y + 0.02 - (box.Position.Y - bs.Y / 2), ground.Z - box.Position.Z))
+			m.Name = "Cafe"
+			m.Parent = det
+			n += 1
+		end
+		if k % 50 == 0 then
+			task.wait()
+		end
+	end
+	return n
 end
 
 return Buildings

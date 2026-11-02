@@ -28,7 +28,7 @@ local FarCity = {}
 
 local CHUNK = 256
 local GROUND_RANGE = 1250 -- the real terrain and roads are there to ~1500
-local BUILDING_RANGE = 950 -- the real window detail shows to 800-900
+local BUILDING_RANGE = 950 -- (the real buildings' small detail shows to 650-700)
 local MAX_SHARE = 0.45 -- DayCycle's most windows lit (dusk)
 local ASPHALT = Color3.fromRGB(54, 54, 57)
 
