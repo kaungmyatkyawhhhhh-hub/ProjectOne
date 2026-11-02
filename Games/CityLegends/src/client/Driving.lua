@@ -64,6 +64,7 @@ function Driving.setCamFx(fx: { shake: number?, head: number?, blur: boolean?, f
 	end
 end
 Driving.inputEnabled = true
+Driving.menuHold = false -- the main menu is open: the car is braked and held (MainMenu)
 Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings; Q / E switch to manual too)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
@@ -258,6 +259,13 @@ end
 -- Input
 ---------------------------------------------------------------------
 local function readInput(): (number, number, number, boolean, boolean)
+	-- the main menu is open: braked and held where it is (owner, 2026-11-02)
+	if Driving.menuHold then
+		-- (brakes while moving, the handbrake once stopped: a held brake at a stop would reverse)
+		local s = state
+		local moving = s ~= nil and Vector3.new(s.vel.X, 0, s.vel.Z).Magnitude > 3
+		return 0, if moving then 1 else 0, 0, true, false
+	end
 	if not Driving.inputEnabled or UI.isGarageOpen() then
 		return 0, 0, 0, false, false
 	end
@@ -885,6 +893,28 @@ function Driving.reset()
 	s.root.AssemblyAngularVelocity = Vector3.zero
 	s.root.CFrame = cf + Vector3.new(0, s.halfHeight + 0.4, 0)
 	s.yaw = yawFromLook(cf.LookVector)
+	s.vel = Vector3.zero
+	s.yawRate = 0
+	s.groundDist = nil
+	s.groundUp = Vector3.yAxis
+	s.drifting = false
+	s.airT, s.airVy = 0, 0
+	s.skidL, s.skidR = nil, nil
+	s.lastCommand = Vector3.zero
+end
+
+-- the main menu's fast travel: the car onto a spot (ground level, facing the way on), stopped
+function Driving.teleport(cf: CFrame)
+	local s = state
+	if not s then
+		return
+	end
+	local look = Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z)
+	local flat = if look.Magnitude > 0.1 then CFrame.lookAt(cf.Position, cf.Position + look.Unit) else CFrame.new(cf.Position)
+	s.root.AssemblyLinearVelocity = Vector3.zero
+	s.root.AssemblyAngularVelocity = Vector3.zero
+	s.root.CFrame = flat + Vector3.new(0, s.halfHeight + 0.6, 0)
+	s.yaw = yawFromLook(flat.LookVector)
 	s.vel = Vector3.zero
 	s.yawRate = 0
 	s.groundDist = nil
@@ -3012,7 +3042,7 @@ function Driving.init()
 	RunService.Heartbeat:Connect(updateOthers)
 
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if processed or not state then
+		if processed or not state or UI.modalOpen then
 			return
 		end
 		if input.KeyCode == Enum.KeyCode.V then

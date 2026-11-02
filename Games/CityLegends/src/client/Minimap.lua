@@ -296,6 +296,52 @@ local shown = true
 function Minimap.setVisible(on: boolean)
 	shown = on
 end
+function Minimap.isVisible(): boolean
+	return shown
+end
+
+-- the main menu's settings (2026-11-02): which corner it sits in
+local corner = "TopRight"
+local relayout: (() -> ())? = nil
+function Minimap.setCorner(c: string)
+	if c == "TopRight" or c == "TopLeft" or c == "BottomRight" or c == "BottomLeft" then
+		corner = c
+		if relayout then
+			relayout()
+		end
+	end
+end
+
+-- the world map's SET WAYPOINT: a mint blip (held on the rim when far) and a light beam at the
+-- spot, until you get there or set another (nil clears it)
+local waypoint: Vector3? = nil
+local beacon: Part? = nil
+function Minimap.setWaypoint(pos: Vector3?)
+	waypoint = pos
+	if beacon then
+		beacon:Destroy()
+		beacon = nil
+	end
+	if pos then
+		local b = Instance.new("Part")
+		b.Name = "Waypoint"
+		b.Anchored = true
+		b.CanCollide = false
+		b.CanQuery = false
+		b.CanTouch = false
+		b.CastShadow = false
+		b.Material = Enum.Material.Neon
+		b.Color = Color3.fromRGB(74, 234, 172)
+		b.Transparency = 0 -- (Playbook: parts 0 or 1; it's thin)
+		b.Size = Vector3.new(0.8, 400, 0.8)
+		b.CFrame = CFrame.new(pos + Vector3.new(0, 200, 0))
+		b.Parent = workspace.CurrentCamera
+		beacon = b
+	end
+end
+function Minimap.getWaypoint(): Vector3?
+	return waypoint
+end
 
 function Minimap.start()
 	if started or not MM.Enabled then
@@ -392,6 +438,7 @@ function Minimap.start()
 		table.insert(fixed, { frame = makeBlip(layer, "M", Color3.fromRGB(255, 110, 220), 13, 21), pos = meetAt, edge = false })
 	end
 	local dropBlip = makeBlip(layer, "$", Color3.fromRGB(80, 255, 140), 16, 23)
+	local wayBlip = makeBlip(layer, "W", Color3.fromRGB(74, 234, 172), 15, 24)
 	local targetBlip = makeBlip(layer, "", Color3.fromRGB(255, 214, 40), 13, 24)
 	local policePool: { Frame } = {}
 	for _ = 1, 8 do
@@ -532,11 +579,20 @@ function Minimap.start()
 			right = 20
 		end
 		holder.Size = UDim2.fromOffset(size, size)
-		holder.Position = UDim2.new(1, -right, 0, TOP)
-		gui:SetAttribute("Bottom", TOP + size)
+		-- (the menu's setting: any corner; the bottom ones sit above the HUD's bottom row)
+		local left = corner == "TopLeft" or corner == "BottomLeft"
+		local bottom = corner == "BottomRight" or corner == "BottomLeft"
+		holder.AnchorPoint = Vector2.new(if left then 0 else 1, if bottom then 1 else 0)
+		local x = if left then UDim.new(0, right + (if corner == "TopLeft" then 0 else (if isTouch then 70 else 96))) else UDim.new(1, -right)
+		local y = if bottom then UDim.new(1, if isTouch then -170 else -200) else UDim.new(0, TOP)
+		holder.Position = UDim2.new(x, y)
+		gui:SetAttribute("Bottom", if bottom then TOP else TOP + size)
 		return size
 	end
 	local radius = layout() / 2
+	relayout = function()
+		radius = layout() / 2
+	end
 	local cam0 = workspace.CurrentCamera
 	if cam0 then
 		cam0:GetPropertyChangedSignal("ViewportSize"):Connect(function()
@@ -807,7 +863,8 @@ function Minimap.start()
 		local on = shown and hud
 		holder.Visible = on
 		pill.Visible = hud and not shown
-		pill.Position = UDim2.new(1, if isTouch then -14 else -20, 0, TOP)
+		pill.Position = if corner == "TopRight" then UDim2.new(1, if isTouch then -14 else -20, 0, TOP) else holder.Position
+		pill.AnchorPoint = holder.AnchorPoint
 		if not on then
 			return
 		end
@@ -883,6 +940,18 @@ function Minimap.start()
 			place(targetBlip, target, true)
 		else
 			targetBlip.Visible = false
+		end
+		-- the menu's waypoint: gone once you're there
+		local wp = waypoint
+		if wp and Vector3.new(wp.X - here.X, 0, wp.Z - here.Z).Magnitude < 40 then
+			Minimap.setWaypoint(nil)
+			UI.toast("You've arrived", Color3.fromRGB(74, 234, 172))
+			wp = nil
+		end
+		if wp then
+			place(wayBlip, wp, true)
+		else
+			wayBlip.Visible = false
 		end
 		-- live markers: far ones on the rim
 		showLive(livePool, liveEvents(), function(f, p)

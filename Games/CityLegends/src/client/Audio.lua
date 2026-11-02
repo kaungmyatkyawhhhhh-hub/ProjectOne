@@ -151,6 +151,7 @@ end
 ---------------------------------------------------------------------
 local musicSound: Sound? = nil
 local musicMuted = false
+local musicLevel = 1 -- the menu's music slider (0..1)
 local station = 1
 local order: { string } = {}
 local index = 1
@@ -207,7 +208,7 @@ function Audio.nextStation(): string
 	if musicMuted then
 		musicMuted = false
 		if musicSound then
-			musicSound.Volume = Config.Sounds.MusicVolume or 0.22
+			musicSound.Volume = (Config.Sounds.MusicVolume or 0.22) * musicLevel
 		end
 		tune(1)
 	elseif station >= #Config.Radio.Stations then
@@ -222,7 +223,7 @@ function Audio.startMusic()
 	if musicSound then
 		return
 	end
-	local m = newSound("", SoundService, Config.Sounds.MusicVolume or 0.22)
+	local m = newSound("", SoundService, (Config.Sounds.MusicVolume or 0.22) * musicLevel)
 	m.Name = "Music"
 	musicSound = m
 	m.Ended:Connect(function()
@@ -240,11 +241,40 @@ function Audio.startMusic()
 	end)
 end
 
+-- the main menu's sliders (2026-11-02): music and sound effects apart (Playbook), 0..1
 function Audio.toggleMusic()
 	musicMuted = not musicMuted
 	if musicSound then
-		musicSound.Volume = if musicMuted then 0 else (Config.Sounds.MusicVolume or 0.22)
+		musicSound.Volume = if musicMuted then 0 else (Config.Sounds.MusicVolume or 0.22) * musicLevel
 	end
+end
+function Audio.setMusicLevel(k: number)
+	musicLevel = math.clamp(k, 0, 1)
+	if musicSound and not musicMuted then
+		musicSound.Volume = (Config.Sounds.MusicVolume or 0.22) * musicLevel
+	end
+end
+-- every other sound in the game goes through one SoundGroup whose volume the slider sets
+local sfxGroup: SoundGroup? = nil
+function Audio.setSfxLevel(k: number)
+	if not sfxGroup then
+		local g = Instance.new("SoundGroup")
+		g.Name = "Effects"
+		g.Parent = SoundService
+		sfxGroup = g
+		local function adopt(d: Instance)
+			if d:IsA("Sound") and d ~= musicSound and d.Name ~= "Music" and d.SoundGroup == nil then
+				d.SoundGroup = g
+			end
+		end
+		for _, root in { workspace, SoundService } do
+			for _, d in root:GetDescendants() do
+				adopt(d)
+			end
+			root.DescendantAdded:Connect(adopt)
+		end
+	end
+	(sfxGroup :: SoundGroup).Volume = math.clamp(k, 0, 1)
 end
 
 function Audio.play(key: string, volume: number, speed: number?, parent: Instance?): Sound

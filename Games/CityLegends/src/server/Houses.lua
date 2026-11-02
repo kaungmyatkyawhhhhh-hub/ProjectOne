@@ -1355,6 +1355,16 @@ function Houses.refresh(player: Player)
 end
 
 -- the lot a player's house stands on (other systems)
+-- your house for the menu's fast travel: the drive spot (a car) and the front door (on foot)
+function Houses.homeSpot(player: Player): (CFrame?, CFrame?)
+	local lotId = placed[player]
+	local rec = lotId and recs[lotId]
+	if not (rec and rec.info) then
+		return nil, nil
+	end
+	return rec.info.spawn, rec.info.door
+end
+
 function Houses.placedLot(player: Player): string?
 	return placed[player]
 end

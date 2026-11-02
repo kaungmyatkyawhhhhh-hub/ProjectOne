@@ -55,6 +55,28 @@ Config.Knock = {
 
 -- Studio play tests only (RunService:IsStudio()): every player starts with everything unlocked
 -- and this much cash (owner, 2026-10-23)
+-- the main menu (owner, 2026-11-02: big tiles, CAMPAIGN / CARS / STORE, opened from the HUD's MENU
+-- button, in place of SETTINGS). A new player picks 1 of 3 starter cars; the world map fast travels
+-- to the venues (server-checked, not while wanted or in a race / job / heist, a cooldown between)
+Config.Menu = {
+	StarterChoices = {
+		{ id = "suzaki_swift", feel = "Easy and grippy" },
+		{ id = "byt_seal", feel = "Fast but loose" },
+		{ id = "kio_ev6", feel = "Big and comfy" },
+	},
+	FastTravelCooldown = 30, -- seconds between trips
+	-- the store (Playbook money rules): names and exact effects here, prices read from Roblox.
+	-- Ids are the owner's to give: until then the tiles show greyed, "Coming soon"
+	Store = {
+		{ key = "vip", name = "VIP", kind = "Pass", id = nil, art = "store_vip", effect = "A VIP tag, the VIP bays in every tower garage and +10% cash from cut-ups" },
+		{ key = "cash2x", name = "2x Cash", kind = "Pass", id = nil, art = "store_cash2x", effect = "Double the cash from driving, cut-ups and jobs, for good" },
+		{ key = "starter", name = "Starter Pack", kind = "Product", id = nil, art = "store_starter", effect = "$50,000 and a Mid car of your choice, once per player" },
+		{ key = "cash_s", name = "Cash: $25,000", kind = "Product", id = nil, art = "store_bundle", effect = "$25,000 added to your cash" },
+		{ key = "cash_m", name = "Cash: $100,000", kind = "Product", id = nil, art = "store_bundle", effect = "$100,000 added to your cash" },
+		{ key = "garage", name = "Garage Space", kind = "Product", id = nil, art = "store_garage", effect = "One more garage space at your house" },
+	},
+}
+
 Config.Testing = {
 	StudioUnlockAll = true,
 	StudioCash = 50000000,

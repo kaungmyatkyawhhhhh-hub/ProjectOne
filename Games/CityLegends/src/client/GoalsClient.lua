@@ -398,6 +398,15 @@ local function setState(st: any)
 	end
 end
 
+-- the Legends Path for the main menu: goals done, how many, the next one ({ text, have, need, cash })
+function GoalsClient.getState(): (number, number, any)
+	local st = state
+	if not st then
+		return 0, 0, nil
+	end
+	return st.done or 0, st.total or 0, st.next
+end
+
 function GoalsClient.init()
 	local remotes = ReplicatedStorage:WaitForChild("Remotes")
 	call = remotes:WaitForChild("GoalsCall", 30) :: RemoteFunction?

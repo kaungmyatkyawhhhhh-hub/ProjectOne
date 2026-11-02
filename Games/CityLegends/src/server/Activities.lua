@@ -468,6 +468,11 @@ handlers.chip = function(player, index)
 	return { ok = true, cash = cash, count = count, total = #ActivityData.chips }
 end
 
+-- in a race, a delivery or a duel (the menu's fast travel waits until it's over)
+function Activities.isBusy(player: Player): boolean
+	return runs[player] ~= nil or duels[player] ~= nil
+end
+
 function Activities.init(c: any)
 	ctx = c
 	Push = ctx.remote("RemoteEvent", "RacePush")

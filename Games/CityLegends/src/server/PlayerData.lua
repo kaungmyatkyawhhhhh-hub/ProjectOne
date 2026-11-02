@@ -41,6 +41,9 @@ export type Profile = {
 	Customs: { [string]: { [string]: any } }, -- per car id: its Legends Customs look (Customs.lua checks it)
 	Goals: { [string]: any }, -- Legends Path, the daily streak and today's tasks (Goals.lua checks it)
 	Brands: { [string]: number }, -- brand XP per brand (Brands.lua)
+	-- the first car picked in the menu (2026-11-02): false only for a brand new player until they
+	-- choose 1 of the 3 starters (Config.Menu.StarterChoices); old saves count as claimed
+	Claimed: boolean,
 	Loaded: boolean,
 }
 
@@ -48,6 +51,13 @@ export type Settings = {
 	Units: string, -- "mph" | "kmh"
 	Gearbox: string, -- "Auto" | "Manual"
 	CamFx: { shake: number, head: number, blur: boolean, fov: number }?, -- Settings > Camera
+	-- the main menu's settings (2026-11-02)
+	Minimap: { on: boolean, corner: string }?, -- shown, and which corner ("TopRight" ...)
+	Graphics: string?, -- "Low" | "Medium" | "High" | "Ultra"
+	Music: number?, -- 0..1
+	Sfx: number?, -- 0..1
+	Favs: { string }?, -- favourite cars (CARS tab)
+	HideKeys: boolean?, -- the on-screen controls hidden
 }
 
 export type Snapshot = {
@@ -61,6 +71,7 @@ export type Snapshot = {
 	Settings: Settings,
 	Penthouses: { string },
 	Home: string,
+	Claimed: boolean,
 }
 
 export type XpResult = {
@@ -115,6 +126,7 @@ local function defaultProfile(): Profile
 		Customs = {},
 		Goals = {},
 		Brands = {},
+		Claimed = false,
 		Loaded = false,
 	}
 end
@@ -148,6 +160,7 @@ function PlayerData.load(player: Player): Profile
 			return (store :: DataStore):GetAsync("p_" .. player.UserId)
 		end)
 		if ok and type(saved) == "table" then
+			profile.Claimed = saved.Claimed ~= false -- (saves from before the claim count as claimed)
 			if type(saved.Cash) == "number" then
 				profile.Cash = math.max(0, math.floor(saved.Cash))
 			end
@@ -360,6 +373,7 @@ function PlayerData.save(player: Player)
 		Customs = profile.Customs,
 		Goals = profile.Goals,
 		Brands = profile.Brands,
+		Claimed = profile.Claimed,
 	}
 	local ok, err = pcall(function()
 		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)
@@ -450,9 +464,10 @@ function PlayerData.snapshot(player: Player): Snapshot?
 		XP = profile.XP,
 		XPNeed = Config.xpForLevel(profile.Level),
 		DailyIn = PlayerData.dailyReadyIn(player),
-		Settings = { Units = profile.Settings.Units, Gearbox = profile.Settings.Gearbox, CamFx = profile.Settings.CamFx },
+		Settings = table.clone(profile.Settings),
 		Penthouses = penthouses,
 		Home = profile.Home,
+		Claimed = profile.Claimed,
 	}
 end
 
@@ -481,6 +496,33 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 			blur = fx.blur ~= false,
 			fov = if fov and fov == fov then math.clamp(math.floor(fov + 0.5), Config.Camera.FovMin, Config.Camera.FovMax) else Config.Camera.Immersive.Fov,
 		}
+	end
+	-- the main menu's settings: only known values
+	local mm = raw.Minimap
+	if type(mm) == "table" then
+		local corners = { TopRight = true, TopLeft = true, BottomRight = true, BottomLeft = true }
+		profile.Settings.Minimap = { on = mm.on ~= false, corner = if type(mm.corner) == "string" and corners[mm.corner] then mm.corner else "TopRight" }
+	end
+	if type(raw.HideKeys) == "boolean" then
+		profile.Settings.HideKeys = raw.HideKeys
+	end
+	if raw.Graphics == "Low" or raw.Graphics == "Medium" or raw.Graphics == "High" or raw.Graphics == "Ultra" then
+		profile.Settings.Graphics = raw.Graphics
+	end
+	for _, key in { "Music", "Sfx" } do
+		local v = tonumber(raw[key])
+		if v and v == v then
+			(profile.Settings :: any)[key] = math.clamp(math.floor(v * 20 + 0.5) / 20, 0, 1)
+		end
+	end
+	if type(raw.Favs) == "table" then
+		local favs = {}
+		for _, id in raw.Favs do
+			if type(id) == "string" and Cars.ById[id] and #favs < 100 and not table.find(favs, id) then
+				table.insert(favs, id)
+			end
+		end
+		profile.Settings.Favs = favs
 	end
 end
 

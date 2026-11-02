@@ -43,6 +43,7 @@ UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
 UI.onPhotoButton = nil :: (() -> ())? -- photo mode (PhotoMode)
+UI.onMenuButton = nil :: (() -> ())? -- the main menu (MainMenu; the MENU button replaced SETTINGS, 2026-11-02)
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -420,7 +421,13 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		end
 		return f
 	end
-	if kind == "gear" then
+	if kind == "menu" then
+		-- the main menu: a 2 x 2 of rounded tiles, one bigger (the menu's own look)
+		box(5, 5, 13, 13, 3)
+		box(20, 5, 7, 13, 2.5)
+		box(5, 20, 7, 7, 2.5)
+		box(14, 20, 13, 7, 2.5)
+	elseif kind == "gear" then
 		-- eight teeth around a thick ring
 		for t = 0, 7 do
 			local a = math.rad(t * 45)
@@ -1019,7 +1026,9 @@ local function buildSideButtons()
 		return b
 	end
 
-	local settingsBtn = sideButton("gear", "SETTINGS", 1)
+	-- (owner, 2026-11-02: SETTINGS became MENU, the big-tile main menu; settings live in it)
+	local settingsBtn = sideButton("menu", "MENU", 1)
+	settingsBtn.Name = "MenuButton"
 	-- (owner, 2026-10-23: the SHOP became CARS, your own cars; new ones are sold at the dealership)
 	local shopBtn = sideButton("car", "CARS", 2)
 	-- (owner, 2026-10-30: GIFTS became GOALS: Legends Path, daily tasks and the daily streak)
@@ -1194,7 +1203,12 @@ local function buildSideButtons()
 	end)
 
 	settingsBtn.Activated:Connect(function()
-		togglePanel(settingsPanel)
+		closePanels()
+		if UI.onMenuButton then
+			UI.onMenuButton()
+		else
+			togglePanel(settingsPanel)
+		end
 	end)
 	shopBtn.Activated:Connect(function()
 		closePanels()

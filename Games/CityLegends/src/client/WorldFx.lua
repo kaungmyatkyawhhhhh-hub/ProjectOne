@@ -110,7 +110,27 @@ end)
 -- Quality: scales LOD distances + traffic density from the player's
 -- Roblox graphics setting (and a little lower on phones/tablets)
 ---------------------------------------------------------------------
+-- the main menu's Graphics setting (2026-11-02): Low / Medium / High / Ultra over Roblox's own
+local qualityPick: number? = nil
+local QUALITY = { Low = 0.6, Medium = 0.8, High = 1, Ultra = 1.15 }
+function WorldFx.setQuality(name: string)
+	qualityPick = QUALITY[name]
+	-- the costly screen effects: off on Low, depth of field off on Medium
+	local Lighting = game:GetService("Lighting")
+	for _, e in Lighting:GetChildren() do
+		if e:IsA("SunRaysEffect") or e:IsA("BloomEffect") then
+			e.Enabled = name ~= "Low"
+		elseif e:IsA("DepthOfFieldEffect") then
+			e.Enabled = name == "High" or name == "Ultra"
+		end
+	end
+end
+
 function WorldFx.qualityScale(): number
+	if qualityPick then
+		local touch = game:GetService("UserInputService").TouchEnabled and not game:GetService("UserInputService").KeyboardEnabled
+		return qualityPick * (if touch then 0.85 else 1)
+	end
 	local scale = 1
 	local ok, level = pcall(function()
 		return UserSettings():GetService("UserGameSettings").SavedQualityLevel

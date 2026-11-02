@@ -670,6 +670,127 @@ DealerOpen.OnClientEvent:Connect(function(carId: any)
 	}, if type(carId) == "string" then carId else nil)
 end)
 
+-- the main menu (owner, 2026-11-02: big tiles, CAMPAIGN / CARS / STORE): the start screen, and
+-- from the HUD's MENU button (it replaced SETTINGS) while you play
+local MainMenu = require(script.Parent:WaitForChild("MainMenu"))
+local FastTravel = remotes:WaitForChild("FastTravel") :: RemoteFunction
+local ClaimStarter = remotes:WaitForChild("ClaimStarter") :: RemoteFunction
+MainMenu.init({
+	getData = function()
+		return data
+	end,
+	refresh = function()
+		local fresh = GetData:InvokeServer()
+		if fresh then
+			data = fresh
+		end
+		return data
+	end,
+	drive = function(id: string)
+		requestDrive(id)
+	end,
+	-- fast travel (the server checks it and says where): the car, or you on foot, onto the spot;
+	-- from the start screen your car comes out there
+	travel = function(spotId: string)
+		local ok, result = pcall(function()
+			return FastTravel:InvokeServer(spotId)
+		end)
+		if not ok or type(result) ~= "table" then
+			return { ok = false, message = "The server didn't answer, try again" }
+		end
+		if not result.ok or typeof(result.cf) ~= "CFrame" then
+			return result
+		end
+		local cf: CFrame = result.cf
+		MainMenu.close()
+		-- the ground there has to have reached this game first (streaming): wait for it, then sit
+		-- the car or you on it
+		local function ground(): RaycastResult?
+			local rp = RaycastParams.new()
+			rp.FilterType = Enum.RaycastFilterType.Exclude
+			rp.FilterDescendantsInstances = { playerCars, player.Character :: any, workspace.CurrentCamera }
+			-- (only solid ground: the far-city stand-in's ground is there before the real one streams in)
+			rp.RespectCanCollide = true
+			rp.IgnoreWater = true
+			return workspace:Raycast(cf.Position + Vector3.new(0, 40, 0), Vector3.new(0, -120, 0), rp)
+		end
+		local function settle(): boolean
+			local deadline = os.clock() + 6
+			local hit = ground()
+			while not hit and os.clock() < deadline do
+				task.wait(0.2)
+				hit = ground()
+			end
+			-- (ground far under the spot: it's over water or a drop; don't put anyone there)
+			if hit and hit.Position.Y > cf.Position.Y - 8 then
+				cf = CFrame.new(hit.Position) * cf.Rotation
+				return true
+			end
+			return false
+		end
+		if Driving.isDriving() then
+			UI.fade(true, 0.25)
+			task.wait(0.3)
+			if not settle() then
+				UI.fade(false, 0.3)
+				UI.toast("Can't put the car there right now, try again", Config.Theme.Danger)
+				return result
+			end
+			Driving.teleport(cf)
+			Traffic.clearAround(cf.Position, 35)
+			task.wait(0.5)
+			UI.fade(false, 0.4)
+		elseif OnFoot.active and player.Character then
+			UI.fade(true, 0.25)
+			task.wait(0.3)
+			if settle() and player.Character then
+				player.Character:PivotTo(cf + Vector3.new(0, 3, 0))
+			else
+				UI.toast("Can't put you there right now, try again", Config.Theme.Danger)
+			end
+			task.wait(0.5)
+			UI.fade(false, 0.4)
+		elseif result.spawn and data.Selected then
+			requestDrive(data.Selected)
+		end
+		return result
+	end,
+	claim = function(id: string)
+		local ok, result = pcall(function()
+			return ClaimStarter:InvokeServer(id)
+		end)
+		if not ok or type(result) ~= "table" then
+			return { ok = false, message = "The server didn't answer, try again" }
+		end
+		if result.ok and type(result.data) == "table" then
+			data = result.data
+		end
+		return result
+	end,
+	settings = settings,
+	saveSettings = function()
+		SaveSettings:FireServer(settings)
+	end,
+	openGoals = function()
+		if UI.onGoalsButton then
+			UI.onGoalsButton()
+		end
+	end,
+	openMarket = function()
+		require(script.Parent:WaitForChild("MarketUI")).open()
+	end,
+	openPhoto = function()
+		if UI.onPhotoButton then
+			UI.onPhotoButton()
+		end
+	end,
+})
+MainMenu.applySettings(settings)
+if settings.HideKeys then
+	UI.toggleControls(false)
+end
+UI.onMenuButton = MainMenu.toggle
+
 showMenu = function()
 	UI.showHud(false)
 	-- (the server streams the menu's part of the map in again: the Riviera)
@@ -677,10 +798,7 @@ showMenu = function()
 		(remotes:WaitForChild("MenuFocus", 5) :: RemoteEvent):FireServer()
 	end)
 	startOrbit()
-	UI.showMainMenu(data.Cash, function()
-		UI.hideMainMenu()
-		openGarage(true)
-	end)
+	MainMenu.open(true)
 end
 
 local function toggleGarage()

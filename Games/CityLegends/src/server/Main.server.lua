@@ -464,6 +464,13 @@ GetData.OnServerInvoke = function(player: Player)
 	while not PlayerData.get(player) and os.clock() < timeout do
 		task.wait(0.1)
 	end
+	if game:GetService("RunService"):IsStudio() and player:GetAttribute("TestNewPlayer") then
+		local profile = PlayerData.get(player)
+		if profile then
+			profile.Claimed = false -- (Studio only: shows the claim screen again)
+		end
+		player:SetAttribute("TestNewPlayer", nil)
+	end
 	local snap = PlayerData.snapshot(player) :: any
 	if snap then
 		local day, readyIn = Goals.streak(player)
@@ -629,6 +636,108 @@ end)
 
 SaveSettings.OnServerEvent:Connect(function(player: Player, raw: any)
 	PlayerData.setSettings(player, raw) -- kept with the profile, saved with it
+end)
+
+---------------------------------------------------------------------
+-- The main menu (2026-11-02): the first car, fast travel
+---------------------------------------------------------------------
+local TravelSpots = require(Shared:WaitForChild("TravelSpots"))
+local ClaimStarter: RemoteFunction = remote("RemoteFunction", "ClaimStarter")
+local FastTravel: RemoteFunction = remote("RemoteFunction", "FastTravel")
+
+-- a new player picks 1 of the 3 starter cars, once: it becomes their only car
+local claiming: { [Player]: boolean } = {}
+ClaimStarter.OnServerInvoke = function(player: Player, carId: any)
+	local profile = PlayerData.get(player)
+	if not profile or type(carId) ~= "string" then
+		return { ok = false, message = "Try again" }
+	end
+	local pick = nil
+	for _, c in Config.Menu.StarterChoices do
+		if c.id == carId then
+			pick = c
+		end
+	end
+	if not pick or not Cars.ById[carId] then
+		return { ok = false, message = "Pick one of the three" }
+	end
+	if profile.Claimed or claiming[player] then
+		return { ok = false, message = "Your first car is already claimed" }
+	end
+	claiming[player] = true
+	-- (a new profile holds only the default starter: swap it for the one picked)
+	if carId ~= Cars.StarterId then
+		local others = 0
+		for id in profile.Owned do
+			if id ~= Cars.StarterId then
+				others += 1
+			end
+		end
+		if others == 0 then
+			profile.Owned[Cars.StarterId] = nil
+		end
+	end
+	profile.Owned[carId] = true
+	profile.Selected = carId
+	profile.Claimed = true
+	claiming[player] = nil
+	task.spawn(PlayerData.save, player)
+	return { ok = true, data = PlayerData.snapshot(player) }
+end
+
+-- fast travel from the world map: to a venue's kerb (or your house), you and your car
+local lastTravel: { [Player]: number } = {}
+FastTravel.OnServerInvoke = function(player: Player, spotId: any)
+	if type(spotId) ~= "string" or #spotId > 40 then
+		return { ok = false, message = "Unknown place" }
+	end
+	if ((player:GetAttribute("Wanted") :: number?) or 0) > 0 then
+		return { ok = false, message = "Lose the police first" }
+	end
+	if player:GetAttribute("Loot") then
+		return { ok = false, message = "Not while you carry the loot" }
+	end
+	if Activities.isBusy(player) then
+		return { ok = false, message = "Finish your race or job first" }
+	end
+	if spotId ~= "home" and not TravelSpots.get(spotId) then
+		return { ok = false, message = "Unknown place" }
+	end
+	local wait = Config.Menu.FastTravelCooldown - (os.clock() - (lastTravel[player] or -1e9))
+	if wait > 0 then
+		return { ok = false, message = string.format("Fast travel again in %d s", math.ceil(wait)) }
+	end
+	local car = getSession(player).car
+	local inCar = car ~= nil and car.Parent ~= nil and player.Character == nil
+	local cf: CFrame? = nil
+	if spotId == "home" then
+		local drive, door = Houses.homeSpot(player)
+		cf = if inCar then drive else door
+		if not cf then
+			return { ok = false, message = "Place a house first (Legends Realty)" }
+		end
+	else
+		local spot = TravelSpots.get(spotId)
+		cf = spot and spot.cf
+	end
+	if not cf then
+		return { ok = false, message = "Unknown place" }
+	end
+	lastTravel[player] = os.clock()
+	-- the ground there reaches the player's game first
+	pcall(function()
+		player:RequestStreamAroundAsync(cf.Position, 8)
+	end)
+	-- no car and not on foot (the start screen): their car comes out there
+	local spawn = not inCar and player.Character == nil
+	if spawn then
+		spawnAt[player] = cf
+	end
+	return { ok = true, cf = cf, inCar = inCar, spawn = spawn }
+end
+Players.PlayerRemoving:Connect(function(player)
+	lastTravel[player] = nil
+	claiming[player] = nil
 end)
 
 DespawnCar.OnServerEvent:Connect(function(player: Player)
