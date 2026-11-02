@@ -62,7 +62,6 @@ Big tiles, like the reference:
    - controls (show keys, steering sensitivity for phone);
    - reduced motion.
    - All saved per player.
-5. **EXIT TO DESKTOP** is not needed (Roblox has its own). Instead, a small **DAILY REWARD** tile (streak days, Claim) when one is ready.
 
 ## CARS tab
 - A big grid of **your cars** (owned), grouped by brand like the garage, with "**X / 79 owned**" at the top.
@@ -93,15 +92,6 @@ In-game purchases, following the **Playbook money rules**:
 2. Press it (or PLAY): **choose 1 of 3 starter cars**, shown as 3 big cards with name, stats and a one-line feel ("easy and grippy", "fast but loose", "big and comfy"), picked from the Starter tier.
 3. Confirm → the car is yours (server-checked, once only) → the menu closes → you're **driving within 15 seconds** of joining (Playbook first-session rule).
 4. The first goal shows on the HUD.
-
-## Make it better (extra ideas)
-1. **Live 3D car behind the menu:** a slow camera orbit around your actual car in the world while the menu is open (cheap, no extra models).
-2. **Badges and dots** on tabs and tiles when something's new (a reward, a car unlocked, an achievement done).
-3. **Quick-select wheel** on gamepad / keyboard: hold a key for Spawn car / Despawn / Fast travel home / Waypoint to last venue.
-4. **"Continue" chips** on the PLAY tile: your last activity (Resume delivery, Back to race, Go home).
-5. **Friends on the map:** your friends' markers, with "Join friend" fast travel (same rules).
-6. **Phone first:** tiles at least 44 px tall, thumb-reachable, test at 667 × 375; no tiny text.
-7. **Gamepad:** full D-pad / stick navigation with a clear highlight (the bright outline from the reference).
 
 ## Rules
 - Our own art: drawn icons and tiles, no placeholder buttons, no copied art, **no logos**, fictional names.

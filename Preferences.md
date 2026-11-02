@@ -10,6 +10,8 @@ _Claude: follow these exactly. They're a starting point: edit them to say exactl
 - Be honest when something won't work or can't be done, and say what will work instead.
 - Don't ask for my passwords or logins.
 
+- Don't add your own extra ideas to prompts or plans unless I ask for them (2026-11-02). Do only what I asked.
+
 ## Taste
 - Quality matters: I don't want anything that looks cheap or "slop".
 - For games: realistic visuals in the style of top Roblox games (e.g. Highway Legends).
