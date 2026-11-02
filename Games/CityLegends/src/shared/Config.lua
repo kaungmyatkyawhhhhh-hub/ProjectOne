@@ -342,7 +342,9 @@ Config.DrivingFeel = {
 	Downforce = { Supercar = 0.35, Hypercar = 0.5 } :: { [string]: number }, -- extra grip at top speed
 	SteerSlowdown = 150, -- the wheel turns half as fast at this many studs/s (calm at speed)
 	PowerOversteer = 0.6, -- traction control off: flooring it lets the rear step out this much more
-	BumpKick = 0.5, -- body pitch kick (radians/s) per stud of sudden ground change (kerbs, ramps)
+	BumpKick = 0.18, -- body pitch kick (radians/s) per stud of sudden ground change over 0.45 (kerbs, ramps; was 0.5 from 0.18, owner 2026-11-02: the car jerked on every stud)
+	LiftEase = 5, -- how fast the body rises to a bump under its wheels (per second; settling back is SettleEase)
+	SettleEase = 12,
 	-- realistic suspension (owner, 2026-10-24): a spring per wheel. spring: stiffness (its square
 	-- root sets how fast the body returns to its ride height); damp: the fastest the body moves up or
 	-- down on its springs (studs/s); bump / droop: how far a wheel can move up / down (studs). Soft
@@ -355,7 +357,7 @@ Config.DrivingFeel = {
 		Supercar = { spring = 560, damp = 13, bump = 0.35, droop = 0.4 },
 		Hypercar = { spring = 620, damp = 14, bump = 0.3, droop = 0.35 },
 	} :: { [string]: { spring: number, damp: number, bump: number, droop: number } },
-	HullLift = 0.9,
+	HullLift = 1.3, -- the collision box's bottom over the car's (a small step slides under it; was 0.9)
 	RoadTexture = 0.004, -- fine body shimmy at speed (radians)
 	BodyRoll = 3.4, -- body lean in a corner (degrees per g, times the class's roll)
 	BodyPitch = 3.0, -- nose dive braking / squat pulling away (degrees per g, times the class's pitch)

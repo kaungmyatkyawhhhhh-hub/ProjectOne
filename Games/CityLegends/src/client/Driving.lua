@@ -212,6 +212,7 @@ type State = {
 	-- driving feel (Config.DrivingFeel)
 	yawRate: number, -- the car's turn now (it follows the wheel with some weight)
 	groundDist: number?, -- last ground ray distance (kerbs and bumps kick the body)
+	gapSm: number?, -- the springs' mean travel, smoothed (a stud under one wheel barely lifts the body)
 	groundUp: Vector3, -- the road's slope under the car, smoothed (the body sits along it)
 	fovPunch: number, -- a moment's wider view (launch, flat-out shift, close pass)
 	blurPulse: number,
@@ -1995,10 +1996,13 @@ function Driving.step(dt: number)
 		local last = s.groundDist
 		if last then
 			local jump = last - hit.Distance -- up when the ground rises
-			if math.abs(jump) > 0.18 and math.abs(jump) < 4 then -- (the spring smooths small ones)
-				s.pitchVel += jump * DF.BumpKick * 20
-				s.rollVel += jump * DF.BumpKick * 8 * (if math.random() < 0.5 then -1 else 1)
-				s.shake = math.max(s.shake, math.min(math.abs(jump) * 0.5, 0.6))
+			-- (owner, 2026-11-02: "the car is jerking and jump and lifting up too much when there is
+			-- a stud or a bump"): only a real kerb or ramp kicks the body, and gently; a stud or a
+			-- seam in the road is soaked up by the springs. No random sideways roll any more.
+			if math.abs(jump) > 0.45 and math.abs(jump) < 4 then
+				local k = math.clamp(math.abs(jump) - 0.45, 0, 1.5) * math.sign(jump)
+				s.pitchVel += k * DF.BumpKick * 20
+				s.shake = math.max(s.shake, math.min(math.abs(k) * 0.3, 0.35))
 			end
 		end
 		s.groundDist = hit.Distance
@@ -2029,8 +2033,14 @@ function Driving.step(dt: number)
 	-- The body rises or sinks back to its ride height at the spring's own rate, plus the road's own
 	-- climb or fall under it, and the damping is the speed limit on the way.
 	if nOn > 0 then
-		local avg = sum / nOn
-		local rate = math.sqrt(sp.spring) * 0.55
+		-- the springs' mean travel, smoothed: the body follows the road, not each stud under a
+		-- wheel (it rises more slowly than it settles, so a bump doesn't throw it up)
+		local raw = sum / nOn
+		local prev = s.gapSm or raw
+		local k = if raw < prev then DF.LiftEase else DF.SettleEase
+		s.gapSm = prev + (raw - prev) * math.min(1, dt * k)
+		local avg = s.gapSm
+		local rate = math.sqrt(sp.spring) * 0.45
 		local vy = -avg * rate
 		-- (fewer wheels on the road: over an edge the car drops away freely)
 		if nOn < #s.corners then
@@ -2039,6 +2049,7 @@ function Driving.step(dt: number)
 		s.vyTarget = math.clamp(vy, -sp.damp, sp.damp)
 	else
 		s.vyTarget = nil
+		s.gapSm = nil
 	end
 	-- the road plane under the four wheels: the body lies along it (one wheel up a kerb tips it; a
 	-- crest or a dip pitches it). In the air it eases back level.
@@ -2075,7 +2086,10 @@ function Driving.step(dt: number)
 			upNow = hit.Normal
 		end
 	end
-	s.groundUp = s.groundUp:Lerp(upNow, math.min(1, dt * (if nOn > 0 then 12 else 2))).Unit
+	-- (the road plane eases in: a sudden tilt of more than ~6 degrees is one wheel on a stud, which
+	-- tilts the body only slowly; a real change of slope comes through within a few tenths)
+	local tiltRate = if nOn == 0 then 2 elseif upNow:Dot(s.groundUp) < 0.9945 then 3 else 8
+	s.groundUp = s.groundUp:Lerp(upNow, math.min(1, dt * tiltRate)).Unit
 	s.grounded = nOn > 0
 
 	local actual = root.AssemblyLinearVelocity
