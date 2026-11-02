@@ -265,3 +265,30 @@ Screenshots: `Map/screens/2026-11-02-studio-check-fixes/` (playtest wide + free 
   - **FPS not measured this time:** Studio was capped at 15 FPS again (the same cap seen earlier with the whole map removed). The last valid reading was 60 FPS at 587 parts.
 - **Code copy:** `Code\map\MapBuilder.lua`.
 - **Republish needed.**
+
+---
+## Camera bug sweep (2 Nov night, Claude Code; owner: "check everywhere with ur camera, theres so many bugs")
+**What I checked:**
+- wide shots from 4 sides + top-down;
+- every zone up close;
+- bridge landings at both ends, the islands at tiers 0 / 1 / 3 / 5 / 6, the Sector 2 island, under the centre;
+- a walk from a bridge onto the plaza and back.
+
+Before / after screenshots: `Map/screens/2026-11-02-bug-sweep/`.
+
+**Bugs found and fixed:**
+1. **Every bridge ran UNDER the plaza's brass rim** (the bridge started inside the rim at floor level, so it looked cut off).
+   - Now each landing has a stone threshold: a ramp up from the plaza, a slab over the rim with brass edges, and the bridge starts at its outer end (`MapConfig.Centre.Threshold`).
+   - Also done for the Sector 2 bridge.
+   - Walk test: bridge -> plaza and plaza -> bridge both in 1.3 s, no snag.
+2. **The Core's gyroscope rings cut through the stone altar.** Core moved up 11.5 -> 15 and rings slightly smaller (`MapConfig.Centre.Gyros`); their lowest point is now above the altar. The violet back light follows the Core.
+3. **Star-chart lines were buried under the floor tiles** (only the dots showed). Lines, dots and ring are now above the tiles.
+4. **Tier-5 islands: the brass "outer ring" floated in the air outside the island.** It now rests on the 6 lamp pillars as a crown ring under the lamps.
+5. **Tier-6 telescope stood inside a crystal.** Moved to a free spot.
+6. **Black Hole inner glow was a hairline.** It's now a thick glowing ring.
+7. **The Forge's blue rim overhung its top step.** It's now sized to the step.
+
+**Checked and fine:** the free-slot rocks, both boards (front / back / legs off the walkways), the leaderboard, IGNITION, the Sector 2 island, the hanging crystals under the centre, the banners.
+
+- **Numbers:** 60 FPS in play with 8 islands; static map 469 parts; no script errors.
+- **Republish needed.**

@@ -101,6 +101,32 @@ function Builder.IslandCenter(slot: number): (Vector3, Vector3, number)
 	return O + dir * I.Ring + Vector3.new(0, I.Heights[slot] or 0, 0), dir, a
 end
 
+-- a stone threshold over the plaza's brass rim where a bridge lands: a ramp up from the floor, a slab over the rim, and the
+-- bridge starts at the slab's outer end (before, every bridge ran UNDER the 1.6-stud rim). Returns the bridge's start point.
+local function threshold(parent, dir: Vector3, width: number): Vector3
+	local CR = MapConfig.Centre
+	local T = CR.Threshold
+	local w = width + 1.2
+	local frame = CFrame.lookAt(O, O + dir) -- (-Z = out along the bridge)
+	local slabLen = T.Out + T.In
+	local slab = part({ Name = "Threshold", Size = Vector3.new(w, T.Thick, slabLen), Color = C.Stone2, CanCollide = true,
+		CFrame = frame * CFrame.new(0, T.Top - T.Thick / 2, -(CR.Radius + (T.Out - T.In) / 2)), Parent = parent })
+	local ramp = Instance.new("WedgePart")
+	ramp.Name = "ThresholdRamp"
+	ramp.Size = Vector3.new(w, T.Top, T.Ramp)
+	-- (a wedge rises toward its -Z... toward its front face: turned so it climbs going OUT)
+	ramp.CFrame = frame * CFrame.new(0, T.Top / 2, -(CR.Radius - T.In - T.Ramp / 2)) * CFrame.Angles(0, math.pi, 0)
+	ramp.Anchored, ramp.CastShadow, ramp.CanTouch = true, false, false
+	ramp.Color, ramp.Material = C.Stone2, Enum.Material.SmoothPlastic
+	ramp.Parent = parent
+	for _, side in ipairs({ -1, 1 }) do
+		part(brass({ Name = "ThresholdEdge", Size = Vector3.new(0.3, 0.2, slabLen), CFrame = slab.CFrame * CFrame.new(side * (w / 2 - 0.15), T.Thick / 2 + 0.1, 0),
+			CanCollide = false, CanQuery = false, Parent = parent }))
+	end
+	local _ = slab
+	return O + dir * (CR.Radius + T.Out - 0.3) + Vector3.new(0, T.Top - 0.2, 0)
+end
+
 local function bridge(parent, A: Vector3, B: Vector3, n: number, width: number, arch: number, color: Color3, name: string)
 	local folder = Instance.new("Folder")
 	folder.Name = name
@@ -178,16 +204,16 @@ function Builder.Build()
 	for gi, angle in ipairs(CR.Accents) do
 		local out = MapConfig.ZoneDir(angle)
 		local frame = CFrame.lookAt(O + out * D.Chart, O + out * D.Chart - out) -- (+Z out, +X along the rim)
-		Kit.Make("RimRing", brass({ Name = "ChartRing", Size = Vector3.new(D.ChartRadius * 2, 0.1, D.ChartRadius * 2), CFrame = frame * CFrame.new(0, 0.05, 0), Parent = details }))
+		Kit.Make("RimRing", brass({ Name = "ChartRing", Size = Vector3.new(D.ChartRadius * 2, 0.16, D.ChartRadius * 2), CFrame = frame * CFrame.new(0, 0.08, 0), Parent = details }))
 		local pts = {}
 		local flip = if gi % 2 == 0 then -1 else 1 -- (mirrored in every other gap, so they're not stamped)
 		for i, pt in ipairs(CHART) do
 			pts[i] = (frame * CFrame.new(pt[1] * flip, 0, pt[2])).Position
 			part({ Name = "ChartStar", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.12, 1, 1) * (if i == 4 then 1.4 else 1),
-				CFrame = CFrame.new(pts[i] + Vector3.new(0, 0.06, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = C.Lamp, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = details })
+				CFrame = CFrame.new(pts[i] + Vector3.new(0, 0.1, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = C.Lamp, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = details })
 			if i > 1 then
 				local a, b = pts[i - 1], pts[i]
-				part(brass({ Name = "ChartLine", Size = Vector3.new(0.22, 0.06, (b - a).Magnitude), CFrame = CFrame.lookAt((a + b) / 2, b) + Vector3.new(0, 0.03, 0),
+				part(brass({ Name = "ChartLine", Size = Vector3.new(0.22, 0.06, (b - a).Magnitude), CFrame = CFrame.lookAt((a + b) / 2, b) + Vector3.new(0, 0.1, 0),
 					CanCollide = false, CanQuery = false, Parent = details }))
 			end
 		end
@@ -230,7 +256,7 @@ function Builder.Build()
 	local light = Instance.new("PointLight")
 	light.Color, light.Range, light.Brightness, light.Shadows = Color3.fromRGB(255, 170, 90), 24, 1.4, false
 	light.Parent = lightHost
-	local rimHost = part({ Name = "RimLight", Size = Vector3.new(1, 1, 1), CFrame = CFrame.lookAt(O + Vector3.new(0, 13, -20), O + Vector3.new(0, 13, 10)),
+	local rimHost = part({ Name = "RimLight", Size = Vector3.new(1, 1, 1), CFrame = CFrame.lookAt(O + Vector3.new(0, CR.CoreHeight + 1.5, -20), O + Vector3.new(0, CR.CoreHeight + 1.5, 10)),
 		Transparency = 1, CanCollide = false, CanQuery = false, Parent = core })
 	local rim = Instance.new("SpotLight")
 	rim.Face, rim.Color, rim.Range, rim.Brightness, rim.Angle, rim.Shadows = Enum.NormalId.Front, Color3.fromRGB(170, 110, 255), 40, 2.5, 60, false
@@ -245,7 +271,7 @@ function Builder.Build()
 		Kit.Make("CoreSpike", { Name = "Spike", Size = Vector3.new(1.6, len, 1.6), CFrame = alongY(corePos + dir * (CR.CoreRadius + len / 2 - 0.6), dir),
 			Color = C.Spike, Material = Enum.Material.Neon, Parent = core })
 	end
-	for i, spec in ipairs({ { 9.5, 72, 0 }, { 10.25, -58, 30 }, { 11, 10, -70 } }) do
+	for i, spec in ipairs(CR.Gyros) do
 		local ring = Kit.Make("GyroRing", brass({ Name = "Gyro" .. i, Size = Vector3.new(spec[1] * 2, 0.7 - i * 0.12, spec[1] * 2),
 			CFrame = CFrame.new(corePos) * CFrame.Angles(math.rad(spec[2]), math.rad(spec[3]), 0), Parent = core }))
 		ring:SetAttribute("Spin", ({ 0.35, -0.25, 0.18 })[i])
@@ -325,7 +351,7 @@ function Builder.Build()
 	local zf = zoneCf(Z.Forge.angle, Z.Forge.dist) * CFrame.Angles(0, math.pi, 0)
 	local stepH = 3.6
 	Kit.Make("Dais", { Name = "Platform", Size = Vector3.new(16, stepH, 16), CFrame = zf * CFrame.new(0, stepH / 2, 0), Color = C.Stone2, Collide = true, Parent = forge })
-	Kit.Make("RimRing", { Name = "Rim", Size = Vector3.new(10, 0.4, 10), CFrame = zf * CFrame.new(0, stepH + 0.1, 0), Color = C.ForgeRim, Parent = forge })
+	Kit.Make("RimRing", { Name = "Rim", Size = Vector3.new(8.6, 0.4, 8.6), CFrame = zf * CFrame.new(0, stepH + 0.1, 0), Color = C.ForgeRim, Parent = forge })
 	Kit.Make("Anvil", { Name = "Anvil", Size = Vector3.new(6, 4, 2.4), CFrame = zf * CFrame.new(0, stepH + 2, -0.5), Color = C.Steel, Reflectance = 0.1, Collide = true, Parent = forge })
 	-- the padlock hangs on the anvil's front face (the face toward the Core: the anvil's +Z face is at -0.5 + 1.2)
 	Kit.Make("Padlock", { Name = "Padlock", Size = Vector3.new(1.6, 2.2, 0.5), CFrame = zf * CFrame.new(0, stepH + 2.9, 0.7 + 0.25), Color = C.Lock, Reflectance = 0.1, Parent = forge })
@@ -371,7 +397,7 @@ function Builder.Build()
 			prev = pt
 		end
 	end
-	local glow = Kit.Make("OrbitRing", { Name = "InnerGlow", Size = Vector3.new(inner * 2 + 0.6, 0.55, inner * 2 + 0.6), CFrame = ringCf, Color = Color3.fromRGB(255, 160, 235),
+	local glow = Kit.Make("GateRing", { Name = "InnerGlow", Size = Vector3.new(inner * 2 + 1.4, 1, inner * 2 + 1.4), CFrame = ringCf, Color = Color3.fromRGB(255, 160, 235),
 		Material = Enum.Material.Neon, Parent = hole })
 	glow:SetAttribute("Swirl", 0.8)
 	local glowHost = part({ Name = "GlowLight", Size = Vector3.new(1, 1, 1), CFrame = ringCf, Transparency = 1, CanCollide = false, CanQuery = false, Parent = hole })
@@ -436,7 +462,7 @@ function Builder.Build()
 		island.Parent = islands
 		local anchor = part({ Name = "Anchor", Size = Vector3.new(1, 1, 1), CFrame = CFrame.new(center), Transparency = 1, CanCollide = false, CanQuery = false, Parent = island })
 		island.PrimaryPart = anchor
-		local A = O + dir * (CR.Radius - 0.5) + Vector3.new(0, 0.05, 0)
+		local A = threshold(centre, dir, I.Bridge.Width)
 		local B = center - dir * 9.5 + Vector3.new(0, 0.05, 0)
 		bridge(island, A, B, I.Bridge.Segments, I.Bridge.Width, I.Bridge.Arch, C.BridgeDim, "Bridge")
 		local pieces = Instance.new("Folder")
@@ -474,7 +500,7 @@ function Builder.Build()
 			Color = C.Ice, Reflectance = 0.2, Parent = nextS })
 	end
 	Kit.Make("Padlock", { Name = "Padlock", Size = Vector3.new(3.5, 4.8, 1.4), CFrame = CFrame.new(N + Vector3.new(0, 10, 0)), Color = C.Lock, Reflectance = 0.1, Parent = nextS })
-	local A = O + nsDir * (CR.Radius - 0.5) + Vector3.new(0, 0.05, 0)
+	local A = threshold(centre, nsDir, NS.BridgeWidth + 0.8)
 	local B = N - nsDir * (NS.Radius - 1) + Vector3.new(0, 0.05, 0)
 	local _, pts = bridge(nextS, A, B, NS.BridgeSegments, NS.BridgeWidth, NS.Arch, C.BridgeDim, "Bridge")
 	-- brass edges along it (wider and clearer than the island bridges)
