@@ -668,9 +668,35 @@ function Roads.build(data, opts)
 					local narrow = math.min(if side < 0 then a.wl else a.wr, if side < 0 then b.wl else b.wr) < HALF - 0.5
 					if otherNear(roads, grid, sidePos, ri, HALF + 2) == nil and not a.tunnel and not narrow
 						and not selfNear(roads, grid, sidePos, ri, i, HALF + 1) and not selfNear(roads, grid, kerbPos, ri, i, HALF - 1) then
-						-- 6 studs deep: the terrain under the road is cleared 4 studs down
-						local walkCF = stripCF(a2, b2, side * (HALF + WALK / 2), CURB_UP - 3)
-						local pv = newPart({ Name = "Pavement", Size = Vector3.new(WALK, 6, len + grow), CFrame = walkCF, Material = Enum.Material.Pavement, Color = paver }, folder)
+						-- 6 studs deep: the terrain under the road is cleared 4 studs down.
+						-- (owner, 2026-11-02: "the curbs are glitching out") the kerb and pavement follow the
+						-- road's own edge (its height can differ from the centre line's at junctions now),
+						-- and neighbouring pieces differ by a hair in width and height so their overlaps
+						-- never share a face (that flickered). A fan's pivot (the inside of a tight bend,
+						-- where the edge stands still) keeps the old centre-line strip.
+						local ea = if side < 0 then edgeL[i] else edgeR[i]
+						local eb = if side < 0 then edgeL[i + 1] else edgeR[i + 1]
+						local edgeLen = Vector2.new(eb.X - ea.X, eb.Z - ea.Z).Magnitude
+						local alt = if i % 2 == 0 then 1 else 0
+						local walkCF, kerbCF, walkLen, kerbLen
+						if edgeLen > 0.5 then
+							local out = right * side
+							local extra = math.min(grow, 8) + 0.3
+							local function along(offset: number, y: number): (CFrame, number)
+								local pa = ea + out * offset + Vector3.new(0, y, 0)
+								local pb = eb + out * offset + Vector3.new(0, y, 0)
+								return CFrame.lookAt((pa + pb) / 2, pb), (pb - pa).Magnitude + extra
+							end
+							local wcf, wl2 = along(WALK / 2, CURB_UP - 3 + alt * 0.006)
+							walkCF, walkLen = wcf, wl2
+							kerbCF, kerbLen = along(0.45, CURB_UP + 0.02 - 3 + alt * 0.006)
+						else
+							walkCF = stripCF(a2, b2, side * (HALF + WALK / 2), CURB_UP - 3 + alt * 0.006)
+							kerbCF = stripCF(a2, b2, side * (HALF + 0.45), CURB_UP + 0.02 - 3 + alt * 0.006)
+							walkLen = len + grow
+							kerbLen = len + grow
+						end
+						local pv = newPart({ Name = "Pavement", Size = Vector3.new(WALK - alt * 0.01, 6, walkLen), CFrame = walkCF, Material = Enum.Material.Pavement, Color = paver }, folder)
 						-- patterned paving in some quarters (owner 2026-11-02: "add some sidewalk
 						-- patterns"); MaterialVariants in MaterialService (Creator Store textures)
 						local pattern = PATTERNS[r.name]
@@ -678,8 +704,7 @@ function Roads.build(data, opts)
 							pv.MaterialVariant = pattern[1]
 							pv.Color = pattern[2]
 						end
-						local kerbCF = stripCF(a2, b2, side * (HALF + 0.45), CURB_UP + 0.02 - 3)
-						local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9, 6.04, len + grow), CFrame = kerbCF, Material = Enum.Material.Granite, Color = KERB }, folder)
+						local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kerbLen), CFrame = kerbCF, Material = Enum.Material.Granite, Color = KERB }, folder)
 						k.CastShadow = false
 						count += 2
 					end
