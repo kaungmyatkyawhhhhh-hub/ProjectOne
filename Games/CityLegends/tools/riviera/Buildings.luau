@@ -404,6 +404,14 @@ local function belle(cf: CFrame, W: number, D: number, gnd: { number }, rng: Ran
 	det:SetAttribute("Range", 650)
 	CollectionService:AddTag(det, "LOD")
 	det.Parent = m
+	-- only the core collides and answers rays: everything else is just for show (less physics work)
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") and d.Name ~= "Body" then
+			d.CanCollide = false
+			d.CanQuery = false
+			d.CanTouch = false
+		end
+	end
 	m.Parent = parent
 	return m
 end
@@ -511,6 +519,14 @@ local function block(cf: CFrame, W: number, D: number, gnd: { number }, rng: Ran
 	det:SetAttribute("Range", 700)
 	CollectionService:AddTag(det, "LOD")
 	det.Parent = m
+	-- only the core collides and answers rays: everything else is just for show (less physics work)
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") and d.Name ~= "Body" then
+			d.CanCollide = false
+			d.CanQuery = false
+			d.CanTouch = false
+		end
+	end
 	m.Parent = parent
 	return m
 end

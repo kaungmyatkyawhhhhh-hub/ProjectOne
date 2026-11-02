@@ -380,6 +380,41 @@ function WorldFx.start()
 			end
 		end)
 	end
+	-- the far city's night billboards (tag FarLight): on at night, past 450 studs, and only up on the
+	-- hills (camera above 110), so phones on low graphics (which stop drawing parts far away) still
+	-- see the city lights from the hills. They cost ~2.5 ms a frame, so not on high graphics (the
+	-- real far city shows there) and not down in the streets (where buildings hide them anyway).
+	local highGraphics = false
+	pcall(function()
+		local level = UserSettings():GetService("UserGameSettings").SavedQualityLevel
+		highGraphics = level ~= Enum.SavedQualitySetting.Automatic and (tonumber(string.match(level.Name, "%d+")) or 0) >= 8
+	end)
+	task.spawn(function()
+		local camera = workspace.CurrentCamera
+		while true do
+			task.wait(0.5)
+			local camPos = camera.CFrame.Position
+			local look = camera.CFrame.LookVector
+			local cosHalf = math.cos(math.rad(math.min(89, camera.FieldOfView * 0.5 * camera.ViewportSize.X / math.max(1, camera.ViewportSize.Y) + 8)))
+			-- (Studio preview: workspace attribute PreviewFarLights acts like a phone on low graphics)
+			local up = camPos.Y > 110 and (not highGraphics or (RunService:IsStudio() and workspace:GetAttribute("PreviewFarLights") == true))
+			for i, bb in CollectionService:GetTagged("FarLight") do
+				local a = bb.Parent
+				if bb:IsA("BillboardGui") and a and a:IsA("BasePart") and a:IsDescendantOf(workspace) then
+					local rel = a.Position - camPos
+					local dist = rel.Magnitude
+					-- (only the ones in front of the camera: each costs a little every frame)
+					local on = up and lampsLit and dist > 450 and rel:Dot(look) > dist * cosHalf
+					if bb.Enabled ~= on then
+						bb.Enabled = on
+					end
+				end
+				if i % 400 == 0 then
+					task.wait()
+				end
+			end
+		end
+	end)
 	local lampCache: { [Instance]: boolean } = {}
 	task.spawn(trimShadows)
 	startLod(WorldFx.qualityScale())

@@ -293,6 +293,59 @@ function FarCity.build(riviera: Model, far: any): { [string]: number }
 		end
 	end
 
+	-- night lights that survive low graphics: Roblox stops drawing parts past ~500 studs on low and
+	-- medium graphics (most phones), but billboards still show. One billboard of lit windows per
+	-- building, at its centre (on high graphics the building around it hides it), switched on at night
+	-- and far away by WorldFx (folder Lights, tag FarLight)
+	local lights = Instance.new("Folder")
+	lights.Name = "Lights"
+	lights.Parent = root
+	local WARM = { Color3.fromRGB(255, 196, 120), Color3.fromRGB(255, 176, 96), Color3.fromRGB(255, 214, 150) }
+	for k, b in (if buildings then buildings:GetChildren() else {}) do
+		local shell = b:GetAttribute("Shell")
+		local size = b:GetAttribute("ShellSize")
+		if typeof(shell) ~= "CFrame" or typeof(size) ~= "Vector3" then
+			continue
+		end
+		local floorY = (shell * CFrame.new(0, -size.Y / 2, 0)).Position.Y
+		local wdt = math.min(size.X, size.Z) * 0.85
+		-- (the part of the building above the street: windows are from the floor up)
+		local top = shell.Position.Y + size.Y / 2
+		local ground = math.max(floorY, top - 160)
+		local hgt = (top - ground) * 0.85
+		local a = part({ Name = "Light", Size = Vector3.new(1, 1, 1), CFrame = CFrame.new(shell.Position.X, (top + ground) / 2, shell.Position.Z), Transparency = 1 }, lights)
+		local bb = Instance.new("BillboardGui")
+		bb.Size = UDim2.fromScale(wdt, hgt)
+		bb.LightInfluence = 0
+		bb.MaxDistance = 100000
+		bb.AlwaysOnTop = false
+		bb.Enabled = false
+		bb.ResetOnSpawn = false
+		local cols = math.max(2, math.floor(wdt / 12)) -- a dot stands for two windows
+		local rows = math.max(3, math.floor(hgt / 9))
+		local count = 0
+		for r = 1, rows do
+			for c = 1, cols do
+				local h = hash(shell.Position + Vector3.new(c * 3.7, r * 9.1, 0))
+				if h < 0.35 and count < 16 then
+					local f = Instance.new("Frame")
+					f.BorderSizePixel = 0
+					f.BackgroundColor3 = if h < 0.03 then Color3.fromRGB(230, 236, 240) else WARM[(c + r) % #WARM + 1]
+					f.Size = UDim2.fromScale(0.6 / cols, 0.5 / rows)
+					f.Position = UDim2.fromScale((c - 1) / cols + 0.2 / cols, (r - 1) / rows + 0.25 / rows)
+					f.Parent = bb
+					count += 1
+				end
+			end
+		end
+		bb.Parent = a
+		CollectionService:AddTag(bb, "FarLight")
+		n.lights = (n.lights or 0) + 1
+		if k % 50 == 0 then
+			task.wait()
+		end
+	end
+
 	root.Parent = ReplicatedStorage
 	return n
 end
