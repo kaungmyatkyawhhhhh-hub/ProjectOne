@@ -119,8 +119,12 @@ end
 local function unlocked(s, k: number): boolean
 	return Econ.Unlocked(k, s.d.nodes)
 end
+-- STAR SURGE (GalaxyStarSurgeService): x2 stardust for everyone while it runs
+local function surgeMult(): number
+	return if workspace:GetServerTimeNow() < (Galaxy:GetAttribute("SurgeUntil") or 0) then MapConfig.Surge.Mult else 1
+end
 local function incomeOf(s): number
-	return Econ.Income(s.d.owned, s.d.nodes)
+	return Econ.Income(s.d.owned, s.d.nodes) * surgeMult()
 end
 local function cometEvery(s): number
 	return Econ.CometEvery(s.d.nodes)
@@ -324,6 +328,15 @@ task.spawn(function()
 			end
 		end
 	end
+end)
+
+-- a surge starting / ending changes everyone's income: re-publish (and once more when it runs out)
+Galaxy:GetAttributeChangedSignal("SurgeUntil"):Connect(function()
+	for player, s in pairs(sessions) do publish(player, s) end
+	local untilT = Galaxy:GetAttribute("SurgeUntil") or 0
+	task.delay(math.max(0, untilT - workspace:GetServerTimeNow()) + 0.1, function()
+		for player, s in pairs(sessions) do publish(player, s) end
+	end)
 end)
 
 -- autosave
