@@ -389,6 +389,7 @@ function Roads.build(data, opts)
 	local roads, grid = prepare(data)
 	alignJunctions(roads, grid)
 	local count = 0
+	local zebraSpots: { Vector3 } = {}
 	for ri, r in roads do
 		if opts.only and not opts.only[r.name] then
 			continue
@@ -709,23 +710,43 @@ function Roads.build(data, opts)
 			else
 				dash = 0
 			end
-			-- zebra crossing where the road leaves a junction (town streets)
-			if town and i > 1 and inJunction[i - 1] and not inJunction[i] and not zebraDone[i] then
-				zebraDone[i] = true
-				local cf = stripCF(a.pos, b.pos, 0, LINE_T / 2 + 0.04) * CFrame.new(0, 0, -len / 2 + 7)
+			-- zebra crossing where the road leaves a junction (town streets). (owner, 2026-11-02: two
+			-- side roads leaving one junction side by side painted their crossings over each other,
+			-- across each other's lanes) A crossing is left out when any stripe would lie on another
+			-- road's carriageway or near a crossing already painted; stripes stop at a narrowed edge.
+			local function zebra(cf: CFrame, w: { number })
+				local stripes = {}
 				for k = -6, 6 do
-					local p = newPart({ Name = "Zebra", Size = Vector3.new(2.6, LINE_T, 10), CFrame = cf * CFrame.new(k * 4.8, 0, 0), Material = Enum.Material.SmoothPlastic, Color = PAINT }, folder)
+					local off = k * 4.8
+					if off < -(w[1] - 3) or off > w[2] - 3 then
+						continue
+					end
+					local sc = cf * CFrame.new(off, 0, 0)
+					if otherNear(roads, grid, sc.Position, ri, HALF - 2) ~= nil then
+						return
+					end
+					table.insert(stripes, sc)
+				end
+				local centre = cf.Position
+				for _, z in zebraSpots do
+					if Vector2.new(z.X - centre.X, z.Z - centre.Z).Magnitude < 24 then
+						return
+					end
+				end
+				table.insert(zebraSpots, centre)
+				for _, sc in stripes do
+					local p = newPart({ Name = "Zebra", Size = Vector3.new(2.6, LINE_T, 10), CFrame = sc, Material = Enum.Material.SmoothPlastic, Color = PAINT }, folder)
 					decor(p)
 					count += 1
 				end
 			end
+			if town and i > 1 and inJunction[i - 1] and not inJunction[i] and not zebraDone[i] then
+				zebraDone[i] = true
+				-- (left / right as the road runs a -> b: the crossing's stripes run across it)
+				zebra(stripCF(a.pos, b.pos, 0, LINE_T / 2 + 0.04) * CFrame.new(0, 0, -len / 2 + 7), { math.min(a.wl, b.wl), math.min(a.wr, b.wr) })
+			end
 			if i < n - 1 and inJunction[i + 1] and not inJunction[i] then
-				local cf = stripCF(a.pos, b.pos, 0, LINE_T / 2 + 0.04) * CFrame.new(0, 0, len / 2 - 7)
-				for k = -6, 6 do
-					local p = newPart({ Name = "Zebra", Size = Vector3.new(2.6, LINE_T, 10), CFrame = cf * CFrame.new(k * 4.8, 0, 0), Material = Enum.Material.SmoothPlastic, Color = PAINT }, folder)
-					decor(p)
-					count += 1
-				end
+				zebra(stripCF(a.pos, b.pos, 0, LINE_T / 2 + 0.04) * CFrame.new(0, 0, len / 2 - 7), { math.min(a.wl, b.wl), math.min(a.wr, b.wr) })
 			end
 			if i % 40 == 0 then
 				task.wait()
