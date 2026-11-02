@@ -627,19 +627,95 @@ function Builder.RockPieces(island: Instance, center: Vector3, dir: Vector3, slo
 		Kit.Make("IslandTop", { Name = "BoardPad", Fit = { "X", pad.Fit }, CFrame = CFrame.lookAt(at - UP * (padH / 2), at - UP * (padH / 2) + dir), Color = C.Stone, Collide = true, Parent = t0 })
 		local under = Kit.Fit("IslandUnder", "X", pad.Fit)
 		Kit.Make("IslandUnder", { Name = "PadUnder", Fit = { "X", pad.Fit }, CFrame = CFrame.new(at - UP * (padH + under.Y / 2 - 0.3)) * CFrame.Angles(0, slot, 0), Color = C.Rock, Parent = t0 })
+		-- a pad under each side board (Bodies, Star Upgrades), touching the rock: the tutorial's first buy is on the Bodies board
+		local SP = I.SidePads
+		local sideH = Kit.Fit("IslandTop", "X", SP.Fit).Y
+		local sideUnder = Kit.Fit("IslandUnder", "X", SP.Fit)
+		for _, b in ipairs(MapConfig.Boards.List) do
+			if b.At then
+				local p = Builder.IslandPoint(center, dir, b.At - b.At.Unit * SP.In)
+				Kit.Make("IslandTop", { Name = "BoardPad", Fit = { "X", SP.Fit }, CFrame = CFrame.lookAt(p - UP * (sideH / 2), p - UP * (sideH / 2) + dir), Color = C.Stone, Collide = true, Parent = t0 })
+				Kit.Make("IslandUnder", { Name = "PadUnder", Fit = { "X", SP.Fit }, CFrame = CFrame.new(p - UP * (sideH + sideUnder.Y / 2 - 0.3)) * CFrame.Angles(0, slot + b.At.Z, 0), Color = C.Rock, Parent = t0 })
+			end
+		end
 	end
 	local _ = island
 	return t0
 end
 
--- a board panel's frame on an island: side -1 = UPGRADES (left, seen from the island), 1 = TREE. Its +Z faces the island's
--- centre (the screen's Back face), tilted back; the CFrame is the panel's centre.
-function Builder.BoardCFrame(center: Vector3, dir: Vector3, side: number): CFrame
+-- the island boards' places (MapConfig.Boards): [id] = the centre of the board's SCREEN, +Z toward the player (the screen's
+-- Back face carries the live SurfaceGui). The pair stands upright in a shallow V (each turned Pair.V in toward the player,
+-- their inner frame edges Pair.Gap apart); the side boards face the island's centre, tilted back Tilt on their stand.
+function Builder.BoardCFrames(center: Vector3, dir: Vector3): { [string]: CFrame }
 	local B = MapConfig.Boards
-	local a = math.rad(side * B.Angle)
-	local at = Builder.IslandPoint(center, dir, Vector3.new(math.cos(a) * B.Radius, 0, math.sin(a) * B.Radius))
-	local base = faceTo(at, center)
-	return base * CFrame.new(0, B.Bottom, 0) * CFrame.Angles(math.rad(-B.Tilt), 0, 0) * CFrame.new(0, B.Height / 2, 0)
+	local P = B.Pair
+	local function world(v: Vector3): Vector3 return Builder.IslandPoint(center, dir, v) end
+	local function along(v: Vector3): Vector3 return world(v) - world(Vector3.zero) end
+	local out = {}
+	for _, b in ipairs(B.List) do
+		if b.pair then
+			local v, side = math.rad(P.V), b.pair
+			local lateral = Vector3.new(-math.sin(v), 0, side * math.cos(v)) -- (along the board, from the gap outward)
+			local normal = Vector3.new(-math.cos(v), 0, -side * math.sin(v)) -- (its face, toward the player)
+			local base = world(P.At + Vector3.new(0, 0, side * P.Gap / 2) + lateral * (b.Width / 2 + B.Frame))
+			local n = along(normal)
+			out[b.id] = CFrame.lookAt(base, base - n) * CFrame.new(0, P.Bottom + b.Height / 2, 0)
+		else
+			local base = faceTo(world(b.At), center)
+			out[b.id] = base * CFrame.new(0, b.Bottom, 0) * CFrame.Angles(math.rad(-b.Tilt), 0, 0) * CFrame.new(0, b.Height / 2, 0)
+		end
+	end
+	return out
+end
+
+-- one board (Regrowth's chunky frame): the dark screen 0.4 back inside a 1.2 lavender stone frame with rounded outer corners
+-- (the screen's own rounded corners, in the stone's colour, are drawn by its UI), a brass trim round the screen, a back
+-- plate; under it a stone pedestal (upright boards) or two legs leaning with it (tilted boards, on a stand like Regrowth's
+-- Machines board)
+function Builder.BoardFrame(parent: Instance, cf: CFrame, w: number, h: number, floorY: number, tilted: boolean)
+	local B = MapConfig.Boards
+	local F, D = B.Frame, B.Depth
+	local function stone(props)
+		props.Color = props.Color or B.Stone
+		props.CanCollide = true
+		props.Parent = parent
+		return part(props)
+	end
+	part({ Name = "Screen", Size = Vector3.new(w, h, 0.2), CFrame = cf * CFrame.new(0, 0, 0.1), Color = B.Screen, CanCollide = false, Parent = parent })
+	stone({ Name = "BackPlate", Size = Vector3.new(w, h, 0.4), CFrame = cf * CFrame.new(0, 0, -D / 2 + 0.2), Color = B.StoneDark })
+	for _, s in ipairs({ -1, 1 }) do
+		-- the bars run half a frame past the screen; a round (frame-thick) fills each outer corner
+		stone({ Name = "FrameBar", Size = Vector3.new(w + F, F, D), CFrame = cf * CFrame.new(0, s * (h / 2 + F / 2), 0) })
+		stone({ Name = "FrameBar", Size = Vector3.new(F, h + F, D), CFrame = cf * CFrame.new(s * (w / 2 + F / 2), 0, 0) })
+		for _, t in ipairs({ -1, 1 }) do
+			stone({ Name = "FrameCorner", Shape = Enum.PartType.Cylinder, Size = Vector3.new(D, F, F),
+				CFrame = cf * CFrame.new(s * (w / 2 + F / 2), t * (h / 2 + F / 2), 0) * CFrame.Angles(0, math.pi / 2, 0) })
+		end
+		-- the brass trim round the screen, on the frame's front (straight runs between the corner rounds)
+		part(brass({ Name = "Trim", Size = Vector3.new(w + 0.44, 0.22, 0.12), CFrame = cf * CFrame.new(0, s * (h / 2 + 0.11), D / 2 + 0.05), Parent = parent }))
+		part(brass({ Name = "Trim", Size = Vector3.new(0.22, h + 0.44, 0.12), CFrame = cf * CFrame.new(s * (w / 2 + 0.11), 0, D / 2 + 0.05), Parent = parent }))
+	end
+	if tilted then
+		-- two legs up the back, leaning with the board, from the floor to 2 studs under the top; a brass foot each
+		local up = cf.UpVector
+		for _, sx in ipairs({ -1, 1 }) do
+			local top = (cf * CFrame.new(sx * (w / 2 - 2), h / 2 - 2, -D / 2 - 0.55)).Position
+			local reach = (top.Y - floorY) / up.Y
+			local bottom = top - up * reach
+			stone({ Name = "Leg", Size = Vector3.new(1.1, reach + 0.6, 1.1), CFrame = CFrame.fromMatrix((top + bottom) / 2, cf.RightVector, up), Color = B.StoneDark })
+			local look = Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z)
+			part(brass({ Name = "Foot", Size = Vector3.new(1.8, 0.5, 2.6), CFrame = CFrame.lookAt(bottom + UP * 0.2, bottom + UP * 0.2 + look), CanCollide = true, Parent = parent }))
+		end
+	else
+		-- a stone pedestal from the floor to the frame, with a brass band at its top and a wider foot slab
+		local bottomY = (cf * CFrame.new(0, -h / 2 - F, 0)).Position.Y
+		local tall = bottomY - floorY + 0.3
+		local flat = CFrame.lookAt(cf.Position, cf.Position + Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z))
+		local at = Vector3.new(cf.Position.X, floorY + tall / 2, cf.Position.Z)
+		stone({ Name = "Pedestal", Size = Vector3.new(w * 0.62, tall, D * 0.9), CFrame = flat - flat.Position + at, Color = B.StoneDark })
+		part(brass({ Name = "Band", Size = Vector3.new(w * 0.62 + 0.1, 0.25, D * 0.9 + 0.1), CFrame = flat - flat.Position + at + UP * (tall / 2 - 0.45), Parent = parent }))
+		stone({ Name = "Slab", Size = Vector3.new(w * 0.8, 0.4, D * 2), CFrame = flat - flat.Position + Vector3.new(at.X, floorY + 0.2, at.Z) })
+	end
 end
 
 return Builder

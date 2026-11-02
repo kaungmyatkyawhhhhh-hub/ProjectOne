@@ -8,7 +8,10 @@
 --  * the player attributes the map reads: Bodies, BodyTiers, Supernovas, Rank, SupernovaReady, BestRunStardust,
 --    Tree_CometLure, CometsCaught; and the ones the HUD reads: Stardust, Income, EarnedRun, Essence, TutStep, Own1..,
 --    Node_<id>, Loaded
--- Remotes (ReplicatedStorage.Galaxy): EconRequest (RemoteFunction: "BuyBody", k / "BuyNode", id), EconEvent (server ->
+-- Studio test switch: Workspace attribute TestFreshSave = true -> every player starts on a NEW save that is never written
+-- (the tutorial / tier 0 test; the Studio save stays as it was).
+-- Remotes (ReplicatedStorage.Galaxy): EconRequest (RemoteFunction: "BuyBody" / "BuyBody10" / "BuyBodyMax", k / "BuyNode", id; +
+-- the island slot from a board), EconEvent (server ->
 -- client: "TutorialStep", step, essence / "Bought", kind, what / "CometPaid", id, value), MapEvent ("CometSpawn" to the
 -- client; the client answers "Comet", id).
 local Players = game:GetService("Players")
@@ -70,6 +73,7 @@ end
 local LOCK_STALE = 150 -- seconds: a lock older than this is from a server that died
 local function load(player: Player): (any, boolean, boolean) -- data, readOnly, noSave
 	if not store then return newData(), false, true end
+	if IS_STUDIO and workspace:GetAttribute("TestFreshSave") == true then return newData(), false, true end
 	local key = keyOf(player)
 	for attempt = 1, 6 do
 		local result, lockedElsewhere
@@ -208,16 +212,15 @@ end
 ------------------------------------------------------------------------ requests
 local lastReq = {}
 -- a buy from an island BOARD (arg 3 = the island slot): only the island's owner, standing within MapConfig.Boards.BuyRange
--- of the boards (the 2D window, hotbar U, sends no slot and works anywhere)
+-- of the island's centre, i.e. on the island (the 2D window, hotbar U, sends no slot and works anywhere)
 local function boardAllowed(player: Player, slot): boolean
 	if type(slot) ~= "number" or slot ~= slot or player:GetAttribute("Island") ~= slot then return false end
 	local islands = workspace:FindFirstChild("Galaxy") and workspace.Galaxy:FindFirstChild("Islands")
 	local island = islands and islands:FindFirstChild("Island_" .. slot)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if not island or not root or island:GetAttribute("Owner") ~= player.UserId then return false end
-	local c, a = island:GetAttribute("Center"), island:GetAttribute("Angle")
-	local far = c + Vector3.new(math.cos(a), 0, math.sin(a)) * MapConfig.Boards.Radius
-	return (root.Position - far).Magnitude <= MapConfig.Boards.BuyRange
+	local c = island:GetAttribute("Center")
+	return typeof(c) == "Vector3" and (root.Position - c).Magnitude <= MapConfig.Boards.BuyRange
 end
 
 request.OnServerInvoke = function(player: Player, action, arg, slot)
@@ -231,13 +234,20 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 	r.n += 1
 	if r.n > 25 then return false, "slow" end
 	local d = s.d
-	if action == "BuyBody" then
+	if action == "BuyBody" or action == "BuyBody10" or action == "BuyBodyMax" then
+		-- one body; BuyBody10 = up to 10 (the INFO board's 10x); BuyBodyMax = as many as you can pay for (the BODIES board's M)
 		if type(arg) ~= "number" or arg ~= arg or arg % 1 ~= 0 or arg < 0 or arg >= Econ.PlayableTiers then return false, "bad" end
 		if not unlocked(s, arg) then return false, "locked" end
-		local cost = Econ.Cost(arg, d.owned[arg + 1])
-		if d.stardust < cost then return false, "poor" end
-		d.stardust -= cost
-		d.owned[arg + 1] += 1
+		local most = if action == "BuyBody" then 1 elseif action == "BuyBody10" then 10 else 1000
+		local got = 0
+		while got < most do
+			local cost = Econ.Cost(arg, d.owned[arg + 1])
+			if d.stardust < cost then break end
+			d.stardust -= cost
+			d.owned[arg + 1] += 1
+			got += 1
+		end
+		if got == 0 then return false, "poor" end
 		checkTutorial(player, s)
 		publish(player, s)
 		return true, d.owned[arg + 1]

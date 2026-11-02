@@ -94,32 +94,46 @@ MapConfig.Islands = {
 	RimFit = 61,                                    -- tier 2 brass rim (1.5 high)
 	InlayFit = 34,
 	Lamps = { Radius = 27.5, Angles = { 60, -60, 120, -120 }, Pillar = 6.5, Orb = 1.5 }, -- 8 tall; none at the bridge or the boards
-	Crystals = { Angles = { 65, 105, -65, -105, 140 }, From = 15, To = 21, Low = 3, High = 8 }, -- (none in front of the boards)
+	-- (the crystals, banner and telescope keep clear of the four boards: none in front of a board, none on the bridge path)
+	Crystals = { Angles = { 130, 150, -125 }, From = 15, To = 21, Low = 3, High = 8 },
 	Garden = { At = Vector3.new(-6, 0, 12), Fit = 14 },
-	Banner = { At = Vector3.new(0, 0, 26), Pole = 10, Cloth = 5 }, -- (the cloth mesh at 5 high is 5.1 wide)
+	Banner = { At = Vector3.new(-21, 0, 17), Pole = 10, Cloth = 5 }, -- (the cloth mesh at 5 high is 5.1 wide)
 	CrownRing = 55, CrownHeight = 15.5,             -- tier 5: a brass halo ring above the island (clear of the boards' tops)
 	Dais = 12,
-	Telescope = { At = Vector3.new(-15, 0, -11), Height = 7 },
+	Telescope = { At = Vector3.new(-19, 0, -13), Height = 7 },
 	HangingCrystals = 3,
-	-- tier 0 (a new player): the walkway from the bridge across the rock to a stone pad under the boards
+	-- tier 0 (a new player): the walkway from the bridge across the rock to a stone pad under the pair of boards, + a pad
+	-- under each side board (Bodies, Star Upgrades) touching the rock
 	RockPad = { At = Vector3.new(19, 0, 0), Fit = 34, WalkTo = 4 },
+	SidePads = { Fit = 22, In = 2 }, -- (centred In studs nearer the middle than the side board)
 }
 
--- the island BOARDS (owner, "boards like Regrowth", 2 Nov): two live panels on the OUTER edge of every owned island, on the
--- far side from the bridge, backs to the void, each face tangent to the rim, left UPGRADES / right CONSTELLATION TREE (seen
--- from the island). Their screens are live SurfaceGuis (GalaxyBoards, canvas 745 x 512 = the v12 board PNGs / 2) with real
--- buttons: no prompt, no ClickDetector. Buying from a board: the server checks the island's owner + within BuyRange.
--- (The spec's +-14 deg puts two 16-wide panels at radius 26 into each other: 18.5 deg is the closest they stand apart.)
--- Boards fix 2 (owner): Angle 25 = a ~6 stud gap between the two frames; Tilt 18 = the screens lean back and face up toward
--- the player like Regrowth's; the legs lean with them (bottom edge still Bottom above the floor).
+-- the island BOARDS (owner, 2 Nov: "1:1 direct copy boards from regrowth"; vault "Island boards like Regrowth 1to1"): four
+-- live boards round every owned island, placed like Regrowth's plot (island-local: x = out from the Core, z = to the side).
+--  * far edge, the PAIR (Regrowth's Perks Tree + Info): CONSTELLATION TREE left, INFO right; upright, each turned V degrees
+--    in toward the player (a shallow V), Gap studs apart; the spawn faces Pair.At (the middle of the gap)
+--  * left edge BODIES (Regrowth's Machines board), right edge STAR UPGRADES (Factory Upgrades): Tilt back on a stand
+-- Each: a chunky rounded Frame (lavender stone, brass trim) round a dark screen; the screen's SurfaceGui is drawn by the client
+-- (GalaxyBoards + IslandBoardsUI, PxPerStud pixels a stud) with an animated neon edge in the board's Neon colour. No prompt,
+-- no ClickDetector: the buttons are on the screens. A board buy: the server checks the island's owner + within BuyRange of
+-- the island's centre. Width / Height = the screen (the frame goes round it).
 MapConfig.Boards = {
-	Radius = 26, Angle = 25, Tilt = 18, Bottom = 2.5,
-	Width = 16, Height = 11,                        -- (16 / 11 = 1.4545 = the canvas 745 / 512)
-	Frame = 0.8, Depth = 0.8,
-	Canvas = Vector2.new(745, 512), Window = Vector2.new(30, 32), -- (the v12 window's place on the canvas)
-	BuyRange = 45, DrawRange = 160,
-	Panels = { { id = "Upgrades", side = -1 }, { id = "Tree", side = 1 } },
+	Frame = 1.2, Depth = 1.2, PxPerStud = 50,
+	Stone = Color3.fromRGB(203, 192, 230), StoneDark = Color3.fromRGB(146, 134, 184), Screen = Color3.fromRGB(10, 8, 18),
+	Pair = { At = Vector3.new(25, 0, 0), Gap = 3, V = 16, Bottom = 2.2 },
+	List = {
+		{ id = "Tree", title = "CONSTELLATION TREE", pair = -1, Width = 12, Height = 10, Neon = Color3.fromRGB(150, 100, 255) },
+		{ id = "Info", title = "INFO", pair = 1, Width = 8.5, Height = 10, Neon = Color3.fromRGB(80, 170, 255) },
+		{ id = "Bodies", title = "BODIES", At = Vector3.new(0, 0, -23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
+			Neon = Color3.fromRGB(190, 110, 255) },
+		{ id = "Stars", title = "STAR UPGRADES", At = Vector3.new(0, 0, 23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
+			Neon = Color3.fromRGB(255, 176, 42) },
+	},
+	BuyRange = 40,  -- (from the island's centre: the island is 60 across, so anywhere on it)
+	DrawRange = 160,
 }
+MapConfig.Boards.ById = {}
+for _, b in ipairs(MapConfig.Boards.List) do MapConfig.Boards.ById[b.id] = b end
 
 -- the island grows (tycoon feeling): each tier adds pieces (a pop + sparkle). Bodies reset every Supernova, so the first
 -- tiers come from bodies owned in the first run and the later ones from Supernovas: an island never shrinks.

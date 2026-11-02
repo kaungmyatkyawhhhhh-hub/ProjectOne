@@ -439,10 +439,52 @@ event.OnClientEvent:Connect(function(kind, a, b)
 end)
 UserInputService.InputBegan:Connect(function() tut.idleSince = os.clock() end)
 
+-- step 1 while YOUR Bodies board's button is off screen: gold arrows on the floor from you to the board (Regrowth's trail)
+local trailFolder = Instance.new("Folder")
+trailFolder.Name = "TutorialTrail"
+trailFolder.Parent = workspace
+local trail = {}
+for i = 1, 3 do
+	local pt = Instance.new("Part")
+	pt.Anchored, pt.CanCollide, pt.CanQuery, pt.CanTouch, pt.CastShadow = true, false, false, false, false
+	pt.Transparency = 1
+	pt.Size = Vector3.new(3, 0.05, 3)
+	local decal = Instance.new("Decal")
+	decal.Face = Enum.NormalId.Top
+	decal.Texture = Kit.A.arrow
+	decal.Color3 = Color3.fromRGB(255, 210, 90)
+	decal.Parent = pt
+	trail[i] = pt
+end
+local function showTrail(to: Vector3?)
+	local char = player.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local flat = if to and root then Vector3.new(to.X - root.Position.X, 0, to.Z - root.Position.Z) else Vector3.zero
+	if not root or not hum or flat.Magnitude < 9 then
+		for _, pt in ipairs(trail) do pt.Parent = nil end
+		return
+	end
+	local d = flat.Unit
+	local floor = Vector3.new(root.Position.X, root.Position.Y - hum.HipHeight - root.Size.Y / 2 + 0.06, root.Position.Z)
+	local drift = if Kit.calm() then 0 else (os.clock() * 3) % 3.2 -- (the arrows creep toward the board)
+	for i, pt in ipairs(trail) do
+		local s = 3 + (i - 1) * 3.2 + drift
+		if s > flat.Magnitude - 5 then
+			pt.Parent = nil
+		else
+			local at = floor + d * s
+			pt.CFrame = CFrame.lookAt(at, at + d)
+			pt.Parent = trailFolder
+		end
+	end
+end
+
 RunService.Heartbeat:Connect(function()
 	local step = player:GetAttribute("TutStep") or 0
 	tut.step = step
 	if step >= #Econ.Tutorial then
+		showTrail(nil)
 		arrow.Visible, targetRing.Visible = false, false
 		tutorialTab = nil
 		clearHint()
@@ -457,18 +499,23 @@ RunService.Heartbeat:Connect(function()
 		local s = screenScale()
 		hintRoot.Position = if small and open then UDim2.new(0.5, 0, 0, viewport().Y - math.floor(46 * s)) else UDim2.new(0.5, 0, 0, math.floor(90 * s))
 	end
-	-- step 1 points at the BUY button on YOUR island's Upgrades board when it's on screen (like Regrowth); else the hotbar
-	local boardAt, boardTop
+	-- step 1 points at the Asteroid's UPGRADE on YOUR island's BODIES board (like Regrowth): the arrow + ring when it's on
+	-- screen, the floor trail while you're away from it; the hotbar only when you have no board (no island)
+	local boardAt, boardTop, boardAspect, boardWorld
 	if Econ.Tutorial[step + 1].id == "BuyAsteroid" and not open and shared.GalaxyBoardTarget then
-		local c, t = shared.GalaxyBoardTarget("Body0", "PLANETS")
+		local c, t, aspect = shared.GalaxyBoardTarget("Body0")
 		local cam = workspace.CurrentCamera
 		if c and cam then
+			boardWorld = c
 			local sc, on = cam:WorldToViewportPoint(c)
 			local st = cam:WorldToViewportPoint(t)
-			if on and sc.Z > 0 then boardAt, boardTop = Vector2.new(sc.X, sc.Y), Vector2.new(st.X, st.Y) end
+			if on and sc.Z > 0 then boardAt, boardTop, boardAspect = Vector2.new(sc.X, sc.Y), Vector2.new(st.X, st.Y), aspect end
 		end
 	end
-	if boardAt then
+	showTrail(boardWorld)
+	if boardWorld and not boardAt then
+		arrow.Visible, targetRing.Visible = false, false
+	elseif boardAt then
 		local h = math.max(12, (boardAt.Y - boardTop.Y) * 2)
 		local bob = if Kit.calm() then 0 else math.sin(os.clock() * 5) * 6
 		arrow.Visible = true
@@ -476,7 +523,7 @@ RunService.Heartbeat:Connect(function()
 		arrow.Position = UDim2.fromOffset(boardAt.X, boardTop.Y - 4 + bob)
 		targetRing.Visible = true
 		targetRing.Position = UDim2.fromOffset(boardAt.X, boardAt.Y)
-		targetRing.Size = UDim2.fromOffset(h * 146 / 52 + 8, h + 8)
+		targetRing.Size = UDim2.fromOffset(h * (boardAspect or 146 / 52) + 8, h + 8)
 		targetRing.Rotation = 0
 	elseif target and target.Parent and target.AbsoluteSize.X > 0 then
 		-- (AbsolutePosition is below the top bar even in an IgnoreGuiInset ScreenGui: add the inset back)

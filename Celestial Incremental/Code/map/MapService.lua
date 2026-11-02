@@ -8,7 +8,8 @@
 --  * A Supernova (your Supernovas count going up) = the shared moment: every client sees the Core burst and the shockwave.
 --  * Comets: GalaxyEconService sends them and pays them (MapEvent "CometSpawn" / "Comet").
 --  * Belt: one small rock per body owned (max 20) in the island's star system, so it grows with every buy.
---  * Every owned island has its two live BOARDS (UPGRADES + CONSTELLATION TREE) on the far edge; GalaxyBoards draws them.
+--  * Every owned island has its four live BOARDS, like Regrowth's plot (MapConfig.Boards): CONSTELLATION TREE + INFO on the
+--    far edge, BODIES on the left, STAR UPGRADES on the right; GalaxyBoards draws their screens.
 -- Every size and place comes from MapConfig.Islands (redone to scale against the R15 character, 2 Nov night).
 -- Reads the PLAYER's attributes (set by the economy): Bodies, BodyTiers, Supernovas, SupernovaReady.
 -- Studio test switches (Workspace attributes, Studio only): TestIslands = true (the empty islands get fake owners at every
@@ -71,40 +72,22 @@ local function angled(island: Model, deg: number, r: number): Vector3
 	return at(island, math.cos(a) * r, math.sin(a) * r)
 end
 
--- the island's two BOARDS (owner, "boards like Regrowth"): brass-framed panels on the far edge, backs to the void, each
--- face tangent to the rim, tilted back; a dark screen (GalaxyBoards draws the live UI on it), a beacon on top (shown by the
--- client only while something can be bought). No prompt, no ClickDetector: the buttons are on the screen.
+-- the island's four BOARDS (owner, 2 Nov: "1:1 direct copy boards from regrowth"): Regrowth's chunky stone frames round a
+-- dark screen (GalaxyBoards draws the live UI on it). No prompt, no ClickDetector: the buttons are on the screens.
 local function makeBoards(island: Model)
 	local old = island:FindFirstChild("Boards")
 	if old then return old end
-	local B = MapConfig.Boards
 	local c, dir = centerOf(island)
+	local cfs = Builder.BoardCFrames(c, dir)
 	local model = Instance.new("Model")
 	model.Name = "Boards"
-	for _, spec in ipairs(B.Panels) do
-		local cf = Builder.BoardCFrame(c, dir, spec.side)
+	for _, spec in ipairs(MapConfig.Boards.List) do
 		local panel = Instance.new("Model")
 		panel.Name = "Board_" .. spec.id
 		panel:SetAttribute("Board", spec.id)
+		Builder.BoardFrame(panel, cfs[spec.id], spec.Width, spec.Height, c.Y, spec.Tilt ~= nil)
+		panel.Screen:SetAttribute("Board", spec.id)
 		panel.Parent = model
-		local screen = Builder.part({ Name = "Screen", Size = Vector3.new(B.Width, B.Height, 0.2), CFrame = cf * CFrame.new(0, 0, 0.2), Color = C.Screen, CanCollide = false, Parent = panel })
-		screen:SetAttribute("Board", spec.id)
-		local f = B.Frame
-		for _, bar in ipairs({ { 0, B.Height / 2 + f / 2, B.Width + 2 * f, f }, { 0, -B.Height / 2 - f / 2, B.Width + 2 * f, f }, { -B.Width / 2 - f / 2, 0, f, B.Height }, { B.Width / 2 + f / 2, 0, f, B.Height } }) do
-			Builder.part(brass({ Name = "FrameBar", Size = Vector3.new(bar[3], bar[4], B.Depth), CFrame = cf * CFrame.new(bar[1], bar[2], 0.1), CanCollide = true, Parent = panel }))
-		end
-		Builder.part(brass({ Name = "BackPlate", Size = Vector3.new(B.Width + 2 * f, B.Height + 2 * f, 0.3), CFrame = cf * CFrame.new(0, 0, -B.Depth / 2 + 0.1), CanCollide = true, Parent = panel }))
-		-- two legs up the back, leaning with the board (boards fix 2): from the floor to 3 studs under the top, + a foot block
-		local up = cf.UpVector
-		for _, sx in ipairs({ -1, 1 }) do
-			local top = (cf * CFrame.new(sx * (B.Width / 2 - 2), B.Height / 2 - 3, -B.Depth / 2 - 0.5)).Position
-			local reach = (top.Y - c.Y) / up.Y -- (along the board down to the floor)
-			local bottom = top - up * reach
-			Builder.part(brass({ Name = "Post", Size = Vector3.new(0.9, reach + 0.6, 0.9), CFrame = CFrame.fromMatrix((top + bottom) / 2, cf.RightVector, up), CanCollide = true, Parent = panel }))
-			Builder.part(brass({ Name = "Foot", Size = Vector3.new(1.6, 0.5, 2.4), CFrame = CFrame.lookAt(bottom + Vector3.new(0, 0.2, 0), bottom + Vector3.new(0, 0.2, 0) + Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z)), CanCollide = true, Parent = panel }))
-		end
-		local beacon = Kit.Make("LampOrb", { Name = "Beacon", Fit = { "Y", 1.8 }, CFrame = cf * CFrame.new(0, B.Height / 2 + f + 1.2, 0), Color = Color3.fromRGB(255, 200, 80), Material = Enum.Material.Neon, Parent = panel })
-		local _ = beacon
 	end
 	model.Parent = island
 	return model
@@ -266,8 +249,8 @@ local function spawnCFrame(slot: number): CFrame
 	local island = islandOf(slot)
 	local spot = if (island:GetAttribute("Tier") or 0) == 0 then I.SpawnRock else I.Spawn
 	local pos = at(island, spot.X, spot.Z, 3.5)
-	-- facing the boards (the far edge, between the two panels)
-	local boards = at(island, MapConfig.Boards.Radius, 0)
+	-- facing the pair of boards (the far edge, the gap between CONSTELLATION TREE and INFO)
+	local boards = at(island, MapConfig.Boards.Pair.At.X, MapConfig.Boards.Pair.At.Z)
 	return CFrame.lookAt(pos, Vector3.new(boards.X, pos.Y, boards.Z))
 end
 local function toIsland(player: Player)

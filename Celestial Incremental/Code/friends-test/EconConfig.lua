@@ -44,6 +44,15 @@ function Econ.NextMilestone(owned: number): number?
 	end
 	return nil
 end
+-- a body's TIER = the milestones it has passed (the island boards show "TIER 2 [SILVER]", like Regrowth's machine tiers)
+Econ.MilestoneNames = { [0] = "NO TIER", "BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND", "COSMIC" }
+function Econ.MilestoneTier(owned: number): number
+	local t = 0
+	for _, at in ipairs(Econ.Milestones) do
+		if owned >= at then t += 1 end
+	end
+	return t
+end
 
 ------------------------------------------------------------------------ ring 1 (ONE table: the Upgrades window reads it for
 -- the friends test, the Constellation Tree (T) reads the same table from the alpha; owner 2 Nov)
