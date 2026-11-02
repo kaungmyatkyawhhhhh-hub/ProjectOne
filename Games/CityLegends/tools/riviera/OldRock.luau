@@ -481,4 +481,261 @@ function OldRock.build(parent: Instance, kit, data, rng: Random, buildings: Inst
 	return n
 end
 
+---------------------------------------------------------------------
+-- finishing (owner 2026-11-02: "finish Old rock"): palace guards, ramparts along the rock's edge,
+-- gardens with trees on the empty ground between the old town and the loop road
+---------------------------------------------------------------------
+function OldRock.finish(root: Model, data, rng: Random): { [string]: number }
+	local n = { guards = 0, wall = 0, garden = 0, trees = 0 }
+	for _, name in { "Guards", "Ramparts", "Gardens" } do
+		local old = root:FindFirstChild(name)
+		if old then
+			old:Destroy()
+		end
+	end
+	local loop
+	local roadPts = {}
+	for _, r in data.roads do
+		if r.name == "Old Rock" then
+			loop = r
+		end
+		for i, s in r.s do
+			if i % 2 == 0 then
+				table.insert(roadPts, Vector2.new(s[1], s[3]))
+			end
+		end
+	end
+	local poly = {}
+	for _, s in loop.s do
+		table.insert(poly, Vector2.new(s[1], s[3]))
+	end
+	local function roadDist(p: Vector2): number
+		local best = math.huge
+		for _, q in roadPts do
+			local d = (q - p).Magnitude
+			if d < best then
+				best = d
+			end
+		end
+		return best
+	end
+	local T = workspace.Terrain
+	local terrainRay = RaycastParams.new()
+	terrainRay.FilterType = Enum.RaycastFilterType.Include
+	terrainRay.FilterDescendantsInstances = { T }
+	local function groundAt(x: number, z: number): (number, Enum.Material?)
+		local hit = workspace:Raycast(Vector3.new(x, 400, z), Vector3.new(0, -500, 0), terrainRay)
+		return if hit then hit.Position.Y else 30, if hit then hit.Material else nil
+	end
+	-- everything already standing on the rock (houses, palace, cathedral, square, lanes, ramp); their
+	-- parts mostly answer no queries, so their boxes are tested by hand
+	local solids = {}
+	for _, d in root:GetDescendants() do
+		if d:IsA("BasePart") and d.Size.X * d.Size.Z > 60 then
+			table.insert(solids, d)
+		end
+	end
+	local function taken(p: Vector3, r: number): boolean
+		for _, d in solids do
+			local lp = d.CFrame:PointToObjectSpace(p)
+			local hs = d.Size / 2 + Vector3.new(r, 0, r)
+			if math.abs(lp.X) < hs.X and math.abs(lp.Z) < hs.Z and lp.Y < hs.Y + 30 and lp.Y > -hs.Y - 30 then
+				return true
+			end
+		end
+		return false
+	end
+	local function part(props, parent): BasePart
+		local q = Instance.new(props.Class or "Part")
+		props.Class = nil
+		q.Anchored = true
+		q.TopSurface = Enum.SurfaceType.Smooth
+		q.BottomSurface = Enum.SurfaceType.Smooth
+		for k, v in props do
+			(q :: any)[k] = v
+		end
+		q.Parent = parent
+		return q
+	end
+
+	-- palace guards in white with a white cap, a red sash and a rifle: two by the sentry boxes, two at
+	-- the cathedral doors
+	local guards = Instance.new("Model")
+	guards.Name = "Guards"
+	guards.Parent = root
+	local spots = {}
+	for _, info in { { "RockPalace", 15.5, -5 }, { "StAurelCathedral", 14, -9 } } do
+		local b = root:FindFirstChild(info[1])
+		if b then
+			local shell = b:GetAttribute("Shell")
+			local size = b:GetAttribute("ShellSize")
+			local front = shell * CFrame.new(0, 0, -size.Z / 2)
+			for _, side in { -1, 1 } do
+				local p = (front * CFrame.new(side * info[2], 0, info[3])).Position
+				local base = Vector3.new(p.X, SQUARE_Y, p.Z)
+				table.insert(spots, CFrame.lookAt(base, base + front.LookVector))
+			end
+		end
+	end
+	local WHITE = Color3.fromRGB(240, 240, 236)
+	local BLACK = Color3.fromRGB(24, 24, 26)
+	for _, cf in spots do
+		local ok, rig = pcall(function()
+			local d = Instance.new("HumanoidDescription")
+			d.HeadColor = Color3.fromRGB(214, 170, 130)
+			d.TorsoColor = WHITE
+			d.LeftArmColor = WHITE
+			d.RightArmColor = WHITE
+			d.LeftLegColor = WHITE
+			d.RightLegColor = WHITE
+			return game:GetService("Players"):CreateHumanoidModelFromDescription(d, Enum.HumanoidRigType.R6)
+		end)
+		if not ok or not rig then
+			continue
+		end
+		local model = rig :: Model
+		model.Name = "PalaceGuard"
+		local hum = model:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+		end
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") then
+				d.Anchored = true
+			end
+		end
+		model:PivotTo(cf * CFrame.new(0, 3, 0))
+		local head = model:FindFirstChild("Head") :: BasePart?
+		local torso = model:FindFirstChild("Torso") :: BasePart?
+		local rarm = model:FindFirstChild("Right Arm") :: BasePart?
+		if head and torso then
+			part({ Name = "Kepi", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.7, 1.3, 1.3), CFrame = head.CFrame * CFrame.new(0, 0.62, 0) * CFrame.Angles(0, 0, math.pi / 2), Color = WHITE, CanCollide = false }, model)
+			part({ Name = "Visor", Size = Vector3.new(1.1, 0.1, 0.5), CFrame = head.CFrame * CFrame.new(0, 0.34, -0.72), Color = BLACK, CanCollide = false }, model)
+			part({ Name = "Belt", Size = Vector3.new(2.05, 0.3, 1.05), CFrame = torso.CFrame * CFrame.new(0, -0.7, 0), Color = BLACK, CanCollide = false }, model)
+			part({ Name = "Sash", Size = Vector3.new(0.3, 2.1, 1.06), CFrame = torso.CFrame * CFrame.Angles(0, 0, 0.75), Color = Color3.fromRGB(196, 32, 40), CanCollide = false }, model)
+		end
+		if rarm then
+			part({ Name = "Rifle", Size = Vector3.new(0.25, 4.4, 0.35), CFrame = rarm.CFrame * CFrame.new(0, 1.1, -0.45), Color = Color3.fromRGB(46, 36, 28), Material = Enum.Material.Wood, CanCollide = false }, model)
+		end
+		-- feet on the stones (the rig's pivot is not always its root)
+		local box, bs = model:GetBoundingBox()
+		model:PivotTo(model:GetPivot() + Vector3.new(0, cf.Position.Y - (box.Position.Y - bs.Y / 2), 0))
+		model.Parent = guards
+		n.guards += 1
+	end
+
+	-- ramparts: a crenellated stone wall just inside the loop road's inner pavement, where nothing stands
+	local walls = Instance.new("Model")
+	walls.Name = "Ramparts"
+	walls.Parent = root
+	local STONEW = Color3.fromRGB(206, 194, 170)
+	local pts = loop.s
+	local acc, k2 = 0, 0
+	for i = 2, #pts do
+		local a, b = pts[i - 1], pts[i]
+		local pa, pb = Vector3.new(a[1], 0, a[3]), Vector3.new(b[1], 0, b[3])
+		acc += (pb - pa).Magnitude
+		if acc < 7 then
+			continue
+		end
+		acc = 0
+		local dir = Vector3.new(b[4], 0, b[5]).Unit
+		local right = Vector3.new(-dir.Z, 0, dir.X)
+		-- the inner side: the one inside the loop
+		local probe = pb + right * 50
+		if not inPoly(poly, Vector2.new(probe.X, probe.Z)) then
+			right = -right
+		end
+		local p = pb + right * 44.5
+		if roadDist(Vector2.new(p.X, p.Z)) < 43 then
+			continue
+		end
+		local gy = groundAt(p.X, p.Z)
+		local top = math.max(gy + 4.5, b[2] + 5)
+		if taken(Vector3.new(p.X, top, p.Z), 3) then
+			continue
+		end
+		local h = top - (math.min(gy, b[2]) - 1)
+		local cf = CFrame.lookAt(Vector3.new(p.X, top - h / 2, p.Z), Vector3.new(p.X, top - h / 2, p.Z) + dir)
+		part({ Name = "Rampart", Size = Vector3.new(2.4, h, 7.4), CFrame = cf, Material = Enum.Material.Limestone, Color = STONEW }, walls)
+		k2 += 1
+		if k2 % 2 == 0 then
+			part({ Name = "Merlon", Size = Vector3.new(2.4, 2.2, 3.4), CFrame = cf * CFrame.new(0, h / 2 + 1.1, 0), Material = Enum.Material.Limestone, Color = STONEW, CanCollide = false, CanQuery = false }, walls)
+		end
+		n.wall += 1
+	end
+
+	-- gardens: grass on the free ground inside the loop, umbrella pines and palms, low hedges
+	local gardens = Instance.new("Model")
+	gardens.Name = "Gardens"
+	gardens.Parent = root
+	local lib = game:GetService("ServerStorage"):FindFirstChild("RivieraAssets")
+	local props = lib and lib:FindFirstChild("Props")
+	local trees = {}
+	local CELL = 8
+	local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
+	for _, p in poly do
+		minX, maxX, minZ, maxZ = math.min(minX, p.X), math.max(maxX, p.X), math.min(minZ, p.Y), math.max(maxZ, p.Y)
+	end
+	for x = minX, maxX, CELL do
+		for z = minZ, maxZ, CELL do
+			local p2 = Vector2.new(x, z)
+			if not inPoly(poly, p2) then
+				continue
+			end
+			local rd = roadDist(p2)
+			if rd < 47 then
+				continue
+			end
+			local gy, mat = groundAt(x, z)
+			if mat == nil or mat == Enum.Material.Water then
+				continue
+			end
+			if taken(Vector3.new(x, gy, z), 2) then
+				continue
+			end
+			local grass = if (x + z) % 24 < 12 then Enum.Material.LeafyGrass else Enum.Material.Grass
+			if mat ~= grass then
+				T:ReplaceMaterial(Region3.new(Vector3.new(x - CELL / 2, gy - 8, z - CELL / 2), Vector3.new(x + CELL / 2, gy + 4, z + CELL / 2)):ExpandToGrid(4), 4, mat, grass)
+			end
+			n.garden += 1
+			-- a tree now and then, never near another
+			local near = false
+			for _, t in trees do
+				if (t - p2).Magnitude < 20 then
+					near = true
+					break
+				end
+			end
+			if not near and props and rd > 52 and rng:NextNumber() < 0.5 and not taken(Vector3.new(x, gy, z), 9) then
+				local src = if rng:NextNumber() < 0.6 then props:FindFirstChild("PineA") else props:FindFirstChild("PalmA")
+				if src then
+					local m = src:Clone() :: Model
+					local _, size = m:GetBoundingBox()
+					m:ScaleTo(m:GetScale() * (if src.Name == "PineA" then rng:NextNumber(18, 24) else rng:NextNumber(20, 26)) / size.Y)
+					m:PivotTo(CFrame.new(x, gy, z) * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0))
+					local box, bs = m:GetBoundingBox()
+					m:PivotTo(m:GetPivot() + Vector3.new(0, gy - 0.3 - (box.Position.Y - bs.Y / 2), 0))
+					for _, d in m:GetDescendants() do
+						if d:IsA("BasePart") then
+							d.Anchored = true
+							d.CanCollide = false
+							d.CanQuery = false
+							d.CanTouch = false
+						end
+					end
+					m.Name = "Tree"
+					m.Parent = gardens
+					table.insert(trees, p2)
+					n.trees += 1
+				end
+			elseif rng:NextNumber() < 0.08 then
+				part({ Name = "Hedge", Size = Vector3.new(CELL - 1, 2.4, 2.2), CFrame = CFrame.new(x, gy + 1, z) * CFrame.Angles(0, rng:NextInteger(0, 1) * math.pi / 2, 0), Material = Enum.Material.Grass, Color = Color3.fromRGB(64, 98, 52), CanCollide = false, CanQuery = false, CastShadow = false }, gardens)
+			end
+		end
+		task.wait()
+	end
+	return n
+end
+
 return OldRock
