@@ -166,3 +166,15 @@ The owner removes them by hand. Checked which ones stand in the Starter Gym (Edi
   - Walking along the arrows to the machine: the arrows didn't move at all (0 moves).
   - Walking off the path: they glide, biggest step 0.94 studs.
   - No errors. Shot: `Screenshots/freeze/tutorial_guide_after_2nov.jpg`.
+
+## Machine strip at Alter 15 (2 Nov)
+Prompt: [[2026-11-02 GYM ARC Prompt - Machine strip missing at Alter 15]].
+- **Cause:** `ProgressClient` hid the machine strip (top left, on a machine) whenever `progress.maxed` was true. After the last alter (15) that is always true, so the strip vanished, even while the player still trains for the HALL OF FAME GOAL.
+- **Fix (ProgressClient):**
+  1. Training for the Hall of Fame goal: the strip shows "HALL OF FAME · 73%", the bar, "Needs CORE, LEGS" and the Alter 15 (gold) art, like the HUD card.
+  2. Goal met: "HALL OF FAME / Tap to become a legend" with the glowing outline; a tap opens the Hall of Fame screen.
+  3. A tap while training opens "Hall of Fame goal" with the muscles behind and their GO buttons (before, the window said "Nothing left to train").
+  4. The same groups now drive the HUD card's "Needs", the Body Map's red groups and the "holding you back" hint. The HUD card now names the groups furthest behind (sorted), not the first two in list order.
+  - `HallOfFame` is required at the top of the script now (it was required lower down).
+- **Not changed:** with the Hall of Fame closed and every alter done ("MORE ALTERS SOON"), the strip stays hidden: there is nothing to train.
+- **Tested in Play** (temporary fresh-player data, not saved): Alter 15 at 73% → strip shows; tap → the goal window; goal met → HALL OF FAME strip, tap → the Hall of Fame screen. No errors. Shots: `Screenshots/hof_strip/`.
