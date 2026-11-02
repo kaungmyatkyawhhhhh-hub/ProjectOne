@@ -97,7 +97,7 @@ local function spotFrom(ids: any): ChauffeurRoute.Spot?
 	if type(ids) ~= "table" then
 		return nil
 	end
-	local seg = CityLayout.buildGraph().all[ids[1]]
+	local seg = ChauffeurRoute.graph().all[ids[1]]
 	if not seg then
 		return nil
 	end

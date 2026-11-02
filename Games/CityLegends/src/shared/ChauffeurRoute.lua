@@ -71,6 +71,19 @@ local function graph(): Graph
 	end
 	local g = CityLayout.buildGraph()
 	local all = g.all
+	-- (owner, 2026-11-02: in Monaco the chauffeur said "Walk to a road first") the Riviera's lanes too,
+	-- when it is in the place; their ids follow the old city's, so all[id] finds either
+	if workspace:FindFirstChild("Riviera") then
+		local ok, riv = pcall(function()
+			return require(script.Parent:WaitForChild("RivieraTraffic")).build()
+		end)
+		if ok and riv then
+			all = table.clone(all)
+			for _, seg in riv.all do
+				all[seg.id] = seg
+			end
+		end
+	end
 	-- parallel lanes: same road and direction, a lane apart, side by side, about the same length
 	local buckets: { [string]: { Segment } } = {}
 	local CELL = 60

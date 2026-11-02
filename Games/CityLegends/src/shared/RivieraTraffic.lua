@@ -112,6 +112,12 @@ function RivieraTraffic.build()
 			end
 		end
 	end
+	-- ids continue after the old city's (CityLayout.buildGraph().all), so one list holds both
+	-- (the chauffeur sends segments by id: ChauffeurRoute.graph().all[id])
+	local base = #CityLayout.buildGraph().all
+	for i, seg in all do
+		seg.id = base + i
+	end
 	cached = { lanes = lanes, all = all }
 	return cached
 end

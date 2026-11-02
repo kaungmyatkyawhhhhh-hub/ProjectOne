@@ -63,32 +63,37 @@ local SHOES = { Color3.fromRGB(236, 236, 236), Color3.fromRGB(20, 20, 22), Color
 -- part offsets from the figure's root (feet on the ground, facing -Z); limbs swing from their
 -- joints. {name, size, joint (from root), offset from the joint, swing: 0 none, 1 / -1 legs,
 -- 2 / -2 arms}
-type PartDef = { size: Vector3, joint: Vector3, offset: Vector3, swing: number, colour: string, shape: Enum.PartType? }
+type PartDef = { size: Vector3, joint: Vector3, offset: Vector3, swing: number, colour: string, head: boolean? }
+-- (owner, 2026-11-02: "make all of the walking npc R6 with a random face") Roblox's R6 body: a 2 x 2
+-- torso, the classic head with a face, 1 x 2 arms and legs; 6 parts (was 13)
 local DEFS: { PartDef } = {
-	{ size = Vector3.new(1.7, 1.9, 0.9), joint = Vector3.new(0, 3.2, 0), offset = Vector3.zero, swing = 0, colour = "shirt" },
-	{ size = Vector3.new(1.62, 0.5, 0.86), joint = Vector3.new(0, 2.15, 0), offset = Vector3.zero, swing = 0, colour = "trousers" },
-	{ size = Vector3.new(1.15, 1.15, 1.15), joint = Vector3.new(0, 4.85, 0), offset = Vector3.zero, swing = 0, colour = "skin", shape = Enum.PartType.Ball },
-	{ size = Vector3.new(1.2, 0.5, 1.2), joint = Vector3.new(0, 5.25, 0.06), offset = Vector3.zero, swing = 0, colour = "hair" },
-	{ size = Vector3.new(0.4, 0.3, 0.4), joint = Vector3.new(0, 4.2, 0), offset = Vector3.zero, swing = 0, colour = "skin" },
-	-- legs (hip joints) and shoes
-	{ size = Vector3.new(0.76, 2.1, 0.8), joint = Vector3.new(-0.42, 2.1, 0), offset = Vector3.new(0, -1.05, 0), swing = 1, colour = "trousers" },
-	{ size = Vector3.new(0.76, 2.1, 0.8), joint = Vector3.new(0.42, 2.1, 0), offset = Vector3.new(0, -1.05, 0), swing = -1, colour = "trousers" },
-	{ size = Vector3.new(0.8, 0.32, 1.15), joint = Vector3.new(-0.42, 2.1, 0), offset = Vector3.new(0, -2.0, -0.16), swing = 1, colour = "shoes" },
-	{ size = Vector3.new(0.8, 0.32, 1.15), joint = Vector3.new(0.42, 2.1, 0), offset = Vector3.new(0, -2.0, -0.16), swing = -1, colour = "shoes" },
-	-- arms (shoulder joints) and hands
-	{ size = Vector3.new(0.56, 1.6, 0.6), joint = Vector3.new(-1.14, 4.0, 0), offset = Vector3.new(0, -0.75, 0), swing = -2, colour = "shirt" },
-	{ size = Vector3.new(0.56, 1.6, 0.6), joint = Vector3.new(1.14, 4.0, 0), offset = Vector3.new(0, -0.75, 0), swing = 2, colour = "shirt" },
-	{ size = Vector3.new(0.48, 0.5, 0.5), joint = Vector3.new(-1.14, 4.0, 0), offset = Vector3.new(0, -1.75, 0), swing = -2, colour = "skin" },
-	{ size = Vector3.new(0.48, 0.5, 0.5), joint = Vector3.new(1.14, 4.0, 0), offset = Vector3.new(0, -1.75, 0), swing = 2, colour = "skin" },
+	{ size = Vector3.new(2, 2, 1), joint = Vector3.new(0, 3, 0), offset = Vector3.zero, swing = 0, colour = "shirt" },
+	{ size = Vector3.new(2, 1, 1), joint = Vector3.new(0, 4.5, 0), offset = Vector3.zero, swing = 0, colour = "skin", head = true },
+	-- legs (hip joints)
+	{ size = Vector3.new(1, 2, 1), joint = Vector3.new(-0.5, 2, 0), offset = Vector3.new(0, -1, 0), swing = 1, colour = "trousers" },
+	{ size = Vector3.new(1, 2, 1), joint = Vector3.new(0.5, 2, 0), offset = Vector3.new(0, -1, 0), swing = -1, colour = "trousers" },
+	-- arms (shoulder joints)
+	{ size = Vector3.new(1, 2, 1), joint = Vector3.new(-1.5, 3.5, 0), offset = Vector3.new(0, -0.5, 0), swing = -2, colour = "arms" },
+	{ size = Vector3.new(1, 2, 1), joint = Vector3.new(1.5, 3.5, 0), offset = Vector3.new(0, -0.5, 0), swing = 2, colour = "arms" },
+}
+-- Roblox's own classic faces (their images), and the default smile
+local FACES = {
+	"rbxasset://textures/face.png",
+	"rbxassetid://7074749", "rbxassetid://7074780", "rbxassetid://7074882", "rbxassetid://7075130",
+	"rbxassetid://7075412", "rbxassetid://7076096", "rbxassetid://7317606", "rbxassetid://15885042",
+	"rbxassetid://7699086", "rbxassetid://7131308", "rbxassetid://7317591", "rbxassetid://7074712",
+	"rbxassetid://7074827", "rbxassetid://7074932", "rbxassetid://7075459", "rbxassetid://7076053",
+	"rbxassetid://7076211", "rbxassetid://8329438", "rbxassetid://10747392", "rbxassetid://12145059",
 }
 
-type Figure = { parts: { BasePart }, cfs: { CFrame }, shown: boolean }
+type Figure = { parts: { BasePart }, cfs: { CFrame }, shown: boolean, face: Decal? }
 
 local folder: Folder? = nil
 local rng = Random.new()
 
 local function newFigure(): Figure
 	local parts = {}
+	local face: Decal? = nil
 	for k, def in DEFS do
 		local p = Instance.new("Part")
 		p.Name = "Ped" .. k
@@ -101,32 +106,41 @@ local function newFigure(): Figure
 		p.Material = Enum.Material.SmoothPlastic
 		p.TopSurface = Enum.SurfaceType.Smooth
 		p.BottomSurface = Enum.SurfaceType.Smooth
-		if def.shape then
-			p.Shape = def.shape
+		if def.head then
+			local mesh = Instance.new("SpecialMesh")
+			mesh.MeshType = Enum.MeshType.Head
+			mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+			mesh.Parent = p
+			local d = Instance.new("Decal")
+			d.Name = "face"
+			d.Face = Enum.NormalId.Front
+			d.Parent = p
+			face = d
 		end
 		parts[k] = p
 	end
 	local cfs = table.create(#DEFS, CFrame.new())
-	return { parts = parts, cfs = cfs, shown = false }
+	return { parts = parts, cfs = cfs, shown = false, face = face }
 end
 
 local function dress(f: Figure)
+	local shirt = SHIRTS[rng:NextInteger(1, #SHIRTS)]
+	local skin = SKIN[rng:NextInteger(1, #SKIN)]
 	local look = {
-		skin = SKIN[rng:NextInteger(1, #SKIN)],
+		skin = skin,
 		hair = HAIR[rng:NextInteger(1, #HAIR)],
-		shirt = SHIRTS[rng:NextInteger(1, #SHIRTS)],
+		shirt = shirt,
 		trousers = TROUSERS[rng:NextInteger(1, #TROUSERS)],
-		shoes = SHOES[rng:NextInteger(1, #SHOES)],
+		arms = if rng:NextNumber() < 0.6 then shirt else skin, -- long sleeves or short
 	}
-	local scale = rng:NextNumber(0.92, 1.06)
+	local scale = rng:NextNumber(0.94, 1.04)
 	for k, def in DEFS do
 		local p = f.parts[k]
 		p.Color = look[def.colour]
 		p.Size = def.size * scale
-		-- some wear short hair (no cap of hair), some a fuller one
-		if def.colour == "hair" then
-			p.Size = Vector3.new(1.2, if rng:NextNumber() < 0.5 then 0.42 else 0.62, 1.2) * scale
-		end
+	end
+	if f.face then
+		f.face.Texture = FACES[rng:NextInteger(1, #FACES)]
 	end
 end
 

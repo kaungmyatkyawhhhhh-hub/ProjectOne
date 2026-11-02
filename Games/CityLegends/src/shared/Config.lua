@@ -151,7 +151,7 @@ Config.Lights.Cycle = (Config.Lights.Green + Config.Lights.Yellow + Config.Light
 -- NPC traffic
 ---------------------------------------------------------------------
 Config.Traffic = {
-	CarCount = 32, -- in the city's streets (owner, 2026-10-29: fewer; was 55 in all)
+	CarCount = 40, -- in the city's streets, Monaco's too (owner, 2026-10-29: fewer; was 55 in all; 2026-11-02: 32 -> 40, "add more cars traffic")
 	HighwayCars = 18, -- on the highways and the loop, well spaced to split lanes and speed past
 	HighwayGap = 60, -- studs kept free round a highway car when one is placed (city: 22)
 	-- every car has its own pace, the inside lane runs faster than the outside ones, and each car's
@@ -174,7 +174,8 @@ Config.Traffic = {
 	MountainTurnK = 0.25, -- how often a car turns up onto the mountain (vs other ways on)
 	-- the Riviera (the new map): quiet streets, only this many NPC cars there at once (owner,
 	-- 2026-11-02: "traffic on the new map (reduce traffic)")
-	RivieraMax = 22, -- (was 12; owner 2026-11-02: "add a little more traffic, the city monaco is kinda dead")
+	RivieraMax = 32, -- (22 before; owner 2026-11-02 again: "add more cars traffic")
+	-- (12 before that: "add a little more traffic, the city monaco is kinda dead")
 	FollowGap = 16, -- ...and at least a car length once moving (owner, 2026-10-29)...
 	Headway = 0.5, -- ...plus this many seconds of travel
 	LookAhead = 70,
@@ -859,7 +860,7 @@ end
 ---------------------------------------------------------------------
 Config.Pedestrians = {
 	-- (owner, 2026-11-02: "optimize the walking npc so that the game wont lag": was 46 / 320 / 420)
-	Max = 30, -- on high graphics; scaled down by WorldFx.qualityScale()
+	Max = 18, -- on high graphics; scaled down by WorldFx.qualityScale() (was 30; owner 2026-11-02: "reduce NPC")
 	SpawnRadius = 260, -- spawn within this of the camera
 	CullRadius = 340, -- returned to the pool beyond this
 	MinSpawnGap = 70, -- never pop in closer than this to the camera
