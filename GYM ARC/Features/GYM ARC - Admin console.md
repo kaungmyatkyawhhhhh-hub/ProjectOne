@@ -56,3 +56,21 @@ game.ServerStorage.Admin:Invoke("best", "LuigiRED", "5B")      -- best ever, up 
 
 ## Old wardrobe tops (23 Oct)
 The Wardrobe is off, but old saves still remember the top picked back then (`settings.top`, e.g. "Tank") and the body still showed it. `shirtless` sets it back to Shirtless (and takes off an old gym fit if one is worn). Done for HEINHEIN1922 (Tank -> Shirtless, still off after a rejoin). Other old players may still have one.
+
+## Admin panel (2 Nov)
+An in-game ADMIN window with the same commands as the console. Prompt: [[2026-11-02 GYM ARC Prompt - Admin panel]].
+- **Who:** HEINHEIN1922 (user id 848360565, display name LuigiRED) is the owner. Admins he grants get it too.
+- **Open:** the ADMIN button under the left menu's tiles (with CODES).
+- **Tabs:**
+  - EXP: Strength / Current / Best ever / Muscle.
+  - PROGRESS: Spurts / Alter / Stars / Genetics.
+  - GIFTS: Coins / Pass / Trainer.
+  - INFO: Info / Coins earned / Reset packs.
+  - ADMINS (owner only): Add admin / Remove admin / Admins (the list).
+- **Use:** the PLAYER box starts with your own name; up to two value boxes per command; RUN; the answer shows underneath. LIST shows the names for Muscle, Pass and Trainer. "all" asks for a second tap (the red SURE? button). Coins take "5K" too.
+- **Admins:** the list is saved in the DataStore `AdminPanel`, key `Admins`. Other servers pick up a change within 60 s; the current server at once. An admin who loses it loses the button and the window at once. The owner can't be removed. Grants need the exact Roblox user name (or the exact name / display name of someone in the server). A Studio test never saves the list.
+- **Not in the panel:** erase, codes, launch (console only).
+- **Safety:** the server checks the user id on every call (Remote `AdminPanel`); only the owner can change admins.
+- **Kit:** Kit.Modal + Kit.Tabs + Kit.Button, text boxes styled like the CODES window.
+- **Tested in Play** (temporary data): Strength 2B, the pass list, coins 5K to "all" with the confirm, two-box layout, add / list / remove admin, losing admin hides it. No errors. Shots: `Screenshots/admin_panel/`.
+- Code: `StarterPlayerScripts.AdminPanelClient`; server part at the end of `AdminService`.
