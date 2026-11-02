@@ -282,6 +282,21 @@ local function startOrbit()
 			camera.FieldOfView = 70
 			return
 		end
+		if workspace:FindFirstChild("Riviera") then
+			-- Monaco (owner, 2026-11-02: "switch it to monaco now"): a slow circle over the harbour
+			-- basin (clear of every building up to 120 studs round it), looking across the water to the
+			-- far shore as it turns: the harbour front, the Old Rock, the town on the hill; the server
+			-- streams the Riviera in round the menu (StreamFocus)
+			travel += dt
+			local a = travel * (math.pi * 2 / 160)
+			local centre = Vector3.new(13700, 0, 700)
+			local off = Vector3.new(math.cos(a), 0, math.sin(a))
+			local pos = centre + off * 105 + Vector3.new(0, 82 + math.sin(travel / 9) * 6, 0)
+			local across = -(off + Vector3.new(-off.Z, 0, off.X) * 0.35).Unit
+			camera.CFrame = CFrame.lookAt(pos, pos + across * 420 + Vector3.new(0, -55, 0))
+			camera.FieldOfView = 64
+			return
+		end
 		travel = (travel + dt * 22) % span
 		local x = -span / 2 + travel
 		local sway = math.sin(travel / 90) * 6
@@ -657,6 +672,10 @@ end)
 
 showMenu = function()
 	UI.showHud(false)
+	-- (the server streams the menu's part of the map in again: the Riviera)
+	pcall(function()
+		(remotes:WaitForChild("MenuFocus", 5) :: RemoteEvent):FireServer()
+	end)
 	startOrbit()
 	UI.showMainMenu(data.Cash, function()
 		UI.hideMainMenu()

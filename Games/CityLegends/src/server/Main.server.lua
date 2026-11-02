@@ -840,7 +840,9 @@ local function menuFocus(player: Player)
 	p.CanTouch = false
 	p.Transparency = 1
 	p.Size = Vector3.one
-	p.Position = Vector3.new(500, 30, 0)
+	-- (the menu flies over Monaco when the Riviera is in the place: owner, 2026-11-02, "switch it to
+	-- monaco now"; Main.client's startOrbit)
+	p.Position = if workspace:FindFirstChild("Riviera") then Vector3.new(13700, 40, 700) else Vector3.new(500, 30, 0)
 	p.Parent = focusFolder
 	if not player.ReplicationFocus then
 		player.ReplicationFocus = p
@@ -870,6 +872,14 @@ local function onPlayerAdded(player: Player)
 		end)
 	end
 end
+
+-- back in the menu: stream the menu's part of the map again
+remote("RemoteEvent", "MenuFocus").OnServerEvent:Connect(function(player: Player)
+	local f = focusFolder:FindFirstChild(player.Name)
+	if f and not getSession(player).car then
+		player.ReplicationFocus = f
+	end
+end)
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 for _, p in Players:GetPlayers() do
