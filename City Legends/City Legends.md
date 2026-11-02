@@ -676,3 +676,30 @@ Each venue uses the place's own dressing and cleaned Toolbox models (no scripts,
   - a phone-size screenshot;
   - a 2-player test.
 - **The owner must save the place** (Ctrl+S): the remodel lives in the place, not in the scripts.
+
+**Legends Grand Hotel, pass 1 (2026-11-03):**
+- **How it's built:** the hotel is built by script at start (`server/Hotel.lua`), so this pass is in the code, not in the place. The ready-made pieces come from `ServerStorage.VenueKit` (saved in the place): without it the hotel uses its own built pieces.
+- **Outside:**
+  - the tower is now cream Riviera stone (was dark glass with pink and teal neon), with punched windows, black iron balconies on every other floor, carved cornices with stone balustrades at both setbacks, and LEGENDS GRAND HOTEL in gold letters round the top;
+  - the crown: stone corner piers with gold lanterns and red aviation lights, stone rings round the glass suites;
+  - the podium: tall lobby glass between stone piers, dark bronze frames, a stone band with an iron balconette, a stone door frame with a keystone, a carved cornice and a stone balustrade on the roof;
+  - the wings: windows with stone hoods and iron balconettes, the boutiques (ATELIER, THE SPA) with dark glass lit warm from inside and black awnings with gold names, VALET GARAGE in gold;
+  - the entrance: an iron-and-glass marquise with a gold-lettered black fascia, iron columns with gold collars, glass lanterns, brass bollards, the red carpet, potted palms by the doors, a brass luggage cart;
+  - the forecourt: the map's own palms, the fountain lit warm;
+  - the vertical pink HOTEL sign and every neon strip are gone (only warm lamp glass and the red aviation lights glow).
+  - The tower's stone body, window strips and name band always stream to every player (`TowerShell`, about 250 parts), so it shows from far away.
+- **Inside the lobby:** 3 crystal chandeliers, tufted leather sofas and armchairs in the lounge, potted palms, a luggage cart; gold strips are brass now.
+- **Not changed:** the suites (they are built by the towers' code: done with the towers), the valet bay, stand, elevators, suite sales and the residents' board.
+- **Tested in Play:** it builds, 50 prompts as before; valet: car handed over in the bay ("The valet is parking your ...") and brought back to the bay. The elevators were not ridden this pass (their code is unchanged).
+- **Numbers:** about 4,060 parts (was about 2,440); the 4 suites are 1,370 of them. FPS not measured. Pictures: [[Legends Grand Hotel remodel - before and after.jpg]].
+- **Still to do here:** a phone-size check, a 2-player test, the suites' own look (with the towers).
+
+**Creator Store models used (credit list, cleaned: scripts, fake windows and sounds removed):**
+| Piece | Name in the store | ID | Creator |
+|---|---|---|---|
+| Lobby chandelier | Luxurious Chandelier | 118310450841440 | Johnha_2020 |
+| Lounge sofa and armchair | Leather Tuffled Chair and Couch | 74202385119908 | Crazyba4747 |
+| Luggage cart | Hotel Luggage Cart | 102974171618544 | quibud |
+| Potted palm | Potted Palm Plant | 84368992834967 | itokadaiodsada |
+
+They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the chandelier from 350 to 39 parts).

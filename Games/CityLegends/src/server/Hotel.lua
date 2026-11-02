@@ -9,8 +9,11 @@
 	  * the grand lobby: marble and gold, columns, chandeliers, reception with a concierge, a lounge
 	    with a grand piano, the suite sales gallery, the residents' board and a bank of elevators
 	    (one per suite, one to the roof)
-	  * the tower: glass and champagne gold in two setbacks, Miami Art Deco neon (pink and teal), a
-	    vertical HOTEL sign and the name round the top
+	  * the tower (remodel 2026-11-03): cream Riviera stone in two setbacks, punched windows, black
+	    iron balconies, carved cornices with balustrades, the name in gold letters round the top and
+	    warm floodlights; the podium in the same stone with an iron-and-glass marquise, a stone
+	    balustrade and balconettes; no neon. Chandeliers, leather sofas, potted palms and luggage
+	    carts come from ServerStorage.VenueKit (cleaned Creator Store models saved in the place)
 	  * the crown: the suites (Config.Hotel.Suites), full penthouse floors built by Towers.suite
 	    (lounge, kitchen, bedroom, car showcase, DJ booth and party mode), with the roof terrace (sky
 	    pool, telescope, helipad) on the top one, and gold fins rising past the roof
@@ -42,10 +45,15 @@ local Hotel = {}
 
 local H = Config.Hotel
 local GOLD = H.Accent
-local PINK, TEAL = H.Neon[1], H.Neon[2]
+-- the remodel (2026-11-03, "Remodel the venues"): a Belle Époque grand hotel in cream Riviera stone
+-- with black iron balconies, an iron-and-glass marquise and gold letters; no neon (gold and warm
+-- white light only)
+local RIV_LIGHT = Color3.fromRGB(230, 208, 168)
+local RIV_DARK = Color3.fromRGB(186, 152, 106)
+local IRON = Color3.fromRGB(22, 22, 24)
 local MARBLE = Color3.fromRGB(232, 228, 220)
 local MARBLE_DARK = Color3.fromRGB(36, 36, 40)
-local STONE = Color3.fromRGB(214, 204, 186) -- warm limestone
+local STONE = Color3.fromRGB(214, 182, 132) -- warm cream Riviera limestone (was 214, 204, 186)
 local BRASS = Color3.fromRGB(201, 162, 92)
 local WALNUT = Color3.fromRGB(74, 50, 36)
 local CREAM = Color3.fromRGB(226, 214, 192)
@@ -126,6 +134,56 @@ local function prompt(parent: Instance, action: string, object: string, key: Enu
 	p.RequiresLineOfSight = false
 	p.Parent = parent
 	return p
+end
+
+-- a ready-made piece from ServerStorage.VenueKit (cleaned Creator Store models saved in the place,
+-- facing -Z, pivot at the bottom middle), or nil (Lune tests, a fresh Rojo build)
+local function kitPiece(name: string, cf: CFrame, scale: number?, parent: Instance): Model?
+	local ss = game:GetService("ServerStorage")
+	local vk = ss:FindFirstChild("VenueKit")
+	local src = vk and vk:FindFirstChild(name)
+	if not (src and src:IsA("Model")) then
+		return nil
+	end
+	local m = src:Clone()
+	if scale and scale ~= 1 then
+		m:ScaleTo(scale)
+	end
+	m:PivotTo(cf)
+	m.Parent = parent
+	return m
+end
+
+-- one of the map's own dressing pieces (workspace.Riviera.Dressing), or nil
+local function mapPiece(name: string): Model?
+	local riv = workspace:FindFirstChild("Riviera")
+	local dressing = riv and riv:FindFirstChild("Dressing")
+	local m = dressing and dressing:FindFirstChild(name, true)
+	return if m and m:IsA("Model") then m:Clone() else nil
+end
+
+-- big gold serif letters on a part's face, lit warm (a self-lit SurfaceGui, not neon)
+local function goldLetters(p: BasePart, face: Enum.NormalId, text: string, perStud: number?, glow: number?)
+	local g = Instance.new("SurfaceGui")
+	g.Face = face
+	g.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	g.PixelsPerStud = perStud or 10
+	g.LightInfluence = 0.4
+	g.Brightness = glow or 1.4
+	g.MaxDistance = 1400
+	g.Parent = p
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.Size = UDim2.fromScale(1, 1)
+	t.Text = text
+	t.TextScaled = true
+	t.FontFace = Font.new("rbxasset://fonts/families/Merriweather.json", Enum.FontWeight.Bold)
+	t.TextColor3 = Color3.fromRGB(222, 178, 84)
+	t.Parent = g
+	local s = Instance.new("UIStroke")
+	s.Color = Color3.fromRGB(120, 86, 30)
+	s.Thickness = 1.5
+	s.Parent = t
 end
 
 ---------------------------------------------------------------------
@@ -295,12 +353,29 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 			deco(par, Vector3.one * 0.9, crown * CFrame.Angles(0, k * 2.1, 0) * CFrame.new(0.7, -0.6, 0), Color3.fromRGB(90, 70, 40), Enum.Material.Wood, { shape = Enum.PartType.Ball })
 		end
 	end
-	local function plant(par: Instance, x: number, y: number, z: number, s: number)
-		dbox(par, 2.6 * s, 3 * s, 2.6 * s, x, y + 1.5 * s, z, CHARCOAL, Enum.Material.Slate)
-		dbox(par, 2.8 * s, 0.25 * s, 2.8 * s, x, y + 3 * s, z, BRASS, Enum.Material.Metal)
-		for k = 0, 2 do
-			local a = k * 2.1
-			deco(par, Vector3.one * 3 * s, at(x + math.cos(a) * 0.6 * s, y + (4 + k) * s, z + math.sin(a) * 0.6 * s), Color3.fromRGB(46, 92, 52), Enum.Material.Grass, { shape = Enum.PartType.Ball })
+	-- the map's own palm (a real-looking tree), scaled to h; the built one if the map has none
+	local function realPalm(par: Instance, x: number, z: number, h: number, y0: number?)
+		local m = mapPiece("Palm")
+		if not m then
+			palm(par, x, z, h, y0)
+			return
+		end
+		local tree = m :: Model
+		tree:ScaleTo(tree:GetScale() * (h / tree:GetExtentsSize().Y))
+		local spin = (x * 0.37 + z * 0.11) % 6.28
+		local cf, size = tree:GetBoundingBox()
+		local base = at(x, y0 or 0, z) * CFrame.Angles(0, spin, 0)
+		tree:PivotTo(base * (CFrame.new(cf.Position - Vector3.new(0, size.Y / 2, 0)):Inverse() * tree:GetPivot()))
+		tree.Parent = par
+	end
+	-- a potted palm (VenueKit) on a stone base; the built plant if the kit is missing
+	local function pottedPalm(par: Instance, x: number, y: number, z: number, s: number)
+		if not kitPiece("PottedPalm", at(x, y, z) * CFrame.Angles(0, (x + z) % 3, 0), s * 1.7, par) then
+			dbox(par, 2.6 * s, 3 * s, 2.6 * s, x, y + 1.5 * s, z, CHARCOAL, Enum.Material.Slate)
+			for k = 0, 2 do
+				local a = k * 2.1
+				deco(par, Vector3.one * 3 * s, at(x + math.cos(a) * 0.6 * s, y + (4 + k) * s, z + math.sin(a) * 0.6 * s), Color3.fromRGB(46, 92, 52), Enum.Material.Grass, { shape = Enum.PartType.Ball })
+			end
 		end
 	end
 	-- a sofa facing local -z of cf, with seats you can sit on
@@ -361,7 +436,6 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	local fz = (islandZ0 + islandZ1) / 2 + 4
 	disc(court, true, 24, 2.4, 0, 0.9, fz, MARBLE, Enum.Material.Marble)
 	disc(court, false, 22, 0.4, 0, 2.9, fz, WATER, Enum.Material.Glass, { transparency = 0.25, reflectance = 0.3 })
-	disc(court, false, 22.6, 0.3, 0, 2.6, fz, PINK, Enum.Material.Neon, { transparency = 0.5 })
 	column(court, true, 3.6, 5, 0, 3.3, fz, MARBLE, Enum.Material.Marble)
 	disc(court, true, 9, 0.8, 0, 8.3, fz, MARBLE, Enum.Material.Marble)
 	local nozzle = dbox(court, 0.6, 0.6, 0.6, 0, 9.4, fz, MARBLE, Enum.Material.Marble)
@@ -378,18 +452,18 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	jet.Rate = 80
 	jet.EmissionDirection = Enum.NormalId.Top
 	jet.Parent = nozzle
-	local glow = dbox(court, 1, 0.4, 1, 0, 3.2, fz, TEAL, Enum.Material.Neon)
-	light(glow, TEAL, 24, 1.2)
+	local glow = dbox(court, 1, 0.4, 1, 0, 3.2, fz, WARM, Enum.Material.SmoothPlastic, { transparency = 1 })
+	light(glow, WARM, 24, 1.2)
 	for _, sx in { -1, 1 } do
-		palm(court, sx * (islandW / 2 - 10), islandZ0 + 12, 30, 1)
-		palm(court, sx * (islandW / 2 - 14), islandZ1 - 9, 26, 1)
-		palm(court, sx * 34, fz, 34, 1)
+		realPalm(court, sx * (islandW / 2 - 10), islandZ0 + 12, 34, 1)
+		realPalm(court, sx * (islandW / 2 - 14), islandZ1 - 9, 30, 1)
+		realPalm(court, sx * 34, fz, 38, 1)
 	end
 	-- the name stone at the front of the island, lit from below
 	local stone = box(court, 46, 7, 3, 0, 4.4, islandZ0 + 4, STONE, Enum.Material.Limestone)
 	local stoneText = dbox(court, 42, 5, 0.2, 0, 4.6, islandZ0 + 2.4, BLACK, Enum.Material.SmoothPlastic, { transparency = 1 })
 	kit.surfaceText(stoneText, Enum.NormalId.Front, H.Name .. "\nHOTEL  ·  SUITES", GOLD, nil, nil, Enum.Font.Garamond, Vector2.new(800, 170))
-	dbox(court, 46.4, 0.3, 0.3, 0, 1.1, islandZ0 + 2.3, GOLD, Enum.Material.Neon)
+	dbox(court, 46.4, 0.3, 0.3, 0, 1.1, islandZ0 + 2.3, GOLD, Enum.Material.Metal)
 	kit.addLight("SpotLight", stone, WARM, 18, 1.4, Enum.NormalId.Front, 70)
 	-- art deco lamp posts along the island's sides
 	for _, sx in { -1, 1 } do
@@ -406,20 +480,36 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	local cz0, cz1 = BAY_Z - 18, PODIUM_Z0 - 0.5
 	local canopyD = cz1 - cz0
 	local canopyZ = (cz0 + cz1) / 2
-	box(model, 124, 2.6, canopyD, 0, 20.3, canopyZ, BLACK, Enum.Material.Metal, { shadow = true, name = "Canopy" })
-	dbox(court, 124.4, 0.3, canopyD + 0.4, 0, 18.9, canopyZ, GOLD, Enum.Material.Neon, { transparency = 0.55 })
-	dbox(model, 125, 0.5, 0.5, 0, 21.85, cz0 - 0.1, GOLD, Enum.Material.Neon)
-	dbox(model, 125, 0.4, 0.4, 0, 18.75, cz0 - 0.1, PINK, Enum.Material.Neon)
-	local fascia = dbox(model, 96, 4.6, 0.4, 0, 24.6, cz0 + 1, BLACK, Enum.Material.SmoothPlastic)
-	kit.surfaceText(fascia, Enum.NormalId.Front, H.Name, GOLD:Lerp(Color3.new(1, 1, 1), 0.25), nil, nil, Enum.Font.Garamond, Vector2.new(1400, 90))
-	dbox(model, 96, 0.3, 0.5, 0, 22.2, cz0 + 0.8, GOLD, Enum.Material.Metal)
-	for _, sx in { -1, 1 } do
-		column(model, true, 2.2, 19, sx * 58, 0.9, cz0 + 2, BRASS, Enum.Material.Metal, { reflectance = 0.25 })
-		column(model, false, 2.8, 1.2, sx * 58, 0.9, cz0 + 2, BLACK, Enum.Material.Metal)
+	-- (a Belle Époque marquise: a black iron frame, a glass roof on iron ribs, a gold-lettered fascia)
+	box(model, 124, 1.6, canopyD, 0, 19.8, canopyZ, IRON, Enum.Material.Metal, { shadow = true, name = "Canopy" })
+	local roofGlass = dbox(model, 122, 0.3, canopyD - 2, 0, 21.4, canopyZ, Color3.fromRGB(196, 214, 222), Enum.Material.Glass, { transparency = 0.45, reflectance = 0.2 })
+	roofGlass.CFrame = at(0, 21.6, canopyZ) * CFrame.Angles(math.rad(-4), 0, 0)
+	for x = -60, 60, 10 do
+		dbox(model, 0.5, 0.9, canopyD, x, 21.2, canopyZ, IRON, Enum.Material.Metal).CFrame = at(x, 21.8, canopyZ) * CFrame.Angles(math.rad(-4), 0, 0)
 	end
-	-- warm downlights in the canopy's underside
+	dbox(model, 125, 0.5, 0.5, 0, 20.75, cz0 - 0.1, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
+	dbox(model, 125, 0.3, 0.3, 0, 18.95, cz0 - 0.1, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
+	-- the fascia: a black iron board with the name in gold letters, an iron crest on top
+	local fascia = dbox(model, 100, 5.4, 0.6, 0, 24.2, cz0 + 0.6, IRON, Enum.Material.Metal)
+	goldLetters(fascia, Enum.NormalId.Front, "LEGENDS GRAND HOTEL", 10, 1.5)
+	dbox(model, 101, 0.4, 0.8, 0, 21.4, cz0 + 0.6, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
+	dbox(model, 101, 0.4, 0.8, 0, 27.0, cz0 + 0.6, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
+	for k = -3, 3 do
+		dbox(model, 0.3, 3, 0.3, k * 2.2, 28.4, cz0 + 0.6, IRON, Enum.Material.Metal).CFrame = at(0, 27.2, cz0 + 0.6) * CFrame.Angles(0, 0, k * 0.32) * CFrame.new(0, 1.6, 0)
+	end
+	-- black iron columns with gold collars, and iron brackets under the glass
+	for _, sx in { -1, 1 } do
+		column(model, true, 1.8, 19, sx * 58, 0.9, cz0 + 2, IRON, Enum.Material.Metal)
+		column(model, false, 2.8, 1.2, sx * 58, 0.9, cz0 + 2, IRON, Enum.Material.Metal)
+		column(model, false, 2.4, 0.6, sx * 58, 5.5, cz0 + 2, GOLD, Enum.Material.Metal)
+		column(model, false, 2.6, 0.8, sx * 58, 18.2, cz0 + 2, GOLD, Enum.Material.Metal)
+		dbox(model, 0.5, 0.5, 14, sx * 58, 16, cz0 + 7, IRON, Enum.Material.Metal).CFrame = at(sx * 58, 15.6, cz0 + 7) * CFrame.Angles(math.rad(38), 0, 0)
+	end
+	-- warm lanterns under the canopy (a small glass lamp each)
 	for _, x in { -48, -24, 0, 24, 48 } do
-		local dl = dbox(court, 3.2, 0.2, 3.2, x, 18.85, canopyZ - 4, WARM, Enum.Material.Neon)
+		dbox(court, 0.25, 1.6, 0.25, x, 18.2, canopyZ - 4, IRON, Enum.Material.Metal)
+		local dl = dbox(court, 1.6, 2, 1.6, x, 16.4, canopyZ - 4, WARM, Enum.Material.Neon, { transparency = 0.2, name = "Lantern" })
+		dbox(court, 2.2, 0.4, 2.2, x, 17.5, canopyZ - 4, GOLD, Enum.Material.Metal)
 		kit.addLight("SpotLight", dl, WARM, 26, 1.5, Enum.NormalId.Bottom, 110)
 	end
 	-- the valet bay: box lines and VALET painted on the paving
@@ -451,7 +541,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	for x = -70, 70, 14 do
 		if math.abs(x) > 10 then
 			column(court, true, 0.9, 3, x, 0.1, BAY_Z + 10.5, BRASS, Enum.Material.Metal, { reflectance = 0.3 })
-			disc(court, false, 1.1, 0.3, x, 3.1, BAY_Z + 10.5, WARM, Enum.Material.Neon)
+			dbox(court, 1.2, 1.2, 1.2, x, 3.5, BAY_Z + 10.5, BRASS, Enum.Material.Metal, { shape = Enum.PartType.Ball, reflectance = 0.3 })
 		end
 	end
 
@@ -459,7 +549,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	local standX, standZ = -34, PODIUM_Z0 - 6
 	box(court, 6, 4.2, 3, standX, 2.1, standZ, WALNUT, Enum.Material.Wood)
 	dbox(court, 6.4, 0.3, 3.4, standX, 4.35, standZ, MARBLE, Enum.Material.Marble)
-	dbox(court, 6.2, 0.2, 0.2, standX, 0.6, standZ - 1.55, GOLD, Enum.Material.Neon)
+	dbox(court, 6.2, 0.2, 0.2, standX, 0.6, standZ - 1.55, GOLD, Enum.Material.Metal)
 	local standTop = dbox(court, 2, 0.4, 1.4, standX, 4.7, standZ, BRASS, Enum.Material.Metal, { name = "ValetStand" })
 	local keys = dbox(court, 8, 8, 1, standX, 6, PODIUM_Z0 - 1, WALNUT, Enum.Material.Wood)
 	for r = 0, 2 do
@@ -484,6 +574,12 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	staff(kit, court, at(standX, 0, PODIUM_Z0 - 2.6) * CFrame.Angles(0, 0, 0), valet, "Valet")
 	staff(kit, court, at(18, 0.2, BAY_Z + 12) * CFrame.Angles(0, math.rad(-20), 0), valet2, "Valet")
 	staff(kit, court, at(30, 0.2, BAY_Z + 13) * CFrame.Angles(0, math.rad(15), 0), valet3, "Valet")
+	-- potted palms either side of the doors and along the carpet, a brass luggage cart by the door
+	for _, sx in { -1, 1 } do
+		pottedPalm(court, sx * 11, 0.2, PODIUM_Z0 - 3, 1.3)
+		pottedPalm(court, sx * 9, 0.2, BAY_Z + 13, 1.1)
+	end
+	kitPiece("LuggageCart", at(16, 0.2, PODIUM_Z0 - 5) * CFrame.Angles(0, math.rad(200), 0), 1, court)
 
 	---------------------------------------------------------------- the podium
 	-- wings either side of the lobby: boutiques on the left, the valet garage on the right
@@ -497,45 +593,116 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	box(model, WING_X - gx1, doorH, gz0 - PODIUM_Z0, (gx1 + WING_X) / 2, doorH / 2, (PODIUM_Z0 + gz0) / 2, STONE, Enum.Material.Limestone)
 	dbox(model, doorW, doorH, 0.4, LANE_X, doorH / 2, gz0 - 0.4, BLACK, Enum.Material.SmoothPlastic) -- the dark inside
 	dbox(model, doorW, 0.2, gz0 - PODIUM_Z0, LANE_X, 0.2, (PODIUM_Z0 + gz0) / 2, Color3.fromRGB(26, 26, 28), Enum.Material.Concrete)
-	local gSign = dbox(model, doorW + 2, 3, 0.3, LANE_X, doorH + 2.6, PODIUM_Z0 - 0.3, BLACK, Enum.Material.SmoothPlastic)
-	kit.surfaceText(gSign, Enum.NormalId.Front, "VALET GARAGE", TEAL, nil, nil, Enum.Font.GothamBold, Vector2.new(500, 80))
-	dbox(model, doorW + 1, 0.4, 0.4, LANE_X, doorH + 0.4, PODIUM_Z0 - 0.4, TEAL, Enum.Material.Neon)
-	-- boutique windows in the left wing
+	local gSign = dbox(model, doorW + 2, 3, 0.4, LANE_X, doorH + 2.6, PODIUM_Z0 - 0.3, IRON, Enum.Material.Metal)
+	goldLetters(gSign, Enum.NormalId.Front, "VALET GARAGE", 20, 1.2)
+	dbox(model, doorW + 1, 0.4, 0.4, LANE_X, doorH + 0.4, PODIUM_Z0 - 0.4, GOLD, Enum.Material.Metal)
+	-- boutique windows in the left wing: dark glass in bronze frames, lit warm from inside, black
+	-- awnings with gold names
 	local wingW = WING_X - LOBBY_X
 	for k, name in { "ATELIER", "THE SPA" } do
 		local x = -LOBBY_X - wingW * (if k == 1 then 0.28 else 0.72)
-		dbox(model, wingW * 0.4, 14, 0.3, x, 8, PODIUM_Z0 - 0.2, Color3.fromRGB(160, 130, 96), Enum.Material.Neon, { transparency = 0.35 })
-		local s = dbox(model, wingW * 0.4, 2.4, 0.3, x, 17, PODIUM_Z0 - 0.3, BLACK, Enum.Material.SmoothPlastic)
-		kit.surfaceText(s, Enum.NormalId.Front, name, GOLD, nil, nil, Enum.Font.Garamond, Vector2.new(400, 70))
+		local w = wingW * 0.4
+		local back = dbox(model, w, 13, 0.3, x, 7.8, PODIUM_Z0 + 0.6, Color3.fromRGB(236, 206, 160), Enum.Material.SmoothPlastic)
+		light(back, WARM, 14, 0.8)
+		dbox(model, w, 13, 0.2, x, 7.8, PODIUM_Z0 - 0.2, Color3.fromRGB(40, 44, 50), Enum.Material.Glass, { transparency = 0.55, reflectance = 0.2 })
+		dbox(model, w + 1.2, 0.8, 0.6, x, 14.6, PODIUM_Z0 - 0.3, Color3.fromRGB(60, 48, 34), Enum.Material.Metal)
+		dbox(model, 0.6, 13, 0.6, x, 7.8, PODIUM_Z0 - 0.3, Color3.fromRGB(60, 48, 34), Enum.Material.Metal)
+		local aw = dbox(model, w + 2, 1.4, 4, x, 16.6, PODIUM_Z0 - 2, IRON, Enum.Material.Fabric)
+		aw.CFrame = at(x, 16.6, PODIUM_Z0 - 2) * CFrame.Angles(math.rad(-14), 0, 0)
+		local s = dbox(model, w, 1.3, 0.1, x, 16, PODIUM_Z0 - 4.05, IRON, Enum.Material.Fabric, { transparency = 1 })
+		goldLetters(s, Enum.NormalId.Front, name, 20, 1.1)
 	end
-	-- the lobby's front: stone piers, gold mullions and tall glass, the doors in the middle
+	-- the stone fronts above the wings: two floors of tall windows with
+	-- carved hoods and black iron balconettes, as on the old Riviera hotels
+	local function wingFront(xa: number, xb: number, fromY: number)
+		local w = xb - xa
+		local bays = math.max(1, math.floor(w / 9))
+		local bay = w / bays
+		for _, fy in { 18, 27.5 } do
+			if fy < fromY - 1 then
+				continue
+			end
+			for b = 0, bays - 1 do
+				local bx = xa + (b + 0.5) * bay
+				local pane = dbox(model, bay - 3.4, 6.4, 0.3, bx, fy + 3.2, PODIUM_Z0 - 0.1, Color3.fromRGB(28, 32, 40), Enum.Material.Glass, { reflectance = 0.15 })
+				CollectionService:AddTag(pane, "Window")
+				dbox(model, bay - 2.2, 0.5, 1.2, bx, fy + 6.9, PODIUM_Z0 - 0.5, RIV_LIGHT, Enum.Material.Limestone)
+				dbox(model, 1, 1.2, 0.6, bx, fy + 7.4, PODIUM_Z0 - 0.4, RIV_LIGHT, Enum.Material.Limestone)
+				dbox(model, bay - 2.4, 0.4, 2.2, bx, fy - 0.1, PODIUM_Z0 - 1.1, RIV_LIGHT, Enum.Material.Limestone)
+				dbox(model, bay - 2.4, 0.18, 0.18, bx, fy + 2.6, PODIUM_Z0 - 2.1, IRON, Enum.Material.Metal)
+				for s = 0, 3 do
+					dbox(model, 0.14, 2.6, 0.14, bx - (bay - 2.6) / 2 + s * (bay - 2.6) / 3, fy + 1.3, PODIUM_Z0 - 2.1, IRON, Enum.Material.Metal)
+				end
+			end
+		end
+	end
+	wingFront(-WING_X, -LOBBY_X, 18)
+	wingFront(LOBBY_X, WING_X, doorH + 6)
+	-- the wings' long outer sides: two rows of windows with stone hoods
+	for _, sx in { -1, 1 } do
+		local xf = sx * WING_X
+		for z = PODIUM_Z0 + 8, PODIUM_Z1 - 6, 11 do
+			for _, fy in { 18, 27.5 } do
+				local pane = dbox(model, 0.3, 6.4, 6, xf + sx * 0.1, fy + 3.2, z, Color3.fromRGB(28, 32, 40), Enum.Material.Glass, { reflectance = 0.15 })
+				CollectionService:AddTag(pane, "Window")
+				dbox(model, 1.2, 0.5, 7.2, xf + sx * 0.5, fy + 6.9, z, RIV_LIGHT, Enum.Material.Limestone)
+				dbox(model, 1.6, 0.4, 6.8, xf + sx * 0.7, fy - 0.1, z, RIV_LIGHT, Enum.Material.Limestone)
+			end
+		end
+		dbox(model, 1, 1.2, PODIUM_Z1 - PODIUM_Z0, xf + sx * 0.4, 16.6, (PODIUM_Z0 + PODIUM_Z1) / 2, RIV_LIGHT, Enum.Material.Limestone)
+	end
+	-- the lobby's front: tall glass between stone piers, dark bronze mullions, a carved stone band
+	-- with an iron balconette at the mezzanine line, the doors in the middle
+	local BRONZE = Color3.fromRGB(60, 48, 34)
 	box(model, LOBBY_X * 2, PODIUM_TOP - 30, 2, 0, 30 + (PODIUM_TOP - 30) / 2, PODIUM_Z0 + 1, STONE, Enum.Material.Limestone) -- transom
 	for _, seg in { { -LOBBY_X, -10 }, { 10, LOBBY_X } } do
 		local len = seg[2] - seg[1]
-		box(model, len, 29.5, 0.5, (seg[1] + seg[2]) / 2, 0.5 + 14.75, PODIUM_Z0 + 1, GLASS, Enum.Material.Glass, { transparency = 0.75, reflectance = 0.15, shadow = false })
+		local mid = (seg[1] + seg[2]) / 2
+		box(model, len, 29.5, 0.5, mid, 0.5 + 14.75, PODIUM_Z0 + 1, GLASS, Enum.Material.Glass, { transparency = 0.75, reflectance = 0.15, shadow = false })
 		for x = seg[1], seg[2], 8 do
-			dbox(model, if math.abs(x) % 32 == 0 then 2.4 else 0.5, 29.5, 0.8, x, 0.5 + 14.75, PODIUM_Z0 + 0.4, if math.abs(x) % 32 == 0 then STONE else BRASS, if math.abs(x) % 32 == 0 then Enum.Material.Limestone else Enum.Material.Metal)
+			if math.abs(x) % 32 == 0 then
+				dbox(model, 4.2, 29.5, 1.6, x, 0.5 + 14.75, PODIUM_Z0 + 0.2, STONE, Enum.Material.Limestone)
+				dbox(model, 5, 1.2, 2, x, 1.1, PODIUM_Z0 + 0.2, RIV_DARK, Enum.Material.Limestone)
+				dbox(model, 5, 1.2, 2, x, 29.4, PODIUM_Z0 + 0.2, RIV_LIGHT, Enum.Material.Limestone)
+			else
+				dbox(model, 0.5, 29.5, 0.8, x, 0.5 + 14.75, PODIUM_Z0 + 0.4, BRONZE, Enum.Material.Metal)
+			end
+		end
+		dbox(model, len, 1.4, 1.6, mid, 17, PODIUM_Z0 + 0.2, RIV_LIGHT, Enum.Material.Limestone)
+		dbox(model, len - 1, 0.18, 0.18, mid, 20.4, PODIUM_Z0 - 0.5, IRON, Enum.Material.Metal)
+		dbox(model, len - 1, 0.12, 0.12, mid, 18.4, PODIUM_Z0 - 0.5, IRON, Enum.Material.Metal)
+		for x = seg[1] + 1, seg[2] - 1, 1.6 do
+			dbox(model, 0.12, 2.6, 0.12, x, 19.1, PODIUM_Z0 - 0.5, IRON, Enum.Material.Metal)
 		end
 	end
-	-- the doors: a revolving door (walk straight through) under a gold sunburst
+	-- the doors: a revolving door (walk straight through) in a stone frame under a gold sunburst
 	column(model, false, 14, 13, 0, 0.5, PODIUM_Z0 + 1, GLASS, Enum.Material.Glass, { transparency = 0.85 })
 	for k = 0, 3 do
 		dbox(model, 0.2, 13, 6.5, 0, 7, PODIUM_Z0 + 1, GLASS, Enum.Material.Glass, { transparency = 0.7 }).CFrame = at(0, 7, PODIUM_Z0 + 1) * CFrame.Angles(0, k * math.pi / 2 + 0.4, 0) * CFrame.new(0, 0, 3.25)
 	end
 	disc(model, false, 15, 0.6, 0, 13.5, PODIUM_Z0 + 1, BRASS, Enum.Material.Metal)
 	for k = -4, 4 do
-		dbox(model, 0.3, 10, 0.3, 0, 19, PODIUM_Z0 + 0.2, GOLD, Enum.Material.Neon, { transparency = 0.2 }).CFrame = at(0, 14.2, PODIUM_Z0 + 0.2) * CFrame.Angles(0, 0, k * 0.3) * CFrame.new(0, 5, 0)
+		dbox(model, 0.3, 10, 0.3, 0, 19, PODIUM_Z0 + 0.2, GOLD, Enum.Material.Metal, { reflectance = 0.25 }).CFrame = at(0, 14.2, PODIUM_Z0 + 0.2) * CFrame.Angles(0, 0, k * 0.3) * CFrame.new(0, 5, 0)
 	end
-	-- the podium roof: a slab, neon edge, planters and palms
+	for _, sx in { -1, 1 } do
+		dbox(model, 2.4, 29.5, 1.8, sx * 9.6, 0.5 + 14.75, PODIUM_Z0 + 0.1, STONE, Enum.Material.Limestone)
+	end
+	dbox(model, 21.6, 1.6, 2.2, 0, 26, PODIUM_Z0 + 0.1, RIV_LIGHT, Enum.Material.Limestone)
+	dbox(model, 3, 3, 1.2, 0, 27.4, PODIUM_Z0 - 0.4, RIV_LIGHT, Enum.Material.Limestone) -- the keystone
+	-- the podium roof: a slab behind a carved cornice and a stone balustrade, planters and palms
 	box(model, WING_X * 2 + 2, 2, PODIUM_Z1 - PODIUM_Z0 + 2, 0, PODIUM_TOP - 1, (PODIUM_Z0 + PODIUM_Z1) / 2, CHARCOAL, Enum.Material.Concrete, { name = "PodiumRoof" })
-	local rx, rz, rw, rd = worldBox(0, (PODIUM_Z0 + PODIUM_Z1) / 2, WING_X * 2 + 2, PODIUM_Z1 - PODIUM_Z0 + 2)
-	kit.neonOutline(model, rx, rz, rw, rd, groundY + PODIUM_TOP + 0.2, TEAL, 0.5)
-	kit.neonOutline(model, rx, rz, rw + 0.6, rd + 0.6, groundY + PODIUM_TOP - 3, PINK, 0.35)
+	dbox(model, WING_X * 2 + 4, 1.6, 3.4, 0, PODIUM_TOP - 0.8, PODIUM_Z0 - 0.7, RIV_LIGHT, Enum.Material.Limestone)
+	dbox(model, WING_X * 2 + 3, 0.7, 2.4, 0, PODIUM_TOP - 2.2, PODIUM_Z0 - 0.4, RIV_DARK, Enum.Material.Limestone)
 	local roofDeco = kit.lodGroup(model, "PodiumTerrace", at(0, PODIUM_TOP, 0).Position, 700)
+	dbox(roofDeco, WING_X * 2 + 2, 0.8, 1.6, 0, PODIUM_TOP + 0.4, PODIUM_Z0 + 0.2, RIV_LIGHT, Enum.Material.Limestone)
+	dbox(roofDeco, WING_X * 2 + 2, 0.7, 1.8, 0, PODIUM_TOP + 3.75, PODIUM_Z0 + 0.2, RIV_LIGHT, Enum.Material.Limestone)
+	for x = -WING_X + 1, WING_X - 1, 2.2 do
+		column(roofDeco, false, 0.9, 2.6, x, PODIUM_TOP + 0.8, PODIUM_Z0 + 0.2, STONE, Enum.Material.Limestone)
+	end
 	for _, sx in { -1, 1 } do
 		for _, z in { PODIUM_Z0 + 8, PODIUM_Z1 - 8 } do
 			box(roofDeco, 8, 3, 8, sx * (WING_X - 8), PODIUM_TOP + 1.5, z, STONE, Enum.Material.Limestone)
-			palm(roofDeco, sx * (WING_X - 8), z, 22, PODIUM_TOP + 3)
+			realPalm(roofDeco, sx * (WING_X - 8), z, 24, PODIUM_TOP + 3)
 		end
 	end
 	-- uplights washing the tower's front
@@ -578,8 +745,14 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 			light(sconce, WARM, 16, 0.6)
 		end
 	end
-	-- chandeliers: tiers of glowing rings with crystal drops
+	-- chandeliers: crystal chandeliers (VenueKit), or tiers of glowing rings with crystal drops
 	for _, z in { -10, 24, 58 } do
+		local ch = kitPiece("Chandelier", at(0, LH - 0.6 - 14.92 * 1.5, z), 1.5, lobby)
+		if ch then
+			local bulb = dbox(lobby, 1, 1, 1, 0, LH - 12, z, WARM, Enum.Material.SmoothPlastic, { transparency = 1 })
+			light(bulb, WARM, 46, 1.5)
+			continue
+		end
 		for k, r in { 22, 15, 8 } do
 			local ring = disc(lobby, false, r, 0.5, 0, LH - 5 - k * 2, z, WARM, Enum.Material.Neon, { transparency = 0.15 })
 			if k == 2 then
@@ -596,11 +769,11 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	local rxD = -60
 	box(lobby, 4, 4.2, 40, rxD, 2.6, 18, WALNUT, Enum.Material.Wood)
 	dbox(lobby, 4.6, 0.4, 40.6, rxD, 4.9, 18, MARBLE, Enum.Material.Marble)
-	dbox(lobby, 0.2, 0.25, 40, rxD + 2.15, 1, 18, GOLD, Enum.Material.Neon)
+	dbox(lobby, 0.2, 0.25, 40, rxD + 2.15, 1, 18, GOLD, Enum.Material.Metal)
 	local wall = box(lobby, 1.4, 22, 48, -LOBBY_X + 0.7, 11.5, 18, WALNUT, Enum.Material.Wood)
 	local wallSign = dbox(lobby, 0.3, 6, 40, -LOBBY_X + 1.6, 15, 18, BLACK, Enum.Material.SmoothPlastic, { transparency = 1 })
 	kit.surfaceText(wallSign, Enum.NormalId.Right, H.Name, GOLD:Lerp(Color3.new(1, 1, 1), 0.2), nil, nil, Enum.Font.Garamond, Vector2.new(1100, 140))
-	dbox(lobby, 0.3, 0.3, 40, -LOBBY_X + 1.6, 11, 18, GOLD, Enum.Material.Neon)
+	dbox(lobby, 0.3, 0.3, 40, -LOBBY_X + 1.6, 11, 18, GOLD, Enum.Material.Metal)
 	light(wall, WARM, 26, 0.9)
 	local recSign = dbox(lobby, 0.3, 2, 14, rxD + 2.4, 6.6, 18, BLACK, Enum.Material.SmoothPlastic)
 	kit.surfaceText(recSign, Enum.NormalId.Right, "RECEPTION", GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(500, 70))
@@ -613,8 +786,16 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	staff(kit, lobby, at(rxD - 5, 0.5, 18) * CFrame.Angles(0, -math.pi / 2, 0), concierge, "Concierge")
 	-- the lounge (right): sofas round low tables, plants and a grand piano
 	for _, z in { -24, 6 } do
-		sofa(lobby, at(60, 0.5, z - 7) * CFrame.Angles(0, 0, 0), 16, CREAM)
-		sofa(lobby, at(60, 0.5, z + 7) * CFrame.Angles(0, math.pi, 0), 16, CREAM)
+		-- tufted leather sofas facing each other and two armchairs (VenueKit), or our own sofas
+		local a = kitPiece("Chesterfield", at(60, 0.5, z - 6.5) * CFrame.Angles(0, math.pi, 0), 1.15, lobby)
+		if a then
+			kitPiece("Chesterfield", at(60, 0.5, z + 6.5), 1.15, lobby)
+			kitPiece("Armchair", at(51, 0.5, z) * CFrame.Angles(0, -math.pi / 2, 0), 1.15, lobby)
+			kitPiece("Armchair", at(69, 0.5, z) * CFrame.Angles(0, math.pi / 2, 0), 1.15, lobby)
+		else
+			sofa(lobby, at(60, 0.5, z - 7) * CFrame.Angles(0, 0, 0), 16, CREAM)
+			sofa(lobby, at(60, 0.5, z + 7) * CFrame.Angles(0, math.pi, 0), 16, CREAM)
+		end
 		box(lobby, 9, 1.4, 5, 60, 1.2, z, MARBLE_DARK, Enum.Material.Marble)
 		dbox(lobby, 9.2, 0.2, 5.2, 60, 1.95, z, BRASS, Enum.Material.Metal)
 		dbox(lobby, 20, 0.08, 22, 60, 0.55, z, Color3.fromRGB(70, 58, 52), Enum.Material.Fabric)
@@ -627,11 +808,10 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 		dbox(lobby, 0.7, 3.4, 0.7, px + o[1], 2.2, pz + o[2], BLACK, Enum.Material.SmoothPlastic)
 	end
 	box(lobby, 5, 1, 2, px, 2.3, pz - 7.2, BLACK, Enum.Material.Fabric)
-	plant(lobby, 70, 0.5, -34, 1.3)
-	plant(lobby, 70, 0.5, 40, 1.3)
-	plant(lobby, -70, 0.5, -34, 1.3)
-	plant(lobby, -26, 0.5, -34, 1.1)
-	plant(lobby, 26, 0.5, -34, 1.1)
+	pottedPalm(lobby, 70, 0.5, -34, 1.5)
+	pottedPalm(lobby, 70, 0.5, 40, 1.5)
+	pottedPalm(lobby, -70, 0.5, -34, 1.5)
+	kitPiece("LuggageCart", at(-52, 0.5, -8) * CFrame.Angles(0, math.rad(70), 0), 1, lobby)
 
 	-- the suite sales gallery (right, at the back): a glowing model of each suite on a plinth
 	local suites = H.Suites
@@ -640,7 +820,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 		box(lobby, 4, 4, 4, 66, 2.5, z, BLACK, Enum.Material.SmoothPlastic)
 		dbox(lobby, 4.2, 0.2, 4.2, 66, 4.6, z, GOLD, Enum.Material.Metal)
 		local mini = dbox(lobby, 1.6, 2 + k * 0.8, 1.6, 66, 5.7 + k * 0.4, z, Color3.fromRGB(30, 40, 56), Enum.Material.Glass, { reflectance = 0.3 })
-		dbox(lobby, 1.7, 0.3, 1.7, 66, 4.7 + 2 + k * 0.8 + 0.2, z, GOLD, Enum.Material.Neon)
+		dbox(lobby, 1.7, 0.3, 1.7, 66, 4.7 + 2 + k * 0.8 + 0.2, z, GOLD, Enum.Material.Metal)
 		local card = dbox(lobby, 0.2, 2.2, 3.6, 63.9, 3, z, BLACK, Enum.Material.SmoothPlastic)
 		kit.surfaceText(card, Enum.NormalId.Left, s.name .. "\n" .. money(s.price) .. "  ·  " .. money(s.perMinute) .. "/min", GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(300, 120))
 		local buy = prompt(mini, "Buy suite", titleCase(s.name) .. "  " .. money(s.price), Enum.KeyCode.E, 1.5, 9)
@@ -669,7 +849,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 		local plate = dbox(lobby, 10, 1.8, 0.2, x, 13.6, ELEVATOR_Z - 0.75, BLACK, Enum.Material.SmoothPlastic)
 		kit.surfaceText(plate, Enum.NormalId.Front, label, GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(400, 70))
 		local panel = dbox(lobby, 1, 2.4, 0.3, x + 5.2, 5.5, ELEVATOR_Z - 0.75, BRASS, Enum.Material.Metal, { reflectance = 0.3 })
-		dbox(lobby, 0.5, 0.5, 0.1, x + 5.2, 6, ELEVATOR_Z - 0.95, if isRoof then TEAL else GOLD, Enum.Material.Neon)
+		dbox(lobby, 0.5, 0.5, 0.1, x + 5.2, 6, ELEVATOR_Z - 0.95, WARM, Enum.Material.Neon)
 		local id = if isRoof then suites[#suites].id else suites[k].id
 		local p = prompt(panel, if isRoof then "Up to the roof" else "Up to " .. titleCase(suites[k].name), "Elevator", Enum.KeyCode.E, 0, 10)
 		p.Triggered:Connect(function(player: Player)
@@ -683,55 +863,84 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	local _, _, boardLabel = kit.surfaceText(boardPart, Enum.NormalId.Front, "", GOLD:Lerp(Color3.new(1, 1, 1), 0.35), nil, nil, Enum.Font.GothamMedium, Vector2.new(1200, 190))
 
 	---------------------------------------------------------------- the tower
-	local pal = kit.randomPalette("glass")
-	pal.body = Color3.fromRGB(18, 26, 34)
-	pal.fin = Color3.fromRGB(176, 146, 100)
-	pal.finMat = Enum.Material.Metal
+	-- warm Riviera stone with punched windows and floor ledges (BuildingSkin paints the stone), black
+	-- iron balconies on every other floor front and back, carved cornices with balustrades at the
+	-- setbacks, the name in gold letters round the top and warm floodlights; no neon
+	local pal = kit.randomPalette("stone")
+	pal.body = STONE
+	pal.fin = RIV_LIGHT
+	pal.finMat = Enum.Material.Limestone
 	pal.warm = true
-	pal.lit = 0.55
+	pal.lit = 0.5
+	-- iron balconies across a face: a stone slab, top and bottom rails, posts on the window grid
+	local function balconies(par: Instance, tier: { w: number, d: number, y0: number, y1: number })
+		local floors = math.floor((tier.y1 - tier.y0 - 3) / 11)
+		local cols = math.min(12, math.max(2, math.floor((tier.w - 2) / pal.module)))
+		local module = (tier.w - 2) / cols
+		local len = tier.w - 4
+		for f = 2, floors, 2 do
+			local ySlab = tier.y0 + 1.5 + (f - 0.5) * 11 - pal.winH / 2 - 0.3
+			for _, face in { -1, 1 } do
+				local zf = TOWER_Z + face * (tier.d / 2)
+				dbox(par, len, 0.7, 3, 0, ySlab - 0.35, zf + face * 1.5, RIV_LIGHT, Enum.Material.Limestone)
+				dbox(par, len, 0.22, 0.22, 0, ySlab + 3.2, zf + face * 2.9, IRON, Enum.Material.Metal)
+				dbox(par, len, 0.14, 0.14, 0, ySlab + 0.5, zf + face * 2.9, IRON, Enum.Material.Metal)
+				for c = 0, cols do
+					dbox(par, 0.16, 3.1, 0.16, -(tier.w - 2) / 2 + c * module, ySlab + 1.6, zf + face * 2.9, IRON, Enum.Material.Metal)
+				end
+			end
+		end
+	end
+	-- a carved cornice and a stone balustrade round a setback
+	local function cornice(par: Instance, tier: { w: number, d: number, y0: number, y1: number })
+		box(model, tier.w + 3, 1.6, tier.d + 3, 0, tier.y1 + 0.8, TOWER_Z, RIV_LIGHT, Enum.Material.Limestone, { name = "Terrace" })
+		dbox(par, tier.w + 1.6, 0.9, tier.d + 1.6, 0, tier.y1 - 0.6, TOWER_Z, RIV_DARK, Enum.Material.Limestone)
+		for _, face in { -1, 1 } do
+			dbox(par, tier.w + 2.4, 0.6, 1, 0, tier.y1 + 4.4, TOWER_Z + face * (tier.d / 2 + 1), RIV_LIGHT, Enum.Material.Limestone)
+			dbox(par, 1, 0.6, tier.d + 2.4, face * (tier.w / 2 + 1), tier.y1 + 4.4, TOWER_Z, RIV_LIGHT, Enum.Material.Limestone)
+			for x = -tier.w / 2, tier.w / 2, 4 do
+				dbox(par, 0.8, 2.6, 0.8, x, tier.y1 + 2.9, TOWER_Z + face * (tier.d / 2 + 1), STONE, Enum.Material.Limestone)
+			end
+		end
+	end
 	local fine1 = kit.lodGroup(model, "Facade1", at(0, (BODY1.y0 + BODY1.y1) / 2, TOWER_Z).Position, 900)
 	local bx, bz, bw, bd = worldBox(0, TOWER_Z, BODY1.w, BODY1.d)
 	kit.facadeTier(model, bx, bz, bw, bd, groundY + BODY1.y0, groundY + BODY1.y1, pal, true, nil, fine1)
-	box(model, BODY1.w + 1, 1.4, BODY1.d + 1, 0, BODY1.y1 + 0.7, TOWER_Z, CHARCOAL, Enum.Material.Concrete, { name = "Terrace" })
-	kit.neonOutline(model, bx, bz, bw + 1, bd + 1, groundY + BODY1.y1 + 1.5, GOLD, 0.5)
+	balconies(fine1, BODY1)
+	cornice(fine1, BODY1)
 	local fine2 = kit.lodGroup(model, "Facade2", at(0, (BODY2.y0 + BODY2.y1) / 2, TOWER_Z).Position, 1000)
 	local b2x, b2z, b2w, b2d = worldBox(0, TOWER_Z, BODY2.w, BODY2.d)
 	kit.facadeTier(model, b2x, b2z, b2w, b2d, groundY + BODY2.y0, groundY + BODY2.y1, pal, true, nil, fine2)
-	box(model, BODY2.w + 1, 1.4, BODY2.d + 1, 0, BODY2.y1 + 0.7, TOWER_Z, CHARCOAL, Enum.Material.Concrete, { name = "Terrace" })
-	kit.neonOutline(model, b2x, b2z, b2w + 1, b2d + 1, groundY + BODY2.y1 + 1.5, GOLD, 0.5)
-	-- art deco neon: pink and teal fins up the front and back, gold corner lines
-	for _, face in { -1, 1 } do
-		for k, x in { -48, -24, 24, 48 } do
-			local c = if k % 2 == 0 then TEAL else PINK
-			dbox(model, 0.7, BODY1.y1 - BODY1.y0 - 6, 0.7, x, (BODY1.y0 + BODY1.y1) / 2, TOWER_Z + face * (BODY1.d / 2 + 0.6), c, Enum.Material.Neon, { transparency = 0.1 })
-		end
-		for _, x in { -30, 30 } do
-			dbox(model, 0.7, BODY2.y1 - BODY2.y0 - 16, 0.7, x, (BODY2.y0 + BODY2.y1) / 2 - 5, TOWER_Z + face * (BODY2.d / 2 + 0.6), PINK, Enum.Material.Neon, { transparency = 0.1 })
-		end
-		for _, sx in { -1, 1 } do
-			dbox(model, 0.6, BODY1.y1 - BODY1.y0, 0.6, sx * (BODY1.w / 2 + 0.5), (BODY1.y0 + BODY1.y1) / 2, TOWER_Z + face * (BODY1.d / 2 + 0.5), GOLD, Enum.Material.Neon, { transparency = 0.15 })
+	balconies(fine2, { w = BODY2.w, d = BODY2.d, y0 = BODY2.y0, y1 = BODY2.y1 - 14 })
+	cornice(fine2, BODY2)
+	-- the landmark from far away: the stone body, its window strips, cornices and name band always
+	-- stream to every player (about 250 parts); the finer stone, balconies and lit rooms stream
+	-- in near
+	local shell = Instance.new("Model")
+	shell.Name = "TowerShell"
+	shell.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
+	shell.Parent = model
+	for _, g in { model, fine1, fine2 } do
+		for _, p in g:GetChildren() do
+			if p:IsA("BasePart") and (p.Name == "Tower" or p.Name == "Pane" or p.Name == "Fin" or p.Name == "Terrace") then
+				p.Parent = shell
+			end
 		end
 	end
-	-- the vertical HOTEL sign on the front corner
-	local bladeZ = TOWER_Z - BODY1.d / 2 - 9
-	local blade = box(model, 3, 150, 18, -BODY1.w / 2 + 8, BODY1.y0 + 40 + 75, bladeZ, BLACK, Enum.Material.SmoothPlastic, { name = "HotelSign" })
-	for _, face in { Enum.NormalId.Left, Enum.NormalId.Right } do
-		local _, _, lbl = kit.surfaceText(blade, face, "H\nO\nT\nE\nL", PINK, nil, nil, Enum.Font.GothamBlack, Vector2.new(140, 1000))
-		lbl.LineHeight = 0.9
+	-- warm floodlights on the first setback, washing the upper stone
+	for _, x in { -40, 0, 40 } do
+		for _, face in { -1, 1 } do
+			local up = dbox(fine2, 2, 1, 2, x, BODY1.y1 + 2, TOWER_Z + face * (BODY2.d / 2 + 4), CHARCOAL, Enum.Material.Metal)
+			kit.addLight("SpotLight", up, WARM, 60, 2, Enum.NormalId.Top, 45)
+		end
 	end
-	for _, sx in { -1, 1 } do
-		dbox(model, 3.4, 151, 0.5, -BODY1.w / 2 + 8, BODY1.y0 + 115, bladeZ + sx * 9, PINK, Enum.Material.Neon)
-	end
-	dbox(model, 3.4, 0.5, 18.4, -BODY1.w / 2 + 8, BODY1.y0 + 190.5, bladeZ, PINK, Enum.Material.Neon)
-	dbox(model, 3.4, 0.5, 18.4, -BODY1.w / 2 + 8, BODY1.y0 + 39.5, bladeZ, PINK, Enum.Material.Neon)
-	-- the name round the top of the tower, under the crown
-	local band = deco(model, Vector3.new(b2w + 0.8, 10, b2d + 0.8), CFrame.new(b2x, groundY + BODY2.y1 - 6, b2z), BLACK, Enum.Material.SmoothPlastic)
+	-- the name round the top of the tower, under the crown: a stone band with gold letters
+	local band = deco(shell, Vector3.new(b2w + 0.8, 10, b2d + 0.8), CFrame.new(b2x, groundY + BODY2.y1 - 6, b2z), RIV_LIGHT, Enum.Material.Limestone)
 	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right } do
-		local _, _, label = kit.surfaceText(band, face, H.Name, Color3.new(1, 1, 1), BLACK, 0, Enum.Font.Garamond, Vector2.new(1200, 110))
-		local grad = Instance.new("UIGradient")
-		grad.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, GOLD), ColorSequenceKeypoint.new(0.5, Color3.new(1, 1, 1)), ColorSequenceKeypoint.new(1, GOLD) })
-		grad.Parent = label
+		goldLetters(band, face, "LEGENDS GRAND HOTEL", 10, 1.6)
 	end
+	dbox(shell, BODY2.w + 1.6, 0.6, BODY2.d + 1.6, 0, BODY2.y1 - 11.3, TOWER_Z, GOLD, Enum.Material.Metal)
+	dbox(shell, BODY2.w + 1.6, 0.6, BODY2.d + 1.6, 0, BODY2.y1 - 0.7, TOWER_Z, GOLD, Enum.Material.Metal)
 
 	---------------------------------------------------------------- the crown: the suites
 	local suiteFrame = frame * CFrame.new(0, 0, TOWER_Z)
@@ -757,16 +966,25 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 			st.roof = roofStop
 		end
 	end
-	-- gold fins at the crown's corners, rising past the roof with lit tips
+	-- the crown: stone corner piers rising past the glass suites to lanterns with gold caps (red
+	-- aviation lights on top), a carved stone ring at the suites' foot and round the roof
 	local roofTop = CROWN_Y + (#suites - 1) * SUITE_STEP + 30 + 1.5
-	local finTop = roofTop + 44
+	local finTop = roofTop + 18
 	for _, sx in { -1, 1 } do
 		for _, sz in { -1, 1 } do
 			local x, z = sx * 44.2, TOWER_Z + sz * 44.2
-			box(model, 1.8, finTop - CROWN_Y + 2, 1.8, x, (CROWN_Y - 2 + finTop) / 2, z, BRASS, Enum.Material.Metal, { reflectance = 0.25 })
-			dbox(model, 0.5, finTop - CROWN_Y + 2, 0.5, x + sx * 1, (CROWN_Y - 2 + finTop) / 2, z + sz * 1, GOLD, Enum.Material.Neon, { transparency = 0.1 })
-			local tip = dbox(model, 2.2, 2.2, 2.2, x, finTop + 1.2, z, Color3.fromRGB(255, 30, 30), Enum.Material.Neon)
+			box(model, 3.4, finTop - CROWN_Y + 2, 3.4, x, (CROWN_Y - 2 + finTop) / 2, z, RIV_LIGHT, Enum.Material.Limestone)
+			dbox(model, 4.6, 1.2, 4.6, x, finTop + 0.6, z, RIV_LIGHT, Enum.Material.Limestone)
+			dbox(model, 3, 3, 3, x, finTop + 2.7, z, GOLD, Enum.Material.Metal, { reflectance = 0.3 })
+			column(model, false, 1.2, 4, x, finTop + 4.2, z, GOLD, Enum.Material.Metal, { reflectance = 0.3 })
+			local tip = dbox(model, 1.2, 1.2, 1.2, x, finTop + 8.8, z, Color3.fromRGB(255, 30, 30), Enum.Material.Neon)
 			CollectionService:AddTag(tip, "Blink")
+		end
+	end
+	for _, y in { CROWN_Y - 1.4, roofTop + 0.6 } do
+		for _, face in { -1, 1 } do
+			dbox(model, 92, 1.2, 1.6, 0, y, TOWER_Z + face * 45.2, RIV_LIGHT, Enum.Material.Limestone)
+			dbox(model, 1.6, 1.2, 92, face * 45.2, y, TOWER_Z, RIV_LIGHT, Enum.Material.Limestone)
 		end
 	end
 
