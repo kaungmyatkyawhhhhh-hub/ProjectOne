@@ -254,6 +254,12 @@ function Realty.init(ctx: any)
 	folder.Name = "Realty"
 	folder.Parent = workspace
 	local ok, err = pcall(function()
+		-- Monaco only: the pavilion on its own lot by the harbour, no island booth
+		local riv = if Config.monacoOnly() then WestLayout.rivieraSite("realty") else nil
+		if riv then
+			pavilion(folder, riv)
+			return
+		end
 		pavilion(folder, clearSpot())
 		-- the island booth: inside the island ring beside where the causeway lands
 		local I = Config.West.Isle

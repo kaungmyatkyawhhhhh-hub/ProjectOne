@@ -65,7 +65,7 @@ if workspace:FindFirstChild("Riviera") then
 		return require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RivieraTraffic")).build()
 	end)
 	if ok and riv then
-		local merged = table.clone(graph.lanes)
+		local merged = if Config.monacoOnly() then {} else table.clone(graph.lanes)
 		for _, seg in riv.lanes do
 			table.insert(merged, seg)
 		end

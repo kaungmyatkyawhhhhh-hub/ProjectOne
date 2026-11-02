@@ -467,6 +467,9 @@ local function stand(parent: Instance, base: CFrame)
 end
 
 local function buildStands()
+	if Config.monacoOnly() then
+		return -- (the stands stood on the old city's corners; in Monaco you call from anywhere)
+	end
 	local parent = Instance.new("Folder")
 	parent.Name = "ChauffeurStands"
 	for _, st in CH.Stands do

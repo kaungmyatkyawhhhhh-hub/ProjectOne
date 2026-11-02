@@ -192,6 +192,23 @@ function WestLayout.places(): { Place }
 	for _, pl in IsleLayout.places() do
 		add(pl.id, pl.name, pl.cf)
 	end
+	-- Monaco only: the venues there, and a few of its own places (on the road, heading on)
+	if Config.monacoOnly() then
+		local keep = {}
+		for _, pl in list do
+			if WestLayout.rivieraSite(pl.id) then
+				table.insert(keep, pl)
+			end
+		end
+		local function onRoad(id: string, name: string, p: Vector3, dir: Vector3)
+			table.insert(keep, { id = id, name = name, cf = CFrame.lookAt(p, p + dir) })
+		end
+		onRoad("old_rock", "Old Rock Palace", Vector3.new(13028.75, 44.48, 1471.33), Vector3.new(-0.99, 0, -0.11))
+		onRoad("stadium", "Riviera Bay Stadium", Vector3.new(11822.03, 11.11, 1060.31), Vector3.new(0.02, 0, -1))
+		onRoad("harbour", "The Harbour", Vector3.new(13696.26, 6, 536.58), Vector3.new(1, 0, -0.03))
+		onRoad("mountain", "Mountain Road Lookout", Vector3.new(13598.51, 121.33, -754.69), Vector3.new(1, 0, 0))
+		return keep
+	end
 	return list
 end
 

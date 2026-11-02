@@ -127,4 +127,33 @@ do
 	end
 end
 
+-- Monaco only: its own races, deliveries and chips (RivieraWorld)
+if Config.monacoOnly() then
+	local ok, world = pcall(function()
+		return require(script.Parent:WaitForChild("RivieraWorld", 5))
+	end)
+	if ok and type(world) == "table" then
+		ActivityData.races = {}
+		ActivityData.raceById = {}
+		for _, r in world.races do
+			local race: Race = {
+				id = r.id,
+				name = r.name,
+				start = r.start,
+				startDir = r.dir.Unit,
+				checkpoints = r.checkpoints,
+				length = r.length,
+				gold = r.length / Config.mphToSps(A.GoldMph),
+				silver = r.length / Config.mphToSps(A.SilverMph),
+				bronze = r.length / Config.mphToSps(A.BronzeMph),
+			}
+			table.insert(ActivityData.races, race)
+			ActivityData.raceById[race.id] = race
+		end
+		ActivityData.dispatch = world.dispatch
+		ActivityData.dropPoints = world.dropPoints
+		ActivityData.chips = world.chips
+	end
+end
+
 return ActivityData

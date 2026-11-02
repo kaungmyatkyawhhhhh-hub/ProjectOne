@@ -114,6 +114,8 @@ local function ringRoad(parent: Instance, c: Vector3, r: number, width: number, 
 end
 
 local function drawMap(map: Frame)
+	-- (Monaco only: just Monaco)
+	if not Config.monacoOnly() then
 	local E = C.HalfExtent + HR -- the city's road edge
 	local O = E + C.OuterRingDepth -- the city island's edge
 	local Wh = O + 1500 -- the harbour's outer edge
@@ -184,6 +186,7 @@ local function drawMap(map: Frame)
 		for k = 1, #rd.pts - 1 do
 			line(map, rd.pts[k], rd.pts[k + 1], IsleLayout.Road, COL.road, 6)
 		end
+	end
 	end
 	-- Monaco (the Riviera) when it is in the place: sea, the land in 128-stud runs, the roads (the
 	-- three long routes in the highway colour); tools/map_plan/export_minimap.py makes RivieraMap

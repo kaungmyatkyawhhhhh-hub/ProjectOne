@@ -74,6 +74,19 @@ Config.Parking = {
 -- where players start (owner, 2026-10-23: "make block_3_2 near streetscape the players spawn"): a
 -- first car comes out on the street along this side of the block, and a player on foot with no car
 -- stands up on its sidewalk, by the streetscape
+-- Monaco only (owner, 2026-11-02: "bring the main stuffs from city legends to Monaco city and remove
+-- the city legends map"): with the Riviera in the place and OldCity off, the old city, Downtown,
+-- the west and Legends Isle aren't built; the venues, houses, races, deliveries and chips are in
+-- Monaco (src/shared/RivieraWorld.lua, tools/map_plan/export_world.py). The old map is kept, unseen,
+-- in ServerStorage.OldMap (and its terrain as ServerStorage.OldMap.Terrain): OldCity = true and
+-- moving it back brings it back.
+Config.World = {
+	OldCity = false,
+}
+function Config.monacoOnly(): boolean
+	return not Config.World.OldCity and workspace:FindFirstChild("Riviera") ~= nil
+end
+
 -- the venues in Monaco (owner, 2026-11-02: "Move the venues ... I may replace some of the venues
 -- soon"): with the Riviera in the place, these sites replace the old city's blocks and Downtown's
 -- (WestLayout). Each site: its middle (x, z), the way its entrance faces (fx, fz: towards the road
@@ -95,6 +108,8 @@ Config.RivieraVenues = {
 		tower_aurum = { x = 15457.2, z = 1111.1, fx = 0, fz = -1, y = 1.72 }, -- the waterfront, on the Coast Road
 		tower_skyline = { x = 16261.7, z = 799.3, fx = 0, fz = -1, y = 13.23 }, -- Larvotto, on the Coast Road
 		tower_crown = { x = 14260.5, z = -574.5, fx = 0, fz = -1, y = 161.15 }, -- high on the Mountain Road over the city
+		-- Legends Realty's glass pavilion (the house catalogue), on the harbour side of the Coast Road
+		realty = { x = 13390, z = 721.8, fx = -0.457, fz = -0.889, y = 6.6, size = 80 },
 		-- the bank heist drop-off: a lot at the far east end
 		dropoff = { x = 17176.4, z = 891, fx = -0.376, fz = -0.927, y = 20.73 },
 	},

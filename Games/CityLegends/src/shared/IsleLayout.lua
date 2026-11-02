@@ -342,6 +342,24 @@ function IsleLayout.lots(): { Lot }
 		return lotsCache
 	end
 	local out: { Lot } = {}
+	-- Monaco only: the lots on its hillside lanes (RivieraWorld)
+	if Config.monacoOnly() then
+		local ok, world = pcall(function()
+			return require(script.Parent:WaitForChild("RivieraWorld", 5))
+		end)
+		if ok and type(world) == "table" then
+			for _, l in world.lots do
+				local c = Vector3.new(l.x, l.y, l.z)
+				table.insert(out, {
+					id = l.id, zone = l.zone, tier = l.tier, number = l.number, water = false,
+					frame = CFrame.lookAt(c, c + Vector3.new(l.fx, 0, l.fz)),
+					width = l.w, depth = l.d, drive = {}, driveWidth = 0,
+				})
+			end
+			lotsCache = out
+			return out
+		end
+	end
 	-- low tier: inside the island ring either side of the causeway (street houses), the gaps,
 	-- setbacks and angles a little uneven like a real street
 	local isleJoins = {}

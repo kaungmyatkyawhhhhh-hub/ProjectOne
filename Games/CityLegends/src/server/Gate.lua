@@ -422,6 +422,9 @@ end
 function Gate.init(c: any)
 	ctx = c
 	fx = ctx.remote("RemoteEvent", "HouseFx")
+	if Config.monacoOnly() then
+		return -- (the Summit gate stood on Legends Isle; Monaco's top lots are open)
+	end
 	local folder = Instance.new("Folder")
 	folder.Name = "SummitGate"
 	folder.Parent = workspace

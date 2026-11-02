@@ -74,6 +74,29 @@ end
 ---------------------------------------------------------------------
 local function cameraSpots(): { Camera }
 	local spots: { Camera } = {}
+	-- Monaco only: along its three long roads, about every 700 studs, on the pavement at the right
+	if Config.monacoOnly() then
+		local ok, riv = pcall(function()
+			return require(Shared:WaitForChild("RivieraTraffic")).build()
+		end)
+		if ok and riv then
+			local acc: { [string]: number } = {}
+			for _, seg in riv.lanes do
+				local road = (seg :: any).road
+				if seg.lane == 2 and (road == "Coast Road" or road == "Town Road" or road == "Mountain Road") then
+					local key = road .. (if seg.p2.X > seg.p0.X then "+" else "-")
+					acc[key] = (acc[key] or 0) + seg.length
+					if acc[key] >= 700 then
+						acc[key] = 0
+						local pos, dir = CityLayout.sample(seg, seg.length * 0.5)
+						local right = dir:Cross(Vector3.yAxis)
+						table.insert(spots, { pos = pos + right * 11.5 + Vector3.new(0, 0.35, 0), face = -dir, id = #spots + 1 })
+					end
+				end
+			end
+		end
+		return spots
+	end
 	local graph = CityLayout.buildGraph()
 	local halfRoad = C.RoadWidth / 2
 	-- city: every few long straight lanes, on the sidewalk at the right of the travel direction

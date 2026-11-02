@@ -161,6 +161,11 @@ for _, seg in graph.lanes do
 end
 -- the Riviera's lanes (the new map), when it is in the place: city lanes, but only a few cars
 -- there at once (owner, 2026-11-02: "traffic on the new map (reduce traffic)"; Config.Traffic.RivieraMax)
+-- (Monaco only: nothing on the old city's lanes)
+if Config.monacoOnly() then
+	table.clear(cityLanes)
+	table.clear(highwayLanes)
+end
 if workspace:FindFirstChild("Riviera") then
 	local riv = RivieraTraffic.build()
 	if riv then
@@ -353,7 +358,7 @@ function Traffic.start(count: number?, focus: (() -> Vector3?)?)
 	local center = if focus then focus() else nil
 	local total = count or T.CarCount
 	-- the highways get their share at the same quality scale
-	local highway = math.floor(T.HighwayCars * total / T.CarCount + 0.5)
+	local highway = if Config.monacoOnly() then 0 else math.floor(T.HighwayCars * total / T.CarCount + 0.5)
 	for k = 1, total + highway do
 		-- most cars around the player, some spread through the city; then the highway cars
 		local onHighway = k > total

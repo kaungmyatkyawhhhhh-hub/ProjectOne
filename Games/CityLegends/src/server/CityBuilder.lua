@@ -1529,6 +1529,28 @@ function CityBuilder.build(mode: string?): Folder
 	CityBuilder.setupLighting()
 	local scenery = mode == "scenery"
 
+	-- Monaco only (Config.World): no old city; an empty City folder (the start-up waits on its Ready)
+	-- holds the venues, which build themselves at their Monaco sites
+	if not scenery and Config.monacoOnly() then
+		local city = workspace:FindFirstChild("City")
+		if city and city:GetAttribute("Baked") then
+			-- (an old baked map still in the place: it goes out of the way, kept unseen)
+			local archive = game:GetService("ServerStorage"):FindFirstChild("OldMap") or Instance.new("Folder")
+			archive.Name = "OldMap"
+			archive.Parent = game:GetService("ServerStorage")
+			city.Parent = archive
+			city = nil
+		end
+		if not city then
+			city = Instance.new("Folder")
+			city.Name = "City"
+			city.Parent = workspace
+		end
+		buildVenues(city :: Folder, true)
+		;(city :: Folder):SetAttribute("Ready", true)
+		return city :: Folder
+	end
+
 	local existing = workspace:FindFirstChild("City")
 	if existing and existing:GetAttribute("Baked") and not scenery then
 		-- the venues saved in the place as a preview (so their blocks aren't empty grey squares in

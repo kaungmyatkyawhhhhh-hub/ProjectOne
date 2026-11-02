@@ -48,6 +48,9 @@ do
 	local function add(id: string, name: string, pos: Vector3, dir: Vector3, half: number)
 		table.insert(ChallengeData.traps, { id = id, name = name, pos = pos, dir = dir.Unit, half = half })
 	end
+	-- (Monaco only: just Monaco's)
+	local old = not Config.monacoOnly()
+	if old then
 	add("harbour", "HARBOUR RUN", Vector3.new(CityLayout.HighwayStartX + 600, 0, 0), Vector3.xAxis, HW + 2)
 	local lp, ld = loopPoint(0.5)
 	add("loop", "LEGENDS LOOP", lp, ld, HW + 8)
@@ -56,6 +59,7 @@ do
 	local bx = (W.BridgeTowers[1] + W.BridgeTowers[2]) / 2
 	add("bridge", "LEGENDS BRIDGE", Vector3.new(bx, CityLayout.westRoadY(bx), 0), Vector3.xAxis, DECK_HALF - 2)
 	add("ocean", "OCEAN DRIVE", Vector3.new(CityLayout.roadCoord(W.IndexBase), 0, C.BlockSize * 1.5), Vector3.zAxis, HALF_ROAD + 2)
+	end
 	-- Monaco (owner, 2026-11-02: "move rest of the venue to monaco"): on the straightest stretch of
 	-- each main road, well away from junctions and the tunnel (from build/riviera/roads.json)
 	if workspace:FindFirstChild("Riviera") then
@@ -74,7 +78,7 @@ end
 
 -- jump ramps: open ground, never on a lane (tools/world_test checks lanes stay clear)
 ChallengeData.ramps = {} :: { Ramp }
-do
+if not Config.monacoOnly() then -- (no ramps in Monaco yet)
 	local size = Vector3.new(24, 9, 34)
 	local function add(id: string, foot: Vector3, dir: Vector3)
 		table.insert(ChallengeData.ramps, { id = id, cf = CFrame.lookAt(foot, foot + dir), size = size })
