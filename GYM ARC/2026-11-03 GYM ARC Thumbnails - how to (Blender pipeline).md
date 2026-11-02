@@ -48,3 +48,9 @@ Compare with my render: if it changed a face, a body or the text, use my render 
 - Bodies are the game's own: Robloxian 2.0 body, the NPC muscle stage meshes, skin maps, white tank top + black shorts, Roblox's free Pal Hair (63690008). Giants = mass monster body, normal skin (Pumped alter skin looked orange/gold, so not used). The game has no open-mouth face: default face.
 - All anchored, posed with Motor6D Transforms (the pose is also saved on each model as the `PoseJSON` attribute). Rebuild tool: `ServerStorage._Builders.ThumbnailRigBuilder` (not used by the game).
 - Next: Step 2 (export).
+
+## Status (3 Nov, later): 2 action poses added
+- LIFT: GIANT_lift (arms straight up, chest out, slight lean back, wide legs) + BACON_lifted (lying on the giant's hands, limbs flailing, head turned to the camera). Center x=70.
+- CRUSH: BARBELL_falling (copy of the 875 lb bar, tilted 20 deg, ~6 studs up) + BACON_run (big step, arms pumping, leaning forward, head turned back to the bar) + GIANT_drop (arms down, confident). Center x=95.
+- **Bug found and fixed (gameplay):** building in Edit mode required the game's BodyStages module, whose client biceps reshape ran in Edit and swapped the 14 upper arm templates in `ReplicatedStorage.BodyStages` for EditableMesh copies (MeshId empty; after a save they load as plain boxes = everyone else's arms broken). Restored all 14 with the real meshes (ids from `Config.StageMeshBackup`, checked by size), and fixed the arm pieces in every scene model the same way. The builder now runs `B.RestoreTemplates()` before every build. **Rule: after any Edit-mode build, run `B.RestoreTemplates()` and check no `BS_*Arm_Arm_*` template has an empty MeshId before saving.**
+- Scene arms use the real upper-arm meshes without the runtime biceps trim (biceps up to ~8% deeper than in game).
