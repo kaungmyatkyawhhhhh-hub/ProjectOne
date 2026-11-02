@@ -167,8 +167,27 @@ local function buildSystem(island)
 	beam.FaceCamera = true
 	beam.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.45, 0.55), NumberSequenceKeypoint.new(1, 0.15) })
 	beam.Parent = beamHost
+	-- the island's star lights its island a little, stronger by tier (lighting pass: "my star lights my island"); a light
+	-- below the star, so its range reaches the floor; no shadows; none on a low-end device (GalaxyLighting)
+	local tierK = math.clamp((island:GetAttribute("Tier") or 0) / MapConfig.MaxTier, 0, 1)
+	if not shared.GalaxyLowEnd then
+		local LS = MapConfig.Lighting.Star
+		local lightHost = Instance.new("Part")
+		lightHost.Name = "StarLightHost"
+		lightHost.Anchored, lightHost.CanCollide, lightHost.CanQuery, lightHost.CanTouch, lightHost.Transparency = true, false, false, false, 1
+		lightHost.Size = Vector3.new(0.2, 0.2, 0.2)
+		lightHost.CFrame = CFrame.new(c + Vector3.new(0, LS.Height, 0))
+		lightHost.Parent = folder
+		local starLight = Instance.new("PointLight")
+		starLight.Name = "StarLight"
+		starLight.Color = C.Star
+		starLight.Range = LS.RangeMin + (LS.RangeMax - LS.RangeMin) * tierK
+		starLight.Brightness = LS.Brightness
+		starLight.Shadows = false
+		starLight.Parent = lightHost
+	end
 	if sys.star then
-		local d = SY.StarMin + (SY.StarMax - SY.StarMin) * math.clamp((island:GetAttribute("Tier") or 0) / MapConfig.MaxTier, 0, 1)
+		local d = SY.StarMin + (SY.StarMax - SY.StarMin) * tierK
 		s.star = Kit.Make("CoreOrb", { Name = "Star", Fit = { "Y", d }, CFrame = CFrame.new(top), Color = C.Star, Material = Enum.Material.Neon, Parent = folder })
 	else
 		s.star = Kit.Make("RockBare", { Name = "Rock", Fit = { "X", SY.Rock }, CFrame = CFrame.new(top), Color = C.BareRock, Parent = folder })

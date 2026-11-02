@@ -255,7 +255,8 @@ function Builder.Build()
 	Kit.Make("CoreOrb", { Name = "CoreOrb", Fit = { "Y", K.Star }, CFrame = CFrame.new(corePos), Color = C.Core, Material = Enum.Material.Neon, Parent = core })
 	local lightHost = part({ Name = "CoreLight", Size = Vector3.new(1, 1, 1), CFrame = CFrame.new(corePos), Transparency = 1, CanCollide = false, CanQuery = false, Parent = core })
 	local light = Instance.new("PointLight")
-	light.Color, light.Range, light.Brightness, light.Shadows = Color3.fromRGB(255, 170, 90), 30, 1.4, false
+	local LC = MapConfig.Lighting.Core
+	light.Color, light.Range, light.Brightness, light.Shadows = LC.Color, LC.Range, LC.Brightness, false
 	light.Parent = lightHost
 	local rimHost = part({ Name = "RimLight", Size = Vector3.new(1, 1, 1), CFrame = CFrame.lookAt(corePos + Vector3.new(0, 2, -28), corePos + Vector3.new(0, 0, 14)),
 		Transparency = 1, CanCollide = false, CanQuery = false, Parent = core })
@@ -565,7 +566,7 @@ function Builder.Build()
 		end
 	end
 
-	------------------------------------------------------------------ sky + lighting (warm ground vs violet sky)
+	------------------------------------------------------------------ sky + lighting (MapConfig.Sky, MapConfig.Lighting)
 	local keepL = ServerStorage:FindFirstChild("LightingDefaults") or Instance.new("Folder")
 	keepL.Name = "LightingDefaults"
 	keepL.Parent = ServerStorage
@@ -578,26 +579,7 @@ function Builder.Build()
 	sky.CelestialBodiesShown = false
 	sky.StarCount = 0
 	sky.Parent = Lighting
-	Lighting.ClockTime = 10.5
-	Lighting.GeographicLatitude = 58
-	Lighting.Brightness = 1.7
-	Lighting.Ambient = Color3.fromRGB(70, 58, 80)
-	Lighting.OutdoorAmbient = Color3.fromRGB(112, 100, 112)
-	Lighting.ColorShift_Top = Color3.fromRGB(255, 230, 196)
-	Lighting.ColorShift_Bottom = Color3.fromRGB(150, 90, 235)
-	local atm = Lighting:FindFirstChildOfClass("Atmosphere") or Instance.new("Atmosphere")
-	atm.Density, atm.Offset, atm.Color, atm.Decay, atm.Glare, atm.Haze = 0.18, 0, Color3.fromRGB(96, 48, 140), Color3.fromRGB(40, 16, 70), 0, 0
-	atm.Parent = Lighting
-	Lighting.EnvironmentDiffuseScale = 0.35
-	Lighting.EnvironmentSpecularScale = 1
-	Lighting.GlobalShadows = true
-	local bloom = Lighting:FindFirstChildOfClass("BloomEffect") or Instance.new("BloomEffect")
-	bloom.Intensity, bloom.Size, bloom.Threshold = 0.32, 18, 2.1
-	bloom.Parent = Lighting
-	local cc = Lighting:FindFirstChild("GalaxyGrade") or Instance.new("ColorCorrectionEffect")
-	cc.Name = "GalaxyGrade"
-	cc.Saturation, cc.Contrast, cc.Brightness, cc.TintColor = 0.1, 0.1, 0, Color3.fromRGB(255, 246, 232)
-	cc.Parent = Lighting
+	require(Galaxy:WaitForChild("GalaxyLighting")).Apply()
 
 	local count = 0
 	for _, d in ipairs(root:GetDescendants()) do if d:IsA("BasePart") then count += 1 end end

@@ -85,10 +85,11 @@ MapConfig.Islands = {
 	-- the island end of every bridge: a threshold over the island's rim (in island units: x = out from the Core, from -Radius)
 	Landing = { From = -33, To = -25, Top = 1.6, Ramp = 4 },
 	-- island-local places (x = away from the Core, z = to the side; the bridge enters at x = -30, z = 0)
-	-- the spawn FACES THE PAIR of boards, 16.5 studs in front of it: from the spawn camera (Roblox starts it 12.5 behind you,
-	-- looking down at you) the pair fills most of the screen with its huge titles in view (owner, boards 1:1 passes 2-3).
+	-- the spawn FACES THE PAIR of boards, 21 studs in front of it: from the spawn camera (Roblox starts it 12.5 behind you,
+	-- looking down at you) the pair fills most of the screen with its huge titles in view (owner, boards 1:1 passes 2-3;
+	-- checked again in the lighting pass with Roblox's real starting camera: at 16.5 the titles were still cut off).
 	-- (The island's star beam starts above the boards now, so the camera may stand behind it.)
-	Spawn = Vector3.new(8.5, 0, -2.5),
+	Spawn = Vector3.new(4, 0, -2.5),
 	SpawnRock = Vector3.new(-2, 0, -2),             -- (tier 0: on the walkway over the rock)
 	Rock = 30,                                      -- tier 0 / free slot: a bare asteroid 30 across (the mesh makes it 23 high)
 	Tiles = { From = 0.6, To = 0.92, Count = 14 },
@@ -236,9 +237,10 @@ MapConfig.PlayerColors = {
 }
 
 MapConfig.Colors = {
-	-- (owner, pass 3: stone #E8DCC8, brass #C9902E; Stone2 = the floor tiles' second tone; Rock = the cones under the islands)
+	-- (owner, pass 3: stone #E8DCC8; lighting pass: brass #D9A441; Stone2 = the floor tiles' second tone; Rock = the cones
+	-- under the islands)
 	Stone = Color3.fromRGB(232, 220, 200), Stone2 = Color3.fromRGB(204, 188, 162), Rock = Color3.fromRGB(128, 104, 150),
-	BareRock = Color3.fromRGB(150, 142, 150), Brass = Color3.fromRGB(201, 144, 46), Lamp = Color3.fromRGB(255, 196, 110),
+	BareRock = Color3.fromRGB(150, 142, 150), Brass = Color3.fromRGB(217, 164, 65), Lamp = Color3.fromRGB(255, 196, 110),
 	Crystal = Color3.fromRGB(150, 85, 255), Grass = Color3.fromRGB(90, 200, 140), Ice = Color3.fromRGB(130, 215, 255),
 	Bridge = Color3.fromRGB(125, 100, 215), BridgeDim = Color3.fromRGB(70, 60, 105), Void = Color3.fromRGB(6, 2, 14),
 	VoidGlow = Color3.fromRGB(150, 80, 255), Core = Color3.fromRGB(235, 158, 70), Spike = Color3.fromRGB(205, 96, 34),
@@ -246,10 +248,42 @@ MapConfig.Colors = {
 	Orbit = Color3.fromRGB(176, 150, 230), Star = Color3.fromRGB(255, 190, 80), Mote = Color3.fromRGB(255, 225, 160),
 	SignBack = Color3.fromRGB(26, 20, 34), Screen = Color3.fromRGB(12, 10, 18),
 }
--- brass everywhere = gold with a small reflectance (owner: #C9902E, pass 3). (Material Metal was tried: against the dark sky
--- it mirrors the black and reads orange-brown, not gold.)
+-- brass everywhere = gold with a reflectance (lighting pass: #D9A441, 0.15, so it picks up the galaxy sky). (Material Metal
+-- was tried in map pass 3: against the dark sky it mirrors the black and reads orange-brown, not gold.)
 MapConfig.BrassMaterial = Enum.Material.SmoothPlastic
-MapConfig.BrassReflectance = 0.06
+MapConfig.BrassReflectance = 0.15
+
+-- the LIGHTING (owner, lighting pass 2 Nov; vault "Lighting pass"): every value here, applied by GalaxyLighting (the server
+-- at start; the map builder; the client's low-end switch). Edit a number here + play to tune it.
+--  * the sun = a low warm key light from the Core's side (one sun for the whole map, so it's aimed from the Core toward
+--    island 1, the first player's island: ClockTime / GeographicLatitude give it 25 degrees up); the Core's own warm light
+--    and each island's star light do the "light from the centre / my star lights my island" part
+--  * violet ambient (shadows never black), violet atmosphere (far islands fade into violet, not white)
+--  * bloom only on neon / the Core (threshold 1.8); a light warm grade; no sun rays, no depth of field
+--  * lights: the Core (warm gold, 60) + one per island star (Star.Height above the island, range by tier), no shadows;
+--    the boards light themselves with their neon. Full server: the Core, its rim light, the black hole, 8 stars = 11.
+--  * LowEnd (phones, slow PCs, or Workspace TestLowEnd in Studio): bloom off, shadows off, island star lights off
+MapConfig.Lighting = {
+	ClockTime = 16.21, GeographicLatitude = 3.25, -- (sun 25 degrees up, from the Core over island 1)
+	Brightness = 1.5, -- (2 + the Core's light + the star lights burnt the cream floor out; tuned in Play)
+	ColorShift_Top = Color3.fromRGB(255, 236, 208), ColorShift_Bottom = Color3.fromRGB(150, 90, 235), -- (a softer gold: the
+	-- grade's warm tint and the star lights add to it)
+	GlobalShadows = true, ShadowSoftness = 0.3,
+	Ambient = Color3.fromRGB(45, 35, 70), OutdoorAmbient = Color3.fromRGB(85, 70, 120),
+	EnvironmentDiffuseScale = 0.6, EnvironmentSpecularScale = 0.8,
+	ExposureCompensation = 0,
+	-- (Haze 0.5 and the darker colours were tried: they drew a flat dark band over the galaxy sky behind the islands; with Haze 0
+	-- the sky shows down to the horizon and the far islands still fade into violet)
+	Atmosphere = { Density = 0.25, Offset = 0, Color = Color3.fromRGB(96, 56, 140), Decay = Color3.fromRGB(40, 20, 70), Glare = 0, Haze = 0 },
+	Bloom = { Intensity = 0.4, Size = 24, Threshold = 1.8 },
+	Grade = { Contrast = 0.15, Saturation = 0.15, Brightness = 0, TintColor = Color3.fromRGB(255, 244, 228) },
+	Core = { Color = Color3.fromRGB(255, 186, 96), Range = 60, Brightness = 1 }, -- (2 blew the cream plaza out white; the
+	-- client's pulse adds +-18% and a Supernova bursts it to 8)
+	Star = { Height = 14, RangeMin = 20, RangeMax = 32, Brightness = 0.7 }, -- (range by island tier 0 -> MaxTier; the star's colour)
+	-- (a slow PC: Roblox graphics level 1-3, or under 40 FPS over 8 s). Without shadows nothing is sun-lit or shaded, so the
+	-- floor would go flat grey-pink: low-end uses a warmer, brighter OutdoorAmbient to keep the stone cream.
+	LowEnd = { FpsBelow = 40, QualityAtMost = 3, OutdoorAmbient = Color3.fromRGB(150, 128, 120) },
+}
 MapConfig.PlanetColors = {
 	Color3.fromRGB(150, 110, 240), Color3.fromRGB(80, 190, 255), Color3.fromRGB(90, 220, 120), Color3.fromRGB(255, 100, 120),
 	Color3.fromRGB(255, 205, 80), Color3.fromRGB(200, 200, 215),
