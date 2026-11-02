@@ -168,6 +168,92 @@ local function threshold(parent, origin: Vector3, dir: Vector3, from: number, to
 	return origin + dir * (to - 0.3) + UP * (top - 0.1)
 end
 
+-- the LEFT zone's leaderboard wall + the PLAYERS NEAR YOU board next to it (overnight part 3: its own function, so Studio
+-- can rebuild just these two without rebuilding the map: Builder.Leaderboards(workspace.Galaxy.Centre))
+function Builder.Leaderboards(centre: Instance)
+	for _, n in ipairs({ "Leaderboard", "NearBoard" }) do
+		local old = centre:FindFirstChild(n)
+		if old then old:Destroy() end
+	end
+	local Z = MapConfig.Centre.Zones
+	------------------------------------------------------------------ LEFT: the leaderboard wall (facing the Core, both sides)
+	-- TOP SUPERNOVAS (GalaxyLeaderboardService) in 2 columns of 5; PLAYERS NEAR YOU has its own board next to it (below)
+	local LB = MapConfig.Leaderboard
+	local lb = Instance.new("Model")
+	lb.Name = "Leaderboard"
+	lb.Parent = centre
+	local zl = zoneCf(Z.Leaderboard.angle, Z.Leaderboard.dist, true)
+	local wallCf = zl * CFrame.new(0, LB.Bottom + LB.Height / 2, 0)
+	local wall = part({ Name = "Wall", Size = Vector3.new(LB.Width, LB.Height, 0.6), CFrame = wallCf, Color = Color3.fromRGB(22, 17, 30), Parent = lb })
+	part(brass({ Name = "WallEdge", Size = Vector3.new(LB.Width + 1, LB.Height + 1, 0.4), CFrame = wallCf, Parent = lb }))
+	for _, sx in ipairs({ -1, 1 }) do
+		local h = LB.Bottom + LB.Height + 1
+		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zl * CFrame.new(sx * (LB.Width / 2 + 0.9), h / 2, 0), Parent = lb }))
+		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zl * CFrame.new(sx * (LB.Width / 2 + 0.9), h + 0.8, 0), Color = C.Lamp, Material = Enum.Material.Neon, Parent = lb })
+	end
+	for _, face in ipairs({ Enum.NormalId.Back, Enum.NormalId.Front }) do
+		local gui = surface(wall, face)
+		gui.Name = "Board_" .. face.Name
+		local f = Instance.new("Frame")
+		f.Name = "Top"
+		f.BackgroundTransparency = 1
+		f.Position = UDim2.fromScale(0.02, 0.03)
+		f.Size = UDim2.fromScale(0.96, 0.94)
+		f.Parent = gui
+		label(f, "TOP SUPERNOVAS", UDim2.fromScale(0, 0), UDim2.fromScale(1, 0.17), Color3.fromRGB(255, 214, 120))
+		local perCol = math.ceil(LB.Rows / 2)
+		for r = 1, LB.Rows do
+			local col, i = (r - 1) // perCol, (r - 1) % perCol
+			local row = label(f, "", UDim2.fromScale(0.02 + col * 0.5, 0.21 + i * (0.78 / perCol)), UDim2.fromScale(0.46, 0.78 / perCol * 0.82), Color3.fromRGB(225, 215, 240), FONT_B, Enum.TextXAlignment.Left)
+			row.Name = "Row" .. r
+		end
+		local divider = Instance.new("Frame")
+		divider.BackgroundColor3 = C.Brass
+		divider.BorderSizePixel = 0
+		divider.Position = UDim2.fromScale(0.497, 0.22)
+		divider.Size = UDim2.new(0, 4, 0.74, 0)
+		divider.Parent = gui
+	end
+
+	------------------------------------------------------------------ PLAYERS NEAR YOU (overnight part 3): its own board next
+	-- to the wall, facing the Core; each player's screen fills it with THEIR neighbours (GalaxyMapClient, BoardEvent "Near")
+	local NB = MapConfig.NearBoard
+	local nb = Instance.new("Model")
+	nb.Name = "NearBoard"
+	nb.Parent = centre
+	local zn = zoneCf(NB.angle, NB.dist, true)
+	local nbCf = zn * CFrame.new(0, NB.Bottom + NB.Height / 2, 0)
+	local board = part({ Name = "Board", Size = Vector3.new(NB.Width, NB.Height, 0.6), CFrame = nbCf, Color = Color3.fromRGB(22, 17, 30), Parent = nb })
+	part(brass({ Name = "BoardEdge", Size = Vector3.new(NB.Width + 1, NB.Height + 1, 0.4), CFrame = nbCf, Parent = nb }))
+	for _, sx in ipairs({ -1, 1 }) do
+		local h = NB.Bottom + NB.Height + 1
+		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zn * CFrame.new(sx * (NB.Width / 2 + 0.9), h / 2, 0), Parent = nb }))
+		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zn * CFrame.new(sx * (NB.Width / 2 + 0.9), h + 0.8, 0), Color = C.Lamp, Material = Enum.Material.Neon, Parent = nb })
+	end
+	local ngui = surface(board, Enum.NormalId.Back)
+	ngui.Name = "Board_Back"
+	local nf = Instance.new("Frame")
+	nf.Name = "Near"
+	nf.BackgroundTransparency = 1
+	nf.Position = UDim2.fromScale(0.04, 0.025)
+	nf.Size = UDim2.fromScale(0.92, 0.95)
+	nf.Parent = ngui
+	label(nf, "PLAYERS NEAR YOU", UDim2.fromScale(0, 0), UDim2.fromScale(1, 0.1), Color3.fromRGB(150, 220, 255))
+	for r = 1, NB.Rows do
+		-- (each row: a soft band behind it; the server's list fills the text, you in gold on your own screen)
+		local band = Instance.new("Frame")
+		band.Name = "Band" .. r
+		band.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		band.BackgroundTransparency = if r % 2 == 0 then 0.94 else 1
+		band.BorderSizePixel = 0
+		band.Position = UDim2.fromScale(0, 0.12 + (r - 1) * (0.88 / NB.Rows))
+		band.Size = UDim2.fromScale(1, 0.88 / NB.Rows)
+		band.Parent = nf
+		local row = label(nf, "", UDim2.fromScale(0.03, 0.12 + (r - 1) * (0.88 / NB.Rows) + 0.88 / NB.Rows * 0.1), UDim2.fromScale(0.94, 0.88 / NB.Rows * 0.8), Color3.fromRGB(225, 215, 240), FONT_B, Enum.TextXAlignment.Left)
+		row.Name = "Row" .. r
+	end
+end
+
 function Builder.Build()
 	local old = workspace:FindFirstChild("Galaxy")
 	if old then old:Destroy() end
@@ -401,44 +487,7 @@ function Builder.Build()
 	hole:SetAttribute("RingCF", ringCf)
 	sign(hole, "Sign", zh * CFrame.new(0, 0, B.Sign.Dist), B.Sign.Width, B.Sign.Height, B.Sign.Bottom, { "BLACK HOLE", "LOCKED" }, Color3.fromRGB(200, 150, 255), true)
 
-	------------------------------------------------------------------ LEFT: the leaderboard wall (facing the Core, both sides)
-	-- TOP SUPERNOVAS (GalaxyLeaderboardService) + PLAYERS NEAR YOU (each screen fills its own)
-	local LB = MapConfig.Leaderboard
-	local lb = Instance.new("Model")
-	lb.Name = "Leaderboard"
-	lb.Parent = centre
-	local zl = zoneCf(Z.Leaderboard.angle, Z.Leaderboard.dist, true)
-	local wallCf = zl * CFrame.new(0, LB.Bottom + LB.Height / 2, 0)
-	local wall = part({ Name = "Wall", Size = Vector3.new(LB.Width, LB.Height, 0.6), CFrame = wallCf, Color = Color3.fromRGB(22, 17, 30), Parent = lb })
-	part(brass({ Name = "WallEdge", Size = Vector3.new(LB.Width + 1, LB.Height + 1, 0.4), CFrame = wallCf, Parent = lb }))
-	for _, sx in ipairs({ -1, 1 }) do
-		local h = LB.Bottom + LB.Height + 1
-		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zl * CFrame.new(sx * (LB.Width / 2 + 0.9), h / 2, 0), Parent = lb }))
-		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zl * CFrame.new(sx * (LB.Width / 2 + 0.9), h + 0.8, 0), Color = C.Lamp, Material = Enum.Material.Neon, Parent = lb })
-	end
-	for _, face in ipairs({ Enum.NormalId.Back, Enum.NormalId.Front }) do
-		local gui = surface(wall, face)
-		gui.Name = "Board_" .. face.Name
-		for col, spec in ipairs({ { "Top", "TOP SUPERNOVAS", Color3.fromRGB(255, 214, 120), LB.Rows }, { "Near", "PLAYERS NEAR YOU", Color3.fromRGB(150, 220, 255), LB.Rows + 1 } }) do
-			local f = Instance.new("Frame")
-			f.Name = spec[1]
-			f.BackgroundTransparency = 1
-			f.Position = UDim2.fromScale(if col == 1 then 0.02 else 0.51, 0.03)
-			f.Size = UDim2.fromScale(0.47, 0.94)
-			f.Parent = gui
-			label(f, spec[2], UDim2.fromScale(0, 0), UDim2.fromScale(1, 0.15), spec[3])
-			for r = 1, spec[4] do
-				local row = label(f, "", UDim2.fromScale(0.02, 0.18 + (r - 1) * (0.8 / spec[4])), UDim2.fromScale(0.96, 0.8 / spec[4] * 0.9), Color3.fromRGB(225, 215, 240), FONT_B, Enum.TextXAlignment.Left)
-				row.Name = "Row" .. r
-			end
-		end
-		local divider = Instance.new("Frame")
-		divider.BackgroundColor3 = C.Brass
-		divider.BorderSizePixel = 0
-		divider.Position = UDim2.fromScale(0.497, 0.05)
-		divider.Size = UDim2.new(0, 4, 0.9, 0)
-		divider.Parent = gui
-	end
+	Builder.Leaderboards(centre)
 
 	------------------------------------------------------------------ the gaps: star-chart inlay, benches, crystals
 	local D = CR.Details

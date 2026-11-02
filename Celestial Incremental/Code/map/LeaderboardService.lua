@@ -1,7 +1,8 @@
 -- GalaxyLeaderboardService (Galaxy Incremental, 2 Nov): the LEFT zone's leaderboard wall (owner's centre redesign).
 --  * TOP SUPERNOVAS: the 10 highest lifetime Supernova counts (OrderedDataStore), written on the wall for everyone
 --  * PLAYERS NEAR YOU (Regrowth lesson, design additions note): the players just above and below YOUR lifetime Supernovas;
---    each player gets their own list (BoardEvent "Near") and their screen fills its side of the wall
+--    each player gets their own list (BoardEvent "Near") and their screen fills the PLAYERS NEAR YOU board next to the
+--    wall (its own board since overnight part 3)
 -- Writes each player's lifetime Supernovas when it changes (and on join). Studio uses its own store.
 -- Budget: GetSortedAsync allows 5 + 2 per player a minute; this uses 1 (top) + 1 per player (near) a minute.
 local Players = game:GetService("Players")

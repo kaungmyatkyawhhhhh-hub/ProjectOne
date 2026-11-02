@@ -63,7 +63,10 @@ MapConfig.BlackHole = {
 	Arms = 3, ArmSteps = 18, ArmWidth = 1.8,
 	Sign = { Width = 15, Height = 6, Bottom = 1.2, Dist = 18 },
 }
-MapConfig.Leaderboard = { Width = 24, Height = 12, Bottom = 3, Rows = 10 }
+MapConfig.Leaderboard = { Width = 24, Height = 12, Bottom = 3, Rows = 10 } -- (TOP SUPERNOVAS: 2 columns of 5, overnight part 3)
+-- PLAYERS NEAR YOU (overnight part 3): its own board next to the leaderboard wall (it shared the wall before and was too
+-- small to read on a phone): 5 above you, you (gold), 5 below; on the floor between the wall's end and the star-chart gap
+MapConfig.NearBoard = { angle = 110, dist = 46, Width = 13, Height = 15, Bottom = 3, Rows = 11 }
 MapConfig.Sector2 = {
 	-- the arch scaled uniformly so the 10-wide bridge fits through it (the kit arch's opening is 74% of its width): 14.2 wide,
 	-- 18 high (the spec's 14 x 12 arch would leave a 9-wide opening for a 10-wide bridge)

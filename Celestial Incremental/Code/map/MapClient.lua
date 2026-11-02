@@ -645,22 +645,28 @@ task.spawn(function()
 	end
 end)
 
--- the leaderboard wall: PLAYERS NEAR YOU (your own list from the server; you in gold)
+-- PLAYERS NEAR YOU (its own board next to the leaderboard wall since overnight part 3): your own list from the server;
+-- your row in gold on a gold band
 local boardEvent = Galaxy:WaitForChild("BoardEvent", 30)
 if boardEvent then
 	boardEvent.OnClientEvent:Connect(function(kind, list)
 		if kind ~= "Near" or type(list) ~= "table" then return end
-		local lb = centre:FindFirstChild("Leaderboard")
-		local wall = lb and lb:FindFirstChild("Wall")
-		for _, gui in ipairs(wall and wall:GetChildren() or {}) do
+		local nb = centre:FindFirstChild("NearBoard")
+		local board = nb and nb:FindFirstChild("Board")
+		for _, gui in ipairs(board and board:GetChildren() or {}) do
 			local near = gui:IsA("SurfaceGui") and gui:FindFirstChild("Near")
 			if near then
-				for r = 1, 11 do
+				for r = 1, MapConfig.NearBoard.Rows do
 					local row = near:FindFirstChild("Row" .. r)
+					local band = near:FindFirstChild("Band" .. r)
 					local e = list[r]
 					if row then
 						row.Text = if e then string.format("%s   %d", tostring(e.name), tonumber(e.value) or 0) else ""
 						row.TextColor3 = if e and e.you then Color3.fromRGB(255, 214, 120) else Color3.fromRGB(225, 215, 240)
+					end
+					if band then
+						band.BackgroundColor3 = if e and e.you then Color3.fromRGB(255, 190, 60) else Color3.fromRGB(255, 255, 255)
+						band.BackgroundTransparency = if e and e.you then 0.75 elseif r % 2 == 0 then 0.94 else 1
 					end
 				end
 			end
