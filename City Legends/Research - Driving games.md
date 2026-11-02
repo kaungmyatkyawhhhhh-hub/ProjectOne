@@ -31,7 +31,7 @@ Ranked by how much they matter for players (Playbook: first 3 minutes, reasons t
    - VL pays more than 2x for racing with others.
 5. **Small daily tasks:** CDT's 3 random challenges a day, DE's speed traps and Miles. There's always something quick to do.
 6. **Each car must feel different.** MR:T: weight, power curve, drive layout, gearbox, TCS. Manual with clutch for fans, simple buttons for phones.
-7. **Interiors with live clusters** (Driving Empire): needles, digital screens, blinker lights in the dash, a good first-person camera. Hands real-size (owner).
+7. **Interiors with live clusters** (Driving Empire): needles, digital screens, blinker lights in the dash, a good first-person camera. Hands: the player's own R6 avatar hands (owner, 2026-11-02).
 8. **Night mood is the brand:**
    - sodium highway lights, neon, wet roads, tail-light streaks;
    - radio stations by genre (MR:T: Eurobeat, lo-fi / phonk, city-pop, trance…).
@@ -46,7 +46,7 @@ Ranked by how much they matter for players (Playbook: first 3 minutes, reasons t
 14. **Fair shop:** fun and convenience passes (MR:T lights 300, toll 49, boombox; DE radio 15). Paid random cars were removed from DE after backlash. Whole car classes behind passes (Highway Legends, Greenville) and pay-to-earn paints feel greedy.
 15. **Fictional brands only.** Ford cars were pulled from CDT and Greenville by licence or copyright. Our look-alike names are safe.
 
-**Midnight Racing's way wins** when lessons disagree (owner), except interiors, clusters and the in-car view, where **Driving Empire's way wins**, with real-size hands.
+**Midnight Racing's way wins** when lessons disagree (owner), except interiors, clusters and the in-car view, where **Driving Empire's way wins**, with the player's R6 avatar hands on the wheel.
 
 ## Numbers (Roblox pages, 2026-10-30)
 
@@ -277,7 +277,7 @@ Sources:
   - The community keeps a wiki list of cars whose **interior blinkers flash in the cluster** ("bright cluster indicators", "clean analog dash signals", "modern digital indicators", "police dash indicators").
   - Players care about this for role play: the cluster is part of the fun.
 - *(general knowledge)* The first-person camera sits at the driver's eye height with a normal FOV, so you see the cluster under the wheel rim and the road over the bonnet.
-- *(general knowledge)* The driver's hands grip the rim. The owner says they are **too big**; ours stay real-size.
+- *(general knowledge)* The driver's hands grip the rim. The owner says they are **too big**; ours are the player's R6 avatar hands.
 - **Photo mode:** time of day slider, FOV, depth of field, hide character. A cinematic free camera on PC (Shift+P).
 - Sound: engine sounds per car. A popular video is literally "I tried Driving Empire WITH SOUNDS", a mod-style video with better engine sounds, which shows players want **better engine audio**.
 - Car radio pass for 15 R$ (very cheap).
@@ -762,7 +762,7 @@ Sources:
 | Police | DE bounty, Jailbreak bounty board | wanted stars, chases, speed cameras, escape bounty, bank robbery | have (good) |
 | Map events shown | Jailbreak flashing icons, DE race waiting counts | minimap, but no live event markers | ours is worse |
 | Houses | DE blueprints + claim, SWFL buy type + claim | 31 blueprints, claim a lot, walk-in, gates, roommates, underground garage | **ours is better** |
-| Interiors / clusters | DE live clusters with blinkers | imported cabins, live needles on some cars, real-size hands | have (blinker lights in the cluster to check) |
+| Interiors / clusters | DE live clusters with blinkers | imported cabins, live needles on some cars, R6 avatar hands | have (blinker lights in the cluster to check) |
 | Cameras | MR:T chase / hood / bumper, DE first person, FH lag | Immersive / Low / Chase / Interior, camera FX settings | have |
 | Night mood | MR:T, HL sodium / neon / wet roads | night city, rain, wet roads, neon at night, day cycle | have |
 | Radio stations | MR:T 7 stations by genre | music on/off (M) | ours is worse |
