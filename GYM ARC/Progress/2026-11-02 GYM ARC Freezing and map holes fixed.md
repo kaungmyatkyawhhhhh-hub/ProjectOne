@@ -151,3 +151,18 @@ The owner removes them by hand. Checked which ones stand in the Starter Gym (Edi
 - **Rosa, Theo** (tag GymNpc): no script names them. Safe to delete.
 - **Benny** (Bully): used by IntroCutscene, StoryClient and Config/Story (the first bully of the storyline). Deleting him breaks the intro and the story; move him instead if needed.
 - **Coach Dex** (tag Coach): used by Quests, the store, the Pump Shop, GymGoerService and the story. Keep.
+
+## Tutorial guide arrows: no more jumping (2 Nov, owner: "the tutorial guide dots rn are laggy")
+- **Cause:** `Shared/UI/GuidePath` recomputed the path 4 times a second whenever you moved a stud. Each new path came back slightly different, and all 40 chevrons and 40 ribbon pieces were re-placed every frame, so the arrows near you jumped.
+  - Measured over 8 s of walking: 104 jumps of more than 0.3 studs, up to 3.2 studs.
+  - The script cost itself was small (~0.19 ms a frame on PC), and drawing the guide measured within noise. The lag was the jumping, not FPS.
+- **Fix:**
+  - The path is recomputed only when you leave it (more than 2.5 studs off) or the target changes.
+  - Chevrons and ribbon pieces are laid out once per path, at fixed spots back from the target.
+  - A new path eases them to their new spots in 0.2 s instead of snapping.
+  - Each frame only decides how many show, the pulse, and the start of the first ribbon piece.
+  - The ribbon glow builds one NumberSequence a frame (was one per piece). The marker writes its distance text and visibility only when they change.
+- **Tested:**
+  - Walking along the arrows to the machine: the arrows didn't move at all (0 moves).
+  - Walking off the path: they glide, biggest step 0.94 studs.
+  - No errors. Shot: `Screenshots/freeze/tutorial_guide_after_2nov.jpg`.
