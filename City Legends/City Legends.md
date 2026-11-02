@@ -621,3 +621,58 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - **Tested in Studio Play (2026-11-03):** every tab, the map card, fast travel driving (to Legends Realty) and from the start screen (the bank), the claim on a test-new save, PLAY, the MENU button while driving. PC and phone-size (667x375) screenshots: `Main menu - PC 1..7`, `Main menu - phone size`.
 - **Not tested:** gamepad, a real phone, 2 players.
 - **Found (old bug, not fixed):** `Driving.reset` (Backspace, and the fall-out-of-world reset) looks for a road only in the old city. In Monaco it throws the car to the old map's Legends Loop (x 3340). So the menu has no Reset car button.
+
+## Venue remodel (started 2026-11-03, `Prompts/Remodel the venues.md`)
+**The plan, in this order (one venue at a time, the owner OKs each before the next):**
+1. **Legends Motors (done first, below):** the showroom becomes the ground floor of a cream Belle Époque Riviera block, as in the owner's Monaco photos.
+2. **Legends Grand Hotel:**
+   - outside: cream stone, iron balconies, a big canopy with gold letters, a red carpet, palms in pots, the valet stand;
+   - inside: a lobby with chandeliers and marble, the reception and a lounge.
+3. **High-Rollers Casino (scenery only):**
+   - outside: a Belle Époque palace with two corner towers, a copper-green roof, an arched glass entrance, gardens and a fountain, floodlit gold at night;
+   - inside: a gilded hall and the VIP area.
+4. **Legends Reserve Bank:**
+   - outside: a stone bank with columns, a bronze door, a carved cornice and flags;
+   - inside: a marble banking hall with brass lamps and the round steel vault door. The heist parts are kept.
+5. **The 3 towers:**
+   - Aurum Residences: a warm-stone Belle Époque high-rise;
+   - Skyline One: curved glass;
+   - The Crown: slim, with a crown top;
+   - each with a marble lobby, the penthouse and a roof pool.
+6. **Legends Customs:** a glass and steel workshop with an epoxy floor, 3 lifts, tool walls and a stage-lit TUNING bay.
+7. **Gem Showcase:** black stone and bronze, lit display cases.
+8. **The rest:** Legends Realty, the chauffeur kiosks, the challenge gantries.
+
+Each venue uses the place's own dressing and cleaned Toolbox models (no scripts, no logos).
+
+**Legends Motors, pass 1 (2026-11-03):**
+- **How it's built:** `tools/dealer_remodel.lua` (run in Studio as `ServerStorage.RivieraTools.DealerRemodel`) edits `ServerStorage.DealerBody`.
+  - All new parts are in `DealerBody.Remodel`.
+  - Recoloured parts keep their old look in `Orig*` attributes; `.undo(body)` puts them back.
+  - The untouched copy is `ServerStorage.DealerBody_before_remodel`.
+- **Outside:**
+  - 5 floors of cream stone above the showroom, with window bays, carved hoods and keystones;
+  - stone balconies with black iron railings on floors 2 and 4, and a long iron balcony on the top floor;
+  - side windows, a big cornice, a slate mansard roof with dormers, and chimneys;
+  - a light-grey concrete band over the glass with big gold serif letters LEGENDS MOTORS (self-lit, not neon);
+  - a black awning with a gold line and LEGENDS MOTORS · RIVIERA;
+  - a light stone base with metal vents, and warm floodlights on the facade;
+  - out front: light stone paving, black bollards with red bands, white stone cubes, and wooden planters with palms (the map's own pieces);
+  - the outside walls are light stone.
+- **Inside:**
+  - a pale terrazzo floor and a white ceiling;
+  - 7 black light tracks on the diagonal with small warm spots (14 real lights);
+  - a wood-slat back wall with gold letters (it sits behind the old model's big sea-picture wall, so it's mostly hidden);
+  - beige curtains along one side;
+  - the indoor display cars turned to angles (±24°).
+- **Gameplay not touched:** the prompts, the desk, the drive-out bay and the car spots stay the same. Tested in Play: it builds and the counter is still there. Buying and test driving were not re-tested this pass.
+- **Numbers:** the live venue went from about 1,500 to 2,500 parts. FPS was not measured. Before / after pictures: `Legends Motors remodel - before and after.jpg`.
+- **Still to do here:**
+  - the display cars show as the old blocky built cars in Studio tests (the showcase skinning didn't run there);
+  - a lounge (sofa, coffee machine);
+  - real Toolbox furniture;
+  - the neighbour café with its awning;
+  - the garage ramp;
+  - a phone-size screenshot;
+  - a 2-player test.
+- **The owner must save the place** (Ctrl+S): the remodel lives in the place, not in the scripts.
