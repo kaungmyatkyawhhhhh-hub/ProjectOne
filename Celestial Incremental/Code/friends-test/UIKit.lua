@@ -248,4 +248,27 @@ function Kit.tagVfx(o)
 	return o
 end
 
+-- UI sounds (pooled, pitch varied a little): the built-in UI click pitched per action. (A proper buy sound needs an audio
+-- upload to P&L Studios XP: then only the ids below change.)
+local SOUNDS = { buy = { "rbxasset://sounds/volume_slider.ogg", 1.5, 0.7 }, tab = { "rbxasset://sounds/volume_slider.ogg", 1.15, 0.45 },
+	no = { "rbxasset://sounds/volume_slider.ogg", 0.7, 0.5 } }
+local pool, poolI = {}, 0
+function Kit.sound(name: string)
+	local spec = SOUNDS[name]
+	if not spec then return end
+	if #pool == 0 then
+		for i = 1, 6 do
+			local s = Instance.new("Sound")
+			s.Parent = game:GetService("SoundService")
+			pool[i] = s
+		end
+	end
+	poolI = poolI % #pool + 1
+	local s = pool[poolI]
+	s.SoundId = spec[1]
+	s.PlaybackSpeed = spec[2] * (1 + (math.random() - 0.5) * 0.08)
+	s.Volume = spec[3]
+	s:Play()
+end
+
 return Kit

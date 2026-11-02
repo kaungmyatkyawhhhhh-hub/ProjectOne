@@ -21,6 +21,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local Kit = require(Galaxy:WaitForChild("UIKit"))
+local UpgradesPanel = require(Galaxy:WaitForChild("UpgradesPanel"))
 local A = Kit.A
 local hex = Kit.hex
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
@@ -180,227 +181,12 @@ for i, k in ipairs(KEYS) do
 	keyUI[k.key] = { label = label.Parent, line = line, hit = hit, diamond = d, x = x, y = y, sparkles = {} }
 end
 
------------------------------------------------------------------------- the UPGRADES window (v12 window at 300,120, 700x470)
+------------------------------------------------------------------------ the UPGRADES window: UpgradesPanel, the same v12 window
+-- (and the same code) as the live island board
 local win, winScale = scaledRoot("Upgrades", Vector2.new(0.5, 0.5), 700, 470)
 win.Visible = false
-local ess -- the Essence number in the header chip
-do
-	-- breathing neon glow (v12 'breathe' 2.6 s)
-	local glow = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.glow9, ImageColor3 = Color3.fromRGB(255, 100, 20), ScaleType = Enum.ScaleType.Slice,
-		SliceCenter = Rect.new(48, 48, 80, 80), Position = UDim2.fromOffset(-34, -34), Size = UDim2.fromOffset(768, 538), ImageTransparency = 0.25, ZIndex = 1 }, win)
-	task.spawn(function()
-		if not Kit.calm() then
-			Kit.tween(glow, { ImageTransparency = 0, Position = UDim2.fromOffset(-44, -44), Size = UDim2.fromOffset(788, 558) }, 1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-		end
-	end)
-	local frame = Kit.box(win, 0, 0, 700, 470, { BackgroundTransparency = 0, BackgroundColor3 = Kit.INK, ZIndex = 2 })
-	Kit.corner(frame, 10)
-	local body = Kit.box(win, 3, 3, 694, 464, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
-	Kit.corner(body, 8)
-	Kit.grad(body, hex("#1a1620"), hex("#0f0d13"), 90)
-	Kit.stroke(body, Color3.fromRGB(255, 106, 26), 1.5, 0.45)
-	-- header: the texture at 1:1 (v12: background 0 50% / 900px 80px), the bottom corners squared by a second strip
-	local header = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.header, ImageRectOffset = Vector2.new(0, 12), ImageRectSize = Vector2.new(694, 56),
-		Position = UDim2.fromOffset(3, 3), Size = UDim2.fromOffset(694, 56), ZIndex = 4, ClipsDescendants = true }, win)
-	Kit.corner(header, 8)
-	Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.header, ImageRectOffset = Vector2.new(0, 58), ImageRectSize = Vector2.new(694, 10),
-		Position = UDim2.fromOffset(3, 49), Size = UDim2.fromOffset(694, 10), ZIndex = 4 }, win)
-	Kit.box(win, 9, 4, 682, 2, { BackgroundTransparency = 0.4, BackgroundColor3 = Color3.fromRGB(255, 208, 160), ZIndex = 5 })
-	local sweep = Kit.shine(header, 4.5, 0.16, 0.35)
-	sweep.ZIndex = 5
-	for i, ex in ipairs({ 20, 90, 170, 260, 350, 430, 520, 610, 660 }) do
-		Kit.ember(win, ex + 3, 3 + 44 + ((i - 1) % 3) * 4, ((i - 1) * 0.41) % 3)
-	end
-	Kit.box(win, 3, 59, 694, 2, { BackgroundTransparency = 0, BackgroundColor3 = Kit.INK, ZIndex = 5 })
-	Kit.icon(win, "stardust", -22, -30, 92, Color3.fromRGB(255, 170, 60), { ZIndex = 9 })
-	Kit.sparkle(win, -26, -24, 12, 0.5)
-	Kit.sparkle(win, 60, 34, 9, 1.1)
-	Kit.text(win, 80, 13, 300, 34, "UPGRADES", 28, { ZIndex = 8, stroke = 1.8 })
-	-- the Essence chip (v12's currency chip; the friends test's currency is Essence)
-	local chip = Kit.box(win, 438, 13, 150, 34, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 6 })
-	Kit.corner(chip, 4)
-	Kit.stroke(chip, Kit.INK, 2)
-	Kit.grad(chip, hex("#0f5a5a"), hex("#22c7b8"), 0)
-	ess = Kit.text(win, 470, 12, 70, 24, "0", 20, { ZIndex = 8, stroke = 1.5, TextXAlignment = Enum.TextXAlignment.Center })
-	Kit.text(win, 470, 33, 70, 12, "ESSENCE", 9, { ZIndex = 8, stroke = 1, TextColor3 = hex("#dcfffb"), TextXAlignment = Enum.TextXAlignment.Center })
-	Kit.icon(win, "essence", 548, 2, 50, Color3.fromRGB(60, 230, 210), { ZIndex = 8 })
-end
--- close (pink, white rim, white X)
-local closeBtn
-do
-	closeBtn = Kit.new("TextButton", { Text = "", AutoButtonColor = false, Position = UDim2.fromOffset(648, 13), Size = UDim2.fromOffset(34, 34),
-		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 8 }, win)
-	Kit.corner(closeBtn, 6)
-	Kit.stroke(closeBtn, Color3.new(1, 1, 1), 2, 0.1)
-	Kit.grad(closeBtn, hex("#ff7d8e"), hex("#e2334c"), 90)
-	for _, r in ipairs({ 45, -45 }) do
-		local bar = Kit.box(closeBtn, 0, 0, 20, 4, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), AnchorPoint = Vector2.new(0.5, 0.5),
-			Rotation = r, ZIndex = 9 })
-		bar.Position = UDim2.fromScale(0.5, 0.5)
-		Kit.corner(bar, 2)
-	end
-	Kit.box(win, 648, 15, 34, 34, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 7 }).Name = "CloseShadow"
-	Kit.corner(win.CloseShadow, 6)
-end
-
--- category list (v12: panel 16,74 190x380; buttons 28, 88 + i*58, 166x46)
-local listPanel = Kit.box(win, 16, 74, 190, 380, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 4 })
-Kit.corner(listPanel, 6)
-Kit.stroke(listPanel, hex("#2a2433"), 1.5)
-local TABS = {
-	{ id = "STARDUST", c1 = "#ff9a3a", c2 = "#c2410c", icon = "stardust", glow = Color3.fromRGB(255, 170, 60) },
-	{ id = "COMETS", c1 = "#5ad1ff", c2 = "#1f6fd1", icon = "comet", glow = Color3.fromRGB(90, 200, 255) },
-	{ id = "PLANETS", c1 = "#b49bff", c2 = "#5a3ad8", icon = "planet", glow = Color3.fromRGB(170, 130, 255) },
-	{ id = "FORGE", c1 = "#6a6474", c2 = "#3f3a48", icon = "forge", glow = nil, locked = "SUPERNOVA 3",
-		lockedTitle = "STAR FORGE", lockedText = "Roll Star Cores with Essence. Opens at SUPERNOVA 3." },
-	{ id = "BLACK HOLE", c1 = "#5a5562", c2 = "#38343f", icon = "gear", glow = nil, locked = "100K SHARDS",
-		lockedTitle = "BLACK HOLE", lockedText = "Collapse your shards into Dark Matter. Opens at 100K shards." },
-}
-local tabUI = {}
-local currentTab = "PLANETS"
-local selRing
-for i, t in ipairs(TABS) do
-	local x, y = 28, 88 + (i - 1) * 58
-	local b, inner = Kit.button(win, x, y, 166, 46, hex(t.c1), hex(t.c2), { ZIndex = 6 })
-	if t.locked then
-		Kit.text(inner, 30, 5, 136, 20, t.id, 15, { ZIndex = inner.ZIndex, stroke = 1.6, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
-		Kit.text(inner, 30, 26, 136, 14, t.locked, 10, { ZIndex = inner.ZIndex, stroke = 1.1, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#a99fb8") })
-	else
-		Kit.text(inner, 30, 12, 136, 22, t.id, 17, { ZIndex = inner.ZIndex, stroke = 1.6, TextXAlignment = Enum.TextXAlignment.Center })
-	end
-	local img = Kit.icon(win, t.icon, x - 12, y - 8, if t.icon == "forge" then 56 else 54, t.glow, { ZIndex = 9 })
-	if t.locked then img.ImageTransparency = 0.35 end
-	tabUI[t.id] = { button = b, inner = inner, x = x, y = y, def = t }
-end
-Kit.sparkle(win, 30, 82, 10, 0.4)
-Kit.sparkle(win, 180, 128, 8, 1.2)
-
--- rows panel (v12: 218,74 466x380; rows 10, 12 + i*120, 446x110)
-local rowsPanel = Kit.new("ScrollingFrame", { Position = UDim2.fromOffset(218, 74), Size = UDim2.fromOffset(466, 380), BackgroundColor3 = hex("#0b090e"),
-	BorderSizePixel = 0, ScrollBarThickness = 4, ScrollBarImageColor3 = hex("#3a3346"), CanvasSize = UDim2.fromOffset(0, 380),
-	ScrollingDirection = Enum.ScrollingDirection.Y, ZIndex = 4, ElasticBehavior = Enum.ElasticBehavior.Never }, win)
-Kit.corner(rowsPanel, 6)
-Kit.stroke(rowsPanel, hex("#2a2433"), 1.5)
-
------------------------------------------------------------------------- rows
-local GREEN1, GREEN2 = hex("#7dff7a"), hex("#1fa83a")
-local GREY1, GREY2 = hex("#6a6474"), hex("#3f3a48")
-local VIO1, VIO2 = hex("#b49bff"), hex("#5a3ad8")
-local TIER_LOOK = { -- border, title gradient, icon glow
-	{ "#9a8cb0", "#f3eaff", "#b9a8cc", Color3.fromRGB(200, 180, 230) },
-	{ "#3a8acc", "#ffffff", "#bfe9ff", Color3.fromRGB(90, 200, 255) },
-	{ "#8a6cff", "#efe8ff", "#b49bff", Color3.fromRGB(170, 130, 255) },
-	{ "#ff9a3a", "#fff1c0", "#ffb02a", Color3.fromRGB(255, 120, 30) },
-	{ "#5a5562", "#cfc6dd", "#8a8296", nil },
-}
-local TAB_LOOK = {
-	STARDUST = { "#ff9a3a", "#fff1c0", "#ffb02a", Color3.fromRGB(255, 120, 30) },
-	COMETS = { "#3a8acc", "#ffffff", "#bfe9ff", Color3.fromRGB(90, 200, 255) },
-}
-
-local rows = {} -- { refresh = fn }
-local tutorialTargets = {} -- name -> GuiObject (for the arrow)
-
--- the button area of a row (146x52 at 288,30): rebuilt when its state changes
-local function setButton(row, state: string, price: number?, label: string?)
-	local key = state .. "|" .. (price and fmt(price) or "") .. "|" .. (label or "")
-	if row.btnKey == key then return end
-	row.btnKey = key
-	if row.btn then row.btn:Destroy() row.btnShadow:Destroy() end
-	if row.fx then row.fx:Destroy() end
-	-- (the sparkles around the button live in their own layer, rebuilt with it)
-	row.fx = Kit.box(row.frame, 0, 0, 446, 110, { ZIndex = 9 })
-	local c1, c2 = GREEN1, GREEN2
-	if state == "no" or state == "locked" then c1, c2 = GREY1, GREY2 elseif state == "owned" then c1, c2 = VIO1, VIO2 end
-	local b, inner, _, shadow = Kit.button(row.frame, 288, 30, 146, 52, c1, c2, { ZIndex = 6 })
-	row.btn, row.btnShadow = b, shadow
-	local z = inner.ZIndex
-	if state == "owned" then
-		Kit.text(inner, 0, 10, 146, 32, label or "OWNED", 24, { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY })
-		Kit.shine(b, 3.6)
-		Kit.sparkle(row.fx, 288 + 134, 30 - 4, 10, 0.5)
-		Kit.sparkle(row.fx, 288 - 4, 30 + 44, 8, 1.5)
-	elseif state == "locked" then
-		local img = Kit.icon(inner, "lock", 10, 10, 30, nil, { ZIndex = z })
-		img.ImageTransparency = 0.2
-		Kit.text(inner, 38, 15, 104, 24, label or "LOCKED", if #(label or "LOCKED") > 9 then 13 else 18, { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
-	else
-		local top = 10
-		if label then
-			Kit.text(inner, 0, 3, 146, 14, label, 11, { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.2 })
-			top = 16
-		end
-		local ic = Kit.icon(inner, "stardust", 14, top + 2, if label then 22 else 26, nil, { ZIndex = z })
-		if state == "no" then ic.ImageTransparency = 0.3 end
-		local priceStr = if price == 0 then "FREE" else fmt(price or 0)
-		Kit.text(inner, 40, top, 100, 30, priceStr, if label then 20 else 24, { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center,
-			TextColor3 = if state == "no" then hex("#ff6b6b") else Color3.new(1, 1, 1) })
-		if state == "buy" then
-			Kit.shine(b, 2.4)
-			for _, m in ipairs({ { 20, 40, 0 }, { 60, 44, 0.6 }, { 100, 42, 1.2 }, { 124, 40, 0.3 } }) do Kit.mote(b, m[1], m[2], m[3]) end
-			Kit.sparkle(row.fx, 288 + 128, 30 - 6, 12, 0)
-			Kit.sparkle(row.fx, 288 - 6, 30 + 40, 10, 0.8)
-			Kit.sparkle(row.fx, 288 + 70, 30 - 8, 8, 1.3)
-		end
-	end
-	row.onButton(b)
-end
-
-local function newRowFrame(i, borderHex)
-	local y = 12 + (i - 1) * 120
-	local f = Kit.box(rowsPanel, 10, y, 446, 110, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
-	Kit.corner(f, 5)
-	Kit.stroke(f, hex(borderHex), 2)
-	Kit.grad(f, hex("#17141c"), hex("#0e0c12"), 90)
-	return f
-end
-local function chip(row, from: string, to: string?)
-	if row.chipKey == from .. "|" .. (to or "") then return end
-	row.chipKey = from .. "|" .. (to or "")
-	if row.chip then row.chip:Destroy() end
-	local holder = Kit.box(row.frame, 86, 60, 300, 32, { ZIndex = 6 })
-	row.chip = holder
-	-- sized to the text (v12: 160 wide with an arrow, 80 without, never smaller)
-	local function width(str) return TextService:GetTextSize(str, 17, Enum.Font.GothamBlack, Vector2.new(400, 30)).X + 4 end
-	local fromW = width(from)
-	local w = if to then math.max(160, 10 + fromW + 20 + width(to) + 10) else math.max(80, fromW + 20)
-	local c = Kit.box(holder, 0, 0, w, 32, { BackgroundTransparency = 0, BackgroundColor3 = hex("#221d2a"), ZIndex = 6 })
-	Kit.corner(c, 4)
-	Kit.stroke(c, hex("#3a3346"), 1.5)
-	Kit.text(holder, 10, 5, fromW, 22, from, 17, { ZIndex = 7, stroke = 1.5 })
-	if to then
-		Kit.text(holder, fromW + 12, 3, 16, 24, ">", 18, { ZIndex = 7, TextColor3 = hex("#9a90a8") })
-		Kit.text(holder, fromW + 28, 5, w - fromW - 30, 22, to, 17, { ZIndex = 7, stroke = 1.5, TextColor3 = hex("#7dff6b") })
-	end
-end
-
--- hold-to-buy (bodies): one buy at press, then every 0.12 s after 0.4 s while held
-local function holdBuy(b: GuiButton, buyOnce: () -> boolean)
-	local holding = false
-	b.MouseButton1Down:Connect(function()
-		holding = true
-		if not buyOnce() then return end
-		task.wait(0.4)
-		while holding and b.Parent do
-			if not buyOnce() then break end
-			task.wait(0.12)
-		end
-	end)
-	local function stop() holding = false end
-	b.MouseButton1Up:Connect(stop)
-	b.MouseLeave:Connect(stop)
-	b.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then stop() end
-	end)
-end
-
-local busy = false
-local function afterBuy(row, incomeBefore: number)
-	-- feedback: a sparkle burst on the row, the counter pops, "+x/s" floats under it
-	for _ = 1, 5 do
-		local s = Kit.sparkle(row.frame, math.random(250, 430), math.random(10, 80), math.random(8, 14), 0)
-		task.delay(1.6, function() s:Destroy() end)
-	end
+local function afterBuy(_, incomeBefore: number)
+	-- feedback on the HUD too: the counter pops, "+x/s" floats under it
 	task.defer(function()
 		local now = player:GetAttribute("Income") or 0
 		if now > incomeBefore then floatText(top, 186, 52, "+" .. fmt(now - incomeBefore) .. "/s", hex("#7dff6b"), 14) end
@@ -408,192 +194,17 @@ local function afterBuy(row, incomeBefore: number)
 	Kit.tween(topScale, { Scale = topScale.Scale * 1.08 }, 0.08)
 	task.delay(0.08, function() Kit.tween(topScale, { Scale = screenScale() }, 0.2, Enum.EasingStyle.Back) end)
 end
-
-local function bodyRow(i, k: number)
-	local tier = Econ.Tiers[k + 1]
-	local look = TIER_LOOK[k + 1]
-	local row = { frame = newRowFrame(i, look[1]) }
-	Kit.icon(row.frame, tier.icon, -8, 2, if tier.icon == "comet" then 96 else 90, look[4], { ZIndex = 7 })
-	local lv = Kit.text(row.frame, 16, 82, 60, 16, "LV 0", 12, { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
-	Kit.text(row.frame, 86, 10, 300, 28, tier.name, 22, { ZIndex = 8, gradient = ColorSequence.new(hex(look[2]), hex(look[3])) })
-	local desc = Kit.text(row.frame, 88, 38, 196, 16, "", 11, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1 })
-	local node = tier.unlock and Econ.Ring1ById[tier.unlock]
-	row.onButton = function(b)
-		holdBuy(b, function()
-			if busy then return false end
-			local o, n = owned(), nodes()
-			local unlockedNow = Econ.Unlocked(k, n)
-			if k >= Econ.PlayableTiers then
-				toast(tier.name .. ": opens at " .. (tier.lockedText or ""), hex("#8a8296"))
-				return false
-			end
-			if not unlockedNow then
-				if node.requires and not n[node.requires] then
-					toast("Unlock the " .. Econ.Tiers[k].name .. " first", hex("#8a8296"))
-					return false
-				end
-				if stardust() < node.cost then return false end
-				busy = true
-				local before = player:GetAttribute("Income") or 0
-				local ok = request:InvokeServer("BuyNode", node.id)
-				busy = false
-				if ok then afterBuy(row, before) toast(tier.name .. " UNLOCKED", hex("#7dff6b")) end
-				return false -- (one unlock per press)
-			end
-			if stardust() < Econ.Cost(k, o[k + 1]) then return false end
-			busy = true
-			local before = player:GetAttribute("Income") or 0
-			local ok = request:InvokeServer("BuyBody", k)
-			busy = false
-			if ok then afterBuy(row, before) end
-			return ok == true
-		end)
-	end
-	row.refresh = function()
-		local o, n = owned(), nodes()
-		local own = o[k + 1] or 0
-		if k >= Econ.PlayableTiers then
-			Kit.setText(lv, "LOCKED")
-			Kit.setText(desc, "opens at " .. tier.lockedText)
-			chip(row, tier.lockedText)
-			setButton(row, "locked", nil, tier.lockedText)
-			return
-		end
-		local unlockedNow = Econ.Unlocked(k, n)
-		local each = Econ.TierIncomeWith(k, 1, n) * Econ.AllMult(n)
-		if not unlockedNow then
-			Kit.setText(lv, "LOCKED")
-			Kit.setText(desc, "opens with " .. node.name .. ", " .. fmt(each) .. "/s each")
-			chip(row, "LOCKED", "OPEN")
-			if node.requires and not n[node.requires] then
-				setButton(row, "locked", nil, "UNLOCK " .. Econ.Tiers[k].name)
-			else
-				setButton(row, if stardust() >= node.cost then "buy" else "no", node.cost, "UNLOCK")
-			end
-			tutorialTargets["Unlock" .. k] = row.btn
-			return
-		end
-		Kit.setText(lv, "LV " .. own)
-		local nextM = Econ.NextMilestone(own)
-		Kit.setText(desc, "earns " .. fmt(each) .. "/s each" .. (if nextM then ", x2 at " .. nextM else ""))
-		local now = Econ.TierIncomeWith(k, own, n) * Econ.AllMult(n)
-		local after = Econ.TierIncomeWith(k, own + 1, n) * Econ.AllMult(n)
-		chip(row, fmt(now) .. "/s", fmt(after) .. "/s")
-		local cost = Econ.Cost(k, own)
-		setButton(row, if stardust() >= cost then "buy" else "no", cost)
-		tutorialTargets["Body" .. k] = row.btn
-	end
-	return row
-end
-
-local function nodeRow(i, node, look)
-	local row = { frame = newRowFrame(i, look[1]) }
-	Kit.icon(row.frame, node.icon, -8, 2, if node.icon == "comet" then 96 else 90, look[4], { ZIndex = 7 })
-	local lv = Kit.text(row.frame, 16, 82, 60, 16, "LV 0", 12, { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
-	Kit.text(row.frame, 86, 10, 300, 28, node.name, 22, { ZIndex = 8, gradient = ColorSequence.new(hex(look[2]), hex(look[3])) })
-	Kit.text(row.frame, 88, 38, 196, 16, node.desc, 11, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1 })
-	local e = node.effect
-	local from, to
-	if e.kind == "tierMult" or e.kind == "allMult" then
-		from, to = "x1", "x" .. tostring(e.mult)
-	elseif e.kind == "cometEvery" then
-		from, to = Econ.Comet.Every .. "s", e.seconds .. "s"
-	end
-	row.onButton = function(b)
-		b.MouseButton1Click:Connect(function()
-			if busy then return end
-			local n = nodes()
-			if n[node.id] then return end
-			if node.requires and not n[node.requires] then return end
-			if stardust() < node.cost then return end
-			busy = true
-			local before = player:GetAttribute("Income") or 0
-			local ok = request:InvokeServer("BuyNode", node.id)
-			busy = false
-			if ok then afterBuy(row, before) end
-		end)
-	end
-	row.refresh = function()
-		local n = nodes()
-		if n[node.id] then
-			Kit.setText(lv, "LV 1")
-			chip(row, to or "")
-			setButton(row, "owned", nil, "OWNED")
-		else
-			Kit.setText(lv, "LV 0")
-			chip(row, from or "", to)
-			setButton(row, if stardust() >= node.cost then "buy" else "no", node.cost)
-		end
-		tutorialTargets["Node_" .. node.id] = row.btn
-	end
-	return row
-end
-
-local function lockedPanel(t)
-	local f = Kit.box(rowsPanel, 10, 12, 446, 356, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
-	Kit.corner(f, 5)
-	Kit.stroke(f, hex("#5a5562"), 2)
-	Kit.grad(f, hex("#17141c"), hex("#0e0c12"), 90)
-	local img = Kit.icon(f, t.icon, 163, 40, 120, nil, { ZIndex = 7 })
-	img.ImageTransparency = 0.35
-	Kit.icon(f, "lock", 250, 120, 48, nil, { ZIndex = 9 })
-	Kit.text(f, 0, 190, 446, 34, t.lockedTitle, 28, { ZIndex = 8, TextXAlignment = Enum.TextXAlignment.Center, gradient = ColorSequence.new(hex("#cfc6dd"), hex("#8a8296")) })
-	Kit.text(f, 30, 232, 386, 40, t.lockedText, 13, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1,
-		TextXAlignment = Enum.TextXAlignment.Center, TextWrapped = true })
-end
-
-local function buildTab(id: string)
-	for _, c in ipairs(rowsPanel:GetChildren()) do
-		if not c:IsA("UICorner") and not c:IsA("UIStroke") then c:Destroy() end
-	end
-	table.clear(rows)
-	table.clear(tutorialTargets)
-	local t = tabUI[id].def
-	local list = {}
-	if t.locked then
-		lockedPanel(t)
-		rowsPanel.CanvasSize = UDim2.fromOffset(0, 380)
-		return
-	elseif id == "PLANETS" then
-		for k = 0, #Econ.Tiers - 1 do table.insert(list, function(i) return bodyRow(i, k) end) end
-	else
-		for _, node in ipairs(Econ.Ring1) do
-			if node.tab == id and node.effect.kind ~= "unlockTier" then
-				table.insert(list, function(i) return nodeRow(i, node, TAB_LOOK[id]) end)
-			end
-		end
-	end
-	for i, make in ipairs(list) do
-		local row = make(i)
-		table.insert(rows, row)
-		row.refresh()
-	end
-	rowsPanel.CanvasSize = UDim2.fromOffset(0, math.max(380, 12 + #list * 120))
-	rowsPanel.CanvasPosition = Vector2.zero
-end
-local function refreshRows()
-	for _, row in ipairs(rows) do row.refresh() end
-end
-
-local selPulse
-local function selectTab(id: string)
-	currentTab = id
-	if selRing then selRing:Destroy() end
-	if selPulse then selPulse:Cancel() end
-	for tid, ui in pairs(tabUI) do
-		Kit.clearVfx(ui.button)
-		if tid == id and not ui.def.locked then Kit.tagVfx(Kit.shine(ui.button, 3)) end
-	end
-	local ui = tabUI[id]
-	selRing = Kit.box(win, ui.x - 4, ui.y - 4, 174, 54, { ZIndex = 7 })
-	Kit.corner(selRing, 7)
-	local st = Kit.stroke(selRing, Color3.new(1, 1, 1), 2)
-	if not Kit.calm() then selPulse = Kit.tween(st, { Transparency = 0.65 }, 0.7, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true) end
-	buildTab(id)
-end
-for id, ui in pairs(tabUI) do
-	ui.button.MouseButton1Click:Connect(function() selectTab(id) end)
-end
+local panel = UpgradesPanel.new(win, {
+	subject = player, chip = "ESSENCE", close = true, paged = false, edgeGlow = false,
+	buy = function(kind, arg) return request:InvokeServer(kind, arg) end,
+	onBought = afterBuy, toast = toast, sound = Kit.sound,
+})
+local closeBtn = panel.closeButton
+local tabUI = panel.tabUI
+local tutorialTargets = panel.targets
+local ess = panel.chipText
+local function selectTab(id: string) panel:selectTab(id) end
+local function refreshRows() panel:refresh() end
 
 ------------------------------------------------------------------------ open / close
 local open = false
@@ -613,13 +224,13 @@ end
 local layout, windowScale -- (defined below)
 local function openWindow(tab: string?)
 	if open then
-		if tab and tab ~= currentTab then selectTab(tab) end
+		if tab and tab ~= panel.currentTab then selectTab(tab) end
 		return
 	end
 	open = true
 	win.Visible = true
 	setKeySelected("U")
-	selectTab(tab or currentTab)
+	selectTab(tab or panel.currentTab)
 	layout()
 	local ws = windowScale()
 	winScale.Scale = ws * 0.8
@@ -782,7 +393,7 @@ local function stepTarget(step: number): (GuiObject?, string?)
 	elseif def.id == "FirstMoon" then wantTab, rowKey = "PLANETS", if player:GetAttribute("Node_LunarPull") then "Body1" else "Unlock1"
 	else return nil, nil end
 	if not open then return keyUI.U.hit, wantTab end
-	if currentTab ~= wantTab then return tabUI[wantTab].button, wantTab end
+	if panel.currentTab ~= wantTab then return tabUI[wantTab].button, wantTab end
 	return tutorialTargets[rowKey], wantTab
 end
 
@@ -846,7 +457,28 @@ RunService.Heartbeat:Connect(function()
 		local s = screenScale()
 		hintRoot.Position = if small and open then UDim2.new(0.5, 0, 0, viewport().Y - math.floor(46 * s)) else UDim2.new(0.5, 0, 0, math.floor(90 * s))
 	end
-	if target and target.Parent and target.AbsoluteSize.X > 0 then
+	-- step 1 points at the BUY button on YOUR island's Upgrades board when it's on screen (like Regrowth); else the hotbar
+	local boardAt, boardTop
+	if Econ.Tutorial[step + 1].id == "BuyAsteroid" and not open and shared.GalaxyBoardTarget then
+		local c, t = shared.GalaxyBoardTarget("Body0", "PLANETS")
+		local cam = workspace.CurrentCamera
+		if c and cam then
+			local sc, on = cam:WorldToViewportPoint(c)
+			local st = cam:WorldToViewportPoint(t)
+			if on and sc.Z > 0 then boardAt, boardTop = Vector2.new(sc.X, sc.Y), Vector2.new(st.X, st.Y) end
+		end
+	end
+	if boardAt then
+		local h = math.max(12, (boardAt.Y - boardTop.Y) * 2)
+		local bob = if Kit.calm() then 0 else math.sin(os.clock() * 5) * 6
+		arrow.Visible = true
+		arrow.Size = UDim2.fromOffset(44 * screenScale(), 44 * screenScale())
+		arrow.Position = UDim2.fromOffset(boardAt.X, boardTop.Y - 4 + bob)
+		targetRing.Visible = true
+		targetRing.Position = UDim2.fromOffset(boardAt.X, boardAt.Y)
+		targetRing.Size = UDim2.fromOffset(h * 146 / 52 + 8, h + 8)
+		targetRing.Rotation = 0
+	elseif target and target.Parent and target.AbsoluteSize.X > 0 then
 		-- (AbsolutePosition is below the top bar even in an IgnoreGuiInset ScreenGui: add the inset back)
 		local p, sz = target.AbsolutePosition + GuiService:GetGuiInset(), target.AbsoluteSize
 		local centre = p + sz / 2

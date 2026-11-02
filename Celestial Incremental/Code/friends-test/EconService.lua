@@ -207,9 +207,23 @@ end
 
 ------------------------------------------------------------------------ requests
 local lastReq = {}
-request.OnServerInvoke = function(player: Player, action, arg)
+-- a buy from an island BOARD (arg 3 = the island slot): only the island's owner, standing within MapConfig.Boards.BuyRange
+-- of the boards (the 2D window, hotbar U, sends no slot and works anywhere)
+local function boardAllowed(player: Player, slot): boolean
+	if type(slot) ~= "number" or slot ~= slot or player:GetAttribute("Island") ~= slot then return false end
+	local islands = workspace:FindFirstChild("Galaxy") and workspace.Galaxy:FindFirstChild("Islands")
+	local island = islands and islands:FindFirstChild("Island_" .. slot)
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not island or not root or island:GetAttribute("Owner") ~= player.UserId then return false end
+	local c, a = island:GetAttribute("Center"), island:GetAttribute("Angle")
+	local far = c + Vector3.new(math.cos(a), 0, math.sin(a)) * MapConfig.Boards.Radius
+	return (root.Position - far).Magnitude <= MapConfig.Boards.BuyRange
+end
+
+request.OnServerInvoke = function(player: Player, action, arg, slot)
 	local s = sessions[player]
 	if not s or s.readOnly then return false, "loading" end
+	if slot ~= nil and not boardAllowed(player, slot) then return false, "board" end
 	-- rate limit: 25 requests a second (hold-to-buy is ~10)
 	local now = os.clock()
 	local r = lastReq[player]

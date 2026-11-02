@@ -8,7 +8,7 @@
 --  * A Supernova (your Supernovas count going up) = the shared moment: every client sees the Core burst and the shockwave.
 --  * Comets: GalaxyEconService sends them and pays them (MapEvent "CometSpawn" / "Comet").
 --  * Belt: one small rock per body owned (max 20) in the island's star system, so it grows with every buy.
---  * From tier 1 the island has its UPGRADES terminal (facing the spawn); it opens the window for the island's owner only.
+--  * Every owned island has its two live BOARDS (UPGRADES + CONSTELLATION TREE) on the far edge; GalaxyBoards draws them.
 -- Every size and place comes from MapConfig.Islands (redone to scale against the R15 character, 2 Nov night).
 -- Reads the PLAYER's attributes (set by the economy): Bodies, BodyTiers, Supernovas, SupernovaReady.
 -- Studio test switches (Workspace attributes, Studio only): TestIslands = true (the empty islands get fake owners at every
@@ -71,67 +71,41 @@ local function angled(island: Model, deg: number, r: number): Vector3
 	return at(island, math.cos(a) * r, math.sin(a) * r)
 end
 
--- the UPGRADES terminal: a brass-framed screen exactly the board image's ratio (15 x 10.31), its front facing the island's
--- spawn, a beacon on top; click (ClickDetector, 40 studs) or the prompt up close -> Galaxy.OpenWindow("Upgrades") on the
--- OWNER's screen only (GalaxyMapClient checks the island's owner)
-local function terminal(island: Model, folder: Instance, window: string, place: Vector3)
-	local T = MapConfig.Terminal
-	local W = T.Width
-	local H = W / T.Ratio
-	local pos = at(island, place.X, place.Z)
-	local face = Builder.faceTo(pos, at(island, I.Spawn.X, I.Spawn.Z))
+-- the island's two BOARDS (owner, "boards like Regrowth"): brass-framed panels on the far edge, backs to the void, each
+-- face tangent to the rim, tilted back; a dark screen (GalaxyBoards draws the live UI on it), a beacon on top (shown by the
+-- client only while something can be bought). No prompt, no ClickDetector: the buttons are on the screen.
+local function makeBoards(island: Model)
+	local old = island:FindFirstChild("Boards")
+	if old then return old end
+	local B = MapConfig.Boards
+	local c, dir = centerOf(island)
 	local model = Instance.new("Model")
-	model.Name = "Terminal_" .. window
-	model:SetAttribute("Window", window)
-	model:SetAttribute("Slot", island:GetAttribute("Slot"))
-	model.Parent = folder
-	local mid = face * CFrame.new(0, T.Bottom + H / 2, 0)
-	local image = T.Images[window]
-	local screen = Builder.part({ Name = if image then "Screen" else "BoardImagePending", Size = Vector3.new(W, H, 0.2), CFrame = mid * CFrame.new(0, 0, 0.2),
-		Color = C.Screen, CanCollide = false, Parent = model })
-	screen:SetAttribute("Screen", true)
-	local gui = Instance.new("SurfaceGui")
-	gui.Face = Enum.NormalId.Back
-	gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
-	gui.CanvasSize = Vector2.new(1490, 1024) -- (the image's own pixels on a part of the same ratio: 1:1, no stretch, no crop)
-	gui.LightInfluence = 0
-	gui.MaxDistance = 160
-	gui.Parent = screen
-	if image then
-		local img = Instance.new("ImageLabel")
-		img.BackgroundTransparency = 1
-		img.Size = UDim2.fromScale(1, 1)
-		img.Image = image
-		img.ScaleType = Enum.ScaleType.Stretch
-		img.Parent = gui
-	else
-		Builder.label(gui, if window == "Tree" then "CONSTELLATION TREE" else string.upper(window), UDim2.fromScale(0.08, 0.36), UDim2.fromScale(0.84, 0.28), Color3.fromRGB(255, 196, 110))
+	model.Name = "Boards"
+	for _, spec in ipairs(B.Panels) do
+		local cf = Builder.BoardCFrame(c, dir, spec.side)
+		local panel = Instance.new("Model")
+		panel.Name = "Board_" .. spec.id
+		panel:SetAttribute("Board", spec.id)
+		panel.Parent = model
+		local screen = Builder.part({ Name = "Screen", Size = Vector3.new(B.Width, B.Height, 0.2), CFrame = cf * CFrame.new(0, 0, 0.2), Color = C.Screen, CanCollide = false, Parent = panel })
+		screen:SetAttribute("Board", spec.id)
+		local f = B.Frame
+		for _, bar in ipairs({ { 0, B.Height / 2 + f / 2, B.Width + 2 * f, f }, { 0, -B.Height / 2 - f / 2, B.Width + 2 * f, f }, { -B.Width / 2 - f / 2, 0, f, B.Height }, { B.Width / 2 + f / 2, 0, f, B.Height } }) do
+			Builder.part(brass({ Name = "FrameBar", Size = Vector3.new(bar[3], bar[4], B.Depth), CFrame = cf * CFrame.new(bar[1], bar[2], 0.1), CanCollide = true, Parent = panel }))
+		end
+		Builder.part(brass({ Name = "BackPlate", Size = Vector3.new(B.Width + 2 * f, B.Height + 2 * f, 0.3), CFrame = cf * CFrame.new(0, 0, -B.Depth / 2 + 0.1), CanCollide = true, Parent = panel }))
+		-- two posts from the floor up the back to the bottom bar
+		local foot = cf * CFrame.new(0, -B.Height / 2, 0)
+		for _, sx in ipairs({ -1, 1 }) do
+			local base = foot * CFrame.new(sx * (B.Width / 2 - 2), 0, -B.Depth / 2 - 0.3)
+			local top = base.Position
+			local bottom = Vector3.new(top.X, c.Y, top.Z)
+			Builder.part(brass({ Name = "Post", Size = Vector3.new(0.9, (top - bottom).Magnitude + 0.6, 0.9), CFrame = CFrame.new((top + bottom) / 2), CanCollide = true, Parent = panel }))
+		end
+		local beacon = Kit.Make("LampOrb", { Name = "Beacon", Fit = { "Y", 1.8 }, CFrame = cf * CFrame.new(0, B.Height / 2 + f + 1.2, 0), Color = Color3.fromRGB(255, 200, 80), Material = Enum.Material.Neon, Parent = panel })
+		local _ = beacon
 	end
-	-- the brass frame: 4 bars round the screen + a back plate, 2 posts down to the floor, a beacon on top
-	local f = T.Frame
-	for _, bar in ipairs({ { 0, H / 2 + f / 2, W + 2 * f, f }, { 0, -H / 2 - f / 2, W + 2 * f, f }, { -W / 2 - f / 2, 0, f, H }, { W / 2 + f / 2, 0, f, H } }) do
-		Builder.part(brass({ Name = "FrameBar", Size = Vector3.new(bar[3], bar[4], T.Depth + 0.2), CFrame = mid * CFrame.new(bar[1], bar[2], 0.1), CanCollide = true, Parent = model }))
-	end
-	local back = Builder.part(brass({ Name = "BackPlate", Size = Vector3.new(W + 2 * f, H + 2 * f, 0.3), CFrame = mid * CFrame.new(0, 0, -T.Depth / 2 + 0.05), CanCollide = true, Parent = model }))
-	for _, sx in ipairs({ -1, 1 }) do
-		Builder.part(brass({ Name = "Post", Size = Vector3.new(0.8, T.Bottom + 0.2, 0.8), CFrame = face * CFrame.new(sx * (W / 2 - 1.5), (T.Bottom + 0.2) / 2, -0.1), CanCollide = true, Parent = model }))
-	end
-	Kit.Make("LampOrb", { Name = "Beacon", Fit = { "Y", 1.6 }, CFrame = mid * CFrame.new(0, H / 2 + f + 1, 0), Color = Color3.fromRGB(255, 160, 60), Material = Enum.Material.Neon, Parent = model })
-	for _, host in ipairs({ screen, back }) do
-		local click = Instance.new("ClickDetector")
-		click.MaxActivationDistance = T.ClickRange
-		click.Parent = host
-	end
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.Name = "Open"
-	prompt.ActionText = "Open"
-	prompt.ObjectText = string.upper(window)
-	prompt.KeyboardKeyCode = Enum.KeyCode.E
-	prompt.MaxActivationDistance = T.PromptRange
-	prompt.RequiresLineOfSight = false
-	prompt:SetAttribute("Window", window)
-	prompt:SetAttribute("Slot", island:GetAttribute("Slot"))
-	prompt.Parent = screen
+	model.Parent = island
 	return model
 end
 
@@ -148,8 +122,6 @@ TIER_BUILD[1] = function(island, folder)
 		Color = C.Rock, Parent = folder })
 	Kit.HangingCrystals(folder, c - UP * floorH, R, under.Y, C.Crystal, slot)
 	Kit.TileRing(folder, c, R * I.Tiles.From, R * I.Tiles.To, I.Tiles.Count, C.Stone2, a)
-	-- the UPGRADES terminal (the Tree terminal's spot, I.TreeSpot, stays free for the alpha)
-	terminal(island, folder, "Upgrades", I.Terminal)
 	local _ = dir
 end
 TIER_BUILD[2] = function(island, folder)
@@ -191,10 +163,8 @@ TIER_BUILD[5] = function(island, folder)
 	local cloth = pole + toCentre * (poleSize.X / 2 + 0.4) + UP * (BN.Pole - BN.Cloth / 2 - 0.3)
 	local flag = Kit.Make("Banner", { Name = "Banner", Fit = { "Y", BN.Cloth }, CFrame = CFrame.lookAt(cloth, cloth + toCentre), Color = island:GetAttribute("Color") or C.Brass, Parent = folder })
 	flag:SetAttribute("PlayerColor", true)
-	-- a brass crown ring resting on the lamps (above head height over the bridge's landing)
-	local L = I.Lamps
-	local crownTube = Kit.Fit("RimRing", "X", I.CrownRing).Y
-	Kit.Make("RimRing", brass({ Name = "CrownRing", Fit = { "X", I.CrownRing }, CFrame = CFrame.new(c + UP * (L.Pillar + L.Orb + crownTube / 2)), Parent = folder }))
+	-- a brass halo ring above the island (clear of the boards' tops)
+	Kit.Make("RimRing", brass({ Name = "CrownRing", Fit = { "X", I.CrownRing }, CFrame = CFrame.new(c + UP * I.CrownHeight), Parent = folder }))
 end
 TIER_BUILD[6] = function(island, folder)
 	local c = centerOf(island)
@@ -222,6 +192,10 @@ local function applyTier(island: Model, tier: number, pop: boolean)
 	local owned = (island:GetAttribute("Owner") or 0) ~= 0
 	-- tier 0 (and a free slot): the bare asteroid + its landing (Builder.RockPieces); from tier 1 the island replaces it
 	local rock = pieces:FindFirstChild("T0")
+	if rock and rock:GetAttribute("Owned") ~= owned then
+		rock:Destroy()
+		rock = nil
+	end
 	if tier == 0 and not rock then
 		local c, dir = centerOf(island)
 		rock = Builder.RockPieces(island, c, dir, island:GetAttribute("Slot") or 1, owned)
@@ -229,11 +203,6 @@ local function applyTier(island: Model, tier: number, pop: boolean)
 	elseif tier > 0 and rock then
 		rock:Destroy()
 		rock = nil
-	end
-	if rock then
-		Kit.SetColor(rock.Rock, if owned then C.BareRock else C.BareRock:Lerp(Color3.new(0, 0, 0), 0.45))
-		rock.Landing.Color = if owned then C.Bridge else C.BridgeDim
-		rock.Landing.Material = if owned then Enum.Material.Neon else Enum.Material.SmoothPlastic
 	end
 	for t = 1, MapConfig.MaxTier do
 		local folder = pieces:FindFirstChild("T" .. t)
@@ -272,6 +241,8 @@ local function refresh(slot: number, pop: boolean)
 		island:SetAttribute("Ready", false)
 		setBridge(island, false)
 		applyTier(island, 0, false)
+		local boards = island:FindFirstChild("Boards")
+		if boards then boards:Destroy() end
 		return
 	end
 	local isPlayer = typeof(owner) == "Instance"
@@ -284,6 +255,7 @@ local function refresh(slot: number, pop: boolean)
 	island:SetAttribute("Supernovas", novas)
 	island:SetAttribute("Ready", (if isPlayer then owner:GetAttribute("SupernovaReady") else owner.Ready) == true)
 	setBridge(island, true)
+	makeBoards(island)
 	local tier = MapConfig.TierOf(bodies, novas)
 	island:SetAttribute("Rank", MapConfig.RankOf(tier, novas))
 	applyTier(island, tier, pop and tier > (island:GetAttribute("Tier") or 0))
@@ -293,7 +265,9 @@ local function spawnCFrame(slot: number): CFrame
 	local island = islandOf(slot)
 	local spot = if (island:GetAttribute("Tier") or 0) == 0 then I.SpawnRock else I.Spawn
 	local pos = at(island, spot.X, spot.Z, 3.5)
-	return CFrame.lookAt(pos, Vector3.new(O.X, pos.Y, O.Z))
+	-- facing the boards (the far edge, between the two panels)
+	local boards = at(island, MapConfig.Boards.Radius, 0)
+	return CFrame.lookAt(pos, Vector3.new(boards.X, pos.Y, boards.Z))
 end
 local function toIsland(player: Player)
 	local slot = slotOf[player]

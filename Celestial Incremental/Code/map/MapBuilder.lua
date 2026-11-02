@@ -605,20 +605,41 @@ function Builder.Build()
 	return root
 end
 
--- tier 0 / a free slot: a bare asteroid at the island's centre + a landing from the island threshold to it. `owned` = lit.
+-- tier 0 / a free slot: a bare asteroid at the island's centre + a landing from the island threshold to it. `owned` = lit,
+-- and (a new player) the walkway runs on across the lowered rock to a stone pad under the boards.
 function Builder.RockPieces(island: Instance, center: Vector3, dir: Vector3, slot: number, owned: boolean): Model
 	local I = MapConfig.Islands
 	local t0 = Instance.new("Model")
 	t0.Name = "T0"
+	t0:SetAttribute("Owned", owned)
 	local rock = Kit.Fit("RockBare", "X", I.Rock)
-	Kit.Make("RockBare", { Name = "Rock", Fit = { "X", I.Rock }, CFrame = CFrame.new(center - UP * (rock.Y / 2 - 1.5)) * CFrame.Angles(0, slot * 0.7, 0),
+	local top = if owned then -0.3 else 1.5 -- (owned: under the walkway)
+	Kit.Make("RockBare", { Name = "Rock", Fit = { "X", I.Rock }, CFrame = CFrame.new(center + UP * (top - rock.Y / 2)) * CFrame.Angles(0, slot * 0.7, 0),
 		Color = if owned then C.BareRock else C.BareRock:Lerp(Color3.new(0, 0, 0), 0.45), Collide = true, Parent = t0 })
 	local from = Builder.IslandPoint(center, dir, Vector3.new(I.Landing.To + I.Landing.Ramp, 0, 0))
-	local to = Builder.IslandPoint(center, dir, Vector3.new(-I.Rock * 0.38, 0, 0))
-	part({ Name = "Landing", Size = Vector3.new(I.Bridge.Width, I.Bridge.Thick, (to - from).Magnitude), CFrame = CFrame.lookAt((from + to) / 2, to) * CFrame.new(0, -I.Bridge.Thick / 2, 0),
+	local to = Builder.IslandPoint(center, dir, Vector3.new(if owned then I.RockPad.WalkTo else -I.Rock * 0.38, 0, 0))
+	part({ Name = "Landing", Size = Vector3.new(I.Bridge.Width, I.Bridge.Thick, (to - from).Magnitude), CFrame = CFrame.lookAt((from + to) / 2, to) * CFrame.new(0, -I.Bridge.Thick / 2 + 0.05, 0),
 		Color = if owned then C.Bridge else C.BridgeDim, Material = if owned then Enum.Material.Neon else Enum.Material.SmoothPlastic, CanCollide = true, Parent = t0 })
+	if owned then
+		local pad = I.RockPad
+		local padH = Kit.Fit("IslandTop", "X", pad.Fit).Y
+		local at = Builder.IslandPoint(center, dir, pad.At)
+		Kit.Make("IslandTop", { Name = "BoardPad", Fit = { "X", pad.Fit }, CFrame = CFrame.lookAt(at - UP * (padH / 2), at - UP * (padH / 2) + dir), Color = C.Stone, Collide = true, Parent = t0 })
+		local under = Kit.Fit("IslandUnder", "X", pad.Fit)
+		Kit.Make("IslandUnder", { Name = "PadUnder", Fit = { "X", pad.Fit }, CFrame = CFrame.new(at - UP * (padH + under.Y / 2 - 0.3)) * CFrame.Angles(0, slot, 0), Color = C.Rock, Parent = t0 })
+	end
 	local _ = island
 	return t0
+end
+
+-- a board panel's frame on an island: side -1 = UPGRADES (left, seen from the island), 1 = TREE. Its +Z faces the island's
+-- centre (the screen's Back face), tilted back; the CFrame is the panel's centre.
+function Builder.BoardCFrame(center: Vector3, dir: Vector3, side: number): CFrame
+	local B = MapConfig.Boards
+	local a = math.rad(side * B.Angle)
+	local at = Builder.IslandPoint(center, dir, Vector3.new(math.cos(a) * B.Radius, 0, math.sin(a) * B.Radius))
+	local base = faceTo(at, center)
+	return base * CFrame.new(0, B.Bottom, 0) * CFrame.Angles(math.rad(-B.Tilt), 0, 0) * CFrame.new(0, B.Height / 2, 0)
 end
 
 return Builder

@@ -85,36 +85,38 @@ MapConfig.Islands = {
 	-- the island end of every bridge: a threshold over the island's rim (in island units: x = out from the Core, from -Radius)
 	Landing = { From = -33, To = -25, Top = 1.6, Ramp = 4 },
 	-- island-local places (x = away from the Core, z = to the side; the bridge enters at x = -30, z = 0)
-	Spawn = Vector3.new(-12, 0, -6),                -- facing the Core (off the star system's beam: the camera behind
-	                                                -- the player would look straight through it)
-	SpawnRock = Vector3.new(-17, 0, 0),             -- (tier 0: on the landing in front of the rock)
-	Terminal = Vector3.new(-14, 0, 13),             -- the UPGRADES terminal, front facing the spawn
-	TreeSpot = Vector3.new(-14, 0, -13),            -- kept free for the Tree terminal (alpha)
+	-- the spawn FACES THE BOARDS (owner, boards like Regrowth): tutorial step 1 is a button on the board. A little off the
+	-- island's centre line, so the camera behind the player doesn't look through the star system's beam
+	Spawn = Vector3.new(6, 0, -5),
+	SpawnRock = Vector3.new(-2, 0, -2),             -- (tier 0: on the walkway over the rock)
 	Rock = 30,                                      -- tier 0 / free slot: a bare asteroid 30 across (the mesh makes it 23 high)
 	Tiles = { From = 0.6, To = 0.92, Count = 14 },
 	RimFit = 61,                                    -- tier 2 brass rim (1.5 high)
 	InlayFit = 34,
-	Lamps = { Radius = 27.5, Angles = { 0, 60, -60, 120, -120 }, Pillar = 6.5, Orb = 1.5 }, -- 8 tall, none at the bridge
-	Crystals = { Angles = { -80, -40, 0, 40, 80 }, From = 15, To = 21, Low = 3, High = 8 },
-	Garden = { At = Vector3.new(8, 0, -9), Fit = 14 },
+	Lamps = { Radius = 27.5, Angles = { 60, -60, 120, -120 }, Pillar = 6.5, Orb = 1.5 }, -- 8 tall; none at the bridge or the boards
+	Crystals = { Angles = { 65, 105, -65, -105, 140 }, From = 15, To = 21, Low = 3, High = 8 }, -- (none in front of the boards)
+	Garden = { At = Vector3.new(-6, 0, 12), Fit = 14 },
 	Banner = { At = Vector3.new(0, 0, 26), Pole = 10, Cloth = 5 }, -- (the cloth mesh at 5 high is 5.1 wide)
-	CrownRing = 55,                                 -- tier 5: a brass ring on the lamp pillars' tops
+	CrownRing = 55, CrownHeight = 15.5,             -- tier 5: a brass halo ring above the island (clear of the boards' tops)
 	Dais = 12,
-	Telescope = { At = Vector3.new(13, 0, 8), Height = 7 },
+	Telescope = { At = Vector3.new(-15, 0, -11), Height = 7 },
 	HangingCrystals = 3,
+	-- tier 0 (a new player): the walkway from the bridge across the rock to a stone pad under the boards
+	RockPad = { At = Vector3.new(19, 0, 0), Fit = 34, WalkTo = 4 },
 }
 
--- the UPGRADES / TREE terminals (one per island, from tier 1): the screen is exactly the image's ratio (745:512 = 1490 x 1024)
-MapConfig.Terminal = {
-	Width = 15, Ratio = 1490 / 1024,                -- screen 15 x 10.31, unstretched, uncropped, one-sided
-	Bottom = 3, Frame = 0.6, Depth = 0.6,
-	ClickRange = 40, PromptRange = 12,
-	-- the approved v12 board images (Map\images\board_*_v12.png), uploaded to P&L Studios XP. nil = not uploaded yet: the
-	-- screen part is named "BoardImagePending" and shows the window's name until the id is set here
-	Images = {
-		Upgrades = nil, -- board_upgrades_v12.png
-		Tree = nil,     -- board_tree_v12.png
-	},
+-- the island BOARDS (owner, "boards like Regrowth", 2 Nov): two live panels on the OUTER edge of every owned island, on the
+-- far side from the bridge, backs to the void, each face tangent to the rim, left UPGRADES / right CONSTELLATION TREE (seen
+-- from the island). Their screens are live SurfaceGuis (GalaxyBoards, canvas 745 x 512 = the v12 board PNGs / 2) with real
+-- buttons: no prompt, no ClickDetector. Buying from a board: the server checks the island's owner + within BuyRange.
+-- (The spec's +-14 deg puts two 16-wide panels at radius 26 into each other: 18.5 deg is the closest they stand apart.)
+MapConfig.Boards = {
+	Radius = 26, Angle = 18.5, Tilt = 8, Bottom = 2.5,
+	Width = 16, Height = 11,                        -- (16 / 11 = 1.4545 = the canvas 745 / 512)
+	Frame = 0.8, Depth = 0.8,
+	Canvas = Vector2.new(745, 512), Window = Vector2.new(30, 32), -- (the v12 window's place on the canvas)
+	BuyRange = 45, DrawRange = 160,
+	Panels = { { id = "Upgrades", side = -1 }, { id = "Tree", side = 1 } },
 }
 
 -- the island grows (tycoon feeling): each tier adds pieces (a pop + sparkle). Bodies reset every Supernova, so the first
