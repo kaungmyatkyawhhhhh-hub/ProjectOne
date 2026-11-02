@@ -6,7 +6,7 @@
 	"Body2_Node", "FL2_Node" ... (a model of mesh parts each) and turns the car round: its front is
 	+Z, its left +X. The first time a model is used it is scaled to its real length
 	(Config.Traffic.ModelLengths, by type letter) and given what Traffic expects: an anchored
-	"Chassis" root (the hitbox), Wheel_* Motor6Ds on the root, brake lights tagged TailLight, and
+	"Chassis" root (the hitbox), Wheel_* Motor6Ds on the root (no lights: owner 2026-11-02), and
 	Length / Width / Height attributes. Every car after that is a clone of the ready one.
 ]]
 
@@ -17,7 +17,6 @@ local Config = require(Shared:WaitForChild("Config"))
 
 local TrafficBodies = {}
 
-local BRAKE_OFF = Color3.fromRGB(150, 0, 6)
 local WHEELS = { "FL", "FR", "RL", "RR" }
 local UNTEXTURED = Color3.fromRGB(26, 26, 28)
 
@@ -152,23 +151,7 @@ local function prepare(template: Model): Model
 			end
 		end
 	end
-	-- brake lights: two thin strips on the tail (the painted lamps stay as they are)
-	for _, side in { -1, 1 } do
-		local t = Instance.new("Part")
-		t.Name = "TailLight"
-		t.Size = Vector3.new(box.X * 0.2, box.Y * 0.07, 0.08)
-		t.CFrame = cf * CFrame.new(side * box.X * 0.33, -box.Y * 0.05, box.Z / 2 - 0.25)
-		t.Material = Enum.Material.Neon
-		t.Color = BRAKE_OFF
-		t.CanCollide = false
-		t.CanQuery = false
-		t.CanTouch = false
-		t.CastShadow = false
-		t.Massless = true
-		t:SetAttribute("TailLight", true)
-		t.Parent = m
-		weld(root, t)
-	end
+	-- (no brake-light strips: traffic cars have no lights, owner 2026-11-02)
 	m:SetAttribute("Length", box.Z)
 	m:SetAttribute("Width", box.X)
 	m:SetAttribute("Height", box.Y)

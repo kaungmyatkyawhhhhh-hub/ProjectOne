@@ -19,6 +19,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local TrafficBodies = require(script.Parent:WaitForChild("TrafficBodies"))
 
@@ -158,6 +159,18 @@ for _, seg in graph.lanes do
 		table.insert(if seg.speedK >= Config.City.HighwaySpeedK - 0.01 then highwayLanes else cityLanes, seg)
 	end
 end
+-- the Riviera's lanes (the new map), when it is in the place: city lanes, but only a few cars
+-- there at once (owner, 2026-11-02: "traffic on the new map (reduce traffic)"; Config.Traffic.RivieraMax)
+if workspace:FindFirstChild("Riviera") then
+	local riv = RivieraTraffic.build()
+	if riv then
+		for _, seg in riv.lanes do
+			laneBox[seg] = { seg.p0:Min(seg.p1):Min(seg.p2), seg.p0:Max(seg.p1):Max(seg.p2) }
+			table.insert(cityLanes, seg)
+		end
+	end
+end
+local rivieraCars = 0
 local nearby: { CityLayout.Segment } = {}
 local function lanesNear(lanes: { CityLayout.Segment }, center: Vector3, maxDist: number): { CityLayout.Segment }
 	table.clear(nearby)
@@ -186,6 +199,9 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 		if seg.mountain and (mountainCars >= T.MountainMax or rng:NextNumber() > T.MountainShare) then
 			continue
 		end
+		if (seg :: any).riviera and rivieraCars >= T.RivieraMax then
+			continue
+		end
 		local s = rng:NextNumber(8, math.max(9, seg.length - 25))
 		local pos = CityLayout.sample(seg, s)
 		local ok = true
@@ -202,6 +218,9 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 		if ok and isFree(pos, gap, ignore) then
 			if seg.mountain then
 				mountainCars += 1 -- (counted again each frame; this covers several placed at once)
+			end
+			if (seg :: any).riviera then
+				rivieraCars += 1
 			end
 			return seg, s
 		end
@@ -243,9 +262,14 @@ local function spawnNpc(center: Vector3?, highway: boolean): Npc?
 			table.insert(wheels, j)
 		end
 	end
+	-- no lights on traffic cars (owner, 2026-11-02: "you can remove car lights for traffic cars"):
+	-- their brake lamps stay plain painted lamps, never glowing
 	for _, d in model:GetDescendants() do
 		if d:IsA("BasePart") and d:GetAttribute("TailLight") then
-			table.insert(tails, d)
+			d.Material = Enum.Material.SmoothPlastic
+			d.Color = BRAKE_OFF
+		elseif d:IsA("Light") then
+			d:Destroy()
 		end
 	end
 	local npc: Npc = {
@@ -422,9 +446,13 @@ function Traffic.update(dt: number)
 	local now = workspace:GetServerTimeNow()
 
 	mountainCars = 0
+	rivieraCars = 0
 	for _, npc in Traffic.cars do
 		if npc.seg.mountain then
 			mountainCars += 1
+		end
+		if (npc.seg :: any).riviera then
+			rivieraCars += 1
 		end
 	end
 
