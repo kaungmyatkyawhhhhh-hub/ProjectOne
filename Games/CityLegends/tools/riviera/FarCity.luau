@@ -173,7 +173,15 @@ function FarCity.build(riviera: Model, far: any): { [string]: number }
 
 	-- buildings
 	local buildings = riviera:FindFirstChild("Buildings")
-	for k, b in (if buildings then buildings:GetChildren() else {}) do
+	-- (and the landmarks: the Old Rock palace, cathedral and old-town houses carry the same attributes)
+	local list = if buildings then buildings:GetChildren() else {}
+	local oldRock = riviera:FindFirstChild("OldRock")
+	for _, d in (if oldRock then oldRock:GetDescendants() else {}) do
+		if d:IsA("Model") and d:GetAttribute("Shell") then
+			table.insert(list, d)
+		end
+	end
+	for k, b in list do
 		if not b:IsA("Model") or not b:FindFirstChild("Body") then
 			continue
 		end
@@ -301,7 +309,7 @@ function FarCity.build(riviera: Model, far: any): { [string]: number }
 	lights.Name = "Lights"
 	lights.Parent = root
 	local WARM = { Color3.fromRGB(255, 196, 120), Color3.fromRGB(255, 176, 96), Color3.fromRGB(255, 214, 150) }
-	for k, b in (if buildings then buildings:GetChildren() else {}) do
+	for k, b in list do
 		local shell = b:GetAttribute("Shell")
 		local size = b:GetAttribute("ShellSize")
 		if typeof(shell) ~= "CFrame" or typeof(size) ~= "Vector3" then

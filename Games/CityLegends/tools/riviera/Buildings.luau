@@ -713,6 +713,9 @@ function Buildings.build(data, box, parent: Instance, rng: Random, opts): number
 	return count
 end
 
+-- the kit, for the landmarks (tools/riviera/OldRock.luau)
+Buildings.kit = { part = part, small = small, quiet = quiet, pane = pane, face = face, faces = faces, core = core, belle = belle, block = block, hash = hash, R = R, CORE = CORE, TILE = TILE, SLATE = SLATE, IRON = IRON, SHUTTER = SHUTTER, BELLE = BELLE }
+
 -- café tables on the pavement in front of some ground-floor shops (Creator Store sets in
 -- ServerStorage.RivieraAssets.Props: CafeA, CafeB, cleaned); never on the street furniture, lamps,
 -- trees or the doors. Into each building's Detail (hidden far away). chance(position) -> 0..1
