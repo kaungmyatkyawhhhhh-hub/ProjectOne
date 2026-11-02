@@ -34,6 +34,11 @@ def main() -> None:
     for img in bpy.data.images:
         if img.has_data and not img.packed_file:
             img.pack()
+        # images packed from a .glb have no file name, and the FBX writer leaves those out (the
+        # SVJ pack, 2026-11-02, came into Studio with no textures): give each one a name
+        if img.packed_file and not img.filepath:
+            ext = ".jpg" if img.packed_file.data[:2] == bytes([0xFF, 0xD8]) else ".png"
+            img.filepath_raw = "//" + "".join(c if c.isalnum() else "_" for c in img.name) + ext
     bpy.ops.export_scene.fbx(filepath=out, path_mode="COPY", embed_textures=True, apply_unit_scale=True, apply_scale_options="FBX_SCALE_ALL", axis_forward="-Z", axis_up="Y")
 
 
