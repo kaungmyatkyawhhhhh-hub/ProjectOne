@@ -145,3 +145,9 @@ Phones are roughly 3-5x slower than this PC.
   - the loaded bars look like before (shot: `Assets/plate_faces/in_game_incline_bench.jpg`);
   - both faces read the right way round (checked from both sides).
 - **Measured:** with the plate signs on, the Pro Gym was 23.6 / 19.9 ms render CPU, and 21.1 / 18.2 with them switched off. After the change it reads 20.7 / 18.9, about the switched-off level. Studio's noise is ±1-2 ms, so the live phone check is the real measure.
+
+## Starter Gym NPCs (2 Nov, owner: "ill remove npcs on starter gym because thats already crowded")
+The owner removes them by hand. Checked which ones stand in the Starter Gym (Edit place) and what needs them:
+- **Rosa, Theo** (tag GymNpc): no script names them. Safe to delete.
+- **Benny** (Bully): used by IntroCutscene, StoryClient and Config/Story (the first bully of the storyline). Deleting him breaks the intro and the story; move him instead if needed.
+- **Coach Dex** (tag Coach): used by Quests, the store, the Pump Shop, GymGoerService and the story. Keep.
