@@ -181,8 +181,8 @@ end
 
 -- the surface height of a bigger road (rank below `rank`) at a point on its carriageway, or nil.
 -- Roads are flat side to side, so it is the centre line's height where the point meets it square-on.
-local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number): number?
-	local rj = otherNear(roads, grid, pos, self, HALF - 0.5, rank)
+local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number, radius: number?): number?
+	local rj = otherNear(roads, grid, pos, self, radius or (HALF - 0.5), rank)
 	if rj == nil then
 		return nil
 	end
@@ -230,13 +230,169 @@ local function stripCF(a: Vector3, b: Vector3, side: number, up: number): CFrame
 	return CFrame.new(mid) * cf.Rotation * CFrame.new(side, up, 0)
 end
 
+-- (owner, 2026-11-02: "the road isnt aligned properly here. most of the roads arent aligned
+-- properly"): where a road meets or crosses a bigger one, its own height there (from the map data)
+-- could be a stud or two off the bigger road's surface, a step across the junction mouth. Every
+-- road's heights are eased onto the bigger road's surface at each mouth, the change fading out
+-- along the road over at least 40 studs (at most a 6% change of grade). Biggest roads first, so a
+-- road always meets its bigger roads' final heights.
+local function alignJunctions(roads, grid)
+	local order = {}
+	for ri in roads do
+		table.insert(order, ri)
+	end
+	table.sort(order, function(a, b)
+		return roads[a].rank < roads[b].rank
+	end)
+	for _, ri in order do
+		local r = roads[ri]
+		local pts = r.pts
+		local n = #pts
+		local arc = { 0 }
+		for i = 2, n do
+			local d = pts[i].pos - pts[i - 1].pos
+			arc[i] = arc[i - 1] + Vector2.new(d.X, d.Z).Magnitude
+		end
+		-- the junction mouths: runs of samples within the bigger road's reach. Inside a run every sample
+		-- sits on the bigger road's surface (so this road's slab meets the bigger one's edge level);
+		-- outside, the change at the run's end fades out along the road. A run where this road is
+		-- narrowed all through is a road running alongside behind a wall, not a mouth: left alone.
+		local events = {}
+		local cur = nil
+		for i = 1, n do
+			local rj = otherNear(roads, grid, pts[i].pos, ri, HALF + 6, r.rank)
+			if rj then
+				if cur and cur.rj == rj and cur.last == i - 1 then
+					cur.last = i
+				else
+					cur = { rj = rj, first = i, last = i, wide = false }
+					table.insert(events, cur)
+				end
+				if pts[i].wl >= HALF - 0.5 and pts[i].wr >= HALF - 0.5 then
+					cur.wide = true
+				end
+			else
+				cur = nil
+			end
+		end
+		local target = {}
+		local offs = table.create(n, 0)
+		local weight = table.create(n, 0)
+		local any = false
+		for _, e in events do
+			if not e.wide then
+				continue
+			end
+			any = true
+			for i = e.first, e.last do
+				local y = bigSurface(roads, grid, pts[i].pos, ri, r.rank, HALF + 6)
+				if y then
+					target[i] = y
+				end
+			end
+			local d0 = if target[e.first] then target[e.first] - pts[e.first].pos.Y else 0
+			local d1 = if target[e.last] then target[e.last] - pts[e.last].pos.Y else 0
+			for j = 1, n do
+				if j < e.first or j > e.last then
+					local gap = if j < e.first then arc[e.first] - arc[j] else arc[j] - arc[e.last]
+					local d = if j < e.first then d0 else d1
+					local L = math.max(40, math.abs(d) / 0.06)
+					local w = math.clamp(1 - gap / L, 0, 1)
+					if w > weight[j] then
+						weight[j], offs[j] = w, d * w
+					end
+				end
+			end
+		end
+		-- a road that curls back over itself (a hooked end, a tight hairpin without a wall): where its
+		-- earlier part lies on its later part, the earlier part takes the later part's surface
+		-- (a junction mouth always keeps its own)
+		do
+			local runFirst, runLast, dEnd = nil, nil, 0
+			local function closeRun()
+				if runFirst then
+					for _, k in { { runFirst, -1 }, { runLast, 1 } } do
+						local edgeI = k[1]
+						local d = (target[edgeI] or pts[edgeI].pos.Y) - pts[edgeI].pos.Y
+						local L = math.max(40, math.abs(d) / 0.06)
+						for j = 1, n do
+							local gap = if k[2] < 0 then arc[edgeI] - arc[j] else arc[j] - arc[edgeI]
+							if gap > 0 then
+								local w = math.clamp(1 - gap / L, 0, 1)
+								if w > weight[j] then
+									weight[j], offs[j] = w, d * w
+								end
+							end
+						end
+					end
+					any = true
+				end
+				runFirst, runLast = nil, nil
+			end
+			for i = 1, n do
+				local hit = nil
+				if not target[i] and pts[i].wl >= HALF - 0.5 and pts[i].wr >= HALF - 0.5 then
+					local cx, cz = math.floor(pts[i].pos.X / 24), math.floor(pts[i].pos.Z / 24)
+					-- (the two parts' carriageways overlap once their centres are under two half widths apart)
+					local bestD = 2 * HALF - 2
+					for dx = -3, 3 do
+						for dz = -3, 3 do
+							for _, e in grid[(cx + dx) .. "," .. (cz + dz)] or {} do
+								if e[1] == ri and e[2] >= i + 10 then
+									local q = pts[e[2]].pos
+									local dd = Vector2.new(q.X - pts[i].pos.X, q.Z - pts[i].pos.Z).Magnitude
+									-- (really curled back: heading the other way, further along the road than across)
+									local opposed = pts[e[2]].dir.Unit:Dot(pts[i].dir.Unit) < -0.2
+									if dd < bestD and opposed and arc[e[2]] - arc[i] > 1.15 * dd then
+										bestD, hit = dd, e[2]
+									end
+								end
+							end
+						end
+					end
+				end
+				if hit then
+					target[i] = target[hit] or pts[hit].pos.Y
+					runFirst = runFirst or i
+					runLast = i
+				else
+					closeRun()
+				end
+			end
+			closeRun()
+		end
+		if any then
+			for j = 1, n do
+				local p = pts[j].pos
+				if target[j] then
+					pts[j].pos = Vector3.new(p.X, target[j], p.Z)
+					pts[j].mouth = true
+				elseif offs[j] ~= 0 then
+					pts[j].pos = Vector3.new(p.X, p.Y + offs[j], p.Z)
+				end
+			end
+		end
+	end
+end
+
+-- (debugging) the roads as the build sees them: samples after the junction alignment
+function Roads.prepared(data)
+	local roads, grid = prepare(data)
+	alignJunctions(roads, grid)
+	return roads
+end
+
 function Roads.build(data, opts)
 	opts = opts or {}
 	local box = opts.box
 	local parent = opts.parent
 	local roads, grid = prepare(data)
+	alignJunctions(roads, grid)
 	local count = 0
 	for ri, r in roads do
+		if opts.only and not opts.only[r.name] then
+			continue
+		end
 		local folder = Instance.new("Folder")
 		folder.Name = r.name
 		local pts = r.pts
@@ -271,7 +427,8 @@ function Roads.build(data, opts)
 		end
 		-- a waiting edge is one point (the pivot of a fan of triangles round the bend's inside): it
 		-- gets one height, the mean of the run, or the surface would have a vertical step there
-		local function settle(edge, waited)
+		local fanL, fanR = {}, {}
+		local function settle(edge, waited, fan)
 			local i = 2
 			while i <= n do
 				if waited[i] then
@@ -279,13 +436,24 @@ function Roads.build(data, opts)
 					while j < n and waited[j + 1] do
 						j += 1
 					end
-					local sum = 0
+					-- (a junction mouth's samples keep the bigger road's height: the pivot takes theirs)
+					local sum, cnt, msum, mcnt = 0, 0, 0, 0
 					for k = i - 1, j do
 						sum += edge[k].Y
+						cnt += 1
 					end
-					local y = sum / (j - i + 2)
+					-- (a fan that starts or ends next to a mouth: the mouth's height, or its edge would
+					-- sit below the bigger road's)
+					for k = math.max(1, i - 4), math.min(n, j + 4) do
+						if pts[k].mouth then
+							msum += pts[k].pos.Y
+							mcnt += 1
+						end
+					end
+					local y = if mcnt > 0 then msum / mcnt else sum / cnt
 					for k = i - 1, j do
 						edge[k] = Vector3.new(edge[k].X, y, edge[k].Z)
+						fan[k] = true
 					end
 					i = j + 1
 				else
@@ -293,20 +461,105 @@ function Roads.build(data, opts)
 				end
 			end
 		end
-		settle(edgeL, waitL)
-		settle(edgeR, waitR)
+		settle(edgeL, waitL, fanL)
+		settle(edgeR, waitR, fanR)
 		-- where this road's edge lies on a bigger road (a junction mouth), it takes that road's surface
 		-- height, so both surfaces are one plane there and the joint has no step
+		local pinL, pinR = {}, {}
 		for i = 1, n do
 			for side, edge in { edgeL, edgeR } do
 				if (if side == 1 then pts[i].wl else pts[i].wr) < HALF - 0.5 then
 					continue -- a narrowed edge stops at the wall between this road and the next
 				end
-				local y = bigSurface(roads, grid, edge[i], ri, r.rank)
+				local y = bigSurface(roads, grid, edge[i], ri, r.rank, HALF + 8) -- (a little past its edge: the joint stays level)
 				if y then
 					edge[i] = Vector3.new(edge[i].X, y, edge[i].Z)
+					;(if side == 1 then pinL else pinR)[i] = true
 				end
 			end
+		end
+		-- (owner, 2026-11-02: "the road isnt aligned properly here. most of the roads arent aligned
+		-- properly"): a pinned edge (on a bigger road) could sit a stud or two off its neighbours, a
+		-- step at the junction mouth. The free edge points ease in: along each edge no more than
+		-- GRADE between neighbours, and across the road no more than CROSS, worked out from the pinned
+		-- points (they never move) by passes back and forth until nothing changes
+		local GRADE, CROSS = 0.19, 0.06 -- (GRADE: over the steepest climb, 16%)
+		-- (a fan's pivot is one point: it moves as one, all its copies keep one height; spacing is
+		-- measured between the edge points themselves)
+		local function relax(edge, pin, fan)
+			-- nodes: runs of fan points (one pivot) or single points
+			local nodes = {}
+			local i = 1
+			while i <= n do
+				local j = i
+				if fan[i] then
+					while j < n and fan[j + 1] and (Vector2.new(edge[j + 1].X - edge[i].X, edge[j + 1].Z - edge[i].Z)).Magnitude < 0.5 do
+						j += 1
+					end
+				end
+				local held = false
+				for k = i, j do
+					if pin[k] then
+						held = true
+					end
+				end
+				table.insert(nodes, { i = i, j = j, held = held })
+				i = j + 1
+			end
+			local function setY(nd, y)
+				for k = nd.i, nd.j do
+					edge[k] = Vector3.new(edge[k].X, y, edge[k].Z)
+				end
+			end
+			local function dist(a, b)
+				local p, q = edge[a.j], edge[b.i]
+				return Vector2.new(p.X - q.X, p.Z - q.Z).Magnitude
+			end
+			for _ = 1, 4 do
+				for k = 2, #nodes do
+					local nd, pv = nodes[k], nodes[k - 1]
+					if not nd.held then
+						local d = dist(pv, nd)
+						local y0 = edge[pv.j].Y
+						setY(nd, math.clamp(edge[nd.i].Y, y0 - GRADE * d - 0.02, y0 + GRADE * d + 0.02))
+					end
+				end
+				for k = #nodes - 1, 1, -1 do
+					local nd, nx = nodes[k], nodes[k + 1]
+					if not nd.held then
+						local d = dist(nd, nx)
+						local y0 = edge[nx.i].Y
+						setY(nd, math.clamp(edge[nd.i].Y, y0 - GRADE * d - 0.02, y0 + GRADE * d + 0.02))
+					end
+				end
+			end
+		end
+		for _ = 1, 3 do
+			relax(edgeL, pinL, fanL)
+			relax(edgeR, pinR, fanR)
+			for i = 1, n do
+				local w = Vector2.new(edgeR[i].X - edgeL[i].X, edgeR[i].Z - edgeL[i].Z).Magnitude
+				local lim = CROSS * w + 0.02
+				local dy = edgeR[i].Y - edgeL[i].Y
+				if math.abs(dy) > lim then
+					local fixedL, fixedR = pinL[i] or fanL[i], pinR[i] or fanR[i]
+					if fixedL and fixedR then
+						-- both held
+					elseif fixedL then
+						edgeR[i] = Vector3.new(edgeR[i].X, edgeL[i].Y + math.sign(dy) * lim, edgeR[i].Z)
+					elseif fixedR then
+						edgeL[i] = Vector3.new(edgeL[i].X, edgeR[i].Y - math.sign(dy) * lim, edgeL[i].Z)
+					else
+						local mid = (edgeL[i].Y + edgeR[i].Y) / 2
+						edgeL[i] = Vector3.new(edgeL[i].X, mid - math.sign(dy) * lim / 2, edgeL[i].Z)
+						edgeR[i] = Vector3.new(edgeR[i].X, mid + math.sign(dy) * lim / 2, edgeR[i].Z)
+					end
+				end
+			end
+		end
+		if opts.debug then
+			Roads.debugEdges = Roads.debugEdges or {}
+			Roads.debugEdges[r.name] = { L = edgeL, R = edgeR, waitL = waitL, waitR = waitR, pinL = pinL, pinR = pinR }
 		end
 		local dash = 0
 		local zebraDone = {}

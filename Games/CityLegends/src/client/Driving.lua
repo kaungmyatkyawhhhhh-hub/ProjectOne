@@ -738,6 +738,40 @@ function Driving.detach()
 	end
 	s.ride:Destroy()
 	s.hull:Destroy()
+	-- (owner, 2026-11-02: "when a player exit a car the hands get left behind"): the driver's arms
+	-- (a local rig under the camera) go, and the steering wheel and needle parts that were posed by
+	-- hand (unwelded and anchored on this client) are put back at rest and welded to the car again,
+	-- so they move with it once the driver is out
+	for _, arm in s.localArms do
+		local rig = arm.upper and arm.upper.Parent
+		if rig and rig:IsA("Model") and rig:IsDescendantOf(workspace.CurrentCamera) then
+			rig:Destroy()
+		end
+	end
+	table.clear(s.localArms)
+	pcall(function()
+		local root = s.root
+		local function reweld(part: BasePart, cf: CFrame)
+			part.CFrame = cf
+			local w = Instance.new("WeldConstraint")
+			w.Part0 = root
+			w.Part1 = part
+			w.Parent = part
+			part.Anchored = false
+		end
+		if s.steerMount then
+			for _, ls in s.localSteer do
+				if ls.part.Parent then
+					reweld(ls.part, root.CFrame * s.steerMount * ls.offset)
+				end
+			end
+		end
+		for _, n in s.partNeedles do
+			if n.part.Parent then
+				reweld(n.part, root.CFrame * n.pivot * n.offset)
+			end
+		end
+	end)
 	if s.root.Parent then
 		s.root.CanCollide = true
 	end
