@@ -225,3 +225,7 @@ Screenshots: `Map/screens/2026-11-02-centre-v2/` (wide_centre, bridge1..8_view, 
   - It now faces the CORE / plaza, with its sign in front of it on the plaza side (one-sided, facing the plaza). Facing out, you saw the back of the ring from the plaza and the sign was hidden behind it.
   - The void disc now has a back face too (the kit's VoidDisc is a one-sided plane).
   - Screenshot `blackhole_faces_plaza.jpg`.
+- **Star Forge turned (owner: "still faces the other way"):**
+  - It now faces the CORE / plaza too. The anvil, padlock and the "STAR FORGE / SUPERNOVA 3" sign are on the plaza side.
+  - Screenshot `starforge_faces_plaza.jpg`.
+  - **Rule from now on:** the things you walk up to on the plaza (Forge, Black Hole) face the Core. The boards, leaderboard, Sector 2 name and IGNITION are double-sided.

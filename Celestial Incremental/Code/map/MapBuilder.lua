@@ -285,12 +285,13 @@ function Builder.Build()
 	end
 
 	------------------------------------------------------------------ RIGHT: the Star Forge on its stepped platform
-	-- (locked until Supernova 3: a padlock over the anvil, a blue rim that's not lit; anvil, padlock + sign face out)
+	-- (locked until Supernova 3: a padlock over the anvil, a blue rim that's not lit). It faces the CORE (owner, 2 Nov):
+	-- players walk up to it from the plaza; its sign stands in front on the plaza side
 	local forge = Instance.new("Model")
 	forge.Name = "StarForge"
 	forge:SetAttribute("Window", "Forge")
 	forge.Parent = centre
-	local zf = zoneCf(Z.Forge.angle, Z.Forge.dist)
+	local zf = zoneCf(Z.Forge.angle, Z.Forge.dist) * CFrame.Angles(0, math.pi, 0)
 	local stepH = 3.6
 	Kit.Make("Dais", { Name = "Platform", Size = Vector3.new(16, stepH, 16), CFrame = zf * CFrame.new(0, stepH / 2, 0), Color = C.Stone2, Collide = true, Parent = forge })
 	Kit.Make("RimRing", { Name = "Rim", Size = Vector3.new(10, 0.4, 10), CFrame = zf * CFrame.new(0, stepH + 0.1, 0), Color = C.ForgeRim, Parent = forge })
