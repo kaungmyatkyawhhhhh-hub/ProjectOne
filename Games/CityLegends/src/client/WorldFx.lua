@@ -51,7 +51,8 @@ end
 -- (2026-11-02, realistic lighting: rooms lit from inside, not neon strips) soft warm interiors,
 -- a few cool-white rooms and the odd blue TV glow; how many are lit follows the night (DayCycle
 -- sets the share: most at dusk, fewer after midnight)
-local WINDOW_DARK = Color3.fromRGB(44, 52, 58)
+local WINDOW_DARK = Color3.fromRGB(46, 42, 38)
+local SHOP_DAY = Color3.fromRGB(70, 64, 56) -- shop windows by day: a dim room behind the glass
 local WINDOW_WARM_A = Color3.fromRGB(150, 110, 70)
 local WINDOW_WARM_B = Color3.fromRGB(170, 132, 92)
 local WINDOW_WHITE = Color3.fromRGB(150, 146, 134)
@@ -63,18 +64,22 @@ function WorldFx.setWindow(p: Instance)
 	end
 	local pos = p.Position
 	local h = math.abs(math.sin(pos.X * 12.9898 + pos.Y * 78.233 + pos.Z * 37.719) * 43758.5453) % 1
-	local on = lampsLit and h < windowShare
+	local size = p.Size
+	local shop = size.X * size.Y > 60 or size.Z * size.Y > 60
+	-- shops stay lit later than homes; the far stand-in's panes stand for two windows each and only
+	-- exist where a window can be lit, so more of them are
+	local share = if shop then math.max(windowShare, 0.7) elseif p:HasTag("FarWindow") then math.min(0.95, windowShare * 2) else windowShare
+	local on = lampsLit and h < share
 	p.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
 	if not on then
-		p.Color = WINDOW_DARK
+		p.Color = if not lampsLit and shop then SHOP_DAY else WINDOW_DARK
 		return
 	end
 	local kind = (h * 97.31) % 1
-	local size = p.Size
 	local long = math.max(size.X, size.Z) > 14 -- a whole balcony band of glass: dimmer, never one bright bar
-	local big = size.X * size.Y > 60 or size.Z * size.Y > 60 -- shopfronts: always warm
-	local c = if kind < 0.08 and not big then WINDOW_TV elseif kind < 0.2 and not big then WINDOW_WHITE else WINDOW_WARM_A:Lerp(WINDOW_WARM_B, kind)
-	p.Color = if long then c:Lerp(Color3.new(0, 0, 0), 0.3) else c
+	local big = shop -- shopfronts: always warm
+	local c = if kind < 0.04 and not big then WINDOW_TV elseif kind < 0.2 and not big then WINDOW_WHITE else WINDOW_WARM_A:Lerp(WINDOW_WARM_B, kind)
+	p.Color = if long then c:Lerp(Color3.new(0, 0, 0), 0.3) elseif p:HasTag("FarWindow") then c:Lerp(Color3.fromRGB(255, 196, 120), 0.4) else c
 end
 -- the share of windows lit (0..1); re-sets them all, spread over frames, when it moves
 local windowJob = 0
@@ -126,7 +131,11 @@ end
 -- the camera is far away, and lights (tag "LODLight") are switched off.
 -- Work is spread over frames so it never causes a hitch.
 ---------------------------------------------------------------------
-type LodEntry = { inst: Instance, parent: Instance?, center: Vector3, range: number, shown: boolean }
+-- (2026-11-02, owner: "on the summit make it so that u can see the city lights") groups with the
+-- attribute Far are the far stand-ins (ReplicatedStorage.RivieraFar, see tools/riviera/FarCity.luau):
+-- the other way round, shown only PAST their range, or while the real building they stand for
+-- (ObjectValue "Real") is streamed out; NoScale keeps the range whatever the graphics level
+type LodEntry = { inst: Instance, parent: Instance?, center: Vector3, range: number, shown: boolean, far: boolean, real: ObjectValue? }
 
 local function startLod(scale: number)
 	local entries: { LodEntry } = {}
@@ -141,7 +150,16 @@ local function startLod(scale: number)
 			return
 		end
 		known[inst] = true
-		table.insert(entries, { inst = inst, parent = inst.Parent, center = center, range = range * scale, shown = true })
+		local real = inst:FindFirstChild("Real")
+		table.insert(entries, {
+			inst = inst,
+			parent = inst.Parent,
+			center = center,
+			range = if inst:GetAttribute("NoScale") then range else range * scale,
+			shown = true,
+			far = inst:GetAttribute("Far") == true,
+			real = if real and real:IsA("ObjectValue") then real else nil,
+		})
 	end
 	for _, inst in CollectionService:GetTagged("LOD") do
 		register(inst)
@@ -183,6 +201,10 @@ local function startLod(scale: number)
 			local e = entries[cursor]
 			cursor += 1
 			local want = (e.center - camPos).Magnitude < e.range
+			if e.far then
+				local real = e.real and e.real.Value
+				want = not want or (real ~= nil and real:FindFirstChild("Body") == nil)
+			end
 			if want ~= e.shown then
 				e.shown = want
 				e.inst.Parent = if want then e.parent else nil
@@ -348,6 +370,16 @@ local function trimShadows()
 end
 
 function WorldFx.start()
+	-- the Riviera's far stand-in lives in ReplicatedStorage (always on every client, never in the way
+	-- in Studio's editor); here it moves into this player's world
+	if workspace:FindFirstChild("Riviera") then
+		task.spawn(function()
+			local far = ReplicatedStorage:WaitForChild("RivieraFar", 60)
+			if far then
+				far.Parent = workspace
+			end
+		end)
+	end
 	local lampCache: { [Instance]: boolean } = {}
 	task.spawn(trimShadows)
 	startLod(WorldFx.qualityScale())
