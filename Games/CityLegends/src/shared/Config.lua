@@ -858,9 +858,10 @@ end
 -- Pedestrians (client): people walking the sidewalks, crossing on red, strolling the beach
 ---------------------------------------------------------------------
 Config.Pedestrians = {
-	Max = 46, -- on high graphics; scaled down by WorldFx.qualityScale()
-	SpawnRadius = 320, -- spawn within this of the camera
-	CullRadius = 420, -- returned to the pool beyond this
+	-- (owner, 2026-11-02: "optimize the walking npc so that the game wont lag": was 46 / 320 / 420)
+	Max = 30, -- on high graphics; scaled down by WorldFx.qualityScale()
+	SpawnRadius = 260, -- spawn within this of the camera
+	CullRadius = 340, -- returned to the pool beyond this
 	MinSpawnGap = 70, -- never pop in closer than this to the camera
 	WalkSpeed = { 4.2, 6 }, -- studs a second
 	CrossSpeed = 6.4,

@@ -407,32 +407,67 @@ end
 
 local rivRay = RaycastParams.new()
 rivRay.FilterType = Enum.RaycastFilterType.Include
-local function onPavement(p: Vector3): number?
-	local roads = workspace:FindFirstChild("Riviera") and workspace.Riviera:FindFirstChild("Roads")
-	if not roads then
+local rivRoads: Instance? = nil
+-- the pavement's height at a point: a number on pavement, false on anything else (road, kerb,
+-- nothing), nil when that part of the map isn't streamed in yet (not known)
+local function pavementAt(p: Vector3): number | boolean | nil
+	if not rivRoads then
+		local r = workspace:FindFirstChild("Riviera")
+		rivRoads = r and r:FindFirstChild("Roads")
+		if not rivRoads then
+			return nil
+		end
+		rivRay.FilterDescendantsInstances = { rivRoads }
+	end
+	local hit = workspace:Raycast(p + Vector3.new(0, 6, 0), Vector3.new(0, -12, 0), rivRay)
+	if not hit then
 		return nil
 	end
-	rivRay.FilterDescendantsInstances = { roads }
-	local hit = workspace:Raycast(p + Vector3.new(0, 6, 0), Vector3.new(0, -12, 0), rivRay)
-	if hit and hit.Instance.Name == "Pavement" then
-		return hit.Position.Y
+	return if hit.Instance.Name == "Pavement" then hit.Position.Y else false
+end
+
+-- (owner, 2026-11-02: "let them walk on each lane. I see an npc walking on a different lane") a
+-- walker only ever steps along a piece of pavement line that is pavement all the way (both ends and
+-- the middle, checked once and remembered), so nobody wanders onto the road at a bend, a narrowed
+-- stretch or a junction mouth; at the end of the pavement they turn back
+local segOk: { [{ Vector3 }]: { [number]: boolean } } = {}
+local pointY: { [{ Vector3 }]: { [number]: number } } = {}
+local function segmentOk(path: { Vector3 }, i: number, j: number): boolean
+	local lo = math.min(i, j)
+	local cache = segOk[path]
+	if not cache then
+		cache = {}
+		segOk[path] = cache
 	end
-	return nil
+	local known = cache[lo]
+	if known ~= nil then
+		return known
+	end
+	local a, b = path[lo], path[lo + 1]
+	if not (a and b) then
+		return false
+	end
+	local ya, ym, yb = pavementAt(a), pavementAt((a + b) / 2), pavementAt(b)
+	if ya == nil or ym == nil or yb == nil then
+		return false -- not streamed in: not walkable for now (not remembered)
+	end
+	local ok = type(ya) == "number" and type(ym) == "number" and type(yb) == "number"
+	cache[lo] = ok
+	return ok
+end
+
+-- spawn spots: the pavement lines' points in 200-stud cells, so a spawn only looks at its own area
+local rivCells: { [string]: { { any } } }? = nil
+local function rivCellKey(x: number, z: number): string
+	return math.floor(x / 200) .. "," .. math.floor(z / 200)
 end
 
 local function stepRiv(w: Walker, dt: number)
 	local path = w.rivPath :: { Vector3 }
 	local k = w.rivK :: number
-	local a = path[math.floor(k)]
-	local nextI = math.floor(k) + w.way
+	local nextI = k + w.way
 	local b = path[nextI]
-	local turn = b == nil
-	local y = nil
-	if b then
-		y = onPavement(b)
-		turn = y == nil
-	end
-	if turn then
+	if not b or not segmentOk(path, k, nextI) then
 		w.way = -w.way
 		if rng:NextNumber() < 0.3 then
 			w.mode = "pause"
@@ -440,20 +475,31 @@ local function stepRiv(w: Walker, dt: number)
 		end
 		return
 	end
-	local seg = (b - a) * Vector3.new(1, 0, 1)
-	local len = math.max(seg.Magnitude, 0.1)
-	local dir = seg / len
-	local to = Vector3.new(b.X, y :: number, b.Z)
-	local stepD = w.speed * dt
+	-- (the pavement's height at each point, found once)
+	local ys = pointY[path]
+	if not ys then
+		ys = {}
+		pointY[path] = ys
+	end
+	local y = ys[nextI]
+	if y == nil then
+		local found = pavementAt(b)
+		y = if type(found) == "number" then found else w.pos.Y
+		ys[nextI] = y
+	end
+	local to = Vector3.new(b.X, y, b.Z)
 	local flat = (to - w.pos) * Vector3.new(1, 0, 1)
+	local stepD = w.speed * dt
 	if flat.Magnitude <= stepD then
 		w.pos = to
 		w.rivK = nextI
 	else
-		local t = stepD / flat.Magnitude
-		w.pos = w.pos:Lerp(to, t)
+		w.pos = w.pos:Lerp(to, stepD / flat.Magnitude)
 	end
-	w.yaw = math.atan2(-dir.X, -dir.Z)
+	if flat.Magnitude > 0.05 then
+		local dir = flat.Unit
+		w.yaw = math.atan2(-dir.X, -dir.Z)
+	end
 end
 
 -- pose the figure: legs and arms swing with the stride
@@ -487,29 +533,44 @@ local function spawnRiv(camPos: Vector3): boolean
 	if #paths == 0 then
 		return false
 	end
-	-- a point on any pavement line within reach of the camera (every 3rd point is enough)
-	local near = {}
-	for _, pth in paths do
-		for i = 1, #pth, 3 do
-			local d = flatDist(pth[i], camPos)
-			if d >= P.MinSpawnGap and d <= P.SpawnRadius then
-				table.insert(near, { pth, i })
+	if not rivCells then
+		local cells = {}
+		for _, pth in paths do
+			for i = 1, #pth - 1 do
+				local key = rivCellKey(pth[i].X, pth[i].Z)
+				cells[key] = cells[key] or {}
+				table.insert(cells[key], { pth, i })
+			end
+		end
+		rivCells = cells
+	end
+	-- a point within reach of the camera: from the cells round it
+	local reach = math.ceil(P.SpawnRadius / 200)
+	local cx, cz = math.floor(camPos.X / 200), math.floor(camPos.Z / 200)
+	local pick = nil
+	for _ = 1, 4 do
+		local cell = (rivCells :: any)[(cx + rng:NextInteger(-reach, reach)) .. "," .. (cz + rng:NextInteger(-reach, reach))]
+		if cell then
+			local c = cell[rng:NextInteger(1, #cell)]
+			local d = flatDist(c[1][c[2]], camPos)
+			if d >= P.MinSpawnGap and d <= P.SpawnRadius and segmentOk(c[1], c[2], c[2] + 1) then
+				pick = c
+				break
 			end
 		end
 	end
-	if #near == 0 then
+	if not pick then
 		return false
 	end
-	local pick = near[rng:NextInteger(1, #near)]
 	local path, k = pick[1], pick[2]
 	local p = path[k]
-	local y = onPavement(p)
-	if not y then
+	local y = pavementAt(p)
+	if type(y) ~= "number" then
 		return false
 	end
 	local fig = getFigure()
 	local w: Walker = {
-		fig = fig, mode = "riv", blk = nil, r = 0, s = 0, way = if rng:NextNumber() < 0.5 then 1 else -1,
+		fig = fig, mode = "riv", blk = nil, r = 0, s = 0, way = 1,
 		speed = rng:NextNumber(P.WalkSpeed[1], P.WalkSpeed[2]), phase = rng:NextNumber(0, 6),
 		pos = Vector3.new(p.X, y, p.Z), yaw = 0, path = nil, pathK = 0, nextBlk = nil, nextS = 0,
 		light = nil, axis = "X", timer = 0, promDir = 1, promZ0 = 0, promZ1 = 0, lastEdge = 0, animAcc = 0,
@@ -640,7 +701,8 @@ function Pedestrians.start(qualityScale: number)
 			end
 			-- near figures animate every frame, far ones a few times a second
 			w.animAcc += dt
-			local every = if dist < 120 then 0 elseif dist < 250 then 0.08 else 0.2
+			-- (lighter: owner, 2026-11-02 "optimize the walking npc so that the game wont lag")
+			local every = if dist < 70 then 0 elseif dist < 160 then 0.1 else 0.25
 			if w.animAcc >= every then
 				w.animAcc = 0
 				pose(w, moving)
