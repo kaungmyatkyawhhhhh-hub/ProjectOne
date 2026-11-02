@@ -299,11 +299,12 @@ function Builder.Build()
 	sign(forge, "Sign", zf * CFrame.new(0, 0, 9.4), Vector3.new(7.4, 2.3, 0.3), 1.4, { "STAR FORGE", "SUPERNOVA 3" }, nil, false)
 
 	------------------------------------------------------------------ BACK: the Black Hole gate (x1.5) on its dais
-	-- (a brass ring round a violet void; locked; the client swirls the disk)
+	-- (a brass ring round a violet void; locked; the client swirls the disk). It faces the CORE (owner, 2 Nov): a gate you
+	-- walk up to from the plaza, its sign in front of it on the plaza side (facing out, its back was all you saw)
 	local hole = Instance.new("Model")
 	hole.Name = "BlackHoleGate"
 	hole.Parent = centre
-	local zh = zoneCf(Z.BlackHole.angle, Z.BlackHole.dist)
+	local zh = zoneCf(Z.BlackHole.angle, Z.BlackHole.dist) * CFrame.Angles(0, math.pi, 0)
 	local k = CR.BlackHoleScale
 	local daisH = 2
 	Kit.Make("Dais", { Name = "Base", Size = Vector3.new(19, daisH, 19), CFrame = zh * CFrame.new(0, daisH / 2, 0), Color = C.Stone2, Collide = true, Parent = hole })
@@ -311,13 +312,14 @@ function Builder.Build()
 	local ringCf = zh * CFrame.new(0, daisH + outer / 2 - 0.4, 0) * CFrame.Angles(math.rad(90), 0, 0)
 	Kit.Make("GateRing", brass({ Name = "Ring", Size = Vector3.new(outer, 2.55 * k, outer), CFrame = ringCf, Collide = true, Parent = hole }))
 	Kit.Make("VoidDisc", { Name = "Void", Size = Vector3.new(15.4 * k, 0.2, 15.4 * k), CFrame = ringCf, Color = C.Void, Parent = hole })
+	Kit.Make("VoidDisc", { Name = "VoidBack", Size = Vector3.new(15.4 * k, 0.2, 15.4 * k), CFrame = ringCf * CFrame.Angles(math.pi, 0, 0), Color = C.Void, Parent = hole })
 	local disk = Kit.Make("OrbitRing", { Name = "Disk", Size = Vector3.new(12 * k, 0.3, 12 * k), CFrame = ringCf * CFrame.new(0, 0.25, 0), Color = C.VoidGlow, Material = Enum.Material.Neon, Parent = hole })
 	disk:SetAttribute("Swirl", 0.9)
 	local swirl = Kit.Make("OrbitRing", { Name = "Swirl", Size = Vector3.new(7.5 * k, 0.3, 7.5 * k), CFrame = ringCf * CFrame.new(0, 0.3, 0) * CFrame.Angles(0, 0, math.rad(8)),
 		Color = Color3.fromRGB(200, 140, 255), Material = Enum.Material.Neon, Parent = hole })
 	swirl:SetAttribute("Swirl", -1.6)
 	hole:SetAttribute("RingCF", ringCf)
-	sign(hole, "Sign", zh * CFrame.new(0, 0, 10.4), Vector3.new(7.4, 2.1, 0.3), 1.2, { "BLACK HOLE", "LOCKED" }, Color3.fromRGB(200, 150, 255), true)
+	sign(hole, "Sign", zh * CFrame.new(0, 0, 10.2), Vector3.new(7.4, 2.1, 0.3), 1.2, { "BLACK HOLE", "LOCKED" }, Color3.fromRGB(200, 150, 255), false)
 
 	------------------------------------------------------------------ LEFT: the leaderboard wall (both sides)
 	-- TOP SUPERNOVAS (filled by GalaxyLeaderboardService) + PLAYERS NEAR YOU (each screen fills its own, from the server)
