@@ -63,15 +63,49 @@ Every car's cabin must look clean and real from the driver's seat and from outsi
    - no logo on the hub (covered);
    - turns with the steering;
    - the player's **R6 avatar hands** on the wheel at 9 and 3, turning with it, never covering the cluster.
-4. **Cluster and screens:**
-   - live needles or digital screens matching the real car (`DialLooks` / `DIAL_NEEDLES`), sharp and readable at night, no logos;
-   - the centre screen shows something simple (map or music), not a blank grey box.
+4. **Cluster and screens: use the model's OWN cluster** (owner, 2026-11-02):
+   - **Never draw our own custom cluster over it** (no `DialLooks` overlay, no added dial pictures) on the new models. Use the cluster that comes **in the model** and make it **work**:
+     - **analog needles:** cut each needle out of the model as its own part (or, if the needle is painted on the texture, paint it out and make a matching needle part), find its pivot and its 0 and max angle from the dial's numbers, and turn it live for **speed** and **RPM**, plus fuel / temperature if it has those;
+     - **digital clusters** (most modern cars, e.g. the Aventador SVJ): keep the model's screen shape and look, and drive what's on it from the game: the **RPM bar / sweep**, **speed number**, **gear** (P/R/N/D or 1–7 / M), the shift-light / redline flash, drive mode (STRADA / SPORT / CORSA style, our own words), fuel, time. Copy the layout and colours of the model's own screen picture, so it still looks like the model's cluster, just alive. Use SurfaceGui on the screen part (pixel-matched to the screen area), not a floating overlay.
+   - **Warning lights:** turn signals blink, high beam, handbrake, check-engine at start-up, ABS / TC off light when drifting.
+   - **Start-up sequence:** pressing F (start) does a needle sweep or a screen boot animation, like a real car.
+   - **Centre screen:** shows something simple (map, music, camera), not a blank grey box.
+   - **Smooth and accurate:** needles move smoothly (slight lag like a real needle), the speed matches the HUD exactly, RPM matches the engine sound and the gearbox, and the redline matches the car.
+   - Readable at night (backlit), no logos (cover any brand mark on the cluster).
 5. **Small details:** pedals, gear lever or selector, seat belts, mirrors that show something (or a dark reflective mirror), door cards, air vents, and the roof lining.
 6. **Lighting inside:**
    - the dash glows softly at night (cluster, screen, ambient strip in the car's own colour, no neon look);
    - the cabin isn't pitch black by day: real window light, no fake brightness.
 7. **Driver's eye:** the first-person camera sits where a real driver's head is (`EyeHeight`), so you see the cluster and the road like in Driving Empire.
 8. **Check:** a first-person screenshot of each car next to a **real interior photo** of that car from the same angle (find one online, or the owner sends one). The owner approves.
+
+## Part 2b: keep every model high quality (checklist for each car)
+Run this list on every new model, and don't sign a car off until it all passes:
+1. **Scale and stance:** real wheelbase (`CarBuilder.REAL_WB`), real ride height, wheels fill the arches, the right tyre width front and rear (wider rears on supercars), no floating or sinking.
+2. **Wheels:** round and smooth (enough sides), the tyre sidewall visible, rims with depth, brake discs and calipers behind the spokes, discs don't spin with the caliper, front wheels steer at the right angle, wheels don't clip the body.
+3. **Shading:** smooth curves (no faceted or crumpled paint), no black or inverted faces, no shiny seams, normals correct (check by orbiting under a bright light).
+4. **Textures:** sharp at driving distance (512–1024 px), no stretched or blurry decals, no missing (pink / grey / white) textures, the PBR maps applied (Part 1).
+5. **Paint:** takes every Customs colour and finish correctly, without colouring the trim, glass, lights, tyres or interior by mistake. Check 3 colours.
+6. **Glass:** windscreen and windows tinted and clear from inside, no doubled glass layers that flicker.
+7. **Lights:** headlights (low / high), DRLs, tail lights, brake lights, reverse light, indicators: all work and glow in the right places.
+8. **Interior:** passes Part 2 from the driver's seat and through the windows from outside.
+9. **Cluster:** the model's own cluster works (speed, RPM, gear, lights); no overlay.
+10. **Doors:** open like the real car (Part 4), if they're separate.
+11. **Logos:** none visible anywhere (badges, wheel caps, the steering hub, the cluster, the brakes, the number plate): covered or removed.
+12. **Performance:** the triangle count per car and the total are reported, with a LOD version for far away (traffic and other players' cars use it), and the textures shared where possible. A car must not drop FPS on a phone.
+13. **Physics fit:** the collision box matches the body (no hitting invisible walls, no sinking into kerbs), and the exhaust flames / pops come out of the real exhaust tips.
+14. **Sound:** the car uses an engine sound that fits it (a V12 for the SVJ).
+15. **Screenshots for the owner:** front 3/4, rear 3/4, side, the driver's seat, the cluster close-up, night, doors open, and next to the Sketchfab view.
+
+## First car: Lamborghini Aventador SVJ (owner, 2026-11-02)
+- The owner's first new model is an **Aventador SVJ**. In the game it's fictional: **"Enfurecido Aventador SVJ"** (no real badge or name), the top of the "Enfurecido Aventador" series after the LP700 and LP750 (`Cars.Series`). Suggest its price, level, top speed (about 217 mph / 350 km/h) and 0–60 (about 2.7 s) to the owner before adding it.
+- Use it as the test car for Parts 1, 2, 2b and 4:
+  - its **own digital cluster** working (the RPM sweep, speed, gear, the drive modes);
+  - **scissor doors**;
+  - Y-shaped lights;
+  - the big rear wing and centre exhaust (pops and flames from there);
+  - a V12 sound.
+- It may also replace the LP750 as the cutscene car (`Cars.CutsceneId`) if the owner likes it. Ask first.
 
 ## Part 3: one-by-one replacement routine (the owner will send new models one at a time)
 For each new model the owner sends (a `.glb` / `.fbx` in `Games/CityLegends/imports/`, or a Sketchfab link they downloaded; licence CC0 / CC-BY, or bought):
