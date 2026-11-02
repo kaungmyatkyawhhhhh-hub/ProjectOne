@@ -1,7 +1,7 @@
 ---
 date: 2026-11-02
 tags: [galaxy, map, progress]
-status: built and tested in Studio (stand-in pieces until the kit is imported), not published
+status: pass 2 done in Studio (kit meshes, concept look); sky Up/Dn to re-upload; not published
 ---
 # Galaxy Incremental - map build, day 1 (2 Nov, Claude Code)
 
@@ -74,3 +74,61 @@ Prompt: [[2026-11-02 Galaxy Incremental - Prompt - Build the map (personal islan
 - **Hotbar windows:** the UI isn't in this place yet; the boards fire `Galaxy.OpenWindow`.
 - **To confirm with the design:** the Ignition checklist numbers (placeholders: Supernova 5, 1T stardust in one run, Comet Lure, 250 shards) and the tier milestones.
 - **Not published.**
+
+---
+## Pass 2 (2 Nov, later, Claude Code): owner's review points 1-7
+Screenshots: `Map/screens/2026-11-02-pass2/`. They include the same set as day 1 (wide, tier0..tier6, supernova_shockwave, sector2_bridge_ignition), plus `side_by_side_concept_vs_studio.jpg` and 2 phone crops.
+
+1. **Sky:**
+   - The owner's 6 group uploads are in `MapConfig.Sky`, and they load. The 6 decals were moved from Workspace to `ServerStorage.SkyUploads`.
+   - The default band is gone: the black/violet band came from the **Atmosphere**, which was covering the skybox. Now density 0.18, offset 0, haze 0.
+   - **Found: my face layout was wrong.** I measured it in Studio with test images:
+     - Roblox's **Lf = +X, Rt = -X**;
+     - **Up**: the image top points to +X;
+     - **Dn**: the image top points to -X.
+     - That's why the edges showed as seams.
+   - `make_map_images.py` is fixed and the sky was re-made:
+     - Ft/Bk are unchanged.
+     - The old Lf/Rt are simply swapped in the config (group ids 120684256007059 = Lf, 76670709549755 = Rt).
+     - **Up and Dn are new and must be re-uploaded to P&L Studios XP**: `Map/images/sky_Up.png` and `sky_Dn.png`. Then put the 2 ids in `MapConfig.Sky` (SkyboxUp/SkyboxDn).
+     - Until then the top and bottom show seams.
+   - The pass-2 screenshots use the fixed Up/Dn through test copies uploaded under the owner's user account (client-side only, not in the place).
+2. **Kit meshes:**
+   - The map was rebuilt from `ReplicatedStorage.GalaxyKit`: 214 MeshParts, 0 stand-ins.
+   - The static map went from ~900 parts to **236**. In play with 8 islands full: **407 parts** (was 1,172), 4 lights, 10 emitters, 60 FPS, no script errors.
+   - Collision set on the kit templates: Hull for discs, pillars and rock; Box for decoration. Every piece was looked at in the close-ups.
+3. **Materials + light (to match concept v3):**
+   - **Brass = #D9A441**, SmoothPlastic, reflectance 0.06. Material Metal was tried: against the dark sky it mirrors the black and reads orange-brown, not gold.
+   - **Stone = warm cream** (236,218,184; darker 205,186,152), not pink.
+   - **Sun:** comes from the front, high (ClockTime 10.5, latitude 58), brightness 1.7.
+   - **Ambient:** less blue (70,58,80 / 112,100,112).
+   - **Violet rim:** ColorShift_Bottom (150,90,235) on the faces turned away from the sun, plus a violet SpotLight behind the Core.
+   - **ColorCorrection:** warm tint (255,246,232).
+   - **Atmosphere:** thinner (see 1).
+   - **Core light:** range 30. The Core area washed out to white at 2.4 brightness with the old back light aimed at the floor.
+   - The anvil and padlocks are no longer Metal (they went black).
+   - **Far nebula planets:** pushed further out. The magenta one moved from behind the Sector 2 island to the upper left.
+4. **Tier-0 rock = a small asteroid** about half an island (11.5 x 7 x 11.5). It has a lit landing from the bridge's end, and a new player spawns on it.
+5. **Ranks** (`MapConfig.RankOf`): NEW STAR (tiers 0-1), RISING STAR (2-3), SUPERNOVA n. The economy's `Rank` attribute is no longer used, and "STARDUST" is gone.
+6. **Banners** = the kit's cloth Banner (swallowtail, rod on top) on a 9.5-stud brass pole, 4.4 x 5.6.
+7. **Phone view + players:**
+   - **Phone 667x375:** the Studio window can't be resized from here. `phone_667x375_*.png` are the player's own spawn camera (FOV 70, third person), cropped to 16:9 and scaled to 667x375. They check framing, not the device's UI scale.
+   - **Found + fixed through the phone view:**
+     - From the spawn camera, the island's light beam split the view of the Core in two, and from tier 5 the banner pole stood right in the way.
+     - The spawn is now 2-4 studs to the side, and the banner is off to the side (no longer straight behind the centre).
+     - Both views now show the Core, the boards and the Forge clearly.
+   - **2+ real players:** not done. The Studio tools here only start solo Play. To run it: Studio > Test > Clients and Servers > 2 players > Start, and check that each spawns on their own island and both see the same Supernova.
+- **Re-tested:**
+  - every tier;
+  - a Supernova (shockwave across all islands, my island popped to tier 4 "SUPERNOVA 1");
+  - Ignition 3/4: 14 of 18 segments lit, gate shut.
+- **Side-by-side vs concept, what's still different:**
+  - the concept's background is a lighter violet with big glowing nebula spheres; ours is darker space;
+  - the concept has a thin glowing ring round the whole map;
+  - the concept's stone has a fine grain.
+
+### Owner to do
+1. Upload `Celestial Incremental/Map/images/sky_Up.png` + `sky_Dn.png` to P&L Studios XP. Send me the 2 ids, or put them in `MapConfig.Sky`.
+2. Save the place in Studio (File > Save to Roblox). Pass 2 is in the open place only.
+3. Run the 2-player test above, or tell me to walk you through it.
+4. The 8 test images I uploaded to your user account (6 coloured test faces + 2 sky copies) can be deleted from Creator Hub; nothing in the place uses them.

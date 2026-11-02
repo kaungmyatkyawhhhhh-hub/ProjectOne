@@ -41,17 +41,24 @@ def fbm(d, scale, octaves=5):
     return total
 
 
-# Roblox skybox faces: Bk (+z?), we use the standard: Ft = -Z, Bk = +Z, Lf = -X, Rt = +X, Up = +Y, Dn = -Y
+# Roblox skybox faces, measured in Studio on 2 Nov with test images (seen from inside): Ft = -Z, Bk = +Z, Lf = +X, Rt = -X
+# (Lf/Rt are NOT the -X/+X you'd guess), Up = +Y with the image top toward +X, Dn = -Y with the image top toward -X.
+# Each face: F (the direction it faces), R (the image's right), U (the image's top); a pixel's direction = F + x*R + y*U
+FACES = {
+    "Ft": ((0, 0, -1), (1, 0, 0), (0, 1, 0)),
+    "Bk": ((0, 0, 1), (-1, 0, 0), (0, 1, 0)),
+    "Lf": ((1, 0, 0), (0, 0, 1), (0, 1, 0)),
+    "Rt": ((-1, 0, 0), (0, 0, -1), (0, 1, 0)),
+    "Up": ((0, 1, 0), (0, 0, -1), (1, 0, 0)),
+    "Dn": ((0, -1, 0), (0, 0, -1), (-1, 0, 0)),
+}
+
+
 def face_dirs(face):
+    F, R, U = (np.array(v, np.float64) for v in FACES[face])
     u = (np.arange(N) + 0.5) / N * 2 - 1
     uu, vv = np.meshgrid(u, -u)
-    one = np.ones_like(uu)
-    if face == "Ft": d = np.stack([uu, vv, -one], -1)
-    elif face == "Bk": d = np.stack([-uu, vv, one], -1)
-    elif face == "Lf": d = np.stack([-one, vv, -uu], -1)
-    elif face == "Rt": d = np.stack([one, vv, uu], -1)
-    elif face == "Up": d = np.stack([uu, one, vv], -1)
-    else: d = np.stack([uu, -one, -vv], -1)
+    d = F + uu[..., None] * R + vv[..., None] * U
     return d / np.linalg.norm(d, axis=-1, keepdims=True)
 
 
@@ -74,18 +81,13 @@ for face in ["Ft", "Bk", "Lf", "Rt", "Up", "Dn"]:
     img = np.clip(col, 0, 1)
     # stars on this face
     lay = np.zeros((N, N, 3), np.float32)
-    ax = {"Ft": (0, 1, 2, -1), "Bk": (0, 1, 2, 1), "Lf": (2, 1, 0, -1), "Rt": (2, 1, 0, 1), "Up": (0, 2, 1, 1), "Dn": (0, 2, 1, -1)}[face]
-    for s, b, c in zip(STARS, SB, SCOL):
-        if s[ax[2]] * ax[3] <= 0: continue
-        dd = s / abs(s[ax[2]])
-        if abs(dd[ax[0]]) > 1 or abs(dd[ax[1]]) > 1: continue
-        # map back with the same convention as face_dirs
-        if face == "Ft": x, y = dd[0], dd[1]
-        elif face == "Bk": x, y = -dd[0], dd[1]
-        elif face == "Lf": x, y = -dd[2], dd[1]
-        elif face == "Rt": x, y = dd[2], dd[1]
-        elif face == "Up": x, y = dd[0], dd[2]
-        else: x, y = dd[0], -dd[2]
+    F, R, U = (np.array(v, np.float64) for v in FACES[face])
+    for s_, b, c in zip(STARS, SB, SCOL):
+        f = s_ @ F
+        if f <= 0: continue
+        dd = s_ / f
+        x, y = dd @ R, dd @ U
+        if abs(x) > 1 or abs(y) > 1: continue
         px, py = int((x + 1) / 2 * N), int((1 - (y + 1) / 2) * N)
         if 0 <= px < N and 0 <= py < N:
             lay[py, px] += c * (0.35 + 1.6 * b)
