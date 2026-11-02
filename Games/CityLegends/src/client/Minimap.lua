@@ -185,6 +185,26 @@ local function drawMap(map: Frame)
 			line(map, rd.pts[k], rd.pts[k + 1], IsleLayout.Road, COL.road, 6)
 		end
 	end
+	-- Monaco (the Riviera) when it is in the place: sea, the land in 128-stud runs, the roads (the
+	-- three long routes in the highway colour); tools/map_plan/export_minimap.py makes RivieraMap
+	if workspace:FindFirstChild("Riviera") then
+		local ok, rm = pcall(function()
+			return require(Shared:WaitForChild("RivieraMap", 3))
+		end)
+		if ok and type(rm) == "table" then
+			rect(map, 10300, -3000, 17900, 2100, COL.water, 1)
+			for _, r in rm.land do
+				rect(map, r[1], r[2], r[3], r[4], COL.back, 2)
+			end
+			for _, rd in rm.roads do
+				local pts = rd.pts
+				local col = if rd.kind == "route" then COL.highway else COL.road
+				for k = 1, #pts // 2 - 1 do
+					line(map, Vector3.new(pts[2 * k - 1], 0, pts[2 * k]), Vector3.new(pts[2 * k + 1], 0, pts[2 * k + 2]), 64, col, 6)
+				end
+			end
+		end
+	end
 	local _ = HW
 end
 

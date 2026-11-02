@@ -48,9 +48,24 @@ function WestLayout.blockCenter(bi: number, bj: number): Vector3
 	return Vector3.new((CityLayout.roadCoord(bi) + CityLayout.roadCoord(bi + 1)) / 2, C.CurbHeight, (CityLayout.roadCoord(bj) + CityLayout.roadCoord(bj + 1)) / 2)
 end
 
+-- a venue's site in Monaco (Config.RivieraVenues), when the Riviera is in the place
+function WestLayout.rivieraSite(name: string): CFrame?
+	local rv = Config.RivieraVenues
+	local s = rv and rv.On and rv.Sites[name]
+	if not s or not workspace:FindFirstChild("Riviera") then
+		return nil
+	end
+	local c = Vector3.new(s.x, s.y, s.z)
+	return CFrame.lookAt(c, c + Vector3.new(s.fx, 0, s.fz).Unit)
+end
+
 -- a Downtown site ("hotel", "casino", "gems"): its frame (ground level, facing out of the
 -- entrance) and its lot size (square, inside the sidewalks)
 function WestLayout.site(name: string): (CFrame, number)
+	local riv = WestLayout.rivieraSite(name)
+	if riv then
+		return riv, LOT
+	end
 	local s = W.Sites[name]
 	local c = WestLayout.blockCenter(s[1], s[2])
 	return CFrame.lookAt(c, c + SIDE_DIR[s[3]]), LOT
@@ -59,12 +74,20 @@ end
 -- the dealership's frame (ground level at its lot's middle, facing out of the showroom) and lot
 -- Legends Customs: its frame (ground level, facing out of the bay doors) and lot
 function WestLayout.customs(): (CFrame, number)
+	local riv = WestLayout.rivieraSite("customs")
+	if riv then
+		return riv, LOT
+	end
 	local d = Config.Customs
 	local c = WestLayout.blockCenter(d.Block[1], d.Block[2])
 	return CFrame.lookAt(c, c + SIDE_DIR[d.Face]), LOT
 end
 
 function WestLayout.dealership(): (CFrame, number)
+	local riv = WestLayout.rivieraSite("dealership")
+	if riv then
+		return riv, LOT
+	end
 	local d = Config.Dealership
 	local c = WestLayout.blockCenter(d.Block[1], d.Block[2])
 	return CFrame.lookAt(c, c + SIDE_DIR[d.Face]), LOT
@@ -75,7 +98,8 @@ end
 function WestLayout.kerbFor(frame: CFrame, depth: number): CFrame
 	local out = frame.LookVector
 	local p = frame.Position + out * (depth / 2 + C.SidewalkWidth + C.LaneWidth * 1.5)
-	p = Vector3.new(p.X, 0, p.Z)
+	-- (on the road: the site's floor is the pavement, a kerb above it; 0 in the old city)
+	p = Vector3.new(p.X, frame.Position.Y - C.CurbHeight, p.Z)
 	-- travelling with the entrance on the right: right = travel x up, so travel = up x right
 	local travel = Vector3.yAxis:Cross(-out)
 	return CFrame.lookAt(p, p + travel)

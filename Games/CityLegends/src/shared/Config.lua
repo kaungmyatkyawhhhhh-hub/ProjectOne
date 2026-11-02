@@ -74,6 +74,24 @@ Config.Parking = {
 -- where players start (owner, 2026-10-23: "make block_3_2 near streetscape the players spawn"): a
 -- first car comes out on the street along this side of the block, and a player on foot with no car
 -- stands up on its sidewalk, by the streetscape
+-- the venues in Monaco (owner, 2026-11-02: "Move the venues ... I may replace some of the venues
+-- soon"): with the Riviera in the place, these sites replace the old city's blocks and Downtown's
+-- (WestLayout). Each site: its middle (x, z), the way its entrance faces (fx, fz: towards the road
+-- it opens onto) and its ground height (y: the lot's floor, level with the pavement). The lots are
+-- WestLayout.Lot square (216); tools/riviera/Sites.luau clears and levels them in Studio.
+-- Move a venue: change its site here and run Sites.luau for it again.
+Config.RivieraVenues = {
+	On = true,
+	Sites = {
+		-- (each 150 from its road's centre line, like the old city's blocks: the lot meets the pavement)
+		dealership = { x = 16582.3, z = 847.1, fx = 0.174, fz = -0.985, y = 16.83 }, -- Larvotto, on the Coast Road
+		customs = { x = 15061.4, z = 1089.1, fx = 0.129, fz = -0.992, y = 1.73 }, -- by the sea on the Coast Road
+		hotel = { x = 11673.7, z = 1020.9, fx = 0.998, fz = 0.065, y = 12.37 }, -- Riviera Bay, by the sea
+		casino = { x = 14378.5, z = 31.2, fx = -0.134, fz = 0.991, y = 72.9 }, -- Casino Heights, on the Town Road
+		gems = { x = 14779.9, z = 64, fx = -0.022, fz = 1, y = 69.72 }, -- up the Town Road from the casino
+	},
+}
+
 Config.Spawn = {
 	Block = { 3, 2 }, -- the Needle's block
 	Side = Vector3.new(0, 0, 1), -- its edge on the city's middle road
