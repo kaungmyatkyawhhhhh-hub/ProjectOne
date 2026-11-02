@@ -12,6 +12,7 @@
 -- have any; shared.GalaxyShardsTarget() = where flying shards land), hotbar T = the 2D TREE window (the island's Constellation
 -- Tree + Info screens, IslandBoardsUI), tutorial steps 5-7 (the bar to 50%, the SUPERNOVA button, STARFIRE in the tree).
 -- The SUPERNOVA button, card and cinematic are GalaxySupernova's.
+-- Overnight (3 Nov): hotbar E = the STORE (GalaxyStore; its CODES button opens GalaxyCodes, side key "C").
 -- Alpha part 2 (3 Nov): hotbar G = the GUIDE BOOK (GalaxyGuide, with its red dot), Q = SETTINGS (GalaxySettings); the window
 -- open / close, new body and x2 milestone sounds (Galaxy.Sounds); at TUTORIAL COMPLETE the Star Forge glows in the world.
 -- Numbers all come from EconConfig; the server decides every buy (EconRequest).
@@ -203,7 +204,7 @@ local KEYS = {
 	{ key = "F", colour = hex("#ffd84a"), icon = "forge", name = "STAR FORGE", note = "STAR FORGE: opens at SUPERNOVA 3" },
 	{ key = "T", colour = hex("#7dff8a"), icon = "planet", name = "TREE", window = "Tree" },
 	{ key = "G", colour = hex("#b49bff"), icon = "book", name = "GUIDE", window = "Guide" },
-	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", window = "Codes" },
+	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", window = "Store" },
 	{ key = "Q", colour = hex("#c9c4d2"), icon = "gear", name = "SETTINGS", window = "Settings" },
 }
 local keyUI = {}
@@ -412,13 +413,14 @@ end
 shared.GalaxyCloseSide = function(keep: string?)
 	if sideOpen == "G" and keep ~= "G" and shared.GalaxyGuideClose then shared.GalaxyGuideClose() end
 	if sideOpen == "Q" and keep ~= "Q" and shared.GalaxySettingsClose then shared.GalaxySettingsClose() end
-	if sideOpen == "E" and keep ~= "E" and shared.GalaxyCodesClose then shared.GalaxyCodesClose() end
+	if sideOpen == "E" and keep ~= "E" and shared.GalaxyStoreClose then shared.GalaxyStoreClose() end
+	if sideOpen == "C" and keep ~= "C" and shared.GalaxyCodesClose then shared.GalaxyCodesClose() end
 end
 local function pressKey(k)
 	if k.window == "Guide" then
 		if shared.GalaxyGuideToggle then shared.GalaxyGuideToggle() end
-	elseif k.window == "Codes" then
-		if shared.GalaxyCodesToggle then shared.GalaxyCodesToggle() end
+	elseif k.window == "Store" then
+		if shared.GalaxyStoreToggle then shared.GalaxyStoreToggle() end
 	elseif k.window == "Settings" then
 		if shared.GalaxySettingsToggle then shared.GalaxySettingsToggle() end
 	elseif k.window == "Tree" then

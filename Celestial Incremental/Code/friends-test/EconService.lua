@@ -62,7 +62,7 @@ local function newData()
 	for i = 1, #Econ.Tiers do owned[i] = Econ.StartOwned[i] or 0 end
 	return { v = Econ.DataVersion, stardust = 0, earnedRun = 0, earnedTotal = 0, bestRun = 0, owned = owned, nodes = {},
 		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {}, settings = {}, guide = {},
-		codes = {}, potions = {}, boostLeft = {} }
+		codes = {}, potions = {}, boostLeft = {}, alphaPlayer = false, alphaBadge = false }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -165,8 +165,9 @@ end
 local function boosting(s, id: string): boolean
 	return (s.d.boostLeft[id] or 0) > 0
 end
+-- (the x2 STARDUST pass: s.passX2, set by GalaxyStoreService; applied here once, like every other income multiplier)
 local function incomeOf(s): number
-	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * surgeMult() * (if boosting(s, "Stardust") then 2 else 1)
+	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * surgeMult() * (if boosting(s, "Stardust") then 2 else 1) * (if s.passX2 then 2 else 1)
 end
 local function cometEvery(s): number
 	return Econ.CometEvery(s.d.nodes) / (if boosting(s, "Comets") then 2 else 1)

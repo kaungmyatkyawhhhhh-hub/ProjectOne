@@ -1,6 +1,7 @@
 -- GalaxyCodes (Galaxy Incremental, overnight part 2, 3 Nov): the CODES window (design additions 3: "Codes window: in the
 -- Store (E) + Settings"). The v12 frame (Kit.window, the Store's red), a code box, a green REDEEM, the result line.
--- shared.GalaxyCodesOpen() opens it (the Settings window's CODES button; the Store's from part 4). Codes: GalaxyCodeService.
+-- shared.GalaxyCodesOpen() opens it (the CODES buttons in SETTINGS and the STORE). Codes: GalaxyCodeService.
+-- (a side window with its own key "C": no hotbar key, it opens from those two buttons)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -110,16 +111,16 @@ local function close()
 	box:ReleaseFocus()
 	Kit.tween(scale, { Scale = scale.Scale * 0.85 }, 0.15)
 	task.delay(0.15, function() if not isOpen then holder.Visible = false end end)
-	if shared.GalaxySideWindow then shared.GalaxySideWindow("E", false) end
+	if shared.GalaxySideWindow then shared.GalaxySideWindow("C", false) end
 end
 local function open()
 	if isOpen then return end
-	if shared.GalaxyCloseSide then shared.GalaxyCloseSide("E") end
+	if shared.GalaxyCloseSide then shared.GalaxyCloseSide("C") end
 	isOpen = true
 	Kit.sound("open")
 	show("", true)
 	holder.Visible = true
-	if shared.GalaxySideWindow then shared.GalaxySideWindow("E", true) end
+	if shared.GalaxySideWindow then shared.GalaxySideWindow("C", true) end
 	local want = place()
 	scale.Scale = want * 0.8
 	Kit.tween(scale, { Scale = want }, 0.25, Enum.EasingStyle.Back)
