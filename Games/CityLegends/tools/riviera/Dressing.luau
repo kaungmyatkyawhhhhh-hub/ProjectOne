@@ -305,7 +305,7 @@ function Dressing.harbour(data, box, parent: Instance, rng: Random): (number, nu
 				end
 				-- umbrella pines on the harbour side every ~46 studs, in the pavement's outer edge
 				pineAcc += (b.pos - a.pos).Magnitude
-				local spot = b.pos + right * side * (HALF + WALK - 4) + Vector3.new(0, 0.5, 0)
+				local spot = b.pos + right * side * (HALF + 2.6) + Vector3.new(0, 0.5, 0) -- at the kerb
 				-- not on top of a street lamp (lamps are placed first): wait for the next sample
 				local clash = false
 				for _, lampPos in lampSpots(parent) do
@@ -451,7 +451,41 @@ end
 -- street furniture (video: bollards, blue crossing signs, scooters parked in rows, planters,
 -- palms, bus shelters)
 ---------------------------------------------------------------------
+-- Creator Store props (owner 2026-11-02: "take and insert from Toolbox, for more realism"):
+-- ServerStorage.RivieraAssets.Props, cleaned of scripts; the part-built ones are the fallback
+local function prop(name: string): Instance?
+	local lib = game:GetService("ServerStorage"):FindFirstChild("RivieraAssets")
+	local props = lib and lib:FindFirstChild("Props")
+	return props and props:FindFirstChild(name)
+end
+-- a copy of a prop standing on cf (its bottom on cf's height, centred on cf), turned like cf
+local function placeProp(name: string, cf: CFrame, scale: number?, parent: Instance): Instance?
+	local src = prop(name)
+	if not src then
+		return nil
+	end
+	local m = src:Clone()
+	if m:IsA("BasePart") then
+		if scale then
+			m.Size *= scale
+		end
+		m.CFrame = cf * CFrame.new(0, m.Size.Y / 2, 0)
+	elseif m:IsA("Model") then
+		if scale then
+			m:ScaleTo(m:GetScale() * scale)
+		end
+		m:PivotTo(cf)
+		local box, size = m:GetBoundingBox()
+		m:PivotTo(m:GetPivot() + Vector3.new(cf.Position.X - box.Position.X, cf.Position.Y - (box.Position.Y - size.Y / 2), cf.Position.Z - box.Position.Z))
+	end
+	m.Parent = parent
+	return m
+end
+
 local function bollard(pos: Vector3, striped: boolean, parent: Instance)
+	if not striped and placeProp("BollardBlack", CFrame.new(pos), nil, parent) then
+		return
+	end
 	local col = if striped then Color3.fromRGB(196, 32, 36) else Color3.fromRGB(34, 36, 38)
 	part({ Name = "Bollard", Shape = Enum.PartType.Cylinder, Size = Vector3.new(3, 0.8, 0.8), CFrame = CFrame.new(pos + Vector3.new(0, 1.5, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Metal, Color = col, CastShadow = false }, parent)
 	if striped then
@@ -460,6 +494,9 @@ local function bollard(pos: Vector3, striped: boolean, parent: Instance)
 end
 
 local function crossingSign(pos: Vector3, face: Vector3, parent: Instance)
+	if placeProp("CrossingSign", CFrame.lookAt(pos, pos + face) * CFrame.Angles(0, math.pi / 2, 0), 0.6, parent) then
+		return
+	end
 	part({ Name = "SignPole", Shape = Enum.PartType.Cylinder, Size = Vector3.new(10, 0.4, 0.4), CFrame = CFrame.new(pos + Vector3.new(0, 5, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Metal, Color = Color3.fromRGB(150, 152, 156), CastShadow = false }, parent)
 	local cf = CFrame.lookAt(pos + Vector3.new(0, 9.2, 0), pos + Vector3.new(0, 9.2, 0) + face)
 	part({ Name = "CrossingSign", Size = Vector3.new(2.6, 2.6, 0.15), CFrame = cf, Material = Enum.Material.SmoothPlastic, Color = Color3.fromRGB(28, 82, 168), CastShadow = false }, parent)
@@ -468,6 +505,10 @@ end
 
 local SCOOTER = { Color3.fromRGB(230, 230, 226), Color3.fromRGB(30, 30, 32), Color3.fromRGB(150, 30, 34), Color3.fromRGB(40, 70, 120), Color3.fromRGB(170, 172, 176) }
 local function scooter(cf: CFrame, rng: Random, parent: Instance)
+	local pick = if rng:NextNumber() < 0.55 then "ScooterClassic" else "ScooterModern"
+	if placeProp(pick, cf * CFrame.Angles(0, if rng:NextNumber() < 0.5 then 0 else math.pi, 0) * CFrame.Angles(0, rng:NextNumber(-0.12, 0.12), 0), nil, parent) then
+		return
+	end
 	local col = SCOOTER[rng:NextInteger(1, #SCOOTER)]
 	local m = Instance.new("Model")
 	m.Name = "Scooter"
@@ -482,7 +523,16 @@ local function scooter(cf: CFrame, rng: Random, parent: Instance)
 	m.Parent = parent
 end
 
-local function planter(pos: Vector3, rng: Random, parent: Instance)
+local function planter(pos: Vector3, rng: Random, parent: Instance, along: Vector3?)
+	local dir = along or Vector3.new(1, 0, 0)
+	local cf = CFrame.lookAt(pos, pos + dir)
+	if rng:NextNumber() < 0.3 then
+		if placeProp("PlanterStone", cf * CFrame.Angles(0, math.pi / 2, 0), 0.8, parent) then
+			return
+		end
+	elseif placeProp("PlanterPot", cf * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0), rng:NextNumber(1.1, 1.4), parent) then
+		return
+	end
 	part({ Name = "Planter", Size = Vector3.new(5, 2.6, 5), CFrame = CFrame.new(pos + Vector3.new(0, 1.3, 0)), Material = Enum.Material.WoodPlanks, Color = Color3.fromRGB(122, 92, 64) }, parent)
 	local green = Color3.fromRGB(64, 104, 52):Lerp(Color3.fromRGB(96, 130, 64), rng:NextNumber())
 	part({ Name = "Shrub", Shape = Enum.PartType.Ball, Size = Vector3.new(5.6, 5.6, 5.6), CFrame = CFrame.new(pos + Vector3.new(0, 4.4, 0)), Material = Enum.Material.Grass, Color = green, CanCollide = false }, parent)
@@ -492,6 +542,9 @@ local function planter(pos: Vector3, rng: Random, parent: Instance)
 end
 
 local function busShelter(cf: CFrame, parent: Instance)
+	if placeProp("BusShelter", cf, nil, parent) then
+		return
+	end
 	local m = Instance.new("Model")
 	m.Name = "BusShelter"
 	part({ Name = "Roof", Size = Vector3.new(4.5, 0.4, 14), CFrame = cf * CFrame.new(0, 9, 0), Material = Enum.Material.Metal, Color = Color3.fromRGB(70, 72, 76) }, m)
@@ -586,7 +639,27 @@ function Dressing.furniture(data, box, parent: Instance, rng: Random, palms: Mod
 					side = -side
 				end
 				local spot = b.pos + right * side * (HALF + WALK - 3) + Vector3.new(0, 0.5, 0)
-				if nearestOther(roads, r, spot) > HALF + WALK then
+				-- street trees stand at the kerb, so their crowns stay clear of the buildings (owner
+				-- 2026-11-02: "some of the trees are not in the correct place")
+				local kerbSpot = b.pos + right * side * (HALF + 2.6) + Vector3.new(0, 0.5, 0)
+				local palmA = prop("PalmA")
+				if nearestOther(roads, r, spot) > HALF + WALK and palmA and (casino or r.name == "Beach Avenue" or r.name == "Coast Road") then
+					-- a Creator Store palm (textured; the owner's import shows white): its trunk's foot
+					-- (attribute TrunkFoot on the trunk mesh, in its own space) on the kerb spot
+					local pm = palmA:Clone()
+					pm:ScaleTo(pm:GetScale() * rng:NextNumber(0.62, 0.8))
+					pm:PivotTo(CFrame.new(kerbSpot) * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0))
+					for _, d in pm:GetDescendants() do
+						if d:IsA("BasePart") and d:GetAttribute("TrunkFoot") then
+							local foot = (d.CFrame * CFrame.new((d:GetAttribute("TrunkFoot") :: Vector3) * d.Size)).Position
+							pm:PivotTo(pm:GetPivot() + (kerbSpot - Vector3.new(0, 0.3, 0) - foot))
+							break
+						end
+					end
+					pm.Name = "Palm"
+					pm.Parent = grp(kerbSpot)
+					n.palms += 1
+				elseif nearestOther(roads, r, spot) > HALF + WALK then
 					if palms and (casino or r.name == "Beach Avenue" or r.name == "Coast Road") then
 						-- one palm of the imported group (the group is 60 studs wide: whole, it stood
 						-- on the road, owner 2026-11-02 "why is there trees on the road")
@@ -612,8 +685,15 @@ function Dressing.furniture(data, box, parent: Instance, rng: Random, palms: Mod
 						pm.Parent = grp(spot)
 						n.palms += 1
 					else
-						planter(spot, rng, grp(spot))
+						planter(spot, rng, grp(spot), b.dir)
 						n.planters += 1
+						-- now and then a bench beside it, facing the street
+						if rng:NextNumber() < 0.35 then
+							local at = spot + b.dir.Unit * 7
+							if placeProp("Bench", CFrame.lookAt(at, at + b.dir), nil, grp(at)) then
+								n.benches = (n.benches or 0) + 1
+							end
+						end
 					end
 				end
 			end
@@ -633,6 +713,41 @@ function Dressing.furniture(data, box, parent: Instance, rng: Random, palms: Mod
 		end
 	end
 	return n
+end
+
+-- trees whose crown runs into a building, or whose trunk stands on a lamp, sign or bus shelter, go
+-- (run last, when the buildings and the furniture are in)
+function Dressing.fitTrees(parent: Instance, buildings: Instance): number
+	local op = OverlapParams.new()
+	op.FilterType = Enum.RaycastFilterType.Include
+	op.FilterDescendantsInstances = { buildings }
+	local clutter = {}
+	for _, m in parent:GetDescendants() do
+		if m:IsA("Model") and (m.Name == "StreetLamp" or m.Name == "BusShelter" or m.Name == "CrossingSign") then
+			table.insert(clutter, m)
+		end
+	end
+	local op2 = OverlapParams.new()
+	op2.FilterType = Enum.RaycastFilterType.Include
+	op2.FilterDescendantsInstances = clutter
+	local removed = 0
+	local trees = {}
+	for _, m in parent:GetDescendants() do
+		if m:IsA("Model") and (m.Name == "Tree" or m.Name == "Palm") then
+			table.insert(trees, m)
+		end
+	end
+	for _, m in trees do
+		local box, size = m:GetBoundingBox()
+		local crown = workspace:GetPartBoundsInBox(box * CFrame.new(0, size.Y * 0.2, 0), Vector3.new(size.X * 0.6, size.Y * 0.5, size.Z * 0.6), op)
+		local base = Vector3.new(box.Position.X, box.Position.Y - size.Y / 2, box.Position.Z)
+		local trunk = workspace:GetPartBoundsInBox(CFrame.new(base + Vector3.new(0, 4, 0)), Vector3.new(5, 8, 5), op2)
+		if #crown > 0 or #trunk > 0 then
+			m:Destroy()
+			removed += 1
+		end
+	end
+	return removed
 end
 
 return Dressing
