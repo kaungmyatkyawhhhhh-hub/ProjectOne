@@ -8,6 +8,10 @@
 --    COMETS = Comet Lure (owner 2 Nov; the Constellation Tree takes the ring-1 nodes in the alpha, same Config table)
 --  * tutorial steps 1-4: the target glows + an arrow at once, the hint line after 5 s idle, a step counter "n/4",
 --    +1 Essence per step, then TUTORIAL COMPLETE
+-- Alpha part 1 (3 Nov): the SUPERNOVA goal bar under the counter ("SUPERNOVA 63%"), the SHARDS counter next to it (once you
+-- have any; shared.GalaxyShardsTarget() = where flying shards land), hotbar T = the 2D TREE window (the island's Constellation
+-- Tree + Info screens, IslandBoardsUI), tutorial steps 5-7 (the bar to 50%, the SUPERNOVA button, STARFIRE in the tree).
+-- The SUPERNOVA button, card and cinematic are GalaxySupernova's.
 -- Numbers all come from EconConfig; the server decides every buy (EconRequest).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,6 +26,8 @@ local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local Kit = require(Galaxy:WaitForChild("UIKit"))
 local UpgradesPanel = require(Galaxy:WaitForChild("UpgradesPanel"))
+local BoardsUI = require(Galaxy:WaitForChild("IslandBoardsUI"))
+local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 local A = Kit.A
 local hex = Kit.hex
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
@@ -114,6 +120,41 @@ local rateText = Kit.text(top, 186, 35, 90, 16, "+0/s", 12, { ZIndex = 9, TextCo
 counterText.ZIndex = 9
 rateText.ZIndex = 9
 
+-- the SUPERNOVA goal bar under the counter (design step 5: "SUPERNOVA 0% -> 100%"): shown from tutorial step 5 on; full = gold
+local goal = Kit.box(top, 56, 64, 204, 16, { BackgroundTransparency = 0, BackgroundColor3 = hex("#16131b"), ZIndex = 4, Visible = false })
+Kit.corner(goal, 8)
+Kit.stroke(goal, Kit.INK, 2)
+local goalFill = Kit.box(goal, 0, 0, 0, 16, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
+Kit.corner(goalFill, 8)
+local goalGrad = Kit.grad(goalFill, hex("#ffe08a"), hex("#ff9a1a"), 90)
+local goalText = Kit.text(goal, 0, 1, 204, 14, "", 11, { ZIndex = 7, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.3 })
+local _g = goalGrad
+
+-- the SHARDS counter (alpha part 1), right of the stardust counter: shown once you've earned shards
+local shardsRoot, shardsScale = scaledRoot("Shards", Vector2.new(0, 0), 170, 64)
+shardsRoot.Visible = false
+do
+	local outer = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.plate, ImageColor3 = Kit.INK, Position = UDim2.fromOffset(30, 14), Size = UDim2.fromOffset(136, 36), ZIndex = 2 }, shardsRoot)
+	local inner = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.plate, Position = UDim2.fromOffset(32, 16), Size = UDim2.fromOffset(130, 32), ZIndex = 3 }, shardsRoot)
+	Kit.grad(inner, hex("#2a2240"), hex("#120f1c"), 90)
+	Kit.box(shardsRoot, 38, 44, 118, 2.5, { BackgroundTransparency = 0, BackgroundColor3 = hex("#a77bff"), ZIndex = 4 })
+	local _ = outer
+	local d1 = Kit.box(shardsRoot, 26 - 21, 32 - 21, 42, 42, { BackgroundTransparency = 0, BackgroundColor3 = Kit.INK, Rotation = 45, ZIndex = 5 })
+	local d2 = Kit.box(shardsRoot, 26 - 17, 32 - 17, 34, 34, { BackgroundTransparency = 0, BackgroundColor3 = hex("#1d1430"), Rotation = 45, ZIndex = 6 })
+	Kit.stroke(d2, hex("#a77bff"), 2)
+	local _2 = d1
+	Kit.icon(shardsRoot, "shard", -2, 3, 58, Color3.fromRGB(170, 110, 255), { ZIndex = 8 })
+	Kit.text(shardsRoot, 74, 3, 80, 14, "SHARDS", 10, { ZIndex = 9, TextColor3 = hex("#d9c2ff"), stroke = 1 })
+end
+local shardsText = Kit.text(shardsRoot, 66, 17, 96, 28, "0", 22, { ZIndex = 9 })
+shared.GalaxyShardsTarget = function(): Vector2
+	return shardsRoot.AbsolutePosition + GuiService:GetGuiInset() + Vector2.new(26, 32) * shardsScale.Scale
+end
+shared.GalaxyShardsPop = function()
+	Kit.tween(shardsScale, { Scale = shardsScale.Scale * 1.15 }, 0.06)
+	task.delay(0.06, function() Kit.tween(shardsScale, { Scale = screenScale() }, 0.18, Enum.EasingStyle.Back) end)
+end
+
 ------------------------------------------------------------------------ toasts + floating numbers (one at a time)
 local toastRoot = scaledRoot("Toasts", Vector2.new(0.5, 0), 420, 120)
 local function toast(str: string, colour: Color3?)
@@ -157,7 +198,7 @@ local hot, hotScale = scaledRoot("Hotbar", Vector2.new(0.5, 1), 360, 110)
 local KEYS = {
 	{ key = "U", colour = hex("#ff9a3a"), icon = "stardust", name = "UPGRADES", window = "Upgrades" },
 	{ key = "F", colour = hex("#ffd84a"), icon = "forge", name = "STAR FORGE", note = "STAR FORGE: opens at SUPERNOVA 3" },
-	{ key = "T", colour = hex("#7dff8a"), icon = "planet", name = "TREE", note = "CONSTELLATION TREE: not in this test" },
+	{ key = "T", colour = hex("#7dff8a"), icon = "planet", name = "TREE", window = "Tree" },
 	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", note = "STORE: not in this test" },
 	{ key = "Q", colour = hex("#c9c4d2"), icon = "gear", name = "SETTINGS", note = "SETTINGS: not in this test" },
 }
@@ -201,6 +242,63 @@ local panel = UpgradesPanel.new(win, {
 })
 local closeBtn = panel.closeButton
 local tabUI = panel.tabUI
+
+------------------------------------------------------------------------ the TREE window (hotbar T, alpha part 1): the island's
+-- CONSTELLATION TREE + INFO screens side by side (IslandBoardsUI: the same code and look as the boards), your own numbers,
+-- buys without an island slot (anywhere)
+local treeWin, treeScale = scaledRoot("TreeWindow", Vector2.new(0.5, 0.5), 1124, 650)
+treeWin.Visible = false
+local treePanels, treeCtx = {}, nil
+local treeOpen = false
+local function treeDefault()
+	if player:GetAttribute("SupernovaReady") == true then return { kind = "supernova" } end
+	for _, n in ipairs(Econ.Ring2) do
+		local lv = player:GetAttribute("R2_" .. n.id) or 0
+		local cost = Econ.R2Cost(n.id, lv)
+		if cost and (player:GetAttribute("Supernovas") or 0) >= (n.novas or 0) and (player:GetAttribute("ShardsEarned") or 0) > 0 then
+			return { kind = "node2", key = n.id }
+		end
+	end
+	for _, n in ipairs(Econ.Ring1) do
+		if player:GetAttribute("Node_" .. n.id) ~= true then return { kind = "node", key = n.id } end
+	end
+	return { kind = "body", key = 0 }
+end
+local function buildTreeWindow()
+	if treeCtx then return end
+	treeCtx = { subject = player, picked = false, sel = treeDefault(), sound = Kit.sound, size = Vector2.new(550, 650) }
+	treeCtx.canAct = function() return true end
+	treeCtx.buy = function(kind, arg) return request:InvokeServer(kind, arg) end
+	treeCtx.supernova = function() if shared.GalaxyOpenSupernova then shared.GalaxyOpenSupernova() end end
+	treeCtx.select = function(kind, key)
+		treeCtx.sel = { kind = kind, key = key }
+		treeCtx.picked = true
+		for _, p in pairs(treePanels) do p:refresh() end
+	end
+	treeCtx.bought = function(kind, arg)
+		if (kind == "BuyNode" or kind == "BuyRing2") and treeCtx.sel.key == arg then treeCtx.picked = false end
+	end
+	for i, id in ipairs({ "Tree", "Info" }) do
+		local board = MapConfig.Boards.ById[id]
+		-- (no `pair`: the screen draws its own title, like the stand boards)
+		local spec = { id = id, title = board.title, Neon = board.Neon, Width = board.Width, Height = board.Height }
+		local canvas = Kit.box(treeWin, (i - 1) * 574, 0, 550, 650, { ClipsDescendants = true, ZIndex = 2 })
+		treePanels[id] = BoardsUI.new(id, canvas, spec, treeCtx)
+	end
+	-- the v12 close button (pink X) on the INFO screen's corner
+	local closeTree = Kit.new("TextButton", { Text = "", AutoButtonColor = false, Position = UDim2.fromOffset(1124 - 64, 14), Size = UDim2.fromOffset(44, 44),
+		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 20 }, treeWin)
+	Kit.corner(closeTree, 8)
+	Kit.stroke(closeTree, Color3.new(1, 1, 1), 2, 0.1)
+	Kit.grad(closeTree, hex("#ff7d8e"), hex("#e2334c"), 90)
+	for _, r in ipairs({ 45, -45 }) do
+		local bar = Kit.box(closeTree, 0, 0, 26, 5, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), AnchorPoint = Vector2.new(0.5, 0.5), Rotation = r, ZIndex = 21 })
+		bar.Position = UDim2.fromScale(0.5, 0.5)
+		Kit.corner(bar, 2)
+	end
+	closeTree.MouseButton1Click:Connect(function() if shared.GalaxyCloseTree then shared.GalaxyCloseTree() end end)
+end
+local tutorialTree -- (the tutorial's target in the tree window: "R2_Starfire")
 local tutorialTargets = panel.targets
 local ess = panel.chipText
 local function selectTab(id: string) panel:selectTab(id) end
@@ -247,26 +345,49 @@ local function closeWindow()
 	layout()
 end
 closeBtn.MouseButton1Click:Connect(closeWindow)
-local tutorialTab -- set by the tutorial: the tab the current step needs
-for _, k in ipairs(KEYS) do
-	keyUI[k.key].hit.MouseButton1Click:Connect(function()
-		if k.window then
-			if open then closeWindow() else openWindow(tutorialTab) end
-		else
-			toast(k.note, k.colour)
-		end
+local function closeTree()
+	if not treeOpen then return end
+	treeOpen = false
+	setKeySelected(nil)
+	Kit.tween(treeScale, { Scale = treeScale.Scale * 0.85 }, 0.15)
+	task.delay(0.15, function()
+		if not treeOpen then treeWin.Visible = false end
 	end)
+	layout()
+end
+shared.GalaxyCloseTree = closeTree
+local function openTree()
+	if open then closeWindow() end
+	if treeOpen then return end
+	buildTreeWindow()
+	treeOpen = true
+	treeWin.Visible = true
+	setKeySelected("T")
+	if not treeCtx.picked then treeCtx.sel = treeDefault() end
+	for _, p in pairs(treePanels) do p:refresh() end
+	layout()
+	local ws = treeScale.Scale
+	treeScale.Scale = ws * 0.8
+	Kit.tween(treeScale, { Scale = ws }, 0.25, Enum.EasingStyle.Back)
+end
+local tutorialTab -- set by the tutorial: the tab the current step needs
+local function pressKey(k)
+	if k.window == "Tree" then
+		if treeOpen then closeTree() else openTree() end
+	elseif k.window then
+		if treeOpen then closeTree() end
+		if open then closeWindow() else openWindow(tutorialTab) end
+	else
+		toast(k.note, k.colour)
+	end
+end
+for _, k in ipairs(KEYS) do
+	keyUI[k.key].hit.MouseButton1Click:Connect(function() pressKey(k) end)
 end
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then return end
 	for _, k in ipairs(KEYS) do
-		if input.KeyCode == Enum.KeyCode[k.key] then
-			if k.window then
-				if open then closeWindow() else openWindow(tutorialTab) end
-			else
-				toast(k.note, k.colour)
-			end
-		end
+		if input.KeyCode == Enum.KeyCode[k.key] then pressKey(k) end
 	end
 end)
 
@@ -277,10 +398,8 @@ task.spawn(function()
 	opener.Event:Connect(function(id)
 		if id == "Upgrades" then
 			openWindow(tutorialTab)
-		else
-			for _, k in ipairs(KEYS) do
-				if k.name == "TREE" and id == "Tree" then toast(k.note, k.colour) end
-			end
+		elseif id == "Tree" then
+			openTree()
 		end
 	end)
 end)
@@ -313,7 +432,14 @@ function layout()
 	if open then winScale.Scale = ws end
 	local topEdge, room = windowRoom()
 	win.Position = UDim2.fromOffset(vp.X / 2, topEdge + room / 2 + 15 * ws)
-	hot.Visible = not (small and open)
+	-- the tree window: as big as fits between the counter and the hotbar (and the screen's sides)
+	-- (below the hint line while the tutorial runs)
+	local hintRoom = if not small and (player:GetAttribute("TutStep") or 0) < #Econ.Tutorial then 46 * s else 0
+	treeScale.Scale = math.min((room - hintRoom) / 650, (vp.X - 24) / 1124, s)
+	treeWin.Position = UDim2.fromOffset(vp.X / 2, topEdge + hintRoom + (room - hintRoom) / 2)
+	hot.Visible = not (small and (open or treeOpen))
+	-- the shards counter, right of the stardust counter
+	shardsRoot.Position = UDim2.new(0.5, math.floor(144 * s), 0, math.floor(16 * s))
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
 layout()
@@ -337,11 +463,41 @@ RunService.RenderStepped:Connect(function(dt)
 		Kit.setText(counterText, str)
 	end
 	affordCheck += dt
-	if affordCheck > 0.25 and open then
+	if affordCheck > 0.25 then
 		affordCheck = 0
-		refreshRows()
+		if open then refreshRows() end
+		if treeOpen then
+			if not treeCtx.picked then treeCtx.sel = treeDefault() end
+			for _, p in pairs(treePanels) do p:refresh() end
+		end
+	end
+	if treeOpen then
+		for _, p in pairs(treePanels) do p:step(dt) end
 	end
 end)
+
+-- the goal bar: % of the 1M stardust this run's Supernova needs (from tutorial step 5 on); the shards counter
+local function onGoal()
+	local tutStep = player:GetAttribute("TutStep") or 0
+	local novas = player:GetAttribute("Supernovas") or 0
+	goal.Visible = tutStep >= 4 or novas >= 1
+	local k = math.clamp((player:GetAttribute("EarnedRun") or 0) / Econ.SupernovaNeed, 0, 1)
+	goalFill.Size = UDim2.fromOffset(math.floor(204 * k), 16)
+	goalFill.Visible = k > 0
+	Kit.setText(goalText, if k >= 1 then "SUPERNOVA READY!" else "SUPERNOVA " .. math.floor(k * 100) .. "%")
+end
+player:GetAttributeChangedSignal("EarnedRun"):Connect(onGoal)
+player:GetAttributeChangedSignal("TutStep"):Connect(onGoal)
+player:GetAttributeChangedSignal("Supernovas"):Connect(onGoal)
+onGoal()
+local function onShards()
+	shardsRoot.Visible = (player:GetAttribute("ShardsEarned") or 0) > 0 or shardsRoot:GetAttribute("Force") == true
+	Kit.setText(shardsText, fmt(player:GetAttribute("Shards") or 0))
+end
+player:GetAttributeChangedSignal("Shards"):Connect(onShards)
+player:GetAttributeChangedSignal("ShardsEarned"):Connect(onShards)
+shardsRoot:GetAttributeChangedSignal("Force"):Connect(onShards)
+onShards()
 local function onIncome()
 	Kit.setText(rateText, "+" .. fmt(player:GetAttribute("Income") or 0) .. "/s")
 end
@@ -387,6 +543,21 @@ Kit.tween(ringStroke, { Transparency = 0.7 }, 0.6, Enum.EasingStyle.Sine, Enum.E
 local function stepTarget(step: number): (GuiObject?, string?)
 	local def = Econ.Tutorial[step + 1]
 	if not def then return nil, nil end
+	-- steps 5-7 (alpha part 1): the goal bar, the SUPERNOVA button, STARFIRE in the tree window
+	if def.id == "HalfSupernova" then return if open or treeOpen then nil else goal, nil end
+	if def.id == "Supernova" then
+		local b = shared.GalaxySupernovaButton
+		return if b and b.Visible and not shared.GalaxyCinematic then b else nil, nil
+	end
+	if def.id == "Starfire" then
+		if shared.GalaxyCinematic then return nil, nil end
+		if not treeOpen then return keyUI.T.hit, nil end
+		local tree = treePanels.Tree
+		local tile = tree and tree.targets.R2_Starfire
+		if treeCtx.sel.kind == "node2" and treeCtx.sel.key == "Starfire" then return treePanels.Info.ui.upWide.button, nil end
+		if tile then tree:reveal(tile) end
+		return tile, nil
+	end
 	local wantTab, rowKey
 	if def.id == "BuyAsteroid" then wantTab, rowKey = "PLANETS", "Body0"
 	elseif def.id == "FirstLight" then wantTab, rowKey = "STARDUST", "Node_FirstLight"
@@ -406,6 +577,8 @@ local function tutorialComplete()
 		gradient = ColorSequence.new(hex("#fff1c0"), hex("#ffb02a")) })
 	Kit.text(f, 0, 64, 520, 26, #Econ.Tutorial .. "/" .. #Econ.Tutorial .. "  ESSENCE " .. fmt(player:GetAttribute("Essence") or 0), 20,
 		{ ZIndex = 71, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#7dffe9") })
+	-- (design: the end of the tutorial teases the next big thing)
+	Kit.text(f, 0, 94, 520, 22, "NEXT: STAR FORGE AT SUPERNOVA 3", 16, { ZIndex = 71, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#ffd84a") })
 	for i = 1, 10 do Kit.sparkle(f, math.random(0, 500), math.random(-10, 100), math.random(10, 20), i * 0.12) end
 	Kit.tween(sc, { Scale = screenScale() }, 0.35, Enum.EasingStyle.Back)
 	task.delay(2.8, function()

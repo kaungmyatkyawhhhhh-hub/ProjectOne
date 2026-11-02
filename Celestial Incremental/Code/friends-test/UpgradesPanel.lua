@@ -53,6 +53,7 @@ local TIER_LOOK = { -- border, title gradient, icon glow
 	{ "#8a6cff", "#efe8ff", "#b49bff", Color3.fromRGB(170, 130, 255) },
 	{ "#ff9a3a", "#fff1c0", "#ffb02a", Color3.fromRGB(255, 120, 30) },
 	{ "#5a5562", "#cfc6dd", "#8a8296", nil },
+	{ "#ff7a5a", "#fff1c0", "#ff9a7a", Color3.fromRGB(255, 140, 110) },
 }
 local TAB_LOOK = {
 	STARDUST = { "#ff9a3a", "#fff1c0", "#ffb02a", Color3.fromRGB(255, 120, 30) },
@@ -197,6 +198,12 @@ function Panel:canAct(): boolean
 end
 function Panel:sound(name: string)
 	if self.opts.sound then self.opts.sound(name) end
+end
+-- ring 2 levels (shards; opens the Star tiers)
+function Panel:ring2()
+	local t = {}
+	for _, n in ipairs(Econ.Ring2) do t[n.id] = self:attr("R2_" .. n.id) or 0 end
+	return t
 end
 -- this press turned into a scroll (a drag on the list): its button must not buy
 function Panel:dragged(): boolean
@@ -357,11 +364,12 @@ function Panel:bodyRow(i, k: number)
 	row.onButton = function(b)
 		holdBuy(b, function()
 			local o, n = self:owned(), self:nodes()
-			if k >= Econ.PlayableTiers then
-				if self.opts.toast then self.opts.toast(tier.name .. ": opens at " .. (tier.lockedText or ""), hex("#8a8296")) end
+			if not node and not Econ.Unlocked(k, n, self:ring2()) then
+				-- (the Star tiers: opened with shards in the Constellation Tree, ring 2)
+				if self.opts.toast then self.opts.toast(tier.name .. ": " .. (tier.lockedText or "") .. ", then ring 2 in the tree", hex("#8a8296")) end
 				return false
 			end
-			if not Econ.Unlocked(k, n) then
+			if not Econ.Unlocked(k, n, self:ring2()) then
 				if node.requires and not n[node.requires] then
 					if self.opts.toast then self.opts.toast("Unlock the " .. Econ.Tiers[k].name .. " first", hex("#8a8296")) end
 					return false
@@ -375,17 +383,17 @@ function Panel:bodyRow(i, k: number)
 		end, function() return self:dragged() end)
 	end
 	row.refresh = function()
-		local o, n = self:owned(), self:nodes()
+		local o, n, r2 = self:owned(), self:nodes(), self:ring2()
 		local own = o[k + 1] or 0
-		if k >= Econ.PlayableTiers then
+		if not node and not Econ.Unlocked(k, n, r2) then
 			Kit.setText(lv, "LOCKED")
-			Kit.setText(desc, "opens at " .. tier.lockedText)
+			Kit.setText(desc, "opens at " .. tier.lockedText .. " (ring 2)")
 			self:chip(row, tier.lockedText)
 			self:setButton(row, "locked", nil, tier.lockedText)
 			return
 		end
-		local each = Econ.TierIncomeWith(k, 1, n) * Econ.AllMult(n)
-		if not Econ.Unlocked(k, n) then
+		local each = Econ.TierIncomeWith(k, 1, n, r2) * Econ.AllMult(n, r2)
+		if not Econ.Unlocked(k, n, r2) then
 			Kit.setText(lv, "LOCKED")
 			Kit.setText(desc, "opens with " .. node.name .. ", " .. fmt(each) .. "/s each")
 			self:chip(row, "LOCKED", "OPEN")
@@ -400,8 +408,8 @@ function Panel:bodyRow(i, k: number)
 		Kit.setText(lv, "LV " .. own)
 		local nextM = Econ.NextMilestone(own)
 		Kit.setText(desc, "earns " .. fmt(each) .. "/s each" .. (if nextM then ", x2 at " .. nextM else ""))
-		local now = Econ.TierIncomeWith(k, own, n) * Econ.AllMult(n)
-		local after = Econ.TierIncomeWith(k, own + 1, n) * Econ.AllMult(n)
+		local now = Econ.TierIncomeWith(k, own, n, r2) * Econ.AllMult(n, r2)
+		local after = Econ.TierIncomeWith(k, own + 1, n, r2) * Econ.AllMult(n, r2)
 		self:chip(row, fmt(now) .. "/s", fmt(after) .. "/s")
 		local cost = Econ.Cost(k, own)
 		self:setButton(row, if self:stardust() >= cost then "buy" else "no", cost)
@@ -422,6 +430,8 @@ function Panel:nodeRow(i, node, look)
 		from, to = "x1", "x" .. tostring(e.mult)
 	elseif e.kind == "cometEvery" then
 		from, to = Econ.Comet.Every .. "s", e.seconds .. "s"
+	elseif e.kind == "shardBonus" then
+		from, to = "+0%", "+" .. e.pct .. "%"
 	end
 	row.onButton = function(b)
 		b.MouseButton1Click:Connect(function()
@@ -502,8 +512,9 @@ end
 -- is anything buyable right now (the board's beacon)
 function Panel:anyBuyable(): boolean
 	local o, n, sd = self:owned(), self:nodes(), self:stardust()
-	for k = 0, Econ.PlayableTiers - 1 do
-		if Econ.Unlocked(k, n) and sd >= Econ.Cost(k, o[k + 1] or 0) then return true end
+	local r2 = self:ring2()
+	for k = 0, #Econ.Tiers - 1 do
+		if Econ.Unlocked(k, n, r2) and sd >= Econ.Cost(k, o[k + 1] or 0) then return true end
 	end
 	for _, node in ipairs(Econ.Ring1) do
 		if not n[node.id] and (not node.requires or n[node.requires]) and sd >= node.cost then return true end

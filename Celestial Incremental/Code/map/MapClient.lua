@@ -27,6 +27,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 local Kit = require(Galaxy:WaitForChild("Kit"))
+local UIAssets = require(Galaxy:WaitForChild("UIAssets"))
 local remote = Galaxy:WaitForChild("MapEvent", 30) :: RemoteEvent
 
 local C = MapConfig.Colors
@@ -161,9 +162,11 @@ local function buildSystem(island)
 	b0.Parent, b1.Parent = beamHost, beamHost
 	local beam = Instance.new("Beam")
 	beam.Attachment0, beam.Attachment1 = b0, b1
-	beam.Color = ColorSequence.new(Color3.fromRGB(175, 120, 255))
+	-- (alpha part 1: GOLD and a bit wider while the island's owner is ready to go Supernova)
+	local ready = island:GetAttribute("Ready") == true
+	beam.Color = ColorSequence.new(if ready then Color3.fromRGB(255, 205, 90) else Color3.fromRGB(175, 120, 255))
 	beam.LightEmission = 1
-	beam.Width0, beam.Width1 = 0.25, 0.25
+	beam.Width0, beam.Width1 = if ready then 0.6 else 0.25, if ready then 0.6 else 0.25
 	beam.FaceCamera = true
 	beam.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.45, 0.55), NumberSequenceKeypoint.new(1, 0.15) })
 	beam.Parent = beamHost
@@ -191,6 +194,40 @@ local function buildSystem(island)
 		s.star = Kit.Make("CoreOrb", { Name = "Star", Fit = { "Y", d }, CFrame = CFrame.new(top), Color = C.Star, Material = Enum.Material.Neon, Parent = folder })
 	else
 		s.star = Kit.Make("RockBare", { Name = "Rock", Fit = { "X", SY.Rock }, CFrame = CFrame.new(top), Color = C.BareRock, Parent = folder })
+	end
+	s.starSize = {}
+	for _, p in ipairs(Kit.Parts(s.star)) do s.starSize[p] = p.Size end
+	-- the nebula patches that stay in the sky over the island, one per Supernova (alpha part 1, VFX plan "the world remembers
+	-- it"): soft glows, seeded by the island and the count so they never move
+	local NB = MapConfig.Supernova
+	for i = 1, math.min(novas, NB.Nebulae) do
+		local rnd = Random.new((island:GetAttribute("Slot") or 1) * 101 + i * 7)
+		local a = rnd:NextNumber(0, math.pi * 2)
+		local host = Instance.new("Part")
+		host.Name = "Nebula"
+		host.Anchored, host.CanCollide, host.CanQuery, host.CanTouch, host.Transparency = true, false, false, false, 1
+		host.Size = Vector3.new(0.2, 0.2, 0.2)
+		host.CFrame = CFrame.new(c + Vector3.new(math.cos(a) * rnd:NextNumber(15, 45), NB.NebulaHeight + rnd:NextNumber(-10, 20), math.sin(a) * rnd:NextNumber(15, 45)))
+		host.Parent = folder
+		local bb = Instance.new("BillboardGui")
+		local size = NB.NebulaSize * rnd:NextNumber(0.7, 1.2)
+		bb.Size = UDim2.fromScale(size, size * 0.6)
+		bb.LightInfluence = 0
+		bb.MaxDistance = 1000
+		bb.Parent = host
+		local hue = ({ Color3.fromRGB(190, 110, 255), Color3.fromRGB(255, 120, 190), Color3.fromRGB(110, 170, 255), Color3.fromRGB(255, 190, 110) })[i % 4 + 1]
+		for j = 1, 4 do
+			local img = Instance.new("ImageLabel")
+			img.BackgroundTransparency = 1
+			img.Image = UIAssets.softglow
+			img.ImageColor3 = hue:Lerp(Color3.new(1, 1, 1), (j - 1) * 0.12)
+			img.ImageTransparency = 0.55 + j * 0.08
+			img.AnchorPoint = Vector2.new(0.5, 0.5)
+			img.Position = UDim2.fromScale(rnd:NextNumber(0.3, 0.7), rnd:NextNumber(0.35, 0.65))
+			img.Size = UDim2.fromScale(rnd:NextNumber(0.5, 1), rnd:NextNumber(0.5, 1))
+			img.Rotation = rnd:NextNumber(0, 360)
+			img.Parent = bb
+		end
 	end
 	local slot = island:GetAttribute("Slot") or 1
 	local span = math.max(SY.MaxPlanets - 1, 1)
@@ -320,7 +357,8 @@ local coreBase = if coreLight then coreLight.Brightness else 1.4
 local coreRange = if coreLight then coreLight.Range else 24
 local spawnComet -- (defined in the comets section; the remote handler below calls it)
 
-local function shockwave()
+local function shockwave(delay: number?)
+	if delay and delay > 0 then task.wait(delay) end
 	local n = 72
 	local segs = {}
 	for i = 1, n do
@@ -359,11 +397,27 @@ local function supernova(slot: number?)
 		tween(coreLight, { Brightness = coreBase, Range = coreRange }, 1.4)
 	end
 	sparkleBurst(O + Vector3.new(0, MapConfig.Centre.CoreHeight, 0), 80, Color3.fromRGB(255, 210, 140), 1.4)
-	shockwave()
-	-- a burst over the player's island too
+	-- (alpha part 1: two rings across the plaza and the islands, the second a beat later)
+	for i = 1, MapConfig.Supernova.Shockwaves do task.spawn(shockwave, (i - 1) * 0.3) end
+	-- the burst over the player's island (everyone sees it; at the system's height: the system itself is rebuilt as the rock)
 	local island = slot and islands:FindFirstChild("Island_" .. slot)
-	local s = island and systems[island]
-	if s then sparkleBurst(s.top, 60, Color3.fromRGB(255, 220, 150), 1.1) end
+	local c = island and island:GetAttribute("Center")
+	if c then
+		local top = c + Vector3.new(0, systemHeight(island), 0)
+		sparkleBurst(top, 90, Color3.fromRGB(255, 220, 150), 1.6)
+		sparkleBurst(top, 40, Color3.fromRGB(200, 150, 255), 1.1)
+	end
+end
+
+-- the SUPERNOVA wind-up on YOUR island (GalaxySupernova calls it): the bodies spiral into your star while it swells and
+-- pulses faster and faster; `dur` seconds, then it holds until the system is rebuilt (the server's reset)
+shared.GalaxyWindup = function(dur: number)
+	for island, s in pairs(systems) do
+		if island:GetAttribute("Owner") == player.UserId then s.windup = { t0 = os.clock(), dur = dur } end
+	end
+end
+shared.GalaxyWindupCancel = function()
+	for _, s in pairs(systems) do s.windup = nil end
 end
 if remote then
 	remote.OnClientEvent:Connect(function(kind, a, b, c)
@@ -629,9 +683,17 @@ RunService.RenderStepped:Connect(function(dt)
 			if s.motes then s.motes.Enabled = near end
 		end
 		if near then
+			-- (the Supernova wind-up: k 0 -> 1; the orbits shrink into the star, which swells and pulses faster)
+			local k = if s.windup then math.clamp((os.clock() - s.windup.t0) / s.windup.dur, 0, 1) else 0
+			local pull = 1 - k * k
+			if s.windup then
+				local pulse = if calm() then 0 else math.sin(os.clock() * (6 + 26 * k)) * 0.08 * k
+				local grow = 1 + (MapConfig.Supernova.Swell - 1) * k + pulse
+				for p, size in pairs(s.starSize or {}) do p.Size = size * grow end
+			end
 			for _, pl in ipairs(s.planets) do
-				pl.angle += dt * pl.speed
-				local cf = CFrame.new(s.top) * pl.tilt * CFrame.new(math.cos(pl.angle) * pl.r, 0, math.sin(pl.angle) * pl.r)
+				pl.angle += dt * pl.speed * (1 + 6 * k)
+				local cf = CFrame.new(s.top) * pl.tilt * CFrame.new(math.cos(pl.angle) * pl.r * pull, 0, math.sin(pl.angle) * pl.r * pull)
 				if pl.flyAt then
 					local a = math.clamp((os.clock() - pl.flyAt) / 0.7, 0, 1)
 					if a >= 1 then
@@ -645,8 +707,8 @@ RunService.RenderStepped:Connect(function(dt)
 				for _, p in ipairs(pl.parts) do p.CFrame = cf end
 			end
 			for _, br in ipairs(s.belt or {}) do
-				br.angle += dt * 0.12
-				local cf = CFrame.new(s.top) * br.tilt * CFrame.new(math.cos(br.angle) * br.r, br.dy, math.sin(br.angle) * br.r) * CFrame.Angles(br.angle, br.angle * 0.7, 0)
+				br.angle += dt * 0.12 * (1 + 10 * k)
+				local cf = CFrame.new(s.top) * br.tilt * CFrame.new(math.cos(br.angle) * br.r * pull, br.dy * pull, math.sin(br.angle) * br.r * pull) * CFrame.Angles(br.angle, br.angle * 0.7, 0)
 				for _, p in ipairs(br.parts) do p.CFrame = cf end
 			end
 		end

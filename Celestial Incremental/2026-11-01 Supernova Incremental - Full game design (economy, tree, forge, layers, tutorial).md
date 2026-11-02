@@ -190,3 +190,22 @@ FINAL: LunarPull 80, PlanetSeed 640, GasGiant 5,120, OrbitSpeed 55,000, CometLur
 - To hit ~2 min in real time, x0.25 (28,000 / 40,000) would be needed.
 
 Kept in ONE Config table: `ReplicatedStorage.Galaxy.EconConfig` -> `Econ.Ring1` (id, name, cost, effect, tab, requires). The Upgrades window reads it for the friends test, and the Constellation Tree reads the same table from the alpha.
+
+## Ring 2 (STELLAR) + Supernova Readiness prices: PROPOSED (calc, 3 Nov, Claude Code)
+Script: `Calc\ring2.py` (same formulas, best-choice buyer, ring 1 at its game prices, half the comets caught).
+**Rule (design):** a sensible ring-2 build is worth about x(1 + 0.1 x shards spent). A new tier isn't a flat multiplier, so a build's worth = (time to 1M with no build) / (time to 1M with it). Each purchase is priced so the build after it hits the rule.
+
+| Node | Effect | Shards | Status |
+|---|---|---|---|
+| Starfire | every body x1.5 a level, 5 levels | 5 / 8 / 15 / 25 / 40 | PROPOSED (calc) |
+| Star | unlocks the Star (needs Supernova 1) | 3 | PROPOSED: calc says 2, floor 3 |
+| Heavy Elements | each tier x(1 + 0.25 x its number) (needs Star) | 20 | PROPOSED (calc) |
+| Binary Star | unlocks the Binary Star (needs Supernova 3, Star) | 5 | PROPOSED: calc says 1, floor 5 |
+| Supernova Readiness (ring 1) | +20% shards at this Supernova | 400,000 stardust | PROPOSED: ~60 s of late run-1 income |
+
+**Why the floors:** in 1M-stardust runs a Star / Binary Star barely pays back. By the rule they're worth 2 and 1 shard. They are "new tier" moments, so not 1-shard throwaways.
+
+**Script output (campaign, Supernova as soon as ready):**
+- Supernova 1: run 5.4 min best-choice (~7.6 real), +10 shards.
+- Supernova 2: run 3.2 min (1.7x faster).
+- Supernova 3 at 10.8 min total; Supernova 5 at 14.2 min; Supernova 10 at 18.8 min (runs under 1 min by then).

@@ -4,14 +4,19 @@
 --  * Stardust income every tick from the bodies you own (EconConfig formulas), buying bodies + ring-1 nodes
 --  * comets: the SERVER decides when one appears (every 45 s, 30 s with Comet Lure) and pays 30-60 s of income when the
 --    client catches that comet in time (a client can't make up comets)
---  * tutorial steps 1-4: each pays 1 Essence (step counter "n/4"), logged to the onboarding funnel
+--  * tutorial steps 1-7: each pays 1 Essence (step counter "n/7"), logged to the onboarding funnel
+--  * THE SUPERNOVA (alpha part 1): "Supernova" when 1M stardust was earned this run -> shards (EconConfig.ShardsFor), the
+--    Supernova count + 1; resets stardust, bodies (the asteroid stays) and ring 1; keeps shards, ring 2, Essence, the
+--    tutorial. The client plays the wind-up first and asks at the impact; the map / Star Surge see the count go up.
+--  * RING 2 (shards): "BuyRing2", id -> the node's next level (EconConfig.Ring2: costs, the Supernovas it needs, requires)
 --  * the player attributes the map reads: Bodies, BodyTiers, Supernovas, Rank, SupernovaReady, BestRunStardust,
 --    Tree_CometLure, CometsCaught; and the ones the HUD reads: Stardust, Income, EarnedRun, Essence, TutStep, Own1..,
 --    Node_<id>, Loaded
 -- Studio test switch: Workspace attribute TestFreshSave = true -> every player starts on a NEW save that is never written
--- (the tutorial / tier 0 test; the Studio save stays as it was).
--- Remotes (ReplicatedStorage.Galaxy): EconRequest (RemoteFunction: "BuyBody" / "BuyBody10" / "BuyBodyMax", k / "BuyNode", id; +
--- the island slot from a board), EconEvent (server ->
+-- (the tutorial / tier 0 test; the Studio save stays as it was). Workspace TestGiveStardust = n -> every player gets n
+-- stardust EARNED (counts for the Supernova; for screenshots, never in the pace test).
+-- Remotes (ReplicatedStorage.Galaxy): EconRequest (RemoteFunction: "BuyBody" / "BuyBody10" / "BuyBodyMax", k / "BuyNode", id /
+-- "BuyRing2", id / "Supernova"; + the island slot from a board), EconEvent (server ->
 -- client: "TutorialStep", step, essence / "Bought", kind, what / "CometPaid", id, value), MapEvent ("CometSpawn" to the
 -- client; the client answers "Comet", id).
 local Players = game:GetService("Players")
@@ -51,7 +56,7 @@ local function newData()
 	local owned = {}
 	for i = 1, #Econ.Tiers do owned[i] = Econ.StartOwned[i] or 0 end
 	return { v = Econ.DataVersion, stardust = 0, earnedRun = 0, earnedTotal = 0, bestRun = 0, owned = owned, nodes = {},
-		essence = 0, tut = 0, supernovas = 0, comets = 0 }
+		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {} }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -61,11 +66,21 @@ local function migrate(d): (any, boolean)
 	for k, v in pairs(base) do
 		if d[k] == nil then d[k] = v end
 	end
+	if type(d.owned) ~= "table" then d.owned = base.owned end
 	for i = 1, #Econ.Tiers do d.owned[i] = math.max(0, math.floor(tonumber(d.owned[i]) or 0)) end
-	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets" }) do
+	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned" }) do
 		local n = tonumber(d[k]) or 0
 		d[k] = if n == n and n ~= math.huge then n else 0
 	end
+	-- v2: ring 2 levels (only known nodes, whole numbers within their level count)
+	local r2 = {}
+	if type(d.ring2) == "table" then
+		for _, n in ipairs(Econ.Ring2) do
+			local lv = math.floor(tonumber(d.ring2[n.id]) or 0)
+			if lv > 0 then r2[n.id] = math.min(lv, #n.costs) end
+		end
+	end
+	d.ring2 = r2
 	d.v = Econ.DataVersion
 	return d, false
 end
@@ -121,14 +136,14 @@ end
 
 ------------------------------------------------------------------------ the economy
 local function unlocked(s, k: number): boolean
-	return Econ.Unlocked(k, s.d.nodes)
+	return Econ.Unlocked(k, s.d.nodes, s.d.ring2)
 end
 -- STAR SURGE (GalaxyStarSurgeService): x2 stardust for everyone while it runs
 local function surgeMult(): number
 	return if workspace:GetServerTimeNow() < (Galaxy:GetAttribute("SurgeUntil") or 0) then MapConfig.Surge.Mult else 1
 end
 local function incomeOf(s): number
-	return Econ.Income(s.d.owned, s.d.nodes) * surgeMult()
+	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * surgeMult()
 end
 local function cometEvery(s): number
 	return Econ.CometEvery(s.d.nodes)
@@ -149,6 +164,10 @@ local function publish(player: Player, s)
 		if d.owned[k] > 0 then tiers += 1 end
 	end
 	for _, n in ipairs(Econ.Ring1) do player:SetAttribute("Node_" .. n.id, d.nodes[n.id] == true) end
+	for _, n in ipairs(Econ.Ring2) do player:SetAttribute("R2_" .. n.id, d.ring2[n.id] or 0) end
+	player:SetAttribute("Shards", d.shards)
+	player:SetAttribute("ShardsEarned", d.shardsEarned)
+	player:SetAttribute("SupernovaShards", Econ.ShardsFor(d.earnedRun, d.nodes))
 	-- the map
 	player:SetAttribute("Bodies", bodies)
 	player:SetAttribute("BodyTiers", tiers)
@@ -166,6 +185,9 @@ local TUT_DONE = {
 	function(d) return d.nodes.FirstLight == true end,
 	function(d) return (d.owned[2] or 0) >= 1 end, -- the first Moon (Lunar Pull, then buy one)
 	function(d) return d.comets >= 1 end,
+	function(d) return d.earnedRun >= Econ.SupernovaNeed / 2 or d.supernovas >= 1 end, -- the goal bar at 50%
+	function(d) return d.supernovas >= 1 end,
+	function(d) return (d.ring2.Starfire or 0) >= 1 end,
 }
 local function checkTutorial(player: Player, s)
 	local d = s.d
@@ -175,6 +197,9 @@ local function checkTutorial(player: Player, s)
 		d.essence += step.essence
 		pcall(function() AnalyticsService:LogOnboardingFunnelStepEvent(player, d.tut, step.id) end)
 		event:FireClient(player, "TutorialStep", d.tut, step.essence)
+		-- (the step and the Essence show at once, whoever called this)
+		player:SetAttribute("TutStep", d.tut)
+		player:SetAttribute("Essence", d.essence)
 	end
 end
 
@@ -236,7 +261,7 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 	local d = s.d
 	if action == "BuyBody" or action == "BuyBody10" or action == "BuyBodyMax" then
 		-- one body; BuyBody10 = up to 10 (the INFO board's 10x); BuyBodyMax = as many as you can pay for (the BODIES board's M)
-		if type(arg) ~= "number" or arg ~= arg or arg % 1 ~= 0 or arg < 0 or arg >= Econ.PlayableTiers then return false, "bad" end
+		if type(arg) ~= "number" or arg ~= arg or arg % 1 ~= 0 or arg < 0 or arg >= #Econ.Tiers then return false, "bad" end
 		if not unlocked(s, arg) then return false, "locked" end
 		local most = if action == "BuyBody" then 1 elseif action == "BuyBody10" then 10 else 1000
 		local got = 0
@@ -265,6 +290,37 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		checkTutorial(player, s)
 		publish(player, s)
 		return true
+	elseif action == "BuyRing2" then
+		local node = type(arg) == "string" and Econ.Ring2ById[arg]
+		if not node then return false, "bad" end
+		local level = d.ring2[node.id] or 0
+		local cost = Econ.R2Cost(node.id, level)
+		if not cost then return false, "max" end
+		if d.supernovas < (node.novas or 0) then return false, "locked" end
+		if node.requires and (d.ring2[node.requires] or 0) < 1 then return false, "locked" end
+		if d.shards < cost then return false, "poor" end
+		d.shards -= cost
+		d.ring2[node.id] = level + 1
+		checkTutorial(player, s)
+		publish(player, s)
+		return true, level + 1
+	elseif action == "Supernova" then
+		-- (the client has played the wind-up; this is the impact)
+		local got = Econ.ShardsFor(d.earnedRun, d.nodes)
+		if got <= 0 then return false, "notready" end
+		local first = d.supernovas == 0
+		d.bestRun = math.max(d.bestRun, d.earnedRun)
+		d.shards += got
+		d.shardsEarned += got
+		d.supernovas += 1
+		d.stardust, d.earnedRun = 0, 0
+		for i = 1, #Econ.Tiers do d.owned[i] = Econ.StartOwned[i] or 0 end
+		d.nodes = {}
+		checkTutorial(player, s)
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "Supernova", d.supernovas, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = tostring(got) }) end)
+		task.spawn(save, player, false)
+		return true, got, first
 	end
 	return false, "bad"
 end
@@ -348,7 +404,12 @@ task.spawn(function()
 				s.d.earnedTotal += gain
 				player:SetAttribute("Stardust", s.d.stardust)
 				player:SetAttribute("EarnedRun", s.d.earnedRun)
+				player:SetAttribute("SupernovaShards", Econ.ShardsFor(s.d.earnedRun, s.d.nodes))
 				if s.d.earnedRun >= Econ.SupernovaNeed and not player:GetAttribute("SupernovaReady") then publish(player, s) end
+				if s.d.tut == 4 and s.d.earnedRun >= Econ.SupernovaNeed / 2 then
+					checkTutorial(player, s)
+					publish(player, s)
+				end
 			end
 		end
 	end
@@ -362,6 +423,20 @@ Galaxy:GetAttributeChangedSignal("SurgeUntil"):Connect(function()
 		for player, s in pairs(sessions) do publish(player, s) end
 	end)
 end)
+
+if IS_STUDIO then
+	workspace:GetAttributeChangedSignal("TestGiveStardust"):Connect(function()
+		local n = tonumber(workspace:GetAttribute("TestGiveStardust"))
+		if not n then return end
+		for player, s in pairs(sessions) do
+			s.d.stardust += n
+			s.d.earnedRun += n
+			s.d.earnedTotal += n
+			checkTutorial(player, s)
+			publish(player, s)
+		end
+	end)
+end
 
 -- autosave
 task.spawn(function()

@@ -14,9 +14,14 @@
 -- boards have their title inside (centred, a rule under it); the pair's huge titles sit over the frame (GalaxyBoards).
 -- Lists scroll (Kit.scroller); a refresh (4x a second) only changes words and colours, never rebuilds, so what you
 -- scrolled to stays put. Pass 2 (owner): the pair's screens are 11 x 13 studs (550 x 650), the tree tiles 3 a row.
--- IslandBoardsUI.new(id, gui, spec, ctx) -> board: :refresh(), :step(dt), .targets[key] (tutorial "Body0"), :reveal(button)
+-- Alpha part 1 (3 Nov): the tree's RING 2 (shards: Starfire, Star, Heavy Elements, Binary Star; the other branches "?" with
+-- what opens them), INFO pages for a ring-2 node and for the SUPERNOVA when it's ready, the Star / Binary Star rows opened
+-- by ring 2. The 2D Tree window (hotbar T) builds the same Tree + Info screens (GalaxyHUD).
+-- IslandBoardsUI.new(id, gui, spec, ctx) -> board: :refresh(), :step(dt), .targets[key] (tutorial "Body0", "R2_Starfire"),
+--   :reveal(button)
 --   ctx.subject, ctx.canAct(), ctx.buy(kind, arg) -> ok, ctx.sound(name), ctx.pointer(screenPos), ctx.size (canvas),
---   ctx.sel = the shared selection { kind = "node" | "body", key = id | k }, ctx.select(kind, key), ctx.bought(kind, arg)
+--   ctx.sel = the shared selection { kind = "node" | "node2" | "body" | "supernova", key = id | k }, ctx.select(kind, key),
+--   ctx.bought(kind, arg), ctx.supernova() (opens the Supernova card; nil = none here)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
@@ -37,17 +42,38 @@ local LOOK = { -- the v12 kit's button colours
 	buy = { hex("#7dff7a"), hex("#1fa83a") }, no = { hex("#6a6474"), hex("#3f3a48") }, owned = { hex("#b49bff"), hex("#5a3ad8") },
 	blue = { hex("#5ad1ff"), hex("#1f6fd1") },
 }
-local TIER_TITLE = { { "#f3eaff", "#b9a8cc" }, { "#ffffff", "#bfe9ff" }, { "#efe8ff", "#b49bff" }, { "#fff1c0", "#ffb02a" }, { "#cfc6dd", "#8a8296" } }
+local TIER_TITLE = { { "#f3eaff", "#b9a8cc" }, { "#ffffff", "#bfe9ff" }, { "#efe8ff", "#b49bff" }, { "#fff1c0", "#ffb02a" }, { "#fff1c0", "#ffc83a" },
+	{ "#ffe8d8", "#ff8a6a" } }
+local SHARD_GLOW = Color3.fromRGB(170, 110, 255)
 local NODE_GLOW = { STARDUST = Color3.fromRGB(255, 170, 60), COMETS = Color3.fromRGB(90, 200, 255), PLANETS = Color3.fromRGB(170, 130, 255) }
 local LEFT, RIGHT, CENTRE = Enum.TextXAlignment.Left, Enum.TextXAlignment.Right, Enum.TextXAlignment.Center
 
 -- the CONSTELLATION TREE's tiles (Regrowth's perks grid, boards pass 3): every ring-1 node in the tree's order (EconConfig.Ring1),
--- 3 a row, left to right, top to bottom; no empty slots (a node you can't buy yet is a dark silhouette)
-local TREE_GRID = {}
-for i, n in ipairs(Econ.Ring1) do
-	table.insert(TREE_GRID, { id = n.id, col = (i - 1) % 3, row = (i - 1) // 3 })
-end
+-- 3 a row, left to right, top to bottom; no empty slots (a node you can't buy yet is a dark silhouette). Under it RING 2
+-- (shards, alpha part 1): the STELLAR nodes, then the branches not in the game yet ("?" + what opens them).
 local TILE_W, TILE_H, PITCH_X, PITCH_Y = 142, 136, 159, 186
+local HEAD = 44 -- (a ring's heading)
+local TREE_GRID = {}
+local TREE_HEADS = {}
+do
+	local y = 0
+	local function section(title: string, list)
+		table.insert(TREE_HEADS, { title = title, y = y })
+		y += HEAD
+		for i, e in ipairs(list) do
+			e.x, e.y = 8 + ((i - 1) % 3) * PITCH_X, y + ((i - 1) // 3) * PITCH_Y
+			table.insert(TREE_GRID, e)
+		end
+		y += math.ceil(#list / 3) * PITCH_Y + 6
+	end
+	local r1, r2 = {}, {}
+	for _, n in ipairs(Econ.Ring1) do table.insert(r1, { ring = 1, id = n.id }) end
+	for _, n in ipairs(Econ.Ring2) do table.insert(r2, { ring = 2, id = n.id }) end
+	for _, l in ipairs(Econ.Ring2Later) do table.insert(r2, { ring = 2, later = l }) end
+	section("RING 1 · STARDUST", r1)
+	section("RING 2 · SHARDS", r2)
+	TREE_GRID.height = y
+end
 
 ------------------------------------------------------------------------ what a node / body shows
 local function unlockNode(k: number)
@@ -61,15 +87,37 @@ local function nodeValue(node, bought: boolean): (string, string)
 		return if bought then "x" .. e.mult else "x1", if bought then "MAX" else "+x" .. (e.mult - 1)
 	elseif e.kind == "cometEvery" then
 		return (if bought then e.seconds else Econ.Comet.Every) .. "s", if bought then "MAX" else "-" .. (Econ.Comet.Every - e.seconds) .. "s"
+	elseif e.kind == "shardBonus" then
+		return "+" .. (if bought then e.pct else 0) .. "%", if bought then "MAX" else "+" .. e.pct .. "% shards"
 	end
 	return if bought then "OPEN" else "LOCKED", if bought then "MAX" else "opens the " .. Econ.Tiers[e.tier + 1].name
+end
+-- a ring-2 node at level lv: its value now and the green step of the next level
+local function node2Value(node, lv: number): (string, string)
+	local e = node.effect
+	local maxed = lv >= #node.costs
+	if e.kind == "allMult" then
+		local now = e.mult ^ lv
+		return "x" .. fmt(now), if maxed then "MAX" else "x" .. fmt(now * e.mult) .. " next"
+	elseif e.kind == "heavy" then
+		return if lv >= 1 then "x" .. (1 + e.per) .. "-x" .. (1 + e.per * #Econ.Tiers) else "x1", if maxed then "MAX" else "x1.25 per tier number"
+	end
+	return if lv >= 1 then "OPEN" else "LOCKED", if maxed then "MAX" else "opens the " .. Econ.Tiers[e.tier + 1].name
 end
 -- the short value on a tree tile (Regrowth's "1.2x")
 local function tileValue(node): string
 	local e = node.effect
 	if e.kind == "tierMult" or e.kind == "allMult" then return "x" .. e.mult end
 	if e.kind == "cometEvery" then return e.seconds .. "s" end
+	if e.kind == "shardBonus" then return "+" .. e.pct .. "%" end
+	if e.kind == "heavy" then return "x" .. (1 + e.per) .. "+" end
 	return "NEW"
+end
+-- why a ring-2 node can't be bought yet (nil = it can, shards allowing)
+local function node2Lock(node, r2, novas: number): string?
+	if novas < (node.novas or 0) then return "SUPERNOVA " .. node.novas end
+	if node.requires and (r2[node.requires] or 0) < 1 then return "needs " .. Econ.Ring2ById[node.requires].name end
+	return nil
 end
 local STAR_NODES = {}
 for _, n in ipairs(Econ.Ring1) do
@@ -140,6 +188,18 @@ end
 local function shown(main: GuiObject, on: boolean)
 	main.Parent.Visible = on
 end
+-- a Kit.text's size (the text and its shadow)
+local function textSize(main: TextLabel, size: number)
+	for _, l in ipairs(main.Parent:GetChildren()) do
+		if l:IsA("TextLabel") then l.TextSize = size end
+	end
+end
+-- a Kit.icon's picture (the icon and its shadow)
+local function iconImage(img: ImageLabel, name: string)
+	for _, c in ipairs(img.Parent:GetChildren()) do
+		if c.Name == "Icon" or c.Name == "Shadow" then c.Image = A.icon[name] or "" end
+	end
+end
 
 ------------------------------------------------------------------------ the board
 function UI.new(id: string, gui: SurfaceGui, spec, ctx)
@@ -161,6 +221,13 @@ function UI:nodes()
 	for _, n in ipairs(Econ.Ring1) do t[n.id] = self:attr("Node_" .. n.id) == true end
 	return t
 end
+function UI:ring2()
+	local t = {}
+	for _, n in ipairs(Econ.Ring2) do t[n.id] = tonumber(self:attr("R2_" .. n.id)) or 0 end
+	return t
+end
+function UI:shards(): number return tonumber(self:attr("Shards")) or 0 end
+function UI:novas(): number return tonumber(self:attr("Supernovas")) or 0 end
 function UI:can(): boolean return self.ctx.canAct == nil or self.ctx.canAct() end
 function UI:dragged(): boolean return self.scroll ~= nil and self.scroll.moved end
 -- a buy through the island's remote (+ the sound; the boards refresh from the owner's attributes)
@@ -176,8 +243,7 @@ end
 -- a body: UPGRADE (or UNLOCK while it's locked) once; false = stop a hold
 function UI:bodyOnce(k: number, kind: string?): boolean
 	local n = self:nodes()
-	if k >= Econ.PlayableTiers then self.ctx.sound("no") return false end
-	if not Econ.Unlocked(k, n) then
+	if not Econ.Unlocked(k, n, self:ring2()) then
 		local node = unlockNode(k)
 		if node and (not node.requires or n[node.requires]) and self:stardust() >= node.cost then self:buy("BuyNode", node.id) else self.ctx.sound("no") end
 		return false
@@ -189,6 +255,12 @@ function UI:nodeOnce(node)
 	local n = self:nodes()
 	if n[node.id] or (node.requires and not n[node.requires]) or self:stardust() < node.cost then self.ctx.sound("no") return end
 	self:buy("BuyNode", node.id)
+end
+function UI:node2Once(node)
+	local r2 = self:ring2()
+	local cost = Econ.R2Cost(node.id, r2[node.id] or 0)
+	if not cost or node2Lock(node, r2, self:novas()) or self:shards() < cost then self.ctx.sound("no") return end
+	self:buy("BuyRing2", node.id)
 end
 
 -- the screen's shell: stone-coloured corners round a dark rounded screen, the neon edge (a glow in from every side + a bright
@@ -229,41 +301,63 @@ function UI:buildTree()
 	local sf, scroll = Kit.scroller(self.gui, 28, 96, W - 56, H - 126, "Y", { ZIndex = 4, pointer = self.ctx.pointer })
 	self.scroll = scroll
 	self.tiles = {}
-	-- (rows that fit sit in the middle of the screen; more rows scroll from the top)
-	local rows = 0
-	for _, spec in ipairs(TREE_GRID) do rows = math.max(rows, spec.row + 1) end
-	local top = math.max(8, math.floor((H - 126 - rows * PITCH_Y) / 2))
+	-- the rings' headings (ring 2's shows how many shards you have)
+	for i, h in ipairs(TREE_HEADS) do
+		local label = Kit.text(sf, 10, h.y + 6, W - 90, 32, h.title, 26, { ZIndex = 8, stroke = 2, FontFace = Kit.FONT_HEAVY,
+			TextColor3 = if i == 2 then hex("#d9c2ff") else hex("#ffd27a") })
+		Kit.box(sf, 10, h.y + 38, W - 90, 2, { BackgroundTransparency = 0.6, BackgroundColor3 = WHITE, ZIndex = 6 })
+		if i == 2 then
+			Kit.icon(sf, "shard", W - 180, h.y + 2, 36, nil, { ZIndex = 7 })
+			self.shardsText = Kit.text(sf, W - 146, h.y + 6, 80, 32, "0", 26, { ZIndex = 8, stroke = 2, FontFace = Kit.FONT_HEAVY })
+		end
+		local _ = label
+	end
 	for _, spec in ipairs(TREE_GRID) do
-		local node = spec.id and Econ.Ring1ById[spec.id]
-		local x, y = 8 + spec.col * PITCH_X, top + spec.row * PITCH_Y
+		local node = if spec.ring == 1 then Econ.Ring1ById[spec.id] elseif spec.id then Econ.Ring2ById[spec.id] else nil
+		local x, y = spec.x, spec.y
 		-- a dark tile with a soft rounded border; the icon centred, the value at the bottom right, the cost under the tile
 		local tile = Kit.box(sf, x, y, TILE_W, TILE_H, { BackgroundTransparency = 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
 		Kit.corner(tile, 20)
 		local st = Kit.stroke(tile, hex("#4b4170"), 3, 0.25)
-		local img = Kit.icon(sf, (node and node.icon) or spec.icon, x + (TILE_W - 92) / 2, y + 12, 92, nil, { ZIndex = 6 })
+		local img = Kit.icon(sf, if node then node.icon else spec.later.icon, x + (TILE_W - 92) / 2, y + 12, 92, nil, { ZIndex = 6 })
 		local value = Kit.text(sf, x, y + TILE_H - 42, TILE_W - 12, 38, "", 32, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 2.4, FontFace = Kit.FONT_HEAVY })
-		local costIcon = Kit.icon(sf, "stardust", x + 26, y + TILE_H + 6, 28, nil, { ZIndex = 6 })
+		local costIcon = Kit.icon(sf, if spec.ring == 2 then "shard" else "stardust", x + 26, y + TILE_H + 6, 28, nil, { ZIndex = 6 })
 		local cost = Kit.text(sf, x + 58, y + TILE_H + 4, 110, 32, "", 26, { ZIndex = 6, stroke = 1.8 })
-		local t = { node = node, tile = tile, stroke = st, img = img, value = value, costIcon = costIcon, cost = cost }
+		local t = { node = node, ring = spec.ring, later = spec.later, tile = tile, stroke = st, img = img, value = value, costIcon = costIcon, cost = cost, x = x }
+		if node and spec.ring == 2 and #node.costs > 1 then
+			-- (a node with levels: "2/5" in the top-left corner)
+			t.level = Kit.text(sf, x + 10, y + 6, 60, 26, "", 20, { ZIndex = 8, stroke = 1.8, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#d9c2ff") })
+		end
+		if spec.later then
+			-- (a branch not in the game yet: a big "?" over the silhouette)
+			Kit.text(sf, x, y + 22, TILE_W, 80, "?", 64, { ZIndex = 8, TextXAlignment = CENTRE, stroke = 2.4, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#8a8296") })
+		end
 		if node then
+			local kind = if spec.ring == 2 then "node2" else "node"
 			local hit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, AutoButtonColor = false, Position = UDim2.fromOffset(x, y),
 				Size = UDim2.fromOffset(TILE_W, TILE_H + 40), ZIndex = 9 }, sf)
 			tap(hit, function()
 				self.ctx.sound("tab")
-				self.ctx.select("node", node.id)
+				self.ctx.select(kind, node.id)
 			end, function() return scroll.moved end)
 			hit.MouseEnter:Connect(function() tile.BackgroundColor3 = hex("#251f3a") end)
 			hit.MouseLeave:Connect(function() tile.BackgroundColor3 = hex("#130f1e") end)
-			self.targets["Node_" .. node.id] = hit
+			self.targets[(if spec.ring == 2 then "R2_" else "Node_") .. node.id] = hit
 		end
 		table.insert(self.tiles, t)
 	end
-	sf.CanvasSize = UDim2.fromOffset(0, top + rows * PITCH_Y + 2)
+	sf.CanvasSize = UDim2.fromOffset(0, TREE_GRID.height + 4)
 end
 function UI:refreshTree()
 	local n, sd = self:nodes(), self:stardust()
+	local r2, sh, novas = self:ring2(), self:shards(), self:novas()
 	local sel = self.ctx.sel
+	if self.shardsText then Kit.setText(self.shardsText, fmt(sh)) end
 	for _, t in ipairs(self.tiles) do
+		if t.ring == 2 then
+			self:refreshTile2(t, r2, sh, novas, sel)
+			continue
+		end
 		local node = t.node
 		local locked = not node or (node.requires ~= nil and not n[node.requires])
 		local bought = node ~= nil and n[node.id]
@@ -290,6 +384,49 @@ function UI:refreshTree()
 		t.stroke.Transparency = if selected then 0 else 0.25
 		t.tile.BackgroundTransparency = if locked then 0.4 else 0.05
 	end
+end
+-- a ring-2 tile: a silhouette with what opens it while locked (and for the branches not in the game yet); else its value,
+-- its level (2/5) and the next level's shard cost under it
+function UI:refreshTile2(t, r2, sh: number, novas: number, sel)
+	local node = t.node
+	local lv = if node then r2[node.id] or 0 else 0
+	local reason = if node then node2Lock(node, r2, novas) else t.later.lockedText
+	local locked = reason ~= nil and lv == 0
+	local cost = node and Econ.R2Cost(node.id, lv)
+	local maxed = node ~= nil and cost == nil
+	t.img.ImageColor3 = if locked then Color3.new(0, 0, 0) else WHITE
+	local shadow = t.img.Parent:FindFirstChild("Shadow")
+	if shadow then shadow.Visible = not locked end
+	shown(t.value, not locked)
+	if t.level then
+		shown(t.level, not locked)
+		Kit.setText(t.level, lv .. "/" .. #node.costs)
+	end
+	if not locked then Kit.setText(t.value, if lv > 0 then (node2Value(node, lv)) else tileValue(node)) end
+	t.costIcon.Parent.Visible = not locked and not maxed
+	shown(t.cost, true)
+	if locked then
+		Kit.setText(t.cost, reason)
+		t.cost.TextColor3 = GREY_TEXT
+		textSize(t.cost, if #reason > 11 then 17 else 22)
+		t.cost.Parent.Position = UDim2.fromOffset(t.x + 4, t.tile.Position.Y.Offset + TILE_H + 6)
+	elseif maxed then
+		Kit.setText(t.cost, "MAX")
+		t.cost.TextColor3 = GREEN_TEXT
+	else
+		Kit.setText(t.cost, fmt(cost))
+		t.cost.TextColor3 = if sh >= cost then WHITE else RED_TEXT
+	end
+	if not locked then
+		textSize(t.cost, 26)
+		t.cost.Parent.Position = UDim2.fromOffset(t.x + (if maxed then 36 else 58), t.tile.Position.Y.Offset + TILE_H + 4)
+	end
+	local selected = node ~= nil and sel.kind == "node2" and sel.key == node.id
+	t.stroke.Color = if selected then WHITE elseif maxed then hex("#7dff9a") elseif locked then hex("#2e2840")
+		elseif sh >= cost then GOLD_TEXT else hex("#6a4fa8")
+	t.stroke.Thickness = if selected then 4.5 else 3
+	t.stroke.Transparency = if selected then 0 else 0.25
+	t.tile.BackgroundTransparency = if locked then 0.4 else 0.05
 end
 
 ------------------------------------------------------------------------ INFO (Regrowth's INFO)
@@ -330,6 +467,15 @@ function UI:buildInfo()
 	local function once(): boolean
 		local sel = self.ctx.sel
 		if sel.kind == "body" then return self:bodyOnce(sel.key, if self.ten then "BuyBody10" else "BuyBody") end
+		if sel.kind == "supernova" then
+			if self:can() and self.ctx.supernova then self.ctx.sound("tab") self.ctx.supernova() else self.ctx.sound("no") end
+			return false
+		end
+		if sel.kind == "node2" then
+			local node2 = Econ.Ring2ById[sel.key]
+			if node2 then self:node2Once(node2) end
+			return false
+		end
 		local node = Econ.Ring1ById[sel.key]
 		if node then self:nodeOnce(node) end
 		return false
@@ -350,9 +496,62 @@ function UI:refreshInfo()
 	local ui = self.ui
 	local sel = self.ctx.sel
 	local n, sd = self:nodes(), self:stardust()
+	local r2 = self:ring2()
 	local can = self:can()
 	local fill, progress = 0, ""
-	if sel.kind == "body" then
+	if sel.kind == "supernova" then
+		-- SUPERNOVA (ready): what you get now and what waiting gives; the button opens the confirm card
+		local earned = tonumber(self:attr("EarnedRun")) or 0
+		local got = Econ.ShardsFor(earned, n)
+		local later = Econ.ShardsFor(earned * 2, n)
+		setIcon(ui, "sun", Color3.fromRGB(255, 200, 80))
+		Kit.setText(ui.name, "SUPERNOVA")
+		setGradient(ui.name, hex("#fff1c0"), hex("#ffb02a"))
+		Kit.setText(ui.level, "READY · SUPERNOVA " .. (self:novas() + 1))
+		Kit.setText(ui.value, got .. " SHARDS")
+		Kit.setText(ui.step, "+" .. (later - got) .. " if you earn 2x first")
+		Kit.setText(ui.desc, "Resets stardust, bodies and ring 1. Keeps shards, ring 2 and your rank.")
+		Kit.setText(ui.tier, "EARNED THIS RUN " .. fmt(earned))
+		progress, fill = "100%", 1
+		ui.up.show(false)
+		ui.ten.show(false)
+		ui.upWide.show(true)
+		ui.upWide.set(if can then "buy" else "no", if can then "SUPERNOVA" else "VISIT")
+		self:infoCost(nil, false)
+	elseif sel.kind == "node2" then
+		-- a ring-2 node (shards)
+		local node = Econ.Ring2ById[sel.key] or Econ.Ring2[1]
+		local lv = r2[node.id] or 0
+		local cost = Econ.R2Cost(node.id, lv)
+		local reason = node2Lock(node, r2, self:novas())
+		setIcon(ui, node.icon, SHARD_GLOW)
+		Kit.setText(ui.name, node.name)
+		setGradient(ui.name, hex("#f3eaff"), hex("#b49bff"))
+		Kit.setText(ui.level, "LEVEL " .. lv .. " / " .. #node.costs)
+		local v, s = node2Value(node, lv)
+		Kit.setText(ui.value, v)
+		Kit.setText(ui.step, s)
+		Kit.setText(ui.desc, node.desc:sub(1, 1):upper() .. node.desc:sub(2) .. ".")
+		Kit.setText(ui.tier, "RING 2 [SHARDS]")
+		progress, fill = lv .. "/" .. #node.costs, lv / #node.costs
+		ui.up.show(false)
+		ui.ten.show(false)
+		ui.upWide.show(true)
+		local costText, costCan = nil, false
+		local sh = self:shards()
+		if not can then
+			ui.upWide.set("no", "VISIT")
+		elseif not cost then
+			ui.upWide.set("owned", "MAX")
+		elseif reason then
+			ui.upWide.set("no", "LOCKED")
+			costText = reason
+		else
+			ui.upWide.set(if sh >= cost then "buy" else "no", "UPGRADE")
+			costText, costCan = fmt(cost), sh >= cost
+		end
+		self:infoCost(costText, costCan, "shard")
+	elseif sel.kind == "body" then
 		local k = sel.key
 		local tier = Econ.Tiers[k + 1]
 		local own = self:owned(k)
@@ -361,16 +560,16 @@ function UI:refreshInfo()
 		Kit.setText(ui.name, tier.name)
 		setGradient(ui.name, hex(TIER_TITLE[k + 1][1]), hex(TIER_TITLE[k + 1][2]))
 		Kit.setText(ui.level, "LEVEL " .. own .. " / TIER " .. mt)
-		local playable = k < Econ.PlayableTiers
-		local open = playable and Econ.Unlocked(k, n)
+		local playable = unlockNode(k) ~= nil or k == 0 or Econ.Unlocked(k, n, r2) -- (false = a Star tier ring 2 hasn't opened)
+		local open = Econ.Unlocked(k, n, r2)
 		local add = if self.ten then 10 else 1
-		local now = Econ.TierIncomeWith(k, own, n) * Econ.AllMult(n)
-		local after = Econ.TierIncomeWith(k, own + add, n) * Econ.AllMult(n)
+		local now = Econ.TierIncomeWith(k, own, n, r2) * Econ.AllMult(n, r2)
+		local after = Econ.TierIncomeWith(k, own + add, n, r2) * Econ.AllMult(n, r2)
 		Kit.setText(ui.value, fmt(now) .. "/s")
 		Kit.setText(ui.step, if open then "+" .. fmt(after - now) .. "/s" else "")
 		local nextM = Econ.NextMilestone(own)
-		local each = Econ.TierIncomeWith(k, 1, n) * Econ.AllMult(n)
-		Kit.setText(ui.desc, if not playable then "Opens at " .. tier.lockedText .. "."
+		local each = Econ.TierIncomeWith(k, 1, n, r2) * Econ.AllMult(n, r2)
+		Kit.setText(ui.desc, if not playable then "Opens at " .. tier.lockedText .. ", in the tree's ring 2."
 			elseif open then "Earns " .. fmt(each) .. "/s each" .. (if nextM then ", x2 at " .. nextM .. "." else ".")
 			else "Opens with " .. unlockNode(k).name .. ".")
 		Kit.setText(ui.tier, "TIER " .. mt .. " [" .. Econ.MilestoneNames[mt] .. "]")
@@ -389,6 +588,7 @@ function UI:refreshInfo()
 			ui.up.set("no", "VISIT")
 		elseif not playable then
 			ui.up.set("no", "LOCKED")
+			costText = "ring 2: " .. Econ.Ring2ById[tier.unlockR2].name
 		elseif not open then
 			local node = unlockNode(k)
 			if node.requires and not n[node.requires] then
@@ -441,10 +641,14 @@ function UI:refreshInfo()
 	ui.fill.Size = UDim2.fromOffset(math.floor(ui.barW * math.clamp(fill, 0, 1)), ui.barH)
 	ui.fill.Visible = fill > 0
 end
--- the cost under UPGRADE (a number = with the stardust icon; words = grey, no icon)
-function UI:infoCost(text: string?, can: boolean)
+-- the cost under UPGRADE (a number = with the currency's icon, stardust or shards; words = grey, no icon)
+function UI:infoCost(text: string?, can: boolean, currency: string?)
 	local ui = self.ui
 	local isNumber = text ~= nil and not text:find(" ")
+	if ui.currency ~= (currency or "stardust") then
+		ui.currency = currency or "stardust"
+		iconImage(ui.costIcon, ui.currency)
+	end
 	ui.costIcon.Parent.Visible = isNumber
 	shown(ui.cost, text ~= nil)
 	Kit.setText(ui.cost, text or "")
@@ -485,7 +689,7 @@ function UI:buildBodies()
 		r.boost = Kit.text(row, rw - 92, 6, 80, 30, "", 26, { ZIndex = 8, TextXAlignment = RIGHT, TextColor3 = GOLD_TEXT, stroke = 2, FontFace = Kit.FONT_HEAVY })
 		holdBuy(r.up.button, function() return self:bodyOnce(k) end, dragged)
 		tap(r.max.button, function()
-			if Econ.Unlocked(k, self:nodes()) and k < Econ.PlayableTiers and self:stardust() >= Econ.Cost(k, self:owned(k)) then
+			if Econ.Unlocked(k, self:nodes(), self:ring2()) and self:stardust() >= Econ.Cost(k, self:owned(k)) then
 				self:buy("BuyBodyMax", k)
 			else
 				self.ctx.sound("no")
@@ -498,26 +702,30 @@ function UI:buildBodies()
 end
 function UI:refreshBodies()
 	local n, sd = self:nodes(), self:stardust()
+	local r2, novas = self:ring2(), self:novas()
 	local can = self:can()
 	local sel = self.ctx.sel
 	for k, r in pairs(self.rows) do
 		local tier = Econ.Tiers[k + 1]
 		local own = self:owned(k)
 		local mt = Econ.MilestoneTier(own)
-		local playable = k < Econ.PlayableTiers
-		local open = playable and Econ.Unlocked(k, n)
+		local open = Econ.Unlocked(k, n, r2)
+		local playable = open or unlockNode(k) ~= nil -- (false = a Star tier: ring 2 opens it)
 		Kit.setText(r.level, if open then "LEVEL " .. own else "LOCKED")
 		Kit.setText(r.tier, "TIER " .. mt .. " " .. Econ.MilestoneNames[mt])
-		local now = Econ.TierIncomeWith(k, own, n) * Econ.AllMult(n)
+		local now = Econ.TierIncomeWith(k, own, n, r2) * Econ.AllMult(n, r2)
 		Kit.setText(r.rate, "+" .. fmt(now) .. "/s")
-		local boost = Econ.Milestone(own) * (Econ.TierIncomeWith(k, 1, n) / Econ.TierIncome(k, 1)) * Econ.AllMult(n)
+		local boost = Econ.Milestone(own) * (Econ.TierIncomeWith(k, 1, n, r2) / Econ.TierIncome(k, 1)) * Econ.AllMult(n, r2)
 		Kit.setText(r.boost, if open and own > 0 then fmt(boost) .. "x" else "")
 		local costText, costCan = nil, false
 		r.max.show(can and open)
 		if not can then
 			r.up.set("no", "VISIT")
 		elseif not playable then
-			r.up.set("no", tier.lockedText)
+			-- (before its Supernova: "SUPERNOVA 1"; after it: bought in the tree's ring 2)
+			local r2node = Econ.Ring2ById[tier.unlockR2]
+			r.up.set("no", if novas < (r2node.novas or 0) then tier.lockedText else "LOCKED")
+			if novas >= (r2node.novas or 0) then costText = "ring 2: " .. r2node.name end
 		elseif not open then
 			local node = unlockNode(k)
 			if node.requires and not n[node.requires] then

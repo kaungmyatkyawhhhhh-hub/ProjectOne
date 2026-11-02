@@ -165,11 +165,38 @@ MapConfig.Tiers = {
 	-- (later sectors add tiers here: Comet Reach, Nebula Gate, ...)
 }
 MapConfig.MaxTier = 6
--- the rank on the name plate (owner, pass 2): NEW STAR (tiers 0-1), RISING STAR (2-3), then SUPERNOVA n
+-- the rank (on the name plate and over your head): NEW STAR (tiers 0-1), RISING STAR (2-3), then by Supernovas (alpha part 1,
+-- PROPOSED names; design: "rank SPARK" at Supernova 1; colour per rank, gold first, VFX plan "Spark gold -> ...")
+MapConfig.Ranks = {
+	{ at = 1, name = "SPARK", colour = Color3.fromRGB(255, 205, 90) },
+	{ at = 3, name = "FLARE", colour = Color3.fromRGB(255, 150, 70) },
+	{ at = 5, name = "BLAZE", colour = Color3.fromRGB(255, 110, 120) },
+	{ at = 8, name = "NOVA", colour = Color3.fromRGB(200, 140, 255) },
+	{ at = 12, name = "SUPERGIANT", colour = Color3.fromRGB(120, 200, 255) },
+}
+function MapConfig.RankDef(supernovas: number)
+	local def
+	for _, r in ipairs(MapConfig.Ranks) do
+		if supernovas >= r.at then def = r end
+	end
+	return def
+end
 function MapConfig.RankOf(tier: number, supernovas: number): string
-	if supernovas >= 1 then return "SUPERNOVA " .. supernovas end
+	local def = MapConfig.RankDef(supernovas)
+	if def then return def.name end
 	return if tier >= 2 then "RISING STAR" else "NEW STAR"
 end
+
+-- the SUPERNOVA moment (alpha part 1; VFX plan: anticipation -> impact -> fade, ~5 s the first time, ~2 s after, skip after
+-- the first): seconds of each beat; the nebula patches that stay in the sky over your island (one per Supernova, max Nebulae)
+MapConfig.Supernova = {
+	First = { Windup = 2.2, Hold = 0.25, Fade = 2.6 }, -- (~5 s)
+	Again = { Windup = 0.8, Hold = 0.1, Fade = 1.1 }, -- (~2 s)
+	Swell = 1.8,          -- the star grows to this x its size in the wind-up
+	FovPunch = 8,         -- degrees, at the impact (none with Reduced Motion)
+	Shockwaves = 2,       -- rings across the plaza and the islands, for everyone
+	Nebulae = 8, NebulaHeight = 70, NebulaSize = 70,
+}
 function MapConfig.TierOf(bodies: number, supernovas: number): number
 	local tier = 0
 	for t = 1, MapConfig.MaxTier do
@@ -181,7 +208,8 @@ function MapConfig.TierOf(bodies: number, supernovas: number): number
 end
 
 -- the star system above an island: 30 above the floor (boards pass 3: clear above the 19-tall pair of boards); a rock until the
--- player owns a star (or has gone Supernova), then a star 4 -> 8 across by tier; one planet per body tier owned (max 6) on
+-- player owns a Star THIS run (alpha part 1: a Supernova shrinks it back to the rock, then it regrows), then a star 4 -> 8
+-- across by tier; one planet per body tier owned (max 6) on
 -- orbits of radius 6 -> 14, planets 1.5 -> 3. Its beam (and the stardust motes) start at BeamFrom, above every board's top,
 -- so from the island they never run across a board.
 MapConfig.System = {
@@ -191,8 +219,8 @@ MapConfig.System = {
 	MaxPlanets = 6, StarTierFrom = 5,
 	Plate = { Above = 10, Width = 26, Height = 4.6 }, -- name letters ~2.5
 }
-function MapConfig.SystemOf(bodyTiers: number, supernovas: number)
-	local star = bodyTiers >= MapConfig.System.StarTierFrom or supernovas >= 1
+function MapConfig.SystemOf(bodyTiers: number, _supernovas: number)
+	local star = bodyTiers >= MapConfig.System.StarTierFrom
 	return { star = star, planets = math.clamp(bodyTiers, 0, MapConfig.System.MaxPlanets) }
 end
 

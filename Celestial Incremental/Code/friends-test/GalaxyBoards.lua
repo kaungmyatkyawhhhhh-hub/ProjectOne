@@ -264,8 +264,10 @@ local function decorate(spec, screen: BasePart)
 	return { parts = parts, step = step }
 end
 
--- INFO's default: the first ring-1 node you can buy (Regrowth shows its first perk); all bought: the Asteroid
+-- INFO's default: the SUPERNOVA when it's ready (alpha part 1), else the first ring-1 node you can buy (Regrowth shows its
+-- first perk); all bought: the Asteroid
 local function defaultSel(subject)
+	if subject:GetAttribute("SupernovaReady") == true then return { kind = "supernova" } end
 	for _, n in ipairs(Econ.Ring1) do
 		local ready = not n.requires or subject:GetAttribute("Node_" .. n.requires) == true
 		if ready and subject:GetAttribute("Node_" .. n.id) ~= true then return { kind = "node", key = n.id } end
@@ -287,6 +289,8 @@ local function build(island)
 	local ctx = { subject = subject, picked = false, sel = defaultSel(subject), sound = Kit.sound }
 	ctx.canAct = function() return mine end
 	ctx.buy = function(kind, arg) return request:InvokeServer(kind, arg, slot) end
+	-- (INFO's SUPERNOVA button: the confirm card, GalaxySupernova)
+	ctx.supernova = function() if mine and shared.GalaxyOpenSupernova then shared.GalaxyOpenSupernova() end end
 	ctx.select = function(kind, key)
 		ctx.sel = { kind = kind, key = key }
 		ctx.picked = true
