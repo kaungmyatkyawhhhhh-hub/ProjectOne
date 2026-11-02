@@ -221,3 +221,7 @@ Screenshots: `Map/screens/2026-11-02-centre-v2/` (wide_centre, bridge1..8_view, 
 - **Code copies:** `Celestial Incremental\Code\map\` (MapBuilder, LeaderboardService) + `friends-test\GalaxyHUD.lua`.
 
 **Republish needed:** all of this is in the open place only. Save / publish again.
+- **Black Hole turned (owner: "still facing the other way"):**
+  - It now faces the CORE / plaza, with its sign in front of it on the plaza side (one-sided, facing the plaza). Facing out, you saw the back of the ring from the plaza and the sign was hidden behind it.
+  - The void disc now has a back face too (the kit's VoidDisc is a one-sided plane).
+  - Screenshot `blackhole_faces_plaza.jpg`.
