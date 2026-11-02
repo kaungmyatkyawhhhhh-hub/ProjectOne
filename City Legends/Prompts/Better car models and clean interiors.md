@@ -94,7 +94,7 @@ Run this list on every new model, and don't sign a car off until it all passes:
 11. **Logos:** none visible anywhere (badges, wheel caps, the steering hub, the cluster, the brakes, the number plate): covered or removed.
 12. **Performance:** the triangle count per car and the total are reported, with a LOD version for far away (traffic and other players' cars use it), and the textures shared where possible. A car must not drop FPS on a phone.
 13. **Physics fit:** the collision box matches the body (no hitting invisible walls, no sinking into kerbs), and the exhaust flames / pops come out of the real exhaust tips.
-14. **Sound:** the car uses an engine sound that fits it (a V12 for the SVJ).
+14. **Engine / exhaust sound: don't add or change it yet** (owner, 2026-11-02). The owner will send a Roblox audio asset ID per car. When an ID arrives, put it in that car's sound setting (Config / Cars), check it plays, loops cleanly and follows the RPM (pitch up with revs), and keep the old sound until then.
 15. **Screenshots for the owner:** front 3/4, rear 3/4, side, the driver's seat, the cluster close-up, night, doors open, and next to the Sketchfab view.
 
 ## First car: Lamborghini Aventador SVJ (owner, 2026-11-02)
@@ -103,8 +103,8 @@ Run this list on every new model, and don't sign a car off until it all passes:
   - its **own digital cluster** working (the RPM sweep, speed, gear, the drive modes);
   - **scissor doors**;
   - Y-shaped lights;
-  - the big rear wing and centre exhaust (pops and flames from there);
-  - a V12 sound.
+  - the big rear wing and centre exhaust (flames from there; no new sound yet);
+  - sound: leave it as it is; the owner will send a Roblox audio ID for the SVJ.
 - It may also replace the LP750 as the cutscene car (`Cars.CutsceneId`) if the owner likes it. Ask first.
 
 ## Part 3: one-by-one replacement routine (the owner will send new models one at a time)
