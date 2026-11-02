@@ -97,7 +97,15 @@ They still look like the old blocky part-built buildings. **Remodel each one, ou
   - aim for under about 2,000–4,000 parts per big venue;
   - report part counts and FPS before / after (phone-size included).
   - It must not run worse on Medium.
-- **Imported models** (Creator Store or Sketchfab) may be used as a base only if clean: scripts deleted, logos removed, licence OK, and changed enough to be our own. No auto-loading by script.
+- **Use the Toolbox / Creator Store a lot** (owner, 2026-11-02: most of our own building isn't good enough). For each venue, search the Creator Store for good-looking models first (buildings, facades, showrooms, lobbies, furniture, chandeliers, vault doors, jewellery cases, garage lifts, hotel canopies, lamps, planters...) and build from the best ones:
+  - search with the Toolbox API (`apis.roblox.com/toolbox-service/...`) or Studio's Toolbox, and pick models with **good ratings, a clean look and sensible part counts**;
+  - **insert them in Studio while editing** (through the MCP, or ask the owner to click "Get Model" first if needed). They are saved into the place. **Never make the game load models by ID while it runs**;
+  - **clean every model:** delete all Script / LocalScript / ModuleScript, check for hidden `require(` backdoors, odd folders, giant invisible parts, sounds and GUIs with links;
+  - **remove logos, brand names and real-brand cars**, and put our fictional names on;
+  - **change them enough to be ours** (colours, materials, layout, details), so nobody can say it's their building;
+  - fit them to real scale, our Monaco style and our materials; merge or remove hidden detail for performance;
+  - keep a list in `City Legends/City Legends.md` of every model used (name, ID, creator) so they can be credited.
+- Sketchfab models can also be used (CC0 / CC-BY, credited), converted with our tools.
 
 ## How to do it
 1. **Plan:** for each venue, a short design (what it looks like, which reference) and a screenshot of the current one. Show the owner the list and order. **Suggested order:** Legends Motors → Hotel → Casino → Bank → the towers → Customs → Gem Showcase → the rest.
