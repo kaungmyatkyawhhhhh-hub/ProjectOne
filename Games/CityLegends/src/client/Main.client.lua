@@ -33,7 +33,65 @@ local camera = workspace.CurrentCamera
 
 require(script.Parent:WaitForChild("UIStyle")).init() -- one studio finish for every screen
 UI.init()
-UI.setLoadingMap(require(script.Parent:WaitForChild("Minimap")).drawWhole)
+
+-- the loading screen films the Monaco city (the Riviera) in slow cinematic shots, like the main menu
+-- (owner, 2026-11-02: "switch the loading screen to those city cinematic photos like the start
+-- menu", "by the city i meant the monaco city"). The player stands in the old city while loading, so
+-- the Riviera's streets aren't streamed in yet: the shots are wide ones from the sea and the hills,
+-- filmed on the far-city stand-in (ReplicatedStorage.RivieraFar: every building, its lit windows,
+-- the ground, the roads and the lamps, always on every client). A short dip to black between
+-- shots; the menu camera takes over when loading is done. Without the Riviera: the old city.
+UI.setLoadingCinematic(true)
+require(script.Parent:WaitForChild("DayCycle")).start() -- (early: the loading shots get the game's light)
+local loadingShotsConn: RBXScriptConnection? = nil
+local function stopLoadingShots()
+	if loadingShotsConn then
+		loadingShotsConn:Disconnect()
+		loadingShotsConn = nil
+	end
+end
+do
+	-- { from, look at, drift per second, field of view }
+	local shots = {}
+	local far = if workspace:FindFirstChild("Riviera") then ReplicatedStorage:WaitForChild("RivieraFar", 3) else nil
+	if workspace:FindFirstChild("Riviera") and far then
+		far.Parent = workspace -- (WorldFx's far-city switch picks it up from here later)
+		shots = {
+			-- (all from far off: the stand-in is made to be seen from a distance)
+			{ Vector3.new(14600, 120, 2800), Vector3.new(14300, 50, 700), Vector3.new(-14, 0, 0), 58 }, -- from the sea
+			{ Vector3.new(12600, 90, 2600), Vector3.new(13800, 40, 800), Vector3.new(12, 0, -3), 56 }, -- the harbour from the water
+			{ Vector3.new(16800, 300, 2400), Vector3.new(14200, 30, 800), Vector3.new(-10, 0, 0), 60 }, -- high over the bay
+			{ Vector3.new(11400, 420, -650), Vector3.new(14300, 0, 800), Vector3.new(10, 0, 4), 62 }, -- from above the summit
+		}
+	else
+		local span = Config.City.HalfExtent * 1.7
+		shots = {
+			{ Vector3.new(-span * 0.42, 20, 5), Vector3.new(0, 10, 5), Vector3.new(16, 0, 0), 58 },
+			{ Vector3.new(span * 0.42, 26, -4), Vector3.new(0, 10, 0), Vector3.new(-18, 0, 0), 55 },
+		}
+	end
+	local SHOT = 4.6
+	local t0 = os.clock()
+	local lastShot = 0
+	camera.CameraType = Enum.CameraType.Scriptable
+	loadingShotsConn = RunService.RenderStepped:Connect(function()
+		local t = os.clock() - t0
+		local k = math.floor(t / SHOT)
+		local shot = shots[k % #shots + 1]
+		local shotT = t - k * SHOT
+		if k ~= lastShot then
+			lastShot = k
+			-- (a quick dip to black between shots, under the title)
+			task.spawn(function()
+				UI.fade(true, 0.01)
+				UI.fade(false, 0.45)
+			end)
+		end
+		local drift = shot[3] * shotT
+		camera.CFrame = CFrame.lookAt(shot[1] + drift, shot[2] + drift)
+		camera.FieldOfView = shot[4]
+	end)
+end
 UI.showLoading("Loading sounds...")
 Audio.musicKeyBlocked = Driving.isDriving -- in a car M is the gearbox
 Audio.init() -- test-loads the Creator Store sounds (falls back to built-in ones)
@@ -80,7 +138,7 @@ end
 require(script.Parent:WaitForChild("Knockables")).init()
 WorldFx.start()
 Weather.init() -- rain cycle (starts raining), wet roads, mist, rain sound
-require(script.Parent:WaitForChild("DayCycle")).start() -- morning, day, sunset, night
+-- (the day / night cycle runs since the loading screen: morning, day, sunset, night)
 
 ---------------------------------------------------------------------
 -- Data
@@ -239,6 +297,7 @@ local function stopOrbit()
 	end
 end
 
+stopLoadingShots()
 startOrbit()
 UI.showLoading("Filling the streets with traffic...")
 UI.fade(false, 0.01)

@@ -374,7 +374,8 @@ function WorldFx.start()
 	-- in Studio's editor); here it moves into this player's world
 	if workspace:FindFirstChild("Riviera") then
 		task.spawn(function()
-			local far = ReplicatedStorage:WaitForChild("RivieraFar", 60)
+			-- (the loading screen may have moved it in already)
+			local far = workspace:FindFirstChild("RivieraFar") or ReplicatedStorage:WaitForChild("RivieraFar", 60)
 			if far then
 				far.Parent = workspace
 			end

@@ -1471,8 +1471,19 @@ local function addLoadingMap(f: Frame)
 	})
 end
 
+-- (owner, 2026-11-02: "switch the loading screen to those city cinematic photos like the start
+-- menu"): with this on, the loading screen is see-through over the city, which Main.client films
+-- in slow cinematic shots; only a shade, the title and the status stay on top
+local loadingCinematic = false
+function UI.setLoadingCinematic(on: boolean)
+	loadingCinematic = on
+end
+
 -- what draws the map behind the loading screen (Main.client gives Minimap.drawWhole)
 function UI.setLoadingMap(draw: (Frame) -> (Vector2, Vector2))
+	if loadingCinematic then
+		return
+	end
 	loadingMap = draw
 	if loadingFrame and not loadingFrame:FindFirstChild("Map") then
 		addLoadingMap(loadingFrame)
@@ -1486,8 +1497,23 @@ function UI.showLoading(text: string)
 		(loadingFrame:FindFirstChild("Status") :: TextLabel).Text = text
 		return
 	end
-	local f = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), Size = UDim2.fromScale(1, 1), ZIndex = 100, Parent = gui })
-	addLoadingMap(f)
+	local f = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = if loadingCinematic then 1 else 0, Size = UDim2.fromScale(1, 1), ZIndex = 100, Parent = gui })
+	if loadingCinematic then
+		-- a film look: dark along the bottom (the title reads) and a little at the top
+		local shade = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ZIndex = 100, Parent = f })
+		new("UIGradient", {
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.55),
+				NumberSequenceKeypoint.new(0.22, 1),
+				NumberSequenceKeypoint.new(0.6, 1),
+				NumberSequenceKeypoint.new(1, 0.05),
+			}),
+			Rotation = 90,
+			Parent = shade,
+		})
+	else
+		addLoadingMap(f)
+	end
 	-- (the title sits low, under the map)
 	label({ Text = "CITY LEGENDS", TextSize = 46, Font = Enum.Font.GothamBlack, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -86), Size = UDim2.fromOffset(600, 60), ZIndex = 101, Parent = f })
 	label({ Name = "Status", Text = text, TextSize = 14, TextColor3 = Theme.SubText, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -60), Size = UDim2.fromOffset(600, 20), ZIndex = 101, Parent = f })
