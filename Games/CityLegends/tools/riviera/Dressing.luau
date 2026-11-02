@@ -175,6 +175,14 @@ function Dressing.lamps(data, box, parent: Instance): number
 	return n
 end
 
+-- Creator Store props (owner 2026-11-02: "take and insert from Toolbox, for more realism"):
+-- ServerStorage.RivieraAssets.Props, cleaned of scripts; the part-built ones are the fallback
+local function prop(name: string): Instance?
+	local lib = game:GetService("ServerStorage"):FindFirstChild("RivieraAssets")
+	local props = lib and lib:FindFirstChild("Props")
+	return props and props:FindFirstChild(name)
+end
+
 ---------------------------------------------------------------------
 -- harbour balustrade and umbrella pines
 ---------------------------------------------------------------------
@@ -198,7 +206,38 @@ local function treeTemplates(): { MeshPart }
 	return treeMeshes :: { MeshPart }
 end
 
-local function pine(base: Vector3, rng: Random, parent: Instance)
+-- harbour trees: a Creator Store umbrella-crowned tree (Props.PineA, "realistic acacia" from the
+-- Toolbox, cleaned) looks like Monaco's umbrella pines (owner 2026-11-02: "trees here doesnt look
+-- good, can u find better tree models from toolbox"). Its crown is 67 x 55 at 32 tall: the long side
+-- runs along the road so it overhangs the lanes less. The trunk's foot (attribute TrunkFoot on
+-- Trunk, a fraction of its size in its own space) goes on the kerb spot.
+local function pineFromProp(base: Vector3, rng: Random, parent: Instance, along: Vector3?): boolean
+	local src = prop("PineA")
+	if not src then
+		return false
+	end
+	local m = src:Clone() :: Model
+	m.Name = "Tree"
+	local dir = if along and along.Magnitude > 0.01 then Vector3.new(along.X, 0, along.Z).Unit else Vector3.new(1, 0, 0)
+	local _, size = m:GetBoundingBox()
+	m:ScaleTo(m:GetScale() * rng:NextNumber(26, 31) / size.Y)
+	local flip = if rng:NextNumber() < 0.5 then 0 else math.pi
+	m:PivotTo(CFrame.lookAt(base, base + dir) * CFrame.Angles(0, math.pi / 2 + flip + rng:NextNumber(-0.25, 0.25), 0))
+	local trunk = m:FindFirstChild("Trunk", true) :: BasePart?
+	if trunk and trunk:GetAttribute("TrunkFoot") then
+		local foot = (trunk.CFrame * CFrame.new((trunk:GetAttribute("TrunkFoot") :: Vector3) * trunk.Size)).Position
+		m:PivotTo(m:GetPivot() + (base - Vector3.new(0, 0.3, 0) - foot))
+	end
+	-- an invisible trunk so cars still hit the tree
+	part({ Name = "Collider", Shape = Enum.PartType.Cylinder, Size = Vector3.new(14, 2, 2), CFrame = CFrame.new(base + Vector3.new(0, 7, 0)) * CFrame.Angles(0, 0, math.pi / 2), Transparency = 1, CastShadow = false }, m)
+	m.Parent = parent
+	return true
+end
+
+local function pine(base: Vector3, rng: Random, parent: Instance, along: Vector3?)
+	if pineFromProp(base, rng, parent, along) then
+		return
+	end
 	local m = Instance.new("Model")
 	local templates = treeTemplates()
 	if #templates > 0 then
@@ -316,7 +355,7 @@ function Dressing.harbour(data, box, parent: Instance, rng: Random): (number, nu
 				end
 				if pineAcc > 46 and not clash then
 					pineAcc = 0
-					pine(spot, rng, parent)
+					pine(spot, rng, parent, b.dir)
 					pines += 1
 				end
 			end
@@ -451,13 +490,6 @@ end
 -- street furniture (video: bollards, blue crossing signs, scooters parked in rows, planters,
 -- palms, bus shelters)
 ---------------------------------------------------------------------
--- Creator Store props (owner 2026-11-02: "take and insert from Toolbox, for more realism"):
--- ServerStorage.RivieraAssets.Props, cleaned of scripts; the part-built ones are the fallback
-local function prop(name: string): Instance?
-	local lib = game:GetService("ServerStorage"):FindFirstChild("RivieraAssets")
-	local props = lib and lib:FindFirstChild("Props")
-	return props and props:FindFirstChild(name)
-end
 -- a copy of a prop standing on cf (its bottom on cf's height, centred on cf), turned like cf
 local function placeProp(name: string, cf: CFrame, scale: number?, parent: Instance): Instance?
 	local src = prop(name)
