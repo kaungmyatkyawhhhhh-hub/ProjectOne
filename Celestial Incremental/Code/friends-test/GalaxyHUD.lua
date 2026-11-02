@@ -179,6 +179,7 @@ local function toast(str: string, colour: Color3?)
 		end
 	end)
 end
+shared.GalaxyToast = function(str: string, colour: Color3?) toast(str, colour) end
 local function floatText(parent, x, y, str, colour: Color3, size)
 	local main, _, holder = Kit.text(parent, x, y, 220, 30, str, size or 18, { ZIndex = 40, TextColor3 = colour })
 	local _2 = main
@@ -202,7 +203,7 @@ local KEYS = {
 	{ key = "F", colour = hex("#ffd84a"), icon = "forge", name = "STAR FORGE", note = "STAR FORGE: opens at SUPERNOVA 3" },
 	{ key = "T", colour = hex("#7dff8a"), icon = "planet", name = "TREE", window = "Tree" },
 	{ key = "G", colour = hex("#b49bff"), icon = "book", name = "GUIDE", window = "Guide" },
-	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", note = "STORE: not in this test" },
+	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", window = "Codes" },
 	{ key = "Q", colour = hex("#c9c4d2"), icon = "gear", name = "SETTINGS", window = "Settings" },
 }
 local keyUI = {}
@@ -411,10 +412,13 @@ end
 shared.GalaxyCloseSide = function(keep: string?)
 	if sideOpen == "G" and keep ~= "G" and shared.GalaxyGuideClose then shared.GalaxyGuideClose() end
 	if sideOpen == "Q" and keep ~= "Q" and shared.GalaxySettingsClose then shared.GalaxySettingsClose() end
+	if sideOpen == "E" and keep ~= "E" and shared.GalaxyCodesClose then shared.GalaxyCodesClose() end
 end
 local function pressKey(k)
 	if k.window == "Guide" then
 		if shared.GalaxyGuideToggle then shared.GalaxyGuideToggle() end
+	elseif k.window == "Codes" then
+		if shared.GalaxyCodesToggle then shared.GalaxyCodesToggle() end
 	elseif k.window == "Settings" then
 		if shared.GalaxySettingsToggle then shared.GalaxySettingsToggle() end
 	elseif k.window == "Tree" then

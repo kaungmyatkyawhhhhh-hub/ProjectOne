@@ -52,13 +52,17 @@ local function keyOf(player: Player): string
 end
 
 local sessions = {} -- [Player] = { d = data, pending = {[id] = clock}, cometId, nextComet, readOnly, noSave, dirty }
+-- (other server scripts reach the sessions, publish and save through this module: GalaxyCodeService)
+local Shared = require(game:GetService("ServerStorage"):WaitForChild("GalaxyEconShared"))
+Shared.sessions = sessions
 
 ------------------------------------------------------------------------ data
 local function newData()
 	local owned = {}
 	for i = 1, #Econ.Tiers do owned[i] = Econ.StartOwned[i] or 0 end
 	return { v = Econ.DataVersion, stardust = 0, earnedRun = 0, earnedTotal = 0, bestRun = 0, owned = owned, nodes = {},
-		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {}, settings = {}, guide = {} }
+		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {}, settings = {}, guide = {},
+		codes = {}, potions = {}, boostLeft = {} }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -86,6 +90,16 @@ local function migrate(d): (any, boolean)
 	-- (alpha part 2: settings + guide pages; no version bump, an older save just gets them empty)
 	if type(d.settings) ~= "table" then d.settings = {} end
 	if type(d.guide) ~= "table" then d.guide = {} end
+	-- (overnight part 2: codes used, potions owned, boost seconds left; only known potions, whole / finite numbers)
+	if type(d.codes) ~= "table" then d.codes = {} end
+	local pots, left = {}, {}
+	for _, p in ipairs(Econ.Potions) do
+		local n = math.floor(tonumber(type(d.potions) == "table" and d.potions[p.id]) or 0)
+		if n > 0 and n < 1e6 then pots[p.id] = n end
+		local l = tonumber(type(d.boostLeft) == "table" and d.boostLeft[p.id]) or 0
+		if l > 0 and l < 1e7 then left[p.id] = l end
+	end
+	d.potions, d.boostLeft = pots, left
 	d.v = Econ.DataVersion
 	return d, false
 end
@@ -147,11 +161,15 @@ end
 local function surgeMult(): number
 	return if workspace:GetServerTimeNow() < (Galaxy:GetAttribute("SurgeUntil") or 0) then MapConfig.Surge.Mult else 1
 end
+-- the boosts running for this player (potions)
+local function boosting(s, id: string): boolean
+	return (s.d.boostLeft[id] or 0) > 0
+end
 local function incomeOf(s): number
-	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * surgeMult()
+	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * surgeMult() * (if boosting(s, "Stardust") then 2 else 1)
 end
 local function cometEvery(s): number
-	return Econ.CometEvery(s.d.nodes)
+	return Econ.CometEvery(s.d.nodes) / (if boosting(s, "Comets") then 2 else 1)
 end
 
 -- everything the HUD and the map read
@@ -184,6 +202,12 @@ local function publish(player: Player, s)
 	player:SetAttribute("CometsCaught", d.comets)
 	if type(d.settings.music) == "number" then player:SetAttribute("VolMusic", d.settings.music) end
 	if type(d.settings.sfx) == "number" then player:SetAttribute("VolSfx", d.settings.sfx) end
+	-- potions: how many you have, and when each running boost ends (server time; the HUD counts down)
+	for _, p in ipairs(Econ.Potions) do
+		player:SetAttribute("Potion_" .. p.id, d.potions[p.id] or 0)
+		local left = d.boostLeft[p.id] or 0
+		player:SetAttribute("BoostEnd_" .. p.id, if left > 0 then workspace:GetServerTimeNow() + left else 0)
+	end
 	local seen = {}
 	for id in pairs(d.guide) do table.insert(seen, id) end
 	table.sort(seen)
@@ -324,6 +348,17 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		end
 		publish(player, s)
 		return true
+	elseif action == "UsePotion" then
+		local p = type(arg) == "string" and Econ.PotionsById[arg]
+		if not p then return false, "bad" end
+		if (d.potions[p.id] or 0) < 1 then return false, "none" end
+		d.potions[p.id] -= 1
+		if d.potions[p.id] <= 0 then d.potions[p.id] = nil end
+		d.boostLeft[p.id] = (d.boostLeft[p.id] or 0) + p.minutes * 60
+		if p.id == "Comets" and s.nextComet then s.nextComet = math.min(s.nextComet, os.clock() + cometEvery(s)) end
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "PotionUsed", 1, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = p.id }) end)
+		return true, d.boostLeft[p.id]
 	elseif action == "GuideSeen" then
 		if type(arg) ~= "string" or not GUIDE_PAGES[arg] then return false, "bad" end
 		d.guide[arg] = true
@@ -400,6 +435,9 @@ Players.PlayerRemoving:Connect(function(player)
 	sessions[player] = nil
 	lastReq[player] = nil
 end)
+Shared.publish = publish
+Shared.save = save
+
 game:BindToClose(function()
 	local left = 0
 	for player in pairs(sessions) do
@@ -422,6 +460,16 @@ task.spawn(function()
 		local dt = math.min(now - last, 5)
 		last = now
 		for player, s in pairs(sessions) do
+			-- the boosts run down while you play; one ending changes your income: re-publish
+			for id, left in pairs(s.d.boostLeft) do
+				left -= dt
+				if left <= 0 then
+					s.d.boostLeft[id] = nil
+					publish(player, s)
+				else
+					s.d.boostLeft[id] = left
+				end
+			end
 			local gain = incomeOf(s) * dt
 			if gain > 0 then
 				s.d.stardust += gain

@@ -209,6 +209,59 @@ def i_book():
     render("book")
 
 
-ALL = {"asteroid": i_asteroid, "moon": i_moon, "gasgiant": i_gasgiant, "essence": i_essence, "lock": i_lock, "book": i_book}
+def potion(name, liquid, glow, symbol):
+    # a BOOST POTION (overnight part 2, 3 Nov): a round flask, glowing liquid, gold cork band, a symbol floating in front
+    reset()
+    glass = mat("glass", (0.85, 0.9, 1.0), rough=0.05, coat=1.0)
+    m = bpy.data.materials[glass.name]; b = m.node_tree.nodes['Principled BSDF']
+    if 'Transmission Weight' in b.inputs: b.inputs['Transmission Weight'].default_value = 0.85
+    elif 'Transmission' in b.inputs: b.inputs['Transmission'].default_value = 0.85
+    liq = mat("liq", liquid, rough=0.15, emit=glow, estr=0.45, coat=0.8)
+    cork = mat("cork", (0.55, 0.33, 0.18), rough=0.6, coat=0.2)
+    gold = mat("gold", (1.0, 0.72, 0.22), rough=0.18, metal=0.85, emit=(1.0, 0.6, 0.15), estr=0.25, coat=0.6)
+    core = mat("core", (1.0, 0.97, 0.85), rough=0.1, emit=(1.0, 0.95, 0.8), estr=3.0)
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=1.25, location=(0, 0, -0.45))
+    bpy.context.object.data.materials.append(glass)
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=1.08, location=(0, 0, -0.55))
+    l = bpy.context.object; l.data.materials.append(liq); l.scale = (1, 1, 0.92)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.42, depth=1.0, location=(0, 0, 1.0))
+    bpy.context.object.data.materials.append(glass)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.5, depth=0.18, location=(0, 0, 1.35))
+    bpy.context.object.data.materials.append(gold)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.36, depth=0.5, location=(0, 0, 1.7))
+    bpy.context.object.data.materials.append(cork)
+    if symbol == "star":
+        outline = []
+        for i in range(8):
+            a = math.pi / 2 + i * math.pi / 4
+            rr = 0.62 if i % 2 == 0 else 0.18
+            outline.append((math.cos(a) * rr, 0, math.sin(a) * rr))
+        sv = outline + [(0, -0.2, 0), (0, 0.2, 0)]
+        sf = []
+        for i in range(8):
+            j = (i + 1) % 8
+            sf += [(i, j, 8), (j, i, 9)]
+        me = bpy.data.meshes.new("st"); me.from_pydata(sv, [], sf); me.update()
+        s = bpy.data.objects.new("st", me); bpy.context.scene.collection.objects.link(s); s.data.materials.append(core)
+        s.location = (0, -1.35, -0.45)
+    else:
+        # a small comet: a glowing head + a tapered tail
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.3, location=(0.3, -1.35, -0.25))
+        bpy.context.object.data.materials.append(core)
+        bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=0.26, radius2=0.0, depth=1.1, location=(-0.2, -1.35, -0.6))
+        c = bpy.context.object; c.rotation_euler = (0, math.radians(-125), 0); c.data.materials.append(core)
+    render(name)
+
+
+def i_potion_stardust():
+    potion("potion_stardust", (0.95, 0.45, 0.05), (1.0, 0.45, 0.05), "star")
+
+
+def i_potion_comets():
+    potion("potion_comets", (0.08, 0.5, 0.95), (0.1, 0.55, 1.0), "comet")
+
+
+ALL = {"asteroid": i_asteroid, "moon": i_moon, "gasgiant": i_gasgiant, "essence": i_essence, "lock": i_lock, "book": i_book,
+       "potion_stardust": i_potion_stardust, "potion_comets": i_potion_comets}
 for k in (which or ALL.keys()):
     ALL[k]()

@@ -181,6 +181,19 @@ function Econ.ShardsFor(earned: number, nodes): number
 	return math.floor(base + 1e-9)
 end
 
+------------------------------------------------------------------------ BOOST POTIONS (design additions 3, overnight part 2): from codes,
+-- kept in an inventory, used when the player wants. Using one adds its minutes to that boost's timer (they stack by TIME,
+-- never x4). The timer only runs while you play. x2 STARDUST doubles all stardust income; x2 COMETS = comets come twice
+-- as often (and a caught one pays the same).
+Econ.Potions = {
+	{ id = "Stardust", name = "x2 STARDUST", icon = "potionStardust", minutes = 15, colour = Color3.fromRGB(255, 150, 40),
+		desc = "x2 stardust for 15 min" },
+	{ id = "Comets", name = "x2 COMETS", icon = "potionComets", minutes = 15, colour = Color3.fromRGB(70, 170, 255),
+		desc = "twice as many comets for 15 min" },
+}
+Econ.PotionsById = {}
+for _, p in ipairs(Econ.Potions) do Econ.PotionsById[p.id] = p end
+
 ------------------------------------------------------------------------ tutorial (design steps 1-4; Regrowth lesson: Essence
 -- per step + a step counter). Friends test: "1/4".."4/4", 1 Essence each, then TUTORIAL COMPLETE (owner 2 Nov)
 Econ.Tutorial = {

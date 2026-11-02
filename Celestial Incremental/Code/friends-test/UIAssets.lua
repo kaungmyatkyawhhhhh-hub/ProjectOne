@@ -17,6 +17,9 @@ return {
 		lock = "rbxassetid://116845939092136",
 		-- (alpha part 2, 3 Nov: the GUIDE BOOK key; Icons\rendered\icon_book.png, uploaded from Studio = a test copy, re-upload to P&L Studios XP)
 		book = "rbxassetid://80421452290179",
+		-- (overnight part 2: the BOOST POTIONS; Icons\rendered\icon_potion_*.png, Studio test copies too)
+		potionStardust = "rbxassetid://75757117780273",
+		potionComets = "rbxassetid://111020939074381",
 	},
 	stripes = "rbxassetid://123710673700412", -- 512x128, white diagonal stripes (v12 .stripes)
 	glow9 = "rbxassetid://109052962777294", -- 128 px 9-slice soft glow (window breathe)

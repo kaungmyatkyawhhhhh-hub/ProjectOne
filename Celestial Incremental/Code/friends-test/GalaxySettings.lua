@@ -56,7 +56,7 @@ local function screenScale(): number
 end
 
 ------------------------------------------------------------------------ the window (520 x 260)
-local W, H = 520, 260
+local W, H = 520, 336
 local holder = Kit.box(root, 0, 0, W, H, { Name = "SettingsWindow", AnchorPoint = Vector2.new(0.5, 0.5), Visible = false })
 local scale = Instance.new("UIScale")
 scale.Parent = holder
@@ -92,6 +92,14 @@ local sfxSlider, showSfx = row(164, "SOUND EFFECTS", sfxVol, function(v)
 		Kit.sound("tab")
 	end
 end, save)
+
+-- CODES (overnight part 2): opens the Codes window
+local codes, codesInner = Kit.button(win, 16, 256, W - 32, 62, hex("#ff7d8e"), hex("#c22a3e"), { ZIndex = 6 })
+Kit.text(codesInner, 0, 14, W - 32, 34, "CODES", 28, { ZIndex = codesInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
+Kit.icon(win, "essence", 150, 252, 64, Color3.fromRGB(60, 230, 210), { ZIndex = 9 })
+codes.MouseButton1Click:Connect(function()
+	if shared.GalaxyCodesOpen then shared.GalaxyCodesOpen() end
+end)
 
 ------------------------------------------------------------------------ open / close
 local isOpen = false
