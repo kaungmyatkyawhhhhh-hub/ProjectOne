@@ -22,6 +22,13 @@ Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongm
 - **Before the pause:** prompts 1-11 done (3 worlds with wall courses, pacing, store with IDs). Next: prompt 12 (bold sporty colours, no pink/pastel; UI as real art, mockup approval first), then prompt 13 (move to a NEW group, owner doesn't want it in the GYM ARC group; re-create passes/products and re-upload assets there) and publish.
 - **Last updated:** 2026-10-28
 
+## Galaxy Incremental (Roblox incremental, P&L Studios XP): active
+Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, ring 2), Star Surge, ranks. ALPHA planned Sat 14 Nov.
+- **Details:** `Celestial Incremental` folder (all Galaxy notes go there). Studio place "Galaxy Incremental" (placeId 111654682859982).
+- **3 Nov (overnight, Claude Code, in Studio, not published):** alpha 2 (pace 2M / Starfire x1.75, tutorial 1-7, guide book, licensed sounds + music) + codes/potions, Players Near You board, Store + x2 Stardust pass + Alpha badge (placeholder ids), analytics, phone readability. See [[Celestial Incremental/Progress/2026-11-03 Galaxy Incremental - Overnight summary]].
+- **Owner to do:** listen to the sounds; create the x2 Stardust pass (249 R$) + Alpha Player badge and put the ids in GameConfig; re-upload 10 images to the group; File > Save; publish.
+- **Last updated:** 2026-11-03
+
 ## MOW ARC (Roblox incremental): on hold
 Idea only, not started: mow grass -> upgrades -> REGROW / SEASON prestige. Notes and 3 prompts ready in [[MOW ARC/00 MOW ARC Home]].
 

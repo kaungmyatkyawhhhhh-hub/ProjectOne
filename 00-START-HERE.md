@@ -14,6 +14,7 @@ This vault is my personal context for Claude: who I am, what I'm working on and 
 | GYM ARC | live, main game | [[GYM ARC/00 GYM ARC Home]] |
 | SPEED ARC | finishing, then publish in a NEW group | [[SPEED ARC/00 SPEED ARC Home]] |
 | City Legends | active | [[City Legends/City Legends]] |
+| Galaxy Incremental | active, alpha 14 Nov | [[Celestial Incremental/Progress/2026-11-03 Galaxy Incremental - Overnight summary]] |
 | MOW ARC | on hold, idea only (incremental) | [[MOW ARC/00 MOW ARC Home]] |
 | Break A Bed | archived 28 Oct | [[Archive/Break A Bed/Project Overview]] |
 
