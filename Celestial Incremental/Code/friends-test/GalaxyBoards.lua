@@ -11,6 +11,10 @@
 --  * lists scroll with the mouse wheel, a drag and touch (the drag needs the mouse ray projected onto the screen:
 --    pointerFor); a refresh never moves a list
 --  * shared.GalaxyBoardTarget(key) -> the world position of a button on YOUR BODIES board (the tutorial arrow points there)
+--  * pass 2 (owner, "Boards 1to1 pass 2"): what spills OUTSIDE the screens is drawn here too, only for the boards built:
+--    the pair's huge titles over the top frame edge, a glow halo behind the pair's frames and their crackling energy beams
+--    along the frame, Star Upgrades' flame border (fire particles, gold to violet). Bodies' neon tubes glow by themselves
+--    (a rectangular halo showed square corners round the other boards). Reduced Motion: no crackle.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -51,14 +55,187 @@ local function pointerFor(screen: BasePart, canvas: Vector2)
 	end
 end
 
-local boards = {} -- [island] = { guis = { [id] = SurfaceGui }, panels = { [id] = board }, conns, ctx }
+local boards = {} -- [island] = { guis = { [id] = SurfaceGui }, panels = { [id] = board }, conns, ctx, fx = { { parts, step } } }
 
 local function clear(island)
 	local b = boards[island]
 	if not b then return end
 	for _, c in ipairs(b.conns) do c:Disconnect() end
 	for _, g in pairs(b.guis) do g:Destroy() end
+	for _, f in ipairs(b.fx or {}) do
+		for _, p in ipairs(f.parts) do p:Destroy() end
+	end
 	boards[island] = nil
+end
+
+------------------------------------------------------------------------ what spills outside the screens (pass 2)
+local fxFolder = Instance.new("Folder")
+fxFolder.Name = "GalaxyBoardFx"
+fxFolder.Parent = workspace
+local TITLE_FONT = Font.fromEnum(Enum.Font.FredokaOne)
+local FIRE = "rbxasset://textures/particles/fire_main.dds"
+local function fxPart(name: string, size: Vector3, cf: CFrame): Part
+	local p = Instance.new("Part")
+	p.Name = name
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Transparency = 1
+	p.Size = size
+	p.CFrame = cf
+	p.Parent = fxFolder
+	return p
+end
+local function faceGui(p: BasePart, pps: number): SurfaceGui
+	local g = Instance.new("SurfaceGui")
+	g.Face = Enum.NormalId.Back
+	g.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	g.PixelsPerStud = pps
+	g.LightInfluence = 0
+	g.MaxDistance = B.DrawRange + 40
+	g.Parent = p
+	return g
+end
+-- a board's frame outline, board-local (the screen's centre = 0): half width, top, bottom, front, back
+local function outline(spec)
+	local w, h = spec.Width, spec.Height
+	if spec.pair then
+		local P = B.Pair
+		return w / 2 + P.Lip + P.Post, h / 2 + P.Lip + P.Bar + 0.3 + P.Post / 2, -h / 2 - P.Lip - P.BarLow, P.PostDepth / 2, P.Depth / 2
+	elseif spec.Style == "Neon" then
+		return w / 2 + 1.9, h / 2 + 1.4, -h / 2 - 0.7, 0.5, 0.45
+	end
+	return w / 2 + B.Frame, h / 2 + B.Frame, -h / 2 - B.Frame, B.Depth / 2, B.Depth / 2
+end
+local function decorate(spec, screen: BasePart)
+	local cf = screen.CFrame * CFrame.new(0, 0, -0.1) -- (the board's centre plane)
+	local hw, top, bottom, front, back = outline(spec)
+	local parts, beams, glows = {}, {}, {}
+	local neon = spec.Neon
+	if spec.pair then
+		-- the halo: a glow behind the frame, so only what spills round its outline shows
+		local S = 1.8
+		local halo = fxPart("Halo", Vector3.new(2 * hw + 2 * S, top - bottom + 2 * S, 0.05), cf * CFrame.new(0, (top + bottom) / 2, -back - 0.15))
+		table.insert(parts, halo)
+		local hg = faceGui(halo, 20)
+		-- (four strips round the edge, bright where they meet the frame, fading outward)
+		for _, s in ipairs({ { UDim2.new(0, 0, 0, 0), UDim2.new(1, 0, 0, S * 20 + 8), 90 }, { UDim2.new(0, 0, 1, -S * 20 - 8), UDim2.new(1, 0, 0, S * 20 + 8), 270 },
+			{ UDim2.new(0, 0, 0, 0), UDim2.new(0, S * 20 + 8, 1, 0), 0 }, { UDim2.new(1, -S * 20 - 8, 0, 0), UDim2.new(0, S * 20 + 8, 1, 0), 180 } }) do
+			local f = Instance.new("Frame")
+			f.BorderSizePixel = 0
+			f.BackgroundColor3 = neon
+			f.Position, f.Size = s[1], s[2]
+			local g = Instance.new("UIGradient")
+			g.Rotation = s[3]
+			g.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0.15) })
+			g.Parent = f
+			f.Parent = hg
+			table.insert(glows, f)
+		end
+	end
+	if spec.pair then
+		-- the huge title over the top frame edge (Regrowth's "PERKS TREE" / "INFO"): white, a thick dark outline
+		local P = B.Pair
+		local band = fxPart("Title", Vector3.new(2 * hw, 3, 0.05), cf * CFrame.new(0, spec.Height / 2 + P.Lip + P.Bar / 2 - 0.1, front + 0.08))
+		table.insert(parts, band)
+		local tg = faceGui(band, 40)
+		local l = Instance.new("TextLabel")
+		l.BackgroundTransparency = 1
+		l.Position = UDim2.new(0, 34, 0, 6)
+		l.Size = UDim2.new(1, -60, 1, -12)
+		l.FontFace = TITLE_FONT
+		l.Text = spec.title
+		l.TextColor3 = Color3.new(1, 1, 1)
+		l.TextScaled = true
+		l.TextXAlignment = Enum.TextXAlignment.Left
+		local cap = Instance.new("UITextSizeConstraint")
+		cap.MaxTextSize = 96
+		cap.Parent = l
+		local st = Instance.new("UIStroke")
+		st.Color = Color3.fromRGB(26, 16, 48)
+		st.Thickness = 7
+		st.LineJoinMode = Enum.LineJoinMode.Round
+		st.Parent = l
+		l.Parent = tg
+		-- the energy strip: crackling beams along the frame's sides and top (+ a soft wide glow beam under each)
+		local holder = fxPart("Energy", Vector3.new(1, 1, 1), cf)
+		table.insert(parts, holder)
+		local z = front + 0.2
+		local pts = { Vector3.new(-hw, bottom + 1, z), Vector3.new(-hw, (top + bottom) / 2, z), Vector3.new(-hw, top - 0.6, z), Vector3.new(0, top + 0.2, z),
+			Vector3.new(hw, top - 0.6, z), Vector3.new(hw, (top + bottom) / 2, z), Vector3.new(hw, bottom + 1, z) }
+		local bright = ColorSequence.new(neon:Lerp(Color3.new(1, 1, 1), 0.55), neon)
+		for i = 1, #pts - 1 do
+			local a, c = pts[i], pts[i + 1]
+			local d = (c - a).Unit
+			local perp = Vector3.new(-d.Y, d.X, 0)
+			local function att(p: Vector3): Attachment
+				local at = Instance.new("Attachment")
+				at.CFrame = CFrame.fromMatrix(p, perp, Vector3.new(0, 0, 1):Cross(perp))
+				at.Parent = holder
+				return at
+			end
+			local a0, a1 = att(a), att(c)
+			for layer = 1, 2 do
+				local bm = Instance.new("Beam")
+				bm.Attachment0, bm.Attachment1 = a0, a1
+				bm.FaceCamera = true
+				bm.LightEmission, bm.LightInfluence = 1, 0
+				bm.Segments = 14
+				bm.Color = bright
+				if layer == 1 then
+					bm.Width0, bm.Width1 = 1.4, 1.4
+					bm.Transparency = NumberSequence.new(0.72)
+				else
+					bm.Width0, bm.Width1 = 0.3, 0.3
+					table.insert(beams, bm)
+				end
+				bm.Parent = holder
+			end
+		end
+	end
+	if spec.Flames then
+		-- Factory Upgrades' flame border: fire particles from all four sides, gold to violet, rising, spilling out
+		for _, side in ipairs({ { 0, top, 2 * hw, Enum.NormalId.Top, 70 }, { 0, bottom, 2 * hw, Enum.NormalId.Bottom, 36 },
+			{ -hw, 0, top - bottom, Enum.NormalId.Left, 46 }, { hw, 0, top - bottom, Enum.NormalId.Right, 46 } }) do
+			local across = side[4] == Enum.NormalId.Top or side[4] == Enum.NormalId.Bottom
+			local p = fxPart("Flames", if across then Vector3.new(side[3], 0.3, 0.4) else Vector3.new(0.3, side[3], 0.4), cf * CFrame.new(side[1], side[2], front))
+			table.insert(parts, p)
+			local e = Instance.new("ParticleEmitter")
+			e.Texture = FIRE
+			e.Shape = Enum.ParticleEmitterShape.Box
+			e.EmissionDirection = side[4]
+			e.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 214, 110)), ColorSequenceKeypoint.new(0.3, neon),
+				ColorSequenceKeypoint.new(0.6, spec.Neon2 or neon), ColorSequenceKeypoint.new(1, spec.Neon2 or neon) })
+			e.LightEmission, e.LightInfluence = 1, 0
+			e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(0.45, 1.6), NumberSequenceKeypoint.new(1, 0.3) })
+			e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.05), NumberSequenceKeypoint.new(0.6, 0.35), NumberSequenceKeypoint.new(1, 1) })
+			e.Lifetime = NumberRange.new(0.35, 0.7)
+			e.Speed = NumberRange.new(0.8, 1.8)
+			e.SpreadAngle = Vector2.new(20, 20)
+			-- (they rise; the bottom ones don't, or they'd drift up over the screen)
+			e.Acceleration = if side[4] == Enum.NormalId.Bottom then Vector3.zero else Vector3.new(0, 3, 0)
+			e.Brightness = 2
+			e.RotSpeed = NumberRange.new(-40, 40)
+			e.Rate = side[5]
+			e.Parent = p
+		end
+	end
+	-- the animation: the halo breathes, the energy crackles (new bends + widths ~14 times a second)
+	local acc = 0
+	local function step(dt: number)
+		if Kit.calm() then return end
+		local a = 0.25 + math.sin(os.clock() * 2.2) * 0.15
+		for _, g in ipairs(glows) do g.BackgroundTransparency = a end
+		acc += dt
+		if acc < 0.07 then return end
+		acc = 0
+		for _, bm in ipairs(beams) do
+			bm.CurveSize0 = (math.random() - 0.5) * 2.4
+			bm.CurveSize1 = (math.random() - 0.5) * 2.4
+			bm.Width0 = 0.12 + math.random() * 0.35
+			bm.Width1 = 0.12 + math.random() * 0.35
+			bm.Transparency = NumberSequence.new(math.random() * 0.45)
+		end
+	end
+	return { parts = parts, step = step }
 end
 
 -- INFO's default: the first ring-1 node you can buy (Regrowth shows its first perk); all bought: the Asteroid
@@ -78,7 +255,7 @@ local function build(island)
 	local slot = island:GetAttribute("Slot")
 	local subject = Players:GetPlayerByUserId(ownerId) or NOBODY
 	local mine = subject == player
-	local b = { guis = {}, panels = {}, conns = {} }
+	local b = { guis = {}, panels = {}, conns = {}, fx = {} }
 	boards[island] = b
 	local dirty = true
 	local ctx = { subject = subject, picked = false, sel = defaultSel(subject), sound = Kit.sound }
@@ -114,6 +291,7 @@ local function build(island)
 		b.guis[spec.id] = gui
 		-- (each board its own pointer + canvas; the rest is the island's shared ctx)
 		b.panels[spec.id] = BoardsUI.new(spec.id, gui, spec, setmetatable({ pointer = pointerFor(screen, canvas), size = canvas }, { __index = ctx }))
+		table.insert(b.fx, decorate(spec, screen))
 	end
 	-- live numbers: the owner's attributes (Stardust changes every half second: refresh at most 4 times a second)
 	if subject ~= NOBODY then
@@ -170,6 +348,7 @@ RunService.RenderStepped:Connect(function(dt)
 	if doRefresh then acc = 0 end
 	for _, b in pairs(boards) do
 		for _, p in pairs(b.panels) do p:step(dt) end
+		for _, f in ipairs(b.fx) do f.step(dt) end
 		if doRefresh and b.dirty() then
 			if not b.ctx.picked then b.ctx.sel = defaultSel(b.ctx.subject) end
 			for _, p in pairs(b.panels) do p:refresh() end

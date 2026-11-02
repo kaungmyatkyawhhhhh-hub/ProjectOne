@@ -10,9 +10,10 @@
 --  * Bodies (Regrowth's MACHINES): rows: name, LEVEL, TIER, +x/s, UPGRADE (cost above it), M (max), the boost ("x4");
 --           locked rows UNLOCK; a tap on a row shows it on INFO
 --  * Stars  (Regrowth's FACTORY UPGRADES): cards: name, short text, icon, value + step, star level badge, UPGRADE + price
--- Every screen: rounded corners in the frame's stone colour, a dark screen, an animated neon edge in the board's colour, a
--- big white title. Lists scroll (Kit.scroller); a refresh (4x a second) only changes words and colours, never rebuilds, so
--- what you scrolled to stays put.
+-- Every screen: rounded corners in its frame's colour, a dark screen, an animated neon edge in the board's colour; the stand
+-- boards have their title inside (centred, a rule under it); the pair's huge titles sit over the frame (GalaxyBoards).
+-- Lists scroll (Kit.scroller); a refresh (4x a second) only changes words and colours, never rebuilds, so what you
+-- scrolled to stays put. Pass 2 (owner): the pair's screens are 11 x 13 studs (550 x 650), the tree tiles 3 a row.
 -- IslandBoardsUI.new(id, gui, spec, ctx) -> board: :refresh(), :step(dt), .targets[key] (tutorial "Body0"), :reveal(button)
 --   ctx.subject, ctx.canAct(), ctx.buy(kind, arg) -> ok, ctx.sound(name), ctx.pointer(screenPos), ctx.size (canvas),
 --   ctx.sel = the shared selection { kind = "node" | "body", key = id | k }, ctx.select(kind, key), ctx.bought(kind, arg)
@@ -41,13 +42,13 @@ local NODE_GLOW = { STARDUST = Color3.fromRGB(255, 170, 60), COMETS = Color3.fro
 local LEFT, RIGHT, CENTRE = Enum.TextXAlignment.Left, Enum.TextXAlignment.Right, Enum.TextXAlignment.Center
 
 -- the CONSTELLATION TREE's tiles (Regrowth's perks grid): [col, row]; no id = a node not in the game yet (a dark silhouette)
-local TREE_GRID = {
+local TREE_GRID = { -- (3 a row, filling the screen's width like Regrowth's)
 	{ id = "FirstLight", col = 1, row = 0 },
 	{ id = "LunarPull", col = 0, row = 1 }, { id = "OrbitSpeed", col = 1, row = 1 }, { id = "CometLure", col = 2, row = 1 },
 	{ id = "PlanetSeed", col = 0, row = 2 }, { col = 1, row = 2, icon = "forge" }, { col = 2, row = 2, icon = "shard" },
 	{ id = "GasGiant", col = 0, row = 3 }, { col = 1, row = 3, icon = "gear" },
 }
-local TILE_W, TILE_H, PITCH_X, PITCH_Y = 120, 108, 168, 156
+local TILE_W, TILE_H, PITCH_X, PITCH_Y = 142, 136, 159, 186
 
 ------------------------------------------------------------------------ what a node / body shows
 local function unlockNode(k: number)
@@ -196,7 +197,9 @@ end
 function UI:shell()
 	local W, H = self.size.X, self.size.Y
 	local neon = self.spec.Neon
-	Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = MapConfig.Boards.Stone, ZIndex = 1 })
+	local B = MapConfig.Boards
+	local corners = if self.spec.pair then B.StoneLight elseif self.spec.Style == "Neon" then B.Screen else B.Stone
+	Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = corners, ZIndex = 1 })
 	local bg = Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 1 })
 	Kit.corner(bg, 40)
 	Kit.grad(bg, hex("#151026"), hex("#06050b"), 90)
@@ -215,9 +218,7 @@ function UI:shell()
 	local st = Kit.stroke(line, WHITE, 5)
 	self.edge = Kit.new("UIGradient", { Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, neon), ColorSequenceKeypoint.new(0.42, neon),
 		ColorSequenceKeypoint.new(0.5, neon:Lerp(WHITE, 0.8)), ColorSequenceKeypoint.new(0.58, neon), ColorSequenceKeypoint.new(1, neon) }) }, st)
-	if self.spec.pair then
-		Kit.text(self.gui, 52, 16, W - 80, 60, self.spec.title, if #self.spec.title > 10 then 42 else 52, { ZIndex = 9, stroke = 3, FontFace = Kit.FONT_HEAVY })
-	else
+	if not self.spec.pair then
 		Kit.text(self.gui, 0, 12, W, 44, self.spec.title, 34, { ZIndex = 9, stroke = 2.6, FontFace = Kit.FONT_HEAVY, TextXAlignment = CENTRE })
 		Kit.box(self.gui, W / 2 - 130, 58, 260, 2, { BackgroundTransparency = 0.35, BackgroundColor3 = WHITE, ZIndex = 9 })
 	end
@@ -226,36 +227,37 @@ end
 ------------------------------------------------------------------------ CONSTELLATION TREE (Regrowth's PERKS TREE)
 function UI:buildTree()
 	local W, H = self.size.X, self.size.Y
-	local sf, scroll = Kit.scroller(self.gui, 34, 84, W - 64, H - 112, "Y", { ZIndex = 4, pointer = self.ctx.pointer })
+	local sf, scroll = Kit.scroller(self.gui, 28, 96, W - 56, H - 126, "Y", { ZIndex = 4, pointer = self.ctx.pointer })
 	self.scroll = scroll
 	self.tiles = {}
 	local rows = 0
 	for _, spec in ipairs(TREE_GRID) do
 		rows = math.max(rows, spec.row + 1)
 		local node = spec.id and Econ.Ring1ById[spec.id]
-		local x, y = 22 + spec.col * PITCH_X, 10 + spec.row * PITCH_Y
-		local tile = Kit.box(sf, x, y, TILE_W, TILE_H, { BackgroundTransparency = 0.1, BackgroundColor3 = hex("#1f1a33"), ZIndex = 5 })
-		Kit.corner(tile, 14)
-		local st = Kit.stroke(tile, hex("#4a4066"), 2)
-		local img = Kit.icon(sf, (node and node.icon) or spec.icon, x + 22, y + 6, 76, nil, { ZIndex = 6 })
-		local value = Kit.text(sf, x, y + 72, TILE_W - 10, 32, "", 26, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 2, FontFace = Kit.FONT_HEAVY })
-		local costIcon = Kit.icon(sf, "stardust", x + 10, y + TILE_H + 4, 24, nil, { ZIndex = 6 })
-		local cost = Kit.text(sf, x + 36, y + TILE_H + 3, 100, 26, "", 20, { ZIndex = 6, stroke = 1.6 })
+		local x, y = 8 + spec.col * PITCH_X, 8 + spec.row * PITCH_Y
+		-- a dark tile with a soft rounded border; the icon centred, the value at the bottom right, the cost under the tile
+		local tile = Kit.box(sf, x, y, TILE_W, TILE_H, { BackgroundTransparency = 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
+		Kit.corner(tile, 20)
+		local st = Kit.stroke(tile, hex("#4b4170"), 3, 0.25)
+		local img = Kit.icon(sf, (node and node.icon) or spec.icon, x + (TILE_W - 92) / 2, y + 12, 92, nil, { ZIndex = 6 })
+		local value = Kit.text(sf, x, y + TILE_H - 42, TILE_W - 12, 38, "", 32, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 2.4, FontFace = Kit.FONT_HEAVY })
+		local costIcon = Kit.icon(sf, "stardust", x + 26, y + TILE_H + 6, 28, nil, { ZIndex = 6 })
+		local cost = Kit.text(sf, x + 58, y + TILE_H + 4, 110, 32, "", 26, { ZIndex = 6, stroke = 1.8 })
 		local t = { node = node, tile = tile, stroke = st, img = img, value = value, costIcon = costIcon, cost = cost }
 		if node then
 			local hit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, AutoButtonColor = false, Position = UDim2.fromOffset(x, y),
-				Size = UDim2.fromOffset(TILE_W, TILE_H + 30), ZIndex = 9 }, sf)
+				Size = UDim2.fromOffset(TILE_W, TILE_H + 40), ZIndex = 9 }, sf)
 			tap(hit, function()
 				self.ctx.sound("tab")
 				self.ctx.select("node", node.id)
 			end, function() return scroll.moved end)
-			hit.MouseEnter:Connect(function() tile.BackgroundColor3 = hex("#2d2648") end)
-			hit.MouseLeave:Connect(function() tile.BackgroundColor3 = hex("#1f1a33") end)
+			hit.MouseEnter:Connect(function() tile.BackgroundColor3 = hex("#251f3a") end)
+			hit.MouseLeave:Connect(function() tile.BackgroundColor3 = hex("#130f1e") end)
 			self.targets["Node_" .. node.id] = hit
 		end
 		table.insert(self.tiles, t)
 	end
-	sf.CanvasSize = UDim2.fromOffset(0, rows * PITCH_Y + 12)
+	sf.CanvasSize = UDim2.fromOffset(0, rows * PITCH_Y + 10)
 end
 function UI:refreshTree()
 	local n, sd = self:nodes(), self:stardust()
@@ -282,9 +284,10 @@ function UI:refreshTree()
 		end
 		local selected = node ~= nil and sel.kind == "node" and sel.key == node.id
 		t.stroke.Color = if selected then WHITE elseif bought then hex("#7dff9a") elseif locked then hex("#2e2840")
-			elseif sd >= node.cost then GOLD_TEXT else hex("#4a4066")
-		t.stroke.Thickness = if selected then 4 else 2
-		t.tile.BackgroundTransparency = if locked then 0.45 else 0.1
+			elseif sd >= node.cost then GOLD_TEXT else hex("#4b4170")
+		t.stroke.Thickness = if selected then 4.5 else 3
+		t.stroke.Transparency = if selected then 0 else 0.25
+		t.tile.BackgroundTransparency = if locked then 0.4 else 0.05
 	end
 end
 
@@ -294,27 +297,29 @@ function UI:buildInfo()
 	local gui = self.gui
 	local ui = {}
 	self.ui = ui
-	ui.icon, ui.iconHolder = Kit.icon(gui, "sun", 20, 76, 150, WHITE, { ZIndex = 6 })
-	ui.name = Kit.text(gui, 172, 78, W - 196, 46, "", 40, { ZIndex = 8, TextScaled = true, FontFace = Kit.FONT_HEAVY, stroke = 2.4, gradient = ColorSequence.new(WHITE, WHITE) })
-	ui.level = Kit.text(gui, 174, 124, W - 196, 26, "", 22, { ZIndex = 8, stroke = 1.8 })
-	ui.value = Kit.text(gui, 174, 150, W - 196, 46, "", 40, { ZIndex = 8, stroke = 2.4, FontFace = Kit.FONT_HEAVY })
-	ui.step = Kit.text(gui, 176, 196, W - 196, 28, "", 24, { ZIndex = 8, TextColor3 = GREEN_TEXT, stroke = 1.8 })
-	ui.desc = Kit.text(gui, 30, 232, W - 60, 52, "", 20, { ZIndex = 8, TextColor3 = GREY_TEXT, FontFace = Kit.FONT_BOLD, TextWrapped = true, stroke = 1.2 })
-	ui.tier = Kit.text(gui, 30, 284, W - 60, 28, "", 23, { ZIndex = 8, stroke = 1.8 })
-	ui.prog = Kit.text(gui, 30, 310, W - 60, 26, "", 21, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 1.6 })
-	local bar = Kit.box(gui, 30, 338, W - 60, 18, { BackgroundTransparency = 0, BackgroundColor3 = hex("#221d2a"), ZIndex = 6 })
-	Kit.corner(bar, 9)
+	-- (550 x 650: the big title sits over the top edge, so the page starts lower)
+	ui.icon, ui.iconHolder = Kit.icon(gui, "sun", 26, 104, 200, WHITE, { ZIndex = 6 })
+	ui.name = Kit.text(gui, 236, 112, W - 266, 62, "", 56, { ZIndex = 8, TextScaled = true, FontFace = Kit.FONT_HEAVY, stroke = 3, gradient = ColorSequence.new(WHITE, WHITE) })
+	ui.level = Kit.text(gui, 238, 176, W - 266, 32, "", 27, { ZIndex = 8, stroke = 2 })
+	ui.value = Kit.text(gui, 238, 212, W - 266, 58, "", 52, { ZIndex = 8, stroke = 3, FontFace = Kit.FONT_HEAVY })
+	ui.step = Kit.text(gui, 240, 270, W - 266, 34, "", 30, { ZIndex = 8, TextColor3 = GREEN_TEXT, stroke = 2 })
+	ui.desc = Kit.text(gui, 36, 322, W - 72, 64, "", 25, { ZIndex = 8, TextColor3 = GREY_TEXT, FontFace = Kit.FONT_BOLD, TextWrapped = true, stroke = 1.4 })
+	ui.tier = Kit.text(gui, 36, 390, W - 72, 34, "", 29, { ZIndex = 8, stroke = 2 })
+	ui.prog = Kit.text(gui, 36, 424, W - 72, 30, "", 26, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 1.8 })
+	local bar = Kit.box(gui, 36, 458, W - 72, 24, { BackgroundTransparency = 0, BackgroundColor3 = hex("#221d2a"), ZIndex = 6 })
+	Kit.corner(bar, 12)
 	Kit.stroke(bar, Kit.INK, 2)
-	ui.fill = Kit.box(bar, 0, 0, 0, 18, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 7 })
-	Kit.corner(ui.fill, 9)
+	ui.fill = Kit.box(bar, 0, 0, 0, 24, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 7 })
+	Kit.corner(ui.fill, 12)
 	Kit.grad(ui.fill, self.spec.Neon:Lerp(WHITE, 0.45), self.spec.Neon, 90)
-	ui.barW = W - 60
+	ui.barW, ui.barH = W - 72, 24
 	-- 10x (bodies: buy 10 at once) + UPGRADE; nodes have one level, so they use the wide UPGRADE
-	ui.ten = action(gui, 30, 372, 78, 62, 26)
-	ui.up = action(gui, 118, 372, W - 148, 62, 32)
-	ui.upWide = action(gui, 30, 372, W - 60, 62, 32)
-	ui.costIcon = Kit.icon(gui, "stardust", 34, 440, 28, nil, { ZIndex = 6 })
-	ui.cost = Kit.text(gui, 66, 439, W - 100, 30, "", 24, { ZIndex = 6, stroke = 1.8 })
+	ui.ten = action(gui, 36, 500, 100, 78, 34)
+	ui.up = action(gui, 148, 500, W - 184, 78, 42)
+	ui.upWide = action(gui, 36, 500, W - 72, 78, 42)
+	ui.costX, ui.costY = 80, 584
+	ui.costIcon = Kit.icon(gui, "stardust", 40, ui.costY + 2, 34, nil, { ZIndex = 6 })
+	ui.cost = Kit.text(gui, ui.costX, ui.costY, W - 120, 38, "", 32, { ZIndex = 6, stroke = 2 })
 	self.ten = false
 	tap(ui.ten.button, function()
 		self.ten = not self.ten
@@ -432,7 +437,7 @@ function UI:refreshInfo()
 		self:infoCost(costText, costCan)
 	end
 	Kit.setText(ui.prog, progress)
-	ui.fill.Size = UDim2.fromOffset(math.floor(ui.barW * math.clamp(fill, 0, 1)), 18)
+	ui.fill.Size = UDim2.fromOffset(math.floor(ui.barW * math.clamp(fill, 0, 1)), ui.barH)
 	ui.fill.Visible = fill > 0
 end
 -- the cost under UPGRADE (a number = with the stardust icon; words = grey, no icon)
@@ -443,7 +448,7 @@ function UI:infoCost(text: string?, can: boolean)
 	shown(ui.cost, text ~= nil)
 	Kit.setText(ui.cost, text or "")
 	ui.cost.TextColor3 = if not isNumber then GREY_TEXT elseif can then WHITE else RED_TEXT
-	ui.cost.Parent.Position = UDim2.fromOffset(if isNumber then 66 else 34, 439)
+	ui.cost.Parent.Position = UDim2.fromOffset(if isNumber then ui.costX else 40, ui.costY)
 end
 
 ------------------------------------------------------------------------ BODIES (Regrowth's MACHINES)

@@ -85,10 +85,17 @@ local function makeBoards(island: Model)
 		local panel = Instance.new("Model")
 		panel.Name = "Board_" .. spec.id
 		panel:SetAttribute("Board", spec.id)
-		Builder.BoardFrame(panel, cfs[spec.id], spec.Width, spec.Height, c.Y, spec.Tilt ~= nil)
+		Builder.BoardFrame(panel, cfs[spec.id], spec, c.Y)
 		panel.Screen:SetAttribute("Board", spec.id)
 		panel.Parent = model
 	end
+	-- the ledge runs on through the gap between the pair (Regrowth's low wall)
+	local P = MapConfig.Boards.Pair
+	local ledgeTop = P.Bottom - P.Lip - P.BarLow
+	local gap = at(island, P.At.X + 0.3, P.At.Z, ledgeTop / 2)
+	local face = Builder.faceTo(gap, c)
+	Builder.part({ Name = "GapLedge", Size = Vector3.new(P.Gap + 1.2, ledgeTop, P.LedgeDepth - 0.4), CFrame = face, Color = MapConfig.Boards.Stone, CanCollide = true, Parent = model })
+	Builder.part({ Name = "GapLedgeCap", Size = Vector3.new(P.Gap + 1.5, 0.3, P.LedgeDepth - 0.1), CFrame = face * CFrame.new(0, ledgeTop / 2 - 0.1, 0), Color = MapConfig.Boards.StoneLight, CanCollide = true, Parent = model })
 	model.Parent = island
 	return model
 end

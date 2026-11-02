@@ -85,9 +85,10 @@ MapConfig.Islands = {
 	-- the island end of every bridge: a threshold over the island's rim (in island units: x = out from the Core, from -Radius)
 	Landing = { From = -33, To = -25, Top = 1.6, Ramp = 4 },
 	-- island-local places (x = away from the Core, z = to the side; the bridge enters at x = -30, z = 0)
-	-- the spawn FACES THE BOARDS (owner, boards like Regrowth): tutorial step 1 is a button on the board. A little off the
-	-- island's centre line, so the camera behind the player doesn't look through the star system's beam
-	Spawn = Vector3.new(6, 0, -5),
+	-- the spawn FACES THE PAIR of boards, 12.5 studs in front of it: from the spawn camera (12.5 behind you, looking down at
+	-- you) the pair fills most of the screen with its huge titles still in view (owner, boards 1:1 pass 2, like Regrowth's).
+	-- Off the centre line, so the island's star beam (x 0) stays beside the camera, not in front of it.
+	Spawn = Vector3.new(12.5, 0, -2.5),
 	SpawnRock = Vector3.new(-2, 0, -2),             -- (tier 0: on the walkway over the rock)
 	Rock = 30,                                      -- tier 0 / free slot: a bare asteroid 30 across (the mesh makes it 23 high)
 	Tiles = { From = 0.6, To = 0.92, Count = 14 },
@@ -113,21 +114,33 @@ MapConfig.Islands = {
 --  * far edge, the PAIR (Regrowth's Perks Tree + Info): CONSTELLATION TREE left, INFO right; upright, each turned V degrees
 --    in toward the player (a shallow V), Gap studs apart; the spawn faces Pair.At (the middle of the gap)
 --  * left edge BODIES (Regrowth's Machines board), right edge STAR UPGRADES (Factory Upgrades): Tilt back on a stand
--- Each: a chunky rounded Frame (lavender stone, brass trim) round a dark screen; the screen's SurfaceGui is drawn by the client
--- (GalaxyBoards + IslandBoardsUI, PxPerStud pixels a stud) with an animated neon edge in the board's Neon colour. No prompt,
--- no ClickDetector: the buttons are on the screens. A board buy: the server checks the island's owner + within BuyRange of
--- the island's centre. Width / Height = the screen (the frame goes round it).
+-- Pass 2 (owner, vault "Prompt - Boards 1to1 pass 2"):
+--  * the pair: BIG (screens 11 x 13, ~2.5x the player), set INTO a low stone ledge (no legs; the screen's bottom at waist
+--    height), a thick lavender stone frame with a lighter lip (the bevel) and side posts with round caps; huge white titles
+--    over the top frame edge; an energy strip (crackling beams + a halo) round the frame, spilling out
+--  * BODIES: Regrowth's Machines board: a thin angular frame (lavender tubes with violet neon, wider at the top), a neon glow
+--    strip on top, on a ground stand
+--  * STAR UPGRADES: the chunky stone frame with a thick animated flame border (gold / violet) spilling out
+-- The titles, the halos, the beams and the flames are the client's (GalaxyBoards), only near you. Width / Height = the
+-- screen; the frame goes round it. The screen's SurfaceGui (IslandBoardsUI) is drawn by the client, PxPerStud a stud. No
+-- prompt, no ClickDetector: the buttons are on the screens. A board buy: the server checks the island's owner + within
+-- BuyRange of the island's centre.
 MapConfig.Boards = {
-	Frame = 1.2, Depth = 1.2, PxPerStud = 50,
-	Stone = Color3.fromRGB(203, 192, 230), StoneDark = Color3.fromRGB(146, 134, 184), Screen = Color3.fromRGB(10, 8, 18),
-	Pair = { At = Vector3.new(25, 0, 0), Gap = 3, V = 16, Bottom = 2.2 },
+	PxPerStud = 50,
+	Stone = Color3.fromRGB(203, 192, 230), StoneLight = Color3.fromRGB(228, 221, 247), StoneDark = Color3.fromRGB(146, 134, 184),
+	Screen = Color3.fromRGB(10, 8, 18),
+	-- the pair: At = the middle of the gap; Bottom = the screen's bottom above the floor; the frame: Lip (the lighter bevel
+	-- step), Bar (top), BarLow (bottom, on the ledge), Post (side posts, PostDepth deep), Depth; the ledge LedgeDepth deep
+	Pair = { At = Vector3.new(25, 0, 0), Gap = 3, V = 16, Bottom = 2.8, Lip = 0.45, Bar = 1.5, BarLow = 0.5, Post = 2,
+		PostDepth = 2.4, Depth = 1.8, LedgeDepth = 3.4 },
+	Frame = 1.2, Depth = 1.2, -- (Star Upgrades' chunky frame)
 	List = {
-		{ id = "Tree", title = "CONSTELLATION TREE", pair = -1, Width = 12, Height = 10, Neon = Color3.fromRGB(150, 100, 255) },
-		{ id = "Info", title = "INFO", pair = 1, Width = 8.5, Height = 10, Neon = Color3.fromRGB(80, 170, 255) },
+		{ id = "Tree", title = "CONSTELLATION TREE", pair = -1, Width = 11, Height = 13, Neon = Color3.fromRGB(150, 100, 255) },
+		{ id = "Info", title = "INFO", pair = 1, Width = 11, Height = 13, Neon = Color3.fromRGB(70, 165, 255) },
 		{ id = "Bodies", title = "BODIES", At = Vector3.new(0, 0, -23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
-			Neon = Color3.fromRGB(190, 110, 255) },
+			Style = "Neon", Neon = Color3.fromRGB(190, 110, 255) },
 		{ id = "Stars", title = "STAR UPGRADES", At = Vector3.new(0, 0, 23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
-			Neon = Color3.fromRGB(255, 176, 42) },
+			Flames = true, Neon = Color3.fromRGB(255, 176, 42), Neon2 = Color3.fromRGB(170, 90, 255) },
 	},
 	BuyRange = 40,  -- (from the island's centre: the island is 60 across, so anywhere on it)
 	DrawRange = 160,
