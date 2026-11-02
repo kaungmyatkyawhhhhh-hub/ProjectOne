@@ -79,6 +79,7 @@ They still look like the old blocky part-built buildings. **Remodel each one, ou
 10. **Small things:** chauffeur stands (an elegant kiosk with a canopy), challenge gantries (a clean steel arch with a timer screen).
 
 ## Quality rules (every venue)
+- **As realistic as possible** (owner, 2026-11-02): every venue should look like a real photo of a luxury building in Monaco, not a Roblox build. Pick only realistic Toolbox models (real textures and proportions, no cartoon or blocky ones), use PBR materials, real lighting and small real-life details. Compare each one with a real photo of a similar building and keep improving until it matches.
 - **Real scale:** about 3 m per floor (about 9 studs), doors about 2.1 m, people-sized furniture.
 - **Depth and detail:** recessed windows with frames, cornices, balconies with railings, a stone base, a roofline, a real entrance (canopy, steps, doors that open).
 - **Real materials:** the `MaterialVariant` kit (marble, stone, plaster in Monaco colours, brass, dark metal, glass, wood). No plain plastic.
