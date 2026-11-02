@@ -113,3 +113,22 @@ Method:
 - MuscleClient, MachineSignsClient and MachineClient 0.13 ms each.
 
 Phones are roughly 3-5x slower than this PC.
+
+## FPS pass 2 (2 Nov, prompt [[2026-11-02 GYM ARC Prompt - FPS pass 2 (merge decor, MuscleRig, signs, prop shadows)]])
+- **Small prop shadows off:** CastShadow false on 1,336 parts under 6 studs (Town 1,163, ProGym 64, PowerliftingGym 77, Gym 32; characters and NPCs never touched).
+  - Each changed part has the attribute `NoShadow2Nov`, so it can be undone exactly.
+  - Shadow draw calls: Starter Gym 709 → ~680, Pro Gym 529 → ~517. A small gain: most small parts already had no shadows (13,550 of 14,886).
+- **MuscleRig:** another body that's off screen now updates 5 times a second, and one far away (over 45 studs) but on screen 15 times; the skipped time adds into its next update.
+  - Every frame as before: your own body, near bodies on screen, and any body that's changing or showing a tint.
+  - Result: 0.50 → 0.26 ms per frame (Starter Gym, 31 bodies around, PC). No errors, all 130 stage meshes still on the bodies.
+- **Merging decor: tested and UNDONE.** The beach edge fence (908 parts) became 61 unions (one per material per 64-stud cell).
+  - Draw calls went UP at every spot: beach 910 → 920, town 1,049 → 1,122, spawn 1,132 → 1,202.
+  - Roblox already draws identical repeated parts as one batch; each union is a unique mesh with its own draw call.
+  - The fence was restored from the backup (912 parts, shadows still off). Merging only pays if one shared mesh (made in Blender) replaces each repeated object everywhere, so every copy uses the same mesh.
+- **Signs / plates (waiting for the owner's go-ahead):**
+  - A weight plate is 5-6 parts (rim mesh, hub mesh, Body cylinder, FaceLeft, FaceRight, sometimes Label) plus 2-3 SurfaceGuis ("M" or the number).
+  - About 300 plates make up roughly 600 of the 1,929 SurfaceGuis.
+  - Plan: one Blender mesh per plate size with the M / number baked into a texture, the body area transparent so each plate keeps its own color, reused by every plate of that size.
+  - Expected: about 900 fewer parts and about 600 fewer signs. Signs cost 0.3-1.9 ms on PC in total, so the plates should be roughly 0.1-0.6 ms on PC and 0.5-2 ms on a phone, most in the Starter Gym.
+  - Needs the owner to import the meshes and textures (like the earlier Blender models).
+- **Next candidate found:** TutorialClient's guide-path dots (`UI.GuidePath`) cost ~0.2-1 ms a frame while the tutorial runs, which is every new player's first minutes.
