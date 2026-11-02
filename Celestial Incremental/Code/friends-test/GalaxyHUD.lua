@@ -659,6 +659,21 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 end)
 
+-- the map's boards (click / tap / E at the prompt) fire Galaxy.OpenWindow(id)
+task.spawn(function()
+	local opener = Galaxy:WaitForChild("OpenWindow", 60)
+	if not opener then return end
+	opener.Event:Connect(function(id)
+		if id == "Upgrades" then
+			openWindow(tutorialTab)
+		else
+			for _, k in ipairs(KEYS) do
+				if k.name == "TREE" and id == "Tree" then toast(k.note, k.colour) end
+			end
+		end
+	end)
+end)
+
 ------------------------------------------------------------------------ layout (screen size)
 -- the window sits between the counter and the hotbar (on phones the hotbar hides while it's open)
 local function windowRoom(): (number, number)

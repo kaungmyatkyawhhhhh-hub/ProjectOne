@@ -178,3 +178,46 @@ Screenshots: `Map/screens/2026-11-02-pass3/`. They include the same set as befor
 ### Owner to do
 1. Save the place (File > Save to Roblox).
 2. 2-player test: Test > Clients and Servers > 2 players.
+
+---
+## Centre redesign + board fix (2 Nov, later, Claude Code): owner's two prompts
+Screenshots: `Map/screens/2026-11-02-centre-v2/` (wide_centre, bridge1..8_view, board_* front/back/hover/click, phone_667x375_plaza).
+
+**Board fix:**
+1. **Facing:** the boards face out to the islands (they faced the Core before, so islands saw the blank back). The screen is on BOTH sides, so it's never blank from any island. Checked from the front, the back, and from islands 1, 2 and 6.
+2. **Clickable:** a ClickDetector (range 60) on each screen and on the frame (the frame is what a click ray meets round the screen). The ProximityPrompt stays (E, range 18).
+   - Click / tap / E -> `Galaxy.OpenWindow(id)`. The HUD now listens to it (nothing did before, so the prompts opened nothing).
+   - Upgrades opens the Upgrades window on the tutorial's tab. Tree shows "CONSTELLATION TREE: not in this test" until the Tree window comes in the alpha.
+   - Hover: the beacon grows 1.3x and brightens. Click: the board dips 0.35 and springs back.
+   - Tested by real mouse clicks in Studio: from island 1 the Upgrades board opened the window; from island 2 the Tree board fired "Tree".
+   - **Not done:** a real phone tap (the Studio tools here have no touch input); a ClickDetector fires on tap the same as on click. **The UI sound** on click isn't in: the game has no sounds yet (alpha scope).
+   - **Range:** from islands 1, 2, 3 and 8 the boards can be clicked from the island's edge (35-51 studs). From islands 4-7 (across the plaza, 75-92 studs) players walk to the plaza or press U.
+3. **Frames:** brass #C9902E like every brass piece. The "flat orange plastic" came from the screens' own orange / green SurfaceLights tinting the frame: those lights are removed. Material Metal was tried (asked for "metal look") and came out dark bronze here, the same problem as in pass 2, so the frames use the same brass as the rest.
+
+**Centre redesign:**
+- **Size:** centre radius 27.5 -> **47** (rock cone 44 deep). The Core + altar keep their size.
+- **Islands:** moved out to ring 74, so the bridges stay ~18 studs and land at the plaza's edge.
+- **Zones** (`MapConfig.Centre.Zones`, angles like the islands'):
+  - each zone sits in the gap between two bridge landings, so every walkway from a bridge to the Core is open;
+  - FRONT = the gap between islands 1 and 2 (the first islands players get).
+- **The zones:**
+  - **FRONT:** Upgrades + Tree boards, x1.3 (18.2 x 11), double-sided, facing out. They stand as an open V (each turned 20 deg to face its nearer bridge) so their legs stay >= 4 studs out of both walkways. Upgrades faces island 1.
+  - **RIGHT:** the Star Forge on a stepped dais (3.6 high). Anvil, padlock and sign face out; the sign stands on posts.
+  - **BACK:** the Black Hole gate x1.5 on its own dais. The violet disk + an inner swirl ring turn (client). The sign is double-sided.
+  - **BACK-LEFT:** the Sector 2 gate arch at the plaza's edge (both-sided name), the IGNITION sign on posts beside it (double-sided, all rows one text size), and its bridge. The Sector 2 island moved to that side (angle 180, 150 out).
+  - **LEFT:** a **leaderboard wall** (double-sided, brass posts + lamps).
+    - TOP SUPERNOVAS (top 10 lifetime Supernovas, OrderedDataStore `GalaxySupernovas1`; Studio uses its own store) for everyone.
+    - PLAYERS NEAR YOU: 5 above + you + 5 below, sent to each player by `GalaxyLeaderboardService` (BoardEvent "Near"); you in gold.
+    - Refreshes every 60 s (within the DataStore budget).
+- **Walkways:**
+  - the brass inlay round the Core;
+  - 32 wedge tiles to the rim;
+  - lamp posts on the rim only (a pair at each bridge landing);
+  - 3 small crystal accents in the open gaps, out of the walkways.
+- **The Core toned down:** core colour + spikes darker, its light 2.2 -> 1.4 (range 30 -> 24), the pulse follows that. Bloom 0.45 / 22 / 1.9 -> 0.32 / 18 / 2.1.
+- **Stray brass plank:** your screenshot didn't come through. After the rebuild, a scan for brass over the void or with nothing under it found none (every sign now stands on posts).
+- **Numbers:** static map 307 parts; in play with 8 islands 587 parts, 2 lights; **60 FPS**; no script errors.
+- **Phone 667x375 from the plaza:** `phone_667x375_plaza.png`. The HUD fits, with the boards and the leaderboard in view.
+- **Code copies:** `Celestial Incremental\Code\map\` (MapBuilder, LeaderboardService) + `friends-test\GalaxyHUD.lua`.
+
+**Republish needed:** all of this is in the open place only. Save / publish again.
