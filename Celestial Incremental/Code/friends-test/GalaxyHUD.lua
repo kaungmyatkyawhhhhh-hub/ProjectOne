@@ -119,7 +119,7 @@ do
 	Kit.sparkle(top, 76, 10, 8, 1.3)
 end
 local counterText = Kit.text(top, 96, 26, 100, 30, "0", 24, { ZIndex = 9 })
-local rateText = Kit.text(top, 186, 35, 90, 16, "+0/s", 12, { ZIndex = 9, TextColor3 = hex("#ffc35a"), stroke = 1.2 })
+local rateText = Kit.text(top, 186, Kit.ps(35, 33), 90, 20, "+0/s", Kit.ps(12, 18), { ZIndex = 9, TextColor3 = hex("#ffc35a"), stroke = 1.2 })
 counterText.ZIndex = 9
 rateText.ZIndex = 9
 
@@ -218,7 +218,8 @@ for i, k in ipairs(KEYS) do
 	local img = Kit.icon(hot, k.icon, x - 4, y - 6, if k.icon == "forge" then 54 else 52, nil, { ZIndex = 5 })
 	if k.note then img.ImageTransparency = 0.45 end
 	if k.note then Kit.icon(hot, "lock", x + 30, y + 26, 22, nil, { ZIndex = 7 }) end
-	Kit.text(hot, x - 8, y - 18, 20, 16, k.key, 12, { ZIndex = 8, stroke = 1.5 })
+	-- (the key letter: only with a keyboard; phones have none)
+	if not Kit.phone() then Kit.text(hot, x - 8, y - 18, 20, 16, k.key, 12, { ZIndex = 8, stroke = 1.5 }) end
 	local label = Kit.text(hot, x - 24, y - 38, 96, 18, k.name, 15, { ZIndex = 8, TextColor3 = k.colour, TextXAlignment = Enum.TextXAlignment.Center })
 	local line = Kit.box(hot, x - 24, y - 19, 96, 2, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 8 })
 	label.Parent.Visible = false
@@ -468,7 +469,8 @@ local function windowRoom(): (number, number)
 end
 function windowScale(): number
 	local _, room = windowRoom()
-	return math.min(screenScale(), room / (470 + 34))
+	-- (phones: the window may use the glow's margin too, so its text is as big as the screen allows)
+	return math.min(screenScale(), room / (470 + Kit.ps(34, 6)), (viewport().X - 8) / 700)
 end
 function layout()
 	local s = screenScale()
@@ -593,10 +595,10 @@ local function showHint(step: number)
 	Kit.corner(c, 4)
 	Kit.stroke(c, Kit.INK, 2)
 	Kit.grad(c, hex("#ffd84a"), hex("#c79a0a"), 90)
-	Kit.text(c, 0, 3, 46, 20, (step + 1) .. "/" .. #Econ.Tutorial, 15, { ZIndex = 22, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.5 })
-	Kit.text(f, 60, 8, 230, 22, def.hint, 16, { ZIndex = 21 })
+	Kit.text(c, 0, Kit.ps(3, 2), 46, 22, (step + 1) .. "/" .. #Econ.Tutorial, Kit.ps(15, 18), { ZIndex = 22, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.5 })
+	Kit.text(f, 60, Kit.ps(8, 7), 236, 24, def.hint, Kit.ps(16, 18), { ZIndex = 21 })
 	Kit.icon(f, "essence", 300, 2, 32, Color3.fromRGB(60, 230, 210), { ZIndex = 22 })
-	Kit.text(f, 326, 8, 34, 22, "+" .. def.essence, 16, { ZIndex = 22, TextColor3 = hex("#7dffe9") })
+	Kit.text(f, 326, Kit.ps(8, 7), 34, 24, "+" .. def.essence, Kit.ps(16, 18), { ZIndex = 22, TextColor3 = hex("#7dffe9") })
 	tut.hint = f
 end
 local arrow = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.arrow, Size = UDim2.fromOffset(44, 44), AnchorPoint = Vector2.new(0.5, 1), Visible = false, ZIndex = 60 }, gui)

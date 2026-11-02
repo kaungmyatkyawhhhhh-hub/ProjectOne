@@ -197,7 +197,7 @@ end
 for i, p in ipairs(PAGES) do
 	local x, y = 28, 82 + (i - 1) * 52
 	local b, inner = Kit.button(win, x, y, 166, 42, hex(p.c1), hex(p.c2), { ZIndex = 6 })
-	local label = Kit.text(inner, 30, 9, 132, 24, p.tab, 17, { ZIndex = inner.ZIndex, stroke = 1.6, TextXAlignment = CENTRE })
+	local label = Kit.text(inner, 30, Kit.ps(9, 8), 132, 26, p.tab, Kit.ps(17, 20), { ZIndex = inner.ZIndex, stroke = 1.6, TextXAlignment = CENTRE })
 	local icon = Kit.icon(win, p.icon, x - 12, y - 6, 50, nil, { ZIndex = 9 })
 	local lockIcon = Kit.icon(win, "lock", x + 138, y + 18, 24, nil, { ZIndex = 10 })
 	-- the selected page: a pulsing gold outline round its button
@@ -222,7 +222,7 @@ local function place()
 	local small = vp.Y < 500
 	local top = 84 * s
 	local room = (if small then vp.Y - 6 else vp.Y - 104 * s) - top
-	local want = math.min(s, room / (470 + 34), (vp.X - 24) / (700 + 40))
+	local want = math.min(Kit.ps(s, 0.85), room / (470 + Kit.ps(34, 6)), (vp.X - Kit.ps(24, 8)) / (700 + 40))
 	holder.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + 15 * want)
 	return want
 end

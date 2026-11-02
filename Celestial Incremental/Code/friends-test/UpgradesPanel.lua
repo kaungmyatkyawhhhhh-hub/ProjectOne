@@ -115,8 +115,8 @@ function Panel.new(parent: Instance, opts)
 	Kit.corner(chip, 4)
 	Kit.stroke(chip, Kit.INK, 2)
 	if chipName == "SHARDS" then Kit.grad(chip, hex("#3a1f7a"), hex("#7a4cff"), 0) else Kit.grad(chip, hex("#0f5a5a"), hex("#22c7b8"), 0) end
-	self.chipText = Kit.text(win, 470, 12, 70, 24, "0", 20, { ZIndex = 8, stroke = 1.5, TextXAlignment = Enum.TextXAlignment.Center })
-	Kit.text(win, 470, 33, 70, 12, chipName, 9, { ZIndex = 8, stroke = 1, TextColor3 = if chipName == "SHARDS" then hex("#e6dcff") else hex("#dcfffb"), TextXAlignment = Enum.TextXAlignment.Center })
+	self.chipText = Kit.text(win, 470, 10, 70, 24, "0", 20, { ZIndex = 8, stroke = 1.5, TextXAlignment = Enum.TextXAlignment.Center })
+	Kit.text(win, 470, Kit.ps(33, 31), 70, Kit.ps(12, 16), chipName, Kit.ps(9, 14), { ZIndex = 8, stroke = 1, TextColor3 = if chipName == "SHARDS" then hex("#e6dcff") else hex("#dcfffb"), TextXAlignment = Enum.TextXAlignment.Center })
 	if chipName == "SHARDS" then
 		Kit.icon(win, "shard", 548, 2, 50, Color3.fromRGB(170, 110, 255), { ZIndex = 8 })
 	else
@@ -148,11 +148,11 @@ function Panel.new(parent: Instance, opts)
 		local x, y = 28, 88 + (i - 1) * 58
 		local b, inner = Kit.button(win, x, y, 166, 46, hex(t.c1), hex(t.c2), { ZIndex = 6 })
 		if t.locked then
-			Kit.text(inner, 30, 5, 136, 20, t.id, 15, { ZIndex = inner.ZIndex, stroke = 1.6, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
-			Kit.text(inner, 30, 26, 136, 14, t.locked, 10, { ZIndex = inner.ZIndex, stroke = 1.1, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#a99fb8") })
+			Kit.text(inner, 30, Kit.ps(5, 2), 136, 20, t.id, Kit.ps(15, 19), { ZIndex = inner.ZIndex, stroke = 1.6, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
+			Kit.text(inner, 30, Kit.ps(26, 25), 136, Kit.ps(14, 20), t.locked, Kit.ps(10, 17), { ZIndex = inner.ZIndex, stroke = 1.1, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#a99fb8") })
 			Kit.icon(win, "lock", x + 140, y + 22, 26, nil, { ZIndex = 10 })
 		else
-			Kit.text(inner, 30, 12, 136, 22, t.id, 17, { ZIndex = inner.ZIndex, stroke = 1.6, TextXAlignment = Enum.TextXAlignment.Center })
+			Kit.text(inner, 30, Kit.ps(12, 10), 136, 26, t.id, Kit.ps(17, 20), { ZIndex = inner.ZIndex, stroke = 1.6, TextXAlignment = Enum.TextXAlignment.Center })
 		end
 		local img = Kit.icon(win, t.icon, x - 12, y - 8, if t.icon == "forge" then 56 else 54, t.glow, { ZIndex = 9 })
 		if t.locked then img.ImageTransparency = 0.35 end
@@ -235,11 +235,11 @@ function Panel:setButton(row, state: string, price: number?, label: string?)
 	elseif state == "locked" then
 		local img = Kit.icon(inner, "lock", 10, 10, 30, nil, { ZIndex = z })
 		img.ImageTransparency = 0.2
-		Kit.text(inner, 38, 15, 104, 24, label or "LOCKED", if #(label or "LOCKED") > 9 then 13 else 18, { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
+		Kit.text(inner, 38, Kit.ps(15, 12), 104, 28, label or "LOCKED", if #(label or "LOCKED") > 9 then Kit.ps(13, 18) else Kit.ps(18, 20), { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
 	else
 		local top = 10
 		if label then
-			Kit.text(inner, 0, 3, 146, 14, label, 11, { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.2 })
+			Kit.text(inner, 0, 2, 146, Kit.ps(14, 20), label, Kit.ps(11, 18), { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.2 })
 			top = 16
 		end
 		local ic = Kit.icon(inner, "stardust", 14, top + 2, if label then 22 else 26, nil, { ZIndex = z })
@@ -273,19 +273,20 @@ function Panel:chip(row, from: string, to: string?)
 	if row.chipKey == from .. "|" .. (to or "") then return end
 	row.chipKey = from .. "|" .. (to or "")
 	if row.chip then row.chip:Destroy() end
-	local holder = Kit.box(row.frame, 86, 60, 300, 32, { ZIndex = 6 })
+	local holder = Kit.box(row.frame, 86, Kit.ps(60, 74), 300, 32, { ZIndex = 6 })
 	row.chip = holder
 	-- sized to the text (v12: 160 wide with an arrow, 80 without, never smaller)
-	local function width(str) return TextService:GetTextSize(str, 17, Enum.Font.GothamBlack, Vector2.new(400, 30)).X + 4 end
+	local sz = Kit.ps(17, 19)
+	local function width(str) return TextService:GetTextSize(str, sz, Enum.Font.GothamBlack, Vector2.new(400, 30)).X + 4 end
 	local fromW = width(from)
 	local w = if to then math.max(160, 10 + fromW + 20 + width(to) + 10) else math.max(80, fromW + 20)
 	local c = Kit.box(holder, 0, 0, w, 32, { BackgroundTransparency = 0, BackgroundColor3 = hex("#221d2a"), ZIndex = 6 })
 	Kit.corner(c, 4)
 	Kit.stroke(c, hex("#3a3346"), 1.5)
-	Kit.text(holder, 10, 5, fromW, 22, from, 17, { ZIndex = 7, stroke = 1.5 })
+	Kit.text(holder, 10, 4, fromW, 24, from, sz, { ZIndex = 7, stroke = 1.5 })
 	if to then
 		Kit.text(holder, fromW + 12, 3, 16, 24, ">", 18, { ZIndex = 7, TextColor3 = hex("#9a90a8") })
-		Kit.text(holder, fromW + 28, 5, w - fromW - 30, 22, to, 17, { ZIndex = 7, stroke = 1.5, TextColor3 = hex("#7dff6b") })
+		Kit.text(holder, fromW + 28, 4, w - fromW - 30, 24, to, sz, { ZIndex = 7, stroke = 1.5, TextColor3 = hex("#7dff6b") })
 	end
 end
 
@@ -357,9 +358,10 @@ function Panel:bodyRow(i, k: number)
 	local look = TIER_LOOK[k + 1]
 	local row = { frame = self:newRowFrame(i, look[1]) }
 	Kit.icon(row.frame, tier.icon, -8, 2, if tier.icon == "comet" then 96 else 90, look[4], { ZIndex = 7 })
-	local lv = Kit.text(row.frame, 16, 82, 60, 16, "LV 0", 12, { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
-	Kit.text(row.frame, 86, 10, 300, 28, tier.name, 22, { ZIndex = 8, gradient = ColorSequence.new(hex(look[2]), hex(look[3])) })
-	local desc = Kit.text(row.frame, 88, 38, 196, 16, "", 11, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1 })
+	local lv = Kit.text(row.frame, 16, Kit.ps(82, 80), 60, 18, "LV 0", Kit.ps(12, 20), { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
+	Kit.text(row.frame, 86, Kit.ps(10, 4), 300, 28, tier.name, 22, { ZIndex = 8, gradient = ColorSequence.new(hex(look[2]), hex(look[3])) })
+	-- (phones: 2 lines at 20, so it reads at 12 px on a 667x375 screen)
+	local desc = Kit.text(row.frame, 88, Kit.ps(38, 30), 196, Kit.ps(16, 46), "", Kit.ps(11, 20), { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1, TextWrapped = Kit.phone() })
 	local node = tier.unlock and Econ.Ring1ById[tier.unlock]
 	row.onButton = function(b)
 		holdBuy(b, function()
@@ -421,9 +423,9 @@ end
 function Panel:nodeRow(i, node, look)
 	local row = { frame = self:newRowFrame(i, look[1]) }
 	Kit.icon(row.frame, node.icon, -8, 2, if node.icon == "comet" then 96 else 90, look[4], { ZIndex = 7 })
-	local lv = Kit.text(row.frame, 16, 82, 60, 16, "LV 0", 12, { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
-	Kit.text(row.frame, 86, 10, 300, 28, node.name, 22, { ZIndex = 8, gradient = ColorSequence.new(hex(look[2]), hex(look[3])) })
-	Kit.text(row.frame, 88, 38, 196, 16, node.desc, 11, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1 })
+	local lv = Kit.text(row.frame, 16, Kit.ps(82, 80), 60, 18, "LV 0", Kit.ps(12, 20), { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
+	Kit.text(row.frame, 86, Kit.ps(10, 4), 300, 28, node.name, 22, { ZIndex = 8, gradient = ColorSequence.new(hex(look[2]), hex(look[3])) })
+	Kit.text(row.frame, 88, Kit.ps(38, 30), 196, Kit.ps(16, 46), node.desc, Kit.ps(11, 20), { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1, TextWrapped = Kit.phone() })
 	local e = node.effect
 	local from, to
 	if e.kind == "tierMult" or e.kind == "allMult" then
@@ -468,7 +470,7 @@ function Panel:lockedPanel(t)
 	img.ImageTransparency = 0.35
 	Kit.icon(f, "lock", 250, 120, 48, nil, { ZIndex = 9 })
 	Kit.text(f, 0, 190, 446, 34, t.lockedTitle, 28, { ZIndex = 8, TextXAlignment = Enum.TextXAlignment.Center, gradient = ColorSequence.new(hex("#cfc6dd"), hex("#8a8296")) })
-	Kit.text(f, 30, 232, 386, 40, t.lockedText, 13, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1,
+	Kit.text(f, 30, 232, 386, Kit.ps(40, 60), t.lockedText, Kit.ps(13, 19), { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1,
 		TextXAlignment = Enum.TextXAlignment.Center, TextWrapped = true })
 end
 

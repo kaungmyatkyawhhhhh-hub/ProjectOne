@@ -109,7 +109,7 @@ local function place()
 	local small = vp.Y < 500
 	local top = 84 * s
 	local room = (if small then vp.Y - 6 else vp.Y - 104 * s) - top
-	local want = math.min(s, room / (H + 34), (vp.X - 24) / (W + 40))
+	local want = math.min(Kit.ps(s, 0.85), room / (H + Kit.ps(34, 6)), (vp.X - Kit.ps(24, 8)) / (W + 40))
 	holder.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + 15 * want)
 	return want
 end

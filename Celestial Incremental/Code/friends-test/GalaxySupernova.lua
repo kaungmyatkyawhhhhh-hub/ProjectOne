@@ -138,7 +138,7 @@ do
 	column(20, "KEEP", hex("#7dff6b"), { "Shards + ring 2 of the tree", "Supernova count + your rank", "Essence + the tutorial", "Your island's pieces" })
 	column(320, "RESET", hex("#ff7a6b"), { "Stardust", "Bodies (the asteroid stays)", "Ring 1 of the tree", "Your star system: back to a rock" })
 	-- what waiting gives
-	card.wait = Kit.text(win, 20, 326, 580, 24, "", 16, { ZIndex = 8, TextXAlignment = CENTRE, TextColor3 = hex("#ffd84a"), stroke = 1.3 })
+	card.wait = Kit.text(win, 20, 324, 580, 26, "", 18, { ZIndex = 8, TextXAlignment = CENTRE, TextColor3 = hex("#ffd84a"), stroke = 1.3 })
 	-- GO / NOT YET
 	local go, goInner = Kit.button(win, 330, 356, 270, 60, GOLD1, GOLD2, { ZIndex = 6 })
 	Kit.text(goInner, 0, 12, 270, 36, "GO SUPERNOVA", 28, { ZIndex = goInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
@@ -157,7 +157,7 @@ local function cardText()
 	local got = Econ.ShardsFor(earned, nodes)
 	local later = Econ.ShardsFor(earned * 2, nodes)
 	Kit.setText(card.got, got .. " SHARDS")
-	Kit.setText(card.wait, "Next Supernova gives more if you wait: earn 2x first = " .. later .. " shards (+" .. math.floor((later / math.max(got, 1) - 1) * 100 + 0.5) .. "%)")
+	Kit.setText(card.wait, "Wait to earn 2x first: " .. later .. " shards (+" .. math.floor((later / math.max(got, 1) - 1) * 100 + 0.5) .. "%)")
 	return got
 end
 local function closeCard()
@@ -175,7 +175,7 @@ local function openCard()
 	local s = screenScale()
 	local vp = viewport()
 	cardRoot.Position = UDim2.fromOffset(vp.X / 2, vp.Y / 2)
-	local want = math.min(s, (vp.Y - 20) / 440, (vp.X - 20) / 630)
+	local want = math.min(Kit.ps(s, 0.85), (vp.Y - 20) / 440, (vp.X - 20) / 630) -- (phones: as big as fits, for 12 px text)
 	cardScale.Scale = want * 0.8
 	cardRoot.Visible = true
 	dim.Visible = true

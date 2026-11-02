@@ -23,6 +23,17 @@ Kit.FONT_BOLD = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontW
 function Kit.calm(): boolean
 	return GuiService.ReducedMotionEnabled
 end
+-- a phone-size screen (overnight part 5): the windows' small texts get their phone sizes so they read at >= 12 px
+-- (Studio: the Workspace attribute TestPhone = the 667x375 phone frame)
+function Kit.phone(): boolean
+	if game:GetService("RunService"):IsStudio() and workspace:GetAttribute("TestPhone") == true then return true end
+	local cam = workspace.CurrentCamera
+	return cam ~= nil and cam.ViewportSize.Y > 10 and cam.ViewportSize.Y < 500
+end
+-- size `desktop`, or `phone` on a phone-size screen
+function Kit.ps(desktop: number, phone: number): number
+	return if Kit.phone() then phone else desktop
+end
 function Kit.hex(h: string): Color3
 	return Color3.fromHex(h)
 end

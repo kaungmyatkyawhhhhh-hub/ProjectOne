@@ -9,6 +9,9 @@
 --    Supernova count + 1; resets stardust, bodies (the asteroid stays) and ring 1; keeps shards, ring 2, Essence, the
 --    tutorial. The client plays the wind-up first and asks at the impact; the map / Star Surge see the count go up.
 --  * RING 2 (shards): "BuyRing2", id -> the node's next level (EconConfig.Ring2: costs, the Supernovas it needs, requires)
+--  * analytics (overnight part 5): onboarding funnel 1-7, custom events "Supernova" (value = the count, shards in
+--    field 1), "Ring2Buy" (value = the level, node in field 1), "PotionUsed", "SessionMinutes" (5 / 15 / 30);
+--    GalaxyCodeService "CodeRedeemed", GalaxyStoreService "PassPromptShown" / "PassBought"
 --  * alpha part 2: "Settings", { music, sfx } (the Settings sliders, 0..1 -> VolMusic / VolSfx) and "GuideSeen", id (the
 --    GUIDE BOOK pages you've opened -> GuideSeen, comma-separated); both in the save
 --  * the player attributes the map reads: Bodies, BodyTiers, Supernovas, Rank, SupernovaReady, BestRunStardust,
@@ -340,6 +343,7 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		d.ring2[node.id] = level + 1
 		checkTutorial(player, s)
 		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "Ring2Buy", level + 1, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = node.id }) end)
 		return true, level + 1
 	elseif action == "Settings" then
 		if type(arg) ~= "table" then return false, "bad" end
@@ -424,6 +428,15 @@ local function onPlayer(player: Player)
 	player:SetAttribute("Loaded", true)
 	if noSave then warn("[GalaxyEcon] saving is OFF for", player.Name, "(Studio without API access, or no DataStore)") end
 	task.spawn(cometLoop, player, s)
+	-- session milestones (analytics custom event "SessionMinutes", value 5 / 15 / 30), once each per session
+	task.spawn(function()
+		local start = os.clock()
+		for _, m in ipairs({ 5, 15, 30 }) do
+			while sessions[player] == s and os.clock() - start < m * 60 do task.wait(5) end
+			if sessions[player] ~= s then return end
+			pcall(function() AnalyticsService:LogCustomEvent(player, "SessionMinutes", m) end)
+		end
+	end)
 end
 Players.PlayerAdded:Connect(onPlayer)
 for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end

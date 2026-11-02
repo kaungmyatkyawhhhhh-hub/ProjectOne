@@ -333,7 +333,7 @@ function UI:buildTree()
 		local t = { node = node, ring = spec.ring, later = spec.later, tile = tile, stroke = st, img = img, value = value, costIcon = costIcon, cost = cost, x = x }
 		if node and spec.ring == 2 and #node.costs > 1 then
 			-- (a node with levels: "2/5" in the top-left corner)
-			t.level = Kit.text(sf, x + 10, y + 6, 60, 26, "", 20, { ZIndex = 8, stroke = 1.8, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#d9c2ff") })
+			t.level = Kit.text(sf, x + 10, y + 4, 70, 30, "", Kit.ps(20, 26), { ZIndex = 8, stroke = 1.8, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#d9c2ff") })
 		end
 		if spec.later then
 			-- (a branch not in the game yet: a big "?" over the silhouette)
@@ -415,7 +415,7 @@ function UI:refreshTile2(t, r2, sh: number, novas: number, sel)
 	if locked then
 		Kit.setText(t.cost, reason)
 		t.cost.TextColor3 = GREY_TEXT
-		textSize(t.cost, if #reason > 11 then 17 else 22)
+		textSize(t.cost, if #reason > 11 then Kit.ps(17, 21) else Kit.ps(22, 25))
 		t.cost.Parent.Position = UDim2.fromOffset(t.x + 4, t.tile.Position.Y.Offset + TILE_H + 6)
 	elseif maxed then
 		Kit.setText(t.cost, "MAX")
