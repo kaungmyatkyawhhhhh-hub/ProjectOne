@@ -132,3 +132,16 @@ Phones are roughly 3-5x slower than this PC.
   - Expected: about 900 fewer parts and about 600 fewer signs. Signs cost 0.3-1.9 ms on PC in total, so the plates should be roughly 0.1-0.6 ms on PC and 0.5-2 ms on a phone, most in the Starter Gym.
   - Needs the owner to import the meshes and textures (like the earlier Blender models).
 - **Next candidate found:** TutorialClient's guide-path dots (`UI.GuidePath`) cost ~0.2-1 ms a frame while the tutorial runs, which is every new player's first minutes.
+
+## Plate signs baked into images (2 Nov, owner: "try doing the signs in blender")
+- **Not a Blender model.** Each plate face's live sign (two rings, the number twice, "M WEIGHTS" twice: ~18 TextLabels per face) is drawn 1:1 into one PNG and shown as a Decal `PlateFace` on the face. Same look, no mesh import needed. One image per weight: 45, 35, 25, 55, 10, 5, 100. Ids and files: [[GYM ARC - Assets]] "Plate face images".
+- **Converted:**
+  - the 7 templates in `ReplicatedStorage.GymAssets.Plates` (originals backed up in `ServerStorage.PlateTemplatesBeforeDecals_2Nov`);
+  - every matching plate face in Workspace: **416 faces, 5,248 live text labels removed.**
+  - 10 faces with a different (pearl) colour scheme were left as live text, and so were the plate-rack plates with a single Montserrat number on a Label part.
+- **MachineService and RetentionService:** where they switch on the outermost plate's sign, they now also show its `PlateFace` image. A hidden image (Transparency 1) is used for the inner plates, as before.
+- **Tested in Play:**
+  - no errors; 421 plate images shown, 1,137 hidden;
+  - the loaded bars look like before (shot: `Assets/plate_faces/in_game_incline_bench.jpg`);
+  - both faces read the right way round (checked from both sides).
+- **Measured:** with the plate signs on, the Pro Gym was 23.6 / 19.9 ms render CPU, and 21.1 / 18.2 with them switched off. After the change it reads 20.7 / 18.9, about the switched-off level. Studio's noise is ±1-2 ms, so the live phone check is the real measure.
