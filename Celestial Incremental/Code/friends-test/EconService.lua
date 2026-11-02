@@ -9,6 +9,8 @@
 --    Supernova count + 1; resets stardust, bodies (the asteroid stays) and ring 1; keeps shards, ring 2, Essence, the
 --    tutorial. The client plays the wind-up first and asks at the impact; the map / Star Surge see the count go up.
 --  * RING 2 (shards): "BuyRing2", id -> the node's next level (EconConfig.Ring2: costs, the Supernovas it needs, requires)
+--  * alpha part 2: "Settings", { music, sfx } (the Settings sliders, 0..1 -> VolMusic / VolSfx) and "GuideSeen", id (the
+--    GUIDE BOOK pages you've opened -> GuideSeen, comma-separated); both in the save
 --  * the player attributes the map reads: Bodies, BodyTiers, Supernovas, Rank, SupernovaReady, BestRunStardust,
 --    Tree_CometLure, CometsCaught; and the ones the HUD reads: Stardust, Income, EarnedRun, Essence, TutStep, Own1..,
 --    Node_<id>, Loaded
@@ -56,7 +58,7 @@ local function newData()
 	local owned = {}
 	for i = 1, #Econ.Tiers do owned[i] = Econ.StartOwned[i] or 0 end
 	return { v = Econ.DataVersion, stardust = 0, earnedRun = 0, earnedTotal = 0, bestRun = 0, owned = owned, nodes = {},
-		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {} }
+		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {}, settings = {}, guide = {} }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -81,6 +83,9 @@ local function migrate(d): (any, boolean)
 		end
 	end
 	d.ring2 = r2
+	-- (alpha part 2: settings + guide pages; no version bump, an older save just gets them empty)
+	if type(d.settings) ~= "table" then d.settings = {} end
+	if type(d.guide) ~= "table" then d.guide = {} end
 	d.v = Econ.DataVersion
 	return d, false
 end
@@ -177,7 +182,14 @@ local function publish(player: Player, s)
 	player:SetAttribute("BestRunStardust", math.max(d.bestRun, d.earnedRun))
 	player:SetAttribute("Tree_CometLure", if d.nodes.CometLure then 1 else 0)
 	player:SetAttribute("CometsCaught", d.comets)
+	if type(d.settings.music) == "number" then player:SetAttribute("VolMusic", d.settings.music) end
+	if type(d.settings.sfx) == "number" then player:SetAttribute("VolSfx", d.settings.sfx) end
+	local seen = {}
+	for id in pairs(d.guide) do table.insert(seen, id) end
+	table.sort(seen)
+	player:SetAttribute("GuideSeen", table.concat(seen, ","))
 end
+local GUIDE_PAGES = { Stardust = true, Island = true, Tree = true, Comets = true, Supernova = true, Surge = true, Ranks = true }
 
 ------------------------------------------------------------------------ tutorial
 local TUT_DONE = {
@@ -304,6 +316,19 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		checkTutorial(player, s)
 		publish(player, s)
 		return true, level + 1
+	elseif action == "Settings" then
+		if type(arg) ~= "table" then return false, "bad" end
+		for _, k in ipairs({ "music", "sfx" }) do
+			local v = arg[k]
+			if type(v) == "number" and v == v and v >= 0 and v <= 1 then d.settings[k] = math.floor(v * 100 + 0.5) / 100 end
+		end
+		publish(player, s)
+		return true
+	elseif action == "GuideSeen" then
+		if type(arg) ~= "string" or not GUIDE_PAGES[arg] then return false, "bad" end
+		d.guide[arg] = true
+		publish(player, s)
+		return true
 	elseif action == "Supernova" then
 		-- (the client has played the wind-up; this is the impact)
 		local got = Econ.ShardsFor(d.earnedRun, d.nodes)

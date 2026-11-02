@@ -90,8 +90,9 @@ for _, n in ipairs(Econ.Ring1) do Econ.Ring1ById[n.id] = n end
 -- buy priced so the build is worth ~x(1 + 0.1 * shards spent) (the design's rule); the two tier unlocks have a floor (3 / 5).
 -- novas = the Supernovas you need first; requires = the node before it
 Econ.Ring2 = {
+	-- (alpha 2, 3 Nov: x1.5 -> x1.75 a level, so the second run is ~2x faster)
 	{ id = "Starfire", name = "STARFIRE", icon = "sun", costs = { 5, 8, 15, 25, 40 },
-		desc = "every body earns x1.5 a level", effect = { kind = "allMult", mult = 1.5 } },
+		desc = "every body earns x1.75 a level", effect = { kind = "allMult", mult = 1.75 } },
 	{ id = "StarTier", name = "STAR", icon = "sun", costs = { 3 }, novas = 1,
 		desc = "unlocks the Star", effect = { kind = "unlockTier", tier = 4 } },
 	{ id = "HeavyElements", name = "HEAVY ELEMENTS", icon = "gasgiant", costs = { 20 }, requires = "StarTier",
@@ -132,7 +133,7 @@ function Econ.TierIncomeWith(k: number, owned: number, nodes, r2): number
 	if ((r2 or {}).HeavyElements or 0) >= 1 then inc *= 1 + Econ.Ring2ById.HeavyElements.effect.per * (k + 1) end
 	return inc
 end
--- every body x: ring 1's allMult nodes x Starfire (x1.5 a level)
+-- every body x: ring 1's allMult nodes x Starfire (x1.75 a level)
 function Econ.AllMult(nodes, r2): number
 	local m = 1
 	for _, n in ipairs(Econ.Ring1) do
@@ -168,10 +169,12 @@ Econ.Comet = {
 ------------------------------------------------------------------------ Supernova (design section 1: needs 1M stardust EARNED this run;
 -- shards = floor(10 * sqrt(earned / 1M)), +20% with Supernova Readiness). Resets stardust, bodies (the asteroid stays), ring 1.
 -- Keeps shards, ring 2, the Supernova count + rank, Essence, the tutorial, the island's pieces.
-Econ.SupernovaNeed = 1e6
+-- (alpha 2, 3 Nov: the need 1M -> 2M for a ~10 min first run; the shards formula stays on 1M, so the first gives 14)
+Econ.SupernovaNeed = 2e6
+Econ.ShardBase = 1e6
 function Econ.ShardsFor(earned: number, nodes): number
 	if earned < Econ.SupernovaNeed then return 0 end
-	local base = 10 * math.sqrt(earned / Econ.SupernovaNeed)
+	local base = 10 * math.sqrt(earned / Econ.ShardBase)
 	for _, n in ipairs(Econ.Ring1) do
 		if nodes[n.id] and n.effect.kind == "shardBonus" then base *= 1 + n.effect.pct / 100 end
 	end

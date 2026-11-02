@@ -15,6 +15,8 @@ return {
 		gasgiant = "rbxassetid://115501670650344",
 		essence = "rbxassetid://76524340395639",
 		lock = "rbxassetid://116845939092136",
+		-- (alpha part 2, 3 Nov: the GUIDE BOOK key; Icons\rendered\icon_book.png, uploaded from Studio = a test copy, re-upload to P&L Studios XP)
+		book = "rbxassetid://80421452290179",
 	},
 	stripes = "rbxassetid://123710673700412", -- 512x128, white diagonal stripes (v12 .stripes)
 	glow9 = "rbxassetid://109052962777294", -- 128 px 9-slice soft glow (window breathe)
@@ -24,4 +26,14 @@ return {
 	plate = "rbxassetid://126195526088194", -- the top counter's slanted plate (white, tinted)
 	header = "rbxassetid://98206491746323", -- 900x80 orange header texture
 	arrow = "rbxassetid://138731187772172", -- tutorial arrow (points down)
+	-- the GUIDE BOOK pictures (alpha part 2): screenshots of the game taken in Studio, UI\guide\guide_<id>.png
+	guide = {
+		Stardust = "rbxassetid://117771352697576",
+		Island = "rbxassetid://88625933516654",
+		Tree = "rbxassetid://88657456847726",
+		Comets = "rbxassetid://88359616710103",
+		Supernova = "rbxassetid://83888667277193",
+		Surge = "rbxassetid://70451896435179",
+		Ranks = "rbxassetid://123011182047961",
+	},
 }

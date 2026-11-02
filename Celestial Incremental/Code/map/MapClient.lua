@@ -28,6 +28,7 @@ local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 local Kit = require(Galaxy:WaitForChild("Kit"))
 local UIAssets = require(Galaxy:WaitForChild("UIAssets"))
+local UIKit = require(Galaxy:WaitForChild("UIKit")) -- (alpha part 2: the comet / island-piece sounds, Galaxy.Sounds)
 local remote = Galaxy:WaitForChild("MapEvent", 30) :: RemoteEvent
 
 local C = MapConfig.Colors
@@ -315,6 +316,7 @@ local function popIn(piece: Instance)
 			end
 		end
 		sparkleBurst(cf.Position + Vector3.new(0, size.Y / 2, 0), 18 + math.floor(size.Magnitude), nil, 0.7)
+		UIKit.sound("piecePop", { at = cf.Position })
 	end)
 end
 
@@ -473,6 +475,7 @@ function spawnComet(id: number, seed: number, tutorial: boolean?)
 	trail.WidthScale = NumberSequence.new(1, 0)
 	trail.FaceCamera = true
 	trail.Parent = hit
+	UIKit.sound("cometAppear")
 	comets[hit] = { id = id, head = head, parts = parts, hit = hit, pos = from, dir = dir, born = os.clock(), through = through,
 		speed = if tutorial then 22 else 60, life = if tutorial then 10 else 9, tutorial = tutorial, slowUntil = 0, slowed = false }
 	if tutorial then
@@ -509,6 +512,7 @@ local function removeComet(comet, caught: boolean)
 	comets[comet.hit] = nil
 	if caught then
 		sparkleBurst(comet.pos, 40, Color3.fromRGB(170, 235, 255), 1)
+		UIKit.sound("cometCatch")
 		if remote then remote:FireServer("Comet", comet.id) end
 	end
 	comet.head:Destroy()

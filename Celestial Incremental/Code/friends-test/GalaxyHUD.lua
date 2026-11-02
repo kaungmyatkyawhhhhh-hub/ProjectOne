@@ -12,6 +12,8 @@
 -- have any; shared.GalaxyShardsTarget() = where flying shards land), hotbar T = the 2D TREE window (the island's Constellation
 -- Tree + Info screens, IslandBoardsUI), tutorial steps 5-7 (the bar to 50%, the SUPERNOVA button, STARFIRE in the tree).
 -- The SUPERNOVA button, card and cinematic are GalaxySupernova's.
+-- Alpha part 2 (3 Nov): hotbar G = the GUIDE BOOK (GalaxyGuide, with its red dot), Q = SETTINGS (GalaxySettings); the window
+-- open / close, new body and x2 milestone sounds (Galaxy.Sounds); at TUTORIAL COMPLETE the Star Forge glows in the world.
 -- Numbers all come from EconConfig; the server decides every buy (EconRequest).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -194,13 +196,14 @@ local function floatText(parent, x, y, str, colour: Color3, size)
 end
 
 ------------------------------------------------------------------------ HOTBAR (v6, v12 bottom: keys at 480 + i*70, y 650)
-local hot, hotScale = scaledRoot("Hotbar", Vector2.new(0.5, 1), 360, 110)
+local hot, hotScale = scaledRoot("Hotbar", Vector2.new(0.5, 1), 430, 110)
 local KEYS = {
 	{ key = "U", colour = hex("#ff9a3a"), icon = "stardust", name = "UPGRADES", window = "Upgrades" },
 	{ key = "F", colour = hex("#ffd84a"), icon = "forge", name = "STAR FORGE", note = "STAR FORGE: opens at SUPERNOVA 3" },
 	{ key = "T", colour = hex("#7dff8a"), icon = "planet", name = "TREE", window = "Tree" },
+	{ key = "G", colour = hex("#b49bff"), icon = "book", name = "GUIDE", window = "Guide" },
 	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", note = "STORE: not in this test" },
-	{ key = "Q", colour = hex("#c9c4d2"), icon = "gear", name = "SETTINGS", note = "SETTINGS: not in this test" },
+	{ key = "Q", colour = hex("#c9c4d2"), icon = "gear", name = "SETTINGS", window = "Settings" },
 }
 local keyUI = {}
 for i, k in ipairs(KEYS) do
@@ -221,6 +224,19 @@ for i, k in ipairs(KEYS) do
 	local hit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, Position = UDim2.fromOffset(x - 8, y - 8), Size = UDim2.fromOffset(62, 62), ZIndex = 10 }, hot)
 	keyUI[k.key] = { label = label.Parent, line = line, hit = hit, diamond = d, x = x, y = y, sparkles = {} }
 end
+-- the red "new" dot on a key (the GUIDE BOOK's new pages)
+local keyDots = {}
+shared.GalaxyHotbarDot = function(key: string, on: boolean)
+	local ui = keyUI[key]
+	if not ui then return end
+	if on and not keyDots[key] then
+		keyDots[key] = Kit.redDot(hot, ui.x + 40, ui.y - 2, 16, 12)
+	elseif not on and keyDots[key] then
+		keyDots[key]:Destroy()
+		keyDots[key] = nil
+	end
+end
+if shared.GalaxyGuideRefresh then shared.GalaxyGuideRefresh() end
 
 ------------------------------------------------------------------------ the UPGRADES window: UpgradesPanel, the same v12 window
 -- (and the same code) as the live island board
@@ -325,7 +341,9 @@ local function openWindow(tab: string?)
 		if tab and tab ~= panel.currentTab then selectTab(tab) end
 		return
 	end
+	if shared.GalaxyCloseSide then shared.GalaxyCloseSide() end
 	open = true
+	Kit.sound("open")
 	win.Visible = true
 	setKeySelected("U")
 	selectTab(tab or panel.currentTab)
@@ -337,6 +355,7 @@ end
 local function closeWindow()
 	if not open then return end
 	open = false
+	Kit.sound("close")
 	setKeySelected(nil)
 	Kit.tween(winScale, { Scale = winScale.Scale * 0.85 }, 0.15)
 	task.delay(0.15, function()
@@ -348,6 +367,7 @@ closeBtn.MouseButton1Click:Connect(closeWindow)
 local function closeTree()
 	if not treeOpen then return end
 	treeOpen = false
+	Kit.sound("close")
 	setKeySelected(nil)
 	Kit.tween(treeScale, { Scale = treeScale.Scale * 0.85 }, 0.15)
 	task.delay(0.15, function()
@@ -359,8 +379,10 @@ shared.GalaxyCloseTree = closeTree
 local function openTree()
 	if open then closeWindow() end
 	if treeOpen then return end
+	if shared.GalaxyCloseSide then shared.GalaxyCloseSide() end
 	buildTreeWindow()
 	treeOpen = true
+	Kit.sound("open")
 	treeWin.Visible = true
 	setKeySelected("T")
 	if not treeCtx.picked then treeCtx.sel = treeDefault() end
@@ -371,8 +393,31 @@ local function openTree()
 	Kit.tween(treeScale, { Scale = ws }, 0.25, Enum.EasingStyle.Back)
 end
 local tutorialTab -- set by the tutorial: the tab the current step needs
+-- the side windows (GUIDE BOOK, SETTINGS: their own scripts): one open at a time with U / T; the phone hotbar hides for them too
+local sideOpen = nil
+shared.GalaxySideWindow = function(key: string, on: boolean)
+	if on then
+		if open then closeWindow() end
+		if treeOpen then closeTree() end
+		sideOpen = key
+		setKeySelected(key)
+	elseif sideOpen == key then
+		sideOpen = nil
+		setKeySelected(nil)
+	end
+	layout()
+end
+-- closes whichever side window is open (except `keep`)
+shared.GalaxyCloseSide = function(keep: string?)
+	if sideOpen == "G" and keep ~= "G" and shared.GalaxyGuideClose then shared.GalaxyGuideClose() end
+	if sideOpen == "Q" and keep ~= "Q" and shared.GalaxySettingsClose then shared.GalaxySettingsClose() end
+end
 local function pressKey(k)
-	if k.window == "Tree" then
+	if k.window == "Guide" then
+		if shared.GalaxyGuideToggle then shared.GalaxyGuideToggle() end
+	elseif k.window == "Settings" then
+		if shared.GalaxySettingsToggle then shared.GalaxySettingsToggle() end
+	elseif k.window == "Tree" then
 		if treeOpen then closeTree() else openTree() end
 	elseif k.window then
 		if treeOpen then closeTree() end
@@ -437,7 +482,7 @@ function layout()
 	local hintRoom = if not small and (player:GetAttribute("TutStep") or 0) < #Econ.Tutorial then 46 * s else 0
 	treeScale.Scale = math.min((room - hintRoom) / 650, (vp.X - 24) / 1124, s)
 	treeWin.Position = UDim2.fromOffset(vp.X / 2, topEdge + hintRoom + (room - hintRoom) / 2)
-	hot.Visible = not (small and (open or treeOpen))
+	hot.Visible = not (small and (open or treeOpen or sideOpen ~= nil))
 	-- the shards counter, right of the stardust counter
 	shardsRoot.Position = UDim2.new(0.5, math.floor(144 * s), 0, math.floor(16 * s))
 end
@@ -506,7 +551,22 @@ onIncome()
 local function onEssence() Kit.setText(ess, fmt(player:GetAttribute("Essence") or 0)) end
 player:GetAttributeChangedSignal("Essence"):Connect(onEssence)
 onEssence()
-for k = 1, #Econ.Tiers do player:GetAttributeChangedSignal("Own" .. k):Connect(function() if open then refreshRows() end end) end
+-- a new body: its chime; crossing 25 / 50 / 100... = the x2 milestone sound instead (one sound per buy, also for BUY MAX)
+local lastOwn = owned()
+for k = 1, #Econ.Tiers do
+	player:GetAttributeChangedSignal("Own" .. k):Connect(function()
+		if open then refreshRows() end
+		local now = player:GetAttribute("Own" .. k) or 0
+		local was = lastOwn[k] or 0
+		lastOwn[k] = now
+		if now <= was then return end
+		local crossed = false
+		for _, at in ipairs(Econ.Milestones) do
+			if was < at and now >= at then crossed = true end
+		end
+		Kit.sound(if crossed then "milestone" else "buyBody")
+	end)
+end
 for _, n in ipairs(Econ.Ring1) do player:GetAttributeChangedSignal("Node_" .. n.id):Connect(function() if open then refreshRows() end end) end
 
 ------------------------------------------------------------------------ the tutorial (steps 1-4 of the design)
@@ -569,6 +629,10 @@ local function stepTarget(step: number): (GuiObject?, string?)
 end
 
 local function tutorialComplete()
+	-- (the message and the glowing Forge need the screen: the windows close first)
+	closeWindow()
+	closeTree()
+	if shared.GalaxyCloseSide then shared.GalaxyCloseSide() end
 	local f = Kit.box(root, 0, 0, 520, 120, { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.38), ZIndex = 70 })
 	local sc = Instance.new("UIScale")
 	sc.Scale = screenScale() * 0.6
@@ -581,6 +645,42 @@ local function tutorialComplete()
 	Kit.text(f, 0, 94, 520, 22, "NEXT: STAR FORGE AT SUPERNOVA 3", 16, { ZIndex = 71, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#ffd84a") })
 	for i = 1, 10 do Kit.sparkle(f, math.random(0, 500), math.random(-10, 100), math.random(10, 20), i * 0.12) end
 	Kit.tween(sc, { Scale = screenScale() }, 0.35, Enum.EasingStyle.Back)
+	Kit.sound("milestone")
+	-- (design: "the Forge gate glows in the world"): the Star Forge glows gold and pulses for 20 s
+	task.spawn(function()
+		local g = workspace:FindFirstChild("Galaxy")
+		local forge = g and g:FindFirstChild("StarForge", true)
+		if not forge then return end
+		local h = Instance.new("Highlight")
+		h.Name = "TeaserGlow"
+		h.FillColor = Color3.fromRGB(255, 200, 70)
+		h.OutlineColor = Color3.fromRGB(255, 230, 140)
+		h.FillTransparency = 1
+		h.OutlineTransparency = 1
+		h.DepthMode = Enum.HighlightDepthMode.Occluded
+		h.Adornee = forge
+		h.Parent = forge
+		local light = Instance.new("PointLight")
+		light.Color = Color3.fromRGB(255, 190, 80)
+		light.Range = 30
+		light.Brightness = 0
+		local anvil = forge:FindFirstChild("Anvil", true)
+		local lp = if anvil and anvil:IsA("BasePart") then anvil elseif anvil then anvil:FindFirstChildWhichIsA("BasePart", true) else nil
+		light.Parent = lp
+		Kit.tween(h, { OutlineTransparency = 0 }, 0.6)
+		Kit.tween(light, { Brightness = 3 }, 0.6)
+		if Kit.calm() then
+			h.FillTransparency = 0.7
+		else
+			Kit.tween(h, { FillTransparency = 0.55 }, 0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+		end
+		task.wait(20)
+		Kit.tween(h, { OutlineTransparency = 1, FillTransparency = 1 }, 1)
+		Kit.tween(light, { Brightness = 0 }, 1)
+		task.wait(1.1)
+		h:Destroy()
+		light:Destroy()
+	end)
 	task.delay(2.8, function()
 		Kit.tween(sc, { Scale = screenScale() * 0.9 }, 0.25)
 		for _, d in ipairs(f:GetDescendants()) do

@@ -418,27 +418,232 @@ function Kit.tagVfx(o)
 	return o
 end
 
--- UI sounds (pooled, pitch varied a little): the built-in UI click pitched per action. (A proper buy sound needs an audio
--- upload to P&L Studios XP: then only the ids below change.)
-local SOUNDS = { buy = { "rbxasset://sounds/volume_slider.ogg", 1.5, 0.7 }, tab = { "rbxasset://sounds/volume_slider.ogg", 1.15, 0.45 },
-	no = { "rbxasset://sounds/volume_slider.ogg", 0.7, 0.5 } }
-local pool, poolI = {}, 0
-function Kit.sound(name: string)
-	local spec = SOUNDS[name]
-	if not spec then return end
-	if #pool == 0 then
-		for i = 1, 6 do
-			local s = Instance.new("Sound")
-			s.Parent = game:GetService("SoundService")
-			pool[i] = s
-		end
+------------------------------------------------------------------------ SOUND (alpha part 2): every id is in Galaxy.Sounds.
+-- Two SoundGroups carry the player's Settings sliders: GalaxySFX (every effect) and GalaxyMusic (the loop).
+-- Kit.sound(name, opts?) -> Sound: pooled 2D, or 3D at opts.at (a Vector3); opts.pitch / opts.volume multiply the config's.
+-- The old names still work: "buy" = the click, "no" = the error thud.
+local SoundService = game:GetService("SoundService")
+local SoundCfg = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("Sounds"))
+Kit.Sounds = SoundCfg
+local groups = {}
+local function soundGroup(name: string): SoundGroup
+	if groups[name] then return groups[name] end
+	local g = SoundService:FindFirstChild("Galaxy" .. name)
+	if not g then
+		g = Instance.new("SoundGroup")
+		g.Name = "Galaxy" .. name
+		g.Volume = if name == "Music" then SoundCfg.Default.music else SoundCfg.Default.sfx
+		g.Parent = SoundService
 	end
-	poolI = poolI % #pool + 1
-	local s = pool[poolI]
-	s.SoundId = spec[1]
-	s.PlaybackSpeed = spec[2] * (1 + (math.random() - 0.5) * 0.08)
-	s.Volume = spec[3]
+	groups[name] = g
+	return g
+end
+local ALIAS = { buy = "click", no = "error" }
+local pool, poolI = {}, 0
+function Kit.sound(name: string, opts): Sound?
+	local spec = SoundCfg.List[ALIAS[name] or name]
+	if not spec then return nil end
+	local s: Sound
+	if opts and opts.at then
+		-- 3D: heard near where it happens (an attachment in the terrain, gone when the sound ends)
+		local a = Instance.new("Attachment")
+		a.WorldPosition = opts.at
+		a.Parent = workspace.Terrain
+		s = Instance.new("Sound")
+		s.RollOffMode = Enum.RollOffMode.InverseTapered
+		s.RollOffMinDistance = 12
+		s.RollOffMaxDistance = spec.range or 160
+		s.Parent = a
+		s.Ended:Once(function() a:Destroy() end)
+		task.delay(8, function() if a.Parent then a:Destroy() end end)
+	else
+		if #pool == 0 then
+			for i = 1, 12 do
+				local p = Instance.new("Sound")
+				p.Name = "KitSound" .. i
+				p.Parent = SoundService
+				pool[i] = p
+			end
+		end
+		poolI = poolI % #pool + 1
+		s = pool[poolI]
+	end
+	s.SoundGroup = soundGroup("SFX")
+	s.SoundId = "rbxassetid://" .. spec.id
+	s.Volume = spec.volume * ((opts and opts.volume) or 1)
+	s.PlaybackSpeed = (spec.pitch or 1) * ((opts and opts.pitch) or 1) * (1 + (math.random() * 2 - 1) * (spec.vary or 0))
+	s.TimePosition = spec.start or 0
 	s:Play()
+	return s
+end
+-- the music loop (one, started once); Kit.musicFade(k, t): to k x its volume in t seconds (0 = silent, 1 = normal)
+local music: Sound? = nil
+function Kit.music(): Sound
+	if music then return music end
+	music = Instance.new("Sound")
+	music.Name = "GalaxyMusicLoop"
+	music.SoundId = "rbxassetid://" .. SoundCfg.Music.id
+	music.Volume = SoundCfg.Music.volume
+	music.Looped = true
+	music.SoundGroup = soundGroup("Music")
+	music.Parent = SoundService
+	music:Play()
+	return music
+end
+local musicTween: Tween? = nil
+function Kit.musicFade(k: number, t: number)
+	local m = Kit.music()
+	if musicTween then musicTween:Cancel() end
+	musicTween = TweenService:Create(m, TweenInfo.new(t, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Volume = SoundCfg.Music.volume * k })
+	musicTween:Play()
+end
+-- the Settings sliders (0..1)
+function Kit.setVolumes(musicVol: number?, sfxVol: number?)
+	if musicVol then soundGroup("Music").Volume = math.clamp(musicVol, 0, 1) end
+	if sfxVol then soundGroup("SFX").Volume = math.clamp(sfxVol, 0, 1) end
+end
+-- loads every effect in the background (Sound objects: a plain id string would be preloaded as an image)
+function Kit.preloadSounds()
+	local t = {}
+	for _, spec in pairs(SoundCfg.List) do
+		local s = Instance.new("Sound")
+		s.SoundId = "rbxassetid://" .. spec.id
+		table.insert(t, s)
+	end
+	pcall(function() game:GetService("ContentProvider"):PreloadAsync(t) end)
+	for _, s in ipairs(t) do s:Destroy() end
+end
+
+------------------------------------------------------------------------ WINDOW (alpha part 2): the v12 window frame as one piece
+-- (the UPGRADES window's frame: breathing glow, ink frame, dark body, a header with stripes + its shine + embers, the icon
+-- breaking the top-left corner, the title, the pink X). opts: title, icon, iconGlow, c1 / c2 (the header gradient), glow
+-- (the breathing colour), line (the body's thin edge colour), lip (the header's lower band). Returns win, closeButton.
+function Kit.window(parent, w: number, h: number, opts)
+	local win = Kit.box(parent, 0, 0, w, h, { Name = opts.name or "Window" })
+	local glow = new("ImageLabel", { BackgroundTransparency = 1, Image = A.glow9, ImageColor3 = opts.glow or Color3.fromRGB(255, 100, 20), ScaleType = Enum.ScaleType.Slice,
+		SliceCenter = Rect.new(48, 48, 80, 80), Position = UDim2.fromOffset(-34, -34), Size = UDim2.fromOffset(w + 68, h + 68), ImageTransparency = 0.25, ZIndex = 1 }, win)
+	if not Kit.calm() then
+		Kit.tween(glow, { ImageTransparency = 0, Position = UDim2.fromOffset(-44, -44), Size = UDim2.fromOffset(w + 88, h + 88) }, 1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+	end
+	local frame = Kit.box(win, 0, 0, w, h, { BackgroundTransparency = 0, BackgroundColor3 = INK, ZIndex = 2 })
+	Kit.corner(frame, 10)
+	local body = Kit.box(win, 3, 3, w - 6, h - 6, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
+	Kit.corner(body, 8)
+	Kit.grad(body, Kit.hex("#1a1620"), Kit.hex("#0f0d13"), 90)
+	Kit.stroke(body, opts.line or Color3.fromRGB(255, 106, 26), 1.5, 0.45)
+	local header = Kit.box(win, 3, 3, w - 6, 56, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4, ClipsDescendants = true })
+	Kit.corner(header, 8)
+	Kit.grad(header, opts.c1, opts.c2, 0)
+	new("ImageLabel", { BackgroundTransparency = 1, Image = A.stripes, ImageTransparency = 0.9, Size = UDim2.fromOffset(512, 128), ZIndex = 4 }, header)
+	if w - 6 > 512 then
+		new("ImageLabel", { BackgroundTransparency = 1, Image = A.stripes, ImageTransparency = 0.9, Position = UDim2.fromOffset(512, 0), Size = UDim2.fromOffset(512, 128), ZIndex = 4 }, header)
+	end
+	Kit.box(win, 3, 40, w - 6, 20, { BackgroundTransparency = 0, BackgroundColor3 = opts.lip or opts.c2, ZIndex = 4 })
+	Kit.box(win, 9, 4, w - 18, 2, { BackgroundTransparency = 0.4, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
+	local sweep = Kit.shine(header, 4.5, 0.16, 0.3)
+	sweep.ZIndex = 5
+	for i = 1, math.floor(w / 80) do
+		Kit.ember(win, 20 + (i - 1) * 80 + 3, 3 + 44 + ((i - 1) % 3) * 4, ((i - 1) * 0.41) % 3)
+	end
+	Kit.box(win, 3, 59, w - 6, 2, { BackgroundTransparency = 0, BackgroundColor3 = INK, ZIndex = 5 })
+	Kit.icon(win, opts.icon, -22, -30, 92, opts.iconGlow, { ZIndex = 9 })
+	Kit.sparkle(win, -26, -24, 12, 0.5)
+	Kit.sparkle(win, 60, 34, 9, 1.1)
+	Kit.text(win, 80, 13, w - 200, 34, opts.title, 28, { ZIndex = 8, stroke = 1.8 })
+	-- the pink X (the UPGRADES window's)
+	local closeBtn = new("TextButton", { Name = "Close", Text = "", AutoButtonColor = false, Position = UDim2.fromOffset(w - 52, 13), Size = UDim2.fromOffset(34, 34),
+		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 8 }, win)
+	Kit.corner(closeBtn, 6)
+	Kit.stroke(closeBtn, Color3.new(1, 1, 1), 2, 0.1)
+	Kit.grad(closeBtn, Kit.hex("#ff7d8e"), Kit.hex("#e2334c"), 90)
+	for _, r in ipairs({ 45, -45 }) do
+		local bar = Kit.box(closeBtn, 0, 0, 20, 4, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), AnchorPoint = Vector2.new(0.5, 0.5), Rotation = r, ZIndex = 9 })
+		bar.Position = UDim2.fromScale(0.5, 0.5)
+		Kit.corner(bar, 2)
+	end
+	local sh = Kit.box(win, w - 52, 15, 34, 34, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 7 })
+	Kit.corner(sh, 6)
+	return win, closeBtn
+end
+
+-- a dark inset panel (the UPGRADES window's list / rows panels)
+function Kit.panel(parent, x, y, w, h, z)
+	local p = Kit.box(parent, x, y, w, h, { BackgroundTransparency = 0, BackgroundColor3 = Kit.hex("#0b090e"), ZIndex = z or 4 })
+	Kit.corner(p, 6)
+	Kit.stroke(p, Kit.hex("#2a2433"), 1.5)
+	return p
+end
+
+-- the red "new" dot (a v12 badge: red fill, ink outline, white top shine; it pulses unless Reduced Motion)
+function Kit.redDot(parent, x, y, size, z)
+	size = size or 16
+	local d = Kit.box(parent, x, y, size, size, { Name = "RedDot", BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = z or 12, AnchorPoint = Vector2.new(0.5, 0.5) })
+	Kit.corner(d, size)
+	Kit.stroke(d, INK, 2)
+	Kit.grad(d, Kit.hex("#ff6a6a"), Kit.hex("#d11a2a"), 90)
+	local shine = Kit.box(d, size * 0.25, size * 0.12, size * 0.5, size * 0.25, { BackgroundTransparency = 0.35, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = d.ZIndex })
+	Kit.corner(shine, size)
+	local sc = new("UIScale", { Scale = 1 }, d)
+	if not Kit.calm() then Kit.tween(sc, { Scale = 1.18 }, 0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true) end
+	return d
+end
+
+-- SLIDER (alpha part 2, Settings): the goal bar's look (dark track, ink outline, gold fill) + a v12 diamond knob (the
+-- hotbar's diamond: ink outline, dark fill, gold ring). value 0..1; onChange(v) while dragging, onDone(v) on release.
+-- Returns { set = fn(v), get = fn() }. Drag with the mouse or a finger anywhere on the track.
+function Kit.slider(parent, x, y, w, value: number, onChange, onDone, z)
+	z = z or 6
+	local h = 18
+	local track = Kit.box(parent, x, y, w, h, { BackgroundTransparency = 0, BackgroundColor3 = Kit.hex("#16131b"), ZIndex = z })
+	Kit.corner(track, 9)
+	Kit.stroke(track, INK, 2)
+	local fill = Kit.box(track, 0, 0, 0, h, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = z + 1 })
+	Kit.corner(fill, 9)
+	Kit.grad(fill, Kit.hex("#ffe08a"), Kit.hex("#ff9a1a"), 90)
+	local knob = Kit.box(track, 0, h / 2, 26, 26, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), Rotation = 45, AnchorPoint = Vector2.new(0.5, 0.5), ZIndex = z + 3 })
+	Kit.grad(knob, Kit.hex("#2c2735"), Kit.hex("#121016"), 90)
+	Kit.stroke(knob, Kit.hex("#0a070d"), 2)
+	local ring = Kit.box(knob, 3, 3, 20, 20, { ZIndex = z + 4 })
+	Kit.stroke(ring, Kit.hex("#ffd84a"), 2)
+	local hit = new("TextButton", { Text = "", BackgroundTransparency = 1, Position = UDim2.fromOffset(x - 14, y - 12), Size = UDim2.fromOffset(w + 28, h + 24), ZIndex = z + 5 }, parent)
+	local v = math.clamp(value, 0, 1)
+	local function show()
+		fill.Size = UDim2.fromOffset(math.max(h, w * v), h)
+		fill.Visible = v > 0
+		knob.Position = UDim2.fromOffset(w * v, h / 2)
+	end
+	show()
+	local dragging = nil
+	local function setFrom(px: number)
+		local k = track.AbsoluteSize.X / math.max(1, w)
+		v = math.clamp((px - track.AbsolutePosition.X) / math.max(1, w * k), 0, 1)
+		show()
+		if onChange then onChange(v) end
+	end
+	hit.InputBegan:Connect(function(input)
+		local t = input.UserInputType
+		if t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch then
+			dragging = input
+			setFrom(input.Position.X)
+		end
+	end)
+	local c1 = UserInputService.InputChanged:Connect(function(input)
+		if not dragging then return end
+		if input == dragging or (dragging.UserInputType == Enum.UserInputType.MouseButton1 and input.UserInputType == Enum.UserInputType.MouseMovement) then
+			setFrom(input.Position.X)
+		end
+	end)
+	local c2 = UserInputService.InputEnded:Connect(function(input)
+		if dragging and (input == dragging or (dragging.UserInputType == Enum.UserInputType.MouseButton1 and input.UserInputType == Enum.UserInputType.MouseButton1)) then
+			dragging = nil
+			if onDone then onDone(v) end
+		end
+	end)
+	hit.Destroying:Connect(function() c1:Disconnect() c2:Disconnect() end)
+	return {
+		set = function(nv: number) v = math.clamp(nv, 0, 1) show() end,
+		get = function() return v end,
+	}
 end
 
 return Kit

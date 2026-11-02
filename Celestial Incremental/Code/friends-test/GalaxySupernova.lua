@@ -10,7 +10,9 @@
 --    Core burst + 2 shockwave rings for the whole server (MapEvent, GalaxyMapClient), the "SUPERNOVA!" stamp with its rays,
 --    the shards fly into the SHARDS counter, your rank lands over your head (GalaxyRankTags), a nebula patch stays in your
 --    sky. Star Surge +5% (GalaxyStarSurgeService) comes with the count.
--- (No music in the game yet, so there's nothing to cut; the world dims and goes quiet instead.)
+-- Alpha part 2 (3 Nov): the SOUND on the same beats (Galaxy.Sounds): the wind-up riser, the boom at the impact, a
+-- crystal blip per shard landing (climbing in pitch); the MUSIC cuts at the wind-up (fades to silence in 0.3 s) and comes
+-- back after the stamp.
 -- Studio test switch: Workspace TestSlowMo = n -> the cinematic runs n times slower (for screenshots).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -180,12 +182,12 @@ local function openCard()
 	dim.BackgroundTransparency = 1
 	Kit.tween(dim, { BackgroundTransparency = 0.45 }, 0.2)
 	Kit.tween(cardScale, { Scale = want }, 0.25, Enum.EasingStyle.Back)
-	Kit.sound("tab")
+	Kit.sound("open")
 end
 shared.GalaxyOpenSupernova = openCard
 button.MouseButton1Click:Connect(openCard)
 card.no.MouseButton1Click:Connect(function()
-	Kit.sound("tab")
+	Kit.sound("close")
 	closeCard()
 end)
 dim.MouseButton1Click:Connect(closeCard)
@@ -258,7 +260,7 @@ local function flyShards(n: number, slow: number)
 			Kit.tween(img, { Position = UDim2.fromOffset(target.X, target.Y), Size = UDim2.fromOffset(26 * s, 26 * s), Rotation = 0 }, 0.55 * slow, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 			task.delay(0.55 * slow, function()
 				img:Destroy()
-				Kit.sound("tab")
+				Kit.sound("shardIn", { pitch = 1 + (i - 1) * 0.05 })
 				if shared.GalaxyShardsPop then shared.GalaxyShardsPop() end
 			end)
 		end)
@@ -309,7 +311,14 @@ local function cinematic()
 			cam.CFrame = from:Lerp(to, k)
 		end)
 	end
-	-- WIND-UP: the world dims, the bodies pull into the star, it swells and pulses faster
+	-- WIND-UP: the music cuts, the world dims, the bodies pull into the star, it swells and pulses faster (the riser:
+	-- the whole file the first time; only its last part when the wind-up is short, so its peak lands on the impact)
+	Kit.musicFade(0, 0.3)
+	local riser = Kit.sound("windup")
+	if riser and not first then
+		local len = if riser.TimeLength > 0 then riser.TimeLength else 3
+		riser.TimePosition = math.max(0, len - (T.Windup + T.Hold) * riser.PlaybackSpeed)
+	end
 	if shared.GalaxyWindup then shared.GalaxyWindup(T.Windup) end
 	if not Kit.calm() then
 		game:GetService("TweenService"):Create(Lighting, TweenInfo.new(T.Windup, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { ExposureCompensation = oldExposure - 0.7 }):Play()
@@ -319,7 +328,9 @@ local function cinematic()
 	-- IMPACT: the server's Supernova
 	local ok, got = request:InvokeServer("Supernova")
 	Lighting.ExposureCompensation = oldExposure
+	if riser then riser:Stop() end
 	if not ok then
+		Kit.musicFade(1, 1)
 		if shared.GalaxyWindupCancel then shared.GalaxyWindupCancel() end
 		if c then RunService:UnbindFromRenderStep("GalaxySupernovaCam") end
 		cam.CFrame = oldCf
@@ -336,7 +347,10 @@ local function cinematic()
 		cam.FieldOfView = oldFov + SN.FovPunch
 		Kit.tween(cam, { FieldOfView = oldFov }, 0.6, Enum.EasingStyle.Quad)
 	end
+	Kit.sound("boom")
 	if not skipping then stamp(not first) end
+	-- the music comes back once the stamp has gone (it's held 1.8 s, 1 s after the first time)
+	task.delay(if skipping then 0.3 else ((if first then 1.8 else 1) + 0.35) * slow, function() Kit.musicFade(1, 1.5) end)
 	task.delay(if skipping then 0 else 0.5 * slow, function() flyShards(got, slow) end)
 	task.delay(if skipping then 0.2 else 0.9 * slow, function() if shared.GalaxyRankLand then shared.GalaxyRankLand() end end)
 	-- FADE: hold on the burst, then back to you
@@ -354,7 +368,7 @@ local function cinematic()
 	task.delay(1.5 * slow, function() if not busy then fx.Visible = false end end)
 end
 card.go.MouseButton1Click:Connect(function()
-	Kit.sound("buy")
+	Kit.sound("click")
 	cinematic()
 end)
 

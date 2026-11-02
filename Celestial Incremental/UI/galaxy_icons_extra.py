@@ -161,6 +161,54 @@ def i_lock():
     render("lock")
 
 
-ALL = {"asteroid": i_asteroid, "moon": i_moon, "gasgiant": i_gasgiant, "essence": i_essence, "lock": i_lock}
+def i_book():
+    # the GUIDE BOOK (alpha part 2, 3 Nov): a closed hardcover, violet cover with gold corners + a gold 4-point star, cream pages
+    reset()
+    cover = mat("cover", (0.32, 0.16, 0.62), rough=0.3, coat=0.7)
+    pages = mat("pages", (0.98, 0.92, 0.78), rough=0.55, coat=0.1)
+    gold = mat("gold", (1.0, 0.72, 0.22), rough=0.18, metal=0.85, emit=(1.0, 0.6, 0.15), estr=0.25, coat=0.6)
+    core = mat("core", (1.0, 0.95, 0.7), rough=0.1, emit=(1.0, 0.85, 0.45), estr=2.2)
+    parts = []
+    # back + front cover, spine, the page block
+    for y in (0.42, -0.42):
+        bpy.ops.mesh.primitive_cube_add(location=(0, y, 0)); c = bpy.context.object; c.scale = (1.25, 0.09, 1.65)
+        c.data.materials.append(cover); bv = c.modifiers.new("b", 'BEVEL'); bv.width = 0.08; bv.segments = 1; parts.append(c)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.5, depth=3.3, location=(-1.22, 0, 0))
+    sp = bpy.context.object; sp.scale = (0.32, 1.0, 1.0); sp.data.materials.append(cover); parts.append(sp)
+    bpy.ops.mesh.primitive_cube_add(location=(0.05, 0, 0)); pg = bpy.context.object; pg.scale = (1.15, 0.34, 1.56)
+    pg.data.materials.append(pages); parts.append(pg)
+    # gold corners on the front cover
+    for (x, z) in ((1.08, 1.48), (1.08, -1.48)):
+        verts = [(0.2, 0, 0.2 * (1 if z > 0 else -1)), (-0.22, 0, 0.2 * (1 if z > 0 else -1)), (0.2, 0, -0.22 * (1 if z > 0 else -1))]
+        cv = [(vx, vy - 0.03, vz) for (vx, vy, vz) in verts] + [(vx, vy + 0.03, vz) for (vx, vy, vz) in verts]
+        me0 = bpy.data.meshes.new("cn"); me0.from_pydata(cv, [], [(0, 1, 2), (5, 4, 3), (0, 3, 4, 1), (1, 4, 5, 2), (2, 5, 3, 0)]); me0.update()
+        g = bpy.data.objects.new("cn", me0); bpy.context.scene.collection.objects.link(g); g.location = (x, -0.52, z)
+        g.data.materials.append(gold); parts.append(g)
+    # the 4-point star on the cover (raised, glowing core like the Essence icon)
+    outline = []
+    for i in range(8):
+        a = math.pi / 2 + i * math.pi / 4
+        rr = 0.78 if i % 2 == 0 else 0.22
+        outline.append((math.cos(a) * rr, 0, math.sin(a) * rr))
+    sv = outline + [(0, -0.16, 0), (0, 0.06, 0)]
+    sf = []
+    for i in range(8):
+        j = (i + 1) % 8
+        sf += [(i, j, 8), (j, i, 9)]
+    me = bpy.data.meshes.new("st"); me.from_pydata(sv, [], sf); me.update()
+    s = bpy.data.objects.new("st", me); bpy.context.scene.collection.objects.link(s); s.data.materials.append(gold)
+    s.location = (0.08, -0.52, 0.12); parts.append(s)
+    me2 = bpy.data.meshes.new("st2"); me2.from_pydata([(x * 0.45, y, z * 0.45) for (x, y, z) in sv], [], sf); me2.update()
+    s2 = bpy.data.objects.new("st2", me2); bpy.context.scene.collection.objects.link(s2); s2.data.materials.append(core)
+    s2.location = (0.08, -0.6, 0.12); parts.append(s2)
+    # turned a little toward the key light, tilted back
+    for o in parts:
+        o.location.rotate(__import__('mathutils').Euler((math.radians(-8), 0, math.radians(-24))))
+        o.rotation_euler.x += math.radians(-8)
+        o.rotation_euler.z += math.radians(-24)
+    render("book")
+
+
+ALL = {"asteroid": i_asteroid, "moon": i_moon, "gasgiant": i_gasgiant, "essence": i_essence, "lock": i_lock, "book": i_book}
 for k in (which or ALL.keys()):
     ALL[k]()

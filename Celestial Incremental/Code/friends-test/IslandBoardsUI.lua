@@ -92,13 +92,20 @@ local function nodeValue(node, bought: boolean): (string, string)
 	end
 	return if bought then "OPEN" else "LOCKED", if bought then "MAX" else "opens the " .. Econ.Tiers[e.tier + 1].name
 end
+-- a multiplier with up to 2 decimals under 10 (Starfire x1.75 must not read "x1.7"), then the number format
+local function multFmt(n: number): string
+	if n >= 10 then return fmt(n) end
+	local s = string.format("%.2f", math.floor(n * 100 + 0.5) / 100)
+	s = s:gsub("0+$", ""):gsub("%.$", "")
+	return s
+end
 -- a ring-2 node at level lv: its value now and the green step of the next level
 local function node2Value(node, lv: number): (string, string)
 	local e = node.effect
 	local maxed = lv >= #node.costs
 	if e.kind == "allMult" then
 		local now = e.mult ^ lv
-		return "x" .. fmt(now), if maxed then "MAX" else "x" .. fmt(now * e.mult) .. " next"
+		return "x" .. multFmt(now), if maxed then "MAX" else "x" .. multFmt(now * e.mult) .. " next"
 	elseif e.kind == "heavy" then
 		return if lv >= 1 then "x" .. (1 + e.per) .. "-x" .. (1 + e.per * #Econ.Tiers) else "x1", if maxed then "MAX" else "x1.25 per tier number"
 	end
