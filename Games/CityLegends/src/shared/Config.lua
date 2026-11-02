@@ -78,6 +78,13 @@ Config.Spawn = {
 	Block = { 3, 2 }, -- the Needle's block
 	Side = Vector3.new(0, 0, 1), -- its edge on the city's middle road
 	FrontRange = 22, -- a car called on foot comes out up to this far in front of you, if there is room
+	-- players start in Monaco (the Riviera) when it is in the place (owner, 2026-11-02: "I didnt spawn
+	-- in the monaco map"): a first car on Harbour Street or the Coast Road by the harbour, on foot on
+	-- the pavement beside it
+	Riviera = true,
+	RivieraRoads = { ["Harbour Street"] = true, ["Coast Road"] = true },
+	RivieraNear = Vector3.new(13650, 0, 520), -- start within RivieraRadius of this
+	RivieraRadius = 450,
 }
 -- the east highway runs from the city's edge to the loop's inner edge
 Config.City.HighwayLength = Config.City.LoopHalf - Config.City.HighwayWidth / 2 - (Config.City.HalfExtent + Config.City.RoadWidth / 2)

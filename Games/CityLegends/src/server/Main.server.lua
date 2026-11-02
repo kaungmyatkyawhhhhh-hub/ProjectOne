@@ -16,6 +16,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 
 local CityBuilder = require(script.Parent:WaitForChild("CityBuilder"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
@@ -175,8 +176,43 @@ local function carNear(pos: Vector3, range: number): boolean
 	return false
 end
 
+-- Monaco's start spots (Config.Spawn.Riviera): the outer lane of Harbour Street and the Coast Road
+-- near the harbour, mid-piece (never in a junction's turn)
+local rivieraSpots: { CFrame }? = nil
+local function rivieraStartSpots(): { CFrame }
+	if rivieraSpots then
+		return rivieraSpots
+	end
+	local list = {}
+	if Config.Spawn.Riviera and workspace:FindFirstChild("Riviera") then
+		local g = RivieraTraffic.build()
+		local near = Config.Spawn.RivieraNear
+		for _, seg in (if g then g.lanes else {}) do
+			local s = seg :: any
+			if s.lane == 2 and Config.Spawn.RivieraRoads[s.road] and seg.length > 12 then
+				local pos, dir = CityLayout.sample(seg, seg.length / 2)
+				if Vector2.new(pos.X - near.X, pos.Z - near.Z).Magnitude < Config.Spawn.RivieraRadius and math.abs(dir.Y) < 0.08 then
+					table.insert(list, CFrame.lookAt(pos, pos + Vector3.new(dir.X, 0, dir.Z)))
+				end
+			end
+		end
+	end
+	rivieraSpots = list
+	return list
+end
+
 -- a first car: on the street along the start block's edge, in a lane clear of other players' cars
+-- (in Monaco when it is in the place)
 local function startSpawnCFrame(): CFrame?
+	local riv = rivieraStartSpots()
+	if #riv > 0 then
+		for _ = 1, #riv do
+			local cf = riv[spawnRng:NextInteger(1, #riv)]
+			if not carNear(cf.Position, 30) then
+				return cf
+			end
+		end
+	end
 	local c, side, inner = startBlock()
 	local edge = c + side * (inner / 2 + Config.City.RoadWidth / 2) -- the road's centre line
 	local along = side:Cross(Vector3.yAxis)
@@ -202,6 +238,20 @@ end
 
 -- the start block's sidewalk, by the streetscape, facing the road (OnFoot: on foot with no car)
 local function startFootCFrame(): CFrame
+	-- Monaco: on the pavement beside a start spot, facing the road
+	local riv = rivieraStartSpots()
+	if #riv > 0 then
+		local cf = riv[spawnRng:NextInteger(1, #riv)]
+		local at = cf.Position + cf.RightVector * 13
+		local ray = RaycastParams.new()
+		ray.FilterType = Enum.RaycastFilterType.Include
+		local roads = workspace.Riviera:FindFirstChild("Roads")
+		ray.FilterDescendantsInstances = { roads or workspace.Riviera }
+		local hit = workspace:Raycast(at + Vector3.new(0, 20, 0), Vector3.new(0, -40, 0), ray)
+		local y = if hit then hit.Position.Y else at.Y + 0.5
+		local pos = Vector3.new(at.X, y + 3.2, at.Z)
+		return CFrame.lookAt(pos, pos - cf.RightVector)
+	end
 	local c, side, inner = startBlock()
 	local along = side:Cross(Vector3.yAxis)
 	-- between the planters and the bench, a few studs in from the curb

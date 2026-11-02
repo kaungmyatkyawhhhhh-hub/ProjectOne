@@ -80,6 +80,7 @@ function RivieraTraffic.build()
 			local b = Vector3.new(pts[3 * k + 1], pts[3 * k + 2], pts[3 * k + 3])
 			local seg = newSegment(all, a, (a + b) / 2, b, "lane")
 			seg.lane = l.lane
+			seg.road = l.road -- (the server's start spots use it)
 			seg.speedK = speedK
 			row[k] = seg
 			table.insert(lanes, seg)
