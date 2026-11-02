@@ -83,6 +83,9 @@ local function triangle(a: Vector3, b: Vector3, c: Vector3, th: number, props, p
 		for k, v in props do
 			(w :: any)[k] = v
 		end
+		if Roads.debugSeg then
+			w:SetAttribute("Seg", Roads.debugSeg)
+		end
 		w.Parent = parent
 	end
 	return 2
@@ -94,7 +97,8 @@ local function prepare(data)
 	for ri, r in data.roads do
 		local pts = {}
 		for i, s in r.s do
-			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), tunnel = s[6] == 1 }
+			-- s[7], s[8]: left and right half widths (narrower where a hairpin's legs run side by side)
+			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), tunnel = s[6] == 1, wl = s[7] or HALF, wr = s[8] or HALF }
 		end
 		roads[ri] = { name = r.name, kind = r.kind, rank = r.rank, closed = r.closed, pts = pts }
 	end
@@ -139,6 +143,69 @@ local function otherNear(roads, grid, pos: Vector3, self: number, radius: number
 	return best, if best then bestD else nil
 end
 
+-- is a point within radius of this road's own centre line, away from sample i (a tight bend or
+-- hairpin folding back over itself)?
+local function selfNear(roads, grid, pos: Vector3, self: number, i: number, radius: number): boolean
+	local cx, cz = math.floor(pos.X / 24), math.floor(pos.Z / 24)
+	local reach = math.ceil(radius / 24)
+	for dx = -reach, reach do
+		for dz = -reach, reach do
+			local cell = grid[(cx + dx) .. "," .. (cz + dz)]
+			if cell then
+				for _, e in cell do
+					if e[1] == self and math.abs(e[2] - i) >= 2 then
+						local q = roads[self].pts[e[2]].pos
+						if Vector2.new(q.X - pos.X, q.Z - pos.Z).Magnitude < radius then
+							return true
+						end
+					end
+				end
+			end
+		end
+	end
+	return false
+end
+
+-- the surface height of a bigger road (rank below `rank`) at a point on its carriageway, or nil.
+-- Roads are flat side to side, so it is the centre line's height where the point meets it square-on.
+local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number): number?
+	local rj = otherNear(roads, grid, pos, self, HALF - 0.5, rank)
+	if rj == nil then
+		return nil
+	end
+	local pts = roads[rj].pts
+	-- nearest sample of that road, then project onto the segments either side of it
+	local best, bestD = 1, math.huge
+	local cx, cz = math.floor(pos.X / 24), math.floor(pos.Z / 24)
+	for dx = -2, 2 do
+		for dz = -2, 2 do
+			local cell = grid[(cx + dx) .. "," .. (cz + dz)]
+			if cell then
+				for _, e in cell do
+					if e[1] == rj then
+						local q = pts[e[2]].pos
+						local dd = Vector2.new(q.X - pos.X, q.Z - pos.Z).Magnitude
+						if dd < bestD then
+							best, bestD = e[2], dd
+						end
+					end
+				end
+			end
+		end
+	end
+	for _, pair in { { best - 1, best }, { best, best + 1 } } do
+		local a, b = pts[pair[1]], pts[pair[2]]
+		if a and b then
+			local v = Vector2.new(b.pos.X - a.pos.X, b.pos.Z - a.pos.Z)
+			local t = Vector2.new(pos.X - a.pos.X, pos.Z - a.pos.Z):Dot(v) / math.max(v:Dot(v), 1e-9)
+			if t >= 0 and t <= 1 then
+				return a.pos.Y + (b.pos.Y - a.pos.Y) * t
+			end
+		end
+	end
+	return pts[best].pos.Y
+end
+
 local function inBox(box, p: Vector3): boolean
 	return box == nil or (p.X >= box[1] and p.X <= box[3] and p.Z >= box[2] and p.Z <= box[4])
 end
@@ -172,17 +239,59 @@ function Roads.build(data, opts)
 		-- each cross-section's left and right road edges; on a bend tighter than half the road the
 		-- inner edge would run backwards and fold the surface over, so it waits at its last point
 		local edgeL, edgeR = {}, {}
+		local waitL, waitR = {}, {}
 		for i, p in pts do
-			local right = Vector3.new(-p.dir.Z, 0, p.dir.X).Unit * HALF
-			edgeL[i], edgeR[i] = p.pos - right, p.pos + right
+			local right = Vector3.new(-p.dir.Z, 0, p.dir.X).Unit
+			edgeL[i], edgeR[i] = p.pos - right * p.wl, p.pos + right * p.wr
 			if i > 1 then
 				local d = pts[i].pos - pts[i - 1].pos
 				d = Vector3.new(d.X, 0, d.Z)
-				if (edgeL[i] - edgeL[i - 1]):Dot(d) <= 0 then
+				if (edgeL[i] - edgeL[i - 1]):Dot(d) <= 0.05 * d.Magnitude then
 					edgeL[i] = Vector3.new(edgeL[i - 1].X, p.pos.Y, edgeL[i - 1].Z)
+					waitL[i] = true
 				end
-				if (edgeR[i] - edgeR[i - 1]):Dot(d) <= 0 then
+				if (edgeR[i] - edgeR[i - 1]):Dot(d) <= 0.05 * d.Magnitude then
 					edgeR[i] = Vector3.new(edgeR[i - 1].X, p.pos.Y, edgeR[i - 1].Z)
+					waitR[i] = true
+				end
+			end
+		end
+		-- a waiting edge is one point (the pivot of a fan of triangles round the bend's inside): it
+		-- gets one height, the mean of the run, or the surface would have a vertical step there
+		local function settle(edge, waited)
+			local i = 2
+			while i <= n do
+				if waited[i] then
+					local j = i
+					while j < n and waited[j + 1] do
+						j += 1
+					end
+					local sum = 0
+					for k = i - 1, j do
+						sum += edge[k].Y
+					end
+					local y = sum / (j - i + 2)
+					for k = i - 1, j do
+						edge[k] = Vector3.new(edge[k].X, y, edge[k].Z)
+					end
+					i = j + 1
+				else
+					i += 1
+				end
+			end
+		end
+		settle(edgeL, waitL)
+		settle(edgeR, waitR)
+		-- where this road's edge lies on a bigger road (a junction mouth), it takes that road's surface
+		-- height, so both surfaces are one plane there and the joint has no step
+		for i = 1, n do
+			for side, edge in { edgeL, edgeR } do
+				if (if side == 1 then pts[i].wl else pts[i].wr) < HALF - 0.5 then
+					continue -- a narrowed edge stops at the wall between this road and the next
+				end
+				local y = bigSurface(roads, grid, edge[i], ri, r.rank)
+				if y then
+					edge[i] = Vector3.new(edge[i].X, y, edge[i].Z)
 				end
 			end
 		end
@@ -225,8 +334,25 @@ function Roads.build(data, opts)
 				local cf = stripCF(a2, b2, 0, -SLAB / 2)
 				local la, lb, rra, rrb = edgeL[i], edgeL[i + 1], edgeR[i], edgeR[i + 1]
 				local props = { Name = "Road", Material = Enum.Material.Asphalt, Color = ASPHALT }
-				count += triangle(la, rra, rrb, SLAB, props, folder)
-				count += triangle(la, rrb, lb, SLAB, props, folder)
+				-- a climbing bend twists the quad (its 4 corners aren't in one plane), so its 2 triangles
+				-- meet at a crease felt as a bump; split it side to side into strips until each crease
+				-- is under 0.05 studs
+				local nrm = (rra - la):Cross(rrb - la)
+				local strips = 1
+				if math.abs(nrm.Y) > 1e-6 then
+					local dev = math.abs((lb - la):Dot(nrm) / nrm.Y)
+					strips = math.clamp(math.ceil(dev / 0.05), 1, 6)
+				end
+				if opts.debug then
+					Roads.debugSeg = i
+				end
+				for k = 0, strips - 1 do
+					local t0, t1 = k / strips, (k + 1) / strips
+					local pa0, pa1 = la:Lerp(rra, t0), la:Lerp(rra, t1)
+					local pb0, pb1 = lb:Lerp(rrb, t0), lb:Lerp(rrb, t1)
+					count += triangle(pa0, pa1, pb1, SLAB, props, folder)
+					count += triangle(pa0, pb1, pb0, SLAB, props, folder)
+				end
 				-- no terrain may stand above the road surface (it would be a bump). Terrain clears whole
 				-- 4-stud voxels by their centres, so clear from 4 studs under the top up
 				workspace.Terrain:FillBlock(cf * CFrame.new(0, SLAB / 2 - 4 + 11, 0), Vector3.new((HALF + WALK) * 2, 22, len + grow), Enum.Material.Air)
@@ -236,7 +362,9 @@ function Roads.build(data, opts)
 				for _, side in { -1, 1 } do
 					local mid = (a.pos + b.pos) / 2
 					local right = Vector3.new(-(b.pos - a.pos).Z, 0, (b.pos - a.pos).X).Unit
-					if otherNear(roads, grid, mid + right * side * (HALF + WALK / 2), ri, HALF + 2) == nil then
+					local sidePos = mid + right * side * (HALF + WALK / 2)
+					local narrow = math.min(if side < 0 then a.wl else a.wr, if side < 0 then b.wl else b.wr) < HALF - 0.5
+					if otherNear(roads, grid, sidePos, ri, HALF + 2) == nil and not selfNear(roads, grid, sidePos, ri, i, HALF + 1) and not narrow then
 						local cf = stripCF(a2, b2, side * (HALF + WALK / 2), -3 - 0.02)
 						newPart({ Name = "Shoulder", Size = Vector3.new(WALK, 6, len + grow), CFrame = cf, Material = Enum.Material.Concrete, Color = Color3.fromRGB(150, 146, 138) }, folder)
 						count += 1
@@ -244,12 +372,35 @@ function Roads.build(data, opts)
 				end
 			end
 			-- pavements and kerbs, each side
+			-- where a hairpin's two legs run side by side (narrowed edge), a cream stone wall on the line
+			-- between them, from well below to 2.5 above this leg (each leg builds its own)
+			for _, side in { -1, 1 } do
+				local wa = if side < 0 then a.wl else a.wr
+				local wb = if side < 0 then b.wl else b.wr
+				if wa < HALF - 0.5 and wb < HALF - 0.5 then
+					local ea = if side < 0 then edgeL[i] else edgeR[i]
+					local eb = if side < 0 then edgeL[i + 1] else edgeR[i + 1]
+					local flatLen = Vector2.new(eb.X - ea.X, eb.Z - ea.Z).Magnitude
+					-- never across another road (at a junction the legs meet that road instead)
+					if flatLen > 0.05 and otherNear(roads, grid, (ea + eb) / 2, ri, HALF + WALK) == nil then
+						local top = math.max(ea.Y, eb.Y) + 2.5
+						local bottom = math.min(ea.Y, eb.Y) - 9
+						local mid = Vector3.new((ea.X + eb.X) / 2, (top + bottom) / 2, (ea.Z + eb.Z) / 2)
+						local look = Vector3.new(eb.X, mid.Y, eb.Z)
+						newPart({ Name = "LegWall", Size = Vector3.new(1, top - bottom, flatLen + 0.6), CFrame = CFrame.lookAt(mid, look), Material = Enum.Material.Limestone, Color = Color3.fromRGB(222, 214, 196) }, folder)
+						count += 1
+					end
+				end
+			end
 			if town then
 				for _, side in { -1, 1 } do
 					local mid = (a.pos + b.pos) / 2
 					local right = Vector3.new(-(b.pos - a.pos).Z, 0, (b.pos - a.pos).X).Unit
 					local sidePos = mid + right * side * (HALF + WALK / 2)
-					if otherNear(roads, grid, sidePos, ri, HALF + 2) == nil and not a.tunnel then
+					local kerbPos = mid + right * side * (HALF + 0.45)
+					local narrow = math.min(if side < 0 then a.wl else a.wr, if side < 0 then b.wl else b.wr) < HALF - 0.5
+					if otherNear(roads, grid, sidePos, ri, HALF + 2) == nil and not a.tunnel and not narrow
+						and not selfNear(roads, grid, sidePos, ri, i, HALF + 1) and not selfNear(roads, grid, kerbPos, ri, i, HALF - 1) then
 						-- 6 studs deep: the terrain under the road is cleared 4 studs down
 						local walkCF = stripCF(a2, b2, side * (HALF + WALK / 2), CURB_UP - 3)
 						newPart({ Name = "Pavement", Size = Vector3.new(WALK, 6, len + grow), CFrame = walkCF, Material = Enum.Material.Pavement, Color = paver }, folder)
@@ -264,12 +415,17 @@ function Roads.build(data, opts)
 			if not (inJunction[i] or inJunction[i + 1]) then
 				dash += 1
 				local lines = {}
-				table.insert(lines, { x = HALF - 1.2, w = 0.6, solid = true })
-				table.insert(lines, { x = -(HALF - 1.2), w = 0.6, solid = true })
+				local wl, wr = math.min(a.wl, b.wl), math.min(a.wr, b.wr)
+				table.insert(lines, { x = wr - 1.2, w = 0.6, solid = true })
+				table.insert(lines, { x = -(wl - 1.2), w = 0.6, solid = true })
 				if dash % 2 == 0 then
 					table.insert(lines, { x = 0, w = 0.5 })
-					table.insert(lines, { x = HALF / 2, w = 0.4 })
-					table.insert(lines, { x = -HALF / 2, w = 0.4 })
+					if wr > HALF / 2 + 2 then
+						table.insert(lines, { x = HALF / 2, w = 0.4 })
+					end
+					if wl > HALF / 2 + 2 then
+						table.insert(lines, { x = -HALF / 2, w = 0.4 })
+					end
 				end
 				for _, l in lines do
 					local cf = stripCF(a.pos, b.pos, l.x, LINE_T / 2 + 0.04)
@@ -300,6 +456,20 @@ function Roads.build(data, opts)
 			end
 			if i % 40 == 0 then
 				task.wait()
+			end
+		end
+		-- a street that ends on no other road gets a round turning circle, flush with the road (no
+		-- drop off the slab's end)
+		if not r.closed then
+			for _, e in { { pts[1], -1 }, { pts[n], 1 } } do
+				local p = e[1]
+				if inBox(box, p.pos) and otherNear(roads, grid, p.pos, ri, HALF + WALK) == nil then
+					local r0 = HALF + WALK
+					local centre = p.pos + p.dir.Unit * e[2] * (r0 - HALF)
+					newPart({ Name = "TurningCircle", Shape = Enum.PartType.Cylinder, Size = Vector3.new(SLAB, r0 * 2, r0 * 2), CFrame = CFrame.new(centre - Vector3.new(0, SLAB / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Asphalt, Color = ASPHALT }, folder)
+					workspace.Terrain:FillBlock(CFrame.new(centre + Vector3.new(0, 11 - 4 + 0.01, 0)), Vector3.new(r0 * 2, 22, r0 * 2), Enum.Material.Air)
+					count += 1
+				end
 			end
 		end
 		if #folder:GetChildren() > 0 then

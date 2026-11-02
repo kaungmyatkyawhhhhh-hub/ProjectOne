@@ -47,7 +47,7 @@ local function roadsIn(data, box)
 	for _, r in data.roads do
 		local pts = {}
 		for i, s in r.s do
-			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), tunnel = s[6] == 1 }
+			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), tunnel = s[6] == 1, wl = s[7] or HALF, wr = s[8] or HALF }
 		end
 		table.insert(out, { name = r.name, kind = r.kind, rank = r.rank, pts = pts })
 	end
@@ -58,14 +58,41 @@ local function inBox(box, p: Vector3)
 	return box == nil or (p.X >= box[1] and p.X <= box[3] and p.Z >= box[2] and p.Z <= box[4])
 end
 
--- distance from p to the nearest other road's centre (any road but `self`)
+-- distance from p to the nearest other road's centre (any road but `self`). The road's own centre
+-- counts too where it comes back past p (a hairpin's other leg), and a side of the road with no
+-- pavement (narrowed where two roads run side by side: a wall stands there) counts as 0
 local function nearestOther(roads, self, p: Vector3): number
 	local best = math.huge
+	local pv = Vector2.new(p.X, p.Z)
 	for _, r in roads do
 		if r ~= self then
 			for i = 1, #r.pts, 2 do
 				local q = r.pts[i].pos
-				local d = (Vector2.new(q.X, q.Z) - Vector2.new(p.X, p.Z)).Magnitude
+				local d = (Vector2.new(q.X, q.Z) - pv).Magnitude
+				if d < best then
+					best = d
+				end
+			end
+		end
+	end
+	if self then
+		local j0, d0 = 1, math.huge
+		for k, s in self.pts do
+			local d = (Vector2.new(s.pos.X, s.pos.Z) - pv).Magnitude
+			if d < d0 then
+				j0, d0 = k, d
+			end
+		end
+		local s0 = self.pts[j0]
+		local right = Vector3.new(-s0.dir.Z, 0, s0.dir.X)
+		local w = if (p - s0.pos):Dot(right) < 0 then s0.wl else s0.wr
+		if w < HALF - 0.5 then
+			return 0
+		end
+		for k = 1, #self.pts, 2 do
+			if math.abs(k - j0) >= 8 then
+				local q = self.pts[k].pos
+				local d = (Vector2.new(q.X, q.Z) - pv).Magnitude
 				if d < best then
 					best = d
 				end
@@ -151,8 +178,45 @@ end
 ---------------------------------------------------------------------
 -- harbour balustrade and umbrella pines
 ---------------------------------------------------------------------
+-- the owner's tree (ServerStorage.RivieraAssets.Tree, from tree_low_poly_lowpoly.glb: two tree
+-- meshes) is used for the harbour trees; the part-built umbrella pine is only the fallback
+local treeMeshes: { MeshPart }? = nil
+local function treeTemplates(): { MeshPart }
+	if treeMeshes == nil then
+		local list = {}
+		local src = game:GetService("ServerStorage"):FindFirstChild("RivieraAssets")
+		local t = src and src:FindFirstChild("Tree")
+		if t then
+			for _, d in t:GetDescendants() do
+				if d:IsA("MeshPart") then
+					table.insert(list, d)
+				end
+			end
+		end
+		treeMeshes = list
+	end
+	return treeMeshes :: { MeshPart }
+end
+
 local function pine(base: Vector3, rng: Random, parent: Instance)
 	local m = Instance.new("Model")
+	local templates = treeTemplates()
+	if #templates > 0 then
+		m.Name = "Tree"
+		local mesh = templates[rng:NextInteger(1, #templates)]:Clone()
+		local k = rng:NextNumber(30, 40) / mesh.Size.Y
+		mesh.Size *= k
+		mesh.CFrame = CFrame.new(base + Vector3.new(0, mesh.Size.Y / 2 - 0.3, 0)) * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0)
+		mesh.Anchored = true
+		mesh.CanCollide = false
+		mesh.CanQuery = false
+		mesh.Name = "Crown"
+		mesh.Parent = m
+		-- an invisible trunk so cars still hit the tree
+		part({ Name = "Trunk", Shape = Enum.PartType.Cylinder, Size = Vector3.new(14, 2, 2), CFrame = CFrame.new(base + Vector3.new(0, 7, 0)) * CFrame.Angles(0, 0, math.pi / 2), Transparency = 1, CastShadow = false }, m)
+		m.Parent = parent
+		return
+	end
 	m.Name = "UmbrellaPine"
 	local lean = CFrame.Angles(rng:NextNumber(-0.18, 0.18), rng:NextNumber(0, math.pi * 2), rng:NextNumber(-0.18, 0.18))
 	local h = rng:NextNumber(30, 40)
@@ -177,7 +241,22 @@ local function pine(base: Vector3, rng: Random, parent: Instance)
 	m.Parent = parent
 end
 
+local lampCache: { [Instance]: { Vector3 } } = {}
+local function lampSpots(parent: Instance): { Vector3 }
+	if not lampCache[parent] then
+		local list = {}
+		for _, m in parent:GetChildren() do
+			if m.Name == "StreetLamp" and m:FindFirstChild("Pole") then
+				table.insert(list, (m :: any).Pole.Position)
+			end
+		end
+		lampCache[parent] = list
+	end
+	return lampCache[parent]
+end
+
 function Dressing.harbour(data, box, parent: Instance, rng: Random): (number, number)
+	lampCache[parent] = nil
 	local roads = roadsIn(data, box)
 	local balusters, pines = 0, 0
 	for _, r in roads do
@@ -226,9 +305,18 @@ function Dressing.harbour(data, box, parent: Instance, rng: Random): (number, nu
 				end
 				-- umbrella pines on the harbour side every ~46 studs, in the pavement's outer edge
 				pineAcc += (b.pos - a.pos).Magnitude
-				if pineAcc > 46 then
+				local spot = b.pos + right * side * (HALF + WALK - 4) + Vector3.new(0, 0.5, 0)
+				-- not on top of a street lamp (lamps are placed first): wait for the next sample
+				local clash = false
+				for _, lampPos in lampSpots(parent) do
+					if Vector2.new(lampPos.X - spot.X, lampPos.Z - spot.Z).Magnitude < 10 then
+						clash = true
+						break
+					end
+				end
+				if pineAcc > 46 and not clash then
 					pineAcc = 0
-					pine(b.pos + right * side * (HALF + WALK - 4) + Vector3.new(0, 0.5, 0), rng, parent)
+					pine(spot, rng, parent)
 					pines += 1
 				end
 			end
