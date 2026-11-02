@@ -29,6 +29,16 @@ local PAVER = Color3.fromRGB(176, 104, 92) -- Monaco's red-pink pavements
 local STONE_PAVER = Color3.fromRGB(196, 186, 168) -- casino quarter
 local KERB = Color3.fromRGB(205, 202, 194)
 local PAINT = Color3.fromRGB(232, 232, 226)
+-- sidewalk patterns per street (MaterialVariants on Pavement, kept in the place's MaterialService:
+-- RivPaveBasket two-tone basket weave, RivPaveHerring grey blocks, RivCobble small cobbles)
+local PATTERNS = {
+	["Casino Avenue"] = { "RivPaveBasket", Color3.fromRGB(235, 228, 218) },
+	["Casino Climb"] = { "RivPaveBasket", Color3.fromRGB(235, 228, 218) },
+	["Beach Avenue"] = { "RivPaveHerring", Color3.fromRGB(236, 226, 214) },
+	["Harbour Street"] = { "RivPaveHerring", Color3.fromRGB(236, 226, 214) },
+	["Old Rock"] = { "RivCobble", Color3.fromRGB(230, 222, 210) },
+	["Rock Climb"] = { "RivCobble", Color3.fromRGB(230, 222, 210) },
+}
 
 local function newPart(props: { [string]: any }, parent: Instance): BasePart
 	local p = Instance.new("Part")
@@ -403,7 +413,14 @@ function Roads.build(data, opts)
 						and not selfNear(roads, grid, sidePos, ri, i, HALF + 1) and not selfNear(roads, grid, kerbPos, ri, i, HALF - 1) then
 						-- 6 studs deep: the terrain under the road is cleared 4 studs down
 						local walkCF = stripCF(a2, b2, side * (HALF + WALK / 2), CURB_UP - 3)
-						newPart({ Name = "Pavement", Size = Vector3.new(WALK, 6, len + grow), CFrame = walkCF, Material = Enum.Material.Pavement, Color = paver }, folder)
+						local pv = newPart({ Name = "Pavement", Size = Vector3.new(WALK, 6, len + grow), CFrame = walkCF, Material = Enum.Material.Pavement, Color = paver }, folder)
+						-- patterned paving in some quarters (owner 2026-11-02: "add some sidewalk
+						-- patterns"); MaterialVariants in MaterialService (Creator Store textures)
+						local pattern = PATTERNS[r.name]
+						if pattern then
+							pv.MaterialVariant = pattern[1]
+							pv.Color = pattern[2]
+						end
 						local kerbCF = stripCF(a2, b2, side * (HALF + 0.45), CURB_UP + 0.02 - 3)
 						local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9, 6.04, len + grow), CFrame = kerbCF, Material = Enum.Material.Granite, Color = KERB }, folder)
 						k.CastShadow = false
