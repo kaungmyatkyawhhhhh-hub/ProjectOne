@@ -220,6 +220,8 @@ type Walker = {
 	promZ1: number,
 	lastEdge: number,
 	animAcc: number,
+	rivPath: { Vector3 }?, -- Monaco: the pavement line it walks (its points), and where on it
+	rivK: number?,
 }
 
 local pool: { Figure } = {}
@@ -361,6 +363,99 @@ local function stepProm(w: Walker, dt: number)
 	w.yaw = if w.promDir > 0 then math.pi else 0
 end
 
+---------------------------------------------------------------------
+-- Monaco (the Riviera, owner 2026-11-02: "the city monaco is kinda dead right now"): people on its
+-- pavements, walking along a road's pavement line (from the traffic lanes, out past the kerb) and
+-- turning back where the pavement stops (a junction mouth, a wall)
+---------------------------------------------------------------------
+local rivPaths: { { Vector3 } }? = nil
+local function rivieraPaths(): { { Vector3 } }
+	if rivPaths then
+		return rivPaths
+	end
+	local list = {}
+	if workspace:FindFirstChild("Riviera") then
+		local ok, data = pcall(function()
+			return require(Shared:WaitForChild("RivieraLanes", 3))
+		end)
+		if ok and type(data) == "table" then
+			for _, l in data.lanes do
+				if l.lane == 2 then -- the outer lane, 24 right of the centre: the pavement is 13 further
+					local pts = l.pts
+					local n = #pts // 3
+					local path = {}
+					for k = 1, n do
+						local a = Vector3.new(pts[3 * k - 2], pts[3 * k - 1], pts[3 * k])
+						local b = if k < n then Vector3.new(pts[3 * k + 1], pts[3 * k + 2], pts[3 * k + 3]) else a
+						local pa = if k > 1 then Vector3.new(pts[3 * k - 5], pts[3 * k - 4], pts[3 * k - 3]) else a
+						local d = (b - pa) * Vector3.new(1, 0, 1)
+						if d.Magnitude > 0.1 then
+							local right = Vector3.new(-d.Z, 0, d.X).Unit
+							table.insert(path, a + right * 13 + Vector3.new(0, 0.35, 0))
+						end
+					end
+					if #path > 3 then
+						table.insert(list, path)
+					end
+				end
+			end
+		end
+	end
+	rivPaths = list
+	return list
+end
+
+local rivRay = RaycastParams.new()
+rivRay.FilterType = Enum.RaycastFilterType.Include
+local function onPavement(p: Vector3): number?
+	local roads = workspace:FindFirstChild("Riviera") and workspace.Riviera:FindFirstChild("Roads")
+	if not roads then
+		return nil
+	end
+	rivRay.FilterDescendantsInstances = { roads }
+	local hit = workspace:Raycast(p + Vector3.new(0, 6, 0), Vector3.new(0, -12, 0), rivRay)
+	if hit and hit.Instance.Name == "Pavement" then
+		return hit.Position.Y
+	end
+	return nil
+end
+
+local function stepRiv(w: Walker, dt: number)
+	local path = w.rivPath :: { Vector3 }
+	local k = w.rivK :: number
+	local a = path[math.floor(k)]
+	local nextI = math.floor(k) + w.way
+	local b = path[nextI]
+	local turn = b == nil
+	local y = nil
+	if b then
+		y = onPavement(b)
+		turn = y == nil
+	end
+	if turn then
+		w.way = -w.way
+		if rng:NextNumber() < 0.3 then
+			w.mode = "pause"
+			w.timer = rng:NextNumber(2, 6)
+		end
+		return
+	end
+	local seg = (b - a) * Vector3.new(1, 0, 1)
+	local len = math.max(seg.Magnitude, 0.1)
+	local dir = seg / len
+	local to = Vector3.new(b.X, y :: number, b.Z)
+	local stepD = w.speed * dt
+	local flat = (to - w.pos) * Vector3.new(1, 0, 1)
+	if flat.Magnitude <= stepD then
+		w.pos = to
+		w.rivK = nextI
+	else
+		local t = stepD / flat.Magnitude
+		w.pos = w.pos:Lerp(to, t)
+	end
+	w.yaw = math.atan2(-dir.X, -dir.Z)
+end
+
 -- pose the figure: legs and arms swing with the stride
 local function pose(w: Walker, moving: boolean)
 	local fig = w.fig
@@ -387,7 +482,49 @@ local function flatDist(a: Vector3, b: Vector3): number
 	return Vector2.new(a.X - b.X, a.Z - b.Z).Magnitude
 end
 
+local function spawnRiv(camPos: Vector3): boolean
+	local paths = rivieraPaths()
+	if #paths == 0 then
+		return false
+	end
+	-- a point on any pavement line within reach of the camera (every 3rd point is enough)
+	local near = {}
+	for _, pth in paths do
+		for i = 1, #pth, 3 do
+			local d = flatDist(pth[i], camPos)
+			if d >= P.MinSpawnGap and d <= P.SpawnRadius then
+				table.insert(near, { pth, i })
+			end
+		end
+	end
+	if #near == 0 then
+		return false
+	end
+	local pick = near[rng:NextInteger(1, #near)]
+	local path, k = pick[1], pick[2]
+	local p = path[k]
+	local y = onPavement(p)
+	if not y then
+		return false
+	end
+	local fig = getFigure()
+	local w: Walker = {
+		fig = fig, mode = "riv", blk = nil, r = 0, s = 0, way = if rng:NextNumber() < 0.5 then 1 else -1,
+		speed = rng:NextNumber(P.WalkSpeed[1], P.WalkSpeed[2]), phase = rng:NextNumber(0, 6),
+		pos = Vector3.new(p.X, y, p.Z), yaw = 0, path = nil, pathK = 0, nextBlk = nil, nextS = 0,
+		light = nil, axis = "X", timer = 0, promDir = 1, promZ0 = 0, promZ1 = 0, lastEdge = 0, animAcc = 0,
+		rivPath = path, rivK = k,
+	}
+	show(fig, true)
+	table.insert(active, w)
+	return true
+end
+
 local function spawnOne(camPos: Vector3): boolean
+	-- in Monaco: its pavements
+	if camPos.X > 10500 and workspace:FindFirstChild("Riviera") then
+		return spawnRiv(camPos)
+	end
 	-- the beach promenade now and then, when the camera is near it
 	local nearProm = math.abs(camPos.X - PROM_X) < P.SpawnRadius and math.abs(camPos.Z) < PROM_Z + P.SpawnRadius
 	if nearProm and rng:NextNumber() < 0.3 then
@@ -489,11 +626,13 @@ function Pedestrians.start(qualityScale: number)
 				moving = w.mode ~= "wait"
 			elseif w.mode == "prom" then
 				stepProm(w, dt)
+			elseif w.mode == "riv" then
+				stepRiv(w, dt)
 			elseif w.mode == "pause" then
 				moving = false
 				w.timer -= dt
 				if w.timer <= 0 then
-					w.mode = if w.blk then "block" else "prom"
+					w.mode = if w.blk then "block" elseif w.rivPath then "riv" else "prom"
 				end
 			end
 			if moving then

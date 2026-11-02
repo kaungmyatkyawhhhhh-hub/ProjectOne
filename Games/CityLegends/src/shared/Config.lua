@@ -166,7 +166,7 @@ Config.Traffic = {
 	MountainTurnK = 0.25, -- how often a car turns up onto the mountain (vs other ways on)
 	-- the Riviera (the new map): quiet streets, only this many NPC cars there at once (owner,
 	-- 2026-11-02: "traffic on the new map (reduce traffic)")
-	RivieraMax = 12,
+	RivieraMax = 22, -- (was 12; owner 2026-11-02: "add a little more traffic, the city monaco is kinda dead")
 	FollowGap = 16, -- ...and at least a car length once moving (owner, 2026-10-29)...
 	Headway = 0.5, -- ...plus this many seconds of travel
 	LookAhead = 70,

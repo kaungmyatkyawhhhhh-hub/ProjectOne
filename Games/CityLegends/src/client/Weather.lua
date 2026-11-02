@@ -99,28 +99,31 @@ local function emitterPart(parent: Instance, name: string, size: Vector3): BaseP
 end
 
 local function rainEmitter(part: BasePart, size: number): ParticleEmitter
-	-- No Texture set: the built-in default particle squashed 3x and turned to
-	-- face its velocity becomes a thin vertical sliver = a rain streak.
+	-- (owner, 2026-11-02: "the rain looks bad, it looks like the video is glitching"): the built-in
+	-- sparkle squashed and turned along its velocity flickered as the camera moved. Now a real rain
+	-- streak picture (a Creator Store image, from the free "Realistic Rain" model), always upright
+	-- to the camera, thin and see-through
 	local e = Instance.new("ParticleEmitter")
+	e.Texture = "rbxassetid://3806148993"
 	e.Name = "Rain"
 	e.Enabled = false
 	e.Rate = 0
 	e.Shape = Enum.ParticleEmitterShape.Box
 	e.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
 	e.EmissionDirection = Enum.NormalId.Bottom
-	e.Orientation = Enum.ParticleOrientation.VelocityParallel
+	e.Orientation = Enum.ParticleOrientation.FacingCameraWorldUp
 	e.Speed = NumberRange.new(RAIN_SPEED * 0.9, RAIN_SPEED * 1.1)
 	e.SpreadAngle = Vector2.new(2, 2)
 	e.Acceleration = Vector3.new(6, 0, 3) -- light cross wind slants the streaks
 	e.Lifetime = NumberRange.new(0.5)
-	e.Size = NumberSequence.new(size)
-	e.Squash = NumberSequence.new(3)
+	e.Size = NumberSequence.new(size * 9)
+	e.Squash = NumberSequence.new(0)
 	e.Rotation = NumberRange.new(0)
-	e.Transparency = NumberSequence.new({ kp(0, 1), kp(0.2, 0.62), kp(0.85, 0.66), kp(1, 1) })
+	e.Transparency = NumberSequence.new({ kp(0, 1), kp(0.15, 0.4), kp(0.85, 0.45), kp(1, 1) })
 	e.Color = ColorSequence.new(Color3.fromRGB(196, 208, 232))
-	e.LightEmission = 0.05
-	e.LightInfluence = 0.35
-	e.Brightness = 1.3
+	e.LightEmission = 0.35
+	e.LightInfluence = 0.15
+	e.Brightness = 1.6
 	e.Parent = part
 	return e
 end
