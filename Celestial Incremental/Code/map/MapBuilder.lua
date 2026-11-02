@@ -670,10 +670,12 @@ end
 
 -- one board's frame (MapConfig.Boards; boards 1:1 pass 2). Every board: the dark screen (its SurfaceGui is the client's).
 --  * the pair (Regrowth's Perks Tree / Info): a thick lavender stone frame round a lighter lip (the bevel), side posts with
---    round caps and brass bands from the ledge to above the top, set INTO a low stone ledge (no legs)
---  * Style "Neon" (Bodies = Regrowth's Machines): a thin angular frame, wider at the top: lavender tubes with a neon tube on
---    their front, ball joints, a neon glow strip on top; two struts + a slab on the ground
---  * else (Star Upgrades): the chunky 1.2 frame with rounded outer corners and a brass trim; two legs
+--    round caps and brass bands from the ledge to above the top, set INTO a low stone ledge (no legs). Its BACK (pass 3):
+--    a lavender panel with a brass trim and a gold emblem: the big star on the Tree, the owner's name plate on Info
+--  * Style "Neon" (Bodies = Regrowth's Machines, Star Upgrades = Factory Upgrades): a thin angular frame, wider at the top
+--    (MapConfig.Boards.Angular): lavender tubes with a neon tube on their front, ball joints, a neon glow strip on top;
+--    two struts + a slab on the ground
+--  * else (not used now): the chunky 1.2 frame with rounded outer corners and a brass trim; two legs
 -- (The screens' own rounded corners, in the frame's colour, are drawn by their UI.)
 local function flatOf(cf: CFrame): CFrame
 	return CFrame.lookAt(cf.Position, cf.Position + Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z))
@@ -691,7 +693,7 @@ local function legs(parent: Instance, cf: CFrame, w: number, h: number, back: nu
 		part(brass({ Name = "Foot", Size = Vector3.new(1.8, 0.5, 2.6), CFrame = CFrame.lookAt(bottom + UP * 0.2, bottom + UP * 0.2 + look), CanCollide = true, Parent = parent }))
 	end
 end
-function Builder.BoardFrame(parent: Instance, cf: CFrame, spec, floorY: number)
+function Builder.BoardFrame(parent: Instance, cf: CFrame, spec, floorY: number, ownerName: string?)
 	local B = MapConfig.Boards
 	local w, h = spec.Width, spec.Height
 	local function stone(props)
@@ -740,9 +742,11 @@ function Builder.BoardFrame(parent: Instance, cf: CFrame, spec, floorY: number)
 		local mid = (flat * CFrame.new(0, 0, 0.5)).Position
 		stone({ Name = "Ledge", Size = Vector3.new(width, ledgeTop - floorY, P.LedgeDepth), CFrame = flat - flat.Position + Vector3.new(mid.X, (ledgeTop + floorY) / 2, mid.Z) })
 		stone({ Name = "LedgeCap", Size = Vector3.new(width + 0.3, 0.3, P.LedgeDepth + 0.3), CFrame = flat - flat.Position + Vector3.new(mid.X, ledgeTop - 0.1, mid.Z), Color = B.StoneLight })
+		Builder.BoardBack(parent, cf * CFrame.new(0, 0, -D / 2 - 0.15), w + 2 * L, h + 2 * L, spec.id, ownerName)
 	elseif spec.Style == "Neon" then
-		local bl, br = Vector2.new(-w / 2 - 0.4, -h / 2 - 0.4), Vector2.new(w / 2 + 0.4, -h / 2 - 0.4)
-		local tl, tr = Vector2.new(-w / 2 - 1.6, h / 2 + 0.7), Vector2.new(w / 2 + 1.6, h / 2 + 0.7)
+		local G = B.Angular
+		local bl, br = Vector2.new(-w / 2 - G.Low, -h / 2 - G.Low), Vector2.new(w / 2 + G.Low, -h / 2 - G.Low)
+		local tl, tr = Vector2.new(-w / 2 - G.Wide, h / 2 + G.High), Vector2.new(w / 2 + G.Wide, h / 2 + G.High)
 		stone({ Name = "BackPlate", Size = Vector3.new(w + 0.8, h + 0.8, 0.3), CFrame = cf * CFrame.new(0, 0, -0.25), Color = B.Screen })
 		for _, seg in ipairs({ { bl, br }, { br, tr }, { tr, tl }, { tl, bl } }) do
 			piece(seg[1], seg[2], 0.55, 0.6, 0, { Name = "Tube" })
@@ -752,6 +756,7 @@ function Builder.BoardFrame(parent: Instance, cf: CFrame, spec, floorY: number)
 			stone({ Name = "Joint", Shape = Enum.PartType.Ball, Size = Vector3.new(0.85, 0.85, 0.85), CFrame = cf * CFrame.new(p.X, p.Y, 0) })
 		end
 		piece(Vector2.new(-w * 0.34, h / 2 + 1.2), Vector2.new(w * 0.34, h / 2 + 1.2), 0.3, 0.35, 0, { Name = "GlowStrip", Color = spec.Neon, Material = Enum.Material.Neon, CanCollide = false })
+		Builder.BoardBack(parent, cf * CFrame.new(0, 0, -0.55), w + 0.8, h + 0.8, spec.id, nil)
 		legs(parent, cf, w, h, 0.75, floorY, 0.8)
 		local flat = flatOf(cf)
 		local under = (flat * CFrame.new(0, 0, -1)).Position
@@ -773,6 +778,77 @@ function Builder.BoardFrame(parent: Instance, cf: CFrame, spec, floorY: number)
 		legs(parent, cf, w, h, D / 2 + 0.55, floorY, 1.1)
 	end
 end
+-- the back of a board (pass 3: "no blank slab"): a lavender stone panel (cf = its middle, facing the board's front) with a
+-- brass trim inset round it and a gold emblem on its back face: the big four-point star on the Tree, the island owner's
+-- name plate (under a smaller star) on Info, a star on the others
+function Builder.BoardBack(parent: Instance, cf: CFrame, w: number, h: number, id: string, ownerName: string?)
+	local B = MapConfig.Boards
+	local A = require(Galaxy:WaitForChild("UIAssets"))
+	local panel = part({ Name = "BackPanel", Size = Vector3.new(w, h, 0.3), CFrame = cf, Color = B.Stone, CanCollide = true, Parent = parent })
+	local z = -0.15 - 0.05 -- (on the panel's back face)
+	for _, s in ipairs({ -1, 1 }) do
+		part(brass({ Name = "BackTrim", Size = Vector3.new(w - 1.2, 0.25, 0.1), CFrame = cf * CFrame.new(0, s * (h / 2 - 0.6), z), Parent = parent }))
+		part(brass({ Name = "BackTrim", Size = Vector3.new(0.25, h - 1.2, 0.1), CFrame = cf * CFrame.new(s * (w / 2 - 0.6), 0, z), Parent = parent }))
+	end
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = Enum.NormalId.Front -- (-Z: the back of the board)
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 30
+	gui.LightInfluence = 0.3
+	gui.MaxDistance = 300
+	local function image(img: string, colour: Color3, size: number, y: number, transparency: number?)
+		local i = Instance.new("ImageLabel")
+		i.BackgroundTransparency = 1
+		i.Image = img
+		i.ImageColor3 = colour
+		i.ImageTransparency = transparency or 0
+		i.AnchorPoint = Vector2.new(0.5, 0.5)
+		i.Position = UDim2.fromScale(0.5, y)
+		i.Size = UDim2.fromScale(size, size)
+		i.SizeConstraint = Enum.SizeConstraint.RelativeXX
+		i.Parent = gui
+		return i
+	end
+	if id == "Tree" then
+		image(A.softglow, Color3.fromRGB(255, 190, 80), 1.1, 0.5, 0.35)
+		image(A.sparkle, Color3.fromRGB(255, 196, 70), 0.78, 0.5)
+	elseif id ~= "Info" then
+		image(A.softglow, Color3.fromRGB(255, 190, 80), 0.5, 0.5, 0.4)
+		image(A.sparkle, Color3.fromRGB(255, 196, 70), 0.36, 0.5)
+	else
+		image(A.softglow, Color3.fromRGB(255, 190, 80), 0.6, 0.3, 0.45)
+		image(A.sparkle, Color3.fromRGB(255, 196, 70), 0.42, 0.3)
+		-- the name plate: a brass plate with the owner's name
+		local plate = Instance.new("Frame")
+		plate.AnchorPoint = Vector2.new(0.5, 0.5)
+		plate.Position = UDim2.fromScale(0.5, 0.68)
+		plate.Size = UDim2.fromScale(0.82, 0.17)
+		plate.BackgroundColor3 = Color3.new(1, 1, 1)
+		plate.Parent = gui
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0.25, 0)
+		corner.Parent = plate
+		local g = Instance.new("UIGradient")
+		g.Color = ColorSequence.new(Color3.fromRGB(255, 220, 140), Color3.fromRGB(196, 128, 40))
+		g.Rotation = 90
+		g.Parent = plate
+		local st = Instance.new("UIStroke")
+		st.Color = Color3.fromRGB(80, 44, 16)
+		st.Thickness = 5
+		st.Parent = plate
+		local name = Instance.new("TextLabel")
+		name.BackgroundTransparency = 1
+		name.Position = UDim2.fromScale(0.06, 0.1)
+		name.Size = UDim2.fromScale(0.88, 0.8)
+		name.FontFace = Font.fromEnum(Enum.Font.FredokaOne)
+		name.TextScaled = true
+		name.Text = string.upper(ownerName or "")
+		name.TextColor3 = Color3.fromRGB(60, 30, 10)
+		name.Parent = plate
+	end
+	gui.Parent = panel
+end
+
 -- the half width of a board with its frame (the pair's lip + posts; the others' frame)
 function Builder.BoardHalfWidth(spec): number
 	local B = MapConfig.Boards

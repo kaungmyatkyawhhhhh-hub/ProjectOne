@@ -41,13 +41,12 @@ local TIER_TITLE = { { "#f3eaff", "#b9a8cc" }, { "#ffffff", "#bfe9ff" }, { "#efe
 local NODE_GLOW = { STARDUST = Color3.fromRGB(255, 170, 60), COMETS = Color3.fromRGB(90, 200, 255), PLANETS = Color3.fromRGB(170, 130, 255) }
 local LEFT, RIGHT, CENTRE = Enum.TextXAlignment.Left, Enum.TextXAlignment.Right, Enum.TextXAlignment.Center
 
--- the CONSTELLATION TREE's tiles (Regrowth's perks grid): [col, row]; no id = a node not in the game yet (a dark silhouette)
-local TREE_GRID = { -- (3 a row, filling the screen's width like Regrowth's)
-	{ id = "FirstLight", col = 1, row = 0 },
-	{ id = "LunarPull", col = 0, row = 1 }, { id = "OrbitSpeed", col = 1, row = 1 }, { id = "CometLure", col = 2, row = 1 },
-	{ id = "PlanetSeed", col = 0, row = 2 }, { col = 1, row = 2, icon = "forge" }, { col = 2, row = 2, icon = "shard" },
-	{ id = "GasGiant", col = 0, row = 3 }, { col = 1, row = 3, icon = "gear" },
-}
+-- the CONSTELLATION TREE's tiles (Regrowth's perks grid, boards pass 3): every ring-1 node in the tree's order (EconConfig.Ring1),
+-- 3 a row, left to right, top to bottom; no empty slots (a node you can't buy yet is a dark silhouette)
+local TREE_GRID = {}
+for i, n in ipairs(Econ.Ring1) do
+	table.insert(TREE_GRID, { id = n.id, col = (i - 1) % 3, row = (i - 1) // 3 })
+end
 local TILE_W, TILE_H, PITCH_X, PITCH_Y = 142, 136, 159, 186
 
 ------------------------------------------------------------------------ what a node / body shows
@@ -230,11 +229,13 @@ function UI:buildTree()
 	local sf, scroll = Kit.scroller(self.gui, 28, 96, W - 56, H - 126, "Y", { ZIndex = 4, pointer = self.ctx.pointer })
 	self.scroll = scroll
 	self.tiles = {}
+	-- (rows that fit sit in the middle of the screen; more rows scroll from the top)
 	local rows = 0
+	for _, spec in ipairs(TREE_GRID) do rows = math.max(rows, spec.row + 1) end
+	local top = math.max(8, math.floor((H - 126 - rows * PITCH_Y) / 2))
 	for _, spec in ipairs(TREE_GRID) do
-		rows = math.max(rows, spec.row + 1)
 		local node = spec.id and Econ.Ring1ById[spec.id]
-		local x, y = 8 + spec.col * PITCH_X, 8 + spec.row * PITCH_Y
+		local x, y = 8 + spec.col * PITCH_X, top + spec.row * PITCH_Y
 		-- a dark tile with a soft rounded border; the icon centred, the value at the bottom right, the cost under the tile
 		local tile = Kit.box(sf, x, y, TILE_W, TILE_H, { BackgroundTransparency = 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
 		Kit.corner(tile, 20)
@@ -257,7 +258,7 @@ function UI:buildTree()
 		end
 		table.insert(self.tiles, t)
 	end
-	sf.CanvasSize = UDim2.fromOffset(0, rows * PITCH_Y + 10)
+	sf.CanvasSize = UDim2.fromOffset(0, top + rows * PITCH_Y + 2)
 end
 function UI:refreshTree()
 	local n, sd = self:nodes(), self:stardust()
@@ -552,9 +553,11 @@ function UI:buildStars()
 	self.scroll = scroll
 	local dragged = function() return scroll.moved end
 	self.cards = {}
+	-- (two whole cards in view, like Factory Upgrades; the rest scroll sideways: the scrollbar + the < > arrows say so)
 	local ch = H - 92 - 20
+	local pitch = (W - 60 - 8) / 2
 	for i, node in ipairs(STAR_NODES) do
-		local card = Kit.box(sf, 6 + (i - 1) * 306, 4, 290, ch, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 5 })
+		local card = Kit.box(sf, 8 + (i - 1) * pitch, 4, pitch - 16, ch, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 5 })
 		Kit.corner(card, 14)
 		Kit.grad(card, hex("#231a33"), hex("#110c1a"), 90)
 		local st = Kit.stroke(card, self.spec.Neon, 2, 0.35)
@@ -581,7 +584,28 @@ function UI:buildStars()
 		self.targets["Star_" .. node.id] = c.up.button
 		table.insert(self.cards, c)
 	end
-	sf.CanvasSize = UDim2.fromOffset(#STAR_NODES * 306 + 8, 0)
+	sf.CanvasSize = UDim2.fromOffset(#STAR_NODES * pitch + 8, 0)
+	-- the < > arrows on the edges: shown while there are more cards that way; a tap scrolls one card
+	self.arrows = {}
+	for _, a in ipairs({ { -1, 8, "<" }, { 1, W - 50, ">" } }) do
+		local o = action(self.gui, a[2], 70 + ch / 2 - 34, 42, 68, 34, 12)
+		o.set("blue", a[3])
+		tap(o.button, function()
+			local room = sf.AbsoluteCanvasSize.X - sf.AbsoluteWindowSize.X
+			local x = math.clamp(math.floor((sf.CanvasPosition.X + a[1] * pitch) / pitch + 0.5) * pitch, 0, math.max(0, room))
+			self.ctx.sound("tab")
+			Kit.tween(sf, { CanvasPosition = Vector2.new(x, 0) }, 0.25)
+		end, function() return false end)
+		self.arrows[a[1]] = o
+	end
+	local function arrows()
+		local room = sf.AbsoluteCanvasSize.X - sf.AbsoluteWindowSize.X
+		self.arrows[-1].show(sf.CanvasPosition.X > 2)
+		self.arrows[1].show(sf.CanvasPosition.X < room - 2)
+	end
+	sf:GetPropertyChangedSignal("CanvasPosition"):Connect(arrows)
+	sf:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(arrows)
+	arrows()
 end
 function UI:refreshStars()
 	local n, sd = self:nodes(), self:stardust()

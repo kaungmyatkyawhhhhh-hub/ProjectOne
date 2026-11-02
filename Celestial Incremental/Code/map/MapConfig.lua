@@ -85,10 +85,10 @@ MapConfig.Islands = {
 	-- the island end of every bridge: a threshold over the island's rim (in island units: x = out from the Core, from -Radius)
 	Landing = { From = -33, To = -25, Top = 1.6, Ramp = 4 },
 	-- island-local places (x = away from the Core, z = to the side; the bridge enters at x = -30, z = 0)
-	-- the spawn FACES THE PAIR of boards, 12.5 studs in front of it: from the spawn camera (12.5 behind you, looking down at
-	-- you) the pair fills most of the screen with its huge titles still in view (owner, boards 1:1 pass 2, like Regrowth's).
-	-- Off the centre line, so the island's star beam (x 0) stays beside the camera, not in front of it.
-	Spawn = Vector3.new(12.5, 0, -2.5),
+	-- the spawn FACES THE PAIR of boards, 16.5 studs in front of it: from the spawn camera (Roblox starts it 12.5 behind you,
+	-- looking down at you) the pair fills most of the screen with its huge titles in view (owner, boards 1:1 passes 2-3).
+	-- (The island's star beam starts above the boards now, so the camera may stand behind it.)
+	Spawn = Vector3.new(8.5, 0, -2.5),
 	SpawnRock = Vector3.new(-2, 0, -2),             -- (tier 0: on the walkway over the rock)
 	Rock = 30,                                      -- tier 0 / free slot: a bare asteroid 30 across (the mesh makes it 23 high)
 	Tiles = { From = 0.6, To = 0.92, Count = 14 },
@@ -140,8 +140,11 @@ MapConfig.Boards = {
 		{ id = "Bodies", title = "BODIES", At = Vector3.new(0, 0, -23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
 			Style = "Neon", Neon = Color3.fromRGB(190, 110, 255) },
 		{ id = "Stars", title = "STAR UPGRADES", At = Vector3.new(0, 0, 23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
-			Flames = true, Neon = Color3.fromRGB(255, 176, 42), Neon2 = Color3.fromRGB(170, 90, 255) },
+			Style = "Neon", Flames = true, Neon = Color3.fromRGB(255, 176, 42), Neon2 = Color3.fromRGB(170, 90, 255) },
 	},
+	-- the angular neon frame (Style "Neon": Bodies, Star Upgrades), round the screen: its bottom corners Low out and down, its
+	-- top corners Wide out and High up (wider at the top, like Regrowth's Machines board)
+	Angular = { Low = 0.4, Wide = 1.6, High = 0.7 },
 	BuyRange = 40,  -- (from the island's centre: the island is 60 across, so anywhere on it)
 	DrawRange = 160,
 }
@@ -176,10 +179,12 @@ function MapConfig.TierOf(bodies: number, supernovas: number): number
 	return tier
 end
 
--- the star system above an island: ~22 above the floor; a rock until the player owns a star (or has gone Supernova), then a
--- star 4 -> 8 across by tier; one planet per body tier owned (max 6) on orbits of radius 6 -> 14, planets 1.5 -> 3
+-- the star system above an island: 30 above the floor (boards pass 3: clear above the 19-tall pair of boards); a rock until the
+-- player owns a star (or has gone Supernova), then a star 4 -> 8 across by tier; one planet per body tier owned (max 6) on
+-- orbits of radius 6 -> 14, planets 1.5 -> 3. Its beam (and the stardust motes) start at BeamFrom, above every board's top,
+-- so from the island they never run across a board.
 MapConfig.System = {
-	Height = 22, StarMin = 4, StarMax = 8, Rock = 4,
+	Height = 30, BeamFrom = 19.5, StarMin = 4, StarMax = 8, Rock = 4,
 	OrbitMin = 6, OrbitMax = 14, PlanetMin = 1.5, PlanetMax = 3,
 	Belt = 16.5, BeltRock = { 0.8, 1.5 }, MaxBelt = 20,
 	MaxPlanets = 6, StarTierFrom = 5,

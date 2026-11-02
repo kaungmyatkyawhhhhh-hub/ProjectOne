@@ -85,7 +85,7 @@ local function makeBoards(island: Model)
 		local panel = Instance.new("Model")
 		panel.Name = "Board_" .. spec.id
 		panel:SetAttribute("Board", spec.id)
-		Builder.BoardFrame(panel, cfs[spec.id], spec, c.Y)
+		Builder.BoardFrame(panel, cfs[spec.id], spec, c.Y, island:GetAttribute("OwnerName"))
 		panel.Screen:SetAttribute("Board", spec.id)
 		panel.Parent = model
 	end

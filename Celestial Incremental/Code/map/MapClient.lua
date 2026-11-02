@@ -147,8 +147,9 @@ local function buildSystem(island)
 	folder.Name = "System_" .. island.Name
 	folder.Parent = localFolder
 	local s = { folder = folder, planets = {}, rings = {}, h = h, top = top, near = true }
-	-- the light beam from the island up to the system: thin, violet, fading to nothing at the bottom (owner, pass 3: the old
-	-- white neon bar was too thick right in front of the camera on a phone)
+	-- the light beam up to the system: thin, violet, fading to nothing at the bottom (owner, pass 3: the old white neon bar
+	-- was too thick right in front of the camera on a phone). It starts at System.BeamFrom, above the boards' tops (boards
+	-- pass 3: from the spawn it ran up across the INFO board)
 	local beamHost = Instance.new("Part")
 	beamHost.Name = "Beam"
 	beamHost.Anchored, beamHost.CanCollide, beamHost.CanQuery, beamHost.CanTouch, beamHost.Transparency = true, false, false, false, 1
@@ -156,7 +157,7 @@ local function buildSystem(island)
 	beamHost.CFrame = CFrame.new(c)
 	beamHost.Parent = folder
 	local b0, b1 = Instance.new("Attachment"), Instance.new("Attachment")
-	b0.Position, b1.Position = Vector3.new(0, 0.3, 0), Vector3.new(0, h - 1.2, 0)
+	b0.Position, b1.Position = Vector3.new(0, SY.BeamFrom, 0), Vector3.new(0, h - 1.2, 0)
 	b0.Parent, b1.Parent = beamHost, beamHost
 	local beam = Instance.new("Beam")
 	beam.Attachment0, beam.Attachment1 = b0, b1
@@ -205,11 +206,11 @@ local function buildSystem(island)
 			table.insert(s.belt, { piece = rock, parts = Kit.Parts(rock), r = rb + ((b * 3) % 4) * 0.5, angle = b * 2.39996, tilt = beltTilt, dy = ((b * 5) % 3 - 1) * 0.5 })
 		end
 	end
-	-- stardust motes rising from the island to the system
+	-- stardust motes rising up the beam to the system (from the beam's foot, above the boards)
 	local moteHost = Instance.new("Part")
 	moteHost.Anchored, moteHost.CanCollide, moteHost.CanQuery, moteHost.CanTouch, moteHost.Transparency = true, false, false, false, 1
-	moteHost.Size = Vector3.new(10, 0.2, 10)
-	moteHost.CFrame = CFrame.new(c + Vector3.new(0, 0.6, 0))
+	moteHost.Size = Vector3.new(6, 0.2, 6)
+	moteHost.CFrame = CFrame.new(c + Vector3.new(0, SY.BeamFrom, 0))
 	moteHost.Parent = folder
 	local e = Instance.new("ParticleEmitter")
 	e.Texture = SPARK
@@ -217,7 +218,7 @@ local function buildSystem(island)
 	e.LightEmission = 0.7
 	e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.2, 0.55), NumberSequenceKeypoint.new(1, 0) })
 	e.Lifetime = NumberRange.new(2.4, 3)
-	e.Speed = NumberRange.new(h / 3, h / 2.5)
+	e.Speed = NumberRange.new((h - SY.BeamFrom) / 3, (h - SY.BeamFrom) / 2.5)
 	e.EmissionDirection = Enum.NormalId.Top
 	e.SpreadAngle = Vector2.new(6, 6)
 	e.Rate = 3 + 2 * sys.planets

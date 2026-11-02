@@ -13,7 +13,7 @@
 --  * shared.GalaxyBoardTarget(key) -> the world position of a button on YOUR BODIES board (the tutorial arrow points there)
 --  * pass 2 (owner, "Boards 1to1 pass 2"): what spills OUTSIDE the screens is drawn here too, only for the boards built:
 --    the pair's huge titles over the top frame edge, a glow halo behind the pair's frames and their crackling energy beams
---    along the frame, Star Upgrades' flame border (fire particles, gold to violet). Bodies' neon tubes glow by themselves
+--    along the frame, Star Upgrades' flame strip (small flames + a glow line, gold + violet, hugging its frame). Bodies' neon tubes glow by themselves
 --    (a rectangular halo showed square corners round the other boards). Reduced Motion: no crackle.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -101,14 +101,15 @@ local function outline(spec)
 		local P = B.Pair
 		return w / 2 + P.Lip + P.Post, h / 2 + P.Lip + P.Bar + 0.3 + P.Post / 2, -h / 2 - P.Lip - P.BarLow, P.PostDepth / 2, P.Depth / 2
 	elseif spec.Style == "Neon" then
-		return w / 2 + 1.9, h / 2 + 1.4, -h / 2 - 0.7, 0.5, 0.45
+		local G = B.Angular
+		return w / 2 + G.Wide + 0.3, h / 2 + G.High + 0.7, -h / 2 - G.Low - 0.3, 0.5, 0.45
 	end
 	return w / 2 + B.Frame, h / 2 + B.Frame, -h / 2 - B.Frame, B.Depth / 2, B.Depth / 2
 end
 local function decorate(spec, screen: BasePart)
 	local cf = screen.CFrame * CFrame.new(0, 0, -0.1) -- (the board's centre plane)
 	local hw, top, bottom, front, back = outline(spec)
-	local parts, beams, glows = {}, {}, {}
+	local parts, beams, glows, flames = {}, {}, {}, {}
 	local neon = spec.Neon
 	if spec.pair then
 		-- the halo: a glow behind the frame, so only what spills round its outline shows
@@ -192,30 +193,51 @@ local function decorate(spec, screen: BasePart)
 		end
 	end
 	if spec.Flames then
-		-- Factory Upgrades' flame border: fire particles from all four sides, gold to violet, rising, spilling out
-		for _, side in ipairs({ { 0, top, 2 * hw, Enum.NormalId.Top, 70 }, { 0, bottom, 2 * hw, Enum.NormalId.Bottom, 36 },
-			{ -hw, 0, top - bottom, Enum.NormalId.Left, 46 }, { hw, 0, top - bottom, Enum.NormalId.Right, 46 } }) do
-			local across = side[4] == Enum.NormalId.Top or side[4] == Enum.NormalId.Bottom
-			local p = fxPart("Flames", if across then Vector3.new(side[3], 0.3, 0.4) else Vector3.new(0.3, side[3], 0.4), cf * CFrame.new(side[1], side[2], front))
-			table.insert(parts, p)
+		-- Factory Upgrades' flame border (pass 3: a STRIP hugging the frame, not a cloud): along each edge of the angular
+		-- frame a thin glow line + small short-lived flames licking outward (gold, turning violet), at most ~1 stud out
+		local G = B.Angular
+		local w, h = spec.Width, spec.Height
+		local o = 0.3 -- (just outside the neon tube)
+		local corners = { Vector2.new(-w / 2 - G.Low - o, -h / 2 - G.Low - o), Vector2.new(w / 2 + G.Low + o, -h / 2 - G.Low - o),
+			Vector2.new(w / 2 + G.Wide + o, h / 2 + G.High + o), Vector2.new(-w / 2 - G.Wide - o, h / 2 + G.High + o) }
+		local holder = fxPart("FlameLine", Vector3.new(1, 1, 1), cf * CFrame.new(0, 0, 0.45))
+		table.insert(parts, holder)
+		for i = 1, 4 do
+			-- (corners run anticlockwise, so each edge's outside is its part's -Y: EmissionDirection Bottom)
+			local p0, p1 = corners[i], corners[i % 4 + 1]
+			local d = p1 - p0
+			local mid = (p0 + p1) / 2
+			local edge = fxPart("Flames", Vector3.new(d.Magnitude, 0.12, 0.3), cf * CFrame.new(mid.X, mid.Y, 0.45) * CFrame.Angles(0, 0, math.atan2(d.Y, d.X)))
+			table.insert(parts, edge)
 			local e = Instance.new("ParticleEmitter")
 			e.Texture = FIRE
 			e.Shape = Enum.ParticleEmitterShape.Box
-			e.EmissionDirection = side[4]
-			e.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 214, 110)), ColorSequenceKeypoint.new(0.3, neon),
-				ColorSequenceKeypoint.new(0.6, spec.Neon2 or neon), ColorSequenceKeypoint.new(1, spec.Neon2 or neon) })
-			e.LightEmission, e.LightInfluence = 1, 0
-			e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(0.45, 1.6), NumberSequenceKeypoint.new(1, 0.3) })
-			e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.05), NumberSequenceKeypoint.new(0.6, 0.35), NumberSequenceKeypoint.new(1, 1) })
-			e.Lifetime = NumberRange.new(0.35, 0.7)
-			e.Speed = NumberRange.new(0.8, 1.8)
-			e.SpreadAngle = Vector2.new(20, 20)
-			-- (they rise; the bottom ones don't, or they'd drift up over the screen)
-			e.Acceleration = if side[4] == Enum.NormalId.Bottom then Vector3.zero else Vector3.new(0, 3, 0)
-			e.Brightness = 2
-			e.RotSpeed = NumberRange.new(-40, 40)
-			e.Rate = side[5]
-			e.Parent = p
+			e.EmissionDirection = Enum.NormalId.Bottom
+			e.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 226, 130)), ColorSequenceKeypoint.new(0.25, neon),
+				ColorSequenceKeypoint.new(0.55, spec.Neon2 or neon), ColorSequenceKeypoint.new(1, spec.Neon2 or neon) })
+			e.LightEmission, e.LightInfluence, e.Brightness = 1, 0, 3
+			e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.25), NumberSequenceKeypoint.new(0.5, 0.9), NumberSequenceKeypoint.new(1, 0.15) })
+			e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.6, 0.25), NumberSequenceKeypoint.new(1, 1) })
+			e.Lifetime = NumberRange.new(0.25, 0.45)
+			e.Speed = NumberRange.new(0.6, 1.2)
+			e.SpreadAngle = Vector2.new(12, 12)
+			e.Acceleration = Vector3.new(0, 1.5, 0)
+			e.RotSpeed = NumberRange.new(-60, 60)
+			e.Rate = math.floor(d.Magnitude * 14)
+			e.Parent = edge
+			-- the glow line under the flames
+			local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
+			a0.Position, a1.Position = Vector3.new(p0.X, p0.Y, 0), Vector3.new(p1.X, p1.Y, 0)
+			a0.Parent, a1.Parent = holder, holder
+			local bm = Instance.new("Beam")
+			bm.Attachment0, bm.Attachment1 = a0, a1
+			bm.FaceCamera = true
+			bm.LightEmission, bm.LightInfluence = 1, 0
+			bm.Color = ColorSequence.new(neon:Lerp(Color3.new(1, 1, 1), 0.3))
+			bm.Width0, bm.Width1 = 0.45, 0.45
+			bm.Transparency = NumberSequence.new(0.35)
+			bm.Parent = holder
+			table.insert(flames, { beam = bm, width = 0.45 })
 		end
 	end
 	-- the animation: the halo breathes, the energy crackles (new bends + widths ~14 times a second)
@@ -227,6 +249,10 @@ local function decorate(spec, screen: BasePart)
 		acc += dt
 		if acc < 0.07 then return end
 		acc = 0
+		for _, f in ipairs(flames) do
+			f.beam.Width0 = f.width * (0.8 + math.random() * 0.4)
+			f.beam.Width1 = f.width * (0.8 + math.random() * 0.4)
+		end
 		for _, bm in ipairs(beams) do
 			bm.CurveSize0 = (math.random() - 0.5) * 2.4
 			bm.CurveSize1 = (math.random() - 0.5) * 2.4
