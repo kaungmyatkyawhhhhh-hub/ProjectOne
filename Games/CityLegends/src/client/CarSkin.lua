@@ -160,14 +160,14 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "gear", unit = "", at = Vector3.new(-0.0087, -0.0160, -0.2404), face = Vector3.new(0.0519, 0.2968, 0.9535), length = 0.0058, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
 	},
 	bugotti_chiron_pursport = {
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0009, 0.0305, -0.2454), face = Vector3.new(0.0232, 0.3082, 0.9510), length = 0.0300, scale = "0:-135.3,50:-108.2,100:-81.6,150:-55.1,200:-27.4,250:3.6,300:32.0,350:61.5,400:88.0,450:113.4,500:141.7" },
-		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0028, -0.0070, -0.2329), face = Vector3.new(0.0284, 0.3156, 0.9485), length = 0.0177, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
-		{ kind = "gear", unit = "", at = Vector3.new(-0.0096, -0.0116, -0.2312), face = Vector3.new(0.0619, 0.3087, 0.9492), length = 0.0058, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0001, 0.0259, -0.2424), face = Vector3.new(0.0233, 0.3082, 0.9510), length = 0.0365, scale = "0:-135.3,50:-108.2,100:-81.6,150:-55.1,200:-27.4,250:3.6,300:32.0,350:61.5,400:88.0,450:113.4,500:141.7" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0021, -0.0198, -0.2271), face = Vector3.new(0.0285, 0.3156, 0.9485), length = 0.0215, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "gear", unit = "", at = Vector3.new(-0.0104, -0.0254, -0.2251), face = Vector3.new(0.0620, 0.3087, 0.9491), length = 0.0071, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
 	},
 	bugotti_chiron_supersport = {
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0067, 0.0428, -0.2569), face = Vector3.new(0.0242, 0.3043, 0.9523), length = 0.0300, scale = "0:-135.3,50:-108.2,100:-81.6,150:-55.1,200:-27.4,250:3.6,300:32.0,350:61.5,400:88.0,450:113.4,500:141.7" },
-		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0085, 0.0053, -0.2445), face = Vector3.new(0.0294, 0.3117, 0.9497), length = 0.0177, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
-		{ kind = "gear", unit = "", at = Vector3.new(-0.0154, 0.0006, -0.2429), face = Vector3.new(0.0629, 0.3047, 0.9504), length = 0.0058, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0001, 0.0257, -0.2500), face = Vector3.new(0.0242, 0.3042, 0.9523), length = 0.0361, scale = "0:-135.3,50:-108.2,100:-81.6,150:-55.1,200:-27.4,250:3.6,300:32.0,350:61.5,400:88.0,450:113.4,500:141.7" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0021, -0.0196, -0.2351), face = Vector3.new(0.0294, 0.3116, 0.9498), length = 0.0213, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "gear", unit = "", at = Vector3.new(-0.0103, -0.0252, -0.2331), face = Vector3.new(0.0629, 0.3046, 0.9504), length = 0.0070, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
 	},
 
 	lambrini_countach = { -- Countach
@@ -255,7 +255,8 @@ CarSkin.FACELESS_DIALS = {
 -- where the model's needle points as modelled ("rest", the same way). Kinds: speed (unit mph / kmh),
 -- rpm (unit "redline": the car's own redline at our limiter), power (its top at full throttle and
 -- revs), fuel (nearly full), oil (warms up after the start). Measured with tools/needle_specs.py.
--- The Veyron family (owner, 2026-11-03): the 16.4's own dials and needles in all three.
+-- The Veyron family (owner, 2026-11-03): the 16.4's own dials and needles in all three (since the
+-- owner's "the cluster doesn't look smooth", the 16.4's whole binnacle in the Super Sport and GS Vitesse).
 export type OwnNeedle = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, rest: number }
 CarSkin.OWN_NEEDLES = {
 	bugotti_veyron = {
@@ -266,18 +267,18 @@ CarSkin.OWN_NEEDLES = {
 		{ kind = "oil", unit = "f", at = Vector3.new(-0.0852, 0.0796, -0.2270), face = Vector3.new(0.0119, 0.1534, 0.9881), length = 0.0161, scale = "50:-122.7,100:-72.2,150:-23.8,200:22.2,250:73.2,300:126.9", rest = 122.4 },
 	},
 	bugotti_veyron_sport = {
-		{ kind = "rpm", unit = "redline", at = Vector3.new(0.0034, 0.0515, -0.1938), face = Vector3.new(-0.0016, 0.2803, 0.9599), length = 0.0484, scale = "0:-124.3,1000:-94.1,2000:-63.3,3000:-32.5,4000:-0.2,5000:33.4,6000:63.7,7000:93.7,8000:124.3", rest = 125.9 },
-		{ kind = "speed", unit = "mph", at = Vector3.new(0.1007, 0.0086, -0.1755), face = Vector3.new(-0.0700, 0.2766, 0.9584), length = 0.0389, scale = "0:-132.5,20:-116.2,40:-98.1,60:-79.0,80:-58.8,100:-39.5,120:-17.4,140:4.7,160:25.1,180:45.6,200:62.1,220:80.6,240:97.9,260:114.2,280:130.6", rest = 127.3 },
-		{ kind = "power", unit = "ps", at = Vector3.new(-0.0932, 0.0077, -0.1754), face = Vector3.new(0.0708, 0.2790, 0.9577), length = 0.0345, scale = "0:-125.4,100:-102.1,200:-77.7,300:-52.8,400:-27.0,500:2.7,600:27.8,700:55.0,800:77.5,900:102.1,1001:126.1", rest = 126.4 },
-		{ kind = "fuel", unit = "gal", at = Vector3.new(0.0900, 0.0764, -0.1935), face = Vector3.new(-0.0604, 0.2751, 0.9595), length = 0.0178, scale = "0:-122.3,5:-72.1,10:-22.8,15:26.7,20:76.1,25:123.9", rest = 123.0 },
-		{ kind = "oil", unit = "f", at = Vector3.new(-0.0834, 0.0752, -0.1931), face = Vector3.new(0.0704, 0.2845, 0.9561), length = 0.0175, scale = "50:-121.1,100:-71.0,150:-23.2,200:22.1,250:72.8,300:125.1", rest = 122.0 },
+		{ kind = "rpm", unit = "redline", at = Vector3.new(0.0037, 0.0509, -0.1961), face = Vector3.new(-0.0015, 0.2749, 0.9615), length = 0.0517, scale = "0:-123.8,1000:-93.3,2000:-62.6,3000:-31.9,4000:0.2,5000:33.5,6000:63.5,7000:93.6,8000:124.2", rest = 125.9 },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.0990, 0.0094, -0.1743), face = Vector3.new(-0.0478, 0.2899, 0.9559), length = 0.0364, scale = "0:-133.1,20:-116.8,40:-98.6,60:-79.6,80:-58.8,100:-38.8,120:-16.8,140:4.5,160:24.7,180:45.3,200:61.6,220:79.7,240:96.8,260:112.9,280:129.1", rest = 127.4 },
+		{ kind = "power", unit = "ps", at = Vector3.new(-0.0935, 0.0066, -0.1741), face = Vector3.new(-0.0325, 0.2622, 0.9645), length = 0.0336, scale = "0:-125.9,100:-102.4,200:-77.2,300:-52.4,400:-27.4,500:1.9,600:27.4,700:54.4,800:77.0,900:101.0,1001:124.8", rest = 123.6 },
+		{ kind = "fuel", unit = "gal", at = Vector3.new(0.0911, 0.0759, -0.1911), face = Vector3.new(-0.0078, 0.1365, 0.9906), length = 0.0164, scale = "0:-122.3,5:-71.0,10:-23.3,15:26.2,20:74.1,25:124.3", rest = 122.9 },
+		{ kind = "oil", unit = "f", at = Vector3.new(-0.0838, 0.0763, -0.1913), face = Vector3.new(0.0061, 0.0766, 0.9970), length = 0.0162, scale = "50:-122.6,100:-72.2,150:-23.8,200:22.2,250:73.2,300:126.9", rest = 122.2 },
 	},
 	bugotti_veyron_top = {
-		{ kind = "rpm", unit = "redline", at = Vector3.new(0.0046, 0.0516, -0.1885), face = Vector3.new(0.0007, 0.2776, 0.9607), length = 0.0486, scale = "0:-124.1,1000:-93.5,2000:-62.7,3000:-32.1,4000:0.0,5000:33.4,6000:63.4,7000:93.5,8000:123.7", rest = 125.7 },
-		{ kind = "speed", unit = "mph", at = Vector3.new(0.1031, 0.0133, -0.1714), face = Vector3.new(-0.0723, 0.2761, 0.9584), length = 0.0405, scale = "0:-132.5,20:-116.2,40:-98.0,60:-79.1,80:-59.1,100:-39.6,120:-17.3,140:4.7,160:25.0,180:45.8,200:61.9,220:80.0,240:97.3,260:113.7,280:130.4", rest = 133.3 },
-		{ kind = "power", unit = "ps", at = Vector3.new(-0.0915, 0.0095, -0.1706), face = Vector3.new(0.0706, 0.2791, 0.9577), length = 0.0350, scale = "0:-125.5,100:-102.2,200:-76.4,300:-51.4,400:-26.2,500:3.3,600:28.3,700:54.8,800:76.9,900:101.3,1001:125.2", rest = 128.8 },
-		{ kind = "fuel", unit = "gal", at = Vector3.new(0.0912, 0.0768, -0.1883), face = Vector3.new(-0.0659, 0.2766, 0.9587), length = 0.0180, scale = "0:-122.0,5:-72.5,10:-22.4,15:26.6,20:74.0,25:123.4", rest = 123.2 },
-		{ kind = "oil", unit = "f", at = Vector3.new(-0.0819, 0.0757, -0.1878), face = Vector3.new(0.0728, 0.2797, 0.9573), length = 0.0176, scale = "50:-121.3,100:-72.0,150:-23.4,200:22.2,250:72.9,300:126.9", rest = 121.9 },
+		{ kind = "rpm", unit = "redline", at = Vector3.new(0.0050, 0.0513, -0.1909), face = Vector3.new(-0.0014, 0.2748, 0.9615), length = 0.0517, scale = "0:-123.7,1000:-93.3,2000:-62.6,3000:-31.9,4000:0.2,5000:33.5,6000:63.5,7000:93.6,8000:124.2", rest = 125.9 },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.1002, 0.0097, -0.1691), face = Vector3.new(-0.0478, 0.2898, 0.9559), length = 0.0363, scale = "0:-133.1,20:-116.8,40:-98.6,60:-79.5,80:-58.8,100:-38.8,120:-16.8,140:4.5,160:24.7,180:45.4,200:61.6,220:79.7,240:96.8,260:113.0,280:129.2", rest = 127.4 },
+		{ kind = "power", unit = "ps", at = Vector3.new(-0.0921, 0.0070, -0.1689), face = Vector3.new(-0.0324, 0.2621, 0.9645), length = 0.0335, scale = "0:-125.9,100:-102.4,200:-77.2,300:-52.4,400:-27.4,500:1.9,600:27.5,700:54.4,800:77.0,900:101.0,1001:124.8", rest = 123.6 },
+		{ kind = "fuel", unit = "gal", at = Vector3.new(0.0923, 0.0762, -0.1859), face = Vector3.new(-0.0077, 0.1364, 0.9906), length = 0.0164, scale = "0:-122.3,5:-70.9,10:-23.3,15:26.3,20:74.1,25:124.3", rest = 122.9 },
+		{ kind = "oil", unit = "f", at = Vector3.new(-0.0824, 0.0766, -0.1861), face = Vector3.new(0.0061, 0.0765, 0.9971), length = 0.0162, scale = "50:-122.6,100:-72.2,150:-23.8,200:22.3,250:73.3,300:126.9", rest = 122.2 },
 	},
 } :: { [string]: { OwnNeedle } }
 
