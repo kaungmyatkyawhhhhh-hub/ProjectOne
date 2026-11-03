@@ -911,6 +911,11 @@ Config.Pedestrians = {
 -- penthouse suites on the hotel that "pay out money every minute to their owners"). The suites
 -- are the top floors, lowest first. They pay while you're in the game (time offline doesn't
 -- pay), one payment per full minute.
+-- One suite you upgrade (owner, 2026-11-03: "the 4 suites will be in the same location but when u
+-- upgrade it in lobby the inside of the suites will change and the highest will be pent house"):
+-- you own one tier at a time; the lobby's gallery upgrades it to the next (you pay the difference
+-- in price), only that tier pays, and only its owner can ride up. Each tier's floor is furnished
+-- better than the one below (adds).
 ---------------------------------------------------------------------
 Config.Hotel = {
 	Name = "THE LEGENDS GRAND",
@@ -918,10 +923,11 @@ Config.Hotel = {
 	Neon = { Color3.fromRGB(255, 70, 170), Color3.fromRGB(40, 230, 220) }, -- Miami pink and teal
 	IncomeEvery = 60, -- seconds in the game per payment
 	Suites = {
-		{ id = "grand_skyline", name = "SKYLINE SUITE", price = 2000000, perMinute = 2000 },
-		{ id = "grand_ocean", name = "OCEAN SUITE", price = 6000000, perMinute = 6500 },
-		{ id = "grand_royal", name = "ROYAL SUITE", price = 12000000, perMinute = 14000 },
-		{ id = "grand_presidential", name = "PRESIDENTIAL SUITE", price = 25000000, perMinute = 30000 },
+		-- (price: the tier's full value; an upgrade costs the difference from the tier below)
+		{ id = "grand_skyline", name = "SKYLINE SUITE", price = 2000000, perMinute = 2000, adds = "Lounge, kitchen, bed" },
+		{ id = "grand_ocean", name = "OCEAN SUITE", price = 6000000, perMinute = 6500, adds = "+ Car turntable" },
+		{ id = "grand_royal", name = "ROYAL SUITE", price = 12000000, perMinute = 14000, adds = "+ DJ booth, chandelier" },
+		{ id = "grand_presidential", name = "PENTHOUSE", price = 25000000, perMinute = 30000, adds = "+ Roof pool, helipad" },
 	},
 	ValetRange = 20, -- how close to the middle of the valet bay your car must stop
 	ValetSpeed = 14, -- studs/s: slow enough to hand over

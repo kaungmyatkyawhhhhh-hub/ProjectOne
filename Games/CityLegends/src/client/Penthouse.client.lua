@@ -483,7 +483,9 @@ local function buildTv(part: BasePart): Tv
 	strip.BorderSizePixel = 0
 	strip.Size = UDim2.new(1, 0, 0, 46)
 	strip.Position = UDim2.new(0, 0, 1, -46)
+	strip.ClipsDescendants = true -- (the scrolling ticker stays inside the red bar)
 	strip.Parent = news
+	news.ClipsDescendants = true
 	text(news, "CITY LEGENDS NEWS", 30, UDim2.fromOffset(28, 22), UDim2.new(1, -56, 0, 40), Color3.new(1, 1, 1), Enum.Font.GothamBlack)
 	text(news, "LIVE", 18, UDim2.new(1, -90, 0, 28), UDim2.fromOffset(60, 24), Color3.fromRGB(255, 70, 90))
 	local head = text(news, HEADLINES[1], 34, UDim2.fromOffset(28, 110), UDim2.new(1, -56, 0, 150), Color3.fromRGB(235, 238, 245), Enum.Font.GothamBlack)

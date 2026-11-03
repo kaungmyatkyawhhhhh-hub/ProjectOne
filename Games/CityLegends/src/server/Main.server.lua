@@ -962,8 +962,12 @@ local function watchConsoleEverything(player: Player)
 		for _, t in Config.Towers.List do
 			profile.Penthouses[t.id] = true
 		end
-		for _, t in Config.Hotel.Suites do
-			profile.Penthouses[t.id] = true
+		-- the hotel: one suite you upgrade, so the top one (the penthouse)
+		for k, t in Config.Hotel.Suites do
+			profile.Penthouses[t.id] = if k == #Config.Hotel.Suites then true else nil
+			if profile.Home == t.id and k < #Config.Hotel.Suites then
+				profile.Home = Config.Hotel.Suites[#Config.Hotel.Suites].id
+			end
 		end
 		profile.Houses = profile.Houses or {}
 		for kind in Config.Houses.Types do

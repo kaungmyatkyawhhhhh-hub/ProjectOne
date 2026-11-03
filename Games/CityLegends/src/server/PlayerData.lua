@@ -252,6 +252,28 @@ function PlayerData.load(player: Player): Profile
 					end
 				end
 			end
+			-- the hotel's suites are one suite you upgrade (2026-11-03): an older save that bought
+			-- several keeps only the best one, with its home and showcase car moved onto it
+			local best: string? = nil
+			for _, t in Config.Hotel.Suites do
+				if profile.Penthouses[t.id] then
+					best = t.id
+				end
+			end
+			if best then
+				for _, t in Config.Hotel.Suites do
+					if t.id ~= best then
+						profile.Penthouses[t.id] = nil
+						if type(saved.Home) == "string" and saved.Home == t.id then
+							profile.Home = best
+						end
+						if profile.Showcase[t.id] then
+							profile.Showcase[best] = profile.Showcase[best] or profile.Showcase[t.id]
+							profile.Showcase[t.id] = nil
+						end
+					end
+				end
+			end
 			-- houses (absent in older saves). Old house types (villa, mansion) become the designs
 			-- that replaced them, worth as much or more: nobody loses anything (2026-10-29)
 			local houseTypes = Config.Houses.Types

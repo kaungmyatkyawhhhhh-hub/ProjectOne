@@ -7,22 +7,25 @@
 	  * the forecourt: a porte-cochere driveway off the street under a lit canopy with the hotel's
 	    name, a fountain island with palms and the name stone, the valet stand and valets in uniform
 	  * the grand lobby: marble and gold, columns, chandeliers, reception with a concierge, a lounge
-	    with a grand piano, the suite sales gallery, the residents' board and a bank of elevators
-	    (one per suite, one to the roof)
+	    with a grand piano, the suite upgrades gallery, the residents' board and the suite lifts
 	  * the tower (remodel 2026-11-03): cream Riviera stone in two setbacks, punched windows, black
 	    iron balconies, carved cornices with balustrades, the name in gold letters round the top and
 	    warm floodlights; the podium in the same stone with an iron-and-glass marquise, a stone
 	    balustrade and balconettes; no neon. Chandeliers, leather sofas, potted palms and luggage
 	    carts come from ServerStorage.VenueKit (cleaned Creator Store models saved in the place)
-	  * the crown: the suites (Config.Hotel.Suites), full penthouse floors built by Towers.suite
-	    (lounge, kitchen, bedroom, car showcase, DJ booth and party mode), with the roof terrace (sky
-	    pool, telescope, helipad) on the top one, and gold fins rising past the roof
+	  * the crown: the suites (Config.Hotel.Suites), full penthouse floors built by Towers.suite,
+	    with stone piers and lanterns rising past the roof
+	One suite you upgrade (owner, 2026-11-03): you own one tier at a time (Skyline, Ocean, Royal,
+	the Penthouse). The gallery's plinths buy the first and upgrade to the next (paying the
+	difference); the lifts take you up to your own tier only. Each tier is its own floor, furnished
+	better than the one below (Towers.suite's tier, and VenueKit leather and chandeliers on the
+	Royal and the Penthouse); the roof terrace (sky pool, telescope, helipad) is the Penthouse's.
 
 	Valets: stop your car in the valet bay under the canopy and press Y ("VALET"): you step out at
 	the door and a valet drives the car round into the valet garage. At the valet stand, "Get my
 	car" brings it back to the bay (the next spawn of that car starts there, see ctx.setSpawnAt).
-	Suites pay their owners every full minute in the game (Config.Hotel.IncomeEvery); time offline
-	doesn't pay.
+	Your suite pays you every full minute in the game (Config.Hotel.IncomeEvery, the tier's
+	perMinute); time offline doesn't pay.
 
 	CityBuilder calls Hotel.buildWorld(kit, parent) once Downtown is built (on the site
 	WestLayout.site("hotel")); Main calls Hotel.init(ctx).
@@ -102,10 +105,6 @@ local tickets: { [Player]: string } = {} -- car ids the valet is holding
 local carry: { [Player]: number } = {} -- seconds towards the next suite payment
 local fxRemote: RemoteEvent? = nil
 
-local SUITE_BY_ID: { [string]: any } = {}
-for _, s in H.Suites do
-	SUITE_BY_ID[s.id] = s
-end
 
 local function money(n: number): string
 	local s = tostring(math.floor(n))
@@ -296,6 +295,112 @@ end
 ---------------------------------------------------------------------
 -- Building
 ---------------------------------------------------------------------
+---------------------------------------------------------------------
+-- The suite: one tier at a time
+---------------------------------------------------------------------
+-- the tier a profile owns (0: none; older saves keep only their best, see PlayerData)
+local function tierOf(profile: any): number
+	local best = 0
+	for k, s in H.Suites do
+		if profile.Penthouses[s.id] then
+			best = k
+		end
+	end
+	return best
+end
+
+-- what moving up to tier k costs (from the tier below)
+local function upgradeCost(k: number): number
+	return H.Suites[k].price - (if k > 1 then H.Suites[k - 1].price else 0)
+end
+
+-- the suites' ready-made furniture (cleaned Creator Store models in ServerStorage.VenueKit; see
+-- the credits in the vault): when it's in the place, Towers.suite leaves out its own sofas, bed and
+-- plants and dressSuite furnishes each tier
+local function suiteKit(): boolean
+	local vk = game:GetService("ServerStorage"):FindFirstChild("VenueKit")
+	return vk ~= nil and vk:FindFirstChild("SuiteBed") ~= nil and vk:FindFirstChild("SuiteSectional") ~= nil
+end
+
+-- each tier, in the suite's own frame (x right, y up, -z towards the sea; pieces face -z):
+--   all: lounge chairs by the coffee table, a wood and marble kitchen island, plants, a rug under
+--     the dining table
+--   1 Skyline: a white corner sofa facing the TV, a hotel bed, a dining table by the window
+--   2 Ocean: the leather corner sofa, the dining table in the middle of the room
+--   3 Royal: + a glass fireplace, the tufted sofa and armchairs facing the view, a chandelier
+--   4 Penthouse: a round bed, a freestanding bath, a glass dining table, a concert grand piano at
+--     the window, two chandeliers and palms
+local function dressSuite(kit: any, parent: Instance, frame: CFrame, yP: number, k: number)
+	local function at(x: number, y: number, z: number): CFrame
+		return frame * CFrame.new(x, y, z)
+	end
+	local fl = yP + 0.3
+	local par = kit.lodGroup(parent, "SuiteDressing", (frame * CFrame.new(0, yP + 15, 0)).Position, 380)
+	local turn = CFrame.Angles(0, math.pi, 0) -- (facing +z)
+	if suiteKit() then
+		-- the TV lounge: a corner sofa with its back to the window, facing the TV wall
+		kitPiece(if k == 1 then "SuiteSofa" else "SuiteSectional", at(-26, fl, -28) * turn, nil, par)
+		-- the bed, its head against the back glass
+		if k >= 4 then
+			kitPiece("SuiteBedRound", at(30, fl, 33.4), nil, par)
+		else
+			kitPiece("SuiteBed", at(30, fl, 34.8), nil, par)
+		end
+		-- two lounge chairs either side of the coffee table, facing each other
+		kitPiece("SuiteChair", at(-37, fl, -13) * CFrame.Angles(0, -math.pi / 2, 0), 1.2, par)
+		kitPiece("SuiteChair", at(-13, fl, -13) * CFrame.Angles(0, math.pi / 2, 0), 1.2, par)
+		-- the kitchen island (wood and marble), the stools in front of it
+		kitPiece("SuiteIsland", at(-26, fl, 18), nil, par)
+		-- dining on a rug: by the window on the Skyline, in the middle of the room above it
+		local dx, dz = if k == 1 then 24 else 0, if k == 1 then -24 else -12
+		kitPiece("SuiteRug", at(dx, fl, dz), 1.4, par)
+		kitPiece(if k >= 4 then "SuiteDiningGlass" else "SuiteDining", at(dx, fl + 0.3, dz), nil, par)
+		-- the Penthouse: a freestanding bath by the bedroom's glass
+		if k >= 4 then
+			kitPiece("SuiteBath", at(31.5, fl, 19.5), nil, par)
+		end
+		-- plants in the corners
+		kitPiece("SuiteFig", at(-39.5, fl, -39.5), 1.4, par)
+		kitPiece("SuitePlant", at(10, fl, 24), 1.2, par)
+		if k < 4 then
+			kitPiece("SuitePlant", at(-13, fl, 32), 1.2, par)
+			kitPiece("SuiteFig", at(39, fl, -39), 1.4, par)
+		end
+		-- the Royal and the Penthouse: a glass fireplace on the left wall, facing the room
+		if k >= 3 then
+			local fire = kitPiece("SuiteFireplace", at(-36.6, fl, 4.1) * CFrame.Angles(0, -math.pi / 2, 0), nil, par)
+			if fire then
+				local glow = kit.deco(par, Vector3.new(1, 1, 1), at(-36, fl + 3, 4.1), WARM, Enum.Material.SmoothPlastic, { transparency = 1 })
+				kit.addLight("PointLight", glow, Color3.fromRGB(255, 160, 80), 18, 1.4)
+			end
+		end
+		-- the Penthouse: a concert grand at the window (the bench on the room side)
+		if k >= 4 then
+			kitPiece("SuitePiano", at(0, fl, -30), nil, par)
+		end
+	end
+	if k < 3 then
+		return
+	end
+	-- the Royal Suite: the lobby's tufted sofa and armchairs facing the view
+	if k == 3 and kitPiece("Chesterfield", at(0, fl, -31), 1.15, par) then
+		kitPiece("Armchair", at(-10, fl, -33) * CFrame.Angles(0, math.rad(-25), 0), 1.15, par)
+		kitPiece("Armchair", at(10, fl, -33) * CFrame.Angles(0, math.rad(25), 0), 1.15, par)
+	end
+	local hang = { { 0, 8 } }
+	if k >= 4 then
+		table.insert(hang, { -24, -18 })
+		kitPiece("PottedPalm", at(39, fl, -39), 1.5 * 1.7, par)
+		kitPiece("PottedPalm", at(-13, fl, 32), 1.5 * 1.7, par)
+	end
+	for _, h in hang do
+		if kitPiece("Chandelier", at(h[1], yP + 30 - 14.92 * 0.75, h[2]), 0.75, par) then
+			local bulb = kit.deco(par, Vector3.new(1, 1, 1), at(h[1], yP + 23, h[2]), WARM, Enum.Material.SmoothPlastic, { transparency = 1 })
+			kit.addLight("PointLight", bulb, WARM, 34, 1.2)
+		end
+	end
+end
+
 local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	local mk, deco = kit.mk, kit.deco
 	local half = lot / 2
@@ -813,7 +918,8 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	pottedPalm(lobby, -70, 0.5, -34, 1.5)
 	kitPiece("LuggageCart", at(-52, 0.5, -8) * CFrame.Angles(0, math.rad(70), 0), 1, lobby)
 
-	-- the suite sales gallery (right, at the back): a glowing model of each suite on a plinth
+	-- the suite upgrades gallery (right, at the back): a glowing model of each tier on a plinth;
+	-- the first plinth buys the Skyline Suite, each next one upgrades to its tier
 	local suites = H.Suites
 	for k, s in suites do
 		local z = 44 + (k - 1) * 10
@@ -821,41 +927,37 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 		dbox(lobby, 4.2, 0.2, 4.2, 66, 4.6, z, GOLD, Enum.Material.Metal)
 		local mini = dbox(lobby, 1.6, 2 + k * 0.8, 1.6, 66, 5.7 + k * 0.4, z, Color3.fromRGB(30, 40, 56), Enum.Material.Glass, { reflectance = 0.3 })
 		dbox(lobby, 1.7, 0.3, 1.7, 66, 4.7 + 2 + k * 0.8 + 0.2, z, GOLD, Enum.Material.Metal)
-		local card = dbox(lobby, 0.2, 2.2, 3.6, 63.9, 3, z, BLACK, Enum.Material.SmoothPlastic)
-		kit.surfaceText(card, Enum.NormalId.Left, s.name .. "\n" .. money(s.price) .. "  ·  " .. money(s.perMinute) .. "/min", GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(300, 120))
-		local buy = prompt(mini, "Buy suite", titleCase(s.name) .. "  " .. money(s.price), Enum.KeyCode.E, 1.5, 9)
-		CollectionService:AddTag(buy, "TowerBuy")
-		buy:SetAttribute("Tower", s.id)
-		buy:SetAttribute("Price", s.price)
+		local cost = upgradeCost(k)
+		local card = dbox(lobby, 0.2, 3.2, 3.6, 63.9, 2.8, z, BLACK, Enum.Material.SmoothPlastic)
+		kit.surfaceText(card, Enum.NormalId.Left, s.name .. "\n" .. money(cost) .. "\n" .. money(s.perMinute) .. " / MIN\n" .. s.adds, GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(300, 260))
+		local buy = prompt(mini, if k == 1 then "Buy suite" else "Upgrade", titleCase(s.name) .. "  " .. money(cost), Enum.KeyCode.E, 1.5, 9)
+		CollectionService:AddTag(buy, "HotelTier") -- (HotelClient words it for this player)
+		buy:SetAttribute("Tier", k)
 		buy.Triggered:Connect(function(player: Player)
-			Towers.buy(player, s.id)
+			Hotel.upgrade(player, k)
 		end)
 	end
 	local gallerySign = dbox(lobby, 0.3, 2.4, 20, 69, 11, 59, BLACK, Enum.Material.SmoothPlastic)
-	kit.surfaceText(gallerySign, Enum.NormalId.Left, "SUITE SALES", GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(600, 70))
+	kit.surfaceText(gallerySign, Enum.NormalId.Left, "SUITE UPGRADES", GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(600, 70))
 
-	-- the elevator bank: one car per suite and one to the roof, under the residents' board
+	-- the suite lifts under the residents' board: each takes you up to your own suite (owners only)
 	box(model, 108, LH, PODIUM_Z1 - 2 - ELEVATOR_Z, 0, LH / 2, (ELEVATOR_Z + PODIUM_Z1 - 2) / 2, MARBLE_DARK, Enum.Material.Marble, { name = "ElevatorCore" })
-	local lobbyStops: { CFrame } = {}
-	local doors = { -40, -20, 0, 20, 40 }
-	for k, x in doors do
-		local isRoof = k > #suites
+	local lobbyStop = at(0, 3.7, ELEVATOR_Z - 6) -- facing out of the middle lift's doors
+	for _, x in { -20, 0, 20 } do
 		dbox(lobby, 12, 15, 0.6, x, 7.5 + 0.5, ELEVATOR_Z - 0.3, MARBLE, Enum.Material.Marble)
 		for _, sx in { -1, 1 } do
 			dbox(lobby, 3.6, 11.5, 0.3, x + sx * 1.85, 6.25, ELEVATOR_Z - 0.7, BRASS, Enum.Material.Metal, { reflectance = 0.35 })
 		end
 		dbox(lobby, 0.1, 11.5, 0.32, x, 6.25, ELEVATOR_Z - 0.72, BLACK, Enum.Material.SmoothPlastic)
-		local label = if isRoof then "ROOF TERRACE" else suites[k].name
 		local plate = dbox(lobby, 10, 1.8, 0.2, x, 13.6, ELEVATOR_Z - 0.75, BLACK, Enum.Material.SmoothPlastic)
-		kit.surfaceText(plate, Enum.NormalId.Front, label, GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(400, 70))
+		kit.surfaceText(plate, Enum.NormalId.Front, "SUITES", GOLD, nil, nil, Enum.Font.GothamMedium, Vector2.new(400, 70))
 		local panel = dbox(lobby, 1, 2.4, 0.3, x + 5.2, 5.5, ELEVATOR_Z - 0.75, BRASS, Enum.Material.Metal, { reflectance = 0.3 })
 		dbox(lobby, 0.5, 0.5, 0.1, x + 5.2, 6, ELEVATOR_Z - 0.95, WARM, Enum.Material.Neon)
-		local id = if isRoof then suites[#suites].id else suites[k].id
-		local p = prompt(panel, if isRoof then "Up to the roof" else "Up to " .. titleCase(suites[k].name), "Elevator", Enum.KeyCode.E, 0, 10)
+		local p = prompt(panel, "Up to my suite", "Elevator", Enum.KeyCode.E, 0, 10)
+		CollectionService:AddTag(p, "HotelSuiteLift") -- (HotelClient words it for this player)
 		p.Triggered:Connect(function(player: Player)
-			Towers.travel(player, id, if isRoof then "roof" else "penthouse")
+			Hotel.goUp(player)
 		end)
-		lobbyStops[k] = at(x, 3.7, ELEVATOR_Z - 6) -- facing out of the doors
 	end
 	-- the residents' board above the elevators
 	local boardPart = dbox(lobby, 70, 11, 0.3, 0, 25, ELEVATOR_Z - 0.5, BLACK, Enum.Material.SmoothPlastic)
@@ -957,14 +1059,10 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 			perMinute = s.perMinute,
 			levelName = titleCase(s.name),
 		}
-		stops[k] = Towers.suite(kit, model, spec, { frame = suiteFrame, yP = CROWN_Y + (k - 1) * SUITE_STEP, roof = k == #suites })
-	end
-	local roofStop = stops[#suites].roof
-	for k, st in stops do
-		st.lobby = lobbyStops[k]
-		if k < #suites then
-			st.roof = roofStop
-		end
+		local yP = CROWN_Y + (k - 1) * SUITE_STEP
+		stops[k] = Towers.suite(kit, model, spec, { frame = suiteFrame, yP = yP, roof = k == #suites, tier = k, kitFurniture = suiteKit() })
+		stops[k].lobby = lobbyStop
+		dressSuite(kit, model, suiteFrame, yP, k)
 	end
 	-- the crown: stone corner piers rising past the glass suites to lanterns with gold caps (red
 	-- aviation lights on top), a carved stone ring at the suites' foot and round the roof
@@ -1120,14 +1218,8 @@ end
 -- Suite income and the residents' board
 ---------------------------------------------------------------------
 local function suiteIncome(profile: any): number
-	local total = 0
-	for id in profile.Penthouses do
-		local s = SUITE_BY_ID[id]
-		if s then
-			total += s.perMinute
-		end
-	end
-	return total
+	local k = tierOf(profile)
+	return if k > 0 then H.Suites[k].perMinute else 0
 end
 
 local function refreshBoard()
@@ -1136,7 +1228,7 @@ local function refreshBoard()
 		return
 	end
 	local lines = { "THE SUITES" }
-	for _, suite in H.Suites do
+	for k, suite in H.Suites do
 		local names = {}
 		for _, p in Players:GetPlayers() do
 			local profile = PlayerData.get(p)
@@ -1144,10 +1236,68 @@ local function refreshBoard()
 				table.insert(names, p.DisplayName)
 			end
 		end
-		table.insert(lines, string.format("%s   %s   %s / MIN   %s", suite.name, money(suite.price), money(suite.perMinute), if #names > 0 then table.concat(names, ", ") else "AVAILABLE"))
+		table.insert(lines, string.format("%s   %s   %s / MIN   %s", suite.name, money(upgradeCost(k)), money(suite.perMinute), if #names > 0 then table.concat(names, ", ") else "AVAILABLE"))
 	end
 	local board = s.board :: TextLabel
 	board.Text = table.concat(lines, "\n")
+end
+
+-- the lifts: up to your own suite
+function Hotel.goUp(player: Player)
+	local profile = PlayerData.get(player)
+	if not (profile and profile.Loaded) then
+		return
+	end
+	local k = tierOf(profile)
+	if k == 0 then
+		Towers.send(player, { kind = "toast", text = "The lifts are for suite owners: buy a suite at Suite Upgrades", color = "warning" })
+		return
+	end
+	Towers.travel(player, H.Suites[k].id, "penthouse")
+end
+
+-- a gallery plinth: buy the first tier, or upgrade to the next one (paying the difference); the
+-- home and the showcase car move up with you
+function Hotel.upgrade(player: Player, k: number)
+	local profile = PlayerData.get(player)
+	local s = H.Suites[k]
+	if not (s and profile and profile.Loaded) then
+		return
+	end
+	local cur = tierOf(profile)
+	if k <= cur then
+		Towers.send(player, { kind = "toast", text = if k == cur then "This is your suite" else "Your suite is already better", color = "accent" })
+		return
+	end
+	if k > cur + 1 then
+		Towers.send(player, { kind = "toast", text = "Upgrade to the " .. titleCase(H.Suites[cur + 1].name) .. " first", color = "warning" })
+		return
+	end
+	local cost = upgradeCost(k)
+	if profile.Cash < cost then
+		Towers.send(player, { kind = "toast", text = "Not enough cash: this costs " .. money(cost), color = "danger" })
+		return
+	end
+	PlayerData.addCash(player, -cost)
+	profile.Penthouses[s.id] = true
+	if cur > 0 then
+		local old = H.Suites[cur].id
+		profile.Penthouses[old] = nil
+		if profile.Home == old then
+			profile.Home = s.id
+		end
+		if profile.Showcase[old] then
+			profile.Showcase[s.id] = profile.Showcase[old]
+			profile.Showcase[old] = nil
+		end
+	end
+	if profile.Home == "" then
+		profile.Home = s.id
+	end
+	Towers.refresh(player)
+	refreshBoard()
+	task.spawn(PlayerData.save, player)
+	Towers.send(player, { kind = "bought", text = (if cur == 0 then "Welcome to the " else "Upgraded to the ") .. titleCase(s.name), amount = -cost })
 end
 
 function Hotel.init(c: any)

@@ -480,7 +480,7 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
   - **Getting there:** leave the city west (Legends Blvd, the middle road). The coastal highway climbs onto a viaduct over the harbour, the suburbs and the Legends Loop, drops into the countryside, runs through a canyon in the mountains and crosses the river on the **Legends Bridge** (lit towers, necklace lights on the cables) into **Downtown**.
   - **Downtown:** its own 6 x 6 street grid with traffic lights and traffic, glass skyscrapers, palms on every sidewalk, a skyline ring, a riverside park with a big DOWNTOWN sign. Along the beach, **Ocean Drive**: pastel art deco hotels with neon names, cafes, the promenade, the beach (lifeguard towers, parasols) and the sea.
   - **Islands:** the causeway from Ocean Drive goes to **Legends Key** (ring road, fountain, helipad), with bridges on to **Palm Isle** and **Coral Cay**.
-  - **Legends Grand Hotel** (Ocean Drive, by the boulevard): valets (stop in the yellow VALET box, press Y; get the car back at the VALET stand with E), lobby, roof. Suites pay every full minute you're in the game: Skyline $2M ($2,000/min), Ocean $6M ($6,500/min), Royal $12M ($14,000/min), Presidential $25M ($30,000/min).
+  - **Legends Grand Hotel** (Ocean Drive, by the boulevard): valets (stop in the yellow VALET box, press Y; get the car back at the VALET stand with E), lobby, roof. Suites pay every full minute you're in the game: Skyline $2M ($2,000/min), Ocean $6M ($6,500/min), Royal $12M ($14,000/min), Penthouse $25M ($30,000/min). Since 2026-11-03 it is one suite you upgrade (see the hotel suites section below).
   - **High-Rollers Casino** (across the boulevard): scenery-only gaming floor (Roblox bans playable gambling, even with fake money), VIP cards Gold $250k / Platinum $2.5M / Black $25M (title over your head, VIP lounge, gem discount), and a vault heist (security panel, vault door, trolleys, 5 stars, up to $400k, cashed in at the bank's drop-off). `Config.Luxe.GamingFloorDecor = false` swaps the slot machines for lounge seating if the age rating needs it.
   - **Legends Gem Showcase** (on the boulevard): 19 wearable flex pieces in 6 slots (necklaces, watches, rings, earrings, shades, crowns), $15k up to the $40M Midnight Star; everyone sees what you wear. Smash-and-grab: cases (3 stars) and the Legends Heart dome ($75k, 4 stars).
   - **Chauffeur:** H (or the CHAUFFEUR button) on foot, or a gold stand. A contract per car is bought once (the owner's fleet prices: DBX $450k up to the Phantom $2.5M); rides are free after that. Pick a place; the car drives you there on the roads; SKIP RIDE / STOP HERE.
@@ -692,7 +692,24 @@ Each venue uses the place's own dressing and cleaned Toolbox models (no scripts,
 - **Not changed:** the suites (they are built by the towers' code: done with the towers), the valet bay, stand, elevators, suite sales and the residents' board.
 - **Tested in Play:** it builds, 50 prompts as before; valet: car handed over in the bay ("The valet is parking your ...") and brought back to the bay. The elevators were not ridden this pass (their code is unchanged).
 - **Numbers:** about 4,060 parts (was about 2,440); the 4 suites are 1,370 of them. FPS not measured. Pictures: [[Legends Grand Hotel remodel - before and after.jpg]].
-- **Still to do here:** a phone-size check, a 2-player test, the suites' own look (with the towers).
+- **Still to do here:** a phone-size check, a 2-player test.
+
+**Hotel suites: one suite you upgrade (2026-11-03, owner: "the 4 suites will be in the same location but when u upgrade it in lobby the inside of the suites will change and the highest will be pent house"; "make the interior of the suites a million times better, insert some items from toolbox"):**
+- You own one suite at a time: Skyline → Ocean → Royal → **Penthouse** (the top tier, was "Presidential Suite"; id `grand_presidential` kept).
+- **Buying:** the lobby's SUITE UPGRADES plinths. The first buys the Skyline ($2M); each next one upgrades, costing the difference ($4M, $6M, $13M: $25M in all, as before). Prompts say "Upgrade", "Your suite" or "Locked: upgrade to the X first".
+- **Lifts:** 3 lifts marked SUITES, "Up to my suite": only owners go up, and only to their own tier. The roof (pool, helipad) is the Penthouse's only.
+- **Income:** only your current tier pays (Skyline $2,000/min ... Penthouse $30,000/min). Old saves that bought several suites keep only the best one (its home and showcase car move to it).
+- **How it works:** the 4 tiers are still 4 floors at the top of the tower, but you only ever ride to yours, so to the player it is one suite that changes.
+- **Inside, by tier:**
+  - all: lounge chairs, a wood and marble kitchen island, plants, a rug under the dining table;
+  - Skyline: oak floor, white corner sofa, hotel bed, dining table by the window;
+  - Ocean: + car turntable, leather corner sofa, dining table in the middle;
+  - Royal: + DJ booth and party mode, cream marble floor, glass fireplace, tufted sofa and armchairs facing the view, a chandelier;
+  - Penthouse: black marble floor, round bed, freestanding bath, glass dining table, concert grand piano by the window, two chandeliers, palms, the roof.
+- TV ticker no longer runs outside the red bar.
+- **Tested in Play:** buy, the upgrade order, not enough cash, the lift for non-owners and owners, the roof (owner only), another tier's floor (refused), prompt wording.
+- **Numbers:** the suites' furniture is about 1,100 parts on all 4 floors (pieces merged; the piano went from 4,599 to 74 parts). FPS not measured.
+- Pictures: [[Legends Grand Hotel suites - 4 tiers.jpg]].
 
 **Creator Store models used (credit list, cleaned: scripts, fake windows and sounds removed):**
 | Piece | Name in the store | ID | Creator |
@@ -701,5 +718,19 @@ Each venue uses the place's own dressing and cleaned Toolbox models (no scripts,
 | Lounge sofa and armchair | Leather Tuffled Chair and Couch | 74202385119908 | Crazyba4747 |
 | Luggage cart | Hotel Luggage Cart | 102974171618544 | quibud |
 | Potted palm | Potted Palm Plant | 84368992834967 | itokadaiodsada |
+| Suite leather corner sofa | Couch Mose Productions Sofa Chair Living Room Mesh | 105084664862925 | Sparknee6284 |
+| Suite white corner sofa | Bigger Sofa Couch Seat Furniture Chair Stats Seats | 119279847641237 | Embeblaz3350 |
+| Suite bed | Hotel Bed Luxury White Classic Modern Pillows Twin | 130746828417473 | ZerofRIce41178 |
+| Penthouse round bed | Round Circle Modern Luxury Bed Bedroom Furniture | 91271832639217 | Crankneedle0649 |
+| Suite dining table | Modern Table and Chairs Dining Furniture Fabric | 91611412852539 | (creator account deleted) |
+| Penthouse glass dining table | Modern Dining Table Chairs Furniture Tables Room | 92766904562760 | Gearfr9834 |
+| Glass fireplace | updated modern fireplace | 5505331729 | downtownbabydoll |
+| Concert grand piano | Concert Grand Piano (Free) | 10732134811 | LittleLapupu |
+| Fiddle-leaf fig | Fiddle-leaf fig potted plant | 11900728265 | harht |
+| Potted plant | Potted Plant Planter Indoor Decor Plants Mesh Pack | 111570375915755 | Skywhis6687 |
+| Rug | Carpet Texture Material Carpets Modern White Rug | 120724162445020 | (creator account deleted) |
+| Lounge chair | Modern Leather Lounge Chair | 7147753206 | nzxnxvn |
+| Kitchen island | Kitchen Island Marble Decor Kitchen Modern Luxury | 78028888353531 | AlphaNDPandajDStrike |
+| Penthouse bath | Oval Bathtub Bathroom Granite Decor Freestanding | 80971814446378 | (creator account deleted) |
 
 They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the chandelier from 350 to 39 parts).

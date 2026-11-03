@@ -19,8 +19,12 @@
 
 	CityBuilder calls Towers.block for every city block; it returns true where it built a tower.
 	Towers.suite builds just a penthouse floor (and optionally the roof terrace) on another
-	building, for the Legends Grand Hotel's suites (Hotel.lua): same rooms, buying, home, party
-	mode and showcase, with the elevator's lobby and roof stops set by that building.
+	building, for the Legends Grand Hotel's suites (Hotel.lua): same rooms, home, party mode and
+	showcase, with the elevator's lobby and roof stops set by that building. The hotel's suites
+	are tiers of one suite you upgrade (2026-11-03): a tier furnishes the floor (1: lounge, kitchen,
+	bedroom; 2: + the car turntable, the long sofa, art and the tall kitchen; 3: + the DJ booth and
+	party mode, a cream marble floor; 4: a black marble floor and the roof), and only the tier's
+	owner rides up.
 ]]
 
 local CollectionService = game:GetService("CollectionService")
@@ -55,6 +59,8 @@ export type SuiteOpts = {
 	frame: CFrame, -- the building's frame at ground level, -Z out of the entrance; the floor is 84 x 84 round it
 	yP: number, -- the suite's floor height above the frame
 	roof: boolean, -- also build the roof terrace (pool, telescope, helipad) on top of this suite
+	tier: number?, -- how well the floor is furnished, 1 to 4 (default 4: everything)
+	kitFurniture: boolean?, -- the building puts in its own sofas, bed, kitchen island and plants (ready-made models)
 }
 type Built = {
 	spec: TowerSpec,
@@ -63,12 +69,12 @@ type Built = {
 	stops: { [string]: CFrame }, -- where the elevator leaves you on each level
 	home: CFrame, -- beside the bed
 	plaques: { TextLabel },
-	showcase: BasePart, -- turntable top
+	showcase: BasePart?, -- turntable top (none in a hotel suite below tier 2)
 	showcaseCar: Model?,
 	showcaseId: string?,
-	speaker: BasePart,
+	speaker: BasePart?, -- (no DJ booth in a hotel suite below tier 3)
 	music: Sound?,
-	confetti: ParticleEmitter,
+	confetti: ParticleEmitter?,
 	tv: BasePart,
 }
 
@@ -207,6 +213,8 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	local yR = yP + PH + 1.5 -- roof top
 	local withStreet = suite == nil
 	local withRoof = suite == nil or suite.roof
+	local tier = if suite and suite.tier then suite.tier else 4
+	local kitFurniture = suite ~= nil and suite.kitFurniture == true
 
 	local model = Instance.new("Model")
 	model.Name = (if suite then "Suite_" else "Tower_") .. t.id
@@ -349,7 +357,7 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		kit.surfaceText(ind, Enum.NormalId.Front, if level == "lobby" then "L" elseif level == "penthouse" then "PH" else "R", accent, nil, nil, Enum.Font.GothamBold, Vector2.new(200, 60))
 		local panel = dbox(par, 1, 2.4, 0.3, x + 5, y + 5, z - 0.45, GOLD, Enum.Material.Metal, { reflectance = 0.3 })
 		dbox(par, 0.5, 0.5, 0.1, x + 5, y + 5.5, z - 0.62, accent, Enum.Material.Neon)
-		local options = if level == "lobby" then { "penthouse", "roof" } elseif level == "penthouse" then { "lobby", "roof" } else { "penthouse", "lobby" }
+		local options = if level == "lobby" then { "penthouse", "roof" } elseif level == "penthouse" then (if withRoof then { "lobby", "roof" } else { "lobby" }) else { "penthouse", "lobby" }
 		local labels = { lobby = "Lobby", penthouse = t.levelName or "Penthouse", roof = "Roof: sky pool & helipad" }
 		for k, dest in options do
 			local p = prompt(panel, labels[dest], "Elevator", if k == 1 then Enum.KeyCode.E else Enum.KeyCode.R, 0, 10)
@@ -505,7 +513,14 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	---------------------------------------------------------------- penthouse
 	local ph = kit.lodGroup(model, "Penthouse", base + Vector3.new(0, yP + PH / 2, 0), 380)
 	box(model, F + 1, 1.6, F + 1, 0, yP - 0.8, 0, CHARCOAL, Enum.Material.Concrete, { name = "PenthouseSlab" })
-	box(model, F - 0.8, 0.3, F - 0.8, 0, yP + 0.15, 0, OAK:Lerp(WALNUT, 0.4), Enum.Material.WoodPlanks, { name = "PenthouseFloor" })
+	-- (a hotel suite's floor by tier: light oak, walnut-oak, cream marble, then black marble)
+	local floorColor = OAK:Lerp(WALNUT, 0.4)
+	local floorMat = Enum.Material.WoodPlanks
+	if suite then
+		floorColor = ({ OAK, OAK:Lerp(WALNUT, 0.4), MARBLE, Color3.fromRGB(30, 30, 34) })[math.clamp(tier, 1, 4)]
+		floorMat = if tier >= 3 then Enum.Material.Marble else Enum.Material.WoodPlanks
+	end
+	box(model, F - 0.8, 0.3, F - 0.8, 0, yP + 0.15, 0, floorColor, floorMat, { name = "PenthouseFloor", reflectance = if suite and tier >= 4 then 0.12 else 0 })
 	box(model, F + 2, 1.5, F + 2, 0, yR - 0.75, 0, CHARCOAL, Enum.Material.Concrete, { name = "Roof" })
 	glassBox(model, ph, yP + 0.3, PH)
 	kit.neonOutline(model, cx, cz, F + 1, F + 1, groundY + yP - 0.2, accent, 0.5)
@@ -522,13 +537,16 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	box(model, 18, PH, 14, 0, yP + PH / 2 + 0.3, HF - 7, MARBLE_DARK, Enum.Material.Marble, { name = "PenthouseCore" })
 	elevator(ph, 0, yP + 0.3, HF - 14.1, "penthouse")
 	plaque(ph, at(0, yP + 17, HF - 14.25))
-	local buyHere = prompt(dbox(ph, 1, 1, 1, -7, yP + 4, HF - 14.6, GOLD, Enum.Material.Metal), "Buy this penthouse", t.name .. "  " .. money(t.price), Enum.KeyCode.F, 1.5, 9)
-	CollectionService:AddTag(buyHere, "TowerBuy")
-	buyHere:SetAttribute("Tower", t.id)
-	buyHere:SetAttribute("Price", t.price)
-	buyHere.Triggered:Connect(function(player: Player)
-		Towers.buy(player, t.id)
-	end)
+	if not suite then
+		-- (a hotel suite is bought and upgraded in the hotel's lobby)
+		local buyHere = prompt(dbox(ph, 1, 1, 1, -7, yP + 4, HF - 14.6, GOLD, Enum.Material.Metal), "Buy this penthouse", t.name .. "  " .. money(t.price), Enum.KeyCode.F, 1.5, 9)
+		CollectionService:AddTag(buyHere, "TowerBuy")
+		buyHere:SetAttribute("Tower", t.id)
+		buyHere:SetAttribute("Price", t.price)
+		buyHere.Triggered:Connect(function(player: Player)
+			Towers.buy(player, t.id)
+		end)
+	end
 
 	-- TV lounge (front left): a media wall with a big screen, an L-shaped sofa facing it
 	box(ph, 28, 13, 1.6, -26, yP + 6.8, -4, WALNUT, Enum.Material.Wood)
@@ -544,109 +562,125 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 	dbox(ph, 20, 0.2, 0.2, -26, yP + 1.6, -5.2, accent, Enum.Material.Neon) -- light under the console
 	box(ph, 22, 2, 3, -26, yP + 1.3, -6.5, BLACK, Enum.Material.SmoothPlastic)
 	dbox(ph, 26, 0.08, 18, -24, yP + 0.34, -20, Color3.fromRGB(60, 56, 54), Enum.Material.Fabric) -- rug
-	sofa(ph, at(-24, yP + 0.3, -30) * CFrame.Angles(0, math.pi, 0), 20, Color3.fromRGB(70, 66, 64))
-	sofa(ph, at(-38, yP + 0.3, -18) * CFrame.Angles(0, -math.pi / 2, 0), 12, Color3.fromRGB(70, 66, 64))
+	if not kitFurniture then
+		sofa(ph, at(-24, yP + 0.3, -30) * CFrame.Angles(0, math.pi, 0), 20, Color3.fromRGB(70, 66, 64))
+	end
+	if tier >= 2 then
+		if not kitFurniture then
+			sofa(ph, at(-38, yP + 0.3, -18) * CFrame.Angles(0, -math.pi / 2, 0), 12, Color3.fromRGB(70, 66, 64))
+		end
+		art(ph, at(-26, yP + 8, -2.9) * CFrame.Angles(0, math.pi, 0), 14, 8, accent, Color3.fromRGB(255, 120, 60))
+	end
 	box(ph, 10, 1.4, 6, -24, yP + 1, -18, MARBLE, Enum.Material.Marble)
 	floorLamp(ph, -38, yP + 0.3, -34)
-	art(ph, at(-26, yP + 8, -2.9) * CFrame.Angles(0, math.pi, 0), 14, 8, accent, Color3.fromRGB(255, 120, 60))
 
 	-- car showcase (front right): a turntable with a resident's car under spotlights
-	part(model, true, 1.2, 24, 24, at(22, yP + 0.9, -22) * CFrame.Angles(0, 0, math.pi / 2), CHARCOAL, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
-	local turntable = part(model, true, 0.4, 23, 23, at(22, yP + 1.6, -22) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(56, 56, 62), Enum.Material.DiamondPlate, { shape = Enum.PartType.Cylinder })
-	turntable.Name = "Turntable"
-	-- residents pick the car on show (owner, 2026-10-23: "add a function to change car")
-	local showPrompt = Instance.new("ProximityPrompt")
-	showPrompt.Name = "ChangeCar"
-	showPrompt.ActionText = "Change car"
-	showPrompt.ObjectText = "Car showcase"
-	showPrompt.KeyboardKeyCode = Enum.KeyCode.E
-	showPrompt.MaxActivationDistance = 18
-	showPrompt.RequiresLineOfSight = false
-	showPrompt.Parent = turntable
-	showPrompt.Triggered:Connect(function(player: Player)
-		Towers.pickShowcase(player, t.id)
-	end)
-	part(ph, false, 0.2, 24.4, 24.4, at(22, yP + 1.3, -22) * CFrame.Angles(0, 0, math.pi / 2), accent, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.3 })
-	for k = 0, 2 do
-		local a = k * math.pi * 2 / 3 + 0.5
-		local spot = dbox(ph, 1, 1.4, 1, 22 + math.cos(a) * 9, yP + PH - 1.2, -22 + math.sin(a) * 9, CHARCOAL, Enum.Material.Metal)
-		kit.addLight("SpotLight", spot, Color3.fromRGB(255, 244, 230), 30, 2.2, Enum.NormalId.Bottom, 55)
+	local turntable: BasePart? = nil
+	if tier >= 2 then
+		part(model, true, 1.2, 24, 24, at(22, yP + 0.9, -22) * CFrame.Angles(0, 0, math.pi / 2), CHARCOAL, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+		turntable = part(model, true, 0.4, 23, 23, at(22, yP + 1.6, -22) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(56, 56, 62), Enum.Material.DiamondPlate, { shape = Enum.PartType.Cylinder })
+		local tt = turntable :: BasePart
+		tt.Name = "Turntable"
+		-- residents pick the car on show (owner, 2026-10-23: "add a function to change car")
+		local showPrompt = Instance.new("ProximityPrompt")
+		showPrompt.Name = "ChangeCar"
+		showPrompt.ActionText = "Change car"
+		showPrompt.ObjectText = "Car showcase"
+		showPrompt.KeyboardKeyCode = Enum.KeyCode.E
+		showPrompt.MaxActivationDistance = 18
+		showPrompt.RequiresLineOfSight = false
+		showPrompt.Parent = tt
+		showPrompt.Triggered:Connect(function(player: Player)
+			Towers.pickShowcase(player, t.id)
+		end)
+		part(ph, false, 0.2, 24.4, 24.4, at(22, yP + 1.3, -22) * CFrame.Angles(0, 0, math.pi / 2), accent, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, transparency = 0.3 })
+		for k = 0, 2 do
+			local a = k * math.pi * 2 / 3 + 0.5
+			local spot = dbox(ph, 1, 1.4, 1, 22 + math.cos(a) * 9, yP + PH - 1.2, -22 + math.sin(a) * 9, CHARCOAL, Enum.Material.Metal)
+			kit.addLight("SpotLight", spot, Color3.fromRGB(255, 244, 230), 30, 2.2, Enum.NormalId.Bottom, 55)
+		end
 	end
 
 	-- DJ booth (right side) with speakers; party mode lights live in the ceiling
-	local djx, djz = 34, 4
-	box(ph, 5, 4.4, 14, djx, yP + 2.5, djz, BLACK, Enum.Material.SmoothPlastic)
-	local strip = dbox(ph, 0.2, 4, 13.6, djx - 2.6, yP + 2.4, djz, accent, Enum.Material.Neon, { transparency = 0.45, name = "PartyStrip" })
-	strip:SetAttribute("Tower", t.id)
-	CollectionService:AddTag(strip, "TowerPartyStrip")
-	for _, dz in { -3.5, 3.5 } do
-		part(ph, false, 0.3, 3, 3, at(djx, yP + 4.9, djz + dz) * CFrame.Angles(0, 0, math.pi / 2), CHARCOAL, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
-	end
 	local speakers: { BasePart } = {}
-	for _, dz in { -10.5, 10.5 } do
-		local sp = box(ph, 4, 11, 4, djx, yP + 5.8, djz + dz, BLACK, Enum.Material.SmoothPlastic)
-		for k, r in { 2.6, 1.6 } do
-			-- cones facing into the room (a cylinder's axis is its X)
-			part(ph, false, 0.2, r, r, at(djx - 2.05, yP + 3 + k * 3.2, djz + dz), CHARCOAL, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+	local confetti: ParticleEmitter? = nil
+	if tier >= 3 then
+		local djx, djz = 34, 4
+		box(ph, 5, 4.4, 14, djx, yP + 2.5, djz, BLACK, Enum.Material.SmoothPlastic)
+		local strip = dbox(ph, 0.2, 4, 13.6, djx - 2.6, yP + 2.4, djz, accent, Enum.Material.Neon, { transparency = 0.45, name = "PartyStrip" })
+		strip:SetAttribute("Tower", t.id)
+		CollectionService:AddTag(strip, "TowerPartyStrip")
+		for _, dz in { -3.5, 3.5 } do
+			part(ph, false, 0.3, 3, 3, at(djx, yP + 4.9, djz + dz) * CFrame.Angles(0, 0, math.pi / 2), CHARCOAL, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 		end
-		table.insert(speakers, sp)
+		for _, dz in { -10.5, 10.5 } do
+			local sp = box(ph, 4, 11, 4, djx, yP + 5.8, djz + dz, BLACK, Enum.Material.SmoothPlastic)
+			for k, r in { 2.6, 1.6 } do
+				-- cones facing into the room (a cylinder's axis is its X)
+				part(ph, false, 0.2, r, r, at(djx - 2.05, yP + 3 + k * 3.2, djz + dz), CHARCOAL, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+			end
+			table.insert(speakers, sp)
+		end
+		local deck = dbox(ph, 1, 0.4, 1, djx - 1.6, yP + 5, djz, accent, Enum.Material.Neon)
+		local djPrompt = prompt(deck, "Party mode", "DJ booth", Enum.KeyCode.E, 0, 9)
+		djPrompt.Triggered:Connect(function(player: Player)
+			Towers.toggleParty(player, t.id)
+		end)
+		-- party lights and a mirror ball (the client animates them while the party is on)
+		local ball = part(ph, false, 3, 3, 3, at(0, yP + PH - 6, -12), Color3.fromRGB(200, 200, 210), Enum.Material.Glass, { shape = Enum.PartType.Ball, reflectance = 0.9 })
+		ball.Name = "MirrorBall"
+		ball:SetAttribute("Tower", t.id)
+		CollectionService:AddTag(ball, "TowerMirrorBall")
+		dbox(ph, 0.15, 4.5, 0.15, 0, yP + PH - 2.4, -12, CHARCOAL, Enum.Material.Metal)
+		for k = 0, 5 do
+			local a = k * math.pi / 3
+			local holder = dbox(ph, 1, 0.6, 1, math.cos(a) * 22, yP + PH - 0.6, -6 + math.sin(a) * 22, CHARCOAL, Enum.Material.Metal, { name = "PartyLamp" })
+			holder:SetAttribute("Tower", t.id)
+			holder:SetAttribute("Index", k)
+			CollectionService:AddTag(holder, "TowerPartyLamp")
+			local pl = Instance.new("PointLight")
+			pl.Brightness = 0
+			pl.Range = 30
+			pl.Shadows = false
+			pl.Name = "PartyLight"
+			pl.Parent = holder
+		end
+		-- confetti popper on a side table by the DJ (a celebration, no drinks)
+		local gift = box(ph, 4, 3, 4, 30, yP + 1.8, -6, WALNUT, Enum.Material.Wood)
+		local popper = part(ph, false, 2.2, 0.8, 0.8, at(30, yP + 4.4, -6) * CFrame.Angles(0, 0, math.pi / 2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+		local pop = Instance.new("ParticleEmitter")
+		pop.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		pop.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, accent), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 80, 160)), ColorSequenceKeypoint.new(1, GOLD) })
+		pop.LightEmission = 0.5
+		pop.Size = NumberSequence.new(0.5, 0.3)
+		pop.Speed = NumberRange.new(16, 26)
+		pop.SpreadAngle = Vector2.new(35, 35)
+		pop.Acceleration = Vector3.new(0, -18, 0)
+		pop.Drag = 1.5
+		pop.Lifetime = NumberRange.new(2, 3)
+		pop.RotSpeed = NumberRange.new(-200, 200)
+		pop.Rate = 0
+		pop.EmissionDirection = Enum.NormalId.Top
+		pop.Parent = popper
+		confetti = pop
+		prompt(gift, "Pop confetti", "Celebration", Enum.KeyCode.E, 0, 8).Triggered:Connect(function(player: Player)
+			pop:Emit(90)
+			local s = Instance.new("Sound")
+			s.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+			s.Volume = 0.8
+			s.PlayOnRemove = true
+			s.Parent = popper
+			s:Destroy()
+			send(player, { kind = "cheer" })
+		end)
 	end
-	local deck = dbox(ph, 1, 0.4, 1, djx - 1.6, yP + 5, djz, accent, Enum.Material.Neon)
-	local djPrompt = prompt(deck, "Party mode", "DJ booth", Enum.KeyCode.E, 0, 9)
-	djPrompt.Triggered:Connect(function(player: Player)
-		Towers.toggleParty(player, t.id)
-	end)
-	-- party lights and a mirror ball (the client animates them while the party is on)
-	local ball = part(ph, false, 3, 3, 3, at(0, yP + PH - 6, -12), Color3.fromRGB(200, 200, 210), Enum.Material.Glass, { shape = Enum.PartType.Ball, reflectance = 0.9 })
-	ball.Name = "MirrorBall"
-	ball:SetAttribute("Tower", t.id)
-	CollectionService:AddTag(ball, "TowerMirrorBall")
-	dbox(ph, 0.15, 4.5, 0.15, 0, yP + PH - 2.4, -12, CHARCOAL, Enum.Material.Metal)
-	for k = 0, 5 do
-		local a = k * math.pi / 3
-		local holder = dbox(ph, 1, 0.6, 1, math.cos(a) * 22, yP + PH - 0.6, -6 + math.sin(a) * 22, CHARCOAL, Enum.Material.Metal, { name = "PartyLamp" })
-		holder:SetAttribute("Tower", t.id)
-		holder:SetAttribute("Index", k)
-		CollectionService:AddTag(holder, "TowerPartyLamp")
-		local pl = Instance.new("PointLight")
-		pl.Brightness = 0
-		pl.Range = 30
-		pl.Shadows = false
-		pl.Name = "PartyLight"
-		pl.Parent = holder
-	end
-	-- confetti popper on a side table by the DJ (a celebration, no drinks)
-	local gift = box(ph, 4, 3, 4, 30, yP + 1.8, -6, WALNUT, Enum.Material.Wood)
-	local popper = part(ph, false, 2.2, 0.8, 0.8, at(30, yP + 4.4, -6) * CFrame.Angles(0, 0, math.pi / 2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
-	local confetti = Instance.new("ParticleEmitter")
-	confetti.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	confetti.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, accent), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 80, 160)), ColorSequenceKeypoint.new(1, GOLD) })
-	confetti.LightEmission = 0.5
-	confetti.Size = NumberSequence.new(0.5, 0.3)
-	confetti.Speed = NumberRange.new(16, 26)
-	confetti.SpreadAngle = Vector2.new(35, 35)
-	confetti.Acceleration = Vector3.new(0, -18, 0)
-	confetti.Drag = 1.5
-	confetti.Lifetime = NumberRange.new(2, 3)
-	confetti.RotSpeed = NumberRange.new(-200, 200)
-	confetti.Rate = 0
-	confetti.EmissionDirection = Enum.NormalId.Top
-	confetti.Parent = popper
-	prompt(gift, "Pop confetti", "Celebration", Enum.KeyCode.E, 0, 8).Triggered:Connect(function(player: Player)
-		confetti:Emit(90)
-		local s = Instance.new("Sound")
-		s.SoundId = "rbxasset://sounds/electronicpingshort.wav"
-		s.Volume = 0.8
-		s.PlayOnRemove = true
-		s.Parent = popper
-		s:Destroy()
-		send(player, { kind = "cheer" })
-	end)
 
 	-- kitchen (back left): an island with stools and a run of tall cabinets
-	box(ph, 18, 4, 7, -26, yP + 2.3, 18, Color3.fromRGB(28, 28, 32), Enum.Material.SmoothPlastic)
-	dbox(ph, 18.6, 0.5, 7.6, -26, yP + 4.55, 18, MARBLE, Enum.Material.Marble)
-	dbox(ph, 18.2, 0.15, 0.15, -26, yP + 0.6, 14.4, accent, Enum.Material.Neon, { transparency = 0.3 })
+	if not kitFurniture then
+		box(ph, 18, 4, 7, -26, yP + 2.3, 18, Color3.fromRGB(28, 28, 32), Enum.Material.SmoothPlastic)
+		dbox(ph, 18.6, 0.5, 7.6, -26, yP + 4.55, 18, MARBLE, Enum.Material.Marble)
+		dbox(ph, 18.2, 0.15, 0.15, -26, yP + 0.6, 14.4, accent, Enum.Material.Neon, { transparency = 0.3 })
+	end
 	for k = -1, 1 do
 		local x = -26 + k * 5.5
 		part(ph, false, 0.4, 2.2, 2.2, at(x, yP + 3.4, 12.4) * CFrame.Angles(0, 0, math.pi / 2), CREAM, Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder })
@@ -658,24 +692,35 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 			light(pend, WARM_LIGHT, 20, 0.9)
 		end
 	end
-	box(ph, 22, 16, 3.5, -27, yP + 8.3, HF - 2.2, WALNUT, Enum.Material.Wood)
-	dbox(ph, 22.2, 0.2, 0.2, -27, yP + 8.4, HF - 4, GOLD, Enum.Material.Metal)
-	dbox(ph, 6, 14, 0.2, -34, yP + 7.4, HF - 4.05, Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.3 }) -- fridge
-	plant(ph, -38, yP + 0.3, 30, 1.1)
+	if tier >= 2 then
+		box(ph, 22, 16, 3.5, -27, yP + 8.3, HF - 2.2, WALNUT, Enum.Material.Wood)
+		dbox(ph, 22.2, 0.2, 0.2, -27, yP + 8.4, HF - 4, GOLD, Enum.Material.Metal)
+		dbox(ph, 6, 14, 0.2, -34, yP + 7.4, HF - 4.05, Color3.fromRGB(150, 152, 158), Enum.Material.Metal, { reflectance = 0.3 }) -- fridge
+	end
+	if not kitFurniture then
+		plant(ph, -38, yP + 0.3, 30, 1.1)
+	end
 
 	-- bedroom (back right) behind a walnut and frosted glass partition
 	local bx0, bz0 = 12, 12
 	box(ph, 24, PH, 0.8, 30, yP + PH / 2 + 0.3, bz0, WALNUT, Enum.Material.Wood) -- along z = 12, doorway at x 12..18
 	box(ph, 0.8, PH, HF - bz0, bx0, yP + PH / 2 + 0.3, (bz0 + HF) / 2, Color3.fromRGB(200, 210, 220), Enum.Material.Glass, { transparency = 0.45 })
 	art(ph, at(30, yP + 12, bz0 - 0.5), 12, 7, Color3.fromRGB(255, 120, 60), accent)
-	-- bed against the back glass
-	box(ph, 14, 2.2, 18, 30, yP + 1.4, 31, WALNUT, Enum.Material.Wood)
-	dbox(ph, 13.4, 1.4, 17, 30, yP + 3.1, 31, Color3.fromRGB(236, 234, 228), Enum.Material.SmoothPlastic)
-	dbox(ph, 13.6, 0.5, 8, 30, yP + 3.9, 26, Color3.fromRGB(60, 62, 70), Enum.Material.SmoothPlastic) -- throw
-	for _, sx in { -3.5, 3.5 } do
-		dbox(ph, 5, 1.4, 2.2, 30 + sx, yP + 4.4, 38, CREAM, Enum.Material.SmoothPlastic)
+	-- bed against the back glass (a building with its own furniture puts its bed here; the
+	-- headboard stays, unseen, for the "Set as home" prompt)
+	if not kitFurniture then
+		box(ph, 14, 2.2, 18, 30, yP + 1.4, 31, WALNUT, Enum.Material.Wood)
+		dbox(ph, 13.4, 1.4, 17, 30, yP + 3.1, 31, Color3.fromRGB(236, 234, 228), Enum.Material.SmoothPlastic)
+		dbox(ph, 13.6, 0.5, 8, 30, yP + 3.9, 26, Color3.fromRGB(60, 62, 70), Enum.Material.SmoothPlastic) -- throw
+		for _, sx in { -3.5, 3.5 } do
+			dbox(ph, 5, 1.4, 2.2, 30 + sx, yP + 4.4, 38, CREAM, Enum.Material.SmoothPlastic)
+		end
 	end
 	local headboard = box(ph, 16, 9, 1, 30, yP + 4.8, 40.6, WALNUT:Lerp(BLACK, 0.3), Enum.Material.Fabric)
+	if kitFurniture then
+		headboard.Transparency = 1
+		headboard.CanCollide = false
+	end
 	for _, sx in { -9.5, 9.5 } do
 		box(ph, 3.6, 2.6, 3.6, 30 + sx, yP + 1.6, 38.5, WALNUT, Enum.Material.Wood)
 		local lamp = part(ph, false, 1.6, 1.6, 1.6, at(30 + sx, yP + 4, 38.5), WARM_LIGHT, Enum.Material.Neon, { shape = Enum.PartType.Ball, transparency = 0.15 })
@@ -835,7 +880,7 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		showcase = turntable,
 		showcaseCar = nil,
 		showcaseId = nil,
-		speaker = speakers[1],
+		speaker = speakers[1], -- (nil without a DJ booth)
 		music = nil,
 		confetti = confetti,
 		tv = tv,
@@ -856,8 +901,17 @@ function Towers.travel(player: Player, id: string, level: string)
 	if not (rec and char and stop) then
 		return
 	end
+	-- a hotel suite: only its owner rides up (the lobby is open to everyone)
+	if rec.spec.perMinute and level ~= "lobby" then
+		local profile = PlayerData.get(player)
+		if not (profile and profile.Penthouses[id]) then
+			send(player, { kind = "toast", text = "Only the suite's owner can go up", color = "warning" })
+			return
+		end
+	end
 	local labels = { lobby = "LOBBY", penthouse = "PENTHOUSE", roof = "ROOF" }
-	send(player, { kind = "travel", label = rec.spec.name .. "  ·  " .. (labels[level] or "") })
+	local label = if rec.spec.perMinute and level == "penthouse" then rec.spec.name else rec.spec.name .. "  ·  " .. (labels[level] or "")
+	send(player, { kind = "travel", label = label })
 	task.delay(0.35, function()
 		if char.Parent then
 			char:PivotTo(stop)
@@ -935,7 +989,7 @@ end
 
 function Towers.toggleParty(player: Player, id: string)
 	local rec = built[id]
-	if not rec then
+	if not (rec and rec.speaker) then
 		return
 	end
 	local on = not rec.model:GetAttribute("Party")
@@ -953,7 +1007,9 @@ function Towers.toggleParty(player: Player, id: string)
 		s.Parent = rec.speaker
 		s:Play()
 		rec.music = s
-		rec.confetti:Emit(60)
+		if rec.confetti then
+			rec.confetti:Emit(60)
+		end
 	elseif rec.music then
 		rec.music:Destroy()
 		rec.music = nil
@@ -972,6 +1028,10 @@ end
 -- Residents: plaques and the showcase car (a resident's own car, or a hypercar for show)
 ---------------------------------------------------------------------
 local function setShowcase(rec: Built, carId: string)
+	local showcase = rec.showcase
+	if not showcase then
+		return -- (a hotel suite without the turntable)
+	end
 	if rec.showcaseId == carId and rec.showcaseCar and rec.showcaseCar.Parent then
 		return
 	end
@@ -986,7 +1046,7 @@ local function setShowcase(rec: Built, carId: string)
 		return
 	end
 	local h = (car:GetAttribute("Height") :: number?) or 4
-	local top = rec.showcase.Position + Vector3.new(0, rec.showcase.Size.X / 2, 0)
+	local top = showcase.Position + Vector3.new(0, showcase.Size.X / 2, 0)
 	car:PivotTo(CFrame.new(top + Vector3.new(0, h / 2 + 0.05, 0)) * rec.frame.Rotation * CFrame.Angles(0, math.rad(35), 0))
 	for _, d in car:GetDescendants() do
 		if d:IsA("BasePart") then
@@ -1031,7 +1091,7 @@ end
 -- the turntable's "Change car": a resident gets the list of their cars to pick from
 function Towers.pickShowcase(player: Player, id: string)
 	local profile = PlayerData.get(player)
-	if not (profile and built[id]) then
+	if not (profile and built[id] and built[id].showcase) then
 		return
 	end
 	if not profile.Penthouses[id] then
