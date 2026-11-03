@@ -7,7 +7,7 @@ status: report only - no numbers changed (owner decides)
 
 Full table, assumptions and raw numbers: [[2026-11-03 Pace by star - realistic trainers]] (folder `GYM ARC\Calc`, with the CSV and `pace_sim.luau`). Design targets: [[2026-10-29 GYM ARC Hall of Fame - good or bad]].
 
-Owner asked for realistic trainers per star (not 2 Voltas forever), no pass:
+Owner asked for realistic trainers per star (not 2 Voltas forever), no pass. Everyone has Pro belt + Pro wraps from Alter 1 (owner, 3 Nov; +10% EXP, moves the runs only 1-2%):
 - ★0-2: 2 Voltas.
 - ★3-5: 2 Hall of Fame Mythics.
 - ★6-9: the same Mythics (the agency's best non-Secret).
@@ -25,10 +25,10 @@ Owner asked for realistic trainers per star (not 2 Voltas forever), no pass:
 ## Run time (Growth Spurts + Alters 1-15 + the Hall of Fame goal)
 | Setup | Lifting min | Real, est. (x2.35) | Design target | Flag |
 |---|---|---|---|---|
-| ★0, 2 Voltas | 230 | ~9.0 h | ~8 h | - |
-| ★1, 2 Voltas | 110 | ~4.3 h | ~3 h | - |
+| ★0, 2 Voltas | 228 | ~8.9 h | ~8 h | - |
+| ★1, 2 Voltas | 107 | ~4.2 h | ~3 h | - |
 | ★3, 2 Titans | 50 | ~1.9 h | ~2 h | - |
-| ★5, 2 Titans | 43 | ~1.7 h | ~1.5 h | **too fast** (lifting < 45) |
+| ★5, 2 Titans | 42 | ~1.7 h | ~1.5 h | **too fast** (lifting < 45) |
 | ★10, 2 Heracles | 23 | ~0.9 h | ~1 h | **too fast** (lifting < 45) |
 | **Owner maxed (★4)** | **12** | **~27 min** | - | **too fast** (lifting and real) |
 Per alter (lifting minutes), ★0: about 10-13 for Alters 1-13, 20 / 28 for 14 / 15, 27-31 for 16-20. ★3: about 2-3, then 4-6. Owner: under 1 min every alter.

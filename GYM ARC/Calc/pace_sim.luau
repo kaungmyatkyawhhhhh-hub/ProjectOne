@@ -3,7 +3,7 @@
 --   local r = require(game.ServerStorage._PaceSim).Run({ stars = 3, gains = 3.08, progress = 0.55 })
 --   game.ReplicatedStorage:SetAttribute("LaunchDone_Gem", nil)
 -- setup = { stars, gains (trainer EXP, 0.77 = +77%), progress, genetics (a Genetics table, default the starter's B), aura,
--- pass (2 = the 2x EXP pass), noGemEarly (what-if: the Gem Mine only from Alter 15) }
+-- pass (2 = the 2x EXP pass), gear (0.10 = Pro belt + wraps, from Alter 1), noGemEarly (what-if: the Gem Mine only from Alter 15) }
 -- -> { spurts = s, alters = { [1..20] = s }, hof = s } (seconds of pure lifting)
 -- The rules (the 1 Nov calibration's): one rep every 1.05 s, the heaviest weight the level allows, the best open machine
 -- for the weakest muscle of the group furthest from the goal, Balanced +10%, each gym's bonus (Pro x1.1, Powerlifting
@@ -65,7 +65,10 @@ local function repXp(d, setup, machine, tierIndex, entry, q, balanced)
 	local tier = machine.tiers[tierIndex]
 	local spurt = GrowthSpurts.GetBonus(d.growthSpurts)
 	local alterBonus = Alters.Bonus(d.alter.highest or 0) * (1 + HallOfFame.Perks(setup.stars or 0).exp)
-	local mult = Gains.Total(1, spurt, 1 + (setup.gains or 0), balanced, 1) * Genetics.GetMultiplier(d.genetics, entry.id)
+	-- (owner, 3 Nov: "everyone starting from alter 1 has pro gear") Pro belt + Pro wraps add setup.gear (0.10) to the boost,
+	-- like MachineService (BoostService.Gains + gear - 1), from the alters on (a starred run keeps its gear: the whole run)
+	local gear = if setup.gear and (d.gearOn or (setup.stars or 0) > 0) then setup.gear else 0
+	local mult = Gains.Total(1, spurt, 1 + (setup.gains or 0) + gear, balanced, 1) * Genetics.GetMultiplier(d.genetics, entry.id)
 	local dim = 1 / (1 + math.min(d.muscles[entry.id].level, Gains.DiminishCap) / Gains.DiminishLevel)
 	return Gains.BaseXp * tier.gains * (entry.share or 1) * mult * dim * q * (machine.gainScale or 1) * alterBonus
 end
@@ -149,6 +152,7 @@ function Sim.Run(setup)
 		d.growthSpurts += 1
 	end
 	out.spurts = t
+	d.gearOn = true
 	for n = 1, 20 do
 		local s, capped = train(d, setup, alterProgress, 80000)
 		out.alters[n] = s

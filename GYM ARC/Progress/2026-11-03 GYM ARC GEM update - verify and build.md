@@ -235,3 +235,18 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
       - Each with shorts.
     - **Owner: import to the group, then say "imported"**; until then they keep today's NPC outfits.
   - **Pace by star with realistic trainers:** report only, nothing changed. [[2026-11-03 GYM ARC Pace by star - realistic trainers]] + `GYM ARC\Calc`. Run (lifting min): ★0 230, ★1 110, ★3 50, ★5 43, ★10 23, owner's maxed 12.
+- **3 Nov - Coach Dex gear tour + Pro gear in the pace table.**
+  - **Owner:** "when the player first enters the shop ... make it so that the coach dex dialogue makes the player buy the gears too if they have enough coins and if they dont then coach dex will just introduce about the gears".
+  - **What was there:** no Dex dialogue on the shop window itself (only the Growth Spurt 3 guide that walks to the Pump Shop; Basic / Pro gear is sold at Coach Dex's counter). So it's a new first-visit **tour** (same Dex box + gold spotlight as the tutorial's STOP) on Coach Dex's shop, the first time it opens with GEAR open (Growth Spurt 2+).
+    - Enough coins: GEAR tab, then the tile, then BUY, for each piece they can afford (cheapest next level, belt first), then "Looking strong!". These steps wait for the real tap (tapping Dex's box only repeats the line, "Tap the gold button"); SKIP still ends it.
+    - Not enough coins and no gear: GEAR tab, the belt, the wraps, "Basic gear costs 750 coins. Keep training and come back for it!".
+    - Owns gear and can't afford the next level: nothing.
+    - Plays once (`Tour:Gear`); closing the shop early = it plays again next time.
+    - Words in Config/Guides.GearTour (owner can edit).
+    - Code: Config/Guides (tour `Gear` + `GearTour`), TourClient (custom steps, `mustTap`, a line with no button, re-points at a rebuilt button), CoachDialog.Show(pages, done, foot), PumpShopClient (window attributes ShopId / Tab / GearOpen).
+    - **Tested** (fresh player, Growth Spurt 2):
+      - 3,000 coins: bought Basic belt + Basic wraps through the tour (3,000 -> 1,500, both OWNED); tapping Dex's box did not skip; seen saved, no replay on reopen.
+      - 300 coins: the intro played, seen saved.
+      - No errors.
+  - **Bug fixed:** ProgressClient line 634 errored on a save past the last alter (the owner's admin save at Alter 30: "next alter" 31 doesn't exist). Now "Max". Real players can't reach it.
+  - **Pace table re-run with Pro belt + wraps from Alter 1** (owner: "everyone starting from alter 1 has pro gear"). It adds +10% to the EXP boost next to the trainers, so the runs move only 1-2%. Lifting min: ★0 228, ★1 107, ★3 50, ★5 42, ★10 23, owner 12. Updated [[2026-11-03 GYM ARC Pace by star - realistic trainers]] + Calc.
