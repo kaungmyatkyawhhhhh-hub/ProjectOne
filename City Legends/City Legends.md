@@ -711,6 +711,11 @@ Each venue uses the place's own dressing and cleaned Toolbox models (no scripts,
 - **Numbers:** the suites' furniture is about 1,100 parts on all 4 floors (pieces merged; the piano went from 4,599 to 74 parts). FPS not measured.
 - Pictures: [[Legends Grand Hotel suites - 4 tiers.jpg]].
 
+**Venue car entrances (2026-11-03, owner: "make every venue entrance perfect ... the car cant drive up the ramp in some venues ... the ramp looks bad"):**
+- The little grey kerb wedges are gone. The 4 car entrances (Legends Motors' drive-out, Legends Customs' tuning bay, the hotel's two driveways) now get a paved driveway fitted to the real ground when the server starts (`EntranceRamp.lua`).
+- It measures the lot, the pavement, the stone ledge and the road, then lays one smooth slope (at most about 11 degrees): paving with granite edges on the pavement part, road asphalt on the part out on the road. Where the lot is lower than the street (one hotel lane) the slope starts inside the lot. Small props in the way (bollards, posts) are hidden.
+- Measured in Play: steepest 8.8 to 11.2 degrees. Not yet driven over with a car.
+
 **Creator Store models used (credit list, cleaned: scripts, fake windows and sounds removed):**
 | Piece | Name in the store | ID | Creator |
 |---|---|---|---|

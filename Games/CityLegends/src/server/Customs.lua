@@ -22,12 +22,11 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
+local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
 
 local Customs = {}
 
 local CU = Config.Customs
-local C = Config.City
-local CURB = C.CurbHeight
 
 export type Look = {
 	paint: { number }?,
@@ -378,10 +377,12 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 		deco(detail, Vector3.new(0.8, 3.4, 3.4), at(bays[3] - 6 + k * 4, 4 + (k % 2) * 4, Z1 - 1.8) * CFrame.Angles(0, math.pi / 2, 0), Color3.fromRGB(176, 180, 186), Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 	end
 
-	-- the ramp from the road onto the sidewalk in front of the tuning bay
-	local rampZ = -half - C.SidewalkWidth - 2
-	-- (a wedge's slope faces its -Z, which is the street here; its top meets the sidewalk)
-	mk(model, Vector3.new(DOOR_W, CURB, 4), at(tb, -CURB / 2, rampZ), Color3.fromRGB(62, 62, 66), Enum.Material.Concrete, { class = "Wedge", name = "KerbRamp" })
+	-- the drive from the road onto the lot in front of the tuning bay, fitted to the real ground
+	-- (EntranceRamp)
+	local rampIn = at(tb, 0.2, -half + 0.5)
+	task.defer(function()
+		EntranceRamp.build(model, rampIn, { width = DOOR_W, color = Color3.fromRGB(70, 70, 74), material = Enum.Material.Concrete, keep = { model } })
+	end)
 
 	bayCF = at(tb, 0, bayZ)
 	workspace:SetAttribute("CustomsBay", bayCF)

@@ -30,8 +30,7 @@ local Dealership = {}
 
 local D = Config.Dealership
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
-local C = Config.City
-local CURB = C.CurbHeight
+local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
 
 local GLASS = Color3.fromRGB(150, 180, 205)
 local FRAME = Color3.fromRGB(32, 34, 40)
@@ -257,8 +256,11 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 		for _, dx in { -7, 7 } do
 			deco(detail, Vector3.new(0.4, 0.04, laneLen - 4), at(lp.X + dx, 0.07, (lp.Z - half) / 2 + 2), Color3.fromRGB(236, 200, 70), Enum.Material.SmoothPlastic)
 		end
-		local kerbZ = -half - C.SidewalkWidth
-		mk(model, Vector3.new(18, CURB, 5), at(lp.X, -CURB / 2, kerbZ - 2.5), Color3.fromRGB(110, 110, 114), Enum.Material.Concrete, { class = "Wedge", name = "KerbRamp" })
+		-- the drive from the bay down to the street, fitted to the real ground (EntranceRamp)
+		local inner = at(lp.X, 0.2, -half + 0.5)
+		task.defer(function()
+			EntranceRamp.build(model, inner, { width = 18, keep = { model } })
+		end)
 	end
 
 	-- the pylon sign on the forecourt's other corner: brushed metal, the name and the brands
@@ -371,10 +373,12 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 	local bayX = (BX + SW) / 2 - 1
 	local bayP = (base * CFrame.new(bayX, FLOOR_T, (Z0 + Z1) / 2 + 6)).Position
 	doorCF = CFrame.lookAt(bayP, bayP + base.LookVector)
-	-- kerb ramps where the bay's lane crosses the sidewalk and meets the road
-	-- (a wedge's slope faces its -Z: down towards the street; the road is CURB below the frame)
-	local kerbZ = -half - C.SidewalkWidth
-	mk(model, Vector3.new(SW - BX + 2, CURB, 5), at(bayX, -CURB / 2, kerbZ - 2.5), Color3.fromRGB(110, 110, 114), Enum.Material.Concrete, { class = "Wedge", name = "KerbRamp" })
+	-- the drive where the bay's lane crosses the sidewalk and meets the road, fitted to the real
+	-- ground (EntranceRamp)
+	local rampIn = at(bayX, FLOOR_T + 0.2, -half + 0.5)
+	task.defer(function()
+		EntranceRamp.build(model, rampIn, { width = SW - BX + 2, keep = { model } })
+	end)
 
 	-- big LEGENDS MOTORS sign on the roof edge over the front glass
 	local sign = mk(model, Vector3.new(SW * 1.3, 8, 1.2), at(-12, H + 6.5, Z0 - 1), Color3.fromRGB(14, 14, 18), Enum.Material.SmoothPlastic, { name = "DealerSign" })

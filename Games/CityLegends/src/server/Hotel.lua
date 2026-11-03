@@ -43,6 +43,7 @@ local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Towers = require(script.Parent:WaitForChild("Towers"))
+local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
 
 local Hotel = {}
 
@@ -68,7 +69,6 @@ local PAVER = Color3.fromRGB(58, 56, 60)
 local WATER = Color3.fromRGB(40, 150, 200)
 local LEAF = Color3.fromRGB(52, 96, 44)
 local BURGUNDY = Color3.fromRGB(122, 20, 34)
-local CURB = Config.City.CurbHeight
 
 -- sizes in the hotel's own frame (x right, y up from the lot, -z out of the entrance); the
 -- podium and the driveway fit the lot, which shrinks when the roads get wider
@@ -512,9 +512,13 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	dbox(court, LANE_X * 2 + 20, 0.16, 20, 0, 0.08, BAY_Z, PAVER, Enum.Material.Cobblestone)
 	-- the right-hand lane's apron runs on into the valet garage
 	dbox(court, 20, 0.16, BAY_Z - PODIUM_Z0 + 10, LANE_X, 0.09, (BAY_Z + PODIUM_Z0) / 2 + 5, PAVER, Enum.Material.Cobblestone)
-	-- dropped kerbs: little ramps from the street up onto the driveway (they sit on the road)
+	-- the driveways from the street up onto the forecourt: paved ramps fitted to the real ground
+	-- (EntranceRamp: over the pavement, the kerb and the site's stone ledge)
 	for _, sx in { -1, 1 } do
-		mk(court, Vector3.new(20, CURB, 6), at(sx * LANE_X, -CURB / 2, -half - Config.City.SidewalkWidth - 3), Color3.fromRGB(110, 110, 116), Enum.Material.Concrete, { class = "Wedge", name = "KerbRamp" })
+		local inner = at(sx * LANE_X, 0.2, -half + 0.5)
+		task.defer(function()
+			EntranceRamp.build(court, inner, { width = 20, color = PAVER, material = Enum.Material.Cobblestone, keep = { model } })
+		end)
 		-- arrows: in on the left, out on the right
 		local arrow = dbox(court, 6, 0.05, 6, sx * LANE_X, 0.2, -half + 14, Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, { transparency = 1 })
 		local g = Instance.new("SurfaceGui")
