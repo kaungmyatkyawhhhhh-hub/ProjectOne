@@ -1,7 +1,7 @@
 ---
 date: 2026-11-03
 tags: [gymarc, pacing, hall-of-fame, trainers]
-status: report only - no numbers changed (owner decides)
+status: DECIDED 3 Nov - no pace changes
 ---
 # Pace by star with realistic trainers (3 Nov)
 
@@ -59,3 +59,12 @@ Per alter (lifting minutes), ★0: about 10-13 for Alters 1-13, 20 / 28 for 14 /
 | ★10, 2 Heracles | 21 | 31 | 13 | 23 | 18 |
 
 - **Skipping is FASTER, not slower.** The 1 Nov estimate said skip-all costs ~2.4x the effort, but that only counted EXP. Skipping keeps your muscles big, so you keep using the heaviest weights. Altering one by one drops you to 25% and back to lighter weights each time. Biggest gain: going straight to Alter 20 (★3: 72 -> 49 min).
+
+## Owner's decision (3 Nov)
+- **No pace changes.** Skipping straight to 20 being fastest is fine (it's a ★1+ reward). Don't nerf skipping or anything players own.
+- ★1 to Alter 15 with skip (~90 lifting min) is close enough: no ★1 boost.
+- **Rebirth still unlocks at Alter 15 (checked in Studio, nothing changed):**
+  - `HallOfFame.RequiredAlter = 15`.
+  - `CanEnter` = Alter 15 or past it + the Hall of Fame goal (the training goal after Alter 15 that has always been there).
+  - The server checks the same rule (PlayerData:EnterHallOfFame, HallOfFameService).
+  - Nothing requires Alter 20. Alter 20 (`BonusAlter`) only raises the reward: 2 stars instead of 1, and 1 extra Legacy card.

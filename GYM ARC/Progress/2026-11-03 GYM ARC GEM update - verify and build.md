@@ -270,3 +270,9 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
   - **The NEXT card moves down by 28 px while the bar shows.** The right column stacks its cards, and there's only ~10 px between the quest card and the NEXT card, so keeping the card fixed would mean the bar covers the quest card.
   - Tested on PC and the phone frame (TestPhoneSize 844x390, TestInput Touch) at 0%, 13% (real) and 90%: the text reads on dark and on gold. Tap opens the choice.
   - The thumbstick is bottom-left and the bar is top-right, so they can't overlap. Studio doesn't draw Roblox's real thumbstick, so a real phone has to confirm.
+- **3 Nov - Hall of Fame bar stays on top** (owner accepts the 28 px push of the NEXT card).
+  - When it shows: Gem update out + Hall of Fame open + this run at Alter 15-19. It doesn't depend on the %, panels or respawning.
+  - At Alter 20 the NEXT card itself turns into the gold HALL OF FAME card (no next alter), so the bar isn't needed there.
+  - After entering the Hall the new run starts at Alter 0, so the bar comes back when that run reaches Alter 15.
+  - Tested in Play (logging every frame): bar visible and card at the same spot through opening the Shop, the Inventory and a respawn; no change.
+  - The whole right column (bar + card together) still hides on a machine and during cutscenes, as before, so the card never moves alone.
