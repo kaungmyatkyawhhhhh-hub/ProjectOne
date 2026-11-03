@@ -38,3 +38,16 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
   - **Tested in Play:** all 5 skins render on a max body (not grey).
   - Diamond reads pale white on its own; its LIGHT / MOTION layers (prism sparkle) are what make it read as diamond.
   - Still locked until the update (LastAvailable + GemAlters).
+- **3 Nov - Hall of Fame from Alter 20 = 2★ + 1 extra Legacy card** (decided 1 Nov).
+  - **Config/HallOfFame:** BonusAlter 20 / BonusStars 1 / BonusCards 1, with `StarsForEntry(data)` and `CardsForEntry(data)`.
+  - **PlayerData.EnterHallOfFame:** adds StarsForEntry stars and counts `fame.runs` (runs are no longer the same as stars).
+  - **HallOfFameService:**
+    - Works out the card count before the reset and passes it to `RunCardService.NewLife(player, keep, count)`, which takes a list of up to `count` cards (each uses one copy; reads at most 5 entries).
+    - First-star rewards (free roll, launch quest) use "stars before = 0", so a first entry at Alter 20 (0 → ★2) still gets them.
+    - SecondRun_Done uses `fame.runs`; new analytics event `HallOfFame_BonusStar`.
+  - **Keep window (RunCardsClient):** "KEEP 2 CARDS" with the Alter 20 text; the 2 best are pre-picked and a 3rd tap swaps out the oldest pick.
+  - **Hall of Fame screen:** shows the star you'll reach (★+2) and "ALTER 20 BONUS: +1 star, keep 2 cards".
+  - **Tested in Play (Alter 20 save, 4 cards):**
+    - Keep window clicked: it returned Arms_Rare + Back_Rare.
+    - After Enter: stars 2, both cards legacy-active, run reset to Spurt 3.
+    - HALL OF FAMER + Rising Star titles and the free roll were granted. No errors.
