@@ -907,7 +907,7 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Checked in Play on a straight (Coast Road): SV idle at half the SVJ's loudness; braking from 72 mph, three downshifts at 41 / 35 / 27 mph, each blip at its own pitch (0.85 / 0.90 / 1.00); no errors.
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
-Summary at the end of the run goes here. Next: step 4 (venues: Customs, Gem Showcase, Realty, chauffeur kiosks, challenge gantries, then the Legends Rewards check; the bank and the 3 towers are done).
+Summary at the end of the run goes here. Next: step 4 (venues: Gem Showcase, Realty, chauffeur kiosks, challenge gantries, then the Legends Rewards check; the bank, the 3 towers and Customs are done).
 
 ### Choices made while the owner was away (2026-11-03)
 - Buildings: the global environment reflections (`Lighting.EnvironmentSpecularScale` 1) were left as they are. Lowering them takes the slight sky sheen off the walls but also dulls the cars' paint and the wet roads, and the sheen wasn't the black / white flashing. Easy to change in `CityBuilder` / Lighting if wanted.
@@ -991,3 +991,9 @@ Driven in Play on the Coast Road (automatic, full throttle, then full brake, the
 - **No neon:** the corner light columns, paving lines, canopy strips, lanterns, the fountain and pool rims, the lobby's ring chandelier and the plaques' lines are gold metal or warm lit glass now (their lights stay). Left glowing: party lights and window glow.
 - **Gameplay not touched:** lifts, buy prompts, showcase turntable, DJ booth, roof (17 prompts per tower, as before). Play: no errors. Lifts weren't ridden this pass (their code is unchanged).
 - **Numbers:** Aurum 1,524 parts (was 688), Skyline One 1,051 (was 737), The Crown 993 (was 772); the new facade parts are in a LOD group (hidden far away).
+
+**Legends Customs (done, 2026-11-04; `Customs.dress` in `server/Customs.lua`):**
+- **Outside:** dark steel cladding with vertical fins over the concrete front, a steel canopy blade over the doors with warm downlights (night only), glass door edges showing under the rolled-up doors.
+- **Inside:** a polished grey epoxy floor with yellow safety lines round each bay; red two-post lifts in bays 1 and 3 (the tuning bay keeps its own); the TUNING bay lit like a stage (a dark ring round the plate, a black light truss with 6 spotlights on the car); a white paint booth with glass front and soft light panels at the back of bay 3; a glass-walled lounge in the front corner beside bay 1 (wood floor, Chesterfield sofa and armchair from the kit, low table, palm, a coffee / juice counter with a machine), looking onto the bays.
+- **Gameplay not touched:** the tuning bay, its plate (`CustomsBay`), the doors and the drive. Checked in Play: no solid part in the tuning lane, no errors. Not driven in this pass.
+- **Numbers:** 462 parts (was 172). Pictures: [[Customs remodel - before (outside).jpg]], [[Customs remodel - before (inside).jpg]], [[Customs remodel - after (outside).jpg]], [[Customs remodel - after (inside).jpg]].

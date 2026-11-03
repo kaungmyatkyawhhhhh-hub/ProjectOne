@@ -264,6 +264,180 @@ local WARM = Color3.fromRGB(255, 236, 210)
 local BLUE = Color3.fromRGB(28, 52, 92) -- tool chests
 
 -- (CityBuilder asks this when baking the map: this block stays empty and is built at start)
+---------------------------------------------------------------------
+-- The remodel (2026-11-04, owner-away run, `Prompts/Remodel the venues.md`: "a clean modern workshop:
+-- a glass-and-steel front, a polished grey epoxy floor, 3 bays with lifts, tool walls, tyre racks, a
+-- paint booth with soft lights; the TUNING bay lit like a stage; a lounge with a window onto the
+-- bays"). Looks only: the tuning bay, its turntable plate, the walls and the drive stay as before.
+---------------------------------------------------------------------
+local GLASS_C = Color3.fromRGB(70, 92, 110)
+local YELLOW_C = Color3.fromRGB(236, 186, 36)
+local WHITE_C = Color3.fromRGB(238, 238, 234)
+
+local function kitPiece(name: string, cf: CFrame, scale: number?, parent: Instance): Model?
+	local vk = game:GetService("ServerStorage"):FindFirstChild("VenueKit")
+	local src = vk and vk:FindFirstChild(name)
+	if not (src and src:IsA("Model")) then
+		return nil
+	end
+	local m = src:Clone()
+	if scale and scale ~= 1 then
+		m:ScaleTo(scale)
+	end
+	m:PivotTo(cf)
+	m.Parent = parent
+	return m
+end
+
+function Customs.dress(kit: any, model: Model, at: (number, number, number) -> CFrame, d: { [string]: any })
+	local mk, deco = kit.mk, kit.deco
+	local W, Z0, Z1, H = d.W, d.Z0, d.Z1, d.H
+	local DOOR_W, DOOR_H = d.DOOR_W, d.DOOR_H
+	local bays: { number } = d.bays
+	local bayZ = d.bayZ
+	local detail = kit.lodGroup(model, "Remodel", at(0, 10, 0).Position, 480)
+	local face = Z0 - 0.8 -- the front wall's outer face
+
+	-------------------------------------------------------------------
+	-- outside: a glass-and-steel front
+	-------------------------------------------------------------------
+	-- dark steel cladding with vertical fins over the solid parts of the front
+	local edges = { -W }
+	for _, bx in bays do
+		table.insert(edges, bx - DOOR_W / 2)
+		table.insert(edges, bx + DOOR_W / 2)
+	end
+	table.insert(edges, W)
+	for k = 1, #edges, 2 do
+		local x0, x1 = edges[k], edges[k + 1]
+		local w = x1 - x0
+		if w > 1 then
+			deco(model, Vector3.new(w, H - 6, 0.3), at((x0 + x1) / 2, (H - 6) / 2, face - 0.15), Color3.fromRGB(46, 48, 54), Enum.Material.Metal)
+			local n = math.max(1, math.floor(w / 3))
+			for j = 0, n do
+				deco(detail, Vector3.new(0.4, H - 6, 1), at(x0 + j * w / n, (H - 6) / 2, face - 0.6), Color3.fromRGB(84, 88, 96), Enum.Material.Metal)
+			end
+		end
+	end
+	-- a band of tinted glass over each door (in front of the lintel), steel mullions
+	for _, bx in bays do
+		local gh = H - 6 - DOOR_H - 1
+		local gy = DOOR_H + 1 + gh / 2
+		deco(model, Vector3.new(DOOR_W + 1, gh, 0.3), at(bx, gy, face - 0.2), GLASS_C, Enum.Material.Glass, { reflectance = 0.25 })
+		for j = -3, 3 do
+			deco(detail, Vector3.new(0.3, gh, 0.5), at(bx + j * DOOR_W / 6, gy, face - 0.4), STEEL, Enum.Material.Metal)
+		end
+		-- the door: a glass sectional door rolled up (its lower edge shows under the drum)
+		deco(detail, Vector3.new(DOOR_W, 1.2, 0.3), at(bx, DOOR_H - 0.6, face + 0.6), GLASS_C:Lerp(STEEL, 0.4), Enum.Material.Glass)
+		deco(detail, Vector3.new(DOOR_W, 0.25, 0.4), at(bx, DOOR_H - 1.3, face + 0.6), STEEL, Enum.Material.Metal)
+	end
+	-- a thin steel canopy blade over the doors with downlights
+	deco(model, Vector3.new(W * 2 + 2, 0.6, 6), at(0, DOOR_H + 0.9, face - 3), Color3.fromRGB(40, 42, 46), Enum.Material.Metal)
+	deco(detail, Vector3.new(W * 2 + 2, 0.3, 0.4), at(0, DOOR_H + 1.3, face - 6), STEEL, Enum.Material.Metal)
+	for x = -W + 6, W - 6, 12 do
+		local dl = deco(detail, Vector3.new(1, 0.15, 1), at(x, DOOR_H + 0.55, face - 3), Color3.fromRGB(255, 244, 226), Enum.Material.Glass)
+		local l = kit.addLight("SpotLight", dl, WARM, 20, 1.2, Enum.NormalId.Bottom, 80)
+		game:GetService("CollectionService"):AddTag(l, "DayOff")
+	end
+
+	-------------------------------------------------------------------
+	-- inside
+	-------------------------------------------------------------------
+	-- the polished epoxy floor (laid over the concrete) and yellow safety lines round each bay
+	deco(model, Vector3.new(W * 2 - 2, 0.04, Z1 - Z0 - 2), at(0, 0.16, (Z0 + Z1) / 2), Color3.fromRGB(104, 108, 114), Enum.Material.SmoothPlastic, { reflectance = 0.14 })
+	for _, bx in bays do
+		local bw, bd = DOOR_W - 4, Z1 - Z0 - 26
+		for _, sx in { -1, 1 } do
+			deco(model, Vector3.new(0.5, 0.05, bd), at(bx + sx * bw / 2, 0.2, bayZ), YELLOW_C, Enum.Material.SmoothPlastic)
+		end
+		deco(model, Vector3.new(bw, 0.05, 0.5), at(bx, 0.2, bayZ + bd / 2), YELLOW_C, Enum.Material.SmoothPlastic)
+	end
+	-- two-post lifts in bays 1 and 3 (the tuning bay has its own)
+	for i, bx in bays do
+		if i ~= 2 then
+			for _, sx in { -1, 1 } do
+				mk(model, Vector3.new(1.6, 15, 1.6), at(bx + sx * 13.5, 7.5, bayZ), Color3.fromRGB(196, 40, 40), Enum.Material.Metal, { name = "LiftPost" })
+				deco(detail, Vector3.new(2.4, 0.5, 2.4), at(bx + sx * 13.5, 15.25, bayZ), DARK, Enum.Material.Metal)
+				deco(detail, Vector3.new(2.6, 0.4, 2.6), at(bx + sx * 13.5, 0.4, bayZ), DARK, Enum.Material.Metal)
+				for _, dz in { -4, 4 } do
+					deco(detail, Vector3.new(6, 0.5, 0.8), at(bx + sx * 10.5, 2.4, bayZ + dz) * CFrame.Angles(0, sx * math.rad(if dz < 0 then 12 else -12), 0), DARK, Enum.Material.Metal)
+				end
+			end
+			-- an overhead beam with the hoses
+			deco(detail, Vector3.new(28.6, 1, 1), at(bx, 15.8, bayZ), Color3.fromRGB(196, 40, 40), Enum.Material.Metal)
+		end
+	end
+	-- the TUNING bay lit like a stage: a dark ring round the plate, a light truss with spots
+	local tb = bays[2]
+	deco(model, Vector3.new(0.1, 25, 25), at(tb, 0.12, bayZ) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(26, 26, 30), Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder })
+	deco(model, Vector3.new(0.12, 23, 23), at(tb, 0.14, bayZ) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(150, 152, 156), Enum.Material.DiamondPlate, { shape = Enum.PartType.Cylinder })
+	local trussY = H - 4
+	for _, sz in { -1, 1 } do
+		deco(detail, Vector3.new(26, 1, 1), at(tb, trussY, bayZ + sz * 12), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
+	end
+	for _, sx in { -1, 1 } do
+		deco(detail, Vector3.new(1, 1, 25), at(tb + sx * 12.5, trussY, bayZ), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
+	end
+	for _, c in { { -9, -9 }, { 9, -9 }, { -9, 9 }, { 9, 9 }, { 0, -12 }, { 0, 12 } } do
+		local pos = at(tb + c[1], trussY - 1.2, bayZ + c[2]).Position
+		local lamp = deco(detail, Vector3.new(1.2, 1.2, 1.8), CFrame.lookAt(pos, at(tb, 2, bayZ).Position), Color3.fromRGB(22, 22, 24), Enum.Material.Metal)
+		kit.addLight("SpotLight", lamp, Color3.fromRGB(255, 246, 232), 34, 1.6, Enum.NormalId.Front, 36)
+	end
+	-- a paint booth at the back of bay 3: white walls, glass front, soft light panels
+	local pb = bays[3]
+	local pz0, pz1 = Z1 - 30, Z1 - 1
+	for _, sx in { -1, 1 } do
+		deco(model, Vector3.new(0.4, 16, pz1 - pz0), at(pb + sx * 13, 8, (pz0 + pz1) / 2), WHITE_C, Enum.Material.SmoothPlastic)
+	end
+	deco(model, Vector3.new(26.4, 0.4, pz1 - pz0), at(pb, 16.2, (pz0 + pz1) / 2), WHITE_C, Enum.Material.SmoothPlastic)
+	for _, sx in { -1, 1 } do
+		deco(detail, Vector3.new(0.8, 16, 0.8), at(pb + sx * 13, 8, pz0), STEEL, Enum.Material.Metal)
+		deco(detail, Vector3.new(4.5, 15, 0.2), at(pb + sx * 10.5, 8.5, pz0), GLASS_C:Lerp(WHITE_C, 0.6), Enum.Material.Glass, { transparency = 0.5 })
+	end
+	deco(detail, Vector3.new(26, 3, 0.4), at(pb, 14.4, pz0), WHITE_C, Enum.Material.SmoothPlastic)
+	local signBooth = deco(detail, Vector3.new(10, 1.6, 0.2), at(pb, 14.4, pz0 - 0.3), DARK, Enum.Material.SmoothPlastic)
+	kit.surfaceText(signBooth, Enum.NormalId.Front, "PAINT BOOTH", WHITE_C, nil, nil, Enum.Font.GothamBold, Vector2.new(400, 64))
+	for _, z in { pz0 + 7, pz0 + 15, pz0 + 23 } do
+		for _, sx in { -1, 1 } do
+			local panel = deco(detail, Vector3.new(0.2, 10, 4), at(pb + sx * 12.7, 8, z), Color3.fromRGB(252, 250, 244), Enum.Material.Glass)
+			kit.addLight("SurfaceLight", panel, Color3.fromRGB(255, 250, 240), 14, 0.8, if sx < 0 then Enum.NormalId.Right else Enum.NormalId.Left, 120)
+		end
+	end
+	-- the lounge: in the front corner beside bay 1 (between the side wall and the door), behind a
+	-- glass wall that looks onto the bays
+	local x0, x1 = -W + 1, bays[1] - DOOR_W / 2 - 0.8
+	local lz0, lz1 = Z0 + 1, Z0 + 15
+	local lx = (x0 + x1) / 2
+	deco(model, Vector3.new(0.3, 12, lz1 - lz0), at(x1, 6, (lz0 + lz1) / 2), GLASS_C:Lerp(WHITE_C, 0.5), Enum.Material.Glass, { transparency = 0.6 })
+	deco(model, Vector3.new(x1 - x0, 12, 0.3), at(lx, 6, lz1), GLASS_C:Lerp(WHITE_C, 0.5), Enum.Material.Glass, { transparency = 0.6 })
+	for z = lz0, lz1, 3.5 do
+		deco(detail, Vector3.new(0.4, 12, 0.4), at(x1, 6, z), STEEL, Enum.Material.Metal)
+	end
+	for x = x0, x1, 4 do
+		deco(detail, Vector3.new(0.4, 12, 0.4), at(x, 6, lz1), STEEL, Enum.Material.Metal)
+	end
+	deco(detail, Vector3.new(0.6, 0.5, lz1 - lz0), at(x1, 12.2, (lz0 + lz1) / 2), STEEL, Enum.Material.Metal)
+	deco(detail, Vector3.new(x1 - x0, 0.5, 0.6), at(lx, 12.2, lz1), STEEL, Enum.Material.Metal)
+	deco(model, Vector3.new(x1 - x0, 0.06, lz1 - lz0), at(lx, 0.2, (lz0 + lz1) / 2), Color3.fromRGB(120, 86, 58), Enum.Material.WoodPlanks)
+	-- a sofa against the side wall looking at the bays, an armchair, a low table, a palm
+	if not kitPiece("Chesterfield", at(x0 + 2.5, 0.25, lz0 + 8) * CFrame.Angles(0, math.rad(-90), 0), nil, detail) then
+		mk(detail, Vector3.new(3, 3, 9), at(x0 + 2, 1.5, lz0 + 8), Color3.fromRGB(60, 40, 30), Enum.Material.Fabric)
+	end
+	kitPiece("Armchair", at(x1 - 3, 0.25, lz0 + 11) * CFrame.Angles(0, math.rad(130), 0), nil, detail)
+	kitPiece("PottedPalm", at(x1 - 2, 0.25, lz0 + 2), nil, detail)
+	mk(detail, Vector3.new(3, 1.4, 5), at(x0 + 7.5, 0.7, lz0 + 8), Color3.fromRGB(30, 30, 34), Enum.Material.Marble)
+	-- a coffee counter against the front wall, a machine and a board over it
+	mk(detail, Vector3.new(9, 3.6, 2.4), at(x0 + 6, 1.8, lz0 + 1.4), Color3.fromRGB(44, 46, 52), Enum.Material.SmoothPlastic)
+	deco(detail, Vector3.new(9.4, 0.3, 2.8), at(x0 + 6, 3.75, lz0 + 1.4), Color3.fromRGB(220, 218, 212), Enum.Material.Marble)
+	deco(detail, Vector3.new(1.8, 2, 1.6), at(x0 + 8, 4.9, lz0 + 1.2), Color3.fromRGB(150, 152, 158), Enum.Material.Metal)
+	deco(detail, Vector3.new(0.6, 0.8, 0.6), at(x0 + 8, 4.3, lz0 + 2.1), Color3.fromRGB(240, 238, 232), Enum.Material.SmoothPlastic)
+	local menuBoard = deco(detail, Vector3.new(6, 2.4, 0.2), at(x0 + 6, 8, lz0 + 0.1) * CFrame.Angles(0, math.pi, 0), DARK, Enum.Material.SmoothPlastic)
+	kit.surfaceText(menuBoard, Enum.NormalId.Front, "COFFEE  ·  JUICE", WARM, nil, nil, Enum.Font.GothamBold, Vector2.new(300, 120))
+	local loungeLight = deco(detail, Vector3.new(8, 0.3, 8), at(lx, 12.6, (lz0 + lz1) / 2), Color3.fromRGB(255, 244, 228), Enum.Material.Glass)
+	deco(detail, Vector3.new(x1 - x0, 0.4, lz1 - lz0), at(lx, 12.9, (lz0 + lz1) / 2), Color3.fromRGB(40, 42, 46), Enum.Material.SmoothPlastic)
+	kit.addLight("SurfaceLight", loungeLight, WARM, 16, 1, Enum.NormalId.Bottom, 120)
+end
+
 function Customs.isBlock(bi: number, bj: number): boolean
 	return bi == CU.Block[1] and bj == CU.Block[2]
 end
@@ -355,7 +529,6 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 		deco(detail, Vector3.new(6, 0.5, 0.8), at(tb + sx * 10.5, 2.4, bayZ - 4), DARK, Enum.Material.Metal)
 		deco(detail, Vector3.new(6, 0.5, 0.8), at(tb + sx * 10.5, 2.4, bayZ + 4), DARK, Enum.Material.Metal)
 	end
-	deco(model, Vector3.new(0.12, 22, 22), at(tb, 0.14, bayZ) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(150, 152, 156), Enum.Material.DiamondPlate, { shape = Enum.PartType.Cylinder })
 	-- a camera rig and soft boxes for the "photo" look of the tuning screen
 	for _, a in { -0.8, 0.8 } do
 		local p = at(tb + math.sin(a) * 17, 0, bayZ + math.cos(a) * 14)
@@ -396,6 +569,8 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 	for k = 0, 3 do
 		deco(detail, Vector3.new(0.8, 3.4, 3.4), at(bays[3] - 6 + k * 4, 4 + (k % 2) * 4, Z1 - 1.8) * CFrame.Angles(0, math.pi / 2, 0), Color3.fromRGB(176, 180, 186), Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 	end
+
+	Customs.dress(kit, model, at, { W = W, Z0 = Z0, Z1 = Z1, H = H, DOOR_W = DOOR_W, DOOR_H = DOOR_H, bays = bays, bayZ = bayZ })
 
 	-- the drive from the road onto the lot in front of the tuning bay, fitted to the real ground
 	-- (EntranceRamp)
