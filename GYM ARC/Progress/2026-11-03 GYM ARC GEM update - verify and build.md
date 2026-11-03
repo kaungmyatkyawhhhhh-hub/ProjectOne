@@ -76,3 +76,4 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - All 5 looks visible from the front; tuned once (Ruby brighter + smaller core, Jade thicker cuffs, Sapphire bigger lighter spikes, Diamond crown raised above the hair).
     - Walking: 8 footprints in 30 studs. Flex burst fired. 60 FPS, no errors.
   - **Not tested yet:** the rep burst on a real machine (needs seating on a Gem machine); 10+ players (the FPS pass).
+- **3 Nov - ALTER SKIP now 2.5x** (owner: "make alter skip 2.5x the next alter not 1.5x"). `Alters.SkipAt = 2.5`: every group needs 2.5x a later alter's goal EXP to skip to it. Same rule for skipping 1, 2 or more alters. Checked in Studio: the module loads and returns 2.5.
