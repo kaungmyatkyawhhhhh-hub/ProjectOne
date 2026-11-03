@@ -77,3 +77,19 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - Walking: 8 footprints in 30 studs. Flex burst fired. 60 FPS, no errors.
   - **Not tested yet:** the rep burst on a real machine (needs seating on a Gem machine); 10+ players (the FPS pass).
 - **3 Nov - ALTER SKIP now 2.5x** (owner: "make alter skip 2.5x the next alter not 1.5x"). `Alters.SkipAt = 2.5`: every group needs 2.5x a later alter's goal EXP to skip to it. Same rule for skipping 1, 2 or more alters. Checked in Studio: the module loads and returns 2.5.
+- **3 Nov - Item 2: Hall of Fame "keep going" UI built + tested.** Everything only after the update (`LiveEvents.Unlocked("GemAlters")`) and at Alter 15+.
+  - **HUD card (ProgressClient):**
+    - Alter 15-19: the card stays the next alter's ("NEXT: ALTER 16 JADE" + %), with a thin gold-outlined strip under it: "HALL OF FAME · ★1 ›", or "· 48%" while the Hall of Fame goal isn't met. Tap = the choice screen.
+    - Alter 20: the whole card is the gold Hall of Fame card, "HALL OF FAME · ★2" / "+1 card · Max reward ready!", glowing. Tap = the choice screen.
+  - **Choice screen (new `HallChoiceClient`, Kit.Modal "Hall of Fame"):** never opens by itself.
+    - **ENTER NOW** (gold): ★ you'd reach (+1 CARD tag at 20), next run's boosts, "Keep 1/2 Legacy cards", "Resets your run". ENTER HALL opens the existing confirm screen; before the goal: goal bar + WHAT TO TRAIN.
+    - **KEEP GOING** (gem purple, the next alter's art): "NEXT: ALTER 16 JADE" + goal bar, "Alter 20 = 2 stars + 1 extra card", GO TO GEM MINE (the gold path + marker to the mouth; it clears there or after 3 min). At 20: MAX REACHED.
+  - **One-time "NEW: ALTERS 16-20" card:** for Alter 15+ players; waits for the join's other windows (trainer roll, other windows, guides), then shows once (SHOW ME opens the choice). Saved as `onboarding.gemAltersSeen` (HallOfFame remote "GemAltersSeen").
+  - The old "NEW: HALL OF FAME" screen no longer opens by itself after the update ("never forces").
+  - Analytics: `HallChoice_Opened`, `HallChoice_KeepGoing`.
+  - **Tested in Play:**
+    - Before the update: unchanged (old card, no strip, no new card).
+    - After the update at Alter 15: goal met and goal not met (48%).
+    - After the update at Alter 20: MAX + ★2 + 2 cards.
+    - ENTER HALL opens the confirm screen; GO TO GEM MINE sets the path (owner HallChoice).
+    - Phone 667x375 fits. Fixed in testing: lines under the buttons, a double star, the HUD title wrapping.
