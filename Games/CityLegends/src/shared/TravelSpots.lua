@@ -1,7 +1,7 @@
 --[[
 	TravelSpots (shared)
 	The places the main menu's world map shows and fast travels to (owner, 2026-11-02): each venue
-	(WestLayout.places: Legends Motors, Legends Customs, the bank, the towers, the hotel, the casino,
+	(WestLayout.places: Legends Motors, Legends Customs, the bank, the towers, the hotel, Legends Rewards,
 	the gem showcase, and Monaco's own spots), Legends Realty, the races' starts and the delivery
 	dispatches. Each spot: an id, a name, its symbol (MenuArt.venues), a line on what you do there,
 	and where you arrive: on the road outside, facing the way on (cf). Your own house is added by the
@@ -25,7 +25,7 @@ local INFO = {
 	bank = "The vault: rob it, if you dare",
 	tower = "Penthouses with garages",
 	hotel = "Suites and the valet",
-	casino = "Games and the high-rollers vault",
+	rewards = "Daily rewards, gifts and wheel spins",
 	gems = "Rare gems and flex items",
 	realty = "Buy a house, pick a lot",
 	race = "Race the clock or other players",
@@ -41,7 +41,7 @@ local function iconFor(id: string): string
 	if string.sub(id, 1, 6) == "tower_" then
 		return "tower"
 	end
-	local map = { old_rock = "palace", mountain = "lookout", stadium = "stadium", harbour = "harbour", dealership = "dealership", customs = "customs", bank = "bank", hotel = "hotel", casino = "casino", gems = "gems", beach = "beach" }
+	local map = { old_rock = "palace", mountain = "lookout", stadium = "stadium", harbour = "harbour", dealership = "dealership", customs = "customs", bank = "bank", hotel = "hotel", rewards = "rewards", gems = "gems", beach = "beach" }
 	return map[id] or "harbour"
 end
 

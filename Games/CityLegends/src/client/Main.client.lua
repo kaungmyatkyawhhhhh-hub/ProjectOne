@@ -348,10 +348,13 @@ startStep("Pedestrians", function()
 end)
 startStep("Chauffeur", ChauffeurClient.init)
 startStep("Luxe", function()
-	require(script.Parent:WaitForChild("LuxeClient")).init() -- casino VIP, the gem shop, heist messages
+	require(script.Parent:WaitForChild("LuxeClient")).init() -- the gem shop and VIP cards, smash-and-grab messages
 end)
 startStep("Minimap", function()
 	require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, top right (N toggles)
+end)
+startStep("Rewards", function()
+	require(script.Parent:WaitForChild("RewardsClient")).init() -- Legends Rewards: the REWARDS pill, the rewards screen, the wheels
 end)
 startStep("PhotoMode", function()
 	require(script.Parent:WaitForChild("PhotoMode")).init()

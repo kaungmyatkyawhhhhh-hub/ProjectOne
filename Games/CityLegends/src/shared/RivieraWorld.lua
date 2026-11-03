@@ -70,7 +70,7 @@ return {
 		{ name = "Larvotto Flats", pos = Vector3.new(15846.6, 12.48, 541.9) },
 		{ name = "Town Road Bakery", pos = Vector3.new(13472.5, 72.3, 80.1) },
 		{ name = "Hilltop Villa", pos = Vector3.new(12407.0, 130.06, -11.1) },
-		{ name = "Casino Valet", pos = Vector3.new(14940.9, 47.77, 457.6) },
+		{ name = "Legends Rewards Valet", pos = Vector3.new(14940.9, 47.77, 457.6) },
 		{ name = "Port Office", pos = Vector3.new(13777.6, 37.9, 366.8) },
 	},
 	chips = { Vector3.new(15207.5, 160.95, -350.3), Vector3.new(14728.0, 37.97, 771.0), Vector3.new(13010.4, 29.97, 836.2), Vector3.new(16432.9, 112.75, -40.4), Vector3.new(13238.9, 93.02, -32.3), Vector3.new(12433.0, 48.65, 495.2), Vector3.new(16581.6, 54.95, 390.3), Vector3.new(14608.8, 52.54, 510.4), Vector3.new(12830.3, 41.81, 450.4), Vector3.new(12076.8, 17.24, 974.4), Vector3.new(12359.1, 11.41, 1343.6), Vector3.new(13798.5, 53.1, 229.5), Vector3.new(13182.8, 22.31, 518.8), Vector3.new(15923.0, 97.75, -64.6), Vector3.new(12059.1, 10.78, 1310.7), Vector3.new(14074.9, 65.56, 278.9), Vector3.new(12091.7, 66.92, 266.6), Vector3.new(16765.2, 59.63, 421.5), Vector3.new(16287.8, 48.4, 343.4), Vector3.new(11596.5, 41.85, 457.2), Vector3.new(12853.1, 36.5, 1188.7), Vector3.new(15517.0, 33.47, 429.0), Vector3.new(13133.8, 140.53, -659.9), Vector3.new(14703.8, 60.85, 341.0), Vector3.new(11948.2, 15.27, 1084.8) },

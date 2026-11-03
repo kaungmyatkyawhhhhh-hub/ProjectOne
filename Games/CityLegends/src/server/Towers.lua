@@ -972,6 +972,27 @@ function Towers.collectRent(player: Player, id: string)
 	send(player, { kind = "cash", text = "RENT COLLECTED", amount = rec.spec.rent })
 end
 
+-- the owned penthouses' safes for Legends Rewards: { id, name, rent, readyIn } (hotel suites pay by
+-- the minute on their own and aren't listed)
+function Towers.rentState(player: Player): { { [string]: any } }
+	local profile = PlayerData.get(player)
+	local list = {}
+	if not profile then
+		return list
+	end
+	for id in profile.Penthouses do
+		local rec = built[id]
+		if rec and not rec.spec.perMinute then
+			local wait = (profile.Rent[id] or 0) + Config.Towers.RentCooldown - os.time()
+			table.insert(list, { id = id, name = rec.spec.name, rent = rec.spec.rent, readyIn = math.max(0, wait) })
+		end
+	end
+	table.sort(list, function(x, y)
+		return x.rent < y.rent
+	end)
+	return list
+end
+
 function Towers.setHome(player: Player, id: string)
 	local profile = PlayerData.get(player)
 	if not (profile and profile.Loaded and built[id]) then

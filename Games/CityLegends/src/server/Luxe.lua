@@ -1,9 +1,9 @@
 --[[
 	Luxe (server)
-	What the rich spend on Downtown (owner, 2026-10-22): VIP membership at the High-Rollers Casino
-	and flex items from the Legends Gem Showcase.
-	  * VIP cards (Config.Luxe.Vip): a title over your head that everyone sees, the casino's VIP
-	    lounge, and money off at the Gem Showcase. A higher card costs the difference.
+	What the rich spend on Downtown (owner, 2026-10-22): VIP membership and flex items at the Legends
+	Gem Showcase (the VIP desk moved there from the casino, 2026-11-03).
+	  * VIP cards (Config.Luxe.Vip): a title over your head that everyone sees, and money off at the
+	    Gem Showcase. A higher card costs the difference.
 	  * Wearables (Config.Luxe.Items, built by Flex): bought once, one worn per slot, welded onto
 	    your character so everyone sees them, saved in the profile's Luxe field.
 	  * Heist loot shared with the bank: Luxe.addLoot fills the same bag (the Loot attribute) that the
@@ -158,6 +158,36 @@ local function dress(player: Player)
 		end
 	end
 	titleTag(character, d.vip)
+end
+
+-- Legends Rewards' spins: a piece the player doesn't own, at or under maxPrice (nil: none left)
+function Luxe.pickItem(player: Player, maxPrice: number): string?
+	local d = data(player)
+	if not d then
+		return nil
+	end
+	local pick = {}
+	for id, it in Flex.ById do
+		if it.price <= maxPrice and not d.items[id] then
+			table.insert(pick, id)
+		end
+	end
+	return if #pick > 0 then pick[math.random(1, #pick)] else nil
+end
+
+function Luxe.give(player: Player, id: string, on: boolean)
+	local d = data(player)
+	if d and Flex.ById[id] then
+		d.items[id] = if on then true else nil
+		if not on and d.worn[Flex.ById[id].slot] == id then
+			d.worn[Flex.ById[id].slot] = nil
+		end
+	end
+end
+
+function Luxe.itemName(id: string): string
+	local it = Flex.ById[id]
+	return if it then it.name else id
 end
 
 -- testers (console "UnlockEverything"): the top VIP card and every flex item

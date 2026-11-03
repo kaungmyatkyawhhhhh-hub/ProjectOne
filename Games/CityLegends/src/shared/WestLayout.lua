@@ -2,7 +2,7 @@
 	WestLayout
 	Where everything in the west is (owner, 2026-10-22: a coastal highway over a river on a
 	suspension bridge to a Miami / New York style Downtown, the beach, private islands offshore, a
-	hotel, a casino and a gem showcase Downtown, and houses to buy). Pure maths from Config.West,
+	hotel, Legends Rewards (was a casino) and a gem showcase Downtown, and houses to buy). Pure maths from Config.West,
 	shared by server and client.
 
 	Going west (-X) from the city along z = 0:
@@ -59,7 +59,7 @@ function WestLayout.rivieraSite(name: string): CFrame?
 	return CFrame.lookAt(c, c + Vector3.new(s.fx, 0, s.fz).Unit)
 end
 
--- a Downtown site ("hotel", "casino", "gems"): its frame (ground level, facing out of the
+-- a Downtown site ("hotel", "rewards", "gems"): its frame (ground level, facing out of the
 -- entrance) and its lot size (square, inside the sidewalks)
 function WestLayout.site(name: string): (CFrame, number)
 	local riv = WestLayout.rivieraSite(name)
@@ -181,9 +181,9 @@ function WestLayout.places(): { Place }
 	local customsFrame, customsLot = WestLayout.customs()
 	add("customs", "Legends Customs", WestLayout.kerbFor(customsFrame, customsLot))
 	-- Downtown
-	for _, name in { "hotel", "casino", "gems" } do
+	for _, name in { "hotel", "rewards", "gems" } do
 		local frame, lot = WestLayout.site(name)
-		local label = if name == "hotel" then "Legends Grand Hotel" elseif name == "casino" then "High-Rollers Casino" else "Gem Showcase"
+		local label = if name == "hotel" then "Legends Grand Hotel" elseif name == "rewards" then "Legends Rewards" else "Gem Showcase"
 		add(name, label, WestLayout.kerbFor(frame, lot))
 	end
 	add("downtown", "Downtown", onLane(W.DowntownX + C.BlockSize / 2, 0, Vector3.new(-1, 0, 0)))

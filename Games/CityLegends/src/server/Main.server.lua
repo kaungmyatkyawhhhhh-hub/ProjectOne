@@ -345,10 +345,11 @@ Dealership.init(ctx)
 require(script.Parent:WaitForChild("Challenges")).init(ctx)
 local Customs = require(script.Parent:WaitForChild("Customs"))
 Customs.init(ctx)
--- the High-Rollers Casino and the Legends Gem Showcase, Downtown (VIP, flex items, two heists)
+-- the Legends Gem Showcase, Downtown (VIP cards, flex items, the smash-and-grab), and Legends
+-- Rewards (the daily reward, gifts, the wheels; it replaced the casino, 2026-11-03)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
 Luxe.init(ctx)
-require(script.Parent:WaitForChild("Casino")).init(ctx, Police, Luxe)
+require(script.Parent:WaitForChild("Rewards")).init(ctx, { Goals = Goals, Towers = Towers, Hotel = Hotel, Luxe = Luxe })
 require(script.Parent:WaitForChild("GemShowcase")).init(ctx, Police, Luxe)
 
 local function despawn(player: Player)

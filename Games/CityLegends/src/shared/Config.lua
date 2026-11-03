@@ -122,8 +122,8 @@ Config.RivieraVenues = {
 		dealership = { x = 16582.3, z = 847.1, fx = 0.174, fz = -0.985, y = 16.83 }, -- Larvotto, on the Coast Road
 		customs = { x = 15061.4, z = 1089.1, fx = 0.129, fz = -0.992, y = 1.73 }, -- by the sea on the Coast Road
 		hotel = { x = 11673.7, z = 1020.9, fx = 0.998, fz = 0.065, y = 12.37 }, -- Riviera Bay, by the sea
-		casino = { x = 14378.5, z = 31.2, fx = -0.134, fz = 0.991, y = 72.9 }, -- Casino Heights, on the Town Road
-		gems = { x = 14779.9, z = 64, fx = -0.022, fz = 1, y = 69.72 }, -- up the Town Road from the casino
+		rewards = { x = 14378.5, z = 31.2, fx = -0.134, fz = 0.991, y = 72.9 }, -- Legends Rewards (was the casino), Casino Heights, on the Town Road
+		gems = { x = 14779.9, z = 64, fx = -0.022, fz = 1, y = 69.72 }, -- up the Town Road from Legends Rewards
 		-- (owner, 2026-11-02: "move rest of the venue to monaco")
 		bank = { x = 12491, z = 983.6, fx = -0.927, fz = 0.376, y = 10.97 }, -- Riviera Bay, east of the stadium
 		-- the luxury towers: square to the world axes (their plaza and facade tiers are), entrance -Z
@@ -800,7 +800,7 @@ Config.West = {
 	-- block sites in Downtown {bi, bj, the side the entrance faces: "N" -Z, "S" +Z, "E" +X, "W" -X}
 	Sites = {
 		hotel = { 100, 2, "S" }, -- on Ocean Drive, facing Legends Boulevard (z = 0)
-		casino = { 100, 3, "N" }, -- across the boulevard from the hotel
+		rewards = { 100, 3, "N" }, -- Legends Rewards (was the casino), across the boulevard from the hotel
 		gems = { 102, 3, "N" }, -- the gem showcase, up the boulevard
 	},
 	-- Legends Isle (owner, 2026-10-29: one big island with a mountain, in place of the three small
@@ -968,19 +968,14 @@ Config.Chauffeur = {
 }
 
 ---------------------------------------------------------------------
--- High-Rollers Casino and the Legends Gem Showcase, Downtown (owner, 2026-10-22: "places to spend
--- big money on rare, visible flex items like custom gems and accessories, and players can steal
--- and thrive from the casino and gem showcase"). Roblox doesn't allow gambling you can play, even
--- with fake money, so nothing in the casino takes a bet: you buy VIP membership, look the part and
--- rob the vault. In-game cash only, never Robux.
+-- The Legends Gem Showcase, Downtown (owner, 2026-10-22: "places to spend big money on rare,
+-- visible flex items like custom gems and accessories"). In-game cash only, never Robux. (The
+-- High-Rollers Casino was replaced by Legends Rewards on 2026-11-03; its VIP desk moved here and
+-- its vault heist was removed.)
 ---------------------------------------------------------------------
 Config.Luxe = {
-	-- slot machines and card tables as scenery (none of them can be played). Roblox's maturity
-	-- questionnaire asks about gambling scenery too, which can raise the age label; false puts
-	-- lounge seating and car displays there instead
-	GamingFloorDecor = true,
-	-- VIP membership at the casino's VIP desk: a title over your head, the VIP lounge and money off
-	-- at the Gem Showcase. A higher card replaces the lower one (you pay the difference)
+	-- VIP membership at the Gem Showcase's VIP desk: a title over your head and money off the
+	-- collection. A higher card replaces the lower one (you pay the difference)
 	Vip = {
 		{ id = 1, name = "GOLD CARD", title = "GOLD HIGH ROLLER", price = 250000, discount = 0.05, color = Color3.fromRGB(255, 200, 70) },
 		{ id = 2, name = "PLATINUM CARD", title = "PLATINUM HIGH ROLLER", price = 2500000, discount = 0.1, color = Color3.fromRGB(215, 230, 245) },
@@ -1023,22 +1018,6 @@ Config.Luxe = {
 		pink = Color3.fromRGB(255, 120, 200),
 		black = Color3.fromRGB(30, 30, 40),
 	},
-	-- the casino vault: hack the security room (the vault corridor's lasers go off), drill the vault
-	-- door (the alarm), then load up from the trolleys. Cash in at the drop-off like the bank's
-	Casino = {
-		HackSeconds = 6, -- hold E at the security panel
-		LasersOffSeconds = 150, -- how long the hack keeps the lasers off
-		DrillSeconds = 12, -- hold E at the vault door, after the hack
-		Stars = 5,
-		OpenSeconds = 120,
-		CooldownSeconds = 600,
-		GrabSeconds = 3,
-		GrabsPerTrolley = 3,
-		GrabMin = 22000,
-		GrabMax = 40000,
-		MaxLoot = 400000, -- one bag
-		HackXp = 80,
-	},
 	-- the Gem Showcase's smash-and-grab: smash a case (the alarm), grab its gems; the showpiece
 	-- under the glass dome is worth the most and brings more stars
 	Showcase = {
@@ -1052,6 +1031,102 @@ Config.Luxe = {
 		ShowpieceSeconds = 5,
 		MaxLoot = 180000,
 		RestockSeconds = 420, -- cases are mended and refilled after this
+	},
+}
+
+---------------------------------------------------------------------
+-- Legends Rewards (owner, 2026-11-03: "Replace the casino with a rewards centre"): one building
+-- on the casino square where players claim their daily reward and everything else they've earned.
+-- The amounts are the owner's choice ("Double that"). Codes, the group and the Robux products are
+-- the owner's to fill in.
+---------------------------------------------------------------------
+Config.Rewards = {
+	Name = "LEGENDS REWARDS",
+	DeskRange = 22, -- studs: how close to a claim desk you must stand (codes work anywhere)
+	-- playtime gifts: minutes played today (UTC) -> cash; they start again each day
+	Playtime = {
+		{ minutes = 5, cash = 6000 },
+		{ minutes = 15, cash = 12000 },
+		{ minutes = 30, cash = 24000 },
+		{ minutes = 60, cash = 60000 },
+	},
+	Weekly = 150000, -- once every 7 days
+	WeeklyEvery = 7 * 24 * 60 * 60,
+	-- level-up rewards: each level reached pays LevelCash x level, every 5th level a chest of
+	-- ChestCash x level on top (older saves start from the level they had on 2026-11-03)
+	LevelCash = 2000,
+	ChestCash = 8000,
+	ChestEvery = 5,
+	Return = 100000, -- the welcome back gift, after this long away
+	ReturnAway = 7 * 24 * 60 * 60,
+	FriendDaily = 10000, -- playing in the same server as a friend, once a day
+	Invite = 50000, -- a friend joins for the first time from your invite: both get this
+	-- the Roblox group gift (one time): 0 hides it until the owner gives the group's id
+	GroupId = 0,
+	Group = 50000,
+	-- codes: { code (capitals, 4-20 letters / digits), cash, ends ("YYYY-MM-DD", UTC, the last
+	-- day it works), on }; each works once per player
+	Codes = {
+		{ code = "LEGENDS", cash = 25000, ends = "2026-12-31", on = false }, -- (a test code: off)
+	},
+	-- the wheels (owner, 2026-11-03: "add wheel spin and super wheel spins too and if they ran out
+	-- u can buy back with money or robux"; "Bigger prizes"). Free spins come back on their timer;
+	-- extra spins are bought with cash or Robux. The odds are shown before every spin (Roblox's
+	-- rule for paid random items), and buying is hidden where Roblox restricts paid random items.
+	-- weight = the chance in percent (they add up to 100); car = a free Mid car you don't own (or
+	-- carCash when you own them all). reels: prizes a spin gives (owner, 2026-11-03: reels of
+	-- prize cards like a wheelspin, the SUPER one more exciting: 3 reels, 3 prizes; its cash price
+	-- went up to stay above what 3 prizes are worth on average)
+	-- (owner, 2026-11-03: "make the prices rarer to get ... add more low percentage like up to 0.5%
+	-- which will give a car and also add way more stuffs"): many small prizes, the big ones rare;
+	-- kinds: cash, spin (one more spin of the same kind), flex (a Gem Showcase piece you don't own,
+	-- at or under flexMax, or flexCash), car (a car you don't own, of carTiers at or under carMax,
+	-- or carCash)
+	Wheels = {
+		wheel = {
+			name = "SPIN",
+			reels = 1,
+			freeEvery = 24 * 60 * 60,
+			cashPrice = 50000,
+			productId = 0, -- the Robux developer product for 1 spin (0: hidden)
+			prizes = {
+				{ cash = 5000, weight = 22 },
+				{ cash = 8000, weight = 18 },
+				{ cash = 12000, weight = 15 },
+				{ cash = 18000, weight = 12 },
+				{ cash = 25000, weight = 9 },
+				{ spin = true, weight = 8 },
+				{ cash = 40000, weight = 6 },
+				{ cash = 60000, weight = 4 },
+				{ flex = true, flexMax = 120000, flexCash = 50000, weight = 2.5 },
+				{ cash = 100000, weight = 2 },
+				{ cash = 200000, weight = 1 },
+				{ car = true, carTiers = { "Mid" }, carMax = 120000, carCash = 120000, weight = 0.5 },
+			},
+		},
+		super = {
+			name = "SUPER SPIN",
+			reels = 3,
+			freeEvery = 7 * 24 * 60 * 60,
+			cashPrice = 1000000,
+			productId = 0, -- (0: hidden)
+			prizes = {
+				{ cash = 25000, weight = 22 },
+				{ cash = 40000, weight = 16 },
+				{ cash = 60000, weight = 14 },
+				{ cash = 90000, weight = 11 },
+				{ cash = 125000, weight = 9 },
+				{ cash = 175000, weight = 7 },
+				{ cash = 250000, weight = 5 },
+				{ spin = true, weight = 4 },
+				{ flex = true, flexMax = 1000000, flexCash = 300000, weight = 4 },
+				{ cash = 400000, weight = 3 },
+				{ cash = 750000, weight = 2 },
+				{ cash = 1500000, weight = 1.5 },
+				{ car = true, carTiers = { "Mid", "High" }, carMax = 600000, carCash = 500000, weight = 1 },
+				{ cash = 5000000, weight = 0.5 },
+			},
+		},
 	},
 }
 

@@ -1246,6 +1246,16 @@ local function refreshBoard()
 	board.Text = table.concat(lines, "\n")
 end
 
+-- for Legends Rewards: the suite you own and what it pays a minute (nil: none; it pays on its own)
+function Hotel.incomeOf(player: Player): { name: string, perMinute: number }?
+	local profile = PlayerData.get(player)
+	local k = if profile then tierOf(profile) else 0
+	if k == 0 then
+		return nil
+	end
+	return { name = titleCase(H.Suites[k].name), perMinute = H.Suites[k].perMinute }
+end
+
 -- the lifts: up to your own suite
 function Hotel.goUp(player: Player)
 	local profile = PlayerData.get(player)

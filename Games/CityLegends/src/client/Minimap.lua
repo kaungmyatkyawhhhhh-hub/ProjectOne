@@ -13,7 +13,7 @@
 
 	Blips (kept upright, on a layer above): police cars, the bank drop-off while you carry loot,
 	the race checkpoint or delivery drop (held on the rim when far), and the landmarks (bank,
-	towers, hotel, casino, gem showcase, chauffeur stands, Downtown, the beach and the islands).
+	towers, hotel, Legends Rewards, gem showcase, chauffeur stands, Downtown, the beach and the islands).
 	The rim flashes red and blue while you're wanted. N or its X hides it (a MAP pill brings it
 	back); a click or tap on it opens the full map (owner, 2026-10-23): north up, centred on you,
 	scroll or + / - to zoom, drag to move, X or a click outside it to close.
@@ -281,7 +281,7 @@ end
 local LANDMARKS: { [string]: { glyph: string, color: Color3 } } = {
 	bank = { glyph = "$", color = Color3.fromRGB(80, 230, 130) },
 	hotel = { glyph = "H", color = Color3.fromRGB(255, 200, 120) },
-	casino = { glyph = "♠", color = Color3.fromRGB(255, 90, 170) },
+	rewards = { glyph = "★", color = Color3.fromRGB(255, 200, 90) },
 	gems = { glyph = "◆", color = Color3.fromRGB(120, 210, 255) },
 	beach = { glyph = "☀", color = Color3.fromRGB(255, 220, 110) },
 	downtown = { glyph = "D", color = Color3.fromRGB(200, 200, 210) },
@@ -459,9 +459,6 @@ function Minimap.start()
 		if workspace:GetAttribute("LiveBank") == true and landmarkPos.bank then
 			table.insert(list, { pos = landmarkPos.bank, glyph = "$", color = Color3.fromRGB(80, 255, 140) })
 		end
-		if workspace:GetAttribute("LiveCasino") == true and landmarkPos.casino then
-			table.insert(list, { pos = landmarkPos.casino, glyph = "♠", color = Color3.fromRGB(255, 90, 170) })
-		end
 		local meetCount = workspace:GetAttribute("MeetCount")
 		local meetPos = workspace:GetAttribute("MeetSpot")
 		if type(meetCount) == "number" and meetCount >= 2 and typeof(meetPos) == "Vector3" then
@@ -511,11 +508,6 @@ function Minimap.start()
 	workspace:GetAttributeChangedSignal("LiveBank"):Connect(function()
 		if workspace:GetAttribute("LiveBank") == true then
 			UI.toast("LIVE · The bank vault is open: green $ on the map", Color3.fromRGB(80, 255, 140))
-		end
-	end)
-	workspace:GetAttributeChangedSignal("LiveCasino"):Connect(function()
-		if workspace:GetAttribute("LiveCasino") == true then
-			UI.toast("LIVE · The casino vault is open: pink ♠ on the map", Color3.fromRGB(255, 90, 170))
 		end
 	end)
 

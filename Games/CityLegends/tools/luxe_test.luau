@@ -1,4 +1,4 @@
--- Lune test for the casino, the Gem Showcase and the wearables: builds both buildings with real
+-- Lune test for Legends Rewards (was the casino), the Gem Showcase and the wearables: builds both buildings with real
 -- Roblox instances, checks they stay inside their lots, puts every item on an R15 and an R6
 -- stand-in, and runs the shop's buy / wear / VIP calls.
 --   lune run tools/luxe_test.luau <path to Games/CityLegends>
@@ -19,6 +19,7 @@ local env: { [string]: any } = {
 	UDim = roblox.UDim,
 	Enum = roblox.Enum,
 	CFrame = roblox.CFrame,
+	Font = roblox.Font,
 	ColorSequence = roblox.ColorSequence,
 	ColorSequenceKeypoint = roblox.ColorSequenceKeypoint,
 	NumberSequence = roblox.NumberSequence,
@@ -37,6 +38,10 @@ local env: { [string]: any } = {
 		end
 		return r
 	end },
+	-- (no Riviera map in the test: the venues use their old Downtown sites)
+	workspace = { FindFirstChild = function()
+		return nil
+	end },
 	-- (no background loops in the test)
 	task = { spawn = function() end, wait = function() end },
 	os = os,
@@ -52,6 +57,11 @@ local services = {
 	},
 	TweenService = { Create = function()
 		return { Play = function() end }
+	end },
+	MarketplaceService = {},
+	PolicyService = {},
+	ServerStorage = { FindFirstChild = function()
+		return nil
 	end },
 	Players = { GetPlayers = function()
 		return {}
@@ -87,7 +97,9 @@ local paths = {
 	WestLayout = "src/shared/WestLayout.lua",
 	IsleLayout = "src/shared/IsleLayout.lua",
 	Flex = "src/shared/Flex.lua",
-	Casino = "src/server/Casino.lua",
+	Rewards = "src/server/Rewards.lua",
+	Garden = "src/server/Garden.lua",
+	Cars = "src/shared/Cars.lua",
 	GemShowcase = "src/server/GemShowcase.lua",
 	Luxe = "src/server/Luxe.lua",
 }
@@ -114,7 +126,7 @@ if process.args[2] == "wide" then
 	Config.City.HalfExtent = Config.City.Blocks * Config.City.BlockSize / 2
 end
 local WestLayout = env.require({ name = "WestLayout" })
-local Casino = env.require({ name = "Casino" })
+local Rewards = env.require({ name = "Rewards" })
 local GemShowcase = env.require({ name = "GemShowcase" })
 local Flex = env.require({ name = "Flex" })
 local Luxe = env.require({ name = "Luxe" })
@@ -179,7 +191,7 @@ function kit.surfaceText(part, face, text, color, bg, bgT, font, canvas)
 end
 
 local world = Instance.new("Model")
-Casino.buildWorld(kit, world)
+Rewards.buildWorld(kit, world)
 GemShowcase.buildWorld(kit, world)
 
 -- every part of each building stays inside its lot (a little slack for signs on the edge)
@@ -198,7 +210,7 @@ local function check(name: string, site: string)
 	print(string.format("%s: %d parts, furthest %.1f from the middle (lot half %.1f)", name, count, worst, lot / 2))
 	assert(worst <= lot / 2 + 6, name .. " spills out of its lot")
 end
-check("HighRollersCasino", "casino")
+check("LegendsRewards", "rewards")
 check("LegendsGemShowcase", "gems")
 for tag, list in tags do
 	print("tag", tag, #list)

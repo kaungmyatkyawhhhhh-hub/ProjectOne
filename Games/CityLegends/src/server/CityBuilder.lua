@@ -26,7 +26,7 @@ local Dealership = require(script.Parent:WaitForChild("Dealership"))
 local Customs = require(script.Parent:WaitForChild("Customs"))
 local West = require(script.Parent:WaitForChild("West"))
 local Hotel = require(script.Parent:WaitForChild("Hotel"))
-local Casino = require(script.Parent:WaitForChild("Casino"))
+local Rewards = require(script.Parent:WaitForChild("Rewards"))
 local GemShowcase = require(script.Parent:WaitForChild("GemShowcase"))
 local Fountain = require(script.Parent:WaitForChild("Fountain"))
 local Plazas = require(script.Parent:WaitForChild("Plazas"))
@@ -1015,7 +1015,7 @@ local function buildBlocks(parent: Instance, ib: number, scenery: boolean)
 
 			local lot = inner - C.SidewalkWidth * 2
 			-- gameplay venues first (the bank), then the landmark towers; Downtown: its sites (hotel,
-			-- casino, gem showcase), the Ocean Drive hotels and its own skyline
+			-- Legends Rewards, gem showcase), the Ocean Drive hotels and its own skyline
 			local landmark
 			if downtown then
 				landmark = West.block(CityBuilder.kit, blockFolder, bi, bj, cx, cz, lot)
@@ -1511,7 +1511,7 @@ local function buildVenues(city: Instance, blocks: boolean)
 	end
 	-- the venues on Downtown's sites and the houses on the islands' plots
 	Hotel.buildWorld(CityBuilder.kit, city)
-	Casino.buildWorld(CityBuilder.kit, city)
+	Rewards.buildWorld(CityBuilder.kit, city)
 	GemShowcase.buildWorld(CityBuilder.kit, city)
 	Houses.buildWorld(CityBuilder.kit, city)
 	-- speed traps, jump ramps and the leaderboard board

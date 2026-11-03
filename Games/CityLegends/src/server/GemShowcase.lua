@@ -23,7 +23,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local Flex = require(Shared:WaitForChild("Flex"))
-local Casino = require(script.Parent:WaitForChild("Casino"))
+local Garden = require(script.Parent:WaitForChild("Garden"))
 
 local L = Config.Luxe
 local S = L.Showcase
@@ -56,6 +56,7 @@ type Case = {
 }
 local cases: { Case } = {}
 local shopPrompt: ProximityPrompt? = nil
+local vipPrompt: ProximityPrompt? = nil -- the VIP card desk (moved here from the casino, 2026-11-03)
 local alarm: Sound? = nil
 local alarmLights: { Light } = {}
 local alarmUntil = 0
@@ -219,7 +220,7 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	kit.addLight("PointLight", big, Color3.fromRGB(150, 220, 255), 40, 2)
 	for _, s in { -1, 1 } do
 		for k, z in { -half + 8, -half + 44, Z_FRONT - 6, 0, 40, half - 10 } do
-			Casino.palm(kit, model, at(s * (half - 10), 0.3, z).Position, 28 + (k % 3) * 4, 400 + k * 13 + (if s > 0 then 5 else 0))
+			Garden.palm(kit, model, at(s * (half - 10), 0.3, z).Position, 28 + (k % 3) * 4, 400 + k * 13 + (if s > 0 then 5 else 0))
 		end
 		local lamp = deco(model, Vector3.new(1.6, 1, 1.6), at(s * 50, 0.8, Z_FRONT - 6), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
 		kit.addLight("SpotLight", lamp, WARM, 60, 2.6, Enum.NormalId.Top, 45)
@@ -375,6 +376,12 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	kit.surfaceText(ds, Enum.NormalId.Front, "CONCIERGE  ·  THE COLLECTION", GOLD, nil, nil, Enum.Font.Garamond, Vector2.new(700, 100))
 	local shopPart = deco(inside, Vector3.new(2, 2, 2), desk * CFrame.new(0, 3, -3.4), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
 	shopPrompt = prompt(shopPart, "Browse the collection", "Legends Gem Showcase", 0, 10)
+	-- the VIP cards are sold at the same desk (Luxe: a title and money off the collection)
+	local vipPart = deco(inside, Vector3.new(2, 2, 2), desk * CFrame.new(5, 3, -3.4), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
+	local vp = prompt(vipPart, "VIP membership", "Legends Gem Showcase", 0, 10)
+	vp.KeyboardKeyCode = Enum.KeyCode.R
+	vp.GamepadKeyCode = Enum.KeyCode.ButtonY
+	vipPrompt = vp
 	for _, dx in { -5, 5 } do
 		local chair = at(38 + dx, FLOOR, -12)
 		deco(inside, Vector3.new(3.4, 1.6, 3.4), chair * CFrame.new(0, 1, 0), Color3.fromRGB(110, 14, 40), Enum.Material.Fabric)
@@ -425,6 +432,11 @@ function GemShowcase.init(_ctx: any, Police: any, Luxe: any)
 	if shopPrompt then
 		shopPrompt.Triggered:Connect(function(who: Player)
 			Luxe.fire(who, { kind = "openShop" })
+		end)
+	end
+	if vipPrompt then
+		vipPrompt.Triggered:Connect(function(who: Player)
+			Luxe.fire(who, { kind = "openVip" })
 		end)
 	end
 	for _, c in cases do

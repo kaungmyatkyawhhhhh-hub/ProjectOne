@@ -740,3 +740,28 @@ Each venue uses the place's own dressing and cleaned Toolbox models (no scripts,
 
 They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the chandelier from 350 to 39 parts).
 - Casino replaced by a rewards centre (2026-11-03, owner): "Legends Rewards" on the casino square to claim the daily 7-day streak and the other rewards the game already has (Legends Path milestones, penthouse rent, hotel suite income). Prompt: `Prompts/Replace the casino with a rewards centre.md`.
+
+**Legends Rewards (replaced the High-Rollers Casino, 2026-11-03; prompt `Prompts/Replace the casino with a rewards centre.md`):**
+- **Removed:** the casino building, its vault heist (hack, lasers, drill, trolleys, LIVE map marker), the slot / card table scenery, the VIP lounge and its gate, the pink ♠ map symbol. `Casino.lua` is gone; palms and fountains moved to `Garden.lua`.
+- **Kept (owner's choice):** VIP cards. Owners keep the card, title and Gem Showcase discount; the VIP desk is now at the Gem Showcase's concierge desk (R).
+- **The building:** same cream-stone palace look (copper domes, iron-and-glass marquise, gold letters LEGENDS REWARDS, gardens, fountains, chandeliers). Inside: 7 claim desks (DAILY REWARD, GIFTS, LEVEL REWARDS, ACHIEVEMENTS, FRIENDS, CODES, PROPERTY) and two spin cabinets (SPIN, SUPER SPIN). Gold ★ on the minimap, a gift symbol on the world map, chauffeur / fast-travel stop "Legends Rewards".
+- **What you claim (amounts: owner chose "Double that", all in `Config.Rewards`):**
+  - daily 7-day streak (as before, car on day 7);
+  - playtime gifts at 5 / 15 / 30 / 60 min a day: $6K / $12K / $24K / $60K;
+  - weekly $150K;
+  - level rewards $2K x level, every 5th level a chest of $8K x level (old saves start from their level on 2026-11-03);
+  - welcome back $100K after 7+ days away;
+  - friend in your server $10K a day; invite gift $50K for both;
+  - group gift $50K (hidden until `GroupId` is set);
+  - codes (`Config.Rewards.Codes`, one test code, off);
+  - penthouse rent (all ready safes at once); the hotel suite's per-minute income is shown (it pays on its own);
+  - achievements: the Legends Path is shown only (each goal still pays when done, owner's choice).
+- **Spins (owner: "add wheel spin and super wheel spins ... buy back with money or robux", then "like this [a wheelspin with reels of prize cards] but make the super wheel spin look more exciting", then "make the prices rarer ... up to 0.5% which will give a car and add way more stuffs"):**
+  - SPIN: 1 reel, a free spin every day, buy 1 for $50K. 12 prizes from $5K (22%) up; one more spin 8%; a Gem Showcase jewel 2.5%; $200K 1%; a free Mid car 0.5%.
+  - SUPER SPIN: 3 reels (3 prizes a spin), a free spin every 7 days, buy 1 for $1M. 14 prizes from $25K (22%) up; one more spin 4%; a jewel 4%; $1.5M 1.5%; a free Mid/High car (up to $600K) 1%; $5M 0.5%.
+  - The odds (ODDS button) are shown before spinning. Buying spins is hidden where Roblox restricts paid random items (PolicyService).
+  - Robux: make 2 developer products (1 SPIN, 1 SUPER SPIN) and put their ids in `Config.Rewards.Wheels.wheel.productId` / `super.productId`; until then the Robux buttons stay hidden.
+- **Rules:** the server checks everything (at a desk, cooldowns, one claim at a time, rate limit), saves before paying, never twice. A REWARDS pill on the HUD shows what's ready and the next playtime gift; tap it for the screen; WAYPOINT button.
+- **Tested in Play (1 player):** weekly, daily streak, rent, codes, spins and buying, refused twice, refused away from the desks. Not yet: the new prize lists in Play, 2 players (friend / invite), day 7 car, phone size, FPS.
+- **Owner to decide / give:** the group id, codes, the 2 Robux product ids.
+

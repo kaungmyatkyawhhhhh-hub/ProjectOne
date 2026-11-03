@@ -1,13 +1,12 @@
 --[[
 	LuxeClient
-	The High-Rollers Casino and the Legends Gem Showcase on screen (server: Luxe, Casino,
-	GemShowcase):
-	  * the Gem Showcase's shop (the concierge desk): pieces by slot with a 3D preview, the price
-	    (VIP money off), BUY / WEAR / TAKE OFF
-	  * the VIP desk: the Gold, Platinum and Black cards, what each gives, BUY / UPGRADE
-	  * heist messages (robbery under way, lasers down, grabs, bag full)
-	  * the buildings' effects, run on each client: the marquee's chasing bulbs, the stage's moving
-	    lights, the turning gems, and the VIP lounge's gate (members walk through it)
+	The Legends Gem Showcase on screen (server: Luxe, GemShowcase):
+	  * the shop (the concierge desk): pieces by slot with a 3D preview, the price (VIP money off),
+	    BUY / WEAR / TAKE OFF
+	  * the VIP desk (the same desk, R; moved here from the casino, 2026-11-03): the Gold, Platinum
+	    and Black cards, what each gives, BUY / UPGRADE
+	  * smash-and-grab messages (robbery under way, grabs, bag full)
+	  * the turning gems, run on each client
 	The server decides everything; this only asks and shows.
 ]]
 
@@ -121,19 +120,7 @@ local function setState(s: any)
 	for _, id in s.owned or {} do
 		ownedSet[id] = true
 	end
-	-- the VIP gate: members walk through it (on their own client)
-	for _, g in CollectionService:GetTagged("VipGate") do
-		if g:IsA("BasePart") then
-			g.CanCollide = (state.vip or 0) < 1
-		end
-	end
 end
--- (streaming: the gate can arrive after the state did)
-CollectionService:GetInstanceAddedSignal("VipGate"):Connect(function(g)
-	if g:IsA("BasePart") then
-		g.CanCollide = (state.vip or 0) < 1
-	end
-end)
 
 local function priceOf(it: Flex.Item): number
 	return math.floor(it.price * (1 - (state.discount or 0)))
@@ -233,7 +220,7 @@ end
 local shopSlot = "Neck"
 
 local function openShop()
-	local _, body, cashLabel = window("LEGENDS GEM SHOWCASE", if (state.discount or 0) > 0 then string.format("The collection  ·  your VIP card takes %d%% off", math.floor(state.discount * 100 + 0.5)) else "The collection  ·  VIP members pay less (casino VIP desk)", C.gold)
+	local _, body, cashLabel = window("LEGENDS GEM SHOWCASE", if (state.discount or 0) > 0 then string.format("The collection  ·  your VIP card takes %d%% off", math.floor(state.discount * 100 + 0.5)) else "The collection  ·  VIP members pay less (VIP desk, press R)", C.gold)
 	local tabs = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(0, 132, 1, 0), Parent = body }, {
 		new("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
@@ -355,7 +342,7 @@ end
 -- The VIP desk
 ---------------------------------------------------------------------
 local function openVip()
-	local _, body, cashLabel = window("HIGH-ROLLERS VIP", "Membership cards  ·  in-game cash only  ·  a higher card costs the difference", Color3.fromRGB(200, 150, 255))
+	local _, body, cashLabel = window("LEGENDS VIP", "Membership cards  ·  in-game cash only  ·  a higher card costs the difference", Color3.fromRGB(200, 150, 255))
 	local row = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = body }, {
 		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 12), HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
@@ -374,11 +361,10 @@ local function openVip()
 				corner(10),
 				new("UIGradient", { Color = ColorSequence.new(tier.color, tier.color:Lerp(Color3.new(0, 0, 0), 0.55)), Rotation = 35 }),
 			})
-			label({ Text = "HIGH-ROLLERS", Font = Enum.Font.Garamond, TextSize = 16, TextColor3 = Color3.fromRGB(20, 16, 10), Position = UDim2.fromOffset(12, 8), Size = UDim2.new(1, -24, 0, 18), Parent = face })
+			label({ Text = "LEGENDS", Font = Enum.Font.Garamond, TextSize = 16, TextColor3 = Color3.fromRGB(20, 16, 10), Position = UDim2.fromOffset(12, 8), Size = UDim2.new(1, -24, 0, 18), Parent = face })
 			label({ Text = tier.name, Font = Enum.Font.GothamBlack, TextSize = 18, TextColor3 = Color3.new(1, 1, 1), Position = UDim2.new(0, 12, 1, -30), Size = UDim2.new(1, -24, 0, 22), Parent = face })
 			local perks = {
 				"Title over your head:\n◆ " .. tier.title .. " ◆",
-				"The casino's VIP lounge",
 				string.format("%d%% off at the Gem Showcase", math.floor(tier.discount * 100 + 0.5)),
 			}
 			label({
@@ -432,9 +418,6 @@ local function tracked(tag: string): { Instance }
 	local list = CollectionService:GetTagged(tag)
 	CollectionService:GetInstanceAddedSignal(tag):Connect(function(inst)
 		table.insert(list, inst)
-		if tag == "VipGate" and inst:IsA("BasePart") then
-			inst.CanCollide = (state.vip or 0) < 1
-		end
 	end)
 	CollectionService:GetInstanceRemovedSignal(tag):Connect(function(inst)
 		local i = table.find(list, inst)
@@ -446,43 +429,10 @@ local function tracked(tag: string): { Instance }
 end
 
 local function startEffects()
-	local marquee = tracked("Marquee")
-	local spots = tracked("CasinoSpot")
 	local gems = tracked("SpinGem")
-	local gates = tracked("VipGate")
-	local BULB_ON = Color3.fromRGB(255, 226, 170)
-	local BULB_OFF = Color3.fromRGB(90, 60, 30)
-	local lastStep = -1
-	local gateWarned = false
 	RunService.Heartbeat:Connect(function()
 		local now = workspace:GetServerTimeNow()
 		local camPos = camera.CFrame.Position
-		-- the marquee's bulbs chase round the sign (10 Hz)
-		local step = math.floor(now * 10)
-		if step ~= lastStep then
-			lastStep = step
-			for _, b in marquee do
-				if b:IsA("BasePart") then
-					local i = (b:GetAttribute("Index") :: number?) or 0
-					local on = (i + step) % 4 < 2
-					b.Color = if on then BULB_ON else BULB_OFF
-				end
-			end
-		end
-		-- the stage's moving heads sweep and change colour
-		for _, h in spots do
-			if h:IsA("BasePart") and (h.Position - camPos).Magnitude < 350 then
-				local home = h:GetAttribute("Home") :: CFrame?
-				local phase = (h:GetAttribute("Phase") :: number?) or 0
-				if home then
-					h.CFrame = home * CFrame.Angles(math.sin(now * 0.9 + phase) * 0.7, 0, math.cos(now * 0.7 + phase * 1.3) * 0.7)
-					local beam = h:FindFirstChild("Beam")
-					if beam and beam:IsA("SpotLight") then
-						beam.Color = Color3.fromHSV((now * 0.06 + phase * 0.12) % 1, 0.75, 1)
-					end
-				end
-			end
-		end
 		-- the gems turn
 		for _, g in gems do
 			if g:IsA("BasePart") and (g.Position - camPos).Magnitude < 500 then
@@ -491,23 +441,6 @@ local function startEffects()
 					g.CFrame = CFrame.new(home.Position + Vector3.new(0, math.sin(now * 1.4) * 0.3, 0)) * CFrame.Angles(0, now * 0.7, 0) * home.Rotation
 				end
 			end
-		end
-		-- the VIP gate: a word for non-members who walk up to it
-		if (state.vip or 0) < 1 then
-			local character = player.Character
-			local hrp = if character then character:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
-			local near = false
-			if hrp then
-				for _, g in gates do
-					if g:IsA("BasePart") and (g.Position - hrp.Position).Magnitude < 9 then
-						near = true
-					end
-				end
-			end
-			if near and not gateWarned then
-				UI.toast("VIP members only: buy a card at the VIP desk", Color3.fromRGB(200, 150, 255))
-			end
-			gateWarned = near
 		end
 		-- walking away closes the shop
 		if openPanel and openedAt then
@@ -552,16 +485,10 @@ function LuxeClient.init()
 			openShop()
 		elseif kind == "openVip" then
 			openVip()
-		elseif kind == "casinoRobbery" then
-			UI.toast(`{info.by} is robbing the High-Rollers Casino vault!`, Theme.Danger)
 		elseif kind == "gemsRobbery" then
 			UI.toast(`{info.by} is smashing up the Legends Gem Showcase!`, Theme.Danger)
 		elseif kind == "heartRobbery" then
 			UI.toast(`{info.by} is going for the Legends Heart!`, Theme.Danger)
-		elseif kind == "hacked" then
-			local s = tonumber(info.seconds) or 0
-			UI.toast(string.format("Security hacked: the lasers are down for %d:%02d. Drill the vault!", s // 60, s % 60), Theme.Warning)
-			Audio.cutUp(2, "HACKED")
 		elseif kind == "grab" then
 			UI.popup(if type(info.what) == "string" then info.what else "LOOT GRABBED", tonumber(info.amount) or 0, Theme.Money)
 			Audio.cutUp(2, "CASH")

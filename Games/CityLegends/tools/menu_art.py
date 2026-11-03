@@ -245,7 +245,7 @@ def store_icon(kind):
 
 
 # ---- the map's venue symbols: white on clear, 64 px each in one sheet -----------------------------
-VENUES = ["dealership", "customs", "bank", "tower", "hotel", "casino", "gems", "realty", "home", "race", "delivery", "beach", "stadium", "palace", "harbour", "lookout"]
+VENUES = ["dealership", "customs", "bank", "tower", "hotel", "rewards", "gems", "realty", "home", "race", "delivery", "beach", "stadium", "palace", "harbour", "lookout"]
 
 
 def venue_icon(d, kind, ox):
@@ -283,10 +283,13 @@ def venue_icon(d, kind, ox):
         rrect(d, ox + 8, 18, ox + 14, 52, 2, fill=c)
         rrect(d, ox + 50, 36, ox + 56, 52, 2, fill=c)
         rrect(d, ox + 16, 22, ox + 30, 30, 4, fill=c)
-    elif kind == "casino":  # a die
-        rrect(d, ox + 12, 12, ox + 52, 52, 8, fill=c)
-        for x, y in ((22, 22), (42, 22), (32, 32), (22, 42), (42, 42)):
-            circle(d, ox + x, y, 4, fill=INK + (255,))
+    elif kind == "rewards":  # a gift box with a bow (Legends Rewards, was the casino's die)
+        rrect(d, ox + 10, 28, ox + 54, 54, 3, fill=c)
+        rrect(d, ox + 7, 20, ox + 57, 30, 3, fill=c)
+        rrect(d, ox + 29, 20, ox + 35, 54, 0, fill=INK + (255,))
+        line(d, P([(7, 30), (57, 30)]), INK + (255,), 2)
+        poly(d, P([(32, 20), (18, 8), (16, 18)]), fill=c)
+        poly(d, P([(32, 20), (46, 8), (48, 18)]), fill=c)
     elif kind == "gems":  # a cut gem
         poly(d, P([(14, 24), (22, 12), (42, 12), (50, 24), (32, 54)]), fill=c)
         line(d, P([(14, 24), (50, 24)]), INK + (255,), 2)

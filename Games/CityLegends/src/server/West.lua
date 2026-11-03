@@ -14,7 +14,7 @@
 	    and the sea
 	  * the causeway to Legends Isle (one big island with a mountain, built by Isle; the houses
 	    on its plots are built by Houses)
-	The hotel, casino and gem showcase sites are left as bare blocks here; their own modules build
+	The hotel, Legends Rewards and gem showcase sites are left as bare blocks here; their own modules build
 	them.
 ]]
 
@@ -233,7 +233,7 @@ local function artDeco(kit: any, parent: Instance, cf: CFrame, w: number, d: num
 	return model
 end
 
--- one of Downtown's venue sites (hotel, casino, gem showcase)?
+-- one of Downtown's venue sites (hotel, Legends Rewards, gem showcase)?
 function West.isSite(bi: number, bj: number): boolean
 	for _, s in W.Sites do
 		if s[1] == bi and s[2] == bj then
@@ -243,7 +243,7 @@ function West.isSite(bi: number, bj: number): boolean
 	return false
 end
 
--- the hotel / casino / gem showcase sites stay bare (their own modules build there); the Ocean
+-- the hotel / Legends Rewards / gem showcase sites stay bare (their own modules build there); the Ocean
 -- Drive row gets art deco hotels in front and glass condo towers behind
 function West.block(kit: any, parent: Instance, bi: number, bj: number, cx: number, cz: number, lot: number): boolean
 	if West.isSite(bi, bj) then

@@ -41,6 +41,10 @@ export type Profile = {
 	Customs: { [string]: { [string]: any } }, -- per car id: its Legends Customs look (Customs.lua checks it)
 	Goals: { [string]: any }, -- Legends Path, the daily streak and today's tasks (Goals.lua checks it)
 	Brands: { [string]: number }, -- brand XP per brand (Brands.lua)
+	Rewards: { [string]: any }, -- Legends Rewards: gifts claimed, wheel spins, codes (Rewards.lua checks it)
+	LastSeen: number, -- os.time() of the last save (0 = never: a save from before 2026-11-03)
+	Away: number, -- (not saved) seconds since the last session ended, from LastSeen (0 = unknown)
+	IsNew: boolean, -- (not saved) no save existed when this session loaded
 	-- the first car picked in the menu (2026-11-02): false only for a brand new player until they
 	-- choose 1 of the 3 starters (Config.Menu.StarterChoices); old saves count as claimed
 	Claimed: boolean,
@@ -126,6 +130,10 @@ local function defaultProfile(): Profile
 		Customs = {},
 		Goals = {},
 		Brands = {},
+		Rewards = {},
+		LastSeen = 0,
+		Away = 0,
+		IsNew = true,
 		Claimed = false,
 		Loaded = false,
 	}
@@ -160,7 +168,17 @@ function PlayerData.load(player: Player): Profile
 			return (store :: DataStore):GetAsync("p_" .. player.UserId)
 		end)
 		if ok and type(saved) == "table" then
+			profile.IsNew = false
 			profile.Claimed = saved.Claimed ~= false -- (saves from before the claim count as claimed)
+			if type(saved.Rewards) == "table" then
+				profile.Rewards = saved.Rewards -- (Rewards.lua cleans it when it's read)
+			end
+			-- how long they were away: from the last save, or (older saves) the last daily claim
+			local seen = if type(saved.LastSeen) == "number" then saved.LastSeen elseif type(saved.LastDaily) == "number" then saved.LastDaily else 0
+			if seen > 0 and seen <= os.time() then
+				profile.LastSeen = seen
+				profile.Away = os.time() - seen
+			end
 			if type(saved.Cash) == "number" then
 				profile.Cash = math.max(0, math.floor(saved.Cash))
 			end
@@ -351,11 +369,16 @@ function PlayerData.load(player: Player): Profile
 	return profile
 end
 
-function PlayerData.save(player: Player)
+-- saves the profile; true when it was written (or there is no store to write to)
+function PlayerData.save(player: Player): boolean
 	local profile = profiles[player]
-	if not profile or not profile.Loaded or not store then
-		return
+	if not profile or not profile.Loaded then
+		return false
 	end
+	if not store then
+		return true
+	end
+	profile.LastSeen = os.time()
 	local owned = {}
 	for id in profile.Owned do
 		table.insert(owned, id)
@@ -395,6 +418,8 @@ function PlayerData.save(player: Player)
 		Customs = profile.Customs,
 		Goals = profile.Goals,
 		Brands = profile.Brands,
+		Rewards = profile.Rewards,
+		LastSeen = profile.LastSeen,
 		Claimed = profile.Claimed,
 	}
 	local ok, err = pcall(function()
@@ -403,6 +428,7 @@ function PlayerData.save(player: Player)
 	if not ok then
 		warn("[CityLegends] save failed for", player.Name, err)
 	end
+	return ok
 end
 
 function PlayerData.get(player: Player): Profile?
