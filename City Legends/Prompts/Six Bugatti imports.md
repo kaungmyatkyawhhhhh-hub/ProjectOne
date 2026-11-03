@@ -6,7 +6,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
 In `Games/CityLegends/imports/importing cars/`:
 - **Veyron family** (main model + 2 high-spec trims):
   - `2009_bugatti_veyron_16.4.glb` (main);
-  - `2012_bugatti_veyron_super_sport_-_patrol.glb` (Super Sport; "patrol" may mean a police livery: check, and remove police markings if it's not meant to be a police car);
+  - `2010_bugatti_veyron_16.4_super_sport_431_kmh.glb` (Super Sport; the owner replaced the old "patrol" model with this one);
   - `2013_bugatti_veyron_grand_sport_vitesse_wrc.glb` (Grand Sport Vitesse; "WRC" may be a special livery: check).
 - **Chiron family** (main model + 2 high-spec trims):
   - `2016_bugatti_chiron.glb` (main);
