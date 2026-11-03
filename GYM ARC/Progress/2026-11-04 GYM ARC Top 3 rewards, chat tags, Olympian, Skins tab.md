@@ -204,3 +204,10 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
   - The parts sit in a local folder, not in the character (AuraClient rebuilds on body changes).
 - **Tested** with the Inventory try-on at full power: Ember (nothing extra), Living Legend outdoors and indoors (pillar, orbs, sparkles, ground ring), Forged (its own lightning + 3 orbs). No errors. Screens 18-21.
 - **Open:** the hard auras still reuse easy auras' orb ICONS in the menus (e.g. Living Legend uses Golden's orb). New orb art would finish it (import needed).
+- (4 Nov, owner: "olympian skin should look like atlas's with a crown and gears like atlas too") **Olympian = Atlas's look.**
+  - His white-and-gold-vein marble (the skin's maps).
+  - His **gold laurel crown:** AlterLookClient's new `laurel` piece, the trainers' laurel. On big hair it rests on top of the hair like a crown instead of disappearing inside it.
+  - His **gold wrist cuffs + gold waistband:** Shared/Gear Cuffs / Waistband, built by CosmeticService while the skin is worn, so everyone sees them. They replace a worn belt / wraps visually; those stay worn and keep their boosts.
+  - Gear rebuilds when a skin or alter is worn (ActionService).
+  - The old forearm / arm rings are gone.
+  - Tested: crown, marble, cuffs and waistband on the body. Screen 22.
