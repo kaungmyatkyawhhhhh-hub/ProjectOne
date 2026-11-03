@@ -312,3 +312,29 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
     - On the stage meshes it tints the SurfaceAppearance (Color #ffaaff) and the part colour.
     - Since a stage mesh is a whole region, training biceps turns the WHOLE upper arm red and quads the whole thigh.
     - No Highlight / outline, no glow, no scale bounce. Others see the same tint.
+- **3 Nov (late) - PUMP + muscle look (owner: go ahead; glow for the LOCAL player only, others the tint pulse, test with a full server, Gold only after a before/after OK, new textures for import).**
+  - **Pump (built, tested):**
+    - New `Shared/VFX/PumpGlow`, called from MuscleRig.SetTraining / Flash for YOUR character only.
+      - A warm Highlight (pale fill, orange outline; Occluded) on the trained REGION's stage mesh(es): upper arms / thighs / forearms / calves = left + right, so 2 Highlights; chest or back piece = 1.
+      - Each rep: a brighter pulse and a ~3% bounce of the piece's Size, put back exactly (BodyStages only re-sizes on a body size change, so nothing fights it).
+      - A BIG / PUMPED rep flashes whiter.
+      - Fades over 1 s after you get off, or after 2.5 s without a rep.
+    - Your body no longer gets the red tint. Others keep the tint pulse, now warm orange instead of red (MuscleRig TINT).
+    - **Highlight budget:** evolved trainers' StageGlow Highlights (one per evolved trainer of EVERY player, on every client) are tagged BudgetGlow. New `HighlightBudgetClient` keeps the nearest 20 on (attribute BudgetOff; TrainerFollowClient respects it).
+    - Tested: arms (Gold, Obsidian), thighs, back. A crowd of 30 fake trainer glows: 20 on, 22 Highlights in the world in total, the pump glow on and visible. The fade checked.
+    - Tuned after the first look: a strong fill turned dark skin muddy brown, so the fill is now pale and the outline carries the glow.
+  - **Spike meshes:**
+    - The owner imported v1. Swapped into ReplicatedStorage.BodyStages / LimbStages (old ones in ServerStorage._Backups_3Nov_spike).
+    - Config/BodyStages + Config/LimbStages centre / size now = the new meshes' bounds.
+    - The runtime biceps reshape (BodyStages reshapeBiceps, 27 Oct) still runs on the new arms.
+    - In game at Alter 15 maxed (same cameras as before): thighs and the back lobe better.
+    - **Still pointed:** the lip under the delt cap (seen from behind) and the forearm's wrist tail. **v2 for these 4 meshes made** (`muscle_spike_fix_v2`, IMPORT_LIST); owner to import.
+  - **Skin definition:**
+    - `ClaudeOne\tools\skin_define.py`:
+      - 5 stages x normal + roughness.
+      - Roughness lifted (stage 3, the full look, 0.16 -> 0.48: a sheen, not a balloon).
+      - Soft sunken lines placed from the stage meshes' UV-to-angle map: the outer-side line (u 0.309: biceps / triceps and quad / hamstring), the back split (u 0.20), the delt line (the upper arm's own band).
+      - The chest is untouched (the torso is the tank top).
+    - Gold proposal: roughness 0.24 -> 0.33, still fully metal (metalness 1.0), NOT applied.
+    - Folder `skin_definition` + IMPORT_LIST.
+    - Live preview without importing failed: Studio takes an EditableImage in a SurfaceAppearance but draws it blank. So the in-game before / after come after the import.
