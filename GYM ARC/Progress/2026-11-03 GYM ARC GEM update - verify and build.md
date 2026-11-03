@@ -250,3 +250,13 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
       - No errors.
   - **Bug fixed:** ProgressClient line 634 errored on a save past the last alter (the owner's admin save at Alter 30: "next alter" 31 doesn't exist). Now "Max". Real players can't reach it.
   - **Pace table re-run with Pro belt + wraps from Alter 1** (owner: "everyone starting from alter 1 has pro gear"). It adds +10% to the EXP boost next to the trainers, so the runs move only 1-2%. Lifting min: ★0 228, ★1 107, ★3 50, ★5 42, ★10 23, owner 12. Updated [[2026-11-03 GYM ARC Pace by star - realistic trainers]] + Calc.
+- **3 Nov - Bully outfits on + Alter Skip needs ★1.**
+  - **Outfits:** the owner imported the 6 templates to Myanmar Builders Club. On the NPCs (Workspace.NPCs, Shirt / Pants):
+    - Flint: shirt 90147283214715, pants 123018063660890.
+    - Ruby: shirt 118967158272091, pants 137312553918522.
+    - Onyx: shirt 104560482256692, pants 128262356890299.
+    - Checked in Play in the Gem Mine: all three show their tank top + shorts.
+  - **Alter Skip is a ★1 reward** (owner: "im ok with skip all at 2.5x but make it so that u can only skip if u have hall of fame 1 star so thats gonna be a new feature for getting 1 star"):
+    - `Config/Alters.SkipStars = 1`. `Alters.Progress` only works out a skip with that many stars, and both the server's alter (PlayerData) and every screen read it, so a ★0 player alters one at a time.
+    - Star Track ★1 lists "Alter Skip: jump past alters" (Config/HallOfFame.TrackRewards).
+    - Tested: the same big save at Alter 3: ★0 -> Alter 4 only; ★1 / ★3 -> skip to Alter 10.
