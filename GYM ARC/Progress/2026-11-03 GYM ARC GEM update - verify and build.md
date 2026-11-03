@@ -7,7 +7,20 @@ status: in progress (publish Fri 6 Nov by the owner)
 
 Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM update launch event (7 Nov)]] · Star Track: [[2026-11-03 GYM ARC Star Track built]] · Gem Mine: [[2026-11-03 GYM ARC Gem Mine Gym built]]
 
-## Verify table (checked in Studio, 3 Nov evening)
+## Status after building (3 Nov, late) - all 8 built and tested in Studio, NOT published
+| # | Item | Now |
+|---|---|---|
+| 1 | Alters 16-20 | **DONE**: skins, 4 look layers, Alter Effects setting, Alter 20 = 2★ + 2 cards, rep burst fixed, Road / Alters tab / Coach Dex after the flip, Run Card picks |
+| 2 | Hall of Fame UI (keep going) | **DONE**: HUD strip "+1★", Alter 20 gold card, ENTER NOW / KEEP GOING screen, one-time NEW card |
+| 3 | Gem Mine Gym | **DONE**: lights 14 → 8 |
+| 4 | Story chapters 7-9 | **DONE**: Flint / Ruby / Onyx, new ch6 ending, Ruby Wraps, titles, throne (Gem posing division not built: owner's call) |
+| 5 | Live event "Gem" | **DONE**: enabled, cutscene, NEWS, full flip test |
+| 6 | Hall of Fame Agency discovery | **DONE**: card, sign + beacon, red dot, VISIT AGENCY, analytics |
+| 7 | Star Track | **DONE** except "faster runs per star" (owner's call): Legacy cards shown, auto spurts ★2, ★4 Star Belt + Wraps, ★6 frame + gold base |
+| 8 | Alters 1-15 cheap layers | **DONE**: light / idle / rep / flex / footsteps for all 15 (after the update only) |
+Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
+
+## Verify table (checked in Studio, 3 Nov evening, before building)
 | # | Item | State | Evidence / what's missing |
 |---|---|---|---|
 | 1 | Alters 16-20 | **PARTLY** | **Have:** <br>- `Config/Alters` List 16-20 (names and placeholder colours).<br>- Goals 1266 / 1344 / 1395 / 1441 / 1487, set 3 Nov for 80-100 min.<br>- Locked until the update: `LastAvailable` checks `LiveEvents.Unlocked("GemAlters")`.<br>- Height +0.8" per alter (`GrowthSpurts.PlayerHeight`, up to 30).<br>- Alter 20 rewards: title Crown Jewel (`Titles.AlterGem`), aura Gemstone (`Auras.AlterGem`), 2 DNA tokens (`Alters.TierRewards[4]`).<br>- AlterThemes 16-20 colours.<br>**Missing:**<br>- Skin textures: generated, waiting for the owner's group import (`Downloads\gem_update_import`).<br>- SkinStages `Alter_<id>` and the popup backgrounds.<br>- All 4 look layers (shape kit, light, motion, touch).<br>- Hall of Fame at Alter 20 = 2★ + 1 extra Legacy card.<br>- The "Alter effects" setting.<br>- A check that Road, Inventory and Coach Dex show 16-20 after the event. |
@@ -202,3 +215,12 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - Estimate for a normal player with today's star boosts: run 2 ~3.7 h, 3 ~3.5, 4 ~3.2, 5 ~2.9, 6 ~2.7 ... 11 ~1.8 h.
     - The design's targets are 3 / 2.5 / 2 / 2 / 1.5 ... 1 h, so a normal player is slower than planned.
     - But the owner said today ★3+ is "too easy" on his maxed setup.
+- **3 Nov - Item 8: Alters 1-15 cheap layers built + tested.**
+  - `Config/AlterLooks`: Pumped, Shredded, Tanned, Vascular, Peak, Clay, Sandstone, Granite, Marble, Obsidian, Bronze, Iron, Steel, Chrome, Gold, per the alter-skins table:
+    - LIGHT: a glow in the alter's colour; Vascular / Obsidian heartbeat.
+    - MOTION: idle (haze, sweat, glints, embers, sand / grit / drips falling: new `fall`) and a rep burst (flash on Pumped / Tanned / Vascular / Obsidian / Iron); a flex ring on the tier finales (Peak, Obsidian, Gold) and Chrome.
+    - TOUCH: footsteps from Peak on, coloured prints + the game's own impact sounds (PlateKnock, StoneThud, ChalkPuff, FloorThud added to `AlterLooks.Sounds`); the Human tier (1-4) none.
+  - No new meshes.
+  - All inside the budget (idle Rate x Life <= 8; same range / light / Low Graphics / Reduce Motion / Alter Effects rules as 16-20).
+  - `afterGem = true`: `AlterLooks.For` returns nothing before the update (tested: Pumped / Obsidian / Gold nil before, Jade unaffected).
+  - Tested in Play (Gold): glow, idle, rep, flex, footstep emitter + chime built on the body.
