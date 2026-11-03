@@ -378,3 +378,50 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
     - New Studio hook `TestTutorialStep` (number): start the tutorial at that step.
     - Tested from step 7: arrows + GO TO to the Crunch Bench, 5 reps, TAP STOP arrow, arrows to the Pull-Up Bar, rep bar "1 / 5 REPS", then step 13. No script errors. Screens 20-22.
     - Analytics funnel names still list the older step ids (not changed).
+  - **Tutorial Chapter 1: Growth Spurt 1 -> 2 (owner, 3 Nov):**
+    - The new steps 15-28 are appended after GrowthSpurt1 (saved step numbers unchanged). The tutorial now ends at Growth Spurt 2; the existing guides take over from Growth Spurt 3.
+    - The steps:
+      - BeatBenny: arrow + GO TO BENNY, waits during story scenes.
+      - GoAgency, then Trainers.
+      - GoBeach: arrow + GO TO BEACH GYM.
+      - MeetCoral: teleport in front of Coral, wait for her lines.
+      - BeachChest: planche, else push-ups, else flat bench; 15 reps.
+      - Genetics, Inventory, Stats.
+      - BeachCore: crunch bench, else hanging leg raise; 15 reps.
+      - BeachLegs: squat rack; 20 reps.
+      - BeachBack: barbell row, else deadlift; 20 reps.
+      - FillSpurt2: the group furthest behind, beach machines only, with a % bar.
+      - Grow2.
+    - New GoTo targets:
+      - `Bully:<id>`: in front of a bully.
+      - `<Gym>:<Id>,<Id>`: the first free type in that gym only.
+      - `Tag:TrainerDesk`: now the Starter desk's gym side; it used to land behind the wall, out of the prompt's reach.
+    - Arm wrestling:
+      - Benny's first match is an auto win: you hold automatically and his power x0.35.
+      - Coral's first match is an auto hold: her full power.
+    - Genetics during the tutorial:
+      - The reveal can't be skipped.
+      - Dex explains, REROLL (free) is spotlit with KEEP hidden, then KEEP is spotlit.
+      - Its own Dex layer sits above the genetics screen. The tutorial's spotlight updater keeps off while it's open.
+    - Auto PUMP while any tutorial step is left (MachineClient; the same taps, so the rate limit stays).
+    - Other systems quiet during Chapter 1 (`UIBus.InTutorialChapter`): the guides, GO TRAIN, the runway invite, the tutorial invite card and Dex's come-back line.
+    - The covered guides (agency, trainers, beach, genetics, inventory, spurt ready) are saved as seen so they never repeat.
+    - The posing stage guide is removed (owner).
+    - Tested in Studio:
+      - The Benny arrow and teleport; an auto win without holding; Coral's cliffhanger, then the agency.
+      - Trainers tile; GO TO BEACH GYM; moved in front of Coral, her lines, then chest.
+      - Planche picked first: 15 / 15 reps with auto pump, then TAP STOP + GENETICS.
+      - Unskippable reveal, the reroll spotlight, the KEEP spotlight; Inventory; Stats; GO TRAIN CORE.
+      - FillSpurt2 leads to the group furthest behind and moves on to the next when one fills.
+    - Not played through: the legs and back steps (same code as chest), Grow2, and Coral's auto hold.
+    - A fresh Growth Spurt 1 test save opens the free trainer roll card and Daily Quests on join (existing behaviour).
+  - **After Coral (owner, 3 Nov):** a new `CoralTrainersClient` LocalScript.
+    - Only for a save that beat Coral and hasn't had the Pro Gym guide yet.
+    - The steps:
+      - Arrow + GO TO TRAINER AGENCY.
+      - Enough coins for 10 rolls: a TRAINER ROLLS n / 10 bar, X3 then ROLL AGAIN spotlit until 10 are done (or the coins run out). Not enough: Dex says so and CLOSE is spotlit.
+      - TRAINERS (the tile, or MY TRAINERS), then BEST EQUIP.
+      - Saved as `CoralTrainers`; the Pro Gym guide (urgent, `waitFor = CoralTrainers`) then plays with its arrow and GO button.
+    - Tested: the arrow, 10 / 10 with the X3 spotlight, the Close spotlights, TRAINERS, BEST EQUIP equipped, then the Pro Gym reveal and Dex's GO. Screens 32-34.
+    - The not-enough-coins path is not played.
+    - The guide-saving code also marks seen any guide whose `after` matches, so the Pro Gym uses the new `waitFor` field instead.
