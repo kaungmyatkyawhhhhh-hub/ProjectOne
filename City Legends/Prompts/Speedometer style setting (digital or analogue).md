@@ -25,6 +25,13 @@ Make **our own version** in City Legends' HUD style (clean, thin lines, semi-tra
 6. **Phone:** sized and placed so it doesn't cover touch controls; readable at 667 × 375.
 7. No logos, no neon. White with a pink / red redline, like the reference, or the game's accent colour.
 
+## Fixes after the first build (owner, 2026-11-03)
+The owner tested the digital speedometer (a screenshot showed the gear box "1" with "M" under it, the big "029" with the dimmed zero, "KM/H", the segmented rev bar, and a green "LIGHTS" label above it):
+1. **Remove the black background panel** behind the digital speedometer (the dark rounded box). The numbers, gear box and rev bar float on the screen with **no background**. Keep them readable over bright and dark scenes with a soft text shadow / thin outline instead (no box).
+   - Do the same for the analogue style if it has a background box.
+2. **Move the "Get out" button / prompt.** It's in the way and doesn't look good where it is now. Move it to a clean spot that doesn't overlap the speedometer, the minimap, the menu button or the phone's driving controls (for example a small pill above the right-side buttons, or near the left edge by the other car buttons). Match the HUD style. **Show the owner a screenshot of the new spot on PC and phone size** before finishing.
+3. Check the small labels near the speedometer (like "LIGHTS") don't overlap anything after these changes.
+
 ## Check before you say done
 - Drive several cars (different redlines and gearboxes, automatic and manual): speed, RPM, gear and redline are right in both styles.
 - Switch the setting while driving; rejoin and it's remembered.
