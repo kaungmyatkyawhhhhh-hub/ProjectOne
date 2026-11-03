@@ -907,7 +907,7 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Checked in Play on a straight (Coast Road): SV idle at half the SVJ's loudness; braking from 72 mph, three downshifts at 41 / 35 / 27 mph, each blip at its own pitch (0.85 / 0.90 / 1.00); no errors.
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
-Summary at the end of the run goes here. Next: step 1.3 (speedometer check).
+Summary at the end of the run goes here. Next: step 2 (driving feel check).
 
 ### Choices made while the owner was away (2026-11-03)
 - Buildings: the global environment reflections (`Lighting.EnvironmentSpecularScale` 1) were left as they are. Lowering them takes the slight sky sheen off the walls but also dulls the cars' paint and the wet roads, and the sheen wasn't the black / white flashing. Easy to change in `CityBuilder` / Lighting if wanted.
@@ -933,3 +933,8 @@ Summary at the end of the run goes here. Next: step 1.3 (speedometer check).
   - Stadium (Riviera Bay): its walls stood on the road at the corner where the road bends. The corner is cut back (8 studs each way plus a short angled wall; old place in the attributes `OldCFrame` / `OldSize`) and the floodlight mast moved in. [[Smooth roads - stadium corner in the lane, before.jpg]], [[Smooth roads - stadium corner, after.jpg]].
   - 2 real ledges ramped out with the new `tools/riviera/Reshape.luau` (moves road triangle corners and rebuilds them; the lines move with the road): the end of the West Switchbacks (a 0.6-0.9 hump in the junction) and Casino Avenue / East Climb 3 (the west side came in 0.9 above the junction). Backup `ServerStorage.ReshapeBackup` (`Reshape.undo()` puts it all back). [[Smooth roads - West Switchbacks end, before (ledge).jpg]], [[Smooth roads - West Switchbacks end, after.jpg]], [[Smooth roads - Casino Avenue junction, before (ledge).jpg]], [[Smooth roads - Casino Avenue junction, after.jpg]].
 - **Checked:** Play: no script errors, 28 traffic cars driving, 80 fps (74 at step 1.1). `luau-lsp analyze` clean. Thin seam lines between road triangles still show in a few junctions (they were there before; they're not bumps). Not done here: a drive of every road with two cars at high speed (do on the next playtest).
+
+### Step 1.3: speedometer check (done)
+- **Checked in Play (PC):** both styles have no background box (numbers, gear box, dial and bar float on the screen); the speed follows the car; the GET OUT pill is on the right under the minimap cards and hides while driving. [[Speedometer check - digital while driving.jpg]].
+- **Fixed:** with the Analogue dial, the GET OUT pill covered the new car strip (class badge + car level, added with car levels). The pill now sits 28 px higher on PC (`UI.setAction`), clear of the strip. [[Speedometer check - analogue, Get out over the car strip (before).jpg]], [[Speedometer check - analogue, Get out moved up (after).jpg]]. Phones are unchanged (the pill is on the right, the dial in the middle).
+- No script errors. The Output shows a warning for a Sound named `videoplayback` in Workspace (`rbxassetid://109026241087535`: "Asset is not approved for the requester"): an audio in the place that Roblox hasn't approved; harmless, it just doesn't play. Not checked: phone size (no touch emulator through the MCP).

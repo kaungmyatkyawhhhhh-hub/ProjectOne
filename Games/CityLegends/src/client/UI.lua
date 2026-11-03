@@ -2355,8 +2355,9 @@ function UI.setAction(text: string?, key: string?)
 			AnchorPoint = Vector2.new(1, 1),
 			-- (owner, 2026-11-03: "move the Get out button, it's in the way") a slim pill on the right,
 			-- above the speedometer and its warning lights, under the minimap's cards; on phones above
-			-- the steering buttons on the right, clear of the speedometer in the middle
-			Position = if UI.isTouch then UDim2.new(1, -14, 1, -232) else UDim2.new(1, -24, 1, -24 - 224 - 34),
+			-- the steering buttons on the right, clear of the speedometer in the middle. (2026-11-04) PC:
+			-- 28 higher, over the car strip (class badge + car level) that sits above the analogue dial
+			Position = if UI.isTouch then UDim2.new(1, -14, 1, -232) else UDim2.new(1, -24, 1, -24 - 224 - 34 - 28),
 			Size = UDim2.fromOffset(if UI.isTouch then 132 else 168, if UI.isTouch then 36 else 40),
 			BackgroundColor3 = Theme.Panel,
 			BackgroundTransparency = 0.15,
