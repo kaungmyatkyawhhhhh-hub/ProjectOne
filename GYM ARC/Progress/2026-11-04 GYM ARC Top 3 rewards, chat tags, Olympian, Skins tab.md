@@ -1,0 +1,113 @@
+---
+date: 2026-11-04
+tags: [gymarc, progress, leaderboard, hall-of-fame, skins, chat]
+status: built + tested in Studio (1 player, faked ranks), not published
+---
+# GYM ARC - Top 3 rewards, chat tags, Olympian, Skins tab (4 Nov)
+
+Back to [[00 GYM ARC Home|GYM ARC Home]] · Related: [[2026-11-03 GYM ARC Hall of Fame board bug fixed]], [[GYM ARC - Leaderboards and Statue]], [[GYM ARC - Body Alters]]
+
+The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then who got there first).
+
+## Part 1 - Leaderboard (mostly done already on 3 Nov)
+- **Already in Studio from 3 Nov, not published yet:**
+  - The board is written on join, on every new star and on leave.
+  - `UpdateAsync` never lowers an entry.
+  - Writes are retried.
+  - The cheat rule is loosened.
+- **Added today:** every board refresh (3 min) also writes each player's value from their save. A failed join write is retried within minutes, and a value the board already holds costs no request.
+- **The missing ★7 player (read-only check, 4 Nov):**
+  - No entry on the real board.
+  - Their save: ★7 reached 2 Nov 22:18 UTC.
+  - It now passes the cheat check (it failed under the old rule).
+- **Real top 10 now:** ★8, 6, 5, 4, 4, 3, 3, 3, 3, 3.
+- **After publish, when they join:** ★8, **★7 (them, #2)**, 6, 5, 4, 4, 3, 3, 3, 3. The last ★3 drops to #11.
+- The other boards (`LB2_`) already write the current value on the first refresh after join (not only when it goes up), so no change there.
+- Nothing was written to the real board from Studio. Studio writes go to the test board only.
+
+## Part 2 - Top 3 boosts
+- **`TopRankService` (new):** every 5 min it reads the board's #1-3 and sets the player attribute `TopRank` (server only).
+- **Boost source `TopRank`:**
+  - +15% / +10% / +5% EXP and coins.
+  - It adds like the other boosts, under the caps (the 2x Coins pass still multiplies after).
+- A player who joins gets the last result right away.
+- **Shown as "TOP 1 BOOST +15%":**
+  - Bottom-left boost tile: trophy icon, "#1" in the rank colour.
+  - Inventory > Items running list.
+
+## Part 3 - Crowns and chat tags
+- **Colours (`Config/TopRanks`):**
+  - TOP 1 #FFD700 / stroke #8A6A00
+  - TOP 2 #E8EEF4 / #6B7480
+  - TOP 3 #B4602A / #4A2410
+- The same colours are used on the crowns, the name tag line and the Hall board's #1-3 rows.
+- **Crown:**
+  - A small 3D crown (the trainers' crown) in the rank colour.
+  - It floats just above the name tag stack, turning slowly.
+  - Built by every client from the server attribute (`Shared/VFX/OlympianFX`, `TopRankClient`).
+- **Chat (`ChatTagClient`):** `[👑 TOP n]` first, then `[VIP]`, max 2 tags.
+  - Both come only from server-set attributes.
+  - Checked: the message really arrives as `[👑 TOP 3] [VIP] Name:`.
+  - The 👑 is in the chat tag only because the brief asked for it. Game UI stays emoji-free.
+
+## Part 4 - Olympian (look only)
+- **While in the top 3:**
+  - The gold laurel aura: a laurel wreath round the feet with a few rising gold sparks (none on low-end phones).
+  - The name tag line "OLYMPIAN · TOP n" in the rank colour.
+- **First time in the top 3:**
+  - `data.olympian = { earned = true, at, best }`, kept forever and saved right away.
+  - The **Olympian** title (Legendary) with its popup.
+  - The **Olympian skin**.
+  - The badge, once the owner creates one (`Config/TopRanks.OlympianBadgeId`, now 0 = none).
+- **Dropping out:** the crown, line, aura and boost go at the next recompute, with no message. The title and skin stay.
+
+## Part 5 - SKINS tab
+- **LOOKS chips:** `[ ALTERS ] [ SKINS ] [ TITLES ]`, in the same window. There's no new HUD button, and the ALTERS list is unchanged.
+- **The grid (`Shared/UI/SkinsPanel`):**
+  - Cards in the Run Cards' frame: the rarity face, the skin's texture + badge in the window, the name on the banner.
+  - States: EQUIPPED (gold edge) / TAP TO EQUIP / LOCKED with the real rule ("Reach Top 3", "Robux skin").
+  - "x / y OWNED" at the top.
+- **Skins** = the alter variants (6 Robux ones, sold from Looks > Alters as before) + Olympian (earned, never sold).
+- **A worn skin:**
+  - Stays on through Body Alters and the Hall of Fame. Before, an alter took a variant off.
+  - Wearing an alter yourself in ALTERS still takes it off.
+- **"ALTER 15 · OLYMPIAN"** on the over-head ALTER pill and on the worn alter's card.
+- **Red dot:**
+  - On SKINS (and LOOKS) when a skin is newly earned, cleared when the tab opens.
+  - Skins bought before this update don't light it.
+- **Olympian's texture:** white marble + gold veins, waiting for import (`Downloads\gem_update_import\olympian_skin\`). Until then it shows the Marble alter's texture.
+
+## Tested in Studio (test save, ranks faked with the Studio switch `TestTopRanks`)
+- **Boost:** rank 1 → 2 → 3 → out gave EXP +0.15 / +0.10 / +0.05, then back to the base.
+- **Visuals:** the crown, line, laurel and boost tile appear for each rank and all go when out.
+- **3 crowns side by side** (copies of the test character): gold, silver and bronze are clearly different.
+- **Chat tags:** the real message prefix checked. The tags shown in a chat-style frame at the chat's real 18 px, in a PC view and a 667x375 frame.
+  - Roblox's own chat window isn't in Studio screen captures.
+  - The phone shot is a frame of that size, not the device emulator.
+- **Olympian:**
+  - The flag, the title and its popup came on first reaching the top 3.
+  - The title stays after dropping out.
+- **SKINS tab:**
+  - The grid shows, the red dot appears on LOOKS + SKINS and clears.
+  - Equipping Olympian puts the marble body on with "ALTER 15 · OLYMPIAN".
+  - **Stats identical with and without the skin:** EXP x2.42, coins x4.9, EXP pass x2 both times.
+- **Hall board:** #1-3 rows in gold / silver / bronze.
+- Screenshots: `Downloads\gem_update_import\screens_4Nov_top3\01-10` (they show real usernames, so they stay outside the vault).
+
+## Not tested / open
+- Real multi-player rotation (Studio here runs 1 player).
+- The skin staying through a real alter / Hall of Fame entry: checked in code only.
+- The phone emulator.
+- **Small cards:** card text is 11-22 px at window size and shrinks with the window on a phone, like the other Inventory cards.
+- The badge needs creating on the Creator Hub.
+- An existing bug seen in Output: `Config/AlterLooks` Sparkle texture 9126073302 doesn't load ("asset not found"). Not fixed.
+
+## Where it lives
+- `Config/TopRanks`, `Server/TopRankService` (Main's service list).
+- `Server/HallOfFameService` (`Top()`, refresh-time writes).
+- `PlayerData.EarnOlympian` (+ alter-up keeps the skin; "Skins" added to the revealed lists).
+- `Config/Alters` (Olympian, rarity, `SkinList`, `OwnsVariant`), `Config/Titles` (Olympian), `Config/Monetization` (skips products without a key).
+- `Shared/VFX/OlympianFX`, `TopRankClient`, `OverheadTitleClient`, `ChatTagClient`, `ActiveBoostsClient`.
+- `TitlesClient` + `Shared/UI/SkinsPanel`, `Shared/UI/AltersPanel`, `HallOfFameClient`.
+- `SkinStages.Alter_Olympian`.
+- Studio switches: ServerStorage `TestTopRanks` = "id,id,id" (0 = empty place), `TestTopRankEvery` = seconds.
