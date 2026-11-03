@@ -21,7 +21,7 @@ In `Games/CityLegends/imports/importing cars/`:
   - `Games/CityLegends/CLAUDE.md` (the new-model routine);
   - `City Legends/City Legends.md`;
   - **`City Legends/Prompts/Better car models and clean interiors.md`** (Parts 1, 2, 2b, 3, 4: PBR kept, clean interior, the model's own cluster made live, the quality checklist, doors; no new sounds until the owner sends IDs);
-  - the SVJ notes (how its own cluster was made live; the texture-naming bug in packs, now fixed).
+  - the SVJ notes (how its own cluster was made live: do the Bugattis the same way).
 - **Check each model's licence** (Sketchfab page / file info). Note the credit needed. Tell the owner if a model looks ripped from another game.
 
 ## Step 1: check all 6 first (no converting yet)
@@ -39,7 +39,7 @@ For each model, render it in Blender (`render_car.py`: front / rear 3/4, side, t
 
 ## Step 3: convert, without losing anything
 For each car, follow the new-model routine (`paint_glb.py` logos out → `auto_car.py` → `cut_pieces.py` if needed → `render_car.py` → `pack_cars.py`), and:
-- **Nothing lost:** every part of the body, interior, cluster, wheels, brakes, lights and badges-turned-plain stays (only logos removed). Compare the part list and a render before and after conversion: same parts, same textures, same colours. Textures keep **unique names** (the SVJ bug) and the PBR maps (colour, normal, roughness, metal).
+- **Nothing lost:** every part of the body, interior, cluster, wheels, brakes, lights and badges-turned-plain stays (only logos removed). Compare the part list and a render before and after conversion: same parts, same textures, same colours. Textures keep **unique names** and the PBR maps (colour, normal, roughness, metal).
 - **The Veyron cluster:** real analog dials in the real layout (the big rev counter in the middle with its needle; speedometer and power gauge needles; the real colours and backlight at night). Make the needles **live** (speed, RPM, power use, fuel) from the model's own dials; no overlay drawn on top.
 - **The Chiron cluster:** the real layout (the big analog speedometer in the middle up to 500 km/h with the needle, two small screens on the sides). Make the needle and side screens **live** (speed, gear, RPM, drive mode, fuel), matching the model's own look.
 - **Interior realistic:** passes Part 2 of the car prompt (no grey parts, holes, flicker or stretched textures; leather, Alcantara, carbon, aluminium; seat belts, pedals, the gear selector, the middle console; soft dash glow at night).
