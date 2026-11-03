@@ -33,7 +33,8 @@ local SEATS = { Sedan = 5, Coupe = 4, SUV = 5, Supercar = 2, Hypercar = 2 }
 -- the drive of each car line (by the base car's id); the rest is RWD
 local AWD = {
 	nisun_gtr = true, audy_r8 = true, lambrini_lp640 = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_svj = true, lambrini_svj63 = true,
-	lambrini_urus = true, bugotti_veyron = true, porsha_panamera = true, bentlee_contgt = true,
+	lambrini_urus = true, bugotti_veyron = true, bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true,
+	porsha_panamera = true, bentlee_contgt = true,
 	bentlee_bentayga = true, bentz_gle53 = true, bentz_g63 = true, brabos_g63 = true, bentz_gls = true,
 	bentz_e63s = true, bnw_m5_f90 = true, bnw_m8gc = true, bnw_x6 = true, bnw_x7 = true, toyoka_lc200 = true,
 	toyoka_lc300 = true, lexis_lx700 = true, astin_dbx = true, maseroti_levante = true, xiaomo_su7 = true,
@@ -62,7 +63,8 @@ local KERB: { [string]: number } = {
 	lambrini_lp750 = 1525, lambrini_svj = 1525, lambrini_svj63 = 1575, lambrini_lp640 = 1665, bnw_750li = 2050,
 	bentz_gls = 2500, bentz_s680 = 2250, lambrini_countach = 1450, toyoka_chaser = 1450, bentz_190e = 1230,
 	bentz_s65_w221 = 2250, maseroti_levante = 2100, lexis_lc500 = 1970, astin_dbx = 2250, ferrara_california = 1735,
-	bugotti_veyron = 1890, bnw_m5_f10 = 1870, bnw_m5_f90 = 1855, bentz_e63s = 1880,
+	bugotti_veyron = 1890, bugotti_veyron_sport = 1838, bugotti_veyron_top = 1990, bugotti_chiron = 1995, bugotti_chiron_pursport = 1945,
+	bugotti_chiron_supersport = 1990, bnw_m5_f10 = 1870, bnw_m5_f90 = 1855, bentz_e63s = 1880,
 }
 local SEAT_OVERRIDE = { toyoka_alfard = 7, toyoka_lc300 = 7, bnw_x7 = 7, bentz_gls = 4, rolls_cullinan = 4, lexis_lx700 = 7 }
 
@@ -157,13 +159,15 @@ local REDLINE_CAR: { [string]: number } = {
 	lambrini_svj63 = 8.7, lambrini_countach = 7.0, lambrini_urus = 6.8,
 	astin_db9 = 7.0, astin_vantage = 7.3, astin_dbx = 6.5, bentlee_contgt = 6.5, bentlee_bentayga = 6.0,
 	rolls_wraith = 5.5, rolls_cullinan = 5.0, bugotti_veyron = 6.4, maseroti_levante = 6.5,
+	bugotti_chiron = 6.7, bugotti_chiron_pursport = 6.9, bugotti_chiron_supersport = 6.9,
 }
 function CarStats.redline(id: string): number
 	local spec = Cars.get(id)
 	if spec and spec.Electric then
 		return 16
 	end
-	return REDLINE_CAR[id] or REDLINE_CLASS[spec and spec.Class or "Sedan"] or 6.5
+	-- (a SPORT / TOP trim revs like its base car)
+	return REDLINE_CAR[id] or (spec and REDLINE_CAR[baseOf(spec)]) or REDLINE_CLASS[spec and spec.Class or "Sedan"] or 6.5
 end
 
 return CarStats

@@ -512,7 +512,7 @@ return {
 			RL = { r = 0.053, surface = 0.0585, color = Color3.fromRGB(172, 174, 172) },
 			RR = { r = 0.053, surface = 0.0585, color = Color3.fromRGB(172, 174, 172) },
 		},
-		hub = { at = Vector3.new(-0.0002, 0.004, 0.0644), face = Vector3.new(-0.0066, 0.1108, 0.9939), r = 0.03, color = Color3.fromRGB(117, 117, 117) },
+		-- (no hub cover: the new Veyrun models' steering hub is plain, 2026-11-03)
 	},
 	byt_seal = {
 		wb = 2.92,

@@ -94,7 +94,9 @@ CarSkin.CLUSTER_STYLE = {
 	astin_dbx = "Aston",
 	lambrini_lp640 = "MurcielagoLP640", -- the 2026-10-18 model
 	maseroti_levante = "Modern",
-	bugotti_veyron = "Veyron", -- 2026-10-23: its own, from real photos (imports/refs)
+	-- 2026-10-23: its own, from real photos (imports/refs). The new Veyrun models (2026-11-03) carry
+	-- their own needles (OWN_NEEDLES), and then this drawn one stays off
+	bugotti_veyron = "Veyron",
 } :: { [string]: string }
 
 -- where a car's own cluster screen is (measured on the model): its middle from the middle of the
@@ -146,8 +148,28 @@ CarSkin.NEEDLE_LENGTH = {
 	bnw_m6_v10 = 0.66,
 } :: { [string]: number }
 
-export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string }
+-- (optional: bg / fg, a read-out's plate and text colours; kind "gear" is a live gear read-out)
+export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, bg: Color3?, fg: Color3? }
 CarSkin.DIAL_NEEDLES = {
+	-- the Chiron family (owner, 2026-11-03): the 2016 Chiron's own screen (its painted needle taken out)
+	-- in all three, with a live needle on the 500 km/h dial, the speed and the gear in its box
+	-- (tools/needle_specs.py)
+	bugotti_chiron = {
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0000, 0.0263, -0.2540), face = Vector3.new(0.0132, 0.2962, 0.9550), length = 0.0300, scale = "0:-135.5,50:-108.4,100:-81.8,150:-55.3,200:-27.6,250:3.4,300:31.8,350:61.3,400:87.8,450:113.2,500:141.5" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0019, -0.0113, -0.2419), face = Vector3.new(0.0184, 0.3036, 0.9526), length = 0.0177, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "gear", unit = "", at = Vector3.new(-0.0087, -0.0160, -0.2404), face = Vector3.new(0.0519, 0.2968, 0.9535), length = 0.0058, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+	},
+	bugotti_chiron_pursport = {
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0009, 0.0305, -0.2454), face = Vector3.new(0.0232, 0.3082, 0.9510), length = 0.0300, scale = "0:-135.3,50:-108.2,100:-81.6,150:-55.1,200:-27.4,250:3.6,300:32.0,350:61.5,400:88.0,450:113.4,500:141.7" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0028, -0.0070, -0.2329), face = Vector3.new(0.0284, 0.3156, 0.9485), length = 0.0177, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "gear", unit = "", at = Vector3.new(-0.0096, -0.0116, -0.2312), face = Vector3.new(0.0619, 0.3087, 0.9492), length = 0.0058, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+	},
+	bugotti_chiron_supersport = {
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0067, 0.0428, -0.2569), face = Vector3.new(0.0242, 0.3043, 0.9523), length = 0.0300, scale = "0:-135.3,50:-108.2,100:-81.6,150:-55.1,200:-27.4,250:3.6,300:32.0,350:61.5,400:88.0,450:113.4,500:141.7" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0085, 0.0053, -0.2445), face = Vector3.new(0.0294, 0.3117, 0.9497), length = 0.0177, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "gear", unit = "", at = Vector3.new(-0.0154, 0.0006, -0.2429), face = Vector3.new(0.0629, 0.3047, 0.9504), length = 0.0058, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+	},
+
 	lambrini_countach = { -- Countach
 		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0825, 0.0077, -0.2274), face = Vector3.new(0, 0.1961, 0.9806), length = 0.0309, scale = "0:-110,20:-98.2,100:-51.7,180:3.1,320:114.9" },
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0911, 0.0056, -0.227), face = Vector3.new(-0, 0.1961, 0.9806), length = 0.0329, scale = "0:-138,1000:-99.6,2000:-56.6,3000:-24.7,4000:0.7,5000:26.9,6000:53,7000:79,8000:105,9000:131" },
@@ -218,6 +240,46 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0041, 0.0646, -0.2678), face = Vector3.new(0.0007, 0.174, 0.9848), length = 0.0131, scale = "" },
 	},
 } :: { [string]: { DialSpec } }
+
+-- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
+-- through), per car and dial number
+CarSkin.FACELESS_DIALS = {
+	bugotti_chiron = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
+	bugotti_chiron_pursport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
+	bugotti_chiron_supersport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
+} :: { [string]: { any } }
+
+-- our converted cars' own needle parts ("Needle_<kind>", tools/share_cockpit.py), turned live by
+-- Driving: the dial's middle from the middle of the steering wheel (m, right / up / back), the way
+-- its face looks, its scale (reading -> degrees clockwise from 12 o'clock as the driver sees it) and
+-- where the model's needle points as modelled ("rest", the same way). Kinds: speed (unit mph / kmh),
+-- rpm (unit "redline": the car's own redline at our limiter), power (its top at full throttle and
+-- revs), fuel (nearly full), oil (warms up after the start). Measured with tools/needle_specs.py.
+-- The Veyron family (owner, 2026-11-03): the 16.4's own dials and needles in all three.
+export type OwnNeedle = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, rest: number }
+CarSkin.OWN_NEEDLES = {
+	bugotti_veyron = {
+		{ kind = "rpm", unit = "redline", at = Vector3.new(0.0010, 0.0546, -0.2309), face = Vector3.new(-0.0006, 0.3105, 0.9506), length = 0.0511, scale = "0:-123.9,1000:-93.5,2000:-62.7,3000:-32.0,4000:0.0,5000:33.4,6000:63.4,7000:93.5,8000:124.1", rest = 125.8 },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.0950, 0.0147, -0.2081), face = Vector3.new(-0.0127, 0.3023, 0.9531), length = 0.0359, scale = "0:-132.7,20:-116.3,40:-98.2,60:-79.1,80:-58.3,100:-38.4,120:-16.4,140:4.9,160:25.1,180:45.8,200:62.0,220:80.2,240:97.2,260:113.4,280:129.6", rest = 127.8 },
+		{ kind = "power", unit = "ps", at = Vector3.new(-0.0946, 0.0117, -0.2075), face = Vector3.new(0.0098, 0.2984, 0.9544), length = 0.0331, scale = "0:-125.3,100:-101.8,200:-76.7,300:-51.9,400:-26.9,500:2.5,600:28.0,700:55.0,800:77.5,900:101.6,1001:125.3", rest = 124.2 },
+		{ kind = "fuel", unit = "gal", at = Vector3.new(0.0870, 0.0795, -0.2271), face = Vector3.new(-0.0118, 0.1568, 0.9876), length = 0.0163, scale = "0:-122.5,5:-71.1,10:-23.5,15:26.1,20:73.9,25:124.1", rest = 122.6 },
+		{ kind = "oil", unit = "f", at = Vector3.new(-0.0852, 0.0796, -0.2270), face = Vector3.new(0.0119, 0.1534, 0.9881), length = 0.0161, scale = "50:-122.7,100:-72.2,150:-23.8,200:22.2,250:73.2,300:126.9", rest = 122.4 },
+	},
+	bugotti_veyron_sport = {
+		{ kind = "rpm", unit = "redline", at = Vector3.new(0.0034, 0.0515, -0.1938), face = Vector3.new(-0.0016, 0.2803, 0.9599), length = 0.0484, scale = "0:-124.3,1000:-94.1,2000:-63.3,3000:-32.5,4000:-0.2,5000:33.4,6000:63.7,7000:93.7,8000:124.3", rest = 125.9 },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.1007, 0.0086, -0.1755), face = Vector3.new(-0.0700, 0.2766, 0.9584), length = 0.0389, scale = "0:-132.5,20:-116.2,40:-98.1,60:-79.0,80:-58.8,100:-39.5,120:-17.4,140:4.7,160:25.1,180:45.6,200:62.1,220:80.6,240:97.9,260:114.2,280:130.6", rest = 127.3 },
+		{ kind = "power", unit = "ps", at = Vector3.new(-0.0932, 0.0077, -0.1754), face = Vector3.new(0.0708, 0.2790, 0.9577), length = 0.0345, scale = "0:-125.4,100:-102.1,200:-77.7,300:-52.8,400:-27.0,500:2.7,600:27.8,700:55.0,800:77.5,900:102.1,1001:126.1", rest = 126.4 },
+		{ kind = "fuel", unit = "gal", at = Vector3.new(0.0900, 0.0764, -0.1935), face = Vector3.new(-0.0604, 0.2751, 0.9595), length = 0.0178, scale = "0:-122.3,5:-72.1,10:-22.8,15:26.7,20:76.1,25:123.9", rest = 123.0 },
+		{ kind = "oil", unit = "f", at = Vector3.new(-0.0834, 0.0752, -0.1931), face = Vector3.new(0.0704, 0.2845, 0.9561), length = 0.0175, scale = "50:-121.1,100:-71.0,150:-23.2,200:22.1,250:72.8,300:125.1", rest = 122.0 },
+	},
+	bugotti_veyron_top = {
+		{ kind = "rpm", unit = "redline", at = Vector3.new(0.0046, 0.0516, -0.1885), face = Vector3.new(0.0007, 0.2776, 0.9607), length = 0.0486, scale = "0:-124.1,1000:-93.5,2000:-62.7,3000:-32.1,4000:0.0,5000:33.4,6000:63.4,7000:93.5,8000:123.7", rest = 125.7 },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.1031, 0.0133, -0.1714), face = Vector3.new(-0.0723, 0.2761, 0.9584), length = 0.0405, scale = "0:-132.5,20:-116.2,40:-98.0,60:-79.1,80:-59.1,100:-39.6,120:-17.3,140:4.7,160:25.0,180:45.8,200:61.9,220:80.0,240:97.3,260:113.7,280:130.4", rest = 133.3 },
+		{ kind = "power", unit = "ps", at = Vector3.new(-0.0915, 0.0095, -0.1706), face = Vector3.new(0.0706, 0.2791, 0.9577), length = 0.0350, scale = "0:-125.5,100:-102.2,200:-76.4,300:-51.4,400:-26.2,500:3.3,600:28.3,700:54.8,800:76.9,900:101.3,1001:125.2", rest = 128.8 },
+		{ kind = "fuel", unit = "gal", at = Vector3.new(0.0912, 0.0768, -0.1883), face = Vector3.new(-0.0659, 0.2766, 0.9587), length = 0.0180, scale = "0:-122.0,5:-72.5,10:-22.4,15:26.6,20:74.0,25:123.4", rest = 123.2 },
+		{ kind = "oil", unit = "f", at = Vector3.new(-0.0819, 0.0757, -0.1878), face = Vector3.new(0.0728, 0.2797, 0.9573), length = 0.0176, scale = "50:-121.3,100:-72.0,150:-23.4,200:22.2,250:72.9,300:126.9", rest = 121.9 },
+	},
+} :: { [string]: { OwnNeedle } }
 
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
 -- driver's eye; rear: how far behind the eye the swap reaches (studs: front seats only, or rear too)
@@ -419,8 +481,9 @@ type Imported = {
 	-- where the live gauges go: on the dash surface behind the wheel, facing the driver (ground space)
 	cluster: CFrame?,
 	-- the model's own gauge needles (parts), turned by Driving; ownGauges also counts on-screen needles
-	gauges: { { kind: string, pivot: CFrame, parts: { Template } } }?,
+	gauges: { { kind: string, pivot: CFrame, parts: { Template }, scale: string?, rest: number?, unit: string? } }?,
 	ownGauges: boolean?,
+	ownNeedles: boolean?, -- its needles are our converted model's own (OWN_NEEDLES): no drawn cluster
 	clusterSize: Vector2?,
 	-- where the red glow behind the tail lamps goes (ground space)
 	tailGlow: Vector3?,
@@ -1638,8 +1701,34 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 		local gauges = {}
 		local pivots: { { pos: Vector3, kind: string } } = {}
+		-- our converted cars' own needle parts (OWN_NEEDLES): each turns about its dial's middle
+		local ownSpecs = CarSkin.OWN_NEEDLES[src.Name]
+		if ownSpecs then
+			local steer = out.steer
+			for _, d in visible do
+				local kind = d.Name:match("^Needle_(%a+)")
+				if kind then
+					gaugeOf[d] = true -- not a body part
+					for _, own in ownSpecs do
+						if own.kind == kind and steer then
+							local m = CarBuilder.STUDS_PER_METRE
+							local face = own.face.Unit
+							local upV = (Vector3.yAxis - face * face.Y).Unit
+							local pv = steer.mount.Position + own.at * m
+							local pivot = CFrame.lookAt(pv, pv - face, upV) -- +Z looks at the driver
+							local t = tmpl(d, Vector3.zero)
+							table.insert(gauges, { kind = kind, pivot = pivot, parts = { { part = t.part, offset = pivot:Inverse() * t.offset } }, scale = own.scale, rest = own.rest, unit = own.unit })
+							out.ownNeedles = true
+						end
+					end
+				end
+			end
+		end
 		for _, d in visible do
 			local n = d.Name:lower()
+			if out.ownNeedles then
+				break -- (its needles are all done above)
+			end
 			if not inWheel[d] and not inSteer(d) and (n:find("needle") or n:find("arrow")) and not n:find("blinker") then
 				local kind = kindOf(d)
 				-- one needle per dial: a second piece of the same dial only hides
@@ -1912,7 +2001,7 @@ function transplantInterior(out: Imported, donor: Imported, rear: number)
 	local gauges = {}
 	if donor.gauges then
 		for _, gauge in donor.gauges do
-			table.insert(gauges, { kind = gauge.kind, pivot = shift * gauge.pivot, parts = gauge.parts })
+			table.insert(gauges, { kind = gauge.kind, pivot = shift * gauge.pivot, parts = gauge.parts, scale = gauge.scale, rest = gauge.rest, unit = gauge.unit })
 		end
 	end
 	out.gauges = gauges
@@ -2052,6 +2141,12 @@ local function drawDialFace(sg: SurfaceGui, dl: DialSpec, look: { [string]: any 
 	local pts: { { number } } = {}
 	for v, a in string.gmatch(dl.scale, "(%-?[%d%.]+):(%-?[%d%.]+)") do
 		table.insert(pts, { tonumber(v) :: number, tonumber(a) :: number })
+	end
+	if look.faceless then
+		-- only the needle (drawn by the caller) over the model's own dial
+		sg.CanvasSize = Vector2.new(200, 200)
+		sg.LightInfluence = 0
+		return 100
 	end
 	local R = look.r + (look.bezelW or 0) + 4
 	sg.CanvasSize = Vector2.new(2 * R, 2 * R)
@@ -2348,6 +2443,11 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				p.CFrame = groundCF * gauge.pivot * t.offset
 				p:SetAttribute("GaugeKind", gauge.kind)
 				p:SetAttribute("GaugePivot", pivotRoot)
+				if gauge.scale then
+					p:SetAttribute("GaugeScale", gauge.scale)
+					p:SetAttribute("GaugeRest", gauge.rest or 0)
+					p:SetAttribute("GaugeUnit", gauge.unit or "")
+				end
 				p:SetAttribute("GaugeOffset", t.offset)
 				p.Parent = skin
 				local w = Instance.new("Weld")
@@ -2359,7 +2459,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		end
 		-- live instrument cluster on the car's own gauge spot, when it has no working gauges of its own
 		-- (cars with their own design here, like the Ferrari, always get it)
-		local ownDesign = CarSkin.CLUSTER_STYLE[id] ~= nil
+		local ownDesign = CarSkin.CLUSTER_STYLE[id] ~= nil and not imported.ownNeedles
 		-- a car with another model's cabin uses that cabin's dials and cluster spot
 		local swap = CarSkin.INTERIOR_DONOR[id]
 		local cabinId = if swap then swap.from else id
@@ -2417,7 +2517,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			for i, dl in dials do
 				local face = dl.face.Unit
 				local up = (Vector3.yAxis - face * face.Y).Unit
-				local digits = dl.kind == "digits"
+				local digits = dl.kind == "digits" or dl.kind == "gear"
 				local pos = imported.steer.mount.Position + dl.at * m + face * (if digits then 0.004 else 0.002) * m
 				local size = if digits then dl.length * m else dl.length * 2.3 * m
 				local p = Instance.new("Part")
@@ -2445,23 +2545,24 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 					-- a dark plate over the fixed number
 					sg.CanvasSize = Vector2.new(200, 90)
 					local label = Instance.new("TextLabel")
-					label.Name = "Speed"
-					label.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+					label.Name = if dl.kind == "gear" then "Gear" else "Speed"
+					label.BackgroundColor3 = dl.bg or Color3.fromRGB(10, 10, 12)
 					label.BackgroundTransparency = 0
 					label.BorderSizePixel = 0
 					label.Size = UDim2.fromScale(1, 1)
 					label.Font = Enum.Font.GothamBold
 					label.TextScaled = true
-					label.TextColor3 = Color3.fromRGB(235, 240, 255)
-					label.TextXAlignment = Enum.TextXAlignment.Right
-					label.Text = "0"
+					label.TextColor3 = dl.fg or Color3.fromRGB(235, 240, 255)
+					label.TextXAlignment = if dl.kind == "gear" then Enum.TextXAlignment.Center else Enum.TextXAlignment.Right
+					label.Text = if dl.kind == "gear" then "N" else "0"
 					label:SetAttribute("GaugeUnit", dl.unit)
 					label.Parent = sg
 					continue
 				end
 				-- our dial, drawn like the real one; the panel grows to the dial's size (100 px = one
 				-- needle length)
-				local look = DialLooks[cabinId] and DialLooks[cabinId][i] or nil
+				local faceless = CarSkin.FACELESS_DIALS[cabinId]
+				local look = if faceless then faceless[i] or faceless[1] else (DialLooks[cabinId] and DialLooks[cabinId][i] or nil)
 				if type(look) ~= "table" then
 					look = DEFAULT_LOOK
 				end
@@ -2496,7 +2597,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				corner.CornerRadius = UDim.new(0.5, 0)
 				corner.Parent = needle
 				local hubR = look.hubR or 14
-				for k, c in { look.hubRing or false, look.hub or Color3.fromRGB(24, 24, 26) } do
+				for k, c in { look.hubRing or false, if look.faceless then false else (look.hub or Color3.fromRGB(24, 24, 26)) } do
 					if c then
 						local cap = Instance.new("Frame")
 						cap.BorderSizePixel = 0

@@ -140,6 +140,27 @@ return {
 		shells = { { name = "Body_detail_glass_red" } },
 		spots = {},
 	},
+	-- the Veyrun's and Chiroun's new models (2026-11-03, added by hand: their red rear glass)
+	bugotti_veyron_sport = {
+		shells = { { name = "SeeThrough_RED_L" } },
+		spots = {},
+	},
+	bugotti_veyron_top = {
+		shells = { { name = "SeeThrough_RED_BLASS" } },
+		spots = {},
+	},
+	bugotti_chiron = {
+		shells = { { name = "SeeThrough_Chironred_glass" } },
+		spots = {},
+	},
+	bugotti_chiron_pursport = {
+		shells = { { name = "SeeThrough_RED_GLASS" } },
+		spots = {},
+	},
+	bugotti_chiron_supersport = {
+		shells = { { name = "SeeThrough_red_glass" } },
+		spots = {},
+	},
 	byt_seal = {
 		shells = { { name = "Body_red_emis" }, { name = "Body_tail_light" } },
 		spots = {},

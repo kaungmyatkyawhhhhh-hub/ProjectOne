@@ -1,0 +1,64 @@
+{
+ "src": "imports/importing cars/2022_bugatti_chiron_super_sport.glb",
+ "drop_material": [
+  "CalliperBadge",
+  "ManufacturerPlate",
+  "2022BadgeB"
+ ],
+ "images": {
+  "0": [
+   {
+    "rect": [
+     0,
+     0,
+     60,
+     45
+    ]
+   },
+   {
+    "ring": [
+     258,
+     252,
+     152,
+     250
+    ]
+   }
+  ],
+  "2": [
+   {
+    "rect": [
+     0,
+     0,
+     60,
+     45
+    ]
+   }
+  ],
+  "10": [
+   {
+    "rect": [
+     0,
+     0,
+     96,
+     56
+    ]
+   },
+   {
+    "rect": [
+     46,
+     200,
+     60,
+     212
+    ]
+   },
+   {
+    "rect": [
+     100,
+     128,
+     120,
+     156
+    ]
+   }
+  ]
+ }
+}

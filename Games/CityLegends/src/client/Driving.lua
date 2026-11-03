@@ -142,7 +142,11 @@ type State = {
 	localSteer: { { part: BasePart, offset: CFrame } },
 	localArms: { LocalArm },
 	-- the model's own gauges: needle parts and on-screen needles (0..1 sweeps 240 degrees)
-	partNeedles: { { part: BasePart, kind: string, pivot: CFrame, offset: CFrame } },
+	-- (scale: our converted cars' own needles, CarSkin.OWN_NEEDLES: reading -> degrees, from the
+	-- needle's modelled angle `rest`)
+	partNeedles: { { part: BasePart, kind: string, pivot: CFrame, offset: CFrame, scale: { { number } }?, rest: number, unit: string } },
+	powerShown: number, -- throttle x revs, eased (a power gauge)
+	warmT: number?, -- when the engine started (an oil gauge warms up)
 	guiNeedles: { { gui: GuiObject, kind: string, base: number } },
 	guiTexts: { { label: TextLabel, kind: string, unit: string? } }, -- on-screen "Speed" / "RPM" / "Gear" read-outs
 	-- live needles over a model's own painted dials (CarSkin.DIAL_NEEDLES): reading -> degrees
@@ -1498,7 +1502,24 @@ function Driving.attach(model: Model)
 						end
 					end
 					d.Anchored = true
-					table.insert(partNeedles, { part = d, kind = kind, pivot = d:GetAttribute("GaugePivot") :: CFrame, offset = d:GetAttribute("GaugeOffset") :: CFrame })
+					local scale: { { number } }? = nil
+					local sc = d:GetAttribute("GaugeScale")
+					if type(sc) == "string" then
+						local pts = {}
+						for v, a in string.gmatch(sc, "(%-?[%d%.]+):(%-?[%d%.]+)") do
+							table.insert(pts, { tonumber(v) :: number, tonumber(a) :: number })
+						end
+						scale = if #pts >= 2 then pts else nil
+					end
+					table.insert(partNeedles, {
+						part = d,
+						kind = kind,
+						pivot = d:GetAttribute("GaugePivot") :: CFrame,
+						offset = d:GetAttribute("GaugeOffset") :: CFrame,
+						scale = scale,
+						rest = tonumber(d:GetAttribute("GaugeRest")) or 0,
+						unit = tostring(d:GetAttribute("GaugeUnit") or ""),
+					})
 				elseif d:IsA("GuiObject") and d.Name == "DialNeedle" then
 					local pts = {}
 					for v, a in string.gmatch(tostring(d:GetAttribute("GaugeScale")), "(%-?[%d%.]+):(%-?[%d%.]+)") do
@@ -1837,6 +1858,7 @@ function Driving.attach(model: Model)
 		dialNeedles = dialNeedles,
 		speedShown = 0,
 		mphShown = 0,
+		powerShown = 0,
 		smoke = smoke,
 		roll = 0,
 		pitch = 0,
@@ -2090,6 +2112,7 @@ function Driving.step(dt: number)
 		if s.cranking <= 0 and s.ignition then
 			UI.startPrompt(false)
 			s.engineOn = true
+			s.warmT = os.clock()
 			s.engine:setRunning(not s.electric)
 			setCarPower(s, true)
 			UI.setIndicators(indicatorState(s))
@@ -2910,10 +2933,46 @@ function Driving.render(dt: number)
 				end
 				n.gui.Rotation = ang
 			end
+			s.powerShown += ((if s.engineOn then s.throttle * s.rpm else 0) - s.powerShown) * k
 			for _, n in s.partNeedles do
-				local v = if n.kind == "speed" then s.speedShown else s.rpmShown
+				local turn: number
+				local pts = n.scale
+				if pts then
+					-- the dial's own scale (OWN_NEEDLES), from where the model's needle points
+					local first, top = pts[1][1], pts[#pts][1]
+					local v: number
+					if n.kind == "speed" then
+						v = if n.unit == "kmh" then s.mphShown * 1.609 else s.mphShown
+					elseif n.kind == "rpm" then
+						v = s.rpmShown * (if n.unit == "redline" then CarStats.redline(s.spec.Id) else 8000)
+					elseif n.kind == "power" then
+						v = s.powerShown * top
+					elseif n.kind == "fuel" then
+						v = first + (top - first) * 0.85 -- nearly full
+					elseif n.kind == "oil" then
+						-- warms up over the first minute to its normal reading
+						local warm = if s.warmT then math.clamp((os.clock() - s.warmT) / 60, 0, 1) else 0
+						v = first + (top - first) * 0.6 * warm
+					else
+						v = first
+					end
+					if n.kind == "speed" or n.kind == "rpm" or n.kind == "power" then
+						v = math.max(v, sweep * top)
+					end
+					local ang = pts[#pts][2]
+					for i = 1, #pts - 1 do
+						local a, b = pts[i], pts[i + 1]
+						if v <= b[1] then
+							ang = a[2] + (b[2] - a[2]) * math.clamp((v - a[1]) / (b[1] - a[1]), 0, 1)
+							break
+						end
+					end
+					turn = ang - n.rest
+				else
+					turn = (if n.kind == "speed" then s.speedShown else s.rpmShown) * 240
+				end
 				-- the pivot's +Z looks at the driver: a negative turn is clockwise as the driver sees it
-				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, -math.rad(v * 240)) * n.offset
+				n.part.CFrame = root.CFrame * n.pivot * CFrame.Angles(0, 0, -math.rad(turn)) * n.offset
 			end
 			for _, tl in s.guiTexts do
 				tl.label.Text = if tl.kind == "Speed" then tostring(math.floor((if (tl.unit or Driving.units) == "kmh" then mph * 1.609 else mph) + 0.5)) elseif tl.kind == "RPM" then tostring(math.floor(s.rpm * 80) * 100) else s.gear

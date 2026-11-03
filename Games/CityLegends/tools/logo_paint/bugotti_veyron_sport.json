@@ -1,0 +1,100 @@
+{
+ "src": "imports/importing cars/2010_bugatti_veyron_16.4_super_sport_431_kmh.glb",
+ "drop": [
+  "Badge_Geo_lodA_Bugatti_VeyronSuperSportGold_2012BadgeB_Material_0",
+  "ManufacturerPlate_Geo_lodA_Bugatti_VeyronSuperSportGold_2012ManufacturerPlateA_Material_0"
+ ],
+ "images": {
+  "18": [
+   {
+    "replace": "tools/logo_paint/bugotti_veyron_sport_interior.png"
+   },
+   {
+    "rect": [
+     228,
+     495,
+     262,
+     515
+    ]
+   },
+   {
+    "rect": [
+     495,
+     522,
+     590,
+     550
+    ]
+   },
+   {
+    "rect": [
+     532,
+     610,
+     566,
+     630
+    ]
+   },
+   {
+    "rect": [
+     683,
+     247,
+     728,
+     270
+    ]
+   }
+  ],
+  "20": [
+   {
+    "rect": [
+     270,
+     110,
+     505,
+     170
+    ]
+   },
+   {
+    "rect": [
+     80,
+     345,
+     262,
+     445
+    ]
+   },
+   {
+    "rect": [
+     0,
+     110,
+     62,
+     415
+    ]
+   }
+  ],
+  "24": [
+   {
+    "rect": [
+     0,
+     0,
+     136,
+     96
+    ]
+   },
+   {
+    "ring": [
+     258,
+     252,
+     152,
+     250
+    ]
+   }
+  ],
+  "25": [
+   {
+    "rect": [
+     0,
+     0,
+     136,
+     96
+    ]
+   }
+  ]
+ }
+}

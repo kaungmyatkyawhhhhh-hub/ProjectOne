@@ -333,6 +333,23 @@ for _, series in Cars.Series do
 	end
 end
 
+-- the Veyrun's trims got their own models (owner, 2026-11-03: the 2010 Super Sport and the 2013
+-- Grand Sport Vitesse replace the SPORT and TOP on the 16.4's body): same ids, levels and prices,
+-- so owners keep them; the dealer shows their real names
+do
+	local ss, gsv = Cars.ById.bugotti_veyron_sport, Cars.ById.bugotti_veyron_top
+	if ss then
+		ss.Model = nil
+		ss.Name = "Velocité Noir Veyrun Super Sport"
+		ss.Trim = "SUPER SPORT"
+	end
+	if gsv then
+		gsv.Model = nil
+		gsv.Name = "Velocité Noir Veyrun Grand Sport Vitesse"
+		gsv.Trim = "GS VITESSE"
+	end
+end
+
 -- brand XP is saved by brand name: the old names it was saved under (Brands.lua moves them)
 Cars.OldBrands = {
 	BNW = "BAVARICA WERKZ", MERCER = "TRI-STAR SILBER", BRABOS = "ROCKET", TOYOKA = "APEX",

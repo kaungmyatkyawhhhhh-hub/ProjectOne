@@ -1,0 +1,215 @@
+{
+ "src": "imports/importing cars/2009_bugatti_veyron_16.4.glb",
+ "drop": [
+  "bug_veyron_09_cockpit_s_hooda_badge__badge_0",
+  "bug_veyron_09_cockpit_s_steering_wheel_badge__badge_cp_0",
+  "bug_veyron_09_s_lod0_doorcardLF_badge__badge_cp_0",
+  "bug_veyron_09_s_lod0_doorcardRF_badge__badge_cp_0",
+  "bug_veyron_09_cockpit_s_interior_embossed_badge__smooth_metal_cp_0",
+  "bug_veyron_09_s_lod0_badgeF_emblem__body_0",
+  "bug_veyron_09_s_lod0_badgeF_misc__misc_0",
+  "bug_veyron_09_s_lod0_badgeR_chrome__chrome_0"
+ ],
+ "images": {
+  "1": [
+   {
+    "rect": [
+     14,
+     855,
+     660,
+     985
+    ]
+   },
+   {
+    "ellipse": [
+     842,
+     927,
+     141,
+     64,
+     156,
+     3,
+     8
+    ]
+   },
+   {
+    "rect": [
+     455,
+     55,
+     495,
+     92
+    ]
+   }
+  ],
+  "11": [
+   {
+    "rect": [
+     14,
+     855,
+     660,
+     985
+    ]
+   },
+   {
+    "ellipse": [
+     842,
+     927,
+     141,
+     64,
+     156,
+     3,
+     8
+    ]
+   },
+   {
+    "rect": [
+     455,
+     55,
+     495,
+     92
+    ]
+   }
+  ],
+  "8": [
+   {
+    "rect": [
+     0,
+     1265,
+     405,
+     2047
+    ]
+   },
+   {
+    "rect": [
+     0,
+     0,
+     300,
+     605
+    ]
+   },
+   {
+    "rect": [
+     0,
+     605,
+     162,
+     1262
+    ]
+   },
+   {
+    "rect": [
+     880,
+     1935,
+     1015,
+     2020
+    ]
+   }
+  ],
+  "17": [
+   {
+    "rect": [
+     0,
+     1265,
+     405,
+     2047
+    ]
+   },
+   {
+    "rect": [
+     0,
+     0,
+     300,
+     605
+    ]
+   },
+   {
+    "rect": [
+     0,
+     605,
+     162,
+     1262
+    ]
+   },
+   {
+    "rect": [
+     880,
+     1935,
+     1015,
+     2020
+    ]
+   }
+  ],
+  "6": [
+   {
+    "rect": [
+     520,
+     715,
+     580,
+     745
+    ]
+   },
+   {
+    "rect": [
+     478,
+     598,
+     612,
+     642
+    ]
+   }
+  ],
+  "7": [
+   {
+    "rect": [
+     160,
+     660,
+     340,
+     840
+    ]
+   }
+  ],
+  "18": [
+   {
+    "rect": [
+     88,
+     792,
+     248,
+     838
+    ]
+   },
+   {
+    "rect": [
+     332,
+     972,
+     462,
+     1015
+    ]
+   }
+  ],
+  "19": [
+   {
+    "rect": [
+     0,
+     0,
+     66,
+     60
+    ]
+   },
+   {
+    "ring": [
+     256,
+     256,
+     152,
+     236
+    ]
+   }
+  ],
+  "20": [
+   {
+    "rect": [
+     0,
+     0,
+     66,
+     60
+    ]
+   }
+  ]
+ }
+}

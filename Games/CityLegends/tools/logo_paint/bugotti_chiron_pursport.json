@@ -1,0 +1,76 @@
+{
+ "src": "imports/importing cars/2021_bugatti_chiron_pur_sport.glb",
+ "drop": [
+  "ManufacturerPlate_Geo_lodA_Bugatti_ChironRMS_2020ManufacturerPlateA_Material_0",
+  "bod_1:Badge_Geo_lodABody_lodA_Bugatti_ChironRMS_2020BadgeA_Material_0"
+ ],
+ "images": {
+  "12": [
+   {
+    "solid": [
+     0,
+     0,
+     63,
+     63,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "19": [
+   {
+    "rect": [
+     205,
+     255,
+     255,
+     310
+    ]
+   },
+   {
+    "rect": [
+     205,
+     140,
+     260,
+     162
+    ]
+   },
+   {
+    "rect": [
+     98,
+     382,
+     126,
+     404
+    ]
+   }
+  ],
+  "21": [
+   {
+    "rect": [
+     0,
+     0,
+     66,
+     52
+    ]
+   },
+   {
+    "ring": [
+     258,
+     252,
+     152,
+     250
+    ]
+   }
+  ],
+  "22": [
+   {
+    "rect": [
+     0,
+     0,
+     66,
+     52
+    ]
+   }
+  ]
+ }
+}

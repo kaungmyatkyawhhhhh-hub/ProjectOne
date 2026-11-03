@@ -1,0 +1,100 @@
+{
+ "src": "imports/importing cars/2013_bugatti_veyron_grand_sport_vitesse_wrc.glb",
+ "drop": [
+  "Kit1_Badge_Geo_lodA_Bugatti_VeyronGrandSportVitesseWRE_2012BadgeB_Material_0",
+  "ManufacturerPlate_Geo_lodA_Bugatti_VeyronGrandSportVitesseWRE_2012ManufacturerPlateB_Material_0"
+ ],
+ "images": {
+  "17": [
+   {
+    "replace": "tools/logo_paint/bugotti_veyron_top_interior.png"
+   },
+   {
+    "rect": [
+     228,
+     495,
+     262,
+     515
+    ]
+   },
+   {
+    "rect": [
+     495,
+     522,
+     590,
+     550
+    ]
+   },
+   {
+    "rect": [
+     532,
+     610,
+     566,
+     630
+    ]
+   },
+   {
+    "rect": [
+     683,
+     247,
+     728,
+     270
+    ]
+   }
+  ],
+  "21": [
+   {
+    "rect": [
+     270,
+     110,
+     505,
+     170
+    ]
+   },
+   {
+    "rect": [
+     80,
+     345,
+     262,
+     445
+    ]
+   },
+   {
+    "rect": [
+     0,
+     110,
+     62,
+     415
+    ]
+   }
+  ],
+  "23": [
+   {
+    "rect": [
+     0,
+     0,
+     136,
+     96
+    ]
+   },
+   {
+    "ring": [
+     258,
+     252,
+     152,
+     250
+    ]
+   }
+  ],
+  "24": [
+   {
+    "rect": [
+     0,
+     0,
+     136,
+     96
+    ]
+   }
+  ]
+ }
+}

@@ -13,7 +13,13 @@ spec.json:
               {"ring": [cx, cy, r0, r1]},          # a tyre's sidewall: the ring filled with its
                                                    # own middle colour (lettering gone)
               {"solid": [x0, y0, x1, y1, r, g, b]},  # one plain colour
-              {"clear": true} ]                    # the whole image see-through
+              {"ellipse": [cx, cy, rx, ry, r, g, b]},  # an oval of one plain colour (a badge's
+                                                       # lettering inside its own rim)
+              {"line": [x0, y0, x1, y1, w]},       # a painted needle from (x0, y0) to (x1, y1):
+                                                   # each row across it filled like "rect", w px
+                                                   # either side
+              {"clear": true},                     # the whole image see-through
+              {"replace": "path.png"} ]            # the image swapped for another (any size)
     },
     "drop": ["Badge_Geo_lodA"]                     # nodes whose meshes go (badge geometry)
   }
@@ -98,10 +104,25 @@ def main():
         mode = "RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB"
         im = im.convert(mode)
         for op in ops:
-            if "rect" in op:
+            if "replace" in op:
+                im = Image.open(op["replace"]).convert(mode)
+            elif "rect" in op:
                 fill_rect(im, *op["rect"])
             elif "ring" in op:
                 fill_ring(im, *op["ring"])
+            elif "line" in op:
+                x0, y0, x1, y1, w = op["line"]
+                for y in range(min(y0, y1) - w, max(y0, y1) + w + 1):
+                    t = 0.0 if y1 == y0 else min(1.0, max(0.0, (y - y0) / (y1 - y0)))
+                    xc = x0 + (x1 - x0) * t
+                    fill_rect(im, int(xc - w), y, int(xc + w), y)
+            elif "ellipse" in op:
+                cx, cy, rx, ry, r, g, b = op["ellipse"]
+                px = im.load()
+                for y in range(max(0, int(cy - ry)), min(im.size[1], int(cy + ry) + 1)):
+                    for x in range(max(0, int(cx - rx)), min(im.size[0], int(cx + rx) + 1)):
+                        if ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1:
+                            px[x, y] = (r, g, b, 255) if im.mode == "RGBA" else (r, g, b)
             elif "solid" in op:
                 x0, y0, x1, y1, r, g, b = op["solid"]
                 im.paste((r, g, b, 255) if im.mode == "RGBA" else (r, g, b), (x0, y0, x1 + 1, y1 + 1))
@@ -130,6 +151,14 @@ def main():
     j["buffers"][0]["byteLength"] = len(new)
     dropped = 0
     names = set(spec.get("drop", []))
+    # "drop_material": meshes whose every primitive uses one of these materials (by name part)
+    mats = spec.get("drop_material", [])
+    if mats:
+        for nd in j["nodes"]:
+            if "mesh" in nd:
+                prims = j["meshes"][nd["mesh"]]["primitives"]
+                if prims and all(any(m in j["materials"][p.get("material", 0)].get("name", "") for m in mats) for p in prims):
+                    names.add(nd.get("name"))
     if names:
         def walk(i, under):
             nd = j["nodes"][i]
