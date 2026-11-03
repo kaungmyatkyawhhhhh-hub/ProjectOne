@@ -182,3 +182,23 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - The 3 chandeliers are violet (#A77BFF), range 54, brightness 2.3, so the cave keeps its purple.
     - Kept: giant crystal, mouth (2), descent lanterns (2). Before/after screenshots checked.
   - The one-time cards (NEW: ALTERS 16-20, the agency card) also wait while you're on a machine (one popped up mid-set in testing).
+- **3 Nov - Item 7: Star Track extras built + tested** (all after the update, `StarTrack` unlock).
+  - **Legacy cards on the track:**
+    - `RunCardService.NewLife` now saves which card(s) each star kept (`runCards.legacy.byStar["<star>"]`).
+    - An earned star's strip shows "LEGACY: +20% ARMS EXP" (the real card). Stars from before show the plain "Keep 1 Run Card".
+  - **Star 2: Growth Spurts claim themselves** (`HallOfFame.AutoSpurtStars` = 2, ProgressClient).
+    - No READY TO GROW popup: it grows as soon as you're off a machine (growing changes the body, never mid-set).
+    - Tested: Growth Spurt 3 → 4 by itself.
+  - **Star 4: Star Belt + Star Wraps** (`StarGearStars` = 4, looks only, no stats: Config/Cosmetics, Gear.LevelColors "Star" = gold with a dark trim).
+    - Given by `HallOfFameService.GrantStarGear` on join, after entering the Hall, at the update's launch (LiveEventService) and from the admin console.
+    - Toast "STAR GEAR UNLOCKED".
+    - Tested: granted, listed in Inventory > GEAR as "Looks only" + WEAR, drawn on the body.
+  - **Star 6** (`StarFrameStars` = 6):
+    - **Profile:** a gold ring with 6 small stars round the headshot (ProfileClient).
+    - **Statue:** a gold plinth with a glowing rim under the statue: the top-3 pedestals, MY STATUE and a profile's VIEW STATUE (part of the statue model). The statue key includes the Star Track state so they rebuild at the flip.
+    - Tested both; fixed in testing: stars clipped / hidden behind the headshot, the gold reading brown as Metal.
+  - **Track rows:** ★2 "Growth Spurts claim themselves", ★4 "Star Belt + Star Wraps (look)", ★6 "Star frame on your profile" + "Gold base under your statue".
+  - **Faster runs per star: NOT changed (owner's call).**
+    - Estimate for a normal player with today's star boosts: run 2 ~3.7 h, 3 ~3.5, 4 ~3.2, 5 ~2.9, 6 ~2.7 ... 11 ~1.8 h.
+    - The design's targets are 3 / 2.5 / 2 / 2 / 1.5 ... 1 h, so a normal player is slower than planned.
+    - But the owner said today ★3+ is "too easy" on his maxed setup.
