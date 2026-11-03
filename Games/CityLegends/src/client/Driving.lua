@@ -2944,7 +2944,7 @@ function Driving.render(dt: number)
 					if n.kind == "speed" then
 						v = if n.unit == "kmh" then s.mphShown * 1.609 else s.mphShown
 					elseif n.kind == "rpm" then
-						v = s.rpmShown * (if n.unit == "redline" then CarStats.redline(s.spec.Id) else 8000)
+						v = s.rpmShown * (if n.unit == "redline" then CarStats.redline(s.spec.Id) * 1000 else 8000) -- (redline is in thousands)
 					elseif n.kind == "power" then
 						v = s.powerShown * top
 					elseif n.kind == "fuel" then

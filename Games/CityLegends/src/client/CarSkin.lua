@@ -353,7 +353,7 @@ CarSkin.STEER_MODEL = {
 	ferrara_f430 = "FerrariF430", ferrara_599 = "FerrariF430", ferrara_california = "FerrariF430",
 	ferrara_458 = "Ferrari458",
 	-- the other supercars and hypercars
-	mclaran_12c = "McLaren", audy_r8 = "AudiR8", bugotti_veyron = "Veyron", lexis_lfa = "LexusSport", lexis_lc500 = "LexusSport",
+	mclaran_12c = "McLaren", audy_r8 = "AudiR8", lexis_lfa = "LexusSport", lexis_lc500 = "LexusSport",
 	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
 	nisun_gtr = "GTR",
 	-- BMW
@@ -373,6 +373,8 @@ CarSkin.STEER_MODEL = {
 	-- Japanese and the rest
 	toyoka_supra_mk4 = "JDM90s", toyoka_chaser = "JDM90s", nisun_r34 = "JDM90s", mazdo_rx7 = "JDM90s", nisun_350z = "JDM90s",
 	mazdo_rx8 = "RX8",
+	-- (bugotti_veyron had the generated "Veyron" wheel; the new Veyrun models of 2026-11-03 keep their
+	-- own, owner: "use the steering wheel which came from the model")
 	toyoka_camri = "ToyotaModern", toyoka_crown = "ToyotaModern", toyoka_alfard = "ToyotaModern", toyoka_lc200 = "ToyotaModern",
 	toyoka_lc300 = "ToyotaModern", lexis_lx700 = "ToyotaModern",
 	xiaomo_su7 = "EV", byt_u8 = "EV", byt_seal = "EV", kio_ev6 = "EV",
@@ -382,7 +384,6 @@ CarSkin.STEER_MODEL = {
 CarSkin.CLUSTER_SHIFT = {
 	audy_r8 = { -0.08, 0.26, 0, 0.84 }, -- up into the twin-dial hood, over its own dials
 	mclaran_12c = { 0, 0.13, -0.12, 0.78 }, -- the dial in the round pod, the screens in the wings
-	bugotti_veyron = { 0, 0.15, 0, 0.95 }, -- each drawn dial on the model's own five (owner, 2026-10-24)
 	lexis_lfa = { 0, 0.075, 0, 1.42 }, -- the ring on the model's round pod (owner, 2026-10-24)
 } :: { [string]: { number } }
 

@@ -148,6 +148,11 @@ local list: { CarSpec } = {
 	{ Id = "astin_dbx", Name = "British Vanguard DBX", Class = "SUV", Tier = "High", TopSpeed = 181, ZeroToSixty = 4.3, Handling = 0.66, Price = 450000, Color = Color3.fromRGB(88, 92, 98), Order = 76 },
 	{ Id = "ferrara_california", Name = "Rosso Rampante Californa", Class = "Supercar", Tier = "High", TopSpeed = 193, ZeroToSixty = 3.8, Handling = 0.84, Price = 650000, Color = Color3.fromRGB(20, 21, 24), Order = 77 },
 	{ Id = "bugotti_veyron", Name = "Velocité Noir Veyrun 16.4", Class = "Hypercar", Tier = "High", TopSpeed = 253, ZeroToSixty = 2.5, Handling = 0.86, Price = 5000000, Color = Color3.fromRGB(20, 21, 24), Accent = Color3.fromRGB(110, 20, 30), Order = 78 },
+	-- the Chiroun line (owner, 2026-11-03): above the Veyrun, the most expensive cars; level 60 opens
+	-- them all, then they only cost money (Cars.HYPER_LEVEL)
+	{ Id = "bugotti_chiron", Name = "Velocité Noir Chiroun", Class = "Hypercar", Tier = "High", TopSpeed = 261, ZeroToSixty = 2.4, Handling = 0.88, Price = 9500000, Color = Color3.fromRGB(28, 86, 190), Accent = Color3.fromRGB(20, 21, 24), Order = 85 },
+	{ Id = "bugotti_chiron_pursport", Name = "Velocité Noir Chiroun Pur Sport", Class = "Hypercar", Tier = "High", TopSpeed = 218, ZeroToSixty = 2.3, Handling = 0.93, Price = 11000000, Color = Color3.fromRGB(30, 100, 220), Accent = Color3.fromRGB(20, 21, 24), Order = 86 },
+	{ Id = "bugotti_chiron_supersport", Name = "Velocité Noir Chiroun Super Sport", Class = "Hypercar", Tier = "High", TopSpeed = 273, ZeroToSixty = 2.4, Handling = 0.87, Price = 13000000, Color = Color3.fromRGB(236, 236, 238), Accent = Color3.fromRGB(20, 21, 24), Order = 87 },
 	-- owner (2026-10-22): the 5 Series and E Series ladders; no models of their own yet (the M5s
 	-- share the G30 5 Series body, the E63 S the E-Class body, which is an E63 S model)
 	{ Id = "bnw_m5_f10", Name = "Bavarica Werkz M5 F10", Class = "Sedan", Tier = "Mid", TopSpeed = 190, ZeroToSixty = 4.2, Handling = 0.74, Price = 145000, Color = Color3.fromRGB(26, 44, 82), Order = 80, Model = "bnw_540i" },
@@ -215,7 +220,16 @@ Cars.Levels = {
 	bentlee_contgt = 25, bentlee_bentayga = 25,
 	rolls_wraith = 32, rolls_cullinan = 40,
 	bugotti_veyron = 50, -- (its SPORT is 55 and TOP 60: owner, 2026-10-31, "cap it at 60")
+	-- above the Veyrun: level 60 opens them, then money only (owner, 2026-11-03)
+	bugotti_chiron = 60, bugotti_chiron_pursport = 60, bugotti_chiron_supersport = 60,
 } :: { [string]: number }
+
+-- (owner, 2026-11-03: "make it so that you can unlock higher hyper cars when you reached level 60
+-- but you can still get levels over 60. The cars higher than Veyrons don't need levels anymore, it
+-- needs money"): the cars above the Veyrun open at this level (no brand-level discount) and then
+-- only cost money; levels go on past it (Config.Progression.MaxLevel)
+Cars.HYPER_LEVEL = 60
+Cars.HYPER = { bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true } :: { [string]: boolean }
 
 Cars.Series = {
 	{ Name = "SOMPACT SWIFF", Ids = { "suzaki_swift" } },
@@ -281,6 +295,7 @@ Cars.Series = {
 	{ Name = "ECSTASY WRAITH", Ids = { "rolls_wraith" } },
 	{ Name = "ECSTASY PHANTOM", Ids = { "rolls_cullinan" } },
 	{ Name = "VELOCITÉ NOIR VEYRUN", Ids = { "bugotti_veyron" } },
+	{ Name = "VELOCITÉ NOIR CHIROUN", Ids = { "bugotti_chiron", "bugotti_chiron_pursport", "bugotti_chiron_supersport" } },
 } :: { Series }
 
 -- a car left out of the series list gets one of its own
@@ -405,6 +420,9 @@ function Cars.requiredLevel(id: string, bonus: number?): number
 	local need = Cars.Levels[id] or 1
 	if need <= 1 then
 		return 1
+	end
+	if Cars.HYPER[id] then
+		return Cars.HYPER_LEVEL -- the hypercars above the Veyrun: level 60, then money only
 	end
 	return math.max(1, need - (bonus or 0))
 end
