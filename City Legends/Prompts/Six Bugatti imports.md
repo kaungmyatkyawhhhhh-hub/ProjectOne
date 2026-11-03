@@ -32,6 +32,7 @@ For each model, render it in Blender (`render_car.py`: front / rear 3/4, side, t
 - **the steering wheel:** good shape and texture, separate part, right size, logo on the hub?
 
 ## Step 2: pick the best cluster and wheel per family, and share it
+- **The Veyron and the Chiron do NOT share a cluster** (owner, 2026-11-03). They're different designs (Veyron: analog dials with a big rev counter in the middle; Chiron: a big 500 km/h speedometer with two side screens). Never put a Veyron cluster or steering wheel in a Chiron, or the other way round. Sharing only happens **inside** each family.
 - **Veyron family:** compare the 3 clusters and 3 steering wheels side by side (one image). Pick the **best cluster** and the **best steering wheel**, and **use them in all 3 Veyrons** (the real cars share the same cockpit design). Do it with the existing donor system (`STEER_DONOR`, the cabin / cluster donor tables, `CLUSTER_RECT` / `DashGauges` for screens, live needles for analog dials), fitted exactly to each car's dash so nothing floats, clips or leaves a gap.
 - **Chiron family:** the same: pick the best cluster and steering wheel among the 3 Chirons and share them across all 3.
 - **If all 3 cars in a family have a bad cluster or a bad steering wheel** (blurry, broken, missing, wrong), **stop and tell the owner** with the close-up renders. Don't fake one. The owner may send a better model or a photo to copy (like the SVJ, where a sharp photo was used to redraw the screen).
