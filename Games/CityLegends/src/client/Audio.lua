@@ -423,6 +423,10 @@ local function exhaustSet(carId: string?): { [string]: string }?
 	return if set.Idle or set.Mid or set.High then set else nil
 end
 
+-- four-band sets (the SVJs): each band's loudness (owner, 2026-11-03: "make the low rev and mid
+-- rev louder")
+local BAND_GAIN = { Idle = 1, Low = 1.7, Mid = 1.7, High = 1 }
+
 local CLASS_PITCH = { Sedan = 0.9, SUV = 0.82, Coupe = 1.0, Supercar = 1.08, Hypercar = 1.15 }
 
 --[[
@@ -588,7 +592,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 			local function set(k: string, w: number, pitch: number)
 				local snd = layers[k]
 				if snd then
-					snd.Volume = 0.95 * w * load * duck * fadeIn * power
+					snd.Volume = 0.95 * w * load * duck * fadeIn * power * (if layers.Low then (BAND_GAIN[k] or 1) else 1)
 					snd.PlaybackSpeed = pitch * ts
 				end
 			end
