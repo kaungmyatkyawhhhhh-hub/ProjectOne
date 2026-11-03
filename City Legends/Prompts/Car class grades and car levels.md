@@ -28,6 +28,13 @@ Reference: `Games/CityLegends/imports/refs/ui/car_class_grades.png` (a racing ga
   - `Customs.lua` (looks);
   - `DealerMenu.lua`, `MainMenu.lua` (CARS tab), `PlayerData.lua`.
 
+## Do these two car-list changes first (same job)
+Before the classes, change the car list, so the PI table and classes are made for the final list:
+1. **`City Legends/Prompts/Remove 10 starter and mid cars.md`**: remove 10 cars (Swiff, Belto, Crowne Athlete, Volt Seal EV, RX-8, E300, 530i, 330i M Sport, CLA 45, Corvette C6). Owners keep them; ask the owner which car becomes the free / fallback car.
+2. **`City Legends/Prompts/More fun starter cars.md`**: move the 540i, Camaro ZL1 and Chasor Tourer V from Mid to Starter, add the new **A45 S** (needs a model), and pick the 3 starter-pick cars with the owner.
+Follow both files fully (they have their own checks), then do the classes below for the cars that are left.
+(Note: with class grades, "Starter / Mid / High" may become less important. Ask the owner whether the tiers stay next to the classes.)
+
 ## Questions to ask the owner first (don't guess)
 1. **Without player-level locks, what stops a new player buying a top car?** Only its price? Or should some classes still need something (e.g. S2 / R / X need a player level, or owning a car of the class below)?
 2. **Does the player level stay** (for XP, rewards and goals), just without locking cars?
