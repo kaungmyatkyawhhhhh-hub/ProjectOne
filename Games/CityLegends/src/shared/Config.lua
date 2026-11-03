@@ -619,8 +619,9 @@ do
 	local VEYRON = {
 		Start = "rbxassetid://117970941785090", -- "Bugatti Veyron Startup Sound" (T0RQUES)
 		Idle = "rbxassetid://82099770713185", -- "Bugatti Chiron Idle" (Tyudogg5): the same W16 at idle
-		Low = "rbxassetid://86689627119760", -- "Bugatti Veyron W16 engine sound" (pjota20102)
-		High = "rbxassetid://8158600779", -- "CSR2 W16 Engine" (Kwerke_Individual): the Veyron in CSR2
+		-- (owner, 2026-11-03: "the Veyron rev sound isn't good, switch it to this": the W16 bank's
+		-- 3,500 rpm loop, pitched across the whole rev range; was the Asphalt and CSR2 loops)
+		Low = "rbxassetid://102979441052957", -- "Bugatti_Chiron_off3500_ext" (chazdoest0pic)
 		Turbo = "rbxassetid://72711797703242",
 		BlowOff = "rbxassetid://95497630494219", -- a large blow-off ("toyotasupra_large", from a racing game)
 	}
@@ -643,7 +644,7 @@ end
 Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number? } }
 do
 	local chiron = { bands = { Idle = 950, Low = 3500, High = 6500 }, whine = 0.62, seq = 3800, bov = 1.0 }
-	local veyron = { bands = { Idle = 950, Low = 3300, High = 5600 }, whine = 0.7, bov = 1.0 }
+	local veyron = { bands = { Idle = 950, Low = 3500 }, whine = 0.7, bov = 1.0 }
 	for _, id in { "bugotti_veyron", "bugotti_veyron_sport", "bugotti_veyron_top" } do
 		Config.ExhaustBands[id] = veyron
 	end
