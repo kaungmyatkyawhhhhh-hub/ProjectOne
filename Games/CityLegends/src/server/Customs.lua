@@ -156,7 +156,7 @@ local function inBay(car: Model): boolean
 	return Vector3.new(d.X, 0, d.Z).Magnitude <= CU.BayRadius + 6
 end
 
-local handlers: { [string]: (Player, any) -> any } = {}
+local handlers: { [string]: (Player, any, any) -> any } = {}
 
 handlers.state = function(player)
 	local car = ctx.getCar(player)
@@ -168,10 +168,22 @@ handlers.state = function(player)
 	if type(carId) ~= "string" then
 		return { ok = false }
 	end
-	return { ok = true, carId = carId, look = Customs.lookOf(profile, carId), mult = tierMult(carId, player), cash = profile.Cash, inBay = inBay(car) }
+	local CarLevels = require(script.Parent:WaitForChild("CarLevels")) :: any
+	local cp = if profile.Owned[carId] then CarLevels.stateOf(profile, carId).cp else 0
+	return { ok = true, carId = carId, look = Customs.lookOf(profile, carId), mult = tierMult(carId, player), cash = profile.Cash, cp = cp, inBay = inBay(car) }
 end
 
-handlers.buy = function(player, raw)
+-- the CP the changes cost (owner, 2026-11-03: looks can be paid with the car's Car Points too)
+function Customs.cpCost(changed: { string }): number
+	local n = 0
+	for _, k in changed do
+		n += Config.CarLevels.LookCp[k] or 1
+	end
+	return n
+end
+
+-- (`pay`: "cp" pays with the car's Car Points, otherwise cash)
+handlers.buy = function(player, raw, pay)
 	local car = ctx.getCar(player)
 	local profile = PlayerData.get(player)
 	if not (car and profile) then
@@ -200,7 +212,15 @@ handlers.buy = function(player, raw)
 	if #changed == 0 then
 		return { ok = false, message = "Nothing changed" }
 	end
-	if profile.Cash < cost then
+	local cpCost = 0
+	if pay == "cp" then
+		cpCost = Customs.cpCost(changed)
+		local CarLevels = require(script.Parent:WaitForChild("CarLevels")) :: any
+		if not CarLevels.spendCp(player, carId, cpCost) then
+			return { ok = false, message = "Not enough CP: level this car up" }
+		end
+		cost = 0
+	elseif profile.Cash < cost then
 		return { ok = false, message = "Not enough cash" }
 	end
 	PlayerData.addCash(player, -cost)
@@ -217,18 +237,18 @@ handlers.buy = function(player, raw)
 		car:SetAttribute("Plate", string.upper(player.Name):gsub("[^%w]", ""):sub(1, 7))
 	end
 	task.spawn(PlayerData.save, player)
-	return { ok = true, cost = cost, cash = profile.Cash, look = new }
+	return { ok = true, cost = cost, cpCost = cpCost, cash = profile.Cash, look = new }
 end
 
 function Customs.init(c: any)
 	ctx = c
 	local call: RemoteFunction = ctx.remote("RemoteFunction", "CustomsCall")
-	call.OnServerInvoke = function(player: Player, what: any, arg: any)
+	call.OnServerInvoke = function(player: Player, what: any, arg: any, arg2: any)
 		local h = if type(what) == "string" then handlers[what] else nil
 		if not h then
 			return { ok = false }
 		end
-		return h(player, arg)
+		return h(player, arg, arg2)
 	end
 end
 

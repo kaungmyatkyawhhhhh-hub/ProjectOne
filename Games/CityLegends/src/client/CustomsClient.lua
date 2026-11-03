@@ -10,6 +10,9 @@
 	  * the tuning screen: stop in the tuning bay and the action pill says CUSTOMISE (Y). The camera
 	    circles the car, every pick shows on the car at once, the total is worked out per change
 	    and by the car's tier, BUY saves it (CustomsCall), CLOSE puts the saved look back.
+	  * (2026-11-03, car levels) the looks can be paid with the car's Car Points too (BUY CP:
+	    Config.CarLevels.LookCp per change), and PERFORMANCE PARTS opens the car's parts screen
+	    (CarUpgrades, through UI.onUpgrade)
 ]]
 
 local HttpService = game:GetService("HttpService")
@@ -428,6 +431,8 @@ local function open()
 	local look: Look = copy(saved)
 	local mult = tonumber(state.mult) or 1
 	local cash = tonumber(state.cash) or 0
+	local cp = tonumber(state.cp) or 0
+	local carId = tostring(state.carId)
 	preview[car] = look
 	watch(car)
 	refresh(car)
@@ -541,9 +546,10 @@ local function open()
 		corner(b, 8)
 		return b
 	end
-	local buyBtn = button("BUY", 0, 0.42, Theme.Money, Theme.Background)
-	local resetBtn = button("RESET", 0.42, 0.29, Theme.PanelLight, Theme.Text)
-	local closeBtn = button("CLOSE", 0.71, 0.29, Theme.PanelLight, Theme.Text)
+	local buyBtn = button("BUY $", 0, 0.3, Theme.Money, Theme.Background)
+	local cpBtn = button("BUY CP", 0.3, 0.26, Theme.Accent2, Theme.Background)
+	local resetBtn = button("RESET", 0.56, 0.22, Theme.PanelLight, Theme.Text)
+	local closeBtn = button("CLOSE", 0.78, 0.22, Theme.PanelLight, Theme.Text)
 
 	local function cost(): number
 		local sum = 0
@@ -554,13 +560,24 @@ local function open()
 		end
 		return math.floor(sum * mult)
 	end
+	-- the same changes in Car Points (Config.CarLevels.LookCp)
+	local function cpCost(): number
+		local sum = 0
+		for k in CU.Prices do
+			if not same(look[k], saved[k]) then
+				sum += Config.CarLevels.LookCp[k] or 1
+			end
+		end
+		return sum
+	end
 	local refreshers: { () -> () } = {}
 	local function changed()
 		preview[car] = look
 		refresh(car)
 		local c = cost()
-		total.Text = if c > 0 then "TOTAL  " .. money(c) else "NO CHANGES"
-		total.TextColor3 = if c > cash then Theme.Danger else Theme.Money
+		local n = cpCost()
+		total.Text = if c > 0 then string.format("TOTAL  %s  or  %d CP  (you have %d CP)", money(c), n, cp) else "NO CHANGES   ·   " .. cp .. " CP"
+		total.TextColor3 = if c > cash and n > cp then Theme.Danger else Theme.Money
 		for _, f in refreshers do
 			f()
 		end
@@ -663,6 +680,26 @@ local function open()
 			knob.Position = UDim2.fromScale(get(), 0.5)
 		end)
 	end
+
+	-- the car's performance parts: their own screen (CarUpgrades)
+	order += 1
+	local partsBtn = new("TextButton", {
+		LayoutOrder = order,
+		Size = UDim2.new(1, -6, 0, 44),
+		BackgroundColor3 = Theme.PanelLight,
+		Font = Enum.Font.GothamBlack,
+		Text = "PERFORMANCE PARTS  ›",
+		TextSize = 15,
+		TextColor3 = Theme.Accent2,
+		AutoButtonColor = true,
+	}, list)
+	corner(partsBtn, 8)
+	new("UIStroke", { Color = Theme.Accent2, Thickness = 1.5, Transparency = 0.3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, partsBtn)
+	partsBtn.Activated:Connect(function()
+		if UI.onUpgrade then
+			UI.onUpgrade(carId)
+		end
+	end)
 
 	-- PAINT: palette, then a custom colour
 	local paintSec = section("PAINT", CU.Prices.paint)
@@ -802,7 +839,7 @@ local function open()
 		Driving.cameraHold = false
 		close()
 	end
-	buyBtn.Activated:Connect(function()
+	local function buy(pay: string)
 		if busy then
 			return
 		end
@@ -811,17 +848,28 @@ local function open()
 			return
 		end
 		busy = true
-		local result = (call :: RemoteFunction):InvokeServer("buy", look)
+		local result = (call :: RemoteFunction):InvokeServer("buy", look, pay)
 		busy = false
 		if type(result) == "table" and result.ok then
 			saved = if type(result.look) == "table" then result.look else copy(look)
 			look = copy(saved)
 			cash = tonumber(result.cash) or cash
-			UI.toast("Legends Customs: " .. money(tonumber(result.cost) or 0), Theme.Money)
+			if pay == "cp" then
+				cp -= tonumber(result.cpCost) or 0
+				UI.toast("Legends Customs: " .. tostring(result.cpCost) .. " CP", Theme.Accent2)
+			else
+				UI.toast("Legends Customs: " .. money(tonumber(result.cost) or 0), Theme.Money)
+			end
 			finish()
 		else
 			UI.toast(if type(result) == "table" and result.message then result.message else "Couldn't save that", Theme.Warning)
 		end
+	end
+	buyBtn.Activated:Connect(function()
+		buy("cash")
+	end)
+	cpBtn.Activated:Connect(function()
+		buy("cp")
 	end)
 	resetBtn.Activated:Connect(function()
 		look = copy(saved)

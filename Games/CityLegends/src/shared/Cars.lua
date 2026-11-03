@@ -6,6 +6,11 @@
 	  ZeroToSixty: seconds
 	  Handling   : 0..1 (grip + steering response)
 	  Price      : $ (0 = free starter)
+
+	(2026-11-03, owner: "car class grades and car levels") Cars no longer open by player level: each
+	car has a class from its Performance Index (CarStats.pi, the ranges in Config.CarClasses) and only
+	class X needs a player level (Config.CarClasses.XLevel). Ten cars were retired from sale (Retired:
+	owners keep and drive them) and the A45 S waits for its model (Pending: not sold until imported).
 ]]
 
 export type CarSpec = {
@@ -24,6 +29,8 @@ export type CarSpec = {
 	Model: string?, -- uses another car's imported model (a trim without its own model yet)
 	Trim: string?, -- BASE / SPORT / TOP on a line that got the extra trims
 	BaseId: string?, -- a SPORT / TOP trim: the car it is built on
+	Retired: boolean?, -- no longer sold (owners keep it, it still drives; not in the dealer, market, traffic)
+	Pending: boolean?, -- not sold yet: waits for its 3D model (no blocky placeholder in the dealer)
 }
 
 local Cars = {}
@@ -66,7 +73,7 @@ local list: { CarSpec } = {
 	-- Starter cars (beginner)
 	{ Id = "suzaki_swift", Name = "Sompact Swiff", Class = "Sedan", Tier = "Starter", TopSpeed = 112, ZeroToSixty = 9.5, Handling = 0.62, Price = 0, Color = Color3.fromRGB(200, 30, 36), Order = 1 },
 	{ Id = "toyoka_belta", Name = "Apex Belto", Class = "Sedan", Tier = "Starter", TopSpeed = 112, ZeroToSixty = 10.5, Handling = 0.55, Price = 6000, Color = Color3.fromRGB(196, 199, 204), Order = 2 },
-	{ Id = "kio_ev6", Name = "Orient EV6", Class = "SUV", Tier = "Starter", TopSpeed = 93, ZeroToSixty = 9.5, Handling = 0.5, Price = 11000, Color = Color3.fromRGB(235, 236, 238), Order = 3, Electric = true },
+	{ Id = "kio_ev6", Name = "Orient EV6", Class = "SUV", Tier = "Starter", TopSpeed = 93, ZeroToSixty = 9.5, Handling = 0.5, Price = 0, Color = Color3.fromRGB(235, 236, 238), Order = 3, Electric = true },
 	{ Id = "byt_seal", Name = "Dream-Build Volt Seal EV", Class = "Sedan", Tier = "Starter", TopSpeed = 100, ZeroToSixty = 7.3, Handling = 0.55, Price = 14000, Color = Color3.fromRGB(40, 90, 160), Order = 4, Electric = true },
 	{ Id = "toyoka_camri", Name = "Apex Camri", Class = "Sedan", Tier = "Starter", TopSpeed = 135, ZeroToSixty = 7.6, Handling = 0.58, Price = 16000, Color = Color3.fromRGB(20, 21, 24), Order = 5 },
 	{ Id = "toyoka_crown", Name = "Apex Crowne Athlete", Class = "Sedan", Tier = "Starter", TopSpeed = 143, ZeroToSixty = 6.9, Handling = 0.6, Price = 22000, Color = Color3.fromRGB(235, 236, 238), Order = 6 },
@@ -78,7 +85,7 @@ local list: { CarSpec } = {
 
 	-- Mid tier
 	{ Id = "bnw_530i", Name = "Bavarica Werkz 530i G30", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.9, Handling = 0.66, Price = 52000, Color = Color3.fromRGB(20, 21, 24), Order = 12 },
-	{ Id = "bnw_540i", Name = "Bavarica Werkz 540i G30", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.7, Handling = 0.68, Price = 64000, Color = Color3.fromRGB(26, 44, 82), Order = 13 },
+	{ Id = "bnw_540i", Name = "Bavarica Werkz 540i G30", Class = "Sedan", Tier = "Starter", TopSpeed = 155, ZeroToSixty = 4.7, Handling = 0.68, Price = 42000, Color = Color3.fromRGB(26, 44, 82), Order = 13 },
 	{ Id = "bentz_e300", Name = "Tri-Star Silber E300", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 6.1, Handling = 0.63, Price = 70000, Color = Color3.fromRGB(88, 92, 98), Order = 14 },
 	{ Id = "bentz_e400", Name = "Tri-Star Silber E400", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.9, Handling = 0.66, Price = 85000, Color = Color3.fromRGB(20, 21, 24), Order = 15 },
 	{ Id = "bnw_330i_g20", Name = "Bavarica Werkz 330i M Sport", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.3, Handling = 0.7, Price = 60000, Color = Color3.fromRGB(40, 90, 160), Order = 16 },
@@ -102,7 +109,7 @@ local list: { CarSpec } = {
 	{ Id = "bentz_g63", Name = "Tri-Star Silber G63", Class = "SUV", Tier = "Mid", TopSpeed = 149, ZeroToSixty = 4.4, Handling = 0.52, Price = 260000, Color = Color3.fromRGB(20, 21, 24), Order = 34 },
 	{ Id = "byt_u8", Name = "Dream-Build Volt Yangwong U8", Class = "SUV", Tier = "Mid", TopSpeed = 124, ZeroToSixty = 3.6, Handling = 0.55, Price = 290000, Color = Color3.fromRGB(20, 21, 24), Order = 35, Electric = true },
 	{ Id = "porsha_panamera", Name = "Stuttgart Panamera Turbo S", Class = "Sedan", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 3.0, Handling = 0.8, Price = 300000, Color = Color3.fromRGB(88, 92, 98), Order = 36 },
-	{ Id = "chevo_camaro", Name = "Golden Camaro ZL1", Class = "Coupe", Tier = "Mid", TopSpeed = 184, ZeroToSixty = 3.9, Handling = 0.74, Price = 62000, Color = Color3.fromRGB(230, 180, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 37 },
+	{ Id = "chevo_camaro", Name = "Golden Camaro ZL1", Class = "Coupe", Tier = "Starter", TopSpeed = 184, ZeroToSixty = 3.9, Handling = 0.74, Price = 36000, Color = Color3.fromRGB(230, 180, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 37 },
 	{ Id = "chevo_c6", Name = "Golden Corvette C6", Class = "Coupe", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 4.2, Handling = 0.8, Price = 78000, Color = Color3.fromRGB(26, 44, 82), Order = 38 },
 	{ Id = "porsha_boxster", Name = "Stuttgart Boxster 718", Class = "Coupe", Tier = "Mid", TopSpeed = 177, ZeroToSixty = 4.2, Handling = 0.9, Price = 92000, Color = Color3.fromRGB(200, 200, 206), Order = 39 },
 	{ Id = "chevo_c7", Name = "Golden Corvette C7", Class = "Coupe", Tier = "Mid", TopSpeed = 180, ZeroToSixty = 3.8, Handling = 0.84, Price = 112000, Color = Color3.fromRGB(200, 10, 20), Order = 40 },
@@ -140,7 +147,7 @@ local list: { CarSpec } = {
 	{ Id = "bentz_s680", Name = "Tri-Star Silber Maybech S680", Class = "Sedan", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.62, Price = 1600000, Color = Color3.fromRGB(110, 20, 30), Accent = Color3.fromRGB(215, 200, 170), Order = 68 },
 	{ Id = "lambrini_countach", Name = "Enfurecido Countach LP400S", Class = "Supercar", Tier = "High", TopSpeed = 179, ZeroToSixty = 5.6, Handling = 0.78, Price = 2500000, Color = Color3.fromRGB(235, 235, 235), Order = 69 },
 	-- the cars of 2026-10-18
-	{ Id = "toyoka_chaser", Name = "Apex Chasor Tourer V", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.6, Handling = 0.76, Price = 55000, Color = Color3.fromRGB(200, 202, 206), Order = 71 },
+	{ Id = "toyoka_chaser", Name = "Apex Chasor Tourer V", Class = "Sedan", Tier = "Starter", TopSpeed = 155, ZeroToSixty = 5.6, Handling = 0.76, Price = 30000, Color = Color3.fromRGB(200, 202, 206), Order = 71 },
 	{ Id = "bentz_190e", Name = "Tri-Star Silber 190E Evo II", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 7.1, Handling = 0.74, Price = 80000, Color = Color3.fromRGB(20, 21, 24), Order = 72 },
 	{ Id = "bentz_s65_w221", Name = "Tri-Star Silber S63 W221", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.66, Price = 140000, Color = Color3.fromRGB(235, 236, 238), Order = 73 },
 	{ Id = "maseroti_levante", Name = "Trident Motors Levanto GTS", Class = "SUV", Tier = "Mid", TopSpeed = 181, ZeroToSixty = 4.0, Handling = 0.64, Price = 190000, Color = Color3.fromRGB(88, 92, 98), Order = 74 },
@@ -148,8 +155,8 @@ local list: { CarSpec } = {
 	{ Id = "astin_dbx", Name = "British Vanguard DBX", Class = "SUV", Tier = "High", TopSpeed = 181, ZeroToSixty = 4.3, Handling = 0.66, Price = 450000, Color = Color3.fromRGB(88, 92, 98), Order = 76 },
 	{ Id = "ferrara_california", Name = "Rosso Rampante Californa", Class = "Supercar", Tier = "High", TopSpeed = 193, ZeroToSixty = 3.8, Handling = 0.84, Price = 650000, Color = Color3.fromRGB(20, 21, 24), Order = 77 },
 	{ Id = "bugotti_veyron", Name = "Velocité Noir Veyrun 16.4", Class = "Hypercar", Tier = "High", TopSpeed = 253, ZeroToSixty = 2.5, Handling = 0.86, Price = 5000000, Color = Color3.fromRGB(20, 21, 24), Accent = Color3.fromRGB(110, 20, 30), Order = 78 },
-	-- the Chiroun line (owner, 2026-11-03): above the Veyrun, the most expensive cars; level 60 opens
-	-- them all, then they only cost money (Cars.HYPER_LEVEL)
+	-- the Chiroun line (owner, 2026-11-03): above the Veyrun, the most expensive cars; class X: player
+	-- level 60 opens them (Config.CarClasses.XLevel), then they only cost money
 	{ Id = "bugotti_chiron", Name = "Velocité Noir Chiroun", Class = "Hypercar", Tier = "High", TopSpeed = 261, ZeroToSixty = 2.4, Handling = 0.88, Price = 9500000, Color = Color3.fromRGB(28, 86, 190), Accent = Color3.fromRGB(20, 21, 24), Order = 85 },
 	{ Id = "bugotti_chiron_pursport", Name = "Velocité Noir Chiroun Pur Sport", Class = "Hypercar", Tier = "High", TopSpeed = 218, ZeroToSixty = 2.3, Handling = 0.93, Price = 11000000, Color = Color3.fromRGB(30, 100, 220), Accent = Color3.fromRGB(20, 21, 24), Order = 86 },
 	{ Id = "bugotti_chiron_supersport", Name = "Velocité Noir Chiroun Super Sport", Class = "Hypercar", Tier = "High", TopSpeed = 273, ZeroToSixty = 2.4, Handling = 0.87, Price = 13000000, Color = Color3.fromRGB(236, 236, 238), Accent = Color3.fromRGB(20, 21, 24), Order = 87 },
@@ -158,15 +165,31 @@ local list: { CarSpec } = {
 	{ Id = "bnw_m5_f10", Name = "Bavarica Werkz M5 F10", Class = "Sedan", Tier = "Mid", TopSpeed = 190, ZeroToSixty = 4.2, Handling = 0.74, Price = 145000, Color = Color3.fromRGB(26, 44, 82), Order = 80, Model = "bnw_540i" },
 	{ Id = "bnw_m5_f90", Name = "Bavarica Werkz M5 F90", Class = "Sedan", Tier = "Mid", TopSpeed = 190, ZeroToSixty = 3.1, Handling = 0.79, Price = 165000, Color = Color3.fromRGB(88, 92, 98), Order = 81, Model = "bnw_540i" },
 	{ Id = "bentz_e63s", Name = "Tri-Star Silber E63 S", Class = "Sedan", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 3.3, Handling = 0.76, Price = 175000, Color = Color3.fromRGB(20, 21, 24), Order = 82, Model = "bentz_e400" },
+	-- owner (2026-11-03): the A45 S hot hatch, the small fast Tri-Star Silber in place of the CLA 45; a
+	-- starter-pick car. Pending until the owner imports its model (then take Pending off)
+	{ Id = "bentz_a45s", Name = "Tri-Star Silber A45 S", Class = "Sedan", Tier = "Starter", TopSpeed = 168, ZeroToSixty = 3.9, Handling = 0.79, Price = 38000, Color = Color3.fromRGB(238, 190, 20), Order = 88, Pending = true },
 }
 
-Cars.List = list
+-- the ten cars taken out of the game (owner, 2026-11-03): no longer sold anywhere, but a player who
+-- owns one keeps it in the garage and can still drive and tune it
+Cars.RETIRED = {
+	suzaki_swift = true, toyoka_belta = true, toyoka_crown = true, byt_seal = true, mazdo_rx8 = true,
+	bentz_e300 = true, bnw_530i = true, bnw_330i_g20 = true, bentz_cla45 = true, chevo_c6 = true,
+} :: { [string]: boolean }
+for _, spec in list do
+	if Cars.RETIRED[spec.Id] then
+		spec.Retired = true
+	end
+end
+
 Cars.ById = {} :: { [string]: CarSpec }
 for _, spec in list do
 	Cars.ById[spec.Id] = spec
 end
 
-Cars.StarterId = "suzaki_swift"
+-- the free car and the fallback for an unknown id (owner, 2026-11-03: the Orient EV6, $0; it was the
+-- Sompact Swiff)
+Cars.StarterId = "kio_ev6"
 
 -- the car whose imported model a car uses (its own id unless it borrows one)
 function Cars.modelOf(id: string): string
@@ -177,87 +200,41 @@ end
 ---------------------------------------------------------------------
 -- Series, trims and levels (owner, 2026-10-30: "dealership with trims like Midnight Racing")
 --   * a series is one car line; its cars are the trims, cheapest first (the dealer's trim chips)
---   * every car is sold at Legends Motors once you reach its level (Cars.Levels); no car is market
---     only any more and you don't need the trim before (levels only). The car market is a second
+--   * every car is sold at Legends Motors for its price (2026-11-03: no level locks, only class X
+--     needs Config.CarClasses.XLevel); you don't need the trim before. The car market is a second
 --     way to get cars.
 --   * a line with one car gets a SPORT and a TOP trim (owner: "add extra trims"): the same body,
---     a little faster and dearer, 5 and 10 levels on
+--     a little faster and dearer
 ---------------------------------------------------------------------
-export type Series = { Name: string, Ids: { string }, Brand: string? }
+export type Series = { Name: string, Ids: { string }, Brand: string?, Hidden: boolean?, NoTrims: boolean? }
 
 Cars.TrimSteps = {
-	{ Key = "sport", Trim = "SPORT", Label = "Sport", Levels = 5, Price = 1.3, Speed = 1.05, Accel = 0.92, Grip = 0.03, FreePrice = 8000 },
-	{ Key = "top", Trim = "TOP", Label = "Top", Levels = 10, Price = 1.7, Speed = 1.1, Accel = 0.85, Grip = 0.06, FreePrice = 15000 },
+	{ Key = "sport", Trim = "SPORT", Label = "Sport", Price = 1.3, Speed = 1.05, Accel = 0.92, Grip = 0.03, FreePrice = 8000 },
+	{ Key = "top", Trim = "TOP", Label = "Top", Price = 1.7, Speed = 1.1, Accel = 0.85, Grip = 0.06, FreePrice = 15000 },
 }
 
--- the level each car opens at the dealer (by price; each better trim at least 5 levels on; the top
--- cars at 40 - 60, nothing above 60 for now: the owner will add cars above the Veyrun later)
-Cars.Levels = {
-	suzaki_swift = 1, toyoka_belta = 1, toyoka_camri = 1, toyoka_crown = 1, toyoka_alfard = 1,
-	toyoka_lc200 = 1, toyoka_lc300 = 6, toyoka_chaser = 3, toyoka_supra_mk4 = 6,
-	kio_ev6 = 1, byt_seal = 1, byt_u8 = 10,
-	nisun_350z = 1, nisun_r34 = 6, nisun_gtr = 15,
-	mazdo_rx7 = 1, mazdo_rx8 = 1,
-	bnw_330i_g20 = 3, bnw_m3_f80 = 8, bnw_m3_e92 = 3, bnw_m4_f82 = 8,
-	bnw_530i = 3, bnw_540i = 8, bnw_m5_e60 = 13, bnw_m5_f10 = 18, bnw_m5_f90 = 23,
-	bnw_m6_v10 = 6, bnw_m8gc = 11, bnw_750li = 6, bnw_x6 = 6, bnw_x7 = 6,
-	bentz_190e = 3, bentz_cla45 = 3, bentz_cls63s = 6,
-	bentz_e300 = 3, bentz_e400 = 8, bentz_e63s = 13,
-	bentz_s65_w221 = 6, bentz_s63 = 11, bentz_s680 = 32,
-	bentz_gle53 = 10, bentz_g63 = 10, brabos_g63 = 32, bentz_gls = 25, bentz_sl65bs = 20, bentz_sls = 25,
-	dodger_challenger = 6, bentz_gt63s = 10,
-	chevo_camaro = 3, chevo_c6 = 3, chevo_c7 = 8,
-	xiaomo_su7 = 6,
-	lexis_lc500 = 10, lexis_lx700 = 10, lexis_lfa = 40,
-	maseroti_levante = 6,
-	porsha_boxster = 3, porsha_panamera = 10, porsha_gt3 = 25,
-	astin_dbx = 15, astin_db9 = 15, astin_vantage = 15,
-	audy_r8 = 15,
-	ferrara_f430 = 20, ferrara_california = 20, ferrara_599 = 20, ferrara_458 = 25,
-	lambrini_lp570 = 20, lambrini_lp640 = 32, lambrini_lp700 = 37, lambrini_lp750 = 48, lambrini_svj = 53, lambrini_svj63 = 58,
-	lambrini_urus = 32, lambrini_countach = 40,
-	mclaran_12c = 20,
-	bentlee_contgt = 25, bentlee_bentayga = 25,
-	rolls_wraith = 32, rolls_cullinan = 40,
-	bugotti_veyron = 50, -- (its SPORT is 55 and TOP 60: owner, 2026-10-31, "cap it at 60")
-	-- above the Veyrun: level 60 opens them, then money only (owner, 2026-11-03)
-	bugotti_chiron = 60, bugotti_chiron_pursport = 60, bugotti_chiron_supersport = 60,
-} :: { [string]: number }
-
--- (owner, 2026-11-03: "make it so that you can unlock higher hyper cars when you reached level 60
--- but you can still get levels over 60. The cars higher than Veyrons don't need levels anymore, it
--- needs money"): the cars above the Veyrun open at this level (no brand-level discount) and then
--- only cost money; levels go on past it (Config.Progression.MaxLevel)
-Cars.HYPER_LEVEL = 60
-Cars.HYPER = { bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true } :: { [string]: boolean }
-
 Cars.Series = {
-	{ Name = "SOMPACT SWIFF", Ids = { "suzaki_swift" } },
-	{ Name = "APEX BELTO", Ids = { "toyoka_belta" } },
 	{ Name = "APEX CAMRI", Ids = { "toyoka_camri" } },
-	{ Name = "APEX CROWNE", Ids = { "toyoka_crown" } },
 	{ Name = "APEX ALFARD", Ids = { "toyoka_alfard" } },
 	{ Name = "APEX LAND CRUZER", Ids = { "toyoka_lc200", "toyoka_lc300" } },
 	{ Name = "APEX CHASOR", Ids = { "toyoka_chaser" } },
 	{ Name = "APEX SUPRO", Ids = { "toyoka_supra_mk4" } },
 	{ Name = "ORIENT EV6", Ids = { "kio_ev6" } },
-	{ Name = "DREAM-BUILD VOLT SEAL", Ids = { "byt_seal" } },
 	{ Name = "DREAM-BUILD VOLT YANGWONG U8", Ids = { "byt_u8" } },
 	{ Name = "HORIZON 350Z", Ids = { "nisun_350z" } },
 	{ Name = "HORIZON GT-R", Ids = { "nisun_r34", "nisun_gtr" } },
 	{ Name = "AHURA RX-7", Ids = { "mazdo_rx7" } },
-	{ Name = "AHURA RX-8", Ids = { "mazdo_rx8" } },
-	{ Name = "BAVARICA WERKZ 3 SERIES", Ids = { "bnw_330i_g20", "bnw_m3_f80" } },
+	{ Name = "BAVARICA WERKZ 3 SERIES", Ids = { "bnw_m3_f80" } },
 	{ Name = "BAVARICA WERKZ M3 COUPE & M4", Ids = { "bnw_m3_e92", "bnw_m4_f82" } },
-	{ Name = "BAVARICA WERKZ 5 SERIES", Ids = { "bnw_530i", "bnw_540i", "bnw_m5_e60", "bnw_m5_f10", "bnw_m5_f90" } },
+	{ Name = "BAVARICA WERKZ 5 SERIES", Ids = { "bnw_540i", "bnw_m5_e60", "bnw_m5_f10", "bnw_m5_f90" } },
 	{ Name = "BAVARICA WERKZ M6 & M8", Ids = { "bnw_m6_v10", "bnw_m8gc" } },
 	{ Name = "BAVARICA WERKZ 7 SERIES", Ids = { "bnw_750li" } },
 	{ Name = "BAVARICA WERKZ X6", Ids = { "bnw_x6" } },
 	{ Name = "BAVARICA WERKZ X7", Ids = { "bnw_x7" } },
 	{ Name = "TRI-STAR SILBER 190E", Ids = { "bentz_190e" } },
-	{ Name = "TRI-STAR SILBER CLA", Ids = { "bentz_cla45" } },
+	{ Name = "TRI-STAR SILBER A-CLASS", Ids = { "bentz_a45s" } },
 	{ Name = "TRI-STAR SILBER CLS", Ids = { "bentz_cls63s" } },
-	{ Name = "TRI-STAR SILBER E-CLASS", Ids = { "bentz_e300", "bentz_e400", "bentz_e63s" } },
+	{ Name = "TRI-STAR SILBER E-CLASS", Ids = { "bentz_e400", "bentz_e63s" } },
 	{ Name = "TRI-STAR SILBER S-CLASS", Ids = { "bentz_s65_w221", "bentz_s63", "bentz_s680" } },
 	{ Name = "TRI-STAR SILBER GLE", Ids = { "bentz_gle53" } },
 	{ Name = "TRI-STAR SILBER G-CLASS", Ids = { "bentz_g63", "brabos_g63" } },
@@ -267,7 +244,7 @@ Cars.Series = {
 	{ Name = "HEMI CHALLENJER", Ids = { "dodger_challenger" } },
 	{ Name = "HEMI SRT", Ids = { "bentz_gt63s" } },
 	{ Name = "GOLDEN CAMARO", Ids = { "chevo_camaro" } },
-	{ Name = "GOLDEN CORVETTE", Ids = { "chevo_c6", "chevo_c7" } },
+	{ Name = "GOLDEN CORVETTE", Ids = { "chevo_c7" } },
 	{ Name = "HYPERSPEED TECH SU7", Ids = { "xiaomo_su7" } },
 	{ Name = "STEALTH-APEX LC500", Ids = { "lexis_lc500" } },
 	{ Name = "STEALTH-APEX LX700", Ids = { "lexis_lx700" } },
@@ -298,17 +275,38 @@ Cars.Series = {
 	{ Name = "VELOCITÉ NOIR CHIROUN", Ids = { "bugotti_chiron", "bugotti_chiron_pursport", "bugotti_chiron_supersport" } },
 } :: { Series }
 
+-- the retired cars' own lines (owners still see them in their garage; the one-car lines kept their
+-- SPORT / TOP trims, the cars that were part of a ladder get none: NoTrims)
+local RETIRED_SERIES = {
+	{ Name = "SOMPACT SWIFF", Ids = { "suzaki_swift" } },
+	{ Name = "APEX BELTO", Ids = { "toyoka_belta" } },
+	{ Name = "APEX CROWNE", Ids = { "toyoka_crown" } },
+	{ Name = "DREAM-BUILD VOLT SEAL", Ids = { "byt_seal" } },
+	{ Name = "AHURA RX-8", Ids = { "mazdo_rx8" } },
+	{ Name = "TRI-STAR SILBER CLA", Ids = { "bentz_cla45" } },
+	{ Name = "BAVARICA WERKZ 330I", Ids = { "bnw_330i_g20" }, NoTrims = true },
+	{ Name = "BAVARICA WERKZ 530I", Ids = { "bnw_530i" }, NoTrims = true },
+	{ Name = "TRI-STAR SILBER E300", Ids = { "bentz_e300" }, NoTrims = true },
+	{ Name = "GOLDEN CORVETTE C6", Ids = { "chevo_c6" }, NoTrims = true },
+}
+
+-- every line, the retired ones too (Cars.Series is cut down to the ones on sale further on)
+local allSeries: { Series } = table.clone(Cars.Series)
+for _, series in RETIRED_SERIES do
+	table.insert(allSeries, series :: Series)
+end
+
 -- a car left out of the series list gets one of its own
 for _, spec in list do
 	local found = false
-	for _, series in Cars.Series do
+	for _, series in allSeries do
 		if table.find(series.Ids, spec.Id) then
 			found = true
 			break
 		end
 	end
 	if not found then
-		table.insert(Cars.Series, { Name = Cars.upper(spec.Name), Ids = { spec.Id } })
+		table.insert(allSeries, { Name = Cars.upper(spec.Name), Ids = { spec.Id } })
 	end
 end
 
@@ -316,13 +314,12 @@ end
 local function round(n: number, step: number): number
 	return math.floor(n / step + 0.5) * step
 end
-for _, series in Cars.Series do
-	if #series.Ids ~= 1 then
+for _, series in allSeries do
+	if #series.Ids ~= 1 or series.NoTrims then
 		continue
 	end
 	local base = Cars.ById[series.Ids[1]]
 	base.Trim = "BASE"
-	local baseLevel = Cars.Levels[base.Id] or 1
 	for i, step in Cars.TrimSteps do
 		local spec: CarSpec = {
 			Id = base.Id .. "_" .. step.Key,
@@ -340,10 +337,11 @@ for _, series in Cars.Series do
 			Model = base.Model or base.Id,
 			Trim = step.Trim,
 			BaseId = base.Id,
+			Retired = base.Retired,
+			Pending = base.Pending,
 		}
 		table.insert(list, spec)
 		Cars.ById[spec.Id] = spec
-		Cars.Levels[spec.Id] = baseLevel + step.Levels
 		table.insert(series.Ids, spec.Id)
 	end
 end
@@ -357,11 +355,16 @@ do
 		ss.Model = nil
 		ss.Name = "Velocité Noir Veyrun Super Sport"
 		ss.Trim = "SUPER SPORT"
+		-- (2026-11-03, the classes: the real road cars' numbers in place of the SPORT / TOP steps,
+		-- so the Veyruns sit in class R under the Chirouns in X; the Super Sport's road cars were
+		-- limited to 258 mph)
+		ss.TopSpeed, ss.ZeroToSixty, ss.Handling = 258, 2.5, 0.88
 	end
 	if gsv then
 		gsv.Model = nil
 		gsv.Name = "Velocité Noir Veyrun Grand Sport Vitesse"
 		gsv.Trim = "GS VITESSE"
+		gsv.TopSpeed, gsv.ZeroToSixty, gsv.Handling = 254, 2.6, 0.87
 	end
 end
 
@@ -378,15 +381,46 @@ Cars.OldBrands = {
 
 -- each series' brand (owner, 2026-10-22: "fit each car into the brands"): the make its first
 -- car's name starts with (Cars.Makes); the garage and the dealer list brands, then their series
-for _, series in Cars.Series do
+for _, series in allSeries do
 	local first = Cars.ById[series.Ids[1]]
 	series.Brand = Cars.upper(if first then Cars.makeOf(first.Name) else series.Name)
 end
 
 Cars.SeriesOf = {} :: { [string]: { series: Series, index: number } }
-for _, series in Cars.Series do
+for _, series in allSeries do
 	for i, id in series.Ids do
 		Cars.SeriesOf[id] = { series = series, index = i }
+	end
+end
+
+-- a car you can buy (not retired, not waiting for its model)
+function Cars.forSale(id: string): boolean
+	local spec = Cars.ById[id]
+	return spec ~= nil and not spec.Retired and not spec.Pending
+end
+
+-- Cars.All: every car, the retired and pending ones too (saves, garages, lookups by id);
+-- Cars.List: the cars on sale (the dealer, the market, traffic, rewards, "own every car")
+-- Cars.AllSeries: every line; Cars.Series: the lines on sale (Hidden: none of its cars on sale)
+Cars.All = list
+Cars.List = {} :: { CarSpec }
+for _, spec in list do
+	if Cars.forSale(spec.Id) then
+		table.insert(Cars.List, spec)
+	end
+end
+Cars.AllSeries = allSeries
+Cars.Series = {} :: { Series }
+for _, series in allSeries do
+	local onSale = false
+	for _, id in series.Ids do
+		if Cars.forSale(id) then
+			onSale = true
+		end
+	end
+	series.Hidden = not onSale
+	if onSale then
+		table.insert(Cars.Series, series)
 	end
 end
 
@@ -414,18 +448,7 @@ function Cars.isMarketOnly(_id: string): boolean
 	return false
 end
 
--- the level a car opens at the dealer (`bonus`: levels off for the player's brand level,
--- Config.brandTrimBonus; never below 1)
-function Cars.requiredLevel(id: string, bonus: number?): number
-	local need = Cars.Levels[id] or 1
-	if need <= 1 then
-		return 1
-	end
-	if Cars.HYPER[id] then
-		return Cars.HYPER_LEVEL -- the hypercars above the Veyrun: level 60, then money only
-	end
-	return math.max(1, need - (bonus or 0))
-end
+-- (the level a car needs is CarStats.requiredLevel: by its class, 2026-11-03)
 
 -- the trim before this one in its series (nil for the first)
 function Cars.previous(id: string): string?

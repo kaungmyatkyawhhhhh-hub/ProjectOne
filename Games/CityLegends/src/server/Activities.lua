@@ -15,6 +15,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local ActivityData = require(Shared:WaitForChild("ActivityData"))
+local CarStats = require(Shared:WaitForChild("CarStats"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
@@ -162,11 +163,31 @@ end
 ---------------------------------------------------------------------
 -- Race lobbies
 ---------------------------------------------------------------------
+-- a racer's car class and PI ({ "A", 661 }; with its parts) for the lobby card (2026-11-03)
+local function carClass(player: Player): { any }?
+	local car = ctx and ctx.getCar(player)
+	local id = car and car:GetAttribute("CarId")
+	if type(id) ~= "string" then
+		return nil
+	end
+	local letter, _, pi = CarStats.classOf(id, CarStats.decodeParts(car:GetAttribute("Parts")))
+	return { letter, pi }
+end
+
 local function lobbyList(): { [string]: any }
 	local now = os.clock()
 	local list = {}
 	for id, l in lobbies do
-		list[id] = { count = if l.racing then l.racers else #l.players, startsIn = math.max(0, l.startAt - now), racing = l.racing }
+		local classes = {}
+		if not l.racing then
+			for _, p in l.players do
+				local c = carClass(p)
+				if c then
+					table.insert(classes, c)
+				end
+			end
+		end
+		list[id] = { count = if l.racing then l.racers else #l.players, startsIn = math.max(0, l.startAt - now), racing = l.racing, classes = classes }
 	end
 	return list
 end

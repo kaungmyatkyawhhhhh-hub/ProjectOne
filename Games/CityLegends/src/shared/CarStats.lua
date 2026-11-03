@@ -6,6 +6,7 @@
 ]]
 
 local Cars = require(script.Parent:WaitForChild("Cars"))
+local Config = require(script.Parent:WaitForChild("Config"))
 
 local CarStats = {}
 
@@ -39,6 +40,7 @@ local AWD = {
 	bentz_e63s = true, bnw_m5_f90 = true, bnw_m8gc = true, bnw_x6 = true, bnw_x7 = true, toyoka_lc200 = true,
 	toyoka_lc300 = true, lexis_lx700 = true, astin_dbx = true, maseroti_levante = true, xiaomo_su7 = true,
 	byt_u8 = true, kio_ev6 = true, bentz_cla45 = true, bentz_s680 = true, rolls_cullinan = false,
+	bentz_a45s = true,
 }
 local FWD = { suzaki_swift = true, toyoka_belta = true, toyoka_camri = true, toyoka_alfard = true }
 local MANUAL = {
@@ -65,7 +67,33 @@ local KERB: { [string]: number } = {
 	bentz_s65_w221 = 2250, maseroti_levante = 2100, lexis_lc500 = 1970, astin_dbx = 2250, ferrara_california = 1735,
 	bugotti_veyron = 1890, bugotti_veyron_sport = 1838, bugotti_veyron_top = 1990, bugotti_chiron = 1995, bugotti_chiron_pursport = 1945,
 	bugotti_chiron_supersport = 1990, bnw_m5_f10 = 1870, bnw_m5_f90 = 1855, bentz_e63s = 1880,
+	bentz_a45s = 1635,
 }
+-- (2026-11-03, the classes: the PI reads power-to-weight, owner: "from real performance") the real
+-- power (hp) of the car each one is modelled on; a SPORT / TOP trim gets its base car's, scaled by its
+-- quicker 0-60. Cars not listed work it out from the 0-60 time as before.
+local POWER: { [string]: number } = {
+	toyoka_camri = 203, toyoka_alfard = 250, toyoka_lc200 = 381, toyoka_lc300 = 409, lexis_lx700 = 409,
+	kio_ev6 = 225, nisun_350z = 306, mazdo_rx7 = 276, bnw_540i = 335, bentz_e400 = 329,
+	bnw_m3_e92 = 414, bnw_m3_f80 = 425, bnw_m4_f82 = 425, bnw_m5_e60 = 500, bnw_m6_v10 = 500,
+	bnw_m8gc = 617, bentz_cls63s = 603, toyoka_supra_mk4 = 320, nisun_r34 = 330, dodger_challenger = 485,
+	xiaomo_su7 = 673, bnw_x6 = 335, bnw_x7 = 523, bentz_gle53 = 429, bentz_g63 = 577, byt_u8 = 1180,
+	porsha_panamera = 621, chevo_camaro = 650, porsha_boxster = 394, chevo_c7 = 460, bentz_s63 = 621,
+	bentz_gt63s = 630, bnw_750li = 445, toyoka_chaser = 280, bentz_190e = 235, bentz_s65_w221 = 518,
+	maseroti_levante = 550, lexis_lc500 = 471, astin_dbx = 542, nisun_gtr = 565, astin_db9 = 568,
+	astin_vantage = 503, ferrara_f430 = 483, bentz_sl65bs = 661, lambrini_lp570 = 562, audy_r8 = 420,
+	mclaran_12c = 592, ferrara_599 = 611, ferrara_458 = 562, bentz_sls = 563, porsha_gt3 = 500,
+	bentlee_contgt = 626, bentlee_bentayga = 600, lambrini_urus = 641, brabos_g63 = 789, rolls_wraith = 624,
+	rolls_cullinan = 563, lambrini_lp700 = 700, lexis_lfa = 553, lambrini_lp750 = 750, lambrini_svj = 770,
+	lambrini_svj63 = 770, lambrini_lp640 = 640, bentz_gls = 550, bentz_s680 = 621, lambrini_countach = 375,
+	ferrara_california = 453, bugotti_veyron = 1001, bugotti_veyron_sport = 1200, bugotti_veyron_top = 1200,
+	bugotti_chiron = 1500, bugotti_chiron_pursport = 1500, bugotti_chiron_supersport = 1600,
+	bnw_m5_f10 = 560, bnw_m5_f90 = 600, bentz_e63s = 603, bentz_a45s = 416,
+	-- the retired cars
+	suzaki_swift = 90, toyoka_belta = 106, toyoka_crown = 226, byt_seal = 201, mazdo_rx8 = 231,
+	bentz_e300 = 255, bnw_530i = 248, bnw_330i_g20 = 255, bentz_cla45 = 416, chevo_c6 = 430,
+}
+
 local SEAT_OVERRIDE = { toyoka_alfard = 7, toyoka_lc300 = 7, bnw_x7 = 7, bentz_gls = 4, rolls_cullinan = 4, lexis_lx700 = 7 }
 
 local LINES = {
@@ -95,9 +123,18 @@ function CarStats.of(id: string): Stats
 	-- (owner, 2026-11-03, realistic physics) the real kerb weight (kg) of the cars modelled on known
 	-- ones; the physics uses it (braking, grip, how the turn builds, bumps, crashes)
 	weight = KERB[id] or KERB[base] or weight
-	-- power-to-weight from the 0-60 time (about 110 hp/t at 9.5 s, about 520 at 2.5 s)
+	-- power-to-weight from the 0-60 time (about 110 hp/t at 9.5 s, about 520 at 2.5 s), or the
+	-- real power where it's known (a trim: its base car's, scaled by its quicker 0-60)
 	local ptw = 110 * (9.5 / zts) ^ 1.18
 	local hp = ptw * weight / 1000
+	local real = POWER[id]
+	if not real and spec.BaseId and POWER[spec.BaseId] then
+		real = POWER[spec.BaseId] * (Cars.get(spec.BaseId).ZeroToSixty / zts) ^ 1.18
+	end
+	if real then
+		hp = real
+		ptw = real * 1000 / weight
+	end
 	local torque = hp * (if spec.Electric then 1.9 elseif spec.Class == "SUV" then 1.55 else 1.25)
 	local drive = if AWD[base] then "AWD" elseif FWD[base] then "FWD" else "RWD"
 	local seats = SEAT_OVERRIDE[base] or SEATS[spec.Class] or 4
@@ -160,6 +197,7 @@ local REDLINE_CAR: { [string]: number } = {
 	astin_db9 = 7.0, astin_vantage = 7.3, astin_dbx = 6.5, bentlee_contgt = 6.5, bentlee_bentayga = 6.0,
 	rolls_wraith = 5.5, rolls_cullinan = 5.0, bugotti_veyron = 6.4, maseroti_levante = 6.5,
 	bugotti_chiron = 6.7, bugotti_chiron_pursport = 6.9, bugotti_chiron_supersport = 6.9,
+	bentz_a45s = 7.2,
 }
 function CarStats.redline(id: string): number
 	local spec = Cars.get(id)
@@ -168,6 +206,170 @@ function CarStats.redline(id: string): number
 	end
 	-- (a SPORT / TOP trim revs like its base car)
 	return REDLINE_CAR[id] or (spec and REDLINE_CAR[baseOf(spec)]) or REDLINE_CLASS[spec and spec.Class or "Sedan"] or 6.5
+end
+
+---------------------------------------------------------------------
+-- Classes, parts and the Performance Index (owner, 2026-11-03: "car class grades and car levels")
+---------------------------------------------------------------------
+export type Parts = { [string]: number } -- part key -> stage (1..3), Config.CarParts
+
+-- what a car's parts do in all: shares off the 0-60 time, onto the top speed, onto Handling, onto
+-- the braking force and off the weight (Config.CarParts)
+export type Tune = { accel: number, speed: number, grip: number, brake: number, weight: number, pi: number }
+function CarStats.tuneOf(parts: Parts?): Tune
+	local t = { accel = 0, speed = 0, grip = 0, brake = 0, weight = 0, pi = 0 }
+	if not parts then
+		return t
+	end
+	local P = Config.CarParts
+	local accelK = 1
+	for key, stage in parts do
+		local def = P.Parts[key]
+		if not (def and def.stages[stage]) then
+			continue
+		end
+		-- the engine's rules (Config.CarParts): Race Camshafts without Race Fuel count as Sport; an
+		-- intake past the exhaust's stage gives only part of the extra
+		if key == "cams" and stage >= 3 and (parts.fuel or 0) < 3 then
+			stage = 2
+		end
+		local fx: { [string]: number } = table.clone(def.stages[stage] :: any)
+		local ex = parts.exhaust or 0
+		if key == "intake" and stage > ex then
+			local low: { [string]: number } = if ex > 0 then def.stages[ex] :: any else {}
+			for k, v in fx do
+				local lv = low[k] or 0
+				fx[k] = lv + (v - lv) * P.IntakeOverExhaust
+			end
+		end
+		accelK *= 1 - (fx.accel or 0)
+		t.speed += fx.speed or 0
+		t.grip += fx.grip or 0
+		t.brake += fx.brake or 0
+		t.weight += fx.weight or 0
+		t.pi += fx.pi or 0
+	end
+	-- a lighter car also pulls harder
+	accelK *= (1 - t.weight) ^ 0.5
+	t.accel = 1 - accelK
+	return t
+end
+
+-- a car's stock class (cached: the screens ask often)
+local stockClass: { [string]: string } = {}
+local function stockLetter(id: string): string
+	local l = stockClass[id]
+	if not l then
+		l = (Config.carClass(CarStats.pi(id)))
+		stockClass[id] = l
+	end
+	return l
+end
+
+-- whether a part can go on this car: stock S2 / R / X cars take only tyres, gearbox, suspension and
+-- exhaust (Config.CarParts.TopClasses / TopAllowed)
+function CarStats.partAllowed(id: string, key: string): boolean
+	local P = Config.CarParts
+	if not P.Parts[key] then
+		return false
+	end
+	return not P.TopClasses[stockLetter(id)] or P.TopAllowed[key] == true
+end
+
+-- only the parts this car can take (a part saved before a rule changed does nothing)
+function CarStats.cleanParts(id: string, parts: Parts?): Parts?
+	if not parts or next(parts) == nil then
+		return parts
+	end
+	local out: Parts = {}
+	for key, stage in parts do
+		if CarStats.partAllowed(id, key) then
+			out[key] = stage
+		end
+	end
+	return out
+end
+
+-- the car's spec with its parts on (a copy; the same Id): what Driving drives and the PI reads
+function CarStats.tunedSpec(id: string, parts: Parts?): Cars.CarSpec
+	local spec = Cars.get(id)
+	parts = CarStats.cleanParts(id, parts)
+	if not parts or next(parts) == nil then
+		return spec
+	end
+	local t = CarStats.tuneOf(parts)
+	local out = table.clone(spec)
+	out.ZeroToSixty = math.max(1.6, spec.ZeroToSixty * (1 - t.accel))
+	out.TopSpeed = math.floor(spec.TopSpeed * (1 + t.speed) + 0.5)
+	out.Handling = math.min(0.99, spec.Handling + t.grip)
+	return out
+end
+
+-- the Performance Index, 100-999: 0-60, power-to-weight, top speed, grip, braking and weight, each read on its range
+-- in Config.CarClasses and weighted, then curved so the top of the field spreads out
+function CarStats.pi(id: string, parts: Parts?): number
+	local C = Config.CarClasses
+	parts = CarStats.cleanParts(id, parts)
+	local spec = CarStats.tunedSpec(id, parts)
+	local base = CarStats.of(id)
+	local t = CarStats.tuneOf(parts)
+	local weight = base.weightKg * (1 - t.weight)
+	local braking = math.clamp(base.braking * (1 + t.brake * 0.6) + t.grip * 0.5, 0, 1.15)
+	-- (the power parts give more power: as much as the quicker 0-60 needs)
+	local ptw = base.hp * (1 / math.max(1 - t.accel, 0.3)) ^ 1.18 * 1000 / weight
+	local function k(v: number, lo: number, hi: number): number
+		return math.clamp((v - lo) / (hi - lo), 0, 1.1)
+	end
+	local a = math.clamp(math.log(C.Accel[1] / math.max(spec.ZeroToSixty, 1)) / math.log(C.Accel[1] / C.Accel[2]), 0, 1.1)
+	local p = math.clamp(math.log(ptw / C.Power[1]) / math.log(C.Power[2] / C.Power[1]), 0, 1.1)
+	local w = C.Weights
+	local score = w.accel * a
+		+ w.power * p
+		+ w.speed * k(spec.TopSpeed, C.Speed[1], C.Speed[2]) ^ C.SpeedCurve
+		+ w.grip * k(spec.Handling, C.Grip[1], C.Grip[2])
+		+ w.brake * braking
+		+ w.weight * k(weight, C.Weight[1], C.Weight[2])
+	local x = math.max(0, (score - C.Map[1]) / (C.Map[2] - C.Map[1]))
+	return math.clamp(math.floor(100 + 899 * x ^ C.Curve + t.pi + 0.5), 100, 999)
+end
+
+-- the class letter and colour of a car (with parts, or stock)
+function CarStats.classOf(id: string, parts: Parts?): (string, Color3, number)
+	local pi = CarStats.pi(id, parts)
+	local letter, color = Config.carClass(pi)
+	return letter, color, pi
+end
+
+-- the player level a car needs at the dealer: only stock class X needs one (owner: "price only,
+-- X needs level 60")
+function CarStats.requiredLevel(id: string): number
+	local letter = CarStats.classOf(id)
+	return if letter == "X" then Config.CarClasses.XLevel else 1
+end
+
+-- parts to and from the car model's "Parts" attribute ("engine=2,tyres=1")
+function CarStats.encodeParts(parts: Parts?): string
+	local out = {}
+	for _, key in Config.CarParts.Keys do
+		local stage = parts and parts[key]
+		if stage and stage > 0 then
+			table.insert(out, key .. "=" .. stage)
+		end
+	end
+	return table.concat(out, ",")
+end
+function CarStats.decodeParts(raw: any): Parts
+	local parts: Parts = {}
+	if type(raw) ~= "string" then
+		return parts
+	end
+	for key, stage in string.gmatch(raw, "(%a+)=(%d)") do
+		local n = tonumber(stage) :: number
+		if Config.CarParts.Parts[key] and n >= 1 and n <= #Config.CarParts.Stages then
+			parts[key] = n
+		end
+	end
+	return parts
 end
 
 return CarStats

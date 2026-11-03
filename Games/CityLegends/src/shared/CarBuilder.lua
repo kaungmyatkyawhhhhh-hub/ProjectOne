@@ -92,7 +92,7 @@ local REAL_WB: { [string]: number } = {
 
 -- cars that share another car's imported model (same body and interior) until they get their own
 CarBuilder.MODEL_ALIAS = {} :: { [string]: string }
-for _, spec in Cars.List do
+for _, spec in Cars.All do
 	if spec.Model then
 		CarBuilder.MODEL_ALIAS[spec.Id] = spec.Model
 	end
@@ -893,9 +893,9 @@ end
 
 -- City traffic draws from a small pool of everyday cars: every design traffic shows needs its own
 -- runtime meshes, and building them for all 55 cars runs out of Roblox's mesh memory budget
+-- (2026-11-03: the retired cars taken out)
 CarBuilder.TRAFFIC_POOL = {
-	"toyoka_camri", "toyoka_crown", "toyoka_belta", "suzaki_swift", "toyoka_alfard",
-	"toyoka_lc200", "bnw_530i", "bentz_e300", "byt_seal", "nisun_350z",
+	"toyoka_camri", "toyoka_alfard", "toyoka_lc200", "kio_ev6", "bnw_540i", "bentz_e400", "nisun_350z",
 }
 
 -- A car spec for NPC traffic (the paint is randomised by the caller)

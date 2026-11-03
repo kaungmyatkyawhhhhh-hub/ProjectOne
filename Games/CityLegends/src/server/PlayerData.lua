@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local CarStats = require(Shared:WaitForChild("CarStats"))
 
 export type Profile = {
 	Cash: number,
@@ -41,6 +42,12 @@ export type Profile = {
 	Customs: { [string]: { [string]: any } }, -- per car id: its Legends Customs look (Customs.lua checks it)
 	Goals: { [string]: any }, -- Legends Path, the daily streak and today's tasks (Goals.lua checks it)
 	Brands: { [string]: number }, -- brand XP per brand (Brands.lua)
+	-- car levels (2026-11-03, CarLevels.lua): per car id its level (1-50), XP inside that level, unspent
+	-- Car Points, and its performance parts ({ part = stage })
+	CarLevels: { [string]: number },
+	CarXP: { [string]: number },
+	CarCP: { [string]: number },
+	CarParts: { [string]: { [string]: number } },
 	Rewards: { [string]: any }, -- Legends Rewards: gifts claimed, wheel spins, codes (Rewards.lua checks it)
 	LastSeen: number, -- os.time() of the last save (0 = never: a save from before 2026-11-03)
 	Away: number, -- (not saved) seconds since the last session ended, from LastSeen (0 = unknown)
@@ -134,6 +141,10 @@ local function defaultProfile(): Profile
 		Customs = {},
 		Goals = {},
 		Brands = {},
+		CarLevels = {},
+		CarXP = {},
+		CarCP = {},
+		CarParts = {},
 		Rewards = {},
 		LastSeen = 0,
 		Away = 0,
@@ -239,6 +250,39 @@ function PlayerData.load(player: Player): Profile
 				for brand, xp in saved.Brands do
 					if type(brand) == "string" and type(xp) == "number" and xp == xp then
 						profile.Brands[brand] = math.max(0, math.floor(xp))
+					end
+				end
+			end
+			-- car levels, XP, CP and parts (absent in saves from before 2026-11-03): only known cars,
+			-- whole numbers in range, known parts and stages
+			local maxLevel = Config.CarLevels.Max
+			for _, key in { "CarLevels", "CarXP", "CarCP" } do
+				local raw = saved[key]
+				if type(raw) == "table" then
+					local into = (profile :: any)[key]
+					for id, n in raw do
+						if type(id) == "string" and Cars.ById[id] and type(n) == "number" and n == n then
+							local v = math.max(0, math.floor(n))
+							if key == "CarLevels" then
+								v = math.clamp(v, 1, maxLevel)
+							end
+							into[id] = v
+						end
+					end
+				end
+			end
+			if type(saved.CarParts) == "table" then
+				for id, parts in saved.CarParts do
+					if type(id) == "string" and Cars.ById[id] and type(parts) == "table" then
+						local clean = {}
+						for key, stage in parts do
+							if type(key) == "string" and CarStats.partAllowed(id, key) and type(stage) == "number" and stage >= 1 and stage <= #Config.CarParts.Stages then
+								clean[key] = math.floor(stage)
+							end
+						end
+						if next(clean) then
+							profile.CarParts[id] = clean
+						end
 					end
 				end
 			end
@@ -422,6 +466,10 @@ function PlayerData.save(player: Player): boolean
 		Customs = profile.Customs,
 		Goals = profile.Goals,
 		Brands = profile.Brands,
+		CarLevels = profile.CarLevels,
+		CarXP = profile.CarXP,
+		CarCP = profile.CarCP,
+		CarParts = profile.CarParts,
 		Rewards = profile.Rewards,
 		LastSeen = profile.LastSeen,
 		Claimed = profile.Claimed,

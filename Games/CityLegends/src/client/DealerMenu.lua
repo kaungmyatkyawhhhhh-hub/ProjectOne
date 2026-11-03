@@ -15,6 +15,9 @@
 	  * bottom: the brand bar with < >; bottom left: your level, XP and the next unlock
 	  * BUY asks first; the server checks money, level and ownership and charges once; then NEW CAR
 	    with confetti and DRIVE IT NOW. TEST DRIVE is there for cars you don't own.
+	  * (2026-11-03, "car class grades") every car shows its class badge ("A 661", CarStats.pi) in
+	    place of a level lock: cars cost money only, class X also needs player level 60. A brand's
+	    level-50 cars take 5% each off its prices (max 25%, the "BrandOff" attribute from CarLevels).
 	Numbers for show come from CarStats.
 ]]
 
@@ -241,7 +244,25 @@ local function levelNow(): number
 end
 
 local function needFor(id: string): number
-	return Cars.requiredLevel(id)
+	return CarStats.requiredLevel(id)
+end
+
+-- this player's brand discount on a car (CarLevels on the server: the "BrandOff" attribute), and
+-- the price after it (the server works out the same)
+local function brandOff(id: string): number
+	local raw = player:GetAttribute("BrandOff")
+	if type(raw) ~= "string" then
+		return 0
+	end
+	local ok, t = pcall(function()
+		return game:GetService("HttpService"):JSONDecode(raw)
+	end)
+	local at = Cars.SeriesOf[id]
+	local brand = at and at.series.Brand
+	return if ok and type(t) == "table" and brand then tonumber(t[brand]) or 0 else 0
+end
+local function priceOf(id: string): number
+	return math.floor(Cars.get(id).Price * (1 - brandOff(id)) / 100 + 0.5) * 100
 end
 
 ---------------------------------------------------------------------
@@ -356,6 +377,7 @@ local function build(root: Frame)
 	local testBtn = flatButton("TEST DRIVE", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -194, 0, 12), Size = UDim2.fromOffset(130, 46), TextSize = 14, TextColor3 = GOLD, Parent = top })
 	local badge = new("Frame", { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(0.5, -150, 0.5, 0), Size = UDim2.fromOffset(92, 46), BackgroundColor3 = Color3.fromRGB(8, 8, 10), Parent = top }, { corner(8), stroke(GOLD, 1.5, 0.15) })
 	local badgeText = label({ Text = "", TextColor3 = GOLD, Font = Enum.Font.GothamBlack, TextScaled = true, Size = UDim2.new(1, -10, 1, -12), Position = UDim2.fromOffset(5, 6), Parent = badge })
+	local _, setClass = kit.classBadge({ Height = 34, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(0.5, -252, 0.5, 0), Parent = top })
 	local nameText = label({ Text = "", TextSize = 22, Font = Enum.Font.GothamBlack, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 30, 0, 10), Size = UDim2.fromOffset(380, 28), Parent = top })
 	local costText = label({ Text = "", TextSize = 15, TextColor3 = GREY, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 30, 0, 40), Size = UDim2.fromOffset(380, 20), Parent = top })
 
@@ -601,17 +623,17 @@ local function build(root: Frame)
 				refreshAll()
 			end)
 			for i, id in ser.Ids do
-				local spec = Cars.get(id)
 				local row = rowBase(i, 78)
 				if id == s.id then
 					stroke(RED, 2, 0).Parent = row
 				end
 				thumb(row, id, Vector2.new(96, 62)).Position = UDim2.fromOffset(8, 8)
 				label({ Text = Cars.trimLabel(id), TextSize = 15, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(114, 8), Size = UDim2.new(1, -122, 0, 20), Parent = row })
-				label({ Text = money(spec.Price), TextSize = 14, TextColor3 = GREEN, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(114, 30), Size = UDim2.new(1, -122, 0, 18), Parent = row })
+				label({ Text = money(priceOf(id)), TextSize = 14, TextColor3 = GREEN, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(114, 30), Size = UDim2.new(1, -122, 0, 18), Parent = row })
 				local need = needFor(id)
-				local tag = if s.owned[id] then "✔ OWNED" elseif lv < need then "🔒 Level " .. need else "Level " .. need
-				label({ Text = tag, TextSize = 12, TextColor3 = if s.owned[id] then Color3.fromRGB(110, 190, 255) elseif lv < need then GOLD else GREY, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(114, 52), Size = UDim2.new(1, -122, 0, 16), Parent = row })
+				UI.classBadgeFor(id, nil, { Height = 18, Position = UDim2.fromOffset(114, 52), Parent = row })
+				local tag = if s.owned[id] then "✔ OWNED" elseif lv < need then "🔒 Lv " .. need else ""
+				label({ Text = tag, TextSize = 12, TextColor3 = if s.owned[id] then Color3.fromRGB(110, 190, 255) else GOLD, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(172, 53), Size = UDim2.new(1, -180, 0, 16), Parent = row })
 				row.Activated:Connect(function()
 					Audio.click()
 					if s.id ~= id then
@@ -639,6 +661,7 @@ local function build(root: Frame)
 				label({ Text = modelName(ser), TextSize = 15, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(114, 8), Size = UDim2.new(1, -122, 0, 20), Parent = row })
 				label({ Text = "from " .. money(Cars.get(baseId).Price), TextSize = 13, TextColor3 = GREEN, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(114, 32), Size = UDim2.new(1, -122, 0, 16), Parent = row })
 				label({ Text = "◉ " .. #ser.Ids .. " trim" .. (if #ser.Ids == 1 then "" else "s"), TextSize = 13, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(114, 54), Size = UDim2.new(1, -122, 0, 16), Parent = row })
+				UI.classBadgeFor(baseId, nil, { Height = 18, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -8, 0, 53), Parent = row })
 				row.Activated:Connect(function()
 					Audio.click()
 					s.series = ser
@@ -669,7 +692,10 @@ local function build(root: Frame)
 		-- top bar
 		badgeText.Text = (ser and ser.Brand) or ""
 		nameText.Text = spec.Name
-		costText.Text = if owned then "OWNED" else "COST: " .. money(spec.Price)
+		local letter, _, pi = CarStats.classOf(id)
+		setClass(letter, pi)
+		local off = brandOff(id)
+		costText.Text = if owned then "OWNED" elseif off > 0 then string.format("COST: %s   (-%d%% brand bonus)", money(priceOf(id)), math.floor(off * 100 + 0.5)) else "COST: " .. money(spec.Price)
 		costText.TextColor3 = if owned then Color3.fromRGB(110, 190, 255) else GREY
 		if owned then
 			buyBtn.Text = "DRIVE"
@@ -691,7 +717,7 @@ local function build(root: Frame)
 		local idx = if ser then (table.find(ser.Ids, id) or 1) else 1
 		prevTrim.Visible = idx > 1
 		nextTrim.Visible = idx < count
-		trimNote.Text = if owned then "✔ Owned" elseif lv < need then "🔒 Reach level " .. need else count .. " trims · " .. idx .. " of " .. count
+		trimNote.Text = if owned then "✔ Owned" elseif lv < need then "🔒 Class " .. letter .. ": reach level " .. need else count .. " trims · " .. idx .. " of " .. count
 		trimNote.TextColor3 = if owned then Color3.fromRGB(110, 190, 255) elseif lv < need then GOLD else GREEN
 		-- bars
 		speedVal.Text = stats.kmh .. " KM/H · " .. stats.mph .. " MPH"
@@ -777,7 +803,7 @@ local function build(root: Frame)
 				nextId, nextLv = sp.Id, n2
 			end
 		end
-		nextText.Text = if nextId then "Next: " .. Cars.get(nextId).Name .. " at level " .. nextLv else "Every car is open to you"
+		nextText.Text = if nextId then "Class X opens at level " .. nextLv .. ": " .. Cars.get(nextId).Name .. " and up" else "Every car is open to you"
 		-- the list (rebuilt only when what it shows changes)
 		local key = s.brand .. "|" .. (if s.series then s.series.Name else "-") .. "|" .. id .. "|" .. tostring(plv)
 		if key ~= lastListKey then
@@ -854,7 +880,7 @@ local function build(root: Frame)
 		local over = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.5, Size = UDim2.fromScale(1, 1), ZIndex = 90, Active = true, Parent = root })
 		local card = panel({ AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(460, 210), ZIndex = 91, BackgroundTransparency = 0.04, Parent = over })
 		local colourWord = if s.colour and PALETTE[s.colour] then " in " .. PALETTE[s.colour][1] else ""
-		label({ Text = "Buy the " .. spec.Name .. colourWord .. " for " .. money(spec.Price) .. "?", TextSize = 20, Font = Enum.Font.GothamBold, TextWrapped = true, Position = UDim2.fromOffset(24, 22), Size = UDim2.new(1, -48, 0, 70), ZIndex = 92, Parent = card })
+		label({ Text = "Buy the " .. spec.Name .. colourWord .. " for " .. money(priceOf(id)) .. "?", TextSize = 20, Font = Enum.Font.GothamBold, TextWrapped = true, Position = UDim2.fromOffset(24, 22), Size = UDim2.new(1, -48, 0, 70), ZIndex = 92, Parent = card })
 		label({ Text = "You have " .. money(s.data.Cash or 0), TextSize = 14, TextColor3 = GREY, Position = UDim2.fromOffset(24, 96), Size = UDim2.new(1, -48, 0, 18), ZIndex = 92, Parent = card })
 		local cancel = flatButton("CANCEL", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 24, 1, -20), Size = UDim2.new(0.5, -30, 0, 52), TextSize = 16, ZIndex = 92, Parent = card })
 		local yes = flatButton("BUY", { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -24, 1, -20), Size = UDim2.new(0.5, -30, 0, 52), BackgroundColor3 = RED, ZIndex = 92, Parent = card })
@@ -897,11 +923,11 @@ local function build(root: Frame)
 		end
 		local need = needFor(id)
 		if levelNow() < need then
-			showMsg("Reach level " .. need .. " to buy this one")
+			showMsg("Class X: reach level " .. need .. " to buy this one")
 			return
 		end
-		if (s.data.Cash or 0) < Cars.get(id).Price then
-			showMsg("Not enough cash: " .. money(Cars.get(id).Price - (s.data.Cash or 0)) .. " more", Theme.Danger)
+		if (s.data.Cash or 0) < priceOf(id) then
+			showMsg("Not enough cash: " .. money(priceOf(id) - (s.data.Cash or 0)) .. " more", Theme.Danger)
 			return
 		end
 		confirmBuy(id)
@@ -1008,8 +1034,8 @@ function DealerMenu.open(data: any, callbacks: Callbacks, focus: string?)
 		owned[id] = true
 	end
 	local first = if focus and Cars.ById[focus] then focus else (data.Selected or Cars.StarterId)
-	if not Cars.ById[first] then
-		first = Cars.StarterId
+	if not Cars.forSale(first) then
+		first = Cars.StarterId -- (a retired car isn't in the dealer)
 	end
 	local ser = seriesOf(first)
 	st = {

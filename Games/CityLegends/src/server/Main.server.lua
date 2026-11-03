@@ -14,6 +14,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
@@ -30,6 +31,7 @@ local Towers = require(script.Parent:WaitForChild("Towers"))
 local Chauffeur = require(script.Parent:WaitForChild("Chauffeur"))
 local Goals = require(script.Parent:WaitForChild("Goals"))
 local Brands = require(script.Parent:WaitForChild("Brands"))
+local CarLevels = require(script.Parent:WaitForChild("CarLevels"))
 
 Players.CharacterAutoLoads = false
 
@@ -108,6 +110,10 @@ end
 -- XP / levels
 ---------------------------------------------------------------------
 local function grantXp(player: Player, amount: number, source: string)
+	-- (2026-11-03) the car they're driving earns its share (CarLevels: driving sources only)
+	if amount > 0 then
+		CarLevels.onPlayerXp(player, amount, source)
+	end
 	local result = PlayerData.addXp(player, amount)
 	if not result then
 		return
@@ -328,6 +334,7 @@ local ctx = {
 	goals = Goals,
 }
 Goals.init(ctx)
+CarLevels.init(ctx)
 OnFoot.init(ctx)
 Police.init(ctx)
 Bank.init(ctx, Police)
@@ -398,6 +405,9 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })
 	model:SetAttribute("Plate", string.upper(player.Name):gsub("[^%w]", ""):sub(1, 7))
 	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (and its own plate)
+	if not stolen and not test then
+		CarLevels.applyTo(player, model, carId) -- its performance parts (Driving drives them)
+	end
 	model.Name = player.Name
 	model:SetAttribute("Owner", player.UserId)
 	if stolen then
@@ -507,20 +517,25 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any, colour: any)
 		return { ok = true, message = "Already owned", data = PlayerData.snapshot(player) }
 	end
 	local spec = Cars.ById[carId]
+	if not Cars.forSale(carId) then
+		return { ok = false, message = "Not for sale" }
+	end
 	-- new cars come from the dealership, in person
 	if not Dealership.near(player, ctx.getCar) then
 		return { ok = false, message = "Buy new cars at " .. Config.Dealership.Name }
 	end
-	-- every car is sold here once you reach its level (Cars.Levels; levels only, 2026-10-30)
-	local need = Cars.requiredLevel(carId, Config.brandTrimBonus(Brands.levelFor(player, carId)))
+	-- (2026-11-03) cars cost money only; class X also needs a player level (CarStats.requiredLevel)
+	local need = CarStats.requiredLevel(carId)
 	if (profile.Level or 1) < need then
-		return { ok = false, message = "Unlocks at level " .. need }
+		return { ok = false, message = "Class X opens at level " .. need }
 	end
-	if profile.Cash < spec.Price then
+	-- the brand discount for this brand's level-50 cars (CarLevels)
+	local price = CarLevels.priceFor(player, carId)
+	if profile.Cash < price then
 		return { ok = false, message = "Not enough cash" }
 	end
 	buying[player] = true
-	PlayerData.addCash(player, -spec.Price)
+	PlayerData.addCash(player, -price)
 	profile.Owned[carId] = true
 	local swatch = if type(colour) == "number" then Config.Customs.Palette[math.floor(colour)] else nil
 	if swatch then
@@ -535,7 +550,7 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any, colour: any)
 	end
 	buying[player] = nil
 	task.spawn(PlayerData.save, player)
-	return { ok = true, message = "Purchased " .. spec.Name, data = PlayerData.snapshot(player) }
+	return { ok = true, message = "Purchased " .. spec.Name, price = price, data = PlayerData.snapshot(player) }
 end
 
 -- a test drive at Legends Motors (owner, 2026-10-30): a dealer car you don't own, once each per
@@ -552,6 +567,9 @@ TestDrive.OnServerInvoke = function(player: Player, carId: any)
 	end
 	if profile.Owned[carId] then
 		return { ok = false, message = "You own it: drive it" }
+	end
+	if not Cars.forSale(carId) then
+		return { ok = false, message = "Not for sale" }
 	end
 	if not Dealership.near(player, ctx.getCar) then
 		return { ok = false, message = "Test drives start at " .. Config.Dealership.Name }
@@ -659,7 +677,9 @@ ClaimStarter.OnServerInvoke = function(player: Player, carId: any)
 	end
 	local pick = nil
 	for _, c in Config.Menu.StarterChoices do
-		if c.id == carId then
+		-- (a car still waiting for its model is offered as its stand-in)
+		local offered = if Cars.forSale(c.id) or not c.fallback then c.id else c.fallback
+		if offered == carId then
 			pick = c
 		end
 	end
@@ -785,7 +805,7 @@ CutUp.OnServerEvent:Connect(function(player: Player, info: any)
 	table.insert(recent, now)
 	s.cutTimes = recent
 
-	local spec = Cars.get(car:GetAttribute("CarId") :: string)
+	local spec = CarStats.tunedSpec(car:GetAttribute("CarId") :: string, CarStats.decodeParts(car:GetAttribute("Parts")))
 	local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.2) -- (nitro boosts past the top speed)
 	-- a little slack for replication lag
 	if mph < E.CutMinMph * 0.8 then
@@ -842,7 +862,7 @@ RunService.Heartbeat:Connect(function(dt)
 	for player, s in sessions do
 		local car = s.car
 		if car and car.PrimaryPart then
-			local spec = Cars.get(car:GetAttribute("CarId") :: string)
+			local spec = CarStats.tunedSpec(car:GetAttribute("CarId") :: string, CarStats.decodeParts(car:GetAttribute("Parts")))
 			local mph = math.min(Config.spsToMph(horizontalSpeed(car.PrimaryPart)), spec.TopSpeed * 1.2) -- (nitro boosts past the top speed)
 			-- a test drive that's over: back to your own car, where the test car was
 			local ends = car:GetAttribute("TestEnds")
@@ -940,6 +960,23 @@ local function watchConsoleUnlock(player: Player)
 	end)
 end
 
+-- testers (2026-11-03): game.Players.NAME:SetAttribute("CarXp", n) gives the car they're driving n
+-- car XP (level-ups, CP and the brand discount as if driven)
+local function watchConsoleCarXp(player: Player)
+	player:GetAttributeChangedSignal("CarXp"):Connect(function()
+		local n = player:GetAttribute("CarXp")
+		if type(n) ~= "number" then
+			return
+		end
+		player:SetAttribute("CarXp", nil)
+		local car = getSession(player).car
+		local carId = car and car:GetAttribute("CarId")
+		if type(carId) == "string" then
+			CarLevels.add(player, carId, n)
+		end
+	end)
+end
+
 -- testers (owner, 2026-10-23: "a server command line to unlock everything"): every car, the
 -- level every car needs, every penthouse and hotel suite, every house, every chauffeur contract,
 -- the top VIP card and every flex item
@@ -956,7 +993,7 @@ local function watchConsoleEverything(player: Player)
 		local need = 1
 		for _, spec in Cars.List do
 			profile.Owned[spec.Id] = true
-			need = math.max(need, Cars.requiredLevel(spec.Id))
+			need = math.max(need, CarStats.requiredLevel(spec.Id))
 		end
 		if (profile.Level or 1) < need then
 			profile.Level = need
@@ -1023,8 +1060,10 @@ local function onPlayerAdded(player: Player)
 	watchConsoleCash(player)
 	watchConsoleUnlock(player)
 	watchConsoleEverything(player)
+	watchConsoleCarXp(player)
 	PlayerData.load(player)
 	Brands.publish(player)
+	CarLevels.publish(player)
 	-- Studio play tests start with everything unlocked and the test cash (owner, 2026-10-23:
 	-- "always make me unlock all in the testing"); never in a live server
 	if RunService:IsStudio() and Config.Testing.StudioUnlockAll then

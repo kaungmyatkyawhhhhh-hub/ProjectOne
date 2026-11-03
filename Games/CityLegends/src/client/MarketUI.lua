@@ -445,7 +445,8 @@ local function stallsModal()
 	for i, it in s.stash do
 		local row = new("Frame", { Position = UDim2.fromOffset(0, (i - 1) * 58), Size = UDim2.new(1, -8, 0, 52), BackgroundColor3 = C.bg, Parent = list }, { corner(10), stroke(C.stroke, 1, 0.2) })
 		tile(row, it.car, 36, 8, 8)
-		text({ Text = carName(it.car), TextSize = 13, Position = UDim2.fromOffset(52, 7), Size = UDim2.new(1, -200, 0, 18), Parent = row })
+		UI.classBadgeFor(it.car, nil, { Height = 18, Position = UDim2.fromOffset(52, 7), Parent = row })
+		text({ Text = carName(it.car), TextSize = 13, Position = UDim2.fromOffset(112, 7), Size = UDim2.new(1, -260, 0, 18), Parent = row })
 		local profit = it.value - it.paid
 		text({ Text = (COND[it.cond] and COND[it.cond].Name or it.cond) .. " · " .. (if it.paid > 0 then pct(profit / it.paid) else ""), Font = MONO, TextSize = 11, TextColor3 = if profit >= 0 then C.green else C.red, Position = UDim2.fromOffset(52, 27), Size = UDim2.new(1, -200, 0, 16), Parent = row })
 		local b = pill(row, "SELL " .. money(math.floor(it.value * (1 - s.fee))), C.purple, true, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(136, 32) })
@@ -637,7 +638,9 @@ end
 local function listingRow(parent: Instance, l: { [string]: any }, y: number, w: number)
 	local row = new("Frame", { Position = UDim2.fromOffset(0, y), Size = UDim2.fromOffset(w - 8, 56), BackgroundColor3 = C.card, Parent = parent }, { corner(8) })
 	tile(row, l.car, 36, 10, 10)
-	text({ Text = carName(l.car), TextSize = 13, Position = UDim2.fromOffset(56, 8), Size = UDim2.new(1, -230, 0, 18), Parent = row })
+	-- (2026-11-03) the car's class badge before its name
+	UI.classBadgeFor(l.car, nil, { Height = 18, Position = UDim2.fromOffset(56, 8), Parent = row })
+	text({ Text = carName(l.car), TextSize = 13, Position = UDim2.fromOffset(116, 8), Size = UDim2.new(1, -290, 0, 18), Parent = row })
 	text({ Text = ("★%.1f"):format(l.rating), Font = MONO, TextSize = 10, TextColor3 = C.sub, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -150, 0, 10), Size = UDim2.fromOffset(40, 14), TextXAlignment = Enum.TextXAlignment.Right, Parent = row })
 	local cw = condTag(row, l.cond, 56, 31)
 	local diff = if l.mkt > 0 then l.ask / l.mkt - 1 else 0

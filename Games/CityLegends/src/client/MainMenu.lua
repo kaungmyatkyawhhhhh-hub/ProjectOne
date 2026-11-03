@@ -32,6 +32,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local CarStats = require(Shared:WaitForChild("CarStats"))
 local TravelSpots = require(Shared:WaitForChild("TravelSpots"))
 
 local UI = require(script.Parent:WaitForChild("UI"))
@@ -275,6 +276,17 @@ local function ownedList(): { string }
 	return list
 end
 
+-- how many of the cars on sale you own (retired ones you keep don't count towards the total)
+local function ownedOnSale(): number
+	local n = 0
+	for _, id in ownedList() do
+		if Cars.forSale(id) then
+			n += 1
+		end
+	end
+	return n
+end
+
 local function claimed(): boolean
 	return data().Claimed ~= false
 end
@@ -320,8 +332,11 @@ local function buildBackground(root: Frame)
 	})
 end
 
-local function tierColor(tier: string): Color3
-	return if tier == "High" then GOLD elseif tier == "Mid" then Color3.fromRGB(120, 170, 255) else MINT
+-- (2026-11-03, "classes only": the Starter / Mid / High tiers aren't shown any more) a car's parts
+-- (its level and CP too) from CarUpgrades, for the class badge
+local function partsOf(id: string): { [string]: number }?
+	local info = if UI.carInfo then UI.carInfo(id) else nil
+	return info and info.parts
 end
 
 local openClaim: () -> ()
@@ -364,9 +379,9 @@ local function buildTopBar()
 		end
 		text({ Text = if model then "DRIVING" else "YOUR CAR", FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Position = UDim2.fromOffset(24, 12), Size = UDim2.fromOffset(200, 16), Parent = fill })
 		text({ Text = spec.Name, FontFace = HEAVY, TextSize = 28, TextScaled = true, Position = UDim2.fromOffset(24, 30), Size = UDim2.new(1, -80, 0, 36), Parent = fill })
-		local chip = new("Frame", { BackgroundColor3 = tierColor(spec.Tier), Position = UDim2.fromOffset(24, 72), Size = UDim2.fromOffset(78, 22), Parent = fill }, { corner(11) })
-		text({ Text = string.upper(spec.Tier), FontFace = HEAVY, TextSize = 13, TextColor3 = NAVY0, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), Parent = chip })
-		text({ Text = string.upper(Cars.ClassLabels[spec.Class] or spec.Class), FontFace = BOLD, TextSize = 14, TextColor3 = SUB, Position = UDim2.fromOffset(112, 72), Size = UDim2.fromOffset(160, 22), Parent = fill })
+		UI.classBadgeFor(spec.Id, partsOf(spec.Id), { Height = 22, Position = UDim2.fromOffset(24, 72), Parent = fill })
+		local info = if UI.carInfo then UI.carInfo(spec.Id) else nil
+		text({ Text = string.upper(Cars.ClassLabels[spec.Class] or spec.Class) .. (if info then "  ·  CAR LV " .. info.level else ""), FontFace = BOLD, TextSize = 14, TextColor3 = SUB, Position = UDim2.fromOffset(98, 72), Size = UDim2.fromOffset(220, 22), Parent = fill })
 		new("Frame", { BackgroundColor3 = spec.Color, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -20, 0.5, 0), Size = UDim2.fromOffset(34, 34), Parent = fill }, {
 			new("UICorner", { CornerRadius = UDim.new(1, 0) }),
 			new("UIStroke", { Color = WHITE, Thickness = 2 }),
@@ -1234,7 +1249,11 @@ openClaim = function()
 	local n = #Config.Menu.StarterChoices
 	local cw = (W - (n - 1) * 16) / n
 	for k, choice in Config.Menu.StarterChoices do
-		local spec = Cars.ById[choice.id]
+		-- (a pick still waiting for its model shows its stand-in: Config.Menu.StarterChoices fallback)
+		local useFallback = choice.fallback ~= nil and not Cars.forSale(choice.id)
+		local carId = if useFallback then choice.fallback :: string else choice.id
+		local feel = if useFallback then choice.fallbackFeel or choice.feel else choice.feel
+		local spec = Cars.ById[carId]
 		if not spec then
 			continue
 		end
@@ -1244,17 +1263,18 @@ openClaim = function()
 		})
 		new("UIStroke", { Name = "Pick", Color = MINT, Thickness = 4, Transparency = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = card })
 		local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 1, -32), Parent = card })
-		text({ Text = string.upper(Cars.ClassLabels[spec.Class] or spec.Class), FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Size = UDim2.new(1, 0, 0, 16), Parent = body })
+		UI.classBadgeFor(spec.Id, nil, { Height = 18, Position = UDim2.fromOffset(0, -1), Parent = body })
+		text({ Text = string.upper(Cars.ClassLabels[spec.Class] or spec.Class), FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Position = UDim2.fromOffset(60, 0), Size = UDim2.new(1, -60, 0, 16), Parent = body })
 		text({ Text = spec.Name, FontFace = HEAVY, TextSize = 28, TextScaled = true, Position = UDim2.fromOffset(0, 18), Size = UDim2.new(1, -44, 0, 34), Parent = body })
 		new("Frame", { BackgroundColor3 = spec.Color, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 20), Size = UDim2.fromOffset(30, 30), Parent = body }, {
 			new("UICorner", { CornerRadius = UDim.new(1, 0) }),
 			new("UIStroke", { Color = WHITE, Thickness = 2 }),
 		})
-		text({ Text = "“" .. choice.feel .. "”", FontFace = BOLD, TextSize = 18, TextColor3 = MINT, Position = UDim2.fromOffset(0, 58), Size = UDim2.new(1, 0, 0, 24), Parent = body })
+		text({ Text = "“" .. feel .. "”", FontFace = BOLD, TextSize = 18, TextColor3 = MINT, Position = UDim2.fromOffset(0, 58), Size = UDim2.new(1, 0, 0, 24), Parent = body })
 		carStats(body, 96, spec)
-		cards[choice.id] = card
+		cards[carId] = card
 		focusable(card, function()
-			picked = choice.id
+			picked = carId
 			for id, c in cards do
 				(c:FindFirstChild("Pick") :: UIStroke).Transparency = if id == picked then 0 else 1
 			end
@@ -1395,9 +1415,9 @@ local function buildCampaign(page: Frame)
 			if nxt then
 				playSub.Text ..= "\nNext goal: " .. tostring(nxt.text)
 			end
-			achSub.Text = string.format("Legends Path %d / %d\nCars %d / %d", done, total, #ownedList(), #Cars.List)
+			achSub.Text = string.format("Legends Path %d / %d\nCars %d / %d", done, total, ownedOnSale(), #Cars.List)
 		else
-			achSub.Text = string.format("Cars %d / %d", #ownedList(), #Cars.List)
+			achSub.Text = string.format("Cars %d / %d", ownedOnSale(), #Cars.List)
 		end
 	end)
 
@@ -1474,9 +1494,9 @@ local function buildCars(page: Frame)
 			new("UICorner", { CornerRadius = UDim.new(1, 0) }),
 			new("UIStroke", { Color = WHITE, Thickness = 2 }),
 		})
-		local chip = new("Frame", { BackgroundColor3 = tierColor(spec.Tier), Position = UDim2.fromOffset(0, 58), Size = UDim2.fromOffset(78, 22), Parent = body }, { corner(11) })
-		text({ Text = string.upper(spec.Tier), FontFace = HEAVY, TextSize = 13, TextColor3 = NAVY0, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), Parent = chip })
-		text({ Text = string.upper(Cars.ClassLabels[spec.Class] or spec.Class) .. "  ·  " .. Cars.trimLabel(spec.Id), FontFace = BOLD, TextSize = 14, TextColor3 = SUB, Position = UDim2.fromOffset(88, 58), Size = UDim2.new(1, -88, 0, 22), TextTruncate = Enum.TextTruncate.AtEnd, Parent = body })
+		UI.classBadgeFor(spec.Id, partsOf(spec.Id), { Height = 22, Position = UDim2.fromOffset(0, 58), Parent = body })
+		local info = if UI.carInfo then UI.carInfo(spec.Id) else nil
+		text({ Text = (if info then "CAR LV " .. info.level .. "  ·  " .. info.cp .. " CP  ·  " else "") .. string.upper(Cars.ClassLabels[spec.Class] or spec.Class), FontFace = BOLD, TextSize = 14, TextColor3 = SUB, Position = UDim2.fromOffset(74, 58), Size = UDim2.new(1, -74, 0, 22), TextTruncate = Enum.TextTruncate.AtEnd, Parent = body })
 		carStats(body, 92, spec)
 		local by = 210
 		local driving = Driving.getModel()
@@ -1496,7 +1516,14 @@ local function buildCars(page: Frame)
 				api.drive(spec.Id)
 			end
 		end, GOLD)
-		local fav = button(if favs[spec.Id] then "★ FAVOURITE" else "☆ SET AS FAVOURITE", GOLD, { Position = UDim2.fromOffset(0, by + 56), Size = UDim2.new(1, 0, 0, 40), TextSize = 17, Parent = body })
+		local fav = button(if favs[spec.Id] then "★ FAVOURITE" else "☆ FAVOURITE", GOLD, { Position = UDim2.fromOffset(0, by + 56), Size = UDim2.new(0.5, -4, 0, 40), TextSize = 16, Parent = body })
+		-- (2026-11-03) the car's performance parts (CarUpgrades)
+		local upgrade = button("UPGRADE", GOLD, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, by + 56), Size = UDim2.new(0.5, -4, 0, 40), TextSize = 16, Parent = body })
+		focusable(upgrade, function()
+			if UI.onUpgrade then
+				UI.onUpgrade(spec.Id)
+			end
+		end, GOLD)
 		focusable(fav, function()
 			if favs[spec.Id] then
 				favs[spec.Id] = nil
@@ -1540,9 +1567,13 @@ local function buildCars(page: Frame)
 		if isSel then
 			new("UIStroke", { Color = MINT, Thickness = 3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
 		end
-		new("Frame", { BackgroundColor3 = tierColor(spec.Tier), BorderSizePixel = 0, Size = UDim2.new(0, 5, 1, 0), Parent = b }, { corner(3) })
+		local parts = partsOf(id)
+		local letter = CarStats.classOf(id, parts)
+		new("Frame", { BackgroundColor3 = Config.CarClasses.Colors[letter] or MINT, BorderSizePixel = 0, Size = UDim2.new(0, 5, 1, 0), Parent = b }, { corner(3) })
 		text({ Text = spec.Name, FontFace = HEAVY, TextSize = 17, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(16, 10), Size = UDim2.new(1, -60, 0, 20), Parent = b })
-		text({ Text = string.upper(spec.Tier) .. "  ·  " .. speedText(spec.TopSpeed) .. "  ·  " .. string.format("%.1f s", spec.ZeroToSixty), FontFace = BOLD, TextSize = 13, TextColor3 = SUB, Position = UDim2.fromOffset(16, 34), Size = UDim2.new(1, -24, 0, 16), Parent = b })
+		local info = if UI.carInfo then UI.carInfo(id) else nil
+		text({ Text = (if info then "LV " .. info.level .. "  ·  " else "") .. speedText(spec.TopSpeed) .. "  ·  " .. string.format("%.1f s", spec.ZeroToSixty), FontFace = BOLD, TextSize = 13, TextColor3 = SUB, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(16, 34), Size = UDim2.new(1, -78, 0, 16), Parent = b })
+		UI.classBadgeFor(id, parts, { Height = 18, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -10, 0, 33), Parent = b })
 		new("Frame", { BackgroundColor3 = spec.Color, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -10, 0, 10), Size = UDim2.fromOffset(20, 20), Parent = b }, {
 			new("UICorner", { CornerRadius = UDim.new(1, 0) }),
 			new("UIStroke", { Color = WHITE, Thickness = 1.5 }),
@@ -1563,7 +1594,7 @@ local function buildCars(page: Frame)
 			c:Destroy()
 		end
 		local owned = ownedList()
-		count.Text = string.format("%d / %d owned", #owned, #Cars.List)
+		count.Text = string.format("%d / %d owned", ownedOnSale(), #Cars.List)
 		local q = string.lower(search)
 		local list = {}
 		for _, id in owned do

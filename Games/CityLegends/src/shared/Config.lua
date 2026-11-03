@@ -59,10 +59,12 @@ Config.Knock = {
 -- button, in place of SETTINGS). A new player picks 1 of 3 starter cars; the world map fast travels
 -- to the venues (server-checked, not while wanted or in a race / job / heist, a cooldown between)
 Config.Menu = {
+	-- (owner, 2026-11-03: the Chasor, the 350Z and the A45 S; until the A45 S has its model the
+	-- Camaro stands in: `fallback`)
 	StarterChoices = {
-		{ id = "suzaki_swift", feel = "Easy and grippy" },
-		{ id = "byt_seal", feel = "Fast but loose" },
-		{ id = "kio_ev6", feel = "Big and comfy" },
+		{ id = "toyoka_chaser", feel = "Drifts easily" },
+		{ id = "nisun_350z", feel = "Grippy sports car" },
+		{ id = "bentz_a45s", feel = "Small, quick, all-wheel drive", fallback = "chevo_camaro", fallbackFeel = "Loud and fast" },
 	},
 	FastTravelCooldown = 30, -- seconds between trips
 	-- the store (Playbook money rules): names and exact effects here, prices read from Roblox.
@@ -70,7 +72,7 @@ Config.Menu = {
 	Store = {
 		{ key = "vip", name = "VIP", kind = "Pass", id = nil, art = "store_vip", effect = "A VIP tag, the VIP bays in every tower garage and +10% cash from cut-ups" },
 		{ key = "cash2x", name = "2x Cash", kind = "Pass", id = nil, art = "store_cash2x", effect = "Double the cash from driving, cut-ups and jobs, for good" },
-		{ key = "starter", name = "Starter Pack", kind = "Product", id = nil, art = "store_starter", effect = "$50,000 and a Mid car of your choice, once per player" },
+		{ key = "starter", name = "Starter Pack", kind = "Product", id = nil, art = "store_starter", effect = "$50,000 and a car of your choice, once per player" },
 		{ key = "cash_s", name = "Cash: $25,000", kind = "Product", id = nil, art = "store_bundle", effect = "$25,000 added to your cash" },
 		{ key = "cash_m", name = "Cash: $100,000", kind = "Product", id = nil, art = "store_bundle", effect = "$100,000 added to your cash" },
 		{ key = "garage", name = "Garage Space", kind = "Product", id = nil, art = "store_garage", effect = "One more garage space at your house" },
@@ -1460,9 +1462,152 @@ Config.Goals = {
 	TaskLevelBoost = 0.05, -- task cash x(1 + this per level above 1), at most x3
 }
 
+---------------------------------------------------------------------
+-- Car classes, car levels and parts (owner, 2026-11-03: "car class grades and car levels")
+--   * every car has a Performance Index (PI, 100-999) worked out from its numbers (CarStats.pi):
+--     0-60, power-to-weight, top speed, handling, braking and weight; its class letter comes
+--     from these ranges
+--   * cars cost money only; class X also needs this player level (owner: "price only, X needs
+--     level 60"). The player level stays for XP, rewards and goals.
+---------------------------------------------------------------------
+Config.CarClasses = {
+	-- { letter, lowest PI, highest PI } (owner picked the suggested ranges)
+	Ranges = {
+		{ "D", 100, 400 },
+		{ "C", 401, 500 },
+		{ "B", 501, 600 },
+		{ "A", 601, 700 },
+		{ "S1", 701, 750 },
+		{ "S2", 751, 800 },
+		{ "R", 801, 900 },
+		{ "X", 901, 999 },
+	},
+	-- our own badge colours (same idea as the racing games: one colour per class)
+	Colors = {
+		D = Color3.fromRGB(110, 196, 228),
+		C = Color3.fromRGB(116, 214, 112),
+		B = Color3.fromRGB(246, 196, 56),
+		A = Color3.fromRGB(255, 136, 40),
+		S1 = Color3.fromRGB(236, 64, 64),
+		S2 = Color3.fromRGB(184, 76, 226),
+		R = Color3.fromRGB(64, 112, 255),
+		X = Color3.fromRGB(255, 52, 150),
+	},
+	XLevel = 60, -- the player level class X cars need at the dealer
+	-- how much each number counts towards the PI (they add up to 1) and the range each is read in
+	Weights = { accel = 0.2, power = 0.4, speed = 0.12, grip = 0.17, brake = 0.05, weight = 0.06 },
+	SpeedCurve = 1.3, -- top speed counts more and more near the top
+	Accel = { 11, 2.2 }, -- 0-60 mph seconds: the first scores 0, the second 1 (log scale)
+	Power = { 90, 800 }, -- power-to-weight, hp per tonne (log scale)
+	Speed = { 90, 275 }, -- top speed mph
+	Grip = { 0.45, 0.97 }, -- Handling
+	Weight = { 2800, 1200 }, -- kg (lighter scores higher)
+	Map = { 0.03, 0.993 }, -- the weighted score that becomes PI 100 and PI 999
+	Curve = 1, -- (that share raised to this first: above 1 spreads the top)
+}
+
+-- the class letter and colour of a PI
+function Config.carClass(pi: number): (string, Color3)
+	local C = Config.CarClasses
+	local letter = C.Ranges[1][1]
+	for _, r in C.Ranges do
+		if pi >= r[2] then
+			letter = r[1]
+		end
+	end
+	return letter, C.Colors[letter] or Color3.new(1, 1, 1)
+end
+
+-- Car levels: each car you own levels up from 1 to Max by driving it. A car earns the player XP you
+-- get in it (Sources: driving, cut-ups, races, drifts, speed traps, jumps, duels, police escapes,
+-- jobs, the bank delivery) times FromPlayerXp; goals don't count. With about 1.5 XP a second of
+-- mixed driving, 1 -> 50 takes about 2.5-3 hours (owner: "fast levelling")
+Config.CarLevels = {
+	Max = 50,
+	XpBase = 150, -- car XP from level 1 to 2
+	XpStep = 6, -- each level after needs this much more (1 -> 50: about 14,400 XP in all)
+	FromPlayerXp = 1,
+	Sources = { drive = true, cut = true, race = true, drift = true, ["speed trap"] = true, jump = true, duel = true, escape = true, job = true, bank = true },
+	CpPerLevel = 1, -- Car Points for each level (owner: "1 CP per level"; 49 by level 50)
+	-- brand discount (owner): each of a brand's cars at level 50 takes this off that brand's dealer
+	-- prices, up to BrandMax (5 cars). The brand levels (Config.Brands) stay as well (owner: "keep both")
+	BrandOff = 0.05,
+	BrandMax = 0.25,
+	-- Legends Customs looks can be paid with the car's CP too (owner: "both"): CP per change
+	LookCp = { paint = 1, finish = 1, accent = 1, tint = 1, glow = 2, rim = 1, plate = 1, head = 1 },
+}
+
+-- car XP needed to go from `level` to `level + 1`
+function Config.carXpFor(level: number): number
+	local L = Config.CarLevels
+	return math.floor(L.XpBase + L.XpStep * (math.max(1, level) - 1))
+end
+
+-- Performance parts (owner: "8 parts", 3 stages, from car level 1 in any order; paid with the car's
+-- CP or cash, the server checks and saves). Each stage replaces the one before; the numbers are what
+-- that stage does in all: accel = 0-60 time cut, speed = top speed added, grip = Handling added,
+-- brake = braking force added, weight = weight taken off (shares), pi = PI added after the rest
+-- (the flywheel's is below 0). They raise the car's PI and can move it up a class.
+-- (owner, 2026-11-03: "you can't just upgrade engines like that, you have to press engine and then
+-- upgrade these") Engine is a menu of its own 5 parts (Groups.engine), with the racing games' rules:
+--   * Intake & Manifold works with the exhaust: past the exhaust's stage it gives half (IntakeOverExhaust)
+--   * Ignition & Fuel is cheap; Race Camshafts without Race Fuel flatline (count as Sport)
+--   * a lighter Flywheel revs quicker but lowers the PI
+--   * Displacement gives the most power and PI and costs the most: fit it last
+Config.CarParts = {
+	-- the parts screen's rows ("engine" opens its group)
+	Menu = { "engine", "turbo", "exhaust", "gearbox", "tyres", "brakes", "suspension", "weight" },
+	-- every part key (saved, on the car's "Parts" attribute)
+	Keys = { "intake", "fuel", "flywheel", "cams", "displacement", "turbo", "exhaust", "gearbox", "tyres", "brakes", "suspension", "weight" },
+	Groups = {
+		engine = { name = "Engine", icon = "⚙", parts = { "intake", "fuel", "flywheel", "cams", "displacement" } },
+	},
+	Stages = { "STREET", "SPORT", "RACE" },
+	IntakeOverExhaust = 0.5, -- an intake above the exhaust's stage gives this share of the extra
+	-- (owner, 2026-11-03: "S2 and R and X cars that are already in that range stock from the
+	-- dealership, not tuneable except tyres, gearbox, suspension, exhaust, otherwise it would be too
+	-- overpowered"; looks at Legends Customs aren't limited)
+	TopClasses = { S2 = true, R = true, X = true }, -- by the car's stock class
+	TopAllowed = { tyres = true, gearbox = true, suspension = true, exhaust = true },
+	Cp = { 2, 5, 10 }, -- CP for each stage (owner: about 2 / 5 / 10)
+	Cash = { 1500, 4000, 10000 }, -- cash for each stage, times the car's price factor:
+	CashRef = 50000, --   (car price / CashRef) ^ 0.5, from 1 to CashMax
+	CashMax = 10,
+	-- (cp / cashK: a part's own CP per stage and cash multiplier, when not the usual)
+	Parts = {
+		intake = { name = "Intake & Manifold", icon = "⚙", hint = "Breathes with the exhaust: past the exhaust's stage it gives half", stages = { { accel = 0.01, speed = 0.005 }, { accel = 0.02, speed = 0.01 }, { accel = 0.035, speed = 0.015 } } },
+		fuel = { name = "Ignition & Fuel System", icon = "⚙", hint = "Cheap power. Race Camshafts need Race Fuel", cp = { 1, 2, 4 }, cashK = 0.5, stages = { { accel = 0.005 }, { accel = 0.01 }, { accel = 0.02 } } },
+		flywheel = { name = "Flywheel", icon = "⚙", hint = "Revs quicker, but lowers the PI a little", cp = { 1, 3, 6 }, cashK = 0.6, stages = { { accel = 0.005, weight = 0.003, pi = -3 }, { accel = 0.01, weight = 0.006, pi = -6 }, { accel = 0.015, weight = 0.01, pi = -10 } } },
+		cams = { name = "Camshafts, Pistons & Valves", icon = "⚙", hint = "High-rev power. Race needs Race Fuel or it flatlines", stages = { { accel = 0.01, speed = 0.005 }, { accel = 0.02, speed = 0.01 }, { accel = 0.035, speed = 0.02 } } },
+		displacement = { name = "Displacement", icon = "⚙", hint = "The most power and the most PI: fit it last", cp = { 4, 8, 15 }, cashK = 2, stages = { { accel = 0.02, speed = 0.01 }, { accel = 0.04, speed = 0.015 }, { accel = 0.06, speed = 0.025 } } },
+		turbo = { name = "Turbo", icon = "🌀", stages = { { accel = 0.02, speed = 0.01 }, { accel = 0.04, speed = 0.02 }, { accel = 0.06, speed = 0.03 } } },
+		exhaust = { name = "Exhaust", icon = "💨", stages = { { accel = 0.01, speed = 0.005 }, { accel = 0.02, speed = 0.01 }, { accel = 0.035, speed = 0.015 } } },
+		gearbox = { name = "Gearbox", icon = "⚙", stages = { { accel = 0.015, speed = 0.01 }, { accel = 0.03, speed = 0.02 }, { accel = 0.05, speed = 0.03 } } },
+		tyres = { name = "Tyres", icon = "◎", stages = { { grip = 0.02, brake = 0.03 }, { grip = 0.04, brake = 0.06 }, { grip = 0.07, brake = 0.1 } } },
+		brakes = { name = "Brakes", icon = "◉", stages = { { brake = 0.08 }, { brake = 0.16 }, { brake = 0.25 } } },
+		suspension = { name = "Suspension", icon = "⇕", stages = { { grip = 0.015 }, { grip = 0.03 }, { grip = 0.05 } } },
+		weight = { name = "Weight Reduction", icon = "▽", stages = { { weight = 0.03 }, { weight = 0.06 }, { weight = 0.1 } } },
+	},
+}
+
+-- the cash price of a part stage on a car of this price (`key`: the part, for its own multiplier)
+function Config.partCash(stage: number, carPrice: number, key: string?): number
+	local P = Config.CarParts
+	local k = math.clamp((math.max(carPrice, 1) / P.CashRef) ^ 0.5, 1, P.CashMax)
+	local def = if key then P.Parts[key] else nil
+	return math.floor((P.Cash[stage] or 0) * k * ((def and def.cashK) or 1) / 100 + 0.5) * 100
+end
+
+-- the CP price of a part stage
+function Config.partCp(stage: number, key: string?): number
+	local P = Config.CarParts
+	local def = if key then P.Parts[key] else nil
+	return ((def and def.cp) or P.Cp)[stage] or 0
+end
+
 -- Brand levels (owner, 2026-10-30, from the research: Midnight Racing's manufacturer levels):
 -- driving a brand's cars levels the brand up; each level takes CustomsOff off Legends Customs on
--- its cars, and every TrimEvery levels opens its trims one player level sooner
+-- its cars (2026-11-03: cars have no level locks any more, so TrimEvery / TrimMax do nothing now)
 Config.Brands = {
 	XpPerMile = 12,
 	XpPerCut = 3,

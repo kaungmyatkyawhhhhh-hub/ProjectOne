@@ -102,7 +102,9 @@ local function stepPrice(id: string)
 	end
 end
 
-for _, spec in Cars.List do
+-- (every car, the retired ones too: a unit of one in a stash still has a price and sells; only cars
+-- on sale are listed, Cars.List)
+for _, spec in Cars.All do
 	local b = math.max(M.MinBase, spec.Price * M.BaseK)
 	base[spec.Id] = b
 	price[spec.Id] = b * rng:NextNumber(0.85, 1.15)

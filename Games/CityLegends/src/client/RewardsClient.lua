@@ -261,7 +261,7 @@ local function pageDaily(body: Frame): (() -> ())?
 		kit.icon(if reward == "car" then "car" else "gift", area, math.min(36, box - 14), if past then Theme.Money elseif reward == "car" then GOLD else Theme.Text)
 		text(f, if reward == "car" then "FREE CAR" else UI.formatCash(reward :: number), 11, if reward == "car" then GOLD else Theme.Money, { Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Center, TextScaled = box < 56, Position = UDim2.new(0, 2, 1, -30), Size = UDim2.new(1, -4, 0, 16) })
 	end
-	text(body, "Come back every day. Day 7 gives you a free Mid car you don't own yet.\nMiss more than 2 days and the streak starts again at day 1.", 13, Theme.SubText, { Position = UDim2.fromOffset(0, 128), Size = UDim2.new(1, 0, 0, 40) })
+	text(body, "Come back every day. Day 7 gives you a free car you don't own yet.\nMiss more than 2 days and the streak starts again at day 1.", 13, Theme.SubText, { Position = UDim2.fromOffset(0, 128), Size = UDim2.new(1, 0, 0, 40) })
 	local b = button("CLAIM", Theme.Money, { Position = UDim2.new(0, 0, 1, -54), Size = UDim2.new(1, 0, 0, 50), TextSize = 20, ZIndex = 74, Parent = body })
 	local busy = false
 	local function tick()

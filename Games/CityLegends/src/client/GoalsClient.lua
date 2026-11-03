@@ -245,7 +245,7 @@ local function buildStreak(body: Frame)
 			label({ Text = "✓", TextSize = 14, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -6, 0, 4), Size = UDim2.fromOffset(16, 16), ZIndex = 75, Parent = f })
 		end
 	end
-	label({ Text = "Come back every day. Day 7 gives you a free Mid car you don't own yet.\nMiss more than 2 days and the streak starts again at day 1.", TextSize = 13, TextColor3 = Theme.SubText, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(0, 142), Size = UDim2.new(1, 0, 0, 40), ZIndex = 73, Parent = body })
+	label({ Text = "Come back every day. Day 7 gives you a free car you don't own yet.\nMiss more than 2 days and the streak starts again at day 1.", TextSize = 13, TextColor3 = Theme.SubText, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(0, 142), Size = UDim2.new(1, 0, 0, 40), ZIndex = 73, Parent = body })
 	local claim = button("CLAIM", Theme.Money, { Position = UDim2.new(0, 0, 1, -54), Size = UDim2.new(1, 0, 0, 50), TextSize = 20, ZIndex = 74, Parent = body })
 	local busy = false
 	local function tick()

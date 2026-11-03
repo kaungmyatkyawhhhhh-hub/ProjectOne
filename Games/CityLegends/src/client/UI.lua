@@ -18,6 +18,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
@@ -45,6 +46,9 @@ UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
 UI.onPhotoButton = nil :: (() -> ())? -- photo mode (PhotoMode)
 UI.onMenuButton = nil :: (() -> ())? -- the main menu (MainMenu; the MENU button replaced SETTINGS, 2026-11-02)
+-- (2026-11-03, car levels: CarUpgrades sets these) a car's level, CP and parts, and its parts screen
+UI.carInfo = nil :: ((string) -> { level: number, xp: number, need: number, cp: number, parts: { [string]: number } })?
+UI.onUpgrade = nil :: ((string) -> ())?
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -103,6 +107,48 @@ local function tween(inst: Instance, time: number, props: { [string]: any }, sty
 	local t = TweenService:Create(inst, TweenInfo.new(time, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), props)
 	t:Play()
 	return t
+end
+
+-- a car's class badge (2026-11-03, "car class grades"): the class letter on its colour, then the PI
+-- on dark ("A | 661"), sized by its height. props: Height, Position, AnchorPoint, Parent, ZIndex,
+-- LayoutOrder. Returns the badge and set(letter, pi) to change it.
+local function classBadge(props: { [string]: any }?): (Frame, (string, number) -> ())
+	local p = props or {}
+	local h = p.Height or 24
+	local z = p.ZIndex or 1
+	local r = math.max(3, math.floor(h * 0.22))
+	local chipW = math.floor(h * 1.25)
+	local f: Frame = new("Frame", {
+		Name = "ClassBadge",
+		BackgroundColor3 = Color3.fromRGB(14, 15, 20),
+		Size = UDim2.fromOffset(math.floor(h * 2.9), h),
+		Position = p.Position or UDim2.new(),
+		AnchorPoint = p.AnchorPoint or Vector2.zero,
+		LayoutOrder = p.LayoutOrder or 0,
+		ZIndex = z,
+		Parent = p.Parent,
+	}, { corner(r), stroke(Color3.new(1, 1, 1), 1, 0.72) })
+	local chip = new("Frame", { BackgroundColor3 = Theme.Accent, Size = UDim2.new(0, chipW, 1, 0), ZIndex = z, Parent = f }, { corner(r) })
+	-- (squares the chip's right edge where it meets the number)
+	local fill = new("Frame", { BackgroundColor3 = Theme.Accent, BorderSizePixel = 0, AnchorPoint = Vector2.new(1, 0), Position = UDim2.fromScale(1, 0), Size = UDim2.new(0, r, 1, 0), ZIndex = z, Parent = chip })
+	local letter = label({ Text = "", Font = Enum.Font.GothamBlack, TextScaled = true, TextColor3 = Color3.fromRGB(14, 15, 20), Position = UDim2.fromScale(0.08, 0.14), Size = UDim2.fromScale(0.84, 0.72), ZIndex = z + 1, Parent = chip })
+	local pi = label({ Text = "", Font = Enum.Font.GothamBlack, TextScaled = true, TextColor3 = Theme.Text, Position = UDim2.new(0, chipW + math.floor(h * 0.12), 0.18, 0), Size = UDim2.new(1, -chipW - math.floor(h * 0.28), 0.64, 0), ZIndex = z + 1, Parent = f })
+	local function set(l: string, n: number)
+		local c = Config.CarClasses.Colors[l] or Theme.Accent
+		chip.BackgroundColor3 = c
+		fill.BackgroundColor3 = c
+		letter.Text = l
+		pi.Text = tostring(n)
+	end
+	return f, set
+end
+
+-- the badge of a car (stock, or with its parts)
+function UI.classBadgeFor(id: string, parts: { [string]: number }?, props: { [string]: any }?): Frame
+	local f, set = classBadge(props)
+	local letter, _, pi = CarStats.classOf(id, parts)
+	set(letter, pi)
+	return f
 end
 
 local function formatCash(n: number): string
@@ -489,6 +535,7 @@ end
 ---------------------------------------------------------------------
 -- HUD pieces
 ---------------------------------------------------------------------
+local carStripSet: ((any) -> ())? = nil
 local function buildSpeedometer()
 	-- (owner, 2026-11-03) the speedometer is HudSpeedo: Analogue or Digital (Settings), both with
 	-- the big digital speed; the warning lights stay here, in a row under it
@@ -532,6 +579,48 @@ local function buildSpeedometer()
 	tcLamp = lamp("TC OFF", Theme.Warning, 4)
 	lightsLamp = lamp("LIGHTS", GREEN, 5)
 	blinkR = lamp("▶", GREEN, 6)
+	-- (2026-11-03, car levels) the car's class badge, its car level and XP bar, above the lights
+	local h = if UI.isTouch then 18 else 22
+	local strip = new("Frame", {
+		Name = "CarStrip",
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 0, -4 - math.max(14, size * 0.075) - 6),
+		Size = UDim2.fromOffset(math.floor(h * 2.9) + 8 + (if UI.isTouch then 96 else 120), h),
+		BackgroundTransparency = 1,
+		Visible = false,
+		ZIndex = 3,
+		Parent = gauge,
+	})
+	local _, setBadge = classBadge({ Height = h, ZIndex = 3, Parent = strip })
+	local lvl = label({
+		Text = "",
+		TextSize = math.floor(h * 0.62),
+		Font = Enum.Font.GothamBlack,
+		TextStrokeTransparency = 0.55,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.fromOffset(math.floor(h * 2.9) + 8, 0),
+		Size = UDim2.new(1, -math.floor(h * 2.9) - 8, 0, math.floor(h * 0.62)),
+		ZIndex = 3,
+		Parent = strip,
+	})
+	local back = new("Frame", { Position = UDim2.new(0, math.floor(h * 2.9) + 8, 1, -5), Size = UDim2.new(1, -math.floor(h * 2.9) - 8, 0, 4), BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.45, BorderSizePixel = 0, ZIndex = 3, Parent = strip }, { corner(2) })
+	local fill = new("Frame", { Size = UDim2.fromScale(0, 1), BackgroundColor3 = Theme.Accent2, BorderSizePixel = 0, ZIndex = 3, Parent = back }, { corner(2) })
+	carStripSet = function(info: { [string]: any }?)
+		strip.Visible = info ~= nil
+		if not info then
+			return
+		end
+		setBadge(info.letter, info.pi)
+		lvl.Text = if info.level >= Config.CarLevels.Max then "CAR LV MAX" else "CAR LV " .. info.level
+		fill.Size = UDim2.fromScale(if info.need > 0 then math.clamp(info.xp / info.need, 0, 1) else 1, 1)
+	end
+end
+
+-- the car strip over the speedometer: { letter, pi, level, xp, need } or nil to hide (CarUpgrades)
+function UI.setCarHud(info: { [string]: any }?)
+	if carStripSet then
+		carStripSet(info)
+	end
 end
 
 -- the level: a glass pill at the top, the level number in a gold badge, the XP bar beside it
@@ -1734,16 +1823,11 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 			end
 		end
 	end
-	local function brandLevel(id: string): number
-		local at = Cars.SeriesOf[id]
-		local b = at and at.series.Brand
-		return if b then tonumber(brandLevels[b]) or 1 else 1
-	end
 	local function access(id: string): (string, number)
 		if Cars.isMarketOnly(id) then
 			return "market", 0
 		end
-		local need = Cars.requiredLevel(id, Config.brandTrimBonus(brandLevel(id)))
+		local need = CarStats.requiredLevel(id)
 		if level < need then
 			return "level", need
 		end
@@ -1820,7 +1904,10 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	viewport.CurrentCamera = vpCam
 
 	local nameText = label({ Text = "", TextSize = 34, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, 24, 0.56, 22), Size = UDim2.new(0.6, 0, 0, 38), ZIndex = 62, Parent = detail })
-	local classText = label({ Text = "", TextSize = 14, TextColor3 = Theme.Accent, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, 24, 0.56, 62), Size = UDim2.new(0.6, 0, 0, 18), ZIndex = 62, Parent = detail })
+	local classText = label({ Text = "", TextSize = 14, TextColor3 = Theme.Accent, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, 24 + 82, 0.56, 62), Size = UDim2.new(0.6, -82, 0, 18), ZIndex = 62, Parent = detail })
+	-- (2026-11-03) the class badge (with the car's parts) under the name, its car level beside it
+	local badge, setBadge = classBadge({ Height = 22, Position = UDim2.new(0, 24, 0.56, 60), ZIndex = 62, Parent = detail })
+	local _ = badge
 
 	-- (stops short of the DRIVE button, which sits bottom right: on a small screen it hid the numbers)
 	local statsHolder = new("Frame", { BackgroundTransparency = 1, Position = UDim2.new(0, 24, 0.56, 92), Size = UDim2.new(1, -24 - 230 - 24 - 20, 0, 110), ZIndex = 62, Parent = detail }, {
@@ -1845,6 +1932,8 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local msgText = label({ Text = "", TextSize = 14, TextColor3 = Theme.Danger, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -24, 1, -88), Size = UDim2.new(0.4, 0, 0, 18), ZIndex = 62, Parent = detail })
 	-- (owner, 2026-10-30: test drives at the dealership, from the research)
 	local testBtn = button("TEST DRIVE", Theme.Accent2, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -266, 1, -24), Size = UDim2.fromOffset(170, 56), TextSize = 16, TextColor3 = Theme.Accent2, Visible = false, ZIndex = 62, Parent = detail })
+	-- (2026-11-03) the car's parts screen (CarUpgrades), for a car you own
+	local upgradeBtn = button("UPGRADE", Theme.Accent2, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -266, 1, -24), Size = UDim2.fromOffset(170, 56), TextSize = 16, TextColor3 = Theme.Accent2, Visible = false, ZIndex = 62, Parent = detail })
 
 	local previewModel: Model? = nil
 	local previewLen = 14
@@ -1880,7 +1969,11 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		local spec = Cars.get(id)
 		setPreview(spec)
 		nameText.Text = Cars.upper(spec.Name)
-		classText.Text = Cars.ClassLabels[spec.Class]
+		local info = if owned[id] and UI.carInfo then UI.carInfo(id) else nil
+		local letter, _, pi = CarStats.classOf(id, info and info.parts)
+		setBadge(letter, pi)
+		classText.Text = Cars.ClassLabels[spec.Class] .. (if info then string.format("   ·   CAR LV %d   ·   %d CP", info.level, info.cp) else "")
+		upgradeBtn.Visible = owned[id] == true and UI.onUpgrade ~= nil
 		topVal.Text = spec.TopSpeed .. " MPH"
 		topFill.Size = UDim2.fromScale(spec.TopSpeed / 290, 1)
 		accVal.Text = string.format("%.1f s", spec.ZeroToSixty)
@@ -1924,6 +2017,12 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		end
 	end
 
+	upgradeBtn.Activated:Connect(function()
+		local fn = UI.onUpgrade
+		if fn and owned[selectedId] then
+			fn(selectedId)
+		end
+	end)
 	testBtn.Activated:Connect(function()
 		local id = selectedId
 		local fn = callbacks.testDrive
@@ -1998,7 +2097,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		end
 		local brands: { { name: string, order: number, series: { any } } } = {}
 		local brandOf: { [string]: { name: string, order: number, series: { any } } } = {}
-		for _, series in Cars.Series do
+		for _, series in Cars.AllSeries do
 			local name = series.Brand or series.Name
 			local b = brandOf[name]
 			if not b then
@@ -2022,7 +2121,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 				local members = {}
 				for _, id in series.Ids do
 					local sp = Cars.ById[id]
-					if sp and (classFilter == "ALL" or sp.Class == classFilter) and (dealer or owned[id]) then
+					if sp and (classFilter == "ALL" or sp.Class == classFilter) and ((dealer and Cars.forSale(id)) or owned[id]) then
 						table.insert(members, sp)
 					end
 				end
@@ -2079,9 +2178,12 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 					new("Frame", { Size = UDim2.new(0, 4, 1, -16), Position = UDim2.fromOffset(8, 8), BackgroundColor3 = spec.Color, BorderSizePixel = 0, ZIndex = 63, Parent = row }, { corner(2) })
 					label({ Text = (if locked then "🔒 " else "") .. spec.Name, TextSize = 17, Font = Enum.Font.GothamBlack, TextColor3 = if locked then Theme.SubText else Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 9), Size = UDim2.new(0.6, 0, 0, 20), ZIndex = 63, Parent = row })
 					label({ Text = Cars.ClassLabels[spec.Class] .. "  ·  " .. spec.TopSpeed .. " MPH", TextSize = 12, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(22, 32), Size = UDim2.new(0.6, 0, 0, 16), ZIndex = 63, Parent = row })
+					-- (2026-11-03) the class badge on the right, the tag left of it
+					local info = if owned[spec.Id] and UI.carInfo then UI.carInfo(spec.Id) else nil
+					UI.classBadgeFor(spec.Id, info and info.parts, { Height = 24, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -12, 0.5, 0), ZIndex = 63, Parent = row })
 					local tag, tagColor
 					if owned[spec.Id] then
-						tag, tagColor = "OWNED", Theme.Accent
+						tag, tagColor = if info then "LV " .. info.level else "OWNED", Theme.Accent
 					elseif how == "market" then
 						tag, tagColor = "MARKET", Theme.Warning
 					elseif how == "level" then
@@ -2097,8 +2199,8 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 						TextColor3 = tagColor,
 						TextXAlignment = Enum.TextXAlignment.Right,
 						AnchorPoint = Vector2.new(1, 0.5),
-						Position = UDim2.new(1, -14, 0.5, 0),
-						Size = UDim2.new(0.4, 0, 0, 20),
+						Position = UDim2.new(1, -90, 0.5, 0),
+						Size = UDim2.new(0.3, 0, 0, 20),
 						ZIndex = 63,
 						Parent = row,
 					})
@@ -2552,6 +2654,7 @@ end
 
 -- the UI kit for other screens (housing): the same buttons, labels, corners and strokes as here
 UI.kit = {
+	classBadge = classBadge,
 	new = new,
 	label = label,
 	button = button,

@@ -17,7 +17,8 @@ The game lives inside the owner's Obsidian vault (repo `kaungmyatkyawhhhhh-hub/P
 
 - `src/shared`: modules used by both sides.
   - `Config`: all tuning: economy, progression, daily gift, traffic, sounds, theme.
-  - `Cars`: the roster of 79 cars in 3 tiers (Starter, Mid, High), ids like `suzaki_swift`; series (`Cars.Series`), market-only from $600k (`Cars.MarketFromPrice`), 5 levels per step in a series, and trims on another car's model (`Model` field, `Cars.modelOf`).
+  - `Cars`: the roster (ids like `kio_ev6`, the free car `Cars.StarterId`); series (`Cars.Series`: on sale; `Cars.AllSeries`: with the retired ones), trims on another car's model (`Model`, `Cars.modelOf`). `Cars.List` = cars on sale, `Cars.All` = every car (`Retired`: owners keep them; `Pending`: waits for its model). The Starter / Mid / High tiers are internal only.
+  - `CarStats`: show numbers, real power, and (2026-11-03) the class system: `CarStats.pi` (PI 100-999), `classOf`, `requiredLevel` (only class X: `Config.CarClasses.XLevel`), parts (`tuneOf`, `tunedSpec`, `partAllowed`: stock S2 / R / X take only tyres, gearbox, suspension, exhaust). Car levels, CP, parts purchases and brand discounts: `server/CarLevels.lua` + `client/CarUpgrades.lua`; numbers in `Config.CarLevels` / `Config.CarParts`; tests `tools/carlevels_test.luau`, table `tools/pi_table.luau`.
   - `CarBuilder`: part-built car, physics hitbox, interior, driver arms. `getDims(class, id)` gives per-car proportions through `DIM_OVERRIDES`.
   - `CarMesh`: procedural lofted car meshes, with a `DESIGNS` table per car.
   - `CityLayout`: grid maths (the city's roads i = 0..6, Downtown's i = 100..106 along x), traffic-light phases, the Legends Loop's shape (`loopSample`) and the lane graph NPC traffic drives (city and Downtown lanes, the highway and loop: `addHighway`, the west: `addWest`; heights from `westRoadY` / `seaRoadY`).

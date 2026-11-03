@@ -62,6 +62,8 @@ local card: Frame
 local cardTitle: TextLabel
 local cardTime: TextLabel
 local cardSub: TextLabel
+local racersRow: Frame
+local racersKey = ""
 local big: TextLabel
 local arrow: TextLabel
 local cpNow: BasePart
@@ -195,6 +197,19 @@ local function buildHud()
 	cardTitle = lbl(6, 18, 13, Enum.Font.GothamBlack, Color3.fromRGB(255, 170, 60))
 	cardTime = lbl(24, 36, 32, Enum.Font.GothamBlack, Color3.new(1, 1, 1))
 	cardSub = lbl(60, 20, 13, Enum.Font.GothamBold, Theme.SubText)
+	-- (2026-11-03) in a race lobby: each racer's car class badge, under the card's text
+	racersRow = Instance.new("Frame")
+	racersRow.Name = "Racers"
+	racersRow.BackgroundTransparency = 1
+	racersRow.Position = UDim2.fromOffset(14, 84)
+	racersRow.Size = UDim2.new(1, -28, 0, 20)
+	racersRow.Visible = false
+	racersRow.Parent = card
+	local rl = Instance.new("UIListLayout")
+	rl.FillDirection = Enum.FillDirection.Horizontal
+	rl.Padding = UDim.new(0, 6)
+	rl.Wraps = true
+	rl.Parent = racersRow
 	-- closeable (owner, 2026-10-23): hides the card; the run carries on (the arrow still points)
 	local close = Instance.new("TextButton")
 	close.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -321,6 +336,9 @@ local function endRun()
 	lobbyRace = nil
 	racers = 1
 	card.Visible = false
+	card.Size = UDim2.fromOffset(250, 86)
+	racersRow.Visible = false
+	racersKey = ""
 	arrow.Visible = false
 	showCheckpoints()
 end
@@ -725,6 +743,26 @@ local function update(dt: number)
 		local count = if l then l.count else 1
 		cardTime.Text = fmtTime(math.max(0, lobbyStartsAt - os.clock()))
 		cardSub.Text = (if count >= 2 then count .. " racers" else "Waiting for racers") .. " · stay in the ring"
+		-- the racers' class badges (rebuilt only when they change)
+		local classes = if l and type(l.classes) == "table" then l.classes else {}
+		local key = ""
+		for _, c in classes do
+			key ..= tostring(c[1]) .. tostring(c[2]) .. ","
+		end
+		if key ~= racersKey then
+			racersKey = key
+			for _, ch in racersRow:GetChildren() do
+				if ch:IsA("GuiObject") then
+					ch:Destroy()
+				end
+			end
+			for i, c in classes do
+				local _, set = UI.kit.classBadge({ Height = 20, LayoutOrder = i, Parent = racersRow })
+				set(tostring(c[1]), tonumber(c[2]) or 0)
+			end
+			racersRow.Visible = #classes > 0
+			card.Size = UDim2.fromOffset(250, if #classes > 0 then 112 else 86)
+		end
 		return
 	end
 	if state == "idle" then

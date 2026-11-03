@@ -223,6 +223,7 @@ type State = {
 	chirp: number, -- seconds left of a tyre chirp after a hard low-gear shift
 	launchReady: boolean, -- launch control: brake + throttle held at a stop
 	weightK: number, -- the car's kerb weight over Config.DrivingFeel.WeightRef (CarStats)
+	brakeK: number, -- the brake parts' extra braking force (1 = stock; CarStats.tuneOf)
 	lonGReal: number, -- pull-away (+) / braking (-) in real g, last frame
 	surface: string?, -- "hard" | "loose" under the car
 	smokeDust: boolean?,
@@ -1014,7 +1015,9 @@ local powerCache: { [string]: { number } } = {}
 local function powerFor(spec: Cars.CarSpec): (number, number)
 	local top = Config.mphToSps(spec.TopSpeed)
 	local accel = Config.mphToSps(60) / spec.ZeroToSixty
-	local cached = powerCache[spec.Id]
+	-- (keyed by the numbers too: a car with performance parts drives its tuned ones)
+	local key = spec.Id .. "|" .. spec.TopSpeed .. "|" .. spec.ZeroToSixty
+	local cached = powerCache[key]
 	if cached then
 		return cached[1], cached[2]
 	end
@@ -1057,7 +1060,7 @@ local function powerFor(spec: Cars.CarSpec): (number, number)
 			hi = mid
 		end
 	end
-	powerCache[spec.Id] = { hi, dragFor(accel, hi, top, electric) }
+	powerCache[key] = { hi, dragFor(accel, hi, top, electric) }
 	return hi, dragFor(accel, hi, top, electric)
 end
 
@@ -1360,7 +1363,9 @@ end
 function Driving.attach(model: Model)
 	Driving.detach()
 	local root = model.PrimaryPart :: BasePart
-	local spec = Cars.get(model:GetAttribute("CarId") :: string)
+	-- (2026-11-03) the car's performance parts (the "Parts" attribute, CarLevels): it drives its tuned
+	-- numbers (the same Id, so everything else still knows the car)
+	local spec = CarStats.tunedSpec(model:GetAttribute("CarId") :: string, CarStats.decodeParts(model:GetAttribute("Parts")))
 	local dims = CarBuilder.getDims(spec.Class, spec.Id)
 	UI.setSpeedoCar(CarStats.redline(spec.Id), spec.Electric == true) -- the HUD rev counter's scale
 	local lv = root:WaitForChild("Drive", 10) :: LinearVelocity?
@@ -1924,6 +1929,7 @@ function Driving.attach(model: Model)
 		chirp = 0,
 		launchReady = false,
 		weightK = 1,
+		brakeK = 1,
 		lonGReal = 0,
 		yawRate = 0,
 		groundDist = nil,
@@ -1981,8 +1987,20 @@ function Driving.attach(model: Model)
 			table.insert(s.rearGlow, d)
 		end
 	end
-	s.powerK, s.dragC = powerFor(spec)
-	s.weightK = CarStats.of(spec.Id).weightKg / Config.DrivingFeel.WeightRef
+	-- the tuned numbers (performance parts), again whenever a part is bought while the car is out
+	local function applyTune()
+		local parts = CarStats.decodeParts(model:GetAttribute("Parts"))
+		local tuned = CarStats.tunedSpec(model:GetAttribute("CarId") :: string, parts)
+		local tune = CarStats.tuneOf(parts)
+		s.spec = tuned
+		s.topSpeed = Config.mphToSps(tuned.TopSpeed)
+		s.accel = Config.mphToSps(60) / tuned.ZeroToSixty
+		s.powerK, s.dragC = powerFor(tuned)
+		s.weightK = CarStats.of(tuned.Id).weightKg * (1 - tune.weight) / Config.DrivingFeel.WeightRef
+		s.brakeK = 1 + tune.brake
+	end
+	applyTune()
+	table.insert(s.connections, model:GetAttributeChangedSignal("Parts"):Connect(applyTune))
 	s.engine:setRunning(s.engineOn and not s.electric)
 	if s.engineOn and not s.electric then
 		s.engine:crank()
@@ -2362,7 +2380,7 @@ function Driving.step(dt: number)
 		-- brakes by class; a hard stop at speed pulses the anti-lock (keeps some steering)
 		-- (2026-11-03, realistic physics) real stopping power: the class's brake (about g x 28 x
 		-- BrakeBoost), a heavier car stops later, a wet road too
-		local brakeForce = s.cls.brake * s.brakeIn * s.weightK ^ -DF.WeightBrake * (1 - DF.WetBrakeLoss * Driving.wet)
+		local brakeForce = s.cls.brake * s.brakeK * s.brakeIn * s.weightK ^ -DF.WeightBrake * (1 - DF.WetBrakeLoss * Driving.wet)
 		local abs = s.brakeIn > 0.8 and Config.spsToMph(math.abs(fwdSpeed)) > 12
 		if abs then
 			s.absT += dt

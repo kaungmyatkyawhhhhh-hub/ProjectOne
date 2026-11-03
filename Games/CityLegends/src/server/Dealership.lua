@@ -23,6 +23,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
 
@@ -31,6 +32,12 @@ local Dealership = {}
 local D = Config.Dealership
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
+
+-- a car's class and PI for the stand signs ("A 661"; 2026-11-03, the classes replaced the levels)
+local function classText(carId: string): string
+	local letter, _, pi = CarStats.classOf(carId)
+	return letter .. " " .. pi
+end
 
 local GLASS = Color3.fromRGB(150, 180, 205)
 local FRAME = Color3.fromRGB(32, 34, 40)
@@ -148,7 +155,7 @@ local function infoStand(kit: any, parent: Instance, cf: CFrame, carId: string)
 	end
 	kit.deco(parent, Vector3.new(0.3, 2.2, 0.3), cf * CFrame.new(0, 1.1, 0.1), METAL, Enum.Material.Metal)
 	local stand = kit.mk(parent, Vector3.new(3, 2, 0.25), cf * CFrame.new(0, 3, 0) * CFrame.Angles(math.rad(-15), 0, 0), STAND, Enum.Material.SmoothPlastic, { name = "InfoStand", shadow = false })
-	kit.surfaceText(stand, Enum.NormalId.Front, spec.Name .. "\n$" .. tostring(spec.Price) .. "  ·  LV " .. Cars.requiredLevel(carId), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(240, 160))
+	kit.surfaceText(stand, Enum.NormalId.Front, spec.Name .. "\n$" .. tostring(spec.Price) .. "  ·  CLASS " .. classText(carId), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(240, 160))
 	prompt(stand, "View cars", spec.Name, carId)
 end
 
@@ -444,7 +451,7 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 		local topPos = (at(x, tableTop, z)).Position
 		displayCar(model, carId, CFrame.new(topPos) * base.Rotation * CFrame.Angles(0, math.rad(35), 0))
 		local stand = deco(detail, Vector3.new(1.2, 3.4, 0.3), at(x + 9, FLOOR_T + 1.7, z - 12), Color3.fromRGB(20, 20, 24), Enum.Material.SmoothPlastic, { name = "InfoStand" })
-		kit.surfaceText(stand, Enum.NormalId.Front, spec.Name .. "\n$" .. tostring(spec.Price) .. "  ·  LV " .. Cars.requiredLevel(carId), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(160, 160))
+		kit.surfaceText(stand, Enum.NormalId.Front, spec.Name .. "\n$" .. tostring(spec.Price) .. "  ·  CLASS " .. classText(carId), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(160, 160))
 		prompt(stand, "View cars", spec.Name, carId)
 	end
 

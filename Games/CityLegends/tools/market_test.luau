@@ -67,7 +67,7 @@ env.table = table
 local Market = load("src/server/Market.lua", env)
 
 local player = { Name = "Tester", UserId = 1, Parent = true }
-profiles[player] = { Cash = 500000, Owned = { suzaki_swift = true }, Market = {} }
+profiles[player] = { Cash = 500000, Owned = { kio_ev6 = true }, Market = {} }
 Market.start({})
 local call
 for _, c in created do

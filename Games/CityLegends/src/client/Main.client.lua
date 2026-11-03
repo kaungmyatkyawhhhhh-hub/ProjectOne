@@ -564,6 +564,8 @@ end)
 -- the Legends Grand Hotel: the valet takes your car at the bay and brings it back to the door
 require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)
 require(script.Parent:WaitForChild("CustomsClient")).init() -- Legends Customs (after the hotel: it chains the drive action)
+-- car levels, Car Points and the parts screen (2026-11-03; the garage's UPGRADE, the HUD strip)
+require(script.Parent:WaitForChild("CarUpgrades")).init()
 
 local showMenu: () -> ()
 
@@ -641,9 +643,8 @@ do
 		for brand, lvl in now do
 			if type(lvl) == "number" and lvl > (tonumber(known[brand]) or 1) then
 				local off = math.floor((1 - Config.brandCustomsMult(lvl)) * 100 + 0.5)
-				local trims = Config.brandTrimBonus(lvl)
 				UI.popup(brand .. " BRAND LV " .. lvl, 0, Config.Theme.Accent2)
-				UI.toast(off .. "% off at Legends Customs" .. (if trims > 0 then ", its trims " .. trims .. " level" .. (if trims > 1 then "s" else "") .. " sooner" else ""), Config.Theme.Accent2)
+				UI.toast(off .. "% off at Legends Customs", Config.Theme.Accent2)
 			end
 		end
 		known = now
