@@ -40,7 +40,17 @@ Only the rewards the game already has, gathered in one place:
 4. **Hotel suite income:** the earned suite money (also claimable here, for owners).
 5. **Any other reward that already exists in the code** that a player has to claim (look for them, list them for the owner, and add each one the owner agrees to).
 
-**If the owner names other things to claim, add exactly those.** Don't invent new reward types.
+**More gifts to claim (owner, 2026-11-03: "add more claimable gifts"):** add these new ones too. Show the owner the amounts before turning them on (all numbers in `Config`):
+6. **Playtime gifts:** a gift after 5, 15, 30 and 60 minutes played in one session (cash, the last one bigger). Shown as a timer on the desk and the HUD; they reset each day.
+7. **Weekly reward:** once every 7 days, a bigger cash gift (or a rare paint / rim colour for Customs).
+8. **Level-up rewards:** every level's reward is saved and claimed here, with a bigger chest every 5 levels.
+9. **Codes:** a code box at the desk (and in the menu). The owner adds codes in `Config` (code, reward, end date). Each code works once per player. Filter / limit typing; the server checks.
+10. **Group reward:** a one-time gift for being in the game's Roblox group (the server checks with `Player:IsInGroup`). No links in the game (Playbook rule). The owner gives the group ID; until then it's hidden.
+11. **Friend bonus:** a small gift when you play in the same server as a friend (once a day), and a one-time gift for **both** players when a friend joins for the first time from your invite (Playbook: invite rewards for both players).
+12. **Achievement rewards:** rewards for finishing achievements (first race win, 10 cars owned, first house, 1,000 km driven...), claimed here. Use the achievements the game has; add the list to `Config` so the owner can change it.
+13. **Return gift:** a one-time "welcome back" gift for a player who hasn't played for 7+ days.
+
+Each one: the server checks it's really earned, saves before paying, and can't be claimed twice.
 
 ## Rules
 - **The server decides everything:**
