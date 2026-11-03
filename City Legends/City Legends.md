@@ -907,7 +907,7 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Checked in Play on a straight (Coast Road): SV idle at half the SVJ's loudness; braking from 72 mph, three downshifts at 41 / 35 / 27 mph, each blip at its own pitch (0.85 / 0.90 / 1.00); no errors.
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
-Summary at the end of the run goes here. Next: step 4 (venues: Legends Rewards check, then the bank, towers, Customs, Gem Showcase, Realty, chauffeur kiosks, challenge gantries).
+Summary at the end of the run goes here. Next: step 4 (venues: Legends Rewards check, the 3 towers, Customs, Gem Showcase, Realty, chauffeur kiosks, challenge gantries; the bank is done).
 
 ### Choices made while the owner was away (2026-11-03)
 - Buildings: the global environment reflections (`Lighting.EnvironmentSpecularScale` 1) were left as they are. Lowering them takes the slight sky sheen off the walls but also dulls the cars' paint and the wet roads, and the sheen wasn't the black / white flashing. Easy to change in `CityBuilder` / Lighting if wanted.
@@ -920,6 +920,7 @@ Summary at the end of the run goes here. Next: step 4 (venues: Legends Rewards c
 - Dealer menu: the floor is dark and only slightly shiny (Reflectance 0.05). Roblox reflections show the sky, not the room, so a mirror floor turned pale blue by day.
 - Dealer menu: phones (and any screen under 1000 x 520) get a compact layout: the same parts, bigger type, 46 px buttons, no level box (the level is still in the HUD), the speed bar shows km/h only.
 - Dealer menu: Esc closes it (also when Roblox's menu takes the key). Backspace doesn't: the driving keys saw it too and put the car back on the road.
+- Venues: the bank is remodelled in its code (`server/Bank.lua`, `Bank.dress`), like the hotel was, not with a Toolbox building: the bank is built at start and its vault, prompts and carts are placed by that code. Its furniture comes from the cleaned kit already in the place (`ServerStorage.VenueKit`: chandeliers, Chesterfield sofa, armchair, potted palms). Walls are Sandstone (Limestone looked white in the sun), trims and columns cream Limestone.
 
 ### Step 1.1: buildings flashing black and white (done)
 - **Cause:** the far stand-ins (`ReplicatedStorage.RivieraFar`, `tools/riviera/FarCity.luau`) show past ~950 studs (570 on Low graphics, less on phones) and while a building is streamed out. Each one's pale wall-coloured shell was sized from the building's outer skin, so it stood 0.2 studs IN FRONT of the dark core inside every window and shopfront. Close up (stand-in hidden) the windows were dark; past the range (stand-in shown) every window and shop turned the wall colour. That's the "black from one spot, white from another". Pictures: [[Buildings flashing - before (far stand-in showing).jpg]], [[Buildings flashing - after.jpg]], [[Buildings flashing - after, far stand-ins over the city.jpg]].
@@ -973,3 +974,11 @@ Driven in Play on the Coast Road (automatic, full throttle, then full brake, the
   - Backspace ("back to the road") put the car on the old city's lanes, out in the sea west of Monaco (x 3340). It now uses the Riviera lanes (`RivieraTraffic.nearestCFrame`). Checked in Play: the car stays on its road.
   - the list didn't show OWNED right after buying (it rebuilds now).
 - Checked: `luau-lsp analyze` clean, no script errors in Play. Not checked: a real phone (the box above is the phone size on PC).
+
+### Step 4: venues (in progress)
+**Legends Reserve Bank (done, 2026-11-04):**
+- **Outside:** warm sandstone walls with cream stone trims; a rusticated base with deep joints and a band; the six columns with moulded rings and scroll capitals; a carved entablature (architrave, dentils, a deep two-step cornice); a pediment over the middle with a gold medallion; a stone balustrade along the roof; two flagpoles with the bank's own navy-and-gold flag; tall dark windows with stone hoods, keystones and bronze grilles beside the doors; the three doorways with open bronze door leaves (gold handles) and bronze grilles over them; side windows with hoods, sills, keystones and iron grilles, pilasters between them; stone cheek blocks at the stair with iron lantern posts; clipped box trees in stone planters. At night: warm uplights at every column, the lanterns and the old floodlights (all only at night).
+- **Inside:** 6 crystal chandeliers (kit; the old ones had a neon ring); a coffered ceiling; wood panelling with a brass rail and marble pilasters; a dark marble border and a red runner to the counter; the teller counter with raised wood panels, a brass rail and brass bankers' lamps with green glass shades; a queue line of brass posts and velvet ropes; a big clock; the vault with riveted steel cladding, a VAULT plate and yellow-black stripes on the floor; a guard desk with 3 screens; 4 CCTV cameras; a waiting corner with a Chesterfield sofa, an armchair and palms. No neon left in the bank.
+- **Gameplay not touched:** the vault door, Crack the vault prompt, 4 cash carts and the alarm are built as before (checked in Play: all there, no errors). The robbery itself wasn't run this pass.
+- **Numbers:** 1,124 parts (was 197). Pictures: [[Bank remodel - before (outside).jpg]], [[Bank remodel - before (inside).jpg]], [[Bank remodel - after (outside, day).jpg]], [[Bank remodel - after (outside, night).jpg]], [[Bank remodel - after (inside).jpg]].
+- How to look at it in Studio (Edit) without Play: require copies of `Bank` and `CityBuilder` (parented next to them) and call `Bank.block(CityBuilder.kit, folder, Config.Bank.Block[1], Config.Bank.Block[2], 0, 0, 200)`.
