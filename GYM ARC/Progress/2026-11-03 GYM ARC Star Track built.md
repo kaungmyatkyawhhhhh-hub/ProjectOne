@@ -43,3 +43,13 @@ Everything stays locked until the GEM update (`LiveEvents.Unlocked("StarTrack")`
 - **Fixed QoL star rewards:** auto-claim spurts, quick transform, start with feats.
 - **Extra Legacy card** when entering from Alter 16+ (needs the Gem alters first).
 - **Star-only content:** gear at ★4 and the champions ladder from ★6. **Needs the owner's OK before building.**
+
+## Owner decisions (3 Nov, after the build)
+1. **★4 star-only gear: YES, a look, not power.** A gold-star lifting belt + matching wraps that only ★4+ can equip, with the same stats as the best normal belt. Stars must be something you can SEE but must not break the economy or gear prices.
+2. **Champions ladder from ★6: NO** (cancelled 1 Nov: the storyline, bullies + arm wrestling, now chapters 7-9 in the Gem Mine, already does that job). Instead ★6 gets something visible: a **star frame on the player's profile card** + their **Hall of Fame statue gets a gold base**.
+3. **Correction:** the extra Legacy card is for entering the Hall of Fame from **Alter 20** (Diamond), not 16. Alter 15-19 = 1 star; Alter 20 = 2 stars + 1 extra Legacy card (decided 1 Nov).
+4. **Order this week:**
+   - GEM must-haves first: Alters 16-20 + looks, Gem Mine + chapters 7-9, countdown + auto unlock, HoF agency discovery.
+   - Then: Legacy cards shown on the track, faster runs per star, QoL rewards (auto-claim Growth Spurts), the ★4 belt.
+   - Legend Form colours + the ★10 LEGENDS wall can slip to 14 Nov.
+   - **Nothing untested goes live on Saturday.**

@@ -24,4 +24,4 @@ Related: [[2026-11-01 GYM ARC Roadmap after the Gem update]], [[2026-11-01 GYM A
 
 ## Status (3 Nov)
 - **Gem Mine Gym: built** in Studio (east block by the basketball court, the owner's choice), with its cover (tarp, barriers, board "OPENS SAT 15:00 UTC") and the launch flip tested. [[2026-11-03 GYM ARC Gem Mine Gym built]]
-- Still to do for 7 Nov: the Gem cutscene (LaunchCutscenes.Gem), Gem alters 16-20 (Star Track built 3 Nov: [[2026-11-03 GYM ARC Star Track built]]), then switch the event on (`enabled = true` / `Launch_Gem_Enabled`) and the full flip test.
+- Still to do for 7 Nov (owner order, 3 Nov): 1) Alters 16-20 + looks, 2) Gem Mine story chapters 7-9, 3) countdown + auto unlock (Gem cutscene, switch the event on, full flip test), 4) HoF agency discovery. Then: Legacy cards on the Star Track, faster runs per star, auto-claim Growth Spurts, the ★4 belt. Legend Form colours + the ★10 LEGENDS wall may slip to 14 Nov. Nothing untested goes live. Star Track built 3 Nov: [[2026-11-03 GYM ARC Star Track built]].
