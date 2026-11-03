@@ -633,7 +633,8 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 				for k, band in bandList do
 					local d = math.log(math.max(rpmNow, 300) / band.rpm)
 					-- (the idle loop gives way quickly as the revs rise: pitched up it sounds thin)
-					local sig = if band.name == "Idle" and d > 0 then 0.28 else 0.4
+					-- (`width`: how far each band reaches; narrower = one recording at a time)
+					local sig = if band.name == "Idle" and d > 0 then 0.28 else ((bandCfg and bandCfg.width) or 0.4)
 					w[k] = math.exp(-d * d / (2 * sig * sig))
 					if k == 1 and rpmNow < band.rpm then
 						w[k] = 1 -- below the lowest band: it alone

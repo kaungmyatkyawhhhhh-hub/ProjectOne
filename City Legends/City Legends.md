@@ -888,9 +888,16 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
 - Owner-away run (2026-11-03): `Prompts/01 Next steps (owner away, no questions).md`: fix flashing buildings and smooth roads; check physics and classes; skip better car models for now; upgrade the dealer menu UI (no longer "vibe coded"); finish the venue remodels; very good Toolbox houses; a bigger map with a mountain highway (curves plus long straights, max 10 traffic cars there) and a drivable marina parking by the yachts (ref `imports/refs/map/marina_parking_supercars.png`); a much better main menu with a HOUSES tab. No questions: choices written in the notes.
 
 ## Aventador SV exhaust (2026-11-03)
-- **Owner:** "find and add better exhaust sounds for Aventador SV", then (after the first try) "the Aventador rev doesn't sound good".
-- Searched the Creator Store for the Aventador's V12 and checked each sound in Studio: it loads, its length, its loudness, and its engine speed from its firing note (a V12 sounds at rpm / 10 Hz).
-- First try (dropped): the "Aventador SVJ Revloop" bank (Adhamkhedrhuman: loops at 1,000 / 4,198 / 8,375 rpm with coast loops). Pulling away sits at about 2,000-3,000 rpm in this game, right in its gap, so the loops were pitched far off.
-- Now (the way the owner liked the Veyrun): the real SV's recordings from a racing sim (Takumi112892): "Lamborghini_Aventador_idle" 73235710388670 and one rev loop, "Lamborghini_Aventador_ex_on_mid" 72275841063718 (~4,700 rpm), pitched across all the revs (`Config.ExhaustBands.lambrini_lp750`, Idle 1,020 / Low 4,700). Lift-off pops "Aventador SVJ Crackle4", upshift crack "Crackle1", the SVJ's shift / downshift sounds; start-up, launch, crackle and the owner's limiter kept.
-- `Audio.lua`: near idle and off the throttle only the idle loop plays (the other bands fade in with the throttle or the revs); `gain` / `gains` in ExhaustBands level loops recorded louder or softer.
-- Checked in Play: idle, pulling away, a full pull through the gears (the loop pitched 0.45 -> 1.64), lift-off; no errors. Not heard (no sound here): the owner should listen. Other rev loops measured, if wanted: "Lamborghini Aventador SVJ" 104469215650998 (~8,000 rpm, loud), "Lamborghini Aventador Rev" 80757676040270 (~8,000 rpm), "RelB Aventador (10)" 75234523416885 (~7,000 rpm), "gb_lamborghini_aventador_sv#96" 116622116393338 (~5,200 rpm), "Lamborghini_Aventador_ex_on_high" 119803794812033.
+- **Owner:** "find and add better exhaust sounds for Aventador SV", then "the Aventador rev doesn't sound good", then "it still sounds bad, use different rpm for each sound Low, Mid, High".
+- Each sound was checked in Studio: it loads, its length, its loudness, and its engine speed from its firing note (a V12 sounds at rpm / 10 Hz).
+- **Now:** the Aventador's own L539 V12, recorded on the throttle at set revs (uploader ItzDeadsecc, public):
+  - Low = "l539-eng-acc-2000" 119081006371451 (2,000 rpm)
+  - Mid = "l539-eng-acc-4000" 82866280346883 (4,000 rpm)
+  - High = "l539-eng-acc-6500" 138629257229746 (6,500 rpm)
+  - Idle = the real SV's idle "Lamborghini_Aventador_idle" 73235710388670 (Takumi112892).
+  - Each loop is pitched at most about a third off; one band at a time with a short crossfade (`Config.ExhaustBands.lambrini_lp750`: Idle 1,020 / 2,000 / 4,000 / 6,500, `width` 0.28).
+  - Lift-off pops "Aventador SVJ Crackle4", upshift crack "Crackle1", the SVJ's shift / downshift; start-up, launch, crackle and the owner's limiter kept.
+- **Tried and dropped the same day:** the "Aventador SVJ Revloop" bank (1,000 / 4,198 / 8,375 rpm: a gap right where you pull away), then one ~4,700 rpm loop across all the revs.
+- `Audio.lua`: near idle and off the throttle only the idle loop plays; `gain` / `gains` level loops recorded louder or softer; `width` sets how far each band reaches.
+- Checked in Play: idle, pulling away (Low), the pull through the gears (Mid, then High), lift-off; no errors. Not heard here (no sound): the owner listens.
+- Same bank, if wanted: on-throttle 1,250 / 3,000 / 3,500 / 5,200 / 8,700 rpm and off-throttle 3,000 / 3,500 / 4,500 / 5,000 / 6,200 / 8,700 rpm (search "l539-eng"). Another Low / Mid / High set: "l539vtwelvelowrev / midrev / highrev" (YaBoyZenvo).
