@@ -31,6 +31,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local CarStats = require(Shared:WaitForChild("CarStats"))
 
 local Audio = {}
 
@@ -409,7 +410,9 @@ export type Engine = {
 -- a car's own exhaust recordings (Config.Sounds.Exhaust_<car id>_<part>), when they loaded
 -- (2026-11-03, the SVJs: a fourth loop band, Low, and one-shots: Shift on each upshift, Downshift,
 -- ShiftPop on a hard upshift, Pops on lifting off; Crackle stands in for both pops when missing)
-local EXHAUST_PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops" }
+-- (2026-11-03, the Bugattis: coast bands LowOff / MidOff / HighOff, the turbo whine loops Turbo and
+-- Turbo2, and BlowOff; with Config.ExhaustBands each band is pitched from its recorded rpm)
+local EXHAUST_PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops", "LowOff", "MidOff", "HighOff", "Turbo", "Turbo2", "BlowOff" }
 local function exhaustSet(carId: string?): { [string]: string }?
 	if not carId then
 		return nil
@@ -490,12 +493,19 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	-- rev limiter and crackles on lift-off
 	local ex = exhaustSet(carId)
 	local layers: { [string]: Sound } = {}
+	-- recorded-rpm bands (Config.ExhaustBands): sorted by rpm, and the car's redline in rpm
+	local bandCfg = if carId then Config.ExhaustBands[carId] else nil
+	local bandList: { { name: string, rpm: number } } = {}
+	local redlineRpm = if carId then CarStats.redline(carId) * 1000 else 7000
+	local boost, seqK, bovCool = 0, 0, 0
+	-- lifting off: the throttle (smoothed by Driving) passes from high to low over a few frames, so a
+	-- lift is "low now, and high a moment ago"
+	local highAt, liftDone, boostAtHigh = -1e9, true, 0
 	local startedAt = -1e9
 	local launching = false
-	local lastThrottle = 0
 	local crackleCool = 0
 	if ex then
-		for _, k in { "Idle", "Low", "Mid", "High", "Launch", "Redline" } do
+		for _, k in { "Idle", "Low", "Mid", "High", "Launch", "Redline", "LowOff", "MidOff", "HighOff", "Turbo", "Turbo2" } do
 			local id = ex[k]
 			if id then
 				local snd = newSound(id, holder, 0, true)
@@ -508,6 +518,16 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 				snd:Play()
 				layers[k] = snd
 			end
+		end
+		if bandCfg then
+			for name, rpm in bandCfg.bands do
+				if layers[name] then
+					table.insert(bandList, { name = name, rpm = rpm })
+				end
+			end
+			table.sort(bandList, function(a, b)
+				return a.rpm < b.rpm
+			end)
 		end
 	end
 	-- a one-shot from the car's set (pitch varied a little each time)
@@ -601,7 +621,76 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 					snd.PlaybackSpeed = pitch * ts
 				end
 			end
-			if layers.Low then
+			if #bandList > 0 then
+				-- recorded-rpm bands (the Bugattis): equal-power crossfade between neighbouring bands by
+				-- rpm, each pitched from the rpm it was recorded at; on the throttle the "on" loops, off
+				-- it the coast loops (or the same loop, quieter and darker)
+				local rpmNow = r * redlineRpm
+				-- each band is loudest at its own rpm and fades as its pitch moves away from it (a bell in
+				-- log-pitch), so no loop is heard pitched far off; weights are equal-power
+				local w: { number } = table.create(#bandList, 0)
+				local sum = 0
+				for k, band in bandList do
+					local d = math.log(math.max(rpmNow, 300) / band.rpm)
+					-- (the idle loop gives way quickly as the revs rise: pitched up it sounds thin)
+					local sig = if band.name == "Idle" and d > 0 then 0.28 else 0.4
+					w[k] = math.exp(-d * d / (2 * sig * sig))
+					if k == 1 and rpmNow < band.rpm then
+						w[k] = 1 -- below the lowest band: it alone
+					elseif k == #bandList and rpmNow > band.rpm then
+						w[k] = 1 -- above the highest
+					end
+					sum += w[k] * w[k]
+				end
+				sum = math.sqrt(math.max(sum, 1e-6))
+				for k in w do
+					w[k] /= sum
+				end
+				local on = math.clamp(throttle, 0, 1)
+				for k, band in bandList do
+					local pitch = math.clamp(rpmNow / band.rpm, 0.45, if band.name == "Idle" then 1.45 else 1.8) * ts
+					local main = layers[band.name]
+					local coast = layers[band.name .. "Off"]
+					local g = 1.15 * w[k] * duck * fadeIn * power
+					if band.name == "Idle" then
+						main.Volume = g * (0.85 + 0.15 * on)
+					elseif coast then
+						main.Volume = g * (0.15 + 0.85 * on)
+						coast.Volume = g * 0.9 * (1 - on)
+						coast.PlaybackSpeed = pitch
+					else
+						main.Volume = g * (0.45 + 0.55 * on)
+					end
+					main.PlaybackSpeed = pitch * (if coast or band.name == "Idle" or on > 0.3 then 1 else 0.97)
+				end
+				-- the turbos: boost builds with throttle above ~1,800 rpm (with a little lag) and drops
+				-- fast when you lift; the whine's pitch and loudness follow it
+				local target = on * math.clamp((rpmNow - 1800) / 2200, 0, 1)
+				boost += (target - boost) * (if target > boost then 0.035 else 0.14)
+				if layers.Turbo then
+					local whine = (bandCfg and bandCfg.whine) or 0.65
+					layers.Turbo.Volume = 0.6 * boost ^ 1.3 * power * fadeIn
+					layers.Turbo.PlaybackSpeed = whine * (0.55 + 0.45 * boost) * (0.8 + 0.3 * math.clamp(rpmNow / redlineRpm, 0, 1)) * ts
+				end
+				if layers.Turbo2 then
+					-- the second pair of the sequential turbos (the Chiron: from 3,800 rpm)
+					local seq = (bandCfg and bandCfg.seq) or 0
+					seqK += ((if seq > 0 and rpmNow > seq then 1 else 0) - seqK) * 0.05
+					local whine = (bandCfg and bandCfg.whine) or 0.65
+					layers.Turbo2.Volume = 0.45 * boost ^ 1.3 * seqK * power * fadeIn
+					layers.Turbo2.PlaybackSpeed = whine * 1.14 * (0.55 + 0.45 * boost) * (0.8 + 0.3 * math.clamp(rpmNow / redlineRpm, 0, 1)) * ts
+				end
+				-- the blow-off: lifting off under boost lets the pressure out
+				bovCool = math.max(0, bovCool - 1 / 60)
+				if throttle > 0.6 then
+					boostAtHigh = boost
+				end
+				if ex and ex.BlowOff and running and throttle < 0.3 and os.clock() - highAt < 0.4 and not liftDone and boostAtHigh > 0.3 and bovCool <= 0 then
+					oneShot(ex.BlowOff, ((bandCfg and bandCfg.bov) or 1) * (0.45 + 0.65 * boostAtHigh))
+					bovCool = 0.9
+					boost *= 0.2
+				end
+			elseif layers.Low then
 				-- each band's pitch follows the revs round the rpm it was recorded at
 				local function bandPitch(centre: number, lo: number, hi: number): number
 					return math.clamp((r + 0.1) / (centre + 0.1), lo, hi)
@@ -624,10 +713,16 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 				layers.Launch.PlaybackSpeed = ts
 			end
 			-- lift off at high revs: pops and crackles
-			if running and lastThrottle > 0.6 and throttle < 0.25 and r > 0.45 then
+			if running and throttle < 0.3 and os.clock() - highAt < 0.4 and not liftDone and r > 0.45 then
 				crackle(0.85)
 			end
-			lastThrottle = throttle
+			if throttle < 0.3 then
+				liftDone = true
+			end
+			if throttle > 0.6 then
+				highAt = os.clock()
+				liftDone = false
+			end
 		end
 		growl.PlaybackSpeed = (0.5 + r * 0.95) * base * ts
 		growl.Volume = (0.08 + 0.42 * throttle) * math.clamp(r * 1.3, 0.2, 1) * (if usingCustom then 0.35 else 1) * power * (if ex then 0 else 1)
@@ -660,6 +755,12 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 			dip = 0.22
 			if ex and ex.Shift then
 				oneShot(ex.Shift, 0.8)
+			end
+			-- under boost the blow-off sighs on each upshift too (quieter than a lift-off)
+			if ex and ex.BlowOff and boost > 0.5 and bovCool <= 0 then
+				oneShot(ex.BlowOff, 0.4 + 0.3 * boost)
+				bovCool = 0.5
+				boost *= 0.6
 			end
 			if smoothRpm > 0.8 and math.random() < 0.6 then
 				if ex and (ex.ShiftPop or ex.Crackle) then

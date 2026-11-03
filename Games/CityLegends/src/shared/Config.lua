@@ -597,6 +597,61 @@ Config.Sounds = {
 	Alarm = "rbxassetid://9113084849", -- Alarm Bell Constant Ring (SFX)
 }
 
+-- the Bugattis' W16 (owner, 2026-11-03: "add the exhaust sounds, make it super realistic and search
+-- from Toolbox ... a Veyron and Chiron exhaust sounds and don't forget the quad turbos blow-off and
+-- whine, it's the most important of a Bugatti"). Public Creator Store audio (checked: all load and
+-- play in Studio). Bands are crossfaded by rpm and each one pitched from the rpm it was recorded at
+-- (Config.ExhaustBands); the *Off bands are the coast (off-throttle) recordings. Turbo = the turbo
+-- whine loop (pitch and loudness follow the boost), Turbo2 = the second pair of the Chiron's
+-- sequential turbos (comes in at 3,800 rpm), BlowOff = the blow-off on lifting off under boost.
+do
+	local CHIRON = {
+		Start = "rbxassetid://119176690907106", -- "Bugatti Chiron W16 Startup" (EfiniRX)
+		Idle = "rbxassetid://125444595831615", -- "Bugatti_Chiron_exh_on_Idle" (chazdoest0pic)
+		Low = "rbxassetid://78106546390247", -- "Bugatti_Chiron_on3500_ext": on throttle at 3,500 rpm
+		LowOff = "rbxassetid://102979441052957", -- "Bugatti_Chiron_off3500_ext": coasting at 3,500
+		High = "rbxassetid://101082286464059", -- "Bugatti_Chiron_on6500_ext"
+		HighOff = "rbxassetid://79069154574207", -- "Bugatti_Chiron_off6500_ext"
+		Turbo = "rbxassetid://72711797703242", -- "bugatti_turbo" (schaefchen_17): the whine
+		Turbo2 = "rbxassetid://72711797703242",
+		BlowOff = "rbxassetid://101097691662187", -- a big twin-turbo blow-off (McLaren 650S, from a racing game)
+	}
+	local VEYRON = {
+		Start = "rbxassetid://117970941785090", -- "Bugatti Veyron Startup Sound" (T0RQUES)
+		Idle = "rbxassetid://82099770713185", -- "Bugatti Chiron Idle" (Tyudogg5): the same W16 at idle
+		Low = "rbxassetid://86689627119760", -- "Bugatti Veyron W16 engine sound" (pjota20102)
+		High = "rbxassetid://8158600779", -- "CSR2 W16 Engine" (Kwerke_Individual): the Veyron in CSR2
+		Turbo = "rbxassetid://72711797703242",
+		BlowOff = "rbxassetid://95497630494219", -- a large blow-off ("toyotasupra_large", from a racing game)
+	}
+	local PUR_SPORT = table.clone(CHIRON)
+	PUR_SPORT.Start = "rbxassetid://14130290830" -- "Bugatti Chiron Pur Sport Startup" (R5ist)
+	local sets = {
+		bugotti_veyron = VEYRON, bugotti_veyron_sport = VEYRON, bugotti_veyron_top = VEYRON,
+		bugotti_chiron = CHIRON, bugotti_chiron_pursport = PUR_SPORT, bugotti_chiron_supersport = CHIRON,
+	}
+	for carId, set in sets do
+		for part, id in set do
+			Config.Sounds["Exhaust_" .. carId .. "_" .. part] = id
+		end
+	end
+end
+
+-- per-car exhaust bands: the rpm each loop was recorded at (the loop's pitch is the car's rpm over
+-- this; bands crossfade between their rpms), and the turbos: `whine` the whine's pitch at full boost,
+-- `seq` the rpm the second turbo pair comes in (sequential, the Chiron), `bov` the blow-off loudness
+Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number? } }
+do
+	local chiron = { bands = { Idle = 950, Low = 3500, High = 6500 }, whine = 0.62, seq = 3800, bov = 1.0 }
+	local veyron = { bands = { Idle = 950, Low = 3300, High = 5600 }, whine = 0.7, bov = 1.0 }
+	for _, id in { "bugotti_veyron", "bugotti_veyron_sport", "bugotti_veyron_top" } do
+		Config.ExhaustBands[id] = veyron
+	end
+	for _, id in { "bugotti_chiron", "bugotti_chiron_pursport", "bugotti_chiron_supersport" } do
+		Config.ExhaustBands[id] = chiron
+	end
+end
+
 -- Radio stations (owner, 2026-10-30, from the research: Midnight Racing's stations by genre). The
 -- first plays Sounds.Music; the others are Roblox's licensed music library (DistroKid / APM).
 -- Settings > Radio (or the HUD's toast) switches; M turns the radio off and on
