@@ -58,3 +58,10 @@ The first version (shell, crystals, signs, cover) is kept in `ServerStorage.Remo
 - Flint's table: `ReplicatedStorage.StoryTables.BullyTable_Flint` (a copy of Vince's) placed on the platform; it appears when Flint is added to the storyline (chapter 7, not built yet).
 - Code: the guard Zone is the cavern under the streets only (y -25..-6, so people on the back street are never moved); music area = the mouth + deck and the cavern; GymLighting uses the same Zone.
 - Tested in Play: a test character walked deck -> stairs -> floor -> platform -> back row -> back up; the cavern streams in (13 machines on the client); gem plate colours; no errors.
+
+## Headroom for tall players (3 Nov, owner: "theres gonna be tall guys coming in there so make the roof clearance higher")
+- Target: 14+ studs of headroom wherever people walk (the bullies are up to ~10 ft = ~9.7 studs; 7'0" = 6.75 studs).
+- Cavern floor lowered 4 studs (now -26; everything on it moved down): 16+ studs everywhere on the floor (checked on a 3-stud grid), up to ~42 under the dome. Stalactites that came below 14 were shortened or removed (12).
+- Stairs rebuilt longer (32 steps, deck 0.5 -> floor -26) and the tunnel over them cut higher: 14-17 studs over the walking width; a plank wall-rail on the rock side keeps people off the last strip by the wall (lower there). Rock wedge under the low end of the stairs (no low gap to walk into).
+- Deck: ~14-15 studs; the ALTER 15+ plate is now on the beam's face (nothing hangs low), the lanterns hang higher.
+- Checked: no holes to the street/sky (rays from above never reach the cavern), the mountain's front is closed beside the mouth. Tested in Play with a 10.4-stud dummy and a normal one: deck -> stairs -> floor -> platform -> back / east walls -> back up to the deck. No errors.
