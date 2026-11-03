@@ -39,3 +39,22 @@ Prompt: [[2026-11-03 GYM ARC Prompt - Gem Mine Gym]]. Event: [[2026-11-01 GYM AR
 - `Config/LiveEvents` Gem is still `enabled = false` (no countdown card anywhere) until the update is ready: switch on in Config or Creator Hub `Launch_Gem_Enabled`.
 - Not tested: sitting on a Gem Mine machine in Play (the fresh test player can't be put on any club machine by the test hook, Golden Era too). Test with a real Alter 15 save.
 - The 7 apartments are gone from the east block; put back = move them from ServerStorage into `Workspace.Town.Buildings`.
+
+## Exterior pass + interior redo (3 Nov, later) - [[2026-11-03 GYM ARC Prompt - Gem Mine exterior and interior redo]]
+The first version (shell, crystals, signs, cover) is kept in `ServerStorage.RemovedForGemMine_3Nov.GemMineGym_v1`.
+
+**Outside**
+- The rock is now an irregular mountain (terrain): a wide base with rounded corners, uneven peaks (highest ~37 a little behind the middle), sloping down to the street and to the back; the green hill shows behind it from the street.
+- Cave mouth 18 wide, ~17 high: two timber posts (iron bands) + a beam, braces, 2 hanging lanterns, GEM MINE GYM standing on the beam, ALTER 15+ hanging under it. Rails run from the sidewalk onto the deck (buffer stop), one cart full of gems at the mouth.
+- 10 big Neon crystal clusters (purple / blue / pink, up to 14 studs) on the peaks, the front corners and beside the mouth; small crystals, ~60 rubble stones along the base and on the last ~0.8 studs of the sidewalk (walkway clear); 6 glowing cracks.
+- A purple glow out of the mouth onto the street (1 PointLight + 1 SpotLight). No other lights outside.
+
+**Inside (dug down)**
+- From the mouth: a timber deck at street level, then 28 wide stairs (12 studs) on timber trestles down to the cavern floor; handrail with 5 lanterns (2 lit).
+- The cavern: x 104..200, z 94..160 (96 x 66), floor at -22 (the terrain surface; 22 below the street). Ceiling 18 under the town (rock at -8..-4 under the roads, the pavement above untouched) and a dome up to +16 inside the mountain (~38 high) with 16 crystal stalactites. Checked: no holes to the street/sky, the stairs have 6+ studs headroom, nothing underground was in the way (no parts below the roads).
+- Layout: Flint's spot in the middle (a raised rock platform, gold ring, steps toward the stairs, a 22-stud glowing crystal + 2 smaller, a few sparkles); machines in rows along the back (5), east (3 + crunch) and west (2) walls, 2 dumbbell spots under the deck; a mine-cart track loops round the middle (4 carts full of gems).
+- Gem equipment: frames dark metal with the gold trim kept, pads deep purple; plates are gems by weight (MachineService: 45+ lb amethyst, 25-35 sapphire, lighter pink tourmaline; smooth body, glowing rim, gold hub). Signature crystal machines: Monolift, Deadlift, Squat1 (crystal pillars + a glowing gem trim, attribute CrystalMachine).
+- Light: the office lamps are gone; 5 PointLights inside big crystals + 2 lanterns. 9 lights in the whole gym, 1 particle emitter, 1,122 parts, no Glass.
+- Flint's table: `ReplicatedStorage.StoryTables.BullyTable_Flint` (a copy of Vince's) placed on the platform; it appears when Flint is added to the storyline (chapter 7, not built yet).
+- Code: the guard Zone is the cavern under the streets only (y -25..-6, so people on the back street are never moved); music area = the mouth + deck and the cavern; GymLighting uses the same Zone.
+- Tested in Play: a test character walked deck -> stairs -> floor -> platform -> back row -> back up; the cavern streams in (13 machines on the client); gem plate colours; no errors.
