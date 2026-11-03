@@ -746,6 +746,15 @@ function Roads.build(data, opts)
 			-- across each other's lanes) A crossing is left out when any stripe would lie on another
 			-- road's carriageway or near a crossing already painted; stripes stop at a narrowed edge.
 			local function zebra(cf: CFrame, w: { number })
+				-- (owner, 2026-11-03: "remove cross walk on wide curves and only put cross walk on the
+				-- main part of the city map"): none on the hill roads, above the town (92 up) or where
+				-- the road bends more than 20 degrees over about 70 studs
+				local hill = r.name == "Mountain Road" or string.find(r.name, "Hairpin") ~= nil or string.find(r.name, "Terrace") ~= nil or string.find(r.name, "Switchbacks") ~= nil
+				local da, db = pts[math.max(1, i - 6)].dir, pts[math.min(n, i + 6)].dir
+				local bend = if da.Magnitude > 0 and db.Magnitude > 0 then math.deg(math.acos(math.clamp(da.Unit:Dot(db.Unit), -1, 1))) else 0
+				if hill or cf.Position.Y > 92 or bend > 20 then
+					return
+				end
 				local stripes = {}
 				for k = -6, 6 do
 					local off = k * 4.8
