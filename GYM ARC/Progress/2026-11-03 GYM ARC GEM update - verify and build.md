@@ -138,3 +138,27 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - Live cutscene.
     - After it: GemAlters unlocked (last alter 15 → 20), the HUD switched to "NEXT: ALTER 16 JADE" + the gold strip, Flint/Ruby/Onyx appeared, the cover went, the reward (online + 30 min boost) and the NEW: ALTERS 16-20 card.
     - Fixed in testing: the first wide shot sat behind the building across the street.
+- **3 Nov - Item 6: Hall of Fame Agency discovery built + tested.**
+  - **How it was surfaced before:** only by walking up to its desk on the Hall's plaza (right of the steps); under ★3 a locked toast. Nothing pointed to it.
+  - Everything below shows only after the update (`LiveEvents.Unlocked("StarTrack")`).
+  - **One-time card** (new `AgencyClient`, Kit.Modal "Hall of Fame Agency"):
+    - Contents: its 4 trainers as tiles (portrait, rarity colour, real odds 55% / 33% / 10.5% / 1.5%), "15,000 coins a roll", GO TO AGENCY (gold path + marker to the desk) / LATER.
+    - Shown to every ★3+ player once: on reaching ★3, or already past it.
+    - Saved as `onboarding.hofAgencySeen` (HallOfFame remote "AgencySeen").
+    - Waits for the join's windows, Coach Dex's tips, the story and the "NEW: ALTERS 16-20" card. In testing the two cards opened together and one replaced the other; fixed.
+  - **Sign + beacon:** a dark gold-trimmed plate over the desk's board, "HALL OF FAME AGENCY / ★3 ONLY", and a tall gold shaft of light from it (open sky, seen from the Hall's steps). Both hidden before the update.
+  - **Red dot:**
+    - The Trainers tile shows the red "!" (new `SideMenu.SetDot(id, on)`) for ★3+ until the agency is opened once (`onboarding.hofAgencyOpened`, set by TrainerService at the desk).
+    - A tap while it shows opens the card.
+    - The NEW tag couldn't be used: GuideClient resets it every refresh.
+  - **Hall of Fame screen:** VISIT AGENCY under STAR TRACK (opens the card); under ★3 a disabled "REACH ★3".
+  - **Analytics:**
+    - `HofAgency_FirstOpen` (value = days since ★3; `fame.star3At` is now saved when a save reaches ★3; -1 for older saves).
+    - `HofAgency_CardSeen`.
+  - New GoTo target `HofAgency` (in front of the desk).
+  - Star Track already lists it as the ★3 reward (done 3 Nov).
+  - **Also:** the HUD's Hall of Fame strip now says "+1★" / "+2★" (what entering gives), not "★1" (a ★3 player read it as their stars).
+  - **Tested in Play:**
+    - ★3 save: card after the Alters card, red dot, GO TO path, sign + beacon visible.
+    - Opening the desk with E: flag set, dot gone.
+    - ★2: "REACH ★3" locked, no card, no dot.
