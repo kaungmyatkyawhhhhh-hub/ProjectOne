@@ -1,4 +1,4 @@
-# Prompt: realistic car physics (the car feels heavy and planted at speed)
+# Prompt: realistic car physics (heavy and planted at speed), tyre smoke and tyre marks
 
 _For Claude Code with Roblox Studio connected (MCP). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras._
 
@@ -46,6 +46,25 @@ _For Claude Code with Roblox Studio connected (MCP). Read all of this first. Own
    - the suspension absorbs them; the car lands with weight (compresses, then settles);
    - heavy cars feel solid, light cars bounce more.
 9. **Collisions:** heavier cars push lighter ones (traffic included), and the speed lost depends on the hit, with no bouncing like rubber.
+
+## Tyre smoke and tyre marks (owner, 2026-11-03)
+Tied to the real tyre slip from the physics above, so they only appear when the tyres really slide or spin.
+1. **Tyre smoke:**
+   - comes from each wheel that's **slipping** (wheelspin on launch, burnouts, drifts, locked brakes);
+   - the amount and thickness grow with how much it slips and how fast the wheel spins;
+   - **realistic smoke:** soft, light grey-white, billowing, rising slowly and drifting with the car's movement, fading over a few seconds; thicker during long burnouts and drifts; lit by the scene (dark at night except under street lamps);
+   - no smoke in rain (spray instead, if the game already has spray), little on grass or sand (dust instead);
+   - a light version on **Low graphics** (fewer particles), and other players' cars show it too.
+   - **Particle limits:** about 300 on screen and about 100 per second per emitter on mobile (Playbook). Reuse emitters; don't create new ones every frame.
+2. **Tyre marks (skid marks):**
+   - dark rubber marks drawn on the road under each slipping tyre: straight black lines when braking hard or spinning off the line, and curved lines when drifting;
+   - their **width matches the tyre**, their darkness matches how hard the tyre slips, and they're slightly see-through;
+   - they follow the road surface (on slopes and bends) without floating or flickering;
+   - they **fade out** after a while (about 30–60 s) and there's a cap on how many exist at once (e.g. the newest ~200 segments), so memory stays low;
+   - only on asphalt / concrete, not on grass, sand or water;
+   - drawn only on the client, for nearby cars.
+3. **Sound:** a tyre squeal while slipping, louder and higher the more it slips (use the existing squeal sound; the owner will send IDs if a better one is wanted).
+4. **Settings:** "Tyre smoke: Off / Low / High" and "Tyre marks: On / Off" in the menu's Settings (saved per player).
 
 ## Keep it fun and fair
 - **Realistic but still easy to drive on a phone and keyboard:** a bit of help stays (light assist so the car doesn't spin too easily on keyboard / touch, steering assist on phone). Put the strength of the assists in `Config` and in **Settings ("Driving assists: Off / Low / Normal")**.
