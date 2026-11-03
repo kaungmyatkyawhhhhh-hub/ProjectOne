@@ -22,6 +22,7 @@ local SpeedBumps = {}
 local HALF = 32
 local BEFORE = 26 -- studs before a junction's edge
 local SHARP = 55 -- degrees over the window: a sharp turn
+local HAIRPIN = 120 -- ...and past this it's a hairpin (no bumps)
 local WINDOW = 8 -- samples each side (~50 studs)
 local HUMP = 0.35 -- how far it stands above the road
 local DEPTH = 3.2 -- along the road
@@ -133,6 +134,11 @@ function SpeedBumps.build(data, roadsFolder: Instance, parent: Instance): number
 		if r.kind == "route" then
 			continue
 		end
+		-- (owner, same day: "don't add speed ramps on the hairpin") none on the hairpin and
+		-- switchback roads, and none at a hairpin bend on any road (below)
+		if string.find(r.name, "Hairpin") or string.find(r.name, "Switchbacks") then
+			continue
+		end
 		local n = #r.pts
 		local step = if n > 1 then math.max(Vector2.new(r.pts[2].pos.X - r.pts[1].pos.X, r.pts[2].pos.Z - r.pts[1].pos.Z).Magnitude, 1) else 6.4
 		local back = math.max(1, math.floor(BEFORE / step + 0.5))
@@ -150,18 +156,29 @@ function SpeedBumps.build(data, roadsFolder: Instance, parent: Instance): number
 			end
 		end
 		-- sharp turns: bumps before each end of a run of sharp turning
-		local sharp = {}
+		local sharp, turnAt = {}, {}
 		for i = 1, n do
 			local a = r.pts[math.max(1, i - WINDOW)].dir
 			local b = r.pts[math.min(n, i + WINDOW)].dir
-			sharp[i] = a.Magnitude > 0 and b.Magnitude > 0 and math.deg(math.acos(math.clamp(a.Unit:Dot(b.Unit), -1, 1))) > SHARP
+			turnAt[i] = if a.Magnitude > 0 and b.Magnitude > 0 then math.deg(math.acos(math.clamp(a.Unit:Dot(b.Unit), -1, 1))) else 0
+			sharp[i] = turnAt[i] > SHARP
 		end
-		for i = 2, n do
+		local i = 2
+		while i <= n do
 			if sharp[i] and not sharp[i - 1] then
-				bumpAt(ri, i - 2)
-			end
-			if sharp[i - 1] and not sharp[i] then
-				bumpAt(ri, i + 1)
+				-- the whole run of sharp turning: a hairpin (turning back on itself) gets no bumps
+				local j, most = i, 0
+				while j <= n and sharp[j] do
+					most = math.max(most, turnAt[j])
+					j += 1
+				end
+				if most < HAIRPIN then
+					bumpAt(ri, i - 2)
+					bumpAt(ri, j)
+				end
+				i = j
+			else
+				i += 1
 			end
 		end
 		if ri % 4 == 0 then

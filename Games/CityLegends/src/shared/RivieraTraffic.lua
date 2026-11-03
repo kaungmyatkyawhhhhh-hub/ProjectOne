@@ -91,44 +91,69 @@ function RivieraTraffic.build()
 		end
 	end
 	-- turns between lanes: a curve from the end of one piece to the start of another
+	-- (owner, 2026-11-03: "some cars are turning left and turning right, they're not programmed
+	-- properly"): where a lane's end and the next lane's start sit too close for the angle, the curve
+	-- had to swing one way and then back (89 of 414 turns turned both ways). Now the turn may leave a
+	-- piece or two earlier and join a piece or two later, picking the nearest pair whose way in and
+	-- way out meet ahead of both: one clean arc
+	local function corner(before, after): Vector3?
+		local p0, p2 = before.p2, after.p0
+		local d = (p2 - p0).Magnitude
+		local dirIn = (before.p2 - before.p0) * Vector3.new(1, 0, 1)
+		local dirOut = (after.p2 - after.p0) * Vector3.new(1, 0, 1)
+		if dirIn.Magnitude < 0.1 or dirOut.Magnitude < 0.1 then
+			return nil
+		end
+		dirIn, dirOut = dirIn.Unit, dirOut.Unit
+		local a2 = Vector2.new(dirIn.X, dirIn.Z)
+		local b2 = Vector2.new(dirOut.X, dirOut.Z)
+		local cross = a2.X * b2.Y - a2.Y * b2.X
+		if math.abs(cross) <= 0.2 then
+			return nil
+		end
+		local w = Vector2.new(p2.X - p0.X, p2.Z - p0.Z)
+		local t = (w.X * b2.Y - w.Y * b2.X) / cross -- along the way in
+		local u = (a2.X * w.Y - a2.Y * w.X) / cross -- back from p2 along the way out
+		if t > 1 and u > 1 and t < d * 1.2 and u < d * 1.2 then
+			local c = p0 + dirIn * t
+			return Vector3.new(c.X, (p0.Y + p2.Y) / 2, c.Z)
+		end
+		return nil
+	end
 	for _, link in data.links do
 		local fromLane, fromK, toLane, toK = link[1], link[2], link[3], link[4]
 		local fromRow, toRow = pieces[fromLane], pieces[toLane]
 		local before = fromRow and fromRow[fromK - 1] -- the piece ending at point fromK
 		local after = toRow and toRow[toK] -- the piece starting at point toK
 		if before and after then
-			local p0, p2 = before.p2, after.p0
 			if fromLane == toLane and toK == 1 then
 				-- a loop closing on itself: straight on
 				table.insert(before.next, after)
 			else
-				local d = (p2 - p0).Magnitude
-				local dirIn = (before.p2 - before.p0).Unit
-				local p1 = p0 + dirIn * math.min(d * 0.5, 30)
-				-- (2026-11-03, owner: cars swung out in J shapes to turn) the curve's corner where the
-				-- way in and the way out meet, so a turn is a clean arc; the old guess when they don't
-				local dirOut = (after.p2 - after.p0)
-				if dirOut.Magnitude > 0.1 then
-					dirOut = dirOut.Unit
-					local a2 = Vector2.new(dirIn.X, dirIn.Z)
-					local b2 = Vector2.new(dirOut.X, dirOut.Z)
-					local cross = a2.X * b2.Y - a2.Y * b2.X
-					if math.abs(cross) > 0.2 then
-						local w = Vector2.new(p2.X - p0.X, p2.Z - p0.Z)
-						local t = (w.X * b2.Y - w.Y * b2.X) / cross -- along the way in
-						local u = (a2.X * w.Y - a2.Y * w.X) / cross -- back from p2 along the way out
-						if t > 0 and u > 0 and t < d * 1.2 and u < d * 1.2 then
-							local corner = p0 + dirIn * t
-							p1 = Vector3.new(corner.X, (p0.Y + p2.Y) / 2, corner.Z)
+				local b, a, p1 = before, after, nil
+				local best = math.huge
+				for back = 0, 2 do
+					for ahead = 0, 3 do
+						local bb, aa = fromRow[fromK - 1 - back], toRow[toK + ahead]
+						if bb and aa and back + ahead < best then
+							local c = corner(bb, aa)
+							if c then
+								b, a, p1, best = bb, aa, c, back + ahead
+							end
 						end
 					end
 				end
-				local turn = newSegment(all, p0, p1, p2, "turn")
+				if not p1 then
+					-- straight on or turning back: the old way
+					local d = (after.p0 - before.p2).Magnitude
+					p1 = before.p2 + (before.p2 - before.p0).Unit * math.min(d * 0.5, 30)
+				end
+				local turn = newSegment(all, b.p2, p1 :: Vector3, a.p0, "turn")
 				turn.speedK = 0.8
 				turn.turnSpeed = 18
-				turn.next = { after }
-				turn.route = after.route -- (a turn onto a route counts as the route)
-				table.insert(before.next, turn)
+				turn.next = { a }
+				turn.route = a.route -- (a turn onto a route counts as the route)
+				table.insert(b.next, turn)
 			end
 		end
 	end
