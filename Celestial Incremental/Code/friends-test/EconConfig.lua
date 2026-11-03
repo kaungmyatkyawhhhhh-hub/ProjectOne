@@ -164,6 +164,7 @@ Econ.Comet = {
 	ValueMin = 30, ValueMax = 60, -- a caught comet = this many seconds of your income
 	Life = 9,            -- a comet can be caught for this long after it appears (server side)
 	FirstDelay = 20,     -- the first regular comet after the tutorial
+	MinEvery = 15,       -- the floor (3 Nov): never more than one comet per 15 s, whatever stacks (Lure + x2 COMETS = 15)
 }
 
 ------------------------------------------------------------------------ Supernova (design section 1: needs 1M stardust EARNED this run;

@@ -17,7 +17,7 @@ Put each new id in `ReplicatedStorage.Galaxy.GameConfig`. That is the ONE config
 | Badge | **Alpha Player** | You played Galaxy Incremental during the Alpha. Thank you! | (badges cost nothing to make: the first 5 a day are free) | 512x512 | `Badges.AlphaPlayer` |
 
 - The store reads the pass price live from Roblox, so a later price change in Creator Hub shows by itself.
-- No images were made for these two (see the open question in the overnight summary).
+- **Images (3 Nov, Blender):** `Downloads\galaxy_store_art\pass_x2_stardust.png` and `badge_alpha_player.png` (copies in `Icons\rendered\store\`). See [[2026-11-03 Galaxy Incremental - owner answers (comet floor, store art, studio code key)]].
 
 ## x2 STARDUST pass
 - **The STORE window** (hotbar E, key E; shots p4-01, p4-02):

@@ -46,7 +46,14 @@ Every part has its own note in `Progress\`, and all code is in the vault (`Code\
 5. **File > Save** (Studio), then **publish** when you're happy. Nothing was published.
 6. **At full launch:** set `GameConfig.AlphaActive = false`.
 
-## Open questions (with my recommendation)
+## Owner answers (3 Nov): see [[2026-11-03 Galaxy Incremental - owner answers (comet floor, store art, studio code key)]]
+1. **x2 COMETS:** keep twice as many, plus a 15 s floor (done).
+2. **Pass and badge images:** rendered in Blender, in `Downloads\galaxy_store_art\`.
+3. **Phone captions:** leave them for the alpha. Added to the 21 Nov update; they must be fixed before 28 Nov.
+4. **Codes in Studio:** now use their own `studio_list` key (done, tested).
+5. **Pace:** kept at 2M / x1.75.
+
+## Open questions (with my recommendation) - answered above
 1. **x2 COMETS:** I made it "twice as many comets" (more to tap). The other reading is "comets pay x2".
    - **Recommend:** keep twice as many. It's more fun, and the payout already scales with income.
 2. **Pass and badge images:** none were made (no AI art rule).

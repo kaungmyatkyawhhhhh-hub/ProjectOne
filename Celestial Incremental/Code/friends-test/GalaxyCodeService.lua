@@ -3,10 +3,12 @@
 --  * RemoteFunction Galaxy.Codes: Invoke(text) -> ok, message, rewardLine
 --  * one use per player, saved: the code goes in the save (d.codes[CODE] = os.time()) in the SAME change as the reward,
 --    then the save is written at once (never paid twice, never lost)
---  * the live list: CodesConfig.Start, then the DataStore "GalaxyCodes" (key "list") on top; re-read every 5 min
+--  * the live list: CodesConfig.Start, then the DataStore "GalaxyCodes" (key "list"; in Studio "studio_list") on top;
+--    re-read every 5 min
 --  * 5 tries a minute per player
 --  * analytics: custom event "CodeRedeemed" (the code in custom field 1)
--- OWNER CONSOLE (live game: F9 > Server; Studio: the command bar while playing, Server view):
+-- OWNER CONSOLE (live game: F9 > Server = the REAL list; Studio: the command bar while playing, Server view = the
+-- separate Studio test list only):
 --   game.ServerStorage.GalaxyAdmin:Invoke("code", "list")
 --   game.ServerStorage.GalaxyAdmin:Invoke("code", "add", "SPOOKY", { essence = 2, potions = { Stardust = 1 } }, "2026-11-10")
 --   game.ServerStorage.GalaxyAdmin:Invoke("code", "disable", "SPOOKY")   -- "enable" turns it back on
@@ -29,6 +31,9 @@ remote.Parent = Galaxy
 
 local okStore, store = pcall(function() return DataStoreService:GetDataStore("GalaxyCodes") end)
 if not okStore then store = nil end
+-- (3 Nov: Studio reads and writes its own "studio_list", like the studio_u_ saves, so a test or a console command in
+-- Studio can never touch the live code list. Only live servers use "list".)
+local LIST_KEY = if game:GetService("RunService"):IsStudio() then "studio_list" else "list"
 
 ------------------------------------------------------------------------ the live list
 local live = {} -- [CODE] = { reward, ends (os.time or nil), off }
@@ -71,7 +76,7 @@ local function rebuild()
 end
 local function readList()
 	if not store then return end
-	local ok, list = pcall(function() return store:GetAsync("list") end)
+	local ok, list = pcall(function() return store:GetAsync(LIST_KEY) end)
 	if ok and type(list) == "table" then overrides = list end
 	rebuild()
 end
@@ -119,7 +124,7 @@ admin.Parent = ServerStorage
 local function writeList(change)
 	if not store then return false, "no DataStore here (Studio without API access?)" end
 	local ok, err = pcall(function()
-		store:UpdateAsync("list", function(old)
+		store:UpdateAsync(LIST_KEY, function(old)
 			old = if type(old) == "table" then old else {}
 			change(old)
 			return old

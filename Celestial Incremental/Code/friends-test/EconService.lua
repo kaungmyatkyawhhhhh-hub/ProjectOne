@@ -173,7 +173,7 @@ local function incomeOf(s): number
 	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * surgeMult() * (if boosting(s, "Stardust") then 2 else 1) * (if s.passX2 then 2 else 1)
 end
 local function cometEvery(s): number
-	return Econ.CometEvery(s.d.nodes) / (if boosting(s, "Comets") then 2 else 1)
+	return math.max(Econ.Comet.MinEvery, Econ.CometEvery(s.d.nodes) / (if boosting(s, "Comets") then 2 else 1))
 end
 
 -- everything the HUD and the map read
@@ -245,6 +245,9 @@ end
 
 ------------------------------------------------------------------------ comets
 local function spawnComet(player: Player, s, tutorial: boolean)
+	-- (the floor: never two comets within Econ.Comet.MinEvery s, whatever moved nextComet)
+	if s.lastComet and os.clock() - s.lastComet < Econ.Comet.MinEvery then return end
+	s.lastComet = os.clock()
 	s.cometId += 1
 	s.pending[s.cometId] = os.clock()
 	mapEvent:FireClient(player, "CometSpawn", s.cometId, math.random(1, 2 ^ 30), tutorial)
@@ -255,17 +258,17 @@ local function cometLoop(player: Player, s)
 		if tut < 3 then
 			task.wait(1) -- (no comets during tutorial steps 1-3: nothing stacked on a hint)
 		elseif tut == 3 then
-			-- step 4: the tutorial comet, again every 12 s until it's caught
+			-- step 4: the tutorial comet, again every 15 s (the floor) until it's caught
 			task.wait(2.5)
 			if sessions[player] ~= s or s.d.tut ~= 3 then continue end
 			spawnComet(player, s, true)
-			for _ = 1, 12 do
+			for _ = 1, Econ.Comet.MinEvery - 2 do -- (2.5 + 13 s: just over the floor)
 				task.wait(1)
 				if sessions[player] ~= s or s.d.tut ~= 3 then break end
 			end
 		else
 			s.nextComet = s.nextComet or (os.clock() + Econ.Comet.FirstDelay)
-			if os.clock() >= s.nextComet then
+			if os.clock() >= s.nextComet and not (s.lastComet and os.clock() - s.lastComet < Econ.Comet.MinEvery) then
 				spawnComet(player, s, false)
 				s.nextComet = os.clock() + cometEvery(s)
 			end

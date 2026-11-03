@@ -35,6 +35,7 @@ game.ServerStorage.GalaxyAdmin:Invoke("code", "remove", "SPOOKY")
 ```
 - **The last value** is the last day (UTC "YYYY-MM-DD"), a number of days, or nothing (never ends).
 - **Where the live list lives:** the DataStore `GalaxyCodes` (key `list`), on top of CodesConfig. Every server re-reads it every 5 min.
+  - **Since 3 Nov:** Studio uses its own key `studio_list`, so Studio tests and console commands never touch the live list. Only live servers use `list`.
 - **Limits:** rewards are checked and capped (1,000 Essence, 20 potions).
 
 ## Boost potions
