@@ -60,3 +60,6 @@ The soul's flight has its own 3D sounds (Config/Sounds HofSoul*: pull, breath, s
 
 ## Star Track (3 Nov, GEM update)
 Tier colours (bronze 1 / silver 2-4 / gold 5-9 / diamond 10+) on the tag, plaques and niche lights; the Star Track window (Hall of Fame screen button); titles Rising Star / Golden Star / Immortal; auras Silver / Gold / Diamond Star; the weekly FASTEST RUN board on the Hall's west wall. Details: [[2026-11-03 GYM ARC Star Track built]].
+
+## Font (owner, 3 Nov)
+The Hall of Fame screen uses **Fredoka One** for all its chunky text: the title, the star, the perks, YOU KEEP / START OVER and the buttons (was Gotham Heavy Italic + Luckiest Guy).

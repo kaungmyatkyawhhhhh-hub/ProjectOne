@@ -64,3 +64,7 @@ All lifting stamina numbers are in `Config/Stamina.Pacing` (by Growth Spurt):
 - Running out starts **recovering**: no reps (taps or auto reps) until the bar is full, and it refills right away on the machine (no need to get off). The bar turns red and reads "RECOVERING 6s", with "Growth Spurt needs LEGS" (or a tip) above it. The old sticky "Out of stamina" toast is gone.
 - The DRINK SHAKE button sits left of the stamina bar now (44 px tall), on and off machines. It used to be in the right column, which folds away on a machine.
 - Measured in Studio: a full tapping set lasted ~48 s with the old first numbers, recovering 10 s; the numbers above are the retuned ones.
+
+## Out-of-stamina card (owner, 3 Nov)
+- When stamina runs out (not in the tutorial, not with Endless Stamina running), ONE small bottom card shows: "Out of stamina!" with two buttons, **Refill R$ 5** (Instant Stamina Refill) and **Endless 15m** (Endless Stamina). At most once every 2 minutes. If only one product is for sale, the card shows that one alone. (OfferClient; Studio test: Workspace attribute TestOffer = "StaminaOut".)
+- New players get no pop-ups during the quiet start (their first minutes); the card shows after that.
