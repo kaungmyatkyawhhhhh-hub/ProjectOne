@@ -907,7 +907,7 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Checked in Play on a straight (Coast Road): SV idle at half the SVJ's loudness; braking from 72 mph, three downshifts at 41 / 35 / 27 mph, each blip at its own pitch (0.85 / 0.90 / 1.00); no errors.
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
-Summary at the end of the run goes here. Next: step 4, the map realism checks (`Make the Monaco map look real`, `Realistic graphics`, `Fix buildings that look off`), then step 5 (Toolbox houses). All venues are done.
+Summary at the end of the run goes here. Next: step 6 (bigger map: mountain highway, marina parking).
 
 ### Choices made while the owner was away (2026-11-03)
 - Buildings: the global environment reflections (`Lighting.EnvironmentSpecularScale` 1) were left as they are. Lowering them takes the slight sky sheen off the walls but also dulls the cars' paint and the wet roads, and the sheen wasn't the black / white flashing. Easy to change in `CityBuilder` / Lighting if wanted.
@@ -924,6 +924,8 @@ Summary at the end of the run goes here. Next: step 4, the map realism checks (`
 - Venues, the 3 towers: remodelled outside only (code, `Towers.dress` / `Towers.noNeon` in `server/Towers.lua`). Their penthouses and roofs were already redone with the hotel suites (same code), and their glass body, lobby and gameplay stay. The towers' coloured neon (cyan, purple and gold strips, the glowing pool rim, the lobby's neon chandelier rings) became gold metal or warm lit glass, except the DJ booth's party lights (they need to glow) and the windows' night glow (every building has it).
 - Venues, Gem Showcase: the small gems inside the cases and windows keep their glow (they are the products, a stud or two big, and read as jewels only that way), and so do the red security lasers round the Legends Heart. The big gems outside (over the pool, the roof diamond) are glass and bronze now, floodlit warm.
 - Venues: Legends Rewards keeps its warm white glow strips (coves, sconces, lanterns, downlights: 62 parts). They are warm white light, which the rule allows; only coloured neon was taken out elsewhere.
+- Map realism (step 4): the three realism prompts were already worked through (lighting per time of day, skies, buildings v2 with recessed windows and Monaco colours, the far city, Toolbox props and trees, the speed pass). The one item left, a PBR material kit (MaterialVariants for plaster, stone and marble on the buildings), was not done this run: it changes the look of every building at once and needs texture images; better with the owner's eye on it. Only 4 variants exist (carbon, 3 pavers).
+- Houses (step 5): the Creator Store search turned up few houses good enough (most results are old blocky builds or Brookhaven copies with fake "verification" pop-ups and scripts). Two were good enough after cleaning and were added as bodies; the other Low / Mid designs keep their built-here houses until better models turn up. The 11 bodies already in the place (2 Mid, 9 High) stay.
 
 ### Step 1.1: buildings flashing black and white (done)
 - **Cause:** the far stand-ins (`ReplicatedStorage.RivieraFar`, `tools/riviera/FarCity.luau`) show past ~950 studs (570 on Low graphics, less on phones) and while a building is streamed out. Each one's pale wall-coloured shell was sized from the building's outer skin, so it stood 0.2 studs IN FRONT of the dark core inside every window and shopfront. Close up (stand-in hidden) the windows were dark; past the range (stand-in shown) every window and shop turned the wall colour. That's the "black from one spot, white from another". Pictures: [[Buildings flashing - before (far stand-in showing).jpg]], [[Buildings flashing - after.jpg]], [[Buildings flashing - after, far stand-ins over the city.jpg]].
@@ -1015,3 +1017,15 @@ Driven in Play on the Coast Road (automatic, full throttle, then full brake, the
 - Speed-trap gantries (`Challenges.lua` `gantry`): a clean brushed-steel box beam over the lattice, square steel caps and feet on the posts, a steel frame round the timer board. 5 gantries on the map. Not screenshotted (a teleport to one left the car under the road and the loading screen waited).
 
 **Legends Rewards (checked):** the building, its 9 claim desks (DAILY REWARD, GIFTS, FRIENDS, LEVEL REWARDS, CODES, ACHIEVEMENTS, PROPERTY, SPIN, SUPER SPIN) are there, 1,839 parts, no errors.
+
+### Step 4 (rest): map realism checks
+Checked against the notes: done except the PBR material kit (see the choices). Nothing changed.
+
+### Step 5: Toolbox houses (partly done)
+- Searched the Creator Store for realistic modern houses, villas and mansions; 8 inserted into a holding folder and looked at. 6 rejected (lighting packs, a floor plate, a 73-part box, a single 1,200-stud mesh with no inside, old-style builds). The kept ones were cleaned: every script, GUI (one had the fake "CoreValidation" copy-this pop-up), sound, prompt, the house-control kits (fake cash, neon lights, cameras), a cartoon tree and a 3D text object removed; neon turned to glass; all anchored.
+- **New house bodies** (`ReplicatedStorage.HouseBodies`, facing -Z, pivot at the bottom middle, FootW / FootD / Height, doors marked BodyDoor):
+  - **GlassTerraces** → **Ocean Terrace** (Mid, $15M): a three-level modern villa with deep terraces, glass rooms, an outdoor stair and a walled garden; navy trims recoloured to our dark bronze and walls to warm white (so it's ours); scaled into a 96 x 92 lot area (`look.fitW / fitD`). 6 doors open.
+  - **WhiteCube** → **Corsa Lane** (Low, $450K): a white three-storey cube with glass balconies, a roof terrace with a small pool and planters.
+  - Pictures: [[Houses - Toolbox candidates (cleaned).jpg]], [[Houses - Ocean Terrace and Corsa Lane with Toolbox bodies.jpg]], [[Houses - Corsa Lane (WhiteCube body).jpg]].
+- Checked: both build through `HouseBuilder.build` in Play (458 and 361 parts with the garage), `house_test` passes (all 31 designs, built-here fallback), no errors. Not checked: buying and walking through them in Play (the house code is unchanged).
+- **Credits (Creator Store):** House Suburban Modern Big Realistic (86408704929012, Bella29_0Ghost591530) → GlassTerraces; French Maison Roleplay Decor House Villa (70625546599890, Lavar0St3altha0B3ar1) → WhiteCube.
