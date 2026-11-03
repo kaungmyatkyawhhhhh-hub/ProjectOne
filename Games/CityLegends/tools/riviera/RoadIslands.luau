@@ -109,7 +109,11 @@ local function bar(a: Vector3, b: Vector3, width: number, height: number, props,
 	return p
 end
 
-function RoadIslands.build(data, lanes, roadsFolder: Instance, parent: Instance): (number, number, number)
+-- opts.hairpins = { { road = name, from = i, to = j, side = -1 | 1 }, ... }: build only these, each
+-- the gap between two legs of the same road (owner, 2026-11-03, West Switchbacks: "there is a
+-- massive hole here and it's also causing traffic"), into folder opts.folder (default "RoadIslands")
+function RoadIslands.build(data, lanes, roadsFolder: Instance, parent: Instance, opts: any?): (number, number, number)
+	opts = opts or {}
 	local roads = {}
 	for ri, r in data.roads do
 		local pts = {}
@@ -138,7 +142,7 @@ function RoadIslands.build(data, lanes, roadsFolder: Instance, parent: Instance)
 
 	-- 1. every road side that faces another road across a gap: E (this edge), F (the other's edge)
 	-- (pave: the side has its pavement here, WALK wide past w: look from the pavement's outer edge)
-	local function probe(r, i: number, side: number, w: number, pave: boolean?)
+	local function probe(r, i: number, side: number, w: number, pave: boolean?, allowSelf: boolean?)
 		local p = r.pts[i]
 		if p.dir.Magnitude < 0.01 then
 			return nil
@@ -151,14 +155,19 @@ function RoadIslands.build(data, lanes, roadsFolder: Instance, parent: Instance)
 			return nil
 		end
 		local t = 0.6
+		local sawGap = false -- (same road: only past a real gap, not the road's own edge running on)
 		while t <= MAXGAP do
 			local name, y = surface(e + out * t)
+			if not name then
+				sawGap = true
+			end
 			if name and y then
 				if name == r.name then
-					if t > 2 then
+					if t > 2 and not allowSelf then
 						return nil -- this road again (a hairpin: its leg walls stay)
 					end
-				else
+				end
+				if name ~= r.name or (allowSelf and t > 2 and sawGap) then
 					if t < MINGAP then
 						return false -- touching: no island
 					end
@@ -214,7 +223,7 @@ function RoadIslands.build(data, lanes, roadsFolder: Instance, parent: Instance)
 				end
 				local p = r.pts[k]
 				local w = if side < 0 then p.wl else p.wr
-				local pr = probe(r, k, side, w, pavementAt(r, k, side, w))
+				local pr = probe(r, k, side, w, pavementAt(r, k, side, w), run.allowSelf)
 				if not pr or pr.other ~= run.other or pr.gap > EXTEND_GAP then
 					break
 				end
@@ -229,7 +238,25 @@ function RoadIslands.build(data, lanes, roadsFolder: Instance, parent: Instance)
 	end
 
 	local runs = {} -- { road, other, side, list of probes }
-	for _, r in roads do
+	for _, h in opts.hairpins or {} do
+		for _, r in roads do
+			if r.name == h.road then
+				local cur = { road = r.name, kind = r.kind, other = r.name, list = {}, allowSelf = true }
+				for k = h.from, h.to do
+					local p = r.pts[k]
+					local pr = probe(r, k, h.side, if h.side < 0 then p.wl else p.wr, nil, true)
+					if pr then
+						table.insert(cur.list, pr)
+					end
+				end
+				if #cur.list >= 2 then
+					extend(cur, r, h.side)
+					table.insert(runs, cur)
+				end
+			end
+		end
+	end
+	for _, r in (if opts.hairpins then {} else roads) do
 		local n = #r.pts
 		for _, side in { -1, 1 } do
 			local narrowed = {}
@@ -293,7 +320,7 @@ function RoadIslands.build(data, lanes, roadsFolder: Instance, parent: Instance)
 	for _, run in runs do
 		local mine = total[run.road .. "|" .. run.other] or 0
 		local theirs = total[run.other .. "|" .. run.road] or 0
-		run.second = not (mine > theirs or (mine == theirs and run.road < run.other))
+		run.second = run.road ~= run.other and not (mine > theirs or (mine == theirs and run.road < run.other))
 		run.otherKind = kindOf[run.other]
 		table.insert(keep, run)
 	end
@@ -303,12 +330,13 @@ function RoadIslands.build(data, lanes, roadsFolder: Instance, parent: Instance)
 
 	RoadIslands.lastRuns = keep -- (for checking)
 	-- 3. build
-	local folder = parent:FindFirstChild("RoadIslands")
+	local folderName = opts.folder or "RoadIslands"
+	local folder = parent:FindFirstChild(folderName)
 	if folder then
 		folder:Destroy()
 	end
 	folder = Instance.new("Folder")
-	folder.Name = "RoadIslands"
+	folder.Name = folderName
 	folder.Parent = parent
 
 	local query = OverlapParams.new()
