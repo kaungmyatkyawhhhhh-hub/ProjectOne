@@ -518,8 +518,9 @@ Config.Sounds = {
 		"rbxassetid://1842960025", -- Infinite Void (APM)
 	},
 	MusicVolume = 0.22,
-	-- per-car exhaust sets (owner's uploads): Exhaust_<car id>_<Start | Idle | Mid | High | Launch |
-	-- Crackle | Redline>. Idle / Mid / High are loops blended by rpm; a car with them uses these
+	-- per-car exhaust sets (owner's uploads): Exhaust_<car id>_<Start | Idle | Low | Mid | High |
+	-- Launch | Crackle | Redline | Shift | Downshift | ShiftPop | Pops> (Low and the one-shots since
+	-- 2026-11-03). Idle / Mid / High are loops blended by rpm; a car with them uses these
 	-- instead of the shared engine sound (owner, 2026-10-22: the LP750 first, as a test)
 	Exhaust_lambrini_lp750_Start = "rbxassetid://70853763868958",
 	Exhaust_lambrini_lp750_Idle = "rbxassetid://91209556236511",
@@ -528,6 +529,30 @@ Config.Sounds = {
 	Exhaust_lambrini_lp750_Launch = "rbxassetid://100034849111835",
 	Exhaust_lambrini_lp750_Crackle = "rbxassetid://128716617727916",
 	Exhaust_lambrini_lp750_Redline = "rbxassetid://15989284563", -- owner, 2026-10-22: new redline
+	-- (owner, 2026-11-03: "exhaust sounds for SVJ and SVJ 63"; the limiter is the SV's)
+	Exhaust_lambrini_svj_Start = "rbxassetid://70853763868958",
+	Exhaust_lambrini_svj_Idle = "rbxassetid://86888239641129",
+	Exhaust_lambrini_svj_Low = "rbxassetid://119404279673406",
+	Exhaust_lambrini_svj_Mid = "rbxassetid://70783605428332",
+	Exhaust_lambrini_svj_High = "rbxassetid://129073457954629",
+	Exhaust_lambrini_svj_Redline = "rbxassetid://15989284563",
+	Exhaust_lambrini_svj_Shift = "rbxassetid://116713101274714",
+	Exhaust_lambrini_svj_Downshift = "rbxassetid://109515735710638",
+	Exhaust_lambrini_svj_ShiftPop = "rbxassetid://128716617727916",
+	Exhaust_lambrini_svj_Pops = "rbxassetid://125121319222420",
+	Exhaust_lambrini_svj_Launch = "rbxassetid://100034849111835",
+	-- (owner, 2026-11-03: "exhaust sounds for SVJ and SVJ 63"; the limiter is the SV's)
+	Exhaust_lambrini_svj63_Start = "rbxassetid://70853763868958",
+	Exhaust_lambrini_svj63_Idle = "rbxassetid://86888239641129",
+	Exhaust_lambrini_svj63_Low = "rbxassetid://119404279673406",
+	Exhaust_lambrini_svj63_Mid = "rbxassetid://70783605428332",
+	Exhaust_lambrini_svj63_High = "rbxassetid://129073457954629",
+	Exhaust_lambrini_svj63_Redline = "rbxassetid://15989284563",
+	Exhaust_lambrini_svj63_Shift = "rbxassetid://116713101274714",
+	Exhaust_lambrini_svj63_Downshift = "rbxassetid://109515735710638",
+	Exhaust_lambrini_svj63_ShiftPop = "rbxassetid://128716617727916",
+	Exhaust_lambrini_svj63_Pops = "rbxassetid://125121319222420",
+	Exhaust_lambrini_svj63_Launch = "rbxassetid://100034849111835",
 	-- police and the bank (verified creators / ProSoundEffects)
 	Siren = "rbxassetid://9056622054", -- Yelp-Police-Siren (loops)
 	CameraFlash = "rbxassetid://9113678227", -- Camera Shutter 1 (SFX)

@@ -406,7 +406,9 @@ export type Engine = {
 }
 
 -- a car's own exhaust recordings (Config.Sounds.Exhaust_<car id>_<part>), when they loaded
-local EXHAUST_PARTS = { "Start", "Idle", "Mid", "High", "Launch", "Crackle", "Redline" }
+-- (2026-11-03, the SVJs: a fourth loop band, Low, and one-shots: Shift on each upshift, Downshift,
+-- ShiftPop on a hard upshift, Pops on lifting off; Crackle stands in for both pops when missing)
+local EXHAUST_PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops" }
 local function exhaustSet(carId: string?): { [string]: string }?
 	if not carId then
 		return nil
@@ -485,7 +487,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	local lastThrottle = 0
 	local crackleCool = 0
 	if ex then
-		for _, k in { "Idle", "Mid", "High", "Launch", "Redline" } do
+		for _, k in { "Idle", "Low", "Mid", "High", "Launch", "Redline" } do
 			local id = ex[k]
 			if id then
 				local snd = newSound(id, holder, 0, true)
@@ -500,19 +502,26 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 			end
 		end
 	end
-	local function crackle(volume: number)
-		if not (ex and ex.Crackle) or crackleCool > 0 then
-			return
-		end
-		crackleCool = 0.35
-		local snd = newSound(ex.Crackle, holder, volume)
-		snd.PlaybackSpeed = 0.95 + math.random() * 0.1
+	-- a one-shot from the car's set (pitch varied a little each time)
+	local function oneShot(id: string, volume: number)
+		local snd = newSound(id, holder, volume)
+		snd.PlaybackSpeed = 0.96 + math.random() * 0.08
 		if positional then
+			snd.RollOffMode = Enum.RollOffMode.InverseTapered
 			snd.RollOffMinDistance = 14
 			snd.RollOffMaxDistance = 520
 		end
 		snd:Play()
 		Debris:AddItem(snd, 6)
+	end
+	-- pops and crackles: lifting off (Pops) or a hard upshift (ShiftPop); Crackle when either is missing
+	local function crackle(volume: number, kind: string?)
+		local id = if ex then (ex[kind or "Pops"] or ex.Crackle) else nil
+		if not id or crackleCool > 0 then
+			return
+		end
+		crackleCool = 0.35
+		oneShot(id, volume)
 	end
 
 	-- screech 0..1: tyres crying on a hard launch / pull-away, on top of what the slip gives
@@ -549,6 +558,25 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 			local wIdle = math.clamp(1 - (r - 0.15) / 0.25, 0, 1)
 			local wMid = math.clamp((r - 0.15) / 0.25, 0, 1) * math.clamp(1 - (r - 0.6) / 0.25, 0, 1)
 			local wHigh = math.clamp((r - 0.6) / 0.25, 0, 1)
+			local wLow = 0
+			if layers.Low then
+				-- four bands (idle, low, mid, high), each fading into the next round its own rpm
+				local C = { 0.12, 0.32, 0.56, 0.84 }
+				local w = { 0, 0, 0, 0 }
+				if r <= C[1] then
+					w[1] = 1
+				elseif r >= C[4] then
+					w[4] = 1
+				else
+					for k = 1, 3 do
+						if r >= C[k] and r <= C[k + 1] then
+							local t = (r - C[k]) / (C[k + 1] - C[k])
+							w[k], w[k + 1] = math.cos(t * math.pi / 2), math.sin(t * math.pi / 2) -- equal power
+						end
+					end
+				end
+				wIdle, wLow, wMid, wHigh = w[1], w[2], w[3], w[4]
+			end
 			-- a missing band borrows its neighbour
 			if not layers.Mid then
 				wIdle += wMid * 0.5
@@ -564,9 +592,20 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 					snd.PlaybackSpeed = pitch * ts
 				end
 			end
-			set("Idle", wIdle, math.clamp((r + 0.05) / 0.2, 0.85, 1.6))
-			set("Mid", wMid, math.clamp(0.6 + r * 0.8, 0.75, 1.3))
-			set("High", wHigh, math.clamp(0.55 + r * 0.53, 0.85, 1.22))
+			if layers.Low then
+				-- each band's pitch follows the revs round the rpm it was recorded at
+				local function bandPitch(centre: number, lo: number, hi: number): number
+					return math.clamp((r + 0.1) / (centre + 0.1), lo, hi)
+				end
+				set("Idle", wIdle, bandPitch(0.12, 0.9, 1.5))
+				set("Low", wLow, bandPitch(0.32, 0.75, 1.3))
+				set("Mid", wMid, bandPitch(0.56, 0.8, 1.22))
+				set("High", wHigh, bandPitch(0.84, 0.88, 1.15))
+			else
+				set("Idle", wIdle, math.clamp((r + 0.05) / 0.2, 0.85, 1.6))
+				set("Mid", wMid, math.clamp(0.6 + r * 0.8, 0.75, 1.3))
+				set("High", wHigh, math.clamp(0.55 + r * 0.53, 0.85, 1.22))
+			end
 			if layers.Redline then
 				layers.Redline.Volume = if limiter then 0.95 * power else 0
 				layers.Redline.PlaybackSpeed = ts
@@ -597,15 +636,24 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	end
 
 	function self.shift(_, up: boolean)
+		if not running then
+			return
+		end
 		if up then
 			dip = 0.22
+			if ex and ex.Shift then
+				oneShot(ex.Shift, 0.8)
+			end
 			if smoothRpm > 0.8 and math.random() < 0.6 then
-				if ex and ex.Crackle then
-					crackle(0.9)
+				if ex and (ex.ShiftPop or ex.Crackle) then
+					crackle(0.9, "ShiftPop")
 				else
 					Audio.backfire(if positional then parent else nil)
 				end
 			end
+		elseif ex and ex.Downshift then
+			-- the blip as it drops a gear
+			oneShot(ex.Downshift, 0.85)
 		end
 	end
 
