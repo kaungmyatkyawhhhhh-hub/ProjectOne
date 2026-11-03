@@ -140,25 +140,28 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 			if len < 0.5 then
 				continue
 			end
-			local wl, wr = math.min(a.wl, b.wl), math.min(a.wr, b.wr)
+			-- each end at its own sample's width (the edge line follows a narrowed edge). (owner,
+			-- 2026-11-03: "the road became 3.5 lane") the lane line on a side narrowed next to another
+			-- road sits in the middle of what's left, so it reads as two narrower lanes, not a lane
+			-- and a half (it was always 16 out, leaving a sliver past it)
 			local lines = {
-				{ x = wr - 1.2, w = 0.6, solid = true },
-				{ x = -(wl - 1.2), w = 0.6, solid = true },
+				{ x = a.wr - 1.2, xb = b.wr - 1.2, w = 0.6, solid = true },
+				{ x = -(a.wl - 1.2), xb = -(b.wl - 1.2), w = 0.6, solid = true },
 			}
 			if dash % 2 == 0 then
-				table.insert(lines, { x = 0, w = 0.5 })
-				if wr > HALF / 2 + 2 then
-					table.insert(lines, { x = HALF / 2, w = 0.4 })
+				table.insert(lines, { x = 0, xb = 0, w = 0.5 })
+				if math.min(a.wr, b.wr) > 14 then
+					table.insert(lines, { x = math.min(HALF / 2, a.wr / 2), xb = math.min(HALF / 2, b.wr / 2), w = 0.4 })
 				end
-				if wl > HALF / 2 + 2 then
-					table.insert(lines, { x = -HALF / 2, w = 0.4 })
+				if math.min(a.wl, b.wl) > 14 then
+					table.insert(lines, { x = -math.min(HALF / 2, a.wl / 2), xb = -math.min(HALF / 2, b.wl / 2), w = 0.4 })
 				end
 			end
 			local rightA = Vector3.new(-a.dir.Z, 0, a.dir.X).Unit
 			local rightB = Vector3.new(-b.dir.Z, 0, b.dir.X).Unit
 			for _, l in lines do
 				local pa = a.pos + rightA * l.x
-				local pb = b.pos + rightB * l.x
+				local pb = b.pos + rightB * l.xb
 				local d = flat(pb - pa)
 				-- (the inside of a tight bend: the side points stand still or run backwards)
 				if d:Dot(chord) < 0.35 * len * len then
