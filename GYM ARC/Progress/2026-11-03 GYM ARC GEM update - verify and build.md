@@ -51,3 +51,28 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - Keep window clicked: it returned Arms_Rare + Back_Rare.
     - After Enter: stars 2, both cards legacy-active, run reset to Spurt 3.
     - HALL OF FAMER + Rising Star titles and the free roll were granted. No errors.
+- **3 Nov - Gem alter LOOKS (4 layers) built.**
+  - **Files:** `Config/AlterLooks` (one entry per gem alter), `AlterLookClient` (LocalScript), kit `ReplicatedStorage.AlterLookKit` (CrystalThin / CrystalCluster = copies of the Gem Mine crystal meshes).
+  - **How the pieces work:**
+    - They are client-only anchored parts in `Workspace.AlterLooksLocal`.
+    - They follow the body's muscle "...Stage" meshes every frame with BulkMoveTo. Nothing goes inside the character, so AuraClient and MuscleRig never see them.
+    - Offsets are in the body's frame and mapped onto each mesh. The stage meshes face the other way from the body; this was found and fixed in testing.
+    - They rebuild when a stage mesh is swapped (checked by identity, not name).
+  - **The 5 looks:**
+    - **Jade:** cuffs + glowing band, green breathing glow, jade flecks, soft chime.
+    - **Ruby:** crystal spikes on the shoulders, glowing heart core (heartbeat light + pulsing core), red glints, core flare on reps, crystal tink.
+    - **Sapphire:** light-blue spikes on the forearms, cold glow, frost mist, frost prints, ice step.
+    - **Amethyst:** purple clusters on the shoulders + back, violet glow, 3 orbiting shards that spin faster on reps.
+    - **Diamond:** crystal crown + clear clusters (Ice material), prism light (colour turns), rainbow sparkles, prism burst on flex (AuraBurst), diamond chime.
+  - **Limits (owner rules):**
+    - Max 3 shape pieces a body.
+    - Idle emitter Rate x Lifetime <= 8.
+    - Others past 60 studs: skin only.
+    - Light only on yours + the 2 nearest others within 40 studs.
+    - No particles or lights on Low Graphics / low-end devices; Reduce Motion = no pulsing sizes.
+    - Footstep sound only for yours + others within 30 studs.
+  - **Settings "Alter Effects": All / Mine / Off** (`settings.alterFx`, PlayerData validates it).
+  - **Tested in Play (max body, alters 16-20 switched from the server):**
+    - All 5 looks visible from the front; tuned once (Ruby brighter + smaller core, Jade thicker cuffs, Sapphire bigger lighter spikes, Diamond crown raised above the hair).
+    - Walking: 8 footprints in 30 studs. Flex burst fired. 60 FPS, no errors.
+  - **Not tested yet:** the rep burst on a real machine (needs seating on a Gem machine); 10+ players (the FPS pass).
