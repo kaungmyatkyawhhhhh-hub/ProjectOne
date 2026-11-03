@@ -37,3 +37,7 @@ A reusable system for every big update: publish EARLY with the new content hidde
 1. Add an entry to `Config/LiveEvents` (id, name, time, unlocks, lines, reward).
 2. Add its cutscene to `Shared/VFX/LaunchCutscenes` (shots + events).
 3. Gate the new feature with `LiveEvents.Unlocked("<feature>")`, add a covered look if it has a building, and an `event =` entry in `Config/UI.Updates`.
+
+## Per-building covers (3 Nov, Gem Mine)
+- An event can name its building: `building = "GemMineGym"` (default the Hall of Fame). The server and client look for the cover (`LaunchCover`, attribute LaunchEvent = id) on that building; `bannerDate = true` makes the board read "OPENS SAT 15:00 UTC" (the day comes from the launch time in use); `gatherText` = the gather toast's line.
+- `TestLaunchIn` and the admin `launch` command now act on the next event whose time is still ahead (was always the first in the list).

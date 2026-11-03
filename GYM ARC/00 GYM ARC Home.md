@@ -24,6 +24,7 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 4. Before a risky publish (a save-version bump): make one extra backup first.
 
 ## Current status (21 Oct 2026)
+- 3 Nov: **GEM MINE GYM built in Studio** (not published; covered until the GEM event, Sat 7 Nov 15:00 UTC): a crystal cave on the east block by the court, 13 machines with gem plates, x1.30 gains, Alter 15+. Golden Era + Gem Mine got their own music. Gem cutscene not made yet. [[2026-11-03 GYM ARC Gem Mine Gym built]]
 - 1 Nov: **STORYLINE built in Studio** (not published): 6 bullies, one per gym, arm wrestle them to open the next gym (strength decides), TTS voices + captions, 5 s max shots, cliffhangers. Switch `Story_Enabled`. [[2026-11-01 GYM ARC Storyline built - bullies, arm wrestling, voices]] · voice lines to record: [[GYM ARC - Storyline voice lines to record]]
 - 1 Nov: cutscenes skippable after 3 s (rolls, Atlas / Solaris + your avatar at the end), Hall of Fame launch 24 -> 10 s, HoF popup once ever, deal timer restyled. [[2026-11-01 GYM ARC Cutscene fixes, Hall of Fame popup once, deal timer]]
 - 29 Oct: **prompt 95 done by Claude in Studio** (Hall of Fame x2 EXP from Spurt 3, PEAK height tag, board cheat check, legacy 3rd trainer slot, Starter Pack 49 R$, fixed coin packs 2,000/9,000/25,000). Not published yet. [[2026-10-29 GYM ARC Prompt 95 done - Hall of Fame fixes]] · Playtest: [[2026-10-29 GYM ARC Playtest - first 6 minutes]]
@@ -477,7 +478,10 @@ Every GYM ARC note, by folder. This list is the source of truth for note names: 
 - [[2026-10-20 GYM ARC Body lag]]
 - [[2026-10-20 GYM ARC Traps texture and back]]
 
+- [[2026-11-03 GYM ARC Gem Mine Gym built]]
+
 ### Prompts
+- [[2026-11-03 GYM ARC Prompt - Gem Mine Gym]]
 - [[2026-10-28 GYM ARC Prompt - 87 Lag spike when things reappear]]
 - [[2026-10-28 GYM ARC Prompt - 80 Hall of Fame redesign, test stats, cutscenes]]
 - [[2026-10-28 GYM ARC Prompt - 81 Hall of Fame fixes, clock spike, test stats on]]
