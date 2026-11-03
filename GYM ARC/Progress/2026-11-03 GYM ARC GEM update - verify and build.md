@@ -362,3 +362,19 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
     - BodyService sets the Humanoid HeadScale on join and live in its refresh (like BodyHeightScale), with no respawn. `Body.ApplyTo` / `BodyService.PrepareDescription` take a head growth. The progress mirror rigs and the Hall of Fame statue use it too.
     - Tested (FreshPlayer + TestAlter 15): head 1.45x (head part 1.20 -> 1.74 studs), and the hair scales with it. Live through the Settings height: 6'0" -> 1.0, 6'4" -> 1.15, Max -> 1.45. Screenshot `screens_3Nov_late\17`.
     - Not checked in game yet: the mirror and the statue rigs (same function, built from a description).
+  - **Atlas's head was long (owner, 3 Nov):**
+    - Cause: an NPC gets its classic face head before it's scaled to height. The rescale stretched that part to 2 x 1.4 x 1, and a classic head mesh is drawn at part size x Scale, so it came out 40% too tall. Not from the head-growth change.
+    - Fix (NpcService): `ClassicFace` always puts the part back to 2 x 1 x 1, and `ApplyBody` refits it after a rescale. Checked: Atlas's template is now 2 x 1 x 1. This fixes every scaled NPC (gym-goers, trainers).
+  - **Lats in arms-up poses (owner's bug, 3 Nov):**
+    - Reproduced in double biceps: the torso stage meshes are made for arms down, so the lat flare sits as round wings under the raised arms (screenshots 18-19).
+    - Fix = posed copies of the torso stages (`<file>_Up`). Shown only while posing with the upper arms up: the "Pose" attribute, a trainer's flex (TrainerFollowClient sets "Flexing"), or the posed statue / mirror rigs. The ramp is 54-68 deg (double biceps ~71, lat spread ~48, so the lat spread keeps its lats). Cross-fades over the pose's own 0.3 s. Lifting, idle and walking are unchanged.
+    - First version built the copies at runtime with EditableMesh. Tested: it works, but the client's EditableMesh budget ran out after ~10, so it would fail with several posers or on phones. Dropped.
+    - Now made offline (`ClaudeOne\tools\lats_posed.py`, from the chestfix stage OBJs = the in-game meshes). The flare lifts toward the armpit (0.4 per stud) and tapers into a V (pulled in 15% under the armpit -> 75% at the waist). Front and back use one shoulder line, so the seam stays closed; the chest is untouched. Checked: no faces fold over.
+    - Folder `lats_posed` (12 meshes + previews), IMPORT_LIST. **Owner to import**, then the in-game before / after on the 3 builds (balanced max, max lats + small arms, small lats + max arms).
+    - BodyStages uses `<file>_Up` when it's there (MeshShift attribute for a centre shift); without it nothing changes.
+  - **Tutorial v4 (owner, 3 Nov: crunch bench + pull-up bar after the squat):**
+    - New steps 7-12: StopSquat (Tap STOP) -> GoCrunch (arrows to the starter gym's Crunch Bench) -> CrunchLift (5 reps, rep bar) -> StopCrunch (Tap STOP) -> GoPullUp (arrows to the Pull-Up Bar) -> PullUpLift (5 reps, rep bar). Then Goal (13) and GrowthSpurt1 (14).
+    - `Onboarding.Version` = 4. PlayerData moves a v3 save at Goal or later on by 6 (`Onboarding.CoreBackSteps`). DataTemplate saves start at v4. TutorialExtras' invite finds "Goal" by id.
+    - New Studio hook `TestTutorialStep` (number): start the tutorial at that step.
+    - Tested from step 7: arrows + GO TO to the Crunch Bench, 5 reps, TAP STOP arrow, arrows to the Pull-Up Bar, rep bar "1 / 5 REPS", then step 13. No script errors. Screens 20-22.
+    - Analytics funnel names still list the older step ids (not changed).
