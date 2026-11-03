@@ -276,3 +276,29 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
   - After entering the Hall the new run starts at Alter 0, so the bar comes back when that run reaches Alter 15.
   - Tested in Play (logging every frame): bar visible and card at the same spot through opening the Shop, the Inventory and a respawn; no change.
   - The whole right column (bar + card together) still hides on a machine and during cutscenes, as before, so the card never moves alone.
+- **3 Nov (late) - muscle spike at max, Hall of Fame button, Alter 16 wrist cuff, alter footsteps.**
+  - **Spike at max size** (owner: "triceps turns into a spike at max size ... fix the SHAPE only, no caps").
+    - Reproduced at Alter 15 + every muscle maxed (TestHallOfFame + TestHallLevel 1400; below Alter 15 the look is capped at 10-90% of the mass monster, Muscles.AlterShare).
+    - **Cause:**
+      - Since 27 Oct every body (your own too, MuscleClient OWN_STAGES) wears the static STAGE meshes.
+      - At max that is the "gmon" stage. The arm gmon stage (BS_*Arm_Arm_gmon, the 19 Oct low-poly backfix version) still has the pre-23 Oct pushes baked in: the data's biceps and triceps pushes x2.33 make a long tongue in front (biceps, forward and down to the elbow) and a lobe behind (triceps).
+      - The live data itself is smooth (worst bump 0.014 studs). The 23 Oct biceps fix only changed the live meshes, never the stages.
+      - The forearm monster stage has a horn at the elbow end; the thighs have a pointed outer quad and a back lobe.
+      - Calves are round; the torso (lats) only has mild corners, and the chest is left alone (flat rule).
+    - **Fix (shape only):** `ClaudeOne\tools\round_stage_tips.py` moves only the vertices of the owner's low-poly OBJs (same triangles, same UVs, the open seams fixed):
+      - Volume-keeping Taubin smoothing where a point sticks out past its neighbours.
+      - The arms: the whole lower arm under the delt cap (`--lobes 0.15`, 60 passes).
+    - The outline changes 0-2% (forearm length -4% at the horn tip, thigh skin -3.3% at the beak tip).
+    - Sources verified against the game's meshes (sizes / triangle counts): arms + shorts = lowpoly_backfix, thigh skin = lowpoly_innerfix, forearms = lowpoly/limb_stages.
+    - Output: `Downloads\gem_update_import\muscle_spike_fix\` (8 OBJs + bounds.json + preview pictures, IMPORT_LIST section).
+    - Offline renders: `ClaudeOne\tools\render_obj_views.py`.
+    - **Owner: import the 8 meshes, say "imported meshes"**; then Claude swaps them into ReplicatedStorage.BodyStages / LimbStages, updates Config/BodyStages + LimbStages centre/size, and takes in-game before/after shots.
+  - **Hall of Fame button:**
+    - The Road's Hall of Fame stop ("Open" pill, passed but not entered) only selected the stop. Now it opens the Hall of Fame (the choice after the GEM update, the old screen before), and the Road's detail strip has an "Open Hall of Fame" button (RoadClient). Tested: tap -> ENTER NOW / KEEP GOING -> ENTER HALL -> the Hall of Fame screen.
+    - Also fixed: the one-time "NEW: ALTERS 16-20" card opened on top of the Hall of Fame screen. It now waits for the full-screen windows too (HallChoiceClient FULL_SCREENS).
+  - **Alter 16 wrist (Jade's cuff, not the wrap):**
+    - AlterLookClient snapped a piece's angle against the whole body at build time, so an arm bent at that moment turned the cuff 90 degrees for good.
+    - Now it's measured against the piece's own body part (the stage mesh is welded to it). Tested: both cuffs 1.000 along the forearm.
+  - **Alter footsteps "buggy":**
+    - The step sounds are 1-3 s chimes and a stride came every ~0.15 s, each one cutting and restarting the sound.
+    - Now at most one step every 0.3 s, each fading out over 0.45 s, none while skating. Tested walking: steps 0.28-0.33 s apart.
