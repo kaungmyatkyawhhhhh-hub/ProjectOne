@@ -1135,6 +1135,26 @@ local function openSettings()
 		st.Speedo = if v == "DIGITAL" then "Digital" else "Analogue"
 		UI.setSpeedoStyle(st.Speedo)
 	end)
+	-- (2026-11-03, realistic physics) how much help: a slide is caught, the phone's steering calmed at
+	-- speed, drifts held; tyre smoke and tyre marks
+	choices(row("Driving assists"), { "OFF", "LOW", "NORMAL" }, function()
+		return if st.Assist == "Off" then "OFF" elseif st.Assist == "Low" then "LOW" else "NORMAL"
+	end, function(v)
+		st.Assist = if v == "OFF" then "Off" elseif v == "LOW" then "Low" else "Normal"
+		Driving.assist = if v == "OFF" then 0 elseif v == "LOW" then 0.5 else 1
+	end)
+	choices(row("Tyre smoke"), { "OFF", "LOW", "HIGH" }, function()
+		return if st.Smoke == "Off" then "OFF" elseif st.Smoke == "Low" then "LOW" else "HIGH"
+	end, function(v)
+		st.Smoke = if v == "OFF" then "Off" elseif v == "LOW" then "Low" else "High"
+		Driving.smoke = if v == "OFF" then 0 elseif v == "LOW" then 0.5 else 1
+	end)
+	choices(row("Tyre marks"), { "ON", "OFF" }, function()
+		return if st.Marks == false then "OFF" else "ON"
+	end, function(v)
+		st.Marks = v == "ON"
+		Driving.marks = v == "ON"
+	end)
 	choices(row("Controls on screen"), { "SHOW", "HIDE" }, function()
 		return if st.HideKeys then "HIDE" else "SHOW"
 	end, function(v)
@@ -1967,6 +1987,9 @@ function MainMenu.applySettings(st: { [string]: any })
 		WorldFx.setQuality(st.Graphics)
 	end
 	UI.setSpeedoStyle(if st.Speedo == "Digital" then "Digital" else "Analogue")
+	Driving.assist = if st.Assist == "Off" then 0 elseif st.Assist == "Low" then 0.5 else 1
+	Driving.smoke = if st.Smoke == "Off" then 0 elseif st.Smoke == "Low" then 0.5 else 1
+	Driving.marks = st.Marks ~= false
 	if type(st.Music) == "number" then
 		Audio.setMusicLevel(st.Music)
 	end

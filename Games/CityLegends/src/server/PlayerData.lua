@@ -63,6 +63,9 @@ export type Settings = {
 	Favs: { string }?, -- favourite cars (CARS tab)
 	HideKeys: boolean?, -- the on-screen controls hidden
 	Speedo: string?, -- the HUD speedometer: "Analogue" (default) | "Digital"
+	Assist: string?, -- driving assists: "Off" | "Low" | "Normal" (default)
+	Smoke: string?, -- tyre smoke: "Off" | "Low" | "High" (default)
+	Marks: boolean?, -- tyre marks (default on)
 }
 
 export type Snapshot = {
@@ -557,6 +560,15 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 	if raw.Graphics == "Low" or raw.Graphics == "Medium" or raw.Graphics == "High" or raw.Graphics == "Ultra" then
 		profile.Settings.Graphics = raw.Graphics
+	end
+	if raw.Assist == "Off" or raw.Assist == "Low" or raw.Assist == "Normal" then
+		profile.Settings.Assist = raw.Assist -- driving assists (2026-11-03)
+	end
+	if raw.Smoke == "Off" or raw.Smoke == "Low" or raw.Smoke == "High" then
+		profile.Settings.Smoke = raw.Smoke -- tyre smoke
+	end
+	if type(raw.Marks) == "boolean" then
+		profile.Settings.Marks = raw.Marks -- tyre marks
 	end
 	if raw.Speedo == "Analogue" or raw.Speedo == "Digital" then
 		profile.Settings.Speedo = raw.Speedo -- the HUD speedometer style (2026-11-03)

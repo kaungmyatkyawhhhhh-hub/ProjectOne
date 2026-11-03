@@ -387,7 +387,32 @@ Config.DrivingFeel = {
 	YawResponseHandling = 5, -- extra response times the car's Handling
 	SlipPeak = 0.14, -- slip angle (radians, about 8 degrees) where the tyres grip hardest
 	SlideGrip = 0.62, -- grip left once a slide goes well past the peak (it keeps sliding)
-	Downforce = { Supercar = 0.35, Hypercar = 0.5 } :: { [string]: number }, -- extra grip at top speed
+	-- realistic physics (owner, 2026-11-03: "realistic car physics, like the car gets heavy when going
+	-- fast"). Speeds here: 1 stud/s = 0.783 mph, so 1 g = G studs/s^2.
+	G = 28,
+	-- tyre grip in g: GripBase + GripHandling x the car's Handling, times GameGrip (a little more than
+	-- a real car, so it stays fun). Lower GameGrip = slides sooner, heavier feel; higher = more arcade
+	GripBase = 0.8,
+	GripHandling = 0.4,
+	GameGrip = 1.35,
+	Downforce = { Sedan = 0.05, Coupe = 0.1, Supercar = 0.45, Hypercar = 0.6 } :: { [string]: number }, -- extra grip at top speed (grows with speed squared)
+	-- weight (CarStats' kerb weight, kg, over WeightRef): the powers say how much it matters
+	WeightRef = 1600,
+	WeightBrake = 0.25, -- a heavier car stops later
+	WeightGrip = 0.1, -- ...grips a little less
+	WeightInertia = 0.5, -- ...turns in slower (its turn builds and settles slower)
+	WeightBump = 0.6, -- ...and kerbs, landings and crashes throw it about less (a light car bounces more)
+	HighSpeedYaw = 220, -- the turn builds half as fast at this many studs/s (~170 mph): no snapping at speed
+	BrakeTurnIn = 0.25, -- braking loads the front: up to this much more turn-in
+	TrailBrakeLoose = 0.35, -- ...and lightens the rear: braking hard mid-corner, the rear can step out
+	SquatGrip = 0.3, -- pulling away loads the rear: a rear-drive car spins its tyres a little less
+	WetGripLoss = 0.25, -- rain: this share of grip gone
+	WetBrakeLoss = 0.15, -- ...and of braking
+	-- driving assists (Settings: Off / Low / Normal): how hard a slide past the peak is caught,
+	-- and on phones how much steering lock goes at top speed (the drift assist scales too)
+	StabilityAssist = 3,
+	TouchSteerAssist = 0.3,
+	CameraG = 0.35, -- the camera's lean and lag take the g this much (it was tuned to the old scale)
 	SteerSlowdown = 150, -- the wheel turns half as fast at this many studs/s (calm at speed)
 	PowerOversteer = 0.6, -- traction control off: flooring it lets the rear step out this much more
 	BumpKick = 0.18, -- body pitch kick (radians/s) per stud of sudden ground change over 0.45 (kerbs, ramps; was 0.5 from 0.18, owner 2026-11-02: the car jerked on every stud)
@@ -425,7 +450,12 @@ Config.DrivingFeel = {
 	-- sense of speed: these go by real speed, so every car feels fast when it is
 	RushFrom = 45, -- mph where the speed effects start...
 	RushTo = 190, -- ...and where they're full
-	Vignette = 0.5, -- darkened screen edges at full rush (outside cameras; half in the cabin)
+	Vignette = 0.35, -- darkened screen edges at full wind (outside cameras; half in the cabin)
+	-- the speed effect (owner, 2026-11-03: "realistic wind blur, not cartoon lines"): from this speed
+	-- up to the car's top speed the near roadside blurs (depth of field) and the edges darken
+	WindFromMph = 75, -- (120 km/h)
+	WindFarBlur = 0.35, -- how much the street ahead and the roadside further off blur at top speed (0..1)
+	WindStreaks = 0.8, -- the soft streaks at the screen's edge at top speed (0 = none)
 	ShiftPunchFov = 3, -- a flat-out upshift at high revs: the view kicks wider for a moment
 	ShiftBlur = 1,
 	LaunchKickFov = 7, -- a hard launch
@@ -437,13 +467,14 @@ Config.DrivingFeel = {
 	-- physics v2 (owner, 2026-10-23: "the car driving physics improve it"): weight and handling by
 	-- class. roll / pitch: body lean; understeer: the nose pushes wide at speed (front-heavy);
 	-- shiftTime / upshift / revRate: the gearbox and how quickly the revs move; brake: stopping
-	-- power (studs/s^2); inertia: how slowly the car's turn builds and settles
+	-- power (studs/s^2: about real g x 28 x 1.25, so 100-0 km/h takes ~25-40 m like a real car; it
+	-- was 135-188, which stopped in ~10 m: 2026-11-03); inertia: how slowly the car's turn builds and settles
 	ClassFeel = {
-		Sedan = { roll = 1, pitch = 1, understeer = 0.12, shiftTime = 0.22, upshift = 0.9, revRate = 12, brake = 150, inertia = 1 },
-		SUV = { roll = 1.45, pitch = 1.3, understeer = 0.22, shiftTime = 0.3, upshift = 0.86, revRate = 9, brake = 135, inertia = 1.35 },
-		Coupe = { roll = 0.85, pitch = 0.9, understeer = 0.07, shiftTime = 0.16, upshift = 0.93, revRate = 15, brake = 160, inertia = 0.9 },
-		Supercar = { roll = 0.6, pitch = 0.7, understeer = 0.04, shiftTime = 0.11, upshift = 0.95, revRate = 19, brake = 178, inertia = 0.8 },
-		Hypercar = { roll = 0.6, pitch = 0.55, understeer = 0.03, shiftTime = 0.08, upshift = 0.96, revRate = 22, brake = 188, inertia = 0.75 },
+		Sedan = { roll = 1, pitch = 1, understeer = 0.12, shiftTime = 0.22, upshift = 0.9, revRate = 12, brake = 35, inertia = 1 },
+		SUV = { roll = 1.45, pitch = 1.3, understeer = 0.22, shiftTime = 0.3, upshift = 0.86, revRate = 9, brake = 31.5, inertia = 1.35 },
+		Coupe = { roll = 0.85, pitch = 0.9, understeer = 0.07, shiftTime = 0.16, upshift = 0.93, revRate = 15, brake = 37, inertia = 0.9 },
+		Supercar = { roll = 0.6, pitch = 0.7, understeer = 0.04, shiftTime = 0.11, upshift = 0.95, revRate = 19, brake = 40, inertia = 0.8 },
+		Hypercar = { roll = 0.6, pitch = 0.55, understeer = 0.03, shiftTime = 0.08, upshift = 0.96, revRate = 22, brake = 42, inertia = 0.75 },
 	} :: { [string]: { roll: number, pitch: number, understeer: number, shiftTime: number, upshift: number, revRate: number, brake: number, inertia: number } },
 	-- which wheels drive (any car not listed drives the rear wheels)
 	FrontDrive = { suzaki_swift = true, toyoka_belta = true, toyoka_camri = true, toyoka_alfard = true } :: { [string]: boolean },
@@ -485,8 +516,8 @@ Config.DrivingFeel = {
 	NitroFov = 10,
 	NitroBlur = 1.5,
 	-- skid marks (scaled down on phones)
-	SkidMax = 140,
-	SkidLife = 7,
+	SkidMax = 200, -- the newest this many strips (2026-11-03: was 140)
+	SkidLife = 45, -- seconds before a mark has faded away (was 7)
 }
 
 ---------------------------------------------------------------------

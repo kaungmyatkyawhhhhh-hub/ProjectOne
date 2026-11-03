@@ -47,6 +47,23 @@ local MANUAL = {
 	ferrara_f430 = true, lambrini_lp570 = true, lambrini_countach = true, lexis_lfa = false,
 	bentz_190e = true, suzaki_swift = true,
 }
+local KERB: { [string]: number } = {
+	suzaki_swift = 900, toyoka_belta = 1080, kio_ev6 = 2000, byt_seal = 2150, toyoka_camri = 1550, toyoka_crown = 1800,
+	toyoka_alfard = 2200, toyoka_lc200 = 2600, toyoka_lc300 = 2500, lexis_lx700 = 2600, nisun_350z = 1450, mazdo_rx7 = 1280,
+	mazdo_rx8 = 1310, bnw_530i = 1650, bnw_540i = 1750, bentz_e300 = 1700, bentz_e400 = 1800, bnw_330i_g20 = 1550,
+	bnw_m3_e92 = 1600, bnw_m3_f80 = 1550, bnw_m4_f82 = 1550, bnw_m5_e60 = 1830, bnw_m6_v10 = 1785, bnw_m8gc = 1950,
+	bentz_cla45 = 1650, bentz_cls63s = 1950, toyoka_supra_mk4 = 1570, nisun_r34 = 1560, dodger_challenger = 1950,
+	xiaomo_su7 = 2200, bnw_x6 = 2250, bnw_x7 = 2450, bentz_gle53 = 2300, bentz_g63 = 2560, byt_u8 = 3460,
+	porsha_panamera = 2050, chevo_camaro = 1700, chevo_c6 = 1480, porsha_boxster = 1400, chevo_c7 = 1500,
+	bentz_s63 = 2070, bentz_gt63s = 2120, nisun_gtr = 1750, astin_db9 = 1800, astin_vantage = 1630, ferrara_f430 = 1450,
+	bentz_sl65bs = 1870, lambrini_lp570 = 1340, audy_r8 = 1600, mclaran_12c = 1430, ferrara_599 = 1690, ferrara_458 = 1485,
+	bentz_sls = 1620, porsha_gt3 = 1430, bentlee_contgt = 2250, bentlee_bentayga = 2420, lambrini_urus = 2200,
+	brabos_g63 = 2560, rolls_wraith = 2360, rolls_cullinan = 2660, lambrini_lp700 = 1575, lexis_lfa = 1480,
+	lambrini_lp750 = 1525, lambrini_svj = 1525, lambrini_svj63 = 1575, lambrini_lp640 = 1665, bnw_750li = 2050,
+	bentz_gls = 2500, bentz_s680 = 2250, lambrini_countach = 1450, toyoka_chaser = 1450, bentz_190e = 1230,
+	bentz_s65_w221 = 2250, maseroti_levante = 2100, lexis_lc500 = 1970, astin_dbx = 2250, ferrara_california = 1735,
+	bugotti_veyron = 1890, bnw_m5_f10 = 1870, bnw_m5_f90 = 1855, bentz_e63s = 1880,
+}
 local SEAT_OVERRIDE = { toyoka_alfard = 7, toyoka_lc300 = 7, bnw_x7 = 7, bentz_gls = 4, rolls_cullinan = 4, lexis_lx700 = 7 }
 
 local LINES = {
@@ -73,6 +90,9 @@ function CarStats.of(id: string): Stats
 	if base == "suzaki_swift" or base == "toyoka_belta" then
 		weight = 1020
 	end
+	-- (owner, 2026-11-03, realistic physics) the real kerb weight (kg) of the cars modelled on known
+	-- ones; the physics uses it (braking, grip, how the turn builds, bumps, crashes)
+	weight = KERB[id] or KERB[base] or weight
 	-- power-to-weight from the 0-60 time (about 110 hp/t at 9.5 s, about 520 at 2.5 s)
 	local ptw = 110 * (9.5 / zts) ^ 1.18
 	local hp = ptw * weight / 1000

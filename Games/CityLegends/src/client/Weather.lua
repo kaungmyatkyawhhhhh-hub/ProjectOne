@@ -521,6 +521,7 @@ function Weather.init()
 		lastPos = pos
 
 		local level = value.Value
+		Driving.wet = level -- (2026-11-03) wet roads: less grip, longer stops (Driving)
 		local active = level > 0.01
 		if active then
 			probeTimer -= dt

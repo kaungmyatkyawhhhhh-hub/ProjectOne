@@ -840,6 +840,20 @@ MainMenu.init({
 	end,
 })
 MainMenu.applySettings(settings)
+
+-- Studio test hook (Claude's driving tests): player attribute TestCar = a car id drives it out
+if RunService:IsStudio() then
+	player:GetAttributeChangedSignal("TestCar"):Connect(function()
+		local id = player:GetAttribute("TestCar")
+		if type(id) == "string" and id ~= "" then
+			if MainMenu.isOpen and MainMenu.isOpen() then
+				MainMenu.close()
+			end
+			requestDrive(id)
+		end
+	end)
+end
+
 if settings.HideKeys then
 	UI.toggleControls(false)
 end

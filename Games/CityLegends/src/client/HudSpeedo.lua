@@ -30,6 +30,15 @@ local DIM = 0.72 -- transparency of the dimmed leading zeros
 local NUMBER_FONT = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
 local LABEL_FONT = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold)
 
+local function edge(f: GuiObject)
+	local st = Instance.new("UIStroke")
+	st.Color = Color3.new(0, 0, 0)
+	st.Thickness = 1
+	st.Transparency = 0.6
+	st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	st.Parent = f
+end
+
 local function new(className: string, props: { [string]: any }): any
 	local inst = Instance.new(className)
 	local parent = props.Parent
@@ -45,7 +54,12 @@ local function new(className: string, props: { [string]: any }): any
 end
 
 local function text(props: { [string]: any }): TextLabel
-	props.BackgroundTransparency = 1
+	-- (owner, 2026-11-03: no background box) a soft dark outline keeps it readable on any scene
+	props.TextStrokeColor3 = props.TextStrokeColor3 or Color3.new(0, 0, 0)
+	props.TextStrokeTransparency = props.TextStrokeTransparency or 0.55
+	if props.BackgroundTransparency == nil then
+		props.BackgroundTransparency = 1
+	end
 	props.TextColor3 = props.TextColor3 or WHITE
 	props.FontFace = props.FontFace or LABEL_FONT
 	return new("TextLabel", props)
@@ -139,6 +153,7 @@ local function buildDial()
 			ZIndex = 2,
 			Parent = dialLayer,
 		})
+		edge(s)
 		if red then
 			table.insert(aRed, s)
 		end
@@ -162,6 +177,7 @@ local function buildDial()
 			ZIndex = 2,
 			Parent = dialLayer,
 		})
+		edge(tick)
 		if red then
 			table.insert(aRed, tick)
 		end
@@ -197,7 +213,7 @@ local function buildDial()
 		c:Destroy()
 	end
 	local rIn = D * 0.16
-	new("Frame", {
+	local needleBody = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 0.5, -rIn),
 		Size = UDim2.fromOffset(if isTouch then 2 else 3, R + 2 - rIn),
@@ -206,6 +222,7 @@ local function buildDial()
 		ZIndex = 5,
 		Parent = needleHolder,
 	})
+	edge(needleBody)
 	-- a short pink-red tip, so the reading is easy to pick out
 	new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -227,21 +244,7 @@ local function buildAnalogue(D: number)
 		BackgroundTransparency = 1,
 		Parent = holder,
 	})
-	-- a see-through dark backing so the white reads on a bright road
-	local back = new("Frame", {
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Theme.Background,
-		BackgroundTransparency = 0.5,
-		ZIndex = 1,
-		Parent = analogue,
-	})
-	new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = back })
-	new("UIStroke", { Color = WHITE, Thickness = 1, Transparency = 0.82, Parent = back })
-	new("UIGradient", {
-		Rotation = 90,
-		Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(1, 0) }),
-		Parent = back,
-	})
+	-- (owner, 2026-11-03: no background) the dial floats on the screen; thin dark edges keep it readable
 	dialLayer = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ZIndex = 2, Parent = analogue })
 	needleHolder = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -256,8 +259,7 @@ local function buildAnalogue(D: number)
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
 		Size = UDim2.fromOffset(D * 0.26, D * 0.26),
-		BackgroundColor3 = Theme.Background,
-		BackgroundTransparency = 0.45,
+		BackgroundTransparency = 1,
 		ZIndex = 6,
 		Parent = analogue,
 	})
@@ -321,13 +323,10 @@ local function buildDigital(W: number, H: number)
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.fromScale(1, 1),
 		Size = UDim2.fromOffset(W, H),
-		BackgroundColor3 = Theme.Background,
-		BackgroundTransparency = 0.5,
+		BackgroundTransparency = 1, -- (owner, 2026-11-03: no background box)
 		Visible = false,
 		Parent = holder,
 	})
-	new("UICorner", { CornerRadius = UDim.new(0, 12), Parent = digital })
-	new("UIStroke", { Color = WHITE, Thickness = 1, Transparency = 0.82, Parent = digital })
 	local pad = math.floor(H * 0.13)
 	local barH = math.max(5, math.floor(H * 0.07))
 	local top = H - pad - barH - pad * 0.6 -- the height above the bar
@@ -336,8 +335,7 @@ local function buildDigital(W: number, H: number)
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, pad, 0, top / 2 + pad * 0.4),
 		Size = UDim2.fromOffset(top * 0.62, top * 0.62),
-		BackgroundColor3 = Theme.Background,
-		BackgroundTransparency = 0.4,
+		BackgroundTransparency = 1,
 		Parent = digital,
 	})
 	new("UICorner", { CornerRadius = UDim.new(0, 6), Parent = box })
@@ -406,6 +404,7 @@ local function buildDigital(W: number, H: number)
 			BorderSizePixel = 0,
 			Parent = bar,
 		})
+		edge(barSegs[i])
 	end
 end
 

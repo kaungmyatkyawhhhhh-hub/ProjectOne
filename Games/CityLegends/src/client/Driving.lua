@@ -27,6 +27,7 @@ local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
+local GuiService = game:GetService("GuiService")
 local player = Players.LocalPlayer
 local avatarDesc: HumanoidDescription? = nil -- for the driver's arms
 
@@ -67,6 +68,10 @@ function Driving.setCamFx(fx: { shake: number?, head: number?, blur: boolean?, f
 end
 Driving.inputEnabled = true
 Driving.menuHold = false -- the main menu is open: the car is braked and held (MainMenu)
+Driving.wet = 0 -- how wet the road is, 0..1 (Weather sets it): less grip, longer stops
+Driving.assist = 1 -- driving assists (Settings): 0 off, 0.5 low, 1 normal
+Driving.smoke = 1 -- tyre smoke (Settings): 0 off, 0.5 low, 1 high
+Driving.marks = true -- tyre marks (Settings)
 Driving.loadHold = false -- the map round the car is still loading (Main.client's waitForMap): held too
 Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings or M; Q / E shift only in manual)
@@ -213,7 +218,14 @@ type State = {
 	screech: number, -- tyre cry on hard launches (sound only)
 	chirp: number, -- seconds left of a tyre chirp after a hard low-gear shift
 	launchReady: boolean, -- launch control: brake + throttle held at a stop
+	weightK: number, -- the car's kerb weight over Config.DrivingFeel.WeightRef (CarStats)
+	lonGReal: number, -- pull-away (+) / braking (-) in real g, last frame
+	surface: string?, -- "hard" | "loose" under the car
+	smokeDust: boolean?,
+	smokeSent: number?,
+	smokeSendT: number?,
 	tunnelCheck: number?, -- seconds to the next tunnel check
+	wind: number?, -- the wind blur's strength now, 0..1
 	inTunnel: boolean?,
 	autoHintT: number?, -- when Q / E in automatic last showed its hint
 	-- driving feel (Config.DrivingFeel)
@@ -253,6 +265,7 @@ end
 local state: State? = nil
 local remotes: Folder? = nil
 local blur: BlurEffect? = nil
+local windDof: DepthOfFieldEffect? = nil
 local setVignette: (number) -> ()
 
 local function remote(name: string): any
@@ -460,13 +473,14 @@ local function sparks(at: Vector3, normal: Vector3, count: number)
 end
 
 -- skid marks: a pool of thin dark strips under the rear tyres that fade out
-type Skid = { part: BasePart, born: number }
+type Skid = { part: BasePart, born: number, base: number }
 local skids: { Skid } = {}
 local skidNext = 1
 local skidFolder: Folder? = nil
-local function skidMark(a: Vector3, b: Vector3)
+-- (2026-11-03) as wide as the tyre, darker the harder it slips, laid on the road's own slope
+local function skidMark(a: Vector3, b: Vector3, width: number?, dark: number?, normal: Vector3?)
 	local len = (b - a).Magnitude
-	if len < 0.3 or len > 20 then
+	if len < 0.3 or len > 20 or not Driving.marks then
 		return
 	end
 	local DF = Config.DrivingFeel
@@ -489,15 +503,26 @@ local function skidMark(a: Vector3, b: Vector3)
 		p.Material = Enum.Material.SmoothPlastic
 		p.Color = Color3.fromRGB(18, 18, 20)
 		p.Parent = skidFolder
-		entry = { part = p, born = 0 }
+		entry = { part = p, born = 0, base = 0.35 }
 		skids[skidNext] = entry
 	end
-	entry.part.Size = Vector3.new(0.85, 0.04, len + 0.1)
-	entry.part.CFrame = CFrame.lookAt((a + b) / 2, b)
-	entry.part.Transparency = 0.35
+	local base = 0.62 - 0.4 * math.clamp(dark or 0.5, 0, 1) -- see-through, darker with a harder slide
+	entry.part.Size = Vector3.new(width or 0.85, 0.04, len + 0.1)
+	entry.part.CFrame = CFrame.lookAt((a + b) / 2, b, normal or Vector3.yAxis)
+	entry.part.Transparency = base
+	entry.base = base
 	entry.born = os.clock()
 	skidNext = skidNext % math.max(cap, 1) + 1
 end
+local HARD_SURFACE = {
+	[Enum.Material.Asphalt] = true, [Enum.Material.Concrete] = true, [Enum.Material.Pavement] = true,
+	[Enum.Material.SmoothPlastic] = true, [Enum.Material.Plastic] = true, [Enum.Material.Slate] = true,
+	[Enum.Material.Cobblestone] = true, [Enum.Material.Basalt] = true, [Enum.Material.Limestone] = true,
+}
+local LOOSE_SURFACE = {
+	[Enum.Material.Grass] = true, [Enum.Material.LeafyGrass] = true, [Enum.Material.Sand] = true,
+	[Enum.Material.Ground] = true, [Enum.Material.Mud] = true, [Enum.Material.Snow] = true,
+}
 local skidFadeT = 0
 local function fadeSkids(dt: number)
 	skidFadeT += dt
@@ -514,11 +539,14 @@ local function fadeSkids(dt: number)
 				e.born = 0
 				e.part.Transparency = 1
 			else
-				e.part.Transparency = 0.35 + 0.65 * age * age
+				e.part.Transparency = e.base + (1 - e.base) * age * age
 			end
 		end
 	end
 end
+
+local SMOKE = ColorSequence.new(Color3.fromRGB(206, 206, 208), Color3.fromRGB(160, 160, 164))
+local DUST = ColorSequence.new(Color3.fromRGB(170, 150, 118), Color3.fromRGB(140, 124, 98))
 
 -- the flames' blue nitro colour
 local NITRO_FLAME = ColorSequence.new({
@@ -742,6 +770,9 @@ function Driving.detach()
 		s.roar:Destroy()
 	end
 	setVignette(0)
+	if windDof then
+		windDof.NearIntensity, windDof.FarIntensity = 0, 0
+	end
 	if nitroGui then
 		nitroGui.Enabled = false
 	end
@@ -1224,7 +1255,7 @@ local function carKey(s: State, key: Enum.KeyCode)
 end
 
 -- other players' cars: their blinkers and lights, from the attributes the server sets on them
-type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean? }
+type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter } }
 local others: { [Model]: OtherCar } = {}
 local function otherCar(model: Model): OtherCar?
 	local found = others[model]
@@ -1236,7 +1267,30 @@ local function otherCar(model: Model): OtherCar?
 		return nil
 	end
 	local _, size = model:GetBoundingBox()
-	local o: OtherCar = { model = model, L = {}, R = {} }
+	local o: OtherCar = { model = model, L = {}, R = {}, smoke = {} }
+	-- tyre smoke at the rear wheels (the driver's game sends how much: the Smoke attribute)
+	for _, x in { -size.X * 0.38, size.X * 0.38 } do
+		local att = Instance.new("Attachment")
+		att.Name = "OtherSmoke"
+		att.Position = Vector3.new(x, -size.Y * 0.45, size.Z * 0.32)
+		att.Parent = root
+		local e = Instance.new("ParticleEmitter")
+		e.Rate = 0
+		e.Texture = "rbxasset://textures/particles/smoke_main.dds"
+		e.Lifetime = NumberRange.new(1.2, 2.2)
+		e.Speed = NumberRange.new(1, 3)
+		e.SpreadAngle = Vector2.new(25, 25)
+		e.Acceleration = Vector3.new(0, 2.5, 0)
+		e.Drag = 1.5
+		e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.2), NumberSequenceKeypoint.new(0.4, 3.5), NumberSequenceKeypoint.new(1, 7) })
+		e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.7), NumberSequenceKeypoint.new(0.3, 0.6), NumberSequenceKeypoint.new(1, 1) })
+		e.Color = SMOKE
+		e.LightInfluence = 0.25
+		e.Rotation = NumberRange.new(0, 360)
+		e.RotSpeed = NumberRange.new(-40, 40)
+		e.Parent = att
+		table.insert(o.smoke, e)
+	end
 	for _, side in { "L", "R" } do
 		for _, z in { -size.Z * 0.46, size.Z * 0.46 } do
 			local att = Instance.new("Attachment")
@@ -1269,7 +1323,7 @@ local function updateOthers()
 		end
 		local blinker = (model:GetAttribute("Blinker") :: string?) or ""
 		local lights = model:GetAttribute("Lights")
-		local o = others[model] or (if blinker ~= "" or lights ~= nil then otherCar(model) else nil)
+		local o = others[model] or (if blinker ~= "" or lights ~= nil or model:GetAttribute("Smoke") ~= nil then otherCar(model) else nil)
 		if not o then
 			continue
 		end
@@ -1278,6 +1332,10 @@ local function updateOthers()
 			for _, l in list do
 				l.Enabled = on
 			end
+		end
+		local smokeLevel = (model:GetAttribute("Smoke") :: number?) or 0
+		for _, e in o.smoke do
+			e.Rate = (if smokeLevel >= 2 then 70 elseif smokeLevel >= 1 then 25 else 0) * fxQuality() * Driving.smoke
 		end
 		if lights ~= nil and lights ~= o.lights then
 			o.lights = lights :: boolean
@@ -1843,6 +1901,8 @@ function Driving.attach(model: Model)
 		screech = 0,
 		chirp = 0,
 		launchReady = false,
+		weightK = 1,
+		lonGReal = 0,
 		yawRate = 0,
 		groundDist = nil,
 		groundUp = Vector3.yAxis,
@@ -1900,6 +1960,7 @@ function Driving.attach(model: Model)
 		end
 	end
 	s.powerK, s.dragC = powerFor(spec)
+	s.weightK = CarStats.of(spec.Id).weightKg / Config.DrivingFeel.WeightRef
 	s.engine:setRunning(s.engineOn and not s.electric)
 	if s.engineOn and not s.electric then
 		s.engine:crank()
@@ -2001,6 +2062,28 @@ function Driving.step(dt: number)
 	dt = math.min(dt, 1 / 20)
 	local root = s.root
 	local throttleKey, brake, steerIn, handbrake, clutch = readInput()
+	-- Studio test hooks (Claude's driving tests): TestEngine starts the engine, TestGearbox sets it
+	if RunService:IsStudio() then
+		local tester = Players.LocalPlayer
+		if tester:GetAttribute("TestEngine") and not s.engineOn and s.cranking <= 0 then
+			s.cranking = 0.3
+			s.ignition = true
+		end
+		local tp = tester:GetAttribute("TestTeleport")
+		if typeof(tp) == "CFrame" then
+			tester:SetAttribute("TestTeleport", nil)
+			Driving.teleport(tp)
+		end
+		local gb = tester:GetAttribute("TestGearbox")
+		if (gb == "Auto" or gb == "Manual") and (gb == "Manual") ~= s.manual and not s.electric then
+			Driving.setGearbox(gb)
+		end
+	end
+	-- steering help on phones (driving assists): a little less lock at speed, so a thumb can't flick
+	-- the car round at 200 km/h
+	if UI.isTouch and Driving.assist > 0 then
+		steerIn *= 1 - Config.DrivingFeel.TouchSteerAssist * Driving.assist * math.clamp(s.vel.Magnitude / s.topSpeed, 0, 1)
+	end
 	-- the engine: the starter turns it over for a moment, then it runs; off, the pedal does nothing
 	if s.cranking > 0 then
 		s.cranking -= dt
@@ -2079,7 +2162,7 @@ function Driving.step(dt: number)
 			-- seam in the road is soaked up by the springs. No random sideways roll any more.
 			if math.abs(jump) > 0.45 and math.abs(jump) < 4 then
 				local k = math.clamp(math.abs(jump) - 0.45, 0, 1.5) * math.sign(jump)
-				s.pitchVel += k * DF.BumpKick * 20
+				s.pitchVel += k * DF.BumpKick * 20 * s.weightK ^ -DF.WeightBump
 				s.shake = math.max(s.shake, math.min(math.abs(k) * 0.3, 0.35))
 			end
 		end
@@ -2182,7 +2265,7 @@ function Driving.step(dt: number)
 		if s.airT > 0.25 then
 			local fall = -s.airVy
 			if fall > 8 then
-				s.pitchVel -= DF.LandKick * fall
+				s.pitchVel -= DF.LandKick * fall * s.weightK ^ -DF.WeightBump
 				s.headVel += Vector3.new(0, -fall * 0.04, 0)
 				s.shake = math.max(s.shake, math.clamp(fall / 60, 0.2, 1))
 				if fall > 45 then
@@ -2200,7 +2283,7 @@ function Driving.step(dt: number)
 			s.vel = actualFlat
 			reportCrash(s, loss)
 			-- the jolt: the body and the driver's head are thrown
-			local k = math.clamp(loss / 40, 0, 2) * DF.CrashJolt
+			local k = math.clamp(loss / 40, 0, 2) * DF.CrashJolt * s.weightK ^ -DF.WeightBump
 			s.pitchVel -= k * 2
 			s.rollVel += k * 3 * (if math.random() < 0.5 then -1 else 1)
 			s.headVel += Vector3.new(0, 0, -k * 3)
@@ -2254,7 +2337,9 @@ function Driving.step(dt: number)
 			a += 140 * throttle
 		end
 		-- brakes by class; a hard stop at speed pulses the anti-lock (keeps some steering)
-		local brakeForce = s.cls.brake * s.brakeIn
+		-- (2026-11-03, realistic physics) real stopping power: the class's brake (about g x 28 x
+		-- BrakeBoost), a heavier car stops later, a wet road too
+		local brakeForce = s.cls.brake * s.brakeIn * s.weightK ^ -DF.WeightBrake * (1 - DF.WetBrakeLoss * Driving.wet)
 		local abs = s.brakeIn > 0.8 and Config.spsToMph(math.abs(fwdSpeed)) > 12
 		if abs then
 			s.absT += dt
@@ -2320,13 +2405,21 @@ function Driving.step(dt: number)
 		local maxAngle = math.rad(36) / (1 + (speedAbs / 70) ^ 1.3)
 		local angle = s.steer * maxAngle
 		local yawRate = fwdSpeed * math.tan(angle) / s.wheelbase
-		-- real-life grip, not glued to the road; supercars gain downforce with speed
-		local gripG = 2.2 + 2.0 * handling
-		gripG *= 1 + (DF.Downforce[s.spec.Class] or 0) * math.clamp(speedAbs / s.topSpeed, 0, 1) ^ 2
+		-- (2026-11-03, realistic physics) real tyre grip in g (the car's handling, a little help from
+		-- GameGrip), lower for a heavy car, lower in the wet; aero downforce grows with speed squared
+		-- (a lot on supercars, a little on the others), so a fast car is planted at speed
+		local gripG = (DF.GripBase + DF.GripHandling * handling) * DF.GameGrip * s.weightK ^ -DF.WeightGrip
+		gripG *= 1 + (DF.Downforce[s.spec.Class] or 0) * math.clamp(speedAbs / s.topSpeed, 0, 1.1) ^ 2
+		gripG *= 1 - DF.WetGripLoss * Driving.wet
+		local latA = gripG * DF.G -- the sideways pull the tyres have (studs/s^2)
+		-- weight transfer: braking loads the front (it turns in harder), pulling away loads the rear
+		local brakeLoad = math.clamp(s.brakeIn, 0, 1) * math.clamp(speedAbs / 60, 0, 1)
 		-- power on the rear (traction control off, or a clutch-drop launch) loosens it
 		local loss = 0
 		if not handbrake and (throttle > 0.5 or s.launch > 0) and s.drive ~= "FWD" then
 			loss = (if s.tc then 0.05 else 0.4) * throttle * math.clamp(1 - math.abs(speedFrac) * 1.5, 0, 1)
+			-- (the rear squats under power: a rear-drive car puts it down a little better as it digs in)
+			loss *= 1 - DF.SquatGrip * math.clamp(s.lonGReal, 0, 1)
 			if s.launch > 0 then
 				loss += 0.2
 			end
@@ -2335,7 +2428,8 @@ function Driving.step(dt: number)
 			end
 			loss = math.min(loss, 0.7)
 		end
-		local cap = gripG * 28 / math.max(speedAbs, 1)
+		local cap = latA / math.max(speedAbs, 1)
+		cap *= 1 + DF.BrakeTurnIn * brakeLoad
 		-- the front tyres give up first on a heavy-nosed car at speed (understeer), more so when a
 		-- front-drive car is flooring it through the corner; braking hard keeps most of the steering
 		cap *= 1 - s.cls.understeer * math.clamp(speedAbs / s.topSpeed, 0, 1)
@@ -2353,6 +2447,9 @@ function Driving.step(dt: number)
 		yawRate = math.clamp(yawRate, -cap, cap)
 		-- the car's turn follows the wheel with its weight: quick when parking, heavier at speed
 		local response = (DF.YawResponse + DF.YawResponseHandling * handling) * (1 + 3 * math.max(0, 1 - speedAbs / 40)) / s.cls.inertia
+		-- (2026-11-03) momentum: a heavy car's turn builds slower, and every car resists sudden
+		-- direction changes at speed (no snapping at 250 km/h)
+		response /= s.weightK ^ DF.WeightInertia * (1 + speedAbs / DF.HighSpeedYaw)
 		s.yawRate += (yawRate - s.yawRate) * math.min(1, dt * response)
 		yawRate = s.yawRate
 		s.yaw -= yawRate * dt
@@ -2377,7 +2474,7 @@ function Driving.step(dt: number)
 		if s.drifting and speedAbs > 1 then
 			local velYaw = yawFromLook((fwd * fwdSpeed + right * latSpeed).Unit)
 			local d = (velYaw - s.yaw + math.pi) % (2 * math.pi) - math.pi
-			s.yaw += d * DF.DriftAssist * (1 - 0.6 * math.abs(steerIn)) * dt
+			s.yaw += d * DF.DriftAssist * (0.4 + 0.6 * Driving.assist) * (1 - 0.6 * math.abs(steerIn)) * dt
 			if math.abs(d) > DF.DriftMaxAngle then
 				s.yaw += (math.abs(d) - DF.DriftMaxAngle) * math.sign(d) * math.min(1, dt * 12)
 			end
@@ -2398,6 +2495,9 @@ function Driving.step(dt: number)
 		-- away, so a slide keeps going until you catch it
 		local grip = if handbrake then 1.4 else 4.5 + 5 * handling
 		grip *= 1 - loss
+		-- braking hard mid-corner: the rear goes light and can step out
+		grip *= 1 - DF.TrailBrakeLoose * brakeLoad * math.abs(s.steer)
+		grip *= 1 - DF.WetGripLoss * Driving.wet
 		local slipAngle = math.atan2(math.abs(latSpeed), math.max(math.abs(fwdSpeed), 6))
 		if slipAngle > DF.SlipPeak then
 			grip *= 1 - (1 - DF.SlideGrip) * math.clamp((slipAngle - DF.SlipPeak) / DF.SlipPeak, 0, 1)
@@ -2411,9 +2511,15 @@ function Driving.step(dt: number)
 		-- wheelspin or a slide past the peak leaves them less, and the car slides
 		do
 			local gripK = grip / (4.5 + 5 * handling)
-			local remove = gripG * 28 * 1.15 * gripK * dt
+			local remove = latA * 1.15 * gripK * dt
 			latSpeed *= math.exp(-grip * 0.5 * dt)
 			latSpeed = math.sign(latSpeed) * math.max(0, math.abs(latSpeed) - remove)
+		end
+		-- driving assist (Settings: Off / Low / Normal): past the tyres' peak, outside a drift or the
+		-- handbrake, the slide and the spin are gently caught, so keyboard and touch players don't spin
+		if Driving.assist > 0 and not handbrake and not s.drifting and slipAngle > DF.SlipPeak then
+			latSpeed *= math.exp(-DF.StabilityAssist * Driving.assist * dt)
+			s.yawRate *= math.exp(-DF.StabilityAssist * 0.5 * Driving.assist * dt)
 		end
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
 		if s.drifting then
@@ -2450,9 +2556,12 @@ function Driving.step(dt: number)
 
 		-- body on its springs: leans out in turns, dives under braking, squats pulling away, and
 		-- rocks a little when a shift cuts and returns the drive
-		local latG = math.clamp(fwdSpeed * yawRate / 196.2, -1.5, 1.5)
-		local lonG = math.clamp(a / 196.2, -1.5, 1.5)
-		s.latG, s.lonG = latG, lonG
+		-- (g in real units: the body leans and dives by what the car really does; the camera keeps its
+		-- old, gentler scale)
+		local latG = math.clamp(fwdSpeed * yawRate / DF.G, -2.5, 2.5)
+		local lonG = math.clamp(a / DF.G, -2.5, 2.5)
+		s.lonGReal = lonG
+		s.latG, s.lonG = latG * DF.CameraG, lonG * DF.CameraG
 		-- (and a fine shimmy from the road surface at speed)
 		local tex = DF.RoadTexture * math.clamp(speedAbs / s.topSpeed, 0, 1)
 		local tnow = os.clock()
@@ -2498,8 +2607,12 @@ function Driving.step(dt: number)
 		s.nitro = math.min(1, s.nitro + DF.NitroFillSpeed * math.clamp((mphNow - 60) / 80, 0, 1) * dt)
 	end
 
-	-- skid marks under the rear tyres while they slide
-	if s.grounded and hit and (s.slip > 28 or s.drifting) and mphNow > 8 then
+	-- the surface under the car: hard (asphalt, concrete) or loose (grass, sand: dust, no marks)
+	if hit then
+		s.surface = if HARD_SURFACE[hit.Material] then "hard" elseif LOOSE_SURFACE[hit.Material] then "loose" else "hard"
+	end
+	-- skid marks under the rear tyres while they slide (only on a hard road surface)
+	if s.grounded and hit and s.surface == "hard" and (s.slip > 28 or s.drifting) and mphNow > 8 then
 		s.skidT += dt
 		if s.skidT > 0.05 then
 			s.skidT = 0
@@ -2510,11 +2623,13 @@ function Driving.step(dt: number)
 			local r = cf:PointToWorldSpace(Vector3.new(s.width / 2 - 1.1, 0, back))
 			l = Vector3.new(l.X, y, l.Z)
 			r = Vector3.new(r.X, y, r.Z)
+			local tyre = math.clamp(s.width * 0.13, 0.6, 1.2)
+			local dark = math.clamp((s.slip - 20) / 50, 0, 1)
 			if s.skidL then
-				skidMark(s.skidL, l)
+				skidMark(s.skidL, l, tyre, dark, hit.Normal)
 			end
 			if s.skidR then
-				skidMark(s.skidR, r)
+				skidMark(s.skidR, r, tyre, dark, hit.Normal)
 			end
 			s.skidL, s.skidR = l, r
 		end
@@ -2861,14 +2976,34 @@ function Driving.render(dt: number)
 	end
 	-- smoke with the squeal (same curve as the sound); launches smoke the rear tyres most
 	local squeal = math.clamp((s.slip - 8) / 40, 0, 1)
-	local q = fxQuality()
+	-- (2026-11-03) the Tyre smoke setting, none in the rain (wet tyres don't smoke), dust and less
+	-- of it on grass or sand; the driven wheels smoke most
+	local q = fxQuality() * Driving.smoke * (if Driving.wet > 0.3 then 0 else 1) * (if s.surface == "loose" then 0.4 else 1)
+	local loose = s.surface == "loose"
+	if loose ~= s.smokeDust then
+		s.smokeDust = loose
+		for _, sm in s.smoke do
+			sm.emitter.Color = if loose then DUST else SMOKE
+		end
+	end
+	local total = 0
 	for _, sm in s.smoke do
-		local rate = if squeal > 0.05 then squeal * (if sm.rear then 70 else 35) else 0
+		local driven = if s.drive == "FWD" then not sm.rear elseif s.drive == "AWD" then true else sm.rear
+		local rate = if squeal > 0.05 then squeal * (if driven then 70 else 35) else 0
 		-- a drift smokes the rear tyres hard
 		if s.drifting and sm.rear then
 			rate = math.max(rate, 55 * math.clamp(math.abs(s.driftAngle) / 0.4, 0.4, 1))
 		end
-		sm.emitter.Rate = rate * q
+		sm.emitter.Rate = math.min(rate * q, 100) -- (Playbook: about 100 a second per emitter at most)
+		total += sm.emitter.Rate
+	end
+	-- other players see it too: a smoke level on the car (0 / 1 / 2), sent only when it changes
+	local level = if total > 120 then 2 elseif total > 25 then 1 else 0
+	s.smokeSendT = (s.smokeSendT or 0) - dt
+	if level ~= s.smokeSent and s.smokeSendT <= 0 then
+		s.smokeSent = level
+		s.smokeSendT = 0.3
+		remote("CarSignals"):FireServer({ smoke = level })
 	end
 	fadeSkids(dt)
 
@@ -3062,8 +3197,29 @@ function Driving.render(dt: number)
 	s.fov += (targetFov - s.fov) * math.min(1, dt * 4)
 	-- (the cockpit keeps one FOV: the owner wants that view steady and readable)
 	camera.FieldOfView = s.fov + (if interior then 0 else s.fovPunch + s.gFov)
-	UI.setSpeedLines(if interior then 0 else math.max(0, fx - 0.3) / 0.7)
-	setVignette(DF.Vignette * math.max(0, fx - 0.25) / 0.75 * (if interior then 0.5 else 1))
+	-- speed: a realistic wind blur, not cartoon lines (owner, 2026-11-03): the hard white streaks are
+	-- gone; from WindFromMph to the car's top speed the near roadside blurs as it rushes past (depth
+	-- of field: what's close, at the screen's edges, smears; the road ahead, where you look, stays
+	-- sharp), a touch of far haze, the edges darken a little. Off in the cockpit (the cluster stays
+	-- readable), with Motion blur off or Reduced Motion; lighter on phones
+	local wind = 0
+	if not interior and cfx.blur and not GuiService.ReducedMotionEnabled then
+		local mphWind = Config.spsToMph(s.vel.Magnitude)
+		local full = math.max(DF.WindFromMph + 30, Config.spsToMph(s.topSpeed) * 0.95)
+		wind = math.clamp((mphWind - DF.WindFromMph) / (full - DF.WindFromMph), 0, 1) ^ 1.2 * (if UI.isTouch then 0.6 else 1)
+	end
+	if windDof then
+		s.wind = (s.wind or 0) + (wind - (s.wind or 0)) * math.min(1, dt * 3)
+		local w = s.wind :: number
+		-- (Roblox has no screen-edge blur: the car and the road close by stay sharp, the street further
+		-- ahead and the roadside rushing past blur softly, plus a few feathered streaks at the very edge)
+		windDof.NearIntensity = 0
+		windDof.FarIntensity = DF.WindFarBlur * w
+		windDof.FocusDistance = 30
+		windDof.InFocusRadius = 90 - 40 * w
+	end
+	UI.setSpeedLines((s.wind or 0) * DF.WindStreaks)
+	setVignette(DF.Vignette * (s.wind or 0) * (if interior then 0.5 else 1))
 end
 
 -- Settings: speed units for the HUD and the cluster ("mph" | "kmh")
@@ -3097,6 +3253,15 @@ function Driving.init()
 	b.Size = 0
 	b.Parent = Lighting
 	blur = b
+	-- the wind blur at speed (see the camera): a depth of field with nothing in it until you're fast
+	local dof = Instance.new("DepthOfFieldEffect")
+	dof.Name = "WindBlur"
+	dof.NearIntensity = 0
+	dof.FarIntensity = 0
+	dof.FocusDistance = 40
+	dof.InFocusRadius = 80
+	dof.Parent = Lighting
+	windDof = dof
 
 	RunService.Heartbeat:Connect(updateOthers)
 

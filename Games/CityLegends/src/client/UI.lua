@@ -2251,35 +2251,39 @@ function UI.setAction(text: string?, key: string?)
 			AutoButtonColor = false,
 			Text = "",
 			AnchorPoint = Vector2.new(1, 1),
-			-- (on PC left of the rev counter: above it, it covered the dial)
-			Position = if UI.isTouch then UDim2.new(1, -24, 1, -250) else UDim2.new(1, -24 - 240 - 16, 1, -100),
-			Size = UDim2.fromOffset(if UI.isTouch then 150 else 190, 48),
+			-- (owner, 2026-11-03: "move the Get out button, it's in the way") a slim pill on the right,
+			-- above the speedometer and its warning lights, under the minimap's cards; on phones above
+			-- the steering buttons on the right, clear of the speedometer in the middle
+			Position = if UI.isTouch then UDim2.new(1, -14, 1, -232) else UDim2.new(1, -24, 1, -24 - 224 - 34),
+			Size = UDim2.fromOffset(if UI.isTouch then 132 else 168, if UI.isTouch then 36 else 40),
 			BackgroundColor3 = Theme.Panel,
-			BackgroundTransparency = 0.08,
+			BackgroundTransparency = 0.15,
 			Visible = false,
 			ZIndex = 8,
 			Parent = gui,
-		}, { corner(12), stroke(Theme.Accent, 1.5, 0.1) })
+		}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Stroke, 1.2, 0.2) })
+		local kh = if UI.isTouch then 26 else 28
 		actionKey = label({
 			Text = "F",
-			TextSize = 18,
+			TextSize = 16,
 			Font = Enum.Font.GothamBlack,
 			TextColor3 = Theme.Panel,
 			BackgroundColor3 = Theme.Accent,
 			BackgroundTransparency = 0,
-			Position = UDim2.fromOffset(8, 8),
-			Size = UDim2.fromOffset(32, 32),
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(0, 6, 0.5, 0),
+			Size = UDim2.fromOffset(kh, kh),
 			ZIndex = 9,
 			Parent = b,
 		})
 		corner(8).Parent = actionKey
 		actionText = label({
 			Text = "",
-			TextSize = 15,
+			TextSize = if UI.isTouch then 13 else 14,
 			Font = Enum.Font.GothamBlack,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.fromOffset(50, 0),
-			Size = UDim2.new(1, -56, 1, 0),
+			Position = UDim2.fromOffset(kh + 14, 0),
+			Size = UDim2.new(1, -(kh + 18), 1, 0),
 			ZIndex = 9,
 			Parent = b,
 		})
@@ -2302,41 +2306,60 @@ function UI.setAction(text: string?, key: string?)
 end
 
 -- speed lines: thin streaks rushing in from the screen edges at speed (0 = off .. 1 = flat out)
-local speedLines: { Frame } = {}
 local speedRng = Random.new()
+-- (owner, 2026-11-03: "realistic wind blur, not cartoon lines") the hard white lines are gone: a
+-- few soft, see-through streaks at the outer edge only, each fading in and out as it drifts outward
+-- (no flicker), feathered at both ends and along its width
+type Streak = { f: Frame, a: number, r: number, len: number }
+local streaks: { Streak } = {}
+local lastStreak = os.clock()
 function UI.setSpeedLines(k: number)
 	if not gui then
 		return
 	end
-	if #speedLines == 0 then
+	if #streaks == 0 then
 		if k <= 0 then
 			return
 		end
 		local holder = new("Frame", { Name = "SpeedLines", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 0, Parent = gui })
-		for i = 1, 36 do
-			speedLines[i] = new("Frame", {
+		for i = 1, 12 do
+			local f = new("Frame", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundColor3 = Color3.fromRGB(235, 240, 248),
 				BorderSizePixel = 0,
 				BackgroundTransparency = 1,
 				Parent = holder,
 			})
+			-- feathered: clear at both ends, faint in the middle
+			new("UIGradient", {
+				Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.35), NumberSequenceKeypoint.new(1, 1) }),
+				Parent = f,
+			})
+			new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = f })
+			streaks[i] = { f = f, a = speedRng:NextNumber(0, math.pi * 2), r = speedRng:NextNumber(0.8, 1.05), len = speedRng:NextNumber(0.08, 0.16) }
 		end
 	end
-	for i, f in speedLines do
+	local now = os.clock()
+	local dt = math.min(now - lastStreak, 0.1)
+	lastStreak = now
+	for _, st in streaks do
+		local f = st.f
 		if k <= 0.01 then
 			f.BackgroundTransparency = 1
 			continue
 		end
-		-- a ray from the middle of the screen, drawn only near the edges
-		local a = (i / #speedLines) * math.pi * 2 + speedRng:NextNumber(-0.08, 0.08)
-		local r = speedRng:NextNumber(0.55, 0.85)
-		local len = (0.06 + 0.22 * k) * speedRng:NextNumber(0.5, 1.2)
-		local dx, dy = math.cos(a), math.sin(a)
-		f.Position = UDim2.fromScale(0.5 + dx * r * 0.62, 0.5 + dy * r * 0.62)
-		f.Size = UDim2.new(len * 0.62, 0, 0, if speedRng:NextNumber() < 0.3 then 2 else 1)
-		f.Rotation = math.deg(a)
-		f.BackgroundTransparency = 1 - k * speedRng:NextNumber(0.15, 0.45)
+		st.r += dt * (0.5 + 0.9 * k)
+		if st.r > 1.08 then
+			st.r = 0.8
+			st.a = speedRng:NextNumber(0, math.pi * 2)
+			st.len = speedRng:NextNumber(0.08, 0.16)
+		end
+		local life = math.clamp((st.r - 0.8) / 0.28, 0, 1)
+		local dx, dy = math.cos(st.a), math.sin(st.a)
+		f.Position = UDim2.fromScale(0.5 + dx * st.r * 0.62, 0.5 + dy * st.r * 0.62)
+		f.Size = UDim2.new(st.len * (0.5 + k * 0.5) * 0.62, 0, 0, 3)
+		f.Rotation = math.deg(st.a)
+		f.BackgroundTransparency = 1 - k * 0.22 * math.sin(life * math.pi)
 	end
 end
 

@@ -598,6 +598,10 @@ CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
 	if type(raw.lights) == "boolean" then
 		car:SetAttribute("Lights", raw.lights)
 	end
+	-- (2026-11-03) tyre smoke for the other players: 0 / 1 / 2
+	if raw.smoke == 0 or raw.smoke == 1 or raw.smoke == 2 then
+		car:SetAttribute("Smoke", raw.smoke)
+	end
 end)
 
 -- a street light, tree or traffic pole knocked down: the other games drop it too (only from a
