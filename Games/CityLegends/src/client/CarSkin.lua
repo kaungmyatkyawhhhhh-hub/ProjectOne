@@ -149,25 +149,24 @@ CarSkin.NEEDLE_LENGTH = {
 } :: { [string]: number }
 
 -- (optional: bg / fg, a read-out's plate and text colours; kind "gear" is a live gear read-out)
-export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, bg: Color3?, fg: Color3? }
+-- (grow: a read-out's plate that much bigger than the printed box; withGear: the gear shown on the
+-- read-out's left, owner, 2026-11-03: "I can't see the speed properly, make it visible")
+export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, bg: Color3?, fg: Color3?, grow: number?, withGear: boolean? }
 CarSkin.DIAL_NEEDLES = {
 	-- the Chiron family (owner, 2026-11-03): the 2016 Chiron's own screen (its painted needle taken out)
 	-- in all three, with a live needle on the 500 km/h dial, the speed and the gear in its box
 	-- (tools/needle_specs.py)
 	bugotti_chiron = {
 		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0000, 0.0263, -0.2540), face = Vector3.new(0.0132, 0.2962, 0.9550), length = 0.0300, scale = "0:-135.5,50:-108.4,100:-81.8,150:-55.3,200:-27.6,250:3.4,300:31.8,350:61.3,400:87.8,450:113.2,500:141.5" },
-		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0019, -0.0113, -0.2419), face = Vector3.new(0.0184, 0.3036, 0.9526), length = 0.0177, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
-		{ kind = "gear", unit = "", at = Vector3.new(-0.0087, -0.0160, -0.2404), face = Vector3.new(0.0519, 0.2968, 0.9535), length = 0.0058, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0019, -0.0113, -0.2419), face = Vector3.new(0.0184, 0.3036, 0.9526), length = 0.0177, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(255, 255, 255), grow = 1.55, withGear = true },
 	},
 	bugotti_chiron_pursport = {
 		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0001, 0.0259, -0.2424), face = Vector3.new(0.0233, 0.3082, 0.9510), length = 0.0365, scale = "0:-135.3,50:-108.2,100:-81.6,150:-55.1,200:-27.4,250:3.6,300:32.0,350:61.5,400:88.0,450:113.4,500:141.7" },
-		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0021, -0.0198, -0.2271), face = Vector3.new(0.0285, 0.3156, 0.9485), length = 0.0215, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
-		{ kind = "gear", unit = "", at = Vector3.new(-0.0104, -0.0254, -0.2251), face = Vector3.new(0.0620, 0.3087, 0.9491), length = 0.0071, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0021, -0.0168, -0.2271), face = Vector3.new(0.0285, 0.3156, 0.9485), length = 0.0215, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(255, 255, 255), grow = 1.55, withGear = true },
 	},
 	bugotti_chiron_supersport = {
 		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0001, 0.0257, -0.2500), face = Vector3.new(0.0242, 0.3042, 0.9523), length = 0.0361, scale = "0:-135.3,50:-108.2,100:-81.6,150:-55.1,200:-27.4,250:3.6,300:32.0,350:61.5,400:88.0,450:113.4,500:141.7" },
-		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0021, -0.0196, -0.2351), face = Vector3.new(0.0294, 0.3116, 0.9498), length = 0.0213, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
-		{ kind = "gear", unit = "", at = Vector3.new(-0.0103, -0.0252, -0.2331), face = Vector3.new(0.0629, 0.3046, 0.9504), length = 0.0070, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(225, 238, 255) },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0021, -0.0166, -0.2351), face = Vector3.new(0.0294, 0.3116, 0.9498), length = 0.0213, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(255, 255, 255), grow = 1.55, withGear = true },
 	},
 
 	lambrini_countach = { -- Countach
@@ -2521,7 +2520,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				local up = (Vector3.yAxis - face * face.Y).Unit
 				local digits = dl.kind == "digits" or dl.kind == "gear"
 				local pos = imported.steer.mount.Position + dl.at * m + face * (if digits then 0.004 else 0.002) * m
-				local size = if digits then dl.length * m else dl.length * 2.3 * m
+				local size = if digits then dl.length * m * (dl.grow or 1) else dl.length * 2.3 * m
 				local p = Instance.new("Part")
 				p.Name = "DialPanel" .. i
 				p.Size = if digits then Vector3.new(size, size * 0.45, 0.01) else Vector3.new(size, size, 0.01)
@@ -2539,9 +2538,40 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				w.Parent = p
 				local sg = Instance.new("SurfaceGui")
 				sg.Face = Enum.NormalId.Back
-				sg.LightInfluence = 1
+				sg.LightInfluence = if digits and dl.bg then 0 else 1 -- (a lit screen read-out glows)
+				sg.Brightness = if digits and dl.bg then 1.3 else 1
 				sg.MaxDistance = 40
 				sg.Parent = p
+				if digits and dl.withGear then
+					-- one bright plate: the gear on the left, the speed big on the right
+					sg.CanvasSize = Vector2.new(240, 100)
+					local plate = Instance.new("Frame")
+					plate.BackgroundColor3 = dl.bg or Color3.fromRGB(10, 10, 12)
+					plate.BorderSizePixel = 0
+					plate.Size = UDim2.fromScale(1, 1)
+					plate.Parent = sg
+					local corner = Instance.new("UICorner")
+					corner.CornerRadius = UDim.new(0.18, 0)
+					corner.Parent = plate
+					for _, row in { { "Gear", UDim2.fromScale(0.04, 0.12), UDim2.fromScale(0.24, 0.76), "N", Enum.TextXAlignment.Center }, { "Speed", UDim2.fromScale(0.3, 0.06), UDim2.fromScale(0.66, 0.88), "0", Enum.TextXAlignment.Right } } do
+						local label = Instance.new("TextLabel")
+						label.Name = row[1]
+						label.BackgroundTransparency = 1
+						label.Position = row[2]
+						label.Size = row[3]
+						label.Font = Enum.Font.GothamBlack
+						label.TextScaled = true
+						label.TextColor3 = if row[1] == "Gear" then Color3.fromRGB(150, 200, 255) else (dl.fg or Color3.new(1, 1, 1))
+						label.TextXAlignment = row[5]
+						label.Text = row[4]
+						if row[1] == "Speed" then
+							label:SetAttribute("GaugeUnit", dl.unit)
+						end
+						label.Parent = plate
+					end
+					p.Size = Vector3.new(size, size * 100 / 240, 0.01)
+					continue
+				end
 				if digits then
 					-- the speed in the dial's own unit, like the car's display (Driving fills it in), on
 					-- a dark plate over the fixed number
