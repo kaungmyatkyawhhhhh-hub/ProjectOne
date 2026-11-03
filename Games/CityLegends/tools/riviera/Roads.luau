@@ -714,7 +714,9 @@ function Roads.build(data, opts)
 					end
 				end
 			end
-			-- lines (painted on the slab's own plane)
+			-- lines (painted on the slab's own plane). (2026-11-03) These chord-shifted lines cross on tight
+			-- bends and point the wrong way: after a build, run RoadLines.build (tools/riviera/RoadLines.luau),
+			-- which replaces them with lines that follow the curve and sit on the road by raycast.
 			if not (inJunction[i] or inJunction[i + 1]) then
 				dash += 1
 				local lines = {}
