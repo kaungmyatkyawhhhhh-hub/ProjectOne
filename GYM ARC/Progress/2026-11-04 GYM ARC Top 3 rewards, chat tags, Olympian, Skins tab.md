@@ -111,3 +111,28 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
 - `TitlesClient` + `Shared/UI/SkinsPanel`, `Shared/UI/AltersPanel`, `HallOfFameClient`.
 - `SkinStages.Alter_Olympian`.
 - Studio switches: ServerStorage `TestTopRanks` = "id,id,id" (0 = empty place), `TestTopRankEvery` = seconds.
+
+## Later 4 Nov - Olympian maps, real badges, VIP / Members music
+- **Olympian skin:** the owner imported the 4 maps.
+  - The colour map was checked against the PNG (mean 239/230/209 vs 239/230/210).
+  - `Config/Alters` Olympian now has its own color / normal / roughness / metalness. A variant can now carry its own normal / roughness / metalness; `VariantSkins` supports it.
+  - SkinStages.Alter_Olympian rebuilt. The decals are in ServerStorage._Imports_3Nov.
+- **Badges** (`Config/Titles.BadgeIds`, `TopRanks.OlympianBadgeId`):
+  - Olympian 1363293758019677
+  - Hall of Famer 342795569647814
+  - Legend 3939888577757876
+  - Season Halloween 1516847836228515
+  - Season Winter 3688527356350291
+  - Season Summer 182961698713702
+- **How they're awarded:** `TitleService.GiveBadge` checks `UserHasBadgeAsync` first, in a pcall. A failed call simply tries again next join. A badge already being checked isn't checked twice at once.
+  - When a title is earned.
+  - On every join for titles already owned and for an earned Olympian, about 6 s in. This is how current Halloween title owners get theirs.
+- **Studio never awards** (it would give the tester real badges): it prints "would award". ServerStorage `TestAwardBadges` = true turns real awarding on.
+  - Test switch: Workspace `TestOwnTitles` = "id,id" gives an unsaved test player those titles.
+- **Tested:** a test save with ★10 + the 3 season titles. All 5 title badges were checked and logged "would award" on join, and Olympian's when it reached rank 1. No errors. Profile chips untouched.
+- **VIP Gym and Members Gym have their own music** (`Config/Sounds.AreaMusic` Vip / Members, `SettingsClient` boxes = their Zone parts).
+  - The tracks are from Roblox's licensed APM library, picked by name, not by ear:
+    - **VIP:** Electric Glamour, King Cool B, Record Breakers (A).
+    - **Members:** Get Up And Move B, Fortitude, New Team Spirit.
+  - Levels measured and added to MusicGain.
+  - Tested in Play: VIP plays 1848347043 and Members plays 1846471612, both loaded; starter and town are unchanged.
