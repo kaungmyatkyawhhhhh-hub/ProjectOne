@@ -1,4 +1,4 @@
-# Prompt: move fun cars into the Starter tier
+# Prompt: move fun cars into the Starter tier (and add the A45 S)
 
 _For Claude Code. Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras. Do this together with `Remove 7 starter and mid cars.md`._
 
@@ -7,6 +7,12 @@ Make the start of the game more fun: move these cars from **Mid** down to **Star
 - `bnw_540i`: Bavarica Werkz 540i G30 (a fast sports sedan);
 - `chevo_camaro`: Golden Camaro ZL1 (a muscle car);
 - `toyoka_chaser`: Apex Chasor Tourer V (a drift sedan).
+
+**And add one new car to Starter (owner, 2026-11-03):**
+- **Tri-Star Silber A45 S** (a hot hatch, inspired by the Mercedes-AMG A45 S; fictional name, no badges). New id e.g. `bentz_a45s`. It replaces the CLA 45 (which is being removed) as the small fast Tri-Star Silber.
+  - Starter tier, a price in the same range (about $45K–55K), AWD, a punchy 4-cylinder turbo feel; put it in a sensible series (its own, or the start of a Tri-Star Silber ladder). Show the owner the numbers first.
+  - **3D model:** the owner will send one (or Claude Code finds a good, clean, legal one on Sketchfab / the Creator Store and shows it to the owner first). Convert it with the new-model routine (`Better car models and clean interiors.md`, Part 3: own cluster, logos covered, quality checklist). Until the model is in, the car isn't sold (don't show a blocky placeholder).
+  - Real wheelbase in `CarBuilder.REAL_WB` (about 2.73 m).
 
 ## What to do
 1. Set their `Tier = "Starter"` in `Cars.lua`, with Starter prices that fit the ladder (suggest about **$40K–60K**; e.g. Chasor $40K, Camaro $48K, 540i $55K). **Show the owner the prices and the level each needs before saving.**
