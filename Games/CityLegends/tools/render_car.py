@@ -100,5 +100,7 @@ if steer:
     eye = c + Vector((0, 0.55, 0.30)) + eye_nudge
     shot("driver", eye, c + Vector((0, -1.0, -0.05)), 18)
     # the cluster close up, just over the rim
-    shot("cluster", c + Vector((0, 0.32, 0.16)), c + Vector((0, -0.3, 0.05)), 30)
+    shot("cluster", c + Vector((0, 0.32, 0.16)), c + Vector((0, -0.3, 0.05)), 30, 1200, 750)
+    # the steering wheel close up, from the driver's eye straight at the hub
+    shot("wheel", c + Vector((0, 0.62, 0.10)), c, 35, 900, 750)
 print("bounds", tuple(round(v, 3) for v in lo), tuple(round(v, 3) for v in hi), "steer", steer and tuple(round(v, 3) for v in (steer.matrix_world @ (sum((Vector(v) for v in steer.bound_box), Vector()) / 8))))
