@@ -739,3 +739,4 @@ Each venue uses the place's own dressing and cleaned Toolbox models (no scripts,
 | Penthouse bath | Oval Bathtub Bathroom Granite Decor Freestanding | 80971814446378 | (creator account deleted) |
 
 They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the chandelier from 350 to 39 parts).
+- Casino replaced by a rewards centre (2026-11-03, owner): "Legends Rewards" on the casino square to claim the daily 7-day streak and the other rewards the game already has (Legends Path milestones, penthouse rent, hotel suite income). Prompt: `Prompts/Replace the casino with a rewards centre.md`.
