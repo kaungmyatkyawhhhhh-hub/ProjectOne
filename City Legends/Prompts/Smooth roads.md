@@ -28,6 +28,13 @@ Build the roads as **continuous meshes** that follow the curve exactly, instead 
 
 ## Check before you say done
 - Run the **bump checker** (`Roads.check`) on every lane: **zero steps over 0.05 studs**, on straights, curves, hairpins and junctions.
+- **Test all 4 lanes of every road** (owner, 2026-11-03): both lanes each way, on straights, curves, hairpins, slopes and through every junction. For each lane check:
+  - the car stays on smooth asphalt the whole way (no bumps, steps, holes or seams);
+  - **the sidewalk, kerbs and road edge** don't stick into the lane, overlap it, float above it, sink below it or leave a gap; the kerb runs smoothly along the edge without zig-zags;
+  - nothing else is in the lane (lamps, bollards, planters, signs, walls, trees, road islands, building corners);
+  - white lines sit on the road (no flicker / z-fighting, no floating), and lane dashes line up with the lanes;
+  - traffic in that lane drives cleanly.
+  - Automate it: drive / raycast a test car along the middle of each lane a stud at a time and log every problem with its position. Fix all of them, then run it again until the list is empty. Give the owner the final count (0) and screenshots of the worst spots before / after.
 - Drive every road in Studio at low and high speed, with a light hatch and a hypercar: no bumps, no jolts, no shaking on curves, nothing catching the wheels.
 - Close-up screenshots of tight bends and junctions **before / after** (road edge, kerb, lines, pavement): no saw teeth, no zig-zags, no overlaps, no flicker.
 - Traffic drives the new roads without problems.
