@@ -13,8 +13,8 @@
 	  * drive the camera (interior cockpit or chase) with speed-based FOV,
 	    shake and blur
 	  * update the HUD + the live gauge cluster on the dashboard
-	Car controls (keyboard): F start / stop the engine, Q / E shift down / up (the
-	gearbox turns manual on the first shift, or from Settings), M automatic / sequential,
+	Car controls (keyboard): F start / stop the engine, Q / E shift down / up (manual /
+	sequential only: M or Settings switches; in automatic Q / E just say so), M automatic / sequential,
 	Left Shift clutch, P handbrake,
 	T traction control, L lights, Z / X / C left blinker / hazards / right blinker, V camera,
 	(nitro is in but switched off: Config.DrivingFeel.NitroEnabled).
@@ -67,7 +67,7 @@ Driving.inputEnabled = true
 Driving.menuHold = false -- the main menu is open: the car is braked and held (MainMenu)
 Driving.loadHold = false -- the map round the car is still loading (Main.client's waitForMap): held too
 Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
-Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings; Q / E switch to manual too)
+Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings or M; Q / E shift only in manual)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
 Driving.onGearboxChanged = nil :: ((string) -> ())? -- Q / E or M changed the gearbox
 local GEARS = 7
@@ -211,6 +211,7 @@ type State = {
 	screech: number, -- tyre cry on hard launches (sound only)
 	chirp: number, -- seconds left of a tyre chirp after a hard low-gear shift
 	launchReady: boolean, -- launch control: brake + throttle held at a stop
+	autoHintT: number?, -- when Q / E in automatic last showed its hint
 	-- driving feel (Config.DrivingFeel)
 	yawRate: number, -- the car's turn now (it follows the wheel with some weight)
 	groundDist: number?, -- last ground ray distance (kerbs and bumps kick the body)
@@ -1121,16 +1122,14 @@ local function carKey(s: State, key: Enum.KeyCode)
 		end
 	elseif (key == Enum.KeyCode.E or key == Enum.KeyCode.Q) and s.electric then
 		UI.toast("Electric: one gear, just drive")
-	elseif key == Enum.KeyCode.E or key == Enum.KeyCode.Q then
-		if not s.manual then
-			s.manual = true
-			s.mgear = tonumber(s.gear) or (if s.gear == "R" then -1 else 0)
-			Driving.gearbox = "Manual"
-			DashGauges.gearbox = "Manual"
-			if Driving.onGearboxChanged then
-				Driving.onGearboxChanged("Manual")
-			end
+	elseif (key == Enum.KeyCode.E or key == Enum.KeyCode.Q) and not s.manual then
+		-- (owner, 2026-11-03: "when using automatic mode when u press E or Q it switches to manual
+		-- mode"): in automatic Q / E do nothing but say how to change (M, or Settings)
+		if os.clock() - (s.autoHintT or 0) > 3 then
+			s.autoHintT = os.clock()
+			UI.toast("Automatic: press M for sequential (Q / E)")
 		end
+	elseif key == Enum.KeyCode.E or key == Enum.KeyCode.Q then
 		local fwdSpeed = s.vel:Dot(forwardFromYaw(s.yaw))
 		local before = s.mgear
 		if key == Enum.KeyCode.E then
@@ -1991,10 +1990,13 @@ function Driving.step(dt: number)
 	-- the car crept, so the revs bounced 1,000-3,000 and the car rolled: owner, 2026-10-24)
 	local standing = math.abs(s.vel:Dot(forwardFromYaw(s.yaw))) < 3
 	local holding
+	-- (owner, 2026-11-03: "when cars use manual mode launch control doesnt work"): the manual and
+	-- sequential gearbox get it too, in a forward gear with the clutch up (Shift dropped at high revs
+	-- still launches as well)
 	if s.launchReady then
 		holding = s.engineOn and brake > 0.3 and throttle > 0.3
 	else
-		holding = not s.manual and s.engineOn and standing and brake > 0.5 and throttle > 0.5
+		holding = s.engineOn and standing and brake > 0.5 and throttle > 0.5 and (not s.manual or (s.mgear >= 1 and not s.clutch))
 	end
 	if s.launchReady and not holding and throttle > 0.5 and brake <= 0.3 then
 		s.launch = 0.8
