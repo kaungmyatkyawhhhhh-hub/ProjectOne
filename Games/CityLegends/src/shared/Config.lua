@@ -575,6 +575,7 @@ Config.Radio = {
 -- Police and speed cameras (owner, 2026-10-22: limit 120 km/h, the police chase you)
 ---------------------------------------------------------------------
 Config.Police = {
+	SpeedCameras = false, -- (owner, 2026-11-03: "remove speed cameras for now"; true brings them back)
 	SpeedLimitKmh = 120,
 	CameraGraceKmh = 3, -- flashed above 123 km/h
 	CameraRange = 42, -- studs from the camera
@@ -1147,8 +1148,9 @@ Config.DayCycle = {
 ---------------------------------------------------------------------
 Config.Minimap = {
 	Enabled = true,
-	ZoomNear = 0.5, -- pixels per stud when slow (about 220 studs across the radius)
-	ZoomFar = 0.14, -- ...and at FarMph and above
+	-- (2026-11-03, the drawn map: a little wider, so the roads read as streets, not one big band)
+	ZoomNear = 0.32, -- pixels per stud when slow (about 320 studs across the radius)
+	ZoomFar = 0.12, -- ...and at FarMph and above
 	FarMph = 150,
 }
 

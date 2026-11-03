@@ -242,7 +242,7 @@ function Police.init(c: any)
 	local PoliceReport: RemoteEvent = ctx.remote("RemoteEvent", "PoliceReport")
 
 	-- the cameras
-	Police.cameras = cameraSpots()
+	Police.cameras = if P.SpeedCameras then cameraSpots() else {} -- (off for now: Config.Police.SpeedCameras)
 	local folder = Instance.new("Folder")
 	folder.Name = "SpeedCameras"
 	for _, cam in Police.cameras do

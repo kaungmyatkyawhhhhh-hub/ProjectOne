@@ -38,6 +38,16 @@ local UI = require(script.Parent:WaitForChild("UI"))
 
 local Minimap = {}
 
+-- the Monaco map as picture tiles, the rim and the arrow (owner, 2026-11-03: "make the mini map look
+-- way better and smoother"; tools/minimap_art.py draws them: shaded hills, the shore, every building,
+-- roads with pavements and edges). Without it the old frame-drawn map is used.
+local okArt, Art = pcall(function()
+	return require(script.Parent:WaitForChild("MinimapArt", 3)) :: any
+end)
+if not okArt then
+	Art = nil
+end
+
 local player = Players.LocalPlayer
 local C = Config.City
 local W = Config.West
@@ -113,7 +123,8 @@ local function ringRoad(parent: Instance, c: Vector3, r: number, width: number, 
 	s.Parent = f
 end
 
-local function drawMap(map: Frame)
+type Tile = { label: ImageLabel, image: string, centre: Vector3 }
+local function drawMap(map: Frame): { Tile }
 	-- (Monaco only: just Monaco)
 	if not Config.monacoOnly() then
 	local E = C.HalfExtent + HR -- the city's road edge
@@ -190,7 +201,25 @@ local function drawMap(map: Frame)
 	end
 	-- Monaco (the Riviera) when it is in the place: sea, the land in 128-stud runs, the roads (the
 	-- three long routes in the highway colour); tools/map_plan/export_minimap.py makes RivieraMap
-	if workspace:FindFirstChild("Riviera") then
+	if workspace:FindFirstChild("Riviera") and Art then
+		-- the picture tiles, in world studs (a stud of overlap hides the seams); their images are put
+		-- on by the caller (only the ones near you on the minimap: phones' memory)
+		rect(map, Art.x0 - 6000, Art.z0 - 6000, Art.x0 + Art.tileStuds.X * Art.cols + 6000, Art.z0 + Art.tileStuds.Y * Art.rows + 6000, COL.water, 1)
+		local list = {}
+		for _, t in Art.tiles do
+			local img = Instance.new("ImageLabel")
+			img.Name = "Tile"
+			img.BackgroundTransparency = 1
+			img.BorderSizePixel = 0
+			img.Position = UDim2.fromOffset(Art.x0 + t.col * Art.tileStuds.X, Art.z0 + t.row * Art.tileStuds.Y)
+			img.Size = UDim2.fromOffset(Art.tileStuds.X + 1, Art.tileStuds.Y + 1)
+			img.ScaleType = Enum.ScaleType.Stretch
+			img.ZIndex = 2
+			img.Parent = map
+			table.insert(list, { label = img, image = t.image, centre = Vector3.new(Art.x0 + (t.col + 0.5) * Art.tileStuds.X, 0, Art.z0 + (t.row + 0.5) * Art.tileStuds.Y) })
+		end
+		return list
+	elseif workspace:FindFirstChild("Riviera") then
 		local ok, rm = pcall(function()
 			return require(Shared:WaitForChild("RivieraMap", 3))
 		end)
@@ -209,13 +238,16 @@ local function drawMap(map: Frame)
 		end
 	end
 	local _ = HW
+	return {}
 end
 
 -- the whole world drawn into `frame` for the loading screen (owner, 2026-10-30: "remove the intro
 -- instead just add a loading screen of the map"): returns the middle and size of what's worth
 -- showing (Legends Isle in the west to the Legends Loop in the east), in world studs
 function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
-	drawMap(frame)
+	for _, t in drawMap(frame) do
+		t.label.Image = t.image
+	end
 	-- the places' names, in world studs like the map (so they scale with it)
 	local function name(text: string, x: number, z: number)
 		local l = Instance.new("TextLabel")
@@ -390,7 +422,16 @@ function Minimap.start()
 	map.BackgroundTransparency = 1
 	map.Size = UDim2.fromOffset(0, 0)
 	map.Parent = pivot
-	drawMap(map)
+	local tiles = drawMap(map)
+	-- only the tiles near you get their picture (checked twice a second), and keep it once loaded
+	local tileCheck = 0
+	local function loadTilesNear(here: Vector3, reach: number)
+		for _, t in tiles do
+			if t.label.Image == "" and (Vector3.new(here.X, 0, here.Z) - t.centre).Magnitude < reach then
+				t.label.Image = t.image
+			end
+		end
+	end
 
 	-- blips (upright, placed by hand each frame)
 	local layer = Instance.new("Frame")
@@ -511,22 +552,31 @@ function Minimap.start()
 		end
 	end)
 
-	-- the player's arrow in the middle
-	local arrow = Instance.new("TextLabel")
+	-- the player's arrow in the middle (the drawn arrow: white edge, gold inside)
+	local arrow: GuiObject
+	if Art then
+		local a = Instance.new("ImageLabel")
+		a.Image = Art.arrow
+		a.Size = UDim2.fromOffset(26, 26)
+		arrow = a
+	else
+		local a = Instance.new("TextLabel")
+		a.Text = "▲"
+		a.TextScaled = true
+		a.Font = Enum.Font.GothamBlack
+		a.TextColor3 = Theme.Accent
+		a.Size = UDim2.fromOffset(18, 18)
+		local arrowStroke = Instance.new("UIStroke")
+		arrowStroke.Color = Color3.fromRGB(0, 0, 0)
+		arrowStroke.Thickness = 1.5
+		arrowStroke.Parent = a
+		arrow = a
+	end
 	arrow.AnchorPoint = Vector2.new(0.5, 0.5)
 	arrow.Position = UDim2.fromScale(0.5, 0.5)
-	arrow.Size = UDim2.fromOffset(18, 18)
 	arrow.BackgroundTransparency = 1
-	arrow.Text = "▲"
-	arrow.TextScaled = true
-	arrow.Font = Enum.Font.GothamBlack
-	arrow.TextColor3 = Theme.Accent
 	arrow.ZIndex = 30
 	arrow.Parent = clip
-	local arrowStroke = Instance.new("UIStroke")
-	arrowStroke.Color = Color3.fromRGB(0, 0, 0)
-	arrowStroke.Thickness = 1.5
-	arrowStroke.Parent = arrow
 
 	-- the rim (outside the clip, so it isn't cut) and north
 	local rim = Instance.new("Frame")
@@ -540,8 +590,17 @@ function Minimap.start()
 	local rimStroke = Instance.new("UIStroke")
 	rimStroke.Color = Theme.Stroke
 	rimStroke.Thickness = 3
-	rimStroke.Transparency = 0.1
+	rimStroke.Transparency = if Art then 1 else 0.1 -- (with the drawn rim: only while wanted)
 	rimStroke.Parent = rim
+	if Art then
+		-- the drawn rim: a dark bevelled ring and a soft shadow over the map's edge
+		local rimImg = Instance.new("ImageLabel")
+		rimImg.BackgroundTransparency = 1
+		rimImg.Image = Art.rim
+		rimImg.Size = UDim2.fromScale(1, 1)
+		rimImg.ZIndex = 39
+		rimImg.Parent = holder
+	end
 	local north = Instance.new("TextLabel")
 	north.AnchorPoint = Vector2.new(0.5, 0.5)
 	north.Size = UDim2.fromOffset(18, 18)
@@ -683,7 +742,7 @@ function Minimap.start()
 	fmap.BackgroundTransparency = 1
 	fmap.Size = UDim2.fromOffset(0, 0)
 	fmap.Parent = fpivot
-	drawMap(fmap)
+	local fullTiles = drawMap(fmap)
 	local flayer = Instance.new("Frame")
 	flayer.BackgroundTransparency = 1
 	flayer.Size = UDim2.fromScale(1, 1)
@@ -701,19 +760,28 @@ function Minimap.start()
 		f.Visible = false
 		table.insert(liveFull, f)
 	end
-	local fArrow = Instance.new("TextLabel")
+	local fArrow: GuiObject
+	if Art then
+		local a = Instance.new("ImageLabel")
+		a.Image = Art.arrow
+		a.Size = UDim2.fromOffset(32, 32)
+		fArrow = a
+	else
+		local a = Instance.new("TextLabel")
+		a.Text = "▲"
+		a.TextScaled = true
+		a.Font = Enum.Font.GothamBlack
+		a.TextColor3 = Theme.Accent
+		a.Size = UDim2.fromOffset(24, 24)
+		local fas = Instance.new("UIStroke")
+		fas.Thickness = 2
+		fas.Parent = a
+		fArrow = a
+	end
 	fArrow.AnchorPoint = Vector2.new(0.5, 0.5)
-	fArrow.Size = UDim2.fromOffset(24, 24)
 	fArrow.BackgroundTransparency = 1
-	fArrow.Text = "▲"
-	fArrow.TextScaled = true
-	fArrow.Font = Enum.Font.GothamBlack
-	fArrow.TextColor3 = Theme.Accent
 	fArrow.ZIndex = 30
 	fArrow.Parent = flayer
-	local fas = Instance.new("UIStroke")
-	fas.Thickness = 2
-	fas.Parent = fArrow
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
 	title.Position = UDim2.fromOffset(16, 12)
@@ -754,6 +822,9 @@ function Minimap.start()
 		return if character then character:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
 	end
 	local function openFull()
+		for _, t in fullTiles do
+			t.label.Image = t.image
+		end
 		fitWindow()
 		local part = myPart()
 		center = if part then part.Position else Vector3.zero
@@ -850,6 +921,7 @@ function Minimap.start()
 	end
 
 	local scale = MM.ZoomNear
+	local smoothHeading: number? = nil
 	RunService.RenderStepped:Connect(function(dt)
 		local hud = hudVisible()
 		local on = shown and hud
@@ -881,7 +953,19 @@ function Minimap.start()
 			facing = cam.CFrame.LookVector
 		end
 		local look = cam.CFrame.LookVector
-		local heading = math.atan2(look.X, -look.Z) -- 0 = north, clockwise
+		-- 0 = north, clockwise; smoothed, so the camera's shake and sway don't jiggle the map
+		local wantHeading = math.atan2(look.X, -look.Z)
+		if smoothHeading == nil then
+			smoothHeading = wantHeading
+		end
+		local turn = (wantHeading - smoothHeading + math.pi) % (2 * math.pi) - math.pi
+		smoothHeading = (smoothHeading :: number) + turn * math.min(1, dt * 9)
+		local heading = smoothHeading :: number
+		tileCheck -= dt
+		if tileCheck <= 0 then
+			tileCheck = 0.5
+			loadTilesNear(here, 2600)
+		end
 		-- zoom out with speed
 		local mph = Config.spsToMph(Driving.getSpeed())
 		local want = MM.ZoomNear + (MM.ZoomFar - MM.ZoomNear) * math.clamp(mph / MM.FarMph, 0, 1)
@@ -965,9 +1049,11 @@ function Minimap.start()
 		if Police.getWanted() > 0 then
 			rimStroke.Color = if flash then Color3.fromRGB(255, 40, 40) else Color3.fromRGB(60, 120, 255)
 			rimStroke.Thickness = 4
+			rimStroke.Transparency = 0.1
 		else
 			rimStroke.Color = Theme.Stroke
 			rimStroke.Thickness = 3
+			rimStroke.Transparency = if Art then 1 else 0.1
 		end
 	end)
 end
