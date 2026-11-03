@@ -71,6 +71,17 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
    - No extra cost per frame: a few springs, no loops over parts.
 10. **Put every number in `Config.Camera` / `Config.DrivingFeel`** with a short comment, so the owner can tweak them.
 
+## Speed effect: realistic wind blur, not cartoon lines (owner, 2026-11-03)
+- **Replace the speed lines** (hard white streaks on the screen) with a **realistic speed / wind blur**:
+  - a soft **radial motion blur** towards the screen edges that grows with speed (the centre, where you look, stays sharp);
+  - a light **edge darkening / vignette** at high speed;
+  - the road and roadside objects blurring as they pass (camera motion blur), not drawn lines.
+  - Build it with Roblox effects (`BlurEffect` used gently, `DepthOfFieldEffect` far blur at speed, the edge vignette), never strong enough to make it hard to drive. Start at about 120 km/h, full at top speed (use the existing `RushFrom` / `RushTo`).
+- **If lines are used at all**, they must be **soft, blurred, see-through streaks** (no sharp white lines): faint, thin, motion-blurred, only at the outer screen edges, fading in and out smoothly, and few of them.
+- Off in the in-car view if it hurts readability of the cluster; light on phones.
+- It follows the existing **Motion blur On / Off** setting and `ReducedMotion` (off = no blur and no streaks).
+- Show the owner a before / after clip or screenshots at 100, 200 and 300 km/h.
+
 ## How to test
 1. In Studio Play, drive the same 3 things with each camera: a hard corner on the mountain or loop, a hard stop from 80 mph, and flat out on the highway to top speed.
 2. Record a short clip or take 4 screenshots per test, and put them next to the video's frames at the same moments (0:23 corner, 0:22 braking, 0:35 shake, 0:47 chase acceleration, 0:53 chase corner). Show the owner.
