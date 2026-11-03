@@ -126,6 +126,15 @@ local function chooseNext(seg: CityLayout.Segment): CityLayout.Segment?
 	-- at all while it already has its few cars
 	local function weight(o: CityLayout.Segment): number
 		local w = if o.dir == seg.dir then 3 else 1
+		-- (cars stay on the yellow routes: seldom off them onto a street, back onto them gladly)
+		if (seg :: any).riviera then
+			local fromRoute, toRoute = (seg :: any).route == true, (o :: any).route == true
+			if fromRoute and not toRoute then
+				w *= T.LeaveRouteK
+			elseif not fromRoute and toRoute then
+				w *= 4
+			end
+		end
 		local ang = turnAngle(seg, o)
 		if ang > 135 and hasOther then
 			return 0
@@ -223,18 +232,6 @@ local function lanesNear(lanes: { CityLayout.Segment }, center: Vector3, maxDist
 	return nearby
 end
 
--- the hill roads (Mountain Road, the hairpins, terraces and switchbacks): quiet
-local hillCache: { [any]: boolean } = setmetatable({}, { __mode = "k" }) :: any
-local function isHillRoad(seg: CityLayout.Segment): boolean
-	local v = hillCache[seg]
-	if v == nil then
-		local road = (seg :: any).road :: string?
-		v = road ~= nil and (road == "Mountain Road" or string.find(road, "Hairpin") ~= nil or string.find(road, "Terrace") ~= nil or string.find(road, "Switchbacks") ~= nil)
-		hillCache[seg] = v
-	end
-	return v :: boolean
-end
-
 -- Lane position near "center" (or anywhere if center == nil)
 local function findSpot(center: Vector3?, minDist: number, maxDist: number, ignore: Npc?, avoidView: boolean?, highway: boolean?): (CityLayout.Segment?, number)
 	local camera = workspace.CurrentCamera
@@ -252,9 +249,10 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 		if (seg :: any).riviera and rivieraCars >= T.RivieraMax then
 			continue
 		end
-		-- (owner, 2026-11-03: "add more cars on the main city area"): the hill roads up to the
-		-- summits get only a share of the spots, so the town's streets carry most of the traffic
-		if isHillRoad(seg) and rng:NextNumber() > T.HillShare then
+		-- (owner, 2026-11-03: "only make it so that there is traffic on the yellow roads ... remove the
+		-- cars on the roads which isn't yellow"): the three long routes get the traffic, the other
+		-- streets only a rare car
+		if (seg :: any).riviera and not (seg :: any).route and rng:NextNumber() > T.StreetShare then
 			continue
 		end
 		local s = rng:NextNumber(8, math.max(9, seg.length - 25))
@@ -807,7 +805,10 @@ function Traffic.update(dt: number)
 				if moved >= 3 then
 					break
 				end
-				if (npc.pos - flatFocus).Magnitude > T.RecycleDistance then
+				local away = (npc.pos - flatFocus).Magnitude
+				-- (a car that wandered off the routes goes back to one once it's out of the way)
+				local offRoute = (npc.seg :: any).riviera and not (npc.seg :: any).route
+				if away > T.RecycleDistance or (offRoute and away > T.StreetRecycle) then
 					local seg, s = findSpot(flatFocus, T.RespawnMin, T.RespawnMax, npc, true, npc.highway)
 					if seg then
 						placeNpc(npc, seg, s)

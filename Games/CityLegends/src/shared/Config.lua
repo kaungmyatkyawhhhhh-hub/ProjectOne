@@ -188,7 +188,7 @@ Config.Lights.Cycle = (Config.Lights.Green + Config.Lights.Yellow + Config.Light
 -- NPC traffic
 ---------------------------------------------------------------------
 Config.Traffic = {
-	CarCount = 90, -- in the city's streets, Monaco's too (owner, 2026-10-29: fewer; was 55 in all; 2026-11-02: 32 -> 40, "add more cars traffic"; 2026-11-03: 40 -> 64, "add more traffic cars throughout the map"; 64 -> 90 the same day, "add more traffic cars too"; phones get ~60%)
+	CarCount = 38, -- (2026-11-03: 90 -> 38 with the traffic now on the yellow routes only: about the same number of cars on them as before) -- in the city's streets, Monaco's too (owner, 2026-10-29: fewer; was 55 in all; 2026-11-02: 32 -> 40, "add more cars traffic"; 2026-11-03: 40 -> 64, "add more traffic cars throughout the map"; 64 -> 90 the same day, "add more traffic cars too"; phones get ~60%)
 	HighwayCars = 18, -- on the highways and the loop, well spaced to split lanes and speed past
 	HighwayGap = 60, -- studs kept free round a highway car when one is placed (city: 22)
 	-- every car has its own pace, the inside lane runs faster than the outside ones, and each car's
@@ -211,7 +211,10 @@ Config.Traffic = {
 	MountainTurnK = 0.25, -- how often a car turns up onto the mountain (vs other ways on)
 	-- the Riviera (the new map): quiet streets, only this many NPC cars there at once (owner,
 	-- 2026-11-02: "traffic on the new map (reduce traffic)")
-	HillShare = 0.25, -- (2026-11-03, "more cars on the main city area") of the spots picked on the hill roads, this share is used
+	-- (owner, 2026-11-03: traffic only on the yellow roads, the three long routes)
+	StreetShare = 0.05, -- of the spots picked on other streets, this share is used (a rare car)
+	LeaveRouteK = 0.03, -- how seldom a car turns off a route onto a street
+	StreetRecycle = 260, -- a car off the routes this far from you goes back onto one
 	RivieraMax = 90, -- (64 before, then 32 before that, 2026-11-03: "add more traffic cars throughout the map"; 22 before that; owner 2026-11-02 again: "add more cars traffic")
 	-- (12 before that: "add a little more traffic, the city monaco is kinda dead")
 	FollowGap = 16, -- ...and at least a car length once moving (owner, 2026-10-29)...

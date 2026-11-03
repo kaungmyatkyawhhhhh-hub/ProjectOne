@@ -81,6 +81,7 @@ function RivieraTraffic.build()
 			local seg = newSegment(all, a, (a + b) / 2, b, "lane")
 			seg.lane = l.lane
 			seg.road = l.road -- (the server's start spots use it)
+			seg.route = l.kind == "route" -- the three long routes (yellow on the map)
 			seg.speedK = speedK
 			row[k] = seg
 			table.insert(lanes, seg)
@@ -126,6 +127,7 @@ function RivieraTraffic.build()
 				turn.speedK = 0.8
 				turn.turnSpeed = 18
 				turn.next = { after }
+				turn.route = after.route -- (a turn onto a route counts as the route)
 				table.insert(before.next, turn)
 			end
 		end
