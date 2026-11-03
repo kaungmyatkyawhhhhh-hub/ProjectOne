@@ -907,7 +907,7 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Checked in Play on a straight (Coast Road): SV idle at half the SVJ's loudness; braking from 72 mph, three downshifts at 41 / 35 / 27 mph, each blip at its own pitch (0.85 / 0.90 / 1.00); no errors.
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
-Summary at the end of the run goes here. Next: step 2 (driving feel check).
+Summary at the end of the run goes here. Next: step 3 (cars check, then the dealer menu UI).
 
 ### Choices made while the owner was away (2026-11-03)
 - Buildings: the global environment reflections (`Lighting.EnvironmentSpecularScale` 1) were left as they are. Lowering them takes the slight sky sheen off the walls but also dulls the cars' paint and the wet roads, and the sheen wasn't the black / white flashing. Easy to change in `CityBuilder` / Lighting if wanted.
@@ -938,3 +938,16 @@ Summary at the end of the run goes here. Next: step 2 (driving feel check).
 - **Checked in Play (PC):** both styles have no background box (numbers, gear box, dial and bar float on the screen); the speed follows the car; the GET OUT pill is on the right under the minimap cards and hides while driving. [[Speedometer check - digital while driving.jpg]].
 - **Fixed:** with the Analogue dial, the GET OUT pill covered the new car strip (class badge + car level, added with car levels). The pill now sits 28 px higher on PC (`UI.setAction`), clear of the strip. [[Speedometer check - analogue, Get out over the car strip (before).jpg]], [[Speedometer check - analogue, Get out moved up (after).jpg]]. Phones are unchanged (the pill is on the right, the dial in the middle).
 - No script errors. The Output shows a warning for a Sound named `videoplayback` in Workspace (`rbxassetid://109026241087535`: "Asset is not approved for the requester"): an audio in the place that Roblox hasn't approved; harmless, it just doesn't play. Not checked: phone size (no touch emulator through the MCP).
+
+### Step 2: driving feel check (done, nothing broken)
+Driven in Play on the Coast Road (automatic, full throttle, then full brake, then a steer at 60-80 km/h), timed by a script:
+
+| Car | 0-100 km/h | Speed after 9 s | Full brake | Steer (yaw, stays upright) |
+|---|---|---|---|---|
+| Sompact Swiff (light hatch) | 0-60 in 5.2 s | 88 km/h | from 88 km/h: 21 m | OK |
+| Bavarica Werkz 540i (sedan) | 5.2 s (real ~5.0) | 140 km/h | from 109 km/h: 34 m | 53°/s, OK |
+| Apex Land Cruzer 200 (SUV) | 7.9 s (real ~8) | 110 km/h | from 110 km/h: 41 m | 43°/s, OK |
+| Enfurecido Aventador SVJ (hypercar) | 3.0 s (real 2.8) | 211 km/h | from 211 km/h: 93 m | 48°/s, no slide, OK |
+
+- No flips, no shaking, gears change, the cars stay flat in the steer test. No script errors.
+- Not changed (not bugs): the brakes stop at about 1.2-1.7 g (a real road car does about 1 g): that's on purpose, 1.5 x real since 2026-11-03 (`Config.DrivingFeel.ClassFeel` brake). The Swiff (retired) still has a blocky part-built model in `CarModels`.
