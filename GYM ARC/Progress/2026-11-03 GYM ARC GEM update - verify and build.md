@@ -356,3 +356,9 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
   - **Owner imported v3 (3 Nov):** both upper arms swapped in (v2 kept as `*_v2` in the backup folder). Config/BodyStages arms now = v3 bounds (old values in comments).
     - In game at Alter 15 maxed, same camera as the v2 shot: **the triceps fin is gone**, and the back of the arm curves round. Shots 14-16 in `screens_3Nov_late`.
     - (The head and hair were missing in that test run: Roblox asset downloads timed out, per the console. Not caused by the change.)
+  - **Bigger head per alter (owner, 3 Nov: "make my head 3% bigger every alter like how height grows"):**
+    - New `GrowthSpurts.HeadPerAlter = 0.03` + `GrowthSpurts.HeadScaleFor(heightInches)`. It counts alters from the height the same way the height grows (each 0.8" past the last spurt's height = 1 alter, at most 30). It's linear like the height: Alter 5 = 1.15x, 15 = 1.45x, 30 = 1.9x.
+    - It follows the height picked in Settings: a shorter height = the matching smaller head, and the last spurt's height = the normal head.
+    - BodyService sets the Humanoid HeadScale on join and live in its refresh (like BodyHeightScale), with no respawn. `Body.ApplyTo` / `BodyService.PrepareDescription` take a head growth. The progress mirror rigs and the Hall of Fame statue use it too.
+    - Tested (FreshPlayer + TestAlter 15): head 1.45x (head part 1.20 -> 1.74 studs), and the hair scales with it. Live through the Settings height: 6'0" -> 1.0, 6'4" -> 1.15, Max -> 1.45. Screenshot `screens_3Nov_late\17`.
+    - Not checked in game yet: the mirror and the statue rigs (same function, built from a description).
