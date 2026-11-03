@@ -302,3 +302,13 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
   - **Alter footsteps "buggy":**
     - The step sounds are 1-3 s chimes and a stride came every ~0.15 s, each one cutting and restarting the sound.
     - Now at most one step every 0.3 s, each fading out over 0.45 s, none while skating. Tested walking: steps 0.28-0.33 s apart.
+- **3 Nov (late) - MUSCLE LOOK + TRAINING HIGHLIGHT: first report** (owner's brief from players' feedback; nothing changed yet).
+  - **What the muscles are:**
+    - Every body (yours too) wears the static stage meshes: MeshParts, Material SmoothPlastic, Reflectance 0, with a SurfaceAppearance "SkinStage" (colour + normal + roughness + metalness maps: the skin stage, or the alter's skin).
+    - Under a SurfaceAppearance, Material and Reflectance do nothing: the gloss comes from the roughness map, the metal look from the metalness map (Gold is meant to be metal).
+    - The torso and the waist / shorts are Fabric (the tank top / shorts).
+  - **What lifting does now (MuscleRig.SetTraining + Flash):**
+    - A red tint (#FF4646, main muscle 55%, helpers 30%) fades in over 0.25 s and out over 0.4 s, with a brighter pulse on every rep (~0.2 s).
+    - On the stage meshes it tints the SurfaceAppearance (Color #ffaaff) and the part colour.
+    - Since a stage mesh is a whole region, training biceps turns the WHOLE upper arm red and quads the whole thigh.
+    - No Highlight / outline, no glow, no scale bounce. Others see the same tint.
