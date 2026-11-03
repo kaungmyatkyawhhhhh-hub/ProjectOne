@@ -3168,6 +3168,14 @@ local function aventadorSVJ(gui: SurfaceGui): Update
 	local W, H = Art.W, Art.H
 	local D = design(gui, W, H, Color3.new(0, 0, 0))
 	local area = D.area
+	-- (2026-11-03) fills the panel exactly (the panel is fitted to the car's cluster frame), with
+	-- nothing behind it: the picture's cut-away corners stay see-through
+	local ratio = area:FindFirstChildOfClass("UIAspectRatioConstraint")
+	if ratio then
+		ratio:Destroy()
+	end
+	local back = area.Parent :: Frame
+	back.BackgroundTransparency = 1
 	local SOFT = Color3.fromRGB(170, 190, 215)
 	local split = Art.split / W
 	new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[1], Size = UDim2.fromScale(split, 1), ZIndex = 1 }, area)

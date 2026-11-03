@@ -465,6 +465,16 @@ def lua_num(v):
 
 
 def build_assets(out, base):
+    # (owner, 2026-11-03: the screen sits under the SVJs' own cluster frame) the parts of the picture
+    # that would show past the frame's top corners, over the windscreen, are cut away
+    # (tools/svj_cluster_mask.png: measured on both SVJ models, build/svj_bezel)
+    here = os.path.dirname(os.path.abspath(__file__))
+    mpath = os.path.join(here, "svj_cluster_mask.png")
+    if os.path.exists(mpath):
+        mask = Image.open(mpath).convert("L").resize(base.size, Image.BILINEAR)
+        r, g, b, a = base.split()
+        a = Image.fromarray((np.asarray(a, np.float32) * np.asarray(mask, np.float32) / 255).astype(np.uint8))
+        base = Image.merge("RGBA", (r, g, b, a))
     # the background in two halves
     full = base.resize((round(W * BG), round(H * BG)), Image.LANCZOS)
     half = full.width // 2

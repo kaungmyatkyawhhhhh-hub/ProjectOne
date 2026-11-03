@@ -122,10 +122,13 @@ CarSkin.CLUSTER_RECT = {
 	-- the LP750 in its own cabin: the same screen
 	-- (a little wider than the screen it covers: owner, 2026-10-24, "stretch the LP750 SV cluster a little bit")
 	lambrini_lp750 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.362, h = 0.1455 },
-	-- the SVJ: exactly over its own screen picture (the texture's cluster pixels mapped onto the
-	-- model); the SVJ 63: over its blank screen, the same size (tools/render_car.py notes)
-	lambrini_svj = { at = Vector3.new(0.0004, 0.0507, -0.1725), face = Vector3.new(0.0007, 0.1363, 0.9907), w = 0.3255, h = 0.1196 },
-	lambrini_svj63 = { at = Vector3.new(-0.0005, 0.0391, -0.2288), face = Vector3.new(0, 0.11, 0.9939), w = 0.34, h = 0.125 },
+	-- the SVJ and SVJ 63 (owner, 2026-11-03: "put the cluster under that outline"): the whole screen
+	-- fills their own cluster frame (the centre and both side windows), just behind the frame's
+	-- ribs and edges so the frame lies over it like on the real car. Measured on the models
+	-- (build/svj_bezel: depth across the frame from the driver's side; the picture's corners past
+	-- the frame are cut away, tools/svj_cluster_mask.png). Was: over the screen picture only.
+	lambrini_svj = { at = Vector3.new(-0.0016, 0.0524, -0.1748), face = Vector3.new(0.0007, 0.1363, 0.9907), w = 0.336, h = 0.136 },
+	lambrini_svj63 = { at = Vector3.new(-0.0005, 0.0411, -0.229), face = Vector3.new(0, 0.11, 0.9939), w = 0.324, h = 0.132 },
 } :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the

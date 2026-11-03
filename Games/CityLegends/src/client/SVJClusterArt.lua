@@ -3,7 +3,7 @@
 return {
 	W = 1110, H = 400, A = 1.5,
 	split = 555,
-	bg = { "rbxassetid://132568349295294", "rbxassetid://129029567564450" },
+	bg = { "rbxassetid://96181985174513", "rbxassetid://116586970080039" },
 	sheets = { "rbxassetid://133291626799094", "rbxassetid://101853882615058" },
 	dial = { cx = 580.0, cy = 302.0, rx = 348.0, ry = 262.0, t0 = -85.0, tv = 17.0 },
 	-- the lit rev blocks: sheet, x, y, w, h (sheet px), left, top (design px), first value
