@@ -859,6 +859,12 @@ if settings.HideKeys then
 	UI.toggleControls(false)
 end
 UI.onMenuButton = MainMenu.toggle
+UI.onCashPlus = function()
+	if not MainMenu.isOpen() then
+		MainMenu.open(false)
+	end
+	MainMenu.show("STORE")
+end
 
 showMenu = function()
 	UI.showHud(false)

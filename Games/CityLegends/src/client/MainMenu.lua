@@ -11,6 +11,8 @@
 	    corner, graphics, camera, units, gearbox, music and sound sliders, radio, controls).
 	  * CARS: your cars by brand (sort, search), a side panel with SPAWN, FAVOURITE, CUSTOMISE (a
 	    waypoint to Legends Customs) and MARKET; "Get more cars" sets a waypoint to Legends Motors.
+	  * HOUSES (2026-11-04): the house standing in this server (TELEPORT HOME), your blueprints, the
+	    house settings (HousingClient's house menu) and Legends Realty (fast travel).
 	  * STORE: passes and products by name and exact effect, prices read from Roblox; greyed with
 	    "Coming soon" until the owner gives the ids (Config.Menu.Store).
 	  * A new player: CLAIM CAR (and PLAY) open the pick of 3 starter cars; the pick is the server's.
@@ -182,7 +184,7 @@ local blur: BlurEffect? = nil
 local isOpen = false
 local startMode = false -- the start screen: no car yet (nothing to go back to)
 local tabName = "CAMPAIGN"
-local TABS = { "CAMPAIGN", "CARS", "STORE" }
+local TABS = { "CAMPAIGN", "CARS", "HOUSES", "STORE" }
 local tabButtons: { [string]: TextButton } = {}
 local tabBadges: { [string]: Frame } = {}
 local pages: { [string]: Frame } = {}
@@ -422,7 +424,7 @@ local closeSubPage: () -> ()
 local function buildTabs()
 	local strip = new("Frame", { Name = "Tabs", BackgroundColor3 = NAVY0, BackgroundTransparency = 0.05, Position = UDim2.fromOffset(0, 118), Size = UDim2.new(1, 0, 0, 46), Parent = canvas }, { corner(6) })
 	new("Frame", { BackgroundColor3 = GOLD, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 3), Parent = strip })
-	local row = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 6), Size = UDim2.fromOffset(3 * 196, 36), Parent = strip }, {
+	local row = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 6), Size = UDim2.fromOffset(#TABS * 196, 36), Parent = strip }, {
 		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), HorizontalAlignment = Enum.HorizontalAlignment.Center }),
 	})
 	for i, name in TABS do
@@ -559,14 +561,24 @@ local function tile(parent: Instance, x: number, y: number, w: number, h: number
 	if o.sub then
 		text({ Name = "Sub", Text = o.sub, FontFace = MEDIUM, TextSize = 17, TextColor3 = ink, TextTransparency = 0.1, TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Bottom, AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 20, 1, -14), Size = UDim2.new(1, -40, 0, 44), ZIndex = 3, Parent = b })
 	end
-	-- hover: lift a little
+	-- (2026-11-04) a thin light edge, brighter on hover, like the dealer menu's glass
+	local edge = new("UIStroke", { Color = WHITE, Transparency = 0.82, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
+	-- hover: lift a little; press: squeeze
 	local scale = new("UIScale", { Parent = b })
 	b.MouseEnter:Connect(function()
 		hoverSound()
 		tween(scale, 0.12, { Scale = 1.015 })
+		tween(edge, 0.12, { Transparency = 0.45 })
 	end)
 	b.MouseLeave:Connect(function()
 		tween(scale, 0.12, { Scale = 1 })
+		tween(edge, 0.12, { Transparency = 0.82 })
+	end)
+	b.MouseButton1Down:Connect(function()
+		tween(scale, 0.07, { Scale = 0.985 })
+	end)
+	b.MouseButton1Up:Connect(function()
+		tween(scale, 0.14, { Scale = 1.015 })
 	end)
 	return b
 end
@@ -1764,12 +1776,172 @@ local function buildStore(page: Frame)
 end
 
 ---------------------------------------------------------------------
+-- HOUSES (2026-11-04, owner-away run step 7.2): your house(s) in one place: the house standing in
+-- this server (TELEPORT HOME), your blueprints (the catalogue), the house settings (who can come
+-- in, roommates, change house, garage, remove: HousingClient's house menu) and Legends Realty (fast
+-- travel there). Reads the player's "HouseLot" / "HouseDesign" / "Houses" attributes (Houses.lua).
+---------------------------------------------------------------------
+local TIER_WORD = { [0] = "Low", [1] = "Mid", [2] = "High" }
+
+local function housing(): any
+	local ok, mod = pcall(function()
+		return require(script.Parent:WaitForChild("HousingClient", 2)) :: any
+	end)
+	return if ok then mod else nil
+end
+
+local function houseCall(what: string, arg: any?): any
+	local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+	local call = remotes and remotes:FindFirstChild("HouseCall")
+	if not (call and call:IsA("RemoteFunction")) then
+		return { ok = false }
+	end
+	local ok, r = pcall(function()
+		return (call :: RemoteFunction):InvokeServer(what, arg)
+	end)
+	return if ok and type(r) == "table" then r else { ok = false }
+end
+
+local function ownedHouses(): { string }
+	local out = {}
+	local raw = player:GetAttribute("Houses")
+	if type(raw) == "string" then
+		for id in raw:gmatch("[^,]+") do
+			table.insert(out, id)
+		end
+	end
+	return out
+end
+
+-- leaves the menu for a house action; on the start screen (no car, no avatar yet) your car comes
+-- out first, or you'd be left looking at the backdrop
+local function outOfMenu(after: () -> ())
+	local needCar = startMode or (not Driving.isDriving() and not (player.Character and player.Character.Parent))
+	local id = data().Selected
+	closeMenu()
+	if needCar and api and id then
+		api.drive(id)
+		task.delay(2.5, after)
+	else
+		after()
+	end
+end
+
+local function buildHouses(page: Frame)
+	local hTall = page.Size.Y.Offset
+	local c1 = 470
+	local c2 = (W - c1 - 24) / 2
+	local x2, x3 = c1 + 12, c1 + 12 + c2 + 12
+	local rowH = (hTall - 12) / 2
+
+	-- MY HOUSE (tall, left): the house standing in this server
+	local mine = tile(page, 0, 0, c1, hTall, { top = Color3.fromRGB(226, 170, 86), bottom = Color3.fromRGB(150, 92, 40), title = "My House", sub = "", art = MenuArt.store_garage, artSize = Vector2.new(260, 260), artPos = UDim2.new(1, 20, 0.42, 0), titleSize = 44, dark = true })
+	local mineSub = mine:FindFirstChild("Sub") :: TextLabel
+	mineSub.Size = UDim2.new(1, -40, 0, 96)
+	local action = new("Frame", { BackgroundColor3 = NAVY0, AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 20, 1, -122), Size = UDim2.fromOffset(230, 44), ZIndex = 4, Parent = mine }, { corner(10) })
+	local actionText = text({ Text = "", FontFace = HEAVY, TextSize = 17, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), ZIndex = 5, Parent = action })
+	focusable(mine, function()
+		local lot = player:GetAttribute("HouseLot")
+		outOfMenu(function()
+			if type(lot) == "string" then
+				local r = houseCall("home")
+				if not r.ok then
+					UI.toast(r.message or "Couldn't get you home", RED)
+				end
+			else
+				local H = housing()
+				if H then
+					if #ownedHouses() > 0 then
+						H.openMenu(nil)
+					else
+						H.openCatalog(nil)
+					end
+				end
+			end
+		end)
+	end, GOLD)
+
+	-- BLUEPRINTS (top middle): the houses you own, the catalogue
+	local blue = tile(page, x2, 0, c2, rowH, { top = Color3.fromRGB(46, 86, 170), bottom = Color3.fromRGB(20, 34, 80), title = "Blueprints", sub = "", titleSize = 32 })
+	local blueSub = blue:FindFirstChild("Sub") :: TextLabel
+	focusable(blue, function()
+		outOfMenu(function()
+			local H = housing()
+			if H then
+				H.openCatalog(nil)
+			end
+		end)
+	end)
+
+	-- HOUSE SETTINGS (top right)
+	local set = tile(page, x3, 0, c2, rowH, { top = Color3.fromRGB(58, 98, 190), bottom = Color3.fromRGB(26, 46, 104), title = "House Settings", sub = "Who can come in, roommates, garage", art = MenuArt.menu_settings, artSize = Vector2.new(120, 120), artPos = UDim2.new(1, 10, 0.55, 0), titleSize = 30 })
+	focusable(set, function()
+		local lot = player:GetAttribute("HouseLot")
+		outOfMenu(function()
+			local H = housing()
+			if H then
+				H.openMenu(if type(lot) == "string" then lot else nil)
+			end
+		end)
+	end)
+
+	-- LEGENDS REALTY (bottom, wide): fast travel to the agency
+	local realty = tile(page, x2, rowH + 12, c2 * 2 + 12, rowH, { top = Color3.fromRGB(70, 236, 176), bottom = Color3.fromRGB(18, 150, 120), title = "Legends Realty", sub = "Buy a house, then claim a FOR SALE lot  ·  fast travel there", titleSize = 32, dark = true })
+	local realtySub = realty:FindFirstChild("Sub") :: TextLabel
+	realtySub.Size = UDim2.new(0.8, 0, 0, 44)
+	focusable(realty, function()
+		if api then
+			local r = api.travel("realty")
+			if r and r.ok then
+				closeMenu()
+			else
+				UI.toast((r and r.message) or "Can't travel right now", RED)
+			end
+		end
+	end, MINT)
+
+	table.insert(refreshers, function()
+		if not page.Visible then
+			return
+		end
+		local lot = player:GetAttribute("HouseLot")
+		local design = player:GetAttribute("HouseDesign")
+		local owned = ownedHouses()
+		local d = if type(design) == "string" then (Config.Houses.ById :: any)[design] else nil
+		local title = mine:FindFirstChild("Title") :: TextLabel
+		if type(lot) == "string" and d then
+			title.Text = d.name
+			mineSub.Text = string.format("%s tier  ·  %s\nLot %s", TIER_WORD[d.tier] or "", d.style or "", tostring(lot))
+			actionText.Text = "TELEPORT HOME"
+		elseif #owned > 0 then
+			title.Text = "My House"
+			mineSub.Text = "Nothing standing in this server yet. Put your house back, or claim a FOR SALE lot of its tier."
+			actionText.Text = "PLACE MY HOUSE"
+		else
+			title.Text = "My House"
+			mineSub.Text = "You don't own a house yet. Pick one at Legends Realty, then claim a lot."
+			actionText.Text = "SEE THE HOUSES"
+		end
+		local names = {}
+		for _, id in owned do
+			local dd = (Config.Houses.ById :: any)[id]
+			if dd then
+				table.insert(names, dd.name)
+			end
+		end
+		blueSub.Text = if #names == 0 then "None yet  ·  open the catalogue" else #names .. " owned: " .. table.concat(names, ", ")
+		blueSub.TextTruncate = Enum.TextTruncate.AtEnd
+	end)
+end
+
+---------------------------------------------------------------------
 -- Tabs, open, close
 ---------------------------------------------------------------------
 local carsRefresh: (() -> ())? = nil
 local playFocus: Focus? = nil
 local campaignFocus: { Focus } = {}
 local storeFocus: { Focus } = {}
+local housesFocus: { Focus } = {}
 
 switchTab = function(name: string)
 	tabName = name
@@ -1793,6 +1965,11 @@ switchTab = function(name: string)
 		setFocus(playFocus)
 	elseif name == "STORE" then
 		for _, f in storeFocus do
+			table.insert(focusList, f)
+		end
+		setFocus(focusList[1])
+	elseif name == "HOUSES" then
+		for _, f in housesFocus do
 			table.insert(focusList, f)
 		end
 		setFocus(focusList[1])
@@ -1840,6 +2017,9 @@ local function build()
 	table.clear(focusList)
 	buildStore(pages.STORE)
 	storeFocus = table.clone(focusList)
+	table.clear(focusList)
+	buildHouses(pages.HOUSES)
+	housesFocus = table.clone(focusList)
 	table.clear(focusList)
 
 	-- keys inside the menu
@@ -1994,7 +2174,7 @@ end
 
 -- (screenshots / tests) open a tab or a page by name
 function MainMenu.show(what: string)
-	if what == "CAMPAIGN" or what == "CARS" or what == "STORE" then
+	if what == "CAMPAIGN" or what == "CARS" or what == "HOUSES" or what == "STORE" then
 		if sub then
 			closeSub()
 		end

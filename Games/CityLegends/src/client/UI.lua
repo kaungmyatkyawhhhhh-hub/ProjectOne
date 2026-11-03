@@ -46,6 +46,7 @@ UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
 UI.onPhotoButton = nil :: (() -> ())? -- photo mode (PhotoMode)
 UI.onMenuButton = nil :: (() -> ())? -- the main menu (MainMenu; the MENU button replaced SETTINGS, 2026-11-02)
+UI.onCashPlus = nil :: (() -> ())? -- the "+" on the cash pill: the main menu's STORE (2026-11-04)
 -- (2026-11-03, car levels: CarUpgrades sets these) a car's level, CP and parts, and its parts screen
 UI.carInfo = nil :: ((string) -> { level: number, xp: number, need: number, cp: number, parts: { [string]: number } })?
 UI.onUpgrade = nil :: ((string) -> ())?
@@ -725,6 +726,29 @@ local function buildCashTab()
 		Parent = tab,
 	})
 	new("UIStroke", { Color = Color3.fromRGB(0, 30, 14), Thickness = 1.5, Transparency = 0.3, Parent = cashLabel })
+	-- (2026-11-04, owner's HUD reference: "the cash in a pill with a +") a round + at the pill's
+	-- right end opens the main menu's STORE
+	cashLabel.Size = UDim2.new(1, -16 - height, 0, height)
+	local plusSize = height - 12
+	local plus: TextButton = new("TextButton", {
+		Name = "CashPlus",
+		AutoButtonColor = false,
+		Text = "+",
+		Font = Enum.Font.GothamBlack,
+		TextSize = math.floor(plusSize * 0.8),
+		TextColor3 = Color3.fromRGB(8, 30, 16),
+		BackgroundColor3 = Theme.Money,
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -7, 0, 6),
+		Size = UDim2.fromOffset(plusSize, plusSize),
+		Parent = tab,
+	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
+	plus.Activated:Connect(function()
+		Audio.click()
+		if UI.onCashPlus then
+			UI.onCashPlus()
+		end
+	end)
 
 	-- controls hint tab next to the cash (keyboard players only)
 	if UI.isTouch then
