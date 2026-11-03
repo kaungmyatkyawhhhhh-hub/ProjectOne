@@ -125,3 +125,16 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - Onyx locked at 17, open at 19; beaten = Gem Champion, story done.
     - Before the update: no Gem bullies, old ending.
   - **Not built:** a Gem posing division for beating Flint (in the plan; needs the owner's OK).
+- **3 Nov - Item 5: Gem event switched ON + cutscene + NEWS, full flip tested.**
+  - `Config/LiveEvents` Gem: **enabled = true** (Sat 7 Nov 15:00 UTC; Creator Hub `Launch_Gem_Enabled` = false still turns it off live). Lines mention the three new bullies + chapters 7-9; `goToText` "Go to the Gem Mine" (the window's button said "Go to the Hall": fixed in LiveEventClient).
+  - **Cutscene `LaunchCutscenes.Gem`** (10 s, tap to skip after 3 s, like the Hall of Fame's):
+    - Fly to the covered mouth from the street corner; push in as the tarp drops.
+    - Over the roofs (a building stands 24 studs across the street) for the crystal mountain + violet/cyan light shafts + gem-coloured fireworks.
+    - "NOW OPEN / THE GEM MINE / Gem alters 16-20 · Run Cards · Star Track".
+    - LaunchCinematic now takes a cutscene's own `beamColors`, `lightColor`, `fireworkColors` (default gold).
+  - **NEWS** (`Config/UI.Updates`): "7 Nov · The Gem Update" (event = "Gem": shows only after the launch; the NEWS dot comes back). Six lines: Gem Mine, alters 16-20, chapters 7-9, the Hall of Fame choice, Run Cards + Star Track, the Alter Effects setting.
+  - **Full flip test** (Studio `TestLaunchIn`, an Alter 15 save on a running server):
+    - Countdown card + window.
+    - Live cutscene.
+    - After it: GemAlters unlocked (last alter 15 → 20), the HUD switched to "NEXT: ALTER 16 JADE" + the gold strip, Flint/Ruby/Onyx appeared, the cover went, the reward (online + 30 min boost) and the NEW: ALTERS 16-20 card.
+    - Fixed in testing: the first wide shot sat behind the building across the street.
