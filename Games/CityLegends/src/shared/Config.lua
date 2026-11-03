@@ -318,7 +318,7 @@ Config.Camera = {
 		Lag = 4.5, -- the car pulls away on a hard launch, comes closer braking (studs per g)...
 		LagResponse = 2.2, -- ...and how fast the camera catches up (per second; lower = more lag)
 		Swing = 0.3, -- looks into turns (radians at full lock)
-		Buzz = 0.09, -- road shake at top speed
+		Buzz = 0.035, -- road shake at top speed (2026-11-03: was 0.09, too much)
 		LookAhead = 22,
 		LookHeight = 1.6,
 		Blur = 4, -- motion blur at top speed (Settings: Motion blur Off turns it off). Lighter since
@@ -370,10 +370,10 @@ Config.Camera = {
 	Shake = {
 		FromMph = 100,
 		ToMph = 190,
-		Roll = 0.045, -- up to about 2.5 degrees of slow roll...
-		Bob = 0.12, -- ...and this many studs up and down...
+		Roll = 0.02, -- up to about 1 degree of slow roll (2026-11-03: was 0.045)...
+		Bob = 0.06, -- ...and this many studs up and down (was 0.12)...
 		Rate = 0.4, -- ...about every 2.5 s
-		Buzz = 0.03, -- the fine fast vibration (studs)
+		Buzz = 0.012, -- the fine vibration (studs; was 0.03)
 	},
 }
 
@@ -394,15 +394,15 @@ Config.DrivingFeel = {
 	-- a real car, so it stays fun). Lower GameGrip = slides sooner, heavier feel; higher = more arcade
 	GripBase = 0.8,
 	GripHandling = 0.4,
-	GameGrip = 1.35,
+	GameGrip = 1.55, -- (2026-11-03: 1.35 felt too heavy, owner)
 	Downforce = { Sedan = 0.05, Coupe = 0.1, Supercar = 0.45, Hypercar = 0.6 } :: { [string]: number }, -- extra grip at top speed (grows with speed squared)
 	-- weight (CarStats' kerb weight, kg, over WeightRef): the powers say how much it matters
 	WeightRef = 1600,
-	WeightBrake = 0.25, -- a heavier car stops later
+	WeightBrake = 0.2, -- a heavier car stops later
 	WeightGrip = 0.1, -- ...grips a little less
-	WeightInertia = 0.5, -- ...turns in slower (its turn builds and settles slower)
+	WeightInertia = 0.35, -- ...turns in slower (its turn builds and settles slower; was 0.5)
 	WeightBump = 0.6, -- ...and kerbs, landings and crashes throw it about less (a light car bounces more)
-	HighSpeedYaw = 220, -- the turn builds half as fast at this many studs/s (~170 mph): no snapping at speed
+	HighSpeedYaw = 320, -- the turn builds half as fast at this many studs/s (~250 mph): no snapping at speed (was 220)
 	BrakeTurnIn = 0.25, -- braking loads the front: up to this much more turn-in
 	TrailBrakeLoose = 0.35, -- ...and lightens the rear: braking hard mid-corner, the rear can step out
 	SquatGrip = 0.3, -- pulling away loads the rear: a rear-drive car spins its tyres a little less
@@ -467,14 +467,14 @@ Config.DrivingFeel = {
 	-- physics v2 (owner, 2026-10-23: "the car driving physics improve it"): weight and handling by
 	-- class. roll / pitch: body lean; understeer: the nose pushes wide at speed (front-heavy);
 	-- shiftTime / upshift / revRate: the gearbox and how quickly the revs move; brake: stopping
-	-- power (studs/s^2: about real g x 28 x 1.25, so 100-0 km/h takes ~25-40 m like a real car; it
+	-- power (studs/s^2: about real g x 28 x 1.5, so 100-0 km/h takes ~22-33 m (2026-11-03: a bit lighter); it
 	-- was 135-188, which stopped in ~10 m: 2026-11-03); inertia: how slowly the car's turn builds and settles
 	ClassFeel = {
-		Sedan = { roll = 1, pitch = 1, understeer = 0.12, shiftTime = 0.22, upshift = 0.9, revRate = 12, brake = 35, inertia = 1 },
-		SUV = { roll = 1.45, pitch = 1.3, understeer = 0.22, shiftTime = 0.3, upshift = 0.86, revRate = 9, brake = 31.5, inertia = 1.35 },
-		Coupe = { roll = 0.85, pitch = 0.9, understeer = 0.07, shiftTime = 0.16, upshift = 0.93, revRate = 15, brake = 37, inertia = 0.9 },
-		Supercar = { roll = 0.6, pitch = 0.7, understeer = 0.04, shiftTime = 0.11, upshift = 0.95, revRate = 19, brake = 40, inertia = 0.8 },
-		Hypercar = { roll = 0.6, pitch = 0.55, understeer = 0.03, shiftTime = 0.08, upshift = 0.96, revRate = 22, brake = 42, inertia = 0.75 },
+		Sedan = { roll = 1, pitch = 1, understeer = 0.12, shiftTime = 0.22, upshift = 0.9, revRate = 12, brake = 42, inertia = 1 },
+		SUV = { roll = 1.45, pitch = 1.3, understeer = 0.22, shiftTime = 0.3, upshift = 0.86, revRate = 9, brake = 38, inertia = 1.35 },
+		Coupe = { roll = 0.85, pitch = 0.9, understeer = 0.07, shiftTime = 0.16, upshift = 0.93, revRate = 15, brake = 44, inertia = 0.9 },
+		Supercar = { roll = 0.6, pitch = 0.7, understeer = 0.04, shiftTime = 0.11, upshift = 0.95, revRate = 19, brake = 48, inertia = 0.8 },
+		Hypercar = { roll = 0.6, pitch = 0.55, understeer = 0.03, shiftTime = 0.08, upshift = 0.96, revRate = 22, brake = 50, inertia = 0.75 },
 	} :: { [string]: { roll: number, pitch: number, understeer: number, shiftTime: number, upshift: number, revRate: number, brake: number, inertia: number } },
 	-- which wheels drive (any car not listed drives the rear wheels)
 	FrontDrive = { suzaki_swift = true, toyoka_belta = true, toyoka_camri = true, toyoka_alfard = true } :: { [string]: boolean },

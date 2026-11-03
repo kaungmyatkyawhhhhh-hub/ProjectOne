@@ -3073,9 +3073,11 @@ function Driving.render(dt: number)
 	-- moments of extra speed: launches, flat-out shifts and close passes punch the view
 	s.fovPunch *= math.exp(-dt * 3.5)
 	s.blurPulse = math.max(0, s.blurPulse - dt * 14)
-	local speedShake = 0.012 * math.min(fx * 6, 1) + math.max(0, fx - 0.3) * 0.16
+	-- (owner, 2026-11-03: "the shaking at top speed is too much ... unrealistic") a real camera at
+	-- speed rumbles slowly and a little; it was a fast jitter. Smaller and about 9 times a second now
+	local speedShake = 0.008 * math.min(fx * 6, 1) + math.max(0, fx - 0.3) * 0.05
 	local shakeAmt = (speedShake + s.shake * 0.5) * cfx.shake
-	local shakeOffset = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * shakeAmt
+	local shakeOffset = Vector3.new(math.noise(t * 9, 0, 1), math.noise(0, t * 8, 2), 0) * shakeAmt
 	local function setBlur(size: number)
 		if blur then
 			blur.Size = if cfx.blur then size else 0
@@ -3109,7 +3111,7 @@ function Driving.render(dt: number)
 			return math.clamp(math.noise(a, b, 0.5) * 2, -1, 1)
 		end
 		local float = Vector3.new(0, HS.Bob * hs * n(t * HS.Rate, 21.7), 0)
-		local buzz = Vector3.new(n(t * 37, 5.1), n(5.3, t * 41), 0) * HS.Buzz * hs
+		local buzz = Vector3.new(n(t * 11, 5.1), n(5.3, t * 13), 0) * HS.Buzz * hs
 		sway = CFrame.new(float + buzz) * CFrame.Angles(0, 0, HS.Roll * hs * n(t * HS.Rate, 13.3))
 	end
 
@@ -3142,7 +3144,7 @@ function Driving.render(dt: number)
 		-- breathing when slow or parked: a tiny slow rise and fall, a little uneven
 		local slow = math.clamp(1 - mphNow / H.BreathFadeMph, 0, 1)
 		local breath = H.Breath * slow * hk * math.sin(t * 2 * math.pi / H.BreathPeriod + math.noise(t * 0.15, 7.7, 0) * 1.5) * (0.85 + 0.3 * math.noise(t * 0.1, 9.9, 0))
-		local jolt = Vector3.new(math.noise(t * 23, 0, 1), math.noise(0, t * 21, 2), 0) * (s.shake * 0.15 + DF.CabinBuzz * rush) * cfx.shake
+		local jolt = Vector3.new(math.noise(t * 10, 0, 1), math.noise(0, t * 9, 2), 0) * (s.shake * 0.15 + DF.CabinBuzz * rush) * cfx.shake
 		camera.CFrame = eyeCF * CFrame.new(s.headPos + jolt + Vector3.new(0, breath, 0)) * CFrame.Angles(s.headTilt.X, 0, s.headTilt.Y)
 		setBlur(0)
 	elseif mode == "Immersive" or mode == "Low" then
@@ -3157,10 +3159,10 @@ function Driving.render(dt: number)
 		local base = CFrame.new(root.Position) * CFrame.Angles(0, s.yaw, 0) -- level with the road, not the body roll
 		local camPos = (base * CFrame.Angles(0, s.camSwing, 0) * CFrame.new(side, up, back)).Position
 		-- road buzz: fine fast shake that grows with speed, plus a slow float
-		s.camBob += dt * (6 + fx * 30)
-		local buzz = (0.015 + fx ^ 2 * IC.Buzz + s.shake * 0.4) * cfx.shake
-		local shake = Vector3.new(math.noise(t * 31, 0, 3), math.noise(0, t * 29, 4), 0) * buzz
-			+ Vector3.new(0, math.sin(s.camBob) * 0.03 * fx * cfx.shake, 0)
+		s.camBob += dt * (4 + fx * 8)
+		local buzz = (0.01 + fx ^ 2 * IC.Buzz + s.shake * 0.4) * cfx.shake
+		local shake = Vector3.new(math.noise(t * 9, 0, 3), math.noise(0, t * 8, 4), 0) * buzz
+			+ Vector3.new(0, math.sin(s.camBob) * 0.012 * fx * cfx.shake, 0)
 		local ahead = if low then CFrame.new(-LC.Side * 0.3, LC.LookHeight, -LC.LookAhead) else CFrame.new(0, IC.LookHeight, -IC.LookAhead)
 		local lookAt = (base * CFrame.Angles(0, -s.camSwing * 0.6, 0) * ahead).Position
 		s.camPos = camPos
