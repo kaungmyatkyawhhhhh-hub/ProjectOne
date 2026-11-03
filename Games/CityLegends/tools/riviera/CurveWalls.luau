@@ -240,4 +240,64 @@ function CurveWalls.build(data, roadsFolder: Instance, parent: Instance): number
 	return count, old
 end
 
+-- (owner, 2026-11-03: "the side wall is on the road making the road a 2+1.5 road and it became tight
+-- ... check others"): any wall piece closer than CLEAR studs to a traffic lane's centre line (a lane
+-- is 16 wide) stands in that lane: it goes. Run after build with the lane data (shared/RivieraLanes)
+local CLEAR = 5.5
+function CurveWalls.clearLanes(lanes, roadsFolder: Instance, parent: Instance): number
+	local cells = {}
+	for _, l in lanes.lanes do
+		local pts = l.pts
+		for k = 1, #pts // 3 - 1 do
+			local a = Vector3.new(pts[3 * k - 2], pts[3 * k - 1], pts[3 * k])
+			local b = Vector3.new(pts[3 * k + 1], pts[3 * k + 2], pts[3 * k + 3])
+			local n = math.max(1, math.ceil((b - a).Magnitude / 2))
+			for i = 0, n - 1 do
+				local q = a:Lerp(b, i / n)
+				local key = math.floor(q.X / 32) .. "," .. math.floor(q.Z / 32)
+				cells[key] = cells[key] or {}
+				table.insert(cells[key], q)
+			end
+		end
+	end
+	local function inLane(w: BasePart): boolean
+		local half = w.Size.Z / 2
+		local y = w.Position.Y + w.Size.Y / 2 - WALL_UP
+		for _, f in { -1, -0.5, 0, 0.5, 1 } do
+			local q = w.CFrame:PointToWorldSpace(Vector3.new(0, 0, half * f))
+			local cx, cz = math.floor(q.X / 32), math.floor(q.Z / 32)
+			for dx = -1, 1 do
+				for dz = -1, 1 do
+					for _, p in cells[(cx + dx) .. "," .. (cz + dz)] or {} do
+						if math.abs(p.Y - y) < 12 and Vector2.new(p.X - q.X, p.Z - q.Z).Magnitude < CLEAR then
+							return true
+						end
+					end
+				end
+			end
+		end
+		return false
+	end
+	local gone = 0
+	local walls = {}
+	for _, d in roadsFolder:GetDescendants() do
+		if d.Name == "LegWall" then
+			table.insert(walls, d)
+		end
+	end
+	local folder = parent:FindFirstChild("CurveWalls")
+	if folder then
+		for _, d in folder:GetChildren() do
+			table.insert(walls, d)
+		end
+	end
+	for _, w in walls do
+		if w:IsA("BasePart") and inLane(w) then
+			w:Destroy()
+			gone += 1
+		end
+	end
+	return gone
+end
+
 return CurveWalls

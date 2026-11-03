@@ -188,7 +188,7 @@ Config.Lights.Cycle = (Config.Lights.Green + Config.Lights.Yellow + Config.Light
 -- NPC traffic
 ---------------------------------------------------------------------
 Config.Traffic = {
-	CarCount = 38, -- (2026-11-03: 90 -> 38 with the traffic now on the yellow routes only: about the same number of cars on them as before) -- in the city's streets, Monaco's too (owner, 2026-10-29: fewer; was 55 in all; 2026-11-02: 32 -> 40, "add more cars traffic"; 2026-11-03: 40 -> 64, "add more traffic cars throughout the map"; 64 -> 90 the same day, "add more traffic cars too"; phones get ~60%)
+	CarCount = 28, -- (2026-11-03: 38 -> 28, owner "reduce a little bit of traffic like 10 cars"; 90 -> 38 with the traffic now on the yellow routes only: about the same number of cars on them as before) -- in the city's streets, Monaco's too (owner, 2026-10-29: fewer; was 55 in all; 2026-11-02: 32 -> 40, "add more cars traffic"; 2026-11-03: 40 -> 64, "add more traffic cars throughout the map"; 64 -> 90 the same day, "add more traffic cars too"; phones get ~60%)
 	HighwayCars = 18, -- on the highways and the loop, well spaced to split lanes and speed past
 	HighwayGap = 60, -- studs kept free round a highway car when one is placed (city: 22)
 	-- every car has its own pace, the inside lane runs faster than the outside ones, and each car's
