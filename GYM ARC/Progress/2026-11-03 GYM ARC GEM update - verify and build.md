@@ -338,3 +338,18 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
     - Gold proposal: roughness 0.24 -> 0.33, still fully metal (metalness 1.0), NOT applied.
     - Folder `skin_definition` + IMPORT_LIST.
     - Live preview without importing failed: Studio takes an EditableImage in a SurfaceAppearance but draws it blank. So the in-game before / after come after the import.
+  - **Owner imported v2 + the skins (3 Nov, latest):**
+    - **v2 arms + forearms swapped in** (v1 kept as `*_v1` in ServerStorage._Backups_3Nov_spike). Config/BodyStages arms + Config/LimbStages forearms now use the v2 bounds (old values in comments).
+    - **In game at Alter 15 maxed (TestHallOfFame + TestHallLevel 1400):**
+      - Upper arms and forearms rounder, and the forearm's wrist end is blunt.
+      - **Still pointed:** the triceps lobe ends in a thin flat fin pointing backwards. It's in the mesh itself (v1 and v2 smoothing keep volume, so a fin stays a fin).
+      - **v3 made** (`ClaudeOne\tools\soften_lobe_tip.py`): the last ~0.1 stud of the point is eased in, then rounded. Width and height are the same; the back reach is ~5% shorter. Folder `muscle_spike_fix_v3` + IMPORT_LIST; owner to import.
+      - (A "dome" rebuild of the lobe was tried first: it made a flat slab, so it was dropped.)
+    - **Skin maps on:** ReplicatedStorage.SkinStages Stage1-5 normal + roughness = the new ids. Config/SkinStages updated (old ids in comments). The imported decals were moved to ServerStorage._Imports_3Nov.
+      - These only change the plain skin (before Alter 1, or no alter skin). Alters 1-15 have their own maps and were not touched.
+      - **Before / after in game** (full look, Stage 3, 3 skin tones: tan, light, dark; plus mass monster Stage 5) are in `Downloads\gem_update_import\screens_3Nov_late`.
+      - Result: the plastic shine is gone, and the skin is now a matte satin. The lines are soft and only show up close. Stage 5 barely changes (it was already matte). It may read a bit clay-like; a middle sheen (~0.3) is the option if the owner wants some shine back.
+    - **Gold proposal tried live (roughness 0.24 -> 0.33): Gold went matte yellow and lost the metal look.** Not applied; Gold unchanged. Recommendation: keep Gold as it is.
+    - Test tips:
+      - The MoneyCoach trainer (workspace.LocalTrainers) is a see-through copy of you that stands behind you. Hide it for body shots.
+      - The skin tone for a test is the Player's "SkinColor" attribute (set on the client).
