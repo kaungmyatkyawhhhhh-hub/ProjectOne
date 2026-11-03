@@ -495,6 +495,8 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	local layers: { [string]: Sound } = {}
 	-- recorded-rpm bands (Config.ExhaustBands): sorted by rpm, and the car's redline in rpm
 	local bandCfg = if carId then Config.ExhaustBands[carId] else nil
+	local carVol = if carId then (Config.ExhaustVolume[carId] or 1) else 1 -- (the SV: half, owner)
+	local downCool = 0
 	local bandList: { { name: string, rpm: number } } = {}
 	local redlineRpm = if carId then CarStats.redline(carId) * 1000 else 7000
 	local boost, seqK, bovCool = 0, 0, 0
@@ -531,9 +533,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		end
 	end
 	-- a one-shot from the car's set (pitch varied a little each time)
-	local function oneShot(id: string, volume: number)
-		local snd = newSound(id, holder, volume * (1 + tunnelK))
-		snd.PlaybackSpeed = 0.96 + math.random() * 0.08
+	local function oneShot(id: string, volume: number, pitch: number?)
+		local snd = newSound(id, holder, volume * (1 + tunnelK) * carVol)
+		snd.PlaybackSpeed = pitch or (0.96 + math.random() * 0.08)
 		if positional then
 			snd.RollOffMode = Enum.RollOffMode.InverseTapered
 			snd.RollOffMinDistance = 14
@@ -736,6 +738,12 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		end
 		growl.PlaybackSpeed = (0.5 + r * 0.95) * base * ts
 		growl.Volume = (0.08 + 0.42 * throttle) * math.clamp(r * 1.3, 0.2, 1) * (if usingCustom then 0.35 else 1) * power * (if ex then 0 else 1)
+		downCool = math.max(0, downCool - 1 / 60)
+		if carVol ~= 1 then
+			for _, snd in layers do
+				snd.Volume *= carVol
+			end
+		end
 		if tunnelK > 0.001 then
 			local g = 1 + tunnelK
 			rumble.Volume *= g
@@ -757,7 +765,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		end
 	end
 
-	function self.shift(_, up: boolean)
+	-- (`rpmAfter`: the revs, 0..1 of the redline, the new gear runs at; Driving calls this the moment the
+	-- gearbox changes gear, when the revs start to move)
+	function self.shift(_, up: boolean, rpmAfter: number?)
 		if not running then
 			return
 		end
@@ -779,9 +789,13 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 					Audio.backfire(if positional then parent else nil)
 				end
 			end
-		elseif ex and ex.Downshift then
-			-- the blip as it drops a gear
-			oneShot(ex.Downshift, 0.85)
+		elseif ex and ex.Downshift and downCool <= 0 then
+			-- the blip as it drops a gear, pitched to the revs it lands on (owner, 2026-11-03: "the
+			-- downshift sound doesn't match the actual downshift")
+			local at = Config.ExhaustShotRpm[ex.Downshift]
+			local pitch = if at and rpmAfter then math.clamp(rpmAfter * redlineRpm / at, 0.7, 1.45) else nil
+			oneShot(ex.Downshift, 0.85, pitch)
+			downCool = 0.18
 		end
 	end
 
@@ -792,7 +806,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	function self.crank(_)
 		startedAt = os.clock()
 		if ex and ex.Start then
-			local snd = newSound(ex.Start, holder, 0.95)
+			local snd = newSound(ex.Start, holder, 0.95 * carVol)
 			snd:Play()
 			Debris:AddItem(snd, 10)
 		else

@@ -562,26 +562,7 @@ Config.Sounds = {
 	-- Launch | Crackle | Redline | Shift | Downshift | ShiftPop | Pops> (Low and the one-shots since
 	-- 2026-11-03). Idle / Mid / High are loops blended by rpm; a car with them uses these
 	-- instead of the shared engine sound (owner, 2026-10-22: the LP750 first, as a test)
-	Exhaust_lambrini_lp750_Start = "rbxassetid://70853763868958",
-	-- (owner, 2026-11-03: "find and add better exhaust sounds for Aventador SV", "the Aventador rev
-	-- doesn't sound good", "it still sounds bad, use different rpm for each sound Low, Mid, High") the
-	-- Aventador's own L539 V12 recorded on the throttle at set revs ("l539-eng-acc-2000 / 4000 /
-	-- 6500", uploader ItzDeadsecc, public; each one's rpm checked by its firing note, V12 = rpm / 10
-	-- Hz) as Low / Mid / High, and the real SV's idle ("Lamborghini_Aventador_idle", Takumi112892)
-	-- (Config.ExhaustBands). Tried and dropped the same day: the "Aventador SVJ Revloop" bank (1,000 /
-	-- 4,198 / 8,375 rpm: a gap where you pull away) and one ~4,700 rpm loop across all the revs. Before
-	-- that: Idle 91209556236511, Mid 70783605428332, High 132442120648563
-	Exhaust_lambrini_lp750_Idle = "rbxassetid://73235710388670", -- "Lamborghini_Aventador_idle"
-	Exhaust_lambrini_lp750_Low = "rbxassetid://119081006371451", -- "l539-eng-acc-2000"
-	Exhaust_lambrini_lp750_Mid = "rbxassetid://82866280346883", -- "l539-eng-acc-4000"
-	Exhaust_lambrini_lp750_High = "rbxassetid://138629257229746", -- "l539-eng-acc-6500"
-	Exhaust_lambrini_lp750_Launch = "rbxassetid://100034849111835",
-	Exhaust_lambrini_lp750_Crackle = "rbxassetid://128716617727916", -- "Aventador SVJ Crackle3"
-	Exhaust_lambrini_lp750_Pops = "rbxassetid://105065066916581", -- "Aventador SVJ Crackle4" (lift-off)
-	Exhaust_lambrini_lp750_ShiftPop = "rbxassetid://97354969724257", -- "Aventador SVJ Crackle1" (upshift)
-	Exhaust_lambrini_lp750_Shift = "rbxassetid://116713101274714", -- (the SVJ's gearbox: the same ISR box)
-	Exhaust_lambrini_lp750_Downshift = "rbxassetid://109515735710638",
-	Exhaust_lambrini_lp750_Redline = "rbxassetid://15989284563", -- owner, 2026-10-22: new redline
+	-- (the Aventador SV: the SVJ's set, copied after this table at half volume, owner 2026-11-03)
 	-- (owner, 2026-11-03: "exhaust sounds for SVJ and SVJ 63"; the limiter is the SV's)
 	Exhaust_lambrini_svj_Start = "rbxassetid://70853763868958",
 	Exhaust_lambrini_svj_Idle = "rbxassetid://86888239641129",
@@ -653,6 +634,24 @@ do
 	end
 end
 
+-- (owner, 2026-11-03: "use the SVJ exhaust sound and share it with the SV, but make the SV 2x
+-- quieter") the Aventador SV plays the SVJ's whole exhaust set at half volume (Config.ExhaustVolume).
+-- Tried the same day and dropped: the L539 V12 at 2,000 / 4,000 / 6,500 rpm ("l539-eng-acc-2000"
+-- 119081006371451, "-4000" 82866280346883, "-6500" 138629257229746) with the SV's idle
+-- 73235710388670, one ~4,700 rpm loop (72275841063718) and the "Aventador SVJ Revloop" bank
+do
+	for _, part in { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops" } do
+		Config.Sounds["Exhaust_lambrini_lp750_" .. part] = Config.Sounds["Exhaust_lambrini_svj_" .. part]
+	end
+end
+
+-- per-car exhaust loudness (every loop and one-shot of the car's set), 1 = as recorded
+Config.ExhaustVolume = { lambrini_lp750 = 0.5 } :: { [string]: number }
+
+-- the engine speed a one-shot was recorded at (by asset), so it's pitched to the revs it plays at: the
+-- SVJ's downshift blip settles at ~4,200 rpm (its firing note)
+Config.ExhaustShotRpm = { ["rbxassetid://109515735710638"] = 4200 } :: { [string]: number }
+
 -- per-car exhaust bands: the rpm each loop was recorded at (the loop's pitch is the car's rpm over
 -- this; bands crossfade between their rpms), and the turbos: `whine` the whine's pitch at full boost,
 -- `seq` the rpm the second turbo pair comes in (sequential, the Chiron), `bov` the blow-off loudness;
@@ -660,10 +659,6 @@ end
 -- `width` how far each band reaches round its rpm (default 0.4; narrower = one recording heard at a time)
 Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number?, gain: number?, gains: { [string]: number }?, width: number? } }
 do
-	-- the Aventador SV (2026-11-03): the idle at the game's idle revs, then Low / Mid / High recorded at
-	-- 2,000 / 4,000 / 6,500 rpm (each pitched at most about a third off); the idle is recorded loud, so
-	-- it's levelled to sit with the others
-	Config.ExhaustBands.lambrini_lp750 = { bands = { Idle = 1020, Low = 2000, Mid = 4000, High = 6500 }, gain = 0.85, gains = { Idle = 0.6 }, width = 0.28 }
 	local chiron = { bands = { Idle = 950, Low = 3500, High = 6500 }, whine = 0.62, seq = 3800, bov = 1.0 }
 	local veyron = { bands = { Idle = 950, Low = 3500 }, whine = 0.7, bov = 1.0 }
 	for _, id in { "bugotti_veyron", "bugotti_veyron_sport", "bugotti_veyron_top" } do

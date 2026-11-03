@@ -198,6 +198,7 @@ type State = {
 	-- drivetrain feel
 	agear: number, -- the automatic gearbox's gear (1..GEARS)
 	shiftT: number, -- seconds left of a shift: no drive while the gear changes
+	soundGear: number?, -- the gear the shift sounds last heard (the one the revs follow)
 	nextGear: number,
 	electric: boolean, -- one gear, silent motor
 	powerK: number, -- per car, so 0-60 mph matches its real time with gears and shifts
@@ -2707,7 +2708,6 @@ function Driving.step(dt: number)
 	-- gears / rpm (cosmetic)
 	local fs = s.vel:Dot(forwardFromYaw(s.yaw))
 	local frac = math.clamp(math.abs(fs) / s.topSpeed, 0, 1)
-	local prevGear = s.gear
 	local function manualName(): string
 		return if s.mgear < 0 then "R" elseif s.mgear == 0 then "N" else tostring(s.mgear)
 	end
@@ -2775,14 +2775,18 @@ function Driving.step(dt: number)
 		end
 	end
 
-	-- shift sounds (dip in revs, pops on hard upshifts)
-	local pg, ng = tonumber(prevGear), tonumber(s.gear)
-	if pg and ng and ng ~= pg then
-		s.engine:shift(ng > pg)
-		if ng > pg and throttle > 0.5 then
+	-- shift sounds (dip in revs, pops on hard upshifts, the downshift blip): the moment the gearbox
+	-- takes the new gear, which is when the revs start to move (owner, 2026-11-03: "the downshift sound
+	-- doesn't match the actual downshift"; it used to wait for the gear on the dash, after the shift)
+	local effGear: number? = if s.electric then nil elseif s.manual then (if s.mgear > 0 then s.mgear else nil) elseif s.shiftT > 0 then s.nextGear else s.agear
+	if effGear and s.soundGear and effGear ~= s.soundGear and math.abs(fs) > 2 and s.engineOn then
+		local isUp = effGear > s.soundGear
+		s.engine:shift(isUp, math.clamp(0.12 + 0.88 * frac / gearHi(effGear), 0.12, 1.02))
+		if isUp and throttle > 0.5 then
 			exhaustPop(s, 1)
 		end
 	end
+	s.soundGear = effGear
 
 	local mph = Config.spsToMph(math.abs(fs))
 	detectCuts(s, forwardFromYaw(s.yaw), mph)
