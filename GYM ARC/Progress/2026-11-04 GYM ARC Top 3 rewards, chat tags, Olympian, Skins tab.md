@@ -170,3 +170,37 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
   - Gains added; tested playing in the gym.
 - **Settings "Runway Invites" On / Off:** Off = PosingCompService doesn't send THE RUNWAY invite card; the show still runs. Saved in `settings.runwayInvites`. Tested: the row shows and the setting saves.
 - Screens 13-17 in `screens_4Nov_top3`.
+
+## Later 4 Nov - hard auras look superior (owner: "make the hard-to-get auras and high stats to look superior to the ones that are easy to get")
+- **What was wrong:** 9 hard auras borrowed an easy aura's effect.
+  - Peak Human = Ember.
+  - Stone Skin and Silver Star = Frost.
+  - Forged = Storm.
+  - Gemstone, Living Legend and Gold Star = Golden.
+  - Diamond Star = Galaxy.
+  - So the Alter 30 aura looked exactly like the 1B EXP one.
+- **Own looks:** each of the 9 now has its own effect (`Config/Auras` `look`; presets in the new `Shared/VFX/AuraPrestige`, registered into the owner's AuraVFX without editing it; AuraService sends `look or vfx`):
+  - Peak Human: skin-gold fire.
+  - Stone Skin: stone dust.
+  - Forged: white-hot steel lightning with a forge-orange tail.
+  - Gemstone: violet-to-cyan glow.
+  - Elemental: fire burning blue at the tips.
+  - Living Legend: white-gold radiance.
+  - Silver Star: silver radiance.
+  - Gold Star: golden fire.
+  - Diamond Star: cyan-white lightning with a violet tail.
+- **Prestige tier 1-5** by how hard an aura is (`Config/Auras` `tier`). A layer on top grows with it (`AuraPrestige`, built and powered with the effect in `AuraClient`):
+
+  | Tier | Auras | Layer |
+  |---|---|---|
+  | 1 | Ember, Frost | effect only |
+  | 2 | Toxic, Storm, Shadow | + rising motes |
+  | 3 | Golden, Peak Human, the 5 Aura Pack auras, Royal | + 2 orbiting light orbs and a light |
+  | 4 | Stone Skin, Forged, Titan, Silver Star | + 3 orbs, a halo over the head, a stronger light |
+  | 5 | Gemstone, Elemental, Living Legend, Gold Star, Diamond Star | + 4 orbs with trails, a light pillar, a ground shockwave every ~3 s; rarity now **MYTHIC** |
+
+  - Phones: half the particles, no trails.
+  - Other players far away: halo + pillar only, then off.
+  - The parts sit in a local folder, not in the character (AuraClient rebuilds on body changes).
+- **Tested** with the Inventory try-on at full power: Ember (nothing extra), Living Legend outdoors and indoors (pillar, orbs, sparkles, ground ring), Forged (its own lightning + 3 orbs). No errors. Screens 18-21.
+- **Open:** the hard auras still reuse easy auras' orb ICONS in the menus (e.g. Living Legend uses Golden's orb). New orb art would finish it (import needed).
