@@ -13,6 +13,7 @@
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CollectionService = game:GetService("CollectionService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -55,6 +56,7 @@ export type Npc = {
 type Obstacle = { pos: Vector3, fwd: Vector3, speed: number, halfLen: number, width: number, self: Npc? }
 
 local Traffic = {}
+local bumpAhead: (Npc) -> boolean
 Traffic.cars = {} :: { Npc }
 
 local rng = Random.new()
@@ -602,6 +604,38 @@ local function crossConflict(npc: Npc, obstacles: { Obstacle }): number?
 	return nil
 end
 
+-- speed bumps (tag "SpeedBump", tools/riviera/SpeedBumps.luau) in 64-stud cells; they stream in,
+-- so the list is refreshed every few seconds
+local bumpCells: { [string]: { { pos: Vector3, dir: Vector3 } } } = {}
+local bumpRefresh = 0
+local function refreshBumps()
+	table.clear(bumpCells)
+	for _, m in CollectionService:GetTagged("SpeedBump") do
+		if m:IsA("Model") and m.Parent then
+			local pos = m:GetPivot().Position
+			local key = math.floor(pos.X / 64) .. "," .. math.floor(pos.Z / 64)
+			bumpCells[key] = bumpCells[key] or {}
+			table.insert(bumpCells[key], { pos = pos, dir = (m:GetAttribute("Dir") :: Vector3?) or Vector3.zAxis })
+		end
+	end
+end
+bumpAhead = function(npc: Npc): boolean
+	local cx, cz = math.floor(npc.pos.X / 64), math.floor(npc.pos.Z / 64)
+	for dx = -1, 1 do
+		for dz = -1, 1 do
+			local cell = bumpCells[(cx + dx) .. "," .. (cz + dz)]
+			for _, b in cell or {} :: { { pos: Vector3, dir: Vector3 } } do
+				local rel = b.pos - npc.pos
+				local ahead = rel:Dot(npc.fwd)
+				if ahead > -npc.halfLen and ahead < T.BumpLook and math.abs(rel:Dot(Vector3.new(-npc.fwd.Z, 0, npc.fwd.X))) < 34 then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
 local obstacleList: { Obstacle } = {}
 local npcObstacle: { [Npc]: Obstacle } = setmetatable({}, { __mode = "k" }) :: any
 local frameCount = 0
@@ -614,6 +648,11 @@ function Traffic.update(dt: number)
 	end
 	dt = math.min(dt, 0.1)
 	refreshPlayerCars()
+	bumpRefresh -= dt
+	if bumpRefresh <= 0 then
+		bumpRefresh = 3
+		refreshBumps()
+	end
 	local now = workspace:GetServerTimeNow()
 
 	mountainCars = 0
@@ -686,6 +725,11 @@ function Traffic.update(dt: number)
 					end
 				end
 			end
+		end
+
+		-- speed bumps ahead (owner, 2026-11-03): ease down to BumpMph for them
+		if bumpAhead(npc) then
+			target = math.min(target, Config.mphToSps(T.BumpMph))
 		end
 
 		-- yield before turning left across oncoming traffic

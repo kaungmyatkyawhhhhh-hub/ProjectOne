@@ -212,6 +212,8 @@ Config.Traffic = {
 	-- the Riviera (the new map): quiet streets, only this many NPC cars there at once (owner,
 	-- 2026-11-02: "traffic on the new map (reduce traffic)")
 	-- (owner, 2026-11-03: traffic only on the yellow roads, the three long routes)
+	BumpMph = 14, -- traffic slows to this over a speed bump (2026-11-03)
+	BumpLook = 40, -- ...from this many studs before it
 	StreetShare = 0.05, -- of the spots picked on other streets, this share is used (a rare car)
 	LeaveRouteK = 0.03, -- how seldom a car turns off a route onto a street
 	StreetRecycle = 260, -- a car off the routes this far from you goes back onto one
