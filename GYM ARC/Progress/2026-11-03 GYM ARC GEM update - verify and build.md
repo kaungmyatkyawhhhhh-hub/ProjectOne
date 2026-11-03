@@ -93,3 +93,35 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - After the update at Alter 20: MAX + ★2 + 2 cards.
     - ENTER HALL opens the confirm screen; GO TO GEM MINE sets the path (owner HallChoice).
     - Phone 667x375 fits. Fixed in testing: lines under the buttons, a double star, the HUD title wrapping.
+- **3 Nov - Item 4: Story chapters 7-9 built + tested** (plan: [[2026-11-03 GYM ARC Storyline - Gem chapters 7-9]]).
+  - **Config/Story:**
+    - **Flint** ch7 "THE GEM MINE" (Alter 15, 25,000 coins).
+    - **Ruby** ch8 "THE FASTEST" (Alter 17, 40,000 + the RUBY WRAPS look).
+    - **Onyx** ch9 "THE CRYSTAL KING" (Alter 19, 60,000; the ELEMENTS cliffhanger for 14 Nov).
+    - All three: lines, taunts, voices, heights 9'9" / 9'9" / 10'0".
+    - `event = "GemAlters"`: they exist only after the update (`Story.Available`). Before it the story ends at Vince, unchanged (tested).
+    - Their need counts your alter OR your best run's (fame.peak), not stars alone, so everyone who ever reached Alter 15 meets Flint at launch.
+  - **New chapter 6 ending** after the update (`Story.CliffOf`, `cliffGem`): Flint's voice "The Hall is for retirees. Real legends dig deeper." + Dex "that voice came from under the Gem Mine".
+  - **World:**
+    - NPCs Flint / Ruby / Onyx in Workspace.NPCs (copies of Vince's rig, Gym = GemMine), each with headgear made from parts: miner's hard hat + lamp / ruby headband with a ruby / dark crystal crown.
+    - Tables BullyTable_Ruby / _Onyx (copies of Flint's gem table) in ReplicatedStorage.StoryTables.
+    - Spots: Flint on the stage's south side (moved: the giant crystal blocked his shot), Ruby east floor (192.8, 128), Onyx (132.8, 140) in front of the new **OnyxThrone** (dark Slate + violet Neon trim + crystal clusters, no Glass).
+  - **Underground fix:** a far client only has low-detail terrain (no cave), so a far shot showed the sky. Now:
+    - A Gem bully calls you out when you're within 70 studs (`Story.CalloutNear`); before that his chapter toast + BEAT HIM marker show the way.
+    - Farther than 140 studs (`Story.FarShot`) his lines are a dark voice-over on you.
+  - **Rewards:**
+    - Titles Mine Breaker (Flint), Faster Than Ruby (Ruby), Gem Champion (Onyx).
+    - **Reward looks** (Config/Cosmetics `look = true`): Ruby Wraps (Gear.LevelColors Ruby); Star Belt + Star Wraps for item 7. Worn in the gear slot, no stats (gear boost = best owned level), never sold, listed in Inventory > GEAR as "Looks only".
+  - **Progression Road:**
+    - The Hall of Fame stop now sits after Alter 15 (16-20 after it).
+    - Gem bully stops only after the update, done only when beaten.
+    - Alters 16-20 count as reached only by your alter or your best run's (a star alone doesn't).
+    - The road rebuilds when the update flips.
+  - **Tested in Play:**
+    - All 9 bully templates built.
+    - Vince's new ending (far voice-over); Flint's toast + marker (204 studs).
+    - Flint's call-out in the cave; beat Flint (Ruby cliff).
+    - Ruby at 17: wraps owned + worn + drawn on both wrists, titles.
+    - Onyx locked at 17, open at 19; beaten = Gem Champion, story done.
+    - Before the update: no Gem bullies, old ending.
+  - **Not built:** a Gem posing division for beating Flint (in the plan; needs the owner's OK).
