@@ -647,11 +647,20 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 					w[k] /= sum
 				end
 				local on = math.clamp(throttle, 0, 1)
+				-- (2026-11-03, the Aventador SV's 1,000 rpm loops sit right by its idle) near idle and off
+				-- the throttle only the idle loop plays: the other bands fade in with the throttle or as
+				-- the revs rise past the idle
+				local idleRpm = bandCfg and bandCfg.bands.Idle
+				local lift = if idleRpm then math.max(on, math.clamp((rpmNow - idleRpm * 1.15) / (idleRpm * 0.6), 0, 1)) else 1
+				local gain = (bandCfg and bandCfg.gain) or 1
 				for k, band in bandList do
 					local pitch = math.clamp(rpmNow / band.rpm, 0.45, if band.name == "Idle" then 1.45 else 1.8) * ts
 					local main = layers[band.name]
 					local coast = layers[band.name .. "Off"]
-					local g = 1.15 * w[k] * duck * fadeIn * power
+					local g = 1.15 * w[k] * duck * fadeIn * power * gain * ((bandCfg and bandCfg.gains and bandCfg.gains[band.name]) or 1)
+					if band.name ~= "Idle" then
+						g *= lift
+					end
 					if band.name == "Idle" then
 						main.Volume = g * (0.85 + 0.15 * on)
 					elseif coast then
