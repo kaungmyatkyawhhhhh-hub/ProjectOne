@@ -2996,7 +2996,7 @@ function Driving.render(dt: number)
 		local look = root.Position + fwd * 10 + Vector3.new(0, 1.8, 0)
 		s.camLook = s.camLook:Lerp(look, 1 - math.exp(-dt * 14))
 		camera.CFrame = CFrame.lookAt(s.camPos + shakeOffset, s.camLook) * CFrame.Angles(s.camPitch * 0.7, 0, s.camRoll * 0.8)
-		setBlur(math.max(3.5 * math.max(0, fx - 0.45) ^ 1.5, s.blurPulse))
+		setBlur(math.max(2 * math.max(0, fx - 0.55) ^ 1.5, s.blurPulse))
 	end
 	camera.CFrame *= sway
 	camera.Focus = CFrame.new(root.Position) -- (Playbook: every frame, or shadows and detail break)

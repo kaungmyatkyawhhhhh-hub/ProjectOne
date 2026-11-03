@@ -320,8 +320,9 @@ Config.Camera = {
 		Buzz = 0.09, -- road shake at top speed
 		LookAhead = 22,
 		LookHeight = 1.6,
-		Blur = 7, -- motion blur at top speed (Settings: Motion blur Off turns it off)
-		BlurFrom = 0.3, -- share of the rush where it starts
+		Blur = 4, -- motion blur at top speed (Settings: Motion blur Off turns it off). Lighter since
+		-- 2026-11-03 (owner: the game looked grainy): Roblox's blur softens the whole screen
+		BlurFrom = 0.5, -- share of the rush where it starts
 	},
 	-- the low camera (V cycle): about wheel-top height, close, a little to the side, lots of blur
 	Low = {
@@ -333,8 +334,8 @@ Config.Camera = {
 		SpeedPull = 2,
 		LookAhead = 26,
 		LookHeight = 1.1,
-		Blur = 11,
-		BlurFrom = 0.15,
+		Blur = 6,
+		BlurFrom = 0.4,
 	},
 	-- the g-forces on the outside cameras (owner, 2026-10-23: dramatic turns, launches and stops)
 	Drama = {
@@ -425,9 +426,9 @@ Config.DrivingFeel = {
 	RushTo = 190, -- ...and where they're full
 	Vignette = 0.5, -- darkened screen edges at full rush (outside cameras; half in the cabin)
 	ShiftPunchFov = 3, -- a flat-out upshift at high revs: the view kicks wider for a moment
-	ShiftBlur = 3,
+	ShiftBlur = 1,
 	LaunchKickFov = 7, -- a hard launch
-	LaunchBlur = 6,
+	LaunchBlur = 2,
 	NearMissFov = 2.5, -- a close pass on traffic
 	RoadRoar = 0.45, -- tyre and road roar at full rush (volume)
 	CabinBuzz = 0.025, -- the driver's head buzzes with the road at speed (studs)
@@ -481,7 +482,7 @@ Config.DrivingFeel = {
 	NitroFillPass = 0.08, -- per close pass
 	NitroFillDrift = 0.07, -- per second of drifting
 	NitroFov = 10,
-	NitroBlur = 2.5,
+	NitroBlur = 1.5,
 	-- skid marks (scaled down on phones)
 	SkidMax = 140,
 	SkidLife = 7,

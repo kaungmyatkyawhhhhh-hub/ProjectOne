@@ -7,7 +7,8 @@
 	    centre heights, so consecutive slabs meet edge to edge with no step (owner, 2026-11-01: "no
 	    bumps or extra studs on the road"). A smaller road's slab stops where it enters a bigger
 	    road's carriageway; the bigger one carries on (heights there were made equal in network.py).
-	  * pavements (red-pink pavers, Monaco) with light granite kerbs, left out at junction mouths
+	  * pavements (red-pink pavers, Monaco) with light stone kerbs (Concrete: Granite's speckle
+	    looked grainy, owner 2026-11-03), left out at junction mouths
 	  * white lines: dashed centre and lane lines, solid edges, zebra crossings at junction
 	    approaches (no collision, no shadows)
 	The terrain under roads sits 1.5 studs lower (terrain_build.py) so it never pokes through.
@@ -674,6 +675,9 @@ function Roads.build(data, opts)
 						-- and neighbouring pieces differ by a hair in width and height so their overlaps
 						-- never share a face (that flickered). A fan's pivot (the inside of a tight bend,
 						-- where the edge stands still) keeps the old centre-line strip.
+						-- (owner, 2026-11-03: kerbs still flickered) the kerb's road face sat exactly on the
+						-- pavement's and the road's edge, and its top only 0.04 over the pavers: it now
+						-- stands 0.05 nearer the road and 0.1 over the pavers.
 						local ea = if side < 0 then edgeL[i] else edgeR[i]
 						local eb = if side < 0 then edgeL[i + 1] else edgeR[i + 1]
 						local edgeLen = Vector2.new(eb.X - ea.X, eb.Z - ea.Z).Magnitude
@@ -689,10 +693,10 @@ function Roads.build(data, opts)
 							end
 							local wcf, wl2 = along(WALK / 2, CURB_UP - 3 + alt * 0.006)
 							walkCF, walkLen = wcf, wl2
-							kerbCF, kerbLen = along(0.45, CURB_UP + 0.02 - 3 + alt * 0.006)
+							kerbCF, kerbLen = along(0.4, CURB_UP + 0.08 - 3 + alt * 0.006)
 						else
 							walkCF = stripCF(a2, b2, side * (HALF + WALK / 2), CURB_UP - 3 + alt * 0.006)
-							kerbCF = stripCF(a2, b2, side * (HALF + 0.45), CURB_UP + 0.02 - 3 + alt * 0.006)
+							kerbCF = stripCF(a2, b2, side * (HALF + 0.4), CURB_UP + 0.08 - 3 + alt * 0.006)
 							walkLen = len + grow
 							kerbLen = len + grow
 						end
@@ -704,7 +708,7 @@ function Roads.build(data, opts)
 							pv.MaterialVariant = pattern[1]
 							pv.Color = pattern[2]
 						end
-						local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kerbLen), CFrame = kerbCF, Material = Enum.Material.Granite, Color = KERB }, folder)
+						local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kerbLen), CFrame = kerbCF, Material = Enum.Material.Concrete, Color = KERB }, folder)
 						k.CastShadow = false
 						count += 2
 					end
