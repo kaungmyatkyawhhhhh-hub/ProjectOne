@@ -15,7 +15,9 @@
 	  * cover    : rain stops in the tunnel / under big overhangs (one upward
 	               ray every 0.3 s), and the near curtain is skipped in the
 	               cockpit camera so no drops fall through the cabin
-	Clear <-> rain alternates every 4-8 minutes; it is raining when you join.
+	Rain is rare (owner, 2026-11-03: "its raining too much, make the rain rarer"): you join in clear
+	weather, a dry spell lasts 20-40 minutes and a shower 3-5 minutes (was 4-8 minutes each, starting
+	wet).
 
 	API: Weather.init(), Weather.setRaining(on, instant?), Weather.isRaining()
 ]]
@@ -31,7 +33,8 @@ local Audio = require(script.Parent:WaitForChild("Audio"))
 local Weather = {}
 
 local FADE_TIME = 12 -- seconds for the rain to build up / clear away
-local SPELL_MIN, SPELL_MAX = 240, 480 -- each clear / rainy spell lasts 4-8 minutes
+local DRY_MIN, DRY_MAX = 1200, 2400 -- a clear spell lasts 20-40 minutes
+local WET_MIN, WET_MAX = 180, 300 -- a shower lasts 3-5 minutes
 local RAIN_SPEED = 105 -- studs/s
 local NEAR_HALF = 32 -- dense curtain around the camera (half size)
 -- (owner, 2026-10-30: "it looks like the camera is glitching": drops falling right past the lens
@@ -69,8 +72,11 @@ local nextToggle = math.huge
 local wet: NumberValue? = nil
 local tween: Tween? = nil
 
-local function randomSpell(): number
-	return SPELL_MIN + math.random() * (SPELL_MAX - SPELL_MIN)
+local function randomSpell(wetSpell: boolean): number
+	if wetSpell then
+		return WET_MIN + math.random() * (WET_MAX - WET_MIN)
+	end
+	return DRY_MIN + math.random() * (DRY_MAX - DRY_MIN)
 end
 
 local function lerp(a: number, b: number, t: number): number
@@ -353,7 +359,7 @@ end
 
 function Weather.setRaining(on: boolean, instant: boolean?)
 	raining = on
-	nextToggle = os.clock() + randomSpell()
+	nextToggle = os.clock() + randomSpell(on)
 	local value = wet
 	if not value then
 		return -- init() picks this up
@@ -584,8 +590,8 @@ function Weather.init()
 		end
 	end)
 
-	-- the reference night is a rainy one: start wet
-	Weather.setRaining(true, true)
+	-- you join in clear weather (the rain is rare)
+	Weather.setRaining(false, true)
 	applyLevel()
 end
 

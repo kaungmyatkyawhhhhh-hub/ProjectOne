@@ -137,7 +137,7 @@ end
 -- knockable street lights, trees and traffic poles (scanned before the LOD system hides far ones)
 require(script.Parent:WaitForChild("Knockables")).init()
 WorldFx.start()
-Weather.init() -- rain cycle (starts raining), wet roads, mist, rain sound
+Weather.init() -- rain cycle (rare showers, starts clear), wet roads, mist, rain sound
 -- (the day / night cycle runs since the loading screen: morning, day, sunset, night)
 
 ---------------------------------------------------------------------

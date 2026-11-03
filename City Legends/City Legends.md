@@ -10,7 +10,7 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - **Driving and money:** you earn money by driving and by cutting up traffic, with combos. You buy cars in the garage.
 - **Cars:** 55 cars in 3 tiers (Starter, Mid, High), remade 2026-10-10 from the owner's list of real cars. Names are close look-alikes (e.g. "BNW M3 F80", "Toyoka Land Cruzer 200", "Lambrini Urus"). Free starter: Suzaki Swiff (`suzaki_swift`).
 - **HUD:** a Highway Legends-style HUD with level/XP bar, rev counter, cash, side buttons and a daily gift.
-- **Weather:** a rain cycle with wet roads, plus blue exhaust flames.
+- **Weather:** a rain cycle with wet roads, plus blue exhaust flames. Rain is rare since 2026-11-03 (owner: "its raining too much, make the rain rarer"): you join in clear weather, dry spells last 20-40 minutes, showers 3-5 minutes (was 4-8 minutes each, starting wet).
 - **Sounds and lighting:** a full soundscape and night lighting.
 
 ## Decisions
