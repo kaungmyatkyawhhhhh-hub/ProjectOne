@@ -196,12 +196,16 @@ function FarCity.build(riviera: Model, far: any): { [string]: number }
 		real.Name = "Real"
 		real.Value = b
 		real.Parent = g
-		-- the shell: one box in the wall colour (v2 buildings: attributes Shell, ShellSize, Wall) and
-		-- the roof; v1: every big part outside the Detail group. All 0.4 smaller on each side.
+		-- the shell: one box in the wall colour (v2 buildings: attributes Shell, Wall) and the roof; v1:
+		-- every big part outside the Detail group. All 0.4 smaller on each side.
+		-- (2026-11-03, owner: "buildings flash black and white depending on where you look from") the
+		-- shell sits INSIDE the dark core, not the outer skin: sized from the skin it stood 0.2 in front
+		-- of the core, so past its range every window and shopfront showed the pale shell (white) and
+		-- close up the dark core (black)
 		local recess = b:GetAttribute("Recess") or 0
 		if typeof(shell) == "CFrame" then
-			local size = b:GetAttribute("ShellSize") :: Vector3
-			part({ Name = "Shell", Size = size - Vector3.new(0.8, 0.8, 0.8), CFrame = shell, Color = b:GetAttribute("Wall"), Material = Enum.Material.SmoothPlastic }, g)
+			local inside = body.Size - Vector3.new(0.8, 0.8, 0.8)
+			part({ Name = "Shell", Size = Vector3.new(math.max(0.2, inside.X), math.max(0.2, inside.Y), math.max(0.2, inside.Z)), CFrame = body.CFrame, Color = b:GetAttribute("Wall"), Material = Enum.Material.SmoothPlastic }, g)
 			n.bodyParts += 1
 		end
 		for _, p in b:GetChildren() do

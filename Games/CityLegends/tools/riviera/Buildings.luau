@@ -32,6 +32,8 @@
 	Buildings.build(data, box, parent, rng, opts) -> count
 	opts.style = function(position) -> chance of Belle Epoque (0..1)
 	opts.skip = function(roadName) -> true to leave a road without buildings
+	opts.unstack = false: don't run Unstack at the end (it pushes trims, piers and the foot 0.05 out so
+	no two faces share a plane: they flickered dark / light by angle, 2026-11-03)
 ]]
 
 local CollectionService = game:GetService("CollectionService")
@@ -709,6 +711,13 @@ function Buildings.build(data, box, parent: Instance, rng: Random, opts): number
 				end
 			end
 		end
+	end
+	-- (2026-11-03, "buildings flash black and white") no two faces on one plane: a trim over the wall,
+	-- a pier over a band, the foot over the piers: the front one 0.05 out (tools/riviera/Unstack.luau,
+	-- next to this file; opts.unstack = false to skip)
+	local unstack = if script.Parent then script.Parent:FindFirstChild("Unstack") else nil
+	if opts.unstack ~= false and unstack then
+		(require(unstack) :: any).all(parent)
 	end
 	return count
 end
