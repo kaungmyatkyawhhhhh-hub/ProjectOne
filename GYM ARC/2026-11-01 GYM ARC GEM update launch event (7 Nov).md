@@ -24,4 +24,4 @@ Related: [[2026-11-01 GYM ARC Roadmap after the Gem update]], [[2026-11-01 GYM A
 
 ## Status (3 Nov)
 - **Gem Mine Gym: built** in Studio (east block by the basketball court, the owner's choice), with its cover (tarp, barriers, board "OPENS SAT 15:00 UTC") and the launch flip tested. [[2026-11-03 GYM ARC Gem Mine Gym built]]
-- Still to do for 7 Nov: the Gem cutscene (LaunchCutscenes.Gem), Star Track, Gem alters 16-20, then switch the event on (`enabled = true` / `Launch_Gem_Enabled`) and the full flip test.
+- Still to do for 7 Nov: the Gem cutscene (LaunchCutscenes.Gem), Gem alters 16-20 (Star Track built 3 Nov: [[2026-11-03 GYM ARC Star Track built]]), then switch the event on (`enabled = true` / `Launch_Gem_Enabled`) and the full flip test.

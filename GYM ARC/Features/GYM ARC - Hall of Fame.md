@@ -57,3 +57,6 @@ The soul's flight has its own 3D sounds (Config/Sounds HofSoul*: pull, breath, s
 
 ## Run 2 fast, peak height, cheat check (29 Oct, prompt 95)
 [[2026-10-29 GYM ARC Prompt 95 done - Hall of Fame fixes]]. Stars now: ★1 x2 EXP + start at Growth Spurt 3, every star faster (★10 x4.5 + GS 5), live scale `HallOfFame_EXPScale` in Creator Hub Configs. Tag "PEAK 7'0" ★1", profile "(PEAK 7'0")", `fame.peakInches / firstAt / lastEnteredAt`. Board + statues only for saves that pass `HallOfFame.Plausible` (console: `fame suspicious`). Analytics: HallOfFame_Declined, RunDone_Minutes, SecondRun_Done, StarPlayer_Day, Alter15NoStar_Day. Star Perks are replaced by Legacy cards (prompt 105).
+
+## Star Track (3 Nov, GEM update)
+Tier colours (bronze 1 / silver 2-4 / gold 5-9 / diamond 10+) on the tag, plaques and niche lights; the Star Track window (Hall of Fame screen button); titles Rising Star / Golden Star / Immortal; auras Silver / Gold / Diamond Star; the weekly FASTEST RUN board on the Hall's west wall. Details: [[2026-11-03 GYM ARC Star Track built]].

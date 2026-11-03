@@ -1,7 +1,7 @@
 ---
 date: 2026-10-29
 tags: [gymarc, prompt, hall-of-fame]
-status: todo (after 105; when anyone is past Alter 10 on run 2, latest 9 Jan)
+status: part built 3 Nov (window, tiers, titles, auras, fastest-run board) - see [[2026-11-03 GYM ARC Star Track built]]
 ---
 # 101 Hall of Fame star track (2nd, 3rd... Hall of Fame)
 
