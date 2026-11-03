@@ -92,6 +92,7 @@ Owner: "make the coins fixed values, not like 2 minutes, because it's gonna conf
 | Boosts after the merge (prompt 97) | Stamina 100 · Gains 400 · Luck 400 |
 | Gear | Basic 750 · Pro 4,000 · Elite 25,000 · Champion 70,000 · Legend 200,000 |
 | DNA token | **25,000** flat (the +10%-per-week rise is removed) |
+| Plate tiers (owner 4 Nov: x2 of the first numbers; bought once, in order, every machine) | BRONZE 50,000 · SILVER 100,000 · GOLD 200,000 · PLATINUM 400,000 · RUBY 800,000 · DIAMOND 1,600,000 |
 | Tank tops, STYLE colours, aura colours, alter tints, coin auras, skate parts | already fixed: keep |
 
 ### Rewards (fixed)
@@ -117,3 +118,16 @@ Owner: "make the coins fixed values, not like 2 minutes, because it's gonna conf
 | Medium | 99 | 9,000 | +14% per Robux |
 | Large | 249 | 25,000 | +25% per Robux, BEST VALUE |
 (Replaces the "10 / 45 / 130 minutes" idea above.)
+
+## UPDATE 31 Oct (owner): coin packs SCALE with the player
+- **Why:** owner: "no one buys the small, medium, large coin packs". The fixed 2,000 / 9,000 / 25,000 was worthless to players earning thousands a minute.
+- **Built:** a pack is PackMinutes of the buyer's OWN coins a minute, never less than the fixed number, and always shown as one exact number before buying (so it isn't confusing).
+  - Small 15 min, Medium 66 min, Large 180 min. That's 0.60 / 0.67 / 0.72 minutes per Robux, so the bigger pack is better value.
+  - "Coins a minute" = what the player really earns while playing, measured by PlayerData (data.coinRate, attribute CoinRate) and smoothed once a minute. Robux packs, admin gifts, codes and timed rewards (offline coins, gifts) don't count.
+  - Examples: earning 300/min gives 4,500 / 19,800 / 54,000. Earning 50,000/min gives 750,000 / 3.3M / 9M.
+- **Owner's worry:** "everything becomes so cheap and players won't know where to spend". Answer: late players need sinks that grow with them (see below). Fixed prices stay fixed; new things are priced for each stage.
+- **Sink plan (proposed 31 Oct):**
+  - Rising-price trainer agencies with new trainers above Atlas.
+  - Gear tiers into the alter era.
+  - An endless Upgrades board with exponential prices.
+  - The Aura Altar sooner, with a premium altar.

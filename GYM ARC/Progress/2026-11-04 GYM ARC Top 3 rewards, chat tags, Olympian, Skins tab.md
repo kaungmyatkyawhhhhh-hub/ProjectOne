@@ -237,3 +237,72 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
   - **Not tested:** the phone frame. The Studio emulator can't be switched from here. The padlocks sit inside the existing cells and the Frame / Body row, so no new rows.
 - (owner: "dont put texts like UP and DOWN ...") after a reroll: a **green arrow up** right after the multiplier for a better grade, a **red arrow down** for a worse one (16 px). Tested.
 - Screens 23-27.
+
+## PLATE TIERS (7 Nov update part 9, FINAL prompt + STACK RULE + PLATE LOOKS FINAL), built in Studio, not published
+Prompt: [[2026-11-04 GYM ARC Prompt - Plate tiers FINAL (7 Nov part 9)]]. Numbers, real-data check and every stack: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]].
+
+**Owner decisions (after the data check):**
+- Prices x2: BRONZE 50k · SILVER 100k · GOLD 200k · PLATINUM 400k · RUBY 800k · DIAMOND 1.6M.
+- Gates: 400 / 435 / 470 / 500 / 535 / 565.
+- Shop names by material.
+
+**What's built:**
+- **Config/PlateTiers (new, one place for every number):**
+  - standard sizes and stripes; the STACK RULE (`StandardStack`); the tier values (`Values`, rounded to 5); gates; prices; looks
+  - `DigitIds` / `BrandId` (empty until the decals are imported)
+- **Config/Machines:**
+  - every machine except the treadmill gets 6 × 8 = 48 steps after its own top weight (`machine.plateBase` = how many weights it had before)
+  - barbell weights are restacked by the STACK RULE, visual only
+  - `UsableTier` / `LiftTier` take the plate tiers owned, and every caller passes them: MachineService, MachineClient, ProgressClient, MachineSignsClient
+  - NPC regulars and the stone / keg sizes stay on the old weights
+- **Save:** `data.plateTiers` (0-6). `PlayerData.BuyPlateTier` sells only the next tier: the server checks the order and the coins, and logs analytics "Shop:PlateTier". `AdminSetPlates`, plus the admin command `plates <player> <0-6 | bronze..diamond>`.
+- **Shared/PlateLook (new):** builds every plate to concept v3.
+  - thin disc, raised band, slightly sunken face, chrome hub
+  - STANDARD steel with the edge stripe by size
+  - tier plates in their material; Ruby and Diamond faces glow
+  - only plates whose face shows get the face, hub and words; inner plates are just their edge
+- **MachineService:**
+  - bars carry the new plates
+  - a weight stack turns the tier colour, with the number on the pinned block
+  - dumbbell heads take the tier colours, with the number on each end
+  - bodyweight / cable machines show one plate with the number
+  - Members and VIP keep their ruby / diamond faces on the standard plates
+  - drawing plates runs in a pcall: a look error is only logged and never blocks getting on a machine (the first test showed it could)
+- **PlateNumbersClient (new):** "M WEIGHTS" above the hub and the number below, white with a thin dark outline on every plate. Only on faces within 40 studs, a pool of up to 96. It uses the decals once their ids are set, and text in the same style until then.
+- **THE PLATE FORGE (Gem Mine, `PlateForgeBuilder`):**
+  - Where: the clear spot after the descent, between the mine-cart track and Flint's stage, south of the Onyx Throne. The spot by the dumbbell-rack wall in the prompt is full of machines and the cart track (floor map, 4 Nov).
+  - What: platform with an ember trim, sign, glowing furnace, anvil with a hot plate, quench barrel, workbench (the shop prompt)
+  - Smith Brann (leather apron) faces the floor
+  - Rack with all 7 plates and name boards; locked tiers are dark silhouettes for each player (PlateForgeClient)
+- **Shop (`Config/PumpShop` + PumpShopClient):**
+  - a PLATES tab at Coach Dex (the main shop), and the Forge's own shop (PLATES only)
+  - kit tiles with the plate drawn in 3D; STANDARD shows OWNED, the next tier is picked, locked tiers are silhouettes; "Heavier weights on EVERY machine"; Buy / Buy X first / Owned
+  - a double tap can't buy two tiers: the bought card stays picked and the button rests 0.8 s
+- **Weight panel:**
+  - a step not bought: "Needs BRONZE plates: Plate Forge (Gem Mine)"
+  - the tier line: "BRONZE PLATES 3 / 8"
+  - the machine prompt names the plates
+  - coins a rep +9% a tier; EXP unchanged
+
+**Tested (Studio, temp save; test attributes cleared):**
+- Gem bench: 735 = 45×7 + 25 + 5 · + shows 775 / "Needs BRONZE plates".
+- Bought Bronze + Silver: coins went down by exactly 150k.
+- Strong chest: BEST = Silver 8 (925). Weak quads (405): BEST = Silver 1 (1185). Different tiers on different machines works.
+- Bronze 1 / 4 / 8, Silver / Gold / Ruby / Diamond 8 all checked on the bar.
+- Gem curl stack: Platinum 3 = 495. Gem dumbbells: Platinum 3 = 590.
+- Parts per bar: today's 735 restacked = 56 parts, a full 8 Diamond bar = 34.
+- Screens: `Downloads\gem_update_import\screens_4Nov_plates\01-14`.
+
+**Fixed during the test:**
+- the stack and dumbbell code still read the old `body` field
+- the double-tap buy
+- the smith faced the wall and hid the rack: the rack and sign were raised
+- Diamond's face was too white for the white words: now icy blue
+
+**Not done / not tested:**
+- (c) PR leaderboards + profile PRs and (e) the meet ranked by PR: not built.
+- (d) the plates sliding on with a clank (today it's the old PlateSlide sound) and a new "NEW PR" pop: not built.
+- Phone FPS: not tested. The Studio PC ran at 36 FPS by the bench; there was no before/after on a phone.
+- The digit and "M WEIGHTS" decals are waiting for your upload (IMPORT_LIST "PLATE NUMBERS").
+- The starter, Pro and PL bars only got the number check, no screenshots.
+- Rounding plates to 5 makes the first Bronze step jump on light machines (starter bench 315 → 375).
