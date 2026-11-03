@@ -66,3 +66,9 @@ Nothing here changed in the owner's 19 Oct Studio work. What a player can change
 
 ## Tank top colours (27 Oct, prompt 75, [[2026-10-27 GYM ARC Tank top colours]])
 - The clothing store's left mirror: MINE, white (free), 9 colours at 1,000 and gold at 1,500 coins; try on, buy once, wear. A tank top picked there is worn over your own Roblox shirt (MINE brings it back). `TankTopClient`, CosmeticService "TankTop", `Config/Body.TankShop`.
+
+## Show / hide each gear piece (3 Nov, owner)
+- Owner: "make it so that i can turn off the belt appearance" -> "put it in inventory gear" -> "put show/hide on the gear so that players can hide specific gears".
+- Inventory > GEAR: the worn LIFTING BELT and WRIST WRAPS tiles have a "Show belt" / "Show wraps" row with the kit's ON / OFF toggle (the same toggle as the aura's "Show effect"; it replaced the old "ALWAYS ON" text). Off = that piece isn't drawn on your body for anyone; it stays worn and its boost still counts.
+- Saved as `settings.showBelt` / `settings.showWraps` ("On" / "Off", default On; PlayerData.SetSettings). `ActionService.SetSettings` rebuilds the gear; `CosmeticService.build` skips the Waist / Wrists slot when hidden (a Pump Shop try-on still shows). Hiding the belt also hides an old clothing-store belt worn in the same slot.
+- Code: `Shared/UI/GearPanel` (gearCard), `Server/CosmeticService`, `Server/ActionService`, `Server/PlayerData`.
