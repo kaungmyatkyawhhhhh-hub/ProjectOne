@@ -907,7 +907,7 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Checked in Play on a straight (Coast Road): SV idle at half the SVJ's loudness; braking from 72 mph, three downshifts at 41 / 35 / 27 mph, each blip at its own pitch (0.85 / 0.90 / 1.00); no errors.
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
-Summary at the end of the run goes here. Next: step 4 (venues: Realty, chauffeur kiosks, challenge gantries, then the Legends Rewards check; the bank, the 3 towers, Customs and the Gem Showcase are done).
+Summary at the end of the run goes here. Next: step 4, the map realism checks (`Make the Monaco map look real`, `Realistic graphics`, `Fix buildings that look off`), then step 5 (Toolbox houses). All venues are done.
 
 ### Choices made while the owner was away (2026-11-03)
 - Buildings: the global environment reflections (`Lighting.EnvironmentSpecularScale` 1) were left as they are. Lowering them takes the slight sky sheen off the walls but also dulls the cars' paint and the wet roads, and the sheen wasn't the black / white flashing. Easy to change in `CityBuilder` / Lighting if wanted.
@@ -923,6 +923,7 @@ Summary at the end of the run goes here. Next: step 4 (venues: Realty, chauffeur
 - Venues: the bank is remodelled in its code (`server/Bank.lua`, `Bank.dress`), like the hotel was, not with a Toolbox building: the bank is built at start and its vault, prompts and carts are placed by that code. Its furniture comes from the cleaned kit already in the place (`ServerStorage.VenueKit`: chandeliers, Chesterfield sofa, armchair, potted palms). Walls are Sandstone (Limestone looked white in the sun), trims and columns cream Limestone.
 - Venues, the 3 towers: remodelled outside only (code, `Towers.dress` / `Towers.noNeon` in `server/Towers.lua`). Their penthouses and roofs were already redone with the hotel suites (same code), and their glass body, lobby and gameplay stay. The towers' coloured neon (cyan, purple and gold strips, the glowing pool rim, the lobby's neon chandelier rings) became gold metal or warm lit glass, except the DJ booth's party lights (they need to glow) and the windows' night glow (every building has it).
 - Venues, Gem Showcase: the small gems inside the cases and windows keep their glow (they are the products, a stud or two big, and read as jewels only that way), and so do the red security lasers round the Legends Heart. The big gems outside (over the pool, the roof diamond) are glass and bronze now, floodlit warm.
+- Venues: Legends Rewards keeps its warm white glow strips (coves, sconces, lanterns, downlights: 62 parts). They are warm white light, which the rule allows; only coloured neon was taken out elsewhere.
 
 ### Step 1.1: buildings flashing black and white (done)
 - **Cause:** the far stand-ins (`ReplicatedStorage.RivieraFar`, `tools/riviera/FarCity.luau`) show past ~950 studs (570 on Low graphics, less on phones) and while a building is streamed out. Each one's pale wall-coloured shell was sized from the building's outer skin, so it stood 0.2 studs IN FRONT of the dark core inside every window and shopfront. Close up (stand-in hidden) the windows were dark; past the range (stand-in shown) every window and shop turned the wall colour. That's the "black from one spot, white from another". Pictures: [[Buildings flashing - before (far stand-in showing).jpg]], [[Buildings flashing - after.jpg]], [[Buildings flashing - after, far stand-ins over the city.jpg]].
@@ -1004,3 +1005,13 @@ Driven in Play on the Coast Road (automatic, full throttle, then full brake, the
 - **Inside:** a velvet-dark room: a dark polished floor, deep plum velvet walls with a bronze rail, a dark fabric ceiling with the bronze beams; a spotlight over every case; the chandeliers' bulbs are warm glass (were neon).
 - **Gameplay not touched:** 28 prompts (smash / grab on every case, the Legends Heart, the shop and VIP desk), the alarm. Play: no errors.
 - **Numbers:** 1,212 parts (was 1,113). Pictures: [[Gem Showcase remodel - before (outside).jpg]], [[Gem Showcase remodel - before (inside).jpg]], [[Gem Showcase remodel - after (outside).jpg]], [[Gem Showcase remodel - after (inside).jpg]].
+
+**Legends Realty (done, 2026-11-04; `Realty.dress` in `server/Realty.lua`):**
+- Listing cards in the side and back windows, seen from outside and inside: a drawn "photo" of each design's house (sky or dusk, sea, lawn, the house in its own wall and roof colours, flat or pitched roof), its name, price and style; an oak slat soffit under the roof's overhang with warm downlights (night); planters with clipped olive trees by the door; a lounge corner (rug, Chesterfield sofa, armchair, low table, palms from the kit); two slim screens on the desk; the blueprint table now holds a scale model of the island (sea, green hill, white villas) on blue glass (was neon). The big screen with the designs stays.
+- Gameplay not touched: Browse houses (table and desk), 2 prompts. Play: no errors. 252 parts (was 28). Pictures: [[Realty remodel - before.jpg]], [[Realty remodel - after.jpg]].
+
+**Chauffeur kiosks and challenge gantries (done, 2026-11-04):**
+- Chauffeur kiosk (`Chauffeur.lua` `stand`): a glass canopy with a bronze edge on two slim black posts, a warm downlight and a slatted wood bench under it. Note: the kiosks are only built on the old city's corners; in Monaco you call the chauffeur from the phone, so none stand on the Riviera map.
+- Speed-trap gantries (`Challenges.lua` `gantry`): a clean brushed-steel box beam over the lattice, square steel caps and feet on the posts, a steel frame round the timer board. 5 gantries on the map. Not screenshotted (a teleport to one left the car under the road and the loading screen waited).
+
+**Legends Rewards (checked):** the building, its 9 claim desks (DAILY REWARD, GIFTS, FRIENDS, LEVEL REWARDS, CODES, ACHIEVEMENTS, PROPERTY, SPIN, SUPER SPIN) are there, 1,839 parts, no errors.

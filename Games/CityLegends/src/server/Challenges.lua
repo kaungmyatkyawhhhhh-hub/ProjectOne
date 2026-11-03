@@ -412,6 +412,16 @@ local function gantry(kit: any, parent: Instance, trap: ChallengeData.Trap)
 		local x = -reach + (k + 0.5) * span / n
 		kit.deco(model, Vector3.new(0.3, 3.6, 0.3), base * CFrame.new(x, top - 1.5, 0) * CFrame.Angles(0, 0, if k % 2 == 0 then 0.8 else -0.8), CHROME, Enum.Material.Metal)
 	end
+	-- (2026-11-04 remodel, "a clean steel arch with a timer screen") a clean brushed-steel box
+	-- clads the lattice, the posts get square steel caps and feet, the board a steel frame
+	kit.deco(model, Vector3.new(span + 2, 4.4, 1.6), base * CFrame.new(0, top - 1.5, 0), Color3.fromRGB(168, 172, 178), Enum.Material.Metal, { reflectance = 0.12 })
+	kit.deco(model, Vector3.new(span + 2.2, 0.4, 1.8), base * CFrame.new(0, top + 0.8, 0), Color3.fromRGB(60, 62, 68), Enum.Material.Metal)
+	for _, s in { -1, 1 } do
+		local foot = trap.pos + side * s * reach
+		kit.deco(model, Vector3.new(2.6, 0.8, 2.6), CFrame.new(foot + Vector3.new(0, 0.4, 0)), Color3.fromRGB(60, 62, 68), Enum.Material.Metal)
+		kit.deco(model, Vector3.new(2.2, 1.2, 2.2), CFrame.new(foot + Vector3.new(0, top - 0.4, 0)), Color3.fromRGB(168, 172, 178), Enum.Material.Metal)
+	end
+	kit.deco(model, Vector3.new(27, 9, 0.6), base * CFrame.new(0, top + 4.6, 0), Color3.fromRGB(150, 154, 160), Enum.Material.Metal)
 	-- the board (facing both ways)
 	local board = kit.mk(model, Vector3.new(26, 8, 0.8), base * CFrame.new(0, top + 4.6, 0) * CFrame.Angles(0, math.pi, 0), INK, Enum.Material.SmoothPlastic, { name = "TrapBoard", collide = false })
 	local labels = {}

@@ -116,9 +116,15 @@ end
 -- the glowing blueprint table: step up to it and press E
 local function blueprintTable(parent: Instance, at: CFrame, r: number)
 	local base = part(parent, Vector3.new(2.4, r * 2, r * 2), at * CFrame.new(0, 1.2, 0) * CFrame.Angles(0, 0, math.pi / 2), DARK, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
-	local glow = part(parent, Vector3.new(0.2, r * 2 - 1, r * 2 - 1), at * CFrame.new(0, 2.5, 0) * CFrame.Angles(0, 0, math.pi / 2), BLUEPRINT, Enum.Material.Neon, { shape = Enum.PartType.Cylinder, collide = false, name = "BlueprintGlow" })
-	-- a little house drawn in light on the table
-	part(parent, Vector3.new(r * 0.7, r * 0.45, r * 0.6), at * CFrame.new(0, 2.6 + r * 0.22, 0), Color3.fromRGB(200, 230, 255), Enum.Material.ForceField, { collide = false })
+	local glow = part(parent, Vector3.new(0.2, r * 2 - 1, r * 2 - 1), at * CFrame.new(0, 2.5, 0) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(150, 196, 236), Enum.Material.Glass, { shape = Enum.PartType.Cylinder, collide = false, name = "BlueprintGlow" })
+	-- (2026-11-04 remodel) a scale model of the island on the table: sea, a green hill, white villas
+	part(parent, Vector3.new(0.12, r * 1.7, r * 1.7), at * CFrame.new(0, 2.66, 0) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(60, 130, 170), Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder, collide = false })
+	part(parent, Vector3.new(r * 1.2, r * 0.5, r * 1.0), at * CFrame.new(0, 2.7 + r * 0.12, 0), Color3.fromRGB(96, 128, 72), Enum.Material.Grass, { shape = Enum.PartType.Ball, collide = false })
+	for k = 0, 5 do
+		local a = k * math.pi / 3 + 0.3
+		local rr = r * (if k % 2 == 0 then 0.42 else 0.3)
+		part(parent, Vector3.new(r * 0.12, r * 0.09, r * 0.1), at * CFrame.new(math.cos(a) * rr, 2.78 + r * (if k % 2 == 0 then 0.06 else 0.18), math.sin(a) * rr) * CFrame.Angles(0, -a, 0), Color3.fromRGB(246, 242, 234), Enum.Material.SmoothPlastic, { collide = false })
+	end
 	local light = Instance.new("PointLight")
 	light.Color = BLUEPRINT
 	light.Range = r * 4
@@ -156,7 +162,7 @@ local function pavilion(parent: Instance, at: CFrame)
 	part(folder, Vector3.new(w + 6, 1.4, d + 6), at * CFrame.new(0, 1.7 + h, 0), WHITE, Enum.Material.Concrete)
 	local sign = part(folder, Vector3.new(30, 3.4, 0.6), at * CFrame.new(0, 1.7 + h + 2.4, -d / 2 - 2.6), DARK, Enum.Material.Metal, { name = "RealtySign" })
 	text(sign, Enum.NormalId.Front, "LEGENDS REALTY", WARM, Vector2.new(900, 100))
-	local lamp = part(folder, Vector3.new(w - 4, 0.3, 1), at * CFrame.new(0, h + 0.6, 0), WARM, Enum.Material.Neon, { collide = false })
+	local lamp = part(folder, Vector3.new(w - 4, 0.3, 1), at * CFrame.new(0, h + 0.6, 0), WARM, Enum.Material.Glass, { collide = false })
 	local pl = Instance.new("PointLight")
 	pl.Color = WARM
 	pl.Range = 30
@@ -191,8 +197,182 @@ local function pavilion(parent: Instance, at: CFrame)
 			task.wait(4)
 		end
 	end)
+	Realty.dress(folder, at, w, d, h)
 	folder.Parent = parent
 	return folder
+end
+
+---------------------------------------------------------------------
+-- The remodel (2026-11-04, owner-away run, `Prompts/Remodel the venues.md`: "an elegant estate
+-- agency: big windows with house photos, a desk, the island / map model on a table, screens"):
+-- listing cards in the windows (a picture of each design's house, its name and price), a wood
+-- slat soffit, a lounge corner, two desk screens, planters by the door. Looks only.
+---------------------------------------------------------------------
+local function listingCard(parent: Instance, cf: CFrame, design: { [string]: any }, k: number)
+	local frame = part(parent, Vector3.new(6.4, 8.4, 0.25), cf, Color3.fromRGB(196, 158, 92), Enum.Material.Metal, { collide = false })
+	local card = part(parent, Vector3.new(6, 8, 0.1), cf * CFrame.new(0, 0, -0.16), WHITE, Enum.Material.SmoothPlastic, { collide = false })
+	local sg = Instance.new("SurfaceGui")
+	sg.Face = Enum.NormalId.Front
+	sg.CanvasSize = Vector2.new(300, 400)
+	sg.LightInfluence = 0.3
+	sg.Brightness = 1.2
+	sg.MaxDistance = 260
+	sg.Parent = card
+	local bg = Instance.new("Frame")
+	bg.Size = UDim2.fromScale(1, 1)
+	bg.BackgroundColor3 = Color3.fromRGB(250, 248, 244)
+	bg.BorderSizePixel = 0
+	bg.Parent = sg
+	-- the "photo": sky, sea, a lawn and the house (a body, a roof, windows), in the design's colours
+	local photo = Instance.new("Frame")
+	photo.Position = UDim2.fromOffset(14, 14)
+	photo.Size = UDim2.new(1, -28, 0, 220)
+	photo.BorderSizePixel = 0
+	photo.BackgroundColor3 = Color3.new(1, 1, 1)
+	photo.ClipsDescendants = true
+	photo.Parent = bg
+	local sky = Instance.new("UIGradient")
+	sky.Rotation = 90
+	local dusk = k % 3 == 0
+	sky.Color = if dusk then ColorSequence.new(Color3.fromRGB(250, 170, 120), Color3.fromRGB(120, 110, 170)) else ColorSequence.new(Color3.fromRGB(120, 180, 236), Color3.fromRGB(214, 236, 250))
+	sky.Parent = photo
+	local function rect(x: number, y: number, w2: number, h2: number, c: Color3, rot: number?)
+		local f = Instance.new("Frame")
+		f.Position = UDim2.fromOffset(x, y)
+		f.Size = UDim2.fromOffset(w2, h2)
+		f.BackgroundColor3 = c
+		f.BorderSizePixel = 0
+		f.Rotation = rot or 0
+		f.Parent = photo
+		return f
+	end
+	rect(0, 150, 272, 30, Color3.fromRGB(40, 110, 160))
+	rect(0, 170, 272, 60, Color3.fromRGB(96, 140, 78))
+	local look = design.look or {}
+	local wall = if typeof(look.wall) == "Color3" then look.wall else Color3.fromRGB(240, 236, 226)
+	local roof = if typeof(look.roof) == "Color3" then look.roof else Color3.fromRGB(70, 66, 64)
+	rect(56, 104, 160, 76, wall)
+	if k % 2 == 0 then
+		rect(46, 92, 180, 14, roof) -- a flat modern roof
+	else
+		rect(70, 78, 70, 70, roof, 45)
+		rect(132, 78, 70, 70, roof, 45)
+		rect(56, 104, 160, 76, wall)
+	end
+	for j = 0, 3 do
+		rect(70 + j * 36, 120, 22, 26, if dusk then Color3.fromRGB(255, 214, 150) else Color3.fromRGB(60, 80, 100))
+	end
+	rect(126, 150, 20, 30, Color3.fromRGB(70, 50, 36))
+	local name = Instance.new("TextLabel")
+	name.BackgroundTransparency = 1
+	name.Position = UDim2.fromOffset(14, 246)
+	name.Size = UDim2.new(1, -28, 0, 60)
+	name.Text = string.upper(design.name or "")
+	name.TextColor3 = Color3.fromRGB(28, 30, 34)
+	name.FontFace = Font.new("rbxasset://fonts/families/Merriweather.json", Enum.FontWeight.Bold)
+	name.TextScaled = true
+	name.TextWrapped = true
+	name.Parent = bg
+	local price = Instance.new("TextLabel")
+	price.BackgroundTransparency = 1
+	price.Position = UDim2.fromOffset(14, 314)
+	price.Size = UDim2.new(1, -28, 0, 40)
+	price.Text = "$" .. string.format("%.1fM", (design.price or 0) / 1e6):gsub("%.0M", "M")
+	price.TextColor3 = Color3.fromRGB(150, 112, 50)
+	price.Font = Enum.Font.GothamBold
+	price.TextScaled = true
+	price.Parent = bg
+	local tag = Instance.new("TextLabel")
+	tag.BackgroundTransparency = 1
+	tag.Position = UDim2.fromOffset(14, 356)
+	tag.Size = UDim2.new(1, -28, 0, 28)
+	tag.Text = tostring(design.style or "")
+	tag.TextColor3 = Color3.fromRGB(110, 112, 118)
+	tag.Font = Enum.Font.Gotham
+	tag.TextScaled = true
+	tag.Parent = bg
+	return frame
+end
+
+function Realty.dress(folder: Model, at: CFrame, w: number, d: number, h: number)
+	local designs = Config.Houses.Designs
+	-- listing cards hung inside the side and back glass, facing out (passers-by see them)
+	local k = 0
+	local spots = {}
+	for _, sx in { -1, 1 } do
+		for _, z in { -8, 0, 8 } do
+			table.insert(spots, at * CFrame.new(sx * (w / 2 - 0.6), 7.5, z) * CFrame.Angles(0, sx * math.pi / 2, 0))
+		end
+	end
+	for _, x in { -16, -8 } do
+		table.insert(spots, at * CFrame.new(x, 7.5, d / 2 - 0.6) * CFrame.Angles(0, math.pi, 0))
+	end
+	for _, cf in spots do
+		k += 1
+		local design = designs[((k * 5) % #designs) + 1]
+		if design then
+			listingCard(folder, cf, design, k)
+			-- (the same card seen from inside)
+			listingCard(folder, cf * CFrame.Angles(0, math.pi, 0) * CFrame.new(0, 0, -0.5), design, k)
+		end
+	end
+	-- a warm oak slat soffit under the roof's overhang, front and sides
+	for x = -w / 2 - 2, w / 2 + 2, 1.6 do
+		part(folder, Vector3.new(0.7, 0.3, 4), at * CFrame.new(x, 1 + h - 0.1, -d / 2 - 1.8), Color3.fromRGB(176, 128, 82), Enum.Material.Wood, { collide = false })
+	end
+	-- downlights in the soffit (night)
+	for _, x in { -14, 0, 14 } do
+		local dl = part(folder, Vector3.new(0.8, 0.1, 0.8), at * CFrame.new(x, 1 + h - 0.3, -d / 2 - 1.8), WARM, Enum.Material.Glass, { collide = false })
+		local sl = Instance.new("SpotLight")
+		sl.Face = Enum.NormalId.Bottom
+		sl.Color = WARM
+		sl.Range = 16
+		sl.Brightness = 1.2
+		sl.Angle = 80
+		sl.Parent = dl
+		game:GetService("CollectionService"):AddTag(sl, "DayOff")
+	end
+	-- planters with clipped olive trees either side of the door
+	for _, sx in { -1, 1 } do
+		part(folder, Vector3.new(4, 2.6, 4), at * CFrame.new(sx * 10, 2.3, -d / 2 - 5), Color3.fromRGB(46, 48, 52), Enum.Material.Concrete)
+		part(folder, Vector3.new(0.5, 3, 0.5), at * CFrame.new(sx * 10, 5, -d / 2 - 5), Color3.fromRGB(90, 70, 50), Enum.Material.Wood, { collide = false })
+		part(folder, Vector3.new(4.2, 3.6, 4.2), at * CFrame.new(sx * 10, 7.6, -d / 2 - 5), Color3.fromRGB(110, 128, 90), Enum.Material.Grass, { shape = Enum.PartType.Ball, collide = false })
+	end
+	-- a lounge corner (front right): rug, sofa and palm from the venue kit, a low table
+	local vk = game:GetService("ServerStorage"):FindFirstChild("VenueKit")
+	local function kit(name: string, cf: CFrame)
+		local src = vk and vk:FindFirstChild(name)
+		if src and src:IsA("Model") then
+			local m = src:Clone()
+			m:PivotTo(cf)
+			m.Parent = folder
+		end
+	end
+	part(folder, Vector3.new(14, 0.06, 10), at * CFrame.new(12, 1.43, -6), Color3.fromRGB(200, 190, 172), Enum.Material.Fabric, { collide = false })
+	kit("Chesterfield", at * CFrame.new(12, 1.4, -10.5))
+	kit("Armchair", at * CFrame.new(18, 1.4, -4) * CFrame.Angles(0, math.rad(-110), 0))
+	kit("PottedPalm", at * CFrame.new(w / 2 - 3, 1.4, -d / 2 + 3))
+	kit("PottedPalm", at * CFrame.new(-w / 2 + 3, 1.4, d / 2 - 3))
+	part(folder, Vector3.new(5, 1.4, 3), at * CFrame.new(12, 2.1, -6), Color3.fromRGB(30, 30, 34), Enum.Material.Marble)
+	-- two slim screens on the desk
+	for _, sx in { -1, 1 } do
+		local scr = part(folder, Vector3.new(2.6, 1.7, 0.15), at * CFrame.new(sx * 3, 6, d / 2 - 6.4) * CFrame.Angles(math.rad(-8), math.pi, 0), Color3.fromRGB(20, 22, 26), Enum.Material.SmoothPlastic, { collide = false })
+		local sg = Instance.new("SurfaceGui")
+		sg.Face = Enum.NormalId.Front
+		sg.CanvasSize = Vector2.new(160, 100)
+		sg.LightInfluence = 0
+		sg.Parent = scr
+		local f = Instance.new("Frame")
+		f.Size = UDim2.fromScale(1, 1)
+		f.BorderSizePixel = 0
+		f.BackgroundColor3 = Color3.fromRGB(30, 60, 90)
+		f.Parent = sg
+		local g = Instance.new("UIGradient")
+		g.Rotation = 90
+		g.Color = ColorSequence.new(Color3.fromRGB(120, 180, 230), Color3.fromRGB(40, 90, 70))
+		g.Parent = f
+		part(folder, Vector3.new(0.3, 1, 0.3), at * CFrame.new(sx * 3, 5.1, d / 2 - 6.2), DARK, Enum.Material.Metal, { collide = false })
+	end
 end
 
 -- the booth by the causeway's landing on the island: a kiosk with a canopy

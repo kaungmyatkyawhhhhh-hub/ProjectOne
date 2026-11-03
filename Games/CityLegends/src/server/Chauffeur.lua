@@ -451,6 +451,33 @@ local function stand(parent: Instance, base: CFrame)
 	for _, x in { -3.6, 3.6 } do
 		part(model, Vector3.new(3.4, 0.3, 0.3), at(x, 2.6, -1.2), Color3.fromRGB(120, 10, 26), Enum.Material.Fabric)
 	end
+	-- (2026-11-04 remodel, "an elegant kiosk with a canopy") two slim black posts behind the
+	-- column, a glass canopy with a bronze edge and a warm downlight, a bench under it
+	for _, x in { -4.2, 4.2 } do
+		part(model, Vector3.new(0.4, 11, 0.4), at(x, 5.5, 2.4), black, Enum.Material.Metal)
+	end
+	part(model, Vector3.new(11, 0.3, 6), at(0, 11.1, 0.6), Color3.fromRGB(200, 214, 222), Enum.Material.Glass, { Transparency = 0.45 })
+	part(model, Vector3.new(11.4, 0.5, 0.3), at(0, 11.1, -2.45), GOLD, Enum.Material.Metal)
+	part(model, Vector3.new(11.4, 0.5, 0.3), at(0, 11.1, 3.65), GOLD, Enum.Material.Metal)
+	for _, x in { -5.6, 5.6 } do
+		part(model, Vector3.new(0.3, 0.5, 6.4), at(x, 11.1, 0.6), GOLD, Enum.Material.Metal)
+	end
+	local down = part(model, Vector3.new(1, 0.1, 1), at(0, 10.85, -0.6), Color3.fromRGB(255, 236, 200), Enum.Material.Glass)
+	local dl = Instance.new("SpotLight")
+	dl.Face = Enum.NormalId.Bottom
+	dl.Color = Color3.fromRGB(255, 220, 170)
+	dl.Range = 14
+	dl.Brightness = 1.4
+	dl.Angle = 90
+	dl:AddTag("LODLight")
+	dl.Parent = down
+	-- a slatted bench against the back posts
+	part(model, Vector3.new(6, 0.4, 1.6), at(0, 1.9, 2.2), Color3.fromRGB(150, 106, 66), Enum.Material.Wood)
+	part(model, Vector3.new(6, 1.6, 0.3), at(0, 2.9, 2.95), Color3.fromRGB(150, 106, 66), Enum.Material.Wood)
+	for _, x in { -2.6, 2.6 } do
+		part(model, Vector3.new(0.3, 1.8, 1.4), at(x, 0.9, 2.2), black, Enum.Material.Metal)
+	end
+
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "ChauffeurStand"
 	prompt.ActionText = "Call a chauffeur"
