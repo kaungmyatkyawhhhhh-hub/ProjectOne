@@ -218,6 +218,13 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 		local op = OverlapParams.new()
 		op.FilterType = Enum.RaycastFilterType.Exclude
 		local ex: { Instance } = { workspace.Terrain }
+		-- (owner, 2026-11-03: "there is a hole at the ramp of legends hotel") never the road itself:
+		-- the road's small triangle pieces were taken for props and hidden
+		local riv = workspace:FindFirstChild("Riviera")
+		local roads = riv and riv:FindFirstChild("Roads")
+		if roads then
+			table.insert(ex, roads)
+		end
 		for _, k in o.keep or {} do
 			table.insert(ex, k)
 		end

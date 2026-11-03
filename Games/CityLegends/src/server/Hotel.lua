@@ -823,7 +823,9 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	---------------------------------------------------------------- the grand lobby
 	local lobby = kit.lodGroup(model, "Lobby", at(0, LH / 2, 30).Position, 380)
 	box(model, LOBBY_X * 2, 0.5, PODIUM_Z1 - PODIUM_Z0 - 2, 0, 0.25, (PODIUM_Z0 + PODIUM_Z1) / 2, MARBLE, Enum.Material.Marble, { name = "LobbyFloor" })
-	box(model, LOBBY_X * 2, 1.5, PODIUM_Z1 - PODIUM_Z0, 0, LH + 0.75, (PODIUM_Z0 + PODIUM_Z1) / 2, CREAM, Enum.Material.SmoothPlastic, { name = "LobbyCeiling" })
+	-- (owner, 2026-11-03: "the hotel roof is bugging") its underside sat exactly on the podium
+	-- roof's underside, and the two flickered (cream / charcoal): it hangs 0.15 lower now
+	box(model, LOBBY_X * 2, 1.5, PODIUM_Z1 - PODIUM_Z0, 0, LH + 0.75 - 0.15, (PODIUM_Z0 + PODIUM_Z1) / 2, CREAM, Enum.Material.SmoothPlastic, { name = "LobbyCeiling" })
 	box(model, LOBBY_X * 2, LH, 2, 0, LH / 2, PODIUM_Z1 - 1, STONE, Enum.Material.Limestone) -- back wall
 	box(model, 2, LH, gz0 - PODIUM_Z0, LOBBY_X - 1, LH / 2, (PODIUM_Z0 + gz0) / 2, STONE, Enum.Material.Limestone) -- beside the garage
 	-- coffered ceiling: gold ribs
