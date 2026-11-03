@@ -211,3 +211,29 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
   - Gear rebuilds when a skin or alter is worn (ActionService).
   - The old forearm / arm rings are gone.
   - Tested: crown, marble, cuffs and waistband on the body. Screen 22.
+
+## Later 4 Nov - alter effects on phones, genetics locks, arrows
+- (owner: "make alter effects default by off on mobile phones") **Settings "Alter Effects":** never chosen = Off on a phone, All elsewhere (`AlterLookClient`, `SettingsClient`; `LowEnd.IsPhone`). A player's own choice always wins.
+- **GENETICS LOCKS** (owner's brief):
+  - **Toggles:** a padlock on each of the 6 grade cells and beside Frame and Body (gold when locked). At most 5 of the 6 grades.
+  - **Cost:** 1 + locks DNA tokens. The button says it live ("REROLL · 7 DNA"). Not enough: greyed, "NEED 7 DNA · HAVE 2", and a tap opens the get-a-token choice, which now says what this reroll costs.
+  - **What rerolls:** locked items keep their exact values; the rest roll with the same odds.
+  - **Free reroll and the tutorial:** no locks; the padlocks hide.
+  - **Server checks everything** (`PlayerData.CleanGeneticsLocks` / `RerollGenetics`, `ActionService` Reroll / GeneticsLocks): only real keys, at most 5 grades, a lock dropped if its value isn't a real one, the cost. The client only sends the list.
+  - **Saved:** `data.geneticsLocks`, remembered between visits.
+  - **Analytics:** the economy sink is the real cost ("Gameplay:GeneticsReroll"), plus a custom event "GeneticsReroll" with value = locks and fields `locks=n`, `cost=n`.
+  - Confirm prompt: only asks when an UNLOCKED good grade is at risk.
+  - Studio switch: Workspace `TestDnaTokens` = n (a test save starts with n tokens and the free reroll used).
+  - **Tested (Studio, test save):**
+
+    | Case | Cost | Result |
+    |---|---|---|
+    | 0 locks | 1 token | everything rerolled |
+    | 1 padlock clicked | button: 2 DNA | lock saved |
+    | 5 grades + frame (Core also asked) | 7 tokens | server kept 5 grades; locked values unchanged, Core and Body rerolled |
+    | 3 locks | 4 tokens | the 3 kept |
+    | not enough (2 tokens) | button greyed | a direct server call refused, nothing spent; the tap opens the buy choice |
+
+  - **Not tested:** the phone frame. The Studio emulator can't be switched from here. The padlocks sit inside the existing cells and the Frame / Body row, so no new rows.
+- (owner: "dont put texts like UP and DOWN ...") after a reroll: a **green arrow up** right after the multiplier for a better grade, a **red arrow down** for a worse one (16 px). Tested.
+- Screens 23-27.
