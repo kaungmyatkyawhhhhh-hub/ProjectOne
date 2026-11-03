@@ -142,3 +142,5 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
   - Same rules as before: the base alter reached first ("Reach Granite first"), and SOON with no product.
   - A skin worn over your alter: WEAR in Alters takes it off.
   - Tested: no circles in the Gold detail; SKINS shows the 6 prices and Olympian in its new marble. Screens 11-12.
+- (4 Nov, owner: "when u dont own the skin and u press on the card, then it will open the ... product prompt") **Any Robux skin you don't own opens its purchase prompt on tap.** The "reach its alter first" rule is gone (the server never checked it). Olympian (earned, never sold) still says how to get it; a skin with no product says SOON.
+  - Tested on a brand-new save: all 6 cards show BUY R$ with the live price, the tap runs with no errors. The prompt itself is Roblox's own window, which Studio screenshots don't capture.
