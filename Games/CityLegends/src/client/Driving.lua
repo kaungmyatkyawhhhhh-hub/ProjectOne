@@ -33,6 +33,7 @@ local avatarDesc: HumanoidDescription? = nil -- for the driver's arms
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 
@@ -1299,6 +1300,7 @@ function Driving.attach(model: Model)
 	local root = model.PrimaryPart :: BasePart
 	local spec = Cars.get(model:GetAttribute("CarId") :: string)
 	local dims = CarBuilder.getDims(spec.Class, spec.Id)
+	UI.setSpeedoCar(CarStats.redline(spec.Id), spec.Electric == true) -- the HUD rev counter's scale
 	local lv = root:WaitForChild("Drive", 10) :: LinearVelocity?
 	local ao = root:WaitForChild("Steer", 10) :: AlignOrientation?
 	if not (lv and ao) then
@@ -2806,7 +2808,7 @@ function Driving.render(dt: number)
 			end
 		end
 	end)
-	UI.setSpeed(mph, speedFrac, s.gear, s.rpm)
+	UI.setSpeed(mph, speedFrac, s.gear, s.rpm, s.launchReady, s.manual)
 
 	-- blinkers: the corner lights and the HUD arrows flash together, with a soft tick
 	if s.blinker ~= "" then

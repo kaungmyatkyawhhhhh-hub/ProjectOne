@@ -62,6 +62,7 @@ export type Settings = {
 	Sfx: number?, -- 0..1
 	Favs: { string }?, -- favourite cars (CARS tab)
 	HideKeys: boolean?, -- the on-screen controls hidden
+	Speedo: string?, -- the HUD speedometer: "Analogue" (default) | "Digital"
 }
 
 export type Snapshot = {
@@ -556,6 +557,9 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 	if raw.Graphics == "Low" or raw.Graphics == "Medium" or raw.Graphics == "High" or raw.Graphics == "Ultra" then
 		profile.Settings.Graphics = raw.Graphics
+	end
+	if raw.Speedo == "Analogue" or raw.Speedo == "Digital" then
+		profile.Settings.Speedo = raw.Speedo -- the HUD speedometer style (2026-11-03)
 	end
 	for _, key in { "Music", "Sfx" } do
 		local v = tonumber(raw[key])

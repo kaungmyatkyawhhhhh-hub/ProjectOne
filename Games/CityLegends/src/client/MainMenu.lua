@@ -1127,6 +1127,14 @@ local function openSettings()
 			UI.onGearboxChanged(mode)
 		end
 	end)
+	-- (owner, 2026-11-03) the HUD speedometer: an arc rev dial or a flat rev bar, both with the big
+	-- digital speed
+	choices(row("Speedometer"), { "ANALOGUE", "DIGITAL" }, function()
+		return if st.Speedo == "Digital" then "DIGITAL" else "ANALOGUE"
+	end, function(v)
+		st.Speedo = if v == "DIGITAL" then "Digital" else "Analogue"
+		UI.setSpeedoStyle(st.Speedo)
+	end)
 	choices(row("Controls on screen"), { "SHOW", "HIDE" }, function()
 		return if st.HideKeys then "HIDE" else "SHOW"
 	end, function(v)
@@ -1958,6 +1966,7 @@ function MainMenu.applySettings(st: { [string]: any })
 	if type(st.Graphics) == "string" then
 		WorldFx.setQuality(st.Graphics)
 	end
+	UI.setSpeedoStyle(if st.Speedo == "Digital" then "Digital" else "Analogue")
 	if type(st.Music) == "number" then
 		Audio.setMusicLevel(st.Music)
 	end

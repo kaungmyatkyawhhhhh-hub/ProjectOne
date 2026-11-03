@@ -21,6 +21,7 @@ local Cars = require(Shared:WaitForChild("Cars"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
+local HudSpeedo = require(script.Parent:WaitForChild("HudSpeedo"))
 
 local Theme = Config.Theme
 local player = Players.LocalPlayer
@@ -146,11 +147,6 @@ local gui: ScreenGui
 local hud: Frame
 local overlay: Frame
 local cashLabel: TextLabel
-local speedLabel: TextLabel
-local gearLabel: TextLabel
-local gearTag: TextLabel
-local needleHolder: Frame
-local rpmTrack: { Frame } = {}
 local comboFrame: Frame
 local comboLabel: TextLabel
 local comboBar: Frame
@@ -164,7 +160,6 @@ local camToggle: TextButton
 local musicToggle: TextButton
 local unitsToggle: TextButton
 local gearboxToggle: TextButton
-local unitLabel: TextLabel
 local speedKmh = false
 -- warning lights under the speedometer
 local blinkL: TextLabel
@@ -190,8 +185,6 @@ local displayedCash = 0
 local targetCash = 0
 
 local WHITE = Color3.new(1, 1, 1)
-local RPM_MAX = 7 -- the gauge reads 0..7 (x1000 rpm)
-local REDLINE = 6
 
 local progress = { level = 1, xp = 0, need = Config.xpForLevel(1) }
 local daily = { known = false, readyAt = 0, claiming = false, shown = -1 }
@@ -199,18 +192,6 @@ local daily = { known = false, readyAt = 0, claiming = false, shown = -1 }
 -- and what it gives ("" until the server says)
 local streak = { day = 1, reward = "" }
 local dailyCardTitle: TextLabel
-
--- 0..RPM_MAX -> gauge angle in degrees (maths convention, 0 = right, CCW);
--- the dial sweeps 270 degrees clockwise from bottom-left to bottom-right
-local function rpmAngle(v: number): number
-	return 225 - (v / RPM_MAX) * 270
-end
-
--- position on a circle around the centre of the parent
-local function polar(r: number, deg: number): UDim2
-	local a = math.rad(deg)
-	return UDim2.new(0.5, math.cos(a) * r, 0.5, -math.sin(a) * r)
-end
 
 local function formatClock(seconds: number): string
 	local s = math.max(0, math.ceil(seconds))
@@ -509,172 +490,14 @@ end
 -- HUD pieces
 ---------------------------------------------------------------------
 local function buildSpeedometer()
-	local size = if UI.isTouch then 180 else 240
-	local half = size / 2
-	local gauge = new("Frame", {
-		Name = "Speedometer",
-		AnchorPoint = if UI.isTouch then Vector2.new(0.5, 1) else Vector2.new(1, 1),
-		-- on touch it sits bottom-centre between the pedals and the steering
-		-- buttons, lifted above the cash tab
-		Position = if UI.isTouch then UDim2.new(0.5, 0, 1, -48) else UDim2.new(1, -24, 1, -24),
-		Size = UDim2.fromOffset(size, size),
-		BackgroundColor3 = Theme.Background,
-		BackgroundTransparency = 0.22,
-		Parent = hud,
-	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Stroke, 2, 0.15) })
-	new("UIGradient", {
-		Rotation = 90,
-		Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.15), NumberSequenceKeypoint.new(1, 0) }),
-		Parent = gauge,
-	})
-
-	-- rpm track: thin arc that lights up to the current rpm, red in the redline
-	local segCount = 63
-	local rTrack = half - 9
-	local step = 270 / segCount
-	local segLen = rTrack * math.rad(step) + 1.2
-	for i = 1, segCount do
-		local mid = (i - 0.5) / segCount * RPM_MAX
-		local a = rpmAngle(mid)
-		local seg = new("Frame", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = polar(rTrack, a),
-			Size = UDim2.fromOffset(segLen, if UI.isTouch then 3 else 4),
-			Rotation = 90 - a,
-			BackgroundColor3 = if mid >= REDLINE then Theme.Danger else Theme.Stroke,
-			BackgroundTransparency = if mid >= REDLINE then 0.45 else 0.1,
-			BorderSizePixel = 0,
-			ZIndex = 2,
-			Parent = gauge,
-		})
-		table.insert(rpmTrack, seg)
-	end
-
-	-- ticks every 500 rpm, numbers every 1000
-	local rTick = half - 15
-	local major = size * 0.06
-	local minor = size * 0.03
-	for t = 0, RPM_MAX * 2 do
-		local v = t / 2
-		local isMajor = t % 2 == 0
-		local len = if isMajor then major else minor
-		local a = rpmAngle(v)
-		new("Frame", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = polar(rTick - len / 2, a),
-			Size = UDim2.fromOffset(if isMajor then 3 else 2, len),
-			Rotation = 90 - a,
-			BackgroundColor3 = if v >= REDLINE then Theme.Danger else Theme.Text,
-			BackgroundTransparency = if isMajor then 0 else 0.35,
-			BorderSizePixel = 0,
-			ZIndex = 2,
-			Parent = gauge,
-		})
-		if isMajor then
-			label({
-				Text = tostring(v),
-				TextSize = math.floor(size * 0.068),
-				Font = Enum.Font.GothamBlack,
-				TextColor3 = if v >= REDLINE then Theme.Danger else Theme.Text,
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = polar(rTick - major - size * 0.065, a),
-				Size = UDim2.fromOffset(24, 18),
-				ZIndex = 2,
-				Parent = gauge,
-			})
-		end
-	end
-	label({
-		Text = "x1000rpm",
-		TextSize = math.max(8, math.floor(size * 0.037)),
-		Font = Enum.Font.GothamBold,
-		TextColor3 = Theme.SubText,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.285),
-		Size = UDim2.new(0.4, 0, 0, 12),
-		ZIndex = 2,
-		Parent = gauge,
-	})
-
-	-- centre ring with the gear
-	local ringSize = size * 0.34
-	new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromOffset(ringSize, ringSize),
-		BackgroundColor3 = Theme.Panel,
-		BackgroundTransparency = 0.35,
-		ZIndex = 2,
-		Parent = gauge,
-	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Stroke, 1.5, 0.2) })
-	local gearRow = new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromOffset(ringSize, ringSize * 0.6),
-		BackgroundTransparency = 1,
-		ZIndex = 3,
-		Parent = gauge,
-	}, {
-		new("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = UDim.new(0, 2),
-		}),
-	})
-	gearLabel = label({
-		Text = "N",
-		TextSize = math.floor(size * 0.19),
-		Font = Enum.Font.GothamBlack,
-		TextColor3 = Theme.Accent,
-		AutomaticSize = Enum.AutomaticSize.X,
-		Size = UDim2.fromScale(0, 1),
-		LayoutOrder = 1,
-		ZIndex = 3,
-		Parent = gearRow,
-	})
-	gearTag = label({
-		Text = "AT",
-		TextSize = math.max(9, math.floor(size * 0.05)),
-		Font = Enum.Font.GothamBlack,
-		TextColor3 = Theme.SubText,
-		TextYAlignment = Enum.TextYAlignment.Bottom,
-		Size = UDim2.new(0, size * 0.08, 0.62, 0),
-		LayoutOrder = 2,
-		Visible = false,
-		ZIndex = 3,
-		Parent = gearRow,
-	})
-
-	-- speed readout under the ring
-	speedLabel = label({
-		Text = "0",
-		TextSize = math.floor(size * 0.145),
-		Font = Enum.Font.GothamBlack,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.785),
-		Size = UDim2.new(0.5, 0, 0, size * 0.15),
-		ZIndex = 3,
-		Parent = gauge,
-	})
-	unitLabel = label({
-		Text = if speedKmh then "km/h" else "mph",
-		TextSize = math.max(10, math.floor(size * 0.05)),
-		Font = Enum.Font.GothamBold,
-		TextColor3 = Theme.SubText,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.885),
-		Size = UDim2.new(0.4, 0, 0, 14),
-		ZIndex = 3,
-		Parent = gauge,
-	})
-
-	-- warning lights in a row under the dial: blinkers, engine, handbrake, traction control, lights
+	-- (owner, 2026-11-03) the speedometer is HudSpeedo: Analogue or Digital (Settings), both with
+	-- the big digital speed; the warning lights stay here, in a row under it
+	local gauge = HudSpeedo.build(hud, UI.isTouch)
+	local size = if UI.isTouch then 170 else 224
 	local lamps = new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 1, 2),
-		Size = UDim2.new(1.2, 0, 0, math.max(14, size * 0.075)),
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 0, -4),
+		Size = UDim2.new(0, size * 1.3, 0, math.max(14, size * 0.075)),
 		BackgroundTransparency = 1,
 		ZIndex = 3,
 		Parent = gauge,
@@ -693,6 +516,7 @@ local function buildSpeedometer()
 			TextSize = math.max(10, math.floor(size * 0.055)),
 			Font = Enum.Font.GothamBlack,
 			TextColor3 = color,
+			TextStrokeTransparency = 0.6,
 			AutomaticSize = Enum.AutomaticSize.X,
 			Size = UDim2.fromScale(0, 1),
 			LayoutOrder = order,
@@ -708,45 +532,6 @@ local function buildSpeedometer()
 	tcLamp = lamp("TC OFF", Theme.Warning, 4)
 	lightsLamp = lamp("LIGHTS", GREEN, 5)
 	blinkR = lamp("▶", GREEN, 6)
-
-	-- needle: a square the size of the gauge, rotated about its centre; the
-	-- red bar starts outside the centre ring so the gear stays readable
-	needleHolder = new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(1, 1),
-		BackgroundTransparency = 1,
-		Rotation = 90 - rpmAngle(0),
-		ZIndex = 4,
-		Parent = gauge,
-	})
-	local rIn = ringSize / 2 + 4
-	local rOut = half - 12
-	local width = if UI.isTouch then 3 else 4
-	new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 0.5, -rIn),
-		Size = UDim2.fromOffset(width + 6, rOut - rIn),
-		BackgroundColor3 = Theme.Danger,
-		BackgroundTransparency = 0.78,
-		BorderSizePixel = 0,
-		ZIndex = 4,
-		Parent = needleHolder,
-	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
-	local needle = new("Frame", {
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 0.5, -rIn),
-		Size = UDim2.fromOffset(width, rOut - rIn),
-		BackgroundColor3 = Theme.Danger,
-		BorderSizePixel = 0,
-		ZIndex = 5,
-		Parent = needleHolder,
-	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
-	new("UIGradient", {
-		Rotation = 90,
-		Color = ColorSequence.new(Color3.fromRGB(255, 170, 170), WHITE),
-		Parent = needle,
-	})
 end
 
 -- the level: a glass pill at the top, the level number in a gold badge, the XP bar beside it
@@ -2386,62 +2171,36 @@ function UI.setCash(amount: number, instant: boolean?)
 	end
 end
 
-local lastLit = -1
-local lastSpeedText = ""
-local lastGear = ""
--- mph, speed fraction of top speed (unused by the analog dial), gear ("N",
--- "R", "1".."6") and rpm 0..1 (needle sweeps 0..7 x1000)
-function UI.setSpeed(mph: number, _frac: number, gear: string, rpm: number)
-	local speedText = tostring(math.floor(math.abs(mph) * (if speedKmh then 1.609 else 1) + 0.5))
-	if speedText ~= lastSpeedText then
-		lastSpeedText = speedText
-		speedLabel.Text = speedText
-	end
-	if gear ~= lastGear then
-		lastGear = gear
-		local numeric = tonumber(gear) ~= nil
-		gearLabel.Text = gear
-		gearTag.Visible = numeric
-		gearLabel.TextColor3 = if numeric then Theme.Text elseif gear == "R" then Theme.Warning else Theme.Accent
-	end
-	local v = math.clamp(rpm, 0, 1) * RPM_MAX
-	needleHolder.Rotation = 90 - rpmAngle(v)
-	local lit = math.floor(v / RPM_MAX * #rpmTrack + 0.5)
-	if lit ~= lastLit then
-		lastLit = lit
-		for i, seg in rpmTrack do
-			local segV = (i - 0.5) / #rpmTrack * RPM_MAX
-			local red = segV >= REDLINE
-			if i <= lit then
-				seg.BackgroundColor3 = if red then Theme.Danger else Theme.Accent:Lerp(Theme.Accent2, segV / REDLINE)
-				seg.BackgroundTransparency = 0
-			else
-				seg.BackgroundColor3 = if red then Theme.Danger else Theme.Stroke
-				seg.BackgroundTransparency = if red then 0.45 else 0.1
-			end
-		end
-	end
+-- mph, speed fraction of top speed (unused), gear ("N", "R", "1".."7"), rpm 0..1 (1 = the car's
+-- redline), launch control held, manual gearbox
+local manualBox = false
+function UI.setSpeed(mph: number, _frac: number, gear: string, rpm: number, launch: boolean?, manual: boolean?)
+	HudSpeedo.update(mph, gear, rpm, speedKmh, if manual ~= nil then manual else manualBox, launch == true)
+end
+
+-- the car's own rev scale (CarStats.redline, x1000 rpm), when a car is attached
+function UI.setSpeedoCar(redline: number, electric: boolean)
+	HudSpeedo.setCar(redline, electric)
+end
+
+-- Settings > Speedometer: "Analogue" | "Digital" (instant, even while driving)
+function UI.setSpeedoStyle(style: string)
+	HudSpeedo.setStyle(style)
 end
 
 -- Settings: "mph" | "kmh" on the HUD speedometer and the settings button
 function UI.setUnits(units: string)
 	speedKmh = units == "kmh"
-	if unitLabel then
-		unitLabel.Text = if speedKmh then "km/h" else "mph"
-	end
 	if unitsToggle then
 		unitsToggle.Text = if speedKmh then "KM/H" else "MPH"
 	end
-	lastSpeedText = ""
 end
 
 function UI.setGearboxLabel(mode: string)
 	if gearboxToggle then
 		gearboxToggle.Text = if mode == "Manual" then "MANUAL" else "AUTO"
 	end
-	if gearTag then
-		gearTag.Text = if mode == "Manual" then "MT" else "AT"
-	end
+	manualBox = mode == "Manual"
 end
 
 -- the car's warning lights: { ignition, engine, manual, park, tc, lights, blinker }
@@ -2464,11 +2223,16 @@ function UI.setBlink(left: boolean, right: boolean)
 end
 
 -- on foot: the speedometer goes away (the rest of the HUD stays)
-function UI.setOnFoot(onFoot: boolean)
+local speedoOnFoot, speedoInterior = false, false
+local function speedoVisible()
 	local speedo = hud and hud:FindFirstChild("Speedometer")
 	if speedo and speedo:IsA("GuiObject") then
-		speedo.Visible = not onFoot
+		speedo.Visible = not speedoOnFoot and not speedoInterior
 	end
+end
+function UI.setOnFoot(onFoot: boolean)
+	speedoOnFoot = onFoot
+	speedoVisible()
 end
 
 -- the context action pill (bottom right): "[Y] GET OUT", "[Y] GET IN", "[E] ROB THE VAULT" ...
@@ -2584,6 +2348,9 @@ end
 
 function UI.setCameraLabel(mode: string)
 	camToggle.Text = string.upper(mode)
+	-- (the in-car view keeps the car's own working cluster: no HUD speedometer over it)
+	speedoInterior = mode == "Interior"
+	speedoVisible()
 end
 
 function UI.toggleControls(show: boolean?)

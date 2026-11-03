@@ -117,4 +117,33 @@ function CarStats.best(): { kmh: number, ptw: number, weightKg: number }
 	return best :: { kmh: number, ptw: number, weightKg: number }
 end
 
+-- each car's redline (x1000 rpm) for the HUD rev counter (owner, 2026-11-03: the speedometer
+-- style setting, "each car's own redline from its stats"): by class, and the cars known for their
+-- own (the real engines they're modelled on); electric cars read their motor up to 16,000
+local REDLINE_CLASS = { Sedan = 6.5, SUV = 6.0, Coupe = 7.0, Supercar = 8.0, Hypercar = 7.5 }
+local REDLINE_CAR: { [string]: number } = {
+	suzaki_swift = 6.5, toyoka_belta = 6.0, toyoka_camri = 6.2, toyoka_crown = 6.2, toyoka_alfard = 6.0,
+	toyoka_lc200 = 5.5, toyoka_lc300 = 5.8, lexis_lx700 = 5.8, toyoka_chaser = 7.0, toyoka_supra_mk4 = 6.8,
+	nisun_350z = 7.0, nisun_r34 = 8.0, nisun_gtr = 7.0, mazdo_rx7 = 8.0, mazdo_rx8 = 9.0,
+	bnw_m3_e92 = 8.3, bnw_m3_f80 = 7.3, bnw_m4_f82 = 7.3, bnw_m5_e60 = 8.25, bnw_m6_v10 = 8.25,
+	bnw_m5_f10 = 7.2, bnw_m5_f90 = 7.2, bnw_m8gc = 7.2, bnw_x6 = 6.5, bnw_x7 = 6.5, bnw_750li = 6.5,
+	bentz_190e = 6.5, bentz_e63s = 7.0, bentz_cla45 = 7.2, bentz_cls63s = 7.0, bentz_sls = 7.2,
+	bentz_sl65bs = 6.0, bentz_s65_w221 = 6.0, bentz_g63 = 6.5, brabos_g63 = 6.5, bentz_gt63s = 7.0,
+	dodger_challenger = 6.4, chevo_camaro = 6.5, chevo_c6 = 7.0, chevo_c7 = 6.6,
+	porsha_boxster = 7.8, porsha_gt3 = 9.0, porsha_panamera = 6.8,
+	ferrara_f430 = 8.5, ferrara_458 = 9.0, ferrara_599 = 8.4, ferrara_california = 7.5,
+	audy_r8 = 8.7, mclaran_12c = 8.5, lexis_lfa = 9.0, lexis_lc500 = 7.1,
+	lambrini_lp570 = 8.5, lambrini_lp640 = 8.0, lambrini_lp700 = 8.5, lambrini_lp750 = 8.5, lambrini_svj = 8.7,
+	lambrini_svj63 = 8.7, lambrini_countach = 7.0, lambrini_urus = 6.8,
+	astin_db9 = 7.0, astin_vantage = 7.3, astin_dbx = 6.5, bentlee_contgt = 6.5, bentlee_bentayga = 6.0,
+	rolls_wraith = 5.5, rolls_cullinan = 5.0, bugotti_veyron = 6.4, maseroti_levante = 6.5,
+}
+function CarStats.redline(id: string): number
+	local spec = Cars.get(id)
+	if spec and spec.Electric then
+		return 16
+	end
+	return REDLINE_CAR[id] or REDLINE_CLASS[spec and spec.Class or "Sedan"] or 6.5
+end
+
 return CarStats
