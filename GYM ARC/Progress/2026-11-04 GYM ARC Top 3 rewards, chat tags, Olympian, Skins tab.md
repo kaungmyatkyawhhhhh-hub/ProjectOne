@@ -137,3 +137,8 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
   - Levels measured and added to MusicGain.
   - Tested in Play: VIP plays 1848347043 and Members plays 1846471612, both loaded; starter and town are unchanged.
 - (4 Nov, owner) **Head growth per alter: 3% → 1%** (`Config/GrowthSpurts.HeadPerAlter = 0.01`): Alter 5 = x1.05, Alter 15 = x1.15, Alter 20 = x1.20. The player, mirror and Hall statues all use it.
+- (4 Nov, owner: "remove variants from alters now that theres skins") **The variant circles are gone** from Looks > Alters and Coach Dex > Alters (`AltersPanel` VARIANT_ROW = false brings them back).
+  - Skins are bought in **LOOKS > SKINS** now: "BUY R$ <price>" with Roblox's live price (R$ 135 / 180 / 225 seen in Studio). Tap = Roblox's purchase prompt.
+  - Same rules as before: the base alter reached first ("Reach Granite first"), and SOON with no product.
+  - A skin worn over your alter: WEAR in Alters takes it off.
+  - Tested: no circles in the Gold detail; SKINS shows the 6 prices and Olympian in its new marble. Screens 11-12.
