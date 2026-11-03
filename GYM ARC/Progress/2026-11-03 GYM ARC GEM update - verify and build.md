@@ -162,3 +162,23 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
     - ★3 save: card after the Alters card, red dot, GO TO path, sign + beacon visible.
     - Opening the desk with E: flag set, dot gone.
     - ★2: "REACH ★3" locked, no card, no dot.
+- **3 Nov - Item 1 leftovers (Alters 16-20) done + tested.**
+  - **Rep burst: it never fired (real bug).**
+    - Machines don't seat you (no `Humanoid.SeatPart`): MachineService marks the machine model with your `UserId` and counts `Reps` on it.
+    - AlterLookClient now maps players to machines from the "Machine"-tagged models' `UserId` (streaming-safe) and hooks the rep burst there.
+    - **Tested on the Gem Mine bench (Ruby): 5 reps = 5 bursts.**
+  - **The look rebuilt every second while lifting.** The muscles pump on every rep and its rebuild key had the exact mesh sizes. Now the key is only which meshes exist, and the look rebuilds when a size drifts > 25% from the one it was built on. Tested: 1 build in 12 s of lifting (was 12).
+  - **Inventory / Coach Dex ALTERS** (`AltersPanel`):
+    - It would have shown the Gem tier before the update (it only checked for textures). Tiles past `Alters.LastAvailable()` are now hidden and never "next"; "ALTERS 15 / 15" before, "16 / 20" after.
+    - Tiles are built once, so the update opening mid-session shows them at the next refresh. Tested before and after a live flip.
+  - **Progression Road:**
+    - Rebuilds its tiles when the stops change (the update mid-session).
+    - Past Alter 15 the Hall of Fame stop counts as passed (pill OPEN until you enter, then REACHED), so YOU ARE HERE / NEXT follow your alter (it said "YOU ARE HERE: Gold, NEXT: Hall of Fame" at Alter 17).
+    - Tested after a live flip.
+  - **Run Card pick at Alter 17:** "Alter 17 · Keep 1 of 3" (tested).
+  - **MORE ALTERS SOON** now only shows after Alter 20 (the next alter is locked = maxed); at 20 the gold Hall of Fame card takes the spot while the Hall is open.
+  - **Gem Mine lights 14 → 8:**
+    - The 6 small-crystal PointLights are off (attribute `TrimmedForFPS`; the crystals are Neon and still glow).
+    - The 3 chandeliers are violet (#A77BFF), range 54, brightness 2.3, so the cave keeps its purple.
+    - Kept: giant crystal, mouth (2), descent lanterns (2). Before/after screenshots checked.
+  - The one-time cards (NEW: ALTERS 16-20, the agency card) also wait while you're on a machine (one popped up mid-set in testing).
