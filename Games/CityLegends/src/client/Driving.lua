@@ -37,6 +37,7 @@ local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 
 local Traffic = require(script.Parent:WaitForChild("Traffic"))
 local UI = require(script.Parent:WaitForChild("UI"))
@@ -931,7 +932,9 @@ function Driving.reset()
 	if not s then
 		return
 	end
-	local cf = CityLayout.nearestLaneCFrame(s.root.Position)
+	-- (on the Monaco map its own lanes; CityLayout only knows the old city's)
+	local here = s.root.Position - Vector3.new(0, 2, 0)
+	local cf = (if workspace:FindFirstChild("Riviera") then RivieraTraffic.nearestCFrame(here) else nil) or CityLayout.nearestLaneCFrame(s.root.Position)
 	s.root.AssemblyLinearVelocity = Vector3.zero
 	s.root.AssemblyAngularVelocity = Vector3.zero
 	s.root.CFrame = cf + Vector3.new(0, s.halfHeight + 0.4, 0)

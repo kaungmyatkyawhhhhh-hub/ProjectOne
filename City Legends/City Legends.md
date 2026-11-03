@@ -907,7 +907,7 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Checked in Play on a straight (Coast Road): SV idle at half the SVJ's loudness; braking from 72 mph, three downshifts at 41 / 35 / 27 mph, each blip at its own pitch (0.85 / 0.90 / 1.00); no errors.
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
-Summary at the end of the run goes here. Next: step 3 (cars check, then the dealer menu UI).
+Summary at the end of the run goes here. Next: step 4 (venues: Legends Rewards check, then the bank, towers, Customs, Gem Showcase, Realty, chauffeur kiosks, challenge gantries).
 
 ### Choices made while the owner was away (2026-11-03)
 - Buildings: the global environment reflections (`Lighting.EnvironmentSpecularScale` 1) were left as they are. Lowering them takes the slight sky sheen off the walls but also dulls the cars' paint and the wet roads, and the sheen wasn't the black / white flashing. Easy to change in `CityBuilder` / Lighting if wanted.
@@ -916,6 +916,10 @@ Summary at the end of the run goes here. Next: step 3 (cars check, then the deal
 - Smooth roads: the checker still counts 1,759 small kinks over 0.05 studs (1,094 under 0.1, 396 at 0.1-0.2, 234 at 0.2-0.3, 35 at 0.3-0.4, none bigger). Most are where two road pieces meet at a junction (the side road sits 0.05 lower on purpose so it doesn't flicker) or where the slope changes between road samples. Smoothing all of them means solving the heights again and rebuilding every road (losing the in-place fixes), so they were left.
 - Smooth roads: the 163 speed bumps the lane test finds were left: they are meant to be there.
 - Smooth roads: `src/shared/RivieraLanes.lua` is no longer exactly what `export_lanes.py` writes: 134 lane points were moved off kerbs and walls. The moves are in `tools/map_plan/lane_nudges.json`; after a new export run `tools/map_plan/apply_lane_nudges.py`.
+- Dealer menu: gold is the main-action and selection colour (BUY, the picked brand / trim / row), the same gold as the main menu, with mint-green prices and blue for owned cars. The old red accent and the red band in the showroom are gone (the room's line is warm white now). Panels are dark glass drawn with gradients and a thin light edge: Roblox can't blur only behind a panel (a Blur effect would blur the car too).
+- Dealer menu: the floor is dark and only slightly shiny (Reflectance 0.05). Roblox reflections show the sky, not the room, so a mirror floor turned pale blue by day.
+- Dealer menu: phones (and any screen under 1000 x 520) get a compact layout: the same parts, bigger type, 46 px buttons, no level box (the level is still in the HUD), the speed bar shows km/h only.
+- Dealer menu: Esc closes it (also when Roblox's menu takes the key). Backspace doesn't: the driving keys saw it too and put the car back on the road.
 
 ### Step 1.1: buildings flashing black and white (done)
 - **Cause:** the far stand-ins (`ReplicatedStorage.RivieraFar`, `tools/riviera/FarCity.luau`) show past ~950 studs (570 on Low graphics, less on phones) and while a building is streamed out. Each one's pale wall-coloured shell was sized from the building's outer skin, so it stood 0.2 studs IN FRONT of the dark core inside every window and shopfront. Close up (stand-in hidden) the windows were dark; past the range (stand-in shown) every window and shop turned the wall colour. That's the "black from one spot, white from another". Pictures: [[Buildings flashing - before (far stand-in showing).jpg]], [[Buildings flashing - after.jpg]], [[Buildings flashing - after, far stand-ins over the city.jpg]].
@@ -951,3 +955,21 @@ Driven in Play on the Coast Road (automatic, full throttle, then full brake, the
 
 - No flips, no shaking, gears change, the cars stay flat in the steer test. No script errors.
 - Not changed (not bugs): the brakes stop at about 1.2-1.7 g (a real road car does about 1 g): that's on purpose, 1.5 x real since 2026-11-03 (`Config.DrivingFeel.ClassFeel` brake). The Swiff (retired) still has a blocky part-built model in `CarModels`.
+
+### Step 3: cars (3.1 checked, 3.2 skipped, 3.3 done)
+- **3.1 check:** Lune tests `carlevels_test`, `market_test`, `goals_test` pass. In Play: the dealer opens with class badges, trims, prices and OWNED; buying (one charge), NEW CAR and DRIVE IT NOW work. The starter pick wasn't re-run (it needs a fresh join; tested when it was made). Still without a real model and on sale: Bentlee Continental GT (3 trims, known).
+- **3.2 better car models:** skipped (owner: not now).
+- **3.3 dealer menu, new look** (`src/client/DealerMenu.lua`; icons `tools/dealer_art.py` → `src/client/DealerArt.lua`, sheet `rbxassetid://73992987615681`):
+  - one font family (Builder Sans, like the main menu): ExtraBold names and prices, Bold labels, Medium text; small grey captions over each part (PERFORMANCE, SPECS, PAINT, TRIMS, FEATURES);
+  - dark glass panels (gradient, thin light edge, a highlight along the top), gold BUY / selection, blue DRIVE when owned, grey LEVEL n when locked;
+  - 24 drawn icons (exit, arrows, lock, check, price tag, key, steering wheel, gauge, bolt, brake disc, weight, piston, torque, seat, drive, fuel, gearbox, economy, sound, star): no emoji or letters any more. [[Dealer menu - icons.png]];
+  - the car is bigger in the middle of the screen (camera FOV 40, closer), on a dark polished floor under warm spotlights with soft shadows; the camera circles slowly; a soft dark edge at the top and bottom of the screen;
+  - animations: the panels slide in, buttons grow on hover and squeeze on press, bars grow to the new value, the name fades in on a new car, modals rise in; click sounds as before;
+  - the top bar shows the make and class badge over the car's name (without the make), the price big (green when you can afford it), TEST DRIVE and BUY; messages come as a pill with an icon; confirm and NEW CAR cards in the same style; Q / E step brands;
+  - phones: the compact layout (above). [[Dealer menu - after (phone 667 x 375).jpg]] (drawn in a 667 x 375 box with the Studio hook `workspace` attribute `PreviewPhone`).
+  - Pictures: [[Dealer menu - before (PC).jpg]], [[Dealer menu - after (PC, owned car).jpg]], [[Dealer menu - after (PC, car to buy).jpg]], [[Dealer menu - after (PC, confirm).jpg]], [[Dealer menu - after (PC, new car).jpg]]. Before on a phone: the same PC layout shrunk to about 55% (text around 7 px).
+- **Bugs found and fixed on the way:**
+  - opening the dealer from a car: the driving camera kept the shot (the showroom never showed). The dealer now holds the driving camera and brakes the car (`Driving.cameraHold` / `menuHold`, put back on close).
+  - Backspace ("back to the road") put the car on the old city's lanes, out in the sea west of Monaco (x 3340). It now uses the Riviera lanes (`RivieraTraffic.nearestCFrame`). Checked in Play: the car stays on its road.
+  - the list didn't show OWNED right after buying (it rebuilds now).
+- Checked: `luau-lsp analyze` clean, no script errors in Play. Not checked: a real phone (the box above is the phone size on PC).

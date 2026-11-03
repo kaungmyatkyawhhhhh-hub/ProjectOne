@@ -167,4 +167,31 @@ function RivieraTraffic.build()
 	return cached
 end
 
+-- (car resets, 2026-11-04: Backspace put the car back on the old city's lanes, out in the sea west
+-- of Monaco) the nearest point on a Riviera lane and the way it runs, or nil without lane data
+function RivieraTraffic.nearestCFrame(pos: Vector3): CFrame?
+	local g = RivieraTraffic.build()
+	if not g then
+		return nil
+	end
+	local best: CFrame? = nil
+	local bd = math.huge
+	for _, seg in g.lanes do
+		local sg = seg :: any
+		if (sg.p1 - pos).Magnitude < sg.length + bd then
+			local n = math.max(2, math.ceil(sg.length / 3))
+			for k = 0, n do
+				local p, dir = CityLayout.sample(seg, sg.length * k / n)
+				local d = (p - pos).Magnitude
+				if d < bd then
+					bd = d
+					local flat = Vector3.new(dir.X, 0, dir.Z)
+					best = if flat.Magnitude > 0.01 then CFrame.lookAt(p, p + flat.Unit) else CFrame.new(p)
+				end
+			end
+		end
+	end
+	return best
+end
+
 return RivieraTraffic
