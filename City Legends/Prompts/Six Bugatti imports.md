@@ -48,8 +48,13 @@ For each car, follow the new-model routine (`paint_glb.py` logos out → `auto_c
 - **Sound:** leave it (the owner will send IDs).
 
 ## Step 4: put them in the game
-- The 2 main models replace the old Veyron / add the Chiron; the 4 high-spec trims sit above them in the same series (`Cars.Series`: Veyrun 16.4 → Super Sport → Grand Sport Vitesse; Chiroun → Pur Sport → Super Sport). The existing `bugotti_veyron` id stays for the 16.4 (players who own it keep it).
-- Suggest prices, levels, top speeds and 0–60 to the owner (all High tier, the top of the game; e.g. Veyrun ~$5M up to Chiroun Super Sport as the most expensive car), real wheelbases in `CarBuilder.REAL_WB`.
+- **The Veyron is already in the game with its trims** (owner, 2026-11-03): `bugotti_veyron` "Velocité Noir Veyrun 16.4" (level 50) and its automatic **SPORT** (level 55) and **TOP** (level 60) trims, which use the same body (`Cars.lua`, the extra-trims table and `Cars.Series`). **The 3 new Veyron models replace those 3:**
+  - BASE → the new **Veyron 16.4** model (keeps the id `bugotti_veyron`, so owners keep it);
+  - SPORT → the new **Veyron Super Sport** model;
+  - TOP → the new **Veyron Grand Sport Vitesse** model.
+  - Each trim gets **its own model** instead of sharing the 16.4's body. Keep the same ids / levels / prices players already own and see (rename the trims to "Super Sport" and "Grand Sport Vitesse" in the dealer), so nobody loses a car. Check the garage, dealer, market, Customs paint and saves still work for owners of the SPORT and TOP trims.
+- **The Chiron family is new:** add the 3 Chirons as a new series above the Veyron (Chiroun → Pur Sport → Super Sport), High tier, the most expensive cars in the game. Suggest prices, levels (the owner capped levels at 60 for now: ask how to fit them), top speeds and 0–60 to the owner first. Real wheelbases in `CarBuilder.REAL_WB`.
+- Remove the old Veyron model only after the new ones are in and checked.
 - Pack them for one Import 3D (or two packs: Veyrons, Chirons) in `imports/new_cars/`, and tell the owner when to import. After the import: check each one in Play.
 
 ## Check before you say done
