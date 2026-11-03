@@ -402,6 +402,7 @@ export type Engine = {
 	setRunning: (self: Engine, on: boolean) -> (), -- engine off: only wind and tyres are heard
 	crank: (self: Engine) -> (), -- the starter: the car's own start-up sound, else the shared one
 	setLaunch: (self: Engine, on: boolean) -> (), -- launch control held (brake + throttle at a stop)
+	setTunnel: (self: Engine, inside: boolean) -> (), -- in a tunnel: the engine twice as loud, with an echo
 	destroy: (self: Engine) -> (),
 }
 
@@ -480,6 +481,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	local dip = 0
 	local smoothRpm = 0.1
 	local running, power = true, 1
+	-- in a tunnel (owner, 2026-11-03: "if you drive through the tunnel the car becomes 2 times
+	-- louder"): every engine sound x2, eased in and out over half a second
+	local tunnelWant, tunnelK = 0, 0
 	local self = {} :: any
 
 	-- the car's own exhaust: idle / mid / high loops crossfaded by rpm, plus launch control, the
@@ -508,7 +512,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	end
 	-- a one-shot from the car's set (pitch varied a little each time)
 	local function oneShot(id: string, volume: number)
-		local snd = newSound(id, holder, volume)
+		local snd = newSound(id, holder, volume * (1 + tunnelK))
 		snd.PlaybackSpeed = 0.96 + math.random() * 0.08
 		if positional then
 			snd.RollOffMode = Enum.RollOffMode.InverseTapered
@@ -532,6 +536,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	function self.update(_, rpm: number, throttle: number, speedFrac: number, slip: number, timeScale: number?, screech: number?)
 		local ts = timeScale or 1
 		power += ((if running then 1 else 0) - power) * 0.2
+		tunnelK += (tunnelWant - tunnelK) * 0.06
 		smoothRpm += (rpm - smoothRpm) * 0.25
 		local r = math.clamp(smoothRpm - dip, 0.05, 1.1)
 		dip = math.max(0, dip - 0.04)
@@ -626,6 +631,14 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		end
 		growl.PlaybackSpeed = (0.5 + r * 0.95) * base * ts
 		growl.Volume = (0.08 + 0.42 * throttle) * math.clamp(r * 1.3, 0.2, 1) * (if usingCustom then 0.35 else 1) * power * (if ex then 0 else 1)
+		if tunnelK > 0.001 then
+			local g = 1 + tunnelK
+			rumble.Volume *= g
+			growl.Volume *= g
+			for _, snd in layers do
+				snd.Volume *= g
+			end
+		end
 		wind.PlaybackSpeed = (0.85 + speedFrac * 0.6) * ts
 		-- the driver's own car: wind rushes in from walking pace and roars at speed
 		wind.Volume = if positional then 0.55 * speedFrac ^ 1.8 else (if speedFrac > 0.02 then 0.12 + 1.0 * speedFrac ^ 1.3 else 0)
@@ -678,6 +691,10 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 
 	function self.setLaunch(_, on: boolean)
 		launching = on
+	end
+
+	function self.setTunnel(_, inside: boolean)
+		tunnelWant = if inside then 1 else 0
 	end
 
 	function self.destroy(_)

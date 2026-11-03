@@ -78,6 +78,23 @@ local function isMountain(s: CityLayout.Segment): boolean
 end
 local publicNext: { [CityLayout.Segment]: { CityLayout.Segment } } = {}
 
+-- the angle (degrees) between the way into a junction and the way out through option o
+local angleCache: { [any]: number } = setmetatable({}, { __mode = "k" }) :: any
+local function turnAngle(from: CityLayout.Segment, o: CityLayout.Segment): number
+	if o.kind ~= "turn" then
+		return 0
+	end
+	local a = angleCache[o]
+	if a == nil then
+		local after = o.next[1]
+		local fin = (from.p2 - from.p0) * Vector3.new(1, 0, 1)
+		local fout = if after then (after.p2 - after.p0) * Vector3.new(1, 0, 1) else (o.p2 - o.p1) * Vector3.new(1, 0, 1)
+		a = if fin.Magnitude > 0.1 and fout.Magnitude > 0.1 then math.deg(math.acos(math.clamp(fin.Unit:Dot(fout.Unit), -1, 1))) else 0
+		angleCache[o] = a
+	end
+	return a :: number
+end
+
 local function chooseNext(seg: CityLayout.Segment): CityLayout.Segment?
 	local options = publicNext[seg]
 	if not options then
@@ -95,10 +112,26 @@ local function chooseNext(seg: CityLayout.Segment): CityLayout.Segment?
 	if seg.kind == "turn" then
 		return options[1]
 	end
+	-- (owner, 2026-11-03: "some traffic cars would do a unnecessary U turn or J turn just to turn
+	-- right or left"): a turn that doubles back (more than 135 degrees between the way in and the way
+	-- out) is only taken where there is no other way on (a dead end)
+	local hasOther = false
+	for _, o in options do
+		if turnAngle(seg, o) <= 135 then
+			hasOther = true
+			break
+		end
+	end
 	-- prefer going straight (weight 3) over turning (weight 1); onto the mountain seldom, and not
 	-- at all while it already has its few cars
 	local function weight(o: CityLayout.Segment): number
 		local w = if o.dir == seg.dir then 3 else 1
+		local ang = turnAngle(seg, o)
+		if ang > 135 and hasOther then
+			return 0
+		elseif ang > 110 then
+			w *= 0.3 -- sharp turns back up a hill: seldom
+		end
 		if not seg.mountain and isMountain(o) then
 			w *= if mountainCars >= T.MountainMax then 0 else T.MountainTurnK
 		end
@@ -190,6 +223,18 @@ local function lanesNear(lanes: { CityLayout.Segment }, center: Vector3, maxDist
 	return nearby
 end
 
+-- the hill roads (Mountain Road, the hairpins, terraces and switchbacks): quiet
+local hillCache: { [any]: boolean } = setmetatable({}, { __mode = "k" }) :: any
+local function isHillRoad(seg: CityLayout.Segment): boolean
+	local v = hillCache[seg]
+	if v == nil then
+		local road = (seg :: any).road :: string?
+		v = road ~= nil and (road == "Mountain Road" or string.find(road, "Hairpin") ~= nil or string.find(road, "Terrace") ~= nil or string.find(road, "Switchbacks") ~= nil)
+		hillCache[seg] = v
+	end
+	return v :: boolean
+end
+
 -- Lane position near "center" (or anywhere if center == nil)
 local function findSpot(center: Vector3?, minDist: number, maxDist: number, ignore: Npc?, avoidView: boolean?, highway: boolean?): (CityLayout.Segment?, number)
 	local camera = workspace.CurrentCamera
@@ -205,6 +250,11 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 			continue
 		end
 		if (seg :: any).riviera and rivieraCars >= T.RivieraMax then
+			continue
+		end
+		-- (owner, 2026-11-03: "add more cars on the main city area"): the hill roads up to the
+		-- summits get only a share of the spots, so the town's streets carry most of the traffic
+		if isHillRoad(seg) and rng:NextNumber() > T.HillShare then
 			continue
 		end
 		local s = rng:NextNumber(8, math.max(9, seg.length - 25))
@@ -436,6 +486,124 @@ local function mustYieldLeft(npc: Npc, seg: CityLayout.Segment): boolean
 	return false
 end
 
+-- Crossing traffic (owner, 2026-11-03: "make the traffic cars smarter, they're bumping into each
+-- other at the intersection"): lookAheadGap only sees what is straight ahead, so cars turning at a
+-- junction ran into cars crossing or turning into the same lane. Each turn through a junction knows
+-- which other paths cross it or merge with it (worked out once, from the curves themselves). A car
+-- about to take a turn waits at the junction's edge while a car is on one of those paths, or is
+-- coming up to one and nearer the junction (on a tie, the lower number goes first). Cars already in
+-- the junction carry on and clear it. A player's car always has the way.
+local npcIndex: { [Npc]: number } = setmetatable({}, { __mode = "k" }) :: any
+local nextIndex = 0
+local function indexOf(n: Npc): number
+	local k = npcIndex[n]
+	if not k then
+		nextIndex += 1
+		k = nextIndex
+		npcIndex[n] = k
+	end
+	return k
+end
+local conflictCache: { [any]: { [any]: Vector3 } } = {}
+local allRiv: { CityLayout.Segment }? = nil
+local function conflictsOf(turn: CityLayout.Segment): { [any]: Vector3 }
+	local c = conflictCache[turn]
+	if c then
+		return c
+	end
+	c = {}
+	conflictCache[turn] = c
+	if not allRiv then
+		local riv = RivieraTraffic.build()
+		allRiv = if riv then riv.all else {}
+	end
+	local lo = turn.p0:Min(turn.p1):Min(turn.p2) - Vector3.new(8, 8, 8)
+	local hi = turn.p0:Max(turn.p1):Max(turn.p2) + Vector3.new(8, 8, 8)
+	local mine = {}
+	for k = 0, 6 do
+		mine[k + 1] = (CityLayout.sample(turn, turn.length * k / 6))
+	end
+	for _, other in allRiv :: { CityLayout.Segment } do
+		if other ~= turn then
+			local olo = other.p0:Min(other.p1):Min(other.p2)
+			local ohi = other.p0:Max(other.p1):Max(other.p2)
+			if olo.X <= hi.X and ohi.X >= lo.X and olo.Z <= hi.Z and ohi.Z >= lo.Z then
+				local sameStart = (other.p0 - turn.p0).Magnitude < 1
+				local sameEnd = (other.p2 - turn.p2).Magnitude < 1
+				local feeds = (other.p2 - turn.p0).Magnitude < 1 or (other.p0 - turn.p2).Magnitude < 1
+				local sameRoad = turn.kind == "lane" and other.kind == "lane" and (turn :: any).road == (other :: any).road
+				if sameRoad then
+					-- (a road's own lanes never cross each other)
+				elseif sameEnd and not sameStart then
+					c[other] = turn.p2 -- both end in the same lane: a merge
+				elseif not sameStart and not feeds then
+					-- where the two paths come closest (within 6 studs)
+					local bestD, bestP = 6, nil
+					for k = 0, 6 do
+						local q = (CityLayout.sample(other, other.length * k / 6))
+						for _, p in mine do
+							local d = Vector3.new(p.X - q.X, 0, p.Z - q.Z).Magnitude
+							if d < bestD and math.abs(p.Y - q.Y) < 6 then
+								bestD, bestP = d, (p + q) / 2
+							end
+						end
+					end
+					if bestP then
+						c[other] = bestP
+					end
+				end
+			end
+		end
+	end
+	return c
+end
+-- the distance to stop in before the junction, or nil
+local function crossConflict(npc: Npc, obstacles: { Obstacle }): number?
+	local seg, nxt = npc.seg, npc.nextSeg
+	-- (the next piece: a turn through the junction, or a lane piece that runs across another road)
+	if seg.kind ~= "lane" or not nxt or not (nxt :: any).riviera then
+		return nil
+	end
+	local toEnd = seg.length - npc.s - npc.halfLen - T.StopLineMargin
+	if toEnd < -1 or toEnd > 30 then
+		return nil
+	end
+	local C = conflictsOf(nxt)
+	local me = indexOf(npc)
+	local vMe = math.max(npc.speed, 5)
+	for _, o in Traffic.cars do
+		if o ~= npc and (o.pos - npc.pos).Magnitude < 120 then
+			local P = C[o.seg] or (if o.nextSeg then C[o.nextSeg] else nil)
+			if P then
+				local toP = P - o.pos
+				local ahead = toP:Dot(o.fwd) -- how far the spot is ahead of that car's middle
+				local dist = Vector3.new(toP.X, 0, toP.Z).Magnitude
+				if dist < o.halfLen + 4 and (o.speed > 0.5 or ahead < o.halfLen * 0.5) then
+					-- it is on the spot right now (a car stopped short of it, waiting its turn, isn't)
+					return math.max(0, toEnd)
+				elseif ahead > 0 and dist < 40 and o.speed > 0.5 then
+					-- it is heading for the spot: whoever gets there first goes
+					local tO = ahead / math.max(o.speed, 0.5)
+					local myP = P - npc.pos
+					local tMe = math.max(myP:Dot(npc.fwd), 0) / vMe
+					if tO < tMe - 0.2 or (math.abs(tO - tMe) <= 0.2 and indexOf(o) < me) then
+						return math.max(0, toEnd)
+					end
+				end
+			end
+		end
+	end
+	-- a player's car near the junction: wait for it
+	local jp = nxt.p1
+	for _, pc in playerCarCache do
+		if (pc.pos - jp).Magnitude < 40 and pc.speed > 3 then
+			return math.max(0, toEnd)
+		end
+	end
+	local _ = obstacles
+	return nil
+end
+
 local obstacleList: { Obstacle } = {}
 local npcObstacle: { [Npc]: Obstacle } = setmetatable({}, { __mode = "k" }) :: any
 local frameCount = 0
@@ -534,8 +702,15 @@ function Traffic.update(dt: number)
 		-- cars / players ahead
 		local crossBlocked = false
 		if npc.ghost <= 0 then
+			-- crossing traffic at a junction: give way to whoever gets there first
+			-- (only where it can be seen: cars far from the camera skip it, it is the costliest check)
+			local stopAt = if (npc.pos - camPos).Magnitude < 500 then crossConflict(npc, obstacleList) else nil
+			if stopAt then
+				target = if stopAt < 0.5 then 0 else math.min(target, math.sqrt(2 * T.Brake * 0.7 * stopAt))
+				crossBlocked = true -- (a true standoff still gets broken by the gridlock breaker)
+			end
 			local gap, otherSpeed, align = lookAheadGap(npc, obstacleList)
-			crossBlocked = gap < math.huge and align < 0.7
+			crossBlocked = crossBlocked or (gap < math.huge and align < 0.7)
 			if gap < math.huge then
 				-- (owner, 2026-10-29: "NPC cars on each other's tail, make space for at least one
 				-- car"): once moving, keep a car length plus a time gap; a stopped queue closes up

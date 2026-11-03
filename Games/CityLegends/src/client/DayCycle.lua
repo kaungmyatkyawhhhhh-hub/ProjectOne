@@ -92,6 +92,9 @@ local RIVIERA_KEYS: { Key } = {
 	{ hour = 19.6, brightness = 1.7, ambient = rgb(78, 90, 130), outdoor = rgb(92, 108, 160), shiftTop = rgb(120, 140, 210), exposure = 0.65, density = 0.22, haze = 0.5, glare = 0.2, atmo = rgb(62, 86, 152), decay = rgb(36, 52, 112), bloom = 0.35, rays = 0, tint = rgb(246, 244, 255), water = rgb(14, 36, 72), sat = 0.08, con = 0.1 },
 	table.freeze(with(R_NIGHT, 21)),
 }
+-- the realistic grade laid over RIVIERA_KEYS (see DayCycle.start)
+local REAL = table.freeze({ sat = 0.16, con = 0.05, density = 0.08, hazeMin = 0.7, bloom = 0.75, brightness = 0.92, shade = 0.18 })
+
 -- On the Riviera the sun follows a stretched evening clock, so the golden hour and the blue hour
 -- last (in Roblox the sun sets at 18:00 and it is dark by 18:40): game hour -> sun clock
 local SUN_CLOCK = { { 0, 0 }, { 16.5, 16.5 }, { 18.3, 17.72 }, { 19.6, 18.32 }, { 21, 19.3 }, { 24, 24 } }
@@ -264,6 +267,19 @@ function DayCycle.start()
 		setSky(if w >= 0.5 then rivieraSky(hour) else "base")
 		if w > 0 then
 			local r = sample(hour, RIVIERA_KEYS)
+			-- (owner, 2026-11-03: "the game look a little bit like an arcade game, I want it to feel
+			-- very realistic") a photographic grade over the Riviera's light: colours a little muted
+			-- (the bright pastels and the deep-blue sky read as cartoon), firmer contrast, deeper
+			-- shade (less flat ambient fill), a real distance haze so far streets fade into the air,
+			-- and a softer bloom
+			r.sat = (r.sat or BASE_SAT) - REAL.sat
+			r.con = (r.con or BASE_CON) + REAL.con
+			r.density += REAL.density
+			r.haze = math.max(r.haze, REAL.hazeMin)
+			r.bloom *= REAL.bloom
+			r.brightness *= REAL.brightness
+			r.ambient = r.ambient:Lerp(Color3.new(0, 0, 0), REAL.shade)
+			r.outdoor = r.outdoor:Lerp(Color3.new(0, 0, 0), REAL.shade * 0.6)
 			for key, v in r do
 				local base = (k :: any)[key]
 				if typeof(v) == "Color3" then

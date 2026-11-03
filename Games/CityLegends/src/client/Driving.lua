@@ -26,6 +26,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
+local SoundService = game:GetService("SoundService")
 local player = Players.LocalPlayer
 local avatarDesc: HumanoidDescription? = nil -- for the driver's arms
 
@@ -211,6 +212,8 @@ type State = {
 	screech: number, -- tyre cry on hard launches (sound only)
 	chirp: number, -- seconds left of a tyre chirp after a hard low-gear shift
 	launchReady: boolean, -- launch control: brake + throttle held at a stop
+	tunnelCheck: number?, -- seconds to the next tunnel check
+	inTunnel: boolean?,
 	autoHintT: number?, -- when Q / E in automatic last showed its hint
 	-- driving feel (Config.DrivingFeel)
 	yawRate: number, -- the car's turn now (it follows the wheel with some weight)
@@ -1098,6 +1101,45 @@ local function setLights(s: State, on: boolean)
 end
 
 -- the engine starting brings the dash (needle sweep) and the lights on; stopping it turns them off
+-- a tunnel: a roof overhead here and also 25 studs ahead and behind (so a bridge or a sign
+-- overhead doesn't count; the coast tunnel is open to the sea on one side, so no wall check)
+local tunnelRay = RaycastParams.new()
+tunnelRay.FilterType = Enum.RaycastFilterType.Exclude
+tunnelRay.IgnoreWater = true
+local function roofAt(p: Vector3): boolean
+	local up = workspace:Raycast(p, Vector3.new(0, 45, 0), tunnelRay)
+	if not up then
+		return false
+	end
+	if up.Instance ~= workspace.Terrain then
+		local sz = (up.Instance :: BasePart).Size
+		if math.max(sz.X * sz.Z, sz.X * sz.Y, sz.Y * sz.Z) < 300 then
+			return false -- a sign or a lamp overhead, not a roof
+		end
+	end
+	return true
+end
+local function isInTunnel(s: State): boolean
+	local ignore: { Instance } = { s.model }
+	for _, name in { "Traffic", "PlayerCars", "Pedestrians" } do
+		local f = workspace:FindFirstChild(name)
+		if f then
+			table.insert(ignore, f)
+		end
+	end
+	if workspace.CurrentCamera then
+		table.insert(ignore, workspace.CurrentCamera)
+	end
+	tunnelRay.FilterDescendantsInstances = ignore
+	local p = s.root.Position
+	local f = s.root.CFrame.LookVector * Vector3.new(1, 0, 1)
+	if f.Magnitude < 0.1 then
+		return false
+	end
+	f = f.Unit
+	return roofAt(p) and roofAt(p + f * 25) and roofAt(p - f * 25)
+end
+
 local function setCarPower(s: State, on: boolean)
 	setClusterPower(s, on)
 	setLights(s, on)
@@ -2797,6 +2839,18 @@ function Driving.render(dt: number)
 	local fx = math.max(speedFrac, rush)
 
 	-- engine / wind / tyre audio (the wind by the rush too)
+	-- in a tunnel (a roof overhead along the way; owner, 2026-11-03): the engine doubles and
+	-- the sound gets a stone-corridor echo; checked a few times a second
+	s.tunnelCheck = (s.tunnelCheck or 0) - dt
+	if s.tunnelCheck <= 0 then
+		s.tunnelCheck = 0.2
+		local inside = isInTunnel(s)
+		if inside ~= s.inTunnel then
+			s.inTunnel = inside
+			s.engine:setTunnel(inside)
+			SoundService.AmbientReverb = if inside then Enum.ReverbType.StoneCorridor else Enum.ReverbType.City
+		end
+	end
 	s.engine:update(s.rpm, s.throttle, fx, s.slip, nil, s.screech)
 	if s.roar then
 		local k = if s.grounded then math.clamp(mphNow / 180, 0, 1) ^ 1.3 else 0

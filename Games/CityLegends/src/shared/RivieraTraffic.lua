@@ -104,6 +104,24 @@ function RivieraTraffic.build()
 				local d = (p2 - p0).Magnitude
 				local dirIn = (before.p2 - before.p0).Unit
 				local p1 = p0 + dirIn * math.min(d * 0.5, 30)
+				-- (2026-11-03, owner: cars swung out in J shapes to turn) the curve's corner where the
+				-- way in and the way out meet, so a turn is a clean arc; the old guess when they don't
+				local dirOut = (after.p2 - after.p0)
+				if dirOut.Magnitude > 0.1 then
+					dirOut = dirOut.Unit
+					local a2 = Vector2.new(dirIn.X, dirIn.Z)
+					local b2 = Vector2.new(dirOut.X, dirOut.Z)
+					local cross = a2.X * b2.Y - a2.Y * b2.X
+					if math.abs(cross) > 0.2 then
+						local w = Vector2.new(p2.X - p0.X, p2.Z - p0.Z)
+						local t = (w.X * b2.Y - w.Y * b2.X) / cross -- along the way in
+						local u = (a2.X * w.Y - a2.Y * w.X) / cross -- back from p2 along the way out
+						if t > 0 and u > 0 and t < d * 1.2 and u < d * 1.2 then
+							local corner = p0 + dirIn * t
+							p1 = Vector3.new(corner.X, (p0.Y + p2.Y) / 2, corner.Z)
+						end
+					end
+				end
 				local turn = newSegment(all, p0, p1, p2, "turn")
 				turn.speedK = 0.8
 				turn.turnSpeed = 18

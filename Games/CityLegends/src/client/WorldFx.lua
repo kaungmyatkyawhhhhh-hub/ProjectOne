@@ -492,7 +492,8 @@ function WorldFx.start()
 
 	-- monorail
 	local train: { TrainCar } = {}
-	if Config.Graphics.Monorail then
+	-- (2026-11-03, optimising) the monorail runs round the old city's skyline: not in Monaco only
+	if Config.Graphics.Monorail and not Config.monacoOnly() then
 		local folder = Instance.new("Folder")
 		folder.Name = "MonorailTrain"
 		folder.Parent = workspace
