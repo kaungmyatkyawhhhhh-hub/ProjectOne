@@ -28,7 +28,7 @@ _For Claude Code. Read all of this first. Owner: talk short and simple (caveman 
   - the car market;
   - challenges;
   - tests.
-- **Careful with donors:** other cars may borrow a removed car's cabin or steering wheel (for example `bentz_cla45` and `bnw_x6` appear in donor tables). If a kept car uses a removed car's model as a donor, keep that model in `CarModels` as a donor only (not sold), or move the kept car to another donor, and check it still looks right.
+- **Careful with donors:** other cars may borrow a removed car's cabin or steering wheel (for example `bentz_cla45` appears in donor tables). If a kept car uses a removed car's model as a donor, keep that model in `CarModels` as a donor only (not sold), or move the kept car to another donor, and check it still looks right.
 
 ## What to do
 1. Take the 8 cars out of the **dealer, the roster, the market listings, the starter-car pick, traffic and the dealership display**.
