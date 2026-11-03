@@ -353,3 +353,6 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
     - Test tips:
       - The MoneyCoach trainer (workspace.LocalTrainers) is a see-through copy of you that stands behind you. Hide it for body shots.
       - The skin tone for a test is the Player's "SkinColor" attribute (set on the client).
+  - **Owner imported v3 (3 Nov):** both upper arms swapped in (v2 kept as `*_v2` in the backup folder). Config/BodyStages arms now = v3 bounds (old values in comments).
+    - In game at Alter 15 maxed, same camera as the v2 shot: **the triceps fin is gone**, and the back of the arm curves round. Shots 14-16 in `screens_3Nov_late`.
+    - (The head and hair were missing in that test run: Roblox asset downloads timed out, per the console. Not caused by the change.)
