@@ -144,3 +144,29 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
   - Tested: no circles in the Gold detail; SKINS shows the 6 prices and Olympian in its new marble. Screens 11-12.
 - (4 Nov, owner: "when u dont own the skin and u press on the card, then it will open the ... product prompt") **Any Robux skin you don't own opens its purchase prompt on tap.** The "reach its alter first" rule is gone (the server never checked it). Olympian (earned, never sold) still says how to get it; a skin with no product says SOON.
   - Tested on a brand-new save: all 6 cards show BUY R$ with the live price, the tap runs with no errors. The prompt itself is Roblox's own window, which Studio screenshots don't capture.
+
+## Later 4 Nov (owner's batch)
+- **SKINS cards:** no lock icons (a skin you don't own is just darker). Zombie (an event skin) says **LIMITED** in red where the others say "Look only".
+- **YOUR ROAD:** the tick on reached stops is gone (`RoadClient`). Tested: 0 of 26 shown.
+- **Coach Dex:** the ALTERS tab is replaced by **SKINS**, the same cards as LOOKS > SKINS (`Config/PumpShop` Coach tabs, `PumpShopClient`).
+  - ALTER NOW / WHAT TO TRAIN lived in that old tab. Altering is still done from the BODY ALTER READY popup and the HUD's alter card.
+- **Admin:** `skin` (give, or `false` / off to take away) and `skins` (the list), in the F9 console and in the ADMIN panel's GIFTS tab (`AdminService`, `PlayerData.AdminSetSkin`).
+  - A given skin is owned but not worn.
+  - Olympian can be given (marks it earned and gives the title) but never taken away.
+  - Names match loosely ("black marble").
+  - Tested: give, already has it, take away, Olympian refused, unknown name.
+- **Robux skins look superior** (owner): `Config/AlterLooks` now has a full look for each skin, more than the alter finales: up to 3 pieces, the strongest light (1.6-1.8), busier idle particles (still <= 8), a rep burst, a flex ring with beams and its own footstep. Live now (not gated by the Gem update).
+  - **Inferno:** molten chest core, lava cuffs, embers.
+  - **Frostbite:** ice crown + forearm shards, frost mist, ice-crack steps.
+  - **Zombie:** toxic core, bandaged wrists, green fumes.
+  - **Black Marble:** gold crown, gold-banded cuffs, gold dust.
+  - **Patina:** bronze cuffs, teal core.
+  - **Rose Gold:** rose crown, shoulder crystals, prism light.
+  - **Olympian:** gold bracers and arm bands (no head piece: the live top-3 crown floats there).
+  - Crowns lifted (lift 1.1) so hair doesn't hide them. Checked on the body: Inferno, Black Marble, Rose Gold.
+- Correction: the "Sparkle 9126073302 doesn't load" note above was wrong. It's a **sound** id in AlterLooks; it only failed because I'd tried it as a particle texture.
+- **Members Gym music changed** (owner): Ride To Victory, Final Strike, Inside The Machine (APM).
+  - Two first picks (Down To The Wire, Kick It Off) measured too quiet and were dropped.
+  - Gains added; tested playing in the gym.
+- **Settings "Runway Invites" On / Off:** Off = PosingCompService doesn't send THE RUNWAY invite card; the show still runs. Saved in `settings.runwayInvites`. Tested: the row shows and the setting saves.
+- Screens 13-17 in `screens_4Nov_top3`.
