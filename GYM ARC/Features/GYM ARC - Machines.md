@@ -70,3 +70,6 @@ One reusable machine system: every machine is a config entry with the muscles it
 
 ## Shiny starter plates (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
 - Owner: "make the starter gym weight plates shiny like pro gym too". `MachineService`: plates loaded on a machine in `workspace.Gym` keep their colours with Metal on the body, rim and hub (the Pro Gym's gold plates are Metal too). The display plates already standing in the starter gym (racks, trees, floor: 111 parts) were set to Metal in Studio.
+
+## Gem Mine copies (3 Nov)
+- `Machines.GemCopies` (21: GemBench ... GemWoodchop) and `Machines.GemDumbbells` (GemDB*): gym "GemMine", base = the normal id, the heaviest copy's whole ladder + 7 Gem weights (`Machines.GemProgression`, `GemFullProgression` = 33 weights). `openAt = math.huge` keeps them out of the spurt goal, the muscles panel and the Members gyms' best-copy pick. Their models (Workspace.Town.GemMineGym.Machines) have Members = true, MembersBase = the Gem id, Club = "GemMine". Plate 150 lb added (`Machines.Plates[150]`, `GymAssets.Plates.Plate150`). Details: [[2026-11-03 GYM ARC Gem Mine Gym built]].
