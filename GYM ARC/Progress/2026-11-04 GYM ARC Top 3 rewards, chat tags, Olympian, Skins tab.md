@@ -136,3 +136,4 @@ The "main leaderboard" = the Hall of Fame board (TOP 10 ALL TIME: stars, then wh
     - **Members:** Get Up And Move B, Fortitude, New Team Spirit.
   - Levels measured and added to MusicGain.
   - Tested in Play: VIP plays 1848347043 and Members plays 1846471612, both loaded; starter and town are unchanged.
+- (4 Nov, owner) **Head growth per alter: 3% → 1%** (`Config/GrowthSpurts.HeadPerAlter = 0.01`): Alter 5 = x1.05, Alter 15 = x1.15, Alter 20 = x1.20. The player, mirror and Hall statues all use it.
