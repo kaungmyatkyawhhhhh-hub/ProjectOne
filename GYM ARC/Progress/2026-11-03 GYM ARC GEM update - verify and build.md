@@ -29,3 +29,12 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Event: [[2026-11-01 GYM ARC GEM upda
   - the **Alter 15 body look**, so bodies don't shrink at launch;
   - the **old-save rescale** in PlayerData, so Alter 15 saves aren't scaled up.
 - **Gem skins:** made by `ClaudeOne\tools\alter_textures_gem.py`: 5 alters x colour / normal / roughness + 5 popup backgrounds. They are in `Downloads\gem_update_import\` with `IMPORT_LIST.md`. **Owner: import to Myanmar Builders Club.**
+- **3 Nov - Gem skins LIVE in Studio:** the owner imported the 20 PNGs to the group.
+  - Ids were read from the Decals and checked: each colour map's average matches the generator.
+  - The decals are kept in `ServerStorage.AlterMapsGem_GroupImages`.
+  - Built `ReplicatedStorage.SkinStages.Alter_Jade / _Ruby / _Sapphire / _Amethyst / _Diamond` (copies of Alter_Gold's setup, gem maps, no metalness).
+  - `Config/Alters` 16-20: textures, mean, tone Raw, RawPlain head colours.
+  - `Config/AlterThemes` popup backgrounds 16-20.
+  - **Tested in Play:** all 5 skins render on a max body (not grey).
+  - Diamond reads pale white on its own; its LIGHT / MOTION layers (prism sparkle) are what make it read as diamond.
+  - Still locked until the update (LastAvailable + GemAlters).

@@ -128,3 +128,16 @@ Owner: "add alter variants in some of the alters. and it will cost robux. in the
 - (27 Oct) **Emblems in** (owner imported; matched by colour): Inferno 121722957833242 (flame), Frostbite 115304328078861 (snowflake), Zombie 92040330441249 (pumpkin), Black Marble 118591104017679 (gem), Patina 103349913890318 (leaf), Rose Gold 130238671216695 (crown). `Config/Alters` `emblem`; a drawn emblem is shown 35% bigger in its circle (its picture has a margin). Checked in the Store and Inventory.
 
 - (28 Oct) After the last alter: the HUD pill says **MORE ALTERS SOON / Tap to get update alerts**; a tap asks Roblox's notification opt-in prompt (`ProgressClient.notifyUpdates`).
+
+## Tier 4 GEM (16-20), 3 Nov - for the GEM update (7 Nov)
+- Jade, Ruby, Sapphire, Amethyst, Diamond. Own procedural maps (`ClaudeOne\tools\alter_textures_gem.py`), imported to Myanmar Builders Club by the owner.
+  - Ids are in `Config/Alters`; the decals are in `ServerStorage.AlterMapsGem_GroupImages`.
+  - SkinStages `Alter_<id>`; popup backgrounds are in `Config/AlterThemes` 16-20.
+- **Goals:** 1266 / 1344 / 1395 / 1441 / 1487 = ~80 / 85 / 90 / 95 / 100 min for a 2-Volta player in the Gem Mine.
+  - Gem Mine machines give x2.7 EXP a rep vs the Powerlifting ladder.
+  - Outside the Gem Mine it takes ~2.7x longer.
+- **Locked until the GEM update:** `Alters.LastAvailable` checks `LiveEvents.Unlocked("GemAlters")` for tier 4+.
+- `Alters.GoalBeforeGem(n)` (the old formula, 16 = 902) keeps three things as they were:
+  - the Hall of Fame goal;
+  - the Alter 15 body look;
+  - the PlayerData old-save rescale.
