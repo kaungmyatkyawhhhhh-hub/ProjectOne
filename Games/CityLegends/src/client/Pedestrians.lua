@@ -383,6 +383,7 @@ end
 -- turning back where the pavement stops (a junction mouth, a wall)
 ---------------------------------------------------------------------
 local rivPaths: { { Vector3 } }? = nil
+local TOWN_TOP = 92 -- studs up: the busy town ends here (Town Road and the top streets reach ~85)
 local function rivieraPaths(): { { Vector3 } }
 	if rivPaths then
 		return rivPaths
@@ -394,7 +395,11 @@ local function rivieraPaths(): { { Vector3 } }
 		end)
 		if ok and type(data) == "table" then
 			for _, l in data.lanes do
-				if l.lane == 2 then -- the outer lane, 24 right of the centre: the pavement is 13 further
+				-- (owner, 2026-11-03: "dont add walking npc near the summits but npc in the busy city
+				-- area is fine"): no one on the hill roads up to the summits, nor above the town
+				local hill = l.road == "Mountain Road" or string.find(l.road or "", "Hairpin") ~= nil
+					or string.find(l.road or "", "Terrace") ~= nil or string.find(l.road or "", "Switchbacks") ~= nil
+				if l.lane == 2 and not hill then -- the outer lane, 24 right of the centre: the pavement is 13 further
 					local pts = l.pts
 					local n = #pts // 3
 					local path = {}
@@ -403,7 +408,13 @@ local function rivieraPaths(): { { Vector3 } }
 						local b = if k < n then Vector3.new(pts[3 * k + 1], pts[3 * k + 2], pts[3 * k + 3]) else a
 						local pa = if k > 1 then Vector3.new(pts[3 * k - 5], pts[3 * k - 4], pts[3 * k - 3]) else a
 						local d = (b - pa) * Vector3.new(1, 0, 1)
-						if d.Magnitude > 0.1 then
+						if a.Y > TOWN_TOP then
+							-- (a climb past the town's top: the path stops there, a new one starts below)
+							if #path > 3 then
+								table.insert(list, path)
+							end
+							path = {}
+						elseif d.Magnitude > 0.1 then
 							local right = Vector3.new(-d.Z, 0, d.X).Unit
 							table.insert(path, a + right * 13 + Vector3.new(0, 0.35, 0))
 						end

@@ -1443,12 +1443,15 @@ end
 -- Loading / fades / cinematic
 ---------------------------------------------------------------------
 -- Safety net (Playbook: SKIP after ~5 s): a SKIP button shows after 5 seconds and the screen
--- always goes after 10, even if something is still loading behind it. Once skipped, it stays away
--- until the startup step that showed it is over (the next hideLoading).
+-- always goes after LOADING_MAX, even if something is still loading behind it. Once skipped, it
+-- stays away until the startup step that showed it is over (the next hideLoading).
+-- (owner, 2026-11-03: "add a loading screen to finish loading the map so that players dont need to
+-- play with loading map and lag"): it used to go after 10 s whatever; now Main.client keeps it up
+-- until the map round the player has streamed in (waitForMap), so the cap is only for a stuck load
 local loadingFrame: Frame? = nil
 local loadingSkipped = false
 local LOADING_SKIP_AFTER = 5
-local LOADING_MAX = 10
+local LOADING_MAX = 45
 -- the loading screen shows the whole map behind the title (owner, 2026-10-30, in place of the intro
 -- film); Minimap draws it: returns the middle and size of the part to fit on screen
 local loadingMap: ((Frame) -> (Vector2, Vector2))? = nil
@@ -1563,6 +1566,11 @@ function UI.showLoading(text: string)
 		b.Activated:Connect(skip)
 	end)
 	task.delay(LOADING_MAX, skip)
+end
+
+-- still on screen (not skipped, not hidden)
+function UI.loadingVisible(): boolean
+	return loadingFrame ~= nil
 end
 
 function UI.hideLoading()

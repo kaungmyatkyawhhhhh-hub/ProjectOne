@@ -65,6 +65,7 @@ function Driving.setCamFx(fx: { shake: number?, head: number?, blur: boolean?, f
 end
 Driving.inputEnabled = true
 Driving.menuHold = false -- the main menu is open: the car is braked and held (MainMenu)
+Driving.loadHold = false -- the map round the car is still loading (Main.client's waitForMap): held too
 Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings; Q / E switch to manual too)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
@@ -260,7 +261,7 @@ end
 ---------------------------------------------------------------------
 local function readInput(): (number, number, number, boolean, boolean)
 	-- the main menu is open: braked and held where it is (owner, 2026-11-02)
-	if Driving.menuHold then
+	if Driving.menuHold or Driving.loadHold then
 		-- (brakes while moving, the handbrake once stopped: a held brake at a stop would reverse)
 		local s = state
 		local moving = s ~= nil and Vector3.new(s.vel.X, 0, s.vel.Z).Magnitude > 3

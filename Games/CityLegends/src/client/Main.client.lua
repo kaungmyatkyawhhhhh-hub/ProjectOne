@@ -116,6 +116,46 @@ end
 if not city then
 	warn("[CityLegends] no City in Workspace after 60 s, going on without it")
 end
+-- Loading the map (owner, 2026-11-03: "add a loading screen to finish loading the map so that
+-- players dont need to play with loading map and lag"): with streaming on, the map round the
+-- player arrives over a few seconds. The loading screen stays up (the car held) until parts have
+-- stopped arriving for a moment, then the game starts. SKIP (after 5 s, Playbook) still works.
+local streamedIn = 0
+for _, root in { workspace:FindFirstChild("Riviera"), city } do
+	if root then
+		root.DescendantAdded:Connect(function(d)
+			if d:IsA("BasePart") then
+				streamedIn += 1
+			end
+		end)
+	end
+end
+local MAP_QUIET_PARTS = 6 -- at most this many parts arriving per quarter second...
+local MAP_QUIET_TIME = 1.5 -- ...for this long counts as loaded
+local MAP_MAX_WAIT = 30
+local function waitForMap(status: string)
+	if not workspace.StreamingEnabled or not workspace:FindFirstChild("Riviera") then
+		return
+	end
+	UI.showLoading(status)
+	local t0 = os.clock()
+	task.wait(1)
+	local last, quiet = streamedIn, 0
+	while os.clock() - t0 < MAP_MAX_WAIT and UI.loadingVisible() do
+		task.wait(0.25)
+		local added = streamedIn - last
+		last = streamedIn
+		if added <= MAP_QUIET_PARTS and not player.GameplayPaused then
+			quiet += 0.25
+			if quiet >= MAP_QUIET_TIME then
+				break
+			end
+		else
+			quiet = 0
+		end
+	end
+end
+
 UI.showLoading("Shaping the cars...")
 UI.showLoading("Starting engines...")
 task.wait(1) -- let the world finish replicating
@@ -369,6 +409,7 @@ startStep("Challenges", function()
 	require(script.Parent:WaitForChild("ChallengesClient")).init() -- drifts, speed traps, jumps, leaderboard (B)
 end)
 print("[CityLegends] startup: " .. table.concat(stepTimes, ", "))
+waitForMap("Loading the map...")
 UI.hideLoading()
 
 ---------------------------------------------------------------------
@@ -425,6 +466,11 @@ local function tryAttach(model: Instance)
 		OnFoot.reset()
 		Traffic.clearAround(model:GetPivot().Position, 35)
 		Driving.attach(model)
+		-- (the streets round the car finish loading behind the loading screen, the car held)
+		Driving.loadHold = true
+		waitForMap("Loading the streets...")
+		Driving.loadHold = false
+		UI.hideLoading()
 		UI.showHud(true)
 		UI.setCameraLabel(Driving.cameraMode)
 		UI.fade(false, 0.5)
@@ -741,17 +787,22 @@ MainMenu.init({
 			end
 			Driving.teleport(cf)
 			Traffic.clearAround(cf.Position, 35)
-			task.wait(0.5)
+			Driving.loadHold = true
+			waitForMap("Loading the streets...")
+			Driving.loadHold = false
+			UI.hideLoading()
 			UI.fade(false, 0.4)
 		elseif OnFoot.active and player.Character then
 			UI.fade(true, 0.25)
 			task.wait(0.3)
 			if settle() and player.Character then
 				player.Character:PivotTo(cf + Vector3.new(0, 3, 0))
+				waitForMap("Loading the streets...")
+				UI.hideLoading()
 			else
 				UI.toast("Can't put you there right now, try again", Config.Theme.Danger)
+				task.wait(0.5)
 			end
-			task.wait(0.5)
 			UI.fade(false, 0.4)
 		elseif result.spawn and data.Selected then
 			requestDrive(data.Selected)
