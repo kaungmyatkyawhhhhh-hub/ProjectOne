@@ -31,7 +31,7 @@ local Parking = {}
 local P = Config.Parking
 local rng = Random.new()
 
-type Bay = { cf: CFrame, car: Model? }
+type Bay = { cf: CFrame, car: Model?, pool: { string }? }
 
 local bays: { Bay } = {}
 local vipBays: { BasePart } = {}
@@ -39,16 +39,19 @@ local folder: Folder
 
 -- the cars that can be parked: Starter / Mid tiers with an imported model in the game
 local pool: { string } = {}
+-- (2026-11-04) the marina's bays by the yachts get supercars (Config.Parking.MarinaTiers)
+local marinaPool: { string } = {}
 
-local function pickCar(): string?
-	if #pool == 0 then
+local function pickCar(from: { string }?): string?
+	local list = from or pool
+	if #list == 0 then
 		return nil
 	end
-	return pool[rng:NextInteger(1, #pool)]
+	return list[rng:NextInteger(1, #list)]
 end
 
 local function park(bay: Bay)
-	local id = pickCar()
+	local id = pickCar(bay.pool)
 	if not id then
 		return
 	end
@@ -84,6 +87,9 @@ function Parking.init(ctx: any, Police: any, Towers: any)
 		if table.find(P.Tiers, spec.Tier) and not spec.BaseId then
 			table.insert(pool, spec.Id)
 		end
+		if table.find(P.MarinaTiers or {}, spec.Tier) and not spec.BaseId and not spec.Pending then
+			table.insert(marinaPool, spec.Id)
+		end
 	end
 	folder = Instance.new("Folder")
 	folder.Name = "ParkedCars"
@@ -108,6 +114,29 @@ function Parking.init(ctx: any, Police: any, Towers: any)
 		end
 		for i = 1, math.min(P.ParkedPerGarage, #spots) do
 			local bay: Bay = { cf = spots[i], car = nil }
+			table.insert(bays, bay)
+			park(bay)
+		end
+	end
+
+	-- the marina's quay (Workspace.Riviera.Marina, tools/riviera/Marina.luau): supercars in a few of
+	-- its bays, like the owner's photo of the harbour
+	local riv = workspace:FindFirstChild("Riviera")
+	local marina = riv and riv:FindFirstChild("Marina")
+	local mb = marina and marina:FindFirstChild("MarinaBays")
+	if mb then
+		local spots = {}
+		for _, d in mb:GetChildren() do
+			if d:IsA("BasePart") and d.Name == "ParkBay" then
+				table.insert(spots, d.CFrame)
+			end
+		end
+		for i = #spots, 2, -1 do
+			local j = rng:NextInteger(1, i)
+			spots[i], spots[j] = spots[j], spots[i]
+		end
+		for i = 1, math.min(P.MarinaParked or 0, #spots) do
+			local bay: Bay = { cf = spots[i], car = nil, pool = marinaPool }
 			table.insert(bays, bay)
 			park(bay)
 		end

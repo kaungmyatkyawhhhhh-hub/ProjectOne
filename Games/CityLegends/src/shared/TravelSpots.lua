@@ -33,6 +33,7 @@ local INFO = {
 	palace = "The old town on the rock",
 	stadium = "The bay's stadium",
 	harbour = "The harbour front",
+	marina = "Park by the yachts",
 	lookout = "A view over the whole bay",
 	home = "Your house",
 }
@@ -62,6 +63,12 @@ function TravelSpots.list(): { Spot }
 		local site = (Config.RivieraVenues.Sites :: any).realty
 		local depth = if site and type(site.size) == "number" then site.size else WestLayout.Lot
 		table.insert(list, { id = "realty", name = "Legends Realty", icon = "realty", info = INFO.realty, cf = WestLayout.kerbFor(realty, depth) })
+	end
+	-- (2026-11-04) the marina car park on the harbour's east quay (Workspace.Riviera.Marina)
+	local riv = workspace:FindFirstChild("Riviera")
+	if riv and riv:FindFirstChild("Marina") then
+		local at = Vector3.new(13990, 8, 742)
+		table.insert(list, { id = "marina", name = "Marina Parking", icon = "harbour", info = INFO.marina, cf = CFrame.lookAt(at, at + Vector3.new(0.608, 0, 0.794)) })
 	end
 	for _, r in ActivityData.races do
 		local dir = Vector3.new(r.startDir.X, 0, r.startDir.Z)

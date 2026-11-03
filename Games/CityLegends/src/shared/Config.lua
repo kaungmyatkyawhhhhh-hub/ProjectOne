@@ -93,6 +93,9 @@ Config.Parking = {
 	StealHold = 2.5, -- seconds to hold E to break in
 	StealStars = 1, -- police stars for a theft
 	RefillSeconds = { 90, 180 }, -- a stolen car's bay gets a new random car after this long
+	-- (2026-11-04) the marina car park by the yachts: supercars parked in some of its bays
+	MarinaParked = 7,
+	MarinaTiers = { "High" },
 }
 
 -- where players start (owner, 2026-10-23: "make block_3_2 near streetscape the players spawn"): a
