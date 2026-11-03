@@ -907,7 +907,7 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Checked in Play on a straight (Coast Road): SV idle at half the SVJ's loudness; braking from 72 mph, three downshifts at 41 / 35 / 27 mph, each blip at its own pitch (0.85 / 0.90 / 1.00); no errors.
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
-Summary at the end of the run goes here. Next: step 4 (venues: Legends Rewards check, the 3 towers, Customs, Gem Showcase, Realty, chauffeur kiosks, challenge gantries; the bank is done).
+Summary at the end of the run goes here. Next: step 4 (venues: Customs, Gem Showcase, Realty, chauffeur kiosks, challenge gantries, then the Legends Rewards check; the bank and the 3 towers are done).
 
 ### Choices made while the owner was away (2026-11-03)
 - Buildings: the global environment reflections (`Lighting.EnvironmentSpecularScale` 1) were left as they are. Lowering them takes the slight sky sheen off the walls but also dulls the cars' paint and the wet roads, and the sheen wasn't the black / white flashing. Easy to change in `CityBuilder` / Lighting if wanted.
@@ -921,6 +921,7 @@ Summary at the end of the run goes here. Next: step 4 (venues: Legends Rewards c
 - Dealer menu: phones (and any screen under 1000 x 520) get a compact layout: the same parts, bigger type, 46 px buttons, no level box (the level is still in the HUD), the speed bar shows km/h only.
 - Dealer menu: Esc closes it (also when Roblox's menu takes the key). Backspace doesn't: the driving keys saw it too and put the car back on the road.
 - Venues: the bank is remodelled in its code (`server/Bank.lua`, `Bank.dress`), like the hotel was, not with a Toolbox building: the bank is built at start and its vault, prompts and carts are placed by that code. Its furniture comes from the cleaned kit already in the place (`ServerStorage.VenueKit`: chandeliers, Chesterfield sofa, armchair, potted palms). Walls are Sandstone (Limestone looked white in the sun), trims and columns cream Limestone.
+- Venues, the 3 towers: remodelled outside only (code, `Towers.dress` / `Towers.noNeon` in `server/Towers.lua`). Their penthouses and roofs were already redone with the hotel suites (same code), and their glass body, lobby and gameplay stay. The towers' coloured neon (cyan, purple and gold strips, the glowing pool rim, the lobby's neon chandelier rings) became gold metal or warm lit glass, except the DJ booth's party lights (they need to glow) and the windows' night glow (every building has it).
 
 ### Step 1.1: buildings flashing black and white (done)
 - **Cause:** the far stand-ins (`ReplicatedStorage.RivieraFar`, `tools/riviera/FarCity.luau`) show past ~950 studs (570 on Low graphics, less on phones) and while a building is streamed out. Each one's pale wall-coloured shell was sized from the building's outer skin, so it stood 0.2 studs IN FRONT of the dark core inside every window and shopfront. Close up (stand-in hidden) the windows were dark; past the range (stand-in shown) every window and shop turned the wall colour. That's the "black from one spot, white from another". Pictures: [[Buildings flashing - before (far stand-in showing).jpg]], [[Buildings flashing - after.jpg]], [[Buildings flashing - after, far stand-ins over the city.jpg]].
@@ -982,3 +983,11 @@ Driven in Play on the Coast Road (automatic, full throttle, then full brake, the
 - **Gameplay not touched:** the vault door, Crack the vault prompt, 4 cash carts and the alarm are built as before (checked in Play: all there, no errors). The robbery itself wasn't run this pass.
 - **Numbers:** 1,124 parts (was 197). Pictures: [[Bank remodel - before (outside).jpg]], [[Bank remodel - before (inside).jpg]], [[Bank remodel - after (outside, day).jpg]], [[Bank remodel - after (outside, night).jpg]], [[Bank remodel - after (inside).jpg]].
 - How to look at it in Studio (Edit) without Play: require copies of `Bank` and `CityBuilder` (parented next to them) and call `Bank.block(CityBuilder.kit, folder, Config.Bank.Block[1], Config.Bank.Block[2], 0, 0, 200)`.
+
+**The 3 penthouse towers (done, 2026-11-04):**
+- **Aurum Residences:** now a warm-stone Belle Epoque high-rise: sandstone piers (wide at the corners) and a stone spandrel at every floor, so the glass reads as punched windows; stone bands every three floors with iron balconies; a two-step carved cornice under the penthouse; stone piers and a band round the lobby. [[Towers remodel - Aurum before.jpg]], [[Towers remodel - Aurum after.jpg]].
+- **Skyline One:** rounded glass corners and white wraparound balconies every two floors with glass rails and rounded ends; a white band over the lobby. [[Towers remodel - Skyline One after.jpg]].
+- **The Crown:** slim gold fins up the body and a crown of 32 gold fins round the roof (tallest in the middle of each side, leaning out, thicker ones at the corners), lit from below at night; a gold ring at its foot. [[Towers remodel - The Crown before.jpg]], [[Towers remodel - The Crown after.jpg]], [[Towers remodel - The Crown at night.jpg]].
+- **No neon:** the corner light columns, paving lines, canopy strips, lanterns, the fountain and pool rims, the lobby's ring chandelier and the plaques' lines are gold metal or warm lit glass now (their lights stay). Left glowing: party lights and window glow.
+- **Gameplay not touched:** lifts, buy prompts, showcase turntable, DJ booth, roof (17 prompts per tower, as before). Play: no errors. Lifts weren't ridden this pass (their code is unchanged).
+- **Numbers:** Aurum 1,524 parts (was 688), Skyline One 1,051 (was 737), The Crown 993 (was 772); the new facade parts are in a LOD group (hidden far away).

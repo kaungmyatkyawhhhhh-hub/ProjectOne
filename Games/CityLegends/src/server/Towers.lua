@@ -185,6 +185,169 @@ local function seat(parent: Instance, cf: CFrame, w: number, d: number): Seat
 	return s
 end
 
+---------------------------------------------------------------------
+-- The remodel (2026-11-04, owner-away run, `Prompts/Remodel the venues.md`): each tower its own
+-- landmark outside (the glass body, lobby, penthouse and roof stay as they are):
+--   * Aurum Residences: a warm-stone Belle Epoque high-rise (stone piers and floor bands over the
+--     glass, iron balconies, a carved cornice, stone round the lobby);
+--   * Skyline One: rounded glass corners and white wraparound balconies with glass rails;
+--   * The Crown: gold pinstripe fins up the body and a crown of tall gold fins round the roof,
+--     floodlit warm at night, with a spire.
+-- And no neon anywhere (owner's rule: gold and warm white light only): the old accent-coloured
+-- neon strips become gold metal, warm ones plain lit glass (their lights stay). The party lights
+-- keep working.
+---------------------------------------------------------------------
+local STONE_T = Color3.fromRGB(204, 170, 122) -- (warm Riviera stone; Sandstone, Limestone read white in the sun)
+local STONE_T2 = Color3.fromRGB(224, 204, 168)
+local IRON_T = Color3.fromRGB(26, 26, 28)
+local WHITE_T = Color3.fromRGB(240, 240, 236)
+
+function Towers.dress(kit: any, model: Model, t: TowerSpec, at: (number, number, number) -> CFrame, d: { [string]: number })
+	local deco = kit.deco
+	local yP, yR = d.yP, d.yR
+	local y0, y1 = LH + 1.2, yP - 1.6 -- the glass body
+	local fine = kit.lodGroup(model, "Remodel", at(0, t.height / 2, 0).Position, 700 + t.height * 0.6)
+	local function p(par: Instance, size: Vector3, cf: CFrame, color: Color3, mat: Enum.Material, o: any?): BasePart
+		return deco(par, size, cf, color, mat, o)
+	end
+	-- the four faces: an outward normal and the axis along the face
+	local faces = {
+		{ n = Vector3.new(0, 0, -1), a = Vector3.new(1, 0, 0) },
+		{ n = Vector3.new(0, 0, 1), a = Vector3.new(1, 0, 0) },
+		{ n = Vector3.new(-1, 0, 0), a = Vector3.new(0, 0, 1) },
+		{ n = Vector3.new(1, 0, 0), a = Vector3.new(0, 0, 1) },
+	}
+	-- a box on a face: `along` offset, height y, out = how far out from the glass, size (along, h, depth)
+	local function onFace(par: Instance, f: { n: Vector3, a: Vector3 }, along: number, y: number, out: number, w: number, h: number, dp: number, color: Color3, mat: Enum.Material, o: any?): BasePart
+		local c = f.n * (HF + out) + f.a * along
+		local size = if f.a.X ~= 0 then Vector3.new(w, h, dp) else Vector3.new(dp, h, w)
+		return p(par, size, at(c.X, y, c.Z), color, mat, o)
+	end
+
+	if t.id == "aurum" then
+		-- stone piers on every face (wide corner piers), a stone spandrel at every floor (the glass
+		-- reads as punched windows), stone bands every three floors
+		for _, f in faces do
+			for k = -3, 3 do
+				local along = k * 12
+				local w = if math.abs(k) == 3 then 6 else 3.4
+				onFace(fine, f, along, (y0 + y1) / 2, 0.6, w, y1 - y0, 1.4, STONE_T, Enum.Material.Sandstone)
+			end
+			for y = y0 + 4.5, y1 - 2, 9 do
+				onFace(fine, f, 0, y, 0.45, F + 1, 3, 1, STONE_T, Enum.Material.Sandstone)
+			end
+			for y = y0 + 9, y1 - 4, 27 do
+				onFace(fine, f, 0, y, 0.7, F + 3, 1.6, 1.8, STONE_T2, Enum.Material.Sandstone)
+				-- iron balconies in the two middle bays
+				for _, along in { -6, 6 } do
+					onFace(fine, f, along, y + 0.4, 2.6, 10, 0.5, 4, STONE_T2, Enum.Material.Sandstone)
+					onFace(fine, f, along, y + 3.3, 4.4, 10, 0.25, 0.25, IRON_T, Enum.Material.Metal)
+					for b = -2, 2 do
+						onFace(fine, f, along + b * 2.4, y + 1.9, 4.4, 0.18, 3, 0.18, IRON_T, Enum.Material.Metal)
+					end
+				end
+			end
+			-- a carved cornice under the penthouse, stone round the lobby
+			onFace(model, f, 0, y1 + 0.6, 1.2, F + 6, 1.4, 3, STONE_T2, Enum.Material.Sandstone)
+			onFace(model, f, 0, y1 + 1.6, 1.8, F + 8, 0.8, 4.2, STONE_T2, Enum.Material.Sandstone)
+			onFace(model, f, 0, LH + 1.4, 0.8, F + 4, 2.6, 2, STONE_T, Enum.Material.Sandstone)
+			for k = -3, 3 do
+				if not (f.n.Z < 0 and math.abs(k) == 0) then
+					onFace(fine, f, k * 12, LH / 2 + 0.5, 0.6, if math.abs(k) == 3 then 4.5 else 2.4, LH, 1.4, STONE_T, Enum.Material.Sandstone)
+				end
+			end
+		end
+	elseif t.id == "skyline" then
+		-- rounded glass corners
+		for _, sx in { -1, 1 } do
+			for _, sz in { -1, 1 } do
+				p(fine, Vector3.new(y1 - y0, 9, 9), at(sx * (HF - 1), (y0 + y1) / 2, sz * (HF - 1)) * CFrame.Angles(0, 0, math.rad(90)), Color3.fromRGB(120, 160, 190), Enum.Material.Glass, { shape = Enum.PartType.Cylinder, transparency = 0.25, reflectance = 0.25 })
+			end
+		end
+		-- white wraparound balconies every two floors, with glass rails and rounded corners
+		for y = y0 + 9, y1 - 4, 18 do
+			for _, f in faces do
+				onFace(fine, f, 0, y, 2.6, F - 2, 0.7, 5.4, WHITE_T, Enum.Material.SmoothPlastic)
+				onFace(fine, f, 0, y + 2, 5, F - 2, 3.4, 0.25, Color3.fromRGB(190, 220, 235), Enum.Material.Glass, { transparency = 0.55 })
+			end
+			for _, sx in { -1, 1 } do
+				for _, sz in { -1, 1 } do
+					p(fine, Vector3.new(0.7, 10.8, 10.8), at(sx * (HF + 0.2), y, sz * (HF + 0.2)) * CFrame.Angles(0, 0, math.rad(90)), WHITE_T, Enum.Material.SmoothPlastic, { shape = Enum.PartType.Cylinder })
+				end
+			end
+		end
+		-- a white crown band over the lobby
+		for _, f in faces do
+			onFace(model, f, 0, LH + 1.6, 0.8, F + 3, 2.2, 2, WHITE_T, Enum.Material.SmoothPlastic)
+		end
+	elseif t.id == "crown" then
+		-- slim gold pinstripe fins up the body
+		for _, f in faces do
+			for k = -6, 6 do
+				onFace(fine, f, k * 6.4, (y0 + y1) / 2, 0.5, 0.5, y1 - y0, 1.2, Color3.fromRGB(176, 140, 76), Enum.Material.Metal)
+			end
+			onFace(model, f, 0, y1 + 0.8, 1, F + 3, 2, 2, Color3.fromRGB(176, 140, 76), Enum.Material.Metal)
+		end
+		-- the crown: tall gold fins round the roof edge, leaning out, floodlit from below
+		local crownH = 46
+		for _, f in faces do
+			for k = -3, 3 do
+				local along = k * 11.5
+				local h = if k == 0 then crownH + 18 else crownH - math.abs(k) * 5
+				local c = f.n * (HF + 1.5) + f.a * along
+				-- (leaning out: turned about the face's own axis, in the tower's frame)
+				local lean = CFrame.fromAxisAngle(f.a, if f.n.X ~= 0 then -f.n.X * 0.16 else f.n.Z * 0.16)
+				local size = if f.a.X ~= 0 then Vector3.new(7, h, 1.4) else Vector3.new(1.4, h, 7)
+				p(model, size, at(c.X, yR + h / 2, c.Z) * lean, Color3.fromRGB(206, 166, 86), Enum.Material.Metal, { reflectance = 0.15 })
+				local lamp = p(model, Vector3.new(1, 0.5, 1), at(c.X - f.n.X * 2.5, yR + 0.6, c.Z - f.n.Z * 2.5), IRON_T, Enum.Material.Metal)
+				local l = kit.addLight("SpotLight", lamp, Color3.fromRGB(255, 210, 150), h + 10, 2, Enum.NormalId.Top, 30)
+				CollectionService:AddTag(l, "DayOff")
+			end
+		end
+		for _, sx in { -1, 1 } do
+			for _, sz in { -1, 1 } do
+				local c = Vector3.new(sx * (HF + 1), 0, sz * (HF + 1))
+				local out = Vector3.new(sx, 0, sz).Unit
+				local axis = Vector3.new(out.Z, 0, -out.X) -- (turning about it tips the top outward)
+				p(model, Vector3.new(6, crownH + 6, 6), at(c.X, yR + (crownH + 6) / 2, c.Z) * CFrame.fromAxisAngle(axis, 0.16) * CFrame.Angles(0, math.rad(45), 0), Color3.fromRGB(206, 166, 86), Enum.Material.Metal, { reflectance = 0.15 })
+			end
+		end
+		-- a gold ring round the crown's foot
+		for _, f in faces do
+			onFace(model, f, 0, yR + 1.2, 1.6, F + 6, 2.4, 1.2, Color3.fromRGB(206, 166, 86), Enum.Material.Metal)
+		end
+	end
+end
+
+-- (no neon: accent-coloured neon becomes gold metal, warm neon lit glass; party lights and the
+-- facade's lit windows stay)
+function Towers.noNeon(model: Instance)
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") and d.Material == Enum.Material.Neon then
+			local party = false
+			for _, tag in CollectionService:GetTags(d) do
+				if string.find(tag, "Party") then
+					party = true
+				end
+			end
+			-- (lit windows, "WinLit", are the city's own window glow: kept like every other building's)
+			if not party and not string.find(d.Name, "Party") and d.Name ~= "WinLit" then
+				local h, s, v = d.Color:ToHSV()
+				local warm = (h < 0.17 or h > 0.95) and s < 0.75
+				if warm and v > 0.6 then
+					d.Material = Enum.Material.Glass
+					d.Color = Color3.fromRGB(255, 232, 196)
+					d.Transparency = math.max(d.Transparency, 0.1)
+				else
+					d.Material = Enum.Material.Metal
+					d.Color = GOLD
+					d.Transparency = 0
+				end
+			end
+		end
+	end
+end
+
 local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, cz: number, lot: number, suite: SuiteOpts?): Built
 	local mk, deco = kit.mk, kit.deco
 	local frame: CFrame
@@ -869,6 +1032,12 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		local spirePos = frame * CFrame.new(HF - 6, 0, HF - 6)
 		kit.spire(model, spirePos.Position.X, spirePos.Position.Z, groundY + yR + 0.3, 0.9)
 	end -- withRoof
+
+	-- (2026-11-04 remodel) each tower its own landmark outside, and no neon anywhere
+	if withStreet then
+		Towers.dress(kit, model, t, at, { yP = yP, yR = yR })
+	end
+	Towers.noNeon(model)
 
 	local rec: Built = {
 		spec = t,
