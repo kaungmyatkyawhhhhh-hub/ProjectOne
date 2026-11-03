@@ -42,3 +42,20 @@ Per alter (lifting minutes), ★0: about 10-13 for Alters 1-13, 20 / 28 for 14 /
   - The star EXP: it multiplies on top of the trainers' total, outside the cap.
 - The Gem Mine opening at star 1 doesn't speed runs up (tested).
 - Nothing was changed. Owner's call.
+
+## What the run measures + Alter 20 + skipping (owner, 3 Nov; report only)
+- **The run table above = a whole run from the start:** muscles 0, the star's starting Growth Spurt -> every Growth Spurt -> Alters 1-15 one by one -> the Hall of Fame goal. It is NOT "Alter 1 -> Alter 15" (it includes the Growth Spurts before Alter 1 and the Hall of Fame goal after 15).
+- New columns: start -> Alter 15 and start -> Alter 20 (Gem alters 16-20), no Hall of Fame goal. Pro gear from Alter 1. Lifting minutes.
+- Skip needs ★1 now, so ★0 has no skip column. Two skip ways were simulated:
+  - "Skip to 15": train without altering until you can jump straight to Alter 15 (2.5x its goal), then 16-20 one by one.
+  - "Skip to 20": jump straight to Alter 20.
+
+| Row | One by one: to 15 | One by one: to 20 | Skip to 15: to 15 | Skip to 15: to 20 | Skip to 20 |
+|---|---|---|---|---|---|
+| ★0, 2 Voltas | 201 | 343 | - | - | - |
+| ★1, 2 Voltas | 94 | 166 | 90 | 161 | 126 |
+| ★3, 2 Titans | 44 | 72 | 36 | 64 | 49 |
+| ★5, 2 Titans | 38 | 62 | 29 | 53 | 41 |
+| ★10, 2 Heracles | 21 | 31 | 13 | 23 | 18 |
+
+- **Skipping is FASTER, not slower.** The 1 Nov estimate said skip-all costs ~2.4x the effort, but that only counted EXP. Skipping keeps your muscles big, so you keep using the heaviest weights. Altering one by one drops you to 25% and back to lighter weights each time. Biggest gain: going straight to Alter 20 (★3: 72 -> 49 min).

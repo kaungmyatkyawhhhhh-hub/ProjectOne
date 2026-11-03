@@ -260,3 +260,13 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
     - `Config/Alters.SkipStars = 1`. `Alters.Progress` only works out a skip with that many stars, and both the server's alter (PlayerData) and every screen read it, so a ★0 player alters one at a time.
     - Star Track ★1 lists "Alter Skip: jump past alters" (Config/HallOfFame.TrackRewards).
     - Tested: the same big save at Alter 3: ★0 -> Alter 4 only; ★1 / ★3 -> skip to Alter 10.
+- **3 Nov - Hall of Fame bar redesign** (owner: "keep it SMALL, not a second card", then "ABOVE the NEXT: ALTER card").
+  - ProgressClient: one slim bar (half the card's height = 24, same width, corner 10).
+    - Dark fill; the gold (#FFD700) fill grows to the real % and is the progress bar.
+    - "HALL OF FAME +1★" on the left, "13%" on the right, white with a thin dark stroke.
+    - Thin #8A6A00 border. No pill, no dots, no arrow.
+    - Placed above the NEXT card with a 4 px gap. Same tap (the ENTER NOW / KEEP GOING choice).
+    - Studio hook UIBus.SetHallBarForTest(stars, share) for screenshots.
+  - **The NEXT card moves down by 28 px while the bar shows.** The right column stacks its cards, and there's only ~10 px between the quest card and the NEXT card, so keeping the card fixed would mean the bar covers the quest card.
+  - Tested on PC and the phone frame (TestPhoneSize 844x390, TestInput Touch) at 0%, 13% (real) and 90%: the text reads on dark and on gold. Tap opens the choice.
+  - The thumbstick is bottom-left and the bar is top-right, so they can't overlap. Studio doesn't draw Roblox's real thumbstick, so a real phone has to confirm.
