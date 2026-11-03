@@ -224,3 +224,14 @@ Checklist: [[2026-11-03 GYM ARC GEM update - ready to publish Friday checklist]]
   - All inside the budget (idle Rate x Life <= 8; same range / light / Low Graphics / Reduce Motion / Alter Effects rules as 16-20).
   - `afterGem = true`: `AlterLooks.For` returns nothing before the update (tested: Pumped / Obsidian / Gold nil before, Jade unaffected).
   - Tested in Play (Gold): glow, idle, rep, flex, footstep emitter + chime built on the body.
+- **3 Nov - Owner answers (after the 7 items).**
+  - **Auto Growth Spurts toggle:** Settings "Auto Growth Spurts" On / Off (`settings.autoSpurt`, PlayerData validates it). The row shows only to ★2+ players after the update. Tested: shown at ★2, saved Off.
+  - **Gem posing division** (Flint's reward): on the 14 Nov list in [[2026-11-01 GYM ARC Roadmap after the Gem update]], unlocked for everyone who already beat Flint.
+  - **New bully outfits:**
+    - `ClaudeOne\tools\bully_clothes.py` drew 6 templates in `Downloads\gem_update_import\bully_outfits\` (listed in IMPORT_LIST.md):
+      - Flint: charcoal work tank, orange safety stripes.
+      - Ruby: ruby racing tank, white panels, cut gem.
+      - Onyx: black tank, violet trim, gold crown.
+      - Each with shorts.
+    - **Owner: import to the group, then say "imported"**; until then they keep today's NPC outfits.
+  - **Pace by star with realistic trainers:** report only, nothing changed. [[2026-11-03 GYM ARC Pace by star - realistic trainers]] + `GYM ARC\Calc`. Run (lifting min): ★0 230, ★1 110, ★3 50, ★5 43, ★10 23, owner's maxed 12.
