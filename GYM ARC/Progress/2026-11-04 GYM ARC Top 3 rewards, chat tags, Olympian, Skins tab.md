@@ -376,3 +376,14 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - **Tested in Play (temp save):** my row on the board shows the username, no row shows a display name, and the Legends list shows the username.
 - The board is read-only in Studio.
 
+### Plate gates in EXP (owner, 4 Nov, final)
+- **Built:** the current EXP on the machine's main muscle. Bronze 250M, Silver 800M, Gold 2.5B, Platinum 8B, Ruby 30B, Diamond 100B, each spread over 8 steps geometrically. Shown as "Needs <Muscle> <EXP> exp".
+- **Checks from real saves:**
+  - The max current EXP on one muscle in the top 50 is 365M, so nobody is near 100B.
+  - Ruby is reachable in one run only by grinding one muscle: about 8 h of lifting for the owner, about 18 h for a ★10.
+  - Lifetime EXP (up to 188B a muscle) would give Diamond on day 1, so current EXP is kept.
+  - An Alter keeps 25% of the EXP; a Growth Spurt or the Hall of Fame resets it to 0.
+- **Tested in Play:** chest 300M EXP gave Silver 1 on the Gem bench, and Silver 2 showed "Needs Mid Chest 334,624,118 exp".
+- **Open question:** Bronze steps 1-6 are below what Gem-alter players already have.
+- Details: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 7.
+

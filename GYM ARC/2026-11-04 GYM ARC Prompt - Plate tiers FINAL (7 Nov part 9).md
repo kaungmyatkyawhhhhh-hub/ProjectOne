@@ -55,3 +55,10 @@ PLATES - FIX PASS (owner + Claude review of screens_4Nov_plates). Match concept 
 PLATES - OPTIMIZATION (must before publish; keep the concept v3 look). 1. MESHES: ONE thin plate MeshPart per plate (band + recessed face + hub in the mesh), same MeshId for all plates; tier = Color + Material; only the OUTER plate per side gets stripe, M WEIGHTS + number, and a small Neon inset on Ruby/Diamond; no Glass. Target ~18 parts per loaded bar (was 56). 2. CLIENT-SIDE PLATES: server only sets weight/stack attributes; each client builds plates within ~60 studs, beyond that ONE cylinder per side in the tier colour; pool parts. 3. SETTINGS: Anchored, CanCollide/CanTouch/CanQuery false, Massless, CastShadow false (inner), RenderFidelity Performance, CollisionFidelity Box. 4. MEASURE before/after with every bar at 8 Diamond: FPS phone + PC, part count, draw calls. Target 60 FPS PC, 30+ mid phone. Don't publish.
 ```
 Results and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 6.
+
+## Owner 4 Nov: PLATE GATES (final, replaces the level gates 400-565)
+- **Brief:** EXP on the machine's main muscle: BRONZE 250M · SILVER 800M · GOLD 2.5B · PLATINUM 8B · RUBY 30B · DIAMOND 100B. Each tier's gate is spread over its 8 steps geometrically. Shown as "Needs <Muscle> <EXP> exp".
+- **The owner's reasoning:** players reaching the Gem alters have ~3B total, about 170M a muscle, so Bronze starts just above that.
+- Two earlier versions (levels 400-800, then 25M-1.6B) were replaced the same day.
+- **Built.** The checks and numbers are in the report, section 7.
+

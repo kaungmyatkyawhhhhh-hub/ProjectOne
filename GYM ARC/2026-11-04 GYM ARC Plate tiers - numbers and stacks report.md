@@ -152,3 +152,60 @@ Diamond 8 on the Gem bench is now 1181 (was 1245).
 - The standard plate's blue/red/teal edge stripe is now a ring a little wider than the mesh rim, so it shows all the way round.
 - **Mesh screens:** `screens_4Nov_plates_fix` 15-17 (17 = every plate a mesh, Ruby 8, before the switch to outer-only).
 
+## 7. PLATE GATES IN EXP (owner, 4 Nov, final)
+### The briefs
+- **Brief 1:** level gates 400 / 470 / 535 / 600 / 700 / 800. Not built.
+  - For a ★10 with 2 Heracles at the Gem bench top, 565 -> 800 is **6 reps (0.1 min)**. Even ★0 with 2 Voltas needs only 42 reps.
+  - The cause: one rep there gives 7-9M EXP, and level gaps are about 1.1K raw EXP.
+- **Brief 2:** EXP gates 25M ... 1.6B. Replaced before it was finished: a ★1 with 2 Voltas reaches 1.6B in ~1.8 h of lifting one muscle.
+- **Final (built):** the CURRENT EXP of the machine's main muscle.
+  - Tier gates: **BRONZE 250M · SILVER 800M · GOLD 2.5B · PLATINUM 8B · RUBY 30B · DIAMOND 100B**.
+  - Each tier is spread over its 8 steps geometrically. Bronze starts from the Gem Mine top's 12.4M.
+  - Shown as "Needs <Muscle> <EXP> exp".
+
+### Checks from real saves (top 50 of the Strongest board + the owner, read-only)
+| | p90 | max |
+|---|---|---|
+| CURRENT EXP, one muscle (all pooled) | 67.2M | 365M |
+| CURRENT EXP, each player's strongest muscle | 116M | 365M |
+| LIFETIME EXP per muscle (the top bar's lifetime / 18) | 74.8B | 188B |
+
+- The current body total is 273M (p50), 919M (p90) and 4.9B (max).
+- The owner: strongest muscle 269M current, about 387M lifetime per muscle; Alter 18, ★4.
+- **An Alter keeps 25% of every muscle's EXP (removes 75%). A Growth Spurt and entering the Hall of Fame reset the muscles to 0.**
+- **The #1 player is nowhere near 100B on current EXP** (the max in the top 50 is 365M), so there is no flag.
+- **Lifetime EXP would be wrong for this:** the top is already 188B a muscle, so a lifetime gate would give out Diamond on day 1.
+
+**Can anyone reach Ruby in one run on current EXP?** Pure lifting, one muscle, Gem bench top, from 0:
+
+| Setup | Bronze | Silver | Gold | Platinum | Ruby | Diamond |
+|---|---|---|---|---|---|---|
+| ★1, 2 Voltas, Alter 7 | 7 min | 38 min | 3 h | 20 h | 143 h | 867 h |
+| ★10, 2 Heracles, Alter 20 | 1 min | 5 min | 26 min | 3 h | 18 h | 111 h |
+| Owner's maxed setup | 0 min | 2 min | 11 min | 66 min | 8 h | 49 h |
+
+- Yes, but only by grinding one muscle without altering (an alter drops a Ruby 30B to 7.5B = Gold).
+- The time grows faster than the EXP because of diminishing returns (EXP a rep ~ 1 / level).
+- So current EXP is kept, not lifetime.
+- For scale: one muscle at the Alter 15 goal is 77.6M, and at the Alter 20 goal 219M.
+
+### Built
+- **`PlateTiers.GateExp(k, s)`:** geometric from the tier before.
+- **`PlateTiers.Gate(k, s)`:** the whole muscle level that first has that EXP. Every machine compares levels, so the "Needs" number shown is exactly what's checked: e.g. "Needs Mid Chest 334,624,118 exp" for Silver 2.
+- **Step gates:**
+
+  | Tier | Steps 1 → 8 |
+  |---|---|
+  | Bronze | 18.1M → 26.2M → 38.2M → 55.7M → 81.1M → 118M → 171M → 250M |
+  | Silver | 289M → 800M |
+  | Gold | 922M → 2.5B |
+  | Platinum | 2.9B → 8B |
+  | Ruby | 9.4B → 30B |
+  | Diamond | 34.9B → 100B |
+
+- **Tested in Play (temp save, all tiers owned, chest 300M EXP):**
+  - The server put the Gem bench on Silver 1 (821 lb).
+  - Asking for Silver 2 was refused.
+  - The panel shows "Needs Mid Chest 334,624,118 exp".
+- **Open question for the owner:** Bronze 1-6 (18M-118M) sit below the ~170M a muscle that Gem-alter players have, so they get those steps at once. Starting Bronze from ~170M instead would make every Bronze step a real goal.
+
