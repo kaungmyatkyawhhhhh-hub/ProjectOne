@@ -182,6 +182,13 @@ def roads_layer(draw):
     north = os.path.join(RIV, "north.json")  # the north roads (tools/map_plan/north_roads.py)
     if os.path.exists(north):
         data["roads"] = data["roads"] + json.load(open(north))["roads"]
+    hairpin = os.path.join(RIV, "hairpin.json")  # the Grand Hairpin replaces a stretch of the West Switchbacks
+    if os.path.exists(hairpin):
+        hp = json.load(open(hairpin))
+        for r in data["roads"]:
+            if r["name"] == "West Switchbacks":
+                mid = [[q[0], q[1], q[2], q[3], q[4], 0, q[5], q[5]] for q in hp["s"]]
+                r["s"] = r["s"][:hp["from"]] + mid + r["s"][hp["to"] + 1:]
     roads = sorted(data["roads"], key=lambda r: 0 if r["kind"] != "route" else 1)
 
     def stroke(pts, width, color):

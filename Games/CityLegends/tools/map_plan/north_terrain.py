@@ -41,6 +41,10 @@ STREET_RISE = 2.4
 # hillside, there since the lots were made): the ground comes up under it. (x, z, size x, size z, top)
 LOT_HILLS = [(11423.3, -40.2, 150, 144, 190.5)]
 HILL_SLOPE = 2.0
+# paved pads (capsules from a to b, radius r, top height): the bank heist's drop-off stood in a field,
+# its marker 11 studs in the air, behind a 3-stud drop off the pavement
+PADS = [((17176.4, 891.0), (17176.4, 891.0), 46.0, 20.6), ((17176.4, 891.0), (17134.3, 787.2), 17.0, 20.6)]
+PAD_SLOPE = 0.9
 
 
 def cut_rise(out):
@@ -52,6 +56,14 @@ def main():
     C, X0, Z0 = meta["cell"], meta["x0"], meta["z0"]
     roads = json.load(open(os.path.join(RIV, "north.json")))["roads"]
     old = json.load(open(os.path.join(RIV, "roads.json")))["roads"]
+    # the Grand Hairpin (tools/map_plan/hairpin.py): the West Switchbacks' samples it replaces no longer
+    # hold their ground
+    hp = json.load(open(os.path.join(RIV, "hairpin.json")))
+    for r in old:
+        if r["name"] == "West Switchbacks":
+            r["s"] = r["s"][:hp["from"] - 3] + r["s"][hp["to"] + 4:]
+    hp_road = {"name": hp["name"], "kind": "street", "hairpin": True, "s": [[q[0], q[1], q[2], q[3], q[4], 0, q[5], q[5]] for q in hp["s"][::2]]}
+    roads = roads + [hp_road]
     road_hw = json.load(open(os.path.join(RIV, "highway.json")))["roads"]
     lots = json.load(open(os.path.join(RIV, "lots.json")))
     shape = H.shape
@@ -89,6 +101,8 @@ def main():
                 continue
             sl, dd = win
             core = (s[6] + 4) if s[6] < 30 else 44
+            if r.get("hairpin"):
+                core = s[6] + 12.5  # (its pavements are meshes, with nothing under them)
             out = np.maximum(dd - core, 0)
             bed = s[1] - 1.5
             if bridge[k]:
@@ -139,6 +153,32 @@ def main():
     newM[keep] = M[keep]
     cx = X0 + C * (np.arange(shape[1]) + 0.5)
     cz = Z0 + C * (np.arange(shape[0]) + 0.5)
+    # the old road bed round the Grand Hairpin: grass now, and level with the island inside the bend
+    xx, zz = np.meshgrid(cx, cz)
+    near_hp = (np.abs(xx - 10880) < 170) & (np.abs(zz + 95) < 170)
+    newM[near_hp & (newM == "A") & (best > core_w) & ~keep] = "G"
+    from_c = np.sqrt((xx - hp["centre"][0]) ** 2 + (zz - hp["centre"][1]) ** 2)
+    isl = near_hp & (best > 22 + 1) & (from_c < 22)
+    newH[isl] = np.minimum(newH[isl], road_y[isl] - 1.0)
+    newM[isl] = "G"
+    near43 = np.zeros(shape, dtype=bool)
+    for r in old + road_hw:
+        for s in r["s"][::3]:
+            win = window(s[0], s[2], 47)
+            if win:
+                sl, dd = win
+                near43[sl] |= dd < 43
+    for (a, b, rad, top) in PADS:
+        ax, az, bx, bz = a[0], a[1], b[0], b[1]
+        L2 = max((bx - ax) ** 2 + (bz - az) ** 2, 1e-6)
+        t = np.clip(((xx - ax) * (bx - ax) + (zz - az) * (bz - az)) / L2, 0, 1)
+        dist = np.sqrt((xx - (ax + (bx - ax) * t)) ** 2 + (zz - (az + (bz - az) * t)) ** 2)
+        out_p = np.maximum(dist - rad, 0)
+        hill = (top - out_p * PAD_SLOPE).astype(np.float32)
+        pad = (hill > newH) & ~near43
+        newH[pad] = hill[pad]
+        newM[pad & (out_p <= 0)] = "P"
+        newM[pad & (out_p > 0)] = "G"
     for (x, z, sx, sz, top) in LOT_HILLS:
         ox = np.maximum(np.abs(cx[None, :] - x) - sx / 2 - 3, 0)
         oz = np.maximum(np.abs(cz[:, None] - z) - sz / 2 - 3, 0)

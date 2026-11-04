@@ -15,7 +15,7 @@
 
 	Roads.build(data, opts) -> part count;  opts.box = {x0, z0, x1, z1} builds only samples inside
 	  (opts.noLines: no chord lines, RoadLines draws them; opts.noLegWalls: no walls on narrowed edges,
-	  tools/riviera/Parapets.luau builds them)
+	  tools/riviera/Parapets.luau builds them; opts.surfaceOnly: only the road's slabs)
 	Roads.check(data, opts) -> list of bumps found by raycasting each lane every stud
 ]]
 
@@ -383,6 +383,8 @@ local function alignJunctions(roads, grid)
 end
 
 -- (debugging) the roads as the build sees them: samples after the junction alignment
+Roads.triangle = triangle
+
 function Roads.prepared(data)
 	local roads, grid = prepare(data)
 	alignJunctions(roads, grid)
@@ -635,7 +637,7 @@ function Roads.build(data, opts)
 				workspace.Terrain:FillBlock(cf * CFrame.new(0, SLAB / 2 - 4 + 11, 0), Vector3.new(wide * 2, 22, len + grow), Enum.Material.Air)
 			end
 			-- outside the town: flush concrete shoulders (the ground under them is cleared too)
-			if not town then
+			if not town and not opts.surfaceOnly then
 				for _, side in { -1, 1 } do
 					local mid = (a.pos + b.pos) / 2
 					local right = Vector3.new(-(b.pos - a.pos).Z, 0, (b.pos - a.pos).X).Unit
@@ -669,7 +671,7 @@ function Roads.build(data, opts)
 					end
 				end
 			end
-			if town then
+			if town and not opts.surfaceOnly then
 				for _, side in { -1, 1 } do
 					local mid = (a.pos + b.pos) / 2
 					local right = Vector3.new(-(b.pos - a.pos).Z, 0, (b.pos - a.pos).X).Unit
@@ -791,12 +793,12 @@ function Roads.build(data, opts)
 					count += 1
 				end
 			end
-			if town and i > 1 and inJunction[i - 1] and not inJunction[i] and not zebraDone[i] then
+			if town and i > 1 and inJunction[i - 1] and not inJunction[i] and not zebraDone[i] and not opts.surfaceOnly then
 				zebraDone[i] = true
 				-- (left / right as the road runs a -> b: the crossing's stripes run across it)
 				zebra(stripCF(a.pos, b.pos, 0, LINE_T / 2 + 0.04) * CFrame.new(0, 0, -len / 2 + 7), { math.min(a.wl, b.wl), math.min(a.wr, b.wr) })
 			end
-			if i < n - 1 and inJunction[i + 1] and not inJunction[i] then
+			if i < n - 1 and inJunction[i + 1] and not inJunction[i] and not opts.surfaceOnly then
 				zebra(stripCF(a.pos, b.pos, 0, LINE_T / 2 + 0.04) * CFrame.new(0, 0, len / 2 - 7), { math.min(a.wl, b.wl), math.min(a.wr, b.wr) })
 			end
 			if i % 40 == 0 then

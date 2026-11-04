@@ -40,6 +40,7 @@ local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local Customs = require(script.Parent:WaitForChild("Customs"))
+local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
 
 local Towers = {}
 
@@ -547,6 +548,14 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		-- glowing paving lines leading to the door
 		for _, sx in { -1, 1 } do
 			dbox(plaza, 0.5, 0.14, lot / 2 - HF - 4, sx * 12, 0.08, -HF - (lot / 2 - HF) / 2 - 2, accent, Enum.Material.Neon, { transparency = 0.35 })
+		end
+		-- (owner, 2026-11-04: "I cant drive onto the parking of Skyline one") on the Riviera the lot stands
+		-- back from the road, often over lower ground: a drive from the road onto the forecourt
+		if riv then
+			local inner = at(0, 0.2, -lot / 2 + 0.5)
+			task.defer(function()
+				EntranceRamp.build(model, inner, { width = 26, reach = 80, keep = { model } })
+			end)
 		end
 		-- red carpet and steps
 		dbox(plaza, 12, 0.2, 18, 0, 0.18, -HF - 9, Color3.fromRGB(120, 18, 26), Enum.Material.Fabric)

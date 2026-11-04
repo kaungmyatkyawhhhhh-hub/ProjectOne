@@ -18,6 +18,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
+local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local B = Config.Bank
@@ -600,6 +601,13 @@ local function buildDropoff(parent: Instance)
 	t.Parent = bb
 	m:SetAttribute("Dropoff", true)
 	m.Parent = parent
+	-- (owner, 2026-11-04: every venue you can drive onto) the paved pad to the road, over the kerb
+	if riv then
+		local inner = riv * CFrame.new(0, 0.2, -96)
+		task.defer(function()
+			EntranceRamp.build(m, inner, { width = 30, reach = 50, keep = { m } })
+		end)
+	end
 end
 
 ---------------------------------------------------------------------

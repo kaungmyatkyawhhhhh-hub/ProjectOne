@@ -11,8 +11,6 @@ return {
 		{ id = "riv_high_8", zone = "high", tier = 2, number = 8, x = 13637.6, y = 119.47, z = -641.6, fx = 0.006, fz = -1.0, w = 120, d = 130 },
 		{ id = "riv_high_9", zone = "high", tier = 2, number = 9, x = 13808.9, y = 124.47, z = -639.4, fx = 0.014, fz = -1.0, w = 120, d = 130 },
 		{ id = "riv_high_10", zone = "high", tier = 2, number = 10, x = 13982.0, y = 138.36, z = -637.0, fx = 0.019, fz = -1.0, w = 120, d = 130 },
-		{ id = "riv_high_11", zone = "high", tier = 2, number = 11, x = 14153.5, y = 152.44, z = -631.2, fx = 0.058, fz = -0.998, w = 120, d = 130 },
-		{ id = "riv_high_12", zone = "high", tier = 2, number = 12, x = 14324.3, y = 166.62, z = -614.3, fx = 0.115, fz = -0.993, w = 120, d = 130 },
 		{ id = "riv_mid_1", zone = "mid", tier = 1, number = 1, x = 13066.5, y = 137.88, z = -466.6, fx = -0.133, fz = -0.991, w = 104, d = 100 },
 		{ id = "riv_mid_2", zone = "mid", tier = 1, number = 2, x = 15475.4, y = 142.03, z = -175.4, fx = 0.124, fz = -0.992, w = 104, d = 100 },
 		{ id = "riv_mid_3", zone = "mid", tier = 1, number = 3, x = 15789.3, y = 121.62, z = -216.6, fx = -0.58, fz = -0.815, w = 104, d = 100 },

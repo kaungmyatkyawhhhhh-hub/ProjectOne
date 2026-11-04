@@ -22,7 +22,7 @@ local ROAD_PIECES = {
 	WallCap = true,
 }
 
-local GROUPS = { Furniture = true, Walls = true }
+local GROUPS = { Furniture = true, Walls = true, GrandHairpin = true }
 
 local function hiddenFolder(): Folder
 	local f = ServerStorage:FindFirstChild("HighwayHidden")
@@ -97,7 +97,7 @@ function Mouth.clear(data, name: string, opts)
 					-- (the Furniture and Walls models are big groups spread over a whole district: only the
 					-- piece standing here goes)
 					local top: Instance = p
-					while top.Parent and top.Parent ~= Riviera.Dressing and not (top.Parent:IsA("Model") and GROUPS[top.Parent.Name]) do
+					while top.Parent and top.Parent ~= Riviera.Dressing and not GROUPS[top.Parent.Name] do
 						top = top.Parent
 					end
 					hide(top, name, hidden)

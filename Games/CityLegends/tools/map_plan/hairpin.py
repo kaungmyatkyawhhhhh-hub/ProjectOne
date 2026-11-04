@@ -19,7 +19,6 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import highway as hw  # noqa: E402
-import north_roads  # noqa: E402
 
 RIV = hw.RIV
 FROM_I, TO_I = 399, 465   # West Switchbacks samples replaced between (their ends stay)
@@ -35,21 +34,30 @@ ISLAND_R = HALF and (R - HALF - KERB - 0.6)  # the round end of the teardrop
 ISLAND_TIP = (10925.0, -92.0)
 
 
+def hermite(p0, d0, p1, d1, n=120):
+    """a smooth curve from p0 (heading d0) to p1 (heading d1); no smoothing passes afterwards: those
+    pulled the bend in over the island"""
+    p0, p1 = np.array(p0, dtype=float), np.array(p1, dtype=float)
+    k = float(np.linalg.norm(p1 - p0))
+    d0, d1 = np.array(d0, dtype=float) * k, np.array(d1, dtype=float) * k
+    out = []
+    for t in np.linspace(0, 1, n):
+        h00, h10 = 2 * t ** 3 - 3 * t ** 2 + 1, t ** 3 - 2 * t ** 2 + t
+        h01, h11 = -2 * t ** 3 + 3 * t ** 2, t ** 3 - t ** 2
+        out.append(h00 * p0 + h10 * d0 + h01 * p1 + h11 * d1)
+    return out
+
+
 def centre_line(ws):
-    a0, a1 = ws[FROM_I - 12], ws[FROM_I]
-    b0, b1 = ws[TO_I], ws[TO_I + 12]
-    pts = [(a0[0], a0[2]), (a1[0], a1[2]), (10925, -30), (10885, -44)]
-    for deg in range(90, 271, 15):
-        th = math.radians(deg)
-        pts.append((C[0] + R * math.cos(th), C[1] + R * math.sin(th)))
-    pts += [(10890, -154), (10935, -160), (b0[0], b0[2]), (b1[0], b1[2])]
-    line = hw.catmull(pts, False, per=24)
-    P, _ = hw.resample(line, False, STEP)
-    P, _ = hw.resample(north_roads.open_bends(P, R - 2.0, 1500), False, STEP)
-    # only the part between the two joins
-    i0 = int(np.argmin(np.linalg.norm(P - np.array((a1[0], a1[2])), axis=1)))
-    i1 = int(np.argmin(np.linalg.norm(P - np.array((b0[0], b0[2])), axis=1)))
-    return P[i0:i1 + 1]
+    """the old road's point, a curve onto a true circle round the bend's middle, the circle, a curve off it"""
+    a, b = ws[FROM_I], ws[TO_I]
+    pts = hermite((a[0], a[2]), (a[3], a[4]), (C[0], C[1] + R), (-1.0, 0.0))
+    for deg in np.linspace(90, 270, 121)[1:-1]:
+        th = math.radians(float(deg))
+        pts.append(np.array((C[0] + R * math.cos(th), C[1] + R * math.sin(th))))
+    pts += hermite((C[0], C[1] - R), (1.0, 0.0), (b[0], b[2]), (b[3], b[4]))
+    P, _ = hw.resample(np.array(pts), False, STEP)
+    return P
 
 
 def island_outline():

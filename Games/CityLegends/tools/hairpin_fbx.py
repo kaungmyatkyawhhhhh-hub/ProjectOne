@@ -201,6 +201,12 @@ for name, me in meshes.items():
     mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(verts, [], me.f)
     mesh.update()
+    # (every flat piece faces up: the first pack's road and lines faced down and showed only two-sided)
+    if name != "HP_Wall":
+        for poly in mesh.polygons:
+            if poly.normal.z < 0:
+                poly.flip()
+        mesh.update()
     uvl = mesh.uv_layers.new(name="UV")
     for poly in mesh.polygons:
         for li in poly.loop_indices:

@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local IsleLayout = require(Shared:WaitForChild("IsleLayout"))
@@ -438,6 +439,13 @@ function Realty.init(ctx: any)
 		local riv = if Config.monacoOnly() then WestLayout.rivieraSite("realty") else nil
 		if riv then
 			pavilion(folder, riv)
+			-- (owner, 2026-11-04: every venue you can drive onto) a drive from the road over the trench
+			-- between the pavement and the lot
+			local size = (Config.RivieraVenues.Sites :: any).realty.size or 80
+			local inner = riv * CFrame.new(0, 0.2, -size / 2 - 1.5)
+			task.defer(function()
+				EntranceRamp.build(folder, inner, { width = 26, reach = 50, keep = { folder } })
+			end)
 			return
 		end
 		pavilion(folder, clearSpot())
