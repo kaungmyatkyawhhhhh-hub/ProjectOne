@@ -2064,7 +2064,8 @@ local function detectCuts(s: State, fwd: Vector3, speedMph: number)
 	local myPos = Vector3.new(s.root.Position.X, 0, s.root.Position.Z)
 	local E = Config.Economy
 	local seen = {}
-	for _, npc in Traffic.near(myPos, 45) do
+	-- (asked at the car's real height: from y 0 nothing up a hill was ever near, 2026-11-04)
+	for _, npc in Traffic.near(s.root.Position, 45) do
 		seen[npc] = true
 		local rel = npc.pos - myPos
 		local f = rel:Dot(fwd)

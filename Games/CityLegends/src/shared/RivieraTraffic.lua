@@ -8,7 +8,7 @@
 	(signal off), dir 1 on lanes and 2 on turns (cars slow before a turn, prefer going straight),
 	riviera = true (Traffic keeps few cars here: Config.Traffic.RivieraMax).
 
-	RivieraTraffic.build() -> { lanes: { Segment }, all: { Segment } } (cached), or nil without data
+	RivieraTraffic.build() -> { lanes: { Segment } (the ones with a way on), all: { Segment }, dead } (cached), or nil without data
 ]]
 
 local CityLayout = require(script.Parent:WaitForChild("CityLayout"))
@@ -120,8 +120,24 @@ function RivieraTraffic.build()
 		end
 		return nil
 	end
+	-- (owner, 2026-11-04: "the cars are bugging here", a pile-up where Bay Link meets the Coast Road)
+	-- a lane redrawn by hand with more or fewer points kept its junction links on the old last point,
+	-- so its real last piece led nowhere (6 lanes). A link from past a lane's end, or from its last
+	-- three points when nothing leaves the end itself, now starts at the end.
+	local endLinked = {}
+	for _, link in data.links do
+		local l = data.lanes[link[1]]
+		if l and link[2] == #l.pts // 3 then
+			endLinked[link[1]] = true
+		end
+	end
 	for _, link in data.links do
 		local fromLane, fromK, toLane, toK = link[1], link[2], link[3], link[4]
+		local fl = data.lanes[fromLane]
+		local fromN = if fl then #fl.pts // 3 else 0
+		if fl and not fl.closed and (fromK > fromN or (not endLinked[fromLane] and fromK >= fromN - 3)) then
+			fromK = fromN
+		end
 		local fromRow, toRow = pieces[fromLane], pieces[toLane]
 		local before = fromRow and fromRow[fromK - 1] -- the piece ending at point fromK
 		local after = toRow and toRow[toK] -- the piece starting at point toK
@@ -157,13 +173,41 @@ function RivieraTraffic.build()
 			end
 		end
 	end
+	-- (same day) a turn that leaves a piece or two early (the clean arcs above) left the lane's last
+	-- pieces leading nowhere when nothing else left from there (20 places): a car going straight on
+	-- drove into the dead end and the queue behind it piled up. Pieces and turns with no way on are
+	-- taken out of the graph (step by step back from each dead end), so every choice goes somewhere.
+	local dead = {}
+	local changed = true
+	while changed do
+		changed = false
+		for _, seg in all do
+			if not dead[seg] then
+				for i = #seg.next, 1, -1 do
+					if dead[seg.next[i]] then
+						table.remove(seg.next, i)
+					end
+				end
+				if #seg.next == 0 then
+					dead[seg] = true
+					changed = true
+				end
+			end
+		end
+	end
+	local live = {}
+	for _, seg in lanes do
+		if not dead[seg] then
+			table.insert(live, seg)
+		end
+	end
 	-- ids continue after the old city's (CityLayout.buildGraph().all), so one list holds both
 	-- (the chauffeur sends segments by id: ChauffeurRoute.graph().all[id])
 	local base = #CityLayout.buildGraph().all
 	for i, seg in all do
 		seg.id = base + i
 	end
-	cached = { lanes = lanes, all = all }
+	cached = { lanes = live, all = all, dead = dead }
 	return cached
 end
 

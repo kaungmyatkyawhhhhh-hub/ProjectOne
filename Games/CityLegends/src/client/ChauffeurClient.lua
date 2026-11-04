@@ -863,7 +863,7 @@ local function targetSpeed(r: Ride, k: number, pos: Vector3, fwd: Vector3): numb
 		local flatPos = Vector3.new(pos.X, 0, pos.Z)
 		local myHalfW = ((r.car and r.car:GetAttribute("Width") :: number?) or 6) / 2
 		for _, npc in Traffic.near(pos + flatFwd * 24, 30) do
-			local rel = npc.pos - flatPos
+			local rel = (npc.pos - flatPos) * Vector3.new(1, 0, 1) -- (flat: up a hill the height made every car look off to the side)
 			local along = rel:Dot(flatFwd)
 			local side = (rel - flatFwd * along).Magnitude
 			-- (only what's on the car's own line: lane splitting passes cars a half lane over)
@@ -911,8 +911,8 @@ local SPLIT_RATE = 7 -- studs a second sideways
 local function carOnLine(pos: Vector3, fwd: Vector3, right: Vector3, off: number, from: number, to: number, halfW: number): Traffic.Npc?
 	local flatPos = Vector3.new(pos.X, 0, pos.Z)
 	local best, bestA = nil, math.huge
-	for _, npc in Traffic.near(flatPos + fwd * ((from + to) / 2), (to - from) / 2 + 16) do
-		local rel = npc.pos - flatPos
+	for _, npc in Traffic.near(pos + Vector3.new(fwd.X, 0, fwd.Z) * ((from + to) / 2), (to - from) / 2 + 16) do
+		local rel = (npc.pos - flatPos) * Vector3.new(1, 0, 1)
 		local along = rel:Dot(fwd)
 		local lat = rel:Dot(right) - off
 		if along > from and along < to and math.abs(lat) < halfW + npc.width / 2 + 0.8 and along < bestA then

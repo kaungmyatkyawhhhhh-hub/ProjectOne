@@ -51,6 +51,7 @@ export type Npc = {
 	wheels: { Motor6D },
 	spin: number,
 	highway: boolean, -- a highway car: spawns and comes back on the highways, with wider gaps
+	deadEnd: boolean?, -- stopped at the end of a lane with no way on: recycled next
 }
 
 type Obstacle = { pos: Vector3, fwd: Vector3, speed: number, halfLen: number, width: number, self: Npc? }
@@ -171,6 +172,7 @@ local function placeNpc(npc: Npc, seg: CityLayout.Segment, s: number)
 	npc.nextSeg = chooseNext(seg)
 	npc.stuck = 0
 	npc.ghost = 0
+	npc.deadEnd = nil
 	local pos, fwd = CityLayout.sample(seg, s)
 	npc.pos = pos
 	npc.fwd = fwd
@@ -383,8 +385,11 @@ local function refreshPlayerCars()
 			local flatV = Vector3.new(v.X, 0, v.Z)
 			local look = root.CFrame.LookVector
 			local flatLook = Vector3.new(look.X, 0, look.Z)
+			-- (at its real height, like the traffic cars' own positions: flattened to y 0 it was
+			-- hundreds of studs below a mountain road's cars, so out there traffic didn't wait for
+			-- players at junctions and could be placed on top of them; 2026-11-04)
 			table.insert(playerCarCache, {
-				pos = Vector3.new(root.Position.X, 0, root.Position.Z),
+				pos = root.Position,
 				fwd = if flatLook.Magnitude > 0.01 then flatLook.Unit else Vector3.zAxis,
 				speed = flatV.Magnitude,
 				halfLen = ((model:GetAttribute("Length") :: number?) or 14) / 2,
@@ -440,9 +445,16 @@ local function lookAheadGap(npc: Npc, obstacles: { Obstacle }): (number, number,
 		if o.self ~= npc then
 			local rel = o.pos - npc.pos
 			local f = rel:Dot(fwd)
-			if f > 0 and f < T.LookAhead then
+			-- (a car on a road above or below, a bridge or a tunnel, isn't in our way)
+			if f > 0 and f < T.LookAhead and math.abs(rel.Y) < 12 then
 				local lat = math.abs(rel:Dot(right))
-				if lat < (npc.width + o.width) / 2 + 0.9 then
+				-- (owner, 2026-11-04: "the cars are bugging here", the Mountain Road's hairpin into the
+				-- West Switchbacks) where a road narrows its two lanes run closer than a car's width
+				-- (58 spots); two cars side by side each saw the other a little ahead and both stopped
+				-- for good, with the queue piling up behind. A car going the same way whose middle is
+				-- not ahead of our front half is beside us, not in front.
+				local beside = f < npc.halfLen * 0.6 and o.fwd:Dot(fwd) > 0.7
+				if lat < (npc.width + o.width) / 2 + 0.9 and not beside then
 					local gap = f - npc.halfLen - o.halfLen
 					if gap < best then
 						best = gap
@@ -752,7 +764,9 @@ function Traffic.update(dt: number)
 				crossBlocked = true -- (a true standoff still gets broken by the gridlock breaker)
 			end
 			local gap, otherSpeed, align = lookAheadGap(npc, obstacleList)
-			crossBlocked = crossBlocked or (gap < math.huge and align < 0.7)
+			-- (and a car already overlapping the one ahead, gap under 0, isn't a normal queue either:
+			-- the gridlock breaker may take it through)
+			crossBlocked = crossBlocked or (gap < math.huge and align < 0.7) or gap < 0
 			if gap < math.huge then
 				-- (owner, 2026-10-29: "NPC cars on each other's tail, make space for at least one
 				-- car"): once moving, keep a car length plus a time gap; a stopped queue closes up
@@ -802,7 +816,13 @@ function Traffic.update(dt: number)
 			npc.s -= npc.seg.length
 			local nxt = npc.nextSeg
 			if not nxt then
-				npc.s = 0
+				-- a lane with no way on (owner, 2026-11-04: "the cars are bugging here"): the car used
+				-- to jump back to the start of its last piece, into the car behind, and the queue
+				-- piled up on top of itself. Now it waits at the end and the next recycle moves it
+				-- out of sight.
+				npc.s = npc.seg.length
+				npc.speed = 0
+				npc.deadEnd = true
 				break
 			end
 			npc.seg = nxt
@@ -849,10 +869,13 @@ function Traffic.update(dt: number)
 				if moved >= 3 then
 					break
 				end
-				local away = (npc.pos - flatFocus).Magnitude
+				-- (flat: with the car's height in it, a mountain road 215 up counted as 215 further
+				-- away, and cars turning off a route there were whisked away right in front of you;
+				-- owner, 2026-11-04: "the cars are bugging here")
+				local away = Vector3.new(npc.pos.X - flatFocus.X, 0, npc.pos.Z - flatFocus.Z).Magnitude
 				-- (a car that wandered off the routes goes back to one once it's out of the way)
 				local offRoute = (npc.seg :: any).riviera and not (npc.seg :: any).route
-				if away > T.RecycleDistance or (offRoute and away > T.StreetRecycle) then
+				if away > T.RecycleDistance or (offRoute and away > T.StreetRecycle) or npc.deadEnd then
 					local seg, s = findSpot(flatFocus, T.RespawnMin, T.RespawnMax, npc, true, npc.highway)
 					if seg then
 						placeNpc(npc, seg, s)
@@ -866,10 +889,18 @@ function Traffic.update(dt: number)
 end
 
 -- Move NPCs out of the way (used when a player car spawns)
+-- (2026-11-04: these two measured from y 0 against the cars' real heights, so above ~40 studs, most
+-- of the Riviera, nothing was ever near: no cut-ups up there, and a car brought out on a hill
+-- road wasn't cleared of traffic. Now flat distance, and within a storey of the given height.)
+local function nearXZ(npc: Npc, pos: Vector3, radius: number): boolean
+	local dx, dz = npc.pos.X - pos.X, npc.pos.Z - pos.Z
+	return dx * dx + dz * dz < radius * radius and math.abs(npc.pos.Y - pos.Y) < 15
+end
+
 function Traffic.clearAround(pos: Vector3, radius: number)
 	local flat = Vector3.new(pos.X, 0, pos.Z)
 	for _, npc in Traffic.cars do
-		if (npc.pos - flat).Magnitude < radius then
+		if nearXZ(npc, pos, radius) then
 			local seg, s = findSpot(flat, T.RespawnMin, T.RespawnMax, npc, true, npc.highway)
 			if seg then
 				placeNpc(npc, seg, s)
@@ -878,12 +909,11 @@ function Traffic.clearAround(pos: Vector3, radius: number)
 	end
 end
 
--- Cars currently near a point (used for cut-up detection)
+-- Cars currently near a point (used for cut-up detection): pos at its real height
 function Traffic.near(pos: Vector3, radius: number): { Npc }
 	local out = {}
-	local flat = Vector3.new(pos.X, 0, pos.Z)
 	for _, npc in Traffic.cars do
-		if (npc.pos - flat).Magnitude < radius then
+		if nearXZ(npc, pos, radius) then
 			table.insert(out, npc)
 		end
 	end
