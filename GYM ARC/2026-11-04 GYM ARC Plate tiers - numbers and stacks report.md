@@ -355,3 +355,17 @@ On the starter bench one lb a plate is 26 lb (8% of 315), so whole-lb tiers can'
 
 **Screens:** `Downloads\gem_update_import\screens_4Nov_plates_13\`. 01-04 Gem bench: 735 / Bronze 7 / Gold 7 / Diamond 13. 05-07 starter bench: 315 / Bronze 13 / Diamond 13.
 
+### The plate rim mesh after the import (4 Nov): measured, NOT used
+- **Imported:** rbxassetid://117511241661500. The axis is right: next to a Cylinder part of the same size, the two discs match.
+- **Measured (the whole Gem Mine view, same camera as section 6, every bar Diamond 13, two runs each):**
+
+  | Plain discs as | Triangles | Draw calls |
+  |---|---|---|
+  | Roblox Cylinder parts | 181.7k (181.0k-183.0k) | 372-376 |
+  | The rim mesh, Precise | 226.4k | 472-476 |
+  | The rim mesh, Automatic / Performance | 230.0k / 230.9k | 486 / 493 |
+
+- **So the rim made the whole view heavier: +45k triangles, +100 draw calls.** A Roblox Cylinder part is ~790 triangles only up close; it gets much cheaper with distance and batches well. A mesh stays at full detail and batches worse.
+- **The close-up bar alone couldn't be measured cleanly** this time: three runs gave -13.7k to +19.9k, too much noise from the scene.
+- **Decision: cylinders stay.** The rim waits in `ServerStorage._Imports.PlateRim_NotUsed`; moving it to `ReplicatedStorage.GymAssets` as `PlateRim` turns it on again (the code path is kept and tested). The Forge rack is back on cylinders. The original import is in `ServerStorage._Imports.gymarc_plate_rim`.
+- **What this means for the ~1.1k-a-bar target:** not reachable with 13 separate plates a side. The real cost of the plates in a full Gem Mine is about 17k triangles and 20 draw calls (+10% of the view), which is small. If phone FPS turns out low in a full Gem Mine, the next step is a closer "near" distance (e.g. 25 studs instead of 60) so fewer bars build every plate.

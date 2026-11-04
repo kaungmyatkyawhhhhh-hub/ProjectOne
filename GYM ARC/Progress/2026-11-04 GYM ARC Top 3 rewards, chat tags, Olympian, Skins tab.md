@@ -509,4 +509,4 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - **Phone FPS:** not measured (Studio caps it).
 - **Fixed:** plate numbers disappeared after a respawn (PlayerGui reset).
 - Details and both step tables: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 9. Screens: `screens_4Nov_plates_13`.
-
+- **Rim mesh imported and measured (4 Nov): not used.** It made the full Gem Mine view heavier (181.7k -> 226.4k triangles, 372 -> 476 draw calls), because Roblox's own cylinders get cheaper with distance and batch better. Cylinders stay; the rim is kept in `ServerStorage._Imports.PlateRim_NotUsed`. Report section 9.
