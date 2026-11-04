@@ -303,6 +303,11 @@ Prompt: [[2026-11-04 GYM ARC Prompt - Plate tiers FINAL (7 Nov part 9)]]. Number
 - (c) PR leaderboards + profile PRs and (e) the meet ranked by PR: not built.
 - (d) the plates sliding on with a clank (today it's the old PlateSlide sound) and a new "NEW PR" pop: not built.
 - Phone FPS: not tested. The Studio PC ran at 36 FPS by the bench; there was no before/after on a phone.
-- The digit and "M WEIGHTS" decals are waiting for your upload (IMPORT_LIST "PLATE NUMBERS").
 - The starter, Pro and PL bars only got the number check, no screenshots.
 - Rounding plates to 5 makes the first Bronze step jump on light machines (starter bench 315 → 375).
+
+### Plate decals in (4 Nov)
+- The owner imported the 10 digit decals + "M WEIGHTS" (Myanmar Builders Club images). The ids are in `Config/PlateTiers` (DigitIds 0-9, BrandId).
+- Checked in Play on a temp save: all load. 2, 3 and 4 digits fit (45, 375, 1245).
+- Fixed: the digit PNGs have empty side margins, so "45" read as "4 5". The client now crops each digit to its glyph box (`PlateNumbersClient`).
+- The 12 loose Decal objects in Workspace can be deleted (owner's call).
