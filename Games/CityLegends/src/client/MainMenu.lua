@@ -1,9 +1,10 @@
 --[[
 	MainMenu (client)
-	The City Legends main menu (owner, 2026-11-02, "Main menu (tile style)"): big bold tiles on a
-	soft patterned background, a top bar (the car you drive by name, or CLAIM CAR for a new player;
-	the player, level and cash on the right) and three tabs: CAMPAIGN, CARS, STORE. Our own look:
-	deep navy, warm gold and one mint accent; the pictures are drawn by tools/menu_art.py (MenuArt).
+	The City Legends main menu (owner, 2026-11-02, "Main menu (tile style)"): big tiles over the live
+	game scene (blurred), a top bar (the car you drive by name, or CLAIM CAR for a new player; the
+	player, level and cash on the right) and the tabs CAMPAIGN, CARS, HOUSES, STORE. The look
+	(2026-11-04, owner-away step 7: same bar as the dealer menu): dark glass panels, Builder Sans,
+	gold for the main action, drawn icons from DealerArt (no emoji, no cartoon tiles).
 
 	  * CAMPAIGN: PLAY (the big highlighted tile: back to driving, or your car out), WORLD MAP (a live
 	    map: venue symbols, a card with FAST TRAVEL and SET WAYPOINT), ACHIEVEMENTS (the cars
@@ -44,24 +45,26 @@ local Minimap = require(script.Parent:WaitForChild("Minimap"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local Weather = require(script.Parent:WaitForChild("Weather"))
 local MenuArt = require(script.Parent:WaitForChild("MenuArt"))
+local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
 
 local MainMenu = {}
 
 local player = Players.LocalPlayer
 
--- the look: deep navy, warm gold, one mint accent (colour = meaning: mint go, gold claim, blue
--- normal, red close, grey locked)
-local NAVY0 = Color3.fromRGB(8, 12, 26)
-local NAVY = Color3.fromRGB(17, 26, 54)
-local PANEL = Color3.fromRGB(14, 20, 42)
-local BLUE = Color3.fromRGB(46, 86, 170)
-local GOLD = Color3.fromRGB(255, 192, 72)
-local MINT = Color3.fromRGB(74, 234, 172)
-local WHITE = Color3.fromRGB(246, 248, 255)
-local SUB = Color3.fromRGB(160, 172, 204)
-local RED = Color3.fromRGB(255, 96, 96)
-local GREY = Color3.fromRGB(92, 98, 116)
-local GREEN = Color3.fromRGB(96, 228, 146)
+-- the look, the dealer menu's (colour = meaning: MINT the main action, drawn gold; GOLD a gold
+-- outline; BLUE / NAVY plain glass; RED close, grey locked, green money)
+local NAVY0 = Color3.fromRGB(10, 12, 20) -- the darkest glass
+local NAVY = Color3.fromRGB(30, 33, 46)
+local PANEL = Color3.fromRGB(18, 21, 32) -- panels (new() gives them the glass edge)
+local BLUE = Color3.fromRGB(44, 48, 64)
+local GOLD = Color3.fromRGB(255, 196, 82)
+local GOLD_D = Color3.fromRGB(226, 146, 40)
+local MINT = Color3.fromRGB(255, 197, 83)
+local WHITE = Color3.fromRGB(246, 247, 251)
+local SUB = Color3.fromRGB(160, 166, 184)
+local RED = Color3.fromRGB(236, 72, 78)
+local GREY = Color3.fromRGB(72, 76, 92)
+local GREEN = Color3.fromRGB(116, 228, 160)
 
 local FAMILY = "rbxasset://fonts/families/BuilderSans.json"
 local HEAVY = Font.new(FAMILY, Enum.FontWeight.ExtraBold)
@@ -85,6 +88,19 @@ local function new(className: string, props: { [string]: any }?, children: { Ins
 	end
 	for _, c in (children or {}) :: { Instance } do
 		c.Parent = inst
+	end
+	-- a panel is dark glass: a soft gradient and a thin light edge
+	if inst:IsA("GuiObject") and inst.BackgroundColor3 == PANEL and inst.BackgroundTransparency < 0.9 and not inst:FindFirstChildOfClass("UIStroke") then
+		local g = Instance.new("UIGradient")
+		g.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(150, 154, 168))
+		g.Rotation = 90
+		g.Parent = inst
+		local e = Instance.new("UIStroke")
+		e.Color = Color3.new(1, 1, 1)
+		e.Transparency = 0.86
+		e.Thickness = 1
+		e.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		e.Parent = inst
 	end
 	if parent then
 		inst.Parent = parent
@@ -135,27 +151,73 @@ end
 
 -- a button with our finish: rounded, a colour by meaning, a press-in
 local function button(label: string, color: Color3, props: { [string]: any }): TextButton
+	local primary = color == MINT or color == GREEN
 	local base: { [string]: any } = {
 		AutoButtonColor = false,
-		BackgroundColor3 = color,
+		BackgroundColor3 = if primary then Color3.new(1, 1, 1) else BLUE,
 		FontFace = HEAVY,
 		Text = label,
-		TextColor3 = if color == MINT or color == GOLD or color == GREEN then NAVY0 else WHITE,
+		TextColor3 = if primary then NAVY0 elseif color == GOLD then GOLD elseif color == RED then RED else WHITE,
 		TextSize = 18,
 	}
 	for k, v in props do
 		base[k] = v
 	end
-	local b: TextButton = new("TextButton", base, { corner(8) })
-	new("UIGradient", { Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(205, 210, 222)), Rotation = 90, Parent = b })
-	b.MouseEnter:Connect(hoverSound)
+	local b: TextButton = new("TextButton", base, { corner(10) })
+	if primary then
+		new("UIGradient", { Color = ColorSequence.new(GOLD, GOLD_D), Rotation = 90, Parent = b })
+	else
+		new("UIGradient", { Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(176, 180, 192)), Rotation = 90, Parent = b })
+	end
+	local rest = if primary then 0.6 elseif color == GOLD then 0.45 else 0.84
+	local edge = new("UIStroke", { Color = if color == GOLD then GOLD else Color3.new(1, 1, 1), Transparency = rest, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
+	local scale = new("UIScale", { Parent = b })
+	b.MouseEnter:Connect(function()
+		hoverSound()
+		tween(scale, 0.12, { Scale = 1.03 })
+		tween(edge, 0.12, { Transparency = rest * 0.55 })
+	end)
+	b.MouseLeave:Connect(function()
+		tween(scale, 0.12, { Scale = 1 })
+		tween(edge, 0.12, { Transparency = rest })
+	end)
+	b.MouseButton1Down:Connect(function()
+		tween(scale, 0.07, { Scale = 0.96 })
+	end)
+	b.MouseButton1Up:Connect(function()
+		tween(scale, 0.14, { Scale = 1.03 })
+	end)
 	return b
+end
+
+-- a drawn icon from the sheet (white, tinted)
+local function glyph(name: string, size: number, color: Color3?, props: { [string]: any }?): ImageLabel
+	local i = (table.find(DealerArt.icons, name) or 1) - 1
+	local c = DealerArt.cell
+	local base: { [string]: any } = {
+		BackgroundTransparency = 1,
+		Image = DealerArt.sheet,
+		ImageRectOffset = Vector2.new((i % DealerArt.cols) * c, (i // DealerArt.cols) * c),
+		ImageRectSize = Vector2.new(c, c),
+		ImageColor3 = color or WHITE,
+		Size = UDim2.fromOffset(size, size),
+		ScaleType = Enum.ScaleType.Fit,
+	}
+	if props then
+		for k, v in props do
+			base[k] = v
+		end
+	end
+	return new("ImageLabel", base)
 end
 
 -- key caps for the hints
 local function keyCap(parent: Instance, key: string, order: number): Frame
-	local f = new("Frame", { BackgroundColor3 = WHITE, Size = UDim2.fromOffset(math.max(26, #key * 9 + 14), 24), LayoutOrder = order, Parent = parent }, { corner(5) })
-	text({ Text = key, FontFace = HEAVY, TextColor3 = NAVY0, TextSize = 13, Size = UDim2.fromScale(1, 1), TextXAlignment = Enum.TextXAlignment.Center, Parent = f })
+	local f = new("Frame", { BackgroundColor3 = BLUE, Size = UDim2.fromOffset(math.max(26, #key * 9 + 14), 24), LayoutOrder = order, Parent = parent }, {
+		corner(6),
+		new("UIStroke", { Color = Color3.new(1, 1, 1), Transparency = 0.8, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
+	})
+	text({ Text = key, FontFace = HEAVY, TextColor3 = WHITE, TextSize = 13, Size = UDim2.fromScale(1, 1), TextXAlignment = Enum.TextXAlignment.Center, Parent = f })
 	return f
 end
 
@@ -221,7 +283,7 @@ end
 
 local function focusable(b: GuiButton, activate: () -> (), color: Color3?): Focus
 	if not b:FindFirstChild("FocusStroke") then
-		new("UIStroke", { Name = "FocusStroke", Color = color or WHITE, Thickness = 4, Transparency = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
+		new("UIStroke", { Name = "FocusStroke", Color = color or GOLD, Thickness = 2, Transparency = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
 	end
 	local f = { button = b, activate = activate }
 	table.insert(focusList, f)
@@ -315,22 +377,13 @@ end
 -- Background, top bar, tabs, hints
 ---------------------------------------------------------------------
 local function buildBackground(root: Frame)
-	local back = new("Frame", { Name = "Back", Size = UDim2.fromScale(1, 1), BackgroundColor3 = NAVY0, BackgroundTransparency = 0.04, BorderSizePixel = 0, Parent = root }, {
-		gradient(Color3.fromRGB(40, 52, 96), Color3.fromRGB(8, 12, 26)),
-	})
-	new("ImageLabel", {
-		Name = "Pattern",
-		BackgroundTransparency = 1,
-		Image = MenuArt.menu_pattern,
-		ScaleType = Enum.ScaleType.Tile,
-		TileSize = UDim2.fromOffset(256, 256),
-		ImageTransparency = 0.35,
-		Size = UDim2.fromScale(1, 1),
-		Parent = back,
-	})
-	-- a warm glow from the top
-	new("Frame", { BackgroundColor3 = GOLD, BackgroundTransparency = 0, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0.5, 0), Parent = back }, {
-		new("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.86), NumberSequenceKeypoint.new(1, 1) }) }),
+	-- the live game behind a dark veil (the blur is MenuBlur in Lighting), darker at the edges
+	new("Frame", { Name = "Back", Size = UDim2.fromScale(1, 1), BackgroundColor3 = WHITE, BackgroundTransparency = 0, BorderSizePixel = 0, Parent = root }, {
+		new("UIGradient", {
+			Rotation = 90,
+			Color = ColorSequence.new(Color3.fromRGB(26, 29, 42), NAVY0),
+			Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.22), NumberSequenceKeypoint.new(0.5, 0.3), NumberSequenceKeypoint.new(1, 0.12) }),
+		}),
 	})
 end
 
@@ -345,7 +398,6 @@ local openClaim: () -> ()
 
 local function buildTopBar()
 	topLeft = new("Frame", { Name = "Car", BackgroundColor3 = PANEL, BackgroundTransparency = 0.1, Position = UDim2.fromOffset(0, 0), Size = UDim2.fromOffset(400, 104), Parent = canvas }, { corner(10) })
-	new("Frame", { BackgroundColor3 = GOLD, BorderSizePixel = 0, Size = UDim2.new(0, 6, 1, 0), Parent = topLeft }, { corner(3) })
 	topRight = new("Frame", { Name = "Player", BackgroundColor3 = PANEL, BackgroundTransparency = 0.1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.fromOffset(400, 104), Parent = canvas }, { corner(10) })
 
 	local function fillLeft()
@@ -422,8 +474,8 @@ local switchTab: (string) -> ()
 local closeSubPage: () -> ()
 
 local function buildTabs()
-	local strip = new("Frame", { Name = "Tabs", BackgroundColor3 = NAVY0, BackgroundTransparency = 0.05, Position = UDim2.fromOffset(0, 118), Size = UDim2.new(1, 0, 0, 46), Parent = canvas }, { corner(6) })
-	new("Frame", { BackgroundColor3 = GOLD, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 3), Parent = strip })
+	local strip = new("Frame", { Name = "Tabs", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 118), Size = UDim2.new(1, 0, 0, 46), Parent = canvas }, { corner(6) })
+	new("Frame", { BackgroundColor3 = WHITE, BackgroundTransparency = 0.86, BorderSizePixel = 0, AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Size = UDim2.new(1, 0, 0, 1), Parent = strip })
 	local row = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 6), Size = UDim2.fromOffset(#TABS * 196, 36), Parent = strip }, {
 		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), HorizontalAlignment = Enum.HorizontalAlignment.Center }),
 	})
@@ -440,6 +492,8 @@ local function buildTabs()
 			end
 		end)
 		tabButtons[name] = b
+		b.BackgroundTransparency = 1
+		new("Frame", { Name = "Under", BackgroundColor3 = GOLD, BorderSizePixel = 0, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, 4), Size = UDim2.new(0.5, 0, 0, 3), Visible = false, Parent = b }, { corner(2) })
 		local badge = new("Frame", { Name = "Badge", BackgroundColor3 = GOLD, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -14, 0, 2), Size = UDim2.fromOffset(22, 22), Visible = false, ZIndex = 3, Parent = b }, {
 			new("UICorner", { CornerRadius = UDim.new(1, 0) }),
 			new("UIStroke", { Color = NAVY0, Thickness = 2 }),
@@ -451,16 +505,22 @@ local function buildTabs()
 	for _, side in { -1, 1 } do
 		local b = new("TextButton", {
 			AutoButtonColor = false,
-			Text = if side < 0 then "◀  Q" else "E  ▶",
+			Text = if side < 0 then "Q" else "E",
 			FontFace = HEAVY,
 			TextSize = 16,
-			TextColor3 = NAVY0,
-			BackgroundColor3 = WHITE,
+			TextColor3 = WHITE,
+			BackgroundColor3 = BLUE,
 			AnchorPoint = Vector2.new(if side < 0 then 0 else 1, 0),
-			Position = if side < 0 then UDim2.fromOffset(8, 9) else UDim2.new(1, -8, 0, 9),
+			Position = if side < 0 then UDim2.fromOffset(2, 8) else UDim2.new(1, -2, 0, 8),
 			Size = UDim2.fromOffset(64, 30),
+			TextXAlignment = if side < 0 then Enum.TextXAlignment.Right else Enum.TextXAlignment.Left,
 			Parent = strip,
-		}, { corner(5) })
+		}, {
+			corner(8),
+			new("UIStroke", { Color = Color3.new(1, 1, 1), Transparency = 0.84, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
+			new("UIPadding", { PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12) }),
+		})
+		glyph(if side < 0 then "back" else "next", 16, WHITE, { AnchorPoint = Vector2.new(if side < 0 then 0 else 1, 0.5), Position = UDim2.new(if side < 0 then 0 else 1, 0, 0.5, 0), Parent = b })
 		b.MouseEnter:Connect(hoverSound)
 		b.Selectable = false
 		b.Activated:Connect(function()
@@ -532,37 +592,34 @@ end
 ---------------------------------------------------------------------
 -- Tiles
 ---------------------------------------------------------------------
-type TileOpts = { top: Color3, bottom: Color3, title: string, sub: string?, art: string?, artSize: Vector2?, artPos: UDim2?, titleSize: number?, dark: boolean? }
+type TileOpts = { title: string, sub: string?, icon: string?, iconSize: number?, iconPos: UDim2?, titleSize: number?, primary: boolean? }
 
+-- a tile: dark glass, or gold for the main action, with a drawn icon
 local function tile(parent: Instance, x: number, y: number, w: number, h: number, o: TileOpts): TextButton
-	local b: TextButton = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = WHITE, Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(w, h), ClipsDescendants = true, Parent = parent }, {
-		corner(10),
-		gradient(o.top, o.bottom, 115),
+	local b: TextButton = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = WHITE, BackgroundTransparency = if o.primary then 0 else 0.06, Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(w, h), ClipsDescendants = true, Parent = parent }, {
+		corner(12),
+		if o.primary then gradient(GOLD, GOLD_D, 100) else gradient(Color3.fromRGB(38, 42, 56), PANEL, 100),
 	})
-	-- a soft shine across the top
-	new("Frame", { BackgroundColor3 = WHITE, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0.45, 0), Parent = b }, {
-		new("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.82), NumberSequenceKeypoint.new(1, 1) }) }),
-	})
-	if o.art then
-		new("ImageLabel", {
+	-- a thin highlight along the top
+	new("Frame", { BackgroundColor3 = WHITE, BackgroundTransparency = if o.primary then 0.55 else 0.8, BorderSizePixel = 0, Position = UDim2.fromOffset(14, 1), Size = UDim2.new(1, -28, 0, 1), Parent = b })
+	if o.icon then
+		local size = o.iconSize or math.floor(math.min(h * 0.46, 120))
+		glyph(o.icon, size, if o.primary then NAVY0 else GOLD, {
 			Name = "Art",
-			BackgroundTransparency = 1,
-			Image = o.art,
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = o.artPos or UDim2.new(1, -8, 0.5, 0),
-			Size = UDim2.fromOffset((o.artSize or Vector2.new(h, h)).X, (o.artSize or Vector2.new(h, h)).Y),
+			AnchorPoint = Vector2.new(1, 0),
+			Position = o.iconPos or UDim2.new(1, -20, 0, 20),
+			ImageTransparency = if o.primary then 0.12 else 0,
 			ZIndex = 2,
 			Parent = b,
 		})
 	end
-	local ink = if o.dark then NAVY0 else WHITE
-	local title = text({ Name = "Title", Text = o.title, FontFace = HEAVY, TextSize = o.titleSize or 40, TextColor3 = ink, TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 0, (o.titleSize or 40) * 2.2), ZIndex = 3, Parent = b })
-	new("UIStroke", { Color = Color3.new(0, 0, 0), Transparency = if o.dark then 1 else 0.7, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual, Parent = title })
+	local ink = if o.primary then NAVY0 else WHITE
+	text({ Name = "Title", Text = o.title, FontFace = HEAVY, TextSize = o.titleSize or 40, TextColor3 = ink, TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 0, (o.titleSize or 40) * 2.2), ZIndex = 3, Parent = b })
 	if o.sub then
 		text({ Name = "Sub", Text = o.sub, FontFace = MEDIUM, TextSize = 17, TextColor3 = ink, TextTransparency = 0.1, TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Bottom, AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 20, 1, -14), Size = UDim2.new(1, -40, 0, 44), ZIndex = 3, Parent = b })
 	end
 	-- (2026-11-04) a thin light edge, brighter on hover, like the dealer menu's glass
-	local edge = new("UIStroke", { Color = WHITE, Transparency = 0.82, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
+	local edge = new("UIStroke", { Color = WHITE, Transparency = 0.84, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
 	-- hover: lift a little; press: squeeze
 	local scale = new("UIScale", { Parent = b })
 	b.MouseEnter:Connect(function()
@@ -572,7 +629,7 @@ local function tile(parent: Instance, x: number, y: number, w: number, h: number
 	end)
 	b.MouseLeave:Connect(function()
 		tween(scale, 0.12, { Scale = 1 })
-		tween(edge, 0.12, { Transparency = 0.82 })
+		tween(edge, 0.12, { Transparency = 0.84 })
 	end)
 	b.MouseButton1Down:Connect(function()
 		tween(scale, 0.07, { Scale = 0.985 })
@@ -712,7 +769,7 @@ local function openSub(title: string): Frame
 	setFocus(nil)
 	table.clear(focusList)
 	local f = new("Frame", { Name = "Sub", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 176), Size = UDim2.new(1, 0, 0, H - 176 - 46), Parent = canvas })
-	local back = button("◀  BACK", BLUE, { Position = UDim2.fromOffset(0, 0), Size = UDim2.fromOffset(120, 36), TextSize = 16, Parent = f })
+	local back = button("BACK", BLUE, { Position = UDim2.fromOffset(0, 0), Size = UDim2.fromOffset(120, 36), TextSize = 16, Parent = f })
 	back.Activated:Connect(function()
 		selectSound()
 		goBack()
@@ -975,7 +1032,7 @@ local function openSettings()
 		local function refresh()
 			local cur = current()
 			for name, b in buttons do
-				b.BackgroundColor3 = if name == cur then MINT else Color3.fromRGB(34, 46, 84)
+				b.BackgroundColor3 = if name == cur then MINT else BLUE
 				b.TextColor3 = if name == cur then NAVY0 else WHITE
 			end
 		end
@@ -994,7 +1051,7 @@ local function openSettings()
 	end
 	-- a slider 0..1
 	local function slider(r: Frame, get: () -> number, set: (number) -> ())
-		local back = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = Color3.fromRGB(34, 46, 84), AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -70, 0.5, 0), Size = UDim2.new(0.5, 0, 0, 10), Parent = r }, { corner(5) })
+		local back = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = BLUE, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -70, 0.5, 0), Size = UDim2.new(0.5, 0, 0, 10), Parent = r }, { corner(5) })
 		local fill = new("Frame", { BackgroundColor3 = MINT, Size = UDim2.fromScale(get(), 1), Parent = back }, { corner(5) })
 		local knob = new("Frame", { BackgroundColor3 = WHITE, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(get(), 0.5), Size = UDim2.fromOffset(22, 22), Parent = back }, {
 			new("UICorner", { CornerRadius = UDim.new(1, 0) }),
@@ -1112,7 +1169,7 @@ local function openSettings()
 		end
 		show()
 		for k, d in { -2, 2 } do
-			local b = button(if d < 0 then "−" else "+", Color3.fromRGB(34, 46, 84), { Position = UDim2.fromOffset(if k == 1 then 0 else 142, 0), Size = UDim2.fromOffset(38, 34), TextSize = 22, Parent = holder })
+			local b = button(if d < 0 then "−" else "+", BLUE, { Position = UDim2.fromOffset(if k == 1 then 0 else 142, 0), Size = UDim2.fromOffset(38, 34), TextSize = 22, Parent = holder })
 			b.Activated:Connect(function()
 				selectSound()
 				local t = fx()
@@ -1204,7 +1261,7 @@ local function openSettings()
 	end)
 	do
 		local r = row("Radio")
-		local b = button(Audio.stationName() .. "  ▶", Color3.fromRGB(34, 46, 84), { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(240, 34), TextSize = 16, Parent = r })
+		local b = button(Audio.stationName() .. "  ▶", BLUE, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(240, 34), TextSize = 16, Parent = r })
 		b.Activated:Connect(function()
 			selectSound()
 			b.Text = Audio.nextStation() .. "  ▶"
@@ -1231,7 +1288,7 @@ end
 local function statBar(parent: Instance, y: number, label: string, k: number, valueText: string)
 	text({ Text = label, FontFace = BOLD, TextSize = 14, TextColor3 = SUB, Position = UDim2.fromOffset(0, y), Size = UDim2.fromOffset(120, 18), Parent = parent })
 	text({ Text = valueText, FontFace = HEAVY, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, y), Size = UDim2.fromOffset(120, 18), Parent = parent })
-	local back = new("Frame", { BackgroundColor3 = Color3.fromRGB(34, 46, 84), Position = UDim2.fromOffset(0, y + 21), Size = UDim2.new(1, 0, 0, 8), Parent = parent }, { corner(4) })
+	local back = new("Frame", { BackgroundColor3 = BLUE, Position = UDim2.fromOffset(0, y + 21), Size = UDim2.new(1, 0, 0, 8), Parent = parent }, { corner(4) })
 	new("Frame", { BackgroundColor3 = MINT, Size = UDim2.fromScale(math.clamp(k, 0.04, 1), 1), Parent = back }, { corner(4) })
 end
 
@@ -1271,7 +1328,7 @@ openClaim = function()
 		end
 		local card: TextButton = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = WHITE, Position = UDim2.fromOffset((k - 1) * (cw + 16), 66), Size = UDim2.fromOffset(cw, 268), Parent = page }, {
 			corner(10),
-			gradient(Color3.fromRGB(46, 70, 140), Color3.fromRGB(18, 28, 60), 115),
+			gradient(Color3.fromRGB(38, 42, 56), PANEL, 115),
 		})
 		new("UIStroke", { Name = "Pick", Color = MINT, Thickness = 4, Transparency = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = card })
 		local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 1, -32), Parent = card })
@@ -1349,7 +1406,7 @@ local function buildCampaign(page: Frame)
 	local lowH = hTall - lowY
 
 	-- ACHIEVEMENTS (tall, left)
-	local ach = tile(page, 0, y0, c1, hTall, { top = Color3.fromRGB(122, 74, 214), bottom = Color3.fromRGB(56, 30, 120), title = "Achievements", sub = "", art = MenuArt.menu_trophy, artSize = Vector2.new(250, 250), artPos = UDim2.new(1, 10, 0.5, 0), titleSize = 34 })
+	local ach = tile(page, 0, y0, c1, hTall, { title = "Achievements", sub = "", icon = "trophy", iconSize = 150, iconPos = UDim2.new(0.5, 75, 0.5, -90), titleSize = 32 })
 	local achSub = ach:FindFirstChild("Sub") :: TextLabel
 	achSub.Size = UDim2.new(1, -40, 0, 70)
 	focusable(ach, function()
@@ -1360,7 +1417,7 @@ local function buildCampaign(page: Frame)
 	end)
 
 	-- WORLD MAP (wide, top)
-	local mapTile = tile(page, x2, y0, c2 + 12 + c3, topH, { top = Color3.fromRGB(20, 44, 80), bottom = Color3.fromRGB(10, 22, 44), title = "World Map", titleSize = 44 })
+	local mapTile = tile(page, x2, y0, c2 + 12 + c3, topH, { title = "World Map", titleSize = 32 })
 	local mapPane = new("Frame", { Name = "MapPane", BackgroundColor3 = Color3.fromRGB(14, 34, 58), Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = mapTile })
 	local shadeL = new("Frame", { BackgroundColor3 = NAVY0, BorderSizePixel = 0, Size = UDim2.new(0.55, 0, 1, 0), ZIndex = 2, Parent = mapTile }, {
 		new("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(1, 1) }) }),
@@ -1370,9 +1427,10 @@ local function buildCampaign(page: Frame)
 		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8), VerticalAlignment = Enum.VerticalAlignment.Center }),
 	})
 	local function chip(t: string, color: Color3, order: number): TextLabel
-		local c = text({ Text = t, FontFace = HEAVY, TextSize = 16, TextColor3 = NAVY0, BackgroundColor3 = color, BackgroundTransparency = 0, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 30), LayoutOrder = order, ZIndex = 5, Parent = chips })
+		local c = text({ Text = t, FontFace = HEAVY, TextSize = 15, TextColor3 = color, BackgroundColor3 = NAVY0, BackgroundTransparency = 0.2, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 30), LayoutOrder = order, ZIndex = 5, Parent = chips })
 		new("UIPadding", { PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12), Parent = c })
 		corner(8).Parent = c
+		new("UIStroke", { Color = Color3.new(1, 1, 1), Transparency = 0.84, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = c })
 		return c
 	end
 	local timeChip = chip("", WHITE, 1)
@@ -1402,8 +1460,7 @@ local function buildCampaign(page: Frame)
 	focusable(mapTile, openWorldMap)
 
 	-- PLAY (the big highlighted one)
-	local play = tile(page, x2, lowY, c2, lowH, { top = Color3.fromRGB(70, 236, 176), bottom = Color3.fromRGB(18, 150, 120), title = "Play", sub = "", art = MenuArt.menu_play, artSize = Vector2.new(lowH * 2, lowH), artPos = UDim2.new(1, -6, 0.5, 0), titleSize = 52, dark = true })
-	new("UIStroke", { Color = WHITE, Thickness = 4, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = play })
+	local play = tile(page, x2, lowY, c2, lowH, { title = "Play", sub = "", icon = "play", iconSize = 96, iconPos = UDim2.new(1, -28, 0.5, -48), titleSize = 50, primary = true })
 	local playSub = play:FindFirstChild("Sub") :: TextLabel
 	playSub.Size = UDim2.new(0.62, 0, 0, 60)
 	local playFocus = focusable(play, playNow, GOLD)
@@ -1434,7 +1491,7 @@ local function buildCampaign(page: Frame)
 	end)
 
 	-- SETTINGS
-	local set = tile(page, x3, lowY, c3, lowH, { top = Color3.fromRGB(58, 98, 190), bottom = Color3.fromRGB(26, 46, 104), title = "Settings", sub = "Map, graphics, camera, sound", art = MenuArt.menu_settings, artSize = Vector2.new(150, 150), artPos = UDim2.new(1, 6, 0.52, 0), titleSize = 36 })
+	local set = tile(page, x3, lowY, c3, lowH, { title = "Settings", sub = "Map, graphics, camera, sound", icon = "gear", iconSize = 64, titleSize = 30 })
 	focusable(set, openSettings)
 	return playFocus
 end
@@ -1465,7 +1522,7 @@ local function buildCars(page: Frame)
 		TextSize = 16,
 		TextColor3 = WHITE,
 		PlaceholderColor3 = SUB,
-		BackgroundColor3 = Color3.fromRGB(34, 46, 84),
+		BackgroundColor3 = BLUE,
 		ClearTextOnFocus = false,
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.new(1, 0, 0, 3),
@@ -1575,7 +1632,7 @@ local function buildCars(page: Frame)
 	local function card(parent: Instance, x: number, y: number, w: number, h: number, id: string)
 		local spec = Cars.ById[id]
 		local isSel = id == selected
-		local b: TextButton = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = if isSel then Color3.fromRGB(40, 66, 130) else Color3.fromRGB(24, 34, 70), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(w, h), Parent = parent }, { corner(8) })
+		local b: TextButton = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = if isSel then Color3.fromRGB(46, 50, 68) else Color3.fromRGB(26, 29, 42), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(w, h), Parent = parent }, { corner(8) })
 		if isSel then
 			new("UIStroke", { Color = MINT, Thickness = 3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
 		end
@@ -1689,7 +1746,7 @@ local function buildCars(page: Frame)
 	for k, name in { "Brand", "Price", "Speed", "Newest" } do
 		local b = new("TextButton", { AutoButtonColor = false, Text = name, FontFace = HEAVY, TextSize = 14, Size = UDim2.fromOffset(76, 34), LayoutOrder = k, Parent = sorts }, { corner(8) })
 		local function paint()
-			b.BackgroundColor3 = if sortBy == name then MINT else Color3.fromRGB(34, 46, 84)
+			b.BackgroundColor3 = if sortBy == name then MINT else BLUE
 			b.TextColor3 = if sortBy == name then NAVY0 else WHITE
 		end
 		paint()
@@ -1717,6 +1774,8 @@ local function buildCars(page: Frame)
 	end
 end
 
+local STORE_ICON = { store_vip = "crown", store_cash2x = "cash", store_starter = "gift", store_bundle = "cash", store_garage = "garage" }
+
 local function buildStore(page: Frame)
 	local items = Config.Menu.Store
 	local cols = 3
@@ -1727,13 +1786,10 @@ local function buildStore(page: Frame)
 		local col, rowN = (k - 1) % cols, (k - 1) // cols
 		local live = item.id ~= nil
 		local b = tile(page, col * (cw + gap), rowN * (ch + gap), cw, ch, {
-			top = if live then Color3.fromRGB(46, 86, 170) else Color3.fromRGB(56, 62, 80),
-			bottom = if live then Color3.fromRGB(20, 34, 80) else Color3.fromRGB(30, 34, 46),
 			title = item.name,
 			sub = item.effect,
-			art = MenuArt[item.art],
-			artSize = Vector2.new(150, 150),
-			artPos = UDim2.new(1, -4, 0.4, 0),
+			icon = STORE_ICON[item.art or ""] or "tag",
+			iconSize = 78,
 			titleSize = 28,
 		})
 		local subLabel = b:FindFirstChild("Sub") :: TextLabel
@@ -1746,8 +1802,8 @@ local function buildStore(page: Frame)
 			-- greyed until the owner gives the id
 			local art = b:FindFirstChild("Art") :: ImageLabel?
 			if art then
-				art.ImageTransparency = 0.45
-				art.ImageColor3 = Color3.fromRGB(170, 176, 190)
+				art.ImageTransparency = 0.3
+				art.ImageColor3 = SUB
 			end
 		else
 			task.spawn(function()
@@ -1835,7 +1891,7 @@ local function buildHouses(page: Frame)
 	local rowH = (hTall - 12) / 2
 
 	-- MY HOUSE (tall, left): the house standing in this server
-	local mine = tile(page, 0, 0, c1, hTall, { top = Color3.fromRGB(226, 170, 86), bottom = Color3.fromRGB(150, 92, 40), title = "My House", sub = "", art = MenuArt.store_garage, artSize = Vector2.new(260, 260), artPos = UDim2.new(1, 20, 0.42, 0), titleSize = 44, dark = true })
+	local mine = tile(page, 0, 0, c1, hTall, { title = "My House", sub = "", icon = "house", iconSize = 110, titleSize = 34 })
 	local mineSub = mine:FindFirstChild("Sub") :: TextLabel
 	mineSub.Size = UDim2.new(1, -40, 0, 96)
 	local action = new("Frame", { BackgroundColor3 = NAVY0, AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 20, 1, -122), Size = UDim2.fromOffset(230, 44), ZIndex = 4, Parent = mine }, { corner(10) })
@@ -1862,7 +1918,7 @@ local function buildHouses(page: Frame)
 	end, GOLD)
 
 	-- BLUEPRINTS (top middle): the houses you own, the catalogue
-	local blue = tile(page, x2, 0, c2, rowH, { top = Color3.fromRGB(46, 86, 170), bottom = Color3.fromRGB(20, 34, 80), title = "Blueprints", sub = "", titleSize = 32 })
+	local blue = tile(page, x2, 0, c2, rowH, { title = "Blueprints", sub = "", icon = "blueprint", iconSize = 64, titleSize = 30 })
 	local blueSub = blue:FindFirstChild("Sub") :: TextLabel
 	focusable(blue, function()
 		outOfMenu(function()
@@ -1874,7 +1930,7 @@ local function buildHouses(page: Frame)
 	end)
 
 	-- HOUSE SETTINGS (top right)
-	local set = tile(page, x3, 0, c2, rowH, { top = Color3.fromRGB(58, 98, 190), bottom = Color3.fromRGB(26, 46, 104), title = "House Settings", sub = "Who can come in, roommates, garage", art = MenuArt.menu_settings, artSize = Vector2.new(120, 120), artPos = UDim2.new(1, 10, 0.55, 0), titleSize = 30 })
+	local set = tile(page, x3, 0, c2, rowH, { icon = "gear", iconSize = 64, title = "House Settings", sub = "Who can come in, roommates, garage", art = MenuArt.menu_settings, artSize = Vector2.new(120, 120), artPos = UDim2.new(1, 10, 0.55, 0), titleSize = 30 })
 	focusable(set, function()
 		local lot = player:GetAttribute("HouseLot")
 		outOfMenu(function()
@@ -1886,7 +1942,7 @@ local function buildHouses(page: Frame)
 	end)
 
 	-- LEGENDS REALTY (bottom, wide): fast travel to the agency
-	local realty = tile(page, x2, rowH + 12, c2 * 2 + 12, rowH, { top = Color3.fromRGB(70, 236, 176), bottom = Color3.fromRGB(18, 150, 120), title = "Legends Realty", sub = "Buy a house, then claim a FOR SALE lot  ·  fast travel there", titleSize = 32, dark = true })
+	local realty = tile(page, x2, rowH + 12, c2 * 2 + 12, rowH, { title = "Legends Realty", sub = "Buy a house, then claim a FOR SALE lot  ·  fast travel there", icon = "pin", iconSize = 64, titleSize = 30 })
 	local realtySub = realty:FindFirstChild("Sub") :: TextLabel
 	realtySub.Size = UDim2.new(0.8, 0, 0, 44)
 	focusable(realty, function()
@@ -1947,8 +2003,11 @@ switchTab = function(name: string)
 	tabName = name
 	for n, b in tabButtons do
 		local on = n == name
-		b.BackgroundTransparency = if on then 0 else 1
-		b.TextColor3 = if on then NAVY0 else WHITE
+		b.TextColor3 = if on then WHITE else SUB
+		local under = b:FindFirstChild("Under")
+		if under then
+			(under :: any).Visible = on
+		end
 	end
 	if sub then
 		return
@@ -1987,6 +2046,15 @@ switchTab = function(name: string)
 	end
 end
 
+-- the canvas's scale for this screen (Studio: workspace attribute PreviewPhone draws it phone size)
+local function fitScale(): number
+	local vp = workspace.CurrentCamera.ViewportSize
+	if workspace:GetAttribute("PreviewPhone") then
+		vp = Vector2.new(667, 375)
+	end
+	return math.min((vp.X - 24) / W, (vp.Y - 16) / H)
+end
+
 local function build()
 	local pg = player:WaitForChild("PlayerGui")
 	gui = new("ScreenGui", { Name = "MainMenu", ResetOnSpawn = false, IgnoreGuiInset = true, DisplayOrder = 40, Enabled = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, Parent = pg })
@@ -1995,8 +2063,7 @@ local function build()
 	canvas = new("Frame", { Name = "Canvas", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(W, H), Parent = root })
 	scaler = new("UIScale", { Parent = canvas })
 	local function fit()
-		local vp = workspace.CurrentCamera.ViewportSize
-		scaler.Scale = math.min((vp.X - 24) / W, (vp.Y - 16) / H)
+		scaler.Scale = fitScale()
 	end
 	fit()
 	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
@@ -2103,8 +2170,7 @@ closeMenu = function()
 	task.delay(if calm then 0 else 0.16, function()
 		if not isOpen then
 			g.Enabled = false
-			local vp = workspace.CurrentCamera.ViewportSize
-			scaler.Scale = math.min((vp.X - 24) / W, (vp.Y - 16) / H)
+			scaler.Scale = fitScale()
 		end
 	end)
 	if api and api.onClosed then
@@ -2138,8 +2204,7 @@ function MainMenu.open(start: boolean?)
 		blur = new("BlurEffect", { Name = "MenuBlur", Size = 0, Parent = Lighting })
 	end
 	tween(blur :: BlurEffect, 0.25, { Size = 14 })
-	local vp = workspace.CurrentCamera.ViewportSize
-	local target = math.min((vp.X - 24) / W, (vp.Y - 16) / H)
+	local target = fitScale()
 	scaler.Scale = if calm then target else target * 0.96
 	tween(scaler, 0.22, { Scale = target }, Enum.EasingStyle.Quint)
 	Audio.play("swoosh", 0.25, 1.3)

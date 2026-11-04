@@ -24,6 +24,9 @@ ICONS = [
     "exit", "back", "next", "up", "down", "lock", "check", "sound",
     "fuel", "bolt", "gearbox", "abs", "drive", "drop", "gauge", "weight",
     "power", "torque", "seat", "paint", "wheel", "tag", "key", "star",
+    # (2026-11-04, the main menu)
+    "trophy", "gear", "play", "map", "house", "crown", "cash", "gift",
+    "garage", "blueprint", "pin", "close",
 ]
 
 
@@ -167,6 +170,60 @@ def draw_icon(d, name, ox, oy):
             r = 26 if k % 2 == 0 else 11
             pts.append((32 + math.cos(a) * r, 34 + math.sin(a) * r))
         poly(*pts)
+    elif name == "trophy":
+        poly((18, 9), (46, 9), (44, 29), (36, 38), (28, 38), (20, 29))
+        arc(17, 17, 8, 90, 270, w=4)
+        arc(47, 17, 8, -90, 90, w=4)
+        line((32, 38), (32, 46), w=6)
+        rrect(20, 46, 44, 54, 2, fill=W)
+    elif name == "gear":
+        for k in range(8):
+            a = k * math.pi / 4
+            line((32 + math.cos(a) * 18, 32 + math.sin(a) * 18), (32 + math.cos(a) * 26, 32 + math.sin(a) * 26), w=8)
+        circle(32, 32, 20, fill=W)
+        circle(32, 32, 9, fill=CLEAR)
+    elif name == "play":
+        poly((19, 10), (19, 54), (54, 32))
+    elif name == "map":
+        line((9, 15), (24, 9), (40, 15), (55, 9), (55, 49), (40, 55), (24, 49), (9, 55), (9, 15))
+        line((24, 9), (24, 49))
+        line((40, 15), (40, 55))
+    elif name == "house":
+        line((7, 31), (32, 9), (57, 31), w=6)
+        line((14, 28), (14, 55), (50, 55), (50, 28))
+        rrect(26, 36, 38, 55, 2, fill=W)
+    elif name == "crown":
+        poly((8, 46), (8, 17), (20, 31), (32, 11), (44, 31), (56, 17), (56, 46))
+        rrect(8, 49, 56, 55, 2, fill=W)
+    elif name == "cash":
+        rrect(7, 17, 57, 47, 5, w=LW)
+        circle(32, 32, 8, w=4)
+        circle(16, 32, 2.5, fill=W)
+        circle(48, 32, 2.5, fill=W)
+    elif name == "gift":
+        rrect(9, 23, 55, 33, 3, fill=W)
+        rrect(13, 33, 51, 56, 3, w=LW)
+        line((32, 23), (32, 56))
+        circle(24, 16, 7, w=4)
+        circle(40, 16, 7, w=4)
+    elif name == "garage":
+        line((7, 27), (32, 10), (57, 27), w=6)
+        line((12, 25), (12, 55))
+        line((52, 25), (52, 55))
+        for y in (33, 41, 49):
+            line((20, y), (44, y), w=4)
+    elif name == "blueprint":
+        rrect(9, 9, 55, 55, 4, w=LW)
+        line((9, 31), (30, 31), (30, 9))
+        line((30, 43), (55, 43))
+        line((30, 43), (30, 55))
+    elif name == "pin":
+        circle(32, 25, 17, fill=W)
+        poly((18, 35), (46, 35), (32, 59))
+        circle(32, 25, 7, fill=CLEAR)
+    elif name == "close":
+        line((15, 15), (49, 49), w=6)
+        line((49, 15), (15, 49), w=6)
 
 
 def main():
