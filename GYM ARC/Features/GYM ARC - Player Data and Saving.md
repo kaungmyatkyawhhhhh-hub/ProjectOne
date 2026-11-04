@@ -20,7 +20,7 @@ One saved table per player in Roblox's DataStore, with retries and a session loc
 - **Fresh test player:** the `FreshPlayer` attribute plays on temporary data and never touches the real save.
 
 ## Save version and migrations (prompt 108, 2 Nov)
-- Every save has `dataVersion`. `Server/DataMigrations` holds `Latest` (now **2**: step 1 -> 2 gives old saves their Run Cards catch-up picks, [[GYM ARC - Run Cards]]) and the steps: `Steps[n]` turns a version n save into n + 1. They run once on load, in order (`[PlayerData] X: save version 0 -> 1` in the output).
+- Every save has `dataVersion`. `Server/DataMigrations` holds `Latest` (now **3**: step 1 -> 2 gives old saves their Run Cards catch-up picks, [[GYM ARC - Run Cards]]; step 2 -> 3 (4 Nov) gives every star already earned a waiting Legacy card pick, flag `runCards.legacyBackfill`) and the steps: `Steps[n]` turns a version n save into n + 1. They run once on load, in order (`[PlayerData] X: save version 0 -> 1` in the output).
 - **Rules for every update that changes saved data:**
   1. A new field with a default: just add it to `DataTemplate` (old saves get it on load). No version bump.
   2. A field that moves, is renamed or needs new numbers on old saves: bump `DataMigrations.Latest` by one and add `Steps[old]` doing the change.

@@ -25,6 +25,7 @@ Every Body Alter gives a **card pick**: keep 1 of 3 cards. Cards stack for this 
 - **MY BUILD** (button on the Physique body card): the total per type, how many cards (and legacy cards) give it, and the legacy cards.
 - **Legacy cards:** at the Hall of Fame YES you pick 1 card to keep (the best one is picked already). Up to 3 legacy cards are on at once; tap one in MY BUILD to switch it on or off.
 - **Old players:** on the first join with this build, a save gets 1 pick per alter already reached (save version 2).
+- **Retroactive Legacy cards (4 Nov, save version 3):** every star earned before Run Cards gets 1 waiting LEGACY PICK (3 cards, normal odds, pick 1, saved in `legacy.byStar`). A popup "Your ★4 earned you 4 Legacy cards – pick them now" opens once a session when the screen is clear; LATER keeps them on the RUN CARDS card. Once only (`legacyBackfill`). [[2026-11-04 GYM ARC Legacy card backfill, next weight panel, tap arm wrestling]]
 - **When it's on:** from the GEM event (Config/LiveEvents "Gem", unlocks RunCards). Creator Hub switch `RunCards_Enabled`. Studio: `TestRunCards`.
 
 ## Art (2 Nov, owner: "create icons or images for the cards")

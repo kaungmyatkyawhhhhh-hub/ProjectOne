@@ -9,7 +9,10 @@ Back to [[00 GYM ARC Home|GYM ARC Home]].
 
 A tapping duel at two tables (starter gym and pro gym). Bigger biceps and forearms push a bit harder, but tap speed decides most matches. Rebuilt 13 Oct (new features run, task 3).
 
-## How it works
+## TAP, not hold (4 Nov, owner: "players just click, lose and leave")
+- Every tap pushes the bar toward you (`TapPush` x your share of both strengths); the opponent pushes back all the time (Rocco 2.5, Tess 4, Big Lou 5 taps a second, bullies 5; a player with their taps). Strength = ladder power x arm look (biceps, forearms, triceps) x arm gear: stronger = fewer taps. The server counts max 12 taps a second. Big pulsing TAP! button, hit sound + small shake per tap. Tutorial Benny / first Coral push for you. Details: [[2026-11-04 GYM ARC Legacy card backfill, next weight panel, tap arm wrestling]]. (The 2 Nov HOLD version is gone.)
+
+## How it works (13 Oct; numbers above replace it)
 - **Tables:** one by the starter gym's front desk and one in the pro gym on the open floor in front of the cable machines. Each runs its own matches.
 - **Sitting down:** the same sign and prompt as the machines: a glass diamond "ARM WRESTLING" with the biceps and forearms in red and "1 v 1", the key and OCCUPY, and the glowing floor outline.
 - **Opponent:** two players = a match. Alone, you pick an NPC: Rocco (easy, 8 coins), Tess (medium, 15 coins) or Big Lou (hard, 35 coins), or wait for a player to sit down.
