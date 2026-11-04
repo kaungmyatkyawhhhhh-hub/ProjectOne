@@ -40,3 +40,4 @@ Photos from Wikimedia Commons (licence in brackets), frames from YouTube videos 
 - `revuelto_cluster_owner.png`: Revuelto cluster, CORSA + HYBRID, gear P.
 - `aventador_sv_cluster_owner.png`: Aventador SV cluster, SPORT, gear N (a dealer's watermark in one corner).
 - `aventador_lp700_cluster_owner.png`: Aventador LP700-4 cluster, STRADA, gear N.
+- `aventador_sv_cluster_owner_2.png`: a second SV photo, the owner's reference for the gear N.

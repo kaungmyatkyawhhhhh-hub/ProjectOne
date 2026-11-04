@@ -502,12 +502,24 @@ def sv(outdir):
     A.text(549, 253, "10", TECH, 24, (238, 52, 48), shear=0.24, stroke=0.45, strokecol=(255, 236, 190))
     A.line([(177, 230), (219, 253)], (240, 76, 76), 1.3, glow=(120, 20, 24), gw=2.2)
 
-    # the gear: a huge leaning N with soft corners and a thin white edge
-    N_pts = [(345, 264), (375, 180), (398, 178.5), (408, 232), (417, 178.5), (437, 178.5), (404, 262), (388, 263), (369, 214), (363, 264)]
+    # the gear: the owner's second photo, traced (2026-11-04, "make the N like this"): a heavy leaning
+    # N, its top right and bottom right corners well rounded, two narrow notches, a thin white edge.
+    # n5 numbers: pixels of the 8x crop of that photo; photo scale is about the same as the first one
+    def n5(x, y):
+        return (347.0 + (x - 300) * 0.1152, 178.5 + (y - 80) * 0.1275)
+
+    def arc(cx, cy, r, a0, a1, steps=8):
+        return [n5(cx + r * math.cos(math.radians(a0 + (a1 - a0) * k / steps)), cy + r * math.sin(math.radians(a0 + (a1 - a0) * k / steps))) for k in range(steps + 1)]
+
+    N_pts = [n5(300, 745), n5(540, 80), n5(682, 80), n5(738, 540), n5(905, 80), n5(975, 80)]
+    N_pts += arc(975, 145, 42, -90, 12)  # top right corner
+    N_pts += [n5(835, 660)]
+    N_pts += arc(745, 660, 88, 22, 90)  # bottom right corner
+    N_pts += [n5(628, 748), n5(585, 360), n5(445, 748)]
+    edge = N_pts + N_pts[:1]
+    A.line(edge, (252, 244, 214), 1.5)
     A.poly(N_pts, black)
-    A.line(N_pts + N_pts[:2], black, 2.6)
-    A.line([(437.5, 178), (404.5, 263)], (250, 238, 200), 0.6)
-    A.line([(369, 214), (363, 264.5)], (250, 238, 200), 0.5)
+    A.line(edge, black, 0.5)
 
     # the gear strip
     A.text(335, 256, "R", TECH, 17, black, shear=0.24)

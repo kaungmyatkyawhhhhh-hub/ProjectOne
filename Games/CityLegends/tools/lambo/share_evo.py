@@ -8,8 +8,12 @@ gx,gy,gz: a first guess of the offset (metres). Only the cluster's faces of `Bod
 (texture v under 0.38: the atlas also holds the centre screen and the button icons).
 """
 
+import os
 import statistics
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from mesh_cut import delete_faces  # noqa: E402
 
 import bmesh
 import bpy
@@ -112,24 +116,20 @@ cut = {}
 for o in bpy.data.objects:
     if o.type != "MESH" or o.name in donor_names or not o.name.startswith("Body_"):
         continue
-    bm = bmesh.new()
-    bm.from_mesh(o.data)
     m = o.matrix_world
     rot = m.to_3x3()
     drop = []
-    for f in bm.faces:
-        c = m @ f.calc_center_median()
+    for p in o.data.polygons:
+        c = m @ p.center
         if not inside(c, lo2, hi2):
             continue
-        n = (rot @ f.normal).normalized()
+        n = (rot @ p.normal).normalized()
         q, _, _, d = cbvh.find_nearest(c)
         if q is not None and d < 0.022 and abs(n.dot(normal)) > 0.8:
-            drop.append(f)
+            drop.append(p.index)
     if drop:
         cut[o.name[:30]] = len(drop)
-        bmesh.ops.delete(bm, geom=drop, context="FACES")
-        bm.to_mesh(o.data)
-    bm.free()
+        delete_faces(o, drop)
 print("SHARE own faces cut", cut)
 ob = bpy.data.objects.new("Body_HuracanCluster", me)
 home = next(o for o in bpy.data.objects if o.name.startswith("Body_") and o.name not in donor_names and o.users_collection)

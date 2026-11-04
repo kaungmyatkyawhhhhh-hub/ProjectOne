@@ -8,7 +8,11 @@ the driver's left.
 Prints the screen's middle, its normal, width and height (what CarSkin.CLUSTER_RECT needs).
 """
 
+import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from mesh_cut import delete_faces  # noqa: E402
 
 import bmesh
 import bpy
@@ -32,26 +36,28 @@ hit, loc, nrm, idx, obj, _ = sc.ray_cast(dg, eye, d)
 while hit and obj.name.startswith("SteeringWheel"):
     hit, loc, nrm, idx, obj, _ = sc.ray_cast(dg, loc + d * 0.001, d)
 print("ART seed face", obj.name[:40], idx)
-bm = bmesh.new()
-bm.from_mesh(obj.data)
-bm.faces.ensure_lookup_table()
+me = obj.data
 m = obj.matrix_world
 rot = m.to_3x3()
-start = bm.faces[idx]
-n0 = (rot @ start.normal).normalized()
-seen = {start.index}
-stack = [start]
+edge_faces = {}
+for p in me.polygons:
+    for k in p.edge_keys:
+        edge_faces.setdefault(k, []).append(p.index)
+n0 = (rot @ me.polygons[idx].normal).normalized()
+seen = {idx}
+stack = [idx]
 faces = []
 while stack:
     f = stack.pop()
     faces.append(f)
-    for e in f.edges:
-        for g in e.link_faces:
-            if g.index not in seen:
-                seen.add(g.index)
-                if (rot @ g.normal).normalized().dot(n0) > 0.94:
+    for k in me.polygons[f].edge_keys:
+        for g in edge_faces[k]:
+            if g not in seen:
+                seen.add(g)
+                if (rot @ me.polygons[g].normal).normalized().dot(n0) > 0.94:
                     stack.append(g)
-pts = [m @ v.co for f in faces for v in f.verts]
+loops = [[m @ me.vertices[v].co for v in me.polygons[f].vertices] for f in faces]
+pts = [p for lp in loops for p in lp]
 s = Vector((-1, 0, 0))  # the driver's right
 s = (s - n0 * s.dot(n0)).normalized()
 t = n0.cross(s).normalized()
@@ -89,8 +95,8 @@ b.inputs["Specular IOR Level"].default_value = 0.0
 new = bpy.data.meshes.new("Body_ClusterArt")  # (a second run on the same car adds another part)
 nb = bmesh.new()
 uvl = nb.loops.layers.uv.new("UVMap")
-for f in faces:
-    vs = [nb.verts.new(m @ v.co + n0 * 0.0006) for v in f.verts]
+for lp in loops:
+    vs = [nb.verts.new(p + n0 * 0.0006) for p in lp]
     nf = nb.faces.new(vs)
     for l, v in zip(nf.loops, vs):
         p = v.co - centre
@@ -98,9 +104,7 @@ for f in faces:
         cv = 0.5 + (p.dot(t) / ah) + nudge[1]
         # (crop: x0, y0, x1, y1 of the picture as fractions, y from the top)
         l[uvl].uv = (crop[0] + cu * (crop[2] - crop[0]), 1 - crop[3] + cv * (crop[3] - crop[1]))
-bmesh.ops.delete(bm, geom=faces, context="FACES")
-bm.to_mesh(obj.data)
-bm.free()
+delete_faces(obj, faces)
 nb.to_mesh(new)
 nb.free()
 new.materials.append(mat)

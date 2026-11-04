@@ -9,3 +9,4 @@ Paths point at the session's temp folder; change them before reuse. Results are 
 - `share_gallardo.py`: the SL's dash fixed, and its pictures on the LP560 Spyder's dials.
 - `cluster_art.py`: Revuelto, SV and LP700 clusters redrawn from the owner's photos.
 - `put_art.py`: a picture projected onto a car's blank screen. `lp700_atlas.py`: the LP700's into its model's atlas.
+- `gallardo_dash.py`: the SL's binnacle in the LP560 Spyder. `mesh_cut.py`: delete faces and keep a part's shading.
