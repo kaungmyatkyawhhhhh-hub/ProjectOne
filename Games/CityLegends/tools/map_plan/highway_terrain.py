@@ -29,7 +29,7 @@ OUT = os.path.join(ROOT, "build", "riviera_hw")
 
 CORE = 32 + 10 + 2  # carriageway + shoulder + a little
 REACH = 220  # banks end here at the latest
-CUT_SLOPE = 2.2  # rise per stud out from the shoulder (a steep rock cutting)
+CUT_SLOPE = 2.0  # rise per stud out from the shoulder (a steep rock cutting)
 FILL_SLOPE = 0.9  # fall per stud (an earth embankment)
 BLEND = 50  # the last studs of the reach fade back to the natural ground (no cliff at the edge)
 KEEP = 50  # cells this close to an existing road's centre line stay as they are
@@ -47,38 +47,50 @@ def main():
     hw = json.load(open(os.path.join(RIV, "highway.json")))["roads"]
     old = json.load(open(os.path.join(RIV, "roads.json")))["roads"]
 
-    best = np.full(H.shape, 1e9, dtype=np.float32)  # distance to the highway's centre line
-    road_y = np.zeros(H.shape, dtype=np.float32)
-    core_w = np.full(H.shape, CORE, dtype=np.float32)  # each cell's road's flat width (half)
+    best = np.full(H.shape, 1e9, dtype=np.float32)  # distance to the nearest highway centre line
+    road_y = np.zeros(H.shape, dtype=np.float32)       # that road's height (for the flat bed)
+    core_w = np.full(H.shape, CORE, dtype=np.float32)  # that road's flat half width
+    # (2026-11-04, the pass's stacked legs) every road nearby limits the ground: no higher than the
+    # lowest cut line of them all, no lower than the highest fill line; with only the nearest road's
+    # lines, the ground jumped by a whole leg's height half way between two legs
+    cut_min = np.full(H.shape, 1e9, dtype=np.float32)
+    fill_max = np.full(H.shape, -1e9, dtype=np.float32)
     near_old = np.full(H.shape, 1e9, dtype=np.float32)
 
-    def stamp(samples, radius, dist, yv=None, core=None):
+    def window(x, z, radius):
         r = int(radius / C) + 2
-        for s in samples:
-            x, y, z = s[0], s[1], s[2]
-            ci, cj = int((x - X0) / C), int((z - Z0) / C)
-            i0, i1 = max(ci - r, 0), min(ci + r + 1, H.shape[1])
-            j0, j1 = max(cj - r, 0), min(cj + r + 1, H.shape[0])
-            if i0 >= i1 or j0 >= j1:
-                continue
-            cx = X0 + C * (np.arange(i0, i1) + 0.5)
-            cz = Z0 + C * (np.arange(j0, j1) + 0.5)
-            dd = np.sqrt((cx[None, :] - x) ** 2 + (cz[:, None] - z) ** 2).astype(np.float32)
-            sub = dist[j0:j1, i0:i1]
-            m = dd < sub
-            sub[m] = dd[m]
-            if yv is not None:
-                yy = yv[j0:j1, i0:i1]
-                yy[m] = y
-            if core is not None:
-                cc = core_w[j0:j1, i0:i1]
-                # (the pass: its walls stand at the road's edge, no shoulders)
-                cc[m] = (s[6] + 4) if s[6] < 30 else CORE
+        ci, cj = int((x - X0) / C), int((z - Z0) / C)
+        i0, i1 = max(ci - r, 0), min(ci + r + 1, H.shape[1])
+        j0, j1 = max(cj - r, 0), min(cj + r + 1, H.shape[0])
+        if i0 >= i1 or j0 >= j1:
+            return None
+        cx = X0 + C * (np.arange(i0, i1) + 0.5)
+        cz = Z0 + C * (np.arange(j0, j1) + 0.5)
+        dd = np.sqrt((cx[None, :] - x) ** 2 + (cz[:, None] - z) ** 2).astype(np.float32)
+        return (slice(j0, j1), slice(i0, i1)), dd
 
     for r in hw:
-        stamp(r["s"], REACH, best, road_y, core=True)
+        for s in r["s"]:
+            win = window(s[0], s[2], REACH)
+            if not win:
+                continue
+            sl, dd = win
+            core = (s[6] + 4) if s[6] < 30 else CORE  # (the pass: walls at its edge, no shoulders)
+            out = np.maximum(dd - core, 0)
+            bed = s[1] - 1.5
+            np.minimum(cut_min[sl], bed + out * CUT_SLOPE, out=cut_min[sl])
+            np.maximum(fill_max[sl], bed - out * FILL_SLOPE, out=fill_max[sl])
+            sub = best[sl]
+            m = dd < sub
+            sub[m] = dd[m]
+            road_y[sl][m] = s[1]
+            core_w[sl][m] = core
     for r in old:
-        stamp(r["s"][::1], KEEP + 8, near_old)
+        for s in r["s"]:
+            win = window(s[0], s[2], KEEP + 8)
+            if win:
+                sl, dd = win
+                np.minimum(near_old[sl], dd, out=near_old[sl])
 
     newH = H.copy()
     newM = M.copy()
@@ -86,19 +98,17 @@ def main():
     core = zone & (best <= core_w)
     flat = road_y - 1.5
     out_d = np.maximum(best - core_w, 0)
-    cut_top = flat + out_d * CUT_SLOPE
-    fill_bot = flat - out_d * FILL_SLOPE
-    # core: flat; banks: the ground clipped between the fill and cut lines
     newH[core] = flat[core]
     bank = zone & ~core
-    newH[bank] = np.clip(H[bank], fill_bot[bank], cut_top[bank])
+    lo = np.minimum(fill_max, cut_min)
+    newH[bank] = np.clip(H[bank], lo[bank], cut_min[bank])
     fade = np.clip((best - (REACH - BLEND)) / BLEND, 0, 1)
     fade = fade * fade * (3 - 2 * fade)
     newH[bank] = newH[bank] * (1 - fade[bank]) + H[bank] * fade[bank]
     newM[core] = "A"
     cutm = bank & (H > newH + 0.3)
     fillm = bank & (H < newH - 0.3)
-    newM[cutm] = "L"
+    newM[cutm] = "R"  # (grey rock cuttings: the pale limestone read as snow)
     newM[fillm & (out_d < 30)] = "D"
     newM[fillm & (out_d >= 30)] = "G"
     # existing roads' ground stays
@@ -106,6 +116,17 @@ def main():
     newH[keep] = H[keep]
     newM[keep] = M[keep]
     changed = (np.abs(newH - H) > 0.12) | (newM != M)
+    # --restore x0 z0 x1 z1: also write the natural ground back over that box (where nothing above
+    # changes it and away from the old roads), undoing an earlier version's cuts and fills
+    if "--restore" in sys.argv:
+        k = sys.argv.index("--restore")
+        bx0, bz0, bx1, bz1 = (float(v) for v in sys.argv[k + 1:k + 5])
+        cx = X0 + C * (np.arange(H.shape[1]) + 0.5)
+        cz = Z0 + C * (np.arange(H.shape[0]) + 0.5)
+        box = ((cx[None, :] >= bx0) & (cx[None, :] <= bx1)) & ((cz[:, None] >= bz0) & (cz[:, None] <= bz1))
+        extra = box & ~changed & ~keep
+        print("restoring", int(extra.sum()), "cells to the natural ground")
+        changed = changed | extra
     print("cells changed:", int(changed.sum()), " deepest cut %.0f, highest fill %.0f" % (float((H - newH).max()), float((newH - H).max())))
 
     os.makedirs(OUT, exist_ok=True)

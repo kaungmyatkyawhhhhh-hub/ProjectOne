@@ -50,7 +50,7 @@ PASS_END = (11951, -251)   # on the Mountain Road (the T; set to its nearest sam
 HAIRPIN_GAP = 68           # between the centre lines of two legs of a stack
 
 
-def stack(start, d, n_legs, length, side):
+def stack(start, d, n_legs, length, side, gap=None):
     """n_legs straight legs of `length` from `start` heading `d`, joined by hairpins; the next leg
     lies HAIRPIN_GAP to the `side` (+1: the right of the first leg's way, -1: its left)"""
     d = np.array(d, dtype=float)
@@ -59,7 +59,8 @@ def stack(start, d, n_legs, length, side):
     nrm = right * side
     pts = []
     p = np.array(start, dtype=float)
-    r = HAIRPIN_GAP / 2
+    gap = gap or HAIRPIN_GAP
+    r = gap / 2
     for k in range(n_legs):
         e = p + d * length
         for t in np.linspace(0, 1, int(length / 4) + 1)[:-1]:
@@ -70,33 +71,55 @@ def stack(start, d, n_legs, length, side):
         c = e + nrm * r
         for th in np.linspace(0, math.pi, 24)[:-1]:
             pts.append(c - nrm * r * math.cos(th) + d * r * math.sin(th))
-        p = e + nrm * HAIRPIN_GAP
+        p = e + nrm * gap
         d = -d
     return pts, p if n_legs % 2 == 1 else p, d
 
 
-def pass_line():
-    # approach from the T on the valley road, east to the foot of the west face
-    # (it comes up to the stack's first leg from the south, already turning onto it: no kink)
-    w_start = np.array((10600.0, -440.0))
-    w_d = np.array((-0.42, -0.91)) / np.linalg.norm((-0.42, -0.91))
-    a = catmull([PASS_START, (10160, -290), (10400, -315), (10560, -360), tuple(w_start), tuple(w_start + w_d * 40)], False, per=16)
+# the pass's shape (tools/map_plan/pass_fit.py searched these so the road sits on the hill, not deep in it)
+PASS_PARAMS = {
+    "w_x": 10622.5, "w_z": -342.5, "w_ang": -118.5, "w_len": 518.8, "w_gap": 71.0, "w_legs": 4,
+    "t1": 120.0, "t2": 100.0,
+    "s_x": 11550.0, "s_z": -470.0, "s_ang": 0.0, "s_len": 340.0, "s_gap": 71.0, "s_legs": 3,
+}
+
+
+def pass_line(P=None):
+    P = dict(PASS_PARAMS, **(P or {}))
+    # the west stack: legs along the face, climbing; each next leg further up (to the right)
+    ang = math.radians(P["w_ang"])
+    w_d = np.array((math.cos(ang), math.sin(ang)))
+    w_start = np.array((P["w_x"], P["w_z"]))
+    # approach from the T on the valley road, coming up to the first leg already turning onto it
+    a = catmull([PASS_START, (10160, -290), (10400, -315), tuple(w_start + np.array((-40, 80))), tuple(w_start), tuple(w_start + w_d * 40)], False, per=16)
     j = int(np.argmin(np.linalg.norm(a - w_start, axis=1)))
     a = a[:j]
-    # the west stack: legs NNW / SSE along the face, climbing; each next leg further up (east)
-    w_dir = (-0.42, -0.91)
-    ws_pts, _, _ = stack((10600, -440), w_dir, 4, 380, +1)
-    # across the south face, high up (the rock arch on the way), to the top of the south stack
-    last = ws_pts[-1]
-    t = catmull([tuple(last), (last[0] + 30, last[1] + 70), (10930, -400), (11120, -420), (11300, -450), (11420, -468)], False, per=16)
-    # the south stack: legs east / west, coming down towards the Mountain Road (each next leg lower: south)
-    ss_pts, _, d_end = stack((11460, -470), (1, 0.0), 3, 340, +1)
+    ws_pts, _, w_end_d = stack(tuple(w_start), tuple(w_d), int(P["w_legs"]), P["w_len"], +1, P["w_gap"])
+    # the south stack (legs coming down towards the Mountain Road, each next leg lower: to the right)
+    sang = math.radians(P["s_ang"])
+    s_d = np.array((math.cos(sang), math.sin(sang)))
+    s_start = np.array((P["s_x"], P["s_z"]))
+    ss_pts, _, d_end = stack(tuple(s_start), tuple(s_d), int(P["s_legs"]), P["s_len"], +1, P["s_gap"])
+    # across the face between them: leaving the west stack along its last leg, arriving along the
+    # south stack's first; two middle points, shifted across the line by t1 / t2
+    last = np.array(ws_pts[-1])
+    out_d = np.array(w_end_d) / np.linalg.norm(w_end_d)
+    a0 = last + out_d * 60
+    b0 = s_start - s_d * 60
+    line_d = (b0 - a0) / max(np.linalg.norm(b0 - a0), 1e-6)
+    nrm = np.array((-line_d[1], line_d[0]))
+    m1 = a0 + (b0 - a0) / 3 + nrm * P["t1"]
+    m2 = a0 + (b0 - a0) * 2 / 3 + nrm * P["t2"]
+    t = catmull([tuple(last), tuple(a0), tuple(m1), tuple(m2), tuple(b0), tuple(s_start)], False, per=16)
     # to the T on the Mountain Road
-    e = ss_pts[-1]
-    tail = catmull([tuple(e), (e[0] + 60, e[1] + 8), (PASS_END[0] - 10, PASS_END[1] - 40), PASS_END], False, per=16)
-    line = list(a) + [np.array(q) for q in ws_pts] + list(t[1:]) + [np.array(q) for q in ss_pts] + list(tail[1:])
+    # (one smooth turn: a quadratic curve through the corner where the last leg's line meets the
+    # line straight up from the T)
+    e = np.array(ss_pts[-1])
+    corner = np.array((PASS_END[0], e[1]))
+    end = np.array(PASS_END, dtype=float)
+    tail = [e * (1 - u) ** 2 + corner * 2 * u * (1 - u) + end * u * u for u in np.linspace(0, 1, 40)]
+    line = list(a) + [np.array(q) for q in ws_pts] + list(t[1:-1]) + [np.array(q) for q in ss_pts] + list(tail[1:])
     return np.array(line)
-
 
 
 def catmull(pts, closed, per=24):

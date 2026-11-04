@@ -623,7 +623,10 @@ function Roads.build(data, opts)
 				end
 				-- no terrain may stand above the road surface (it would be a bump). Terrain clears whole
 				-- 4-stud voxels by their centres, so clear from 4 studs under the top up
-				workspace.Terrain:FillBlock(cf * CFrame.new(0, SLAB / 2 - 4 + 11, 0), Vector3.new((HALF + WALK) * 2, 22, len + grow), Enum.Material.Air)
+				-- (2026-11-04: as wide as this road, not a full one: on the 1+1 Summit Pass the full width
+				-- carved under the next hairpin leg up)
+				local wide = math.max(a.wl, a.wr, b.wl, b.wr) + WALK
+				workspace.Terrain:FillBlock(cf * CFrame.new(0, SLAB / 2 - 4 + 11, 0), Vector3.new(wide * 2, 22, len + grow), Enum.Material.Air)
 			end
 			-- outside the town: flush concrete shoulders (the ground under them is cleared too)
 			if not town then
