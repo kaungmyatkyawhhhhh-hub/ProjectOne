@@ -50,6 +50,12 @@ For each model, render it in Blender (`render_car.py`: front / rear 3/4, side, t
 - **the steering wheel:** good shape and texture, separate part, right size, logo on the hub?
 Show the owner the close-ups.
 
+### Cluster check (owner, 2026-11-04): tell the owner about every bad one
+- Check **every** car's cluster close-up (all models, not just one per family).
+- If a cluster is **blurry**, low-resolution, broken, a flat picture with nothing readable, or **missing**, **stop and tell the owner**: list each car with its cluster close-up render and say what's wrong.
+- **The owner will send a photo of that car's real cluster.** Then **recreate it 1:1** from the photo: the same layout, shapes, numbers and scale marks, needle(s) or screen bars, colours, fonts as close as possible, warning lights and backlight glow, at the exact size and position of the cluster in the dash. Draw it sharp (like the SVJ's redrawn screen: `tools/svj_cluster_art.py`), with **no maker's logos or real names** (blank or our own fictional mark), then make it **live** (speed, RPM, gear, modes) the same way as the others.
+- Put the owner's photo next to a render of the new cluster for approval.
+
 ## Step 2: pick the best cluster and wheel per family, and share it
 - **Only share inside the same family** (the same real cockpit design):
   - **Aventador family** (LP700, SV LP750, and the SVJ / SVJ 63 already done): they share the Aventador's digital cluster style. If a new LP700 or SV model has a worse cluster than the SVJ's working one, use the **best** one for the family (the SVJ's is already live and sharp).
