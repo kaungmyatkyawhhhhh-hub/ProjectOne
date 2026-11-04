@@ -1172,3 +1172,22 @@ Owner: "find bugs that would annoy players and can u fix it all". Five code audi
 - **Owner decides:** tower garages (car stealing, VIP bays) don't exist on the Riviera map, though the Store text still promises VIP bays. Robux Store has no server side yet: write it before adding product ids, or players pay and get nothing.
 - **Lune tests:** `chauffeur_test` and `luxe_test` were already broken by the Riviera (their stubs have no `workspace`, `GemShowcase`), nothing to do with this work.
 - Lamborghini imports prompt (2026-11-04, owner): same routine as the Bugattis for new Lamborghini models dropped in `imports/importing cars/` (clusters shared only inside a family: Aventador / Murcielago / Gallardo / Urus / Countach; scissor doors). Waiting for the owner's models. Prompt: `Prompts/Lamborghini imports.md`.
+
+## Lamborghini imports (2026-11-04, `Prompts/Lamborghini imports.md`)
+**Step 1 done (check only, nothing converted).** 9 models rendered; the West Yokohama Gallardo is skipped. Scripts: `Games/CityLegends/tools/lambo/`. Pictures: [[Lamborghini clusters - all 9.jpg]] [[Lamborghini steering wheels - all 9.jpg]] [[Lamborghini models - all 9.jpg]].
+
+| Model | Triangles | Licence | Separate doors | Cluster |
+|---|---|---|---|---|
+| Aventador LP700-4 | 131k | CC-BY-NC-SA | no | soft: 512 px picture (`Avemis`), needle painted, 12-sided ring |
+| Aventador SV | 145k | CC-BY | no | missing: blank part of the interior atlas |
+| Revuelto | 293k | CC-BY-NC-SA | no | missing: blank |
+| Gallardo LP570-4 Superleggera | 345k | CC-BY-NC-SA | yes | sharp: 1024 px (`MI_Dashboard1`), needles painted; a second picture ("+21.0", "R N") shows through the middle screen, because the part has alpha and comes out as `SeeThrough_` |
+| Gallardo LP560-4 Spyder | 101k | CC-BY | yes | soft: 512 px atlas, low-poly dial rings |
+| Huracan EVO | 223k | CC-BY-NC-SA | no | sharp: 1024 px with its own emissive (`emiss`), the best of the 9 |
+| Huracan Performante Spyder | 217k | CC-BY-NC-SA | no | missing: blank |
+| Huracan STO | 243k | CC-BY-NC-SA | no | missing: blank |
+| Huracan Sterrato | 295k | CC-BY-NC-SA | no | missing: blank |
+
+- All by Ddiaz Design (Sketchfab), credit needed. 7 of the 9 are non-commercial. Part names look like racing-game files (`_Geo_lodA`, `RewardRecycled`; the SL `SK_` / `SM_` / `MI_`), so they may not really be the uploader's to give.
+- All 9: textures came in, full interior, `auto_car.py` found the right steering wheel as its own part with no hints (wheelbases 2.70 / 2.78 / 2.56 / 2.62 / 2.63), good shape and size, a maker's shield on every hub. Logos also on the dash script, plates and badges.
+- **Waiting on the owner:** a photo of the real Revuelto cluster (no donor, own cockpit). Then Step 2.
