@@ -11,7 +11,7 @@ Screenshots: `Progress\screens\overnight\p4-*`.
 ## Done 4 Nov (Claude Code)
 - Pass **x2 Stardust** id **2070906361**, 249 R$ base (Roblox Plus players see 225), on sale, image `pass_x2_stardust.png`.
 - Badge **Alpha Player** id **4501804696776519**, enabled, image `badge_alpha_player.png`.
-- Both ids in `ReplicatedStorage.Galaxy.GameConfig` (and `Coderiends-test\GameConfig.lua`); checked from Studio with GetProductInfo / GetBadgeInfoAsync. Not saved or published: File > Save + publish is yours.
+- Both ids in `ReplicatedStorage.Galaxy.GameConfig` (and `Code/friends-test\GameConfig.lua`); checked from Studio with GetProductInfo / GetBadgeInfoAsync. Not saved or published: File > Save + publish is yours.
 
 ## Creator Hub: what you must create (P&L Studios XP, the Galaxy Incremental experience)
 Put each new id in `ReplicatedStorage.Galaxy.GameConfig`. That is the ONE config for every Creator Hub id; they are all placeholders (0) now.
