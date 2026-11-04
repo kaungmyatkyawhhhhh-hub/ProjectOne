@@ -413,3 +413,19 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
   - The Hall of Fame screen's VISIT AGENCY button still opens the card on purpose.
 - **Not tested by tapping:** the fresh test save's first-join tutorial overlays block the side menu in Studio. Checked in code: the server's AgencySeen sets the flag.
 
+### Hall of Fame bar restyle (4 Nov)
+- Owner: "ugly". It must match the right-column cards (dark glass, thin coloured border), in gold, in the column's card-title font.
+- **Built (ProgressClient):**
+  - The bar is the kit's own HUD card (Theme.Button "Quiet", like NEXT YOU) at its slim height, with a gold border (#FFC83A).
+  - "HALL OF FAME" is white, in the card-title font (Kit "Title", clean italic, no stroke, like TODAY'S QUEST / NEXT: ALTER), with "+1★" in gold.
+  - The % is gold, in the alter card's number font.
+  - The progress is a thin gold bar along the bottom edge, not a full yellow fill.
+  - At 100% the text reads "HALL OF FAME READY", the border glows (the kit's ReadyGlow) and the bar pulses. Reduced Motion turns the pulse off.
+  - The tap is unchanged: it still opens the Enter now / Keep going choice.
+- **Not built:** the optional faint gold glow behind the card that rises with the %.
+- **Tested in Play (temp save, early GEM update on):** 10% / 93% / 100% on PC, and at phone scale (the kit's 0.8 for 667x375) next to the other cards; the tap opens the choice.
+- Screens: `Downloads\gem_update_import\screens_4Nov_hof_bar\`.
+
+### Also 4 Nov: Hall of Fame Agency card
+- Fixed (see above): it opens from the Trainers tile only the first time.
+
