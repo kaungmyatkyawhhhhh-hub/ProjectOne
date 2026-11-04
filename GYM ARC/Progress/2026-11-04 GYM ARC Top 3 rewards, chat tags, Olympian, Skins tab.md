@@ -475,3 +475,22 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
   - A 0.4 s press resets; a full hold opens the confirm screen; GO TO GEM MINE closes the window and shows the guide path.
 - **Screens:** `Downloads\gem_update_import\screens_4Nov_hof_choice\`.
 
+### Hall of Fame popup polish (4 Nov)
+- "+1 extra card" now uses the same title font as the star line, smaller, in light purple.
+- The four reward chips are a 2x2 grid of equal widths.
+- The buttons use the kit display font with no heavy outline.
+- KEEP GOING text is centred.
+- The header emblem is a bolder gold laurel and star, a bit bigger.
+- Screens: `screens_4Nov_hof_choice` 07 (PC) and 08 (phone).
+
+### Genetics locks UI fixes + owner lock icons (4 Nov)
+- **Overall card:** wider, and the word wraps to 2 lines when needed, so "GENETIC FREAK" shows whole.
+- **Lock icons:** the owner's `icon_lock_unlocked` / `icon_lock_locked` (GYM ARC/Assets/icons_v5_runcards), uploaded as rbxassetid://85927971844160 (open, grey) and rbxassetid://124235298357660 (closed, gold). 28 px in each grade card's top-right corner, and after the Frame / Body chips.
+  - Locked = gold icon + gold border on the card or chip. Unlocked = grey icon, no border.
+- **Tap target:** the whole card / chip toggles its lock. Cards are 56 kit px tall (44 px on a 667x375 phone).
+- **5 grade locks:** the other padlocks fade. Tapping one shows "Max 5 locks" on that card for 1.5 s (the HUD's toasts wait behind this full screen, so the message is on the card).
+- **REROLL:** shows the live cost "REROLL · <1 + locks> DNA"; greyed "NEED 8 DNA · HAVE 7" when short (a tap still opens the get-tokens choice). Free first reroll: "REROLL · FREE" and no padlocks.
+- **Fonts:** KEEP, REROLL and the card titles use the kit display font with no heavy black outline.
+- **Up / down arrows (owner: "in the wrong positions"):** they sat at the old card height after the cards grew. Now placed from the multiplier itself: centred on it, 4 px after its text, on PC and phone.
+- Tested in Play on the temp save: 0, 3 and 5 locks (+ the 6th refused), not enough tokens, PC + phone. Screens: `screens_4Nov_genetics_locks`.
+
