@@ -510,3 +510,13 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - **Fixed:** plate numbers disappeared after a respawn (PlayerGui reset).
 - Details and both step tables: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 9. Screens: `screens_4Nov_plates_13`.
 - **Rim mesh imported and measured (4 Nov): not used.** It made the full Gem Mine view heavier (181.7k -> 226.4k triangles, 372 -> 476 draw calls), because Roblox's own cylinders get cheaper with distance and batch better. Cylinders stay; the rim is kept in `ServerStorage._Imports.PlateRim_NotUsed`. Report section 9.
+
+### Plates sold at the Plate Forge only (owner, 4 Nov)
+- **Owner:** "there is suppose to be the forge for plates only; no other shop sells plates".
+- Coach Dex's PLATES tab is removed. The Plate Forge in the Gem Mine is the only place that sells plate tiers.
+- The server only sells plates to a player the Gem Mine is open for (the Gem update out, or the admin's early access).
+- Machines don't show the plate steps until the Gem update is out for that player (before, a maxed player could see "Needs Bronze plates" one step past the top).
+- **Tested in Play (temp save):**
+  - Gem Mine open: the Forge sold Bronze and Silver (coins taken); Coach Dex refused.
+  - Gem update not out: a machine's + stops at the top weight. With it out: + goes into the plate steps (BRONZE PLATES n / 13).
+  - Locked: the server moves a player out of the Gem Mine, so nobody can reach the Forge. The new server check can't be triggered on its own for that reason.
