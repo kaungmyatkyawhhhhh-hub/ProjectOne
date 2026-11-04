@@ -12,7 +12,7 @@ Rule: every phase cites checklist row numbers; Progress notes update the rows. G
 - Server size 8 (#397) · boosts of the same kind add, not multiply (#69) · first Supernova cinematic skippable + Camera.Focus (#316, #317) · Store hidden until tutorial step 7 (#448) · own sparkle texture, no stock Roblox one (#281) · Boards one job each (#219-221, prompt 4 Nov).
 
 ## Phase 1 - the first hour feels like a game (blocks the alpha)
-1. Feel pass (prompt "Why it doesnt feel like Regrowth or Immortality"): body levels + named tiers with a visible look change (#82, #83, #314), island tycoon pads (#388, #86, #87, #125), Cosmic Level XP bar + perk grid (#84, #85), purchase density.
+1. **PLAN + numbers sent 5 Nov, waiting for the owner's OK:** [[2026-11-05 Galaxy Incremental - Feel pass PLAN + numbers]]. Feel pass (prompt "Why it doesnt feel like Regrowth or Immortality"): body levels + named tiers with a visible look change (#82, #83, #314), island tycoon pads (#388, #86, #87, #125), Cosmic Level XP bar + perk grid (#84, #85), purchase density.
 2. Purpose (prompt "Purpose"): premise + loading screen, sectors, dark sky that lights up, IGNITION HUD line + checklist + cinematic + reward + path pick, GALAXY LIT % (#9-#27, #477).
 3. Small-reward feedback + next goal: income tick / pops, x2 milestone + node buy visuals, "NEXT: <tier> - cost" line, "NEW: <TIER>!" moment (#222, #223, #239, #242, #283, #284, #286).
 4. First Supernova ~5 min for run 1 only (#77).

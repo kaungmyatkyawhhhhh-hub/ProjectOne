@@ -1,0 +1,236 @@
+
+=== Supernova 1 needs 300,000, each next one x6.0 ===
+  runs to each Supernova (real min): 5.0, 2.1, 1.9, 1.8, 2.3, 4.5
+  stardust purchases by  5 min: 47
+  stardust purchases by 10 min: 239
+  stardust purchases by 20 min: 593
+  stardust purchases by 30 min: 612
+  gap between purchases: median 0 s, 90% 7 s, longest 190 s
+  NEW named things (tier, body, +BODY, pad, level, Supernova): 224; median gap 1 s, longest 295 s
+  at 30 min: Cosmic Level 19, pads 19/20, perks {'STARDUST': 10, 'FIRST LIGHT': 10}, Supernovas 6
+
+  TIMELINE (real time) - named things:
+     0:14  PAD 1
+     1:01  +BODY Asteroid x2
+     1:10  PAD 2
+     1:21  NEW BODY: MOON
+     1:32  PAD 3 (x1.15)
+     1:39  COSMIC LEVEL 2
+     1:47  +BODY Asteroid x3
+     1:56  PAD 4
+     2:08  NEW BODY: PLANET
+     2:13  +BODY Moon x2
+     2:15  COSMIC LEVEL 3
+     2:31  +BODY Asteroid x4
+     2:38  PAD 5
+     2:46  COSMIC LEVEL 4
+     2:49  PAD 6 (x1.15)
+     3:04  NEW BODY: GAS GIANT
+     3:10  +BODY Planet x2
+     3:20  +BODY Moon x3
+     3:21  COSMIC LEVEL 5
+     3:28  PAD 7
+     3:41  Asteroid -> ROCK (Lv10)
+     3:42  +BODY Asteroid x5
+     3:55  COSMIC LEVEL 6
+     3:56  PAD 8
+     4:09  +BODY Gas Giant x2
+     4:20  +BODY Planet x3
+     4:34  COSMIC LEVEL 7
+     4:35  +BODY Moon x4
+     4:59  SUPERNOVA 1
+     5:03  +BODY Asteroid x2
+     5:06  +BODY Asteroid x3
+     5:09  NEW BODY: MOON
+     5:12  NEW BODY: PLANET
+     5:13  +BODY Asteroid x4
+     5:16  +BODY Moon x2
+     5:24  NEW BODY: GAS GIANT
+     5:27  +BODY Planet x2
+     5:27  COSMIC LEVEL 8
+     5:30  Asteroid -> ROCK (Lv10)
+     5:31  +BODY Asteroid x5
+     5:37  +BODY Moon x3
+     5:48  NEW BODY: STAR
+     5:52  +BODY Gas Giant x2
+     5:59  +BODY Planet x3
+     6:05  PAD 9 (x1.15)
+     6:13  COSMIC LEVEL 9
+     6:13  +BODY Moon x4
+     6:23  PAD 10
+     6:34  +BODY Star x2
+     6:44  +BODY Gas Giant x3
+     6:58  +BODY Planet x4
+     7:08  SUPERNOVA 2
+     7:11  +BODY Asteroid x2
+     7:12  +BODY Asteroid x3
+     7:14  NEW BODY: MOON
+     7:14  COSMIC LEVEL 10
+     7:15  +BODY Asteroid x4
+     7:15  NEW BODY: PLANET
+     7:16  +BODY Moon x2
+     7:21  NEW BODY: GAS GIANT
+     7:22  Asteroid -> ROCK (Lv10)
+     7:22  +BODY Asteroid x5
+     7:23  +BODY Planet x2
+     7:26  +BODY Moon x3
+     7:30  NEW BODY: STAR
+     7:33  +BODY Gas Giant x2
+     7:36  +BODY Planet x3
+     7:40  +BODY Moon x4
+     7:47  +BODY Star x2
+     7:57  +BODY Gas Giant x3
+     8:00  +BODY Planet x4
+     8:05  COSMIC LEVEL 11
+     8:05  PAD 11
+     8:19  +BODY Star x3
+     8:21  Moon -> ROCK (Lv10)
+     8:21  +BODY Moon x5
+     8:32  +BODY Gas Giant x4
+     8:35  Planet -> ROCK (Lv10)
+     8:36  +BODY Planet x5
+     8:42  PAD 12 (x1.15)
+     9:00  PAD 13
+     9:03  SUPERNOVA 3
+     9:04  +BODY Asteroid x2
+     9:06  +BODY Asteroid x3
+     9:06  NEW BODY: MOON
+     9:07  +BODY Asteroid x4
+     9:07  NEW BODY: PLANET
+     9:08  +BODY Moon x2
+     9:10  NEW BODY: GAS GIANT
+     9:10  Asteroid -> ROCK (Lv10)
+     9:11  +BODY Asteroid x5
+     9:11  COSMIC LEVEL 12
+     9:11  +BODY Planet x2
+     9:13  +BODY Moon x3
+     9:14  NEW BODY: STAR
+     9:15  +BODY Gas Giant x2
+     9:17  +BODY Planet x3
+     9:20  +BODY Moon x4
+     9:22  +BODY Star x2
+     9:27  +BODY Gas Giant x3
+     9:28  +BODY Planet x4
+     9:35  +BODY Star x3
+     9:36  Moon -> ROCK (Lv10)
+     9:36  +BODY Moon x5
+     9:41  +BODY Gas Giant x4
+     9:43  Planet -> ROCK (Lv10)
+     9:43  +BODY Planet x5
+     9:56  +BODY Star x4
+    10:04  Gas Giant -> ROCK (Lv10)
+    10:07  +BODY Gas Giant x5
+    10:10  COSMIC LEVEL 13
+    10:24  PAD 14
+    10:34  Star -> ROCK (Lv10)
+    10:44  +BODY Star x5
+    10:53  SUPERNOVA 4
+    10:55  +BODY Asteroid x2
+    10:56  +BODY Asteroid x3
+    10:56  NEW BODY: MOON
+    10:56  +BODY Asteroid x4
+    10:56  NEW BODY: PLANET
+    10:58  +BODY Moon x2
+    10:58  NEW BODY: GAS GIANT
+    10:59  Asteroid -> ROCK (Lv10)
+    10:59  +BODY Asteroid x5
+    10:59  +BODY Planet x2
+    10:59  +BODY Moon x3
+    11:00  NEW BODY: STAR
+    11:02  +BODY Gas Giant x2
+    11:03  +BODY Planet x3
+    11:06  +BODY Star x2
+    11:06  +BODY Moon x4
+    11:09  +BODY Gas Giant x3
+    11:09  +BODY Planet x4
+    11:13  +BODY Star x3
+    11:13  Moon -> ROCK (Lv10)
+    11:13  +BODY Moon x5
+    11:16  +BODY Gas Giant x4
+    11:17  Planet -> ROCK (Lv10)
+    11:17  +BODY Planet x5
+    11:20  COSMIC LEVEL 14
+    11:24  +BODY Star x4
+    11:28  Gas Giant -> ROCK (Lv10)
+    11:30  +BODY Gas Giant x5
+    11:41  Star -> ROCK (Lv10)
+    11:47  +BODY Star x5
+    11:52  PAD 15 (x1.15)
+    12:08  Asteroid -> IRON (Lv20)
+    12:17  PAD 16
+    13:13  SUPERNOVA 5
+    13:15  COSMIC LEVEL 15
+    13:15  +BODY Asteroid x2
+    13:15  +BODY Asteroid x3
+    13:16  NEW BODY: MOON
+    13:16  +BODY Asteroid x4
+    13:16  NEW BODY: PLANET
+    13:16  +BODY Moon x2
+    13:16  NEW BODY: GAS GIANT
+    13:18  Asteroid -> ROCK (Lv10)
+    13:18  +BODY Asteroid x5
+    13:18  +BODY Planet x2
+    13:18  +BODY Moon x3
+    13:19  NEW BODY: STAR
+    13:19  +BODY Gas Giant x2
+    13:20  +BODY Planet x3
+    13:22  +BODY Star x2
+    13:22  +BODY Moon x4
+    13:22  +BODY Gas Giant x3
+    13:23  +BODY Planet x4
+    13:25  +BODY Star x3
+    13:26  Moon -> ROCK (Lv10)
+    13:26  +BODY Moon x5
+    13:27  +BODY Gas Giant x4
+    13:27  Planet -> ROCK (Lv10)
+    13:27  +BODY Planet x5
+    13:32  +BODY Star x4
+    13:34  Gas Giant -> ROCK (Lv10)
+    13:34  +BODY Gas Giant x5
+    13:40  Star -> ROCK (Lv10)
+    13:43  +BODY Star x5
+    13:53  Asteroid -> IRON (Lv20)
+    14:28  PAD 17
+    14:47  COSMIC LEVEL 16
+    15:22  PAD 18 (x1.15)
+    15:58  Moon -> IRON (Lv20)
+    17:01  Planet -> IRON (Lv20)
+    17:41  SUPERNOVA 6
+    17:42  +BODY Asteroid x2
+    17:42  +BODY Asteroid x3
+    17:44  NEW BODY: MOON
+    17:44  +BODY Asteroid x4
+    17:44  NEW BODY: PLANET
+    17:44  +BODY Moon x2
+    17:44  NEW BODY: GAS GIANT
+    17:44  Asteroid -> ROCK (Lv10)
+    17:45  +BODY Asteroid x5
+    17:45  +BODY Planet x2
+    17:45  NEW BODY: STAR
+    17:45  +BODY Moon x3
+    17:46  +BODY Gas Giant x2
+    17:46  +BODY Planet x3
+    17:46  +BODY Moon x4
+    17:48  +BODY Star x2
+    17:49  +BODY Gas Giant x3
+    17:49  +BODY Planet x4
+    17:51  +BODY Star x3
+    17:52  COSMIC LEVEL 17
+    17:52  Moon -> ROCK (Lv10)
+    17:52  +BODY Moon x5
+    17:53  +BODY Gas Giant x4
+    17:53  Planet -> ROCK (Lv10)
+    17:53  +BODY Planet x5
+    17:56  +BODY Star x4
+    17:59  Gas Giant -> ROCK (Lv10)
+    17:59  +BODY Gas Giant x5
+    18:05  Star -> ROCK (Lv10)
+    18:07  +BODY Star x5
+    18:14  Asteroid -> IRON (Lv20)
+    19:34  Moon -> IRON (Lv20)
+    20:37  Planet -> IRON (Lv20)
+    21:30  PAD 19
+    21:49  COSMIC LEVEL 18
+    23:32  Gas Giant -> IRON (Lv20)
+    28:28  COSMIC LEVEL 19
+    29:26  Star -> IRON (Lv20)
