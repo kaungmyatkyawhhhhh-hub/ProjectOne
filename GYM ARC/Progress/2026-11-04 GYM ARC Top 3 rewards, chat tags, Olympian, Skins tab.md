@@ -312,10 +312,24 @@ Prompt: [[2026-11-04 GYM ARC Prompt - Plate tiers FINAL (7 Nov part 9)]]. Number
 - Fixed: the digit PNGs have empty side margins, so "45" read as "4 5". The client now crops each digit to its glyph box (`PlateNumbersClient`).
 - The 12 loose Decal objects in Workspace can be deleted (owner's call).
 
-### Gem Mine open for admins (4 Nov)
-- Owner: "unlock the gem gym for admins". Admins = the owner + the admins granted in the ADMIN panel (server attribute AdminPanel; players can't set it themselves).
-- Admins get in even before the GEM update: the door and gate open, they can use the machines, and the guard doesn't put them outside. Before the launch they walk through the launch cover; it still shows, and it stays solid for everyone else.
-- The gold arrow and the "visited" mark still only come with the real unlock. The LIFTS tab shows the Gem lifts to admins.
-- Code: `Config/GemMine.Unlocked(data, player)`, MembersService, GemMineClient, StatsClient.
-- Tested in Play (temp save, before the launch): as admin I walked in through the cover, stayed inside, and Bench1 was allowed. With admin taken off, the same player was put back outside and the machine was refused.
+### Early GEM access: two admin panel switches (4 Nov)
+- Owner: "unlock the gem gym for admins", then "make it in admin panel instead, so i can choose whenever i want the gem update out for me", then "add another one too that is the entire gem update on/off".
+- **ADMIN panel > Progress:**
+  - **GEM MINE** on / off: the Gem Mine is open for that admin, no alter needed. Before the launch they walk through the cover, which stays visible.
+  - **GEM UPDATE** on / off: the whole update is out for that admin only. That means Alters 16-20, Run Cards, the Star Track (titles, auras, star belt), the 3 Gem Mine bullies, no countdown, and no cover on their screen. The Gem Mine then uses its normal rule (Alter 15 or a star).
+- Admins only, one at a time ("all" is refused). Each switch is saved on the admin's save until turned off. If someone stops being an admin, it's cleared when they next join.
+- Admins no longer get in automatically: the always-open rule from earlier today is replaced by these switches.
+- What everyone sees still waits for the real launch: statues, name-tag star colours, the cover and the countdown for other players.
+- Turning the update off doesn't undo progress made while it was on: alters 16+ done and Run Cards picked stay on that save.
+- How it works:
+  - `Config/LiveEvents.EarlyFor` / `Launched(id, who)` / `Unlocked(feature, who)`: who = a Player, a save, or false for the real launch only. With nothing passed, a client means you and the server means the real launch.
+  - The server passes the save in the Alter progress, Run Cards, the story bullies, titles, auras, the star belt and the profile skin count.
+  - The server marks the admin's player with `Early_Gem` so their screens know.
+- Tested in Play (temp save, before the launch):
+  - Gem Mine switch: off = put outside, on = in through the cover, off = cover solid again and put outside.
+  - Gem update on: Alters 16-20, Run Cards on, countdown gone, cover hidden and walk-through, inside the mine, HUD "NEXT: ALTER 16 JADE".
+  - Gem update off: everything back, cover back, put outside.
+  - A sample save with the switch on gets the update; with no save, the server still says not launched.
+  - "all" is refused.
+- Panel screenshot: `Downloads\gem_update_import\screens_4Nov_plates_admin_panel_gem_switches.jpg`.
 
