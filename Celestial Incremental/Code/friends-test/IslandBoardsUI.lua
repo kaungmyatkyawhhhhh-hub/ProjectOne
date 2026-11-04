@@ -327,7 +327,7 @@ function UI:buildTree()
 		local bar = Kit.box(gui, (a.X + b.X) / 2 - d.Magnitude / 2, (a.Y + b.Y) / 2 - 4, d.Magnitude, 8,
 			{ BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 4, Rotation = math.deg(math.atan2(d.Y, d.X)) })
 		Kit.corner(bar, 4)
-		table.insert(self.links, { bar = bar, to = g.id })
+		table.insert(self.links, { bar = bar, to = g.id, a = a, b = b })
 	end
 	-- the hub: your star, where every branch starts
 	local hc = centres.hub
@@ -370,6 +370,48 @@ function UI:buildTree()
 			self.targets["R2_" .. node.id] = hit
 		end
 		table.insert(self.tiles, t)
+	end
+end
+-- #284: a node bought (from INFO's BUY, on the board or the T window): its tile flashes white, its line DRAWS from the node it
+-- comes from to it (gold), 10 sparkles round it
+function UI:celebrate(kind: string, id: string)
+	if self.id ~= "Tree" or kind ~= "BuyRing2" then return end
+	for _, t in ipairs(self.tiles or {}) do
+		if t.node and t.node.id == id then
+			t.stroke.Color = WHITE
+			t.stroke.Thickness = 9
+			t.stroke.Transparency = 0
+			Kit.tween(t.stroke, { Thickness = 4.5 }, 0.5)
+			for i = 1, 10 do
+				local s = Kit.sparkle(self.gui, t.x + math.random(-10, TILE_W - 10), t.y + math.random(-10, TILE_H), math.random(14, 26), i * 0.03)
+				s.ImageColor3 = Color3.fromRGB(255, 220, 120)
+				task.delay(1.4, function() s:Destroy() end)
+			end
+		end
+	end
+	for _, l in ipairs(self.links or {}) do
+		if l.to == id and l.a and l.b then
+			-- a gold line growing from the start to the end over 0.35 s, over the link, then fading into it
+			local d = l.b - l.a
+			local len = d.Magnitude
+			local line = Kit.box(self.gui, l.a.X, l.a.Y - 5, 0, 10, { BackgroundTransparency = 0, BackgroundColor3 = Color3.fromRGB(255, 220, 120), ZIndex = 4,
+				Rotation = math.deg(math.atan2(d.Y, d.X)) })
+			Kit.corner(line, 5)
+			task.spawn(function()
+				local t0 = os.clock()
+				while os.clock() - t0 < 0.35 do
+					local p = (os.clock() - t0) / 0.35
+					local c = l.a + d * (p / 2)
+					line.Size = UDim2.fromOffset(len * p, 10)
+					line.Position = UDim2.fromOffset(c.X - len * p / 2, c.Y - 5)
+					task.wait()
+				end
+				line.Size = UDim2.fromOffset(len, 10)
+				line.Position = UDim2.fromOffset((l.a.X + l.b.X) / 2 - len / 2, (l.a.Y + l.b.Y) / 2 - 5)
+				Kit.tween(line, { BackgroundTransparency = 1 }, 0.6)
+				task.delay(0.65, function() line:Destroy() end)
+			end)
+		end
 	end
 end
 function UI:refreshTree()

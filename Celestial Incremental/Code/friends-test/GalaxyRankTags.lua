@@ -35,22 +35,18 @@ local function build(p: Player)
 	bb.MaxDistance = 90
 	bb.ResetOnSpawn = false
 	bb.Parent = playerGui
-	local l = Instance.new("TextLabel")
-	l.BackgroundTransparency = 1
-	l.Size = UDim2.fromScale(1, 1)
-	l.FontFace = Kit.FONT_HEAVY
-	l.TextScaled = true
-	l.Text = def.name
-	l.TextColor3 = Color3.new(1, 1, 1)
-	l.Parent = bb
-	local g = Instance.new("UIGradient")
-	g.Color = ColorSequence.new(def.colour:Lerp(Color3.new(1, 1, 1), 0.6), def.colour)
-	g.Rotation = 90
-	g.Parent = l
-	local st = Instance.new("UIStroke")
-	st.Color = Color3.fromRGB(26, 16, 40)
-	st.Thickness = 2.5
-	st.Parent = l
+	-- (the ✦ is our sparkle image: the font has no ✦, Kit.rankLine)
+	local labels = Kit.rankLine(bb, def.name, Kit.FONT_HEAVY)
+	for _, l in ipairs(labels) do
+		local g = Instance.new("UIGradient")
+		g.Color = ColorSequence.new(def.colour:Lerp(Color3.new(1, 1, 1), 0.6), def.colour)
+		g.Rotation = 90
+		g.Parent = l
+		local st = Instance.new("UIStroke")
+		st.Color = Color3.fromRGB(26, 16, 40)
+		st.Thickness = 2.5
+		st.Parent = l
+	end
 	tags[p] = bb
 end
 

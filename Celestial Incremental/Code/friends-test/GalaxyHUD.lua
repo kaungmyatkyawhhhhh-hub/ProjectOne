@@ -133,6 +133,49 @@ local goalGrad = Kit.grad(goalFill, hex("#ffe08a"), hex("#ff9a1a"), 90)
 local goalText = Kit.text(goal, 0, 1, 204, 14, "", 11, { ZIndex = 7, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.3 })
 local _g = goalGrad
 
+-- the NEXT line (#223, Tutorial 2 C): always under the counter, the cheapest next NAMED thing ("NEXT: MOON · 80", "NEXT: PAD
+-- STAR GATE · 1M", "NEXT: IRON ASTEROID · 2.1K"); refreshed twice a second
+local nextRoot = scaledRoot("Next", Vector2.new(0.5, 0), 360, 24)
+local nextText = Kit.text(nextRoot, 0, 2, 360, 20, "", Kit.ps(14, 17), { ZIndex = 9, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#ffd84a"), stroke = 1.5, FontFace = Kit.FONT_HEAVY })
+local function nextGoal(): string?
+	local sd = player:GetAttribute("Stardust") or 0
+	local perks = Econ.PerksOf(player)
+	local nodes = {}
+	for _, n in ipairs(Econ.Ring1) do nodes[n.id] = player:GetAttribute("Node_" .. n.id) == true end
+	local best, bestCost = nil, math.huge
+	local function offer(text: string, cost: number)
+		if cost > sd and cost < bestCost then best, bestCost = text, cost end
+	end
+	for k = 0, #Econ.Tiers - 1 do
+		local tier = Econ.Tiers[k + 1]
+		local lv = player:GetAttribute("Own" .. (k + 1)) or 0
+		local node = tier.unlock and Econ.Ring1ById[tier.unlock]
+		if lv == 0 and node and not nodes[node.id] and (not node.requires or nodes[node.requires]) then
+			offer(tier.name, node.cost)
+		elseif lv > 0 then
+			local at = Econ.NextTierAt(lv)
+			if at then
+				local cost = 0
+				for l = lv, at - 1 do cost += Econ.Cost(k, l, perks) end
+				offer(Econ.TierNames[Econ.NamedTier(lv) + 1] .. " " .. tier.name, cost)
+			end
+		end
+	end
+	local pads = player:GetAttribute("Pads") or 0
+	local pad = Econ.Pads[pads + 1]
+	if pad then offer("PAD " .. pad.name, pad.price) end
+	if not best then return nil end
+	return "NEXT: " .. best .. " · " .. fmt(bestCost)
+end
+task.spawn(function()
+	while true do
+		local t = if shared.GalaxyCinematic then nil else nextGoal()
+		nextText.Parent.Visible = t ~= nil
+		if t then Kit.setText(nextText, t) end
+		task.wait(0.5)
+	end
+end)
+
 -- the SHARDS counter (alpha part 1), right of the stardust counter: shown once you've earned shards
 local shardsRoot, shardsScale = scaledRoot("Shards", Vector2.new(0, 0), 170, 64)
 shardsRoot.Visible = false
@@ -308,8 +351,8 @@ for i, k in ipairs(KEYS) do
 	end
 	keyUI[k.key] = { label = label.Parent, line = line, hit = hit, diamond = d, x = x, y = y, x0 = x, sparkles = {}, parts = parts, shown = true }
 end
--- STORE hidden until tutorial step 7 is done (#448: no shop during the tutorial); the other keys close the gap
-local STORE_AT_STEP = 7
+-- STORE hidden until tutorial step 14 is done (#448: no shop before Supernova 1 / during the tutorial's start); the other keys close the gap
+local STORE_AT_STEP = 14 -- (Tutorial 2: after the first Supernova + Starfire, like the old step 7)
 local function keyAllowed(k): boolean
 	if k.window == "Store" then return (player:GetAttribute("TutStep") or 0) >= STORE_AT_STEP end
 	return true
@@ -398,7 +441,9 @@ local function buildTreeWindow()
 		treeCtx.picked = true
 		for _, p in pairs(treePanels) do p:refresh() end
 	end
-	treeCtx.bought = function() end -- (the selection stays on the node you bought)
+	treeCtx.bought = function(kind, arg) -- (the selection stays on the node you bought; #284: the tree celebrates it)
+		for _, p in pairs(treePanels) do p:celebrate(kind, arg) end
+	end
 	for i, id in ipairs({ "Tree", "Info" }) do
 		local board = MapConfig.Boards.ById[id]
 		-- (no `pair`: the screen draws its own title, like the stand boards)
@@ -441,6 +486,7 @@ local function setKeySelected(key: string?)
 	end
 end
 local layout, windowScale -- (defined below)
+local cardRoot -- (Tutorial 2's card, made below)
 local function openWindow(tab: string?)
 	if open then
 		if tab and tab ~= panel.currentTab then selectTab(tab) end
@@ -555,9 +601,11 @@ end)
 task.spawn(function()
 	local opener = Galaxy:WaitForChild("OpenWindow", 60)
 	if not opener then return end
-	opener.Event:Connect(function(id)
+	opener.Event:Connect(function(id, tab)
 		if id == "Upgrades" then
-			openWindow(tutorialTab)
+			-- (a tapped board names its tab: BODIES / PERKS; the tutorial's arrow then points at the right tab inside)
+			if treeOpen then closeTree() end
+			openWindow(tab or tutorialTab)
 		elseif id == "Tree" then
 			openTree()
 		elseif id == "Forge" then
@@ -597,7 +645,7 @@ function layout()
 	win.Position = UDim2.fromOffset(vp.X / 2, topEdge + room / 2 + 15 * ws)
 	-- the tree window: as big as fits between the counter and the hotbar (and the screen's sides)
 	-- (below the hint line while the tutorial runs)
-	local hintRoom = if not small and (player:GetAttribute("TutStep") or 0) < #Econ.Tutorial then 46 * s else 0
+	local hintRoom = 0 -- (Tutorial 2: the card is at the bottom and hides while a window is open)
 	treeScale.Scale = math.min((room - hintRoom) / 650, (vp.X - 24) / 1124, s)
 	treeWin.Position = UDim2.fromOffset(vp.X / 2, topEdge + hintRoom + (room - hintRoom) / 2)
 	hot.Visible = not (small and (open or treeOpen or sideOpen ~= nil))
@@ -605,6 +653,13 @@ function layout()
 	shardsRoot.Position = UDim2.new(0.5, math.floor(144 * s), 0, math.floor(16 * s))
 	levelRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor(16 * s))
 	ignRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor(64 * s))
+	nextRoot.Position = UDim2.new(0.5, 0, 0, math.floor(82 * s))
+	-- (LUMI's card: above the hotbar; on phones a bit smaller so it leaves the middle of the screen free)
+	if cardRoot then
+		cardRoot.Position = UDim2.new(0.5, 0, 1, -math.floor((if small then 80 else 110) * s))
+		local us = cardRoot:FindFirstChildOfClass("UIScale")
+		if us then us.Scale = s * (if small then 0.8 else 1) end
+	end
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
 layout()
@@ -645,7 +700,7 @@ end)
 local function onGoal()
 	local tutStep = player:GetAttribute("TutStep") or 0
 	local novas = player:GetAttribute("Supernovas") or 0
-	goal.Visible = tutStep >= 4 or novas >= 1
+	goal.Visible = tutStep >= 8 or novas >= 1
 	local need = player:GetAttribute("SupernovaNeed") or Econ.NeedFor(novas)
 	local k = math.clamp((player:GetAttribute("EarnedRun") or 0) / need, 0, 1)
 	goalFill.Size = UDim2.fromOffset(math.floor(204 * k), 16)
@@ -668,11 +723,73 @@ onShards()
 local function onIncome()
 	Kit.setText(rateText, "+" .. fmt(player:GetAttribute("Income") or 0) .. "/s")
 end
+-- #283 + #239: every second the counter gives a tiny pop and a soft tick whose pitch climbs the pentatonic as income grows
+-- (one step every x3 of income; quiet; none in a cinematic or with Reduced Motion for the pop)
+local PENTA = { 1, 9 / 8, 5 / 4, 3 / 2, 5 / 3, 2, 9 / 4, 5 / 2, 3, 10 / 3, 4 }
+task.spawn(function()
+	while true do
+		task.wait(1)
+		local inc = player:GetAttribute("Income") or 0
+		if inc > 0 and not shared.GalaxyCinematic then
+			local step = math.clamp(math.floor(math.log(inc + 1, 3)), 0, 32)
+			local pitch = PENTA[step % 10 + 1] * (if step >= 10 then 2 else 1) * 0.5
+			Kit.sound("click", { volume = 0.16, pitch = math.min(pitch, 2.2) })
+			if not Kit.calm() then
+				Kit.tween(topScale, { Scale = screenScale() * 1.035 }, 0.06)
+				task.delay(0.06, function() Kit.tween(topScale, { Scale = screenScale() }, 0.16) end)
+			end
+		end
+	end
+end)
 player:GetAttributeChangedSignal("Income"):Connect(onIncome)
 onIncome()
 local function onEssence() Kit.setText(ess, fmt(player:GetAttribute("Essence") or 0)) end
 player:GetAttributeChangedSignal("Essence"):Connect(onEssence)
 onEssence()
+-- the NEW moment (#222): "NEW: MOON!" / "NEW: ROCK ASTEROID!" for 1.5 s (skippable: any tap), a small FOV nudge (not with
+-- Reduced Motion), sparkles; one at a time (a newer one replaces it)
+local momentRoot, momentScale = scaledRoot("NewMoment", Vector2.new(0.5, 0.5), 620, 110)
+momentRoot.Visible = false
+local momentText = Kit.text(momentRoot, 0, 8, 620, 56, "", 46, { ZIndex = 60, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 3,
+	gradient = ColorSequence.new(hex("#fff1c0"), hex("#ffb02a")) })
+local momentSub = Kit.text(momentRoot, 0, 66, 620, 28, "", 22, { ZIndex = 60, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#7dff6b"), stroke = 2 })
+local momentToken = 0
+local function hideMoment() momentRoot.Visible = false end
+UserInputService.InputBegan:Connect(function(input)
+	if momentRoot.Visible and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then hideMoment() end
+end)
+local CutsceneMod
+task.spawn(function() CutsceneMod = require(Galaxy:WaitForChild("GalaxyCutscene")) end)
+local function newMoment(title: string, sub: string)
+	if shared.GalaxyCinematic then return end
+	-- (cutscene template, 5 Nov: the MINI version, 1.2 s, no black frame: the body's colour, the sparkle, a small starburst)
+	if CutsceneMod and not CutsceneMod.busy() then
+		task.spawn(CutsceneMod.play, { mini = true, length = 1.2, drop = 0.25, colour = Color3.fromRGB(255, 205, 90), symbol = Kit.A.sparkle, title = title, sub = sub })
+		return
+	end
+	momentToken += 1
+	local token = momentToken
+	Kit.setText(momentText, title)
+	Kit.setText(momentSub, sub)
+	local vp = viewport()
+	momentRoot.Position = UDim2.fromOffset(vp.X / 2, vp.Y * 0.3)
+	momentRoot.Visible = true
+	local s = screenScale()
+	momentScale.Scale = s * 0.6
+	Kit.tween(momentScale, { Scale = s }, 0.3, Enum.EasingStyle.Back)
+	for i = 1, 8 do
+		local sp = Kit.sparkle(momentRoot, math.random(60, 560), math.random(0, 90), math.random(12, 22), i * 0.05)
+		task.delay(1.6, function() sp:Destroy() end)
+	end
+	Kit.sound("milestone")
+	local cam = workspace.CurrentCamera
+	if cam and not Kit.calm() then
+		local fov = cam.FieldOfView
+		Kit.tween(cam, { FieldOfView = fov + 3 }, 0.12)
+		task.delay(0.12, function() Kit.tween(cam, { FieldOfView = fov }, 0.4) end)
+	end
+	task.delay(1.5, function() if momentToken == token then hideMoment() end end)
+end
 -- a level: the body chime; a new NAMED TIER (every 10 levels, x2) = the milestone sound instead (one sound per buy, also MAX)
 local lastOwn = owned()
 for k = 1, #Econ.Tiers do
@@ -683,7 +800,14 @@ for k = 1, #Econ.Tiers do
 		lastOwn[k] = now
 		if now <= was then return end
 		local crossed = was > 0 and Econ.NamedTier(now) > Econ.NamedTier(was)
-		Kit.sound(if crossed then "milestone" else "buyBody")
+		local tierName = Econ.Tiers[k].name
+		if was == 0 then
+			newMoment("NEW: " .. tierName .. "!", "a new body in your sky")
+		elseif crossed then
+			newMoment("NEW: " .. Econ.TierName(now) .. " " .. tierName .. "!", tierName .. " income x2")
+		else
+			Kit.sound("buyBody")
+		end
 	end)
 	-- +BODY: a new copy flies into orbit (the map shows it); the chime
 	player:GetAttributeChangedSignal("Copies" .. k):Connect(function()
@@ -696,27 +820,122 @@ player:GetAttributeChangedSignal("CosmicLevel"):Connect(function() if open then 
 
 ------------------------------------------------------------------------ the tutorial (steps 1-4 of the design)
 local tut = { arrow = nil, glow = nil, hint = nil, idleSince = os.clock(), step = player:GetAttribute("TutStep") or 0, target = nil }
-local hintRoot = scaledRoot("Hint", Vector2.new(0.5, 0), 420, 44)
 layout()
+-- TUTORIAL 2 (5 Nov): LUMI's CARD, bottom centre above the hotbar (Regrowth's NPC card): the star spirit's portrait, her
+-- name, "STEP 4/20", the goal, a segmented bar with the live counter ("3/5"), the reward (+Essence, +~20 s of stardust);
+-- HIDE (shrinks it to the goal line) and SKIP (red, "not recommended": a second tap skips the whole tutorial)
+local cardScale
+cardRoot, cardScale = scaledRoot("TutCard", Vector2.new(0.5, 1), 540, 100)
+local card = {}
+do
+	local panelF = Kit.panel(cardRoot, 0, 0, 540, 100, 20)
+	Kit.stroke(panelF, hex("#ffd84a"), 2, 0.15)
+	card.panel = panelF
+	local ring = Kit.box(cardRoot, 8, 8, 84, 84, { BackgroundTransparency = 0, BackgroundColor3 = hex("#1c1430"), ZIndex = 21 })
+	Kit.corner(ring, 42)
+	Kit.stroke(ring, hex("#ffd84a"), 3)
+	card.portrait = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Econ.TutorialSpirit.portrait, Position = UDim2.fromOffset(2, 2), Size = UDim2.fromOffset(80, 80),
+		ZIndex = 22 }, ring)
+	Kit.corner(card.portrait, 40)
+	card.ring = ring
+	card.name = Kit.text(cardRoot, 102, 6, 120, 20, Econ.TutorialSpirit.name, Kit.ps(16, 19), { ZIndex = 23, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#ffd84a"), stroke = 1.5 })
+	local chip = Kit.box(cardRoot, 168, 6, 92, 22, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 22 })
+	Kit.corner(chip, 4)
+	Kit.stroke(chip, Kit.INK, 2)
+	Kit.grad(chip, hex("#ffd84a"), hex("#c79a0a"), 90)
+	card.chip = chip
+	card.step = Kit.text(chip, 0, Kit.ps(2, 1), 92, 20, "STEP 1/20", Kit.ps(13, 15), { ZIndex = 23, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
+	card.line = Kit.text(cardRoot, 102, 30, 330, 28, "", Kit.ps(20, 22), { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.8 })
+	-- the segmented bar (up to 10 segments) + the counter
+	card.segs = {}
+	for i = 1, 10 do
+		local seg = Kit.box(cardRoot, 102 + (i - 1) * 27, 66, 24, 14, { BackgroundTransparency = 0, BackgroundColor3 = hex("#2a2433"), ZIndex = 22 })
+		Kit.corner(seg, 4)
+		Kit.stroke(seg, Kit.INK, 1.5)
+		card.segs[i] = seg
+	end
+	card.count = Kit.text(cardRoot, 376, 62, 70, 22, "0/1", Kit.ps(15, 18), { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
+	-- the reward
+	Kit.icon(cardRoot, "essence", 440, 30, 34, Color3.fromRGB(60, 230, 210), { ZIndex = 23 })
+	card.ess = Kit.text(cardRoot, 474, 36, 60, 22, "+1", Kit.ps(16, 19), { ZIndex = 23, TextColor3 = hex("#7dffe9"), FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
+	Kit.icon(cardRoot, "stardust", 440, 62, 30, Color3.fromRGB(255, 170, 60), { ZIndex = 23 })
+	Kit.text(cardRoot, 472, 66, 66, 20, "+BONUS", Kit.ps(11, 14), { ZIndex = 23, TextColor3 = hex("#ffc35a"), FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
+	-- HIDE + SKIP
+	local hideB, hideI = Kit.button(cardRoot, 330, 4, 64, 24, hex("#5ad1ff"), hex("#1f6fd1"), { ZIndex = 24 })
+	card.hideText = Kit.text(hideI, 0, Kit.ps(3, 2), 64, 18, "HIDE", Kit.ps(12, 14), { ZIndex = hideI.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
+	local skipB, skipI = Kit.button(cardRoot, 400, 4, 132, 24, hex("#ff7d8e"), hex("#e2334c"), { ZIndex = 24 })
+	card.skipText = Kit.text(skipI, 0, Kit.ps(3, 2), 132, 18, "SKIP (not advised)", Kit.ps(11, 13), { ZIndex = skipI.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
+	card.hideB, card.skipB = hideB, skipB
+	for _, c in ipairs(cardRoot:GetChildren()) do
+		if c ~= hideB and c:IsA("Frame") and c.Position == hideB.Position + UDim2.fromOffset(0, 2) then card.hideShadow = c end
+	end
+end
+local cardHidden, skipArmed = false, false
+local cardFull = {}
+for _, c in ipairs(cardRoot:GetChildren()) do table.insert(cardFull, c) end
+local function setCardHidden(h: boolean)
+	cardHidden = h
+	-- (hidden: a slim strip at the bottom with only the goal line, the counter and SHOW)
+	local keep = { [card.panel] = true, [card.line.Parent] = true, [card.count.Parent] = true, [card.hideB] = true, [card.hideShadow or card.panel] = true }
+	for _, c in ipairs(cardFull) do
+		if c:IsA("GuiObject") and not keep[c] then c.Visible = not h end
+	end
+	local hx, hy = if h then 460 else 330, if h then 68 else 4
+	card.panel.Position = UDim2.fromOffset(0, if h then 62 else 0)
+	card.panel.Size = UDim2.fromOffset(540, if h then 38 else 100)
+	card.line.Parent.Position = UDim2.fromOffset(if h then 12 else 102, if h then 66 else 30)
+	card.count.Parent.Position = UDim2.fromOffset(376, if h then 68 else 62)
+	card.hideB.Position = UDim2.fromOffset(hx, hy)
+	if card.hideShadow then card.hideShadow.Position = UDim2.fromOffset(hx, hy + 2) end
+	Kit.setText(card.hideText, if h then "SHOW" else "HIDE")
+end
+card.hideB.MouseButton1Click:Connect(function()
+	Kit.sound("tab")
+	setCardHidden(not cardHidden)
+end)
+card.skipB.MouseButton1Click:Connect(function()
+	if not skipArmed then
+		skipArmed = true
+		Kit.setText(card.skipText, "TAP AGAIN TO SKIP")
+		Kit.sound("error")
+		task.delay(3, function() if skipArmed then skipArmed = false Kit.setText(card.skipText, "SKIP (not advised)") end end)
+		return
+	end
+	skipArmed = false
+	request:InvokeServer("SkipTutorial")
+end)
+local cardStep = -1
 local function clearHint()
-	if tut.hint then tut.hint:Destroy() tut.hint = nil end
+	cardRoot.Visible = false
 end
 local function showHint(step: number)
-	clearHint()
 	local def = Econ.Tutorial[step + 1]
-	if not def then return end
-	local f = Kit.box(hintRoot, 30, 4, 360, 36, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0f0d13"), ZIndex = 20 })
-	Kit.corner(f, 5)
-	Kit.stroke(f, hex("#ff9a2a"), 2)
-	local c = Kit.box(f, 6, 5, 46, 26, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 21 })
-	Kit.corner(c, 4)
-	Kit.stroke(c, Kit.INK, 2)
-	Kit.grad(c, hex("#ffd84a"), hex("#c79a0a"), 90)
-	Kit.text(c, 0, Kit.ps(3, 2), 46, 22, (step + 1) .. "/" .. #Econ.Tutorial, Kit.ps(15, 18), { ZIndex = 22, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.5 })
-	Kit.text(f, 60, Kit.ps(8, 7), 236, 24, def.hint, Kit.ps(16, 18), { ZIndex = 21 })
-	Kit.icon(f, "essence", 300, 2, 32, Color3.fromRGB(60, 230, 210), { ZIndex = 22 })
-	Kit.text(f, 326, Kit.ps(8, 7), 34, 24, "+" .. def.essence, Kit.ps(16, 18), { ZIndex = 22, TextColor3 = hex("#7dffe9") })
-	tut.hint = f
+	if not def then cardRoot.Visible = false return end
+	cardRoot.Visible = true
+	if cardStep ~= step then
+		cardStep = step
+		Kit.setText(card.step, "STEP " .. (step + 1) .. "/" .. #Econ.Tutorial)
+		Kit.setText(card.line, def.hint)
+		Kit.setText(card.ess, "+" .. def.essence)
+		if not Kit.calm() then
+			local cs = screenScale() * (if small then 0.8 else 1)
+			cardScale.Scale = cs * 0.9
+			Kit.tween(cardScale, { Scale = cs }, 0.25, Enum.EasingStyle.Back)
+			-- (the first frame's viewport can be 1x1: settle on the real scale after the pop)
+			task.delay(0.3, function() cardScale.Scale = screenScale() * (if small then 0.8 else 1) end)
+		end
+	end
+	-- the live counter + the segments
+	local v = math.min(tonumber(player:GetAttribute(def.attr)) or 0, def.need)
+	Kit.setText(card.count, (if def.attr == "SupernovaPct" then v .. "%" else v .. "/" .. def.need))
+	local n = math.min(def.need, 10)
+	local lit = math.floor(v / def.need * n + 1e-6)
+	for i, seg in ipairs(card.segs) do
+		seg.Visible = i <= n and not cardHidden
+		seg.BackgroundColor3 = if i <= lit then hex("#7dff6b") else hex("#2a2433")
+		seg.Size = UDim2.fromOffset(math.floor(270 / n) - 3, 14)
+		seg.Position = UDim2.fromOffset(102 + (i - 1) * math.floor(270 / n), 66)
+	end
 end
 local arrow = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.arrow, Size = UDim2.fromOffset(44, 44), AnchorPoint = Vector2.new(0.5, 1), Visible = false, ZIndex = 60 }, gui)
 local targetRing = Kit.new("Frame", { BackgroundTransparency = 1, Visible = false, ZIndex = 59, AnchorPoint = Vector2.new(0.5, 0.5) }, gui)
@@ -724,29 +943,34 @@ Kit.corner(targetRing, 8)
 local ringStroke = Kit.stroke(targetRing, hex("#ffd84a"), 3)
 Kit.tween(ringStroke, { Transparency = 0.7 }, 0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
 
--- what the current step points at
+-- what the current step points at (in the windows; the boards / pads: boardKeyFor, below)
 local function stepTarget(step: number): (GuiObject?, string?)
 	local def = Econ.Tutorial[step + 1]
 	if not def then return nil, nil end
-	-- steps 5-7 (alpha part 1): the goal bar, the SUPERNOVA button, STARFIRE in the tree window
-	if def.id == "HalfSupernova" then return if open or treeOpen then nil else goal, nil end
-	if def.id == "Supernova" then
+	local id = def.id
+	if id == "Ready" then return if open or treeOpen then nil else goal, nil end
+	if id == "Supernova" or id == "Nova2" or id == "Nova6" then
 		local b = shared.GalaxySupernovaButton
 		return if b and b.Visible and not shared.GalaxyCinematic then b else nil, nil
 	end
-	if def.id == "Starfire" then
+	if id == "Ignition" then return if shared.GalaxyCinematic then nil else ignBtn, nil end
+	if id == "Starfire" or id == "StarTier" then
 		if shared.GalaxyCinematic then return nil, nil end
 		if not treeOpen then return keyUI.T.hit, nil end
 		local tree = treePanels.Tree
-		local tile = tree and tree.targets.R2_Starfire
-		if treeCtx.sel.kind == "node2" and treeCtx.sel.key == "Starfire" then return treePanels.Info.targets.Buy, nil end
+		local tile = tree and tree.targets["R2_" .. id]
+		if treeCtx.sel.kind == "node2" and treeCtx.sel.key == id then return treePanels.Info.targets.Buy, nil end
 		if tile then tree:reveal(tile) end
 		return tile, nil
 	end
 	local wantTab, rowKey
-	if def.id == "BuyAsteroid" then wantTab, rowKey = "BODIES", "Body0"
-	elseif def.id == "FirstLight" then wantTab, rowKey = "PERKS", "Perk_FirstLight"
-	elseif def.id == "FirstMoon" then wantTab, rowKey = "BODIES", if player:GetAttribute("Node_LunarPull") then "Body1" else "Unlock1"
+	local function unlockOr(k: number) return if (player:GetAttribute("Own" .. (k + 1)) or 0) > 0 then "Body" .. k else "Unlock" .. k end
+	if id == "Asteroid3" or id == "Rock" then wantTab, rowKey = "BODIES", "Body0"
+	elseif id == "FirstLight" then wantTab, rowKey = "PERKS", "Perk_FirstLight"
+	elseif id == "Moon" then wantTab, rowKey = "BODIES", unlockOr(1)
+	elseif id == "Copy" then wantTab, rowKey = "BODIES", "Copy0"
+	elseif id == "Planet" then wantTab, rowKey = "BODIES", unlockOr(2)
+	elseif id == "Giant" then wantTab, rowKey = "BODIES", unlockOr(3)
 	else return nil, nil end
 	if not open then return keyUI.U.hit, wantTab end
 	if panel.currentTab ~= wantTab then return tabUI[wantTab].button, wantTab end
@@ -767,7 +991,7 @@ local function tutorialComplete()
 	Kit.text(f, 0, 64, 520, 26, #Econ.Tutorial .. "/" .. #Econ.Tutorial .. "  ESSENCE " .. fmt(player:GetAttribute("Essence") or 0), 20,
 		{ ZIndex = 71, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#7dffe9") })
 	-- (design: the end of the tutorial teases the next big thing)
-	Kit.text(f, 0, 94, 520, 22, "NEXT: STAR FORGE AT SUPERNOVA 3", 16, { ZIndex = 71, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#ffd84a") })
+	Kit.text(f, 0, 94, 520, 22, "THE STAR FORGE IS OPEN: PRESS F", 16, { ZIndex = 71, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#ffd84a") })
 	for i = 1, 10 do Kit.sparkle(f, math.random(0, 500), math.random(-10, 100), math.random(10, 20), i * 0.12) end
 	Kit.tween(sc, { Scale = screenScale() }, 0.35, Enum.EasingStyle.Back)
 	Kit.sound("milestone")
@@ -818,19 +1042,26 @@ local function tutorialComplete()
 	end)
 end
 
-event.OnClientEvent:Connect(function(kind, a, b)
+event.OnClientEvent:Connect(function(kind, a, b, ...)
 	if kind == "TutorialStep" then
 		tut.step = a
 		tut.idleSince = os.clock()
 		clearHint()
-		-- +1 Essence flies up from the hint line
+		-- the step's payout floats up from the counter: +Essence, +stardust (Tutorial 2)
 		floatText(top, 120, 70, "+" .. b .. " ESSENCE", hex("#7dffe9"), 16)
+		local pay = tonumber((...)) or 0
+		if pay > 0 then task.delay(0.25, function() floatText(top, 120, 92, "+" .. fmt(pay), hex("#ffc35a"), 16) end) end
+		Kit.sound("buy")
 		if a >= #Econ.Tutorial then
 			task.delay(0.4, tutorialComplete)
-		elseif Econ.Tutorial[a + 1].id == "Comet" then
+		elseif Econ.Tutorial[a + 1].id == "Comets" then
 			-- the Moon flies in: close the window so the system and the comet are in view
 			task.delay(1.2, closeWindow)
 		end
+	elseif kind == "ForgeGlobal" then
+		-- (someone on the server rolled a CELESTIAL core)
+		toast(tostring(a) .. " forged a CELESTIAL core!", hex("#96fff0"))
+		Kit.sound("milestone")
 	elseif kind == "CometPaid" then
 		floatText(top, 120, 60, "+" .. fmt(b), hex("#9be7ff"), 20)
 	end
@@ -842,11 +1073,11 @@ local trailFolder = Instance.new("Folder")
 trailFolder.Name = "TutorialTrail"
 trailFolder.Parent = workspace
 local trail = {}
-for i = 1, 3 do
+for i = 1, 6 do
 	local pt = Instance.new("Part")
 	pt.Anchored, pt.CanCollide, pt.CanQuery, pt.CanTouch, pt.CastShadow = true, false, false, false, false
 	pt.Transparency = 1
-	pt.Size = Vector3.new(3, 0.05, 3)
+	pt.Size = Vector3.new(4.2, 0.05, 4.2) -- (Tutorial 2: 6 bigger chevrons, a beam you can't miss)
 	local decal = Instance.new("Decal")
 	decal.Face = Enum.NormalId.Top
 	decal.Texture = Kit.A.arrow
@@ -865,9 +1096,9 @@ local function showTrail(to: Vector3?)
 	end
 	local d = flat.Unit
 	local floor = Vector3.new(root.Position.X, root.Position.Y - hum.HipHeight - root.Size.Y / 2 + 0.06, root.Position.Z)
-	local drift = if Kit.calm() then 0 else (os.clock() * 3) % 3.2 -- (the arrows creep toward the board)
+	local drift = if Kit.calm() then 0 else (os.clock() * 3) % 3.6 -- (the arrows creep toward the board)
 	for i, pt in ipairs(trail) do
-		local s = 3 + (i - 1) * 3.2 + drift
+		local s = 3 + (i - 1) * 3.6 + drift
 		if s > flat.Magnitude - 5 then
 			pt.Parent = nil
 		else
@@ -878,13 +1109,27 @@ local function showTrail(to: Vector3?)
 	end
 end
 
--- which board button a step points at: BODIES (bodies + their unlocks), STAR UPGRADES (ring 1), TREE then INFO (ring 2)
+-- which board button a step points at: BODIES (bodies, +BODY, unlocks), PERKS, TREE then INFO; "PAD" = the next island pad
 local function boardKeyFor(id: string): string?
-	if id == "BuyAsteroid" then return "Body0" end
+	if id == "Asteroid3" or id == "Rock" then return "Body0" end
 	if id == "FirstLight" then return "Perk_FirstLight" end
-	if id == "FirstMoon" then return "Body1" end -- (UNLOCK on the Moon's row, then its UPGRADE)
-	if id == "Starfire" then return if shared.GalaxyCinematic then nil else "R2_Starfire" end
+	if id == "Moon" then return "Body1" end
+	if id == "Copy" then return "Copy0" end
+	if id == "Planet" then return "Body2" end
+	if id == "Giant" then return "Body3" end
+	if id == "Pad1" or id == "Pads4" or id == "Pads12" then return "PAD" end
+	if id == "Starfire" or id == "StarTier" then return if shared.GalaxyCinematic then nil else "R2_" .. id end
 	return nil
+end
+-- the next island pad's place (world), its top, its aspect
+local function padTarget(): (Vector3?, Vector3?, number?)
+	local slot = player:GetAttribute("Island")
+	local g = workspace:FindFirstChild("Galaxy")
+	local island = g and slot and g.Islands:FindFirstChild("Island_" .. slot)
+	local pad = island and island:FindFirstChild("NextPad")
+	local disc = pad and pad:FindFirstChild("Disc")
+	if not disc then return nil end
+	return disc.Position, disc.Position + Vector3.new(0, 2.5, 0), 1
 end
 RunService.Heartbeat:Connect(function()
 	local step = player:GetAttribute("TutStep") or 0
@@ -898,20 +1143,16 @@ RunService.Heartbeat:Connect(function()
 	end
 	local target, wantTab = stepTarget(step)
 	tutorialTab = wantTab
-	-- the hint line: after 5 s without input, and then it stays until the step is done
-	if not tut.hint and (os.clock() - tut.idleSince > Econ.HintAfter or Econ.Tutorial[step + 1].id == "Comet") then showHint(step) end
-	if tut.hint then
-		-- under the counter; on phones with the window open it goes to the bottom (the hotbar is hidden then)
-		local s = screenScale()
-		hintRoot.Position = if small and open then UDim2.new(0.5, 0, 0, viewport().Y - math.floor(46 * s)) else UDim2.new(0.5, 0, 0, math.floor(90 * s))
-	end
+	-- LUMI's card: always there while the tutorial runs (phones: hidden while a window covers the screen)
+	if open or treeOpen or sideOpen ~= nil or shared.GalaxyCinematic then clearHint() else showHint(step) end
 	-- the steps done on YOUR island's boards point at the right board (like Regrowth; boards one job each, 5 Nov): the
 	-- arrow + ring when the button is on screen, the floor trail while you're away from it. With a window open (or no
 	-- island) the windows' own targets are used.
 	local boardAt, boardTop, boardAspect, boardWorld
 	local boardKey = boardKeyFor(Econ.Tutorial[step + 1].id)
-	if boardKey and not open and not treeOpen and shared.GalaxyBoardTarget then
-		local c, t, aspect = shared.GalaxyBoardTarget(boardKey)
+	if boardKey and not open and not treeOpen and (shared.GalaxyBoardTarget or boardKey == "PAD") then
+		local c, t, aspect
+		if boardKey == "PAD" then c, t, aspect = padTarget() else c, t, aspect = shared.GalaxyBoardTarget(boardKey) end
 		local cam = workspace.CurrentCamera
 		if c and cam then
 			boardWorld = c

@@ -215,7 +215,7 @@ end
 -- the SUPERNOVA moment (alpha part 1; VFX plan: anticipation -> impact -> fade, ~5 s the first time, ~2 s after, skip after
 -- the first): seconds of each beat; the nebula patches that stay in the sky over your island (one per Supernova, max Nebulae)
 MapConfig.Supernova = {
-	First = { Windup = 2.2, Hold = 0.25, Fade = 2.6 }, -- (~5 s)
+	First = { Windup = 7.6, Hold = 0.4, Fade = 2.0 }, -- (~10 s: the cutscene template's first Supernova, 5 Nov; the climax at 8 s)
 	Again = { Windup = 0.8, Hold = 0.1, Fade = 1.1 }, -- (~2 s)
 	Swell = 1.8,          -- the star grows to this x its size in the wind-up
 	FovPunch = 8,         -- degrees, at the impact (none with Reduced Motion)
@@ -266,7 +266,7 @@ end
 -- checkIgnition); tuned with the Studio bot to land ~minute 28 (vault "Feel pass" Progress note). Done once = Ignition 1
 MapConfig.Ignition = {
 	-- (Calc\feel2.py at ~28 real min: Supernova 11, LVL 19, all 20 pads; IRON = a body at Lv 20 in that run)
-	{ attribute = "Supernovas", need = 12, text = "Go Supernova 12 times" }, -- (the Studio bot, no pass, lit it at 25.9 min with 11: 12 ~ 27.5)
+	{ attribute = "Supernovas", need = 11, text = "Go Supernova 11 times" }, -- (5 Nov re-tune: Supernova 11 ~27.4 min in Calceel2.py)
 	{ attribute = "CosmicLevel", need = 19, text = "Reach Cosmic LVL 19" },
 	{ attribute = "Pads", need = 20, text = "Build all 20 island pads" },
 	{ attribute = "BestTier", need = 3, text = "A body at IRON (Lv 20)" },

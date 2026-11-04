@@ -103,6 +103,8 @@ local function migrate(d): (any, boolean)
 		for _, id in ipairs({ "FirstLight", "OrbitSpeed", "CometLure", "SupernovaReadiness" }) do nodes[id] = nil end
 		d.xp = Econ.XP.Start + 50 * (tonumber(d.supernovas) or 0)
 		d.xpTotal = d.xp
+		-- (the old tutorial had 7 steps: finished = Tutorial 2 done too; else it starts again and skips past what you have)
+		d.tut = if (tonumber(d.tut) or 0) >= 7 then #Econ.Tutorial else 0
 	end
 	if type(d.path) ~= "string" then d.path = "" end
 	-- the Forge: only known cores, levels 1..max; equipped = known keys you own, at most Slots
@@ -258,7 +260,9 @@ local function shardsOf(s): number
 end
 local function cometEvery(s): number
 	local path = if s.d.path == "Comet" then 0.8 else 1
-	return math.max(Econ.Comet.MinEvery, Econ.CometEvery(s.d.nodes, s.d.perks) * path / (if boosting(s, "Comets") then 2 else 1))
+	-- (Tutorial 2: run 1 only, comets every ~20 s)
+	local base = if s.d.supernovas == 0 then math.min(Econ.Comet.RunOneEvery, Econ.CometEvery(s.d.nodes, s.d.perks)) else Econ.CometEvery(s.d.nodes, s.d.perks)
+	return math.max(Econ.Comet.MinEvery, base * path / (if boosting(s, "Comets") then 2 else 1))
 end
 
 -- everything the HUD and the map read
@@ -324,6 +328,8 @@ local function publish(player: Player, s)
 	table.sort(seen)
 	player:SetAttribute("GuideSeen", table.concat(seen, ","))
 	if s.d.ignition < 1 and Shared.checkIgnition then task.defer(Shared.checkIgnition, player, s) end
+	-- (Tutorial 2: the live values of the goal counters the card shows)
+	player:SetAttribute("SupernovaPct", if d.supernovas >= 1 then 100 else math.floor(d.earnedRun / Econ.NeedFor(d.supernovas) * 100))
 end
 -- IGNITION 1: every item of MapConfig.Ignition met at once -> the sector lights up (once ever): Essence, Sector 2 opens
 local function checkIgnition(player: Player, s)
@@ -344,23 +350,40 @@ Shared.checkIgnition = checkIgnition
 local GUIDE_PAGES = { Stardust = true, Island = true, Tree = true, Comets = true, Supernova = true, Surge = true, Ranks = true }
 
 ------------------------------------------------------------------------ tutorial
-local TUT_DONE = {
-	function(d) return d.owned[1] >= 2 end, -- the Asteroid to level 2 (you start at level 1)
-	function(d) return (d.perks.FirstLight or 0) >= 1 end, -- the FIRST LIGHT perk (2 XP: a new save starts with 2)
-	function(d) return (d.owned[2] or 0) >= 1 end, -- the Moon unlocked (UNLOCK on its BODIES row)
-	function(d) return d.comets >= 1 end,
-	function(d) return d.earnedRun >= Econ.NeedFor(d.supernovas) / 2 or d.supernovas >= 1 end, -- the goal bar at 50%
-	function(d) return d.supernovas >= 1 end,
-	function(d) return (d.ring2.Starfire or 0) >= 1 end,
-}
+-- a step's live value, from the save (the same numbers the attributes show; `attr` names them)
+local function tutValue(s, attr: string): number
+	local d = s.d
+	local k = tonumber(string.match(attr, "^Own(%d)$"))
+	if k then return d.owned[k] or 0 end
+	k = tonumber(string.match(attr, "^Copies(%d)$"))
+	if k then return d.copies[k] or 0 end
+	if attr == "Pads" then return d.pads end
+	if attr == "CometsCaught" then return d.comets end
+	if attr == "CosmicLevel" then return Econ.LevelOf(d.xpTotal) end
+	if attr == "Supernovas" then return d.supernovas end
+	if attr == "Ignition" then return d.ignition end
+	if attr == "SupernovaPct" then return if d.supernovas >= 1 then 100 else math.floor(d.earnedRun / Econ.NeedFor(d.supernovas) * 100) end
+	local p = string.match(attr, "^Perk_(%a+)$")
+	if p then return d.perks[p] or 0 end
+	local r = string.match(attr, "^R2_(%a+)$")
+	if r then return d.ring2[r] or 0 end
+	return 0
+end
 local function checkTutorial(player: Player, s)
 	local d = s.d
-	while d.tut < #Econ.Tutorial and TUT_DONE[d.tut + 1](d) do
+	local paid = false
+	while d.tut < #Econ.Tutorial and tutValue(s, Econ.Tutorial[d.tut + 1].attr) >= Econ.Tutorial[d.tut + 1].need do
 		d.tut += 1
 		local step = Econ.Tutorial[d.tut]
 		d.essence += step.essence
+		-- (the payout: ~20 s of your income in stardust, so every step feels like a reward. Spending money only: it does NOT
+		-- count toward the Supernova, and steps done together pay once, so the curve stays as tuned)
+		local pay = if paid then 0 else math.max(10, incomeOf(s) * Econ.TutorialStardustSec)
+		paid = true
+		d.stardust += pay
+		player:SetAttribute("Stardust", d.stardust)
 		pcall(function() AnalyticsService:LogOnboardingFunnelStepEvent(player, d.tut, step.id) end)
-		event:FireClient(player, "TutorialStep", d.tut, step.essence)
+		event:FireClient(player, "TutorialStep", d.tut, step.essence, pay)
 		-- (the step and the Essence show at once, whoever called this)
 		player:SetAttribute("TutStep", d.tut)
 		player:SetAttribute("Essence", d.essence)
@@ -373,22 +396,25 @@ local function spawnComet(player: Player, s, tutorial: boolean)
 	if s.lastComet and os.clock() - s.lastComet < Econ.Comet.MinEvery then return end
 	s.lastComet = os.clock()
 	s.cometId += 1
+	-- (run 1 only: 1 in 10 is GOLDEN, x5; never the tutorial's own comets)
+	local golden = not tutorial and s.d.supernovas == 0 and math.random() < Econ.Comet.Golden
 	s.pending[s.cometId] = os.clock()
-	mapEvent:FireClient(player, "CometSpawn", s.cometId, math.random(1, 2 ^ 30), tutorial)
+	if golden then s.golden = s.golden or {} s.golden[s.cometId] = true end
+	mapEvent:FireClient(player, "CometSpawn", s.cometId, math.random(1, 2 ^ 30), tutorial, golden)
 end
 local function cometLoop(player: Player, s)
 	while sessions[player] == s do
 		local tut = s.d.tut
-		if tut < 3 then
-			task.wait(1) -- (no comets during tutorial steps 1-3: nothing stacked on a hint)
-		elseif tut == 3 then
-			-- step 4: the tutorial comet, again every 15 s (the floor) until it's caught
+		if tut < 5 then
+			task.wait(1) -- (no comets during tutorial steps 1-5: nothing stacked on a hint)
+		elseif tut == 5 then
+			-- step 6: the tutorial comets, again every 15 s (the floor) until 2 are caught
 			task.wait(2.5)
-			if sessions[player] ~= s or s.d.tut ~= 3 then continue end
+			if sessions[player] ~= s or s.d.tut ~= 5 then continue end
 			spawnComet(player, s, true)
 			for _ = 1, Econ.Comet.MinEvery - 2 do -- (2.5 + 13 s: just over the floor)
 				task.wait(1)
-				if sessions[player] ~= s or s.d.tut ~= 3 then break end
+				if sessions[player] ~= s or s.d.tut ~= 5 then break end
 			end
 		else
 			s.nextComet = s.nextComet or (os.clock() + Econ.Comet.FirstDelay)
@@ -495,6 +521,8 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 			-- (a free slot takes a new core by itself)
 			if #F.equipped < Econ.Forge.Slots and not table.find(F.equipped, key) then table.insert(F.equipped, key) end
 			table.insert(results, key)
+			-- (a CELESTIAL is told to the whole server: cutscene template, GLOBAL)
+			if rarity == "Celestial" then event:FireAllClients("ForgeGlobal", player.DisplayName, key) end
 			pcall(function() AnalyticsService:LogCustomEvent(player, "ForgeRoll", ri, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = key }) end)
 		end
 		publish(player, s)
@@ -511,6 +539,12 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 			table.insert(eq, arg)
 		end
 		publish(player, s)
+		return true
+	elseif action == "SkipTutorial" then
+		-- the card's SKIP (red, "not recommended"): the tutorial ends; no step rewards
+		d.tut = #Econ.Tutorial
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "TutorialSkipped", 1) end)
 		return true
 	elseif action == "PickPath" then
 		-- after Ignition 1: pick a path (free the first time; a switch costs Econ.PathSwitchShards shards)
@@ -648,6 +682,10 @@ mapEvent.OnServerEvent:Connect(function(player: Player, kind, id)
 	local value = incomeOf(s) * math.random(Econ.Comet.ValueMin, Econ.Comet.ValueMax)
 		* (1 + Econ.PerksById.CometValue.per * Econ.PerkLv(s.d.perks, "CometValue")) * (if s.d.path == "Comet" then 2 else 1) * forgeOf(s, "Comets")
 	if math.random() < Econ.PerksById.LuckyComet.per * Econ.PerkLv(s.d.perks, "LuckyComet") then value *= 10 end
+	if s.golden and s.golden[id] then
+		s.golden[id] = nil
+		value *= Econ.Comet.GoldenX
+	end
 	s.d.stardust += value
 	s.d.earnedRun += value
 	s.d.earnedTotal += value
@@ -753,9 +791,12 @@ task.spawn(function()
 				local need = Econ.NeedFor(s.d.supernovas)
 				player:SetAttribute("SupernovaShards", shardsOf(s))
 				if s.d.earnedRun >= need and not player:GetAttribute("SupernovaReady") then publish(player, s) end
-				if s.d.tut == 4 and s.d.earnedRun >= need / 2 then
+				-- (Tutorial 2: the "100% SUPERNOVA" and "Cosmic LVL" steps complete on the income tick)
+				if s.d.tut < #Econ.Tutorial then
+					if s.d.supernovas == 0 then player:SetAttribute("SupernovaPct", math.floor(s.d.earnedRun / need * 100)) end
+					local before = s.d.tut
 					checkTutorial(player, s)
-					publish(player, s)
+					if s.d.tut ~= before then publish(player, s) end
 				end
 			end
 		end

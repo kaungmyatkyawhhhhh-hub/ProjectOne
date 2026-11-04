@@ -246,70 +246,38 @@ end)
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function() if isOpen then scale.Scale = place() end end)
 
 ------------------------------------------------------------------------ IGNITION 1: the cinematic (client only)
-local fx = Kit.box(root, 0, 0, 0, 0, { Name = "IgnitionFx", Size = UDim2.fromScale(1, 1), Visible = false, ZIndex = 80 })
-local title = Kit.text(fx, 0, 0, 900, 90, "SECTOR 1 LIT!", 72, { ZIndex = 82, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 4,
-	gradient = ColorSequence.new(hex("#fff1c0"), hex("#ff9a3a")) })
-local sub = Kit.text(fx, 0, 0, 900, 40, "SECTOR 2: COMET REACH IS OPEN · THE STAR FORGE", 28, { ZIndex = 82, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2.4 })
-local reward = Kit.text(fx, 0, 0, 900, 34, "", 26, { ZIndex = 82, TextXAlignment = CENTRE, TextColor3 = hex("#7dffe9"), stroke = 2 })
-local skipRoot = Kit.box(root, 0, 0, 150, 60, { Name = "IgnitionSkip", AnchorPoint = Vector2.new(1, 1), Visible = false, ZIndex = 90 })
-local skipBtn, skipInner = Kit.button(skipRoot, 10, 6, 130, 46, hex("#6a6474"), hex("#3f3a48"), { ZIndex = 95 })
-Kit.text(skipInner, 0, 9, 130, 28, "SKIP", 24, { ZIndex = skipInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
-local skipping = false
-skipBtn.MouseButton1Click:Connect(function() skipping = true end)
-local function layoutFx()
-	local vp = viewport()
-	local s = math.min(1, vp.X / 960)
-	for _, t in ipairs({ { title, 0.34 }, { sub, 0.34 + 0.11 }, { reward, 0.34 + 0.18 } }) do
-		local holder2 = t[1].Parent
-		holder2.Size = UDim2.fromOffset(900 * s, holder2.Size.Y.Offset)
-		holder2.Position = UDim2.fromOffset((vp.X - 900 * s) / 2, vp.Y * t[2])
-	end
-	skipRoot.Position = UDim2.fromOffset(vp.X - 12, vp.Y - 120)
-end
+-- (cutscene template, 5 Nov: IGNITION ~8 s with GalaxyCutscene: the camera's high arc over the plaza to Sector 2 + the
+-- screen layers in the sector's colour, constellation lines drawing, the words = the sector's name; the climax (white flash,
+-- starburst, boom) lights the galaxy and gives the reward line; then the PATH card)
+local Cutscene = require(Galaxy:WaitForChild("GalaxyCutscene"))
 local function cinematic(essence: number)
-	shared.GalaxyCinematic = true
+	-- (Studio: Workspace TestSlowMo = n plays it n x slower, for frame-by-frame screenshots)
+	local slow = if RunService:IsStudio() then tonumber(workspace:GetAttribute("TestSlowMo")) or 1 else 1
 	if shared.GalaxyCloseSide then shared.GalaxyCloseSide() end
 	local cam = workspace.CurrentCamera
-	local oldType, oldCf = cam.CameraType, cam.CFrame
 	local NS = MapConfig.NextSector
 	local target = MapConfig.Origin + NS.Position
-	local islandSlot = player:GetAttribute("Island")
-	local islands = workspace:FindFirstChild("Galaxy") and workspace.Galaxy:FindFirstChild("Islands")
-	local island = islands and islandSlot and islands:FindFirstChild("Island_" .. islandSlot)
-	local c = island and island:GetAttribute("Center") or cam.CFrame.Position
+	-- (an ARC high over the plaza, so it never skims the plaza's boards: from you, up to ~70 above the middle, down to 70 studs
+	-- short of Sector 2 and 36 above it; the look turns from where you looked to Sector 2)
 	local from = cam.CFrame
-	-- (the camera flies out to Sector 2: 60 studs short of it on the Core's side, above, so its island + bridge fill the shot)
 	local dir = Vector3.new(target.X - MapConfig.Origin.X, 0, target.Z - MapConfig.Origin.Z).Unit
-	local to = CFrame.lookAt(target - dir * 60 + Vector3.new(0, 24, 0), target)
-	local _ = c
-	local t0 = os.clock()
-	skipping = false
-	cam.CameraType = Enum.CameraType.Scriptable
-	RunService:BindToRenderStep("GalaxyIgnitionCam", Enum.RenderPriority.Camera.Value + 1, function()
-		local k = math.clamp((os.clock() - t0) / 1.8, 0, 1)
-		k = 1 - (1 - k) ^ 3
-		cam.CFrame = from:Lerp(to, k)
-		cam.Focus = CFrame.new(target)
-	end)
-	task.delay(1, function() if shared.GalaxyCinematic then skipRoot.Visible = true end end)
-	Kit.musicFade(0.3, 0.4)
-	Kit.sound("boom")
-	if shared.GalaxyLightUp then shared.GalaxyLightUp(2.5) end
-	layoutFx()
-	fx.Visible = true
-	Kit.setText(reward, "+" .. essence .. " ESSENCE")
-	for _, t in ipairs({ title, sub, reward }) do t.Parent.Visible = false end
-	task.delay(0.6, function() title.Parent.Visible = true Kit.sound("milestone") end)
-	task.delay(1.2, function() sub.Parent.Visible = true end)
-	task.delay(1.8, function() reward.Parent.Visible = true end)
-	while os.clock() - t0 < 5 and not skipping do task.wait() end
-	RunService:UnbindFromRenderStep("GalaxyIgnitionCam")
-	cam.CFrame = oldCf
-	cam.CameraType = if oldType == Enum.CameraType.Scriptable then Enum.CameraType.Custom else oldType
-	fx.Visible = false
-	skipRoot.Visible = false
-	Kit.musicFade(1, 1.5)
-	shared.GalaxyCinematic = false
+	local p0 = from.Position
+	local p2 = target - dir * 70 + Vector3.new(0, 36, 0)
+	local p1 = (p0 + p2) / 2 + Vector3.new(0, 70, 0)
+	local look0 = p0 + from.LookVector * 50
+	Cutscene.play({
+		colour = Color3.fromRGB(255, 150, 60), symbol = Kit.A.icon.sun, length = 8, drop = 6.2, slow = slow, lines = true,
+		words = { "SECTOR 1", "EMBER BELT" }, title = "SECTOR 1 LIT!", sub = "SECTOR 2: COMET REACH · THE STAR FORGE · +" .. essence .. " ESSENCE",
+		camera = function(k)
+			local kk = math.clamp(k / 0.6, 0, 1) -- (the flight is the first 60%: then it holds on Sector 2)
+			kk = kk * kk * (3 - 2 * kk)
+			local pos = (1 - kk) ^ 2 * p0 + 2 * (1 - kk) * kk * p1 + kk ^ 2 * p2
+			return CFrame.lookAt(pos, look0:Lerp(target, math.min(1, kk * 1.4))), target
+		end,
+		onClimax = function()
+			if shared.GalaxyLightUp then shared.GalaxyLightUp(1.5 * slow) end
+		end,
+	})
 	showPathCard()
 end
 event.OnClientEvent:Connect(function(kind, a, b)

@@ -26,6 +26,8 @@ local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 local Kit = require(Galaxy:WaitForChild("UIKit"))
+local Cutscene -- (GalaxyCutscene: the first Supernova's screen layers; required below once it exists)
+task.spawn(function() Cutscene = require(Galaxy:WaitForChild("GalaxyCutscene")) end)
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
 local A = Kit.A
 local hex = Kit.hex
@@ -204,7 +206,10 @@ local skip, skipInner = Kit.button(skipRoot, 10, 6, 130, 46, hex("#6a6474"), hex
 Kit.text(skipInner, 0, 9, 130, 28, "SKIP", 24, { ZIndex = skipInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
 local skipping = false
 local showSkipToken = nil
-skip.MouseButton1Click:Connect(function() skipping = true end)
+skip.MouseButton1Click:Connect(function()
+	skipping = true
+	if Cutscene then Cutscene.skip() end
+end)
 
 -- the "SUPERNOVA!" stamp: hand-drawn feel (a slanted, outlined word on a burst of sharp gold rays), slammed in and held
 local function stamp(quick: boolean)
@@ -331,6 +336,16 @@ local function cinematic()
 		riser.TimePosition = math.max(0, len - (T.Windup + T.Hold) * riser.PlaybackSpeed)
 	end
 	if shared.GalaxyWindup then shared.GalaxyWindup(T.Windup) end
+	-- (cutscene template, 5 Nov: the FIRST Supernova gets the screen layers too: your rank's colour, the star symbol growing and
+	-- turning, rings, glints, speed lines, the held breath, the flash + starburst on the impact; this script keeps its camera,
+	-- riser and SKIP)
+	if first and Cutscene then
+		local rc = Color3.fromRGB(255, 205, 90)
+		local lv = player:GetAttribute("CosmicLevel")
+		if lv then rc = Econ.LevelBand(lv).colour end
+		task.spawn(Cutscene.play, { colour = rc, symbol = Kit.A.icon.sun, length = T.Windup + T.Hold + T.Fade, drop = T.Windup + T.Hold, audio = false,
+			skippable = false, title = "SUPERNOVA!", keepCinematic = true, veil = 0.45, keepGuis = { "GalaxySupernova" } })
+	end
 	if not Kit.calm() then
 		game:GetService("TweenService"):Create(Lighting, TweenInfo.new(T.Windup, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { ExposureCompensation = oldExposure - 0.7 }):Play()
 	end

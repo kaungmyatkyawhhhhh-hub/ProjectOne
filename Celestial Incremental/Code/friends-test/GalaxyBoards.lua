@@ -18,6 +18,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -53,6 +54,11 @@ local function pointerFor(screen: BasePart, canvas: Vector2)
 		return Vector2.new(u * canvas.X, v * canvas.Y)
 	end
 end
+
+-- TOUCH (owner 5 Nov): on a phone / tablet the boards' small buttons are hard to hit from the spawn camera, so a TAP on any
+-- of YOUR boards opens its 2D window instead (TREE / INFO -> the T window, BODIES -> U on BODIES, PERKS -> U on PERKS).
+-- Studio: Workspace TestPhone = true makes a mouse click a tap.
+local TOUCH = UserInputService.TouchEnabled or (RunService:IsStudio() and workspace:GetAttribute("TestPhone") == true)
 
 local boards = {} -- [island] = { guis = { [id] = SurfaceGui }, panels = { [id] = board }, conns, ctx, fx = { { parts, step } } }
 
@@ -287,8 +293,10 @@ local function build(island)
 		ctx.picked = true
 		for _, p in pairs(b.panels) do p:refresh() end
 	end
-	ctx.bought = function()
+	ctx.bought = function(kind, arg)
 		dirty = true
+		-- (#284: the TREE board celebrates a node bought from INFO)
+		for _, p in pairs(b.panels) do p:celebrate(kind, arg) end
 	end
 	b.ctx = ctx
 	for _, spec in ipairs(B.List) do
@@ -307,6 +315,8 @@ local function build(island)
 		gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		gui.ClipsDescendants = true
 		gui.ResetOnSpawn = false
+		-- (touch devices: the board is the 3D look only; a tap opens its 2D window, below)
+		gui.Active = not TOUCH
 		gui.Parent = playerGui
 		b.guis[spec.id] = gui
 		-- (each board its own pointer + canvas; the rest is the island's shared ctx)
@@ -402,4 +412,45 @@ shared.GalaxyBoardTarget = function(key: string): (Vector3?, Vector3?, number?)
 		end
 	end
 	return nil
+end
+
+-- the TAP (touch devices): a short press that barely moved, not on a 2D button -> a ray from the camera; the board it hits
+-- (on YOUR island) opens its window through Galaxy.OpenWindow (GalaxyHUD)
+if TOUCH then
+	local opener = ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("OpenWindow", 30)
+	local WINDOW = { Tree = { "Tree" }, Info = { "Tree" }, Bodies = { "Upgrades", "BODIES" }, Stars = { "Upgrades", "PERKS" } }
+	local downAt, downPos
+	local function isTap(input: InputObject): boolean
+		return input.UserInputType == Enum.UserInputType.Touch
+			or (input.UserInputType == Enum.UserInputType.MouseButton1 and RunService:IsStudio() and workspace:GetAttribute("TestPhone") == true)
+	end
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed or not isTap(input) then return end
+		downAt, downPos = os.clock(), input.Position
+	end)
+	UserInputService.InputEnded:Connect(function(input, processed)
+		if processed or not isTap(input) or not downAt then return end
+		local quick = os.clock() - downAt < 0.45 and (Vector2.new(input.Position.X, input.Position.Y) - Vector2.new(downPos.X, downPos.Y)).Magnitude < 14
+		downAt = nil
+		if not quick or shared.GalaxyCinematic or not opener then return end
+		local mine
+		for island in pairs(boards) do
+			if island:GetAttribute("Owner") == player.UserId then mine = island:FindFirstChild("Boards") end
+		end
+		if not mine then return end
+		local cam = workspace.CurrentCamera
+		local ray = cam:ScreenPointToRay(input.Position.X, input.Position.Y)
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Include
+		params.FilterDescendantsInstances = { mine }
+		local hit = workspace:Raycast(ray.Origin, ray.Direction * 250, params)
+		local node = hit and hit.Instance
+		while node and node ~= mine and not (node:IsA("Model") and node:GetAttribute("Board")) do node = node.Parent end
+		local id = node and node ~= mine and node:GetAttribute("Board")
+		local w = id and WINDOW[id]
+		if w then
+			Kit.sound("open")
+			opener:Fire(w[1], w[2])
+		end
+	end)
 end

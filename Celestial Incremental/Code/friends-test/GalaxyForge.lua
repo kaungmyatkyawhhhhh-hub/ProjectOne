@@ -21,6 +21,7 @@ local hex = Kit.hex
 local CENTRE = Enum.TextXAlignment.Center
 local RIGHT = Enum.TextXAlignment.Right
 local F = Econ.Forge
+local Cutscene = require(Galaxy:WaitForChild("GalaxyCutscene"))
 
 while not player:GetAttribute("Loaded") do player:GetAttributeChangedSignal("Loaded"):Wait() end
 
@@ -229,6 +230,23 @@ local function roll(n: number)
 	local ok, results = request:InvokeServer("ForgeRoll", n)
 	rolling = false
 	if not ok then Kit.sound("error") return end
+	-- (cutscene template, 5 Nov: the length grows with the best rarity: Common / Uncommon instant, Rare 3 s, Epic 5 s,
+	-- Legendary 8 s, Mythic 12 s, Celestial 18 s; the card shows at the climax. A Celestial is told to the whole server.)
+	local bestI, bestKey = 0, nil
+	for _, key in ipairs(results) do
+		local i = Econ.ForgeRarityById[string.match(key, ":(%a+)$")].index
+		if i > bestI then bestI, bestKey = i, key end
+	end
+	local LEN = { [3] = 3, [4] = 5, [5] = 8, [6] = 12, [7] = 18 }
+	if LEN[bestI] and Cutscene and not Cutscene.busy() then
+		local k, r = string.match(bestKey, "^(%a+):(%a+)$")
+		local rar, kind = Econ.ForgeRarityById[r], Econ.ForgeKindById[k]
+		holder.Visible = false
+		Cutscene.play({ colour = rar.colour, symbol = Kit.A.icon[kind.icon], length = LEN[bestI], drop = LEN[bestI] * 0.8,
+			words = if bestI >= 5 then { "THE FORGE", "SPEAKS" } else nil, title = rar.name .. "!", sub = kind.name,
+			onClimax = function() refresh() end })
+		holder.Visible = true -- (the window was open: the roll came from its buttons)
+	end
 	task.defer(function()
 		refresh()
 		showRoll(results)

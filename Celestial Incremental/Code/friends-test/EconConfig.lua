@@ -80,17 +80,21 @@ for _, n in ipairs(Econ.Ring1) do Econ.Ring1ById[n.id] = n end
 -- novas = the Supernovas you need first; requires = the node before it
 Econ.Ring2 = {
 	-- (alpha 2, 3 Nov: x1.5 -> x1.75 a level, so the second run is ~2x faster)
-	{ id = "Starfire", name = "STARFIRE", icon = "sun", costs = { 5, 8, 15, 25, 40 },
+	-- (re-priced 5 Nov, owner: ~40% of ring 2 + its capstone still unbought at Ignition 1 (~27 min, ~600 shards earned):
+	-- the bot buys Star, Starfire 1-3, Heavy Elements by then; Starfire 4-5 and the Binary Star are still ahead)
+	{ id = "Starfire", name = "STARFIRE", icon = "sun", costs = { 5, 15, 45, 600, 1200 },
 		desc = "every body earns x1.75 a level", effect = { kind = "allMult", mult = 1.75 } },
 	{ id = "StarTier", name = "STAR", icon = "sun", costs = { 3 }, novas = 1,
 		desc = "unlocks the Star", effect = { kind = "unlockTier", tier = 4 } },
-	{ id = "HeavyElements", name = "HEAVY ELEMENTS", icon = "gasgiant", costs = { 20 }, requires = "StarTier",
+	{ id = "HeavyElements", name = "HEAVY ELEMENTS", icon = "gasgiant", costs = { 120 }, requires = "StarTier",
 		desc = "each tier earns x(1 + 0.25 x its number)", effect = { kind = "heavy", per = 0.25 } },
-	{ id = "BinaryStar", name = "BINARY STAR", icon = "sun", costs = { 5 }, novas = 3, requires = "StarTier",
+	{ id = "BinaryStar", name = "BINARY STAR", icon = "sun", costs = { 600 }, novas = 3, requires = "StarTier",
 		desc = "unlocks the Binary Star", effect = { kind = "unlockTier", tier = 5 } },
 }
 Econ.Ring2ById = {}
 for _, n in ipairs(Econ.Ring2) do Econ.Ring2ById[n.id] = n end
+-- ring 2's CAPSTONE (pick 1: design 2; Phase 2 builds it): its planned price, above what a player holds at Ignition 1
+Econ.Ring2CapstoneShards = 1000
 -- the other ring-2 branches: shown as "?" with what opens them (not in the alpha)
 Econ.Ring2Later = {
 	{ name = "COMETS", icon = "comet", lockedText = "NEXT UPDATE" },
@@ -156,7 +160,9 @@ Econ.Comet = {
 	Every = 45,          -- seconds between comets (Comet Lure: 30)
 	ValueMin = 30, ValueMax = 60, -- a caught comet = this many seconds of your income
 	Life = 9,            -- a comet can be caught for this long after it appears (server side)
-	FirstDelay = 20,     -- the first regular comet after the tutorial
+	FirstDelay = 20,     -- the first regular comet after the tutorial's comets
+	RunOneEvery = 20,    -- (Tutorial 2: run 1 only, a comet every ~20 s)
+	Golden = 0.1, GoldenX = 5, -- (run 1 only: 1 in 10 comets is GOLDEN and pays x5)
 	MinEvery = 15,       -- the floor (3 Nov): never more than one comet per 15 s, whatever stacks (Lure + x2 COMETS = 15)
 }
 
@@ -168,8 +174,11 @@ Econ.Comet = {
 -- earned amount gave 269 -> 1,146 a Supernova and bought all of ring 2 by Supernova 3).
 -- Resets stardust, body levels + copies (the asteroid stays at level 1), the tier unlocks. Keeps shards, ring 2, the count + rank,
 -- Essence, the tutorial, pads, the Cosmic Level and perks.
-Econ.SupernovaNeeds = { 3e5, 1.4e6, 6e7, 5e8, 1.2e9, 4.6e9, 9e9, 1.1e10, 1.3e10, 1.6e10 }
-Econ.NeedGrowthAfter = 1.3
+-- (owner 5 Nov: Supernova 1 ~5 min, runs never under ~1.5 min; with ring 2 re-priced. Sim: 5.0, 2.6, 2.5, 2.4, 2.3, 2.2, 2.2,
+-- 2.0, 2.0, 2.0, 2.1, 2.2, then 1.6-3.0 with x1.6. 220K gave 5.7 min, so Supernova 1 = 110K)
+-- (bot 5 Nov, 2nd check: from Supernova 9 the runs fell to 0.9-1.5 min with 720M..960M: the late needs grow faster now)
+Econ.SupernovaNeeds = { 2.5e5, 1.8e6, 1.2e7, 4.8e7, 2.4e8, 4e8, 4.6e8, 1.4e9, 1.7e9, 1.9e9, 2.6e9, 1.6e10 }
+Econ.NeedGrowthAfter = 2.4
 function Econ.NeedFor(novas: number): number
 	local n = (novas or 0) + 1
 	local list = Econ.SupernovaNeeds
@@ -191,6 +200,7 @@ end
 -- your island, only the next one lit (the arrow points at it). Each builds a piece of your island in front of you
 -- (MapService PAD_BUILD); bonus = x1.15 stardust. Pads are KEPT through a Supernova. Prices: Calc\feel.py (a pad is
 -- bought once it costs <= ~45 s of income: 1-8 in run 1, the rest by ~30 min). Pads 1-10 are the island's old pieces.
+-- (bot 5 Nov: pads 17-20 at 100M-1.5B cost more than a late run earns, so 'all 20 pads' never finished: now 30M-500M)
 Econ.PadBonus = 1.15
 Econ.Pads = {
 	{ id = "Disc", name = "STONE ISLAND", price = 15 },
@@ -208,11 +218,11 @@ Econ.Pads = {
 	{ id = "Lights", name = "INNER LIGHTS", price = 2.5e6 },
 	{ id = "Floaters", name = "FLOATING CRYSTALS", price = 6e6 },
 	{ id = "Altar", name = "STAR ALTAR", price = 1.5e7, bonus = true },
-	{ id = "Halo", name = "ORBIT HALO", price = 4e7 },
-	{ id = "Globe", name = "PLANET GLOBE", price = 1e8 },
-	{ id = "Spires", name = "CRYSTAL SPIRES", price = 2.5e8, bonus = true },
-	{ id = "Walk", name = "LIGHT WALK", price = 6e8 },
-	{ id = "Beacon", name = "BEACON", price = 1.5e9, bonus = true },
+	{ id = "Halo", name = "ORBIT HALO", price = 3e7 },
+	{ id = "Globe", name = "PLANET GLOBE", price = 6e7 },
+	{ id = "Spires", name = "CRYSTAL SPIRES", price = 1.2e8, bonus = true },
+	{ id = "Walk", name = "LIGHT WALK", price = 2.5e8 },
+	{ id = "Beacon", name = "BEACON", price = 5e8, bonus = true },
 }
 -- the x stardust from the bonus pads you have
 function Econ.PadMult(pads: number, perks): number
@@ -365,6 +375,7 @@ Econ.Forge = {
 		{ id = "XP", name = "XP CORE", icon = "sun", desc = "+% XP" },
 		{ id = "Luck", name = "LUCK CORE", icon = "essence", desc = "+% Forge luck" },
 		{ id = "Giant", name = "GIANT CORE", icon = "gasgiant", desc = "gas giants x" },
+		-- (owner 5 Nov: when offline earnings is built, ADD an OFFLINE core here (offline rate +%); keep the XP core)
 	},
 }
 Econ.ForgeRarityById, Econ.ForgeKindById = {}, {}
@@ -414,15 +425,33 @@ for _, p in ipairs(Econ.Potions) do Econ.PotionsById[p.id] = p end
 
 ------------------------------------------------------------------------ tutorial (design steps 1-4; Regrowth lesson: Essence
 -- per step + a step counter). Friends test: "1/4".."4/4", 1 Essence each, then TUTORIAL COMPLETE (owner 2 Nov)
+-- TUTORIAL 2 (5 Nov, Regrowth style; vault "Prompt - Tutorial 2"; checklist #110-#123): 20 GOAL steps with a live counter
+-- (attr = the player attribute counted, need = the goal), guiding the first ~27 min to IGNITION 1 (the Star Forge). Each
+-- step pays its Essence + ~TutorialStardustSec seconds of income; +3 Essence at the first Supernova and at Ignition. The
+-- guide (LUMI, the star spirit) says `hint`. Every step shows or unlocks something new; never a "now grind" step.
+Econ.TutorialStardustSec = 20
+Econ.TutorialSpirit = { name = "LUMI", portrait = "rbxassetid://128773218162368" } -- (UI\star_spirit_blender.py, Studio test upload)
 Econ.Tutorial = {
-	{ id = "BuyAsteroid", hint = "UPGRADE your Asteroid", essence = 1 },
-	{ id = "FirstLight", hint = "PERK: FIRST LIGHT (free)", essence = 1 },
-	{ id = "FirstMoon", hint = "UNLOCK the Moon", essence = 1 },
-	{ id = "Comet", hint = "Tap the comet!", essence = 1 },
-	-- (design steps 5-7, alpha part 1): the SUPERNOVA goal bar to 50%, the Supernova itself, the first ring-2 node
-	{ id = "HalfSupernova", hint = "Grow to 50% SUPERNOVA", essence = 1 },
-	{ id = "Supernova", hint = "Go SUPERNOVA!", essence = 1 },
-	{ id = "Starfire", hint = "Spend shards: STARFIRE", essence = 1 },
+	{ id = "Asteroid3", hint = "UPGRADE your Asteroid", attr = "Own1", need = 3, essence = 1 },
+	{ id = "FirstLight", hint = "PERK: FIRST LIGHT (free)", attr = "Perk_FirstLight", need = 1, essence = 1 },
+	{ id = "Pad1", hint = "Build your island: STONE ISLAND", attr = "Pads", need = 1, essence = 1 },
+	{ id = "Moon", hint = "UNLOCK the Moon", attr = "Own2", need = 1, essence = 1 },
+	{ id = "Copy", hint = "+BODY: a 2nd Asteroid", attr = "Copies1", need = 2, essence = 1 },
+	{ id = "Comets", hint = "Tap 2 comets!", attr = "CometsCaught", need = 2, essence = 1 },
+	{ id = "Rock", hint = "Asteroid to ROCK (Lv 10)", attr = "Own1", need = 10, essence = 1 },
+	{ id = "Planet", hint = "UNLOCK the Planet", attr = "Own3", need = 1, essence = 1 },
+	{ id = "Pads4", hint = "Build 4 island pads", attr = "Pads", need = 4, essence = 1 },
+	{ id = "Level3", hint = "Reach Cosmic LVL 3", attr = "CosmicLevel", need = 3, essence = 1 },
+	{ id = "Giant", hint = "UNLOCK the Gas Giant", attr = "Own4", need = 1, essence = 1 },
+	{ id = "Ready", hint = "Grow to 100% SUPERNOVA", attr = "SupernovaPct", need = 100, essence = 1 },
+	{ id = "Supernova", hint = "Go SUPERNOVA!", attr = "Supernovas", need = 1, essence = 3 },
+	{ id = "Starfire", hint = "TREE: buy STARFIRE", attr = "R2_Starfire", need = 1, essence = 1 },
+	{ id = "StarTier", hint = "TREE: open the STAR", attr = "R2_StarTier", need = 1, essence = 1 },
+	{ id = "Nova2", hint = "Go SUPERNOVA again", attr = "Supernovas", need = 2, essence = 1 },
+	{ id = "Pads12", hint = "Build 12 island pads", attr = "Pads", need = 12, essence = 1 },
+	{ id = "Level10", hint = "Cosmic LVL 10: new PERKS", attr = "CosmicLevel", need = 10, essence = 1 },
+	{ id = "Nova6", hint = "Go SUPERNOVA 6 times", attr = "Supernovas", need = 6, essence = 1 },
+	{ id = "Ignition", hint = "Light SECTOR 1: IGNITION", attr = "Ignition", need = 1, essence = 3 },
 }
 Econ.HintAfter = 5 -- seconds idle before the hint line shows (design: "only after 5 s idle")
 

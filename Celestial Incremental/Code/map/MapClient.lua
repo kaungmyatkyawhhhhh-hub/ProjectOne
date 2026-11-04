@@ -78,11 +78,65 @@ local function sparkleBurst(at: Vector3, count: number, color: Color3?, size: nu
 	task.delay(1.6, function() host:Destroy() end)
 end
 
+-- one burst of any texture (the VFX pass, 5 Nov: each layer its own job; pooled by Emit, the host goes after `life`). o:
+-- tex, count, color (Color3 or ColorSequence), size, speed {min, max}, life {min, max}, drag, spread, rot (spin), flip (4x4
+-- flipbook), light, accel, align (shards face where they fly), z (light influence 0)
+local FX = UIAssets.fx or {}
+local function fxBurst(at: Vector3, o)
+	local host = Instance.new("Part")
+	host.Anchored, host.CanCollide, host.CanQuery, host.CanTouch, host.Transparency = true, false, false, false, 1
+	host.Size = Vector3.new(1, 1, 1)
+	host.CFrame = CFrame.new(at)
+	host.Parent = localFolder
+	local e = Instance.new("ParticleEmitter")
+	e.Texture = o.tex or SPARK
+	e.Color = if typeof(o.color) == "ColorSequence" then o.color else ColorSequence.new(o.color or Color3.new(1, 1, 1))
+	e.LightEmission = o.light or 0.8
+	e.LightInfluence = 0
+	local sz = o.size or 1
+	e.Size = o.sizeSeq or NumberSequence.new({ NumberSequenceKeypoint.new(0, sz * 0.4), NumberSequenceKeypoint.new(0.2, sz), NumberSequenceKeypoint.new(1, sz * 0.2) })
+	e.Transparency = o.transp or NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.7, 0.2), NumberSequenceKeypoint.new(1, 1) })
+	local life = o.life or { 0.6, 1.2 }
+	e.Lifetime = NumberRange.new(life[1], life[2])
+	local sp = o.speed or { 6, 14 }
+	e.Speed = NumberRange.new(sp[1], sp[2])
+	e.SpreadAngle = Vector2.new(o.spread or 180, o.spread or 180)
+	e.Drag = o.drag or 0
+	e.Acceleration = o.accel or Vector3.zero
+	e.RotSpeed = NumberRange.new(-(o.rot or 0), o.rot or 0)
+	e.Rotation = NumberRange.new(0, 360)
+	if o.align then e.Orientation = Enum.ParticleOrientation.VelocityParallel end
+	if o.flip then
+		e.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
+		e.FlipbookMode = Enum.ParticleFlipbookMode.OneShot
+	end
+	e.Rate = 0
+	e.Parent = host
+	e:Emit(o.count or 10)
+	task.delay(life[2] + 0.5, function() host:Destroy() end)
+end
+-- a ring that flashes out flat from `at` (a new body's arrival, a tier-up): the ring texture growing and fading
+local function ringFlash(at: Vector3, radius: number, color: Color3, t: number?)
+	fxBurst(at, { tex = FX.ring or SPARK, count = 1, color = color, speed = { 0, 0 }, life = { t or 0.45, t or 0.45 }, light = 1,
+		sizeSeq = NumberSequence.new({ NumberSequenceKeypoint.new(0, radius * 0.15), NumberSequenceKeypoint.new(1, radius) }),
+		transp = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.6, 0.3), NumberSequenceKeypoint.new(1, 1) }) })
+end
+-- an island owner's rank colour (#298: the Supernova's colour changes with your rank): the band of the rank's first word
+local function rankColour(island): Color3
+	local rank = tostring(island and island:GetAttribute("Rank") or "")
+	for _, b in ipairs(Econ.LevelBands) do
+		if string.sub(rank, 1, #b.name) == b.name then return b.colour end
+	end
+	return Color3.fromRGB(255, 205, 90)
+end
+
 ------------------------------------------------------------------------
 -- star systems + name plates
 ------------------------------------------------------------------------
 local systems = {} -- [island] = { folder, star, planets = { {piece, parts, r, speed, angle} }, rings, motes, plate, h, near }
 local seenTiers = {} -- [island] = bodies in orbit last built (a new type's / copy's body flies in)
+local seenSys = {} -- [island] = { [type] = named tier } last built (a tier-up pulses that type's bodies, #286)
+local seenNovas = {} -- [island] = Supernovas last built (the newest nebula blooms in slowly, #295)
 local loaded = false -- (true 2 s after start: pops and fly-ins only for changes after the map has loaded)
 
 local SY = MapConfig.System
@@ -123,20 +177,24 @@ local function buildPlate(island, s)
 	local stroke = Instance.new("UIStroke")
 	stroke.Color, stroke.Thickness = Color3.fromRGB(16, 8, 24), 2.5
 	stroke.Parent = name
-	local rank = Instance.new("TextLabel")
-	rank.BackgroundTransparency = 1
-	rank.Position = UDim2.fromScale(0, 0.56)
-	rank.Size = UDim2.fromScale(1, 0.38)
-	rank.FontFace = FONT_B
-	rank.TextScaled = true
-	-- (the rank = the Cosmic Level's name + Supernovas; purpose: + GALAXY LIT %, the finish line)
+	-- (the rank = the Cosmic Level's name + Supernovas, its ✦ drawn as our sparkle (UIKit.rankLine); + GALAXY LIT %)
+	local line = Instance.new("Frame")
+	line.BackgroundTransparency = 1
+	line.Position = UDim2.fromScale(0, 0.56)
+	line.Size = UDim2.fromScale(1, 0.38)
+	line.Parent = gui
 	local lit = island:GetAttribute("Lit") or 0
-	rank.Text = string.upper(island:GetAttribute("Rank") or "") .. (if lit > 0 then "  ·  GALAXY " .. lit .. "%" else "")
-	rank.TextColor3 = Color3.fromRGB(240, 230, 255)
-	rank.Parent = gui
-	local stroke2 = stroke:Clone()
-	stroke2.Thickness = 2
-	stroke2.Parent = rank
+	local rankText = string.upper(island:GetAttribute("Rank") or "")
+	local base = string.gsub(rankText, "%s*·%s*✦%d+$", "")
+	local novasN = string.match(rankText, "✦(%d+)$")
+	local display = base .. (if lit > 0 then " · GALAXY " .. lit .. "%" else "") .. (if novasN then " · ✦" .. novasN else "")
+	local labels = UIKit.rankLine(line, display, FONT_B)
+	for _, l in ipairs(labels) do
+		l.TextColor3 = Color3.fromRGB(240, 230, 255)
+		local stroke2 = stroke:Clone()
+		stroke2.Thickness = 2
+		stroke2.Parent = l
+	end
 	s.plate = gui
 end
 
@@ -232,8 +290,18 @@ local function buildSystem(island)
 			img.Size = UDim2.fromScale(rnd:NextNumber(0.5, 1), rnd:NextNumber(0.5, 1))
 			img.Rotation = rnd:NextNumber(0, 360)
 			img.Parent = bb
+			-- (#295: the newest nebula BLOOMS in over ~2 s instead of appearing; fast rings + slow cloud together)
+			if i == novas and (seenNovas[island] or novas) < novas and loaded and not calm() then
+				local goalT, goalS = img.ImageTransparency, img.Size
+				img.ImageTransparency = 1
+				img.Size = UDim2.fromScale(goalS.X.Scale * 0.3, goalS.Y.Scale * 0.3)
+				task.delay(0.4 + j * 0.15, function()
+					tween(img, { ImageTransparency = goalT, Size = goalS }, 2.2, Enum.EasingStyle.Sine)
+				end)
+			end
 		end
 	end
+	seenNovas[island] = novas
 	local slot = island:GetAttribute("Slot") or 1
 	local span = math.max(SY.MaxPlanets - 1, 1)
 	-- the BODIES (feel pass, 5 Nov): one orbit per body type you have, its copies (+BODY, max 5) spaced round it; each
@@ -254,7 +322,11 @@ local function buildSystem(island)
 				local size = pd * (if c == 1 then 1 else 0.8)
 				local body = Kit.Make(if k == 1 then "RockBare" else "Planet", { Name = "Body", Fit = { if k == 1 then "X" else "Y", size }, CFrame = CFrame.new(top),
 					Color = base:Lerp(look.color, look.blend), Material = look.material, Reflectance = if look.material == Enum.Material.Ice then 0.15 else 0, Parent = folder })
-				table.insert(s.planets, { piece = body, parts = Kit.Parts(body), r = r, tilt = tilt, speed = 0.9 / k, angle = k * 1.9 + slot + (c - 1) * (2 * math.pi / ty.copies) })
+				local parts = Kit.Parts(body)
+				local sizes = {}
+				for _, p in ipairs(parts) do sizes[p] = p.Size end
+				table.insert(s.planets, { piece = body, parts = parts, sizes = sizes, r = r, tilt = tilt, speed = 0.9 / k, angle = k * 1.9 + slot + (c - 1) * (2 * math.pi / ty.copies),
+					k = k, tier = ty.tier, colour = base:Lerp(look.color, look.blend) })
 				total += 1
 			end
 		end
@@ -266,6 +338,56 @@ local function buildSystem(island)
 		local pl = s.planets[#s.planets]
 		pl.flyFrom = top + Vector3.new(0, 40, 0) + (workspace.CurrentCamera.CFrame.RightVector * 30)
 		pl.flyAt = os.clock()
+		-- (#285: a STREAK behind it while it flies in; wider for a bigger type: the escalation ladder, #278)
+		local p0 = pl.parts[1]
+		if p0 then
+			local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
+			a0.Position, a1.Position = Vector3.new(0, 0.5, 0), Vector3.new(0, -0.5, 0)
+			a0.Parent, a1.Parent = p0, p0
+			local tr = Instance.new("Trail")
+			tr.Attachment0, tr.Attachment1 = a0, a1
+			tr.Texture = FX.streak or ""
+			tr.TextureMode = Enum.TextureMode.Stretch
+			tr.LightEmission, tr.LightInfluence = 1, 0
+			tr.Lifetime = 0.35
+			tr.WidthScale = NumberSequence.new(1 + 0.4 * (pl.k - 1), 0)
+			tr.Color = ColorSequence.new(pl.colour:Lerp(Color3.new(1, 1, 1), 0.5), pl.colour)
+			tr.Parent = p0
+			pl.trail = tr
+		end
+	end
+	-- (#286: a type that reached a new NAMED TIER (every 10 levels, x2): its bodies pulse, a gold ring, an "x2" pop)
+	local prevSys = seenSys[island]
+	local nowSys = {}
+	for k, ty in ipairs(types) do nowSys[k] = ty.tier end
+	seenSys[island] = nowSys
+	if prevSys and loaded then
+		for k, ty in ipairs(types) do
+			if (prevSys[k] or 0) > 0 and ty.tier > prevSys[k] then
+				for _, pl in ipairs(s.planets) do
+					if pl.k == k then pl.pulseAt = os.clock() + 0.05 end
+				end
+				task.delay(0.1, function() ringFlash(top, 26 + 4 * k, Color3.fromRGB(255, 205, 90), 0.6) end)
+				local bb = Instance.new("BillboardGui")
+				bb.Size = UDim2.fromOffset(160, 60)
+				bb.StudsOffsetWorldSpace = Vector3.new(0, 4, 0)
+				bb.LightInfluence = 0
+				bb.AlwaysOnTop = true
+				bb.MaxDistance = 220
+				local host = Instance.new("Part")
+				host.Anchored, host.CanCollide, host.CanQuery, host.CanTouch, host.Transparency = true, false, false, false, 1
+				host.Size = Vector3.new(0.2, 0.2, 0.2)
+				host.CFrame = CFrame.new(top)
+				host.Parent = localFolder
+				bb.Adornee = host
+				bb.Parent = playerGui
+				local _, _, holder = UIKit.text(bb, 0, 0, 160, 60, "x2", 52, { TextXAlignment = Enum.TextXAlignment.Center, FontFace = UIKit.FONT_HEAVY, stroke = 3,
+					gradient = ColorSequence.new(Color3.fromRGB(255, 241, 192), Color3.fromRGB(255, 176, 42)) })
+				local _h = holder
+				tween(bb, { StudsOffsetWorldSpace = Vector3.new(0, 9, 0) }, 1.3, Enum.EasingStyle.Quad)
+				task.delay(1.4, function() bb:Destroy() host:Destroy() end)
+			end
+		end
 	end
 	-- the asteroid belt: one rock per body owned (island attribute Belt, max 20), outside the planets' orbits; each new
 	-- rock keeps its place (golden-angle spacing), so a buy adds one instead of reshuffling them
@@ -497,8 +619,31 @@ local function supernova(slot: number?)
 	local c = island and island:GetAttribute("Center")
 	if c then
 		local top = c + Vector3.new(0, systemHeight(island), 0)
-		sparkleBurst(top, 90, Color3.fromRGB(255, 220, 150), 1.6)
-		sparkleBurst(top, 40, Color3.fromRGB(200, 150, 255), 1.1)
+		-- (#298: the colour is your rank's; it grows a little with every Supernova you've made)
+		local col = rankColour(island)
+		local grow = 1 + math.min(island:GetAttribute("Supernovas") or 0, 20) * 0.04
+		sparkleBurst(top, math.floor(70 * grow), col:Lerp(Color3.new(1, 1, 1), 0.5), 1.6 * grow)
+		sparkleBurst(top, 30, Color3.fromRGB(200, 150, 255), 1.1)
+		-- (#294 fast layer: sharp SHARDS ripping out, facing where they fly; "sharp = impact", #279)
+		fxBurst(top, { tex = FX.shard, count = math.floor(36 * grow), color = col:Lerp(Color3.new(1, 1, 1), 0.3), size = 1.6 * grow, speed = { 45, 85 },
+			life = { 0.7, 1.2 }, drag = 1.5, align = true, light = 1 })
+		ringFlash(top, 34 * grow, col, 0.7)
+		-- (#294 slow layer: EMBERS drifting up for seconds, and a soft haze that lingers: fast + slow together, #295)
+		fxBurst(top, { tex = FX.glowdot, count = 40, color = col, size = 0.9, speed = { 2, 7 }, life = { 3.5, 6 }, drag = 0.4,
+			accel = Vector3.new(0, 1.2, 0), light = 1 })
+		fxBurst(top, { tex = FX.smoke, count = 8, color = col:Lerp(Color3.fromRGB(60, 30, 90), 0.4), size = 14 * grow, speed = { 1, 4 },
+			life = { 3, 4 }, flip = true, light = 0.3, transp = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.4), NumberSequenceKeypoint.new(1, 1) }) })
+		-- (#294: a short CAMERA SHAKE for the player who went Supernova; off with Reduced Motion; after the cinematic's camera)
+		if island:GetAttribute("Owner") == player.UserId and not calm() then
+			local t0 = os.clock()
+			RunService:BindToRenderStep("GalaxySupernovaShake", Enum.RenderPriority.Camera.Value + 3, function()
+				local t = os.clock() - t0
+				if t > 0.45 then RunService:UnbindFromRenderStep("GalaxySupernovaShake") return end
+				local cam = workspace.CurrentCamera
+				local amp = 0.35 * (1 - t / 0.45)
+				cam.CFrame = cam.CFrame * CFrame.new(math.noise(t * 40, 1) * amp, math.noise(t * 40, 2) * amp, 0)
+			end)
+		end
 	end
 end
 
@@ -513,11 +658,11 @@ shared.GalaxyWindupCancel = function()
 	for _, s in pairs(systems) do s.windup = nil end
 end
 if remote then
-	remote.OnClientEvent:Connect(function(kind, a, b, c)
+	remote.OnClientEvent:Connect(function(kind, a, b, c, d)
 		if kind == "Supernova" then
 			supernova(a)
 		elseif kind == "CometSpawn" then
-			spawnComet(a, b, c)
+			spawnComet(a, b, c, d)
 		end
 	end)
 end
@@ -526,7 +671,7 @@ end
 -- comets: streak past now and then; click / tap to catch
 ------------------------------------------------------------------------
 local comets = {}
-function spawnComet(id: number, seed: number, tutorial: boolean?)
+function spawnComet(id: number, seed: number, tutorial: boolean?, golden: boolean?)
 	local rnd = Random.new(seed)
 	local from, through
 	local cam = workspace.CurrentCamera
@@ -545,7 +690,9 @@ function spawnComet(id: number, seed: number, tutorial: boolean?)
 		through = O + Vector3.new(rnd:NextNumber(-CM.Through, CM.Through), rnd:NextNumber(CM.Low * 0.6, CM.Low * 1.2), rnd:NextNumber(-CM.Through, CM.Through))
 	end
 	local dir = (through - from).Unit
-	local head = Kit.Make("LampOrb", { Name = "Comet", Fit = { "Y", MapConfig.Comets.Head }, CFrame = CFrame.new(from), Color = Color3.fromRGB(150, 230, 255), Material = Enum.Material.Neon, Parent = localFolder })
+	-- (a GOLDEN comet, run 1 only, pays x5: gold head + gold trail, a bit bigger)
+	local head = Kit.Make("LampOrb", { Name = "Comet", Fit = { "Y", MapConfig.Comets.Head * (if golden then 1.35 else 1) }, CFrame = CFrame.new(from),
+		Color = if golden then Color3.fromRGB(255, 205, 70) else Color3.fromRGB(150, 230, 255), Material = Enum.Material.Neon, Parent = localFolder })
 	local parts = Kit.Parts(head)
 	local hit = Instance.new("Part")
 	hit.Name = "CometHit"
@@ -559,7 +706,7 @@ function spawnComet(id: number, seed: number, tutorial: boolean?)
 	a0.Parent, a1.Parent = hit, hit
 	local trail = Instance.new("Trail")
 	trail.Attachment0, trail.Attachment1 = a0, a1
-	trail.Color = ColorSequence.new(Color3.fromRGB(170, 235, 255), Color3.fromRGB(120, 140, 255))
+	trail.Color = if golden then ColorSequence.new(Color3.fromRGB(255, 230, 140), Color3.fromRGB(255, 150, 40)) else ColorSequence.new(Color3.fromRGB(170, 235, 255), Color3.fromRGB(120, 140, 255))
 	trail.LightEmission = 1
 	trail.Lifetime = 1.1
 	trail.Transparency = NumberSequence.new(0, 1)
@@ -602,9 +749,53 @@ end
 local function removeComet(comet, caught: boolean)
 	comets[comet.hit] = nil
 	if caught then
-		sparkleBurst(comet.pos, 40, Color3.fromRGB(170, 235, 255), 1)
+		sparkleBurst(comet.pos, 30, Color3.fromRGB(170, 235, 255), 1)
+		ringFlash(comet.pos, 6, Color3.fromRGB(170, 235, 255), 0.35)
 		UIKit.sound("cometCatch")
 		if remote then remote:FireServer("Comet", comet.id) end
+		-- (#287: 16 sparks FLY from the comet to YOUR star, each on its own arc, a short trail; a sparkle where they land)
+		local mine
+		for island, sys in pairs(systems) do
+			if island:GetAttribute("Owner") == player.UserId then mine = sys end
+		end
+		if mine and not calm() then
+			local from, to = comet.pos, mine.top
+			for i = 1, 16 do
+				task.delay(i * 0.03, function()
+					local p = Instance.new("Part")
+					p.Shape = Enum.PartType.Ball
+					p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+					p.Material = Enum.Material.Neon
+					p.Color = Color3.fromRGB(190, 240, 255)
+					p.Size = Vector3.new(0.45, 0.45, 0.45)
+					p.CFrame = CFrame.new(from)
+					p.Parent = localFolder
+					local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
+					a0.Position, a1.Position = Vector3.new(0, 0.2, 0), Vector3.new(0, -0.2, 0)
+					a0.Parent, a1.Parent = p, p
+					local tr = Instance.new("Trail")
+					tr.Attachment0, tr.Attachment1 = a0, a1
+					tr.Lifetime = 0.25
+					tr.LightEmission = 1
+					tr.Color = ColorSequence.new(Color3.fromRGB(170, 235, 255))
+					tr.Parent = p
+					local mid = (from + to) / 2 + Vector3.new(math.random(-14, 14), math.random(8, 22), math.random(-14, 14))
+					local dur = 0.55 + math.random() * 0.3
+					local t0 = os.clock()
+					local conn
+					conn = RunService.RenderStepped:Connect(function()
+						local k = math.clamp((os.clock() - t0) / dur, 0, 1)
+						local e = k * k
+						p.CFrame = CFrame.new((1 - e) ^ 2 * from + 2 * (1 - e) * e * mid + e ^ 2 * to)
+						if k >= 1 then
+							conn:Disconnect()
+							p:Destroy()
+							if i % 4 == 0 then sparkleBurst(to, 4, Color3.fromRGB(190, 240, 255), 0.5) end
+						end
+					end)
+				end)
+			end
+		end
 	end
 	comet.head:Destroy()
 	comet.hit:Destroy()
@@ -706,6 +897,18 @@ end)
 local padlock = nextS:FindFirstChild("Padlock")
 local padBase = {}
 for _, p in ipairs(padlock and Kit.Parts(padlock) or {}) do padBase[p] = p.CFrame end
+-- (purpose: once YOUR Ignition 1 has opened Sector 2, its padlocks are gone for you: the sector's big one and the Forge's)
+local function unlockSector()
+	if (player:GetAttribute("Ignition") or 0) < 1 then return end
+	for _, d in ipairs(nextS:GetDescendants()) do
+		if d.Name == "Padlock" then
+			for _, part in ipairs(Kit.Parts(d)) do part.LocalTransparencyModifier = 1 end
+		end
+	end
+end
+player:GetAttributeChangedSignal("Ignition"):Connect(unlockSector)
+nextS.DescendantAdded:Connect(function(d) if d.Name == "Padlock" or d.Name == "SectorForge" then task.defer(unlockSector) end end)
+unlockSector()
 
 ------------------------------------------------------------------------
 -- the boards: "Open" -> the window (the UI listens to Galaxy.OpenWindow)
@@ -796,11 +999,21 @@ RunService.RenderStepped:Connect(function(dt)
 			for _, pl in ipairs(s.planets) do
 				pl.angle += dt * pl.speed * (1 + 6 * k)
 				local cf = CFrame.new(s.top) * pl.tilt * CFrame.new(math.cos(pl.angle) * pl.r * pull, 0, math.sin(pl.angle) * pl.r * pull)
+				if pl.pulseAt and os.clock() >= pl.pulseAt then
+					local a = (os.clock() - pl.pulseAt) / 0.6
+					local g = if a >= 1 or calm() then 1 else 1 + 0.55 * math.sin(math.pi * a)
+					for _, p in ipairs(pl.parts) do if pl.sizes[p] then p.Size = pl.sizes[p] * g end end
+					if a >= 1 then pl.pulseAt = nil end
+				end
 				if pl.flyAt then
 					local a = math.clamp((os.clock() - pl.flyAt) / 0.7, 0, 1)
 					if a >= 1 then
 						pl.flyAt = nil
-						sparkleBurst(cf.Position, 24, Color3.fromRGB(220, 230, 255), 0.6)
+						-- (#285: on arrival a ring flash + sparkles, both bigger for a bigger type)
+						local big = 1 + 0.35 * ((pl.k or 1) - 1)
+						if pl.trail then pl.trail.Enabled = false end
+						ringFlash(cf.Position, 5 * big, pl.colour or Color3.fromRGB(220, 230, 255), 0.45)
+						sparkleBurst(cf.Position, math.floor(14 * big), Color3.fromRGB(220, 230, 255), 0.6 * big)
 					else
 						local e = 1 - (1 - a) ^ 3
 						cf = CFrame.new(pl.flyFrom:Lerp(cf.Position, e))

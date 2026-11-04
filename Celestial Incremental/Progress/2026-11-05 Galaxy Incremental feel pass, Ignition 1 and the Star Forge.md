@@ -122,7 +122,7 @@ Checklist rows: **#77 #82 #83 #84 #85 #86 #87 #125 #314 #388** (feel pass), **#9
   - A duplicate levelled a core (Lv 2); new cores fill free slots by themselves; the slots show rarity + effect.
   - One fix after the test: the book's 6th row hung below the panel.
 - **Output:** no errors from the game scripts. All 34 scripts in the vault = Studio.
-- **Screens:** `Progress\screens6-11-05-feel-ignition-forge\` (14 shots).
+- **Screens:** `Progress\screens\2026-11-05-feel-ignition-forge\` (14 shots).
 - **Not done:** a TestPhone-frame screenshot of the HUD (the TREE tiles were measured from the spawn camera instead).
 
 ## For you

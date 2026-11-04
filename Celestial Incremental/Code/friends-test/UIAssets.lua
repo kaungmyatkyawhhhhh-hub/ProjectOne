@@ -28,6 +28,15 @@ return {
 	mote = "rbxassetid://70545138129350",
 	-- the world sparkle for ParticleEmitters (5 Nov, #281; UI\roblox\fx_sparkle.png, uploaded by the owner 5 Nov)
 	fxSparkle = "rbxassetid://94374970413464",
+	-- the VFX pass's PLACEHOLDER textures (5 Nov; UI\make_fx_set.py -> UI\roblox\fx_*.png, Studio test uploads): the owner's
+	-- artist makes the final set; swap the ids here
+	fx = {
+		glowdot = "rbxassetid://99926211922098",
+		ring = "rbxassetid://96523294175789",
+		streak = "rbxassetid://94618099610729",
+		shard = "rbxassetid://118739627833700",
+		smoke = "rbxassetid://101295804867366", -- (a 4x4 flipbook)
+	},
 	plate = "rbxassetid://126195526088194", -- the top counter's slanted plate (white, tinted)
 	header = "rbxassetid://98206491746323", -- 900x80 orange header texture
 	arrow = "rbxassetid://138731187772172", -- tutorial arrow (points down)

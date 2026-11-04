@@ -39,8 +39,8 @@ Panel.TABS = {
 	-- (feel pass, 5 Nov: BODIES = the BODIES board's rows; PERKS = the PERKS board's perks, bought with XP)
 	{ id = "BODIES", c1 = "#b49bff", c2 = "#5a3ad8", icon = "planet", glow = Color3.fromRGB(170, 130, 255) },
 	{ id = "PERKS", c1 = "#5ad1ff", c2 = "#1f6fd1", icon = "sun", glow = Color3.fromRGB(90, 200, 255) },
-	{ id = "FORGE", c1 = "#6a6474", c2 = "#3f3a48", icon = "forge", glow = nil, locked = "SUPERNOVA 3",
-		lockedTitle = "STAR FORGE", lockedText = "Roll Star Cores with Essence. Opens at SUPERNOVA 3." },
+	{ id = "FORGE", c1 = "#6a6474", c2 = "#3f3a48", icon = "forge", glow = nil, locked = "IGNITION 1",
+		lockedTitle = "STAR FORGE", lockedText = "Roll Star Cores with Essence: hotbar F once IGNITION 1 opens Sector 2." },
 	{ id = "BLACK HOLE", c1 = "#5a5562", c2 = "#38343f", icon = "gear", glow = nil, locked = "100K SHARDS",
 		lockedTitle = "BLACK HOLE", lockedText = "Collapse your shards into Dark Matter. Opens at 100K shards." },
 }

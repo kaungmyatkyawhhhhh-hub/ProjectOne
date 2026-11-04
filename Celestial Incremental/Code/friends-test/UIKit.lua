@@ -485,6 +485,10 @@ function Kit.sound(name: string, opts): Sound?
 	s.PlaybackSpeed = (spec.pitch or 1) * ((opts and opts.pitch) or 1) * (1 + (math.random() * 2 - 1) * (spec.vary or 0))
 	s.TimePosition = spec.start or 0
 	s:Play()
+	-- (#242: a buy is a TWO-NOTE rising confirm: the click, then a major third up 70 ms later)
+	if name == "buy" and not (opts and opts.second) then
+		task.delay(0.07, function() Kit.sound("buy", { second = true, pitch = 1.26 * ((opts and opts.pitch) or 1), volume = 0.8 * ((opts and opts.volume) or 1) }) end)
+	end
 	return s
 end
 -- the music loop (one, started once); Kit.musicFade(k, t): to k x its volume in t seconds (0 = silent, 1 = normal)
@@ -578,6 +582,30 @@ function Kit.window(parent, w: number, h: number, opts)
 end
 
 -- a dark inset panel (the UPGRADES window's list / rows panels)
+-- a RANK line ("FLARE III · ✦12") filling `parent` (scale sizes: billboards): the text before the ✦, our 4-point sparkle
+-- image for the ✦ (Montserrat has no ✦ glyph: it drew a box), the number after it. Returns the labels (to tint) + the star.
+function Kit.rankLine(parent: GuiObject, text: string, font: Font?, starColour: Color3?)
+	local before, after = string.match(text, "^(.-)%s*✦(%d+)$")
+	before = before or text
+	local units = #before * 0.62 + (if after then 1.1 + #after * 0.62 else 0)
+	local function label(str: string, x: number, w: number, align)
+		local l = new("TextLabel", { BackgroundTransparency = 1, Position = UDim2.fromScale(x, 0), Size = UDim2.fromScale(w, 1), FontFace = font or Kit.FONT_HEAVY,
+			TextScaled = true, Text = str, TextColor3 = Color3.new(1, 1, 1), TextXAlignment = align }, parent)
+		return l
+	end
+	local labels = {}
+	local wBefore = #before * 0.62 / units
+	table.insert(labels, label(before, 0, wBefore, if after then Enum.TextXAlignment.Right else Enum.TextXAlignment.Center))
+	local star
+	if after then
+		local wStar = 1.1 / units
+		star = new("ImageLabel", { BackgroundTransparency = 1, Image = A.sparkle, ImageColor3 = starColour or Color3.fromRGB(255, 216, 74),
+			Position = UDim2.fromScale(wBefore + wStar * 0.08, 0.06), Size = UDim2.fromScale(wStar * 0.84, 0.88), ScaleType = Enum.ScaleType.Fit }, parent)
+		table.insert(labels, label(after, wBefore + wStar, 1 - wBefore - wStar, Enum.TextXAlignment.Left))
+	end
+	return labels, star
+end
+
 function Kit.panel(parent, x, y, w, h, z)
 	local p = Kit.box(parent, x, y, w, h, { BackgroundTransparency = 0, BackgroundColor3 = Kit.hex("#0b090e"), ZIndex = z or 4 })
 	Kit.corner(p, 6)

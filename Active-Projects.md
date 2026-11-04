@@ -31,6 +31,13 @@ Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, 
 - **4 Nov, research audit:** [[Celestial Incremental/2026-11-04 Galaxy Incremental - MASTER CHECKLIST (decided vs built)]]: 484 decisions; 222 built, 87 partly, 131 not built, 44 changed. The first ~10 min match the notes; purpose, Star Forge, Tutorial 2 and every come-back reason are not built. Players.MaxPlayers is 60 (design: 8).
 - **5 Nov, Phase 0 done (Claude Code, in Studio, not published):** server size 8 (Creator Hub), same-kind boosts add (pass + potion = x3), first Supernova skippable after 1 s + Camera.Focus, Store hidden until tutorial step 7, our own sparkle texture, boards one job each (TREE = ring-2 node graph, INFO = selected node only). See [[Celestial Incremental/Progress/2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]]. Next: Phase 1 (Feel pass plan + numbers first). Owner 5 Nov: VFX layering pass prompt saved, final particle textures come from the owner's artist.
 - **5 Nov, Phase 1 steps 1-2 + Ignition 1 + Star Forge built (Claude Code, Studio, not published):** body levels + named tiers (DUST..COSMIC) + copies, 20 island pads, Cosmic Level + 16 perks (PERKS board), rank = level name + Supernovas, Supernova needs tuned (runs 2-6 shorter each), loading screen, dim galaxy until Ignition 1, GALAXY window, Ignition 1 (~28 min) opens Sector 2 + the Star Forge, paths. See [[Celestial Incremental/Progress/2026-11-05 Galaxy Incremental feel pass, Ignition 1 and the Star Forge]]. Next: Phase 1 step 3 (small-reward feedback + VFX layering pass), then Tutorial 2, social.
+- **5 Nov, Phase 1 steps 3-5 built (Claude Code, Studio, not published):**
+  - Supernova 1 need 250K (bot 3.7-4.3 min); runs ≥ ~1.5 min; Ignition 1 at 27.4 min; ring 2 ~38% + capstone unbought at Ignition.
+  - Phones: tapping a board opens its 2D window.
+  - VFX layering + small-reward feedback (NEXT line, NEW tier, income tick, node/body/x2/comet effects, Supernova layers).
+  - GalaxyCutscene template (first Supernova 10 s, Ignition 8 s, Forge rolls by rarity, NEW mini; CELESTIAL server message).
+  - Tutorial 2: 20 goal steps to Ignition with LUMI the star spirit card, payouts, beam, run-1 comets + golden comet.
+  - See [[Celestial Incremental/Progress/2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]]. Next: Phase 1 step 6, social basics (#392 #394 #395 #290).
 - **STANDING RULE (Galaxy):** before any Galaxy task, read the master checklist and the source notes for that area. Every Progress note lists the checklist rows it built (#) and updates their status in the checklist.
 - **Last updated:** 2026-11-05
 
