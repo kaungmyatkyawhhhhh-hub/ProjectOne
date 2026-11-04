@@ -331,5 +331,5 @@ Prompt: [[2026-11-04 GYM ARC Prompt - Plate tiers FINAL (7 Nov part 9)]]. Number
   - Gem update off: everything back, cover back, put outside.
   - A sample save with the switch on gets the update; with no save, the server still says not launched.
   - "all" is refused.
-- Panel screenshot: `Downloads\gem_update_import\screens_4Nov_plates_admin_panel_gem_switches.jpg`.
+- Panel screenshot: `Downloads\gem_update_import\screens_4Nov_plates\16_admin_panel_gem_switches.jpg`.
 
