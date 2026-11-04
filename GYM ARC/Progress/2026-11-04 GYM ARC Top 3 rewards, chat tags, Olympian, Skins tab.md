@@ -368,3 +368,11 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - The Forge rack is rebuilt with the mesh.
 - Details: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 6.
 
+### Hall of Fame star board: usernames (4 Nov)
+- Owner: "make hall of fame star leaderboard use the username, not displayname".
+- **Fixed:** the board's names came from `HallOfFameService` nameOf(). It used the display name for players in the server and the username for everyone offline. Now it's the username everywhere.
+  - The statue plaques use the same name.
+  - "LEGENDS IN THIS SERVER" and your own pedestal's plaque (HallOfFameClient) use the username too.
+- **Tested in Play (temp save):** my row on the board shows the username, no row shows a display name, and the Legends list shows the username.
+- The board is read-only in Studio.
+
