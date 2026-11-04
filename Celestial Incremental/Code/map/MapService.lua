@@ -228,6 +228,7 @@ local function refresh(slot: number, pop: boolean)
 		island:SetAttribute("Owner", 0)
 		island:SetAttribute("OwnerName", "")
 		for _, a in ipairs({ "BodyTiers", "Supernovas", "Belt" }) do island:SetAttribute(a, 0) end
+		island:SetAttribute("Sys", "")
 		island:SetAttribute("Rank", "")
 		island:SetAttribute("Ready", false)
 		setBridge(island, false)
@@ -242,7 +243,9 @@ local function refresh(slot: number, pop: boolean)
 	island:SetAttribute("Color", MapConfig.PlayerColors[slot])
 	local bodies, tiers, novas = num(owner, "Bodies"), num(owner, "BodyTiers"), num(owner, "Supernovas")
 	island:SetAttribute("BodyTiers", tiers)
-	island:SetAttribute("Belt", math.min(bodies, 20))
+	-- (feel pass: the copies orbit as bodies now; the belt of one rock per body is gone)
+	island:SetAttribute("Belt", 0)
+	island:SetAttribute("Sys", if isPlayer then owner:GetAttribute("Sys") or "" else owner.Sys or "")
 	island:SetAttribute("Supernovas", novas)
 	island:SetAttribute("Ready", (if isPlayer then owner:GetAttribute("SupernovaReady") else owner.Ready) == true)
 	setBridge(island, true)
@@ -280,7 +283,7 @@ local function claim(player: Player)
 	return nil -- (more than 8 players: no island, the centre spawn)
 end
 
-local WATCH = { "Bodies", "BodyTiers", "Supernovas", "SupernovaReady" }
+local WATCH = { "Bodies", "BodyTiers", "Supernovas", "SupernovaReady", "Sys" }
 local function onPlayer(player: Player)
 	local slot = claim(player)
 	local lastNovas = tonumber(player:GetAttribute("Supernovas")) or 0

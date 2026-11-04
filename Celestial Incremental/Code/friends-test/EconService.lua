@@ -20,7 +20,8 @@
 -- Studio test switch: Workspace attribute TestFreshSave = true -> every player starts on a NEW save that is never written
 -- (the tutorial / tier 0 test; the Studio save stays as it was). Workspace TestGiveStardust = n -> every player gets n
 -- stardust EARNED (counts for the Supernova; for screenshots, never in the pace test).
--- Remotes (ReplicatedStorage.Galaxy): EconRequest (RemoteFunction: "BuyBody" / "BuyBody10" / "BuyBodyMax", k / "BuyNode", id /
+-- Remotes (ReplicatedStorage.Galaxy): EconRequest (RemoteFunction: "BuyBody" / "BuyBody10" / "BuyBodyMax", k (+1 / 10 / max LEVELS) /
+-- "BuyCopy", k (+BODY) / "BuyNode", id /
 -- "BuyRing2", id / "Supernova"; + the island slot from a board), EconEvent (server ->
 -- client: "TutorialStep", step, essence / "Bought", kind, what / "CometPaid", id, value), MapEvent ("CometSpawn" to the
 -- client; the client answers "Comet", id).
@@ -61,9 +62,12 @@ Shared.sessions = sessions
 
 ------------------------------------------------------------------------ data
 local function newData()
-	local owned = {}
-	for i = 1, #Econ.Tiers do owned[i] = Econ.StartOwned[i] or 0 end
-	return { v = Econ.DataVersion, stardust = 0, earnedRun = 0, earnedTotal = 0, bestRun = 0, owned = owned, nodes = {},
+	local owned, copies = {}, {}
+	for i = 1, #Econ.Tiers do
+		owned[i] = Econ.StartOwned[i] or 0
+		copies[i] = if owned[i] > 0 then 1 else 0
+	end
+	return { v = Econ.DataVersion, stardust = 0, earnedRun = 0, earnedTotal = 0, bestRun = 0, owned = owned, copies = copies, nodes = {},
 		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {}, settings = {}, guide = {},
 		codes = {}, potions = {}, boostLeft = {}, alphaPlayer = false, alphaBadge = false }
 end
@@ -71,12 +75,25 @@ end
 local function migrate(d): (any, boolean)
 	if type(d) ~= "table" then return newData(), false end
 	if (tonumber(d.v) or 0) > Econ.DataVersion then return d, true end
+	local oldV = tonumber(d.v) or 0
 	local base = newData()
 	for k, v in pairs(base) do
 		if d[k] == nil then d[k] = v end
 	end
 	if type(d.owned) ~= "table" then d.owned = base.owned end
 	for i = 1, #Econ.Tiers do d.owned[i] = math.max(0, math.floor(tonumber(d.owned[i]) or 0)) end
+	-- v3 (feel pass, 5 Nov): owned = LEVELS + copies. An old owned count n -> level n (max 60), 1 + n/25 copies (max 5)
+	if type(d.copies) ~= "table" then d.copies = {} end
+	for i = 1, #Econ.Tiers do
+		if oldV < 3 then
+			local n = d.owned[i]
+			d.owned[i] = math.min(n, 60)
+			d.copies[i] = if n > 0 then math.min(1 + n // 25, Econ.MaxCopies) else 0
+		end
+		d.copies[i] = math.clamp(math.floor(tonumber(d.copies[i]) or 0), 0, Econ.MaxCopies)
+		if d.owned[i] > 0 and d.copies[i] == 0 then d.copies[i] = 1 end
+		if d.owned[i] == 0 then d.copies[i] = 0 end
+	end
 	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned" }) do
 		local n = tonumber(d[k]) or 0
 		d[k] = if n == n and n ~= math.huge then n else 0
@@ -175,7 +192,7 @@ local function stardustBoost(s): number
 	return 1 + (surgeMult() - 1) + (if boosting(s, "Stardust") then 1 else 0) + (if s.passX2 then 1 else 0)
 end
 local function incomeOf(s): number
-	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * stardustBoost(s)
+	return Econ.Income(s.d.owned, s.d.copies, s.d.nodes, s.d.ring2) * stardustBoost(s)
 end
 local function cometEvery(s): number
 	return math.max(Econ.Comet.MinEvery, Econ.CometEvery(s.d.nodes) / (if boosting(s, "Comets") then 2 else 1))
@@ -189,23 +206,29 @@ local function publish(player: Player, s)
 	player:SetAttribute("EarnedRun", d.earnedRun)
 	player:SetAttribute("Essence", d.essence)
 	player:SetAttribute("TutStep", d.tut)
-	local bodies, tiers = 0, 0
+	-- Own<k> = the body type's LEVEL (0 = not unlocked), Copies<k> = its copies; Bodies = all copies; Sys = what the map draws
+	-- ("namedTier:copies," per type, only changes on a new tier / copy / type, so the system isn't rebuilt every level)
+	local bodies, tiers, sys = 0, 0, {}
 	for k = 1, #Econ.Tiers do
 		player:SetAttribute("Own" .. k, d.owned[k])
-		bodies += d.owned[k]
+		player:SetAttribute("Copies" .. k, d.copies[k])
+		bodies += d.copies[k]
 		if d.owned[k] > 0 then tiers += 1 end
+		table.insert(sys, (if d.owned[k] > 0 then Econ.NamedTier(d.owned[k]) else 0) .. ":" .. d.copies[k])
 	end
+	player:SetAttribute("Sys", table.concat(sys, ","))
 	for _, n in ipairs(Econ.Ring1) do player:SetAttribute("Node_" .. n.id, d.nodes[n.id] == true) end
 	for _, n in ipairs(Econ.Ring2) do player:SetAttribute("R2_" .. n.id, d.ring2[n.id] or 0) end
 	player:SetAttribute("Shards", d.shards)
 	player:SetAttribute("ShardsEarned", d.shardsEarned)
-	player:SetAttribute("SupernovaShards", Econ.ShardsFor(d.earnedRun, d.nodes))
+	player:SetAttribute("SupernovaShards", Econ.ShardsFor(d.earnedRun, d.nodes, d.supernovas))
+	player:SetAttribute("SupernovaNeed", Econ.NeedFor(d.supernovas))
 	-- the map
 	player:SetAttribute("Bodies", bodies)
 	player:SetAttribute("BodyTiers", tiers)
 	player:SetAttribute("Supernovas", d.supernovas)
 	player:SetAttribute("Rank", MapConfig.RankOf(MapConfig.TierOf(bodies, d.supernovas), d.supernovas))
-	player:SetAttribute("SupernovaReady", d.earnedRun >= Econ.SupernovaNeed)
+	player:SetAttribute("SupernovaReady", d.earnedRun >= Econ.NeedFor(d.supernovas))
 	player:SetAttribute("BestRunStardust", math.max(d.bestRun, d.earnedRun))
 	player:SetAttribute("Tree_CometLure", if d.nodes.CometLure then 1 else 0)
 	player:SetAttribute("CometsCaught", d.comets)
@@ -226,11 +249,11 @@ local GUIDE_PAGES = { Stardust = true, Island = true, Tree = true, Comets = true
 
 ------------------------------------------------------------------------ tutorial
 local TUT_DONE = {
-	function(d) return d.owned[1] >= 2 end, -- bought an asteroid (you start with 1)
+	function(d) return d.owned[1] >= 2 end, -- the Asteroid to level 2 (you start at level 1)
 	function(d) return d.nodes.FirstLight == true end,
-	function(d) return (d.owned[2] or 0) >= 1 end, -- the first Moon (Lunar Pull, then buy one)
+	function(d) return (d.owned[2] or 0) >= 1 end, -- the Moon unlocked (UNLOCK on its BODIES row)
 	function(d) return d.comets >= 1 end,
-	function(d) return d.earnedRun >= Econ.SupernovaNeed / 2 or d.supernovas >= 1 end, -- the goal bar at 50%
+	function(d) return d.earnedRun >= Econ.NeedFor(d.supernovas) / 2 or d.supernovas >= 1 end, -- the goal bar at 50%
 	function(d) return d.supernovas >= 1 end,
 	function(d) return (d.ring2.Starfire or 0) >= 1 end,
 }
@@ -311,6 +334,7 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		-- one body; BuyBody10 = up to 10 (the INFO board's 10x); BuyBodyMax = as many as you can pay for (the BODIES board's M)
 		if type(arg) ~= "number" or arg ~= arg or arg % 1 ~= 0 or arg < 0 or arg >= #Econ.Tiers then return false, "bad" end
 		if not unlocked(s, arg) then return false, "locked" end
+		-- (feel pass: +1 LEVEL each; a Star type opened by ring 2 starts at level 0, so its first level gives it one copy)
 		local most = if action == "BuyBody" then 1 elseif action == "BuyBody10" then 10 else 1000
 		local got = 0
 		while got < most do
@@ -318,12 +342,25 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 			if d.stardust < cost then break end
 			d.stardust -= cost
 			d.owned[arg + 1] += 1
+			if d.copies[arg + 1] < 1 then d.copies[arg + 1] = 1 end
 			got += 1
 		end
 		if got == 0 then return false, "poor" end
 		checkTutorial(player, s)
 		publish(player, s)
 		return true, d.owned[arg + 1]
+	elseif action == "BuyCopy" then
+		-- +BODY: one more copy of an unlocked body type (max Econ.MaxCopies)
+		if type(arg) ~= "number" or arg ~= arg or arg % 1 ~= 0 or arg < 0 or arg >= #Econ.Tiers then return false, "bad" end
+		if d.owned[arg + 1] < 1 then return false, "locked" end
+		local c = d.copies[arg + 1]
+		if c >= Econ.MaxCopies then return false, "max" end
+		local cost = Econ.CopyCost(arg, c)
+		if d.stardust < cost then return false, "poor" end
+		d.stardust -= cost
+		d.copies[arg + 1] = c + 1
+		publish(player, s)
+		return true, c + 1
 	elseif action == "BuyNode" then
 		local node = type(arg) == "string" and Econ.Ring1ById[arg]
 		if not node then return false, "bad" end
@@ -332,6 +369,11 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		if d.stardust < node.cost then return false, "poor" end
 		d.stardust -= node.cost
 		d.nodes[node.id] = true
+		-- (an UNLOCK: the body type starts at level 1 with one copy)
+		if node.effect.kind == "unlockTier" and d.owned[node.effect.tier + 1] < 1 then
+			d.owned[node.effect.tier + 1] = 1
+			d.copies[node.effect.tier + 1] = 1
+		end
 		if node.effect.kind == "cometEvery" and s.nextComet then
 			s.nextComet = math.min(s.nextComet, os.clock() + node.effect.seconds)
 		end
@@ -379,7 +421,7 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		return true
 	elseif action == "Supernova" then
 		-- (the client has played the wind-up; this is the impact)
-		local got = Econ.ShardsFor(d.earnedRun, d.nodes)
+		local got = Econ.ShardsFor(d.earnedRun, d.nodes, d.supernovas)
 		if got <= 0 then return false, "notready" end
 		local first = d.supernovas == 0
 		d.bestRun = math.max(d.bestRun, d.earnedRun)
@@ -387,7 +429,10 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		d.shardsEarned += got
 		d.supernovas += 1
 		d.stardust, d.earnedRun = 0, 0
-		for i = 1, #Econ.Tiers do d.owned[i] = Econ.StartOwned[i] or 0 end
+		for i = 1, #Econ.Tiers do
+			d.owned[i] = Econ.StartOwned[i] or 0
+			d.copies[i] = if d.owned[i] > 0 then 1 else 0
+		end
 		d.nodes = {}
 		checkTutorial(player, s)
 		publish(player, s)
@@ -499,9 +544,10 @@ task.spawn(function()
 				s.d.earnedTotal += gain
 				player:SetAttribute("Stardust", s.d.stardust)
 				player:SetAttribute("EarnedRun", s.d.earnedRun)
-				player:SetAttribute("SupernovaShards", Econ.ShardsFor(s.d.earnedRun, s.d.nodes))
-				if s.d.earnedRun >= Econ.SupernovaNeed and not player:GetAttribute("SupernovaReady") then publish(player, s) end
-				if s.d.tut == 4 and s.d.earnedRun >= Econ.SupernovaNeed / 2 then
+				local need = Econ.NeedFor(s.d.supernovas)
+				player:SetAttribute("SupernovaShards", Econ.ShardsFor(s.d.earnedRun, s.d.nodes, s.d.supernovas))
+				if s.d.earnedRun >= need and not player:GetAttribute("SupernovaReady") then publish(player, s) end
+				if s.d.tut == 4 and s.d.earnedRun >= need / 2 then
 					checkTutorial(player, s)
 					publish(player, s)
 				end

@@ -154,8 +154,9 @@ local function cardText()
 	local earned = player:GetAttribute("EarnedRun") or 0
 	local nodes = {}
 	for _, n in ipairs(Econ.Ring1) do nodes[n.id] = player:GetAttribute("Node_" .. n.id) == true end
-	local got = Econ.ShardsFor(earned, nodes)
-	local later = Econ.ShardsFor(earned * 2, nodes)
+	local novas = player:GetAttribute("Supernovas") or 0
+	local got = Econ.ShardsFor(earned, nodes, novas)
+	local later = Econ.ShardsFor(earned * 2, nodes, novas)
 	Kit.setText(card.got, got .. " SHARDS")
 	Kit.setText(card.wait, "Wait to earn 2x first: " .. later .. " shards (+" .. math.floor((later / math.max(got, 1) - 1) * 100 + 0.5) .. "%)")
 	return got

@@ -53,7 +53,7 @@ local PAGES = {
 			"COMET LURE brings one every 30 s." },
 		unlocked = function() return attr("TutStep") >= 4 or attr("CometsCaught") >= 1 end, lockedText = "CATCH A COMET" },
 	{ id = "Supernova", tab = "SUPERNOVA", title = "SUPERNOVA & SHARDS", icon = "shard", glow = Color3.fromRGB(170, 110, 255), c1 = "#ffe27a", c2 = "#e08a0a",
-		lines = { "Earn " .. Econ.Format(Econ.SupernovaNeed) .. " in a run: SUPERNOVA is ready.",
+		lines = { "Earn " .. Econ.Format(Econ.NeedFor(0)) .. " in your first run: SUPERNOVA is ready.",
 			"It resets your run and gives SHARDS.",
 			"Earn more before you go = more shards." },
 		unlocked = function() return attr("TutStep") >= 4 or attr("Supernovas") >= 1 end, lockedText = "TUTORIAL STEP 5" },

@@ -326,6 +326,18 @@ MapConfig.Sky = {
 	SkyboxRt = "rbxassetid://76670709549755", SkyboxUp = "rbxassetid://118744463737898", SkyboxDn = "rbxassetid://90521387144464",
 }
 
+-- a body's look by its NAMED TIER (feel pass, 5 Nov, #314): the type keeps its shape and its colour family; the tier sets the
+-- surface. blend = how far the type's colour moves to the tier's colour. No glass / no part transparency (Playbook).
+MapConfig.BodyLooks = {
+	{ name = "DUST", material = Enum.Material.SmoothPlastic, color = Color3.fromRGB(120, 108, 98), blend = 0.45 },
+	{ name = "ROCK", material = Enum.Material.Slate, color = Color3.fromRGB(92, 80, 74), blend = 0.4 },
+	{ name = "IRON", material = Enum.Material.CorrodedMetal, color = Color3.fromRGB(120, 132, 150), blend = 0.6 },
+	{ name = "CRYSTAL", material = Enum.Material.Ice, color = Color3.fromRGB(170, 225, 255), blend = 0.65 },
+	{ name = "PLASMA", material = Enum.Material.Neon, color = Color3.fromRGB(230, 70, 200), blend = 0.7 },
+	{ name = "SOLAR", material = Enum.Material.Neon, color = Color3.fromRGB(255, 196, 70), blend = 0.8 },
+	{ name = "NOVA", material = Enum.Material.Neon, color = Color3.fromRGB(255, 250, 235), blend = 0.85 },
+}
+
 MapConfig.LodDistance = 140      -- others' star systems simplified past this (star only)
 MapConfig.VoidY = -110           -- below Origin.Y + this = fell off: back to your island
 MapConfig.Comets = { From = 260, Through = 120, Low = 30, High = 80, Head = 4, Hit = 14, TutorialHit = 18 }

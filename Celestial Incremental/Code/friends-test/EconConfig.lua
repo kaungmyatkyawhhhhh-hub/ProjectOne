@@ -3,15 +3,20 @@
 -- Calc\ring1.py). Server and client both read it; nothing else holds an economy number.
 local Econ = {}
 
-Econ.DataVersion = 2 -- the save's version (bump + migrate in GalaxyEconService when the save's shape changes)
+Econ.DataVersion = 3 -- the save's version (bump + migrate in GalaxyEconService when the save's shape changes)
+-- (3 = feel pass, 5 Nov: owned = body LEVELS + copies; an old owned count n -> level n, 1 + n/25 copies)
 -- (2 = alpha part 1, 3 Nov: shards, shardsEarned, ring2, the Binary Star tier; a v1 save gets them empty)
 
------------------------------------------------------------------------- bodies (design: section 1, formulas)
--- cost = 10 * 8^k * 1.15^owned; income = 5^k * owned * milestone per second (k = tier 0..7)
-Econ.CostBase, Econ.CostTier, Econ.CostGrowth = 10, 8, 1.15
+------------------------------------------------------------------------ bodies (FEEL PASS, 5 Nov: Calc\feel.py, vault "Feel pass PLAN + numbers")
+-- a body type k (0 = Asteroid): UPGRADE = +1 level, +BODY = one more copy in orbit (max MaxCopies). Unlocking a type = level 1,
+-- one copy. income = 5^k * level * copies * 2^(named tiers passed); a NAMED TIER every 10 levels (DUST, ROCK, IRON...), x2 each.
+-- UPGRADE cost = 10 * 8^k * 1.8^level; +BODY cost = 50 * 8^k * 4^(copies - 1). A Supernova resets levels and copies.
+Econ.CostBase, Econ.CostTier, Econ.LevelGrowth = 10, 8, 1.8
+Econ.CopyBase, Econ.CopyGrowth, Econ.MaxCopies = 50, 4, 5
 Econ.IncomeTier = 5
-Econ.Milestones = { 25, 50, 100, 200, 300, 400 } -- x2 at each
-Econ.StartOwned = { 1 } -- the asteroid already orbits at 0 s (design: tutorial "0 s")
+Econ.TierEvery = 10
+Econ.TierNames = { "DUST", "ROCK", "IRON", "CRYSTAL", "PLASMA", "SOLAR", "NOVA", "PULSAR", "QUASAR", "COSMIC" }
+Econ.StartOwned = { 1 } -- the asteroid already orbits at 0 s (level 1, one copy)
 
 -- the tiers (design: Star at Supernova 1, Binary Star at Supernova 3, Pulsar / Quasar with the Black Hole later).
 -- unlock = the ring-1 node that opens it; unlockR2 = the ring-2 node (shards) that opens it; lockedText = shown until then
@@ -26,36 +31,29 @@ Econ.Tiers = {
 }
 Econ.PlayableTiers = 4 -- Asteroid .. Gas Giant: the tiers ring 1 opens (the Star and up come from ring 2)
 
-local function milestone(owned: number): number
-	local m = 1
-	for _, at in ipairs(Econ.Milestones) do
-		if owned >= at then m *= 2 end
-	end
-	return m
+-- the named tier of a level: 1 = DUST (Lv 1-9), 2 = ROCK (10-19), 3 = IRON (20-29) ...
+function Econ.NamedTier(level: number): number
+	return math.clamp(level // Econ.TierEvery + 1, 1, #Econ.TierNames)
 end
-Econ.Milestone = milestone
--- k is 0-based (Asteroid = 0)
-function Econ.Cost(k: number, owned: number): number
-	return Econ.CostBase * Econ.CostTier ^ k * Econ.CostGrowth ^ owned
+function Econ.TierName(level: number): string
+	return Econ.TierNames[Econ.NamedTier(level)]
 end
-function Econ.TierIncome(k: number, owned: number): number
-	return Econ.IncomeTier ^ k * owned * milestone(owned)
+-- the level the next named tier starts at (nil = the last one)
+function Econ.NextTierAt(level: number): number?
+	local t = Econ.NamedTier(level)
+	return if t < #Econ.TierNames then t * Econ.TierEvery else nil
 end
--- the next milestone at or above `owned` (for "x2 at 25")
-function Econ.NextMilestone(owned: number): number?
-	for _, at in ipairs(Econ.Milestones) do
-		if owned < at then return at end
-	end
-	return nil
+-- k is 0-based (Asteroid = 0). UPGRADE from `level` to level + 1
+function Econ.Cost(k: number, level: number): number
+	return Econ.CostBase * Econ.CostTier ^ k * Econ.LevelGrowth ^ level
 end
--- a body's TIER = the milestones it has passed (the island boards show "TIER 2 [SILVER]", like Regrowth's machine tiers)
-Econ.MilestoneNames = { [0] = "NO TIER", "BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND", "COSMIC" }
-function Econ.MilestoneTier(owned: number): number
-	local t = 0
-	for _, at in ipairs(Econ.Milestones) do
-		if owned >= at then t += 1 end
-	end
-	return t
+-- +BODY: the next copy when you have `copies`
+function Econ.CopyCost(k: number, copies: number): number
+	return Econ.CopyBase * Econ.CostTier ^ k * Econ.CopyGrowth ^ (math.max(copies, 1) - 1)
+end
+function Econ.TierIncome(k: number, level: number, copies: number): number
+	if level <= 0 or copies <= 0 then return 0 end
+	return Econ.IncomeTier ^ k * level * copies * 2 ^ (Econ.NamedTier(level) - 1)
 end
 
 ------------------------------------------------------------------------ ring 1 (ONE table: the Upgrades window reads it for
@@ -125,8 +123,8 @@ function Econ.Unlocked(k: number, nodes, r2): boolean
 	return false
 end
 -- tier k's income with its node multipliers (not the all-bodies ones): ring 1's tierMult, ring 2's Heavy Elements
-function Econ.TierIncomeWith(k: number, owned: number, nodes, r2): number
-	local inc = Econ.TierIncome(k, owned)
+function Econ.TierIncomeWith(k: number, level: number, copies: number, nodes, r2): number
+	local inc = Econ.TierIncome(k, level, copies)
 	for _, n in ipairs(Econ.Ring1) do
 		if nodes[n.id] and n.effect.kind == "tierMult" and n.effect.tier == k then inc *= n.effect.mult end
 	end
@@ -143,10 +141,11 @@ function Econ.AllMult(nodes, r2): number
 	if sf > 0 then m *= Econ.Ring2ById.Starfire.effect.mult ^ sf end
 	return m
 end
-function Econ.Income(owned, nodes, r2): number
+-- owned = { [1] = the Asteroid's level, ... }, copies = { [1] = its copies, ... }
+function Econ.Income(owned, copies, nodes, r2): number
 	local total = 0
 	for k = 0, #Econ.Tiers - 1 do
-		if (owned[k + 1] or 0) > 0 then total += Econ.TierIncomeWith(k, owned[k + 1], nodes, r2) end
+		if (owned[k + 1] or 0) > 0 then total += Econ.TierIncomeWith(k, owned[k + 1], math.max(copies[k + 1] or 0, 1), nodes, r2) end
 	end
 	return total * Econ.AllMult(nodes, r2)
 end
@@ -167,14 +166,22 @@ Econ.Comet = {
 	MinEvery = 15,       -- the floor (3 Nov): never more than one comet per 15 s, whatever stacks (Lure + x2 COMETS = 15)
 }
 
------------------------------------------------------------------------- Supernova (design section 1: needs 1M stardust EARNED this run;
--- shards = floor(10 * sqrt(earned / 1M)), +20% with Supernova Readiness). Resets stardust, bodies (the asteroid stays), ring 1.
--- Keeps shards, ring 2, the Supernova count + rank, Essence, the tutorial, the island's pieces.
--- (alpha 2, 3 Nov: the need 1M -> 2M for a ~10 min first run; the shards formula stays on 1M, so the first gives 14)
-Econ.SupernovaNeed = 2e6
-Econ.ShardBase = 1e6
-function Econ.ShardsFor(earned: number, nodes): number
-	if earned < Econ.SupernovaNeed then return 0 end
+------------------------------------------------------------------------ Supernova (feel pass, 5 Nov): the stardust EARNED this run that
+-- Supernova n needs: 300K, then x6, x5, x4, x3, x3 ... (Calc\feel.py: runs 2-6 each shorter than the one before; kept pads,
+-- perks and ring 2 would make a flat need instant). shards = floor(10 * sqrt(earned / 153K)): Supernova 1 still gives 14.
+-- Resets stardust, body levels + copies (the asteroid stays at level 1), the tier unlocks. Keeps shards, ring 2, the count + rank,
+-- Essence, the tutorial, pads, the Cosmic Level and perks.
+Econ.SupernovaNeeds = { 3e5, 1.8e6, 9e6, 3.6e7, 1.08e8 }
+Econ.NeedGrowthAfter = 3
+function Econ.NeedFor(novas: number): number
+	local n = (novas or 0) + 1
+	local list = Econ.SupernovaNeeds
+	if n <= #list then return list[n] end
+	return list[#list] * Econ.NeedGrowthAfter ^ (n - #list)
+end
+Econ.ShardBase = 153000
+function Econ.ShardsFor(earned: number, nodes, novas: number?): number
+	if earned < Econ.NeedFor(novas or 0) then return 0 end
 	local base = 10 * math.sqrt(earned / Econ.ShardBase)
 	for _, n in ipairs(Econ.Ring1) do
 		if nodes[n.id] and n.effect.kind == "shardBonus" then base *= 1 + n.effect.pct / 100 end
@@ -198,9 +205,9 @@ for _, p in ipairs(Econ.Potions) do Econ.PotionsById[p.id] = p end
 ------------------------------------------------------------------------ tutorial (design steps 1-4; Regrowth lesson: Essence
 -- per step + a step counter). Friends test: "1/4".."4/4", 1 Essence each, then TUTORIAL COMPLETE (owner 2 Nov)
 Econ.Tutorial = {
-	{ id = "BuyAsteroid", hint = "Buy an asteroid", essence = 1 },
+	{ id = "BuyAsteroid", hint = "UPGRADE your Asteroid", essence = 1 },
 	{ id = "FirstLight", hint = "Get FIRST LIGHT (free)", essence = 1 },
-	{ id = "FirstMoon", hint = "Get your first Moon", essence = 1 },
+	{ id = "FirstMoon", hint = "UNLOCK the Moon", essence = 1 },
 	{ id = "Comet", hint = "Tap the comet!", essence = 1 },
 	-- (design steps 5-7, alpha part 1): the SUPERNOVA goal bar to 50%, the Supernova itself, the first ring-2 node
 	{ id = "HalfSupernova", hint = "Grow to 50% SUPERNOVA", essence = 1 },

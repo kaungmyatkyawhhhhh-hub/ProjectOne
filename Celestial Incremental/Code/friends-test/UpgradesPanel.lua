@@ -182,9 +182,15 @@ function Panel:attr(name: string)
 	local s = self.subject
 	return s and s:GetAttribute(name)
 end
+-- each body type's LEVEL and copies (feel pass)
 function Panel:owned(): { number }
 	local t = {}
 	for k = 1, #Econ.Tiers do t[k] = self:attr("Own" .. k) or 0 end
+	return t
+end
+function Panel:copies(): { number }
+	local t = {}
+	for k = 1, #Econ.Tiers do t[k] = self:attr("Copies" .. k) or 0 end
 	return t
 end
 function Panel:nodes()
@@ -222,7 +228,7 @@ function Panel:setButton(row, state: string, price: number?, label: string?)
 	row.fx = Kit.box(row.frame, 0, 0, 446, 110, { ZIndex = 9 })
 	local c1, c2 = GREEN1, GREEN2
 	if state == "no" or state == "locked" or state == "visit" then c1, c2 = GREY1, GREY2 elseif state == "owned" then c1, c2 = VIO1, VIO2 end
-	local b, inner, _, shadow = Kit.button(row.frame, 288, 30, 146, 52, c1, c2, { ZIndex = 6 })
+	local b, inner, _, shadow = Kit.button(row.frame, 288, if row.copyRow then 14 else 30, 146, if row.copyRow then 62 else 52, c1, c2, { ZIndex = 6 })
 	row.btn, row.btnShadow = b, shadow
 	local z = inner.ZIndex
 	if state == "owned" then
@@ -356,7 +362,7 @@ end
 function Panel:bodyRow(i, k: number)
 	local tier = Econ.Tiers[k + 1]
 	local look = TIER_LOOK[k + 1]
-	local row = { frame = self:newRowFrame(i, look[1]) }
+	local row = { frame = self:newRowFrame(i, look[1]), copyRow = true }
 	Kit.icon(row.frame, tier.icon, -8, 2, if tier.icon == "comet" then 96 else 90, look[4], { ZIndex = 7 })
 	local lv = Kit.text(row.frame, 16, Kit.ps(82, 80), 60, 18, "LV 0", Kit.ps(12, 20), { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
 	Kit.text(row.frame, 86, Kit.ps(10, 4), 300, 28, tier.name, 22, { ZIndex = 8, gradient = ColorSequence.new(hex(look[2]), hex(look[3])) })
@@ -394,7 +400,8 @@ function Panel:bodyRow(i, k: number)
 			self:setButton(row, "locked", nil, tier.lockedText)
 			return
 		end
-		local each = Econ.TierIncomeWith(k, 1, n, r2) * Econ.AllMult(n, r2)
+		local each = Econ.TierIncomeWith(k, 1, 1, n, r2) * Econ.AllMult(n, r2)
+		if row.copyBtn then row.copyBtn.Visible = Econ.Unlocked(k, n, r2) and own > 0 end
 		if not Econ.Unlocked(k, n, r2) then
 			Kit.setText(lv, "LOCKED")
 			Kit.setText(desc, "opens with " .. node.name .. ", " .. fmt(each) .. "/s each")
@@ -407,17 +414,48 @@ function Panel:bodyRow(i, k: number)
 			self.targets["Unlock" .. k] = row.btn
 			return
 		end
+		local copies = math.max(self:copies()[k + 1] or 0, 1)
 		Kit.setText(lv, "LV " .. own)
-		local nextM = Econ.NextMilestone(own)
-		Kit.setText(desc, "earns " .. fmt(each) .. "/s each" .. (if nextM then ", x2 at " .. nextM else ""))
-		local now = Econ.TierIncomeWith(k, own, n, r2) * Econ.AllMult(n, r2)
-		local after = Econ.TierIncomeWith(k, own + 1, n, r2) * Econ.AllMult(n, r2)
+		local nextAt = Econ.NextTierAt(own)
+		Kit.setText(desc, Econ.TierName(own) .. (if copies > 1 then " x" .. copies else "") .. (if nextAt then ", x2 at Lv " .. nextAt .. " (" .. Econ.TierNames[Econ.NamedTier(own) + 1] .. ")" else ""))
+		local now = Econ.TierIncomeWith(k, own, copies, n, r2) * Econ.AllMult(n, r2)
+		local after = Econ.TierIncomeWith(k, own + 1, copies, n, r2) * Econ.AllMult(n, r2)
 		self:chip(row, fmt(now) .. "/s", fmt(after) .. "/s")
 		local cost = Econ.Cost(k, own)
-		self:setButton(row, if self:stardust() >= cost then "buy" else "no", cost)
+		self:setButton(row, if self:stardust() >= cost then "buy" else "no", cost, if own > 0 then nil else "UNLOCK")
 		self.targets["Body" .. k] = row.btn
+		self:copyButton(row, k, own, copies)
 	end
 	return row
+end
+
+-- +BODY (feel pass): a small purple button under the row's main button; one tap = one more copy in orbit (max 5)
+function Panel:copyButton(row, k: number, level: number, copies: number)
+	local full = copies >= Econ.MaxCopies
+	local cost = Econ.CopyCost(k, copies)
+	local state = if not self:canAct() then "visit" elseif full then "max" elseif self:stardust() >= cost then "buy" else "no"
+	local key = state .. "|" .. fmt(cost)
+	if row.copyKey == key and row.copyBtn then
+		row.copyBtn.Visible = level > 0
+		return
+	end
+	row.copyKey = key
+	if row.copyBtn then row.copyBtn:Destroy() row.copyShadow:Destroy() end
+	local c1, c2 = VIO1, VIO2
+	if state == "no" or state == "visit" then c1, c2 = GREY1, GREY2 end
+	local b, inner, _, shadow = Kit.button(row.frame, 288, 84, 146, 22, c1, c2, { ZIndex = 6 })
+	row.copyBtn, row.copyShadow = b, shadow
+	local label = if state == "max" then "MAX BODIES" elseif state == "visit" then "VISIT" else "+BODY  " .. fmt(cost)
+	Kit.text(inner, 0, 1, 146, 18, label, Kit.ps(12, 14), { ZIndex = inner.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY,
+		TextColor3 = if state == "no" then hex("#ff9a9a") else Color3.new(1, 1, 1) })
+	b.Visible = level > 0
+	self.targets["Copy" .. k] = b
+	if state == "buy" then
+		b.MouseButton1Click:Connect(function()
+			if self:dragged() then return end
+			self:try(row, "BuyCopy", k)
+		end)
+	end
 end
 
 function Panel:nodeRow(i, node, look)

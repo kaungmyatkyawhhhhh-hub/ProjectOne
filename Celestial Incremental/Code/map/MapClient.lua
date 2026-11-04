@@ -81,7 +81,7 @@ end
 -- star systems + name plates
 ------------------------------------------------------------------------
 local systems = {} -- [island] = { folder, star, planets = { {piece, parts, r, speed, angle} }, rings, motes, plate, h, near }
-local seenTiers = {} -- [island] = BodyTiers last built (a new tier's planet flies in)
+local seenTiers = {} -- [island] = bodies in orbit last built (a new type's / copy's body flies in)
 local loaded = false -- (true 2 s after start: pops and fly-ins only for changes after the map has loaded)
 
 local SY = MapConfig.System
@@ -233,21 +233,34 @@ local function buildSystem(island)
 	end
 	local slot = island:GetAttribute("Slot") or 1
 	local span = math.max(SY.MaxPlanets - 1, 1)
-	for k = 1, sys.planets do
-		local r = SY.OrbitMin + (SY.OrbitMax - SY.OrbitMin) * (k - 1) / span
-		local tilt = CFrame.Angles(math.rad(8 * k), 0, math.rad(4 * k))
-		local ring = Kit.Make("OrbitRing", { Name = "Orbit", Fit = { "X", r * 2 }, CFrame = CFrame.new(top) * tilt, Color = C.Orbit, Parent = folder })
-		table.insert(s.rings, ring)
-		local pd = SY.PlanetMin + (SY.PlanetMax - SY.PlanetMin) * (k - 1) / span
-		local planet = Kit.Make("Planet", { Name = "Planet", Fit = { "Y", pd }, CFrame = CFrame.new(top), Color = MapConfig.PlanetColors[(k - 1) % #MapConfig.PlanetColors + 1],
-			Reflectance = 0.1, Parent = folder })
-		table.insert(s.planets, { piece = planet, parts = Kit.Parts(planet), r = r, tilt = tilt, speed = 0.9 / k, angle = k * 1.9 + slot })
+	-- the BODIES (feel pass, 5 Nov): one orbit per body type you have, its copies (+BODY, max 5) spaced round it; each
+	-- copy's surface = the type's named tier (MapConfig.BodyLooks). Island attribute Sys = "namedTier:copies," per type
+	local types = {}
+	for t, n in string.gmatch(island:GetAttribute("Sys") or "", "(%d+):(%d+)") do table.insert(types, { tier = tonumber(t), copies = tonumber(n) }) end
+	local total = 0
+	for k, ty in ipairs(types) do
+		if ty.tier > 0 and ty.copies > 0 then
+			local r = SY.OrbitMin + (SY.OrbitMax - SY.OrbitMin) * (k - 1) / span
+			local tilt = CFrame.Angles(math.rad(8 * k), 0, math.rad(4 * k))
+			local ring = Kit.Make("OrbitRing", { Name = "Orbit", Fit = { "X", r * 2 }, CFrame = CFrame.new(top) * tilt, Color = C.Orbit, Parent = folder })
+			table.insert(s.rings, ring)
+			local pd = SY.PlanetMin + (SY.PlanetMax - SY.PlanetMin) * (k - 1) / span
+			local look = MapConfig.BodyLooks[math.clamp(ty.tier, 1, #MapConfig.BodyLooks)]
+			local base = MapConfig.PlanetColors[(k - 1) % #MapConfig.PlanetColors + 1]
+			for c = 1, ty.copies do
+				local size = pd * (if c == 1 then 1 else 0.8)
+				local body = Kit.Make(if k == 1 then "RockBare" else "Planet", { Name = "Body", Fit = { if k == 1 then "X" else "Y", size }, CFrame = CFrame.new(top),
+					Color = base:Lerp(look.color, look.blend), Material = look.material, Reflectance = if look.material == Enum.Material.Ice then 0.15 else 0, Parent = folder })
+				table.insert(s.planets, { piece = body, parts = Kit.Parts(body), r = r, tilt = tilt, speed = 0.9 / k, angle = k * 1.9 + slot + (c - 1) * (2 * math.pi / ty.copies) })
+				total += 1
+			end
+		end
 	end
-	-- a body tier that just appeared: its planet flies in from high up and snaps into its orbit, with a sparkle
+	-- a new body type or copy: the newest one flies in from high up and snaps into its orbit, with a sparkle
 	local before = seenTiers[island]
-	seenTiers[island] = tiers
-	if before and tiers > before and #s.planets > 0 and loaded then
-		local pl = s.planets[math.min(tiers, #s.planets)]
+	seenTiers[island] = total
+	if before and total > before and #s.planets > 0 and loaded then
+		local pl = s.planets[#s.planets]
 		pl.flyFrom = top + Vector3.new(0, 40, 0) + (workspace.CurrentCamera.CFrame.RightVector * 30)
 		pl.flyAt = os.clock()
 	end
@@ -324,7 +337,7 @@ end
 local function watchIsland(island)
 	if not island:IsA("Model") then return end
 	buildSystem(island)
-	for _, name in ipairs({ "Owner", "OwnerName", "Tier", "BodyTiers", "Supernovas", "Rank", "Ready", "Color", "Belt" }) do
+	for _, name in ipairs({ "Owner", "OwnerName", "Tier", "BodyTiers", "Supernovas", "Rank", "Ready", "Color", "Belt", "Sys" }) do
 		island:GetAttributeChangedSignal(name):Connect(function() buildSystem(island) end)
 	end
 	local pieces = island:WaitForChild("Pieces", 10)

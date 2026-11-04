@@ -563,12 +563,14 @@ local function onGoal()
 	local tutStep = player:GetAttribute("TutStep") or 0
 	local novas = player:GetAttribute("Supernovas") or 0
 	goal.Visible = tutStep >= 4 or novas >= 1
-	local k = math.clamp((player:GetAttribute("EarnedRun") or 0) / Econ.SupernovaNeed, 0, 1)
+	local need = player:GetAttribute("SupernovaNeed") or Econ.NeedFor(novas)
+	local k = math.clamp((player:GetAttribute("EarnedRun") or 0) / need, 0, 1)
 	goalFill.Size = UDim2.fromOffset(math.floor(204 * k), 16)
 	goalFill.Visible = k > 0
 	Kit.setText(goalText, if k >= 1 then "SUPERNOVA READY!" else "SUPERNOVA " .. math.floor(k * 100) .. "%")
 end
 player:GetAttributeChangedSignal("EarnedRun"):Connect(onGoal)
+player:GetAttributeChangedSignal("SupernovaNeed"):Connect(onGoal)
 player:GetAttributeChangedSignal("TutStep"):Connect(onGoal)
 player:GetAttributeChangedSignal("Supernovas"):Connect(onGoal)
 onGoal()
@@ -588,7 +590,7 @@ onIncome()
 local function onEssence() Kit.setText(ess, fmt(player:GetAttribute("Essence") or 0)) end
 player:GetAttributeChangedSignal("Essence"):Connect(onEssence)
 onEssence()
--- a new body: its chime; crossing 25 / 50 / 100... = the x2 milestone sound instead (one sound per buy, also for BUY MAX)
+-- a level: the body chime; a new NAMED TIER (every 10 levels, x2) = the milestone sound instead (one sound per buy, also MAX)
 local lastOwn = owned()
 for k = 1, #Econ.Tiers do
 	player:GetAttributeChangedSignal("Own" .. k):Connect(function()
@@ -597,11 +599,12 @@ for k = 1, #Econ.Tiers do
 		local was = lastOwn[k] or 0
 		lastOwn[k] = now
 		if now <= was then return end
-		local crossed = false
-		for _, at in ipairs(Econ.Milestones) do
-			if was < at and now >= at then crossed = true end
-		end
+		local crossed = was > 0 and Econ.NamedTier(now) > Econ.NamedTier(was)
 		Kit.sound(if crossed then "milestone" else "buyBody")
+	end)
+	-- +BODY: a new copy flies into orbit (the map shows it); the chime
+	player:GetAttributeChangedSignal("Copies" .. k):Connect(function()
+		if open then refreshRows() end
 	end)
 end
 for _, n in ipairs(Econ.Ring1) do player:GetAttributeChangedSignal("Node_" .. n.id):Connect(function() if open then refreshRows() end end) end

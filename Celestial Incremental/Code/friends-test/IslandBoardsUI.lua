@@ -8,8 +8,9 @@
 --           once bought); the branches not in the game yet are "?" with what opens them. A tap SELECTS a node (no buy)
 --  * Info   the Tree's partner only: the node selected on the TREE (icon, name, LEVEL, value + green step, what it does,
 --           progress, BUY with its shard cost under it); nothing selected: "Tap a node on the TREE"
---  * Bodies buying bodies only (Regrowth's MACHINES): rows: name, LEVEL, TIER, +x/s, UPGRADE (cost above it), M (max), the
---           boost ("x4"); a tier you haven't opened is "???" (a silhouette) with its UNLOCK price
+--  * Bodies buying bodies only (Regrowth's MACHINES): rows: name, LEVEL + named tier, the bar to the next tier, +x/s,
+--           UPGRADE (cost above it), M (max), +BODY (a copy, cost above it), the copies ("x3") on the icon; a type you
+--           haven't opened is "???" (a silhouette) with its UNLOCK price
 --  * Stars  ring 1 only, all 7 nodes (Regrowth's FACTORY UPGRADES): cards: name, short text, icon, value + step, star level
 --           badge, UPGRADE + price
 -- Every screen: rounded corners in its frame's colour, a dark screen, an animated neon edge in the board's colour; the stand
@@ -214,7 +215,8 @@ end
 
 function UI:attr(name: string) local s = self.ctx.subject return s and s:GetAttribute(name) end
 function UI:stardust(): number return tonumber(self:attr("Stardust")) or 0 end
-function UI:owned(k: number): number return tonumber(self:attr("Own" .. (k + 1))) or 0 end
+function UI:owned(k: number): number return tonumber(self:attr("Own" .. (k + 1))) or 0 end -- (the LEVEL)
+function UI:copies(k: number): number return tonumber(self:attr("Copies" .. (k + 1))) or 0 end
 function UI:nodes()
 	local t = {}
 	for _, n in ipairs(Econ.Ring1) do t[n.id] = self:attr("Node_" .. n.id) == true end
@@ -513,7 +515,7 @@ function UI:infoCost(text: string?, can: boolean)
 	ui.cost.Parent.Position = UDim2.fromOffset(if isNumber then ui.costX else 40, ui.costY)
 end
 
------------------------------------------------------------------------- BODIES (Regrowth's MACHINES)
+------------------------------------------------------------------------ BODIES (Regrowth's MACHINES; feel pass: levels + copies)
 function UI:buildBodies()
 	local W, H = self.size.X, self.size.Y
 	local sf, scroll = Kit.scroller(self.gui, 30, 72, W - 60, H - 96, "Y", { ZIndex = 4, pointer = self.ctx.pointer })
@@ -531,25 +533,47 @@ function UI:buildBodies()
 		local _ = hit -- (the row only takes the press, so a drag scrolls the list; a tap does nothing else)
 		local r = { st = st }
 		r.img = Kit.icon(row, tier.icon, 8, 8, 80, tier.colour, { ZIndex = 6 })
+		-- the copies on the icon's corner ("x3")
+		r.copiesText = Kit.text(row, 52, 60, 44, 28, "", 22, { ZIndex = 9, TextXAlignment = RIGHT, TextColor3 = GOLD_TEXT, stroke = 2, FontFace = Kit.FONT_HEAVY })
 		r.name = Kit.text(row, 96, 2, 200, 32, tier.name, 28, { ZIndex = 8, FontFace = Kit.FONT_HEAVY, gradient = ColorSequence.new(hex(TIER_TITLE[k + 1][1]), hex(TIER_TITLE[k + 1][2])) })
-		r.level = Kit.text(row, 98, 34, 190, 20, "", 17, { ZIndex = 8, stroke = 1.4 })
-		r.tier = Kit.text(row, 98, 53, 190, 18, "", 15, { ZIndex = 8, TextColor3 = GREY_TEXT, stroke = 1.3 })
+		r.level = Kit.text(row, 98, 33, 196, 20, "", 17, { ZIndex = 8, stroke = 1.4 })
+		-- the bar to the next named tier ("-> IRON") + its numbers
+		local bar = Kit.box(row, 98, 56, 118, 10, { BackgroundTransparency = 0, BackgroundColor3 = hex("#221d2a"), ZIndex = 6 })
+		Kit.corner(bar, 5)
+		Kit.stroke(bar, Kit.INK, 1.5)
+		r.barFill = Kit.box(bar, 0, 0, 0, 10, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 7 })
+		Kit.corner(r.barFill, 5)
+		Kit.grad(r.barFill, self.spec.Neon:Lerp(WHITE, 0.45), self.spec.Neon, 90)
+		r.bar = bar
+		r.tier = Kit.text(row, 222, 52, 80, 18, "", 14, { ZIndex = 8, TextColor3 = GOLD_TEXT, stroke = 1.3 })
 		r.rateIcon = Kit.icon(row, "stardust", 95, 71, 22, nil, { ZIndex = 7 })
 		r.rate = Kit.text(row, 119, 70, 170, 22, "", 18, { ZIndex = 8, TextColor3 = GREEN_TEXT, stroke = 1.5 })
 		r.costIcon = Kit.icon(row, "stardust", 300, 6, 22, nil, { ZIndex = 7 })
-		r.cost = Kit.text(row, 326, 6, 150, 22, "", 18, { ZIndex = 8, stroke = 1.5 })
-		r.up = action(row, 300, 32, 170, 54, 22, 6)
-		r.max = action(row, 478, 32, 54, 54, 26, 6)
-		r.boost = Kit.text(row, rw - 92, 6, 80, 30, "", 26, { ZIndex = 8, TextXAlignment = RIGHT, TextColor3 = GOLD_TEXT, stroke = 2, FontFace = Kit.FONT_HEAVY })
+		r.cost = Kit.text(row, 326, 6, 130, 22, "", 18, { ZIndex = 8, stroke = 1.5 })
+		r.up = action(row, 300, 32, 150, 54, 22, 6)
+		r.max = action(row, 456, 32, 50, 54, 26, 6)
+		-- +BODY (purple, like Regrowth's +MACHINE) with its cost above it
+		r.copyIcon = Kit.icon(row, "stardust", 512, 6, 22, nil, { ZIndex = 7 })
+		r.copyCost = Kit.text(row, 536, 6, 90, 22, "", 18, { ZIndex = 8, stroke = 1.5 })
+		r.copy = action(row, 512, 32, rw - 518, 54, 20, 6)
 		holdBuy(r.up.button, function() return self:bodyOnce(k) end, dragged)
 		tap(r.max.button, function()
-			if Econ.Unlocked(k, self:nodes(), self:ring2()) and self:stardust() >= Econ.Cost(k, self:owned(k)) then
+			if Econ.Unlocked(k, self:nodes(), self:ring2()) and self:owned(k) > 0 and self:stardust() >= Econ.Cost(k, self:owned(k)) then
 				self:buy("BuyBodyMax", k)
 			else
 				self.ctx.sound("no")
 			end
 		end, dragged)
+		tap(r.copy.button, function()
+			local c = self:copies(k)
+			if self:owned(k) > 0 and c < Econ.MaxCopies and self:stardust() >= Econ.CopyCost(k, c) then
+				self:buy("BuyCopy", k)
+			else
+				self.ctx.sound("no")
+			end
+		end, dragged)
 		self.targets["Body" .. k] = r.up.button
+		self.targets["Copy" .. k] = r.copy.button
 		self.rows[k] = r
 	end
 	sf.CanvasSize = UDim2.fromOffset(0, #Econ.Tiers * 104 + 8)
@@ -560,24 +584,40 @@ function UI:refreshBodies()
 	local can = self:can()
 	for k, r in pairs(self.rows) do
 		local tier = Econ.Tiers[k + 1]
-		local own = self:owned(k)
-		local mt = Econ.MilestoneTier(own)
+		local lv = self:owned(k)
+		local copies = self:copies(k)
 		local open = Econ.Unlocked(k, n, r2)
+		local have = open and lv > 0
 		local playable = open or unlockNode(k) ~= nil -- (false = a Star tier: ring 2 opens it)
-		-- (a tier you haven't opened: "???" and a silhouette, its price on UNLOCK)
+		-- (a type you haven't opened: "???" and a silhouette, its price on UNLOCK)
 		silhouette(r.img, not open)
 		Kit.setText(r.name, if open then tier.name else "???")
-		shown(r.tier, open)
-		shown(r.rate, open)
-		r.rateIcon.Parent.Visible = open
-		Kit.setText(r.level, if open then "LEVEL " .. own else "LOCKED")
-		Kit.setText(r.tier, "TIER " .. mt .. " " .. Econ.MilestoneNames[mt])
-		local now = Econ.TierIncomeWith(k, own, n, r2) * Econ.AllMult(n, r2)
-		Kit.setText(r.rate, "+" .. fmt(now) .. "/s")
-		local boost = Econ.Milestone(own) * (Econ.TierIncomeWith(k, 1, n, r2) / Econ.TierIncome(k, 1)) * Econ.AllMult(n, r2)
-		Kit.setText(r.boost, if open and own > 0 then fmt(boost) .. "x" else "")
+		Kit.setText(r.copiesText, if have and copies > 1 then "x" .. copies else "")
+		shown(r.rate, have)
+		r.rateIcon.Parent.Visible = have
+		r.bar.Visible = have
+		shown(r.tier, have)
+		if have then
+			Kit.setText(r.level, "LEVEL " .. lv .. " · " .. Econ.TierName(lv))
+			local nextAt = Econ.NextTierAt(lv)
+			if nextAt then
+				local from = nextAt - Econ.TierEvery
+				r.barFill.Size = UDim2.fromOffset(math.floor(118 * math.clamp((lv - from) / Econ.TierEvery, 0, 1)), 10)
+				Kit.setText(r.tier, "> " .. Econ.TierNames[Econ.NamedTier(lv) + 1])
+			else
+				r.barFill.Size = UDim2.fromOffset(118, 10)
+				Kit.setText(r.tier, "MAX")
+			end
+			local now = Econ.TierIncomeWith(k, lv, copies, n, r2) * Econ.AllMult(n, r2)
+			Kit.setText(r.rate, "+" .. fmt(now) .. "/s")
+		else
+			Kit.setText(r.level, "LOCKED")
+		end
 		local costText, costCan = nil, false
-		r.max.show(can and open)
+		r.max.show(can and have)
+		r.copy.show(have)
+		r.copyIcon.Parent.Visible = false
+		shown(r.copyCost, false)
 		if not can then
 			r.up.set("no", "VISIT")
 		elseif not playable then
@@ -595,10 +635,25 @@ function UI:refreshBodies()
 				costText, costCan = fmt(node.cost), sd >= node.cost
 			end
 		else
-			local cost = Econ.Cost(k, own)
-			r.up.set(if sd >= cost then "buy" else "no", "UPGRADE")
+			-- (a Star type opened by ring 2 starts at level 0: its first UPGRADE puts it in orbit)
+			local cost = Econ.Cost(k, lv)
+			r.up.set(if sd >= cost then "buy" else "no", if lv > 0 then "UPGRADE" else "UNLOCK")
 			r.max.set(if sd >= cost then "blue" else "no", "M")
 			costText, costCan = fmt(cost), sd >= cost
+		end
+		if have and can then
+			if copies >= Econ.MaxCopies then
+				r.copy.set("owned", "MAX")
+			else
+				local cc = Econ.CopyCost(k, copies)
+				r.copy.set(if sd >= cc then "owned" else "no", "+BODY")
+				r.copyIcon.Parent.Visible = true
+				shown(r.copyCost, true)
+				Kit.setText(r.copyCost, fmt(cc))
+				r.copyCost.TextColor3 = if sd >= cc then WHITE else RED_TEXT
+			end
+		elseif have then
+			r.copy.set("no", "VISIT")
 		end
 		local isNumber = costText ~= nil and not costText:find(" ")
 		r.costIcon.Parent.Visible = isNumber
