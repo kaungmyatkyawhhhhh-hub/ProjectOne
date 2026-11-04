@@ -1,0 +1,31 @@
+{
+"drop": [
+"WindowInside"
+],
+"id": "lambrini_performante",
+"img_fill": [
+{
+"image": "Image_16",
+"rect": [
+6,
+388,
+112,
+507
+]
+},
+{
+"image": "Image_16",
+"rect": [
+238,
+445,
+506,
+482
+]
+}
+],
+"hub_px": [
+240,
+210,
+46
+]
+}

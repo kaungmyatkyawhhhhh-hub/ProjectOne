@@ -11,3 +11,7 @@ Paths point at the session's temp folder; change them before reuse. Results are 
 - `put_art.py`: a picture projected onto a car's blank screen. `lp700_atlas.py`: the LP700's into its model's atlas.
 - `gallardo_dash.py`: the SL's binnacle in the LP560 Spyder. `mesh_cut.py`: delete faces and keep a part's shading.
 - `cluster_live.py`: Revuelto, SV and Huracan in layers: `preview`, `assets`, `lua` (writes `src/client/LamboClusterArt.lua`); after new pictures upload them and update `cluster_ids.json`.
+- Step 3, in order: `convert_all.sh` (paint_glb + auto_car, hint `keep_big`), `cockpit_all.sh` (the owner's cluster calls), `finish_all.sh` / `finish_car.py` (names, badges out, covers, pieces, surface table), `tools/pack_cars.py`, `pbr_table.py`.
+- `closeups.py`: nose, tail, wheel, hub, dash, seats of a car, to look for logos and holes.
+- `gallardo_dials.py`: the SL's painted needles out of its dash picture.
+- `PbrApply.luau`: SurfaceAppearances on the parts after the Import 3D. `step4_patch.py`: run once after the import.

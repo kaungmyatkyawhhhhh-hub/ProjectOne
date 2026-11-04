@@ -24,7 +24,7 @@ bpy.ops.wm.open_mainfile(filepath=car)
 
 # SL -> Spyder: the middle of the two big dials
 MOVE = Vector((0.3657 - 0.3608, -0.75 + 0.7283, 0.7503 - 0.7924))
-KEEP = ("SeeThrough_SLMI_Cabin1", "SeeThrough_SLMI_Carbon_A1", "SeeThrough_SLMI_Cabin_Suede_A1", "Body_SLMI_Cabin1", "SeeThrough_SLMI_Cabin_A1", "Body_SLMI_Dashboard1")
+KEEP = ("Body_SLMI_Cabin1", "Body_SLMI_Carbon_A1", "Body_SLMI_Cabin_Suede_A1", "Body_SLMI_Cabin_A1", "Body_SLMI_Dashboard1")
 # what's taken, in the SL's own numbers
 X0, X1 = 0.125, 0.60
 Y0, Y1 = -0.84, -0.56

@@ -738,6 +738,12 @@ def main():
     # the rest: one part per material; glass (by name or see-through material) -> SeeThrough_
     def is_glass(o, m):
         n = (o.name + " " + (m.name if m else "")).lower()
+        # hints: materials that really are glass (a name shared by the whole model fools the search)
+        # or ones that aren't
+        if "glass_only" in hint:
+            return bool(m) and any(k.lower() in m.name.lower() for k in hint["glass_only"])
+        if m and any(k.lower() in m.name.lower() for k in hint.get("not_glass", ())):
+            return False
         if any(k in n for k in ("glass", "window", "windshield", "windscreen", "scheibe")) and not any(k in n for k in ("surround", "frame", "light", "lamp", "red", "orange", "mirror")):
             return True
         if m and m.use_nodes and "Principled BSDF" in m.node_tree.nodes:
@@ -813,7 +819,8 @@ def main():
     for o in meshes():
         if not o.data.uv_layers:
             o.data.uv_layers.new(name="UVMap")
-        if tris(o) > MAX_TRIS:
+        # "keep_big": the whole model is kept, tools/lambo/finish_car.py cuts big parts in pieces
+        if tris(o) > MAX_TRIS and not hint.get("keep_big"):
             decimate(o, MAX_TRIS / tris(o) * 0.95, 1e-5)
     # a car made of very many small pieces is still over budget (they are left alone above, as
     # thinning each on its own breaks them up): thin the joined parts, which keeps their shapes

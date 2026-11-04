@@ -30,6 +30,7 @@ local Cars = require(Shared:WaitForChild("Cars"))
 local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 local BrandMarks = require(script.Parent:WaitForChild("BrandMarks"))
 local TailLights = require(script.Parent:WaitForChild("TailLights"))
+local CarFinish = require(script.Parent:WaitForChild("CarFinish"))
 
 local CarSkin = {}
 
@@ -151,7 +152,8 @@ CarSkin.NEEDLE_LENGTH = {
 -- (optional: bg / fg, a read-out's plate and text colours; kind "gear" is a live gear read-out)
 -- (grow: a read-out's plate that much bigger than the printed box; withGear: the gear shown on the
 -- read-out's left, owner, 2026-11-03: "I can't see the speed properly, make it visible")
-export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, bg: Color3?, fg: Color3?, grow: number?, withGear: boolean? }
+-- (aspect: a read-out's height over its width, default 0.45; clear: no plate, only the text; font: its Enum.Font name)
+export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, bg: Color3?, fg: Color3?, grow: number?, withGear: boolean?, aspect: number?, clear: boolean?, font: string? }
 CarSkin.DIAL_NEEDLES = {
 	-- the Chiron family (owner, 2026-11-03): the 2016 Chiron's own screen (its painted needle taken out)
 	-- in all three, with a live needle on the 500 km/h dial, the speed and the gear in its box
@@ -893,7 +895,7 @@ end
 -- tail lamps (owner, 2026-10-17: "add rear tail light for all cars"): a lamp part of the model gets
 -- a red glowing copy over it, a hair bigger; Driving and Traffic brighten it when braking
 local TAIL_COLOR = Color3.fromRGB(150, 0, 6)
-local TAIL_WORDS = { "taillight", "tail light", "tail_light", "brakelight", "brake light", "brake_light", "rearlight", "rear light", "rear_light", "stoplight", "stop light" }
+local TAIL_WORDS = { "lens_red", "taillight", "tail light", "tail_light", "brakelight", "brake light", "brake_light", "rearlight", "rear light", "rear_light", "stoplight", "stop light" }
 local function isTailName(name: string): boolean
 	local n = name:lower()
 	for _, w in TAIL_WORDS do
@@ -2524,7 +2526,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				local size = if digits then dl.length * m * (dl.grow or 1) else dl.length * 2.3 * m
 				local p = Instance.new("Part")
 				p.Name = "DialPanel" .. i
-				p.Size = if digits then Vector3.new(size, size * 0.45, 0.01) else Vector3.new(size, size, 0.01)
+				p.Size = if digits then Vector3.new(size, size * (dl.aspect or 0.45), 0.01) else Vector3.new(size, size, 0.01)
 				p.Transparency = 1
 				p.CanCollide = false
 				p.CanQuery = false
@@ -2576,14 +2578,14 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				if digits then
 					-- the speed in the dial's own unit, like the car's display (Driving fills it in), on
 					-- a dark plate over the fixed number
-					sg.CanvasSize = Vector2.new(200, 90)
+					sg.CanvasSize = Vector2.new(200, 200 * (dl.aspect or 0.45))
 					local label = Instance.new("TextLabel")
 					label.Name = if dl.kind == "gear" then "Gear" else "Speed"
 					label.BackgroundColor3 = dl.bg or Color3.fromRGB(10, 10, 12)
-					label.BackgroundTransparency = 0
+					label.BackgroundTransparency = if dl.clear then 1 else 0
 					label.BorderSizePixel = 0
 					label.Size = UDim2.fromScale(1, 1)
-					label.Font = Enum.Font.GothamBold
+					label.Font = if dl.font then (Enum.Font :: any)[dl.font] else Enum.Font.GothamBold
 					label.TextScaled = true
 					label.TextColor3 = dl.fg or Color3.fromRGB(235, 240, 255)
 					label.TextXAlignment = if dl.kind == "gear" then Enum.TextXAlignment.Center else Enum.TextXAlignment.Right
@@ -2918,6 +2920,9 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		for i = 1, math.min(4, #parts) do
 			parts[i].CastShadow = true
 		end
+	end
+	if not liteMode then
+		CarFinish.apply(id, skin) -- real surfaces on the new imports
 	end
 	model:SetAttribute("Skinned", true)
 	return true

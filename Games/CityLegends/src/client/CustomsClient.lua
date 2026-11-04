@@ -26,6 +26,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
+local CarFinish = require(script.Parent:WaitForChild("CarFinish"))
 
 local CustomsClient = {}
 
@@ -103,7 +104,7 @@ local function kindOf(p: BasePart): string?
 end
 
 -- what each part looked like before any look was put on (to go back)
-type Orig = { color: Color3, material: Enum.Material, reflectance: number, transparency: number, texture: string?, sa: Instance? }
+type Orig = { color: Color3, material: Enum.Material, variant: string, reflectance: number, transparency: number, texture: string?, sa: Instance? }
 local originals: { [BasePart]: Orig } = setmetatable({}, { __mode = "k" }) :: any
 
 local function remember(p: BasePart): Orig
@@ -119,6 +120,7 @@ local function remember(p: BasePart): Orig
 		o = {
 			color = p.Color,
 			material = p.Material,
+			variant = p.MaterialVariant,
 			reflectance = p.Reflectance,
 			transparency = p.Transparency,
 			texture = tex,
@@ -136,6 +138,7 @@ local function restore(p: BasePart)
 	end
 	p.Color = o.color
 	p.Material = o.material
+	p.MaterialVariant = o.variant
 	p.Reflectance = o.reflectance
 	p.Transparency = o.transparency
 	if p:IsA("MeshPart") and o.texture then
@@ -275,8 +278,13 @@ local function paintCar(model: Model, look: Look)
 				end
 				if finish then
 					remember(d)
-					d.Material = finish[1]
-					d.Reflectance = finish[2]
+					local variant = if d:GetAttribute("PbrPaint") then CarFinish.VARIANT[look.finish :: string] else nil
+					if variant then
+						d.MaterialVariant = variant -- (the new imports: real gloss, satin or metal flake)
+					else
+						d.Material = finish[1]
+						d.Reflectance = finish[2]
+					end
 				end
 			elseif kind == "accent" and accent then
 				solid(d, accent)

@@ -78,7 +78,7 @@ SPY_DIALS = {
 
 if donor is None:
     # the SL: a new emission picture, the dash as a solid part
-    o = bpy.data.objects["SeeThrough_SLMI_Dashboard1"]
+    o = bpy.data.objects.get("SeeThrough_SLMI_Dashboard1") or bpy.data.objects["Body_SLMI_Dashboard1"]
     mat = o.material_slots[0].material
     print("GALLARDO emission swapped", fix_material(mat))
     mat.blend_method = "OPAQUE"

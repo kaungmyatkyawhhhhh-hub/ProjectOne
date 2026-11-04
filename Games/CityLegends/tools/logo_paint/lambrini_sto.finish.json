@@ -1,0 +1,38 @@
+{
+"drop": [
+"WindowInside"
+],
+"id": "lambrini_sto",
+"img_fill": [
+{
+"image": "Image_18",
+"rect": [
+6,
+388,
+112,
+507
+]
+},
+{
+"image": "Image_18",
+"rect": [
+120,
+318,
+332,
+366
+]
+}
+],
+"hub_px": [
+240,
+210,
+46
+],
+"cover": [
+0,
+-2.285,
+0.436,
+0.058
+],
+"cover_lift": 0.004
+}

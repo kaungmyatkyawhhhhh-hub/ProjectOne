@@ -609,7 +609,8 @@ def sv(outdir):
 
 
 # --------------------------------------------------------------------------- Aventador LP700
-def lp700(outdir):
+def lp700(outdir, live=False):
+    """live: no needle, speed or big gear letter in the picture (the game draws those: CarSkin.DIAL_NEEDLES)"""
     A = Art("aventador_lp700_cluster_owner.png", (110, 150, 1400, 680), S=4, bg=(7, 7, 8))
     WHITE = (240, 244, 248)
     RED = (226, 30, 40)
@@ -684,7 +685,8 @@ def lp700(outdir):
 
     # the speed box
     A.poly([(870, 444), (979, 443), (965, 483), (845, 483)], (236, 240, 244))
-    A.text(946, 463, "0", TECH, 40, (14, 14, 16), shear=0.22)
+    if not live:
+        A.text(946, 463, "0", TECH, 40, (14, 14, 16), shear=0.22)
     A.text(945, 492, "km/h", ARIAL, 13, (230, 232, 236))
 
     # the gear strip
@@ -692,7 +694,8 @@ def lp700(outdir):
     A.poly([(762, 528), (905, 528), (897, 546), (758, 546)], (12, 14, 16))
     A.line([(760, 517), (954, 517)], GOLD, 1.3)
     A.text(770, 540, "R", TECH, 17, WHITE, shear=0.2)
-    A.text(795, 532, "N", TECH, 42, (232, 214, 32), shear=0.2, stroke=0.4, strokecol=(232, 214, 32))
+    if not live:
+        A.text(795, 532, "N", TECH, 42, (232, 214, 32), shear=0.2, stroke=0.4, strokecol=(232, 214, 32))
     A.text(808, 540, "1234567", TECH, 17.5, WHITE, shear=0.2, track=1.6, anchor="lm")
     A.text(922, 531, "A", TECH, 42, (232, 214, 32), shear=0.2, stroke=0.4, strokecol=(232, 214, 32))
     A.text(819, 568, "STRADA", ARIAL, 18, (230, 196, 40))
@@ -700,12 +703,13 @@ def lp700(outdir):
     A.text(857, 603, "km", ARIAL, 12.5, WHITE)
 
     # the needle, straight down at rest: a pale blade with a red line, the hub with its points
-    A.poly([(741, 430), (758, 430), (752, 640), (747, 640)], (204, 226, 236))
-    A.poly([(744, 392), (755, 392), (752, 366), (747, 366)], (202, 212, 220))
+    if not live:
+        A.poly([(741, 430), (758, 430), (752, 640), (747, 640)], (204, 226, 236))
+        A.poly([(744, 392), (755, 392), (752, 366), (747, 366)], (202, 212, 220))
+        A.line([(749, 358), (751, 640)], (234, 28, 38), 2.6)
+        A.poly([(746, 636), (760, 636), (765, 645), (750, 645)], WHITE)
     A.circle(CX, CY, 25, (176, 186, 194), outline=(226, 232, 238), w=3)
     A.circle(CX, CY, 14, (58, 64, 72), outline=(26, 28, 32), w=2.5)
-    A.line([(749, 358), (751, 640)], (234, 28, 38), 2.6)
-    A.poly([(746, 636), (760, 636), (765, 645), (750, 645)], WHITE)
 
     # the gauges: traced outlines, cells inside
     YEL = (232, 186, 24)
@@ -784,5 +788,5 @@ if __name__ == "__main__":
     if which in ("sv", "all"):
         sv(outdir)
     if which in ("lp700", "all"):
-        lp700(outdir)
+        lp700(outdir, "--live" in sys.argv)
     print("ok")

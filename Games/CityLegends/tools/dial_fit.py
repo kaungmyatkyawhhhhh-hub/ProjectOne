@@ -89,9 +89,9 @@ for dl in spec["dials"]:
         t = math.radians(theta)
         d = math.cos(t) * up_t + math.sin(t) * right_t
         return math.degrees(math.atan2(d @ r, d @ u))
-    if dl["kind"] == "digits":
-        # a live speed read-out: its middle, width (tex px) and the way it faces
-        e = {"kind": "digits", "unit": dl["unit"], "at": game(C - swc), "face": game(n), "length": round(float(np.linalg.norm(right_t)) * dl["w"], 4), "scale": ""}
+    if dl["kind"] in ("digits", "gear"):
+        # a live speed or gear read-out: its middle, width (tex px) and the way it faces
+        e = {"kind": dl["kind"], "unit": dl["unit"], "at": game(C - swc), "face": game(n), "length": round(float(np.linalg.norm(right_t)) * dl["w"], 4), "scale": ""}
         entries.append(e)
         print("DIAL", json.dumps(e))
         if "paint" in dl:
