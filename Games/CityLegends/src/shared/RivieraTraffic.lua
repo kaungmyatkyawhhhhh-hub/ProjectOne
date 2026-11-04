@@ -260,6 +260,21 @@ function RivieraTraffic.build()
 	if not ok or type(data) ~= "table" then
 		return nil
 	end
+	-- (2026-11-04) the Riviera Highway's and the Summit Pass's lanes live in their own module (Studio
+	-- refuses a script over 200,000 characters): numbered on from RivieraLanes', added to its lists
+	local okH, extra = pcall(function()
+		return require(script.Parent:WaitForChild("RivieraLanesHighway", 2))
+	end)
+	if okH and type(extra) == "table" and extra.first == #data.lanes + 1 then
+		local lanesAll, linksAll = table.clone(data.lanes), table.clone(data.links)
+		for _, l in extra.lanes do
+			table.insert(lanesAll, l)
+		end
+		for _, k in extra.links do
+			table.insert(linksAll, k)
+		end
+		data = { lanes = lanesAll, links = linksAll }
+	end
 	local dataLanes, dataLinks = oneLaneStreets(data)
 	dataLinks = mergeRouteEnds(dataLanes, dataLinks)
 	local all, lanes = {}, {}
@@ -281,6 +296,7 @@ function RivieraTraffic.build()
 			seg.lane = l.lane
 			seg.road = l.road -- (the server's start spots use it)
 			seg.route = l.kind == "route" -- the three long routes (yellow on the map)
+			seg.rivHighway = l.highway == true -- the Riviera Highway (Traffic keeps few cars on it)
 			seg.speedK = speedK
 			row[k] = seg
 			table.insert(lanes, seg)
@@ -397,6 +413,7 @@ function RivieraTraffic.build()
 					turn.turnSpeed = 18
 					turn.next = { a }
 					turn.route = a.route -- (a turn onto a route counts as the route)
+					turn.rivHighway = a.rivHighway
 					-- a lane change (way in and way out within 30 degrees): no slowing for it, and it
 					-- weighs like going straight on
 					local dIn = (b.p2 - b.p0) * Vector3.new(1, 0, 1)

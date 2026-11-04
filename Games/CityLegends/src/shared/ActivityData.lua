@@ -150,6 +150,26 @@ if Config.monacoOnly() then
 			table.insert(ActivityData.races, race)
 			ActivityData.raceById[race.id] = race
 		end
+		-- (2026-11-04) the Riviera Highway's race (tools/map_plan/highway.py)
+		local okH, hw = pcall(function()
+			return require(script.Parent:WaitForChild("RivieraHighway", 2))
+		end)
+		if okH and type(hw) == "table" and hw.race then
+			local r = hw.race
+			local race: Race = {
+				id = r.id,
+				name = r.name,
+				start = r.start,
+				startDir = r.dir.Unit,
+				checkpoints = r.checkpoints,
+				length = r.length,
+				gold = r.length / Config.mphToSps(A.GoldMph),
+				silver = r.length / Config.mphToSps(A.SilverMph),
+				bronze = r.length / Config.mphToSps(A.BronzeMph),
+			}
+			table.insert(ActivityData.races, race)
+			ActivityData.raceById[race.id] = race
+		end
 		ActivityData.dispatch = world.dispatch
 		ActivityData.dropPoints = world.dropPoints
 		ActivityData.chips = world.chips

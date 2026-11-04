@@ -224,6 +224,9 @@ Config.Traffic = {
 	-- for the roads which isnt yellow. The yellow road will stay the same"): 1 = one lane in the middle
 	-- of each half (RivieraTraffic), 2 = the old two
 	StreetLanes = 1,
+	-- the Riviera Highway (the mountain highway, 2026-11-04, owner-away prompt: "at most 10 cars in
+	-- total ... so players can drive fast"): traffic cars on it at once
+	RivieraHighwayMax = 10,
 	LeaveRouteK = 0.03, -- how seldom a car turns off a route onto a street
 	StreetRecycle = 260, -- a car off the routes this far from you goes back onto one
 	RivieraMax = 90, -- (64 before, then 32 before that, 2026-11-03: "add more traffic cars throughout the map"; 22 before that; owner 2026-11-02 again: "add more cars traffic")

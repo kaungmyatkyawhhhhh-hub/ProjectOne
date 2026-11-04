@@ -76,6 +76,11 @@ end
 -- Legends Isle's mountain roads (the climbs and the mid ring): only a few cars at a time
 -- (owner, 2026-10-30: "reduce traffic on the mountain"; Config.Traffic.Mountain*)
 local mountainCars = 0
+-- the Riviera Highway (2026-11-04): at most Config.Traffic.RivieraHighwayMax cars on it
+local rivHighwayCars = 0
+local function isRivHighway(s: CityLayout.Segment): boolean
+	return (s :: any).rivHighway == true or (s.kind == "turn" and s.next[1] ~= nil and (s.next[1] :: any).rivHighway == true)
+end
 local function isMountain(s: CityLayout.Segment): boolean
 	return s.mountain == true or (s.kind == "turn" and s.next[1] ~= nil and s.next[1].mountain == true)
 end
@@ -146,6 +151,9 @@ local function chooseNext(seg: CityLayout.Segment): CityLayout.Segment?
 		end
 		if not seg.mountain and isMountain(o) then
 			w *= if mountainCars >= T.MountainMax then 0 else T.MountainTurnK
+		end
+		if not (seg :: any).rivHighway and isRivHighway(o) and rivHighwayCars >= (T.RivieraHighwayMax or 10) then
+			w = 0
 		end
 		return w
 	end
@@ -253,6 +261,9 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 		if (seg :: any).riviera and rivieraCars >= T.RivieraMax then
 			continue
 		end
+		if (seg :: any).rivHighway and rivHighwayCars >= (T.RivieraHighwayMax or 10) then
+			continue
+		end
 		-- (owner, 2026-11-03: "only make it so that there is traffic on the yellow roads ... remove the
 		-- cars on the roads which isn't yellow"): the three long routes get the traffic, the other
 		-- streets only a rare car
@@ -278,6 +289,9 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 			end
 			if (seg :: any).riviera then
 				rivieraCars += 1
+			end
+			if (seg :: any).rivHighway then
+				rivHighwayCars += 1
 			end
 			return seg, s
 		end
@@ -679,7 +693,11 @@ function Traffic.update(dt: number)
 
 	mountainCars = 0
 	rivieraCars = 0
+	rivHighwayCars = 0
 	for _, npc in Traffic.cars do
+		if (npc.seg :: any).rivHighway then
+			rivHighwayCars += 1
+		end
 		if npc.seg.mountain then
 			mountainCars += 1
 		end

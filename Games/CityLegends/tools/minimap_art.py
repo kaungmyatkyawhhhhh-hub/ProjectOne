@@ -11,6 +11,7 @@ Inputs (all in build/, from the map tools):
   build/riviera/meta.json + tile_*.json   the terrain grid (4 studs a cell: height + material)
   build/riviera/roads.json                road centre lines and half widths
   build/minimap/buildings.txt             footprints from the open place (written by the MCP)
+  build/minimap/extra.json                car parks (the marina deck as cell runs + bay lines)
 Output: build/minimap/tile_<col>_<row>.png (1024 x 512 each: bigger pictures didn't load in
 Studio), rim.png, arrow.png, and with --lua <ids.json> the module src/client/MinimapArt.lua.
 
@@ -31,7 +32,8 @@ RIV = os.path.join(ROOT, "build", "riviera")
 OUT = os.path.join(ROOT, "build", "minimap")
 
 # the area drawn (world studs) and its scale: 2 studs a pixel = the minimap's close zoom, 1:1
-X0, Z0 = 10200, -3000
+# (x0 moved west 560 studs on 2026-11-04 so the Riviera Highway's valley is on the map)
+X0, Z0 = 9640, -3000
 SPP = 2.0
 TILE_W, TILE_H = 1024, 512
 COLS, ROWS = 4, 5
@@ -174,6 +176,9 @@ def buildings_layer(draw_shadow, draw_body):
 
 def roads_layer(draw):
     data = json.load(open(os.path.join(RIV, "roads.json")))
+    hw = os.path.join(RIV, "highway.json")  # the Riviera Highway (tools/map_plan/highway.py)
+    if os.path.exists(hw):
+        data["roads"] = data["roads"] + json.load(open(hw))["roads"]
     roads = sorted(data["roads"], key=lambda r: 0 if r["kind"] != "route" else 1)
 
     def stroke(pts, width, color):
@@ -201,6 +206,27 @@ def roads_layer(draw):
         stroke(pts, width, ROUTE if r["kind"] == "route" else STREET)
 
 
+PARKING = (74, 80, 94)
+BAY_LINE = (150, 158, 172)
+
+
+def parking_layer(draw):
+    """car parks drawn from build/minimap/extra.json (2026-11-04: the marina parking): the deck as
+    runs of cells read from the open place, and the painted bay lines"""
+    path = os.path.join(OUT, "extra.json")
+    if not os.path.exists(path):
+        return
+    data = json.load(open(path))
+    for park in data.get("parking", []):
+        step = park.get("step", 2)
+        for z, xa, xb in park["runs"]:
+            a = to_px(xa - step / 2, z - step / 2)
+            b = to_px(xb + step / 2, z + step / 2)
+            draw.rectangle((a[0], a[1], b[0], b[1]), fill=PARKING)
+        for x1, z1, x2, z2 in park.get("lines", []):
+            draw.line((to_px(x1, z1), to_px(x2, z2)), fill=BAY_LINE, width=max(1, SS))
+
+
 def render():
     os.makedirs(OUT, exist_ok=True)
     print("ground...")
@@ -217,6 +243,9 @@ def render():
     roads = Image.new("RGBA", base.size, (0, 0, 0, 0))
     roads_layer(ImageDraw.Draw(roads))
     base.paste(roads, (0, 0), roads)
+    park = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    parking_layer(ImageDraw.Draw(park))
+    base.paste(park, (0, 0), park)
     base.paste(body, (0, 0), body)  # buildings over the pavement edges
     final = base.resize((W, H), Image.LANCZOS)
     final.save(os.path.join(OUT, "whole.png"))
