@@ -687,20 +687,23 @@ def lp700(outdir, live=False):
     A.poly([(870, 444), (979, 443), (965, 483), (845, 483)], (236, 240, 244))
     if not live:
         A.text(946, 463, "0", TECH, 40, (14, 14, 16), shear=0.22)
-    A.text(945, 492, "km/h", ARIAL, 13, (230, 232, 236))
+    if not live:
+        A.text(945, 492, "km/h", ARIAL, 13, (230, 232, 236))
 
     # the gear strip
     A.poly([(756, 520), (954, 520), (934, 547), (756, 547)], (58, 112, 130))
     A.poly([(762, 528), (905, 528), (897, 546), (758, 546)], (12, 14, 16))
     A.line([(760, 517), (954, 517)], GOLD, 1.3)
-    A.text(770, 540, "R", TECH, 17, WHITE, shear=0.2)
+    if not live:
+        A.text(770, 540, "R", TECH, 17, WHITE, shear=0.2)
     if not live:
         A.text(795, 532, "N", TECH, 42, (232, 214, 32), shear=0.2, stroke=0.4, strokecol=(232, 214, 32))
-    A.text(808, 540, "1234567", TECH, 17.5, WHITE, shear=0.2, track=1.6, anchor="lm")
-    A.text(922, 531, "A", TECH, 42, (232, 214, 32), shear=0.2, stroke=0.4, strokecol=(232, 214, 32))
-    A.text(819, 568, "STRADA", ARIAL, 18, (230, 196, 40))
-    A.text(769, 603, "000700", TECH, 17.5, WHITE, shear=0.2, track=1.0, anchor="lm")
-    A.text(857, 603, "km", ARIAL, 12.5, WHITE)
+    if not live:
+        A.text(808, 540, "1234567", TECH, 17.5, WHITE, shear=0.2, track=1.6, anchor="lm")
+        A.text(922, 531, "A", TECH, 42, (232, 214, 32), shear=0.2, stroke=0.4, strokecol=(232, 214, 32))
+        A.text(819, 568, "STRADA", ARIAL, 18, (230, 196, 40))
+        A.text(769, 603, "000700", TECH, 17.5, WHITE, shear=0.2, track=1.0, anchor="lm")
+        A.text(857, 603, "km", ARIAL, 12.5, WHITE)
 
     # the needle, straight down at rest: a pale blade with a red line, the hub with its points
     if not live:
@@ -765,8 +768,9 @@ def lp700(outdir, live=False):
     for y, x0 in ((485, 129), (520, 110), (583, 118), (641, 138)):
         A.line([(x0, y), (300, y)], (190, 120, 40), 1.1)
     A.text(159, 495, "FM", ARIAL, 13, (226, 228, 232))
-    A.text(225, 541, "00:19", TECH, 40, WHITE, shear=0.2, track=2.2)
-    A.text(230, 570, "00.00.0000", TECH, 21, WHITE, shear=0.2, track=1.2)
+    if not live:
+        A.text(225, 541, "00:19", TECH, 40, WHITE, shear=0.2, track=2.2)
+        A.text(230, 570, "00.00.0000", TECH, 21, WHITE, shear=0.2, track=1.2)
     A.text(214, 622, "23.0", ARIAL, 21, (232, 234, 238))
     A.text(266, 622, "°C", ARIAL, 15, (232, 234, 238))
 

@@ -70,6 +70,7 @@ CarSkin.CLUSTER_STYLE = {
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",
 	lexis_lfa = "LFAFitted", -- the ring sized to the model's own round pod
+	lambrini_lp700 = "LiveLP700", -- the real screen from the owner's photo
 	lambrini_lp750 = "LiveSV", -- the real SV screen, redrawn from the owner's photos (tools/lambo/cluster_live.py)
 	-- owner (2026-11-02): the SVJ model's own screen picture made live (DashGauges.aventadorSVJ),
 	-- and the same working screen on the SVJ 63, whose model has a blank one
@@ -122,8 +123,10 @@ CarSkin.CLUSTER_RECT = {
 	lexis_lx700 = { at = Vector3.new(-0.011, 0.0755, -0.114), face = Vector3.new(-0.012, -0.069, 0.9975), w = 0.3288, h = 0.1511 },
 	-- the GT3 in the 718 cabin: the whole hood (its three dials), with the 991's five dials in it
 	porsha_gt3 = { at = Vector3.new(-0.0058, 0.0501, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), w = 0.3, h = 0.118 },
-	-- the LP750 on its 2026-11-04 model: the screen's middle window and both sides
-	lambrini_lp750 = { at = Vector3.new(0.0022, 0.0292, -0.2395), face = Vector3.new(-0.002, 0.107, 0.994), w = 0.37, h = 0.1486 },
+	-- the LP750 and LP700 on their 2026-11-04 models (owner: "go inside like the SVJ", "numbers blurry"): the whole
+	-- screen behind each model's own frame, its ribs lying over it, cut to the openings (tools/lambo/window_*.png)
+	lambrini_lp750 = { at = Vector3.new(0.0043, 0.0403, -0.2442), face = Vector3.new(-0.002, 0.107, 0.994), w = 0.37, h = 0.1486 },
+	lambrini_lp700 = { at = Vector3.new(0.0027, 0.0379, -0.2421), face = Vector3.new(0, 0.108, 0.9942), w = 0.3328, h = 0.1367 },
 	-- the Lamborghini imports: the Revuelto's own screen, the EVO's in all four Huracans
 	lambrini_revuelto = { at = Vector3.new(0.0, 0.0597, -0.222), face = Vector3.new(0, 0.081, 0.997), w = 0.2841, h = 0.1045 },
 	lambrini_huracan = { at = Vector3.new(0.0006, 0.0254, -0.2572), face = Vector3.new(0, 0.407, 0.914), w = 0.283, h = 0.0977 },
@@ -162,19 +165,14 @@ export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3,
 CarSkin.DIAL_NEEDLES = {
 	-- the Lamborghini imports (2026-11-04): the needles the models only had painted (their pictures are
 	-- clean now, tools/lambo/gallardo_dials.py, cluster_art.py --live), with the speed and the gear live
-	lambrini_lp700 = {
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0012, 0.0389, -0.2402), face = Vector3.new(0, 0.108, 0.9942), length = 0.0456, scale = "0:180.0,3000:270.0,6000:360.0,9000:450.0" },
-		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0364, 0.028, -0.239), face = Vector3.new(0, 0.108, 0.9942), length = 0.0224, scale = "", bg = Color3.fromRGB(236, 240, 244), fg = Color3.fromRGB(14, 14, 16), aspect = 0.385 },
-		{ kind = "gear", unit = "", at = Vector3.new(0.0112, 0.0132, -0.2374), face = Vector3.new(0, 0.108, 0.9942), length = 0.0086, scale = "", fg = Color3.fromRGB(232, 214, 32), aspect = 1.05, clear = true, grow = 2.2 },
-	},
 	lambrini_lp570 = {
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0832, 0.0341, -0.2253), face = Vector3.new(-0.0056, 0.5422, 0.8402), length = 0.0425, scale = "0:-129.7,1000:-103.2,2000:-76.6,3000:-52.1,4000:-27.5,5000:-3.6,6000:20.6,7000:46.0,8000:73.2,9000:99.5,10000:125.4" },
-		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0836, 0.0348, -0.2258), face = Vector3.new(-0.0415, 0.543, 0.8387), length = 0.0424, scale = "0:-130.0,40:-99.8,70:-77.1,100:-53.8,130:-30.5,160:-9.0,190:12.5,220:33.5,250:56.3,280:78.9,310:102.3,340:125.2" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0828, 0.0354, -0.2191), face = Vector3.new(0.0015, 0.597, 0.8022), length = 0.0425, scale = "0:-129.7,1000:-103.2,2000:-76.6,3000:-52.1,4000:-27.5,5000:-3.6,6000:20.6,7000:46.0,8000:73.2,9000:99.5,10000:125.4" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.083, 0.0354, -0.2191), face = Vector3.new(-0.0014, 0.597, 0.8022), length = 0.0424, scale = "0:-130.0,40:-99.8,70:-77.1,100:-53.8,130:-30.5,160:-9.0,190:12.5,220:33.5,250:56.3,280:78.9,310:102.3,340:125.2" },
 		{ kind = "gear", unit = "", at = Vector3.new(0.0008, 0.0023, -0.1951), face = Vector3.new(0, 0.7421, 0.6703), length = 0.0586, scale = "", bg = Color3.fromRGB(22, 24, 28), fg = Color3.fromRGB(240, 240, 244), aspect = 0.17, font = "Sarpanch" },
 	},
 	lambrini_lp560 = { -- (the Superleggera's binnacle: tools/lambo/gallardo_dash.py)
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0834, 0.017, -0.251), face = Vector3.new(-0.0056, 0.5422, 0.8402), length = 0.0425, scale = "0:-129.7,1000:-103.2,2000:-76.6,3000:-52.1,4000:-27.5,5000:-3.6,6000:20.6,7000:46.0,8000:73.2,9000:99.5,10000:125.4" },
-		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0834, 0.0177, -0.2514), face = Vector3.new(-0.0415, 0.543, 0.8387), length = 0.0424, scale = "0:-130.0,40:-99.8,70:-77.1,100:-53.8,130:-30.5,160:-9.0,190:12.5,220:33.5,250:56.3,280:78.9,310:102.3,340:125.2" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.083, 0.0183, -0.2448), face = Vector3.new(0.0015, 0.597, 0.8022), length = 0.0425, scale = "0:-129.7,1000:-103.2,2000:-76.6,3000:-52.1,4000:-27.5,5000:-3.6,6000:20.6,7000:46.0,8000:73.2,9000:99.5,10000:125.4" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0828, 0.0183, -0.2448), face = Vector3.new(-0.0014, 0.597, 0.8022), length = 0.0424, scale = "0:-130.0,40:-99.8,70:-77.1,100:-53.8,130:-30.5,160:-9.0,190:12.5,220:33.5,250:56.3,280:78.9,310:102.3,340:125.2" },
 		{ kind = "gear", unit = "", at = Vector3.new(0.0007, -0.0148, -0.2208), face = Vector3.new(0, 0.7421, 0.6703), length = 0.0586, scale = "", bg = Color3.fromRGB(22, 24, 28), fg = Color3.fromRGB(240, 240, 244), aspect = 0.17, font = "Sarpanch" },
 	},
 	-- the Chiron family (owner, 2026-11-03): the 2016 Chiron's own screen (its painted needle taken out)
@@ -266,10 +264,14 @@ CarSkin.DIAL_NEEDLES = {
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
+local GALLARDO_DIALS = {
+	{ faceless = true, image = "rbxassetid://79007040683644", faceR = 120, needle = Color3.fromRGB(232, 56, 24), needleW = 6, hubRing = Color3.fromRGB(46, 48, 54), hubR = 18 },
+	{ faceless = true, image = "rbxassetid://108838218351791", faceR = 120, needle = Color3.fromRGB(232, 56, 24), needleW = 6, hubRing = Color3.fromRGB(46, 48, 54), hubR = 18 },
+}
 CarSkin.FACELESS_DIALS = {
-	lambrini_lp700 = { { faceless = true, needle = Color3.fromRGB(235, 40, 46), needleW = 4 } },
-	lambrini_lp570 = { { faceless = true, needle = Color3.fromRGB(238, 92, 40), needleW = 6, hubRing = Color3.fromRGB(58, 62, 68), hubR = 18 } },
-	lambrini_lp560 = { { faceless = true, needle = Color3.fromRGB(238, 92, 40), needleW = 6, hubRing = Color3.fromRGB(58, 62, 68), hubR = 18 } },
+	-- (the Gallardos' big dials redrawn sharp: tools/lambo/gallardo_art.py; faceR: the dial's rim, 100 = one needle length)
+	lambrini_lp570 = GALLARDO_DIALS,
+	lambrini_lp560 = GALLARDO_DIALS,
 	bugotti_chiron = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
 	bugotti_chiron_pursport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
 	bugotti_chiron_supersport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
@@ -344,6 +346,7 @@ CarSkin.CABIN_RECOLOUR = {
 -- model parts hidden by name, per cabin (the SV's own cluster screen is only a picture: the live
 -- AventadorSV / LP700 designs cover it; owner, 2026-10-24: "hide the old already in cluster")
 CarSkin.HIDE_PARTS = {
+	lambrini_lp750 = { Body_Screen = true, Body_Screen2 = true, Body_Screen3 = true }, -- (the live screen stands in for them, behind the frame)
 } :: { [string]: { [string]: boolean } }
 
 -- a matte black panel behind a swapped-in dash, closing gaps where the donor cabin doesn't meet
@@ -2163,6 +2166,19 @@ local function drawDialFace(sg: SurfaceGui, dl: DialSpec, look: { [string]: any 
 		-- only the needle (drawn by the caller) over the model's own dial
 		sg.CanvasSize = Vector2.new(200, 200)
 		sg.LightInfluence = 0
+		if look.image then
+			local R = look.faceR or 100
+			sg.CanvasSize = Vector2.new(2 * R, 2 * R)
+			sg.LightInfluence = 0.35 -- (white faces: lit, not burning; night stays readable)
+			sg.Brightness = 1.15
+			local face = Instance.new("ImageLabel")
+			face.BackgroundTransparency = 1
+			face.Image = look.image
+			face.Size = UDim2.fromScale(1, 1)
+			face.ZIndex = 1
+			face.Parent = sg
+			return R
+		end
 		return 100
 	end
 	local R = look.r + (look.bezelW or 0) + 4

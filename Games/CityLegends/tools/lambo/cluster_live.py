@@ -14,12 +14,14 @@ import json
 import math
 import os
 import sys
+import tempfile
 
 import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cluster_art import ARIAL, ARIAL_B, REFS, REG, ROBO_B, TECH, TECH_R, Art, font, streaks  # noqa: E402
+from cluster_art import lp700 as lp700_art  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..", "..")
@@ -843,6 +845,57 @@ def sv():
     return sp
 
 
+# ------------------------------------------------------------------------------------ LP700
+def lp700():
+    """one sharp picture behind the model's frame, like the SV and the SVJ (owner, 2026-11-04: "numbers
+    blurry"; it was a 1024 atlas). The real car's screen is one picture, so the photo maps onto the
+    frame at one scale. No needle in the picture: the marker is the needle."""
+    box = (110, 150, 1400, 680)
+    sp = Spec("lp700", box[2] - box[0], box[3] - box[1], 2.0, 1.55, box[0], box[1])
+    sp.redline, sp.idle = 8.5, 0.9
+    tmp = tempfile.mkdtemp()
+    lp700_art(tmp, True)
+    im = Image.open(os.path.join(tmp, "lp700_art.png")).convert("RGB")
+    sp.bg = im.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+    CX, CY = 749.0, 412.0
+
+    def pol(v, r):
+        a = math.radians(-180.0 + v * 30.0)
+        return CX + r * math.sin(a) - sp.ox, CY - r * math.cos(a) - sp.oy
+
+    sp.marker = {"color": (238, 30, 40), "w": 3.4, "glow": 0, "pts": [(v / 4, *pol(v / 4, 27), *pol(v / 4, 224)) for v in range(0, 39)]}
+    K = sp.A
+    Q = 4
+    YEL = (232, 214, 32)
+
+    def yellow(ch):
+        m = letter_mask(ch, TECH, 42, K, 0.2, stroke=0.4)
+        out = Image.new("RGBA", m.size, YEL + (0,))
+        out.putalpha(m)
+        return out.resize((m.width // Q, m.height // Q), Image.LANCZOS)
+
+    sp.gear = {"x": 838 - sp.ox, "y": 532 - sp.oy, "sprites": {ch: {"im": yellow(ch)} for ch in "RN1234567"}}
+    WHITE = (240, 244, 248)
+    sp.font("speed", TECH, 40, "0123456789", stroke=0.25, shear=0.22, track=0.6)
+    sp.readout("speed", 963, 463, "r", 3, "speed", (14, 14, 16))
+    sp.font("unit", ARIAL, 13, "kmhpi/", shear=0)
+    sp.readout("unit", 945, 492, "m", 4, "unit", (230, 232, 236))
+    sp.font("strip", TECH, 17.5, "RN1234567", shear=0.2, track=1.6)
+    sp.readout("strip", 822, 540, "r", 4, "gearLeft4", WHITE)
+    sp.readout("strip", 856, 540, "l", 4, "gearRight4", WHITE)
+    sp.font("mode", ARIAL, 18, "SPORTCA", shear=0)
+    sp.readout("mode", 819, 568, "m", 5, "mode", (230, 196, 40))
+    sp.font("odo", TECH, 17.5, "0123456789", shear=0.2, track=1.0)
+    sp.readout("odo", 769, 603, "l", 6, "odo", WHITE)
+    sp.font("dist", ARIAL, 12.5, "kmi", shear=0)
+    sp.readout("dist", 857, 603, "m", 2, "distUnit", WHITE)
+    sp.font("clock", TECH, 40, "0123456789:", shear=0.2, track=2.2)
+    sp.readout("clock", 225, 541, "m", 5, "clock", WHITE)
+    sp.font("date", TECH, 21, "0123456789.", shear=0.2, track=1.2)
+    sp.readout("date", 230, 570, "m", 10, "date", WHITE)
+    return sp
+
+
 # ------------------------------------------------------------------------------------ Huracan
 def huracan():
     box = (100, 305, 940, 595)
@@ -1101,8 +1154,9 @@ def huracan():
 
 
 # -------------------------------------------------------------------------------------- main
-BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan}
+BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700}
 PREVIEW = {
+    "lp700": ("aventador_lp700_cluster_owner.png", (110, 150, 1400, 680), None, dict(v=3.0, gear="2", mph=31, manual=False, clock="10:45", date="10.08.2019")),
     # ref, the view in the ref, the same view in the design's pixels, a state
     "revuelto": ("revuelto_cluster_driving_owner_2.png", (235, 215, 1405, 645), None, dict(v=6.0, gear="1", mph=23, manual=True, clock="10:45", odo="000350", range="200", station="Radio Riviera")),
     "sv": ("aventador_sv_cluster_driving_owner.png", (40, 95, 1270, 610), (28, 92, 712, 365), dict(v=8.0, gear="5", mph=162.2, manual=True, lights=True, tcoff=True, odo="004600", range="130", gAccel="0.2", clock="06:04", stationShort="Radio Riviera")),
@@ -1168,6 +1222,8 @@ def spec_lua(sp, ids):
     w("\t\tW = %s, H = %s, A = %s, split = %s, idle = %s, redline = %s," % (num(sp.W), num(sp.H), num(sp.A), num(sp.W / 2), num(sp.idle), num(sp.redline)))
     w('\t\tbg = { "%s", "%s" },' % (ids.get(sp.name + "_bg_1", ""), ids.get(sp.name + "_bg_2", "")))
     w("\t\tsheets = { " + ", ".join('"%s"' % ids.get("%s_sheet_%d" % (sp.name, i + 1), "") for i in range(len(pk_sheets))) + " },")
+    if os.path.exists(os.path.join(HERE, "window_%s.png" % sp.name)):
+        w("\t\tclear = true,")
     if sp.bg_tint:
         w('\t\ttint = { "%s", %d, %d, %d },' % (sp.bg_tint["when"], *sp.bg_tint["color"]))
     w("\t\tblocks = {")
@@ -1214,7 +1270,20 @@ def spec_lua(sp, ids):
     return out, pk_sheets
 
 
+def masked(sp):
+    """a car whose screen sits behind its frame: the picture cut to the frame's openings
+    (tools/lambo/window_mask.py), so no corner shows past the hood"""
+    p = os.path.join(HERE, "window_%s.png" % sp.name)
+    if not os.path.exists(p):
+        return False
+    m = Image.open(p).convert("L").resize(sp.bg.size, Image.LANCZOS)
+    sp.bg = sp.bg.convert("RGBA")
+    sp.bg.putalpha(m)
+    return True
+
+
 def write_assets(sp, out):
+    masked(sp)
     W, H = sp.bg.size
     half = W // 2
     sp.bg.crop((0, 0, half, H)).save(os.path.join(out, sp.name + "_bg_1.png"))
@@ -1257,7 +1326,7 @@ def main():
     if what == "lua":
         path = os.path.join(ROOT, "src", "client", "LamboClusterArt.lua")
         with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write("-- made by tools/lambo/cluster_live.py (do not edit by hand): the live Revuelto, Aventador SV and\n")
+            f.write("-- made by tools/lambo/cluster_live.py (do not edit by hand): the live Revuelto, Aventador SV, LP700 and\n")
             f.write("-- Huracan screens: pictures, pieces and where they sit. Design pixels; rects in sheet pixels.\n")
             f.write("return {\n" + "\n".join(lua) + "\n}\n")
         print("wrote", path, os.path.getsize(path))

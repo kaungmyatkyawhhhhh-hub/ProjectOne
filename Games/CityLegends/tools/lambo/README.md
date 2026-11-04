@@ -16,3 +16,4 @@ Paths point at the session's temp folder; change them before reuse. Results are 
 - `gallardo_dials.py`: the SL's painted needles out of its dash picture.
 - `PbrApply.luau`: SurfaceAppearances on the parts after the Import 3D. `step4_patch.py`: run once after the import.
 - `cabin_export.py`, `cabin_dark.py`: pale cabin pictures made dark. `LookFixes.luau`: the look pass in `CarModels`. `step4_patch.py` has run (2026-11-04): don't run it again.
+- `frame_probe.py`: depth across a cluster frame. `window_*.png`: a screen cut to the frame's openings. `gallardo_art.py`: the Gallardo's big dials, sharp.

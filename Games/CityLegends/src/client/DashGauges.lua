@@ -3329,6 +3329,9 @@ local function liveCluster(gui: SurfaceGui, name: string): Update
 	if ratio then
 		ratio:Destroy() -- (fills the panel, which is fitted to the car's screen)
 	end
+	if Art.clear then
+		(area.Parent :: Frame).BackgroundTransparency = 1 -- (behind the car's frame: the cut-away corners stay see-through)
+	end
 	local split = Art.split / W
 	local bg1 = new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[1], Size = UDim2.fromScale(split, 1), ZIndex = 1 }, area)
 	local bg2 = new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[2], Position = UDim2.fromScale(split, 0), Size = UDim2.fromScale(1 - split, 1), ZIndex = 1 }, area)
@@ -3544,6 +3547,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	end,
 	LiveSV = function(gui)
 		return liveCluster(gui, "sv")
+	end,
+	LiveLP700 = function(gui)
+		return liveCluster(gui, "lp700")
 	end,
 	LiveHuracan = function(gui)
 		return liveCluster(gui, "huracan")
