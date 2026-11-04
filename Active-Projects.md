@@ -28,6 +28,8 @@ Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, 
 - **3 Nov (overnight, Claude Code, in Studio, not published):** alpha 2 (pace 2M / Starfire x1.75, tutorial 1-7, guide book, licensed sounds + music) + codes/potions, Players Near You board, Store + x2 Stardust pass + Alpha badge (placeholder ids), analytics, phone readability. See [[Celestial Incremental/Progress/2026-11-03 Galaxy Incremental - Overnight summary]].
 - **4 Nov:** x2 Stardust pass (id 2070906361, 249 R$, on sale) + Alpha Player badge (id 4501804696776519) created in Creator Hub (universe 10774273782) and put in GameConfig.
 - **Owner to do:** listen to the sounds; re-upload 10 images to the group; File > Save; publish.
+- **4 Nov, research audit:** [[Celestial Incremental/2026-11-04 Galaxy Incremental - MASTER CHECKLIST (decided vs built)]]: 484 decisions; 222 built, 87 partly, 131 not built, 44 changed. The first ~10 min match the notes; purpose, Star Forge, Tutorial 2 and every come-back reason are not built. Players.MaxPlayers is 60 (design: 8).
+- **STANDING RULE (Galaxy):** before any Galaxy task, read the master checklist and the source notes for that area. Every Progress note lists the checklist rows it built (#) and updates their status in the checklist.
 - **Last updated:** 2026-11-04
 
 ## MOW ARC (Roblox incremental): on hold
