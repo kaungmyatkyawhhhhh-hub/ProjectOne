@@ -342,6 +342,7 @@ Bank.init(ctx, Police)
 Activities.init(ctx)
 Houses.init(ctx)
 require(script.Parent:WaitForChild("Realty")).init(ctx) -- Legends Realty: the house catalogue
+require(script.Parent:WaitForChild("HairpinHotel")).init() -- the Grand Hairpin Hotel's roof terrace
 -- the Summit's gate on Legends Isle (residents only)
 require(script.Parent:WaitForChild("Gate")).init(ctx)
 Hotel.init(ctx)

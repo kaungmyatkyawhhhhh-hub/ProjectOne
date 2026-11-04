@@ -8,10 +8,14 @@
 
 	EntranceRamp.build looks at the real ground: from a point on the lot's edge (facing out to the
 	street) it walks outwards, finds the lot's surface, the pavement, the kerb and the road, and lays
-	a paved slab from the road up to the lot that clears everything in between (the upper hull of
-	the ground's profile, so it is one straight slope wherever it can be). Granite edging runs along
-	both sides. Small props standing in the way (bollards, posts, benches) are hidden; nothing big is
-	touched. Runs on the server when the venue is built.
+	a paved slab from the road's edge up to the lot that clears everything in between (the upper hull
+	of the ground's profile, so it is one straight slope wherever it can be). Granite edging runs
+	along both sides. Small props standing in the way (bollards, posts, benches) are hidden; nothing
+	big is touched. Runs on the server when the venue is built.
+
+	(owner, 2026-11-04: "Dont make the ramp onto the road or else it look bad and affect driving")
+	Nothing is laid on the road any more: the slab ends level with the road at its edge, a dropped
+	kerb (the kerb and pavement pieces across the drive are hidden).
 ]]
 
 local EntranceRamp = {}
@@ -97,7 +101,6 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 
 	-- the ground along the drive (the highest of three lines across it); rays come down from well
 	-- above, so a pavement higher than the lot is found too (props are cleared in a first pass)
-	local roadLook: RaycastResult? = nil
 	local function ground(t: number): (number?, boolean)
 		local best: number? = nil
 		local road = false
@@ -110,13 +113,18 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 				end
 				if k == 0 then
 					road = isRoad(r)
-					if road and not roadLook then
-						roadLook = r
-					end
 				end
 			end
 		end
 		return best, road
+	end
+
+	-- the ground on the drive's middle line only (the lot's and the road's own heights: the lines at the
+	-- sides can catch a bank or a kerb beside the drive)
+	local function middle(t: number): number?
+		local at = p0 + out * t
+		local r = workspace:Raycast(Vector3.new(at.X, p0.Y + 14, at.Z), Vector3.new(0, -60, 0), params)
+		return if r then r.Position.Y else nil
 	end
 
 	local IN = 18 -- how far into the lot the slope may start, for a lot well below or above the street
@@ -124,13 +132,15 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 
 	-- the profile along the drive and the slab's line over it (the upper hull): the shortest slab
 	-- that is no steeper than MAX_SLOPE, starting on the lot (up to IN inside it) and ending on the road
-	local function plan(): (number?, { Vector2 }, { Vector2 }, number, number, number)
-		local top = ground(0)
+	local function plan(knownRoadT: number?): (number?, { Vector2 }, { Vector2 }, number, number, number)
+		local top = middle(-1) or ground(0)
 		if not top then
 			return nil, {}, {}, 0, 0, 0
 		end
 		local samples: { Vector2 } = {}
-		local roadT: number? = nil
+		-- (after the kerb is hidden the rays reach the asphalt-coloured ground under it: the road's edge
+		-- stays where the first look found it)
+		local roadT: number? = knownRoadT
 		local t = -IN
 		while t <= reach do
 			local h, road = ground(t)
@@ -160,15 +170,16 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 			end
 			return best
 		end
-		local cap = math.max(top, hAt(roadT)) + 3
+		local roadY = middle(roadT + 1) or hAt(roadT) -- (the slab ends level with the road)
+		local cap = math.max(top, roadY) + 3
 		local function hullFor(t0: number, t1: number): ({ Vector2 }, number)
 			local pts: { Vector2 } = { Vector2.new(t0, hAt(t0)) }
 			for _, sm in samples do
-				if sm.X > t0 and sm.X < t1 then
+				if sm.X > t0 and sm.X < t1 - 1 then
 					table.insert(pts, Vector2.new(sm.X, math.min(sm.Y, cap)))
 				end
 			end
-			table.insert(pts, Vector2.new(t1, hAt(t1)))
+			table.insert(pts, Vector2.new(t1, if t1 >= roadT then roadY else hAt(t1)))
 			local hull = upperHull(pts)
 			local steep = 0
 			for i = 1, #hull - 1 do
@@ -179,17 +190,16 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 			end
 			return hull, steep
 		end
-		local bestHull, bestT0, bestT1, bestSteep = nil, 0, roadT + 2.5, math.huge
+		local t1 = roadT -- (the road's edge: never onto the road)
+		local bestHull, bestT0, bestT1, bestSteep = nil, 0, t1, math.huge
 		for t0 = 0, -IN, -2 do
-			for t1 = roadT + 2.5, roadT + 12, 1.5 do
-				local hull, steep = hullFor(t0, t1)
-				-- the gentlest; among the gentle enough ones, the shortest
-				local ok = steep <= MAX_SLOPE
-				local bestOk = bestSteep <= MAX_SLOPE
-				local better = if ok and bestOk then (t1 - t0) < (bestT1 - bestT0) - 0.01 elseif ok ~= bestOk then ok else steep < bestSteep - 0.002
-				if bestHull == nil or better then
-					bestHull, bestT0, bestT1, bestSteep = hull, t0, t1, steep
-				end
+			local hull, steep = hullFor(t0, t1)
+			-- the gentlest; among the gentle enough ones, the shortest
+			local ok = steep <= MAX_SLOPE
+			local bestOk = bestSteep <= MAX_SLOPE
+			local better = if ok and bestOk then (t1 - t0) < (bestT1 - bestT0) - 0.01 elseif ok ~= bestOk then ok else steep < bestSteep - 0.002
+			if bestHull == nil or better then
+				bestHull, bestT0, bestT1, bestSteep = hull, t0, t1, steep
 			end
 		end
 		return top, samples, bestHull :: { Vector2 }, bestT0, bestT1, roadT
@@ -232,11 +242,15 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 		local hid = 0
 		for _, part in workspace:GetPartBoundsInBox(box, Vector3.new(W - 1, 16, tEnd - math.max(tStart, 0)), op) do
 			local sz = part.Size
-			if part.CanCollide and math.max(sz.X, sz.Y, sz.Z) < 24 and sz.X * sz.Z < 60 then
+			-- (railings: their long pieces too, and all of them: the drive goes through; left standing, the
+			-- slab rose over them in a hump)
+			local nm = string.lower(part.Name)
+			local railing = string.find(nm, "rail", 1, true) ~= nil or string.find(nm, "plinth", 1, true) ~= nil or string.find(nm, "baluster", 1, true) ~= nil or string.find(nm, "post", 1, true) ~= nil or string.find(nm, "bollard", 1, true) ~= nil
+			if part.CanCollide and (railing or (math.max(sz.X, sz.Y, sz.Z) < 24 and sz.X * sz.Z < 60)) then
 				local surfaceY = surfaceAt(hull, (part.Position - p0):Dot(out))
 				local partTop = part.Position.Y + sz.Y / 2
 				local bottom = part.Position.Y - sz.Y / 2
-				if partTop > surfaceY + 0.4 and bottom < surfaceY + 4 and partTop - bottom > 0.8 then
+				if railing or (partTop > surfaceY + 0.4 and bottom < surfaceY + 4 and partTop - bottom > 0.8) then
 					part.CanCollide = false
 					part.CanQuery = false
 					part.Transparency = 1
@@ -253,25 +267,72 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 		end
 		return hid
 	end
-	if clearProps() > 0 then
-		local t2, s2, h2, a2, e2, r2 = plan()
+	-- the road's kerb and pavement across the drive: hidden, so the slab comes down level with the road
+	local function dropKerb(): number
+		local riv = workspace:FindFirstChild("Riviera")
+		local roads = riv and riv:FindFirstChild("Roads")
+		if not roads then
+			return 0
+		end
+		local t0, t1 = math.max(roadT - 18, 0), roadT + 1.2
+		local c = p0 + out * ((t0 + t1) / 2)
+		local op = OverlapParams.new()
+		op.FilterType = Enum.RaycastFilterType.Include
+		op.FilterDescendantsInstances = { roads }
+		local hid = 0
+		for _, part in workspace:GetPartBoundsInBox(CFrame.lookAt(c, c + out), Vector3.new(W, 24, t1 - t0), op) do
+			if part.Name == "Kerb" or part.Name == "Pavement" then
+				local rel = part.Position - p0
+				if rel:Dot(out) < roadT + 1.2 and math.abs(rel:Dot(right)) <= W / 2 then
+					part.CanCollide = false
+					part.CanQuery = false
+					part.Transparency = 1
+					hid += 1
+				end
+			end
+		end
+		return hid
+	end
+	-- ground standing above the straight line from the lot to the road's edge: dug away, or the drive
+	-- would hump over it
+	local function digGround(): boolean
+		local roadY = middle(roadT + 1) or top
+		local over = 0
+		for _, sm in samples do
+			if sm.X > 0.5 and sm.X < roadT - 0.5 then
+				local line = top + (roadY - top) * sm.X / roadT
+				over = math.max(over, sm.Y - line)
+			end
+		end
+		if over < 0.5 then
+			return false
+		end
+		local a = Vector3.new(p0.X, top, p0.Z)
+		local e = p0 + out * roadT
+		local b = Vector3.new(e.X, roadY, e.Z)
+		-- (piece by piece along the drive, each level across: 4-stud voxels go by their centres)
+		local len = (b - a).Magnitude
+		for d = 0, len, 6 do
+			local q = a:Lerp(b, d / len)
+			workspace.Terrain:FillBlock(CFrame.lookAt(q, q + out) * CFrame.new(0, 6, 0), Vector3.new(W + 8, 18, 8), Enum.Material.Air)
+		end
+		return true
+	end
+	local function replan()
+		local t2, s2, h2, a2, e2, r2 = plan(roadT)
 		if t2 then
 			top, samples, hull, tStart, tEnd, roadT = t2, s2, h2, a2, e2, r2
 		end
 	end
-	-- split the line where the road begins: the part out on the road is laid in the road's own
-	-- asphalt (a dropped-kerb apron), the rest in paving with granite edges
-	local kerbT = roadT - STEP / 2
-	if kerbT > hull[1].X and kerbT < hull[#hull].X then
-		local split: { Vector2 } = {}
-		for i, pt in hull do
-			table.insert(split, pt)
-			local nx = hull[i + 1]
-			if nx and pt.X < kerbT and nx.X > kerbT then
-				table.insert(split, Vector2.new(kerbT, surfaceAt(hull, kerbT)))
-			end
-		end
-		hull = split
+	local cleared = clearProps()
+	cleared += dropKerb()
+	if cleared > 0 then
+		replan()
+	end
+	if digGround() then
+		-- (rays see the dug ground a moment later)
+		task.wait(0.25)
+		replan()
 	end
 
 	local model = Instance.new("Model")
@@ -279,10 +340,6 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 	model.Parent = parent
 	local color = o.color or Color3.fromRGB(128, 124, 118)
 	local mat = o.material or Enum.Material.Pavement
-	local roadColor, roadMat = Color3.fromRGB(52, 52, 56), Enum.Material.Asphalt
-	if roadLook and roadLook.Instance:IsA("BasePart") then
-		roadColor, roadMat = (roadLook.Instance :: BasePart).Color, (roadLook.Instance :: BasePart).Material
-	end
 	local edge = o.edge or GRANITE
 	local surface: { CFrame } = {}
 	for i = 1, #hull - 1 do
@@ -306,10 +363,9 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 			local topB = Vector3.new(pb.X, b.Y, pb.Z)
 			local cf = CFrame.lookAt((topA + topB) / 2, topB, Vector3.yAxis)
 			table.insert(surface, cf)
-			local onRoad = (a.X + b.X) / 2 > kerbT
-			newPart(model, Vector3.new(W, thick, len + 0.08), cf * CFrame.new(0, -thick / 2, 0), if onRoad then roadColor else color, if onRoad then roadMat else mat, true).Name = "RampSlab"
+			newPart(model, Vector3.new(W, thick, len + 0.08), cf * CFrame.new(0, -thick / 2, 0), color, mat, true).Name = "RampSlab"
 			-- granite edging along both sides (no collision: the wheels roll over it)
-			for _, sx in (if onRoad then {} else { -1, 1 }) :: { number } do
+			for _, sx in { -1, 1 } do
 				newPart(model, Vector3.new(0.9, 0.3, len + 0.08), cf * CFrame.new(sx * (W / 2 - 0.45), 0.1, 0), edge, Enum.Material.Granite, false).Name = "RampEdge"
 				-- and down the side, so the slab reads as stone, not a floating plate
 				newPart(model, Vector3.new(0.3, thick, len + 0.08), cf * CFrame.new(sx * (W / 2 + 0.12), -thick / 2 + 0.05, 0), edge, Enum.Material.Granite, false).Name = "RampSide"
