@@ -333,3 +333,28 @@ Prompt: [[2026-11-04 GYM ARC Prompt - Plate tiers FINAL (7 Nov part 9)]]. Number
   - "all" is refused.
 - Panel screenshot: `Downloads\gem_update_import\screens_4Nov_plates\16_admin_panel_gem_switches.jpg`.
 
+### Plates fix pass + optimization (4 Nov, later)
+Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 6.
+
+**Done:**
+- No step over 3% of a machine's top: the biggest is now 2.2%. Barbells use whole-lb plates where 5s jumped too far; dumbbells and stacks go +1.25% a step.
+- Thinner plates with gaps, so the 8 plates read as separate plates.
+- SmoothPlastic colours: Gold is yellow, Platinum blue-grey, Ruby and Diamond have glowing faces.
+- The dark clamp handle that crossed "M WEIGHTS" is gone.
+- Stacks and dumbbells show the bright tier colour and white numbers.
+- Plates are built on each player's client: the real plates within 60 studs, one cylinder a side further away, pooled parts.
+- A Diamond 8 bar is now 24 parts (was 34) and the 735 bar 42 (was 56). In the Gem Mine plate parts went from 415 to 272; in the whole game, 5,579 replicated parts became 492 on the client.
+
+**For the owner:**
+- Import the plate mesh (IMPORT_LIST "PLATE MESH"). With it, about 18-30 parts a bar.
+
+**Not done / not proven:**
+- **FPS:** Studio caps its own rendering when its window isn't focused (15 FPS even looking at the sky), so FPS before/after can't be measured here. Removing every plate didn't change FPS, so plates aren't the bottleneck there.
+- **Phone FPS:** not tested.
+- **Mesh:** waiting for the owner's import.
+- **Cable stack front:** the pin covers the middle digit; the back reads clean.
+- **Colours:** read warmer and darker in the Gem Mine's lighting than in the concept.
+
+**Test switch:** Studio `TestPlateStep` (Workspace attribute).
+
+**Screens:** `screens_4Nov_plates_fix`.

@@ -25,6 +25,8 @@ For [[2026-11-04 GYM ARC Prompt - Plate tiers FINAL (7 Nov part 9)]]. Everything
   - Checked by script: **all 753 barbell weights add up exactly, none over 8 main + 2 change.** All 48 steps on every machine rise and add up exactly.
 
 ## 3. Plate values per machine (v_0 STANDARD … v_6 DIAMOND, lb per plate)
+**Replaced by section 6 (fix pass, same day): no step over 3%, whole-lb plates where 5s jumped too far.**
+
 | Machine (top weight) | v_0 | BRONZE | SILVER | GOLD | PLAT | RUBY | DIAMOND | Step 1 → Diamond 8 |
 |---|---|---|---|---|---|---|---|---|
 | Starter bench (315) | 20 | 25 | 30 | 35 | 40 | 45 | 50 | 375 → 845 |
@@ -70,3 +72,64 @@ Every bench copy uses the bench ladder up to its own top. Every squat / deadlift
   - Studio PC FPS by the bench: 36.
   - **Not tested on a phone.**
 - **Screenshots:** `Downloads\gem_update_import\screens_4Nov_plates\` (Gem bench 735, Bronze 1 / 4 / 8, Silver 8, Gold 8, Ruby 8, Diamond 8, Gem squat, Gem curl stack, dumbbells, the Plate Forge, the Forge shop).
+
+## 6. FIX PASS + OPTIMIZATION (4 Nov, later; owner's briefs in [[2026-11-04 GYM ARC Prompt - Plate tiers FINAL (7 Nov part 9)]])
+### Step size: no step over 3% of the machine's top weight
+- **Barbells** use 5 lb plates only where every step then stays within 3%. Otherwise they use whole-lb plates. Only the 1085 squat / deadlift keeps 5s.
+- v_0 is the smallest plate that still puts step 1 above the top weight.
+- **Dumbbells and one-stack machines** (cable, bodyweight, strongman) show no plate stack. Each of their steps is top x (1 + 1.25% x n), in whole lb, always at least 1 lb up.
+- Checked by script on all 30 machine types: the biggest step is **2.2%** (squat rack 455), every step goes up, and every barbell still adds up exactly.
+
+| Machine (top) | Step 1 | Diamond 8 | Biggest step | Plates v0 ... v6 |
+|---|---|---|---|---|
+| Starter bench (315) | 321 | 509 | 1.9% | 17/19/21/23/25/27/29 |
+| Starter squat / Pro bench (455) | 465 | 733 | 2.2% | 26/28/31/34/37/40/43 |
+| Comp bench (595) | 597 | 957 | 1.3% | 34/38/42/46/49/53/57 |
+| Pro squat (665) | 677 | 1069 | 1.8% | 39/43/47/51/55/60/64 |
+| **Gem bench (735)** | 743 | **1181** | 1.4% | 43/48/52/57/62/66/71 |
+| Comp squat (875) | 887 | 1405 | 1.4% | 52/57/63/68/74/79/85 |
+| Gem squat (1085) | 1095 | 1725 | 1.8% | 65/70/80/85/90/100/105 |
+| Gem dumbbells (290 each) | 294 | 464 | 1.4% | (+1.25% a step) |
+| Lightest dumbbell / stack (100) | 101 | 160 | 2.0% | (+1.25% a step) |
+
+Diamond 8 on the Gem bench is now 1181 (was 1245).
+
+### Looks
+- **Thinner plates:** 0.1 thick (was 0.14), with a 0.035 gap (was 0.015). The 8 plates read as separate plates, not one drum.
+- **Materials:** SmoothPlastic with a little Reflectance. The knitted Metal and Glass are gone from plates.
+  - Inner plates are their tier colour. Only the outer plate gets the band, face and hub (and the standard stripe on its rim).
+  - Ruby: gunmetal plates with a glowing red Neon face. Diamond: platinum plates with an icy-blue Neon face.
+  - Gold is now yellow, not orange; Platinum is blue-grey, apart from Silver.
+  - Bright colours read darker in the Gem Mine's warm, dark light, and Reflectance darkens them more, so it is kept low.
+- **Dark line through "M WEIGHTS":** this was the clamp's dark handle. The clamp is removed.
+- **Stacks and dumbbells:**
+  - The tier's bright colour is on the stack blocks and dumbbell heads.
+  - Every number is white with a dark outline.
+  - The stack's number is taller than the thin block (0.62) and never hangs below the stack. On the front of the cable stack the pin covers the middle digit; the back reads clean.
+- **Numbers:** the 10 digit images load at the start, so a digit seen for the first time no longer shows late ("48" had shown as "4").
+
+### Performance (Studio PC, the Gem Mine, every bar at Diamond 8, same camera)
+| | Before | After |
+|---|---|---|
+| Plate parts in the Gem Mine | 415 (built by the server, sent to every player) | 272 (built by each player's own game) |
+| Plate parts in the whole game | 5,579 on the server, replicated | 492 on this client (near: real plates; up to 320 studs: 1 cylinder a side) |
+| Gem bench, Diamond 8 | 34 | 24 (22 visible) |
+| Gem bench, standard 735 | 56 | 42 (38 visible); about 30 once the plate mesh is in |
+| Draw calls (this view) | 435 | 437 |
+| Triangles (this view) | 177.5k | 175.3k |
+| Render CPU (this view) | 21.7 ms | 22.6 ms |
+
+- **FPS can't be measured here.** Studio caps its own rendering while its window isn't focused: 15 FPS even looking at empty sky with 0 draw calls, and 15 to 41 FPS for the same scene minutes apart.
+- **Plates aren't the cost.** With every plate in the game removed, FPS and render time didn't change. Draw calls barely move because Roblox already batches identical plate parts.
+- **Real gains:** about 5,000 fewer replicated parts, fewer parts per bar, and nothing built for bars far away.
+- **Phone FPS:** still to measure on a real phone.
+
+### How it works now
+- **Server** (`MachineService`): only sets the machine's Tier and PlateRest (where the racked bar sits). It still builds the weight stacks' number tags and the held dumbbells.
+- **Client** (`PlateClient`):
+  - Within 60 studs it builds the real plates (`PlateLook.Specs`); up to 320 studs, one cylinder a side in the tier colour.
+  - Parts are pooled. Every part is Anchored, with no collide, touch or query, Massless, and no shadow except the outer plate's.
+  - `MachineClient` carries them with the bar during a rep.
+- **Mesh** (`PlateLook`): uses the plate mesh (`GymAssets.PlateMesh`) once it's imported (IMPORT_LIST "PLATE MESH"), else one cylinder per plate.
+- **Studio test switch:** Workspace attribute `TestPlateStep` = n (0 = the top weight, 1-48) loads every idle bar with that step.
+- **Screens:** `Downloads\gem_update_import\screens_4Nov_plates_fix\` (01-14 as before, plus 08b Platinum 8 and 12a/12b the stack front and back).
