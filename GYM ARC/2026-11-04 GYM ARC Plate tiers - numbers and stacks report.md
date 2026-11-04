@@ -289,3 +289,69 @@ Players max the weights around Alter 4-5, so Bronze gives PRs through the alter 
 - **Mesh owner:** rbxassetid://112165957173612 belongs to Myanmar Builders Club, the same group as the place. Nothing to re-upload.
 - **Screens:** `Downloads\gem_update_import\screens_4Nov_plates_rack_fix\`. 00 = before; 01 = rack after; 02-08 = one bar per tier at mid range.
 
+## 9. PLATES - 13 PER SIDE (owner, 4 Nov): BUILT
+### What changed
+- **Stack rule:** at most 13 main plates + 2 thin change plates a side. FILL with 45s up to 13 x 45, then SWAP 45 -> 55 -> 65 -> 75 one plate at a time, inner first. The standard weights are visual only: their numbers are unchanged.
+- **Tiers:** 13 steps each (6 x 13 = 78). Step s of tier k = s plates of v_k inside, the rest the tier before. A tier is still +10%, about 0.8% a step. Prices and gates are unchanged; each gate is spread geometrically over 13 steps.
+- **Plate values are whole lb on every barbell.** Rounding to 5 can't keep +10% a tier with 26 plates: the smallest change (+5 lb a plate) adds 130 lb a tier, while +10% of the Gem squat's 1085 is 108 lb. So `PlateTiers.RoundFor` only picks 5 when every step stays within 3% AND every tier ends within 2% of +10%. No machine passes that, so all use whole lb.
+- **The standard plates under Bronze are two neighbouring values.** One even value can't land on the top weight: on the 315 starter bench, 10 lb plates give 305 and 11 lb plates give 331, so Bronze 1 would jump 5.7% (over the 3% rule; the Powerlifting bench would be 4.0%). Now the 13 standard plates add up to the top weight exactly, heavier inside (315: 11 x 5 + 10 x 8). The tier plates still have one value each (`PlateTiers.StandardSide`, `PlateTiers.Side`).
+- **Thinner plates so 13 + 2 fit the sleeve (1.55 studs):** main and tier plates are 0.075 thick (were 0.1) with a 0.025 gap (was 0.035); change plates 0.06 / 0.055 / 0.05 / 0.04. The widest stack is now 1.28 studs.
+- **Dumbbells and one-stack machines:** +10% / 13 a step (about 0.77%), whole lb.
+- **Also updated:** the Pump Shop line ("13 more steps"), the Studio test switch `TestPlateStep` (now 0-78), and the Plate Forge rack, rebuilt with the new Gem bench plates (29 / 32 / 35 / 38 / 41 / 44).
+
+### Step tables
+**Gem bench (top 735, bar 45).** The standard side is 27 x 7 + 26 x 6 = 345.
+
+| Tier (plate) | Steps 1 -> 13 |
+|---|---|
+| Bronze (29) | 739 743 747 751 755 759 763 769 775 781 787 793 799 |
+| Silver (32) | 805 811 817 823 829 835 841 847 853 859 865 871 877 |
+| Gold (35) | 883 889 895 901 907 913 919 925 931 937 943 949 955 |
+| Platinum (38) | 961 967 973 979 985 991 997 1003 1009 1015 1021 1027 1033 |
+| Ruby (41) | 1039 1045 1051 1057 1063 1069 1075 1081 1087 1093 1099 1105 1111 |
+| Diamond (44) | 1117 1123 1129 1135 1141 1147 1153 1159 1165 1171 1177 1183 1189 |
+
+**Starter bench (top 315, bar 45).** The standard side is 11 x 5 + 10 x 8 = 135.
+
+| Tier (plate) | Steps 1 -> 13 |
+|---|---|
+| Bronze (12) | 317 319 321 323 325 329 333 337 341 345 349 353 357 |
+| Silver (13) | 359 361 363 365 367 369 371 373 375 377 379 381 383 |
+| Gold (14) | 385 387 389 391 393 395 397 399 401 403 405 407 409 |
+| Platinum (15) | 411 413 415 417 419 421 423 425 427 429 431 433 435 |
+| Ruby (16) | 437 439 441 443 445 447 449 451 453 455 457 459 461 |
+| Diamond (18) | 465 469 473 477 481 485 489 493 497 501 505 509 513 |
+
+On the starter bench one lb a plate is 26 lb (8% of 315), so whole-lb tiers can't all be +10%. They go +42 (Bronze, from the top), then +26 each, then +52 (Diamond). The worst tier end is 3.7% off its +10% target. On the Gem bench every tier is +78 lb (10.6%), within 1.8%.
+
+### Checks (script over all 30 machine types)
+- Every barbell step adds up exactly (bar + 2 x the side).
+- Nothing is over 13 main + 2 change plates a side.
+- Every step goes up; the biggest step is 1.33% (the 3% rule holds everywhere).
+- Every stack fits the sleeve.
+
+| Machine (top) | Steps | Biggest | Diamond 13 | v0 / v1 ... v6 |
+|---|---|---|---|---|
+| Starter bench (315) | 2-4 lb | 1.27% | 513 | 11 / 12 13 14 15 16 18 |
+| Starter squat / Pro bench (455) | 2-6 lb | 1.32% | 721 | 16 / 18 19 21 23 25 26 |
+| Comp bench (595) | 2-6 lb | 1.01% | 955 | 22 / 23 26 28 30 33 35 |
+| Pro squat (665) | 4-6 lb | 0.90% | 1059 | 24 / 26 29 32 34 37 39 |
+| Gem bench (735) | 4-6 lb | 0.82% | 1189 | 27 / 29 32 35 38 41 44 |
+| Comp squat (875) | 6-8 lb | 0.91% | 1397 | 32 / 35 39 42 45 49 52 |
+| Gem squat (1085) | 8-10 lb | 0.92% | 1735 | 40 / 44 48 53 57 61 65 |
+
+### Triangles and performance (Studio PC)
+- **One Diamond 13 Gem bench, close up: about 10k triangles, 12 draw calls, 32 parts** (2 of them the plate mesh). That is far over the ~1.1k target.
+  - Measured part by part on an empty sky: a Roblox Cylinder part is about 790 triangles up close, and the outer mesh plate about 1,900 with its shadow. 13 plates a side means 24 inner cylinders.
+- **The whole Gem Mine view (same camera as section 6), every bar Diamond 13:** 181.7k triangles, 372 draw calls, render CPU 23.3 ms. With almost no plates (the lightest weight) it is 164.9k and 352. So all the plates together cost about 17k triangles and 20 draw calls (+10%): Roblox simplifies cylinders with distance, and only bars near the camera are expensive.
+- **The fix for close-up bars, ready for the owner's import:** `gymarc_plate_rim.obj` (a 24-sided disc, 92 triangles, made by code: `ClaudeOne\tools\plate_rim_mesh.py`).
+  - Once it is `ReplicatedStorage.GymAssets.PlateRim`, every plain disc (inner plates, sleeves, stripe and glow rings) uses it instead of a Cylinder part: about 2.6k for the discs + 2 x 1,120 for the outer mesh plates, so ~4.9k a bar instead of ~10k. The code path is tested with a stand-in.
+  - Getting to ~1.1k would also need a lower-poly outer plate mesh (24 sides instead of 40).
+- **Phone FPS: not measured.** Studio caps its own frame rate when its window isn't focused (see section 6), so it needs a real phone in a full Gem Mine.
+
+### Bug found while testing: plate numbers vanished after a respawn
+- The game resets PlayerGui on every spawn (StarterGui.ResetPlayerGuiOnSpawn), which deleted PlateNumbersClient's folder. After any respawn, no bar showed a number for the rest of the session.
+- **Fixed:** the folder is made again when it's gone. Tested: forced a respawn, and the numbers came back ("44" on Diamond 13).
+
+**Screens:** `Downloads\gem_update_import\screens_4Nov_plates_13\`. 01-04 Gem bench: 735 / Bronze 7 / Gold 7 / Diamond 13. 05-07 starter bench: 315 / Bronze 13 / Diamond 13.
+

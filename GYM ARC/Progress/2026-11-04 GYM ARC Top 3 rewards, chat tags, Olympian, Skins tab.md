@@ -494,3 +494,19 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - **Up / down arrows (owner: "in the wrong positions"):** they sat at the old card height after the cards grew. Now placed from the multiplier itself: centred on it, 4 px after its text, on PC and phone.
 - Tested in Play on the temp save: 0, 3 and 5 locks (+ the 6th refused), not enough tokens, PC + phone. Screens: `screens_4Nov_genetics_locks`.
 
+### Plates: 13 per side (4 Nov)
+- **Stacks:** at most 13 main + 2 change plates a side (FILL 45s, then SWAP inner first). The standard weights are unchanged.
+- **Tiers:** 6 x 13 = 78 steps, about 0.8% a step, +10% a tier. Prices and gates are unchanged, each gate spread over 13 steps.
+- **Plates are whole lb on every barbell.** Rounding to 5 can't keep +10% with 26 plates.
+- **The standard plates under Bronze are two neighbouring values** that add up exactly to the top weight. Without that, Bronze 1 jumped 5.7% on the starter bench.
+- **Plates are thinner** (0.075) so 13 + 2 fit the sleeve.
+- **Checked on all 30 machines:** every bar adds up exactly; at most 13 + 2 a side; biggest step 1.33%; every step goes up.
+- **Gem bench:** 739 -> 1189. **Starter bench:** 317 -> 513.
+- **Triangles:**
+  - A close-up Diamond 13 bar is about 10k triangles (a Roblox cylinder is ~790), far over the ~1.1k target.
+  - The whole Gem Mine view costs +17k triangles / +20 draw calls for all its plates.
+  - The low-poly rim mesh (92 triangles) is ready for import; the code uses it automatically.
+- **Phone FPS:** not measured (Studio caps it).
+- **Fixed:** plate numbers disappeared after a respawn (PlayerGui reset).
+- Details and both step tables: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 9. Screens: `screens_4Nov_plates_13`.
+

@@ -62,3 +62,8 @@ Results and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - Two earlier versions (levels 400-800, then 25M-1.6B) were replaced the same day.
 - **Built.** The checks and numbers are in the report, section 7.
 
+## Owner 4 Nov: PLATES - 13 PER SIDE (built the same day, report section 9)
+```text
+PLATES - 13 PER SIDE. STACK RULE: max 13 main plates per side (+ up to 2 thin change plates). FILL with 45s up to 13x45, then SWAP 45->55->65->75 one at a time, inner first. Existing weights visual only (numbers unchanged). TIERS: each tier = 13 steps (78 new weights). Each tier still +10% total (~0.8% a step). Per-machine plate values whole lb (round to 5 where the 3% rule allows). Prices and tier gates unchanged; each tier's gate spread geometrically over 13 steps. Re-check: every bar adds up exactly, nothing over 13+2 per side, tris per bar (~1.1k), phone-frame FPS in a full Gem Mine. Send me the new step table for the Gem bench and starter bench. Don't publish.
+```
+
