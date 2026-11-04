@@ -143,6 +143,7 @@ local function decorate(spec, screen: BasePart)
 		local band = fxPart("Title", Vector3.new(2 * hw, 3, 0.05), cf * CFrame.new(0, spec.Height / 2 + P.Lip + P.Bar / 2 - 0.1, front + 0.08))
 		table.insert(parts, band)
 		local tg = faceGui(band, 40)
+		tg.Brightness = B.Brightness
 		local l = Instance.new("TextLabel")
 		l.BackgroundTransparency = 1
 		l.Position = UDim2.new(0, 34, 0, 6)
@@ -311,6 +312,7 @@ local function build(island)
 		gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
 		gui.CanvasSize = canvas
 		gui.LightInfluence = 0
+		gui.Brightness = B.Brightness
 		gui.MaxDistance = B.DrawRange + 40
 		gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		gui.ClipsDescendants = true
@@ -320,7 +322,7 @@ local function build(island)
 		gui.Parent = playerGui
 		b.guis[spec.id] = gui
 		-- (each board its own pointer + canvas; the rest is the island's shared ctx)
-		b.panels[spec.id] = BoardsUI.new(spec.id, gui, spec, setmetatable({ pointer = pointerFor(screen, canvas), size = canvas }, { __index = ctx }))
+		b.panels[spec.id] = BoardsUI.new(spec.id, gui, spec, setmetatable({ pointer = pointerFor(screen, canvas), size = canvas, world = true }, { __index = ctx }))
 		table.insert(b.fx, decorate(spec, screen))
 	end
 	-- live numbers: the owner's attributes (Stardust changes every half second: refresh at most 4 times a second)

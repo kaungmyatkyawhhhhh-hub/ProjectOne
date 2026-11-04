@@ -22,6 +22,7 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
 local TextService = game:GetService("TextService")
+local TextChatService = game:GetService("TextChatService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -286,6 +287,48 @@ local function toast(str: string, colour: Color3?)
 	end)
 end
 shared.GalaxyToast = function(str: string, colour: Color3?) toast(str, colour) end
+
+-- the SERVER BANNER (#392, Phase 1 social): 3 s across the top for everyone, on a player's FIRST Supernova and a CELESTIAL
+-- Forge roll. The potion card's look, wider: shadow, dark plate, the moment's colour on the edge, shine, sparkles.
+local bannerRoot = scaledRoot("Banner", Vector2.new(0.5, 0), 560, 70)
+local function banner(str: string, colour: Color3)
+	for _, c in ipairs(bannerRoot:GetChildren()) do
+		if c:GetAttribute("Banner") then c:Destroy() end
+	end
+	local W, H = 540, 56
+	local b = Kit.box(bannerRoot, 10, -80, W, H)
+	b:SetAttribute("Banner", true)
+	local shadow = Kit.box(b, 0, 4, W, H, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 40 })
+	Kit.corner(shadow, 10)
+	local plate = Kit.box(b, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 41 })
+	Kit.corner(plate, 10)
+	Kit.stroke(plate, Kit.INK, 2.5)
+	Kit.grad(plate, hex("#2a2433"), hex("#121016"), 90)
+	local edge = Kit.box(b, 3, 3, W - 6, H - 6, { ZIndex = 42 })
+	Kit.corner(edge, 8)
+	Kit.stroke(edge, colour, 2, 0.15)
+	Kit.box(b, 12, 5, W - 24, 2, { BackgroundTransparency = 0.5, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 42 })
+	Kit.text(b, 20, Kit.ps(14, 13), W - 40, 30, str, Kit.ps(22, 22), { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 2,
+		TextXAlignment = Enum.TextXAlignment.Center, gradient = ColorSequence.new(colour:Lerp(Color3.new(1, 1, 1), 0.65), colour) })
+	Kit.sparkle(b, 22, 14, 16, 0).ZIndex = 45
+	Kit.sparkle(b, W - 24, 40, 14, 0.5).ZIndex = 45
+	Kit.sparkle(b, W - 60, 10, 10, 0.9).ZIndex = 45
+	Kit.tween(b, { Position = UDim2.fromOffset(10, 4) }, 0.35, Enum.EasingStyle.Back)
+	task.delay(3, function()
+		if not b.Parent then return end
+		Kit.tween(b, { Position = UDim2.fromOffset(10, -80) }, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		task.wait(0.3)
+		b:Destroy()
+	end)
+end
+-- the SYSTEM CHAT line (#392): "<name> went SUPERNOVA (12)!" in the player's rank colour, for everyone in the server
+local function chatLine(str: string, colour: Color3)
+	local channels = TextChatService:FindFirstChild("TextChannels")
+	local general = channels and channels:FindFirstChild("RBXGeneral")
+	if not general then return end
+	local safe = str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+	pcall(function() (general :: TextChannel):DisplaySystemMessage('<font color="#' .. colour:ToHex() .. '"><b>' .. safe .. "</b></font>") end)
+end
 local function floatText(parent, x, y, str, colour: Color3, size)
 	local main, _, holder = Kit.text(parent, x, y, 220, 30, str, size or 18, { ZIndex = 40, TextColor3 = colour })
 	local _2 = main
@@ -638,6 +681,7 @@ function layout()
 	end
 	top.Position = UDim2.new(0.5, 0, 0, math.floor(8 * s))
 	toastRoot.Position = UDim2.new(0.5, 0, 0, math.floor(132 * s)) -- (under the hint line)
+	bannerRoot.Position = UDim2.new(0.5, 0, 0, math.floor(92 * s)) -- (the server banner: under the counter)
 	hot.Position = UDim2.new(0.5, 0, 1, -math.floor(4 * s))
 	local ws = windowScale()
 	if open then winScale.Scale = ws end
@@ -649,6 +693,8 @@ function layout()
 	treeScale.Scale = math.min((room - hintRoom) / 650, (vp.X - 24) / 1124, s)
 	treeWin.Position = UDim2.fromOffset(vp.X / 2, topEdge + hintRoom + (room - hintRoom) / 2)
 	hot.Visible = not (small and (open or treeOpen or sideOpen ~= nil))
+	-- (the music is quieter while a big window is open: UPGRADES, the TREE, the STORE, the FORGE, the GALAXY, the GUIDE BOOK)
+	Kit.musicDuck(open or treeOpen or sideOpen == "E" or sideOpen == "F" or sideOpen == "S" or sideOpen == "G")
 	-- the shards counter, right of the stardust counter; the Cosmic Level, left of it
 	shardsRoot.Position = UDim2.new(0.5, math.floor(144 * s), 0, math.floor(16 * s))
 	levelRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor(16 * s))
@@ -1059,9 +1105,18 @@ event.OnClientEvent:Connect(function(kind, a, b, ...)
 			task.delay(1.2, closeWindow)
 		end
 	elseif kind == "ForgeGlobal" then
-		-- (someone on the server rolled a CELESTIAL core)
-		toast(tostring(a) .. " forged a CELESTIAL core!", hex("#96fff0"))
+		-- (someone on the server rolled a CELESTIAL core: the banner on every screen)
+		banner(string.upper(tostring(a)) .. " FORGED A CELESTIAL CORE!", hex("#96fff0"))
 		Kit.sound("milestone")
+	elseif kind == "SupernovaGlobal" then
+		-- (someone on the server went Supernova: a, count b, rank colour, first; the server sends max 1 per player per 30 s)
+		local colour, first = ...
+		colour = if typeof(colour) == "Color3" then colour else hex("#ffcd5a")
+		chatLine(tostring(a) .. " went SUPERNOVA (" .. tostring(b) .. ")!", colour)
+		if first then
+			banner(string.upper(tostring(a)) .. "'S FIRST SUPERNOVA!", colour)
+			Kit.sound("milestone")
+		end
 	elseif kind == "CometPaid" then
 		floatText(top, 120, 60, "+" .. fmt(b), hex("#9be7ff"), 20)
 	end

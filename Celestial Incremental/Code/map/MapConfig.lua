@@ -149,6 +149,10 @@ MapConfig.Islands = {
 -- BuyRange of the island's centre.
 MapConfig.Boards = {
 	PxPerStud = 50,
+	-- (5 Nov, faded boards: LightInfluence 0 screens at Brightness 1 were washed out by the Atmosphere haze + the GalaxyGrade
+	-- colour correction + bloom; tested 1.5 / 1.8 / 2.2 in Play: 1.8 = whites and the green / purple buttons like the 2D
+	-- window, the dark rows stay dark (2.2 lifts them to purple). Island boards, their titles and the map signs use it)
+	Brightness = 1.8,
 	Stone = Color3.fromRGB(203, 192, 230), StoneLight = Color3.fromRGB(228, 221, 247), StoneDark = Color3.fromRGB(146, 134, 184),
 	Screen = Color3.fromRGB(10, 8, 18),
 	-- the pair: At = the middle of the gap; Bottom = the screen's bottom above the floor; the frame: Lip (the lighter bevel

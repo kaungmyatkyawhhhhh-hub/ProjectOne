@@ -17,7 +17,7 @@ Rule: every phase cites checklist row numbers; Progress notes update the rows. G
 3. **DONE 5 Nov, with the VFX layering pass + the cutscene template (GalaxyCutscene):** [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]]. Small-reward feedback + next goal: income tick / pops, x2 milestone + node buy visuals, "NEXT: <tier> - cost" line, "NEW: <TIER>!" moment (#222, #223, #239, #242, #283, #284, #286).
 4. **DONE 5 Nov (bot 3.7-4.3 min at 250K; owner playtest decides):** First Supernova ~5 min for run 1 only (#77). Ring 2 re-priced: ~38% + capstone unbought at Ignition.
 5. **DONE 5 Nov (20 steps to IGNITION 1, LUMI the star spirit; bot 20/20 at 27.4 min):** Tutorial 2 LAST (it guides through everything above): ~20 goal steps, star-spirit card, Hide/Skip, payout per step, floor beam (#110-#123).
-6. Social basics: friend +10% / group +10%, server message on Supernova, rank aura (#392, #394, #395, #290).
+6. **DONE 5 Nov (friends capped at +30%, owner 5 Nov; 2-player server not run):** [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]]. Social basics: friend +10% / group +10%, server message on Supernova, rank aura (#392, #394, #395, #290).
 
 ## Phase 2 - reasons to come back + the next new thing
 7. Offline earnings + return screen (#411) · daily streak, 3 daily quests, playtime gifts (#412-#414).

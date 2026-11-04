@@ -38,6 +38,11 @@ Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, 
   - GalaxyCutscene template (first Supernova 10 s, Ignition 8 s, Forge rolls by rarity, NEW mini; CELESTIAL server message).
   - Tutorial 2: 20 goal steps to Ignition with LUMI the star spirit card, payouts, beam, run-1 comets + golden comet.
   - See [[Celestial Incremental/Progress/2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]]. Next: Phase 1 step 6, social basics (#392 #394 #395 #290).
+- **5 Nov, Phase 1 step 6 (social) + boards + music (Claude Code, Studio, not published):**
+  - Friends +10% each (max +30%) + group +10%, both add; chips on the HUD; Supernova chat line (1 per 30 s) + banner for first Supernova / Celestial roll; rank aura by tier.
+  - Island boards + map signs Brightness 1.8 (were washed out), opaque board fills.
+  - Music: 5-track APM playlist (shuffle, no repeats, 2 s crossfade, loudness matched); Ethereal Drone gone.
+  - Not tested: 2-player server (low PC memory), real friend boost, real phone. See [[Celestial Incremental/Progress/2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]]. Phase 1 done.
 - **STANDING RULE (Galaxy):** before any Galaxy task, read the master checklist and the source notes for that area. Every Progress note lists the checklist rows it built (#) and updates their status in the checklist.
 - **Last updated:** 2026-11-05
 
@@ -55,6 +60,13 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **4 Nov (Claude Code):** the 9 Lamborghinis converted with logos out, full detail and real surfaces, packed in `Games/CityLegends/imports/new_cars/lambo_*.fbx`. Owner: do the 3 Import 3Ds, then Claude adds them to the game. See [[City Legends/City Legends]].
 - **4 Nov, later:** the 9 Lamborghinis are in Studio with new interiors, lamps, paint and live clusters; 6 new cars on sale in the game code. Old LP700 / LP750 / LP570 kept in `ServerStorage.OldCarModels`. Not published. Owner: test on a phone, decide on the 7 non-commercial models.
 - **Last updated:** 2026-11-04
+
+## MM Shop Bot (Telegram shop for Myanmar): active, new 5 Nov
+Sells digital products (game top-ups, Roblox gift cards, later a CV pack) to Myanmar customers over Telegram. Pay by KBZPay/Wave slip → owner taps Approve → bot delivers. Goal: $100 → $1,000/month.
+- **Details:** [[MM Shop Bot/00 MM Shop Bot Home]] (all notes go in the `MM Shop Bot` folder)
+- **Code:** `Desktop\mmshop_bot\mmshop` on the PC (Claude edits in place).
+- **5 Nov:** bot built + tested (stock delivery, slip check, Approve/Reject, Reloadly auto-buy). Owner to do: fill `.env`, run `run.bat`, make M Game Coin + Reloadly accounts.
+- **Last updated:** 2026-11-05
 
 ## Archived (not worked on, nothing deleted)
 - **Break A Bed** (bed-breaking clicker, archived 28 Oct): released as "[🎉 RELEASE] Break a Bed", 12K Robux spent on ads, ~500 Robux a day (mid Oct). Notes: [[Archive/Break A Bed/Project Overview]].

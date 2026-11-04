@@ -1,5 +1,5 @@
 -- GalaxySettings (Galaxy Incremental, alpha part 2, 3 Nov): the music loop + the SETTINGS window (key Q / the hotbar's Q).
---  * starts the one calm space loop (Galaxy.Sounds.Music) and sets the MUSIC / SOUND EFFECTS volumes from your save
+--  * starts the music playlist (Galaxy.Sounds.Playlist, UIKit) and sets the MUSIC / SOUND EFFECTS volumes from your save
 --  * the SETTINGS window (the v12 frame, Kit.window): MUSIC and SOUND EFFECTS sliders (Kit.slider), heard while you drag;
 --    saved on release (EconRequest "Settings", { music, sfx } -> the VolMusic / VolSfx attributes)
 local Players = game:GetService("Players")

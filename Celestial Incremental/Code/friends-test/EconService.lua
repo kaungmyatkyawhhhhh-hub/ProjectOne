@@ -237,9 +237,13 @@ end
 -- Boosts of the same kind ADD, they don't multiply (#69): Star Surge, the x2 STARDUST potion and the pass are each +1x,
 -- so pass + potion = x3 and all three = x4 (never x8). Upgrades (ring 1, ring 2, milestones) still multiply inside Econ.Income.
 -- (the SURGE POWER perk makes the Star Surge's part stronger for you)
+-- (+ FRIENDS and GROUP (#394 #395): +0.1x per friend in the server, max 3, and +0.1x in the group; s.friends / s.inGroup)
+local function socialOf(s): number
+	return Econ.Social.FriendPer * math.min(s.friends or 0, Econ.Social.FriendMax) + (if s.inGroup then Econ.Social.Group else 0)
+end
 local function stardustBoost(s): number
 	local surge = (surgeMult() - 1) * (1 + Econ.PerksById.SurgePower.per * Econ.PerkLv(s.d.perks, "SurgePower"))
-	return 1 + surge + (if boosting(s, "Stardust") then 1 else 0) + (if s.passX2 then 1 else 0)
+	return 1 + surge + (if boosting(s, "Stardust") then 1 else 0) + (if s.passX2 then 1 else 0) + socialOf(s)
 end
 local function forgeOf(s, kind: string): number
 	return Econ.ForgeEffect(s.d.forge.equipped, s.d.forge.cores, kind)
@@ -270,6 +274,8 @@ local function publish(player: Player, s)
 	local d = s.d
 	player:SetAttribute("Stardust", d.stardust)
 	player:SetAttribute("Income", incomeOf(s))
+	player:SetAttribute("FriendsHere", s.friends or 0)
+	player:SetAttribute("InGroup", s.inGroup == true)
 	player:SetAttribute("EarnedRun", d.earnedRun)
 	player:SetAttribute("Essence", d.essence)
 	player:SetAttribute("TutStep", d.tut)
@@ -439,6 +445,49 @@ local function boardAllowed(player: Player, slot): boolean
 	if not island or not root or island:GetAttribute("Owner") ~= player.UserId then return false end
 	local c = island:GetAttribute("Center")
 	return typeof(c) == "Vector3" and (root.Position - c).Magnitude <= MapConfig.Boards.BuyRange
+end
+
+------------------------------------------------------------------------ social (#394 #395)
+-- the GROUP is asked once when you join (cached in the session); FRIENDS are counted again whenever anyone joins or leaves
+-- (each pair is asked once a server). Studio: Workspace TestFriends = n and TestGroup = true / false override both.
+local friendPair = {} -- ["lowId:highId"] = true / false
+local function areFriends(a: Player, b: Player): boolean
+	local key = math.min(a.UserId, b.UserId) .. ":" .. math.max(a.UserId, b.UserId)
+	if friendPair[key] == nil then
+		if a.UserId <= 0 or b.UserId <= 0 then return false end -- (Studio test players)
+		local ok, yes = pcall(a.IsFriendsWith, a, b.UserId)
+		if not ok then return false end -- (asked again next time)
+		friendPair[key] = yes == true
+	end
+	return friendPair[key]
+end
+local function refreshSocial()
+	local testFriends = if IS_STUDIO then workspace:GetAttribute("TestFriends") else nil
+	local testGroup = if IS_STUDIO then workspace:GetAttribute("TestGroup") else nil
+	for player, s in pairs(sessions) do
+		local n = 0
+		if type(testFriends) == "number" then
+			n = math.max(0, math.floor(testFriends))
+		else
+			for _, other in ipairs(Players:GetPlayers()) do
+				if other ~= player and sessions[other] and areFriends(player, other) then n += 1 end
+			end
+		end
+		local group = if type(testGroup) == "boolean" then testGroup else s.groupCached == true
+		if n ~= s.friends or group ~= s.inGroup then
+			s.friends, s.inGroup = n, group
+			publish(player, s)
+		end
+	end
+end
+local function checkGroup(player: Player, s)
+	local ok, yes = pcall(player.IsInGroup, player, Econ.Social.GroupId)
+	s.groupCached = ok and yes == true
+	refreshSocial()
+end
+if IS_STUDIO then
+	workspace:GetAttributeChangedSignal("TestFriends"):Connect(refreshSocial)
+	workspace:GetAttributeChangedSignal("TestGroup"):Connect(refreshSocial)
 end
 
 request.OnServerInvoke = function(player: Player, action, arg, slot)
@@ -641,6 +690,12 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		publish(player, s)
 		pcall(function() AnalyticsService:LogCustomEvent(player, "PotionUsed", 1, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = p.id }) end)
 		return true, d.boostLeft[p.id]
+	elseif action == "CheckGroup" then
+		-- (after the JOIN GROUP prompt says joined: asked once more, at most every 10 s)
+		if os.clock() - (s.groupAsked or -math.huge) < 10 then return false, "slow" end
+		s.groupAsked = os.clock()
+		checkGroup(player, s)
+		return s.inGroup == true
 	elseif action == "GuideSeen" then
 		if type(arg) ~= "string" or not GUIDE_PAGES[arg] then return false, "bad" end
 		d.guide[arg] = true
@@ -666,6 +721,12 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		publish(player, s)
 		pcall(function() AnalyticsService:LogCustomEvent(player, "Supernova", d.supernovas, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = tostring(got) }) end)
 		task.spawn(save, player, false)
+		-- (#392: everyone in the server sees "<name> went SUPERNOVA (n)!" in chat, in the rank colour, max once per 30 s a
+		-- player; the FIRST Supernova also gets the 3 s banner on every screen)
+		if first or os.clock() - (s.lastNovaMsg or -math.huge) >= Econ.Social.NovaMsgEvery then
+			s.lastNovaMsg = os.clock()
+			event:FireAllClients("SupernovaGlobal", player.DisplayName, d.supernovas, Econ.LevelBand(Econ.LevelOf(d.xpTotal)).colour, first)
+		end
 		return true, got, first
 	end
 	return false, "bad"
@@ -713,6 +774,7 @@ local function onPlayer(player: Player)
 	publish(player, s)
 	checkTutorial(player, s)
 	player:SetAttribute("Loaded", true)
+	task.spawn(checkGroup, player, s)
 	if noSave then warn("[GalaxyEcon] saving is OFF for", player.Name, "(Studio without API access, or no DataStore)") end
 	task.spawn(cometLoop, player, s)
 	-- session milestones (analytics custom event "SessionMinutes", value 5 / 15 / 30), once each per session
@@ -735,6 +797,7 @@ Players.PlayerRemoving:Connect(function(player)
 	end
 	sessions[player] = nil
 	lastReq[player] = nil
+	task.spawn(refreshSocial)
 end)
 Shared.publish = publish
 Shared.save = save

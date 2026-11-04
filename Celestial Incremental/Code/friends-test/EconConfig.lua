@@ -255,6 +255,9 @@ function Econ.LevelOf(totalXP: number): number
 	return lv
 end
 -- the level's NAME (it is the rank over your head: owner 5 Nov, "FLARE III · ✦12"): 9 steps a band, I-IX
+-- SOCIAL (Phase 1, 5 Nov; #394 #395 #392): +10% stardust per FRIEND in your server (max 3 = +30%), +10% in the P&L Studios XP
+-- group; both ADD to the other boosts (#69). The server line "<name> went SUPERNOVA (n)!" is sent at most once per player per 30 s
+Econ.Social = { FriendPer = 0.1, FriendMax = 3, GroupId = 947215423, Group = 0.1, NovaMsgEvery = 30 }
 Econ.LevelBands = {
 	{ name = "SPARK", colour = Color3.fromRGB(255, 205, 90) },
 	{ name = "FLARE", colour = Color3.fromRGB(255, 150, 70) },

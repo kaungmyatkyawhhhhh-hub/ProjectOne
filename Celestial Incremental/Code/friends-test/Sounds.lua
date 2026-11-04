@@ -31,8 +31,20 @@ Sounds.List = {
 	shardIn = { id = 9125530803, volume = 0.35, pitch = 1, vary = 0 },         -- Electronic Blips Sharp Crystalline Beeps (pitch climbs per shard)
 }
 
--- one calm space loop (design 10: "Stardust: calm dreamy synth"), quieter than the effects
-Sounds.Music = { id = 1837463526, volume = 0.35 } -- APM "Ethereal Drone": celestial ambient synth textures, steady
+-- THE MUSIC PLAYLIST (owner 5 Nov: the old loop, APM "Ethereal Drone" 1837463526, was too chill). All APM Music on Roblox.
+-- UIKit plays it: shuffled each session, each track once per shuffle, never the same track twice in a row, 2 s crossfades.
+-- volume = the track's loudness match (x MusicBus): Studio PlaybackLoudness, the average of 7 points through each track
+-- (5 Nov: Final Frontier 116, Into the Sun 139, Go! 144, Future Plans 187, Full Contact 326 -> all ~130).
+-- stop = where the track's silent tail starts (PlaybackRegion; the intros are all under 0.5 s, so they play from 0)
+Sounds.MusicBus = 0.4
+Sounds.MusicCrossfade = 2
+Sounds.Playlist = {
+	{ id = 1844631856, name = "Final Frontier", volume = 1.1, stop = 172.2 },
+	{ id = 1840016117, name = "Into the Sun (b)", volume = 0.95, stop = 196 },
+	{ id = 1840300465, name = "Go!", volume = 0.9, stop = 171 },
+	{ id = 1840772819, name = "Future Plans (A)", volume = 0.7, stop = 188.8 },
+	{ id = 1841008234, name = "Full Contact (a)", volume = 0.4, stop = 106.5 },
+}
 
 -- the Settings sliders start here (0..1)
 Sounds.Default = { music = 0.6, sfx = 0.8 }

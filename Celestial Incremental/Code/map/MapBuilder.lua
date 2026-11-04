@@ -60,6 +60,7 @@ local function surface(p: BasePart, face: Enum.NormalId): SurfaceGui
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	gui.PixelsPerStud = 40
 	gui.LightInfluence = 0
+	gui.Brightness = MapConfig.Boards.Brightness -- (not washed out by the haze + grade + bloom, 5 Nov)
 	gui.MaxDistance = 300
 	gui.Parent = p
 	return gui
@@ -781,12 +782,13 @@ function Builder.BoardFrame(parent: Instance, cf: CFrame, spec, floorY: number, 
 		stone({ Name = "BackPlate", Size = Vector3.new(w + 0.8, h + 0.8, 0.3), CFrame = cf * CFrame.new(0, 0, -0.25), Color = B.Screen })
 		for _, seg in ipairs({ { bl, br }, { br, tr }, { tr, tl }, { tl, bl } }) do
 			piece(seg[1], seg[2], 0.55, 0.6, 0, { Name = "Tube" })
-			piece(seg[1], seg[2], 0.2, 0.2, 0.36, { Name = "NeonTube", Color = spec.Neon, Material = Enum.Material.Neon, CanCollide = false })
+			-- (the neon edge is in front of the screen's plane: never in the way of a click / tap ray)
+			piece(seg[1], seg[2], 0.2, 0.2, 0.36, { Name = "NeonTube", Color = spec.Neon, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false })
 		end
 		for _, p in ipairs({ bl, br, tl, tr }) do
 			stone({ Name = "Joint", Shape = Enum.PartType.Ball, Size = Vector3.new(0.85, 0.85, 0.85), CFrame = cf * CFrame.new(p.X, p.Y, 0) })
 		end
-		piece(Vector2.new(-w * 0.34, h / 2 + 1.2), Vector2.new(w * 0.34, h / 2 + 1.2), 0.3, 0.35, 0, { Name = "GlowStrip", Color = spec.Neon, Material = Enum.Material.Neon, CanCollide = false })
+		piece(Vector2.new(-w * 0.34, h / 2 + 1.2), Vector2.new(w * 0.34, h / 2 + 1.2), 0.3, 0.35, 0, { Name = "GlowStrip", Color = spec.Neon, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false })
 		Builder.BoardBack(parent, cf * CFrame.new(0, 0, -0.55), w + 0.8, h + 0.8, spec.id, nil)
 		legs(parent, cf, w, h, 0.75, floorY, 0.8)
 		local flat = flatOf(cf)

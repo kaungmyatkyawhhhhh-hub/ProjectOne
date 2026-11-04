@@ -20,26 +20,26 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 
 ## Summary
 
-Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]]; feel pass + Ignition 1 + Star Forge: #9 #12-#18 #20-#25 #27 #59-#62 #77 #82-#87 #125 #314 #388 #421 #477, see [[2026-11-05 Galaxy Incremental feel pass, Ignition 1 and the Star Forge]]). Then feel pass NEXT + VFX layering + cutscene template + Tutorial 2: #77-#79 #110-#124 #128 #130 #222 #223 #239 #242 #266 #274 #275 #278 #279 #283-#287 #289 #294 #295 #298 #301 #303, see [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]].
+Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]]; feel pass + Ignition 1 + Star Forge: #9 #12-#18 #20-#25 #27 #59-#62 #77 #82-#87 #125 #314 #388 #421 #477, see [[2026-11-05 Galaxy Incremental feel pass, Ignition 1 and the Star Forge]]). Then feel pass NEXT + VFX layering + cutscene template + Tutorial 2: #77-#79 #110-#124 #128 #130 #222 #223 #239 #242 #266 #274 #275 #278 #279 #283-#287 #289 #294 #295 #298 #301 #303, see [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]]. Then social basics + board brightness + music playlist: #233-#235 #237 #290 #392 #394 #395 + new #485, see [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]].
 
 | Status | Rows |
 |---|---|
-| BUILT | 277 |
-| PARTLY | 82 |
-| NOT BUILT | 83 |
-| CHANGED | 42 |
-| **Total** | **484** |
+| BUILT | 279 |
+| PARTLY | 83 |
+| NOT BUILT | 79 |
+| CHANGED | 44 |
+| **Total** | **485** |
 
 | Area | BUILT | PARTLY | NOT BUILT | CHANGED |
 |---|---|---|---|---|
 | purpose | 16 | 8 | 5 | 1 |
 | economy | 43 | 6 | 14 | 2 |
 | tutorial | 27 | 4 | 0 | 5 |
-| UI | 61 | 19 | 8 | 12 |
-| SFX | 11 | 8 | 7 | 6 |
-| VFX | 32 | 13 | 6 | 4 |
+| UI | 62 | 19 | 8 | 12 |
+| SFX | 10 | 8 | 7 | 7 |
+| VFX | 33 | 13 | 5 | 4 |
 | map | 55 | 6 | 2 | 10 |
-| social | 8 | 0 | 9 | 1 |
+| social | 9 | 1 | 6 | 2 |
 | retention | 11 | 6 | 12 | 1 |
 | monetization | 7 | 2 | 12 | 0 |
 | launch | 6 | 10 | 8 | 0 |
@@ -221,7 +221,7 @@ Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-
 | 130 | tutorial | One quest card at the bottom that always shows the current goal + counter | 10 incrementals - Take #2 | *CHANGED* | LUMI's card bottom centre above the hotbar (phones: x0.8, above the hotbar) | Was 'one quest line at the top'. [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]] |
 | 131 | tutorial | First 3 minutes: no walking, everything on one screen | Regrowth play log - we do better | *CHANGED* | Step 1 now sends you to your island's BODIES board in the world (floor arrows). The U window also works | Changed by the Regrowth 1:1 boards (2 Nov) |
 
-### UI (HUD, windows, boards, kit) (100)
+### UI (HUD, windows, boards, kit) (101)
 
 | # | Area | Decision | Source note | Status | Evidence | Notes |
 |---|---|---|---|---|---|---|
@@ -325,17 +325,18 @@ Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-
 | 229 | UI | One ACTIVE BOOSTS panel listing every boost with its timer | 10 incrementals - Take #7 | PARTLY | StarterPlayerScripts.GalaxyPotions: potion cards with mm:ss timers (lines 124-138). Star Surge only shows on its plaza bar. There is no single list of all boosts | UI plan wanted one "BOOSTS x1.1" chip that opens a list |
 | 230 | UI | Clear numbers on everything: +x/s, value now and next, goal x/y with a bar, a cost on every button | Regrowth play log - lessons copy #3 | BUILT | GalaxyHUD "+x/s" and a floating "+x/s" after each buy (afterBuy). SUPERNOVA % goal bar. IslandBoardsUI "x2 at 25", "own/next" bar, "x1.75 next" | - |
 | 231 | UI | A red "NOT ENOUGH" banner when you click something you can't afford | Regrowth play log - lessons copy #3 | *CHANGED* | No banner. The button goes grey and a soft "error" sound plays (Sounds.error) | A calmer choice |
+| 485 | UI | Island boards + map signs read like their 2D windows: SurfaceGui Brightness 1.8 (LightInfluence 0), dark fills opaque on the 3D board, nothing see-through or clickable in front of a screen | Owner 5 Nov (Bodies board looked faded) | **BUILT** | MapConfig.Boards.Brightness 1.8 (tested 1.5 / 1.8 / 2.2 in Play) on GalaxyBoards' 4 board guis + their titles, MapBuilder.surface + the 10 Edit signs; IslandBoardsUI tiles 0 transparency when ctx.world; NeonTube / GlowStrip CanQuery off | [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
 
 ### SFX and music (32)
 
 | # | Area | Decision | Source note | Status | Evidence | Notes |
 |---|---|---|---|---|---|---|
 | 232 | SFX | Licensed Creator Store sounds: buy, body buy, milestone, comet appear/catch, piece pop, wind-up/boom/shard blips, UI open/close, error | Prompt ALPHA 2 §4 | BUILT | ReplicatedStorage.Galaxy.Sounds L13-34 (14 ids, all Roblox licensed) | - |
-| 233 | SFX | One calm space music loop + MUSIC / SFX sliders (saved) | Prompt ALPHA 2 §4; Playbook rules §5 | BUILT | Sounds.Music 1837463526 "Ethereal Drone"; Sounds.Default music 0.6 / sfx 0.8; GalaxySettings | - |
-| 234 | SFX | Music fades to silence in 0.3 s at the Supernova wind-up and comes back after the stamp | Prompt OVERNIGHT part 1; UI plan P2 | BUILT | GalaxySupernova L316 musicFade(0, 0.3), L333 musicFade(1, 1) | - |
-| 235 | SFX | One music loop per layer, 1-2 s crossfade, music ducks for every hero moment | Full game design §10; UI plan P2 + Full design §10; SFX plan rule 6 | PARTLY | one loop only; only the Supernova cut is built (grep crossfade/duck: nothing) | (a second check marked it NOT BUILT: Sounds.Music = one loop (APM "Ethereal Drone" 1837463526)) |
+| 233 | SFX | Music: a PLAYLIST of 5 APM tracks (Final Frontier, Into the Sun (b), Go!, Future Plans (A), Full Contact (a)); shuffled each session, each once per shuffle, never the same twice in a row; MUSIC / SFX sliders (saved) | Prompt ALPHA 2 §4; Playbook rules §5 | *CHANGED* | Sounds.Playlist + UIKit Kit.music(): shuffle, 2 s crossfade, silent tails cut (PlaybackRegion), loudness matched (volume table); a track that won't load is skipped + logged. Studio: 8 tracks in a row, no repeat across the reshuffle | Was one loop, APM 'Ethereal Drone' 1837463526 (too chill, owner 5 Nov). [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
+| 234 | SFX | Music fades to silence in 0.3 s at the Supernova wind-up, the rotation pauses, then it fades back in over 1.5 s on the same track | Prompt OVERNIGHT part 1; UI plan P2 | **BUILT** | Kit.musicFade(0, 0.3) pauses the playing track(s); musicFade(1, 1.5) resumes. Studio: paused at 72.8 s, resumed at 72.8 s, back to full in ~1.4 s | [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
+| 235 | SFX | One music loop per layer, 1-2 s crossfade, music ducks for every hero moment | Full game design §10; UI plan P2 + Full design §10; SFX plan rule 6 | PARTLY | 2 s crossfade between tracks (built); music quieter (x0.5) while UPGRADES / TREE / STORE / FORGE / GALAXY / GUIDE are open (Kit.musicDuck); cutscenes fade it out | One playlist for every layer so far. [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
 | 236 | SFX | 3-note Supernova motif in the stingers | Full game design §10; SFX plan rule 3 + Full design §10 | **NOT BUILT** | the boom is a stock "Time Warp" blast (Sounds L31) | - |
-| 237 | SFX | Mixer: Music 0.4, SFX 1.0, UI 0.8, Ambience 0.3 buses into a compressor | UI plan P2 + SFX plan rule 6 | *CHANGED* | UIKit soundGroup(): two SoundGroups GalaxyMusic + GalaxySFX, defaults 0.6 / 0.8 (Sounds.Default); grepped Compressor/AudioFader: 0 hits | No UI or Ambience bus, no compressor |
+| 237 | SFX | Mixer: Music 0.4, SFX 1.0, UI 0.8, Ambience 0.3 buses into a compressor | UI plan P2 + SFX plan rule 6 | *CHANGED* | Music bus = Sounds.MusicBus 0.4 (x each track's loudness match); SoundGroups GalaxyMusic + GalaxySFX carry the sliders (defaults 0.6 / 0.8); no compressor | Bus 0.4 since 5 Nov (the old loop was 0.35). [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
 | 238 | SFX | A volume slider per bus in Settings | UI plan P2 | BUILT | StarterPlayerScripts.GalaxySettings: MUSIC + SOUND EFFECTS sliders (Kit.slider), heard while dragging, saved as VolMusic / VolSfx | - |
 | 239 | SFX | Income: a soft tick every ~1 s whose pitch climbs the pentatonic as income grows | UI plan P2 + SFX plan table | **BUILT** | GalaxyHUD income tick every ~1 s, pitch climbing with income | [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]] |
 | 240 | SFX | Big moments: a "cash roll" + one ding | UI plan P2 | PARTLY | Sounds.milestone (Roblox_UI_Tonal_Stinger 15675043410) at each x2 milestone and TUTORIAL COMPLETE; no cash roll | - |
@@ -393,7 +394,7 @@ Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-
 | 287 | VFX | Comet: long trail + glowing head; tap = 16 sparks fly into your pad | VFX plan table | **BUILT** | MapClient: catching a comet sends 16 sparks flying to your star | To your star, not a pad. [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]] |
 | 288 | VFX | Star Surge full: the Core's rim turns gold, a slow wave rolls over the plaza | VFX plan table | **NOT BUILT** | No Surge code in GalaxyMapClient; GalaxyStarSurgeService only writes the board's labels | - |
 | 289 | VFX | Star Forge roll ladder (Common pop to Legendary beam + rays + confetti) | VFX plan table | PARTLY | Forge cutscene lengths by rarity (above); no confetti / beam per tier yet | [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]] |
-| 290 | VFX | Rank aura: 8-15 particles in the rank colour, off past ~60 studs | VFX plan table; 10 incrementals - Take #3 | **NOT BUILT** | GalaxyRankTags draws only a text tag (MaxDistance 90); grepped "aura": 0 hits | - |
+| 290 | VFX | Rank aura: 8-15 particles in the rank colour, off past ~60 studs | VFX plan table; 10 incrementals - Take #3 | **BUILT** | GalaxyRankTags: ONE ParticleEmitter per player (our fx_sparkle), rank band colour; tiers 1-2 none, 3-5 faint (6-10/s, thrown ~2 studs round the body), 6-7 brighter + the emitter orbits the body (a ring of stars); off past 60 studs; low graphics (quality 1-3) x0.4 + no orbit; Reduced Motion x0.5 + no orbit. Studio: 8 rigs with the top aura 14.9 fps vs 15.0 without | Studio PC, not a phone. [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
 | 291 | VFX | Lost Stars: soft twinkle, quiet sparkle when found | VFX plan table | **NOT BUILT** | No Lost Stars in any script | Revamp 2 kept Lost Stars as an event; never built |
 | 292 | VFX | World glow fix: no always-on glow on paths/lamps; lasting glow only on the Core, your pad rim (gold) and things ready to press | VFX plan "World glow fix" | PARTLY | Studio Edit read: 215 Neon parts in Workspace (24 Lamp, 90 bridge Seg_, 54 black-hole Arm, 21 ChartStar floor inlay, 12 Spike, CoreOrb); island rim is brass, not a gold glow | Lighting pass (2 Nov) allows neon on interactive things; lamps and the floor chart still glow |
 | 293 | VFX | Contrast: quiet before the big moment (music out, world dims) | VFX plan WOAH 1 | BUILT | GalaxySupernova: musicFade(0, 0.3) + Lighting.ExposureCompensation -0.7 over the wind-up | - |
@@ -505,10 +506,10 @@ Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-
 
 | # | Area | Decision | Source note | Status | Evidence | Notes |
 |---|---|---|---|---|---|---|
-| 392 | social | Server chat message when anyone goes Supernova or rolls Mythic+ | Revamp 2 Cutscenes + Game Design v1 | **NOT BUILT** | grep DisplaySystemMessage / TextChannel: nothing; only the visual burst | - |
+| 392 | social | Server chat message when anyone goes Supernova or rolls Mythic+ | Revamp 2 Cutscenes + Game Design v1 | PARTLY | EconService Supernova -> FireAllClients SupernovaGlobal (max 1 per player per 30 s, tested) -> GalaxyHUD: RBXGeneral:DisplaySystemMessage '<name> went SUPERNOVA (n)!' in the rank colour; the FIRST Supernova + a CELESTIAL forge roll = a 3 s banner on every screen | Mythic+ forge rolls are not in chat (owner's 5 Nov prompt: chat for Supernova, banner for Celestial). [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
 | 393 | social | STAR SURGE: each Supernova fills 5%, full = x2 stardust for everyone 3 min, max once per 10 min, names who filled it | Full game design §7; Why play 8 + UI plan P3.8 | BUILT | MapConfig L262 Surge {5, 2, 180, 600}; ServerScriptService.GalaxyStarSurgeService | replaces "fills from everyone's income" (Revamp 2 plan) |
-| 394 | social | Friends in server +10% each (max 5) | Full game design §7; Why play 8 + UI plan P3.8; Playbook rules §2; 10 incrementals - patterns #3 (Celestial already had it) | **NOT BUILT** | grep friend / IsFriendsWith: nothing in income (EconService incomeOf L173) | - |
-| 395 | social | P&L Studios XP group members +10% | Full game design §7 + What is left to discuss; Incremental notes (Roblox incrementals); Regrowth paid access - lessons | **NOT BUILT** | grep IsInGroup / GetRankInGroup: nothing | - |
+| 394 | social | Friends in server +10% each (max 3 = +30%), ADDS to the other boosts (#69) | Full game design §7; Why play 8 + UI plan P3.8; Playbook rules §2; 10 incrementals - patterns #3 (Celestial already had it) | *CHANGED* | EconService socialOf(): s.friends from IsFriendsWith (each pair asked once a server, re-counted on join / leave); GalaxyPotions chip 'FRIENDS +20%' (only with a friend here); Studio switches TestFriends: x1.00 -> x1.10 (2) -> x1.15 (5, capped) | Was 'max 5'; owner 5 Nov: cap +30%. Real IsFriendsWith not tested (Studio test players can't be friends). [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
+| 395 | social | P&L Studios XP group members +10% | Full game design §7 + What is left to discuss; Incremental notes (Roblox incrementals); Regrowth paid access - lessons | **BUILT** | EconService checkGroup(): IsInGroup(947215423) once on join, cached (+ after the join prompt, max every 10 s); +0.1x ADDS (#69); chip 'GROUP +10%' / 'JOIN GROUP FOR +10%' (tap = Roblox's join-group prompt). Studio: real account in group = true; TestGroup on/off works | [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]] |
 | 396 | social | Ranks SPARK 1, FLARE 3, BLAZE 5, NOVA 8, SUPERGIANT 12 Supernovas, shown over the head | Prompt ALPHA 2 (approved); Why play 7 + UI plan P3.7; Map design and quality (incrementals check); 10 incrementals - Take #3 | BUILT | MapConfig.Ranks L173-179; GalaxyRankTags | - |
 | 397 | social | 8 players per server, 8 pads claimed on join and freed on leave | Full game design §6 | **BUILT** | Creator Hub > Galaxy Incremental place > Access: Maximum Visitor Count 8, saved 5 Nov (was 50; Studio read 60). Social slots: Roblox optimized | [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
 | 398 | social | Other players' systems: full detail near, simple far away | Full game design §6 | BUILT | MapConfig.LodDistance=140; MapClient L687 | - |

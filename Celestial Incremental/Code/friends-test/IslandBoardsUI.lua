@@ -341,7 +341,8 @@ function UI:buildTree()
 		local later = g.later and Econ.Ring2Later[g.later]
 		if not node and not later then continue end
 		local x, y = COL_X[g.col] - TILE_W / 2, ROW_Y[g.row]
-		local tile = Kit.box(gui, x, y, TILE_W, TILE_H, { BackgroundTransparency = 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
+		-- (the 3D board (ctx.world): dark fills fully opaque, 5 Nov faded boards)
+		local tile = Kit.box(gui, x, y, TILE_W, TILE_H, { BackgroundTransparency = if self.ctx.world then 0 else 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
 		Kit.corner(tile, 18)
 		local st = Kit.stroke(tile, hex("#4b4170"), 3, 0.25)
 		local img = Kit.icon(gui, if node then node.icon else later.icon, x + (TILE_W - 88) / 2, y + 6, 88, nil, { ZIndex = 6 })
@@ -469,7 +470,13 @@ function UI:refreshTile2(t, r2, sh: number, novas: number, sel)
 		elseif sh >= cost then GOLD_TEXT else hex("#6a4fa8")
 	t.stroke.Thickness = if selected then 4.5 else 3
 	t.stroke.Transparency = if selected then 0 else 0.25
-	t.tile.BackgroundTransparency = if locked then 0.4 else 0.05
+	if self.ctx.world then
+		-- (opaque on the 3D board: a locked tile is a darker fill instead of see-through)
+		t.tile.BackgroundTransparency = 0
+		t.tile.BackgroundColor3 = if locked then hex("#0d0a15") else hex("#130f1e")
+	else
+		t.tile.BackgroundTransparency = if locked then 0.4 else 0.05
+	end
 end
 
 ------------------------------------------------------------------------ INFO (the TREE's partner only, #221)

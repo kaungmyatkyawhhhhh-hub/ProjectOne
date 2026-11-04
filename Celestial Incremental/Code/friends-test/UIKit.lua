@@ -491,26 +491,152 @@ function Kit.sound(name: string, opts): Sound?
 	end
 	return s
 end
--- the music loop (one, started once); Kit.musicFade(k, t): to k x its volume in t seconds (0 = silent, 1 = normal)
-local music: Sound? = nil
-function Kit.music(): Sound
-	if music then return music end
-	music = Instance.new("Sound")
-	music.Name = "GalaxyMusicLoop"
-	music.SoundId = "rbxassetid://" .. SoundCfg.Music.id
-	music.Volume = SoundCfg.Music.volume
-	music.Looped = true
-	music.SoundGroup = soundGroup("Music")
-	music.Parent = SoundService
-	music:Play()
-	return music
+-- THE MUSIC PLAYLIST (5 Nov; Galaxy.Sounds.Playlist): Kit.music() starts it once. Shuffled each session; each track plays
+-- once, then a new shuffle; never the same track twice in a row (also not across the reshuffle); 2 s crossfades; a track's
+-- silent tail is cut (PlaybackRegion). A track that won't load (moderated / gone) is skipped, logged, and left out after.
+-- A track's volume = MusicBus x its loudness match x the crossfade x Kit.musicFade x Kit.musicDuck (the MUSIC slider is
+-- the GalaxyMusic SoundGroup on top).
+-- Kit.musicFade(k, t): to k x in t seconds; at 0 the rotation PAUSES on the same track, and a fade back up RESUMES it there
+-- (the Supernova wind-up: 0 in 0.3 s; after it: 1 in 1.5 s). Kit.musicDuck(on): quieter while a big window is open.
+-- Studio test: Workspace TestMusicSkip = any new value -> the playing track jumps to 6 s before its crossfade.
+local musicStarted = false
+local musicFadeV = Instance.new("NumberValue")
+musicFadeV.Value = 1
+local musicDuckV = Instance.new("NumberValue")
+musicDuckV.Value = 1
+local musicDecks = {} -- the playing tracks (2 during a crossfade): { sound, env = NumberValue, spec, stop }
+local musicNow = nil -- the current deck
+local musicNext = nil -- the next deck, loaded in the background
+local musicOrder, musicI, musicLast = {}, 0, nil
+local musicBad = {} -- [id] = true: didn't load, left out
+local musicPaused, musicSwitching = false, false
+local function musicReshuffle()
+	local list = {}
+	for _, spec in ipairs(SoundCfg.Playlist) do
+		if not musicBad[spec.id] then table.insert(list, spec) end
+	end
+	for i = #list, 2, -1 do
+		local j = math.random(i)
+		list[i], list[j] = list[j], list[i]
+	end
+	-- (never the same track twice in a row, also across the reshuffle)
+	if #list > 1 and list[1].id == musicLast then list[1], list[2] = list[2], list[1] end
+	musicOrder, musicI = list, 0
 end
-local musicTween: Tween? = nil
+local function musicNextSpec()
+	if musicI >= #musicOrder then musicReshuffle() end
+	if #musicOrder == 0 then return nil end
+	musicI += 1
+	return musicOrder[musicI]
+end
+-- loads the next track that works (skips + logs the ones that don't)
+local function musicLoad()
+	for _ = 1, #SoundCfg.Playlist + 1 do
+		local spec = musicNextSpec()
+		if not spec then return nil end
+		local s = Instance.new("Sound")
+		s.Name = "GalaxyMusic_" .. spec.id
+		s:SetAttribute("Track", spec.name)
+		s.SoundId = "rbxassetid://" .. spec.id
+		s.SoundGroup = soundGroup("Music")
+		s.Volume = 0
+		s.Parent = SoundService
+		local t = os.clock()
+		while not s.IsLoaded and os.clock() - t < 10 do task.wait(0.1) end
+		if s.IsLoaded and s.TimeLength > 5 then
+			local stop = math.min(spec.stop or s.TimeLength, s.TimeLength)
+			s.PlaybackRegionsEnabled = true
+			s.PlaybackRegion = NumberRange.new(spec.start or 0, stop)
+			return { sound = s, env = Instance.new("NumberValue"), spec = spec, stop = stop }
+		end
+		warn("[GalaxyMusic] skipped " .. spec.id .. " (" .. spec.name .. "): it didn't load (moderated or gone)")
+		musicBad[spec.id] = true
+		s:Destroy()
+	end
+	return nil
+end
+local function musicPlay(deck, fadeIn: number)
+	deck.sound.TimePosition = deck.spec.start or 0
+	deck.sound:Play()
+	deck.env.Value = 0
+	TweenService:Create(deck.env, TweenInfo.new(fadeIn, Enum.EasingStyle.Linear), { Value = 1 }):Play()
+	table.insert(musicDecks, deck)
+	musicNow, musicLast = deck, deck.spec.id
+	-- (the next one loads while this one plays)
+	musicNext = nil
+	task.spawn(function() musicNext = musicLoad() end)
+end
+local function musicDrop(deck, t: number)
+	TweenService:Create(deck.env, TweenInfo.new(t, Enum.EasingStyle.Linear), { Value = 0 }):Play()
+	task.delay(t + 0.1, function()
+		local i = table.find(musicDecks, deck)
+		if i then table.remove(musicDecks, i) end
+		deck.sound:Destroy()
+	end)
+end
+local function musicSwitch()
+	musicSwitching = true
+	local old = musicNow
+	local t = os.clock()
+	while not musicNext and os.clock() - t < 12 do task.wait(0.2) end -- (still loading: wait, the old one plays on)
+	local nextDeck = musicNext
+	if not nextDeck then nextDeck = musicLoad() end
+	if nextDeck then
+		musicPlay(nextDeck, SoundCfg.MusicCrossfade)
+		if old then musicDrop(old, SoundCfg.MusicCrossfade) end
+	end
+	musicSwitching = false
+end
+function Kit.music()
+	if musicStarted then return end
+	musicStarted = true
+	task.spawn(function()
+		musicReshuffle()
+		local first = musicLoad()
+		if first then musicPlay(first, 1.5) end
+	end)
+	game:GetService("RunService").Heartbeat:Connect(function()
+		for _, d in ipairs(musicDecks) do
+			d.sound.Volume = SoundCfg.MusicBus * (d.spec.volume or 1) * d.env.Value * musicFadeV.Value * musicDuckV.Value
+		end
+		local now = musicNow
+		if now and not musicPaused and not musicSwitching and now.sound.Parent
+			and (now.sound.TimePosition >= now.stop - SoundCfg.MusicCrossfade or not now.sound.IsPlaying) then
+			task.spawn(musicSwitch)
+		end
+	end)
+	if game:GetService("RunService"):IsStudio() then
+		workspace:GetAttributeChangedSignal("TestMusicSkip"):Connect(function()
+			if musicNow then musicNow.sound.TimePosition = math.max(0, musicNow.stop - SoundCfg.MusicCrossfade - 6) end
+		end)
+	end
+end
+local musicFadeTween: Tween? = nil
 function Kit.musicFade(k: number, t: number)
-	local m = Kit.music()
-	if musicTween then musicTween:Cancel() end
-	musicTween = TweenService:Create(m, TweenInfo.new(t, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Volume = SoundCfg.Music.volume * k })
-	musicTween:Play()
+	Kit.music()
+	if musicFadeTween then musicFadeTween:Cancel() end
+	if k > 0 and musicPaused then
+		-- (back from silence: the same track goes on where it stopped)
+		musicPaused = false
+		for _, d in ipairs(musicDecks) do d.sound:Resume() end
+	end
+	musicFadeTween = TweenService:Create(musicFadeV, TweenInfo.new(t, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Value = k })
+	musicFadeTween:Play()
+	if k <= 0 then
+		local tw = musicFadeTween
+		task.delay(t, function()
+			if musicFadeTween == tw and musicFadeV.Value <= 0.001 then
+				musicPaused = true
+				for _, d in ipairs(musicDecks) do d.sound:Pause() end
+			end
+		end)
+	end
+end
+local musicDucked = false
+function Kit.musicDuck(on: boolean)
+	if on == musicDucked then return end
+	musicDucked = on
+	TweenService:Create(musicDuckV, TweenInfo.new(0.4, Enum.EasingStyle.Quad), { Value = if on then 0.5 else 1 }):Play()
 end
 -- the Settings sliders (0..1)
 function Kit.setVolumes(musicVol: number?, sfxVol: number?)

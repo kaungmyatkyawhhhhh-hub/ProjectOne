@@ -2,6 +2,9 @@
 -- Left side, one v12 card per potion you have or have running: the potion icon, its name, how many you have, a green USE,
 -- and the timer while it runs (a second one adds 15 min to the timer: they stack by time). Numbers: the server's
 -- Potion_<id> (count) and BoostEnd_<id> (server time the boost ends) attributes; USE = EconRequest "UsePotion", id.
+-- Social (Phase 1, 5 Nov; #394 #395): under the potions, a FRIENDS chip ("FRIENDS +20%", only with a friend in the server)
+-- and a GROUP chip ("GROUP +10%", or "JOIN GROUP FOR +10%": a tap opens Roblox's join-group prompt). From the server's
+-- FriendsHere / InGroup attributes.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -46,7 +49,8 @@ local function screenScale(): number
 end
 
 local CW, CH, GAP = 214, 74, 10
-local strip = Kit.box(root, 0, 0, CW, (CH + GAP) * #Econ.Potions, { Name = "Potions", AnchorPoint = Vector2.new(0, 0.5) })
+local SH = 40 -- (the social chips' height)
+local strip = Kit.box(root, 0, 0, CW, (CH + GAP) * #Econ.Potions + (SH + GAP) * 2, { Name = "Potions", AnchorPoint = Vector2.new(0, 0.5) })
 local scale = Instance.new("UIScale")
 scale.Parent = strip
 
@@ -88,6 +92,47 @@ for i, p in ipairs(Econ.Potions) do
 	cards[p.id] = { frame = c, count = count, chip = chip, timer = timer, use = use, useShadow = useShadow }
 end
 
+-- the social chips: the potion card's look at chip height (shadow, dark plate, coloured edge, shine, icon, heavy text)
+local function socialChip(name: string, colour: Color3)
+	local c = Kit.new("TextButton", { Name = name, Text = "", AutoButtonColor = false, BackgroundTransparency = 1, Size = UDim2.fromOffset(CW, SH), Visible = false }, strip)
+	local shadow = Kit.box(c, 0, 3, CW, SH, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 1 })
+	Kit.corner(shadow, 8)
+	local plate = Kit.box(c, 0, 0, CW, SH, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 2 })
+	Kit.corner(plate, 8)
+	Kit.stroke(plate, Kit.INK, 2)
+	Kit.grad(plate, hex("#2a2433"), hex("#121016"), 90)
+	local edge = Kit.box(c, 3, 3, CW - 6, SH - 6, { ZIndex = 3 })
+	Kit.corner(edge, 6)
+	Kit.stroke(edge, colour, 1.5, 0.3)
+	Kit.box(c, 8, 4, CW - 16, 2, { BackgroundTransparency = 0.55, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
+	Kit.icon(c, "stardust", -4, -4, 48, colour, { ZIndex = 5 })
+	local label, _, holder = Kit.text(c, 44, Kit.ps(9, 8), CW - 52, 22, "", 16, { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextColor3 = colour, TextScaled = true })
+	-- ("JOIN GROUP FOR +10%" is long: the text shrinks to fit, never over 17)
+	for _, l in ipairs(holder:GetChildren()) do Kit.new("UITextSizeConstraint", { MaxTextSize = Kit.ps(16, 17) }, l) end
+	return c, label
+end
+local friendsChip, friendsText = socialChip("Friends", hex("#7dff7a"))
+local groupChip, groupText = socialChip("Group", hex("#ffd84a"))
+local function refreshSocial()
+	local n = math.min(player:GetAttribute("FriendsHere") or 0, Econ.Social.FriendMax)
+	friendsChip:SetAttribute("Show", n > 0)
+	Kit.setText(friendsText, "FRIENDS +" .. math.floor(n * Econ.Social.FriendPer * 100 + 0.5) .. "%")
+	local inGroup = player:GetAttribute("InGroup") == true
+	Kit.setText(groupText, if inGroup then "GROUP +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%" else "JOIN GROUP FOR +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%")
+	groupChip.Active = not inGroup
+end
+groupChip.MouseButton1Click:Connect(function()
+	if player:GetAttribute("InGroup") == true then return end
+	Kit.sound("click")
+	local ok, status = pcall(function() return game:GetService("GroupService"):PromptJoinAsync(Econ.Social.GroupId) end)
+	if ok and (status == Enum.GroupMembershipStatus.Joined or status == Enum.GroupMembershipStatus.AlreadyMember) then
+		if request:InvokeServer("CheckGroup") then
+			Kit.sound("milestone")
+			if shared.GalaxyToast then shared.GalaxyToast("GROUP BOOST ON: +10% STARDUST", hex("#ffd84a")) end
+		end
+	end
+end)
+
 local function layout()
 	local s = screenScale()
 	local vp = viewport()
@@ -114,7 +159,17 @@ local function refresh()
 			y += CH + GAP
 		end
 	end
+	refreshSocial()
+	for _, chip in ipairs({ friendsChip, groupChip }) do
+		chip.Visible = chip ~= friendsChip or chip:GetAttribute("Show") == true
+		if chip.Visible then
+			chip.Position = UDim2.fromOffset(0, y)
+			y += SH + GAP
+		end
+	end
 end
+player:GetAttributeChangedSignal("FriendsHere"):Connect(function() refresh() end)
+player:GetAttributeChangedSignal("InGroup"):Connect(function() refresh() end)
 for _, p in ipairs(Econ.Potions) do
 	player:GetAttributeChangedSignal("Potion_" .. p.id):Connect(refresh)
 	player:GetAttributeChangedSignal("BoostEnd_" .. p.id):Connect(refresh)
