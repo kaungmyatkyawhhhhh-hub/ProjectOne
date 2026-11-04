@@ -5,8 +5,8 @@
 -- IslandBoardsUI with the same data (EconConfig + the island OWNER's attributes) and the same remote (EconRequest + the
 -- island slot: the server checks the owner and the distance) as the 2D Upgrades window. Visitors see the owner's numbers;
 -- their buttons are grey "VISIT".
---  * INFO shows what you last tapped (a tree tile, a body row, a star card); until then the first node you can buy (all
---    bought: the Asteroid). After you buy the node it shows, it moves on to the next one.
+--  * one job each (5 Nov, #219-#221): BODIES buys bodies, STAR UPGRADES buys ring 1, TREE selects a ring-2 node, INFO shows
+--    the selected node and buys it ("Tap a node on the TREE" until you do; the selection stays after a buy)
 --  * built only for your own island and islands within MapConfig.Boards.DrawRange (others are dropped again)
 --  * lists scroll with the mouse wheel, a drag and touch (the drag needs the mouse ray projected onto the screen:
 --    pointerFor); a refresh never moves a list
@@ -23,7 +23,6 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
-local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local BoardsUI = require(Galaxy:WaitForChild("IslandBoardsUI"))
 local Kit = require(Galaxy:WaitForChild("UIKit"))
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
@@ -264,15 +263,9 @@ local function decorate(spec, screen: BasePart)
 	return { parts = parts, step = step }
 end
 
--- INFO's default: the SUPERNOVA when it's ready (alpha part 1), else the first ring-1 node you can buy (Regrowth shows its
--- first perk); all bought: the Asteroid
-local function defaultSel(subject)
-	if subject:GetAttribute("SupernovaReady") == true then return { kind = "supernova" } end
-	for _, n in ipairs(Econ.Ring1) do
-		local ready = not n.requires or subject:GetAttribute("Node_" .. n.requires) == true
-		if ready and subject:GetAttribute("Node_" .. n.id) ~= true then return { kind = "node", key = n.id } end
-	end
-	return { kind = "body", key = 0 }
+-- INFO's default: nothing selected ("Tap a node on the TREE"; the Supernova lives on the HUD button and its card)
+local function defaultSel(_subject)
+	return { kind = "none" }
 end
 
 local function build(island)
@@ -289,15 +282,12 @@ local function build(island)
 	local ctx = { subject = subject, picked = false, sel = defaultSel(subject), sound = Kit.sound }
 	ctx.canAct = function() return mine end
 	ctx.buy = function(kind, arg) return request:InvokeServer(kind, arg, slot) end
-	-- (INFO's SUPERNOVA button: the confirm card, GalaxySupernova)
-	ctx.supernova = function() if mine and shared.GalaxyOpenSupernova then shared.GalaxyOpenSupernova() end end
 	ctx.select = function(kind, key)
 		ctx.sel = { kind = kind, key = key }
 		ctx.picked = true
 		for _, p in pairs(b.panels) do p:refresh() end
 	end
-	ctx.bought = function(kind, arg)
-		if kind == "BuyNode" and ctx.sel.kind == "node" and ctx.sel.key == arg then ctx.picked = false end
+	ctx.bought = function()
 		dirty = true
 	end
 	b.ctx = ctx
@@ -386,12 +376,17 @@ RunService.RenderStepped:Connect(function(dt)
 	end
 end)
 
--- the tutorial: the world position of a button on YOUR BODIES board (scrolls it into view first), the top of it, its
--- width / height
+-- the tutorial: the world position of a button on one of YOUR boards (scrolls it into view first), the top of it, its
+-- width / height. key: "Body<k>" (BODIES), "Star_<id>" (STAR UPGRADES), "R2_<id>" (TREE; once that node is selected:
+-- INFO's BUY)
 shared.GalaxyBoardTarget = function(key: string): (Vector3?, Vector3?, number?)
 	for island, b in pairs(boards) do
 		if island:GetAttribute("Owner") == player.UserId then
-			local panel, gui = b.panels.Bodies, b.guis.Bodies
+			local boardId = if key:sub(1, 5) == "Star_" then "Stars" elseif key:sub(1, 3) == "R2_" then "Tree" else "Bodies"
+			if boardId == "Tree" and b.ctx.sel.kind == "node2" and "R2_" .. b.ctx.sel.key == key then
+				boardId, key = "Info", "Buy"
+			end
+			local panel, gui = b.panels[boardId], b.guis[boardId]
 			local btn = panel and panel.targets[key]
 			local screen = gui and gui.Adornee
 			if not btn or not btn.Parent or not screen then return nil end

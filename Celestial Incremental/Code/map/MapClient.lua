@@ -46,7 +46,8 @@ local openWindow = Galaxy:FindFirstChild("OpenWindow") or Instance.new("Bindable
 openWindow.Name = "OpenWindow"
 openWindow.Parent = Galaxy
 
-local SPARK = "rbxasset://textures/particles/sparkles_main.dds"
+-- our own world sparkle (#281, 5 Nov: UI\make_fx_sparkle.py -> UI\roblox\fx_sparkle.png; Studio test upload, re-upload to the group)
+local SPARK = require(Galaxy:WaitForChild("UIAssets")).fxSparkle
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
 local FONT_B = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Bold)
 

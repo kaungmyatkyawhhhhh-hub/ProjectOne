@@ -168,9 +168,14 @@ end
 local function boosting(s, id: string): boolean
 	return (s.d.boostLeft[id] or 0) > 0
 end
--- (the x2 STARDUST pass: s.passX2, set by GalaxyStoreService; applied here once, like every other income multiplier)
+-- (the x2 STARDUST pass: s.passX2, set by GalaxyStoreService)
+-- Boosts of the same kind ADD, they don't multiply (#69): Star Surge, the x2 STARDUST potion and the pass are each +1x,
+-- so pass + potion = x3 and all three = x4 (never x8). Upgrades (ring 1, ring 2, milestones) still multiply inside Econ.Income.
+local function stardustBoost(s): number
+	return 1 + (surgeMult() - 1) + (if boosting(s, "Stardust") then 1 else 0) + (if s.passX2 then 1 else 0)
+end
 local function incomeOf(s): number
-	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * surgeMult() * (if boosting(s, "Stardust") then 2 else 1) * (if s.passX2 then 2 else 1)
+	return Econ.Income(s.d.owned, s.d.nodes, s.d.ring2) * stardustBoost(s)
 end
 local function cometEvery(s): number
 	return math.max(Econ.Comet.MinEvery, Econ.CometEvery(s.d.nodes) / (if boosting(s, "Comets") then 2 else 1))

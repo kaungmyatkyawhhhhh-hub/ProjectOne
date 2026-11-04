@@ -26,6 +26,8 @@ return {
 	softglow = "rbxassetid://113034099262576", -- round glow behind icons
 	sparkle = "rbxassetid://94034532317377",
 	mote = "rbxassetid://70545138129350",
+	-- the world sparkle for ParticleEmitters (5 Nov, #281; UI\roblox\fx_sparkle.png, a Studio test copy: re-upload to P&L Studios XP)
+	fxSparkle = "rbxassetid://71469044551825",
 	plate = "rbxassetid://126195526088194", -- the top counter's slanted plate (white, tinted)
 	header = "rbxassetid://98206491746323", -- 900x80 orange header texture
 	arrow = "rbxassetid://138731187772172", -- tutorial arrow (points down)

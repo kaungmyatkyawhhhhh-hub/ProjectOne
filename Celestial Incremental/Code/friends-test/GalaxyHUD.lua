@@ -210,6 +210,8 @@ local KEYS = {
 local keyUI = {}
 for i, k in ipairs(KEYS) do
 	local x, y = 32 + (i - 1) * 70, 50
+	local before = {}
+	for _, c in ipairs(hot:GetChildren()) do before[c] = true end
 	local d = Kit.box(hot, x, y, 46, 46, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), Rotation = 45, ZIndex = 2 })
 	Kit.grad(d, hex("#2c2735"), hex("#121016"), 90)
 	Kit.stroke(d, hex("#0a070d"), 2)
@@ -225,10 +227,49 @@ for i, k in ipairs(KEYS) do
 	label.Parent.Visible = false
 	line.Visible = false
 	local hit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, Position = UDim2.fromOffset(x - 8, y - 8), Size = UDim2.fromOffset(62, 62), ZIndex = 10 }, hot)
-	keyUI[k.key] = { label = label.Parent, line = line, hit = hit, diamond = d, x = x, y = y, sparkles = {} }
+	-- (everything this key put on the hotbar, so a hidden key can go and the others slide together)
+	local parts = {}
+	for _, c in ipairs(hot:GetChildren()) do
+		if not before[c] then table.insert(parts, { inst = c, pos = c.Position, vis = c.Visible }) end
+	end
+	keyUI[k.key] = { label = label.Parent, line = line, hit = hit, diamond = d, x = x, y = y, x0 = x, sparkles = {}, parts = parts, shown = true }
 end
+-- STORE hidden until tutorial step 7 is done (#448: no shop during the tutorial); the other keys close the gap
+local STORE_AT_STEP = 7
+local function keyAllowed(k): boolean
+	if k.window == "Store" then return (player:GetAttribute("TutStep") or 0) >= STORE_AT_STEP end
+	return true
+end
+local keyDots -- (below)
+local function layoutKeys()
+	local shownList = {}
+	for _, k in ipairs(KEYS) do
+		if keyAllowed(k) then table.insert(shownList, k) end
+	end
+	local shift = (#KEYS - #shownList) * 35 -- (keeps the row centred)
+	local slot = 0
+	for _, k in ipairs(KEYS) do
+		local ui = keyUI[k.key]
+		local on = keyAllowed(k)
+		if on then slot += 1 end
+		local x = 32 + (math.max(slot, 1) - 1) * 70 + shift
+		local dx = x - ui.x0
+		for _, p in ipairs(ui.parts) do
+			p.inst.Position = p.pos + UDim2.fromOffset(dx, 0)
+			if not on then p.inst.Visible = false elseif not ui.shown then p.inst.Visible = p.vis end
+		end
+		if keyDots and keyDots[k.key] then
+			keyDots[k.key].Position += UDim2.fromOffset(x - ui.x, 0)
+			keyDots[k.key].Visible = on
+		end
+		ui.x = x
+		ui.shown = on
+	end
+end
+layoutKeys()
+player:GetAttributeChangedSignal("TutStep"):Connect(layoutKeys)
 -- the red "new" dot on a key (the GUIDE BOOK's new pages)
-local keyDots = {}
+keyDots = {}
 shared.GalaxyHotbarDot = function(key: string, on: boolean)
 	local ui = keyUI[key]
 	if not ui then return end
@@ -269,34 +310,21 @@ local treeWin, treeScale = scaledRoot("TreeWindow", Vector2.new(0.5, 0.5), 1124,
 treeWin.Visible = false
 local treePanels, treeCtx = {}, nil
 local treeOpen = false
+-- (boards one job each, 5 Nov: INFO only shows the node picked on the TREE; nothing picked = "Tap a node on the TREE")
 local function treeDefault()
-	if player:GetAttribute("SupernovaReady") == true then return { kind = "supernova" } end
-	for _, n in ipairs(Econ.Ring2) do
-		local lv = player:GetAttribute("R2_" .. n.id) or 0
-		local cost = Econ.R2Cost(n.id, lv)
-		if cost and (player:GetAttribute("Supernovas") or 0) >= (n.novas or 0) and (player:GetAttribute("ShardsEarned") or 0) > 0 then
-			return { kind = "node2", key = n.id }
-		end
-	end
-	for _, n in ipairs(Econ.Ring1) do
-		if player:GetAttribute("Node_" .. n.id) ~= true then return { kind = "node", key = n.id } end
-	end
-	return { kind = "body", key = 0 }
+	return { kind = "none" }
 end
 local function buildTreeWindow()
 	if treeCtx then return end
 	treeCtx = { subject = player, picked = false, sel = treeDefault(), sound = Kit.sound, size = Vector2.new(550, 650) }
 	treeCtx.canAct = function() return true end
 	treeCtx.buy = function(kind, arg) return request:InvokeServer(kind, arg) end
-	treeCtx.supernova = function() if shared.GalaxyOpenSupernova then shared.GalaxyOpenSupernova() end end
 	treeCtx.select = function(kind, key)
 		treeCtx.sel = { kind = kind, key = key }
 		treeCtx.picked = true
 		for _, p in pairs(treePanels) do p:refresh() end
 	end
-	treeCtx.bought = function(kind, arg)
-		if (kind == "BuyNode" or kind == "BuyRing2") and treeCtx.sel.key == arg then treeCtx.picked = false end
-	end
+	treeCtx.bought = function() end -- (the selection stays on the node you bought)
 	for i, id in ipairs({ "Tree", "Info" }) do
 		local board = MapConfig.Boards.ById[id]
 		-- (no `pair`: the screen draws its own title, like the stand boards)
@@ -418,6 +446,7 @@ shared.GalaxyCloseSide = function(keep: string?)
 	if sideOpen == "C" and keep ~= "C" and shared.GalaxyCodesClose then shared.GalaxyCodesClose() end
 end
 local function pressKey(k)
+	if not keyAllowed(k) then return end
 	if k.window == "Guide" then
 		if shared.GalaxyGuideToggle then shared.GalaxyGuideToggle() end
 	elseif k.window == "Store" then
@@ -622,7 +651,7 @@ local function stepTarget(step: number): (GuiObject?, string?)
 		if not treeOpen then return keyUI.T.hit, nil end
 		local tree = treePanels.Tree
 		local tile = tree and tree.targets.R2_Starfire
-		if treeCtx.sel.kind == "node2" and treeCtx.sel.key == "Starfire" then return treePanels.Info.ui.upWide.button, nil end
+		if treeCtx.sel.kind == "node2" and treeCtx.sel.key == "Starfire" then return treePanels.Info.targets.Buy, nil end
 		if tile then tree:reveal(tile) end
 		return tile, nil
 	end
@@ -720,7 +749,7 @@ event.OnClientEvent:Connect(function(kind, a, b)
 end)
 UserInputService.InputBegan:Connect(function() tut.idleSince = os.clock() end)
 
--- step 1 while YOUR Bodies board's button is off screen: gold arrows on the floor from you to the board (Regrowth's trail)
+-- while the step's board button is off screen: gold arrows on the floor from you to the board (Regrowth's trail)
 local trailFolder = Instance.new("Folder")
 trailFolder.Name = "TutorialTrail"
 trailFolder.Parent = workspace
@@ -761,6 +790,14 @@ local function showTrail(to: Vector3?)
 	end
 end
 
+-- which board button a step points at: BODIES (bodies + their unlocks), STAR UPGRADES (ring 1), TREE then INFO (ring 2)
+local function boardKeyFor(id: string): string?
+	if id == "BuyAsteroid" then return "Body0" end
+	if id == "FirstLight" then return "Star_FirstLight" end
+	if id == "FirstMoon" then return "Body1" end -- (UNLOCK on the Moon's row, then its UPGRADE)
+	if id == "Starfire" then return if shared.GalaxyCinematic then nil else "R2_Starfire" end
+	return nil
+end
 RunService.Heartbeat:Connect(function()
 	local step = player:GetAttribute("TutStep") or 0
 	tut.step = step
@@ -780,11 +817,13 @@ RunService.Heartbeat:Connect(function()
 		local s = screenScale()
 		hintRoot.Position = if small and open then UDim2.new(0.5, 0, 0, viewport().Y - math.floor(46 * s)) else UDim2.new(0.5, 0, 0, math.floor(90 * s))
 	end
-	-- step 1 points at the Asteroid's UPGRADE on YOUR island's BODIES board (like Regrowth): the arrow + ring when it's on
-	-- screen, the floor trail while you're away from it; the hotbar only when you have no board (no island)
+	-- the steps done on YOUR island's boards point at the right board (like Regrowth; boards one job each, 5 Nov): the
+	-- arrow + ring when the button is on screen, the floor trail while you're away from it. With a window open (or no
+	-- island) the windows' own targets are used.
 	local boardAt, boardTop, boardAspect, boardWorld
-	if Econ.Tutorial[step + 1].id == "BuyAsteroid" and not open and shared.GalaxyBoardTarget then
-		local c, t, aspect = shared.GalaxyBoardTarget("Body0")
+	local boardKey = boardKeyFor(Econ.Tutorial[step + 1].id)
+	if boardKey and not open and not treeOpen and shared.GalaxyBoardTarget then
+		local c, t, aspect = shared.GalaxyBoardTarget(boardKey)
 		local cam = workspace.CurrentCamera
 		if c and cam then
 			boardWorld = c

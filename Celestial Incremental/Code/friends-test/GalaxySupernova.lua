@@ -201,6 +201,7 @@ skipRoot.Visible = false
 local skip, skipInner = Kit.button(skipRoot, 10, 6, 130, 46, hex("#6a6474"), hex("#3f3a48"), { ZIndex = 95 })
 Kit.text(skipInner, 0, 9, 130, 28, "SKIP", 24, { ZIndex = skipInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
 local skipping = false
+local showSkipToken = nil
 skip.MouseButton1Click:Connect(function() skipping = true end)
 
 -- the "SUPERNOVA!" stamp: hand-drawn feel (a slanted, outlined word on a burst of sharp gold rays), slammed in and held
@@ -290,7 +291,13 @@ local function cinematic()
 	for k, v in pairs(T) do T[k] = v * slow end
 	fx.Visible = true
 	skipping = false
-	skipRoot.Visible = not first
+	-- SKIP after ~1 s, the first time too (#317): nothing you get needs the cinematic to finish
+	skipRoot.Visible = false
+	local skipToken = {}
+	showSkipToken = skipToken
+	task.delay(1 * slow, function()
+		if showSkipToken == skipToken and busy then skipRoot.Visible = true end
+	end)
 	local cam = workspace.CurrentCamera
 	local oldType, oldFov, oldCf = cam.CameraType, cam.FieldOfView, cam.CFrame
 	local oldExposure = Lighting.ExposureCompensation
@@ -309,6 +316,8 @@ local function cinematic()
 			local k = math.clamp((os.clock() - t0) / (0.6 * slow), 0, 1)
 			k = 1 - (1 - k) ^ 3
 			cam.CFrame = from:Lerp(to, k)
+			-- (Camera.Focus every frame, #316: shadows and detail load around what the camera looks at)
+			cam.Focus = CFrame.new(top)
 		end)
 	end
 	-- WIND-UP: the music cuts, the world dims, the bodies pull into the star, it swells and pulses faster (the riser:

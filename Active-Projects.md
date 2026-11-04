@@ -29,8 +29,9 @@ Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, 
 - **4 Nov:** x2 Stardust pass (id 2070906361, 249 R$, on sale) + Alpha Player badge (id 4501804696776519) created in Creator Hub (universe 10774273782) and put in GameConfig.
 - **Owner to do:** listen to the sounds; re-upload 10 images to the group; File > Save; publish.
 - **4 Nov, research audit:** [[Celestial Incremental/2026-11-04 Galaxy Incremental - MASTER CHECKLIST (decided vs built)]]: 484 decisions; 222 built, 87 partly, 131 not built, 44 changed. The first ~10 min match the notes; purpose, Star Forge, Tutorial 2 and every come-back reason are not built. Players.MaxPlayers is 60 (design: 8).
+- **5 Nov, Phase 0 done (Claude Code, in Studio, not published):** server size 8 (Creator Hub), same-kind boosts add (pass + potion = x3), first Supernova skippable after 1 s + Camera.Focus, Store hidden until tutorial step 7, our own sparkle texture, boards one job each (TREE = ring-2 node graph, INFO = selected node only). See [[Celestial Incremental/Progress/2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]]. Next: Phase 1 (Feel pass plan + numbers first). Owner 5 Nov: VFX layering pass prompt saved, final particle textures come from the owner's artist.
 - **STANDING RULE (Galaxy):** before any Galaxy task, read the master checklist and the source notes for that area. Every Progress note lists the checklist rows it built (#) and updates their status in the checklist.
-- **Last updated:** 2026-11-04
+- **Last updated:** 2026-11-05
 
 ## MOW ARC (Roblox incremental): on hold
 Idea only, not started: mow grass -> upgrades -> REGROW / SEASON prestige. Notes and 3 prompts ready in [[MOW ARC/00 MOW ARC Home]].

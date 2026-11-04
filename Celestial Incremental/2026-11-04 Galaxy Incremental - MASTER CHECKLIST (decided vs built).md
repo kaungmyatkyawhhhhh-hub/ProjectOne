@@ -20,26 +20,28 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 
 ## Summary
 
+Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]]).
+
 | Status | Rows |
 |---|---|
-| BUILT | 222 |
-| PARTLY | 87 |
-| NOT BUILT | 131 |
-| CHANGED | 44 |
+| BUILT | 230 |
+| PARTLY | 85 |
+| NOT BUILT | 129 |
+| CHANGED | 40 |
 | **Total** | **484** |
 
 | Area | BUILT | PARTLY | NOT BUILT | CHANGED |
 |---|---|---|---|---|
 | purpose | 6 | 8 | 15 | 1 |
-| economy | 32 | 4 | 25 | 4 |
+| economy | 33 | 4 | 25 | 3 |
 | tutorial | 17 | 7 | 10 | 2 |
-| UI | 56 | 21 | 11 | 12 |
+| UI | 59 | 19 | 10 | 12 |
 | SFX | 9 | 8 | 8 | 7 |
-| VFX | 20 | 14 | 16 | 5 |
+| VFX | 22 | 15 | 15 | 3 |
 | map | 54 | 6 | 3 | 10 |
-| social | 7 | 1 | 9 | 1 |
+| social | 8 | 0 | 9 | 1 |
 | retention | 10 | 6 | 13 | 1 |
-| monetization | 6 | 2 | 12 | 1 |
+| monetization | 7 | 2 | 12 | 0 |
 | launch | 5 | 10 | 9 | 0 |
 
 **In one line:** the first ~10 minutes (bodies, Supernova 1, tutorial 1-7, boards, map, lighting, the v12 UI look) match the notes well. Almost everything AFTER that, and every reason to come back tomorrow, is not built.
@@ -150,7 +152,7 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 | 66 | economy | No flat stardust rewards: every reward = N seconds of current income | Full game design §3 rule 2 | BUILT | comet pays incomeOf x 30-60 s (EconService L404); codes give Essence + potions only (CodesConfig L8-11) | - |
 | 67 | economy | Comets every 45 s, catchable 9 s, first one 20 s after the tutorial, worth 30-60 s of income | Full game design Ring 1 rules | BUILT | EconConfig Econ.Comet L162-168 | - |
 | 68 | economy | Comet floor: never more than one comet per 15 s | Owner answers 3 Nov | BUILT | EconConfig L167 MinEvery=15; EconService cometEvery L176 + spawnComet L249 | - |
-| 69 | economy | Boost rule: same kind of boost doesn't stack (strongest counts), Robux boost never beaten by free | Full game design §3 rule 4 | *CHANGED* | EconService incomeOf L173: x2 pass x x2 potion x Star Surge x2 all multiply (up to x8) | the pass text "Stacks with potions and Star Surge" was written this way on purpose |
+| 69 | economy | Boost rule (owner 5 Nov): boosts of the same kind ADD, they don't multiply (x2 pass + x2 potion = x3; + Star Surge = x4); Robux boost never beaten by free | Full game design §3 rule 4 | **BUILT** | EconService stardustBoost(): 1 + (Surge-1) + potion 1 + pass 1; Studio test 5 Nov: pass x2.00, pass + Surge x3.00 (was x4) | Replaces "strongest counts" (Full game design §3 rule 4). Store line now "Adds to potions and Star Surge (x2 + x2 = x3)." [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
 | 70 | economy | Robux never buys Essence, shards, Dark Matter or luck | Full game design §3 rule 5 + §9 | BUILT | GameConfig has only pass X2Stardust; no dev products | - |
 | 71 | economy | No trading at launch | Full game design §3 rule 6 | BUILT | grep trade: nothing | - |
 | 72 | economy | Every economy number in one Config | Full game design §3 rule 7 | BUILT | ReplicatedStorage.Galaxy.EconConfig ("nothing else holds an economy number") | - |
@@ -310,9 +312,9 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 | 216 | UI | Board buttons big enough to tap on a phone from the spawn camera | Prompt Boards one job each (test) | PARTLY | IslandBoardsUI uses Kit.ps phone sizes (overnight part 5) | not checked on a real phone |
 | 217 | UI | One job per board: no board opens a window; boards and 2D windows (U / T) read the same data | Prompt Boards one job each | BUILT | Board taps only call ctx.select / ctx.buy (IslandBoardsUI); 2D windows reuse UpgradesPanel / IslandBoardsUI | - |
 | 218 | UI | BODIES board = buying bodies only, locked tiers show "???" with their unlock price, +10x on the board | Prompt Boards one job each | PARTLY | IslandBoardsUI buildBodies: rows buy on the board; locked rows show the body name + UNLOCK; only UPGRADE and M (10x is on INFO); tapping a row selects it on INFO | no "???", no +10x on the row |
-| 219 | UI | STAR UPGRADES board = all of ring 1 (First Light, Lunar Pull, Planet Seed, Gas Giant, Orbit Speed, Comet Lure, Readiness) | Prompt Boards one job each | PARTLY | IslandBoardsUI STAR_NODES = Ring1 minus unlockTier nodes = First Light, Orbit Speed, Comet Lure, Readiness (4 of 7) | Lunar Pull, Planet Seed, Gas Giant are still only on the TREE board |
-| 220 | UI | TREE board = the shard tree (ring 2) only, as a node graph; a tap selects a node (no buy, no window) | Prompt Boards one job each | PARTLY | IslandBoardsUI tree tap = ctx.select only (BUILT part); but TREE_GRID shows "RING 1 · STARDUST" + "RING 2 · SHARDS" as a tile grid | still holds ring 1; a grid, not a node graph |
-| 221 | UI | INFO board = only the Tree's partner (selected tree node + BUY; "Tap a node on the TREE" when empty); no Supernova info on it | Prompt Boards one job each | **NOT BUILT** | IslandBoardsUI INFO still shows bodies, star cards and a SUPERNOVA page (sel.kind "supernova", "Resets stardust..."); GalaxyBoards defaultSel shows Supernova or first buyable node; no "Tap a node" text | prompt not sent yet (4 Nov) |
+| 219 | UI | STAR UPGRADES board = all of ring 1 (First Light, Lunar Pull, Planet Seed, Gas Giant, Orbit Speed, Comet Lure, Readiness) | Prompt Boards one job each | **BUILT** | IslandBoardsUI STAR_NODES = all of Econ.Ring1 (7 cards incl. Lunar Pull, Planet Seed, Gas Giant; "needs X" + LOCKED while the one before is missing); a card tap selects nothing | [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
+| 220 | UI | TREE board = the shard tree (ring 2) only, as a node graph; a tap selects a node (no buy, no window) | Prompt Boards one job each | **BUILT** | IslandBoardsUI buildTree: ring 2 only, a node graph (hub = your star, lines bright when bought / half lit when open / dark when locked, "?" branches); a tap = ctx.select only. Test: 3 nodes selected | [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
+| 221 | UI | INFO board = only the Tree's partner (selected tree node + BUY; "Tap a node on the TREE" when empty); no Supernova info on it | Prompt Boards one job each | **BUILT** | IslandBoardsUI INFO: only the TREE's selected node (LEVEL, value -> next, desc, BUY + shard cost); "Tap a node on the TREE" when nothing is selected; Supernova page removed; selection stays after a buy. Test: BUY Starfire 14 -> 9 shards | [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
 | 222 | UI | "NEW: <TIER>!" moment on every new body tier (camera nudge, sound, 1.5 s, skippable) | Tutorial 2 §C | **NOT BUILT** | GalaxyHUD Own<k> handler plays only Kit.sound("buyBody"); grep "NEW:" none | - |
 | 223 | UI | Always show the next goal under the stardust counter ("NEXT: GAS GIANT - 12.4K") | Tutorial 2 §C | **NOT BUILT** | Under the counter is only "SUPERNOVA n%" (GalaxyHUD onGoal); "NEXT:" appears only once at TUTORIAL COMPLETE | - |
 | 224 | UI | Bar under each body row "Lv 14 / 20 -> IRON" showing the next tier | Why not Regrowth §1 | PARTLY | IslandBoardsUI INFO card: text "x2 at <next>" + a fill bar (ui.fill) | Not on each body row; no level numbers |
@@ -382,7 +384,7 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 | 278 | VFX | Bigger reward = bigger effect (escalation ladder) | VFX plan rule 3 | PARTLY | Supernova is the biggest; island piece pops scale with size (popIn); but every body tier's arrival is the same 24-sparkle burst | - |
 | 279 | VFX | Shape meaning: round + stars = reward, sharp shards = impact | VFX plan rule 4 | PARTLY | Stamp has sharp gold rays; shard icons fly to the HUD; the world blast is round sparkles only, no shards | - |
 | 280 | VFX | Colour meaning: gold = Supernova/premium, cyan-white = stardust, violet = rare | VFX plan rule 5 | *CHANGED* | Gold beam when ready (GalaxyMapClient), gold Supernova UI; but stardust is warm orange in the UI and the motes (MapConfig Colors.Mote 255,225,160); cyan is used for comets | UI v2 note made stardust orange |
-| 281 | VFX | Our own textures only (sparkle, glow dot, ring, streak, shard, smoke flipbook); no stock Roblox effects | VFX plan rule 6 | *CHANGED* | UI uses our images (UIAssets sparkle, softglow, mote); EVERY world particle uses Roblox's stock rbxasset://textures/particles/sparkles_main.dds (GalaxyMapClient SPARK; the 1 emitter in Workspace too) | No ring, streak, shard or smoke flipbook textures exist |
+| 281 | VFX | Our own textures only (sparkle, glow dot, ring, streak, shard, smoke flipbook); no stock Roblox effects | VFX plan rule 6 | PARTLY | Our own 4-point sparkle UI\make_fx_sparkle.py -> UI\roblox\fx_sparkle.png (UIAssets.fxSparkle 71469044551825, Studio test upload) on every world sparkle: GalaxyMapClient SPARK, MapBuilder + Workspace BlackHoleGate.Pull emitter | Owner 5 Nov: the artist makes the final set (sparkle, glow dot, ring, streak, shard, 4x4 smoke flipbook); ours is the placeholder, swap the id later. Still stock: fire_main.dds (GalaxyBoards flame strip). Re-upload to P&L Studios XP. [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
 | 282 | VFX | Budget: <=300 particles, pooled emitters + Emit(n), far emitters off, 1 Highlight max, max 3 flashes a second | VFX plan rule 7; Playbook rules §5 | PARTLY | Emit(n) used; far motes switched off (LOD in RenderStepped); 1 Highlight (TeaserGlow); one flash; but sparkleBurst makes a new Part + emitter every time (not pooled) | (a second check marked it CHANGED: GalaxyBoards flame border: ParticleEmitter.Rate = edge length x 14 (a 14-stud edge = ~196/s), 4 per flame board, no phone cap) |
 | 283 | VFX | Income tick: nothing in the world; HUD number counts up + a tiny pop every second | VFX plan table | PARTLY | GalaxyHUD counter counts up live; the pop only happens on buys (afterBuy 1.08x) | - |
 | 284 | VFX | Buy a tree node: node lights up, a star line draws to it, 8-12 sparkles | VFX plan table | **NOT BUILT** | IslandBoardsUI UI:buy plays a sound and the tile refreshes; no line drawing, no sparkles | UPGRADES window buys do get 5 sparkles + a "+x/s" pop (UpgradesPanel Panel:bought) |
@@ -417,8 +419,8 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 | 313 | VFX | Pair neon: animated energy strip along the frame that spills outside (violet on Tree, blue on Info) | Island boards 1to1; Prompt Boards 1to1 pass 2 §3 | BUILT | GalaxyBoards fx: crackling Beams re-bent ~14x/s + breathing Halo; MapConfig Neon colours (150,100,255) / (70,165,255) | no crackle with Reduced Motion |
 | 314 | VFX | A body's look changes with its tier (material, colour, glow) | Why not Regrowth §1 | **NOT BUILT** | GalaxyMapClient planets use fixed MapConfig.PlanetColors per tier type; no tier-based look | - |
 | 315 | VFX | Respect ReducedMotion (no shake or flash) | Playbook rules §5 | BUILT | UIKit Kit.calm() = GuiService.ReducedMotionEnabled; Supernova flash/FOV punch off, bobbing arrows still (GalaxySupernova, GalaxyHUD, MapClient) | - |
-| 316 | VFX | Cameras client only; set Camera.Focus every frame | Playbook rules §5 | **NOT BUILT** | GalaxySupernova BindToRenderStep sets cam.CFrame only; grep "Focus" finds no Camera.Focus | - |
-| 317 | VFX | Cutscenes always skippable after ~1 s | Playbook rules §5 | *CHANGED* | GalaxySupernova: skipRoot.Visible = not first, so the first (~5 s) Supernova can't be skipped; later ones can | - |
+| 316 | VFX | Cameras client only; set Camera.Focus every frame | Playbook rules §5 | **BUILT** | GalaxySupernova render step sets cam.Focus = the system top every frame; Studio test: Focus held on the star the whole cinematic | [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
+| 317 | VFX | Cutscenes always skippable after ~1 s | Playbook rules §5 | **BUILT** | GalaxySupernova: SKIP shows after 1 s every time, the first Supernova too (test 5 Nov: hidden 0-0.8 s, shown from 1.0 s) | [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
 | 318 | VFX | Never a reward that needs watching to the end | Playbook rules §5 | PARTLY | Shards are granted at the impact (after the 2.45 s wind-up), not at the end; the first one can't be skipped | - |
 
 ### Map and lighting (73)
@@ -508,7 +510,7 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 | 394 | social | Friends in server +10% each (max 5) | Full game design §7; Why play 8 + UI plan P3.8; Playbook rules §2; 10 incrementals - patterns #3 (Celestial already had it) | **NOT BUILT** | grep friend / IsFriendsWith: nothing in income (EconService incomeOf L173) | - |
 | 395 | social | P&L Studios XP group members +10% | Full game design §7 + What is left to discuss; Incremental notes (Roblox incrementals); Regrowth paid access - lessons | **NOT BUILT** | grep IsInGroup / GetRankInGroup: nothing | - |
 | 396 | social | Ranks SPARK 1, FLARE 3, BLAZE 5, NOVA 8, SUPERGIANT 12 Supernovas, shown over the head | Prompt ALPHA 2 (approved); Why play 7 + UI plan P3.7; Map design and quality (incrementals check); 10 incrementals - Take #3 | BUILT | MapConfig.Ranks L173-179; GalaxyRankTags | - |
-| 397 | social | 8 players per server, 8 pads claimed on join and freed on leave | Full game design §6 | PARTLY | 8 islands (MapConfig.Islands.Count=8, Workspace.Galaxy.Islands has 8) + claim/free (MapService L2, L309); Players.MaxPlayers reads 60 in Studio | set server size 8 in Creator Hub and re-check |
+| 397 | social | 8 players per server, 8 pads claimed on join and freed on leave | Full game design §6 | **BUILT** | Creator Hub > Galaxy Incremental place > Access: Maximum Visitor Count 8, saved 5 Nov (was 50; Studio read 60). Social slots: Roblox optimized | [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
 | 398 | social | Other players' systems: full detail near, simple far away | Full game design §6 | BUILT | MapConfig.LodDistance=140; MapClient L687 | - |
 | 399 | social | Shared sky: constellations anyone lit stay | Full game design §7 | **NOT BUILT** | constellations are not drawn in the sky at all | - |
 | 400 | social | No likes / favourites board at launch | Full game design §7; 10 incrementals - Take #1 | BUILT | none exists | replaces GLOBAL MILESTONES likes board via proxy (Revamp 2 plan) (a second check marked it NOT BUILT: Searched all 31 scripts for Favorite, likes, upVotes, milestone board: no hits. No such board under Workspace.Galaxy.Centre (checked in Stud) |
@@ -569,7 +571,7 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 | 445 | monetization | Server Surge product 99 R$ (fills Star Surge for everyone) | Full game design §9 | **NOT BUILT** | no dev products | - |
 | 446 | monetization | Supernova Starter once after Supernova 1, 99 R$ (x2 30 min + 1 h warp + trim) | Full game design §9 | **NOT BUILT** | no dev products | - |
 | 447 | monetization | Prices read live from Roblox | Full game design §9; Playbook rules §7 | BUILT | GalaxyStore L88 GetProductInfo | - |
-| 448 | monetization | No offers until Supernova 1, no shop until tutorial step 7, never during cinematics | Full game design §5 + §9 | *CHANGED* | Store (hotbar E) opens from the first second (GalaxyHUD KEYS L207, no lock); but no offer ever pops up by itself | - |
+| 448 | monetization | No offers until Supernova 1, no shop until tutorial step 7, never during cinematics | Full game design §5 + §9 | **BUILT** | GalaxyHUD: the STORE key (E) is hidden until tutorial step 7 is done (keyAllowed, STORE_AT_STEP = 7), the other keys close the gap; E does nothing before; no offer pops up by itself | Codes (inside the Store) open with it. Not checked separately: Store during a cinematic. [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
 | 449 | monetization | Private servers 100 R$ | Full game design §6 | **NOT BUILT** | Creator Hub setting, not visible from Studio; listed in What is left #10 | - |
 | 450 | monetization | Product bubbles next to your system | Revamp 2 plan, gaps table; 10 incrementals - Take #11 | **NOT BUILT** | grep bubble: nothing | - |
 | 451 | monetization | Banned: fake timers, resetting countdowns, false scarcity, "BUY NOW!", offers in the tutorial, paid luck | UI plan P3 banned list; Playbook rules §3 | BUILT | GalaxyStore calm wording, no countdowns; Star Surge timers are real (GalaxyStarSurgeService "never a fake timer"); no store prompt in the tutorial | - |

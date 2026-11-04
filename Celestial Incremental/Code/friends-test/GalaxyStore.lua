@@ -69,7 +69,7 @@ Kit.text(x2, 0, 4, 62, 32, "x2", 28, { ZIndex = 11, TextXAlignment = CENTRE, Fon
 Kit.text(win, 186, 92, 400, 40, X2.title, 34, { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 2.2,
 	gradient = ColorSequence.new(hex("#fff1c0"), hex("#ffb02a")) })
 Kit.text(win, 188, 136, 400, 24, X2.desc, 19, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#e8e2f0"), stroke = 1.3 })
-Kit.text(win, 188, 162, 400, 22, "Stacks with potions and Star Surge.", 16, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1.1 })
+Kit.text(win, 188, 162, 400, 22, "Adds to potions and Star Surge (x2 + x2 = x3).", 16, { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1.1 })
 local buy, buyInner, buyGrad = Kit.button(win, W - 196, 176, 164, 50, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6 })
 local buyText = Kit.text(buyInner, 0, 10, 164, 30, "R$ " .. X2.price, 24, { ZIndex = buyInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
 local buyShine = Kit.tagVfx(Kit.shine(buy, 2.6))
