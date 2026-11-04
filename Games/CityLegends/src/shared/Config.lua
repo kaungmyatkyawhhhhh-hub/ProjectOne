@@ -220,6 +220,10 @@ Config.Traffic = {
 	BumpMph = 14, -- traffic slows to this over a speed bump (2026-11-03)
 	BumpLook = 40, -- ...from this many studs before it
 	StreetShare = 0.05, -- of the spots picked on other streets, this share is used (a rare car)
+	-- lanes each way on the streets, the roads that aren't yellow (owner, 2026-11-04: "Make the road 1+1
+	-- for the roads which isnt yellow. The yellow road will stay the same"): 1 = one lane in the middle
+	-- of each half (RivieraTraffic), 2 = the old two
+	StreetLanes = 1,
 	LeaveRouteK = 0.03, -- how seldom a car turns off a route onto a street
 	StreetRecycle = 260, -- a car off the routes this far from you goes back onto one
 	RivieraMax = 90, -- (64 before, then 32 before that, 2026-11-03: "add more traffic cars throughout the map"; 22 before that; owner 2026-11-02 again: "add more cars traffic")

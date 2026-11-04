@@ -1059,3 +1059,10 @@ Owner: "the cars are bugging here" ([[Traffic pile-up at the Mountain Road hairp
 - **Height:** distances to you were measured including height, so on the mountain (215 up) cars that turned off the yellow route were whisked away right in front of you, over and over.
 - **Same height bug, wider:** cut-ups (near misses) never counted above ~45 studs (most of the Riviera), traffic didn't wait for players at junctions up there, and a car brought out on a hill road didn't clear the traffic around it. All measure at the right height now.
 - Tested in Play: 90 s at the hairpin: 26 cars went down the switchback (0 before), no cars stacked, longest wait 6.5 s (it was minutes). Mountain Road drive: 3 cut-ups counted at heights 120-215. Bay Link, East Climb 1 / Coast Road: no stacking or standstills.
+
+## Streets 1+1 (2026-11-04)
+Owner: "Make the road 1+1 for the roads which isnt yellow. The yellow road will stay the same."
+- **The 3 yellow routes** (Coast Road, Mountain Road, Town Road): unchanged, 2 + 2 lanes.
+- **The 33 other streets:** one lane each way. Their lane lines (the dashes between lane 1 and 2, 4,161 pieces) are taken off; the centre dashes and the edge lines stay. The roads keep their width (narrowing them would mean rebuilding every road, kerb and pavement). The lines are kept in `ServerStorage.OldLaneLines` to put back. `tools/riviera/RoadLines.luau` now draws streets this way too.
+- **Traffic:** street cars drive one lane in the middle of their half (`Config.Traffic.StreetLanes = 1`; 2 puts the old two lanes back). Lane test on the new street lanes: no kerbs or walls under them; 2 tiny holes in the road (Casino Avenue, Hairpin W3) were filled. Players' first car still comes out on Harbour Street / Coast Road.
+- Pictures: [[Streets 1+1 - Harbour Street before.jpg]], [[Streets 1+1 - Harbour Street after.jpg]].

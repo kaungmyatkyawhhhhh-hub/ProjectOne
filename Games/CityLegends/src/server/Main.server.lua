@@ -195,7 +195,8 @@ local function rivieraStartSpots(): { CFrame }
 		local near = Config.Spawn.RivieraNear
 		for _, seg in (if g then g.lanes else {}) do
 			local s = seg :: any
-			if s.lane == 2 and Config.Spawn.RivieraRoads[s.road] and seg.length > 12 then
+			-- (the outer lane; a street's one lane since the streets went 1+1, 2026-11-04)
+			if (s.lane == 2 or not s.route) and Config.Spawn.RivieraRoads[s.road] and seg.length > 12 then
 				local pos, dir = CityLayout.sample(seg, seg.length / 2)
 				if Vector2.new(pos.X - near.X, pos.Z - near.Z).Magnitude < Config.Spawn.RivieraRadius and math.abs(dir.Y) < 0.08 then
 					table.insert(list, CFrame.lookAt(pos, pos + Vector3.new(dir.X, 0, dir.Z)))

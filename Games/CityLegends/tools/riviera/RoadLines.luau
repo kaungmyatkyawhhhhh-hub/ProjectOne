@@ -31,7 +31,7 @@ local function prepare(data)
 		for i, s in r.s do
 			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), wl = s[7] or HALF, wr = s[8] or HALF }
 		end
-		roads[ri] = { name = r.name, pts = pts }
+		roads[ri] = { name = r.name, pts = pts, route = r.kind == "route" }
 	end
 	local grid = {}
 	for ri, r in roads do
@@ -150,10 +150,14 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 			}
 			if dash % 2 == 0 then
 				table.insert(lines, { x = 0, xb = 0, w = 0.5 })
-				if math.min(a.wr, b.wr) > 14 then
+				-- (owner, 2026-11-04: "Make the road 1+1 for the roads which isnt yellow"): only the three
+				-- yellow routes keep their lane lines; the streets are one lane each way
+				if not r.route then
+					-- (no lane lines)
+				elseif math.min(a.wr, b.wr) > 14 then
 					table.insert(lines, { x = math.min(HALF / 2, a.wr / 2), xb = math.min(HALF / 2, b.wr / 2), w = 0.4 })
 				end
-				if math.min(a.wl, b.wl) > 14 then
+				if r.route and math.min(a.wl, b.wl) > 14 then
 					table.insert(lines, { x = -math.min(HALF / 2, a.wl / 2), xb = -math.min(HALF / 2, b.wl / 2), w = 0.4 })
 				end
 			end
