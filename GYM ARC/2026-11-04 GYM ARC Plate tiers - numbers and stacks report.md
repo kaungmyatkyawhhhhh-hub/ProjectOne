@@ -209,3 +209,24 @@ Diamond 8 on the Gem bench is now 1181 (was 1245).
   - The panel shows "Needs Mid Chest 334,624,118 exp".
 - **Open question for the owner:** Bronze 1-6 (18M-118M) sit below the ~170M a muscle that Gem-alter players have, so they get those steps at once. Starting Bronze from ~170M instead would make every Bronze step a real goal.
 
+### Brief 4 (owner, 4 Nov): Bronze 250M · Silver 450M · Gold 800M · Platinum 1.5B · Ruby 2.7B · Diamond 5B. Report only, NOT built.
+- Target: Bronze under 30 min, Diamond about 15-30 h of focused training, from Alter 20 (220M a muscle).
+- Model: ★10 with 2 Heracles (BASE LV 20), Alter 20, the Gem bench top, one muscle, one rep every 1.05 s. No PUMPED, BIG REP, Muscle of the Day or Run Cards.
+- **EXP an hour on one muscle:** 12.5B at 220M, 5.9B at 1B, 3.6B at 2.7B, 2.7B at 5B, 1.1B at 30B (diminishing returns).
+
+| Gates, from 220M | Bronze | Silver | Gold | Platinum | Ruby | Diamond |
+|---|---|---|---|---|---|---|
+| Brief 4, ★10 | 0 min | 1 min | 4 min | 12 min | 29 min | **74 min** |
+| Brief 4, owner maxed | 0 min | 1 min | 2 min | 5 min | 13 min | 33 min |
+
+- **Way off.** Diamond needs about 26B for 15 h, 34B for 22 h, or 42B for 30 h (★10).
+- **Proposed:** the same ×2.61 a tier from Bronze 250M to Diamond 30B: **250M · 650M · 1.7B · 4.4B · 11.5B · 30B**.
+
+  | Proposal, from 220M | Bronze | Silver | Gold | Platinum | Ruby | Diamond |
+  |---|---|---|---|---|---|---|
+  | ★10 | 0 min | 3 min | 14 min | 62 min | 4.4 h | 18.3 h |
+  | Owner maxed | 0 min | 1 min | 6 min | 27 min | 1.9 h | 8.0 h |
+
+- **Also proposed:** start the Bronze steps from 220M (the Alter 20 goal), not the Gem top's 12.4M, so every step comes after Alter 20.
+- Studio still has the brief-3 gates (250M ... 100B) until the owner picks.
+
