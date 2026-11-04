@@ -37,7 +37,7 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **Details:** [[City Legends/City Legends]] (all City Legends notes go in the `City Legends` folder)
 - **Code:** this vault, folder `Games/CityLegends`.
 - **Now (29 Oct):** play-test done in Studio. New: passenger seats (Y beside a friend's car), M = automatic / sequential, varied traffic speeds, chauffeur lane splitting, island bridges 2 lanes each way. Open: a better Suzaki Swift model, Camri badge, a few blocked car meshes. Next: save, publish, check the funnels in Creator Hub, then the AFK Zone.
-- **4 Nov (Claude Code, in Studio):** Riviera Highway + Summit Pass, then the owner's marked map: Corniche Highway (20,846 studs, viaducts), Serpent Road, 6 links, no dead-end roads left. Curved road meshes: option 1 (Blender + one Import 3D by the owner). Still to do: main menu restyle, building materials, Monaco hairpin. See [[City Legends/City Legends]].
+- **4 Nov (Claude Code, in Studio):** Riviera Highway + Summit Pass, then the owner's marked map: Corniche Highway (20,846 studs, viaducts), Serpent Road, 6 links, no dead-end roads left. Curved road meshes: option 1 (Blender + one Import 3D by the owner). Main menu restyled, building materials in. Next: Grand Hairpin, waits for the owner to Import 3D `imports/new_map/Grand Hairpin.fbx`. See [[City Legends/City Legends]].
 - **Last updated:** 2026-11-04
 
 ## Archived (not worked on, nothing deleted)

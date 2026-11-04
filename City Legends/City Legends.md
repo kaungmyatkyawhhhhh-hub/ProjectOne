@@ -1102,3 +1102,16 @@ Owner: "I want to add roads. The big road on top will be a highway. and near the
 - **Parts:** 52,632 new road parts + 274 pines (the place had 306,000). The map streams, so a phone only holds what's near it; not measured on a phone.
 - **No new race or fast travel spot** (not asked for). To get there: fast travel to Riviera Highway and drive to the top of the Highway Loop.
 - Pictures: [[Corniche Highway - rock cutting.jpg]], [[Corniche Highway - viaduct ahead.jpg]], [[Corniche Highway - sea view.jpg]], [[Serpent Road - parapets.jpg]], [[Hairpin E4 - new link.jpg]].
+
+## Building materials (2026-11-04)
+The PBR material kit left from the map realism step. Five MaterialVariants made with Studio's material generator (each came with 3 spare versions, in `MaterialService`): RivStucco (Plaster), RivLimestone (Limestone), RivConcrete2 (Concrete), RivSlate (Slate), RivClayTile (ClayRoofTiles); walls tile every 22 studs. They're **base material overrides**, so every part of those materials changed at once (148,000 building parts plus kerbs, parapets, viaducts) and no part was edited. **Undo one in a line** (Studio command bar): `game:GetService("MaterialService"):SetBaseMaterialOverride(Enum.Material.Plaster, "")`.
+- The first concrete version made buildings dark and grainy, so the third is the one in use.
+- Not done from that prompt's list: wet asphalt, marble, terrazzo, weathering at the bottom of walls.
+- Pictures: [[Building materials - before.jpg]] (same street, one spot), [[Building materials - after.jpg]] (another street). FPS in Studio with them on: 79.
+
+## Grand Hairpin (2026-11-04, started: waits for one Import 3D)
+Owner chose **option 1** for curved roads: meshes made in Blender, one Import 3D by hand.
+- **Where:** the West Switchbacks' upper west bend (around 10810, 180, -100), samples 399-465. It's the map's real 180 degree bend with free hill round it. The Mountain Road's west end is an S bend, not a hairpin.
+- **Made so far:** `tools/map_plan/hairpin.py` (the shape: 1+1, half width 22, narrowing from 32 over 70 studs, teardrop island, 357 studs, grade 12%, radius ~46 in the bend, tightest spot 32) and `tools/hairpin_fbx.py` (Blender) -> `Games/CityLegends/imports/new_map/Grand Hairpin.fbx`: HP_Road, HP_Lines, HP_Pavement, HP_KerbStone, HP_KerbRed, HP_Island, HP_Wall. Piece sizes in `build/riviera/hairpin_parts.json`.
+- **The shape's source:** the owner's reference photos. OpenStreetMap wasn't reachable from here (its certificate had expired), so the prompt's OpenStreetMap shape isn't used.
+- **Nothing changed in the place yet.** After the import: put the pieces in place, invisible collision wedges under them, take out the old block road there, lanes (same number of points, so links keep working), kerb stripe texture, island planting, hotel and towers round it, night look, then the checks in the prompt. Not tested yet: the FBX hasn't been in Studio, so its scale and the kerb profile are unchecked.
