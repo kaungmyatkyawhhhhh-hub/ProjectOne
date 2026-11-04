@@ -61,7 +61,6 @@ CarSkin.CLUSTER_STYLE = {
 	toyoka_crown = "Toyota",
 	toyoka_lc200 = "Toyota",
 	toyoka_alfard = "Toyota", -- owner (2026-10-22): its own dials didn't work; the LC200's cluster
-	lambrini_lp570 = "GallardoSL", -- the Superleggera's white dials
 	kio_ev6 = "EV6",
 	lambrini_urus = "Urus",
 	chevo_c6 = "C6",
@@ -71,10 +70,14 @@ CarSkin.CLUSTER_STYLE = {
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",
 	lexis_lfa = "LFAFitted", -- the ring sized to the model's own round pod
-	lambrini_lp700 = "AventadorLP700", -- owner (2026-10-17): its own, copied from an LP700-4 video
 	lambrini_lp750 = "LiveSV", -- the real SV screen, redrawn from the owner's photos (tools/lambo/cluster_live.py)
 	-- owner (2026-11-02): the SVJ model's own screen picture made live (DashGauges.aventadorSVJ),
 	-- and the same working screen on the SVJ 63, whose model has a blank one
+	lambrini_huracan = "LiveHuracan", -- the EVO's screen, shared in the line (owner, 2026-11-04)
+	lambrini_performante = "LiveHuracan",
+	lambrini_sto = "LiveHuracan",
+	lambrini_sterrato = "LiveHuracan",
+	lambrini_revuelto = "LiveRevuelto",
 	lambrini_svj = "AventadorSVJ",
 	lambrini_svj63 = "AventadorSVJ",
 	-- the cars of the second Sketchfab batch (looks from the real cars, until the owner sends photos)
@@ -117,14 +120,16 @@ CarSkin.CLUSTER_RECT = {
 	bnw_x6 = { at = Vector3.new(0.0101, 0.0352, -0.1909), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3494, h = 0.1211 },
 	bnw_x7 = { at = Vector3.new(-0.0025, -0.0002, -0.257), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3496, h = 0.1339 },
 	lexis_lx700 = { at = Vector3.new(-0.011, 0.0755, -0.114), face = Vector3.new(-0.012, -0.069, 0.9975), w = 0.3288, h = 0.1511 },
-	-- the LP700 in the LP750's cabin: the LP750's whole screen (rev counter and both side screens),
-	-- so the LP750 itself keeps its own cluster where it was
-	lambrini_lp700 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.334, h = 0.1455 },
 	-- the GT3 in the 718 cabin: the whole hood (its three dials), with the 991's five dials in it
 	porsha_gt3 = { at = Vector3.new(-0.0058, 0.0501, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), w = 0.3, h = 0.118 },
-	-- the LP750 in its own cabin: the same screen
-	-- (a little wider than the screen it covers: owner, 2026-10-24, "stretch the LP750 SV cluster a little bit")
-	lambrini_lp750 = { at = Vector3.new(-0.0005, 0.0194, -0.2354), face = Vector3.new(-0.001, 0.113, 0.9936), w = 0.362, h = 0.1455 },
+	-- the LP750 on its 2026-11-04 model: the screen's middle window and both sides
+	lambrini_lp750 = { at = Vector3.new(0.0022, 0.0292, -0.2395), face = Vector3.new(-0.002, 0.107, 0.994), w = 0.37, h = 0.1486 },
+	-- the Lamborghini imports: the Revuelto's own screen, the EVO's in all four Huracans
+	lambrini_revuelto = { at = Vector3.new(0.0, 0.0597, -0.222), face = Vector3.new(0, 0.081, 0.997), w = 0.2841, h = 0.1045 },
+	lambrini_huracan = { at = Vector3.new(0.0006, 0.0254, -0.2572), face = Vector3.new(0, 0.407, 0.914), w = 0.283, h = 0.0977 },
+	lambrini_performante = { at = Vector3.new(0.0002, 0.0264, -0.2568), face = Vector3.new(0, 0.407, 0.914), w = 0.283, h = 0.0977 },
+	lambrini_sto = { at = Vector3.new(0.0005, 0.0247, -0.2575), face = Vector3.new(0, 0.407, 0.914), w = 0.283, h = 0.0977 },
+	lambrini_sterrato = { at = Vector3.new(0.0005, 0.0235, -0.2576), face = Vector3.new(0, 0.407, 0.914), w = 0.283, h = 0.0977 },
 	-- the SVJ and SVJ 63 (owner, 2026-11-03: "put the cluster under that outline"): the whole screen
 	-- fills their own cluster frame (the centre and both side windows), just behind the frame's
 	-- ribs and edges so the frame lies over it like on the real car. Measured on the models
@@ -155,6 +160,23 @@ CarSkin.NEEDLE_LENGTH = {
 -- (aspect: a read-out's height over its width, default 0.45; clear: no plate, only the text; font: its Enum.Font name)
 export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, bg: Color3?, fg: Color3?, grow: number?, withGear: boolean?, aspect: number?, clear: boolean?, font: string? }
 CarSkin.DIAL_NEEDLES = {
+	-- the Lamborghini imports (2026-11-04): the needles the models only had painted (their pictures are
+	-- clean now, tools/lambo/gallardo_dials.py, cluster_art.py --live), with the speed and the gear live
+	lambrini_lp700 = {
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0012, 0.0389, -0.2402), face = Vector3.new(0, 0.108, 0.9942), length = 0.0456, scale = "0:180.0,3000:270.0,6000:360.0,9000:450.0" },
+		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0364, 0.028, -0.239), face = Vector3.new(0, 0.108, 0.9942), length = 0.0224, scale = "", bg = Color3.fromRGB(236, 240, 244), fg = Color3.fromRGB(14, 14, 16), aspect = 0.385 },
+		{ kind = "gear", unit = "", at = Vector3.new(0.0112, 0.0132, -0.2374), face = Vector3.new(0, 0.108, 0.9942), length = 0.0086, scale = "", fg = Color3.fromRGB(232, 214, 32), aspect = 1.05, clear = true, grow = 2.2 },
+	},
+	lambrini_lp570 = {
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0832, 0.0341, -0.2253), face = Vector3.new(-0.0056, 0.5422, 0.8402), length = 0.0425, scale = "0:-129.7,1000:-103.2,2000:-76.6,3000:-52.1,4000:-27.5,5000:-3.6,6000:20.6,7000:46.0,8000:73.2,9000:99.5,10000:125.4" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0836, 0.0348, -0.2258), face = Vector3.new(-0.0415, 0.543, 0.8387), length = 0.0424, scale = "0:-130.0,40:-99.8,70:-77.1,100:-53.8,130:-30.5,160:-9.0,190:12.5,220:33.5,250:56.3,280:78.9,310:102.3,340:125.2" },
+		{ kind = "gear", unit = "", at = Vector3.new(0.0008, 0.0023, -0.1951), face = Vector3.new(0, 0.7421, 0.6703), length = 0.0586, scale = "", bg = Color3.fromRGB(22, 24, 28), fg = Color3.fromRGB(240, 240, 244), aspect = 0.17, font = "Sarpanch" },
+	},
+	lambrini_lp560 = { -- (the Superleggera's binnacle: tools/lambo/gallardo_dash.py)
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0834, 0.017, -0.251), face = Vector3.new(-0.0056, 0.5422, 0.8402), length = 0.0425, scale = "0:-129.7,1000:-103.2,2000:-76.6,3000:-52.1,4000:-27.5,5000:-3.6,6000:20.6,7000:46.0,8000:73.2,9000:99.5,10000:125.4" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(0.0834, 0.0177, -0.2514), face = Vector3.new(-0.0415, 0.543, 0.8387), length = 0.0424, scale = "0:-130.0,40:-99.8,70:-77.1,100:-53.8,130:-30.5,160:-9.0,190:12.5,220:33.5,250:56.3,280:78.9,310:102.3,340:125.2" },
+		{ kind = "gear", unit = "", at = Vector3.new(0.0007, -0.0148, -0.2208), face = Vector3.new(0, 0.7421, 0.6703), length = 0.0586, scale = "", bg = Color3.fromRGB(22, 24, 28), fg = Color3.fromRGB(240, 240, 244), aspect = 0.17, font = "Sarpanch" },
+	},
 	-- the Chiron family (owner, 2026-11-03): the 2016 Chiron's own screen (its painted needle taken out)
 	-- in all three, with a live needle on the 500 km/h dial, the speed and the gear in its box
 	-- (tools/needle_specs.py)
@@ -245,6 +267,9 @@ CarSkin.DIAL_NEEDLES = {
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
 CarSkin.FACELESS_DIALS = {
+	lambrini_lp700 = { { faceless = true, needle = Color3.fromRGB(235, 40, 46), needleW = 4 } },
+	lambrini_lp570 = { { faceless = true, needle = Color3.fromRGB(238, 92, 40), needleW = 6, hubRing = Color3.fromRGB(58, 62, 68), hubR = 18 } },
+	lambrini_lp560 = { { faceless = true, needle = Color3.fromRGB(238, 92, 40), needleW = 6, hubRing = Color3.fromRGB(58, 62, 68), hubR = 18 } },
 	bugotti_chiron = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
 	bugotti_chiron_pursport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
 	bugotti_chiron_supersport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
@@ -295,9 +320,6 @@ CarSkin.INTERIOR_DONOR = {
 	-- owner (2026-10-13): the 458 Italia keeps its body and takes the 458 Speciale's cabin (a cabin
 	-- donor only, not a car in the roster); its own Ferrari cluster design stays
 	ferrara_458 = { from = "ferrara_458s", rear = 1.8 },
-	-- owner (2026-10-17): the LP700's own cabin looks off and blocky; the LP750's goes in, with the
-	-- LP700's own cluster design over its screen (not the LP750's)
-	lambrini_lp700 = { from = "lambrini_lp750", rear = 1.8 },
 	-- owner (2026-10-18): the CLA 45 and the GLE take the 2017 C63 AMG coupe's cockpit (a cabin
 	-- donor only, not a car in the roster)
 	bentz_cla45 = { from = "bentz_c63c", rear = 1.8 },
@@ -317,27 +339,17 @@ CarSkin.KEEP_OWN_CLUSTER = {} :: { [string]: boolean }
 -- lp 750"). Keyed by the cabin's car id (so the LP700, in the SV's cabin, gets it too).
 type CabinLook = { color: Color3, material: Enum.Material, variant: string? }
 CarSkin.CABIN_RECOLOUR = {
-	lambrini_lp750 = {
-		["133052779464309"] = { color = Color3.fromRGB(26, 26, 29), material = Enum.Material.SmoothPlastic }, -- dash, door cards, vents
-		["138771621760894"] = { color = Color3.fromRGB(22, 22, 25), material = Enum.Material.SmoothPlastic }, -- leather
-		["83442883088810"] = { color = Color3.fromRGB(17, 17, 19), material = Enum.Material.Fabric }, -- floor mats
-		["73882896177478"] = { color = Color3.fromRGB(70, 70, 76), material = Enum.Material.Plastic, variant = "CL_Carbon" }, -- trim: carbon, like the real SV
-		["97917365145307"] = { color = Color3.fromRGB(20, 20, 22), material = Enum.Material.SmoothPlastic }, -- "Black": came out light grey
-		["129893661410753"] = { color = Color3.fromRGB(24, 24, 27), material = Enum.Material.SmoothPlastic }, -- dash plastic
-	},
 } :: { [string]: { [string]: CabinLook } }
 
 -- model parts hidden by name, per cabin (the SV's own cluster screen is only a picture: the live
 -- AventadorSV / LP700 designs cover it; owner, 2026-10-24: "hide the old already in cluster")
 CarSkin.HIDE_PARTS = {
-	lambrini_lp750 = { Body_Display = true },
 } :: { [string]: { [string]: boolean } }
 
 -- a matte black panel behind a swapped-in dash, closing gaps where the donor cabin doesn't meet
 -- the car's own body (the LP700 in the SV's cabin: its front wheel showed through the passenger
 -- side of the dash). Studs from the eye: back / front (forward), top / bottom (down).
 CarSkin.FIREWALL = {
-	lambrini_lp700 = { back = 3.1, front = 4.4, top = 1.0, bottom = 3.2 },
 } :: { [string]: { back: number, front: number, top: number, bottom: number } }
 
 -- steering wheels modelled on each car's real one, without makers' logos or badges (owner,
@@ -350,7 +362,7 @@ CarSkin.STEER_MODEL = {
 	-- Lamborghini
 	-- (the LP700 and the SV keep their models' own wheels: owner, 2026-11-04)
 	lambrini_urus = "AventadorFlat",
-	lambrini_lp570 = "LamboRound", lambrini_lp640 = "LamboRound",
+	lambrini_lp640 = "LamboRound",
 	lambrini_countach = "Countach",
 	-- Ferrari
 	ferrara_f430 = "FerrariF430", ferrara_599 = "FerrariF430", ferrara_california = "FerrariF430",
@@ -1088,7 +1100,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 
 	-- makers' badges and logos stay behind: by name (the part or a group it is in), and the ones
 	-- measured on our converted cars (BrandMarks: by name, and by size where the name is shared)
-	local marks = BrandMarks[src.Name]
+	-- (the new imports: logos are out of the models, and these spots were measured on the old ones)
+	local marks = if CarFinish.CARS[src.Name] then nil else BrandMarks[src.Name]
 	local function isMark(d: BasePart): boolean
 		if marks then
 			if marks.keep and table.find(marks.keep, d.Name) then
@@ -1111,7 +1124,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 	-- tail lamps: parts named as tail / brake lights, the converted cars' measured lamp parts
 	-- (TailLights), and A-Chassis brake-light glow meshes (a "Brake" group, invisible when off)
-	local tails = TailLights[src.Name]
+	local tails = if CarFinish.CARS[src.Name] then nil else TailLights[src.Name]
 	local function isTail(d: BasePart): boolean
 		if tails then
 			for _, sh in tails.shells do
@@ -1410,7 +1423,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			table.insert(parts, t)
 		end
 		local radius = discSize / 2 * scale * 0.9
-		if not (marks and marks.hub) then
+		if not (marks and marks.hub) and not CarFinish.CARS[src.Name] then
 			-- a maker's logo as its own little piece in the middle of the hub goes (owner,
 			-- 2026-10-22: no logos); buttons sit out on the spokes and stay
 			local kept = {}

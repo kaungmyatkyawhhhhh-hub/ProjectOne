@@ -19,6 +19,9 @@ CARS = {"lp700": "lambrini_lp700", "sv": "lambrini_lp750", "sl": "lambrini_lp570
 ATLAS = {"lp700": "wheel", "sv": "wheel", "perf": "wheel", "sto": "wheel", "revuelto": "wheel", "sterrato": "wheelS"}
 
 
+MATT = ("Cabin", "CabinTile", "CabinTrim", "Suede", "Leather", "Belt", "SoftTop")
+
+
 def nearest(table, v):
     k = min(table, key=lambda x: abs(float(x) - v))
     return table[k]
@@ -31,6 +34,8 @@ def main():
     for key, cid in CARS.items():
         d = json.load(open(os.path.join(done, key + ".pbr.json")))
         rows = {}
+        dp = os.path.join(done, key + ".dims.json")
+        dims = json.load(open(dp)) if os.path.exists(dp) else {}
         for name, p in d["parts"].items():
             if p["role"] in ("Paint", "Window", "Lens_Red", "Lens_Orange", "Lens_Clear"):
                 continue  # src/client/CarFinish.lua does these
@@ -39,8 +44,16 @@ def main():
                 e["n"] = IDS["normals"][key][p["n"]]
             if p["role"] in ("Screen", "LampGlow"):
                 e["e"] = 1
+            if p["role"] in MATT:
+                e["r"] = IDS["white"]  # full roughness: anything less picks up the blue sky under the roof
+            if p["role"] == "Mirror":
+                e["tint"] = [96, 102, 112]  # a dark mirror glass (it only reflects the sky, and that blows out white)
+            if name.startswith("Body_Paint_Cover") or p["base"] == "col_HubCover":
+                e["two"] = 1  # the covers' faces come in the wrong way round
             if p["role"] == "Rim" and key in ATLAS:
                 e["r"], e["m"] = IDS[ATLAS[key]]["r"], IDS[ATLAS[key]]["m"]
+            if name in dims:
+                e["dim"] = dims[name]  # (a steering wheel piece: matched by size, see PbrApply)
             rows[name] = e
         json.dump({"id": cid, "parts": rows, "white": IDS["white"]}, open(os.path.join(out, cid + ".json"), "w"), indent=0)
         print(cid, len(rows), "of", len(d["parts"]), "tris", d["tris"])

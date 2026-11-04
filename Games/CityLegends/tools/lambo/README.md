@@ -15,3 +15,4 @@ Paths point at the session's temp folder; change them before reuse. Results are 
 - `closeups.py`: nose, tail, wheel, hub, dash, seats of a car, to look for logos and holes.
 - `gallardo_dials.py`: the SL's painted needles out of its dash picture.
 - `PbrApply.luau`: SurfaceAppearances on the parts after the Import 3D. `step4_patch.py`: run once after the import.
+- `cabin_export.py`, `cabin_dark.py`: pale cabin pictures made dark. `LookFixes.luau`: the look pass in `CarModels`. `step4_patch.py` has run (2026-11-04): don't run it again.

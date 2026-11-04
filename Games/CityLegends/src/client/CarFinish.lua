@@ -7,6 +7,8 @@
 	covers, so the lamps inside show. The variants are in MaterialService, saved in the place.
 ]]
 
+local Players = game:GetService("Players")
+
 local CarFinish = {}
 
 CarFinish.CARS = {
@@ -32,7 +34,7 @@ local GLASS = "CL_GlassGloss"
 local LENS = {
 	Red = { color = Color3.fromRGB(150, 12, 14), transparency = 0.32 },
 	Orange = { color = Color3.fromRGB(226, 110, 18), transparency = 0.4 },
-	Clear = { color = Color3.fromRGB(226, 232, 238), transparency = 0.86 },
+	Clear = { color = Color3.fromRGB(14, 16, 20), transparency = 0.72 }, -- (a smoked cover: the models' own is dark glass)
 } :: { [string]: { color: Color3, transparency: number } }
 
 local function bare(p: BasePart)
@@ -47,10 +49,35 @@ local function bare(p: BasePart)
 	end
 end
 
+-- the game's shade is blue and a cabin is all shade: a soft warm light inside your own car, so black
+-- leather reads black and not navy (only yours: one light, and only where you sit)
+local function cabinLight(skin: Instance)
+	local model = skin.Parent
+	if not model or not model:IsA("Model") or model.Name ~= Players.LocalPlayer.Name then
+		return
+	end
+	local root = model.PrimaryPart
+	local eye = model:GetAttribute("Eye")
+	if not root or typeof(eye) ~= "Vector3" then
+		return
+	end
+	local at = Instance.new("Attachment")
+	at.Name = "CabinLight"
+	at.Position = Vector3.new(0, eye.Y + 0.1, eye.Z + 0.2) -- (between the seats, under the roof: nearer the dash it burns a patch on it)
+	at.Parent = root
+	local light = Instance.new("PointLight")
+	light.Color = Color3.fromRGB(255, 246, 236)
+	light.Brightness = 0.55
+	light.Range = 7
+	light.Shadows = false
+	light.Parent = at
+end
+
 function CarFinish.apply(id: string, skin: Instance)
 	if not CarFinish.CARS[id] then
 		return
 	end
+	cabinLight(skin)
 	for _, d in skin:GetDescendants() do
 		if not d:IsA("BasePart") then
 			continue

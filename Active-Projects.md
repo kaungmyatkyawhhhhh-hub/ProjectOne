@@ -53,6 +53,7 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **4 Nov (Claude Code, in Studio, not published):** big bug hunt (saves can't be wiped by a failed load, TEST DRIVE, 27 house lots got a drive, High garages open, duels, phone HUD and more) and the casino spawn: 52 parking bays, real palms, the ground regraded so it no longer sits in a pit. Owner: try it on a real phone, then publish. Decide on tower garages / VIP bays. See [[City Legends/City Legends]].
 - **4 Nov (Claude Code, in Studio, not published):** Lamborghini clusters: all 9 pulled. Revuelto, SV and Huracan redrawn from the owner's driving photos and made live. The current LP750 runs the new SV screen, the SV and LP700 use their models' own wheels. Next: live needles for the LP700 and Gallardos, then Step 3 (logos out, convert). Open: 7 of the 9 models have a non-commercial licence. See [[City Legends/City Legends]].
 - **4 Nov (Claude Code):** the 9 Lamborghinis converted with logos out, full detail and real surfaces, packed in `Games/CityLegends/imports/new_cars/lambo_*.fbx`. Owner: do the 3 Import 3Ds, then Claude adds them to the game. See [[City Legends/City Legends]].
+- **4 Nov, later:** the 9 Lamborghinis are in Studio with new interiors, lamps, paint and live clusters; 6 new cars on sale in the game code. Old LP700 / LP750 / LP570 kept in `ServerStorage.OldCarModels`. Not published. Owner: test on a phone, decide on the 7 non-commercial models.
 - **Last updated:** 2026-11-04
 
 ## Archived (not worked on, nothing deleted)

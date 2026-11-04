@@ -8,7 +8,8 @@
 	    PbrApply.run(car, HttpService:JSONDecode(HttpService:GetAsync(url)))
 
 	A part's own texture stays its colour map. Parts named with Blender's .001 endings are matched
-	without them; several parts of one name (a steering wheel's pieces) are matched in order.
+	without them. Steering wheel pieces are matched by size: cars with the same tilt in one pack share
+	a name, so their endings shift.
 ]]
 
 local PbrApply = {}
@@ -25,7 +26,22 @@ function PbrApply.run(car: Instance, data: any): { applied: number, missing: { s
 			continue
 		end
 		local e = data.parts[d.Name]
-		if not e then
+		if d.Name:sub(1, 13) == "SteeringWheel" then
+			local size = { d.Size.X, d.Size.Y, d.Size.Z }
+			table.sort(size)
+			local best = math.huge
+			for name, row in data.parts do
+				if name:sub(1, 13) == "SteeringWheel" and row.dim then
+					local gap = 0
+					for i = 1, 3 do
+						gap += math.abs(row.dim[i] - size[i])
+					end
+					if gap < best then
+						best, e = gap, row
+					end
+				end
+			end
+		elseif not e then
 			local base = d.Name:match("^(.-)%.%d%d%d$")
 			e = if base then data.parts[base] else nil
 		end
@@ -53,6 +69,12 @@ function PbrApply.run(car: Instance, data: any): { applied: number, missing: { s
 		end
 		if color == "" then
 			sa.Color = d.Color -- a plain part: its colour tints the white map
+		end
+		if e.tint then
+			sa.Color = Color3.fromRGB(e.tint[1], e.tint[2], e.tint[3])
+		end
+		if e.two then
+			d.DoubleSided = true
 		end
 		if e.e then
 			sa.EmissiveMaskContent = Content.fromUri(id(data.white) :: string)

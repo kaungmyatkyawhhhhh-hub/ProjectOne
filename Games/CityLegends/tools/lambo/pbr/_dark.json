@@ -1,0 +1,228 @@
+{
+"lambrini_lp700": {
+"dark": {
+"d_Image_7.png": "Body_Cabin_p1",
+"d_Image_23.png": "SteeringWheel_t15.001"
+},
+"tint": {
+"Body_Cabin_p1": [
+219,
+219,
+219
+],
+"Body_Cabin_p2": [
+219,
+219,
+219
+],
+"Body_Cabin_p3": [
+219,
+219,
+219
+],
+"Body_Cabin_p4": [
+219,
+219,
+219
+],
+"SteeringWheel_t15": [
+219,
+219,
+219
+]
+},
+"darkIds": {
+"Body_Cabin_p1": "112128185482507",
+"SteeringWheel_t15.001": "85549433825814"
+}
+},
+"lambrini_lp750": {
+"dark": {
+"d_Image_14.png": "Body_Cabin_p1"
+},
+"tint": {},
+"darkIds": {
+"Body_Cabin_p1": "104848389701737"
+}
+},
+"lambrini_revuelto": {
+"dark": {
+"d_Image_25.png": "Body_Cabin_p1",
+"d_Image_14.png": "Body_CabinTile"
+},
+"tint": {
+"Body_Grille4": [
+178,
+178,
+178
+]
+},
+"darkIds": {
+"Body_Cabin_p1": "118955008651285",
+"Body_CabinTile": "132875132544719"
+}
+},
+"lambrini_lp570": {
+"dark": {
+"d_Image_0.png": "Body_Cabin2",
+"d_Image_2.png": "Body_Cabin_p1",
+"d_Image_15.png": "Body_Suede2"
+},
+"tint": {
+"FL_Rim": [
+104,
+104,
+104
+],
+"FL_static_Rim": [
+104,
+104,
+104
+],
+"FR_Rim": [
+104,
+104,
+104
+],
+"FR_static_Rim": [
+104,
+104,
+104
+],
+"RL_Rim": [
+104,
+104,
+104
+],
+"RL_static_Rim": [
+104,
+104,
+104
+],
+"RR_Rim": [
+104,
+104,
+104
+],
+"RR_static_Rim": [
+104,
+104,
+104
+]
+},
+"darkIds": {
+"Body_Cabin2": "98626343016026",
+"Body_Cabin_p1": "125508286120449",
+"Body_Suede2": "130334159846940"
+}
+},
+"lambrini_lp560": {
+"dark": {
+"d_Image_2_001.png": "Body_Cabin",
+"d_Image_12.png": "Body_Cabin2",
+"d_Image_0_001.png": "Body_Cabin3"
+},
+"tint": {},
+"darkIds": {
+"Body_Cabin": "83612215342997",
+"Body_Cabin2": "105638303410020",
+"Body_Cabin3": "80139921692366"
+}
+},
+"lambrini_huracan": {
+"dark": {},
+"tint": {
+"Body_Cabin2": [
+114,
+30,
+3
+],
+"Body_Cabin3": [
+178,
+65,
+5
+],
+"Body_Grille4": [
+33,
+33,
+33
+],
+"Body_Grille6": [
+17,
+17,
+17
+],
+"Body_Grille8": [
+190,
+190,
+190
+],
+"Body_Trim_p1": [
+223,
+223,
+223
+],
+"Body_Trim_p2": [
+223,
+223,
+223
+],
+"Body_Trim_p3": [
+223,
+223,
+223
+],
+"Body_Trim_p4": [
+223,
+223,
+223
+],
+"SteeringWheel_t14.002": [
+114,
+30,
+3
+]
+},
+"darkIds": {}
+},
+"lambrini_performante": {
+"dark": {
+"d_Image_15.png": "Body_Cabin_p1",
+"d_Image_17.png": "Body_CabinTile"
+},
+"tint": {
+"Body_Grille": [
+184,
+184,
+184
+],
+"SteeringWheel_t13.001": [
+184,
+184,
+184
+]
+},
+"darkIds": {
+"Body_Cabin_p1": "100335008295655",
+"Body_CabinTile": "96354724140483"
+}
+},
+"lambrini_sto": {
+"dark": {
+"d_Image_17.png": "Body_Cabin_p1"
+},
+"tint": {},
+"darkIds": {
+"Body_Cabin_p1": "82275535561582"
+}
+},
+"lambrini_sterrato": {
+"dark": {
+"d_Image_28.png": "SteeringWheel_t15.001"
+},
+"tint": {},
+"darkIds": {
+"SteeringWheel_t15.001": "90399333827326"
+}
+}
+}
