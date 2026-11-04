@@ -270,3 +270,22 @@ Hours of pure lifting from Alter 20 (220M a muscle), one muscle, Gem bench top (
 - **Tested in Play (temp save, all tiers owned):** chest 320M gave Silver 1 (821 lb) on the Gem bench. Silver 2 was refused: "Needs Mid Chest 323,488,431 exp".
 - **Still open:** Bronze steps 1-6 sit below the Alter 20 goal (220M). Starting them from 220M is the owner's call.
 
+### Owner 4 Nov: Bronze stays from the Gem Mine top (12.4M -> 250M over its 8 steps)
+Players max the weights around Alter 4-5, so Bronze gives PRs through the alter climb; Silver -> Diamond (700M -> 40B) are the post-Alter-20 chase. No change.
+
+## 8. PLATE FORGE RACK BUG (owner screenshot, 4 Nov): FIXED
+- **What the owner saw:** each slot looked like an old plate behind a new tilted 5-7-sided blob, washed out, so every tier looked the same.
+- **Cause 1, the mesh:** the plate mesh template had RenderFidelity = Performance. That swaps in a far cruder version of the mesh a few studs away, and the rack plates are also scaled 0.8. The blob was that crude version; the "plate behind" was the inset / hub showing through it. In Edit there was only ONE plate per slot (no duplicates).
+  - **Fix:** the template is Precise (`GymAssets.PlateMesh`). Only the outer plate of a side is a mesh (~2 a bar), so the cost is small.
+  - **The bars had the same problem** at mid range. Fixed by the same change, and checked: one bar per tier, all round and upright.
+- **Cause 2, the colours:** the furnace and bench lamp (warm orange, reach 16 / 12) lit the rack, turning every pale tier beige and Gold / Bronze orange.
+  - **Fix:** both lights now reach 8.5 (short of the rack), and a white SpotLight (`Rack.RackLight`) lights the plates.
+  - Platinum is a deeper blue-grey (#9AACCB), so it no longer looks like Silver in the Gem Mine's purple light.
+  - Standard steel is #B4BCC7.
+  - Diamond's glow is a deeper blue (#3FA0F0), so the white number reads.
+- **The rack uses the same PlateLook code as the bars:** upright, face out, centred on the peg, tier colours, stripe, Neon inset.
+  - Each plate shows "M WEIGHTS" and the Gem bench's plate for that tier (45, 48, 52, 57, 62, 66, 71).
+  - The rack is tagged `PlateNumbers`, and PlateNumbersClient reads tagged containers too.
+- **Mesh owner:** rbxassetid://112165957173612 belongs to Myanmar Builders Club, the same group as the place. Nothing to re-upload.
+- **Screens:** `Downloads\gem_update_import\screens_4Nov_plates_rack_fix\`. 00 = before; 01 = rack after; 02-08 = one bar per tier at mid range.
+

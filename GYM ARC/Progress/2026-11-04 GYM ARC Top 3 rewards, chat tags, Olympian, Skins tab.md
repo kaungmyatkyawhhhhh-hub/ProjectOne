@@ -394,3 +394,12 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - **Open:** should the Bronze steps start from 220M?
 - Report section 7.
 
+### Plate Forge rack bug fixed (4 Nov)
+- **The blobs:** the plate mesh was set to RenderFidelity Performance, which renders a crude version from a few studs away (the rack and the bars). Now Precise.
+- **The washed-out colours:** the forge's orange lights reached the rack. They're shortened, and a white rack light is added.
+- **Colours:** Platinum is deeper blue-grey and Diamond's glow deeper blue.
+- **Numbers:** the rack shows M WEIGHTS + the Gem bench plate for each tier.
+- **Mesh owner:** Myanmar Builders Club. Fine.
+- **Bronze:** stays 12.4M -> 250M (owner).
+- Screens: `screens_4Nov_plates_rack_fix`. Report section 8.
+
