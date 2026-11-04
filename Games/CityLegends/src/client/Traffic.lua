@@ -78,6 +78,21 @@ end
 local mountainCars = 0
 -- the Riviera Highway (2026-11-04): at most Config.Traffic.RivieraHighwayMax cars on it
 local rivHighwayCars = 0
+local HIGHWAY_SPEED = Config.mphToSps(T.RivieraHighwayMph)
+-- the busy stretches: Config.Traffic.BusyZones
+local zoneCars: { number } = {}
+for i in T.BusyZones do
+	zoneCars[i] = 0
+end
+local function zoneOf(p: Vector3): number?
+	for i, z in T.BusyZones do
+		local dx, dz = p.X - z.at.X, p.Z - z.at.Z
+		if dx * dx + dz * dz <= z.radius * z.radius then
+			return i
+		end
+	end
+	return nil
+end
 local function isRivHighway(s: CityLayout.Segment): boolean
 	return (s :: any).rivHighway == true or (s.kind == "turn" and s.next[1] ~= nil and (s.next[1] :: any).rivHighway == true)
 end
@@ -138,7 +153,8 @@ local function chooseNext(seg: CityLayout.Segment): CityLayout.Segment?
 		if (seg :: any).riviera then
 			local fromRoute, toRoute = (seg :: any).route == true, (o :: any).route == true
 			if fromRoute and not toRoute then
-				w *= T.LeaveRouteK
+				local dest = if o.kind == "turn" and o.next[1] then o.next[1] else o
+				w *= T.SplitTurnK[(dest :: any).road] or T.LeaveRouteK
 			elseif not fromRoute and toRoute then
 				w *= 4
 			end
@@ -261,13 +277,16 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 		if (seg :: any).riviera and rivieraCars >= T.RivieraMax then
 			continue
 		end
-		if (seg :: any).rivHighway and rivHighwayCars >= (T.RivieraHighwayMax or 10) then
+		-- (a car that is moved doesn't count against itself: with the highway full of cars far away, none
+		-- could be brought to a player up there, and the road round you stayed empty)
+		local own = if ignore and (ignore.seg :: any).rivHighway then 1 else 0
+		if (seg :: any).rivHighway and rivHighwayCars - own >= (T.RivieraHighwayMax or 10) then
 			continue
 		end
 		-- (owner, 2026-11-03: "only make it so that there is traffic on the yellow roads ... remove the
 		-- cars on the roads which isn't yellow"): the three long routes get the traffic, the other
 		-- streets only a rare car
-		if (seg :: any).riviera and not (seg :: any).route and rng:NextNumber() > T.StreetShare then
+		if (seg :: any).riviera and not (seg :: any).route and rng:NextNumber() > (T.StreetShareBy[(seg :: any).road] or T.StreetShare) then
 			continue
 		end
 		local s = rng:NextNumber(8, math.max(9, seg.length - 25))
@@ -283,7 +302,14 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 				end
 			end
 		end
-		if ok and isFree(pos, gap, ignore) then
+		local zone = if ok then zoneOf(pos) else nil
+		if zone and zoneCars[zone] - (if ignore and zoneOf(ignore.pos) == zone then 1 else 0) >= T.BusyZones[zone].max then
+			ok = false
+		end
+		if ok and isFree(pos, if (seg :: any).rivHighway then T.HighwayGap else gap, ignore) then
+			if zone then
+				zoneCars[zone] += 1
+			end
 			if seg.mountain then
 				mountainCars += 1 -- (counted again each frame; this covers several placed at once)
 			end
@@ -541,7 +567,45 @@ local function indexOf(n: Npc): number
 	return k
 end
 local conflictCache: { [any]: { [any]: Vector3 } } = {}
-local allRiv: { CityLayout.Segment }? = nil
+-- (2026-11-04, "optimize, a little glitchy") every piece of road a car reached for the first time scanned
+-- all the Riviera's pieces, and the map has grown: a hitch each time, worst on the long highways. Pieces are
+-- found through a grid now, built once.
+local GRID_CELL = 96
+local rivGrid: { [number]: { CityLayout.Segment } }? = nil
+local function rivCells(lo: Vector3, hi: Vector3, visit: (number) -> ())
+	for cx = math.floor(lo.X / GRID_CELL), math.floor(hi.X / GRID_CELL) do
+		for cz = math.floor(lo.Z / GRID_CELL), math.floor(hi.Z / GRID_CELL) do
+			visit(cx * 65536 + cz)
+		end
+	end
+end
+local function nearPieces(lo: Vector3, hi: Vector3): { CityLayout.Segment }
+	if not rivGrid then
+		local grid: { [number]: { CityLayout.Segment } } = {}
+		local riv = RivieraTraffic.build()
+		for _, other in (if riv then riv.all else {}) :: { CityLayout.Segment } do
+			rivCells(other.p0:Min(other.p1):Min(other.p2), other.p0:Max(other.p1):Max(other.p2), function(key)
+				local cell = grid[key]
+				if not cell then
+					cell = {}
+					grid[key] = cell
+				end
+				table.insert(cell, other)
+			end)
+		end
+		rivGrid = grid
+	end
+	local out, seen = {}, {}
+	rivCells(lo, hi, function(key)
+		for _, other in (rivGrid :: any)[key] or {} do
+			if not seen[other] then
+				seen[other] = true
+				table.insert(out, other)
+			end
+		end
+	end)
+	return out
+end
 local function conflictsOf(turn: CityLayout.Segment): { [any]: Vector3 }
 	local c = conflictCache[turn]
 	if c then
@@ -549,17 +613,13 @@ local function conflictsOf(turn: CityLayout.Segment): { [any]: Vector3 }
 	end
 	c = {}
 	conflictCache[turn] = c
-	if not allRiv then
-		local riv = RivieraTraffic.build()
-		allRiv = if riv then riv.all else {}
-	end
 	local lo = turn.p0:Min(turn.p1):Min(turn.p2) - Vector3.new(8, 8, 8)
 	local hi = turn.p0:Max(turn.p1):Max(turn.p2) + Vector3.new(8, 8, 8)
 	local mine = {}
 	for k = 0, 6 do
 		mine[k + 1] = (CityLayout.sample(turn, turn.length * k / 6))
 	end
-	for _, other in allRiv :: { CityLayout.Segment } do
+	for _, other in nearPieces(lo, hi) do
 		if other ~= turn then
 			local olo = other.p0:Min(other.p1):Min(other.p2)
 			local ohi = other.p0:Max(other.p1):Max(other.p2)
@@ -694,9 +754,16 @@ function Traffic.update(dt: number)
 	mountainCars = 0
 	rivieraCars = 0
 	rivHighwayCars = 0
+	for i in zoneCars do
+		zoneCars[i] = 0
+	end
 	for _, npc in Traffic.cars do
 		if (npc.seg :: any).rivHighway then
 			rivHighwayCars += 1
+		end
+		local zone = zoneOf(npc.pos)
+		if zone then
+			zoneCars[zone] += 1
 		end
 		if npc.seg.mountain then
 			mountainCars += 1
@@ -733,6 +800,9 @@ function Traffic.update(dt: number)
 		-- (the highway is driven faster, the inside lane too; each car drifts a little)
 		local laneK = if seg.kind == "turn" then 1 else T.LaneSpeedK[math.clamp(seg.lane or 1, 1, #T.LaneSpeedK)]
 		local target = npc.maxSpeed * seg.speedK * laneK * (1 + T.Wander * math.sin(now * npc.wanderRate + npc.wanderPhase))
+		if (seg :: any).rivHighway and (seg :: any).route then
+			target = HIGHWAY_SPEED * (1 + 0.03 * math.sin(now * npc.wanderRate + npc.wanderPhase)) -- (a hair of drift, or they'd run in step)
+		end
 		local remaining = seg.length - npc.s
 
 		if seg.kind == "turn" then
@@ -903,7 +973,14 @@ function Traffic.update(dt: number)
 				local away = Vector3.new(npc.pos.X - flatFocus.X, 0, npc.pos.Z - flatFocus.Z).Magnitude
 				-- (a car that wandered off the routes goes back to one once it's out of the way)
 				local offRoute = (npc.seg :: any).riviera and not (npc.seg :: any).route
-				if away > T.RecycleDistance or (offRoute and away > T.StreetRecycle) or npc.deadEnd then
+				-- (a busy stretch over its number sends a car out of your sight somewhere else round you)
+				local zone = zoneOf(npc.pos)
+				local crowded = false
+				if zone and zoneCars[zone] > T.BusyZones[zone].max and away > T.RespawnMin then
+					local cam = workspace.CurrentCamera
+					crowded = not cam or (npc.pos - cam.CFrame.Position).Unit:Dot(cam.CFrame.LookVector) < 0.55
+				end
+				if away > T.RecycleDistance or (offRoute and away > T.StreetRecycle) or npc.deadEnd or crowded then
 					local seg, s = findSpot(flatFocus, T.RespawnMin, T.RespawnMax, npc, true, npc.highway)
 					if seg then
 						placeNpc(npc, seg, s)

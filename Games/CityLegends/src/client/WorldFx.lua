@@ -212,8 +212,11 @@ local function startLod(scale: number)
 	local cursor, lightCursor = 1, 1
 	RunService.Heartbeat:Connect(function()
 		local camPos = camera.CFrame.Position
-		-- ~1/8 of the groups per frame -> full sweep every few frames
-		local budget = math.max(60, math.ceil(#entries / 8))
+		-- ~1/16 of the groups per frame -> a full sweep about four times a second (owner, 2026-11-04: "optimize,
+		-- a little glitchy"; driving hitched when many groups came in on one frame, up to 113 ms): at most
+		-- 3 groups go in or out per frame, the rest on the next ones
+		local budget = math.max(60, math.ceil(#entries / 16))
+		local flips = 0
 		for _ = 1, math.min(budget, #entries) do
 			if cursor > #entries then
 				cursor = 1
@@ -222,15 +225,23 @@ local function startLod(scale: number)
 			cursor += 1
 			local want = (e.center - camPos).Magnitude < e.range
 			if e.far then
-				local real = e.real and e.real.Value
-				want = not want or (real ~= nil and real:FindFirstChild("Body") == nil)
+				if want then
+					local real = e.real and e.real.Value
+					want = real ~= nil and real:FindFirstChild("Body") == nil
+				else
+					want = true -- (past its range: no need to look the real building up)
+				end
 			end
 			if want ~= e.shown then
 				e.shown = want
 				e.inst.Parent = if want then e.parent else nil
+				flips += 1
+				if flips >= 3 then
+					break
+				end
 			end
 		end
-		local lbudget = math.max(40, math.ceil(#lights / 10))
+		local lbudget = math.max(40, math.ceil(#lights / 20))
 		for _ = 1, math.min(lbudget, #lights) do
 			if lightCursor > #lights then
 				lightCursor = 1

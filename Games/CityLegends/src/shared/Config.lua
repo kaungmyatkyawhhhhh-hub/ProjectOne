@@ -226,7 +226,22 @@ Config.Traffic = {
 	StreetLanes = 1,
 	-- the Riviera Highway (the mountain highway, 2026-11-04, owner-away prompt: "at most 10 cars in
 	-- total ... so players can drive fast"): traffic cars on it at once
-	RivieraHighwayMax = 10,
+	-- (10 before; owner, 2026-11-04: "add a little more cars on the highway (not alot) and make them go 120 kmh")
+	RivieraHighwayMax = 12,
+	RivieraHighwayMph = 74.6, -- 120 km/h, on the highways proper (the 1 + 1 passes keep their own pace)
+	-- busy stretches (owner, 2026-11-04: "reduce a little bit of traffic on the road near the harbour", then
+	-- "split some cars from the casnio road onto the harbour road, so its not too busy"): at most this many
+	-- cars are placed in each circle, the rest go elsewhere round you. Casino: the Town Road past it;
+	-- harbour: the Coast Road on the front and Harbour Street above it.
+	BusyZones = {
+		{ at = Vector3.new(13760, 0, 640), radius = 420, max = 13 }, -- harbour
+		{ at = Vector3.new(14150, 0, 140), radius = 420, max = 8 }, -- casino
+	} :: { { at: Vector3, radius: number, max: number } },
+	-- streets that share the routes' cars: how many of the spots picked on them are used (others: StreetShare)
+	StreetShareBy = { ["Harbour Street"] = 0.4, ["Casino Climb"] = 0.15 } :: { [string]: number },
+	-- how readily a car leaves a route onto this street (others: LeaveRouteK): the climb from the casino road
+	-- down to the harbour
+	SplitTurnK = { ["Casino Climb"] = 0.6, ["Harbour Street"] = 0.3 } :: { [string]: number },
 	LeaveRouteK = 0.03, -- how seldom a car turns off a route onto a street
 	StreetRecycle = 260, -- a car off the routes this far from you goes back onto one
 	RivieraMax = 90, -- (64 before, then 32 before that, 2026-11-03: "add more traffic cars throughout the map"; 22 before that; owner 2026-11-02 again: "add more cars traffic")
