@@ -403,3 +403,13 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - **Bronze:** stays 12.4M -> 250M (owner).
 - Screens: `screens_4Nov_plates_rack_fix`. Report section 8.
 
+### Hall of Fame Agency card only once (4 Nov)
+- Owner: "when i open trainers, the hall of fame agency tab keeps opening, make it so that it only opens the first time".
+- **Cause** (AgencyClient):
+  - Tapping the TRAINERS tile opened the agency card every time while the tile's red "!" showed.
+  - The "!" stays until the player visits the agency's desk, so the card came back on every tap.
+- **Fix:** a tap opens the card only if it was never seen (`onboarding.hofAgencySeen`, saved by the server the first time the card shows). After that the tile just opens Trainers.
+  - The red "!" stays until the desk is visited.
+  - The Hall of Fame screen's VISIT AGENCY button still opens the card on purpose.
+- **Not tested by tapping:** the fresh test save's first-join tutorial overlays block the side menu in Studio. Checked in code: the server's AgencySeen sets the flag.
+
