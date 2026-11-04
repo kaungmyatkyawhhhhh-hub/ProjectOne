@@ -19,7 +19,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
 |---|---|---|
 | `2012_lamborghini_aventador_lp700-4.glb` | replaces `lambrini_lp700` (Aventador LP700-4) | Aventador |
 | `2016_lamborghini_aventador_lp750-4_sv.glb` | replaces `lambrini_lp750` (Aventador SV LP750-4) | Aventador |
-| `2011_west_yokohama_lamborghini_gallardo_lp560-4.glb` | Gallardo LP560-4: replaces `lambrini_lp570` (Gallardo LP570-4 SL) as the Gallardo, or a new trim below it: **pick the simplest that keeps owners' cars** and note it. "West Yokohama" may mean a race / sponsor livery: remove any sponsor decals and text (no brands) and keep a clean body for Customs paint | Gallardo |
+| `2011_west_yokohama_lamborghini_gallardo_lp560-4.glb` | **SKIP: don't add the Gallardo** (owner, 2026-11-04). Leave the file and the current Gallardo LP570-4 SL as they are | — |
 | `2021_lamborghini_huracan_sto.glb` | **new car**: "Enfurecido Huracan STO" style name (fictional) | Huracan (new family) |
 | `2024_lamborghini_huracan_sterrato.glb` | **new car**: the off-road Huracan (raised, roof rack / light bar); fictional name | Huracan |
 | `2024_lamborghini_revuelto.glb` | **new car**: the Aventador's successor (hybrid V12, its own new cockpit and screens); fictional name; top of the Lamborghini line | Revuelto (own family, its cockpit is different from the Aventador's) |
