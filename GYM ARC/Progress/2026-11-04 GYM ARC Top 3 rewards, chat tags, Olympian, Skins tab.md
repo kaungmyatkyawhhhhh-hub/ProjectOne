@@ -311,3 +311,11 @@ Prompt: [[2026-11-04 GYM ARC Prompt - Plate tiers FINAL (7 Nov part 9)]]. Number
 - Checked in Play on a temp save: all load. 2, 3 and 4 digits fit (45, 375, 1245).
 - Fixed: the digit PNGs have empty side margins, so "45" read as "4 5". The client now crops each digit to its glyph box (`PlateNumbersClient`).
 - The 12 loose Decal objects in Workspace can be deleted (owner's call).
+
+### Gem Mine open for admins (4 Nov)
+- Owner: "unlock the gem gym for admins". Admins = the owner + the admins granted in the ADMIN panel (server attribute AdminPanel; players can't set it themselves).
+- Admins get in even before the GEM update: the door and gate open, they can use the machines, and the guard doesn't put them outside. Before the launch they walk through the launch cover; it still shows, and it stays solid for everyone else.
+- The gold arrow and the "visited" mark still only come with the real unlock. The LIFTS tab shows the Gem lifts to admins.
+- Code: `Config/GemMine.Unlocked(data, player)`, MembersService, GemMineClient, StatsClient.
+- Tested in Play (temp save, before the launch): as admin I walked in through the cover, stayed inside, and Bench1 was allowed. With admin taken off, the same player was put back outside and the machine was refused.
+
