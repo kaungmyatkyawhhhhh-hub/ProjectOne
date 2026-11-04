@@ -387,3 +387,10 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - **Open question:** Bronze steps 1-6 are below what Gem-alter players already have.
 - Details: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 7.
 
+### Plate gates FINAL v2 built (4 Nov)
+- **Gates:** Bronze 250M, Silver 700M, Gold 1.9B, Platinum 5.3B, Ruby 14.5B, Diamond 40B. This is the current EXP on the machine's main muscle, spread over 8 steps geometrically.
+- **Time from Alter 20:** a ★10 with 2 Heracles reaches Diamond in ~28 h of lifting one muscle; a ★0 with 2 Voltas reaches Silver in 26 min.
+- **Tested in Play:** chest 320M gave Silver 1, and Silver 2 was refused ("Needs Mid Chest 323,488,431 exp").
+- **Open:** should the Bronze steps start from 220M?
+- Report section 7.
+

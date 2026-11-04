@@ -244,3 +244,29 @@ Hours of pure lifting from Alter 20 (220M a muscle). One muscle, Gem bench top, 
 - **★10 Diamond is ~111 h, not ~25 h.** EXP a rep falls as the muscle grows (diminishing returns ~1/level), so a ★10 earns 12.5B/h at 220M but only 1.1B/h at 30B. The average from 220M to 100B is ~0.9B/h, not 4B/h.
 - Diamond at ~25 h for a ★10 would be ~37B. Waiting for the owner's call; the gates in Studio stay 250M ... 100B.
 
+### FINAL v2 (owner, 4 Nov): BUILT. Bronze 250M · Silver 700M · Gold 1.9B · Platinum 5.3B · Ruby 14.5B · Diamond 40B
+Hours of pure lifting from Alter 20 (220M a muscle), one muscle, Gem bench top (same model as above):
+
+| Player | Bronze 250M | Silver 700M | Gold 1.9B | Platinum 5.3B | Ruby 14.5B | Diamond 40B |
+|---|---|---|---|---|---|---|
+| ★0, 2 Voltas | 1 min | 26 min | 2.3 h | 10.8 h | 49 h | 224 h |
+| ★3, 2 Bronze Titans | 0 min | 7 min | 38 min | 3.0 h | 13.6 h | 62 h |
+| ★5, 2 Bronze Titans | 0 min | 6 min | 31 min | 2.5 h | 11.4 h | 52 h |
+| ★10, 2 Heracles | 0 min | 3 min | 17 min | 81 min | 6.1 h | **28.2 h** |
+
+- **The owner's checks:** ★10 Diamond 28.2 h (within 20-35 h) and ★0 Silver 26 min (under 1 h). Both passed, so it was built.
+- **Steps** (geometric; the full gate shown as "Needs ... exp"):
+
+  | Tier | Steps 1 → 8 |
+  |---|---|
+  | Bronze | 18.1M → 250M (from the Gem top's 12.4M) |
+  | Silver | 284M → 700M |
+  | Gold | 793M → 1.9B |
+  | Platinum | 2.2B → 5.3B |
+  | Ruby | 6B → 14.5B |
+  | Diamond | 16.5B → 40B |
+
+  Every step rises, on every machine.
+- **Tested in Play (temp save, all tiers owned):** chest 320M gave Silver 1 (821 lb) on the Gem bench. Silver 2 was refused: "Needs Mid Chest 323,488,431 exp".
+- **Still open:** Bronze steps 1-6 sit below the Alter 20 goal (220M). Starting them from 220M is the owner's call.
+
