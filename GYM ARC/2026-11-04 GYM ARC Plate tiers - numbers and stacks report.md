@@ -230,3 +230,17 @@ Diamond 8 on the Gem bench is now 1181 (was 1245).
 - **Also proposed:** start the Bronze steps from 220M (the Alter 20 goal), not the Gem top's 12.4M, so every step comes after Alter 20.
 - Studio still has the brief-3 gates (250M ... 100B) until the owner picks.
 
+### Brief 5 (owner, 4 Nov): back to 250M · 800M · 2.5B · 8B · 30B · 100B (already in Studio since brief 3)
+Hours of pure lifting from Alter 20 (220M a muscle). One muscle, Gem bench top, Alter 20, Pro gear, one rep every 1.05 s; no PUMPED, BIG REP, Muscle of the Day or Run Cards.
+
+| Player | Bronze 250M | Silver 800M | Gold 2.5B | Platinum 8B | Ruby 30B | Diamond 100B | EXP/h at 220M / 30B |
+|---|---|---|---|---|---|---|---|
+| ★0, 2 Voltas | 1 min | 33 min | 3.5 h | 20.1 h | 145.8 h | 886 h | 1.6B / 137M |
+| ★3, 2 Bronze Titans | 0 min | 9 min | 57 min | 5.6 h | 40.5 h | 246 h | 5.6B / 494M |
+| ★5, 2 Bronze Titans | 0 min | 8 min | 48 min | 4.6 h | 33.7 h | 205 h | 6.8B / 593M |
+| ★10, 2 Heracles | 0 min | 4 min | 26 min | 2.5 h | 18.3 h | 111 h | 12.5B / 1.1B |
+
+- **★0 reaches Silver in 33 min**, inside the 2 h check.
+- **★10 Diamond is ~111 h, not ~25 h.** EXP a rep falls as the muscle grows (diminishing returns ~1/level), so a ★10 earns 12.5B/h at 220M but only 1.1B/h at 30B. The average from 220M to 100B is ~0.9B/h, not 4B/h.
+- Diamond at ~25 h for a ★10 would be ~37B. Waiting for the owner's call; the gates in Studio stay 250M ... 100B.
+
