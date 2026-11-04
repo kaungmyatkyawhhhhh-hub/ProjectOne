@@ -16,6 +16,7 @@ local Config = require(script.Parent:WaitForChild("Config"))
 
 local RivieraTraffic = {}
 
+local STRICT_TURNS = false -- (the balanced-arc search below; off: it made more turns cut over kerbs)
 local SAMPLES = 12 -- as CityLayout's (CityLayout.sample walks seg.samples)
 
 local function bezier(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3
@@ -131,6 +132,111 @@ local function oneLaneStreets(data): ({ any }, { { number } })
 	return lanes, links
 end
 
+-- (owner, 2026-11-04: "there is a traffic problem here, its because they dont know how to turn
+-- properly", the Mountain Road's west end) where a yellow route ends into a street, which is now one
+-- lane each way, both its lanes turned into that one lane at the very end and cut across each
+-- other there. Now the outer lane merges into the inner one ~200 studs before the end (a lane
+-- change), and only the inner lane turns. The same at a route's start: a street that fed both its
+-- lanes through two tight turns feeds the inner one, and cars change into the outer lane a little
+-- further on. And one turn per lane end and lane it turns into (two links had made a sharp one and
+-- a gentle one side by side; the gentle one, joining later, stays).
+local function mergeRouteEnds(lanes: { any }, links: { { number } }): { { number } }
+	local function n(li: number): number
+		return #lanes[li].pts // 3
+	end
+	local inner = {}
+	for li, l in lanes do
+		if l.kind == "route" and l.lane == 1 and not l.skip then
+			inner[l.road .. "|" .. l.way] = li
+		end
+	end
+	local endTargets = {} -- [lane] = the lanes its last two points turn into
+	for _, link in links do
+		if link[2] >= n(link[1]) - 1 then
+			endTargets[link[1]] = endTargets[link[1]] or {}
+			endTargets[link[1]][link[3]] = true
+		end
+	end
+	local merged = {}
+	for li, l in lanes do
+		if l.kind == "route" and l.lane == 2 and not l.closed and not l.skip then
+			local l1 = inner[l.road .. "|" .. l.way]
+			local mine, theirs = endTargets[li], if l1 then endTargets[l1] else nil
+			if mine and theirs and n(li) > 14 and n(l1) > 14 then
+				local same = true
+				for t in mine do
+					if not theirs[t] then
+						same = false
+					end
+				end
+				if same then
+					merged[li] = l1
+				end
+			end
+		end
+	end
+	-- the start: route lane 2s fed only from lanes that feed lane 1 too
+	local startFrom = {} -- [lane] = the lanes turning into its first two points
+	for _, link in links do
+		if link[4] <= 2 and link[1] ~= link[3] then
+			startFrom[link[3]] = startFrom[link[3]] or {}
+			startFrom[link[3]][link[1]] = true
+		end
+	end
+	local split = {}
+	for li, l in lanes do
+		if l.kind == "route" and l.lane == 2 and not l.closed and not l.skip then
+			local l1 = inner[l.road .. "|" .. l.way]
+			local mine, theirs = startFrom[li], if l1 then startFrom[l1] else nil
+			if mine and theirs and n(li) > 14 and n(l1) > 14 then
+				local same = true
+				for f in mine do
+					if not theirs[f] then
+						same = false
+					end
+				end
+				if same then
+					split[li] = l1
+				end
+			end
+		end
+	end
+	local out = {}
+	local endBest = {} -- ["from>to"] = the end link kept (the one joining furthest on)
+	for _, link in links do
+		local from, to = link[1], link[3]
+		if merged[from] and link[2] >= n(from) - 1 then
+			continue
+		end
+		if split[to] and link[4] <= 2 and from ~= to then
+			continue
+		end
+		if link[2] >= n(from) - 1 and from ~= to then
+			local key = from .. ">" .. to
+			local had = endBest[key]
+			if had then
+				if link[4] > had[4] then
+					had[2], had[4] = link[2], link[4]
+				end
+				continue
+			end
+			local copy = { link[1], link[2], link[3], link[4] }
+			endBest[key] = copy
+			table.insert(out, copy)
+		else
+			table.insert(out, link)
+		end
+	end
+	for l2, l1 in merged do
+		local k2 = n(l2) - 9
+		table.insert(out, { l2, k2, l1, math.min(k2 + 3, n(l1) - 6) })
+	end
+	for l2, l1 in split do
+		table.insert(out, { l1, 4, l2, 7 })
+	end
+	return out
+end
+
 local cached = nil
 function RivieraTraffic.build()
 	if cached then
@@ -143,6 +249,7 @@ function RivieraTraffic.build()
 		return nil
 	end
 	local dataLanes, dataLinks = oneLaneStreets(data)
+	dataLinks = mergeRouteEnds(dataLanes, dataLinks)
 	local all, lanes = {}, {}
 	local pieces = {} -- [laneIndex][pointIndex] = the piece starting at that point
 	for li, l in dataLanes do
@@ -176,7 +283,11 @@ function RivieraTraffic.build()
 	-- had to swing one way and then back (89 of 414 turns turned both ways). Now the turn may leave a
 	-- piece or two earlier and join a piece or two later, picking the nearest pair whose way in and
 	-- way out meet ahead of both: one clean arc
-	local function corner(before, after): Vector3?
+	-- (2026-11-04, "they dont know how to turn properly") first a strict search, wider (up to 3 pieces
+	-- back and 5 on): the arc must be balanced, its corner at least 6 studs from both ends and neither
+	-- leg under 0.3 of the other (a lopsided arc ran straight and then snapped round in its last
+	-- studs); only if none fits, the loose search as before
+	local function corner(before, after, strict: boolean?): Vector3?
 		local p0, p2 = before.p2, after.p0
 		local d = (p2 - p0).Magnitude
 		local dirIn = (before.p2 - before.p0) * Vector3.new(1, 0, 1)
@@ -194,7 +305,8 @@ function RivieraTraffic.build()
 		local w = Vector2.new(p2.X - p0.X, p2.Z - p0.Z)
 		local t = (w.X * b2.Y - w.Y * b2.X) / cross -- along the way in
 		local u = (a2.X * w.Y - a2.Y * w.X) / cross -- back from p2 along the way out
-		if t > 1 and u > 1 and t < d * 1.2 and u < d * 1.2 then
+		local fits = if strict then t >= 6 and u >= 6 and math.min(t, u) >= 0.3 * math.max(t, u) else t > 1 and u > 1
+		if fits and t < d * 1.2 and u < d * 1.2 then
 			local c = p0 + dirIn * t
 			return Vector3.new(c.X, (p0.Y + p2.Y) / 2, c.Z)
 		end
@@ -211,6 +323,7 @@ function RivieraTraffic.build()
 			endLinked[link[1]] = true
 		end
 	end
+	local made = {} -- [piece][piece] = true: one turn per pair (two links can pick the same pair)
 	for _, link in dataLinks do
 		local fromLane, fromK, toLane, toK = link[1], link[2], link[3], link[4]
 		local fl = dataLanes[fromLane]
@@ -227,16 +340,25 @@ function RivieraTraffic.build()
 				table.insert(before.next, after)
 			else
 				local b, a, p1 = before, after, nil
-				local best = math.huge
-				for back = 0, 2 do
-					for ahead = 0, 3 do
-						local bb, aa = fromRow[fromK - 1 - back], toRow[toK + ahead]
-						if bb and aa and back + ahead < best then
-							local c = corner(bb, aa)
-							if c then
-								b, a, p1, best = bb, aa, c, back + ahead
+				-- (a lane change on the same road goes straight across, no corner to find)
+				local tl = dataLanes[toLane]
+				local laneChange = tl ~= nil and fl.road == tl.road and fl.way == tl.way
+				for pass = if STRICT_TURNS then 1 else 2, if laneChange then 0 else 2 do
+					local strict = pass == 1
+					local best = math.huge
+					for back = 0, if strict then 3 else 2 do
+						for ahead = 0, if strict then 5 else 3 do
+							local bb, aa = fromRow[fromK - 1 - back], toRow[toK + ahead]
+							if bb and aa and back + ahead < best then
+								local c = corner(bb, aa, strict)
+								if c then
+									b, a, p1, best = bb, aa, c, back + ahead
+								end
 							end
 						end
+					end
+					if p1 then
+						break
 					end
 				end
 				if not p1 then
@@ -244,12 +366,27 @@ function RivieraTraffic.build()
 					local d = (after.p0 - before.p2).Magnitude
 					p1 = before.p2 + (before.p2 - before.p0).Unit * math.min(d * 0.5, 30)
 				end
-				local turn = newSegment(all, b.p2, p1 :: Vector3, a.p0, "turn")
-				turn.speedK = 0.8
-				turn.turnSpeed = 18
-				turn.next = { a }
-				turn.route = a.route -- (a turn onto a route counts as the route)
-				table.insert(b.next, turn)
+				made[b] = made[b] or {}
+				if not made[b][a] then
+					made[b][a] = true
+					local turn = newSegment(all, b.p2, p1 :: Vector3, a.p0, "turn")
+					turn.speedK = 0.8
+					turn.turnSpeed = 18
+					turn.next = { a }
+					turn.route = a.route -- (a turn onto a route counts as the route)
+					-- a lane change (way in and way out within 30 degrees): no slowing for it, and it
+					-- weighs like going straight on
+					local dIn = (b.p2 - b.p0) * Vector3.new(1, 0, 1)
+					local dOut = (a.p2 - a.p0) * Vector3.new(1, 0, 1)
+					if dIn.Magnitude > 0.1 and dOut.Magnitude > 0.1 and dIn.Unit:Dot(dOut.Unit) > math.cos(math.rad(30)) then
+						turn.turning = false
+						turn.laneChange = true -- (Traffic: it gives way to cars in the lane it moves into)
+						turn.turnSpeed = nil
+						turn.speedK = 1
+						turn.dir = 1
+					end
+					table.insert(b.next, turn)
+				end
 			end
 		end
 	end

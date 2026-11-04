@@ -441,6 +441,9 @@ local function lookAheadGap(npc: Npc, obstacles: { Obstacle }): (number, number,
 	local fwd = npc.fwd
 	local right = fwd:Cross(Vector3.yAxis)
 	local best, bestSpeed, bestAlign = math.huge, 0, 1
+	-- (2026-11-04) a car changing lanes (a route's outer lane merging before its end) gives way to
+	-- the cars in the lane it moves into; they don't wait for it while it is beside them
+	local meChanging = (npc.seg :: any).laneChange == true
 	for _, o in obstacles do
 		if o.self ~= npc then
 			local rel = o.pos - npc.pos
@@ -452,8 +455,15 @@ local function lookAheadGap(npc: Npc, obstacles: { Obstacle }): (number, number,
 				-- West Switchbacks) where a road narrows its two lanes run closer than a car's width
 				-- (58 spots); two cars side by side each saw the other a little ahead and both stopped
 				-- for good, with the queue piling up behind. A car going the same way whose middle is
-				-- not ahead of our front half is beside us, not in front.
-				local beside = f < npc.halfLen * 0.6 and o.fwd:Dot(fwd) > 0.7
+				-- not ahead of our front half is beside us, not in front. (Only off to the side: one
+				-- straight ahead in our own lane, however close, is in front; ignoring it let two
+				-- cars drive on inside each other.)
+				local beside = f < npc.halfLen * 0.6 and o.fwd:Dot(fwd) > 0.7 and lat > 2.5
+				if meChanging then
+					beside = false
+				elseif o.self and (o.self.seg :: any).laneChange == true then
+					beside = f < npc.halfLen and o.fwd:Dot(fwd) > 0.5
+				end
 				if lat < (npc.width + o.width) / 2 + 0.9 and not beside then
 					local gap = f - npc.halfLen - o.halfLen
 					if gap < best then
