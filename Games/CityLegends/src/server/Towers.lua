@@ -615,7 +615,7 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		dbox(lobby, 13, 0.6, 13, 0, 11.6, -HF + 0.3, GOLD, Enum.Material.Metal)
 		-- floor inlay and a dark border
 		dbox(lobby, 30, 0.06, 30, 0, 0.53, -8, MARBLE_DARK, Enum.Material.Marble)
-		dbox(lobby, 26, 0.08, 26, 0, 0.55, -8, MARBLE, Enum.Material.Marble)
+		dbox(lobby, 26, 0.08, 26, 0, 0.62, -8, MARBLE, Enum.Material.Marble)
 		part(lobby, false, 0.1, 10, 10, at(0, 0.6, -8) * CFrame.Angles(0, 0, math.pi / 2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 		-- elevator core at the back
 		box(model, 22, LH, 14, 0, LH / 2 + 0.5, HF - 7, MARBLE_DARK, Enum.Material.Marble, { name = "Core" })
