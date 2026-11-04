@@ -28,6 +28,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStoreService = game:GetService("DataStoreService")
+local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local AnalyticsService = game:GetService("AnalyticsService")
 
@@ -69,7 +70,9 @@ local function newData()
 	end
 	return { v = Econ.DataVersion, stardust = 0, earnedRun = 0, earnedTotal = 0, bestRun = 0, owned = owned, copies = copies, nodes = {},
 		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {}, settings = {}, guide = {},
-		codes = {}, potions = {}, boostLeft = {}, alphaPlayer = false, alphaBadge = false, pads = 0 }
+		codes = {}, potions = {}, boostLeft = {}, alphaPlayer = false, alphaBadge = false, pads = 0,
+		xp = Econ.XP.Start, xpTotal = Econ.XP.Start, perks = {}, ignition = 0, path = "",
+		forge = { cores = {}, equipped = {}, rolls = 0, pityL = 0, pityM = 0 } }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -89,7 +92,44 @@ local function migrate(d): (any, boolean)
 		local oldBodies = 0
 		for i = 1, #Econ.Tiers do oldBodies += d.owned[i] end
 		d.pads = ({ 0, 2, 3, 4, 6, 8, 10 })[MapConfig.TierOf(oldBodies, tonumber(d.supernovas) or 0) + 1] or 10
+		-- the ring-1 multipliers became PERKS: what you bought becomes perk levels worth the same; XP for the Supernovas done
+		local nodes = if type(d.nodes) == "table" then d.nodes else {}
+		local perks = {}
+		if nodes.FirstLight then perks.FirstLight = 2 end
+		if nodes.OrbitSpeed then perks.OrbitSpeed = 10 end
+		if nodes.CometLure then perks.CometLure = 8 end
+		if nodes.SupernovaReadiness then perks.Readiness = 10 end
+		d.perks = perks
+		for _, id in ipairs({ "FirstLight", "OrbitSpeed", "CometLure", "SupernovaReadiness" }) do nodes[id] = nil end
+		d.xp = Econ.XP.Start + 50 * (tonumber(d.supernovas) or 0)
+		d.xpTotal = d.xp
 	end
+	if type(d.path) ~= "string" then d.path = "" end
+	-- the Forge: only known cores, levels 1..max; equipped = known keys you own, at most Slots
+	local f = if type(d.forge) == "table" then d.forge else {}
+	local cores, eq = {}, {}
+	if type(f.cores) == "table" then
+		for key, lv in pairs(f.cores) do
+			local k, r = string.match(tostring(key), "^(%a+):(%a+)$")
+			if k and Econ.ForgeKindById[k] and Econ.ForgeRarityById[r] then cores[key] = math.clamp(math.floor(tonumber(lv) or 1), 1, Econ.Forge.MaxLevel) end
+		end
+	end
+	if type(f.equipped) == "table" then
+		for _, key in ipairs(f.equipped) do
+			if cores[key] and #eq < Econ.Forge.Slots and not table.find(eq, key) then table.insert(eq, key) end
+		end
+	end
+	d.forge = { cores = cores, equipped = eq, rolls = math.max(0, math.floor(tonumber(f.rolls) or 0)),
+		pityL = math.max(0, math.floor(tonumber(f.pityL) or 0)), pityM = math.max(0, math.floor(tonumber(f.pityM) or 0)) }
+	-- perks: only known ones, whole levels 0..max
+	local pk = {}
+	if type(d.perks) == "table" then
+		for _, p in ipairs(Econ.Perks) do
+			local lv = math.floor(tonumber(d.perks[p.id]) or 0)
+			if lv > 0 then pk[p.id] = math.min(lv, Econ.PerkMax) end
+		end
+	end
+	d.perks = pk
 	for i = 1, #Econ.Tiers do
 		if oldV < 3 then
 			local n = d.owned[i]
@@ -100,7 +140,7 @@ local function migrate(d): (any, boolean)
 		if d.owned[i] > 0 and d.copies[i] == 0 then d.copies[i] = 1 end
 		if d.owned[i] == 0 then d.copies[i] = 0 end
 	end
-	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads" }) do
+	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads", "xp", "xpTotal", "ignition" }) do
 		local n = tonumber(d[k]) or 0
 		d[k] = if n == n and n ~= math.huge then n else 0
 	end
@@ -194,14 +234,31 @@ end
 -- (the x2 STARDUST pass: s.passX2, set by GalaxyStoreService)
 -- Boosts of the same kind ADD, they don't multiply (#69): Star Surge, the x2 STARDUST potion and the pass are each +1x,
 -- so pass + potion = x3 and all three = x4 (never x8). Upgrades (ring 1, ring 2, milestones) still multiply inside Econ.Income.
+-- (the SURGE POWER perk makes the Star Surge's part stronger for you)
 local function stardustBoost(s): number
-	return 1 + (surgeMult() - 1) + (if boosting(s, "Stardust") then 1 else 0) + (if s.passX2 then 1 else 0)
+	local surge = (surgeMult() - 1) * (1 + Econ.PerksById.SurgePower.per * Econ.PerkLv(s.d.perks, "SurgePower"))
+	return 1 + surge + (if boosting(s, "Stardust") then 1 else 0) + (if s.passX2 then 1 else 0)
+end
+local function forgeOf(s, kind: string): number
+	return Econ.ForgeEffect(s.d.forge.equipped, s.d.forge.cores, kind)
 end
 local function incomeOf(s): number
-	return Econ.Income(s.d.owned, s.d.copies, s.d.nodes, s.d.ring2) * Econ.PadMult(s.d.pads) * stardustBoost(s)
+	local d = s.d
+	local path = if d.path == "Planet" then 1.5 else 1
+	local base = Econ.Income(d.owned, d.copies, d.nodes, d.ring2, d.perks)
+	-- (the GIANT core: the gas giants' share x its power)
+	local giant = forgeOf(s, "Giant")
+	if giant > 1 and d.owned[4] > 0 then
+		base += Econ.TierIncomeWith(3, d.owned[4], math.max(d.copies[4], 1), d.nodes, d.ring2, d.perks) * Econ.AllMult(d.nodes, d.ring2, d.perks) * (giant - 1)
+	end
+	return base * Econ.PadMult(d.pads, d.perks) * path * forgeOf(s, "Stardust") * stardustBoost(s)
+end
+local function shardsOf(s): number
+	return math.floor(Econ.ShardsFor(s.d.earnedRun, s.d.nodes, s.d.supernovas, s.d.perks) * forgeOf(s, "Shards"))
 end
 local function cometEvery(s): number
-	return math.max(Econ.Comet.MinEvery, Econ.CometEvery(s.d.nodes) / (if boosting(s, "Comets") then 2 else 1))
+	local path = if s.d.path == "Comet" then 0.8 else 1
+	return math.max(Econ.Comet.MinEvery, Econ.CometEvery(s.d.nodes, s.d.perks) * path / (if boosting(s, "Comets") then 2 else 1))
 end
 
 -- everything the HUD and the map read
@@ -228,16 +285,31 @@ local function publish(player: Player, s)
 	for _, n in ipairs(Econ.Ring2) do player:SetAttribute("R2_" .. n.id, d.ring2[n.id] or 0) end
 	player:SetAttribute("Shards", d.shards)
 	player:SetAttribute("ShardsEarned", d.shardsEarned)
-	player:SetAttribute("SupernovaShards", Econ.ShardsFor(d.earnedRun, d.nodes, d.supernovas))
+	player:SetAttribute("SupernovaShards", shardsOf(s))
 	player:SetAttribute("SupernovaNeed", Econ.NeedFor(d.supernovas))
 	-- the map
 	player:SetAttribute("Bodies", bodies)
 	player:SetAttribute("BodyTiers", tiers)
 	player:SetAttribute("Supernovas", d.supernovas)
-	player:SetAttribute("Rank", MapConfig.RankOf(MapConfig.TierOf(bodies, d.supernovas), d.supernovas))
+	-- the COSMIC LEVEL (XP spent on perks never lowers it) and the rank = its name + the Supernovas ("FLARE III · ✦12")
+	local level = Econ.LevelOf(d.xpTotal)
+	player:SetAttribute("XP", d.xp)
+	player:SetAttribute("XPTotal", d.xpTotal)
+	player:SetAttribute("CosmicLevel", level)
+	player:SetAttribute("Rank", Econ.RankText(level, d.supernovas))
+	for _, p in ipairs(Econ.Perks) do player:SetAttribute("Perk_" .. p.id, d.perks[p.id] or 0) end
+	-- PURPOSE: the best named tier of a body this run (the Ignition's "a body at IRON"), Ignition, the path, GALAXY LIT %
+	local best = 0
+	for k = 1, #Econ.Tiers do if d.owned[k] > 0 then best = math.max(best, Econ.NamedTier(d.owned[k])) end end
+	player:SetAttribute("BestTier", best)
+	player:SetAttribute("Ignition", d.ignition)
+	player:SetAttribute("Path", d.path)
+	player:SetAttribute("GalaxyLit", Econ.GalaxyLit(d.pads, d.supernovas, level, d.ignition))
+	-- the Forge (one JSON attribute: your cores, the equipped ones, the pity counters)
+	player:SetAttribute("Forge", HttpService:JSONEncode(d.forge))
 	player:SetAttribute("SupernovaReady", d.earnedRun >= Econ.NeedFor(d.supernovas))
 	player:SetAttribute("BestRunStardust", math.max(d.bestRun, d.earnedRun))
-	player:SetAttribute("Tree_CometLure", if d.nodes.CometLure then 1 else 0)
+	player:SetAttribute("Tree_CometLure", if (d.perks.CometLure or 0) > 0 then 1 else 0)
 	player:SetAttribute("CometsCaught", d.comets)
 	if type(d.settings.music) == "number" then player:SetAttribute("VolMusic", d.settings.music) end
 	if type(d.settings.sfx) == "number" then player:SetAttribute("VolSfx", d.settings.sfx) end
@@ -251,13 +323,30 @@ local function publish(player: Player, s)
 	for id in pairs(d.guide) do table.insert(seen, id) end
 	table.sort(seen)
 	player:SetAttribute("GuideSeen", table.concat(seen, ","))
+	if s.d.ignition < 1 and Shared.checkIgnition then task.defer(Shared.checkIgnition, player, s) end
 end
+-- IGNITION 1: every item of MapConfig.Ignition met at once -> the sector lights up (once ever): Essence, Sector 2 opens
+local function checkIgnition(player: Player, s)
+	local d = s.d
+	if d.ignition >= 1 then return end
+	local done, total = MapConfig.IgnitionDone(player)
+	if done < total then return end
+	d.ignition = 1
+	d.essence += Econ.IgnitionEssence
+	player:SetAttribute("Ignition", 1)
+	player:SetAttribute("Essence", d.essence)
+	player:SetAttribute("GalaxyLit", Econ.GalaxyLit(d.pads, d.supernovas, Econ.LevelOf(d.xpTotal), 1))
+	event:FireClient(player, "Ignition", 1, Econ.IgnitionEssence)
+	pcall(function() AnalyticsService:LogCustomEvent(player, "Ignition", 1) end)
+	task.spawn(save, player, false)
+end
+Shared.checkIgnition = checkIgnition
 local GUIDE_PAGES = { Stardust = true, Island = true, Tree = true, Comets = true, Supernova = true, Surge = true, Ranks = true }
 
 ------------------------------------------------------------------------ tutorial
 local TUT_DONE = {
 	function(d) return d.owned[1] >= 2 end, -- the Asteroid to level 2 (you start at level 1)
-	function(d) return d.nodes.FirstLight == true end,
+	function(d) return (d.perks.FirstLight or 0) >= 1 end, -- the FIRST LIGHT perk (2 XP: a new save starts with 2)
 	function(d) return (d.owned[2] or 0) >= 1 end, -- the Moon unlocked (UNLOCK on its BODIES row)
 	function(d) return d.comets >= 1 end,
 	function(d) return d.earnedRun >= Econ.NeedFor(d.supernovas) / 2 or d.supernovas >= 1 end, -- the goal bar at 50%
@@ -345,7 +434,7 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		local most = if action == "BuyBody" then 1 elseif action == "BuyBody10" then 10 else 1000
 		local got = 0
 		while got < most do
-			local cost = Econ.Cost(arg, d.owned[arg + 1])
+			local cost = Econ.Cost(arg, d.owned[arg + 1], d.perks)
 			if d.stardust < cost then break end
 			d.stardust -= cost
 			d.owned[arg + 1] += 1
@@ -368,13 +457,98 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		publish(player, s)
 		pcall(function() AnalyticsService:LogCustomEvent(player, "PadBuy", i) end)
 		return true, i
+	elseif action == "ForgeRoll" then
+		-- arg = 1 (ROLL) or Econ.Forge.Bulk (BULK): each roll costs RollCost Essence; the odds x your Luck cores (the
+		-- rarer ones only); pity forces a Legendary / Mythic. Returns the results { "Kind:Rarity", ... }
+		if d.ignition < 1 then return false, "locked" end
+		local n = if arg == Econ.Forge.Bulk then Econ.Forge.Bulk else 1
+		if d.essence < n * Econ.Forge.RollCost then return false, "poor" end
+		d.essence -= n * Econ.Forge.RollCost
+		local F = d.forge
+		local luck = forgeOf(s, "Luck")
+		local results = {}
+		for _ = 1, n do
+			F.rolls += 1
+			F.pityL += 1
+			F.pityM += 1
+			local rarity
+			if F.pityM >= Econ.Forge.PityMythic then
+				rarity = "Mythic"
+			elseif F.pityL >= Econ.Forge.PityLegendary then
+				rarity = "Legendary"
+			else
+				local total = 0
+				for i, r in ipairs(Econ.Forge.Rarities) do total += r.odds * (if i > 1 then luck else 1) end
+				local x = math.random() * total
+				for i, r in ipairs(Econ.Forge.Rarities) do
+					x -= r.odds * (if i > 1 then luck else 1)
+					if x <= 0 then rarity = r.id break end
+				end
+				rarity = rarity or "Common"
+			end
+			local ri = Econ.ForgeRarityById[rarity].index
+			if ri >= 5 then F.pityL = 0 end
+			if ri >= 6 then F.pityM = 0 end
+			local kind = Econ.Forge.Kinds[math.random(1, #Econ.Forge.Kinds)].id
+			local key = kind .. ":" .. rarity
+			F.cores[key] = math.min((F.cores[key] or 0) + 1, Econ.Forge.MaxLevel)
+			-- (a free slot takes a new core by itself)
+			if #F.equipped < Econ.Forge.Slots and not table.find(F.equipped, key) then table.insert(F.equipped, key) end
+			table.insert(results, key)
+			pcall(function() AnalyticsService:LogCustomEvent(player, "ForgeRoll", ri, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = key }) end)
+		end
+		publish(player, s)
+		return true, results
+	elseif action == "ForgeEquip" then
+		-- equip / unequip one core you own (a full set: it replaces the first slot)
+		if type(arg) ~= "string" or not d.forge.cores[arg] then return false, "bad" end
+		local eq = d.forge.equipped
+		local at = table.find(eq, arg)
+		if at then
+			table.remove(eq, at)
+		else
+			if #eq >= Econ.Forge.Slots then table.remove(eq, 1) end
+			table.insert(eq, arg)
+		end
+		publish(player, s)
+		return true
+	elseif action == "PickPath" then
+		-- after Ignition 1: pick a path (free the first time; a switch costs Econ.PathSwitchShards shards)
+		if d.ignition < 1 then return false, "locked" end
+		local ok = false
+		for _, p in ipairs(Econ.Paths) do if p.id == arg then ok = true end end
+		if not ok then return false, "bad" end
+		if d.path == arg then return false, "same" end
+		if d.path ~= "" then
+			if d.shards < Econ.PathSwitchShards then return false, "poor" end
+			d.shards -= Econ.PathSwitchShards
+		end
+		d.path = arg
+		publish(player, s)
+		return true
+	elseif action == "BuyPerk" then
+		-- a perk level, paid in XP; its perk tier must be open (Cosmic Level)
+		local perk = type(arg) == "string" and Econ.PerksById[arg]
+		if not perk then return false, "bad" end
+		local lv = d.perks[perk.id] or 0
+		if lv >= Econ.PerkMax then return false, "max" end
+		if Econ.LevelOf(d.xpTotal) < perk.opens then return false, "locked" end
+		local cost = Econ.PerkCost(lv)
+		if d.xp < cost then return false, "poor" end
+		d.xp -= cost
+		d.perks[perk.id] = lv + 1
+		if perk.id == "CometLure" and s.nextComet then s.nextComet = math.min(s.nextComet, os.clock() + cometEvery(s)) end
+		checkTutorial(player, s)
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "PerkBuy", lv + 1, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = perk.id }) end)
+		return true, lv + 1
 	elseif action == "BuyCopy" then
 		-- +BODY: one more copy of an unlocked body type (max Econ.MaxCopies)
 		if type(arg) ~= "number" or arg ~= arg or arg % 1 ~= 0 or arg < 0 or arg >= #Econ.Tiers then return false, "bad" end
 		if d.owned[arg + 1] < 1 then return false, "locked" end
 		local c = d.copies[arg + 1]
 		if c >= Econ.MaxCopies then return false, "max" end
-		local cost = Econ.CopyCost(arg, c)
+		local cost = Econ.CopyCost(arg, c, d.perks)
 		if d.stardust < cost then return false, "poor" end
 		d.stardust -= cost
 		d.copies[arg + 1] = c + 1
@@ -440,13 +614,14 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		return true
 	elseif action == "Supernova" then
 		-- (the client has played the wind-up; this is the impact)
-		local got = Econ.ShardsFor(d.earnedRun, d.nodes, d.supernovas)
+		local got = shardsOf(s)
 		if got <= 0 then return false, "notready" end
 		local first = d.supernovas == 0
 		d.bestRun = math.max(d.bestRun, d.earnedRun)
 		d.shards += got
 		d.shardsEarned += got
 		d.supernovas += 1
+		d.essence += Econ.SupernovaEssence
 		d.stardust, d.earnedRun = 0, 0
 		for i = 1, #Econ.Tiers do
 			d.owned[i] = Econ.StartOwned[i] or 0
@@ -471,6 +646,8 @@ mapEvent.OnServerEvent:Connect(function(player: Player, kind, id)
 	s.pending[id] = nil
 	if os.clock() - born > Econ.Comet.Life + 1.5 then return end -- (gone)
 	local value = incomeOf(s) * math.random(Econ.Comet.ValueMin, Econ.Comet.ValueMax)
+		* (1 + Econ.PerksById.CometValue.per * Econ.PerkLv(s.d.perks, "CometValue")) * (if s.d.path == "Comet" then 2 else 1) * forgeOf(s, "Comets")
+	if math.random() < Econ.PerksById.LuckyComet.per * Econ.PerkLv(s.d.perks, "LuckyComet") then value *= 10 end
 	s.d.stardust += value
 	s.d.earnedRun += value
 	s.d.earnedTotal += value
@@ -557,6 +734,16 @@ task.spawn(function()
 				end
 			end
 			local gain = incomeOf(s) * dt
+			-- XP from your system (the Cosmic Level); a new level re-publishes (the rank, the perk tiers)
+			local xp = Econ.XPRate(gain / math.max(dt, 1e-6), s.d.perks, forgeOf(s, "XP")) * dt
+			if xp > 0 then
+				local before = Econ.LevelOf(s.d.xpTotal)
+				s.d.xp += xp
+				s.d.xpTotal += xp
+				player:SetAttribute("XP", s.d.xp)
+				player:SetAttribute("XPTotal", s.d.xpTotal)
+				if Econ.LevelOf(s.d.xpTotal) > before then publish(player, s) end
+			end
 			if gain > 0 then
 				s.d.stardust += gain
 				s.d.earnedRun += gain
@@ -564,7 +751,7 @@ task.spawn(function()
 				player:SetAttribute("Stardust", s.d.stardust)
 				player:SetAttribute("EarnedRun", s.d.earnedRun)
 				local need = Econ.NeedFor(s.d.supernovas)
-				player:SetAttribute("SupernovaShards", Econ.ShardsFor(s.d.earnedRun, s.d.nodes, s.d.supernovas))
+				player:SetAttribute("SupernovaShards", shardsOf(s))
 				if s.d.earnedRun >= need and not player:GetAttribute("SupernovaReady") then publish(player, s) end
 				if s.d.tut == 4 and s.d.earnedRun >= need / 2 then
 					checkTutorial(player, s)
@@ -585,6 +772,21 @@ Galaxy:GetAttributeChangedSignal("SurgeUntil"):Connect(function()
 end)
 
 if IS_STUDIO then
+	-- (Studio: TestIgnitionReady = true -> every player meets the Ignition 1 checklist (Supernovas, LVL, pads, a body at IRON);
+	-- the server's own check then lights the sector. For the cinematic / the Forge tests; never in the pace test.)
+	workspace:GetAttributeChangedSignal("TestIgnitionReady"):Connect(function()
+		if workspace:GetAttribute("TestIgnitionReady") ~= true then return end
+		for player, s in pairs(sessions) do
+			local d = s.d
+			d.supernovas = math.max(d.supernovas, 12)
+			d.pads = #Econ.Pads
+			d.xpTotal = math.max(d.xpTotal, Econ.XPForLevel(19) + 1)
+			d.owned[1] = math.max(d.owned[1], 20)
+			d.copies[1] = math.max(d.copies[1], 1)
+			d.tut = #Econ.Tutorial
+			publish(player, s)
+		end
+	end)
 	workspace:GetAttributeChangedSignal("TestGiveStardust"):Connect(function()
 		local n = tonumber(workspace:GetAttribute("TestGiveStardust"))
 		if not n then return end

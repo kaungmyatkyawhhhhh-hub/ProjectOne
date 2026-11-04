@@ -356,6 +356,7 @@ local function refresh(slot: number, pop: boolean)
 	-- (feel pass: the copies orbit as bodies now; the belt of one rock per body is gone)
 	island:SetAttribute("Belt", 0)
 	island:SetAttribute("Sys", if isPlayer then owner:GetAttribute("Sys") or "" else owner.Sys or "")
+	island:SetAttribute("Lit", if isPlayer then owner:GetAttribute("GalaxyLit") or 0 else 0)
 	island:SetAttribute("Supernovas", novas)
 	island:SetAttribute("Ready", (if isPlayer then owner:GetAttribute("SupernovaReady") else owner.Ready) == true)
 	setBridge(island, true)
@@ -363,7 +364,7 @@ local function refresh(slot: number, pop: boolean)
 	local pads = math.clamp(math.floor(num(owner, "Pads")), 0, #Econ.Pads)
 	applyPads(island, pads, pop and pads > (island:GetAttribute("Pads") or 0))
 	local _ = bodies
-	island:SetAttribute("Rank", MapConfig.RankOf(island:GetAttribute("Tier") or 0, novas))
+	island:SetAttribute("Rank", if isPlayer then owner:GetAttribute("Rank") or "" else MapConfig.RankOf(island:GetAttribute("Tier") or 0, novas))
 end
 
 local function spawnCFrame(slot: number): CFrame
@@ -394,7 +395,7 @@ local function claim(player: Player)
 	return nil -- (more than 8 players: no island, the centre spawn)
 end
 
-local WATCH = { "Bodies", "BodyTiers", "Supernovas", "SupernovaReady", "Sys", "Pads" }
+local WATCH = { "Bodies", "BodyTiers", "Supernovas", "SupernovaReady", "Sys", "Pads", "Rank", "GalaxyLit" }
 local function onPlayer(player: Player)
 	local slot = claim(player)
 	local lastNovas = tonumber(player:GetAttribute("Supernovas")) or 0
@@ -442,6 +443,35 @@ end)
 
 
 for slot = 1, MapConfig.Islands.Count do refresh(slot, false) end
+
+-- the STAR FORGE stands on SECTOR 2 (purpose, 5 Nov: Ignition 1 opens Sector 2 = the Forge): a copy of the plaza's Forge
+-- model on the Sector 2 island, with a prompt (Window = "Forge": GalaxyMapClient opens it for players past Ignition 1)
+task.spawn(function()
+	local centre = root:FindFirstChild("Centre")
+	local src = centre and centre:FindFirstChild("StarForge")
+	local nextS = root:FindFirstChild("NextSector")
+	if not src or not nextS or nextS:FindFirstChild("SectorForge") then return end
+	local forge = src:Clone()
+	forge.Name = "SectorForge"
+	local NS = MapConfig.NextSector
+	local at = O + NS.Position + Vector3.new(0, 0.2, 0)
+	local cf, size = forge:GetBoundingBox()
+	forge:PivotTo(CFrame.new(at + Vector3.new(0, size.Y / 2 - (cf.Position.Y - forge:GetPivot().Position.Y), 0)) * CFrame.Angles(0, math.rad(NS.Angle + 90), 0))
+	for _, p in ipairs(forge:GetDescendants()) do
+		if p:IsA("ProximityPrompt") then p:Destroy() end
+	end
+	local host = forge.PrimaryPart or forge:FindFirstChildWhichIsA("BasePart", true)
+	if host then
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.ActionText = "Open"
+		prompt.ObjectText = "STAR FORGE"
+		prompt.MaxActivationDistance = 14
+		prompt.RequiresLineOfSight = false
+		prompt:SetAttribute("Window", "Forge")
+		prompt.Parent = host
+	end
+	forge.Parent = nextS
+end)
 
 ------------------------------------------------------------------------
 -- Studio test switches

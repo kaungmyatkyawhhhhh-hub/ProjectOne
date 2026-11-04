@@ -295,7 +295,7 @@ local function build(island)
 		local panelModel = model:FindFirstChild("Board_" .. spec.id)
 		local screen = panelModel and panelModel:FindFirstChild("Screen")
 		if not screen then continue end
-		local canvas = Vector2.new(spec.Width, spec.Height) * B.PxPerStud
+		local canvas = Vector2.new(spec.Width, spec.Height) * (spec.Px or B.PxPerStud)
 		local gui = Instance.new("SurfaceGui")
 		gui.Name = "Board_" .. spec.id .. "_" .. island.Name
 		gui.Adornee = screen
@@ -377,12 +377,12 @@ RunService.RenderStepped:Connect(function(dt)
 end)
 
 -- the tutorial: the world position of a button on one of YOUR boards (scrolls it into view first), the top of it, its
--- width / height. key: "Body<k>" (BODIES), "Star_<id>" (STAR UPGRADES), "R2_<id>" (TREE; once that node is selected:
+-- width / height. key: "Body<k>" (BODIES), "Perk_<id>" (PERKS), "R2_<id>" (TREE; once that node is selected:
 -- INFO's BUY)
 shared.GalaxyBoardTarget = function(key: string): (Vector3?, Vector3?, number?)
 	for island, b in pairs(boards) do
 		if island:GetAttribute("Owner") == player.UserId then
-			local boardId = if key:sub(1, 5) == "Star_" then "Stars" elseif key:sub(1, 3) == "R2_" then "Tree" else "Bodies"
+			local boardId = if key:sub(1, 5) == "Perk_" then "Stars" elseif key:sub(1, 3) == "R2_" then "Tree" else "Bodies"
 			if boardId == "Tree" and b.ctx.sel.kind == "node2" and "R2_" .. b.ctx.sel.key == key then
 				boardId, key = "Info", "Buy"
 			end

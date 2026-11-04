@@ -6,7 +6,8 @@
 --    "PassPromptShown"; a finished purchase logs "PassBought" (analytics custom events, the pass in custom field 1)
 --  * ALPHA PLAYER: while GameConfig.AlphaActive, a player's first join saves d.alphaPlayer = true (for the launch title) and
 --    awards the badge (once it has an id; d.alphaBadge = true once Roblox confirms, so it's retried until then)
--- Studio test switch: Workspace attribute TestOwnX2 = true -> every player owns x2 Stardust (Studio only).
+-- Studio test switches: Workspace attribute TestOwnX2 = true -> every player owns x2 Stardust; TestNoPass = true -> nobody
+-- does (the pace test). Studio only.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -45,6 +46,8 @@ local function grantX2(player: Player)
 end
 local function checkX2(player: Player)
 	if IS_STUDIO and workspace:GetAttribute("TestOwnX2") == true then grantX2(player) return end
+	-- (Studio: TestNoPass = true -> nobody owns it, for the pace test; the owner's account owns the real pass)
+	if IS_STUDIO and workspace:GetAttribute("TestNoPass") == true then return end
 	if X2.id == 0 then return end
 	for _ = 1, 3 do
 		local ok, owns = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, X2.id) end)

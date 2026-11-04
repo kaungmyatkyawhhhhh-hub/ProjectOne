@@ -50,7 +50,7 @@ local PAGES = {
 	{ id = "Comets", tab = "COMETS", title = "COMETS", icon = "comet", glow = Color3.fromRGB(90, 200, 255), c1 = "#5ad1ff", c2 = "#1f6fd1",
 		lines = { "A comet flies past every " .. Econ.Comet.Every .. " s. Tap it!",
 			"A catch pays " .. Econ.Comet.ValueMin .. "-" .. Econ.Comet.ValueMax .. " s of your income.",
-			"COMET LURE brings one every 30 s." },
+			"The COMET LURE perk brings them sooner." },
 		unlocked = function() return attr("TutStep") >= 4 or attr("CometsCaught") >= 1 end, lockedText = "CATCH A COMET" },
 	{ id = "Supernova", tab = "SUPERNOVA", title = "SUPERNOVA & SHARDS", icon = "shard", glow = Color3.fromRGB(170, 110, 255), c1 = "#ffe27a", c2 = "#e08a0a",
 		lines = { "Earn " .. Econ.Format(Econ.NeedFor(0)) .. " in your first run: SUPERNOVA is ready.",

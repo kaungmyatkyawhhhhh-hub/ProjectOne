@@ -15,17 +15,21 @@ local Kit = require(Galaxy:WaitForChild("UIKit"))
 local REST = Vector3.new(0, 2.4, 0)
 local tags = {} -- [Player] = BillboardGui
 
+-- (feel pass, 5 Nov: the rank = the COSMIC LEVEL's name + the Supernovas, "FLARE III · ✦12", for everyone from the start;
+-- the colour = the level's band)
+local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local function build(p: Player)
 	if tags[p] then tags[p]:Destroy() tags[p] = nil end
 	local char = p.Character
 	local head = char and char:FindFirstChild("Head")
-	local novas = tonumber(p:GetAttribute("Supernovas")) or 0
-	local def = MapConfig.RankDef(novas)
-	if not head or not def then return end
+	local text = p:GetAttribute("Rank")
+	if not head or type(text) ~= "string" or text == "" then return end
+	local def = { name = text, colour = Econ.LevelBand(tonumber(p:GetAttribute("CosmicLevel")) or 1).colour }
+	local _ = MapConfig
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "Rank_" .. p.Name
 	bb.Adornee = head
-	bb.Size = UDim2.fromScale(4.4, 1) -- (studs: about the width of the avatar's shoulders x2)
+	bb.Size = UDim2.fromScale(5.2, 0.8) -- (studs: the name + the Supernovas; smaller than before: it shows from the start now)
 	bb.StudsOffsetWorldSpace = REST
 	bb.LightInfluence = 0
 	bb.MaxDistance = 90
@@ -55,7 +59,7 @@ local function watch(p: Player)
 		char:WaitForChild("Head", 10)
 		build(p)
 	end)
-	p:GetAttributeChangedSignal("Supernovas"):Connect(function() build(p) end)
+	p:GetAttributeChangedSignal("Rank"):Connect(function() build(p) end)
 	if p.Character then build(p) end
 end
 for _, p in ipairs(Players:GetPlayers()) do task.spawn(watch, p) end

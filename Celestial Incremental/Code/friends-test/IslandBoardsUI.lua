@@ -11,8 +11,8 @@
 --  * Bodies buying bodies only (Regrowth's MACHINES): rows: name, LEVEL + named tier, the bar to the next tier, +x/s,
 --           UPGRADE (cost above it), M (max), +BODY (a copy, cost above it), the copies ("x3") on the icon; a type you
 --           haven't opened is "???" (a silhouette) with its UNLOCK price
---  * Stars  ring 1 only, all 7 nodes (Regrowth's FACTORY UPGRADES): cards: name, short text, icon, value + step, star level
---           badge, UPGRADE + price
+--  * Stars  the PERKS board (feel pass: the old STAR UPGRADES board): the 16 perks as Regrowth's FACTORY UPGRADES cards:
+--           name, short text, icon, value + next, the level badge, UPGRADE + its XP price; a perk tier still shut shows LVL n
 -- Every screen: rounded corners in its frame's colour, a dark screen, an animated neon edge in the board's colour; the stand
 -- boards have their title inside (centred, a rule under it); the pair's huge titles sit over the frame (GalaxyBoards).
 -- Lists scroll (Kit.scroller); a refresh (4x a second) only changes words and colours, never rebuilds, so what you
@@ -53,9 +53,10 @@ local LEFT, RIGHT, CENTRE = Enum.TextXAlignment.Left, Enum.TextXAlignment.Right,
 
 -- the SHARD TREE's graph (5 Nov, #220): 3 rows x 3 columns on the 550 x 650 screen, under the heading; the hub (your star)
 -- bottom centre; each node links to `from`. (A ring-2 node not listed here isn't drawn: add it to GRAPH.)
-local TILE_W, TILE_H = 120, 112
-local COL_X = { 110, 275, 440 } -- (tile centres)
-local ROW_Y = { 150, 308, 466 } -- (tile tops)
+-- (5 Nov: tiles 120 -> 150 wide so they're >= 44 px on a phone from the spawn, with the bigger pair boards)
+local TILE_W, TILE_H = 156, 128
+local COL_X = { 97, 275, 453 } -- (tile centres)
+local ROW_Y = { 146, 300, 454 } -- (tile tops)
 local GRAPH = {
 	{ id = "Starfire", col = 1, row = 2, from = "hub" },
 	{ id = "StarTier", col = 2, row = 2, from = "hub" },
@@ -121,7 +122,7 @@ local function node2Lock(node, r2, novas: number): string?
 	if node.requires and (r2[node.requires] or 0) < 1 then return "needs " .. Econ.Ring2ById[node.requires].name end
 	return nil
 end
-local STAR_NODES = Econ.Ring1 -- (all of ring 1, #219: the tier unlocks too)
+local STAR_NODES = Econ.Perks -- (feel pass: the PERKS, bought with XP)
 
 ------------------------------------------------------------------------ pieces
 -- a v12 kit button whose look and words change in place (never rebuilt: hold-to-buy and the scroll stay put)
@@ -228,6 +229,9 @@ function UI:ring2()
 	return t
 end
 function UI:shards(): number return tonumber(self:attr("Shards")) or 0 end
+function UI:xp(): number return tonumber(self:attr("XP")) or 0 end
+function UI:level(): number return tonumber(self:attr("CosmicLevel")) or 1 end
+function UI:perks() return Econ.PerksOf(self.ctx.subject) end
 function UI:novas(): number return tonumber(self:attr("Supernovas")) or 0 end
 function UI:can(): boolean return self.ctx.canAct == nil or self.ctx.canAct() end
 function UI:dragged(): boolean return self.scroll ~= nil and self.scroll.moved end
@@ -249,13 +253,19 @@ function UI:bodyOnce(k: number, kind: string?): boolean
 		if node and (not node.requires or n[node.requires]) and self:stardust() >= node.cost then self:buy("BuyNode", node.id) else self.ctx.sound("no") end
 		return false
 	end
-	if self:stardust() < Econ.Cost(k, self:owned(k)) then self.ctx.sound("no") return false end
+	if self:stardust() < Econ.Cost(k, self:owned(k), self:perks()) then self.ctx.sound("no") return false end
 	return self:buy(kind or "BuyBody", k)
 end
 function UI:nodeOnce(node)
 	local n = self:nodes()
 	if n[node.id] or (node.requires and not n[node.requires]) or self:stardust() < node.cost then self.ctx.sound("no") return end
 	self:buy("BuyNode", node.id)
+end
+-- one level of a perk (XP); false = stop a hold
+function UI:perkOnce(p): boolean
+	local lv = self:perks()[p.id] or 0
+	if lv >= Econ.PerkMax or self:level() < p.opens or self:xp() < Econ.PerkCost(lv) then self.ctx.sound("no") return false end
+	return self:buy("BuyPerk", p.id)
 end
 function UI:node2Once(node)
 	local r2 = self:ring2()
@@ -334,10 +344,10 @@ function UI:buildTree()
 		local tile = Kit.box(gui, x, y, TILE_W, TILE_H, { BackgroundTransparency = 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
 		Kit.corner(tile, 18)
 		local st = Kit.stroke(tile, hex("#4b4170"), 3, 0.25)
-		local img = Kit.icon(gui, if node then node.icon else later.icon, x + (TILE_W - 76) / 2, y + 8, 76, nil, { ZIndex = 6 })
-		local value = Kit.text(gui, x, y + TILE_H - 38, TILE_W - 10, 34, "", 28, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 2.2, FontFace = Kit.FONT_HEAVY })
+		local img = Kit.icon(gui, if node then node.icon else later.icon, x + (TILE_W - 88) / 2, y + 6, 88, nil, { ZIndex = 6 })
+		local value = Kit.text(gui, x, y + TILE_H - 40, TILE_W - 10, 36, "", 30, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 2.2, FontFace = Kit.FONT_HEAVY })
 		local costIcon = Kit.icon(gui, "shard", x + 12, y + TILE_H + 6, 26, nil, { ZIndex = 6 })
-		local cost = Kit.text(gui, x + 40, y + TILE_H + 4, TILE_W + 40, 30, "", 24, { ZIndex = 6, stroke = 1.8 })
+		local cost = Kit.text(gui, x + 40, y + TILE_H + 4, TILE_W + 20, 30, "", 24, { ZIndex = 6, stroke = 1.8 })
 		local t = { node = node, later = later, tile = tile, stroke = st, img = img, value = value, costIcon = costIcon, cost = cost, x = x, y = y }
 		if node and #node.costs > 1 then
 			-- (a node with levels: "2/5" in the top-left corner)
@@ -558,7 +568,7 @@ function UI:buildBodies()
 		r.copy = action(row, 512, 32, rw - 518, 54, 20, 6)
 		holdBuy(r.up.button, function() return self:bodyOnce(k) end, dragged)
 		tap(r.max.button, function()
-			if Econ.Unlocked(k, self:nodes(), self:ring2()) and self:owned(k) > 0 and self:stardust() >= Econ.Cost(k, self:owned(k)) then
+			if Econ.Unlocked(k, self:nodes(), self:ring2()) and self:owned(k) > 0 and self:stardust() >= Econ.Cost(k, self:owned(k), self:perks()) then
 				self:buy("BuyBodyMax", k)
 			else
 				self.ctx.sound("no")
@@ -566,7 +576,7 @@ function UI:buildBodies()
 		end, dragged)
 		tap(r.copy.button, function()
 			local c = self:copies(k)
-			if self:owned(k) > 0 and c < Econ.MaxCopies and self:stardust() >= Econ.CopyCost(k, c) then
+			if self:owned(k) > 0 and c < Econ.MaxCopies and self:stardust() >= Econ.CopyCost(k, c, self:perks()) then
 				self:buy("BuyCopy", k)
 			else
 				self.ctx.sound("no")
@@ -582,6 +592,7 @@ function UI:refreshBodies()
 	local n, sd = self:nodes(), self:stardust()
 	local r2, novas = self:ring2(), self:novas()
 	local can = self:can()
+	local perks = self:perks()
 	for k, r in pairs(self.rows) do
 		local tier = Econ.Tiers[k + 1]
 		local lv = self:owned(k)
@@ -608,7 +619,7 @@ function UI:refreshBodies()
 				r.barFill.Size = UDim2.fromOffset(118, 10)
 				Kit.setText(r.tier, "MAX")
 			end
-			local now = Econ.TierIncomeWith(k, lv, copies, n, r2) * Econ.AllMult(n, r2)
+			local now = Econ.TierIncomeWith(k, lv, copies, n, r2, perks) * Econ.AllMult(n, r2, perks)
 			Kit.setText(r.rate, "+" .. fmt(now) .. "/s")
 		else
 			Kit.setText(r.level, "LOCKED")
@@ -636,7 +647,7 @@ function UI:refreshBodies()
 			end
 		else
 			-- (a Star type opened by ring 2 starts at level 0: its first UPGRADE puts it in orbit)
-			local cost = Econ.Cost(k, lv)
+			local cost = Econ.Cost(k, lv, perks)
 			r.up.set(if sd >= cost then "buy" else "no", if lv > 0 then "UPGRADE" else "UNLOCK")
 			r.max.set(if sd >= cost then "blue" else "no", "M")
 			costText, costCan = fmt(cost), sd >= cost
@@ -645,7 +656,7 @@ function UI:refreshBodies()
 			if copies >= Econ.MaxCopies then
 				r.copy.set("owned", "MAX")
 			else
-				local cc = Econ.CopyCost(k, copies)
+				local cc = Econ.CopyCost(k, copies, perks)
 				r.copy.set(if sd >= cc then "owned" else "no", "+BODY")
 				r.copyIcon.Parent.Visible = true
 				shown(r.copyCost, true)
@@ -681,9 +692,9 @@ function UI:buildStars()
 		local st = Kit.stroke(card, self.spec.Neon, 2, 0.35)
 		local hit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, AutoButtonColor = false, Size = UDim2.fromScale(1, 1), ZIndex = 5 }, card)
 		local _ = hit -- (the card only takes the press, so a drag scrolls the cards; buying is on UPGRADE)
-		Kit.text(card, 16, 8, 190, 34, node.name, 30, { ZIndex = 8, TextScaled = true, FontFace = Kit.FONT_HEAVY, gradient = ColorSequence.new(hex("#fff1c0"), hex("#ffb02a")) })
+		Kit.text(card, 16, 8, 190, 34, node.name, 30, { ZIndex = 8, TextScaled = true, FontFace = Kit.FONT_HEAVY, gradient = ColorSequence.new(hex("#dff4ff"), hex("#5ad1ff")) })
 		Kit.text(card, 16, 44, 160, 40, node.desc:upper(), 12, { ZIndex = 8, TextColor3 = GREY_TEXT, FontFace = Kit.FONT_BOLD, TextWrapped = true, stroke = 1 })
-		Kit.icon(card, node.icon, 150, 64, 126, NODE_GLOW[node.tab], { ZIndex = 6 })
+		local cardIcon = Kit.icon(card, node.icon, 150, 64, 126, Color3.fromRGB(90, 200, 255), { ZIndex = 6 })
 		-- the star level badge (Regrowth's star with the level in it)
 		Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.sparkle, ImageColor3 = hex("#ffb02a"), Position = UDim2.fromOffset(206, -6),
 			Size = UDim2.fromOffset(86, 86), ZIndex = 9 }, card)
@@ -691,16 +702,22 @@ function UI:buildStars()
 		c.badge = Kit.text(card, 206, 20, 86, 34, "0", 30, { ZIndex = 10, TextXAlignment = CENTRE, stroke = 2.4, FontFace = Kit.FONT_HEAVY })
 		c.value = Kit.text(card, 16, 96, 140, 38, "", 32, { ZIndex = 8, stroke = 2, FontFace = Kit.FONT_HEAVY })
 		c.step = Kit.text(card, 18, 134, 140, 20, "", 16, { ZIndex = 8, TextColor3 = GREEN_TEXT, stroke = 1.4 })
-		c.priceIcon = Kit.icon(card, "stardust", 16, ch - 92, 26, nil, { ZIndex = 7 })
+		c.priceIcon = Kit.icon(card, "sun", 16, ch - 92, 26, nil, { ZIndex = 7 })
+		c.icon = cardIcon
+		c.opens = Kit.text(card, 0, 70, pitch - 16, 50, "LVL " .. node.opens, 40, { ZIndex = 9, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2.6, TextColor3 = hex("#cfc6dd") })
 		c.price = Kit.text(card, 46, ch - 92, 200, 26, "", 22, { ZIndex = 8, stroke = 1.6 })
 		c.priceY = ch - 92
 		c.up = action(card, 14, ch - 62, 262, 54, 28, 6)
-		tap(c.up.button, function() self:nodeOnce(node) end, dragged)
+		holdBuy(c.up.button, function() return self:perkOnce(node) end, dragged)
 		c.node = node
-		self.targets["Star_" .. node.id] = c.up.button
+		self.targets["Perk_" .. node.id] = c.up.button
 		table.insert(self.cards, c)
 	end
 	sf.CanvasSize = UDim2.fromOffset(#STAR_NODES * pitch + 8, 0)
+	-- your XP, top right (what the perks cost)
+	Kit.icon(self.gui, "sun", W - 176, 14, 38, Color3.fromRGB(90, 200, 255), { ZIndex = 9 })
+	self.xpText = Kit.text(self.gui, W - 140, 18, 110, 32, "0", 26, { ZIndex = 9, stroke = 2, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#bfe9ff") })
+	self.lvText = Kit.text(self.gui, 34, 18, 150, 32, "LVL 1", 26, { ZIndex = 9, stroke = 2, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#bfe9ff") })
 	-- the < > arrows on the edges: shown while there are more cards that way; a tap scrolls one card
 	self.arrows = {}
 	for _, a in ipairs({ { -1, 8, "<" }, { 1, W - 50, ">" } }) do
@@ -724,26 +741,33 @@ function UI:buildStars()
 	arrows()
 end
 function UI:refreshStars()
-	local n, sd = self:nodes(), self:stardust()
+	local xp, level = self:xp(), self:level()
+	local perks = self:perks()
 	local can = self:can()
+	Kit.setText(self.xpText, fmt(math.floor(xp)))
+	Kit.setText(self.lvText, "LVL " .. level)
 	for _, c in ipairs(self.cards) do
-		local node = c.node
-		local bought = n[node.id] == true
-		Kit.setText(c.badge, if bought then "1" else "0")
-		local needs = node.requires ~= nil and not n[node.requires]
-		local v, s = nodeValue(node, bought)
-		if node.effect.kind == "unlockTier" and not bought then v = "NEW" end
-		Kit.setText(c.value, v)
-		Kit.setText(c.step, s)
-		c.priceIcon.Parent.Visible = not bought and not needs
-		shown(c.price, not bought)
-		Kit.setText(c.price, if needs then "needs " .. Econ.Ring1ById[node.requires].name elseif node.cost == 0 then "FREE" else fmt(node.cost))
-		c.price.TextColor3 = if needs then GREY_TEXT elseif sd >= node.cost then WHITE else RED_TEXT
-		c.price.Parent.Position = UDim2.fromOffset(if needs then 16 else 46, c.priceY)
+		local p = c.node
+		local lv = perks[p.id] or 0
+		local open = level >= p.opens
+		local maxed = lv >= Econ.PerkMax
+		local cost = Econ.PerkCost(lv)
+		Kit.setText(c.badge, tostring(lv))
+		Kit.setText(c.value, Econ.PerkValue(p, lv))
+		Kit.setText(c.step, if maxed then "MAX" else Econ.PerkValue(p, lv + 1) .. " next")
+		silhouette(c.icon, not open)
+		shown(c.opens, not open)
+		shown(c.value, open)
+		shown(c.step, open)
+		c.priceIcon.Parent.Visible = open and not maxed
+		shown(c.price, open and not maxed)
+		Kit.setText(c.price, fmt(cost))
+		c.price.TextColor3 = if xp >= cost then WHITE else RED_TEXT
+		c.price.Parent.Position = UDim2.fromOffset(46, c.priceY)
 		if not can then c.up.set("no", "VISIT")
-		elseif bought then c.up.set("owned", "OWNED")
-		elseif needs then c.up.set("no", "LOCKED")
-		else c.up.set(if sd >= node.cost then "buy" else "no", "UPGRADE") end
+		elseif not open then c.up.set("no", "LVL " .. p.opens)
+		elseif maxed then c.up.set("owned", "MAX")
+		else c.up.set(if xp >= cost then "buy" else "no", "UPGRADE") end
 	end
 end
 

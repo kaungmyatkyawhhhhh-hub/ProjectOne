@@ -157,11 +157,13 @@ MapConfig.Boards = {
 		PostDepth = 2.4, Depth = 1.8, LedgeDepth = 3.4 },
 	Frame = 1.2, Depth = 1.2, -- (Star Upgrades' chunky frame)
 	List = {
-		{ id = "Tree", title = "CONSTELLATION TREE", pair = -1, Width = 11, Height = 13, Neon = Color3.fromRGB(150, 100, 255) },
-		{ id = "Info", title = "INFO", pair = 1, Width = 11, Height = 13, Neon = Color3.fromRGB(70, 165, 255) },
+		-- (5 Nov: 11 x 13 -> 12.5 x 14.8 studs with the same 550 x 650 canvas, Px 44, so the TREE tiles read >= 44 px on the
+		-- phone frame from the spawn; the tops stay under the star beam's start, System.BeamFrom)
+		{ id = "Tree", title = "CONSTELLATION TREE", pair = -1, Width = 12.5, Height = 14.8, Px = 44, Neon = Color3.fromRGB(150, 100, 255) },
+		{ id = "Info", title = "INFO", pair = 1, Width = 12.5, Height = 14.8, Px = 44, Neon = Color3.fromRGB(70, 165, 255) },
 		{ id = "Bodies", title = "BODIES", At = Vector3.new(0, 0, -23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
 			Style = "Neon", Neon = Color3.fromRGB(190, 110, 255) },
-		{ id = "Stars", title = "STAR UPGRADES", At = Vector3.new(0, 0, 23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
+		{ id = "Stars", title = "PERKS", At = Vector3.new(0, 0, 23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
 			Style = "Neon", Flames = true, Neon = Color3.fromRGB(255, 176, 42), Neon2 = Color3.fromRGB(170, 90, 255) },
 	},
 	-- the angular neon frame (Style "Neon": Bodies, Star Upgrades), round the screen: its bottom corners Low out and down, its
@@ -250,7 +252,7 @@ end
 -- the locked next sector, across the void (BACK-LEFT), its 10-wide bridge lit one segment at a time as the Ignition
 -- checklist fills
 MapConfig.NextSector = {
-	Name = "SECTOR 2: COMET REACH",
+	Name = "SECTOR 2: COMET REACH", -- (opens at IGNITION 1: the STAR FORGE)
 	Angle = 180, Distance = 160, Height = 12, Radius = 30,
 	BridgeWidth = 10, BridgeSegments = 18, LitAtStart = 3, Arch = 8,
 	Crystals = { 5, 10 }, Padlock = 6,
@@ -260,14 +262,17 @@ do
 	local a = math.rad(NS.Angle)
 	NS.Position = Vector3.new(math.cos(a) * NS.Distance, NS.Height, math.sin(a) * NS.Distance)
 end
--- (numbers to confirm with the design: the Ignition gate of Sector 1)
+-- the IGNITION gate of Sector 1 (feel pass + purpose, 5 Nov): all four at once (the server checks, GalaxyEconService
+-- checkIgnition); tuned with the Studio bot to land ~minute 28 (vault "Feel pass" Progress note). Done once = Ignition 1
 MapConfig.Ignition = {
-	{ attribute = "Supernovas", need = 5, text = "Go Supernova 5 times" },
-	{ attribute = "BestRunStardust", need = 1e12, text = "Earn 1T stardust in one run" },
-	{ attribute = "Tree_CometLure", need = 1, text = "Unlock Comet Lure in the tree" },
-	{ attribute = "Shards", need = 250, text = "Hold 250 shards" },
+	-- (Calc\feel2.py at ~28 real min: Supernova 11, LVL 19, all 20 pads; IRON = a body at Lv 20 in that run)
+	{ attribute = "Supernovas", need = 12, text = "Go Supernova 12 times" }, -- (the Studio bot, no pass, lit it at 25.9 min with 11: 12 ~ 27.5)
+	{ attribute = "CosmicLevel", need = 19, text = "Reach Cosmic LVL 19" },
+	{ attribute = "Pads", need = 20, text = "Build all 20 island pads" },
+	{ attribute = "BestTier", need = 3, text = "A body at IRON (Lv 20)" },
 }
 function MapConfig.IgnitionDone(player: Player): (number, number)
+	if (tonumber(player:GetAttribute("Ignition")) or 0) >= 1 then return #MapConfig.Ignition, #MapConfig.Ignition end
 	local done = 0
 	for _, item in ipairs(MapConfig.Ignition) do
 		local value = player:GetAttribute(item.attribute)
@@ -328,6 +333,8 @@ MapConfig.Lighting = {
 	Atmosphere = { Density = 0.25, Offset = 0, Color = Color3.fromRGB(96, 56, 140), Decay = Color3.fromRGB(40, 20, 70), Glare = 0, Haze = 0 },
 	Bloom = { Intensity = 0.4, Size = 24, Threshold = 1.8 },
 	Grade = { Contrast = 0.15, Saturation = 0.15, Brightness = 0, TintColor = Color3.fromRGB(255, 244, 228) },
+	-- (purpose: the galaxy before your Ignition 1: less colour, a touch darker and cooler; Ignition tweens to Grade)
+	DimGrade = { Contrast = 0.1, Saturation = -0.2, Brightness = -0.04, TintColor = Color3.fromRGB(225, 225, 255) },
 	Core = { Color = Color3.fromRGB(255, 186, 96), Range = 60, Brightness = 1 }, -- (2 blew the cream plaza out white; the
 	-- client's pulse adds +-18% and a Supernova bursts it to 8)
 	Star = { Height = 14, RangeMin = 20, RangeMax = 32, Brightness = 0.7 }, -- (range by island tier 0 -> MaxTier; the star's colour)

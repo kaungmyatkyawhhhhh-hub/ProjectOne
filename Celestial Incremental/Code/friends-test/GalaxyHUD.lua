@@ -150,6 +150,68 @@ do
 	Kit.text(shardsRoot, 74, 3, 80, 14, "SHARDS", 10, { ZIndex = 9, TextColor3 = hex("#d9c2ff"), stroke = 1 })
 end
 local shardsText = Kit.text(shardsRoot, 66, 17, 96, 28, "0", 22, { ZIndex = 9 })
+
+-- the COSMIC LEVEL (feel pass, 5 Nov, #84), LEFT of the stardust counter: the shards plate's look, the sun in a blue diamond,
+-- "LVL 7" + the XP to the next level ("3.2/12") with a bar under it
+local levelRoot, levelScale = scaledRoot("CosmicLevel", Vector2.new(1, 0), 170, 64)
+local levelText, levelXpText, levelFill
+do
+	local outer = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.plate, ImageColor3 = Kit.INK, Position = UDim2.fromOffset(30, 14), Size = UDim2.fromOffset(136, 36), ZIndex = 2 }, levelRoot)
+	local inner = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.plate, Position = UDim2.fromOffset(32, 16), Size = UDim2.fromOffset(130, 32), ZIndex = 3 }, levelRoot)
+	Kit.grad(inner, hex("#16283a"), hex("#0c121c"), 90)
+	Kit.box(levelRoot, 38, 44, 118, 2.5, { BackgroundTransparency = 0, BackgroundColor3 = hex("#22303e"), ZIndex = 4 })
+	levelFill = Kit.box(levelRoot, 38, 44, 0, 2.5, { BackgroundTransparency = 0, BackgroundColor3 = hex("#5ad1ff"), ZIndex = 5 })
+	local _ = outer
+	local d1 = Kit.box(levelRoot, 26 - 21, 32 - 21, 42, 42, { BackgroundTransparency = 0, BackgroundColor3 = Kit.INK, Rotation = 45, ZIndex = 5 })
+	local d2 = Kit.box(levelRoot, 26 - 17, 32 - 17, 34, 34, { BackgroundTransparency = 0, BackgroundColor3 = hex("#102030"), Rotation = 45, ZIndex = 6 })
+	Kit.stroke(d2, hex("#5ad1ff"), 2)
+	local _2 = d1
+	Kit.icon(levelRoot, "sun", -2, 3, 58, Color3.fromRGB(90, 200, 255), { ZIndex = 8 })
+	levelXpText = Kit.text(levelRoot, 74, 3, 84, 14, "0/8", 10, { ZIndex = 9, TextColor3 = hex("#bfe9ff"), stroke = 1 })
+end
+levelText = Kit.text(levelRoot, 66, 17, 96, 28, "LVL 1", 22, { ZIndex = 9 })
+local ignRoot, ignScale = scaledRoot("Ignition", Vector2.new(1, 0), 170, 34)
+local ignBtn, ignInner = Kit.button(ignRoot, 30, 2, 136, 28, hex("#ff9a3a"), hex("#c2410c"), { ZIndex = 6 })
+local ignText = Kit.text(ignInner, 0, Kit.ps(4, 3), 136, 22, "IGNITION 0/4", Kit.ps(14, 17), { ZIndex = ignInner.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
+Kit.icon(ignRoot, "sun", 4, -4, 40, Color3.fromRGB(255, 140, 40), { ZIndex = 8 })
+local _is = ignScale
+ignBtn.MouseButton1Click:Connect(function()
+	if shared.GalaxySectorsToggle then shared.GalaxySectorsToggle() end
+end)
+local function onIgnition()
+	if (player:GetAttribute("Ignition") or 0) >= 1 then
+		Kit.setText(ignText, "GALAXY " .. (player:GetAttribute("GalaxyLit") or 0) .. "%")
+		Kit.recolour(ignBtn, hex("#7dd8ff"), hex("#1f6fd1"))
+		return
+	end
+	local done, total = MapConfig.IgnitionDone(player)
+	Kit.setText(ignText, "IGNITION " .. done .. "/" .. total)
+end
+for _, item in ipairs(MapConfig.Ignition) do player:GetAttributeChangedSignal(item.attribute):Connect(onIgnition) end
+player:GetAttributeChangedSignal("Ignition"):Connect(onIgnition)
+player:GetAttributeChangedSignal("GalaxyLit"):Connect(onIgnition)
+onIgnition()
+local function onLevel()
+	local total = player:GetAttribute("XPTotal") or 0
+	local level = player:GetAttribute("CosmicLevel") or 1
+	local from, to = Econ.XPForLevel(level), Econ.XPForLevel(level + 1)
+	Kit.setText(levelText, "LVL " .. level)
+	Kit.setText(levelXpText, fmt(math.floor((total - from) * 10) / 10) .. "/" .. fmt(math.floor((to - from) * 10) / 10))
+	levelFill.Size = UDim2.fromOffset(math.floor(118 * math.clamp((total - from) / math.max(to - from, 1e-6), 0, 1)), 2.5)
+end
+player:GetAttributeChangedSignal("XPTotal"):Connect(onLevel)
+local lastLevel = player:GetAttribute("CosmicLevel") or 1
+player:GetAttributeChangedSignal("CosmicLevel"):Connect(function()
+	local now = player:GetAttribute("CosmicLevel") or 1
+	if now > lastLevel then
+		Kit.sound("milestone")
+		Kit.tween(levelScale, { Scale = levelScale.Scale * 1.2 }, 0.08)
+		task.delay(0.08, function() Kit.tween(levelScale, { Scale = screenScale() }, 0.25, Enum.EasingStyle.Back) end)
+	end
+	lastLevel = now
+	onLevel()
+end)
+onLevel()
 shared.GalaxyShardsTarget = function(): Vector2
 	return shardsRoot.AbsolutePosition + GuiService:GetGuiInset() + Vector2.new(26, 32) * shardsScale.Scale
 end
@@ -201,7 +263,7 @@ end
 local hot, hotScale = scaledRoot("Hotbar", Vector2.new(0.5, 1), 430, 110)
 local KEYS = {
 	{ key = "U", colour = hex("#ff9a3a"), icon = "stardust", name = "UPGRADES", window = "Upgrades" },
-	{ key = "F", colour = hex("#ffd84a"), icon = "forge", name = "STAR FORGE", note = "STAR FORGE: opens at SUPERNOVA 3" },
+	{ key = "F", colour = hex("#ffd84a"), icon = "forge", name = "STAR FORGE", note = "STAR FORGE: opens at IGNITION 1 (Sector 2)", window = "Forge" },
 	{ key = "T", colour = hex("#7dff8a"), icon = "planet", name = "TREE", window = "Tree" },
 	{ key = "G", colour = hex("#b49bff"), icon = "book", name = "GUIDE", window = "Guide" },
 	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", window = "Store" },
@@ -216,10 +278,22 @@ for i, k in ipairs(KEYS) do
 	Kit.grad(d, hex("#2c2735"), hex("#121016"), 90)
 	Kit.stroke(d, hex("#0a070d"), 2)
 	local ring = Kit.box(d, 2, 2, 42, 42, { ZIndex = 3 })
-	Kit.stroke(ring, if k.note then Color3.fromRGB(110, 104, 120) else k.colour, 2)
+	local ringStroke = Kit.stroke(ring, if k.note then Color3.fromRGB(110, 104, 120) else k.colour, 2)
 	local img = Kit.icon(hot, k.icon, x - 4, y - 6, if k.icon == "forge" then 54 else 52, nil, { ZIndex = 5 })
+	local lockImg
 	if k.note then img.ImageTransparency = 0.45 end
-	if k.note then Kit.icon(hot, "lock", x + 30, y + 26, 22, nil, { ZIndex = 7 }) end
+	if k.note then lockImg = Kit.icon(hot, "lock", x + 30, y + 26, 22, nil, { ZIndex = 7 }) end
+	-- (the STAR FORGE key unlocks at Ignition 1)
+	if k.window == "Forge" then
+		local function unlock()
+			local on = (player:GetAttribute("Ignition") or 0) >= 1
+			img.ImageTransparency = if on then 0 else 0.45
+			ringStroke.Color = if on then k.colour else Color3.fromRGB(110, 104, 120)
+			if lockImg then lockImg.Parent.Visible = not on end
+		end
+		player:GetAttributeChangedSignal("Ignition"):Connect(unlock)
+		unlock()
+	end
 	-- (the key letter: only with a keyboard; phones have none)
 	if not Kit.phone() then Kit.text(hot, x - 8, y - 18, 20, 16, k.key, 12, { ZIndex = 8, stroke = 1.5 }) end
 	local label = Kit.text(hot, x - 24, y - 38, 96, 18, k.name, 15, { ZIndex = 8, TextColor3 = k.colour, TextXAlignment = Enum.TextXAlignment.Center })
@@ -444,6 +518,8 @@ shared.GalaxyCloseSide = function(keep: string?)
 	if sideOpen == "Q" and keep ~= "Q" and shared.GalaxySettingsClose then shared.GalaxySettingsClose() end
 	if sideOpen == "E" and keep ~= "E" and shared.GalaxyStoreClose then shared.GalaxyStoreClose() end
 	if sideOpen == "C" and keep ~= "C" and shared.GalaxyCodesClose then shared.GalaxyCodesClose() end
+	if sideOpen == "S" and keep ~= "S" and shared.GalaxySectorsClose then shared.GalaxySectorsClose() end
+	if sideOpen == "F" and keep ~= "F" and shared.GalaxyForgeClose then shared.GalaxyForgeClose() end
 end
 local function pressKey(k)
 	if not keyAllowed(k) then return end
@@ -451,6 +527,9 @@ local function pressKey(k)
 		if shared.GalaxyGuideToggle then shared.GalaxyGuideToggle() end
 	elseif k.window == "Store" then
 		if shared.GalaxyStoreToggle then shared.GalaxyStoreToggle() end
+	elseif k.window == "Forge" then
+		-- (the STAR FORGE opens at Ignition 1; until then the key says so)
+		if (player:GetAttribute("Ignition") or 0) < 1 or not shared.GalaxyForgeToggle then toast(k.note, k.colour) else shared.GalaxyForgeToggle() end
 	elseif k.window == "Settings" then
 		if shared.GalaxySettingsToggle then shared.GalaxySettingsToggle() end
 	elseif k.window == "Tree" then
@@ -481,6 +560,8 @@ task.spawn(function()
 			openWindow(tutorialTab)
 		elseif id == "Tree" then
 			openTree()
+		elseif id == "Forge" then
+			if (player:GetAttribute("Ignition") or 0) >= 1 and shared.GalaxyForgeToggle then shared.GalaxyForgeToggle() else toast("STAR FORGE: opens at IGNITION 1", hex("#ffd84a")) end
 		end
 	end)
 end)
@@ -520,8 +601,10 @@ function layout()
 	treeScale.Scale = math.min((room - hintRoom) / 650, (vp.X - 24) / 1124, s)
 	treeWin.Position = UDim2.fromOffset(vp.X / 2, topEdge + hintRoom + (room - hintRoom) / 2)
 	hot.Visible = not (small and (open or treeOpen or sideOpen ~= nil))
-	-- the shards counter, right of the stardust counter
+	-- the shards counter, right of the stardust counter; the Cosmic Level, left of it
 	shardsRoot.Position = UDim2.new(0.5, math.floor(144 * s), 0, math.floor(16 * s))
+	levelRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor(16 * s))
+	ignRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor(64 * s))
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
 layout()
@@ -608,6 +691,8 @@ for k = 1, #Econ.Tiers do
 	end)
 end
 for _, n in ipairs(Econ.Ring1) do player:GetAttributeChangedSignal("Node_" .. n.id):Connect(function() if open then refreshRows() end end) end
+for _, p in ipairs(Econ.Perks) do player:GetAttributeChangedSignal("Perk_" .. p.id):Connect(function() if open then refreshRows() end end) end
+player:GetAttributeChangedSignal("CosmicLevel"):Connect(function() if open then refreshRows() end end)
 
 ------------------------------------------------------------------------ the tutorial (steps 1-4 of the design)
 local tut = { arrow = nil, glow = nil, hint = nil, idleSince = os.clock(), step = player:GetAttribute("TutStep") or 0, target = nil }
@@ -659,9 +744,9 @@ local function stepTarget(step: number): (GuiObject?, string?)
 		return tile, nil
 	end
 	local wantTab, rowKey
-	if def.id == "BuyAsteroid" then wantTab, rowKey = "PLANETS", "Body0"
-	elseif def.id == "FirstLight" then wantTab, rowKey = "STARDUST", "Node_FirstLight"
-	elseif def.id == "FirstMoon" then wantTab, rowKey = "PLANETS", if player:GetAttribute("Node_LunarPull") then "Body1" else "Unlock1"
+	if def.id == "BuyAsteroid" then wantTab, rowKey = "BODIES", "Body0"
+	elseif def.id == "FirstLight" then wantTab, rowKey = "PERKS", "Perk_FirstLight"
+	elseif def.id == "FirstMoon" then wantTab, rowKey = "BODIES", if player:GetAttribute("Node_LunarPull") then "Body1" else "Unlock1"
 	else return nil, nil end
 	if not open then return keyUI.U.hit, wantTab end
 	if panel.currentTab ~= wantTab then return tabUI[wantTab].button, wantTab end
@@ -796,7 +881,7 @@ end
 -- which board button a step points at: BODIES (bodies + their unlocks), STAR UPGRADES (ring 1), TREE then INFO (ring 2)
 local function boardKeyFor(id: string): string?
 	if id == "BuyAsteroid" then return "Body0" end
-	if id == "FirstLight" then return "Star_FirstLight" end
+	if id == "FirstLight" then return "Perk_FirstLight" end
 	if id == "FirstMoon" then return "Body1" end -- (UNLOCK on the Moon's row, then its UPGRADE)
 	if id == "Starfire" then return if shared.GalaxyCinematic then nil else "R2_Starfire" end
 	return nil

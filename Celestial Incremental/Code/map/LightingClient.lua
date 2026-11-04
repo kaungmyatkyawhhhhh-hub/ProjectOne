@@ -8,6 +8,32 @@ local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local GalaxyLighting = require(Galaxy:WaitForChild("GalaxyLighting"))
 local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 
+-- PURPOSE (5 Nov, #13): until your Ignition 1 the galaxy is DIM (the grade: less colour, a little darker, a cool tint);
+-- Ignition 1 "lights it up" (shared.GalaxyLightUp(seconds): back to MapConfig.Lighting.Grade). Your island's star still
+-- lights your island, so the first minutes stay readable.
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+task.spawn(function()
+	local grade = Lighting:WaitForChild("GalaxyGrade", 20)
+	if not grade then return end
+	local lit = MapConfig.Lighting.Grade
+	local dim = MapConfig.Lighting.DimGrade
+	local function apply(t: number?)
+		local goal = if (player:GetAttribute("Ignition") or 0) >= 1 then lit else dim
+		if t and t > 0 then
+			TweenService:Create(grade, TweenInfo.new(t, Enum.EasingStyle.Sine), goal):Play()
+		else
+			for k, v in pairs(goal) do grade[k] = v end
+		end
+	end
+	while player:GetAttribute("Ignition") == nil do player:GetAttributeChangedSignal("Ignition"):Wait() end
+	apply()
+	shared.GalaxyLightUp = function(seconds: number?) apply(seconds or 2.5) end
+	player:GetAttributeChangedSignal("Ignition"):Connect(function() apply(2.5) end)
+end)
+
 if GalaxyLighting.IsLowEnd() then
 	GalaxyLighting.ApplyLowEnd()
 	return

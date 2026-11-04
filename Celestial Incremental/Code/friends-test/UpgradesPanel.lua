@@ -36,9 +36,9 @@ local Panel = {}
 Panel.__index = Panel
 
 Panel.TABS = {
-	{ id = "STARDUST", c1 = "#ff9a3a", c2 = "#c2410c", icon = "stardust", glow = Color3.fromRGB(255, 170, 60) },
-	{ id = "COMETS", c1 = "#5ad1ff", c2 = "#1f6fd1", icon = "comet", glow = Color3.fromRGB(90, 200, 255) },
-	{ id = "PLANETS", c1 = "#b49bff", c2 = "#5a3ad8", icon = "planet", glow = Color3.fromRGB(170, 130, 255) },
+	-- (feel pass, 5 Nov: BODIES = the BODIES board's rows; PERKS = the PERKS board's perks, bought with XP)
+	{ id = "BODIES", c1 = "#b49bff", c2 = "#5a3ad8", icon = "planet", glow = Color3.fromRGB(170, 130, 255) },
+	{ id = "PERKS", c1 = "#5ad1ff", c2 = "#1f6fd1", icon = "sun", glow = Color3.fromRGB(90, 200, 255) },
 	{ id = "FORGE", c1 = "#6a6474", c2 = "#3f3a48", icon = "forge", glow = nil, locked = "SUPERNOVA 3",
 		lockedTitle = "STAR FORGE", lockedText = "Roll Star Cores with Essence. Opens at SUPERNOVA 3." },
 	{ id = "BLACK HOLE", c1 = "#5a5562", c2 = "#38343f", icon = "gear", glow = nil, locked = "100K SHARDS",
@@ -66,7 +66,7 @@ function Panel.new(parent: Instance, opts)
 	self.subject = opts.subject
 	self.targets = {}
 	self.rows = {}
-	self.currentTab = opts.startTab or "PLANETS"
+	self.currentTab = opts.startTab or "BODIES"
 	local o = opts.origin or Vector2.zero
 	local win = Kit.box(parent, o.X, o.Y, 700, 470, { Name = "UpgradesWindow" })
 	self.root = win
@@ -248,7 +248,7 @@ function Panel:setButton(row, state: string, price: number?, label: string?)
 			Kit.text(inner, 0, 2, 146, Kit.ps(14, 20), label, Kit.ps(11, 18), { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.2 })
 			top = 16
 		end
-		local ic = Kit.icon(inner, "stardust", 14, top + 2, if label then 22 else 26, nil, { ZIndex = z })
+		local ic = Kit.icon(inner, row.currency or "stardust", 14, top + 2, if label then 22 else 26, nil, { ZIndex = z })
 		if state == "no" then ic.ImageTransparency = 0.3 end
 		local priceStr = if price == 0 then "FREE" else fmt(price or 0)
 		Kit.text(inner, 40, top, 100, 30, priceStr, if label then 20 else 24, { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center,
@@ -386,7 +386,7 @@ function Panel:bodyRow(i, k: number)
 				if self:try(row, "BuyNode", node.id) and self.opts.toast then self.opts.toast(tier.name .. " UNLOCKED", hex("#7dff6b")) end
 				return false -- (one unlock per press)
 			end
-			if self:stardust() < Econ.Cost(k, o[k + 1]) then self:sound("no") return false end
+			if self:stardust() < Econ.Cost(k, o[k + 1], Econ.PerksOf(self.subject)) then self:sound("no") return false end
 			return self:try(row, "BuyBody", k)
 		end, function() return self:dragged() end)
 	end
@@ -400,7 +400,8 @@ function Panel:bodyRow(i, k: number)
 			self:setButton(row, "locked", nil, tier.lockedText)
 			return
 		end
-		local each = Econ.TierIncomeWith(k, 1, 1, n, r2) * Econ.AllMult(n, r2)
+		local perks = Econ.PerksOf(self.subject)
+		local each = Econ.TierIncomeWith(k, 1, 1, n, r2, perks) * Econ.AllMult(n, r2, perks)
 		if row.copyBtn then row.copyBtn.Visible = Econ.Unlocked(k, n, r2) and own > 0 end
 		if not Econ.Unlocked(k, n, r2) then
 			Kit.setText(lv, "LOCKED")
@@ -418,10 +419,10 @@ function Panel:bodyRow(i, k: number)
 		Kit.setText(lv, "LV " .. own)
 		local nextAt = Econ.NextTierAt(own)
 		Kit.setText(desc, Econ.TierName(own) .. (if copies > 1 then " x" .. copies else "") .. (if nextAt then ", x2 at Lv " .. nextAt .. " (" .. Econ.TierNames[Econ.NamedTier(own) + 1] .. ")" else ""))
-		local now = Econ.TierIncomeWith(k, own, copies, n, r2) * Econ.AllMult(n, r2)
-		local after = Econ.TierIncomeWith(k, own + 1, copies, n, r2) * Econ.AllMult(n, r2)
+		local now = Econ.TierIncomeWith(k, own, copies, n, r2, perks) * Econ.AllMult(n, r2, perks)
+		local after = Econ.TierIncomeWith(k, own + 1, copies, n, r2, perks) * Econ.AllMult(n, r2, perks)
 		self:chip(row, fmt(now) .. "/s", fmt(after) .. "/s")
-		local cost = Econ.Cost(k, own)
+		local cost = Econ.Cost(k, own, perks)
 		self:setButton(row, if self:stardust() >= cost then "buy" else "no", cost, if own > 0 then nil else "UNLOCK")
 		self.targets["Body" .. k] = row.btn
 		self:copyButton(row, k, own, copies)
@@ -429,10 +430,48 @@ function Panel:bodyRow(i, k: number)
 	return row
 end
 
+-- a PERK row (feel pass): icon, name, what it does, the chip "now > next", UPGRADE with its XP price (the sun icon); a perk
+-- tier still shut = locked "LVL n"
+function Panel:perkRow(i, p)
+	local look = TAB_LOOK.COMETS
+	local row = { frame = self:newRowFrame(i, look[1]), currency = "sun" }
+	Kit.icon(row.frame, p.icon, -8, 2, if p.icon == "comet" then 96 else 90, look[4], { ZIndex = 7 })
+	local lv = Kit.text(row.frame, 16, Kit.ps(82, 80), 60, 18, "LV 0", Kit.ps(12, 20), { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
+	Kit.text(row.frame, 86, Kit.ps(10, 4), 300, 28, p.name, 22, { ZIndex = 8, gradient = ColorSequence.new(hex(look[2]), hex(look[3])) })
+	Kit.text(row.frame, 88, Kit.ps(38, 30), 196, Kit.ps(16, 46), p.desc, Kit.ps(11, 20), { ZIndex = 8, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#a99fb8"), stroke = 1, TextWrapped = Kit.phone() })
+	row.onButton = function(b)
+		holdBuy(b, function()
+			local level = self:attr("CosmicLevel") or 1
+			local have = self:attr("Perk_" .. p.id) or 0
+			if level < p.opens or have >= Econ.PerkMax then return false end
+			if (self:attr("XP") or 0) < Econ.PerkCost(have) then self:sound("no") return false end
+			return self:try(row, "BuyPerk", p.id)
+		end, function() return self:dragged() end)
+	end
+	row.refresh = function()
+		local level = self:attr("CosmicLevel") or 1
+		local have = self:attr("Perk_" .. p.id) or 0
+		Kit.setText(lv, "LV " .. have)
+		if level < p.opens then
+			self:chip(row, Econ.PerkValue(p, 0))
+			self:setButton(row, "locked", nil, "LVL " .. p.opens)
+		elseif have >= Econ.PerkMax then
+			self:chip(row, Econ.PerkValue(p, have))
+			self:setButton(row, "owned", nil, "MAX")
+		else
+			self:chip(row, Econ.PerkValue(p, have), Econ.PerkValue(p, have + 1))
+			local cost = Econ.PerkCost(have)
+			self:setButton(row, if (self:attr("XP") or 0) >= cost then "buy" else "no", cost)
+		end
+		self.targets["Perk_" .. p.id] = row.btn
+	end
+	return row
+end
+
 -- +BODY (feel pass): a small purple button under the row's main button; one tap = one more copy in orbit (max 5)
 function Panel:copyButton(row, k: number, level: number, copies: number)
 	local full = copies >= Econ.MaxCopies
-	local cost = Econ.CopyCost(k, copies)
+	local cost = Econ.CopyCost(k, copies, Econ.PerksOf(self.subject))
 	local state = if not self:canAct() then "visit" elseif full then "max" elseif self:stardust() >= cost then "buy" else "no"
 	local key = state .. "|" .. fmt(cost)
 	if row.copyKey == key and row.copyBtn then
@@ -522,14 +561,10 @@ function Panel:buildTab(id: string)
 	local list = {}
 	if t.locked then
 		self:lockedPanel(t)
-	elseif id == "PLANETS" then
+	elseif id == "BODIES" then
 		for k = 0, #Econ.Tiers - 1 do table.insert(list, function(i) return self:bodyRow(i, k) end) end
 	else
-		for _, node in ipairs(Econ.Ring1) do
-			if node.tab == id and node.effect.kind ~= "unlockTier" then
-				table.insert(list, function(i) return self:nodeRow(i, node, TAB_LOOK[id]) end)
-			end
-		end
+		for _, p in ipairs(Econ.Perks) do table.insert(list, function(i) return self:perkRow(i, p) end) end
 	end
 	for i = 1, #list do
 		local row = list[i](i)
@@ -553,8 +588,9 @@ end
 function Panel:anyBuyable(): boolean
 	local o, n, sd = self:owned(), self:nodes(), self:stardust()
 	local r2 = self:ring2()
+	local perks = Econ.PerksOf(self.subject)
 	for k = 0, #Econ.Tiers - 1 do
-		if Econ.Unlocked(k, n, r2) and sd >= Econ.Cost(k, o[k + 1] or 0) then return true end
+		if Econ.Unlocked(k, n, r2) and sd >= Econ.Cost(k, o[k + 1] or 0, perks) then return true end
 	end
 	for _, node in ipairs(Econ.Ring1) do
 		if not n[node.id] and (not node.requires or n[node.requires]) and sd >= node.cost then return true end

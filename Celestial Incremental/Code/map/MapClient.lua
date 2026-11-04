@@ -129,7 +129,9 @@ local function buildPlate(island, s)
 	rank.Size = UDim2.fromScale(1, 0.38)
 	rank.FontFace = FONT_B
 	rank.TextScaled = true
-	rank.Text = string.upper(island:GetAttribute("Rank") or "")
+	-- (the rank = the Cosmic Level's name + Supernovas; purpose: + GALAXY LIT %, the finish line)
+	local lit = island:GetAttribute("Lit") or 0
+	rank.Text = string.upper(island:GetAttribute("Rank") or "") .. (if lit > 0 then "  ·  GALAXY " .. lit .. "%" else "")
 	rank.TextColor3 = Color3.fromRGB(240, 230, 255)
 	rank.Parent = gui
 	local stroke2 = stroke:Clone()
@@ -338,7 +340,7 @@ end
 local function watchIsland(island)
 	if not island:IsA("Model") then return end
 	buildSystem(island)
-	for _, name in ipairs({ "Owner", "OwnerName", "Tier", "BodyTiers", "Supernovas", "Rank", "Ready", "Color", "Belt", "Sys" }) do
+	for _, name in ipairs({ "Owner", "OwnerName", "Tier", "BodyTiers", "Supernovas", "Rank", "Ready", "Color", "Belt", "Sys", "Lit" }) do
 		island:GetAttributeChangedSignal(name):Connect(function() buildSystem(island) end)
 	end
 	local pieces = island:WaitForChild("Pieces", 10)
@@ -692,6 +694,7 @@ end
 for _, item in ipairs(MapConfig.Ignition) do
 	player:GetAttributeChangedSignal(item.attribute):Connect(function() refreshIgnition(true) end)
 end
+player:GetAttributeChangedSignal("Ignition"):Connect(function() refreshIgnition(true) end)
 refreshIgnition(false)
 -- (parts streamed in later: style them too)
 local pending = false

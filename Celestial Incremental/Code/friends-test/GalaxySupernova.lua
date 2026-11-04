@@ -155,8 +155,9 @@ local function cardText()
 	local nodes = {}
 	for _, n in ipairs(Econ.Ring1) do nodes[n.id] = player:GetAttribute("Node_" .. n.id) == true end
 	local novas = player:GetAttribute("Supernovas") or 0
-	local got = Econ.ShardsFor(earned, nodes, novas)
-	local later = Econ.ShardsFor(earned * 2, nodes, novas)
+	local perks = Econ.PerksOf(player)
+	local got = Econ.ShardsFor(earned, nodes, novas, perks)
+	local later = Econ.ShardsFor(earned * 2, nodes, novas, perks)
 	Kit.setText(card.got, got .. " SHARDS")
 	Kit.setText(card.wait, "Wait to earn 2x first: " .. later .. " shards (+" .. math.floor((later / math.max(got, 1) - 1) * 100 + 0.5) .. "%)")
 	return got
