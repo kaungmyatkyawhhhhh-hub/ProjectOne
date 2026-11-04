@@ -445,3 +445,33 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
   - Alter 16 with every muscle at 1M EXP: 100%, can enter, bar READY.
   - Alter 15 with the same muscles: 1.2%, can't enter yet.
 
+### Hall of Fame choice popup redesign (4 Nov)
+- Owner: "make this UI better". Same data, clearer choice (HallChoiceClient).
+- **Header:**
+  - Centred "HALL OF FAME" in gold with a laurel + star emblem, drawn with UI shapes (no image).
+  - Subtitle "Choose: enter now or go further". Gold trim on the window.
+  - Kit fonts as on the HoF card: clean card titles, no heavy outlines; numbers in the kit number font.
+- **ENTER NOW (gold):**
+  - Big "★4 → ★5".
+  - Reward chips with icons, from HallOfFame.Perks: x3 EXP · +20% coins · Start at Growth Spurt 4 · Keep 1 Legacy card.
+  - ENTER HALL is **hold to confirm** (1 s; a fill sweeps the button and a ring draws round it). A tap does nothing; letting go early resets it.
+  - The full hold opens the existing confirm screen (the Legacy card pick + ceremony).
+  - Not ready: the panel greys out, a "Goal" bar shows with its % beside it, and the button reads WHAT TO TRAIN (a tap).
+- **KEEP GOING (purple):**
+  - Big "★4 → ★6 + 1 extra card" (what Alter 20 gives).
+  - "ALTER n NAME" with a bar and the % beside it, and the Gem Mine line.
+  - GO TO GEM MINE in the new kit purple button.
+- **Under both, RESETS / KEEPS, from the real code:**
+  - Resets: height (to the new star's Growth Spurt) · Growth Spurts · muscles · alters · Run Cards (PlayerData.EnterHallOfFame, RunCardService.NewLife).
+  - Keeps: stars · coins · trainers · titles · auras · skins · plates · gear · genetics · lifetime EXP.
+- **New kit pieces (reusable):**
+  - Theme button style "Gem" (purple CTA).
+  - `Kit.HoldButton(button, seconds, onDone)` (hold-to-confirm fill + ring, mouse / touch / gamepad).
+- **Phone:**
+  - The kit scales the whole window to the screen. On 667x375 it is 492x228 px, and the two panels fit side by side, so no stacking was needed.
+  - Text is 14+ kit px. On that phone, 14 kit px draws at ~10 real px, the same as every other kit window.
+- **Tested in Play (temp save):**
+  - Ready (★4, Alter 19) and not ready (Alter 15) on PC and at the phone scale.
+  - A 0.4 s press resets; a full hold opens the confirm screen; GO TO GEM MINE closes the window and shows the guide path.
+- **Screens:** `Downloads\gem_update_import\screens_4Nov_hof_choice\`.
+
