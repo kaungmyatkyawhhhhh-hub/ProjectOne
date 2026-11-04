@@ -35,7 +35,8 @@ BLEND = 50  # the last studs of the reach fade back to the natural ground (no cl
 KEEP = 50  # cells this close to an existing road's centre line stay as they are
 
 
-def main():
+def load():
+    """the master grid: (meta, heights, materials)"""
     meta = json.load(open(os.path.join(RIV, "meta.json")))
     _, H = highway.ground()
     M = np.full(H.shape, " ", dtype="<U1")
@@ -43,10 +44,22 @@ def main():
         t = json.load(open(os.path.join(RIV, name)))
         i, j, w, d = t["i"], t["j"], t["w"], t["d"]
         M[j:j + d, i:i + w] = np.array(list(t["m"])).reshape(d, w)
-    C, X0, Z0 = meta["cell"], meta["x0"], meta["z0"]
+    return meta, H, M
+
+
+def main():
+    meta, H, M = load()
     hw = json.load(open(os.path.join(RIV, "highway.json")))["roads"]
     old = json.load(open(os.path.join(RIV, "roads.json")))["roads"]
+    newH, newM, keep = compute(meta, H, M, hw, old)
+    C, X0, Z0 = meta["cell"], meta["x0"], meta["z0"]
+    changed = (np.abs(newH - H) > 0.12) | (newM != M)
+    write(meta, H, M, newH, newM, keep, changed)
 
+
+def compute(meta, H, M, hw, old):
+    """the ground after the Riviera Highway's roads (`hw`): (heights, materials, cells kept for `old`)"""
+    C, X0, Z0 = meta["cell"], meta["x0"], meta["z0"]
     best = np.full(H.shape, 1e9, dtype=np.float32)  # distance to the nearest highway centre line
     road_y = np.zeros(H.shape, dtype=np.float32)       # that road's height (for the flat bed)
     core_w = np.full(H.shape, CORE, dtype=np.float32)  # that road's flat half width
@@ -115,7 +128,11 @@ def main():
     keep = near_old < KEEP
     newH[keep] = H[keep]
     newM[keep] = M[keep]
-    changed = (np.abs(newH - H) > 0.12) | (newM != M)
+    return newH, newM, keep
+
+
+def write(meta, H, M, newH, newM, keep, changed):
+    C, X0, Z0 = meta["cell"], meta["x0"], meta["z0"]
     # --restore x0 z0 x1 z1: also write the natural ground back over that box (where nothing above
     # changes it and away from the old roads), undoing an earlier version's cuts and fills
     if "--restore" in sys.argv:

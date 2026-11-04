@@ -37,7 +37,8 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **Details:** [[City Legends/City Legends]] (all City Legends notes go in the `City Legends` folder)
 - **Code:** this vault, folder `Games/CityLegends`.
 - **Now (29 Oct):** play-test done in Studio. New: passenger seats (Y beside a friend's car), M = automatic / sequential, varied traffic speeds, chauffeur lane splitting, island bridges 2 lanes each way. Open: a better Suzaki Swift model, Camri badge, a few blocked car meshes. Next: save, publish, check the funnels in Creator Hub, then the AFK Zone.
-- **Last updated:** 2026-10-29
+- **4 Nov (Claude Code, in Studio):** Riviera Highway + Summit Pass, then the owner's marked map: Corniche Highway (20,846 studs, viaducts), Serpent Road, 6 links, no dead-end roads left. Curved road meshes: option 1 (Blender + one Import 3D by the owner). Still to do: main menu restyle, building materials, Monaco hairpin. See [[City Legends/City Legends]].
+- **Last updated:** 2026-11-04
 
 ## Archived (not worked on, nothing deleted)
 - **Break A Bed** (bed-breaking clicker, archived 28 Oct): released as "[🎉 RELEASE] Break a Bed", 12K Robux spent on ads, ~500 Robux a day (mid Oct). Notes: [[Archive/Break A Bed/Project Overview]].

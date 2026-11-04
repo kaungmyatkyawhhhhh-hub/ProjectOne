@@ -179,6 +179,9 @@ def roads_layer(draw):
     hw = os.path.join(RIV, "highway.json")  # the Riviera Highway (tools/map_plan/highway.py)
     if os.path.exists(hw):
         data["roads"] = data["roads"] + json.load(open(hw))["roads"]
+    north = os.path.join(RIV, "north.json")  # the north roads (tools/map_plan/north_roads.py)
+    if os.path.exists(north):
+        data["roads"] = data["roads"] + json.load(open(north))["roads"]
     roads = sorted(data["roads"], key=lambda r: 0 if r["kind"] != "route" else 1)
 
     def stroke(pts, width, color):

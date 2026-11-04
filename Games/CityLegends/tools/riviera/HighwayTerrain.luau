@@ -39,7 +39,7 @@ function HighwayTerrain.run(base: string, from: number?, count: number?): string
 		local w, d = i1 - i0 + 1, j1 - j0 + 1
 		-- read high enough to clear what a cut takes away (the old ground can be ~150 higher)
 		local y0 = math.floor(lo / C) * C - C * 3
-		local y1 = math.ceil(math.max(hi, 0) / C) * C + 220
+		local y1 = math.ceil(math.max(hi, 0) / C) * C + (index.above or 220)
 		y1 = y0 + math.ceil((y1 - y0) / C) * C
 		local region = Region3.new(Vector3.new(x0, y0, z0), Vector3.new(x0 + w * C, y1, z0 + d * C))
 		local mats, occs = T:ReadVoxels(region, C)

@@ -14,6 +14,8 @@
 	The terrain under roads sits 1.5 studs lower (terrain_build.py) so it never pokes through.
 
 	Roads.build(data, opts) -> part count;  opts.box = {x0, z0, x1, z1} builds only samples inside
+	  (opts.noLines: no chord lines, RoadLines draws them; opts.noLegWalls: no walls on narrowed edges,
+	  tools/riviera/Parapets.luau builds them)
 	Roads.check(data, opts) -> list of bumps found by raycasting each lane every stud
 ]]
 
@@ -114,7 +116,7 @@ local function prepare(data)
 			-- s[7], s[8]: left and right half widths (narrower where a hairpin's legs run side by side)
 			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), tunnel = s[6] == 1, wl = s[7] or HALF, wr = s[8] or HALF }
 		end
-		roads[ri] = { name = r.name, kind = r.kind, rank = r.rank, closed = r.closed, pts = pts }
+		roads[ri] = { name = r.name, kind = r.kind, rank = r.rank, closed = r.closed, pts = pts, aligned = r.aligned }
 	end
 	-- a 24-stud grid of every sample, for "is this point on another road?"
 	local grid = {}
@@ -247,6 +249,10 @@ local function alignJunctions(roads, grid)
 	end)
 	for _, ri in order do
 		local r = roads[ri]
+		-- (r.aligned: its heights were already worked out against the roads it joins, north_roads.py)
+		if r.aligned then
+			continue
+		end
 		local pts = r.pts
 		local n = #pts
 		local arc = { 0 }
@@ -473,7 +479,7 @@ function Roads.build(data, opts)
 				if (if side == 1 then pts[i].wl else pts[i].wr) < HALF - 0.5 then
 					continue -- a narrowed edge stops at the wall between this road and the next
 				end
-				local y = bigSurface(roads, grid, edge[i], ri, r.rank, HALF + 8) -- (a little past its edge: the joint stays level)
+				local y = bigSurface(roads, grid, edge[i], ri, r.rank, if r.aligned then HALF + 1 else HALF + 8) -- (a little past its edge: the joint stays level)
 				if y then
 					edge[i] = Vector3.new(edge[i].X, y, edge[i].Z)
 					;(if side == 1 then pinL else pinR)[i] = true
@@ -485,7 +491,7 @@ function Roads.build(data, opts)
 		-- step at the junction mouth. The free edge points ease in: along each edge no more than
 		-- GRADE between neighbours, and across the road no more than CROSS, worked out from the pinned
 		-- points (they never move) by passes back and forth until nothing changes
-		local GRADE, CROSS = 0.19, 0.06 -- (GRADE: over the steepest climb, 16%)
+		local GRADE, CROSS = opts.edgeGrade or 0.19, 0.06 -- (GRADE: over the steepest climb, 16%)
 		-- (a fan's pivot is one point: it moves as one, all its copies keep one height; spacing is
 		-- measured between the edge points themselves)
 		local function relax(edge, pin, fan)
@@ -648,7 +654,7 @@ function Roads.build(data, opts)
 			for _, side in { -1, 1 } do
 				local wa = if side < 0 then a.wl else a.wr
 				local wb = if side < 0 then b.wl else b.wr
-				if wa < HALF - 0.5 and wb < HALF - 0.5 then
+				if wa < HALF - 0.5 and wb < HALF - 0.5 and not opts.noLegWalls then
 					local ea = if side < 0 then edgeL[i] else edgeR[i]
 					local eb = if side < 0 then edgeL[i + 1] else edgeR[i + 1]
 					local flatLen = Vector2.new(eb.X - ea.X, eb.Z - ea.Z).Magnitude
@@ -720,7 +726,9 @@ function Roads.build(data, opts)
 			-- lines (painted on the slab's own plane). (2026-11-03) These chord-shifted lines cross on tight
 			-- bends and point the wrong way: after a build, run RoadLines.build (tools/riviera/RoadLines.luau),
 			-- which replaces them with lines that follow the curve and sit on the road by raycast.
-			if not (inJunction[i] or inJunction[i + 1]) then
+			if opts.noLines then
+				-- (RoadLines draws them)
+			elseif not (inJunction[i] or inJunction[i + 1]) then
 				dash += 1
 				local lines = {}
 				local wl, wr = math.min(a.wl, b.wl), math.min(a.wr, b.wr)

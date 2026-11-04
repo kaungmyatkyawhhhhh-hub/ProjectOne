@@ -4,7 +4,7 @@
 	darker edge strip) between posts, following the road's height. Left out near other roads
 	(junction mouths) and in tunnels.
 
-	GuardRails.build(data, names, parent?) -> parts made   (data = the roads json, names = { [road] = true })
+	GuardRails.build(data, names, parent?, spacing?) -> parts made   (data = the roads json, names = { [road] = true })
 ]]
 
 local GuardRails = {}
@@ -28,7 +28,8 @@ local function part(props, parent)
 	return p
 end
 
-function GuardRails.build(data, names, parent: Instance?): number
+function GuardRails.build(data, names, parent: Instance?, spacing: number?): number
+	local SPACING = spacing or SPACING
 	-- every other road's samples, for keeping clear of junctions
 	local grid = {}
 	for _, r in data.roads do

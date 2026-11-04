@@ -24,6 +24,7 @@ import export_lanes  # noqa: E402  (resample, STEP, CLEAR)
 ROOT = os.path.join(HERE, "..", "..")
 LANES = os.path.join(ROOT, "src", "shared", "RivieraLanes.lua")
 HW = os.path.join(ROOT, "build", "riviera", "highway.json")
+NORTH = os.path.join(ROOT, "build", "riviera", "north.json")  # (tools/map_plan/north_roads.py)
 CLEAR = export_lanes.CLEAR
 
 
@@ -39,6 +40,10 @@ def parse(src):
 
 def lane_points(road):
     s = export_lanes.resample(road["s"], road.get("closed"))
+    if road.get("rank", 0) >= 39:
+        # (the north roads end in the middle of the road they join: a lane starts at that road's edge)
+        e0, e1 = road["s"][0], road["s"][-1]
+        s = [p for p in s if math.hypot(p[0] - e0[0], p[2] - e0[2]) > 30 and math.hypot(p[0] - e1[0], p[2] - e1[2]) > 30]
     out = []
     for way in (1, -1):
         seq = s if way == 1 else list(reversed(s))
@@ -52,7 +57,7 @@ def lane_points(road):
                 half = (p[7] if way == 1 else p[6]) if len(p) > 7 else 32.0
                 o = min(off, max(4.0, half - 8.0)) if lane == 2 else min(off, max(3.0, half / 2.0))
                 pts += [round(p[0] + rx * o, 1), round(p[1] + 0.15, 1), round(p[2] + rz * o, 1)]
-            out.append({"road": road["name"], "way": way, "lane": lane, "kind": road["kind"], "closed": bool(road.get("closed")), "highway": True, "pts": pts})
+            out.append({"road": road["name"], "way": way, "lane": lane, "kind": road["kind"], "closed": bool(road.get("closed")), "highway": road.get("highway", True), "pts": pts})
     return out
 
 
@@ -66,6 +71,8 @@ def main():
     n_old = len(keep)
     links = [k for k in links if k[0] <= n_old and k[2] <= n_old]
     hw = json.load(open(HW))["roads"]
+    north = json.load(open(NORTH))["roads"] if os.path.exists(NORTH) else []
+    hw = hw + north  # (appended, so the older lanes keep their numbers: RivieraTurnPicks uses them)
     new = []
     index = {}
     for r in hw:
@@ -140,6 +147,37 @@ def main():
         junction(-1, [(index[(link["name"], w, l)], l) for w in (1, -1) for l in (1, 2)], (p0[0], p0[1], p0[2]), pr)
         mr = [(i + 1, l["lane"]) for i, l in enumerate(keep) if l["road"] == "Mountain Road"]
         junction(1, mr, (p1[0], p1[1], p1[2]), pr)
+    # the north roads (2026-11-04)
+    by_name = {r["name"]: r for r in hw}
+
+    def lanes_of(name):
+        """(lane number, 1 or 2) of a road's four lanes"""
+        return [(i + 1, l["lane"]) for i, l in enumerate(all_lanes) if l["road"] == name]
+
+    def lanes_near(pos, skip):
+        """every lane of another road with a point near pos"""
+        found = []
+        for i, l in enumerate(all_lanes):
+            if l["road"] == skip:
+                continue
+            p = l["pts"]
+            for k in range(0, len(p), 3):
+                if math.hypot(p[k] - pos[0], p[k + 2] - pos[2]) < 62:
+                    found.append((i + 1, l["lane"]))
+                    break
+        return found
+
+    for r in north:
+        s0, s1 = r["s"][0], r["s"][-1]
+        if r["name"] == "Corniche Highway":
+            junction(-1, lanes_of("Highway Loop"), (s0[0], s0[1], s0[2]), r)
+            junction(1, lanes_of("Mountain Road"), (s1[0], s1[1], s1[2]), r)
+        elif r["name"] == "Serpent Road":
+            junction(-1, lanes_of("Corniche Highway"), (s0[0], s0[1], s0[2]), r)
+            junction(1, lanes_of("Summit Pass"), (s1[0], s1[1], s1[2]), r)
+        else:
+            junction(-1, lanes_near(s0, r["name"]), (s0[0], s0[1], s0[2]), r)
+            junction(1, lanes_near(s1, r["name"]), (s1[0], s1[1], s1[2]), r)
     # Studio refuses a script over 200,000 characters, so the highway's lanes and links go in their own
     # module (src/shared/RivieraLanesHighway.lua; RivieraTraffic adds them to RivieraLanes' lists:
     # lane numbers carry on from the base file's, links use the joined numbering)
@@ -160,8 +198,8 @@ def main():
               "-- the Riviera Highway's and the Summit Pass's lanes (numbered on from RivieraLanes' %d) and their links" % n_old,
               "return {", "	first = %d," % (n_old + 1), "	lanes = {"]
     for l in new:
-        hw_out.append('		{ road = "%s", way = %d, lane = %d, kind = "%s", closed = %s, highway = true, pts = { %s } },' % (
-            l["road"], l["way"], l["lane"], l["kind"], "true" if l["closed"] else "false", ",".join(("%g" % v) for v in l["pts"])))
+        hw_out.append('		{ road = "%s", way = %d, lane = %d, kind = "%s", closed = %s,%s pts = { %s } },' % (
+            l["road"], l["way"], l["lane"], l["kind"], "true" if l["closed"] else "false", " highway = true," if l["highway"] else "", ",".join(("%g" % v) for v in l["pts"])))
     hw_out.append("	},")
     hw_out.append("	links = {")
     for a in sorted(added):
