@@ -436,3 +436,12 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 - **Posing winners keep everything else:** the title, coins and the results.
 - **Tested in Play:** after a simulated posing win the plaque still reads "Strongest lifter: ...".
 
+### Hall of Fame stays 100% from Alter 16 (4 Nov)
+- Owner: "at alter 16, the hall of fame doesnt reset back to 0%, keep it at 100% so players can reset anytime they want starting from alter 16".
+- **Fix:** `Config/HallOfFame.GoalProgress` counts the Hall of Fame goal as met for good once the highest alter is past Alter 15. Alter 16's own goal is already bigger than the Hall of Fame goal.
+  - The server's entry check (CanEnter) and every screen use it: the HUD bar shows HALL OF FAME READY, and so do the Hall of Fame screen and the Enter / Keep going choice.
+  - At Alter 15 itself the goal still has to be trained, as before.
+- **Tested in Play (temp save):**
+  - Alter 16 with every muscle at 1M EXP: 100%, can enter, bar READY.
+  - Alter 15 with the same muscles: 1.2%, can't enter yet.
+
