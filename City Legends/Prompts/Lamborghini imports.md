@@ -19,14 +19,19 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
 |---|---|---|
 | `2012_lamborghini_aventador_lp700-4.glb` | replaces `lambrini_lp700` (Aventador LP700-4) | Aventador |
 | `2016_lamborghini_aventador_lp750-4_sv.glb` | replaces `lambrini_lp750` (Aventador SV LP750-4) | Aventador |
-| `2011_west_yokohama_lamborghini_gallardo_lp560-4.glb` | **SKIP: don't add the Gallardo** (owner, 2026-11-04). Leave the file and the current Gallardo LP570-4 SL as they are | — |
+| `2011_west_yokohama_lamborghini_gallardo_lp560-4.glb` | **SKIP: don't add this one** (owner, 2026-11-04: the West Yokohama Gallardo) | — |
+| `2011_lamborghini_gallardo_lp570-4_superleggera.glb` | replaces `lambrini_lp570` (Gallardo LP570-4 SL) | Gallardo |
+| `2009_lamborghini_gallardo_lp560-4_spyder.glb` | **new car**: the Gallardo LP560-4 Spyder (convertible), a trim below the LP570-4 SL; fictional name | Gallardo |
+| `2019_lamborghini_huracan_evo.glb` | **new car**: Huracan EVO, the base of the Huracan line; fictional name | Huracan |
+| `2019_lamborghini_huracan_performante_spyder.glb` | **new car**: Huracan Performante Spyder; fictional name | Huracan |
 | `2021_lamborghini_huracan_sto.glb` | **new car**: "Enfurecido Huracan STO" style name (fictional) | Huracan (new family) |
 | `2024_lamborghini_huracan_sterrato.glb` | **new car**: the off-road Huracan (raised, roof rack / light bar); fictional name | Huracan |
 | `2024_lamborghini_revuelto.glb` | **new car**: the Aventador's successor (hybrid V12, its own new cockpit and screens); fictional name; top of the Lamborghini line | Revuelto (own family, its cockpit is different from the Aventador's) |
-- The **Huracan STO and Sterrato** share a cockpit family (Huracan): pick the better cluster / steering wheel of the two and share it.
+- **Huracan family: EVO, Performante Spyder, STO and Sterrato** share a cockpit design: pick the best cluster / steering wheel of the four and share it (order the line EVO → Performante Spyder → STO; the Sterrato as its own off-road trim).
+- **Gallardo family: LP560-4 Spyder and LP570-4 Superleggera** share a cockpit: pick the better cluster / steering wheel of the two and share it.
 - The **Revuelto** has its own new digital cockpit: don't share with the Aventador.
 - `2022_bugatti_chiron_super_sport.glb` is still in this folder from the Bugatti job: it's already done; leave it (or remove it once you've checked the Chiroun Super Sport is in the game).
-- Suggest prices, classes / PI and wheelbases for the 3 new cars before adding them (no questions if the owner is away: pick sensible ones and note them).
+- Suggest prices, classes / PI and wheelbases for the new cars (Gallardo Spyder, Huracan EVO, Performante Spyder, STO, Sterrato, Revuelto) before adding them (no questions if the owner is away: pick sensible ones and note them).
 
 ## Before you start
 - Read:
