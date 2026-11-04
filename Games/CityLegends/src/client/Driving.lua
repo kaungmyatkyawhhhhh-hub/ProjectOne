@@ -1140,6 +1140,7 @@ end
 
 local function setLights(s: State, on: boolean)
 	s.lightsOn = on
+	DashGauges.lightsOn = on
 	setTails(s)
 	for _, d in s.model:GetDescendants() do
 		if d:IsA("SpotLight") or (d:IsA("SurfaceLight") and d.Parent and d.Parent.Name:lower():find("head")) then
@@ -1253,6 +1254,7 @@ local function carKey(s: State, key: Enum.KeyCode)
 		UI.toast(if s.parkBrake then "Handbrake on" else "Handbrake off")
 	elseif key == Enum.KeyCode.T then
 		s.tc = not s.tc
+		DashGauges.tcOff = not s.tc
 		UI.toast(if s.tc then "Traction control on" else "Traction control off", if s.tc then nil else Config.Theme.Warning)
 	elseif key == Enum.KeyCode.L then
 		setLights(s, not s.lightsOn)
@@ -2010,6 +2012,7 @@ function Driving.attach(model: Model)
 	end
 	applyTune()
 	table.insert(s.connections, model:GetAttributeChangedSignal("Parts"):Connect(applyTune))
+	DashGauges.tcOff = not s.tc
 	s.engine:setRunning(s.engineOn and not s.electric)
 	if s.engineOn and not s.electric then
 		s.engine:crank()

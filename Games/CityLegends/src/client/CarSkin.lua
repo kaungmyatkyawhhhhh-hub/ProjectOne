@@ -71,7 +71,7 @@ CarSkin.CLUSTER_STYLE = {
 	byt_u8 = "U8",
 	lexis_lfa = "LFAFitted", -- the ring sized to the model's own round pod
 	lambrini_lp700 = "AventadorLP700", -- owner (2026-10-17): its own, copied from an LP700-4 video
-	lambrini_lp750 = "AventadorSV", -- the real SV screen (owner's photo; refs), live, over the model's own
+	lambrini_lp750 = "LiveSV", -- the real SV screen, redrawn from the owner's photos (tools/lambo/cluster_live.py)
 	-- owner (2026-11-02): the SVJ model's own screen picture made live (DashGauges.aventadorSVJ),
 	-- and the same working screen on the SVJ 63, whose model has a blank one
 	lambrini_svj = "AventadorSVJ",
@@ -346,7 +346,8 @@ CarSkin.FIREWALL = {
 CarSkin.STEER_FIT = 1.02
 CarSkin.STEER_MODEL = {
 	-- Lamborghini
-	lambrini_lp700 = "AventadorFlat", lambrini_lp750 = "AventadorFlat", lambrini_urus = "AventadorFlat",
+	-- (the LP700 and the SV keep their models' own wheels: owner, 2026-11-04)
+	lambrini_urus = "AventadorFlat",
 	lambrini_lp570 = "LamboRound", lambrini_lp640 = "LamboRound",
 	lambrini_countach = "Countach",
 	-- Ferrari

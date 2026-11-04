@@ -3297,9 +3297,257 @@ local function aventadorSVJ(gui: SurfaceGui): Update
 	end
 end
 
+-- what the car is doing that the screens show (Driving sets these)
+DashGauges.lightsOn = false
+DashGauges.tcOff = false
+
+-- the Revuelto, Aventador SV and Huracan screens (owner, 2026-11-04: redrawn 1:1 from the owner's
+-- photos and made to work). tools/lambo/cluster_live.py draws the picture and the pieces over it
+-- and writes LamboClusterArt: lit rev blocks, a rev tape that fills, the rev marker, the gear, the
+-- readouts as glyph sprites, signs that show when something is true.
+local function pointOn(pts: { number }, v: number): number
+	local n = #pts
+	if v <= pts[1] then
+		return pts[2]
+	end
+	for i = 1, n - 3, 2 do
+		if v <= pts[i + 2] then
+			local a, b = pts[i], pts[i + 2]
+			return pts[i + 1] + (pts[i + 3] - pts[i + 1]) * (if b > a then (v - a) / (b - a) else 1)
+		end
+	end
+	return pts[n]
+end
+
+local function liveCluster(gui: SurfaceGui, name: string): Update
+	local Art = (require(script.Parent:WaitForChild("LamboClusterArt")) :: any)[name]
+	gui.CanvasSize = Vector2.new(gui.CanvasSize.X * 2, 600) -- twice the usual: the pictures are sharp
+	local W, H, A = Art.W, Art.H, Art.A
+	local D = design(gui, W, H, Color3.new(0, 0, 0))
+	local area = D.area
+	local ratio = area:FindFirstChildOfClass("UIAspectRatioConstraint")
+	if ratio then
+		ratio:Destroy() -- (fills the panel, which is fitted to the car's screen)
+	end
+	local split = Art.split / W
+	local bg1 = new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[1], Size = UDim2.fromScale(split, 1), ZIndex = 1 }, area)
+	local bg2 = new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[2], Position = UDim2.fromScale(split, 0), Size = UDim2.fromScale(1 - split, 1), ZIndex = 1 }, area)
+	local function sprite(e: { any }, left: number, top: number, z: number): ImageLabel
+		return new("ImageLabel", {
+			BackgroundTransparency = 1,
+			Image = Art.sheets[e[1]],
+			ImageRectOffset = Vector2.new(e[2], e[3]),
+			ImageRectSize = Vector2.new(e[4], e[5]),
+			Position = UDim2.fromScale(left / W, top / H),
+			Size = UDim2.fromScale(e[4] / A / W, e[5] / A / H),
+			Visible = false,
+			ZIndex = z,
+		}, area)
+	end
+	local blocks: { { l: ImageLabel, v: number } } = {}
+	for _, e in Art.blocks do
+		table.insert(blocks, { l = sprite(e, e[6], e[7], 2), v = e[8] })
+	end
+	local fills: { any } = {}
+	for _, e in Art.fills do
+		local l = sprite(e, e[6], e[7], 2)
+		l.Visible = true
+		table.insert(fills, { l = l, e = e })
+	end
+	local shows: { { l: ImageLabel, when: string } } = {}
+	for _, e in Art.shows do
+		table.insert(shows, { l = sprite(e, e[6], e[7], 3), when = e[8] })
+	end
+	local marker = Art.marker
+	local mark = if marker then D.rect(0, 0, marker.w, 1, Color3.fromRGB(marker.color[1], marker.color[2], marker.color[3]), 4) else nil
+	local halo = if marker and marker.glow > 0 then D.rect(0, 0, marker.w * marker.glow, 1, Color3.fromRGB(marker.color[1], marker.color[2], marker.color[3]), 4, 0, 0.6) else nil
+	local gears: { [string]: ImageLabel } = {}
+	for ch, e in Art.gear.sprites do
+		gears[ch] = sprite(e, Art.gear.x - e[4] / A / 2, Art.gear.y - e[5] / A / 2, 5)
+	end
+	-- a line of glyphs, its middle at y; align "l" / "r" / "m" at x
+	local readouts: { any } = {}
+	for _, r in Art.readouts do
+		local pool: { ImageLabel } = {}
+		for i = 1, r.len do
+			pool[i] = new("ImageLabel", {
+				BackgroundTransparency = 1,
+				ImageColor3 = Color3.fromRGB(r.color[1], r.color[2], r.color[3]),
+				Visible = false,
+				ZIndex = 6,
+			}, area)
+		end
+		table.insert(readouts, { r = r, pool = pool, f = Art.fonts[r.font], last = false })
+	end
+	local function setText(o: any, s: string?)
+		if s == o.last then
+			return
+		end
+		o.last = s
+		local r, f = o.r, o.f
+		local text = s or ""
+		local width = 0
+		for i = 1, math.min(#text, r.len) do
+			local g = f[text:sub(i, i)]
+			width += if g then g[8] else 0
+		end
+		local pen = if r.align == "r" then r.x - width elseif r.align == "m" then r.x - width / 2 else r.x
+		for i = 1, r.len do
+			local g = if i <= #text then f[text:sub(i, i)] else nil
+			local l = o.pool[i]
+			if g then
+				l.Image = Art.sheets[g[1]]
+				l.ImageRectOffset = Vector2.new(g[2], g[3])
+				l.ImageRectSize = Vector2.new(g[4], g[5])
+				l.Position = UDim2.fromScale((pen + g[6]) / W, (r.y + g[7]) / H)
+				l.Size = UDim2.fromScale(g[4] / A / W, g[5] / A / H)
+				pen += g[8]
+			end
+			l.Visible = g ~= nil
+		end
+	end
+	local labels: { { t: TextLabel, l: any } } = {}
+	for _, l in Art.labels do
+		local t = new("TextLabel", {
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.fromScale(l.x / W, l.y / H),
+			Size = UDim2.fromScale(l.w / W, l.h / H),
+			Font = Enum.Font.Roboto,
+			TextColor3 = Color3.fromRGB(l.color[1], l.color[2], l.color[3]),
+			TextScaled = true,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = "",
+			ZIndex = 6,
+		}, area)
+		table.insert(labels, { t = t, l = l })
+	end
+
+	local ORDER = { "R", "N", "1", "2", "3", "4", "5", "6", "7" }
+	local vals: { [string]: string } = { bandFM = "FM", temp = "100.5", tempUnit = "°F", gAccel = "0.0", gBrake = "0.0" }
+	local shown, slow = 0, -10
+	local lastMph, lastT, accel = 0, os.clock(), 0
+	local odo = (Art.odo or 350) + 0.0
+	local fuelLeft = 0.8
+	local audio: any = nil
+	return function(mph: number, g: string, rpm: number)
+		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+		local v = Art.idle + shown * (Art.redline - Art.idle)
+		local now = os.clock()
+		local dt = now - lastT
+		if dt > 0.1 then
+			accel += ((mph - lastMph) * 0.447 / dt / 9.8 - accel) * 0.4
+			odo += mph * dt / 3600
+			lastMph, lastT = mph, now
+		end
+		local corsa = DashGauges.gearbox == "Manual"
+		local state: { [string]: boolean } = {
+			always = true,
+			parked = mph < 1,
+			moving = mph >= 1,
+			corsa = corsa,
+			sport = not corsa,
+			lights = DashGauges.lightsOn == true,
+			tcoff = DashGauges.tcOff == true,
+			accel = accel > 0.1,
+		}
+		for _, b in blocks do
+			b.l.Visible = b.v < v
+		end
+		for _, f in fills do
+			local e = f.e
+			local frac = math.clamp(pointOn(e[9], v + e[8]), 0, 1)
+			f.l.ImageRectSize = Vector2.new(e[4] * frac, e[5])
+			f.l.Size = UDim2.fromScale(e[4] * frac / A / W, e[5] / A / H)
+		end
+		for _, s in shows do
+			s.l.Visible = state[s.when] == true
+		end
+		if mark and marker then
+			local p = marker.pts
+			local xs: { { number } } = { {}, {}, {}, {} }
+			for i = 1, #p, 5 do
+				for k = 1, 4 do
+					table.insert(xs[k], p[i])
+					table.insert(xs[k], p[i + k])
+				end
+			end
+			local x0, y0, x1, y1 = pointOn(xs[1], v), pointOn(xs[2], v), pointOn(xs[3], v), pointOn(xs[4], v)
+			local dx, dy = x1 - x0, y1 - y0
+			local pos = UDim2.fromScale((x0 + x1) / 2 / W, (y0 + y1) / 2 / H)
+			local size = math.sqrt(dx * dx + dy * dy) / H
+			local rot = math.deg(math.atan2(dx, -dy))
+			mark.Position, mark.Size, mark.Rotation = pos, UDim2.fromScale(marker.w / W, size), rot
+			if halo then
+				halo.Position, halo.Size, halo.Rotation = pos, UDim2.fromScale(marker.w * marker.glow / W, size), rot
+			end
+		end
+		for ch, l in gears do
+			l.Visible = ch == g
+		end
+		local i = table.find(ORDER, g) or 2
+		vals.speed = spd(mph)
+		vals.alt = alt(mph)
+		vals.rpm = tostring(math.floor(v * 100) * 10)
+		vals.unit, vals.altUnit, vals.distUnit = unit(), altUnit(), if KMH then "km" else "mi"
+		vals.mode = if corsa then "CORSA" else "SPORT"
+		vals.gearLeft = table.concat(ORDER, "", 1, i - 1)
+		vals.gearRight = table.concat(ORDER, "", i + 1, #ORDER) .. (if corsa then "" else "A")
+		vals.gearLeft4 = table.concat(ORDER, "", math.max(i - 4, 1), i - 1)
+		vals.gearRight4 = table.concat(ORDER, "", i + 1, math.min(i + 4, #ORDER))
+		vals.gearPrev = if i >= 4 then ORDER[i - 1] else ""
+		vals.gearNext = if i >= 3 and i < #ORDER then ORDER[i + 1] else ""
+		vals.gAccel = string.format("%.1f", math.max(accel, 0))
+		vals.gBrake = string.format("%.1f", math.max(-accel, 0))
+		if now - slow > 5 then
+			slow = now
+			vals.clock = clock()
+			vals.date = os.date("%d.%m.%Y") :: string
+			vals.odo = string.format("%06d", math.floor(if KMH then odo * 1.609 else odo))
+			fuelLeft = math.max(0.15, fuelLeft - 0.0005)
+			vals.range = tostring(math.floor((if KMH then 500 else 310) * fuelLeft))
+			if not audio then
+				local ok, m = pcall(function()
+					return require(script.Parent:WaitForChild("Audio")) :: any
+				end)
+				audio = if ok then m else false
+			end
+			if audio then
+				local ok, st = pcall(audio.stationName)
+				vals.station = if ok then st else ""
+				vals.stationShort = vals.station
+			end
+			for _, l in labels do
+				l.t.Text = vals[l.l.bind] or ""
+			end
+		end
+		for _, o in readouts do
+			local r = o.r
+			setText(o, if not r.when or state[r.when] then vals[r.bind] else nil)
+		end
+		for _, l in labels do
+			l.t.Visible = not l.l.when or state[l.l.when] == true
+		end
+		local tint = Art.tint
+		if tint then
+			local c = if state[tint[1]] then Color3.fromRGB(tint[2], tint[3], tint[4]) else Color3.new(1, 1, 1)
+			bg1.ImageColor3, bg2.ImageColor3 = c, c
+		end
+	end
+end
+
 -- the styles by name (the DashCluster panel's Style attribute)
 local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	AventadorSVJ = aventadorSVJ,
+	LiveRevuelto = function(gui)
+		return liveCluster(gui, "revuelto")
+	end,
+	LiveSV = function(gui)
+		return liveCluster(gui, "sv")
+	end,
+	LiveHuracan = function(gui)
+		return liveCluster(gui, "huracan")
+	end,
 	Veyron = veyron,
 	Maybach57 = maybach,
 	SU7 = function(gui)

@@ -41,3 +41,4 @@ Photos from Wikimedia Commons (licence in brackets), frames from YouTube videos 
 - `aventador_sv_cluster_owner.png`: Aventador SV cluster, SPORT, gear N (a dealer's watermark in one corner).
 - `aventador_lp700_cluster_owner.png`: Aventador LP700-4 cluster, STRADA, gear N.
 - `aventador_sv_cluster_owner_2.png`: a second SV photo, the owner's reference for the gear N.
+- `aventador_sv_cluster_driving_owner.png`, `huracan_cluster_driving_owner.png`, `revuelto_cluster_driving_owner.png`, `revuelto_cluster_driving_owner_2.png` (the sharp one), `revuelto_cluster_owner_2.png`: the owner's driving photos. `revuelto_cluster_owner.png` shows the door-open warning, not the normal screen.

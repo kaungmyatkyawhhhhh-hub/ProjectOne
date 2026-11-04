@@ -10,3 +10,4 @@ Paths point at the session's temp folder; change them before reuse. Results are 
 - `cluster_art.py`: Revuelto, SV and LP700 clusters redrawn from the owner's photos.
 - `put_art.py`: a picture projected onto a car's blank screen. `lp700_atlas.py`: the LP700's into its model's atlas.
 - `gallardo_dash.py`: the SL's binnacle in the LP560 Spyder. `mesh_cut.py`: delete faces and keep a part's shading.
+- `cluster_live.py`: Revuelto, SV and Huracan in layers: `preview`, `assets`, `lua` (writes `src/client/LamboClusterArt.lua`); after new pictures upload them and update `cluster_ids.json`.
