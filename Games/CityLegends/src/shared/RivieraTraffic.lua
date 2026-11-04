@@ -237,6 +237,18 @@ local function mergeRouteEnds(lanes: { any }, links: { { number } }): { { number
 	return out
 end
 
+-- turn picks from tools/riviera/TurnPicks.luau (["fromLane:fromK>toLane:toK"] = { back, ahead })
+local turnPicks: { [string]: { number } } = {}
+do
+	local m = script.Parent:FindFirstChild("RivieraTurnPicks")
+	if m then
+		local ok, t = pcall(require, m)
+		if ok and type(t) == "table" then
+			turnPicks = t
+		end
+	end
+end
+
 local cached = nil
 function RivieraTraffic.build()
 	if cached then
@@ -343,7 +355,18 @@ function RivieraTraffic.build()
 				-- (a lane change on the same road goes straight across, no corner to find)
 				local tl = dataLanes[toLane]
 				local laneChange = tl ~= nil and fl.road == tl.road and fl.way == tl.way
-				for pass = if STRICT_TURNS then 1 else 2, if laneChange then 0 else 2 do
+				-- (2026-11-04) a pick made in Studio by tools/riviera/TurnPicks.luau: the pieces back
+				-- and on whose arc stays on the road (the nearest arc cut over a kerb at 23 corners)
+				local key = fromLane .. ":" .. fromK .. ">" .. toLane .. ":" .. toK
+				local pick = turnPicks[key]
+				if pick and not laneChange then
+					local bb, aa = fromRow[fromK - 1 - pick[1]], toRow[toK + pick[2]]
+					local c = if bb and aa then corner(bb, aa) else nil
+					if c then
+						b, a, p1 = bb, aa, c
+					end
+				end
+				for pass = if STRICT_TURNS then 1 else 2, if laneChange or p1 then 0 else 2 do
 					local strict = pass == 1
 					local best = math.huge
 					for back = 0, if strict then 3 else 2 do
@@ -424,7 +447,8 @@ function RivieraTraffic.build()
 	for i, seg in all do
 		seg.id = base + i
 	end
-	cached = { lanes = live, all = all, dead = dead }
+	-- (rows, links and corner are for the Studio tools: TurnPicks)
+	cached = { lanes = live, all = all, dead = dead, rows = pieces, links = dataLinks, corner = corner, lanesData = dataLanes, endLinked = endLinked }
 	return cached
 end
 
