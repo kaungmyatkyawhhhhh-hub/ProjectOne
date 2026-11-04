@@ -35,3 +35,8 @@ Photos from Wikimedia Commons (licence in brackets), frames from YouTube videos 
 - **Lamborghini Murcielago LP640** (`lambrini_lp640`, style `MurcielagoLP640`): `lp640_cluster_video.jpg` (YouTube P1czi6CKOgo): the layout. `lp640_innenraum.jpg` (Commons, public domain).
 - **Lamborghini Gallardo LP570-4 Superleggera** (`lambrini_lp570`, style `GallardoSL`): `gallardo_sl_cockpit.jpg` (Commons "Lamborghini Gallardo Superleggera cockpit", CC BY-SA 3.0): white dials. `gallardo_lp560_cockpit.jpg`, `gallardo_cluster.jpg`: layout.
 - **Mercedes SLS** (`bentz_sls`, its own dials with `DialLooks`): `sls_cluster_video.jpg` (YouTube RNHCbpbdSZE).
+
+## Owner's photos, 2026-11-04 (for the 1:1 redraws, `tools/lambo/cluster_art.py`)
+- `revuelto_cluster_owner.png`: Revuelto cluster, CORSA + HYBRID, gear P.
+- `aventador_sv_cluster_owner.png`: Aventador SV cluster, SPORT, gear N (a dealer's watermark in one corner).
+- `aventador_lp700_cluster_owner.png`: Aventador LP700-4 cluster, STRADA, gear N.
