@@ -133,3 +133,22 @@ Diamond 8 on the Gem bench is now 1181 (was 1245).
 - **Mesh** (`PlateLook`): uses the plate mesh (`GymAssets.PlateMesh`) once it's imported (IMPORT_LIST "PLATE MESH"), else one cylinder per plate.
 - **Studio test switch:** Workspace attribute `TestPlateStep` = n (0 = the top weight, 1-48) loads every idle bar with that step.
 - **Screens:** `Downloads\gem_update_import\screens_4Nov_plates_fix\` (01-14 as before, plus 08b Platinum 8 and 12a/12b the stack front and back).
+
+### The plate mesh (owner imported it, 4 Nov)
+- **Imported:** `gymarc_plate.obj` as rbxassetid://112165957173612. The axis came in right (thin along X, face +X).
+  - The template is `ReplicatedStorage.GymAssets.PlateMesh`: RenderFidelity Performance, CollisionFidelity Box, no collide / touch / query.
+  - The imported original is kept in `ServerStorage._Imports`.
+- **Measured: a mesh on every plate is heavier.** A mesh plate is 1,120 triangles. With every plate a mesh, the same Gem Mine view went from 175k to 305k triangles and from 437 to 519 draw calls. Those two numbers were from different sessions, so the draw calls carry some session noise.
+- **Built: the mesh only on the OUTER plate per side**, where the raised band, recess and hub show. Inner plates show only their rim and stay one cylinder each, with the gap between plates.
+- **A/B in one session (same camera, every bar Diamond 8):**
+
+  | | Draw calls | Triangles | Mesh plates |
+  |---|---|---|---|
+  | Outer-plate mesh | 519 | 222.9k | 23 |
+  | No mesh (cylinders) | 518 | 210.3k | 0 |
+
+  So the mesh on the outer plates costs +1 draw call and +6% triangles.
+- **A Diamond 8 bar is now 22 parts (20 visible), close to the ~18 target.** Per side: 7 cylinders, the mesh plate, the glow inset, the sleeve and the invisible number face.
+- The standard plate's blue/red/teal edge stripe is now a ring a little wider than the mesh rim, so it shows all the way round.
+- **Mesh screens:** `screens_4Nov_plates_fix` 15-17 (17 = every plate a mesh, Ruby 8, before the switch to outer-only).
+

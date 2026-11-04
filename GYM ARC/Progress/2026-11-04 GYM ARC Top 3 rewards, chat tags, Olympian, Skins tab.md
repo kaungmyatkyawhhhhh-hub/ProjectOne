@@ -358,3 +358,13 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 **Test switch:** Studio `TestPlateStep` (Workspace attribute).
 
 **Screens:** `screens_4Nov_plates_fix`.
+
+### Plate mesh in (4 Nov)
+- The owner imported the plate mesh. Template: `GymAssets.PlateMesh`; the original is kept in `ServerStorage._Imports`.
+- **The mesh is on the outer plate only.** A mesh on every plate was much heavier (1,120 triangles each: 175k to 305k triangles in the Gem Mine view).
+- Outer-only costs +1 draw call and +6% triangles against no mesh (A/B in one session).
+- A Diamond 8 bar is 22 parts.
+- The standard edge stripe is widened so it shows all round.
+- The Forge rack is rebuilt with the mesh.
+- Details: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks report]] section 6.
+
