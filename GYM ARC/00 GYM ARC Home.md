@@ -24,6 +24,8 @@ Roblox gym game for kids (mostly mobile). Tagline: "Everyone starts tiny." You l
 4. Before a risky publish (a save-version bump): make one extra backup first.
 
 ## Current status (21 Oct 2026)
+- 4 Nov: **new icon + 2 thumbnails v1** (bacon + giant shadow icon; #1 giant + Diamond/Ruby plates "1,735 LB"; #2 bacon + giant silhouette "+1 STR"), not uploaded. [[2026-11-04 GYM ARC New icon and 2 thumbnails (v1)]]
+- 4 Nov: **players' legs drawn at most 80% of the mass monster** (visual only: stats, grades, arm wrestling, posing, boards unchanged; NPCs keep full legs). In Studio, not published. [[2026-11-04 GYM ARC Legs max look 80 percent (players)]]
 - 4 Nov: **phone text fix**: Roblox's Text Size setting made all text bigger on some phones, so it ran out of the right cards and the top bar pills. Text now stays at its designed size (TextSizeGuard). In Studio, not published. [[2026-11-04 GYM ARC Phone text too big (Roblox Text Size setting)]]
 - 4 Nov: **Legacy card backfill** (stars from before get their Legacy picks, save version 3), **weight panel shows the NEXT weight** (EXP line, plates needed + Plate Forge tap, plate ladder, + lock / glow, NEW WEIGHT + PLATES MAXED toasts), **arm wrestling is TAP again** (strength = fewer taps, 12 taps/s cap). In Studio, not published. [[2026-11-04 GYM ARC Legacy card backfill, next weight panel, tap arm wrestling]]
 - 3 Nov: **GEM MINE GYM built in Studio** (not published; covered until the GEM event, Sat 7 Nov 15:00 UTC): a crystal cave on the east block by the court, 13 machines with gem plates, x1.30 gains, Alter 15+. Golden Era + Gem Mine got their own music. Gem cutscene not made yet. [[2026-11-03 GYM ARC Gem Mine Gym built]]
