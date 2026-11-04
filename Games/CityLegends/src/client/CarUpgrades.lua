@@ -139,16 +139,26 @@ local function flatButton(text: string, props: { [string]: any }): TextButton
 end
 
 local modalBefore = false
+local closing = false -- (2026-11-04) the moment after it shuts
 function CarUpgrades.close()
 	if gui then
 		gui:Destroy()
 		gui = nil
-		UI.modalOpen = modalBefore -- (driving keys back, unless another screen still holds them)
+		-- (driving keys back, unless another screen still holds them) (2026-11-04) a beat later:
+		-- Backspace shuts this, and the same press went on to put the car back on the road
+		closing = true
+		task.delay(0.1, function()
+			closing = false
+			if not gui then
+				UI.modalOpen = modalBefore
+			end
+		end)
 	end
 end
 
+-- (2026-11-04: and the moment after, so the key that shut it doesn't go on to shut the main menu)
 function CarUpgrades.isOpen(): boolean
-	return gui ~= nil
+	return gui ~= nil or closing
 end
 
 function CarUpgrades.open(carId: string)
@@ -165,7 +175,9 @@ function CarUpgrades.open(carId: string)
 	g.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	g.Parent = player:WaitForChild("PlayerGui")
 	gui = g
-	modalBefore = UI.modalOpen == true
+	if not closing then
+		modalBefore = UI.modalOpen == true
+	end
 	UI.modalOpen = true -- (driving keys off while it's open)
 	local dim = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.45, Size = UDim2.fromScale(1, 1), Active = true, Parent = g })
 	-- one design size, scaled to the screen (a phone gets the same layout, smaller)

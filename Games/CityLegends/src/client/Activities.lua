@@ -711,6 +711,10 @@ local function update(dt: number)
 					if ok and type(res) == "table" and res.ok then
 						UI.popup(`LEGENDS CHIP {res.count}/{res.total}`, res.cash, Color3.fromRGB(255, 205, 60))
 						Audio.cutUp(2, "CHIP")
+					elseif not (ok and type(res) == "table" and res.have) then
+						-- (2026-11-04) not paid: the chip stays in the world, to be picked up again
+						collected[k] = nil
+						refreshLabels()
 					end
 				end)
 				break
@@ -888,7 +892,8 @@ function Activities.init()
 				-- a new race forming: say so (unless it's yours)
 				for id, l in msg.list do
 					local r = ActivityData.raceById[id]
-					if r and not lobbies[id] and not l.racing and lobbyRace ~= r and state == "idle" then
+					local was = lobbies[id]
+					if r and (not was or was.racing) and not l.racing and lobbyRace ~= r and state == "idle" then
 						UI.toast("RACE FORMING · " .. string.upper(r.name) .. " · " .. math.ceil(l.startsIn) .. " s to join (orange R on the map)", Color3.fromRGB(255, 170, 60))
 					end
 				end

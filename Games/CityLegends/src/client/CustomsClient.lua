@@ -413,8 +413,11 @@ local function close()
 	end
 end
 
+-- (2026-11-04) waiting for the server: a second tap on CUSTOMISE opened a second screen, and the
+-- first could never be shut
+local opening = false
 local function open()
-	if gui or not call then
+	if gui or opening or not call then
 		return
 	end
 	local car = Driving.getModel()
@@ -422,9 +425,13 @@ local function open()
 	if not (car and root) then
 		return
 	end
-	local state = (call :: RemoteFunction):InvokeServer("state")
-	if type(state) ~= "table" or not state.ok then
-		UI.toast(if type(state) == "table" and state.message then state.message else "Can't open Legends Customs now", Theme.Warning)
+	opening = true
+	local asked, state = pcall(function()
+		return (call :: RemoteFunction):InvokeServer("state")
+	end)
+	opening = false
+	if not asked or type(state) ~= "table" or not state.ok then
+		UI.toast(if asked and type(state) == "table" and state.message then state.message else "Can't open Legends Customs now", Theme.Warning)
 		return
 	end
 	local saved: Look = if type(state.look) == "table" then state.look else {}

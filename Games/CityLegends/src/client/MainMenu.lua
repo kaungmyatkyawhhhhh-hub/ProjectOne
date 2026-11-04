@@ -37,6 +37,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local TravelSpots = require(Shared:WaitForChild("TravelSpots"))
+local IsleLayout = require(Shared:WaitForChild("IsleLayout"))
 
 local UI = require(script.Parent:WaitForChild("UI"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
@@ -46,6 +47,7 @@ local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local Weather = require(script.Parent:WaitForChild("Weather"))
 local MenuArt = require(script.Parent:WaitForChild("MenuArt"))
 local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
+local CarUpgrades = require(script.Parent:WaitForChild("CarUpgrades"))
 
 local MainMenu = {}
 
@@ -290,7 +292,14 @@ local function focusable(b: GuiButton, activate: () -> (), color: Color3?): Focu
 	b.MouseEnter:Connect(function()
 		setFocus(f)
 	end)
+	-- (2026-11-04) a double tap ran it twice (PLAY and SPAWN asked for the car twice): not once the
+	-- menu is shutting, and not the same press again
+	local lastPress = 0
 	b.Activated:Connect(function()
+		if not isOpen or os.clock() - lastPress < 0.35 then
+			return
+		end
+		lastPress = os.clock()
 		selectSound()
 		activate()
 	end)
@@ -540,19 +549,28 @@ end
 
 local closeMenu: () -> ()
 local goBack: () -> ()
+local outOfMenu: (after: (() -> ())?) -> ()
 
 local function buildHints()
 	hintsBar = new("Frame", { Name = "Hints", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, H - 36), Size = UDim2.new(1, 0, 0, 32), Parent = canvas }, {
 		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 10), VerticalAlignment = Enum.VerticalAlignment.Center }),
 	})
+	local hintsShown = ""
 	local function refresh()
+		local pad = UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled
+		local touch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled and not pad
+		-- (2026-11-04) only when they change: rebuilt every second, a tap across the rebuild was lost,
+		-- and on a phone the Close pill is the way out
+		local shownNow = tostring(sub ~= nil) .. tostring(startMode) .. tostring(pad) .. tostring(touch)
+		if shownNow == hintsShown then
+			return
+		end
+		hintsShown = shownNow
 		for _, c in hintsBar:GetChildren() do
 			if not c:IsA("UIListLayout") then
 				c:Destroy()
 			end
 		end
-		local pad = UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled
-		local touch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled and not pad
 		local order = 0
 		local function hint(keys: { string }, label: string, onClick: (() -> ())?)
 			order += 1
@@ -805,13 +823,15 @@ local function openWorldMap()
 		return if s.icon == "race" then "race" elseif s.icon == "delivery" then "job" else "venue"
 	end
 	local spots = table.clone(TravelSpots.list())
-	if player:GetAttribute("HouseLot") then
-		-- your house (the server knows where): its symbol sits at the lot's sign, if it's streamed in
-		local lot = player:GetAttribute("HouseLot")
-		local houses = workspace:FindFirstChild("Houses", true)
-		local model = houses and houses:FindFirstChild(tostring(lot), true)
-		if model and model:IsA("Model") then
-			table.insert(spots, { id = "home", name = "Your House", icon = "home", info = TravelSpots.INFO.home, cf = model:GetPivot() })
+	local homeLot = player:GetAttribute("HouseLot")
+	if homeLot then
+		-- your house (the server knows where) (2026-11-04: from the lot list; it looked for a "Houses"
+		-- folder that isn't there, and the house itself may not be streamed in)
+		for _, lot in IsleLayout.lots() do
+			if lot.id == homeLot then
+				table.insert(spots, { id = "home", name = "Your House", icon = "home", info = TravelSpots.INFO.home, cf = lot.frame })
+				break
+			end
 		end
 	end
 	local icons: { { b: ImageButton, s: TravelSpots.Spot } } = {}
@@ -989,6 +1009,56 @@ local function openWorldMap()
 end
 
 ---------------------------------------------------------------------
+-- The leaderboard (2026-11-04): the J key's board, here for phones and gamepads too
+---------------------------------------------------------------------
+local function openLeaderboard()
+	local page = openSub("Leaderboard")
+	local paneW = (W - 16) / 2
+	local paneH = H - 176 - 46 - 46 - 62
+	local function pane(x: number): TextLabel
+		local f = new("Frame", { BackgroundColor3 = PANEL, BackgroundTransparency = 0.08, Position = UDim2.fromOffset(x, 46), Size = UDim2.fromOffset(paneW, paneH), Parent = page }, { corner(10) })
+		return text({ Text = "Loading...", FontFace = BOLD, TextSize = 19, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(20, 14), Size = UDim2.new(1, -40, 1, -28), Parent = f })
+	end
+	local speedList, driftList = pane(0), pane(paneW + 16)
+	local mine = text({ Text = "", FontFace = BOLD, TextSize = 18, TextColor3 = GOLD, TextWrapped = true, Position = UDim2.fromOffset(4, 46 + paneH + 8), Size = UDim2.new(1, -8, 0, 46), Parent = page })
+	local function lines(title: string, rows: any, unit: string): string
+		local out = { title, "" }
+		for i, r in (if type(rows) == "table" then rows else {}) :: { any } do
+			if type(r) == "table" then
+				table.insert(out, string.format("%d. %s  %s%s", i, tostring(r.name), tostring(r.value), unit))
+			end
+		end
+		if #out == 2 then
+			table.insert(out, "No one yet")
+		end
+		return table.concat(out, "\n")
+	end
+	task.spawn(function()
+		local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+		local call = remotes and remotes:FindFirstChild("ChallengeBoard")
+		local ok, res = false, nil
+		if call and call:IsA("RemoteFunction") then
+			ok, res = pcall(function()
+				return (call :: RemoteFunction):InvokeServer()
+			end)
+		end
+		if not page.Parent then
+			return
+		end
+		if not (ok and type(res) == "table") then
+			speedList.Text = "Couldn't load the board: try again"
+			driftList.Text = ""
+			return
+		end
+		speedList.Text = lines("TOP SPEED", res.speed, " mph")
+		driftList.Text = lines("BEST DRIFT", res.drift, "")
+		if type(res.mine) == "table" then
+			mine.Text = string.format("YOU  ·  top speed %d mph  ·  best drift %d  ·  longest jump %.1fs", tonumber(res.mine.speed) or 0, tonumber(res.mine.drift) or 0, tonumber(res.mine.air) or 0)
+		end
+	end)
+end
+
+---------------------------------------------------------------------
 -- Settings
 ---------------------------------------------------------------------
 local function openSettings()
@@ -1092,6 +1162,31 @@ local function openSettings()
 		page.Destroying:Connect(function()
 			c1:Disconnect()
 			c2:Disconnect()
+		end)
+	end
+
+	-- (2026-11-04) reset and the camera views, first: on a phone there's no Backspace or V
+	heading("YOUR CAR")
+	do
+		local r = row("Stuck? Back on the road")
+		local b = button("RESET CAR", GOLD, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(160, 34), TextSize = 16, Parent = r })
+		b.Activated:Connect(function()
+			selectSound()
+			if not Driving.isDriving() then
+				UI.toast("Get in your car first", SUB)
+				return
+			end
+			closeMenu()
+			Driving.reset()
+		end)
+	end
+	do
+		local r = row("Camera view")
+		local b = button(string.upper(Driving.cameraMode) .. "  ▶", BLUE, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(240, 34), TextSize = 16, Parent = r })
+		b.Activated:Connect(function()
+			selectSound()
+			Driving.toggleCamera()
+			b.Text = string.upper(Driving.cameraMode) .. "  ▶"
 		end)
 	end
 
@@ -1202,15 +1297,18 @@ local function openSettings()
 			UI.onUnitsChanged(u)
 		end
 	end)
-	choices(row("Gearbox"), { "AUTO", "MANUAL" }, function()
-		return if st.Gearbox == "Manual" then "MANUAL" else "AUTO"
-	end, function(v)
-		local mode = if v == "MANUAL" then "Manual" else "Auto"
-		UI.setGearboxLabel(mode)
-		if UI.onGearboxChanged then
-			UI.onGearboxChanged(mode)
-		end
-	end)
+	-- (2026-11-04) not on a phone: shifting is Q / E only, so MANUAL left the car stuck in neutral
+	if not UI.isTouch then
+		choices(row("Gearbox"), { "AUTO", "MANUAL" }, function()
+			return if st.Gearbox == "Manual" then "MANUAL" else "AUTO"
+		end, function(v)
+			local mode = if v == "MANUAL" then "Manual" else "Auto"
+			UI.setGearboxLabel(mode)
+			if UI.onGearboxChanged then
+				UI.onGearboxChanged(mode)
+			end
+		end)
+	end
 	-- (owner, 2026-11-03) the HUD speedometer: an arc rev dial or a flat rev bar, both with the big
 	-- digital speed
 	choices(row("Speedometer"), { "ANALOGUE", "DIGITAL" }, function()
@@ -1274,8 +1372,26 @@ local function openSettings()
 		local b = button("OPEN", BLUE, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(120, 34), TextSize = 16, Parent = r })
 		b.Activated:Connect(function()
 			selectSound()
+			-- (2026-11-04) the start screen has no car to frame yet, and closing it left nothing on screen
+			if startMode then
+				UI.toast("Drive your car out first", SUB)
+				return
+			end
 			closeMenu()
+			-- (2026-11-04) off now, not in a moment: photo mode saves what's on and puts it back, and it
+			-- put this menu back over the game, closed, with Close doing nothing
+			if gui then
+				gui.Enabled = false
+			end
 			a.openPhoto()
+		end)
+	end
+	do
+		local r = row("Leaderboard")
+		local b = button("OPEN", BLUE, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(120, 34), TextSize = 16, Parent = r })
+		b.Activated:Connect(function()
+			selectSound()
+			openLeaderboard()
 		end)
 	end
 	order += 1
@@ -1409,11 +1525,14 @@ local function buildCampaign(page: Frame)
 	local ach = tile(page, 0, y0, c1, hTall, { title = "Achievements", sub = "", icon = "trophy", iconSize = 150, iconPos = UDim2.new(0.5, 75, 0.5, -90), titleSize = 32 })
 	local achSub = ach:FindFirstChild("Sub") :: TextLabel
 	achSub.Size = UDim2.new(1, -40, 0, 70)
+	-- (2026-11-04) outOfMenu, here and below: on the start screen a plain close left nothing to go
+	-- back to, no HUD and no menu
 	focusable(ach, function()
-		closeMenu()
-		if api then
-			api.openGoals()
-		end
+		outOfMenu(function()
+			if api then
+				api.openGoals()
+			end
+		end)
 	end)
 
 	-- WORLD MAP (wide, top)
@@ -1618,14 +1737,15 @@ local function buildCars(page: Frame)
 				Minimap.setWaypoint(s.cf.Position)
 				UI.toast("Waypoint: Legends Customs (on your map)", MINT)
 			end
-			closeMenu()
+			outOfMenu()
 		end)
 		local market = button("SELL / MARKET", BLUE, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, by + 104), Size = half, TextSize = 16, Parent = body })
 		focusable(market, function()
-			closeMenu()
-			if api then
-				api.openMarket()
-			end
+			outOfMenu(function()
+				if api then
+					api.openMarket()
+				end
+			end)
 		end)
 	end
 
@@ -1713,7 +1833,7 @@ local function buildCars(page: Frame)
 				Minimap.setWaypoint(s.cf.Position)
 				UI.toast("Waypoint: Legends Motors (on your map)", MINT)
 			end
-			closeMenu()
+			outOfMenu()
 		end, GOLD)
 		y += 64
 		local lastGroup = nil
@@ -1869,16 +1989,23 @@ local function ownedHouses(): { string }
 	return out
 end
 
--- leaves the menu for a house action; on the start screen (no car, no avatar yet) your car comes
+-- leaves the menu for another screen; on the start screen (no car, no avatar yet) your car comes
 -- out first, or you'd be left looking at the backdrop
-local function outOfMenu(after: () -> ())
+outOfMenu = function(after: (() -> ())?)
+	-- (2026-11-04) a new player picks their car first
+	if startMode and not claimed() then
+		openClaim()
+		return
+	end
 	local needCar = startMode or (not Driving.isDriving() and not (player.Character and player.Character.Parent))
 	local id = data().Selected
 	closeMenu()
 	if needCar and api and id then
 		api.drive(id)
-		task.delay(2.5, after)
-	else
+		if after then
+			task.delay(2.5, after)
+		end
+	elseif after then
 		after()
 	end
 end
@@ -2091,7 +2218,8 @@ local function build()
 
 	-- keys inside the menu
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if not isOpen or UserInputService:GetFocusedTextBox() then
+		-- (2026-11-04) not behind the parts screen: Backspace shut both at once
+		if not isOpen or UserInputService:GetFocusedTextBox() or CarUpgrades.isOpen() then
 			return
 		end
 		local k = input.KeyCode
@@ -2160,7 +2288,13 @@ closeMenu = function()
 	end
 	GuiService.SelectedObject = nil
 	Driving.menuHold = false
-	UI.modalOpen = false
+	-- (2026-11-04) the driving keys come back a beat later: Backspace closes this, and the same press
+	-- went on to put the car back on the road
+	task.delay(0.1, function()
+		if not isOpen then
+			UI.modalOpen = false
+		end
+	end)
 	local g = gui
 	tween(scaler, 0.16, { Scale = scaler.Scale * 0.97 })
 	local b = blur

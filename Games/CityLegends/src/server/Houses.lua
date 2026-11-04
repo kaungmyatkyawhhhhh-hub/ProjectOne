@@ -35,6 +35,9 @@ local IsleLayout = require(Shared:WaitForChild("IsleLayout"))
 local HouseBuilder = require(Shared:WaitForChild("HouseBuilder"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local Customs = require(script.Parent:WaitForChild("Customs"))
+local Towers = require(script.Parent:WaitForChild("Towers"))
+local Activities = require(script.Parent:WaitForChild("Activities"))
+local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
 
 local Houses = {}
 
@@ -59,6 +62,7 @@ type Rec = {
 	gateSeen: number, -- last time someone allowed was at the gate
 	dug: { { region: Region3, mats: any, occ: any } }?, -- the terrain an underground garage took out
 	hidden: { { part: BasePart, parent: Instance? } }?, -- the map's rocks and trees it took away
+	plate: { part: BasePart, transparency: number, collide: boolean, query: boolean }?, -- Monaco: the lot's stone plate it opened
 }
 
 local friendCache: { [string]: { at: number, yes: boolean } } = {}
@@ -69,6 +73,7 @@ local recs: { [string]: Rec } = {}
 local order: { Rec } = {}
 local placed: { [Player]: string } = {} -- player -> lot id
 local lastClaim: { [Player]: number } = {}
+local lastHome: { [Player]: number } = {}
 local houseFolder: Folder
 local signFolder: Folder
 
@@ -434,6 +439,66 @@ local function publish(player: Player)
 	player:SetAttribute("HouseDesign", if rec then rec.design else nil)
 end
 
+-- (2026-11-04) Monaco: a High lot stands on a stone plate (Riviera.Sites, 4 thick), which lay over the
+-- ramp and the hall, so nothing could get down to the garage. While the house stands the plate is
+-- switched off and strips of it take its place round the two holes (HouseBuilder's info.holes)
+local function cutPlate(rec: Rec)
+	local info = rec.info
+	local riv = workspace:FindFirstChild("Riviera")
+	local sites = riv and riv:FindFirstChild("Sites")
+	local plate = sites and sites:FindFirstChild("lot_" .. rec.lot.id)
+	if not (info and rec.model and plate and plate:IsA("BasePart")) then
+		return
+	end
+	local hx, hz = plate.Size.X / 2, plate.Size.Z / 2
+	local left: { { number } } = { { -hx, hx, -hz, hz } }
+	for _, h in info.holes do
+		-- (the plate has its own middle: the holes are in the lot's frame)
+		local a = plate.CFrame:PointToObjectSpace((rec.lot.frame * CFrame.new(h[1], 0, h[3])).Position)
+		local b = plate.CFrame:PointToObjectSpace((rec.lot.frame * CFrame.new(h[2], 0, h[4])).Position)
+		local x0, x1, z0, z1 = math.min(a.X, b.X), math.max(a.X, b.X), math.min(a.Z, b.Z), math.max(a.Z, b.Z)
+		local out: { { number } } = {}
+		for _, r in left do
+			if x1 <= r[1] or x0 >= r[2] or z1 <= r[3] or z0 >= r[4] then
+				table.insert(out, r)
+			else
+				local lo, hi = math.max(r[1], x0), math.min(r[2], x1)
+				if r[1] < x0 then
+					table.insert(out, { r[1], x0, r[3], r[4] })
+				end
+				if x1 < r[2] then
+					table.insert(out, { x1, r[2], r[3], r[4] })
+				end
+				if r[3] < z0 then
+					table.insert(out, { lo, hi, r[3], z0 })
+				end
+				if z1 < r[4] then
+					table.insert(out, { lo, hi, z1, r[4] })
+				end
+			end
+		end
+		left = out
+	end
+	for _, r in left do
+		local p = Instance.new("Part")
+		p.Name = "LotPlate"
+		p.Anchored = true
+		p.Size = Vector3.new(r[2] - r[1], plate.Size.Y, r[4] - r[3])
+		p.CFrame = plate.CFrame * CFrame.new((r[1] + r[2]) / 2, 0, (r[3] + r[4]) / 2)
+		p.Color = plate.Color
+		p.Material = plate.Material
+		p.MaterialVariant = plate.MaterialVariant
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.CastShadow = plate.CastShadow
+		p.Parent = rec.model
+	end
+	rec.plate = { part = plate, transparency = plate.Transparency, collide = plate.CanCollide, query = plate.CanQuery }
+	plate.Transparency = 1
+	plate.CanCollide = false
+	plate.CanQuery = false
+end
+
 -- an underground garage: dig its ground out of the terrain (keeping what was there to put back),
 -- and take away the map's rocks and trees in the way until the house comes down
 local function dig(rec: Rec)
@@ -481,6 +546,7 @@ local function dig(rec: Rec)
 		p.Parent = nil
 	end
 	rec.hidden = back
+	cutPlate(rec)
 end
 
 local function undig(rec: Rec)
@@ -502,6 +568,14 @@ local function undig(rec: Rec)
 		end
 	end
 	rec.hidden = nil
+	local plate = rec.plate
+	if plate then
+		-- (query first: a part that collides can't have it off)
+		plate.part.CanQuery = plate.query
+		plate.part.CanCollide = plate.collide
+		plate.part.Transparency = plate.transparency
+	end
+	rec.plate = nil
 end
 
 local function takeDown(rec: Rec)
@@ -743,6 +817,19 @@ USE.wardrobe = function(_rec, _p, who)
 	end
 end
 
+-- (2026-11-04) nobody is locked in: when a let-in guest's two minutes run out (or the owner sets
+-- Nobody) a shut door still opens from its indoor side
+local function fromIndoors(rec: Rec, door: Instance?, who: Player): boolean
+	local closed = door and door:GetAttribute("ClosedCF")
+	local char = who.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not (rec.info and typeof(closed) == "CFrame" and root) then
+		return false
+	end
+	local n = closed.LookVector
+	return (root.Position - closed.Position):Dot(n) * (rec.info.center.Position - closed.Position):Dot(n) > 0
+end
+
 local function bindUses(rec: Rec, model: Model)
 	local last: { [ProximityPrompt]: number } = {}
 	for _, p in model:GetDescendants() do
@@ -755,7 +842,7 @@ local function bindUses(rec: Rec, model: Model)
 						return
 					end
 					last[p] = os.clock()
-					if not Houses.mayEnter(who, rec.lot.id) then
+					if not (Houses.mayEnter(who, rec.lot.id) or (kind == "door" and fromIndoors(rec, p.Parent, who))) then
 						toast(who, if kind == "door" then "Locked: ring the bell at the gate" else "You need to be let in first", "warning")
 						return
 					end
@@ -814,6 +901,12 @@ local function moveGate(rec: Rec, open: boolean)
 	end
 end
 
+-- (2026-11-04) anyone on the lot can leave: the gate opens from the inside for them too
+local function onLot(rec: Rec, pos: Vector3): boolean
+	local rel = rec.lot.frame:PointToObjectSpace(pos)
+	return math.abs(rel.X) < rec.lot.width / 2 and rel.Z > -rec.lot.depth / 2 + 3 and rel.Z < rec.lot.depth / 2
+end
+
 local function gateStep()
 	local cars = workspace:FindFirstChild("PlayerCars")
 	for _, rec in order do
@@ -825,7 +918,7 @@ local function gateStep()
 			for _, p in Players:GetPlayers() do
 				local char = p.Character
 				local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if root and (root.Position - at).Magnitude < GATE_RANGE and Houses.mayEnter(p, rec.lot.id) then
+				if root and (root.Position - at).Magnitude < GATE_RANGE and (onLot(rec, root.Position) or Houses.mayEnter(p, rec.lot.id)) then
 					allowed = true
 					break
 				end
@@ -836,7 +929,7 @@ local function gateStep()
 					local root = car:IsA("Model") and car.PrimaryPart
 					if root and (root.Position - at).Magnitude < GATE_RANGE + 10 then
 						local owner = Players:GetPlayerByUserId((car:GetAttribute("Owner") :: number?) or 0)
-						if owner and not owner.Character and Houses.mayEnter(owner, rec.lot.id) then
+						if owner and not owner.Character and (onLot(rec, root.Position) or Houses.mayEnter(owner, rec.lot.id)) then
 							allowed = true
 						end
 						for _, s in car:GetChildren() do
@@ -871,6 +964,8 @@ local function build(rec: Rec, player: Player, id: string)
 	model:SetAttribute("Design", id)
 	model:SetAttribute("Owner", player.UserId)
 	model:SetAttribute("OwnerName", player.DisplayName)
+	local ownerData = PlayerData.get(player)
+	model:SetAttribute("Roommates", table.concat((ownerData and ownerData.Roommates) or {}, ","))
 	rec.model = model
 	rec.info = info
 	rec.owner = player
@@ -935,7 +1030,10 @@ local function place(player: Player, lotId: string, id: string): (boolean, strin
 	if mine ~= lotId then
 		lastClaim[player] = os.clock()
 	end
-	fillSlots(profile, id)
+	-- (2026-11-04) only a house going up for the first time: a bay you emptied stays empty on every join
+	if type(profile.HouseBays[id]) ~= "table" then
+		fillSlots(profile, id)
+	end
 	build(rec, player, id)
 	placed[player] = lotId
 	profile.HomeLot = lotId
@@ -960,7 +1058,8 @@ local function settle(player: Player)
 			place(player, lotId, id)
 			return
 		end
-		send(player, { kind = "toast", text = "Your lot is taken in this server: claim another FOR SALE lot (House menu)", color = "warning" })
+		-- (2026-11-04) a lot no longer on the map (the old island, riv_high_11 / 12): the house is safe
+		send(player, { kind = "toast", text = if rec then "Your lot is taken in this server: claim another FOR SALE lot (House menu)" else "Your old lot is gone but your house is safe: claim any FOR SALE lot (House menu)", color = "warning" })
 	end
 	publish(player)
 end
@@ -1058,9 +1157,48 @@ function Houses.drive(player: Player, lotId: string, slot: number)
 	send(player, { kind = "drive", id = id })
 end
 
+-- (2026-11-04) the same rules as the world map's fast travel (Main.server, FastTravel)
+local function homeBlocked(player: Player): string?
+	if ((player:GetAttribute("Wanted") :: number?) or 0) > 0 then
+		return "Lose the police first"
+	end
+	if player:GetAttribute("Loot") then
+		return "Not while you carry the loot"
+	end
+	if Activities.isBusy(player) then
+		return "Finish your race or job first"
+	end
+	local left = Config.Menu.FastTravelCooldown - (os.clock() - (lastHome[player] or -1e9))
+	if left > 0 then
+		return string.format("Teleport home again in %d s", math.ceil(left))
+	end
+	return nil
+end
+
+-- (2026-11-04) "Set as home": the penthouse or suite, on foot (the first car of a visit still starts
+-- at the casino, owner)
+local function goPenthouse(player: Player): (boolean, string?)
+	local home = Towers.homeCFrame(player)
+	if not home then
+		return false, "Set a home first: E at your penthouse's bed"
+	end
+	local char = player.Character
+	if not char then
+		return false, "Get out of the car first: your home is up in the tower"
+	end
+	pcall(function()
+		player:RequestStreamAroundAsync(home.Position, 6)
+	end)
+	if char.Parent then
+		char:PivotTo(home)
+	end
+	return true, nil
+end
+
 -- teleport home: the car (when driving) onto the drive, or you to the front door
-local function goHome(player: Player): boolean
-	local lotId = placed[player]
+-- (shared: a roommate's way to the house they share; otherwise your own)
+local function goHome(player: Player, shared: string?): boolean
+	local lotId = shared or placed[player]
 	local rec = lotId and recs[lotId]
 	if not (rec and rec.info) then
 		return false
@@ -1233,6 +1371,11 @@ handlers.roommate = function(player, arg)
 	elseif at then
 		table.remove(list, at)
 	end
+	-- (2026-11-04) the client shows them the mailbox's house menu from this
+	local rec = if placed[player] then recs[placed[player]] else nil
+	if rec and rec.model then
+		rec.model:SetAttribute("Roommates", table.concat(list, ","))
+	end
 	task.spawn(PlayerData.save, player)
 	return { ok = true }
 end
@@ -1245,8 +1388,22 @@ handlers.remove = function(player)
 	return { ok = true }
 end
 
-handlers.home = function(player)
-	if goHome(player) then
+-- where: "penthouse" (the home you set in a tower or the hotel), or a lot you are a roommate on
+handlers.home = function(player, where)
+	local blocked = homeBlocked(player)
+	if blocked then
+		return { ok = false, message = blocked }
+	end
+	if where == "penthouse" then
+		local ok, why = goPenthouse(player)
+		if ok then
+			lastHome[player] = os.clock()
+		end
+		return { ok = ok, message = why }
+	end
+	local shared = if type(where) == "string" and recs[where] and Houses.mayUse(player, where) then where else nil
+	if goHome(player, shared) then
+		lastHome[player] = os.clock()
 		return { ok = true }
 	end
 	-- no house standing: put the last one back if its lot is free
@@ -1257,12 +1414,47 @@ handlers.home = function(player)
 			local ok, why = place(player, profile.HomeLot, profile.HomeDesign)
 			if ok then
 				goHome(player)
+				lastHome[player] = os.clock()
 				return { ok = true }
 			end
 			return { ok = false, message = why }
 		end
 	end
+	-- (2026-11-04) a lot that's taken or no longer on the map: the house isn't lost (`tier`: the client
+	-- sets a waypoint to a free lot)
+	local have = if profile and type(profile.HomeDesign) == "string" and owns(profile, profile.HomeDesign) then profile.HomeDesign elseif profile then next(profile.Houses) else nil
+	local d = if have then H.ById[have] else nil
+	if d then
+		return { ok = false, message = "Your house is safe: claim any " .. TIER_NAME[d.tier] .. " FOR SALE lot for it", tier = d.tier }
+	end
 	return { ok = false, message = "You have no house standing: buy one at Legends Realty, then claim a FOR SALE lot" }
+end
+
+-- (2026-11-04) the nearest free lot of a tier, for the map's waypoint (signs far away aren't on the
+-- client, and there is no island to point players at any more)
+handlers.findLot = function(player, tier)
+	if type(tier) ~= "number" then
+		return { ok = false }
+	end
+	local char = player.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local cars = workspace:FindFirstChild("PlayerCars")
+	local car = cars and cars:FindFirstChild(player.Name)
+	local from: Vector3? = if root then root.Position elseif car and car:IsA("Model") then car:GetPivot().Position else nil
+	local best: string? = nil
+	local bestD = math.huge
+	for _, rec in order do
+		if rec.lot.tier == tier and not rec.owner then
+			local dist = if from then (rec.lot.frame.Position - from).Magnitude else 0
+			if dist < bestD then
+				best, bestD = rec.lot.id, dist
+			end
+		end
+	end
+	if not best then
+		return { ok = false, message = "Every " .. (TIER_NAME[tier] or "") .. " lot is taken in this server" }
+	end
+	return { ok = true, lot = best }
 end
 
 handlers.buyBay = function(player)
@@ -1396,6 +1588,19 @@ function Houses.init(c: any)
 		recs[lot.id] = rec
 		table.insert(order, rec)
 	end
+	-- (2026-11-04) 27 of the 45 lots stood 2-3.6 studs off their road, so a car couldn't get on: a drive
+	-- from the road's edge onto each one. Low lots: the whole front (the house's own drive is where its
+	-- garage is); Mid and High: the gate in the middle of the front
+	if Config.monacoOnly() then
+		task.defer(function()
+			for _, rec in order do
+				local lot = rec.lot
+				local w = if lot.tier == 0 then lot.width - 8 else 24
+				pcall(EntranceRamp.build, signFolder, lot.frame * CFrame.new(0, 0, -lot.depth / 2), { width = w, keep = { signFolder } })
+				task.wait()
+			end
+		end)
+	end
 	local function watch(player: Player)
 		task.spawn(function()
 			local deadline = os.clock() + 30
@@ -1427,6 +1632,7 @@ function Houses.init(c: any)
 		end
 		placed[player] = nil
 		lastClaim[player] = nil
+		lastHome[player] = nil
 		ctx.spawnAt[player] = nil
 	end)
 end

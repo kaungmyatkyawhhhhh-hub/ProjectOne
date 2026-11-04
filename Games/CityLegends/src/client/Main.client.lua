@@ -416,6 +416,16 @@ UI.hideLoading()
 -- Spawning / garage
 ---------------------------------------------------------------------
 local pendingAttach = false
+-- (2026-11-04) is this my car, to get straight into? Asked for here, or brought out by the server on
+-- its own (a test drive starting or ending). SpawnedAt is when it came out, so a car of yours
+-- streaming back in later doesn't pull you into it
+local function driveNow(model: Instance): boolean
+	if model:GetAttribute("Owner") ~= player.UserId then
+		return false
+	end
+	local at = model:GetAttribute("SpawnedAt")
+	return pendingAttach or (type(at) == "number" and workspace:GetServerTimeNow() - at < 20)
+end
 -- (after loading; the cars need it, so keep asking, with a warning each time it's late)
 local playerCars = workspace:WaitForChild("PlayerCars", 30) :: Folder?
 while not playerCars do
@@ -449,14 +459,14 @@ for _, existing in playerCars:GetChildren() do
 	task.spawn(skinPlayerCar, existing)
 end
 playerCars.ChildAdded:Connect(function(model)
-	if not (model:GetAttribute("Owner") == player.UserId and pendingAttach) then
+	if not driveNow(model) then
 		skinPlayerCar(model)
 	end
 end)
 
 local arrivedYet = false
 local function tryAttach(model: Instance)
-	if model:IsA("Model") and model:GetAttribute("Owner") == player.UserId and pendingAttach then
+	if model:IsA("Model") and driveNow(model) then
 		pendingAttach = false
 		waitWhole(model)
 		local okSkin, errSkin = pcall(CarSkin.apply, model, false)
@@ -486,8 +496,13 @@ local function tryAttach(model: Instance)
 end
 playerCars.ChildAdded:Connect(tryAttach)
 
+local showMenu: () -> ()
+
 -- stealFrom: a parked car in a tower garage (Parking): the server swaps it for a drivable one
+local driveRequest = 0
 local function requestDrive(id: string, stealFrom: Model?)
+	driveRequest += 1
+	local my = driveRequest
 	pendingAttach = true
 	UI.fade(true, 0.3)
 	if stealFrom then
@@ -505,11 +520,17 @@ local function requestDrive(id: string, stealFrom: Model?)
 			end
 		end
 	end)
-	task.delay(6, function()
-		if pendingAttach then
+	-- (2026-11-04) longer than the server's streaming wait (6 s, Main.server's spawnFor): this used to
+	-- give up first on a slow phone. With no car and no avatar there's nothing left on screen to try
+	-- again with, so the menu comes back
+	task.delay(15, function()
+		if pendingAttach and my == driveRequest then
 			pendingAttach = false
 			UI.fade(false, 0.3)
 			UI.toast("Could not spawn the car, try again", Config.Theme.Danger)
+			if not Driving.isDriving() and not player.Character then
+				showMenu()
+			end
 		end
 	end)
 end
@@ -575,8 +596,6 @@ require(script.Parent:WaitForChild("CustomsClient")).init() -- Legends Customs (
 -- car levels, Car Points and the parts screen (2026-11-03; the garage's UPGRADE, the HUD strip)
 require(script.Parent:WaitForChild("CarUpgrades")).init()
 
-local showMenu: () -> ()
-
 -- island houses: a bay car's "Drive" spawns it on the driveway (the server picks the spot)
 task.spawn(HouseClient.init, function(id: string)
 	UI.closeGarage()
@@ -603,9 +622,7 @@ local function openGarage(fromMenu: boolean, dealer: boolean?, focus: string?)
 		end,
 		testDrive = if dealer
 			then function(id: string)
-				pcall(function()
-					DealerCall:InvokeServer("door")
-				end)
+				-- (the server starts it at the drive-out bay itself; driveNow gets you in)
 				local ok, result = pcall(function()
 					return (remotes:WaitForChild("TestDrive") :: RemoteFunction):InvokeServer(id)
 				end)
@@ -706,9 +723,7 @@ DealerOpen.OnClientEvent:Connect(function(carId: any)
 			return result or { ok = false, message = "Server did not respond" }
 		end,
 		testDrive = function(id: string)
-			pcall(function()
-				DealerCall:InvokeServer("door")
-			end)
+			-- (the server starts it at the drive-out bay itself; driveNow gets you in)
 			local ok, result = pcall(function()
 				return (remotes:WaitForChild("TestDrive") :: RemoteFunction):InvokeServer(id)
 			end)

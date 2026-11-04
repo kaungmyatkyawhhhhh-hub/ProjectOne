@@ -23,14 +23,16 @@ local A = Config.Activities
 
 local Activities = {}
 
-type Run = { kind: string, id: string?, t0: number, dest: number?, deadline: number?, dist: number?, cp: number, lobby: string? }
+type Run = { kind: string, id: string?, t0: number, dest: number?, deadline: number?, dist: number?, cp: number, lobby: Lobby? }
 local runs: { [Player]: Run } = {}
 local ctx: any
 local Push: RemoteEvent? = nil
 
 -- a race ring's lobby: players waiting, then racing together
-type Lobby = { id: string, players: { Player }, startAt: number, racing: boolean, racers: number, finished: number, t0: number, friends: { [Player]: boolean } }
+type Lobby = { id: string, players: { Player }, startAt: number, racers: number, finished: number, t0: number, friends: { [Player]: boolean } }
 local lobbies: { [string]: Lobby } = {}
+-- (2026-11-04) lobbies out on the road: apart from `lobbies`, so a race never locks its ring
+local racing: { [Lobby]: boolean } = {}
 -- duels: two players racing to one junction
 type Duel = { a: Player, b: Player, finish: Vector3, t0: number, winner: Player? }
 local duels: { [Player]: Duel } = {}
@@ -135,8 +137,8 @@ handlers.raceFinish = function(player, clientTime)
 	end
 	-- racing other players: the place, and its share of the pot
 	local place, racers, pot = nil, 1, 0
-	local l = if run.lobby then lobbies[run.lobby] else nil
-	if l and l.racing then
+	local l = if run.lobby and racing[run.lobby] then run.lobby else nil
+	if l then
 		l.finished += 1
 		place = l.finished
 		racers = l.racers
@@ -177,17 +179,19 @@ end
 local function lobbyList(): { [string]: any }
 	local now = os.clock()
 	local list = {}
+	for l in racing do
+		list[l.id] = { count = l.racers, startsIn = 0, racing = true, classes = {} }
+	end
+	-- (a lobby waiting at the ring shows over a race that's out on the road)
 	for id, l in lobbies do
 		local classes = {}
-		if not l.racing then
-			for _, p in l.players do
-				local c = carClass(p)
-				if c then
-					table.insert(classes, c)
-				end
+		for _, p in l.players do
+			local c = carClass(p)
+			if c then
+				table.insert(classes, c)
 			end
 		end
-		list[id] = { count = if l.racing then l.racers else #l.players, startsIn = math.max(0, l.startAt - now), racing = l.racing, classes = classes }
+		list[id] = { count = #l.players, startsIn = math.max(0, l.startAt - now), racing = false, classes = classes }
 	end
 	return list
 end
@@ -200,15 +204,13 @@ end
 
 local function leaveLobby(player: Player)
 	for id, l in lobbies do
-		if not l.racing then
-			local k = table.find(l.players, player)
-			if k then
-				table.remove(l.players, k)
-				if #l.players == 0 then
-					lobbies[id] = nil
-				end
-				broadcast()
+		local k = table.find(l.players, player)
+		if k then
+			table.remove(l.players, k)
+			if #l.players == 0 then
+				lobbies[id] = nil
 			end
+			broadcast()
 		end
 	end
 end
@@ -225,11 +227,8 @@ handlers.raceJoin = function(player, id)
 	end
 	local now = os.clock()
 	local l = lobbies[race.id]
-	if l and l.racing then
-		return { ok = false, message = "A race is on here: wait for it to finish" }
-	end
 	if not l then
-		l = { id = race.id, players = {}, startAt = now + A.LobbySeconds, racing = false, racers = 0, finished = 0, t0 = 0, friends = {} }
+		l = { id = race.id, players = {}, startAt = now + A.LobbySeconds, racers = 0, finished = 0, t0 = 0, friends = {} }
 		lobbies[race.id] = l
 	end
 	if not table.find(l.players, player) then
@@ -259,17 +258,17 @@ local function startLobby(l: Lobby)
 			table.insert(racers, p)
 		end
 	end
+	lobbies[l.id] = nil
 	if #racers == 0 then
-		lobbies[l.id] = nil
 		broadcast()
 		return
 	end
-	l.racing = true
+	racing[l] = true
 	l.players = racers
 	l.racers = #racers
 	l.t0 = os.clock() + 3
 	for _, p in racers do
-		runs[p] = { kind = "race", id = race.id, t0 = l.t0, cp = 0, lobby = l.id }
+		runs[p] = { kind = "race", id = race.id, t0 = l.t0, cp = 0, lobby = l }
 		if Push then
 			Push:FireClient(p, { kind = "go", id = race.id, racers = #racers, t0in = 3 })
 		end
@@ -304,14 +303,25 @@ local function freeDriver(p: Player): Vector3?
 end
 
 -- a junction of the city grid far enough away, but not too far
+-- (2026-11-04) in Monaco a race checkpoint: the old grid is 9,000 studs from the Riviera
 local function pickFinish(from: Vector3): Vector3?
 	local options = {}
-	for i = 0, Config.City.Blocks do
-		for j = 0, Config.City.Blocks do
-			local p = CityLayout.intersectionPos(i, j)
-			local d = flatDist(p, from)
-			if d >= A.DuelMinDist and d <= A.DuelMaxDist then
-				table.insert(options, p)
+	local function consider(p: Vector3)
+		local d = flatDist(p, from)
+		if d >= A.DuelMinDist and d <= A.DuelMaxDist then
+			table.insert(options, p)
+		end
+	end
+	if Config.monacoOnly() then
+		for _, r in ActivityData.races do
+			for _, p in r.checkpoints do
+				consider(p)
+			end
+		end
+	else
+		for i = 0, Config.City.Blocks do
+			for j = 0, Config.City.Blocks do
+				consider(CityLayout.intersectionPos(i, j))
 			end
 		end
 	end
@@ -471,11 +481,12 @@ handlers.chip = function(player, index)
 	local pos = if k then ActivityData.chips[k] else nil
 	local here = where(player)
 	local act = data(player)
-	if not (pos and here and act) or (pos - here).Magnitude > 16 then
+	-- (2026-11-04) 40, was 16: the server sees a moving car a moment behind the player's screen
+	if not (pos and here and act) or (pos - here).Magnitude > 40 then
 		return { ok = false }
 	end
 	if act.chips[tostring(k)] then
-		return { ok = false }
+		return { ok = false, have = true }
 	end
 	act.chips[tostring(k)] = true
 	local count = 0
@@ -526,24 +537,22 @@ function Activities.init(c: any)
 		end
 		acc = 0
 		local now = os.clock()
-		for id, l in lobbies do
-			local race = ActivityData.raceById[id]
-			if not l.racing then
-				if now >= l.startAt then
-					startLobby(l)
+		for _, l in lobbies do
+			if now >= l.startAt then
+				startLobby(l)
+			end
+		end
+		for l in racing do
+			local still = 0
+			for _, p in l.players do
+				local r = runs[p]
+				if r and r.lobby == l then
+					still += 1
 				end
-			else
-				local still = 0
-				for _, p in l.players do
-					local r = runs[p]
-					if r and r.lobby == id then
-						still += 1
-					end
-				end
-				if still == 0 or now > l.t0 + race.bronze * 3 + 10 then
-					lobbies[id] = nil
-					broadcast()
-				end
+			end
+			if still == 0 or now > l.t0 + ActivityData.raceById[l.id].bronze * 3 + 10 then
+				racing[l] = nil
+				broadcast()
 			end
 		end
 		for p, duel in duels do

@@ -79,6 +79,19 @@ local function ownedSet(): { [string]: boolean }
 	return set
 end
 
+-- (2026-11-04) the way to a lot: the map's waypoint on the nearest free FOR SALE sign of a tier
+local function findLot(tier: number)
+	local r = invoke("findLot", tier)
+	local lot = if r.ok then lotsById[r.lot] else nil
+	if not lot then
+		UI.toast(r.message or "Couldn't find a free lot", Theme.Warning)
+		return
+	end
+	local Minimap = require(script.Parent:WaitForChild("Minimap")) :: any
+	Minimap.setWaypoint((lot.frame * CFrame.new(-lot.width / 2 + 9, 0, -lot.depth / 2 + 3)).Position)
+	UI.toast("Waypoint set: the nearest free " .. TIER_NAME[tier] .. " lot", Theme.Accent)
+end
+
 ---------------------------------------------------------------------
 -- The ghost preview on a lot
 ---------------------------------------------------------------------
@@ -186,10 +199,19 @@ end
 -- Legends Realty: the catalogue
 ---------------------------------------------------------------------
 local previewConn: RBXScriptConnection? = nil
+local catalogAsk = 0
 
 function HousingClient.openCatalog(focus: string?)
 	close()
+	-- (2026-11-04) a second tap before the server answers: one screen only (the first one was left
+	-- behind with a dead X, filling the screen until you rejoined)
+	catalogAsk += 1
+	local ask = catalogAsk
 	local data = invoke("catalog")
+	if ask ~= catalogAsk then
+		return
+	end
+	close()
 	if not data.ok then
 		UI.toast(data.message or "Legends Realty is closed: try again", Theme.Danger)
 		return
@@ -205,7 +227,7 @@ function HousingClient.openCatalog(focus: string?)
 	local compact = camera.ViewportSize.X < 900
 	local pad = if compact then 14 else 40
 	label({ Text = "LEGENDS REALTY", TextSize = if compact then 26 else 38, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(pad, if compact then 10 else 34), Size = UDim2.new(0.6, 0, 0, 40), ZIndex = 71, Parent = f })
-	label({ Text = "BUY A HOUSE, THEN CLAIM A FOR SALE LOT OF ITS TIER ON LEGENDS ISLE", TextSize = 12, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(pad, if compact then 44 else 76), Size = UDim2.new(0.7, 0, 0, 14), ZIndex = 71, Parent = f })
+	label({ Text = "BUY A HOUSE, THEN CLAIM A FOR SALE LOT OF ITS TIER ON THE HILLSIDE ROADS", TextSize = 12, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(pad, if compact then 44 else 76), Size = UDim2.new(0.7, 0, 0, 14), ZIndex = 71, Parent = f })
 	local cashText = label({ Text = money(cash), TextColor3 = Theme.Money, TextSize = 24, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -(pad + 56), 0, if compact then 10 else 36), Size = UDim2.new(0.3, 0, 0, 36), ZIndex = 71, Parent = f })
 	local x = button("×", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -pad, 0, if compact then 8 else 34), Size = UDim2.fromOffset(44, 44), TextSize = 20, ZIndex = 71, Parent = f })
 	x.Activated:Connect(close)
@@ -335,7 +357,7 @@ function HousingClient.openCatalog(focus: string?)
 			priceText.Text = "OWNED"
 			priceText.TextColor3 = Theme.Accent
 			buyBtn.Text = "CLAIM A LOT"
-			msgText.Text = "Walk up to any FOR SALE sign with a " .. TIER_NAME[d.tier] .. " band on Legends Isle"
+			msgText.Text = "CLAIM A LOT marks the nearest free " .. TIER_NAME[d.tier] .. " FOR SALE sign on your map"
 		elseif level < d.level then
 			priceText.Text = money(d.price)
 			priceText.TextColor3 = Theme.SubText
@@ -416,7 +438,7 @@ function HousingClient.openCatalog(focus: string?)
 		local d = H.ById[selected]
 		if owned[d.id] then
 			close()
-			UI.toast("Drive to Legends Isle and walk up to a " .. TIER_NAME[d.tier] .. " FOR SALE sign", Theme.Accent)
+			findLot(d.tier)
 			return
 		end
 		if level < d.level or cash < d.price then
@@ -546,13 +568,16 @@ function HousingClient.openMenu(lotId: string?)
 	local here = lotId or player:GetAttribute("HouseLot")
 	if type(here) ~= "string" then
 		-- no house standing
-		local f, body = panel("YOUR HOUSE", "NOTHING STANDING IN THIS SERVER YET", 440, 290)
+		-- (2026-11-04) a penthouse or suite you set as home ("Set as home"): TELEPORT HOME goes there
+		local home = player:GetAttribute("Home")
+		local hasHome = type(home) == "string" and home ~= ""
+		local f, body = panel("YOUR HOUSE", "NOTHING STANDING IN THIS SERVER YET", 440, if hasHome then 350 else 290)
 		local owned = ownedSet()
 		local n = 0
 		for _ in owned do
 			n += 1
 		end
-		label({ Text = if n == 0 then "Buy a house at Legends Realty (Downtown, by the causeway), then claim a FOR SALE lot on Legends Isle." else "Put your last house back on its lot, or walk up to any FOR SALE sign of its tier to claim a new lot.", TextWrapped = true, TextSize = 15, Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 64), ZIndex = 73, Parent = body })
+		label({ Text = if n == 0 then "Buy a house at Legends Realty (by the harbour, on the Coast Road), then claim a FOR SALE lot of its tier." else "Put your last house back on its lot, or walk up to any FOR SALE sign of its tier to claim a new lot.", TextWrapped = true, TextSize = 15, Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 64), ZIndex = 73, Parent = body })
 		local place = button("PLACE MY LAST HOUSE", Theme.Money, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 50), TextSize = 16, ZIndex = 73, Parent = body })
 		place.Visible = n > 0
 		place.Activated:Connect(function()
@@ -561,12 +586,27 @@ function HousingClient.openMenu(lotId: string?)
 				close()
 			else
 				UI.toast(r.message or "Couldn't place it", Theme.Warning)
+				-- (its lot is taken or gone: the way to another one)
+				if type(r.tier) == "number" then
+					close()
+					findLot(r.tier)
+				end
 			end
 		end)
 		local shop = button("SEE THE HOUSES", Theme.Accent, { Position = UDim2.fromOffset(0, if n > 0 then 140 else 80), Size = UDim2.new(1, 0, 0, 50), TextSize = 16, ZIndex = 73, Parent = body })
 		shop.Activated:Connect(function()
 			HousingClient.openCatalog(nil)
 		end)
+		if hasHome then
+			local go = button("TELEPORT HOME", Theme.Accent, { Position = UDim2.fromOffset(0, if n > 0 then 200 else 140), Size = UDim2.new(1, 0, 0, 50), TextSize = 16, ZIndex = 73, Parent = body })
+			go.Activated:Connect(function()
+				local r = invoke("home", "penthouse")
+				close()
+				if not r.ok then
+					UI.toast(r.message or "Couldn't get you home", Theme.Warning)
+				end
+			end)
+		end
 		local _ = f
 		return
 	end
@@ -584,7 +624,8 @@ function HousingClient.openMenu(lotId: string?)
 		return b
 	end
 	row("TELEPORT HOME", Theme.Accent).Activated:Connect(function()
-		local r = invoke("home")
+		-- (a roommate: to the house they share)
+		local r = invoke("home", if data.owner then nil else here)
 		close()
 		if not r.ok then
 			UI.toast(r.message or "Couldn't get you home", Theme.Warning)

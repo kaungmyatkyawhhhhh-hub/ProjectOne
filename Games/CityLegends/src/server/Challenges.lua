@@ -9,7 +9,7 @@
 	  * jump ramps (ChallengeData.ramps): air time and distance pay a bonus
 	  * the leaderboard: top speed (best trap) and best drift, from an OrderedDataStore when it
 	    works (published games), else from the players in this server; on a board on a city-centre
-	    corner and in the client's panel (B)
+	    corner and in the client's panel (J)
 	Remotes: ChallengeReport (client -> server), ChallengeEvent (server -> client), ChallengeBoard
 	(RemoteFunction: the leaderboard).
 ]]
@@ -74,7 +74,8 @@ end
 local function session(player: Player): Session
 	local s = sessions[player]
 	if not s then
-		s = { lastBank = os.clock(), lastStunt = 0, trapAt = {}, pushed = {} }
+		-- (2026-11-04) lastBank 0, was now: the first drift of a visit was held to one second's points
+		s = { lastBank = 0, lastStunt = 0, trapAt = {}, pushed = {} }
 		sessions[player] = s
 	end
 	return s

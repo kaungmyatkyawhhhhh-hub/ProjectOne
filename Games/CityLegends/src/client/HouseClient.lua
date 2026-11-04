@@ -42,6 +42,19 @@ local function ownedKinds(): { [string]: boolean }
 	return set
 end
 
+-- (2026-11-04) is this player a roommate in that house (the server's Roommates attribute)
+local function isMate(house: Instance): boolean
+	local raw = house:GetAttribute("Roommates")
+	if type(raw) == "string" then
+		for id in raw:gmatch("%d+") do
+			if tonumber(id) == player.UserId then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 local function word(p: Instance)
 	if not p:IsA("ProximityPrompt") then
 		return
@@ -59,10 +72,11 @@ local function word(p: Instance)
 		p.ActionText = if moving then "Move in" else "Buy"
 		p.HoldDuration = if moving then 0.4 else 1.5
 	elseif p:HasTag("HouseOwner") then
-		p.Enabled = owner == player.UserId
+		-- (the mailbox's house menu is for roommates too)
+		p.Enabled = owner == player.UserId or (p.Name == "HouseMenu" and isMate(house))
 	elseif p:HasTag("HouseVisitor") then
-		-- the doorbell: for everyone but the owner
-		p.Enabled = owner ~= player.UserId
+		-- the doorbell: for everyone but the owner and roommates
+		p.Enabled = owner ~= player.UserId and not isMate(house)
 	end
 end
 
@@ -81,6 +95,7 @@ local function addHouse(model: Instance)
 	end
 	houses[id] = model
 	model:GetAttributeChangedSignal("Owner"):Connect(rewordAll)
+	model:GetAttributeChangedSignal("Roommates"):Connect(rewordAll)
 	task.defer(rewordAll)
 end
 

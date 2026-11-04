@@ -43,7 +43,7 @@ local env: { [string]: any } = {
 		return nil
 	end },
 	-- (no background loops in the test)
-	task = { spawn = function() end, wait = function() end },
+	task = { spawn = function() end, wait = function() end, defer = function() end },
 	os = os,
 }
 
@@ -99,6 +99,8 @@ local paths = {
 	Flex = "src/shared/Flex.lua",
 	Rewards = "src/server/Rewards.lua",
 	Garden = "src/server/Garden.lua",
+	RewardsPalace = "src/server/RewardsPalace.lua",
+	EntranceRamp = "src/server/EntranceRamp.lua",
 	Cars = "src/shared/Cars.lua",
 	GemShowcase = "src/server/GemShowcase.lua",
 	Luxe = "src/server/Luxe.lua",

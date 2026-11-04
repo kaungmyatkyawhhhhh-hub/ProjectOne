@@ -223,6 +223,8 @@ local dailyPanel: Frame
 local controlsPanel: Frame? = nil
 local controlsArrow: TextLabel? = nil
 local giftDot: Frame
+local dailyCardFrame: TextButton? = nil
+local dailyCardClosed = false
 local dailyCardTime: TextLabel
 local dailyCardSub: TextLabel
 local dailyCardStroke: UIStroke
@@ -358,8 +360,10 @@ end
 ---------------------------------------------------------------------
 -- Touch controls
 ---------------------------------------------------------------------
+local touchHolder: Frame? = nil
 function UI.buildTouchControls()
 	local holder = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = hud })
+	touchHolder = holder
 	local function touchButton(text: string, pos: UDim2, size: UDim2, color: Color3, onDown: () -> (), onUp: () -> ())
 		local b: TextButton = new("TextButton", {
 			AutoButtonColor = false,
@@ -373,14 +377,19 @@ function UI.buildTouchControls()
 			Size = size,
 			Parent = holder,
 		}, { corner(14), stroke(color, 2, 0.2) })
+		-- (2026-11-04) the touch holding this button: it lets go when that touch ends, wherever the
+		-- thumb slid to (the button's own InputEnded can miss it, and GAS or the steering stayed on)
+		local held: InputObject? = nil
 		b.InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			if not held and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1) then
+				held = input
 				b.BackgroundTransparency = 0
 				onDown()
 			end
 		end)
-		b.InputEnded:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		UserInputService.InputEnded:Connect(function(input)
+			if held and (input == held or (input.UserInputType == Enum.UserInputType.MouseButton1 and held.UserInputType == Enum.UserInputType.MouseButton1)) then
+				held = nil
 				b.BackgroundTransparency = 0.25
 				onUp()
 			end
@@ -884,16 +893,19 @@ local claimDaily: () -> ()
 
 local function buildSideButtons()
 	local size = if UI.isTouch then 48 else 64
+	-- (2026-11-04) on a phone seven in one column ran off the top (MENU under Roblox's own icon) and
+	-- down under the steering buttons: three across, under Roblox's top bar, above the steering
 	local column = new("Frame", {
 		Name = "SideButtons",
-		AnchorPoint = Vector2.new(0, 0.5),
-		-- on touch, lift it clear of the steering buttons
-		Position = if UI.isTouch then UDim2.new(0, 14, 0.4, 0) else UDim2.new(0, 20, 0.5, 0),
-		Size = UDim2.fromOffset(size, size * 6 + 50),
+		AnchorPoint = if UI.isTouch then Vector2.zero else Vector2.new(0, 0.5),
+		Position = if UI.isTouch then UDim2.fromOffset(14, 56) else UDim2.new(0, 20, 0.5, 0),
+		Size = if UI.isTouch then UDim2.fromOffset(size * 3 + 16, size * 3 + 16) else UDim2.fromOffset(size, size * 6 + 50),
 		BackgroundTransparency = 1,
 		Parent = hud,
 	}, {
-		new("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder }),
+		if UI.isTouch
+			then new("UIGridLayout", { CellSize = UDim2.fromOffset(size, size), CellPadding = UDim2.fromOffset(8, 8), FillDirectionMaxCells = 3, SortOrder = Enum.SortOrder.LayoutOrder })
+			else new("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
 	local function sideButton(kind: string, caption: string, order: number): TextButton
 		local b: TextButton = new("TextButton", {
@@ -1137,8 +1149,10 @@ local function buildDailyCard()
 		BackgroundTransparency = 0.08,
 		Parent = hud,
 	}, { corner(14) })
+	dailyCardFrame = card
 	-- PC: bottom left, clear of the rev counter (beside the side buttons when they reach that far
-	-- down); touch: top right under the minimap, clear of the pedals
+	-- down); touch: top right under the minimap, on foot only (setOnFoot): on a 375-high phone it lay
+	-- on DRIFT and GAS, and a press opened the gift
 	local function place()
 		local cam = workspace.CurrentCamera
 		local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
@@ -1191,6 +1205,7 @@ local function buildDailyCard()
 	-- closeable (owner, 2026-10-23): gone for this visit; the GIFTS button still opens the gift
 	local close = button("X", Theme.Danger, { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -4, 0, 4), Size = UDim2.fromOffset(if UI.isTouch then 24 else 22, if UI.isTouch then 24 else 22), TextSize = 11, ZIndex = 3, Parent = card })
 	close.Activated:Connect(function()
+		dailyCardClosed = true
 		card.Visible = false
 	end)
 	card.MouseEnter:Connect(function()
@@ -1291,6 +1306,9 @@ function UI.init()
 
 	popupHolder = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.38), Size = UDim2.fromOffset(500, 200), Parent = hud })
 
+	-- (2026-11-04) toasts on their own screen, over the main menu: in this one (order 10) they fell
+	-- behind it (order 40), so SPAWN, the Store and Realty seemed to do nothing
+	local toastGui = new("ScreenGui", { Name = "Toasts", ResetOnSpawn = false, IgnoreGuiInset = true, DisplayOrder = 70, Parent = pg })
 	toast = label({
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.new(0.5, 0, 0, 162),
@@ -1301,7 +1319,7 @@ function UI.init()
 		TextTransparency = 1,
 		Visible = false,
 		ZIndex = 75, -- readable over the garage too
-		Parent = gui,
+		Parent = toastGui,
 	})
 	corner(8).Parent = toast
 
@@ -1860,9 +1878,26 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 
 	local f = new("Frame", { BackgroundColor3 = Theme.Background, BackgroundTransparency = 0.08, Size = UDim2.fromScale(1, 1), ZIndex = 60, Parent = gui })
 	garageFrame = f
+	-- (2026-11-04) a small screen gets this same layout, scaled (as in CarUpgrades): at phone size DRIVE
+	-- lay on the car's name, UPGRADE on the list, and the numbers ran off the screen
+	local cam = workspace.CurrentCamera
+	local page = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), ZIndex = 61, Parent = f })
+	local pageScale = new("UIScale", { Parent = page })
+	local function fit()
+		local vp = cam.ViewportSize
+		local k = math.min(1, vp.X / 1000, vp.Y / 600)
+		pageScale.Scale = k
+		page.Size = UDim2.fromOffset(vp.X / k, vp.Y / k)
+	end
+	fit()
+	local fitConn = cam:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
+	f.Destroying:Connect(function()
+		fitConn:Disconnect()
+	end)
+	local small = pageScale.Scale < 1
 
 	-- header
-	local header = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(40, 40), Size = UDim2.new(1, -80, 0, 50), ZIndex = 61, Parent = f })
+	local header = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(40, 40), Size = UDim2.new(1, -80, 0, 50), ZIndex = 61, Parent = page })
 	label({ Text = if dealer then Config.Dealership.Name else "MY CARS", TextSize = 38, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.5, 0, 1, 0), ZIndex = 61, Parent = header })
 	label({
 		Text = if dealer then "NEW CARS · BUY HERE, DRIVE OUT OF THE BAY" else "NEW CARS ARE SOLD AT " .. Config.Dealership.Name .. ", THE DEALERSHIP",
@@ -1873,7 +1908,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		Position = UDim2.fromOffset(40, 86),
 		Size = UDim2.new(0.6, 0, 0, 14),
 		ZIndex = 61,
-		Parent = f,
+		Parent = page,
 	})
 	local cashText = label({ Text = formatCash(cash), TextColor3 = Theme.Money, TextSize = 26, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -60, 0, 0), Size = UDim2.new(0.4, 0, 1, 0), ZIndex = 61, Parent = header })
 	if callbacks.close then
@@ -1885,7 +1920,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	end
 
 	-- tabs
-	local tabs = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(40, 104), Size = UDim2.new(0.36, 0, 0, 32), ZIndex = 61, Parent = f }, {
+	local tabs = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(40, 104), Size = UDim2.new(0.36, 0, 0, 32), ZIndex = 61, Parent = page }, {
 		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6) }),
 	})
 
@@ -1901,7 +1936,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		ZIndex = 61,
-		Parent = f,
+		Parent = page,
 	}, {
 		corner(10),
 		stroke(Theme.Stroke, 1, 0.2),
@@ -1910,7 +1945,7 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	})
 
 	-- detail panel
-	local detail = new("Frame", { Position = UDim2.new(0.36, 64, 0, 104), Size = UDim2.new(0.64, -104, 1, -144), BackgroundColor3 = Theme.Panel, BackgroundTransparency = 0.1, ZIndex = 61, Parent = f }, { corner(12), stroke(Theme.Stroke, 1, 0.2) })
+	local detail = new("Frame", { Position = UDim2.new(0.36, 64, 0, 104), Size = UDim2.new(0.64, -104, 1, -144), BackgroundColor3 = Theme.Panel, BackgroundTransparency = 0.1, ZIndex = 61, Parent = page }, { corner(12), stroke(Theme.Stroke, 1, 0.2) })
 	local viewport = new("ViewportFrame", {
 		Position = UDim2.fromOffset(12, 12),
 		Size = UDim2.new(1, -24, 0.56, 0),
@@ -1956,8 +1991,9 @@ function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
 	local msgText = label({ Text = "", TextSize = 14, TextColor3 = Theme.Danger, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -24, 1, -88), Size = UDim2.new(0.4, 0, 0, 18), ZIndex = 62, Parent = detail })
 	-- (owner, 2026-10-30: test drives at the dealership, from the research)
 	local testBtn = button("TEST DRIVE", Theme.Accent2, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -266, 1, -24), Size = UDim2.fromOffset(170, 56), TextSize = 16, TextColor3 = Theme.Accent2, Visible = false, ZIndex = 62, Parent = detail })
-	-- (2026-11-03) the car's parts screen (CarUpgrades), for a car you own
-	local upgradeBtn = button("UPGRADE", Theme.Accent2, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -266, 1, -24), Size = UDim2.fromOffset(170, 56), TextSize = 16, TextColor3 = Theme.Accent2, Visible = false, ZIndex = 62, Parent = detail })
+	-- (2026-11-03) the car's parts screen (CarUpgrades), for a car you own ((2026-11-04) a small screen:
+	-- over DRIVE, or it lies on the numbers)
+	local upgradeBtn = button("UPGRADE", Theme.Accent2, { AnchorPoint = Vector2.new(1, 1), Position = if small then UDim2.new(1, -24, 1, -88) else UDim2.new(1, -266, 1, -24), Size = if small then UDim2.fromOffset(230, 44) else UDim2.fromOffset(170, 56), TextSize = 16, TextColor3 = Theme.Accent2, Visible = false, ZIndex = 62, Parent = detail })
 
 	local previewModel: Model? = nil
 	local previewLen = 14
@@ -2348,7 +2384,7 @@ function UI.setBlink(left: boolean, right: boolean)
 	end
 end
 
--- on foot: the speedometer goes away (the rest of the HUD stays)
+-- on foot: the speedometer and the pedals go away (the rest of the HUD stays)
 local speedoOnFoot, speedoInterior = false, false
 local function speedoVisible()
 	local speedo = hud and hud:FindFirstChild("Speedometer")
@@ -2359,6 +2395,13 @@ end
 function UI.setOnFoot(onFoot: boolean)
 	speedoOnFoot = onFoot
 	speedoVisible()
+	-- (2026-11-04) the pedals go too: on foot they sat on the walking thumb and Roblox's jump button
+	if touchHolder then
+		touchHolder.Visible = not onFoot
+	end
+	if UI.isTouch and dailyCardFrame and not dailyCardClosed then
+		dailyCardFrame.Visible = onFoot
+	end
 end
 
 -- the context action pill (bottom right): "[Y] GET OUT", "[Y] GET IN", "[E] ROB THE VAULT" ...

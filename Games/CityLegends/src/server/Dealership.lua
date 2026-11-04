@@ -507,6 +507,12 @@ function Dealership.near(player: Player, getCar: ((Player) -> Model?)?): boolean
 	return pos ~= nil and ((pos :: Vector3) - f.Position).Magnitude < D.BuyRange
 end
 
+-- where a car driven out starts (a test drive asks only once it has been allowed: 2026-11-04, a
+-- refused one left the spot set, and the next car anywhere came out here)
+function Dealership.doorSpot(): CFrame?
+	return doorCF
+end
+
 function Dealership.init(ctx: any)
 	local openEvent: RemoteEvent = ctx.remote("RemoteEvent", "DealerOpen")
 	local call: RemoteFunction = ctx.remote("RemoteFunction", "DealerCall")

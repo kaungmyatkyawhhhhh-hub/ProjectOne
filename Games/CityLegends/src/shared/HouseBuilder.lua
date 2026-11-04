@@ -107,6 +107,10 @@ export type Info = {
 	gateAt: CFrame?,
 	-- boxes of ground to clear for an underground garage (the server digs them out of the terrain)
 	dig: { { cf: CFrame, size: Vector3 } },
+	-- (2026-11-04) where a Monaco lot's stone plate has to open for that garage: { x0, x1, z0, z1 } in
+	-- the lot's frame (Houses.dig)
+	holes: { { number } },
+	center: CFrame, -- the house's middle (which side of a door is indoors)
 }
 
 -- the underground garage on High lots (owner, 2026-10-30: "make the garage under ground"):
@@ -1221,6 +1225,7 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 	-- the garage wing (or the bays in the house's front on small houses, or underground on High lots)
 	local bays: { CFrame } = {}
 	local dig: { { cf: CFrame, size: Vector3 } } = {}
+	local holes: { { number } } = {}
 	local gcf: CFrame
 	if under then
 		local per = math.ceil(maxBays / 2)
@@ -1285,6 +1290,8 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		local dh = 10 - (fy - 6)
 		table.insert(dig, { cf = lot * CFrame.new(ugX, dy, ugTop + UG_RUN / 2), size = Vector3.new(UG_W + 6, dh, UG_RUN + 2) })
 		table.insert(dig, { cf = lot * CFrame.new(hcx, dy, hcz), size = Vector3.new(hallW + 8, dh, hallD + 8) })
+		table.insert(holes, { x0, x0 + UG_W, ugTop, hz0 })
+		table.insert(holes, { x0, x0 + hallW, hz0, hz0 + hallD })
 	elseif integrated then
 		gcf = hcf * CFrame.new(0, 0.4, -d / 2 + (BAY_D + 1) / 2)
 		for k = 1, maxBays do
@@ -1438,11 +1445,15 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 		drive = drive,
 		door = hcf * CFrame.new(doorsOut.front or 0, 0.4, -d / 2 - 3) * CFrame.Angles(0, math.pi, 0),
 		mailbox = mailbox,
-		spawn = lot * CFrame.new(gxLocal, 0.6, -lotD / 2 + 8),
+		-- (2026-11-04) in line with the gate, nose to it (Mid and High: it was at the garage's side of the
+		-- lot, nose against the wall); Low's open drive is there anyway
+		spawn = lot * CFrame.new(entryX, 0.6, -lotD / 2 + (if tier == 0 then 8 else 11)),
 		size = Vector3.new(lotW, topY + 12, lotD),
 		gates = gates,
 		gateAt = gateAt,
 		dig = dig,
+		holes = holes,
+		center = hcf,
 	}
 	return model, info
 end

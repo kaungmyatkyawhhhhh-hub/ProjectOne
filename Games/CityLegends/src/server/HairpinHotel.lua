@@ -14,7 +14,13 @@ local function goTo(player: Player, spot: BasePart)
 	if not char or not hum or hum.SeatPart or hum.Health <= 0 then
 		return
 	end
-	char:PivotTo(spot.CFrame)
+	-- (2026-11-04) streaming: the floor there reaches the player's game first
+	pcall(function()
+		player:RequestStreamAroundAsync(spot.Position, 5)
+	end)
+	if char.Parent then
+		char:PivotTo(spot.CFrame)
+	end
 end
 
 local function door(part: BasePart, action: string, spot: BasePart)

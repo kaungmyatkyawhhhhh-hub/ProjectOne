@@ -16,6 +16,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
+local Driving = require(script.Parent:WaitForChild("Driving"))
 
 local GoalsClient = {}
 
@@ -66,19 +67,22 @@ local function invoke(what: string): any
 end
 
 ---------------------------------------------------------------------
--- The HUD tracker (under the minimap; on a phone under the streak card)
+-- The HUD tracker (under the minimap; on a phone left of it, and only on foot)
 ---------------------------------------------------------------------
 local function placeTracker()
 	local t = tracker
 	if not t then
 		return
 	end
+	-- (2026-11-04) on a phone left of the minimap and the GET OUT pill, under the level bar: under the
+	-- streak card this button sat on GAS, BRAKE and Roblox's jump button, and a press opened GOALS
+	if UI.isTouch then
+		t.Position = UDim2.new(1, -154, 0, 52)
+		return
+	end
 	local map = player.PlayerGui:FindFirstChild("Minimap")
 	local bottom = if map then map:GetAttribute("Bottom") else nil
 	local top = (if type(bottom) == "number" then bottom else 190) + 10
-	if UI.isTouch then
-		top += 78 -- (the streak card sits right under the minimap on a phone)
-	end
 	t.Position = UDim2.new(1, -14, 0, top)
 end
 
@@ -444,7 +448,8 @@ function GoalsClient.init()
 			local hudGui = player.PlayerGui:FindFirstChild("ActivitiesHUD")
 			local card = hudGui and hudGui:FindFirstChild("RunCard")
 			if t then
-				t.Visible = not (card and (card :: Frame).Visible)
+				-- (2026-11-04) on a phone not while driving: there it would cover the combo
+				t.Visible = not (card and (card :: Frame).Visible) and not (UI.isTouch and Driving.isDriving())
 			end
 		end
 	end)

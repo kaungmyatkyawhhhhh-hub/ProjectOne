@@ -15,6 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local ChallengeData = require(Shared:WaitForChild("ChallengeData"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local G = Config.Goals
@@ -35,7 +36,8 @@ local dirty: { [Player]: boolean } = {}
 -- features that some goals need (race lobbies for "pvp"): goals needing one that isn't on are
 -- skipped on the HUD and never dealt as a daily task
 local features: { [string]: boolean } = {}
-local NEEDS = { pvp = "pvp", pvpwins = "pvp" }
+-- (2026-11-04: "ramps": a jump only counts off a ramp, and Monaco has none yet; Goals.init)
+local NEEDS = { pvp = "pvp", pvpwins = "pvp", jumps = "ramps" }
 
 local TASK_BY_ID: { [string]: any } = {}
 for _, t in G.Tasks do
@@ -311,7 +313,7 @@ function Goals.state(player: Player): { [string]: any }?
 	local list = {}
 	for _, t in tasks(player, g) do
 		local spec = TASK_BY_ID[t.id]
-		if spec then
+		if spec and available(spec.stat) then -- (a task dealt before its feature went away stays hidden)
 			table.insert(list, {
 				text = string.format(spec.text, spec.need),
 				have = math.min(spec.need, if spec.stat == "miles" then math.floor(t.have * 10) / 10 else t.have),
@@ -339,6 +341,9 @@ end
 
 function Goals.init(c: any)
 	ctx = c
+	if #ChallengeData.ramps > 0 then
+		Goals.feature("ramps")
+	end
 	Push = c.remote("RemoteEvent", "GoalsPush")
 	local call: RemoteFunction = c.remote("RemoteFunction", "GoalsCall")
 	call.OnServerInvoke = function(player: Player, what: any)

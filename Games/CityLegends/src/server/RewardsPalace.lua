@@ -9,7 +9,10 @@
 	    railing (mirror ball fountain, flower beds, palms), the exclusive parking (10 marked bays at
 	    the garden's kerb, for players' own cars: owner, 2026-11-04: no parked cars here), the drive in
 	    front of the steps, two arms round the garden to the street (EntranceRamp stops at the road's
-	    edge), hedges, flags.
+	    edge), hedges, flags. Beside the palace two side courts (owner, 2026-11-04: "expand the area
+	    ... for atleast 35 cars", "use the realistic palm tree"): 21 more bays each side, 52 in all,
+	    planted islands with the map's real palms, lanterns, hedges. Reached from the drive before the
+	    steps. tools/riviera/CasinoGround.luau grades the ground round them.
 	    Tags: CasinoGardenSpawn (players start here on foot), CasinoCarStart (a first car).
 	  * RewardsPalace.roof: the hipped slate roof over the hall, its dormers, the twin towers, the clock.
 	  * RewardsPalace.hall: the blue stained-glass oval dome (art: tools/casino_art.py), gold mouldings,
@@ -56,6 +59,13 @@ local AISLE_Z0, AISLE_Z1 = -62, -48 -- the drive in front of the steps
 local ARM_X0, ARM_X1 = 62, 84 -- the drives round the garden's ends
 local RAMP_Z = -98 -- where the ramps from the street end
 local BAY_W, BAY_START = 10.5, 8 -- 5 bays each side of the path to the steps
+-- the side courts (x mirrored each side): inner row, drive, outer row, a planted border
+local ROW1_X0, ROW1_X1 = 92, 106
+local LANE_X0, LANE_X1 = 106, 124
+local ROW2_X0, ROW2_X1 = 124, 138
+local COURT_OUT = 148 -- (a Belle Epoque block stands at 151 by the street)
+local COURT_FRONT, COURT_BACK = -100, 36.5
+local LINK_Z0, LINK_Z1 = -62, -46 -- the drive through to the court
 
 export type Frame = (number, number, number) -> CFrame
 
@@ -107,6 +117,23 @@ local function picture(kit: any, parent: Instance, size: Vector3, cf: CFrame, fa
 	d.Face = face
 	d.Parent = p
 	return p
+end
+
+-- the map's own palm (a real-looking tree), its foot at pos, h tall; the built one if the map has none
+function RewardsPalace.palm(kit: any, parent: Instance, pos: Vector3, h: number, seed: number)
+	local riv = workspace:FindFirstChild("Riviera")
+	local dressing = riv and riv:FindFirstChild("Dressing")
+	local m = dressing and dressing:FindFirstChild("Palm", true)
+	if not (m and m:IsA("Model")) then
+		Garden.palm(kit, parent, pos, h, seed)
+		return
+	end
+	local tree = m:Clone()
+	tree:ScaleTo(tree:GetScale() * (h / tree:GetExtentsSize().Y))
+	local cf, size = tree:GetBoundingBox()
+	local foot = CFrame.new(pos) * CFrame.Angles(0, (seed * 1.7) % TAU, 0)
+	tree:PivotTo(foot * (CFrame.new(cf.Position - Vector3.new(0, size.Y / 2, 0)):Inverse() * tree:GetPivot()))
+	tree.Parent = parent
 end
 
 ---------------------------------------------------------------------
@@ -199,8 +226,8 @@ local function garden(kit: any, model: Instance, at: Frame, top: number): number
 	for _, s in { -1, 1 } do
 		bed(kit, model, at, gy, s * 27, 9.6, { Color3.fromRGB(52, 104, 50), Color3.fromRGB(198, 46, 96), Color3.fromRGB(244, 236, 226), Color3.fromRGB(240, 190, 60) })
 		bed(kit, model, at, gy, s * 46, 7.4, { Color3.fromRGB(52, 104, 50), Color3.fromRGB(238, 130, 50), Color3.fromRGB(168, 80, 170) })
-		Garden.palm(kit, model, at(s * 46, gy, GARDEN_Z).Position, 32, if s > 0 then 11 else 23)
-		Garden.palm(kit, model, at(s * 27, gy, GARDEN_Z).Position, 26, if s > 0 then 37 else 41)
+		RewardsPalace.palm(kit, model, at(s * 46, gy, GARDEN_Z).Position, 38, if s > 0 then 11 else 23)
+		RewardsPalace.palm(kit, model, at(s * 27, gy, GARDEN_Z).Position, 32, if s > 0 then 37 else 41)
 	end
 	-- where players start
 	local spawns = Instance.new("Folder")
@@ -233,6 +260,101 @@ local function parking(kit: any, model: Instance, at: Frame, top: number)
 	end
 end
 
+-- a row of bays: pale paving, gold lines, a low stone stop at the nose (nose = the x the cars point at)
+local function bayRow(kit: any, model: Instance, at: Frame, top: number, x0: number, x1: number, nose: number, z0: number, n: number)
+	local deco = kit.deco
+	local mid, wide = (x0 + x1) / 2, math.abs(x1 - x0)
+	local long = n * BAY_W
+	deco(model, Vector3.new(wide, 0.08, long), at(mid, top + 0.04, z0 + long / 2), PAVING_PALE, Enum.Material.Pavement)
+	for k = 0, n do
+		deco(model, Vector3.new(wide - 0.6, 0.06, 0.4), at(mid, top + 0.11, z0 + k * BAY_W), GOLD, Enum.Material.SmoothPlastic)
+	end
+	for k = 0, n - 1 do
+		deco(model, Vector3.new(0.9, 0.34, BAY_W * 0.62), at(nose, top + 0.25, z0 + (k + 0.5) * BAY_W), STONE_DARK, Enum.Material.Pavement)
+	end
+end
+
+-- a planted island at a row's end: a stone kerb, grass, two clipped shrubs, a real palm
+local function island(kit: any, model: Instance, at: Frame, top: number, x0: number, x1: number, z0: number, z1: number, h: number, seed: number)
+	local mk, deco = kit.mk, kit.deco
+	local mid, wide = (x0 + x1) / 2, math.abs(x1 - x0)
+	local midZ, long = (z0 + z1) / 2, z1 - z0
+	mk(model, Vector3.new(wide, 0.8, long), at(mid, top + 0.4, midZ), PAVING_PALE, Enum.Material.Pavement, { name = "CourtIsland" })
+	deco(model, Vector3.new(wide - 1.4, 0.1, long - 1.4), at(mid, top + 0.85, midZ), LAWN, Enum.Material.Grass)
+	for _, f in { -0.3, 0.3 } do
+		deco(model, Vector3.new(3, 2.4, 3), at(mid + wide * f, top + 1.9, midZ), HEDGE, Enum.Material.Grass, { shape = Enum.PartType.Ball })
+	end
+	RewardsPalace.palm(kit, model, at(mid, top + 0.9, midZ).Position, h, seed)
+end
+
+-- a black lantern on a post, gold collar, warm at night
+local function lantern(kit: any, model: Instance, at: Frame, top: number, x: number, z: number)
+	local deco = kit.deco
+	deco(model, Vector3.new(1.4, 0.8, 1.4), at(x, top + 1.2, z), IRON, Enum.Material.Metal)
+	deco(model, Vector3.new(0.42, 15, 0.42), at(x, top + 8.4, z), IRON, Enum.Material.Metal)
+	deco(model, Vector3.new(0.8, 0.3, 0.8), at(x, top + 15.9, z), GOLD, Enum.Material.Metal)
+	local glow = deco(model, Vector3.new(1.3, 1.9, 1.3), at(x, top + 17, z), WARM, Enum.Material.SmoothPlastic)
+	deco(model, Vector3.new(1.8, 0.3, 1.8), at(x, top + 18.1, z), IRON, Enum.Material.Metal)
+	deco(model, Vector3.one * 0.5, at(x, top + 18.5, z), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Ball })
+	kit.addLight("PointLight", glow, WARM, 36, 1.3)
+end
+
+-- a side court (s: which side): the slab past the plate, the drive, two rows of bays, islands, a
+-- planted border with palms and lanterns
+local function court(kit: any, model: Instance, at: Frame, top: number, s: number)
+	local mk, deco = kit.mk, kit.deco
+	local function A(x: number, y: number, z: number): CFrame
+		return at(s * x, y, z)
+	end
+	local stone = Enum.Material.Pavement
+	mk(model, Vector3.new(COURT_OUT - 108 + 2, 4.3, 148), A((108 + COURT_OUT + 2) / 2, top - 2.15, -30), PAVING, stone, { name = "CourtSlab" })
+	-- the drive down the court and the way through from the steps
+	deco(model, Vector3.new(LANE_X1 - LANE_X0, 0.08, COURT_BACK - COURT_FRONT), A((LANE_X0 + LANE_X1) / 2, top + 0.04, (COURT_FRONT + COURT_BACK) / 2), SETT, Enum.Material.Cobblestone)
+	deco(model, Vector3.new(LANE_X0 - ARM_X1, 0.08, LINK_Z1 - LINK_Z0), A((LANE_X0 + ARM_X1) / 2, top + 0.04, (LINK_Z0 + LINK_Z1) / 2), SETT, Enum.Material.Cobblestone)
+	-- the bays: 3 + 4 + 3 on the palace side, 4 + 4 + 3 on the outer side
+	bayRow(kit, model, A, top, ROW1_X0, ROW1_X1, ROW1_X0 + 0.9, -93, 3)
+	bayRow(kit, model, A, top, ROW1_X0, ROW1_X1, ROW1_X0 + 0.9, -44, 4)
+	bayRow(kit, model, A, top, ROW1_X0, ROW1_X1, ROW1_X0 + 0.9, 5, 3)
+	bayRow(kit, model, A, top, ROW2_X0, ROW2_X1, ROW2_X1 - 0.9, -93, 4)
+	bayRow(kit, model, A, top, ROW2_X0, ROW2_X1, ROW2_X1 - 0.9, -44, 4)
+	bayRow(kit, model, A, top, ROW2_X0, ROW2_X1, ROW2_X1 - 0.9, 5, 3)
+	-- islands at the rows' ends and between them
+	local seed = if s > 0 then 3 else 17
+	for k, r in { { ROW1_X0, ROW1_X1, -100, -93 }, { ROW1_X0, ROW1_X1, -2, 5 }, { ROW2_X0, ROW2_X1, -100, -93 }, { ROW2_X0, ROW2_X1, -51, -44 }, { ROW2_X0, ROW2_X1, -2, 5 } } do
+		island(kit, model, A, top, r[1], r[2], r[3], r[4], 38 + (k % 3) * 5, seed + k * 13)
+	end
+	-- the walk beside the palace: black bollards with gold tops
+	for z = -43, 36, 11 do
+		mk(model, Vector3.new(2.6, 1, 1), A(ROW1_X0 - 0.6, top + 1.3, z) * CFrame.Angles(0, 0, math.rad(90)), IRON, Enum.Material.Metal, { shape = Enum.PartType.Cylinder, name = "GardenBollard" })
+		deco(model, Vector3.one * 0.8, A(ROW1_X0 - 0.6, top + 2.7, z), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Ball })
+	end
+	-- the border: a stone kerb, grass, a tall hedge at the back, palms, shrubs, lanterns
+	local bedMid = (ROW2_X1 + COURT_OUT) / 2
+	mk(model, Vector3.new(COURT_OUT - ROW2_X1, 0.8, COURT_BACK - COURT_FRONT), A(bedMid, top + 0.4, (COURT_FRONT + COURT_BACK) / 2), PAVING_PALE, stone, { name = "CourtBorder" })
+	deco(model, Vector3.new(COURT_OUT - ROW2_X1 - 1.4, 0.1, COURT_BACK - COURT_FRONT - 1.4), A(bedMid, top + 0.85, (COURT_FRONT + COURT_BACK) / 2), LAWN, Enum.Material.Grass)
+	mk(model, Vector3.new(2.6, 4.2, COURT_BACK - COURT_FRONT + 9), A(COURT_OUT - 0.6, top + 2.1, (COURT_FRONT + COURT_BACK + 9) / 2 - 1.5), HEDGE, Enum.Material.Grass, { name = "Hedge" })
+	-- the back: the same bed across the end of the court
+	local backZ = COURT_BACK + 3.5
+	mk(model, Vector3.new(COURT_OUT - ROW1_X0, 0.8, 7), A((ROW1_X0 + COURT_OUT) / 2, top + 0.4, backZ), PAVING_PALE, stone, { name = "CourtBorder" })
+	deco(model, Vector3.new(COURT_OUT - ROW1_X0 - 1.4, 0.1, 5.6), A((ROW1_X0 + COURT_OUT) / 2, top + 0.85, backZ), LAWN, Enum.Material.Grass)
+	mk(model, Vector3.new(COURT_OUT - ROW1_X0, 3, 2.2), A((ROW1_X0 + COURT_OUT) / 2, top + 1.6, COURT_BACK + 6), HEDGE, Enum.Material.Grass, { name = "Hedge" })
+	local t = 0
+	for z = -84, 28, 28 do
+		t += 1
+		RewardsPalace.palm(kit, model, A(bedMid - 1, top + 0.9, z).Position, 40 + (t % 3) * 5, seed + t * 29)
+	end
+	for z = -70, 14, 28 do
+		for _, dz in { -5, 5 } do
+			deco(model, Vector3.new(3, 2.4, 3), A(bedMid + 1, top + 1.9, z + dz), Color3.fromRGB(52, 100, 50), Enum.Material.Grass, { shape = Enum.PartType.Ball })
+		end
+		lantern(kit, model, A, top, ROW2_X1 + 1.2, z)
+	end
+	for _, x in { (LANE_X0 + LANE_X1) / 2 - 8, (LANE_X0 + LANE_X1) / 2 + 8 } do
+		lantern(kit, model, A, top, x, COURT_BACK + 1.6)
+	end
+	RewardsPalace.palm(kit, model, A((LANE_X0 + LANE_X1) / 2, top + 0.9, COURT_BACK + 3.2).Position, 44, seed + 91)
+end
+
 local function flag(kit: any, model: Instance, at: Frame, top: number, x: number, z: number, s: number)
 	local deco = kit.deco
 	deco(model, Vector3.new(0.5, 28, 0.5), at(x, top + 14, z), Color3.fromRGB(236, 236, 232), Enum.Material.Metal)
@@ -257,13 +379,13 @@ function RewardsPalace.square(kit: any, model: Instance, at: Frame, half: number
 	garden(kit, model, at, top)
 	parking(kit, model, at, top)
 	for _, s in { -1, 1 } do
-		-- behind the drive: a hedge, a lawn, palms (Rewards' side palms stand on it), flags
-		mk(model, Vector3.new(2.4, 2.8, 57), at(s * (ARM_X1 + 1.2), top + 1.4, -75), HEDGE, Enum.Material.Grass, { name = "Hedge" })
-		mk(model, Vector3.new(half - ARM_X1, 2.8, 2.4), at(s * (ARM_X1 + half) / 2, top + 1.4, -102.5), HEDGE, Enum.Material.Grass, { name = "Hedge" })
-		deco(model, Vector3.new(half - ARM_X1 - 3, 0.1, 56), at(s * (half + ARM_X1 + 3) / 2, top + 0.05, -74), LAWN, Enum.Material.Grass)
-		for z = -96, -50, 15.3 do
+		-- behind the drive: a hedge (open where the way through to the side court goes), flags
+		mk(model, Vector3.new(2.4, 2.8, 41.5), at(s * (ARM_X1 + 1.2), top + 1.4, -82.75), HEDGE, Enum.Material.Grass, { name = "Hedge" })
+		mk(model, Vector3.new(COURT_OUT - ARM_X1, 2.8, 2.4), at(s * (ARM_X1 + COURT_OUT) / 2, top + 1.4, -102.5), HEDGE, Enum.Material.Grass, { name = "Hedge" })
+		for z = -96, -64, 15.3 do
 			flag(kit, model, at, top, s * (ARM_X1 + 5), z, s)
 		end
+		court(kit, model, at, top, s)
 		-- a stone planter along the front wall, clipped balls, the lamps that wash the stone
 		mk(model, Vector3.new(47, 1.2, 4.6), at(s * 60.5, top + 0.6, -44.6), STONE_DARK, Enum.Material.Pavement, { name = "Planter" })
 		deco(model, Vector3.new(46, 1.4, 3.8), at(s * 60.5, top + 1.8, -44.6), HEDGE, Enum.Material.Grass)

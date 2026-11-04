@@ -92,6 +92,7 @@ for _, t in TOWERS do
 end
 
 local built: { [string]: Built } = {}
+local riding: { [Player]: boolean } = {} -- in a lift right now (it waits for the floor to stream in)
 
 -- sizes (studs; a character is about 5 tall)
 local F = 84 -- footprint
@@ -1076,7 +1077,7 @@ function Towers.travel(player: Player, id: string, level: string)
 	local rec = built[id]
 	local char = player.Character
 	local stop = rec and rec.stops[level]
-	if not (rec and char and stop) then
+	if not (rec and char and stop) or riding[player] then
 		return
 	end
 	-- a hotel suite: only its owner rides up (the lobby is open to everyone)
@@ -1090,9 +1091,19 @@ function Towers.travel(player: Player, id: string, level: string)
 	local labels = { lobby = "LOBBY", penthouse = "PENTHOUSE", roof = "ROOF" }
 	local label = if rec.spec.perMinute and level == "penthouse" then rec.spec.name else rec.spec.name .. "  ·  " .. (labels[level] or "")
 	send(player, { kind = "travel", label = label })
+	-- (2026-11-04) streaming: the floor up there reaches the player's game first, or they drop through
+	-- it into the empty tower; the client stays faded out until "arrived"
+	riding[player] = true
 	task.delay(0.35, function()
+		pcall(function()
+			player:RequestStreamAroundAsync(stop.Position, 5)
+		end)
 		if char.Parent then
 			char:PivotTo(stop)
+		end
+		riding[player] = nil
+		if player.Parent then
+			send(player, { kind = "arrived", label = label })
 		end
 	end)
 end
@@ -1183,7 +1194,7 @@ function Towers.setHome(player: Player, id: string)
 	profile.Home = id
 	publish(player)
 	task.spawn(PlayerData.save, player)
-	send(player, { kind = "toast", text = built[id].spec.name .. " is now your home", color = "accent" })
+	send(player, { kind = "toast", text = built[id].spec.name .. " is now your home: HOUSE button, TELEPORT HOME", color = "accent" })
 end
 
 function Towers.toggleParty(player: Player, id: string)

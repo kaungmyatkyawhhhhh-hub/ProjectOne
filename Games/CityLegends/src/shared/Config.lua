@@ -749,7 +749,7 @@ Config.Police = {
 	ZoneCooldown = 5, -- after you get out, this long before the next one
 	LoseRange = 300, -- out of sight and this far from every unit...
 	LoseSeconds = { 9, 11, 13, 15, 18 }, -- ...for this long per star: escaped
-	MinChaseSeconds = 12,
+	MinChaseSeconds = 8, -- (2026-11-04: under LoseSeconds[1], or the server refused the escape and the chase froze)
 	EscapeBounty = { 400, 800, 1500, 2500, 4000 }, -- a little money for getting away
 	EscapeXp = 60,
 	BustedFineFrac = 0.1, -- owner (2026-10-22): caught = 10% of the cash you have, no cap

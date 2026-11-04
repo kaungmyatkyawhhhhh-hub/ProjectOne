@@ -6,8 +6,10 @@
 ]]
 
 local DataStoreService = game:GetService("DataStoreService")
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -112,6 +114,88 @@ do
 	end
 end
 
+-- (2026-11-04) the session lock: a save's `Session` field ({ id, at }) says which game holds it, so
+-- a quick rejoin can't load an old copy and two games can't overwrite each other. Autosaves renew it,
+-- the last save clears it, a crashed server's lock runs out after LOCK_EXPIRES. Saves with no
+-- Session (older ones) just load. A new player's first record is only { Fresh, Session }.
+local LOCK_EXPIRES = 180 -- seconds: a bit over Main's 120 s autosave
+local LOCK_WAIT = 8 -- seconds a join waits for the last game to finish saving
+local LOAD_TRIES = 4
+local FINAL_TRIES = 3
+local LOAD_FAILED = "Your save couldn't load just now. It's safe: please rejoin in a minute."
+-- each player's lock id (none: nothing to save to; false: another game took this save over)
+local locks: { [Player]: string | boolean } = {}
+-- players whose last save has started (weak: they go with the Player)
+local releasing: { [Player]: boolean } = setmetatable({}, { __mode = "k" }) :: any
+local inFlight = 0 -- saves still running (BindToClose waits for them)
+
+local function saveKey(player: Player): string
+	return "p_" .. player.UserId
+end
+
+-- reads the save and takes its lock in one step, trying again after an error and waiting a moment
+-- for a lock another game holds. Returns whether it worked, then the save (nil: a new player)
+local function claim(player: Player): (boolean, any)
+	local id = HttpService:GenerateGUID(false)
+	local studio = RunService:IsStudio()
+	local deadline = os.clock() + LOCK_WAIT
+	local fails = 0
+	while player.Parent do
+		local saved, held = nil, false
+		local ok, err = pcall(function()
+			(store :: DataStore):UpdateAsync(saveKey(player), function(old: any): any
+				local record = if type(old) == "table" then old else nil
+				local session = if record then record.Session else nil
+				-- (Studio never waits: stopping a test can leave its lock behind)
+				held = not studio and type(session) == "table" and session.id ~= id and os.time() - (tonumber(session.at) or 0) < LOCK_EXPIRES
+				if held then
+					return nil
+				end
+				saved = if record and not record.Fresh then record else nil
+				local out = record or { Fresh = true }
+				out.Session = { id = id, at = os.time() }
+				return out
+			end)
+		end)
+		if ok and not held then
+			locks[player] = id
+			return true, saved
+		end
+		if not ok then
+			fails += 1
+			if fails >= (if studio then 1 else LOAD_TRIES) then
+				return false, err
+			end
+			task.wait(fails)
+		elseif os.clock() >= deadline then
+			return false, "another game still holds this save"
+		else
+			task.wait(2)
+		end
+	end
+	return false, "left while loading"
+end
+
+-- hands a lock back without saving (a player who left while their save loaded)
+local function unlock(player: Player)
+	local id = locks[player]
+	locks[player] = nil
+	if type(id) ~= "string" then
+		return
+	end
+	inFlight += 1
+	pcall(function()
+		(store :: DataStore):UpdateAsync(saveKey(player), function(old: any): any
+			if type(old) == "table" and type(old.Session) == "table" and old.Session.id == id then
+				old.Session = nil
+				return old
+			end
+			return nil
+		end)
+	end)
+	inFlight -= 1
+end
+
 local function defaultProfile(): Profile
 	return {
 		Cash = Config.Economy.StartingCash,
@@ -176,12 +260,10 @@ local function setStat(player: Player, name: string, v: number)
 	end
 end
 
-function PlayerData.load(player: Player): Profile
+function PlayerData.load(player: Player): Profile?
 	local profile = defaultProfile()
 	if store then
-		local ok, saved = pcall(function()
-			return (store :: DataStore):GetAsync("p_" .. player.UserId)
-		end)
+		local ok, saved = claim(player)
 		if ok and type(saved) == "table" then
 			profile.IsNew = false
 			profile.Claimed = saved.Claimed ~= false -- (saves from before the claim count as claimed)
@@ -198,9 +280,18 @@ function PlayerData.load(player: Player): Profile
 				profile.Cash = math.max(0, math.floor(saved.Cash))
 			end
 			if type(saved.Owned) == "table" then
+				-- (2026-11-04) a save that made the first-car pick owns just its list: the free car was
+				-- added back here on every join. Older saves (no Claimed) still get it
+				local owned: { [string]: boolean } = if saved.Claimed == true then {} else profile.Owned
 				for _, id in saved.Owned do
 					if type(id) == "string" and Cars.ById[id] then
-						profile.Owned[id] = true
+						owned[id] = true
+					end
+				end
+				if next(owned) then
+					profile.Owned = owned
+					if not owned[profile.Selected] then
+						profile.Selected = (next(owned)) :: string
 					end
 				end
 			end
@@ -409,7 +500,20 @@ function PlayerData.load(player: Player): Profile
 			end
 		elseif not ok then
 			warn("[CityLegends] load failed for", player.Name, saved)
+			-- (2026-11-04) never play on with a blank profile: its saves would wipe the real one.
+			-- (Studio without API access plays on with it: `locks` is empty, so it never saves)
+			if not RunService:IsStudio() then
+				if player.Parent then
+					player:Kick(LOAD_FAILED)
+				end
+				return nil
+			end
 		end
+	end
+	-- (2026-11-04) they left while it loaded: nothing changed, so just hand the lock back
+	if not player.Parent then
+		unlock(player)
+		return nil
 	end
 	profile.Loaded = true
 	profiles[player] = profile
@@ -417,15 +521,8 @@ function PlayerData.load(player: Player): Profile
 	return profile
 end
 
--- saves the profile; true when it was written (or there is no store to write to)
-function PlayerData.save(player: Player): boolean
-	local profile = profiles[player]
-	if not profile or not profile.Loaded then
-		return false
-	end
-	if not store then
-		return true
-	end
+-- what goes in the store (`session`: the lock, nil to clear it)
+local function payloadOf(profile: Profile, session: { [string]: any }?): { [string]: any }
 	profile.LastSeen = os.time()
 	local owned = {}
 	for id in profile.Owned do
@@ -439,7 +536,7 @@ function PlayerData.save(player: Player): boolean
 	for id in profile.Houses do
 		table.insert(houses, id)
 	end
-	local payload = {
+	return {
 		Cash = profile.Cash,
 		Owned = owned,
 		Selected = profile.Selected,
@@ -473,10 +570,44 @@ function PlayerData.save(player: Player): boolean
 		Rewards = profile.Rewards,
 		LastSeen = profile.LastSeen,
 		Claimed = profile.Claimed,
+		Session = session,
 	}
+end
+
+-- saves the profile; true when it was written (or there is no store to write to). `final`: the last
+-- save of a visit, which clears the lock
+function PlayerData.save(player: Player, final: boolean?): boolean
+	local profile = profiles[player]
+	if not profile or not profile.Loaded then
+		return false
+	end
+	local id = locks[player]
+	if not store or id == nil then
+		return true
+	end
+	if id == false or (releasing[player] and not final) then
+		return false
+	end
+	local taken = false
+	inFlight += 1
 	local ok, err = pcall(function()
-		(store :: DataStore):SetAsync("p_" .. player.UserId, payload)
+		(store :: DataStore):UpdateAsync(saveKey(player), function(old: any): any
+			-- (2026-11-04) a later session holds this save now: this copy is out of date
+			local session = if type(old) == "table" then old.Session else nil
+			taken = type(session) == "table" and session.id ~= id
+			if taken or (releasing[player] and not final) then
+				return nil
+			end
+			-- (made here, not before the call, so cash and what it paid for go in together)
+			return payloadOf(profile, if final then nil else { id = id, at = os.time() })
+		end)
 	end)
+	inFlight -= 1
+	if taken then
+		locks[player] = false
+		warn("[CityLegends] save skipped for", player.Name, "another game holds it now")
+		return false
+	end
 	if not ok then
 		warn("[CityLegends] save failed for", player.Name, err)
 	end
@@ -638,14 +769,35 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 end
 
+-- (2026-11-04) the last save, tried again if it fails; it clears the lock for the next game
 function PlayerData.release(player: Player)
-	PlayerData.save(player)
+	if not profiles[player] or releasing[player] then
+		return
+	end
+	releasing[player] = true
+	inFlight += 1 -- (so BindToClose also waits through the pauses between tries)
+	for try = 1, FINAL_TRIES do
+		if PlayerData.save(player, true) or locks[player] == false then
+			break
+		end
+		task.wait(try)
+	end
+	inFlight -= 1
 	profiles[player] = nil
+	locks[player] = nil
 end
 
 function PlayerData.saveAll()
 	for _, player in Players:GetPlayers() do
 		task.spawn(PlayerData.save, player)
+	end
+end
+
+-- (2026-11-04, BindToClose) waits for every save on its way, at most `limit` seconds
+function PlayerData.waitForSaves(limit: number)
+	local deadline = os.clock() + limit
+	while inFlight > 0 and os.clock() < deadline do
+		task.wait(0.1)
 	end
 end
 

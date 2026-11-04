@@ -27,6 +27,7 @@ local TravelSpots = require(Shared:WaitForChild("TravelSpots"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
 local Minimap = require(script.Parent:WaitForChild("Minimap"))
+local Driving = require(script.Parent:WaitForChild("Driving"))
 
 local RewardsClient = {}
 
@@ -142,7 +143,12 @@ local function placePill()
 	end
 	local hud = p.Parent
 	local tracker = hud and hud:FindFirstChild("GoalTracker") :: GuiObject?
-	if tracker and tracker.Visible then
+	if UI.isTouch then
+		-- (2026-11-04) on a phone with the tracker, left of the minimap, and only on foot: under it this
+		-- button sat on the pedals and Roblox's jump button
+		p.Visible = not Driving.isDriving()
+		p.Position = UDim2.new(1, -154, 0, if tracker and tracker.Visible then 110 else 52)
+	elseif tracker and tracker.Visible then
 		p.Position = UDim2.new(1, -14, 0, tracker.AbsolutePosition.Y - (hud :: GuiObject).AbsolutePosition.Y + tracker.AbsoluteSize.Y + 8)
 	else
 		local map = player.PlayerGui:FindFirstChild("Minimap")
@@ -743,6 +749,21 @@ local function closeScreen()
 	refreshScreen = nil
 end
 
+-- (2026-11-04) the pages with something you're in the middle of: a list you've scrolled, a code half
+-- typed, the odds open. The server's push every 30 s leaves these as they are, unless what they show
+-- changed. It keeps the old state, clocks included, so their countdowns stay right
+local KEEP_PAGE = { codes = true, levels = true, achievements = true, wheel = true, super = true }
+local function shownKey(st: any): string
+	local w = st.wheels or {}
+	return table.concat({
+		tostring(st.ready),
+		tostring(st.levels and st.levels.total),
+		tostring(st.achievements and st.achievements.done),
+		tostring(w.wheel and w.wheel.spins),
+		tostring(w.super and w.super.spins),
+	}, "|")
+end
+
 function RewardsClient.open(tab: string?)
 	if screen then
 		closeScreen()
@@ -827,7 +848,8 @@ function RewardsClient.open(tab: string?)
 		end)
 	end
 	refreshScreen = function()
-		if not spinning then
+		-- (2026-11-04) CODES shows no state: a claim's answer wiped a mistyped code before you could fix it
+		if not spinning and screenTab ~= "codes" then
 			show(screenTab)
 		end
 	end
@@ -864,7 +886,10 @@ function RewardsClient.init()
 				return
 			end
 			if msg.kind == "state" and type(msg.state) == "table" then
-				setState(msg.state)
+				local keep = screen ~= nil and state ~= nil and KEEP_PAGE[screenTab] == true and shownKey(msg.state) == shownKey(state)
+				if not keep then
+					setState(msg.state)
+				end
 			elseif msg.kind == "gift" then
 				UI.toast(string.format("Playtime gift ready (%d minutes): claim it at Legends Rewards", tonumber(msg.minutes) or 0), GOLD)
 				Audio.cutUp(4, "GIFT")

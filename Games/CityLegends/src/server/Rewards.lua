@@ -19,7 +19,7 @@
 	    spin cabinets on the back wall.
 	The server decides everything: what's owed and when, one claim at a time per player (a lock),
 	rate limits, the player standing at a desk (codes and the screen's view work anywhere), and the
-	claim is saved before it's paid. Saved as profile.Rewards.
+	claim and its cash are saved together. Saved as profile.Rewards.
 
 	CityBuilder calls Rewards.buildWorld(kit, parent) once Downtown is built; Main.server calls
 	Rewards.init(ctx, deps).
@@ -36,7 +36,6 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
-local Garden = require(script.Parent:WaitForChild("Garden"))
 local Palace = require(script.Parent:WaitForChild("RewardsPalace"))
 
 local R = Config.Rewards
@@ -149,8 +148,9 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 		mk(model, Vector3.new(2.4, 1.4, 1.4), at(x, 1.5, Z_FRONT - 7) * CFrame.Angles(0, 0, math.rad(90)), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder, name = "Bollard" })
 	end
 	for _, s in { -1, 1 } do
-		for k, z in { -half + 12, -half + 46, Z_FRONT - 4, -2, 36, 74 } do
-			Garden.palm(kit, model, at(s * (half - 9), 0.3, z).Position, 30 + (k % 3) * 4, k * 31 + (if s > 0 then 7 else 0))
+		-- (the front half of each side is the car court now: its palms are in RewardsPalace)
+		for k, z in { 54, 76, 98 } do
+			Palace.palm(kit, model, at(s * (half - 9), 0.3, z).Position, 40 + (k % 3) * 5, k * 31 + (if s > 0 then 7 else 0))
 		end
 		-- gold floodlights washing the entrance
 		local lamp = deco(model, Vector3.new(1.6, 1, 1.6), at(s * 24, 1.8, Z_FRONT - 2.4), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
@@ -839,14 +839,16 @@ local function atDesk(player: Player): boolean
 	return false
 end
 
--- marks the claim, saves, then pays (nothing is paid if the save didn't go through)
-local function settle(player: Player, mark: () -> (), undo: () -> (), pay: () -> ()): boolean
+-- (2026-11-04) marks the claim and adds its cash, then saves them together; both are taken back if
+-- the save didn't go through (paying after the save lost the cash of a player who left during it)
+local function settle(player: Player, amount: number, mark: () -> (), undo: () -> ()): boolean
 	mark()
+	PlayerData.addCash(player, amount)
 	if not PlayerData.save(player) then
 		undo()
+		PlayerData.addCash(player, -amount)
 		return false
 	end
-	pay()
 	return true
 end
 
@@ -885,12 +887,10 @@ handlers.play = function(player, arg, d)
 	if d.PlaySecs < g.minutes * 60 then
 		return { ok = false, message = "Keep playing: this gift opens at " .. g.minutes .. " minutes" }
 	end
-	local ok = settle(player, function()
+	local ok = settle(player, g.cash, function()
 		d.PlayGot[key] = true
 	end, function()
 		d.PlayGot[key] = nil
-	end, function()
-		PlayerData.addCash(player, g.cash)
 	end)
 	return if ok then { ok = true, amount = g.cash, what = g.minutes .. " MINUTE GIFT" } else { ok = false, message = "Couldn't save: try again" }
 end
@@ -901,12 +901,10 @@ handlers.weekly = function(player, _arg, d)
 		return { ok = false, message = "The weekly gift isn't ready yet" }
 	end
 	local before = d.WeekLast
-	local ok = settle(player, function()
+	local ok = settle(player, R.Weekly, function()
 		d.WeekLast = now
 	end, function()
 		d.WeekLast = before
-	end, function()
-		PlayerData.addCash(player, R.Weekly)
 	end)
 	return if ok then { ok = true, amount = R.Weekly, what = "WEEKLY GIFT" } else { ok = false, message = "Couldn't save: try again" }
 end
@@ -915,12 +913,10 @@ handlers.welcome = function(player, _arg, d)
 	if not d.ReturnReady then
 		return { ok = false, message = "Nothing waiting" }
 	end
-	local ok = settle(player, function()
+	local ok = settle(player, R.Return, function()
 		d.ReturnReady = false
 	end, function()
 		d.ReturnReady = true
-	end, function()
-		PlayerData.addCash(player, R.Return)
 	end)
 	return if ok then { ok = true, amount = R.Return, what = "WELCOME BACK" } else { ok = false, message = "Couldn't save: try again" }
 end
@@ -936,12 +932,10 @@ handlers.levels = function(player, _arg, d, profile)
 	for _, l in list do
 		chest = chest or l.chest > 0
 	end
-	local ok = settle(player, function()
+	local ok = settle(player, total, function()
 		d.LevelPaid = level
 	end, function()
 		d.LevelPaid = before
-	end, function()
-		PlayerData.addCash(player, total)
 	end)
 	return if ok then { ok = true, amount = total, what = if chest then "LEVEL CHEST" else "LEVEL REWARDS", big = chest } else { ok = false, message = "Couldn't save: try again" }
 end
@@ -956,12 +950,10 @@ handlers.friend = function(player, _arg, d)
 		return { ok = false, message = "Already taken today" }
 	end
 	local before = d.FriendDate
-	local ok = settle(player, function()
+	local ok = settle(player, R.FriendDaily, function()
 		d.FriendDate = t
 	end, function()
 		d.FriendDate = before
-	end, function()
-		PlayerData.addCash(player, R.FriendDaily)
 	end)
 	return if ok then { ok = true, amount = R.FriendDaily, what = "FRIEND BONUS" } else { ok = false, message = "Couldn't save: try again" }
 end
@@ -987,7 +979,7 @@ handlers.invite = function(player, _arg, d)
 		return { ok = false, message = "Invite a friend: when they join for the first time, you both get a gift" }
 	end
 	local amount = R.Invite * count
-	local ok = settle(player, function()
+	local ok = settle(player, amount, function()
 		if selfGift then
 			d.InviteGot = true
 		end
@@ -1001,8 +993,6 @@ handlers.invite = function(player, _arg, d)
 		for _, uid in took do
 			d.Invited[tostring(uid)] = nil
 		end
-	end, function()
-		PlayerData.addCash(player, amount)
 	end)
 	if ok then
 		s.inviter = {}
@@ -1031,12 +1021,10 @@ handlers.group = function(player, _arg, d)
 			return { ok = false, message = "Join the game's group on Roblox to get this" }
 		end
 	end
-	local ok = settle(player, function()
+	local ok = settle(player, R.Group, function()
 		d.Group = true
 	end, function()
 		d.Group = false
-	end, function()
-		PlayerData.addCash(player, R.Group)
 	end)
 	return if ok then { ok = true, amount = R.Group, what = "GROUP GIFT" } else { ok = false, message = "Couldn't save: try again" }
 end
@@ -1061,12 +1049,10 @@ handlers.code = function(player, arg, d)
 	if d.Codes[code] then
 		return { ok = false, message = "You've used this code" }
 	end
-	local ok = settle(player, function()
+	local ok = settle(player, spec.cash, function()
 		d.Codes[code] = true
 	end, function()
 		d.Codes[code] = nil
-	end, function()
-		PlayerData.addCash(player, spec.cash)
 	end)
 	return if ok then { ok = true, amount = spec.cash, what = "CODE " .. code } else { ok = false, message = "Couldn't save: try again" }
 end
@@ -1150,7 +1136,7 @@ handlers.spin = function(player, arg, d, profile)
 	end
 	local beforeFree, beforeSpins = d.FreeLast[id], d.Spins[id]
 	local won = carId
-	local ok = settle(player, function()
+	local ok = settle(player, amount, function()
 		if free then
 			d.FreeLast[id] = now
 		else
@@ -1170,10 +1156,6 @@ handlers.spin = function(player, arg, d, profile)
 		end
 		for _, f in flexIds do
 			deps.Luxe.give(player, f, false)
-		end
-	end, function()
-		if amount > 0 then
-			PlayerData.addCash(player, amount)
 		end
 	end)
 	if not ok then
@@ -1196,13 +1178,11 @@ handlers.buy = function(player, arg, d, profile)
 	end
 	local id = arg :: string
 	local before = d.Spins[id]
-	local ok = settle(player, function()
+	local ok = settle(player, -w.cashPrice, function()
 		d.Spins[id] = (d.Spins[id] or 0) + 1
-		PlayerData.addCash(player, -w.cashPrice)
 	end, function()
 		d.Spins[id] = before
-		PlayerData.addCash(player, w.cashPrice)
-	end, function() end)
+	end)
 	return if ok then { ok = true, amount = -w.cashPrice, what = "1 " .. w.name .. " SPIN", quiet = true } else { ok = false, message = "Couldn't save: try again" }
 end
 

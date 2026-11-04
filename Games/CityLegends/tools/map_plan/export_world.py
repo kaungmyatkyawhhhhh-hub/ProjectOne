@@ -130,7 +130,12 @@ def main():
         dx, dz = p[3], p[4]
         right = (-dz, dx)
         start = (round(p[0] + right[0] * 8, 1), round(p[1], 2), round(p[2] + right[1] * 8, 1))
-        return {"id": rid, "name": name, "start": start, "dir": (round(dx, 3), round(dz, 3)), "cps": cps, "length": round(length)}
+        # (2026-11-04) the way the road runs from here: a road's first sample can hold its junction's
+        # direction (Casino Avenue's pointed across the road, and fast travel faced that way)
+        q = s[i0 + 1]
+        fx, fz = q[0] - p[0], q[2] - p[2]
+        n = math.hypot(fx, fz) or 1
+        return {"id": rid, "name": name, "start": start, "dir": (round(fx / n, 3), round(fz / n, 3)), "cps": cps, "length": round(length)}
 
     races = [
         race("riv_coast", "Coast Road Run", "Coast Road", 0.05, 0.95),

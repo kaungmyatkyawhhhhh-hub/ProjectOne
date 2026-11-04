@@ -251,8 +251,10 @@ local function tour(from: Vector3)
 	UI.fade(false, 0.6)
 	local t0 = os.clock()
 	local DUR = 32
-	local center = Vector3.new(0, 0, 0)
-	local startAngle = math.atan2(from.Z - center.Z, from.X - center.X)
+	-- (2026-11-04) round the building you took off from, at its roof's height, close enough to stay in
+	-- what has streamed in (it flew to the old city's middle, now empty sea 14,000 studs away)
+	local center = Vector3.new(from.X, from.Y - 230, from.Z)
+	local startAngle = 0
 	local conn: RBXScriptConnection
 	conn = RunService.RenderStepped:Connect(function()
 		local t = os.clock() - t0
@@ -270,7 +272,7 @@ local function tour(from: Vector3)
 		-- over the far side
 		local lift = math.clamp(t / 5, 0, 1)
 		local a = startAngle + t / DUR * math.pi * 2 * 0.85
-		local r = 520 + 260 * math.sin(t / DUR * math.pi)
+		local r = 300 + 160 * math.sin(t / DUR * math.pi)
 		local orbit = center + Vector3.new(math.cos(a) * r, 230 + 60 * math.sin(t * 0.35), math.sin(a) * r)
 		local pos = from:Lerp(orbit, lift ^ 2 * (3 - 2 * lift))
 		local look = center + Vector3.new(0, 90, 0)
@@ -378,6 +380,7 @@ end
 ---------------------------------------------------------------------
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local towerFx = remotes:WaitForChild("TowerFX", 120) :: RemoteEvent?
+local liftRide: { any }? = nil -- the lift ride under way (faded out till the server says "arrived")
 if towerFx then
 	towerFx.OnClientEvent:Connect(function(info)
 		if type(info) ~= "table" then
@@ -388,7 +391,18 @@ if towerFx then
 			pickShowcase(info.tower, info.cars, info.current)
 		elseif kind == "travel" then
 			UI.fade(true, 0.25)
-			task.delay(0.55, function()
+			-- (2026-11-04) the server waits for the floor there to stream in; never stay dark for long
+			local ride = {}
+			liftRide = ride
+			task.delay(8, function()
+				if liftRide == ride then
+					liftRide = nil
+					UI.fade(false, 0.4)
+				end
+			end)
+		elseif kind == "arrived" then
+			liftRide = nil
+			task.delay(0.2, function()
 				UI.fade(false, 0.4)
 				if type(info.label) == "string" then
 					UI.toast(info.label, Theme.Accent)

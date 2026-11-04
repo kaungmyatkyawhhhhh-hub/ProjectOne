@@ -386,6 +386,13 @@ local function despawn(player: Player)
 	s.combo = 0
 end
 
+-- (2026-11-04) the spawn waiting on streaming for each player: a request in that time (a double tap)
+-- takes over from it at the same spot, so a player never ends up with two cars and only one tracked
+local spawning: { [Player]: { cf: CFrame } } = {}
+Players.PlayerRemoving:Connect(function(player)
+	spawning[player] = nil
+end)
+
 -- opts.stolen: a car taken from a garage (Parking): not theirs, never saved or selected;
 -- opts.test: a dealer test drive (not theirs either, for Config.Dealership.TestSeconds);
 -- opts.at: where it starts (ground level, facing the way out)
@@ -465,18 +472,29 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 	-- (a house's "Drive" prompt and the hotel valet ask for their own spot; on foot: in front of
 	-- you; otherwise the street by the start block)
 	local h = model:GetAttribute("Height") :: number
-	local spawnCF = spawnAt[player] or swapCF or (if onFoot then frontSpawnCFrame(player, Vector3.new(model:GetExtentsSize().X, h, model:GetExtentsSize().Z)) else nil) or startSpawnCFrame() or findSpawnCFrame()
+	local earlier = spawning[player]
+	local spawnCF = spawnAt[player] or (if earlier then earlier.cf else nil) or swapCF or (if onFoot then frontSpawnCFrame(player, Vector3.new(model:GetExtentsSize().X, h, model:GetExtentsSize().Z)) else nil) or startSpawnCFrame() or findSpawnCFrame()
 	spawnAt[player] = nil
+	local mine = { cf = spawnCF }
+	spawning[player] = mine
 	OnFoot.removeCharacter(player) -- a car from the garage: straight in, off your feet
 	-- (streaming: the ground there reaches the player's game before the car does)
 	pcall(function()
 		player:RequestStreamAroundAsync(spawnCF.Position, 6)
 	end)
+	if spawning[player] ~= mine then
+		model:Destroy() -- (a newer request took over, or the player left)
+		return
+	end
+	spawning[player] = nil
 	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic -- the whole car arrives at once
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation
 	-- a big car reaches clients in pieces: they wait for this many before putting the body on
 	model:SetAttribute("Pieces", #model:GetDescendants())
+	-- (2026-11-04) when it came out: the client gets straight in (it can't always ask: a test drive
+	-- ends on the server's clock)
+	model:SetAttribute("SpawnedAt", workspace:GetServerTimeNow())
 	model.Parent = playerCars
 
 	lv.MaxForce = root.AssemblyMass * 400
@@ -602,7 +620,7 @@ TestDrive.OnServerInvoke = function(player: Player, carId: any)
 	end
 	done[carId] = true
 	lastTest[player] = os.clock()
-	spawnFor(player, carId, { test = true })
+	spawnFor(player, carId, { test = true, at = Dealership.doorSpot() })
 	return { ok = true, seconds = Config.Dealership.TestSeconds }
 end
 Players.PlayerRemoving:Connect(function(player)
@@ -886,8 +904,10 @@ RunService.Heartbeat:Connect(function(dt)
 			local ends = car:GetAttribute("TestEnds")
 			if type(ends) == "number" and workspace:GetServerTimeNow() > ends then
 				local profile = PlayerData.get(player)
-				if profile and profile.Owned[profile.Selected] then
-					task.defer(spawnFor, player, profile.Selected)
+				-- (2026-11-04: any car you own if the selected one is gone, or you'd be left with none)
+				local back = if profile then (if profile.Owned[profile.Selected] then profile.Selected else next(profile.Owned)) else nil
+				if back then
+					task.defer(spawnFor, player, back)
 				else
 					task.defer(despawn, player)
 				end
@@ -1128,8 +1148,11 @@ task.spawn(function()
 	end
 end)
 
+-- (2026-11-04) every player's last save at once, then wait for those and for any already on their
+-- way (the last player's, started by PlayerRemoving): the server closes when this returns
 game:BindToClose(function()
 	for _, player in Players:GetPlayers() do
-		PlayerData.save(player)
+		task.spawn(PlayerData.release, player)
 	end
+	PlayerData.waitForSaves(27)
 end)

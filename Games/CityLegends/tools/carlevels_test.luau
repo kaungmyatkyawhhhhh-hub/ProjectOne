@@ -302,7 +302,9 @@ penv.game = {
 			return { GetDataStore = function()
 				return { GetAsync = function()
 					return saved
-				end, SetAsync = function() end }
+				end, SetAsync = function() end, UpdateAsync = function(_, _, fn)
+					return fn(saved)
+				end }
 			end }
 		elseif name == "Players" then
 			return { GetPlayers = function()
@@ -310,6 +312,14 @@ penv.game = {
 			end }
 		elseif name == "ReplicatedStorage" then
 			return { WaitForChild = waitFor }
+		elseif name == "HttpService" then
+			return { GenerateGUID = function()
+				return "test-session"
+			end }
+		elseif name == "RunService" then
+			return { IsStudio = function()
+				return true
+			end }
 		end
 		error(name)
 	end,
@@ -324,7 +334,7 @@ penv.Instance = { new = function(class)
 	return t
 end }
 local RealPlayerData = load("src/server/PlayerData.lua", penv)
-local oldPlayer = { UserId = 42, Name = "Old" }
+local oldPlayer = { UserId = 42, Name = "Old", Parent = {} }
 local pr = RealPlayerData.load(oldPlayer)
 check(pr.Owned.suzaki_swift and pr.Owned.bnw_530i and pr.Owned.chevo_c6 and pr.Owned.suzaki_swift_top and pr.Owned.bentz_cla45_sport, "an old save keeps its retired cars")
 check(pr.Owned.kio_ev6 == true, "and gets the free car")

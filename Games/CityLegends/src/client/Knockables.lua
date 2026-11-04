@@ -30,7 +30,7 @@ local K = Config.Knock
 local CELL = 64
 
 type Piece = { part: BasePart, transparency: number, collide: boolean, query: boolean }
-type Group = { key: BasePart, base: Vector3, radius: number, pieces: { Piece }, down: boolean, downAt: number, debris: Model?, lights: { [Light]: boolean } }
+type Group = { key: BasePart, base: Vector3, radius: number, pieces: { Piece }, down: boolean, downAt: number, debris: Model?, lights: { [Light]: boolean }, model: Instance? }
 
 local groups: { Group } = {}
 local grid: { [string]: { Group } } = {}
@@ -57,7 +57,7 @@ local function drop(g: Group)
 	end
 end
 
-local function add(key: BasePart, base: Vector3, radius: number, parts: { BasePart })
+local function add(key: BasePart, base: Vector3, radius: number, parts: { BasePart }, model: Instance?)
 	-- (with streaming, a prop's parts go when you drive away and come back as new ones: a group
 	-- whose key part has gone is replaced; one that's down waits until it's back up)
 	local old = byKey[idOf(base)]
@@ -71,7 +71,7 @@ local function add(key: BasePart, base: Vector3, radius: number, parts: { BasePa
 	for _, p in parts do
 		table.insert(pieces, { part = p, transparency = p.Transparency, collide = p.CanCollide, query = p.CanQuery })
 	end
-	local g: Group = { key = key, base = base, radius = radius, pieces = pieces, down = false, downAt = 0, debris = nil, lights = {} }
+	local g: Group = { key = key, base = base, radius = radius, pieces = pieces, down = false, downAt = 0, debris = nil, lights = {}, model = model }
 	table.insert(groups, g)
 	local ck = cellKey(base.X, base.Z)
 	grid[ck] = grid[ck] or {}
@@ -157,6 +157,25 @@ local function considerSignal(m: Model)
 	end
 end
 
+-- (2026-11-04) the Riviera's props (Workspace.Riviera.Dressing): a street lamp's Pole, a tree's invisible
+-- Collider or Trunk. Only this runs for each part that streams in, so phones feel nothing: the
+-- prop's other parts are looked up when it's knocked (knock). Palms have no trunk part: not knockable.
+local function considerDressing(d: Instance)
+	local name = d.Name
+	if name ~= "Pole" and name ~= "Collider" and name ~= "Trunk" then
+		return
+	end
+	local m = d.Parent
+	if not (m and d:IsA("Part") and upright(d)) then
+		return
+	end
+	if name == "Pole" and m.Name == "StreetLamp" then
+		add(d, footOf(d), 1.2, { d }, m)
+	elseif name ~= "Pole" and m.Name == "Tree" then
+		add(d, footOf(d), 1.6, { d }, m)
+	end
+end
+
 local function scan(city: Instance)
 	for _, d in city:GetDescendants() do
 		if d:IsA("Model") and string.sub(d.Name, 1, 7) == "Signal_" then
@@ -212,8 +231,18 @@ local function lightsOff(g: Group, p: BasePart)
 end
 
 local function knock(g: Group, dir: Vector3, speed: number)
-	if g.down then
+	if g.down or not g.key.Parent then
 		return
+	end
+	-- (2026-11-04) a Riviera prop: all the parts of its model that are here now
+	if g.model then
+		local pieces: { Piece } = {}
+		for _, p in g.model:GetDescendants() do
+			if p:IsA("BasePart") then
+				table.insert(pieces, { part = p, transparency = p.Transparency, collide = p.CanCollide, query = p.CanQuery })
+			end
+		end
+		g.pieces = pieces
 	end
 	g.down = true
 	g.downAt = os.clock()
@@ -355,7 +384,22 @@ function Knockables.init()
 	local t0 = os.clock()
 	scan(city)
 	watch(city)
-	print(("[CityLegends] %d knockable props (%.2fs)"):format(#groups, os.clock() - t0))
+	-- (2026-11-04) the Riviera's lamps and trees: from Dressing only (never the whole map), spread
+	-- over frames so the start doesn't wait; what streams in later comes through DescendantAdded
+	task.spawn(function()
+		local riv = workspace:FindFirstChild("Riviera")
+		local dressing = if riv then riv:WaitForChild("Dressing", 20) else nil
+		if dressing then
+			dressing.DescendantAdded:Connect(considerDressing)
+			for k, d in dressing:GetDescendants() do
+				considerDressing(d)
+				if k % 4000 == 0 then
+					task.wait()
+				end
+			end
+		end
+		print(("[CityLegends] %d knockable props (%.2fs)"):format(#groups, os.clock() - t0))
+	end)
 
 	local r = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Knock", 10)
 	remote = if r and r:IsA("RemoteEvent") then r else nil

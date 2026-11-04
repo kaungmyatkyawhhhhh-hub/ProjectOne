@@ -235,6 +235,7 @@ type State = {
 	wind: number?, -- the wind blur's strength now, 0..1
 	inTunnel: boolean?,
 	autoHintT: number?, -- when Q / E in automatic last showed its hint
+	seaT: number?, -- seconds on the water (back to the road after 2)
 	-- driving feel (Config.DrivingFeel)
 	yawRate: number, -- the car's turn now (it follows the wheel with some weight)
 	groundDist: number?, -- last ground ray distance (kerbs and bumps kick the body)
@@ -869,6 +870,10 @@ function Driving.park()
 		return
 	end
 	s.vel = Vector3.zero
+	-- (2026-11-04) on its wheels the car runs in Vector mode, where PlaneVelocity does nothing: it
+	-- kept rolling at its last speed with nobody in it. Plane mode, as it spawned: stopped, on gravity
+	s.lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
+	s.lv.ForceLimitMode = Enum.ForceLimitMode.Magnitude
 	s.lv.PlaneVelocity = Vector2.zero
 	for _, p in s.hidden do
 		p.LocalTransparencyModifier = 0
@@ -2628,6 +2633,11 @@ function Driving.step(dt: number)
 		s.steer += (steerIn - s.steer) * math.min(1, dt * 6)
 		s.yawRate *= math.exp(-dt * 2)
 		s.boosting = false
+		-- (2026-11-04) off the ground for a while, the speed is what the car really does: wedged with
+		-- no wheel on anything it kept its old speed, and "Slow down to get out" never went away
+		if s.airT > 0.5 then
+			s.vel = actualFlat
+		end
 		-- in the air the nose follows the arc (up off a ramp, down to land)
 		local arc = math.clamp(math.atan2(actual.Y, math.max(actualFlat.Magnitude, 1)) * 0.6, -0.35, 0.35)
 		s.pitch += (arc - s.pitch) * math.min(1, dt * 2)
@@ -2687,6 +2697,20 @@ function Driving.step(dt: number)
 	if root.Position.Y < -40 then
 		Driving.reset()
 		return
+	end
+	-- (2026-11-04) in the sea: off a quay the car skates on the water or sits on the shallow seabed, and
+	-- never gets down to the check above. Two seconds of that and it's back on the road (the ray starts
+	-- above the car: from under the surface it would miss the water)
+	local sea = if root.Position.Y < 20 then workspace:Raycast(root.Position + Vector3.new(0, 8, 0), Vector3.new(0, -(s.halfHeight + 9.2), 0), rayParams) else nil
+	if sea and sea.Material == Enum.Material.Water then
+		s.seaT = (s.seaT or 0) + dt
+		if (s.seaT :: number) >= 2 then
+			s.seaT = 0
+			Driving.reset()
+			return
+		end
+	else
+		s.seaT = 0
 	end
 
 	if s.vyTarget and s.grounded then
@@ -3146,6 +3170,10 @@ function Driving.render(dt: number)
 	if Driving.cameraHold then
 		return
 	end
+	-- (2026-11-04) a screen that shut while you sat in the car hands the walking camera back
+	if camera.CameraType ~= Enum.CameraType.Scriptable then
+		camera.CameraType = Enum.CameraType.Scriptable
+	end
 	-- camera (owner, 2026-10-29: "like the video"). The speed comes from the camera's lag, distance,
 	-- sway, shake and blur; the FOV only moves a little outside and never in the cockpit. Settings:
 	-- Driving.camFx (shake, head movement, motion blur, outside FOV).
@@ -3322,7 +3350,9 @@ end
 
 -- Settings: "Auto" | "Manual" gearbox
 function Driving.setGearbox(mode: string)
-	Driving.gearbox = if mode == "Manual" then "Manual" else "Auto"
+	-- (2026-11-04) no Q / E on a phone or a gamepad: a Manual saved on a PC left the car stuck in neutral
+	local canShift = not UI.isTouch and UserInputService.KeyboardEnabled
+	Driving.gearbox = if mode == "Manual" and canShift then "Manual" else "Auto"
 	DashGauges.gearbox = Driving.gearbox
 	local s = state
 	if s then
