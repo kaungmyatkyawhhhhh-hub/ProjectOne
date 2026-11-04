@@ -14,6 +14,20 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
   - plus any new Lamborghini the owner adds (it gets a fictional Enfurecido name and joins the right family).
 - References already in `imports/refs/` for the Aventador clusters and cockpits (`aventador_lp700_cluster_*`, `aventador_sv_cluster_*`, `aventador_sv_cockpit.jpg`, `aventador_lp700_dash.jpg`, `aventador_lp700_cockpit_lit.jpg`) and `gallardo_cluster.jpg`.
 
+## The files the owner pushed (2026-11-04), in `imports/importing cars/`
+| File | Replaces / new | Family |
+|---|---|---|
+| `2012_lamborghini_aventador_lp700-4.glb` | replaces `lambrini_lp700` (Aventador LP700-4) | Aventador |
+| `2016_lamborghini_aventador_lp750-4_sv.glb` | replaces `lambrini_lp750` (Aventador SV LP750-4) | Aventador |
+| `2011_west_yokohama_lamborghini_gallardo_lp560-4.glb` | Gallardo LP560-4: replaces `lambrini_lp570` (Gallardo LP570-4 SL) as the Gallardo, or a new trim below it: **pick the simplest that keeps owners' cars** and note it. "West Yokohama" may mean a race / sponsor livery: remove any sponsor decals and text (no brands) and keep a clean body for Customs paint | Gallardo |
+| `2021_lamborghini_huracan_sto.glb` | **new car**: "Enfurecido Huracan STO" style name (fictional) | Huracan (new family) |
+| `2024_lamborghini_huracan_sterrato.glb` | **new car**: the off-road Huracan (raised, roof rack / light bar); fictional name | Huracan |
+| `2024_lamborghini_revuelto.glb` | **new car**: the Aventador's successor (hybrid V12, its own new cockpit and screens); fictional name; top of the Lamborghini line | Revuelto (own family, its cockpit is different from the Aventador's) |
+- The **Huracan STO and Sterrato** share a cockpit family (Huracan): pick the better cluster / steering wheel of the two and share it.
+- The **Revuelto** has its own new digital cockpit: don't share with the Aventador.
+- `2022_bugatti_chiron_super_sport.glb` is still in this folder from the Bugatti job: it's already done; leave it (or remove it once you've checked the Chiroun Super Sport is in the game).
+- Suggest prices, classes / PI and wheelbases for the 3 new cars before adding them (no questions if the owner is away: pick sensible ones and note them).
+
 ## Before you start
 - Read:
   - `CLAUDE.md`;
