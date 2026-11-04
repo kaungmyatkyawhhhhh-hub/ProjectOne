@@ -48,6 +48,9 @@ local tags: { [string]: number } = {}
 roblox.implementMethod("CollectionService", "AddTag", function(_, _inst, tag)
 	tags[tag] = (tags[tag] or 0) + 1
 end)
+roblox.implementMethod("CollectionService", "GetTags", function()
+	return {}
+end)
 roblox.implementMethod("CollectionService", "GetTagged", function()
 	return {}
 end)
@@ -109,6 +112,9 @@ local collection = {
 		tags[tag] = (tags[tag] or 0) + 1
 	end,
 	GetTagged = function()
+		return {}
+	end,
+	GetTags = function()
 		return {}
 	end,
 	HasTag = function()

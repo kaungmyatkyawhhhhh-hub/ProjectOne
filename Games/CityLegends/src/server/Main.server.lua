@@ -7,6 +7,7 @@
 	  * garage purchases + saving
 ]]
 
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -211,6 +212,14 @@ end
 -- a first car: on the street along the start block's edge, in a lane clear of other players' cars
 -- (in Monaco when it is in the place)
 local function startSpawnCFrame(): CFrame?
+	-- (owner, 2026-11-04: "Make it so that player actually spawn at the garden of the casino") a first
+	-- car waits on the drive in front of the casino's steps
+	for _, p in CollectionService:GetTagged("CasinoCarStart") do
+		local cf = (p :: BasePart).CFrame
+		if not carNear(cf.Position, 18) then
+			return cf
+		end
+	end
 	local riv = rivieraStartSpots()
 	if #riv > 0 then
 		for _ = 1, #riv do
@@ -245,6 +254,13 @@ end
 
 -- the start block's sidewalk, by the streetscape, facing the road (OnFoot: on foot with no car)
 local function startFootCFrame(): CFrame
+	-- the casino's garden, facing the palace
+	local garden = CollectionService:GetTagged("CasinoGardenSpawn")
+	if #garden > 0 then
+		local cf = (garden[spawnRng:NextInteger(1, #garden)] :: BasePart).CFrame
+		local pos = cf.Position + Vector3.new(0, 3.2, 0)
+		return CFrame.lookAt(pos, pos - Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z))
+	end
 	-- Monaco: on the pavement beside a start spot, facing the road
 	local riv = rivieraStartSpots()
 	if #riv > 0 then

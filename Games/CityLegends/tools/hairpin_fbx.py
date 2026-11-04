@@ -83,7 +83,12 @@ in_edge = lambda i: in_sign * half(i)  # noqa: E731
 
 
 def near_island(i):
-    return math.dist((S[i][0], S[i][2]), (CX, CZ)) < d["R"] + 6 and S[i][0] < 10925
+    return math.dist((S[i][0], S[i][2]), (CX, CZ)) < d["R"] + 6 and S[i][0] < CX + 80
+
+
+def at_drive(i):
+    """the hotel's drive leaves the outside of the bend, straight west: the kerb and pavement stop there"""
+    return S[i][0] < CX and abs(S[i][2] - CZ) < 26
 
 
 meshes = {}
@@ -118,11 +123,12 @@ def kerb_strip(mesh, i0, i1, edge, sign):
 
 
 s_out = -in_sign
-for i0, i1 in runs(near_island):
+for i0, i1 in runs(lambda i: near_island(i) and not at_drive(i)):
     kerb_strip(red, i0, i1, out_edge, s_out)
-for i0, i1 in runs(lambda i: not near_island(i)):
+for i0, i1 in runs(lambda i: not near_island(i) and not at_drive(i)):
     kerb_strip(kerb, i0, i1, out_edge, s_out)
-ribbon(walk, 0, n, lambda i: out_edge(i) + s_out * KERB, lambda i: out_edge(i) + s_out * (KERB + WALK), UP, UP)
+for i0, i1 in runs(lambda i: not at_drive(i)):
+    ribbon(walk, i0, i1, lambda i: out_edge(i) + s_out * KERB, lambda i: out_edge(i) + s_out * (KERB + WALK), UP, UP)
 # the inside: kerb and pavement along the legs, stopping at the island (its own kerb goes round it)
 s_in = in_sign
 for i0, i1 in runs(lambda i: not near_island(i)):
@@ -179,10 +185,11 @@ for k in range(m):
 
 # the retaining wall: behind the pavement on the bend's outside, 34 studs high, leaning back a little
 wall = meshes.setdefault("HP_Wall", Mesh())
-w0 = min(i for i in range(n) if near_island(i)) - 40
-w1 = max(i for i in range(n) if near_island(i)) + 40
+# (only on the hill side: from just past the hotel's drive along the upper leg)
+w0 = min(i for i in range(n) if S[i][0] < CX and S[i][2] < CZ - 30)
+w1 = min(n, max(i for i in range(n) if near_island(i)) + 60)
 fa, fb, ua, ub = [], [], [], []
-for i in range(max(w0, 0), min(w1, n)):
+for i in range(w0, w1):
     o = out_edge(i) + s_out * (KERB + WALK + 0.2)
     p0, p1 = side(i, o), side(i, o + s_out * 5)
     y = S[i][1]

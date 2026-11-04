@@ -454,6 +454,7 @@ playerCars.ChildAdded:Connect(function(model)
 	end
 end)
 
+local arrivedYet = false
 local function tryAttach(model: Instance)
 	if model:IsA("Model") and model:GetAttribute("Owner") == player.UserId and pendingAttach then
 		pendingAttach = false
@@ -470,6 +471,13 @@ local function tryAttach(model: Instance)
 		Driving.loadHold = true
 		waitForMap("Loading the streets...")
 		Driving.loadHold = false
+		-- (the first car of a visit: you start on foot in the casino's garden)
+		if not arrivedYet then
+			arrivedYet = true
+			if not player:GetAttribute("TestDrive") then
+				OnFoot.arrive()
+			end
+		end
 		UI.hideLoading()
 		UI.showHud(true)
 		UI.setCameraLabel(Driving.cameraMode)

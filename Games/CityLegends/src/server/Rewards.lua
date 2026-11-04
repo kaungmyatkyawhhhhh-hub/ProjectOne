@@ -5,13 +5,13 @@
 	gambling with bets: the spins (SPIN: one reel of prize cards, SUPER SPIN: three) come free on a
 	timer, extra spins are bought with cash or Robux, the odds are shown before every spin and
 	buying is hidden where Roblox restricts paid random items.
-	  * Outside: a marble plaza with palms, fountains and clipped hedge gardens either side of the
-	    red carpet; an iron-and-glass marquise; the front in cream stone with round-headed windows, a
-	    grand arched entrance, paired pilasters, a frieze with the name in gold letters and a
-	    balustrade; two corner towers with copper-green domes and a big copper dome over the hall;
-	    floodlit gold at night.
-	  * Inside: a grand hall with a gilded coffered ceiling, cream walls with gold pilasters, crystal
-	    chandeliers (VenueKit), and the claim desks (each a ProximityPrompt that opens its page of
+	  * Outside (owner, 2026-11-04: RewardsPalace): the casino square with its garden, the exclusive
+	    parking and the drive; an iron marquise over the drive; the front in cream stone with
+	    round-headed windows, a grand arched entrance, twin towers and a clock, a frieze with the name
+	    in gold letters and a balustrade; corner towers with copper-green domes, a slate hip roof and
+	    a big copper dome over the hall; floodlit gold at night.
+	  * Inside: a grand hall under a blue stained-glass oval dome (RewardsPalace), rose marble columns,
+	    gold mouldings, painted lunettes, crystal chandeliers (VenueKit), and the claim desks (each a ProximityPrompt that opens its page of
 	    the rewards screen, RewardsClient): DAILY REWARD (the 7-day streak, Goals.claimStreak) in
 	    the middle, GIFTS (playtime, weekly, welcome back), LEVEL REWARDS, ACHIEVEMENTS (the Legends
 	    Path, shown only: it pays when each goal is done), FRIENDS (a friend in your server, invites,
@@ -37,6 +37,7 @@ local Cars = require(Shared:WaitForChild("Cars"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local Garden = require(script.Parent:WaitForChild("Garden"))
+local Palace = require(script.Parent:WaitForChild("RewardsPalace"))
 
 local R = Config.Rewards
 
@@ -48,11 +49,10 @@ local GLASS = Color3.fromRGB(22, 24, 36)
 local VELVET = Color3.fromRGB(120, 12, 40)
 local WARM = Color3.fromRGB(255, 214, 160)
 local WALNUT = Color3.fromRGB(74, 50, 36)
-local STONE = Color3.fromRGB(228, 208, 172) -- cream Riviera limestone
-local STONE_DARK = Color3.fromRGB(196, 170, 130)
+local STONE = Color3.fromRGB(242, 228, 198) -- cream Riviera stone
+local STONE_DARK = Color3.fromRGB(216, 194, 154)
 local COPPER = Color3.fromRGB(88, 146, 124) -- weathered copper roofs
 local IRON = Color3.fromRGB(22, 22, 24)
-local CREAM = Color3.fromRGB(236, 224, 200)
 
 local FLOOR = 1.6 -- the hall's floor above the plaza
 local H = 40 -- hall height
@@ -136,86 +136,60 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	local inside = kit.lodGroup(model, "RewardsInterior", base.Position, 700)
 
 	-------------------------------------------------------------
-	-- Plaza: marble, the red carpet, palms, fountains, bollards
+	-- The square (RewardsPalace), the steps, the side palms
 	-------------------------------------------------------------
-	mk(model, Vector3.new(lot, 0.3, lot), at(0, 0.15, 0), Color3.fromRGB(200, 194, 184), Enum.Material.Marble, { name = "Plaza" })
-	deco(model, Vector3.new(16, 0.06, half + Z_FRONT + 2), at(0, 0.33, (-half + Z_FRONT) / 2 - 1), VELVET, Enum.Material.Fabric)
-	for _, s in { -1, 1 } do
-		deco(model, Vector3.new(0.5, 0.07, half + Z_FRONT + 2), at(s * 8.2, 0.34, (-half + Z_FRONT) / 2 - 1), GOLD, Enum.Material.Metal)
-	end
-	-- steps up to the hall
+	Palace.square(kit, model, at, half)
+	-- the steps up to the hall, the red carpet on them
 	mk(model, Vector3.new(70, 0.65, 4), at(0, 0.62, Z_FRONT - 4), MARBLE, Enum.Material.Marble)
 	mk(model, Vector3.new(70, 1.3, 2.2), at(0, 0.95, Z_FRONT - 1.1), MARBLE, Enum.Material.Marble)
+	deco(model, Vector3.new(16, 0.06, 2.2), at(0, 1.63, Z_FRONT - 1.1), VELVET, Enum.Material.Fabric)
+	deco(model, Vector3.new(16, 0.06, 4), at(0, 0.98, Z_FRONT - 4.1), VELVET, Enum.Material.Fabric)
 	-- gold bollards across the doors: people walk through, cars don't
 	for x = -12, 12, 4 do
 		mk(model, Vector3.new(2.4, 1.4, 1.4), at(x, 1.5, Z_FRONT - 7) * CFrame.Angles(0, 0, math.rad(90)), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder, name = "Bollard" })
 	end
 	for _, s in { -1, 1 } do
-		Garden.fountain(kit, model, at(s * 66, 0.3, -half + 26), 11)
-		for k, z in { -half + 8, -half + 46, Z_FRONT - 4, -2, 36, 74 } do
+		for k, z in { -half + 12, -half + 46, Z_FRONT - 4, -2, 36, 74 } do
 			Garden.palm(kit, model, at(s * (half - 9), 0.3, z).Position, 30 + (k % 3) * 4, k * 31 + (if s > 0 then 7 else 0))
 		end
-		-- palms flanking the carpet
-		Garden.palm(kit, model, at(s * 48, 0.3, -half + 6).Position, 26, 90 + s)
-		-- gold floodlights washing the stone front
-		for _, x in { 24, 50, 74 } do
-			local lamp = deco(model, Vector3.new(1.6, 1, 1.6), at(s * x, 0.8, Z_FRONT - 6), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
-			kit.addLight("SpotLight", lamp, Color3.fromRGB(255, 196, 120), 70, 2.6, Enum.NormalId.Top, 50)
-		end
-		-- the gardens either side of the marquise: clipped box hedges round lawns, flower beds, topiary
-		local gx = s * 50
-		local gz0, gz1 = -68, Z_FRONT - 10
-		local gl, gw = gz1 - gz0, 10
-		deco(model, Vector3.new(gw, 0.2, gl), at(gx, 0.4, (gz0 + gz1) / 2), Color3.fromRGB(70, 118, 52), Enum.Material.Grass)
-		for _, e in { { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } } do
-			local size = if e[1] == 0 then Vector3.new(gw, 1.6, 1.6) else Vector3.new(1.6, 1.6, gl)
-			mk(model, size, at(gx + e[1] * (gw / 2 - 0.8), 1.1, (gz0 + gz1) / 2 + e[2] * (gl / 2 - 0.8)), Color3.fromRGB(42, 84, 40), Enum.Material.Grass, { name = "Hedge" })
-		end
-		for k = 0, 1 do
-			local fz = gz0 + 5 + k * 8
-			deco(model, Vector3.new(gw - 4, 0.5, 2.4), at(gx, 0.6, fz), Color3.fromRGB(150, 40, 60), Enum.Material.Grass)
-			deco(model, Vector3.new(gw - 5, 0.55, 0.8), at(gx, 0.65, fz), Color3.fromRGB(240, 200, 90), Enum.Material.Grass)
-			-- a clipped ball of box on a stem
-			deco(model, Vector3.new(0.6, 2.4, 0.6), at(gx, 1.7, fz + 4), Color3.fromRGB(90, 70, 50), Enum.Material.Wood)
-			deco(model, Vector3.one * 3.2, at(gx, 4.2, fz + 4), Color3.fromRGB(46, 92, 44), Enum.Material.Grass, { shape = Enum.PartType.Ball })
-		end
+		-- gold floodlights washing the entrance
+		local lamp = deco(model, Vector3.new(1.6, 1, 1.6), at(s * 24, 1.8, Z_FRONT - 2.4), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
+		kit.addLight("SpotLight", lamp, Color3.fromRGB(255, 196, 120), 70, 2.6, Enum.NormalId.Top, 50)
 	end
 
 	-------------------------------------------------------------
 	-- Floors, walls, roof
 	-------------------------------------------------------------
-	mk(model, Vector3.new(HX * 2, FLOOR, Z_HALL - Z_FRONT), at(0, FLOOR / 2, (Z_FRONT + Z_HALL) / 2), MARBLE, Enum.Material.Marble, { name = "Floor" })
+	mk(model, Vector3.new(HX * 2, FLOOR, Z_HALL - Z_FRONT), at(0, FLOOR / 2, (Z_FRONT + Z_HALL) / 2), Color3.fromRGB(196, 176, 146), Enum.Material.Marble, { name = "Floor" })
 	-- the lobby's marble with a gold star inlay
-	deco(model, Vector3.new(HX * 2 - 6, 0.06, 22), at(0, FLOOR + 0.03, Z_FRONT + 12), MARBLE, Enum.Material.Marble)
 	for k = 0, 3 do
 		deco(model, Vector3.new(14, 0.07, 1.2), at(0, FLOOR + 0.05, Z_FRONT + 12) * CFrame.Angles(0, math.rad(k * 45), 0), GOLD, Enum.Material.Metal)
 	end
 	-- side walls in cream stone: a darker plinth, paired pilasters,
 	-- blind arched windows and a cornice
 	for _, s in { -1, 1 } do
-		mk(model, Vector3.new(3, H, Z_HALL - Z_FRONT), at(s * (HX - 1.5), FLOOR + H / 2, (Z_FRONT + Z_HALL) / 2), STONE, Enum.Material.Limestone, { name = "Wall" })
-		deco(model, Vector3.new(0.8, 4, Z_HALL - Z_FRONT), at(s * (HX + 0.3), FLOOR + 2, (Z_FRONT + Z_HALL) / 2), STONE_DARK, Enum.Material.Limestone)
-		deco(model, Vector3.new(1.6, 2.4, Z_HALL - Z_FRONT + 2), at(s * (HX + 0.6), FLOOR + H - 1.2, (Z_FRONT + Z_HALL) / 2), STONE_DARK, Enum.Material.Limestone)
+		mk(model, Vector3.new(3, H, Z_HALL - Z_FRONT), at(s * (HX - 1.5), FLOOR + H / 2, (Z_FRONT + Z_HALL) / 2), STONE, Enum.Material.Plaster, { name = "Wall" })
+		deco(model, Vector3.new(0.8, 4, Z_HALL - Z_FRONT), at(s * (HX + 0.3), FLOOR + 2, (Z_FRONT + Z_HALL) / 2), STONE_DARK, Enum.Material.Plaster)
+		deco(model, Vector3.new(1.6, 2.4, Z_HALL - Z_FRONT + 2), at(s * (HX + 0.6), FLOOR + H - 1.2, (Z_FRONT + Z_HALL) / 2), STONE_DARK, Enum.Material.Plaster)
 		local bays = math.floor((Z_HALL - Z_FRONT - 20) / 22)
 		for k = 0, bays do
 			local z = Z_FRONT + 14 + k * 22
 			if z < Z_HALL - 4 then
 				for _, dz in { -1.6, 1.6 } do
-					deco(model, Vector3.new(0.8, H - 6.4, 1.6), at(s * (HX + 0.3), FLOOR + 4 + (H - 6.4) / 2, z + dz), STONE, Enum.Material.Limestone)
+					deco(model, Vector3.new(0.8, H - 6.4, 1.6), at(s * (HX + 0.3), FLOOR + 4 + (H - 6.4) / 2, z + dz), STONE, Enum.Material.Plaster)
 				end
 				-- a blind arched window between this pair and the next
 				local wz = z + 11
 				if wz < Z_HALL - 8 then
 					deco(model, Vector3.new(0.4, 18, 8), at(s * (HX + 0.15), FLOOR + 6 + 9, wz), GLASS, Enum.Material.Glass, { reflectance = 0.25 })
 					deco(model, Vector3.new(0.5, 8, 8), at(s * (HX + 0.15), FLOOR + 24, wz) * CFrame.Angles(0, 0, math.rad(90)), GLASS, Enum.Material.Glass, { shape = Enum.PartType.Cylinder, reflectance = 0.25 })
-					deco(model, Vector3.new(0.6, 1, 10), at(s * (HX + 0.35), FLOOR + 5.6, wz), STONE_DARK, Enum.Material.Limestone)
+					deco(model, Vector3.new(0.6, 1, 10), at(s * (HX + 0.35), FLOOR + 5.6, wz), STONE_DARK, Enum.Material.Plaster)
 				end
 			end
 		end
 	end
 	-- the hall's back wall: stone outside, cream panelling inside
-	mk(model, Vector3.new(HX * 2, H, 2), at(0, FLOOR + H / 2, Z_HALL), STONE, Enum.Material.Limestone, { name = "Wall" })
-	deco(inside, Vector3.new(HX * 2 - 6, H - 6, 0.4), at(0, FLOOR + (H - 6) / 2 + 0.5, Z_HALL - 1.2), CREAM, Enum.Material.Plaster)
+	mk(model, Vector3.new(HX * 2, H, 2), at(0, FLOOR + H / 2, Z_HALL), STONE, Enum.Material.Plaster, { name = "Wall" })
 	-- the front in cream stone: round-headed windows between paired pilasters, a grand arched
 	-- entrance in the middle (open, its glass doors pushed to the sides), a frieze with the name in
 	-- gold letters, a cornice and a balustrade
@@ -235,13 +209,13 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 		for k = 0, 8 do
 			local a = math.rad(k * 22.5)
 			local px, py = math.cos(a) * (r + 0.9), math.sin(a) * (r + 0.9)
-			deco(model, Vector3.new(2.2, 1.6, 1.6), at(cx + px, y0 + py, z - 0.4) * CFrame.Angles(0, 0, a + math.pi / 2), STONE_DARK, Enum.Material.Limestone)
+			deco(model, Vector3.new(2.2, 1.6, 1.6), at(cx + px, y0 + py, z - 0.4) * CFrame.Angles(0, 0, a + math.pi / 2), STONE_DARK, Enum.Material.Plaster)
 		end
 		deco(model, Vector3.new(2, 2.6, 1.8), at(cx, y0 + r + 1.2, z - 0.6), GOLD, Enum.Material.Metal, { reflectance = 0.2 })
 	end
 	-- the wall itself: stone above the openings, the openings glazed (windows) or open (the door)
 	local winW, winH = 14, 20
-	local bays = { -70, -50, -30, 30, 50, 70 }
+	local bays = { -71, -52, -33, 33, 52, 71 }
 	-- the stone face behind everything (holes are where the glass and the door go)
 	local cuts = { { -doorHalf, doorHalf, 0, doorH } }
 	for _, x in bays do
@@ -268,11 +242,11 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 			if hole then
 				-- below and above the opening
 				if hole[3] > 0 then
-					mk(model, Vector3.new(x1 - x0, hole[3], 2), at(mid, FLOOR + hole[3] / 2, fz), STONE, Enum.Material.Limestone, { name = "Facade" })
+					mk(model, Vector3.new(x1 - x0, hole[3], 2), at(mid, FLOOR + hole[3] / 2, fz), STONE, Enum.Material.Plaster, { name = "Facade" })
 				end
-				mk(model, Vector3.new(x1 - x0, H - hole[4], 2), at(mid, FLOOR + (hole[4] + H) / 2, fz), STONE, Enum.Material.Limestone, { name = "Facade" })
+				mk(model, Vector3.new(x1 - x0, H - hole[4], 2), at(mid, FLOOR + (hole[4] + H) / 2, fz), STONE, Enum.Material.Plaster, { name = "Facade" })
 			else
-				mk(model, Vector3.new(x1 - x0, H, 2), at(mid, FLOOR + H / 2, fz), STONE, Enum.Material.Limestone, { name = "Facade" })
+				mk(model, Vector3.new(x1 - x0, H, 2), at(mid, FLOOR + H / 2, fz), STONE, Enum.Material.Plaster, { name = "Facade" })
 			end
 		end
 	end
@@ -282,7 +256,7 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 		deco(model, Vector3.new(0.5, winH, 0.4), at(x, FLOOR + 4 + winH / 2, fz - 1), IRON, Enum.Material.Metal)
 		deco(model, Vector3.new(winW, 0.5, 0.4), at(x, FLOOR + 4 + winH * 0.7, fz - 1), IRON, Enum.Material.Metal)
 		archHead(x, FLOOR + 4 + winH, winW, fz - 1.1)
-		deco(model, Vector3.new(winW + 2, 0.8, 2), at(x, FLOOR + 3.6, fz - 1.4), STONE_DARK, Enum.Material.Limestone)
+		deco(model, Vector3.new(winW + 2, 0.8, 2), at(x, FLOOR + 3.6, fz - 1.4), STONE_DARK, Enum.Material.Plaster)
 		-- a little iron balconette in front of each window
 		deco(model, Vector3.new(winW, 0.3, 0.3), at(x, FLOOR + 7.4, fz - 2.2), IRON, Enum.Material.Metal)
 		for k = -3, 3 do
@@ -292,7 +266,7 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	-- the grand entrance: a deep stone surround, the round glass fan above it, gold rays
 	archHead(0, FLOOR + doorH, doorHalf * 2, fz - 1.1)
 	for _, sx in { -1, 1 } do
-		deco(model, Vector3.new(2.4, doorH, 3), at(sx * (doorHalf + 1.2), FLOOR + doorH / 2, fz - 0.6), STONE_DARK, Enum.Material.Limestone)
+		deco(model, Vector3.new(2.4, doorH, 3), at(sx * (doorHalf + 1.2), FLOOR + doorH / 2, fz - 0.6), STONE_DARK, Enum.Material.Plaster)
 		-- open glass doors pushed to the sides
 		deco(model, Vector3.new(6, doorH - 2, 0.4), at(sx * (doorHalf - 3.4), FLOOR + (doorH - 2) / 2, fz + 1.6), Color3.fromRGB(220, 200, 150), Enum.Material.Glass, { transparency = 0.6 })
 	end
@@ -301,51 +275,32 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 		deco(model, Vector3.new(0.4, doorHalf - 2, 0.3), at(math.cos(a) * (doorHalf - 2) / 2, FLOOR + doorH + math.sin(a) * (doorHalf - 2) / 2, fz - 1.6) * CFrame.Angles(0, 0, a - math.pi / 2), GOLD, Enum.Material.Metal)
 	end
 	-- paired pilasters with gold capitals between the bays and at the corners
-	for _, x in { -60, -40, -20, 20, 40, 60 } do
+	for _, x in { -61.5, -42.5, 42.5, 61.5 } do
 		for _, dx in { -1.3, 1.3 } do
-			deco(model, Vector3.new(1.8, H - 8, 1.2), at(x + dx, FLOOR + 4 + (H - 8) / 2, fz - 1.4), STONE, Enum.Material.Limestone)
+			deco(model, Vector3.new(1.8, H - 8, 1.2), at(x + dx, FLOOR + 4 + (H - 8) / 2, fz - 1.4), STONE, Enum.Material.Plaster)
 			deco(model, Vector3.new(2.4, 1.2, 1.6), at(x + dx, FLOOR + H - 4.6, fz - 1.5), GOLD, Enum.Material.Metal)
 		end
-		deco(model, Vector3.new(6, 4, 2.4), at(x, FLOOR + 2, fz - 1.4), STONE_DARK, Enum.Material.Limestone)
+		deco(model, Vector3.new(6, 4, 2.4), at(x, FLOOR + 2, fz - 1.4), STONE_DARK, Enum.Material.Plaster)
 	end
 	-- the plinth, the frieze with the name, the cornice, the balustrade
-	deco(model, Vector3.new(HX * 2 + 2, 1.2, 2.6), at(0, FLOOR + 0.6, fz - 1.3), STONE_DARK, Enum.Material.Limestone)
-	local frieze = mk(model, Vector3.new(HX * 2 + 2, 6, 2.4), at(0, FLOOR + H + 1, fz - 0.4), STONE, Enum.Material.Limestone, { name = "Frieze" })
-	local nameBand = deco(model, Vector3.new(96, 4.4, 0.2), at(0, FLOOR + H + 1, fz - 1.7), STONE, Enum.Material.Limestone)
+	deco(model, Vector3.new(HX * 2 + 2, 1.2, 2.6), at(0, FLOOR + 0.6, fz - 1.3), STONE_DARK, Enum.Material.Plaster)
+	local frieze = mk(model, Vector3.new(HX * 2 + 2, 6, 2.4), at(0, FLOOR + H + 1, fz - 0.4), STONE, Enum.Material.Plaster, { name = "Frieze" })
+	local nameBand = deco(model, Vector3.new(96, 4.4, 0.2), at(0, FLOOR + H + 1, fz - 1.7), STONE, Enum.Material.Plaster)
 	goldLetters(nameBand, Enum.NormalId.Front, "LEGENDS  REWARDS", 10, 1.6)
 	kit.addLight("SpotLight", frieze, WARM, 30, 1.2, Enum.NormalId.Front, 70)
 	for _, y in { FLOOR + H - 2.2, FLOOR + H + 4.2 } do
-		deco(model, Vector3.new(HX * 2 + 4, 1.2, 4), at(0, y, fz - 1), STONE_DARK, Enum.Material.Limestone)
+		deco(model, Vector3.new(HX * 2 + 4, 1.2, 4), at(0, y, fz - 1), STONE_DARK, Enum.Material.Plaster)
 	end
 	deco(model, Vector3.new(HX * 2 + 4, 0.4, 0.5), at(0, FLOOR + H - 1.4, fz - 3), GOLD, Enum.Material.Metal)
 	local by = FLOOR + H + 4.8
-	deco(model, Vector3.new(HX * 2, 0.8, 1.6), at(0, by + 3.2, fz - 0.6), STONE, Enum.Material.Limestone)
+	deco(model, Vector3.new(HX * 2, 0.8, 1.6), at(0, by + 3.2, fz - 0.6), STONE, Enum.Material.Plaster)
 	for x = -HX + 2, HX - 2, 3.4 do
-		deco(model, Vector3.new(2.8, 1.1, 1.1), at(x, by + 1.4, fz - 0.6) * CFrame.Angles(0, 0, math.rad(90)), STONE, Enum.Material.Limestone, { shape = Enum.PartType.Cylinder })
+		deco(model, Vector3.new(2.8, 1.1, 1.1), at(x, by + 1.4, fz - 0.6) * CFrame.Angles(0, 0, math.rad(90)), STONE, Enum.Material.Plaster, { shape = Enum.PartType.Cylinder })
 	end
-	-- the hall's roof (copper), a gilded coffered ceiling and warm coves inside
-	mk(model, Vector3.new(HX * 2, 2, Z_HALL - Z_FRONT), at(0, FLOOR + H + 1, (Z_FRONT + Z_HALL) / 2), COPPER, Enum.Material.Metal, { name = "Roof" })
-	deco(inside, Vector3.new(HX * 2 - 6, 0.6, Z_HALL - Z_FRONT - 4), at(0, FLOOR + H - 1.6, (Z_FRONT + Z_HALL) / 2), CREAM, Enum.Material.Plaster)
-	for x = -HX + 10, HX - 10, 16 do
-		deco(inside, Vector3.new(1.2, 1.4, Z_HALL - Z_FRONT - 6), at(x, FLOOR + H - 2.4, (Z_FRONT + Z_HALL) / 2), GOLD, Enum.Material.Metal, { reflectance = 0.15 })
-	end
-	for z = Z_FRONT + 8, Z_HALL - 6, 16 do
-		deco(inside, Vector3.new(HX * 2 - 8, 1.4, 1.2), at(0, FLOOR + H - 2.4, z), GOLD, Enum.Material.Metal, { reflectance = 0.15 })
-	end
-	for _, s in { -1, 1 } do
-		local cove = deco(inside, Vector3.new(0.6, 0.4, Z_HALL - Z_FRONT - 8), at(s * (HX - 6), FLOOR + H - 3.4, (Z_FRONT + Z_HALL) / 2), WARM, Enum.Material.Neon, { transparency = 0.25 })
-		kit.addLight("SurfaceLight", cove, WARM, 18, 0.6, Enum.NormalId.Top, 120)
-		-- the hall's walls: cream panels, gold pilasters, sconces
-		deco(inside, Vector3.new(0.4, H - 6, Z_HALL - Z_FRONT - 4), at(s * (HX - 3.2), FLOOR + (H - 6) / 2 + 0.5, (Z_FRONT + Z_HALL) / 2), CREAM, Enum.Material.Plaster)
-		for z = Z_FRONT + 14, Z_HALL - 10, 22 do
-			deco(inside, Vector3.new(0.6, H - 8, 1.4), at(s * (HX - 3.6), FLOOR + (H - 8) / 2 + 0.5, z), GOLD, Enum.Material.Metal, { reflectance = 0.15 })
-			local sconce = deco(inside, Vector3.new(0.8, 1.6, 0.8), at(s * (HX - 4.2), FLOOR + 12, z + 11), WARM, Enum.Material.Neon, { transparency = 0.2 })
-			kit.addLight("PointLight", sconce, WARM, 16, 0.6)
-		end
-	end
-	for _, z in { Z_FRONT + 2, Z_HALL - 6 } do
-		deco(inside, Vector3.new(HX * 2 - 12, 0.4, 0.6), at(0, FLOOR + H - 3.4, z), WARM, Enum.Material.Neon, { transparency = 0.25 })
-	end
+	-- the roof, the twin towers and the clock; inside, the stained-glass dome and the walls
+	local palace = { FLOOR = FLOOR, H = H, HX = HX, ZF = Z_FRONT, ZH = Z_HALL }
+	local roofTop = Palace.roof(kit, model, at, palace)
+	Palace.hall(kit, inside, at, palace)
 
 	-------------------------------------------------------------
 	-- The corner towers and the dome
@@ -353,7 +308,7 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	for _, s in { -1, 1 } do
 		local tx, tz2 = s * (HX + 3), Z_FRONT + 6
 		local tTop = FLOOR + H + 22
-		mk(model, Vector3.new(16, tTop - FLOOR, 16), at(tx, FLOOR + (tTop - FLOOR) / 2, tz2), STONE, Enum.Material.Limestone, { name = "CornerTower" })
+		mk(model, Vector3.new(16, tTop - FLOOR, 16), at(tx, FLOOR + (tTop - FLOOR) / 2, tz2), STONE, Enum.Material.Plaster, { name = "CornerTower" })
 		-- round-headed openings on the outside faces, a cornice, the copper dome and a gold finial
 		for _, face in { { 0, -1 }, { s, 0 } } do
 			local ox, oz = face[1] * 8.15, face[2] * 8.15
@@ -362,8 +317,8 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 			deco(model, Vector3.new(5, 10, 0.4), c * rot, GLASS, Enum.Material.Glass, { reflectance = 0.3 })
 			deco(model, Vector3.new(0.5, 5, 5), c * rot * CFrame.new(0, 5, 0) * CFrame.Angles(0, math.pi / 2, 0) * CFrame.Angles(0, 0, 0), GLASS, Enum.Material.Glass, { shape = Enum.PartType.Cylinder, reflectance = 0.3 })
 		end
-		deco(model, Vector3.new(18, 1.4, 18), at(tx, tTop - 0.7, tz2), STONE_DARK, Enum.Material.Limestone)
-		deco(model, Vector3.new(17, 3, 17), at(tx, tTop + 1.5, tz2), STONE, Enum.Material.Limestone)
+		deco(model, Vector3.new(18, 1.4, 18), at(tx, tTop - 0.7, tz2), STONE_DARK, Enum.Material.Plaster)
+		deco(model, Vector3.new(17, 3, 17), at(tx, tTop + 1.5, tz2), STONE, Enum.Material.Plaster)
 		mk(model, Vector3.one * 16, at(tx, tTop + 3, tz2), COPPER, Enum.Material.Metal, { shape = Enum.PartType.Ball, name = "Dome" })
 		deco(model, Vector3.new(2.4, 4, 2.4), at(tx, tTop + 12.6, tz2), GOLD, Enum.Material.Metal, { reflectance = 0.25 })
 		deco(model, Vector3.one * 1.8, at(tx, tTop + 15.4, tz2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Ball, reflectance = 0.25 })
@@ -372,15 +327,16 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	end
 	-- the great dome over the hall: a stone drum with round windows, the copper dome, a lantern
 	local dz = (Z_FRONT + Z_HALL) / 2 + 6
-	local dTop = FLOOR + H + 2
-	mk(model, Vector3.new(12, 46, 46), at(0, dTop + 6, dz) * CFrame.Angles(0, 0, math.rad(90)), STONE, Enum.Material.Limestone, { shape = Enum.PartType.Cylinder, name = "Drum" })
-	deco(model, Vector3.new(1.4, 48, 48), at(0, dTop + 12.5, dz) * CFrame.Angles(0, 0, math.rad(90)), STONE_DARK, Enum.Material.Limestone, { shape = Enum.PartType.Cylinder })
+	local dTop = roofTop + 5
+	mk(model, Vector3.new(5, 50, 50), at(0, roofTop + 2.5, dz) * CFrame.Angles(0, 0, math.rad(90)), STONE_DARK, Enum.Material.Plaster, { shape = Enum.PartType.Cylinder, name = "Drum" })
+	mk(model, Vector3.new(12, 46, 46), at(0, dTop + 6, dz) * CFrame.Angles(0, 0, math.rad(90)), STONE, Enum.Material.Plaster, { shape = Enum.PartType.Cylinder, name = "Drum" })
+	deco(model, Vector3.new(1.4, 48, 48), at(0, dTop + 12.5, dz) * CFrame.Angles(0, 0, math.rad(90)), STONE_DARK, Enum.Material.Plaster, { shape = Enum.PartType.Cylinder })
 	for k = 0, 11 do
 		local a = k / 12 * math.pi * 2
 		deco(model, Vector3.new(0.4, 3.6, 3.6), at(math.cos(a) * 23.05, dTop + 6, dz + math.sin(a) * 23.05) * CFrame.Angles(0, -a, 0), GLASS, Enum.Material.Glass, { shape = Enum.PartType.Cylinder, reflectance = 0.3 })
 	end
 	mk(model, Vector3.one * 44, at(0, dTop + 12, dz), COPPER, Enum.Material.Metal, { shape = Enum.PartType.Ball, name = "Dome" })
-	mk(model, Vector3.new(8, 6, 6), at(0, dTop + 36, dz) * CFrame.Angles(0, 0, math.rad(90)), STONE, Enum.Material.Limestone, { shape = Enum.PartType.Cylinder })
+	mk(model, Vector3.new(8, 6, 6), at(0, dTop + 36, dz) * CFrame.Angles(0, 0, math.rad(90)), STONE, Enum.Material.Plaster, { shape = Enum.PartType.Cylinder })
 	deco(model, Vector3.new(1, 7, 7), at(0, dTop + 40.4, dz) * CFrame.Angles(0, 0, math.rad(90)), COPPER, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 	deco(model, Vector3.new(1.2, 6, 1.2), at(0, dTop + 44, dz), GOLD, Enum.Material.Metal, { reflectance = 0.25 })
 	deco(model, Vector3.one * 2.2, at(0, dTop + 47.6, dz), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Ball, reflectance = 0.25 })
@@ -390,49 +346,45 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 		local wash = deco(model, Vector3.new(1.4, 1, 1.4), at(p[1], dTop + 1, dz + p[2] * 30), Color3.fromRGB(30, 30, 34), Enum.Material.Metal)
 		kit.addLight("SpotLight", wash, Color3.fromRGB(255, 196, 110), 70, 2.4, Enum.NormalId.Top, 50)
 	end
-	-- a copper mansard round the roof's edge behind the balustrade
-	for _, s in { -1, 1 } do
-		deco(model, Vector3.new(4, 4, Z_HALL - Z_FRONT - 4), at(s * (HX - 4), FLOOR + H + 4, (Z_FRONT + Z_HALL) / 2 + 2) * CFrame.Angles(0, 0, s * math.rad(20)), COPPER, Enum.Material.Metal)
-	end
 
 	-------------------------------------------------------------
 	-- The marquise: an iron-and-glass canopy over the carpet, gold letters on its fascia, lanterns
 	-------------------------------------------------------------
-	local cz = Z_FRONT - 24
-	local canopy = mk(model, Vector3.new(84, 0.6, 44), at(0, 21, cz), IRON, Enum.Material.Metal, { name = "Canopy", transparency = 1 })
+	local cz = Z_FRONT - 13
+	local canopy = mk(model, Vector3.new(68, 0.6, 24), at(0, 21, cz), IRON, Enum.Material.Metal, { name = "Canopy", transparency = 1 })
 	canopy.CanCollide = true
-	-- the glass roof on iron ribs, tipped gently towards the street
+	-- the opal glass roof on iron ribs, tipped gently towards the street
 	local tilt = CFrame.Angles(math.rad(-4), 0, 0)
-	deco(model, Vector3.new(82, 0.3, 43), at(0, 21.6, cz) * tilt, Color3.fromRGB(180, 200, 210), Enum.Material.Glass, { transparency = 0.55, reflectance = 0.2 })
-	for x = -40, 40, 8 do
-		deco(model, Vector3.new(0.5, 0.8, 44), at(x, 21.2, cz) * tilt, IRON, Enum.Material.Metal)
+	deco(model, Vector3.new(66, 0.3, 23), at(0, 21.6, cz) * tilt, Color3.fromRGB(206, 222, 220), Enum.Material.SmoothPlastic, { reflectance = 0.2 })
+	for x = -32, 32, 8 do
+		deco(model, Vector3.new(0.5, 0.8, 24), at(x, 21.2, cz) * tilt, IRON, Enum.Material.Metal)
 	end
-	deco(model, Vector3.new(85, 0.6, 0.6), at(0, 22.4, cz + 21.8) * tilt, GOLD, Enum.Material.Metal)
+	deco(model, Vector3.new(69, 0.6, 0.6), at(0, 22.4, cz + 11.8) * tilt, GOLD, Enum.Material.Metal)
 	-- the fascia with the name and a gold crest of rays
-	mk(model, Vector3.new(86, 3.6, 1), at(0, 20.4, cz - 22.2), IRON, Enum.Material.Metal, { name = "Fascia" })
-	deco(model, Vector3.new(86.4, 0.4, 1.2), at(0, 22.4, cz - 22.2), GOLD, Enum.Material.Metal)
-	deco(model, Vector3.new(86.4, 0.4, 1.2), at(0, 18.4, cz - 22.2), GOLD, Enum.Material.Metal)
-	local fl = deco(model, Vector3.new(60, 3, 0.2), at(0, 20.4, cz - 22.8), IRON, Enum.Material.Metal)
+	mk(model, Vector3.new(70, 3.6, 1), at(0, 20.4, cz - 12.2), IRON, Enum.Material.Metal, { name = "Fascia" })
+	deco(model, Vector3.new(70.4, 0.4, 1.2), at(0, 22.4, cz - 12.2), GOLD, Enum.Material.Metal)
+	deco(model, Vector3.new(70.4, 0.4, 1.2), at(0, 18.4, cz - 12.2), GOLD, Enum.Material.Metal)
+	local fl = deco(model, Vector3.new(56, 3, 0.2), at(0, 20.4, cz - 12.8), IRON, Enum.Material.Metal)
 	goldLetters(fl, Enum.NormalId.Front, "LEGENDS  REWARDS", 12, 1.6)
 	for k = 0, 6 do
 		local a = math.rad(15 + k * 25)
-		deco(model, Vector3.new(0.3, 3.4, 0.3), at(math.cos(a) * 1.7, 24 + math.sin(a) * 1.7, cz - 22.2) * CFrame.Angles(0, 0, a - math.pi / 2), GOLD, Enum.Material.Metal)
+		deco(model, Vector3.new(0.3, 3.4, 0.3), at(math.cos(a) * 1.7, 24 + math.sin(a) * 1.7, cz - 12.2) * CFrame.Angles(0, 0, a - math.pi / 2), GOLD, Enum.Material.Metal)
 	end
-	deco(model, Vector3.one * 1.4, at(0, 23.6, cz - 22.2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Ball })
+	deco(model, Vector3.one * 1.4, at(0, 23.6, cz - 12.2), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Ball })
 	for _, s in { -1, 1 } do
-		deco(model, Vector3.new(1, 3.6, 44), at(s * 42.5, 20.4, cz), IRON, Enum.Material.Metal)
+		deco(model, Vector3.new(1, 3.6, 24), at(s * 34.5, 20.4, cz), IRON, Enum.Material.Metal)
 		-- iron columns with gold collars and lanterns on top
-		for _, z in { cz - 18, cz + 14 } do
-			mk(model, Vector3.new(20, 1.6, 1.6), at(s * 36, 10.5, z) * CFrame.Angles(0, 0, math.rad(90)), IRON, Enum.Material.Metal, { shape = Enum.PartType.Cylinder, name = "Column" })
-			deco(model, Vector3.new(0.6, 2.4, 2.4), at(s * 36, 1.4, z) * CFrame.Angles(0, 0, math.rad(90)), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
-			deco(model, Vector3.new(0.6, 2.2, 2.2), at(s * 36, 19.6, z) * CFrame.Angles(0, 0, math.rad(90)), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+		for _, z in { cz - 10, cz + 7.5 } do
+			mk(model, Vector3.new(20, 1.6, 1.6), at(s * 29, 10.5, z) * CFrame.Angles(0, 0, math.rad(90)), IRON, Enum.Material.Metal, { shape = Enum.PartType.Cylinder, name = "Column" })
+			deco(model, Vector3.new(0.6, 2.4, 2.4), at(s * 29, 1.4, z) * CFrame.Angles(0, 0, math.rad(90)), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
+			deco(model, Vector3.new(0.6, 2.2, 2.2), at(s * 29, 19.6, z) * CFrame.Angles(0, 0, math.rad(90)), GOLD, Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 		end
-		local lantern = deco(model, Vector3.new(1.6, 2.4, 1.6), at(s * 30, 18.4, cz - 22.8), Color3.fromRGB(255, 226, 170), Enum.Material.Neon, { transparency = 0.15, name = "Lantern" })
-		deco(model, Vector3.new(2.2, 0.4, 2.2), at(s * 30, 19.8, cz - 22.8), IRON, Enum.Material.Metal)
+		local lantern = deco(model, Vector3.new(1.6, 2.4, 1.6), at(s * 25, 18.4, cz - 12.8), Color3.fromRGB(255, 226, 170), Enum.Material.SmoothPlastic, { name = "Lantern" })
+		deco(model, Vector3.new(2.2, 0.4, 2.2), at(s * 25, 19.8, cz - 12.8), IRON, Enum.Material.Metal)
 		kit.addLight("PointLight", lantern, WARM, 18, 1)
 	end
 	for _, x in { -24, 0, 24 } do
-		local down = deco(model, Vector3.new(4, 0.3, 4), at(x, 20.4, cz), Color3.fromRGB(255, 236, 200), Enum.Material.Neon, { transparency = 0.2 })
+		local down = deco(model, Vector3.new(4, 0.3, 4), at(x, 20.4, cz), Color3.fromRGB(255, 236, 200), Enum.Material.SmoothPlastic)
 		kit.addLight("SpotLight", down, WARM, 30, 2.2, Enum.NormalId.Bottom, 90)
 	end
 
@@ -441,8 +393,9 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	-------------------------------------------------------------
 	-- crystal chandeliers (VenueKit): the lobby, down the middle of the hall; tiers of glass drops
 	-- round a gold hub if the kit isn't in the place
-	for _, p in { { 0, Z_FRONT + 16, 1.6 }, { 0, 14, 1.8 }, { -40, 30, 1.4 }, { 40, 30, 1.4 } } do
-		local top = FLOOR + H - 2.4
+	local domeZ = (Z_FRONT + Z_HALL) / 2
+	for _, p in { { 0, domeZ, 2.1, 12.6 }, { -70, Z_FRONT + 20, 1.3 }, { 70, Z_FRONT + 20, 1.3 }, { -70, 48, 1.3 }, { 70, 48, 1.3 } } do
+		local top = FLOOR + H - 2.4 + (p[4] or 0)
 		local cf = at(p[1], top - 14.92 * p[3], p[2])
 		if kitPiece("Chandelier", cf, p[3], inside) then
 			local bulb = deco(inside, Vector3.new(1, 1, 1), at(p[1], top - 9, p[2]), WARM, Enum.Material.SmoothPlastic, { transparency = 1 })
@@ -476,9 +429,9 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	-------------------------------------------------------------
 	-- The hall: a red runner to the daily desk, the claim desks, the two spin cabinets
 	-------------------------------------------------------------
-	deco(inside, Vector3.new(12, 0.06, Z_HALL - Z_FRONT - 24), at(0, FLOOR + 0.03, (Z_FRONT + 22 + Z_HALL - 2) / 2), VELVET, Enum.Material.Fabric)
+	deco(inside, Vector3.new(12, 0.06, Z_HALL - Z_FRONT - 24), at(0, FLOOR + 0.36, (Z_FRONT + 22 + Z_HALL - 2) / 2), VELVET, Enum.Material.Fabric)
 	for _, s in { -1, 1 } do
-		deco(inside, Vector3.new(0.4, 0.07, Z_HALL - Z_FRONT - 24), at(s * 6.2, FLOOR + 0.04, (Z_FRONT + 22 + Z_HALL - 2) / 2), GOLD, Enum.Material.Metal)
+		deco(inside, Vector3.new(0.4, 0.07, Z_HALL - Z_FRONT - 24), at(s * 6.2, FLOOR + 0.38, (Z_FRONT + 22 + Z_HALL - 2) / 2), GOLD, Enum.Material.Metal)
 	end
 	-- a claim desk: a walnut counter with a marble top and gold trim, a stone board above it with
 	-- the desk's name in gold letters, a warm lamp, and the prompt that opens its page
@@ -489,13 +442,13 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 		for _, sx in { -1, 1 } do
 			deco(inside, Vector3.new(0.4, 3.8, 0.4), cf * CFrame.new(sx * (w / 2 - 0.3), 1.9, -2.1), GOLD, Enum.Material.Metal)
 		end
-		mk(inside, Vector3.new(w + 2, 4, 1), cf * CFrame.new(0, 11, 4), STONE, Enum.Material.Limestone, { name = "DeskBoard" })
+		mk(inside, Vector3.new(w + 2, 4, 1), cf * CFrame.new(0, 11, 4), STONE, Enum.Material.Marble, { name = "DeskBoard" })
 		deco(inside, Vector3.new(w + 2.4, 0.4, 1.2), cf * CFrame.new(0, 13.2, 4), GOLD, Enum.Material.Metal)
 		deco(inside, Vector3.new(w + 2.4, 0.4, 1.2), cf * CFrame.new(0, 8.8, 4), GOLD, Enum.Material.Metal)
-		local face = deco(inside, Vector3.new(w + 1, 3, 0.2), cf * CFrame.new(0, 11, 3.4), STONE, Enum.Material.Limestone)
+		local face = deco(inside, Vector3.new(w + 1, 3, 0.2), cf * CFrame.new(0, 11, 3.4), STONE, Enum.Material.Marble)
 		goldLetters(face, Enum.NormalId.Front, title, 14, 1.4)
 		for _, sx in { -1, 1 } do
-			deco(inside, Vector3.new(1.2, 8, 1.2), cf * CFrame.new(sx * (w / 2 + 0.4), 4.8, 4), STONE_DARK, Enum.Material.Limestone)
+			deco(inside, Vector3.new(1.2, 8, 1.2), cf * CFrame.new(sx * (w / 2 + 0.4), 4.8, 4), STONE_DARK, Enum.Material.Marble)
 		end
 		local lamp = deco(inside, Vector3.new(2.4, 0.3, 2.4), cf * CFrame.new(0, 16, 0), WARM, Enum.Material.Neon, { transparency = 0.2 })
 		kit.addLight("SpotLight", lamp, WARM, 22, 1.8, Enum.NormalId.Bottom, 80)
@@ -509,7 +462,7 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 		-- a palm either side
 		for _, sx in { -1, 1 } do
 			if not kitPiece("PottedPalm", cf * CFrame.new(sx * (w / 2 + 4), 0, 1.5), 1.6, inside) then
-				deco(inside, Vector3.new(2.4, 3, 2.4), cf * CFrame.new(sx * (w / 2 + 4), 1.5, 1.5), STONE_DARK, Enum.Material.Limestone)
+				deco(inside, Vector3.new(2.4, 3, 2.4), cf * CFrame.new(sx * (w / 2 + 4), 1.5, 1.5), STONE_DARK, Enum.Material.Plaster)
 			end
 		end
 	end

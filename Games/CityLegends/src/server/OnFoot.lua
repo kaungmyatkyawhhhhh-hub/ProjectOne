@@ -25,6 +25,7 @@ export type Ctx = {
 local ctx: Ctx
 local EXIT_SPEED = 14 -- studs/s: you can get out while rolling slowly (about 30 km/h)
 local ENTER_RANGE = 16
+local GARDEN_RANGE = 90 -- how near the casino's garden a first car must be for a start on foot
 
 local function carRoot(car: Model): BasePart?
 	return car.PrimaryPart
@@ -227,7 +228,13 @@ function OnFoot.init(c: Ctx)
 	local ExitCar: RemoteFunction = ctx.remote("RemoteFunction", "ExitCar")
 	local EnterCar: RemoteFunction = ctx.remote("RemoteFunction", "EnterCar")
 
-	ExitCar.OnServerInvoke = function(player: Player)
+	-- `where` = "garden": the start of a visit (owner, 2026-11-04: "player actually spawn at the garden
+	-- of the casino"): once a visit, only when the car came out on the casino's drive (not a fast travel)
+	local arrived: { [Player]: boolean } = {}
+	Players.PlayerRemoving:Connect(function(player)
+		arrived[player] = nil
+	end)
+	ExitCar.OnServerInvoke = function(player: Player, where: any)
 		local car = ctx.getCar(player)
 		local root = if car then carRoot(car) else nil
 		if not (car and root) or player.Character then
@@ -236,6 +243,16 @@ function OnFoot.init(c: Ctx)
 		local v = root.AssemblyLinearVelocity
 		if Vector3.new(v.X, 0, v.Z).Magnitude > EXIT_SPEED then
 			return false
+		end
+		if where == "garden" then
+			local spot = ctx.startFootCFrame()
+			if arrived[player] or (spot.Position - root.Position).Magnitude > GARDEN_RANGE then
+				return false
+			end
+			arrived[player] = true
+			park(car)
+			standUp(player, spot)
+			return true
 		end
 		park(car)
 		standUp(player)

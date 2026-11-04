@@ -72,10 +72,10 @@ function TravelSpots.list(): { Spot }
 		local at = Vector3.new(13990, 8, 742)
 		table.insert(list, { id = "marina", name = "Marina Parking", icon = "harbour", info = INFO.marina, cf = CFrame.lookAt(at, at + Vector3.new(0.608, 0, 0.794)) })
 	end
-	-- (2026-11-04) the Grand Hairpin Hotel: on the road beside its door
+	-- (2026-11-04) the Grand Hairpin Hotel: on its drive, facing the door
 	if riv then
-		local at = Vector3.new(10794.9, 181.5, -85.2)
-		table.insert(list, { id = "hairpin_hotel", name = "Grand Hairpin Hotel", icon = "hotel", info = INFO.hairpin, cf = CFrame.lookAt(at, at + Vector3.new(0.259, 0, 0.966)) })
+		local at = Vector3.new(10670, 40.5, 750)
+		table.insert(list, { id = "hairpin_hotel", name = "Grand Hairpin Hotel", icon = "hotel", info = INFO.hairpin, cf = CFrame.lookAt(at, at + Vector3.new(-1, 0, 0)) })
 	end
 	-- (2026-11-04) the Riviera Highway (the mountain highway west of the town): its valley straight
 	local okH, hw = pcall(function()

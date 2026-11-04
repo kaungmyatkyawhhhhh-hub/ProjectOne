@@ -1,7 +1,7 @@
 """
 The Grand Hairpin (2026-11-04, `City Legends/Prompts/Realistic hairpin`, owner chose real curved
-meshes: made here, one Import 3D by hand): the West Switchbacks' upper west bend rebuilt like Monaco's
-famous one: 1+1, a tight 180 round a small teardrop island, the road climbing through the bend. The
+meshes: made here, one Import 3D by hand): the West Switchbacks' lowest bend, just above the Coast Road's
+start (the one the owner marked in red on the map), rebuilt like Monaco's famous one: 1+1, a tight 180 round a small teardrop island, the road climbing through the bend. The
 shape was traced from the owner's reference photos (imports/refs/map/hairpin/), not from a map service.
 
 Writes build/riviera/hairpin.json: the road's samples, the island's outline and the pieces' strips.
@@ -21,8 +21,8 @@ sys.path.insert(0, HERE)
 import highway as hw  # noqa: E402
 
 RIV = hw.RIV
-FROM_I, TO_I = 399, 465   # West Switchbacks samples replaced between (their ends stay)
-C = (10850.0, -100.0)     # the bend's middle
+FROM_I, TO_I = 30, 102    # West Switchbacks samples replaced between (their ends stay)
+C = (10840.0, 750.0)      # the bend's middle
 R = 46.0                  # the centre line's radius in the bend
 HALF = 22.0               # half the road in the bend (1 + 1)
 HALF_END = 32.0           # the streets' half width at both ends
@@ -31,7 +31,7 @@ STEP = 1.5                # between samples: smooth meshes
 WALK = 10.0               # pavement width
 KERB = 1.4                # red-and-white kerb width
 ISLAND_R = HALF and (R - HALF - KERB - 0.6)  # the round end of the teardrop
-ISLAND_TIP = (10925.0, -92.0)
+ISLAND_TIP = (10916.0, 744.0)
 
 
 def hermite(p0, d0, p1, d1, n=120):

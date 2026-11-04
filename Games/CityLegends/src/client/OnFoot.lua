@@ -71,6 +71,23 @@ local function hrp(): BasePart?
 	return if character then character:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
 end
 
+-- the start of a visit: on foot in the casino's garden, the car waiting on the drive (the server says
+-- no when the car came out somewhere else: then you stay in it)
+function OnFoot.arrive()
+	if busy or not Driving.isDriving() then
+		return
+	end
+	busy = true
+	local ok, result = pcall(function()
+		return (remotes:WaitForChild("ExitCar") :: RemoteFunction):InvokeServer("garden")
+	end)
+	busy = false
+	if ok and result then
+		Driving.park()
+		OnFoot.footMode()
+	end
+end
+
 function OnFoot.getOut()
 	if busy or not Driving.isDriving() then
 		return

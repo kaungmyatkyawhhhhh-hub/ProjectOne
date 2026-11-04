@@ -43,8 +43,12 @@ LOT_HILLS = [(11423.3, -40.2, 150, 144, 190.5)]
 HILL_SLOPE = 2.0
 # paved pads (capsules from a to b, radius r, top height): the bank heist's drop-off stood in a field,
 # its marker 11 studs in the air, behind a 3-stud drop off the pavement
-PADS = [((17176.4, 891.0), (17176.4, 891.0), 46.0, 20.6), ((17176.4, 891.0), (17134.3, 787.2), 17.0, 20.6)]
+# (the Grand Hairpin Hotel's terrace on the hill west of the bend, and its drive to the bend)
+PADS = [((17176.4, 891.0), (17176.4, 891.0), 46.0, 20.6), ((17176.4, 891.0), (17134.3, 787.2), 17.0, 20.6),
+        ((10530.0, 700.0), (10530.0, 800.0), 128.0, 38.0), ((10530.0, 750.0), (10760.0, 750.0), 32.0, 38.0),
+        ((10610.0, 690.0), (10610.0, 810.0), 80.0, 38.0)]
 PAD_SLOPE = 0.9
+PAD_CUT = 1.2
 
 
 def cut_rise(out):
@@ -155,7 +159,7 @@ def main():
     cz = Z0 + C * (np.arange(shape[0]) + 0.5)
     # the old road bed round the Grand Hairpin: grass now, and level with the island inside the bend
     xx, zz = np.meshgrid(cx, cz)
-    near_hp = (np.abs(xx - 10880) < 170) & (np.abs(zz + 95) < 170)
+    near_hp = (np.abs(xx - (hp["centre"][0] + 40)) < 170) & (np.abs(zz - hp["centre"][1]) < 170)
     newM[near_hp & (newM == "A") & (best > core_w) & ~keep] = "G"
     from_c = np.sqrt((xx - hp["centre"][0]) ** 2 + (zz - hp["centre"][1]) ** 2)
     isl = near_hp & (best > 22 + 1) & (from_c < 22)
@@ -175,8 +179,9 @@ def main():
         dist = np.sqrt((xx - (ax + (bx - ax) * t)) ** 2 + (zz - (az + (bz - az) * t)) ** 2)
         out_p = np.maximum(dist - rad, 0)
         hill = (top - out_p * PAD_SLOPE).astype(np.float32)
-        pad = (hill > newH) & ~near43
-        newH[pad] = hill[pad]
+        cut = (top + out_p * PAD_CUT).astype(np.float32)
+        pad = ((hill > newH) | (cut < newH)) & ~near43 & (best > 46)
+        newH[pad] = np.clip(newH[pad], hill[pad], cut[pad])
         newM[pad & (out_p <= 0)] = "P"
         newM[pad & (out_p > 0)] = "G"
     for (x, z, sx, sz, top) in LOT_HILLS:
