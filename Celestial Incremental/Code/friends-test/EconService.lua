@@ -69,7 +69,7 @@ local function newData()
 	end
 	return { v = Econ.DataVersion, stardust = 0, earnedRun = 0, earnedTotal = 0, bestRun = 0, owned = owned, copies = copies, nodes = {},
 		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {}, settings = {}, guide = {},
-		codes = {}, potions = {}, boostLeft = {}, alphaPlayer = false, alphaBadge = false }
+		codes = {}, potions = {}, boostLeft = {}, alphaPlayer = false, alphaBadge = false, pads = 0 }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -84,6 +84,12 @@ local function migrate(d): (any, boolean)
 	for i = 1, #Econ.Tiers do d.owned[i] = math.max(0, math.floor(tonumber(d.owned[i]) or 0)) end
 	-- v3 (feel pass, 5 Nov): owned = LEVELS + copies. An old owned count n -> level n (max 60), 1 + n/25 copies (max 5)
 	if type(d.copies) ~= "table" then d.copies = {} end
+	if oldV < 3 then
+		-- (the island grew by itself before: give the pads that build the pieces it had, so it never shrinks)
+		local oldBodies = 0
+		for i = 1, #Econ.Tiers do oldBodies += d.owned[i] end
+		d.pads = ({ 0, 2, 3, 4, 6, 8, 10 })[MapConfig.TierOf(oldBodies, tonumber(d.supernovas) or 0) + 1] or 10
+	end
 	for i = 1, #Econ.Tiers do
 		if oldV < 3 then
 			local n = d.owned[i]
@@ -94,7 +100,7 @@ local function migrate(d): (any, boolean)
 		if d.owned[i] > 0 and d.copies[i] == 0 then d.copies[i] = 1 end
 		if d.owned[i] == 0 then d.copies[i] = 0 end
 	end
-	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned" }) do
+	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads" }) do
 		local n = tonumber(d[k]) or 0
 		d[k] = if n == n and n ~= math.huge then n else 0
 	end
@@ -192,7 +198,7 @@ local function stardustBoost(s): number
 	return 1 + (surgeMult() - 1) + (if boosting(s, "Stardust") then 1 else 0) + (if s.passX2 then 1 else 0)
 end
 local function incomeOf(s): number
-	return Econ.Income(s.d.owned, s.d.copies, s.d.nodes, s.d.ring2) * stardustBoost(s)
+	return Econ.Income(s.d.owned, s.d.copies, s.d.nodes, s.d.ring2) * Econ.PadMult(s.d.pads) * stardustBoost(s)
 end
 local function cometEvery(s): number
 	return math.max(Econ.Comet.MinEvery, Econ.CometEvery(s.d.nodes) / (if boosting(s, "Comets") then 2 else 1))
@@ -217,6 +223,7 @@ local function publish(player: Player, s)
 		table.insert(sys, (if d.owned[k] > 0 then Econ.NamedTier(d.owned[k]) else 0) .. ":" .. d.copies[k])
 	end
 	player:SetAttribute("Sys", table.concat(sys, ","))
+	player:SetAttribute("Pads", math.clamp(math.floor(d.pads), 0, #Econ.Pads))
 	for _, n in ipairs(Econ.Ring1) do player:SetAttribute("Node_" .. n.id, d.nodes[n.id] == true) end
 	for _, n in ipairs(Econ.Ring2) do player:SetAttribute("R2_" .. n.id, d.ring2[n.id] or 0) end
 	player:SetAttribute("Shards", d.shards)
@@ -349,6 +356,18 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		checkTutorial(player, s)
 		publish(player, s)
 		return true, d.owned[arg + 1]
+	elseif action == "BuyPad" then
+		-- the next island pad (only on your island: the pad sends the slot, boardAllowed checked it above)
+		if slot == nil then return false, "board" end
+		local i = math.floor(d.pads) + 1
+		local pad = Econ.Pads[i]
+		if not pad then return false, "max" end
+		if d.stardust < pad.price then return false, "poor" end
+		d.stardust -= pad.price
+		d.pads = i
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "PadBuy", i) end)
+		return true, i
 	elseif action == "BuyCopy" then
 		-- +BODY: one more copy of an unlocked body type (max Econ.MaxCopies)
 		if type(arg) ~= "number" or arg ~= arg or arg % 1 ~= 0 or arg < 0 or arg >= #Econ.Tiers then return false, "bad" end

@@ -1,8 +1,9 @@
 -- GalaxyMapService (Galaxy Incremental, 2 Nov): the PERSONAL ISLANDS.
 --  * Join: you claim the first free island (of 8); leave: it's freed (your save keeps your progress, not the island).
 --  * You spawn ON your island, facing the Core (and come back there if you fall into the void).
---  * Your island GROWS with your progress (MapConfig.Tiers: bodies owned in the first run, then Supernovas): each new tier's
---    pieces appear (the client pops them in with a sparkle). Its bridge to the centre is lit at every tier.
+--  * Your island GROWS with the PADS you buy (feel pass, 5 Nov: EconConfig.Pads, the owner's attribute Pads): each pad builds
+--    its pieces (PAD_BUILD; the client pops them in with a sparkle) and the next pad appears, lit, on the floor. A bare rock
+--    until pad 1. Its bridge to the centre is lit while it's owned.
 --  * The island carries what the clients draw over it: Owner, OwnerName, Color, Tier, BodyTiers, Supernovas, Rank, Ready
 --    (Rank = MapConfig.RankOf: NEW STAR, RISING STAR, SUPERNOVA n).
 --  * A Supernova (your Supernovas count going up) = the shared moment: every client sees the Core burst and the shockwave.
@@ -23,6 +24,7 @@ local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local MapConfig = require(Galaxy.MapConfig)
 local Kit = require(Galaxy.Kit)
 local Builder = require(ServerStorage:WaitForChild("GalaxyMapBuilder"))
+local Econ = require(Galaxy:WaitForChild("EconConfig"))
 
 local C = MapConfig.Colors
 local O = MapConfig.Origin
@@ -100,29 +102,31 @@ local function makeBoards(island: Model)
 	return model
 end
 
-local TIER_BUILD = {}
-TIER_BUILD[1] = function(island, folder)
-	local c, dir, a = centerOf(island)
+-- what each PAD builds (EconConfig.Pads order). 1-10 = the island's pieces that used to come by themselves; 11-20 new
+local PAD_BUILD = {}
+PAD_BUILD[1] = function(island, folder) -- STONE ISLAND: the disc, the rock cone, the crystals hanging under it
+	local c, _, a = centerOf(island)
 	local slot = island:GetAttribute("Slot") or 1
 	local floorH = Kit.Fit("IslandTop", "X", I.Floor.Fit).Y
 	local under = Kit.Fit("IslandUnder", "X", I.Under.Fit)
 	Kit.Make("IslandTop", { Name = "Disc", Fit = { "X", I.Floor.Fit }, CFrame = CFrame.new(c - UP * (floorH / 2)) * CFrame.Angles(0, -a, 0), Color = C.Stone, Collide = true, Parent = folder })
-	-- the floating island's rock cone (turned a little per slot) + crystals hanging from it
 	local rnd = Random.new(slot * 31)
 	Kit.Make("IslandUnder", { Name = "Under", Fit = { "X", I.Under.Fit }, CFrame = CFrame.new(c - UP * (floorH + under.Y / 2 - 0.3)) * CFrame.Angles(rnd:NextNumber(-0.05, 0.05), rnd:NextNumber(0, 6.28), rnd:NextNumber(-0.05, 0.05)),
 		Color = C.Rock, Parent = folder })
 	Kit.HangingCrystals(folder, c - UP * floorH, R, under.Y, C.Crystal, slot)
-	Kit.TileRing(folder, c, R * I.Tiles.From, R * I.Tiles.To, I.Tiles.Count, C.Stone2, a)
-	local _ = dir
 end
-TIER_BUILD[2] = function(island, folder)
+PAD_BUILD[2] = function(island, folder) -- STAR TILES
+	local c, _, a = centerOf(island)
+	Kit.TileRing(folder, c, R * I.Tiles.From, R * I.Tiles.To, I.Tiles.Count, C.Stone2, a)
+end
+PAD_BUILD[3] = function(island, folder) -- BRASS RIM
 	local c = centerOf(island)
 	local rimTube = Kit.Fit("RimRing", "X", I.RimFit).Y
 	Kit.Make("RimRing", brass({ Name = "Rim", Fit = { "X", I.RimFit }, CFrame = CFrame.new(c + UP * (rimTube / 2)), Collide = true, Parent = folder }))
 	local inlayTube = Kit.Fit("RimRing", "X", I.InlayFit).Y
 	Kit.Make("RimRing", brass({ Name = "Inlay", Fit = { "X", I.InlayFit }, CFrame = CFrame.new(c + UP * (0.1 - inlayTube / 2)), Parent = folder }))
 end
-TIER_BUILD[3] = function(island, folder)
+PAD_BUILD[4] = function(island, folder) -- LAMP PILLARS
 	local L = I.Lamps
 	for _, deg in ipairs(L.Angles) do
 		local p = angled(island, deg, L.Radius)
@@ -130,7 +134,7 @@ TIER_BUILD[3] = function(island, folder)
 		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", L.Orb }, CFrame = CFrame.new(p + UP * (L.Pillar + L.Orb / 2)), Color = C.Lamp, Material = Enum.Material.Neon, Parent = folder })
 	end
 end
-TIER_BUILD[4] = function(island, folder)
+PAD_BUILD[5] = function(island, folder) -- CRYSTALS
 	local K = I.Crystals
 	local rnd = Random.new((island:GetAttribute("Slot") or 1) * 97)
 	for _, deg in ipairs(K.Angles) do
@@ -139,31 +143,97 @@ TIER_BUILD[4] = function(island, folder)
 		Kit.Make("Crystal", { Name = "Crystal", Fit = { "Y", h }, CFrame = CFrame.new(p + UP * (h / 2 - 0.3)) * CFrame.Angles(rnd:NextNumber(-0.2, 0.2), rnd:NextNumber(0, 6), rnd:NextNumber(-0.2, 0.2)),
 			Color = C.Crystal, Reflectance = 0.15, Parent = folder })
 	end
+end
+PAD_BUILD[6] = function(island, folder) -- MOON GARDEN
 	local g = at(island, I.Garden.At.X, I.Garden.At.Z)
 	local gs = Kit.Fit("GrassPatch", "X", I.Garden.Fit)
 	Kit.Make("GrassPatch", { Name = "Garden", Fit = { "X", I.Garden.Fit }, CFrame = CFrame.new(g + UP * (gs.Y / 2 - 0.1)), Color = C.Grass, Parent = folder })
 end
-TIER_BUILD[5] = function(island, folder)
+PAD_BUILD[7] = function(island, folder) -- YOUR BANNER
 	local c = centerOf(island)
 	local BN = I.Banner
 	local pole = at(island, BN.At.X, BN.At.Z)
 	local toCentre = Vector3.new(c.X - pole.X, 0, c.Z - pole.Z).Unit
 	local poleSize = Kit.Fit("Pillar", "Y", BN.Pole)
 	Kit.Make("Pillar", brass({ Name = "BannerPole", Fit = { "Y", BN.Pole }, CFrame = CFrame.new(pole + UP * (BN.Pole / 2)), Collide = true, Parent = folder }))
-	-- the kit's cloth Banner hanging in front of the pole, facing the island's centre
 	local cloth = pole + toCentre * (poleSize.X / 2 + 0.4) + UP * (BN.Pole - BN.Cloth / 2 - 0.3)
 	local flag = Kit.Make("Banner", { Name = "Banner", Fit = { "Y", BN.Cloth }, CFrame = CFrame.lookAt(cloth, cloth + toCentre), Color = island:GetAttribute("Color") or C.Brass, Parent = folder })
 	flag:SetAttribute("PlayerColor", true)
-	-- a brass halo ring above the island (clear of the boards' tops)
+end
+PAD_BUILD[8] = function(island, folder) -- CROWN RING (a brass halo above the island, clear of the boards' tops)
+	local c = centerOf(island)
 	Kit.Make("RimRing", brass({ Name = "CrownRing", Fit = { "X", I.CrownRing }, CFrame = CFrame.new(c + UP * I.CrownHeight), Parent = folder }))
 end
-TIER_BUILD[6] = function(island, folder)
+PAD_BUILD[9] = function(island, folder) -- STAR DAIS
 	local c = centerOf(island)
 	local ds = Kit.Fit("Dais", "X", I.Dais)
 	Kit.Make("Dais", brass({ Name = "Dais", Fit = { "X", I.Dais }, CFrame = CFrame.new(c + UP * (ds.Y / 2)), Collide = true, Parent = folder }))
+end
+PAD_BUILD[10] = function(island, folder) -- TELESCOPE
 	local TS = I.Telescope
 	local t = at(island, TS.At.X, TS.At.Z)
 	Kit.Make("Telescope", brass({ Name = "Telescope", Fit = { "Y", TS.Height }, CFrame = CFrame.lookAt(t + UP * (TS.Height / 2), Vector3.new(O.X, t.Y + TS.Height / 2, O.Z)), Collide = true, Parent = folder }))
+end
+-- (11-20: new pieces from the kit; every place from MapConfig.Islands.PadBuilds, clear of the boards, the bridge path and the spawn)
+local PB = I.PadBuilds
+PAD_BUILD[11] = function(island, folder) -- GYRO RING: a tilted brass gyroscope ring floating over the dais
+	local c = centerOf(island)
+	Kit.Make("GyroRing", brass({ Name = "Gyro", Fit = { "X", PB.Gyro.Fit }, CFrame = CFrame.new(c + UP * PB.Gyro.Height) * CFrame.Angles(math.rad(PB.Gyro.Tilt), 0, math.rad(PB.Gyro.Tilt / 2)), Parent = folder }))
+end
+PAD_BUILD[12] = function(island, folder) -- STAR GATE: an arch over the path where the bridge comes in
+	local c = centerOf(island)
+	local p = at(island, PB.Gate.X, 0)
+	local gs = Kit.Fit("GateArch", "Y", PB.Gate.Height)
+	Kit.Make("GateArch", brass({ Name = "Gate", Fit = { "Y", PB.Gate.Height }, CFrame = CFrame.lookAt(p + UP * (gs.Y / 2), Vector3.new(c.X, p.Y + gs.Y / 2, c.Z)), Collide = true, Parent = folder }))
+end
+PAD_BUILD[13] = function(island, folder) -- INNER LIGHTS: four short lamp posts round the dais
+	for _, deg in ipairs(PB.Lights.Angles) do
+		local p = angled(island, deg, PB.Lights.Radius)
+		Kit.Make("Pillar", brass({ Name = "LightPost", Fit = { "Y", PB.Lights.Post }, CFrame = CFrame.new(p + UP * (PB.Lights.Post / 2)), Collide = true, Parent = folder }))
+		Kit.Make("LampOrb", { Name = "Light", Fit = { "Y", PB.Lights.Orb }, CFrame = CFrame.new(p + UP * (PB.Lights.Post + PB.Lights.Orb / 2)), Color = C.Ice, Material = Enum.Material.Neon, Parent = folder })
+	end
+end
+PAD_BUILD[14] = function(island, folder) -- FLOATING CRYSTALS round the rim
+	local rnd = Random.new((island:GetAttribute("Slot") or 1) * 53)
+	for _, deg in ipairs(PB.Floaters.Angles) do
+		local p = angled(island, deg, PB.Floaters.Radius)
+		local h = rnd:NextNumber(PB.Floaters.Size[1], PB.Floaters.Size[2])
+		Kit.Make("CrystalCluster", { Name = "Floater", Fit = { "Y", h }, CFrame = CFrame.new(p + UP * rnd:NextNumber(PB.Floaters.Height[1], PB.Floaters.Height[2])) * CFrame.Angles(0, rnd:NextNumber(0, 6.28), 0),
+			Color = C.Ice, Reflectance = 0.15, Parent = folder })
+	end
+end
+PAD_BUILD[15] = function(island, folder) -- STAR ALTAR on the dais
+	local c = centerOf(island)
+	local ds = Kit.Fit("Dais", "X", I.Dais)
+	local as = Kit.Fit("Altar", "Y", PB.Altar.Height)
+	Kit.Make("Altar", brass({ Name = "Altar", Fit = { "Y", PB.Altar.Height }, CFrame = CFrame.new(c + UP * (ds.Y + as.Y / 2)), Collide = true, Parent = folder }))
+	Kit.Make("CoreOrb", { Name = "AltarStar", Fit = { "Y", PB.Altar.Orb }, CFrame = CFrame.new(c + UP * (ds.Y + as.Y + PB.Altar.Orb / 2 + 0.3)), Color = C.Star, Material = Enum.Material.Neon, Parent = folder })
+end
+PAD_BUILD[16] = function(island, folder) -- ORBIT HALO: a wide thin ring round the whole island
+	local c = centerOf(island)
+	Kit.Make("OrbitRing", { Name = "Halo", Fit = { "X", PB.Halo.Fit }, CFrame = CFrame.new(c + UP * PB.Halo.Height) * CFrame.Angles(math.rad(PB.Halo.Tilt), 0, 0), Color = C.Orbit, Material = Enum.Material.Neon, Parent = folder })
+end
+PAD_BUILD[17] = function(island, folder) -- PLANET GLOBE on a pedestal
+	local p = at(island, PB.Globe.At.X, PB.Globe.At.Z)
+	Kit.Make("Pillar", brass({ Name = "GlobeStand", Fit = { "Y", PB.Globe.Stand }, CFrame = CFrame.new(p + UP * (PB.Globe.Stand / 2)), Collide = true, Parent = folder }))
+	Kit.Make("Planet", { Name = "Globe", Fit = { "Y", PB.Globe.Size }, CFrame = CFrame.new(p + UP * (PB.Globe.Stand + PB.Globe.Size / 2)), Color = C.Ice, Reflectance = 0.1, Parent = folder })
+end
+PAD_BUILD[18] = function(island, folder) -- CRYSTAL SPIRES flanking the bridge
+	for _, deg in ipairs(PB.Spires.Angles) do
+		local p = angled(island, deg, PB.Spires.Radius)
+		Kit.Make("Crystal", { Name = "Spire", Fit = { "Y", PB.Spires.Height }, CFrame = CFrame.new(p + UP * (PB.Spires.Height / 2 - 0.3)) * CFrame.Angles(0, math.rad(deg), 0), Color = C.Crystal, Reflectance = 0.2, Parent = folder })
+	end
+end
+PAD_BUILD[19] = function(island, folder) -- LIGHT WALK: glowing strips along the path from the bridge
+	for _, z in ipairs({ -PB.Walk.Half, PB.Walk.Half }) do
+		local from, to = at(island, PB.Walk.From, z, 0.06), at(island, PB.Walk.To, z, 0.06)
+		Builder.part({ Name = "WalkLight", Size = Vector3.new(0.5, 0.12, (to - from).Magnitude), CFrame = CFrame.lookAt((from + to) / 2, to), Color = C.Lamp, Material = Enum.Material.Neon, Parent = folder })
+	end
+end
+PAD_BUILD[20] = function(island, folder) -- BEACON: a tall brass mast with a star light on top
+	local p = at(island, PB.Beacon.At.X, PB.Beacon.At.Z)
+	Kit.Make("Pillar", brass({ Name = "Beacon", Fit = { "Y", PB.Beacon.Height }, CFrame = CFrame.new(p + UP * (PB.Beacon.Height / 2)), Collide = true, Parent = folder }))
+	Kit.Make("CoreOrb", { Name = "BeaconLight", Fit = { "Y", PB.Beacon.Orb }, CFrame = CFrame.new(p + UP * (PB.Beacon.Height + PB.Beacon.Orb / 2)), Color = C.Star, Material = Enum.Material.Neon, Parent = folder })
 end
 
 local function setBridge(island: Model, lit: boolean)
@@ -177,41 +247,81 @@ local function setBridge(island: Model, lit: boolean)
 	end
 end
 
--- builds / removes pieces so the island shows `tier` (pop: the new ones are announced to the clients)
-local function applyTier(island: Model, tier: number, pop: boolean)
+-- the next pad on the floor: a lit disc (the client draws its name, price and the arrow; a click buys it). On whatever floor
+-- is there (the bare rock first), found with a ray
+local function placePad(island: Model, pads: number)
+	local old = island:FindFirstChild("NextPad")
+	if old then old:Destroy() end
+	if (island:GetAttribute("Owner") or 0) == 0 or pads >= #Econ.Pads then return end
+	local spot = I.PadSpots[(pads % #I.PadSpots) + 1]
+	local p = at(island, spot.X, spot.Z)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { island:FindFirstChild("Pieces") }
+	local hit = workspace:Raycast(p + UP * 30, -UP * 60, params)
+	local y = if hit then hit.Position.Y else p.Y
+	local pad = Instance.new("Model")
+	pad.Name = "NextPad"
+	pad:SetAttribute("Index", pads + 1)
+	pad:SetAttribute("Price", Econ.Pads[pads + 1].price)
+	pad:SetAttribute("PadName", Econ.Pads[pads + 1].name)
+	pad:SetAttribute("Bonus", Econ.Pads[pads + 1].bonus == true)
+	local disc = Builder.part({ Name = "Disc", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.3, I.PadSize, I.PadSize), CFrame = CFrame.new(Vector3.new(p.X, y + 0.15, p.Z)) * CFrame.Angles(0, 0, math.rad(90)),
+		Color = C.Ice, Material = Enum.Material.Neon, CanCollide = false, Parent = pad })
+	disc.CanQuery = true
+	Builder.part({ Name = "Rim", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.2, I.PadSize + 0.8, I.PadSize + 0.8), CFrame = CFrame.new(Vector3.new(p.X, y + 0.08, p.Z)) * CFrame.Angles(0, 0, math.rad(90)),
+		Color = C.Brass, Material = MapConfig.BrassMaterial, CanCollide = false, Parent = pad })
+	local click = Instance.new("ClickDetector")
+	click.MaxActivationDistance = I.PadReach
+	click.Parent = disc
+	pad.PrimaryPart = disc
+	pad.Parent = island
+end
+
+-- builds / removes pieces so the island shows `pads` pads (pop: the new ones are announced to the clients). Island attribute
+-- Tier = the old island tier those pieces add up to (the star's light, the spawn on the rock, the rank before Supernova 1)
+local PAD_TIER = { 1, 1, 2, 3, 3, 4, 4, 5, 5, 6 }
+local function applyPads(island: Model, pads: number, pop: boolean)
 	local pieces = island:FindFirstChild("Pieces") :: Folder
 	local owned = (island:GetAttribute("Owner") or 0) ~= 0
-	-- tier 0 (and a free slot): the bare asteroid + its landing (Builder.RockPieces); from tier 1 the island replaces it
+	if not owned then pads = 0 end
+	-- no pads (and a free slot): the bare asteroid + its landing (Builder.RockPieces); pad 1 (the stone island) replaces it
 	local rock = pieces:FindFirstChild("T0")
 	if rock and rock:GetAttribute("Owned") ~= owned then
 		rock:Destroy()
 		rock = nil
 	end
-	if tier == 0 and not rock then
+	if pads == 0 and not rock then
 		local c, dir = centerOf(island)
 		rock = Builder.RockPieces(island, c, dir, island:GetAttribute("Slot") or 1, owned)
 		rock.Parent = pieces
-	elseif tier > 0 and rock then
+	elseif pads > 0 and rock then
 		rock:Destroy()
 		rock = nil
 	end
-	for t = 1, MapConfig.MaxTier do
-		local folder = pieces:FindFirstChild("T" .. t)
-		if t <= tier and not folder then
+	for i = 1, #Econ.Pads do
+		local folder = pieces:FindFirstChild("P" .. i)
+		if i <= pads and not folder then
 			folder = Instance.new("Model")
-			folder.Name = "T" .. t
-			TIER_BUILD[t](island, folder)
+			folder.Name = "P" .. i
+			PAD_BUILD[i](island, folder)
 			if pop then folder:SetAttribute("Pop", os.clock()) end
 			folder.Parent = pieces
-		elseif t > tier and folder then
+		elseif i > pads and folder then
 			folder:Destroy()
 		end
 	end
-	-- the player's colour on the banner
+	-- (the old tier models, from before the pads)
+	for t = 1, 6 do
+		local f = pieces:FindFirstChild("T" .. t)
+		if f then f:Destroy() end
+	end
 	for _, d in ipairs(pieces:GetDescendants()) do
 		if d:GetAttribute("PlayerColor") then Kit.SetColor(d, island:GetAttribute("Color") or C.Brass) end
 	end
-	island:SetAttribute("Tier", tier)
+	island:SetAttribute("Pads", pads)
+	island:SetAttribute("Tier", if pads == 0 then 0 else PAD_TIER[math.min(pads, #PAD_TIER)])
+	placePad(island, pads)
 end
 
 ------------------------------------------------------------------------
@@ -232,7 +342,7 @@ local function refresh(slot: number, pop: boolean)
 		island:SetAttribute("Rank", "")
 		island:SetAttribute("Ready", false)
 		setBridge(island, false)
-		applyTier(island, 0, false)
+		applyPads(island, 0, false)
 		local boards = island:FindFirstChild("Boards")
 		if boards then boards:Destroy() end
 		return
@@ -250,9 +360,10 @@ local function refresh(slot: number, pop: boolean)
 	island:SetAttribute("Ready", (if isPlayer then owner:GetAttribute("SupernovaReady") else owner.Ready) == true)
 	setBridge(island, true)
 	makeBoards(island)
-	local tier = MapConfig.TierOf(bodies, novas)
-	island:SetAttribute("Rank", MapConfig.RankOf(tier, novas))
-	applyTier(island, tier, pop and tier > (island:GetAttribute("Tier") or 0))
+	local pads = math.clamp(math.floor(num(owner, "Pads")), 0, #Econ.Pads)
+	applyPads(island, pads, pop and pads > (island:GetAttribute("Pads") or 0))
+	local _ = bodies
+	island:SetAttribute("Rank", MapConfig.RankOf(island:GetAttribute("Tier") or 0, novas))
 end
 
 local function spawnCFrame(slot: number): CFrame
@@ -283,7 +394,7 @@ local function claim(player: Player)
 	return nil -- (more than 8 players: no island, the centre spawn)
 end
 
-local WATCH = { "Bodies", "BodyTiers", "Supernovas", "SupernovaReady", "Sys" }
+local WATCH = { "Bodies", "BodyTiers", "Supernovas", "SupernovaReady", "Sys", "Pads" }
 local function onPlayer(player: Player)
 	local slot = claim(player)
 	local lastNovas = tonumber(player:GetAttribute("Supernovas")) or 0
@@ -344,7 +455,8 @@ if RunService:IsStudio() then
 				if on then
 					local novas = ({ 0, 0, 0, 0, 1, 3, 8 })[tier + 1] or 8
 					local bodies = ({ 0, 5, 25, 75, 0, 0, 0 })[tier + 1] or 0
-					owners[slot] = { Name = "Tester " .. slot, Bodies = bodies, BodyTiers = math.min(tier, 6), Supernovas = novas, Ready = tier >= 5 }
+					owners[slot] = { Name = "Tester " .. slot, Bodies = bodies, BodyTiers = math.min(tier, 6), Supernovas = novas, Ready = tier >= 5,
+						Pads = ({ 0, 2, 5, 8, 11, 15, 20 })[tier + 1] or 20 }
 					tier = (tier + 1) % (MapConfig.MaxTier + 1)
 				else
 					owners[slot] = nil

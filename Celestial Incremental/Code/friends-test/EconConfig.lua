@@ -189,6 +189,42 @@ function Econ.ShardsFor(earned: number, nodes, novas: number?): number
 	return math.floor(base + 1e-9)
 end
 
+------------------------------------------------------------------------ ISLAND PADS (feel pass, 5 Nov: #388 #86 #125). A chain of 20 pads on
+-- your island, only the next one lit (the arrow points at it). Each builds a piece of your island in front of you
+-- (MapService PAD_BUILD); bonus = x1.15 stardust. Pads are KEPT through a Supernova. Prices: Calc\feel.py (a pad is
+-- bought once it costs <= ~45 s of income: 1-8 in run 1, the rest by ~30 min). Pads 1-10 are the island's old pieces.
+Econ.PadBonus = 1.15
+Econ.Pads = {
+	{ id = "Disc", name = "STONE ISLAND", price = 15 },
+	{ id = "Tiles", name = "STAR TILES", price = 60 },
+	{ id = "Rim", name = "BRASS RIM", price = 150, bonus = true },
+	{ id = "Lamps", name = "LAMP PILLARS", price = 400 },
+	{ id = "Crystals", name = "CRYSTALS", price = 1.2e3 },
+	{ id = "Garden", name = "MOON GARDEN", price = 3e3, bonus = true },
+	{ id = "Banner", name = "YOUR BANNER", price = 8e3 },
+	{ id = "Crown", name = "CROWN RING", price = 2e4 },
+	{ id = "Dais", name = "STAR DAIS", price = 6e4, bonus = true },
+	{ id = "Telescope", name = "TELESCOPE", price = 1.5e5 },
+	{ id = "Gyro", name = "GYRO RING", price = 4e5 },
+	{ id = "Gate", name = "STAR GATE", price = 1e6, bonus = true },
+	{ id = "Lights", name = "INNER LIGHTS", price = 2.5e6 },
+	{ id = "Floaters", name = "FLOATING CRYSTALS", price = 6e6 },
+	{ id = "Altar", name = "STAR ALTAR", price = 1.5e7, bonus = true },
+	{ id = "Halo", name = "ORBIT HALO", price = 4e7 },
+	{ id = "Globe", name = "PLANET GLOBE", price = 1e8 },
+	{ id = "Spires", name = "CRYSTAL SPIRES", price = 2.5e8, bonus = true },
+	{ id = "Walk", name = "LIGHT WALK", price = 6e8 },
+	{ id = "Beacon", name = "BEACON", price = 1.5e9, bonus = true },
+}
+-- the x stardust from the bonus pads you have
+function Econ.PadMult(pads: number): number
+	local m = 1
+	for i = 1, math.min(pads or 0, #Econ.Pads) do
+		if Econ.Pads[i].bonus then m *= Econ.PadBonus end
+	end
+	return m
+end
+
 ------------------------------------------------------------------------ BOOST POTIONS (design additions 3, overnight part 2): from codes,
 -- kept in an inventory, used when the player wants. Using one adds its minutes to that boost's timer (they stack by TIME,
 -- never x4). The timer only runs while you play. x2 STARDUST doubles all stardust income; x2 COMETS = comets come twice

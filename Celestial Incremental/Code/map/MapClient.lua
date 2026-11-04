@@ -29,6 +29,7 @@ local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 local Kit = require(Galaxy:WaitForChild("Kit"))
 local UIAssets = require(Galaxy:WaitForChild("UIAssets"))
 local UIKit = require(Galaxy:WaitForChild("UIKit")) -- (alpha part 2: the comet / island-piece sounds, Galaxy.Sounds)
+local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local remote = Galaxy:WaitForChild("MapEvent", 30) :: RemoteEvent
 
 local C = MapConfig.Colors
@@ -347,6 +348,80 @@ for _, island in ipairs(islands:GetChildren()) do task.spawn(watchIsland, island
 islands.ChildAdded:Connect(watchIsland)
 islands.ChildRemoved:Connect(clearSystem)
 task.delay(2, function() loaded = true end)
+
+------------------------------------------------------------------------
+-- the ISLAND PADS (feel pass, 5 Nov): the next pad's label (name, price, a bonus star), green when you can buy it, grey when
+-- not; a bobbing arrow over it while you can; a click / tap buys it (EconRequest "BuyPad" + the island slot). Visitors only see
+-- the label.
+local econRequest = Galaxy:WaitForChild("EconRequest", 30)
+local padUI = {} -- [island] = { pad, gui, price, ... }
+local function padLabel(island, pad: Model)
+	local old = padUI[island]
+	if old and old.gui then old.gui:Destroy() end
+	padUI[island] = nil
+	if not pad or not pad.Parent then return end
+	local disc = pad:WaitForChild("Disc", 5)
+	if not disc then return end
+	local mine = island:GetAttribute("Owner") == player.UserId
+	local bb = Instance.new("BillboardGui")
+	bb.Name = "PadLabel"
+	bb.Adornee = disc
+	bb.Size = UDim2.fromOffset(220, 120)
+	bb.StudsOffsetWorldSpace = Vector3.new(0, 4.2, 0)
+	bb.MaxDistance = 90
+	bb.LightInfluence = 0
+	bb.AlwaysOnTop = false
+	bb.Parent = playerGui
+	local holder = UIKit.box(bb, 0, 0, 220, 120, {})
+	local name = UIKit.text(holder, 0, 38, 220, 30, pad:GetAttribute("PadName") or "", 24, { TextXAlignment = Enum.TextXAlignment.Center, FontFace = UIKit.FONT_HEAVY, stroke = 2.4 })
+	local priceIcon = UIKit.icon(holder, "stardust", 58, 70, 30, nil, { ZIndex = 3 })
+	local price = UIKit.text(holder, 90, 72, 120, 28, Econ.Format(pad:GetAttribute("Price") or 0), 24, { FontFace = UIKit.FONT_HEAVY, stroke = 2.2 })
+	local bonus = if pad:GetAttribute("Bonus") then UIKit.text(holder, 0, 100, 220, 20, "x1.15 STARDUST", 15, { TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = Color3.fromRGB(255, 216, 74), stroke = 1.6 }) else nil
+	local arrow = Instance.new("ImageLabel")
+	arrow.BackgroundTransparency = 1
+	arrow.Image = UIAssets.arrow
+	arrow.Size = UDim2.fromOffset(40, 40)
+	arrow.Position = UDim2.fromOffset(90, 0)
+	arrow.Visible = false
+	arrow.Parent = holder
+	local ui = { pad = pad, gui = bb, name = name, price = price, priceIcon = priceIcon, arrow = arrow, disc = disc, mine = mine, bonus = bonus }
+	padUI[island] = ui
+	if mine then
+		local click = disc:FindFirstChildOfClass("ClickDetector")
+		if click then
+			click.MouseClick:Connect(function()
+				if not econRequest then return end
+				local ok = econRequest:InvokeServer("BuyPad", nil, island:GetAttribute("Slot"))
+				UIKit.sound(if ok then "buy" else "no")
+			end)
+		end
+	end
+end
+local function watchPads(island)
+	if not island:IsA("Model") then return end
+	island.ChildAdded:Connect(function(c) if c.Name == "NextPad" then padLabel(island, c) end end)
+	island.ChildRemoved:Connect(function(c) if c.Name == "NextPad" and padUI[island] and padUI[island].pad == c then padLabel(island, nil) end end)
+	local now = island:FindFirstChild("NextPad")
+	if now then task.spawn(padLabel, island, now) end
+end
+for _, island in ipairs(islands:GetChildren()) do watchPads(island) end
+islands.ChildAdded:Connect(watchPads)
+-- the label's colour + the arrow: green / white when you can pay, grey / red when not (4 times a second)
+task.spawn(function()
+	while true do
+		task.wait(0.25)
+		local sd = player:GetAttribute("Stardust") or 0
+		for island, ui in pairs(padUI) do
+			if ui.pad.Parent then
+				local can = ui.mine and sd >= (ui.pad:GetAttribute("Price") or math.huge)
+				ui.disc.Color = if can then Color3.fromRGB(90, 255, 140) elseif ui.mine then Color3.fromRGB(130, 215, 255) else Color3.fromRGB(120, 112, 140)
+				ui.price.TextColor3 = if can or not ui.mine then Color3.new(1, 1, 1) else Color3.fromRGB(255, 107, 107)
+				ui.arrow.Visible = can
+				if can and not calm() then ui.arrow.Position = UDim2.fromOffset(90, 2 + math.sin(os.clock() * 5) * 4) end
+			end
+		end
+	end
+end)
 
 ------------------------------------------------------------------------
 -- the Core: pulse, gyroscopes, and the Supernova burst + shockwave

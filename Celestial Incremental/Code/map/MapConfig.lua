@@ -111,6 +111,24 @@ MapConfig.Islands = {
 	-- under each side board (Bodies, Star Upgrades) touching the rock
 	RockPad = { At = Vector3.new(19, 0, 0), Fit = 34, WalkTo = 4 },
 	SidePads = { Fit = 22, In = 2 }, -- (centred In studs nearer the middle than the side board)
+	-- the ISLAND PADS (feel pass, 5 Nov): where the next pad sits (one at a time, in this order round the dais, all in
+	-- front of the spawn camera or beside it; never on the bridge path or in front of a board), its size, click reach
+	PadSpots = { Vector3.new(10, 0, 8), Vector3.new(10, 0, -9), Vector3.new(-4, 0, 11), Vector3.new(-4, 0, -12), Vector3.new(15, 0, 3),
+		Vector3.new(-12, 0, 6), Vector3.new(-12, 0, -7), Vector3.new(6, 0, 15), Vector3.new(6, 0, -15), Vector3.new(-16, 0, 13) },
+	PadSize = 4.5, PadReach = 60,
+	-- what pads 11-20 build (island-local, x = out from the Core, z = to the side)
+	PadBuilds = {
+		Gyro = { Fit = 16, Height = 9, Tilt = 24 },
+		Gate = { X = -22, Height = 11 },
+		Lights = { Angles = { 45, 135, -45, -135 }, Radius = 9, Post = 3.2, Orb = 1 },
+		Floaters = { Angles = { 35, 75, 105, 145, -35, -75, -105, -145 }, Radius = 26, Size = { 2.5, 4 }, Height = { 5, 9 } },
+		Altar = { Height = 2.4, Orb = 1.4 },
+		Halo = { Fit = 76, Height = 3, Tilt = 6 },
+		Globe = { At = Vector3.new(-12, 0, -17), Stand = 3, Size = 3 },
+		Spires = { Angles = { 160, -160 }, Radius = 26, Height = 8 },
+		Walk = { From = -26, To = 0, Half = 4.6 },
+		Beacon = { At = Vector3.new(-21, 0, -21), Height = 12, Orb = 2.4 },
+	},
 }
 
 -- the island BOARDS (owner, 2 Nov: "1:1 direct copy boards from regrowth"; vault "Island boards like Regrowth 1to1"): four
@@ -159,6 +177,8 @@ for _, b in ipairs(MapConfig.Boards.List) do MapConfig.Boards.ById[b.id] = b end
 -- tiers come from bodies owned in the first run and the later ones from Supernovas: an island never shrinks.
 MapConfig.Tiers = {
 	[0] = { name = "Bare rock", note = "a new player" },
+	-- (feel pass, 5 Nov: the island now grows from the PADS you buy, EconConfig.Pads; these tiers only migrate old saves and
+	-- name the island Tier the pads add up to)
 	[1] = { name = "Stone disc + Upgrades terminal", bodies = 5 },
 	[2] = { name = "Brass rim", bodies = 25 },
 	[3] = { name = "Lamp pillars", bodies = 75 },
