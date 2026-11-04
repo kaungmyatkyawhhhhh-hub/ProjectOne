@@ -429,3 +429,10 @@ Details and numbers: [[2026-11-04 GYM ARC Plate tiers - numbers and stacks repor
 ### Also 4 Nov: Hall of Fame Agency card
 - Fixed (see above): it opens from the Trainers tile only the first time.
 
+### Strongest lifter statue only (4 Nov)
+- Owner: "the strongest lifter statue turns into posing champion sometimes, just keep it as strongest lifter only".
+- **Cause:** a posing competition win (PosingCompService -> ShowOffService.SetChampion) put the winner on the statue until the next round.
+- **Fix:** SetChampion no longer touches the statue. It is always the #1 on the STRONGEST LIFTER board. The Studio test switch TestStatueMe is gone with it.
+- **Posing winners keep everything else:** the title, coins and the results.
+- **Tested in Play:** after a simulated posing win the plaque still reads "Strongest lifter: ...".
+
