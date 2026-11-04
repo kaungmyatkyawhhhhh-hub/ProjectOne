@@ -43,7 +43,7 @@ Checklist rows built: **#69 #219 #220 #221 #281 #316 #317 #397 #448** (statuses 
 
 ## Open / for you
 1. **Phone tap size:** from the spawn camera the TREE tiles are small on a phone (~30 px, tap guide ~44 px). It was the same before (tiles were 15% bigger). Walking 2-3 steps closer fixes it. Say if you want bigger tiles (they can grow ~15% wider, not taller).
-2. **Sparkle texture:** a Studio test upload (like the guide images). Re-upload `UI\roblox\fx_sparkle.png` to P&L Studios XP and swap `UIAssets.fxSparkle` + the id in `GalaxyMapBuilder` + the BlackHoleGate emitter. Your artist's set replaces it later (VFX pass).
+2. **Sparkle texture:** DONE 5 Nov: the owner uploaded it (id 94374970413464), swapped in UIAssets, GalaxyMapBuilder and the BlackHoleGate emitter. (Was: a Studio test upload.) Re-upload `UI\roblox\fx_sparkle.png` to P&L Studios XP and swap `UIAssets.fxSparkle` + the id in `GalaxyMapBuilder` + the BlackHoleGate emitter. Your artist's set replaces it later (VFX pass).
 3. **Still stock:** `fire_main.dds` on the STAR UPGRADES flame strip (part of #281, left for the VFX pass texture set).
 4. The pass description in Creator Hub still says "Stacks with potions and Star Surge" (still true, they add). Change it if you want the exact "x2 + x2 = x3".
 5. **File > Save** in Studio. Nothing was published.
