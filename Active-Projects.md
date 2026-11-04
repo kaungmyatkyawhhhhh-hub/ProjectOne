@@ -26,8 +26,9 @@ Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongm
 Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, ring 2), Star Surge, ranks. ALPHA planned Sat 14 Nov.
 - **Details:** `Celestial Incremental` folder (all Galaxy notes go there). Studio place "Galaxy Incremental" (placeId 111654682859982).
 - **3 Nov (overnight, Claude Code, in Studio, not published):** alpha 2 (pace 2M / Starfire x1.75, tutorial 1-7, guide book, licensed sounds + music) + codes/potions, Players Near You board, Store + x2 Stardust pass + Alpha badge (placeholder ids), analytics, phone readability. See [[Celestial Incremental/Progress/2026-11-03 Galaxy Incremental - Overnight summary]].
-- **Owner to do:** listen to the sounds; create the x2 Stardust pass (249 R$) + Alpha Player badge and put the ids in GameConfig; re-upload 10 images to the group; File > Save; publish.
-- **Last updated:** 2026-11-03
+- **4 Nov:** x2 Stardust pass (id 2070906361, 249 R$, on sale) + Alpha Player badge (id 4501804696776519) created in Creator Hub (universe 10774273782) and put in GameConfig.
+- **Owner to do:** listen to the sounds; re-upload 10 images to the group; File > Save; publish.
+- **Last updated:** 2026-11-04
 
 ## MOW ARC (Roblox incremental): on hold
 Idea only, not started: mow grass -> upgrades -> REGROW / SEASON prestige. Notes and 3 prompts ready in [[MOW ARC/00 MOW ARC Home]].
