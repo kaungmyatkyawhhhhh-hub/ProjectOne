@@ -19,3 +19,4 @@ Paths point at the session's temp folder; change them before reuse. Results are 
 - `frame_probe.py`: depth across a cluster frame. `window_*.png`: a screen cut to the frame's openings. `gallardo_art.py`: the Gallardo's big dials, sharp.
 - `cluster_close.py`: Step 1 close-ups from a converted car (cluster with the wheel hidden, steering wheel, what the cluster is made of). `glb_view.py`: the same shots from the original `.glb`, which keeps the second UV set (glow pictures land right).
 - `share_cabin.py`: a whole cabin in another car of its family. `share_wheel.py`: only the steering wheel. `cabin_shots.py`: six looks into a cabin. `urus_pods.py`: the Urus's side gauges on the model.
+- `seat_view.py`: a cluster from the driver's seat with the wheel in, the check that counts. `lift_wheel.py`: moves the steering wheel up or down.
