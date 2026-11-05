@@ -168,3 +168,10 @@ No UI script, Theme, Kit or UI config changed since the last commit (15 Oct). St
 
 ## Fonts through the UI kit (5 Nov, current rule; [[2026-11-05 GYM ARC Fonts through the UI kit]])
 Replaces every earlier font line above. Three roles in `Theme.Font`: **Display** = Montserrat Black Italic, all caps (titles, tabs, names, labels); **Text** = Builder Sans Bold (descriptions); **Number** = Builder Sans Bold, right-aligned (values, %, multipliers, prices, timers). Sizes by role (`Theme.FontSize`: Title 30, Tab 15, Label 14, Body 14, Small 13, BigNumber 34, Value 24), nothing under 13 px on a phone, Secondary text #D0D0D0. Grades use the one ladder (`Theme.GradeColors`: D grey, C green, B blue, A purple, S gold). Windows use `Kit.Title / Label / Body / Number` and never set font, size or colour themselves. No LuckiestGuy / Fredoka anywhere. Exceptions: logo images, Run Card / skin card faces (Merriweather), plate prints, side-menu tile words.
+
+## Tooltip (5 Nov, kit component; [[2026-11-05 GYM ARC MY BUILD tooltips and talent boost tiles]])
+- `Shared/UI/Tooltip.Attach(card, content, opts)`: the one tooltip for cards and buttons. PC hover 0.2 s; phone first tap = info, second tap = the card's action (`opts.onActivate`), a tap elsewhere closes; `longPress` for buttons that must act on a tap (TALENT bar); `hoverOnly` for hold buttons.
+- Kit card piece + a thin outline in the accent (rarity) colour, Kit text helpers, 260 px wide, beside the card (flips to stay on screen, never over it), one at a time, refreshes every 0.5 s.
+- Content: `{ title, accent, tags = { {text, color} }, lines = { {text, kind = "rule" | "small" | "label" | "title", color, icon} | {divider = true} } }`.
+- Active boosts / talent effects keep the boost row's own info card (bottom left).
+- Kit.Modal's panel is a silent button: taps inside a window never fall through to the backdrop (only the X and taps outside close it).
