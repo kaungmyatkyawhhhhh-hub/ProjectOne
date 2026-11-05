@@ -63,6 +63,7 @@ CarSkin.CLUSTER_STYLE = {
 	toyoka_alfard = "Toyota", -- owner (2026-10-22): its own dials didn't work; the LC200's cluster
 	kio_ev6 = "EV6",
 	lambrini_urus = "Urus",
+	lambrini_urusp = "LiveUrus", -- the Performante's screen, from the owner's photo
 	chevo_c6 = "C6",
 	chevo_c7 = "C7",
 	-- the Sketchfab cars of 2026-10-12 (the owner's list of looks, from the real cars)
@@ -91,13 +92,16 @@ CarSkin.CLUSTER_STYLE = {
 	bnw_750li = "BMWLiveCockpit", -- the 750Li G12 (2026-10-18 model)
 	bentz_gle53 = "AMG", -- in the C63 coupe's cabin, like the CLA 45
 	-- the cars of 2026-10-18 (looks from the real cars)
-	ferrara_california = "FerrariCalifornia",
+	ferrara_california = "LiveCalifornia", -- from the owner's photo
+	ferrara_458spider = "Live458", -- from the owner's photo, shared in the line
+	ferrara_458speciale = "Live458",
 	bentz_s65_w221 = "Maybach57", -- W221: round chrome dials
 	bentz_190e = "Maybach57",
 	toyoka_chaser = "Toyota",
 	lexis_lc500 = "LFA", -- the LC takes the LFA's moving-ring screen
 	astin_dbx = "Aston",
-	lambrini_lp640 = "MurcielagoLP640", -- the 2026-10-18 model
+	lambrini_lp640 = "LiveMurcielago", -- the SV's dials, drawn sharp, without the SV mark (owner, 2026-11-05)
+	lambrini_lp670 = "LiveMurcielagoSV",
 	maseroti_levante = "Modern",
 	-- 2026-10-23: its own, from real photos (imports/refs). The new Veyrun models (2026-11-03) carry
 	-- their own needles (OWN_NEEDLES), and then this drawn one stays off
@@ -127,6 +131,13 @@ CarSkin.CLUSTER_RECT = {
 	-- screen behind each model's own frame, its ribs lying over it, cut to the openings (tools/lambo/window_*.png)
 	lambrini_lp750 = { at = Vector3.new(0.0043, 0.0403, -0.2442), face = Vector3.new(-0.002, 0.107, 0.994), w = 0.37, h = 0.1486 },
 	lambrini_lp700 = { at = Vector3.new(0.0027, 0.0379, -0.2421), face = Vector3.new(0, 0.108, 0.9942), w = 0.3328, h = 0.1367 },
+	-- the second import job (2026-11-06): the screens behind each model's frame (tools/lambo/panel_preview.py)
+	lambrini_lp640 = { at = Vector3.new(0.0068, -0.0431, -0.2989), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
+	lambrini_lp670 = { at = Vector3.new(0.0068, -0.0431, -0.2989), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
+	lambrini_urusp = { at = Vector3.new(-0.0005, 0.022, -0.2298), face = Vector3.new(0, 0.107, 0.994), w = 0.3472, h = 0.0967 },
+	ferrara_california = { at = Vector3.new(0.0159, 0.0388, -0.3375), face = Vector3.new(0, 0.145, 0.989), w = 0.4114, h = 0.1627 },
+	ferrara_458spider = { at = Vector3.new(0.0013, 0.033, -0.2823), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
+	ferrara_458speciale = { at = Vector3.new(0.0013, 0.0277, -0.2672), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
 	-- the Lamborghini imports: the Revuelto's own screen, the EVO's in all four Huracans
 	lambrini_revuelto = { at = Vector3.new(0.0, 0.0597, -0.222), face = Vector3.new(0, 0.081, 0.997), w = 0.2841, h = 0.1045 },
 	lambrini_huracan = { at = Vector3.new(0.0006, 0.0254, -0.2572), face = Vector3.new(0, 0.407, 0.914), w = 0.283, h = 0.0977 },
@@ -365,10 +376,9 @@ CarSkin.STEER_MODEL = {
 	-- Lamborghini
 	-- (the LP700 and the SV keep their models' own wheels: owner, 2026-11-04)
 	lambrini_urus = "AventadorFlat",
-	lambrini_lp640 = "LamboRound",
 	lambrini_countach = "Countach",
 	-- Ferrari
-	ferrara_f430 = "FerrariF430", ferrara_599 = "FerrariF430", ferrara_california = "FerrariF430",
+	ferrara_f430 = "FerrariF430", ferrara_599 = "FerrariF430",
 	ferrara_458 = "Ferrari458",
 	-- the other supercars and hypercars
 	mclaran_12c = "McLaren", audy_r8 = "AudiR8", lexis_lfa = "LexusSport", lexis_lc500 = "LexusSport",

@@ -1,0 +1,21 @@
+{
+"id": "ferrara_458spider",
+"drop": [
+"fphong10sg1"
+],
+"roles": {
+"fphong1sg1": "Paint",
+"fphong14sg1": "Trim",
+"fphong3sg1": "Carbon",
+"fphong4sg1": "Trim",
+"fphong5sg1": "Trim",
+"fphong6sg1": "Trim",
+"fphong7sg1": "Cabin",
+"fphong8sg1": "Lamp",
+"fphong9sg1": "Lamp",
+"fphong16sg1": "Trim",
+"fphong13sg1": "Engine",
+"fphong12sg1": "Trim",
+"finitialshadinggroup1": "Trim"
+}
+}

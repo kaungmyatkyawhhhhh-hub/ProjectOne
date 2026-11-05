@@ -1,0 +1,39 @@
+{
+"box": [
+-0.84,
+-1.22,
+0.08,
+0.84,
+0.52,
+1.12
+],
+"top": 0.97,
+"offset": [
+0,
+0,
+0
+],
+"target_all": [
+"Body_interior"
+],
+"target_box": [
+"Body_lights"
+],
+"donor": [
+"Body_MLamborghini_MurcielagoS.008",
+"Body_MLamborghini_MurcielagoS.002",
+"Body_MLamborghini_MurcielagoS.003",
+"Body_MLamborghini_MurcielagoS.006"
+],
+"paint": [
+{
+"material": "InteriorA",
+"rect": [
+166,
+311,
+204,
+327
+]
+}
+]
+}

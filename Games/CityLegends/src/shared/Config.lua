@@ -515,7 +515,7 @@ Config.DrivingFeel = {
 		toyoka_crown = true, kio_ev6 = true, toyoka_lc200 = true, toyoka_lc300 = true, lexis_lx700 = true, bnw_x6 = true, bnw_x7 = true,
 		bentz_gle53 = true, bentz_g63 = true, brabos_g63 = true, bentz_gls = true, bentz_cla45 = true, bentz_e63s = true, bnw_m5_f90 = true,
 		bentz_s680 = true, byt_u8 = true, xiaomo_su7 = true, porsha_panamera = true, nisun_r34 = true, nisun_gtr = true, audy_r8 = true,
-		lambrini_lp570 = true, lambrini_lp560 = true, lambrini_huracan = true, lambrini_performante = true, lambrini_sterrato = true, lambrini_revuelto = true, lambrini_lp640 = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_svj = true, lambrini_svj63 = true, lambrini_urus = true,
+		lambrini_lp570 = true, lambrini_lp560 = true, lambrini_huracan = true, lambrini_performante = true, lambrini_sterrato = true, lambrini_revuelto = true, lambrini_lp640 = true, lambrini_lp670 = true, lambrini_urusp = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_svj = true, lambrini_svj63 = true, lambrini_urus = true,
 		bentlee_contgt = true, bentlee_bentayga = true, rolls_cullinan = true, astin_dbx = true, maseroti_levante = true, bugotti_veyron = true,
 		bugotti_veyron_sport = true, bugotti_veyron_top = true, bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true,
 	} :: { [string]: boolean },
@@ -1372,7 +1372,7 @@ Config.Dealership = {
 	-- the four indoor spots. The front car park stays empty for players to park in (owner,
 	-- 2026-10-31: "dont put cars infront the dealership"); Lot = { ids } would fill its bays.
 	Stage = "lambrini_lp750",
-	Indoor = { "ferrara_458", "rolls_wraith", "porsha_gt3", "bentz_g63" },
+	Indoor = { "ferrara_599", "rolls_wraith", "porsha_gt3", "bentz_g63" },
 	-- test drives (owner, 2026-10-30, from the research: Vehicle Legends): any dealer car you don't
 	-- own, for a few minutes, once per car each visit; it pays less while you test it
 	TestSeconds = 300,

@@ -17,3 +17,7 @@ Paths point at the session's temp folder; change them before reuse. Results are 
 - `PbrApply.luau`: SurfaceAppearances on the parts after the Import 3D. `step4_patch.py`: run once after the import.
 - `cabin_export.py`, `cabin_dark.py`: pale cabin pictures made dark. `LookFixes.luau`: the look pass in `CarModels`. `step4_patch.py` has run (2026-11-04): don't run it again.
 - `frame_probe.py`: depth across a cluster frame. `window_*.png`: a screen cut to the frame's openings. `gallardo_art.py`: the Gallardo's big dials, sharp.
+- `cluster_close.py`: Step 1 close-ups from a converted car (cluster with the wheel hidden, steering wheel, what the cluster is made of). `glb_view.py`: the same shots from the original `.glb`, which keeps the second UV set (glow pictures land right).
+- `share_cabin.py`: a whole cabin in another car of its family. `share_wheel.py`: only the steering wheel. `cabin_shots.py`: six looks into a cabin. `urus_pods.py`: the Urus's side gauges on the model.
+- `seat_view.py`: a cluster from the driver's seat with the wheel in, the check that counts. `lift_wheel.py`: moves the steering wheel up or down.
+- `panel_preview.py`: a live cluster's picture on a flat panel in a car, and faces out of the way. `window_mask.py`: the picture cut to the opening, from `frame_probe.py`'s depth map.

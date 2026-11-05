@@ -1,0 +1,66 @@
+{
+"src": "imports/importing cars/2012_ferrari_california.glb",
+"images": {
+"20": [
+{
+"solid": [
+0,
+0,
+120,
+125,
+34,
+34,
+34
+]
+},
+{
+"ring": [
+256,
+256,
+150,
+232
+]
+}
+],
+"10": [
+{
+"solid": [
+0,
+0,
+512,
+256,
+232,
+232,
+228
+]
+}
+],
+"8": [
+{
+"replace": "tools/logo_paint/ferrara_california_interior.png"
+},
+{
+"ellipse": [
+233,
+100,
+17,
+17,
+20,
+20,
+20
+]
+},
+{
+"solid": [
+238,
+48,
+256,
+74,
+20,
+20,
+22
+]
+}
+]
+}
+}

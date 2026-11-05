@@ -3319,7 +3319,7 @@ local function pointOn(pts: { number }, v: number): number
 	return pts[n]
 end
 
-local function liveCluster(gui: SurfaceGui, name: string): Update
+local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 	local Art = (require(script.Parent:WaitForChild("LamboClusterArt")) :: any)[name]
 	gui.CanvasSize = Vector2.new(gui.CanvasSize.X * 2, 600) -- twice the usual: the pictures are sharp
 	local W, H, A = Art.W, Art.H, Art.A
@@ -3360,6 +3360,13 @@ local function liveCluster(gui: SurfaceGui, name: string): Update
 	local shows: { { l: ImageLabel, when: string } } = {}
 	for _, e in Art.shows do
 		table.insert(shows, { l = sprite(e, e[6], e[7], 3), when = e[8] })
+	end
+	-- rotating needles: a picture drawn pointing up, its pivot in its middle, turned by a table of value, angle
+	local needles: { { l: ImageLabel, bind: string, pts: { number } } } = {}
+	for _, e in Art.needles or {} do
+		local l = sprite(e, e[6] - e[4] / A / 2, e[7] - e[5] / A / 2, 4)
+		l.Visible = true
+		table.insert(needles, { l = l, bind = e[8], pts = e[9] })
 	end
 	local marker = Art.marker
 	local mark = if marker then D.rect(0, 0, marker.w, 1, Color3.fromRGB(marker.color[1], marker.color[2], marker.color[3]), 4) else nil
@@ -3454,6 +3461,9 @@ local function liveCluster(gui: SurfaceGui, name: string): Update
 			tcoff = DashGauges.tcOff == true,
 			accel = accel > 0.1,
 		}
+		if flag then
+			state[flag] = true -- (a car's own touch on a shared screen: the SV's mark)
+		end
 		for _, b in blocks do
 			b.l.Visible = b.v < v
 		end
@@ -3465,6 +3475,10 @@ local function liveCluster(gui: SurfaceGui, name: string): Update
 		end
 		for _, s in shows do
 			s.l.Visible = state[s.when] == true
+		end
+		for _, n in needles do
+			local value = if n.bind == "rpm" then v elseif n.bind == "kmh" then mph * 1.609 else mph
+			n.l.Rotation = pointOn(n.pts, value)
 		end
 		if mark and marker then
 			local p = marker.pts
@@ -3507,6 +3521,7 @@ local function liveCluster(gui: SurfaceGui, name: string): Update
 			vals.clock = clock()
 			vals.date = os.date("%d.%m.%Y") :: string
 			vals.odo = string.format("%06d", math.floor(if KMH then odo * 1.609 else odo))
+			vals.odoTrim = tostring(math.floor(if KMH then odo * 1.609 else odo))
 			fuelLeft = math.max(0.15, fuelLeft - 0.0005)
 			vals.range = tostring(math.floor((if KMH then 500 else 310) * fuelLeft))
 			if not audio then
@@ -3544,6 +3559,21 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	AventadorSVJ = aventadorSVJ,
 	LiveRevuelto = function(gui)
 		return liveCluster(gui, "revuelto")
+	end,
+	LiveMurcielago = function(gui)
+		return liveCluster(gui, "murcielago")
+	end,
+	LiveMurcielagoSV = function(gui)
+		return liveCluster(gui, "murcielago", "sv")
+	end,
+	LiveUrus = function(gui)
+		return liveCluster(gui, "urus")
+	end,
+	Live458 = function(gui)
+		return liveCluster(gui, "f458")
+	end,
+	LiveCalifornia = function(gui)
+		return liveCluster(gui, "california")
 	end,
 	LiveSV = function(gui)
 		return liveCluster(gui, "sv")

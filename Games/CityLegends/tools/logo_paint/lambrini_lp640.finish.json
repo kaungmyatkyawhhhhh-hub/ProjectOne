@@ -1,0 +1,30 @@
+{
+"id": "lambrini_lp640",
+"drop": [
+"a3_be_79_67"
+],
+"hub_px": [
+240,
+190,
+46
+],
+"roles": {
+"^material$": "Paint",
+"^color_2$": "Paint",
+"7a_73_c2_44": "Carbon",
+"4d_3d_6b_13": "Engine",
+"ed_07_2b_30": "Engine",
+"8e_23_39_20": "Lamp",
+"8e_ea_c3_d9": "Lamp",
+"9a_c4_33_61": "Lamp",
+"e7_d1_e3_c2": "Trim",
+"fa_5c_18_6c": "Trim",
+"black_paint": "Trim",
+"plastic": "Trim",
+"^metal$": "Exhaust",
+"^plate$": "Plate",
+"^grid$": "Grille",
+"calipera": "Brake",
+"^lights$": "Lamp"
+}
+}
