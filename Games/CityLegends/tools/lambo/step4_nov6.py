@@ -75,12 +75,12 @@ if crlf:
 open(p, "w", encoding="utf-8", newline="").write(s)
 
 rects = """	-- the second import job (2026-11-06): the screens behind each model's frame (tools/lambo/panel_preview.py)
-	lambrini_lp640 = { at = Vector3.new(0.0068, -0.0431, -0.2989), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
-	lambrini_lp670 = { at = Vector3.new(0.0068, -0.0431, -0.2989), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
-	lambrini_urusp = { at = Vector3.new(-0.0005, 0.022, -0.2298), face = Vector3.new(0, 0.107, 0.994), w = 0.3472, h = 0.0967 },
-	ferrara_california = { at = Vector3.new(0.0159, 0.0388, -0.3375), face = Vector3.new(0, 0.145, 0.989), w = 0.4114, h = 0.1627 },
-	ferrara_458spider = { at = Vector3.new(0.0013, 0.033, -0.2823), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
-	ferrara_458speciale = { at = Vector3.new(0.0013, 0.0277, -0.2672), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
+	lambrini_lp640 = { at = Vector3.new(0.0065, -0.0464, -0.3043), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
+	lambrini_lp670 = { at = Vector3.new(0.0065, -0.0464, -0.3041), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
+	lambrini_urusp = { at = Vector3.new(0, 0.0163, -0.2308), face = Vector3.new(0, 0.107, 0.994), w = 0.3472, h = 0.0967 },
+	ferrara_california = { at = Vector3.new(0.0163, 0.033, -0.3044), face = Vector3.new(0, 0.145, 0.989), w = 0.4114, h = 0.1627 },
+	ferrara_458spider = { at = Vector3.new(0.001, 0.0276, -0.2746), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
+	ferrara_458speciale = { at = Vector3.new(0.0009, 0.0237, -0.2499), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
 """
 edit("client/CarSkin.lua", [
     ('\tlambrini_urus = "Urus",\n', '\tlambrini_urus = "Urus",\n\tlambrini_urusp = "LiveUrus", -- the Performante\'s screen, from the owner\'s photo\n'),

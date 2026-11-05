@@ -132,12 +132,12 @@ CarSkin.CLUSTER_RECT = {
 	lambrini_lp750 = { at = Vector3.new(0.0043, 0.0403, -0.2442), face = Vector3.new(-0.002, 0.107, 0.994), w = 0.37, h = 0.1486 },
 	lambrini_lp700 = { at = Vector3.new(0.0027, 0.0379, -0.2421), face = Vector3.new(0, 0.108, 0.9942), w = 0.3328, h = 0.1367 },
 	-- the second import job (2026-11-06): the screens behind each model's frame (tools/lambo/panel_preview.py)
-	lambrini_lp640 = { at = Vector3.new(0.0068, -0.0431, -0.2989), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
-	lambrini_lp670 = { at = Vector3.new(0.0068, -0.0431, -0.2989), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
-	lambrini_urusp = { at = Vector3.new(-0.0005, 0.022, -0.2298), face = Vector3.new(0, 0.107, 0.994), w = 0.3472, h = 0.0967 },
-	ferrara_california = { at = Vector3.new(0.0159, 0.0388, -0.3375), face = Vector3.new(0, 0.145, 0.989), w = 0.4114, h = 0.1627 },
-	ferrara_458spider = { at = Vector3.new(0.0013, 0.033, -0.2823), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
-	ferrara_458speciale = { at = Vector3.new(0.0013, 0.0277, -0.2672), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
+	lambrini_lp640 = { at = Vector3.new(0.0065, -0.0464, -0.3043), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
+	lambrini_lp670 = { at = Vector3.new(0.0065, -0.0464, -0.3041), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
+	lambrini_urusp = { at = Vector3.new(0, 0.0163, -0.2308), face = Vector3.new(0, 0.107, 0.994), w = 0.3472, h = 0.0967 },
+	ferrara_california = { at = Vector3.new(0.0163, 0.033, -0.3044), face = Vector3.new(0, 0.145, 0.989), w = 0.4114, h = 0.1627 },
+	ferrara_458spider = { at = Vector3.new(0.001, 0.0276, -0.2746), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
+	ferrara_458speciale = { at = Vector3.new(0.0009, 0.0237, -0.2499), face = Vector3.new(0, 0.16, 0.987), w = 0.3822, h = 0.1449 },
 	-- the Lamborghini imports: the Revuelto's own screen, the EVO's in all four Huracans
 	lambrini_revuelto = { at = Vector3.new(0.0, 0.0597, -0.222), face = Vector3.new(0, 0.081, 0.997), w = 0.2841, h = 0.1045 },
 	lambrini_huracan = { at = Vector3.new(0.0006, 0.0254, -0.2572), face = Vector3.new(0, 0.407, 0.914), w = 0.283, h = 0.0977 },
