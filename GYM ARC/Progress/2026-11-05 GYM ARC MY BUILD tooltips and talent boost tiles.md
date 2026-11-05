@@ -42,7 +42,8 @@ Owner (5 Nov): "MY BUILD: show a card's description on hover" (PC hover 0.2 s; p
 - TALENT bar: SPRINT hover tip (flipped at the screen edge); long press showed the IRON LUNGS tip and didn't start sprinting.
 - Boost row: talent tiles + hover card. No errors.
 - Not tested: a real phone; MAX OUT / BREATHE on a machine (same code path as SPRINT).
-- Found, NOT fixed (was already there): on the phone layout, off a machine, the SPRINT button sits UNDER the right column's STARTER PACK card (its tap area takes the press).
+- Found (was already there): on the phone layout, off a machine, the SPRINT button sat UNDER the right column's STARTER PACK card (its tap area took the press and opened the pack). **Fixed (owner: "yes move sprint on phone")**: on a phone, off a machine, the TALENT bar sits in the thumb's corner, just left of Roblox's jump button (and of SKATE when it shows), level with the jump button (`TalentClient.phoneSpot`; Studio's phone view: Roblox's small-screen jump spot). PC spot unchanged. Checked: nothing over SPRINT, a tap starts sprinting, no popup.
+![[GYM ARC/Screenshots/2026-11-05_mybuild_tooltips/08_phone_sprint_moved_clear_of_starter_pack.jpg]]
 
 ![[GYM ARC/Screenshots/2026-11-05_mybuild_tooltips/01_pc_hover_heavy_day_rare.jpg]]
 ![[GYM ARC/Screenshots/2026-11-05_mybuild_tooltips/02_pc_legendary_requires_met_3_prs_this_run_bottom_edge.jpg]]
