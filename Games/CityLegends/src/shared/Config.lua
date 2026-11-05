@@ -265,6 +265,7 @@ Config.Traffic = {
 Config.Credits = {
 	"Traffic cars: \"Low Poly cars pack\" by matisosanimation (CC BY 4.0)",
 	"Enfurecido Gallardo, Huracan, Aventador LP700 and SV, Revuelto models by Ddiaz Design",
+	"Enfurecido Murcielago, Urus Performante, Rosso Rampante California and 458 models by Ddiaz Design",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
 

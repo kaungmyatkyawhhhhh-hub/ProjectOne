@@ -28,10 +28,16 @@ CARS = {
     "perf": ("lambrini_performante", "2019_lamborghini_huracan_performante_spyder"),
     "sto": ("lambrini_sto", "2021_lamborghini_huracan_sto"),
     "sterrato": ("lambrini_sterrato", "2024_lamborghini_huracan_sterrato"),
+    "lp650r": ("lambrini_lp640", "2010_lamborghini_murcielago_lp670-4_superveloce"),  # (the SV's cabin)
+    "lp670sv": ("lambrini_lp670", "2010_lamborghini_murcielago_lp670-4_superveloce"),
+    "urusp": ("lambrini_urusp", "2023_lamborghini_urus_performante"),
+    "california": ("ferrara_california", "2012_ferrari_california"),
+    "f458spider": ("ferrara_458spider", "2013_ferrari_458_spider"),
+    "f458speciale": ("ferrara_458speciale", "2014_ferrari_458_speciale"),
 }
 DARK_ROLES = ("Cabin", "CabinTile", "Suede", "Leather")
 TARGET = 22.0
-BRAND = re.compile(r"Lamborghini|Aventador|Huracan|Revuelto|Gallardo|Superveloce|Superleggera|Sterrato|RewardRecycled|Performante", re.I)
+BRAND = re.compile(r"Lamborghini|Aventador|Huracan|Revuelto|Gallardo|Superveloce|Superleggera|Sterrato|RewardRecycled|Performante|Murcielago|Urus|Ferrari|California|Speciale", re.I)
 
 
 def srgb(c):
@@ -67,6 +73,8 @@ def darken(src, dst):
 
 out = {}
 for key, (cid, glb) in CARS.items():
+    if not os.path.exists(os.path.join(done, key + "_cab", "cabin.json")):
+        continue  # (each job's cars only)
     d = json.load(open(os.path.join(done, key + "_cab", "cabin.json")))
     fac = factors(os.path.join(glbs, glb + ".glb"))
     row = {"dark": {}, "tint": {}}
