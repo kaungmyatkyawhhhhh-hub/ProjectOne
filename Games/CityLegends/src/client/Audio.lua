@@ -496,6 +496,14 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	-- recorded-rpm bands (Config.ExhaustBands): sorted by rpm, and the car's redline in rpm
 	local bandCfg = if carId then Config.ExhaustBands[carId] else nil
 	local carVol = if carId then (Config.ExhaustVolume[carId] or 1) else 1 -- (the SV: half, owner)
+	local startCfg = if carId then Config.ExhaustStart[carId] else nil -- a start-up clip's own timing
+	local startSnd: Sound? = nil
+	local startLive, startWaiting = false, false
+	local loopRpm = bandCfg and bandCfg.loopRpm
+	local coastCfg = bandCfg and bandCfg.coast
+	local coastEq: { EqualizerSoundEffect } = {}
+	local coastShown = 0
+	local cutUntil, cutK = -1e9, 1
 	local downCool = 0
 	local bandList: { { name: string, rpm: number } } = {}
 	local redlineRpm = if carId then CarStats.redline(carId) * 1000 else 7000
@@ -530,6 +538,19 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 			table.sort(bandList, function(a, b)
 				return a.rpm < b.rpm
 			end)
+		end
+		if startCfg and ex.Start then
+			-- (made now so it has loaded and starts the moment the key turns)
+			local clip = newSound(ex.Start, holder, 0)
+			clip.Name = "ExhaustStart"
+			startSnd = clip
+		end
+		if coastCfg then
+			for _, k in { "Low", "Mid", "High" } do
+				if layers[k] then
+					table.insert(coastEq, effect("EqualizerSoundEffect", layers[k], { LowGain = 0, MidGain = 0, HighGain = 0 }) :: EqualizerSoundEffect)
+				end
+			end
 		end
 	end
 	-- a one-shot from the car's set (pitch varied a little each time)
@@ -581,11 +602,40 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 			rumble.Volume = 0
 			local now = os.clock()
 			crackleCool = math.max(0, crackleCool - 1 / 60)
-			-- after the start-up sound, the idle comes in
-			local fadeIn = if ex.Start then math.clamp((now - startedAt - 1.1) / 0.8, 0, 1) else 1
+			-- after the start-up sound, the idle comes in (a clip's own timing in Config.ExhaustStart;
+			-- touching the throttle cuts the clip short and the engine answers at once)
+			local sinceStart = now - startedAt
+			if startLive and startCfg and startSnd then
+				-- (the clock follows the clip, if it took a moment to load)
+				if startWaiting and (startSnd.IsLoaded or sinceStart > 1.5) then
+					startWaiting = false
+					if startSnd.IsLoaded then
+						startedAt = now - startSnd.TimePosition
+						sinceStart = startSnd.TimePosition
+					end
+				end
+				if throttle > 0.15 and sinceStart < startCfg.out then
+					startWaiting = false
+					startedAt = now - startCfg.out
+					sinceStart = startCfg.out
+				end
+				if sinceStart >= startCfg.ends then
+					startLive = false
+					startSnd:Stop()
+				else
+					startSnd.Volume = 0.95 * carVol * math.clamp((startCfg.ends - sinceStart) / (startCfg.ends - startCfg.out), 0, 1)
+				end
+			end
+			local fadeIn = if not ex.Start
+				then 1
+				elseif startCfg then math.clamp((sinceStart - startCfg.idleAt) / startCfg.fade, 0, 1)
+				else math.clamp((sinceStart - 1.1) / 0.8, 0, 1)
 			local load = 0.55 + 0.45 * throttle
 			local limiter = r >= 0.97 and throttle > 0.6 and layers.Redline ~= nil
 			local duck = if limiter or (launching and layers.Launch) then 0.35 else 1
+			-- an upshift cuts the ignition: the note drops for a moment (bandCfg.shiftCut)
+			cutK += ((if now < cutUntil then 0.4 else 1) - cutK) * 0.35
+			duck *= cutK
 			local wIdle = math.clamp(1 - (r - 0.15) / 0.25, 0, 1)
 			local wMid = math.clamp((r - 0.15) / 0.25, 0, 1) * math.clamp(1 - (r - 0.6) / 0.25, 0, 1)
 			local wHigh = math.clamp((r - 0.6) / 0.25, 0, 1)
@@ -636,7 +686,11 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 					local d = math.log(math.max(rpmNow, 300) / band.rpm)
 					-- (the idle loop gives way quickly as the revs rise: pitched up it sounds thin)
 					-- (`width`: how far each band reaches; narrower = one recording at a time)
-					local sig = if band.name == "Idle" and d > 0 then 0.28 else ((bandCfg and bandCfg.width) or 0.4)
+					-- (`reachDown`: a band that covers the revs below it, with nothing recorded there)
+					local sig = if band.name == "Idle" and d > 0
+						then ((bandCfg and bandCfg.idleReach) or 0.28)
+						elseif d < 0 and bandCfg and bandCfg.reachDown and bandCfg.reachDown[band.name] then bandCfg.reachDown[band.name]
+						else ((bandCfg and bandCfg.width) or 0.4)
 					w[k] = math.exp(-d * d / (2 * sig * sig))
 					if k == 1 and rpmNow < band.rpm then
 						w[k] = 1 -- below the lowest band: it alone
@@ -657,7 +711,11 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 				local lift = if idleRpm then math.max(on, math.clamp((rpmNow - idleRpm * 1.15) / (idleRpm * 0.6), 0, 1)) else 1
 				local gain = (bandCfg and bandCfg.gain) or 1
 				for k, band in bandList do
-					local pitch = math.clamp(rpmNow / band.rpm, 0.45, if band.name == "Idle" then 1.45 else 1.8) * ts
+					local pitch = math.clamp(rpmNow / band.rpm, 0.45, if band.name == "Idle" then ((bandCfg and bandCfg.idleTop) or 1.45) else 1.8) * ts
+					if band.name == "Idle" and startCfg and startCfg.settleFrom then
+						-- just started: the idle takes over from the clip's revs and settles down
+						pitch *= 1 + (startCfg.settleFrom / band.rpm - 1) * math.clamp(1 - (sinceStart - startCfg.idleAt) / (startCfg.settle or 2), 0, 1)
+					end
 					local main = layers[band.name]
 					local coast = layers[band.name .. "Off"]
 					local g = 1.15 * w[k] * duck * fadeIn * power * gain * ((bandCfg and bandCfg.gains and bandCfg.gains[band.name]) or 1)
@@ -674,6 +732,13 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 						main.Volume = g * (0.45 + 0.55 * on)
 					end
 					main.PlaybackSpeed = pitch * (if coast or band.name == "Idle" or on > 0.3 then 1 else 0.97)
+				end
+				if coastCfg and math.abs((1 - on) - coastShown) > 0.02 then
+					coastShown = 1 - on
+					for _, eq in coastEq do
+						eq.MidGain = coastCfg.mid * coastShown
+						eq.HighGain = coastCfg.high * coastShown
+					end
 				end
 				-- the turbos: boost builds with throttle above ~1,800 rpm (with a little lag) and drops
 				-- fast when you lift; the whine's pitch and loudness follow it
@@ -718,11 +783,11 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 			end
 			if layers.Redline then
 				layers.Redline.Volume = if limiter then 0.95 * power else 0
-				layers.Redline.PlaybackSpeed = ts
+				layers.Redline.PlaybackSpeed = ts * (if loopRpm and loopRpm.Redline then math.clamp(r * redlineRpm / loopRpm.Redline, 0.9, 1.1) else 1)
 			end
 			if layers.Launch then
 				layers.Launch.Volume = if launching then 0.95 * power * fadeIn else 0
-				layers.Launch.PlaybackSpeed = ts
+				layers.Launch.PlaybackSpeed = ts * (if loopRpm and loopRpm.Launch then math.clamp(r * redlineRpm / loopRpm.Launch, 0.9, 1.1) else 1)
 			end
 			-- lift off at high revs: pops and crackles
 			if running and throttle < 0.3 and os.clock() - highAt < 0.4 and not liftDone and r > 0.45 then
@@ -773,6 +838,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		end
 		if up then
 			dip = 0.22
+			if bandCfg and bandCfg.shiftCut then
+				cutUntil = os.clock() + bandCfg.shiftCut
+			end
 			if ex and ex.Shift then
 				oneShot(ex.Shift, 0.8)
 			end
@@ -805,7 +873,12 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 
 	function self.crank(_)
 		startedAt = os.clock()
-		if ex and ex.Start then
+		if startSnd then
+			startSnd.Volume = 0.95 * carVol
+			startSnd.TimePosition = 0
+			startSnd:Play()
+			startLive, startWaiting = true, not startSnd.IsLoaded
+		elseif ex and ex.Start then
 			local snd = newSound(ex.Start, holder, 0.95 * carVol)
 			snd:Play()
 			Debris:AddItem(snd, 10)
@@ -828,6 +901,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		end
 		for _, snd in layers do
 			snd:Destroy()
+		end
+		if startSnd then
+			startSnd:Destroy()
 		end
 	end
 

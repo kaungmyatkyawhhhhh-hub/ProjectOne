@@ -671,8 +671,27 @@ do
 	end
 end
 
+-- (owner, 2026-11-05: "replace the lp 700 exhaust sound with the SV's exhaust but make it 1.6 times
+-- quieter and replace the start up with sound 6718630582, also make the exhaust sound realistic") the
+-- LP700-4 plays the SV's loops and one-shots with its own start-up; quieter in Config.ExhaustVolume,
+-- pitched from each loop's real engine speed in Config.ExhaustBands, timed in Config.ExhaustStart
+do
+	for _, part in { "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops" } do
+		Config.Sounds["Exhaust_lambrini_lp700_" .. part] = Config.Sounds["Exhaust_lambrini_lp750_" .. part]
+	end
+	Config.Sounds.Exhaust_lambrini_lp700_Start = "rbxassetid://6718630582" -- "Lamborghini Aventador SVJ Startup" (1Rhymastic)
+end
+
 -- per-car exhaust loudness (every loop and one-shot of the car's set), 1 = as recorded
-Config.ExhaustVolume = { lambrini_lp750 = 0.5 } :: { [string]: number }
+Config.ExhaustVolume = { lambrini_lp750 = 0.5, lambrini_lp700 = 0.5 / 1.6 } :: { [string]: number }
+
+-- a car's own start-up clip, in seconds from pressing start: `idleAt` + `fade` the idle comes in,
+-- `out` to `ends` the clip fades away (touching the throttle jumps to `out`), `settleFrom` the rpm the
+-- clip ends on: the idle starts there and falls to its own rpm over `settle`. The LP700's clip: starter
+-- to 0.8 s (when the engine catches in Driving), flare 4,700 rpm, 2,800 by 1.3 s, 1,340 at its end
+Config.ExhaustStart = {
+	lambrini_lp700 = { idleAt = 1.9, fade = 0.5, out = 2.2, ends = 2.6, settleFrom = 1340, settle = 2.5 },
+} :: { [string]: { idleAt: number, fade: number, out: number, ends: number, settleFrom: number?, settle: number? } }
 
 -- the engine speed a one-shot was recorded at (by asset), so it's pitched to the revs it plays at: the
 -- SVJ's downshift blip settles at ~4,200 rpm (its firing note)
@@ -682,8 +701,12 @@ Config.ExhaustShotRpm = { ["rbxassetid://109515735710638"] = 4200 } :: { [string
 -- this; bands crossfade between their rpms), and the turbos: `whine` the whine's pitch at full boost,
 -- `seq` the rpm the second turbo pair comes in (sequential, the Chiron), `bov` the blow-off loudness;
 -- `gain` all the loops' loudness, `gains` one band's on top (to level loops recorded louder or softer),
--- `width` how far each band reaches round its rpm (default 0.4; narrower = one recording heard at a time)
-Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number?, gain: number?, gains: { [string]: number }?, width: number? } }
+-- `width` how far each band reaches round its rpm (default 0.4; narrower = one recording heard at a time),
+-- `reachDown` a band's own reach below its rpm, `coast` the EQ (dB) with the throttle shut: the note goes
+-- dark and quiet on a lift, `shiftCut` seconds the note drops on an upshift (the ignition cut),
+-- `loopRpm` the rpm the Launch and Redline loops were recorded at, `idleReach` / `idleTop` how far above
+-- its rpm the idle loop lasts (default 0.28) and the highest it's pitched (default 1.45)
+Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number?, gain: number?, gains: { [string]: number }?, width: number?, reachDown: { [string]: number }?, coast: { mid: number, high: number }?, shiftCut: number?, loopRpm: { [string]: number }?, idleReach: number?, idleTop: number? } }
 do
 	local chiron = { bands = { Idle = 950, Low = 3500, High = 6500 }, whine = 0.62, seq = 3800, bov = 1.0 }
 	local veyron = { bands = { Idle = 950, Low = 3500 }, whine = 0.7, bov = 1.0 }
@@ -693,6 +716,20 @@ do
 	for _, id in { "bugotti_chiron", "bugotti_chiron_pursport", "bugotti_chiron_supersport" } do
 		Config.ExhaustBands[id] = chiron
 	end
+	-- the LP700-4: the SV's loops, each pitched from its real engine speed, measured from its firing
+	-- note in Studio (a V12 fires at rpm / 10 Hz: Idle 100 Hz, Low 502, Mid 600, High ~790, Launch 504,
+	-- limiter 820), so every loop plays the same note at any revs. `gains` keep the SV's loudness of
+	-- each loop (with ExhaustVolume: the SV's, 1.6 times quieter)
+	Config.ExhaustBands.lambrini_lp700 = {
+		bands = { Idle = 1000, Low = 5020, Mid = 6000, High = 7900 },
+		-- (nothing is recorded between 1,000 and 5,000 rpm: Low reaches down and the idle reaches up,
+		-- they meet near 2,200, where each is at the end of its pitch)
+		width = 0.2, reachDown = { Low = 0.55 }, idleReach = 0.45, idleTop = 2.2,
+		gains = { Idle = 0.53, Low = 1.4, Mid = 1.4, High = 0.83 },
+		coast = { mid = -3, high = -12 },
+		shiftCut = 0.09,
+		loopRpm = { Launch = 5040, Redline = 8200 },
+	}
 end
 
 -- Radio stations (owner, 2026-10-30, from the research: Midnight Racing's stations by genre). The
