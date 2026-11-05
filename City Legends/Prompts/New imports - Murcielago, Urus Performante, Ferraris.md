@@ -5,7 +5,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
 ## The new files (owner, 2026-11-05), in `Games/CityLegends/imports/importing cars/`
 | File | In the game | Family (share clusters / wheels only inside a family) |
 |---|---|---|
-| `2003_fast__furious_lamborghini_murcielago_lp640.glb` | replaces `lambrini_lp640` (Enfurecido Murcielago LP640). It's a **film car**: remove any film / sponsor stickers, livery text and logos; keep a clean body for Customs paint | Murcielago |
+| `2010__lamborghini_murcielago_lp650-4_roadster.glb` | the owner's replacement for the old Fast & Furious file (2026-11-05): a **Murcielago LP650-4 Roadster**. It **replaces the model of `lambrini_lp640`** (keep the id, price, level and class so owners keep their car; rename it in the game to a fictional "Enfurecido Murcielago LP650-4 Roadster" style name). Only 3.6 MB: check it's detailed enough (interior, cluster) and say so if not | Murcielago |
 | `2010_lamborghini_murcielago_lp670-4_superveloce.glb` | **new car**: Murcielago LP670-4 SV (fictional Enfurecido name), above the LP640 in the Murcielago line | Murcielago |
 | `2023_lamborghini_urus_performante.glb` | **new car**: Urus Performante, above `lambrini_urus` in its line (or replace the Urus's model if the old one is worse: pick the simplest that keeps owners' cars and note it) | Urus |
 | `2012_ferrari_california.glb` | replaces `ferrara_california` (Rosso Rampante California) | California |
