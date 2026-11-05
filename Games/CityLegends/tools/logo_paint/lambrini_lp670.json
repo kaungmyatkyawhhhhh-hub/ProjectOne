@@ -1,0 +1,39 @@
+{
+"src": "imports/importing cars/2010_lamborghini_murcielago_lp670-4_superveloce.glb",
+"images": {
+"1": [
+{
+"solid": [
+0,
+10,
+140,
+165,
+34,
+34,
+34
+]
+},
+{
+"ring": [
+256,
+256,
+150,
+232
+]
+}
+],
+"12": [
+{
+"solid": [
+0,
+0,
+512,
+256,
+232,
+232,
+228
+]
+}
+]
+}
+}

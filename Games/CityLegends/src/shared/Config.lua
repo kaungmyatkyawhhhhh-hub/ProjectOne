@@ -1372,7 +1372,7 @@ Config.Dealership = {
 	-- the four indoor spots. The front car park stays empty for players to park in (owner,
 	-- 2026-10-31: "dont put cars infront the dealership"); Lot = { ids } would fill its bays.
 	Stage = "lambrini_lp750",
-	Indoor = { "ferrara_458", "rolls_wraith", "porsha_gt3", "bentz_g63" },
+	Indoor = { "ferrara_599", "rolls_wraith", "porsha_gt3", "bentz_g63" },
 	-- test drives (owner, 2026-10-30, from the research: Vehicle Legends): any dealer car you don't
 	-- own, for a few minutes, once per car each visit; it pays less while you test it
 	TestSeconds = 300,

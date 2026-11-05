@@ -3,7 +3,7 @@ screen goes). Starting from one face of the screen, the faces joined to it that 
 plane are taken as the screen; they get the picture by a flat projection, left of the picture on
 the driver's left.
 
-    blender -b --python tools/lambo/put_art.py -- car.blend art.png out.blend sx,sy,sz [--fit width|height] [--nudge du,dv] [--scale k] [--crop x0,y0,x1,y1]
+    blender -b --python tools/lambo/put_art.py -- car.blend art.png out.blend sx,sy,sz [--fit width|height] [--nudge du,dv] [--scale k] [--size w,h] [--crop x0,y0,x1,y1]
 
 Prints the screen's middle, its normal, width and height (what CarSkin.CLUSTER_RECT needs).
 """
@@ -81,11 +81,14 @@ else:
     ah, aw = h, h * aspect
 aw *= scale
 ah *= scale
+if "--size" in args:  # the picture's size on the car, metres
+    aw, ah = [float(v) for v in args[args.index("--size") + 1].split(",")]
 mat = bpy.data.materials.new("ClusterArt")
 mat.use_nodes = True
 b = mat.node_tree.nodes["Principled BSDF"]
 tex = mat.node_tree.nodes.new("ShaderNodeTexImage")
 tex.image = img
+tex.extension = "CLIP"
 b.inputs["Base Color"].default_value = (0, 0, 0, 1)
 mat.node_tree.links.new(tex.outputs["Color"], b.inputs["Emission Color"])
 b.inputs["Emission Strength"].default_value = 1.0

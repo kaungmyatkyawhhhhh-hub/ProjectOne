@@ -34,7 +34,7 @@ src, out, spec_path = args[0], args[1], args[2]
 spec = json.load(open(spec_path))
 bpy.ops.wm.open_mainfile(filepath=src)
 bpy.context.scene.tool_settings.mesh_select_mode = (False, False, True)  # (or the first separate takes it all)
-BRAND = re.compile(r"Lamborghini|Aventador|Huracan|Revuelto|Gallardo|Superveloce|Superleggera|Sterrato|RewardRecycled|Performante", re.I)
+BRAND = re.compile(r"Lamborghini|Aventador|Huracan|Revuelto|Gallardo|Superveloce|Superleggera|Sterrato|RewardRecycled|Performante|Murcielago|Urus|Ferrari|California|Speciale", re.I)
 
 # word in the material's name (first match wins) -> (role, roughness, metal)
 ROLES = [

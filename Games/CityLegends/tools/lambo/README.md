@@ -18,3 +18,4 @@ Paths point at the session's temp folder; change them before reuse. Results are 
 - `cabin_export.py`, `cabin_dark.py`: pale cabin pictures made dark. `LookFixes.luau`: the look pass in `CarModels`. `step4_patch.py` has run (2026-11-04): don't run it again.
 - `frame_probe.py`: depth across a cluster frame. `window_*.png`: a screen cut to the frame's openings. `gallardo_art.py`: the Gallardo's big dials, sharp.
 - `cluster_close.py`: Step 1 close-ups from a converted car (cluster with the wheel hidden, steering wheel, what the cluster is made of). `glb_view.py`: the same shots from the original `.glb`, which keeps the second UV set (glow pictures land right).
+- `share_cabin.py`: a whole cabin in another car of its family. `share_wheel.py`: only the steering wheel. `cabin_shots.py`: six looks into a cabin. `urus_pods.py`: the Urus's side gauges on the model.

@@ -182,6 +182,7 @@ local list: { CarSpec } = {
 Cars.RETIRED = {
 	suzaki_swift = true, toyoka_belta = true, toyoka_crown = true, byt_seal = true, mazdo_rx8 = true,
 	bentz_e300 = true, bnw_530i = true, bnw_330i_g20 = true, bentz_cla45 = true, chevo_c6 = true,
+	ferrara_458 = true, -- owner (2026-11-05): "remove 458 italia"
 } :: { [string]: boolean }
 for _, spec in list do
 	if Cars.RETIRED[spec.Id] then
@@ -267,7 +268,6 @@ Cars.Series = {
 	{ Name = "ROSSO RAMPANTE F430", Ids = { "ferrara_f430" } },
 	{ Name = "ROSSO RAMPANTE CALIFORNA", Ids = { "ferrara_california" } },
 	{ Name = "ROSSO RAMPANTE 599", Ids = { "ferrara_599" } },
-	{ Name = "ROSSO RAMPANTE 458", Ids = { "ferrara_458" } },
 	{ Name = "ENFURECIDO GALLARDO", Ids = { "lambrini_lp560", "lambrini_lp570" } },
 	{ Name = "ENFURECIDO HURACAN", Ids = { "lambrini_huracan", "lambrini_performante", "lambrini_sto", "lambrini_sterrato" } },
 	{ Name = "ENFURECIDO MURCIELAGO", Ids = { "lambrini_lp640" } },
@@ -297,6 +297,7 @@ local RETIRED_SERIES = {
 	{ Name = "BAVARICA WERKZ 530I", Ids = { "bnw_530i" }, NoTrims = true },
 	{ Name = "TRI-STAR SILBER E300", Ids = { "bentz_e300" }, NoTrims = true },
 	{ Name = "GOLDEN CORVETTE C6", Ids = { "chevo_c6" }, NoTrims = true },
+	{ Name = "ROSSO RAMPANTE 458 ITALA", Ids = { "ferrara_458" } },
 }
 
 -- every line, the retired ones too (Cars.Series is cut down to the ones on sale further on)

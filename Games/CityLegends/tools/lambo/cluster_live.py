@@ -1154,8 +1154,241 @@ def huracan():
 
 
 # -------------------------------------------------------------------------------------- main
-BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700}
+# ------------------------------------------------------------------------------- Urus Performante
+def urus():
+    """From the owner's photo (imports/refs/urus_performante_cluster_owner.png). The photo leans 1.15
+    degrees, so the coordinates are those of the levelled copy (..._owner_level.png), centre x 370."""
+    box = (92, 236, 652, 392)
+    REF = "urus_performante_cluster_owner_level.png"
+    A = Art(REF, box, S=6, bg=(7, 7, 9))
+    sp = Spec("urus", box[2] - box[0], box[3] - box[1], 3, 3, box[0], box[1])
+    sp.redline, sp.idle = 6.8, 0.8
+    WHITE = (238, 240, 244)
+    RED = (240, 34, 50)
+    REDL = (232, 62, 78)
+    GREY = (150, 153, 160)
+    DIM = (92, 94, 100)
+    DARK = (58, 60, 66)
+    CX = 370
+    RT, CT = 460.0, 708.0  # the top line of the rev band: a circle
+    RL, CL = 426.6, 695.0  # its bottom line
+
+    def ty(x, k=0.0):
+        return CT - math.sqrt((RT - k) ** 2 - (x - CX) ** 2)
+
+    def ly(x):
+        return CL - math.sqrt(RL**2 - (x - CX) ** 2)
+
+    TOP = {0: 209.0, 1: 233.75, 2: 259.5, 3: 291.75, 4: 328.0, 5: 370.5, 6: 418.0, 7: 472.0, 8: 530.5}
+
+    def tx(v):
+        return interp(sorted(TOP.items()), v)
+
+    def lx(v):
+        return 217.5 + (tx(v) - 209.0) * 0.9564
+
+    def arc(x0, x1, k, col, w):
+        pts = [(x, ty(x, k)) for x in np.arange(x0, x1 + 0.01, 3.0)]
+        A.line(pts, col, w)
+
+    arc(207, 533, 0, (176, 179, 186), 1.1)
+    arc(207, 328, 3, (120, 122, 128), 1.0)
+    arc(328, 533, 3, RED, 1.5)
+    A.line([(x, ly(x)) for x in np.arange(217, 526, 3.0)], (108, 110, 116), 1.1)
+    # the dotted row
+    x = 214.0
+    while x < 526:
+        y = ty(x, 11)
+        A.circle(x, y, 0.62, (235, 44, 60) if x >= 328 else (84, 86, 92))
+        x += 7.0 + (x - 214) * 0.003
+    # ticks at the top and the half marks
+    for v in range(0, 9):
+        x = tx(v)
+        col = RED if v >= 4 else (214, 216, 222)
+        A.line([(x, ty(x, 0)), (x + (CX - x) * 0.004, ty(x, 8))], col, 1.3)
+        if v < 8:
+            xh = tx(v + 0.5)
+            A.line([(xh, ty(xh, 3)), (xh, ty(xh, 6))], (RED if v >= 4 else DIM), 0.8)
+    A.line([(tx(8), ty(tx(8), 0)), (lx(8) + 2, ly(lx(8)) - 1)], RED, 1.2)
+    NUM = {0: (213.75, 291.3), 1: (235.5, 282.8), 2: (261.75, 275.3), 3: (293, 269.0), 4: (328.75, 263.7), 5: (370.5, 262.5), 6: (417.5, 264.0), 7: (469.5, 273.0), 8: (526.75, 291.9)}
+    for v, (x, y) in NUM.items():
+        col = RED if v >= 4 else WHITE
+        A.text(x, y, str(v), TECH, 15.5, col, stroke=0.12, strokecol=col, glow=(90, 12, 20) if v >= 4 else None)
+    for s, x, y in (("0", 218.75, 301.5), ("25", 266.25, 286.8), ("50", 330.75, 275.6), ("75", 416.0, 276.6), ("100", 522.0, 301.6)):
+        A.text(x, y, s, REG, 6.4, (190, 192, 198))
+        A.line([(x, ly(x) + 0.2), (x, ly(x) + 2.2)], GREY, 0.7)
+    A.text(187.5, 287.6, "% E-POTENZA", ROBO_B, 4.9, DARK, rot=-19)
+    A.text(195, 296.6, "RPM x 1000", ROBO_B, 4.9, (84, 86, 92), rot=-19)
+    A.text(199.5, 305.8, "% RICARICA", ROBO_B, 4.9, DARK, rot=-19)
+
+    # the top line
+    def bt(x, y, k=1.0):
+        A.line([(x - 2.4 * k, y - 2 * k), (x + 2.4 * k, y + 2 * k), (x, y + 4.4 * k), (x, y - 4.4 * k), (x + 2.4 * k, y - 2 * k), (x - 2.4 * k, y + 2 * k)], (220, 222, 228), 0.75)
+
+    bt(207, 245.5)
+    A.text(212.5, 245.5, "Not connected", ROBO_B, 7.3, WHITE, anchor="lm")
+    A.line([(265.5, 242), (265.5, 249)], DIM, 0.8)
+    A.round_rect(270.6, 241.2, 275.8, 250.2, 0.9, None, outline=(190, 192, 198), w=0.7)
+    A.line([(270.2, 250.8), (276.2, 240.8)], (190, 192, 198), 0.7)
+    A.text(295, 248.4, "+ 31.5", ROBO_B, 7.3, WHITE, anchor="lm")  # (a little lower than the photo: the model's hood reaches further down)
+    A.text(315.5, 248.6, "°C", ROBO_B, 5.2, (210, 212, 218), anchor="lm")
+    A.line([(495.8, 241.5), (495.8, 249.5)], DIM, 0.8)
+    # two fuel pumps: range
+    for x0 in (499.0, 510.5):
+        A.round_rect(x0, 241.0, x0 + 6.4, 250.0, 0.7, None, outline=(216, 218, 224), w=0.7)
+        A.rect(x0 + 1.2, 242.2, x0 + 5.2, 244.8, (216, 218, 224))
+    A.text(507.9, 245.6, "+", ROBO_B, 6, (216, 218, 224))
+
+    # coolant, left
+    A.text(206, 342.8, "50 °C", ROBO_B, 6.4, (226, 228, 232))
+    A.line([(242, 338.5), (242, 345)], (150, 153, 160), 1.0)
+    A.circle(242, 345.6, 1.3, (150, 153, 160))
+    A.line([(245, 341), (247, 340), (249, 341), (251, 340)], (120, 122, 128), 0.7)
+    A.line([(233, 343.5), (235, 342.5), (237, 343.5), (239, 342.5)], (120, 122, 128), 0.7)
+    A.text(280.8, 342.8, "130", ROBO_B, 6.8, RED)
+    A.round_rect(202.5, 348.6, 244, 351.0, 1.0, (232, 234, 238))
+    A.line([(242.6, 348.6), (244.2, 351)], RED, 1.2)
+    A.line([(244, 349.7), (276, 349.8)], (112, 114, 120), 0.9)
+    A.line([(277, 349.8), (286, 349.8), (286.6, 346.6)], RED, 1.1)
+    A.line([(192.5, 355.5), (285, 356.3), (306, 345.7)], REDL, 0.9, glow=(70, 14, 22), gw=2.6)
+    # oil, right: temperature, pressure
+    A.text(461, 342.4, "50 °C", ROBO_B, 6.4, (226, 228, 232))
+    A.line([(475, 340), (480, 340), (482, 337.6)], (190, 192, 198), 0.8)
+    A.line([(473.2, 341.4), (474.6, 337.6), (476.8, 337.6)], (190, 192, 198), 0.8)
+    A.text(492.2, 342.4, "170", ROBO_B, 6.8, RED)
+    A.line([(459.4, 349.6), (488, 349.6)], (112, 114, 120), 0.9)
+    A.line([(458, 350), (461, 347.2)], RED, 1.2)
+    A.line([(488, 349.6), (496.4, 349.6), (497.4, 346.6)], RED, 1.1)
+    A.text(509.4, 342.4, "0 bar", ROBO_B, 6.4, (226, 228, 232))
+    A.line([(517, 340), (522, 340), (524, 337.6)], (190, 192, 198), 0.8)
+    A.line([(515.4, 341.4), (516.8, 337.6), (519, 337.6)], (190, 192, 198), 0.8)
+    A.text(537.8, 342.4, "10", ROBO_B, 6.8, RED)
+    A.line([(502, 349.6), (529, 349.6)], (112, 114, 120), 0.9)
+    A.line([(500.5, 350), (503.5, 347.2)], RED, 1.2)
+    A.line([(529, 349.6), (540, 349.6), (541, 346.6)], RED, 1.1)
+    A.line([(434.5, 345.9), (455, 356.2), (548, 356.2)], REDL, 0.9, glow=(70, 14, 22), gw=2.6)
+
+    # the mode frames
+    def frame(cx, cy, hw):
+        c = (84, 86, 92)
+        for sg in (-1, 1):
+            A.line([(cx + sg * (hw + 2), cy), (cx + sg * (hw + 8), cy)], (214, 216, 222), 1.0)
+            A.line([(cx + sg * (hw - 2), cy - 3.4), (cx + sg * (hw + 2), cy), (cx + sg * (hw - 2), cy + 3.4)], (214, 216, 222), 1.0)
+            A.line([(cx + sg * (hw - 2), cy - 3.4), (cx + sg * (hw - 8), cy - 8.8), (cx + sg * 8, cy - 8.8)], c, 0.6)
+            A.line([(cx + sg * (hw - 2), cy + 3.4), (cx + sg * (hw - 8), cy + 8.8), (cx + sg * 8, cy + 8.8)], c, 0.6)
+
+    frame(239.5, 370.2, 21)
+    frame(503.75, 370.2, 26)
+    A.text(503.75, 370.2, "PERFORMANCE", ROBO_B, 5.3, WHITE, track=0.3)
+    A.text(503.75, 363.4, "TACHIMETRO", ROBO_B, 3.8, DIM, track=0.2)
+    A.text(503.75, 376.9, "ROAD", ROBO_B, 3.8, DIM, track=0.2)
+
+    # the side pods
+    def pod(side):
+        x = (lambda v: v) if side < 0 else (lambda v: 744 - v)
+        A.text(x(121.5), 287.5, "1/1", ROBO_B, 6.8, (226, 228, 232))
+        A.text(x(121.5), 318.5, "1/2", ROBO_B, 6.8, (226, 228, 232))
+        A.text(x(137), 349.4, "R", ROBO_B, 7.6, RED)
+        n = 9 if side < 0 else 25
+        pts = [(133.5 + (k / 8) ** 1.8 * 10.5, 324.5 + k * 2.9) for k in range(0, 9)] if side < 0 else [(131.2 + ((k + 8) / 32 * 2) ** 2.2 * 2.75, 285 + k * 2.42) for k in range(0, 25)]
+        for i in range(n - 1):
+            if i % 2 == 0:
+                A.line([(x(pts[i][0]), pts[i][1]), (x(pts[i + 1][0]), pts[i + 1][1])], WHITE, 1.5)
+        A.line([(x(124.5), 336.4), (x(127.8), 335.0)], (226, 228, 232), 1.0)
+        A.line([(x(127.5), 344.0), (x(130.8), 342.2)], RED, 1.1)
+
+    pod(-1)
+    pod(1)
+    # left pod: the battery; right pod: fuel
+    A.round_rect(106.5, 299.0, 116.5, 307.5, 1.4, None, outline=(216, 218, 224), w=0.9)
+    A.rect(108, 300.5, 115, 306, (120, 122, 128))
+    A.poly([(105.5, 301.0), (102.5, 303.2), (105.5, 305.4)], (216, 218, 224))
+    A.line([(118.5, 303.2), (121.5, 303.2)], (216, 218, 224), 1.0)
+    A.round_rect(627.5, 299.0, 634.5, 308.5, 0.8, None, outline=(216, 218, 224), w=0.8)
+    A.rect(628.8, 300.4, 633.2, 303.2, (216, 218, 224))
+    A.poly([(637.2, 301.0), (640.2, 303.6), (637.2, 306.2)], (216, 218, 224))
+    A.line([(621.5, 303.8), (624.5, 303.8)], (216, 218, 224), 1.0)
+
+    # the ring dial, right of the gear
+    RX, RY = 445.75, 309.0
+    for i in range(16):
+        a0, a1 = 22.5 * i + 0.8, 22.5 * (i + 1) - 0.8
+        col = (66, 68, 74) if i == 0 else (236, 238, 242)
+        pts = []
+        for t in np.linspace(a0, a1, 8):
+            pts.append((RX + 21.2 * math.sin(math.radians(t)), RY - 21.2 * math.cos(math.radians(t))))
+        for t in np.linspace(a1, a0, 8):
+            pts.append((RX + 16.2 * math.sin(math.radians(t)), RY - 16.2 * math.cos(math.radians(t))))
+        A.poly(pts, col)
+    A.circle(RX, RY, 14.6, (17, 17, 20))
+    A.text(RX, RY, "19", TECH, 16.5, WHITE, stroke=0.14, strokecol=WHITE)
+    A.final = A.finish(A.S, blur=2.2, strength=0.7)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    # the rev band that fills, and the red marker
+    F = Art(REF, box, S=6, bg=(0, 0, 0))
+    a = 209.0
+    while a < 530.5:
+        b = a + 1.0
+        F.poly([(a, ty(a, 3.8)), (b, ty(b, 3.8)), (b, ty(b, 7.6)), (a, ty(a, 7.6))], RED if a >= 328 else (232, 234, 238))
+        a = b
+    F.final = F.finish(F.S, blur=1, strength=0)
+    fbox = (205, 244, 535, 286)
+    im, left, top_ = sp.box(F, fbox, black=True)
+    xs = [(v / 4, (tx(v / 4) - fbox[0]) / (fbox[2] - fbox[0])) for v in range(0, 33)]
+    sp.fills.append({"im": im, "left": left, "top": top_, "pts": xs, "lead": 0})
+    sp.marker = {"color": (240, 34, 50), "w": 1.7, "glow": 2.4, "pts": [(v / 4, tx(v / 4) - sp.ox, ty(tx(v / 4), 0.5) - sp.oy, lx(v / 4) - 1.5 - sp.ox, ly(lx(v / 4)) - 5 - sp.oy) for v in range(0, 33)]}
+
+    # the mode word: the middle row is the mode the car is in
+    for when, rows in (("corsa", ("SPORT", "CORSA", "STRADA")), ("sport", ("STRADA", "SPORT", "CORSA"))):
+        L = Art(REF, box, S=6, bg=(0, 0, 0))
+        L.text(239.5, 363.4, rows[0], ROBO_B, 3.8, DIM, track=0.2)
+        L.text(239.5, 370.2, rows[1], ROBO_B, 6.0, RED, track=0.3, glow=(90, 12, 20))
+        L.text(239.5, 376.9, rows[2], ROBO_B, 3.8, DIM, track=0.2)
+        L.final = L.finish(L.S, blur=1, strength=0.5)
+        sp.add_show(sp.box(L, (216, 359, 263, 381), black=True), when)
+
+    # parked: seat belt, the car's warnings
+    W2 = Art(REF, box, S=6, bg=(0, 0, 0))
+    W2.circle(288.6, 361.0, 1.9, RED)
+    W2.poly([(284.8, 372.6), (285.8, 364.2), (291.6, 364.2), (292.6, 372.6)], RED)
+    W2.line([(285.4, 365), (292.2, 371.6)], (60, 8, 14), 0.8)
+    W2.line([(286, 378.6), (291, 375.6), (298, 375.6), (301.6, 378.2), (301.6, 380), (286, 380), (286, 378.6)], (214, 216, 222), 0.9)
+    W2.line([(270, 380.2), (281, 376.4), (278.4, 380)], (150, 153, 160), 0.7)
+    W2.text(407.6, 342.6, "ESC", ROBO_B, 4.1, RED, track=0.2)
+    W2.text(407.6, 347.6, "SPORT", ROBO_B, 4.1, RED, track=0.2)
+    W2.circle(423.8, 341.2, 2.4, None, outline=(232, 200, 40), w=0.9)
+    W2.round_rect(420, 342.8, 427.6, 351, 1.8, None, outline=(232, 200, 40), w=1.0)
+    W2.line([(421, 347), (426.6, 347)], (232, 200, 40), 0.9)
+    W2.final = W2.finish(W2.S, blur=1, strength=0)
+    sp.add_show(sp.box(W2, (266, 356, 306, 384), black=True), "parked")
+    sp.add_show(sp.box(W2, (396, 335, 432, 354), black=True), "parked")
+
+    # the gear: a thin hollow letter
+    K = sp.A
+    sprites = {}
+    for ch in "RNP1234567":
+        m = letter_mask(ch, TECH, 79, K, 0.28, rounded=1.0)
+        sprites[ch] = {"im": hollow(m, 79, K, 0.26, 0.9, (240, 34, 50), 0.5)}
+    sprites["N"], sprites["P"] = sprites["P"], sprites["N"]  # (a car in neutral shows P here)
+    sp.gear = {"x": 369 - sp.ox, "y": 312 - sp.oy, "sprites": sprites}
+    sp.font("speed", TECH, 21, "0123456789", stroke=0.25, shear=0, track=0.3)
+    sp.readout("speed", 372, 359, "m", 3, "speed")
+    sp.font("unit", ROBO_B, 5.6, "kmhpi/", shear=0)
+    sp.readout("unit", 372, 371, "m", 4, "unit")
+    sp.readout("unit", 485.4, 246.6, "l", 2, "distUnit")
+    sp.readout("unit", 534, 246.6, "l", 2, "distUnit")
+    sp.font("clock", ROBO_B, 7.3, "0123456789:", shear=0)
+    sp.readout("clock", 430.5, 248.3, "m", 5, "clock")
+    sp.font("odo", ROBO_B, 7.3, "0123456789", shear=0)
+    sp.readout("odo", 484.2, 245.5, "r", 6, "odo")
+    sp.readout("odo", 532.8, 245.5, "r", 3, "range")
+    return sp
+
+
+BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus}
 PREVIEW = {
+    "urus": ("urus_performante_cluster_owner_level.png", (92, 236, 652, 392), None, dict(v=0.0, gear="N", mph=0, manual=True, clock="9:57", odo="2938", range="432")),
     "lp700": ("aventador_lp700_cluster_owner.png", (110, 150, 1400, 680), None, dict(v=3.0, gear="2", mph=31, manual=False, clock="10:45", date="10.08.2019")),
     # ref, the view in the ref, the same view in the design's pixels, a state
     "revuelto": ("revuelto_cluster_driving_owner_2.png", (235, 215, 1405, 645), None, dict(v=6.0, gear="1", mph=23, manual=True, clock="10:45", odo="000350", range="200", station="Radio Riviera")),
