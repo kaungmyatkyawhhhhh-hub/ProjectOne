@@ -26,7 +26,7 @@ Back to [[00 GYM ARC Home|GYM ARC Home]] · Decisions: [[2026-10-29 GYM ARC Ever
 | DNA token | 25,000 (+10% each this week) | KEEP | Long-term sink; genetics opens at Spurt 4 |
 | Tank tops | White free, colours 1,000, Gold 1,500 | KEEP | Cheap first cosmetic |
 | STYLE name/title colours | 5,000-20,000 solid, 60,000-120,000 gradients | KEEP | Endgame sink |
-| Aura colours / alter tints | 25,000 / 50,000 · 40,000 / 80,000 | KEEP | Endgame sink |
+| Aura colours / alter tints | 25,000 / 50,000 · 40,000 / 80,000 | KEEP aura colours; alter tints REMOVED (owner, 5 Nov: owners refunded in coins) | Endgame sink |
 | Coin auras Toxic / Shadow | 50,000 / 150,000 | KEEP | Endgame sink |
 | Skate decks / wheels | 80-900 | KEEP | Cheap fun |
 
@@ -55,7 +55,7 @@ Total of all passes: ~1,393 R$ (fine for a kids' game).
 | Quest Reroll | 19 | KEEP | |
 | Endless Stamina | 49 per 15 min (max 60) | KEEP; hidden when it would do nothing | |
 | Shake Bundle (3) | 49 | CHANGE with the merge (97): "Stamina x3" 49 | |
-| Robux supplements | 25 x1 / 99 x5 | CHANGE with the merge: Gains / Stamina / Luck x1 25, x5 99 (no cap: always adds something) | |
+| Robux supplements | 25 x1 / 99 x5 | DONE 5 Nov (Studio): GAINS +60% EXP 30 min, STAMINA full + 60% regen 30 min, x1 25 / x5 99. NO Robux Luck (owner, 5 Nov: paid random-item modifier; Luck stays coin-only). Cap ~1.6x. Coach Dex coin boosts unchanged | |
 | Alter variants | 149-299 | KEEP + one new cosmetic each update | Fair money |
 
 ## 400 / 800 bundle fits (good combos to show in the Store)

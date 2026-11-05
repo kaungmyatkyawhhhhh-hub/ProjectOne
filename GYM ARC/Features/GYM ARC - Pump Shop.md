@@ -57,8 +57,9 @@ Coins per minute of active play (`lune run tests/pacing coins`, 60 simulated pla
 
 ## Shop items, Robux and STYLE (23 Oct, prompts 57 / 59 / 60 / 61, [[2026-10-23 GYM ARC Gear, shop items, monetization and economy]])
 - PUMP SHOP tabs: SUPPLEMENTS · STYLE · DNA LAB (no GEAR: all gear is at Coach Dex).
-- The 4 specials are Robux only (x1 25 R$, x5 99 R$; SOON until the products are made); DNA LAB has the coin token and the Robux x1 / x3, with the DNA token picture.
-- STYLE: name tag and title colours, aura colours, alter tints (Config/Style, StyleService).
+- (5 Nov) The shelf sells GAINS + STAMINA (Robux, x1 25 / x5 99; SOON until their 4 products exist); the 4 older specials are off the shelf, owners keep and use them. The same window opens from the HUD "+" boost slot and the "See boost" cards. [[2026-11-05 GYM ARC Supplements Gains + Stamina, alter tints removed]]
+- The 4 specials were Robux only (x1 25 R$, x5 99 R$); DNA LAB has the coin token and the Robux x1 / x3, with the DNA token picture.
+- STYLE: name tag and title colours, aura colours (Config/Style, StyleService). Alter tints removed for good (5 Nov).
 - Coach Dex: SUPPLEMENTS + Shake Bundle, DNA Token (+ x3) for Robux; GEAR = Belt and Wraps rows (Basic / Pro).
 
 ## Tubs like the item pictures (27 Oct, owner: "most of the pump shop tubs don't have images like the item picture")
