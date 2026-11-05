@@ -35,6 +35,7 @@ if not root or (root:GetAttribute("StandIns") == true and Kit.AllImported()) the
 	root = Builder.Build()
 end
 local islandsFolder = root:WaitForChild("Islands")
+Builder.ClearDecor(root) -- (no crystal in front of a sign, 6 Nov)
 
 local remote = Galaxy:FindFirstChild("MapEvent") or Instance.new("RemoteEvent")
 remote.Name = "MapEvent"
@@ -195,6 +196,7 @@ PAD_BUILD[13] = function(island, folder) -- INNER LIGHTS: four short lamp posts 
 end
 PAD_BUILD[14] = function(island, folder) -- FLOATING CRYSTALS round the rim
 	local rnd = Random.new((island:GetAttribute("Slot") or 1) * 53)
+	-- (6 Nov: out past the rim, Radius 34; at 26 they hung in front of / through the boards' screens)
 	for _, deg in ipairs(PB.Floaters.Angles) do
 		local p = angled(island, deg, PB.Floaters.Radius)
 		local h = rnd:NextNumber(PB.Floaters.Size[1], PB.Floaters.Size[2])
@@ -247,19 +249,59 @@ local function setBridge(island: Model, lit: boolean)
 	end
 end
 
+-- is a pad at `p` (on the floor at y) clear of every piece, board and the landing? (6 Nov, owner: "buttons inside a platform":
+-- the garden / crystals are CanQuery off, so a ray never saw them.) Each part's real box: the pad's column (floor + 0.3 to
+-- + 6 studs) must stay PadClear studs away from it. Flat floor pieces (top under the pad's top) and things high overhead
+-- don't count; the thin RINGS (Box collision = a solid disc) are measured as rings.
+local RINGS = { Halo = true, Gyro = true, CrownRing = true, Rim = true, Inlay = true }
+local function padClear(island: Model, p: Vector3, y: number): boolean
+	local need = I.PadSize / 2 + 0.4 + I.PadClear
+	for _, folder in ipairs({ island:FindFirstChild("Pieces"), island:FindFirstChild("Boards"), island:FindFirstChild("Landing") }) do
+		for _, part in ipairs(folder and folder:GetDescendants() or {}) do
+			if not part:IsA("BasePart") or part.Transparency >= 0.95 then continue end
+			local cf, half = part.CFrame, part.Size / 2
+			local reach = math.abs(cf.RightVector.Y) * half.X + math.abs(cf.UpVector.Y) * half.Y + math.abs(cf.LookVector.Y) * half.Z
+			local top, bottom = cf.Position.Y + reach, cf.Position.Y - reach
+			if top <= y + 0.3 or bottom >= y + 6 then continue end
+			for _, h in ipairs({ 0.3, 2, 4, 6 }) do
+				local q = cf:PointToObjectSpace(Vector3.new(p.X, y + h, p.Z))
+				local d
+				if RINGS[part.Name] then
+					local tube = half.Y
+					d = Vector2.new(Vector2.new(q.X, q.Z).Magnitude - (half.X - tube), q.Y).Magnitude - tube
+				else
+					d = Vector3.new(math.max(math.abs(q.X) - half.X, 0), math.max(math.abs(q.Y) - half.Y, 0), math.max(math.abs(q.Z) - half.Z, 0)).Magnitude
+				end
+				if d < need then return false end
+			end
+		end
+	end
+	return true
+end
+
 -- the next pad on the floor: a lit disc (the client draws its name, price and the arrow; a click buys it). On whatever floor
--- is there (the bare rock first), found with a ray
+-- is there (the bare rock first), found with a ray; at its spot in I.PadSpots, or (if a piece is in the way there) the next
+-- spot in the list that is clear
 local function placePad(island: Model, pads: number)
 	local old = island:FindFirstChild("NextPad")
 	if old then old:Destroy() end
 	if (island:GetAttribute("Owner") or 0) == 0 or pads >= #Econ.Pads then return end
-	local spot = I.PadSpots[(pads % #I.PadSpots) + 1]
-	local p = at(island, spot.X, spot.Z)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { island:FindFirstChild("Pieces") }
-	local hit = workspace:Raycast(p + UP * 30, -UP * 60, params)
-	local y = if hit then hit.Position.Y else p.Y
+	local p, y
+	for k = 0, #I.PadSpots - 1 do
+		local spot = I.PadSpots[((pads + k) % #I.PadSpots) + 1]
+		local q = at(island, spot.X, spot.Z)
+		local hit = workspace:Raycast(q + UP * 30, -UP * 60, params)
+		local qy = if hit then hit.Position.Y else q.Y
+		if k == 0 then p, y = q, qy end
+		if padClear(island, q, qy) then
+			p, y = q, qy
+			break
+		end
+		if k == #I.PadSpots - 1 then warn("[GalaxyMap] no clear pad spot on " .. island.Name .. " for pad " .. (pads + 1)) end
+	end
 	local pad = Instance.new("Model")
 	pad.Name = "NextPad"
 	pad:SetAttribute("Index", pads + 1)
@@ -471,6 +513,8 @@ task.spawn(function()
 		prompt.Parent = host
 	end
 	forge.Parent = nextS
+	-- (6 Nov: no crystal in front of the Forge's sign or any other sign: the island's crystals were placed before the Forge)
+	Builder.ClearDecor(root)
 end)
 
 ------------------------------------------------------------------------
@@ -479,6 +523,8 @@ end)
 if RunService:IsStudio() then
 	local function testIslands()
 		local on = workspace:GetAttribute("TestIslands") == true
+		-- (TestIslandPads = n: every test island shows n pads, so the placement check can walk every next-pad spot)
+		local forcePads = workspace:GetAttribute("TestIslandPads")
 		local tier = 0
 		for slot = 1, MapConfig.Islands.Count do
 			if typeof(owners[slot]) ~= "Instance" then
@@ -486,7 +532,7 @@ if RunService:IsStudio() then
 					local novas = ({ 0, 0, 0, 0, 1, 3, 8 })[tier + 1] or 8
 					local bodies = ({ 0, 5, 25, 75, 0, 0, 0 })[tier + 1] or 0
 					owners[slot] = { Name = "Tester " .. slot, Bodies = bodies, BodyTiers = math.min(tier, 6), Supernovas = novas, Ready = tier >= 5,
-						Pads = ({ 0, 2, 5, 8, 11, 15, 20 })[tier + 1] or 20 }
+						Pads = if type(forcePads) == "number" then forcePads else ({ 0, 2, 5, 8, 11, 15, 20 })[tier + 1] or 20 }
 					tier = (tier + 1) % (MapConfig.MaxTier + 1)
 				else
 					owners[slot] = nil
@@ -496,6 +542,7 @@ if RunService:IsStudio() then
 		end
 	end
 	workspace:GetAttributeChangedSignal("TestIslands"):Connect(testIslands)
+	workspace:GetAttributeChangedSignal("TestIslandPads"):Connect(function() if workspace:GetAttribute("TestIslands") then testIslands() end end)
 	if workspace:GetAttribute("TestIslands") then testIslands() end
 	local function testPlayers()
 		for _, player in ipairs(Players:GetPlayers()) do

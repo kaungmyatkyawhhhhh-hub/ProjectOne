@@ -20,15 +20,15 @@ From [[2026-11-04 Galaxy Incremental - Prompt - Research audit (decided vs built
 
 ## Summary
 
-Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]]; feel pass + Ignition 1 + Star Forge: #9 #12-#18 #20-#25 #27 #59-#62 #77 #82-#87 #125 #314 #388 #421 #477, see [[2026-11-05 Galaxy Incremental feel pass, Ignition 1 and the Star Forge]]). Then feel pass NEXT + VFX layering + cutscene template + Tutorial 2: #77-#79 #110-#124 #128 #130 #222 #223 #239 #242 #266 #274 #275 #278 #279 #283-#287 #289 #294 #295 #298 #301 #303, see [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]]. Then social basics + board brightness + music playlist: #233-#235 #237 #290 #392 #394 #395 + new #485, see [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]].
+Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]]; feel pass + Ignition 1 + Star Forge: #9 #12-#18 #20-#25 #27 #59-#62 #77 #82-#87 #125 #314 #388 #421 #477, see [[2026-11-05 Galaxy Incremental feel pass, Ignition 1 and the Star Forge]]). Then feel pass NEXT + VFX layering + cutscene template + Tutorial 2: #77-#79 #110-#124 #128 #130 #222 #223 #239 #242 #266 #274 #275 #278 #279 #283-#287 #289 #294 #295 #298 #301 #303, see [[2026-11-05 Galaxy Incremental feel pass next, VFX, cutscene template and Tutorial 2]]. Then social basics + board brightness + music playlist: #233-#235 #237 #290 #392 #394 #395 + new #485, see [[2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]]. 6 Nov: buttons inside island platforms: new #486, see [[2026-11-06 Galaxy Incremental buttons inside island platforms]].
 
 | Status | Rows |
 |---|---|
-| BUILT | 279 |
+| BUILT | 280 |
 | PARTLY | 83 |
 | NOT BUILT | 79 |
 | CHANGED | 44 |
-| **Total** | **485** |
+| **Total** | **486** |
 
 | Area | BUILT | PARTLY | NOT BUILT | CHANGED |
 |---|---|---|---|---|
@@ -38,7 +38,7 @@ Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-
 | UI | 62 | 19 | 8 | 12 |
 | SFX | 10 | 8 | 7 | 7 |
 | VFX | 33 | 13 | 5 | 4 |
-| map | 55 | 6 | 2 | 10 |
+| map | 56 | 6 | 2 | 10 |
 | social | 9 | 1 | 6 | 2 |
 | retention | 11 | 6 | 12 | 1 |
 | monetization | 7 | 2 | 12 | 0 |
@@ -424,7 +424,7 @@ Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-
 | 317 | VFX | Cutscenes always skippable after ~1 s | Playbook rules §5 | **BUILT** | GalaxySupernova: SKIP shows after 1 s every time, the first Supernova too (test 5 Nov: hidden 0-0.8 s, shown from 1.0 s) | [[2026-11-05 Galaxy Incremental phase 0 - fixes and boards one job each]] |
 | 318 | VFX | Never a reward that needs watching to the end | Playbook rules §5 | PARTLY | Shards are granted at the impact (after the 2.45 s wind-up), not at the end; the first one can't be skipped | - |
 
-### Map and lighting (73)
+### Map and lighting (74)
 
 | # | Area | Decision | Source note | Status | Evidence | Notes |
 |---|---|---|---|---|---|---|
@@ -501,6 +501,7 @@ Updated 5 Nov (Phase 0: #69 #219 #220 #221 #281 #316 #317 #397 #448, see [[2026-
 | 389 | map | A compact place: the first action is near spawn, no long walks | 10 incrementals - Take #12 and what was weak | BUILT | ServerScriptService.GalaxyMapService spawnCFrame(): you spawn ON your island, facing the Core, next to its boards. If you fall into the void you go back to your island (lines 318-324) | - |
 | 390 | map | Its own art style, not plain default studs | 10 incrementals - what was weak | BUILT | ServerStorage.GalaxyMapBuilder builds from custom Kit meshes (Dais, Anvil, GateArch, CoreOrb, Planet) and GalaxyLighting does a lighting pass | - |
 | 391 | map | An open 3D space with no fenced walkways or camera traps | Regrowth play log - lessons avoid #3 | PARTLY | The plaza is 140 studs across and open. Islands link to it by railed 8-wide bridges (GalaxyMapBuilder line 7, line 119). Falling sends you home | The camera wasn't tested in Play (read-only audit) |
+| 486 | map | Nothing ever covers a button, pad, board screen or sign (≥0.5 stud clear), also after later pieces are built | Owner 6 Nov ("some of the buttons are inside a platform": the next pad sat inside the MOON GARDEN) | **BUILT** | MapService.placePad + padClear (every piece's real box, rings as rings) picks a clear spot; MapConfig PadSpots 3/7/8/10 moved; Floaters Radius 26 -> 34; MapBuilder.ClearDecor slides crystals out of signs' view. Studio check: 0 overlaps on 43 screens/signs + 140 pad placements (7 islands x pads 1-20) | [[2026-11-06 Galaxy Incremental buttons inside island platforms]] |
 
 ### Social (18)
 

@@ -17,7 +17,7 @@ Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongm
 - **5 Nov (Claude Code, Studio, not published):** Run Cards v2 talents built and tested solo (15 talents, unique cards, odd-alter picks, legacy collection, +60% TALENT POWER net). Not tested: SPOT / BOND (2 players), real phone. See [[GYM ARC/Progress/2026-11-05 GYM ARC Run Cards v2 talents built]].
 - **5 Nov (Claude Code, Studio, not published):** supplements GAINS + STAMINA for Robux built (HUD + slot, See boost moments, analytics); alter tints removed for good with coin refund (only the owner's save had one). 4 Robux products created 5 Nov. Next: publish + private-server check. See [[GYM ARC/Progress/2026-11-05 GYM ARC Supplements Gains + Stamina, alter tints removed]].
 - **5 Nov (Claude Code, Studio, not published):** Plate Forge booth rebuilt + new PLATE FORGE window with a buy moment. See [[GYM ARC/Progress/2026-11-05 GYM ARC Plate Forge booth and forge window]].
-- **Last updated:** 2026-11-05
+- **Last updated:** 2026-11-06
 
 ## SPEED ARC (Roblox running simulator): PAUSED (29 Oct)
 "+1 SPEED every step": run, smash walls for coins, the last wall = Go Pro to the next world, races every 3 min, shoes / coaches / trails.
@@ -48,8 +48,9 @@ Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, 
   - Island boards + map signs Brightness 1.8 (were washed out), opaque board fills.
   - Music: 5-track APM playlist (shuffle, no repeats, 2 s crossfade, loudness matched); Ethereal Drone gone.
   - Not tested: 2-player server (low PC memory), real friend boost, real phone. See [[Celestial Incremental/Progress/2026-11-05 Galaxy Incremental social basics, board brightness and music playlist]]. Phase 1 done.
+- **6 Nov, buttons inside island platforms fixed (Claude Code, Studio, not published):** next pads sat inside the Moon Garden / crystals (decor is CanQuery off), floating crystals hung in front of the boards, crystals in front of 2 signs. Pads now pick a clear spot, spots moved, floaters out past the rim, decor slides out of signs. Check: 0 overlaps. See [[Celestial Incremental/Progress/2026-11-06 Galaxy Incremental buttons inside island platforms]].
 - **STANDING RULE (Galaxy):** before any Galaxy task, read the master checklist and the source notes for that area. Every Progress note lists the checklist rows it built (#) and updates their status in the checklist.
-- **Last updated:** 2026-11-05
+- **Last updated:** 2026-11-06
 
 ## MOW ARC (Roblox incremental): on hold
 Idea only, not started: mow grass -> upgrades -> REGROW / SEASON prestige. Notes and 3 prompts ready in [[MOW ARC/00 MOW ARC Home]].
@@ -68,6 +69,8 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **5 Nov (Claude Code):** new imports Step 1 done (2 Murcielagos, Urus Performante, California, 458 Spider, 458 Speciale). Best clusters: LP670-4 SV, 458 Speciale. Owner to do: send a lit photo of the Urus Performante cluster, pick the California photo, decide on the 4 non-commercial models. See [[City Legends/City Legends]].
 - **5 Nov (Claude Code, Blender + Studio, not published):** Urus cluster redrawn from the owner's photo, the LP650-4 Roadster has the SV's interior, all six logos out, 458 Italia off sale (owners keep it). 458 and California clusters redrawn from the owner's photos (still Blender previews). 6 Nov: all six in the game in Studio (live clusters, dark cabins), not published. Owner: decide on the non-commercial models. See [[City Legends/City Legends]].
 - **Last updated:** 2026-11-05
+- **5 Nov (Claude Code, in Studio, not published):** LP700 exhaust: the SV's sounds 1.6 times quieter, start-up 6718630582, each loop pitched from its measured rpm so the note follows the revs. Owner: listen to it. See [[City Legends/City Legends]].
+- **Last updated:** 2026-11-06
 
 ## MM Shop Bot (Telegram shop for Myanmar): active, new 5 Nov
 Sells digital products (game top-ups, Roblox gift cards, later a CV pack) to Myanmar customers over Telegram. Pay by KBZPay/Wave slip → owner taps Approve → bot delivers. Goal: $100 → $1,000/month.
@@ -76,6 +79,7 @@ Sells digital products (game top-ups, Roblox gift cards, later a CV pack) to Mya
 - **5 Nov:** bot built + tested (stock delivery, slip check, Approve/Reject, Reloadly auto-buy). Owner to do: fill `.env`, run `run.bat`, make M Game Coin + Reloadly accounts.
 - **6 Nov (Claude Code, in Studio, not published):** overnight run: steps 1-6 done, 7 and 8 part done. Smoother driving, 14 minute day with a cold misty morning, building overlap checker, gates remodelled, all lanes clean, red-and-white kerbs. Next: step 7.2 (reshape the bad bends). Summary at the top of `City Legends/City Legends.md`.
 - **Last updated:** 2026-11-05
+- **Last updated:** 2026-11-06
 
 ## Archived (not worked on, nothing deleted)
 - **Break A Bed** (bed-breaking clicker, archived 28 Oct): released as "[🎉 RELEASE] Break a Bed", 12K Robux spent on ads, ~500 Robux a day (mid Oct). Notes: [[Archive/Break A Bed/Project Overview]].

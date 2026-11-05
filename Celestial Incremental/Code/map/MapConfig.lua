@@ -113,15 +113,19 @@ MapConfig.Islands = {
 	SidePads = { Fit = 22, In = 2 }, -- (centred In studs nearer the middle than the side board)
 	-- the ISLAND PADS (feel pass, 5 Nov): where the next pad sits (one at a time, in this order round the dais, all in
 	-- front of the spawn camera or beside it; never on the bridge path or in front of a board), its size, click reach
-	PadSpots = { Vector3.new(10, 0, 8), Vector3.new(10, 0, -9), Vector3.new(-4, 0, 11), Vector3.new(-4, 0, -12), Vector3.new(15, 0, 3),
-		Vector3.new(-12, 0, 6), Vector3.new(-12, 0, -7), Vector3.new(6, 0, 15), Vector3.new(6, 0, -15), Vector3.new(-16, 0, 13) },
-	PadSize = 4.5, PadReach = 60,
+	-- (6 Nov, owner: "buttons inside a platform": spots 3, 4, 6 and 10 sat in the MOON GARDEN / the crystals once those were
+	-- built; moved clear of every piece. MapService.placePad also skips a spot a piece is in, PadClear studs round the rim)
+	-- (picked from a Studio scan of all 8 islands with every piece built: the side of the island between the garden, the
+	-- crystals and the banner has no room; spot 6 is beside the bridge path, clear of the light walk)
+	PadSpots = { Vector3.new(10, 0, 8), Vector3.new(10, 0, -9), Vector3.new(7, 0, 12), Vector3.new(-1, 0, -12.5), Vector3.new(15, 0, 3),
+		Vector3.new(-15, 0, -8), Vector3.new(14, 0, -4), Vector3.new(9, 0, 16), Vector3.new(6, 0, -15), Vector3.new(13, 0, 14) },
+	PadSize = 4.5, PadReach = 60, PadClear = 0.5,
 	-- what pads 11-20 build (island-local, x = out from the Core, z = to the side)
 	PadBuilds = {
 		Gyro = { Fit = 16, Height = 9, Tilt = 24 },
 		Gate = { X = -22, Height = 11 },
 		Lights = { Angles = { 45, 135, -45, -135 }, Radius = 9, Post = 3.2, Orb = 1 },
-		Floaters = { Angles = { 35, 75, 105, 145, -35, -75, -105, -145 }, Radius = 26, Size = { 2.5, 4 }, Height = { 5, 9 } },
+		Floaters = { Angles = { 35, 75, 105, 145, -35, -75, -105, -145 }, Radius = 34, Size = { 2.5, 4 }, Height = { 5, 9 } },
 		Altar = { Height = 2.4, Orb = 1.4 },
 		Halo = { Fit = 76, Height = 3, Tilt = 6 },
 		Globe = { At = Vector3.new(-12, 0, -17), Stand = 3, Size = 3 },

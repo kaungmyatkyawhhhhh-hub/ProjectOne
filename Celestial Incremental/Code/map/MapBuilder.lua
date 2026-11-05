@@ -255,6 +255,42 @@ function Builder.Leaderboards(centre: Instance)
 	end
 end
 
+-- DECOR NEVER IN FRONT OF A SIGN (6 Nov, owner: "buttons inside a platform"): a crystal standing in a sign's view (its
+-- face +- 0.5 studs, up to 6 studs out in front) is slid sideways out of it, 0.5 studs clear. The plaza and Sector 2 only
+-- (the islands keep their pieces clear by MapConfig). Runs at the end of Build, and again from GalaxyMapService (a place
+-- built before this rule; the Sector 2 Forge it places later).
+local DECOR = { Crystal = true, CrystalCluster = true }
+function Builder.ClearDecor(root: Instance)
+	local islands = root:FindFirstChild("Islands")
+	local faces = {}
+	for _, g in ipairs(root:GetDescendants()) do
+		if g:IsA("SurfaceGui") and g.Parent:IsA("BasePart") and not (islands and g.Parent:IsDescendantOf(islands)) then
+			local p = g.Parent :: BasePart
+			local n = Vector3.FromNormalId(g.Face)
+			local normal = p.CFrame:VectorToWorldSpace(n)
+			local right = normal:Cross(Vector3.new(0, 1, 0))
+			if right.Magnitude < 0.1 then continue end -- (a face looking up or down)
+			right = right.Unit
+			local depth = math.abs(p.Size:Dot(n)) / 2
+			local hw = math.abs(p.CFrame:VectorToObjectSpace(right):Dot(p.Size)) / 2
+			table.insert(faces, { c = p.Position + normal * depth, normal = normal, right = right, hw = hw, hh = p.Size.Y / 2, sign = p })
+		end
+	end
+	for _, d in ipairs(root:GetDescendants()) do
+		if not d:IsA("BasePart") or not DECOR[d.Name] or (islands and d:IsDescendantOf(islands)) then continue end
+		local r = math.max(d.Size.X, d.Size.Z) / 2
+		for _, f in ipairs(faces) do
+			if d:IsDescendantOf(f.sign.Parent) then continue end
+			local v = d.Position - f.c
+			local x, y, z = v:Dot(f.right), v.Y, v:Dot(f.normal)
+			if z > -r and z < 6 + r and math.abs(x) < f.hw + 0.5 + r and math.abs(y) < f.hh + 0.5 + d.Size.Y / 2 then
+				local side = if x >= 0 then 1 else -1
+				d.CFrame += f.right * side * (f.hw + 0.5 + r + 0.1 - math.abs(x))
+			end
+		end
+	end
+end
+
 function Builder.Build()
 	local old = workspace:FindFirstChild("Galaxy")
 	if old then old:Destroy() end
@@ -577,7 +613,7 @@ function Builder.Build()
 	for _ = 1, 7 do
 		local at = N + Vector3.new(rnd:NextNumber(-20, 20), 0, rnd:NextNumber(-20, 20))
 		local h = rnd:NextNumber(NS.Crystals[1], NS.Crystals[2])
-		Kit.Make("Crystal", { Fit = { "Y", h }, CFrame = CFrame.new(at + UP * (h / 2 - 0.3)) * CFrame.Angles(rnd:NextNumber(-0.25, 0.25), rnd:NextNumber(0, 6), rnd:NextNumber(-0.25, 0.25)),
+		Kit.Make("Crystal", { Name = "Crystal", Fit = { "Y", h }, CFrame = CFrame.new(at + UP * (h / 2 - 0.3)) * CFrame.Angles(rnd:NextNumber(-0.25, 0.25), rnd:NextNumber(0, 6), rnd:NextNumber(-0.25, 0.25)),
 			Color = C.Ice, Reflectance = 0.2, Parent = nextS })
 	end
 	Kit.Make("Padlock", { Name = "Padlock", Fit = { "Y", NS.Padlock }, CFrame = CFrame.new(N + UP * 14), Color = C.Lock, Reflectance = 0.1, Parent = nextS })
@@ -634,6 +670,7 @@ function Builder.Build()
 	local count = 0
 	for _, d in ipairs(root:GetDescendants()) do if d:IsA("BasePart") then count += 1 end end
 	root:SetAttribute("Parts", count)
+	Builder.ClearDecor(root)
 	return root
 end
 
