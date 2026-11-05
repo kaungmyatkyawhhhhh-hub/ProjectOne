@@ -31,7 +31,7 @@ In Studio only. **Not published.** No receipts or ProcessReceipt code changed. C
 | Price | 250-1,200 coins | x1 25 R$, x5 99 R$ (shown from Roblox's real price; tag "SAVE n R$" = 5 x x1 - x5) |
 - Both count on every rep, **Auto Rep too**. Using one again adds 30 min (max 60).
 - Mass Gainer, Elite Pre-Workout, Whey Isolate, BCAA are **off the shelf**. Owned ones still work exactly as before; their 8 products stay in Config so an old / pending receipt still gives exactly what was bought.
-- Config: `Config/Boosts` GainsSupp / StaminaSupp (art: Whey and BCAA tubs for now), `Config/Monetization` `Supp_GainsSupp_1/_5`, `Supp_StaminaSupp_1/_5` (**id = nil: the 4 products don't exist yet, the shop shows SOON**), `Config/PumpShop` (Pump shelf + a "Boosts" shop opened from anywhere).
+- Config: `Config/Boosts` GainsSupp / StaminaSupp (art: Whey and BCAA tubs for now), `Config/Monetization` `Supp_GainsSupp_1/_5`, `Supp_StaminaSupp_1/_5` (product ids below), `Config/PumpShop` (Pump shelf + a "Boosts" shop opened from anywhere).
 - **HUD boost slot:** a gold "+" BOOST tile at the end of the bottom-left boost row while neither runs (shop open for you, products exist). Tap = the same shop window (Pump Shop kit) with GAINS + STAMINA.
 - **Moments of need ("See boost", max once per 5 min over all, never in the tutorial, never while that one runs or the shop is open):**
   - stamina runs out: the existing "Out of stamina!" card gets a 3rd button SEE BOOST (STAMINA);
@@ -54,7 +54,7 @@ In Studio only. **Not published.** No receipts or ProcessReceipt code changed. C
 (03 = the card-under-window bug, before the fix.)
 
 ## Before publishing (open)
-- **4 developer products** on the Creator Hub: Gains Supplement 25, Gains Supplement x5 99, Stamina Supplement 25, Stamina Supplement x5 99. Then their ids go into `Config/Monetization`. Without them GAINS / STAMINA show SOON and the "+" slot / See boost cards stay hidden.
+- **Products created (5 Nov, Creator Hub, owner OK):** Gains Supplement 3728450584 (25), Gains Supplement x5 3728450635 (99), Stamina Supplement 3728450686 (25), Stamina Supplement x5 3728450731 (99); Whey / BCAA tub icons, managed pricing on like the other products (so some regions pay less: the owner's account sees 23 / 90, the x5 tag follows the player's real prices). Ids are in `Config/Monetization`.
 - **Private server test can't come before the publish** (a private server runs the published version). Plan: publish, join a private server right away, check Coach Dex (PC + phone), DNA Lab, supplements buy + apply, tint refund on the owner's save; roll back in version history if anything fails (safe: no save version bump).
 - The owner's note "tints are back for owners" in the test list clashes with point 1 (removed for good). Built as point 1.
 - Not done: 2-player server, real phone.
