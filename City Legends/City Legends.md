@@ -5,6 +5,40 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
+## Tonight's run: start here (written 2026-11-06)
+**Done, step by step:**
+1. **Cars:** the 6 new cars are in the game, with live clusters and dark cabins. Sharp carbon on 14 cars. Leather and Alcantara not done: those cabins are one picture.
+2. **Smooth:** at speed, frames over 33 ms went from 86 to 44 on Coast Road and from 55 to 3 on the Corniche Highway. Graphics levels now change shadows and grass. Phones start on Medium.
+3. **Videos:** watched all 6 and compared them with the game. See `Video vs game - day, night, chase.jpg`. No big change came from it (see below).
+4. **Time and morning:** a day is now 14 minutes (was 24). Cold misty morning, clearer by midday, gold sunset, navy dusk, warm night.
+5. **Buildings:** new overlap checker. 104 overlaps down to 1 (0.1 studs). 257 buildings moved, 1 removed.
+6. **Gates:** Low, Mid and High remodelled. The gate now swings smoothly on each player's screen.
+7. **Curves, part done:** all 188 lanes checked: 0 holes, 0 kerbs in a lane, 0 ledges over 0.4 studs. The 163 speed bumps stay. Red-and-white kerbs on 24 sharp bends (313 pieces). **Not done:** no bend was reshaped, and there are no before / after shots of the worst 10.
+8. **Bug hunt, part done:** see the list below.
+
+**Next: step 7.2:** reshape the bad bends. Worst seen: the 4-lane road's end at the West Switchbacks (x 11128, z -108) and the bend at x 11000, z 470: no kerbs and blocky edges. Then finish step 8 (police, races, deliveries, Customs).
+
+**What the owner needs to do:**
+1. Play one lap and say if the morning mist is too much or too little.
+2. Decide on the 4 non-commercial car models (LP650-4 Roadster, Urus Performante, California, 458 Speciale): they can't stay in a game that earns money unless the licence allows it.
+3. Check on a real phone. Phone size and 2 players were not tested tonight.
+4. Publish when happy. Nothing was published. Team Create saves the place by itself.
+
+**Choices and how to undo them:**
+| Choice | Undo |
+|---|---|
+| Streaming radius 640, Opportunistic | Workspace properties (1024, Default) |
+| Road shadows off, rail posts no collision | a loop in Studio |
+| Day 14 minutes, new light | `Config.DayCycle.CycleMinutes`; keys in `DayCycle.lua` |
+| Buildings moved | `Unoverlap.undo()` (`OldPivot`) |
+| Trimmed parts, removed building | `ServerStorage.TrimmedParts_2026-11-06`, `RemovedBuildings_2026-11-06` |
+| Red-and-white kerbs | `BendKerbs.undo(roads)` (`OldKerbColor`) |
+| 350Z badge removed | `ServerStorage.RemovedBadges_2026-11-06` |
+| Sound `videoplayback` moved out of Workspace | `ServerStorage.MovedFromWorkspace_2026-11-06` |
+| Low houses keep an open drive | ask for a small gate |
+
+**FPS (Studio, PC):** Coast Road 31 -> 56. Corniche Highway 65 -> 87. The Harbour parked 64 -> 87. Legends Rewards 57 -> 83. Grand Hairpin 134 (no "before": it wasn't measured). Phone: not measured.
+
 ## Overnight run, 2026-11-06 (`Prompts/02 Overnight run (cars, smoothness, roads, buildings, gates, morning fog).md`)
 **Choices made overnight** (each easy to undo):
 - **Streaming:** `Workspace.StreamingTargetRadius` 1024 -> 640, `StreamOutBehavior` Opportunistic. Why: the stutter at speed was the map streaming in, not scripts. Undo: set them back in Workspace's properties.
@@ -51,6 +85,31 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - **Bugs found on the way:** (1) a lot's ramp was measured off a house already standing there (Studio's own player joins first): it read the gate as the ground and built a 10-stud hump. `EntranceRamp` opt `ignore`. (2) A lamp streamed in by day stayed lit: `WorldFx` now sets it on arrival. (3) The Toolbox farmhouse carried 120 ceiling spots and its front burned white at night: one in three stays, at 60%.
 - **Tested in Play on a test save:** High: closed, opens in 3 s, a car drives through, night. Mid: open, night. Low: day. Not done: 2 players, a guest at the gate, phone size.
 - Picture: `House gates - remodel.jpg`.
+
+**Step 3: the videos (done):**
+- `Cars FOV and Driving physcis.mp4`: the 2026-10-29 camera prompt already covers it (lag, lean, breathing, sway, low camera, wind blur). Measured the car against the camera: no jitter. No change.
+- `smooth cars and enviroments.mp4` (new, 6 minutes, a Roblox race on a Tokyo highway): the camera sits higher, the horizon at about 30% of the screen (ours 45% on the near camera; the far Chase camera, Shift + V, is close to it). The owner tuned the near camera, so it stays. Its road shine is a wet look: left out ("wet-looking roads only if it rained"). The red tail-light glow on the road is already in the game.
+- `mornign.mp4`, `videoplayback (1).mp4`: the map already follows them (2026-11-01 to 11-03). This run's change is the light: step 4 and the brighter night, closer to the video's navy dusk with readable buildings. The owner's cold morning replaces the video's hard sun on purpose.
+- `cars.mp4`: supercars and crowds at the casino at night. Nothing added: no parked cars at the casino (owner's rule), and a crowd would be a new feature.
+- `Houses.mp4` is a Roblox house tour, used as a look for the plots. The gates came from the prompt.
+- Picture: `Video vs game - day, night, chase.jpg`.
+
+**Step 7: curves (part done):**
+- **Lane check, all 188 lanes (368,389 points), ledge limit 0.4:** before: 4 holes, 8 ledges (up to 0.76). After: 0 holes, 0 ledges, 0 edges. 163 "blocks" are the speed bumps, kept. Fixed with `Reshape` (smoothing round each ledge), `HoleFill` and small patches under needle gaps.
+- **New tool `tools/riviera/BendKerbs.luau`:** red-and-white kerbs from the kerbs' own curve: radius under 75, at least 6 pieces, at least 50 degrees. 24 runs, 313 pieces. Junction corners are left out.
+- **Guard rails:** no red-and-white bend has a drop over 4 studs without a wall or rail.
+- **Not done:** the shape of the bends. The road's centre line has 24 spots under radius 25 studs, but most look fine from above; those numbers are junctions. The bad ones are road ends with no kerbs. Rebuilding with `Roads.build` would bring back the hand fixes' faults (see the road notes), so it needs a new tool for edges and kerbs at a spot, or the owner's OK for curved meshes (Import 3D).
+
+**Step 8: bug list, worst first:**
+1. **Fixed:** the starter 350Z showed its real maker's badge and "350Z" on the boot (no-logo rule): that piece is gone. Other old Toolbox cars may carry the same: not all checked.
+2. **Fixed:** new player: CLAIM CAR went gold on gold (unreadable when it pulsed), and "CLAIM THE ..." was pale on gold.
+3. **Fixed (step 6):** lot ramp hump, lamps lit by day, 120 house lights.
+4. **Fixed:** `graph_test`, `chauffeur_test` and `luxe_test` crashed in Lune (`workspace` in `WestLayout.rivieraSite`): one line. They still crash further on, at other `workspace` reads in `Config` and `ChauffeurRoute`: **not fixed**, and it isn't from tonight. `carlevels_test`: the top 2 Revuelto trims are class X, test updated. Unused `SHOES` removed.
+5. **Open:** `market_test` failed once in six runs (random offers): a flaky test, not looked at.
+6. **Open:** "Asset is not approved" in the Output: textures on `ferrara_california` `Body_CabinTile` (`121793854339768`), `lexis_lfa`, `bugotti_veyron` brakes, `rolls_wraith`, and a decal on HelipadVilla. The first came from tonight's job: the cabin tile may be waiting for moderation. Check it again.
+7. **Open:** one more "Failed to load sound" after the `videoplayback` move: not traced.
+8. **Checked, no errors:** new player start, claim, first spawn at the casino, the menu, every fast travel spot has ground under it, the state calls of Goals, Rewards, Customs, Market, Activities, Chauffeur, CarCall.
+9. **Not tested:** police chase, a full race, a delivery, a Customs purchase, a dealer purchase, saves on a real server, phone size, 2 players. The MCP can't click, and drives one client.
 
 ## Features so far
 - **City:** a big night city with traffic that stops at red lights, and a tunnel intro cutscene ("CITY LEGENDS").

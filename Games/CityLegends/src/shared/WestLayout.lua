@@ -52,7 +52,7 @@ end
 function WestLayout.rivieraSite(name: string): CFrame?
 	local rv = Config.RivieraVenues
 	local s = rv and rv.On and rv.Sites[name]
-	if not s or not workspace:FindFirstChild("Riviera") then
+	if not s or not (workspace and workspace:FindFirstChild("Riviera")) then -- (Lune has no workspace)
 		return nil
 	end
 	local c = Vector3.new(s.x, s.y, s.z)

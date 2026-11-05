@@ -55,7 +55,6 @@ local TROUSERS = {
 	Color3.fromRGB(44, 62, 96), Color3.fromRGB(26, 26, 30), Color3.fromRGB(150, 132, 100),
 	Color3.fromRGB(80, 82, 88), Color3.fromRGB(220, 216, 206), Color3.fromRGB(56, 50, 44),
 }
-local SHOES = { Color3.fromRGB(236, 236, 236), Color3.fromRGB(20, 20, 22), Color3.fromRGB(90, 60, 40) }
 
 ---------------------------------------------------------------------
 -- Figures

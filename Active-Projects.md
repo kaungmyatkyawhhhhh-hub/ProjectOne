@@ -74,6 +74,7 @@ Sells digital products (game top-ups, Roblox gift cards, later a CV pack) to Mya
 - **Details:** [[MM Shop Bot/00 MM Shop Bot Home]] (all notes go in the `MM Shop Bot` folder)
 - **Code:** `Desktop\mmshop_bot\mmshop` on the PC (Claude edits in place).
 - **5 Nov:** bot built + tested (stock delivery, slip check, Approve/Reject, Reloadly auto-buy). Owner to do: fill `.env`, run `run.bat`, make M Game Coin + Reloadly accounts.
+- **6 Nov (Claude Code, in Studio, not published):** overnight run: steps 1-6 done, 7 and 8 part done. Smoother driving, 14 minute day with a cold misty morning, building overlap checker, gates remodelled, all lanes clean, red-and-white kerbs. Next: step 7.2 (reshape the bad bends). Summary at the top of `City Legends/City Legends.md`.
 - **Last updated:** 2026-11-05
 
 ## Archived (not worked on, nothing deleted)

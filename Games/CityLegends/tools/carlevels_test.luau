@@ -58,7 +58,7 @@ for _, spec in Cars.List do
 	end
 end
 table.sort(xCars)
-check(#xCars == 3 and table.concat(xCars, ",") == "bugotti_chiron,bugotti_chiron_pursport,bugotti_chiron_supersport", "only the three Chirouns are class X (" .. table.concat(xCars, ",") .. ")")
+check(#xCars == 5 and table.concat(xCars, ",") == "bugotti_chiron,bugotti_chiron_pursport,bugotti_chiron_supersport,lambrini_revuelto_sport,lambrini_revuelto_top", "only the Chirouns and the top two Revuelto trims are class X (" .. table.concat(xCars, ",") .. ")")
 check(rCars.bugotti_veyron and rCars.bugotti_veyron_sport and rCars.bugotti_veyron_top, "the Veyruns are class R")
 check(rCars.lambrini_svj, "the SVJ is class R")
 check(CarStats.classOf("bnw_m5_f90") == "A", "the M5 F90 is class A")

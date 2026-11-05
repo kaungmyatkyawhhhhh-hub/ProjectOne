@@ -24,6 +24,8 @@
 	    windows behind (problem 10: thick white slabs over dark blue bands)
 	Kinds: "BelleEpoque", "Apartment" (1970s-80s), "Modern" (white 2000s blocks with glass railings).
 
+	After a build run tools/riviera/Unoverlap.luau: this tool leaves some walls inside their neighbours (2026-11-06).
+
 	Each building: a "Body" (the dark core: WorldFx's LOD looks for it), the skin and big parts in the
 	model, small detail (sills, shutters, rails, awnings, signs, roof clutter) in "Detail" (tag LOD,
 	hidden far away). Attributes for tools/riviera/FarCity.luau: Shell (CFrame), ShellSize, Wall

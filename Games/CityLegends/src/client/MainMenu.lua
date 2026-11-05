@@ -418,7 +418,7 @@ local function buildTopBar()
 		local fill = new("Frame", { Name = "Fill", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = topLeft })
 		if not claimed() then
 			-- a new player: CLAIM CAR (gold = claim), pulsing
-			local b = button("CLAIM CAR", GOLD, { Position = UDim2.fromOffset(22, 16), Size = UDim2.new(1, -40, 0, 50), TextSize = 26, Parent = fill })
+			local b = button("CLAIM CAR", MINT, { Position = UDim2.fromOffset(22, 16), Size = UDim2.new(1, -40, 0, 50), TextSize = 26, Parent = fill })
 			text({ Text = "Pick your first car: it's free", TextColor3 = SUB, TextSize = 15, FontFace = MEDIUM, Position = UDim2.fromOffset(24, 72), Size = UDim2.new(1, -40, 0, 20), Parent = fill })
 			b.Activated:Connect(function()
 				selectSound()
@@ -426,9 +426,9 @@ local function buildTopBar()
 			end)
 			task.spawn(function()
 				while b.Parent do
-					tween(b, 0.6, { BackgroundColor3 = Color3.fromRGB(255, 220, 140) }, Enum.EasingStyle.Sine)
+					tween(b, 0.6, { BackgroundColor3 = Color3.fromRGB(255, 226, 176) }, Enum.EasingStyle.Sine)
 					task.wait(0.6)
-					tween(b, 0.6, { BackgroundColor3 = GOLD }, Enum.EasingStyle.Sine)
+					tween(b, 0.6, { BackgroundColor3 = Color3.new(1, 1, 1) }, Enum.EasingStyle.Sine)
 					task.wait(0.6)
 				end
 			end)
@@ -1465,6 +1465,7 @@ openClaim = function()
 			end
 			confirm.Text = "CLAIM THE " .. string.upper(spec.Name)
 			confirm.BackgroundColor3 = MINT
+			confirm.TextColor3 = NAVY0 -- (it was pale on gold)
 		end, MINT)
 	end
 	confirm = button("PICK A CAR ABOVE", GREY, { Position = UDim2.fromOffset(0, 348), Size = UDim2.new(1, 0, 0, 56), TextSize = 24, Parent = page })
