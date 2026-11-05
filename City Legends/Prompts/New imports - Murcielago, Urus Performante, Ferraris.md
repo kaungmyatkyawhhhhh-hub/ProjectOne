@@ -55,6 +55,12 @@ The same routine and rules as the Lamborghini job:
 - doors: scissor doors on the Murcielagos if separate, normal doors on the others; if not separate, say so;
 - sound: leave it.
 
+### Realistic inside and out, no grey parts (owner, 2026-11-05)
+- **No grey / white / untextured parts anywhere**, inside or outside: every part gets its real material and colour (paint, carbon, black plastic trim, chrome, rubber, glass, lights, leather, Alcantara, metal pedals, carpet). Check every part in the parts list and in close-up renders from all angles (wheel arches, under the bumpers, engine cover, door shuts, seats, dash, roof lining, boot). Use `CABIN_RECOLOUR` / textures from the real car's photos for anything that came in grey.
+- **Exterior realistic:** glossy clear-coat paint (PBR), dark tinted glass you can still see the cabin through, real-looking light lenses (headlights, LEDs, tail lights), proper tyres with sidewalls, rims with depth, brake discs and calipers, carbon parts that look like carbon, no stretched or blurry textures.
+- **Interior realistic:** dark realistic cabin in the car's real colours, leather with stitching, Alcantara, carbon trim, metal accents, no shiny plastic look, the cluster and screens glowing softly at night, nothing see-through or missing.
+- Show the owner close-ups of each car's interior and exterior before packing.
+
 ## Step 4: put them in the game
 - A replacement keeps the same id, name, price, level and class, so owners keep their car. New cars join their series in the right order. Remove an old model only after the new one is in and checked.
 - Pack them for Import 3D in `imports/new_cars/` and tell the owner when to import. After the import, check each one in Play.
