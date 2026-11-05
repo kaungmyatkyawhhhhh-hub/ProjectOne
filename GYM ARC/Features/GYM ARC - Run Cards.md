@@ -7,7 +7,9 @@ status: built and tested in Studio, locked until the GEM update (7 Nov)
 
 Back to [[GYM ARC - Features index|Features index]]. Prompt 105. Part of the GEM update ([[2026-11-01 GYM ARC GEM update launch event (7 Nov)]]).
 
-Every Body Alter gives a **card pick**: keep 1 of 3 cards. Cards stack for this run. Entering the Hall of Fame clears them, and you keep 1 as a **legacy card** forever.
+**v2 (5 Nov, Studio):** every ODD Body Alter gives a **card pick**: keep 1 of 3. COMMON = the stat cards below (values unchanged); RARE / LEGENDARY = 15 TALENTS (new things to do; Legendaries need a prerequisite). Odds 65 / 28 / 7. Every card only once per run (held = this run + active legacy). Old % Rare / Epic / Legendary cards keep working as CLASSIC. All talents together: at most +60% EXP over 10 min (TALENT POWER, visible). Details: [[2026-11-05 GYM ARC Run Cards v2 talents built]].
+
+(Before v2:) Every Body Alter gave a **card pick**: keep 1 of 3 cards. Cards stacked for the run. Entering the Hall of Fame clears them, and you keep 1 as a **legacy card** forever.
 
 ## How it works
 - **Pick:** 3 cards per pick, each card's rarity rolled on its own: Common 60%, Rare 28%, Epic 10%, Legendary 2%. You get one free reroll per pick.
