@@ -15,6 +15,8 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
   6. write what you did in `City Legends/City Legends.md`, with before / after screenshots.
 - **Backups** before every big change (copies in `ServerStorage`, named with the date).
 - **If the usage limit hits:** finish the current change cleanly, save, push, and write **"Next: step N.M"** at the top of the overnight notes, so the next session continues exactly there.
+- **You have all permission** (owner, 2026-11-05): do every step without waiting for approval. The owner can't reply tonight, so don't stop to ask; decide, note it, continue.
+- **Take anything you want from the Toolbox / Creator Store** (buildings, gates, props, trees, interiors, materials, skies...): insert it in Studio into a holding folder in `ServerStorage`, **remove every script** (Script, LocalScript, ModuleScript, and check for hidden ones and fake "copy this command" popups), remove logos / brand names / real-brand cars, then use it. Keep a credit list (name, ID, creator) in the notes.
 - **Never** save over `CityLegendsCars.rbxl`, never `rojo build` over the place, never auto-load Toolbox models from scripts, never touch the owner's passwords.
 
 ## Step 1: the new cars
@@ -24,6 +26,16 @@ Do **`City Legends/Prompts/New imports - Murcielago, Urus Performante, Ferraris.
   2. recreate the cluster **1:1** from it (layout, numbers, needles or bars, colours, fonts, warning lights, glow, sharp, no logos) and make it live;
   3. if no good photo can be found, use the best cluster in the same family; if there's none, keep the model's own and **list the car** at the top of the overnight notes as "needs the owner's cluster photo", with the close-up render.
 - Licence warnings (NC models) go in the overnight notes for the owner.
+- **Better interior materials, only on the newly imported models** (the cars from this job and the Lamborghini / Bugatti / SVJ jobs; leave older models alone): make the cabin materials look premium and real:
+  - **carbon fibre:** a sharp woven carbon texture at the right scale (twill weave, about 2–3 mm squares), glossy clear coat on top (low roughness), a subtle normal map so the weave catches light; forged carbon where the real car has it;
+  - **leather:** fine grain normal map, slight sheen (roughness about 0.5–0.6), visible stitching lines in a contrast colour where the real car has them, perforated sections on seats if real;
+  - **Alcantara / suede:** soft, matte (roughness about 0.9), a fine fuzzy texture, no shine;
+  - **metal:** brushed aluminium with directional grain, chrome only where real;
+  - **plastics:** soft-touch matte, not shiny; piano black only where real;
+  - **carpet** and **roof lining:** soft fabric textures.
+  - Use `SurfaceAppearance` (colour, normal, roughness, metalness), textures 512–1024 px, shared between cars (one carbon, one leather, one Alcantara set, tinted per car).
+  - Close-up renders / screenshots of each cabin before and after.
+
 - Pack the cars for Import 3D in `imports/new_cars/`. **Studio can't import FBX without the owner**, so if you can't import them, leave the packs ready and write the exact steps for the owner at the top of the notes ("Import 3D these files, then tell Claude 'cars imported'"). Then go on to Step 2.
 
 ## Step 2: make the whole game super smooth (performance and feel)
