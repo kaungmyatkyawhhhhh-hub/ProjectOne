@@ -27,6 +27,7 @@ export type Opts = {
 	edge: Color3?, -- the granite edging
 	reach: number?, -- how far out to look for the road (default 40)
 	keep: { Instance }?, -- never hidden (the venue itself)
+	ignore: { Instance }?, -- never measured (a house already standing on the lot: its gate read as the ground)
 }
 
 local GRANITE = Color3.fromRGB(176, 172, 164)
@@ -96,6 +97,9 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 		if pl.Character then
 			table.insert(skip, pl.Character)
 		end
+	end
+	for _, i in o.ignore or {} do
+		table.insert(skip, i)
 	end
 	params.FilterDescendantsInstances = skip
 

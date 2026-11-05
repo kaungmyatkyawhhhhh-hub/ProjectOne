@@ -875,7 +875,21 @@ local function moveGate(rec: Rec, open: boolean)
 				end
 			end
 			part.CanCollide = not open
-			TweenService:Create(part, TweenInfo.new(GATE_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { CFrame = if open then g.open else g.closed }):Play()
+			-- (overnight step 6) each client swings it round its real hinge, every frame (a tween from
+			-- here reached players in steps); the server puts it at the end when the time is up
+			part:SetAttribute("GateClosed", g.closed)
+			part:SetAttribute("GateOpened", g.open)
+			if g.hinge then
+				part:SetAttribute("GateHinge", g.hinge)
+				part:SetAttribute("GateAngle", g.angle)
+			end
+			part:AddTag("HouseGate")
+			part:SetAttribute("GateGoal", open)
+			task.delay(GATE_TIME + 0.1, function()
+				if rec.gateOpen == open and part.Parent then
+					part.CFrame = if open then g.open else g.closed
+				end
+			end)
 		end
 	end
 	-- a motor hum while they move
@@ -897,6 +911,17 @@ local function moveGate(rec: Rec, open: boolean)
 		snd:Play()
 		task.delay(GATE_TIME, function()
 			snd:Stop()
+			-- the latch at the end of the run
+			if first.Parent then
+				local c = Instance.new("Sound")
+				c.SoundId = "rbxasset://sounds/action_jump_land.mp3"
+				c.PlaybackSpeed = 0.55
+				c.Volume = 0.6
+				c.RollOffMaxDistance = 90
+				c.Parent = first
+				c:Play()
+				game:GetService("Debris"):AddItem(c, 2)
+			end
 		end)
 	end
 end
@@ -958,7 +983,7 @@ end
 
 local function build(rec: Rec, player: Player, id: string)
 	local d = H.ById[id]
-	local model, info = HouseBuilder.build(d, rec.lot.frame, rec.lot.width, rec.lot.depth, { interior = true })
+	local model, info = HouseBuilder.build(d, rec.lot.frame, rec.lot.width, rec.lot.depth, { interior = true, number = rec.lot.number })
 	model.Name = "House_" .. rec.lot.id
 	model:SetAttribute("Plot", rec.lot.id)
 	model:SetAttribute("Design", id)
@@ -1596,7 +1621,7 @@ function Houses.init(c: any)
 			for _, rec in order do
 				local lot = rec.lot
 				local w = if lot.tier == 0 then lot.width - 8 else 24
-				pcall(EntranceRamp.build, signFolder, lot.frame * CFrame.new(0, 0, -lot.depth / 2), { width = w, keep = { signFolder } })
+				pcall(EntranceRamp.build, signFolder, lot.frame * CFrame.new(0, 0, -lot.depth / 2), { width = w, keep = { signFolder }, ignore = { houseFolder } })
 				task.wait()
 			end
 		end)

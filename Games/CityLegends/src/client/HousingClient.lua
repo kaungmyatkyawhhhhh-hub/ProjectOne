@@ -792,7 +792,68 @@ local function word(p: Instance)
 	p.ActionText = if has then "Claim this lot" else "See " .. TIER_NAME[tier :: number] .. " houses"
 end
 
+-- the house gates (overnight step 6): the server says which way (attribute GateGoal), each client
+-- moves the leaf every frame: round its hinge if it has one, along the wall if it slides
+local GATE_TIME = 3
+local gateAt: { [BasePart]: number } = {} -- how far open, 0..1
+local gateRun: { [BasePart]: number } = {}
+local function moveGate(part: BasePart)
+	local closed, opened = part:GetAttribute("GateClosed"), part:GetAttribute("GateOpened")
+	local goal = part:GetAttribute("GateGoal")
+	if typeof(closed) ~= "CFrame" or typeof(opened) ~= "CFrame" or type(goal) ~= "boolean" then
+		return
+	end
+	local hinge, angle = part:GetAttribute("GateHinge"), part:GetAttribute("GateAngle")
+	local run = (gateRun[part] or 0) + 1
+	gateRun[part] = run
+	local from = gateAt[part] or (if goal then 0 else 1)
+	local to = if goal then 1 else 0
+	local time = math.max(0.05, GATE_TIME * math.abs(to - from))
+	local t0 = os.clock()
+	local conn: RBXScriptConnection
+	conn = RunService.RenderStepped:Connect(function()
+		if gateRun[part] ~= run or not part.Parent then
+			conn:Disconnect()
+			return
+		end
+		local a = math.clamp((os.clock() - t0) / time, 0, 1)
+		local k = from + (to - from) * (a * a * (3 - 2 * a))
+		gateAt[part] = k
+		if typeof(hinge) == "CFrame" and type(angle) == "number" then
+			part.CFrame = hinge * CFrame.Angles(0, angle * k, 0) * hinge:ToObjectSpace(closed)
+		else
+			part.CFrame = closed:Lerp(opened, k)
+		end
+		if a >= 1 then
+			conn:Disconnect()
+		end
+	end)
+end
+local function watchGate(part: Instance)
+	if part:IsA("BasePart") then
+		gateAt[part] = if part:GetAttribute("GateGoal") == true then 1 else 0
+		part:GetAttributeChangedSignal("GateGoal"):Connect(function()
+			moveGate(part)
+		end)
+		part.Destroying:Connect(function()
+			gateAt[part] = nil
+			gateRun[part] = nil
+		end)
+	end
+end
+
 function HousingClient.init()
+	for _, g in CollectionService:GetTagged("HouseGate") do
+		watchGate(g)
+	end
+	CollectionService:GetInstanceAddedSignal("HouseGate"):Connect(function(g)
+		watchGate(g)
+		-- (the tag and the first order arrive together)
+		if g:IsA("BasePart") and g:GetAttribute("GateGoal") == true then
+			gateAt[g] = 0
+			moveGate(g)
+		end
+	end)
 	for _, lot in IsleLayout.lots() do
 		lotsById[lot.id] = lot
 	end

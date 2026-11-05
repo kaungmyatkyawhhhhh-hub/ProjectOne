@@ -33,6 +33,25 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - **Blue bars at night:** the "TV glow" window colour landed on whole balcony bands, which read as blue neon. Now only on small windows (`WorldFx.setWindow`).
 - Pictures: `Day cycle - cold morning, sunset, night.jpg`, `Day cycle - mist on the mountain.jpg`.
 
+**Step 5: buildings (done):**
+- The flashing fix was done on 2026-11-03 (see "Step 1.1"); nothing new was found with the shots from the street and from above.
+- **New tool `tools/riviera/Unoverlap.luau`:** `check` (the checker), `run` (moves), `trim`, `undo`. Run it after any `Buildings.build`.
+- **Before:** 104 pairs of buildings sunk into each other (worst 2.3 studs), 73 on a pavement or kerb, 8,512 parts in a neighbour's wall. No double buildings, none on a road, none on a lot or venue.
+- **After:** 1 pair (0.1 studs, between two pavements), 0 parts in a neighbour. 257 buildings moved, nearly all under 2 studs, 2 of them 5-9 studs; the far stand-ins moved with them. Undo: `OldPivot` attribute on each moved model, `Unoverlap.undo()`.
+- **Trimmed:** 26 balcony and trim pieces that stood in a neighbour's wall: `ServerStorage.TrimmedParts_2026-11-06`. **Removed:** 1 building at x 14092, z 256, behind the row (no room): `ServerStorage.RemovedBuildings_2026-11-06`, with its stand-in.
+- **Left as they are:** 8 buildings stand up to 1.6 studs on the back edge of a pavement. They sit on plots between two roads with no room to move; at least 8 of the 10 studs of pavement stay free, nothing to see.
+
+**Step 6: gates (done, `HouseBuilder.fenceAndGate`):**
+- **High:** banded stone piers with a plinth and an iron lantern, two wrought-iron leaves with a curved top, gilt spear tips, dog bars and a lozenge band.
+- **Mid:** rendered piers with a stone cap and lantern, one steel slat leaf on a ground track.
+- **Low:** open drive kept (the owner's earlier choice: "a small gate or an open drive"), now two rendered posts with a lantern and the number.
+- **All:** the house number on a brass plate. Mid and High: a call post (screen, button, camera, number), the house name on a brass plate with a light over it (the old plate's words faced the wall), a small iron arch over the walk-in gap. Lamps follow the night (tags `LampGlow`, `DayOff`).
+- **Smooth opening:** each client moves the leaf every frame, round its real hinge (`HousingClient`, attribute `GateGoal`); the server only sets the end. It was a server tween, which reached players in steps and swung round the leaf's middle. A latch sound at the end. Who it opens for is untouched.
+- **Summit gate:** not built on the Monaco map (`Gate.lua` stops at `Config.monacoOnly()`), so nothing to remodel.
+- **Bugs found on the way:** (1) a lot's ramp was measured off a house already standing there (Studio's own player joins first): it read the gate as the ground and built a 10-stud hump. `EntranceRamp` opt `ignore`. (2) A lamp streamed in by day stayed lit: `WorldFx` now sets it on arrival. (3) The Toolbox farmhouse carried 120 ceiling spots and its front burned white at night: one in three stays, at 60%.
+- **Tested in Play on a test save:** High: closed, opens in 3 s, a car drives through, night. Mid: open, night. Low: day. Not done: 2 players, a guest at the gate, phone size.
+- Picture: `House gates - remodel.jpg`.
+
 ## Features so far
 - **City:** a big night city with traffic that stops at red lights, and a tunnel intro cutscene ("CITY LEGENDS").
 - **Driving and money:** you earn money by driving and by cutting up traffic, with combos. You buy cars in the garage.

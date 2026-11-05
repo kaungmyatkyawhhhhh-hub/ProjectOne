@@ -86,6 +86,8 @@ local WATER = Color3.fromRGB(40, 170, 215)
 local DARK = Color3.fromRGB(32, 32, 36)
 local HEDGE = Color3.fromRGB(46, 92, 46)
 local IRON = Color3.fromRGB(28, 29, 32)
+local GILT = Color3.fromRGB(190, 156, 92)
+local BRONZE = Color3.fromRGB(52, 48, 44)
 local STONE = Color3.fromRGB(176, 168, 152)
 local SOFA = Color3.fromRGB(96, 98, 104)
 local OAK = Color3.fromRGB(150, 112, 76)
@@ -95,7 +97,7 @@ local LINEN = Color3.fromRGB(238, 234, 226)
 local STEEL = Color3.fromRGB(196, 198, 202)
 local CURTAIN = Color3.fromRGB(214, 204, 186)
 
-export type Gate = { part: BasePart, closed: CFrame, open: CFrame }
+export type Gate = { part: BasePart, closed: CFrame, open: CFrame, hinge: CFrame?, angle: number? }
 export type Info = {
 	bays: { CFrame },
 	drive: { CFrame },
@@ -707,34 +709,95 @@ local function picket(mk: any, lot: CFrame, x0: number, x1: number, z: number)
 	end
 end
 
--- a pillar by a gate, with a lamp on Mid and a lantern on High
-local function pillar(mk: any, at: CFrame, tier: number, look: any)
-	if tier == 1 then
-		mk(Vector3.new(2.4, 6, 2.4), at * CFrame.new(0, 3.4, 0), look.wall, Enum.Material.Plaster, { name = "GatePillar" })
-		local lamp = mk(Vector3.new(1.2, 1.2, 1.2), at * CFrame.new(0, 7, 0), WARM, Enum.Material.Neon, { collide = false, shadow = false, name = "PillarLamp" })
-		local l = Instance.new("PointLight")
-		l.Color = WARM
-		l.Range = 16
-		l.Brightness = 1
-		l.Parent = lamp
+-- a lamp that lights at dusk: its head glows by night only, and so does its light (WorldFx)
+local function nightLamp(mk: any, size: Vector3, cf: CFrame, range: number, brightness: number, ghost: boolean): BasePart
+	local lamp = mk(size, cf, WARM, Enum.Material.Neon, { collide = false, shadow = false, name = "PillarLamp" })
+	local l = Instance.new("PointLight")
+	l.Color = WARM
+	l.Range = range
+	l.Brightness = brightness
+	l.Parent = lamp
+	if not ghost then
+		lamp:AddTag("LampGlow")
+		l:AddTag("LODLight")
+		l:AddTag("DayOff")
+	end
+	return lamp
+end
+
+-- a small iron and glass lantern standing on `at`
+local function lantern(mk: any, at: CFrame, s: number, range: number, brightness: number, ghost: boolean)
+	local M = Enum.Material.Metal
+	mk(Vector3.new(1.4, 0.2, 1.4) * s, at * CFrame.new(0, 0.1 * s, 0), IRON, M, { collide = false })
+	nightLamp(mk, Vector3.new(0.9, 1.5, 0.9) * s, at * CFrame.new(0, 0.95 * s, 0), range, brightness, ghost)
+	for _, x in { -1, 1 } do
+		for _, z in { -1, 1 } do
+			mk(Vector3.new(0.12, 1.6, 0.12) * s, at * CFrame.new(x * 0.52 * s, 0.95 * s, z * 0.52 * s), IRON, M, { collide = false, shadow = false })
+		end
+	end
+	mk(Vector3.new(1.5, 0.16, 1.5) * s, at * CFrame.new(0, 1.8 * s, 0), IRON, M, { collide = false })
+	mk(Vector3.new(0.9, 0.22, 0.9) * s, at * CFrame.new(0, 1.97 * s, 0), IRON, M, { collide = false })
+	mk(Vector3.new(0.3, 0.3, 0.3) * s, at * CFrame.new(0, 2.2 * s, 0), GILT, M, { collide = false, shadow = false, shape = Enum.PartType.Ball })
+end
+
+-- a thin plate with words on its street side
+local function signPlate(mk: any, size: Vector3, cf: CFrame, color: Color3, material: Enum.Material, text: string, textColor: Color3, font: Enum.Font, ghost: boolean): BasePart
+	local p = mk(size, cf, color, material, { collide = false, name = "GatePlate" })
+	if ghost then
+		return p
+	end
+	local sg = Instance.new("SurfaceGui")
+	sg.Face = Enum.NormalId.Front
+	sg.CanvasSize = Vector2.new(size.X * 60, size.Y * 60)
+	sg.LightInfluence = 0.6
+	sg.Parent = p
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.Size = UDim2.fromScale(1, 1)
+	t.Text = text
+	t.Font = font
+	t.TextColor3 = textColor
+	t.TextScaled = true
+	t.Parent = sg
+	return p
+end
+
+-- a gate pillar: Low a short rendered post, Mid a rendered pier, High a banded stone pier; each with
+-- a plinth, a stone cap and a lantern
+local function pillar(mk: any, at: CFrame, tier: number, look: any, ghost: boolean)
+	local L = Enum.Material.Limestone
+	local pale = STONE:Lerp(Color3.new(1, 1, 1), 0.25)
+	if tier == 0 then
+		mk(Vector3.new(2.3, 0.5, 2.3), at * CFrame.new(0, 0.65, 0), STONE, L, { name = "GatePillar" })
+		mk(Vector3.new(1.9, 3.6, 1.9), at * CFrame.new(0, 2.7, 0), look.wall, Enum.Material.Plaster, { name = "GatePillar" })
+		mk(Vector3.new(2.4, 0.3, 2.4), at * CFrame.new(0, 4.65, 0), pale, L)
+		lantern(mk, at * CFrame.new(0, 4.8, 0), 0.6, 12, 0.7, ghost)
+	elseif tier == 1 then
+		mk(Vector3.new(3.1, 0.8, 3.1), at * CFrame.new(0, 0.8, 0), STONE, L, { name = "GatePillar" })
+		mk(Vector3.new(2.6, 6.2, 2.6), at * CFrame.new(0, 4.3, 0), look.wall, Enum.Material.Plaster, { name = "GatePillar" })
+		mk(Vector3.new(3.2, 0.35, 3.2), at * CFrame.new(0, 7.57, 0), pale, L)
+		mk(Vector3.new(2.7, 0.3, 2.7), at * CFrame.new(0, 7.9, 0), pale, L)
+		lantern(mk, at * CFrame.new(0, 8.05, 0), 0.75, 16, 1, ghost)
 	else
-		mk(Vector3.new(3.4, 8, 3.4), at * CFrame.new(0, 4.4, 0), STONE, Enum.Material.Limestone, { name = "GatePillar" })
-		mk(Vector3.new(4, 0.8, 4), at * CFrame.new(0, 8.8, 0), STONE:Lerp(Color3.new(1, 1, 1), 0.2), Enum.Material.Limestone)
-		mk(Vector3.new(1.4, 2.2, 1.4), at * CFrame.new(0, 10.3, 0), IRON, Enum.Material.Metal)
-		local lamp = mk(Vector3.new(1, 1.6, 1), at * CFrame.new(0, 10.3, 0), WARM, Enum.Material.Neon, { collide = false, shadow = false, name = "PillarLamp" })
-		local l = Instance.new("PointLight")
-		l.Color = WARM
-		l.Range = 22
-		l.Brightness = 1.3
-		l.Parent = lamp
+		mk(Vector3.new(4.6, 1.1, 4.6), at * CFrame.new(0, 0.95, 0), STONE:Lerp(Color3.new(0, 0, 0), 0.12), L, { name = "GatePillar" })
+		mk(Vector3.new(3.7, 7.1, 3.7), at * CFrame.new(0, 5.05, 0), STONE, L, { name = "GatePillar" })
+		for _, y in { 2.6, 4.4, 6.2 } do
+			mk(Vector3.new(3.95, 0.3, 3.95), at * CFrame.new(0, y, 0), STONE, L)
+		end
+		mk(Vector3.new(4.6, 0.5, 4.6), at * CFrame.new(0, 8.85, 0), pale, L)
+		mk(Vector3.new(4.1, 0.35, 4.1), at * CFrame.new(0, 9.27, 0), pale, L)
+		lantern(mk, at * CFrame.new(0, 9.45, 0), 1.05, 22, 1.3, ghost)
 	end
 end
 
--- a gate leaf: a solid (see-through) panel with bars, all welded to its bottom rail
-local function leaf(mk: any, cf: CFrame, w: number, h: number, ghost: boolean): BasePart
-	local rail = mk(Vector3.new(w, 0.6, 0.5), cf * CFrame.new(0, 0.7, 0), IRON, Enum.Material.Metal, { name = "GateLeaf" })
-	local function bit(size: Vector3, at: CFrame, opts: { [string]: any }?)
-		local p = mk(size, at, IRON, Enum.Material.Metal, opts)
+-- a gate leaf, all welded to its bottom rail. "iron": wrought iron for the High houses, its top
+-- rising in a curve to where the two leaves meet (side: which way the hinge is), with gilt spear
+-- tips, dog bars and a band of lozenges. "slats": a steel frame with flat slats for the Mid houses.
+local function leaf(mk: any, cf: CFrame, w: number, h: number, ghost: boolean, style: string, side: number): BasePart
+	local tone = if style == "iron" then IRON else BRONZE
+	local rail = mk(Vector3.new(w, 0.6, 0.5), cf * CFrame.new(0, 0.7, 0), tone, Enum.Material.Metal, { name = "GateLeaf" })
+	local function bit(size: Vector3, at: CFrame, opts: { [string]: any }?, color: Color3?)
+		local p = mk(size, at, color or tone, Enum.Material.Metal, opts)
 		if not ghost then
 			p.Anchored = false
 			p.Massless = true
@@ -746,21 +809,87 @@ local function leaf(mk: any, cf: CFrame, w: number, h: number, ghost: boolean): 
 		p.Parent = rail
 		return p
 	end
-	bit(Vector3.new(w, 0.5, 0.5), cf * CFrame.new(0, h, 0))
-	bit(Vector3.new(w, 0.3, 0.4), cf * CFrame.new(0, h * 0.55, 0))
-	for _, e in { -1, 1 } do
-		bit(Vector3.new(0.5, h, 0.5), cf * CFrame.new(e * (w / 2 - 0.25), h / 2 + 0.4, 0))
-	end
-	local bars = math.max(2, math.floor(w / 1.2))
-	for k = 1, bars - 1 do
-		bit(Vector3.new(0.22, h - 0.6, 0.22), cf * CFrame.new(-w / 2 + k * w / bars, h / 2 + 0.6, 0))
+	if style == "iron" then
+		local function xAt(u: number): number
+			return side * (w / 2 - u * w) -- 0 at the hinge, 1 where the leaves meet
+		end
+		local function topAt(u: number): number
+			return h - 0.9 + 1.7 * math.sin(u * math.pi / 2)
+		end
+		for _, u in { 0, 1 } do
+			local top = topAt(u)
+			bit(Vector3.new(0.42, top - 0.7, 0.42), cf * CFrame.new(xAt(u) - side * (0.21 - u * 0.42), (top + 0.7) / 2, 0))
+		end
+		-- the top rail, in short pieces along the curve
+		local pieces = 6
+		for k = 1, pieces do
+			local u0, u1 = (k - 1) / pieces, k / pieces
+			local a = Vector3.new(xAt(u0), topAt(u0), 0)
+			local b = Vector3.new(xAt(u1), topAt(u1), 0)
+			local mid = (a + b) / 2
+			local d = b - a
+			bit(Vector3.new(d.Magnitude + 0.1, 0.24, 0.3), cf * CFrame.new(mid) * CFrame.Angles(0, 0, math.atan2(d.Y, d.X)))
+		end
+		local band0, band1 = h * 0.3, h * 0.42
+		for _, y in { band0, band1 } do
+			bit(Vector3.new(w, 0.2, 0.3), cf * CFrame.new(0, y, 0))
+		end
+		-- the bars, each with a gilt spear tip, and short dog bars between them at the foot
+		local n = math.max(4, math.floor(w / 0.6))
+		for k = 1, n - 1 do
+			local u = k / n
+			local top = topAt(u)
+			bit(Vector3.new(0.16, top - 0.7, 0.16), cf * CFrame.new(xAt(u), (top + 0.7) / 2, 0))
+			bit(Vector3.new(0.3, 0.3, 0.1), cf * CFrame.new(xAt(u), top + 0.24, 0) * CFrame.Angles(0, 0, math.pi / 4), { shadow = false }, GILT)
+			local v = (k - 0.5) / n
+			bit(Vector3.new(0.12, 1.5, 0.12), cf * CFrame.new(xAt(v), 1.45, 0), { shadow = false })
+		end
+		-- lozenges in the band
+		local mid = (band0 + band1) / 2
+		local r = (band1 - band0) / 2 - 0.1
+		for _, u in { 0.25, 0.5, 0.75 } do
+			for _, e in { -1, 1 } do
+				for _, f in { -1, 1 } do
+					local at = cf * CFrame.new(xAt(u) + e * r / 2, mid + f * r / 2, 0) * CFrame.Angles(0, 0, -e * f * math.pi / 4)
+					bit(Vector3.new(r * 1.45, 0.1, 0.1), at, { shadow = false }, GILT)
+				end
+			end
+		end
+	else
+		bit(Vector3.new(w, 0.5, 0.5), cf * CFrame.new(0, h + 0.15, 0))
+		for _, e in { -1, 1 } do
+			bit(Vector3.new(0.5, h, 0.5), cf * CFrame.new(e * (w / 2 - 0.25), h / 2 + 0.4, 0))
+		end
+		bit(Vector3.new(0.3, h, 0.3), cf * CFrame.new(0, h / 2 + 0.4, 0))
+		local y = 1.3
+		while y < h - 0.1 do
+			bit(Vector3.new(w - 0.6, 0.42, 0.18), cf * CFrame.new(0, y, 0), { shadow = false })
+			y += 0.62
+		end
 	end
 	-- (an invisible panel inside the bars stops cars and people)
-	bit(Vector3.new(w, h, 0.3), cf * CFrame.new(0, h / 2 + 0.4, 0), { transparency = 1, name = "GatePanel" })
+	bit(Vector3.new(w, h + 0.6, 0.3), cf * CFrame.new(0, h / 2 + 0.6, 0), { transparency = 1, name = "GatePanel" })
 	return rail
 end
 
-local function fenceAndGate(mk: any, lot: CFrame, lotW: number, lotD: number, tier: number, look: any, design: any, entryX: number, gateW: number, pathX: number, ghost: boolean): ({ Gate }, CFrame?)
+-- the call post by the gate, on the street side, at a driver's window: a screen, a button, a camera
+-- and the house number
+local function intercom(mk: any, at: CFrame, number: number?, ghost: boolean)
+	local M = Enum.Material.Metal
+	mk(Vector3.new(0.5, 3.5, 0.4), at * CFrame.new(0, 2.15, 0), Color3.fromRGB(44, 46, 50), M, { collide = false, name = "Intercom" })
+	mk(Vector3.new(1, 1.6, 0.3), at * CFrame.new(0, 4.4, 0), Color3.fromRGB(120, 122, 124), M, { collide = false, name = "Intercom" })
+	mk(Vector3.new(0.66, 0.36, 0.04), at * CFrame.new(0, 4.36, -0.16), Color3.fromRGB(18, 20, 24), Enum.Material.Glass, { collide = false, shadow = false })
+	mk(Vector3.new(0.14, 0.14, 0.14), at * CFrame.new(0, 4.68, -0.16), Color3.fromRGB(14, 14, 16), Enum.Material.Glass, { collide = false, shadow = false, shape = Enum.PartType.Ball })
+	local button = mk(Vector3.new(0.2, 0.2, 0.2), at * CFrame.new(0, 4.02, -0.16), WARM, Enum.Material.Neon, { collide = false, shadow = false, shape = Enum.PartType.Ball })
+	if not ghost then
+		button:AddTag("LampGlow")
+	end
+	if number then
+		signPlate(mk, Vector3.new(0.8, 0.26, 0.03), at * CFrame.new(0, 5.02, -0.16), Color3.fromRGB(26, 26, 28), M, tostring(number), Color3.fromRGB(235, 225, 200), Enum.Font.GothamBold, ghost)
+	end
+end
+
+local function fenceAndGate(mk: any, lot: CFrame, lotW: number, lotD: number, tier: number, look: any, design: any, entryX: number, gateW: number, pathX: number, ghost: boolean, number: number?): ({ Gate }, CFrame?)
 	local z = -lotD / 2 + 1
 	local hw, hd = lotW / 2 - 1, lotD / 2 - 1
 	local gates: { Gate } = {}
@@ -794,54 +923,66 @@ local function fenceAndGate(mk: any, lot: CFrame, lotW: number, lotD: number, ti
 		fenceRun(mk, lot, tier, look, Vector3.new(s * hw, 0, z), Vector3.new(s * hw, 0, hd))
 		fenceRun(mk, lot, tier, look, Vector3.new(s * hw, 0, hd), Vector3.new(s * 4, 0, hd))
 	end
+	-- the pillars either side of the drive (overnight step 6, 2026-11-06: a real remodel of all three)
+	for _, e in { g0, g1 } do
+		pillar(mk, lot * CFrame.new(e, 0, z), tier, look, ghost)
+	end
+	-- the house number on the pillar on the street side, the name on the wall beside the gate
+	local brass = Color3.fromRGB(176, 146, 96)
+	local ink = Color3.fromRGB(36, 30, 24)
+	local half = if tier == 0 then 0.95 elseif tier == 1 then 1.3 else 1.85
+	local numY = if tier == 0 then 3 elseif tier == 1 then 4.6 else 5.3
+	if number then
+		signPlate(mk, Vector3.new(1.7, 1.05, 0.1), lot * CFrame.new(g1, numY, z - half - 0.05), brass, Enum.Material.Metal, tostring(number), ink, Enum.Font.GothamBold, ghost)
+	end
 	if tier == 0 then
 		-- an open drive on the small houses (owner: a small gate or an open drive)
 		return gates, nil
 	end
-	-- the pillars either side of the drive and the path
-	for _, e in { g0, g1 } do
-		pillar(mk, lot * CFrame.new(e, 0, z), tier, look)
-	end
 	local gateAt = lot * CFrame.new(entryX, 0, z)
+	intercom(mk, lot * CFrame.new(g0 + 0.6, 0, z - 3.4), number, ghost)
 	if tier == 1 then
-		-- one sliding leaf, just inside the wall, sliding along it to open
+		-- one sliding leaf of steel slats, just inside the wall, sliding along it on a ground track
 		local closed = lot * CFrame.new(entryX, 0, z + 1.4)
-		local part = leaf(mk, closed, gateW - 2.4, 6, ghost)
+		local part = leaf(mk, closed, gateW - 2.4, 6.4, ghost, "slats", 1)
 		local slide = if entryX <= 0 then 1 else -1
 		table.insert(gates, { part = part, closed = part.CFrame, open = part.CFrame * CFrame.new(slide * (gateW - 1), 0, 0) })
+		mk(Vector3.new(gateW * 2, 0.06, 0.4), lot * CFrame.new(entryX + slide * (gateW / 2 - 1), 0.74, z + 1.4), Color3.fromRGB(70, 70, 72), Enum.Material.Metal, { collide = false, shadow = false, name = "GateTrack" })
 	else
-		-- two big leaves swinging in from the pillars, and the house's name on the wall beside
-		local half = (gateW - 3.4) / 2
+		-- two wrought-iron leaves swinging in from the pillars
+		local half2 = (gateW - 3.4) / 2
 		for _, e in { -1, 1 } do
 			local hingeX = entryX + e * (gateW / 2 - 1.7)
-			local closed = lot * CFrame.new(hingeX - e * half / 2, 0, z)
-			local part = leaf(mk, closed, half, 8, ghost)
+			local closed = lot * CFrame.new(hingeX - e * half2 / 2, 0, z)
+			local part = leaf(mk, closed, half2, 8, ghost, "iron", e)
 			local hinge = lot * CFrame.new(hingeX, part.CFrame.Y - lot.Y, z)
 			local rel = hinge:ToObjectSpace(part.CFrame)
-			table.insert(gates, { part = part, closed = part.CFrame, open = hinge * CFrame.Angles(0, e * math.pi / 2, 0) * rel })
-		end
-		local plateX = entryX + gateW / 2 + 6
-		if plateX + 4 < hw then
-			local namePlate = mk(Vector3.new(9, 1.6, 0.2), lot * CFrame.new(plateX, 3.6, z - 0.9), STONE, Enum.Material.Limestone, { collide = false })
-			local sg = Instance.new("SurfaceGui")
-			sg.Face = Enum.NormalId.Back
-			sg.CanvasSize = Vector2.new(450, 80)
-			sg.LightInfluence = 0.4
-			sg.Parent = namePlate
-			local t = Instance.new("TextLabel")
-			t.BackgroundTransparency = 1
-			t.Size = UDim2.fromScale(1, 1)
-			t.Text = string.upper(design.name)
-			t.Font = Enum.Font.GothamBold
-			t.TextColor3 = Color3.fromRGB(70, 66, 58)
-			t.TextScaled = true
-			t.Parent = sg
+			table.insert(gates, { part = part, closed = part.CFrame, open = hinge * CFrame.Angles(0, e * math.pi / 2, 0) * rel, hinge = hinge, angle = e * math.pi / 2 })
 		end
 	end
-	-- a small walk-in gate by the path
+	-- the house's name on the wall beside the gate, lit from above at night
+	local plateX = entryX + gateW / 2 + 6
+	if plateX + 4 < hw then
+		local thick = if tier == 1 then 0.6 else 0.8
+		local pw, ph = if tier == 1 then 7 else 9, if tier == 1 then 1.2 else 1.6
+		signPlate(mk, Vector3.new(pw, ph, 0.14), lot * CFrame.new(plateX, if tier == 1 then 2.5 else 3.2, z - thick - 0.07), brass, Enum.Material.Metal, string.upper(design.name), ink, Enum.Font.Garamond, ghost)
+		nightLamp(mk, Vector3.new(1.4, 0.16, 0.3), lot * CFrame.new(plateX, if tier == 1 then 3.5 else 4.5, z - thick - 0.2), 7, 0.5, ghost)
+	end
+	-- a small iron arch over the walk-in gap by the path
 	if #gaps > 1 then
-		local pl = lot * CFrame.new(pathX, 0, z)
-		mk(Vector3.new(4.6, 0.3, 0.3), pl * CFrame.new(0, 0.4 + 3.6, 0), IRON, Enum.Material.Metal, { collide = false })
+		local top = if tier == 1 then 5.4 else 6.8
+		for _, e in { -1, 1 } do
+			mk(Vector3.new(0.9, top, 0.9), lot * CFrame.new(pathX + e * 2.9, top / 2 + 0.4, z), STONE, Enum.Material.Limestone, { name = "GatePillar" })
+		end
+		local steps = 6
+		for k = 1, steps do
+			local a0, a1 = (k - 1) / steps * math.pi, k / steps * math.pi
+			local p = Vector3.new(math.cos(a0) * 2.9, math.sin(a0) * 1.1, 0)
+			local q = Vector3.new(math.cos(a1) * 2.9, math.sin(a1) * 1.1, 0)
+			local d = q - p
+			local mid = (p + q) / 2
+			mk(Vector3.new(d.Magnitude + 0.1, 0.22, 0.22), lot * CFrame.new(pathX + mid.X, top + 0.4 + mid.Y, z) * CFrame.Angles(0, 0, math.atan2(d.Y, d.X)), IRON, Enum.Material.Metal, { collide = false })
+		end
 	end
 	return gates, gateAt
 end
@@ -933,6 +1074,19 @@ local function wireBody(mk: any, bm: Model, hcf: CFrame, frontDoorX: number?, d:
 			end
 		end
 	end
+	-- (overnight step 6) a Toolbox house can carry 120 ceiling spots: its front burned white at night
+	-- and every one cost a frame: one in three stays, softer
+	local lights = 0
+	for _, l in bm:GetDescendants() do
+		if l:IsA("Light") then
+			lights += 1
+			if lights % 3 == 0 then
+				l.Brightness *= 0.6
+			else
+				l:Destroy()
+			end
+		end
+	end
 	-- no switches of its own: one of ours just inside the front door
 	if switches == 0 then
 		local x = (frontDoorX or 0) + 3.6
@@ -943,7 +1097,7 @@ end
 ---------------------------------------------------------------------
 -- The house
 ---------------------------------------------------------------------
-function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number, opts: { ghost: boolean?, interior: boolean? }?): (Model, Info)
+function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number, opts: { ghost: boolean?, interior: boolean?, number: number? }?): (Model, Info)
 	local o = opts or {}
 	local ghost = o.ghost == true
 	local interior = o.interior == true and not ghost
@@ -1433,7 +1587,7 @@ function HouseBuilder.build(design: any, lot: CFrame, lotW: number, lotD: number
 	end
 
 	-- the fence or wall round the lot and the gate where the drive comes in
-	local gates, gateAt = fenceAndGate(mk, lot, lotW, lotD, tier, look, design, entryX, gateW, doorLocal.X, ghost)
+	local gates, gateAt = fenceAndGate(mk, lot, lotW, lotD, tier, look, design, entryX, gateW, doorLocal.X, ghost, o.number)
 
 	-- the mailbox outside, beside the gate
 	local mailbox = lot * CFrame.new(entryX + gateW / 2 + 3, 0.4, -lotD / 2 - 0.8)

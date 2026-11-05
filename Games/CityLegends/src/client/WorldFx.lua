@@ -46,6 +46,13 @@ function WorldFx.setDaylight(d: number)
 	end)
 end
 
+-- (a lamp that streams in or is built by day must not glow: only a change of the light used to set it)
+CollectionService:GetInstanceAddedSignal("LampGlow"):Connect(function(p)
+	if p:IsA("BasePart") then
+		p.Material = if lampsLit then Enum.Material.Neon else Enum.Material.SmoothPlastic
+	end
+end)
+
 -- the Riviera's windows (tag "Window"): about 4 in 10 glow warm at night, picked by position so
 -- every player sees the same ones; streamed-in windows are set as they arrive
 -- (2026-11-02, realistic lighting: rooms lit from inside, not neon strips) soft warm interiors,
