@@ -5,6 +5,24 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
+## Overnight run, 2026-11-06 (`Prompts/02 Overnight run (cars, smoothness, roads, buildings, gates, morning fog).md`)
+**Choices made overnight** (each easy to undo):
+- **Streaming:** `Workspace.StreamingTargetRadius` 1024 -> 640, `StreamOutBehavior` Opportunistic. Why: the stutter at speed was the map streaming in, not scripts. Undo: set them back in Workspace's properties.
+- **Road pieces:** `CastShadow` off on all `Road` wedges (14,330), collision off on `RailPost` (3,276; the rails still collide). Undo: a loop in Studio.
+- **Graphics:** Low turns off shadows and terrain grass; grass only on High and Ultra; a phone with no saved choice starts on Medium (`WorldFx.setQuality`, `defaultQuality`).
+- **Carbon:** one sharp 512 px twill (`tools/lambo/carbon_tile.py`, same weave scale as the old 128 px tile) on the 14 Forza-file cars' carbon parts; each part keeps `OldCarbonMap`. SVJ, SVJ 63, Veyron and Chiron kept theirs: their carbon pictures aren't the same tile, so the scale could be wrong.
+
+**Numbers, step 2** (Studio, PC, Ultra; a run along a lane at speed, 14 s; frames over 33 ms):
+| Run | Before | After |
+|---|---|---|
+| Coast Road, 120 studs/s | 31 fps, max 489 ms, 86 frames | 56 fps, max 77 ms, 44 frames |
+| Corniche Highway, 140 studs/s | 65 fps, max 131 ms, 55 frames | 87 fps, max 42 ms, 3 frames |
+| Parked: The Harbour / Legends Rewards | 64 / 57 fps, max 20 / 28 ms | |
+
+- Scripts were never the problem: about 3 ms a frame in all (`ScriptProfilerService`), the top ones Traffic 0.6, Main 0.6, WorldFx LOD 0.6. Client parts: 37k-115k now, 158k-234k before (they piled up without Opportunistic). 347 lights, 6,300 shadow casters.
+- Not done: Roads are 183k parts (97k wedges). Meshes would cut that hard but need an Import 3D by the owner.
+- Not measured: phone size, 2 players (the MCP drives one client).
+
 ## Features so far
 - **City:** a big night city with traffic that stops at red lights, and a tunnel intro cutscene ("CITY LEGENDS").
 - **Driving and money:** you earn money by driving and by cutting up traffic, with combos. You buy cars in the garage.

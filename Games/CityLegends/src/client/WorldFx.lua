@@ -124,6 +124,17 @@ function WorldFx.setQuality(name: string)
 			e.Enabled = name == "High" or name == "Ultra"
 		end
 	end
+	-- (overnight, 2026-11-06) shadows are the dearest thing left on a phone: off on Low
+	Lighting.GlobalShadows = name ~= "Low"
+	pcall(function()
+		workspace.Terrain.Decoration = name == "High" or name == "Ultra"
+	end)
+end
+
+-- a player with no saved choice: phones start on Medium, the rest on High
+function WorldFx.defaultQuality(): string
+	local UIS = game:GetService("UserInputService")
+	return if UIS.TouchEnabled and not UIS.KeyboardEnabled then "Medium" else "High"
 end
 
 function WorldFx.qualityScale(): number

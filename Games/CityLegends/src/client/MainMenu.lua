@@ -1213,7 +1213,7 @@ local function openSettings()
 
 	heading("GRAPHICS")
 	choices(row("Quality"), { "LOW", "MEDIUM", "HIGH", "ULTRA" }, function()
-		return string.upper(st.Graphics or "HIGH")
+		return string.upper(st.Graphics or WorldFx.defaultQuality())
 	end, function(v)
 		local name = string.sub(v, 1, 1) .. string.lower(string.sub(v, 2))
 		st.Graphics = name
@@ -2393,9 +2393,7 @@ function MainMenu.applySettings(st: { [string]: any })
 		Minimap.setVisible(st.Minimap.on ~= false)
 		Minimap.setCorner(st.Minimap.corner or "TopRight")
 	end
-	if type(st.Graphics) == "string" then
-		WorldFx.setQuality(st.Graphics)
-	end
+	WorldFx.setQuality(if type(st.Graphics) == "string" then st.Graphics else WorldFx.defaultQuality())
 	UI.setSpeedoStyle(if st.Speedo == "Digital" then "Digital" else "Analogue")
 	Driving.assist = if st.Assist == "Off" then 0 elseif st.Assist == "Low" then 0.5 else 1
 	Driving.smoke = if st.Smoke == "Off" then 0 elseif st.Smoke == "Low" then 0.5 else 1
