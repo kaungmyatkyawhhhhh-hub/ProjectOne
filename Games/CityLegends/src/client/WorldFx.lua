@@ -78,7 +78,7 @@ function WorldFx.setWindow(p: Instance)
 	local kind = (h * 97.31) % 1
 	local long = math.max(size.X, size.Z) > 14 -- a whole balcony band of glass: dimmer, never one bright bar
 	local big = shop -- shopfronts: always warm
-	local c = if kind < 0.04 and not big then WINDOW_TV elseif kind < 0.2 and not big then WINDOW_WHITE else WINDOW_WARM_A:Lerp(WINDOW_WARM_B, kind)
+	local c = if kind < 0.04 and not big and not long then WINDOW_TV elseif kind < 0.2 and not big then WINDOW_WHITE else WINDOW_WARM_A:Lerp(WINDOW_WARM_B, kind)
 	p.Color = if long then c:Lerp(Color3.new(0, 0, 0), 0.3) elseif p:HasTag("FarWindow") then c:Lerp(Color3.fromRGB(255, 196, 120), 0.4) else c
 end
 -- the share of windows lit (0..1); re-sets them all, spread over frames, when it moves

@@ -1342,7 +1342,7 @@ Config.Rewards = {
 ---------------------------------------------------------------------
 Config.DayCycle = {
 	Enabled = true,
-	CycleMinutes = 24, -- one game hour a minute
+	CycleMinutes = 14, -- about 35 s a game hour (owner, 2026-11-05: quicker days; was 24)
 	StartHour = 20, -- where the clock stands at server time 0 (shifts the whole cycle)
 }
 

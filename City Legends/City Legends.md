@@ -22,6 +22,16 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - Scripts were never the problem: about 3 ms a frame in all (`ScriptProfilerService`), the top ones Traffic 0.6, Main 0.6, WorldFx LOD 0.6. Client parts: 37k-115k now, 158k-234k before (they piled up without Opportunistic). 347 lights, 6,300 shadow casters.
 - Not done: Roads are 183k parts (97k wedges). Meshes would cut that hard but need an Import 3D by the owner.
 - Not measured: phone size, 2 players (the MCP drives one client).
+- **Parked, after:** The Harbour 87 fps (was 64), Legends Rewards 83 (was 57), Grand Hairpin Hotel 134. No frame over 33 ms at any of the three.
+- **Graphics levels at The Harbour:** Ultra 93 fps, High 93, Medium 95, Low 103. Low also draws fewer far parts (LOD scale), which this test doesn't show. Radius 640 doesn't show gaps: from the mountain road the far towers and stand-ins are there.
+- **Car and camera:** the car's place on screen moves by 0.003-0.004 studs from frame to frame (no jitter between car and camera). Nothing to fix there. The car's position only changes at physics rate (60 a second): at 120+ fps the whole view steps at 60, as in any Roblox game.
+
+**Step 4: time and cold morning (done):**
+- **`Config.DayCycle.CycleMinutes` 14** (was 24): about 35 s a game hour, about 3.5 minutes of full night plus 2 of dusk and dawn.
+- **`DayCycle.lua`, Riviera keys:** new key at 7:12 (the thickest mist); 6:00, 8:30, 13:00 and 16:30 are cooler, softer and paler; contrast below zero until midday. New key fields `soft` (`Lighting.ShadowSoftness`) and `cover` (cloud cover). Mist = `density` + `haze` in the keys: density 0.33 at 7:12, 0.25 at 13:00, 0.22 from 16:30. To change it, edit those numbers.
+- **Sunset and night were too dark (seen in the shots):** at 18:18 the road was near black, at night the buildings were black shapes. `ambient`, `outdoor`, `exposure` raised on the 18:18, 19:36 and night keys, contrast lowered on the first two. Sun and lamps are the same.
+- **Blue bars at night:** the "TV glow" window colour landed on whole balcony bands, which read as blue neon. Now only on small windows (`WorldFx.setWindow`).
+- Pictures: `Day cycle - cold morning, sunset, night.jpg`, `Day cycle - mist on the mountain.jpg`.
 
 ## Features so far
 - **City:** a big night city with traffic that stops at red lights, and a tunnel intro cutscene ("CITY LEGENDS").
