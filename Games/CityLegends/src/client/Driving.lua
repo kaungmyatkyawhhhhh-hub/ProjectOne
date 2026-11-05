@@ -722,6 +722,12 @@ local function exhaustPop(s: State, strength: number)
 	s.flameGlow = math.max(s.flameGlow, 4 * strength)
 end
 
+-- a car with no pops or bangs (Config.ExhaustBands: `noPops`)
+local function noPops(s: State): boolean
+	local cfg = Config.ExhaustBands[s.spec.Id]
+	return cfg ~= nil and cfg.noPops == true
+end
+
 -- darkened screen edges at speed (a tunnel-vision rush; Roblox has no real motion blur)
 local vignetteFrames: { Frame } = {}
 setVignette = function(k: number)
@@ -2196,7 +2202,7 @@ function Driving.step(dt: number)
 	end
 	s.throttle += (throttle - s.throttle) * math.min(1, dt * 10)
 	-- lifting off at high revs: a short crackle of pops + flames
-	if s.throttleIn > 0.7 and throttle < 0.2 and s.rpm > 0.6 and Config.spsToMph(s.vel.Magnitude) > 30 and not s.electric then
+	if s.throttleIn > 0.7 and throttle < 0.2 and s.rpm > 0.6 and Config.spsToMph(s.vel.Magnitude) > 30 and not s.electric and not noPops(s) then
 		s.pops = math.random(2, 4)
 		s.popTimer = 0.04
 	end
@@ -2813,7 +2819,7 @@ function Driving.step(dt: number)
 	if effGear and s.soundGear and effGear ~= s.soundGear and math.abs(fs) > 2 and s.engineOn then
 		local isUp = effGear > s.soundGear
 		s.engine:shift(isUp, math.clamp(0.12 + 0.88 * frac / gearHi(effGear), 0.12, 1.02))
-		if isUp and throttle > 0.5 then
+		if isUp and throttle > 0.5 and not noPops(s) then
 			exhaustPop(s, 1)
 		end
 	end

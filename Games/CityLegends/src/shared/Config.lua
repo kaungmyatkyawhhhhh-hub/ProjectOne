@@ -675,8 +675,11 @@ end
 -- quieter and replace the start up with sound 6718630582, also make the exhaust sound realistic") the
 -- LP700-4 plays the SV's loops and one-shots with its own start-up; quieter in Config.ExhaustVolume,
 -- pitched from each loop's real engine speed in Config.ExhaustBands, timed in Config.ExhaustStart
+-- (owner, 2026-11-05: "remove the pop and bangs on the lp700") so not the SV's Crackle, ShiftPop or
+-- Pops, or its Shift clip (a bang at 0.4 s, 5 times the clip's level and louder than Pops: the upshift
+-- is the note dropping, `shiftCut`); `noPops` in Config.ExhaustBands stops the shared backfire too
 do
-	for _, part in { "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops" } do
+	for _, part in { "Idle", "Low", "Mid", "High", "Launch", "Redline", "Downshift" } do
 		Config.Sounds["Exhaust_lambrini_lp700_" .. part] = Config.Sounds["Exhaust_lambrini_lp750_" .. part]
 	end
 	Config.Sounds.Exhaust_lambrini_lp700_Start = "rbxassetid://6718630582" -- "Lamborghini Aventador SVJ Startup" (1Rhymastic)
@@ -705,8 +708,9 @@ Config.ExhaustShotRpm = { ["rbxassetid://109515735710638"] = 4200 } :: { [string
 -- `reachDown` a band's own reach below its rpm, `coast` the EQ (dB) with the throttle shut: the note goes
 -- dark and quiet on a lift, `shiftCut` seconds the note drops on an upshift (the ignition cut),
 -- `loopRpm` the rpm the Launch and Redline loops were recorded at, `idleReach` / `idleTop` how far above
--- its rpm the idle loop lasts (default 0.28) and the highest it's pitched (default 1.45)
-Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number?, gain: number?, gains: { [string]: number }?, width: number?, reachDown: { [string]: number }?, coast: { mid: number, high: number }?, shiftCut: number?, loopRpm: { [string]: number }?, idleReach: number?, idleTop: number? } }
+-- its rpm the idle loop lasts (default 0.28) and the highest it's pitched (default 1.45), `noPops` no
+-- pops or bangs: none of the sounds and none of the exhaust flames that go with them (nitro keeps its own)
+Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number?, gain: number?, gains: { [string]: number }?, width: number?, reachDown: { [string]: number }?, coast: { mid: number, high: number }?, shiftCut: number?, loopRpm: { [string]: number }?, idleReach: number?, idleTop: number?, noPops: boolean? } }
 do
 	local chiron = { bands = { Idle = 950, Low = 3500, High = 6500 }, whine = 0.62, seq = 3800, bov = 1.0 }
 	local veyron = { bands = { Idle = 950, Low = 3500 }, whine = 0.7, bov = 1.0 }
@@ -729,6 +733,7 @@ do
 		coast = { mid = -3, high = -12 },
 		shiftCut = 0.09,
 		loopRpm = { Launch = 5040, Redline = 8200 },
+		noPops = true,
 	}
 end
 

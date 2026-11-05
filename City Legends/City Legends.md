@@ -918,6 +918,11 @@ They are in `ServerStorage.VenueKit` (pieces merged into a few parts each: the c
   - Lifting off: quieter and darker (EQ mid -3 dB, high -12 dB). Upshift: the note drops about 50% for ~0.1 s (ignition cut). Limiter and launch loops pitched to the real revs.
   - Start-up: the clip's engine catches at 0.8 s, the same moment as `Driving`'s crank. It ends at ~1,340 rpm, so the idle comes in there and settles to 1,020 rpm over 2.5 s, with the clip faded out (it ends abruptly). Touching the throttle cuts the clip short and the engine answers at once. The clip is loaded when you get in (it took 0.45 s to start the first time otherwise).
 - **Tested in Play (on a test save, `CityLegends_soundtest`, real store name put back):** start-up, idle settle, throttle during start-up, full-throttle pull with shifts, neutral rev to the limiter, launch hold, lift-off; the SV still on its own path; no new errors. Volumes: idle 0.16 (SV 0.26), Low 0.50 (SV 0.81), High 0.30 (SV 0.48), one-shots 0.25-0.27. **Not heard: Claude has no sound here, the owner listens.**
+- **Pops and bangs removed (same day, in Studio, not published):** owner: "remove the pop and bangs on the lp700". LP700 only (`noPops` in `Config.ExhaustBands`):
+  - Gone: the SV's Pops and ShiftPop clips, the shared `Audio.backfire`, and the exhaust flames that go with pops (`exhaustPop`, on hard upshifts and lift-offs). Nitro flames stay.
+  - Also gone: the SV's Shift clip. It holds a bang at 0.40-0.48 s, 5 times the clip's level and louder than the Pops clip, and it played every ~0.1 s on a lift as the auto box ran up the gears. The upshift is now the note dropping (`shiftCut`), with no clip of its own. The owner may want a clean shift clip here.
+  - Checked for bangs and kept: Downshift, Idle, Low, Mid, High, Launch, Redline, start-up (the limiter and launch clips stutter by nature).
+  - Tested in Play on the same road (`CityLegends_soundtest`, real store name put back), 4 pulls to ~107 mph with a lift each. SV: Shift clip 20, ShiftPop 7, Pops 4, backfire 7, flames 18. LP700: 0 of each. No new errors. **Not heard.**
 
 ## Owner-away run (2026-11-03, `Prompts/01 Next steps (owner away, no questions).md`)
 **Summary (end of the run, 2026-11-04). Next: step 6.1 (the mountain highway), then 6.2 / 6.4 and the rest of step 7.**

@@ -850,7 +850,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 				bovCool = 0.5
 				boost *= 0.6
 			end
-			if smoothRpm > 0.8 and math.random() < 0.6 then
+			if smoothRpm > 0.8 and math.random() < 0.6 and not (bandCfg and bandCfg.noPops) then
 				if ex and (ex.ShiftPop or ex.Crackle) then
 					crackle(0.9, "ShiftPop")
 				else

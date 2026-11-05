@@ -64,7 +64,7 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **4 Nov (Claude Code, in Studio, not published):** Lamborghini clusters: all 9 pulled. Revuelto, SV and Huracan redrawn from the owner's driving photos and made live. The current LP750 runs the new SV screen, the SV and LP700 use their models' own wheels. Next: live needles for the LP700 and Gallardos, then Step 3 (logos out, convert). Open: 7 of the 9 models have a non-commercial licence. See [[City Legends/City Legends]].
 - **4 Nov (Claude Code):** the 9 Lamborghinis converted with logos out, full detail and real surfaces, packed in `Games/CityLegends/imports/new_cars/lambo_*.fbx`. Owner: do the 3 Import 3Ds, then Claude adds them to the game. See [[City Legends/City Legends]].
 - **4 Nov, later:** the 9 Lamborghinis are in Studio with new interiors, lamps, paint and live clusters; 6 new cars on sale in the game code. Old LP700 / LP750 / LP570 kept in `ServerStorage.OldCarModels`. Not published. Owner: test on a phone, decide on the 7 non-commercial models.
-- **5 Nov (Claude Code, in Studio, not published):** LP700 exhaust: the SV's sounds 1.6 times quieter, start-up 6718630582, each loop pitched from its measured rpm so the note follows the revs. Owner: listen to it. See [[City Legends/City Legends]].
+- **5 Nov (Claude Code, in Studio, not published):** LP700 exhaust: the SV's sounds 1.6 times quieter, start-up 6718630582, each loop pitched from its measured rpm so the note follows the revs. Pops and bangs then removed on the LP700 (with its flames and the SV's Shift clip, which had a bang in it). Owner: listen to it. See [[City Legends/City Legends]].
 - **Last updated:** 2026-11-05
 
 ## MM Shop Bot (Telegram shop for Myanmar): active, new 5 Nov
