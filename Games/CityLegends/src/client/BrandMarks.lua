@@ -575,22 +575,6 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0008, -0.0115, 0.0563), face = Vector3.new(-0.0136, 0.1056, 0.9943), r = 0.03, color = Color3.fromRGB(46, 46, 46) },
 	},
-	ferrara_california = {
-		wb = 2.6699,
-		hide = { { name = "Body_Logos" } },
-		covers = {
-			{ emblem = false, disc = false, at = Vector3.new(0.0005, 0.0509, -2.2701), face = Vector3.new(0.1036, 0.0702, -0.9921), w = 0.0913, h = 0.1264, color = Color3.fromRGB(0, 0, 0) },
-			{ emblem = false, disc = false, at = Vector3.new(0.0008, 0.4642, 2.2063), face = Vector3.new(-0.0735, 0.2888, 0.9546), w = 0.0923, h = 0.1136, color = Color3.fromRGB(50, 47, 44) },
-			{ emblem = false, disc = false, at = Vector3.new(-0.93, -0.0306, 0.7632), face = Vector3.new(-0.9931, -0.0581, -0.1016), w = 0.1752, h = 0.0365, color = Color3.fromRGB(50, 47, 44) },
-		},
-		caps = {
-			FL = { r = 0.038, surface = 0.0887, color = Color3.fromRGB(167, 167, 156) },
-			FR = { r = 0.038, surface = 0.0887, color = Color3.fromRGB(167, 167, 156) },
-			RL = { r = 0.038, surface = 0.1197, color = Color3.fromRGB(167, 167, 156) },
-			RR = { r = 0.038, surface = 0.1197, color = Color3.fromRGB(167, 167, 156) },
-		},
-		hub = { at = Vector3.new(-0.0011, -0.0176, 0.0618), face = Vector3.new(-0.0164, 0.0523, 0.9984), r = 0.03, color = Color3.fromRGB(29, 29, 29) },
-	},
 	lambrini_countach = {
 		wb = 2.45,
 		hide = { { name = "Body_SMI_Logo1" } },
@@ -605,21 +589,6 @@ return {
 			RR = { r = 0.038, surface = 0.0387, color = Color3.fromRGB(186, 185, 186) },
 		},
 		hub = { at = Vector3.new(0.0003, -0.0146, 0.0493), face = Vector3.new(0.0005, 0.04, 0.9992), r = 0.03, color = Color3.fromRGB(33, 31, 33) },
-	},
-	lambrini_lp640 = {
-		wb = 2.6651,
-		hide = {},
-		covers = {
-			{ emblem = false, disc = false, at = Vector3.new(0, 0.2124, -2.1925), face = Vector3.new(-0.0031, 0.8843, -0.467), w = 0.0682, h = 0.0758, color = Color3.fromRGB(0, 129, 223) },
-			{ emblem = false, disc = false, at = Vector3.new(-0.0485, 0.4815, 2.0988), face = Vector3.new(-0.0111, 0.485, 0.8744), w = 0.2388, h = 0.0522, color = Color3.fromRGB(0, 129, 223) },
-		},
-		caps = {
-			FL = { r = 0.043, surface = 0.0922, color = Color3.fromRGB(30, 30, 30) },
-			FR = { r = 0.043, surface = 0.0922, color = Color3.fromRGB(30, 30, 30) },
-			RL = { r = 0.048, surface = 0.057, color = Color3.fromRGB(0, 0, 0) },
-			RR = { r = 0.048, surface = 0.057, color = Color3.fromRGB(30, 30, 30) },
-		},
-		hub = { at = Vector3.new(0.0001, -0.0161, 0.0665), face = Vector3.new(0.0038, 0.0614, 0.9981), r = 0.03, color = Color3.fromRGB(8, 8, 9) },
 	},
 	lambrini_lp700 = {
 		wb = 2.7,

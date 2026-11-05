@@ -21,6 +21,12 @@ CarFinish.CARS = {
 	lambrini_sto = true,
 	lambrini_sterrato = true,
 	lambrini_revuelto = true,
+	lambrini_lp640 = true,
+	lambrini_lp670 = true,
+	lambrini_urusp = true,
+	ferrara_california = true,
+	ferrara_458spider = true,
+	ferrara_458speciale = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

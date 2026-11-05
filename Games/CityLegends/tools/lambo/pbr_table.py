@@ -14,9 +14,9 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 IDS = json.load(open(os.path.join(HERE, "pbr_ids.json")))
-CARS = {"lp700": "lambrini_lp700", "sv": "lambrini_lp750", "sl": "lambrini_lp570", "spyder560": "lambrini_lp560", "evo": "lambrini_huracan", "perf": "lambrini_performante", "sto": "lambrini_sto", "sterrato": "lambrini_sterrato", "revuelto": "lambrini_revuelto"}
+CARS = {"lp650r": "lambrini_lp640", "lp670sv": "lambrini_lp670", "urusp": "lambrini_urusp", "california": "ferrara_california", "f458spider": "ferrara_458spider", "f458speciale": "ferrara_458speciale", "lp700": "lambrini_lp700", "sv": "lambrini_lp750", "sl": "lambrini_lp570", "spyder560": "lambrini_lp560", "evo": "lambrini_huracan", "perf": "lambrini_performante", "sto": "lambrini_sto", "sterrato": "lambrini_sterrato", "revuelto": "lambrini_revuelto"}
 # cars whose wheel atlas has the tyre ring in the middle of the picture
-ATLAS = {"lp700": "wheel", "sv": "wheel", "perf": "wheel", "sto": "wheel", "revuelto": "wheel", "sterrato": "wheelS"}
+ATLAS = {"lp670sv": "wheel", "urusp": "wheel", "california": "wheel", "f458speciale": "wheel", "lp700": "wheel", "sv": "wheel", "perf": "wheel", "sto": "wheel", "revuelto": "wheel", "sterrato": "wheelS"}
 
 
 MATT = ("Cabin", "CabinTile", "CabinTrim", "Suede", "Leather", "Belt", "SoftTop")
@@ -32,6 +32,8 @@ def main():
     out = os.path.join(HERE, "pbr")
     os.makedirs(out, exist_ok=True)
     for key, cid in CARS.items():
+        if not os.path.exists(os.path.join(done, key + ".pbr.json")):
+            continue  # (each job's cars only)
         d = json.load(open(os.path.join(done, key + ".pbr.json")))
         rows = {}
         dp = os.path.join(done, key + ".dims.json")

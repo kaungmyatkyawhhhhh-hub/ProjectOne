@@ -3319,7 +3319,7 @@ local function pointOn(pts: { number }, v: number): number
 	return pts[n]
 end
 
-local function liveCluster(gui: SurfaceGui, name: string): Update
+local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 	local Art = (require(script.Parent:WaitForChild("LamboClusterArt")) :: any)[name]
 	gui.CanvasSize = Vector2.new(gui.CanvasSize.X * 2, 600) -- twice the usual: the pictures are sharp
 	local W, H, A = Art.W, Art.H, Art.A
@@ -3461,6 +3461,9 @@ local function liveCluster(gui: SurfaceGui, name: string): Update
 			tcoff = DashGauges.tcOff == true,
 			accel = accel > 0.1,
 		}
+		if flag then
+			state[flag] = true -- (a car's own touch on a shared screen: the SV's mark)
+		end
 		for _, b in blocks do
 			b.l.Visible = b.v < v
 		end
@@ -3556,6 +3559,12 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	AventadorSVJ = aventadorSVJ,
 	LiveRevuelto = function(gui)
 		return liveCluster(gui, "revuelto")
+	end,
+	LiveMurcielago = function(gui)
+		return liveCluster(gui, "murcielago")
+	end,
+	LiveMurcielagoSV = function(gui)
+		return liveCluster(gui, "murcielago", "sv")
 	end,
 	LiveUrus = function(gui)
 		return liveCluster(gui, "urus")

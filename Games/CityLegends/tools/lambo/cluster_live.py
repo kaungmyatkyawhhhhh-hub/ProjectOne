@@ -203,6 +203,7 @@ def active(when, st):
         "lights": st.get("lights", False),
         "tcoff": st.get("tcoff", False),
         "accel": float(st.get("gAccel", "0.0")) > 0.1,
+        "sv": st.get("sv", False),
     }
     return table[when]
 
@@ -1792,8 +1793,110 @@ def california():
     return sp
 
 
-BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california}
+def murcielago():
+    """the Murcielago's dials, drawn sharp from the SV model's own cluster seen straight on
+    (imports/refs/murcielago_model_dials.png, 2963 px a metre; no photo: owner, 2026-11-06). Coordinates are that
+    render's pixels. LP670-4 SV and the LP650-4 Roadster share it; only the SV shows the SV mark ("sv")."""
+    box = (190, 170, 1250, 620)
+    REF = "murcielago_model_dials.png"
+    A = Art(REF, box, S=2, bg=(12, 12, 14))
+    sp = Spec("murcielago", box[2] - box[0], box[3] - box[1], 1, 1, box[0], box[1])
+    sp.redline, sp.idle = 8.0, 0.9
+    WHT = (232, 234, 238)
+    GOLD = (222, 168, 44)
+    RED = (236, 44, 44)
+    BAND = (118, 130, 150)
+    SOFT = (168, 172, 180)
+
+    # the face
+    face = [(245, 400), (330, 325), (430, 225), (560, 188), (700, 178), (840, 188), (1000, 222), (1110, 325), (1225, 400), (1190, 480), (1060, 600), (950, 610), (835, 556), (565, 556), (450, 606), (340, 600), (215, 480)]
+    A.poly(face, (46, 46, 48))
+    radial(A, 700, 410, 230, (66, 66, 68), (46, 46, 48))
+
+    def dial(C, red=None):
+        A.circle(C[0], C[1], 123, (222, 224, 228))
+        A.circle(C[0], C[1], 120, BAND)
+        A.circle(C[0], C[1], 107, (42, 42, 44))
+        if red:
+            ring_band(A, C, 107, 120, red[0], red[1], RED)
+
+    REV, SPD = (549, 407), (852, 407)
+
+    def rev(v):
+        return 180 + 30 * v
+
+    def kph(k):
+        return 180 + 0.75 * k
+
+    dial(REV, (rev(8.5), rev(9.02)))
+    dial(SPD)
+    for i in range(0, 19):
+        t = rev(i / 2)
+        col = RED if i >= 17 else WHT
+        if i % 2 == 0:
+            A.line([polar(REV, 98, t), polar(REV, 126, t)], col, 3.4)
+        else:
+            A.line([polar(REV, 106, t), polar(REV, 118, t)], col, 2.0)
+    for k, x, y in ((1, 507, 480), (2, 479, 450), (3, 466, 407), (4, 478, 366), (5, 509, 336), (6, 550, 325), (7, 593, 337), (8, 621, 367), (9, 632, 407)):
+        col = RED if k == 9 else WHT
+        A.text(x, y, str(k), TECH, 22, col, shear=0.14, stroke=0.2, strokecol=col)
+    A.text(551, 364, "giri x 1000", REG, 8, SOFT)
+    for k in range(0, 361, 10):
+        t = kph(k)
+        if k % 30 == 0:
+            A.line([polar(SPD, 98, t), polar(SPD, 126, t)], WHT, 3.0)
+        else:
+            A.line([polar(SPD, 106, t), polar(SPD, 118, t)], WHT, 1.6)
+    for k in range(30, 361, 30):
+        x, y = polar(SPD, 84, kph(k))
+        A.text(x, y, str(k), TECH, 12.5, WHT, stroke=0.1, strokecol=WHT)
+    A.text(852, 355, "km/h", REG, 8.5, SOFT)
+    # the two windows, the gear row
+    for pts, inner in (([(875, 442), (998, 442), (982, 498), (875, 498)], (884, 448, 976, 492)), ([(598, 208), (802, 208), (784, 272), (616, 272)], (626, 216, 776, 264))):
+        A.poly(pts, (84, 86, 100))
+        A.rect(*inner, (34, 50, 54))
+    A.rect(684, 284, 716, 334, (34, 38, 44))
+    A.text(700, 198, "N123456", TECH, 16, WHT, track=2.0)
+
+    # the small gauges
+    def small(c, red_right):
+        pts = [polar(c, 49, t) for t in range(-72, 73, 4)]
+        A.line(pts, (196, 198, 204), 5)
+        for t in (-72, -36, 0, 36, 72):
+            A.line([polar(c, 40, t), polar(c, 53, t)], WHT, 1.6)
+        a = 58 if red_right else -58
+        tip = polar(c, 40, a)
+        A.poly([tip, polar(c, 53, a - 8), polar(c, 53, a + 8)], RED)
+        A.circle(c[0], c[1], 15, (6, 6, 8))
+
+    for c, rr, nt in (((360, 411), False, 0), ((283, 483), True, 0), ((1041, 411), True, -14), ((1116, 480), True, -24)):
+        small(c, rr)
+        A.line([polar(c, -22, nt), polar(c, 44, nt)], GOLD, 3.6)
+    for s, x, y in (("benzina", 295, 378), ("100 %", 395, 398), ("temperatura motore", 362, 450), ("130 °C", 318, 462), ("pressione olio", 1120, 379), ("10 bar", 1078, 426), ("temperatura olio", 1040, 448), ("150 °C", 1150, 462)):
+        A.text(x, y, s, REG, 7.4, SOFT)
+    A.final = A.finish(A.S, blur=2.0, strength=0.3)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    parts = [(-38, 0, 3.0, 3.4, GOLD), (0, 128, 3.4, 1.4, GOLD)]
+    add_needle(sp, needle_sprite(sp, 128, 38, parts, hub=24, hub_col=(6, 6, 8)), REV[0], REV[1], "rpm", [(0, rev(0)), (9, rev(9))])
+    add_needle(sp, needle_sprite(sp, 128, 38, parts, hub=24, hub_col=(6, 6, 8)), SPD[0], SPD[1], "kmh", [(0, kph(0)), (360, kph(360))])
+
+    # the SV mark, only on the SV
+    L = Art(REF, box, S=2, bg=(0, 0, 0))
+    L.line([(566, 471), (600, 467), (578, 456), (612, 451)], WHT, 2.6)
+    L.line([(604, 450), (620, 471), (642, 449)], WHT, 2.6)
+    L.final = L.finish(L.S, blur=1, strength=0)
+    sp.add_show(sp.box(L, (558, 442, 650, 478), black=True), "sv")
+
+    solid_gear(sp, TECH, 46, (232, 210, 120), 700, 240, stroke=0.4)
+    sp.font("odo", ROBO_B, 22, "0123456789", shear=0)
+    sp.readout("odo", 972, 470, "r", 6, "odoTrim", (214, 196, 120))
+    return sp
+
+
+BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago}
 PREVIEW = {
+    "murcielago": ("murcielago_model_dials.png", (190, 170, 1250, 620), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="20:26", odo="009857", sv=True)),
     "f458": ("f458_cluster_owner.png", (56, 300, 1876, 990), None, dict(v=0.7, gear="N", mph=0, manual=False, clock="20:26", odo="009857", range="432")),
     "california": ("california_cluster_owner.png", (120, 270, 1460, 800), None, dict(v=0.0, gear="N", mph=0, manual=False, clock="20:26", odo="029822", range="432")),
     "urus": ("urus_performante_cluster_owner_level.png", (92, 236, 652, 392), None, dict(v=0.0, gear="N", mph=0, manual=True, clock="9:57", odo="2938", range="432")),
