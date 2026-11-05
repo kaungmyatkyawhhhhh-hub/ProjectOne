@@ -1771,7 +1771,7 @@ def california():
     L.text(*m(652, 745), "auto", ROBO_B, 12, (252, 226, 30))
     L.final = L.finish(L.S, blur=1, strength=0)
     sp.add_show(sp.box(L, (806, 596, 846, 616), black=True), "sport")
-    # parked: the warning lights and the note on the left screen, as in the photo
+    # parked: the warning lights, as in the photo (owner, 2026-11-06: no fault note on the left screen)
     W2 = Art(REF, box, S=2, bg=(0, 0, 0))
     W2.icon((352, 372, 456, 412), floor=46, gain=1.4)
     W2.icon((280, 408, 358, 436), floor=46, gain=1.4)
@@ -1783,18 +1783,6 @@ def california():
     W2.final = W2.finish(W2.S, blur=1.5, strength=0.4)
     for b in ((348, 368, 458, 416), (276, 404, 362, 440), (1050, 382, 1116, 420), (1126, 382, 1209, 420), (1084, 424, 1132, 448), (516, 692, 566, 732), (948, 692, 994, 732)):
         sp.add_show(sp.box(W2, b, black=True), "parked")
-    N_ = Art(REF, box, S=2, bg=(0, 0, 0))
-    for x, y, r in ((222, 512, 15), (243, 502, 19), (262, 513, 13)):
-        N_.circle(*L_(x, y), r / 2.5, (236, 238, 240))
-    N_.rect(*L_(208, 512), *L_(272, 524), (236, 238, 240))
-    for x in (214, 232, 250):
-        N_.line([L_(x, 530), L_(x - 22, 552)], (236, 238, 240), 1.4)
-    N_.rect(*L_(284, 498), *L_(297, 534), (236, 238, 240))
-    N_.rect(*L_(284, 540), *L_(297, 552), (236, 238, 240))
-    N_.text(*L_(238, 606), "Rain sensor", ROBO_B, 14, (236, 238, 240))
-    N_.text(*L_(238, 656), "failure", ROBO_B, 14, (236, 238, 240))
-    N_.final = N_.finish(N_.S, blur=1, strength=0)
-    sp.add_show(sp.box(N_, (172, 530, 300, 626), black=True), "parked")
 
     solid_gear(sp, WIDE, 40, (252, 226, 30), *m(692, 682))
     sp.font("odo", ROBO_B, 22, "0123456789", shear=0)
