@@ -20,7 +20,7 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cluster_art import ARIAL, ARIAL_B, REFS, REG, ROBO_B, TECH, TECH_R, Art, font, streaks  # noqa: E402
+from cluster_art import ARIAL, ARIAL_B, REFS, REG, ROBO_B, TECH, TECH_R, WIDE, Art, font, streaks  # noqa: E402
 from cluster_art import lp700 as lp700_art  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -43,6 +43,7 @@ class Spec:
         self.ox, self.oy = ox, oy  # design (0, 0) in photo pixels
         self.bg = None
         self.blocks, self.fills, self.shows, self.readouts, self.labels = [], [], [], [], []
+        self.needles = []
         self.marker = None
         self.gear = None
         self.fonts = {}
@@ -169,6 +170,7 @@ def values(st):
         "rpm": str(int(v * 100) * 10),
         "odo": st.get("odo", "000350"),
         "odo5": st.get("odo", "000350"),
+        "odoTrim": st.get("odo", "000350").lstrip("0") or "0",
         "range": st.get("range", "200"),
         "clock": st.get("clock", "10:45"),
         "date": st.get("date", "10.08.2019"),
@@ -231,6 +233,10 @@ def compose(spec, st, scale=2):
     for s in spec.shows:
         if active(s["when"], st):
             paste(s["im"], s["left"], s["top"])
+    for n in spec.needles:
+        val = {"rpm": v, "kmh": st["mph"] * 1.609, "mph": st["mph"]}[n["bind"]]
+        im = n["im"].rotate(-interp(n["pts"], val), resample=Image.BICUBIC, expand=True)
+        paste(im, n["x"] - im.width / spec.A / 2, n["y"] - im.height / spec.A / 2)
     if spec.marker:
         pts = spec.marker["pts"]
         x0, y0, x1, y1 = [interp([(p[0], p[1 + i]) for p in pts], v) for i in range(4)]
@@ -1381,13 +1387,427 @@ def urus():
     sp.font("clock", ROBO_B, 7.3, "0123456789:", shear=0)
     sp.readout("clock", 430.5, 248.3, "m", 5, "clock")
     sp.font("odo", ROBO_B, 7.3, "0123456789", shear=0)
-    sp.readout("odo", 484.2, 245.5, "r", 6, "odo")
+    sp.readout("odo", 484.2, 245.5, "r", 6, "odoTrim")
     sp.readout("odo", 532.8, 245.5, "r", 3, "range")
     return sp
 
 
-BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus}
+# ------------------------------------------------------------------------- Rosso Rampante dials
+def gradient(A, box, top, bottom, radius=0.0):
+    """a rounded box filled from one colour at the top to another at the bottom"""
+    x0, y0, x1, y1 = box
+    S = A.S
+    w, h = int((x1 - x0) * S), int((y1 - y0) * S)
+    t = np.linspace(0, 1, h)[:, None, None]
+    g = np.array(top, float)[None, None, :] * (1 - t) + np.array(bottom, float)[None, None, :] * t
+    im = Image.fromarray(np.repeat(g, w, axis=1).astype("uint8"))
+    m = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(m).rounded_rectangle([0, 0, w - 1, h - 1], radius=radius * S, fill=255)
+    A.im.paste(im, (int((x0 - A.ox) * S), int((y0 - A.oy) * S)), m)
+
+
+def radial(A, cx, cy, r, inner, outer):
+    S = A.S
+    d = int(2 * r * S)
+    yy, xx = np.mgrid[0:d, 0:d]
+    t = np.clip(np.hypot(xx - d / 2, yy - d / 2) / (d / 2), 0, 1)[..., None]
+    g = np.array(inner, float)[None, None, :] * (1 - t) + np.array(outer, float)[None, None, :] * t
+    m = Image.new("L", (d, d), 0)
+    ImageDraw.Draw(m).ellipse([0, 0, d - 1, d - 1], fill=255)
+    A.im.paste(Image.fromarray(g.astype("uint8")), (int((cx - r - A.ox) * S), int((cy - r - A.oy) * S)), m)
+
+
+def polar(c, r, deg):
+    a = math.radians(deg)
+    return (c[0] + r * math.sin(a), c[1] - r * math.cos(a))
+
+
+def ring_band(A, c, r0, r1, a0, a1, col):
+    """a band round c between two angles (degrees clockwise from up)"""
+    n = max(2, int(abs(a1 - a0) / 1.5))
+    angs = [a0 + (a1 - a0) * i / n for i in range(n + 1)]
+    A.poly([polar(c, r1, t) for t in angs] + [polar(c, r0, t) for t in reversed(angs)], col)
+
+
+def needle_sprite(sp, length, tail, parts, hub=0.0, hub_col=(0, 0, 0), hub_line=None):
+    """a needle drawn pointing up, the pivot in the middle of the picture: it turns about its own
+    middle in the game. parts: (r0, r1, half width at r0, half width at r1, colour), r up from the pivot"""
+    K = 4
+    L = max(length, tail) + 2
+    k = sp.A * K
+    W = int(2 * (max(p[2] for p in parts) + hub + 3) * k)
+    H = int(2 * L * k)
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    cx, cy = W / 2, H / 2
+    for r0, r1, w0, w1, col in parts:
+        d.polygon([(cx - w0 * k, cy - r0 * k), (cx + w0 * k, cy - r0 * k), (cx + w1 * k, cy - r1 * k), (cx - w1 * k, cy - r1 * k)], fill=tuple(col) + (255,))
+    if hub:
+        d.ellipse([cx - hub * k, cy - hub * k, cx + hub * k, cy + hub * k], fill=tuple(hub_col) + (255,), outline=tuple(hub_line) + (255,) if hub_line else None, width=int(1.5 * k))
+    return im.resize((max(2, W // K), max(2, H // K)), Image.LANCZOS)
+
+
+def add_needle(sp, im, x, y, bind, pts):
+    sp.needles.append({"im": im, "x": x - sp.ox, "y": y - sp.oy, "bind": bind, "pts": pts})
+
+
+def solid_gear(sp, path, size, col, x, y, stroke=0.5):
+    sprites = {}
+    f = {"path": path, "size": size, "chars": "", "stroke": stroke, "shear": 0, "track": 0}
+    for ch in "RNP1234567":
+        im, ox, oy, adv = glyph(ch, f, sp.A)
+        c = Image.new("RGBA", im.size, tuple(col) + (0,))
+        c.putalpha(im.getchannel("A"))
+        sprites[ch] = {"im": c}
+    sprites["N"], sprites["P"] = sprites["P"], sprites["N"]  # (a car in neutral shows P here)
+    sp.gear = {"x": x - sp.ox, "y": y - sp.oy, "sprites": sprites}
+
+
+def f458():
+    """the 458's three screens, from the owner's photo (imports/refs/f458_cluster_owner.png). Coordinates are
+    photo pixels. No maker's horse on the dial. The 458 Spider and Speciale share it."""
+    box = (56, 300, 1876, 990)
+    REF = "f458_cluster_owner.png"
+    A = Art(REF, box, S=2, bg=(10, 10, 12))
+    sp = Spec("f458", box[2] - box[0], box[3] - box[1], 0.9, 1, box[0], box[1])
+    sp.redline, sp.idle = 9.0, 0.7
+    C = (966, 617)
+    NUMG = (112, 106, 88)
+    RED = (206, 34, 30)
+    LINE = (196, 236, 234)
+    WHT = (236, 240, 238)
+
+    def rev(v):
+        return 180 + 27 * v
+
+    # the side panels above the screens
+    for sg in (1, -1):
+        mx = (lambda x: x) if sg > 0 else (lambda x: 1932 - x)
+        A.poly([(mx(196), 545), (mx(240), 478), (mx(330), 442), (mx(565), 408), (mx(565), 545)], (15, 15, 17))
+        A.line([(mx(196), 545), (mx(240), 478), (mx(330), 442), (mx(565), 408)], (46, 46, 50), 2)
+
+    # the rev counter
+    A.circle(C[0], C[1], 303, (226, 228, 226))
+    A.circle(C[0], C[1], 299, (24, 24, 24))
+    radial(A, C[0], C[1], 263, (232, 188, 42), (214, 168, 28))
+    ring_band(A, C, 254, 268, rev(8.98), rev(9.82), RED)
+    for i in range(0, 56):
+        v = i / 5
+        t = rev(v)
+        if i % 5 == 0:
+            A.line([polar(C, 266, t), polar(C, 307, t)], (238, 238, 236), 3.6)
+        else:
+            A.line([polar(C, 268, t), polar(C, 286, t)], (214, 214, 212), 2.0)
+    NUM = {0: (967, 842), 1: (873, 820), 2: (800, 762), 3: (750, 662), 4: (750, 562), 5: (795, 473), 6: (880, 408), 7: (985, 395), 8: (1087, 430), 9: (1160, 505), 10: (1190, 618)}
+    for v, (x, y) in NUM.items():
+        col = RED if v >= 9 else NUMG
+        A.text(x, y, str(v), WIDE, 50, col, stroke=1.4, strokecol=col)
+    A.text(1056, 388, "7500", REG, 15, NUMG, rot=26)
+    A.text(1147, 452, "8500", REG, 15, NUMG, rot=52)
+    A.text(1203, 551, "9500", REG, 15, RED, rot=80)
+    # the inner ribbon
+    for r in (165, 171, 177):
+        ring_band(A, C, r - 0.9, r + 0.9, 183, 448, (176, 136, 24))
+    for v in range(1, 11):
+        t = rev(v)
+        A.line([polar(C, 163, t), polar(C, 179, t)], (176, 136, 24), 1.6)
+    A.text(1068, 606, "RPM", WIDE, 20, NUMG, stroke=0.3, strokecol=NUMG)
+    A.text(1068, 628, "x 1000", REG, 16, NUMG)
+    # the gear window
+    gw = [(1006, 662), (1020, 646), (1180, 646), (1195, 660), (1170, 730), (1145, 770), (1095, 811), (1050, 785), (1015, 730)]
+    A.poly(gw, (130, 112, 94))
+    A.line(gw + [gw[0]], (222, 220, 212), 3)
+
+    # the left screen
+    gradient(A, (66, 586, 574, 974), (38, 38, 42), (38, 38, 42), 20)
+    gradient(A, (72, 592, 568, 968), (13, 22, 42), (20, 30, 50), 16)
+    gradient(A, (76, 908, 566, 964), (34, 50, 62), (28, 42, 54), 10)
+    A.rect(78, 598, 562, 642, (238, 240, 230))
+    A.text(504, 623, "38°", REG, 33, (40, 74, 84))
+    A.round_rect(84, 650, 562, 692, 10, (44, 62, 76), outline=(176, 196, 204), w=1.6)
+    A.text(100, 671, "VDA available in RACE - CT - CST", WIDE, 20.5, (222, 232, 232), anchor="lm", scale_x=0.98)
+    A.line([(418, 681), (456, 663)], (222, 232, 232), 1.6)
+    A.line([(476, 681), (538, 663)], (222, 232, 232), 1.6)
+
+    def Z(x, y):
+        return (60 + x / 2.5, 585 + y / 2.5)
+
+    def car(pts, w=2.3):
+        A.line([Z(*p) for p in pts], LINE, w)
+
+    car([(222, 345), (300, 328), (560, 330), (830, 330), (960, 328), (1040, 345), (1095, 400), (1125, 470), (1134, 530), (1125, 595), (1095, 665), (1040, 715), (970, 737), (830, 735), (560, 735), (300, 735), (222, 720), (205, 660), (196, 530), (205, 410), (222, 345)])
+    car([(245, 365), (300, 345), (560, 346), (830, 345), (1035, 362), (1088, 430), (1114, 530), (1088, 632), (1035, 702), (830, 720), (560, 720), (300, 720), (245, 703), (226, 620), (216, 530), (226, 430), (245, 365)])
+    A.round_rect(*Z(322, 472), *Z(515, 595), 12, None, outline=LINE, w=2.3)
+    A.round_rect(*Z(332, 481), *Z(505, 587), 9, None, outline=LINE, w=2.3)
+    car([(255, 470), (300, 442), (520, 420), (530, 470), (530, 600), (520, 645), (300, 622), (255, 592), (248, 530), (255, 470)])
+    car([(705, 415), (725, 530), (705, 645)])
+    car([(520, 420), (640, 417), (705, 415), (810, 365)])
+    car([(520, 645), (640, 650), (705, 645), (810, 700)])
+    car([(880, 425), (920, 530), (885, 635)])
+    car([(880, 395), (1010, 415), (1085, 455), (1115, 530), (1085, 610), (1010, 650), (880, 675)])
+    car([(550, 335), (570, 375), (560, 410)])
+    car([(550, 722), (570, 662), (555, 648)])
+    for b in ((288, 330, 438, 400), (832, 338, 972, 392), (298, 660, 442, 730), (835, 675, 975, 735)):
+        A.round_rect(*Z(b[0], b[1]), *Z(b[2], b[3]), 6, (12, 18, 34), outline=LINE, w=2.4)
+    for b in ((298, 415, 432, 438), (835, 408, 975, 432), (300, 620, 435, 642), (835, 635, 975, 660)):
+        A.round_rect(*Z(b[0], b[1]), *Z(b[2], b[3]), 4, (12, 18, 34), outline=LINE, w=2.0)
+    # fuel, speed, odometer
+    A.round_rect(*Z(70, 825), *Z(112, 890), 2, (226, 234, 232))
+    A.rect(*Z(80, 833), *Z(102, 852), (34, 50, 62))
+    A.line([Z(112, 840), Z(126, 858), Z(124, 882), Z(116, 884)], (226, 234, 232), 1.5)
+    for i in range(9):
+        x0 = 131 + i * 39
+        if i < 5:
+            A.rect(*Z(x0, 822), *Z(x0 + 36, 887), (232, 138, 44))
+        else:
+            A.rect(*Z(x0, 824), *Z(x0 + 33, 885), (24, 36, 46))
+            A.line([Z(x0, 824), Z(x0 + 33, 824), Z(x0 + 33, 885), Z(x0, 885), Z(x0, 824)], (206, 216, 214), 1.2)
+    for s, x in (("0", 148), ("1/2", 308), ("1", 468)):
+        A.text(*Z(x, 913), s, ROBO_B, 19, (226, 234, 232))
+    A.text(*Z(922, 833), "km/h", ROBO_B, 15, (226, 234, 232))
+
+    # the right screen
+    gradient(A, (1356, 588, 1868, 978), (38, 38, 42), (38, 38, 42), 20)
+    gradient(A, (1362, 594, 1862, 972), (16, 20, 48), (40, 32, 78), 14)
+    H = (1609, 820)
+    SP = {0: -130.3, 30: -110, 60: -86.9, 90: -64.6, 120: -43, 150: -21.1, 180: 0, 210: 23.9, 240: 44.6, 270: 65.7, 300: 86.2, 330: 108.7, 360: 132.5}
+
+    def sang(k):
+        return interp(sorted(SP.items()), k)
+
+    ring_band(A, H, 202, 216, sang(0), sang(360), (112, 132, 146))
+    for k in range(0, 361, 10):
+        t = sang(k)
+        if k % 30 == 0:
+            A.line([polar(H, 190, t), polar(H, 219, t)], (240, 244, 242), 3.6)
+        else:
+            A.line([polar(H, 189, t), polar(H, 201, t)], (232, 236, 236), 2.2)
+
+    def R_(x, y):
+        return (1350 + x / 2.5, 585 + y / 2.5)
+
+    BIG = ((180, 653, 165), (120, 398, 316), (240, 888, 316), (60, 282, 566), (300, 968, 566), (360, 847, 855), (0, 342, 856))
+    SMALL = ((150, 493, 227), (210, 808, 227), (90, 308, 432), (270, 948, 432), (30, 292, 716), (330, 952, 716))
+    for k, x, y in BIG:
+        A.text(*R_(x, y), str(k), WIDE, 27, WHT, stroke=1.0, strokecol=WHT)
+    for k, x, y in SMALL:
+        A.text(*R_(x, y), str(k), WIDE, 20, WHT, stroke=0.8, strokecol=WHT)
+    A.text(*R_(637, 437), "km/h", ROBO_B, 20, WHT)
+    A.round_rect(1752, 601, 1855, 645, 5, (62, 82, 94))
+    A.final = A.finish(A.S, blur=2.0, strength=0.3)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    # the needles
+    im = needle_sprite(sp, 262, 80, [(-82, 0, 4, 6, (14, 14, 14)), (0, 96, 5, 4, (14, 14, 14)), (96, 262, 8, 2, (244, 244, 242)), (112, 240, 2.4, 1, (212, 40, 34))], hub=31, hub_col=(14, 14, 14))
+    add_needle(sp, im, C[0], C[1], "rpm", [(v, rev(v)) for v in (0, 10)])
+    im = needle_sprite(sp, 150, 56, [(-56, 0, 2.2, 2.6, (66, 84, 104)), (0, 62, 2.2, 2.2, (66, 84, 104)), (62, 150, 4.5, 1.5, (244, 244, 242)), (70, 136, 1.2, 0.8, (212, 40, 34))], hub=18, hub_col=(30, 38, 62), hub_line=(150, 178, 192))
+    add_needle(sp, im, H[0], H[1], "kmh", sorted(SP.items()))
+
+    # the mode bar, the gear's "auto", warning lights while parked
+    for when, word in (("sport", "SPORT"), ("corsa", "RACE")):
+        L = Art(REF, box, S=2, bg=(0, 0, 0))
+        L.text(80, 622, word, WIDE, 22, (255, 255, 255), anchor="lm")
+        L.final = L.finish(L.S, blur=1, strength=0)
+        im, left, top_ = sp.box(L, (76, 604, 260, 640), black=True)
+        c = Image.new("RGBA", im.size, (40, 74, 84, 0))
+        c.putalpha(im.getchannel("A"))
+        sp.add_show((c, left, top_), when)
+    L = Art(REF, box, S=2, bg=(0, 0, 0))
+    L.text(1078, 766, "auto", ROBO_B, 20, (240, 110, 44))
+    L.final = L.finish(L.S, blur=1, strength=0)
+    sp.add_show(sp.box(L, (1050, 754, 1106, 778), black=True), "sport")
+    W2 = Art(REF, box, S=2, bg=(0, 0, 0))
+    W2.icon((496, 446, 536, 490), floor=46, gain=1.5)
+    W2.icon((1450, 500, 1498, 542), floor=46, gain=1.5)
+    W2.final = W2.finish(W2.S, blur=1.5, strength=0.4)
+    sp.add_show(sp.box(W2, (490, 442, 542, 494), black=True), "parked")
+    sp.add_show(sp.box(W2, (1444, 496, 1504, 546), black=True), "parked")
+
+    solid_gear(sp, WIDE, 62, (238, 110, 44), 1102, 722)
+    sp.font("speed", WIDE, 36, "0123456789", stroke=0.5, shear=0, track=0.5)
+    sp.readout("speed", 434, 944, "m", 3, "speed", (226, 234, 232))
+    sp.font("odo", ROBO_B, 27, "0123456789", shear=0)
+    sp.readout("odo", 563, 949, "r", 6, "odoTrim", (226, 234, 232))
+    sp.font("unit", ROBO_B, 15, "kmhpi/", shear=0)
+    sp.readout("unit", 547, 919, "m", 2, "distUnit", (226, 234, 232))
+    sp.font("clock", ROBO_B, 27, "0123456789:", shear=0, track=0.6)
+    sp.readout("clock", 1803, 624, "m", 5, "clock", (238, 242, 240))
+    return sp
+
+
+def california():
+    """the California's three dials, from the owner's photo (imports/refs/california_cluster_owner.png).
+    Coordinates are photo pixels, or the zoomed views' (m, L, R). No maker's horse. The word on the photo's corner
+    is the seller's, not the car's: it is outside the box."""
+    box = (120, 270, 1460, 800)
+    REF = "california_cluster_owner.png"
+    A = Art(REF, box, S=2, bg=(9, 9, 12))
+    sp = Spec("california", box[2] - box[0], box[3] - box[1], 1, 1, box[0], box[1])
+    sp.redline, sp.idle = 7.5, 0.7
+
+    def m(x, y):
+        return (540 + x / 2.222, 270 + y / 2.222)
+
+    def L_(x, y):
+        return (130 + x / 2.5, 350 + y / 2.5)
+
+    def R_(x, y):
+        return (1020 + x / 2.3256, 370 + y / 2.3256)
+
+    C = m(488, 515)
+    BLUE = (116, 178, 206)
+    RED = (250, 44, 30)
+    BL2 = (92, 204, 224)
+    WHT = (240, 242, 244)
+
+    def rev(v):
+        return 180 + 27 * v
+
+    # the rev counter
+    A.circle(C[0], C[1], 210, (92, 90, 90))
+    A.circle(C[0], C[1], 205, (16, 16, 18))
+    radial(A, C[0], C[1], 177, (84, 72, 16), (148, 128, 30))
+    ring_band(A, C, 166, 177, rev(7.95), rev(9.95), RED)
+    for i in range(0, 56):
+        v = i / 5
+        t = rev(v)
+        col = (236, 236, 234)
+        if i % 5 == 0:
+            A.line([polar(C, 177, t), polar(C, 205, t)], (150, 150, 150), 2.6)
+        else:
+            A.line([polar(C, 180, t), polar(C, 192, t)], col, 1.4)
+    NUM = {0: (488, 855), 1: (348, 818), 2: (238, 730), 3: (165, 580), 4: (165, 432), 5: (235, 295), 6: (362, 198), 7: (522, 178), 8: (675, 235), 9: (785, 350), 10: (828, 518)}
+    for v, (x, y) in NUM.items():
+        col = RED if v >= 8 else BLUE
+        A.text(*m(x, y), str(v), WIDE, 34, col, stroke=1.0, strokecol=col)
+    A.text(*m(628, 168), "7500", REG, 9.5, (206, 206, 186), rot=14)
+    A.text(*m(762, 265), "8500", REG, 9.5, RED, rot=44)
+    A.text(*m(845, 415), "9500", REG, 9.5, RED, rot=76)
+    for r in (106, 111, 116, 121):
+        ring_band(A, C, r - 0.5, r + 0.5, 181, 448, (104, 168, 176))
+    for v in range(1, 11):
+        t = rev(v)
+        A.line([polar(C, 105, t), polar(C, 122, t)], (104, 168, 176), 1.1)
+    A.text(*m(640, 505), "RPM", WIDE, 11.5, BLUE, stroke=0.15, strokecol=BLUE)
+    A.text(*m(640, 535), "x 1000", REG, 9.5, BLUE)
+    gw = [(545, 585), (565, 565), (815, 565), (830, 585), (805, 655), (770, 730), (680, 806), (590, 760), (550, 700)]
+    A.poly([m(*p) for p in gw], (232, 112, 10))
+    A.line([m(*p) for p in gw + gw[:1]], (120, 116, 110), 2)
+    A.line([m(*p) for p in ((575, 688), (632, 688), (603, 716), (575, 688))], (252, 226, 30), 1.8)
+
+    # the left screen
+    gradient(A, (146, 475, 492, 734), (30, 30, 34), (30, 30, 34), 12)
+    gradient(A, (149, 478, 489, 731), (82, 82, 88), (70, 72, 92), 10)
+    A.rect(149, 478, 458, 507, (248, 248, 246))
+    A.rect(*L_(44, 396), *L_(436, 772), (214, 214, 206))
+    A.rect(*L_(52, 404), *L_(428, 764), (56, 62, 132))
+    for a, b in ((52, 186), (196, 330), (340, 896)):
+        A.rect(*L_(a, 780), *L_(b, 850), (156, 170, 214))
+        A.rect(*L_(a + 3, 783), *L_(b - 3, 847), (42, 42, 62))
+    gradient(A, (150, 692, 489, 730), (42, 46, 98), (40, 44, 92), 8)
+    # coolant, oil
+    A.line([L_(544, 458), L_(544, 512)], WHT, 1.8)
+    A.line([L_(544, 462), L_(558, 462)], WHT, 1.2)
+    A.line([L_(544, 478), L_(558, 478)], WHT, 1.2)
+    A.line([L_(506, 516), L_(524, 508), L_(544, 516), L_(562, 508), L_(582, 516)], WHT, 1.6)
+    A.line([L_(506, 526), L_(524, 518), L_(544, 526), L_(562, 518), L_(582, 526)], WHT, 1.6)
+    A.line([L_(498, 682), L_(530, 690), L_(554, 690), L_(584, 680), L_(552, 708), L_(516, 708), L_(498, 682)], WHT, 1.7)
+    A.line([L_(536, 646), L_(536, 690)], WHT, 1.8)
+    A.line([L_(536, 652), L_(552, 652)], WHT, 1.2)
+    A.line([L_(536, 668), L_(552, 668)], WHT, 1.2)
+    for cy, nums in ((495, (("210", 725, 428), ("230", 775, 480), ("140", 690, 565), ("260", 760, 565), ("°F", 660, 492))), (680, (("240", 725, 614), ("300", 785, 700), ("140", 690, 750), ("360", 760, 750), ("°F", 660, 678)))):
+        c = L_(725, cy)
+        ring_band(A, c, 37.5, 40.5, -140, 104, WHT)
+        ring_band(A, c, 37.5, 40.5, 104, 140, (240, 196, 50))
+        for t in range(-140, 141, 35):
+            A.line([polar(c, 33, t), polar(c, 38, t)], WHT, 1.2)
+        for s, x, y in nums:
+            A.text(*L_(x, y), s, ROBO_B, 7.8, WHT)
+    A.line([L_(725, 680), L_(672, 752)], WHT, 1.8)
+    A.line([L_(725, 680), L_(745, 668)], (150, 170, 210), 1.8)
+    # fuel, odometer
+    A.round_rect(*L_(66, 858), *L_(106, 932), 2, WHT)
+    A.rect(*L_(76, 866), *L_(96, 884), (42, 46, 98))
+    A.line([L_(106, 868), L_(128, 900), L_(122, 924), L_(112, 926)], WHT, 1.4)
+    for i in range(10):
+        x0 = 136 + i * 24.6
+        if i < 5:
+            A.rect(*L_(x0, 860), *L_(x0 + 22, 903), (246, 232, 190))
+        else:
+            A.line([L_(x0, 860), L_(x0 + 20, 860), L_(x0 + 20, 903), L_(x0, 903), L_(x0, 860)], (214, 214, 220), 1.0)
+    for s, x in (("0", 150), ("1/2", 257), ("1", 373)):
+        A.text(*L_(x, 930), s, ROBO_B, 14, WHT)
+
+    # the speedometer
+    H = R_(382, 575)
+    radial(A, H[0], H[1], 186, (10, 10, 30), (12, 12, 22))
+    A.line([polar(H, 186, t) for t in range(0, 365, 5)], (38, 38, 50), 1.4)
+
+    def sp_ang(mph):
+        return 180 + 1.4 * mph
+
+    for r in (103, 106.5, 110, 113):
+        ring_band(A, H, r - 0.65, r + 0.65, 0, 359.5, BL2)
+    for k in range(0, 221, 10):
+        t = sp_ang(k)
+        if k % 20 == 0:
+            A.line([polar(H, 104, t), polar(H, 124, t)], BL2, 1.5)
+        else:
+            A.line([polar(H, 113, t), polar(H, 119, t)], BL2, 1.1)
+    NM = ((20, 235, 845, 26), (40, 118, 742, 19), (60, 72, 605, 26), (80, 95, 452, 19), (100, 190, 330, 26), (120, 325, 265, 19), (140, 478, 280, 26), (160, 607, 355, 19), (180, 680, 483, 26), (200, 688, 632, 19), (220, 615, 770, 26))
+    for k, x, y, s in NM:
+        A.text(*R_(x, y), str(k), WIDE, s * 0.92, BL2, rot=sp_ang(k), stroke=0.25, strokecol=BL2)
+    A.text(*R_(378, 885), "0", WIDE, 12, BL2, rot=180)
+    A.text(*R_(523, 578), "MPH", WIDE, 13, (160, 190, 226))
+    A.final = A.finish(A.S, blur=2.0, strength=0.3)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    im = needle_sprite(sp, 180, 58, [(-58, 0, 3.2, 4, (10, 10, 10)), (0, 60, 4, 3.6, (10, 10, 10)), (60, 118, 6, 6, (116, 116, 112)), (118, 180, 6, 1.2, (116, 116, 112)), (82, 160, 2, 1.2, (238, 30, 60))], hub=20, hub_col=(10, 10, 10))
+    add_needle(sp, im, C[0], C[1], "rpm", [(0, rev(0)), (10, rev(10))])
+    im = needle_sprite(sp, 148, 8, [(0, 88, 2.6, 2.6, (20, 20, 30)), (88, 112, 6, 6, (118, 118, 116)), (112, 148, 6, 1.2, (118, 118, 116)), (94, 138, 2, 1, (238, 30, 60))])
+    add_needle(sp, im, H[0], H[1], "mph", [(0, sp_ang(0)), (220, sp_ang(220))])
+
+    L = Art(REF, box, S=2, bg=(0, 0, 0))
+    L.text(*m(652, 745), "auto", ROBO_B, 12, (252, 226, 30))
+    L.final = L.finish(L.S, blur=1, strength=0)
+    sp.add_show(sp.box(L, (806, 596, 846, 616), black=True), "sport")
+    # parked: the warning lights and the note on the left screen, as in the photo
+    W2 = Art(REF, box, S=2, bg=(0, 0, 0))
+    W2.icon((352, 372, 456, 412), floor=46, gain=1.4)
+    W2.icon((280, 408, 358, 436), floor=46, gain=1.4)
+    W2.icon((1054, 386, 1112, 416), floor=46, gain=1.4)
+    W2.icon((1130, 386, 1205, 416), floor=46, gain=1.4)
+    W2.icon((1088, 428, 1128, 444), floor=46, gain=1.4)
+    W2.icon((520, 696, 562, 728), floor=46, gain=1.4)
+    W2.icon((952, 696, 990, 728), floor=46, gain=1.4)
+    W2.final = W2.finish(W2.S, blur=1.5, strength=0.4)
+    for b in ((348, 368, 458, 416), (276, 404, 362, 440), (1050, 382, 1116, 420), (1126, 382, 1209, 420), (1084, 424, 1132, 448), (516, 692, 566, 732), (948, 692, 994, 732)):
+        sp.add_show(sp.box(W2, b, black=True), "parked")
+    N_ = Art(REF, box, S=2, bg=(0, 0, 0))
+    for x, y, r in ((222, 512, 15), (243, 502, 19), (262, 513, 13)):
+        N_.circle(*L_(x, y), r / 2.5, (236, 238, 240))
+    N_.rect(*L_(208, 512), *L_(272, 524), (236, 238, 240))
+    for x in (214, 232, 250):
+        N_.line([L_(x, 530), L_(x - 22, 552)], (236, 238, 240), 1.4)
+    N_.rect(*L_(284, 498), *L_(297, 534), (236, 238, 240))
+    N_.rect(*L_(284, 540), *L_(297, 552), (236, 238, 240))
+    N_.text(*L_(238, 606), "Rain sensor", ROBO_B, 14, (236, 238, 240))
+    N_.text(*L_(238, 656), "failure", ROBO_B, 14, (236, 238, 240))
+    N_.final = N_.finish(N_.S, blur=1, strength=0)
+    sp.add_show(sp.box(N_, (172, 530, 300, 626), black=True), "parked")
+
+    solid_gear(sp, WIDE, 40, (252, 226, 30), *m(692, 682))
+    sp.font("odo", ROBO_B, 22, "0123456789", shear=0)
+    sp.readout("odo", 468, 713, "r", 6, "odoTrim", WHT)
+    sp.font("unit", ROBO_B, 13, "kmhpi/", shear=0)
+    sp.readout("unit", 317, 714, "m", 2, "distUnit", WHT)
+    return sp
+
+
+BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california}
 PREVIEW = {
+    "f458": ("f458_cluster_owner.png", (56, 300, 1876, 990), None, dict(v=0.7, gear="N", mph=0, manual=False, clock="20:26", odo="009857", range="432")),
+    "california": ("california_cluster_owner.png", (120, 270, 1460, 800), None, dict(v=0.0, gear="N", mph=0, manual=False, clock="20:26", odo="029822", range="432")),
     "urus": ("urus_performante_cluster_owner_level.png", (92, 236, 652, 392), None, dict(v=0.0, gear="N", mph=0, manual=True, clock="9:57", odo="2938", range="432")),
     "lp700": ("aventador_lp700_cluster_owner.png", (110, 150, 1400, 680), None, dict(v=3.0, gear="2", mph=31, manual=False, clock="10:45", date="10.08.2019")),
     # ref, the view in the ref, the same view in the design's pixels, a state
@@ -1443,6 +1863,12 @@ def spec_lua(sp, ids):
             pts += [v, x]
         fills.append(rect(f["im"]) + [f["left"], f["top"], f.get("lead", 0), lua_list(pts)])
     shows = [rect(x["im"]) + [x["left"], x["top"], x["when"] or "always"] for x in sp.shows]
+    needles = []
+    for n in sp.needles:
+        pts = []
+        for a, b in n["pts"]:
+            pts += [a, b]
+        needles.append(rect(n["im"]) + [n["x"], n["y"], '"%s"' % n["bind"], lua_list(pts)])
     gear = {ch: rect(e["im"]) for ch, e in sp.gear["sprites"].items()}
     fonts = {}
     for name, f in sp.fonts.items():
@@ -1477,6 +1903,11 @@ def spec_lua(sp, ids):
     for b in shows:
         w("\t\t\t" + lua_list(b) + ",")
     w("\t\t},")
+    if needles:
+        w("\t\tneedles = {")
+        for b in needles:
+            w("\t\t\t" + lua_list(b) + ",")
+        w("\t\t},")
     w("\t\tgear = { x = %s, y = %s, sprites = {" % (num(sp.gear["x"]), num(sp.gear["y"])))
     for ch, r in gear.items():
         w('\t\t\t["%s"] = %s,' % (ch, lua_list(r)))
