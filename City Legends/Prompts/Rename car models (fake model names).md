@@ -3,14 +3,15 @@
 _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras._
 
 ## Why (owner, 2026-11-06)
-The brand names are already fictional, but the model names are still real (Aventador, Huracan, M3, 458, Chiron...). Those are trademarks too, so they're a DMCA / takedown risk. The owner: "make fake model names, but for the BMWs ... don't make it N5 or N3, use their chassis name like F90 or G80". Mercedes, Porsche, Toyota, Nissan and Mazda use chassis codes the same way, so we use them there too; the rest get made-up names in the same spirit.
+The brand names are already fictional (except "Hemi", renamed below), but the model names are still real (Aventador, Huracan, M3, 458, Chiron...). Those are trademarks too, so they're a DMCA / takedown risk. The owner: "make fake model names, but for the BMWs ... don't make it N5 or N3, use their chassis name like F90 or G80". Mercedes, Porsche, Toyota, Nissan and Mazda use chassis codes the same way, so we use them there too; the rest get made-up names in the same spirit.
 
 ## Rules
 - Change only the **display name** (`Name` in `Games/CityLegends/src/shared/Cars.lua`). **Keep every `Id`**, price, level, class, PI and model, so owners keep their cars and saves don't break.
 - Also rename the extra trims built in code (e.g. the Veyron's "Super Sport" and "Grand Sport Vitesse" steps) and any other place that shows a car name (dealer, garage, market, Customs, races, chauffeur, notifications, store, notes).
-- Search the whole game for the old model words (Aventador, Huracan, Gallardo, Murcielago, Urus, Revuelto, Countach, Veyron/Veyrun, Chiron/Chiroun, Camaro, Corvette, Skyline, Supra/Supro, Land Cruiser/Cruzer, Panamera, Boxster, Continental, Bentayga, Wraith, Phantom, Cullinan, Levante/Levanto, Maybach/Maybech, Vantage, Vanquish, DBX, LFA, Camry/Camri, Alphard/Alfard, Challenger/Challenjer, SRT, ZL1, GT3, AMG, Black Series, M3/M4/M5/M6/M8, X6/X7, 458/599/F430, R8, 12C) in scripts, UI text and part / model names visible to players, and replace them. Internal ids stay.
+- Search the whole game for the old model words (Aventador, Huracan, Gallardo, Murcielago, Urus, Revuelto, Countach, Veyron/Veyrun, Chiron/Chiroun, Camaro, Corvette, Skyline, Supra/Supro, Land Cruiser/Cruzer, Panamera, Boxster, Continental, Bentayga, Wraith, Phantom, Cullinan, Levante/Levanto, Maybach/Maybech, Vantage, Vanquish, DBX, LFA, Camry/Camri, Alphard/Alfard, Challenger/Challenjer, SRT, ZL1, GT3, AMG, Hemi, Gullwing, Gran Coupe, Performante, Black Series, M3/M4/M5/M6/M8, X6/X7, 458/599/F430, R8, 12C) in scripts, UI text and part / model names visible to players, and replace them. Internal ids stay.
 - Retired cars get renamed too (owners still have them).
-- Don't change the brand names, `Cars.Makes` or `makeOf()` (every new name still starts with its brand).
+- **Rename one brand: "Hemi" → "Ironclad"** (owner, 2026-11-06: HEMI is a real registered trademark of the Dodge / Chrysler group). Change it in `Cars.Makes`, every car name, the garage / dealer brand lists, the market, and any other text. Players' saved cars use ids, so nothing is lost; check the garage still groups them under IRONCLAD.
+- Don't change any other brand name or `makeOf()` (every new name still starts with its brand).
 
 ## The new names
 | Id | Old name | New name |
@@ -25,7 +26,7 @@ The brand names are already fictional, but the model names are still real (Avent
 | bnw_m5_f10 | Bavarica Werkz M5 F10 | Bavarica Werkz F10 |
 | bnw_m5_f90 | Bavarica Werkz M5 F90 | Bavarica Werkz F90 |
 | bnw_m6_v10 | Bavarica Werkz M6 V10 | Bavarica Werkz E63 V10 |
-| bnw_m8gc | Bavarica Werkz M8 Gran Coupe | Bavarica Werkz F93 Gran Coupe |
+| bnw_m8gc | Bavarica Werkz M8 Gran Coupe | Bavarica Werkz F93 Fastback |
 | bnw_x6 | Bavarica Werkz X6 M Sport | Bavarica Werkz E71 Sport (check the model's generation: F16 / G06 if newer) |
 | bnw_x7 | Bavarica Werkz X7 | Bavarica Werkz G07 |
 | bnw_750li | Bavarica Werkz 750Li | Bavarica Werkz G12 Long |
@@ -39,14 +40,14 @@ The brand names are already fictional, but the model names are still real (Avent
 | bentz_s63 | Tri-Star Silber S65 W222 | Tri-Star Silber W222 V12 |
 | bentz_s65_w221 | Tri-Star Silber S63 W221 | Tri-Star Silber W221 V8 |
 | bentz_sl65bs | Tri-Star Silber SL65 Black Series | Tri-Star Silber R230 V12 Track |
-| bentz_sls | Tri-Star Silber SLS | Tri-Star Silber C197 Gullwing |
+| bentz_sls | Tri-Star Silber SLS | Tri-Star Silber C197 Wingdoor |
 | bentz_gls | Tri-Star Silber Maybech GLS 600 | Tri-Star Silber X167 Royale |
 | bentz_s680 | Tri-Star Silber Maybech S680 | Tri-Star Silber Z223 Royale V12 |
 | bentz_190e | Tri-Star Silber 190E Evo II | Tri-Star Silber W201 Evo II |
 | bentz_a45s | Tri-Star Silber A45 S | Tri-Star Silber W177 Turbo S |
 | brabos_g63 | Rocket G63 | Rocket W463 800 |
-| bentz_gt63s | Hemi SRT | Hemi Supercharged |
-| dodger_challenger | Hemi Challenjer | Hemi LC V8 |
+| bentz_gt63s | Hemi SRT | Ironclad Supercharged |
+| dodger_challenger | Hemi Challenjer | Ironclad LC V8 |
 | suzaki_swift | Sompact Swiff | Sompact Zippa |
 | toyoka_belta | Apex Belto | Apex Metro |
 | toyoka_camri | Apex Camri | Apex Cambria |
@@ -72,8 +73,8 @@ The brand names are already fictional, but the model names are still real (Avent
 | porsha_boxster | Stuttgart Boxster 718 | Stuttgart 982 |
 | porsha_gt3 | Stuttgart 911 GT3 991.2 | Stuttgart 991.2 Track |
 | chevo_camaro | Golden Camaro ZL1 | Golden Six Supercharged |
-| chevo_c6 | Golden Corvette C6 | Golden C6 |
-| chevo_c7 | Golden Corvette C7 | Golden C7 |
+| chevo_c6 | Golden Corvette C6 | Golden Sting 6 |
+| chevo_c7 | Golden Corvette C7 | Golden Sting 7 |
 | audy_r8 | Precision R8 Type 42 | Precision Type 42 V10 |
 | mclaran_12c | Speedmark MP4-12C | Speedmark P11 |
 | astin_db9 | British Vanguard Vanquish | British Vanguard Vanta V12 |
@@ -96,7 +97,7 @@ The brand names are already fictional, but the model names are still real (Avent
 | lambrini_svj63 | Enfurecido Aventador SVJ 63 | Enfurecido LB834 Corsa 63 |
 | lambrini_revuelto | Enfurecido Revuelto | Enfurecido LB744 |
 | lambrini_huracan | Enfurecido Huracan EVO | Enfurecido LB724 |
-| lambrini_performante | Enfurecido Huracan Performante Spyder | Enfurecido LB724 Performa Spyder |
+| lambrini_performante | Enfurecido Huracan Performante Spyder | Enfurecido LB724 Aero Spyder |
 | lambrini_sto | Enfurecido Huracan STO | Enfurecido LB724 Track |
 | lambrini_sterrato | Enfurecido Huracan Sterrato | Enfurecido LB724 Rally |
 | lambrini_lp570 | Enfurecido Gallardo LP570-4 SL | Enfurecido L140 Leggera |
@@ -104,14 +105,16 @@ The brand names are already fictional, but the model names are still real (Avent
 | lambrini_lp640 | Enfurecido Murcielago LP650-4 Roadster | Enfurecido L147 Roadster |
 | lambrini_lp670 | Enfurecido Murcielago LP670-4 SV | Enfurecido L147 Veloce |
 | lambrini_urus | Enfurecido Urus | Enfurecido Brava |
-| lambrini_urusp | Enfurecido Urus Performante | Enfurecido Brava Performa |
+| lambrini_urusp | Enfurecido Urus Performante | Enfurecido Brava Sport |
 | lambrini_countach | Enfurecido Countach LP400S | Enfurecido Classico 400 |
-| bugotti_veyron | Velocité Noir Veyrun 16.4 | Velocité Noir W16 Origine |
-| (trim step) | Velocité Noir Veyrun Super Sport | Velocité Noir W16 Origine Super Sport |
-| (trim step) | Velocité Noir Veyrun Grand Sport Vitesse | Velocité Noir W16 Origine Roadster Vitesse |
-| bugotti_chiron | Velocité Noir Chiroun | Velocité Noir W16 Éclair |
-| bugotti_chiron_pursport | Velocité Noir Chiroun Pur Sport | Velocité Noir W16 Éclair Pure |
-| bugotti_chiron_supersport | Velocité Noir Chiroun Super Sport | Velocité Noir W16 Éclair Super Sport |
+| bugotti_veyron | Velocité Noir Veyrun 16.4 | Velocité Noir Origine |
+| (trim step) | Velocité Noir Veyrun Super Sport | Velocité Noir Origine Super Sport |
+| (trim step) | Velocité Noir Veyrun Grand Sport Vitesse | Velocité Noir Origine Roadster Vitesse |
+| bugotti_chiron | Velocité Noir Chiroun | Velocité Noir Éclair |
+| bugotti_chiron_pursport | Velocité Noir Chiroun Pur Sport | Velocité Noir Éclair Pure |
+| bugotti_chiron_supersport | Velocité Noir Chiroun Super Sport | Velocité Noir Éclair Super Sport |
+
+Avoid in future names (owner, 2026-11-06): C6 / C7 style codes Chevrolet advertises, W16, "Gran Coupe", "Gullwing", "Performante", and anything a maker uses as a real model name.
 
 If a new car (e.g. the Pending A45 S, or any future import) arrives, name it the same way: BMW / Mercedes / Porsche / Japanese cars by chassis code, the rest with a made-up name in the same style.
 
