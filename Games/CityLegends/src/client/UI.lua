@@ -2701,7 +2701,23 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+-- (2026-11-06) several at once (a race, a level, a goal) landed on top of each other: now they wait
+-- their turn
+local POPUP_GAP = 0.55
+local popupFree = 0
+local showPopup: (string, number, Color3) -> ()
 function UI.popup(text: string, amount: number, color: Color3)
+	local now = os.clock()
+	local wait = popupFree - now
+	popupFree = math.max(now, popupFree) + POPUP_GAP
+	if wait > 0 then
+		task.delay(wait, showPopup, text, amount, color)
+	else
+		showPopup(text, amount, color)
+	end
+end
+
+showPopup = function(text: string, amount: number, color: Color3)
 	local holder = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.6), Size = UDim2.fromOffset(500, 70), Parent = popupHolder })
 	local main = label({ Text = text, TextSize = 34, Font = Enum.Font.GothamBlack, TextColor3 = color, Size = UDim2.new(1, 0, 0, 40), Parent = holder })
 	new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = main })

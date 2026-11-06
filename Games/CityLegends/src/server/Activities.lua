@@ -53,6 +53,15 @@ local function flatDist(a: Vector3, b: Vector3): number
 	return Vector3.new(a.X - b.X, 0, a.Z - b.Z).Magnitude
 end
 
+-- (2026-11-06) the server sees a moving car a moment behind the player's screen, so the faster the
+-- car, the more room at the finish: a fast car on a slow connection had its race thrown away
+local function atFinish(player: Player, pos: Vector3, finish: Vector3, radius: number): boolean
+	local car = ctx.getCar(player)
+	local root = car and car.PrimaryPart
+	local speed = if root then root.AssemblyLinearVelocity.Magnitude else 0
+	return flatDist(pos, finish) <= radius + speed * A.FinishLag
+end
+
 local function data(player: Player): { [string]: any }?
 	local profile = PlayerData.get(player)
 	if not profile then
@@ -112,7 +121,7 @@ handlers.raceFinish = function(player, clientTime)
 	runs[player] = nil
 	local race = ActivityData.raceById[run.id]
 	local pos = where(player)
-	if not pos or flatDist(pos, race.checkpoints[#race.checkpoints]) > A.CheckpointRadius * 2.5 then
+	if not pos or not atFinish(player, pos, race.checkpoints[#race.checkpoints], A.CheckpointRadius * 2.5) then
 		return { ok = false, message = "Not at the finish" }
 	end
 	local elapsed = os.clock() - run.t0
@@ -398,7 +407,7 @@ handlers.duelFinish = function(player)
 		return { ok = false }
 	end
 	local pos = where(player)
-	if not pos or flatDist(pos, duel.finish) > A.CheckpointRadius * 2 or os.clock() < duel.t0 + 5 then
+	if not pos or not atFinish(player, pos, duel.finish, A.CheckpointRadius * 2) or os.clock() < duel.t0 + 5 then
 		return { ok = false, message = "Not at the finish" }
 	end
 	runs[player] = nil

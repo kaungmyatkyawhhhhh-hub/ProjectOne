@@ -830,7 +830,10 @@ local function update(dt: number)
 	-- HUD
 	setStars(level, level > 0 and loseT > 0.6)
 	if level > 0 then
-		local left = math.max(0, math.ceil(P.ChaseSeconds[math.clamp(level, 1, 5)] - chaseT))
+		local stars = math.clamp(level, 1, 5)
+		-- (2026-11-06) with the police cars off nobody can see you, so it ends at LoseSeconds
+		local ends = if P.Cars == false then P.LoseSeconds[stars] else P.ChaseSeconds[stars]
+		local left = math.max(0, math.ceil(ends - chaseT))
 		chaseLabel.Text = string.format("POLICE GIVE UP IN %d:%02d", left // 60, left % 60)
 		chaseLabel.Visible = true
 	else

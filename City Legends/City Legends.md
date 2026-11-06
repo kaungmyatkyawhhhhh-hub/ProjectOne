@@ -92,7 +92,7 @@ Picture: [[Fake names - in the models.jpg]].
 7. **Curves, part done:** all 188 lanes checked: 0 holes, 0 kerbs in a lane, 0 ledges over 0.4 studs. The 163 speed bumps stay. Red-and-white kerbs on 24 sharp bends (313 pieces). **Not done:** no bend was reshaped, and there are no before / after shots of the worst 10.
 8. **Bug hunt, part done:** see the list below.
 
-**Next: step 7.2:** before / after shots of the worst 10 curves (in Play), then real curved road meshes if the owner approves the upload folder (see "Drives, surfaces, bends" below). Then finish step 8 (police, races, deliveries, Customs).
+**Next:** step 7.2's meshes are done and step 8 is done (see the bug list). The before / after of the worst 10 curves can't be taken without undoing the work. Owner's queue, 2026-11-06: Ghost Driver lighting prompt, then a racing hub at the Old Rock with all the race start areas in one place.
 
 **What the owner needs to do:**
 1. Play one lap and say if the morning mist is too much or too little.
@@ -185,7 +185,14 @@ Picture: [[Fake names - in the models.jpg]].
 6. **Open:** "Asset is not approved" in the Output: textures on `ferrara_california` `Body_CabinTile` (`121793854339768`), `lexis_lfa`, `bugotti_veyron` brakes, `rolls_wraith`, and a decal on HelipadVilla. The first came from tonight's job: the cabin tile may be waiting for moderation. Check it again.
 7. **Open:** one more "Failed to load sound" after the `videoplayback` move: not traced.
 8. **Checked, no errors:** new player start, claim, first spawn at the casino, the menu, every fast travel spot has ground under it, the state calls of Goals, Rewards, Customs, Market, Activities, Chauffeur, CarCall.
-9. **Not tested:** police chase, a full race, a delivery, a Customs purchase, a dealer purchase, saves on a real server, phone size, 2 players. The MCP can't click, and drives one client.
+9. **Tested 2026-11-06, in Play on a new test save (store `CityLegends_test_step8_a`, real store put back after):** new player claim (Horizon Z33), full race (Casino Avenue, Gold and Silver paid), delivery (paid), Customs (cash, CP, plate, nothing charged twice), dealer buy (refused away from the dealer, one charge), a 5-minute test drive (own car back), wanted (stars, race cancelled, no fast travel, escape pays), save kept over a restart. No script errors.
+   **Fixed from that test:**
+   - **Customs:** Y or F got you out of the car behind the Customs screen, which then stayed open. The screen now holds the driving keys (`UI.modalOpen`, `OnFoot`).
+   - **Race and duel finish:** the check used a fixed distance, so a fast car on a slow connection could have its race thrown away ("Not at the finish"). It now allows for speed (`Config.Activities.FinishLag`, 0.6 s of driving).
+   - **Police timer:** with the police cars off (`Config.Police.Cars`) the HUD said 0:40 and the chase ended at 9 s. It now counts down the real time.
+   - **Popups:** several at once (race, level, goals) landed on top of each other. They now come 0.55 s apart (`UI.popup`).
+   **Still not tested:** a police chase with police cars (they're switched off), a real server, a real phone, 2 players. The MCP drives one client.
+10. **Asset errors in the Output (2026-11-06):** the sound `109026241087535` is the `videoplayback` Sound now in `ServerStorage.MovedFromWorkspace_2026-11-06` (harmless). `bentz_g63` (3 pictures), `ferrara_599` (body picture and 4 wheels), `rolls_wraith` (1) and one small piece of the 350Z's door (mesh `1363117601`) are "not approved". `100891812021410` (SideDecals) was still being processed by Roblox. Some other ids (`137208988383753`, `116884033603064`, `108647286625321` "not compliant", `89502127512084`) aren't in any car, script or map property I searched: not traced.
 
 ## Features so far
 - **City:** a big night city with traffic that stops at red lights, and a tunnel intro cutscene ("CITY LEGENDS").

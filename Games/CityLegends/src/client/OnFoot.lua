@@ -190,7 +190,7 @@ end
 function OnFoot.init()
 	remotes = ReplicatedStorage:WaitForChild("Remotes") :: Folder
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if processed then
+		if processed or UI.modalOpen then
 			return
 		end
 		if input.KeyCode == Enum.KeyCode.Y or input.KeyCode == Enum.KeyCode.DPadUp then

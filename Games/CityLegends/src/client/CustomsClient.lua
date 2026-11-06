@@ -457,6 +457,7 @@ local function open()
 	local finish: () -> ()
 	Driving.inputEnabled = false
 	Driving.cameraHold = true
+	UI.modalOpen = true -- (2026-11-06: Y and F got you out of the car behind this screen)
 	local camera = workspace.CurrentCamera
 	local angle = 0.6
 	local dragging = false
@@ -852,6 +853,7 @@ local function open()
 		refresh(car)
 		Driving.inputEnabled = true
 		Driving.cameraHold = false
+		UI.modalOpen = false
 		close()
 	end
 	local function buy(pay: string)

@@ -849,6 +849,7 @@ Config.Activities = {
 	RaceRewards = { Gold = 9000, Silver = 5000, Bronze = 2500, Finish = 1000 },
 	RaceXp = { Gold = 300, Silver = 180, Bronze = 100, Finish = 50 },
 	CheckpointRadius = 26,
+	FinishLag = 0.6, -- seconds of driving allowed at a race or duel finish (the server sees a moving car a moment late)
 	JobMinDistance = 900, -- studs between dispatch and drop
 	JobMph = 42, -- the time limit allows this average speed (+ JobGrace s)
 	JobGrace = 25,
