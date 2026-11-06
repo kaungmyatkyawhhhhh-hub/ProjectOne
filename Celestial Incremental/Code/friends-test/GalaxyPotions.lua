@@ -115,6 +115,31 @@ local function socialChip(name: string, colour: Color3)
 end
 local friendsChip, friendsText = socialChip("Friends", hex("#7dff7a"))
 local groupChip, groupText = socialChip("Group", hex("#ffd84a"))
+-- (7 Nov: PREMIUM: Roblox Premium players get +10% stardust; others see it grey, a tap opens Roblox's Premium page (once a
+-- session at most))
+local premiumChip, premiumText = socialChip("Premium", hex("#ffb02a"))
+-- (7 Nov: INVITE on the FRIENDS chip: Roblox's invite prompt (SocialService), only where the player can send invites)
+local inviteBtn, inviteInner, _, inviteShadow = Kit.button(friendsChip, CW - 76, 6, 70, 28, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 7, Visible = false })
+Kit.text(inviteInner, 0, Kit.ps(5, 4), 70, 20, "INVITE", Kit.ps(14, 16), { ZIndex = inviteInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.4 })
+inviteShadow.Visible = false
+local SocialService = game:GetService("SocialService")
+local canInvite = false
+local refreshLater: (() -> ())? = nil -- (= refresh, once it exists below)
+task.spawn(function()
+	local ok, yes = pcall(function() return SocialService:CanSendGameInviteAsync(player) end)
+	canInvite = ok and yes == true
+	inviteBtn.Visible = canInvite
+	inviteShadow.Visible = canInvite
+	-- (the label makes room for the button)
+	if canInvite then (friendsText.Parent :: GuiObject).Size = UDim2.fromOffset(CW - 52 - 78, 22) end
+	if refreshLater then refreshLater() end
+end)
+inviteBtn.MouseButton1Click:Connect(function()
+	Kit.sound("click")
+	local opts = Instance.new("ExperienceInviteOptions")
+	opts.LaunchData = "invite:" .. player.UserId -- (who invited: the analytics can count invites that came back)
+	pcall(function() SocialService:PromptGameInvite(player, opts) end)
+end)
 local function refreshSocial()
 	local n = math.min(player:GetAttribute("FriendsHere") or 0, Econ.Social.FriendMax)
 	-- (owner 6 Nov: shown at 0 too, greyed, as the invite hint: "+10% PER FRIEND (0/3)")
@@ -124,13 +149,25 @@ local function refreshSocial()
 		Kit.setText(friendsText, "FRIENDS +" .. math.floor(n * Econ.Social.FriendPer * 100 + 0.5) .. "% (" .. n .. "/" .. Econ.Social.FriendMax .. ")")
 		friendsText.TextColor3 = hex("#7dff7a")
 	else
-		Kit.setText(friendsText, "+" .. per .. "% PER FRIEND (0/" .. Econ.Social.FriendMax .. ")")
+		-- (with the INVITE button beside it the hint is shorter)
+		Kit.setText(friendsText, "+" .. per .. (if canInvite then "% EACH (0/" else "% PER FRIEND (0/") .. Econ.Social.FriendMax .. ")")
 		friendsText.TextColor3 = hex("#8f889c")
 	end
 	local inGroup = player:GetAttribute("InGroup") == true
 	Kit.setText(groupText, if inGroup then "GROUP +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%" else "JOIN GROUP FOR +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%")
 	groupChip.Active = not inGroup
+	local prem = player:GetAttribute("Premium") == true
+	Kit.setText(premiumText, if prem then "PREMIUM +" .. math.floor(Econ.Premium * 100 + 0.5) .. "%" else "PREMIUM: +" .. math.floor(Econ.Premium * 100 + 0.5) .. "% STARDUST")
+	premiumText.TextColor3 = if prem then hex("#ffb02a") else hex("#8f889c")
+	premiumChip.Active = not prem
 end
+local premiumAsked = false
+premiumChip.MouseButton1Click:Connect(function()
+	if player:GetAttribute("Premium") == true or premiumAsked then return end
+	premiumAsked = true
+	Kit.sound("click")
+	pcall(function() game:GetService("MarketplaceService"):PromptPremiumPurchase(player) end)
+end)
 local function promptGroup()
 	local ok, status = pcall(function() return game:GetService("GroupService"):PromptJoinAsync(Econ.Social.GroupId) end)
 	if ok and (status == Enum.GroupMembershipStatus.Joined or status == Enum.GroupMembershipStatus.AlreadyMember) then
@@ -167,8 +204,8 @@ end)
 local function layout()
 	local s = screenScale()
 	local vp = viewport()
-	scale.Scale = s
-	local _ = vp
+	-- (phones: the column is a bit smaller, so a running potion doesn't push it up into the top HUD)
+	scale.Scale = if vp.Y < 500 then s * 0.82 else s
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
 ------------------------------------------------------------------------ #144 the BOOSTS chip + #229 the ACTIVE BOOSTS list (Phase 2.7): on the
@@ -197,7 +234,7 @@ local listBg = Kit.box(list, 0, 0, 230, 10, { BackgroundTransparency = 0, Backgr
 Kit.corner(listBg, 8)
 Kit.stroke(listBg, hex("#ffb02a"), 2, 0.2)
 local listLines = {}
-for i = 1, 6 do
+for i = 1, 9 do
 	listLines[i] = Kit.text(list, 12, 8 + (i - 1) * 24, 210, 22, "", Kit.ps(14, 16), { ZIndex = 11, FontFace = Kit.FONT_BOLD, stroke = 1.2 })
 end
 local function boostLines(): { string }
@@ -205,6 +242,12 @@ local function boostLines(): { string }
 	local now = workspace:GetServerTimeNow()
 	local function mmss(t) t = math.max(0, math.floor(t)) return string.format("%d:%02d", t // 60, t % 60) end
 	if player:GetAttribute("Pass_X2Stardust") == true then table.insert(out, "x2 STARDUST PASS  +1x  forever") end
+	if player:GetAttribute("Pass_VIP") == true then table.insert(out, "VIP  +" .. math.floor(Econ.VIP.stardust * 100 + 0.5) .. "%  forever") end
+	if player:GetAttribute("Premium") == true then table.insert(out, "PREMIUM  +" .. math.floor(Econ.Premium * 100 + 0.5) .. "%") end
+	local evEnds = Galaxy2:GetAttribute("EventEnds") or 0
+	if evEnds > workspace:GetServerTimeNow() and (Galaxy2:GetAttribute("EventStardust") or 0) > 0 then
+		table.insert(out, tostring(Galaxy2:GetAttribute("EventTitle")) .. "  " .. mmss(evEnds - workspace:GetServerTimeNow()))
+	end
 	for _, p in ipairs(Econ.Potions) do
 		local left = (player:GetAttribute("BoostEnd_" .. p.id) or 0) - now
 		if left > 0 then table.insert(out, p.name .. " POTION  " .. mmss(left)) end
@@ -242,12 +285,14 @@ end)
 local function layoutBoosts()
 	local s = screenScale()
 	local vp = viewport()
-	bScale.Scale = s
-	-- the column's bottom: 80% down the screen on PC, 68% on a phone (above the move thumbstick's corner); BOOSTS there,
+	local cs = if vp.Y < 500 then s * 0.82 else s
+	bScale.Scale = cs
+	scale.Scale = cs
+	-- the column's bottom: 80% down the screen on PC, 74% on a phone (above the move thumbstick's corner); BOOSTS there,
 	-- the potions + social chips right above it
-	local bottom = math.floor(vp.Y * (if vp.Y < 500 then 0.68 else 0.8))
+	local bottom = math.floor(vp.Y * (if vp.Y < 500 then 0.74 else 0.8))
 	boostRoot.Position = UDim2.fromOffset(math.floor(10 * s), bottom)
-	strip.Position = UDim2.fromOffset(math.floor(10 * s), bottom - math.floor((40 + GAP) * s))
+	strip.Position = UDim2.fromOffset(math.floor(10 * s), bottom - math.floor((40 + GAP) * cs))
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layoutBoosts)
 layoutBoosts()
@@ -279,7 +324,7 @@ local function refresh()
 		end
 	end
 	refreshSocial()
-	for _, chip in ipairs({ friendsChip, groupChip }) do
+	for _, chip in ipairs({ friendsChip, groupChip, premiumChip }) do
 		chip.Visible = chip ~= friendsChip or chip:GetAttribute("Show") == true
 		if chip.Visible then
 			chip.Position = UDim2.fromOffset(0, y)
@@ -291,11 +336,13 @@ local function refresh()
 end
 player:GetAttributeChangedSignal("FriendsHere"):Connect(function() refresh() end)
 player:GetAttributeChangedSignal("InGroup"):Connect(function() refresh() end)
+player:GetAttributeChangedSignal("Premium"):Connect(function() refresh() end)
 for _, p in ipairs(Econ.Potions) do
 	player:GetAttributeChangedSignal("Potion_" .. p.id):Connect(refresh)
 	player:GetAttributeChangedSignal("BoostEnd_" .. p.id):Connect(refresh)
 end
 refresh()
+refreshLater = refresh
 
 -- the timers (mm:ss), and the card goes when a boost ends with none left
 local acc = 0

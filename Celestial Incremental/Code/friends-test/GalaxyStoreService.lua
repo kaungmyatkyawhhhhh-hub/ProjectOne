@@ -6,8 +6,8 @@
 --    "PassPromptShown"; a finished purchase logs "PassBought" (analytics custom events, the pass in custom field 1)
 --  * ALPHA PLAYER: while GameConfig.AlphaActive, a player's first join saves d.alphaPlayer = true (for the launch title) and
 --    awards the badge (once it has an id; d.alphaBadge = true once Roblox confirms, so it's retried until then)
--- Studio test switches: Workspace attribute TestOwnX2 = true -> every player owns x2 Stardust; TestNoPass = true -> nobody
--- does (the pace test). Studio only.
+-- Studio test switches: Workspace attribute TestOwnX2 = true -> every player owns x2 Stardust; TestOwnPasses = true -> every
+-- pass; TestNoPass = true -> nobody does (the pace test). Studio only.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -34,46 +34,67 @@ local function sessionOf(player: Player)
 	return Shared.sessions[player]
 end
 
------------------------------------------------------------------------- x2 STARDUST
-local X2 = Config.Passes.X2Stardust
-local function grantX2(player: Player)
+------------------------------------------------------------------------ GAME PASSES (x2 STARDUST; 7 Nov: + VIP, +1 CORE SLOT, AUTO ROLL)
+-- Each pass in GameConfig.Passes: ownership checked on join (UserOwnsGamePassAsync, retried) and when a purchase finishes;
+-- the session's s.pass[key] = true (GalaxyEconService reads it; x2 also keeps s.passX2), the player attribute Pass_<key>
+-- tells the windows. id 0 = not created yet: never owned, never prompted (the store hides it).
+-- Studio: TestOwnX2 = true -> x2 owned; TestOwnPasses = true -> every pass owned; TestNoPass = true -> none.
+local passKeyById = {}
+for key, p in pairs(Config.Passes) do if p.id ~= 0 then passKeyById[p.id] = key end end
+local function grantPass(player: Player, key: string)
 	local s = Shared.sessions[player]
-	player:SetAttribute("Pass_X2Stardust", true)
-	if s and not s.passX2 then
-		s.passX2 = true
-		Shared.publish(player, s)
+	player:SetAttribute("Pass_" .. key, true)
+	if s then
+		s.pass = s.pass or {}
+		if not s.pass[key] then
+			s.pass[key] = true
+			if key == "X2Stardust" then s.passX2 = true end
+			if key == "AutoRoll" then s.d.auto.Roll = nil end -- (on when you get it)
+			Shared.publish(player, s)
+		end
 	end
 end
-local function checkX2(player: Player)
-	if IS_STUDIO and workspace:GetAttribute("TestOwnX2") == true then grantX2(player) return end
-	-- (Studio: TestNoPass = true -> nobody owns it, for the pace test; the owner's account owns the real pass)
+local function checkPasses(player: Player)
 	if IS_STUDIO and workspace:GetAttribute("TestNoPass") == true then return end
-	if X2.id == 0 then return end
-	for _ = 1, 3 do
-		local ok, owns = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, X2.id) end)
-		if ok then
-			if owns then grantX2(player) end
-			return
+	if IS_STUDIO and workspace:GetAttribute("TestOwnX2") == true then grantPass(player, "X2Stardust") end
+	if IS_STUDIO and workspace:GetAttribute("TestOwnPasses") == true then
+		for key in pairs(Config.Passes) do grantPass(player, key) end
+		return
+	end
+	for key, p in pairs(Config.Passes) do
+		if p.id ~= 0 then
+			task.spawn(function()
+				for _ = 1, 3 do
+					local ok, owns = pcall(function() return MarketplaceService:UserOwnsGamePassAsync(player.UserId, p.id) end)
+					if ok then
+						if owns then grantPass(player, key) end
+						return
+					end
+					task.wait(2)
+				end
+			end)
 		end
-		task.wait(2)
 	end
 end
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player: Player, passId: number, bought: boolean)
-	if passId ~= X2.id or X2.id == 0 or not bought then return end
-	grantX2(player)
-	log(player, "PassBought", "X2Stardust")
+	local key = passKeyById[passId]
+	if not key or not bought then return end
+	grantPass(player, key)
+	log(player, "PassBought", key)
 	-- (#91: save right after a purchase)
 	task.spawn(Shared.save, player, false)
 end)
 
 local lastPrompt = {}
 event.OnServerEvent:Connect(function(player: Player, kind, key)
-	if kind ~= "Prompt" or key ~= "X2Stardust" then return end
+	if kind ~= "Prompt" or type(key) ~= "string" then return end
+	local p = Config.Passes[key]
+	if not p or p.id == 0 then return end
 	if os.clock() - (lastPrompt[player] or 0) < 2 then return end
 	lastPrompt[player] = os.clock()
-	if player:GetAttribute("Pass_X2Stardust") == true or X2.id == 0 then return end
-	log(player, "PassPromptShown", "X2Stardust")
-	pcall(function() MarketplaceService:PromptGamePassPurchase(player, X2.id) end)
+	if player:GetAttribute("Pass_" .. key) == true then return end
+	log(player, "PassPromptShown", key)
+	pcall(function() MarketplaceService:PromptGamePassPurchase(player, p.id) end)
 end)
 
 ------------------------------------------------------------------------ DEVELOPER PRODUCTS (Phase 2, #454)
@@ -158,7 +179,7 @@ end
 local function onPlayer(player: Player)
 	local s = sessionOf(player)
 	if not s or not player.Parent then return end
-	task.spawn(checkX2, player)
+	task.spawn(checkPasses, player)
 	alpha(player, s)
 end
 Players.PlayerAdded:Connect(onPlayer)

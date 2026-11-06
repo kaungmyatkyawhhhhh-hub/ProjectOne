@@ -678,6 +678,7 @@ shared.GalaxyCloseSide = function(keep: string?)
 	if sideOpen == "J" and keep ~= "J" and shared.GalaxyDailyClose then shared.GalaxyDailyClose() end
 	if sideOpen == "P" and keep ~= "P" and shared.GalaxyStatsClose then shared.GalaxyStatsClose() end
 	if sideOpen == "B" and keep ~= "B" and shared.GalaxyBlackHoleClose then shared.GalaxyBlackHoleClose() end
+	if sideOpen == "W" and keep ~= "W" and shared.GalaxyWhatsNewClose then shared.GalaxyWhatsNewClose() end
 end
 local function pressKey(k)
 	if not keyAllowed(k) then return end

@@ -81,7 +81,10 @@ local function newData()
 		-- v5 (3.1, 6 Nov): the Black Hole: Supernovas since it (the ladder), Black Holes done, Dark Matter, shards earned since it
 		novaRun = 0, holes = 0, dm = 0, shardsHole = 0,
 		-- (7 Nov: total time played, seconds, for STATS)
-		played = 0 }
+		played = 0,
+		-- (7 Nov, monetization + retention: sessions played (the notification prompt after the 3rd), the What's New version
+		-- seen and the version whose update gift you got (GalaxyLiveService))
+		sessions = 0, seenVersion = 0, giftVersion = 0 }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -195,7 +198,7 @@ local function migrate(d): (any, boolean)
 		d.novaRun = tonumber(d.supernovas) or 0
 		d.shardsHole = tonumber(d.shardsEarned) or 0
 	end
-	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads", "xp", "xpTotal", "ignition", "novaRun", "holes", "dm", "shardsHole", "played" }) do
+	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads", "xp", "xpTotal", "ignition", "novaRun", "holes", "dm", "shardsHole", "played", "sessions", "seenVersion", "giftVersion" }) do
 		local n = tonumber(d[k]) or 0
 		d[k] = if n == n and n ~= math.huge then n else 0
 	end
@@ -304,9 +307,18 @@ end
 local function socialOf(s): number
 	return Econ.Social.FriendPer * math.min(s.friends or 0, Econ.Social.FriendMax) + (if s.inGroup then Econ.Social.Group else 0)
 end
+-- (7 Nov: + VIP +0.25, Roblox PREMIUM +0.1 (s.pass.VIP / s.premium, set by GalaxyStoreService / GalaxyLiveService) and a
+-- timed EVENT (GameConfig.Events: Galaxy attributes EventStardust + EventEnds, set by GalaxyLiveService): all ADD like the rest)
+local function permanentOf(s): number
+	return (if s.passX2 then 1 else 0) + (if s.pass and s.pass.VIP then Econ.VIP.stardust else 0) + (if s.premium then Econ.Premium else 0)
+end
+local function eventOf(): number
+	if workspace:GetServerTimeNow() >= (Galaxy:GetAttribute("EventEnds") or 0) then return 0 end
+	return tonumber(Galaxy:GetAttribute("EventStardust")) or 0
+end
 local function stardustBoost(s): number
 	local surge = (surgeMult() - 1) * (1 + Econ.PerksById.SurgePower.per * Econ.PerkLv(s.d.perks, "SurgePower"))
-	return 1 + surge + (if boosting(s, "Stardust") then 1 else 0) + (if s.passX2 then 1 else 0) + socialOf(s)
+	return 1 + surge + (if boosting(s, "Stardust") then 1 else 0) + permanentOf(s) + socialOf(s) + eventOf()
 end
 local function forgeOf(s, kind: string): number
 	return Econ.ForgeEffect(s.d.forge.equipped, s.d.forge.cores, kind)
@@ -359,6 +371,10 @@ local function cometEvery(s): number
 end
 
 -- everything the HUD and the map read
+-- (7 Nov: +1 CORE SLOT pass = 4 equipped cores)
+local function slotsOf(s): number
+	return Econ.Forge.Slots + (if s.pass and s.pass.CoreSlot then 1 else 0)
+end
 local function publish(player: Player, s)
 	local d = s.d
 	player:SetAttribute("Stardust", d.stardust)
@@ -442,7 +458,7 @@ local function publish(player: Player, s)
 	player:SetAttribute("CometsCaught", d.comets)
 	-- OFFLINE EARNINGS (#411): the income they count from = your income without the timed boosts (Star Surge, potions,
 	-- friends here), so a potion at the moment you leave doesn't count for hours
-	d.lastIncome = incomeOf(s) / stardustBoost(s) * (1 + (if s.passX2 then 1 else 0))
+	d.lastIncome = incomeOf(s) / stardustBoost(s) * (1 + permanentOf(s)) -- (7 Nov: the passes + Premium count offline, events don't)
 	player:SetAttribute("OfflinePending", d.offline)
 	-- (#4 STATS + #144 the BOOSTS chip: the split and the boosts' total)
 	player:SetAttribute("IncomeSplit", HttpService:JSONEncode(incomeSplit(s)))
@@ -462,7 +478,14 @@ local function publish(player: Player, s)
 		if def and Shared.questValue then table.insert(ql, { i = i, id = q.id, text = string.format(def.text, q.need), need = q.need, have = math.min(Shared.questValue(s, q.id) - q.start, q.need), got = q.got }) end
 	end
 	player:SetAttribute("Quests", HttpService:JSONEncode(ql))
-	player:SetAttribute("GiftPlayed", d.gifts.played)
+	player:SetAttribute("GiftPlayed", math.floor(d.gifts.played))
+	-- (7 Nov: the passes' state + the once-only prompts, for the HUD / Forge / GalaxyLive)
+	player:SetAttribute("CoreSlots", slotsOf(s))
+	player:SetAttribute("AutoRollOn", s.pass ~= nil and s.pass.AutoRoll == true and d.auto.Roll ~= false)
+	player:SetAttribute("Sessions", d.sessions)
+	player:SetAttribute("SeenVersion", d.seenVersion)
+	player:SetAttribute("FavAsked", d.settings.favAsked == true)
+	player:SetAttribute("NotifAsked", d.settings.notifAsked == true)
 	player:SetAttribute("PlayTime", math.floor(d.played))
 	local gg = {}
 	for k in pairs(d.gifts.got) do table.insert(gg, k) end
@@ -658,6 +681,75 @@ if IS_STUDIO then
 end
 
 -- THE SUPERNOVA (alpha part 1; 3.1: a function, so AUTO-SUPERNOVA can call it too). Returns (ok, shards got, first)
+-- a FORGE ROLL (the ROLL / BULK buttons and the AUTO ROLL pass both use this: the same odds, pity and Essence)
+local function forgeRoll(player: Player, s, arg): (boolean, any)
+	local d = s.d
+	-- arg = 1 (ROLL) or Econ.Forge.Bulk (BULK): each roll costs RollCost Essence; the odds x your Luck cores (the
+	-- rarer ones only); pity forces a Legendary / Mythic. Returns the results { "Kind:Rarity", ... }
+	if d.ignition < 1 then return false, "locked" end
+	-- (ring 2's BULK ROLL: BULK = 10 rolls)
+	local bulk = if (d.ring2.BulkRoll or 0) >= 1 then 10 else Econ.Forge.Bulk
+	local n = if arg == Econ.Forge.Bulk or arg == 10 then bulk else 1
+	if d.essence < n * Econ.Forge.RollCost then return false, "poor" end
+	d.essence -= n * Econ.Forge.RollCost
+	local F = d.forge
+	-- (ring 2's FORGE LUCK +10%, the FORGE MASTER capstone +25%)
+	local luck = forgeOf(s, "Luck") * (if (d.ring2.ForgeLuck or 0) >= 1 then 1.1 else 1) * (if d.capstone == "ForgeMaster" then 1.25 else 1)
+	local results = {}
+	for _ = 1, n do
+		F.rolls += 1
+		F.pityL += 1
+		F.pityM += 1
+		local rarity
+		if F.pityM >= Econ.Forge.PityMythic then
+			rarity = "Mythic"
+		elseif F.pityL >= Econ.Forge.PityLegendary then
+			rarity = "Legendary"
+		else
+			-- (2.5: maxed cores leave the pool; their weight goes to the rarer rarities: Econ.ForgeOdds)
+			local odds = Econ.ForgeOdds(F.cores, luck)
+			local x = math.random() * 100
+			for i, r in ipairs(Econ.Forge.Rarities) do
+				x -= odds[i]
+				if x <= 0 and odds[i] > 0 then rarity = r.id break end
+			end
+			rarity = rarity or "Common"
+		end
+		local ri = Econ.ForgeRarityById[rarity].index
+		if ri >= 5 then F.pityL = 0 end
+		if ri >= 6 then F.pityM = 0 end
+		-- (a kind still below MAX at that rarity; if all are maxed (a pity roll), any. c1, 6 Nov: NEW KIND FIRST: a kind you
+		-- don't have yet at that rarity comes before a duplicate, so every rarity's row fills in 6 hits)
+		local _, open = Econ.ForgeOdds(F.cores, 1)
+		local pick = open[ri]
+		local fresh = {}
+		for _, k in ipairs(pick) do if not F.cores[k .. ":" .. rarity] then table.insert(fresh, k) end end
+		if #fresh > 0 then pick = fresh end
+		local kind = if #pick > 0 then pick[math.random(1, #pick)] else Econ.Forge.Kinds[math.random(1, #Econ.Forge.Kinds)].id
+		local key = kind .. ":" .. rarity
+		F.cores[key] = math.min((F.cores[key] or 0) + 1, Econ.Forge.MaxLevel)
+		-- (a free slot takes a new core by itself)
+		if #F.equipped < slotsOf(s) and not table.find(F.equipped, key) then table.insert(F.equipped, key) end
+		table.insert(results, key)
+		-- (a rarity's row complete: its COLLECTOR title + badge, once)
+		if not F.done[rarity] then
+			local all = true
+			for _, k in ipairs(Econ.Forge.Kinds) do if not F.cores[k.id .. ":" .. rarity] then all = false end end
+			if all then
+				F.done[rarity] = true
+				event:FireClient(player, "ForgeRowDone", rarity)
+				if Shared.awardBadge then task.spawn(Shared.awardBadge, player, "Collection" .. rarity) end
+			end
+		end
+		-- (a CELESTIAL is told to the whole server: cutscene template, GLOBAL)
+		-- (owner 6 Nov, #392: Mythic + Celestial go to the server's chat; a Celestial also gets the banner)
+		if rarity == "Celestial" or rarity == "Mythic" then event:FireAllClients("ForgeGlobal", player.DisplayName, key) end
+		pcall(function() AnalyticsService:LogCustomEvent(player, "ForgeRoll", ri, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = key }) end)
+	end
+	publish(player, s)
+	return true, results
+end
+
 local function doSupernova(player: Player, s): (boolean, any, any)
 	local d = s.d
 	local got = shardsOf(s)
@@ -672,6 +764,7 @@ local function doSupernova(player: Player, s): (boolean, any, any)
 	-- (+1 STAR ESSENCE node, +2 FORGE MASTER capstone)
 	d.essence += Econ.SupernovaEssence + (if (d.ring2.ForgeEssence or 0) >= 1 then 1 else 0) + (if d.capstone == "ForgeMaster" then 2 else 0)
 		+ Econ.SupernovaEssenceAfter(d.ignition, d.supernovas) -- (c1, 6 Nov)
+		+ (if s.pass and s.pass.VIP then Econ.VIP.essence else 0) -- (7 Nov: the VIP pass)
 	d.stardust, d.earnedRun = 0, 0
 	for i = 1, #Econ.Tiers do
 		d.owned[i] = Econ.StartOwned[i] or 0
@@ -765,70 +858,7 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		pcall(function() AnalyticsService:LogCustomEvent(player, "PadBuy", i) end)
 		return true, i
 	elseif action == "ForgeRoll" then
-		-- arg = 1 (ROLL) or Econ.Forge.Bulk (BULK): each roll costs RollCost Essence; the odds x your Luck cores (the
-		-- rarer ones only); pity forces a Legendary / Mythic. Returns the results { "Kind:Rarity", ... }
-		if d.ignition < 1 then return false, "locked" end
-		-- (ring 2's BULK ROLL: BULK = 10 rolls)
-		local bulk = if (d.ring2.BulkRoll or 0) >= 1 then 10 else Econ.Forge.Bulk
-		local n = if arg == Econ.Forge.Bulk or arg == 10 then bulk else 1
-		if d.essence < n * Econ.Forge.RollCost then return false, "poor" end
-		d.essence -= n * Econ.Forge.RollCost
-		local F = d.forge
-		-- (ring 2's FORGE LUCK +10%, the FORGE MASTER capstone +25%)
-		local luck = forgeOf(s, "Luck") * (if (d.ring2.ForgeLuck or 0) >= 1 then 1.1 else 1) * (if d.capstone == "ForgeMaster" then 1.25 else 1)
-		local results = {}
-		for _ = 1, n do
-			F.rolls += 1
-			F.pityL += 1
-			F.pityM += 1
-			local rarity
-			if F.pityM >= Econ.Forge.PityMythic then
-				rarity = "Mythic"
-			elseif F.pityL >= Econ.Forge.PityLegendary then
-				rarity = "Legendary"
-			else
-				-- (2.5: maxed cores leave the pool; their weight goes to the rarer rarities: Econ.ForgeOdds)
-				local odds = Econ.ForgeOdds(F.cores, luck)
-				local x = math.random() * 100
-				for i, r in ipairs(Econ.Forge.Rarities) do
-					x -= odds[i]
-					if x <= 0 and odds[i] > 0 then rarity = r.id break end
-				end
-				rarity = rarity or "Common"
-			end
-			local ri = Econ.ForgeRarityById[rarity].index
-			if ri >= 5 then F.pityL = 0 end
-			if ri >= 6 then F.pityM = 0 end
-			-- (a kind still below MAX at that rarity; if all are maxed (a pity roll), any. c1, 6 Nov: NEW KIND FIRST: a kind you
-			-- don't have yet at that rarity comes before a duplicate, so every rarity's row fills in 6 hits)
-			local _, open = Econ.ForgeOdds(F.cores, 1)
-			local pick = open[ri]
-			local fresh = {}
-			for _, k in ipairs(pick) do if not F.cores[k .. ":" .. rarity] then table.insert(fresh, k) end end
-			if #fresh > 0 then pick = fresh end
-			local kind = if #pick > 0 then pick[math.random(1, #pick)] else Econ.Forge.Kinds[math.random(1, #Econ.Forge.Kinds)].id
-			local key = kind .. ":" .. rarity
-			F.cores[key] = math.min((F.cores[key] or 0) + 1, Econ.Forge.MaxLevel)
-			-- (a free slot takes a new core by itself)
-			if #F.equipped < Econ.Forge.Slots and not table.find(F.equipped, key) then table.insert(F.equipped, key) end
-			table.insert(results, key)
-			-- (a rarity's row complete: its COLLECTOR title + badge, once)
-			if not F.done[rarity] then
-				local all = true
-				for _, k in ipairs(Econ.Forge.Kinds) do if not F.cores[k.id .. ":" .. rarity] then all = false end end
-				if all then
-					F.done[rarity] = true
-					event:FireClient(player, "ForgeRowDone", rarity)
-					if Shared.awardBadge then task.spawn(Shared.awardBadge, player, "Collection" .. rarity) end
-				end
-			end
-			-- (a CELESTIAL is told to the whole server: cutscene template, GLOBAL)
-			-- (owner 6 Nov, #392: Mythic + Celestial go to the server's chat; a Celestial also gets the banner)
-			if rarity == "Celestial" or rarity == "Mythic" then event:FireAllClients("ForgeGlobal", player.DisplayName, key) end
-			pcall(function() AnalyticsService:LogCustomEvent(player, "ForgeRoll", ri, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = key }) end)
-		end
-		publish(player, s)
-		return true, results
+		return forgeRoll(player, s, arg)
 	elseif action == "ForgeEquip" then
 		-- equip / unequip one core you own (a full set: it replaces the first slot)
 		if type(arg) ~= "string" or not d.forge.cores[arg] then return false, "bad" end
@@ -837,7 +867,7 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		if at then
 			table.remove(eq, at)
 		else
-			if #eq >= Econ.Forge.Slots then table.remove(eq, 1) end
+			if #eq >= slotsOf(s) then table.remove(eq, 1) end
 			table.insert(eq, arg)
 		end
 		publish(player, s)
@@ -951,6 +981,12 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		checkTutorial(player, s)
 		publish(player, s)
 		return true, bought
+	elseif action == "AutoToggle" and arg == "Roll" then
+		-- (7 Nov: the AUTO ROLL pass: on when you buy it; this switches it)
+		if not (s.pass and s.pass.AutoRoll) then return false, "locked" end
+		d.auto.Roll = if d.auto.Roll == false then nil else false
+		publish(player, s)
+		return true, d.auto.Roll ~= false
 	elseif action == "AutoToggle" and arg == "Supernova" then
 		-- (3.1 AUTO-SUPERNOVA, from Black Hole 1: off until you switch it on)
 		if d.holes < 1 then return false, "locked" end
@@ -1018,9 +1054,18 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		if d.gifts.got[tostring(m)] then return false, "done" end
 		if d.gifts.played < m * 60 then return false, "notyet" end
 		d.gifts.got[tostring(m)] = true
-		d.essence += 1
+		-- (7 Nov: each gift its own reward: Econ.GiftRewards)
+		local r = Econ.GiftRewards[m] or { essence = 1, text = "+1 ESSENCE" }
+		if r.essence then d.essence += r.essence end
+		if r.stardust then
+			local pay = incomeOf(s) * r.stardust * 60
+			d.stardust += pay
+			d.earnedRun += pay
+			d.earnedTotal += pay
+		end
+		if r.boost then d.boostLeft.Stardust = (d.boostLeft.Stardust or 0) + r.boost * 60 end
 		publish(player, s)
-		return true, 1
+		return true, r.text
 	elseif action == "FreeClaim" then
 		-- (the plaza's FREE REWARDS: once each; the group one is checked with the group API)
 		local def
@@ -1062,6 +1107,13 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		if type(arg.sci) == "boolean" then d.settings.sci = arg.sci end
 		-- (owner 6 Nov: the JOIN GROUP prompt is shown once, ever: remembered in the save, can't be turned back off)
 		if arg.groupPrompt == true then d.settings.groupPrompt = true end
+		-- (7 Nov: the FAVOURITE prompt (after the first Supernova) and the NOTIFICATIONS prompt (after the 3rd session) are
+		-- asked once; What's New: the version you've seen)
+		if arg.favAsked == true then d.settings.favAsked = true end
+		if arg.notifAsked == true then d.settings.notifAsked = true end
+		if type(arg.seenVersion) == "number" and arg.seenVersion == arg.seenVersion then
+			d.seenVersion = math.clamp(math.floor(arg.seenVersion), d.seenVersion, 1e6)
+		end
 		publish(player, s)
 		return true
 	elseif action == "UsePotion" then
@@ -1288,6 +1340,15 @@ task.spawn(function()
 			-- (7 Nov: time played in total, for STATS; the attribute every 5 s)
 			s.d.played += dt
 			if math.floor(s.d.played) % 5 == 0 then player:SetAttribute("PlayTime", math.floor(s.d.played)) end
+			-- (7 Nov: the HUD's gift timer counts from this; it's sent every second, the HUD ticks in between)
+			if math.floor(s.d.gifts.played) ~= player:GetAttribute("GiftPlayed") then player:SetAttribute("GiftPlayed", math.floor(s.d.gifts.played)) end
+			-- AUTO ROLL (7 Nov, the pass): one roll every few seconds while you have the Essence, unless switched off
+			if s.pass and s.pass.AutoRoll and s.d.auto.Roll ~= false and s.d.ignition >= 1 and s.d.essence >= Econ.Forge.RollCost
+				and os.clock() >= (s.nextAutoRoll or 0) then
+				s.nextAutoRoll = os.clock() + Econ.AutoRollEvery
+				local ok, results = forgeRoll(player, s, 1)
+				if ok then event:FireClient(player, "AutoRoll", results) end
+			end
 			-- 3.1 AUTO-SUPERNOVA (#417): from Black Hole 1, switched on: goes Supernova by itself when it's ready
 			if s.d.holes >= 1 and s.d.auto.Supernova == true and s.d.earnedRun >= Econ.NeedFor(s.d.novaRun) and not s.autoNovaBusy then
 				s.autoNovaBusy = true

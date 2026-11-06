@@ -225,19 +225,19 @@ for i = 1, 3 do
 	local bt = Kit.text(inner, 0, Kit.ps(5, 4), 102, 22, "CLAIM", Kit.ps(16, 18), { ZIndex = inner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
 	questRows[i] = { text = text, fill = fill, count = count, button = b, label = bt, panel = panel, shadow = shadow }
 end
--- the GIFTS (2 x 2)
+-- the GIFTS (7 Nov: five, 5 / 10 / 20 / 40 / 60 min: 3 + 2 tiles)
 heading(460, 262, "PLAYTIME GIFTS")
 local giftTiles = {}
 for i, m in ipairs(Econ.Gifts) do
-	local x, y = 460 + ((i - 1) % 2) * 112, 292 + ((i - 1) // 2) * 70
-	local panel = Kit.panel(dWin, x, y, 104, 62, 4)
-	Kit.icon(dWin, "playtimeGift", x + 2, y + 2, 34, nil, { ZIndex = 7 })
-	Kit.text(dWin, x + 36, y + 6, 66, 20, m .. " MIN", Kit.ps(15, 17), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4 })
-	local b, inner = Kit.button(dWin, x + 6, y + 32, 92, 24, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6 })
-	local bt = Kit.text(inner, 8, Kit.ps(2, 1), 84, 20, "", Kit.ps(13, 15), { ZIndex = inner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
+	local x, y = 460 + ((i - 1) % 3) * 76, 292 + ((i - 1) // 3) * 70
+	local panel = Kit.panel(dWin, x, y, 70, 62, 4)
+	Kit.icon(dWin, "playtimeGift", x + 1, y + 2, 28, nil, { ZIndex = 7 })
+	Kit.text(dWin, x + 28, y + 7, 40, 20, tostring(m), Kit.ps(15, 17), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4, TextXAlignment = CENTRE })
+	local b, inner = Kit.button(dWin, x + 4, y + 32, 62, 24, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6 })
+	local bt = Kit.text(inner, 12, Kit.ps(2, 1), 50, 20, "", Kit.ps(12, 14), { ZIndex = inner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
 	-- (7 Nov, item 5: a time-locked gift shows the stopwatch beside its countdown)
 	local cool = Kit.new("ImageLabel", { Name = "Cooldown", BackgroundTransparency = 1, Image = Art.uiIcon.cooldown, ScaleType = Enum.ScaleType.Fit,
-		Position = UDim2.fromOffset(4, 1), Size = UDim2.fromOffset(20, 20), ZIndex = inner.ZIndex + 1, Visible = false }, inner)
+		Position = UDim2.fromOffset(2, 2), Size = UDim2.fromOffset(16, 16), ZIndex = inner.ZIndex + 1, Visible = false }, inner)
 	giftTiles[i] = { m = m, button = b, label = bt, panel = panel, cool = cool }
 end
 
@@ -301,6 +301,10 @@ local function refreshDaily()
 		local left = math.max(0, g.m * 60 - played)
 		Kit.setText(g.label, if have then "GOT" elseif ready2 then "CLAIM" else string.format("%d:%02d", left // 60, left % 60))
 		g.cool.Visible = not have and not ready2
+		-- (the label centres on the button; with the stopwatch it sits right of it)
+		local h = g.label.Parent :: GuiObject
+		h.Position = UDim2.new(0, if g.cool.Visible then 12 else 0, h.Position.Y.Scale, h.Position.Y.Offset)
+		h.Size = UDim2.new(0, if g.cool.Visible then 50 else 62, h.Size.Y.Scale, h.Size.Y.Offset)
 	end
 	if shared.GalaxyHotbarDot then shared.GalaxyHotbarDot("J", claimable()) end
 end
@@ -322,8 +326,8 @@ for i, r in ipairs(questRows) do
 end
 for _, g in ipairs(giftTiles) do
 	g.button.MouseButton1Click:Connect(function()
-		local ok = request:InvokeServer("GiftClaim", g.m)
-		if ok then claimFx("GIFT: +1 ESSENCE", g.button) else Kit.sound("error") end
+		local ok, what = request:InvokeServer("GiftClaim", g.m)
+		if ok then claimFx("GIFT: " .. tostring(what or "+1 ESSENCE"), g.button) else Kit.sound("error") end
 	end)
 end
 for _, a in ipairs({ "DailyReady", "DailyDay", "Quests", "GiftsGot" }) do player:GetAttributeChangedSignal(a):Connect(refreshDaily) end

@@ -119,18 +119,46 @@ local pityText = Kit.text(win, 30, 402, 236, 18, "", Kit.ps(11, 13), { ZIndex = 
 local right = Kit.panel(win, 290, 72, 374, 352, 4)
 Kit.stroke(right, hex("#ffc83a"), 2, 0.2)
 Kit.text(win, 304, 80, 200, 24, "EQUIPPED", 18, { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.5, TextColor3 = hex("#ffe08a") })
-local slots = {}
-for i = 1, F.Slots do
-	local x = 304 + (i - 1) * 118
-	local s = Kit.box(win, x, 106, 110, 64, { BackgroundTransparency = 0, BackgroundColor3 = hex("#130f1e"), ZIndex = 6 })
-	Kit.corner(s, 8)
-	local st = Kit.stroke(s, hex("#4b4170"), 2.5, 0.2)
-	local icon = Kit.icon(win, "stardust", x + 2, 108, 44, nil, { ZIndex = 8 })
-	local name = Kit.text(win, x + 46, 112, 62, 18, "", Kit.ps(11, 13), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
-	local val = Kit.text(win, x + 46, 132, 62, 22, "", Kit.ps(15, 17), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4, TextColor3 = hex("#7dff6b") })
-	local empty = Kit.text(win, x, 126, 110, 24, "EMPTY", 15, { ZIndex = 8, TextXAlignment = CENTRE, TextColor3 = hex("#8a8296"), stroke = 1.2 })
-	slots[i] = { st = st, icon = icon, name = name, val = val, empty = empty }
+-- (7 Nov: two sets of slots: 3 (everyone) and 4 (the +1 CORE SLOT pass: narrower, the rarity shows as the slot's colour);
+-- refresh shows the one that matches the CoreSlots attribute)
+local function makeSlots(n: number)
+	local list = {}
+	local w = if n <= 3 then 110 else 84
+	local gap = if n <= 3 then 118 else 89
+	for i = 1, n do
+		local x = 304 + (i - 1) * gap
+		local s = Kit.box(win, x, 106, w, 64, { BackgroundTransparency = 0, BackgroundColor3 = hex("#130f1e"), ZIndex = 6 })
+		Kit.corner(s, 8)
+		local st = Kit.stroke(s, hex("#4b4170"), 2.5, 0.2)
+		local isz = if n <= 3 then 44 else 38
+		local icon = Kit.icon(win, "stardust", x + 2, 108, isz, nil, { ZIndex = 8 })
+		local name = Kit.text(win, x + isz + 2, 112, w - isz - 4, 18, "", Kit.ps(11, 13), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
+		local val = Kit.text(win, x + isz + 2, 132, w - isz - 4, 22, "", Kit.ps(15, 17), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4, TextColor3 = hex("#7dff6b") })
+		local empty = Kit.text(win, x, 126, w, 24, "EMPTY", 15, { ZIndex = 8, TextXAlignment = CENTRE, TextColor3 = hex("#8a8296"), stroke = 1.2 })
+		list[i] = { box = s, st = st, icon = icon, name = name, val = val, empty = empty, compact = n > 3 }
+	end
+	return list
 end
+local slotSets = { [3] = makeSlots(F.Slots), [4] = makeSlots(F.Slots + 1) }
+local slots = slotSets[3]
+-- AUTO ROLL (7 Nov, the pass): an on / off switch in the EQUIPPED header, only for its owners
+local autoBtn, autoInner, _, autoShadow = Kit.button(win, 520, 76, 132, 28, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6, Visible = false })
+local autoText = Kit.text(autoInner, 0, Kit.ps(4, 3), 132, 20, "AUTO ROLL: ON", Kit.ps(13, 15), { ZIndex = autoInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
+local function refreshAuto()
+	local has = player:GetAttribute("Pass_AutoRoll") == true
+	autoBtn.Visible = has
+	autoShadow.Visible = has
+	local on = player:GetAttribute("AutoRollOn") == true
+	Kit.recolour(autoBtn, if on then hex("#7dff7a") else hex("#6a6474"), if on then hex("#1fa83a") else hex("#3f3a48"))
+	Kit.setText(autoText, if on then "AUTO ROLL: ON" else "AUTO ROLL: OFF")
+end
+autoBtn.MouseButton1Click:Connect(function()
+	Kit.sound("tab")
+	request:InvokeServer("AutoToggle", "Roll")
+end)
+player:GetAttributeChangedSignal("Pass_AutoRoll"):Connect(refreshAuto)
+player:GetAttributeChangedSignal("AutoRollOn"):Connect(refreshAuto)
+refreshAuto()
 Kit.text(win, 304, 174, 200, 22, "BOOK", 18, { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.5, TextColor3 = hex("#ffe08a") })
 local bookCount = Kit.text(win, 400, 174, 250, 22, "0/42", 16, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 1.3 })
 local tiles = {}
@@ -222,12 +250,27 @@ local function refresh()
 		Kit.setText(rowPct[r.id], math.floor(n / #F.Kinds * 100) .. "%")
 		rowTrim[r.id].Visible = (d.done or {})[r.id] == true
 	end
+	-- (the set that matches your slots: 3, or 4 with the +1 CORE SLOT pass; the other set is hidden)
+	local n = if (player:GetAttribute("CoreSlots") or F.Slots) >= F.Slots + 1 then F.Slots + 1 else F.Slots
+	slots = slotSets[n]
+	for m, set in pairs(slotSets) do
+		if m ~= n then
+			for _, s in ipairs(set) do
+				s.box.Visible = false
+				s.icon.Parent.Visible = false
+				shown(s.name, false)
+				shown(s.val, false)
+				shown(s.empty, false)
+			end
+		end
+	end
 	for i, s in ipairs(slots) do
 		local key = d.equipped[i]
 		local k, r
 		if key then k, r = string.match(key, "^(%a+):(%a+)$") end
+		s.box.Visible = true
 		s.icon.Parent.Visible = key ~= nil
-		shown(s.name, key ~= nil)
+		shown(s.name, key ~= nil and not s.compact)
 		shown(s.val, key ~= nil)
 		shown(s.empty, key == nil)
 		if key and k and r then
@@ -244,7 +287,7 @@ local function refresh()
 		end
 	end
 end
-for _, a in ipairs({ "Essence", "Forge", "BulkSize", "CollectorTitle", "Capstone", "R2_ForgeLuck" }) do
+for _, a in ipairs({ "Essence", "Forge", "BulkSize", "CollectorTitle", "Capstone", "R2_ForgeLuck", "CoreSlots" }) do
 	player:GetAttributeChangedSignal(a):Connect(function() if holder.Visible then refresh() end end)
 end
 
@@ -457,6 +500,16 @@ rollBtn.MouseButton1Click:Connect(function() roll(1) end)
 bulkBtn.MouseButton1Click:Connect(function() roll(F.Bulk) end)
 -- (a book row completed: its COLLECTOR title + the trim)
 event.OnClientEvent:Connect(function(kind, rarity)
+	-- (7 Nov: an AUTO ROLL result: a toast in its rarity's colour; the book glows a NEW core like a normal roll)
+	if kind == "AutoRoll" and type(rarity) == "table" then
+		for _, key in ipairs(rarity) do
+			local k, r = string.match(key, "^(%a+):(%a+)$")
+			local kd, rr = k and Econ.ForgeKindById[k], r and Econ.ForgeRarityById[r]
+			if kd and rr and shared.GalaxyToast then shared.GalaxyToast("AUTO ROLL: " .. rr.name .. " " .. kd.name, rr.colour) end
+		end
+		if holder.Visible then refresh() end
+		return
+	end
 	if kind ~= "ForgeRowDone" then return end
 	local r = Econ.ForgeRarityById[rarity]
 	if not r then return end

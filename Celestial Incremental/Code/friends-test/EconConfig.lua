@@ -469,7 +469,20 @@ Econ.QuestsById = {}
 for _, q in ipairs(Econ.Quests) do Econ.QuestsById[q.id] = q end
 Econ.QuestReward = { essence = 1, stardustSeconds = 300 }
 -- PLAYTIME GIFTS: minutes played today -> 1 Essence each (#414)
-Econ.Gifts = { 5, 15, 30, 60 }
+-- (7 Nov, owner: 5 / 10 / 20 / 40 / 60 minutes; Essence stays 4 a day like before (1+1+2), plus stardust and a 2x)
+Econ.Gifts = { 5, 10, 20, 40, 60 }
+-- what each gift gives: stardust = that many minutes of your income; essence; boost = minutes of x2 STARDUST (the potion's boost)
+Econ.GiftRewards = {
+	[5] = { stardust = 3, text = "3 MIN OF STARDUST" },
+	[10] = { essence = 1, text = "+1 ESSENCE" },
+	[20] = { essence = 1, text = "+1 ESSENCE" },
+	[40] = { boost = 10, text = "2x STARDUST 10 MIN" },
+	[60] = { essence = 2, text = "+2 ESSENCE" },
+}
+-- the passes' effects (GameConfig.Passes ids) and Premium (7 Nov)
+Econ.VIP = { stardust = 0.25, essence = 1 }
+Econ.Premium = 0.10
+Econ.AutoRollEvery = 3 -- (the AUTO ROLL pass: one roll every 3 s while you have Essence)
 -- the plaza's FREE REWARDS board (Depth Incremental's lobby board): once each. The group is checked (IsInGroup); a like
 -- can't be checked by a game, so it's an honour claim. PROPOSED: like 1 Essence, group 2
 Econ.FreeRewards = { { id = "like", text = "LIKE THE GAME", essence = 1 }, { id = "group", text = "JOIN THE GROUP", essence = 2 } }

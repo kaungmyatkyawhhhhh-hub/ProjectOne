@@ -85,6 +85,37 @@ local function build(p: Player)
 		n.Parent = full
 		w += h * 0.62 + h * 0.4 * #novas + 4
 	end
+	-- (7 Nov: the VIP pass: a gold VIP pill after the plate (the kit's gold chip: gradient, ink outline, heavy text))
+	if p:GetAttribute("Pass_VIP") == true then
+		local pill = Instance.new("Frame")
+		pill.Name = "VIP"
+		pill.BackgroundColor3 = Color3.new(1, 1, 1)
+		pill.Position = UDim2.fromOffset(w + 4, h * 0.17)
+		pill.Size = UDim2.fromOffset(h * 1.25, h * 0.66)
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0.35, 0)
+		c.Parent = pill
+		local g = Instance.new("UIGradient")
+		g.Color = ColorSequence.new(Color3.fromRGB(255, 241, 160), Color3.fromRGB(224, 138, 10))
+		g.Rotation = 90
+		g.Parent = pill
+		local ps = Instance.new("UIStroke")
+		ps.Color, ps.Thickness = RankPlate.INK, 2
+		ps.Parent = pill
+		local t = Instance.new("TextLabel")
+		t.BackgroundTransparency = 1
+		t.Size = UDim2.fromScale(1, 1)
+		t.FontFace = RankPlate.FONT
+		t.Text = "VIP"
+		t.TextColor3 = Color3.new(1, 1, 1)
+		t.TextSize = math.floor(h * 0.44)
+		local ts = Instance.new("UIStroke")
+		ts.Color, ts.Thickness = RankPlate.INK, 2
+		ts.Parent = t
+		t.Parent = pill
+		pill.Parent = full
+		w += h * 1.25 + 6
+	end
 	-- (Phase 2.5: a Forge COLLECTOR title, when you have one, in a smaller line under the plate)
 	local title = p:GetAttribute("CollectorTitle")
 	local hasTitle = type(title) == "string" and title ~= ""
@@ -242,6 +273,7 @@ local function watch(p: Player)
 	end)
 	p:GetAttributeChangedSignal("Rank"):Connect(function() build(p) end)
 	p:GetAttributeChangedSignal("CollectorTitle"):Connect(function() build(p) end)
+	p:GetAttributeChangedSignal("Pass_VIP"):Connect(function() build(p) end)
 	p:GetAttributeChangedSignal("CosmicLevel"):Connect(function() auraFor(p) end)
 	if p.Character then build(p) auraFor(p) end
 end
