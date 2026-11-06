@@ -140,3 +140,49 @@ Screens: `Progress/screens/2026-11-07-launch-day/`.
 - **UI sounds vs the tracks' keys:** not checked (same reason).
 - **Black Hole darker track:** not added (the prompt said "may").
 - **UI bus 0.8 / Ambience bus 0.3:** the game has 2 buses (Music, SFX = every effect incl. UI); kept, no ambience loops exist.
+
+## 5. Step-on buttons (tycoon pads)
+**What's built:**
+- Three floor pads in front of each island's **BODIES** board. They cover what that board sells:
+  - **UPGRADE:** a level of your newest body.
+  - **+BODY:** a copy of it.
+  - **UNLOCK:** the next body; LOCKED until the Tree opens it.
+- **Clicking a board button still works.** Clicking a pad also works (the backup).
+- **Not padded (yet):** PERKS (paid in XP), the TREE nodes, Forge / Black Hole. They stay buttons on their boards.
+
+**How it works:**
+- **Server (EconService):**
+  - Every 0.6 s, if the island's **owner** has their HumanoidRootPart over a pad with their feet on it, it buys through the SAME request handler the boards use. The server checks the price, the money and the rate (25 / s).
+  - Standing there repeats it (hold to buy).
+  - Only your own island's pads are ever checked for you. The click backup also checks you own that island.
+  - The prompt said "Touched": a 0.6 s position check of the root does the same job without Touched's misses or double fires.
+- **Client (MapClient):**
+  - **Top face** (SurfaceGui, Face = Top): the action, the body, the price.
+  - **Label above:** the action + price, 130 px, readable from 20 studs.
+  - **Rim:** the button's colour when you can pay, grey when not.
+  - **Buy:** a 0.15 s press 0.2 studs down + the buy sound.
+  - **Can't:** a red flash + "NEED x" + the soft no sound, once a second at most.
+
+**Layout** (`MapConfig.Boards.StepPads`; placed by MapService on the line from the BODIES board to the island centre, checked clear of every piece, board and the island buy-pad; the island buy-pad now also avoids them):
+| zone | object | position (from the BODIES board) | ground y | facing | size | why here |
+|---|---|---|---|---|---|---|
+| owned island, in front of BODIES | UPGRADE pad | 9 in toward the centre, 7 to one side | island floor (the board's floor) | lined up with the BODIES board, text reads toward it | 6 round, 0.4 thick | beside its board, off the bridge path, 7 apart (prompts don't fight) |
+| | +BODY pad | 9 in, centre | same | same | same | same |
+| | UNLOCK pad | 9 in, 7 to the other side | same | same | same | same |
+
+On island 1 that's 17-18 studs from the centre, at -22 / -45 / -67 deg; the dais is under 8, the boards 26.
+
+**MapAudit:**
+- **First run with pads:** TILT / SUNK (the turned cylinder as pivot), and UPGRADE overlapped the Star Forge lock board (the row followed the board's front, which faces the spawn, ~30 deg off the centre).
+- **Fixed:** the upright face plate is the pivot, and the row runs on the board → centre line.
+- **Final:** `CLEAN: nothing to fix` (47 objects, 5 interactables).
+
+**Tests** (a throwaway save, `TestFreshSave`, saving OFF):
+- **UPGRADE held:** Asteroid level 1 → 7 in 3.6 s; it then stopped when broke, with "Denied" about once a second.
+- **+BODY:** copies 1 → 4 until it couldn't pay.
+- **UNLOCK on a locked Moon:** no buy, only the soft no.
+- **Click on my pad:** 2 clicks = 2 levels.
+- **Non-owner:** my pads were copied onto island 2 (not mine). Standing on its UPGRADE for 4 s did nothing, and clicking it twice did nothing (level stayed, no press, no flash).
+- **NOT a true 2-client test:** Studio's tool runs one client. The rule holds by design (only the owner's own island is checked; the click checks ownership). Please do a quick 2-player check (Test > Clients and Servers, 2 players) before relying on it.
+
+**Shots:** `pads-pc.jpg`, `pads-phone.jpg`, `pads-fresh-save-labels.jpg`.

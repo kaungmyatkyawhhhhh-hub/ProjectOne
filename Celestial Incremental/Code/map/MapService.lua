@@ -379,7 +379,7 @@ end
 local RINGS = { Halo = true, Gyro = true, CrownRing = true, Rim = true, Inlay = true }
 local function padClear(island: Model, p: Vector3, y: number): boolean
 	local need = I.PadSize / 2 + 0.4 + I.PadClear
-	for _, folder in ipairs({ island:FindFirstChild("Pieces"), island:FindFirstChild("Boards"), island:FindFirstChild("Landing") }) do
+	for _, folder in ipairs({ island:FindFirstChild("Pieces"), island:FindFirstChild("Boards"), island:FindFirstChild("Landing"), island:FindFirstChild("StepPads") }) do
 		for _, part in ipairs(folder and folder:GetDescendants() or {}) do
 			if not part:IsA("BasePart") or part.Transparency >= 0.95 then continue end
 			local cf, half = part.CFrame, part.Size / 2
@@ -441,6 +441,61 @@ local function placePad(island: Model, pads: number)
 	click.Parent = disc
 	pad.PrimaryPart = disc
 	pad.Parent = island
+end
+
+-- STEP-ON PADS (7 Nov, MapConfig.Boards.StepPads): flat round pads on the floor in front of the BODIES board; EconService
+-- buys while the island's owner stands on one (and a click is the backup). Each pad: Base (the round pad), Rim (its neon
+-- ring, the button's colour), Face (an invisible plate on top for the SurfaceGui). Model pivot = the pad's floor centre
+local function makeStepPads(island: Model)
+	if island:FindFirstChild("StepPads") then return end
+	local SP = MapConfig.Boards.StepPads
+	local board = island:FindFirstChild("Boards") and island.Boards:FindFirstChild("Board_" .. SP.Board)
+	if not board then return end
+	local piv = board:GetPivot()
+	local folder = Instance.new("Model")
+	folder.Name = "StepPads"
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { island:FindFirstChild("Pieces") }
+	local c = centerOf(island)
+	-- (along the line from the board to the island's centre (the board faces the island SPAWN, ~30 deg off it: along its own
+	-- front the row swung into the Star Forge board), spread across that line)
+	local inward = Vector3.new(c.X - piv.Position.X, 0, c.Z - piv.Position.Z).Unit
+	local across = inward:Cross(Vector3.new(0, 1, 0))
+	for _, spec in ipairs(SP) do
+		local spot = piv.Position + inward * spec.fwd + across * spec.x
+		-- (the floor: the board's pivot stands on it; a ray onto the pieces only if it finds the floor near that height)
+		local hit = workspace:Raycast(Vector3.new(spot.X, piv.Position.Y + 30, spot.Z), Vector3.new(0, -60, 0), params)
+		local y = if hit and math.abs(hit.Position.Y - piv.Position.Y) < 1 then hit.Position.Y else piv.Position.Y
+		local p = Vector3.new(spot.X, y, spot.Z)
+		if not padClear(island, p, y) then warn("[GalaxyMap] step pad " .. spec.id .. " on " .. island.Name .. " is not clear") end
+		local m = Instance.new("Model")
+		m.Name = "StepPad_" .. spec.id
+		m:SetAttribute("StepPad", spec.id)
+		m:SetAttribute("Label", spec.label)
+		m:SetAttribute("Colour", spec.colour)
+		m:SetAttribute("Placeable", true)
+		m:SetAttribute("Interactable", true)
+		m:SetAttribute("FaceTarget", "Galaxy.Islands." .. island.Name .. ".Boards." .. board.Name) -- (it lines up with its board)
+		local face = CFrame.lookAt(p, p + inward) -- (faces away from the board, toward the island)
+		local base = Builder.part({ Name = "Base", Shape = Enum.PartType.Cylinder, Size = Vector3.new(SP.Thick, SP.Size, SP.Size),
+			CFrame = CFrame.new(p + Vector3.new(0, SP.Thick / 2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = Color3.fromRGB(46, 40, 60), Material = Enum.Material.SmoothPlastic, CanCollide = true, Parent = m })
+		Builder.part({ Name = "Rim", Shape = Enum.PartType.Cylinder, Size = Vector3.new(SP.Thick - 0.1, SP.Size + 0.6, SP.Size + 0.6),
+			CFrame = CFrame.new(p + Vector3.new(0, (SP.Thick - 0.1) / 2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+			Color = spec.colour, Material = Enum.Material.Neon, CanCollide = false, Parent = m })
+		-- (turned 90 deg: a Top-face SurfaceGui's "up" is the part's side, so the text reads toward the board)
+		local top = Builder.part({ Name = "Face", Size = Vector3.new(SP.Size * 0.72, 0.05, SP.Size * 0.72), CFrame = face * CFrame.new(0, SP.Thick + 0.03, 0) * CFrame.Angles(0, math.rad(90), 0),
+			Transparency = 1, CanCollide = false, Parent = m })
+		top.CanQuery = false
+		local click = Instance.new("ClickDetector")
+		click.MaxActivationDistance = 40
+		click.Parent = base
+		m.PrimaryPart = top -- (the upright plate: the pad lies flat, its cylinder is turned)
+		m.WorldPivot = face
+		m.Parent = folder
+	end
+	folder.Parent = island
 end
 
 -- builds / removes pieces so the island shows `pads` pads (pop: the new ones are announced to the clients). Island attribute
@@ -510,6 +565,8 @@ local function refresh(slot: number, pop: boolean)
 		applyPads(island, 0, false)
 		local boards = island:FindFirstChild("Boards")
 		if boards then boards:Destroy() end
+		local steps = island:FindFirstChild("StepPads")
+		if steps then steps:Destroy() end
 		return
 	end
 	local isPlayer = typeof(owner) == "Instance"
@@ -526,6 +583,7 @@ local function refresh(slot: number, pop: boolean)
 	island:SetAttribute("Ready", (if isPlayer then owner:GetAttribute("SupernovaReady") else owner.Ready) == true)
 	setBridge(island, true)
 	makeBoards(island)
+	makeStepPads(island)
 	local pads = math.clamp(math.floor(num(owner, "Pads")), 0, #Econ.Pads)
 	applyPads(island, pads, pop and pads > (island:GetAttribute("Pads") or 0))
 	local _ = bodies

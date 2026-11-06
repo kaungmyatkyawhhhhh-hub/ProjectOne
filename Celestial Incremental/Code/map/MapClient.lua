@@ -555,6 +555,110 @@ task.spawn(function()
 	end
 end)
 
+-- STEP-ON PADS (7 Nov; MapService builds them, EconService buys while the island's owner stands on one): the top face
+-- (the action, the body, the price), a label above (readable from 20 studs), the rim in the button's colour when you can
+-- pay, grey when not; a press-down + the buy sound on a buy, a red flash + "NEED x" + a soft sound when you can't (the
+-- server sends Pressed / Denied counters; once a second at most)
+local GREY = Color3.fromRGB(120, 116, 135)
+local stepUI = {} -- [pad model] = { ... }
+local function stepPadUI(m: Model)
+	if stepUI[m] then return end
+	local base, rim, face = m:WaitForChild("Base", 5), m:WaitForChild("Rim", 5), m:WaitForChild("Face", 5)
+	if not base or not rim or not face then return end
+	local island = m:FindFirstAncestorWhichIsA("Model") and m.Parent and m.Parent.Parent
+	local colour = m:GetAttribute("Colour") or Color3.new(1, 1, 1)
+	-- the top face
+	local sg = Instance.new("SurfaceGui")
+	sg.Name = "StepPadFace"
+	sg.Adornee = face
+	sg.Face = Enum.NormalId.Top
+	sg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	sg.PixelsPerStud = 50
+	sg.LightInfluence = 0
+	sg.Parent = playerGui
+	local W = math.floor(face.Size.X * 50)
+	local fh = UIKit.box(sg, 0, 0, W, W, {})
+	local act = UIKit.text(fh, 0, math.floor(W * 0.14), W, 44, m:GetAttribute("Label") or "", 40, { TextXAlignment = Enum.TextXAlignment.Center, FontFace = UIKit.FONT_HEAVY, stroke = 3 })
+	local body = UIKit.text(fh, 0, math.floor(W * 0.36), W, 30, "", 26, { TextXAlignment = Enum.TextXAlignment.Center, FontFace = UIKit.FONT_HEAVY, stroke = 2.4, TextColor3 = colour })
+	UIKit.icon(fh, "stardust", math.floor(W * 0.12), math.floor(W * 0.6), 40, nil, { ZIndex = 3 })
+	local price = UIKit.text(fh, math.floor(W * 0.12) + 44, math.floor(W * 0.6) + 2, W - math.floor(W * 0.12) * 2 - 44, 38, "", 34, { FontFace = UIKit.FONT_HEAVY, stroke = 2.6 })
+	-- the label above (an upright anchor: the pad's own parts are turned)
+	local anchor = Instance.new("Attachment")
+	anchor.Name = "LabelAnchor"
+	anchor.Parent = base
+	anchor.WorldCFrame = CFrame.new(base.Position + Vector3.new(0, base.Size.X / 2 + 3, 0))
+	local bb = Instance.new("BillboardGui")
+	bb.Name = "StepPadLabel"
+	bb.Adornee = anchor
+	-- (the action + the price only, 130 px: three side by side 7 studs apart must not run into each other)
+	bb.Size = UDim2.fromOffset(130, 54)
+	bb.MaxDistance = 70
+	bb.LightInfluence = 0
+	bb.Parent = playerGui
+	local bh = UIKit.box(bb, 0, 0, 130, 54, {})
+	local bAct = UIKit.text(bh, 0, 0, 130, 26, "", 22, { TextXAlignment = Enum.TextXAlignment.Center, FontFace = UIKit.FONT_HEAVY, stroke = 2.2 })
+	local bPrice = UIKit.text(bh, 0, 28, 130, 24, "", 20, { TextXAlignment = Enum.TextXAlignment.Center, FontFace = UIKit.FONT_HEAVY, stroke = 2 })
+	local ui = { m = m, base = base, rim = rim, face = face, sg = sg, bb = bb, act = act, body = body, price = price, bAct = bAct, bPrice = bPrice,
+		colour = colour, island = island, flashUntil = 0, homes = { [base] = base.CFrame, [rim] = rim.CFrame, [face] = face.CFrame } }
+	stepUI[m] = ui
+	local function mine(): boolean return island ~= nil and island:GetAttribute("Owner") == player.UserId end
+	m:GetAttributeChangedSignal("Pressed"):Connect(function()
+		if not mine() then return end
+		UIKit.sound("buy")
+		-- (press down 0.2 studs in 0.15 s, then back)
+		for p, home in pairs(ui.homes) do
+			tween(p, { CFrame = home - Vector3.new(0, 0.2, 0) }, 0.075, Enum.EasingStyle.Quad)
+			task.delay(0.08, function() tween(p, { CFrame = home }, 0.075, Enum.EasingStyle.Quad) end)
+		end
+	end)
+	m:GetAttributeChangedSignal("Denied"):Connect(function()
+		if not mine() then return end
+		UIKit.sound("no")
+		ui.flashUntil = os.clock() + 0.35
+	end)
+	m.Destroying:Connect(function()
+		sg:Destroy()
+		bb:Destroy()
+		stepUI[m] = nil
+	end)
+end
+local function watchStepPads(island: Instance)
+	if not island:IsA("Model") then return end
+	local function folder(f: Instance)
+		if f.Name ~= "StepPads" then return end
+		for _, m in ipairs(f:GetChildren()) do task.spawn(stepPadUI, m) end
+		f.ChildAdded:Connect(function(m) task.spawn(stepPadUI, m) end)
+	end
+	local now = island:FindFirstChild("StepPads")
+	if now then folder(now) end
+	island.ChildAdded:Connect(folder)
+end
+for _, island in ipairs(islands:GetChildren()) do watchStepPads(island) end
+islands.ChildAdded:Connect(watchStepPads)
+task.spawn(function()
+	while true do
+		task.wait(0.1)
+		local sd = player:GetAttribute("Stardust") or 0
+		for m, ui in pairs(stepUI) do
+			local state = m:GetAttribute("State") or "none"
+			local cost = m:GetAttribute("Price") or -1
+			local isMine = ui.island ~= nil and ui.island:GetAttribute("Owner") == player.UserId
+			local can = isMine and state == "ok" and cost >= 0 and sd >= cost
+			local label = (m:GetAttribute("Label") or "")
+			UIKit.setText(ui.act, label)
+			UIKit.setText(ui.bAct, label)
+			UIKit.setText(ui.body, m:GetAttribute("Body") or "")
+			local p = if state == "locked" then "LOCKED" elseif state == "max" then "MAX" elseif cost >= 0 then Econ.Format(cost) else ""
+			UIKit.setText(ui.price, p)
+			local flashing = os.clock() < ui.flashUntil
+			UIKit.setText(ui.bPrice, if flashing then "NEED " .. Econ.Format(math.max(0, cost - sd)) else p)
+			local priceCol = if flashing then Color3.fromRGB(255, 90, 90) elseif can then Color3.fromRGB(125, 255, 122) else Color3.fromRGB(200, 196, 210)
+			ui.price.TextColor3, ui.bPrice.TextColor3 = priceCol, priceCol
+			ui.rim.Color = if flashing then Color3.fromRGB(255, 70, 70) elseif can then ui.colour else GREY
+		end
+	end
+end)
+
 -- (the pad label bobs 0.5 studs, smoothly; Reduced Motion: still)
 RunService.RenderStepped:Connect(function()
 	local bob = if calm() then 0 else (math.sin(os.clock() * 3) + 1) * 0.25
