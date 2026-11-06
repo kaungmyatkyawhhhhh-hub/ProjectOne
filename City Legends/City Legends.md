@@ -32,10 +32,26 @@ Owner: "I told you to fix these ... Find all buildings and roads if they have th
 **Not done:**
 - Before / after of the worst 10 curves: the "before" pieces are in the backup, so only "after" shots can be taken without undoing the work.
 - A thin dark crack across the asphalt at that bend (a gap between two road triangles).
-- Real meshes "like in Blender". The owner approved the folder (2026-11-06), but Claude Code's own permission check refused the upload, so the folder approval is untested. A small trial mesh was built and removed. It needs the owner's clear yes to upload, or a permission rule for `open_cloud_invoke`.
-- Plan for the meshes: kerbs and pavements first (they give seamless pavement); the export has to come from the place, because hand fixes aren't in the road data; each drive's gap must be cut out of the mesh; the old parts stay, invisible, for collision. The road surface comes last: only it gives a big FPS gain, and it's the riskiest (hand fixes, patches).
 - `world_test` stops in `GemShowcase` (`part.Position` in Lune). Not from these changes.
 - **Correction:** last night's "worst bends" (no kerbs, blocky edges) were an Edit-mode picture fault: seen in Play, those bends have kerbs and clean edges.
+
+## Real road meshes (2026-11-06, owner: "make all the roads smooth like in the blender")
+Every road on the Riviera is now shown by real curved meshes, made in Blender and uploaded through Open Cloud to the group. 675 meshes, 432,000 triangles, in `Workspace.Riviera.RoadMeshes`. Picture: [[Road meshes - bends.jpg]].
+- **Road surface:** the place's own 50,000 triangles, joined up, so hand fixes are kept and the hairline cracks between triangles are gone.
+- **Kerbs:** a rounded profile along a smooth curve. **Pavements and shoulders:** one continuous ribbon, so no lines between pieces. Red-and-white stripes kept. Long white lines redrawn along the curve.
+- **Islands between roads (owner's picture: "the curb is too wide and not good"):** 14 rebuilt from their outline: rounded corners, no thin tips, a normal kerb all round.
+- **Ground through the pavement:** rewritten under 109 pieces. The patches on the bends are gone in the shots.
+- **Drives:** cut out of the kerbs and pavements. Pavement stubs lying on the asphalt at junctions left out.
+
+**What stays:** the old road, kerb, pavement, line and island parts are still in the place, invisible, with no change to collision: cars, traffic, the lane test and every raycast use them exactly as before. Only the look changed.
+
+**Checked in Play:** the Switchbacks bend, the island, the Rewards drive, a junction. No new script errors. FPS: in one run, meshes 52 and old parts 51, so no gain and no loss. Part of that run's low numbers was the PC (Studio at 9 GB after many test runs); 73-79 driving, against 148-150 earlier the same day, was not traced further. The FPS gain people expected needs the old parts removed, and they are the collision.
+
+**Not done:** a phone test, the worst-10 before / after set. The white edge line by that island still has one soft kink. Serpent Road, Summit Pass and the Grand Hairpin's own trim stay as they were, except the road surface and lines.
+
+**If a road changes:** the meshes don't follow. Export again and run `tools/road_mesh/` (see `Games/CityLegends/CLAUDE.md`).
+
+**Undo:** `RoadMeshes.undo(roads)` (`tools/riviera/RoadMeshes.luau`): shows the old parts and removes the meshes.
 
 ## Tonight's run: start here (written 2026-11-06)
 **Done, step by step:**
