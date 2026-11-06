@@ -10,6 +10,7 @@ Back to [[GYM ARC - Assets]]. Every image of the alter skins / alter VFX / aura 
 - Skins were uploaded 3 times (first pass, re-tiled pass 2, pass 3 for granite / vascular / clay / bronze / jade); the table lists the ids in use. Older uploads stay in the group unused.
 - `v_alter_*` = alter VFX, `v_aura_*` = aura VFX (`_add` glow on black, `_alpha` coloured), `v_auraflat_*_ring` = the plain rings redrawn flat.
 - (later, 6 Nov) the owner rebuilt every VFX texture (clean backgrounds) and they were re-uploaded: the alter / aura / flare / flame ids below are the new ones. `v_titan_*` = the Titan VFX (`ArtIds.Titan`, not used in the game yet). `v_auraflat_flare_ring_alpha` = the flat flare ring (prestige halo).
+- (later, 6 Nov) the **Olympian skin** has its own maps now (`olympian_L_*` / `olympian_T_*`, from `Assets/trainers/olympian`, x2 limbs / x4 torso). Atlas keeps his own marble.
 
 | file | decal id | image id |
 |---|---|---|
@@ -109,6 +110,14 @@ Back to [[GYM ARC - Assets]]. Every image of the alter skins / alter VFX / aura 
 | obsidian_T_color | 71378526902111 | 129456010042591 |
 | obsidian_T_normal | 71956281366389 | 112523367160766 |
 | obsidian_T_roughness | 129374521970323 | 98247739197819 |
+| olympian_L_color | 90610667437497 | 101908631618601 |
+| olympian_L_metalness | 95502691457845 | 127527534011280 |
+| olympian_L_normal | 137318751451042 | 135621270167984 |
+| olympian_L_roughness | 75700298571665 | 118940334321430 |
+| olympian_T_color | 110844545109812 | 74046949087198 |
+| olympian_T_metalness | 120953033528255 | 103291350987982 |
+| olympian_T_normal | 100697469137541 | 118357514754693 |
+| olympian_T_roughness | 104978491528793 | 109127070719339 |
 | patina_L_color | 112483425180926 | 131979959361513 |
 | patina_L_metalness | 134414178016501 | 92385337694174 |
 | patina_L_normal | 95678678614891 | 84541148530944 |

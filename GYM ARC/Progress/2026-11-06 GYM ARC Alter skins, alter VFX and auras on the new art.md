@@ -119,3 +119,15 @@ Already OK, unchanged: alter glows, spark shower, transform burst, flare star / 
 
 ![[GYM ARC/Screenshots/aura_fix_1106/top_golden_light_front.jpg]]
 ![[GYM ARC/Screenshots/aura_fix_1106/top_golden_dark_side.jpg]]
+
+## Later, 6 Nov: Olympian's own skin (not Atlas's marble)
+Owner's prompt "OLYMPIAN NEW SKIN". Owner's answer: it's the **Olympian skin** (the earned Top 3 skin in Looks > Skins), not the trainer Olympian Reyes (he stays as he is).
+- New art: `GYM ARC/Assets/trainers/olympian/olympian_{color,normal,roughness,metalness}_1024.png` (white + sky-blue marble, gold veins, the veins metal).
+- Tiled like the alter skins (x2 on arms / legs, x4 on the torso + waist), 8 maps uploaded to Myanmar Builders Club. Ids: `Config/ArtIds.Skins.olympian` and the table in [[2026-11-06 GYM ARC - Art ids (ChatGPT batch)]].
+- `Config/Alters` Olympian now uses `art = "olympian"` (mean 220/224/229, plain `#DCE0E5`); `SkinStages.Alter_Olympian` rebuilt and `Alter_Olympian_T` added (all 4 maps each). The Skins card picture takes the same colour map.
+- **Atlas keeps his own marble** (the trainer's MaterialVariant `GymArc_GoldVeinMarble`, untouched). The old Olympian maps are only left in `ServerStorage._Imports_3Nov`.
+- Tested after a play restart: all 8 maps load, 0 errors. PC + phone (low-end) shots next to Atlas, front + back: Olympian = white with soft blue clouds and thin gold veins; Atlas = cream with chunky gold flecks. The face stays readable (the head keeps the player's own skin). The torso is under the tank top, as for every skin.
+- Screenshots: `GYM ARC/Screenshots/olympian_skin_1106/` (`phone/` = 667x375 copies).
+
+![[GYM ARC/Screenshots/olympian_skin_1106/pc_olympian_vs_atlas_front.jpg]]
+![[GYM ARC/Screenshots/olympian_skin_1106/pc_olympian_vs_atlas_back.jpg]]
