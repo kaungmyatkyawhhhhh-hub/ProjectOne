@@ -9,7 +9,9 @@ Prompt: "NEW UI ART FOR THE 9 WEAK UIs". Art: `Celestial Incremental/Assets/ui/`
 
 Checklist rows: **#138** (now BUILT), **#215**, **#401** updated.
 
-**Ids:** all 48 are in `ArtIds.lua` (`A.ui`, `A.uiIcon`, `A.uiIcon128`). They are **Studio test uploads under the owner's account**, not P&L Studios XP yet. The owner group-imports them, then I swap the ids.
+**Ids:** all 48 are in `ArtIds.lua` (`A.ui`, `A.uiIcon`, `A.uiIcon128`). **Group ids** (P&L Studios XP): the owner imported them 7 Nov and I swapped all 48. Checked in play: 47 of 48 show.
+- `galaxy_icon_lock_512` (101709923599217) fails to load (AssetFetchStatus Failure), probably still in moderation. Nothing uses it (the 128 version works).
+- The 48 imported decals were moved out of Workspace to `ServerStorage.ImportedArt` (kept, not deleted).
 
 Screens: `Progress/screens/2026-11-07-ui-art/` (pc-* and phone-* for each item).
 
@@ -58,5 +60,5 @@ Screens: `Progress/screens/2026-11-07-ui-art/` (pc-* and phone-* for each item).
 ## Flags
 1. **Wall rows are small from 20+ studs** (the plaque's dark screen fits 5 rows). The map placement task (next) looks at this board again: the plaque also sits inside the wall's wooden frame = the "frame inside a frame" in the new map rules.
 2. LUMI points right in the TREE INFO panel; the TREE is on the left. Mirroring her needs a flipped copy of the image.
-3. The ids are test uploads under the owner's account (see top).
+3. ~~The ids are test uploads~~: swapped to the group ids (see top).
 4. The Ignition "empty" check and the locked board were checked with client/server test values (this save has everything done), then restored.
