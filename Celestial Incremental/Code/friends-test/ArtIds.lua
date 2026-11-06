@@ -61,52 +61,52 @@ A.plate = {
 	nova = "rbxassetid://123306551172765",
 	supergiant = "rbxassetid://128041560933204",
 }
--- (7 Nov: the 9 weak UIs' new art, Assets/ui, prompt 'NEW UI ART FOR THE 9 WEAK UIs'. STUDIO TEST UPLOADS (owner's
--- account): the owner group-imports them to P&L Studios XP, then these ids are swapped)
+-- (7 Nov: the 9 weak UIs' new art, Assets/ui, prompt 'NEW UI ART FOR THE 9 WEAK UIs'. Group ids (P&L Studios XP,
+-- imported by the owner 7 Nov))
 A.ui = {
-	cardBack = "rbxassetid://96221144388203", -- the Forge card's back (before the flip)
-	card = { Common = "rbxassetid://114295653500669", Uncommon = "rbxassetid://127186091425923", Rare = "rbxassetid://129497951198810", Epic = "rbxassetid://75366703719479",
-		Legendary = "rbxassetid://135433262557381", Mythic = "rbxassetid://90141110823451", Celestial = "rbxassetid://123754381422922" },
-	plaque = "rbxassetid://136967023294881", -- the leaderboard boards
-	row = { gold = "rbxassetid://112855235823462", silver = "rbxassetid://83163898460461", bronze = "rbxassetid://74762401196466" },
-	medal = { "rbxassetid://138499823934662", "rbxassetid://117671087560688", "rbxassetid://108286234795446" },
-	signLocked = "rbxassetid://110023859014734", -- the locked island boards
+	cardBack = "rbxassetid://101387423894945", -- the Forge card's back (before the flip)
+	card = { Common = "rbxassetid://71021729038330", Uncommon = "rbxassetid://91441307241226", Rare = "rbxassetid://119201555133285", Epic = "rbxassetid://125758543057445",
+		Legendary = "rbxassetid://118469745280338", Mythic = "rbxassetid://73920516614074", Celestial = "rbxassetid://110110572885031" },
+	plaque = "rbxassetid://89093867656806", -- the leaderboard boards
+	row = { gold = "rbxassetid://105709001777534", silver = "rbxassetid://122860293572816", bronze = "rbxassetid://99479388410995" },
+	medal = { "rbxassetid://135666899361723", "rbxassetid://100056181929811", "rbxassetid://101043733093147" },
+	signLocked = "rbxassetid://106374341547572", -- the locked island boards
 }
 -- the new icons (512; Kit.icon finds them by these names too, as "ui:<name>")
 A.uiIcon = {
-	bodies = "rbxassetid://108900349699469",
-	checkDone = "rbxassetid://95931168962571",
-	checkEmpty = "rbxassetid://136880282203905",
-	comet = "rbxassetid://134722181316248",
-	cooldown = "rbxassetid://115935213244757",
-	darkMatter = "rbxassetid://128843910231978",
-	essence = "rbxassetid://101698449037013",
-	forgeRolls = "rbxassetid://87109939015182",
-	keep = "rbxassetid://114970167622370",
-	lock = "rbxassetid://89185707033939",
-	playtime = "rbxassetid://107423182688241",
-	reset = "rbxassetid://89575373606738",
-	starCore = "rbxassetid://126417965974860",
-	starShard = "rbxassetid://126842361932133",
-	supernova = "rbxassetid://130128298476349",
-	trophy = "rbxassetid://76394301271069",
+	bodies = "rbxassetid://89134302104435",
+	checkDone = "rbxassetid://104179310775621",
+	checkEmpty = "rbxassetid://137691735892950",
+	comet = "rbxassetid://131343793351633",
+	cooldown = "rbxassetid://93195828602893",
+	darkMatter = "rbxassetid://92182121871359",
+	essence = "rbxassetid://106572560252409",
+	forgeRolls = "rbxassetid://73151743225016",
+	keep = "rbxassetid://123989008126451",
+	lock = "rbxassetid://101709923599217",
+	playtime = "rbxassetid://124171523892238",
+	reset = "rbxassetid://101881184721305",
+	starCore = "rbxassetid://104761787576688",
+	starShard = "rbxassetid://91902429832510",
+	supernova = "rbxassetid://135507495295555",
+	trophy = "rbxassetid://127031199985219",
 }
 A.uiIcon128 = {
-	bodies = "rbxassetid://99555165341158",
-	checkDone = "rbxassetid://114495593514870",
-	checkEmpty = "rbxassetid://105551373234340",
-	comet = "rbxassetid://107496112247116",
-	cooldown = "rbxassetid://72177186522453",
-	darkMatter = "rbxassetid://90110184353787",
-	essence = "rbxassetid://80653408039264",
-	forgeRolls = "rbxassetid://127141706915818",
-	keep = "rbxassetid://138082696306807",
-	lock = "rbxassetid://136642507891980",
-	playtime = "rbxassetid://79209912137928",
-	reset = "rbxassetid://103665160679183",
-	starCore = "rbxassetid://113231424892654",
-	starShard = "rbxassetid://97211927698186",
-	supernova = "rbxassetid://91415311029827",
-	trophy = "rbxassetid://132558760047562",
+	bodies = "rbxassetid://131155501758809",
+	checkDone = "rbxassetid://126618089355699",
+	checkEmpty = "rbxassetid://140251785262733",
+	comet = "rbxassetid://140170910795888",
+	cooldown = "rbxassetid://94368522621794",
+	darkMatter = "rbxassetid://110464494247708",
+	essence = "rbxassetid://125698901531060",
+	forgeRolls = "rbxassetid://74987758501372",
+	keep = "rbxassetid://82841944521392",
+	lock = "rbxassetid://122051159998588",
+	playtime = "rbxassetid://97306154160718",
+	reset = "rbxassetid://107868642223501",
+	starCore = "rbxassetid://118039856854925",
+	starShard = "rbxassetid://90956822079526",
+	supernova = "rbxassetid://128906966133797",
+	trophy = "rbxassetid://139972944661727",
 }
 return A
