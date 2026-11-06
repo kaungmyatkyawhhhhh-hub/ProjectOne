@@ -49,6 +49,17 @@ const G=(op=.8)=>`<ellipse cx="100" cy="62" rx="70" ry="30" fill="url(#gloss)" o
 const RR=(x,y,w,h,r,m='chrome')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="url(#${m})" filter="url(#drop)"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="url(#${m})" filter="url(#bevel)"/>`;
 const RE=(x,y,w,h,r,e)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${e}" filter="url(#inset)"/>`;
 const NEW=[
+["Dearborn","Ford style · new brand",`
+${P('M14 50 L100 16 L186 50 L172 140 L100 186 L28 140 Z')}
+${PE('M14 50 L100 16 L186 50 L172 140 L100 186 L28 140 Z','url(#enamelNavy)',.9)}
+<path d="M28 58 L100 30 L172 58" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
+<g filter="url(#bevel)" fill="url(#chrome)">
+<path d="M70 66 H104 Q140 66 140 102 Q140 138 104 138 H70 Z M86 80 V124 H102 Q124 124 124 102 Q124 80 102 80 Z" fill-rule="evenodd"/>
+<rect x="40" y="82" width="24" height="7" rx="3.5"/><rect x="34" y="98" width="30" height="7" rx="3.5"/><rect x="42" y="114" width="22" height="7" rx="3.5"/>
+</g>
+<path d="M70 146 H130" stroke="#d32a35" stroke-width="3"/>
+${T(100,160,"DEARBORN",8.5,"url(#chromeTxt)",{ls:3.5,w:800,flt:"txt"})}
+<path d="M30 56 L100 28 L170 56 L166 76 Q100 56 34 80 Z" fill="url(#gloss)" opacity=".7"/>`],
 ["Wolfsburg","Volkswagen style · new brand",`
 ${RR(14,14,172,172,46)}${RE(21,21,158,158,40,'url(#enamelBlue)')}
 <rect x="27" y="27" width="146" height="146" rx="35" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
