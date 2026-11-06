@@ -67,7 +67,7 @@ Screens: `Progress/screens/2026-11-07-launch-day/`.
   - MapService swaps the place's saved emitters to `_alpha` at start.
 - **3 `_alpha` uploads FAIL to load on Roblox** (AssetFetchStatus.Failure; their `_add` files load): `comet_head` (124706844499223), `forge_sparks` (99004213794315), `gold_coin_sparkle` (105414210629114).
   - Until re-uploaded they use the `_add` file at LightEmission 1 (fully additive: the black adds nothing), via `VfxTextures.fx` / `brokenAlpha`.
-  - **Owner: please re-upload those 3 `_alpha` PNGs** and put the new ids in VfxTextures.alpha (then empty `brokenAlpha`). The UI comet image (`T.alpha.comet_head` in an ImageLabel) is blank until then.
+  - **Fixed (owner re-uploaded, 7 Nov):** comet_head 90899113298190, forge_sparks 89837646840352, gold_coin_sparkle 100475753325033. All 3 load; `brokenAlpha` is empty; VfxTextureAudit on the client: **CLEAN, 59 effects, no fallbacks**. The UI comet image works again.
 - **Tools/VfxTextureAudit** (`tools/VfxTextureAudit.lua`, in the place as `ReplicatedStorage.Tools.VfxTextureAudit`, so the client can run it):
   - FAILS on an `_add` texture or an unknown one; allows an `_add` whose `_alpha` is listed as broken only at LightEmission 1.
   - Before: 2 BAD (the motes + sparkles: `_add` at LE 0.7) + 1 UNKNOWN (Pull).

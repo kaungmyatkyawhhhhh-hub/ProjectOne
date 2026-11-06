@@ -63,7 +63,7 @@ T.alpha = {
 	black_hole_swirl = "rbxassetid://125237533530152", -- BDE/vfx_black_hole_swirl_512_alpha.png
 	bridge_segment = "rbxassetid://112503823963940", -- G/vfx_bridge_segment_512_alpha.png
 	build_sparkle_trail = "rbxassetid://82719035072589", -- G/vfx_build_sparkle_trail_512_alpha.png
-	comet_head = "rbxassetid://124706844499223", -- BDE/vfx_comet_head_512_alpha.png
+	comet_head = "rbxassetid://90899113298190", -- BDE/vfx_comet_head_512_alpha.png (re-uploaded 7 Nov: 124706844499223 never loaded)
 	comet_tail = "rbxassetid://113370765750175", -- BDE/vfx_comet_tail_512_alpha.png
 	confetti_burst = "rbxassetid://78001004234977", -- H/vfx_confetti_burst_flipbook4x4_1024_alpha.png
 	confetti_pieces = "rbxassetid://133137263419583", -- F/vfx_confetti_pieces_512_alpha.png
@@ -75,9 +75,9 @@ T.alpha = {
 	forge_beam = "rbxassetid://94442343358983", -- F/vfx_forge_beam_512_alpha.png
 	forge_card_frame = "rbxassetid://137572793272248", -- F/vfx_forge_card_frame_512_alpha.png
 	forge_glow = "rbxassetid://137489360341714", -- F/vfx_forge_glow_512_alpha.png
-	forge_sparks = "rbxassetid://99004213794315", -- H/vfx_forge_sparks_flipbook4x4_1024_alpha.png
+	forge_sparks = "rbxassetid://89837646840352", -- H/vfx_forge_sparks_flipbook4x4_1024_alpha.png (re-uploaded 7 Nov: 99004213794315 never loaded)
 	glow_dot = "rbxassetid://128335922437416", -- A/vfx_glow_dot_alpha_512.png
-	gold_coin_sparkle = "rbxassetid://105414210629114", -- BDE/vfx_gold_coin_sparkle_512_alpha.png
+	gold_coin_sparkle = "rbxassetid://100475753325033", -- BDE/vfx_gold_coin_sparkle_512_alpha.png (re-uploaded 7 Nov: 105414210629114 never loaded)
 	ground_dust_ring = "rbxassetid://72420258647993", -- G/vfx_ground_dust_ring_512_alpha.png
 	hammer_impact_star = "rbxassetid://110328091080135", -- F/vfx_hammer_impact_star_512_alpha.png
 	island_beam = "rbxassetid://88900452951935", -- G/vfx_island_beam_512_alpha.png
@@ -101,9 +101,9 @@ T.alpha = {
 -- (7 Nov: the _alpha twin of any id (an _add id, or an old upload of the mote); nil = unknown. Used by MapService to fix
 -- emitters saved in the place, and by Tools/VfxTextureAudit)
 T.oldIds = { ["rbxassetid://107591336585756"] = "stardust_mote" } -- (an early upload of the mote, on the Black Hole's Pull)
--- (7 Nov: these 3 _alpha uploads FAIL to load on Roblox (AssetFetchStatus.Failure; the _add ones load): until the owner
--- re-uploads them, effects use the _add file with LightEmission 1 (fully additive: the black adds nothing, no box))
-T.brokenAlpha = { comet_head = true, forge_sparks = true, gold_coin_sparkle = true }
+-- (an _alpha upload that won't load on Roblox goes here (its name = true): effects then use the _add file at LightEmission
+-- 1 until it's re-uploaded. 7 Nov: comet_head, forge_sparks, gold_coin_sparkle were here; the owner re-uploaded them)
+T.brokenAlpha = {}
 -- the texture an EFFECT (emitter / beam / trail) should use, and whether it must be LightEmission 1
 function T.fx(name: string): (string, boolean)
 	if T.brokenAlpha[name] then return T.add[name], true end
