@@ -1117,6 +1117,7 @@ local function lbPlaque(gui: SurfaceGui, title: string, tall: boolean)
 	local img = Instance.new("ImageLabel")
 	img.BackgroundTransparency = 1
 	img.Image = Art.ui.plaque
+	img:SetAttribute("HasOwnFrame", true) -- (rule 8: this art is the board's only frame)
 	img.ZIndex = 50
 	img.Size = UDim2.fromScale(1, 1)
 	-- (PLAYERS NEAR YOU is tall: the plaque is 9-sliced through a strip of its dark screen, so the frame keeps its look)

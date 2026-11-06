@@ -53,8 +53,12 @@ Config.Passes.X2Stardust.order = 1
 --   start = UTC time (ISO), minutes = how long, everyDays = repeats (7 = every week at the same time), stardust = +x (added
 --   to the boosts like Star Surge: +1 = 2x STARDUST). The banner shows the real time left; no fake timers.
 Config.Events = {
-	-- the alpha launch 2x hour (Sat 21 Nov 15:00 UTC = 21:30 Myanmar, the Playbook's weekly slot) and every Saturday after
-	{ id = "Stardust2x", title = "2x STARDUST HOUR", start = "2026-11-21T15:00:00Z", minutes = 60, everyDays = 7, stardust = 1 },
+	-- (owner, 7 Nov: the alpha moved to "Sat 8 Nov 02:30 UTC = 9:00 Myanmar". In 2026 Saturday is 7 Nov (8 Nov is a Sunday),
+	-- so the launch 2x hour is set for BOTH days, 02:30-03:30 UTC; the owner deletes the one that isn't the launch)
+	{ id = "AlphaLaunch2xSat", title = "2x STARDUST HOUR", start = "2026-11-07T02:30:00Z", minutes = 60, stardust = 1 },
+	{ id = "AlphaLaunch2xSun", title = "2x STARDUST HOUR", start = "2026-11-08T02:30:00Z", minutes = 60, stardust = 1 },
+	-- then every Saturday 15:00 UTC (21:30 Myanmar, the Playbook's weekly slot)
+	{ id = "Stardust2x", title = "2x STARDUST HOUR", start = "2026-11-14T15:00:00Z", minutes = 60, everyDays = 7, stardust = 1 },
 }
 
 -- WHAT'S NEW (7 Nov): the panel opens once per new version (after the tutorial), and everyone who played before it gets the

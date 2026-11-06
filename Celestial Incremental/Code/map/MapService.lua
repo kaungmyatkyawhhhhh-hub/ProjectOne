@@ -37,6 +37,66 @@ end
 local islandsFolder = root:WaitForChild("Islands")
 if root:FindFirstChild("Centre") then Builder.FreeBoard(root.Centre) end -- (Phase 2.4: a place built before the board)
 Builder.ClearDecor(root) -- (no crystal in front of a sign, 6 Nov)
+-- (7 Nov, rule 8 ONE FRAME) a place built before it: the leaderboard wall + PLAYERS NEAR YOU lose their brass edge and the
+-- screen part goes see-through (the plaque art is the frame; MapBuilder builds them this way now)
+do
+	local centre = root:FindFirstChild("Centre")
+	for _, t in ipairs({ { "Leaderboard", "Wall", "WallEdge" }, { "NearBoard", "Board", "BoardEdge" } }) do
+		local m = centre and centre:FindFirstChild(t[1])
+		if m then
+			local edge = m:FindFirstChild(t[3])
+			if edge then edge:Destroy() end
+			local scr = m:FindFirstChild(t[2])
+			if scr then scr.Transparency = 1 end
+		end
+	end
+end
+-- (7 Nov) what MapAudit checks (ServerStorage.Tools.MapAudit): the plaza's pieces line the plaza facing in, at the Core
+do
+	local CORE = "Galaxy.Centre.Core"
+	local function tag(inst: Instance?, attrs)
+		if not inst then return end
+		inst:SetAttribute("Placeable", true)
+		for k, v in pairs(attrs or {}) do inst:SetAttribute(k, v) end
+	end
+	local centre = root:FindFirstChild("Centre")
+	if centre then
+		for _, n in ipairs({ "Leaderboard", "NearBoard", "StarForge", "BlackHoleGate", "StarSurge", "FreeBoard" }) do tag(centre:FindFirstChild(n), { FaceTarget = CORE }) end
+		tag(centre:FindFirstChild("Core"), { Animated = true }) -- (the landmark: it hovers, tilts and spins on purpose)
+		-- (the posts stand on the plaza's raised rim ring; the ground ray from their middle misses the ring and lands on the
+		-- floor's bevelled edge 0.8-1.5 below: Floating, with that reason)
+		for _, c in ipairs(centre:GetChildren()) do if c.Name == "LampPost" then tag(c, { Floating = true }) end end
+		local det = centre:FindFirstChild("Details")
+		if det then
+			for _, c in ipairs(det:GetChildren()) do
+				if c.Name == "CrystalCluster" and c:IsA("BasePart") then
+					-- (the audit: they were turned 40 / 50 / 130 deg and sat 0.3-0.4 above the floor: snapped to 15 deg, set down)
+					local _, ry, _ = c.CFrame:ToOrientation()
+					local snap = math.rad(math.floor(math.deg(ry) / 15 + 0.5) * 15)
+					local rp = RaycastParams.new()
+					rp.FilterType = Enum.RaycastFilterType.Exclude
+					rp.FilterDescendantsInstances = { c }
+					local hit = workspace:Raycast(c.Position + Vector3.new(0, c.Size.Y, 0), Vector3.new(0, -60, 0), rp)
+					local y = if hit then hit.Position.Y + c.Size.Y / 2 - 0.1 else c.Position.Y
+					c.CFrame = CFrame.new(c.Position.X, y, c.Position.Z) * CFrame.Angles(0, snap, 0)
+					tag(c)
+				end
+			end
+		end
+	end
+	local ns = root:FindFirstChild("NextSector")
+	if ns then
+		-- (a gateway: its legs stand on the floor either side of the path; the audit's ground ray goes down its middle onto the
+		-- path's ramp: Floating, with that reason)
+		tag(ns:FindFirstChild("Arch"), { FaceTarget = CORE, Floating = true })
+		tag(ns:FindFirstChild("IgnitionSign"), { FaceTarget = CORE, Floating = true }) -- (it hangs on its two posts)
+		tag(ns:FindFirstChild("ArchSign"), { FaceTarget = CORE, Floating = true }) -- (on its post, over the arch)
+		-- (the Barrier is the arch's door, not floor; the sector-2 Forge sign faces its own island)
+		local bar = ns:FindFirstChild("Barrier")
+		if bar then bar:SetAttribute("NotGround", true) end
+		-- (the Sector 2 Forge copy is made below, tagged by being a copy of the plaza's)
+	end
+end
 -- (6 Nov: the place's Forge sign was built when the Forge opened at Supernova 3; the builder says IGNITION 1 now)
 do
 	local forgeSign = root:FindFirstChild("Centre") and root.Centre:FindFirstChild("StarForge") and root.Centre.StarForge:FindFirstChild("Sign")
@@ -90,29 +150,68 @@ end
 
 -- the island's four BOARDS (owner, 2 Nov: "1:1 direct copy boards from regrowth"): Regrowth's chunky stone frames round a
 -- dark screen (GalaxyBoards draws the live UI on it). No prompt, no ClickDetector: the buttons are on the screens.
+-- (7 Nov, the map placement rules) every island has an AREA (its walkable disc: BoardPlacer's centre + radius) with an
+-- ISLANDSPAWN in it (where you step off the bridge: the boards face it). Made by code, invisible, not collidable.
+local BoardPlacer = require(ServerStorage:WaitForChild("Tools"):WaitForChild("BoardPlacer"))
+local function islandArea(island: Model): BasePart
+	local name = island.Name .. "_Area"
+	local area = island:FindFirstChild(name)
+	if area then return area end
+	local c = centerOf(island)
+	area = Builder.part({ Name = name, Size = Vector3.new(2 * R, 1, 2 * R), CFrame = CFrame.new(c - UP * 0.5), Transparency = 1,
+		CanCollide = false, CanQuery = false, Parent = island })
+	Builder.part({ Name = "IslandSpawn", Size = Vector3.new(4, 1, 4), CFrame = CFrame.new(at(island, -(R - 6), 0, 0.5)), Transparency = 1,
+		CanCollide = false, CanQuery = false, Parent = area })
+	return area
+end
+-- the boards: built where the old geometry put them (so each frame is whole), given a bottom-centre pivot that looks at the
+-- player (front = LookVector), then PLACED BY BoardPlacer from MapConfig.Boards.Layout. (The pair's old gap ledge is gone:
+-- the pair now stands 30 deg apart round the rim.)
 local function makeBoards(island: Model)
 	local old = island:FindFirstChild("Boards")
 	if old then return old end
 	local c, dir = centerOf(island)
+	local area = islandArea(island)
 	local cfs = Builder.BoardCFrames(c, dir)
+	local L = MapConfig.Boards.Layout
 	local model = Instance.new("Model")
 	model.Name = "Boards"
+	model.Parent = island
+	local placed = {}
 	for _, spec in ipairs(MapConfig.Boards.List) do
 		local panel = Instance.new("Model")
 		panel.Name = "Board_" .. spec.id
 		panel:SetAttribute("Board", spec.id)
 		Builder.BoardFrame(panel, cfs[spec.id], spec, c.Y, island:GetAttribute("OwnerName"))
-		panel.Screen:SetAttribute("Board", spec.id)
+		local screen = panel.Screen
+		screen:SetAttribute("Board", spec.id)
+		-- (the screen's visible side is its Back face: -LookVector)
+		local front = -screen.CFrame.LookVector
+		front = Vector3.new(front.X, 0, front.Z).Unit
+		local bottom = Vector3.new(screen.Position.X, c.Y, screen.Position.Z)
+		panel.WorldPivot = CFrame.lookAt(bottom, bottom + front)
 		panel.Parent = model
+		local row = L[spec.id]
+		if row then
+			-- the rim angle in WORLD degrees (BoardPlacer: 0 = +X): the island's far side turned by the row's angle
+			local a = math.rad(row.angle)
+			local w = at(island, math.cos(a), math.sin(a)) - at(island, 0, 0)
+			local worldDeg = math.deg(math.atan2(w.Z, w.X))
+			BoardPlacer.place(panel, area, worldDeg, { margin = L.Margin, tiltBack = 0, groundY = c.Y })
+			placed[spec.id] = { panel = panel, row = row, deg = worldDeg }
+		end
+		panel:SetAttribute("Placeable", true)
 	end
-	-- the ledge runs on through the gap between the pair (Regrowth's low wall)
-	local P = MapConfig.Boards.Pair
-	local ledgeTop = P.Bottom - P.Lip - P.BarLow
-	local gap = at(island, P.At.X + 0.3, P.At.Z, ledgeTop / 2)
-	local face = Builder.faceTo(gap, c)
-	Builder.part({ Name = "GapLedge", Size = Vector3.new(P.Gap + 1.2, ledgeTop, P.LedgeDepth - 0.4), CFrame = face, Color = MapConfig.Boards.Stone, CanCollide = true, Parent = model })
-	Builder.part({ Name = "GapLedgeCap", Size = Vector3.new(P.Gap + 1.5, 0.3, P.LedgeDepth - 0.1), CFrame = face * CFrame.new(0, ledgeTop / 2 - 0.1, 0), Color = MapConfig.Boards.StoneLight, CanCollide = true, Parent = model })
-	model.Parent = island
+	-- the pair turns `spread` deg toward each other (the side is worked out from where the other board stands)
+	for _, pair in ipairs({ { "Tree", "Info" }, { "Info", "Tree" } }) do
+		local me, other = placed[pair[1]], placed[pair[2]]
+		if me and other and (me.row.spread or 0) ~= 0 then
+			local look = me.panel:GetPivot().LookVector
+			local to = other.panel:GetPivot().Position - me.panel:GetPivot().Position
+			local side = if look:Cross(to).Y >= 0 then 1 else -1
+			BoardPlacer.place(me.panel, area, me.deg, { margin = L.Margin, tiltBack = 0, groundY = c.Y, pairSpread = side * me.row.spread })
+		end
+	end
 	return model
 end
 
@@ -511,7 +610,9 @@ task.spawn(function()
 	local NS = MapConfig.NextSector
 	local at = O + NS.Position + Vector3.new(0, 0.2, 0)
 	local cf, size = forge:GetBoundingBox()
-	forge:PivotTo(CFrame.new(at + Vector3.new(0, size.Y / 2 - (cf.Position.Y - forge:GetPivot().Position.Y), 0)) * CFrame.Angles(0, math.rad(NS.Angle + 90), 0))
+	-- (7 Nov, MapAudit FACING: its sign faced away from the plaza, the only place it's seen from: turned to face the Core)
+	forge:PivotTo(CFrame.new(at + Vector3.new(0, size.Y / 2 - (cf.Position.Y - forge:GetPivot().Position.Y), 0)) * CFrame.Angles(0, math.rad(NS.Angle + 90 + 180), 0))
+	forge:SetAttribute("FaceTarget", "Galaxy.Centre.Core")
 	for _, p in ipairs(forge:GetDescendants()) do
 		if p:IsA("ProximityPrompt") then p:Destroy() end
 	end

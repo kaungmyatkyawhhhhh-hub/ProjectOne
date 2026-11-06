@@ -144,10 +144,22 @@ local slots = slotSets[3]
 -- AUTO ROLL (7 Nov, the pass): an on / off switch in the EQUIPPED header, only for its owners
 local autoBtn, autoInner, _, autoShadow = Kit.button(win, 520, 76, 132, 28, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6, Visible = false })
 local autoText = Kit.text(autoInner, 0, Kit.ps(4, 3), 132, 20, "AUTO ROLL: ON", Kit.ps(13, 15), { ZIndex = autoInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
+-- (owner 7 Nov: KEEP: the Essence AUTO ROLL leaves you; a tap goes 0 -> 5 -> 10 -> 25 -> 0)
+local keepBtn, keepInner, _, keepShadow = Kit.button(win, 420, 76, 94, 28, hex("#5ad1ff"), hex("#1f6fd1"), { ZIndex = 6, Visible = false })
+local keepText = Kit.text(keepInner, 0, Kit.ps(4, 3), 94, 20, "KEEP 0", Kit.ps(13, 15), { ZIndex = keepInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
+keepBtn.MouseButton1Click:Connect(function()
+	Kit.sound("tab")
+	local list = Econ.AutoRollKeep
+	local at = table.find(list, player:GetAttribute("AutoRollKeep") or 0) or 1
+	request:InvokeServer("AutoRollKeep", list[at % #list + 1])
+end)
 local function refreshAuto()
 	local has = player:GetAttribute("Pass_AutoRoll") == true
 	autoBtn.Visible = has
 	autoShadow.Visible = has
+	keepBtn.Visible = has
+	keepShadow.Visible = has
+	Kit.setText(keepText, "KEEP " .. tostring(player:GetAttribute("AutoRollKeep") or 0))
 	local on = player:GetAttribute("AutoRollOn") == true
 	Kit.recolour(autoBtn, if on then hex("#7dff7a") else hex("#6a6474"), if on then hex("#1fa83a") else hex("#3f3a48"))
 	Kit.setText(autoText, if on then "AUTO ROLL: ON" else "AUTO ROLL: OFF")
@@ -158,6 +170,7 @@ autoBtn.MouseButton1Click:Connect(function()
 end)
 player:GetAttributeChangedSignal("Pass_AutoRoll"):Connect(refreshAuto)
 player:GetAttributeChangedSignal("AutoRollOn"):Connect(refreshAuto)
+player:GetAttributeChangedSignal("AutoRollKeep"):Connect(refreshAuto)
 refreshAuto()
 Kit.text(win, 304, 174, 200, 22, "BOOK", 18, { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.5, TextColor3 = hex("#ffe08a") })
 local bookCount = Kit.text(win, 400, 174, 250, 22, "0/42", 16, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 1.3 })

@@ -50,7 +50,9 @@ local function cleanReward(r)
 			if n > 0 then out.potions[p.id] = math.min(n, Codes.MaxPotions) end
 		end
 	end
-	if out.essence == 0 and next(out.potions) == nil then return nil end
+	local b = math.floor(tonumber(r.boost) or 0)
+	if b > 0 then out.boost = math.min(b, 240) end -- (minutes of x2 stardust, max 4 h)
+	if out.essence == 0 and next(out.potions) == nil and not out.boost then return nil end
 	return out
 end
 local function endsOf(v): number?
@@ -110,6 +112,8 @@ remote.OnServerInvoke = function(player: Player, text)
 	d.codes[code] = os.time()
 	d.essence += c.reward.essence or 0
 	for id, n in pairs(c.reward.potions or {}) do d.potions[id] = (d.potions[id] or 0) + n end
+	-- (a boost reward runs at once: the x2 STARDUST potion's boost, added on top of any time left)
+	if (c.reward.boost or 0) > 0 then d.boostLeft.Stardust = (d.boostLeft.Stardust or 0) + c.reward.boost * 60 end
 	Shared.publish(player, s)
 	task.spawn(Shared.save, player, false)
 	pcall(function() AnalyticsService:LogCustomEvent(player, "CodeRedeemed", 1, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = code }) end)

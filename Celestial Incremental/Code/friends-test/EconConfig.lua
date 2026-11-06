@@ -483,6 +483,7 @@ Econ.GiftRewards = {
 Econ.VIP = { stardust = 0.25, essence = 1 }
 Econ.Premium = 0.10
 Econ.AutoRollEvery = 3 -- (the AUTO ROLL pass: one roll every 3 s while you have Essence)
+Econ.AutoRollKeep = { 0, 5, 10, 25 } -- (owner 7 Nov: AUTO ROLL stops when you'd go under this much Essence; default 0)
 -- the plaza's FREE REWARDS board (Depth Incremental's lobby board): once each. The group is checked (IsInGroup); a like
 -- can't be checked by a game, so it's an honour claim. PROPOSED: like 1 Essence, group 2
 Econ.FreeRewards = { { id = "like", text = "LIKE THE GAME", essence = 1 }, { id = "group", text = "JOIN THE GROUP", essence = 2 } }

@@ -185,8 +185,8 @@ function Builder.Leaderboards(centre: Instance)
 	lb.Parent = centre
 	local zl = zoneCf(Z.Leaderboard.angle, Z.Leaderboard.dist, true)
 	local wallCf = zl * CFrame.new(0, LB.Bottom + LB.Height / 2, 0)
-	local wall = part({ Name = "Wall", Size = Vector3.new(LB.Width, LB.Height, 0.6), CFrame = wallCf, Color = Color3.fromRGB(22, 17, 30), Parent = lb })
-	part(brass({ Name = "WallEdge", Size = Vector3.new(LB.Width + 1, LB.Height + 1, 0.4), CFrame = wallCf, Parent = lb }))
+	-- (7 Nov, rule 8 ONE FRAME: the plaque art is the board's frame: no brass edge, the wall itself is see-through)
+	local wall = part({ Name = "Wall", Size = Vector3.new(LB.Width, LB.Height, 0.6), CFrame = wallCf, Color = Color3.fromRGB(22, 17, 30), Transparency = 1, Parent = lb })
 	for _, sx in ipairs({ -1, 1 }) do
 		local h = LB.Bottom + LB.Height + 1
 		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zl * CFrame.new(sx * (LB.Width / 2 + 0.9), h / 2, 0), Parent = lb }))
@@ -224,8 +224,7 @@ function Builder.Leaderboards(centre: Instance)
 	nb.Parent = centre
 	local zn = zoneCf(NB.angle, NB.dist, true)
 	local nbCf = zn * CFrame.new(0, NB.Bottom + NB.Height / 2, 0)
-	local board = part({ Name = "Board", Size = Vector3.new(NB.Width, NB.Height, 0.6), CFrame = nbCf, Color = Color3.fromRGB(22, 17, 30), Parent = nb })
-	part(brass({ Name = "BoardEdge", Size = Vector3.new(NB.Width + 1, NB.Height + 1, 0.4), CFrame = nbCf, Parent = nb }))
+	local board = part({ Name = "Board", Size = Vector3.new(NB.Width, NB.Height, 0.6), CFrame = nbCf, Color = Color3.fromRGB(22, 17, 30), Transparency = 1, Parent = nb })
 	for _, sx in ipairs({ -1, 1 }) do
 		local h = NB.Bottom + NB.Height + 1
 		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zn * CFrame.new(sx * (NB.Width / 2 + 0.9), h / 2, 0), Parent = nb }))
@@ -862,7 +861,8 @@ function Builder.BoardFrame(parent: Instance, cf: CFrame, spec, floorY: number, 
 	else
 		local F, D = B.Frame, B.Depth
 		stone({ Name = "BackPlate", Size = Vector3.new(w, h, 0.4), CFrame = cf * CFrame.new(0, 0, -D / 2 + 0.2), Color = B.StoneDark })
-		for _, s in ipairs({ -1, 1 }) do
+		-- (7 Nov, rule 8 ONE FRAME: the STAR FORGE / BLACK HOLE boards show framed art (the chained sign): no stone frame round it)
+		for _, s in ipairs(if spec.locked then {} else { -1, 1 }) do
 			-- the bars run half a frame past the screen; a round (frame-thick) fills each outer corner
 			stone({ Name = "FrameBar", Size = Vector3.new(w + F, F, D), CFrame = cf * CFrame.new(0, s * (h / 2 + F / 2), 0) })
 			stone({ Name = "FrameBar", Size = Vector3.new(F, h + F, D), CFrame = cf * CFrame.new(s * (w / 2 + F / 2), 0, 0) })

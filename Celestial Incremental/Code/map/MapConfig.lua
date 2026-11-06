@@ -185,6 +185,22 @@ MapConfig.Boards = {
 			-- (3.1: it opens with Ignition 1; the window shows the 100K shards progress and the COLLAPSE)
 			Neon = Color3.fromRGB(170, 90, 255), locked = { text = "IGNITION 1", attr = "Ignition", need = 1, window = "BlackHole", icon = "blackHole" } },
 	},
+	-- (7 Nov, the map placement rules: every island board is placed by BoardPlacer (ServerStorage.Tools) at the RIM, front to
+	-- the island's IslandSpawn (where you arrive off the bridge), back to the void. angle = degrees round the rim from the
+	-- island's FAR side (0 = straight across from the bridge; - = the side Bodies is on), margin = studs in from the edge,
+	-- spread = the pair's turn toward each other. Never move a board by hand: change its row here.
+	--   board          angle  why
+	--   Tree / Info    -24/24 the pair, straight ahead as you step off the bridge (each 18.3 wide with its back panel)
+	--   Bodies / Stars -67/67 the two buy boards, either side of the pair (18.1 wide with the angular frame)
+	--   ForgeLock      -94    the small Star Forge board, past Bodies (further round, it turns > 45 deg off the island centre)
+	--   BlackHoleLock   94    the small Black Hole board, past Perks
+	--   (MapAudit, 7 Nov: +-15 / +-52 / +-82 and then +-19 / +-60 / +-90 overlapped (the boxes include the back panels): widened)
+	Layout = {
+		Tree = { angle = -24, spread = 10 }, Info = { angle = 24, spread = 10 },
+		Bodies = { angle = -67 }, Stars = { angle = 67 },
+		ForgeLock = { angle = -94 }, BlackHoleLock = { angle = 94 },
+		Margin = 4,
+	},
 	-- the angular neon frame (Style "Neon": Bodies, Star Upgrades), round the screen: its bottom corners Low out and down, its
 	-- top corners Wide out and High up (wider at the top, like Regrowth's Machines board)
 	Angular = { Low = 0.4, Wide = 1.6, High = 0.7 },

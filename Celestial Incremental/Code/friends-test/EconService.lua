@@ -482,6 +482,7 @@ local function publish(player: Player, s)
 	-- (7 Nov: the passes' state + the once-only prompts, for the HUD / Forge / GalaxyLive)
 	player:SetAttribute("CoreSlots", slotsOf(s))
 	player:SetAttribute("AutoRollOn", s.pass ~= nil and s.pass.AutoRoll == true and d.auto.Roll ~= false)
+	player:SetAttribute("AutoRollKeep", tonumber(d.auto.RollKeep) or 0)
 	player:SetAttribute("Sessions", d.sessions)
 	player:SetAttribute("SeenVersion", d.seenVersion)
 	player:SetAttribute("FavAsked", d.settings.favAsked == true)
@@ -987,6 +988,13 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		d.auto.Roll = if d.auto.Roll == false then nil else false
 		publish(player, s)
 		return true, d.auto.Roll ~= false
+	elseif action == "AutoRollKeep" then
+		-- (owner 7 Nov: how much Essence AUTO ROLL leaves you: 0 / 5 / 10 / 25)
+		local n = tonumber(arg)
+		if not n or not table.find(Econ.AutoRollKeep, n) then return false, "bad" end
+		d.auto.RollKeep = if n == 0 then nil else n
+		publish(player, s)
+		return true, n
 	elseif action == "AutoToggle" and arg == "Supernova" then
 		-- (3.1 AUTO-SUPERNOVA, from Black Hole 1: off until you switch it on)
 		if d.holes < 1 then return false, "locked" end
@@ -1343,7 +1351,8 @@ task.spawn(function()
 			-- (7 Nov: the HUD's gift timer counts from this; it's sent every second, the HUD ticks in between)
 			if math.floor(s.d.gifts.played) ~= player:GetAttribute("GiftPlayed") then player:SetAttribute("GiftPlayed", math.floor(s.d.gifts.played)) end
 			-- AUTO ROLL (7 Nov, the pass): one roll every few seconds while you have the Essence, unless switched off
-			if s.pass and s.pass.AutoRoll and s.d.auto.Roll ~= false and s.d.ignition >= 1 and s.d.essence >= Econ.Forge.RollCost
+			if s.pass and s.pass.AutoRoll and s.d.auto.Roll ~= false and s.d.ignition >= 1
+				and s.d.essence >= Econ.Forge.RollCost + (tonumber(s.d.auto.RollKeep) or 0)
 				and os.clock() >= (s.nextAutoRoll or 0) then
 				s.nextAutoRoll = os.clock() + Econ.AutoRollEvery
 				local ok, results = forgeRoll(player, s, 1)

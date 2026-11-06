@@ -296,6 +296,8 @@ end)
 ------------------------------------------------------------------------ NOTIFICATIONS (once, after the 3rd session)
 task.spawn(function()
 	if (player:GetAttribute("Sessions") or 0) < 3 or player:GetAttribute("NotifAsked") == true then return end
+	-- (Studio: Roblox's opt-in prompt can't be answered in a play test and it blocks every GUI click: only with TestNotifPrompt)
+	if RunService:IsStudio() and workspace:GetAttribute("TestNotifPrompt") ~= true then return end
 	local ENS = game:GetService("ExperienceNotificationService")
 	-- (90 s into the session, after the tutorial, when nothing else is up)
 	task.wait(90)

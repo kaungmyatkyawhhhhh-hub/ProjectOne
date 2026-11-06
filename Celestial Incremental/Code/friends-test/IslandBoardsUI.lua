@@ -297,7 +297,7 @@ function UI:shell()
 	local neon = self.spec.Neon
 	local B = MapConfig.Boards
 	local corners = if self.spec.pair then B.StoneLight elseif self.spec.Style == "Neon" then B.Screen else B.Stone
-	Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = corners, ZIndex = 1 })
+	local cornerBox = Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = corners, ZIndex = 1 })
 	local bg = Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 1 })
 	Kit.corner(bg, 40)
 	Kit.grad(bg, hex("#151026"), hex("#06050b"), 90)
@@ -314,6 +314,8 @@ function UI:shell()
 	local line = Kit.box(self.gui, 9, 9, W - 18, H - 18, { ZIndex = 3 })
 	Kit.corner(line, 32)
 	local st = Kit.stroke(line, WHITE, 5)
+	-- (7 Nov, rule 8 ONE FRAME: a LOCKED board shows framed art (the chained sign): this shell's frame hides while it's locked)
+	self.shellFrame = { cornerBox, line }
 	self.edge = Kit.new("UIGradient", { Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, neon), ColorSequenceKeypoint.new(0.42, neon),
 		ColorSequenceKeypoint.new(0.5, neon:Lerp(WHITE, 0.8)), ColorSequenceKeypoint.new(0.58, neon), ColorSequenceKeypoint.new(1, neon) }) }, st)
 	if not self.spec.pair then
@@ -712,6 +714,7 @@ function UI:buildLocked()
 	local sign = Kit.new("ImageLabel", { Name = "LockedSign", BackgroundTransparency = 1, ScaleType = Enum.ScaleType.Fit,
 		Image = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("ArtIds")).ui.signLocked,
 		Position = UDim2.fromOffset((W - sw) / 2, 38), Size = UDim2.fromOffset(sw, sh), ZIndex = 6 }, gui)
+	sign:SetAttribute("HasOwnFrame", true) -- (rule 8: the sign art is the board's only frame)
 	self.lockIcon = sign
 	self.kindIcon = Kit.icon(gui, L.icon, W / 2 - 50, 60, 100, self.spec.Neon, { ZIndex = 6 })
 	self.lockText = Kit.text(gui, 10, H - 48, W - 20, 30, "Unlocks at " .. L.text, 24, { ZIndex = 8, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2, TextColor3 = Color3.new(1, 1, 1) })
@@ -727,6 +730,8 @@ function UI:refreshLocked()
 	local L = self.spec.locked
 	local open = L.attr ~= nil and (tonumber(self:attr(L.attr)) or 0) >= (L.need or 1)
 	self.lockIcon.Visible = not open
+	for _, f in ipairs(self.shellFrame or {}) do f.Visible = open end
+	for _, g in ipairs(self.glows or {}) do g.Visible = open end
 	self.kindIcon.Parent.Visible = open
 	shown(self.lockText, not open)
 	self.openBtn.show(open)
