@@ -17,7 +17,7 @@ Checklist rows: **#114 #257 #271 #339 #396** + new **#495 #496 #497**.
   - rank / rank128
   - plate
 - The old single LUMI portrait id is gone from EconConfig.
-- **FLAG: Studio test uploads under your account.** Please bulk-import to the **P&L Studios XP group** and swap the ids in ArtIds.
+- **Group ids (6 Nov, later):** all 42 now point to your P&L Studios XP group import (the decals you put in Workspace).
 
 ## 1. LUMI (#114, new #495 #496)
 - **6 expressions.** Each tutorial step has a `face` (EconConfig.Tutorial).
@@ -98,4 +98,3 @@ Checklist rows: **#114 #257 #271 #339 #396** + new **#495 #496 #497**.
 1. **#257 sound:** there's no rank-up sound of its own. I used a rising 3-note chime (the buy-body bell pitched up, like the Forge's Rare). The SFX plan's chime arpeggio needs a licensed stinger.
 2. **Special / Ignition titles:** RankPlate has `keyOfTier(n)` to pick a plate by tier, but the Forge COLLECTOR titles still show as a plain gold line under the plate. No special title uses its own plate yet.
 3. **Not screenshotted:** the leaderboard and the rank-up on phone, the pointer floating, and Reduced Motion.
-4. **Re-upload to the group** (see Art ids).
