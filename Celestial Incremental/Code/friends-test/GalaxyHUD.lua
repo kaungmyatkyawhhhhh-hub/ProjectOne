@@ -28,6 +28,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
+local Art = require(Galaxy:WaitForChild("ArtIds")) -- (LUMI's expressions + effects, 6 Nov)
 local Kit = require(Galaxy:WaitForChild("UIKit"))
 local UpgradesPanel = require(Galaxy:WaitForChild("UpgradesPanel"))
 local BoardsUI = require(Galaxy:WaitForChild("IslandBoardsUI"))
@@ -100,6 +101,41 @@ local function scaledRoot(name, anchor: Vector2, w, h)
 	table.insert(scaled, { f = f, s = s })
 	return f, s
 end
+
+------------------------------------------------------------------------ the GALAXY LIT BAR (Phase 2.1, 6 Nov; Depth's depth bar = the
+-- one big "how far" number): a thin bar across the top centre, always on: your sector + "GALAXY LIT 7%", filling. A tap
+-- opens the GALAXY window. Everything else at the top sits LIT_H lower to make room.
+local LIT_H = 28
+local litRoot = scaledRoot("GalaxyBar", Vector2.new(0.5, 0), 360, 26)
+local litBar, litFill, litText
+do
+	local shadow = Kit.box(litRoot, 0, 2, 360, 24, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 2 })
+	Kit.corner(shadow, 12)
+	litBar = Kit.box(litRoot, 0, 0, 360, 24, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3, ClipsDescendants = true })
+	Kit.corner(litBar, 12)
+	Kit.stroke(litBar, Kit.INK, 2)
+	Kit.grad(litBar, hex("#1d1a2a"), hex("#0e0c14"), 90)
+	litFill = Kit.box(litBar, 0, 0, 0, 24, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4 })
+	Kit.corner(litFill, 12)
+	Kit.grad(litFill, hex("#bfe9ff"), hex("#5a7dff"), 90)
+	Kit.box(litBar, 10, 2, 340, 1.5, { BackgroundTransparency = 0.6, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
+	litText = Kit.text(litRoot, 0, Kit.ps(3, 2), 360, 20, "EMBER BELT  ·  GALAXY LIT 0%", Kit.ps(15, 16), { ZIndex = 7, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.4 })
+	Kit.sparkle(litRoot, -8, -2, 16, 0.3).ZIndex = 8
+	local hit = Kit.new("TextButton", { Name = "Open", Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 9 }, litRoot)
+	hit.MouseButton1Click:Connect(function()
+		Kit.sound("click")
+		if shared.GalaxySectorsToggle then shared.GalaxySectorsToggle() end
+	end)
+end
+local function onLit()
+	local lit = player:GetAttribute("GalaxyLit") or 0
+	local sector = Econ.Sectors[if (player:GetAttribute("Ignition") or 0) >= 1 then 2 else 1]
+	Kit.setText(litText, sector.name .. "  ·  GALAXY LIT " .. lit .. "%")
+	Kit.tween(litFill, { Size = UDim2.fromOffset(math.floor(360 * math.clamp(lit / 100, 0, 1)), 24) }, 0.4)
+end
+player:GetAttributeChangedSignal("GalaxyLit"):Connect(onLit)
+player:GetAttributeChangedSignal("Ignition"):Connect(onLit)
+onLit()
 
 ------------------------------------------------------------------------ TOP COUNTER (v12 top: badge 504,18; plate 548,36)
 local top, topScale = scaledRoot("Counter", Vector2.new(0.5, 0), 280, 84)
@@ -351,6 +387,8 @@ local KEYS = {
 	{ key = "U", colour = hex("#ff9a3a"), icon = "stardust", name = "UPGRADES", window = "Upgrades" },
 	{ key = "F", colour = hex("#ffd84a"), icon = "forge", name = "STAR FORGE", note = "STAR FORGE: opens at IGNITION 1 (Sector 2)", window = "Forge" },
 	{ key = "T", colour = hex("#7dff8a"), icon = "planet", name = "TREE", window = "Tree" },
+	-- (Phase 2.4, #142: the DAILY window: streak, quests, playtime gifts; a red dot when something can be claimed)
+	{ key = "J", colour = hex("#5ae6d2"), icon = "essence", name = "QUESTS", window = "Daily" },
 	{ key = "G", colour = hex("#b49bff"), icon = "book", name = "GUIDE", window = "Guide" },
 	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", window = "Store" },
 	{ key = "Q", colour = hex("#c9c4d2"), icon = "gear", name = "SETTINGS", window = "Settings" },
@@ -406,7 +444,7 @@ local function layoutKeys()
 	for _, k in ipairs(KEYS) do
 		if keyAllowed(k) then table.insert(shownList, k) end
 	end
-	local shift = (#KEYS - #shownList) * 35 -- (keeps the row centred)
+	local shift = (6 - #shownList) * 35 -- (keeps the row centred: the bar was drawn for 6 keys)
 	local slot = 0
 	for _, k in ipairs(KEYS) do
 		local ui = keyUI[k.key]
@@ -474,6 +512,7 @@ local treeOpen = false
 local function treeDefault()
 	return { kind = "none" }
 end
+local treeScroll: ScrollingFrame? = nil -- (phones: the stacked TREE + INFO)
 local function buildTreeWindow()
 	if treeCtx then return end
 	treeCtx = { subject = player, picked = false, sel = treeDefault(), sound = Kit.sound, size = Vector2.new(550, 650) }
@@ -483,19 +522,30 @@ local function buildTreeWindow()
 		treeCtx.sel = { kind = kind, key = key }
 		treeCtx.picked = true
 		for _, p in pairs(treePanels) do p:refresh() end
+		-- (phones: INFO is under the TREE: a tap on a node scrolls down to it)
+		if treeScroll and kind ~= "none" then Kit.tween(treeScroll, { CanvasPosition = Vector2.new(0, 674) }, 0.3) end
 	end
 	treeCtx.bought = function(kind, arg) -- (the selection stays on the node you bought; #284: the tree celebrates it)
 		for _, p in pairs(treePanels) do p:celebrate(kind, arg) end
+	end
+	-- (#138, Phase 2.7: on a PHONE the two screens side by side drew every caption at 7-12 px; there they stack in one
+	-- column, TREE over INFO, in a scroll, big enough for 14 px captions)
+	local holder = treeWin
+	if Kit.phone() then
+		treeScroll = Kit.new("ScrollingFrame", { Name = "PhoneScroll", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromOffset(574, 650),
+			CanvasSize = UDim2.fromOffset(0, 1324), ScrollBarThickness = 10, ScrollingDirection = Enum.ScrollingDirection.Y, ZIndex = 2,
+			ScrollBarImageColor3 = hex("#b49bff") }, treeWin)
+		holder = treeScroll
 	end
 	for i, id in ipairs({ "Tree", "Info" }) do
 		local board = MapConfig.Boards.ById[id]
 		-- (no `pair`: the screen draws its own title, like the stand boards)
 		local spec = { id = id, title = board.title, Neon = board.Neon, Width = board.Width, Height = board.Height }
-		local canvas = Kit.box(treeWin, (i - 1) * 574, 0, 550, 650, { ClipsDescendants = true, ZIndex = 2 })
+		local canvas = Kit.box(holder, if treeScroll then 0 else (i - 1) * 574, if treeScroll then (i - 1) * 674 else 0, 550, 650, { ClipsDescendants = true, ZIndex = 2 })
 		treePanels[id] = BoardsUI.new(id, canvas, spec, treeCtx)
 	end
 	-- the v12 close button (pink X) on the INFO screen's corner
-	local closeTree = Kit.new("TextButton", { Text = "", AutoButtonColor = false, Position = UDim2.fromOffset(1124 - 64, 14), Size = UDim2.fromOffset(44, 44),
+	local closeTree = Kit.new("TextButton", { Text = "", AutoButtonColor = false, Position = UDim2.fromOffset((if treeScroll then 550 else 1124) - 64, 14), Size = UDim2.fromOffset(44, 44),
 		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 20 }, treeWin)
 	Kit.corner(closeTree, 8)
 	Kit.stroke(closeTree, Color3.new(1, 1, 1), 2, 0.1)
@@ -609,6 +659,9 @@ shared.GalaxyCloseSide = function(keep: string?)
 	if sideOpen == "C" and keep ~= "C" and shared.GalaxyCodesClose then shared.GalaxyCodesClose() end
 	if sideOpen == "S" and keep ~= "S" and shared.GalaxySectorsClose then shared.GalaxySectorsClose() end
 	if sideOpen == "F" and keep ~= "F" and shared.GalaxyForgeClose then shared.GalaxyForgeClose() end
+	if sideOpen == "R" and keep ~= "R" and shared.GalaxyReturnClose then shared.GalaxyReturnClose() end
+	if sideOpen == "J" and keep ~= "J" and shared.GalaxyDailyClose then shared.GalaxyDailyClose() end
+	if sideOpen == "P" and keep ~= "P" and shared.GalaxyStatsClose then shared.GalaxyStatsClose() end
 end
 local function pressKey(k)
 	if not keyAllowed(k) then return end
@@ -621,6 +674,8 @@ local function pressKey(k)
 		if (player:GetAttribute("Ignition") or 0) < 1 or not shared.GalaxyForgeToggle then toast(k.note, k.colour) else shared.GalaxyForgeToggle() end
 	elseif k.window == "Settings" then
 		if shared.GalaxySettingsToggle then shared.GalaxySettingsToggle() end
+	elseif k.window == "Daily" then
+		if shared.GalaxyDailyToggle then shared.GalaxyDailyToggle() end
 	elseif k.window == "Tree" then
 		if treeOpen then closeTree() else openTree() end
 	elseif k.window then
@@ -657,12 +712,22 @@ task.spawn(function()
 	end)
 end)
 
+------------------------------------------------------------------------ #163 TAP OUTSIDE CLOSES (Phase 2.7): a see-through backdrop under the
+-- windows, only while one is open; a tap on it closes whatever is open (one window at a time already)
+local backdrop = Kit.new("TextButton", { Name = "Backdrop", Text = "", AutoButtonColor = false, BackgroundTransparency = 1,
+	Size = UDim2.fromScale(1, 1), ZIndex = 0, Visible = false }, root) -- (ZIndex 0: under every window and the HUD)
+backdrop.MouseButton1Click:Connect(function()
+	if open then closeWindow() end
+	if treeOpen then closeTree() end
+	if shared.GalaxyCloseSide then shared.GalaxyCloseSide() end
+end)
+
 ------------------------------------------------------------------------ layout (screen size)
 -- the window sits between the counter and the hotbar (on phones the hotbar hides while it's open)
 local function windowRoom(): (number, number)
 	local s = screenScale()
 	local vp = viewport()
-	local topEdge = 84 * s
+	local topEdge = (96 + LIT_H) * s -- (6 Nov overlap check: under the counter's SUPERNOVA bar)
 	-- (on phones: down to the bottom edge, or above the hint line while the tutorial runs)
 	local tutorialOn = (player:GetAttribute("TutStep") or 0) < #Econ.Tutorial
 	local bottomEdge = if small then vp.Y - (if tutorialOn then 50 * s else 6) else vp.Y - 104 * s
@@ -679,9 +744,10 @@ function layout()
 	for _, e in ipairs(scaled) do
 		if e.f ~= win then e.s.Scale = s end
 	end
-	top.Position = UDim2.new(0.5, 0, 0, math.floor(8 * s))
-	toastRoot.Position = UDim2.new(0.5, 0, 0, math.floor(132 * s)) -- (under the hint line)
-	bannerRoot.Position = UDim2.new(0.5, 0, 0, math.floor(92 * s)) -- (the server banner: under the counter)
+	litRoot.Position = UDim2.new(0.5, 0, 0, math.floor(4 * s))
+	top.Position = UDim2.new(0.5, 0, 0, math.floor((8 + LIT_H) * s))
+	toastRoot.Position = UDim2.new(0.5, 0, 0, math.floor((132 + LIT_H) * s)) -- (under the hint line)
+	bannerRoot.Position = UDim2.new(0.5, 0, 0, math.floor((92 + LIT_H) * s)) -- (the server banner: under the counter)
 	hot.Position = UDim2.new(0.5, 0, 1, -math.floor(4 * s))
 	local ws = windowScale()
 	if open then winScale.Scale = ws end
@@ -690,16 +756,31 @@ function layout()
 	-- the tree window: as big as fits between the counter and the hotbar (and the screen's sides)
 	-- (below the hint line while the tutorial runs)
 	local hintRoom = 0 -- (Tutorial 2: the card is at the bottom and hides while a window is open)
-	treeScale.Scale = math.min((room - hintRoom) / 650, (vp.X - 24) / 1124, s)
+	if treeScroll then
+		-- (phones: one column at ~0.78, as tall as the room, scrolling)
+		local ts = math.min(0.78, (vp.X - 24) / 574)
+		treeScale.Scale = ts
+		treeWin.Size = UDim2.fromOffset(574, math.floor(room / ts))
+		treeScroll.Size = UDim2.fromOffset(574, math.floor(room / ts))
+	else
+		treeScale.Scale = math.min((room - hintRoom) / 650, (vp.X - 24) / 1124, s)
+	end
 	treeWin.Position = UDim2.fromOffset(vp.X / 2, topEdge + hintRoom + (room - hintRoom) / 2)
 	hot.Visible = not (small and (open or treeOpen or sideOpen ~= nil))
+	-- (the potion / FRIENDS / GROUP strip hides while a window is open: it covered the TREE window)
+	if shared.GalaxyPotionsShow then shared.GalaxyPotionsShow(not (open or treeOpen or sideOpen ~= nil)) end
+	backdrop.Visible = open or treeOpen or sideOpen ~= nil
+	-- (and the NEXT line + the GALAXY pill: a window covers that space, on phones most of all)
+	nextRoot.Visible = not (open or treeOpen or sideOpen ~= nil)
+	ignRoot.Visible = not (open or treeOpen or sideOpen ~= nil)
 	-- (the music is quieter while a big window is open: UPGRADES, the TREE, the STORE, the FORGE, the GALAXY, the GUIDE BOOK)
 	Kit.musicDuck(open or treeOpen or sideOpen == "E" or sideOpen == "F" or sideOpen == "S" or sideOpen == "G")
 	-- the shards counter, right of the stardust counter; the Cosmic Level, left of it
-	shardsRoot.Position = UDim2.new(0.5, math.floor(144 * s), 0, math.floor(16 * s))
-	levelRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor(16 * s))
-	ignRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor(64 * s))
-	nextRoot.Position = UDim2.new(0.5, 0, 0, math.floor(82 * s))
+	shardsRoot.Position = UDim2.new(0.5, math.floor(144 * s), 0, math.floor((16 + LIT_H) * s))
+	levelRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor((16 + LIT_H) * s))
+	-- (6 Nov overlap check: 64 put its sun icon on the LVL badge's, 82 put NEXT on the SUPERNOVA bar)
+	ignRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor((82 + LIT_H) * s))
+	nextRoot.Position = UDim2.new(0.5, 0, 0, math.floor((92 + LIT_H) * s))
 	-- (LUMI's card: above the hotbar; on phones a bit smaller so it leaves the middle of the screen free)
 	if cardRoot then
 		cardRoot.Position = UDim2.new(0.5, 0, 1, -math.floor((if small then 80 else 110) * s))
@@ -880,9 +961,14 @@ do
 	local ring = Kit.box(cardRoot, 8, 8, 84, 84, { BackgroundTransparency = 0, BackgroundColor3 = hex("#1c1430"), ZIndex = 21 })
 	Kit.corner(ring, 42)
 	Kit.stroke(ring, hex("#ffd84a"), 3)
-	card.portrait = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Econ.TutorialSpirit.portrait, Position = UDim2.fromOffset(2, 2), Size = UDim2.fromOffset(80, 80),
-		ZIndex = 22 }, ring)
-	Kit.corner(card.portrait, 40)
+	-- (6 Nov, #114: LUMI's 6 EXPRESSIONS (ArtIds.lumi) + her HALO behind the portrait, slowly breathing, 2.6 s)
+	card.halo = Kit.new("ImageLabel", { Name = "LumiHalo", BackgroundTransparency = 1, Image = Art.lumiFx.halo, AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1.55, 1.55), ImageTransparency = 0.15, ZIndex = 20 }, ring)
+	if not Kit.calm() then
+		Kit.tween(card.halo, { Size = UDim2.fromScale(1.75, 1.75), ImageTransparency = 0.4 }, 1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+	end
+	card.portrait = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Art.lumi.talking, AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromScale(1.12, 1.12), ZIndex = 22 }, ring)
 	card.ring = ring
 	card.name = Kit.text(cardRoot, 102, 6, 120, 20, Econ.TutorialSpirit.name, Kit.ps(16, 19), { ZIndex = 23, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#ffd84a"), stroke = 1.5 })
 	local chip = Kit.box(cardRoot, 168, 6, 92, 22, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 22 })
@@ -951,13 +1037,87 @@ card.skipB.MouseButton1Click:Connect(function()
 	request:InvokeServer("SkipTutorial")
 end)
 local cardStep = -1
+local cardGoneAt = 0 -- (when the card was last hidden: a card back after >0.6 s gets the poof)
+local happyUntil = 0 -- (a step just done: LUMI is happy, with the heart star, for 0.6 s)
 local function clearHint()
+	if cardRoot.Visible then cardGoneAt = os.clock() end
 	cardRoot.Visible = false
+end
+-- LUMI's face for the step (happy while a finished step is celebrated)
+local function lumiFace(step: number): string
+	if os.clock() < happyUntil then return "happy" end
+	local def = Econ.Tutorial[step + 1]
+	return def and def.face or "talking"
+end
+-- phones: the card is 0.8x, so the portrait grows inside it to stay at least 72 px on screen (it pops out above the card)
+local function sizePortrait()
+	local s = cardScale.Scale
+	local p = if s > 0 then math.max(84, math.ceil(74 / s)) else 84
+	card.ring.Size = UDim2.fromOffset(p, p)
+	card.ring.Position = UDim2.fromOffset(8, 92 - p)
+	local c = card.ring:FindFirstChildOfClass("UICorner")
+	if c then c.CornerRadius = UDim.new(0.5, 0) end
+end
+-- the card opens: a poof where LUMI appears + a short sparkle trail flying in (Reduced Motion: none, she just shows)
+local function lumiAppear()
+	if Kit.calm() then return end
+	local poof = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Art.lumiFx.appearPoof, AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.6, 0.6), ZIndex = 26 }, card.ring)
+	Kit.tween(poof, { Size = UDim2.fromScale(1.9, 1.9) }, 0.35, Enum.EasingStyle.Back)
+	task.delay(0.25, function() Kit.tween(poof, { ImageTransparency = 1 }, 0.3) end)
+	task.delay(0.6, function() poof:Destroy() end)
+	local trail = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Art.lumiFx.sparkleTrail, AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(-1.2, 0.2), Size = UDim2.fromScale(1.8, 1.1), ZIndex = 25 }, card.ring)
+	Kit.tween(trail, { Position = UDim2.fromScale(0.2, 0.5) }, 0.35, Enum.EasingStyle.Quad)
+	task.delay(0.3, function() Kit.tween(trail, { ImageTransparency = 1 }, 0.25) end)
+	task.delay(0.6, function() trail:Destroy() end)
+	local inS = card.portrait:FindFirstChild("PopIn") or Kit.new("UIScale", { Name = "PopIn" }, card.portrait)
+	inS.Scale = 0.3
+	Kit.tween(inS, { Scale = 1 }, 0.35, Enum.EasingStyle.Back)
+end
+-- a step done: the heart star pops (0.6 s) over a happy LUMI, then the next expression
+local function lumiHeart(hold: number?)
+	local t = hold or 0.6 -- (a Studio test can hold it longer for a screenshot)
+	happyUntil = os.clock() + t
+	card.portrait.Image = Art.lumi.happy
+	if Kit.calm() then return end
+	local heart = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Art.lumiFx.heartStar, AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.82, 0.12), Size = UDim2.fromScale(0.2, 0.2), ZIndex = 27 }, card.ring)
+	Kit.tween(heart, { Size = UDim2.fromScale(0.75, 0.75), Position = UDim2.fromScale(0.86, -0.05) }, 0.25, Enum.EasingStyle.Back)
+	task.delay(t - 0.25, function() Kit.tween(heart, { ImageTransparency = 1, Position = UDim2.fromScale(0.9, -0.35) }, 0.25) end)
+	task.delay(t + 0.02, function() heart:Destroy() end)
+end
+-- (Studio test switch: Workspace TestLumiHeart = any new value plays the step-done heart)
+if RunService:IsStudio() then workspace:GetAttributeChangedSignal("TestLumiHeart"):Connect(function() lumiHeart(tonumber(workspace:GetAttribute("TestLumiHold"))) end) end
+-- pointing steps: LUMI's pointer floats from her toward the board on screen, again and again
+local pointerNext = 0
+local function lumiPoint(at: Vector2?)
+	if not at or Kit.calm() or not cardRoot.Visible or os.clock() < pointerNext then return end
+	pointerNext = os.clock() + 1.6
+	local r = card.ring
+	local from = r.AbsolutePosition + r.AbsoluteSize / 2 + GuiService:GetGuiInset()
+	local d = at - from
+	if d.Magnitude < 40 then return end
+	local u = d.Unit
+	local size = math.max(48, r.AbsoluteSize.X * 0.8)
+	local p = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Art.lumiFx.pointer, AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromOffset(from.X + u.X * size * 0.6, from.Y + u.Y * size * 0.6), Size = UDim2.fromOffset(size, size),
+		Rotation = math.deg(math.atan2(u.Y, u.X)), ImageTransparency = 0.1, ZIndex = 58 }, gui)
+	local to = from + d * 0.45
+	Kit.tween(p, { Position = UDim2.fromOffset(to.X, to.Y) }, 1.1, Enum.EasingStyle.Sine)
+	task.delay(0.7, function() Kit.tween(p, { ImageTransparency = 1 }, 0.4) end)
+	task.delay(1.15, function() p:Destroy() end)
 end
 local function showHint(step: number)
 	local def = Econ.Tutorial[step + 1]
 	if not def then cardRoot.Visible = false return end
-	cardRoot.Visible = true
+	if not cardRoot.Visible then
+		cardRoot.Visible = true
+		sizePortrait()
+		if os.clock() - cardGoneAt > 0.6 then lumiAppear() end
+	end
+	local face = Art.lumi[lumiFace(step)] or Art.lumi.talking
+	if card.portrait.Image ~= face then card.portrait.Image = face end
 	if cardStep ~= step then
 		cardStep = step
 		Kit.setText(card.step, "STEP " .. (step + 1) .. "/" .. #Econ.Tutorial)
@@ -968,7 +1128,7 @@ local function showHint(step: number)
 			cardScale.Scale = cs * 0.9
 			Kit.tween(cardScale, { Scale = cs }, 0.25, Enum.EasingStyle.Back)
 			-- (the first frame's viewport can be 1x1: settle on the real scale after the pop)
-			task.delay(0.3, function() cardScale.Scale = screenScale() * (if small then 0.8 else 1) end)
+			task.delay(0.3, function() cardScale.Scale = screenScale() * (if small then 0.8 else 1) sizePortrait() end)
 		end
 	end
 	-- the live counter + the segments
@@ -1093,6 +1253,7 @@ event.OnClientEvent:Connect(function(kind, a, b, ...)
 		tut.step = a
 		tut.idleSince = os.clock()
 		clearHint()
+		lumiHeart()
 		-- the step's payout floats up from the counter: +Essence, +stardust (Tutorial 2)
 		floatText(top, 120, 70, "+" .. b .. " ESSENCE", hex("#7dffe9"), 16)
 		local pay = tonumber((...)) or 0
@@ -1117,6 +1278,18 @@ event.OnClientEvent:Connect(function(kind, a, b, ...)
 			banner(string.upper(tostring(a)) .. "'S FIRST SUPERNOVA!", colour)
 			Kit.sound("milestone")
 		end
+	elseif kind == "Automation" then
+		-- (Phase 2.2: the AUTOMATION ONLINE beat, the cutscene template's short version, ending on a tease of what's next)
+		local tease = ({ AutoBuy1 = "NEXT: KEEP RING 1 THROUGH A SUPERNOVA", KeepRing1 = "NEXT: AUTO-BUY EVERY BODY", AutoBuy2 = "NEXT: THE BLACK HOLE AUTOMATES THE SUPERNOVA" })[a] or ""
+		local title = ({ AutoBuy1 = "AUTOMATION ONLINE", KeepRing1 = "RING 1 KEPT", AutoBuy2 = "FULL AUTOMATION" })[a] or "AUTOMATION ONLINE"
+		task.spawn(function()
+			require(Galaxy:WaitForChild("GalaxyCutscene")).play({ colour = Color3.fromRGB(125, 255, 150), symbol = Kit.A.icon.gear,
+				length = 4, drop = 2.6, words = { "SYSTEMS", "LEARNING", "YOUR WAY" }, title = title, sub = tease })
+		end)
+	elseif kind == "CometChain" then
+		-- (ring 2's COMET CHAIN: 3 in a row)
+		floatText(top, 120, 40, "CHAIN x2  +" .. fmt(a), hex("#9be7ff"), 22)
+		Kit.sound("milestone")
 	elseif kind == "CometPaid" then
 		floatText(top, 120, 60, "+" .. fmt(b), hex("#9be7ff"), 20)
 	end
@@ -1217,6 +1390,13 @@ RunService.Heartbeat:Connect(function()
 		end
 	end
 	showTrail(boardWorld)
+	if Econ.Tutorial[step + 1].face == "pointing" then
+		local at = boardAt
+		if not at and not boardWorld and target and target.Parent and target.AbsoluteSize.X > 0 then
+			at = target.AbsolutePosition + GuiService:GetGuiInset() + target.AbsoluteSize / 2
+		end
+		lumiPoint(at)
+	end
 	if boardWorld and not boardAt then
 		arrow.Visible, targetRing.Visible = false, false
 	elseif boardAt then

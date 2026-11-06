@@ -72,7 +72,12 @@ local function newData()
 		essence = 0, tut = 0, supernovas = 0, comets = 0, shards = 0, shardsEarned = 0, ring2 = {}, settings = {}, guide = {},
 		codes = {}, potions = {}, boostLeft = {}, alphaPlayer = false, alphaBadge = false, pads = 0,
 		xp = Econ.XP.Start, xpTotal = Econ.XP.Start, perks = {}, ignition = 0, path = "",
-		forge = { cores = {}, equipped = {}, rolls = 0, pityL = 0, pityM = 0 } }
+		forge = { cores = {}, equipped = {}, rolls = 0, pityL = 0, pityM = 0, done = {} },
+		-- v4 (Phase 2, 6 Nov): automation toggles, the ring-2 capstone, offline earnings, daily streak / quests / playtime
+		-- gifts, the lobby FREE REWARDS
+		auto = {}, capstone = "", capSwap = false, lastSeen = 0, lastIncome = 0, offline = 0,
+		daily = { day = 0, streak = 0 }, quests = { day = 0, list = {} }, gifts = { day = 0, played = 0, got = {} }, free = {},
+		offlineSeen = 0, receipts = {}, levelsBought = 0, ring2Bought = 0 }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -121,8 +126,46 @@ local function migrate(d): (any, boolean)
 			if cores[key] and #eq < Econ.Forge.Slots and not table.find(eq, key) then table.insert(eq, key) end
 		end
 	end
+	local done = {}
+	if type(f.done) == "table" then for id, v in pairs(f.done) do if Econ.ForgeRarityById[id] and v == true then done[id] = true end end end
 	d.forge = { cores = cores, equipped = eq, rolls = math.max(0, math.floor(tonumber(f.rolls) or 0)),
-		pityL = math.max(0, math.floor(tonumber(f.pityL) or 0)), pityM = math.max(0, math.floor(tonumber(f.pityM) or 0)) }
+		pityL = math.max(0, math.floor(tonumber(f.pityL) or 0)), pityM = math.max(0, math.floor(tonumber(f.pityM) or 0)), done = done }
+	-- v4 (Phase 2): every new table checked, unknown keys dropped, numbers finite
+	local function num(v, lo, hi) v = tonumber(v) or 0 if v ~= v then v = 0 end return math.clamp(v, lo, hi) end
+	local auto = {}
+	if type(d.auto) == "table" then for _, k in ipairs({ "Buy1", "Buy2" }) do if d.auto[k] == false then auto[k] = false end end end
+	d.auto = auto
+	d.capstone = if type(d.capstone) == "string" and Econ.Ring2CapstonesById[d.capstone] then d.capstone else ""
+	d.capSwap = d.capSwap == true
+	d.lastSeen = num(d.lastSeen, 0, 1e10)
+	d.lastIncome = num(d.lastIncome, 0, 1e300)
+	d.offline = num(d.offline, 0, 1e300)
+	d.offlineSeen = num(d.offlineSeen, 0, 1e300)
+	d.levelsBought = math.floor(num(d.levelsBought, 0, 1e12))
+	d.ring2Bought = math.floor(num(d.ring2Bought, 0, 1e9))
+	-- (developer product receipts already granted: [PurchaseId] = os.time(); the 50 newest kept)
+	local rc = {}
+	if type(d.receipts) == "table" then for k, v in pairs(d.receipts) do if type(k) == "string" then rc[k] = num(v, 0, 1e10) end end end
+	d.receipts = rc
+	local dl = if type(d.daily) == "table" then d.daily else {}
+	d.daily = { day = math.floor(num(dl.day, 0, 1e7)), streak = math.floor(num(dl.streak, 0, 7)) }
+	local q = if type(d.quests) == "table" then d.quests else {}
+	local qlist = {}
+	if type(q.list) == "table" then
+		for _, e in ipairs(q.list) do
+			if type(e) == "table" and type(e.id) == "string" then
+				table.insert(qlist, { id = e.id, need = math.floor(num(e.need, 1, 1e6)), start = num(e.start, 0, 1e12), got = e.got == true })
+			end
+		end
+	end
+	d.quests = { day = math.floor(num(q.day, 0, 1e7)), list = qlist }
+	local g = if type(d.gifts) == "table" then d.gifts else {}
+	local got = {}
+	if type(g.got) == "table" then for k, v in pairs(g.got) do if v == true then got[tostring(k)] = true end end end
+	d.gifts = { day = math.floor(num(g.day, 0, 1e7)), played = num(g.played, 0, 86400), got = got }
+	local fr = {}
+	if type(d.free) == "table" then for _, k in ipairs({ "group", "like" }) do if d.free[k] == true then fr[k] = true end end end
+	d.free = fr
 	-- perks: only known ones, whole levels 0..max
 	local pk = {}
 	if type(d.perks) == "table" then
@@ -205,20 +248,30 @@ local function load(player: Player): (any, boolean, boolean) -- data, readOnly, 
 	return nil, true, true
 end
 
-local function save(player: Player, release: boolean)
+-- (#91, Phase 2: up to 3 tries, 1 s then 3 s apart; returns true once written. Every save stamps lastSeen = the time the
+-- offline earnings count from)
+local function save(player: Player, release: boolean): boolean
 	local s = sessions[player]
-	if not s or s.noSave or s.readOnly or not store then return end
+	if not s or s.noSave or s.readOnly or not store then return false end
 	local data = s.d
-	local ok, err = pcall(function()
-		store:UpdateAsync(keyOf(player), function(old)
-			if type(old) == "table" and type(old.lock) == "table" and old.lock.job ~= game.JobId
-				and os.time() - (tonumber(old.lock.t) or 0) < LOCK_STALE then
-				return nil -- another server took this save over: don't overwrite it
-			end
-			return { data = data, lock = if release then nil else { job = game.JobId, t = os.time() } }
+	data.lastSeen = os.time()
+	for attempt = 1, 3 do
+		local taken = false
+		local ok, err = pcall(function()
+			store:UpdateAsync(keyOf(player), function(old)
+				if type(old) == "table" and type(old.lock) == "table" and old.lock.job ~= game.JobId
+					and os.time() - (tonumber(old.lock.t) or 0) < LOCK_STALE then
+					taken = true
+					return nil -- another server took this save over: don't overwrite it
+				end
+				return { data = data, lock = if release then nil else { job = game.JobId, t = os.time() } }
+			end)
 		end)
-	end)
-	if not ok then warn("[GalaxyEcon] save failed for", player.Name, err) end
+		if ok then return not taken end
+		warn("[GalaxyEcon] save failed for", player.Name, "try", attempt, err)
+		if attempt < 3 then task.wait(if attempt == 1 then 1 else 3) end
+	end
+	return false
 end
 
 ------------------------------------------------------------------------ the economy
@@ -257,7 +310,32 @@ local function incomeOf(s): number
 	if giant > 1 and d.owned[4] > 0 then
 		base += Econ.TierIncomeWith(3, d.owned[4], math.max(d.copies[4], 1), d.nodes, d.ring2, d.perks) * Econ.AllMult(d.nodes, d.ring2, d.perks) * (giant - 1)
 	end
-	return base * Econ.PadMult(d.pads, d.perks) * path * forgeOf(s, "Stardust") * stardustBoost(s)
+	-- (ring 2's IDLE STAR capstone: x3 income, comets off)
+	local idle = if d.capstone == "IdleStar" then 3 else 1
+	return base * Econ.PadMult(d.pads, d.perks) * path * forgeOf(s, "Stardust") * stardustBoost(s) * idle
+end
+-- (#4 the STATS screen: what your income is made of, each step a multiplier; FORGE CORES = the Stardust + Giant cores)
+local function incomeSplit(s)
+	local d = s.d
+	local raw = 0
+	for k = 0, #Econ.Tiers - 1 do
+		if (d.owned[k + 1] or 0) > 0 then raw += Econ.TierIncomeWith(k, d.owned[k + 1], math.max(d.copies[k + 1] or 0, 1), d.nodes, d.ring2, d.perks) end
+	end
+	local perks = (1 + Econ.PerksById.Stardust.per * Econ.PerkLv(d.perks, "Stardust")) * (1 + Econ.PerksById.OrbitSpeed.per * Econ.PerkLv(d.perks, "OrbitSpeed"))
+	local starfire = Econ.Ring2ById.Starfire.effect.mult ^ (d.ring2.Starfire or 0)
+	local pads = Econ.PadMult(d.pads, d.perks)
+	local path = if d.path == "Planet" then 1.5 else 1
+	local idle = if d.capstone == "IdleStar" then 3 else 1
+	local boost = stardustBoost(s)
+	local total = incomeOf(s)
+	local rest = raw * perks * starfire * pads * path * idle * boost
+	local forge = if rest > 0 then total / rest else 1
+	return {
+		{ "BODIES (levels, copies, body perks, Heavy Elements)", raw, "base" },
+		{ "PERKS: STARDUST + ORBIT SPEED", perks }, { "STARFIRE (ring 2)", starfire }, { "ISLAND PADS", pads },
+		{ "PATH", path }, { "FORGE CORES", forge }, { "CAPSTONE", idle }, { "BOOSTS (pass, potions, Surge, friends, group)", boost },
+		{ "TOTAL", total, "total" },
+	}
 end
 local function shardsOf(s): number
 	return math.floor(Econ.ShardsFor(s.d.earnedRun, s.d.nodes, s.d.supernovas, s.d.perks) * forgeOf(s, "Shards"))
@@ -315,12 +393,69 @@ local function publish(player: Player, s)
 	player:SetAttribute("Ignition", d.ignition)
 	player:SetAttribute("Path", d.path)
 	player:SetAttribute("GalaxyLit", Econ.GalaxyLit(d.pads, d.supernovas, level, d.ignition))
+	-- the player list's columns (#2 Supernovas, #406 GALAXY %): leaderstats
+	local ls = player:FindFirstChild("leaderstats")
+	if ls then
+		ls.Supernovas.Value = d.supernovas
+		ls.Galaxy.Value = Econ.GalaxyLit(d.pads, d.supernovas, level, d.ignition) .. "%"
+	end
 	-- the Forge (one JSON attribute: your cores, the equipped ones, the pity counters)
 	player:SetAttribute("Forge", HttpService:JSONEncode(d.forge))
+	-- (2.5: a row already complete (cores found before the book had rewards) counts too, once)
+	for _, r in ipairs(Econ.Forge.Rarities) do
+		if not d.forge.done[r.id] then
+			local all = true
+			for _, k in ipairs(Econ.Forge.Kinds) do if not d.forge.cores[k.id .. ":" .. r.id] then all = false end end
+			if all then
+				d.forge.done[r.id] = true
+				if Shared.awardBadge then task.spawn(Shared.awardBadge, player, "Collection" .. r.id) end
+			end
+		end
+	end
+	player:SetAttribute("Forge", HttpService:JSONEncode(d.forge)) -- (again: with the rows just marked done)
+	-- (2.5: the best COLLECTOR title = the rarest complete row of the book)
+	local title = ""
+	for _, r in ipairs(Econ.Forge.Rarities) do if d.forge.done[r.id] then title = Econ.CollectorTitles[r.id] end end
+	player:SetAttribute("CollectorTitle", title)
+	player:SetAttribute("BulkSize", if (d.ring2.BulkRoll or 0) >= 1 then 10 else Econ.Forge.Bulk)
 	player:SetAttribute("SupernovaReady", d.earnedRun >= Econ.NeedFor(d.supernovas))
 	player:SetAttribute("BestRunStardust", math.max(d.bestRun, d.earnedRun))
 	player:SetAttribute("Tree_CometLure", if (d.perks.CometLure or 0) > 0 then 1 else 0)
 	player:SetAttribute("CometsCaught", d.comets)
+	-- OFFLINE EARNINGS (#411): the income they count from = your income without the timed boosts (Star Surge, potions,
+	-- friends here), so a potion at the moment you leave doesn't count for hours
+	d.lastIncome = incomeOf(s) / stardustBoost(s) * (1 + (if s.passX2 then 1 else 0))
+	player:SetAttribute("OfflinePending", d.offline)
+	-- (#4 STATS + #144 the BOOSTS chip: the split and the boosts' total)
+	player:SetAttribute("IncomeSplit", HttpService:JSONEncode(incomeSplit(s)))
+	player:SetAttribute("BoostTotal", stardustBoost(s))
+	player:SetAttribute("NumSci", d.settings.sci == true)
+	-- DAILY (#412-#414): the streak, the 3 quests (JSON), the gifts, the free rewards
+	local today = Econ.Today()
+	if d.quests.day ~= today and Shared.newQuests then Shared.newQuests(player, s) end
+	if d.gifts.day ~= today then d.gifts = { day = today, played = 0, got = {} } end
+	local streakNext = if d.daily.day == today then d.daily.streak elseif d.daily.day == today - 1 then d.daily.streak % 7 + 1 else 1
+	player:SetAttribute("DailyReady", d.daily.day ~= today)
+	player:SetAttribute("DailyDay", streakNext)
+	local ql = {}
+	for i, q in ipairs(d.quests.list) do
+		local def = Econ.QuestsById[q.id]
+		if def and Shared.questValue then table.insert(ql, { i = i, id = q.id, text = string.format(def.text, q.need), need = q.need, have = math.min(Shared.questValue(s, q.id) - q.start, q.need), got = q.got }) end
+	end
+	player:SetAttribute("Quests", HttpService:JSONEncode(ql))
+	player:SetAttribute("GiftPlayed", d.gifts.played)
+	local gg = {}
+	for k in pairs(d.gifts.got) do table.insert(gg, k) end
+	player:SetAttribute("GiftsGot", table.concat(gg, ","))
+	local fg = {}
+	for k in pairs(d.free) do table.insert(fg, k) end
+	player:SetAttribute("FreeGot", table.concat(fg, ","))
+	player:SetAttribute("OfflineAway", s.offlineAway or 0)
+	-- (Phase 2: automation toggles, the capstone)
+	player:SetAttribute("Auto_Buy1", d.auto.Buy1 ~= false)
+	player:SetAttribute("Auto_Buy2", d.auto.Buy2 ~= false)
+	player:SetAttribute("Capstone", d.capstone)
+	player:SetAttribute("CapSwap", d.capSwap)
 	if type(d.settings.music) == "number" then player:SetAttribute("VolMusic", d.settings.music) end
 	if type(d.settings.sfx) == "number" then player:SetAttribute("VolSfx", d.settings.sfx) end
 	-- potions: how many you have, and when each running boost ends (server time; the HUD counts down)
@@ -402,10 +537,13 @@ local function spawnComet(player: Player, s, tutorial: boolean)
 	if s.lastComet and os.clock() - s.lastComet < Econ.Comet.MinEvery then return end
 	s.lastComet = os.clock()
 	s.cometId += 1
-	-- (run 1 only: 1 in 10 is GOLDEN, x5; never the tutorial's own comets)
-	local golden = not tutorial and s.d.supernovas == 0 and math.random() < Econ.Comet.Golden
+	-- (run 1 only: 1 in 10 is GOLDEN, x5; never the tutorial's own comets. Ring 2's GOLDEN COMETS: 1 in 20, x10, every run)
+	local goldenX = nil
+	if not tutorial and s.d.supernovas == 0 and math.random() < Econ.Comet.Golden then goldenX = Econ.Comet.GoldenX
+	elseif not tutorial and (s.d.ring2.GoldenComets or 0) >= 1 and math.random() < 0.05 then goldenX = 10 end
+	local golden = goldenX ~= nil
 	s.pending[s.cometId] = os.clock()
-	if golden then s.golden = s.golden or {} s.golden[s.cometId] = true end
+	if golden then s.golden = s.golden or {} s.golden[s.cometId] = goldenX end
 	mapEvent:FireClient(player, "CometSpawn", s.cometId, math.random(1, 2 ^ 30), tutorial, golden)
 end
 local function cometLoop(player: Player, s)
@@ -424,6 +562,15 @@ local function cometLoop(player: Player, s)
 			end
 		else
 			s.nextComet = s.nextComet or (os.clock() + Econ.Comet.FirstDelay)
+			-- (a comet that flew past uncaught breaks a COMET CHAIN)
+			for id, born in pairs(s.pending) do
+				if os.clock() - born > Econ.Comet.Life + 1.5 then
+					s.pending[id] = nil
+					s.chain = 0
+				end
+			end
+			-- (ring 2's IDLE STAR capstone: no comets)
+			if s.d.capstone == "IdleStar" then task.wait(1) continue end
 			if os.clock() >= s.nextComet and not (s.lastComet and os.clock() - s.lastComet < Econ.Comet.MinEvery) then
 				spawnComet(player, s, false)
 				s.nextComet = os.clock() + cometEvery(s)
@@ -517,6 +664,7 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 			got += 1
 		end
 		if got == 0 then return false, "poor" end
+		d.levelsBought += got -- (the LEVELS quest counts the levels you buy yourself, not AUTO-BUY's)
 		checkTutorial(player, s)
 		publish(player, s)
 		return true, d.owned[arg + 1]
@@ -536,11 +684,14 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		-- arg = 1 (ROLL) or Econ.Forge.Bulk (BULK): each roll costs RollCost Essence; the odds x your Luck cores (the
 		-- rarer ones only); pity forces a Legendary / Mythic. Returns the results { "Kind:Rarity", ... }
 		if d.ignition < 1 then return false, "locked" end
-		local n = if arg == Econ.Forge.Bulk then Econ.Forge.Bulk else 1
+		-- (ring 2's BULK ROLL: BULK = 10 rolls)
+		local bulk = if (d.ring2.BulkRoll or 0) >= 1 then 10 else Econ.Forge.Bulk
+		local n = if arg == Econ.Forge.Bulk or arg == 10 then bulk else 1
 		if d.essence < n * Econ.Forge.RollCost then return false, "poor" end
 		d.essence -= n * Econ.Forge.RollCost
 		local F = d.forge
-		local luck = forgeOf(s, "Luck")
+		-- (ring 2's FORGE LUCK +10%, the FORGE MASTER capstone +25%)
+		local luck = forgeOf(s, "Luck") * (if (d.ring2.ForgeLuck or 0) >= 1 then 1.1 else 1) * (if d.capstone == "ForgeMaster" then 1.25 else 1)
 		local results = {}
 		for _ = 1, n do
 			F.rolls += 1
@@ -552,24 +703,37 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 			elseif F.pityL >= Econ.Forge.PityLegendary then
 				rarity = "Legendary"
 			else
-				local total = 0
-				for i, r in ipairs(Econ.Forge.Rarities) do total += r.odds * (if i > 1 then luck else 1) end
-				local x = math.random() * total
+				-- (2.5: maxed cores leave the pool; their weight goes to the rarer rarities: Econ.ForgeOdds)
+				local odds = Econ.ForgeOdds(F.cores, luck)
+				local x = math.random() * 100
 				for i, r in ipairs(Econ.Forge.Rarities) do
-					x -= r.odds * (if i > 1 then luck else 1)
-					if x <= 0 then rarity = r.id break end
+					x -= odds[i]
+					if x <= 0 and odds[i] > 0 then rarity = r.id break end
 				end
 				rarity = rarity or "Common"
 			end
 			local ri = Econ.ForgeRarityById[rarity].index
 			if ri >= 5 then F.pityL = 0 end
 			if ri >= 6 then F.pityM = 0 end
-			local kind = Econ.Forge.Kinds[math.random(1, #Econ.Forge.Kinds)].id
+			-- (a kind still below MAX at that rarity; if all are maxed (a pity roll), any)
+			local _, open = Econ.ForgeOdds(F.cores, 1)
+			local pick = open[ri]
+			local kind = if #pick > 0 then pick[math.random(1, #pick)] else Econ.Forge.Kinds[math.random(1, #Econ.Forge.Kinds)].id
 			local key = kind .. ":" .. rarity
 			F.cores[key] = math.min((F.cores[key] or 0) + 1, Econ.Forge.MaxLevel)
 			-- (a free slot takes a new core by itself)
 			if #F.equipped < Econ.Forge.Slots and not table.find(F.equipped, key) then table.insert(F.equipped, key) end
 			table.insert(results, key)
+			-- (a rarity's row complete: its COLLECTOR title + badge, once)
+			if not F.done[rarity] then
+				local all = true
+				for _, k in ipairs(Econ.Forge.Kinds) do if not F.cores[k.id .. ":" .. rarity] then all = false end end
+				if all then
+					F.done[rarity] = true
+					event:FireClient(player, "ForgeRowDone", rarity)
+					if Shared.awardBadge then task.spawn(Shared.awardBadge, player, "Collection" .. rarity) end
+				end
+			end
 			-- (a CELESTIAL is told to the whole server: cutscene template, GLOBAL)
 			if rarity == "Celestial" then event:FireAllClients("ForgeGlobal", player.DisplayName, key) end
 			pcall(function() AnalyticsService:LogCustomEvent(player, "ForgeRoll", ri, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = key }) end)
@@ -667,16 +831,139 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		if d.shards < cost then return false, "poor" end
 		d.shards -= cost
 		d.ring2[node.id] = level + 1
+		d.ring2Bought += 1
 		checkTutorial(player, s)
 		publish(player, s)
+		-- (the AUTOMATION ONLINE moment: the cutscene template's short beat, client side)
+		if node.id == "AutoBuy1" or node.id == "AutoBuy2" or node.id == "KeepRing1" then event:FireClient(player, "Automation", node.id) end
 		pcall(function() AnalyticsService:LogCustomEvent(player, "Ring2Buy", level + 1, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = node.id }) end)
 		return true, level + 1
+	elseif action == "BuyRing2All" then
+		-- (#136 BUY ALL AFFORDABLE: the cheapest buyable ring-2 level first, again and again, until nothing is affordable)
+		local bought = 0
+		for _ = 1, 50 do
+			local best, bestCost = nil, math.huge
+			for _, node in ipairs(Econ.Ring2) do
+				local c = Econ.R2Cost(node.id, d.ring2[node.id] or 0)
+				-- (the STELLAR branch first: it's the income; then the cheapest)
+				local key = c and (c + (if node.branch == "STELLAR" then 0 else 1e12))
+				if c and c <= d.shards and key < bestCost and d.supernovas >= (node.novas or 0)
+					and (not node.requires or (d.ring2[node.requires] or 0) >= 1) then best, bestCost = node, key end
+			end
+			if not best then break end
+			d.shards -= Econ.R2Cost(best.id, d.ring2[best.id] or 0)
+			d.ring2[best.id] = (d.ring2[best.id] or 0) + 1
+			d.ring2Bought += 1
+			bought += 1
+			if best.id == "AutoBuy1" or best.id == "AutoBuy2" or best.id == "KeepRing1" then event:FireClient(player, "Automation", best.id) end
+		end
+		if bought == 0 then return false, "poor" end
+		checkTutorial(player, s)
+		publish(player, s)
+		return true, bought
+	elseif action == "AutoToggle" then
+		-- (an AUTO-BUY you own: on / off)
+		local node = ({ Buy1 = "AutoBuy1", Buy2 = "AutoBuy2" })[arg]
+		if not node or (d.ring2[node] or 0) < 1 then return false, "bad" end
+		d.auto[arg] = if d.auto[arg] == false then nil else false
+		publish(player, s)
+		return true, d.auto[arg] ~= false
+	elseif action == "PickCapstone" then
+		-- (#56: the first pick costs Ring2CapstoneShards; switching is free right after a Supernova, once)
+		local cap = type(arg) == "string" and Econ.Ring2CapstonesById[arg]
+		if not cap or d.capstone == arg then return false, "bad" end
+		if d.supernovas < Econ.Ring2CapstoneNovas then return false, "locked" end
+		if d.capstone == "" then
+			if d.shards < Econ.Ring2CapstoneShards then return false, "poor" end
+			d.shards -= Econ.Ring2CapstoneShards
+		elseif not d.capSwap then
+			return false, "swap"
+		end
+		d.capstone, d.capSwap = arg, false
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "Capstone", d.supernovas, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = arg }) end)
+		return true
+	elseif action == "DailyClaim" then
+		-- (#412: once a UTC day; yesterday claimed = the next day of the 7, else day 1 again)
+		local today = Econ.Today()
+		if d.daily.day == today then return false, "done" end
+		local day = if d.daily.day == today - 1 then d.daily.streak % 7 + 1 else 1
+		d.daily = { day = today, streak = day }
+		local ess = Econ.Daily.Essence[day]
+		d.essence += ess
+		local warp = 0
+		if day == 7 then
+			warp = incomeOf(s) * Econ.Daily.WarpSeconds
+			d.stardust += warp
+			d.earnedRun += warp
+			d.earnedTotal += warp
+		end
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "DailyStreak", day) end)
+		return true, day, ess, warp
+	elseif action == "QuestClaim" then
+		-- (#413: a finished quest pays 1 Essence + 5 min of income, once)
+		local q = type(arg) == "number" and d.quests.list[arg]
+		if not q or q.got then return false, "bad" end
+		if Shared.questValue(s, q.id) - q.start < q.need then return false, "notyet" end
+		q.got = true
+		d.essence += Econ.QuestReward.essence
+		local pay = incomeOf(s) * Econ.QuestReward.stardustSeconds
+		d.stardust += pay
+		d.earnedRun += pay
+		d.earnedTotal += pay
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "QuestDone", arg, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = q.id }) end)
+		return true, Econ.QuestReward.essence, pay
+	elseif action == "GiftClaim" then
+		-- (#414: minutes played today >= the gift's minutes; once a day each)
+		local m = tonumber(arg)
+		if not m or not table.find(Econ.Gifts, m) then return false, "bad" end
+		if d.gifts.got[tostring(m)] then return false, "done" end
+		if d.gifts.played < m * 60 then return false, "notyet" end
+		d.gifts.got[tostring(m)] = true
+		d.essence += 1
+		publish(player, s)
+		return true, 1
+	elseif action == "FreeClaim" then
+		-- (the plaza's FREE REWARDS: once each; the group one is checked with the group API)
+		local def
+		for _, f in ipairs(Econ.FreeRewards) do if f.id == arg then def = f end end
+		if not def or d.free[def.id] then return false, "done" end
+		if def.id == "group" then
+			local ok, yes = pcall(player.IsInGroup, player, Econ.Social.GroupId)
+			if not (ok and yes) then return false, "notmember" end
+		end
+		d.free[def.id] = true
+		d.essence += def.essence
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "FreeReward", 1, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = def.id }) end)
+		return true, def.essence
+	elseif action == "OfflineClaim" then
+		-- (the return screen's free CLAIM; it also counts toward the Supernova: it's income)
+		if d.offline <= 0 then return false, "none" end
+		local amount = d.offline
+		d.offline = 0
+		d.stardust += amount
+		d.earnedRun += amount
+		d.earnedTotal += amount
+		s.offlineAway = 0
+		checkTutorial(player, s)
+		publish(player, s)
+		pcall(function() AnalyticsService:LogCustomEvent(player, "OfflineClaim", 1) end)
+		return true, amount
+	elseif action == "OfflineX2" then
+		-- (the x2 button: the server prompts the developer product; ProcessReceipt grants it)
+		if d.offline <= 0 then return false, "none" end
+		return Shared.promptProduct ~= nil and Shared.promptProduct(player, "OfflineX2")
 	elseif action == "Settings" then
 		if type(arg) ~= "table" then return false, "bad" end
 		for _, k in ipairs({ "music", "sfx" }) do
 			local v = arg[k]
 			if type(v) == "number" and v == v and v >= 0 and v <= 1 then d.settings[k] = math.floor(v * 100 + 0.5) / 100 end
 		end
+		-- (#6 the number format)
+		if type(arg.sci) == "boolean" then d.settings.sci = arg.sci end
 		publish(player, s)
 		return true
 	elseif action == "UsePotion" then
@@ -710,13 +997,17 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		d.shards += got
 		d.shardsEarned += got
 		d.supernovas += 1
-		d.essence += Econ.SupernovaEssence
+		-- (+1 STAR ESSENCE node, +2 FORGE MASTER capstone)
+		d.essence += Econ.SupernovaEssence + (if (d.ring2.ForgeEssence or 0) >= 1 then 1 else 0) + (if d.capstone == "ForgeMaster" then 2 else 0)
 		d.stardust, d.earnedRun = 0, 0
 		for i = 1, #Econ.Tiers do
 			d.owned[i] = Econ.StartOwned[i] or 0
 			d.copies[i] = if d.owned[i] > 0 then 1 else 0
 		end
-		d.nodes = {}
+		-- (KEEP RING 1: the tier unlocks stay)
+		if (d.ring2.KeepRing1 or 0) < 1 then d.nodes = {} end
+		-- (the capstone may be switched for free until your next pick)
+		if d.capstone ~= "" then d.capSwap = true end
 		checkTutorial(player, s)
 		publish(player, s)
 		pcall(function() AnalyticsService:LogCustomEvent(player, "Supernova", d.supernovas, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = tostring(got) }) end)
@@ -743,9 +1034,21 @@ mapEvent.OnServerEvent:Connect(function(player: Player, kind, id)
 	local value = incomeOf(s) * math.random(Econ.Comet.ValueMin, Econ.Comet.ValueMax)
 		* (1 + Econ.PerksById.CometValue.per * Econ.PerkLv(s.d.perks, "CometValue")) * (if s.d.path == "Comet" then 2 else 1) * forgeOf(s, "Comets")
 	if math.random() < Econ.PerksById.LuckyComet.per * Econ.PerkLv(s.d.perks, "LuckyComet") then value *= 10 end
+	-- (ring 2's COMET CHASER capstone: comets x5)
+	if s.d.capstone == "CometChaser" then value *= 5 end
 	if s.golden and s.golden[id] then
+		value *= s.golden[id]
 		s.golden[id] = nil
-		value *= Econ.Comet.GoldenX
+	end
+	-- (ring 2's COMET CHAIN: the 3rd comet caught in a row pays x2; COMET TAIL: + 60 s of income too)
+	if (s.d.ring2.CometChain or 0) >= 1 then
+		s.chain = (s.chain or 0) + 1
+		if s.chain >= 3 then
+			s.chain = 0
+			value *= 2
+			if (s.d.ring2.CometTail or 0) >= 1 then value += incomeOf(s) * 60 end
+			event:FireClient(player, "CometChain", value)
+		end
 	end
 	s.d.stardust += value
 	s.d.earnedRun += value
@@ -771,6 +1074,34 @@ local function onPlayer(player: Player)
 		return
 	end
 	sessions[player] = s
+	-- OFFLINE EARNINGS (#411, Phase 2.3): time away x your income then x the rate (50%, 75% with DEEP SLEEP), up to 4 h (6 h
+	-- with LONG NIGHT); waits on the return screen (CLAIM, or x2 with Robux). Less than 2 min away = nothing.
+	-- (Studio: TestOfflineHours = h -> as if you left h hours ago with your current income)
+	local fakeAway = if IS_STUDIO then tonumber(workspace:GetAttribute("TestOfflineHours")) else nil
+	if fakeAway then
+		d.lastSeen = os.time() - fakeAway * 3600
+		if d.lastIncome <= 0 then d.lastIncome = incomeOf(s) / stardustBoost(s) end
+	end
+	if d.lastSeen > 0 and d.lastIncome > 0 then
+		local away = os.time() - d.lastSeen
+		if away >= Econ.Offline.MinSeconds then
+			local rate, cap = Econ.OfflineOf(d.ring2)
+			local amount = d.lastIncome * rate * math.min(away, cap)
+			d.offline += amount
+			d.offlineSeen = d.offline
+			s.offlineAway = away
+		end
+	end
+	-- the player list's columns (sorted by the first: Supernovas)
+	local ls = Instance.new("Folder")
+	ls.Name = "leaderstats"
+	local novas = Instance.new("IntValue")
+	novas.Name = "Supernovas"
+	novas.Parent = ls
+	local lit = Instance.new("StringValue")
+	lit.Name = "Galaxy"
+	lit.Parent = ls
+	ls.Parent = player
 	publish(player, s)
 	checkTutorial(player, s)
 	player:SetAttribute("Loaded", true)
@@ -801,6 +1132,49 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 Shared.publish = publish
 Shared.save = save
+-- DAILY QUESTS: what a quest counts (the save's own counters), and today's 3 (picked from the ones you can do, the same
+-- 3 all day: seeded by the day and your id)
+Shared.questValue = function(s, id: string): number
+	local d = s.d
+	if id == "Supernova" then return d.supernovas end
+	if id == "Comets" then return d.comets end
+	if id == "Levels" then return d.levelsBought end
+	if id == "Forge" then return d.forge.rolls end
+	if id == "Ring2" then return d.ring2Bought end
+	if id == "Play" then return math.floor(d.gifts.played / 60) end
+	return 0
+end
+Shared.newQuests = function(player: Player, s)
+	local d = s.d
+	local today = Econ.Today()
+	if d.gifts.day ~= today then d.gifts = { day = today, played = 0, got = {} } end
+	local pool = {}
+	for _, q in ipairs(Econ.Quests) do
+		if (not q.ignition or d.ignition >= 1) and d.supernovas >= (q.novas or 0) then table.insert(pool, q) end
+	end
+	local rnd = Random.new(today * 7919 + player.UserId % 100000)
+	local list = {}
+	while #list < 3 and #pool > 0 do
+		local q = table.remove(pool, rnd:NextInteger(1, #pool))
+		table.insert(list, { id = q.id, need = q.need, start = Shared.questValue(s, q.id), got = false })
+	end
+	d.quests = { day = today, list = list }
+end
+-- DEVELOPER PRODUCTS (granted by GalaxyStoreService's ProcessReceipt only): Shared.products[key](player, s) changes the save
+Shared.products = {
+	-- x2 OFFLINE: twice what you earned while away (what's still waiting, or what the return screen showed)
+	OfflineX2 = function(player: Player, s)
+		local d = s.d
+		local amount = 2 * (if d.offline > 0 then d.offline else d.offlineSeen)
+		d.offline = 0
+		d.stardust += amount
+		d.earnedRun += amount
+		d.earnedTotal += amount
+		s.offlineAway = 0
+		publish(player, s)
+		event:FireClient(player, "ProductGranted", "OfflineX2", amount)
+	end,
+}
 
 game:BindToClose(function()
 	local left = 0
@@ -833,6 +1207,31 @@ task.spawn(function()
 				else
 					s.d.boostLeft[id] = left
 				end
+			end
+			-- (playtime today, for the gifts and the PLAY quest; a new UTC day starts again at 0)
+			if s.d.gifts.day ~= Econ.Today() then publish(player, s) end
+			s.d.gifts.played += dt
+			-- AUTO-BUY (ring 2's AUTOMATION, #55 #417): body levels bought for you, cheapest first, a few a tick. AUTO-BUY I =
+			-- Asteroid + Moon, AUTO-BUY II = the rest. Each one can be switched off (INFO).
+			local a1 = (s.d.ring2.AutoBuy1 or 0) >= 1 and s.d.auto.Buy1 ~= false
+			local a2 = (s.d.ring2.AutoBuy2 or 0) >= 1 and s.d.auto.Buy2 ~= false
+			if a1 or a2 then
+				local any = false
+				for _ = 1, 8 do
+					local bestK, bestC = nil, math.huge
+					for k = 0, #Econ.Tiers - 1 do
+						if ((k <= 1 and a1) or (k >= 2 and a2)) and unlocked(s, k) then
+							local c = Econ.Cost(k, s.d.owned[k + 1], s.d.perks)
+							if c < bestC then bestK, bestC = k, c end
+						end
+					end
+					if not bestK or s.d.stardust < bestC then break end
+					s.d.stardust -= bestC
+					s.d.owned[bestK + 1] += 1
+					if s.d.copies[bestK + 1] == 0 then s.d.copies[bestK + 1] = 1 end
+					any = true
+				end
+				if any then publish(player, s) end
 			end
 			local gain = incomeOf(s) * dt
 			-- XP from your system (the Cosmic Level); a new level re-publishes (the rank, the perk tiers)
@@ -890,6 +1289,17 @@ if IS_STUDIO then
 			d.tut = #Econ.Tutorial
 			publish(player, s)
 		end
+	end)
+	-- (Phase 2 tests: TestGiveShards = n adds n shards; TestSetNovas = n sets the Supernova count, never lower)
+	workspace:GetAttributeChangedSignal("TestGiveShards"):Connect(function()
+		local n = tonumber(workspace:GetAttribute("TestGiveShards"))
+		if not n then return end
+		for player, s in pairs(sessions) do s.d.shards += n publish(player, s) end
+	end)
+	workspace:GetAttributeChangedSignal("TestSetNovas"):Connect(function()
+		local n = tonumber(workspace:GetAttribute("TestSetNovas"))
+		if not n then return end
+		for player, s in pairs(sessions) do s.d.supernovas = math.max(s.d.supernovas, math.floor(n)) publish(player, s) end
 	end)
 	workspace:GetAttributeChangedSignal("TestGiveStardust"):Connect(function()
 		local n = tonumber(workspace:GetAttribute("TestGiveStardust"))

@@ -30,6 +30,7 @@ local Cutscene -- (GalaxyCutscene: the first Supernova's screen layers; required
 task.spawn(function() Cutscene = require(Galaxy:WaitForChild("GalaxyCutscene")) end)
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
 local A = Kit.A
+local VT = require(Galaxy:WaitForChild("VfxTextures")) -- (the VFX pass)
 local hex = Kit.hex
 local fmt = Econ.Format
 local SN = MapConfig.Supernova
@@ -265,6 +266,16 @@ local function flyShards(n: number, slow: number)
 		task.delay(i * 0.06 * slow, function()
 			local img = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.icon.shard, AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(44 * s, 44 * s),
 				Position = UDim2.fromOffset(from.X + math.random(-140, 140) * s, from.Y + math.random(-60, 60) * s), Rotation = math.random(-30, 30), ZIndex = 94 }, fx)
+			-- (#270, the VFX pass: a light streak behind each shard, along its flight)
+			local d = target - Vector2.new(img.Position.X.Offset, img.Position.Y.Offset)
+			if d.Magnitude > 1 then
+				local u = d.Unit
+				local len = 110 * s
+				local streak = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = VT.alpha.light_streak, AnchorPoint = Vector2.new(0.5, 0.5),
+					Size = UDim2.fromOffset(len, 18 * s), Position = UDim2.new(0.5, -u.X * len * 0.45, 0.5, -u.Y * len * 0.45), ZIndex = 93,
+					Rotation = math.deg(math.atan2(u.Y, u.X)) - img.Rotation, ImageColor3 = Color3.fromRGB(190, 160, 255) }, img)
+				Kit.tween(streak, { Rotation = math.deg(math.atan2(u.Y, u.X)) }, 0.55 * slow)
+			end
 			Kit.tween(img, { Position = UDim2.fromOffset(target.X, target.Y), Size = UDim2.fromOffset(26 * s, 26 * s), Rotation = 0 }, 0.55 * slow, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 			task.delay(0.55 * slow, function()
 				img:Destroy()

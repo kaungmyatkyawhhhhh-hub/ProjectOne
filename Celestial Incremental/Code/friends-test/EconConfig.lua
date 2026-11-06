@@ -3,7 +3,7 @@
 -- Calc\ring1.py). Server and client both read it; nothing else holds an economy number.
 local Econ = {}
 
-Econ.DataVersion = 3 -- the save's version (bump + migrate in GalaxyEconService when the save's shape changes)
+Econ.DataVersion = 4 -- the save's version (bump + migrate in GalaxyEconService when the save's shape changes; 4 = Phase 2, 6 Nov)
 -- (3 = feel pass, 5 Nov: owned = body LEVELS + copies; an old owned count n -> level n, 1 + n/25 copies)
 -- (2 = alpha part 1, 3 Nov: shards, shardsEarned, ring2, the Binary Star tier; a v1 save gets them empty)
 
@@ -82,24 +82,76 @@ Econ.Ring2 = {
 	-- (alpha 2, 3 Nov: x1.5 -> x1.75 a level, so the second run is ~2x faster)
 	-- (re-priced 5 Nov, owner: ~40% of ring 2 + its capstone still unbought at Ignition 1 (~27 min, ~600 shards earned):
 	-- the bot buys Star, Starfire 1-3, Heavy Elements by then; Starfire 4-5 and the Binary Star are still ahead)
-	{ id = "Starfire", name = "STARFIRE", icon = "sun", costs = { 5, 15, 45, 600, 1200 },
+	{ id = "Starfire", name = "STARFIRE", icon = "sun", costs = { 5, 15, 45, 600, 1200 }, branch = "STELLAR",
 		desc = "every body earns x1.75 a level", effect = { kind = "allMult", mult = 1.75 } },
-	{ id = "StarTier", name = "STAR", icon = "sun", costs = { 3 }, novas = 1,
+	{ id = "StarTier", name = "STAR", icon = "sun", costs = { 3 }, novas = 1, branch = "STELLAR",
 		desc = "unlocks the Star", effect = { kind = "unlockTier", tier = 4 } },
-	{ id = "HeavyElements", name = "HEAVY ELEMENTS", icon = "gasgiant", costs = { 120 }, requires = "StarTier",
+	{ id = "HeavyElements", name = "HEAVY ELEMENTS", icon = "gasgiant", costs = { 120 }, requires = "StarTier", branch = "STELLAR",
 		desc = "each tier earns x(1 + 0.25 x its number)", effect = { kind = "heavy", per = 0.25 } },
-	{ id = "BinaryStar", name = "BINARY STAR", icon = "sun", costs = { 600 }, novas = 3, requires = "StarTier",
+	{ id = "BinaryStar", name = "BINARY STAR", icon = "sun", costs = { 600 }, novas = 3, requires = "StarTier", branch = "STELLAR",
 		desc = "unlocks the Binary Star", effect = { kind = "unlockTier", tier = 5 } },
+	-- PHASE 2 (6 Nov; design "Full game design" 2, checklist #53-#56). PRICES + Supernova gates PROPOSED: shards per Supernova
+	-- grow x1.25 each (ShardsFor), so ~600 are earned by Supernova 11 (Ignition 1), ~1.9K by 16, ~4.8K by 20, ~12K by 24.
+	-- Gates: COMETS right after Ignition, FORGE once the Forge has had some rolls, AUTO-BUY ~minute 60 (#417). Tuned with the
+	-- bot (Progress note "Phase 2").
+	-- COMETS: CHAIN = 3 caught in a row -> the 3rd pays x2 (a miss breaks it); GOLDEN = 5% of comets are gold x10; TAIL = a
+	-- chain also pays 60 s of income
+	{ id = "CometChain", name = "COMET CHAIN", icon = "comet", costs = { 150 }, novas = 8, branch = "COMETS",
+		desc = "catch 3 comets in a row: the 3rd pays x2", effect = { kind = "flag" } },
+	{ id = "GoldenComets", name = "GOLDEN COMETS", icon = "comet", costs = { 300 }, novas = 10, requires = "CometChain", branch = "COMETS",
+		desc = "1 comet in 20 is GOLDEN and pays x10", effect = { kind = "flag" } },
+	{ id = "CometTail", name = "COMET TAIL", icon = "comet", costs = { 500 }, novas = 12, requires = "GoldenComets", branch = "COMETS",
+		desc = "a 3-comet chain also pays 60 s of income", effect = { kind = "flag" } },
+	-- FORGE (the Forge itself opens at IGNITION 1 since 5 Nov, so the design's "Forge unlock" node is gone; BULK x3 is free,
+	-- so the node makes it x10)
+	{ id = "ForgeEssence", name = "STAR ESSENCE", icon = "essence", costs = { 300 }, novas = 11, branch = "FORGE",
+		desc = "+1 Essence at every Supernova", effect = { kind = "flag" } },
+	{ id = "ForgeLuck", name = "FORGE LUCK", icon = "forge", costs = { 600 }, novas = 13, requires = "ForgeEssence", branch = "FORGE",
+		desc = "+10% Forge luck", effect = { kind = "flag" } },
+	{ id = "BulkRoll", name = "BULK ROLL", icon = "forge", costs = { 900 }, novas = 15, requires = "ForgeLuck", branch = "FORGE",
+		desc = "BULK rolls 10 cores at once (was 3)", effect = { kind = "flag" } },
+	-- AUTOMATION (#55 #94 #417): "each layer automates the last layer's busywork"
+	{ id = "AutoBuy1", name = "AUTO-BUY I", icon = "gear", costs = { 1000 }, novas = 20, branch = "AUTOMATION",
+		desc = "buys Asteroid and Moon levels for you (switch it off on INFO)", effect = { kind = "flag" } },
+	{ id = "OfflineTime", name = "LONG NIGHT", icon = "gear", costs = { 600 }, novas = 17, branch = "AUTOMATION",
+		desc = "offline earnings for up to 6 h (was 4 h)", effect = { kind = "flag" } },
+	{ id = "KeepRing1", name = "KEEP RING 1", icon = "gear", costs = { 1500 }, novas = 21, requires = "AutoBuy1", branch = "AUTOMATION",
+		desc = "Lunar Pull, Planet Seed and Gas Giant stay through a Supernova", effect = { kind = "flag" } },
+	{ id = "AutoBuy2", name = "AUTO-BUY II", icon = "gear", costs = { 2500 }, novas = 23, requires = "KeepRing1", branch = "AUTOMATION",
+		desc = "buys every other body's levels too", effect = { kind = "flag" } },
+	{ id = "OfflineRate", name = "DEEP SLEEP", icon = "gear", costs = { 1500 }, novas = 22, requires = "OfflineTime", branch = "AUTOMATION",
+		desc = "offline earnings 75% of your income (was 50%)", effect = { kind = "flag" } },
 }
+-- the tree's 4 BRANCHES (columns, in order; a node's place in its branch = its order in Econ.Ring2)
+Econ.Ring2Branches = {
+	{ id = "STELLAR", name = "STELLAR", colour = Color3.fromRGB(255, 190, 80) },
+	{ id = "COMETS", name = "COMETS", colour = Color3.fromRGB(90, 200, 255) },
+	{ id = "FORGE", name = "FORGE", colour = Color3.fromRGB(255, 140, 60) },
+	{ id = "AUTOMATION", name = "AUTOMATION", colour = Color3.fromRGB(125, 255, 150) },
+}
+-- the CAPSTONE (#56): pick 1 of 3 for Ring2CapstoneShards once; switching is FREE right after each Supernova
+Econ.Ring2Capstones = {
+	{ id = "IdleStar", name = "IDLE STAR", icon = "sun", desc = "x3 income, comets off" },
+	{ id = "CometChaser", name = "COMET CHASER", icon = "comet", desc = "comets pay x5" },
+	{ id = "ForgeMaster", name = "FORGE MASTER", icon = "forge", desc = "+2 Essence at every Supernova, +25% Forge luck" },
+}
+Econ.Ring2CapstoneNovas = 12
+Econ.Ring2CapstonesById = {}
+for _, c in ipairs(Econ.Ring2Capstones) do Econ.Ring2CapstonesById[c.id] = c end
+-- OFFLINE EARNINGS (#411, Phase 2.3): a share of your income for the time away, capped; the AUTOMATION nodes raise both
+Econ.Offline = { Rate = 0.5, Hours = 4, RateNode = 0.75, HoursNode = 6, MinSeconds = 120 }
+function Econ.OfflineOf(r2): (number, number)
+	r2 = r2 or {}
+	return if (r2.OfflineRate or 0) >= 1 then Econ.Offline.RateNode else Econ.Offline.Rate,
+		3600 * (if (r2.OfflineTime or 0) >= 1 then Econ.Offline.HoursNode else Econ.Offline.Hours)
+end
 Econ.Ring2ById = {}
 for _, n in ipairs(Econ.Ring2) do Econ.Ring2ById[n.id] = n end
 -- ring 2's CAPSTONE (pick 1: design 2; Phase 2 builds it): its planned price, above what a player holds at Ignition 1
-Econ.Ring2CapstoneShards = 1000
+Econ.Ring2CapstoneShards = 500 -- (Phase 2 bot: 1,000 was never reached by minute 55; PROPOSED)
 -- the other ring-2 branches: shown as "?" with what opens them (not in the alpha)
 Econ.Ring2Later = {
-	{ name = "COMETS", icon = "comet", lockedText = "NEXT UPDATE" },
-	{ name = "FORGE", icon = "forge", lockedText = "SUPERNOVA 3" },
-	{ name = "AUTOMATION", icon = "gear", lockedText = "NEXT UPDATE" },
+	-- (Phase 2, 6 Nov: all four branches are in the game now)
 }
 -- r2 = { [id] = level }. The next level's cost (nil = maxed)
 function Econ.R2Cost(id: string, level: number): number?
@@ -178,7 +230,8 @@ Econ.Comet = {
 -- 2.0, 2.0, 2.0, 2.1, 2.2, then 1.6-3.0 with x1.6. 220K gave 5.7 min, so Supernova 1 = 110K)
 -- (bot 5 Nov, 2nd check: from Supernova 9 the runs fell to 0.9-1.5 min with 720M..960M: the late needs grow faster now)
 Econ.SupernovaNeeds = { 2.5e5, 1.8e6, 1.2e7, 4.8e7, 2.4e8, 4e8, 4.6e8, 1.4e9, 1.7e9, 1.9e9, 2.6e9, 1.6e10 }
-Econ.NeedGrowthAfter = 2.4
+-- (Phase 2 bot, 6 Nov: x2.4 made run 17 take ~25 min after Ignition; x1.7 keeps the runs after the list ~3-5 min. PROPOSED)
+Econ.NeedGrowthAfter = 1.7
 function Econ.NeedFor(novas: number): number
 	local n = (novas or 0) + 1
 	local list = Econ.SupernovaNeeds
@@ -353,6 +406,55 @@ function Econ.GalaxyLit(pads: number, novas: number, level: number, ignition: nu
 	return math.floor(pads * 0.4 + math.min(novas, 10) * 0.5 + math.min(level, 30) * 0.1 + math.min(ignition, 1) * 7)
 end
 
+-- the ROOMS of each sector with their % complete (Phase 2.1, 6 Nov; Depth Incremental's "% complete per room"): the GALAXY
+-- window lists them under each sector. Only things you KEEP count (pads, perks, ring 2, Supernovas to Ignition, Forge cores),
+-- so a room's % never goes down. get(attr) = the player's attribute; found = Forge cores found (of 42).
+function Econ.SectorRooms(i: number, get, found: number): { { name: string, pct: number } }
+	local function pct(a: number, b: number): number return math.clamp(math.floor(a / math.max(b, 1) * 100), 0, 100) end
+	if i == 1 then
+		local perks, r2, r2Max = 0, 0, 0
+		for _, p in ipairs(Econ.Perks) do perks += tonumber(get("Perk_" .. p.id)) or 0 end
+		for _, n in ipairs(Econ.Ring2) do
+			r2 += tonumber(get("R2_" .. n.id)) or 0
+			r2Max += #n.costs
+		end
+		return {
+			{ name = "PADS", pct = pct(tonumber(get("Pads")) or 0, #Econ.Pads) },
+			{ name = "PERKS", pct = pct(perks, #Econ.Perks * Econ.PerkMax) },
+			{ name = "TREE", pct = pct(r2, r2Max) },
+			{ name = "NOVAS", pct = pct(tonumber(get("Supernovas")) or 0, 11) }, -- (toward Ignition 1's 11)
+		}
+	elseif i == 2 then
+		return { { name = "STAR FORGE", pct = pct(found, #Econ.Forge.Kinds * #Econ.Forge.Rarities) } }
+	end
+	return {}
+end
+
+------------------------------------------------------------------------ DAILY REASONS (Phase 2.4, 6 Nov; design "Full game design" 8,
+-- #412-#414 #435). Days are UTC days. Essence budget (design 3 rule 3): streak 2-5 + quests 3 + gifts 4 a day.
+-- the 7-day STREAK: claim once a day; a missed day starts again at day 1 (what you got stays); day 7 also gives a TIME WARP
+-- (1 h of your income now). Then day 1 again.
+Econ.Daily = { Essence = { 2, 2, 3, 3, 4, 4, 5 }, WarpSeconds = 3600 }
+-- 3 DAILY QUESTS a day, sized to one session; each pays 1 Essence + 5 min of income (design 3 rule 2: quest = 5 min).
+-- need / text; ignition / novas = only offered once you've got that far. PROPOSED sizes (a ~30 min session)
+Econ.Quests = {
+	{ id = "Supernova", text = "Go Supernova %d times", need = 2 },
+	{ id = "Comets", text = "Catch %d comets", need = 10 },
+	{ id = "Levels", text = "Buy %d body levels", need = 40 },
+	{ id = "Forge", text = "Roll the Star Forge %d times", need = 3, ignition = true },
+	{ id = "Ring2", text = "Buy %d tree level", need = 1, novas = 1 },
+	{ id = "Play", text = "Play %d minutes", need = 15 },
+}
+Econ.QuestsById = {}
+for _, q in ipairs(Econ.Quests) do Econ.QuestsById[q.id] = q end
+Econ.QuestReward = { essence = 1, stardustSeconds = 300 }
+-- PLAYTIME GIFTS: minutes played today -> 1 Essence each (#414)
+Econ.Gifts = { 5, 15, 30, 60 }
+-- the plaza's FREE REWARDS board (Depth Incremental's lobby board): once each. The group is checked (IsInGroup); a like
+-- can't be checked by a game, so it's an honour claim. PROPOSED: like 1 Essence, group 2
+Econ.FreeRewards = { { id = "like", text = "LIKE THE GAME", essence = 1 }, { id = "group", text = "JOIN THE GROUP", essence = 2 } }
+function Econ.Today(): number return os.time() // 86400 end
+
 ------------------------------------------------------------------------ THE STAR FORGE (design "Full game design" 3b; Sector 2, opens at
 -- IGNITION 1: checklist #59-#62). Roll a Star Core for 1 Essence (BULK = 3 rolls); the odds are shown (sum 100%); pity:
 -- Legendary by roll 200, Mythic by 1,500 (none for Celestial). Equip 3 cores. 6 kinds x 7 rarities = 42 cores (the book);
@@ -384,6 +486,39 @@ Econ.Forge = {
 Econ.ForgeRarityById, Econ.ForgeKindById = {}, {}
 for i, r in ipairs(Econ.Forge.Rarities) do r.index = i Econ.ForgeRarityById[r.id] = r end
 for _, k in ipairs(Econ.Forge.Kinds) do Econ.ForgeKindById[k.id] = k end
+-- the COLLECTION BOOK (Phase 2.5, #62 #438; Depth's fossil list): a core at MaxLevel leaves the pool; when every kind of a
+-- rarity is maxed, that rarity's odds move to the rarer ones (shared by their odds). Completing a rarity's row (all 6 kinds
+-- found) = a COLLECTOR title (on your rank tag), a gold trim on its book row, and its badge (GameConfig.Badges, id 0 = none).
+-- The odds a roll uses now: { [rarity index] = % } (still sums to 100) and which kinds can still come at each rarity.
+function Econ.ForgeOdds(cores, luck: number?): ({ number }, { { string } })
+	local F = Econ.Forge
+	local base, kept, kinds = {}, {}, {}
+	for i, r in ipairs(F.Rarities) do
+		local open = {}
+		for _, k in ipairs(F.Kinds) do
+			if ((cores or {})[k.id .. ":" .. r.id] or 0) < F.MaxLevel then table.insert(open, k.id) end
+		end
+		kinds[i] = open
+		base[i] = r.odds * (if i > 1 then (luck or 1) else 1)
+		kept[i] = base[i] * #open / #F.Kinds
+	end
+	-- (each rarity's lost weight goes to the rarer rarities, by what they still hold)
+	local odds = table.clone(kept)
+	for i = 1, #F.Rarities do
+		local lost = base[i] - kept[i]
+		local above = 0
+		for j = i + 1, #F.Rarities do above += kept[j] end
+		if lost > 0 and above > 0 then
+			for j = i + 1, #F.Rarities do odds[j] += lost * kept[j] / above end
+		end
+	end
+	local total = 0
+	for _, o in ipairs(odds) do total += o end
+	for i = 1, #odds do odds[i] = if total > 0 then odds[i] / total * 100 else 0 end
+	return odds, kinds
+end
+Econ.CollectorTitles = { Common = "STAR FINDER", Uncommon = "CORE HUNTER", Rare = "RARE COLLECTOR", Epic = "EPIC COLLECTOR",
+	Legendary = "LEGEND KEEPER", Mythic = "MYTH MAKER", Celestial = "CELESTIAL ARCHIVIST" }
 function Econ.CorePower(rarity: string, level: number): number
 	local r = Econ.ForgeRarityById[rarity]
 	if not r then return 1 end
@@ -433,36 +568,46 @@ for _, p in ipairs(Econ.Potions) do Econ.PotionsById[p.id] = p end
 -- step pays its Essence + ~TutorialStardustSec seconds of income; +3 Essence at the first Supernova and at Ignition. The
 -- guide (LUMI, the star spirit) says `hint`. Every step shows or unlocks something new; never a "now grind" step.
 Econ.TutorialStardustSec = 20
-Econ.TutorialSpirit = { name = "LUMI", portrait = "rbxassetid://128773218162368" } -- (UI\star_spirit_blender.py, Studio test upload)
+-- (LUMI's art: ArtIds.lumi, 6 expressions; each step's `face` (6 Nov): talking = a plain line, pointing = "go to this board",
+-- excited = a new unlock, thinking = a hint / tip, proud = a big milestone (Supernova, Ignition); happy = shown as a step is done)
+Econ.TutorialSpirit = { name = "LUMI" }
 Econ.Tutorial = {
-	{ id = "Asteroid3", hint = "UPGRADE your Asteroid", attr = "Own1", need = 3, essence = 1 },
-	{ id = "FirstLight", hint = "PERK: FIRST LIGHT (free)", attr = "Perk_FirstLight", need = 1, essence = 1 },
-	{ id = "Pad1", hint = "Build your island: STONE ISLAND", attr = "Pads", need = 1, essence = 1 },
-	{ id = "Moon", hint = "UNLOCK the Moon", attr = "Own2", need = 1, essence = 1 },
-	{ id = "Copy", hint = "+BODY: a 2nd Asteroid", attr = "Copies1", need = 2, essence = 1 },
-	{ id = "Comets", hint = "Tap 2 comets!", attr = "CometsCaught", need = 2, essence = 1 },
-	{ id = "Rock", hint = "Asteroid to ROCK (Lv 10)", attr = "Own1", need = 10, essence = 1 },
-	{ id = "Planet", hint = "UNLOCK the Planet", attr = "Own3", need = 1, essence = 1 },
-	{ id = "Pads4", hint = "Build 4 island pads", attr = "Pads", need = 4, essence = 1 },
-	{ id = "Level3", hint = "Reach Cosmic LVL 3", attr = "CosmicLevel", need = 3, essence = 1 },
-	{ id = "Giant", hint = "UNLOCK the Gas Giant", attr = "Own4", need = 1, essence = 1 },
-	{ id = "Ready", hint = "Grow to 100% SUPERNOVA", attr = "SupernovaPct", need = 100, essence = 1 },
-	{ id = "Supernova", hint = "Go SUPERNOVA!", attr = "Supernovas", need = 1, essence = 3 },
-	{ id = "Starfire", hint = "TREE: buy STARFIRE", attr = "R2_Starfire", need = 1, essence = 1 },
-	{ id = "StarTier", hint = "TREE: open the STAR", attr = "R2_StarTier", need = 1, essence = 1 },
-	{ id = "Nova2", hint = "Go SUPERNOVA again", attr = "Supernovas", need = 2, essence = 1 },
-	{ id = "Pads12", hint = "Build 12 island pads", attr = "Pads", need = 12, essence = 1 },
-	{ id = "Level10", hint = "Cosmic LVL 10: new PERKS", attr = "CosmicLevel", need = 10, essence = 1 },
-	{ id = "Nova6", hint = "Go SUPERNOVA 6 times", attr = "Supernovas", need = 6, essence = 1 },
-	{ id = "Ignition", hint = "Light SECTOR 1: IGNITION", attr = "Ignition", need = 1, essence = 3 },
+	{ id = "Asteroid3", hint = "UPGRADE your Asteroid", attr = "Own1", need = 3, essence = 1, face = "pointing" },
+	{ id = "FirstLight", hint = "PERK: FIRST LIGHT (free)", attr = "Perk_FirstLight", need = 1, essence = 1, face = "excited" },
+	{ id = "Pad1", hint = "Build your island: STONE ISLAND", attr = "Pads", need = 1, essence = 1, face = "pointing" },
+	{ id = "Moon", hint = "UNLOCK the Moon", attr = "Own2", need = 1, essence = 1, face = "excited" },
+	{ id = "Copy", hint = "+BODY: a 2nd Asteroid", attr = "Copies1", need = 2, essence = 1, face = "thinking" },
+	{ id = "Comets", hint = "Tap 2 comets!", attr = "CometsCaught", need = 2, essence = 1, face = "talking" },
+	{ id = "Rock", hint = "Asteroid to ROCK (Lv 10)", attr = "Own1", need = 10, essence = 1, face = "talking" },
+	{ id = "Planet", hint = "UNLOCK the Planet", attr = "Own3", need = 1, essence = 1, face = "excited" },
+	{ id = "Pads4", hint = "Build 4 island pads", attr = "Pads", need = 4, essence = 1, face = "pointing" },
+	{ id = "Level3", hint = "Reach Cosmic LVL 3", attr = "CosmicLevel", need = 3, essence = 1, face = "thinking" },
+	{ id = "Giant", hint = "UNLOCK the Gas Giant", attr = "Own4", need = 1, essence = 1, face = "excited" },
+	{ id = "Ready", hint = "Grow to 100% SUPERNOVA", attr = "SupernovaPct", need = 100, essence = 1, face = "thinking" },
+	{ id = "Supernova", hint = "Go SUPERNOVA!", attr = "Supernovas", need = 1, essence = 3, face = "proud" },
+	{ id = "Starfire", hint = "TREE: buy STARFIRE", attr = "R2_Starfire", need = 1, essence = 1, face = "pointing" },
+	{ id = "StarTier", hint = "TREE: open the STAR", attr = "R2_StarTier", need = 1, essence = 1, face = "excited" },
+	{ id = "Nova2", hint = "Go SUPERNOVA again", attr = "Supernovas", need = 2, essence = 1, face = "talking" },
+	{ id = "Pads12", hint = "Build 12 island pads", attr = "Pads", need = 12, essence = 1, face = "pointing" },
+	{ id = "Level10", hint = "Cosmic LVL 10: new PERKS", attr = "CosmicLevel", need = 10, essence = 1, face = "excited" },
+	{ id = "Nova6", hint = "Go SUPERNOVA 6 times", attr = "Supernovas", need = 6, essence = 1, face = "proud" },
+	{ id = "Ignition", hint = "Light SECTOR 1: IGNITION", attr = "Ignition", need = 1, essence = 3, face = "proud" },
 }
 Econ.HintAfter = 5 -- seconds idle before the hint line shows (design: "only after 5 s idle")
 
 ------------------------------------------------------------------------ number format (design: K, M, B, T, Qa, Qi...)
 local SUFFIX = { "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc" }
+-- (#6, Phase 2.7: the player's setting, set by GalaxySettings on the client: "short" = 1.2M, "sci" = 1.20e6)
+Econ.NumberMode = "short"
 function Econ.Format(n: number): string
 	if n ~= n or n == math.huge then return "0" end
 	if n < 0 then return "-" .. Econ.Format(-n) end
+	if Econ.NumberMode == "sci" and n >= 1000 then
+		local e = math.floor(math.log10(n))
+		local m = n / 10 ^ e
+		if m >= 9.995 then m, e = 1, e + 1 end
+		return string.format("%.2fe%d", m, e)
+	end
 	if n < 100 then
 		local f = math.floor(n * 10) / 10
 		return if f == math.floor(f) then tostring(math.floor(f)) else string.format("%.1f", f)

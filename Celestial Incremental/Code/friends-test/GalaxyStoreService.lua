@@ -62,6 +62,8 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player: Playe
 	if passId ~= X2.id or X2.id == 0 or not bought then return end
 	grantX2(player)
 	log(player, "PassBought", "X2Stardust")
+	-- (#91: save right after a purchase)
+	task.spawn(Shared.save, player, false)
 end)
 
 local lastPrompt = {}
@@ -73,6 +75,67 @@ event.OnServerEvent:Connect(function(player: Player, kind, key)
 	log(player, "PassPromptShown", "X2Stardust")
 	pcall(function() MarketplaceService:PromptGamePassPurchase(player, X2.id) end)
 end)
+
+------------------------------------------------------------------------ DEVELOPER PRODUCTS (Phase 2, #454)
+-- ProcessReceipt is the ONLY place a product is granted: the player's session must be loaded, a PurchaseId already in the
+-- save is answered "granted" without granting again, the grant + the receipt are SAVED before Roblox hears "granted" (a
+-- failed save = NotProcessedYet: Roblox asks again later; the receipt in memory stops a second grant meanwhile).
+local productById = {}
+for key, p in pairs(Config.Products or {}) do if p.id ~= 0 then productById[p.id] = key end end
+local function processReceipt(info, keyOverride: string?)
+	local player = Players:GetPlayerByUserId(info.PlayerId)
+	local key = keyOverride or productById[info.ProductId]
+	if not player or not key or not Shared.products or not Shared.products[key] then return Enum.ProductPurchaseDecision.NotProcessedYet end
+	local s = Shared.sessions[player]
+	if not s or s.readOnly then return Enum.ProductPurchaseDecision.NotProcessedYet end
+	local d = s.d
+	local id = tostring(info.PurchaseId)
+	if d.receipts[id] then return Enum.ProductPurchaseDecision.PurchaseGranted end
+	Shared.products[key](player, s)
+	d.receipts[id] = os.time()
+	-- (keep the 50 newest receipts)
+	local list = {}
+	for k, t in pairs(d.receipts) do table.insert(list, { k = k, t = t }) end
+	if #list > 50 then
+		table.sort(list, function(a, b) return a.t > b.t end)
+		for i = 51, #list do d.receipts[list[i].k] = nil end
+	end
+	log(player, "ProductBought", key)
+	if s.noSave then return Enum.ProductPurchaseDecision.PurchaseGranted end -- (Studio without saving)
+	if not Shared.save(player, false) then return Enum.ProductPurchaseDecision.NotProcessedYet end
+	return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+MarketplaceService.ProcessReceipt = processReceipt
+-- the prompt (the server asks Roblox; the client only says which product it wants)
+Shared.promptProduct = function(player: Player, key: string): boolean
+	local p = Config.Products and Config.Products[key]
+	if not p or p.id == 0 then return false end
+	log(player, "ProductPromptShown", key)
+	pcall(function() MarketplaceService:PromptProductPurchase(player, p.id) end)
+	return true
+end
+-- (Studio: TestReceipt = "<product key>" runs the same grant with one fake PurchaseId TWICE: the second must not grant)
+if IS_STUDIO then
+	workspace:GetAttributeChangedSignal("TestReceipt"):Connect(function()
+		local key = workspace:GetAttribute("TestReceipt")
+		if type(key) ~= "string" or key == "" then return end
+		for _, player in ipairs(Players:GetPlayers()) do
+			local info = { PlayerId = player.UserId, ProductId = 0, PurchaseId = "test-" .. key .. "-" .. math.floor(os.clock()) }
+			local a = processReceipt(info, key)
+			local b = processReceipt(info, key)
+			print("[GalaxyStore] TestReceipt", key, a, b)
+		end
+	end)
+end
+
+-- any badge by its GameConfig key (id 0 = skipped)
+Shared.awardBadge = function(player: Player, key: string)
+	local id = Config.Badges[key]
+	if not id or id == 0 then return end
+	pcall(function()
+		if not BadgeService:UserHasBadgeAsync(player.UserId, id) then BadgeService:AwardBadge(player.UserId, id) end
+	end)
+end
 
 ------------------------------------------------------------------------ ALPHA PLAYER
 local function alpha(player: Player, s)

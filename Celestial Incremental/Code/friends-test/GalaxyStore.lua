@@ -120,7 +120,7 @@ local function place()
 	local s = screenScale()
 	local vp = viewport()
 	local small = vp.Y < 500
-	local top = 84 * s
+	local top = 124 * s -- (6 Nov overlap check: under the GALAXY LIT bar + the counter's SUPERNOVA bar)
 	local room = (if small then vp.Y - 6 else vp.Y - 104 * s) - top
 	local want = math.min(Kit.ps(s, 0.85), room / (H + Kit.ps(34, 6)), (vp.X - Kit.ps(24, 8)) / (W + 40))
 	holder.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + 15 * want)

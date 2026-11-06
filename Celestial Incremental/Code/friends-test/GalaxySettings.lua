@@ -75,8 +75,12 @@ local function row(y: number, title: string, value: number, onChange, onDone)
 	end, onDone, 6)
 	return s, show
 end
+local Econ = require(Galaxy:WaitForChild("EconConfig"))
+-- (#6: the number format, for every number in the game on this screen; saved like the sliders)
+local sci = player:GetAttribute("NumSci") == true
+Econ.NumberMode = if sci then "sci" else "short"
 local function save()
-	task.spawn(function() request:InvokeServer("Settings", { music = musicVol, sfx = sfxVol }) end)
+	task.spawn(function() request:InvokeServer("Settings", { music = musicVol, sfx = sfxVol, sci = sci }) end)
 end
 local musicSlider, showMusic = row(76, "MUSIC", musicVol, function(v)
 	musicVol = v
@@ -93,10 +97,24 @@ local sfxSlider, showSfx = row(164, "SOUND EFFECTS", sfxVol, function(v)
 	end
 end, save)
 
--- CODES (overnight part 2): opens the Codes window
-local codes, codesInner = Kit.button(win, 16, 256, W - 32, 62, hex("#ff7d8e"), hex("#c22a3e"), { ZIndex = 6 })
-Kit.text(codesInner, 0, 14, W - 32, 34, "CODES", 28, { ZIndex = codesInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
-Kit.icon(win, "essence", 150, 252, 64, Color3.fromRGB(60, 230, 210), { ZIndex = 9 })
+-- the bottom row (2.7): NUMBERS (#6 short / scientific), STATS (#4), CODES (overnight part 2)
+local BW = (W - 32 - 16) / 3
+local numBtn, numInner = Kit.button(win, 16, 256, BW, 62, hex("#5ad1ff"), hex("#1f6fd1"), { ZIndex = 6 })
+Kit.text(numInner, 0, Kit.ps(6, 5), BW, 22, "NUMBERS", Kit.ps(17, 19), { ZIndex = numInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
+local numText = Kit.text(numInner, 0, Kit.ps(30, 29), BW, 24, "", Kit.ps(18, 20), { ZIndex = numInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
+local function showNum() Kit.setText(numText, if sci then "1.20e6" else "1.2M") end
+showNum()
+numBtn.MouseButton1Click:Connect(function()
+	sci = not sci
+	Econ.NumberMode = if sci then "sci" else "short"
+	Kit.sound("tab")
+	showNum()
+	save()
+end)
+local statsBtn, statsInner = Kit.button(win, 16 + BW + 8, 256, BW, 62, hex("#ffd84a"), hex("#e08a00"), { ZIndex = 6 })
+Kit.text(statsInner, 0, Kit.ps(18, 16), BW, 28, "STATS", Kit.ps(24, 26), { ZIndex = statsInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
+local codes, codesInner = Kit.button(win, 16 + 2 * (BW + 8), 256, BW, 62, hex("#ff7d8e"), hex("#c22a3e"), { ZIndex = 6 })
+Kit.text(codesInner, 0, Kit.ps(18, 16), BW, 28, "CODES", Kit.ps(24, 26), { ZIndex = codesInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2 })
 codes.MouseButton1Click:Connect(function()
 	if shared.GalaxyCodesOpen then shared.GalaxyCodesOpen() end
 end)
@@ -107,7 +125,7 @@ local function place()
 	local s = screenScale()
 	local vp = viewport()
 	local small = vp.Y < 500
-	local top = 84 * s
+	local top = 124 * s -- (6 Nov overlap check: under the GALAXY LIT bar + the counter's SUPERNOVA bar)
 	local room = (if small then vp.Y - 6 else vp.Y - 104 * s) - top
 	local want = math.min(Kit.ps(s, 0.85), room / (H + Kit.ps(34, 6)), (vp.X - Kit.ps(24, 8)) / (W + 40))
 	holder.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + 15 * want)
@@ -140,3 +158,87 @@ shared.GalaxySettingsToggle = function() if isOpen then close() else open() end 
 shared.GalaxySettingsClose = close
 closeBtn.MouseButton1Click:Connect(close)
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function() if isOpen then scale.Scale = place() end end)
+
+------------------------------------------------------------------------ #4 the STATS window (Settings > STATS; side key "P"): your income,
+-- step by step (the server's IncomeSplit: each line a multiplier on the one before), the total, and the time to your next
+-- Supernova at this income
+local HttpService = game:GetService("HttpService")
+local SW, SH = 560, 400
+local stats = Kit.box(root, 0, 0, SW, SH, { Name = "StatsWindow", AnchorPoint = Vector2.new(0.5, 0.5), Visible = false })
+local sScale = Instance.new("UIScale")
+sScale.Parent = stats
+local sWin, sClose = Kit.window(stats, SW, SH, { title = "STATS", icon = "stardust", iconGlow = Color3.fromRGB(255, 200, 70),
+	c1 = hex("#7a4a0a"), c2 = hex("#ffc83a"), lip = hex("#c2840c"), glow = Color3.fromRGB(255, 170, 40), line = hex("#ffe08a") })
+local sPanel = Kit.panel(sWin, 16, 70, SW - 32, 262, 4)
+Kit.stroke(sPanel, hex("#ffc83a"), 2, 0.2)
+local statRows = {}
+for i = 1, 9 do
+	local y = 78 + (i - 1) * 28
+	local name = Kit.text(sWin, 30, y, 380, 24, "", Kit.ps(14, 16), { ZIndex = 8, FontFace = Kit.FONT_BOLD, stroke = 1.2 })
+	local val = Kit.text(sWin, SW - 170, y, 140, 24, "", Kit.ps(16, 18), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4, TextXAlignment = Enum.TextXAlignment.Right })
+	statRows[i] = { name = name, val = val }
+end
+local nextLine = Kit.text(sWin, 16, 344, SW - 32, 40, "", Kit.ps(17, 19), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextXAlignment = CENTRE,
+	TextColor3 = hex("#ffd84a"), TextWrapped = true })
+local fmt = Econ.Format
+local function mult(x: number): string
+	if x >= 10 then return "x" .. fmt(x) end
+	return "x" .. (string.format("%.2f", x):gsub("0+$", ""):gsub("%.$", ""))
+end
+local function refreshStats()
+	local ok, list = pcall(function() return HttpService:JSONDecode(player:GetAttribute("IncomeSplit") or "[]") end)
+	if not ok or type(list) ~= "table" then list = {} end
+	for i, r in ipairs(statRows) do
+		local e = list[i]
+		r.name.Parent.Visible = e ~= nil
+		r.val.Parent.Visible = e ~= nil
+		if e then
+			Kit.setText(r.name, e[1])
+			Kit.setText(r.val, if e[3] == "base" or e[3] == "total" then fmt(e[2]) .. "/s" else mult(e[2]))
+			r.val.TextColor3 = if e[3] == "total" then hex("#ffd84a") elseif e[3] == "base" then Color3.new(1, 1, 1) elseif e[2] > 1.0001 then hex("#7dff6b") else hex("#a99fb8")
+			r.name.TextColor3 = if e[3] == "total" then hex("#ffd84a") else Color3.new(1, 1, 1)
+		end
+	end
+	local need = player:GetAttribute("SupernovaNeed") or 0
+	local earned = player:GetAttribute("EarnedRun") or 0
+	local income = math.max(player:GetAttribute("Income") or 0, 1e-9)
+	local left = math.max(0, need - earned) / income
+	Kit.setText(nextLine, if player:GetAttribute("SupernovaReady") then "Your SUPERNOVA is ready!"
+		else "Next SUPERNOVA in about " .. (if left >= 3600 then math.floor(left / 3600) .. " h " .. math.floor(left % 3600 / 60) .. " min" elseif left >= 60 then math.floor(left / 60) .. " min " .. math.floor(left % 60) .. " s" else math.ceil(left) .. " s") .. " at this income")
+end
+local sOpen = false
+local function closeStats()
+	if not sOpen then return end
+	sOpen = false
+	Kit.sound("close")
+	Kit.tween(sScale, { Scale = sScale.Scale * 0.85 }, 0.15)
+	task.delay(0.15, function() if not sOpen then stats.Visible = false end end)
+	if shared.GalaxySideWindow then shared.GalaxySideWindow("P", false) end
+end
+local function openStats()
+	if sOpen then return end
+	if shared.GalaxyCloseSide then shared.GalaxyCloseSide("P") end
+	sOpen = true
+	Kit.sound("open")
+	refreshStats()
+	stats.Visible = true
+	if shared.GalaxySideWindow then shared.GalaxySideWindow("P", true) end
+	local s = screenScale()
+	local vp = viewport()
+	local small = vp.Y < 500
+	local top = 124 * s
+	local room = (if small then vp.Y - 6 else vp.Y - 104 * s) - top
+	local want = math.min(Kit.ps(s, 0.85), room / (SH + Kit.ps(34, 6)), (vp.X - Kit.ps(24, 8)) / (SW + 40))
+	stats.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + 15 * want)
+	sScale.Scale = want * 0.8
+	Kit.tween(sScale, { Scale = want }, 0.25, Enum.EasingStyle.Back)
+end
+shared.GalaxyStatsClose = closeStats
+statsBtn.MouseButton1Click:Connect(function() Kit.sound("click") openStats() end)
+sClose.MouseButton1Click:Connect(closeStats)
+task.spawn(function()
+	while true do
+		task.wait(1)
+		if sOpen then refreshStats() end
+	end
+end)

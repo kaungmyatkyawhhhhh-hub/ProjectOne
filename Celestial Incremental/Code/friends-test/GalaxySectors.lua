@@ -65,7 +65,8 @@ local win, closeBtn = Kit.window(holder, W, H, { title = "GALAXY", icon = "sun",
 -- GALAXY LIT % (the finish line)
 local litText = Kit.text(win, 24, 70, 360, 32, "GALAXY LIT 0%", 26, { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 2,
 	gradient = ColorSequence.new(hex("#e8f2ff"), hex("#7db4ff")) })
-Kit.text(win, 300, 76, W - 324, 22, Econ.Premise, Kit.ps(12, 15), { ZIndex = 8, TextColor3 = hex("#a99fb8"), TextXAlignment = RIGHT, stroke = 1.1 })
+-- (the premise line: PC only; on a phone it ran into GALAXY LIT, 6 Nov overlap check)
+if not Kit.phone() then Kit.text(win, 300, 76, W - 324, 22, Econ.Premise, Kit.ps(12, 15), { ZIndex = 8, TextColor3 = hex("#a99fb8"), TextXAlignment = RIGHT, stroke = 1.1 }) end
 local litBar = Kit.box(win, 24, 106, W - 48, 16, { BackgroundTransparency = 0, BackgroundColor3 = hex("#16131b"), ZIndex = 6 })
 Kit.corner(litBar, 8)
 Kit.stroke(litBar, Kit.INK, 2)
@@ -101,11 +102,15 @@ local right = Kit.panel(win, 324, 136, 300, 268, 4)
 Kit.stroke(right, hex("#5a7dff"), 2, 0.2)
 Kit.text(win, 338, 146, 270, 28, "SECTORS", 21, { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.8, gradient = ColorSequence.new(hex("#e8f2ff"), hex("#7db4ff")) })
 local sectorRows = {}
+-- (2.1: sector 1 lists its 4 rooms on two lines, so its row is taller)
+local ROW_H = { 62, 48, 38, 38, 38 }
+local rowY = 178
 for i, sec in ipairs(Econ.Sectors) do
-	local y = 178 + (i - 1) * 45
+	local y = rowY
+	rowY += ROW_H[i] or 38
 	local icon = Kit.icon(win, sec.icon, 334, y - 2, 44, nil, { ZIndex = 8 })
 	local name = Kit.text(win, 382, y, 150, 22, (if i <= 4 then i .. "  " else "") .. sec.name, Kit.ps(16, 18), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
-	local sys = Kit.text(win, 382, y + 21, 160, 18, sec.system, Kit.ps(11, 14), { ZIndex = 8, TextColor3 = hex("#a99fb8"), stroke = 1 })
+	local sys = Kit.text(win, 382, y + 21, 156, if i == 1 then 36 else 18, sec.system, Kit.ps(12, 14), { ZIndex = 8, TextColor3 = hex("#a99fb8"), stroke = 1, TextWrapped = true })
 	local chip = Kit.box(win, 540, y + 6, 74, 24, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 7 })
 	Kit.corner(chip, 5)
 	Kit.stroke(chip, Kit.INK, 2)
@@ -115,12 +120,17 @@ for i, sec in ipairs(Econ.Sectors) do
 end
 
 local function shown(main: GuiObject, on: boolean) main.Parent.Visible = on end
+local found = 0
 local function refresh()
 	local lit = player:GetAttribute("GalaxyLit") or 0
 	Kit.setText(litText, "GALAXY LIT " .. lit .. "%")
 	litFill.Size = UDim2.fromOffset(math.floor((W - 48) * math.clamp(lit / 100, 0, 1)), 16)
 	litFill.Visible = lit > 0
 	local ignited = (player:GetAttribute("Ignition") or 0) >= 1
+	-- (Forge cores found, for the COMET REACH room %)
+	found = 0
+	local okF, forge = pcall(function() return game:GetService("HttpService"):JSONDecode(player:GetAttribute("Forge") or "{}") end)
+	if okF and type(forge) == "table" and type(forge.cores) == "table" then for _ in pairs(forge.cores) do found += 1 end end
 	-- the checklist (before) / the path (after)
 	Kit.setText(ignTitle, if ignited then "SECTOR 1 LIT" else "IGNITION · EMBER BELT")
 	shown(ignSub, not ignited)
@@ -161,6 +171,12 @@ local function refresh()
 		local dark = i >= 3 or (i == 2 and not ignited)
 		r.icon.ImageColor3 = if dark then Color3.new(0, 0, 0) else Color3.new(1, 1, 1)
 		r.name.TextColor3 = if dark then hex("#8a8296") else Color3.new(1, 1, 1)
+		-- (2.1: its ROOMS with % complete; a locked sector is a dark "?" silhouette)
+		local rooms = Econ.SectorRooms(i, function(a) return player:GetAttribute(a) end, found)
+		local parts = {}
+		for k, room in ipairs(rooms) do table.insert(parts, room.name .. " " .. room.pct .. "%" .. (if k == 2 then "\n" elseif k < #rooms then " · " else "")) end
+		Kit.setText(r.sys, if dark then "? ? ?" elseif #parts > 0 then table.concat(parts) else sec.system)
+		if dark then Kit.setText(r.name, (if i <= 4 then i .. "  " else "") .. "?") end
 	end
 end
 for _, a in ipairs({ "GalaxyLit", "Ignition", "Path", "Supernovas", "CosmicLevel", "Pads", "BestTier" }) do
@@ -210,7 +226,7 @@ local function place()
 	local s = screenScale()
 	local vp = viewport()
 	local small = vp.Y < 500
-	local top = 84 * s
+	local top = 124 * s -- (6 Nov overlap check: under the GALAXY LIT bar + the counter's SUPERNOVA bar)
 	local room = (if small then vp.Y - 6 else vp.Y - 104 * s) - top
 	local want = math.min(Kit.ps(s, 0.85), room / (H + Kit.ps(34, 6)), (vp.X - Kit.ps(24, 8)) / (W + 40))
 	holder.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + 15 * want)

@@ -140,6 +140,89 @@ local function layout()
 	strip.Position = UDim2.fromOffset(math.floor(10 * s), math.floor(vp.Y * 0.5))
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+------------------------------------------------------------------------ #144 the BOOSTS chip + #229 the ACTIVE BOOSTS list (Phase 2.7): on the
+-- right, "BOOSTS x2.30" = every boost of yours added together (#69: same kind adds); a tap opens the list of each one with its
+-- timer (the pass, the potions, the Star Surge, friends, group)
+local Galaxy2 = ReplicatedStorage:WaitForChild("Galaxy")
+local boostRoot = Kit.box(root, 0, 0, 230, 40, { Name = "Boosts", AnchorPoint = Vector2.new(1, 0.5) })
+local bScale = Instance.new("UIScale")
+bScale.Parent = boostRoot
+local bChip = Kit.new("TextButton", { Text = "", AutoButtonColor = false, BackgroundTransparency = 1, Size = UDim2.fromOffset(230, 40), ZIndex = 9 }, boostRoot)
+do
+	local sh = Kit.box(boostRoot, 0, 3, 230, 40, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 1 })
+	Kit.corner(sh, 8)
+	local plate = Kit.box(boostRoot, 0, 0, 230, 40, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 2 })
+	Kit.corner(plate, 8)
+	Kit.stroke(plate, Kit.INK, 2)
+	Kit.grad(plate, hex("#2a2433"), hex("#121016"), 90)
+	local edge = Kit.box(boostRoot, 3, 3, 224, 34, { ZIndex = 3 })
+	Kit.corner(edge, 6)
+	Kit.stroke(edge, hex("#ffb02a"), 1.5, 0.3)
+	Kit.icon(boostRoot, "stardust", -4, -4, 48, Color3.fromRGB(255, 170, 60), { ZIndex = 5 })
+end
+local bText = Kit.text(boostRoot, 44, Kit.ps(9, 8), 180, 22, "BOOSTS x1", Kit.ps(16, 17), { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextColor3 = hex("#ffd84a") })
+local list = Kit.box(boostRoot, 0, 48, 230, 10, { ZIndex = 10, Visible = false })
+local listBg = Kit.box(list, 0, 0, 230, 10, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 10 })
+Kit.corner(listBg, 8)
+Kit.stroke(listBg, hex("#ffb02a"), 2, 0.2)
+local listLines = {}
+for i = 1, 6 do
+	listLines[i] = Kit.text(list, 12, 8 + (i - 1) * 24, 210, 22, "", Kit.ps(14, 16), { ZIndex = 11, FontFace = Kit.FONT_BOLD, stroke = 1.2 })
+end
+local function boostLines(): { string }
+	local out = {}
+	local now = workspace:GetServerTimeNow()
+	local function mmss(t) t = math.max(0, math.floor(t)) return string.format("%d:%02d", t // 60, t % 60) end
+	if player:GetAttribute("Pass_X2Stardust") == true then table.insert(out, "x2 STARDUST PASS  +1x  forever") end
+	for _, p in ipairs(Econ.Potions) do
+		local left = (player:GetAttribute("BoostEnd_" .. p.id) or 0) - now
+		if left > 0 then table.insert(out, p.name .. " POTION  " .. mmss(left)) end
+	end
+	local surge = (Galaxy2:GetAttribute("SurgeUntil") or 0) - now
+	if surge > 0 then table.insert(out, "STAR SURGE  +1x  " .. mmss(surge)) end
+	local friends = math.min(player:GetAttribute("FriendsHere") or 0, Econ.Social.FriendMax)
+	if friends > 0 then table.insert(out, "FRIENDS HERE  +" .. math.floor(friends * Econ.Social.FriendPer * 100 + 0.5) .. "%") end
+	if player:GetAttribute("InGroup") == true then table.insert(out, "GROUP  +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%") end
+	if #out == 0 then table.insert(out, "No boosts right now") end
+	return out
+end
+local function refreshBoosts()
+	local total = player:GetAttribute("BoostTotal") or 1
+	Kit.setText(bText, "BOOSTS x" .. (string.format("%.2f", total):gsub("0+$", ""):gsub("%.$", "")))
+	if list.Visible then
+		local lines = boostLines()
+		for i, l in ipairs(listLines) do Kit.setText(l, lines[i] or "") end
+		listBg.Size = UDim2.fromOffset(230, 12 + #lines * 24)
+	end
+end
+bChip.MouseButton1Click:Connect(function()
+	Kit.sound("tab")
+	list.Visible = not list.Visible
+	refreshBoosts()
+end)
+player:GetAttributeChangedSignal("BoostTotal"):Connect(refreshBoosts)
+task.spawn(function()
+	while true do
+		task.wait(1)
+		refreshBoosts()
+	end
+end)
+local function layoutBoosts()
+	local s = screenScale()
+	local vp = viewport()
+	bScale.Scale = s
+	boostRoot.Position = UDim2.fromOffset(vp.X - math.floor(10 * s), math.floor(vp.Y * 0.42))
+end
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layoutBoosts)
+layoutBoosts()
+refreshBoosts()
+
+-- (6 Nov overlap check: the strip covered the TREE window's left column; it hides while a window is open: GalaxyHUD calls this)
+shared.GalaxyPotionsShow = function(on: boolean)
+	strip.Visible = on
+	boostRoot.Visible = on
+	if not on then list.Visible = false end
+end
 layout()
 
 -- shown / hidden, counts, and the order (only the visible cards, packed from the top)

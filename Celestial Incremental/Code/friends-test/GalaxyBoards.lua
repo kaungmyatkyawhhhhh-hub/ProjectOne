@@ -78,7 +78,8 @@ local fxFolder = Instance.new("Folder")
 fxFolder.Name = "GalaxyBoardFx"
 fxFolder.Parent = workspace
 local TITLE_FONT = Font.fromEnum(Enum.Font.FredokaOne)
-local FIRE = "rbxasset://textures/particles/fire_main.dds"
+-- (the VFX pass, #281: was Roblox's stock fire_main.dds; now our forge_sparks flipbook, looping)
+local FIRE = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("VfxTextures")).add.forge_sparks
 local function fxPart(name: string, size: Vector3, cf: CFrame): Part
 	local p = Instance.new("Part")
 	p.Name = name
@@ -217,6 +218,10 @@ local function decorate(spec, screen: BasePart)
 			table.insert(parts, edge)
 			local e = Instance.new("ParticleEmitter")
 			e.Texture = FIRE
+			e.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
+			e.FlipbookMode = Enum.ParticleFlipbookMode.Loop
+			e.FlipbookFramerate = NumberRange.new(20, 20)
+			e.FlipbookStartRandom = true
 			e.Shape = Enum.ParticleEmitterShape.Box
 			e.EmissionDirection = Enum.NormalId.Bottom
 			e.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 226, 130)), ColorSequenceKeypoint.new(0.25, neon),
@@ -229,7 +234,7 @@ local function decorate(spec, screen: BasePart)
 			e.SpreadAngle = Vector2.new(12, 12)
 			e.Acceleration = Vector3.new(0, 1.5, 0)
 			e.RotSpeed = NumberRange.new(-60, 60)
-			e.Rate = math.floor(d.Magnitude * 14)
+			e.Rate = math.floor(d.Magnitude * 6) -- (was 14 a stud: ~400 alive per board; the 300 budget, #304)
 			e.Parent = edge
 			-- the glow line under the flames
 			local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
@@ -324,6 +329,22 @@ local function build(island)
 		-- (each board its own pointer + canvas; the rest is the island's shared ctx)
 		b.panels[spec.id] = BoardsUI.new(spec.id, gui, spec, setmetatable({ pointer = pointerFor(screen, canvas), size = canvas, world = true }, { __index = ctx }))
 		table.insert(b.fx, decorate(spec, screen))
+		-- (#214, Phase 2.7: on YOUR boards a BEACON over the top lights up while something on it can be bought; Info has none)
+		if mine and spec.id ~= "Info" then
+			local up = screen.CFrame.UpVector
+			local top = screen.Position + up * (screen.Size.Y / 2 + (if spec.pair then 4.2 else 2.2))
+			local beam = fxPart("Beacon", Vector3.new(6, 0.6, 0.6), CFrame.new(top + Vector3.new(0, 3, 0)) * CFrame.Angles(0, 0, math.rad(90)))
+			beam.Shape = Enum.PartType.Cylinder
+			beam.Material = Enum.Material.Neon
+			beam.Color = spec.Neon or Color3.fromRGB(255, 220, 120)
+			local orb = fxPart("BeaconOrb", Vector3.new(1.4, 1.4, 1.4), CFrame.new(top + Vector3.new(0, 6.4, 0)))
+			orb.Shape = Enum.PartType.Ball
+			orb.Material = Enum.Material.Neon
+			orb.Color = beam.Color
+			b.beacons = b.beacons or {}
+			b.beacons[spec.id] = { beam = beam, orb = orb, on = false }
+			table.insert(b.fx, { parts = { beam, orb }, step = function() end })
+		end
 	end
 	-- live numbers: the owner's attributes (Stardust changes every half second: refresh at most 4 times a second)
 	if subject ~= NOBODY then
@@ -384,6 +405,13 @@ RunService.RenderStepped:Connect(function(dt)
 		if doRefresh and b.dirty() then
 			if not b.ctx.picked then b.ctx.sel = defaultSel(b.ctx.subject) end
 			for _, p in pairs(b.panels) do p:refresh() end
+			for id, bc in pairs(b.beacons or {}) do bc.on = b.panels[id] ~= nil and b.panels[id]:buyable() end
+		end
+		-- (the beacons breathe while lit; off = gone. Reduced Motion: steady)
+		for _, bc in pairs(b.beacons or {}) do
+			local a = if not bc.on then 1 elseif Kit.calm() then 0.3 else 0.3 + 0.25 * math.sin(os.clock() * 3)
+			bc.beam.Transparency = a
+			bc.orb.Transparency = if bc.on then a * 0.6 else 1
 		end
 	end
 end)
@@ -420,7 +448,7 @@ end
 -- (on YOUR island) opens its window through Galaxy.OpenWindow (GalaxyHUD)
 if TOUCH then
 	local opener = ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("OpenWindow", 30)
-	local WINDOW = { Tree = { "Tree" }, Info = { "Tree" }, Bodies = { "Upgrades", "BODIES" }, Stars = { "Upgrades", "PERKS" } }
+	local WINDOW = { Tree = { "Tree" }, Info = { "Tree" }, Bodies = { "Upgrades", "BODIES" }, Stars = { "Upgrades", "PERKS" }, ForgeLock = { "Forge" } }
 	local downAt, downPos
 	local function isTap(input: InputObject): boolean
 		return input.UserInputType == Enum.UserInputType.Touch

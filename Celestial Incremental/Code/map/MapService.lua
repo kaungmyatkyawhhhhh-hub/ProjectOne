@@ -35,7 +35,15 @@ if not root or (root:GetAttribute("StandIns") == true and Kit.AllImported()) the
 	root = Builder.Build()
 end
 local islandsFolder = root:WaitForChild("Islands")
+if root:FindFirstChild("Centre") then Builder.FreeBoard(root.Centre) end -- (Phase 2.4: a place built before the board)
 Builder.ClearDecor(root) -- (no crystal in front of a sign, 6 Nov)
+-- (6 Nov: the place's Forge sign was built when the Forge opened at Supernova 3; the builder says IGNITION 1 now)
+do
+	local forgeSign = root:FindFirstChild("Centre") and root.Centre:FindFirstChild("StarForge") and root.Centre.StarForge:FindFirstChild("Sign")
+	for _, l in ipairs(forgeSign and forgeSign:GetDescendants() or {}) do
+		if l:IsA("TextLabel") and l.Text == "SUPERNOVA 3" then l.Text = "IGNITION 1" end
+	end
+end
 
 local remote = Galaxy:FindFirstChild("MapEvent") or Instance.new("RemoteEvent")
 remote.Name = "MapEvent"

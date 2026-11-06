@@ -17,6 +17,8 @@
 --   cfg.veil       how dark the backdrop gets (0-1): default 0.85 on screen-only moments, 0.45 with a world camera move
 --   cfg.keepGuis   { ScreenGui names } that stay on (every other ScreenGui is hidden during a full cutscene, like Sol's)
 --   cfg.audio      false = no riser / boom (the host plays its own, e.g. GalaxySupernova); Cutscene.skip() jumps to the climax
+--   cfg.world      true = the moment is in the WORLD (cfg.camera shows it, e.g. the Forge's anvil): no centre symbol, rings
+--                  or nebula on screen (they would cover it); the words, title, breath, flash and rays stay
 -- BEATS (relative to `drop`): a. contrast opener (world dims, music out, near silence) -> b. build (symbol grows + turns,
 -- rings speed up, glints, speed lines, words) -> c. held breath (0.3 s black frame, silence) -> d. CLIMAX on `drop` (flash,
 -- starburst rays, boom, FOV punch + short shake; the riser is started so that its END lands exactly on `drop`) -> e. tail
@@ -29,7 +31,7 @@ local Lighting = game:GetService("Lighting")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Kit = require(Galaxy:WaitForChild("UIKit"))
 local A = Kit.A
-local FX = A.fx or {}
+local VT = require(Galaxy:WaitForChild("VfxTextures")) -- (the VFX pass: our own ring + streak)
 
 local Cutscene = {}
 local player = Players.LocalPlayer
@@ -117,7 +119,7 @@ function Cutscene.play(cfg)
 	local symbol = image(layer, cfg.symbol or A.icon.sun, { Size = UDim2.fromOffset(unit * 0.12, unit * 0.12), ImageTransparency = 1, ZIndex = 6 })
 	local rings = {}
 	for i = 1, (if mini then 1 else 3) do
-		table.insert(rings, image(layer, FX.ring or A.sparkle, { Size = UDim2.fromOffset(unit * (0.25 + i * 0.12), unit * (0.25 + i * 0.12) * (0.35 + i * 0.12)),
+		table.insert(rings, image(layer, VT.alpha.shockwave_ring, { Size = UDim2.fromOffset(unit * (0.25 + i * 0.12), unit * (0.25 + i * 0.12) * (0.35 + i * 0.12)),
 			ImageColor3 = col:Lerp(Color3.new(1, 1, 1), 0.4), ImageTransparency = 1, ZIndex = 5, Rotation = i * 30 }))
 	end
 	local glints = {}
@@ -129,7 +131,7 @@ function Cutscene.play(cfg)
 	if not mini then
 		for i = 1, 14 do
 			local a = math.rad(i * (360 / 14) + math.random(-8, 8))
-			table.insert(speed, { img = image(layer, FX.streak or A.stripes, { Size = UDim2.fromOffset(unit * 0.35, unit * 0.012), ImageColor3 = col:Lerp(Color3.new(1, 1, 1), 0.5),
+			table.insert(speed, { img = image(layer, VT.alpha.light_streak, { Size = UDim2.fromOffset(unit * 0.35, unit * 0.012), ImageColor3 = col:Lerp(Color3.new(1, 1, 1), 0.5),
 				ImageTransparency = 1, ZIndex = 4, Rotation = math.deg(a), ScaleType = Enum.ScaleType.Stretch }), a = a })
 		end
 	end
@@ -147,6 +149,11 @@ function Cutscene.play(cfg)
 			table.insert(links, { a = a, d = d, f = frame(layer, { BackgroundColor3 = col:Lerp(Color3.new(1, 1, 1), 0.5), AnchorPoint = Vector2.new(0.5, 0.5),
 				Size = UDim2.fromOffset(0, 3), Position = UDim2.fromOffset(a.X, a.Y), Rotation = math.deg(math.atan2(d.Y, d.X)), ZIndex = 7, BackgroundTransparency = 0.1 }) })
 		end
+	end
+	if cfg.world then
+		symbol.Visible = false
+		for _, r in ipairs(rings) do r.Visible = false end
+		for _, n in ipairs(nebulae) do n.Visible = false end
 	end
 	-- the words (build), the title + sub (climax)
 	local wordsHolder = frame(layer, { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ZIndex = 9 })
@@ -170,7 +177,7 @@ function Cutscene.play(cfg)
 	local flash = frame(layer, { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, ZIndex = 21 })
 	local rays = {}
 	for i = 1, (if mini then 8 else 16) do
-		table.insert(rays, image(layer, FX.streak or A.stripes, { Size = UDim2.fromOffset(0, unit * 0.03), ImageColor3 = col:Lerp(Color3.new(1, 1, 1), 0.65),
+		table.insert(rays, image(layer, VT.alpha.light_streak, { Size = UDim2.fromOffset(0, unit * 0.03), ImageColor3 = col:Lerp(Color3.new(1, 1, 1), 0.65),
 			ImageTransparency = 1, ZIndex = 8, Rotation = i * (360 / (if mini then 8 else 16)), ScaleType = Enum.ScaleType.Stretch }))
 	end
 	-- the SKIP (after 1 s)

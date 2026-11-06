@@ -51,24 +51,34 @@ local SHARD_GLOW = Color3.fromRGB(170, 110, 255)
 local NODE_GLOW = { STARDUST = Color3.fromRGB(255, 170, 60), COMETS = Color3.fromRGB(90, 200, 255), PLANETS = Color3.fromRGB(170, 130, 255) }
 local LEFT, RIGHT, CENTRE = Enum.TextXAlignment.Left, Enum.TextXAlignment.Right, Enum.TextXAlignment.Center
 
--- the SHARD TREE's graph (5 Nov, #220): 3 rows x 3 columns on the 550 x 650 screen, under the heading; the hub (your star)
--- bottom centre; each node links to `from`. (A ring-2 node not listed here isn't drawn: add it to GRAPH.)
--- (5 Nov: tiles 120 -> 150 wide so they're >= 44 px on a phone from the spawn, with the bigger pair boards)
-local TILE_W, TILE_H = 156, 128
-local COL_X = { 97, 275, 453 } -- (tile centres)
-local ROW_Y = { 146, 300, 454 } -- (tile tops)
-local GRAPH = {
-	{ id = "Starfire", col = 1, row = 2, from = "hub" },
-	{ id = "StarTier", col = 2, row = 2, from = "hub" },
-	{ id = "HeavyElements", col = 1, row = 1, from = "StarTier" },
-	{ id = "BinaryStar", col = 3, row = 1, from = "StarTier" },
-	{ later = 3, col = 3, row = 2, from = "hub" }, -- (Econ.Ring2Later: AUTOMATION)
-	{ later = 1, col = 1, row = 3, from = "hub" }, -- (COMETS)
-	{ later = 2, col = 3, row = 3, from = "hub" }, -- (FORGE)
-}
-local HUB = { col = 2, row = 3 }
-local function cellCentre(col: number, row: number): Vector2
-	return Vector2.new(COL_X[col], ROW_Y[row] + TILE_H / 2)
+-- the SHARD TREE (Phase 2, 6 Nov: #53-#56 #135 #136): 4 BRANCH columns (Econ.Ring2Branches) on the 550 x 650 screen, each
+-- showing a WINDOW of 3 tiles: the node you're on (+ the one before it) and the next one; nodes further on are a dark "?"
+-- ("show the next 2-3 nodes, the rest ?"). Bottom: the CAPSTONE tile (pick 1 of 3) and BUY ALL AFFORDABLE.
+local TILE_W, TILE_H = 118, 88
+local COL_X = { 80, 210, 340, 470 } -- (tile centres)
+local ROW_Y = { 178, 300, 422 } -- (tile tops)
+local SLOTS = 3
+-- the nodes of a branch, in order
+local function branchNodes(id: string)
+	local list = {}
+	for _, n in ipairs(Econ.Ring2) do if n.branch == id then table.insert(list, n) end end
+	return list
+end
+-- which nodes a branch shows now: { node or false (a "?") or nil (empty) } x SLOTS
+local function branchWindow(list, r2)
+	local k = #list + 1
+	for i, n in ipairs(list) do
+		if (r2[n.id] or 0) < #n.costs then k = i break end
+	end
+	local start = math.clamp(k - 1, 1, math.max(1, #list - SLOTS + 1))
+	local out = {}
+	for j = 0, SLOTS - 1 do
+		local n = list[start + j]
+		if not n then out[j + 1] = nil
+		elseif start + j > k + 1 and (r2[n.id] or 0) == 0 then out[j + 1] = false
+		else out[j + 1] = n end
+	end
+	return out
 end
 
 ------------------------------------------------------------------------ what a node / body shows
@@ -105,6 +115,7 @@ local function node2Value(node, lv: number): (string, string)
 	elseif e.kind == "heavy" then
 		return if lv >= 1 then "x" .. (1 + e.per) .. "-x" .. (1 + e.per * #Econ.Tiers) else "x1", if maxed then "MAX" else "x1.25 per tier number"
 	end
+	if e.kind == "flag" then return if lv >= 1 then "OWNED" else "NEW", if maxed then "MAX" else "a new feature" end
 	return if lv >= 1 then "OPEN" else "NEW", if maxed then "MAX" else "opens the " .. Econ.Tiers[e.tier + 1].name
 end
 -- the short value on a tree tile (Regrowth's "1.2x")
@@ -206,7 +217,8 @@ end
 function UI.new(id: string, gui: SurfaceGui, spec, ctx)
 	local self = setmetatable({ id = id, gui = gui, spec = spec, ctx = ctx, size = ctx.size, targets = {}, sparks = 0 }, UI)
 	self:shell()
-	if id == "Tree" then self:buildTree()
+	if spec.locked then self:buildLocked()
+	elseif id == "Tree" then self:buildTree()
 	elseif id == "Info" then self:buildInfo()
 	elseif id == "Bodies" then self:buildBodies()
 	else self:buildStars() end
@@ -318,60 +330,64 @@ function UI:buildTree()
 	Kit.icon(gui, "shard", W - 172, 92, 40, nil, { ZIndex = 7 })
 	self.shardsText = Kit.text(gui, W - 134, 98, 96, 34, "0", 28, { ZIndex = 8, stroke = 2, FontFace = Kit.FONT_HEAVY })
 	Kit.box(gui, 40, 136, W - 80, 2, { BackgroundTransparency = 0.6, BackgroundColor3 = WHITE, ZIndex = 6 })
-	-- the links first (under the tiles): a rounded bar from centre to centre
-	local centres = { hub = cellCentre(HUB.col, HUB.row) }
-	for _, g in ipairs(GRAPH) do centres[g.id or g.later] = cellCentre(g.col, g.row) end
-	for _, g in ipairs(GRAPH) do
-		local a, b = centres[g.from], centres[g.id or g.later]
-		local d = b - a
-		local bar = Kit.box(gui, (a.X + b.X) / 2 - d.Magnitude / 2, (a.Y + b.Y) / 2 - 4, d.Magnitude, 8,
-			{ BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 4, Rotation = math.deg(math.atan2(d.Y, d.X)) })
-		Kit.corner(bar, 4)
-		table.insert(self.links, { bar = bar, to = g.id, a = a, b = b })
-	end
-	-- the hub: your star, where every branch starts
-	local hc = centres.hub
-	local hub = Kit.box(gui, hc.X - 50, hc.Y - 50, 100, 100, { BackgroundTransparency = 0, BackgroundColor3 = hex("#1c1430"), ZIndex = 5 })
-	Kit.corner(hub, 50)
-	Kit.stroke(hub, hex("#ffd27a"), 4, 0)
-	Kit.icon(gui, "sun", hc.X - 44, hc.Y - 44, 88, Color3.fromRGB(255, 200, 80), { ZIndex = 6 })
-	-- the nodes: a dark rounded tile, the icon, the value bottom right, the shard cost under it
-	for _, g in ipairs(GRAPH) do
-		local node = g.id and Econ.Ring2ById[g.id]
-		local later = g.later and Econ.Ring2Later[g.later]
-		if not node and not later then continue end
-		local x, y = COL_X[g.col] - TILE_W / 2, ROW_Y[g.row]
-		-- (the 3D board (ctx.world): dark fills fully opaque, 5 Nov faded boards)
-		local tile = Kit.box(gui, x, y, TILE_W, TILE_H, { BackgroundTransparency = if self.ctx.world then 0 else 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
-		Kit.corner(tile, 18)
-		local st = Kit.stroke(tile, hex("#4b4170"), 3, 0.25)
-		local img = Kit.icon(gui, if node then node.icon else later.icon, x + (TILE_W - 88) / 2, y + 6, 88, nil, { ZIndex = 6 })
-		local value = Kit.text(gui, x, y + TILE_H - 40, TILE_W - 10, 36, "", 30, { ZIndex = 8, TextXAlignment = RIGHT, stroke = 2.2, FontFace = Kit.FONT_HEAVY })
-		local costIcon = Kit.icon(gui, "shard", x + 12, y + TILE_H + 6, 26, nil, { ZIndex = 6 })
-		local cost = Kit.text(gui, x + 40, y + TILE_H + 4, TILE_W + 20, 30, "", 24, { ZIndex = 6, stroke = 1.8 })
-		local t = { node = node, later = later, tile = tile, stroke = st, img = img, value = value, costIcon = costIcon, cost = cost, x = x, y = y }
-		if node and #node.costs > 1 then
-			-- (a node with levels: "2/5" in the top-left corner)
-			t.level = Kit.text(gui, x + 8, y + 4, 60, 26, "", Kit.ps(18, 22), { ZIndex = 8, stroke = 1.8, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#d9c2ff") })
+	for c, b in ipairs(Econ.Ring2Branches) do
+		local cx = COL_X[c]
+		-- the branch name over its column
+		Kit.text(gui, cx - 64, 146, 128, 26, b.name, Kit.ps(19, 22), { ZIndex = 8, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.8, TextColor3 = b.colour })
+		-- the links between the slots (under the tiles)
+		for r = 1, SLOTS - 1 do
+			local bar = Kit.box(gui, cx - 4, ROW_Y[r] + TILE_H, 8, ROW_Y[r + 1] - ROW_Y[r] - TILE_H, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 4 })
+			Kit.corner(bar, 4)
+			table.insert(self.links, { bar = bar, col = c, slot = r + 1, a = Vector2.new(cx, ROW_Y[r] + TILE_H), b = Vector2.new(cx, ROW_Y[r + 1]) })
 		end
-		if later then
-			-- (a branch not in the game yet: a big "?" over the silhouette)
-			Kit.text(gui, x, y + 18, TILE_W, 70, "?", 56, { ZIndex = 8, TextXAlignment = CENTRE, stroke = 2.4, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#8a8296") })
-		end
-		if node then
-			-- a tap SELECTS the node (INFO shows it and buys it); it never buys and never opens a window
+		for r = 1, SLOTS do
+			local x, y = cx - TILE_W / 2, ROW_Y[r]
+			-- (the 3D board (ctx.world): dark fills fully opaque, 5 Nov faded boards)
+			local tile = Kit.box(gui, x, y, TILE_W, TILE_H, { BackgroundTransparency = if self.ctx.world then 0 else 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
+			Kit.corner(tile, 16)
+			local st = Kit.stroke(tile, hex("#4b4170"), 3, 0.25)
+			local img = Kit.icon(gui, "sun", x + (TILE_W - 62) / 2, y + 4, 62, nil, { ZIndex = 6 })
+			local value = Kit.text(gui, x, y + TILE_H - 30, TILE_W - 8, 28, "", Kit.ps(22, 24), { ZIndex = 8, TextXAlignment = RIGHT, stroke = 2, FontFace = Kit.FONT_HEAVY })
+			local q = Kit.text(gui, x, y + 10, TILE_W, 60, "?", 50, { ZIndex = 8, TextXAlignment = CENTRE, stroke = 2.4, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#8a8296") })
+			local costIcon = Kit.icon(gui, "shard", x + 4, y + TILE_H + 3, 22, nil, { ZIndex = 6 })
+			local cost = Kit.text(gui, x + 28, y + TILE_H + 2, TILE_W, 24, "", Kit.ps(18, 20), { ZIndex = 6, stroke = 1.6 })
+			local level = Kit.text(gui, x + 6, y + 3, 60, 22, "", Kit.ps(16, 19), { ZIndex = 8, stroke = 1.6, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#d9c2ff") })
+			local t = { col = c, slot = r, tile = tile, stroke = st, img = img, value = value, q = q, costIcon = costIcon, cost = cost, level = level, x = x, y = y }
+			-- a tap SELECTS the node shown (INFO shows it and buys it); never buys, never opens a window
 			local hit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, AutoButtonColor = false, Position = UDim2.fromOffset(x, y),
-				Size = UDim2.fromOffset(TILE_W, TILE_H + 34), ZIndex = 9 }, gui)
+				Size = UDim2.fromOffset(TILE_W, TILE_H + 26), ZIndex = 9 }, gui)
 			tap(hit, function()
+				if not t.node then return end
 				self.ctx.sound("tab")
-				self.ctx.select("node2", node.id)
+				self.ctx.select("node2", t.node.id)
 			end, noDrag)
-			hit.MouseEnter:Connect(function() tile.BackgroundColor3 = hex("#251f3a") end)
-			hit.MouseLeave:Connect(function() tile.BackgroundColor3 = hex("#130f1e") end)
-			self.targets["R2_" .. node.id] = hit
+			hit.MouseEnter:Connect(function() if t.node then tile.BackgroundColor3 = hex("#251f3a") end end)
+			hit.MouseLeave:Connect(function() tile.BackgroundColor3 = if t.locked then hex("#0d0a15") else hex("#130f1e") end)
+			t.hit = hit
+			table.insert(self.tiles, t)
 		end
-		table.insert(self.tiles, t)
 	end
+	-- the CAPSTONE (pick 1 of 3): a wide tile bottom left; a tap selects it (INFO shows the 3 choices)
+	local cap = Kit.box(gui, 30, 548, 300, 76, { BackgroundTransparency = if self.ctx.world then 0 else 0.05, BackgroundColor3 = hex("#130f1e"), ZIndex = 5 })
+	Kit.corner(cap, 16)
+	self.capStroke = Kit.stroke(cap, hex("#ffd27a"), 3, 0.2)
+	self.capIcon = Kit.icon(gui, "sun", 36, 550, 72, Color3.fromRGB(255, 200, 80), { ZIndex = 6 })
+	Kit.text(gui, 112, 556, 214, 26, "CAPSTONE", Kit.ps(18, 20), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextColor3 = hex("#ffd27a") })
+	self.capText = Kit.text(gui, 112, 584, 214, 30, "PICK 1 OF 3", Kit.ps(20, 22), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.8, TextScaled = true })
+	local capHit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, AutoButtonColor = false, Position = UDim2.fromOffset(30, 548),
+		Size = UDim2.fromOffset(300, 76), ZIndex = 9 }, gui)
+	tap(capHit, function()
+		self.ctx.sound("tab")
+		self.ctx.select("cap", "cap")
+	end, noDrag)
+	self.targets.Capstone = capHit
+	-- BUY ALL AFFORDABLE (#136): every ring-2 level you can pay for, cheapest first (the server picks)
+	self.buyAll = action(gui, 346, 552, 176, 68, Kit.ps(20, 22))
+	tap(self.buyAll.button, function()
+		if self.buyAll.state ~= "buy" then self.ctx.sound("no") return end
+		self:buy("BuyRing2All", nil)
+	end, noDrag)
+	self.targets.BuyAll = self.buyAll.button
 end
 -- #284: a node bought (from INFO's BUY, on the board or the T window): its tile flashes white, its line DRAWS from the node it
 -- comes from to it (gold), 10 sparkles round it
@@ -391,7 +407,7 @@ function UI:celebrate(kind: string, id: string)
 		end
 	end
 	for _, l in ipairs(self.links or {}) do
-		if l.to == id and l.a and l.b then
+		if l.to and l.to == id and l.a and l.b then
 			-- a gold line growing from the start to the end over 0.35 s, over the link, then fading into it
 			local d = l.b - l.a
 			local len = d.Magnitude
@@ -419,41 +435,81 @@ function UI:refreshTree()
 	local r2, sh, novas = self:ring2(), self:shards(), self:novas()
 	local sel = self.ctx.sel
 	Kit.setText(self.shardsText, fmt(sh))
-	for _, t in ipairs(self.tiles) do self:refreshTile2(t, r2, sh, novas, sel) end
-	-- a link: bright once its node is bought, half lit while you can buy it, dark while it's locked
+	local windows = {}
+	for c, b in ipairs(Econ.Ring2Branches) do windows[c] = branchWindow(branchNodes(b.id), r2) end
+	for _, t in ipairs(self.tiles) do
+		local n = windows[t.col][t.slot]
+		t.node = n or nil
+		self:refreshTile2(t, r2, sh, novas, sel, n)
+	end
+	-- a link: bright once the node under it is bought, half lit while you can buy it, dark while it's locked
 	for _, l in ipairs(self.links) do
-		local node = l.to and Econ.Ring2ById[l.to]
+		local node = windows[l.col][l.slot]
+		l.to = if node then node.id else nil
 		local lv = if node then r2[node.id] or 0 else 0
-		local open = node ~= nil and node2Lock(node, r2, novas) == nil
-		l.bar.BackgroundColor3 = if lv > 0 then self.spec.Neon:Lerp(WHITE, 0.35) elseif open then self.spec.Neon else hex("#2e2840")
+		local open = node and node2Lock(node, r2, novas) == nil
+		local colour = Econ.Ring2Branches[l.col].colour
+		l.bar.Visible = node ~= nil or node == false
+		l.bar.BackgroundColor3 = if lv > 0 then colour:Lerp(WHITE, 0.35) elseif open then colour else hex("#2e2840")
 		l.bar.BackgroundTransparency = if lv > 0 then 0 elseif open then 0.45 else 0.15
 	end
-end
--- a ring-2 tile: a silhouette with what opens it while locked (and for the branches not in the game yet); else its value,
--- its level (2/5) and the next level's shard cost under it
-function UI:refreshTile2(t, r2, sh: number, novas: number, sel)
-	local node = t.node
-	local lv = if node then r2[node.id] or 0 else 0
-	local reason = if node then node2Lock(node, r2, novas) else t.later.lockedText
-	local locked = reason ~= nil and lv == 0
-	local cost = node and Econ.R2Cost(node.id, lv)
-	local maxed = node ~= nil and cost == nil
-	t.img.ImageColor3 = if locked then Color3.new(0, 0, 0) else WHITE
-	local shadow = t.img.Parent:FindFirstChild("Shadow")
-	if shadow then shadow.Visible = not locked end
-	shown(t.value, not locked)
-	if t.level then
-		shown(t.level, not locked)
-		Kit.setText(t.level, lv .. "/" .. #node.costs)
+	-- the capstone tile + BUY ALL
+	local capId = tostring(self:attr("Capstone") or "")
+	local capDef = Econ.Ring2CapstonesById[capId]
+	Kit.setText(self.capText, if capDef then capDef.name elseif novas < Econ.Ring2CapstoneNovas then "SUPERNOVA " .. Econ.Ring2CapstoneNovas else "PICK 1 OF 3")
+	self.capIcon.Image = A.icon[if capDef then capDef.icon else "sun"] or ""
+	self.capStroke.Color = if sel.kind == "cap" then WHITE elseif capDef then hex("#7dff9a") else hex("#ffd27a")
+	self.capStroke.Thickness = if sel.kind == "cap" then 4.5 else 3
+	local any = false
+	for _, node in ipairs(Econ.Ring2) do
+		local c = Econ.R2Cost(node.id, r2[node.id] or 0)
+		if c and c <= sh and node2Lock(node, r2, novas) == nil then any = true break end
 	end
+	self.buyAll.set(if any and self:can() then "buy" else "no", "BUY ALL")
+end
+-- a ring-2 tile: the node in this slot (nil = empty slot, false = a "?" further on); a silhouette with what opens it while
+-- locked; else its value, its level (2/5) and the next level's shard cost under it
+function UI:refreshTile2(t, r2, sh: number, novas: number, sel, node)
+	local empty, hidden = node == nil, node == false
+	t.tile.Visible = not empty
+	t.hit.Visible = not empty
+	shown(t.q, hidden)
+	if empty or hidden then
+		t.img.Parent.Visible = false
+		shown(t.value, false)
+		shown(t.level, false)
+		shown(t.cost, false)
+		t.costIcon.Parent.Visible = false
+		t.locked = true
+		t.stroke.Color = hex("#2e2840")
+		t.stroke.Thickness = 3
+		t.tile.BackgroundTransparency = if self.ctx.world then 0 else 0.4
+		t.tile.BackgroundColor3 = hex("#0d0a15")
+		return
+	end
+	t.img.Parent.Visible = true
+	t.img.Image = A.icon[node.icon] or ""
+	local sh2 = t.img.Parent:FindFirstChild("Shadow")
+	if sh2 then sh2.Image = t.img.Image end
+	local lv = r2[node.id] or 0
+	local reason = node2Lock(node, r2, novas)
+	local locked = reason ~= nil and lv == 0
+	t.locked = locked
+	local cost = Econ.R2Cost(node.id, lv)
+	local maxed = cost == nil
+	t.img.ImageColor3 = if locked then Color3.new(0, 0, 0) else WHITE
+	if sh2 then sh2.Visible = not locked end
+	shown(t.value, not locked)
+	shown(t.level, not locked and #node.costs > 1)
+	Kit.setText(t.level, lv .. "/" .. #node.costs)
 	if not locked then Kit.setText(t.value, if lv > 0 then (node2Value(node, lv)) else tileValue(node)) end
 	t.costIcon.Parent.Visible = not locked and not maxed
 	shown(t.cost, true)
 	if locked then
 		Kit.setText(t.cost, reason)
 		t.cost.TextColor3 = GREY_TEXT
-		textSize(t.cost, if #reason > 11 then Kit.ps(16, 19) else Kit.ps(20, 22))
-		t.cost.Parent.Position = UDim2.fromOffset(t.x - 6, t.y + TILE_H + 6)
+		textSize(t.cost, if #reason > 11 then Kit.ps(13, 19) else Kit.ps(16, 20)) -- (#138: >= 14 px on a phone)
+		t.cost.Parent.Position = UDim2.fromOffset(t.x - 4, t.y + TILE_H + 3)
 	elseif maxed then
 		Kit.setText(t.cost, "MAX")
 		t.cost.TextColor3 = GREEN_TEXT
@@ -462,10 +518,10 @@ function UI:refreshTile2(t, r2, sh: number, novas: number, sel)
 		t.cost.TextColor3 = if sh >= cost then WHITE else RED_TEXT
 	end
 	if not locked then
-		textSize(t.cost, 24)
-		t.cost.Parent.Position = UDim2.fromOffset(t.x + (if maxed then 30 else 40), t.y + TILE_H + 4)
+		textSize(t.cost, Kit.ps(18, 20))
+		t.cost.Parent.Position = UDim2.fromOffset(t.x + (if maxed then 8 else 28), t.y + TILE_H + 2)
 	end
-	local selected = node ~= nil and sel.kind == "node2" and sel.key == node.id
+	local selected = sel.kind == "node2" and sel.key == node.id
 	t.stroke.Color = if selected then WHITE elseif maxed then hex("#7dff9a") elseif locked then hex("#2e2840")
 		elseif sh >= cost then GOLD_TEXT else hex("#6a4fa8")
 	t.stroke.Thickness = if selected then 4.5 else 3
@@ -476,7 +532,9 @@ function UI:refreshTile2(t, r2, sh: number, novas: number, sel)
 		t.tile.BackgroundColor3 = if locked then hex("#0d0a15") else hex("#130f1e")
 	else
 		t.tile.BackgroundTransparency = if locked then 0.4 else 0.05
+		t.tile.BackgroundColor3 = if locked then hex("#0d0a15") else hex("#130f1e")
 	end
+	self.targets["R2_" .. node.id] = t.hit
 end
 
 ------------------------------------------------------------------------ INFO (the TREE's partner only, #221)
@@ -510,12 +568,29 @@ function UI:buildInfo()
 	ui.cost = Kit.text(page, ui.costX, ui.costY, W - 120, 38, "", 32, { ZIndex = 6, stroke = 2 })
 	tap(ui.buy.button, function()
 		local node = if self.ctx.sel.kind == "node2" then Econ.Ring2ById[self.ctx.sel.key] else nil
+		local autoKey = node and ({ AutoBuy1 = "Buy1", AutoBuy2 = "Buy2" })[node.id]
+		if autoKey and (self:ring2()[node.id] or 0) >= 1 then
+			if self:can() then self:buy("AutoToggle", autoKey) end
+			return
+		end
 		if node then self:node2Once(node) else self.ctx.sound("no") end
 	end, function() return false end)
 	self.targets.Buy = ui.buy.button
 	-- nothing selected
 	ui.empty = Kit.text(gui, 40, 250, W - 80, 130, "Tap a node on the TREE", 46, { ZIndex = 8, TextXAlignment = CENTRE, TextYAlignment = Enum.TextYAlignment.Center,
 		TextWrapped = true, FontFace = Kit.FONT_HEAVY, stroke = 2.6 })
+	-- (the CAPSTONE: three choice buttons where BUY is; the first pick costs shards, a switch is free after a Supernova)
+	ui.caps = {}
+	local cw = (W - 72 - 16) / 3
+	for i, c in ipairs(Econ.Ring2Capstones) do
+		local b = action(page, 36 + (i - 1) * (cw + 8), 500, cw, 78, Kit.ps(19, 21))
+		b.label.TextWrapped = true
+		tap(b.button, function()
+			if b.state ~= "buy" then self.ctx.sound("no") return end
+			self:buy("PickCapstone", c.id)
+		end, function() return false end)
+		ui.caps[i] = b
+	end
 end
 local function setIcon(ui, name: string, glow: Color3)
 	ui.icon.Image = A.icon[name] or ""
@@ -529,14 +604,23 @@ function UI:refreshInfo()
 	local ui = self.ui
 	local sel = self.ctx.sel
 	local node = if sel.kind == "node2" then Econ.Ring2ById[sel.key] else nil
-	ui.page.Visible = node ~= nil
-	shown(ui.empty, node == nil)
+	local isCap = sel.kind == "cap"
+	ui.page.Visible = node ~= nil or isCap
+	shown(ui.empty, node == nil and not isCap)
+	for _, b in ipairs(ui.caps) do b.show(isCap) end
+	ui.buy.show(not isCap)
+	for _, l in ipairs({ ui.level, ui.value, ui.step, ui.prog, ui.tier }) do shown(l, not isCap) end
+	-- (the capstone's 3 lines need the room the tier line + bar used)
+	ui.desc.Parent.Size = UDim2.fromOffset(ui.desc.Parent.Size.X.Offset, if isCap then 160 else 64)
+	ui.fill.Parent.Visible = not isCap
+	if isCap then self:refreshCapstone() return end
 	if not node then return end
 	local r2 = self:ring2()
 	local lv = r2[node.id] or 0
 	local cost = Econ.R2Cost(node.id, lv)
 	local reason = node2Lock(node, r2, self:novas())
 	setIcon(ui, node.icon, SHARD_GLOW)
+	Kit.setText(ui.tier, "RING 2 [SHARDS] · " .. (node.branch or ""))
 	Kit.setText(ui.name, node.name)
 	setGradient(ui.name, hex("#f3eaff"), hex("#b49bff"))
 	Kit.setText(ui.level, "LEVEL " .. lv .. " / " .. #node.costs)
@@ -550,8 +634,14 @@ function UI:refreshInfo()
 	ui.fill.Visible = fill > 0
 	local costText, costCan = nil, false
 	local sh = self:shards()
+	local autoKey = ({ AutoBuy1 = "Buy1", AutoBuy2 = "Buy2" })[node.id]
 	if not self:can() then
 		ui.buy.set("no", "VISIT")
+	elseif autoKey and lv >= 1 then
+		-- (an AUTO-BUY you own: the button switches it on / off)
+		local on = self:attr("Auto_" .. autoKey) ~= false
+		ui.buy.set(if on then "buy" else "no", if on then "AUTO: ON" else "AUTO: OFF")
+		costText = "tap to switch"
 	elseif not cost then
 		ui.buy.set("owned", "MAX")
 	elseif reason then
@@ -563,6 +653,33 @@ function UI:refreshInfo()
 	end
 	self:infoCost(costText, costCan)
 end
+-- the CAPSTONE page: the 3 choices (yours = OWNED), what each does, the price / the free switch
+function UI:refreshCapstone()
+	local ui = self.ui
+	local capId = tostring(self:attr("Capstone") or "")
+	local swap = self:attr("CapSwap") == true
+	local novas, sh = self:novas(), self:shards()
+	setIcon(ui, if Econ.Ring2CapstonesById[capId] then Econ.Ring2CapstonesById[capId].icon else "sun", Color3.fromRGB(255, 200, 80))
+	Kit.setText(ui.name, "CAPSTONE")
+	setGradient(ui.name, hex("#fff1c0"), hex("#ffb02a"))
+	local lines = {}
+	for _, c in ipairs(Econ.Ring2Capstones) do table.insert(lines, c.name .. ": " .. c.desc) end
+	Kit.setText(ui.desc, table.concat(lines, "\n"))
+	local text, can = nil, false
+	for i, c in ipairs(Econ.Ring2Capstones) do
+		local b = ui.caps[i]
+		if not self:can() then b.set("no", c.name)
+		elseif c.id == capId then b.set("owned", c.name)
+		elseif novas < Econ.Ring2CapstoneNovas then b.set("no", c.name)
+		elseif capId == "" then b.set(if sh >= Econ.Ring2CapstoneShards then "buy" else "no", c.name)
+		else b.set(if swap then "buy" else "no", c.name) end
+	end
+	if novas < Econ.Ring2CapstoneNovas then text = "SUPERNOVA " .. Econ.Ring2CapstoneNovas
+	elseif capId == "" then text, can = fmt(Econ.Ring2CapstoneShards), sh >= Econ.Ring2CapstoneShards
+	elseif swap then text = "FREE SWITCH NOW"
+	else text = "switch after your next Supernova" end
+	self:infoCost(text, can)
+end
 -- the cost under BUY (a number = with the shard icon; words = grey, no icon)
 function UI:infoCost(text: string?, can: boolean)
 	local ui = self.ui
@@ -572,6 +689,69 @@ function UI:infoCost(text: string?, can: boolean)
 	Kit.setText(ui.cost, text or "")
 	ui.cost.TextColor3 = if not isNumber then GREY_TEXT elseif can then WHITE else RED_TEXT
 	ui.cost.Parent.Position = UDim2.fromOffset(if isNumber then ui.costX else 40, ui.costY)
+end
+
+------------------------------------------------------------------------ #215 a LOCKED board (STAR FORGE / BLACK HOLE): a padlock + the
+-- unlock text; once it opens (spec.locked.attr >= need), an OPEN button for its window (Galaxy.OpenWindow, GalaxyHUD)
+function UI:buildLocked()
+	local W, H = self.size.X, self.size.Y
+	local L = self.spec.locked
+	local gui = self.gui
+	self.lockIcon = Kit.icon(gui, "lock", W / 2 - 50, 66, 100, nil, { ZIndex = 6 })
+	self.kindIcon = Kit.icon(gui, L.icon, W / 2 - 50, 60, 100, self.spec.Neon, { ZIndex = 6 })
+	self.lockText = Kit.text(gui, 10, H - 70, W - 20, 30, L.text, 24, { ZIndex = 8, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2, TextColor3 = GREY_TEXT })
+	self.openBtn = action(gui, 40, H - 62, W - 80, 48, 26)
+	tap(self.openBtn.button, function()
+		if not self:can() or not L.window then self.ctx.sound("no") return end
+		local opener = ReplicatedStorage:FindFirstChild("Galaxy") and ReplicatedStorage.Galaxy:FindFirstChild("OpenWindow")
+		if opener then self.ctx.sound("open") opener:Fire(L.window) end
+	end, function() return false end)
+end
+function UI:refreshLocked()
+	local L = self.spec.locked
+	local open = L.attr ~= nil and (tonumber(self:attr(L.attr)) or 0) >= (L.need or 1)
+	self.lockIcon.Parent.Visible = not open
+	self.kindIcon.Parent.Visible = open
+	shown(self.lockText, not open)
+	self.openBtn.show(open)
+	if open then self.openBtn.set(if self:can() then "buy" else "no", if self:can() then "OPEN" else "VISIT") end
+end
+-- #214: is there something to buy on this board right now? (its beacon lights up)
+function UI:buyable(): boolean
+	if not self:can() then return false end
+	if self.spec.locked then
+		local L = self.spec.locked
+		return L.attr ~= nil and (tonumber(self:attr(L.attr)) or 0) >= (L.need or 1) and (tonumber(self:attr("Essence")) or 0) >= Econ.Forge.RollCost
+	end
+	if self.id == "Tree" then
+		local r2, sh, novas = self:ring2(), self:shards(), self:novas()
+		for _, node in ipairs(Econ.Ring2) do
+			local c = Econ.R2Cost(node.id, r2[node.id] or 0)
+			if c and c <= sh and node2Lock(node, r2, novas) == nil then return true end
+		end
+		return false
+	elseif self.id == "Bodies" then
+		local sd, perks = tonumber(self:attr("Stardust")) or 0, self:perks()
+		local n = {}
+		for _, node in ipairs(Econ.Ring1) do n[node.id] = self:attr("Node_" .. node.id) == true end
+		for k = 0, #Econ.Tiers - 1 do
+			local lv = tonumber(self:attr("Own" .. (k + 1))) or 0
+			if Econ.Unlocked(k, n, self:ring2()) then
+				if Econ.Cost(k, lv, perks) <= sd then return true end
+			else
+				local node = unlockNode(k)
+				if node and (not node.requires or n[node.requires]) and node.cost <= sd then return true end
+			end
+		end
+		return false
+	elseif self.id == "Stars" then
+		local xp, level, perks = self:xp(), self:level(), self:perks()
+		for _, p in ipairs(Econ.Perks) do
+			local lv = perks[p.id] or 0
+			if level >= p.opens and lv < Econ.PerkMax and Econ.PerkCost(lv) <= xp then return true end
+		end
+	end
+	return false
 end
 
 ------------------------------------------------------------------------ BODIES (Regrowth's MACHINES; feel pass: levels + copies)
@@ -822,7 +1002,8 @@ end
 
 ------------------------------------------------------------------------
 function UI:refresh()
-	if self.id == "Tree" then self:refreshTree()
+	if self.spec.locked then self:refreshLocked()
+	elseif self.id == "Tree" then self:refreshTree()
 	elseif self.id == "Info" then self:refreshInfo()
 	elseif self.id == "Bodies" then self:refreshBodies()
 	else self:refreshStars() end

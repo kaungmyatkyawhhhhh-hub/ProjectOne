@@ -19,8 +19,19 @@ Config.Passes = {
 	},
 }
 
+-- DEVELOPER PRODUCTS (Phase 2, 6 Nov): granted ONLY in GalaxyStoreService's ProcessReceipt, saved first, never twice (#454).
+-- id 0 = not created in Creator Hub yet: the game hides that button. PRICES PROPOSED (owner creates them):
+Config.Products = {
+	-- the return screen's "x2" (#411): doubles what you earned while away. 25 R$: a small impulse buy (Depth's cheapest
+	-- offer is 32 R$); it never sells a currency that buys luck
+	OfflineX2 = { id = 0, name = "x2 Offline Earnings", price = 25 },
+}
+
 Config.Badges = {
 	AlphaPlayer = 4501804696776519, -- the badge id from Creator Hub (created 4 Nov)
+	-- (Phase 2.5: a complete row of the Forge book; 0 = not created yet, nothing is awarded)
+	CollectionCommon = 0, CollectionUncommon = 0, CollectionRare = 0, CollectionEpic = 0,
+	CollectionLegendary = 0, CollectionMythic = 0, CollectionCelestial = 0,
 }
 
 return Config

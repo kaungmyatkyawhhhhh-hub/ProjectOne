@@ -66,6 +66,9 @@ MapConfig.BlackHole = {
 MapConfig.Leaderboard = { Width = 24, Height = 12, Bottom = 3, Rows = 10 } -- (TOP SUPERNOVAS: 2 columns of 5, overnight part 3)
 -- PLAYERS NEAR YOU (overnight part 3): its own board next to the leaderboard wall (it shared the wall before and was too
 -- small to read on a phone): 5 above you, you (gold), 5 below; on the floor between the wall's end and the star-chart gap
+-- the FREE REWARDS board (Phase 2.4, 6 Nov; Depth's lobby board): on the plaza between the Star Surge (45) and PLAYERS NEAR YOU
+-- (110), facing the Core; its screen is drawn by GalaxyDaily
+MapConfig.FreeBoard = { angle = 80, dist = 46, Width = 11, Height = 7.5, Bottom = 3 }
 MapConfig.NearBoard = { angle = 110, dist = 46, Width = 13, Height = 15, Bottom = 3, Rows = 11 }
 MapConfig.Sector2 = {
 	-- the arch scaled uniformly so the 10-wide bridge fits through it (the kit arch's opening is 74% of its width): 14.2 wide,
@@ -173,6 +176,13 @@ MapConfig.Boards = {
 			Style = "Neon", Neon = Color3.fromRGB(190, 110, 255) },
 		{ id = "Stars", title = "PERKS", At = Vector3.new(0, 0, 23), Width = 14, Height = 8, Tilt = 10, Bottom = 2.6,
 			Style = "Neon", Flames = true, Neon = Color3.fromRGB(255, 176, 42), Neon2 = Color3.fromRGB(170, 90, 255) },
+		-- (Phase 2.7 #215: the STAR FORGE + BLACK HOLE boards, small, in the corners between the pair and the side boards;
+		-- a padlock + what opens them; the FORGE one opens the Forge window from IGNITION 1. Checked clear of every piece +
+		-- pad by the 6 Nov placement scan)
+		{ id = "ForgeLock", title = "STAR FORGE", At = Vector3.new(17, 0, -19), Width = 6, Height = 4, Tilt = 0, Bottom = 1.6,
+			Neon = Color3.fromRGB(255, 200, 70), locked = { text = "IGNITION 1", attr = "Ignition", need = 1, window = "Forge", icon = "forge" } },
+		{ id = "BlackHoleLock", title = "BLACK HOLE", At = Vector3.new(17, 0, 19), Width = 6, Height = 4, Tilt = 0, Bottom = 1.6,
+			Neon = Color3.fromRGB(170, 90, 255), locked = { text = "100K SHARDS · LATER", icon = "gear" } },
 	},
 	-- the angular neon frame (Style "Neon": Bodies, Star Upgrades), round the screen: its bottom corners Low out and down, its
 	-- top corners Wide out and High up (wider at the top, like Regrowth's Machines board)

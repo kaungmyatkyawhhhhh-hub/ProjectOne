@@ -25,40 +25,116 @@ local tags = {} -- [Player] = BillboardGui
 -- (feel pass, 5 Nov: the rank = the COSMIC LEVEL's name + the Supernovas, "FLARE III · ✦12", for everyone from the start;
 -- the colour = the level's band)
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
+-- (6 Nov, LUMI + RANK TITLE ART, #271 #339 #396): the rank is a PLATE (RankPlate: the rank's banner, its emblem in the
+-- slot, the title in Luckiest Guy) + your Supernovas (a sparkle + the count) + a Forge COLLECTOR title under it. Sized in
+-- PIXELS: readable at 60 studs and more; past FAR studs only the emblem shows
+local RankPlate = require(Galaxy:WaitForChild("RankPlate"))
+local Vfx = require(Galaxy:WaitForChild("VfxLibrary"))
+local FAR = 140
+local tagParts = {} -- [BillboardGui] = { full, far, head }
+local function plateH(): number
+	return if Vfx.phone() then 26 else 30
+end
 local function build(p: Player)
-	if tags[p] then tags[p]:Destroy() tags[p] = nil end
+	if tags[p] then tagParts[tags[p]] = nil tags[p]:Destroy() tags[p] = nil end
 	local char = p.Character
 	local head = char and char:FindFirstChild("Head")
 	local text = p:GetAttribute("Rank")
 	if not head or type(text) ~= "string" or text == "" then return end
-	local def = { name = text, colour = Econ.LevelBand(tonumber(p:GetAttribute("CosmicLevel")) or 1).colour }
 	local _ = MapConfig
+	local base, novas = string.match(text, "^(.-)%s*·%s*✦(%d+)$")
+	base = base or text
+	local key = RankPlate.keyOf(base)
+	local h = plateH()
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "Rank_" .. p.Name
 	bb.Adornee = head
-	bb.Size = UDim2.fromScale(5.2, 0.8) -- (studs: the name + the Supernovas; smaller than before: it shows from the start now)
 	bb.StudsOffsetWorldSpace = REST
 	bb.LightInfluence = 0
-	bb.MaxDistance = 90
+	bb.MaxDistance = 400
 	bb.ResetOnSpawn = false
-	bb.Parent = playerGui
-	-- (the ✦ is our sparkle image: the font has no ✦, Kit.rankLine)
-	local labels = Kit.rankLine(bb, def.name, Kit.FONT_HEAVY)
-	for _, l in ipairs(labels) do
-		local g = Instance.new("UIGradient")
-		g.Color = ColorSequence.new(def.colour:Lerp(Color3.new(1, 1, 1), 0.6), def.colour)
-		g.Rotation = 90
-		g.Parent = l
+	local full = Instance.new("Frame")
+	full.Name = "Full"
+	full.BackgroundTransparency = 1
+	full.Parent = bb
+	local plate = RankPlate.build(full, base, key, h)
+	local w = plate:GetAttribute("W")
+	-- (your Supernovas: our sparkle + the count, right of the plate)
+	if novas then
+		local star = Instance.new("ImageLabel")
+		star.Name = "NovaStar"
+		star.BackgroundTransparency = 1
+		star.Image = Kit.A.sparkle
+		star.ImageColor3 = Color3.fromRGB(255, 216, 74)
+		star.Position = UDim2.fromOffset(w + 1, h * 0.2)
+		star.Size = UDim2.fromOffset(h * 0.6, h * 0.6)
+		star.Parent = full
+		local n = Instance.new("TextLabel")
+		n.Name = "Novas"
+		n.BackgroundTransparency = 1
+		n.FontFace = RankPlate.FONT
+		n.Text = novas
+		n.TextColor3 = Color3.new(1, 1, 1)
+		n.TextSize = math.floor(h * 0.5)
+		n.TextXAlignment = Enum.TextXAlignment.Left
+		n.Position = UDim2.fromOffset(w + h * 0.62, h * 0.24)
+		n.Size = UDim2.fromOffset(h * 0.4 * #novas + 4, h * 0.52)
 		local st = Instance.new("UIStroke")
-		st.Color = Color3.fromRGB(26, 16, 40)
-		st.Thickness = 2.5
-		st.Parent = l
+		st.Color, st.Thickness = RankPlate.INK, 2
+		st.Parent = n
+		n.Parent = full
+		w += h * 0.62 + h * 0.4 * #novas + 4
 	end
+	-- (Phase 2.5: a Forge COLLECTOR title, when you have one, in a smaller line under the plate)
+	local title = p:GetAttribute("CollectorTitle")
+	local hasTitle = type(title) == "string" and title ~= ""
+	local total = h
+	if hasTitle then
+		local t = Instance.new("TextLabel")
+		t.Name = "Collector"
+		t.BackgroundTransparency = 1
+		t.Position = UDim2.fromOffset(0, h + 1)
+		t.Size = UDim2.fromOffset(w, math.floor(h * 0.5))
+		t.FontFace = RankPlate.FONT
+		t.TextSize = math.floor(h * 0.46)
+		t.Text = title
+		t.TextColor3 = Color3.fromRGB(255, 216, 74)
+		local st = Instance.new("UIStroke")
+		st.Color, st.Thickness = RankPlate.INK, 2
+		st.Parent = t
+		t.Parent = full
+		total += math.floor(h * 0.5) + 1
+	end
+	full.Size = UDim2.fromOffset(w, total)
+	-- the far view: the emblem only (the plate's emblem pokes out of the plate: room for it above / left)
+	local far = RankPlate.emblem(bb, key, h * 1.1)
+	far.Name = "Far"
+	far.Position = UDim2.new(0.5, 0, 0, h * 0.55)
+	far.Visible = false
+	bb.Size = UDim2.fromOffset(w + h * 0.2, total + h * 0.2)
+	full.Position = UDim2.fromOffset(h * 0.1, h * 0.1)
+	bb.Parent = playerGui
 	tags[p] = bb
+	tagParts[bb] = { full = full, far = far, head = head, plate = plate }
 end
+-- (every 0.5 s: past FAR studs a tag shows the emblem only)
+local farCheck = 0
+RunService.Heartbeat:Connect(function(dt)
+	farCheck += dt
+	if farCheck < 0.5 then return end
+	farCheck = 0
+	local cam = workspace.CurrentCamera
+	if not cam then return end
+	for bb, t in pairs(tagParts) do
+		if not bb.Parent or not t.head.Parent then continue end
+		local isFar = (t.head.Position - cam.CFrame.Position).Magnitude > FAR
+		t.full.Visible = not isFar
+		t.far.Visible = isFar
+	end
+end)
 
 ------------------------------------------------------------------------ rank aura (#290)
-local A = require(Galaxy:WaitForChild("UIAssets"))
+local VT = require(Galaxy:WaitForChild("VfxTextures")) -- (the VFX pass: our sparkle_star)
 local AURA_FAR = 60
 -- per tier: rate, alpha (0 = solid), size, brightness, orbit
 local AURA = {
@@ -89,7 +165,7 @@ local function auraOn(model: Model, level: number)
 	local att = Instance.new("Attachment")
 	att.Name = "RankAura"
 	local em = Instance.new("ParticleEmitter")
-	em.Texture = A.fxSparkle
+	em.Texture = VT.add.starburst_twinkle -- (white-cored: takes the band colour)
 	em.Color = ColorSequence.new(colour:Lerp(Color3.new(1, 1, 1), 0.45), colour)
 	em.LightEmission = 1
 	em.Brightness = def.bright
@@ -165,6 +241,7 @@ local function watch(p: Player)
 		auraFor(p)
 	end)
 	p:GetAttributeChangedSignal("Rank"):Connect(function() build(p) end)
+	p:GetAttributeChangedSignal("CollectorTitle"):Connect(function() build(p) end)
 	p:GetAttributeChangedSignal("CosmicLevel"):Connect(function() auraFor(p) end)
 	if p.Character then build(p) auraFor(p) end
 end
@@ -175,17 +252,41 @@ Players.PlayerRemoving:Connect(function(p)
 	if p.Character then auraOff(p.Character) end
 end)
 
--- your rank lands: dropped from high above, a bounce, sparkles round it
+-- your rank lands (after a Supernova, the cinematic calls it): the new EMBLEM scales in, then the PLATE slides in, a burst
+-- of sparkle_star round your head and the rising chime (3 notes; #257 has no sound of its own yet). Reduced Motion: it just shows
 shared.GalaxyRankLand = function()
 	build(player)
 	local bb = tags[player]
-	if not bb then return end
+	local t = bb and tagParts[bb]
+	if not t then return end
+	local head = t.head
+	Vfx.Sparkles(head.Position + Vector3.new(0, 3, 0), 24, Color3.fromRGB(255, 225, 150), 0.7, { mine = true })
+	for k = 0, 2 do task.delay(0.25 + k * 0.1, function() Kit.sound("buyBody", { pitch = 1 + k * 0.26, volume = 0.7 }) end) end
 	if Kit.calm() then return end
-	bb.StudsOffsetWorldSpace = REST + Vector3.new(0, 9, 0)
-	TweenService:Create(bb, TweenInfo.new(0.7, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), { StudsOffsetWorldSpace = REST }):Play()
-	for i = 1, 6 do
-		local s = Kit.sparkle(bb, math.random(0, 100), math.random(0, 20), 12, 0.5 + i * 0.08)
-		s.Position = UDim2.fromScale(math.random(), math.random())
-		task.delay(2.5, function() s:Destroy() end)
+	local em = t.plate:FindFirstChild("Emblem")
+	if em then
+		local sc = Instance.new("UIScale")
+		sc.Scale = 0
+		sc.Parent = em
+		TweenService:Create(sc, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	end
+	local plate, title = t.plate:FindFirstChild("Plate"), t.plate:FindFirstChild("Title")
+	for _, o in ipairs({ plate, title }) do
+		if o then
+			local goal = o.Position
+			o.Position = goal - UDim2.fromOffset(40, 0)
+			local prop = if o:IsA("TextLabel") then "TextTransparency" else "ImageTransparency"
+			o[prop] = 1
+			task.delay(0.25, function()
+				TweenService:Create(o, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = goal, [prop] = 0 }):Play()
+			end)
+		end
+	end
+	local st = title and title:FindFirstChildOfClass("UIStroke")
+	if st then
+		st.Transparency = 1
+		task.delay(0.25, function() TweenService:Create(st, TweenInfo.new(0.3), { Transparency = 0 }):Play() end)
 	end
 end
+-- (Studio test switch: Workspace TestRankLand = any new value plays your rank landing)
+if RunService:IsStudio() then workspace:GetAttributeChangedSignal("TestRankLand"):Connect(function() shared.GalaxyRankLand() end) end

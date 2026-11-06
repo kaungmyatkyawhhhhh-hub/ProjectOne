@@ -47,8 +47,9 @@ local openWindow = Galaxy:FindFirstChild("OpenWindow") or Instance.new("Bindable
 openWindow.Name = "OpenWindow"
 openWindow.Parent = Galaxy
 
--- our own world sparkle (#281, 5 Nov: UI\make_fx_sparkle.py -> UI\roblox\fx_sparkle.png; Studio test upload, re-upload to the group)
-local SPARK = require(Galaxy:WaitForChild("UIAssets")).fxSparkle
+-- every effect: VfxLibrary (the VFX pass, 6 Nov: our own textures, VfxTextures; pooled, budgeted, Reduced Motion aware)
+local Vfx = require(Galaxy:WaitForChild("VfxLibrary"))
+local VT = Vfx.T
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
 local FONT_B = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Bold)
 
@@ -58,68 +59,11 @@ local function tween(o, goal, t, style, dir)
 	return tw
 end
 local function sparkleBurst(at: Vector3, count: number, color: Color3?, size: number?)
-	local host = Instance.new("Part")
-	host.Anchored, host.CanCollide, host.CanQuery, host.CanTouch, host.Transparency = true, false, false, false, 1
-	host.Size = Vector3.new(1, 1, 1)
-	host.CFrame = CFrame.new(at)
-	host.Parent = localFolder
-	local e = Instance.new("ParticleEmitter")
-	e.Texture = SPARK
-	e.Color = ColorSequence.new(color or Color3.fromRGB(255, 230, 160))
-	e.LightEmission = 0.8
-	e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.3, size or 0.6), NumberSequenceKeypoint.new(1, 0) })
-	e.Lifetime = NumberRange.new(0.6, 1.2)
-	e.Speed = NumberRange.new(6, 14)
-	e.SpreadAngle = Vector2.new(180, 180)
-	e.Drag = 3
-	e.Rate = 0
-	e.Parent = host
-	e:Emit(count)
-	task.delay(1.6, function() host:Destroy() end)
+	Vfx.Sparkles(at, count, color, size)
 end
-
--- one burst of any texture (the VFX pass, 5 Nov: each layer its own job; pooled by Emit, the host goes after `life`). o:
--- tex, count, color (Color3 or ColorSequence), size, speed {min, max}, life {min, max}, drag, spread, rot (spin), flip (4x4
--- flipbook), light, accel, align (shards face where they fly), z (light influence 0)
-local FX = UIAssets.fx or {}
-local function fxBurst(at: Vector3, o)
-	local host = Instance.new("Part")
-	host.Anchored, host.CanCollide, host.CanQuery, host.CanTouch, host.Transparency = true, false, false, false, 1
-	host.Size = Vector3.new(1, 1, 1)
-	host.CFrame = CFrame.new(at)
-	host.Parent = localFolder
-	local e = Instance.new("ParticleEmitter")
-	e.Texture = o.tex or SPARK
-	e.Color = if typeof(o.color) == "ColorSequence" then o.color else ColorSequence.new(o.color or Color3.new(1, 1, 1))
-	e.LightEmission = o.light or 0.8
-	e.LightInfluence = 0
-	local sz = o.size or 1
-	e.Size = o.sizeSeq or NumberSequence.new({ NumberSequenceKeypoint.new(0, sz * 0.4), NumberSequenceKeypoint.new(0.2, sz), NumberSequenceKeypoint.new(1, sz * 0.2) })
-	e.Transparency = o.transp or NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.7, 0.2), NumberSequenceKeypoint.new(1, 1) })
-	local life = o.life or { 0.6, 1.2 }
-	e.Lifetime = NumberRange.new(life[1], life[2])
-	local sp = o.speed or { 6, 14 }
-	e.Speed = NumberRange.new(sp[1], sp[2])
-	e.SpreadAngle = Vector2.new(o.spread or 180, o.spread or 180)
-	e.Drag = o.drag or 0
-	e.Acceleration = o.accel or Vector3.zero
-	e.RotSpeed = NumberRange.new(-(o.rot or 0), o.rot or 0)
-	e.Rotation = NumberRange.new(0, 360)
-	if o.align then e.Orientation = Enum.ParticleOrientation.VelocityParallel end
-	if o.flip then
-		e.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
-		e.FlipbookMode = Enum.ParticleFlipbookMode.OneShot
-	end
-	e.Rate = 0
-	e.Parent = host
-	e:Emit(o.count or 10)
-	task.delay(life[2] + 0.5, function() host:Destroy() end)
-end
--- a ring that flashes out flat from `at` (a new body's arrival, a tier-up): the ring texture growing and fading
+-- a ring that flashes out from `at` (a new body's arrival, a tier-up): the shockwave_ring texture growing and fading
 local function ringFlash(at: Vector3, radius: number, color: Color3, t: number?)
-	fxBurst(at, { tex = FX.ring or SPARK, count = 1, color = color, speed = { 0, 0 }, life = { t or 0.45, t or 0.45 }, light = 1,
-		sizeSeq = NumberSequence.new({ NumberSequenceKeypoint.new(0, radius * 0.15), NumberSequenceKeypoint.new(1, radius) }),
-		transp = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.6, 0.3), NumberSequenceKeypoint.new(1, 1) }) })
+	Vfx.Ring(at, radius, color, t or 0.45)
 end
 -- an island owner's rank colour (#298: the Supernova's colour changes with your rank): the band of the rank's first word
 local function rankColour(island): Color3
@@ -152,50 +96,84 @@ local function clearSystem(island)
 	systems[island] = nil
 end
 
+local RankPlate = require(Galaxy:WaitForChild("RankPlate"))
+local PLATE_FAR = 140
+-- (6 Nov, rank title art: the owner's name, then the RANK PLATE (RankPlate: the rank's banner, emblem, title), then a small
+-- line "GALAXY 12% · ✦3"; sized in PIXELS so it reads from the plaza; past PLATE_FAR studs only the emblem)
 local function buildPlate(island, s)
 	local anchor = island:FindFirstChild("Anchor")
 	if not anchor then return end
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "Plate_" .. island.Name
 	gui.Adornee = anchor
-	-- (sized in studs: readable from the centre, ~60 studs, and far plates shrink instead of piling up)
-	gui.Size = UDim2.fromScale(SY.Plate.Width, SY.Plate.Height) -- (letters ~2.5 studs: readable from the plaza)
 	gui.StudsOffsetWorldSpace = Vector3.new(0, s.h + SY.Plate.Above, 0)
 	gui.MaxDistance = 600
 	gui.LightInfluence = 0
 	gui.ResetOnSpawn = false
-	gui.Parent = playerGui
+	local h = if Vfx.phone() then 26 else 32
 	local color = island:GetAttribute("Color") or C.Brass
+	local full = Instance.new("Frame")
+	full.Name = "Full"
+	full.BackgroundTransparency = 1
+	full.Parent = gui
 	local name = Instance.new("TextLabel")
 	name.BackgroundTransparency = 1
-	name.Size = UDim2.fromScale(1, 0.56)
-	name.FontFace = FONT
-	name.TextScaled = true
+	name.FontFace = RankPlate.FONT
+	name.TextSize = math.floor(h * 0.85)
 	name.Text = island:GetAttribute("OwnerName") or ""
 	name.TextColor3 = color:Lerp(Color3.new(1, 1, 1), 0.15)
-	name.Parent = gui
+	name.Parent = full
 	local stroke = Instance.new("UIStroke")
 	stroke.Color, stroke.Thickness = Color3.fromRGB(16, 8, 24), 2.5
 	stroke.Parent = name
-	-- (the rank = the Cosmic Level's name + Supernovas, its ✦ drawn as our sparkle (UIKit.rankLine); + GALAXY LIT %)
-	local line = Instance.new("Frame")
-	line.BackgroundTransparency = 1
-	line.Position = UDim2.fromScale(0, 0.56)
-	line.Size = UDim2.fromScale(1, 0.38)
-	line.Parent = gui
-	local lit = island:GetAttribute("Lit") or 0
+	local nameH = math.floor(h * 0.95)
+	local w = math.max(game:GetService("TextService"):GetTextSize(name.Text, name.TextSize, Enum.Font.LuckiestGuy, Vector2.new(10000, 1000)).X + 12, 60)
+	local y = nameH
 	local rankText = string.upper(island:GetAttribute("Rank") or "")
 	local base = string.gsub(rankText, "%s*·%s*✦%d+$", "")
 	local novasN = string.match(rankText, "✦(%d+)$")
-	local display = base .. (if lit > 0 then " · GALAXY " .. lit .. "%" else "") .. (if novasN then " · ✦" .. novasN else "")
-	local labels = UIKit.rankLine(line, display, FONT_B)
-	for _, l in ipairs(labels) do
-		l.TextColor3 = Color3.fromRGB(240, 230, 255)
-		local stroke2 = stroke:Clone()
-		stroke2.Thickness = 2
-		stroke2.Parent = l
+	local key = RankPlate.keyOf(base)
+	local plate
+	if base ~= "" then
+		plate = RankPlate.build(full, base, key, h)
+		plate.Position = UDim2.fromOffset(0, y)
+		w = math.max(w, plate:GetAttribute("W"))
+		y += h + 2
 	end
+	local lit = island:GetAttribute("Lit") or 0
+	local info = (if lit > 0 then "GALAXY " .. lit .. "%" else "") .. (if novasN then (if lit > 0 then " · " else "") .. "✦" .. novasN else "")
+	if info ~= "" then
+		local line = Instance.new("Frame")
+		line.BackgroundTransparency = 1
+		line.Position = UDim2.fromOffset(0, y)
+		line.Parent = full
+		local lh = math.floor(h * 0.55)
+		line.Size = UDim2.fromOffset(math.max(w, 10), lh)
+		local labels = UIKit.rankLine(line, info, FONT_B)
+		for _, l in ipairs(labels) do
+			l.TextColor3 = Color3.fromRGB(240, 230, 255)
+			local stroke2 = stroke:Clone()
+			stroke2.Thickness = 2
+			stroke2.Parent = l
+		end
+		-- (rankLine fills its frame: keep the line about as wide as its text)
+		line.Size = UDim2.fromOffset(math.min(w, #info * lh * 0.62), lh)
+		line.Position = UDim2.fromOffset((w - line.Size.X.Offset) / 2, y)
+		y += lh
+	end
+	-- centre the name + the plate in the widest
+	name.Size = UDim2.fromOffset(w, nameH)
+	if plate then plate.Position = UDim2.fromOffset((w - plate:GetAttribute("W")) / 2, nameH) end
+	full.Size = UDim2.fromOffset(w, y)
+	full.Position = UDim2.fromOffset(0, h * 0.2)
+	local far = RankPlate.emblem(gui, key, h * 1.3)
+	far.Name = "Far"
+	far.Position = UDim2.new(0.5, 0, 1, -h * 0.7)
+	far.Visible = false
+	gui.Size = UDim2.fromOffset(w, y + h * 0.2)
+	gui.Parent = playerGui
 	s.plate = gui
+	s.plateFull, s.plateFar = full, far
 end
 
 local function buildSystem(island)
@@ -229,7 +207,9 @@ local function buildSystem(island)
 	local ready = island:GetAttribute("Ready") == true
 	beam.Color = ColorSequence.new(if ready then Color3.fromRGB(255, 205, 90) else Color3.fromRGB(175, 120, 255))
 	beam.LightEmission = 1
-	beam.Width0, beam.Width1 = if ready then 0.6 else 0.25, if ready then 0.6 else 0.25
+	beam.Texture = VT.add.light_streak
+	beam.TextureMode = Enum.TextureMode.Stretch
+	beam.Width0, beam.Width1 = if ready then 1.6 else 0.7, if ready then 1.6 else 0.7
 	beam.FaceCamera = true
 	beam.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.45, 0.55), NumberSequenceKeypoint.new(1, 0.15) })
 	beam.Parent = beamHost
@@ -282,7 +262,7 @@ local function buildSystem(island)
 		for j = 1, 4 do
 			local img = Instance.new("ImageLabel")
 			img.BackgroundTransparency = 1
-			img.Image = UIAssets.softglow
+			img.Image = VT.alpha.nebula_wisp
 			img.ImageColor3 = hue:Lerp(Color3.new(1, 1, 1), (j - 1) * 0.12)
 			img.ImageTransparency = 0.55 + j * 0.08
 			img.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -346,7 +326,7 @@ local function buildSystem(island)
 			a0.Parent, a1.Parent = p0, p0
 			local tr = Instance.new("Trail")
 			tr.Attachment0, tr.Attachment1 = a0, a1
-			tr.Texture = FX.streak or ""
+			tr.Texture = VT.add.light_streak
 			tr.TextureMode = Enum.TextureMode.Stretch
 			tr.LightEmission, tr.LightInfluence = 1, 0
 			tr.Lifetime = 0.35
@@ -367,7 +347,7 @@ local function buildSystem(island)
 				for _, pl in ipairs(s.planets) do
 					if pl.k == k then pl.pulseAt = os.clock() + 0.05 end
 				end
-				task.delay(0.1, function() ringFlash(top, 26 + 4 * k, Color3.fromRGB(255, 205, 90), 0.6) end)
+				task.delay(0.1, function() Vfx.Milestone(top, 26 + 4 * k) end)
 				local bb = Instance.new("BillboardGui")
 				bb.Size = UDim2.fromOffset(160, 60)
 				bb.StudsOffsetWorldSpace = Vector3.new(0, 4, 0)
@@ -409,7 +389,7 @@ local function buildSystem(island)
 	moteHost.CFrame = CFrame.new(c + Vector3.new(0, SY.BeamFrom, 0))
 	moteHost.Parent = folder
 	local e = Instance.new("ParticleEmitter")
-	e.Texture = SPARK
+	e.Texture = VT.add.stardust_mote
 	e.Color = ColorSequence.new(C.Mote)
 	e.LightEmission = 0.7
 	e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.2, 0.55), NumberSequenceKeypoint.new(1, 0) })
@@ -423,6 +403,7 @@ local function buildSystem(island)
 	-- sparkles when the Supernova is ready
 	if island:GetAttribute("Ready") then
 		local r2 = e:Clone()
+		r2.Texture = VT.add.starburst_twinkle -- (warm: the white-cored star takes the tint; sparkle_star is cyan)
 		r2.Color = ColorSequence.new(Color3.fromRGB(255, 240, 200))
 		r2.Speed = NumberRange.new(1, 3)
 		r2.SpreadAngle = Vector2.new(180, 180)
@@ -454,7 +435,7 @@ local function popIn(piece: Instance)
 				tween(p, { Size = full }, 0.45, Enum.EasingStyle.Back)
 			end
 		end
-		sparkleBurst(cf.Position + Vector3.new(0, size.Y / 2, 0), 18 + math.floor(size.Magnitude), nil, 0.7)
+		Vfx.PadBuild(cf.Position - Vector3.new(0, size.Y / 2, 0), math.max(size.X, size.Z))
 		UIKit.sound("piecePop", { at = cf.Position })
 	end)
 end
@@ -465,6 +446,16 @@ local function watchIsland(island)
 	for _, name in ipairs({ "Owner", "OwnerName", "Tier", "BodyTiers", "Supernovas", "Rank", "Ready", "Color", "Belt", "Sys", "Lit" }) do
 		island:GetAttributeChangedSignal(name):Connect(function() buildSystem(island) end)
 	end
+	-- (the VFX pass (c): the island grows a TIER: the rune circle under it, a beam up, the crown burst, confetti)
+	local tierSeen = island:GetAttribute("Tier") or 0
+	island:GetAttributeChangedSignal("Tier"):Connect(function()
+		local now = island:GetAttribute("Tier") or 0
+		local c = island:GetAttribute("Center")
+		if now > tierSeen and loaded and c then
+			Vfx.IslandTierUp(c, rankColour(island), island:GetAttribute("Owner") == player.UserId)
+		end
+		tierSeen = now
+	end)
 	local pieces = island:WaitForChild("Pieces", 10)
 	if pieces then pieces.ChildAdded:Connect(popIn) end
 end
@@ -568,9 +559,19 @@ for _, g in ipairs(core:GetChildren()) do
 	end
 end
 local burstUntil = 0
+local windupFx -- (your Supernova's wind-up effect, stopped at the impact)
 local coreBase = if coreLight then coreLight.Brightness else 1.4
 local coreRange = if coreLight then coreLight.Range else 24
 local spawnComet -- (defined in the comets section; the remote handler below calls it)
+-- (#305: the Core's slow turning rays, always on: 3 particles alive)
+Vfx.CoreRays(O + Vector3.new(0, MapConfig.Centre.CoreHeight, 0), Color3.fromRGB(255, 200, 120))
+-- (#288: the STAR SURGE fills: a gold wave rolls over the plaza from the Core + its rays flare, for everyone)
+local surgeSeen = Galaxy:GetAttribute("SurgeUntil") or 0
+Galaxy:GetAttributeChangedSignal("SurgeUntil"):Connect(function()
+	local v = Galaxy:GetAttribute("SurgeUntil") or 0
+	if v > surgeSeen and v > workspace:GetServerTimeNow() then Vfx.StarSurge(O + Vector3.new(0, MapConfig.Centre.CoreHeight, 0)) end
+	surgeSeen = v
+end)
 
 local function shockwave(delay: number?)
 	if delay and delay > 0 then task.wait(delay) end
@@ -611,7 +612,9 @@ local function supernova(slot: number?)
 		coreLight.Range = 60
 		tween(coreLight, { Brightness = coreBase, Range = coreRange }, 1.4)
 	end
-	sparkleBurst(O + Vector3.new(0, MapConfig.Centre.CoreHeight, 0), 80, Color3.fromRGB(255, 210, 140), 1.4)
+	local coreAt = O + Vector3.new(0, MapConfig.Centre.CoreHeight, 0)
+	Vfx.CorePulse(coreAt, Color3.fromRGB(255, 210, 140))
+	sparkleBurst(coreAt, 50, Color3.fromRGB(255, 210, 140), 1.4)
 	-- (alpha part 1: two rings across the plaza and the islands, the second a beat later)
 	for i = 1, MapConfig.Supernova.Shockwaves do task.spawn(shockwave, (i - 1) * 0.3) end
 	-- the burst over the player's island (everyone sees it; at the system's height: the system itself is rebuilt as the rock)
@@ -622,28 +625,11 @@ local function supernova(slot: number?)
 		-- (#298: the colour is your rank's; it grows a little with every Supernova you've made)
 		local col = rankColour(island)
 		local grow = 1 + math.min(island:GetAttribute("Supernovas") or 0, 20) * 0.04
-		sparkleBurst(top, math.floor(70 * grow), col:Lerp(Color3.new(1, 1, 1), 0.5), 1.6 * grow)
-		sparkleBurst(top, 30, Color3.fromRGB(200, 150, 255), 1.1)
-		-- (#294 fast layer: sharp SHARDS ripping out, facing where they fly; "sharp = impact", #279)
-		fxBurst(top, { tex = FX.shard, count = math.floor(36 * grow), color = col:Lerp(Color3.new(1, 1, 1), 0.3), size = 1.6 * grow, speed = { 45, 85 },
-			life = { 0.7, 1.2 }, drag = 1.5, align = true, light = 1 })
-		ringFlash(top, 34 * grow, col, 0.7)
-		-- (#294 slow layer: EMBERS drifting up for seconds, and a soft haze that lingers: fast + slow together, #295)
-		fxBurst(top, { tex = FX.glowdot, count = 40, color = col, size = 0.9, speed = { 2, 7 }, life = { 3.5, 6 }, drag = 0.4,
-			accel = Vector3.new(0, 1.2, 0), light = 1 })
-		fxBurst(top, { tex = FX.smoke, count = 8, color = col:Lerp(Color3.fromRGB(60, 30, 90), 0.4), size = 14 * grow, speed = { 1, 4 },
-			life = { 3, 4 }, flip = true, light = 0.3, transp = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.4), NumberSequenceKeypoint.new(1, 1) }) })
-		-- (#294: a short CAMERA SHAKE for the player who went Supernova; off with Reduced Motion; after the cinematic's camera)
-		if island:GetAttribute("Owner") == player.UserId and not calm() then
-			local t0 = os.clock()
-			RunService:BindToRenderStep("GalaxySupernovaShake", Enum.RenderPriority.Camera.Value + 3, function()
-				local t = os.clock() - t0
-				if t > 0.45 then RunService:UnbindFromRenderStep("GalaxySupernovaShake") return end
-				local cam = workspace.CurrentCamera
-				local amp = 0.35 * (1 - t / 0.45)
-				cam.CFrame = cam.CFrame * CFrame.new(math.noise(t * 40, 1) * amp, math.noise(t * 40, 2) * amp, 0)
-			end)
-		end
+		-- (the VFX pass: the 3 beats from VfxLibrary: the flash flipbook + starburst + rays on frame 0, two rings across the
+		-- floor, shards + the explosion, then embers, the nebula blooming and violet smoke; yours flashes + shakes)
+		local mine = island:GetAttribute("Owner") == player.UserId
+		if windupFx then windupFx:Stop() windupFx = nil end
+		Vfx.Supernova(top, col, grow, mine)
 	end
 end
 
@@ -651,11 +637,17 @@ end
 -- pulses faster and faster; `dur` seconds, then it holds until the system is rebuilt (the server's reset)
 shared.GalaxyWindup = function(dur: number)
 	for island, s in pairs(systems) do
-		if island:GetAttribute("Owner") == player.UserId then s.windup = { t0 = os.clock(), dur = dur } end
+		if island:GetAttribute("Owner") == player.UserId then
+			s.windup = { t0 = os.clock(), dur = dur }
+			-- (stardust pulled into the star + arcs crackling round it, faster at the end)
+			if windupFx then windupFx:Stop() end
+			windupFx = Vfx.SupernovaWindup(s.top, rankColour(island), dur)
+		end
 	end
 end
 shared.GalaxyWindupCancel = function()
 	for _, s in pairs(systems) do s.windup = nil end
+	if windupFx then windupFx:Stop() windupFx = nil end
 end
 if remote then
 	remote.OnClientEvent:Connect(function(kind, a, b, c, d)
@@ -708,6 +700,8 @@ function spawnComet(id: number, seed: number, tutorial: boolean?, golden: boolea
 	trail.Attachment0, trail.Attachment1 = a0, a1
 	trail.Color = if golden then ColorSequence.new(Color3.fromRGB(255, 230, 140), Color3.fromRGB(255, 150, 40)) else ColorSequence.new(Color3.fromRGB(170, 235, 255), Color3.fromRGB(120, 140, 255))
 	trail.LightEmission = 1
+	trail.Texture = VT.add.comet_tail
+	trail.TextureMode = Enum.TextureMode.Stretch
 	trail.Lifetime = 1.1
 	trail.Transparency = NumberSequence.new(0, 1)
 	trail.WidthScale = NumberSequence.new(1, 0)
@@ -715,7 +709,7 @@ function spawnComet(id: number, seed: number, tutorial: boolean?, golden: boolea
 	trail.Parent = hit
 	UIKit.sound("cometAppear")
 	comets[hit] = { id = id, head = head, parts = parts, hit = hit, pos = from, dir = dir, born = os.clock(), through = through,
-		speed = if tutorial then 22 else 60, life = if tutorial then 10 else 9, tutorial = tutorial, slowUntil = 0, slowed = false }
+		speed = if tutorial then 22 else 60, life = if tutorial then 10 else 9, tutorial = tutorial, slowUntil = 0, slowed = false, golden = golden }
 	if tutorial then
 		-- a ring on it (first time only)
 		local bb = Instance.new("BillboardGui")
@@ -749,8 +743,7 @@ end
 local function removeComet(comet, caught: boolean)
 	comets[comet.hit] = nil
 	if caught then
-		sparkleBurst(comet.pos, 30, Color3.fromRGB(170, 235, 255), 1)
-		ringFlash(comet.pos, 6, Color3.fromRGB(170, 235, 255), 0.35)
+		Vfx.CometCatch(comet.pos, if comet.golden then Color3.fromRGB(255, 215, 110) else nil, comet.golden)
 		UIKit.sound("cometCatch")
 		if remote then remote:FireServer("Comet", comet.id) end
 		-- (#287: 16 sparks FLY from the comet to YOUR star, each on its own arc, a short trail; a sparkle where they land)
@@ -777,6 +770,8 @@ local function removeComet(comet, caught: boolean)
 					tr.Attachment0, tr.Attachment1 = a0, a1
 					tr.Lifetime = 0.25
 					tr.LightEmission = 1
+					tr.Texture = VT.add.light_streak
+					tr.TextureMode = Enum.TextureMode.Stretch
 					tr.Color = ColorSequence.new(Color3.fromRGB(170, 235, 255))
 					tr.Parent = p
 					local mid = (from + to) / 2 + Vector3.new(math.random(-14, 14), math.random(8, 22), math.random(-14, 14))
@@ -875,7 +870,7 @@ local function refreshIgnition(animate: boolean?)
 			for i = from, to, step do
 				styleSeg(i, step > 0)
 				local p = segParts(i)[1]
-				if step > 0 and p then sparkleBurst(p.Position + Vector3.new(0, 1, 0), 10, C.Bridge, 0.5) end
+				if step > 0 and p then Vfx.BridgeSegment(p.Position + Vector3.new(0, 1, 0), C.Bridge, math.max(p.Size.X, p.Size.Z) * 1.2) end
 				task.wait(0.12)
 			end
 		end)
@@ -907,6 +902,19 @@ local function unlockSector()
 	end
 end
 player:GetAttributeChangedSignal("Ignition"):Connect(unlockSector)
+-- (the VFX pass (d): the moment YOUR Ignition 1 lands, the gate's portal swirls up, then rays + a ring + the flash)
+local ignitionSeen = player:GetAttribute("Ignition") or 0
+player:GetAttributeChangedSignal("Ignition"):Connect(function()
+	local now = player:GetAttribute("Ignition") or 0
+	if now > ignitionSeen then
+		local arch = nextS:FindFirstChild("Arch")
+		if arch then
+			local cf, size = if arch:IsA("Model") then arch:GetBoundingBox() else arch.CFrame, arch.Size
+			Vfx.IgnitionGate(cf.Position - Vector3.new(0, size.Y * 0.1, 0), cf.LookVector, C.Bridge, true)
+		end
+	end
+	ignitionSeen = now
+end)
 nextS.DescendantAdded:Connect(function(d) if d.Name == "Padlock" or d.Name == "SectorForge" then task.defer(unlockSector) end end)
 unlockSector()
 
@@ -937,6 +945,46 @@ task.spawn(function()
 			local speed = piece:GetAttribute("Swirl") or 1
 			for _, p in ipairs(Kit.Parts(piece)) do swirls[p] = { rel = ringCf:ToObjectSpace(p.CFrame), ring = ringCf, speed = speed } end
 		end
+	end
+end)
+
+-- (6 Nov, rank title art #396: every leaderboard row gets a small RANK EMBLEM before it, by the row's Supernovas (the
+-- number at its end; MapConfig.RankDef: SPARK at 1 .. SUPERGIANT at 12; 0 = NEW STAR); the text moves right to make room)
+local function rowEmblem(row: TextLabel)
+	if row:GetAttribute("EmblemOn") then return end
+	row:SetAttribute("EmblemOn", true)
+	local pad = Instance.new("UIPadding")
+	pad.Parent = row
+	local em = RankPlate.emblem(row, "new_star", 10, true)
+	em.AnchorPoint = Vector2.new(0, 0.5)
+	local function fit()
+		local h = row.AbsoluteSize.Y
+		pad.PaddingLeft = UDim.new(0, h * 1.15)
+		em.Size = UDim2.fromOffset(h, h)
+		em.Position = UDim2.new(0, -h * 1.15, 0.5, 0)
+	end
+	local function update()
+		local v = tonumber(string.match(row.Text, "(%d+)%s*$"))
+		em.Visible = row.Text ~= ""
+		local def = v and MapConfig.RankDef(v)
+		local key = if def then RankPlate.keyOf(def.name) else "new_star"
+		em.Image = require(Galaxy:WaitForChild("ArtIds")).rank128[key]
+	end
+	row:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+	row:GetPropertyChangedSignal("Text"):Connect(update)
+	fit()
+	update()
+end
+task.spawn(function()
+	local function scan(model: Instance?)
+		for _, d in ipairs(model and model:GetDescendants() or {}) do
+			if d:IsA("TextLabel") and string.match(d.Name, "^Row%d+$") then rowEmblem(d) end
+		end
+	end
+	for _, name in ipairs({ "Leaderboard", "NearBoard" }) do
+		local m = centre:WaitForChild(name, 30)
+		scan(m)
+		if m then m.DescendantAdded:Connect(function(d) if d:IsA("TextLabel") and string.match(d.Name, "^Row%d+$") then task.defer(rowEmblem, d) end end) end
 	end
 end)
 
@@ -979,6 +1027,11 @@ RunService.RenderStepped:Connect(function(dt)
 	local camPos = cam and cam.CFrame.Position or O
 	-- star systems
 	for island, s in pairs(systems) do
+		if s.plateFull then
+			local isFar = (s.top - camPos).Magnitude > PLATE_FAR
+			s.plateFull.Visible = not isFar
+			s.plateFar.Visible = isFar
+		end
 		local near = (s.top - camPos).Magnitude <= MapConfig.LodDistance + s.h or (island:GetAttribute("Owner") == player.UserId)
 		if near ~= s.near then
 			s.near = near

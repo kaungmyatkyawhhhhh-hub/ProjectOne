@@ -263,8 +263,14 @@ local DECOR = { Crystal = true, CrystalCluster = true }
 function Builder.ClearDecor(root: Instance)
 	local islands = root:FindFirstChild("Islands")
 	local faces = {}
+	-- (a part named Screen = a board whose screen the client draws, e.g. FREE REWARDS: its Back face counts too)
+	local list = {}
 	for _, g in ipairs(root:GetDescendants()) do
-		if g:IsA("SurfaceGui") and g.Parent:IsA("BasePart") and not (islands and g.Parent:IsDescendantOf(islands)) then
+		if g:IsA("SurfaceGui") then table.insert(list, g)
+		elseif g:IsA("BasePart") and g.Name == "Screen" and not (islands and g:IsDescendantOf(islands)) then table.insert(list, { Parent = g, Face = Enum.NormalId.Back }) end
+	end
+	for _, g in ipairs(list) do
+		if g.Parent:IsA("BasePart") and not (islands and g.Parent:IsDescendantOf(islands)) then
 			local p = g.Parent :: BasePart
 			local n = Vector3.FromNormalId(g.Face)
 			local normal = p.CFrame:VectorToWorldSpace(n)
@@ -289,6 +295,25 @@ function Builder.ClearDecor(root: Instance)
 			end
 		end
 	end
+end
+
+-- the plaza's FREE REWARDS board (MapConfig.FreeBoard): a dark screen in a brass edge on two posts with lamps, like PLAYERS
+-- NEAR YOU. Built by Build, and by GalaxyMapService into a place built before it (it checks first)
+function Builder.FreeBoard(centre: Instance)
+	if centre:FindFirstChild("FreeBoard") then return end
+	local FB = MapConfig.FreeBoard
+	local m = Instance.new("Model")
+	m.Name = "FreeBoard"
+	local zn = zoneCf(FB.angle, FB.dist, true)
+	local cf = zn * CFrame.new(0, FB.Bottom + FB.Height / 2, 0)
+	part({ Name = "Screen", Size = Vector3.new(FB.Width, FB.Height, 0.6), CFrame = cf, Color = Color3.fromRGB(22, 17, 30), Parent = m })
+	part(brass({ Name = "Edge", Size = Vector3.new(FB.Width + 1, FB.Height + 1, 0.4), CFrame = cf, Parent = m }))
+	for _, sx in ipairs({ -1, 1 }) do
+		local h = FB.Bottom + FB.Height + 1
+		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zn * CFrame.new(sx * (FB.Width / 2 + 0.9), h / 2, 0), Parent = m }))
+		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zn * CFrame.new(sx * (FB.Width / 2 + 0.9), h + 0.8, 0), Color = C.Lamp, Material = Enum.Material.Neon, Parent = m })
+	end
+	m.Parent = centre
 end
 
 function Builder.Build()
@@ -466,7 +491,8 @@ function Builder.Build()
 	-- (on the front face: the face toward the Core is at +Z = anvil.Z / 2; hung on the upper part, the anvil's face block)
 	Kit.Make("Padlock", { Name = "Padlock", Fit = { "Y", F.Padlock }, CFrame = zf * CFrame.new(anvil.X * 0.08, platH + anvil.Y - lock.Y / 2 - 0.25, anvil.Z / 2 + lock.Z / 2),
 		Color = C.Lock, Reflectance = 0.1, Parent = forge })
-	sign(forge, "Sign", zf * CFrame.new(0, 0, F.Sign.Dist), F.Sign.Width, F.Sign.Height, F.Sign.Bottom, { "STAR FORGE", "SUPERNOVA 3" }, nil, true)
+	-- (6 Nov: the Forge opens at IGNITION 1 since 5 Nov; was "SUPERNOVA 3")
+	sign(forge, "Sign", zf * CFrame.new(0, 0, F.Sign.Dist), F.Sign.Width, F.Sign.Height, F.Sign.Bottom, { "STAR FORGE", "IGNITION 1" }, nil, true)
 
 	------------------------------------------------------------------ BACK: the Black Hole gate (facing the Core)
 	-- a 22-wide brass ring on its dais round an OPAQUE void, a glowing inner ring, 3 spiral arms and particles drawn inward
@@ -508,7 +534,7 @@ function Builder.Build()
 	glow:SetAttribute("Swirl", 1.2)
 	local pull = part({ Name = "Pull", Size = Vector3.new(voidD - 1, 0.2, voidD - 1), CFrame = ringCf, Transparency = 1, CanCollide = false, CanQuery = false, Parent = hole })
 	local pe = Instance.new("ParticleEmitter")
-	pe.Texture = "rbxassetid://94374970413464" -- our own sparkle (#281; = UIAssets.fxSparkle)
+	pe.Texture = require(Galaxy:WaitForChild("VfxTextures")).add.stardust_mote -- (the VFX pass: our stardust mote, #281)
 	pe.Shape, pe.ShapeInOut, pe.ShapeStyle = Enum.ParticleEmitterShape.Disc, Enum.ParticleEmitterShapeInOut.Inward, Enum.ParticleEmitterShapeStyle.Surface
 	pe.Color = ColorSequence.new(Color3.fromRGB(255, 170, 240), Color3.fromRGB(150, 90, 255))
 	pe.LightEmission = 1
@@ -670,6 +696,7 @@ function Builder.Build()
 	local count = 0
 	for _, d in ipairs(root:GetDescendants()) do if d:IsA("BasePart") then count += 1 end end
 	root:SetAttribute("Parts", count)
+	Builder.FreeBoard(centre)
 	Builder.ClearDecor(root)
 	return root
 end
