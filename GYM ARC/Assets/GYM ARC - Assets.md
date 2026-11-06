@@ -257,3 +257,6 @@ Each "M WEIGHTS" plate face (rings + the number twice + "M WEIGHTS" twice, ~18 l
 | Plate100 | 79381828256284 |
 
 To move them to Myanmar Builders Club, upload the 7 PNGs to the group and swap the Decal Texture ids (the templates in `ReplicatedStorage.GymAssets.Plates` and every `PlateFace` decal in Workspace).
+
+## Alter skins, alter VFX, aura VFX (6 Nov, ChatGPT batch, group-owned)
+All ids in `Config/ArtIds`; the full table is [[2026-11-06 GYM ARC - Art ids (ChatGPT batch)]]. They replace the alter skin ids of 21 / 26 Oct and 3 Nov and the alter / aura particle textures (the older aura textures stay for the trainers' auras and the Hall of Fame screens).
