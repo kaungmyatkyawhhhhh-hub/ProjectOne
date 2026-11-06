@@ -5,6 +5,36 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
+## Drives, surfaces, bends (2026-11-06, day, owner's pictures)
+Owner: "I told you to fix these ... Find all buildings and roads if they have this problem", "its happening on this too and also on some buildings, FIND IT ALL", "make all the roads smooth like in the blender but mainly the turns".
+
+**The drive in the picture (Legends Rewards):** `EntranceRamp` is now one straight plane from the lot's edge to the road's edge. It was up to six slabs over the ground's outline: it measured the pavement it was about to remove, which bent it, gave the lines across and the curved dark edges, and dropped the last stud at up to 37 degrees.
+- Kerb and pavement pieces half in the drive are cut back to its edge. Left whole they came up through the slab in strips.
+- Edges are the road's own kerb stone, flush with the slab.
+- 57 drives: all one slab, none over 11 degrees (19 were steeper). Two lots stood too close to the road: the slab starts inside the lot, in a notch cut from the plate (`opts.notch`: Rewards east drive, Legends Motors). The Rewards setts now run to the ramp.
+- Drove the Rewards drive both ways at 25-40 studs a second: no jump. Picture: [[Legends Rewards drive - before and after.jpg]].
+
+**"Find it all", the walls:** new `tools/riviera/SurfaceCheck.luau` looks at every flat face on the map for two faces in one place. Cause on the buildings: walls are piers and floor bands that overlap. They had been pushed apart by tiny, uneven amounts, so over 110,000 pairs sat under 0.05 studs apart and showed patches of each other's plaster.
+- Buildings: bands on one plane, piers 0.08 behind. Under 100 pairs left (a piece's 0.6-wide end at a corner doesn't count).
+- New `src/server/SurfaceFix.lua` does the rest: each group of fighting faces gets planes 0.08 apart. Old Rock, Stadium, Dressing, Sites, Roads done in the place. Venues are built by code, so it runs on the server 8 seconds after start.
+- Venues: thousands of pairs down to about 250, small or between tilted pieces.
+- **Not proved:** the owner's second picture (a wall with two tones) wasn't found by position. It matches the overlapping wall pieces, but check it in game.
+- Undo: `SurfaceFix.undo(root)` (`OldFixCFrame`).
+
+**"Find it all", the roads:** where two roads met, each one's pavement ran on over the other's. New `tools/riviera/PaveOverlap.luau`: the longer road's pavement runs through. 80 pieces and 68 stray kerbs removed, about 400 lowered: 136 level overlaps down to 0. Backup: `ServerStorage.PaveOverlap_2026-11-06`, `PaveOverlap.undo(roads)`.
+
+**Smooth bends:** new `tools/riviera/SmoothKerbs.luau`. The builder lays one piece per road sample, up to 30 studs long on a tight bend, so bends were chains of straight bits. Every stretch with a kink over 1.5 degrees is redrawn along a curve in 2.5-stud kerbs and 4-stud pavements: 552 stretches, 5,457 pieces replaced by 13,884. Red-and-white stripes kept. Picture: [[Smooth kerbs - bends.jpg]]. Backup: `ServerStorage.OldKerbs_2026-11-06`, `SmoothKerbs.undo(roads)`.
+- `tools/riviera/PaveDig.luau`: dug the ground off 191 pavement pieces it stood over.
+- Lane check after it all: 188 lanes, 0 holes, 0 kerbs in a lane, 0 ledges, 163 speed bumps.
+
+**Not done:**
+- FPS not measured: Studio was minimized, and it draws nothing then. Roads have 8,400 more parts (+5%, now 178,000).
+- The second, tighter pass on bends wasn't seen in a picture, for the same reason. Numbers only.
+- Before / after of the worst 10 curves.
+- Real meshes "like in Blender". They would be smoother and take the road's 178,000 parts down a lot, but Studio refused the upload: the folder isn't approved. The owner has to add it: Assistant Settings, MCP Permissions. Then Claude can upload them itself, with no Import 3D.
+- `world_test` stops in `GemShowcase` (`part.Position` in Lune). Not from these changes.
+- **Correction:** last night's "worst bends" (no kerbs, blocky edges) were an Edit-mode picture fault: seen in Play, those bends have kerbs and clean edges.
+
 ## Tonight's run: start here (written 2026-11-06)
 **Done, step by step:**
 1. **Cars:** the 6 new cars are in the game, with live clusters and dark cabins. Sharp carbon on 14 cars. Leather and Alcantara not done: those cabins are one picture.
@@ -16,7 +46,7 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 7. **Curves, part done:** all 188 lanes checked: 0 holes, 0 kerbs in a lane, 0 ledges over 0.4 studs. The 163 speed bumps stay. Red-and-white kerbs on 24 sharp bends (313 pieces). **Not done:** no bend was reshaped, and there are no before / after shots of the worst 10.
 8. **Bug hunt, part done:** see the list below.
 
-**Next: step 7.2:** reshape the bad bends. Worst seen: the 4-lane road's end at the West Switchbacks (x 11128, z -108) and the bend at x 11000, z 470: no kerbs and blocky edges. Then finish step 8 (police, races, deliveries, Customs).
+**Next: step 7.2:** before / after shots of the worst 10 curves (in Play), then real curved road meshes if the owner approves the upload folder (see "Drives, surfaces, bends" below). Then finish step 8 (police, races, deliveries, Customs).
 
 **What the owner needs to do:**
 1. Play one lap and say if the morning mist is too much or too little.

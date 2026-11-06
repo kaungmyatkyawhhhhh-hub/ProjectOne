@@ -24,10 +24,10 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local SmoothKerbs = {}
 
-local KINK = 2.5 -- degrees at a joint that show
+local KINK = 1.5 -- degrees at a joint that show
 local STEPS = { Kerb = 2.5, Pavement = 4, Shoulder = 4 }
 local OVER = 0.25 -- neighbours overlap this much
-local REACH = 16 -- the next piece's middle is at most this far on
+local REACH = 32 -- the next piece's middle is at most this far on (tight bends have 30-stud pieces)
 local STRIPE = 5
 local RED = Color3.fromRGB(186, 34, 34)
 local WHITE = Color3.fromRGB(232, 230, 224)
@@ -68,13 +68,13 @@ local function chains(list: { Piece }): { { Piece } }
 		local bestJ, bestD = nil, math.huge
 		local side = Vector3.new(-k.dir.Z, 0, k.dir.X)
 		local cx, cz = math.floor(k.c.X / G), math.floor(k.c.Z / G)
-		for gx = cx - 2, cx + 2 do
-			for gz = cz - 2, cz + 2 do
-				for _, j in grid[gx .. "," .. gz] or {} do
+		for gx = cx - 3, cx + 3 do
+			for gz = cz - 3, cz + 3 do
+				for _, j in (grid[gx .. "," .. gz] or {}) :: { number } do
 					local o = list[j]
 					local dv = flat(o.c - k.c)
 					local fwd, lat = dv:Dot(k.dir), math.abs(dv:Dot(side))
-					if j ~= i and not hasPrev[j] and fwd > 0.5 and fwd < REACH and lat < 0.35 * fwd + 0.8 and k.dir:Dot(o.dir) > 0.6 and math.abs(o.c.Y - k.c.Y) < 2.5 then
+					if j ~= i and not hasPrev[j] and fwd > 0.5 and fwd < REACH and lat < 0.6 * fwd + 0.8 and k.dir:Dot(o.dir) > 0.35 and math.abs(o.c.Y - k.c.Y) < 4 then
 						local d = fwd + 2 * lat
 						if d < bestD then
 							bestJ, bestD = j, d
