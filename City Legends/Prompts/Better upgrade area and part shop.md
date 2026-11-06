@@ -102,7 +102,7 @@ Each slot holds one part:
 2. **Builds:** save up to 3 builds per car (e.g. Street, Race, Drift) and switch with one tap; parts move between builds you own.
 3. **Parts move between cars:** uninstalling puts the part back in My Parts, so you can fit it to another car it suits. Selling a part gives back 50%.
 4. **Rare drops:** sometimes a part is a reward: the daily streak, race golds, the Legends spin, bank heists. Legendary parts only come from the shop at a high price, or as rare rewards.
-5. **Engine swaps: the 25 most popular tuning engines** (owner, 2026-11-06: "the top 25 most popular tunable engines in the world"); see the section below.
+5. **Engine swaps: 43 engines (the 25 most popular tuning engines, plus the top BMW and German ones)** (owner, 2026-11-06: "the top 25 most popular tunable engines in the world"); see the section below.
 6. **Nitrous:** a bottle (small / big) that refills slowly; a short boost with a blue flame. Counted in PI; off in races marked "no nitrous".
 7. **Turbo sounds:** a turbo spool whistle and a blow-off "pssh" on gear changes when a turbo / blow-off valve is fitted (from Roblox library sounds or ones already in the game).
 8. **Part condition is NOT added** (keeps it simple).
@@ -145,6 +145,38 @@ An **ENGINE SWAP** slot (Engine category). A swap replaces the car's engine: its
 - The rev limit, torque curve (for the dyno graph) and weight change per engine: rotary and high-rev engines rev to 9,000+, big V8s are heavy with lots of low torque, small I4s are light.
 - Each swap gets its own icon (the engine-swap icon with its layout: I4 / I6 / V6 / V8 / rotary / flat-4 badge).
 - Check the list against current tuning sources before building; swap an entry only if it's clearly not a popular tuning engine.
+
+### Plus: the top 10 BMW tuning engines and the top 10 German tuning engines (owner, 2026-11-06)
+Same rules as above (engine codes only, never "M", "AMG", "TFSI", "VR6" or other trademark words; the closest existing sound; class rules). The N54, B58 (BMW) and EA888 (VW) are already in the 25 above, so each list adds the rest. **43 engines in all.**
+
+**BMW top 10** (N54 and B58 are #14 and #15 above):
+| # | In-game name | Real engine (reference only) | Stock hp | Tuned max hp | Rarity |
+|---|---|---|---|---|---|
+| 26 | S58 3.0 I6 Twin-Turbo | BMW S58 | 473 | 900 | Legendary |
+| 27 | S63 4.4 V8 Twin-Turbo | BMW S63 | 600 | 1,000 | Legendary |
+| 28 | S55 3.0 I6 Twin-Turbo | BMW S55 | 425 | 800 | Epic |
+| 29 | S85 5.0 V10 High-Rev | BMW S85 | 500 | 650 | Epic |
+| 30 | S65 4.0 V8 High-Rev | BMW S65 | 414 | 550 | Rare |
+| 31 | S54 3.2 I6 High-Rev | BMW S54 | 333 | 450 | Rare |
+| 32 | N55 3.0 I6 Turbo | BMW N55 | 300 | 550 | Rare |
+| 33 | M52 2.8 I6 | BMW M50 / M52 | 190 | 500 | Uncommon |
+
+**German top 10** (other German makers; EA888 is #25 above):
+| # | In-game name | Real engine (reference only) | Stock hp | Tuned max hp | Rarity |
+|---|---|---|---|---|---|
+| 34 | M177 4.0 V8 Twin-Turbo | Mercedes M177 / M178 | 603 | 1,000 | Legendary |
+| 35 | 4.0 V8 Twin-Turbo (EA825) | Audi / VW group 4.0 V8 TT | 591 | 1,000 | Legendary |
+| 36 | 5.2 V10 High-Rev | Audi / Lamborghini 5.2 V10 | 602 | 1,000 | Legendary |
+| 37 | 3.8 Flat-6 Twin-Turbo | Porsche 3.8 turbo flat-six | 640 | 900 | Legendary |
+| 38 | 2.5 I5 Turbo | Audi 2.5 five-cylinder (EA855) | 400 | 800 | Epic |
+| 39 | M156 6.2 V8 | Mercedes M156 | 507 | 650 | Epic |
+| 40 | 4.0 Flat-6 High-Rev | Porsche 4.0 naturally aspirated flat-six | 500 | 600 | Epic |
+| 41 | M139 2.0 I4 Turbo | Mercedes M139 | 416 | 550 | Rare |
+| 42 | 3.2 Narrow-V6 | VW 3.2 narrow-angle V6 | 250 | 650 | Rare |
+| 43 | 1.8 I4 Turbo 20V | VW / Audi 1.8T (EA113) | 180 | 450 | Uncommon |
+
+- The shop's ENGINE SWAP tab gets filters: **All / Japanese / American / BMW / German / Other** (Barra = Other).
+- The 5-cylinder needs its own warble: use the closest sound (I6 pitched up) until the owner sends an ID.
 
 ## Saves (don't lose anything)
 - New save fields: owned parts, installed parts per car, builds, tune settings.
