@@ -49,6 +49,20 @@ const G=(op=.8)=>`<ellipse cx="100" cy="62" rx="70" ry="30" fill="url(#gloss)" o
 const RR=(x,y,w,h,r,m='chrome')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="url(#${m})" filter="url(#drop)"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="url(#${m})" filter="url(#bevel)"/>`;
 const RE=(x,y,w,h,r,e)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${e}" filter="url(#inset)"/>`;
 const NEW=[
+["Wolfsburg","Volkswagen style · new brand",`
+${RR(14,14,172,172,46)}${RE(21,21,158,158,40,'url(#enamelBlue)')}
+<rect x="27" y="27" width="146" height="146" rx="35" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
+<g filter="url(#bevel)">
+<polygon points="66,40 84,70 100,64" fill="#eef1f4"/><polygon points="134,40 116,70 100,64" fill="#b9c0c8"/>
+<polygon points="66,40 64,90 84,70" fill="#c9cfd6"/><polygon points="134,40 136,90 116,70" fill="#8f98a3"/>
+<polygon points="84,70 100,64 100,104" fill="#f6f8fa"/><polygon points="116,70 100,64 100,104" fill="#cfd5dc"/>
+<polygon points="64,90 84,70 100,104 86,124" fill="#dfe4e9"/><polygon points="136,90 116,70 100,104 114,124" fill="#a3abb5"/>
+<polygon points="86,124 100,104 100,146" fill="#eef1f4"/><polygon points="114,124 100,104 100,146" fill="#b4bbc4"/>
+</g>
+<polygon points="76,86 90,90 80,94" fill="#06173a"/><polygon points="124,86 110,90 120,94" fill="#06173a"/>
+<polygon points="95,136 105,136 100,146" fill="#06173a"/>
+${T(100,166,'WOLFSBURG',11,'url(#chromeTxt)',{ls:4,w:800,flt:'txt'})}
+<ellipse cx="100" cy="58" rx="66" ry="26" fill="url(#gloss)" opacity=".6"/>`],
 ["Atelier Vento","Pagani style · new name",`
 ${O(98,52)}${OE(92,46,'url(#enamelNavy)')}
 <ellipse cx="100" cy="100" rx="86" ry="40.5" fill="none" stroke="url(#chromeTxt)" stroke-width="1"/>
