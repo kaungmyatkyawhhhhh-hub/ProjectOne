@@ -99,6 +99,7 @@ end
 
 local RankPlate = require(Galaxy:WaitForChild("RankPlate"))
 local Art = require(Galaxy:WaitForChild("ArtIds")) -- (7 Nov: the new UI art: plaques, checks)
+local WM = require(Galaxy:WaitForChild("WindowManager")) -- (7 Nov: no world clicks while a 2D window is open)
 local PLATE_FAR = 140
 -- (6 Nov, rank title art: the owner's name, then the RANK PLATE (RankPlate: the rank's banner, emblem, title), then a small
 -- line "GALAXY 12% · ✦3"; sized in PIXELS so it reads from the plaza; past PLATE_FAR studs only the emblem)
@@ -507,7 +508,7 @@ local function padLabel(island, pad: Model)
 		local click = disc:FindFirstChildOfClass("ClickDetector")
 		if click then
 			click.MouseClick:Connect(function()
-				if not econRequest then return end
+				if not econRequest or WM.anyOpen() then return end
 				local ok = econRequest:InvokeServer("BuyPad", nil, island:GetAttribute("Slot"))
 				UIKit.sound(if ok then "buy" else "no")
 			end)
@@ -953,7 +954,9 @@ ProximityPromptService.PromptTriggered:Connect(function(prompt)
 	local id = prompt:GetAttribute("Window")
 	if not id or not prompt:IsDescendantOf(root) then return end
 	if prompt:GetAttribute("Slot") and not ownsSlot(prompt:GetAttribute("Slot")) then return end
-	openWindow:Fire(id)
+	if WM.anyOpen() then return end -- (7 Nov: a window is open: world prompts are ignored)
+	local at = prompt.Parent
+	openWindow:Fire(id, nil, if at and at:IsA("BasePart") then at.Position elseif at and at:IsA("Attachment") then at.WorldPosition else nil)
 end)
 
 -- the Black Hole's disk, inner glow and 3 spiral arms (they turn round the ring's axis, each at its own speed)

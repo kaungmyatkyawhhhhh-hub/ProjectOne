@@ -187,8 +187,12 @@ local function holdBuy(b: GuiButton, buyOnce: () -> boolean, dragged: () -> bool
 		if not repeated and not dragged() then buyOnce() end
 	end)
 end
+-- (7 Nov: a button on a 3D BOARD does nothing while a 2D window is open (WindowManager): a click meant for the window
+-- can't buy on the board behind it or re-toggle the window. The TREE window's own panels use this file too: not those)
+local WM = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("WindowManager"))
 local function tap(b: GuiButton, fn: () -> (), dragged: () -> boolean)
 	b.MouseButton1Click:Connect(function()
+		if WM.anyOpen() and b:FindFirstAncestorWhichIsA("SurfaceGui") then return end
 		if not dragged() then fn() end
 	end)
 end
@@ -715,7 +719,8 @@ function UI:buildLocked()
 	tap(self.openBtn.button, function()
 		if not self:can() or not L.window then self.ctx.sound("no") return end
 		local opener = ReplicatedStorage:FindFirstChild("Galaxy") and ReplicatedStorage.Galaxy:FindFirstChild("OpenWindow")
-		if opener then self.ctx.sound("open") opener:Fire(L.window) end
+		local screen = self.gui:IsA("SurfaceGui") and self.gui.Adornee
+		if opener then self.ctx.sound("open") opener:Fire(L.window, nil, if screen and screen:IsA("BasePart") then screen.Position else nil) end
 	end, function() return false end)
 end
 function UI:refreshLocked()

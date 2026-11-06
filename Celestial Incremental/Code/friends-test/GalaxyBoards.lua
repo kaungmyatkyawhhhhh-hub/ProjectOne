@@ -26,6 +26,7 @@ local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 local BoardsUI = require(Galaxy:WaitForChild("IslandBoardsUI"))
 local Kit = require(Galaxy:WaitForChild("UIKit"))
+local WM = require(Galaxy:WaitForChild("WindowManager")) -- (7 Nov: no board taps while a 2D window is open)
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
 local B = MapConfig.Boards
 
@@ -463,7 +464,8 @@ if TOUCH then
 		if processed or not isTap(input) or not downAt then return end
 		local quick = os.clock() - downAt < 0.45 and (Vector2.new(input.Position.X, input.Position.Y) - Vector2.new(downPos.X, downPos.Y)).Magnitude < 14
 		downAt = nil
-		if not quick or shared.GalaxyCinematic or not opener then return end
+		-- (7 Nov: while a 2D window is open, a tap never reaches the world: it's for the window)
+		if not quick or shared.GalaxyCinematic or not opener or WM.anyOpen() then return end
 		local mine
 		for island in pairs(boards) do
 			if island:GetAttribute("Owner") == player.UserId then mine = island:FindFirstChild("Boards") end
@@ -481,7 +483,7 @@ if TOUCH then
 		local w = id and WINDOW[id]
 		if w then
 			Kit.sound("open")
-			opener:Fire(w[1], w[2])
+			opener:Fire(w[1], w[2], node:GetPivot().Position)
 		end
 	end)
 end

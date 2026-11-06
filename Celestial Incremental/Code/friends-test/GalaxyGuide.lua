@@ -14,6 +14,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
+local WM = require(Galaxy:WaitForChild("WindowManager")) -- (7 Nov: closes only by X, Esc / B, outside)
 local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 local Kit = require(Galaxy:WaitForChild("UIKit"))
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
@@ -254,6 +255,7 @@ end
 shared.GalaxyGuideToggle = function() if isOpen then close() else open() end end
 shared.GalaxyGuideRefresh = refreshTabs -- (GalaxyHUD calls it once its hotbar's red dot exists)
 shared.GalaxyGuideClose = close
+WM.register("G", holder, close)
 closeBtn.MouseButton1Click:Connect(close)
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function() if isOpen then scale.Scale = place() end end)
 

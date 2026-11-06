@@ -13,6 +13,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Kit = require(Galaxy:WaitForChild("UIKit"))
+local WM = require(Galaxy:WaitForChild("WindowManager")) -- (7 Nov: closes only by X, Esc / B, outside)
 local Config = require(Galaxy:WaitForChild("GameConfig"))
 local storeEvent = Galaxy:WaitForChild("StoreEvent") :: RemoteEvent
 local hex = Kit.hex
@@ -148,5 +149,6 @@ local function open()
 end
 shared.GalaxyStoreToggle = function() if isOpen then close() else open() end end
 shared.GalaxyStoreClose = close
+WM.register("E", holder, close)
 closeBtn.MouseButton1Click:Connect(close)
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function() if isOpen then scale.Scale = place() end end)

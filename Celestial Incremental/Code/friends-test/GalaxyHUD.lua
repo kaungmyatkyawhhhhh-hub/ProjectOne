@@ -29,6 +29,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local Art = require(Galaxy:WaitForChild("ArtIds")) -- (LUMI's expressions + effects, 6 Nov)
+local WM = require(Galaxy:WaitForChild("WindowManager")) -- (7 Nov: one place that opens / closes the 2D windows)
 local Kit = require(Galaxy:WaitForChild("UIKit"))
 local UpgradesPanel = require(Galaxy:WaitForChild("UpgradesPanel"))
 local BoardsUI = require(Galaxy:WaitForChild("IslandBoardsUI"))
@@ -593,6 +594,7 @@ local function openWindow(tab: string?)
 	end
 	if shared.GalaxyCloseSide then shared.GalaxyCloseSide() end
 	open = true
+	WM.opened("U")
 	Kit.sound("open")
 	win.Visible = true
 	setKeySelected("U")
@@ -605,6 +607,7 @@ end
 local function closeWindow()
 	if not open then return end
 	open = false
+	WM.closed("U")
 	Kit.sound("close")
 	setKeySelected(nil)
 	Kit.tween(winScale, { Scale = winScale.Scale * 0.85 }, 0.15)
@@ -614,9 +617,11 @@ local function closeWindow()
 	layout()
 end
 closeBtn.MouseButton1Click:Connect(closeWindow)
+WM.register("U", win, closeWindow)
 local function closeTree()
 	if not treeOpen then return end
 	treeOpen = false
+	WM.closed("T")
 	Kit.sound("close")
 	setKeySelected(nil)
 	Kit.tween(treeScale, { Scale = treeScale.Scale * 0.85 }, 0.15)
@@ -626,12 +631,14 @@ local function closeTree()
 	layout()
 end
 shared.GalaxyCloseTree = closeTree
+WM.register("T", treeWin, closeTree)
 local function openTree()
 	if open then closeWindow() end
 	if treeOpen then return end
 	if shared.GalaxyCloseSide then shared.GalaxyCloseSide() end
 	buildTreeWindow()
 	treeOpen = true
+	WM.opened("T")
 	Kit.sound("open")
 	treeWin.Visible = true
 	setKeySelected("T")
@@ -650,9 +657,11 @@ shared.GalaxySideWindow = function(key: string, on: boolean)
 		if open then closeWindow() end
 		if treeOpen then closeTree() end
 		sideOpen = key
+		WM.opened(key)
 		setKeySelected(key)
 	elseif sideOpen == key then
 		sideOpen = nil
+		WM.closed(key)
 		setKeySelected(nil)
 	end
 	layout()
@@ -672,6 +681,8 @@ shared.GalaxyCloseSide = function(keep: string?)
 end
 local function pressKey(k)
 	if not keyAllowed(k) then return end
+	-- (7 Nov: a key opens its window; pressing it again while it's open does nothing. Close = X, Esc / B, or outside)
+	if WM.isOpen(k.key) then return end
 	if k.window == "Guide" then
 		if shared.GalaxyGuideToggle then shared.GalaxyGuideToggle() end
 	elseif k.window == "Store" then
@@ -706,7 +717,13 @@ end)
 task.spawn(function()
 	local opener = Galaxy:WaitForChild("OpenWindow", 60)
 	if not opener then return end
-	opener.Event:Connect(function(id, tab)
+	-- (7 Nov: `from` = the board's position: the window closes when you walk 25+ studs away from it. A board can't
+	-- toggle an open window shut: Forge / Black Hole only open)
+	opener.Event:Connect(function(id, tab, from)
+		if id == "Forge" and WM.isOpen("F") then return end
+		if id == "BlackHole" and WM.isOpen("B") then return end
+		if id == "Tree" and WM.isOpen("T") then return end
+		task.defer(function() if typeof(from) == "Vector3" and WM.anyOpen() then WM.fromBoard(from) end end)
 		if id == "Upgrades" then
 			-- (a tapped board names its tab: BODIES / PERKS; the tutorial's arrow then points at the right tab inside)
 			if treeOpen then closeTree() end
@@ -722,15 +739,10 @@ task.spawn(function()
 	end)
 end)
 
------------------------------------------------------------------------- #163 TAP OUTSIDE CLOSES (Phase 2.7): a see-through backdrop under the
--- windows, only while one is open; a tap on it closes whatever is open (one window at a time already)
-local backdrop = Kit.new("TextButton", { Name = "Backdrop", Text = "", AutoButtonColor = false, BackgroundTransparency = 1,
-	Size = UDim2.fromScale(1, 1), ZIndex = 0, Visible = false }, root) -- (ZIndex 0: under every window and the HUD)
-backdrop.MouseButton1Click:Connect(function()
-	if open then closeWindow() end
-	if treeOpen then closeTree() end
-	if shared.GalaxyCloseSide then shared.GalaxyCloseSide() end
-end)
+------------------------------------------------------------------------ #163 TAP OUTSIDE CLOSES: WindowManager's backdrop (7 Nov). It was one
+-- full-screen button under the windows, and a click on a window's plain frame (a row, the tab column) reached it and closed
+-- the window. Now: four dim strips AROUND the open window only (ZIndex 0: under the hotbar)
+WM.backdrop(root, 0)
 
 ------------------------------------------------------------------------ layout (screen size)
 -- the window sits between the counter and the hotbar (on phones the hotbar hides while it's open)
@@ -790,7 +802,6 @@ function layout()
 	hot.Visible = not (small and (open or treeOpen or sideOpen ~= nil))
 	-- (the potion / FRIENDS / GROUP strip hides while a window is open: it covered the TREE window)
 	if shared.GalaxyPotionsShow then shared.GalaxyPotionsShow(not (open or treeOpen or sideOpen ~= nil)) end
-	backdrop.Visible = open or treeOpen or sideOpen ~= nil
 	-- (and the NEXT line + the GALAXY pill: a window covers that space, on phones most of all)
 	nextRoot.Visible = not (open or treeOpen or sideOpen ~= nil)
 	ignRoot.Visible = not (open or treeOpen or sideOpen ~= nil)

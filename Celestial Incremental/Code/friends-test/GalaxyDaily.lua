@@ -11,6 +11,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Kit = require(Galaxy:WaitForChild("UIKit"))
+local WM = require(Galaxy:WaitForChild("WindowManager")) -- (7 Nov: closes only by X, Esc / B, outside)
 local Vfx = require(Galaxy:WaitForChild("VfxLibrary"))
 local Art = require(Galaxy:WaitForChild("ArtIds")) -- (7 Nov: the stopwatch)
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
@@ -164,6 +165,7 @@ event.OnClientEvent:Connect(function(kind, key, amount)
 end)
 -- (another window opening = claim + close, so nothing is lost)
 shared.GalaxyReturnClose = function() if retOpen then claim() end end
+WM.register("R", ret, shared.GalaxyReturnClose)
 -- shown once the loading screen and any cinematic are done
 task.spawn(function()
 	task.wait(4)
@@ -356,6 +358,7 @@ local function openDaily()
 end
 shared.GalaxyDailyToggle = function() if dOpen then closeDaily() else openDaily() end end
 shared.GalaxyDailyClose = closeDaily
+WM.register("J", daily, closeDaily)
 dClose.MouseButton1Click:Connect(closeDaily)
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function() if dOpen then dScale.Scale = placeIn(daily, DW, DH) end end)
 task.defer(refreshDaily)

@@ -50,7 +50,9 @@ end
 
 local CW, CH, GAP = 214, 74, 10
 local SH = 40 -- (the social chips' height)
-local strip = Kit.box(root, 0, 0, CW, (CH + GAP) * #Econ.Potions + (SH + GAP) * 2, { Name = "Potions", AnchorPoint = Vector2.new(0, 0.5) })
+-- (7 Nov, owner: the boost chips go to the MIDDLE-BOTTOM LEFT, out of the way on PC and phone: one column, its bottom
+-- fixed (BOOSTS at the bottom, the social chips + potions stacked above it, growing upward). See layoutBoosts)
+local strip = Kit.box(root, 0, 0, CW, (CH + GAP) * #Econ.Potions + (SH + GAP) * 2, { Name = "Potions", AnchorPoint = Vector2.new(0, 1) })
 local scale = Instance.new("UIScale")
 scale.Parent = strip
 
@@ -166,14 +168,14 @@ local function layout()
 	local s = screenScale()
 	local vp = viewport()
 	scale.Scale = s
-	strip.Position = UDim2.fromOffset(math.floor(10 * s), math.floor(vp.Y * 0.5))
+	local _ = vp
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
 ------------------------------------------------------------------------ #144 the BOOSTS chip + #229 the ACTIVE BOOSTS list (Phase 2.7): on the
 -- right, "BOOSTS x2.30" = every boost of yours added together (#69: same kind adds); a tap opens the list of each one with its
 -- timer (the pass, the potions, the Star Surge, friends, group)
 local Galaxy2 = ReplicatedStorage:WaitForChild("Galaxy")
-local boostRoot = Kit.box(root, 0, 0, 230, 40, { Name = "Boosts", AnchorPoint = Vector2.new(1, 0.5) })
+local boostRoot = Kit.box(root, 0, 0, 230, 40, { Name = "Boosts", AnchorPoint = Vector2.new(0, 1) })
 local bScale = Instance.new("UIScale")
 bScale.Parent = boostRoot
 local bChip = Kit.new("TextButton", { Text = "", AutoButtonColor = false, BackgroundTransparency = 1, Size = UDim2.fromOffset(230, 40), ZIndex = 9 }, boostRoot)
@@ -222,6 +224,7 @@ local function refreshBoosts()
 		local lines = boostLines()
 		for i, l in ipairs(listLines) do Kit.setText(l, lines[i] or "") end
 		listBg.Size = UDim2.fromOffset(230, 12 + #lines * 24)
+		list.Position = UDim2.fromOffset(0, -(12 + #lines * 24) - 8) -- (it opens UPWARD: the chip is at the bottom of the column)
 	end
 end
 bChip.MouseButton1Click:Connect(function()
@@ -240,7 +243,11 @@ local function layoutBoosts()
 	local s = screenScale()
 	local vp = viewport()
 	bScale.Scale = s
-	boostRoot.Position = UDim2.fromOffset(vp.X - math.floor(10 * s), math.floor(vp.Y * 0.42))
+	-- the column's bottom: 80% down the screen on PC, 68% on a phone (above the move thumbstick's corner); BOOSTS there,
+	-- the potions + social chips right above it
+	local bottom = math.floor(vp.Y * (if vp.Y < 500 then 0.68 else 0.8))
+	boostRoot.Position = UDim2.fromOffset(math.floor(10 * s), bottom)
+	strip.Position = UDim2.fromOffset(math.floor(10 * s), bottom - math.floor((40 + GAP) * s))
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layoutBoosts)
 layoutBoosts()
@@ -279,6 +286,8 @@ local function refresh()
 			y += SH + GAP
 		end
 	end
+	-- (the column's bottom is fixed: its height = what's in it, so it grows upward)
+	strip.Size = UDim2.fromOffset(CW, math.max(1, y - GAP))
 end
 player:GetAttributeChangedSignal("FriendsHere"):Connect(function() refresh() end)
 player:GetAttributeChangedSignal("InGroup"):Connect(function() refresh() end)
