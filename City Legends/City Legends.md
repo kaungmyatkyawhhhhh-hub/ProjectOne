@@ -23,7 +23,7 @@ Pictures, theirs on the left: [[Ghost look - highway sunset.jpg]], [[Ghost look 
 All 5 race rings are on the Old Rock's palace square. Pictures: [[Racing Hub - arch.jpg]], [[Racing Hub - palace square.jpg]].
 - **How it works:** stop in a ring on the square to join. After the 15 s lobby you're taken to that race's start line (fade, car held), then 3-2-1. Tested solo in Play: Casino Avenue, ring to start line in under a second, GO on time. 2+ racers line up in two rows (`gridSpot`): not tested.
 - **Code:** `Config.Activities.Hub` (bays, fast travel spot, grid), `race.ring` in `ActivityData`, `startLobby` / `gridSpot` in `server/Activities.lua`, `toStartLine` in `client/Activities.lua`. The rings on the roads are gone. One fast travel spot, `racing_hub`, replaces the 5 race spots.
-- **The look:** `tools/riviera/RacingHub.luau` (`build`, `undo`): RACING HUB arch at the top of the ramp, a pad and sign per race, flags, tyre stacks, 56 parts in `Riviera.OldRock.RacingHub`. The two benches moved to the palace side (`OldCFrame`).
+- **The look:** `tools/riviera/RacingHub.luau` (`build`, `undo`): RACING HUB arch at the top of the ramp, a pad and sign per race, flags, tyre stacks, 58 parts in `Riviera.OldRock.RacingHub`. The two benches moved to the palace side (`OldCFrame`).
 - **Choice:** the races keep their routes and you're carried to the start, so nothing about the roads changed. Racing away from the hub would mean new routes.
 - **Seen, not touched:** the cobbles on the square and the ramp show long dark cracks up close (`RivCobble`).
 
