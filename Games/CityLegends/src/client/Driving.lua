@@ -76,6 +76,7 @@ Driving.smoke = 1 -- tyre smoke (Settings): 0 off, 0.5 low, 1 high
 Driving.marks = true -- tyre marks (Settings)
 Driving.loadHold = false -- the map round the car is still loading (Main.client's waitForMap): held too
 Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
+Driving.workshopOpen = false -- the workshop has the camera (over Legends Customs too)
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings or M; Q / E shift only in manual)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
 Driving.onGearboxChanged = nil :: ((string) -> ())? -- Q / E or M changed the gearbox

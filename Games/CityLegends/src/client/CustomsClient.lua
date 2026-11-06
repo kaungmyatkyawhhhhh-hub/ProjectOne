@@ -467,6 +467,9 @@ local function open()
 			finish()
 			return
 		end
+		if Driving.workshopOpen then
+			return -- (PERFORMANCE PARTS: the workshop has the camera)
+		end
 		if not dragging then
 			angle += dt * 0.22
 		end

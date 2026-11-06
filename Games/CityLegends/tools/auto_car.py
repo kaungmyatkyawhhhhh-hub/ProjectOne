@@ -582,7 +582,7 @@ def main():
         json.dump(report, open(out + ".json", "w"), indent=1)
         print(json.dumps(report))
         return
-    sc, R, depth = best["centre"], best["radius"] / scale, 0.14 / scale
+    sc, R, depth = best["centre"], float(hint.get("steer_r", best["radius"])) / scale, 0.14 / scale  # (hint: the rim's real radius, m, when a wider one takes in vents or door trim)
     # the steering wheel's pieces: any within its radius (side/up plane) and a short depth either
     # side of it
     sel_pts = []

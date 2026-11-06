@@ -1288,7 +1288,7 @@ local function dynoRun()
 		table.insert(segs, { rpm = b.rpm, hp = h, nm = n })
 	end
 	pose("dyno")
-	wantShift, wantShiftY = 0, 0.56
+	wantShift, wantShiftY = 0, 0.5
 	Driving.muteEngine(true)
 	task.spawn(function()
 		-- down onto the rollers
@@ -1878,6 +1878,7 @@ function Workshop.close()
 		end
 	end
 	table.clear(savedBlur)
+	Driving.workshopOpen = false
 	if savedHold then
 		Driving.cameraHold = savedHold[1]
 		Driving.menuHold = savedHold[2]
@@ -1958,6 +1959,7 @@ function Workshop.open(carId: string)
 	savedHold = { Driving.cameraHold, Driving.menuHold }
 	Driving.cameraHold = true
 	Driving.menuHold = true
+	Driving.workshopOpen = true
 	savedFov = camera.FieldOfView
 	savedCamType = camera.CameraType
 	room = buildRoom()
