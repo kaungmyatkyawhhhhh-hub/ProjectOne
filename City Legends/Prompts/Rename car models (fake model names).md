@@ -1,4 +1,4 @@
-# Prompt: give every car a fake model name (BMWs and Mercedes use chassis codes)
+# Prompt: give every car a fake model name, rename Hemi to Ironclad, add the ZV / ZVX / VTZ side lettering
 
 _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras._
 
@@ -116,7 +116,7 @@ The brand names are already fictional (except "Hemi", renamed below), but the mo
 
 Avoid in future names (owner, 2026-11-06): C6 / C7 style codes Chevrolet advertises, W16, "Gran Coupe", "Gullwing", "Performante", and anything a maker uses as a real model name.
 
-## Side nicknames on the Aventador line (owner, 2026-11-06)
+## Side nicknames: Aventador line and Huracan STO (owner, 2026-11-06)
 Our own version of the real SV / SVJ side lettering (the real cars say "SV" = Super Veloce, "SVJ" = Super Veloce Jota):
 - **ZV** = **Zanna Vortice** ("fang vortex"), on `lambrini_lp750` (old SV).
 - **ZVX** = **Zanna Vortice Xtrema** ("fang vortex extreme"), on `lambrini_svj`.
@@ -132,4 +132,5 @@ If a new car (e.g. the Pending A45 S, or any future import) arrives, name it the
 - Commit, push, save the place; note it in `City Legends/City Legends.md`.
 
 ## When done, tell the owner (short)
-- done, how many names changed, anything you couldn't rename.
+- done, how many names changed, anything you couldn't rename;
+- screenshots of the ZV, ZVX, ZVX 63 and VTZ side lettering on the cars (day, phone size).
