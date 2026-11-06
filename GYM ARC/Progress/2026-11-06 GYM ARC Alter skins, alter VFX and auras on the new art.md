@@ -87,3 +87,35 @@ Owner: "in every aura, remove the vfx thats under ur foot".
 - Kept: wisps, floaters, the flame loop on the body, and the flare's star + pillar. Tested in Play: 0 emitters at the feet, 0 errors.
 
 ![[GYM ARC/Screenshots/alter_art_1106/aura_no_ground_vfx_galaxy_flare.jpg]]
+
+## Later, 6 Nov: AURA VFX FIX (black boxes + too much)
+Owner's prompt "AURA VFX FIX". Owner answers: keep nothing under the feet (no ring); tiers = Common/Uncommon/Rare/Epic **low**, Legendary + Mythic **top** (no mid tier).
+
+**1. Re-upload.** The owner rebuilt every texture in `Assets\vfx\auras`, `alters`, `titan` (clean transparent `_alpha`, pure black `_add`). 159 images re-uploaded to Myanmar Builders Club (+1 flat flare ring for the prestige halo). New ids in `Config/ArtIds` (alter VFX, aura wisp / particle / ring, flare, flame loop) and a new `ArtIds.Titan` (the 9 Titan textures, not used by the game yet). Table: [[2026-11-06 GYM ARC - Art ids (ChatGPT batch)]].
+
+**2. Blending rule** (`_alpha` at LightEmission 0.2-0.4 + LightInfluence 0; `_add` only at LightEmission 1). Changed:
+| Where | Before | Now |
+|---|---|---|
+| AuraVFX wisp / particle / flame | `_add` at 1 or 0.9 (flame), dark auras `_alpha` at 0 with LightInfluence 0.3 | `_alpha`, LightEmission 0.3, LightInfluence 0 |
+| AuraVFX ground ring | `_add` at 0.5 for dark auras (the black square) | removed (owner) |
+| AuraPrestige halo | `_add` flat ring at 1 | new flat `_alpha` ring at 0.3 (layer is off, see 3) |
+| AlterLookClient solid things (clay, rock, coin, sweat, jade, amethyst, ruby) | `_alpha` at 0, LightInfluence 0.5 | `_alpha` at 0.3, LightInfluence 0 |
+| AlterLookClient footstep puff | `_alpha` at 0, LightInfluence 0.6 | `_alpha` at 0.3, LightInfluence 0 |
+Already OK, unchanged: alter glows, spark shower, transform burst, flare star / pillar, Peak's gold dust, prestige motes (`_add` at 1). No UI, Beam, BillboardGui or Decal uses these textures (the only ImageLabels are invisible preloaders).
+
+**3. Toned down (AuraVFX v5).**
+- low: particles only, 2-3 a second. top: + wisp 1-2 a second + one flame-loop emitter 2-3 a second, both behind the body.
+- Particles: Transparency 0.35 -> 1, Size 0.4-0.9 studs, Lifetime 1-1.6 s, from a box hugging the body (~0.75 stud out) from the feet to the shoulders, never at the face.
+- Flare (record / full pump / equipping): star + pillar, unchanged size.
+- Others x0.5, past 60 studs off, phones / low graphics (LowEnd: phones, tablets and slow PCs) x0.5 again. Reduced Motion: no aura particles and no flare (the rule said "ring only" and the ring is off).
+- **The prestige layer (orbs, motes, halo, light pillar, from 4 Nov) is off**: it was outside the per-tier budget. One switch in AuraClient (`PRESTIGE_LAYER`) brings it back. The hard auras' own colours stay.
+
+**4. Test.**
+- Particles alive per player (rate x lifetime, own aura at full power): **before** Frost 39, Galaxy 48, Golden 48, Titan 54, Gemstone 57 (10-12 emitters). **After** low ~4 (1 emitter), top ~10 (3 emitters); another player's half; on a phone half again.
+- FPS (Studio, PC): no aura 53 fps, 10 bodies with top auras 50 fps (~53 aura particles alive on a normal PC). 9 of the 10 were clones (Studio can't start a 10-player test from here). Real phone still to check.
+- No black or hazy boxes on the light plaza floor or in the dark gym; the body and face stay readable. 0 script errors.
+- Screenshots: `GYM ARC/Screenshots/aura_fix_1106/` (low Frost, low-Epic Galaxy, top Golden; dark gym + light plaza; front + side; the flare; phone low-end shots; `phone/` = 667x375 copies). The gym floors are all dark, so the light floor is the outdoor plaza.
+- Note: the low auras are now very quiet (a few small floaters); top auras show most from the side (wisp + flame sit behind the body).
+
+![[GYM ARC/Screenshots/aura_fix_1106/top_golden_light_front.jpg]]
+![[GYM ARC/Screenshots/aura_fix_1106/top_golden_dark_side.jpg]]

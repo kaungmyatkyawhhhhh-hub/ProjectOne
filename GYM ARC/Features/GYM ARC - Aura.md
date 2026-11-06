@@ -160,3 +160,6 @@ While benching: ![[GYM ARC/Screenshots/auras_v4_inferno_bench.jpg]]
 
 ## Effects v4: the ChatGPT aura art (6 Nov)
 Each aura: its own rising wisps, its own floaters and the tinted flame loop on the body; a flare (star + pillar) on a record, a full pump and equipping. Owner, 6 Nov: no VFX under the feet (no ground ring, no flare ring, no tier-5 shockwave). See [[2026-11-06 GYM ARC Alter skins, alter VFX and auras on the new art]].
+
+## Effects v5: toned down (6 Nov, later)
+Low (Common-Epic): a few floaters only. Top (Legendary, Mythic): + a wisp and one flame behind the body. Nothing under the feet, nothing over the face; prestige layer off. Flare stays big. See [[2026-11-06 GYM ARC Alter skins, alter VFX and auras on the new art]].
