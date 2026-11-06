@@ -211,8 +211,8 @@ Same rules as above (engine codes only, never "M", "AMG", "TFSI", "VR6" or other
 
 ---
 
-## PART 2: new starter cars (350Z, 330i, Golf GTI Clubsport Mk7)
-_Owner, 2026-11-06: added to this prompt so both are done in one run. Do Part 1 (the upgrades) first, then this._
+## PART 2: new starter cars (350Z, 330i, Ford Focus RS Mk3)
+_Owner, 2026-11-06: added to this prompt so both are done in one run. Do Part 1 (the upgrades) first, then this. **The Ford Focus RS replaces the Golf** (owner, 2026-11-06), so don't convert or add the Golf._
 
 ### What the owner wants (2026-11-06)
 The free starter pick (`Config.Menu.StarterChoices`) becomes:
@@ -220,35 +220,34 @@ The free starter pick (`Config.Menu.StarterChoices`) becomes:
 |---|---|---|---|---|
 | 1 | Horizon 350Z (Z33 after the rename) | `nisun_350z` | 155 | "Grippy sports car" |
 | 2 | Bavarica Werkz 330i (G20 Sport after the rename) | `bnw_330i_g20` | 155 | "Quick, comfy sedan" |
-| 3 | **VW Golf GTI Clubsport Mk7** (new car, see below) | new id, e.g. `wolfs_golf_gti_cs` | 155 | "Hot hatch, front-wheel drive" |
+| 3 | **Ford Focus RS Mk3** (new car, see below) | new id, e.g. `dearb_focus_rs` | 165 | "All-wheel drive, drift mode" |
 
-Why: the Camaro (top 184) was standing in for the A45 S and was far too fast for a free car.
+Why: the Camaro (top 184) was standing in for the A45 S and was far too fast for a free car. The Focus RS is a little faster than the other two (165): the owner is fine with that.
 
 ### Changes
 1. **Starter pick** = the 3 cars above. The Chasor, the A45 S and the Camaro leave the pick; they stay in the game as normal cars you can buy (the A45 S is still waiting for its model, `Cars.Pending`).
 2. **Bring the 330i back:** remove `bnw_330i_g20` from `Cars.RETIRED`, and move it to the **Starter** tier with a Starter price (about $40K, in line with the 540i $42K and the 350Z $38K). Keep its id, so players who own it keep it. Check its model, cluster and wheel still work.
-3. **Golf GTI Clubsport Mk7 (new car; owner, 2026-11-06: replaces the Audi TT idea):** the owner will put the model in `Games/CityLegends/imports/importing cars/`. Then do the normal new-model routine (`Better car models and clean interiors.md`, Part 3; licence check, logos out, live cluster, clean interior):
-   - **new fictional brand "Wolfsburg"** (Volkswagen; a city name like "Stuttgart" for Porsche): add it to `Cars.Makes`; no VW logo anywhere (cover the badges front, rear, wheel caps and steering wheel);
-   - name by **chassis code** (Golf Mk7 = 5G): **"Wolfsburg 5G Club"**. Never use "Golf", "GTI" or "Clubsport" (VW's names), and remove the GTI / Clubsport lettering and the red grille-stripe badge text from the model (the plain red stripe can stay);
-   - stats like the real car: about 265–290 hp, front-wheel drive, 0–60 about 5.8 s, top speed 155; Starter tier, price about $40K; real wheelbase 2.63 m in `CarBuilder.REAL_WB`;
-   - it's a new model, so it also gets the new-model looks (the lighting / car look and small design change prompts) if those are done.
-   - **The model is in:** `Games/CityLegends/imports/importing cars/2016_volkswagen_golf_gti_clubsport_mk7.glb` (Sketchfab, Ddiaz Design; about 95k triangles, full interior, separate wheels).
-   - **Licence warning (write it in the notes for the owner):** it's marked **CC-BY-NC-SA** (non-commercial) and its part names look like a racing game's files (`Lowcar_volkswagen_golfgti_2016_..._lod1`), so it may be ripped. The owner chose to use it for now (2026-11-06) and change it a little. Small changes don't fix the licence: keep a note to swap it for a commercially licensed model later.
-   - **Change it up a little** (owner, 2026-11-06), the same way as `Small design changes on famous new cars.md`, so it reads as our own "Wolfsburg 5G Club":
-     - **all VW badges and lettering off** (front, rear, steering wheel, wheel caps, seats, the GTI / Clubsport side lettering);
-     - **our own wheels** from that prompt's wheel library (a 5-spoke or Y-spoke sport style, same size and fit);
-     - a **different grille insert** (e.g. hex mesh instead of honeycomb, our own small Wolfsburg badge spot), keeping the thin red grille line;
+3. **Ford Focus RS Mk3 (new car):** the owner will put the model in `Games/CityLegends/imports/importing cars/`. Then do the normal new-model routine (`Better car models and clean interiors.md`, Part 3: licence check, logos out, live cluster, clean interior):
+   - **Licence first:** check the model's licence before anything else. A commercial licence (bought) or CC-BY is fine (credit it). If it's **NC** (non-commercial) or looks ripped from a game (part names like a racing game's files), **write a warning at the top of the notes for the owner**, then carry on.
+   - **New fictional brand "Dearborn"** (Ford; a city name like "Stuttgart" for Porsche): add it to `Cars.Makes`; no Ford oval or lettering anywhere (front, rear, wheel caps, steering wheel, seats, the "RS" badges and side lettering).
+   - Name by **chassis code** (Focus Mk3 = C346): **"Dearborn C346 Rallye"**. Never use "Ford", "Focus" or "RS".
+   - Stats like the real car: about 350 hp, **all-wheel drive** with a rear bias that lets it slide (a **drift mode** feel: more power to the rear wheels), 0–60 about 4.5 s, top speed 165. Starter tier, price about $42K. Real wheelbase 2.65 m in `CarBuilder.REAL_WB`.
+   - **Change it up a little**, the same way as `Small design changes on famous new cars.md`, so it reads as our own:
+     - **our own wheels** from that prompt's wheel library (a sport multi-spoke, same size and fit);
+     - a **different grille mesh** and lower intakes (slat count / pattern);
      - **tail lights:** change the inner glowing pattern only (outer shape stays);
-     - **small details:** lower bumper vent slats, the rear diffuser fins and the exhaust tips (shape / count);
-     - a **"5G CLUB"** script on the boot in our own font;
-     - before / after renders at normal distance and close up, like the other prompt.
-4. **Until the Golf model is in:** slot 3 uses the **540i** (`bnw_540i`, top 155, "Fast and comfy") as its stand-in (`fallback`), not the Camaro. When the Golf is in, the Golf takes the slot.
-5. New players who already picked a starter keep their car.
+     - **small details:** the rear spoiler end plates, the diffuser fins and the exhaust tips;
+     - a **"C346"** script on the boot in our own font;
+     - before / after renders at normal distance and close up.
+   - It's a new model, so it also gets the new-model looks (the lighting / car look prompt) if those are done.
+4. **The Golf:** don't add it (its model was CC-BY-NC-SA and possibly ripped). Leave its `.glb` in the folder; the owner decides later. No "Wolfsburg" brand for now.
+5. **Until the Focus model is in:** slot 3 uses the **540i** (`bnw_540i`, top 155, "Fast and comfy") as its stand-in (`fallback`), not the Camaro. When the Focus is in, it takes the slot.
+6. New players who already picked a starter keep their car.
 
 ### Check before you say done
-- A new player sees the 3 picks (with the 540i in slot 3 until the Golf arrives), can pick each one, and gets it in the garage; phone-size screenshot of the pick screen.
+- A new player sees the 3 picks (with the 540i in slot 3 until the Focus arrives), can pick each one, and gets it in the garage; phone-size screenshot of the pick screen.
 - The 330i shows in the dealer under Starter; old owners still have it.
 - Lune tests and `luau-lsp analyze` clean; save the place, commit, push; note it in `City Legends/City Legends.md`.
 
 ### Report (starter cars)
-- done, the pick screen screenshot, and that the Golf model is still needed (if it is).
+- done, the pick screen screenshot, the Focus's licence, and that the Focus model is still needed (if it is).
