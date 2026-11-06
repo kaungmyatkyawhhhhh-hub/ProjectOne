@@ -232,6 +232,16 @@ Why: the Camaro (top 184) was standing in for the A45 S and was far too fast for
    - name by **chassis code** (Golf Mk7 = 5G): **"Wolfsburg 5G Club"**. Never use "Golf", "GTI" or "Clubsport" (VW's names), and remove the GTI / Clubsport lettering and the red grille-stripe badge text from the model (the plain red stripe can stay);
    - stats like the real car: about 265–290 hp, front-wheel drive, 0–60 about 5.8 s, top speed 155; Starter tier, price about $40K; real wheelbase 2.63 m in `CarBuilder.REAL_WB`;
    - it's a new model, so it also gets the new-model looks (the lighting / car look and small design change prompts) if those are done.
+   - **The model is in:** `Games/CityLegends/imports/importing cars/2016_volkswagen_golf_gti_clubsport_mk7.glb` (Sketchfab, Ddiaz Design; about 95k triangles, full interior, separate wheels).
+   - **Licence warning (write it in the notes for the owner):** it's marked **CC-BY-NC-SA** (non-commercial) and its part names look like a racing game's files (`Lowcar_volkswagen_golfgti_2016_..._lod1`), so it may be ripped. The owner chose to use it for now (2026-11-06) and change it a little. Small changes don't fix the licence: keep a note to swap it for a commercially licensed model later.
+   - **Change it up a little** (owner, 2026-11-06), the same way as `Small design changes on famous new cars.md`, so it reads as our own "Wolfsburg 5G Club":
+     - **all VW badges and lettering off** (front, rear, steering wheel, wheel caps, seats, the GTI / Clubsport side lettering);
+     - **our own wheels** from that prompt's wheel library (a 5-spoke or Y-spoke sport style, same size and fit);
+     - a **different grille insert** (e.g. hex mesh instead of honeycomb, our own small Wolfsburg badge spot), keeping the thin red grille line;
+     - **tail lights:** change the inner glowing pattern only (outer shape stays);
+     - **small details:** lower bumper vent slats, the rear diffuser fins and the exhaust tips (shape / count);
+     - a **"5G CLUB"** script on the boot in our own font;
+     - before / after renders at normal distance and close up, like the other prompt.
 4. **Until the Golf model is in:** slot 3 uses the **540i** (`bnw_540i`, top 155, "Fast and comfy") as its stand-in (`fallback`), not the Camaro. When the Golf is in, the Golf takes the slot.
 5. New players who already picked a starter keep their car.
 
