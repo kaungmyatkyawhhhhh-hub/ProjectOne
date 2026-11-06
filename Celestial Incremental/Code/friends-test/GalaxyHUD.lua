@@ -388,7 +388,7 @@ local KEYS = {
 	{ key = "F", colour = hex("#ffd84a"), icon = "forge", name = "STAR FORGE", note = "STAR FORGE: opens at IGNITION 1 (Sector 2)", window = "Forge" },
 	{ key = "T", colour = hex("#7dff8a"), icon = "planet", name = "TREE", window = "Tree" },
 	-- (Phase 2.4, #142: the DAILY window: streak, quests, playtime gifts; a red dot when something can be claimed)
-	{ key = "J", colour = hex("#5ae6d2"), icon = "essence", name = "QUESTS", window = "Daily" },
+	{ key = "J", colour = hex("#5ae6d2"), icon = "quests", name = "QUESTS", window = "Daily" },
 	{ key = "G", colour = hex("#b49bff"), icon = "book", name = "GUIDE", window = "Guide" },
 	{ key = "E", colour = hex("#ff5a6a"), icon = "shard", name = "STORE", window = "Store" },
 	{ key = "Q", colour = hex("#c9c4d2"), icon = "gear", name = "SETTINGS", window = "Settings" },

@@ -71,7 +71,7 @@ local RW, RH = 520, 330
 local ret = Kit.box(root, 0, 0, RW, RH, { Name = "ReturnWindow", AnchorPoint = Vector2.new(0.5, 0.5), Visible = false })
 local retScale = Instance.new("UIScale")
 retScale.Parent = ret
-local retWin, retClose = Kit.window(ret, RW, RH, { title = "WHILE YOU WERE AWAY", icon = "stardust", iconGlow = Color3.fromRGB(255, 170, 60),
+local retWin, retClose = Kit.window(ret, RW, RH, { title = "WHILE YOU WERE AWAY", icon = "offlineEarnings", iconGlow = Color3.fromRGB(255, 170, 60),
 	c1 = hex("#7a3a14"), c2 = hex("#ff9a3a"), lip = hex("#c2410c"), glow = Color3.fromRGB(255, 140, 40), line = hex("#ffc58a") })
 local retAway = Kit.text(retWin, 0, 74, RW, 24, "", Kit.ps(18, 20), { ZIndex = 8, TextXAlignment = CENTRE, FontFace = Kit.FONT_BOLD, TextColor3 = hex("#e8e2f0") })
 local amtPanel = Kit.panel(retWin, 40, 106, RW - 80, 88, 5)
@@ -179,7 +179,7 @@ local DW, DH = 700, 440
 local daily = Kit.box(root, 0, 0, DW, DH, { Name = "DailyWindow", AnchorPoint = Vector2.new(0.5, 0.5), Visible = false })
 local dScale = Instance.new("UIScale")
 dScale.Parent = daily
-local dWin, dClose = Kit.window(daily, DW, DH, { title = "DAILY", icon = "essence", iconGlow = Color3.fromRGB(60, 230, 210),
+local dWin, dClose = Kit.window(daily, DW, DH, { title = "DAILY", icon = "dailyStreak", iconGlow = Color3.fromRGB(60, 230, 210),
 	c1 = hex("#0f5a52"), c2 = hex("#38d6c0"), lip = hex("#14907f"), glow = Color3.fromRGB(60, 230, 210), line = hex("#8af5e6") })
 local function heading(x, y, text)
 	return Kit.text(dWin, x, y, 300, 26, text, Kit.ps(19, 21), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.8,
@@ -226,7 +226,7 @@ local giftTiles = {}
 for i, m in ipairs(Econ.Gifts) do
 	local x, y = 460 + ((i - 1) % 2) * 112, 292 + ((i - 1) // 2) * 70
 	local panel = Kit.panel(dWin, x, y, 104, 62, 4)
-	Kit.icon(dWin, "essence", x + 2, y + 2, 34, nil, { ZIndex = 7 })
+	Kit.icon(dWin, "playtimeGift", x + 2, y + 2, 34, nil, { ZIndex = 7 })
 	Kit.text(dWin, x + 36, y + 6, 66, 20, m .. " MIN", Kit.ps(15, 17), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4 })
 	local b, inner = Kit.button(dWin, x + 6, y + 32, 92, 24, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6 })
 	local bt = Kit.text(inner, 0, Kit.ps(2, 1), 92, 20, "", Kit.ps(13, 15), { ZIndex = inner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
@@ -371,6 +371,9 @@ task.spawn(function()
 	Kit.grad(bg, hex("#1d1a2a"), hex("#0e0c14"), 90)
 	Kit.text(sg, 0, 14, 440, 40, "FREE REWARDS", 34, { ZIndex = 5, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2.4,
 		gradient = ColorSequence.new(hex("#fff1c0"), hex("#ffb02a")) })
+	-- (6 Nov: the board's own icon either side of the title)
+	Kit.icon(sg, "freeRewards", 34, 6, 54, nil, { ZIndex = 5 })
+	Kit.icon(sg, "freeRewards", 440 - 34 - 54, 6, 54, nil, { ZIndex = 5 })
 	local rows = {}
 	for i, f in ipairs(Econ.FreeRewards) do
 		local y = 70 + (i - 1) * 92

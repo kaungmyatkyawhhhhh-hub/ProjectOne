@@ -15,7 +15,7 @@ Checklist rows: **#270 #281 #282 #288 #289 #297 #299 #300 #301 #302 #303 #304 #3
   - `_add` files: LightEmission 1.
   - `_alpha` files: tinted, used on screen.
   - Flipbooks: Grid4x4. One-shots last 0.7-1.2 s; loops run at 18-24 fps.
-- **Group ids (6 Nov, later):** you bulk-imported the files to the **P&L Studios XP group** and put the decals in Workspace. VfxTextures now uses the group ids (checked: Creator = P&L Studios XP), except `add.core_light_rays`: that file wasn't in the import, so it still uses my Studio test upload.
+- **Group ids (6 Nov, later):** you bulk-imported the files to the **P&L Studios XP group** and put the decals in Workspace. VfxTextures now uses the group ids (checked: Creator = P&L Studios XP). `add.core_light_rays` came later: you sent decal 115502892460875; the image inside it is 113369449336887.
 - 4 files never finished processing on the first upload and were re-uploaded with one invisible pixel changed:
   - stardust_mote, core_light_rays, forge_sparks, electric_arc
   - electric_arc was still processing when I stopped.
@@ -146,7 +146,7 @@ Checklist rows: **#270 #281 #282 #288 #289 #297 #299 #300 #301 #302 #303 #304 #3
 - Aura flames were hidden inside the anvil. Lifted.
 
 ## Not done / flags
-1. **One texture still on a test upload:** `vfx_core_light_rays_512_add` (not in the group import).
+1. **The group uploads were still processing on Roblox's side** ("being generated") when I checked: 15 of 142 loaded. They show once Roblox finishes.
 2. **Frame strips, not video:** Studio can't record clips here. The frames were taken slowed down (VfxLibrary.TimeScale, test only).
 3. **Not seen on screen:** a real Forge roll end to end (camera at the anvil), the Celestial alone, the Ring Nebula after the fix, the Supernova wind-up arcs (their texture was the one still processing), Reduced Motion (coded, not screenshotted).
 4. **No 2-player test:** other players' Supernovas use the same code without shake/flash.

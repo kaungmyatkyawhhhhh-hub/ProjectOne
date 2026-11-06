@@ -137,3 +137,14 @@ Ideas to close the late gap (NOT built, your call):
   - create the OFFLINE x2 product + the collector badges (ids)
   - decide on the late-gap fix
 - Keep the Studio switches off (they are cleared).
+
+## Later (6 Nov): the features' own icons
+You imported galaxy_icon_* (P&L Studios XP group). They're in UIAssets.icon (+ icon128) and replace the old stand-ins:
+- RETURN screen window icon: stardust → **offlineEarnings**
+- DAILY window icon: essence → **dailyStreak**
+- QUESTS hotbar key (J): essence → **quests**
+- PLAYTIME GIFTS tiles: essence → **playtimeGift**
+- BOOSTS chip: stardust → **boosts**
+- FREE REWARDS board: **freeRewards** either side of the title (it had none)
+- The streak tiles, quest rows and free-reward rows keep the Essence icon: that's the reward they pay.
+

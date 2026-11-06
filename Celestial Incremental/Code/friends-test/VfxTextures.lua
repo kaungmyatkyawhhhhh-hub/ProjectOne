@@ -4,8 +4,7 @@
 --   alpha = transparent -> normal particles and screen UI (ImageLabels), tinted with Color
 -- Flipbooks (4x4, 1024): FlipbookLayout Grid4x4; one-shots explosion_burst, supernova_flash, anvil_impact, confetti_burst,
 -- smoke_puff; loops electric_arc, forge_sparks, portal_swirl.
--- The ids are the P&L Studios XP group's uploads (the owner's bulk import, 6 Nov), except add.core_light_rays: not in the
--- import yet, still the Studio test upload (owner's account).
+-- The ids are the P&L Studios XP group's uploads (the owner's bulk import, 6 Nov).
 local T = {}
 T.add = {
 	anvil_impact = "rbxassetid://118234560109808", -- H/vfx_anvil_impact_flipbook4x4_1024_add.png
@@ -22,7 +21,7 @@ T.add = {
 	comet_tail = "rbxassetid://100336815743008", -- BDE/vfx_comet_tail_512_add.png
 	confetti_burst = "rbxassetid://80044379144048", -- H/vfx_confetti_burst_flipbook4x4_1024_add.png
 	confetti_pieces = "rbxassetid://99701066884789", -- F/vfx_confetti_pieces_512_add.png
-	core_light_rays = "rbxassetid://109864604358324", -- BDE/vfx_core_light_rays_512_add.png (re-uploaded, as above)
+	core_light_rays = "rbxassetid://113369449336887", -- BDE/vfx_core_light_rays_512_add.png (the image inside decal 115502892460875)
 	crystal_shard = "rbxassetid://89429839064369", -- A/vfx_crystal_shard_add_512.png
 	dark_pulse = "rbxassetid://108298599304639", -- BDE/vfx_dark_pulse_512_add.png
 	electric_arc = "rbxassetid://118833364940449", -- C/vfx_electric_arc_flipbook4x4_1024_add.png

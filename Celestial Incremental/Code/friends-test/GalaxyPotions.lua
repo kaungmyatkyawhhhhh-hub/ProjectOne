@@ -158,7 +158,7 @@ do
 	local edge = Kit.box(boostRoot, 3, 3, 224, 34, { ZIndex = 3 })
 	Kit.corner(edge, 6)
 	Kit.stroke(edge, hex("#ffb02a"), 1.5, 0.3)
-	Kit.icon(boostRoot, "stardust", -4, -4, 48, Color3.fromRGB(255, 170, 60), { ZIndex = 5 })
+	Kit.icon(boostRoot, "boosts", -4, -4, 48, Color3.fromRGB(255, 170, 60), { ZIndex = 5 })
 end
 local bText = Kit.text(boostRoot, 44, Kit.ps(9, 8), 180, 22, "BOOSTS x1", Kit.ps(16, 17), { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextColor3 = hex("#ffd84a") })
 local list = Kit.box(boostRoot, 0, 48, 230, 10, { ZIndex = 10, Visible = false })

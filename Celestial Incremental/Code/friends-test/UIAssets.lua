@@ -20,6 +20,22 @@ return {
 		-- (overnight part 2: the BOOST POTIONS; Icons\rendered\icon_potion_*.png, Studio test copies too)
 		potionStardust = "rbxassetid://75757117780273",
 		potionComets = "rbxassetid://111020939074381",
+		-- (6 Nov: the Phase 2 features' own icons, Assets galaxy_icon_*_512, P&L Studios XP group import)
+		offlineEarnings = "rbxassetid://88662519526579", -- the RETURN screen
+		dailyStreak = "rbxassetid://96631498406611", -- the DAILY window
+		quests = "rbxassetid://104265099631183", -- the QUESTS hotbar key
+		playtimeGift = "rbxassetid://97650869572088", -- the PLAYTIME GIFTS tiles
+		freeRewards = "rbxassetid://126118769169465", -- the FREE REWARDS board
+		boosts = "rbxassetid://82218225965129", -- the BOOSTS chip
+	},
+	-- (the same icons at 128 px, for small spots)
+	icon128 = {
+		offlineEarnings = "rbxassetid://119076193495482",
+		dailyStreak = "rbxassetid://133675373246183",
+		quests = "rbxassetid://105917484730156",
+		playtimeGift = "rbxassetid://123554725293656",
+		freeRewards = "rbxassetid://97169368459028",
+		boosts = "rbxassetid://107966977637634",
 	},
 	stripes = "rbxassetid://123710673700412", -- 512x128, white diagonal stripes (v12 .stripes)
 	glow9 = "rbxassetid://109052962777294", -- 128 px 9-slice soft glow (window breathe)
