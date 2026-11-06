@@ -91,7 +91,7 @@ local function cabinLight(skin: Instance)
 	local light = Instance.new("PointLight")
 	light.Color = Color3.fromRGB(255, 246, 236)
 	light.Brightness = 0.55
-	light.Range = 7
+	light.Range = 3.2 -- (2026-11-06: 7 reached the road under the car and lit a patch there)
 	light.Shadows = false
 	light.Parent = at
 end

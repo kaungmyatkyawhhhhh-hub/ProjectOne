@@ -87,6 +87,9 @@ local function part(props: { [string]: any }): BasePart
 	return p
 end
 
+-- (2026-11-06) the Racing Hub's signs: only close to, or five of them fill the screen
+local HUB_SIGN_RANGE = 45
+
 local function ring(pos: Vector3, color: Color3, diameter: number): BasePart
 	return part({
 		Shape = Enum.PartType.Cylinder,
@@ -132,8 +135,12 @@ local function buildWorld()
 	folder.Name = "Activities"
 	folder.Parent = workspace
 	for _, r in ActivityData.races do
-		local p = ring(r.start, Color3.fromRGB(255, 140, 20), 30)
+		local p = ring(r.ring, Color3.fromRGB(255, 140, 20), 30)
 		startLabels[r.id] = billboard(p, "RACE · " .. string.upper(r.name), "", Color3.fromRGB(255, 160, 40))
+		local bb = p:FindFirstChildOfClass("BillboardGui")
+		if bb then
+			bb.MaxDistance = HUB_SIGN_RANGE
+		end
 	end
 	for _, d in ActivityData.dispatch do
 		local p = ring(d.pos - Vector3.new(0, Config.City.CurbHeight, 0), Color3.fromRGB(40, 150, 255), 24)
@@ -328,7 +335,12 @@ local function showCheckpoints()
 	place(cpNext, cp + 1, 0.9)
 end
 
+local gridHold = false -- (the car is held on the start line until GO)
 local function endRun()
+	if gridHold then
+		gridHold = false
+		Driving.loadHold = false
+	end
 	state = "idle"
 	race = nil
 	job = nil
@@ -392,7 +404,29 @@ local function countdown(t0in: number, onGo: () -> ())
 	end)
 end
 
-local function startRace(r: ActivityData.Race, t0in: number, count: number)
+-- sits the car on the start line, once the road there has reached this game
+local function toStartLine(cf: CFrame): boolean
+	local rp = RaycastParams.new()
+	rp.FilterType = Enum.RaycastFilterType.Exclude
+	local cars = workspace:FindFirstChild("PlayerCars")
+	rp.FilterDescendantsInstances = { cars :: any, workspace.CurrentCamera }
+	rp.RespectCanCollide = true
+	rp.IgnoreWater = true
+	local deadline = os.clock() + 4
+	repeat
+		local hit = workspace:Raycast(cf.Position + Vector3.new(0, 40, 0), Vector3.new(0, -120, 0), rp)
+		if hit and hit.Position.Y > cf.Position.Y - 8 then
+			local at = CFrame.new(hit.Position) * cf.Rotation
+			Driving.teleport(at)
+			require(script.Parent:WaitForChild("Traffic")).clearAround(at.Position, 60)
+			return true
+		end
+		task.wait(0.15)
+	until os.clock() > deadline
+	return false
+end
+
+local function startRace(r: ActivityData.Race, t0in: number, count: number, grid: CFrame?)
 	state = "countdown"
 	race = r
 	cp = 1
@@ -402,8 +436,39 @@ local function startRace(r: ActivityData.Race, t0in: number, count: number)
 	cardTime.Text = fmtTime(0)
 	cardSub.Text = `Gold {fmtTime(r.gold)} · Silver {fmtTime(r.silver)}`
 	showCheckpoints()
-	countdown(t0in, function()
-		state = "race"
+	local function go()
+		countdown(3, function()
+			if gridHold then
+				gridHold = false
+				Driving.loadHold = false
+			end
+			state = "race"
+		end)
+	end
+	if not grid then
+		go()
+		return
+	end
+	-- from the Racing Hub to the race's start line, the car held there until GO
+	local goAt = os.clock() + t0in
+	task.spawn(function()
+		UI.fade(true, 0.25)
+		task.wait(0.3)
+		gridHold = true
+		Driving.loadHold = true
+		local there = toStartLine(grid)
+		UI.fade(false, 0.4)
+		if state ~= "countdown" or race ~= r then
+			return
+		end
+		if not there then
+			cancel("Couldn't reach the start line, try again")
+			return
+		end
+		task.wait(math.max(0, goAt - 3 - os.clock()))
+		if state == "countdown" and race == r then
+			go()
+		end
 	end)
 end
 
@@ -739,7 +804,7 @@ local function update(dt: number)
 			leaveLobby("You left the race lobby")
 			return
 		end
-		if Vector3.new(pos.X - r.start.X, 0, pos.Z - r.start.Z).Magnitude > 28 then
+		if Vector3.new(pos.X - r.ring.X, 0, pos.Z - r.ring.Z).Magnitude > 28 then
 			leaveLobby("You drove out of the race ring")
 			return
 		end
@@ -777,7 +842,7 @@ local function update(dt: number)
 		-- stopped in a start ring or a dispatch ring
 		local found: ActivityData.Race? = nil
 		for _, r in ActivityData.races do
-			if Vector3.new(pos.X - r.start.X, 0, pos.Z - r.start.Z).Magnitude < 15 then
+			if Vector3.new(pos.X - r.ring.X, 0, pos.Z - r.ring.Z).Magnitude < 15 then
 				found = r
 			end
 		end
@@ -858,7 +923,7 @@ function Activities.getLive(): { { pos: Vector3, racing: boolean, count: number 
 	for id, l in lobbies do
 		local r = ActivityData.raceById[id]
 		if r then
-			table.insert(list, { pos = r.start, racing = l.racing, count = l.count })
+			table.insert(list, { pos = r.ring, racing = l.racing, count = l.count })
 		end
 	end
 	return list
@@ -903,7 +968,7 @@ function Activities.init()
 			elseif msg.kind == "go" then
 				local r = ActivityData.raceById[msg.id]
 				if r and (state == "lobby" or state == "idle") then
-					startRace(r, tonumber(msg.t0in) or 3, tonumber(msg.racers) or 1)
+					startRace(r, tonumber(msg.t0in) or 3, tonumber(msg.racers) or 1, if typeof(msg.grid) == "CFrame" then msg.grid else nil)
 				end
 			elseif msg.kind == "finished" then
 				local suffix = ({ "st", "nd", "rd" })[msg.place] or "th"

@@ -231,7 +231,7 @@ handlers.raceJoin = function(player, id)
 		return { ok = false }
 	end
 	local pos = car.PrimaryPart and car.PrimaryPart.Position
-	if not pos or flatDist(pos, race.start) > 45 then
+	if not pos or flatDist(pos, race.ring) > 45 then
 		return { ok = false, message = "Drive into the race ring" }
 	end
 	local now = os.clock()
@@ -256,14 +256,27 @@ handlers.raceLeave = function(player)
 	return { ok = true }
 end
 
--- a lobby whose time has come: everyone still in the ring races (3-2-1 on every screen at once)
+-- where a racer lines up: alone in the middle of the road, with others in two lines behind the start
+local function gridSpot(race: ActivityData.Race, i: number, count: number): CFrame
+	local dir = Vector3.new(race.startDir.X, 0, race.startDir.Z).Unit
+	local p = race.start
+	if count >= 2 then
+		local H = A.Hub
+		local right = dir:Cross(Vector3.yAxis)
+		p = p - dir * (((i - 1) // 2) * H.GridGap) + right * (if i % 2 == 1 then -H.GridSide else H.GridSide)
+	end
+	return CFrame.lookAt(p, p + dir)
+end
+
+-- a lobby whose time has come: everyone still in the ring goes to the start line and races (3-2-1 on
+-- every screen at once)
 local function startLobby(l: Lobby)
 	local race = ActivityData.raceById[l.id]
 	local racers = {}
 	for _, p in l.players do
 		local car = if p.Parent then ctx.getCar(p) else nil
 		local pos = car and car.PrimaryPart and car.PrimaryPart.Position
-		if pos and not p.Character and not runs[p] and flatDist(pos, race.start) <= 45 then
+		if pos and not p.Character and not runs[p] and flatDist(pos, race.ring) <= 45 then
 			table.insert(racers, p)
 		end
 	end
@@ -275,12 +288,20 @@ local function startLobby(l: Lobby)
 	racing[l] = true
 	l.players = racers
 	l.racers = #racers
-	l.t0 = os.clock() + 3
-	for _, p in racers do
+	l.t0 = os.clock() + A.Hub.GridSeconds
+	for i, p in racers do
 		runs[p] = { kind = "race", id = race.id, t0 = l.t0, cp = 0, lobby = l }
-		if Push then
-			Push:FireClient(p, { kind = "go", id = race.id, racers = #racers, t0in = 3 })
-		end
+		local cf = gridSpot(race, i, #racers)
+		task.spawn(function()
+			-- (the road there reaches the player's game first)
+			pcall(function()
+				p:RequestStreamAroundAsync(cf.Position, 5)
+			end)
+			local r = runs[p]
+			if Push and p.Parent and r and r.lobby == l then
+				Push:FireClient(p, { kind = "go", id = race.id, racers = #racers, t0in = math.max(l.t0 - os.clock(), 3), grid = cf })
+			end
+		end)
 	end
 	broadcast()
 	-- racing with a friend pays more (looked up after the start: it can take a moment)

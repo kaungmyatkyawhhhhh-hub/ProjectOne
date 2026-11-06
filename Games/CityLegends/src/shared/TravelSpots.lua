@@ -84,12 +84,8 @@ function TravelSpots.list(): { Spot }
 	if riv and okH and type(hw) == "table" and hw.spot then
 		table.insert(list, { id = "highway", name = "Riviera Highway", icon = "lookout", info = INFO.highway, cf = CFrame.lookAt(hw.spot.at + Vector3.new(0, 3, 0), hw.spot.at + Vector3.new(0, 3, 0) + hw.spot.dir) })
 	end
-	for _, r in ActivityData.races do
-		local dir = Vector3.new(r.startDir.X, 0, r.startDir.Z)
-		if dir.Magnitude > 0.1 then
-			table.insert(list, { id = "race_" .. r.id, name = r.name, icon = "race", info = INFO.race, cf = CFrame.lookAt(r.start, r.start + dir.Unit) })
-		end
-	end
+	-- (2026-11-06) all the races start from the Racing Hub
+	table.insert(list, { id = "racing_hub", name = Config.Activities.Hub.Name, icon = "race", info = INFO.race, cf = Config.Activities.Hub.Spot })
 	-- (the dispatch's own spot on the pavement: CityLayout's lane search only knows the old city)
 	for k, dsp in ActivityData.dispatch do
 		table.insert(list, { id = "job_" .. k, name = dsp.name, icon = "delivery", info = INFO.delivery, cf = CFrame.new(dsp.pos) })

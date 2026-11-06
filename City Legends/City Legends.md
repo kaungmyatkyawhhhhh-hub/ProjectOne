@@ -5,18 +5,27 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
-## Ghost Driver look (2026-11-06, in progress, `Prompts/Lighting and car look like the Ghost Driver videos.md`)
-**In the place and in the code, not tuned by eye yet (Studio was minimized, so no 3D pictures):**
-- **Light:** new 17:30 key in `DayCycle` (pink haze, `Atmosphere.Offset` per hour, contrast +0.16, saturation -0.07), `Sunset` sky in `ReplicatedStorage.RivieraSkies` (only the 6 pictures of Creator Store model 135758030102263; its hidden scripts and UI thrown away). A new server starts at 17:00 (`DayZero`, `Config.DayCycle.ServerStartHour`), the start menu holds 17:18 and eases to the server's clock.
-- **Fog band:** `client/LookFx.lua`: 16 soft sheets in a ring 520 studs out, resting on the ground below them.
-- **Settings:** Settings > Graphics (shadows, reflections, ambient, glow, sun rays, depth of field, brightness, contrast, saturation) and TIME AND WEATHER (owner: "add a feature to edit lighting time of day": SERVER, MORNING, NOON, SUNSET, NIGHT, an hour slider; weather, sky, sun and clouds, haze, fog). Client only. Saved as `Settings.Look`. Levels set them (`Config.Look.Presets`).
-- **New models only (`CarFinish.NEW`):** contact shadow, darker carbon, gloss 0.2, SATIN in Customs (`CL_PaintSatin`), `RenderFidelity = Precise` on 483 body parts, gloss on the Bugattis' body parts. Old cars untouched.
-- **Road:** `RivAsphalt` over Asphalt (`tools/look_art.py`, our own maps).
+## Ghost Driver look (2026-11-06, `Prompts/Lighting and car look like the Ghost Driver videos.md`)
+Pictures, theirs on the left: [[Ghost look - highway sunset.jpg]], [[Ghost look - car rear.jpg]], [[Ghost look - car side.jpg]]. Ours only: [[Ghost look - town road 17-18.jpg]], [[Ghost look - town road 18-18.jpg]].
+- **Sunset:** new 17:18 key and a retuned 18:18 key in `DayCycle` (`Atmosphere.Offset` per hour, contrast +0.13, saturation -0.07, soft bloom). `Sunset` sky in `ReplicatedStorage.RivieraSkies`: the 6 pictures of Creator Store model 135758030102263. That model carried a hidden script and a UI, both thrown away. Morning, noon and night keys only got the fog amount; they look as they did.
+- **Start of play:** a new server starts at 17:00 (`DayZero`, `Config.DayCycle.ServerStartHour`). The start menu holds 17:18 and eases to the server's clock over 5 s.
+- **Fog band:** `client/LookFx.lua`: 16 soft sheets in a ring 520 studs out, resting on the ground below them (one ray a frame).
+- **Settings:** Settings > Graphics (shadows, reflections, ambient, glow, sun rays, depth of field, brightness, contrast, saturation) and TIME AND WEATHER (owner: "add a feature to edit lighting time of day": SERVER, MORNING, NOON, SUNSET, NIGHT, an hour slider; weather, sky, sun and clouds, haze, fog). All on the player's own screen. Saved as `Settings.Look`. Quality levels set them (`Config.Look.Presets`); phones get no sun rays and a light fog at most.
+- **New models only (`CarFinish.NEW`, 23 cars):** contact shadow (`ContactShadow`, a soft decal under the car), carbon darker, gloss roughness 0.2, SATIN in Customs (`CL_PaintSatin`, not on the Bugattis: their paint is in the picture), `RenderFidelity = Precise` on 483 body parts, gloss on the Bugattis' body parts. Old models: no change to any of them (no before / after shot taken: the code leaves them out).
+- **Your own cabin light:** range 7 -> 3.2. It reached the road under the car and lit a patch there.
+- **Road:** `RivAsphalt` over Asphalt (`tools/look_art.py`, our own colour, normal and roughness maps). A first version with band-pass noise showed ripples at a low angle: use low-pass noise.
 - **Speed feel:** the wind blur and edge streaks were already there, off with Settings > Motion blur.
-- **Art ids:** fog 123351176849967, shadow 96671888596471, asphalt 137731605748656 / 74173256137470 / 94165991665432, roughness 91277332178340 (gloss), 101717891010716 (satin).
-**Still to do:** tune it against the frames, side-by-side pictures, FPS before / after, settings page on screen. The sky swap at 16:54 is instant: Roblox can't blend two skies.
+- **FPS (Studio PC, Ultra, parked, one run):** Harbour 84 with the new look, 84 with fog and new road off. Town Road 83 / 84. Riviera Highway 119 / 131. Phone: not measured.
+- **Art ids:** fog 123351176849967, shadow 96671888596471, asphalt 140076736047159 / 70737471501573 / 91325503780367, roughness 91277332178340 (gloss), 101717891010716 (satin), checks 133964192622409.
+- **Limits:** the sky swaps at 16:54 and 19:12 with no blend: Roblox can't fade between two skies. Not tested: phone size, a real phone, 2 players. `PreviewHour` was left on 13 in the place by an old test, which held the time in Studio: removed.
 
-**Racing hub (owner, 2026-11-06):** "collect all of those racing areas and make a racing hub at the Old Rock place", after the bugs and the lighting.
+## Racing Hub (2026-11-06, owner: "collect all of those racing areas and make a racing hub at the Old Rock place")
+All 5 race rings are on the Old Rock's palace square. Pictures: [[Racing Hub - arch.jpg]], [[Racing Hub - palace square.jpg]].
+- **How it works:** stop in a ring on the square to join. After the 15 s lobby you're taken to that race's start line (fade, car held), then 3-2-1. Tested solo in Play: Casino Avenue, ring to start line in under a second, GO on time. 2+ racers line up in two rows (`gridSpot`): not tested.
+- **Code:** `Config.Activities.Hub` (bays, fast travel spot, grid), `race.ring` in `ActivityData`, `startLobby` / `gridSpot` in `server/Activities.lua`, `toStartLine` in `client/Activities.lua`. The rings on the roads are gone. One fast travel spot, `racing_hub`, replaces the 5 race spots.
+- **The look:** `tools/riviera/RacingHub.luau` (`build`, `undo`): RACING HUB arch at the top of the ramp, a pad and sign per race, flags, tyre stacks, 56 parts in `Riviera.OldRock.RacingHub`. The two benches moved to the palace side (`OldCFrame`).
+- **Choice:** the races keep their routes and you're carried to the start, so nothing about the roads changed. Racing away from the hub would mean new routes.
+- **Seen, not touched:** the cobbles on the square and the ramp show long dark cracks up close (`RivCobble`).
 
 ## Drives, surfaces, bends (2026-11-06, day, owner's pictures)
 Owner: "I told you to fix these ... Find all buildings and roads if they have this problem", "its happening on this too and also on some buildings, FIND IT ALL", "make all the roads smooth like in the blender but mainly the turns".
@@ -105,7 +114,7 @@ Picture: [[Fake names - in the models.jpg]].
 7. **Curves, part done:** all 188 lanes checked: 0 holes, 0 kerbs in a lane, 0 ledges over 0.4 studs. The 163 speed bumps stay. Red-and-white kerbs on 24 sharp bends (313 pieces). **Not done:** no bend was reshaped, and there are no before / after shots of the worst 10.
 8. **Bug hunt, part done:** see the list below.
 
-**Next:** step 7.2's meshes are done and step 8 is done (see the bug list). The before / after of the worst 10 curves can't be taken without undoing the work. Owner's queue, 2026-11-06: Ghost Driver lighting prompt, then a racing hub at the Old Rock with all the race start areas in one place.
+**Next:** step 7.2's meshes are done and step 8 is done (see the bug list). The before / after of the worst 10 curves can't be taken without undoing the work. The Ghost Driver look and the Racing Hub are done: see their sections below.
 
 **What the owner needs to do:**
 1. Play one lap and say if the morning mist is too much or too little.

@@ -78,6 +78,7 @@ Night-city driving game: earn money by driving and cutting up traffic, buy cars,
 - **Last updated:** 2026-11-06
 
 - **6 Nov, step 8 finished (Claude Code, in Studio, not published):** race, delivery, Customs, dealer, test drive and wanted tested on a test save; 4 bugs fixed (Y/F in Customs, race finish on fast cars, police timer, stacked popups). Next: Ghost Driver lighting prompt, then a racing hub at the Old Rock. See [[City Legends/City Legends]].
+- **6 Nov, Ghost Driver look + Racing Hub (Claude Code, Blender-free, in Studio, not published):** sunset sky and haze, fog band, picture settings and time of day in Settings, new-model paint, carbon, contact shadow, asphalt maps; all 5 race rings on the Old Rock's palace square, you're carried to the start line. Not tested: phone, 2 players. See [[City Legends/City Legends]].
 - **6 Nov, later (Claude Code, Blender + Studio, not published):** real names on the new imports taken out of the meshes and fake names put in the same place, no covers left: LP670, LP750, STO, ZVX 63, Eclair Pure wing, Veyron plates and fuel caps, LP570 and LB744 engines; raised names flattened in surface maps. See [[City Legends/City Legends]].
 
 ## MM Shop Bot (Telegram shop for Myanmar): active, new 5 Nov

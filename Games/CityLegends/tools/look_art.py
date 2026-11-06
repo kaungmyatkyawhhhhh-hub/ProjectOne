@@ -27,22 +27,33 @@ def save(arr, name):
 # asphalt: fine stones in dark binder, a little wear. The map stays bright: Roblox multiplies it with
 # the part's own colour, so the road keeps the colour it has
 N = 1024
-stones = band_noise(N, 150, 300)
-fine = band_noise(N, 300, 480)
-mid = band_noise(N, 40, 90)
-patch = band_noise(N, 2, 7)
-height = 0.62 * stones + 0.28 * fine + 0.25 * mid
+
+
+def low_pass(n, cut):
+    """seamless grain: white noise with the fine detail above `cut` removed (no ring of frequencies,
+    so no worm or ripple pattern at a low angle)"""
+    f = np.fft.fft2(rng.standard_normal((n, n)))
+    kx = np.fft.fftfreq(n) * n
+    r2 = kx[:, None] ** 2 + kx[None, :] ** 2
+    out = np.fft.ifft2(f * np.exp(-r2 / (2 * cut * cut))).real
+    return (out - out.mean()) / out.std()
+
+
+stones = low_pass(N, 170)
+fine = low_pass(N, 420)
+patch = low_pass(N, 4)
+height = 0.75 * stones + 0.25 * fine
 height = (height - height.min()) / (height.max() - height.min())
-pale = np.clip((stones - 1.5) / 1.1, 0, 1)  # pale stones catch the light
-value = 0.74 + 0.16 * (height - 0.5) + 0.2 * pale + 0.022 * patch
+pale = np.clip((stones - 1.7) / 1.0, 0, 1)  # pale stones catch the light
+value = 0.9 + 0.17 * (height - height.mean()) + 0.12 * pale + 0.018 * patch
 col = np.stack([value * 1.0, value * 0.995, value * 0.985], axis=2)
 save(col, "asphalt_color.png")
-dx = (np.roll(height, -1, 1) - np.roll(height, 1, 1)) * 2.2
-dy = (np.roll(height, -1, 0) - np.roll(height, 1, 0)) * 2.2
+dx = (np.roll(height, -1, 1) - np.roll(height, 1, 1)) * 0.8
+dy = (np.roll(height, -1, 0) - np.roll(height, 1, 0)) * 0.8
 nz = np.ones_like(dx)
 l = np.sqrt(dx**2 + dy**2 + nz**2)
 save(np.stack([(-dx / l + 1) / 2, (dy / l + 1) / 2, (nz / l + 1) / 2], axis=2), "asphalt_normal.png")
-save(np.clip(0.84 - 0.12 * pale + 0.05 * (height - 0.5) + 0.018 * patch, 0.5, 1), "asphalt_rough.png")
+save(np.clip(0.84 - 0.1 * pale + 0.04 * (height - height.mean()) + 0.015 * patch, 0.5, 1), "asphalt_rough.png")
 
 
 # the fog band: white, its strength in alpha; soft top and bottom, wisps across, ends fade to nothing
@@ -72,3 +83,10 @@ Image.fromarray((sh * 255).astype(np.uint8), "RGBA").save(OUT / "contact_shadow.
 # flat roughness maps for the paint variants
 for name, val in (("rough_gloss", 0.2), ("rough_satin", 0.46)):
     save(np.full((16, 16), val), name + ".png")
+
+
+# the Racing Hub's checks: one tile of black and white
+c = np.ones((64, 64))
+c[:32, :32] = 0.08
+c[32:, 32:] = 0.08
+save(np.dstack([c, c, c]), "checker.png")

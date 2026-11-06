@@ -19,6 +19,7 @@ local ActivityData = {}
 export type Race = {
 	id: string,
 	name: string,
+	ring: Vector3, -- where you stop to join it (the Racing Hub)
 	start: Vector3,
 	startDir: Vector3,
 	checkpoints: { Vector3 },
@@ -56,6 +57,7 @@ local function route(id: string, name: string, corners: { { number } }): Race
 	return {
 		id = id,
 		name = name,
+		ring = start,
 		start = start,
 		startDir = dir,
 		checkpoints = cps,
@@ -139,6 +141,7 @@ if Config.monacoOnly() then
 			local race: Race = {
 				id = r.id,
 				name = r.name,
+				ring = A.Hub.Bays[r.id] or r.start,
 				start = r.start,
 				startDir = r.dir.Unit,
 				checkpoints = r.checkpoints,
@@ -159,6 +162,7 @@ if Config.monacoOnly() then
 			local race: Race = {
 				id = r.id,
 				name = r.name,
+				ring = A.Hub.Bays[r.id] or r.start,
 				start = r.start,
 				startDir = r.dir.Unit,
 				checkpoints = r.checkpoints,

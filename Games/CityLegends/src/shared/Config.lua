@@ -877,6 +877,23 @@ Config.Activities = {
 	DuelTimeout = 180,
 	DuelPot = 10000,
 	DuelSecondCash = 1500,
+	-- the Racing Hub (owner, 2026-11-06: "collect all of those racing areas and make a racing hub at the
+	-- Old Rock place"): every race's ring is on the palace square; when its lobby starts you're taken to
+	-- the race's start line
+	Hub = {
+		Name = "Racing Hub",
+		Bays = {
+			riv_coast = Vector3.new(12988, 52, 1252),
+			riv_mountain = Vector3.new(13028, 52, 1252),
+			riv_town = Vector3.new(13068, 52, 1252),
+			riv_casino = Vector3.new(13008, 52, 1306),
+			riv_highway = Vector3.new(13052, 52, 1306),
+		},
+		Spot = CFrame.lookAt(Vector3.new(13032, 52, 1326), Vector3.new(13032, 52, 1250)), -- fast travel
+		GridSeconds = 8, -- from the lobby's end to GO: the trip to the start line and 3-2-1
+		GridGap = 16, -- studs between rows on the start line
+		GridSide = 6, -- studs either side of the line's middle
+	},
 }
 
 ---------------------------------------------------------------------
