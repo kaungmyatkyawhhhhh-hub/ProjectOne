@@ -3,6 +3,7 @@
 ## GYM ARC (Roblox gym game): live, main game
 Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongman Yard. Next big update: HALL OF FAME (rebirth after Alter 15) + codes + profiles.
 - **Details:** [[GYM ARC/00 GYM ARC Home]] (all GYM ARC notes go in the `GYM ARC` folder)
+- **6 Nov, Pump Shop update built (Studio, not published):** TITAN SERUM (+ TITAN MODE), MONSTER MIX, BEAST FORMULA, 3 bundles; the 7 products are placeholders (hidden) until the owner creates them and sends the ids. See [[GYM ARC/Progress/2026-11-06 GYM ARC Pump Shop update - Titan Serum, Monster Mix, Beast Formula, bundles, Titan Mode]].
 - **Studio place:** "GYM ARC" (placeId 80031260599632), owned by the group Myanmar Builders Club.
 - **Now:** Hall of Fame being finished (prompt 80). Launch event Sat 31 Oct with a new icon, thumbnails and title `[🎃🏆 HALL OF FAME] GYM ARC 💪`. Before it: loading screen SKIP at 5 s, kit-only UI (no placeholder buttons).
 - **Numbers (to 26 Oct):** a traffic boost on 23-25 Oct (Home recommendations + ads) faded; day-1 retention 4.5-6.5%, ~33% still playing at 5 min. First-15-minute fixes went in 26-27 Oct: check the funnel and retention 3-4 days after the update. No ads until day-1 retention is ~10%+.

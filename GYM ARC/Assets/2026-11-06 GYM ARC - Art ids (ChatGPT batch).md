@@ -11,6 +11,7 @@ Back to [[GYM ARC - Assets]]. Every image of the alter skins / alter VFX / aura 
 - `v_alter_*` = alter VFX, `v_aura_*` = aura VFX (`_add` glow on black, `_alpha` coloured), `v_auraflat_*_ring` = the plain rings redrawn flat.
 - (later, 6 Nov) the owner rebuilt every VFX texture (clean backgrounds) and they were re-uploaded: the alter / aura / flare / flame ids below are the new ones. `v_titan_*` = the Titan VFX (`ArtIds.Titan`, not used in the game yet). `v_auraflat_flare_ring_alpha` = the flat flare ring (prestige halo).
 - (later, 6 Nov) the **Olympian skin** has its own maps now (`olympian_L_*` / `olympian_T_*`, from `Assets/trainers/olympian`, x2 limbs / x4 torso). Atlas keeps his own marble.
+- (later, 6 Nov) the **serum icons** (TITAN SERUM, MONSTER MIX, BEAST FORMULA; 512 + 1024) are in `ArtIds.Serums`: titan_serum 139943304871307 / 78506664821619, monster_mix 93552653311768 / 96489439286933, beast_formula 112167268328330 / 119392690684389 (decals 87293688401838, 79453968583185, 91248697292071, 97002310170843, 98496839384386, 138207753190654). The Titan VFX ids (above, `v_titan_*`) are now used by TITAN MODE.
 
 | file | decal id | image id |
 |---|---|---|

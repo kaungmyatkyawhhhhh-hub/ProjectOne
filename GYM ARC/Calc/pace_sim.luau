@@ -1,4 +1,4 @@
--- GYM ARC pace sim (3 Nov). Put this in ServerStorage as a ModuleScript "_PaceSim", then in Studio's Edit command bar:
+-- GYM ARC pace sim (3 Nov; 6 Nov: setup.repSpeed = reps this much faster (MONSTER MIX), out.spurtTimes = each Growth Spurt). Put this in ServerStorage as a ModuleScript "_PaceSim", then in Studio's Edit command bar:
 --   game.ReplicatedStorage:SetAttribute("LaunchDone_Gem", true) -- (the Gem Mine counts as open; remove it after!)
 --   local r = require(game.ServerStorage._PaceSim).Run({ stars = 3, gains = 3.08, progress = 0.55 })
 --   game.ReplicatedStorage:SetAttribute("LaunchDone_Gem", nil)
@@ -147,14 +147,19 @@ function Sim.Run(setup)
 	for _, m in ipairs(Muscles.List) do total[m.id] = 0 end
 	local out = { name = setup.name, alters = {} }
 	local t = 0
+	local rs = setup.repSpeed or 1
+	out.spurtTimes = {}
 	while not GrowthSpurts.IsMaxed(d.growthSpurts) do
-		t += train(d, setup, spurtProgress, 60000)
+		local one = train(d, setup, spurtProgress, 60000) / rs
+		table.insert(out.spurtTimes, one)
+		t += one
 		d.growthSpurts += 1
 	end
 	out.spurts = t
 	d.gearOn = true
 	for n = 1, 20 do
 		local s, capped = train(d, setup, alterProgress, 80000)
+		s /= (setup.repSpeed or 1)
 		out.alters[n] = s
 		if capped then out.capped = n break end
 		d.alter = { highest = n }
