@@ -6,7 +6,7 @@ tags: [gymarc, progress, monetization, supplements, bundles, titan]
 
 Back to [[00 GYM ARC Home|GYM ARC Home]] · Spec: [[2026-11-06 GYM ARC Prompt - OP supplement + bundles]] · Before: [[2026-11-05 GYM ARC Supplements Gains + Stamina, alter tints removed]]
 
-In Studio only. **Not published.** All 7 new products are **placeholders** (`Config/Products` = 0): every new card, offer and HUD bit stays **hidden in the live game** until the owner sends the ids.
+In Studio only. **Not published.** (Later 6 Nov) the owner created the 7 products: their ids are in `Config/Products`, so everything shows once published (see the end of this note).
 
 ## Owner answers (6 Nov)
 - BEAST FORMULA's "+25% PR gains" = **+25% EXP** (a PR gives no EXP of its own in the code).
@@ -59,7 +59,6 @@ Order: **TITAN SERUM featured card** (gold running frame, the looping TITAN MODE
 - Screenshots: `GYM ARC/Screenshots/pump_shop_1106/` (shop PC + phone, featured card, bundles, MONSTER and BEAST cards, the three timers, the TITAN offer card, before / activation / active front + back / last seconds / ended, phone activation; `phone/` = 667x375 copies). No video: a frame sequence instead.
 
 ## Open / for the owner
-- **Create the 7 developer products** and send the ids (TitanSerum1 149, TitanSerum3 399, MonsterMix 99, BeastFormula 99, PowerHour 45, GymRatPack 179, TitanPack 549; managed pricing like GAINS / STAMINA).
 - **The coin cap (x4 before the 2x pass)** limits BEAST's x3 for players who already have big coin boosts (and TITAN + BEAST together reach it).
 - The flex shows the posing hint "Move or jump to stop" (the same as the alter flex).
 - The boost row's timers sit very close together with three long serums running ("29:40 14:53").
@@ -75,3 +74,19 @@ Order: **TITAN SERUM featured card** (gold running frame, the looping TITAN MODE
 ![[GYM ARC/Screenshots/pump_shop_1106/09_titan_activation_impact_pc.jpg]]
 ![[GYM ARC/Screenshots/pump_shop_1106/10_titan_active_front.jpg]]
 ![[GYM ARC/Screenshots/pump_shop_1106/06_offer_go_titan_phone.jpg]]
+
+## Later 6 Nov: the real product ids
+| Product | Id | List price | Owner's account (managed pricing) |
+|---|---|---|---|
+| TITAN SERUM | 3728842856 | 149 | 135 |
+| TITAN SERUM x3 | 3728843110 | 399 | 360 |
+| MONSTER MIX | 3728843203 | 99 | 90 |
+| BEAST FORMULA | 3728843569 | 99 | 90 |
+| POWER HOUR | 3728843662 | 45 | 41 |
+| GYM RAT PACK | 3728843778 | 179 | 162 |
+| TITAN PACK | 3728843909 | 549 | 495 |
+- In `Config/Products`; each id checked against Roblox (the right name for each).
+- Tested on temporary data with the Studio switch OFF (as players will see it): all 7 cards show with Roblox's real prices; a test receipt with each real id gives the right thing (TITAN and POWER HOUR start, the rest go to the inventory); a repeated purchase id gives nothing more. The tags from the real prices: TITAN x3 SAVE 45 R$, POWER HOUR SAVE 5, GYM RAT PACK SAVE 18 + BEST VALUE, TITAN PACK SAVE 45.
+
+![[GYM ARC/Screenshots/pump_shop_1106/16_shop_real_ids.jpg]]
+![[GYM ARC/Screenshots/pump_shop_1106/17_bundles_real_ids.jpg]]
