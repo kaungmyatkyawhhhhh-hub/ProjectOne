@@ -1,9 +1,21 @@
-# Prompt: proper working headlights (every car)
+# Prompt: proper working headlights and tail lights, in their proper place (every car)
 
 _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras._
 
 ## What the owner wants (2026-11-06)
 "Make proper working headlights." Headlights that look and work like real ones: the car's own light units glow, real beams light the road ahead at night, and you can switch between modes.
+
+## RULE: every light works IN ITS PROPER PLACE (owner, 2026-11-06: "the headlight and taillight NEEDS to work in its proper place")
+This is the most important part. On **every car** (old and new models, traffic and police too):
+- **Headlights** glow and shine **from the car's own headlight units**: the exact lamps on the front of the model, left and right. Never from the middle of the bonnet, the grille, inside the car, the roof, under the car, or floating in front of it.
+- **Tail lights** glow **on the car's own tail-light units** at the back: running lights when the lights are on, **brighter when braking**, and the **reverse light** (white) only when reversing. Never on the boot lid, the bumper, the number plate or floating behind.
+- **Indicators / blinkers** flash on the car's own indicator spots (front corners, mirrors or side, rear), left and right the right way round.
+- The glow must **match the shape of each light unit** (the lens / LED strip / round lamps), not a square block stuck on top. No light poking through the body, no glow showing from the wrong side, no flicker or z-fighting.
+- How:
+  - map every car's light parts (headlight, DRL, tail, brake, reverse, indicators, left / right) in data (`HeadlightMap` with the tail-light map), found from the model's own parts and checked by eye;
+  - fix any car where the existing tail lights (`client/TailLights.lua`) sit in the wrong place too;
+  - where a model has no separate lamp part, fit a thin glowing insert shaped to the unit, just behind the lens.
+- **Check every car one by one** at night from the front, back and both sides (a close-up of each corner). Keep a checklist in the notes: car, headlights ✓, tail / brake ✓, reverse ✓, indicators ✓. **No car is "done" until all four are in the right place.**
 
 ## What we have now (check it first)
 - The F engine start turns on the dash and headlights; L toggles the lights while running.
@@ -49,6 +61,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
   - fog and rain haze.
 - Day: DRLs on, no beam light, nothing looks odd.
 - Before / after screenshots at night from behind the car and from the front (facing another car).
+- The per-car light checklist (headlights, tail / brake, reverse, indicators in their proper place) is complete for **every** car, with close-ups of any car that needed fixing.
 - FPS not worse at the 3 usual spots (night, lots of traffic); no errors; Lune tests and `luau-lsp analyze` clean.
 - Save the place, commit, push; note it in `City Legends/City Legends.md`.
 
