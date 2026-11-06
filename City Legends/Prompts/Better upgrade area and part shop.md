@@ -38,14 +38,13 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
   - Toolbox props allowed (cleaned: scripts removed, no logos).
   - The garage's UPGRADE button also takes you here, or shows the same screen over the garage.
 - **Camera:** slow orbit round the car; drag to turn; tap a slot to zoom to that area (engine bay for engine parts, wheels for tyres / brakes, rear for exhaust).
-- **Layout like the reference**, in our own City Legends style (the dealer menu's dark glass panels, showroom red, white type; the same components as our other menus), phone first:
-  - top left: the car's name, class badge and level;
-  - left: the **slots** with the part installed in each (tap to see it, uninstall, or swap);
-  - below that: **My Parts** (the parts you own and haven't installed);
-  - top: **PART SHOP / TUNE / APPEARANCE / EXIT**, plus cash and CP;
-  - right: **Stats** (Power hp, Torque, Weight, 0–100, Top speed, Grip, PI and class) as bars, with **green / red differences** when you look at a part before installing it;
-  - bottom right: the **dyno graph** (power and torque against RPM) that redraws when parts change;
-  - bottom: the **category icons** (Engine, Forced Induction, Exhaust, Drivetrain, Tyres & Brakes, Suspension, Body, Tune).
+- **Layout: our own, NOT the reference's** (owner, 2026-11-06: the first mockup was "a little too similar to the reference photo"). Follow `Games/CityLegends/imports/refs/ui/upgrades/workshop_mockup.png` (source: `workshop_mockup_source.html`), in our City Legends style, phone first:
+  - **the car in the middle is the player's real 3D car model** (not a picture) on a turntable with a red ring and floor light; drag to spin;
+  - **hotspot pins on the car** (ENGINE 5/8, BOOST 1/4, EXHAUST 3/5, GRIP 2/3, CHASSIS 2/4: filled slots / all slots, pin colour = best rarity fitted); tapping a pin zooms the camera there and opens that category;
+  - **left rail:** round category buttons (Engine, Boost, Exhaust, Drive, Grip, Chassis, Body);
+  - **top:** car name with its class badge and level on the left; **UPGRADE / SHOP / TUNE / STYLE** pills in the middle; cash, CP and a close ✕ on the right;
+  - **right:** a **PI ring** (class letter and number, the change in green, "still class B (A at 601)"), four small rings (Power, 0-100, Top speed, Grip) with differences, and a big **DYNO RUN** button;
+  - **bottom drawer:** the open category's slots as rarity tiles (tap one), then that slot's options (installed / owned · install / buy price).
 
 ## 2. Slots (what can be installed)
 Each slot holds one part:
@@ -71,7 +70,7 @@ Each slot holds one part:
   - category tabs, a search box and rarity filters;
   - tiles coloured by rarity, each with its icon, name, price and **"fits this car" / "doesn't fit"**;
   - a details panel with BUY (cash, or CP where it makes sense), plus **BUY & INSTALL**;
-  - **use our icon set:** `Games/CityLegends/imports/refs/ui/upgrades/part_icons_sheet.png` (33 tiles; the source with every icon as SVG is `part_icons_source.html` next to it). Turn each icon into a sharp white PNG (512 px, transparent) for Roblox, and copy the tile look: rarity gradient, top shine, rarity pill, name, brand · slot, a green price bar. The owner asked for these (2026-11-06).
+  - **use our icon sets:** `part_icons_sheet.png` (33 tiles) and `part_icons_more_sheet.png` (35 more: lowering springs, air suspension, camber kit, strut brace, bushings, drift angle kit, short shifter, sequential and dual-clutch gearboxes, final drive, carbon driveshaft, street / sport / drift / drag / rally tyres, forged wheels, centrifugal and twin-screw superchargers, smaller pulley, big single / twin / ball-bearing turbos, wastegate, boost controller, anti-lag, rev limiter, coils, spark plugs, fuel pump, oil cooler, radiator, light battery, roll cage, bucket seats), both in `Games/CityLegends/imports/refs/ui/upgrades/` (each with an `_source.html` holding every icon as SVG; the first is `part_icons_source.html`; the source with every icon as SVG is `part_icons_source.html` next to it). Turn each icon into a sharp white PNG (512 px, transparent) for Roblox, and copy the tile look: rarity gradient, top shine, rarity pill, name, brand · slot, a green price bar. The owner asked for these (2026-11-06).
 - **Exhaust and ECU parts the owner asked for**, each with its own sound / feel:
   - **Pop Tune ECU:** pops on lift-off;
   - **Crackle Tune ECU:** long crackles on lift-off, and on downshifts;
@@ -103,10 +102,49 @@ Each slot holds one part:
 2. **Builds:** save up to 3 builds per car (e.g. Street, Race, Drift) and switch with one tap; parts move between builds you own.
 3. **Parts move between cars:** uninstalling puts the part back in My Parts, so you can fit it to another car it suits. Selling a part gives back 50%.
 4. **Rare drops:** sometimes a part is a reward: the daily streak, race golds, the Legends spin, bank heists. Legendary parts only come from the shop at a high price, or as rare rewards.
-5. **Engine swaps (Legendary):** a few fictional engines ("V8 4.0 Twin-Turbo", "Flat-6 4.0", "V10 5.2", "Inline-6 3.0 Turbo") that fit chosen cars only (e.g. a V8 in the Bavarica G20). Each changes power, weight and the engine sound to a fitting one already in the game. Big PI change, so the class rules apply.
+5. **Engine swaps: the 25 most popular tuning engines** (owner, 2026-11-06: "the top 25 most popular tunable engines in the world"); see the section below.
 6. **Nitrous:** a bottle (small / big) that refills slowly; a short boost with a blue flame. Counted in PI; off in races marked "no nitrous".
 7. **Turbo sounds:** a turbo spool whistle and a blow-off "pssh" on gear changes when a turbo / blow-off valve is fitted (from Roblox library sounds or ones already in the game).
 8. **Part condition is NOT added** (keeps it simple).
+
+## Engine swaps: the 25 most popular tuning engines (owner, 2026-11-06)
+An **ENGINE SWAP** slot (Engine category). A swap replaces the car's engine: its power, torque, weight, rev limit, layout and **sound** (use the closest engine sound already in the game: I4, I6, V6, V8, rotary or flat-4). After a swap, the normal engine parts tune it further, up to that engine's **tuned max**.
+- **Names:** engine codes only (like chassis codes), never the maker's or trademark words (no "VTEC", "EcoBoost", "Coyote", "Hemi", "Hellcat", "TFSI"). Add a short layout name, e.g. "2JZ 3.0 I6 Twin-Turbo".
+- **Fits:** every petrol car except stock S2 / R / X cars (class rule) and EVs. Drive type stays the car's own. The engine bay doesn't change visually (no new engine meshes needed); the workshop shows the engine icon and the dyno.
+- **PI and class** move with the swap. The shop shows the new class before buying ("B 562 → A 648").
+- Price by rarity (times the car price factor as usual). Rough start: Uncommon $150K, Rare $350K, Epic $800K, Legendary $2M–3M. Tune these after play-testing.
+
+| # | In-game name | Real engine (for reference only, never shown) | Stock hp | Tuned max hp | Rarity |
+|---|---|---|---|---|---|
+| 1 | 2JZ 3.0 I6 Twin-Turbo | Toyota 2JZ-GTE | 320 | 900 | Legendary |
+| 2 | RB26 2.6 I6 Twin-Turbo | Nissan RB26DETT | 276 | 800 | Legendary |
+| 3 | VR38 3.8 V6 Twin-Turbo | Nissan VR38DETT | 565 | 1,000 | Legendary |
+| 4 | Barra 4.0 I6 Turbo | Ford Barra 4.0 turbo | 362 | 900 | Legendary |
+| 5 | 6.2 Supercharged V8 | Dodge / SRT 6.2 supercharged | 707 | 1,000 | Legendary |
+| 6 | LS7 7.0 V8 | GM LS7 | 505 | 800 | Legendary |
+| 7 | 20B 3-Rotor Twin-Turbo | Mazda 20B-REW | 300 | 800 | Legendary |
+| 8 | LS3 6.2 V8 | GM LS3 | 430 | 750 | Epic |
+| 9 | 454 7.4 Big-Block V8 | Chevrolet big-block 454 | 450 | 900 | Epic |
+| 10 | 5.0 V8 32-Valve | Ford 5.0 4V V8 | 460 | 800 | Epic |
+| 11 | 4G63 2.0 I4 Turbo | Mitsubishi 4G63T | 280 | 650 | Epic |
+| 12 | 1JZ 2.5 I6 Turbo | Toyota 1JZ-GTE | 280 | 650 | Epic |
+| 13 | 13B 2-Rotor Twin-Turbo | Mazda 13B-REW | 276 | 600 | Epic |
+| 14 | N54 3.0 I6 Twin-Turbo | BMW N54 | 300 | 650 | Epic |
+| 15 | B58 3.0 I6 Turbo | BMW B58 | 382 | 750 | Epic |
+| 16 | 350 5.7 Small-Block V8 | Chevrolet small-block 350 | 300 | 600 | Rare |
+| 17 | SR20 2.0 I4 Turbo | Nissan SR20DET | 250 | 550 | Rare |
+| 18 | 3S 2.0 I4 Turbo | Toyota 3S-GTE | 255 | 550 | Rare |
+| 19 | 4B11 2.0 I4 Turbo | Mitsubishi 4B11T | 291 | 550 | Rare |
+| 20 | EJ25 2.5 Flat-4 Turbo | Subaru EJ257 | 300 | 550 | Rare |
+| 21 | K20 2.0 I4 | Honda K20 | 220 | 450 | Rare |
+| 22 | F20 2.0 I4 High-Rev | Honda F20C | 240 | 350 | Rare |
+| 23 | B18 1.8 I4 High-Rev | Honda B18C | 195 | 400 | Uncommon |
+| 24 | CA18 1.8 I4 Turbo | Nissan CA18DET | 170 | 400 | Uncommon |
+| 25 | EA888 2.0 I4 Turbo | VW EA888 | 220 | 500 | Uncommon |
+
+- The rev limit, torque curve (for the dyno graph) and weight change per engine: rotary and high-rev engines rev to 9,000+, big V8s are heavy with lots of low torque, small I4s are light.
+- Each swap gets its own icon (the engine-swap icon with its layout: I4 / I6 / V6 / V8 / rotary / flat-4 badge).
+- Check the list against current tuning sources before building; swap an entry only if it's clearly not a popular tuning engine.
 
 ## Saves (don't lose anything)
 - New save fields: owned parts, installed parts per car, builds, tune settings.
