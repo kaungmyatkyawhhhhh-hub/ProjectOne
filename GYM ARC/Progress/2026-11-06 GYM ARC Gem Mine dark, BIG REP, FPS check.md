@@ -32,3 +32,13 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. In Studio only, **not published**.
 - **Measured (A/B, the original 912 parts swapped back in): no difference** in render CPU (21-23 ms both ways, noise). Roblox already draws many identical simple parts cheaply; and the merged pieces were worse in two ways: 54k triangles, and too big for the phone LOD (WorldLodClient hides small decor far away on phones, part by part).
 - So it was **put back**: EdgeMarkers, Beach and Plaza restored from the backups (exactly as before). PocketPark keeps 4 merged pieces (its two round trees: 18 parts -> 4; no backup survived the first try and Studio can't split them from a script; they look the same and stay under the LOD size).
 - **Conclusion:** the part count of the decoration isn't what costs the frames. The real lever is how much of the map is streamed in at once (Workspace StreamingTargetRadius, set in Studio's Properties) and quality on phones.
+
+## 5. Later 6 Nov: owner "StreamingTargetRadius is 160 already" - what loads, and the Studio floor
+- Why 160 doesn't shrink the world: the big buildings are **Atomic** (ProGym 2,650, PowerliftingGym 2,716, BeachGym 2,209, GoldenEra 1,708, PumpShop 1,173, VipGym 835, MembersGym, Sauna, ClothingStore, HallOfFame, 38 Town.Buildings; set 2 Nov against the holes) and StreamOutBehavior is **LowMemory** (set 28 Oct against the reload spikes). An Atomic gym loads whole once any of it is in range and stays. The town is compact: right after spawning, **22,366 parts** are loaded (24,000 after visiting every gym). Both settings were right for those bugs; keep them.
+- Measured in Studio (render CPU per frame, the plaza):
+  - everything loaded: ~22-25 ms;
+  - every far gym hidden (Pro, Powerlifting, Beach, Golden Era, Gem Mine, Starter, backdrops: 13,700 parts): 19 ms (-4 ms);
+  - **the whole map hidden (only you + terrain): 16.5 ms** = the floor in this Studio;
+  - the 2 LIMITLESS trainers (Atlas + Solaris), the aura + alter look, the Gem Mine's 13 lights or its particles: no measurable change.
+- So in Studio most of the frame is Studio / engine overhead; the map adds ~6-8 ms. The owner's 43-52 ms session (long-running Studio, 3.2 GB memory, the console spamming "being generated") couldn't be reproduced (22 ms in the same spot). The true number is the live game in the Roblox player (and a phone).
+- (One test above ran on the owner's real save by mistake: Studio started without the temporary-data switch. Only teleports and hiding things on the client; no rep was counted, nothing given or changed.)
