@@ -5,6 +5,19 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
+## Ghost Driver look (2026-11-06, in progress, `Prompts/Lighting and car look like the Ghost Driver videos.md`)
+**In the place and in the code, not tuned by eye yet (Studio was minimized, so no 3D pictures):**
+- **Light:** new 17:30 key in `DayCycle` (pink haze, `Atmosphere.Offset` per hour, contrast +0.16, saturation -0.07), `Sunset` sky in `ReplicatedStorage.RivieraSkies` (only the 6 pictures of Creator Store model 135758030102263; its hidden scripts and UI thrown away). A new server starts at 17:00 (`DayZero`, `Config.DayCycle.ServerStartHour`), the start menu holds 17:18 and eases to the server's clock.
+- **Fog band:** `client/LookFx.lua`: 16 soft sheets in a ring 520 studs out, resting on the ground below them.
+- **Settings:** Settings > Graphics (shadows, reflections, ambient, glow, sun rays, depth of field, brightness, contrast, saturation) and TIME AND WEATHER (owner: "add a feature to edit lighting time of day": SERVER, MORNING, NOON, SUNSET, NIGHT, an hour slider; weather, sky, sun and clouds, haze, fog). Client only. Saved as `Settings.Look`. Levels set them (`Config.Look.Presets`).
+- **New models only (`CarFinish.NEW`):** contact shadow, darker carbon, gloss 0.2, SATIN in Customs (`CL_PaintSatin`), `RenderFidelity = Precise` on 483 body parts, gloss on the Bugattis' body parts. Old cars untouched.
+- **Road:** `RivAsphalt` over Asphalt (`tools/look_art.py`, our own maps).
+- **Speed feel:** the wind blur and edge streaks were already there, off with Settings > Motion blur.
+- **Art ids:** fog 123351176849967, shadow 96671888596471, asphalt 137731605748656 / 74173256137470 / 94165991665432, roughness 91277332178340 (gloss), 101717891010716 (satin).
+**Still to do:** tune it against the frames, side-by-side pictures, FPS before / after, settings page on screen. The sky swap at 16:54 is instant: Roblox can't blend two skies.
+
+**Racing hub (owner, 2026-11-06):** "collect all of those racing areas and make a racing hub at the Old Rock place", after the bugs and the lighting.
+
 ## Drives, surfaces, bends (2026-11-06, day, owner's pictures)
 Owner: "I told you to fix these ... Find all buildings and roads if they have this problem", "its happening on this too and also on some buildings, FIND IT ALL", "make all the roads smooth like in the blender but mainly the turns".
 

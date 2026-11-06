@@ -16,6 +16,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Weather = require(script.Parent:WaitForChild("Weather"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local BuildingSkin = require(script.Parent:WaitForChild("BuildingSkin"))
+local LookFx = require(script.Parent:WaitForChild("LookFx"))
 
 local DayCycle = {}
 
@@ -39,6 +40,9 @@ type Key = {
 	con: number?,
 	soft: number?, -- how soft the shadows are (Lighting.ShadowSoftness; 0.12 unless a key says so)
 	cover: number?, -- the cloud cover (0.48 unless a key says so)
+	offset: number?, -- Atmosphere.Offset: how far things fade into the sky (0.12 unless a key says so)
+	fog: number?, -- the low fog band, 0..1 (LookFx)
+	cloud: Color3?, -- the clouds' colour by day
 }
 
 local function rgb(r: number, g: number, b: number): Color3
@@ -76,25 +80,29 @@ end
 -- the morning drive and the blue-hour / night drive) a crisp deep-blue day with strong sun, a warm
 -- golden hour, a long navy blue hour with the lamps just on, and a navy (never black) night under
 -- warm sodium lamps. Grade kept subtle: a touch more saturation and contrast, warm by day.
-local R_NIGHT: Key = { hour = 0, brightness = 1.3, ambient = rgb(74, 86, 124), outdoor = rgb(88, 104, 154), shiftTop = rgb(110, 124, 170), exposure = 0.66, density = 0.2, haze = 0.4, glare = 0, atmo = rgb(34, 50, 96), decay = rgb(18, 28, 66), bloom = 0.32, rays = 0, tint = rgb(255, 242, 226), water = rgb(8, 22, 44), sat = 0.06, con = 0.1 }
+local R_NIGHT: Key = { hour = 0, brightness = 1.3, ambient = rgb(74, 86, 124), outdoor = rgb(88, 104, 154), shiftTop = rgb(110, 124, 170), exposure = 0.66, density = 0.2, haze = 0.4, glare = 0, atmo = rgb(34, 50, 96), decay = rgb(18, 28, 66), bloom = 0.32, rays = 0, tint = rgb(255, 242, 226), water = rgb(8, 22, 44), sat = 0.06, con = 0.1, fog = 0.1 }
 local RIVIERA_KEYS: { Key } = {
 	R_NIGHT,
 	table.freeze(with(R_NIGHT, 4.6)),
 	-- dawn
-	{ hour = 6, brightness = 2.2, ambient = rgb(122, 120, 132), outdoor = rgb(158, 154, 166), shiftTop = rgb(255, 214, 190), exposure = 0.3, density = 0.3, haze = 1.8, glare = 0.3, atmo = rgb(226, 214, 216), decay = rgb(170, 160, 176), bloom = 0.3, rays = 0.04, tint = rgb(252, 244, 244), water = rgb(58, 88, 112), sat = 0.04, con = -0.05, soft = 0.4, cover = 0.62 },
+	{ hour = 6, brightness = 2.2, ambient = rgb(122, 120, 132), outdoor = rgb(158, 154, 166), shiftTop = rgb(255, 214, 190), exposure = 0.3, density = 0.3, haze = 1.8, glare = 0.3, atmo = rgb(226, 214, 216), decay = rgb(170, 160, 176), bloom = 0.3, rays = 0.04, tint = rgb(252, 244, 244), water = rgb(58, 88, 112), sat = 0.04, con = -0.05, soft = 0.4, cover = 0.62, fog = 0.6, offset = 0.3 },
 	-- the cold misty morning (overnight step 4, owner 2026-11-05): cool blue-grey light, a pale soft sun, a low mist,
 	-- soft shadows and a lower contrast; the mist thins by midday (density, haze), it never gets thick enough to hide the road
-	{ hour = 7.2, brightness = 2.5, ambient = rgb(150, 158, 174), outdoor = rgb(174, 186, 206), shiftTop = rgb(232, 236, 248), exposure = 0.2, density = 0.33, haze = 2.3, glare = 0.1, atmo = rgb(220, 224, 230), decay = rgb(186, 192, 204), bloom = 0.2, rays = 0.02, tint = rgb(244, 247, 255), water = rgb(66, 102, 124), sat = 0.01, con = -0.09, soft = 0.5, cover = 0.74 },
+	{ hour = 7.2, brightness = 2.5, ambient = rgb(150, 158, 174), outdoor = rgb(174, 186, 206), shiftTop = rgb(232, 236, 248), exposure = 0.2, density = 0.33, haze = 2.3, glare = 0.1, atmo = rgb(220, 224, 230), decay = rgb(186, 192, 204), bloom = 0.2, rays = 0.02, tint = rgb(244, 247, 255), water = rgb(66, 102, 124), sat = 0.01, con = -0.09, soft = 0.5, cover = 0.74, fog = 0.85, offset = 0.35 },
 	-- morning: still cold, the mist lifting
-	{ hour = 8.5, brightness = 2.83, ambient = rgb(156, 163, 178), outdoor = rgb(179, 191, 209), shiftTop = rgb(238, 240, 248), exposure = 0.12, density = 0.3, haze = 2, glare = 0.1, atmo = rgb(222, 224, 226), decay = rgb(196, 198, 204), bloom = 0.2, rays = 0.02, tint = rgb(246, 248, 255), water = rgb(70, 108, 128), sat = 0.02, con = -0.09, soft = 0.45, cover = 0.72 },
+	{ hour = 8.5, brightness = 2.83, ambient = rgb(156, 163, 178), outdoor = rgb(179, 191, 209), shiftTop = rgb(238, 240, 248), exposure = 0.12, density = 0.3, haze = 2, glare = 0.1, atmo = rgb(222, 224, 226), decay = rgb(196, 198, 204), bloom = 0.2, rays = 0.02, tint = rgb(246, 248, 255), water = rgb(70, 108, 128), sat = 0.02, con = -0.09, soft = 0.45, cover = 0.72, fog = 0.55, offset = 0.3 },
 	-- day: cool, a light haze left over the far towers
-	{ hour = 13, brightness = 3.15, ambient = rgb(154, 161, 176), outdoor = rgb(177, 188, 206), shiftTop = rgb(246, 246, 250), exposure = 0.06, density = 0.25, haze = 1.5, glare = 0.15, atmo = rgb(222, 228, 236), decay = rgb(170, 186, 208), bloom = 0.2, rays = 0.03, tint = rgb(250, 251, 255), water = rgb(54, 110, 140), sat = 0.06, con = -0.05, soft = 0.35, cover = 0.6 },
+	{ hour = 13, brightness = 3.15, ambient = rgb(154, 161, 176), outdoor = rgb(177, 188, 206), shiftTop = rgb(246, 246, 250), exposure = 0.06, density = 0.25, haze = 1.5, glare = 0.15, atmo = rgb(222, 228, 236), decay = rgb(170, 186, 208), bloom = 0.2, rays = 0.03, tint = rgb(250, 251, 255), water = rgb(54, 110, 140), sat = 0.06, con = -0.05, soft = 0.35, cover = 0.6, fog = 0.15 },
 	-- afternoon, warming
-	{ hour = 16.5, brightness = 3.1, ambient = rgb(146, 142, 146), outdoor = rgb(170, 162, 160), shiftTop = rgb(255, 230, 196), exposure = 0.06, density = 0.22, haze = 0.9, glare = 0.35, atmo = rgb(230, 216, 200), decay = rgb(160, 146, 160), bloom = 0.25, rays = 0.08, tint = rgb(255, 246, 232), water = rgb(34, 98, 132), sat = 0.08, con = 0.02, soft = 0.22, cover = 0.52 },
+	{ hour = 16.5, brightness = 3.1, ambient = rgb(146, 142, 146), outdoor = rgb(170, 162, 160), shiftTop = rgb(255, 230, 196), exposure = 0.06, density = 0.22, haze = 0.9, glare = 0.35, atmo = rgb(230, 216, 200), decay = rgb(160, 146, 160), bloom = 0.25, rays = 0.08, tint = rgb(255, 246, 232), water = rgb(34, 98, 132), sat = 0.08, con = 0.02, soft = 0.22, cover = 0.52, fog = 0.35, offset = 0.25 },
+	-- the sunset look (owner, 2026-11-06, the Ghost Driver videos): a warm pink haze the far city fades
+	-- into, the road ahead clear, a soft filmic grade (with REAL: contrast +0.16, saturation -0.07), dark
+	-- contact shadows, few clouds so the sky's own show
+	{ hour = 17.3, brightness = 3.1, ambient = rgb(176, 146, 150), outdoor = rgb(220, 184, 176), shiftTop = rgb(255, 190, 140), exposure = 0.26, density = 0.27, haze = 2.4, glare = 0.75, atmo = rgb(255, 198, 178), decay = rgb(204, 134, 150), bloom = 0.5, rays = 0.16, tint = rgb(255, 240, 228), water = rgb(64, 84, 118), sat = 0.09, con = 0.11, soft = 0.12, cover = 0.34, offset = 0.6, fog = 1, cloud = rgb(255, 190, 160) },
 	-- golden hour / sunset: warm, long shadows (the sun just above the sea: see sunClock)
-	{ hour = 18.3, brightness = 2.8, ambient = rgb(171, 141, 134), outdoor = rgb(220, 175, 148), shiftTop = rgb(255, 162, 98), exposure = 0.42, density = 0.26, haze = 1, glare = 0.8, atmo = rgb(255, 166, 112), decay = rgb(168, 92, 84), bloom = 0.35, rays = 0.15, tint = rgb(255, 230, 204), water = rgb(44, 74, 104), sat = 0.12, con = 0.01 },
+	{ hour = 18.3, brightness = 2.8, ambient = rgb(171, 141, 134), outdoor = rgb(220, 175, 148), shiftTop = rgb(255, 162, 98), exposure = 0.42, density = 0.27, haze = 2, glare = 0.8, atmo = rgb(255, 176, 136), decay = rgb(176, 100, 104), bloom = 0.4, rays = 0.15, tint = rgb(255, 232, 210), water = rgb(44, 74, 104), sat = 0.1, con = 0.11, soft = 0.12, cover = 0.34, offset = 0.5, fog = 0.9, cloud = rgb(255, 170, 140) },
 	-- blue hour: a navy sky, buildings still readable, the lamps and windows coming on
-	{ hour = 19.6, brightness = 1.7, ambient = rgb(96, 108, 148), outdoor = rgb(116, 132, 182), shiftTop = rgb(120, 140, 210), exposure = 0.72, density = 0.22, haze = 0.5, glare = 0.2, atmo = rgb(62, 86, 152), decay = rgb(36, 52, 112), bloom = 0.35, rays = 0, tint = rgb(246, 244, 255), water = rgb(14, 36, 72), sat = 0.08, con = 0.05 },
+	{ hour = 19.6, brightness = 1.7, ambient = rgb(96, 108, 148), outdoor = rgb(116, 132, 182), shiftTop = rgb(120, 140, 210), exposure = 0.72, density = 0.22, haze = 0.5, glare = 0.2, atmo = rgb(62, 86, 152), decay = rgb(36, 52, 112), bloom = 0.35, rays = 0, tint = rgb(246, 244, 255), water = rgb(14, 36, 72), sat = 0.08, con = 0.05, fog = 0.3 },
 	table.freeze(with(R_NIGHT, 21)),
 }
 -- the realistic grade laid over RIVIERA_KEYS (see DayCycle.start)
@@ -117,7 +125,9 @@ end
 -- (the clear blue Day sky also makes the navy blue hour and night once the sun is down: the
 -- Night box is near black, kept for later)
 local function rivieraSky(hour: number): string
-	if (hour >= 17.6 and hour < 19.2) or (hour >= 5 and hour < 6.8) then
+	if hour >= 16.9 and hour < 19.2 then
+		return "Sunset" -- (2026-11-06: big clouds lit from below, Creator Store model 135758030102263, only its 6 pictures kept)
+	elseif hour >= 5 and hour < 6.8 then
 		return "Dusk"
 	end
 	return "Day"
@@ -128,6 +138,8 @@ DayCycle.RIVIERA_X = 9000 -- east of this the camera is on the Riviera map
 -- the old map's grade (the place's ColorCorrection)
 local BASE_SAT, BASE_CON = 0.02, 0.12
 local BASE_SOFT, BASE_COVER = 0.12, 0.48
+local BASE_OFFSET = 0.12
+local BASE_CLOUD = Color3.fromRGB(236, 238, 242)
 
 local function lerp(a: number, b: number, t: number): number
 	return a + (b - a) * t
@@ -168,13 +180,27 @@ local function sample(hour: number, keys: { Key }?): Key
 		con = lerp(a.con or BASE_CON, b.con or BASE_CON, t),
 		soft = lerp(a.soft or BASE_SOFT, b.soft or BASE_SOFT, t),
 		cover = lerp(a.cover or BASE_COVER, b.cover or BASE_COVER, t),
+		offset = lerp(a.offset or BASE_OFFSET, b.offset or BASE_OFFSET, t),
+		fog = lerp(a.fog or 0, b.fog or 0, t),
+		cloud = (a.cloud or BASE_CLOUD):Lerp(b.cloud or BASE_CLOUD, t),
 	}
 end
 
 -- photo mode can hold the time of day (nil: the shared clock)
 DayCycle.override = nil :: number?
 
--- the hour now (0 - 24), the same for everyone
+-- (2026-11-06) the start menu holds the sunset; playing eases over to the server's clock
+local menuHeld = false
+local menuLeft: number? = nil
+function DayCycle.holdMenu(on: boolean)
+	if on then
+		menuHeld, menuLeft = true, nil
+	elseif menuHeld then
+		menuHeld, menuLeft = false, os.clock()
+	end
+end
+
+-- the hour now (0 - 24), the same for everyone (unless a player sets their own in Settings)
 function DayCycle.hour(): number
 	if DayCycle.override then
 		return DayCycle.override
@@ -184,9 +210,29 @@ function DayCycle.hour(): number
 	if type(preview) == "number" and RunService:IsStudio() then
 		return preview
 	end
+	local mine = LookFx.state.Time
+	if type(mine) == "number" then
+		return mine
+	end
 	local c = Config.DayCycle
-	local minutes = workspace:GetServerTimeNow() / 60
-	return (minutes / c.CycleMinutes * 24 + c.StartHour) % 24
+	if menuHeld then
+		return c.MenuHour
+	end
+	local zero = workspace:GetAttribute("DayZero")
+	local now = workspace:GetServerTimeNow()
+	local real = if type(zero) == "number"
+		then ((now - zero) / 60 / c.CycleMinutes * 24 + c.ServerStartHour) % 24
+		else (now / 60 / c.CycleMinutes * 24 + c.StartHour) % 24
+	if menuLeft then
+		local t = (os.clock() - menuLeft) / c.MenuBlend
+		if t >= 1 then
+			menuLeft = nil
+		else
+			local way = (real - c.MenuHour + 12) % 24 - 12 -- the short way round the clock
+			return (c.MenuHour + way * t * t * (3 - 2 * t)) % 24
+		end
+	end
+	return real
 end
 
 -- how much of the night it is: 1 from late evening to dawn, 0 through the day, smooth between
@@ -241,6 +287,7 @@ function DayCycle.start()
 		end
 		baseSky.MoonAngularSize = sky.MoonAngularSize
 		baseSky.StarCount = sky.StarCount
+		baseSky.SunAngularSize = sky.SunAngularSize
 	end
 	local skies = ReplicatedStorage:FindFirstChild("RivieraSkies")
 	local skyNow = "base"
@@ -258,6 +305,7 @@ function DayCycle.start()
 		end
 		sky.MoonAngularSize = if src then 7 else baseSky.MoonAngularSize
 		sky.StarCount = if src then 2000 else baseSky.StarCount
+		sky.SunAngularSize = if name == "Sunset" then 9 else baseSky.SunAngularSize
 	end
 	RunService.Heartbeat:Connect(function(dt)
 		acc += dt
@@ -272,7 +320,11 @@ function DayCycle.start()
 		-- on the Riviera map its own light (blended over 1500 studs so it never pops)
 		local cam = workspace.CurrentCamera
 		w = if cam then math.clamp((cam.CFrame.Position.X - (DayCycle.RIVIERA_X - 1500)) / 1500, 0, 1) else 0
-		setSky(if w >= 0.5 then rivieraSky(hour) else "base")
+		local look = LookFx.state
+		setSky(if w >= 0.5 then (if look.Sky ~= "Auto" then look.Sky else rivieraSky(hour)) else "base")
+		if sky then
+			sky.CelestialBodiesShown = look.SunClouds
+		end
 		if w > 0 then
 			local r = sample(hour, RIVIERA_KEYS)
 			-- (owner, 2026-11-03: "the game look a little bit like an arcade game, I want it to feel
@@ -297,6 +349,9 @@ function DayCycle.start()
 				end
 			end
 		end
+		if not look.Haze then
+			k.haze, k.density, k.offset = 0, k.density * 0.5, 0
+		end
 		Lighting.Brightness = k.brightness
 		Lighting.Ambient = k.ambient
 		Lighting.ShadowSoftness = k.soft or BASE_SOFT
@@ -309,14 +364,16 @@ function DayCycle.start()
 		end
 		if grade and grade.Parent then
 			grade.TintColor = k.tint
-			grade.Saturation = k.sat or BASE_SAT
-			grade.Contrast = k.con or BASE_CON
+			grade.Saturation = (k.sat or BASE_SAT) + look.Saturation
+			grade.Contrast = (k.con or BASE_CON) + look.Contrast
 		end
 		workspace.Terrain.WaterColor = k.water
 		local atmo = Lighting:FindFirstChildOfClass("Atmosphere")
 		if atmo then
 			atmo.Glare = k.glare
+			atmo.Offset = k.offset or BASE_OFFSET
 		end
+		LookFx.setFog(k.fog or 0, k.atmo:Lerp(Color3.new(1, 1, 1), 0.3))
 		-- how many windows are lit: most through the evening, fewer after midnight
 		local share = if hour >= 12 then 0.45 elseif hour < 0.5 then 0.45 elseif hour < 3 then 0.45 - (hour - 0.5) / 2.5 * 0.22 else 0.23
 		WorldFx.setWindowShare(share)
@@ -330,13 +387,13 @@ function DayCycle.start()
 		-- haze, exposure and the outdoor light go through Weather, which adds the rain on top; clouds
 		-- are white and lighter by day, dark and fuller at night
 		Weather.setBaseLighting({
-			cloudColor = Color3.fromRGB(236, 238, 242):Lerp(Color3.fromRGB(56, 58, 74), n),
+			cloudColor = (k.cloud or BASE_CLOUD):Lerp(Color3.fromRGB(56, 58, 74), n),
 			cover = (k.cover or BASE_COVER) + 0.12 * n,
 			density = k.density,
 			haze = k.haze,
 			atmoColor = k.atmo,
 			decay = k.decay,
-			exposure = k.exposure,
+			exposure = k.exposure + look.Brightness,
 			outdoor = k.outdoor,
 		})
 	end)

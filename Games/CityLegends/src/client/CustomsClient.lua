@@ -169,6 +169,7 @@ local FINISH = {
 	gloss = { Enum.Material.SmoothPlastic, 0.14 },
 	matte = { Enum.Material.SmoothPlastic, 0 },
 	metallic = { Enum.Material.SmoothPlastic, 0.32 },
+	satin = { Enum.Material.SmoothPlastic, 0.05 },
 }
 
 -- the wheel parts that are rims: on an imported model the biggest piece of each wheel is the tyre
@@ -750,7 +751,11 @@ local function open()
 
 	local finishSec = section("FINISH", CU.Prices.finish)
 	local finishItems = {}
-	for _, f in { { "STOCK", nil }, { "GLOSS", "gloss" }, { "MATTE", "matte" }, { "METALLIC", "metallic" } } do
+	local finishes = { { "STOCK", nil }, { "GLOSS", "gloss" }, { "MATTE", "matte" }, { "METALLIC", "metallic" } }
+	if CarFinish.hasPaint(carId) then
+		table.insert(finishes, 3, { "SATIN", "satin" }) -- (2026-11-06: the new models)
+	end
+	for _, f in finishes do
 		local id = f[2]
 		table.insert(finishItems, { label = f[1], pick = function()
 			look.finish = id

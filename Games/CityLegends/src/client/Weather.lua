@@ -27,6 +27,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
+local LookFx = require(script.Parent:WaitForChild("LookFx"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
 
@@ -344,6 +345,7 @@ function Weather.setBaseLighting(t: { density: number, haze: number, atmoColor: 
 	b.decay = t.decay
 	b.exposure = t.exposure
 	b.outdoor = t.outdoor
+	b.specular = LookFx.specular()
 	if t.cloudColor then
 		b.cloudColor = t.cloudColor
 	end
@@ -576,15 +578,27 @@ function Weather.init()
 
 	-- clear <-> rain cycle
 	task.spawn(function()
+		local held = false -- (Settings > Weather: this player's own weather)
 		while true do
 			task.wait(1)
 			-- Studio previews (Claude's lighting screenshots): a test script holds the weather
 			local preview = workspace:GetAttribute("PreviewRain")
+			local mine = LookFx.state.Weather
 			if type(preview) == "boolean" and game:GetService("RunService"):IsStudio() then
 				if preview ~= raining then
 					Weather.setRaining(preview, true)
 				end
 				nextToggle = math.huge
+			elseif mine ~= "Auto" then
+				local want = mine == "Rain"
+				if want ~= raining then
+					Weather.setRaining(want)
+				end
+				nextToggle = math.huge
+				held = true
+			elseif held then
+				held = false
+				nextToggle = os.clock() + randomSpell(raining)
 			elseif os.clock() >= nextToggle then
 				Weather.setRaining(not raining)
 			end

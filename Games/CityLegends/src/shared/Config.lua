@@ -1344,7 +1344,47 @@ Config.Rewards = {
 Config.DayCycle = {
 	Enabled = true,
 	CycleMinutes = 14, -- about 35 s a game hour (owner, 2026-11-05: quicker days; was 24)
-	StartHour = 20, -- where the clock stands at server time 0 (shifts the whole cycle)
+	StartHour = 20, -- where the clock stands at server time 0 (only until the server's DayZero arrives)
+	ServerStartHour = 17, -- a new server starts here (2026-11-06: the sunset look comes first)
+	MenuHour = 17.3, -- the start menu's backdrop, on every join
+	MenuBlend = 5, -- seconds from it to the server's clock when you start playing
+}
+
+-- the picture settings (owner, 2026-11-06, the Ghost Driver look: client/LookFx.lua; Settings > Graphics and
+-- Weather). A graphics level sets Presets; a player's own changes are saved as Settings.Look
+Config.Look = {
+	Defaults = {
+		Shadows = true, Reflections = "High", Ambient = "High", Glow = true, Rays = true, Dof = false,
+		Brightness = 0, Contrast = 0, Saturation = 0,
+		Weather = "Auto", Sky = "Auto", SunClouds = true, Haze = true, Fog = "Thick",
+	},
+	Presets = {
+		Low = { Shadows = false, Reflections = "Low", Ambient = "Low", Glow = false, Rays = false, Fog = "Off" },
+		Medium = { Shadows = true, Reflections = "High", Ambient = "High", Glow = true, Rays = false, Fog = "Light" },
+		High = { Shadows = true, Reflections = "High", Ambient = "High", Glow = true, Rays = true, Fog = "Thick" },
+		Ultra = { Shadows = true, Reflections = "High", Ambient = "High", Glow = true, Rays = true, Fog = "Thick" },
+	},
+	Choices = {
+		Reflections = { "Low", "High" },
+		Ambient = { "Low", "High" },
+		Weather = { "Auto", "Clear", "Rain" },
+		Sky = { "Auto", "Day", "Sunset", "Night" },
+		Fog = { "Off", "Light", "Thick" },
+	},
+	Sliders = { Brightness = 0.5, Contrast = 0.2, Saturation = 0.3 }, -- how far each goes each way from the look
+	AmbientLow = 0.45, -- EnvironmentDiffuseScale at Ambient Low
+	ReflectionsLow = 0.35, -- EnvironmentSpecularScale at Reflections Low
+	Dof = { Far = 0.12, Focus = 70, Radius = 220 }, -- a soft distance blur when a player turns it on
+	Fog = {
+		Image = "rbxassetid://123351176849967", -- tools/look_art.py
+		Sheets = 16,
+		Overlap = 1.5, -- each sheet is this many times its share of the ring
+		Radius = 520, -- inside the streaming radius, so the far city fades into it
+		Height = 90,
+		Lift = 26, -- the band's middle over the ground
+		Level = { Off = 0, Light = 0.4, Thick = 0.75 },
+	},
+	ShadowImage = "rbxassetid://96671888596471", -- tools/look_art.py
 }
 
 ---------------------------------------------------------------------

@@ -63,6 +63,7 @@ local Earned: RemoteEvent = remote("RemoteEvent", "Earned")
 local Progress: RemoteEvent = remote("RemoteEvent", "Progress") -- server -> client XP / level updates
 local ClaimDaily: RemoteFunction = remote("RemoteFunction", "ClaimDaily")
 local SaveSettings: RemoteEvent = remote("RemoteEvent", "SaveSettings") -- client -> server: speed units, gearbox
+workspace:SetAttribute("DayZero", workspace:GetServerTimeNow()) -- (the day's clock starts with the server: DayCycle)
 local CarSignals: RemoteEvent = remote("RemoteEvent", "CarSignals") -- client -> server: blinkers + lights, shown to everyone
 local Knock: RemoteEvent = remote("RemoteEvent", "Knock") -- a prop knocked down (Knockables): passed on to everyone else
 local TestDrive: RemoteFunction = remote("RemoteFunction", "TestDrive") -- a dealer car for a few minutes

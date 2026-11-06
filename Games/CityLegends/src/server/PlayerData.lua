@@ -752,6 +752,35 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	if raw.Speedo == "Analogue" or raw.Speedo == "Digital" then
 		profile.Settings.Speedo = raw.Speedo -- the HUD speedometer style (2026-11-03)
 	end
+	-- Settings > Graphics and Weather (2026-11-06): only known values, in range; none = the graphics level's
+	local look = raw.Look
+	if look == false then
+		profile.Settings.Look = nil
+	elseif type(look) == "table" then
+		local L = Config.Look
+		local out: { [string]: any } = {}
+		for _, k in { "Shadows", "Glow", "Rays", "Dof", "SunClouds", "Haze" } do
+			if type(look[k]) == "boolean" then
+				out[k] = look[k]
+			end
+		end
+		for k, allowed in L.Choices do
+			if type(look[k]) == "string" and table.find(allowed, look[k]) then
+				out[k] = look[k]
+			end
+		end
+		for k, range in L.Sliders do
+			local v = tonumber(look[k])
+			if v and v == v then
+				out[k] = math.clamp(v, -range, range)
+			end
+		end
+		local t = tonumber(look.Time)
+		if t and t == t and t >= 0 and t < 24 then
+			out.Time = t
+		end
+		profile.Settings.Look = out
+	end
 	for _, key in { "Music", "Sfx" } do
 		local v = tonumber(raw[key])
 		if v and v == v then

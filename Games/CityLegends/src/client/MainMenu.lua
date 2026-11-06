@@ -45,6 +45,8 @@ local Driving = require(script.Parent:WaitForChild("Driving"))
 local Minimap = require(script.Parent:WaitForChild("Minimap"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local Weather = require(script.Parent:WaitForChild("Weather"))
+local LookFx = require(script.Parent:WaitForChild("LookFx"))
+local DayCycle = require(script.Parent:WaitForChild("DayCycle"))
 local MenuArt = require(script.Parent:WaitForChild("MenuArt"))
 local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
 local CarUpgrades = require(script.Parent:WaitForChild("CarUpgrades"))
@@ -1082,6 +1084,7 @@ local function openSettings()
 		new("UIPadding", { PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 20), PaddingTop = UDim.new(0, 12), PaddingBottom = UDim.new(0, 12) }),
 	})
 	local order = 0
+	local refreshers: { () -> () } = {} -- (a graphics level changes what the rows below it show)
 	local function heading(t: string)
 		order += 1
 		local h = text({ Text = t, FontFace = HEAVY, TextSize = 15, TextColor3 = GOLD, Size = UDim2.new(1, 0, 0, 30), LayoutOrder = order, Parent = list })
@@ -1106,6 +1109,7 @@ local function openSettings()
 				b.TextColor3 = if name == cur then NAVY0 else WHITE
 			end
 		end
+		table.insert(refreshers, refresh)
 		for k, name in options do
 			local b = new("TextButton", { AutoButtonColor = false, Text = name, FontFace = HEAVY, TextSize = 15, Size = UDim2.fromOffset(math.max(84, #name * 10 + 24), 34), LayoutOrder = k, Parent = holder }, { corner(8) })
 			b.MouseEnter:Connect(hoverSound)
@@ -1119,8 +1123,8 @@ local function openSettings()
 		end
 		refresh()
 	end
-	-- a slider 0..1
-	local function slider(r: Frame, get: () -> number, set: (number) -> ())
+	-- a slider 0..1 (`say`: its value in words, `steps`: how many stops, 20 unless given)
+	local function slider(r: Frame, get: () -> number, set: (number) -> (), say: ((number) -> string)?, steps: number?)
 		local back = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = BLUE, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -70, 0.5, 0), Size = UDim2.new(0.5, 0, 0, 10), Parent = r }, { corner(5) })
 		local fill = new("Frame", { BackgroundColor3 = MINT, Size = UDim2.fromScale(get(), 1), Parent = back }, { corner(5) })
 		local knob = new("Frame", { BackgroundColor3 = WHITE, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(get(), 0.5), Size = UDim2.fromOffset(22, 22), Parent = back }, {
@@ -1131,13 +1135,17 @@ local function openSettings()
 		local function show(v: number)
 			fill.Size = UDim2.fromScale(v, 1)
 			knob.Position = UDim2.fromScale(v, 0.5)
-			value.Text = tostring(math.floor(v * 100 + 0.5)) .. "%"
+			value.Text = if say then say(v) else tostring(math.floor(v * 100 + 0.5)) .. "%"
 		end
 		show(get())
+		table.insert(refreshers, function()
+			show(get())
+		end)
 		local held = false
 		local function at(x: number)
 			local v = math.clamp((x - back.AbsolutePosition.X) / back.AbsoluteSize.X, 0, 1)
-			v = math.floor(v * 20 + 0.5) / 20
+			local n = steps or 20
+			v = math.floor(v * n + 0.5) / n
 			set(v)
 			show(v)
 		end
@@ -1217,8 +1225,95 @@ local function openSettings()
 	end, function(v)
 		local name = string.sub(v, 1, 1) .. string.lower(string.sub(v, 2))
 		st.Graphics = name
+		st.Look = false -- (the level's own values; the time, weather and sky stay as you set them)
+		local keep = { Time = LookFx.state.Time, Weather = LookFx.state.Weather, Sky = LookFx.state.Sky }
 		WorldFx.setQuality(name)
+		LookFx.state.Time, LookFx.state.Weather, LookFx.state.Sky = keep.Time, keep.Weather, keep.Sky
+		for _, f in refreshers do
+			f()
+		end
 	end)
+	-- (2026-11-06) one setting of the picture, kept in the save with the rest of the look
+	local function look(key: string, value: any)
+		LookFx.set(key, value)
+		st.Look = LookFx.save()
+	end
+	local function onOff(label: string, key: string)
+		choices(row(label), { "ON", "OFF" }, function()
+			return if LookFx.state[key] then "ON" else "OFF"
+		end, function(v)
+			look(key, v == "ON")
+		end)
+	end
+	local function pickOne(label: string, key: string)
+		local options = {}
+		for _, o in Config.Look.Choices[key] do
+			table.insert(options, string.upper(o))
+		end
+		choices(row(label), options, function()
+			return string.upper(LookFx.state[key])
+		end, function(v)
+			look(key, string.sub(v, 1, 1) .. string.lower(string.sub(v, 2)))
+		end)
+	end
+	local function plusMinus(label: string, key: string)
+		local range = Config.Look.Sliders[key]
+		slider(row(label), function()
+			return (LookFx.state[key] + range) / (2 * range)
+		end, function(v)
+			look(key, (v - 0.5) * 2 * range)
+		end, function(v)
+			local n = math.floor((v - 0.5) * 200 + 0.5)
+			return (if n > 0 then "+" else "") .. tostring(n)
+		end)
+	end
+	onOff("Shadows", "Shadows")
+	pickOne("Reflections", "Reflections")
+	pickOne("Ambient light", "Ambient")
+	onOff("Glow", "Glow")
+	onOff("Sun rays", "Rays")
+	onOff("Depth of field", "Dof")
+	plusMinus("Brightness", "Brightness")
+	plusMinus("Contrast", "Contrast")
+	plusMinus("Saturation", "Saturation")
+
+	heading("TIME AND WEATHER")
+	-- (owner, 2026-11-06: "add a feature to edit lighting time of day") yours only: the others keep
+	-- the server's clock
+	local HOURS = { MORNING = 8, NOON = 13, SUNSET = 17.3, NIGHT = 22 }
+	choices(row("Time of day"), { "SERVER", "MORNING", "NOON", "SUNSET", "NIGHT" }, function()
+		local t = LookFx.state.Time
+		if t == nil then
+			return "SERVER"
+		end
+		for name, h in HOURS do
+			if h == t then
+				return name
+			end
+		end
+		return ""
+	end, function(v)
+		look("Time", HOURS[v])
+		for _, f in refreshers do
+			f()
+		end
+	end)
+	slider(row("Set the hour"), function()
+		return (LookFx.state.Time or DayCycle.hour()) / 24
+	end, function(v)
+		look("Time", math.min(v * 24, 23.75))
+		for _, f in refreshers do
+			f()
+		end
+	end, function(v)
+		local minutes = math.floor(v * 24 * 60 + 0.5)
+		return string.format("%02d:%02d", (minutes // 60) % 24, minutes % 60)
+	end, 96)
+	pickOne("Weather", "Weather")
+	pickOne("Sky", "Sky")
+	onOff("Sun and clouds", "SunClouds")
+	onOff("Horizon haze", "Haze")
+	pickOne("Fog layer", "Fog")
 
 	heading("CAMERA")
 	local function fx(): any
@@ -2321,6 +2416,9 @@ end
 
 -- start: the menu as the start screen (no car out yet: nothing to close back to)
 function MainMenu.open(start: boolean?)
+	if start then
+		DayCycle.holdMenu(true) -- (2026-11-06: the first thing a player sees is the sunset)
+	end
 	if not gui then
 		return
 	end
@@ -2355,6 +2453,7 @@ function MainMenu.open(start: boolean?)
 end
 
 function MainMenu.close()
+	DayCycle.holdMenu(false)
 	closeMenu()
 end
 
@@ -2395,6 +2494,7 @@ function MainMenu.applySettings(st: { [string]: any })
 		Minimap.setCorner(st.Minimap.corner or "TopRight")
 	end
 	WorldFx.setQuality(if type(st.Graphics) == "string" then st.Graphics else WorldFx.defaultQuality())
+	LookFx.load(st.Look)
 	UI.setSpeedoStyle(if st.Speedo == "Digital" then "Digital" else "Analogue")
 	Driving.assist = if st.Assist == "Off" then 0 elseif st.Assist == "Low" then 0.5 else 1
 	Driving.smoke = if st.Smoke == "Off" then 0 elseif st.Smoke == "Low" then 0.5 else 1

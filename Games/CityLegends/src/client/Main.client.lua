@@ -43,6 +43,7 @@ UI.init()
 -- shots; the menu camera takes over when loading is done. Without the Riviera: the old city.
 UI.setLoadingCinematic(true)
 require(script.Parent:WaitForChild("DayCycle")).start() -- (early: the loading shots get the game's light)
+require(script.Parent:WaitForChild("LookFx")).start()
 local loadingShotsConn: RBXScriptConnection? = nil
 local function stopLoadingShots()
 	if loadingShotsConn then

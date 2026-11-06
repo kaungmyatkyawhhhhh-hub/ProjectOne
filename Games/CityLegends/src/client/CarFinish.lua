@@ -9,6 +9,8 @@
 
 local Players = game:GetService("Players")
 
+local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config"))
+
 local CarFinish = {}
 
 CarFinish.CARS = {
@@ -34,7 +36,22 @@ CarFinish.VARIANT = {
 	gloss = "CL_PaintGloss",
 	matte = "CL_PaintMatte",
 	metallic = "CL_PaintMetal",
+	satin = "CL_PaintSatin",
 } :: { [string]: string }
+
+-- (2026-11-06, the Ghost Driver look: new models only, never the older ones) the new models that came
+-- before the list above: they get the contact shadow and the carbon too, and the two SVJs the paint
+CarFinish.NEW = table.clone(CarFinish.CARS)
+for _, id in { "lambrini_svj", "lambrini_svj63", "bugotti_veyron", "bugotti_veyron_sport", "bugotti_veyron_top", "bugotti_chiron", "bugotti_chiron_pursport", "bugotti_chiron_supersport" } do
+	CarFinish.NEW[id] = true
+end
+local PLAIN_PAINT = { Body_A_CAR_PAINT = true, Body_MAIN_PAINT = true } -- (the SVJs' paint: a plain colour, no picture)
+local CARBON_TINT = Color3.fromRGB(150, 150, 156) -- darker than its picture, less shine than the paint
+
+-- can Customs give this car a real satin?
+function CarFinish.hasPaint(id: string): boolean
+	return CarFinish.CARS[id] == true or id == "lambrini_svj" or id == "lambrini_svj63"
+end
 
 local GLASS = "CL_GlassGloss"
 local LENS = {
@@ -79,11 +96,55 @@ local function cabinLight(skin: Instance)
 	light.Parent = at
 end
 
-function CarFinish.apply(id: string, skin: Instance)
-	if not CarFinish.CARS[id] then
+-- a soft dark shadow right under the car, on top of the real one, so it never looks like it floats
+local function contactShadow(skin: Instance)
+	local model = skin.Parent
+	local root = if model and model:IsA("Model") then model.PrimaryPart else nil
+	if not (model and root) or model:FindFirstChild("ContactShadow") then
 		return
 	end
-	cabinLight(skin)
+	local box, size = (model :: Model):GetBoundingBox()
+	local bottom = root.CFrame:ToObjectSpace(box).Position.Y - size.Y / 2 + 0.12
+	local p = Instance.new("Part")
+	p.Name = "ContactShadow"
+	p.Size = Vector3.new(size.X * 1.3, 0.05, size.Z * 1.2)
+	p.CFrame = root.CFrame * CFrame.new(0, bottom, 0)
+	p.Transparency = 1
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CastShadow = false
+	p.Massless = true
+	p.Anchored = root.Anchored
+	local d = Instance.new("Decal")
+	d.Face = Enum.NormalId.Top
+	d.Texture = Config.Look.ShadowImage
+	d.Parent = p
+	if not root.Anchored then
+		local w = Instance.new("WeldConstraint")
+		w.Part0 = root
+		w.Part1 = p
+		w.Parent = p
+	end
+	p.Parent = model
+end
+
+local function gloss(d: BasePart)
+	d.Material = Enum.Material.SmoothPlastic
+	d.MaterialVariant = CarFinish.VARIANT.gloss
+	d.Reflectance = 0
+	d:SetAttribute("PbrPaint", true)
+end
+
+function CarFinish.apply(id: string, skin: Instance)
+	if not CarFinish.NEW[id] then
+		return
+	end
+	contactShadow(skin)
+	local full = CarFinish.CARS[id]
+	if full then
+		cabinLight(skin)
+	end
 	for _, d in skin:GetDescendants() do
 		if not d:IsA("BasePart") then
 			continue
@@ -92,11 +153,19 @@ function CarFinish.apply(id: string, skin: Instance)
 		if type(src) ~= "string" then
 			continue
 		end
-		if src:sub(1, 10) == "Body_Paint" then
-			d.Material = Enum.Material.SmoothPlastic
-			d.MaterialVariant = CarFinish.VARIANT.gloss
+		local low = src:lower()
+		if low:find("carbon", 1, true) and not low:find("cabin", 1, true) and d:IsA("MeshPart") and d.TextureID ~= "" then
+			d.Color = CARBON_TINT
 			d.Reflectance = 0
-			d:SetAttribute("PbrPaint", true)
+		end
+		if PLAIN_PAINT[src] then
+			gloss(d)
+		end
+		if not full then
+			continue
+		end
+		if src:sub(1, 10) == "Body_Paint" then
+			gloss(d)
 		elseif src:sub(1, 16) == "SeeThrough_Lens_" then
 			local lens = LENS[src:sub(17):match("^%a+") or ""]
 			if lens then

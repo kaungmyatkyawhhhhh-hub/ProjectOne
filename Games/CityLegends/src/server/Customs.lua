@@ -39,7 +39,7 @@ export type Look = {
 	head: string?,
 }
 
-local FINISHES = { gloss = true, matte = true, metallic = true }
+local FINISHES = { gloss = true, matte = true, metallic = true, satin = true }
 local KEYS = { "paint", "finish", "accent", "tint", "glow", "rim", "plate", "head" }
 
 local ctx: any = nil

@@ -14,6 +14,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local LookFx = require(script.Parent:WaitForChild("LookFx"))
 
 local WorldFx = {}
 
@@ -122,17 +123,16 @@ local qualityPick: number? = nil
 local QUALITY = { Low = 0.6, Medium = 0.8, High = 1, Ultra = 1.15 }
 function WorldFx.setQuality(name: string)
 	qualityPick = QUALITY[name]
-	-- the costly screen effects: off on Low, depth of field off on Medium
+	-- the costly screen effects: depth of field off on Medium (the wind blur; a player's own is LookDof)
 	local Lighting = game:GetService("Lighting")
 	for _, e in Lighting:GetChildren() do
-		if e:IsA("SunRaysEffect") or e:IsA("BloomEffect") then
-			e.Enabled = name ~= "Low"
-		elseif e:IsA("DepthOfFieldEffect") then
+		if e:IsA("DepthOfFieldEffect") and e.Name ~= "LookDof" then
 			e.Enabled = name == "High" or name == "Ultra"
 		end
 	end
-	-- (overnight, 2026-11-06) shadows are the dearest thing left on a phone: off on Low
-	Lighting.GlobalShadows = name ~= "Low"
+	-- (overnight, 2026-11-06: shadows are the dearest thing left on a phone: off on Low) the level
+	-- sets shadows, glow, sun rays, reflections and fog
+	LookFx.preset(name)
 	pcall(function()
 		workspace.Terrain.Decoration = name == "High" or name == "Ultra"
 	end)
