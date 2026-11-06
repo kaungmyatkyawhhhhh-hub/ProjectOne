@@ -25,3 +25,10 @@ Back to [[00 GYM ARC Home|GYM ARC Home]]. In Studio only, **not published**.
 - Ideas, not done (owner's call): a smaller streaming radius (Workspace StreamingTargetRadius; scripts can't read it), merge / simplify the biggest builds (EdgeMarkers, Backdrops), keep the post effects off on low graphics.
 
 ![[GYM ARC/Screenshots/2026-11-06_gem_mine_lit.jpg]]
+
+## 4. Later 6 Nov: "simplify the heaviest decoration" (tried, measured, put back)
+- The heaviest pure decoration: **Town.EdgeMarkers**, 912 single parts (fence posts + ropes, buoys + ropes, striped barriers; no collisions, no scripts, no tags). Backdrops (1,388) is already handled: BackdropClient shows it only near the Pro Gym.
+- Merged EdgeMarkers by area (80 studs) + material: **912 -> 55 objects**, looking identical (before / after screenshots matched). Also the safe parts of the street decor (no collision, lights, prompts, tags or script names; same parent only): Beach 722 -> 681, Plaza 230 -> 222, PocketPark 41 -> 27; Street, SkatePark, Greenery, SportsCourt had nothing safe enough (their decor is many small separate models: one tree, one bench, one lamp).
+- **Measured (A/B, the original 912 parts swapped back in): no difference** in render CPU (21-23 ms both ways, noise). Roblox already draws many identical simple parts cheaply; and the merged pieces were worse in two ways: 54k triangles, and too big for the phone LOD (WorldLodClient hides small decor far away on phones, part by part).
+- So it was **put back**: EdgeMarkers, Beach and Plaza restored from the backups (exactly as before). PocketPark keeps 4 merged pieces (its two round trees: 18 parts -> 4; no backup survived the first try and Studio can't split them from a script; they look the same and stay under the LOD size).
+- **Conclusion:** the part count of the decoration isn't what costs the frames. The real lever is how much of the map is streamed in at once (Workspace StreamingTargetRadius, set in Studio's Properties) and quality on phones.
