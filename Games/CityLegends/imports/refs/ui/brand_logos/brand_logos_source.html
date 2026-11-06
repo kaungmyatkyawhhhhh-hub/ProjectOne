@@ -50,16 +50,20 @@ const RR=(x,y,w,h,r,m='chrome')=>`<rect x="${x}" y="${y}" width="${w}" height="$
 const RE=(x,y,w,h,r,e)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${e}" filter="url(#inset)"/>`;
 const NEW=[
 ["Dearborn","Ford style · new brand",`
-${P('M14 50 L100 16 L186 50 L172 140 L100 186 L28 140 Z')}
-${PE('M14 50 L100 16 L186 50 L172 140 L100 186 L28 140 Z','url(#enamelNavy)',.9)}
-<path d="M28 58 L100 30 L172 58" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
-<g filter="url(#bevel)" fill="url(#chrome)">
-<path d="M70 66 H104 Q140 66 140 102 Q140 138 104 138 H70 Z M86 80 V124 H102 Q124 124 124 102 Q124 80 102 80 Z" fill-rule="evenodd"/>
-<rect x="40" y="82" width="24" height="7" rx="3.5"/><rect x="34" y="98" width="30" height="7" rx="3.5"/><rect x="42" y="114" width="22" height="7" rx="3.5"/>
-</g>
-<path d="M70 146 H130" stroke="#d32a35" stroke-width="3"/>
-${T(100,160,"DEARBORN",8.5,"url(#chromeTxt)",{ls:3.5,w:800,flt:"txt"})}
-<path d="M30 56 L100 28 L170 56 L166 76 Q100 56 34 80 Z" fill="url(#gloss)" opacity=".7"/>`],
+${P('M100 8 C140 8 170 16 184 24 L180 108 Q172 160 100 194 Q28 160 20 108 L16 24 C30 16 60 8 100 8 Z')}
+<g transform="translate(100 101) scale(.9) translate(-100 -100)"><clipPath id="dbc"><path d="M100 8 C140 8 170 16 184 24 L180 108 Q172 160 100 194 Q28 160 20 108 L16 24 C30 16 60 8 100 8 Z"/></clipPath>
+<g clip-path="url(#dbc)" filter="url(#inset)"><rect width="200" height="200" fill="url(#enamelNavy)"/>
+${Array.from({length:24},(_,k)=>`<path d="M100 92 L${100+160*Math.cos(k*Math.PI/12)} ${92+160*Math.sin(k*Math.PI/12)}" stroke="#fff" stroke-opacity=".05" stroke-width="5"/>`).join('')}</g></g>
+<path d="M100 8 C140 8 170 16 184 24 L180 108 Q172 160 100 194 Q28 160 20 108 L16 24 C30 16 60 8 100 8 Z" fill="none" stroke="url(#chromeTxt)" stroke-width="1" transform="translate(100 101) scale(.84) translate(-100 -100)"/>
+${star(82,34,3.6,'url(#chromeTxt)')}${star(100,30,4.6,'url(#chromeTxt)')}${star(118,34,3.6,'url(#chromeTxt)')}
+<g transform="translate(104 0) skewX(-12) translate(-104 0)" filter="url(#bevel)">
+<path d="M72 50 H106 Q144 50 144 88 Q144 124 106 124 H72 Z M89 65 V109 H104 Q127 109 127 87 Q127 65 104 65 Z" fill="url(#chrome)" fill-rule="evenodd"/>
+<path d="M58 66 H64 M52 82 H64 M58 98 H64" stroke="url(#chrome)" stroke-width="6" stroke-linecap="round"/></g>
+<path d="M24 136 L40 128 H160 L176 136 L160 144 L168 156 H32 L40 144 Z" fill="#7d0812" filter="url(#drop)"/>
+<path d="M40 128 H160 V156 H40 Z" fill="url(#enamelRed)" filter="url(#bevel)"/>
+<path d="M40 128 H160" stroke="url(#chromeTxt)" stroke-width="1.2"/><path d="M40 156 H160" stroke="url(#chromeTxt)" stroke-width="1.2"/>
+${T(100,147,'DEARBORN',11,'url(#chromeTxt)',{ls:4,w:900,flt:'txt'})}
+<path d="M26 30 C60 14 140 14 174 30 L172 62 Q100 40 28 66 Z" fill="url(#gloss)" opacity=".75"/>`],
 ["Wolfsburg","Volkswagen style · new brand",`
 ${RR(14,14,172,172,46)}${RE(21,21,158,158,40,'url(#enamelBlue)')}
 <rect x="27" y="27" width="146" height="146" rx="35" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
