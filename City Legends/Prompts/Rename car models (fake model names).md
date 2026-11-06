@@ -92,9 +92,9 @@ The brand names are already fictional (except "Hemi", renamed below), but the mo
 | ferrara_458speciale | Rosso Rampante 458 Speciale | Rosso Rampante F142 Speciale |
 | ferrara_california | Rosso Rampante Californa | Rosso Rampante F149 Riviera |
 | lambrini_lp700 | Enfurecido Aventador LP700-4 | Enfurecido LB834 |
-| lambrini_lp750 | Enfurecido Aventador SV LP750-4 | Enfurecido LB834 RF |
-| lambrini_svj | Enfurecido Aventador SVJ | Enfurecido LB834 RFT |
-| lambrini_svj63 | Enfurecido Aventador SVJ 63 | Enfurecido LB834 RFT 63 |
+| lambrini_lp750 | Enfurecido Aventador SV LP750-4 | Enfurecido LB834 ZV |
+| lambrini_svj | Enfurecido Aventador SVJ | Enfurecido LB834 ZVX |
+| lambrini_svj63 | Enfurecido Aventador SVJ 63 | Enfurecido LB834 ZVX 63 |
 | lambrini_revuelto | Enfurecido Revuelto | Enfurecido LB744 |
 | lambrini_huracan | Enfurecido Huracan EVO | Enfurecido LB724 |
 | lambrini_performante | Enfurecido Huracan Performante Spyder | Enfurecido LB724 Aero Spyder |
@@ -118,10 +118,10 @@ Avoid in future names (owner, 2026-11-06): C6 / C7 style codes Chevrolet adverti
 
 ## Side nicknames on the Aventador line (owner, 2026-11-06)
 Our own version of the real SV / SVJ side lettering (the real cars say "SV" = Super Veloce, "SVJ" = Super Veloce Jota):
-- **RF** = **Ruggente Furia** ("roaring fury"), on `lambrini_lp750` (old SV).
-- **RFT** = **Ruggente Furia Tempesta** ("roaring fury storm"), on `lambrini_svj`.
-- **RFT 63** on `lambrini_svj63`.
-- Put it on **both sides** of the car, low on the doors / side skirts, like the real lettering: big italic letters, the full words small underneath, a thin stripe; design in `Games/CityLegends/imports/refs/ui/brand_logos/side_decals_rf_rft.png`. Make it a decal (or a texture painted in Blender) that sits flat on the body with no z-fighting, sharp at phone size, and doesn't change with Customs paint unless the player picks a decal colour. No real "SV" / "SVJ" lettering may stay anywhere on these cars.
+- **ZV** = **Zanna Vortice** ("fang vortex"), on `lambrini_lp750` (old SV).
+- **ZVX** = **Zanna Vortice Xtrema** ("fang vortex extreme"), on `lambrini_svj`.
+- **ZVX 63** on `lambrini_svj63`.
+- Put it on **both sides** of the car, low on the doors / side skirts, like the real lettering: big italic letters, the full words small underneath, a thin stripe; design in `Games/CityLegends/imports/refs/ui/brand_logos/side_decals_zv_zvx.png`. Make it a decal (or a texture painted in Blender) that sits flat on the body with no z-fighting, sharp at phone size, and doesn't change with Customs paint unless the player picks a decal colour. No real "SV" / "SVJ" lettering may stay anywhere on these cars.
 
 If a new car (e.g. the Pending A45 S, or any future import) arrives, name it the same way: BMW / Mercedes / Porsche / Japanese cars by chassis code, the rest with a made-up name in the same style.
 
