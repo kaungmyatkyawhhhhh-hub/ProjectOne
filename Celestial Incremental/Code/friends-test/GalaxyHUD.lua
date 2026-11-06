@@ -682,8 +682,12 @@ shared.GalaxyCloseSide = function(keep: string?)
 end
 local function pressKey(k)
 	if not keyAllowed(k) then return end
-	-- (7 Nov: a key opens its window; pressing it again while it's open does nothing. Close = X, Esc / B, or outside)
-	if WM.isOpen(k.key) then return end
+	-- (owner 7 Nov: a key TOGGLES its window: pressed again (button or keybind) while it's open, it closes; once more, it
+	-- opens. Boards and other openers still only open, they never close a window)
+	if WM.isOpen(k.key) then
+		WM.closeCurrent()
+		return
+	end
 	if k.window == "Guide" then
 		if shared.GalaxyGuideToggle then shared.GalaxyGuideToggle() end
 	elseif k.window == "Store" then

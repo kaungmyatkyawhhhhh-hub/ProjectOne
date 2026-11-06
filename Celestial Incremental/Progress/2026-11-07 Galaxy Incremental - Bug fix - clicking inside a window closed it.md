@@ -60,3 +60,9 @@ The other three, checked:
 - No test of mine pressed COLLAPSE on purpose. Most likely, during the earlier phone screenshot pass (9 UI art task), clicks meant for the hotbar / Settings landed on COLLAPSE and AUTO-SUPERNOVA while the BLACK HOLE window was still open (on a phone those buttons are where the hotbar was).
 - It's the Studio test save only (no real player). I can't undo it without a backup.
 - From now on my click tests skip any point on COLLAPSE / AUTO-SUPERNOVA / Robux buttons. The first blocklist missed COLLAPSE (its label isn't inside the button); caught before clicking.
+
+## Change (owner, 7 Nov, later): hotbar keys TOGGLE again
+- Pressing a window's own hotbar button or keybind while that window is open now CLOSES it; pressing it again opens it.
+- Boards and other openers still only open (they never close a window). X, Esc / B and tapping outside still close it.
+- **Tested on PC** (hotbar clicks): U open → close → open; T, F and J open → close.
+- **Phones:** the hotbar hides while a window is open, so there the window closes with X or a tap outside, as before.
