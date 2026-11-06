@@ -79,3 +79,11 @@ Skins (Robux / earned) got the same treatment: Inferno embers + lava cracks, Fro
 ![[GYM ARC/Screenshots/alter_art_1106/alter10_obsidian_front.jpg]]
 ![[GYM ARC/Screenshots/alter_art_1106/aura11_galaxy.jpg]]
 ![[GYM ARC/Screenshots/alter_art_1106/aura_flare_levelup_golden.jpg]]
+
+## Later, 6 Nov: no aura VFX under the feet (owner)
+Owner: "in every aura, remove the vfx thats under ur foot".
+- AuraVFX: the ground ring and the flare's ground ring are off for every aura (`GROUND_EFFECTS = false` at the top of the module; true brings them back).
+- AuraPrestige: the tier-5 ground shockwave at the feet is off too.
+- Kept: wisps, floaters, the flame loop on the body, and the flare's star + pillar. Tested in Play: 0 emitters at the feet, 0 errors.
+
+![[GYM ARC/Screenshots/alter_art_1106/aura_no_ground_vfx_galaxy_flare.jpg]]

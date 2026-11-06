@@ -157,3 +157,6 @@ The owner's third module. The effect now comes off the body itself (the 10 bigge
 | Galaxy | ![[GYM ARC/Screenshots/auras_v4_galaxy_idle_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_galaxy_full_front.jpg]] | ![[GYM ARC/Screenshots/auras_v4_galaxy_idle_side.jpg]] | ![[GYM ARC/Screenshots/auras_v4_galaxy_full_side.jpg]] |
 
 While benching: ![[GYM ARC/Screenshots/auras_v4_inferno_bench.jpg]]
+
+## Effects v4: the ChatGPT aura art (6 Nov)
+Each aura: its own rising wisps, its own floaters and the tinted flame loop on the body; a flare (star + pillar) on a record, a full pump and equipping. Owner, 6 Nov: no VFX under the feet (no ground ring, no flare ring, no tier-5 shockwave). See [[2026-11-06 GYM ARC Alter skins, alter VFX and auras on the new art]].
