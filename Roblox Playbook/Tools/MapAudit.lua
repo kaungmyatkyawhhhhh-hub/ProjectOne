@@ -1,4 +1,4 @@
---[[ MapAudit v2 (P&L Studios / Myanmar Builders Club)
+--[[ MapAudit v3 (P&L Studios / Myanmar Builders Club)
 Read-only. A ModuleScript (put it in ServerStorage.Tools; it never runs by itself). In Play (server) or Studio:
   local report = require(game.ServerStorage.Tools.MapAudit)({ root = workspace.Galaxy })
 It prints the report and returns it as text. Changes nothing.
@@ -7,7 +7,9 @@ Checks:
   FLOAT / SUNK   - object not resting on the ground
   TILT           - object rotated on X/Z (leaning / upside down) without AllowTilt
   ROT            - Y rotation not a multiple of 15 degrees (skipped for things aimed at a target: FaceTarget / Island)
-  OVERLAP        - two objects inside each other
+  OVERLAP        - two objects inside each other (real geometry: rings / halos as rings, not as their bounding box);
+                   a BOARD is also checked against every other part in the map (island pieces, decoration)
+  FACECLEAR      - something stands in front of a board's face: a 5x5 grid of rays from 6 studs in front to the face
   STACK          - two objects at (almost) the same spot
   FACING         - sign / board / screen faces away from its target (default: spawn)
   EDGE / OUTWARD - a board on an island not at the rim / not facing the island
@@ -28,6 +30,10 @@ Attributes you can put on any object (Model or Part):
   Island      (string) the island (by name) a board stands on (BoardPlacer sets it)
   NotGround   (bool)   on a PART that isn't floor (a door inside an arch): the ground ray goes through it
   Animated    (bool)   spins / hovers on purpose (a landmark): FLOAT, TILT and ROT are skipped
+  Ring        (bool)   on a PART that is a ring / halo / torus mesh (also guessed: a flat round part named *Ring* / Halo /
+                       Gyro / Rim / Orbit): measured as a ring (centre line + tube), never as its solid bounding disc
+  Ground      (bool)   on a PART that is floor others may stand on / in (a raised rim lip): OVERLAP + FACECLEAR skip it
+  PartOf      (string) on a PART that belongs to the object of that name (a sign's own edge frame): not an overlap
 
 v2 (7 Nov, first run on Galaxy Incremental), changed from v1:
   - a ModuleScript can't run code without returning a value: v1 errored when required. Now it returns a function (opts).
@@ -40,6 +46,13 @@ v2 (7 Nov, first run on Galaxy Incremental), changed from v1:
   - FACING is judged per OBJECT (any of its screens facing the target is enough), not per part: a board's decorated back
     panel faces the void on purpose. A Board whose UI the client draws counts its own front (its pivot's LookVector).
   - NotGround parts (a door in an arch) are skipped by the ground ray; Animated objects skip FLOAT / TILT / ROT.
+
+v3 (7 Nov, launch day: "the gold ring cuts through the boards" and the audit said CLEAN):
+  - OVERLAP only compared bounding boxes of AUDITED objects: the island's own pieces (a brass crown ring) weren't in it,
+    and a ring's box is a solid disc, so a box test is either blind or always hits. Now every board is tested against
+    every visible part in the map, part by part, with real shapes: a ring = points along its centre line (tube radius),
+    a ball = a sphere, anything else = its oriented box. Spatial queries skip CanQuery-off parts, so this walks the parts.
+  - new FACECLEAR (see above), with the same geometry (so CanQuery-off parts and rings count).
 ]]
 
 local PFS = game:GetService("PathfindingService")
@@ -121,6 +134,63 @@ return function(opts)
 		return it:GetAttribute("Board") ~= nil or it:FindFirstChildWhichIsA("SurfaceGui", true) ~= nil
 	end
 
+	-- (v3) real geometry ------------------------------------------------------------------------------------------
+	local function isRing(part)
+		if part:GetAttribute("Ring") ~= nil then return part:GetAttribute("Ring") == true end
+		local s = part.Size
+		local n = part.Name:lower()
+		local named = n:find("ring") or n:find("halo") or n:find("gyro") or n == "rim" or n:find("orbit")
+		return named ~= nil and s.Y < 0.25 * math.min(s.X, s.Z) and math.abs(s.X - s.Z) < 0.1 * s.X
+	end
+	-- is the point p inside the part (grown by pad studs)?
+	local function inside(part, p, pad)
+		local q = part.CFrame:PointToObjectSpace(p)
+		local h = part.Size / 2
+		if isRing(part) then
+			local tube = part.Size.Y / 2
+			local R = h.X - tube
+			local d = math.sqrt((math.sqrt(q.X * q.X + q.Z * q.Z) - R) ^ 2 + q.Y * q.Y)
+			return d < tube + pad
+		end
+		if part:IsA("Part") and part.Shape == Enum.PartType.Ball then return q.Magnitude < h.X + pad end
+		return math.abs(q.X) < h.X + pad and math.abs(q.Y) < h.Y + pad and math.abs(q.Z) < h.Z + pad
+	end
+	-- the points a part is made of (a ring: its centre line; else its corners, edge middles, face centres and centre)
+	local function samples(part)
+		local pts = {}
+		local h = part.Size / 2
+		if isRing(part) then
+			local R = h.X - part.Size.Y / 2
+			for i = 0, 95 do
+				local a = i / 96 * math.pi * 2
+				table.insert(pts, part.CFrame:PointToWorldSpace(Vector3.new(math.cos(a) * R, 0, math.sin(a) * R)))
+			end
+			return pts, part.Size.Y / 2
+		end
+		for _, x in ipairs({ -1, 0, 1 }) do
+			for _, y in ipairs({ -1, 0, 1 }) do
+				for _, z in ipairs({ -1, 0, 1 }) do
+					table.insert(pts, part.CFrame:PointToWorldSpace(Vector3.new(x * math.max(h.X - 0.2, 0), y * math.max(h.Y - 0.2, 0), z * math.max(h.Z - 0.2, 0))))
+				end
+			end
+		end
+		return pts, 0
+	end
+	local function visible(part)
+		return part:IsA("BasePart") and part.Transparency < 0.95 and part:GetAttribute("Ground") ~= true
+	end
+	local allParts = {}
+	for _, d in ipairs(MAP:GetDescendants()) do if visible(d) then table.insert(allParts, d) end end
+	local function reach(part) return part.Size.Magnitude / 2 end
+	-- do parts a and b really touch? (each one's sample points inside the other)
+	local function touch(a, b)
+		local pa, ra = samples(a)
+		for _, p in ipairs(pa) do if inside(b, p, ra - 0.15) then return true end end
+		local pb, rb = samples(b)
+		for _, p in ipairs(pb) do if inside(a, p, rb - 0.15) then return true end end
+		return false
+	end
+
 	-- 1. ground contact + 2. rotation
 	local rp = RaycastParams.new()
 	rp.FilterType = Enum.RaycastFilterType.Exclude
@@ -155,21 +225,90 @@ return function(opts)
 		end
 	end
 
-	-- 3. overlaps + stacks
-	local op = OverlapParams.new()
-	op.FilterType = Enum.RaycastFilterType.Exclude
+	-- 3. overlaps + stacks (v3: part by part, real shapes; boards against every visible part in the map)
 	local seen = {}
 	for _, it in ipairs(items) do
 		local cf, size = bbox(it)
-		op.FilterDescendantsInstances = { it }
-		local shrink = Vector3.new(math.max(size.X - 0.4, 0.1), math.max(size.Y - 0.4, 0.1), math.max(size.Z - 0.4, 0.1))
-		for _, p in ipairs(ws:GetPartBoundsInBox(cf, shrink, op)) do
+		local board = isBoard(it)
+		local mine = {}
+		for _, d in ipairs(it:IsA("BasePart") and { it } or it:GetDescendants()) do if visible(d) then table.insert(mine, d) end end
+		local bottom = cf.Position.Y - size.Y / 2
+		for _, p in ipairs(allParts) do
+			if p == it or p:IsDescendantOf(it) or p:GetAttribute("PartOf") == it.Name then continue end
 			local other = itemOf(p)
-			if other and other ~= it then
-				local key = it:GetFullName() < other:GetFullName() and (it:GetFullName() .. "|" .. other:GetFullName()) or (other:GetFullName() .. "|" .. it:GetFullName())
-				if not seen[key] then seen[key] = true; add("OVERLAP", it, "inside " .. other:GetFullName()) end
+			if other == it then continue end
+			if not other and not board then continue end
+			-- (the floor it stands on: a part whose top is at or under this object's bottom is ground, not an overlap)
+			local pr = math.abs(p.CFrame.RightVector.Y) * p.Size.X / 2 + math.abs(p.CFrame.UpVector.Y) * p.Size.Y / 2 + math.abs(p.CFrame.LookVector.Y) * p.Size.Z / 2
+			if p.Position.Y + pr <= bottom + 0.6 and not isRing(p) then continue end
+			if (p.Position - cf.Position).Magnitude > reach(p) + size.Magnitude / 2 then continue end
+			local hit = false
+			for _, m in ipairs(mine) do
+				if (m.Position - p.Position).Magnitude <= reach(m) + reach(p) and touch(m, p) then hit = true break end
+			end
+			if hit then
+				local o = other or p
+				local key = it:GetFullName() < o:GetFullName() and (it:GetFullName() .. "|" .. o:GetFullName()) or (o:GetFullName() .. "|" .. it:GetFullName())
+				if not seen[key] then seen[key] = true; add("OVERLAP", it, "inside " .. o:GetFullName() .. (if isRing(p) then " (ring)" else "")) end
 			end
 		end
+	end
+	-- 3b. FACECLEAR: nothing in front of a board's face (a 5x5 grid of rays from 6 studs out to the face, real shapes).
+	-- The face = each SurfaceGui's face; a Board drawn by the client = its part named Screen, front = the pivot's LookVector
+	for _, it in ipairs(items) do
+		if not isBoard(it) then continue end
+		local faces = {}
+		for _, sg in ipairs(it:GetDescendants()) do
+			if sg:IsA("SurfaceGui") then
+				local part = sg.Adornee or sg.Parent
+				if part and part:IsA("BasePart") then
+					local n = Vector3.FromNormalId(sg.Face)
+					table.insert(faces, { part = part, normal = part.CFrame:VectorToWorldSpace(n), depth = math.abs(part.Size:Dot(n)) / 2 })
+				end
+			end
+		end
+		if #faces == 0 and it:IsA("Model") and it:GetAttribute("Board") ~= nil then
+			local screen = it:FindFirstChild("Screen", true)
+			if screen and screen:IsA("BasePart") then
+				local look = it:GetPivot().LookVector
+				local n = screen.CFrame:VectorToObjectSpace(look)
+				table.insert(faces, { part = screen, normal = look, depth = math.abs(screen.Size:Dot(n)) / 2 })
+			end
+		end
+		-- (a face pointing AWAY from the board's target is its decorated back panel: not a face players read)
+		local tpos = posOf(findTarget(it))
+		local front = if it:IsA("Model") and it:GetAttribute("Board") ~= nil then it:GetPivot().LookVector else nil
+		local blocked = {}
+		for _, f in ipairs(faces) do
+			if front and f.normal:Dot(front) < 0 then continue end
+			if not front and tpos then
+				local to = Vector3.new(tpos.X - f.part.Position.X, 0, tpos.Z - f.part.Position.Z)
+				if to.Magnitude > 1 and Vector3.new(f.normal.X, 0, f.normal.Z):Dot(to) < 0 then continue end
+			end
+			local right = f.normal:Cross(Vector3.new(0, 1, 0))
+			if right.Magnitude < 0.1 then continue end -- (a face looking up or down)
+			right = right.Unit
+			local p0 = f.part
+			local hw = math.abs(p0.CFrame:VectorToObjectSpace(right):Dot(p0.Size)) / 2
+			local hh = math.abs(p0.CFrame:VectorToObjectSpace(Vector3.new(0, 1, 0)):Dot(p0.Size)) / 2
+			local c = p0.Position + f.normal * f.depth
+			local nearParts = {}
+			for _, p in ipairs(allParts) do
+				if p ~= it and not p:IsDescendantOf(it) and p:GetAttribute("PartOf") ~= it.Name and (p.Position - c).Magnitude <= reach(p) + math.max(hw, hh) + 8 then table.insert(nearParts, p) end
+			end
+			for i = 0, 4 do
+				for j = 0, 4 do
+					local face = c + right * (hw * (-0.8 + 1.6 * i / 4)) + Vector3.new(0, hh * (-0.8 + 1.6 * j / 4), 0)
+					for k = 0, 24 do
+						local pt = face + f.normal * (6 * k / 24 + 0.05)
+						for _, p in ipairs(nearParts) do
+							if not blocked[p] and inside(p, pt, 0) then blocked[p] = true end
+						end
+					end
+				end
+			end
+		end
+		for p in pairs(blocked) do add("FACECLEAR", it, p:GetFullName() .. " stands in front of the face" .. (if isRing(p) then " (ring)" else "")) end
 	end
 	for i = 1, #items do
 		for j = i + 1, #items do

@@ -66,6 +66,9 @@ do
 		-- (the posts stand on the plaza's raised rim ring; the ground ray from their middle misses the ring and lands on the
 		-- floor's bevelled edge 0.8-1.5 below: Floating, with that reason)
 		for _, c in ipairs(centre:GetChildren()) do if c.Name == "LampPost" then tag(c, { Floating = true }) end end
+		-- (MapAudit: the plaza's raised rim ring is floor: the lamps, the Black Hole gate and the boards' feet stand on it)
+		local plazaRim = centre:FindFirstChild("Rim")
+		if plazaRim then plazaRim:SetAttribute("Ground", true) end
 		local det = centre:FindFirstChild("Details")
 		if det then
 			for _, c in ipairs(det:GetChildren()) do
@@ -94,6 +97,11 @@ do
 		-- (the Barrier is the arch's door, not floor; the sector-2 Forge sign faces its own island)
 		local bar = ns:FindFirstChild("Barrier")
 		if bar then bar:SetAttribute("NotGround", true) end
+		-- (a sign's brass edge is its own frame: part of that sign, for the audit)
+		for _, n in ipairs({ "ArchSign", "IgnitionSign" }) do
+			local e = ns:FindFirstChild(n .. "Edge")
+			if e then e:SetAttribute("PartOf", n) end
+		end
 		-- (the Sector 2 Forge copy is made below, tagged by being a copy of the plaza's)
 	end
 end
@@ -236,6 +244,9 @@ PAD_BUILD[3] = function(island, folder) -- BRASS RIM
 	local c = centerOf(island)
 	local rimTube = Kit.Fit("RimRing", "X", I.RimFit).Y
 	Kit.Make("RimRing", brass({ Name = "Rim", Fit = { "X", I.RimFit }, CFrame = CFrame.new(c + UP * (rimTube / 2)), Collide = true, Parent = folder }))
+	-- (MapAudit: the island's edge lip is floor; the boards' feet stand on it)
+	local rimPart = folder:FindFirstChild("Rim", true)
+	if rimPart then rimPart:SetAttribute("Ground", true) end
 	local inlayTube = Kit.Fit("RimRing", "X", I.InlayFit).Y
 	Kit.Make("RimRing", brass({ Name = "Inlay", Fit = { "X", I.InlayFit }, CFrame = CFrame.new(c + UP * (0.1 - inlayTube / 2)), Parent = folder }))
 end
@@ -629,6 +640,46 @@ task.spawn(function()
 	forge.Parent = nextS
 	-- (6 Nov: no crystal in front of the Forge's sign or any other sign: the island's crystals were placed before the Forge)
 	Builder.ClearDecor(root)
+	-- (7 Nov, MapAudit v3 (real shapes; the crystals are CanQuery off, so rays never saw them):
+	--  * Sector 2's random crystals stood inside the Forge's platform: any crystal on its footprint moves out to its side;
+	--  * ClearDecor pushed a plaza crystal sideways off PLAYERS NEAR YOU's face into its neighbour: two clusters closer than
+	--    their sizes allow, the bigger one steps away from the smaller (away from the face it was cleared from))
+	local fcf, fsize = forge:GetBoundingBox()
+	for _, cr in ipairs(nextS:GetChildren()) do
+		if cr.Name == "Crystal" and cr:IsA("BasePart") then
+			local q = fcf:PointToObjectSpace(cr.Position)
+			local r = math.max(cr.Size.X, cr.Size.Z) / 2
+			if math.abs(q.X) < fsize.X / 2 + r + 1 and math.abs(q.Z) < fsize.Z / 2 + r + 1 then
+				local side = if q.X >= 0 then 1 else -1
+				local to = fcf:PointToWorldSpace(Vector3.new(side * (fsize.X / 2 + r + 1.5), q.Y, q.Z))
+				cr.CFrame = cr.CFrame + Vector3.new(to.X - cr.Position.X, 0, to.Z - cr.Position.Z)
+			end
+		end
+	end
+	local det = centre and centre:FindFirstChild("Details")
+	local clusters = {}
+	for _, d in ipairs(det and det:GetChildren() or {}) do
+		if d.Name == "CrystalCluster" and d:IsA("BasePart") then table.insert(clusters, d) end
+	end
+	for i = 1, #clusters do
+		for j = i + 1, #clusters do
+			local a, b = clusters[i], clusters[j]
+			local ra, rb = math.max(a.Size.X, a.Size.Z) / 2, math.max(b.Size.X, b.Size.Z) / 2
+			local d = Vector3.new(b.Position.X - a.Position.X, 0, b.Position.Z - a.Position.Z)
+			if d.Magnitude < ra + rb + 0.5 then
+				local big, small = if a.Size.Y >= b.Size.Y then a else b, if a.Size.Y >= b.Size.Y then b else a
+				local away = Vector3.new(big.Position.X - small.Position.X, 0, big.Position.Z - small.Position.Z)
+				away = if away.Magnitude > 0.01 then away.Unit else Vector3.new(1, 0, 0)
+				big.CFrame = big.CFrame + away * (ra + rb + 0.5 - d.Magnitude)
+				-- (re-seated on what's under it now: it may have stepped onto the plaza's raised rim)
+				local rp = RaycastParams.new()
+				rp.FilterType = Enum.RaycastFilterType.Exclude
+				rp.FilterDescendantsInstances = { big }
+				local hit = workspace:Raycast(big.Position + Vector3.new(0, big.Size.Y, 0), Vector3.new(0, -big.Size.Y * 3, 0), rp)
+				if hit then big.CFrame = big.CFrame + Vector3.new(0, hit.Position.Y + big.Size.Y / 2 - 0.1 - big.Position.Y, 0) end
+			end
+		end
+	end
 end)
 
 -- (3.1: the plaza's Black Hole gate gets a prompt: "Open BLACK HOLE" -> the window, GalaxyMapClient -> Galaxy.OpenWindow)

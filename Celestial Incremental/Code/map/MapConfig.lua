@@ -101,12 +101,16 @@ MapConfig.Islands = {
 	Tiles = { From = 0.6, To = 0.92, Count = 14 },
 	RimFit = 61,                                    -- tier 2 brass rim (1.5 high)
 	InlayFit = 34,
-	Lamps = { Radius = 27.5, Angles = { 60, -60, 120, -120 }, Pillar = 6.5, Orb = 1.5 }, -- 8 tall; none at the bridge or the boards
+	-- (7 Nov: the +-60 pair stood inside the BODIES / PERKS boards' backs since the boards moved to +-67 (MapAudit v3);
+	-- now +-140, between the lock boards (+-94) and the spires (+-160))
+	Lamps = { Radius = 27.5, Angles = { 140, -140, 120, -120 }, Pillar = 6.5, Orb = 1.5 }, -- 8 tall; none at the bridge or the boards
 	-- (the crystals, banner and telescope keep clear of the four boards: none in front of a board, none on the bridge path)
 	Crystals = { Angles = { 130, 150, -125 }, From = 15, To = 21, Low = 3, High = 8 },
 	Garden = { At = Vector3.new(-6, 0, 12), Fit = 14 },
 	Banner = { At = Vector3.new(-21, 0, 17), Pole = 10, Cloth = 5 }, -- (the cloth mesh at 5 high is 5.1 wide)
-	CrownRing = 55, CrownHeight = 15.5,             -- tier 5: a brass halo ring above the island (clear of the boards' tops)
+	-- (7 Nov, launch day, owner: "the golden ring is colliding with the boards": at 15.5 it cut through the TREE / INFO boards
+	-- (20.9 tall) and its near side crossed the view. Now ABOVE the tallest board: TREE / INFO top 20.9 + 3.6 clear)
+	CrownRing = 55, CrownHeight = 24.5,             -- tier 5: a brass halo ring above the island (clear of the boards' tops)
 	Dais = 12,
 	Telescope = { At = Vector3.new(-19, 0, -13), Height = 7 },
 	HangingCrystals = 3,
@@ -125,7 +129,9 @@ MapConfig.Islands = {
 	PadSize = 4.5, PadReach = 60, PadClear = 0.5,
 	-- what pads 11-20 build (island-local, x = out from the Core, z = to the side)
 	PadBuilds = {
-		Gyro = { Fit = 16, Height = 9, Tilt = 24 },
+		-- (7 Nov, "the gold ring crosses the boards": at 9 up, 16 wide and tilted 24 it swept across the INFO title from the
+		-- island spawn; now round the altar star itself (5.9 up), smaller and flatter, under the boards' screens in that view)
+		Gyro = { Fit = 9, Height = 7, Tilt = 16 }, -- (hugs the star: lowest point 5.2 = the dais top)
 		Gate = { X = -22, Height = 11 },
 		Lights = { Angles = { 45, 135, -45, -135 }, Radius = 9, Post = 3.2, Orb = 1 },
 		Floaters = { Angles = { 35, 75, 105, 145, -35, -75, -105, -145 }, Radius = 34, Size = { 2.5, 4 }, Height = { 5, 9 } },
