@@ -1435,7 +1435,12 @@ local function setTab(name: string)
 		return
 	end
 	if name == "STYLE" then
-		showMsg("Paint and looks are at Legends Customs: stop in the tuning bay", GOLD)
+		-- (opened from Legends Customs: its paint screen is underneath)
+		if savedHold and savedHold[1] then
+			Workshop.close()
+		else
+			showMsg("Paint and looks are at Legends Customs: stop in the tuning bay", GOLD)
+		end
 		return
 	end
 	st.tab = name

@@ -761,11 +761,15 @@ local chipCooldown = 0
 local function update(dt: number)
 	local pos, speed = myPos()
 	-- chips spin; touch one to collect it
+	-- (2026-11-06, FPS: only the ones you can see: all 25 moved every frame, the whole map over)
 	local spin = os.clock() * 2
+	local camAt = workspace.CurrentCamera.CFrame.Position
 	for k, chip in chipParts do
 		if not collected[k] then
 			local base = ActivityData.chips[k]
-			chip.CFrame = CFrame.new(base + Vector3.new(0, math.sin(spin + k) * 0.4, 0)) * CFrame.Angles(0, spin + k, 0)
+			if (base - camAt).Magnitude < 240 then
+				chip.CFrame = CFrame.new(base + Vector3.new(0, math.sin(spin + k) * 0.4, 0)) * CFrame.Angles(0, spin + k, 0)
+			end
 		end
 	end
 	chipCooldown = math.max(0, chipCooldown - dt)

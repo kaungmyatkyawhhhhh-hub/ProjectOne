@@ -743,6 +743,7 @@ function Traffic.update(dt: number)
 		return
 	end
 	dt = math.min(dt, 0.1)
+	local dt0 = dt
 	refreshPlayerCars()
 	bumpRefresh -= dt
 	if bumpRefresh <= 0 then
@@ -796,6 +797,16 @@ function Traffic.update(dt: number)
 	local camPos = if workspace.CurrentCamera then workspace.CurrentCamera.CFrame.Position else Vector3.zero
 
 	for _idx, npc in Traffic.cars do
+		-- (2026-11-06, FPS: a car far from the camera thinks every 3rd frame, with the time saved up)
+		local dt = dt0
+		if ((npc :: any).camDist or 0) > 380 then
+			(npc :: any).bank = ((npc :: any).bank or 0) + dt0
+			if (frameCount + _idx) % 3 ~= 0 then
+				continue
+			end
+			dt = (npc :: any).bank;
+			(npc :: any).bank = 0
+		end
 		local seg = npc.seg
 		-- (the highway is driven faster, the inside lane too; each car drifts a little)
 		local laneK = if seg.kind == "turn" then 1 else T.LaneSpeedK[math.clamp(seg.lane or 1, 1, #T.LaneSpeedK)]
@@ -932,7 +943,8 @@ function Traffic.update(dt: number)
 		npc.fwd = fwd
 		-- far-away cars only need their transform pushed every 3rd frame
 		local dist = (pos - camPos).Magnitude
-		local far = dist > 380
+		local far = dist > 380;
+		(npc :: any).camDist = dist
 		-- spin the wheels of cars close enough to notice
 		npc.spin = (npc.spin - npc.speed * dt / 1.1) % (math.pi * 2)
 		if dist < 160 then

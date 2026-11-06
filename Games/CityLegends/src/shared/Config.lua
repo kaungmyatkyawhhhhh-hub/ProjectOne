@@ -266,6 +266,7 @@ Config.Credits = {
 	"Traffic cars: \"Low Poly cars pack\" by matisosanimation (CC BY 4.0)",
 	"Enfurecido L140, LB724, LB834 and LB834 ZV, LB744 models by Ddiaz Design",
 	"Enfurecido L147, Brava Sport, Rosso Rampante F149 Riviera and F142 models by Ddiaz Design",
+	"Dearborn C346 model by Ddiaz Design",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
 
@@ -1389,7 +1390,8 @@ Config.Look = {
 	},
 	Presets = {
 		Low = { Shadows = false, Reflections = "Low", Ambient = "Low", Glow = false, Rays = false, Fog = "Off" },
-		Medium = { Shadows = true, Reflections = "High", Ambient = "High", Glow = true, Rays = false, Fog = "Light" },
+		-- (2026-11-06, FPS: shadows cost a fifth of the frame in Studio, so phones, on Medium, go without)
+		Medium = { Shadows = false, Reflections = "High", Ambient = "High", Glow = true, Rays = false, Fog = "Light" },
 		High = { Shadows = true, Reflections = "High", Ambient = "High", Glow = true, Rays = true, Fog = "Thick" },
 		Ultra = { Shadows = true, Reflections = "High", Ambient = "High", Glow = true, Rays = true, Fog = "Thick" },
 	},

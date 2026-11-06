@@ -175,6 +175,12 @@ CarSkin.NEEDLE_LENGTH = {
 -- (aspect: a read-out's height over its width, default 0.45; clear: no plate, only the text; font: its Enum.Font name)
 export type DialSpec = { kind: string, unit: string, at: Vector3, face: Vector3, length: number, scale: string, bg: Color3?, fg: Color3?, grow: number?, withGear: boolean?, aspect: number?, clear: boolean?, font: string? }
 CarSkin.DIAL_NEEDLES = {
+	-- the Dearborn C346 (2026-11-06): its own dials, painted needles out (tools/logo_paint/dearb_focus_rs*)
+	dearb_focus_rs = {
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.1041, 0.0343, -0.2566), face = Vector3.new(0, 0.3149, 0.9491), length = 0.0358, scale = "0:-127.3,1000:-94.9,2000:-62.6,3000:-30.2,4000:2.1,5000:34.5,6000:66.8,7000:99.2,8000:131.5" },
+		{ kind = "speed", unit = "mph", at = Vector3.new(0.1028, 0.0349, -0.2568), face = Vector3.new(0, 0.3149, 0.9491), length = 0.0358, scale = "0:-131.0,20:-102.0,40:-73.1,60:-44.1,80:-15.1,100:13.9,120:42.9,140:71.9,160:100.9,180:129.9" },
+		{ kind = "digits", unit = "mph", at = Vector3.new(-0.0026, 0.0817, -0.2471), face = Vector3.new(0.0005, 0.3156, 0.9489), length = 0.0255, scale = "", bg = Color3.fromRGB(44, 70, 142), fg = Color3.fromRGB(255, 255, 255) },
+	},
 	-- the Lamborghini imports (2026-11-04): the needles the models only had painted (their pictures are
 	-- clean now, tools/lambo/gallardo_dials.py, cluster_art.py --live), with the speed and the gear live
 	lambrini_lp570 = {
@@ -918,6 +924,35 @@ local function coverParts(cf: CFrame, w: number, h: number, color: Color3, disc:
 	return out
 end
 
+-- a plate of ours over the moulded badge on a hub (metres from the wheel's centre at wheelbase wb, +Z
+-- towards the driver): for models whose badge is part of the shape, not only its picture
+local HUB_PLATES: { [string]: { at: Vector3, w: number, h: number, text: string, wb: number } } = {
+	dearb_focus_rs = { at = Vector3.new(0, 0.005, 0.044), w = 0.09, h = 0.042, text = "C346", wb = 2.65 },
+}
+
+local function hubPlateParts(plate: { at: Vector3, w: number, h: number, text: string, wb: number }, spm: number): { Template }
+	local pos = plate.at * spm
+	local out = coverParts(CFrame.lookAt(pos, pos + Vector3.zAxis), plate.w * spm, plate.h * spm, Color3.fromRGB(20, 21, 24), false, nil)
+	local base = out[1].part
+	local gui = Instance.new("SurfaceGui")
+	gui.Name = "HubPlate"
+	gui.Face = Enum.NormalId.Front
+	gui.CanvasSize = Vector2.new(270, 126)
+	gui.LightInfluence = 1
+	gui.Parent = base
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.AnchorPoint = Vector2.new(0.5, 0.5)
+	l.Position = UDim2.fromScale(0.5, 0.5)
+	l.Size = UDim2.fromScale(0.8, 0.6)
+	l.Font = Enum.Font.GothamBlack
+	l.Text = plate.text
+	l.TextScaled = true
+	l.TextColor3 = EMBLEM_SILVER
+	l.Parent = gui
+	return out
+end
+
 -- tail lamps (owner, 2026-10-17: "add rear tail light for all cars"): a lamp part of the model gets
 -- a red glowing copy over it, a hair bigger; Driving and Traffic brighten it when braking
 local TAIL_COLOR = Color3.fromRGB(150, 0, 6)
@@ -1488,6 +1523,12 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			local face = hub.face.Unit
 			local pos = hub.at * spm + face * 0.008 * spm
 			for _, t in coverParts(CFrame.lookAt(pos, pos + face), hub.r * 2 * spm, hub.r * 2 * spm, hub.color, true, marks.brand) do
+				table.insert(parts, t)
+			end
+		end
+		local hubPlate = HUB_PLATES[src.Name]
+		if hubPlate then
+			for _, t in hubPlateParts(hubPlate, dims.wb / hubPlate.wb) do
 				table.insert(parts, t)
 			end
 		end

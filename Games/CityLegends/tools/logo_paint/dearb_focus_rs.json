@@ -241,42 +241,12 @@
   ],
   "16": [
    {
-    "line": [
-     36,
-     93,
-     120,
-     171,
-     6
-    ]
-   },
-   {
-    "line": [
-     236,
-     101,
-     328,
-     166,
-     6
-    ]
+    "replace": "tools/logo_paint/dearb_dash_base.png"
    }
   ],
   "17": [
    {
-    "line": [
-     36,
-     93,
-     120,
-     171,
-     6
-    ]
-   },
-   {
-    "line": [
-     236,
-     101,
-     328,
-     166,
-     6
-    ]
+    "replace": "tools/logo_paint/dearb_dash_glow.png"
    }
   ]
  },

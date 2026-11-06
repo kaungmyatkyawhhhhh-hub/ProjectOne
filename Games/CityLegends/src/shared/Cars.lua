@@ -181,8 +181,8 @@ local list: { CarSpec } = {
 	-- owner (2026-11-03): the A45 S hot hatch, the small fast Tri-Star Silber in place of the CLA 45; a
 	-- starter-pick car. Pending until the owner imports its model (then take Pending off)
 	-- owner (2026-11-06): the third starter pick, an all-wheel-drive hot hatch that lets its tail out
-	-- (`RearBias`). Pending until its model is in
-	{ Id = "dearb_focus_rs", Name = "Dearborn C346 Rallye", Class = "Sedan", Tier = "Starter", TopSpeed = 165, ZeroToSixty = 4.5, Handling = 0.76, Price = 42000, Color = Color3.fromRGB(60, 120, 200), Order = 7, RearBias = true, Pending = true },
+	-- (`RearBias`)
+	{ Id = "dearb_focus_rs", Name = "Dearborn C346 Rallye", Class = "Sedan", Tier = "Starter", TopSpeed = 165, ZeroToSixty = 4.5, Handling = 0.76, Price = 42000, Color = Color3.fromRGB(60, 120, 200), Order = 7, RearBias = true },
 	{ Id = "bentz_a45s", Name = "Tri-Star Silber W177 Turbo S", Class = "Sedan", Tier = "Starter", TopSpeed = 168, ZeroToSixty = 3.9, Handling = 0.79, Price = 38000, Color = Color3.fromRGB(238, 190, 20), Order = 88, Pending = true },
 }
 

@@ -75,8 +75,12 @@ if logo:
             continue
         n.normalize()
         print("FIX oval", [round(x, 3) for x in c], [round(x, 2) for x in n], len(comp))
+        # (flat, a touch bigger and proud of the panel: it covers the seam round the old badge)
+        big = len(comp) > 100
         for v in vs:
-            v.co = v.co - n * (v.co - c).dot(n) * 0.9
+            v.co = v.co - n * (v.co - c).dot(n) * (1.0 if big else 0.9)
+            if big:
+                v.co = c + (v.co - c) * 1.14 + n * 0.0012
     for f in bm.faces:
         for l in f.loops:
             l[uv].uv = (0.4, 0.4)  # (the paint picture's plain blue)
@@ -144,6 +148,73 @@ for n in CHROME:
     bm.free()
 print("FIX letters cut", cut)
 
+# ------------------------------------------------------------------ the steering wheel: only the wheel
+# (the rim needs a wide pick, and that also takes bits of vent and dash: they go back to the body, or they
+# would turn with the wheel)
+tilt = math.radians(22)
+axis = Vector((0, math.cos(tilt), math.sin(tilt)))
+centre = Vector((0.36, -0.43, 0.925))
+back = 0
+for o in [x for x in bpy.data.objects if x.name.startswith("SteeringWheel")]:
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bm.faces.ensure_lookup_table()
+    W = o.matrix_world
+    out_faces = []
+    for comp in islands(bm):
+        far = 0
+        for f in comp:
+            for v in f.verts:
+                d = (W @ v.co) - centre
+                far = max(far, (d - axis * d.dot(axis)).length)
+        if far > 0.218:
+            out_faces += comp
+    if out_faces:
+        # a body part of the same material
+        me2 = o.data.copy()
+        o2 = bpy.data.objects.new("Body_FromWheel" + str(back), me2)
+        bpy.context.scene.collection.objects.link(o2)
+        o2.matrix_world = W
+        bm2 = bmesh.new()
+        bm2.from_mesh(me2)
+        bm2.faces.ensure_lookup_table()
+        ids = {f.index for f in out_faces}
+        bmesh.ops.delete(bm2, geom=[f for f in bm2.faces if f.index not in ids], context="FACES")
+        bm2.to_mesh(me2)
+        bm2.free()
+        bmesh.ops.delete(bm, geom=out_faces, context="FACES")
+        bm.to_mesh(o.data)
+        back += 1
+        print("FIX wheel bits back to the body", o.name, len(ids))
+    bm.free()
+
+# ------------------------------------------------------------------ the oval on the steering wheel's hub
+# (it goes on the hub's own leather)
+sw = bpy.data.objects.get("SteeringWheel_t22")
+hub = next((o for o in bpy.data.objects if o.name.startswith("SteeringWheel") and o.data.materials and o.data.materials[0].name == "uvMI_Leather_C1"), None)
+if sw and hub:
+    bm = bmesh.new()
+    bm.from_mesh(sw.data)
+    bm.faces.ensure_lookup_table()
+    W = sw.matrix_world
+    keep = hub.data.materials[0]
+    if keep.name not in sw.data.materials:
+        sw.data.materials.append(keep)
+    idx = list(sw.data.materials).index(keep) if keep.name in [m.name for m in sw.data.materials] else 0
+    moved = 0
+    for comp in islands(bm):
+        pts = [W @ v.co for f in comp for v in f.verts]
+        lo = [min(p[i] for p in pts) for i in range(3)]
+        hi = [max(p[i] for p in pts) for i in range(3)]
+        print("FIX hub isle", len(comp), [round(x, 3) for x in lo], [round(hi[i] - lo[i], 3) for i in range(3)])
+        if hi[0] - lo[0] < 0.11 and abs((lo[0] + hi[0]) / 2 - 0.36) < 0.02 and lo[2] > 0.84 and hi[2] < 1.0:
+            for f in comp:
+                f.material_index = idx
+            moved += len(comp)
+    bm.to_mesh(sw.data)
+    bm.free()
+    print("FIX hub oval faces", moved)
+
 # ------------------------------------------------------------------ the tips: oval
 o = bpy.data.objects["Body_RsMI_Exhaust1"]
 M = o.matrix_world
@@ -185,15 +256,14 @@ def box_mesh(name, centre, size, mat, rot=None):
 
 # the diffuser: four fins between the tips
 for i, x in enumerate((-0.17, -0.06, 0.06, 0.17)):
-    box_mesh(f"Body_Fin{i}", (x, 2.02, 0.262), (0.01, 0.13, 0.042), dark)
+    box_mesh(f"Body_Fin{i}", (x, 2.0, 0.28), (0.01, 0.13, 0.03), dark)
 
 # the spoiler's end plates: on its outermost points
 paint = bpy.data.objects["Body_RsMI_ChangeB_Decals_Pain"]
-xs = [(paint.matrix_world @ v.co) for v in paint.data.vertices if (paint.matrix_world @ v.co).z > 1.3 and (paint.matrix_world @ v.co).y > 1.5]
+xs = [(paint.matrix_world @ v.co) for v in paint.data.vertices if (paint.matrix_world @ v.co).z > 1.3 and (paint.matrix_world @ v.co).y > 1.72]
 if xs:
     tip = max(xs, key=lambda p: abs(p.x))
-    far = max(xs, key=lambda p: p.y)
-    print("FIX spoiler end", tip, "far", far)
+    print("FIX spoiler end", tip)
     for sx, name in ((1, "L"), (-1, "R")):
         box_mesh("Body_EndPlate" + name, (sx * (abs(tip.x) + 0.002), tip.y + 0.01, tip.z - 0.005), (0.007, 0.2, 0.06), dark)
 

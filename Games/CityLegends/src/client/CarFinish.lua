@@ -29,6 +29,7 @@ CarFinish.CARS = {
 	ferrara_california = true,
 	ferrara_458spider = true,
 	ferrara_458speciale = true,
+	dearb_focus_rs = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

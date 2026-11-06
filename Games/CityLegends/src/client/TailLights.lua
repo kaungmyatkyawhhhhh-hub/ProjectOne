@@ -8,6 +8,14 @@ export type Spot = { at: Vector3, face: Vector3, w: number, h: number }
 export type Tails = { shells: { { name: string, size: Vector3? } }, spots: { Spot }, wb: number? }
 
 return {
+	dearb_focus_rs = { -- (by hand, 2026-11-06: its lamps share one part with the headlights)
+		shells = {},
+		wb = 2.65,
+		spots = {
+			{ at = Vector3.new(-0.7, 0.65, 1.9), face = Vector3.new(-0.35, 0.1, 0.93), w = 0.3, h = 0.13 },
+			{ at = Vector3.new(0.7, 0.65, 1.9), face = Vector3.new(0.35, 0.1, 0.93), w = 0.3, h = 0.13 },
+		},
+	},
 	astin_db9 = {
 		shells = { { name = "SeeThrough_red_glass" } },
 		spots = {},

@@ -14,7 +14,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 IDS = json.load(open(os.path.join(HERE, "pbr_ids.json")))
-CARS = {"lp650r": "lambrini_lp640", "lp670sv": "lambrini_lp670", "urusp": "lambrini_urusp", "california": "ferrara_california", "f458spider": "ferrara_458spider", "f458speciale": "ferrara_458speciale", "lp700": "lambrini_lp700", "sv": "lambrini_lp750", "sl": "lambrini_lp570", "spyder560": "lambrini_lp560", "evo": "lambrini_huracan", "perf": "lambrini_performante", "sto": "lambrini_sto", "sterrato": "lambrini_sterrato", "revuelto": "lambrini_revuelto"}
+CARS = {"focus": "dearb_focus_rs", "lp650r": "lambrini_lp640", "lp670sv": "lambrini_lp670", "urusp": "lambrini_urusp", "california": "ferrara_california", "f458spider": "ferrara_458spider", "f458speciale": "ferrara_458speciale", "lp700": "lambrini_lp700", "sv": "lambrini_lp750", "sl": "lambrini_lp570", "spyder560": "lambrini_lp560", "evo": "lambrini_huracan", "perf": "lambrini_performante", "sto": "lambrini_sto", "sterrato": "lambrini_sterrato", "revuelto": "lambrini_revuelto"}
 # cars whose wheel atlas has the tyre ring in the middle of the picture
 ATLAS = {"lp670sv": "wheel", "urusp": "wheel", "california": "wheel", "f458speciale": "wheel", "lp700": "wheel", "sv": "wheel", "perf": "wheel", "sto": "wheel", "revuelto": "wheel", "sterrato": "wheelS"}
 
