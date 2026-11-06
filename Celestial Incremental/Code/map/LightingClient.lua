@@ -34,6 +34,23 @@ task.spawn(function()
 	player:GetAttributeChangedSignal("Ignition"):Connect(function() apply(2.5) end)
 end)
 
+-- (7 Nov: board screens are never in shadow: every SurfaceGui, in the map or drawn by this client, LightInfluence 0 +
+-- Brightness 1.5 (MapConfig.Lighting.Screens))
+do
+	local S = MapConfig.Lighting.Screens
+	local function screen(d: Instance)
+		if d:IsA("SurfaceGui") then
+			d.LightInfluence = S.LightInfluence
+			d.Brightness = S.Brightness
+		end
+	end
+	local pg = player:WaitForChild("PlayerGui")
+	for _, root in ipairs({ workspace, pg }) do
+		for _, d in ipairs(root:GetDescendants()) do screen(d) end
+		root.DescendantAdded:Connect(screen)
+	end
+end
+
 if GalaxyLighting.IsLowEnd() then
 	GalaxyLighting.ApplyLowEnd()
 	return

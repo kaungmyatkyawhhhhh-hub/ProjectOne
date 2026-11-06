@@ -320,7 +320,8 @@ local function cinematic()
 	end)
 	local cam = workspace.CurrentCamera
 	local oldType, oldFov, oldCf = cam.CameraType, cam.FieldOfView, cam.CFrame
-	local oldExposure = Lighting.ExposureCompensation
+	-- (7 Nov: back to the lighting's own exposure (GalaxyLighting.Base), not the one when this started)
+	local oldExposure = require(Galaxy:WaitForChild("GalaxyLighting")).Base().ExposureCompensation
 	local island = myIsland()
 	local c = island and island:GetAttribute("Center")
 	if c then

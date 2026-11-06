@@ -191,7 +191,9 @@ function Cutscene.play(cfg)
 	-- the world camera (optional) + the world dim + the music
 	local cam = workspace.CurrentCamera
 	local oldType, oldCf, oldFov = cam.CameraType, cam.CFrame, cam.FieldOfView
-	local oldExposure = Lighting.ExposureCompensation
+	-- (7 Nov: always back to the lighting's OWN exposure (GalaxyLighting.Base), never to what it was when this started: a
+	-- cutscene starting during another dim kept the dim for good)
+	local oldExposure = require(Galaxy:WaitForChild("GalaxyLighting")).Base().ExposureCompensation
 	if cfg.camera then
 		cam.CameraType = Enum.CameraType.Scriptable
 	end

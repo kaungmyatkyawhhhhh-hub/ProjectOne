@@ -30,6 +30,8 @@ end
 function M.Apply()
 	local L = MapConfig.Lighting
 	for _, k in ipairs(PROPS) do Lighting[k] = L[k] end
+	-- (Technology is set in the place; a script may not be allowed to: tried, quietly)
+	pcall(function() Lighting.Technology = Enum.Technology[L.Technology] end)
 	local atm = effect("Atmosphere")
 	for k, v in pairs(L.Atmosphere) do atm[k] = v end
 	local bloom = effect("BloomEffect")
@@ -49,6 +51,17 @@ function M.Apply()
 	end
 end
 
+-- (7 Nov) the values a cinematic / sky effect must go BACK to when it ends (this device: low-end has its own ambient)
+function M.Base(): { [string]: any }
+	local L = MapConfig.Lighting
+	return {
+		ExposureCompensation = if shared.GalaxyLowEnd then L.LowEnd.ExposureCompensation else L.ExposureCompensation,
+		Ambient = L.Ambient,
+		OutdoorAmbient = if shared.GalaxyLowEnd then L.LowEnd.OutdoorAmbient else L.OutdoorAmbient,
+		ColorShift_Top = L.ColorShift_Top,
+	}
+end
+
 function M.IsLowEnd(): boolean
 	if RunService:IsStudio() and workspace:GetAttribute("TestLowEnd") == true then return true end
 	if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then return true end
@@ -63,6 +76,8 @@ function M.ApplyLowEnd()
 	shared.GalaxyLowEnd = true
 	Lighting.GlobalShadows = false
 	Lighting.OutdoorAmbient = MapConfig.Lighting.LowEnd.OutdoorAmbient
+	Lighting.Brightness = MapConfig.Lighting.LowEnd.Brightness
+	Lighting.ExposureCompensation = MapConfig.Lighting.LowEnd.ExposureCompensation
 	local bloom = Lighting:FindFirstChildOfClass("BloomEffect")
 	if bloom then bloom.Enabled = false end
 	local localFolder = workspace:FindFirstChild("GalaxyLocal")

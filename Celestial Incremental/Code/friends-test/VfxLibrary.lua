@@ -570,7 +570,9 @@ end
 -- the Celestial's SKY TURN: the sky tints violet for `t` s, then back (a Lighting tween; the old values are restored)
 function V.SkyTurn(t: number)
 	if calm() then return end
-	local old = { Ambient = Lighting.Ambient, OutdoorAmbient = Lighting.OutdoorAmbient, ColorShift_Top = Lighting.ColorShift_Top }
+	-- (7 Nov: back to the lighting's own values (GalaxyLighting.Base), not the ones when this started)
+	local base = require(game:GetService("ReplicatedStorage"):WaitForChild("Galaxy"):WaitForChild("GalaxyLighting")).Base()
+	local old = { Ambient = base.Ambient, OutdoorAmbient = base.OutdoorAmbient, ColorShift_Top = base.ColorShift_Top }
 	tween(Lighting, { Ambient = Color3.fromRGB(120, 70, 190), OutdoorAmbient = Color3.fromRGB(140, 90, 210), ColorShift_Top = Color3.fromRGB(200, 120, 255) }, 0.8, Enum.EasingStyle.Sine)
 	task.delay(t, function() tween(Lighting, old, 1.2, Enum.EasingStyle.Sine) end)
 end

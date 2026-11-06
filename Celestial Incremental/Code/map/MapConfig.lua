@@ -360,28 +360,37 @@ MapConfig.BrassReflectance = 0.15
 --  * lights: the Core (warm gold, 60) + one per island star (Star.Height above the island, range by tier), no shadows;
 --    the boards light themselves with their neon. Full server: the Core, its rim light, the black hole, 8 stars = 11.
 --  * LowEnd (phones, slow PCs, or Workspace TestLowEnd in Studio): bloom off, shadows off, island star lights off
+-- (7 Nov, launch day, owner: "the lighting is still bad, i dont like how its mostly dark". These values REPLACE the 2 Nov
+-- lighting pass: the PLAY SPACE is lit like daytime; the space mood stays in the SKY (the skybox) only. Nothing the player
+-- uses may fall below the ambient here. Every cinematic restores THESE values (GalaxyLighting.Base))
 MapConfig.Lighting = {
-	ClockTime = 16.21, GeographicLatitude = 3.25, -- (sun 25 degrees up, from the Core over island 1)
-	Brightness = 1.5, -- (2 + the Core's light + the star lights burnt the cream floor out; tuned in Play)
-	ColorShift_Top = Color3.fromRGB(255, 236, 208), ColorShift_Bottom = Color3.fromRGB(150, 90, 235), -- (a softer gold: the
-	-- grade's warm tint and the star lights add to it)
+	Technology = "Future", -- (set in the place; Roblox scales it down on weak phones by itself)
+	ClockTime = 14, GeographicLatitude = 3.25, -- (the sun high: no long shadows over the boards)
+	-- (the prompt said 2.5-3 and exposure +0.3: tried in Play, the 14:00 sun on the flat cream floor clipped it to white and
+	-- bloom lit everything; 2 + 0.15 is the brightest that keeps the floor cream and the gold gold)
+	Brightness = 2,
+	ColorShift_Top = Color3.fromRGB(255, 240, 220), ColorShift_Bottom = Color3.fromRGB(150, 140, 200),
 	GlobalShadows = true, ShadowSoftness = 0.3,
-	Ambient = Color3.fromRGB(45, 35, 70), OutdoorAmbient = Color3.fromRGB(85, 70, 120),
-	EnvironmentDiffuseScale = 0.6, EnvironmentSpecularScale = 0.8,
-	ExposureCompensation = 0,
-	-- (Haze 0.5 and the darker colours were tried: they drew a flat dark band over the galaxy sky behind the islands; with Haze 0
-	-- the sky shows down to the horizon and the far islands still fade into violet)
-	Atmosphere = { Density = 0.25, Offset = 0, Color = Color3.fromRGB(96, 56, 140), Decay = Color3.fromRGB(40, 20, 70), Glare = 0, Haze = 0 },
-	Bloom = { Intensity = 0.4, Size = 24, Threshold = 1.8 },
-	Grade = { Contrast = 0.15, Saturation = 0.15, Brightness = 0, TintColor = Color3.fromRGB(255, 244, 228) },
-	-- (purpose: the galaxy before your Ignition 1: less colour, a touch darker and cooler; Ignition tweens to Grade)
-	DimGrade = { Contrast = 0.1, Saturation = -0.2, Brightness = -0.04, TintColor = Color3.fromRGB(225, 225, 255) },
+	Ambient = Color3.fromRGB(120, 120, 140), OutdoorAmbient = Color3.fromRGB(140, 140, 165),
+	EnvironmentDiffuseScale = 1, EnvironmentSpecularScale = 0.5,
+	ExposureCompensation = 0.15,
+	-- (low density, no haze, a light purple-blue: the far islands still read; the galaxy sky shows down to the horizon)
+	Atmosphere = { Density = 0.2, Offset = 0, Color = Color3.fromRGB(175, 170, 235), Decay = Color3.fromRGB(130, 120, 210), Glare = 0, Haze = 0 },
+	Bloom = { Intensity = 0.6, Size = 24, Threshold = 1.5 }, -- (only neon + VFX glow, not the whole screen)
+	Grade = { Contrast = 0.1, Saturation = 0.15, Brightness = 0, TintColor = Color3.fromRGB(245, 248, 255) }, -- (+0.05 clipped the floor)
+	-- (before your Ignition 1: less colour only, NOT darker (7 Nov: every alpha player starts here); Ignition tweens to Grade)
+	DimGrade = { Contrast = 0.1, Saturation = 0, Brightness = 0, TintColor = Color3.fromRGB(240, 244, 255) },
+	-- (board screens: never in shadow)
+	Screens = { LightInfluence = 0, Brightness = 1.5 },
 	Core = { Color = Color3.fromRGB(255, 186, 96), Range = 60, Brightness = 1 }, -- (2 blew the cream plaza out white; the
 	-- client's pulse adds +-18% and a Supernova bursts it to 8)
-	Star = { Height = 14, RangeMin = 20, RangeMax = 32, Brightness = 0.7 }, -- (range by island tier 0 -> MaxTier; the star's colour)
+	-- (7 Nov: 0.2; at 0.7 it added a warm hot spot that, with the daytime sun, burnt the island floor white)
+	Star = { Height = 14, RangeMin = 20, RangeMax = 32, Brightness = 0.2 }, -- (range by island tier 0 -> MaxTier; the star's colour)
 	-- (a slow PC: Roblox graphics level 1-3, or under 40 FPS over 8 s). Without shadows nothing is sun-lit or shaded, so the
 	-- floor would go flat grey-pink: low-end uses a warmer, brighter OutdoorAmbient to keep the stone cream.
-	LowEnd = { FpsBelow = 40, QualityAtMost = 3, OutdoorAmbient = Color3.fromRGB(150, 128, 120) },
+	-- (7 Nov: every PHONE takes this path (no shadows: the sun hits everything at full), so a lower sun + no exposure keep it
+	-- from washing out; the ambient never under OutdoorAmbient)
+	LowEnd = { FpsBelow = 40, QualityAtMost = 3, OutdoorAmbient = Color3.fromRGB(140, 140, 165), Brightness = 1.5, ExposureCompensation = 0 },
 }
 MapConfig.PlanetColors = {
 	Color3.fromRGB(150, 110, 240), Color3.fromRGB(80, 190, 255), Color3.fromRGB(90, 220, 120), Color3.fromRGB(255, 100, 120),

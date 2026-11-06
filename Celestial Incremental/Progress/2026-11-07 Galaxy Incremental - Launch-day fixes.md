@@ -73,3 +73,33 @@ Screens: `Progress/screens/2026-11-07-launch-day/`.
   - Before: 2 BAD (the motes + sparkles: `_add` at LE 0.7) + 1 UNKNOWN (Pull).
   - After: **server CLEAN; client CLEAN (52 effects; 4 use the fallback above).**
 - **Proof:** `particles-before-after.png` (zoomed), `particles-after-floor.jpg`, `particles-after-sky.jpg`.
+
+## 3. Lighting: bright play space, space mood in the sky only
+**What made it dark:**
+- **Base lighting:** Brightness 1.5, a dark violet ambient (45,35,70 / 85,70,120) and a low sun (16:13).
+- **The pre-Ignition `DimGrade`** (darker, -0.2 saturation): every new alpha player starts there.
+- **Supernova + the cutscene** restored the exposure they captured when they started, so one starting during another's dim kept the dim for good.
+
+**Final values** (`MapConfig.Lighting`; they replace the 2 Nov lighting pass):
+| | prompt | final | why |
+|---|---|---|---|
+| ClockTime | 14 | 14 | |
+| Brightness | 2.5-3 | **2** | 2.5 + exposure 0.3 clipped the cream floor to white and bloom lit everything (`light-tried-prompt-values-blown-out.jpg`) |
+| ExposureCompensation | +0.3 | **+0.15** | same |
+| Ambient / OutdoorAmbient | (120,120,140) / (140,140,165) | same | |
+| EnvironmentDiffuse / Specular | 1 / 0.5 | same | |
+| GlobalShadows / ShadowSoftness | on / 0.3 | same (PC) | |
+| ColorCorrection | +0.05 bright, +0.1 contrast, +0.15 sat, tint (245,248,255) | **0** bright, rest same | +0.05 clipped the floor |
+| Bloom | 0.6 / threshold 1.5 / size 24 | same | only neon + VFX glow |
+| Atmosphere | density 0.2, haze 0, light purple-blue | 0.2, 0, (175,170,235), decay (130,120,210) | |
+| Board SurfaceGuis | LightInfluence 0, Brightness 1.5 | same, on EVERY SurfaceGui (map + client-drawn; 26 checked) | |
+| Island star light | - | **0.2** (was 0.7) | its warm hot spot + the sun burnt the island floor |
+| Pre-Ignition DimGrade | - | less colour only, NOT darker | |
+| **Phones / graphics 1-3** (no shadows) | - | Brightness **1.5**, exposure 0, OutdoorAmbient = (140,140,165) | every phone takes this path; with no shadows the full sun washed it out |
+
+- **Cinematics restore THESE values:** Supernova, the cutscene and the Celestial sky-turn all go back to `GalaxyLighting.Base()` (low-end aware). The Black Hole and the EventController don't touch Lighting.
+- **Technology = Future: NOT SET.** Studio's tools may not read or set `Lighting.Technology` (it needs a higher permission than plugins / scripts get). **Owner: set Lighting > Technology = Future in Studio's Properties before publishing** (ShadowMap if phones lag).
+- **No extra island lights needed:** every island is lit by the sun and ambient now.
+- **Shots** (from the island spawn at eye height, a board, the Black Hole gate; PC and phone at graphics quality 1):
+  - `light-before-*` and `light-after-*`.
+  - Phone before: spawn only (taken before the change); phone after: all 3.
