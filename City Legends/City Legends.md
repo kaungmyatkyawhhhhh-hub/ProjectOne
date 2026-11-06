@@ -806,6 +806,7 @@ Every road on the Riviera is now shown by real curved meshes, made in Blender an
 - New car models use the cluster that's IN the model, made to work (speed, RPM, gear, lights): no custom cluster overlay any more (owner, 2026-11-02). First new model: Aventador SVJ (fictional "Enfurecido Aventador SVJ"). A quality checklist runs on every new model (`Prompts/Better car models and clean interiors.md`, Part 2b).
 - Car engine / exhaust sounds: don't add new ones yet; the owner will send Roblox audio asset IDs per car (2026-11-02).
 - Brand logos (2026-11-06): draft sheet of 25 fictional brand badges in `Games/CityLegends/imports/refs/ui/brand_logos/` (menus only, not on cars; not in the game yet). Pagani / Koenigsegg have suggested names "Atelier Vento" / "Nordkrona" (not confirmed). Grille changes (e.g. Bavarica Werkz): owner will decide per model later ("the grills depend on how the model looks"); body shapes stay as they are for now.
+- Fake model names (owner, 2026-11-06): every car gets a fictional model name; BMWs use their chassis code (F90, G80...), not "N5 / N3"; Mercedes / Porsche / Japanese cars by chassis code too, the rest made-up names. Ids stay. Full list: `Prompts/Rename car models (fake model names).md`.
 
 ## Aventador SVJ and SVJ 63 (2026-11-02)
 - **Owner:** "New model for the Aventador SVJ is in imports, do it. I added 2 model SVJ and SVJ 63. The SVJ comes with the cluster and make it work and also put that working cluster onto the svj 63."
