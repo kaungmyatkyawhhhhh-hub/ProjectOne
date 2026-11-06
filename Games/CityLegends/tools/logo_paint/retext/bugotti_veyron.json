@@ -1,0 +1,103 @@
+{
+ "source": "C:/Users/USER/ProjectOne/Games/CityLegends/imports/new_cars/cars_26.fbx",
+ "root": "bugotti_veyron",
+ "offset": [
+  7,
+  0,
+  -0.029
+ ],
+ "ops": [
+  {
+   "op": "drop",
+   "part": "Body_METALEGNINE#13045",
+   "boxes": [
+    [
+     0.206,
+     1.072,
+     0.929,
+     0.276,
+     1.121,
+     0.946
+    ],
+    [
+     -0.276,
+     1.072,
+     0.929,
+     -0.206,
+     1.121,
+     0.946
+    ]
+   ]
+  },
+  {
+   "op": "text",
+   "part": "Body_METALEGNINE#13045",
+   "text": "VN",
+   "on": [
+    "Body_METALEGNINE#13045"
+   ],
+   "o": [
+    0.27,
+    1.1135,
+    1.2
+   ],
+   "u": [
+    -0.058,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    -0.0335,
+    0
+   ],
+   "ray": [
+    0,
+    0,
+    -1
+   ],
+   "uv": [
+    0.7,
+    0.09
+   ],
+   "lift": 0.002
+  },
+  {
+   "op": "text",
+   "part": "Body_METALEGNINE#13045",
+   "text": "VN",
+   "on": [
+    "Body_METALEGNINE#13045"
+   ],
+   "o": [
+    -0.212,
+    1.1135,
+    1.2
+   ],
+   "u": [
+    -0.058,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    -0.0335,
+    0
+   ],
+   "ray": [
+    0,
+    0,
+    -1
+   ],
+   "uv": [
+    0.7,
+    0.09
+   ],
+   "lift": 0.002
+  }
+ ],
+ "export": [
+  "Body_METALEGNINE#13045"
+ ],
+ "out": "imports/retext/bugotti_veyron.fbx"
+}

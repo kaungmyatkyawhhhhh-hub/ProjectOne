@@ -1,0 +1,64 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/547a11d1-4da6-41a3-806e-0115399e346d/scratchpad/lambo/final/done/sv.blend",
+ "like": {
+  "Body_Paint_Fill": "Body_Paint"
+ },
+ "ops": [
+  {
+   "op": "move",
+   "part": "Body_Trim",
+   "to": "Body_Paint_Fill",
+   "like": "Body_Paint",
+   "mirror": true,
+   "boxes": [
+    [
+     0.96,
+     0.3,
+     0.19,
+     1.03,
+     0.8,
+     0.345
+    ]
+   ]
+  },
+  {
+   "op": "text",
+   "part": "Body_Trim",
+   "text": "ZV",
+   "on": [
+    "Body_Paint",
+    "Body_Paint_Fill"
+   ],
+   "mirror": true,
+   "o": [
+    1.1,
+    0.37,
+    0.232
+   ],
+   "u": [
+    0,
+    0.38,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    0.088
+   ],
+   "ray": [
+    -1,
+    0,
+    0
+   ],
+   "uv": [
+    0.3,
+    0.82
+   ]
+  }
+ ],
+ "export": [
+  "Body_Trim",
+  "Body_Paint_Fill"
+ ],
+ "out": "imports/retext/lambrini_lp750.fbx"
+}

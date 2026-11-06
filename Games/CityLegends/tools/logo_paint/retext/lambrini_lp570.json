@@ -1,0 +1,97 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/547a11d1-4da6-41a3-806e-0115399e346d/scratchpad/lambo/final/done/sl.blend",
+ "ops": [
+  {
+   "op": "drop",
+   "part": "Body_Engine_p1",
+   "boxes": [
+    [
+     -0.125,
+     0.72,
+     0.8,
+     -0.05,
+     0.99,
+     0.88
+    ],
+    [
+     0.115,
+     0.72,
+     0.8,
+     0.195,
+     0.99,
+     0.88
+    ]
+   ]
+  },
+  {
+   "op": "text",
+   "part": "Body_Engine_p1",
+   "text": "ENFURECIDO",
+   "on": [
+    "Body_CabinTrim"
+   ],
+   "o": [
+    0.172,
+    0.75,
+    1.0
+   ],
+   "u": [
+    0,
+    0.215,
+    0
+   ],
+   "v": [
+    -0.034,
+    0,
+    0
+   ],
+   "ray": [
+    0,
+    0,
+    -1
+   ],
+   "uv": [
+    0.43,
+    0.98
+   ],
+   "lift": 0.004
+  },
+  {
+   "op": "text",
+   "part": "Body_Engine_p1",
+   "text": "ENFURECIDO",
+   "on": [
+    "Body_CabinTrim"
+   ],
+   "o": [
+    -0.102,
+    0.965,
+    1.0
+   ],
+   "u": [
+    0,
+    -0.215,
+    0
+   ],
+   "v": [
+    0.034,
+    0,
+    0
+   ],
+   "ray": [
+    0,
+    0,
+    -1
+   ],
+   "uv": [
+    0.43,
+    0.98
+   ],
+   "lift": 0.004
+  }
+ ],
+ "export": [
+  "Body_Engine_p1"
+ ],
+ "out": "imports/retext/lambrini_lp570.fbx"
+}

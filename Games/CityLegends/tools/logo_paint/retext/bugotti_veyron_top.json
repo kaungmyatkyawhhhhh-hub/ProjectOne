@@ -1,0 +1,86 @@
+{
+ "source": "C:/Users/USER/ProjectOne/Games/CityLegends/imports/new_cars/bugatti_cluster_fix.fbx",
+ "root": "bugotti_veyron_top",
+ "offset": [
+  3.5,
+  0,
+  -0.017
+ ],
+ "ops": [
+  {
+   "op": "drop",
+   "part": "Body_Bugatti_VeyronGrandSport#2582",
+   "mirror": true,
+   "boxes": [
+    [
+     0.752,
+     0.56,
+     0.927,
+     0.788,
+     0.628,
+     0.969
+    ]
+   ]
+  },
+  {
+   "op": "fill",
+   "part": "Body_Bugatti_VeyronGrandSport#16914",
+   "mirror": true,
+   "boxes": [
+    [
+     0.75,
+     0.555,
+     0.92,
+     0.79,
+     0.632,
+     0.975
+    ]
+   ],
+   "max_span": 0.08,
+   "flat_uv": true
+  },
+  {
+   "op": "text",
+   "part": "Body_Bugatti_VeyronGrandSport#2582",
+   "text": "VN",
+   "on": [
+    "Body_Bugatti_VeyronGrandSport#16914"
+   ],
+   "o": [
+    0.7825,
+    0.567,
+    0.9355
+   ],
+   "u": [
+    0,
+    0.055,
+    0
+   ],
+   "v": [
+    -0.0125,
+    0,
+    0.0125
+   ],
+   "ray": [
+    -0.71,
+    0,
+    -0.7
+   ],
+   "uv": [
+    0.5,
+    0.5
+   ],
+   "mirror": true,
+   "lift": 0.002
+  }
+ ],
+ "export": [
+  "Body_Bugatti_VeyronGrandSport#2582",
+  "Body_Bugatti_VeyronGrandSport#16914"
+ ],
+ "out": "imports/retext/bugotti_veyron_top.fbx",
+ "names": {
+  "Body_Bugatti_VeyronGrandSport#2582": "GS_Chrome",
+  "Body_Bugatti_VeyronGrandSport#16914": "GS_Body"
+ }
+}

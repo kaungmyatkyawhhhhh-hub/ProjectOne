@@ -1,0 +1,65 @@
+{
+ "source": "C:/Users/USER/ProjectOne/Games/CityLegends/build/svj/lambrini_svj63_cut.blend",
+ "like": {
+  "Body_Stripe_Red3": "Body_Stripe_Red2"
+ },
+ "ops": [
+  {
+   "op": "move",
+   "part": "Body_Carbon1M_Ma",
+   "to": "Body_Stripe_Red3",
+   "like": "Body_Stripe_Red2",
+   "mirror": true,
+   "boxes": [
+    [
+     0.44,
+     1.12,
+     0.9,
+     0.6,
+     1.5,
+     1.05
+    ]
+   ]
+  },
+  {
+   "op": "text",
+   "part": "Body_Carbon1M_Ma",
+   "text": "ZVX",
+   "on": [
+    "Body_Stripe_Red2",
+    "Body_Stripe_Red3"
+   ],
+   "mirror": true,
+   "o": [
+    0.565,
+    1.2,
+    1.2
+   ],
+   "u": [
+    0,
+    0.25,
+    0
+   ],
+   "v": [
+    -0.075,
+    0,
+    0
+   ],
+   "ray": [
+    0,
+    0,
+    -1
+   ],
+   "uv": [
+    -15.33,
+    -0.12
+   ],
+   "lift": 0.012
+  }
+ ],
+ "export": [
+  "Body_Carbon1M_Ma",
+  "Body_Stripe_Red3"
+ ],
+ "out": "imports/retext/lambrini_svj63.fbx"
+}

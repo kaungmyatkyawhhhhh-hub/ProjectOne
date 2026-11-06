@@ -1,0 +1,79 @@
+{
+ "source": "C:/Users/USER/ProjectOne/Games/CityLegends/imports/new_cars/bugatti_cluster_fix.fbx",
+ "root": "bugotti_chiron_pursport",
+ "offset": [
+  7,
+  0,
+  -0.021
+ ],
+ "ops": [
+  {
+   "op": "drop",
+   "part": "Body_Bugatti_ChironRMS_2020Pa#12004",
+   "boxes": [
+    [
+     -0.38,
+     1.97,
+     1.035,
+     0.38,
+     2.13,
+     1.07
+    ]
+   ]
+  },
+  {
+   "op": "fill",
+   "part": "Body_Bugatti_ChironRMS_2020Te#17095",
+   "boxes": [
+    [
+     -0.4,
+     1.96,
+     1.03,
+     0.4,
+     2.14,
+     1.08
+    ]
+   ],
+   "max_span": 0.2,
+   "auto_normals": true
+  },
+  {
+   "op": "text",
+   "part": "Body_Bugatti_ChironRMS_2020Pa#12004",
+   "text": "VELOCITÉ NOIR",
+   "on": [
+    "Body_Bugatti_ChironRMS_2020Te#17095"
+   ],
+   "o": [
+    0.37,
+    2.1,
+    1.2
+   ],
+   "u": [
+    -0.74,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    -0.095,
+    0
+   ],
+   "ray": [
+    0,
+    0,
+    -1
+   ],
+   "uv": [
+    0.5,
+    0.5
+   ],
+   "lift": 0.004
+  }
+ ],
+ "export": [
+  "Body_Bugatti_ChironRMS_2020Pa#12004",
+  "Body_Bugatti_ChironRMS_2020Te#17095"
+ ],
+ "out": "imports/retext/bugotti_chiron_pursport.fbx"
+}

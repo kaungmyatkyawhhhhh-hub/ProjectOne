@@ -1,0 +1,110 @@
+{
+ "source": "C:/Users/USER/ProjectOne/Games/CityLegends/imports/new_cars/bugatti_cluster_fix.fbx",
+ "root": "bugotti_veyron_sport",
+ "offset": [
+  0,
+  0,
+  -0.017
+ ],
+ "ops": [
+  {
+   "op": "drop",
+   "part": "Body_CHROME#6769",
+   "mirror": true,
+   "boxes": [
+    [
+     0.752,
+     0.56,
+     0.92,
+     0.788,
+     0.628,
+     0.962
+    ]
+   ]
+  },
+  {
+   "op": "skin",
+   "to": "Body_Cap_Fill",
+   "like": "Body_Bugatti_VeyronSuperSport.004",
+   "on": [
+    "Body_Bugatti_VeyronSuperSport.004"
+   ],
+   "mirror": true,
+   "o": [
+    0.7875,
+    0.56,
+    0.921
+   ],
+   "u": [
+    0,
+    0.068,
+    0
+   ],
+   "v": [
+    -0.0345,
+    0,
+    0.0395
+   ],
+   "ray": [
+    -0.71,
+    0,
+    -0.7
+   ],
+   "ring": [
+    0.3,
+    0.3
+   ],
+   "gap": [
+    0.02,
+    0.02
+   ],
+   "n": [
+    14,
+    12
+   ],
+   "lift": 0.001
+  },
+  {
+   "op": "text",
+   "part": "Body_CHROME#6769",
+   "text": "VN",
+   "on": [
+    "Body_Cap_Fill"
+   ],
+   "o": [
+    0.7825,
+    0.567,
+    0.9285
+   ],
+   "u": [
+    0,
+    0.055,
+    0
+   ],
+   "v": [
+    -0.0125,
+    0,
+    0.0125
+   ],
+   "ray": [
+    -0.71,
+    0,
+    -0.7
+   ],
+   "uv": [
+    0.5,
+    0.5
+   ],
+   "mirror": true,
+   "lift": 0.002
+  }
+ ],
+ "export": [
+  "Body_CHROME#6769",
+  "Body_Cap_Fill"
+ ],
+ "out": "imports/retext/bugotti_veyron_sport.fbx",
+ "like": {
+  "Body_Cap_Fill": "Body_Bugatti_VeyronSuperSport.004"
+ }
+}

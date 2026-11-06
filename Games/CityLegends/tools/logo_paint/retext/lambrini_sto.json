@@ -1,0 +1,154 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/547a11d1-4da6-41a3-806e-0115399e346d/scratchpad/lambo/final/done/sto.blend",
+ "like": {
+  "Body_Trim_Fill": "Body_Trim_p4"
+ },
+ "ops": [
+  {
+   "op": "drop",
+   "part": "Body_Trim2",
+   "mirror": true,
+   "boxes": [
+    [
+     0.9,
+     -0.72,
+     0.49,
+     0.945,
+     -0.235,
+     0.625
+    ]
+   ]
+  },
+  {
+   "op": "fill",
+   "part": "Body_Paint_p1",
+   "mirror": true,
+   "boxes": [
+    [
+     0.88,
+     -0.74,
+     0.47,
+     0.96,
+     -0.22,
+     0.64
+    ]
+   ],
+   "max_span": 0.3
+  },
+  {
+   "op": "text",
+   "part": "Body_Paint2",
+   "text": "VTZ",
+   "on": [
+    "Body_Paint_p1"
+   ],
+   "mirror": true,
+   "o": [
+    1.05,
+    -0.69,
+    0.498
+   ],
+   "u": [
+    0,
+    0.425,
+    0.0514
+   ],
+   "v": [
+    0,
+    0,
+    0.0485
+   ],
+   "ray": [
+    -1,
+    0,
+    0
+   ],
+   "uv": [
+    0.5,
+    0.5
+   ],
+   "lift": 0.003
+  },
+  {
+   "op": "skin",
+   "to": "Body_Trim_Fill",
+   "like": "Body_Trim_p4",
+   "on": [
+    "Body_Trim_p4"
+   ],
+   "o": [
+    0.121,
+    2.4,
+    0.6178
+   ],
+   "u": [
+    -0.242,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    0.0385
+   ],
+   "ray": [
+    0,
+    -1,
+    0
+   ],
+   "ring": [
+    0.05,
+    0.02
+   ],
+   "gap": [
+    -1,
+    -1
+   ],
+   "n": [
+    30,
+    6
+   ],
+   "lift": 0.002
+  },
+  {
+   "op": "text",
+   "part": "Body_Trim2",
+   "text": "VTZ",
+   "on": [
+    "Body_Trim_Fill"
+   ],
+   "o": [
+    0.113,
+    2.4,
+    0.6215
+   ],
+   "u": [
+    -0.226,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    0.0305
+   ],
+   "ray": [
+    0,
+    -1,
+    0
+   ],
+   "uv": [
+    0.03,
+    0.98
+   ],
+   "lift": 0.006
+  }
+ ],
+ "export": [
+  "Body_Trim2",
+  "Body_Paint2",
+  "Body_Paint_p1",
+  "Body_Trim_Fill"
+ ],
+ "out": "imports/retext/lambrini_sto.fbx"
+}

@@ -14,6 +14,7 @@ ops:  {"rect": [x0, y0, x1, y1]}                 each row blended from the pixel
       {"solid": [x0, y0, x1, y1, r, g, b]}
       {"from": [x0, y0, x1, y1, sx, sy]}         one colour, read at (sx, sy)
       {"text": [x0, y0, x1, y1, "TEXT", r, g, b], "flip": "v" | "h" | "vh"}   text fitted to the box (bold italic)
+      {"emboss": [x0, y0, x1, y1, "TEXT"], "flip": ...}   a normal map: flat, with raised letters
 """
 import json
 import os
@@ -59,6 +60,29 @@ def do_text(im, box, text, color, flip):
     im.paste(Image.new("RGBA", (w, h), (*color, 255)), (x0, y0), mask)
 
 
+def emboss(a, x0, y0, x1, y1, text, flip):
+    """for a normal map: flat there, with raised letters (the old script was only in the normal map)"""
+    w, h = x1 - x0, y1 - y0
+    mask = Image.new("L", (w, h), 0)
+    size = 200
+    font = ImageFont.truetype(FONT, size)
+    l, t, r, b = font.getbbox(text)
+    size = int(size * min(w * 0.96 / (r - l), h * 0.8 / (b - t)))
+    font = ImageFont.truetype(FONT, size)
+    l, t, r, b = font.getbbox(text)
+    ImageDraw.Draw(mask).text(((w - (r - l)) / 2 - l, (h - (b - t)) / 2 - t), text, fill=255, font=font)
+    if "v" in flip:
+        mask = ImageOps.flip(mask)
+    m = np.asarray(mask, dtype=float) / 255
+    m = (m + np.roll(m, 1, 0) + np.roll(m, -1, 0) + np.roll(m, 1, 1) + np.roll(m, -1, 1)) / 5
+    gy, gx = np.gradient(m)
+    k = 3.0
+    n = np.dstack([-gx * k, gy * k, np.ones_like(m)])
+    n /= np.linalg.norm(n, axis=2, keepdims=True)
+    a[y0:y1, x0:x1, :3] = (n + 1) * 127.5
+    return a
+
+
 def main():
     src = sys.argv[1] if len(sys.argv) > 1 else None
     jobs = json.load(open(os.path.join(HERE, "logo_paint", "retex.json"), encoding="utf-8"))
@@ -79,6 +103,8 @@ def main():
             elif "from" in op:
                 x0, y0, x1, y1, sx, sy = op["from"]
                 a[y0:y1, x0:x1] = a[sy, sx]
+            elif "emboss" in op:
+                a = emboss(a, *op["emboss"], op.get("flip", ""))
             elif "text" in op:
                 im2 = Image.fromarray(a.round().astype(np.uint8), "RGBA")
                 x0, y0, x1, y1, text, r, g, b = op["text"]
