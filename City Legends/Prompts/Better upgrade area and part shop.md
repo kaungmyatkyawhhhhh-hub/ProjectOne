@@ -50,13 +50,17 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
 Each slot holds one part:
 | Category | Slots |
 |---|---|
-| Engine | Intake, Air Filter, Camshaft, Cylinder Head, Fuel Injectors, Pistons & Internals, Engine Block / Displacement, **ECU tune** |
-| Forced induction | Turbo (or Supercharger: one or the other), Intercooler, Blow-off valve |
+| Engine | Intake, Air Filter, Camshaft, Cylinder Head, Fuel Injectors, **Fuel Pump**, Pistons & Internals, Engine Block / Displacement, **Ignition** (coils, spark plugs), **ECU tune** (Stage 1, Pop, Crackle, Burble, **Anti-Lag map**, **Rev Limiter raise**), **Engine Swap** (43 engines, below) |
+| Forced induction | **Turbo** (ball-bearing, big single, twin-turbo kit) **or Supercharger** (centrifugal, twin-screw, smaller pulley): one or the other; Intercooler, Blow-off valve, **Wastegate**, **Boost Controller** |
 | Exhaust | **Downpipe**, Catalytic converter (stock / high-flow / **decat**), Mid-pipe, **Muffler** (stock / sport / **muffler delete** / **straight pipe**), Exhaust tips |
-| Drivetrain | Gearbox, Clutch, Flywheel, Differential (LSD), Final drive |
-| Tyres & brakes | Tyres (street / sport / semi-slick / drift), Brakes (pads, discs, big brake kit) |
-| Suspension | Springs / Coilovers, Anti-roll bars |
-| Body | Weight reduction stages, Carbon bonnet, Carbon roof (small weight savings), Rear wing (small grip at speed) |
+| Drivetrain | Gearbox (close-ratio, **sequential**, **dual-clutch**), **Short Shifter**, Clutch, Flywheel, Differential (LSD), Final drive, **Carbon Driveshaft** |
+| Tyres & wheels | Tyres (**street / sport / semi-slick / drift / drag radials / rally**), **Forged light wheels** (lighter, small grip and acceleration gain) |
+| Brakes | Pads, discs, big brake kit |
+| Suspension & steering | Springs (**lowering springs**) / Coilovers / **Air suspension** (lower when parked), Anti-roll bars, **Camber kit**, **Strut brace**, **Poly bushings**, **Drift angle kit** (more steering lock) |
+| Cooling | **Oil cooler**, **Race radiator** (keep power on long runs; small effect) |
+| Body & interior | Weight reduction stages, Carbon bonnet, Carbon roof, **Lightweight battery**, **Bucket seats**, **Roll cage** (stiffer, small grip), Rear wing (small grip at speed) |
+
+Every part on both icon sheets has a slot here (68 parts). Effects stay small per part; the big jumps are turbo / supercharger, displacement and engine swaps.
 
 ## 3. Parts and the Part Shop
 - **Rarity:** Common (grey), Uncommon (green), Rare (blue), Epic (purple), Legendary (orange / gold). Rarity tells how strong the part is and how much it costs:
