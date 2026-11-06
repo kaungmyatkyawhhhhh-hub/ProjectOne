@@ -71,7 +71,7 @@ Each slot holds one part:
   - category tabs, a search box and rarity filters;
   - tiles coloured by rarity, each with its icon, name, price and **"fits this car" / "doesn't fit"**;
   - a details panel with BUY (cash, or CP where it makes sense), plus **BUY & INSTALL**;
-  - our own simple icons, drawn in one style.
+  - **use our icon set:** `Games/CityLegends/imports/refs/ui/upgrades/part_icons_sheet.png` (33 tiles; the source with every icon as SVG is `part_icons_source.html` next to it). Turn each icon into a sharp white PNG (512 px, transparent) for Roblox, and copy the tile look: rarity gradient, top shine, rarity pill, name, brand · slot, a green price bar. The owner asked for these (2026-11-06).
 - **Exhaust and ECU parts the owner asked for**, each with its own sound / feel:
   - **Pop Tune ECU:** pops on lift-off;
   - **Crackle Tune ECU:** long crackles on lift-off, and on downshifts;
