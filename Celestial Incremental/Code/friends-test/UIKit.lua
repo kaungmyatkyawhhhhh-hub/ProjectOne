@@ -58,8 +58,23 @@ function Kit.box(parent, x, y, w, h, props)
 	if props then for k, v in pairs(props) do f[k] = v end end
 	return f
 end
+-- (7 Nov, owner: "UI corners: square layers poking out of rounded windows") THE one rounding helper: every visible layer
+-- (fill / image) gets its own UICorner; a nested layer's radius = the outer radius - its inset (never bigger than its
+-- parent's). One UICorner per object (an old one is reused). Kit.corner = Kit.Round (all the old calls go through it).
+function Kit.Round(frame: GuiObject, radius: number): UICorner
+	local c = frame:FindFirstChildOfClass("UICorner") or new("UICorner", {}, frame)
+	c.CornerRadius = UDim.new(0, radius)
+	-- (a stroke on a rounded layer follows its border)
+	local st = frame:FindFirstChildOfClass("UIStroke")
+	if st then st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border end
+	return c
+end
+-- the inner radius for a layer inset `inset` px inside a parent rounded `outer` (rule: outer - inset, at least 2)
+function Kit.InnerRadius(outer: number, inset: number): number
+	return math.max(2, outer - inset)
+end
 function Kit.corner(parent, r)
-	return new("UICorner", { CornerRadius = UDim.new(0, r) }, parent)
+	return Kit.Round(parent, r)
 end
 function Kit.stroke(parent, color, thick, transp)
 	return new("UIStroke", { Color = color or INK, Thickness = thick or 2, Transparency = transp or 0, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, parent)
@@ -235,8 +250,11 @@ function Kit.button(parent, x, y, w, h, c1: Color3, c2: Color3, props)
 	Kit.stroke(b, INK, 2)
 	local g = Kit.grad(b, c1, c2, 90)
 	-- stripes (static) + the white top line
-	new("ImageLabel", { Name = "Stripes", BackgroundTransparency = 1, Image = A.stripes, ImageTransparency = 0.87, Size = UDim2.fromOffset(512, 128),
-		ZIndex = b.ZIndex, ScaleType = Enum.ScaleType.Stretch }, b)
+	-- (7 Nov: the stripes are the button's size, tiled, and rounded like it: ClipsDescendants clips square, so a bigger
+	-- image showed square corners outside the button's curve)
+	local stripes = new("ImageLabel", { Name = "Stripes", BackgroundTransparency = 1, Image = A.stripes, ImageTransparency = 0.87, Size = UDim2.fromScale(1, 1),
+		ZIndex = b.ZIndex, ScaleType = Enum.ScaleType.Tile, TileSize = UDim2.fromOffset(512, 128) }, b)
+	Kit.Round(stripes, 5)
 	new("Frame", { Name = "TopLine", BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.55, BorderSizePixel = 0,
 		Position = UDim2.fromOffset(2, 1), Size = UDim2.new(1, -4, 0, 2), ZIndex = b.ZIndex }, b)
 	local inner = Kit.box(b, 0, 0, w, h, { Name = "Inner", ZIndex = b.ZIndex + 2 })
@@ -671,19 +689,21 @@ function Kit.window(parent, w: number, h: number, opts)
 	if not Kit.calm() then
 		Kit.tween(glow, { ImageTransparency = 0, Position = UDim2.fromOffset(-44, -44), Size = UDim2.fromOffset(w + 88, h + 88) }, 1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
 	end
+	-- (7 Nov, rounding rules: the outer frame 10; the body + header are inset 3, so 7; the accent stroke on the outermost
+	-- layer, border mode; the header's stripes are its size, tiled and rounded like it)
+	local OUTER, INSET = 10, 3
 	local frame = Kit.box(win, 0, 0, w, h, { BackgroundTransparency = 0, BackgroundColor3 = INK, ZIndex = 2 })
-	Kit.corner(frame, 10)
-	local body = Kit.box(win, 3, 3, w - 6, h - 6, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
-	Kit.corner(body, 8)
+	Kit.stroke(frame, opts.line or Color3.fromRGB(255, 106, 26), 1.5, 0.45)
+	Kit.Round(frame, OUTER)
+	local body = Kit.box(win, INSET, INSET, w - 2 * INSET, h - 2 * INSET, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
+	Kit.Round(body, Kit.InnerRadius(OUTER, INSET))
 	Kit.grad(body, Kit.hex("#1a1620"), Kit.hex("#0f0d13"), 90)
-	Kit.stroke(body, opts.line or Color3.fromRGB(255, 106, 26), 1.5, 0.45)
-	local header = Kit.box(win, 3, 3, w - 6, 56, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4, ClipsDescendants = true })
-	Kit.corner(header, 8)
+	local header = Kit.box(win, INSET, INSET, w - 2 * INSET, 56, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4, ClipsDescendants = true })
+	Kit.Round(header, Kit.InnerRadius(OUTER, INSET))
 	Kit.grad(header, opts.c1, opts.c2, 0)
-	new("ImageLabel", { BackgroundTransparency = 1, Image = A.stripes, ImageTransparency = 0.9, Size = UDim2.fromOffset(512, 128), ZIndex = 4 }, header)
-	if w - 6 > 512 then
-		new("ImageLabel", { BackgroundTransparency = 1, Image = A.stripes, ImageTransparency = 0.9, Position = UDim2.fromOffset(512, 0), Size = UDim2.fromOffset(512, 128), ZIndex = 4 }, header)
-	end
+	local hs = new("ImageLabel", { BackgroundTransparency = 1, Image = A.stripes, ImageTransparency = 0.9, Size = UDim2.fromScale(1, 1), ZIndex = 4,
+		ScaleType = Enum.ScaleType.Tile, TileSize = UDim2.fromOffset(512, 128) }, header)
+	Kit.Round(hs, Kit.InnerRadius(OUTER, INSET))
 	Kit.box(win, 3, 40, w - 6, 20, { BackgroundTransparency = 0, BackgroundColor3 = opts.lip or opts.c2, ZIndex = 4 })
 	Kit.box(win, 9, 4, w - 18, 2, { BackgroundTransparency = 0.4, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
 	local sweep = Kit.shine(header, 4.5, 0.16, 0.3)

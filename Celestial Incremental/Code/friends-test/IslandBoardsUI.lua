@@ -297,7 +297,9 @@ function UI:shell()
 	local neon = self.spec.Neon
 	local B = MapConfig.Boards
 	local corners = if self.spec.pair then B.StoneLight elseif self.spec.Style == "Neon" then B.Screen else B.Stone
-	local cornerBox = Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = corners, ZIndex = 1 })
+	-- (7 Nov, the corners fix: this square layer fills the 3D board's stone frame round the rounded screen; in the 2D TREE /
+	-- INFO window there is no stone frame, so it poked out at the 4 corners: only on the 3D boards (ctx.world))
+	local cornerBox = Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = corners, ZIndex = 1, Visible = self.ctx.world == true })
 	local bg = Kit.box(self.gui, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = WHITE, ZIndex = 1 })
 	Kit.corner(bg, 40)
 	Kit.grad(bg, hex("#151026"), hex("#06050b"), 90)
@@ -730,7 +732,7 @@ function UI:refreshLocked()
 	local L = self.spec.locked
 	local open = L.attr ~= nil and (tonumber(self:attr(L.attr)) or 0) >= (L.need or 1)
 	self.lockIcon.Visible = not open
-	for _, f in ipairs(self.shellFrame or {}) do f.Visible = open end
+	for _, f in ipairs(self.shellFrame or {}) do f.Visible = open and (f ~= self.shellFrame[1] or self.ctx.world == true) end
 	for _, g in ipairs(self.glows or {}) do g.Visible = open end
 	self.kindIcon.Parent.Visible = open
 	shown(self.lockText, not open)

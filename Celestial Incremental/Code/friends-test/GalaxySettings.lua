@@ -281,8 +281,10 @@ local function openStats()
 	if sHolder ~= stats then
 		want = math.min(1, (vp.X - 12) / (SW + 16))
 		local h = math.min(SH, math.floor(room / want))
-		sHolder.Size = UDim2.fromOffset(SW, h)
-		stats.Size = UDim2.fromOffset(SW, h)
+		-- (7 Nov, corners: the scroll bar runs in a 12 px margin BESIDE the window; at the window's own width Roblox drew it over
+		-- the rounded right edge, a square layer at the corners)
+		sHolder.Size = UDim2.fromOffset(SW + 12, h)
+		stats.Size = UDim2.fromOffset(SW + 12, h)
 	end
 	stats.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + (if sHolder ~= stats then 0 else 15 * want))
 	sScale.Scale = want * 0.8

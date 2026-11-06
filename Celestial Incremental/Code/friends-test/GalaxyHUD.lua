@@ -760,7 +760,7 @@ function windowScale(): number
 	local _, room = windowRoom()
 	-- (phones: the window may use the glow's margin too, so its text is as big as the screen allows)
 	-- (7 Nov: phones fit the WIDTH and scroll the height, so the text stays readable)
-	if small then return math.min(1, (viewport().X - 12) / 700) end
+	if small then return math.min(1, (viewport().X - 12) / 712) end -- (700 + the 12 px scroll-bar margin)
 	return math.min(screenScale(), room / (470 + Kit.ps(34, 6)), (viewport().X - 8) / 700)
 end
 function layout()
@@ -779,8 +779,11 @@ function layout()
 	do
 		local _, room0 = windowRoom()
 		local hgt = if small then math.min(470, math.floor(room0 / ws)) else 470
-		win.Size = UDim2.fromOffset(700, hgt)
-		upScroll.Size = UDim2.fromOffset(700, hgt)
+		-- (7 Nov, corners: the scroll bar runs in a 12 px margin BESIDE the window; at the window's own width Roblox drew it over
+		-- the rounded right edge, a square layer at the corners)
+		local bar = if hgt < 470 then 12 else 0
+		win.Size = UDim2.fromOffset(700 + bar, hgt)
+		upScroll.Size = UDim2.fromOffset(700 + bar, hgt)
 		upScroll.ScrollingEnabled = hgt < 470
 		upScroll.ScrollBarThickness = if hgt < 470 then 8 else 0
 		if hgt >= 470 then upScroll.CanvasPosition = Vector2.zero end

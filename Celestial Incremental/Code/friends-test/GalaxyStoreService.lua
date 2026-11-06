@@ -49,7 +49,6 @@ local function grantPass(player: Player, key: string)
 		if not s.pass[key] then
 			s.pass[key] = true
 			if key == "X2Stardust" then s.passX2 = true end
-			if key == "AutoRoll" then s.d.auto.Roll = nil end -- (on when you get it)
 			Shared.publish(player, s)
 		end
 	end
@@ -83,6 +82,12 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player: Playe
 	local key = passKeyById[passId]
 	if not key or not bought then return end
 	grantPass(player, key)
+	-- (AUTO ROLL is switched ON when you buy it; after that your ON / OFF stays as you left it, every session)
+	local s = Shared.sessions[player]
+	if key == "AutoRoll" and s then
+		s.d.auto.Roll = nil
+		Shared.publish(player, s)
+	end
 	log(player, "PassBought", key)
 	-- (#91: save right after a purchase)
 	task.spawn(Shared.save, player, false)
