@@ -324,6 +324,16 @@ local function refresh()
 		end
 	end
 	refreshSocial()
+	-- (owner 7 Nov: the GIFT chip sits in this column, right ABOVE the FRIENDS / INVITE chip; GalaxyLive moves it in here and
+	-- sets "Want" while there is a gift to count down to)
+	local gift = strip:FindFirstChild("GiftChip")
+	if gift then
+		gift.Visible = gift:GetAttribute("Want") == true
+		if gift.Visible then
+			gift.Position = UDim2.fromOffset(0, y)
+			y += SH + GAP
+		end
+	end
 	for _, chip in ipairs({ friendsChip, groupChip, premiumChip }) do
 		chip.Visible = chip ~= friendsChip or chip:GetAttribute("Show") == true
 		if chip.Visible then
@@ -343,6 +353,8 @@ for _, p in ipairs(Econ.Potions) do
 end
 refresh()
 refreshLater = refresh
+shared.GalaxyColumn = strip
+shared.GalaxyColumnRefresh = refresh
 
 -- the timers (mm:ss), and the card goes when a boost ends with none left
 local acc = 0

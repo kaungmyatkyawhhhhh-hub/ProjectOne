@@ -96,11 +96,24 @@ local function chip(parent: Instance, w: number, h: number, colour: Color3, icon
 	return c, text, edgeStroke
 end
 
------------------------------------------------------------------------- the GIFT chip (right side)
-local giftRoot = Kit.box(root, 0, 0, 220, 40, { Name = "GiftChip", AnchorPoint = Vector2.new(1, 0.5) })
+------------------------------------------------------------------------ the GIFT chip (left column, above INVITE)
+-- (owner 7 Nov: "move the gift ready button above the invite button": it joins the boosts column (GalaxyPotions), in the
+-- slot right above the FRIENDS / INVITE chip, at the column's width. If the column never shows up it stays on the right)
+local giftRoot = Kit.box(root, 0, 0, 214, 40, { Name = "GiftChip", AnchorPoint = Vector2.new(1, 0.5) })
 local giftScale = Instance.new("UIScale")
 giftScale.Parent = giftRoot
-local giftBtn, giftText, giftEdge = chip(giftRoot, 220, 40, hex("#ffd84a"), "playtimeGift")
+local giftBtn, giftText, giftEdge = chip(giftRoot, 214, 40, hex("#ffd84a"), "playtimeGift")
+local inColumn = false
+task.spawn(function()
+	local t0 = os.clock()
+	while not shared.GalaxyColumn and os.clock() - t0 < 20 do task.wait(0.2) end
+	if not shared.GalaxyColumn then return end
+	inColumn = true
+	giftScale.Scale = 1 -- (the column has its own UIScale)
+	giftRoot.AnchorPoint = Vector2.new(0, 0)
+	giftRoot.Parent = shared.GalaxyColumn
+	shared.GalaxyColumnRefresh()
+end)
 local lastPlayed, playedAt = player:GetAttribute("GiftPlayed") or 0, os.clock()
 player:GetAttributeChangedSignal("GiftPlayed"):Connect(function()
 	lastPlayed, playedAt = player:GetAttribute("GiftPlayed") or 0, os.clock()
@@ -146,8 +159,10 @@ local updateUntil = 0
 local function layout()
 	local s = screenScale()
 	local vp = viewport()
-	giftScale.Scale = s
-	giftRoot.Position = UDim2.fromOffset(vp.X - math.floor(10 * s), math.floor(vp.Y * 0.42))
+	if not inColumn then
+		giftScale.Scale = s
+		giftRoot.Position = UDim2.fromOffset(vp.X - math.floor(10 * s), math.floor(vp.Y * 0.42))
+	end
 	eventScale.Scale, updateScale.Scale = s, s
 	-- (under the counter's SUPERNOVA bar + NEXT line)
 	eventBar.Position = UDim2.fromOffset(vp.X / 2, math.floor(152 * s))
@@ -159,7 +174,16 @@ local function tick()
 	local busy = WM.anyOpen() or shared.GalaxyCinematic == true
 	-- gift chip
 	local state, left = giftState()
-	giftRoot.Visible = state ~= "done" and not busy
+	if inColumn then
+		-- (the column hides itself while a window is open; it places the chip)
+		local want = state ~= "done"
+		if giftRoot:GetAttribute("Want") ~= want then
+			giftRoot:SetAttribute("Want", want)
+			shared.GalaxyColumnRefresh()
+		end
+	else
+		giftRoot.Visible = state ~= "done" and not busy
+	end
 	if state == "ready" then
 		Kit.setText(giftText, "GIFT READY!")
 		giftText.TextColor3 = hex("#7dff7a")
