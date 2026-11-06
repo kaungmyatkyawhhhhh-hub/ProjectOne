@@ -98,7 +98,7 @@ The brand names are already fictional (except "Hemi", renamed below), but the mo
 | lambrini_revuelto | Enfurecido Revuelto | Enfurecido LB744 |
 | lambrini_huracan | Enfurecido Huracan EVO | Enfurecido LB724 |
 | lambrini_performante | Enfurecido Huracan Performante Spyder | Enfurecido LB724 Aero Spyder |
-| lambrini_sto | Enfurecido Huracan STO | Enfurecido LB724 Track |
+| lambrini_sto | Enfurecido Huracan STO | Enfurecido LB724 VTZ |
 | lambrini_sterrato | Enfurecido Huracan Sterrato | Enfurecido LB724 Rally |
 | lambrini_lp570 | Enfurecido Gallardo LP570-4 SL | Enfurecido L140 Leggera |
 | lambrini_lp560 | Enfurecido Gallardo LP560-4 Spyder | Enfurecido L140 Spyder |
@@ -121,6 +121,7 @@ Our own version of the real SV / SVJ side lettering (the real cars say "SV" = Su
 - **ZV** = **Zanna Vortice** ("fang vortex"), on `lambrini_lp750` (old SV).
 - **ZVX** = **Zanna Vortice Xtrema** ("fang vortex extreme"), on `lambrini_svj`.
 - **ZVX 63** on `lambrini_svj63`.
+- **VTZ** = **Veloce Tracciato Zanna** ("fast circuit fang"), on `lambrini_sto` (old Huracan STO); design in `Games/CityLegends/imports/refs/ui/brand_logos/side_decal_vtz.png`. No real "STO" lettering may stay on the car.
 - Put it on **both sides** of the car, low on the doors / side skirts, like the real lettering: big italic letters, the full words small underneath, a thin stripe; design in `Games/CityLegends/imports/refs/ui/brand_logos/side_decals_zv_zvx.png`. Make it a decal (or a texture painted in Blender) that sits flat on the body with no z-fighting, sharp at phone size, and doesn't change with Customs paint unless the player picks a decal colour. No real "SV" / "SVJ" lettering may stay anywhere on these cars.
 
 If a new car (e.g. the Pending A45 S, or any future import) arrives, name it the same way: BMW / Mercedes / Porsche / Japanese cars by chassis code, the rest with a made-up name in the same style.
