@@ -17,7 +17,7 @@ Cars in the same family get the same changes (e.g. all LB724s match), so the bra
 Pick **4–6 per car** from this list. Keep the body shape, size and stance exactly the same.
 - **Vents and intakes:** change the slat count (e.g. 5 slats → 4 or 6), the slat angle, or the mesh pattern (hex → diamond, diamond → horizontal bars); a small extra fin inside a side intake; round off or sharpen a vent's inner corner.
 - **Side details:** the shape of the small side-skirt blade end, a fin on the rear-arch vent, the door-handle / door-cut-line shape, a slightly different mirror-cap edge or mirror arm.
-- **Headlights:** change the **inner pattern** only: the shape of the daytime running light (e.g. a Y-shape becomes a split double line, a C-shape becomes three short bars), the number of projector lenses, a different inner housing pattern. The outer light shape stays.
+- **Headlights: skip for now** (owner, 2026-11-06: the concepts looked bad). Don't change the headlights at all.
 - **Tail lights:** the inner light graphic (e.g. the number or shape of glowing lines, a different hexagon / bar layout), the lens texture. The outer shape stays.
 - **Small parts:** exhaust tip shape (round ↔ hexagon ↔ oval, or a different count inside the same area), diffuser fin count, the fuel-cap shape, wing end-plate cut, brake caliper shape lettering removed.
 - **Badge spots:** where a real badge was, leave clean paint or our own small mark (never the real one).
@@ -47,7 +47,7 @@ Replace the real rim designs on these new models with **our own rim designs** in
 - Then the normal routine: `render_car.py` → `pack_cars.py`, pack for Import 3D in `imports/new_cars/`, and tell the owner when to import. After import, check in Play.
 
 ## Check before you say done
-- One render of every wheel design from the library (front and 3/4).
+- One render of every wheel design from the library (front and 3/4). Wheel styles to start from: `Games/CityLegends/imports/refs/ui/brand_logos/enfurecido_wheels_lights_concept.png` (Furia 7, Saetta Y5, Corsa 10, Centro 6 CL; the owner is fine with these; ignore the headlight drawings there).
 - Per car: one picture with **before / after at normal distance** (should look the same) and **before / after close-ups** of each changed spot (front light, tail light, the vents, the side).
 - In Play: lights work day and night, Customs paint works, no errors; FPS not worse.
 - Commit, push, save the place; note in `City Legends/City Legends.md` what changed on each car and which wheel each car got.
