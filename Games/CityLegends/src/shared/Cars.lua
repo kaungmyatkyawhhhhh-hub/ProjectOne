@@ -138,6 +138,7 @@ local list: { CarSpec } = {
 	{ Id = "rolls_cullinan", Name = "Ecstasy Grandeur", Class = "Sedan", Tier = "High", TopSpeed = 155, ZeroToSixty = 5.1, Handling = 0.55, Price = 2500000, Color = Color3.fromRGB(235, 236, 238), Order = 60 },
 	{ Id = "lambrini_lp700", Name = "Enfurecido LB834", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.9, Handling = 0.88, Price = 2200000, Color = Color3.fromRGB(235, 236, 238), Order = 61 },
 	{ Id = "lexis_lfa", Name = "Stealth-Apex V10 Halo", Class = "Hypercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.6, Handling = 0.92, Price = 3000000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 62 },
+	{ Id = "lexis_lfa_circuit", Name = "Stealth-Apex V10 Halo Circuit", Class = "Hypercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.5, Handling = 0.95, Price = 3600000, Color = Color3.fromRGB(240, 110, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 62.5 },
 	{ Id = "lambrini_lp750", Name = "Enfurecido LB834 ZV", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.8, Handling = 0.92, Price = 3500000, Color = Color3.fromRGB(120, 200, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 63 },
 	-- the Lamborghini imports (2026-11-04): the Gallardo Spyder, the Huracan line, the Revuelto
 	{ Id = "lambrini_lp560", Name = "Enfurecido L140 Spyder", Class = "Supercar", Tier = "High", TopSpeed = 201, ZeroToSixty = 3.9, Handling = 0.85, Price = 680000, Color = Color3.fromRGB(236, 214, 40), Accent = Color3.fromRGB(16, 16, 18), Order = 47.5 },
@@ -158,7 +159,7 @@ local list: { CarSpec } = {
 	{ Id = "bnw_750li", Name = "Bavarica Werkz G12 Long", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.8, Handling = 0.64, Price = 150000, Color = Color3.fromRGB(20, 21, 24), Order = 66 },
 	{ Id = "bentz_gls", Name = "Tri-Star Silber X167 Royale", Class = "SUV", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.8, Handling = 0.58, Price = 1200000, Color = Color3.fromRGB(235, 235, 235), Order = 67 },
 	{ Id = "bentz_s680", Name = "Tri-Star Silber Z223 Royale V12", Class = "Sedan", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.62, Price = 1600000, Color = Color3.fromRGB(110, 20, 30), Accent = Color3.fromRGB(215, 200, 170), Order = 68 },
-	{ Id = "lambrini_countach", Name = "Enfurecido Classico 400", Class = "Supercar", Tier = "High", TopSpeed = 179, ZeroToSixty = 5.6, Handling = 0.78, Price = 2500000, Color = Color3.fromRGB(235, 235, 235), Order = 69 },
+	{ Id = "lambrini_countach", Name = "Enfurecido Classico 5000", Class = "Supercar", Tier = "High", TopSpeed = 179, ZeroToSixty = 5.6, Handling = 0.78, Price = 2500000, Color = Color3.fromRGB(235, 235, 235), Order = 69 },
 	-- the cars of 2026-10-18
 	{ Id = "toyoka_chaser", Name = "Apex JZX100 Tourer", Class = "Sedan", Tier = "Starter", TopSpeed = 155, ZeroToSixty = 5.6, Handling = 0.76, Price = 30000, Color = Color3.fromRGB(200, 202, 206), Order = 71 },
 	{ Id = "bentz_190e", Name = "Tri-Star Silber W201 Evo II", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 7.1, Handling = 0.74, Price = 80000, Color = Color3.fromRGB(20, 21, 24), Order = 72 },
@@ -267,7 +268,7 @@ Cars.Series = {
 	{ Name = "HYPERSPEED TECH S7", Ids = { "xiaomo_su7" } },
 	{ Name = "STEALTH-APEX Z100", Ids = { "lexis_lc500" } },
 	{ Name = "STEALTH-APEX J310", Ids = { "lexis_lx700" } },
-	{ Name = "STEALTH-APEX V10 HALO", Ids = { "lexis_lfa" } },
+	{ Name = "STEALTH-APEX V10 HALO", Ids = { "lexis_lfa", "lexis_lfa_circuit" } },
 	{ Name = "TRIDENT MOTORS MAESTRALE", Ids = { "maseroti_levante" } },
 	{ Name = "STUTTGART 982", Ids = { "porsha_boxster" } },
 	{ Name = "STUTTGART 971", Ids = { "porsha_panamera" } },

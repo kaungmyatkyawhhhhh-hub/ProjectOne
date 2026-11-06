@@ -76,7 +76,7 @@ local REAL_WB: { [string]: number } = {
 	lambrini_lp570 = 2.56, lambrini_lp560 = 2.56, lambrini_huracan = 2.62, lambrini_performante = 2.62, lambrini_sto = 2.62, lambrini_sterrato = 2.63, lambrini_revuelto = 2.78, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
 	ferrara_458 = 2.65, ferrara_458spider = 2.65, ferrara_458speciale = 2.65, lambrini_lp670 = 2.665, lambrini_urusp = 3.003, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,
 	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.772,
-	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lambrini_lp750 = 2.7, lambrini_svj = 2.7, lambrini_svj63 = 2.7,
+	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lexis_lfa_circuit = 2.605, lambrini_lp750 = 2.7, lambrini_svj = 2.7, lambrini_svj63 = 2.7,
 	bentz_s63 = 3.165, mazdo_rx8 = 2.7, bnw_m8gc = 3.023, bnw_x7 = 3.105, xiaomo_su7 = 3.0, porsha_boxster = 2.475, lambrini_lp640 = 2.665, mazdo_rx7 = 2.425,
 	bentz_gt63s = 3.052, chevo_c7 = 2.71, chevo_c6 = 2.686, chevo_camaro = 2.811,
 	-- the cars of 2026-10-18

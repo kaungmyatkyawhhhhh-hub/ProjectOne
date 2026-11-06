@@ -111,7 +111,7 @@ Config.World = {
 	OldCity = false,
 }
 function Config.monacoOnly(): boolean
-	return not Config.World.OldCity and workspace:FindFirstChild("Riviera") ~= nil
+	return not Config.World.OldCity and workspace ~= nil and workspace:FindFirstChild("Riviera") ~= nil
 end
 
 -- the venues in Monaco (owner, 2026-11-02: "Move the venues ... I may replace some of the venues
@@ -267,6 +267,9 @@ Config.Credits = {
 	"Enfurecido L140, LB724, LB834 and LB834 ZV, LB744 models by Ddiaz Design",
 	"Enfurecido L147, Brava Sport, Rosso Rampante F149 Riviera and F142 models by Ddiaz Design",
 	"Dearborn C346 model by Ddiaz Design",
+	"Stealth-Apex V10 Halo and Halo Circuit models by Ddiaz Design",
+	"Enfurecido Classico 5000 model by Ddiaz Design (CC BY)",
+	"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
 

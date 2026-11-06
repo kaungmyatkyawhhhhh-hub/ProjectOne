@@ -30,6 +30,11 @@ CarFinish.CARS = {
 	ferrara_458spider = true,
 	ferrara_458speciale = true,
 	dearb_focus_rs = true,
+	lexis_lfa = true,
+	lexis_lfa_circuit = true,
+	lambrini_countach = true,
+	bentz_s680 = true,
+	bentz_gls = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

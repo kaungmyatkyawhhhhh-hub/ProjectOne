@@ -71,7 +71,8 @@ CarSkin.CLUSTER_STYLE = {
 	bentz_s63 = "W213", -- S 65 W222: wide glass screen
 	xiaomo_su7 = "SU7",
 	byt_u8 = "U8",
-	lexis_lfa = "LFAFitted", -- the ring sized to the model's own round pod
+	lexis_lfa = "LiveLFA", -- from the owner's photo
+	lexis_lfa_circuit = "LiveLFA",
 	lambrini_lp700 = "LiveLP700", -- the real screen from the owner's photo
 	lambrini_lp750 = "LiveSV", -- the real SV screen, redrawn from the owner's photos (tools/lambo/cluster_live.py)
 	-- owner (2026-11-02): the SVJ model's own screen picture made live (DashGauges.aventadorSVJ),
@@ -87,7 +88,7 @@ CarSkin.CLUSTER_STYLE = {
 	rolls_cullinan = "Maybach57", -- Phantom: chrome-ringed luxury dials
 	rolls_wraith = "Maybach57",
 	byt_seal = "U8", -- wide electric screen
-	bentz_s680 = "W213",
+	bentz_s680 = "LiveMaybach", -- from the owner's photo
 	bentz_e400 = "W213", -- the E63 S W213 model: its wide glass screen
 	bentz_gls = "W213", -- Maybach GLS 600: wide glass screen
 	bnw_750li = "BMWLiveCockpit", -- the 750Li G12 (2026-10-18 model)
@@ -132,6 +133,10 @@ CarSkin.CLUSTER_RECT = {
 	-- screen behind each model's own frame, its ribs lying over it, cut to the openings (tools/lambo/window_*.png)
 	lambrini_lp750 = { at = Vector3.new(0.0043, 0.0403, -0.2442), face = Vector3.new(-0.002, 0.107, 0.994), w = 0.37, h = 0.1486 },
 	lambrini_lp700 = { at = Vector3.new(0.0027, 0.0379, -0.2421), face = Vector3.new(0, 0.108, 0.9942), w = 0.3328, h = 0.1367 },
+	-- the third import job (2026-11-07): the owner's cluster photos, over the model's own ring
+	lexis_lfa = { at = Vector3.new(-0.003, 0.0411, -0.1761), face = Vector3.new(0, 0.14, 0.99), w = 0.267, h = 0.175 },
+	lexis_lfa_circuit = { at = Vector3.new(-0.003, 0.0411, -0.1761), face = Vector3.new(0, 0.14, 0.99), w = 0.267, h = 0.175 },
+	bentz_s680 = { at = Vector3.new(0.0005, 0.0508, -0.203), face = Vector3.new(0, 0.14, 0.99), w = 0.366, h = 0.146 },
 	-- the second import job (2026-11-06): the screens behind each model's frame (tools/lambo/panel_preview.py)
 	lambrini_lp640 = { at = Vector3.new(0.0065, -0.0464, -0.3043), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
 	lambrini_lp670 = { at = Vector3.new(0.0065, -0.0464, -0.3041), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
@@ -209,9 +214,9 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0021, -0.0166, -0.2351), face = Vector3.new(0.0294, 0.3116, 0.9498), length = 0.0213, scale = "", bg = Color3.fromRGB(24, 60, 150), fg = Color3.fromRGB(255, 255, 255), grow = 1.55, withGear = true },
 	},
 
-	lambrini_countach = { -- Countach
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0825, 0.0077, -0.2274), face = Vector3.new(0, 0.1961, 0.9806), length = 0.0309, scale = "0:-110,20:-98.2,100:-51.7,180:3.1,320:114.9" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0911, 0.0056, -0.227), face = Vector3.new(-0, 0.1961, 0.9806), length = 0.0329, scale = "0:-138,1000:-99.6,2000:-56.6,3000:-24.7,4000:0.7,5000:26.9,6000:53,7000:79,8000:105,9000:131" },
+	lambrini_countach = { -- the 5000's own two big dials, redrawn sharp (tools/lambo/countach_art.py)
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0922, 0.0258, -0.2031), face = Vector3.new(-0.0086, 0.1833, 0.983), length = 0.0356, scale = "0:-135,40:-101.3,80:-67.5,120:-33.8,160:0,200:33.8,240:67.5,280:101.3,320:135" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0907, 0.0258, -0.2031), face = Vector3.new(-0.0086, 0.1833, 0.983), length = 0.0359, scale = "0:-114.1,1000:-90,2000:-61,3000:-35.4,4000:-14,5000:10.4,6000:34,7000:58,8000:90,9000:118" },
 	},
 	astin_vantage = { -- V12 Vantage
 		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0517, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:162,200:377" },
@@ -290,6 +295,10 @@ CarSkin.FACELESS_DIALS = {
 	-- (the Gallardos' big dials redrawn sharp: tools/lambo/gallardo_art.py; faceR: the dial's rim, 100 = one needle length)
 	lambrini_lp570 = GALLARDO_DIALS,
 	lambrini_lp560 = GALLARDO_DIALS,
+	lambrini_countach = {
+		{ faceless = true, image = "rbxassetid://90634108999362", faceR = 124, needle = Color3.fromRGB(240, 160, 30), needleW = 6, hubRing = Color3.fromRGB(46, 48, 54), hubR = 16 },
+		{ faceless = true, image = "rbxassetid://81321173656948", faceR = 120, needle = Color3.fromRGB(240, 160, 30), needleW = 6, hubRing = Color3.fromRGB(46, 48, 54), hubR = 16 },
+	},
 	bugotti_chiron = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
 	bugotti_chiron_pursport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
 	bugotti_chiron_supersport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
@@ -383,12 +392,11 @@ CarSkin.STEER_MODEL = {
 	-- Lamborghini
 	-- (the LP700 and the SV keep their models' own wheels: owner, 2026-11-04)
 	lambrini_urus = "AventadorFlat",
-	lambrini_countach = "Countach",
 	-- Ferrari
 	ferrara_f430 = "FerrariF430", ferrara_599 = "FerrariF430",
 	ferrara_458 = "Ferrari458",
 	-- the other supercars and hypercars
-	mclaran_12c = "McLaren", audy_r8 = "AudiR8", lexis_lfa = "LexusSport", lexis_lc500 = "LexusSport",
+	mclaran_12c = "McLaren", audy_r8 = "AudiR8", lexis_lc500 = "LexusSport",
 	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
 	nisun_gtr = "GTR",
 	-- BMW
@@ -398,7 +406,7 @@ CarSkin.STEER_MODEL = {
 	-- Mercedes
 	bentz_cla45 = "AMGFlat", bentz_cls63s = "AMGFlat", bentz_gle53 = "AMGFlat", bentz_g63 = "AMGFlat", brabos_g63 = "AMGFlat",
 	bentz_sl65bs = "AMGFlat", bentz_sls = "AMGFlat", bentz_e63s = "AMGFlat", bentz_e400 = "AMGFlat",
-	bentz_e300 = "MercLuxury", bentz_s63 = "MercLuxury", bentz_s680 = "MercLuxury", bentz_gls = "MercLuxury",
+	bentz_e300 = "MercLuxury", bentz_s63 = "MercLuxury", bentz_gls = "MercLuxury",
 	bentz_190e = "Merc90s", bentz_s65_w221 = "Merc90s",
 	-- luxury
 	rolls_wraith = "Rolls", rolls_cullinan = "Rolls", bentlee_contgt = "Bentley", bentlee_bentayga = "Bentley",
@@ -419,7 +427,6 @@ CarSkin.STEER_MODEL = {
 CarSkin.CLUSTER_SHIFT = {
 	audy_r8 = { -0.08, 0.26, 0, 0.84 }, -- up into the twin-dial hood, over its own dials
 	mclaran_12c = { 0, 0.13, -0.12, 0.78 }, -- the dial in the round pod, the screens in the wings
-	lexis_lfa = { 0, 0.075, 0, 1.42 }, -- the ring on the model's round pod (owner, 2026-10-24)
 } :: { [string]: { number } }
 
 -- steering wheels (owner, 2026-10-24: "fix all of the steering wheels bad color and if it doesnt

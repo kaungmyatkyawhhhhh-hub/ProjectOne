@@ -64,9 +64,13 @@ ROLES = [
     (r"base|chassis", "Base", 0.6, 0.0),
 ]
 for word, role in spec.get("roles", {}).items():
+    if isinstance(role, list):  # [role, roughness, metal]
+        ROLES.insert(0, (word, role[0], role[1], role[2]))
+        continue
     r = next((x for x in ROLES if x[1] == role), (None, role, 0.4, 0.0))
     ROLES.insert(0, (word, role, r[2], r[3]))
 LENS = [(r"red_?g", "Lens_Red"), (r"or[a]?[gn]+e_?glass", "Lens_Orange"), (r"glass_light|d_glass|glass_surr", "Lens_Clear")]
+LENS = [tuple(x) for x in spec.get("lens", [])] + LENS
 
 
 def meshes():
@@ -137,11 +141,17 @@ for c in spec.get("cut_uv", []):
         bm.free()
 
 for c in spec.get("cut_box", []):
-    # faces of the parts wearing a picture, inside a box in car metres (a badge in a shared atlas)
-    img = bpy.data.images[c["image"]]
+    # faces of the parts wearing a picture (or a material by name, "mat"), inside a box in car metres
+    # (a badge in a shared atlas, or a chrome badge in the chrome part)
+    img = bpy.data.images[c["image"]] if "image" in c else None
     x0, y0, z0, x1, y1, z1 = c["box"]
     for o in meshes():
-        slots = {i for i, m in enumerate(o.data.materials) if m and m.use_nodes and any(k.type == "TEX_IMAGE" and k.image == img for k in m.node_tree.nodes)}
+        if "only" in c and not o.name.startswith(c["only"]):
+            continue
+        if img:
+            slots = {i for i, m in enumerate(o.data.materials) if m and m.use_nodes and any(k.type == "TEX_IMAGE" and k.image == img for k in m.node_tree.nodes)}
+        else:
+            slots = {i for i, m in enumerate(o.data.materials) if m and c["mat"].lower() in m.name.lower()}
         if not slots:
             continue
         M = o.matrix_world
@@ -247,11 +257,13 @@ for o in sorted(meshes(), key=tris, reverse=True):
 def cover_nose():
     """the badge's spot on the nose: a thin paint-coloured cover that follows the body round it (owner,
     2026-10-22: every logo spot gets a plain cover; the badge leaves a hole or a dark plate)"""
-    if not removed:
+    if not removed and "cover" not in spec:
         return
     ylo = min((o.matrix_world @ Vector(c)).y for o in meshes() for c in o.bound_box)
-    pts = np.array(removed)
+    pts = np.array(removed or [(0.0, 0.0, 0.0)])
     pts = pts[(np.abs(pts[:, 0]) < 0.2) & (pts[:, 1] < ylo + 0.75) & (pts[:, 2] > 0.38)]
+    if len(pts) < 3 and "cover" in spec:
+        pts = np.array([spec["cover"][:3]] * 3, float)
     paints = [o for o in meshes() if looks.get(o.name, {}).get("role") == "Paint"]
     if len(pts) < 3 or not paints:
         return
@@ -472,7 +484,7 @@ if spec.get("to_paint"):
 
 for word, k in spec.get("thin", {}).items():
     for o in meshes():
-        if o.name.startswith("Body_" + word):
+        if o.name.startswith("Body_" + word) or o.name[:3] in ("FL_", "FR_", "RL_", "RR_") and o.name[3:].startswith(word):
             bpy.context.view_layer.objects.active = o
             d = o.modifiers.new("thin", "DECIMATE")
             d.ratio = k
