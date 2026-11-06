@@ -44,11 +44,16 @@ In `Lighting` and the `DayCycle` / `Weather` system (don't break the day cycle):
 - Make the **default time and the main menu backdrop** around 17:00–17:30 so the first thing players see is this look; the day cycle still runs.
 
 ### 2. Cars to match
-For the cars already converted (the new-model routine ones first, then the others where it's safe):
-- **Paint:** retune the shared paint `SurfaceAppearance` / material so it reads like their clear coat: roughness about 0.15–0.3 for gloss, wider soft reflections, correct metalness (0 for paint); add a **satin / matte finish** to Customs if it isn't there.
+**Only the newly imported models** (owner, 2026-11-06: "for the cars don't do it to old import models, only do it to newly imported models"):
+- **Yes:** the cars converted with the new-model routine: the Aventador SVJ / SVJ 63, the 6 Bugattis, the 9 Lamborghinis from `Lamborghini imports.md` (LP700, SV, Gallardo LP570 SL, LP560 Spyder, Huracan EVO / Performante / STO / Sterrato, Revuelto), the cars from `New imports - Murcielago, Urus Performante, Ferraris.md`, and every car imported from now on.
+- **No:** every older model. Don't change their paint, carbon, meshes, shadows or Customs options. If a shared material is used by old cars too, make a **separate copy** for the new models so the old cars look exactly the same as before.
+- Not sure if a car counts as new? Check the import notes in `City Legends/City Legends.md`; if it's not listed there as a new-model-routine import, leave it alone.
+
+For those new models:
+- **Paint:** retune the paint `SurfaceAppearance` / material (new models only) so it reads like their clear coat: roughness about 0.15–0.3 for gloss, wider soft reflections, correct metalness (0 for paint); add a **satin / matte finish** to Customs for these new models if it isn't there.
 - **Carbon:** the shared carbon set darker and slightly less glossy than the paint, with the weave visible up close.
 - **Smoothness:** `RenderFidelity = Precise` on body meshes (keep collisions simple, `Box` / `Hull`); fix faceted bodies in Blender (smooth shading / weighted normals) when re-packing.
-- **Contact shadow:** every car gets a soft dark shadow under it (a blurred dark decal / plane under the body, faded at the edges) on top of the real shadow, so cars never look like they float.
+- **Contact shadow:** every new model gets a soft dark shadow under it (a blurred dark decal / plane under the body, faded at the edges) on top of the real shadow, so they never look like they float.
 - **Lights, wheels, tyres:** lenses over dark housings, rims with depth, tyre sidewalls, discs and calipers (Part 2b of `Better car models and clean interiors.md`).
 - **Road:** a detailed asphalt texture (grain, slight wear, normal + roughness maps) on the main roads so the shadow and the car sit on something real.
 
@@ -63,7 +68,7 @@ Add to the game's existing settings menu, in our own UI style (same as our other
 At high speed, a subtle streak / blur at the screen edges only (the car stays sharp), plus the FOV kick we already have. Off in the settings for players who don't like it.
 
 ## Check before you say done
-- **Side-by-side screenshots:** our game vs each frame in `refs/lighting/ghostdriver/` (same time of day, similar camera): the highway at sunset, a car close up from the side and the rear 3/4. Put them in `City Legends/City Legends.md`.
+- **Side-by-side screenshots:** our game vs each frame in `refs/lighting/ghostdriver/` (same time of day, similar camera): the highway at sunset, a new-model car close up from the side and the rear 3/4; plus one old car before / after to prove it didn't change. Put them in `City Legends/City Legends.md`.
 - Every time of day still looks good (morning mist, midday, sunset, night warm and golden).
 - FPS not worse than before on PC High and on phone-size Low (measure the 3 usual spots); the fog and sky cost little.
 - No console errors; Lune tests and `luau-lsp analyze` clean; save the place, commit, push; note it in `City Legends/City Legends.md`.
