@@ -336,7 +336,7 @@ end
 ---------------------------------------------------------------------
 -- Neon billboards along the loop's outer edge, facing the oncoming traffic both ways
 ---------------------------------------------------------------------
-local ADS = { "CITY LEGENDS", "NIGHT RUN", "VORTEX V10", "MIDNIGHT FM 98.7", "CUT UP\nGET PAID", "KAIZEN RZ", "ECLIPSE JX", "NEON NIGHTS", "PHANTOM W16", "LEGENDS LOOP\n8 KM" }
+local ADS = { "CITY LEGENDS", "NIGHT RUN", "VORTEX V10", "MIDNIGHT FM 98.7", "CUT UP\nGET PAID", "KAIZEN RZ", "ECLIPSE JX", "NEON NIGHTS", "NOCTURNE V12", "LEGENDS LOOP\n8 KM" }
 local function billboards(kit: any, parent: Instance)
 	local root = kit.folder("LoopBillboards", parent)
 	local L = CityLayout.loopLength()

@@ -1,0 +1,23 @@
+[
+ {"name": "veyron_brakes", "file": "imports/new_cars/bugatti_veyrons.fbm/Image_18.png", "assets": ["121847815055426"], "ops": [{"rect": [240, 585, 385, 668]}, {"rect": [510, 870, 660, 950]}], "new": "75288811949099"},
+ {"name": "veyron_badge", "file": "imports/new_cars/bugatti_veyrons.fbm/Image_17.png", "assets": ["119856394389162"], "ops": [{"rect": [290, 672, 392, 725]}, {"rect": [830, 660, 955, 755]}, {"rect": [870, 930, 1012, 1022]}, {"rect": [335, 940, 354, 962]}], "new": "95131128698099"},
+ {"name": "veyron_badge_solid", "file": "imports/new_cars/bugatti_veyrons.fbm/Image_17_solid.png", "assets": ["89488484230269"], "ops": [{"rect": [290, 672, 392, 725]}, {"rect": [830, 660, 955, 755]}, {"rect": [870, 930, 1012, 1022]}, {"rect": [335, 940, 354, 962]}], "new": "102836505412578"},
+ {"name": "veyron_plate", "file": "imports/new_cars/bugatti_cluster_fix.fbm/Image_1.png", "assets": ["119388087092621", "120822080787723", "82195242850592"], "ops": [{"rect": [110, 620, 540, 860]}], "new": "84783694931930"},
+ {"name": "veyronss_plates", "file": "imports/new_cars/bugatti_cluster_fix.fbm/Image_20.png", "assets": ["95363934640153"], "ops": [{"rect": [270, 35, 510, 122]}, {"rect": [78, 270, 268, 382]}], "new": "82074908482713"},
+ {"name": "veyrongs_plates", "file": "imports/new_cars/bugatti_cluster_fix.fbm/Image_21_001.png", "assets": ["126554118655393"], "ops": [{"rect": [270, 35, 510, 122]}, {"rect": [78, 270, 268, 382]}], "new": "72263255185655"},
+ {"name": "chiron_wheel", "file": "imports/new_cars/bugatti_chirons.fbm/Image_21_001.png", "assets": ["87576787599104"], "ops": [{"from": [0, 0, 135, 100, 140, 6]}], "new": "82077209491439"},
+ {"name": "veyron_wheel", "file": "imports/new_cars/bugatti_veyrons.fbm/Image_19.png", "assets": ["131170277068190"], "ops": [{"from": [0, 0, 138, 104, 142, 6]}], "new": "78433350314457"},
+ {"name": "chiron_cabin_a", "file": "imports/new_cars/bugatti_chirons.fbm/Image_0.png", "assets": ["136999272287656"], "ops": [{"rect": [140, 75, 330, 112]}, {"rect": [300, 305, 420, 345]}], "new": "96177212773926"},
+ {"name": "chiron_cabin_b", "file": "imports/new_cars/bugatti_chirons.fbm/Image_0_solid.png", "assets": ["72570849067319", "89364175706731"], "ops": [{"rect": [140, 75, 330, 112]}, {"rect": [300, 305, 420, 345]}], "new": "117538202523438"},
+ {"name": "chiron_cabin_c", "file": "imports/new_cars/bugatti_chirons.fbm/Image_3.png", "assets": ["133224870831162"], "ops": [{"rect": [140, 75, 330, 112]}, {"rect": [300, 305, 420, 345]}], "new": "75049040003008"},
+ {"name": "chiron_cabin_d", "file": "imports/new_cars/bugatti_chirons.fbm/chiron_leather_black.png", "assets": ["75309475722187"], "ops": [{"rect": [140, 75, 330, 112]}, {"rect": [300, 305, 420, 345]}], "new": "95678875588303"},
+ {"name": "chironss_dash", "file": "imports/new_cars/bugatti_chirons.fbm/Image_10_004.png", "assets": ["71146960433638"], "ops": [{"rect": [100, 68, 142, 84]}], "new": "93651681637861"},
+ {"name": "chironps_dash", "file": "imports/new_cars/bugatti_chirons.fbm/Image_19_001.png", "assets": ["78129581898305"], "ops": [{"rect": [200, 242, 305, 268]}], "new": "89470740275672"},
+ {"name": "chiron_engine_a", "file": "imports/new_cars/bugatti_chirons.fbm/Image_18.png", "assets": ["93854771063873"], "ops": [{"rect": [305, 95, 395, 205]}], "new": "129653928182756"},
+ {"name": "chiron_engine_b", "file": "imports/new_cars/bugatti_chirons.fbm/Image_7.png", "assets": ["136529269554437"], "ops": [{"rect": [305, 95, 395, 205]}], "new": "89343725650212"},
+ {"name": "lp560_badges", "file": "imports/new_cars/lambo_gallardo.fbm/Image_7.png", "assets": ["82007753772471"], "ops": [{"solid": [0, 125, 280, 430, 0, 0, 0]}, {"solid": [215, 130, 512, 215, 0, 0, 0]}, {"solid": [40, 442, 470, 498, 236, 236, 236]}, {"text": [70, 448, 440, 492, "L140 SPYDER", 12, 12, 12], "flip": "v"}], "new": "106250188905554"},
+ {"name": "lp640_deck", "file": "imports/new_cars/new_murcielago_urus.fbm/Image_6.png", "assets": ["109079671724470"], "ops": [{"from": [76, 48, 250, 74, 10, 10]}, {"text": [84, 50, 244, 72, "L147 ROADSTER", 212, 138, 28], "flip": "v"}], "new": "102726504827244"},
+ {"name": "urusp_lamp", "file": "imports/new_cars/new_murcielago_urus.fbm/Image_24.png", "assets": ["81670677366008"], "ops": [{"rect": [195, 170, 375, 225]}], "new": "103816410796883"},
+ {"name": "svj_brakes", "file": "build/svj_tex/lambrini_svj/Image_2.png", "assets": ["104595903641790"], "ops": [{"rect": [4, 54, 252, 124]}], "new": "126514604996227"},
+ {"name": "svj_engine", "file": "build/svj_tex/lambrini_svj/Image_18.png", "assets": ["122866249295957"], "ops": [{"rect": [22, 0, 78, 44]}, {"rect": [95, 205, 290, 248]}], "new": "84099912122105"}
+]

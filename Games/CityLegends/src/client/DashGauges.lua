@@ -759,7 +759,7 @@ local function supraTrd(gui: SurfaceGui): Update
 	-- (brand mark removed: owner, 2026-10-17)
 	local setSpeed = speedDial(bg, UDim2.fromScale(0.83, 0.5), 0.95, 200, 20, 0.85, needle, -125, 125, nil)
 	text(bg, unit(true), UDim2.fromScale(0.85, 0.62), UDim2.fromScale(0.03, 0.04), WHITE, Enum.Font.Gotham)
-	text(bg, "Supra", UDim2.fromScale(0.82, 0.74), UDim2.fromScale(0.07, 0.07), WHITE, Enum.Font.Arcade)
+	text(bg, "JZA80", UDim2.fromScale(0.82, 0.74), UDim2.fromScale(0.07, 0.07), WHITE, Enum.Font.Arcade)
 	return function(mph: number, _g: string, rpm: number)
 		setRpm(rpm)
 		setSpeed(mph)

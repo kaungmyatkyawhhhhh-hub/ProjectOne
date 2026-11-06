@@ -31,6 +31,7 @@ local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 local BrandMarks = require(script.Parent:WaitForChild("BrandMarks"))
 local TailLights = require(script.Parent:WaitForChild("TailLights"))
 local CarFinish = require(script.Parent:WaitForChild("CarFinish"))
+local SideDecals = require(script.Parent:WaitForChild("SideDecals"))
 
 local CarSkin = {}
 
@@ -1972,6 +1973,31 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			end
 		end
 	end
+	-- our own side lettering (SideDecals), both sides: a see-through flat part just off the door
+	local lettering = SideDecals.lettering[src.Name]
+	if lettering then
+		local spm = dims.wb / lettering.wb
+		for _, side in { 1, -1 } do
+			local face = Vector3.new(side, 0, -lettering.slope).Unit
+			local middle = lettering.centre or 0
+			local pos = Vector3.new((middle + side * lettering.at.X) * spm, lettering.at.Y * spm + modelR * scale, lettering.at.Z * spm)
+			local thick = 0.02
+			local part = Instance.new("Part")
+			part.Name = "Lettering"
+			part.Size = Vector3.new(lettering.w * spm, lettering.h * spm, thick)
+			part.Transparency = 1
+			part.CastShadow = false
+			part.CanCollide = false
+			part.CanQuery = false
+			part.CanTouch = false
+			part.Massless = true
+			local decal = Instance.new("Decal")
+			decal.Face = Enum.NormalId.Front
+			decal.Texture = lettering.image
+			decal.Parent = part
+			out.body["Lettering" .. side] = { part = part, offset = CFrame.lookAt(pos, pos + face, Vector3.yAxis) * CFrame.new(0, 0, thick / 2) } :: any
+		end
+	end
 	return out
 end
 
@@ -2150,6 +2176,66 @@ local function place(t: Template, name: string, look: Look, color: Color3, cf: C
 	w.Part1 = p
 	w.Parent = p
 	return p
+end
+
+-- real names that are part of a model's shape: covered, with our name on top (SideDecals)
+local function addPatches(id: string, skin: Instance, root: BasePart)
+	for i, patch in SideDecals.patches[id] or {} do
+		for _, side in (if patch.both then { 1, -1 } else { 1 }) :: { number } do
+			local flip = Vector3.new(side, 1, 1)
+			local at = Vector3.new((patch.centre or 0) + side * patch.at.X, patch.at.Y, patch.at.Z)
+			local face = patch.face.Unit * flip
+			local thick = patch.thick or 0.02
+			local p = Instance.new("Part")
+			p.Name = "SkinPatch" .. i
+			p.Anchored = false
+			p.CastShadow = false
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.Massless = true
+			p.TopSurface = Enum.SurfaceType.Smooth
+			p.BottomSurface = Enum.SurfaceType.Smooth
+			p.Material = Enum.Material.SmoothPlastic
+			local cf = root.CFrame * CFrame.lookAt(at, at + face, (patch.up or Vector3.yAxis) * flip) * CFrame.new(0, 0, thick / 2)
+			if patch.disc then
+				p.Shape = Enum.PartType.Cylinder
+				p.Size = Vector3.new(thick, patch.w, patch.w)
+				cf *= CFrame.Angles(0, math.pi / 2, 0)
+			else
+				p.Size = Vector3.new(patch.w, patch.h, thick)
+			end
+			p.CFrame = cf
+			if patch.image then
+				p.Transparency = 1
+				local decal = Instance.new("Decal")
+				decal.Face = Enum.NormalId.Front
+				decal.Texture = patch.image
+				if patch.tint then
+					decal.Color3 = patch.tint
+				end
+				decal.Parent = p
+			elseif patch.match then
+				for _, d in skin:GetChildren() do
+					if d:IsA("BasePart") and d:GetAttribute("SrcName") == patch.match then
+						p.Color = d.Color
+						p.Material = d.Material
+						p.MaterialVariant = d.MaterialVariant
+						p.Reflectance = d.Reflectance
+						break
+					end
+				end
+				p:SetAttribute("SrcName", patch.src)
+			elseif patch.color then
+				p.Color = patch.color
+			end
+			p.Parent = skin
+			local w = Instance.new("WeldConstraint")
+			w.Part0 = root
+			w.Part1 = p
+			w.Parent = p
+		end
+	end
 end
 
 --[[
@@ -2406,6 +2492,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			p:SetAttribute("TailLight", true)
 		end
 	end
+
+	addPatches(id, skin, root)
 
 	if generic and imported and imported.tailGlow and not liteMode then
 		-- a soft red glow on the road and bumper behind the tail lamps (brighter when braking)
