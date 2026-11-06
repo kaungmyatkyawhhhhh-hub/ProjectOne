@@ -400,7 +400,7 @@ end
 
 -- (2026-11-03, "classes only": the Starter / Mid / High tiers aren't shown any more) a car's parts
 -- (its level and CP too) from CarUpgrades, for the class badge
-local function partsOf(id: string): { [string]: number }?
+local function partsOf(id: string): { [string]: string }?
 	local info = if UI.carInfo then UI.carInfo(id) else nil
 	return info and info.parts
 end

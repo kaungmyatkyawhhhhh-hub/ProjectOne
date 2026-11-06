@@ -488,7 +488,8 @@ end
 -- spin (pink); `name` is the won car's or jewel's name
 local function card(parent: Instance, y: number, o: any, name: string?)
 	local isCar = o.car == true
-	local isFlex = o.flex == true
+	local isPart = o.part ~= nil
+	local isFlex = o.flex == true or isPart
 	local isSpin = o.spin == true
 	local bigOne = not isCar and not isFlex and not isSpin and (o.percent or 100) <= 2
 	local top = if isCar then Color3.fromRGB(120, 220, 255) elseif isFlex then Color3.fromRGB(220, 170, 255) elseif isSpin then Color3.fromRGB(255, 160, 210) elseif bigOne then Color3.fromRGB(255, 220, 90) else Color3.fromRGB(214, 250, 96)
@@ -502,7 +503,7 @@ local function card(parent: Instance, y: number, o: any, name: string?)
 	if isCar or isFlex or isSpin then
 		local area = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(4, 3), Size = UDim2.fromOffset(44, 44), ZIndex = 78, Parent = plate })
 		kit.icon(if isCar then "car" else "gift", area, 34, if isCar then Color3.fromRGB(30, 60, 110) elseif isFlex then Color3.fromRGB(110, 40, 170) else Color3.fromRGB(170, 30, 100))
-		label({ Text = name or (if isCar then "FREE CAR" elseif isFlex then "JEWEL" else "+1 SPIN"), TextScaled = true, Font = Enum.Font.GothamBlack, TextColor3 = Color3.fromRGB(20, 30, 50), Position = UDim2.fromOffset(50, 8), Size = UDim2.new(1, -56, 1, -16), ZIndex = 78, Parent = plate })
+		label({ Text = name or (if isCar then "FREE CAR" elseif isPart then string.upper(tostring(o.part)) .. " PART" elseif isFlex then "JEWEL" else "+1 SPIN"), TextScaled = true, Font = Enum.Font.GothamBlack, TextColor3 = Color3.fromRGB(20, 30, 50), Position = UDim2.fromOffset(50, 8), Size = UDim2.new(1, -56, 1, -16), ZIndex = 78, Parent = plate })
 	else
 		local area = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(4, 3), Size = UDim2.fromOffset(44, 44), ZIndex = 78, Parent = plate })
 		kit.icon("gift", area, 30, if bigOne then Color3.fromRGB(200, 120, 20) else Color3.fromRGB(60, 120, 30))
@@ -588,8 +589,8 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 			local y = (i - 1) * (CARD_H + CARD_GAP)
 			if at and i == at and prize then
 				local o = w.odds[prize.index] or randomOdd(w.odds)
-				local shown = if prize.car then { car = true } elseif prize.flex then { flex = true } elseif prize.spin then { spin = true } else { cash = prize.cash, percent = o.percent }
-				won = card(strip, y, shown, prize.car or prize.flex)
+				local shown = if prize.car then { car = true } elseif prize.flex then { flex = true } elseif prize.part then { part = prize.part } elseif prize.spin then { spin = true } else { cash = prize.cash, percent = o.percent }
+				won = card(strip, y, shown, prize.car or prize.flex or prize.part)
 			else
 				card(strip, y, randomOdd(w.odds), nil)
 			end
@@ -612,7 +613,7 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 		oddsPanel = op
 		label({ Text = "THE ODDS  ·  " .. (if n > 1 then "each of the 3 reels" else "the reel"), TextSize = 14, Font = Enum.Font.GothamBlack, TextColor3 = GOLD, Position = UDim2.fromOffset(14, 10), Size = UDim2.new(1, -28, 0, 18), ZIndex = 91, Parent = op })
 		for k, o in w.odds do
-			local prize = if o.car then "A free car (or " .. UI.formatCash(o.carCash or 0) .. ")" elseif o.flex then "A Gem Showcase jewel (or " .. UI.formatCash(o.flexCash or 0) .. ")" elseif o.spin then "One more spin" else UI.formatCash(o.cash)
+			local prize = if o.car then "A free car (or " .. UI.formatCash(o.carCash or 0) .. ")" elseif o.flex then "A Gem Showcase jewel (or " .. UI.formatCash(o.flexCash or 0) .. ")" elseif o.part then "A free " .. tostring(o.part) .. " part" elseif o.spin then "One more spin" else UI.formatCash(o.cash)
 			label({ Text = prize, TextSize = 12, Font = Enum.Font.GothamBold, TextColor3 = Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(14, 32 + (k - 1) * 21), Size = UDim2.new(1, -110, 0, 20), ZIndex = 91, Parent = op })
 			label({ Text = tostring(o.percent) .. "%", TextSize = 12, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 32 + (k - 1) * 21), Size = UDim2.fromOffset(80, 20), ZIndex = 91, Parent = op })
 		end
@@ -703,7 +704,7 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 					end)
 				end
 				Audio.cutUp(4 + r * 2, "REEL")
-				if prize and (prize.car or prize.flex or (w.odds[prize.index] and w.odds[prize.index].percent <= 2)) then
+				if prize and (prize.car or prize.flex or prize.part or (w.odds[prize.index] and w.odds[prize.index].percent <= 2)) then
 					UI.flash(GOLD)
 				end
 			end)
@@ -718,6 +719,8 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 		for _, rr in result.reels do
 			if type(rr.flex) == "string" then
 				UI.toast("You won the " .. rr.flex .. "! Wear it from the Gem Showcase", GOLD)
+			elseif type(rr.part) == "string" then
+				UI.toast("You won the " .. rr.part .. "! It's in My Parts at the workshop", GOLD)
 			elseif rr.spin then
 				UI.toast("+1 " .. (if super then "SUPER SPIN" else "SPIN"), GOLD)
 			end

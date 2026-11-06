@@ -31,6 +31,7 @@ export type CarSpec = {
 	BaseId: string?, -- a SPORT / TOP trim: the car it is built on
 	Retired: boolean?, -- no longer sold (owners keep it, it still drives; not in the dealer, market, traffic)
 	Pending: boolean?, -- not sold yet: waits for its 3D model (no blocky placeholder in the dealer)
+	RearBias: boolean?, -- an all-wheel-drive car that sends more to the rear and slides like a rear-drive one
 }
 
 local Cars = {}
@@ -50,7 +51,7 @@ Cars.Makes = {
 	"Bavarica Werkz", "Tri-Star Silber", "Rocket", "Apex", "Stealth-Apex", "Horizon", "Ahura", "Sompact",
 	"Orient", "Dream-Build Volt", "HyperSpeed Tech", "Golden", "Ironclad", "Stuttgart", "Precision",
 	"British Vanguard", "Rosso Rampante", "Enfurecido", "Trident Motors", "Speedmark", "Sovereign",
-	"Ecstasy", "Velocité Noir",
+	"Ecstasy", "Velocité Noir", "Dearborn",
 }
 
 -- string.upper that also does the accented letters in the makes (it only knows a-z)
@@ -88,7 +89,7 @@ local list: { CarSpec } = {
 	{ Id = "bnw_540i", Name = "Bavarica Werkz G30 3.0", Class = "Sedan", Tier = "Starter", TopSpeed = 155, ZeroToSixty = 4.7, Handling = 0.68, Price = 42000, Color = Color3.fromRGB(26, 44, 82), Order = 13 },
 	{ Id = "bentz_e300", Name = "Tri-Star Silber W213 2.0", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 6.1, Handling = 0.63, Price = 70000, Color = Color3.fromRGB(88, 92, 98), Order = 14 },
 	{ Id = "bentz_e400", Name = "Tri-Star Silber W213 3.0", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.9, Handling = 0.66, Price = 85000, Color = Color3.fromRGB(20, 21, 24), Order = 15 },
-	{ Id = "bnw_330i_g20", Name = "Bavarica Werkz G20 Sport", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 5.3, Handling = 0.7, Price = 60000, Color = Color3.fromRGB(40, 90, 160), Order = 16 },
+	{ Id = "bnw_330i_g20", Name = "Bavarica Werkz G20 Sport", Class = "Sedan", Tier = "Starter", TopSpeed = 155, ZeroToSixty = 5.3, Handling = 0.7, Price = 40000, Color = Color3.fromRGB(40, 90, 160), Order = 16 },
 	{ Id = "bnw_m3_e92", Name = "Bavarica Werkz E92 V8", Class = "Coupe", Tier = "Mid", TopSpeed = 165, ZeroToSixty = 4.6, Handling = 0.76, Price = 90000, Color = Color3.fromRGB(235, 236, 238), Order = 17 },
 	{ Id = "bnw_m3_f80", Name = "Bavarica Werkz F80", Class = "Sedan", Tier = "Mid", TopSpeed = 174, ZeroToSixty = 4.0, Handling = 0.78, Price = 110000, Color = Color3.fromRGB(220, 170, 30), Order = 18 },
 	{ Id = "bnw_m4_f82", Name = "Bavarica Werkz F82", Class = "Coupe", Tier = "Mid", TopSpeed = 174, ZeroToSixty = 4.1, Handling = 0.8, Price = 100000, Color = Color3.fromRGB(30, 80, 170), Order = 19 },
@@ -179,6 +180,9 @@ local list: { CarSpec } = {
 	{ Id = "bentz_e63s", Name = "Tri-Star Silber W213 V8 S", Class = "Sedan", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 3.3, Handling = 0.76, Price = 175000, Color = Color3.fromRGB(20, 21, 24), Order = 82, Model = "bentz_e400" },
 	-- owner (2026-11-03): the A45 S hot hatch, the small fast Tri-Star Silber in place of the CLA 45; a
 	-- starter-pick car. Pending until the owner imports its model (then take Pending off)
+	-- owner (2026-11-06): the third starter pick, an all-wheel-drive hot hatch that lets its tail out
+	-- (`RearBias`). Pending until its model is in
+	{ Id = "dearb_focus_rs", Name = "Dearborn C346 Rallye", Class = "Sedan", Tier = "Starter", TopSpeed = 165, ZeroToSixty = 4.5, Handling = 0.76, Price = 42000, Color = Color3.fromRGB(60, 120, 200), Order = 7, RearBias = true, Pending = true },
 	{ Id = "bentz_a45s", Name = "Tri-Star Silber W177 Turbo S", Class = "Sedan", Tier = "Starter", TopSpeed = 168, ZeroToSixty = 3.9, Handling = 0.79, Price = 38000, Color = Color3.fromRGB(238, 190, 20), Order = 88, Pending = true },
 }
 
@@ -186,7 +190,7 @@ local list: { CarSpec } = {
 -- owns one keeps it in the garage and can still drive and tune it
 Cars.RETIRED = {
 	suzaki_swift = true, toyoka_belta = true, toyoka_crown = true, byt_seal = true, mazdo_rx8 = true,
-	bentz_e300 = true, bnw_530i = true, bnw_330i_g20 = true, bentz_cla45 = true, chevo_c6 = true,
+	bentz_e300 = true, bnw_530i = true, bentz_cla45 = true, chevo_c6 = true, -- (2026-11-06: the G20 is back, a starter pick)
 	ferrara_458 = true, -- owner (2026-11-05): "remove 458 italia"
 } :: { [string]: boolean }
 for _, spec in list do
@@ -239,6 +243,8 @@ Cars.Series = {
 	{ Name = "AHURA FD ROTARY", Ids = { "mazdo_rx7" } },
 	{ Name = "BAVARICA WERKZ F80", Ids = { "bnw_m3_f80" } },
 	{ Name = "BAVARICA WERKZ E92 & F82", Ids = { "bnw_m3_e92", "bnw_m4_f82" } },
+	{ Name = "BAVARICA WERKZ G20", Ids = { "bnw_330i_g20" }, NoTrims = true },
+	{ Name = "DEARBORN C346", Ids = { "dearb_focus_rs" }, NoTrims = true },
 	{ Name = "BAVARICA WERKZ SALOON", Ids = { "bnw_540i", "bnw_m5_e60", "bnw_m5_f10", "bnw_m5_f90" } },
 	{ Name = "BAVARICA WERKZ E63 & F93", Ids = { "bnw_m6_v10", "bnw_m8gc" } },
 	{ Name = "BAVARICA WERKZ G12", Ids = { "bnw_750li" } },
@@ -299,7 +305,6 @@ local RETIRED_SERIES = {
 	{ Name = "DREAM-BUILD VOLT ORCA", Ids = { "byt_seal" } },
 	{ Name = "AHURA SE3P ROTARY", Ids = { "mazdo_rx8" } },
 	{ Name = "TRI-STAR SILBER C118", Ids = { "bentz_cla45" } },
-	{ Name = "BAVARICA WERKZ G20", Ids = { "bnw_330i_g20" }, NoTrims = true },
 	{ Name = "BAVARICA WERKZ G30", Ids = { "bnw_530i" }, NoTrims = true },
 	{ Name = "TRI-STAR SILBER W213 2.0", Ids = { "bentz_e300" }, NoTrims = true },
 	{ Name = "GOLDEN STING 6", Ids = { "chevo_c6" }, NoTrims = true },

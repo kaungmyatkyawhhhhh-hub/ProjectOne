@@ -7,6 +7,7 @@
 
 local Cars = require(script.Parent:WaitForChild("Cars"))
 local Config = require(script.Parent:WaitForChild("Config"))
+local PartData = require(script.Parent:WaitForChild("PartData"))
 
 local CarStats = {}
 
@@ -40,7 +41,7 @@ local AWD = {
 	bentz_e63s = true, bnw_m5_f90 = true, bnw_m8gc = true, bnw_x6 = true, bnw_x7 = true, toyoka_lc200 = true,
 	toyoka_lc300 = true, lexis_lx700 = true, astin_dbx = true, maseroti_levante = true, xiaomo_su7 = true,
 	byt_u8 = true, kio_ev6 = true, bentz_cla45 = true, bentz_s680 = true, rolls_cullinan = false,
-	bentz_a45s = true,
+	bentz_a45s = true, dearb_focus_rs = true,
 }
 local FWD = { suzaki_swift = true, toyoka_belta = true, toyoka_camri = true, toyoka_alfard = true }
 local MANUAL = {
@@ -48,7 +49,7 @@ local MANUAL = {
 	toyoka_chaser = true, bnw_m3_e92 = true, bnw_m5_e60 = true, bnw_m6_v10 = true, chevo_c6 = true,
 	chevo_camaro = true, dodger_challenger = true, porsha_boxster = true, porsha_gt3 = true,
 	ferrara_f430 = true, lambrini_lp570 = true, lambrini_countach = true, lexis_lfa = false,
-	bentz_190e = true, suzaki_swift = true,
+	bentz_190e = true, suzaki_swift = true, dearb_focus_rs = true,
 }
 local KERB: { [string]: number } = {
 	suzaki_swift = 900, toyoka_belta = 1080, kio_ev6 = 2000, byt_seal = 2150, toyoka_camri = 1550, toyoka_crown = 1800,
@@ -67,7 +68,7 @@ local KERB: { [string]: number } = {
 	bentz_s65_w221 = 2250, maseroti_levante = 2100, lexis_lc500 = 1970, astin_dbx = 2250, ferrara_california = 1735,
 	bugotti_veyron = 1890, bugotti_veyron_sport = 1838, bugotti_veyron_top = 1990, bugotti_chiron = 1995, bugotti_chiron_pursport = 1945,
 	bugotti_chiron_supersport = 1990, bnw_m5_f10 = 1870, bnw_m5_f90 = 1855, bentz_e63s = 1880,
-	bentz_a45s = 1635,
+	bentz_a45s = 1635, dearb_focus_rs = 1530,
 }
 -- (2026-11-03, the classes: the PI reads power-to-weight, owner: "from real performance") the real
 -- power (hp) of the car each one is modelled on; a SPORT / TOP trim gets its base car's, scaled by its
@@ -88,7 +89,7 @@ local POWER: { [string]: number } = {
 	lambrini_svj63 = 770, lambrini_lp640 = 640, bentz_gls = 550, bentz_s680 = 621, lambrini_countach = 375,
 	ferrara_california = 453, bugotti_veyron = 1001, bugotti_veyron_sport = 1200, bugotti_veyron_top = 1200,
 	bugotti_chiron = 1500, bugotti_chiron_pursport = 1500, bugotti_chiron_supersport = 1600,
-	bnw_m5_f10 = 560, bnw_m5_f90 = 600, bentz_e63s = 603, bentz_a45s = 416,
+	bnw_m5_f10 = 560, bnw_m5_f90 = 600, bentz_e63s = 603, bentz_a45s = 416, dearb_focus_rs = 350,
 	-- the retired cars
 	suzaki_swift = 90, toyoka_belta = 106, toyoka_crown = 226, byt_seal = 201, mazdo_rx8 = 231,
 	bentz_e300 = 255, bnw_530i = 248, bnw_330i_g20 = 255, bentz_cla45 = 416, chevo_c6 = 430,
@@ -197,7 +198,7 @@ local REDLINE_CAR: { [string]: number } = {
 	astin_db9 = 7.0, astin_vantage = 7.3, astin_dbx = 6.5, bentlee_contgt = 6.5, bentlee_bentayga = 6.0,
 	rolls_wraith = 5.5, rolls_cullinan = 5.0, bugotti_veyron = 6.4, maseroti_levante = 6.5,
 	bugotti_chiron = 6.7, bugotti_chiron_pursport = 6.9, bugotti_chiron_supersport = 6.9,
-	bentz_a45s = 7.2,
+	bentz_a45s = 7.2, dearb_focus_rs = 6.8,
 }
 function CarStats.redline(id: string): number
 	local spec = Cars.get(id)
@@ -209,50 +210,147 @@ function CarStats.redline(id: string): number
 end
 
 ---------------------------------------------------------------------
--- Classes, parts and the Performance Index (owner, 2026-11-03: "car class grades and car levels")
+-- Classes, parts and the Performance Index (owner, 2026-11-03: "car class grades and car levels";
+-- 2026-11-06: the workshop and the Part Shop, PartData)
 ---------------------------------------------------------------------
-export type Parts = { [string]: number } -- part key -> stage (1..3), Config.CarParts
+export type Parts = { [string]: string } -- slot -> part id (PartData)
 
--- what a car's parts do in all: shares off the 0-60 time, onto the top speed, onto Handling, onto
--- the braking force and off the weight (Config.CarParts)
-export type Tune = { accel: number, speed: number, grip: number, brake: number, weight: number, pi: number }
+-- the slots in a fixed order (the "Parts" attribute, and the screens)
+local SLOT_ORDER: { string } = {}
+for _, cat in PartData.Cats do
+	for _, slot in cat.slots do
+		table.insert(SLOT_ORDER, slot)
+	end
+end
+CarStats.SlotOrder = SLOT_ORDER
+
+-- what a car's parts do in all: shares off the 0-60 time, onto the top speed, onto Handling, onto the
+-- braking force and off the weight, plus the feel and sound of the parts (PartData's fx)
+export type Tune = {
+	accel: number,
+	speed: number,
+	grip: number,
+	brake: number,
+	weight: number,
+	pi: number,
+	shift: number,
+	steer: number,
+	drift: number,
+	launch: number,
+	redline: number,
+	rally: number,
+	nitro: number,
+	loud: number,
+	spool: number,
+	power: number, -- the power slots' share of `accel`
+	driveK: number, -- what the rest (gearbox, tyres ...) leaves of the 0-60
+	speedDrive: number, -- the top speed from slots that aren't power slots
+	pop: string?,
+	decat: boolean,
+	bov: boolean,
+	downpipe: boolean,
+	air: boolean,
+	forced: string?, -- "turbo" or "super"
+	engine: PartData.Engine?, -- a swapped engine
+}
+
+-- the turbo or supercharger a set of parts has (a fitted one, or a swapped engine's own)
+function CarStats.forcedOf(parts: Parts?): string?
+	if not parts then
+		return nil
+	end
+	local ind = parts.induction and PartData.Parts[parts.induction]
+	if ind then
+		return if string.sub(ind.id, 1, 3) == "sc_" then "super" else "turbo"
+	end
+	local sw = parts.swap and PartData.Parts[parts.swap]
+	return if sw and sw.engine then sw.engine.forced else nil
+end
+
+local function needsMet(def: PartData.Part, forced: string?): boolean
+	if def.needs == "forced" then
+		return forced ~= nil
+	end
+	return def.needs == nil or def.needs == forced
+end
+
+local ADD = { "speed", "grip", "brake", "weight", "pi", "shift", "steer", "drift", "launch", "redline", "rally", "nitro" }
 function CarStats.tuneOf(parts: Parts?): Tune
-	local t = { accel = 0, speed = 0, grip = 0, brake = 0, weight = 0, pi = 0 }
+	local t: Tune = {
+		accel = 0, speed = 0, grip = 0, brake = 0, weight = 0, pi = 0, shift = 0, steer = 0, drift = 0, launch = 0, redline = 0,
+		rally = 0, nitro = 0, loud = 0, spool = 0, power = 0, driveK = 1, speedDrive = 0, decat = false, bov = false, downpipe = false, air = false,
+	}
 	if not parts then
 		return t
 	end
-	local P = Config.CarParts
-	local accelK = 1
-	for key, stage in parts do
-		local def = P.Parts[key]
-		if not (def and def.stages[stage]) then
+	local forced = CarStats.forcedOf(parts)
+	t.forced = forced
+	local powerK, driveK = 1, 1
+	for slot, id in parts do
+		local def = PartData.Parts[id]
+		if not (def and def.slot == slot) then
 			continue
 		end
-		-- the engine's rules (Config.CarParts): Race Camshafts without Race Fuel count as Sport; an
-		-- intake past the exhaust's stage gives only part of the extra
-		if key == "cams" and stage >= 3 and (parts.fuel or 0) < 3 then
-			stage = 2
+		if def.engine then
+			t.engine = def.engine
+			continue
 		end
-		local fx: { [string]: number } = table.clone(def.stages[stage] :: any)
-		local ex = parts.exhaust or 0
-		if key == "intake" and stage > ex then
-			local low: { [string]: number } = if ex > 0 then def.stages[ex] :: any else {}
-			for k, v in fx do
-				local lv = low[k] or 0
-				fx[k] = lv + (v - lv) * P.IntakeOverExhaust
+		if not needsMet(def, forced) then
+			continue -- (a part that waits for a turbo does nothing yet)
+		end
+		local fx: { [string]: any } = def.fx
+		local a = fx.accel or 0
+		if fx.turboAccel and forced == "turbo" then
+			a += fx.turboAccel
+		end
+		local power = PartData.PowerCats[PartData.Slots[slot].cat] == true
+		if power then
+			powerK *= 1 - a
+		else
+			driveK *= 1 - a
+			t.speedDrive += fx.speed or 0
+		end
+		for _, k in ADD do
+			(t :: any)[k] += fx[k] or 0
+		end
+		t.loud = math.max(t.loud, fx.loud or 0)
+		t.spool = math.max(t.spool, fx.spool or 0)
+		t.pop = fx.pop or t.pop
+		t.decat = t.decat or fx.decat == true
+		t.bov = t.bov or fx.bov == true
+		t.downpipe = t.downpipe or fx.downpipe == true
+		t.air = t.air or fx.air == true
+	end
+	if forced == "turbo" and t.spool == 0 then
+		t.spool = 0.9 -- (a swapped engine's own turbo)
+	end
+	t.power = 1 - powerK
+	t.driveK = driveK
+	-- a lighter car also pulls harder
+	t.accel = 1 - powerK * driveK * (1 - t.weight) ^ 0.5
+	return t
+end
+
+-- all the power slots at their best: a swapped engine reaches its tuned max there
+local fullPower: number? = nil
+local function powerFull(): number
+	if not fullPower then
+		local k = 1
+		for _, cat in PartData.Cats do
+			if PartData.PowerCats[cat.key] then
+				for _, slot in cat.slots do
+					local best = 0
+					for _, def in PartData.BySlot[slot] or {} do
+						local fx: { [string]: any } = def.fx
+						best = math.max(best, (fx.accel or 0) + (fx.turboAccel or 0))
+					end
+					k *= 1 - best
+				end
 			end
 		end
-		accelK *= 1 - (fx.accel or 0)
-		t.speed += fx.speed or 0
-		t.grip += fx.grip or 0
-		t.brake += fx.brake or 0
-		t.weight += fx.weight or 0
-		t.pi += fx.pi or 0
+		fullPower = 1 - k
 	end
-	-- a lighter car also pulls harder
-	accelK *= (1 - t.weight) ^ 0.5
-	t.accel = 1 - accelK
-	return t
+	return fullPower :: number
 end
 
 -- a car's stock class (cached: the screens ask often)
@@ -266,14 +364,53 @@ local function stockLetter(id: string): string
 	return l
 end
 
--- whether a part can go on this car: stock S2 / R / X cars take only tyres, gearbox, suspension and
--- exhaust (Config.CarParts.TopClasses / TopAllowed)
-function CarStats.partAllowed(id: string, key: string): boolean
-	local P = Config.CarParts
-	if not P.Parts[key] then
+-- whether a stock S2 / R / X car takes this part: tyres, gearbox, suspension, exhaust, and sound parts
+local function topOk(def: PartData.Part): boolean
+	return PartData.Slots[def.slot].top == true or def.sound == true
+end
+
+-- whether a part counts on this car (the class rule). Old saves can hold a part that no longer fits
+-- for another reason (an electric car's Street exhaust): it keeps working, `fits` only stops new ones
+function CarStats.partAllowed(id: string, partId: string): boolean
+	local def = PartData.Parts[partId]
+	if not def then
 		return false
 	end
-	return not P.TopClasses[stockLetter(id)] or P.TopAllowed[key] == true
+	return not Config.CarParts.TopClasses[stockLetter(id)] or topOk(def)
+end
+
+-- whether a part can be fitted now, and why not. `parts`: the car's parts as they stand
+function CarStats.fits(id: string, partId: string, parts: Parts?): (boolean, string?)
+	local def = PartData.Parts[partId]
+	if not def then
+		return false, "Unknown part"
+	end
+	local spec = Cars.get(id)
+	local slot = PartData.Slots[def.slot]
+	if spec.Electric and ((slot.ice and not def.ev) or (def.slot == "ecu" and not def.ev)) then
+		return false, "Not on electric cars"
+	end
+	if def.slot == "shaft" and CarStats.of(id).drive == "FWD" then
+		return false, "Not on front-wheel drive cars"
+	end
+	if not CarStats.partAllowed(id, partId) then
+		return false, "S2, R and X cars take only tyres, gearbox, suspension and exhaust"
+	end
+	if parts and not needsMet(def, CarStats.forcedOf(parts)) then
+		return false, if def.needs == "super" then "Needs a supercharger" elseif def.needs == "turbo" then "Needs a turbo" else "Needs a turbo or supercharger"
+	end
+	return true, nil
+end
+
+-- what a part costs on this car ($, a CP price or nil when it's cash only)
+function CarStats.partPrice(id: string, partId: string): (number, number?)
+	local def = PartData.Parts[partId]
+	if not def then
+		return math.huge, nil
+	end
+	local cash = Config.partCash(def.list, Config.partK(Cars.get(id).Price), def.engine ~= nil)
+	local cp = def.cp or PartData.Rarity[def.rarity].cp
+	return cash, if cp and cp > 0 then cp else nil
 end
 
 -- only the parts this car can take (a part saved before a rule changed does nothing)
@@ -282,26 +419,100 @@ function CarStats.cleanParts(id: string, parts: Parts?): Parts?
 		return parts
 	end
 	local out: Parts = {}
-	for key, stage in parts do
-		if CarStats.partAllowed(id, key) then
-			out[key] = stage
+	for slot, partId in parts do
+		local def = PartData.Parts[partId]
+		if def and def.slot == slot and CarStats.partAllowed(id, partId) then
+			out[slot] = partId
 		end
 	end
 	return out
 end
 
--- the car's spec with its parts on (a copy; the same Id): what Driving drives and the PI reads
-function CarStats.tunedSpec(id: string, parts: Parts?): Cars.CarSpec
+-- the car's power (hp) and weight (kg) with its parts on
+function CarStats.powerOf(id: string, parts: Parts?): (number, number)
+	parts = CarStats.cleanParts(id, parts)
+	local base = CarStats.of(id)
+	local t = CarStats.tuneOf(parts)
+	local weight = base.weightKg * (1 - t.weight)
+	local e = t.engine
+	if e then
+		return e.hp + (e.tuned - e.hp) * math.clamp(t.power / powerFull(), 0, 1), weight + e.kg
+	end
+	-- (the power parts give as much power as the quicker 0-60 needs)
+	return base.hp * (1 / math.max(1 - t.accel, 0.3)) ^ 1.18, weight
+end
+
+-- the TUNE tab's settings: clamped to their ranges, the stock ones dropped
+export type Setup = { [string]: number }
+function CarStats.cleanSetup(raw: any): Setup
+	local out: Setup = {}
+	if type(raw) ~= "table" then
+		return out
+	end
+	for key, v in raw do
+		local def = if type(key) == "string" then PartData.TuneByKey[key] else nil
+		if def and type(v) == "number" and v == v then
+			local n = math.clamp(v, def.min, def.max)
+			if math.abs(n - def.def) > 0.001 then
+				out[key] = n
+			end
+		end
+	end
+	return out
+end
+
+-- the settings to and from the car model's "Setup" attribute ("final=0.3,ride=-0.2")
+function CarStats.encodeSetup(setup: Setup?): string
+	local out = {}
+	for _, def in PartData.Tune do
+		local v = setup and setup[def.key]
+		if v then
+			table.insert(out, def.key .. "=" .. string.format("%.2f", v))
+		end
+	end
+	return table.concat(out, ",")
+end
+function CarStats.decodeSetup(raw: any): Setup
+	local t: { [string]: number } = {}
+	if type(raw) ~= "string" then
+		return t
+	end
+	for key, v in string.gmatch(raw, "(%a+)=(%-?[%d%.]+)") do
+		t[key] = tonumber(v) or 0
+	end
+	return CarStats.cleanSetup(t)
+end
+
+-- the car's spec with its parts on (a copy; the same Id): what Driving drives and the PI reads.
+-- `setup`: the TUNE tab's settings on top (they don't count for the PI)
+local FLOOR_0_60 = { AWD = 2.1, RWD = 2.6, FWD = 3.3 }
+function CarStats.tunedSpec(id: string, parts: Parts?, setup: Setup?): Cars.CarSpec
 	local spec = Cars.get(id)
 	parts = CarStats.cleanParts(id, parts)
-	if not parts or next(parts) == nil then
+	local hasParts = parts ~= nil and next(parts :: Parts) ~= nil
+	if not hasParts and not (setup and next(setup)) then
 		return spec
 	end
 	local t = CarStats.tuneOf(parts)
 	local out = table.clone(spec)
-	out.ZeroToSixty = math.max(1.6, spec.ZeroToSixty * (1 - t.accel))
-	out.TopSpeed = math.floor(spec.TopSpeed * (1 + t.speed) + 0.5)
+	if t.engine then
+		-- a swap: the 0-60 and top speed follow the new power and weight
+		local base = CarStats.of(id)
+		local hp, kg = CarStats.powerOf(id, parts)
+		local zts = spec.ZeroToSixty * ((base.hp / base.weightKg) / (hp / kg)) ^ (1 / 1.18) * t.driveK
+		out.ZeroToSixty = math.max(math.min(spec.ZeroToSixty, FLOOR_0_60[base.drive] or 2.6), zts)
+		out.TopSpeed = math.floor(spec.TopSpeed * (hp / base.hp) ^ (1 / 3) * (1 + t.speedDrive) + 0.5)
+	else
+		out.ZeroToSixty = math.max(1.6, spec.ZeroToSixty * (1 - t.accel))
+		out.TopSpeed = math.floor(spec.TopSpeed * (1 + t.speed) + 0.5)
+	end
 	out.Handling = math.min(0.99, spec.Handling + t.grip)
+	if setup then
+		local f, ride, press, down = setup.final or 0, setup.ride or 0, setup.press or 0, setup.down or 0
+		out.ZeroToSixty = math.max(1.6, out.ZeroToSixty * (1 + 0.05 * f))
+		out.TopSpeed = math.floor(out.TopSpeed * (1 + 0.04 * f) * (1 - 0.02 * down) + 0.5)
+		out.Handling = math.clamp(out.Handling - 0.012 * ride - 0.012 * press, 0.1, 0.99)
+	end
 	return out
 end
 
@@ -313,10 +524,9 @@ function CarStats.pi(id: string, parts: Parts?): number
 	local spec = CarStats.tunedSpec(id, parts)
 	local base = CarStats.of(id)
 	local t = CarStats.tuneOf(parts)
-	local weight = base.weightKg * (1 - t.weight)
+	local hp, weight = CarStats.powerOf(id, parts)
 	local braking = math.clamp(base.braking * (1 + t.brake * 0.6) + t.grip * 0.5, 0, 1.15)
-	-- (the power parts give more power: as much as the quicker 0-60 needs)
-	local ptw = base.hp * (1 / math.max(1 - t.accel, 0.3)) ^ 1.18 * 1000 / weight
+	local ptw = hp * 1000 / weight
 	local function k(v: number, lo: number, hi: number): number
 		return math.clamp((v - lo) / (hi - lo), 0, 1.1)
 	end
@@ -347,13 +557,65 @@ function CarStats.requiredLevel(id: string): number
 	return if letter == "X" then Config.CarClasses.XLevel else 1
 end
 
--- parts to and from the car model's "Parts" attribute ("engine=2,tyres=1")
+-- the car's redline with its parts on (a swapped engine's own, raised by the parts)
+function CarStats.redlineOf(id: string, parts: Parts?): number
+	local t = CarStats.tuneOf(CarStats.cleanParts(id, parts))
+	return (if t.engine then t.engine.redline else CarStats.redline(id)) * (1 + t.redline)
+end
+
+-- the dyno's curves: `n` points from idle to the redline. rpm, hp, torque (Nm), the peaks
+local function curveShape(kind: string, r: number): number
+	local function bell(mid: number, width: number): number
+		return math.exp(-((r - mid) / width) ^ 2)
+	end
+	if kind == "turbo" then
+		return (math.clamp((r - 0.12) / 0.26, 0, 1) ^ 0.7) * (1 - 0.38 * math.max(0, r - 0.68) / 0.32) * 0.98 + 0.02
+	elseif kind == "bigv8" then
+		return 0.55 + 0.45 * bell(0.5, 0.42)
+	elseif kind == "highrev" then
+		return 0.5 + 0.5 * bell(0.8, 0.42)
+	elseif kind == "rotary" then
+		return 0.45 + 0.55 * bell(0.76, 0.46)
+	elseif kind == "ev" then
+		return if r < 0.35 then 1 else 0.35 / r
+	end
+	return 0.58 + 0.42 * bell(0.66, 0.42)
+end
+export type Dyno = { points: { { rpm: number, hp: number, nm: number } }, hp: number, nm: number, redline: number }
+function CarStats.dyno(id: string, parts: Parts?, n: number?): Dyno
+	local spec = Cars.get(id)
+	parts = CarStats.cleanParts(id, parts)
+	local t = CarStats.tuneOf(parts)
+	local hp = CarStats.powerOf(id, parts)
+	local redline = CarStats.redlineOf(id, parts) * 1000
+	local kind = if spec.Electric then "ev" elseif t.engine then t.engine.curve elseif t.forced == "turbo" then "turbo" elseif t.forced == "super" then "bigv8" elseif spec.Class == "Supercar" or spec.Class == "Hypercar" then "highrev" elseif spec.Class == "SUV" then "bigv8" else "na"
+	local count = n or 28
+	-- the shape first, then scaled so its peak is the car's power
+	local shape, peak = {}, 0
+	for k = 1, count do
+		local r = 0.14 + 0.86 * (k - 1) / (count - 1)
+		local v = curveShape(kind, r) * r
+		shape[k] = { r = r, v = v }
+		peak = math.max(peak, v)
+	end
+	local out: Dyno = { points = {}, hp = hp, nm = 0, redline = redline }
+	for k, p in shape do
+		local rpm = p.r * redline
+		local h = p.v / peak * hp
+		local nm = h * 7127 / rpm
+		out.points[k] = { rpm = rpm, hp = h, nm = nm }
+		out.nm = math.max(out.nm, nm)
+	end
+	return out
+end
+
+-- parts to and from the car model's "Parts" attribute ("intake=in_cold,tyres=ty_sport")
 function CarStats.encodeParts(parts: Parts?): string
 	local out = {}
-	for _, key in Config.CarParts.Keys do
-		local stage = parts and parts[key]
-		if stage and stage > 0 then
-			table.insert(out, key .. "=" .. stage)
+	for _, slot in SLOT_ORDER do
+		local id = parts and parts[slot]
+		if id then
+			table.insert(out, slot .. "=" .. id)
 		end
 	end
 	return table.concat(out, ",")
@@ -363,10 +625,10 @@ function CarStats.decodeParts(raw: any): Parts
 	if type(raw) ~= "string" then
 		return parts
 	end
-	for key, stage in string.gmatch(raw, "(%a+)=(%d)") do
-		local n = tonumber(stage) :: number
-		if Config.CarParts.Parts[key] and n >= 1 and n <= #Config.CarParts.Stages then
-			parts[key] = n
+	for slot, id in string.gmatch(raw, "([%w_]+)=([%w_]+)") do
+		local def = PartData.Parts[id]
+		if def and def.slot == slot then
+			parts[slot] = id
 		end
 	end
 	return parts

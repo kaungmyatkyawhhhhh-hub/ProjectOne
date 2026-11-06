@@ -315,6 +315,9 @@ local function startOrbit()
 	local travel = 0
 	local span = Config.City.HalfExtent * 1.7
 	orbitConn = RunService.RenderStepped:Connect(function(dt: number)
+		if Driving.cameraHold then
+			return -- (another screen has the shot: the workshop, opened from the menu)
+		end
 		-- Studio previews (Claude's lighting screenshots): a test script parks the menu camera
 		local preview = workspace:GetAttribute("PreviewCam")
 		if typeof(preview) == "CFrame" and RunService:IsStudio() then
@@ -596,6 +599,7 @@ require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)
 require(script.Parent:WaitForChild("CustomsClient")).init() -- Legends Customs (after the hotel: it chains the drive action)
 -- car levels, Car Points and the parts screen (2026-11-03; the garage's UPGRADE, the HUD strip)
 require(script.Parent:WaitForChild("CarUpgrades")).init()
+require(script.Parent:WaitForChild("Workshop")).init() -- the parts screen, its room and the Part Shop (2026-11-06)
 
 -- island houses: a bay car's "Drive" spawns it on the driveway (the server picks the spot)
 task.spawn(HouseClient.init, function(id: string)

@@ -48,7 +48,7 @@ UI.onPhotoButton = nil :: (() -> ())? -- photo mode (PhotoMode)
 UI.onMenuButton = nil :: (() -> ())? -- the main menu (MainMenu; the MENU button replaced SETTINGS, 2026-11-02)
 UI.onCashPlus = nil :: (() -> ())? -- the "+" on the cash pill: the main menu's STORE (2026-11-04)
 -- (2026-11-03, car levels: CarUpgrades sets these) a car's level, CP and parts, and its parts screen
-UI.carInfo = nil :: ((string) -> { level: number, xp: number, need: number, cp: number, parts: { [string]: number } })?
+UI.carInfo = nil :: ((string) -> { level: number, xp: number, need: number, cp: number, parts: { [string]: string } })?
 UI.onUpgrade = nil :: ((string) -> ())?
 
 ---------------------------------------------------------------------
@@ -145,7 +145,7 @@ local function classBadge(props: { [string]: any }?): (Frame, (string, number) -
 end
 
 -- the badge of a car (stock, or with its parts)
-function UI.classBadgeFor(id: string, parts: { [string]: number }?, props: { [string]: any }?): Frame
+function UI.classBadgeFor(id: string, parts: { [string]: string }?, props: { [string]: any }?): Frame
 	local f, set = classBadge(props)
 	local letter, _, pi = CarStats.classOf(id, parts)
 	set(letter, pi)
@@ -2323,6 +2323,10 @@ function UI.showHud(visible: boolean)
 	if not visible then
 		closePanels()
 	end
+end
+
+function UI.getCash(): number
+	return targetCash
 end
 
 function UI.setCash(amount: number, instant: boolean?)

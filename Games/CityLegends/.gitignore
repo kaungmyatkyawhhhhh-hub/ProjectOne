@@ -5,3 +5,4 @@ build/
 CityLegends.rbxlx
 globalTypes.d.luau
 __pycache__/
+imports/sync/

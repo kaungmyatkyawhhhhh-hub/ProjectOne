@@ -404,6 +404,9 @@ export type Engine = {
 	crank: (self: Engine) -> (), -- the starter: the car's own start-up sound, else the shared one
 	setLaunch: (self: Engine, on: boolean) -> (), -- launch control held (brake + throttle at a stop)
 	setTunnel: (self: Engine, inside: boolean) -> (), -- in a tunnel: the engine twice as loud, with an echo
+	setMods: (self: Engine, mods: any) -> (), -- the fitted parts' sound (CarStats.tuneOf)
+	setRedline: (self: Engine, rpm: number) -> (),
+	pop: (self: Engine, strength: number) -> (), -- one pop or crackle of the ECU's map
 	destroy: (self: Engine) -> (),
 }
 
@@ -433,11 +436,26 @@ local BAND_GAIN = { Idle = 1, Low = 1.7, Mid = 1.7, High = 1 }
 
 local CLASS_PITCH = { Sedan = 0.9, SUV = 0.82, Coupe = 1.0, Supercar = 1.08, Hypercar = 1.15 }
 
+-- a swapped engine's sound (2026-11-06): the closest in the game by layout. There's one shared engine
+-- loop and one high-revving recording, so a layout is that loop's pitch until the owner sends ids:
+-- `high` = the high-revving one, I5 is the I6 pitched up (its warble)
+local LAYOUT = {
+	I4 = { pitch = 1.14 },
+	I5 = { pitch = 1.24 },
+	I6 = { pitch = 1.04 },
+	V6 = { pitch = 0.98 },
+	V8 = { pitch = 0.8 },
+	V10 = { pitch = 0.95, high = true },
+	R = { pitch = 1.42 },
+	F4 = { pitch = 0.9 },
+	F6 = { pitch = 0.88, high = true },
+}
+
 --[[
 	parent: a BasePart for positional (3D) sound, or nil for 2D (the local
 	player's own car always plays 2D so it sounds the same in every camera).
 ]]
-function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
+function Audio.engine(class: string, parent: Instance?, carId: string?, layout: string?): Engine
 	local holder = parent or SoundService
 	local base = CLASS_PITCH[class] or 1
 	local positional = parent ~= nil and parent:IsA("BasePart")
@@ -446,6 +464,13 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	local own = if carId then pickCustom("Engine_" .. carId) else nil
 	if own then
 		base = 1
+	end
+	-- (a swapped engine: not the car's own sound, the closest to its layout)
+	local swapped = if layout then LAYOUT[layout] else nil
+	if swapped then
+		own = if swapped.high then pickCustom("Engine_ferrara_458") else nil
+		base = swapped.pitch
+		carId = nil
 	end
 	local engineId = own or pickCustom("Engine")
 	local squealId = pickCustom("TyreSqueal")
@@ -484,6 +509,12 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 	local dip = 0
 	local smoothRpm = 0.1
 	local running, power = true, 1
+	-- the fitted parts' sound (setMods): louder and rawer, a turbo's whistle, a blow-off
+	local mods: any = {}
+	local loudK = 1
+	local spoolSnd: Sound? = nil
+	local spoolK = 0
+	local liftBov = false
 	-- in a tunnel (owner, 2026-11-03: "if you drive through the tunnel the car becomes 2 times
 	-- louder"): every engine sound x2, eased in and out over half a second
 	local tunnelWant, tunnelK = 0, 0
@@ -573,6 +604,80 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		end
 		crackleCool = 0.35
 		oneShot(id, volume)
+	end
+
+	-- the ECU's map: one pop or crackle, from the car's own set or the shared one. Louder and harder
+	-- with a loud exhaust; soft and low for a burble
+	function self.pop(_, strength: number)
+		if not running then
+			return
+		end
+		local kind = mods.pop
+		local id: string?
+		if kind == "crackle" or kind == "antilag" then
+			id = (ex and (ex.Crackle or ex.ShiftPop or ex.Pops)) or pickCustom("SharedCrackle")
+		else
+			id = (ex and (ex.Pops or ex.Crackle)) or pickCustom("SharedPops")
+		end
+		if not id then
+			Audio.backfire(if positional then parent else nil)
+			return
+		end
+		local vol = if kind == "burble" then 0.32 elseif kind == "pop" then 0.7 elseif kind == "antilag" then 0.95 else 0.8
+		vol *= strength * (1 + 0.12 * (mods.loud or 0)) * (if mods.decat then 1.15 else 1)
+		local snd = newSound(id, holder, vol * (1 + tunnelK) * carVol)
+		snd.PlaybackSpeed = (if kind == "burble" then 0.78 else 1) * (0.94 + math.random() * 0.12)
+		local level = 0.1 * (mods.loud or 0) + (if mods.decat then 0.1 else 0)
+		if level > 0 then
+			effect("DistortionSoundEffect", snd, { Level = level })
+		end
+		if positional then
+			snd.RollOffMode = Enum.RollOffMode.InverseTapered
+			snd.RollOffMinDistance = 14
+			snd.RollOffMaxDistance = 520
+		end
+		snd:Play()
+		Debris:AddItem(snd, 6)
+	end
+
+	function self.setRedline(_, rpm: number)
+		redlineRpm = rpm
+	end
+
+	function self.setMods(_, m: any)
+		mods = m or {}
+		local loud = mods.loud or 0
+		loudK = 1 + 0.14 * loud + (if mods.decat then 0.08 else 0)
+		local level = 0.09 * loud + (if mods.decat then 0.05 else 0)
+		local list: { Sound } = { rumble, growl }
+		for _, snd in layers do
+			table.insert(list, snd)
+		end
+		for _, snd in list do
+			local fx = snd:FindFirstChild("LoudFx") :: DistortionSoundEffect?
+			if level > 0 and not fx then
+				fx = effect("DistortionSoundEffect", snd, { Level = level }) :: any
+				if fx then
+					fx.Name = "LoudFx"
+				end
+			elseif fx then
+				fx.Level = level
+				fx.Enabled = level > 0
+			end
+		end
+		-- a turbo's whistle (the car's own recording, if it has one, stays)
+		if (mods.spool or 0) > 0 and not layers.Turbo and not spoolSnd then
+			local id = pickCustom("SharedTurbo")
+			if id then
+				local snd = newSound(id, holder, 0, true)
+				snd.Name = "TurboSpool"
+				snd:Play()
+				spoolSnd = snd
+			end
+		elseif (mods.spool or 0) <= 0 and spoolSnd then
+			spoolSnd:Destroy()
+			spoolSnd = nil
+		end
 	end
 
 	-- screech 0..1: tyres crying on a hard launch / pull-away, on top of what the slip gives
@@ -804,6 +909,36 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		growl.PlaybackSpeed = (0.5 + r * 0.95) * base * ts
 		growl.Volume = (0.08 + 0.42 * throttle) * math.clamp(r * 1.3, 0.2, 1) * (if usingCustom then 0.35 else 1) * power * (if ex then 0 else 1)
 		downCool = math.max(0, downCool - 1 / 60)
+		if loudK ~= 1 then
+			rumble.Volume *= loudK
+			growl.Volume *= loudK
+			for _, snd in layers do
+				snd.Volume *= loudK
+			end
+		end
+		-- the turbo: boost builds with throttle and revs, a whistle follows it; lifting off under boost
+		-- lets it out through the blow-off valve
+		if (mods.spool or 0) > 0 then
+			local want = throttle * math.clamp((r - 0.22) / 0.3, 0, 1)
+			spoolK += (want - spoolK) * (if want > spoolK then 0.05 else 0.16)
+			if spoolSnd then
+				spoolSnd.Volume = (0.3 + (if mods.downpipe then 0.2 else 0)) * math.min(mods.spool, 1.2) * spoolK ^ 1.3 * power
+				spoolSnd.PlaybackSpeed = 0.6 * (0.55 + 0.45 * spoolK) * (0.8 + 0.4 * r) * ts
+			end
+			if throttle > 0.6 then
+				liftBov = true
+			elseif liftBov and throttle < 0.3 then
+				liftBov = false
+				if mods.bov and spoolK > 0.3 and bovCool <= 0 and running then
+					local id = (ex and ex.BlowOff) or pickCustom("SharedBlowOff")
+					if id then
+						oneShot(id, 0.4 + 0.5 * spoolK)
+						bovCool = 0.7
+					end
+					spoolK *= 0.25
+				end
+			end
+		end
 		if carVol ~= 1 then
 			for _, snd in layers do
 				snd.Volume *= carVol
@@ -850,7 +985,15 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 				bovCool = 0.5
 				boost *= 0.6
 			end
-			if smoothRpm > 0.8 and math.random() < 0.6 and not (bandCfg and bandCfg.noPops) then
+			if mods.bov and spoolK > 0.4 and bovCool <= 0 then
+				local id = (ex and ex.BlowOff) or pickCustom("SharedBlowOff")
+				if id then
+					oneShot(id, 0.3 + 0.35 * spoolK)
+					bovCool = 0.5
+				end
+				spoolK *= 0.5
+			end
+			if smoothRpm > 0.8 and math.random() < 0.6 and not (bandCfg and bandCfg.noPops) and not mods.pop then
 				if ex and (ex.ShiftPop or ex.Crackle) then
 					crackle(0.9, "ShiftPop")
 				else
@@ -904,6 +1047,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?): Engine
 		end
 		if startSnd then
 			startSnd:Destroy()
+		end
+		if spoolSnd then
+			spoolSnd:Destroy()
 		end
 	end
 

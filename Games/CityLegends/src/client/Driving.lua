@@ -69,6 +69,7 @@ function Driving.setCamFx(fx: { shake: number?, head: number?, blur: boolean?, f
 end
 Driving.inputEnabled = true
 Driving.menuHold = false -- the main menu is open: the car is braked and held (MainMenu)
+Driving.nitroBlocked = false -- a race marked "no nitrous" (Activities)
 Driving.wet = 0 -- how wet the road is, 0..1 (Weather sets it): less grip, longer stops
 Driving.assist = 1 -- driving assists (Settings): 0 off, 0.5 low, 1 normal
 Driving.smoke = 1 -- tyre smoke (Settings): 0 off, 0.5 low, 1 high
@@ -226,6 +227,24 @@ type State = {
 	launchReady: boolean, -- launch control: brake + throttle held at a stop
 	weightK: number, -- the car's kerb weight over Config.DrivingFeel.WeightRef (CarStats)
 	brakeK: number, -- the brake parts' extra braking force (1 = stock; CarStats.tuneOf)
+	-- (2026-11-06, the workshop) what the parts and the TUNE tab's settings do to the feel
+	shiftK: number, -- shift time
+	steerK: number, -- wheel lock
+	driftK: number, -- how easily the tyres let go
+	launchK: number, -- the launch's pull
+	launchRev: number, -- launch control's revs, 0..1 of the redline
+	bumpK: number, -- how hard a bump kicks
+	downK: number, -- wing downforce added
+	rallyK: number, -- grip on dirt and grass
+	rideDrop: number, -- how far the body sits under its stock height (studs)
+	rideWant: number,
+	airRide: boolean,
+	popTune: string?, -- the ECU's map: pop, crackle, burble, antilag
+	popLoud: boolean, -- a straight pipe, muffler delete or decat
+	popGap: number, -- seconds between pops
+	nitroOn: boolean, -- a bottle is fitted
+	nitroDrain: number,
+	engineLayout: string?, -- a swapped engine's layout
 	lonGReal: number, -- pull-away (+) / braking (-) in real g, last frame
 	surface: string?, -- "hard" | "loose" under the car
 	smokeDust: boolean?,
@@ -346,7 +365,7 @@ end
 -- nitro: Left Ctrl or B, R1 on a gamepad, the N2O button on a phone (held)
 local nitroTouch = false
 local function nitroHeld(): boolean
-	if not Config.DrivingFeel.NitroEnabled or not Driving.inputEnabled or UI.isGarageOpen() then
+	if not (Config.DrivingFeel.NitroEnabled or (state and state.nitroOn)) or Driving.nitroBlocked or not Driving.inputEnabled or UI.isGarageOpen() then
 		return false
 	end
 	if UserInputService:GetFocusedTextBox() == nil and (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.B)) then
@@ -860,6 +879,14 @@ function Driving.getRoot(): BasePart?
 	return if state then state.root else nil
 end
 
+-- the car's own engine stays quiet while something else plays it (the workshop's dyno)
+function Driving.muteEngine(on: boolean)
+	local s = state
+	if s then
+		s.engine:setRunning(not on and s.engineOn and not s.electric)
+	end
+end
+
 function Driving.getModel(): Model?
 	return if state then state.model else nil
 end
@@ -1239,7 +1266,7 @@ local function carKey(s: State, key: Enum.KeyCode)
 			UI.toast(if s.mgear < 0 then "Reverse" else "Neutral")
 		end
 		if s.mgear ~= before and s.mgear > 0 and not s.clutch then
-			s.shiftT = 0.1 -- a quick shift: the drive drops for a moment, then kicks back in
+			s.shiftT = 0.1 * s.shiftK -- a quick shift: the drive drops for a moment, then kicks back in
 			s.nextGear = s.mgear
 		end
 	elseif key == Enum.KeyCode.M then
@@ -1946,6 +1973,21 @@ function Driving.attach(model: Model)
 		launchReady = false,
 		weightK = 1,
 		brakeK = 1,
+		shiftK = 1,
+		steerK = 1,
+		driftK = 0,
+		launchK = 1.15,
+		launchRev = 0.62,
+		bumpK = 1,
+		downK = 0,
+		rallyK = 0,
+		rideDrop = 0,
+		rideWant = 0,
+		airRide = false,
+		popLoud = false,
+		popGap = 0.1,
+		nitroOn = false,
+		nitroDrain = Config.DrivingFeel.NitroDrain,
 		lonGReal = 0,
 		yawRate = 0,
 		groundDist = nil,
@@ -1973,12 +2015,6 @@ function Driving.attach(model: Model)
 		table.insert(s.flameColors, e.Color)
 	end
 	state = s
-	if Config.DrivingFeel.NitroEnabled then
-		nitroHud()
-		if nitroGui then
-			nitroGui.Enabled = true
-		end
-	end
 	-- road roar: the tyres on the tarmac and the air round the car, rising with speed
 	do
 		local roar = Instance.new("Sound")
@@ -2005,18 +2041,59 @@ function Driving.attach(model: Model)
 	end
 	-- the tuned numbers (performance parts), again whenever a part is bought while the car is out
 	local function applyTune()
+		local id = model:GetAttribute("CarId") :: string
 		local parts = CarStats.decodeParts(model:GetAttribute("Parts"))
-		local tuned = CarStats.tunedSpec(model:GetAttribute("CarId") :: string, parts)
-		local tune = CarStats.tuneOf(parts)
+		local setup = CarStats.decodeSetup(model:GetAttribute("Setup"))
+		local tuned = CarStats.tunedSpec(id, parts, setup)
+		local tune = CarStats.tuneOf(CarStats.cleanParts(id, parts))
+		local DFeel = Config.DrivingFeel
 		s.spec = tuned
 		s.topSpeed = Config.mphToSps(tuned.TopSpeed)
 		s.accel = Config.mphToSps(60) / tuned.ZeroToSixty
 		s.powerK, s.dragC = powerFor(tuned)
-		s.weightK = CarStats.of(tuned.Id).weightKg * (1 - tune.weight) / Config.DrivingFeel.WeightRef
-		s.brakeK = 1 + tune.brake
+		local _, kg = CarStats.powerOf(id, parts)
+		s.weightK = kg / DFeel.WeightRef
+		-- (brake bias: a little off at either end)
+		s.brakeK = (1 + tune.brake) * (1 - 0.5 * math.abs((setup.bias or 0.6) - 0.6))
+		s.shiftK = 1 - math.min(tune.shift, 0.7)
+		s.steerK = 1 + tune.steer
+		s.driftK = tune.drift + math.max(0, setup.press or 0) * 0.15 + math.max(0, 0.6 - (setup.bias or 0.6)) * 0.5
+		s.rallyK = tune.rally
+		s.downK = (setup.down or 0) * 0.12 + (if parts.wing then 0.03 else 0)
+		-- launch control: its revs, and how well that suits the drive (a good value gives the best start)
+		local best = (if s.drive == "AWD" then 0.72 elseif s.drive == "FWD" then 0.48 else 0.58) + (if tune.forced == "turbo" then 0.06 else 0)
+		s.launchRev = setup.launch or 0.62
+		s.launchK = 1.05 + 0.15 * math.clamp(1 - math.abs(s.launchRev - best) / 0.25, 0, 1) + tune.launch
+		s.rideWant = -(setup.ride or 0) * 0.2
+		s.bumpK = 1 + math.max(0, -(setup.ride or 0)) * 0.7
+		s.airRide = tune.air
+		s.popTune = tune.pop
+		s.popLoud = tune.loud >= 2 or tune.decat
+		s.popGap = if tune.pop == "crackle" then 0.05 elseif tune.pop == "burble" then 0.14 else 0.08
+		-- a nitrous bottle: its HUD, and how long it lasts
+		s.nitroOn = tune.nitro > 0
+		s.nitroDrain = DFeel.NitroDrain / math.max(tune.nitro, 0.1)
+		if s.nitroOn or DFeel.NitroEnabled then
+			nitroHud()
+		end
+		if nitroGui then
+			nitroGui.Enabled = s.nitroOn or DFeel.NitroEnabled
+		end
+		-- a swapped engine sounds like its layout, and revs to its own limit
+		UI.setSpeedoCar(CarStats.redlineOf(id, parts), spec.Electric == true)
+		local layout = if tune.engine then tune.engine.layout else nil
+		if layout ~= s.engineLayout then
+			s.engineLayout = layout
+			s.engine:destroy()
+			s.engine = Audio.engine(spec.Class, nil, spec.Id, layout)
+			s.engine:setRunning(s.engineOn and not s.electric)
+		end
+		s.engine:setRedline(CarStats.redlineOf(id, parts) * 1000)
+		s.engine:setMods(tune)
 	end
 	applyTune()
 	table.insert(s.connections, model:GetAttributeChangedSignal("Parts"):Connect(applyTune))
+	table.insert(s.connections, model:GetAttributeChangedSignal("Setup"):Connect(applyTune))
 	DashGauges.tcOff = not s.tc
 	s.engine:setRunning(s.engineOn and not s.electric)
 	if s.engineOn and not s.electric then
@@ -2201,11 +2278,36 @@ function Driving.step(dt: number)
 	end
 	s.throttle += (throttle - s.throttle) * math.min(1, dt * 10)
 	-- lifting off at high revs: a short crackle of pops + flames
-	if s.throttleIn > 0.7 and throttle < 0.2 and s.rpm > 0.6 and Config.spsToMph(s.vel.Magnitude) > 30 and not s.electric and not noPops(s) then
-		s.pops = math.random(2, 4)
-		s.popTimer = 0.04
+	if s.throttleIn > 0.7 and throttle < 0.2 and not s.electric then
+		local liftMph = Config.spsToMph(s.vel.Magnitude)
+		local map = s.popTune
+		if map == "crackle" or map == "antilag" then
+			if s.rpm > 0.4 then
+				s.pops = math.random(8, 12)
+				s.popTimer = 0.04
+			end
+		elseif map == "pop" then
+			if s.rpm > 0.45 then
+				s.pops = math.random(4, 6)
+				s.popTimer = 0.04
+			end
+		elseif map == "burble" then
+			if s.rpm > 0.18 and s.rpm < 0.7 then
+				s.pops = math.random(3, 5)
+				s.popTimer = 0.08
+			end
+		elseif s.rpm > 0.6 and liftMph > 30 and not noPops(s) then
+			s.pops = math.random(2, 4)
+			s.popTimer = 0.04
+		end
 	end
 	s.throttleIn = throttle
+
+	-- the ride height (TUNE), and air suspension sinking when parked
+	do
+		local parked = s.airRide and s.vel.Magnitude < 2 and throttle == 0
+		s.rideDrop += (s.rideWant + (if parked then 0.35 else 0) - s.rideDrop) * math.min(1, dt * 1.5)
+	end
 
 	-- ground check
 	rayParams.FilterDescendantsInstances = { s.model, workspace:FindFirstChild("Traffic") :: Instance }
@@ -2221,8 +2323,8 @@ function Driving.step(dt: number)
 			-- seam in the road is soaked up by the springs. No random sideways roll any more.
 			if math.abs(jump) > 0.45 and math.abs(jump) < 4 then
 				local k = math.clamp(math.abs(jump) - 0.45, 0, 1.5) * math.sign(jump)
-				s.pitchVel += k * DF.BumpKick * 20 * s.weightK ^ -DF.WeightBump
-				s.shake = math.max(s.shake, math.min(math.abs(k) * 0.3, 0.35))
+				s.pitchVel += k * DF.BumpKick * 20 * s.weightK ^ -DF.WeightBump * s.bumpK
+				s.shake = math.max(s.shake, math.min(math.abs(k) * 0.3 * s.bumpK, 0.35))
 			end
 		end
 		s.groundDist = hit.Distance
@@ -2239,7 +2341,7 @@ function Driving.step(dt: number)
 		local origin = root.CFrame:PointToWorldSpace(c.at) + up * 1
 		local r = workspace:Raycast(origin, -up * (1 + c.rest + sp.droop + 0.6), rayParams)
 		if r and r.Normal.Y > 0.6 then
-			c.gap = (r.Distance - 1) - c.rest -- above zero: the road is lower than the wheel's rest
+			c.gap = (r.Distance - 1) - (c.rest - s.rideDrop) -- above zero: the road is lower than the wheel's rest
 			c.hit = r.Position
 			sum += c.gap
 			nOn += 1
@@ -2368,7 +2470,7 @@ function Driving.step(dt: number)
 				local rev = speedFrac / gearHi(s.agear)
 				if s.agear < GEARS and rev >= 0.5 + (s.cls.upshift - 0.5) * throttle then
 					s.nextGear = s.agear + 1
-					s.shiftT = if throttle > 0.5 then s.cls.shiftTime else s.cls.shiftTime * 1.6
+					s.shiftT = (if throttle > 0.5 then s.cls.shiftTime else s.cls.shiftTime * 1.6) * s.shiftK
 				elseif s.agear > 1 and rev < (if throttle > 0.8 then 0.55 else 0.28) and speedFrac / gearHi(s.agear - 1) < 0.9 then
 					s.nextGear = s.agear - 1
 					s.shiftT = 0.12
@@ -2383,7 +2485,7 @@ function Driving.step(dt: number)
 			local rev = if s.electric then math.max(speedFrac, 0) else math.max(speedFrac, 0) / gearHi(gearNow)
 			if throttle > 0 and speedFrac < 1 then -- at top speed the limiter holds it there
 				local pull = if s.electric then evPull(math.max(speedFrac, 0)) else torqueCurve(math.max(rev, 0.3)) * gearMul(gearNow)
-				a += s.accel * s.powerK * throttle * pull * (if s.launch > 0 then 1.15 else 1)
+				a += s.accel * s.powerK * throttle * pull * (if s.launch > 0 then s.launchK else 1)
 			elseif throttle == 0 and fwdSpeed > 2 then
 				a -= 3 + 6 * math.min(rev, 1) -- engine braking (regen on an electric car)
 			end
@@ -2452,7 +2554,9 @@ function Driving.step(dt: number)
 			else
 				a += drag + DF.NitroAccel * math.clamp((DF.NitroTop - speedFrac) / (DF.NitroTop - 1), 0, 1)
 			end
-			s.nitro = math.max(0, s.nitro - DF.NitroDrain * dt)
+			s.nitro = math.max(0, s.nitro - s.nitroDrain * dt)
+		elseif s.nitroOn then
+			s.nitro = math.min(1, s.nitro + DF.NitroFillIdle * dt) -- (a fitted bottle refills slowly)
 		end
 		fwdSpeed += a * dt
 
@@ -2461,14 +2565,14 @@ function Driving.step(dt: number)
 		local speedAbs = math.abs(fwdSpeed)
 		local steerRate = (if math.abs(steerIn) > math.abs(s.steer) then 4.2 else 7) / (1 + speedAbs / DF.SteerSlowdown)
 		s.steer += (steerIn - s.steer) * math.min(1, dt * steerRate)
-		local maxAngle = math.rad(36) / (1 + (speedAbs / 70) ^ 1.3)
+		local maxAngle = math.rad(36) * s.steerK / (1 + (speedAbs / 70) ^ 1.3)
 		local angle = s.steer * maxAngle
 		local yawRate = fwdSpeed * math.tan(angle) / s.wheelbase
 		-- (2026-11-03, realistic physics) real tyre grip in g (the car's handling, a little help from
 		-- GameGrip), lower for a heavy car, lower in the wet; aero downforce grows with speed squared
 		-- (a lot on supercars, a little on the others), so a fast car is planted at speed
 		local gripG = (DF.GripBase + DF.GripHandling * handling) * DF.GameGrip * s.weightK ^ -DF.WeightGrip
-		gripG *= 1 + (DF.Downforce[s.spec.Class] or 0) * math.clamp(speedAbs / s.topSpeed, 0, 1.1) ^ 2
+		gripG *= 1 + ((DF.Downforce[s.spec.Class] or 0) + s.downK) * math.clamp(speedAbs / s.topSpeed, 0, 1.1) ^ 2
 		gripG *= 1 - DF.WetGripLoss * Driving.wet
 		local latA = gripG * DF.G -- the sideways pull the tyres have (studs/s^2)
 		-- weight transfer: braking loads the front (it turns in harder), pulling away loads the rear
@@ -2483,7 +2587,7 @@ function Driving.step(dt: number)
 				loss += 0.2
 			end
 			if s.drive == "AWD" then
-				loss *= DF.AwdPowerOversteer -- all four wheels share the power
+				loss *= if s.spec.RearBias then DF.AwdRearBias else DF.AwdPowerOversteer -- all four wheels share the power
 			end
 			loss = math.min(loss, 0.7)
 		end
@@ -2554,6 +2658,10 @@ function Driving.step(dt: number)
 		-- away, so a slide keeps going until you catch it
 		local grip = if handbrake then 1.4 else 4.5 + 5 * handling
 		grip *= 1 - loss
+		grip *= 1 - math.min(s.driftK, 0.6) * 0.4 -- (drift tyres, a drift kit, high pressures)
+		if s.surface == "loose" then
+			grip *= 1 + s.rallyK
+		end
 		-- braking hard mid-corner: the rear goes light and can step out
 		grip *= 1 - DF.TrailBrakeLoose * brakeLoad * math.abs(s.steer)
 		grip *= 1 - DF.WetGripLoss * Driving.wet
@@ -2791,7 +2899,7 @@ function Driving.step(dt: number)
 		elseif s.electric then
 			target = 0.1 + 0.85 * frac -- the motor's speed: no gears, no limiter
 		elseif s.launchReady then
-			target = 0.62 -- launch control holds the revs, steady
+			target = s.launchRev -- launch control holds the revs, steady
 			s.rpm = target
 		elseif s.gear == "N" then
 			target = 0.12
@@ -2818,8 +2926,13 @@ function Driving.step(dt: number)
 	if effGear and s.soundGear and effGear ~= s.soundGear and math.abs(fs) > 2 and s.engineOn then
 		local isUp = effGear > s.soundGear
 		s.engine:shift(isUp, math.clamp(0.12 + 0.88 * frac / gearHi(effGear), 0.12, 1.02))
-		if isUp and throttle > 0.5 and not noPops(s) then
-			exhaustPop(s, 1)
+		if isUp and throttle > 0.5 and (s.popTune or not noPops(s)) then
+			exhaustPop(s, if s.popLoud then 1.4 else 1)
+		end
+		-- the crackle map also crackles on the way down the gears
+		if not isUp and (s.popTune == "crackle" or s.popTune == "antilag") then
+			s.pops = math.max(s.pops, 3)
+			s.popTimer = 0.04
 		end
 	end
 	s.soundGear = effGear
@@ -2847,7 +2960,7 @@ function Driving.render(dt: number)
 	-- each wheel moves up and down on its spring to stay on the road (its travel smoothed a touch)
 	local sp = s.susp
 	for _, c in s.corners do
-		local want = math.clamp(-c.gap, -sp.droop, sp.bump)
+		local want = math.clamp(-c.gap + s.rideDrop, -sp.droop, sp.bump)
 		c.travel += (want - c.travel) * math.min(1, dt * 30)
 		local m = c.motor
 		local lift = CFrame.new(m.C0.Rotation:Inverse() * Vector3.new(0, c.travel, 0))
@@ -3162,10 +3275,20 @@ function Driving.render(dt: number)
 		s.popTimer -= dt
 		if s.popTimer <= 0 then
 			s.pops -= 1
-			s.popTimer = 0.07 + math.random() * 0.12
-			exhaustPop(s, 0.6 + math.random() * 0.4)
-			if math.random() < 0.6 then
-				Audio.backfire()
+			if s.popTune then
+				s.popTimer = s.popGap + math.random() * s.popGap * 1.2
+				local k = 0.6 + math.random() * 0.4
+				s.engine:pop(k)
+				-- (burbles are soft: no flame)
+				if s.popTune ~= "burble" then
+					exhaustPop(s, k * (if s.popLoud then 1.5 else 1))
+				end
+			else
+				s.popTimer = 0.07 + math.random() * 0.12
+				exhaustPop(s, 0.6 + math.random() * 0.4)
+				if math.random() < 0.6 then
+					Audio.backfire()
+				end
 			end
 		end
 	end

@@ -337,6 +337,7 @@ end
 
 local gridHold = false -- (the car is held on the start line until GO)
 local function endRun()
+	Driving.nitroBlocked = false
 	if gridHold then
 		gridHold = false
 		Driving.loadHold = false
@@ -435,6 +436,11 @@ local function startRace(r: ActivityData.Race, t0in: number, count: number, grid
 	cardTitle.Text = (if count >= 2 then "RACE · " .. count .. " RACERS · " else "RACE · ") .. string.upper(r.name)
 	cardTime.Text = fmtTime(0)
 	cardSub.Text = `Gold {fmtTime(r.gold)} · Silver {fmtTime(r.silver)}`
+	-- (2026-11-06) some races are run without nitrous
+	Driving.nitroBlocked = Config.Activities.NoNitrous[r.id] == true
+	if Driving.nitroBlocked then
+		cardSub.Text ..= " · No nitrous"
+	end
 	showCheckpoints()
 	local function go()
 		countdown(3, function()

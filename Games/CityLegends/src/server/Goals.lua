@@ -277,6 +277,9 @@ function Goals.claimStreak(player: Player): { [string]: any }
 	g.Streak.Day = day
 	g.Streak.Last = os.time()
 	profile.LastDaily = g.Streak.Last
+	if ctx and ctx.dropPart then
+		ctx.dropPart(player, "daily")
+	end
 	task.spawn(PlayerData.save, player)
 	local nextDay, nextIn = Goals.streak(player)
 	result.next = nextDay

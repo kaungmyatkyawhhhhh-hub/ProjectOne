@@ -361,6 +361,10 @@ local ctx = {
 	end,
 	-- something a goal counts happened (Goals: Legends Path, daily tasks)
 	note = Goals.note,
+	-- (2026-11-06) maybe a free part, after the daily streak, a race gold or a bank job
+	dropPart = function(player: Player, source: string)
+		return CarLevels.rollDrop(player, source)
+	end,
 	goals = Goals,
 }
 Goals.init(ctx)
@@ -387,7 +391,7 @@ Customs.init(ctx)
 -- Rewards (the daily reward, gifts, the wheels; it replaced the casino, 2026-11-03)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
 Luxe.init(ctx)
-require(script.Parent:WaitForChild("Rewards")).init(ctx, { Goals = Goals, Towers = Towers, Hotel = Hotel, Luxe = Luxe })
+require(script.Parent:WaitForChild("Rewards")).init(ctx, { Goals = Goals, Towers = Towers, Hotel = Hotel, Luxe = Luxe, CarLevels = CarLevels, PartData = require(Shared:WaitForChild("PartData")) })
 require(script.Parent:WaitForChild("GemShowcase")).init(ctx, Police, Luxe)
 
 local function despawn(player: Player)

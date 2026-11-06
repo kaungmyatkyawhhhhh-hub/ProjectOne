@@ -143,6 +143,7 @@ handlers.raceFinish = function(player, clientTime)
 	ctx.note(player, "races", 1)
 	if medal == "Gold" then
 		ctx.note(player, "gold", 1)
+		ctx.dropPart(player, "gold")
 	end
 	-- racing other players: the place, and its share of the pot
 	local place, racers, pot = nil, 1, 0

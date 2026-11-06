@@ -530,7 +530,7 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 				-- (a car on the middle row of the middle reel, the rest a spread of prizes)
 				local pz = if k == 2 and r == math.ceil(n / 2) then prizes[#prizes] else prizes[((r * 4 + k * 3) % #prizes) + 1]
 				local card = Instance.new("Frame")
-				card.BackgroundColor3 = if pz.car then Color3.fromRGB(110, 210, 255) elseif pz.flex then Color3.fromRGB(200, 140, 255) elseif pz.spin then Color3.fromRGB(255, 130, 190) elseif pz.weight <= 2 then Color3.fromRGB(255, 210, 80) else Color3.fromRGB(200, 240, 90)
+				card.BackgroundColor3 = if pz.car then Color3.fromRGB(110, 210, 255) elseif pz.flex then Color3.fromRGB(200, 140, 255) elseif pz.part then Color3.fromRGB(255, 170, 70) elseif pz.spin then Color3.fromRGB(255, 130, 190) elseif pz.weight <= 2 then Color3.fromRGB(255, 210, 80) else Color3.fromRGB(200, 240, 90)
 				card.Position = UDim2.new(0, 6, (k - 1) / 3, 6)
 				card.Size = UDim2.new(1, -12, 1 / 3, -12)
 				card.Parent = col
@@ -543,7 +543,7 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 				t.TextScaled = true
 				t.Font = Enum.Font.GothamBlack
 				t.TextColor3 = Color3.fromRGB(30, 20, 10)
-				t.Text = if pz.car then "CAR" elseif pz.flex then "JEWEL" elseif pz.spin then "+1 SPIN" elseif pz.cash >= 1000000 then string.format("$%gM", pz.cash / 1000000) else string.format("$%gK", pz.cash / 1000)
+				t.Text = if pz.car then "CAR" elseif pz.flex then "JEWEL" elseif pz.part then "PART" elseif pz.spin then "+1 SPIN" elseif pz.cash >= 1000000 then string.format("$%gM", pz.cash / 1000000) else string.format("$%gK", pz.cash / 1000)
 				t.Parent = card
 				local tp = Instance.new("UIPadding")
 				tp.PaddingTop = UDim.new(0.18, 0)
@@ -711,7 +711,7 @@ local function wheelOdds(w: any): { { [string]: any } }
 	end
 	local out = {}
 	for _, p in w.prizes do
-		table.insert(out, { cash = p.cash, car = p.car == true, spin = p.spin == true, flex = p.flex == true, carCash = p.carCash, flexCash = p.flexCash, percent = math.floor(p.weight / total * 1000 + 0.5) / 10 })
+		table.insert(out, { cash = p.cash, car = p.car == true, spin = p.spin == true, flex = p.flex == true, part = p.part, carCash = p.carCash, flexCash = p.flexCash, percent = math.floor(p.weight / total * 1000 + 0.5) / 10 })
 	end
 	return out
 end
@@ -1125,6 +1125,9 @@ handlers.spin = function(player, arg, d, profile)
 				reel.cash = prize.flexCash
 				amount += prize.flexCash
 			end
+		elseif prize.part then
+			local partId = if deps.CarLevels then deps.CarLevels.givePart(player, prize.part) else nil
+			reel.part = if partId then deps.PartData.Parts[partId].name else prize.part .. " part"
 		elseif prize.spin then
 			extraSpins += 1
 			reel.spin = true

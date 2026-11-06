@@ -68,7 +68,7 @@ local REAL_WB: { [string]: number } = {
 	suzaki_swift = 2.45, toyoka_belta = 2.55, kio_ev6 = 2.9, byt_seal = 2.92,
 	toyoka_camri = 2.825, toyoka_crown = 2.85, toyoka_alfard = 3.0, toyoka_lc200 = 2.85, nisun_350z = 2.65,
 	bnw_530i = 2.975, bnw_540i = 2.975, bentz_e300 = 2.939, bentz_e400 = 2.939,
-	 bnw_330i_g20 = 2.851,
+	 bnw_330i_g20 = 2.851, dearb_focus_rs = 2.65,
 	bnw_m3_e92 = 2.761, bnw_m3_f80 = 2.812, bnw_m4_f82 = 2.812, bnw_m5_e60 = 2.889, bnw_m6_v10 = 2.78, bentz_cla45 = 2.699,
 	bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
 	dodger_challenger = 2.946, bnw_x6 = 2.975, toyoka_lc300 = 2.85, lexis_lx700 = 2.85, bentz_gle53 = 2.915, byt_u8 = 3.05, bentz_g63 = 2.89,

@@ -758,6 +758,7 @@ function Bank.init(ctx: any, Police: any)
 								PlayerData.addCash(player, loot)
 								ctx.grantXp(player, B.DeliverXp, "bank")
 								ctx.note(player, "bank", 1)
+								ctx.dropPart(player, "heist")
 								task.spawn(PlayerData.save, player)
 								BankEvent:FireClient(player, { kind = "paid", amount = loot })
 							end

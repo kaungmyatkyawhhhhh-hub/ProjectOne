@@ -15,6 +15,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
+local PartData = require(Shared:WaitForChild("PartData"))
 
 export type Profile = {
 	Cash: number,
@@ -45,11 +46,16 @@ export type Profile = {
 	Goals: { [string]: any }, -- Legends Path, the daily streak and today's tasks (Goals.lua checks it)
 	Brands: { [string]: number }, -- brand XP per brand (Brands.lua)
 	-- car levels (2026-11-03, CarLevels.lua): per car id its level (1-50), XP inside that level, unspent
-	-- Car Points, and its performance parts ({ part = stage })
+	-- Car Points, and its performance parts ({ slot = part id }, PartData; saves from before 2026-11-06
+	-- hold { part = stage }, moved when they load), the spare parts ({ part id = { price factor of each
+	-- spare } }), the TUNE tab's settings and the builds per car (all CarLevels checks)
 	CarLevels: { [string]: number },
 	CarXP: { [string]: number },
 	CarCP: { [string]: number },
-	CarParts: { [string]: { [string]: number } },
+	CarParts: { [string]: { [string]: string } },
+	PartBag: { [string]: { number } },
+	CarSetup: { [string]: { [string]: number } },
+	CarBuilds: { [string]: any },
 	Rewards: { [string]: any }, -- Legends Rewards: gifts claimed, wheel spins, codes (Rewards.lua checks it)
 	LastSeen: number, -- os.time() of the last save (0 = never: a save from before 2026-11-03)
 	Away: number, -- (not saved) seconds since the last session ended, from LastSeen (0 = unknown)
@@ -229,6 +235,9 @@ local function defaultProfile(): Profile
 		CarXP = {},
 		CarCP = {},
 		CarParts = {},
+		PartBag = {},
+		CarSetup = {},
+		CarBuilds = {},
 		Rewards = {},
 		LastSeen = 0,
 		Away = 0,
@@ -365,15 +374,54 @@ function PlayerData.load(player: Player): Profile?
 			if type(saved.CarParts) == "table" then
 				for id, parts in saved.CarParts do
 					if type(id) == "string" and Cars.ById[id] and type(parts) == "table" then
+						-- (2026-11-06) an old save's Street / Sport / Race parts become their new parts,
+						-- installed; a save already moved reads as it is
 						local clean = {}
-						for key, stage in parts do
-							if type(key) == "string" and CarStats.partAllowed(id, key) and type(stage) == "number" and stage >= 1 and stage <= #Config.CarParts.Stages then
-								clean[key] = math.floor(stage)
+						for slot, partId in PartData.migrate(parts) do
+							if CarStats.partAllowed(id, partId) then
+								clean[slot] = partId
 							end
 						end
 						if next(clean) then
 							profile.CarParts[id] = clean
 						end
+					end
+				end
+			end
+			if type(saved.PartBag) == "table" then
+				for partId, list in saved.PartBag do
+					if type(partId) == "string" and PartData.Parts[partId] and type(list) == "table" then
+						local clean = {}
+						for _, k in list do
+							if type(k) == "number" and k == k and k >= 1 and k <= Config.CarParts.CashMax and #clean < 99 then
+								table.insert(clean, k)
+							end
+						end
+						if #clean > 0 then
+							profile.PartBag[partId] = clean
+						end
+					end
+				end
+			end
+			if type(saved.CarSetup) == "table" then
+				for id, setup in saved.CarSetup do
+					if type(id) == "string" and Cars.ById[id] then
+						local clean = CarStats.cleanSetup(setup)
+						if next(clean) then
+							profile.CarSetup[id] = clean
+						end
+					end
+				end
+			end
+			if type(saved.CarBuilds) == "table" then
+				for id, b in saved.CarBuilds do
+					if type(id) == "string" and Cars.ById[id] and type(b) == "table" and type(b.list) == "table" then
+						local list = {}
+						for n = 1, PartData.MaxBuilds do
+							list[n] = if type(b.list[n]) == "table" then PartData.migrate(b.list[n]) else {}
+						end
+						local active = if type(b.active) == "number" and list[b.active] then b.active else 1
+						profile.CarBuilds[id] = { active = active, list = list }
 					end
 				end
 			end
@@ -567,6 +615,9 @@ local function payloadOf(profile: Profile, session: { [string]: any }?): { [stri
 		CarXP = profile.CarXP,
 		CarCP = profile.CarCP,
 		CarParts = profile.CarParts,
+		PartBag = profile.PartBag,
+		CarSetup = profile.CarSetup,
+		CarBuilds = profile.CarBuilds,
 		Rewards = profile.Rewards,
 		LastSeen = profile.LastSeen,
 		Claimed = profile.Claimed,

@@ -59,12 +59,12 @@ Config.Knock = {
 -- button, in place of SETTINGS). A new player picks 1 of 3 starter cars; the world map fast travels
 -- to the venues (server-checked, not while wanted or in a race / job / heist, a cooldown between)
 Config.Menu = {
-	-- (owner, 2026-11-03: the Chasor, the 350Z and the A45 S; until the A45 S has its model the
-	-- Camaro stands in: `fallback`)
+	-- (owner, 2026-11-06: the 350Z, the 330i and the Focus RS; until the Focus has its model the 540i
+	-- stands in: `fallback`. The Camaro stood in for the A45 S and was far too fast for a free car)
 	StarterChoices = {
-		{ id = "toyoka_chaser", feel = "Drifts easily" },
 		{ id = "nisun_350z", feel = "Grippy sports car" },
-		{ id = "bentz_a45s", feel = "Small, quick, all-wheel drive", fallback = "chevo_camaro", fallbackFeel = "Loud and fast" },
+		{ id = "bnw_330i_g20", feel = "Quick, comfy sedan" },
+		{ id = "dearb_focus_rs", feel = "All-wheel drive, drift mode", fallback = "bnw_540i", fallbackFeel = "Fast and comfy" },
 	},
 	FastTravelCooldown = 30, -- seconds between trips
 	-- the store (Playbook money rules): names and exact effects here, prices read from Roblox.
@@ -522,6 +522,7 @@ Config.DrivingFeel = {
 	} :: { [string]: boolean },
 	FwdUndersteer = 0.3, -- front drive: flooring it in a corner pushes the nose wide
 	AwdPowerOversteer = 0.35, -- an all-wheel-drive car gets this share of rear-drive power oversteer
+	AwdRearBias = 0.8, -- the same for one that sends more to the rear (Cars `RearBias`: a drift mode feel)
 	-- drifting: hold the handbrake into a corner, then balance it on the throttle and steering
 	DriftMinMph = 22, -- slower than this it's just a slide
 	DriftEnter = 0.2, -- slip angle (radians) that starts a drift
@@ -547,6 +548,7 @@ Config.DrivingFeel = {
 	NitroDrain = 0.25, -- a full bottle lasts 4 seconds
 	NitroFillSpeed = 0.03, -- per second at 140 mph and up (from 60 mph)
 	NitroFillPass = 0.08, -- per close pass
+	NitroFillIdle = 0.03, -- per second, always (2026-11-06: a fitted bottle refills slowly)
 	NitroFillDrift = 0.07, -- per second of drifting
 	NitroFov = 10,
 	NitroBlur = 1.5,
@@ -568,6 +570,12 @@ Config.Sounds = {
 	-- engine set by the verified "Roblox Resources" group (public domain)
 	Engine = "rbxassetid://80317022777602", -- Car-Engine-Loop (pitch follows RPM)
 	EngineStart = "rbxassetid://78270463799678", -- Engine-Start
+	-- (2026-11-06) parts' sounds, all already in the game: pops and crackles for a car with none of its
+	-- own (the SVJ's), a turbo's whine and a blow-off (the Bugattis')
+	SharedPops = "rbxassetid://125121319222420",
+	SharedCrackle = "rbxassetid://128716617727916",
+	SharedTurbo = "rbxassetid://72711797703242",
+	SharedBlowOff = "rbxassetid://95497630494219",
 	-- per-car engines (verified creators); a car without one uses Engine above
 	Engine_ferrara_458 = "rbxassetid://130398079560929", -- "Ferrari Engine", Roblox Sim Racing League
 	-- ProSoundEffects (Roblox's official SFX partner, public domain)
@@ -877,6 +885,7 @@ Config.Activities = {
 	DuelTimeout = 180,
 	DuelPot = 10000,
 	DuelSecondCash = 1500,
+	NoNitrous = { riv_mountain = true }, -- (2026-11-06) races run without nitrous: their card says so
 	-- the Racing Hub (owner, 2026-11-06: "collect all of those racing areas and make a racing hub at the
 	-- Old Rock place"): every race's ring is on the palace square; when its lobby starts you're taken to
 	-- the race's start line
@@ -1324,6 +1333,7 @@ Config.Rewards = {
 				{ cash = 60000, weight = 4 },
 				{ flex = true, flexMax = 120000, flexCash = 50000, weight = 2.5 },
 				{ cash = 100000, weight = 2 },
+				{ part = "Rare", weight = 1.5 }, -- (2026-11-06) a free part of this rarity, into My Parts
 				{ cash = 200000, weight = 1 },
 				{ car = true, carTiers = { "Mid" }, carMax = 120000, carCash = 120000, weight = 0.5 },
 			},
@@ -1346,9 +1356,11 @@ Config.Rewards = {
 				{ flex = true, flexMax = 1000000, flexCash = 300000, weight = 4 },
 				{ cash = 400000, weight = 3 },
 				{ cash = 750000, weight = 2 },
+				{ part = "Epic", weight = 2 },
 				{ cash = 1500000, weight = 1.5 },
 				{ car = true, carTiers = { "Mid", "High" }, carMax = 600000, carCash = 500000, weight = 1 },
 				{ cash = 5000000, weight = 0.5 },
+				{ part = "Legendary", weight = 0.4 },
 			},
 		},
 	},
@@ -1684,66 +1696,40 @@ function Config.carXpFor(level: number): number
 	return math.floor(L.XpBase + L.XpStep * (math.max(1, level) - 1))
 end
 
--- Performance parts (owner: "8 parts", 3 stages, from car level 1 in any order; paid with the car's
--- CP or cash, the server checks and saves). Each stage replaces the one before; the numbers are what
--- that stage does in all: accel = 0-60 time cut, speed = top speed added, grip = Handling added,
--- brake = braking force added, weight = weight taken off (shares), pi = PI added after the rest
--- (the flywheel's is below 0). They raise the car's PI and can move it up a class.
--- (owner, 2026-11-03: "you can't just upgrade engines like that, you have to press engine and then
--- upgrade these") Engine is a menu of its own 5 parts (Groups.engine), with the racing games' rules:
---   * Intake & Manifold works with the exhaust: past the exhaust's stage it gives half (IntakeOverExhaust)
---   * Ignition & Fuel is cheap; Race Camshafts without Race Fuel flatline (count as Sport)
---   * a lighter Flywheel revs quicker but lowers the PI
---   * Displacement gives the most power and PI and costs the most: fit it last
+-- Performance parts (owner, 2026-11-06: "make the upgrading area way better"): the parts, slots and
+-- engine swaps are in shared/PartData.lua, the numbers are worked out in CarStats. Here: the class rule
+-- and the money.
 Config.CarParts = {
-	-- the parts screen's rows ("engine" opens its group)
-	Menu = { "engine", "turbo", "exhaust", "gearbox", "tyres", "brakes", "suspension", "weight" },
-	-- every part key (saved, on the car's "Parts" attribute)
-	Keys = { "intake", "fuel", "flywheel", "cams", "displacement", "turbo", "exhaust", "gearbox", "tyres", "brakes", "suspension", "weight" },
-	Groups = {
-		engine = { name = "Engine", icon = "⚙", parts = { "intake", "fuel", "flywheel", "cams", "displacement" } },
-	},
-	Stages = { "STREET", "SPORT", "RACE" },
-	IntakeOverExhaust = 0.5, -- an intake above the exhaust's stage gives this share of the extra
 	-- (owner, 2026-11-03: "S2 and R and X cars that are already in that range stock from the
 	-- dealership, not tuneable except tyres, gearbox, suspension, exhaust, otherwise it would be too
-	-- overpowered"; looks at Legends Customs aren't limited)
+	-- overpowered"; PartData.Slots `top`; sound parts are fine on them, looks at Legends Customs aren't
+	-- limited)
 	TopClasses = { S2 = true, R = true, X = true }, -- by the car's stock class
-	TopAllowed = { tyres = true, gearbox = true, suspension = true, exhaust = true },
-	Cp = { 2, 5, 10 }, -- CP for each stage (owner: about 2 / 5 / 10)
-	Cash = { 1500, 4000, 10000 }, -- cash for each stage, times the car's price factor:
-	CashRef = 50000, --   (car price / CashRef) ^ 0.5, from 1 to CashMax
+	-- a part's price: its list price * ListShare * the car's price factor. The factor is
+	-- (car price / CashRef) ^ 0.5, from 1 to CashMax, so the list price is what the dearest cars pay.
+	-- An engine swap pays its list price * the factor (the prompt's $150K-3M are for the cheapest cars)
+	ListShare = 0.1,
+	CashRef = 50000,
 	CashMax = 10,
-	-- (cp / cashK: a part's own CP per stage and cash multiplier, when not the usual)
-	Parts = {
-		intake = { name = "Intake & Manifold", icon = "⚙", hint = "Breathes with the exhaust: past the exhaust's stage it gives half", stages = { { accel = 0.01, speed = 0.005 }, { accel = 0.02, speed = 0.01 }, { accel = 0.035, speed = 0.015 } } },
-		fuel = { name = "Ignition & Fuel System", icon = "⚙", hint = "Cheap power. Race Camshafts need Race Fuel", cp = { 1, 2, 4 }, cashK = 0.5, stages = { { accel = 0.005 }, { accel = 0.01 }, { accel = 0.02 } } },
-		flywheel = { name = "Flywheel", icon = "⚙", hint = "Revs quicker, but lowers the PI a little", cp = { 1, 3, 6 }, cashK = 0.6, stages = { { accel = 0.005, weight = 0.003, pi = -3 }, { accel = 0.01, weight = 0.006, pi = -6 }, { accel = 0.015, weight = 0.01, pi = -10 } } },
-		cams = { name = "Camshafts, Pistons & Valves", icon = "⚙", hint = "High-rev power. Race needs Race Fuel or it flatlines", stages = { { accel = 0.01, speed = 0.005 }, { accel = 0.02, speed = 0.01 }, { accel = 0.035, speed = 0.02 } } },
-		displacement = { name = "Displacement", icon = "⚙", hint = "The most power and the most PI: fit it last", cp = { 4, 8, 15 }, cashK = 2, stages = { { accel = 0.02, speed = 0.01 }, { accel = 0.04, speed = 0.015 }, { accel = 0.06, speed = 0.025 } } },
-		turbo = { name = "Turbo", icon = "🌀", stages = { { accel = 0.02, speed = 0.01 }, { accel = 0.04, speed = 0.02 }, { accel = 0.06, speed = 0.03 } } },
-		exhaust = { name = "Exhaust", icon = "💨", stages = { { accel = 0.01, speed = 0.005 }, { accel = 0.02, speed = 0.01 }, { accel = 0.035, speed = 0.015 } } },
-		gearbox = { name = "Gearbox", icon = "⚙", stages = { { accel = 0.015, speed = 0.01 }, { accel = 0.03, speed = 0.02 }, { accel = 0.05, speed = 0.03 } } },
-		tyres = { name = "Tyres", icon = "◎", stages = { { grip = 0.02, brake = 0.03 }, { grip = 0.04, brake = 0.06 }, { grip = 0.07, brake = 0.1 } } },
-		brakes = { name = "Brakes", icon = "◉", stages = { { brake = 0.08 }, { brake = 0.16 }, { brake = 0.25 } } },
-		suspension = { name = "Suspension", icon = "⇕", stages = { { grip = 0.015 }, { grip = 0.03 }, { grip = 0.05 } } },
-		weight = { name = "Weight Reduction", icon = "▽", stages = { { weight = 0.03 }, { weight = 0.06 }, { weight = 0.1 } } },
+	SellShare = 0.5, -- selling a spare part back: this share of what it was paid for
+	-- rare drops: the chance of a free part (it comes fully paid: it fits any car with no fee) and
+	-- how the rarity is picked (no engine swaps). Shown in the wheels' ODDS
+	Drops = {
+		Chance = { daily = 0.2, gold = 0.1, heist = 0.25 },
+		Rarity = { Common = 46, Uncommon = 32, Rare = 16, Epic = 5, Legendary = 1 },
 	},
 }
 
--- the cash price of a part stage on a car of this price (`key`: the part, for its own multiplier)
-function Config.partCash(stage: number, carPrice: number, key: string?): number
+-- a car's price factor for parts
+function Config.partK(carPrice: number): number
 	local P = Config.CarParts
-	local k = math.clamp((math.max(carPrice, 1) / P.CashRef) ^ 0.5, 1, P.CashMax)
-	local def = if key then P.Parts[key] else nil
-	return math.floor((P.Cash[stage] or 0) * k * ((def and def.cashK) or 1) / 100 + 0.5) * 100
+	return math.clamp((math.max(carPrice, 1) / P.CashRef) ^ 0.5, 1, P.CashMax)
 end
 
--- the CP price of a part stage
-function Config.partCp(stage: number, key: string?): number
-	local P = Config.CarParts
-	local def = if key then P.Parts[key] else nil
-	return ((def and def.cp) or P.Cp)[stage] or 0
+-- a part's price at a price factor (rounded to $100); `swap`: an engine swap
+function Config.partCash(list: number, k: number, swap: boolean?): number
+	local share = if swap then 1 else Config.CarParts.ListShare
+	return math.floor(list * share * k / 100 + 0.5) * 100
 end
 
 -- Brand levels (owner, 2026-10-30, from the research: Midnight Racing's manufacturer levels):
