@@ -64,7 +64,7 @@ The Mountain Road now carries straight on into the West Switchbacks' top bend (x
 
 ## Fake model names (2026-11-06, `Prompts/Rename car models (fake model names).md`)
 Every car and line has a fake name, ids and saves are the same. 95 cars, the 2 Origine trims, all 72 lines. Hemi is Ironclad (brand XP saved under HEMI moves over, `Cars.OldBrands`). Owner, same day: the **LP670 SV is ZV too** (`Enfurecido L147 ZV`, not the prompt's L147 Veloce). X6 model is the G06 (notes: 2020 car), so `Bavarica Werkz G06 Sport`. Picture: [[Fake names - side lettering.jpg]].
-- **Other text:** credits, the Supra dial's word (JZA80), the PHANTOM W16 billboards (NOCTURNE V12; baked billboards in the place keep the old text until a re-bake: in `Workspace.City`, the game's map). A BMW label in the E300's dash cleared.
+- **Other text:** credits, the Supra dial's word (JZA80), the PHANTOM W16 billboards in the code (NOCTURNE V12). A BMW label in the E300's dash cleared. A search of all text in Workspace found none of the old words; `ServerStorage.OldMap` still has them, players never see it.
 - **Real names in pictures (owner: "remove every new imports car model if they have their actual car brands name"):** 21 colour pictures repainted and swapped in `CarModels`: `tools/retex.py`, `tools/logo_paint/retex.json` (old and new ids, so it can go back). BUGATTI on the Veyron and Chiron brakes, rim labels, chassis plates, dash; Lamborghini and Carboceramici on the SVJ brakes and engine; the LP560's rear badges (now L140 SPYDER); the LP650's LP 650-4 deck plates (now L147 ROADSTER); the Urus lamp text.
 - **Real names in the models' shapes:** can't be painted. `src/client/SideDecals.lua` + `CarSkin.addPatches`: covers with our name on, built with each car. Wing of the Eclair Pure (BUGATTI, now VELOCITÉ NOIR), STO doors (black pointed plate, VTZ) and rear, SV behind the LP750's door (plate, ZV), small SV on the LP670, SV in the ZVX 63's red lid panels (ZVX), Veyron EB / 16.4 engine plates, EB fuel caps on two Veyrons, Lamborghini script on the LP570 and LB744 engine covers (ENFURECIDO).
 - **Side lettering:** ZV, ZVX, ZVX 63 as decals on the doors (`tools/side_decals.py` cuts them from the design sheets).
@@ -73,7 +73,7 @@ Every car and line has a fake name, ids and saves are the same. 95 cars, the 2 O
 - The big SV on the LP670's rear wings: letters are in the mesh and the wing curves too much for a flat cover. Needs the letters cut in Blender and the mesh uploaded (the road mesh route; the owner hasn't okayed that upload for cars).
 - ENFURECIDO strips on the LP570 and LB744 engines: placed, not looked at (Studio was minimized). ZVX and ZVX 63 door lettering: seen before the last move, no phone-size shots yet.
 - Not checked: dealer, garage, market, Customs and races on screen. The names come from `Cars.lua` and the comparison of old and new car tables is clean (201 cars, same ids and stats, 0 faults). 2 players not tested.
-- The STO's trim picture (84462166852270) is refused by Roblox ("not approved"), so its window frames and mirrors show pale. 10 more car pictures fail to load the same way. They were like that before this work.
+- The STO's trim picture (84462166852270) is refused by Roblox ("not approved"), so its window frames and mirrors show pale. 10 more car pictures failed to load when read from Studio, not looked into. All of them were like that before this work.
 
 ## Tonight's run: start here (written 2026-11-06)
 **Done, step by step:**
