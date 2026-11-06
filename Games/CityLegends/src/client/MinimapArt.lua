@@ -5,7 +5,7 @@ return {
 	tiles = {
 		{ col = 0, row = 0, image = "rbxassetid://80140386466769" },
 		{ col = 0, row = 1, image = "rbxassetid://136255829956640" },
-		{ col = 0, row = 2, image = "rbxassetid://122203520307587" },
+		{ col = 0, row = 2, image = "rbxassetid://118580036072506" },
 		{ col = 0, row = 3, image = "rbxassetid://119429271093594" },
 		{ col = 0, row = 4, image = "rbxassetid://99505644802706" },
 		{ col = 1, row = 0, image = "rbxassetid://90218139590880" },

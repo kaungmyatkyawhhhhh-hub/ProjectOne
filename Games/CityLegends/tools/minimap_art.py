@@ -189,6 +189,14 @@ def roads_layer(draw):
             if r["name"] == "West Switchbacks":
                 mid = [[q[0], q[1], q[2], q[3], q[4], 0, q[5], q[5]] for q in hp["s"]]
                 r["s"] = r["s"][:hp["from"]] + mid + r["s"][hp["to"] + 1:]
+    # the straight link (owner, 2026-11-06; tools/riviera/StraightLink.luau): the top of the West Switchbacks
+    # carries straight on into the Mountain Road, no bend back
+    for r in data["roads"]:
+        if r["name"] == "West Switchbacks":
+            s = r["s"]
+            k = max(i for i, q in enumerate(s) if 10900 < q[0] < 10925 and q[2] < -170)
+            q = s[k]
+            r["s"] = s[:k + 1] + [[x, q[1], -176 + 1.9 * (x - 10905) / 245] + q[3:] for x in range(int(q[0]) + 8, 11130, 8)]
     roads = sorted(data["roads"], key=lambda r: 0 if r["kind"] != "route" else 1)
 
     def stroke(pts, width, color):

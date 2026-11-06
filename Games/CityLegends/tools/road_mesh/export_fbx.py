@@ -15,7 +15,8 @@ work, out = sys.argv[sys.argv.index("--") + 1 : sys.argv.index("--") + 3]
 os.makedirs(out, exist_ok=True)
 meshes = pickle.load(open(os.path.join(work, "meshes.pkl"), "rb"))
 OX, OY, OZ = 14000.0, 100.0, 0.0
-BATCH = 90000  # triangles a file (keep each file under 150 meshes)
+BATCH = 90000  # triangles a file
+MESHES = 120  # meshes a file: a Model of 150 or more fails with "Failed to load package asset"
 
 
 def code(v):
@@ -30,26 +31,13 @@ def to_b(p):
 batches = [[]]
 tris = 0
 for m in sorted(meshes, key=lambda q: (q[1], q[0])):
-    if tris + len(m[4]) > BATCH and batches[-1]:
+    if (tris + len(m[4]) > BATCH or len(batches[-1]) >= MESHES) and batches[-1]:
         batches.append([])
         tris = 0
     batches[-1].append(m)
     tris += len(m[4])
 
-# (a Model of 150 meshes or more wouldn't load: "Failed to load package asset". Arguments after the two
-# folders: only these batches, each cut in two)
-only = [int(a) for a in sys.argv[sys.argv.index("--") + 3 :]]
-if only:
-    picked = {}
-    for b in only:
-        half = len(batches[b]) // 2
-        picked[b * 10 + 100] = batches[b][:half]
-        picked[b * 10 + 101] = batches[b][half:]
-    work_list = list(picked.items())
-else:
-    work_list = list(enumerate(batches))
-
-for bi, batch in work_list:
+for bi, batch in enumerate(batches):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     for i, (kind, cell, v, uv, f) in enumerate(batch):
         xs = [p[0] for p in v]

@@ -53,6 +53,15 @@ Every road on the Riviera is now shown by real curved meshes, made in Blender an
 
 **Undo:** `RoadMeshes.undo(roads)` (`tools/riviera/RoadMeshes.luau`): shows the old parts and removes the meshes.
 
+## Straight link (2026-11-06, owner's picture with two red lines)
+The Mountain Road now carries straight on into the West Switchbacks' top bend (x 10905 to 11150). The tight bend, its island and the long first leg are gone. Picture: [[Straight link - Mountain Road into the bend.jpg]].
+- **Road:** same width as both roads, climbs 10%, eases out flat at x 11120. Rock cut on the north, grass bank on the south. Kerb and red pavement both sides up to x 11134, then the Mountain Road's grey shoulder. The 2 + 2 lines end at x 11165, the edge lines and the middle line run through. 4 new lamps. The planter left on the bank went onto the new pavement.
+- **Traffic and map:** lanes moved in `RivieraLanes.lua` (same point counts, 0 dead ends). Map tile 0_2 redrawn (`tools/minimap_art.py`), new id in `MinimapArt.lua`. Road meshes exported and uploaded again (674).
+- **Checked in Play:** lane test: no holes, no steps. Car through the join at full throttle, 105 studs/s, 3 clean runs; down into the bend and on, and up from the leg. Traffic drives it. In one 40 s count, with the car parked near the top, 24 cars went down and 1 went up; why was not looked into.
+- **Not done:** the south half of the road at x 11168 still drops off the old junction's flat top (about 15% for 12 studs). No jump at 105 studs/s, the suspension just moves; changing it means new meshes. Not tested: phone, night, 2 players, a race or police chase over it.
+- **Old shapes still in the tools:** `tools/map_plan/` and `RivieraMap.lua` (only used if the map art is missing) still have the old road. A `Roads.build` of these roads brings it back.
+- **Undo:** `StraightLink.undo()` (`tools/riviera/StraightLink.luau`; backups `ServerStorage.StraightLinkOld`, `StraightLinkGround`). The lanes, the map tile and the meshes don't go back with it: `git` for the first two, a new export for the meshes.
+
 ## Tonight's run: start here (written 2026-11-06)
 **Done, step by step:**
 1. **Cars:** the 6 new cars are in the game, with live clusters and dark cabins. Sharp carbon on 14 cars. Leather and Alcantara not done: those cabins are one picture.
