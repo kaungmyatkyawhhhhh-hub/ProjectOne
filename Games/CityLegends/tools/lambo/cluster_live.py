@@ -204,6 +204,11 @@ def active(when, st):
         "tcoff": st.get("tcoff", False),
         "accel": float(st.get("gAccel", "0.0")) > 0.1,
         "sv": st.get("sv", False),
+        "kmh": st.get("kmh", True),
+        "mph": not st.get("kmh", True),
+        "gearN": st["gear"] == "N",
+        "gearR": st["gear"] == "R",
+        "gearD": st["gear"] not in ("N", "R"),
     }
     return table[when]
 
@@ -235,8 +240,9 @@ def compose(spec, st, scale=2):
         if active(s["when"], st):
             paste(s["im"], s["left"], s["top"])
     for n in spec.needles:
-        val = {"rpm": v, "kmh": st["mph"] * 1.609, "mph": st["mph"]}[n["bind"]]
-        im = n["im"].rotate(-interp(n["pts"], val), resample=Image.BICUBIC, expand=True)
+        val = {"rpm": v, "kmh": st["mph"] * 1.609, "mph": st["mph"], "dial": st["mph"] * 1.609 if st.get("kmh", True) else st["mph"]}[n["bind"]]
+        pts = n["alt"] if n["bind"] == "dial" and not st.get("kmh", True) else n["pts"]
+        im = n["im"].rotate(-interp(pts, val), resample=Image.BICUBIC, expand=True)
         paste(im, n["x"] - im.width / spec.A / 2, n["y"] - im.height / spec.A / 2)
     if spec.marker:
         pts = spec.marker["pts"]
@@ -1894,8 +1900,22 @@ def murcielago():
     return sp
 
 
-BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago}
+def lfa():
+    import cluster_lfa_maybach as m
+
+    return m.lfa(Spec, needle_sprite, add_needle)
+
+
+def maybach():
+    import cluster_lfa_maybach as m
+
+    return m.maybach(Spec, needle_sprite, add_needle, glyph)
+
+
+BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "lfa": ("lfa_cluster_owner.png", (14, 26, 466, 322), None, dict(v=7.0, gear="4", mph=99.4, manual=False, clock="12:56", odo="000364", range="36")),
+    "maybach": ("maybach_gls_s680_cluster_owner.png", (2, 34, 594, 270), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="12:06", odo="009857", range="190")),
     "murcielago": ("murcielago_model_dials.png", (190, 170, 1250, 620), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="20:26", odo="009857", sv=True)),
     "f458": ("f458_cluster_owner.png", (56, 300, 1876, 990), None, dict(v=0.7, gear="N", mph=0, manual=False, clock="20:26", odo="009857", range="432")),
     "california": ("california_cluster_owner.png", (120, 270, 1460, 800), None, dict(v=0.0, gear="N", mph=0, manual=False, clock="20:26", odo="029822", range="432")),
@@ -1959,7 +1979,13 @@ def spec_lua(sp, ids):
         pts = []
         for a, b in n["pts"]:
             pts += [a, b]
-        needles.append(rect(n["im"]) + [n["x"], n["y"], '"%s"' % n["bind"], lua_list(pts)])
+        row = rect(n["im"]) + [n["x"], n["y"], '"%s"' % n["bind"], lua_list(pts)]
+        if n.get("alt"):
+            alt = []
+            for a, b in n["alt"]:
+                alt += [a, b]
+            row.append(lua_list(alt))
+        needles.append(row)
     gear = {ch: rect(e["im"]) for ch, e in sp.gear["sprites"].items()}
     fonts = {}
     for name, f in sp.fonts.items():

@@ -1,5 +1,7 @@
 # City Legends
 
+> **LICENCE WARNING (owner, read this):** these car models are **NC (non-commercial)** and the game sells Robux items, so they are risky: Dearborn C346 (Focus RS, CC-BY-NC-SA, Ddiaz Design), plus the Lamborghini / Ferrari ones listed further down. The Focus's part names (`Rs:SK_...`, `MI_...`) look ripped from a racing game. The call is yours. The game still works if one model is swapped later.
+
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
@@ -20,7 +22,18 @@ Pictures: [[Workshop - upgrade screen.jpg]], [[Workshop - Part Shop.jpg]], [[Wor
 - **Not tested:** a real phone (phone size in Studio yes), 2 players, opening from the garage and Legends Customs (same call as the menu, which was tested).
 
 ## New starter cars (2026-11-06)
-The pick: Horizon Z33, Bavarica Werkz G20 Sport (back on sale, $40K, Starter), Dearborn C346 Rallye ($42K, 165 mph, AWD with a rear bias: `RearBias`, `DrivingFeel.AwdRearBias`). The Golf isn't used (owner). Picture: [[Starter pick - new cars.jpg]]. Until the C346 model is in, the G30 3.0 stands in.
+The pick: Horizon Z33, Bavarica Werkz G20 Sport (back on sale, $40K, Starter), Dearborn C346 Rallye ($42K, 165 mph, AWD with a rear bias: `RearBias`, `DrivingFeel.AwdRearBias`). The Golf isn't used (owner). Pictures: [[Starter pick - new cars.jpg]], [[Focus C346 - before and after.jpg]], [[Focus C346 - driver seat.jpg]].
+- **The C346 model (2026-11-07):** Ddiaz Design, CC-BY-NC-SA-4.0, in `CarModels.dearb_focus_rs`. No Ford oval or lettering: badges flat in the paint, chrome letters cut, a "C346" plate over the moulded oval on the steering hub (`HUB_PLATES` in `CarSkin`). Changed a little: own wheels, oval tips, diffuser fins, spoiler end plates, tail lamp inside, grille mesh, "C346" script on the boot (`tools/focus_fix.py`). Live needles, digits; brake lamps.
+- **Owner, 2026-11-06:** "the whole car angle is off". The body was turned 8.68 degrees on the car. The model sat at yaw -98.68 in `CarModels`, and when a model has no seat or PrimaryPart and its FL / FR corners are Models, not parts, `CarSkin` falls back to a straight world axis. Every other car sits at a multiple of 90. Fixed by turning the model to 0: **after inserting a car, check its pivot's rotation.**
+- **Grey / white parts cause:** the FBX brought its own SurfaceAppearances as well as ours, one with an emissive id that doesn't exist (`rbxassetid://51`). Deleted them; ours (`Pbr`) stay, and the cabin got its surfaces back.
+- **Checked in Play:** spawn, no errors, outside, driver's seat, rev and speed needles, brake lamp, dealer list, pick screen. **Not checked:** a real claim on a fresh save, night, phone size, 2 players, Customs paint.
+
+## FPS (2026-11-07, owner: "Optimize the game for better FPS")
+Measured on the Studio PC only: phones can't be measured from here.
+- **Numbers (fps, parked, 4 places):** marina 103, customs 90, highway 138, Legends Rewards 98. Render CPU 8-10 ms, GPU 7-8 ms, scripts about 1.8 ms a frame.
+- **What costs most:** shadows (120 fps with them off, 100 with). Then traffic (108 with none). Post effects, atmosphere, clouds, pedestrians, own car: 2 fps or less each. Hiding 16K far small parts: nothing.
+- **Done:** Medium graphics has no shadows (phones); challenge chips only within 240 studs; far traffic (over 380 studs) thinks every 3rd frame; penthouse party check twice a second; 2,083 map meshes from Precise to Automatic render fidelity (no gain measured on the PC; it lets phones use simpler far meshes, and it can't be set back part by part).
+- **Tried and dropped:** streaming radius 480 instead of 640: fewer parts but *lower* FPS (marina 92, customs 66). Stays 640.
 
 ## Ghost Driver look (2026-11-06, `Prompts/Lighting and car look like the Ghost Driver videos.md`)
 Pictures, theirs on the left: [[Ghost look - highway sunset.jpg]], [[Ghost look - car rear.jpg]], [[Ghost look - car side.jpg]]. Ours only: [[Ghost look - town road 17-18.jpg]], [[Ghost look - town road 18-18.jpg]].

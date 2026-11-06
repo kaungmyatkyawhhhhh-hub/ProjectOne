@@ -927,7 +927,7 @@ end
 -- a plate of ours over the moulded badge on a hub (metres from the wheel's centre at wheelbase wb, +Z
 -- towards the driver): for models whose badge is part of the shape, not only its picture
 local HUB_PLATES: { [string]: { at: Vector3, w: number, h: number, text: string, wb: number } } = {
-	dearb_focus_rs = { at = Vector3.new(0, 0.005, 0.044), w = 0.09, h = 0.042, text = "C346", wb = 2.65 },
+	dearb_focus_rs = { at = Vector3.new(0, -0.0084, 0.071), w = 0.09, h = 0.042, text = "C346", wb = 2.65 },
 }
 
 local function hubPlateParts(plate: { at: Vector3, w: number, h: number, text: string, wb: number }, spm: number): { Template }

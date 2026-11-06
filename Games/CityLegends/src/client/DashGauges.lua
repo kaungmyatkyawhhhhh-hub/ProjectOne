@@ -3362,11 +3362,11 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 		table.insert(shows, { l = sprite(e, e[6], e[7], 3), when = e[8] })
 	end
 	-- rotating needles: a picture drawn pointing up, its pivot in its middle, turned by a table of value, angle
-	local needles: { { l: ImageLabel, bind: string, pts: { number } } } = {}
+	local needles: { { l: ImageLabel, bind: string, pts: { number }, alt: { number }? } } = {}
 	for _, e in Art.needles or {} do
 		local l = sprite(e, e[6] - e[4] / A / 2, e[7] - e[5] / A / 2, 4)
 		l.Visible = true
-		table.insert(needles, { l = l, bind = e[8], pts = e[9] })
+		table.insert(needles, { l = l, bind = e[8], pts = e[9], alt = e[10] })
 	end
 	local marker = Art.marker
 	local mark = if marker then D.rect(0, 0, marker.w, 1, Color3.fromRGB(marker.color[1], marker.color[2], marker.color[3]), 4) else nil
@@ -3460,6 +3460,11 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 			lights = DashGauges.lightsOn == true,
 			tcoff = DashGauges.tcOff == true,
 			accel = accel > 0.1,
+			kmh = KMH,
+			mph = not KMH,
+			gearN = g == "N",
+			gearR = g == "R",
+			gearD = tonumber(g) ~= nil,
 		}
 		if flag then
 			state[flag] = true -- (a car's own touch on a shared screen: the SV's mark)
@@ -3477,8 +3482,9 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 			s.l.Visible = state[s.when] == true
 		end
 		for _, n in needles do
-			local value = if n.bind == "rpm" then v elseif n.bind == "kmh" then mph * 1.609 else mph
-			n.l.Rotation = pointOn(n.pts, value)
+			-- ("dial": a speedometer whose numbers follow the player's units, with a table for each)
+			local value = if n.bind == "rpm" then v elseif n.bind == "kmh" or (n.bind == "dial" and KMH) then mph * 1.609 else mph
+			n.l.Rotation = pointOn(if n.bind == "dial" and not KMH then n.alt else n.pts, value)
 		end
 		if mark and marker then
 			local p = marker.pts
@@ -3574,6 +3580,12 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	end,
 	LiveCalifornia = function(gui)
 		return liveCluster(gui, "california")
+	end,
+	LiveLFA = function(gui)
+		return liveCluster(gui, "lfa")
+	end,
+	LiveMaybach = function(gui)
+		return liveCluster(gui, "maybach")
 	end,
 	LiveSV = function(gui)
 		return liveCluster(gui, "sv")

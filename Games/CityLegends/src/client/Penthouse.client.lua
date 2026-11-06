@@ -566,21 +566,27 @@ end
 
 local skinned: { [Model]: boolean } = {}
 local partyBase: { [Instance]: Color3 } = {}
+local partyWait, partyLit = 0, false -- (FPS, 2026-11-07: looks for a party twice a second, not every frame)
 
 RunService.RenderStepped:Connect(function(dt: number)
 	local camPos = camera.CFrame.Position
 	local now = os.clock()
 	-- party mode: which towers are partying (and close enough to see)
 	local partying: { [string]: boolean } = {}
-	for _, m in CollectionService:GetTagged("TowerPenthouse") do
-		if m:IsA("Model") and m:GetAttribute("Party") == true then
-			local pivot = m:GetPivot().Position
-			if (Vector3.new(pivot.X, camPos.Y, pivot.Z) - camPos).Magnitude < 400 then
-				partying[m:GetAttribute("TowerId") :: string] = true
+	partyWait -= dt
+	local partyNow = partyWait <= 0 or partyLit
+	if partyNow then
+		partyWait = 0.5
+		for _, m in CollectionService:GetTagged("TowerPenthouse") do
+			if m:IsA("Model") and m:GetAttribute("Party") == true then
+				local pivot = m:GetPivot().Position
+				if (Vector3.new(pivot.X, camPos.Y, pivot.Z) - camPos).Magnitude < 400 then
+					partying[m:GetAttribute("TowerId") :: string] = true
+				end
 			end
 		end
 	end
-	for _, holder in CollectionService:GetTagged("TowerPartyLamp") do
+	for _, holder in if partyNow then CollectionService:GetTagged("TowerPartyLamp") else {} do
 		local l = holder:FindFirstChild("PartyLight")
 		if l and l:IsA("PointLight") then
 			local i = (holder:GetAttribute("Index") :: number?) or 0
@@ -592,17 +598,18 @@ RunService.RenderStepped:Connect(function(dt: number)
 			end
 		end
 	end
-	for _, strip in CollectionService:GetTagged("TowerPartyStrip") do
+	for _, strip in if partyNow then CollectionService:GetTagged("TowerPartyStrip") else {} do
 		if strip:IsA("BasePart") then
 			partyBase[strip] = partyBase[strip] or strip.Color
 			strip.Color = if partying[strip:GetAttribute("Tower") :: string] then Color3.fromHSV((now * 0.4) % 1, 0.9, 1) else partyBase[strip]
 		end
 	end
-	for _, ball in CollectionService:GetTagged("TowerMirrorBall") do
+	for _, ball in if partyNow then CollectionService:GetTagged("TowerMirrorBall") else {} do
 		if ball:IsA("BasePart") and partying[ball:GetAttribute("Tower") :: string] then
 			ball.CFrame = ball.CFrame * CFrame.Angles(0, dt * 1.6, 0)
 		end
 	end
+	partyLit = next(partying) ~= nil
 	-- showcase cars: skinned when you come close, turning slowly while you're near
 	for _, car in CollectionService:GetTagged("TowerShowcase") do
 		if not car:IsA("Model") or not car.Parent then
