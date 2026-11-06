@@ -147,4 +147,4 @@ You imported galaxy_icon_* (P&L Studios XP group). They're in UIAssets.icon (+ i
 - BOOSTS chip: stardust → **boosts**
 - FREE REWARDS board: **freeRewards** either side of the title (it had none)
 - The streak tiles, quest rows and free-reward rows keep the Essence icon: that's the reward they pay.
-
+- Checked on screen: `icons-pc-return-screen-offline-icon`, `icons-pc-lumi-boosts-quests-key-group-art`, `icons-pc-daily-window-gift-icons`.

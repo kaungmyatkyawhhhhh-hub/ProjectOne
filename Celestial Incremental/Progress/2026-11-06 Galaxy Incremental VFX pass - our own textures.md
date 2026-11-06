@@ -146,7 +146,7 @@ Checklist rows: **#270 #281 #282 #288 #289 #297 #299 #300 #301 #302 #303 #304 #3
 - Aura flames were hidden inside the anvil. Lifted.
 
 ## Not done / flags
-1. **The group uploads were still processing on Roblox's side** ("being generated") when I checked: 15 of 142 loaded. They show once Roblox finishes.
+1. **Group art checked on screen:** Roblox lists all 142 group images as Completed and they draw in Studio (LUMI, plates, auras, the new icons). Note: `ContentProvider:PreloadAsync` wrongly reports most of them as Failure ("being generated") while an ImageLabel loads them fine, so don't trust PreloadAsync for this check.
 2. **Frame strips, not video:** Studio can't record clips here. The frames were taken slowed down (VfxLibrary.TimeScale, test only).
 3. **Not seen on screen:** a real Forge roll end to end (camera at the anvil), the Celestial alone, the Ring Nebula after the fix, the Supernova wind-up arcs (their texture was the one still processing), Reduced Motion (coded, not screenshotted).
 4. **No 2-player test:** other players' Supernovas use the same code without shake/flash.
