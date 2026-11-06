@@ -1,0 +1,223 @@
+<html><body style="margin:0;background:radial-gradient(circle at 50% 30%,#2a2e35,#0e1013);font-family:Inter;color:#fff">
+<div id="row" style="display:grid;grid-template-columns:repeat(5,220px);gap:30px 34px;padding:36px;justify-content:center"></div>
+<script>
+const DEFS=`<defs>
+<linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfdfd"/><stop offset=".3" stop-color="#c3c9d0"/><stop offset=".48" stop-color="#6f7884"/><stop offset=".52" stop-color="#e8ecf0"/><stop offset=".8" stop-color="#a7afb9"/><stop offset="1" stop-color="#f4f6f8"/></linearGradient>
+<linearGradient id="chromeTxt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#d4d9df"/><stop offset="1" stop-color="#9aa2ac"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4c4"/><stop offset=".3" stop-color="#e6bf55"/><stop offset=".5" stop-color="#9a7116"/><stop offset=".54" stop-color="#f6d77e"/><stop offset=".8" stop-color="#c8981f"/><stop offset="1" stop-color="#fbe7a6"/></linearGradient>
+<linearGradient id="goldFlat" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b0"/><stop offset=".45" stop-color="#e3b648"/><stop offset="1" stop-color="#a77a14"/></linearGradient>
+<radialGradient id="enamelBlack" cx=".5" cy=".25" r=".85"><stop offset="0" stop-color="#2b2f36"/><stop offset=".6" stop-color="#0f1114"/><stop offset="1" stop-color="#050607"/></radialGradient>
+<radialGradient id="enamelWhite" cx=".5" cy=".25" r=".9"><stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#eef1f5"/><stop offset="1" stop-color="#cfd5dc"/></radialGradient>
+<linearGradient id="blue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f95ff"/><stop offset="1" stop-color="#0b4ec2"/></linearGradient>
+<radialGradient id="yellow" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#ffe95c"/><stop offset=".7" stop-color="#ffcf10"/><stop offset="1" stop-color="#e9a800"/></radialGradient>
+<linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<filter id="bevel" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceAlpha" stdDeviation="1" result="b"/><feSpecularLighting in="b" surfaceScale="2.5" specularConstant=".8" specularExponent="22" lighting-color="#fff" result="s"><feDistantLight azimuth="240" elevation="50"/></feSpecularLighting><feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/><feComposite in="SourceGraphic" in2="s2" operator="arithmetic" k2="1" k3=".55"/></filter>
+<filter id="inset" x="-10%" y="-10%" width="120%" height="120%"><feComponentTransfer in="SourceAlpha" result="inv"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer><feGaussianBlur in="inv" stdDeviation="2.2"/><feOffset dy="2" result="sh"/><feFlood flood-color="#000" flood-opacity=".75"/><feComposite in2="sh" operator="in"/><feComposite in2="SourceAlpha" operator="in" result="ish"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="ish"/></feMerge></filter>
+<filter id="drop" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity=".6"/></filter>
+<filter id="txt" x="-5%" y="-20%" width="110%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation=".5" flood-opacity=".9"/></filter>
+<pattern id="carbon" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#121417"/><rect width="3" height="3" fill="#24282e"/><rect x="3" y="3" width="3" height="3" fill="#24282e"/><path d="M0 0 L3 3 M3 3 L6 6" stroke="#2f343b" stroke-width=".5"/></pattern>
+<radialGradient id="enamelRed" cx=".5" cy=".3" r=".85"><stop offset="0" stop-color="#ff3b3b"/><stop offset=".7" stop-color="#c8101e"/><stop offset="1" stop-color="#7d0812"/></radialGradient>
+<radialGradient id="enamelBlue" cx=".5" cy=".3" r=".85"><stop offset="0" stop-color="#2b5fb8"/><stop offset=".7" stop-color="#0d2c66"/><stop offset="1" stop-color="#06173a"/></radialGradient>
+<radialGradient id="enamelNavy" cx=".5" cy=".3" r=".85"><stop offset="0" stop-color="#1d2b44"/><stop offset=".7" stop-color="#0b1222"/><stop offset="1" stop-color="#03060d"/></radialGradient>
+<radialGradient id="enamelGreen" cx=".5" cy=".3" r=".85"><stop offset="0" stop-color="#1f6b4f"/><stop offset=".7" stop-color="#0b3b2b"/><stop offset="1" stop-color="#041a12"/></radialGradient>
+<radialGradient id="enamelOrange" cx=".5" cy=".3" r=".85"><stop offset="0" stop-color="#ffa04a"/><stop offset=".7" stop-color="#ff6a00"/><stop offset="1" stop-color="#c84a00"/></radialGradient>
+<radialGradient id="enamelGrey" cx=".5" cy=".3" r=".85"><stop offset="0" stop-color="#4a5059"/><stop offset=".7" stop-color="#2a2e34"/><stop offset="1" stop-color="#15171a"/></radialGradient>
+<linearGradient id="goldBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a0"/><stop offset=".5" stop-color="#e3ad2b"/><stop offset="1" stop-color="#b07d10"/></linearGradient>
+<linearGradient id="orangeSw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff5a00" stop-opacity="0"/><stop offset=".5" stop-color="#ff7a1a"/><stop offset="1" stop-color="#ffb066"/></linearGradient>
+</defs>`;
+const arc=(id,r,top)=>top?`<path id="${id}" d="M${100-r} 100 A${r} ${r} 0 0 1 ${100+r} 100" fill="none"/>`:`<path id="${id}" d="M${100-r} 100 A${r} ${r} 0 0 0 ${100+r} 100" fill="none"/>`;
+const arcText=(id,r,top,txt,size,fill,ls)=>arc(id,r,top)+`<text font-family="Inter" font-weight="800" font-size="${size}" fill="${fill}" letter-spacing="${ls}" filter="url(#txt)" ${top?'':'dominant-baseline="hanging"'}><textPath href="#${id}" startOffset="50%" text-anchor="middle">${txt}</textPath></text>`;
+const star=(cx,cy,r,f,extra='')=>{let p=[];for(let i=0;i<10;i++){const a=Math.PI/5*i-Math.PI/2,rr=i%2?r*.4:r;p.push((cx+rr*Math.cos(a)).toFixed(2)+','+(cy+rr*Math.sin(a)).toFixed(2))}return `<polygon points="${p.join(' ')}" fill="${f}" ${extra}/>`};
+const leaf=(x,y,rot,s,f)=>`<path d="M0 0 Q${5*s} ${-2.6*s} ${10*s} 0 Q${5*s} ${2.6*s} 0 0 Z" fill="${f}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(1)})"/>`;
+const laurel=(f)=>{const r=74;let g='';const p=a=>[100+r*Math.cos(a*Math.PI/180),100+r*Math.sin(a*Math.PI/180)];
+ const [x0,y0]=p(176),[x1,y1]=p(116);g+=`<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 0 0 ${x1.toFixed(1)} ${y1.toFixed(1)}" fill="none" stroke="${f}" stroke-width="1.2" stroke-linecap="round"/>`;
+ let i=0;for(let a=172;a>=120;a-=7.5,i++){const [x,y]=p(a);const t=a-90;const s=1.05-i*0.03;g+=leaf(x,y,t-200+0,s,f)+leaf(x,y,t-160,s,f);}
+ return `<g filter="url(#bevel)">${g}</g><g transform="translate(200 0) scale(-1 1)" filter="url(#bevel)">${g}</g>`};
+const SH="M100 8 C130 8 158 14 178 22 C180 110 150 160 100 194 C50 160 20 110 22 22 C42 14 70 8 100 8 Z";
+const inner=(path,s,dy=0)=>`transform="translate(100 ${100+dy}) scale(${s}) translate(-100 -100)"`;
+const HEX="M42 8 L158 8 L188 36 L188 118 L100 194 L12 118 L12 36 Z";
+
+const C=(r,m='chrome')=>`<circle cx="100" cy="100" r="${r}" fill="url(#${m})" filter="url(#drop)"/><circle cx="100" cy="100" r="${r}" fill="url(#${m})" filter="url(#bevel)"/>`;
+const CE=(r,e)=>`<circle cx="100" cy="100" r="${r}" fill="${e}" filter="url(#inset)"/>`;
+const O=(rx,ry,m='chrome')=>`<ellipse cx="100" cy="100" rx="${rx}" ry="${ry}" fill="url(#${m})" filter="url(#drop)"/><ellipse cx="100" cy="100" rx="${rx}" ry="${ry}" fill="url(#${m})" filter="url(#bevel)"/>`;
+const OE=(rx,ry,e)=>`<ellipse cx="100" cy="100" rx="${rx}" ry="${ry}" fill="${e}" filter="url(#inset)"/>`;
+const P=(d,m='chrome')=>`<path d="${d}" fill="url(#${m})" filter="url(#drop)"/><path d="${d}" fill="url(#${m})" filter="url(#bevel)"/>`;
+const PE=(d,e,s,dy=0)=>`<path d="${d}" fill="${e}" filter="url(#inset)" transform="translate(100 ${100+dy}) scale(${s}) translate(-100 -100)"/>`;
+const M=(inner,f='url(#chrome)')=>`<g filter="url(#bevel)" fill="${f}">${inner}</g>`;
+const T=(x,y,t,size,fill,o={})=>`<text x="${x}" y="${y}" font-family="${o.f||'Inter'}" font-weight="${o.w||800}" font-size="${size}" fill="${fill}" text-anchor="middle" letter-spacing="${o.ls||0}" ${o.it?'font-style="italic"':''} filter="url(#${o.flt||'bevel'})">${t}</text>`;
+const G=(op=.8)=>`<ellipse cx="100" cy="62" rx="70" ry="30" fill="url(#gloss)" opacity="${op}"/>`;
+const RR=(x,y,w,h,r,m='chrome')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="url(#${m})" filter="url(#drop)"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="url(#${m})" filter="url(#bevel)"/>`;
+const RE=(x,y,w,h,r,e)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${e}" filter="url(#inset)"/>`;
+const NEW=[
+["Atelier Vento","Pagani style · new name",`
+${O(98,52)}${OE(92,46,'url(#enamelNavy)')}
+<ellipse cx="100" cy="100" rx="86" ry="40.5" fill="none" stroke="url(#chromeTxt)" stroke-width="1"/>
+<path d="M28 100 H52 M148 100 H172" stroke="url(#chromeTxt)" stroke-width="1"/>
+${T(100,109,'VENTO',27,'url(#chromeTxt)',{ls:7,w:600})}
+${T(100,80,'ATELIER',7.5,'url(#chromeTxt)',{ls:5,w:600,flt:'txt'})}
+${T(100,127,'· HYPERCAR ·',6,'url(#chromeTxt)',{ls:3,w:600,flt:'txt'})}
+<ellipse cx="100" cy="80" rx="80" ry="22" fill="url(#gloss)" opacity=".7"/>`],
+["Nordkrona","Koenigsegg style · new name",`
+${P('M30 46 H170 V108 Q170 160 100 192 Q30 160 30 108 Z')}
+<g transform="translate(100 104) scale(.91) translate(-100 -100)"><clipPath id="nk"><path d="M30 46 H170 V108 Q170 160 100 192 Q30 160 30 108 Z"/></clipPath>
+<g clip-path="url(#nk)" filter="url(#inset)"><rect x="0" y="0" width="200" height="200" fill="url(#carbon)"/>
+${[0,1,2,3].map(i=>`<path d="M30 ${92+i*22} L100 ${62+i*22} L170 ${92+i*22}" fill="none" stroke="${i%2?'#e9b62a':'#1d4ea8'}" stroke-width="9"/>`).join('')}</g></g>
+${M('<path d="M58 40 L52 12 L72 26 L86 6 L100 24 L114 6 L128 26 L148 12 L142 40 Z"/><circle cx="52" cy="12" r="3.5"/><circle cx="86" cy="6" r="3.5"/><circle cx="114" cy="6" r="3.5"/><circle cx="148" cy="12" r="3.5"/>','url(#gold)')}
+<rect x="54" y="38" width="92" height="7" rx="2" fill="url(#gold)" filter="url(#bevel)"/>
+${G(.5)}`],
+["Rocket","Brabus style",`
+${RR(8,8,184,184,40)}${RE(16,16,168,168,34,'url(#enamelBlack)')}
+<rect x="24" y="24" width="152" height="152" rx="28" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
+${T(100,146,'R',120,'url(#chrome)',{w:900})}
+${T(100,172,'ROCKET',10,'url(#chromeTxt)',{ls:6,w:700,flt:'txt'})}${G(.6)}`],
+["Apex","Toyota style",`
+${O(97,70)}${OE(90,63,'url(#enamelRed)')}
+<ellipse cx="100" cy="100" rx="84" ry="57" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
+${M('<path d="M56 138 L100 56 L144 138 H122 L100 96 L78 138 Z"/><path d="M84 124 H116 L112 116 H88 Z"/>')}${G(.6)}`],
+["Stealth-Apex","Lexus style",`
+${O(97,68)}${OE(90,61,'url(#enamelGrey)')}
+${M('<path d="M134 62 H84 L70 100 H120 L112 120 H62 L56 138 H122 L136 98 H86 L92 80 H128 Z"/>')}${G(.6)}`],
+["Horizon","Nissan style",`
+${C(97)}${CE(90,'url(#enamelBlack)')}
+${M('<path d="M40 100 A60 60 0 0 1 160 100 Z"/>','url(#goldFlat)')}
+<g opacity=".5">${[0,1,2,3,4,5,6].map(i=>{const a=(200+i*23.3)*Math.PI/180;return `<line x1="${100+64*Math.cos(a)}" y1="${100+64*Math.sin(a)}" x2="${100+80*Math.cos(a)}" y2="${100+80*Math.sin(a)}" stroke="url(#goldFlat)" stroke-width="3" stroke-linecap="round"/>`}).join('')}</g>
+${RR(4,96,192,30,4)}${RE(8,99,184,24,3,'url(#enamelBlack)')}
+${T(100,117,'HORIZON',17,'url(#chromeTxt)',{ls:6})}${G(.4)}`],
+["Ahura","Mazda style",`
+${O(97,76)}${OE(90,69,'url(#enamelBlack)')}
+${M('<path d="M26 70 Q70 86 100 142 Q130 86 174 70 Q138 104 114 132 L100 108 L86 132 Q62 104 26 70 Z"/><path d="M100 62 L112 94 L100 86 L88 94 Z"/>')}${G(.6)}`],
+["Sompact","Suzuki style",`
+${C(97)}${CE(90,'url(#enamelWhite)')}
+<path d="M138 58 Q100 40 70 62 Q54 78 76 96 L124 104 Q146 122 128 140 Q100 160 62 142" fill="none" stroke="#7d0812" stroke-width="24" stroke-linecap="round" opacity=".35" transform="translate(0 2)"/>
+<path d="M138 58 Q100 40 70 62 Q54 78 76 96 L124 104 Q146 122 128 140 Q100 160 62 142" fill="none" stroke="url(#enamelRed)" stroke-width="22" stroke-linecap="round" filter="url(#bevel)"/>${G(.7)}`],
+["Orient","Kia style",`
+${RR(4,62,192,76,38)}${RE(10,68,180,64,32,'url(#enamelBlack)')}
+${T(100,113,'ORIENT',38,'url(#chromeTxt)',{ls:4,w:900,it:1})}
+<path d="M30 124 H170" stroke="url(#chromeTxt)" stroke-width="1" opacity=".5"/>
+<ellipse cx="100" cy="82" rx="86" ry="14" fill="url(#gloss)" opacity=".7"/>`],
+["Dream-Build Volt","BYD style",`
+${O(97,62)}${OE(91,56,'url(#enamelBlack)')}
+<ellipse cx="100" cy="100" rx="84" ry="49" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
+${T(92,116,'DBV',44,'url(#chromeTxt)',{ls:3,w:900})}
+${M('<path d="M154 66 L136 104 H150 L140 136 L170 92 H155 L166 66 Z"/>','url(#goldFlat)')}${G(.5)}`],
+["HyperSpeed Tech","Xiaomi style",`
+<path d="M100 8 C170 8 192 30 192 100 C192 170 170 192 100 192 C30 192 8 170 8 100 C8 30 30 8 100 8 Z" fill="url(#enamelOrange)" filter="url(#drop)"/>
+<path d="M100 8 C170 8 192 30 192 100 C192 170 170 192 100 192 C30 192 8 170 8 100 C8 30 30 8 100 8 Z" fill="url(#enamelOrange)" filter="url(#bevel)"/>
+${M('<path d="M50 60 H66 V92 H96 V60 H112 V140 H96 V106 H66 V140 H50 Z"/><path d="M118 60 H156 V74 H145 V140 H129 V74 H118 Z"/>','#ffffff')}
+<path d="M30 30 Q100 14 170 30 Q140 70 100 72 Q60 70 30 30 Z" fill="url(#gloss)" opacity=".6"/>`],
+["Golden","Chevrolet style",`
+${P('M14 72 H70 L80 56 H120 L130 72 H186 L172 128 H130 L120 144 H80 L70 128 H28 Z')}
+${PE('M14 72 H70 L80 56 H120 L130 72 H186 L172 128 H130 L120 144 H80 L70 128 H28 Z','url(#goldBar)',.9)}
+${T(100,113,'GOLDEN',26,'#2b1d00',{ls:3,w:900,flt:'txt'})}
+<path d="M24 76 H186 L182 92 Q100 82 22 96 Z" fill="url(#gloss)" opacity=".8"/>`],
+["Hemi","Dodge style",`
+${RR(6,30,188,140,14)}${RE(12,36,176,128,10,'url(#enamelBlack)')}
+<g filter="url(#bevel)"><path d="M24 124 L56 52 H78 L46 124 Z" fill="url(#enamelRed)"/><path d="M58 124 L90 52 H112 L80 124 Z" fill="url(#enamelRed)"/></g>
+${T(150,98,'HEMI',26,'url(#chromeTxt)',{w:900,it:1})}
+${T(100,150,'HIGH-OUTPUT',8,'url(#chromeTxt)',{ls:5,w:700,flt:'txt'})}${G(.5)}`],
+["Stuttgart","Porsche style",`
+${P('M28 14 H172 V104 Q172 160 100 192 Q28 160 28 104 Z','gold')}
+<g transform="translate(100 102) scale(.9) translate(-100 -100)"><clipPath id="stc"><path d="M28 14 H172 V104 Q172 160 100 192 Q28 160 28 104 Z"/></clipPath>
+<g clip-path="url(#stc)" filter="url(#inset)"><rect width="200" height="200" fill="url(#yellow)"/>
+<rect x="0" y="0" width="200" height="40" fill="#0b0b0c"/>
+${[0,1,2].map(i=>`<rect x="28" y="${70+i*30}" width="72" height="14" fill="#0b0b0c"/><rect x="100" y="${70+i*30}" width="72" height="14" fill="#b3121b"/>`).join('')}
+<rect x="96" y="40" width="8" height="160" fill="url(#gold)"/></g></g>
+${T(100,40,'STUTTGART',13,'url(#gold)',{ls:3})}
+${C(28,'gold').replace(/cx="100" cy="100"/g,'cx="100" cy="112"')}<circle cx="100" cy="112" r="23" fill="url(#enamelBlack)" filter="url(#inset)"/>
+${T(100,124,'S',32,'url(#gold)',{w:900})}${G(.4)}`],
+["Precision","Audi style",`
+${RR(4,56,192,88,16)}${RE(10,62,180,76,12,'url(#enamelBlack)')}
+<g filter="url(#bevel)"><polygon points="32,100 45,77 71,77 84,100 71,123 45,123" fill="none" stroke="url(#chromeTxt)" stroke-width="6" stroke-linejoin="round"/><polygon points="74,100 87,77 113,77 126,100 113,123 87,123" fill="none" stroke="url(#chromeTxt)" stroke-width="6" stroke-linejoin="round"/><polygon points="116,100 129,77 155,77 168,100 155,123 129,123" fill="none" stroke="url(#chromeTxt)" stroke-width="6" stroke-linejoin="round"/></g>${G(.5)}`],
+["British Vanguard","Aston Martin style",`
+${M(`${[0,1,2,3,4].map(i=>`<path d="M78 ${86+i*8} L${10+i*8} ${70+i*6} Q${30+i*6} ${84+i*7} 78 ${96+i*8} Z"/><path d="M122 ${86+i*8} L${190-i*8} ${70+i*6} Q${170-i*6} ${84+i*7} 122 ${96+i*8} Z"/>`).join('')}`)}
+${RR(64,78,72,44,8)}${RE(68,82,64,36,6,'url(#enamelGreen)')}
+${T(100,107,'BV',22,'url(#chromeTxt)',{f:"Caladea",w:700,ls:2})}
+${T(100,148,'VANGUARD',10,'url(#chromeTxt)',{ls:6,w:700,flt:'txt'})}`],
+["Trident Motors","Maserati style",`
+${O(74,96)}${OE(67,89,'url(#enamelBlue)')}
+<ellipse cx="100" cy="100" rx="61" ry="83" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
+${M('<path d="M96 52 H104 V148 H96 Z"/><path d="M100 26 L110 54 H90 Z"/><path d="M66 46 L76 70 L74 96 H88 V104 H66 Z"/><path d="M134 46 L124 70 L126 96 H112 V104 H134 Z"/><rect x="82" y="148" width="36" height="6" rx="2"/>')}
+${T(100,170,'TRIDENT',8,'url(#chromeTxt)',{ls:4,w:700,flt:'txt'})}${G(.5)}`],
+["Speedmark","McLaren style",`
+${RR(4,52,192,96,48)}${RE(10,58,180,84,42,'url(#carbon)')}
+<path d="M96 92 Q140 92 170 68 Q150 100 92 98 Z" fill="url(#orangeSw)" filter="url(#bevel)"/>
+${T(100,122,'SPEEDMARK',19,'url(#chromeTxt)',{ls:2,w:800})}
+<ellipse cx="100" cy="72" rx="84" ry="16" fill="url(#gloss)" opacity=".6"/>`],
+["Sovereign","Bentley style",`
+${C(97)}${CE(90,'url(#enamelGreen)')}
+<circle cx="100" cy="100" r="84" fill="none" stroke="url(#chromeTxt)" stroke-width="1.2"/>
+${M('<path d="M60 70 L52 36 L76 54 L88 28 L100 50 L112 28 L124 54 L148 36 L140 70 Z"/><rect x="58" y="70" width="84" height="8" rx="2"/>','url(#gold)')}
+${T(100,142,'S',58,'url(#chromeTxt)',{f:"Caladea",w:700})}
+${T(100,164,'SOVEREIGN',8,'url(#chromeTxt)',{ls:5,w:700,flt:'txt'})}${G(.5)}`],
+["Ecstasy","Rolls-Royce style",`
+${RR(36,10,128,180,4)}${RE(42,16,116,168,2,'url(#enamelBlack)')}
+<rect x="50" y="24" width="100" height="152" fill="none" stroke="url(#chromeTxt)" stroke-width="1.5"/>
+<rect x="54" y="28" width="92" height="144" fill="none" stroke="url(#chromeTxt)" stroke-width=".6"/>
+${T(100,128,'E',100,'url(#chrome)',{f:"Caladea",w:700})}
+${T(100,160,'ECSTASY',9,'url(#chromeTxt)',{ls:5,w:600,flt:'txt'})}`],
+["Velocité Noir","Bugatti style",`
+${O(97,64)}${OE(91,58,'url(#enamelRed)')}
+<ellipse cx="100" cy="100" rx="84" ry="51" fill="none" stroke="#fff" stroke-width="2"/>
+${T(100,118,'VN',52,'#ffffff',{f:"Caladea",w:700,ls:2})}
+${T(100,136,'NOIR',7,'#ffffff',{ls:5,w:700,flt:'txt'})}${G(.6)}`],
+];
+const L=[...NEW,
+["Bavarica Werkz","BMW style",`
+<circle cx="100" cy="100" r="97" fill="url(#chrome)" filter="url(#drop)"/>
+<circle cx="100" cy="100" r="97" fill="url(#chrome)" filter="url(#bevel)"/>
+<circle cx="100" cy="100" r="90" fill="url(#enamelBlack)" filter="url(#inset)"/>
+${arcText('b1',70,true,'BAVARICA',17,'url(#chromeTxt)',6.5)}${arcText('b2',70,false,'WERKZ',17,'url(#chromeTxt)',8)}
+${star(22,100,3,'url(#chromeTxt)')}${star(178,100,3,'url(#chromeTxt)')}
+<circle cx="100" cy="100" r="57" fill="url(#chrome)" filter="url(#bevel)"/>
+<clipPath id="bc"><circle cx="100" cy="100" r="52"/></clipPath>
+<g clip-path="url(#bc)" filter="url(#inset)"><circle cx="100" cy="100" r="52" fill="url(#enamelWhite)"/>
+<g transform="rotate(-28 100 100)"><rect x="30" y="100" width="140" height="26" fill="url(#blue)"/><rect x="30" y="88" width="140" height="7" fill="url(#blue)"/><rect x="30" y="126" width="140" height="2" fill="#c4ccd6"/></g></g>
+<path d="M50 92 A52 52 0 0 1 150 92 Q100 70 50 92 Z" fill="url(#gloss)"/>`],
+["Tri-Star Silber","Mercedes style",`
+<circle cx="100" cy="100" r="97" fill="url(#chrome)" filter="url(#drop)"/>
+<circle cx="100" cy="100" r="97" fill="url(#chrome)" filter="url(#bevel)"/>
+<circle cx="100" cy="100" r="90" fill="url(#enamelBlack)" filter="url(#inset)"/>
+<circle cx="100" cy="100" r="85.5" fill="none" stroke="url(#chromeTxt)" stroke-width="1.4"/>
+${arcText('t1',70,true,'TRI-STAR  SILBER',12.5,'url(#chromeTxt)',3.2)}
+${laurel('url(#chromeTxt)')}
+${star(88,170,3.4,'url(#chromeTxt)')}${star(100,172,4.2,'url(#chromeTxt)')}${star(112,170,3.4,'url(#chromeTxt)')}
+<path d="M64 62 H136 V110 Q136 138 100 150 Q64 138 64 110 Z" fill="url(#chrome)" filter="url(#bevel)"/>
+<g ${inner(0,.9,6)}><clipPath id="tc"><path d="M64 62 H136 V110 Q136 138 100 150 Q64 138 64 110 Z"/></clipPath>
+<g clip-path="url(#tc)" filter="url(#inset)"><rect x="60" y="60" width="80" height="95" fill="url(#enamelWhite)"/>
+<path d="M60 136 L74 108 L81 117 L92 92 L100 104 L100 160 L60 160 Z" fill="#101215"/><path d="M92 92 L86 105 L90 103 L93 107 L97 100 Z" fill="#fff"/><path d="M74 108 L71 115 L75 113 L77 116 Z" fill="#fff"/>
+${star(74,78,4,'#101215')}${star(86,72,5,'#101215')}
+<rect x="100" y="60" width="40" height="100" fill="#101215"/>
+${star(119,80,7,'url(#chromeTxt)')}
+<path d="M106 104 q3.5 -3 7 0 t7 0 t7 0 t7 0 M106 114 q3.5 -3 7 0 t7 0 t7 0 t7 0 M106 124 q3.5 -3 7 0 t7 0 t7 0 t7 0" fill="none" stroke="url(#chromeTxt)" stroke-width="2.4" stroke-linecap="round"/></g></g>
+<path d="M30 80 A72 72 0 0 1 170 80 Q100 56 30 80 Z" fill="url(#gloss)" opacity=".7"/>`],
+["Rosso Rampante","Ferrari style",`
+<g transform="translate(100 100) scale(.92 1) translate(-100 -100)">
+<rect x="30" y="4" width="140" height="192" rx="12" fill="#000" filter="url(#drop)"/>
+<rect x="30" y="4" width="140" height="192" rx="12" fill="url(#chrome)" filter="url(#bevel)"/>
+<rect x="34" y="8" width="132" height="184" rx="9" fill="#0b0b0c"/>
+<clipPath id="rc"><rect x="37" y="11" width="126" height="178" rx="7"/></clipPath>
+<g clip-path="url(#rc)" filter="url(#inset)"><rect x="37" y="11" width="126" height="178" fill="url(#yellow)"/>
+<rect x="37" y="11" width="126" height="7" fill="#00924a"/><rect x="37" y="18" width="126" height="6" fill="#f7f7f5"/><rect x="37" y="24" width="126" height="7" fill="#d32a35"/></g>
+<text x="102" y="128" font-family="Caladea" font-weight="bold" font-style="italic" font-size="104" fill="#0b0b0c" text-anchor="middle">R</text>
+<path d="M60 142 H140" stroke="#0b0b0c" stroke-width="1.6"/>
+<text x="100" y="164" font-family="Caladea" font-weight="bold" font-size="17" fill="#0b0b0c" text-anchor="middle" letter-spacing="1.5">Rampante</text>
+<text x="100" y="178" font-family="Inter" font-weight="700" font-size="6.5" fill="#0b0b0c" text-anchor="middle" letter-spacing="3">ROSSO</text>
+<path d="M37 11 H163 V80 Q100 60 37 92 Z" fill="url(#gloss)" opacity=".9"/>
+<rect x="37" y="11" width="126" height="178" rx="7" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1"/>
+</g>`],
+["Enfurecido","Lamborghini style",`
+<path d="${HEX}" fill="url(#gold)" filter="url(#drop)"/>
+<path d="${HEX}" fill="url(#gold)" filter="url(#bevel)"/>
+<path d="${HEX}" fill="url(#enamelBlack)" ${inner(0,.91,1)} filter="url(#inset)"/>
+<path d="${HEX}" fill="none" stroke="url(#goldFlat)" stroke-width="1.3" ${inner(0,.84,1)}/>
+<text x="100" y="48" font-family="Inter" font-weight="800" font-size="12" fill="url(#gold)" text-anchor="middle" letter-spacing="3" filter="url(#bevel)">ENFURECIDO</text>
+<path d="M58 56 H142" stroke="url(#goldFlat)" stroke-width="1"/>
+<g filter="url(#bevel)">
+<path d="M97 122 C74 124 46 108 38 64 C52 92 72 104 97 106 Z" fill="url(#goldFlat)"/>
+<path d="M103 122 C126 124 154 108 162 64 C148 92 128 104 103 106 Z" fill="url(#goldFlat)"/>
+<path d="M86 112 L114 112 L108 140 L100 152 L92 140 Z" fill="url(#goldFlat)"/></g>
+<path d="M100 112 L100 152 L92 140 L86 112 Z" fill="#000" opacity=".22"/>
+<path d="M30 34 L54 16 L146 16 L170 34 Q100 22 30 34 Z" fill="url(#gloss)" opacity=".8"/>`]
+];
+document.getElementById('row').innerHTML=L.map(([n,s,b])=>`<div style="text-align:center;width:220px"><svg width="220" height="220" viewBox="0 0 200 200">${DEFS}${b}</svg><div style="font-size:22px;font-weight:700;margin-top:12px">${n}</div><div style="font-size:14px;color:#9aa3ad">${s}</div></div>`).join('');
+</script></body></html>
