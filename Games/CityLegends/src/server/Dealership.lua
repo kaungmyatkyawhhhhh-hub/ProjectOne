@@ -266,7 +266,7 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 		-- the drive from the bay down to the street, fitted to the real ground (EntranceRamp)
 		local inner = at(lp.X, 0.2, -half + 0.5)
 		task.defer(function()
-			EntranceRamp.build(model, inner, { width = 18, keep = { model } })
+			EntranceRamp.build(model, inner, { width = 18, keep = { model }, notch = true })
 		end)
 	end
 
@@ -384,7 +384,7 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 	-- ground (EntranceRamp)
 	local rampIn = at(bayX, FLOOR_T + 0.2, -half + 0.5)
 	task.defer(function()
-		EntranceRamp.build(model, rampIn, { width = SW - BX + 2, keep = { model } })
+		EntranceRamp.build(model, rampIn, { width = SW - BX + 2, keep = { model }, notch = true })
 	end)
 
 	-- big LEGENDS MOTORS sign on the roof edge over the front glass

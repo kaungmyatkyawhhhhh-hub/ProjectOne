@@ -397,9 +397,15 @@ function RewardsPalace.square(kit: any, model: Instance, at: Frame, half: number
 			kit.addLight("SpotLight", lamp, Color3.fromRGB(255, 196, 120), 70, 2.6, Enum.NormalId.Top, 50)
 		end
 		-- the drives from the street: they stop at the road's edge
+		-- (owner, 2026-11-06) the setts run on from the drive to where the ramp starts
 		local inner = at(s * (ARM_X0 + ARM_X1) / 2, top, RAMP_Z)
 		task.defer(function()
-			EntranceRamp.build(model, inner, { width = ARM_X1 - ARM_X0, reach = 40, color = SETT, material = Enum.Material.Cobblestone, keep = { model } })
+			local ramp = EntranceRamp.build(model, inner, { width = ARM_X1 - ARM_X0, reach = 40, color = SETT, material = Enum.Material.Cobblestone, keep = { model }, lift = 0.08, notch = true })
+			local from = if ramp then ramp:GetAttribute("RampStart") else nil
+			if type(from) == "number" and from > 0 then
+				local x0, x1 = math.min(s * ARM_X0, s * ARM_X1), math.max(s * ARM_X0, s * ARM_X1)
+				setts(x0, x1, RAMP_Z - from, RAMP_Z)
+			end
 		end)
 	end
 end

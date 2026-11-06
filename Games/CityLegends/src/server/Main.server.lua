@@ -77,6 +77,18 @@ playerCars.Parent = workspace
 
 local cityStart = os.clock()
 CityBuilder.build()
+
+-- (owner, 2026-11-06) no two faces of a venue in the same place: one pass when all is built (the drives
+-- come a moment after the venues)
+task.delay(8, function()
+	local SurfaceFix = require(script.Parent:WaitForChild("SurfaceFix"))
+	for _, name in { "City", "IslandLots" } do
+		local root = workspace:FindFirstChild(name)
+		if root then
+			SurfaceFix.run(root, { rounds = 8 })
+		end
+	end
+end)
 print(string.format("[CityLegends] city built in %.2fs", os.clock() - cityStart))
 
 ---------------------------------------------------------------------
