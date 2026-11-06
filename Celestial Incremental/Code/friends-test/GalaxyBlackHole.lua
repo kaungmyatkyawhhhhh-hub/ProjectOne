@@ -80,7 +80,7 @@ end
 -- your Dark Matter
 local dmPanel = Kit.panel(win, 24, 66, W - 48, 64, 4)
 Kit.stroke(dmPanel, VIOLET, 2, 0.3)
-Kit.icon(win, "blackHole", 34, 68, 60, VIOLET, { ZIndex = 7 })
+Kit.icon(win, "ui:darkMatter", 34, 68, 60, VIOLET, { ZIndex = 7 }) -- (7 Nov: the Dark Matter icon)
 local dmText = Kit.text(win, 104, 72, W - 140, 30, "", Kit.ps(24, 26), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 2,
 	gradient = ColorSequence.new(hex("#f2e8ff"), hex("#b98aff")) })
 local dmSub = Kit.text(win, 104, 102, W - 140, 22, "", Kit.ps(14, 16), { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2 })
@@ -96,13 +96,17 @@ local barText = Kit.text(bar, 0, Kit.ps(1, 0), W - 48, 22, "", Kit.ps(14, 16), {
 local gainText = Kit.text(win, 24, 200, W - 48, 24, "", Kit.ps(16, 18), { ZIndex = 8, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.6,
 	TextColor3 = hex("#d7b8ff") })
 -- what goes, what stays
-heading(24, 232, "RESETS")
-heading(W / 2 + 6, 232, "STAYS")
+-- (7 Nov, item 8: LOSE with the reset icon, KEEP with the keep icon)
+Kit.icon(win, "ui:reset", 24, 228, 30, nil, { ZIndex = 8 })
+heading(60, 232, "LOSE")
+Kit.icon(win, "ui:keep", W / 2 + 6, 228, 30, nil, { ZIndex = 8 })
+heading(W / 2 + 42, 232, "KEEP")
 local goes = "Stardust + bodies\nRing 1 + shards\nRing 2 + capstone\nthe Supernova climb"
-local stays = "Supernovas + rank\nCosmic Level + perks\nPads, Ignition, Forge\nEssence, AUTOMATION, Dark Matter"
-Kit.text(win, 24, 258, W / 2 - 34, 96, goes, Kit.ps(14, 16), { ZIndex = 8, TextColor3 = hex("#ff9db0"), stroke = 1.2, TextWrapped = true,
+local stays = "Supernovas + rank\nCosmic Level + perks\nPads, Ignition, Forge\nEssence + Dark Matter\nthe AUTOMATION branch"
+-- (7 Nov: bigger lines, they were ~11 px on a phone)
+Kit.text(win, 24, 262, W / 2 - 34, 96, goes, Kit.ps(16, 19), { ZIndex = 8, TextColor3 = hex("#ff9db0"), stroke = 1.2, TextWrapped = true,
 	TextYAlignment = Enum.TextYAlignment.Top })
-Kit.text(win, W / 2 + 6, 258, W / 2 - 30, 96, stays, Kit.ps(14, 16), { ZIndex = 8, TextColor3 = hex("#9dffb0"), stroke = 1.2, TextWrapped = true,
+Kit.text(win, W / 2 + 6, 262, W / 2 - 30, 96, stays, Kit.ps(16, 19), { ZIndex = 8, TextColor3 = hex("#9dffb0"), stroke = 1.2, TextWrapped = true,
 	TextYAlignment = Enum.TextYAlignment.Top })
 -- the COLLAPSE button (a 2nd tap confirms: it resets a lot) + AUTO-SUPERNOVA
 local goBtn, goInner, _, goShadow = Kit.button(win, 24, 362, 330, 56, hex("#b98aff"), hex("#5a1fc2"), { ZIndex = 6 })

@@ -17,6 +17,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local ProximityPromptService = game:GetService("ProximityPromptService")
@@ -97,6 +98,7 @@ local function clearSystem(island)
 end
 
 local RankPlate = require(Galaxy:WaitForChild("RankPlate"))
+local Art = require(Galaxy:WaitForChild("ArtIds")) -- (7 Nov: the new UI art: plaques, checks)
 local PLATE_FAR = 140
 -- (6 Nov, rank title art: the owner's name, then the RANK PLATE (RankPlate: the rank's banner, emblem, title), then a small
 -- line "GALAXY 12% · ✦3"; sized in PIXELS so it reads from the plaza; past PLATE_FAR studs only the emblem)
@@ -853,7 +855,29 @@ local function refreshIgnition(animate: boolean?)
 			local n = if type(v) == "boolean" then (if v then 1 else 0) else (tonumber(v) or 0)
 			if row then
 				local ok = n >= item.need
-				row.Text = (if ok then "[X]  " else "[  ]  ") .. item.text
+				-- (7 Nov, the new UI art: a round check badge (done) / an empty one before each line, not "[X]" / "[ ]")
+				local check = row:FindFirstChild("Check")
+				if not check then
+					check = Instance.new("ImageLabel")
+					check.Name = "Check"
+					check.BackgroundTransparency = 1
+					check.ScaleType = Enum.ScaleType.Fit
+					check.AnchorPoint = Vector2.new(1, 0.5)
+					check.Size = UDim2.fromScale(1, 1)
+					local ar = Instance.new("UIAspectRatioConstraint")
+					ar.AspectRatio = 1
+					ar.Parent = check
+					check.Parent = row
+					local pad = Instance.new("UIPadding")
+					pad.Name = "CheckPad"
+					pad.Parent = row
+				end
+				local h = row.AbsoluteSize.Y
+				local pad = row:FindFirstChild("CheckPad") :: UIPadding
+				if pad and h > 0 then pad.PaddingLeft = UDim.new(0, h * 1.25) end
+				check.Position = UDim2.new(0, -h * 0.2, 0.5, 0)
+				check.Image = if ok then Art.uiIcon.checkDone else Art.uiIcon.checkEmpty
+				row.Text = item.text
 				row.TextColor3 = if ok then Color3.fromRGB(120, 240, 150) else Color3.fromRGB(200, 190, 220)
 			end
 		end
@@ -948,74 +972,225 @@ task.spawn(function()
 	end
 end)
 
--- (6 Nov, rank title art #396: every leaderboard row gets a small RANK EMBLEM before it, by the row's Supernovas (the
--- number at its end; MapConfig.RankDef: SPARK at 1 .. SUPERGIANT at 12; 0 = NEW STAR); the text moves right to make room)
-local function rowEmblem(row: TextLabel)
-	if row:GetAttribute("EmblemOn") then return end
-	row:SetAttribute("EmblemOn", true)
-	local pad = Instance.new("UIPadding")
-	pad.Parent = row
-	local em = RankPlate.emblem(row, "new_star", 10, true)
-	em.AnchorPoint = Vector2.new(0, 0.5)
-	local function fit()
-		local h = row.AbsoluteSize.Y
-		pad.PaddingLeft = UDim.new(0, h * 1.15)
-		em.Size = UDim2.fromOffset(h, h)
-		em.Position = UDim2.new(0, -h * 1.15, 0.5, 0)
-	end
-	local function update()
-		local v = tonumber(string.match(row.Text, "(%d+)%s*$"))
-		em.Visible = row.Text ~= ""
-		local def = v and MapConfig.RankDef(v)
-		local key = if def then RankPlate.keyOf(def.name) else "new_star"
-		em.Image = require(Galaxy:WaitForChild("ArtIds")).rank128[key]
-	end
-	row:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
-	row:GetPropertyChangedSignal("Text"):Connect(update)
-	fit()
-	update()
+-- THE LEADERBOARD PLAQUES (7 Nov, the new UI art; #396 #403): TOP SUPERNOVAS (the wall, both faces) and PLAYERS NEAR YOU
+-- are drawn here on the boards' SurfaceGuis: the galaxy_plaque art as the board (its title on the top banner, the list in its
+-- dark screen). Rows 1-3: the gold / silver / bronze row art (9-sliced), the player's headshot in its round slot, the rank
+-- emblem (#396), name, Supernovas, and the 1st / 2nd / 3rd medal at the row's end; rows 4+: a plain dark row, same height.
+-- An empty board: "Be the first!". The server's lists: the wall's TopList attribute, BoardEvent "Near" (your own list).
+local LB_FONT = Font.fromEnum(Enum.Font.LuckiestGuy)
+local ROW_SLICE = Rect.new(140, 30, 970, 62)
+local RANK_ART = { "gold", "silver", "bronze" }
+local function lbText(parent: Instance, text: string, x: number, y: number, w: number, h: number, colour: Color3, align: Enum.TextXAlignment, z: number, font: Font?)
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.Position = UDim2.fromOffset(x, y)
+	t.Size = UDim2.fromOffset(w, h)
+	t.FontFace = font or FONT
+	t.Text = text
+	t.TextScaled = true
+	t.TextColor3 = colour
+	t.TextXAlignment = align
+	t.ZIndex = z
+	local st = Instance.new("UIStroke")
+	st.Color, st.Thickness = Color3.fromRGB(20, 10, 34), math.max(1.5, h / 14)
+	st.Parent = t
+	t.Parent = parent
+	return t
 end
+-- one row: rank r (1..), entry { u, name, value, you }; x, y, w, h in the canvas' pixels
+local function lbRow(parent: Instance, r: number, e, x: number, y: number, w: number, h: number)
+	local row = Instance.new("Frame")
+	row.Name = "Row" .. r
+	row.BackgroundTransparency = 1
+	row.Position = UDim2.fromOffset(x, y)
+	row.Size = UDim2.fromOffset(w, h)
+	row.ZIndex = 52
+	row.Parent = parent
+	local k = h / 95
+	if e.empty then
+		-- (an empty board: one plain row, "Be the first!" in the middle)
+		local plain = Instance.new("Frame")
+		plain.BackgroundColor3 = Color3.fromRGB(26, 18, 40)
+		plain.BackgroundTransparency = 0.15
+		plain.Size = UDim2.fromScale(1, 1)
+		plain.ZIndex = 52
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0.5, 0)
+		c.Parent = plain
+		local st = Instance.new("UIStroke")
+		st.Color, st.Thickness = Color3.fromRGB(255, 200, 70), 3
+		st.Parent = plain
+		plain.Parent = row
+		lbText(row, "Be the first!", 0, h * 0.2, w, h * 0.6, Color3.fromRGB(255, 220, 120), Enum.TextXAlignment.Center, 54, LB_FONT)
+		return row
+	end -- (the row art is 95 px high: its round slot's middle is at x 92, ~72 across)
+	if r <= 3 then
+		local art = Instance.new("ImageLabel")
+		art.BackgroundTransparency = 1
+		art.Image = Art.ui.row[RANK_ART[r]]
+		art.ScaleType = Enum.ScaleType.Slice
+		art.SliceCenter = ROW_SLICE
+		art.SliceScale = 1 -- (tested 7 Nov: at the row's own scale (~0.46) the bar didn't draw at all; at 1 it draws, Roblox fits the ends)
+		art.Size = UDim2.fromScale(1, 1)
+		art.ZIndex = 52
+		art.Parent = row
+	else
+		local plain = Instance.new("Frame")
+		plain.BackgroundColor3 = Color3.fromRGB(26, 18, 40)
+		plain.BackgroundTransparency = 0.15
+		plain.Size = UDim2.new(1, -h * 0.4, 0.8, 0)
+		plain.Position = UDim2.new(0, h * 0.2, 0.1, 0)
+		plain.ZIndex = 52
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0.5, 0)
+		c.Parent = plain
+		local st = Instance.new("UIStroke")
+		st.Color, st.Thickness, st.Transparency = if e.you then Color3.fromRGB(255, 200, 70) else Color3.fromRGB(90, 70, 130), 2, 0.2
+		st.Parent = plain
+		plain.Parent = row
+		if not e.noNum then lbText(row, tostring(r), h * 0.3, h * 0.25, h * 0.7, h * 0.5, Color3.fromRGB(200, 190, 220), Enum.TextXAlignment.Center, 54, LB_FONT) end
+	end
+	-- the headshot in the round slot (rows 1-3: the art's slot; 4+: the same place)
+	local slotX = if r <= 3 then 92 * k elseif e.noNum then h * 0.8 else h * 1.45
+	local d = (if r <= 3 then 70 else 60) * k
+	local head = Instance.new("ImageLabel")
+	head.BackgroundColor3 = Color3.fromRGB(30, 22, 44)
+	head.AnchorPoint = Vector2.new(0.5, 0.5)
+	head.Position = UDim2.fromOffset(slotX, h / 2)
+	head.Size = UDim2.fromOffset(d, d)
+	head.Image = if (tonumber(e.u) or 0) > 0 then "rbxthumb://type=AvatarHeadShot&id=" .. tostring(e.u) .. "&w=150&h=150" else ""
+	head.ZIndex = 53
+	local hc = Instance.new("UICorner")
+	hc.CornerRadius = UDim.new(0.5, 0)
+	hc.Parent = head
+	head.Parent = row
+	-- the rank emblem by Supernovas (#396), the name, the Supernovas
+	local def = MapConfig.RankDef(tonumber(e.value) or 0)
+	local em = RankPlate.emblem(row, if def then RankPlate.keyOf(def.name) else "new_star", h * 0.62, true)
+	em.Position = UDim2.fromOffset(slotX + d / 2 + h * 0.42, h / 2)
+	em.ZIndex = 54
+	local nameX = slotX + d / 2 + h * 0.8
+	local valueW = h * 1.6
+	local medalW = if r <= 3 then h * 1.15 else 0
+	local textH = h * 0.5
+	lbText(row, tostring(e.name), nameX, (h - textH) / 2, w - nameX - valueW - medalW - h * 0.4, textH,
+		if e.you then Color3.fromRGB(255, 220, 120) else Color3.new(1, 1, 1), Enum.TextXAlignment.Left, 54, LB_FONT)
+	lbText(row, tostring(tonumber(e.value) or 0), w - valueW - medalW - h * 0.35, (h - textH) / 2, valueW, textH,
+		Color3.fromRGB(255, 230, 150), Enum.TextXAlignment.Right, 54, LB_FONT)
+	if r <= 3 then
+		local medal = Instance.new("ImageLabel")
+		medal.BackgroundTransparency = 1
+		medal.Image = Art.ui.medal[r]
+		medal.ScaleType = Enum.ScaleType.Fit
+		medal.AnchorPoint = Vector2.new(0.5, 0.5)
+		medal.Position = UDim2.fromOffset(w - medalW * 0.5 - h * 0.25, h / 2)
+		medal.Size = UDim2.fromOffset(h * 1.25, h * 1.25)
+		medal.ZIndex = 55
+		medal.Parent = row
+	end
+	return row
+end
+-- the plaque on one SurfaceGui (its old text hidden); returns the list frame (the dark screen) + its size
+local function lbPlaque(gui: SurfaceGui, title: string, tall: boolean)
+	local old = gui:FindFirstChild("Plaque")
+	if old then return old:FindFirstChild("List") end
+	for _, c in ipairs(gui:GetChildren()) do if c:IsA("GuiObject") then c.Visible = false end end
+	local cw, ch = gui.AbsoluteSize.X, gui.AbsoluteSize.Y
+	-- (everything is laid out in the ART's pixels (the plaque is 920 x 436) inside a frame shrunk with a UIScale: Roblox
+	-- skipped / repeated 9-slices drawn at a small SliceScale (tested 7 Nov), at scale 1 they draw right)
+	local k = (if tall then cw / 920 else math.min(cw / 920, ch / 436)) * 0.95 -- (a small margin: the banner's star kept touching the edge)
+	local ah = if tall then ch * 0.95 / k else 436
+	local pl = Instance.new("Frame")
+	pl.Name = "Plaque"
+	pl.BackgroundTransparency = 1
+	pl.AnchorPoint = Vector2.new(0.5, 0.5)
+	pl.Position = UDim2.fromScale(0.5, 0.5)
+	pl.Size = UDim2.fromOffset(920, ah)
+	pl.ZIndex = 50
+	local sc = Instance.new("UIScale")
+	sc.Scale = k
+	sc.Parent = pl
+	pl.Parent = gui
+	local img = Instance.new("ImageLabel")
+	img.BackgroundTransparency = 1
+	img.Image = Art.ui.plaque
+	img.ZIndex = 50
+	img.Size = UDim2.fromScale(1, 1)
+	-- (PLAYERS NEAR YOU is tall: the plaque is 9-sliced through a strip of its dark screen, so the frame keeps its look)
+	img.ScaleType = Enum.ScaleType.Slice
+	img.SliceCenter = Rect.new(150, 156, 770, 184) -- (y 144-190: the sides are plain frame there; the wings start at ~192)
+	img.Parent = pl
+	-- the title on the top banner (x 215-705, y 92-152 of the art)
+	lbText(pl, title, 230, 96, 460, 52, Color3.new(1, 1, 1), Enum.TextXAlignment.Center, 51, LB_FONT)
+	local list = Instance.new("Frame")
+	list.Name = "List"
+	list.BackgroundTransparency = 1
+	list.Position = UDim2.fromOffset(100, 172)
+	list.Size = UDim2.fromOffset(720, ah - 172 - (if tall then 70 else 56))
+	list.ZIndex = 51
+	list.Parent = pl
+	return list
+end
+local function lbFill(list: Frame, entries, columns: number, rows: number)
+	for _, c in ipairs(list:GetChildren()) do c:Destroy() end
+	local w, h = list.Size.X.Offset, list.Size.Y.Offset
+	local gap = 8
+	local cw = (w - gap * (columns - 1)) / columns
+	local rh = math.min(h / rows, cw * 0.13)
+	if #entries == 0 then
+		lbRow(list, 1, { empty = true }, 0, (h / rows - rh) / 2, cw, rh)
+		return
+	end
+	for i, e in ipairs(entries) do
+		if i > columns * rows then break end
+		local col, r = (i - 1) // rows, (i - 1) % rows
+		lbRow(list, e.rank or i, e, col * (cw + gap), r * (h / rows) + (h / rows - rh) / 2, cw, rh)
+	end
+end
+-- TOP SUPERNOVAS: both faces of the wall, from its TopList (the server writes it every minute)
 task.spawn(function()
-	local function scan(model: Instance?)
-		for _, d in ipairs(model and model:GetDescendants() or {}) do
-			if d:IsA("TextLabel") and string.match(d.Name, "^Row%d+$") then rowEmblem(d) end
+	local lb = centre:WaitForChild("Leaderboard", 30)
+	local wall = lb and lb:WaitForChild("Wall", 30)
+	if not wall then return end
+	local function draw()
+		local ok, list = pcall(function() return HttpService:JSONDecode(wall:GetAttribute("TopList") or "[]") end)
+		local entries = {}
+		for i, e in ipairs(ok and list or {}) do entries[i] = { u = e.u, name = e.n, value = e.v, you = e.u == player.UserId } end
+		for _, gui in ipairs(wall:GetChildren()) do
+			if gui:IsA("SurfaceGui") then
+				local l = lbPlaque(gui, "TOP SUPERNOVAS", false)
+				if l then lbFill(l, entries, 2, 5) end
+			end
 		end
 	end
-	for _, name in ipairs({ "Leaderboard", "NearBoard" }) do
-		local m = centre:WaitForChild(name, 30)
-		scan(m)
-		if m then m.DescendantAdded:Connect(function(d) if d:IsA("TextLabel") and string.match(d.Name, "^Row%d+$") then task.defer(rowEmblem, d) end end) end
-	end
+	wall:GetAttributeChangedSignal("TopList"):Connect(draw)
+	task.wait(1)
+	draw()
 end)
-
--- PLAYERS NEAR YOU (its own board next to the leaderboard wall since overnight part 3): your own list from the server;
--- your row in gold on a gold band
+-- PLAYERS NEAR YOU: your own list from the server (5 above you, you, 5 below); your row outlined gold. The server sends no
+-- real ranks for it, so its rows are the plain ones, without numbers or medals.
 local boardEvent = Galaxy:WaitForChild("BoardEvent", 30)
+local function nearDraw(list)
+	local nb = centre:FindFirstChild("NearBoard")
+	local board = nb and nb:FindFirstChild("Board")
+	for _, gui in ipairs(board and board:GetChildren() or {}) do
+		if gui:IsA("SurfaceGui") then
+			local l = lbPlaque(gui, "PLAYERS NEAR YOU", true)
+			if l then
+				local entries = {}
+				for i, e in ipairs(list or {}) do entries[i] = { u = e.u, name = e.name, value = e.value, you = e.you, rank = 4, noNum = true } end
+				lbFill(l, entries, 1, MapConfig.NearBoard.Rows)
+			end
+		end
+	end
+end
 if boardEvent then
 	boardEvent.OnClientEvent:Connect(function(kind, list)
 		if kind ~= "Near" or type(list) ~= "table" then return end
-		local nb = centre:FindFirstChild("NearBoard")
-		local board = nb and nb:FindFirstChild("Board")
-		for _, gui in ipairs(board and board:GetChildren() or {}) do
-			local near = gui:IsA("SurfaceGui") and gui:FindFirstChild("Near")
-			if near then
-				for r = 1, MapConfig.NearBoard.Rows do
-					local row = near:FindFirstChild("Row" .. r)
-					local band = near:FindFirstChild("Band" .. r)
-					local e = list[r]
-					if row then
-						row.Text = if e then string.format("%s   %d", tostring(e.name), tonumber(e.value) or 0) else ""
-						row.TextColor3 = if e and e.you then Color3.fromRGB(255, 214, 120) else Color3.fromRGB(225, 215, 240)
-					end
-					if band then
-						band.BackgroundColor3 = if e and e.you then Color3.fromRGB(255, 190, 60) else Color3.fromRGB(255, 255, 255)
-						band.BackgroundTransparency = if e and e.you then 0.75 elseif r % 2 == 0 then 0.94 else 1
-					end
-				end
-			end
-		end
+		nearDraw(list)
 	end)
 end
+task.delay(3, function() nearDraw({}) end) -- (until the server's list comes: "Be the first!")
 
 ------------------------------------------------------------------------
 -- every frame: planets orbit, near / far detail, the core, the comets

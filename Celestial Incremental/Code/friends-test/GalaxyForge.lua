@@ -23,6 +23,7 @@ local RIGHT = Enum.TextXAlignment.Right
 local F = Econ.Forge
 local Cutscene = require(Galaxy:WaitForChild("GalaxyCutscene"))
 local Vfx = require(Galaxy:WaitForChild("VfxLibrary"))
+local Art = require(Galaxy:WaitForChild("ArtIds")) -- (7 Nov: the Forge card art)
 local event = Galaxy:WaitForChild("EconEvent") :: RemoteEvent
 
 while not player:GetAttribute("Loaded") do player:GetAttributeChangedSignal("Loaded"):Wait() end
@@ -248,21 +249,49 @@ end
 
 ------------------------------------------------------------------------ the roll's reveal
 local reveal = Kit.box(win, 0, 0, W, H, { Visible = false, ZIndex = 40 })
-local revealBg = Kit.box(reveal, 120, 120, W - 240, 200, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 41 })
-Kit.corner(revealBg, 10)
-local revealStroke = Kit.stroke(revealBg, Color3.new(1, 1, 1), 3)
-local revealIcon = Kit.icon(reveal, "stardust", 140, 140, 120, nil, { ZIndex = 43 })
--- (the VFX pass: the core shows inside the rarity-coloured CARD FRAME, forge_card_frame)
-local revealFrame = Kit.new("ImageLabel", { Name = "CardFrame", BackgroundTransparency = 1, Image = Vfx.T.alpha.forge_card_frame, AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.fromOffset(200, 200), Size = UDim2.fromOffset(236, 236), ZIndex = 44 }, reveal)
-local revealRarity = Kit.text(reveal, 270, 150, 270, 36, "", 30, { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 2.4 })
-local revealName = Kit.text(reveal, 272, 190, 270, 26, "", 20, { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
-local revealVal = Kit.text(reveal, 272, 220, 270, 30, "", 26, { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 1.8, TextColor3 = hex("#7dff6b") })
-local revealMore = Kit.text(reveal, 272, 256, 270, 22, "", 15, { ZIndex = 44, TextColor3 = hex("#a99fb8"), stroke = 1.1 })
--- (c1: the NEW CORE! pop, over the card's top edge)
-local newPop = Kit.box(reveal, 0, 104, W, 44, { ZIndex = 47, Visible = false })
+-- (7 Nov, new UI art: the window dims behind the CARD; the card = galaxy_card_<rarity>_full (ArtIds.ui.card), the core in
+-- its dark window, the core's NAME in its bottom banner (Luckiest Guy). It shows its BACK first, then flips (0.25 s))
+local revealBg = Kit.box(reveal, 0, 0, W, H, { BackgroundTransparency = 0.08, BackgroundColor3 = hex("#07050c"), ZIndex = 41 })
+Kit.corner(revealBg, 12)
+local CARD_W, CARD_H, CARD_X, CARD_Y = 232, 318, 200, 226 -- (the card's size + its centre in the window; the art is ~0.73 wide)
+local cardHolder = Kit.new("Frame", { Name = "Card", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5),
+	Position = UDim2.fromOffset(CARD_X, CARD_Y), Size = UDim2.fromOffset(CARD_W, CARD_H), ZIndex = 42 }, reveal)
+local cardImg = Kit.new("ImageLabel", { Name = "Art", BackgroundTransparency = 1, Image = Art.ui.cardBack, ScaleType = Enum.ScaleType.Fit,
+	Size = UDim2.fromScale(1, 1), ZIndex = 42 }, cardHolder)
+-- (the core in the card's dark window: its middle sits at ~44% of the card's height)
+local cardShadow = Kit.new("ImageLabel", { Name = "Shadow", BackgroundTransparency = 1, ScaleType = Enum.ScaleType.Fit, AnchorPoint = Vector2.new(0.5, 0.5),
+	Position = UDim2.new(0.5, 0, 0.44, 4), Size = UDim2.fromScale(0.56, 0.4), ImageColor3 = Color3.new(0, 0, 0), ImageTransparency = 0.4, ZIndex = 43 }, cardHolder)
+local cardIcon = Kit.new("ImageLabel", { Name = "Icon", BackgroundTransparency = 1, ScaleType = Enum.ScaleType.Fit, AnchorPoint = Vector2.new(0.5, 0.5),
+	Position = UDim2.fromScale(0.5, 0.44), Size = UDim2.fromScale(0.56, 0.4), ZIndex = 44 }, cardHolder)
+local cardName = Kit.new("TextLabel", { Name = "CoreName", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5),
+	Position = UDim2.fromScale(0.5, 0.845), Size = UDim2.fromScale(0.62, 0.065), FontFace = Font.fromEnum(Enum.Font.LuckiestGuy), Text = "",
+	TextColor3 = Color3.new(1, 1, 1), TextScaled = true, ZIndex = 45 }, cardHolder)
+Kit.stroke(cardName, hex("#1a0e28"), 2)
+local revealRarity = Kit.text(reveal, 340, 136, 320, 40, "", 34, { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 2.4 })
+local revealName = Kit.text(reveal, 342, 182, 320, 26, "", 20, { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
+local revealVal = Kit.text(reveal, 342, 214, 320, 30, "", 26, { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 1.8, TextColor3 = hex("#7dff6b") })
+local revealMore = Kit.text(reveal, 342, 252, 320, 22, "", 15, { ZIndex = 44, TextColor3 = hex("#a99fb8"), stroke = 1.1 })
+-- the card flip: the back shows, it turns edge-on, the rarity card turns back to face you (0.25 s; Reduced Motion: a swap)
+local function flipCard(art: string, front: () -> ())
+	cardIcon.Visible, cardShadow.Visible, cardName.Visible = false, false, false
+	if Kit.calm() then
+		cardImg.Image = art
+		front()
+		return
+	end
+	cardImg.Image = Art.ui.cardBack
+	cardHolder.Size = UDim2.fromOffset(CARD_W, CARD_H)
+	Kit.tween(cardHolder, { Size = UDim2.fromOffset(0, CARD_H) }, 0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	task.delay(0.12, function()
+		cardImg.Image = art
+		front()
+		Kit.tween(cardHolder, { Size = UDim2.fromOffset(CARD_W, CARD_H) }, 0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	end)
+end
+-- (c1: the NEW CORE! pop, above the rarity in the text column (7 Nov: it sat on the rarity before))
+local newPop = Kit.box(reveal, 0, 0, 320, 44, { ZIndex = 47, Visible = false, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(500, 108) })
 local newScale = Kit.new("UIScale", { Scale = 1 }, newPop)
-local newText = Kit.text(newPop, 0, 0, W, 44, "NEW CORE!", 34, { ZIndex = 48, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2.6,
+local newText = Kit.text(newPop, 0, 0, 320, 44, "NEW CORE!", 34, { ZIndex = 48, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2.6,
 	gradient = ColorSequence.new(hex("#fff1c0"), hex("#ffb02a")) })
 local revealHit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 45 }, reveal)
 revealHit.MouseButton1Click:Connect(function() reveal.Visible = false end)
@@ -278,11 +307,13 @@ local function showRoll(results, newOnes)
 	local k, r = string.match(best, "^(%a+):(%a+)$")
 	local kind, rar = Econ.ForgeKindById[k], Econ.ForgeRarityById[r]
 	local d = forgeData()
-	for _, c in ipairs(revealIcon.Parent:GetChildren()) do
-		if c:IsA("ImageLabel") and (c.Name == "Icon" or c.Name == "Shadow") then c.Image = Kit.A.icon[kind.icon] or "" end
-	end
-	revealStroke.Color = rar.colour
-	revealFrame.ImageColor3 = rar.colour:Lerp(Color3.new(1, 1, 1), 0.15)
+	-- (the card: its back, then the flip to this rarity's card with the core + its name)
+	cardIcon.Image = Kit.A.icon[kind.icon] or ""
+	cardShadow.Image = cardIcon.Image
+	cardName.Text = kind.name
+	flipCard(Art.ui.card[r] or Art.ui.card.Common, function()
+		cardIcon.Visible, cardShadow.Visible, cardName.Visible = true, true, true
+	end)
 	Kit.setText(revealRarity, rar.name)
 	revealRarity.TextColor3 = rar.colour
 	Kit.setText(revealName, kind.name .. " · LV " .. (d.cores[best] or 1))
@@ -315,7 +346,7 @@ local function showRoll(results, newOnes)
 	end
 	-- (2.5 #289 + the VFX pass: the card's ladder from VfxLibrary: the hammer hit every roll; Uncommon + the rarity's aura;
 	-- Rare + a ring; Epic + rays; Legendary + confetti + a starburst; Celestial + the supernova flash. Reduced Motion: the hit only)
-	Vfx.UiForgeReveal(reveal, bestI, rar.colour, UDim2.fromOffset(200, 200), 42)
+	Vfx.UiForgeReveal(reveal, bestI, rar.colour, UDim2.fromOffset(CARD_X, CARD_Y), 41)
 	-- (#247: the SOUND ladder: pop, chime, a rising arpeggio, a whoosh + chime, then a held silence + the big stinger)
 	if bestI <= 1 then Kit.sound("piecePop")
 	elseif bestI == 2 then Kit.sound("cometCatch")
@@ -454,8 +485,17 @@ local function close()
 	task.delay(0.15, function() if not isOpen then holder.Visible = false end end)
 	if shared.GalaxySideWindow then shared.GalaxySideWindow("F", false) end
 end
+local cardsLoaded = false
 local function open()
 	if isOpen then return end
+	-- (7 Nov: the card art loads the first time the Forge opens, so the first roll's flip doesn't show an empty card)
+	if not cardsLoaded then
+		cardsLoaded = true
+		for _, id in ipairs({ Art.ui.cardBack, Art.ui.card.Common, Art.ui.card.Uncommon, Art.ui.card.Rare, Art.ui.card.Epic,
+			Art.ui.card.Legendary, Art.ui.card.Mythic, Art.ui.card.Celestial }) do
+			Kit.new("ImageLabel", { Name = "Preload", BackgroundTransparency = 1, Image = id, ImageTransparency = 0.99, Size = UDim2.fromOffset(2, 2), ZIndex = 1 }, win)
+		end
+	end
 	if shared.GalaxyCloseSide then shared.GalaxyCloseSide("F") end
 	isOpen = true
 	Kit.sound("open")

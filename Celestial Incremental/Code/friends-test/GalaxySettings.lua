@@ -163,29 +163,76 @@ workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(functio
 -- step by step (the server's IncomeSplit: each line a multiplier on the one before), the total, and the time to your next
 -- Supernova at this income
 local HttpService = game:GetService("HttpService")
-local SW, SH = 560, 400
+local SW, SH = 560, 620 -- (7 Nov: + YOUR STATS on top, an icon per line)
 local stats = Kit.box(root, 0, 0, SW, SH, { Name = "StatsWindow", AnchorPoint = Vector2.new(0.5, 0.5), Visible = false })
 local sScale = Instance.new("UIScale")
 sScale.Parent = stats
-local sWin, sClose = Kit.window(stats, SW, SH, { title = "STATS", icon = "stardust", iconGlow = Color3.fromRGB(255, 200, 70),
+-- (7 Nov: on a PHONE the window fits the width (text >= 14 px) and scrolls up / down, like UPGRADES)
+local sHolder: GuiObject = stats
+if Kit.phone() then
+	sHolder = Kit.new("ScrollingFrame", { Name = "PhoneScroll", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromOffset(SW, SH),
+		CanvasSize = UDim2.fromOffset(0, SH), ScrollBarThickness = 8, ScrollingDirection = Enum.ScrollingDirection.Y,
+		ScrollBarImageColor3 = hex("#ffd84a") }, stats)
+end
+local sWin, sClose = Kit.window(sHolder, SW, SH, { title = "STATS", icon = "stardust", iconGlow = Color3.fromRGB(255, 200, 70),
 	c1 = hex("#7a4a0a"), c2 = hex("#ffc83a"), lip = hex("#c2840c"), glow = Color3.fromRGB(255, 170, 40), line = hex("#ffe08a") })
-local sPanel = Kit.panel(sWin, 16, 70, SW - 32, 262, 4)
+-- (7 Nov, item 7: YOUR STATS: 10 lines in 2 columns, each with its own icon (ArtIds.uiIcon))
+local gPanel = Kit.panel(sWin, 16, 66, SW - 32, 212, 4)
+Kit.stroke(gPanel, hex("#ffc83a"), 2, 0.2)
+local STATS = {
+	{ icon = "supernova", name = "SUPERNOVAS" }, { icon = "comet", name = "COMETS" },
+	{ icon = "starShard", name = "SHARDS" }, { icon = "starCore", name = "CORES" },
+	{ icon = "essence", name = "ESSENCE" }, { icon = "darkMatter", name = "DARK MATTER" },
+	{ icon = "forgeRolls", name = "FORGE ROLLS" }, { icon = "bodies", name = "BODIES" },
+	{ icon = "playtime", name = "TIME PLAYED" }, { icon = "trophy", name = "RANK" },
+}
+local gridVals = {}
+for i, st in ipairs(STATS) do
+	local col, row = (i - 1) % 2, (i - 1) // 2
+	local x, y = 26 + col * 262, 74 + row * 40
+	Kit.icon(sWin, "ui:" .. st.icon, x, y, 36, nil, { ZIndex = 8 })
+	Kit.text(sWin, x + 42, y + 8, 120, 22, st.name, Kit.ps(13, 15), { ZIndex = 8, FontFace = Kit.FONT_BOLD, stroke = 1.2, TextColor3 = hex("#cfc6dd") })
+	gridVals[i] = Kit.text(sWin, x + 132, y + 6, 112, 26, "", Kit.ps(16, 18), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4, TextXAlignment = Enum.TextXAlignment.Right })
+end
+local sPanel = Kit.panel(sWin, 16, 290, SW - 32, 262, 4)
 Kit.stroke(sPanel, hex("#ffc83a"), 2, 0.2)
 local statRows = {}
 for i = 1, 9 do
-	local y = 78 + (i - 1) * 28
+	local y = 298 + (i - 1) * 28
 	local name = Kit.text(sWin, 30, y, 380, 24, "", Kit.ps(14, 16), { ZIndex = 8, FontFace = Kit.FONT_BOLD, stroke = 1.2 })
 	local val = Kit.text(sWin, SW - 170, y, 140, 24, "", Kit.ps(16, 18), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4, TextXAlignment = Enum.TextXAlignment.Right })
 	statRows[i] = { name = name, val = val }
 end
-local nextLine = Kit.text(sWin, 16, 344, SW - 32, 40, "", Kit.ps(17, 19), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextXAlignment = CENTRE,
+local nextLine = Kit.text(sWin, 16, 562, SW - 32, 40, "", Kit.ps(17, 19), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextXAlignment = CENTRE,
 	TextColor3 = hex("#ffd84a"), TextWrapped = true })
 local fmt = Econ.Format
 local function mult(x: number): string
 	if x >= 10 then return "x" .. fmt(x) end
 	return "x" .. (string.format("%.2f", x):gsub("0+$", ""):gsub("%.$", ""))
 end
+local function playTime(sec: number): string
+	if sec >= 3600 then return math.floor(sec / 3600) .. "h " .. math.floor(sec % 3600 / 60) .. "m" end
+	return math.floor(sec / 60) .. " min"
+end
+local function refreshGrid()
+	local okF, forge = pcall(function() return HttpService:JSONDecode(player:GetAttribute("Forge") or "{}") end)
+	if not okF or type(forge) ~= "table" then forge = {} end
+	local cores = 0
+	for _ in pairs(type(forge.cores) == "table" and forge.cores or {}) do cores += 1 end
+	local bodies = 0
+	for i = 1, #Econ.Tiers do bodies += tonumber(player:GetAttribute("Copies" .. i)) or 0 end
+	local rank = string.gsub(tostring(player:GetAttribute("Rank") or ""), "%s*·.*$", "")
+	local vals = {
+		fmt(player:GetAttribute("Supernovas") or 0), fmt(player:GetAttribute("CometsCaught") or 0),
+		fmt(player:GetAttribute("Shards") or 0), cores .. "/" .. (#Econ.Forge.Kinds * #Econ.Forge.Rarities),
+		fmt(player:GetAttribute("Essence") or 0), fmt(player:GetAttribute("DarkMatter") or 0),
+		fmt(tonumber(forge.rolls) or 0), fmt(bodies),
+		playTime(player:GetAttribute("PlayTime") or 0), if rank ~= "" then rank else "NEW STAR",
+	}
+	for i, v in ipairs(vals) do Kit.setText(gridVals[i], v) end
+end
 local function refreshStats()
+	refreshGrid()
 	local ok, list = pcall(function() return HttpService:JSONDecode(player:GetAttribute("IncomeSplit") or "[]") end)
 	if not ok or type(list) ~= "table" then list = {} end
 	for i, r in ipairs(statRows) do
@@ -229,7 +276,13 @@ local function openStats()
 	local top = 124 * s
 	local room = (if small then vp.Y - 6 else vp.Y - 104 * s) - top
 	local want = math.min(Kit.ps(s, 0.85), room / (SH + Kit.ps(34, 6)), (vp.X - Kit.ps(24, 8)) / (SW + 40))
-	stats.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + 15 * want)
+	if sHolder ~= stats then
+		want = math.min(1, (vp.X - 12) / (SW + 16))
+		local h = math.min(SH, math.floor(room / want))
+		sHolder.Size = UDim2.fromOffset(SW, h)
+		stats.Size = UDim2.fromOffset(SW, h)
+	end
+	stats.Position = UDim2.fromOffset(vp.X / 2, top + room / 2 + (if sHolder ~= stats then 0 else 15 * want))
 	sScale.Scale = want * 0.8
 	Kit.tween(sScale, { Scale = want }, 0.25, Enum.EasingStyle.Back)
 end

@@ -577,7 +577,10 @@ function UI:buildInfo()
 	end, function() return false end)
 	self.targets.Buy = ui.buy.button
 	-- nothing selected
-	ui.empty = Kit.text(gui, 40, 250, W - 80, 130, "Tap a node on the TREE", 46, { ZIndex = 8, TextXAlignment = CENTRE, TextYAlignment = Enum.TextYAlignment.Center,
+	-- (7 Nov, item 6: LUMI points at the TREE, with one line under her)
+	ui.emptyLumi = Kit.new("ImageLabel", { Name = "EmptyLumi", BackgroundTransparency = 1, Image = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("ArtIds")).lumi.pointing,
+		ScaleType = Enum.ScaleType.Fit, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromOffset(W / 2, 150), Size = UDim2.fromOffset(250, 250), ZIndex = 8 }, gui)
+	ui.empty = Kit.text(gui, 40, 410, W - 80, 100, "Tap a node to see what it does", 40, { ZIndex = 8, TextXAlignment = CENTRE, TextYAlignment = Enum.TextYAlignment.Center,
 		TextWrapped = true, FontFace = Kit.FONT_HEAVY, stroke = 2.6 })
 	-- (the CAPSTONE: three choice buttons where BUY is; the first pick costs shards, a switch is free after a Supernova)
 	ui.caps = {}
@@ -607,6 +610,7 @@ function UI:refreshInfo()
 	local isCap = sel.kind == "cap"
 	ui.page.Visible = node ~= nil or isCap
 	shown(ui.empty, node == nil and not isCap)
+	ui.emptyLumi.Visible = node == nil and not isCap
 	for _, b in ipairs(ui.caps) do b.show(isCap) end
 	ui.buy.show(not isCap)
 	for _, l in ipairs({ ui.level, ui.value, ui.step, ui.prog, ui.tier }) do shown(l, not isCap) end
@@ -697,9 +701,16 @@ function UI:buildLocked()
 	local W, H = self.size.X, self.size.Y
 	local L = self.spec.locked
 	local gui = self.gui
-	self.lockIcon = Kit.icon(gui, "lock", W / 2 - 50, 66, 100, nil, { ZIndex = 6 })
+	-- (7 Nov, item 9: locked = the chained sign art (galaxy_sign_locked, 468 x 239) over the board + "Unlocks at ..." under it)
+	-- (it fits between the board's title (top 38) and the line (bottom 52), so they never overlap)
+	local sh = math.min((W - 30) * 239 / 468, H - 38 - 56)
+	local sw = sh * 468 / 239
+	local sign = Kit.new("ImageLabel", { Name = "LockedSign", BackgroundTransparency = 1, ScaleType = Enum.ScaleType.Fit,
+		Image = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("ArtIds")).ui.signLocked,
+		Position = UDim2.fromOffset((W - sw) / 2, 38), Size = UDim2.fromOffset(sw, sh), ZIndex = 6 }, gui)
+	self.lockIcon = sign
 	self.kindIcon = Kit.icon(gui, L.icon, W / 2 - 50, 60, 100, self.spec.Neon, { ZIndex = 6 })
-	self.lockText = Kit.text(gui, 10, H - 70, W - 20, 30, L.text, 24, { ZIndex = 8, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2, TextColor3 = GREY_TEXT })
+	self.lockText = Kit.text(gui, 10, H - 48, W - 20, 30, "Unlocks at " .. L.text, 24, { ZIndex = 8, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2, TextColor3 = Color3.new(1, 1, 1) })
 	self.openBtn = action(gui, 40, H - 62, W - 80, 48, 26)
 	tap(self.openBtn.button, function()
 		if not self:can() or not L.window then self.ctx.sound("no") return end
@@ -710,7 +721,7 @@ end
 function UI:refreshLocked()
 	local L = self.spec.locked
 	local open = L.attr ~= nil and (tonumber(self:attr(L.attr)) or 0) >= (L.need or 1)
-	self.lockIcon.Parent.Visible = not open
+	self.lockIcon.Visible = not open
 	self.kindIcon.Parent.Visible = open
 	shown(self.lockText, not open)
 	self.openBtn.show(open)

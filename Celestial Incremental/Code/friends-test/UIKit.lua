@@ -212,7 +212,12 @@ function Kit.icon(parent, name, x, y, w, glowColor: Color3?, props)
 			end
 		end)
 	end
-	local img = new("ImageLabel", { Name = "Icon", BackgroundTransparency = 1, Image = A.icon[name] or "", Size = UDim2.fromScale(1, 1), ZIndex = holder.ZIndex + 1,
+	-- (7 Nov: "ui:<name>" = the new UI art icons, ArtIds.uiIcon)
+	local image = A.icon[name]
+	if not image and type(name) == "string" and string.sub(name, 1, 3) == "ui:" then
+		image = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("ArtIds")).uiIcon[string.sub(name, 4)]
+	end
+	local img = new("ImageLabel", { Name = "Icon", BackgroundTransparency = 1, Image = image or "", Size = UDim2.fromScale(1, 1), ZIndex = holder.ZIndex + 1,
 		ScaleType = Enum.ScaleType.Fit }, holder)
 	-- hard drop shadow (v12: drop-shadow 0 3px 0 rgba(0,0,0,.6))
 	new("ImageLabel", { Name = "Shadow", BackgroundTransparency = 1, Image = img.Image, ImageColor3 = Color3.new(0, 0, 0), ImageTransparency = 0.4,

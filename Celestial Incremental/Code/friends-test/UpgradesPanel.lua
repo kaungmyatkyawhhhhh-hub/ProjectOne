@@ -116,7 +116,7 @@ function Panel.new(parent: Instance, opts)
 	Kit.stroke(chip, Kit.INK, 2)
 	if chipName == "SHARDS" then Kit.grad(chip, hex("#3a1f7a"), hex("#7a4cff"), 0) else Kit.grad(chip, hex("#0f5a5a"), hex("#22c7b8"), 0) end
 	self.chipText = Kit.text(win, 470, 10, 70, 24, "0", 20, { ZIndex = 8, stroke = 1.5, TextXAlignment = Enum.TextXAlignment.Center })
-	Kit.text(win, 470, Kit.ps(33, 31), 70, Kit.ps(12, 16), chipName, Kit.ps(9, 14), { ZIndex = 8, stroke = 1, TextColor3 = if chipName == "SHARDS" then hex("#e6dcff") else hex("#dcfffb"), TextXAlignment = Enum.TextXAlignment.Center })
+	Kit.text(win, 470, Kit.ps(33, 31), 70, Kit.ps(12, 16), chipName, Kit.ps(9, 15), { ZIndex = 8, stroke = 1, TextColor3 = if chipName == "SHARDS" then hex("#e6dcff") else hex("#dcfffb"), TextXAlignment = Enum.TextXAlignment.Center })
 	if chipName == "SHARDS" then
 		Kit.icon(win, "shard", 548, 2, 50, Color3.fromRGB(170, 110, 255), { ZIndex = 8 })
 	else
@@ -241,7 +241,7 @@ function Panel:setButton(row, state: string, price: number?, label: string?)
 	elseif state == "locked" then
 		local img = Kit.icon(inner, "lock", 10, 10, 30, nil, { ZIndex = z })
 		img.ImageTransparency = 0.2
-		Kit.text(inner, 38, Kit.ps(15, 12), 104, 28, label or "LOCKED", if #(label or "LOCKED") > 9 then Kit.ps(13, 18) else Kit.ps(18, 20), { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
+		Kit.text(inner, 38, Kit.ps(15, 12), 104, 28, label or "LOCKED", if #(label or "LOCKED") > 9 then Kit.ps(13, 15) else Kit.ps(18, 20), { ZIndex = z, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = hex("#cfc6dd") })
 	else
 		local top = 10
 		if label then
@@ -485,7 +485,7 @@ function Panel:copyButton(row, k: number, level: number, copies: number)
 	local b, inner, _, shadow = Kit.button(row.frame, 288, 84, 146, 22, c1, c2, { ZIndex = 6 })
 	row.copyBtn, row.copyShadow = b, shadow
 	local label = if state == "max" then "MAX BODIES" elseif state == "visit" then "VISIT" else "+BODY  " .. fmt(cost)
-	Kit.text(inner, 0, 1, 146, 18, label, Kit.ps(12, 14), { ZIndex = inner.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY,
+	Kit.text(inner, 0, 1, 146, 18, label, Kit.ps(12, 15), { ZIndex = inner.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY,
 		TextColor3 = if state == "no" then hex("#ff9a9a") else Color3.new(1, 1, 1) })
 	b.Visible = level > 0
 	self.targets["Copy" .. k] = b
