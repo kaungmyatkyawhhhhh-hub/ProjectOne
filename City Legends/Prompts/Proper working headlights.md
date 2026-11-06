@@ -17,7 +17,7 @@ This is the most important part. On **every newly imported car** (and traffic / 
 - **Indicators / blinkers** flash on the car's own indicator spots (front corners, mirrors or side, rear), left and right the right way round.
 - The glow must **match the shape of each light unit** (the lens / LED strip / round lamps), not a square block stuck on top. No light poking through the body, no glow showing from the wrong side, no flicker or z-fighting.
 - How:
-  - map every car's light parts (headlight, DRL, tail, brake, reverse, indicators, left / right) in data (`HeadlightMap` with the tail-light map), found from the model's own parts and checked by eye;
+  - map every new-model car's light parts (headlight, DRL, tail, brake, reverse, indicators, left / right) in data (`HeadlightMap` with the tail-light map), found from the model's own parts and checked by eye;
   - fix any car where the existing tail lights (`client/TailLights.lua`) sit in the wrong place too;
   - where a model has no separate lamp part, fit a thin glowing insert shaped to the unit, just behind the lens.
 - **Check every new-model car one by one** at night from the front, back and both sides (a close-up of each corner). Keep a checklist in the notes: car, headlights ✓, tail / brake ✓, reverse ✓, indicators ✓. **No car is "done" until all four are in the right place.**
@@ -31,7 +31,7 @@ This is the most important part. On **every newly imported car** (and traffic / 
 
 ## What "proper" means
 ### 1. The light units glow (the model's own headlights)
-- Find each car's **real headlight parts** (lens, projector, DRL strip) on every model, old and new. Store their positions per car (a `HeadlightMap` in data, like the tail-light map) so the light comes from the right spot.
+- Find each car's **real headlight parts** (lens, projector, DRL strip) on every new model (not the old ones). Store their positions per car (a `HeadlightMap` in data, like the tail-light map) so the light comes from the right spot.
 - When the lights are on: the projector / bulb part glows (Neon material or a bright emissive colour on that part only, the Customs headlight colour), the lens looks lit, and the **DRL strip** glows softly whenever the engine runs.
 - When off: the units look like glass and chrome, not grey or black holes.
 - If a car's model has no separate light part, add a small glowing insert shaped to fit behind the lens, so it never looks painted on.
