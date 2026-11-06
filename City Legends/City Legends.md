@@ -27,11 +27,13 @@ Owner: "I told you to fix these ... Find all buildings and roads if they have th
 - `tools/riviera/PaveDig.luau`: dug the ground off 191 pavement pieces it stood over.
 - Lane check after it all: 188 lanes, 0 holes, 0 kerbs in a lane, 0 ledges, 163 speed bumps.
 
+**Checked in Play after it all (Studio open):** the tight bend at the top of the Switchbacks is a clean curve. FPS with the HUD on: Coast Road driving 148, Corniche Highway driving 150. Rewards parked 163, Harbour parked 145 (HUD off). 0 to 2 slow frames. These aren't comparable with last night's numbers: the spots and the PC's load differ. They do show the extra parts cost nothing that matters.
+
 **Not done:**
-- FPS not measured: Studio was minimized, and it draws nothing then. Roads have 8,400 more parts (+5%, now 178,000).
-- The second, tighter pass on bends wasn't seen in a picture, for the same reason. Numbers only.
-- Before / after of the worst 10 curves.
-- Real meshes "like in Blender". They would be smoother and take the road's 178,000 parts down a lot, but Studio refused the upload: the folder isn't approved. The owner has to add it: Assistant Settings, MCP Permissions. Then Claude can upload them itself, with no Import 3D.
+- Before / after of the worst 10 curves: the "before" pieces are in the backup, so only "after" shots can be taken without undoing the work.
+- A thin dark crack across the asphalt at that bend (a gap between two road triangles).
+- Real meshes "like in Blender". The owner approved the folder (2026-11-06), but Claude Code's own permission check refused the upload, so the folder approval is untested. A small trial mesh was built and removed. It needs the owner's clear yes to upload, or a permission rule for `open_cloud_invoke`.
+- Plan for the meshes: kerbs and pavements first (they give seamless pavement); the export has to come from the place, because hand fixes aren't in the road data; each drive's gap must be cut out of the mesh; the old parts stay, invisible, for collision. The road surface comes last: only it gives a big FPS gain, and it's the riskiest (hand fixes, patches).
 - `world_test` stops in `GemShowcase` (`part.Position` in Lune). Not from these changes.
 - **Correction:** last night's "worst bends" (no kerbs, blocky edges) were an Edit-mode picture fault: seen in Play, those bends have kerbs and clean edges.
 
