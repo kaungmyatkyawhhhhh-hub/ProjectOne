@@ -8,6 +8,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStoreService = game:GetService("DataStoreService")
+local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
@@ -55,10 +56,15 @@ local function refreshTop()
 	if not store then return end
 	local okGet, page = pcall(function() return store:GetSortedAsync(false, 10):GetCurrentPage() end)
 	if not okGet then return end
-	local lines = {}
+	local lines, list = {}, {}
 	for i, entry in ipairs(page) do
 		lines[i] = string.format("%d.  %s   %d", i, nameOf(tonumber(entry.key) or 0), entry.value)
+		-- (7 Nov, the new plaque art: the clients draw the rows from this list: user id (the headshot), name, value)
+		list[i] = { u = tonumber(entry.key) or 0, n = nameOf(tonumber(entry.key) or 0), v = entry.value }
 	end
+	local wallPart = workspace:FindFirstChild("Galaxy") and workspace.Galaxy:FindFirstChild("Centre")
+	wallPart = wallPart and wallPart:FindFirstChild("Leaderboard") and wallPart.Leaderboard:FindFirstChild("Wall")
+	if wallPart then wallPart:SetAttribute("TopList", HttpService:JSONEncode(list)) end
 	for _, gui in ipairs(wallGuis()) do
 		local top = gui:FindFirstChild("Top")
 		for r = 1, 10 do
@@ -84,9 +90,9 @@ local function refreshNear(player: Player)
 		if not seen[e.key] and #down < 5 then seen[e.key] = true table.insert(down, e) end
 	end
 	local list = {}
-	for _, e in ipairs(up) do table.insert(list, { name = nameOf(tonumber(e.key) or 0), value = e.value }) end
-	table.insert(list, { name = player.DisplayName, value = mine, you = true })
-	for _, e in ipairs(down) do table.insert(list, { name = nameOf(tonumber(e.key) or 0), value = e.value }) end
+	for _, e in ipairs(up) do table.insert(list, { name = nameOf(tonumber(e.key) or 0), value = e.value, u = tonumber(e.key) or 0 }) end
+	table.insert(list, { name = player.DisplayName, value = mine, you = true, u = player.UserId })
+	for _, e in ipairs(down) do table.insert(list, { name = nameOf(tonumber(e.key) or 0), value = e.value, u = tonumber(e.key) or 0 }) end
 	event:FireClient(player, "Near", list)
 end
 

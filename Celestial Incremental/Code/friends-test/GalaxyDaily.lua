@@ -12,6 +12,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local Galaxy = ReplicatedStorage:WaitForChild("Galaxy")
 local Kit = require(Galaxy:WaitForChild("UIKit"))
 local Vfx = require(Galaxy:WaitForChild("VfxLibrary"))
+local Art = require(Galaxy:WaitForChild("ArtIds")) -- (7 Nov: the stopwatch)
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local Config = require(Galaxy:WaitForChild("GameConfig"))
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
@@ -201,6 +202,8 @@ for i = 1, 7 do
 end
 local dayBtn, dayInner, _, dayShadow = Kit.button(dWin, DW - 24 - 200, 204, 200, 46, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6 })
 local dayText = Kit.text(dayInner, 0, Kit.ps(10, 8), 200, 28, "CLAIM", Kit.ps(21, 23), { ZIndex = dayInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.8 })
+local dayCool = Kit.new("ImageLabel", { Name = "Cooldown", BackgroundTransparency = 1, Image = Art.uiIcon.cooldown, ScaleType = Enum.ScaleType.Fit,
+	Position = UDim2.fromOffset(12, 7), Size = UDim2.fromOffset(32, 32), ZIndex = dayInner.ZIndex + 1, Visible = false }, dayInner)
 local dayInfo = Kit.text(dWin, 24, 214, DW - 260, 26, "", Kit.ps(14, 16), { ZIndex = 8, TextColor3 = hex("#cfc6dd"), stroke = 1.2, TextWrapped = true })
 -- the QUESTS
 heading(24, 262, "TODAY'S QUESTS")
@@ -229,8 +232,11 @@ for i, m in ipairs(Econ.Gifts) do
 	Kit.icon(dWin, "playtimeGift", x + 2, y + 2, 34, nil, { ZIndex = 7 })
 	Kit.text(dWin, x + 36, y + 6, 66, 20, m .. " MIN", Kit.ps(15, 17), { ZIndex = 8, FontFace = Kit.FONT_HEAVY, stroke = 1.4 })
 	local b, inner = Kit.button(dWin, x + 6, y + 32, 92, 24, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6 })
-	local bt = Kit.text(inner, 0, Kit.ps(2, 1), 92, 20, "", Kit.ps(13, 15), { ZIndex = inner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
-	giftTiles[i] = { m = m, button = b, label = bt, panel = panel }
+	local bt = Kit.text(inner, 8, Kit.ps(2, 1), 84, 20, "", Kit.ps(13, 15), { ZIndex = inner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
+	-- (7 Nov, item 5: a time-locked gift shows the stopwatch beside its countdown)
+	local cool = Kit.new("ImageLabel", { Name = "Cooldown", BackgroundTransparency = 1, Image = Art.uiIcon.cooldown, ScaleType = Enum.ScaleType.Fit,
+		Position = UDim2.fromOffset(4, 1), Size = UDim2.fromOffset(20, 20), ZIndex = inner.ZIndex + 1, Visible = false }, inner)
+	giftTiles[i] = { m = m, button = b, label = bt, panel = panel, cool = cool }
 end
 
 local function quests()
@@ -257,9 +263,12 @@ local function refreshDaily()
 		t.tile.BackgroundColor3 = if got then hex("#123326") else hex("#130f1e")
 	end
 	Kit.setText(streakNote, "Miss a day: back to day 1 (you keep what you got)")
-	dayBtn.Visible = ready
-	dayShadow.Visible = ready -- (the button's drop shadow goes with it)
-	if ready then Kit.setText(dayText, "CLAIM DAY " .. day) end
+	-- (7 Nov, item 5: claimed today = the button stays, grey, with the stopwatch: "TOMORROW")
+	dayBtn.Visible = true
+	dayShadow.Visible = true
+	Kit.recolour(dayBtn, if ready then hex("#7dff7a") else hex("#6a6474"), if ready then hex("#1fa83a") else hex("#3f3a48"))
+	dayCool.Visible = not ready
+	Kit.setText(dayText, if ready then "CLAIM DAY " .. day else "TOMORROW")
 	Kit.setText(dayInfo, if ready then "Day " .. day .. ": +" .. Econ.Daily.Essence[day] .. " Essence" .. (if day == 7 then " + a 1 h TIME WARP" else "")
 		else "Come back tomorrow for day " .. (day % 7 + 1) .. "!")
 	local list = quests()
@@ -277,7 +286,8 @@ local function refreshDaily()
 			r.fill.Size = UDim2.fromOffset(math.floor(200 * math.clamp(q.have / q.need, 0, 1)), 8)
 			local done = q.have >= q.need
 			Kit.recolour(r.button, if q.got then hex("#b49bff") elseif done then hex("#7dff7a") else hex("#6a6474"), if q.got then hex("#5a3ad8") elseif done then hex("#1fa83a") else hex("#3f3a48"))
-			Kit.setText(r.label, if q.got then "DONE" elseif done then "CLAIM" else "...")
+			-- (7 Nov, item 5: a quest that isn't done shows its progress on the button, "3/5")
+			Kit.setText(r.label, if q.got then "DONE" elseif done then "CLAIM" else math.max(q.have, 0) .. "/" .. q.need)
 		end
 	end
 	local played = player:GetAttribute("GiftPlayed") or 0
@@ -288,6 +298,7 @@ local function refreshDaily()
 		Kit.recolour(g.button, if have then hex("#b49bff") elseif ready2 then hex("#7dff7a") else hex("#6a6474"), if have then hex("#5a3ad8") elseif ready2 then hex("#1fa83a") else hex("#3f3a48"))
 		local left = math.max(0, g.m * 60 - played)
 		Kit.setText(g.label, if have then "GOT" elseif ready2 then "CLAIM" else string.format("%d:%02d", left // 60, left % 60))
+		g.cool.Visible = not have and not ready2
 	end
 	if shared.GalaxyHotbarDot then shared.GalaxyHotbarDot("J", claimable()) end
 end

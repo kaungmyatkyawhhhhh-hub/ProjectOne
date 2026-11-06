@@ -493,7 +493,13 @@ local function afterBuy(_, incomeBefore: number)
 	Kit.tween(topScale, { Scale = topScale.Scale * 1.08 }, 0.08)
 	task.delay(0.08, function() Kit.tween(topScale, { Scale = screenScale() }, 0.2, Enum.EasingStyle.Back) end)
 end
-local panel = UpgradesPanel.new(win, {
+-- (7 Nov, item 4: on a PHONE the window is as wide as the screen allows (~0.94, so every caption is >= 14 px) and it
+-- scrolls up / down inside the room between the counter and the bottom, like the TREE. The scroll frame is always
+-- there; layout() turns it on for phones only (`small` isn't known at load: the camera may not have its size yet))
+local upScroll = Kit.new("ScrollingFrame", { Name = "PhoneScroll", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromOffset(700, 470),
+	CanvasSize = UDim2.fromOffset(0, 470), ScrollBarThickness = 0, ScrollingEnabled = false, ScrollingDirection = Enum.ScrollingDirection.Y, ZIndex = 2,
+	ScrollBarImageColor3 = hex("#ffd84a") }, win)
+local panel = UpgradesPanel.new(upScroll, {
 	subject = player, chip = "ESSENCE", close = true, edgeGlow = false,
 	buy = function(kind, arg) return request:InvokeServer(kind, arg) end,
 	onBought = afterBuy, toast = toast, sound = Kit.sound,
@@ -740,6 +746,8 @@ end
 function windowScale(): number
 	local _, room = windowRoom()
 	-- (phones: the window may use the glow's margin too, so its text is as big as the screen allows)
+	-- (7 Nov: phones fit the WIDTH and scroll the height, so the text stays readable)
+	if small then return math.min(1, (viewport().X - 12) / 700) end
 	return math.min(screenScale(), room / (470 + Kit.ps(34, 6)), (viewport().X - 8) / 700)
 end
 function layout()
@@ -755,6 +763,15 @@ function layout()
 	hot.Position = UDim2.new(0.5, 0, 1, -math.floor(4 * s))
 	local ws = windowScale()
 	if open then winScale.Scale = ws end
+	do
+		local _, room0 = windowRoom()
+		local hgt = if small then math.min(470, math.floor(room0 / ws)) else 470
+		win.Size = UDim2.fromOffset(700, hgt)
+		upScroll.Size = UDim2.fromOffset(700, hgt)
+		upScroll.ScrollingEnabled = hgt < 470
+		upScroll.ScrollBarThickness = if hgt < 470 then 8 else 0
+		if hgt >= 470 then upScroll.CanvasPosition = Vector2.zero end
+	end
 	local topEdge, room = windowRoom()
 	win.Position = UDim2.fromOffset(vp.X / 2, topEdge + room / 2 + 15 * ws)
 	-- the tree window: as big as fits between the counter and the hotbar (and the screen's sides)

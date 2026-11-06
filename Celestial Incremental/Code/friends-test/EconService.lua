@@ -79,7 +79,9 @@ local function newData()
 		daily = { day = 0, streak = 0 }, quests = { day = 0, list = {} }, gifts = { day = 0, played = 0, got = {} }, free = {},
 		offlineSeen = 0, receipts = {}, levelsBought = 0, ring2Bought = 0,
 		-- v5 (3.1, 6 Nov): the Black Hole: Supernovas since it (the ladder), Black Holes done, Dark Matter, shards earned since it
-		novaRun = 0, holes = 0, dm = 0, shardsHole = 0 }
+		novaRun = 0, holes = 0, dm = 0, shardsHole = 0,
+		-- (7 Nov: total time played, seconds, for STATS)
+		played = 0 }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -193,7 +195,7 @@ local function migrate(d): (any, boolean)
 		d.novaRun = tonumber(d.supernovas) or 0
 		d.shardsHole = tonumber(d.shardsEarned) or 0
 	end
-	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads", "xp", "xpTotal", "ignition", "novaRun", "holes", "dm", "shardsHole" }) do
+	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads", "xp", "xpTotal", "ignition", "novaRun", "holes", "dm", "shardsHole", "played" }) do
 		local n = tonumber(d[k]) or 0
 		d[k] = if n == n and n ~= math.huge then n else 0
 	end
@@ -461,6 +463,7 @@ local function publish(player: Player, s)
 	end
 	player:SetAttribute("Quests", HttpService:JSONEncode(ql))
 	player:SetAttribute("GiftPlayed", d.gifts.played)
+	player:SetAttribute("PlayTime", math.floor(d.played))
 	local gg = {}
 	for k in pairs(d.gifts.got) do table.insert(gg, k) end
 	player:SetAttribute("GiftsGot", table.concat(gg, ","))
@@ -1282,6 +1285,9 @@ task.spawn(function()
 			-- (playtime today, for the gifts and the PLAY quest; a new UTC day starts again at 0)
 			if s.d.gifts.day ~= Econ.Today() then publish(player, s) end
 			s.d.gifts.played += dt
+			-- (7 Nov: time played in total, for STATS; the attribute every 5 s)
+			s.d.played += dt
+			if math.floor(s.d.played) % 5 == 0 then player:SetAttribute("PlayTime", math.floor(s.d.played)) end
 			-- 3.1 AUTO-SUPERNOVA (#417): from Black Hole 1, switched on: goes Supernova by itself when it's ready
 			if s.d.holes >= 1 and s.d.auto.Supernova == true and s.d.earnedRun >= Econ.NeedFor(s.d.novaRun) and not s.autoNovaBusy then
 				s.autoNovaBusy = true

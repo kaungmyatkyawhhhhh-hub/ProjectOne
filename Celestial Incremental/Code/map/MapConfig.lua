@@ -183,7 +183,7 @@ MapConfig.Boards = {
 			Neon = Color3.fromRGB(255, 200, 70), locked = { text = "IGNITION 1", attr = "Ignition", need = 1, window = "Forge", icon = "forge" } },
 		{ id = "BlackHoleLock", title = "BLACK HOLE", At = Vector3.new(17, 0, 19), Width = 6, Height = 4, Tilt = 0, Bottom = 1.6,
 			-- (3.1: it opens with Ignition 1; the window shows the 100K shards progress and the COLLAPSE)
-			Neon = Color3.fromRGB(170, 90, 255), locked = { text = "100K SHARDS", attr = "Ignition", need = 1, window = "BlackHole", icon = "blackHole" } },
+			Neon = Color3.fromRGB(170, 90, 255), locked = { text = "IGNITION 1", attr = "Ignition", need = 1, window = "BlackHole", icon = "blackHole" } },
 	},
 	-- the angular neon frame (Style "Neon": Bodies, Star Upgrades), round the screen: its bottom corners Low out and down, its
 	-- top corners Wide out and High up (wider at the top, like Regrowth's Machines board)
