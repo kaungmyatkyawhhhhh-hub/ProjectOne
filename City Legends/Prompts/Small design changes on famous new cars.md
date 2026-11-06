@@ -1,4 +1,4 @@
-# Prompt: very small design changes on the famous new car models (vents, side details, lights)
+# Prompt: very small design changes on the famous new car models (vents, side details, lights) + our own wheels
 
 _For Claude Code on the PC, with Blender (`C:/Users/USER/tools/blender-4.5.9-windows-x64`) and Roblox Studio connected (MCP). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras._
 
@@ -19,8 +19,24 @@ Pick **4–6 per car** from this list. Keep the body shape, size and stance exac
 - **Side details:** the shape of the small side-skirt blade end, a fin on the rear-arch vent, the door-handle / door-cut-line shape, a slightly different mirror-cap edge or mirror arm.
 - **Headlights:** change the **inner pattern** only: the shape of the daytime running light (e.g. a Y-shape becomes a split double line, a C-shape becomes three short bars), the number of projector lenses, a different inner housing pattern. The outer light shape stays.
 - **Tail lights:** the inner light graphic (e.g. the number or shape of glowing lines, a different hexagon / bar layout), the lens texture. The outer shape stays.
-- **Small parts:** exhaust tip shape (round ↔ hexagon ↔ oval, or a different count inside the same area), diffuser fin count, the fuel-cap shape, wing end-plate cut, wheel centre cap (our own simple design), brake caliper shape lettering removed.
+- **Small parts:** exhaust tip shape (round ↔ hexagon ↔ oval, or a different count inside the same area), diffuser fin count, the fuel-cap shape, wing end-plate cut, brake caliper shape lettering removed.
 - **Badge spots:** where a real badge was, leave clean paint or our own small mark (never the real one).
+
+## Our own wheels (owner, 2026-11-06: "also make our own very similar wheels")
+Replace the real rim designs on these new models with **our own rim designs** in the same style, so the car still looks right but the wheel is ours:
+- Build a small **wheel library** in Blender: about 6–8 original designs that cover the styles these cars use. For example:
+  - thin twin multi-spoke (supercar);
+  - 5 Y-spokes (sports);
+  - 10-spoke forged (hypercar);
+  - centre-lock 7-spoke (track);
+  - turbine / aero discs (EV / Bugatti-style);
+  - 6 split-spokes (SUV).
+  Name them ours, e.g. "Furia 7", "Saetta Y5", "Corsa 10".
+- **Don't copy any real rim:** each design gets its own spoke count, spoke shape, lip, centre and bolt pattern. It only matches the **style family** (thin spokes, forged look, centre-lock and so on).
+- **Same size and fit** as the original wheel: diameter, width, offset, tyre size and sidewall, so the stance and arches stay exactly the same. Keep the brake disc and caliper behind, with no logos or lettering.
+- Quality: depth (a concave face, spokes with thickness), a polished or machined lip where it fits, a gloss black / gunmetal / silver / carbon finish, a centre cap with our own simple mark (or blank), and smooth shading. Stay in the triangle budget (shared meshes, one per design).
+- Give each car the closest-style design from the library. Cars in the same family share the same wheel.
+- If Customs has a wheel option, add the library designs there (new models only).
 
 ## Rules
 - **Backup first:** keep the original `.glb` and the current packed model; work on copies.
@@ -31,11 +47,13 @@ Pick **4–6 per car** from this list. Keep the body shape, size and stance exac
 - Then the normal routine: `render_car.py` → `pack_cars.py`, pack for Import 3D in `imports/new_cars/`, and tell the owner when to import. After import, check in Play.
 
 ## Check before you say done
+- One render of every wheel design from the library (front and 3/4).
 - Per car: one picture with **before / after at normal distance** (should look the same) and **before / after close-ups** of each changed spot (front light, tail light, the vents, the side).
 - In Play: lights work day and night, Customs paint works, no errors; FPS not worse.
-- Commit, push, save the place; note in `City Legends/City Legends.md` what changed on each car.
+- Commit, push, save the place; note in `City Legends/City Legends.md` what changed on each car and which wheel each car got.
 
 ## When done, tell the owner (short)
 - the before / after pictures;
 - the list of what changed per car;
+- the wheel library (one render of each design) and which car got which;
 - when to import the packs.
