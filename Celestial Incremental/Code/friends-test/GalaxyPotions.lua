@@ -242,7 +242,7 @@ local function boostLines(): { string }
 	local now = workspace:GetServerTimeNow()
 	local function mmss(t) t = math.max(0, math.floor(t)) return string.format("%d:%02d", t // 60, t % 60) end
 	if player:GetAttribute("Pass_X2Stardust") == true then table.insert(out, "x2 STARDUST PASS  +1x  forever") end
-	if player:GetAttribute("Pass_VIP") == true then table.insert(out, "VIP  +" .. math.floor(Econ.VIP.stardust * 100 + 0.5) .. "%  forever") end
+	if player:GetAttribute("Pass_VIP") == true then table.insert(out, "VIP  +" .. math.floor(Econ.VIP.stardust * 100 + 0.5) .. "%  +" .. math.floor(Econ.VIP.shards * 100 + 0.5) .. "% SHARDS") end
 	if player:GetAttribute("Premium") == true then table.insert(out, "PREMIUM  +" .. math.floor(Econ.Premium * 100 + 0.5) .. "%") end
 	local evEnds = Galaxy2:GetAttribute("EventEnds") or 0
 	if evEnds > workspace:GetServerTimeNow() and (Galaxy2:GetAttribute("EventStardust") or 0) > 0 then

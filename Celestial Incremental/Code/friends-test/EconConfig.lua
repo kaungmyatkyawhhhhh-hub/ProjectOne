@@ -480,7 +480,8 @@ Econ.GiftRewards = {
 	[60] = { essence = 2, text = "+2 ESSENCE" },
 }
 -- the passes' effects (GameConfig.Passes ids) and Premium (7 Nov)
-Econ.VIP = { stardust = 0.25, essence = 1 }
+-- (owner 7 Nov: VIP gives NO Essence: Robux -> Essence -> random Forge rolls would be a paid random item (Roblox rule))
+Econ.VIP = { stardust = 0.25, shards = 0.10 }
 Econ.Premium = 0.10
 Econ.AutoRollEvery = 3 -- (the AUTO ROLL pass: one roll every 3 s while you have Essence)
 Econ.AutoRollKeep = { 0, 5, 10, 25 } -- (owner 7 Nov: AUTO ROLL stops when you'd go under this much Essence; default 0)

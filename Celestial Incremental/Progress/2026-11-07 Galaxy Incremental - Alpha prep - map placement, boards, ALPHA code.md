@@ -121,3 +121,21 @@ Angle = degrees round the rim from the island's FAR side (0 = straight across fr
    - Shards spent by the TREE click test.
    - ALPHA redeemed.
 7. **Phone:** the boost column covers part of the Black Hole sign in the spawn view (the HUD over the world).
+
+## Launch changes (owner, 7 Nov: launch today Sat 7 Nov 02:30 UTC)
+1. **Events:** the 7 Nov 02:30-03:30 UTC launch hour stays (`AlphaLaunch2x`); the 8 Nov one is deleted. Weekly from Sat 14 Nov 15:00 UTC stays.
+2. **Pass ids:** VIP 2076176957, CoreSlot 2075582904, AutoRoll 2075666914 (the store shows their cards now; live prices from Roblox).
+3. **VIP gives NO Essence** (Robux -> Essence -> random Forge rolls = a paid random item):
+   - Changes: `Econ.VIP = { stardust = 0.25, shards = 0.10 }`; the Essence line in the Supernova is removed; Supernova shards x1.10 with VIP.
+   - Desc: "+25% stardust, +10% shards, a gold VIP name tag and chat tag."
+   - The BOOSTS list says "VIP +25% +10% SHARDS".
+   - **Robux check, nothing gives Essence or a roll:**
+     - x2 Stardust = stardust; VIP = stardust + shards; +1 Core Slot = a 4th equip slot.
+     - Auto Roll only spends Essence earned for free.
+     - The one product (x2 Offline) = stardust; Premium = stardust.
+     - Codes and the update gift give Essence but are free.
+   - **Test** (Studio, `TestOwnPass = "VIP"`): owning VIP at join gave no Essence. A Supernova gave Essence 8 -> 15 = +7, exactly the no-VIP formula (VIP adds 0). Shards 839 = the preview, with VIP's +10%.
+   - The owner's account owns all 4 real passes now (UserOwnsGamePassAsync).
+4. Badges Mythic / Celestial: still 0.
+
+Test save after this: one more Supernova, Auto Roll switched OFF.

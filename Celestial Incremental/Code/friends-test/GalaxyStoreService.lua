@@ -57,6 +57,9 @@ end
 local function checkPasses(player: Player)
 	if IS_STUDIO and workspace:GetAttribute("TestNoPass") == true then return end
 	if IS_STUDIO and workspace:GetAttribute("TestOwnX2") == true then grantPass(player, "X2Stardust") end
+	-- (Studio: TestOwnPass = "<key>" -> just that pass, as if bought now)
+	local one = IS_STUDIO and workspace:GetAttribute("TestOwnPass")
+	if type(one) == "string" and Config.Passes[one] then grantPass(player, one) end
 	if IS_STUDIO and workspace:GetAttribute("TestOwnPasses") == true then
 		for key in pairs(Config.Passes) do grantPass(player, key) end
 		return

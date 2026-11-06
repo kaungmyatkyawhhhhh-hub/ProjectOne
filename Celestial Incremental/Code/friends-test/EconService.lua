@@ -361,7 +361,9 @@ local function incomeSplit(s)
 end
 local function shardsOf(s): number
 	-- (3.1: the ladder is the Supernovas since the last Black Hole; Dark Matter +25% each)
-	return math.floor(Econ.ShardsFor(s.d.earnedRun, s.d.nodes, s.d.novaRun, s.d.perks) * forgeOf(s, "Shards") * Econ.DarkMatterMult(s.d.dm))
+	-- (7 Nov: the VIP pass +10% shards)
+	return math.floor(Econ.ShardsFor(s.d.earnedRun, s.d.nodes, s.d.novaRun, s.d.perks) * forgeOf(s, "Shards") * Econ.DarkMatterMult(s.d.dm)
+		* (1 + (if s.pass and s.pass.VIP then Econ.VIP.shards else 0)))
 end
 local function cometEvery(s): number
 	local path = if s.d.path == "Comet" then 0.8 else 1
@@ -765,7 +767,6 @@ local function doSupernova(player: Player, s): (boolean, any, any)
 	-- (+1 STAR ESSENCE node, +2 FORGE MASTER capstone)
 	d.essence += Econ.SupernovaEssence + (if (d.ring2.ForgeEssence or 0) >= 1 then 1 else 0) + (if d.capstone == "ForgeMaster" then 2 else 0)
 		+ Econ.SupernovaEssenceAfter(d.ignition, d.supernovas) -- (c1, 6 Nov)
-		+ (if s.pass and s.pass.VIP then Econ.VIP.essence else 0) -- (7 Nov: the VIP pass)
 	d.stardust, d.earnedRun = 0, 0
 	for i = 1, #Econ.Tiers do
 		d.owned[i] = Econ.StartOwned[i] or 0

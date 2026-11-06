@@ -20,16 +20,16 @@ Config.Passes = {
 	-- (7 Nov, design §9 + the owner's monetization prompt: id 0 = not created yet = HIDDEN in the store, no effect. The owner
 	-- creates them in Creator Hub and sends the ids. Prices: GetProductInfo once there is an id)
 	VIP = {
-		id = 0,
+		id = 2076176957, -- (owner created it 7 Nov)
 		name = "VIP",
 		title = "VIP",
-		desc = "+25% stardust, +1 Essence every Supernova, a gold VIP name tag and chat tag.",
+		desc = "+25% stardust, +10% shards, a gold VIP name tag and chat tag.",
 		price = 399,
 		icon = "trophy",
 		order = 2,
 	},
 	CoreSlot = {
-		id = 0,
+		id = 2075582904, -- (owner created it 7 Nov)
 		name = "+1 Core Slot",
 		title = "+1 CORE SLOT",
 		desc = "Equip 4 Star Cores at once instead of 3.",
@@ -38,7 +38,7 @@ Config.Passes = {
 		order = 3,
 	},
 	AutoRoll = {
-		id = 0,
+		id = 2075666914, -- (owner created it 7 Nov)
 		name = "Auto Roll",
 		title = "AUTO ROLL",
 		desc = "The Star Forge rolls by itself while you have Essence. Switch it on or off in the Forge.",
@@ -53,10 +53,8 @@ Config.Passes.X2Stardust.order = 1
 --   start = UTC time (ISO), minutes = how long, everyDays = repeats (7 = every week at the same time), stardust = +x (added
 --   to the boosts like Star Surge: +1 = 2x STARDUST). The banner shows the real time left; no fake timers.
 Config.Events = {
-	-- (owner, 7 Nov: the alpha moved to "Sat 8 Nov 02:30 UTC = 9:00 Myanmar". In 2026 Saturday is 7 Nov (8 Nov is a Sunday),
-	-- so the launch 2x hour is set for BOTH days, 02:30-03:30 UTC; the owner deletes the one that isn't the launch)
-	{ id = "AlphaLaunch2xSat", title = "2x STARDUST HOUR", start = "2026-11-07T02:30:00Z", minutes = 60, stardust = 1 },
-	{ id = "AlphaLaunch2xSun", title = "2x STARDUST HOUR", start = "2026-11-08T02:30:00Z", minutes = 60, stardust = 1 },
+	-- (owner, 7 Nov: the alpha launches Sat 7 Nov 02:30 UTC = 9:00 Myanmar) the launch 2x hour, once
+	{ id = "AlphaLaunch2x", title = "2x STARDUST HOUR", start = "2026-11-07T02:30:00Z", minutes = 60, stardust = 1 },
 	-- then every Saturday 15:00 UTC (21:30 Myanmar, the Playbook's weekly slot)
 	{ id = "Stardust2x", title = "2x STARDUST HOUR", start = "2026-11-14T15:00:00Z", minutes = 60, everyDays = 7, stardust = 1 },
 }
