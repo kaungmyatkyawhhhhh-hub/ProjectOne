@@ -24,14 +24,16 @@ Config.Passes = {
 Config.Products = {
 	-- the return screen's "x2" (#411): doubles what you earned while away. 25 R$: a small impulse buy (Depth's cheapest
 	-- offer is 32 R$); it never sells a currency that buys luck
-	OfflineX2 = { id = 0, name = "x2 Offline Earnings", price = 25 },
+	OfflineX2 = { id = 3728719049, name = "x2 Offline Earnings", price = 25 }, -- (owner created it 6 Nov: 25 R$, no managed pricing)
 }
 
 Config.Badges = {
 	AlphaPlayer = 4501804696776519, -- the badge id from Creator Hub (created 4 Nov)
 	-- (Phase 2.5: a complete row of the Forge book; 0 = not created yet, nothing is awarded)
-	CollectionCommon = 0, CollectionUncommon = 0, CollectionRare = 0, CollectionEpic = 0,
-	CollectionLegendary = 0, CollectionMythic = 0, CollectionCelestial = 0,
+	-- (owner created 5 of them 6 Nov; Mythic + Celestial: PLACEHOLDERS, the owner sends the ids)
+	CollectionCommon = 3711833782304936, CollectionUncommon = 20592640022331, CollectionRare = 2311076528381815,
+	CollectionEpic = 3492227656070750, CollectionLegendary = 4059818233250995,
+	CollectionMythic = 0, CollectionCelestial = 0,
 }
 
 return Config

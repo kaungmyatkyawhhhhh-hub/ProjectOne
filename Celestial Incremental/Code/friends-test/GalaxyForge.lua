@@ -161,12 +161,21 @@ for ki, kind in ipairs(F.Kinds) do
 			local ok = request:InvokeServer("ForgeEquip", key)
 			Kit.sound(if ok then "click" else "error")
 		end)
-		tiles[key] = { t = t, st = st, icon = icon, lv = lv, q = q }
+		-- (c1, 6 Nov: a core you just found for the first time GLOWS in the book until you've seen it: the window closes)
+		local glow = Kit.box(win, x - 3, y - 3, TS + 6, TS + 6, { ZIndex = 7, Visible = false })
+		Kit.corner(glow, 9)
+		local gst = Kit.stroke(glow, hex("#fff1a8"), 3, 0)
+		if not Kit.calm() then Kit.tween(gst, { Transparency = 0.7 }, 0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true) end
+		local tag = Kit.text(win, x - 6, y - 10, TS + 12, 14, "NEW", 11, { ZIndex = 11, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.3,
+			TextColor3 = hex("#fff1a8") })
+		tag.Parent.Visible = false
+		tiles[key] = { t = t, st = st, icon = icon, lv = lv, q = q, glow = glow, tag = tag }
 	end
 	Kit.icon(win, kind.icon, 302, 198 + (ki - 1) * PITCH + 1, 26, nil, { ZIndex = 8 })
 end
 
 local function shown(main: GuiObject, on: boolean) main.Parent.Visible = on end
+local fresh = {} -- [key] = true: cores found for the first time, not seen in the book yet
 local function refresh()
 	local ess = player:GetAttribute("Essence") or 0
 	Kit.setText(essText, Econ.Format(ess) .. " ESSENCE")
@@ -198,6 +207,8 @@ local function refresh()
 		t.st.Thickness = if eq then 3.5 else 2
 		t.st.Transparency = if eq then 0 elseif have then 0.2 else 0.65
 		t.st.Color = if eq then Color3.new(1, 1, 1) else Econ.ForgeRarityById[string.match(key, ":(%a+)$")].colour
+		t.glow.Visible = fresh[key] == true
+		t.tag.Parent.Visible = fresh[key] == true
 	end
 	-- (2.5: % complete in total and per rarity; a complete row has its gold trim; the COLLECTOR title)
 	local total = #F.Kinds * #F.Rarities
@@ -248,9 +259,14 @@ local revealRarity = Kit.text(reveal, 270, 150, 270, 36, "", 30, { ZIndex = 44, 
 local revealName = Kit.text(reveal, 272, 190, 270, 26, "", 20, { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
 local revealVal = Kit.text(reveal, 272, 220, 270, 30, "", 26, { ZIndex = 44, FontFace = Kit.FONT_HEAVY, stroke = 1.8, TextColor3 = hex("#7dff6b") })
 local revealMore = Kit.text(reveal, 272, 256, 270, 22, "", 15, { ZIndex = 44, TextColor3 = hex("#a99fb8"), stroke = 1.1 })
+-- (c1: the NEW CORE! pop, over the card's top edge)
+local newPop = Kit.box(reveal, 0, 104, W, 44, { ZIndex = 47, Visible = false })
+local newScale = Kit.new("UIScale", { Scale = 1 }, newPop)
+local newText = Kit.text(newPop, 0, 0, W, 44, "NEW CORE!", 34, { ZIndex = 48, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2.6,
+	gradient = ColorSequence.new(hex("#fff1c0"), hex("#ffb02a")) })
 local revealHit = Kit.new("TextButton", { Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 45 }, reveal)
 revealHit.MouseButton1Click:Connect(function() reveal.Visible = false end)
-local function showRoll(results)
+local function showRoll(results, newOnes)
 	-- the best of the results gets the card; the rest are listed under it
 	local best, bestI = nil, 0
 	for _, key in ipairs(results) do
@@ -275,6 +291,19 @@ local function showRoll(results)
 	for _, key in ipairs(results) do if key ~= best then table.insert(others, (string.match(key, ":(%a+)$"))) end end
 	Kit.setText(revealMore, if #others > 0 then "+ " .. table.concat(others, ", ") else "Tap to close")
 	reveal.Visible = true
+	-- (c1, 6 Nov: the NEW CORE! moment: a gold pop over the card + a bright chime; "NEW CORES x3!" when a bulk found several)
+	local nNew = 0
+	for _ in pairs(newOnes or {}) do nNew += 1 end
+	newPop.Visible = nNew > 0
+	if nNew > 0 then
+		Kit.setText(newText, if nNew > 1 then "NEW CORES x" .. nNew .. "!" else "NEW CORE!")
+		newScale.Scale = if Kit.calm() then 1 else 0.3
+		if not Kit.calm() then
+			Kit.tween(newScale, { Scale = 1 }, 0.35, Enum.EasingStyle.Back)
+			Vfx.UiPop(reveal, "starburst_twinkle", UDim2.fromOffset(W / 2, 128), 140, 0.6, hex("#fff1a8"), 43)
+		end
+		task.delay(0.12, function() Kit.sound("buyBody", { pitch = 1.5, volume = 0.8 }) end)
+	end
 	if r == "Celestial" then rainbow(revealRarity) else
 		local g = revealRarity:FindFirstChild("Rainbow")
 		if g then g:Destroy() end
@@ -325,9 +354,15 @@ local rolling = false
 local function roll(n: number)
 	if rolling then return end
 	rolling = true
+	local before = forgeData().cores
 	local ok, results = request:InvokeServer("ForgeRoll", n)
 	rolling = false
 	if not ok then Kit.sound("error") return end
+	-- (c1: the cores that are NEW to your book: they glow there, and the card says NEW CORE!)
+	local newOnes = {}
+	for _, key in ipairs(results) do
+		if not before[key] and not newOnes[key] then newOnes[key] = true fresh[key] = true end
+	end
 	-- (cutscene template, 5 Nov: the length grows with the best rarity: Common / Uncommon instant, Rare 3 s, Epic 5 s,
 	-- Legendary 8 s, Mythic 12 s, Celestial 18 s; the card shows at the climax. A Celestial is told to the whole server.)
 	local bestI, bestKey = 0, nil
@@ -383,7 +418,7 @@ local function roll(n: number)
 	end
 	task.defer(function()
 		refresh()
-		showRoll(results)
+		showRoll(results, newOnes)
 	end)
 end
 rollBtn.MouseButton1Click:Connect(function() roll(1) end)
@@ -413,6 +448,7 @@ end
 local function close()
 	if not isOpen then return end
 	isOpen = false
+	table.clear(fresh) -- (the new cores' glow has been seen)
 	Kit.sound("close")
 	Kit.tween(scale, { Scale = scale.Scale * 0.85 }, 0.15)
 	task.delay(0.15, function() if not isOpen then holder.Visible = false end end)

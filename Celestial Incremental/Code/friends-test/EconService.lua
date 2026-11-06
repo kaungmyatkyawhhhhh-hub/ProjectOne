@@ -77,7 +77,9 @@ local function newData()
 		-- gifts, the lobby FREE REWARDS
 		auto = {}, capstone = "", capSwap = false, lastSeen = 0, lastIncome = 0, offline = 0,
 		daily = { day = 0, streak = 0 }, quests = { day = 0, list = {} }, gifts = { day = 0, played = 0, got = {} }, free = {},
-		offlineSeen = 0, receipts = {}, levelsBought = 0, ring2Bought = 0 }
+		offlineSeen = 0, receipts = {}, levelsBought = 0, ring2Bought = 0,
+		-- v5 (3.1, 6 Nov): the Black Hole: Supernovas since it (the ladder), Black Holes done, Dark Matter, shards earned since it
+		novaRun = 0, holes = 0, dm = 0, shardsHole = 0 }
 end
 -- forward-safe: fills what an older save doesn't have; a NEWER save (from a newer server) is never overwritten
 local function migrate(d): (any, boolean)
@@ -134,6 +136,7 @@ local function migrate(d): (any, boolean)
 	local function num(v, lo, hi) v = tonumber(v) or 0 if v ~= v then v = 0 end return math.clamp(v, lo, hi) end
 	local auto = {}
 	if type(d.auto) == "table" then for _, k in ipairs({ "Buy1", "Buy2" }) do if d.auto[k] == false then auto[k] = false end end end
+	if type(d.auto) == "table" and d.auto.Supernova == true then auto.Supernova = true end
 	d.auto = auto
 	d.capstone = if type(d.capstone) == "string" and Econ.Ring2CapstonesById[d.capstone] then d.capstone else ""
 	d.capSwap = d.capSwap == true
@@ -185,7 +188,12 @@ local function migrate(d): (any, boolean)
 		if d.owned[i] > 0 and d.copies[i] == 0 then d.copies[i] = 1 end
 		if d.owned[i] == 0 then d.copies[i] = 0 end
 	end
-	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads", "xp", "xpTotal", "ignition" }) do
+	-- v5 (3.1): an older save has had no Black Hole: its ladder = its Supernovas, every shard it earned counts toward Black Hole 1
+	if oldV < 5 then
+		d.novaRun = tonumber(d.supernovas) or 0
+		d.shardsHole = tonumber(d.shardsEarned) or 0
+	end
+	for _, k in ipairs({ "stardust", "earnedRun", "earnedTotal", "bestRun", "essence", "tut", "supernovas", "comets", "shards", "shardsEarned", "pads", "xp", "xpTotal", "ignition", "novaRun", "holes", "dm", "shardsHole" }) do
 		local n = tonumber(d[k]) or 0
 		d[k] = if n == n and n ~= math.huge then n else 0
 	end
@@ -338,7 +346,8 @@ local function incomeSplit(s)
 	}
 end
 local function shardsOf(s): number
-	return math.floor(Econ.ShardsFor(s.d.earnedRun, s.d.nodes, s.d.supernovas, s.d.perks) * forgeOf(s, "Shards"))
+	-- (3.1: the ladder is the Supernovas since the last Black Hole; Dark Matter +25% each)
+	return math.floor(Econ.ShardsFor(s.d.earnedRun, s.d.nodes, s.d.novaRun, s.d.perks) * forgeOf(s, "Shards") * Econ.DarkMatterMult(s.d.dm))
 end
 local function cometEvery(s): number
 	local path = if s.d.path == "Comet" then 0.8 else 1
@@ -374,7 +383,15 @@ local function publish(player: Player, s)
 	player:SetAttribute("Shards", d.shards)
 	player:SetAttribute("ShardsEarned", d.shardsEarned)
 	player:SetAttribute("SupernovaShards", shardsOf(s))
-	player:SetAttribute("SupernovaNeed", Econ.NeedFor(d.supernovas))
+	player:SetAttribute("SupernovaNeed", Econ.NeedFor(d.novaRun))
+	-- (3.1 the Black Hole)
+	player:SetAttribute("NovaRun", d.novaRun)
+	player:SetAttribute("BlackHoles", d.holes)
+	player:SetAttribute("DarkMatter", d.dm)
+	player:SetAttribute("ShardsHole", d.shardsHole)
+	player:SetAttribute("BlackHoleGain", Econ.DarkMatterFor(d.shardsHole))
+	player:SetAttribute("BlackHoleReady", d.shardsHole >= Econ.BlackHole.Need)
+	player:SetAttribute("AutoSupernova", d.holes >= 1 and d.auto.Supernova == true)
 	-- the map
 	player:SetAttribute("Bodies", bodies)
 	player:SetAttribute("BodyTiers", tiers)
@@ -401,16 +418,15 @@ local function publish(player: Player, s)
 	end
 	-- the Forge (one JSON attribute: your cores, the equipped ones, the pity counters)
 	player:SetAttribute("Forge", HttpService:JSONEncode(d.forge))
-	-- (2.5: a row already complete (cores found before the book had rewards) counts too, once)
+	-- (2.5: a row already complete (cores found before the book had rewards) counts too, once; and on every join each done
+	-- row's badge is checked again: rows done while its badge id was still 0 get the badge once the id exists, 6 Nov)
 	for _, r in ipairs(Econ.Forge.Rarities) do
 		if not d.forge.done[r.id] then
 			local all = true
 			for _, k in ipairs(Econ.Forge.Kinds) do if not d.forge.cores[k.id .. ":" .. r.id] then all = false end end
-			if all then
-				d.forge.done[r.id] = true
-				if Shared.awardBadge then task.spawn(Shared.awardBadge, player, "Collection" .. r.id) end
-			end
+			if all then d.forge.done[r.id] = true end
 		end
+		if d.forge.done[r.id] and Shared.awardBadge then task.spawn(Shared.awardBadge, player, "Collection" .. r.id) end
 	end
 	player:SetAttribute("Forge", HttpService:JSONEncode(d.forge)) -- (again: with the rows just marked done)
 	-- (2.5: the best COLLECTOR title = the rarest complete row of the book)
@@ -418,7 +434,7 @@ local function publish(player: Player, s)
 	for _, r in ipairs(Econ.Forge.Rarities) do if d.forge.done[r.id] then title = Econ.CollectorTitles[r.id] end end
 	player:SetAttribute("CollectorTitle", title)
 	player:SetAttribute("BulkSize", if (d.ring2.BulkRoll or 0) >= 1 then 10 else Econ.Forge.Bulk)
-	player:SetAttribute("SupernovaReady", d.earnedRun >= Econ.NeedFor(d.supernovas))
+	player:SetAttribute("SupernovaReady", d.earnedRun >= Econ.NeedFor(d.novaRun))
 	player:SetAttribute("BestRunStardust", math.max(d.bestRun, d.earnedRun))
 	player:SetAttribute("Tree_CometLure", if (d.perks.CometLure or 0) > 0 then 1 else 0)
 	player:SetAttribute("CometsCaught", d.comets)
@@ -430,6 +446,7 @@ local function publish(player: Player, s)
 	player:SetAttribute("IncomeSplit", HttpService:JSONEncode(incomeSplit(s)))
 	player:SetAttribute("BoostTotal", stardustBoost(s))
 	player:SetAttribute("NumSci", d.settings.sci == true)
+	player:SetAttribute("GroupPrompted", d.settings.groupPrompt == true)
 	-- DAILY (#412-#414): the streak, the 3 quests (JSON), the gifts, the free rewards
 	local today = Econ.Today()
 	if d.quests.day ~= today and Shared.newQuests then Shared.newQuests(player, s) end
@@ -637,6 +654,70 @@ if IS_STUDIO then
 	workspace:GetAttributeChangedSignal("TestGroup"):Connect(refreshSocial)
 end
 
+-- THE SUPERNOVA (alpha part 1; 3.1: a function, so AUTO-SUPERNOVA can call it too). Returns (ok, shards got, first)
+local function doSupernova(player: Player, s): (boolean, any, any)
+	local d = s.d
+	local got = shardsOf(s)
+	if got <= 0 then return false, "notready" end
+	local first = d.supernovas == 0
+	d.bestRun = math.max(d.bestRun, d.earnedRun)
+	d.shards += got
+	d.shardsEarned += got
+	d.shardsHole += got
+	d.supernovas += 1
+	d.novaRun += 1
+	-- (+1 STAR ESSENCE node, +2 FORGE MASTER capstone)
+	d.essence += Econ.SupernovaEssence + (if (d.ring2.ForgeEssence or 0) >= 1 then 1 else 0) + (if d.capstone == "ForgeMaster" then 2 else 0)
+		+ Econ.SupernovaEssenceAfter(d.ignition, d.supernovas) -- (c1, 6 Nov)
+	d.stardust, d.earnedRun = 0, 0
+	for i = 1, #Econ.Tiers do
+		d.owned[i] = Econ.StartOwned[i] or 0
+		d.copies[i] = if d.owned[i] > 0 then 1 else 0
+	end
+	-- (KEEP RING 1: the tier unlocks stay)
+	if (d.ring2.KeepRing1 or 0) < 1 then d.nodes = {} end
+	-- (the capstone may be switched for free until your next pick)
+	if d.capstone ~= "" then d.capSwap = true end
+	checkTutorial(player, s)
+	publish(player, s)
+	pcall(function() AnalyticsService:LogCustomEvent(player, "Supernova", d.supernovas, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = tostring(got) }) end)
+	task.spawn(save, player, false)
+	-- (#392: everyone in the server sees "<name> went SUPERNOVA (n)!" in chat, in the rank colour, max once per 30 s a
+	-- player; the FIRST Supernova also gets the 3 s banner on every screen)
+	if first or os.clock() - (s.lastNovaMsg or -math.huge) >= Econ.Social.NovaMsgEvery then
+		s.lastNovaMsg = os.clock()
+		event:FireAllClients("SupernovaGlobal", player.DisplayName, d.supernovas, Econ.LevelBand(Econ.LevelOf(d.xpTotal)).colour, first)
+	end
+	return true, got, first
+end
+
+-- 3.1 THE BLACK HOLE (#58 #26): 100K shards earned since the last one -> Dark Matter; resets the climb (see EconConfig)
+local function doBlackHole(player: Player, s): (boolean, any)
+	local d = s.d
+	local gain = Econ.DarkMatterFor(d.shardsHole)
+	if gain <= 0 then return false, "locked" end
+	d.dm += gain
+	d.holes += 1
+	d.stardust, d.earnedRun, d.shards, d.shardsHole, d.novaRun = 0, 0, 0, 0, 0
+	for i = 1, #Econ.Tiers do
+		d.owned[i] = Econ.StartOwned[i] or 0
+		d.copies[i] = if d.owned[i] > 0 then 1 else 0
+	end
+	d.nodes = {}
+	-- (ring 2 goes, except its AUTOMATION branch; the capstone too)
+	local keep = {}
+	for _, n in ipairs(Econ.Ring2) do
+		if n.branch == "AUTOMATION" and (d.ring2[n.id] or 0) > 0 then keep[n.id] = d.ring2[n.id] end
+	end
+	d.ring2 = keep
+	d.capstone, d.capSwap = "", false
+	publish(player, s)
+	pcall(function() AnalyticsService:LogCustomEvent(player, "BlackHole", d.holes, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = tostring(gain) }) end)
+	task.spawn(save, player, false)
+	event:FireAllClients("BlackHoleGlobal", player.DisplayName, d.holes, gain)
+	return true, gain
+end
+
 request.OnServerInvoke = function(player: Player, action, arg, slot)
 	local s = sessions[player]
 	if not s or s.readOnly then return false, "loading" end
@@ -715,9 +796,13 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 			local ri = Econ.ForgeRarityById[rarity].index
 			if ri >= 5 then F.pityL = 0 end
 			if ri >= 6 then F.pityM = 0 end
-			-- (a kind still below MAX at that rarity; if all are maxed (a pity roll), any)
+			-- (a kind still below MAX at that rarity; if all are maxed (a pity roll), any. c1, 6 Nov: NEW KIND FIRST: a kind you
+			-- don't have yet at that rarity comes before a duplicate, so every rarity's row fills in 6 hits)
 			local _, open = Econ.ForgeOdds(F.cores, 1)
 			local pick = open[ri]
+			local fresh = {}
+			for _, k in ipairs(pick) do if not F.cores[k .. ":" .. rarity] then table.insert(fresh, k) end end
+			if #fresh > 0 then pick = fresh end
 			local kind = if #pick > 0 then pick[math.random(1, #pick)] else Econ.Forge.Kinds[math.random(1, #Econ.Forge.Kinds)].id
 			local key = kind .. ":" .. rarity
 			F.cores[key] = math.min((F.cores[key] or 0) + 1, Econ.Forge.MaxLevel)
@@ -735,7 +820,8 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 				end
 			end
 			-- (a CELESTIAL is told to the whole server: cutscene template, GLOBAL)
-			if rarity == "Celestial" then event:FireAllClients("ForgeGlobal", player.DisplayName, key) end
+			-- (owner 6 Nov, #392: Mythic + Celestial go to the server's chat; a Celestial also gets the banner)
+			if rarity == "Celestial" or rarity == "Mythic" then event:FireAllClients("ForgeGlobal", player.DisplayName, key) end
 			pcall(function() AnalyticsService:LogCustomEvent(player, "ForgeRoll", ri, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = key }) end)
 		end
 		publish(player, s)
@@ -845,8 +931,9 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 			local best, bestCost = nil, math.huge
 			for _, node in ipairs(Econ.Ring2) do
 				local c = Econ.R2Cost(node.id, d.ring2[node.id] or 0)
-				-- (the STELLAR branch first: it's the income; then the cheapest)
-				local key = c and (c + (if node.branch == "STELLAR" then 0 else 1e12))
+				-- (AUTO-BUY I first (owner 6 Nov: it's the milestone at Supernova 16), then the STELLAR branch: it's the income; then
+				-- the cheapest)
+				local key = c and (c + (if node.id == "AutoBuy1" then -1e12 elseif node.branch == "STELLAR" then 0 else 1e12))
 				if c and c <= d.shards and key < bestCost and d.supernovas >= (node.novas or 0)
 					and (not node.requires or (d.ring2[node.requires] or 0) >= 1) then best, bestCost = node, key end
 			end
@@ -861,6 +948,12 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		checkTutorial(player, s)
 		publish(player, s)
 		return true, bought
+	elseif action == "AutoToggle" and arg == "Supernova" then
+		-- (3.1 AUTO-SUPERNOVA, from Black Hole 1: off until you switch it on)
+		if d.holes < 1 then return false, "locked" end
+		d.auto.Supernova = if d.auto.Supernova == true then nil else true
+		publish(player, s)
+		return true, d.auto.Supernova == true
 	elseif action == "AutoToggle" then
 		-- (an AUTO-BUY you own: on / off)
 		local node = ({ Buy1 = "AutoBuy1", Buy2 = "AutoBuy2" })[arg]
@@ -964,6 +1057,8 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		end
 		-- (#6 the number format)
 		if type(arg.sci) == "boolean" then d.settings.sci = arg.sci end
+		-- (owner 6 Nov: the JOIN GROUP prompt is shown once, ever: remembered in the save, can't be turned back off)
+		if arg.groupPrompt == true then d.settings.groupPrompt = true end
 		publish(player, s)
 		return true
 	elseif action == "UsePotion" then
@@ -990,35 +1085,9 @@ request.OnServerInvoke = function(player: Player, action, arg, slot)
 		return true
 	elseif action == "Supernova" then
 		-- (the client has played the wind-up; this is the impact)
-		local got = shardsOf(s)
-		if got <= 0 then return false, "notready" end
-		local first = d.supernovas == 0
-		d.bestRun = math.max(d.bestRun, d.earnedRun)
-		d.shards += got
-		d.shardsEarned += got
-		d.supernovas += 1
-		-- (+1 STAR ESSENCE node, +2 FORGE MASTER capstone)
-		d.essence += Econ.SupernovaEssence + (if (d.ring2.ForgeEssence or 0) >= 1 then 1 else 0) + (if d.capstone == "ForgeMaster" then 2 else 0)
-		d.stardust, d.earnedRun = 0, 0
-		for i = 1, #Econ.Tiers do
-			d.owned[i] = Econ.StartOwned[i] or 0
-			d.copies[i] = if d.owned[i] > 0 then 1 else 0
-		end
-		-- (KEEP RING 1: the tier unlocks stay)
-		if (d.ring2.KeepRing1 or 0) < 1 then d.nodes = {} end
-		-- (the capstone may be switched for free until your next pick)
-		if d.capstone ~= "" then d.capSwap = true end
-		checkTutorial(player, s)
-		publish(player, s)
-		pcall(function() AnalyticsService:LogCustomEvent(player, "Supernova", d.supernovas, { [Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = tostring(got) }) end)
-		task.spawn(save, player, false)
-		-- (#392: everyone in the server sees "<name> went SUPERNOVA (n)!" in chat, in the rank colour, max once per 30 s a
-		-- player; the FIRST Supernova also gets the 3 s banner on every screen)
-		if first or os.clock() - (s.lastNovaMsg or -math.huge) >= Econ.Social.NovaMsgEvery then
-			s.lastNovaMsg = os.clock()
-			event:FireAllClients("SupernovaGlobal", player.DisplayName, d.supernovas, Econ.LevelBand(Econ.LevelOf(d.xpTotal)).colour, first)
-		end
-		return true, got, first
+		return doSupernova(player, s)
+	elseif action == "BlackHole" then
+		return doBlackHole(player, s)
 	end
 	return false, "bad"
 end
@@ -1054,6 +1123,8 @@ mapEvent.OnServerEvent:Connect(function(player: Player, kind, id)
 	s.d.earnedRun += value
 	s.d.earnedTotal += value
 	s.d.comets += 1
+	-- (c1, 6 Nov: after Ignition 1, every 25th comet caught also gives 1 Essence)
+	if s.d.ignition >= 1 and s.d.comets % Econ.ForgeFeed.CometsPer == 0 then s.d.essence += 1 end
 	checkTutorial(player, s)
 	publish(player, s)
 	event:FireClient(player, "CometPaid", id, value)
@@ -1211,6 +1282,13 @@ task.spawn(function()
 			-- (playtime today, for the gifts and the PLAY quest; a new UTC day starts again at 0)
 			if s.d.gifts.day ~= Econ.Today() then publish(player, s) end
 			s.d.gifts.played += dt
+			-- 3.1 AUTO-SUPERNOVA (#417): from Black Hole 1, switched on: goes Supernova by itself when it's ready
+			if s.d.holes >= 1 and s.d.auto.Supernova == true and s.d.earnedRun >= Econ.NeedFor(s.d.novaRun) and not s.autoNovaBusy then
+				s.autoNovaBusy = true
+				local ok, got = doSupernova(player, s)
+				if ok then event:FireClient(player, "AutoSupernova", got) end
+				s.autoNovaBusy = false
+			end
 			-- AUTO-BUY (ring 2's AUTOMATION, #55 #417): body levels bought for you, cheapest first, a few a tick. AUTO-BUY I =
 			-- Asteroid + Moon, AUTO-BUY II = the rest. Each one can be switched off (INFO).
 			local a1 = (s.d.ring2.AutoBuy1 or 0) >= 1 and s.d.auto.Buy1 ~= false
@@ -1250,7 +1328,7 @@ task.spawn(function()
 				s.d.earnedTotal += gain
 				player:SetAttribute("Stardust", s.d.stardust)
 				player:SetAttribute("EarnedRun", s.d.earnedRun)
-				local need = Econ.NeedFor(s.d.supernovas)
+				local need = Econ.NeedFor(s.d.novaRun)
 				player:SetAttribute("SupernovaShards", shardsOf(s))
 				if s.d.earnedRun >= need and not player:GetAttribute("SupernovaReady") then publish(player, s) end
 				-- (Tutorial 2: the "100% SUPERNOVA" and "Cosmic LVL" steps complete on the income tick)
@@ -1295,6 +1373,11 @@ if IS_STUDIO then
 		local n = tonumber(workspace:GetAttribute("TestGiveShards"))
 		if not n then return end
 		for player, s in pairs(sessions) do s.d.shards += n publish(player, s) end
+	end)
+	-- (3.1: TestBlackHoleReady = true -> every player has the 100K shards earned since the last Black Hole)
+	workspace:GetAttributeChangedSignal("TestBlackHoleReady"):Connect(function()
+		if workspace:GetAttribute("TestBlackHoleReady") ~= true then return end
+		for player, s in pairs(sessions) do s.d.shardsHole = math.max(s.d.shardsHole, Econ.BlackHole.Need) publish(player, s) end
 	end)
 	workspace:GetAttributeChangedSignal("TestSetNovas"):Connect(function()
 		local n = tonumber(workspace:GetAttribute("TestSetNovas"))

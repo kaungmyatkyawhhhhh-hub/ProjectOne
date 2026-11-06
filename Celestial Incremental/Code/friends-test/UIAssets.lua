@@ -27,6 +27,8 @@ return {
 		playtimeGift = "rbxassetid://97650869572088", -- the PLAYTIME GIFTS tiles
 		freeRewards = "rbxassetid://126118769169465", -- the FREE REWARDS board
 		boosts = "rbxassetid://82218225965129", -- the BOOSTS chip
+		-- (3.1: the BLACK HOLE's icon = our black_hole_swirl texture, the transparent version: VfxTextures.alpha.black_hole_swirl)
+		blackHole = "rbxassetid://125237533530152",
 	},
 	-- (the same icons at 128 px, for small spots)
 	icon128 = {

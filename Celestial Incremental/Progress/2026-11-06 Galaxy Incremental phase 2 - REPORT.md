@@ -148,3 +148,59 @@ You imported galaxy_icon_* (P&L Studios XP group). They're in UIAssets.icon (+ i
 - FREE REWARDS board: **freeRewards** either side of the title (it had none)
 - The streak tiles, quest rows and free-reward rows keep the Essence icon: that's the reward they pay.
 - Checked on screen: `icons-pc-return-screen-offline-icon`, `icons-pc-lumi-boosts-quests-key-group-art`, `icons-pc-daily-window-gift-icons`.
+
+## Owner's answers (6 Nov, chat)
+1. **Slow late game:** do (a) AUTO-BUY at Supernova 16 (~min 48) AND (c) a new Forge book row about every 10 min; not (b). Re-run the bot after; target never more than 5 min with nothing new (#420) in the first 90 min; report the new timeline.
+2. **Friends test: yes.** The owner creates the OFFLINE x2 product (25 R$) and the 7 collector badges and sends the ids; clearly named placeholders until then.
+3. **JOIN GROUP prompt:** keep it, but only once, after the first Supernova (never on join); easy to close; never asks again after a "no".
+   **FRIENDS chip at 0:** show it, greyed, "+10% per friend (0/3)" (the invite hint).
+   **Forge rolls in chat:** Mythic and Celestial (#392).
+4. **Go Phase 3**, in this order: the VFX pass, the LUMI + rank titles prompt, then 3.1 Black Hole onward; stop + report after each.
+
+## Follow-up after the answers (6 Nov): bot run 4
+**Built:**
+- **(a) AUTO-BUY I:** Supernova 16, 400 shards (one Supernova's worth there). BUY ALL takes it first.
+- **c1, Forge:**
+  - **New kind first:** a roll gives a kind you don't have yet at that rarity before a duplicate.
+  - **More Essence after Ignition 1:** +1 per Supernova, plus 1 per 5 Supernovas you have; +1 per 25 comets caught (EconConfig.ForgeFeed, PROPOSED).
+  - **NEW CORE! moment:** a gold "NEW CORE!" (or "NEW CORES x3!") pops on the card with a chime. The book entry glows with a NEW tag until you close the Forge.
+- **JOIN GROUP prompt:** once, after a Supernova; never on join; never again (the save remembers).
+- **FRIENDS chip:** always shown; at 0 it's greyed "+10% PER FRIEND (0/3)".
+- **Mythic + Celestial rolls:** in the server chat (Celestial keeps its banner).
+- **Ids:** OFFLINE x2 (3728719049) is live, so the x2 button shows. Collector badges are in for Common to Legendary; Mythic + Celestial stay 0.
+  - A row finished while its badge id was 0 now gets the badge on the player's next join.
+
+**Bot run 4** (fresh save, no pass, PC; the bot rolls 1 at a time as soon as it has Essence):
+- **Supernovas:**
+  - before Ignition: 2.6, 4.3, 6.5, 8.4, 10.8, 13.7, 16.1, 17.5, 20.0, 21.6, 23.8
+  - after: 29.6, 31.8, 33.2, 36.4, 41.1, 48.1, 54.7, 61.5, 67.8, 71.4, 84.1 (22 in 90 min)
+- **Ignition 1:** 26.2 (about 47 Essence saved up by then: the tutorial's plus Ignition's 10)
+- **Book rows:**
+
+| row | done at | after Ignition |
+|---|---|---|
+| Common | 27.3 | 1 min |
+| Uncommon | 28.8 | 2.6 min |
+| Rare | 30.9 | 4.7 min |
+| Epic | 41.6 | 15.4 min |
+| Legendary | not done | first Legendary core at 48.5 |
+| Mythic, Celestial | not done | |
+
+- **New cores:**
+  - every ~20 s from 26.3 to 30.9 (the saved Essence)
+  - then 32.6, 41.6, 48.5
+  - then none to minute 90
+- **AUTO-BUY I:** 41.1 (Supernova 16). **Capstone:** 33.2. **KEEP RING 1:** 84.1.
+- **Longest gap with nothing new:**
+  - up to minute 41: 4.7 min (36.4 to 41.1). **Met.**
+  - after minute 41: 6.5, 6.2, 6.3 and **12.0 min (71.4 to 83.4)**. **Not met.**
+
+**What it shows:**
+- **Rows come too fast early.** You expected Rare 30-60 min after Ignition; it took 4.7. Epic took 15. The ~47 saved Essence is spent at once, and "new kind first" makes each of those Rare / Epic hits count.
+- **Then the Forge goes quiet.** With Common to Epic full, a new core needs a Legendary+ hit (about 1%).
+- **The late gaps are the Supernova runs** (6-7 min each from Supernova 16, one 12 min with nothing else).
+- **Fix ideas (NOT built, your call):**
+  1. New-kind-first only for Common / Uncommon, so Rare+ stay random.
+  2. Ignition gives 3 Essence instead of 10, so less is saved up.
+  3. Supernova growth after the Ignition list x1.7 → x1.5, so late runs drop to ~4-5 min.
+

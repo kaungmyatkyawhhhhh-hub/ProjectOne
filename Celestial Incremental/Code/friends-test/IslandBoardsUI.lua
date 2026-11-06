@@ -721,7 +721,10 @@ function UI:buyable(): boolean
 	if not self:can() then return false end
 	if self.spec.locked then
 		local L = self.spec.locked
-		return L.attr ~= nil and (tonumber(self:attr(L.attr)) or 0) >= (L.need or 1) and (tonumber(self:attr("Essence")) or 0) >= Econ.Forge.RollCost
+		local open = L.attr ~= nil and (tonumber(self:attr(L.attr)) or 0) >= (L.need or 1)
+		-- (3.1: the BLACK HOLE board lights up when you can collapse; the Forge's when you can roll)
+		if L.window == "BlackHole" then return open and self:attr("BlackHoleReady") == true end
+		return open and (tonumber(self:attr("Essence")) or 0) >= Econ.Forge.RollCost
 	end
 	if self.id == "Tree" then
 		local r2, sh, novas = self:ring2(), self:shards(), self:novas()

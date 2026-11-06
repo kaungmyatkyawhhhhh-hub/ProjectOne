@@ -662,6 +662,7 @@ shared.GalaxyCloseSide = function(keep: string?)
 	if sideOpen == "R" and keep ~= "R" and shared.GalaxyReturnClose then shared.GalaxyReturnClose() end
 	if sideOpen == "J" and keep ~= "J" and shared.GalaxyDailyClose then shared.GalaxyDailyClose() end
 	if sideOpen == "P" and keep ~= "P" and shared.GalaxyStatsClose then shared.GalaxyStatsClose() end
+	if sideOpen == "B" and keep ~= "B" and shared.GalaxyBlackHoleClose then shared.GalaxyBlackHoleClose() end
 end
 local function pressKey(k)
 	if not keyAllowed(k) then return end
@@ -708,6 +709,9 @@ task.spawn(function()
 			openTree()
 		elseif id == "Forge" then
 			if (player:GetAttribute("Ignition") or 0) >= 1 and shared.GalaxyForgeToggle then shared.GalaxyForgeToggle() else toast("STAR FORGE: opens at IGNITION 1", hex("#ffd84a")) end
+		elseif id == "BlackHole" then
+			-- (3.1: your island's BLACK HOLE board or the plaza's gate)
+			if shared.GalaxyBlackHoleToggle then shared.GalaxyBlackHoleToggle() end
 		end
 	end)
 end)
@@ -1266,9 +1270,22 @@ event.OnClientEvent:Connect(function(kind, a, b, ...)
 			task.delay(1.2, closeWindow)
 		end
 	elseif kind == "ForgeGlobal" then
-		-- (someone on the server rolled a CELESTIAL core: the banner on every screen)
-		banner(string.upper(tostring(a)) .. " FORGED A CELESTIAL CORE!", hex("#96fff0"))
-		Kit.sound("milestone")
+		-- (someone on the server rolled a MYTHIC or CELESTIAL core (#392): a chat line; a Celestial also the banner on every screen)
+		local rar = Econ.ForgeRarityById[string.match(tostring(b), ":(%a+)$") or ""]
+		local rname = rar and rar.name or "CELESTIAL"
+		chatLine(tostring(a) .. " forged a " .. rname .. " core!", rar and rar.colour or hex("#96fff0"))
+		if rname == "CELESTIAL" then
+			banner(string.upper(tostring(a)) .. " FORGED A CELESTIAL CORE!", hex("#96fff0"))
+			Kit.sound("milestone")
+		end
+	elseif kind == "BlackHoleGlobal" then
+		-- (3.1: someone fell into a Black Hole: a chat line for everyone; the banner too (it's the big one))
+		chatLine(tostring(a) .. " collapsed into BLACK HOLE " .. tostring(b) .. " (+" .. tostring((...)) .. " DARK MATTER)!", Color3.fromRGB(190, 140, 255))
+		banner(string.upper(tostring(a)) .. ": BLACK HOLE " .. tostring(b) .. "!", Color3.fromRGB(190, 140, 255))
+	elseif kind == "AutoSupernova" then
+		-- (3.1 AUTO-SUPERNOVA went off by itself: the shards float up, the rank lands)
+		floatText(top, 120, 70, "AUTO SUPERNOVA +" .. fmt(tonumber(a) or 0) .. " SHARDS", hex("#d7b8ff"), 16)
+		if shared.GalaxyRankLand then shared.GalaxyRankLand() end
 	elseif kind == "SupernovaGlobal" then
 		-- (someone on the server went Supernova: a, count b, rank colour, first; the server sends max 1 per player per 30 s)
 		local colour, first = ...

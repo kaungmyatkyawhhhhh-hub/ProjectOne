@@ -43,6 +43,11 @@ do
 	for _, l in ipairs(forgeSign and forgeSign:GetDescendants() or {}) do
 		if l:IsA("TextLabel") and l.Text == "SUPERNOVA 3" then l.Text = "IGNITION 1" end
 	end
+	-- (3.1: the Black Hole opens at 100K shards now: its sign said LOCKED)
+	local holeSign = root:FindFirstChild("Centre") and root.Centre:FindFirstChild("BlackHoleGate") and root.Centre.BlackHoleGate:FindFirstChild("Sign")
+	for _, l in ipairs(holeSign and holeSign:GetDescendants() or {}) do
+		if l:IsA("TextLabel") and l.Text == "LOCKED" then l.Text = "100K SHARDS" end
+	end
 end
 
 local remote = Galaxy:FindFirstChild("MapEvent") or Instance.new("RemoteEvent")
@@ -523,6 +528,24 @@ task.spawn(function()
 	forge.Parent = nextS
 	-- (6 Nov: no crystal in front of the Forge's sign or any other sign: the island's crystals were placed before the Forge)
 	Builder.ClearDecor(root)
+end)
+
+-- (3.1: the plaza's Black Hole gate gets a prompt: "Open BLACK HOLE" -> the window, GalaxyMapClient -> Galaxy.OpenWindow)
+task.spawn(function()
+	local g = workspace:WaitForChild("Galaxy", 60)
+	local centre = g and g:WaitForChild("Centre", 30)
+	local hole = centre and centre:WaitForChild("BlackHoleGate", 30)
+	if not hole or hole:FindFirstChildWhichIsA("ProximityPrompt", true) then return end
+	hole:SetAttribute("Window", "BlackHole")
+	local host = hole:FindFirstChild("Pull") or hole:FindFirstChildWhichIsA("BasePart", true)
+	if not host then return end
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Open"
+	prompt.ObjectText = "BLACK HOLE"
+	prompt.MaxActivationDistance = 16
+	prompt.RequiresLineOfSight = false
+	prompt:SetAttribute("Window", "BlackHole")
+	prompt.Parent = host
 end)
 
 ------------------------------------------------------------------------

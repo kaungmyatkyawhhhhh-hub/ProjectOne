@@ -448,7 +448,8 @@ end
 -- (on YOUR island) opens its window through Galaxy.OpenWindow (GalaxyHUD)
 if TOUCH then
 	local opener = ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("OpenWindow", 30)
-	local WINDOW = { Tree = { "Tree" }, Info = { "Tree" }, Bodies = { "Upgrades", "BODIES" }, Stars = { "Upgrades", "PERKS" }, ForgeLock = { "Forge" } }
+	local WINDOW = { Tree = { "Tree" }, Info = { "Tree" }, Bodies = { "Upgrades", "BODIES" }, Stars = { "Upgrades", "PERKS" }, ForgeLock = { "Forge" },
+		BlackHoleLock = { "BlackHole" } }
 	local downAt, downPos
 	local function isTap(input: InputObject): boolean
 		return input.UserInputType == Enum.UserInputType.Touch

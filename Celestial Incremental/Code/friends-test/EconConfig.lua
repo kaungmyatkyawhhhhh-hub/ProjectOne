@@ -3,7 +3,7 @@
 -- Calc\ring1.py). Server and client both read it; nothing else holds an economy number.
 local Econ = {}
 
-Econ.DataVersion = 4 -- the save's version (bump + migrate in GalaxyEconService when the save's shape changes; 4 = Phase 2, 6 Nov)
+Econ.DataVersion = 5 -- the save's version (bump + migrate in GalaxyEconService when the save's shape changes; 4 = Phase 2, 5 = the Black Hole, 6 Nov)
 -- (3 = feel pass, 5 Nov: owned = body LEVELS + copies; an old owned count n -> level n, 1 + n/25 copies)
 -- (2 = alpha part 1, 3 Nov: shards, shardsEarned, ring2, the Binary Star tier; a v1 save gets them empty)
 
@@ -111,7 +111,7 @@ Econ.Ring2 = {
 	{ id = "BulkRoll", name = "BULK ROLL", icon = "forge", costs = { 900 }, novas = 15, requires = "ForgeLuck", branch = "FORGE",
 		desc = "BULK rolls 10 cores at once (was 3)", effect = { kind = "flag" } },
 	-- AUTOMATION (#55 #94 #417): "each layer automates the last layer's busywork"
-	{ id = "AutoBuy1", name = "AUTO-BUY I", icon = "gear", costs = { 1000 }, novas = 20, branch = "AUTOMATION",
+	{ id = "AutoBuy1", name = "AUTO-BUY I", icon = "gear", costs = { 400 }, novas = 16, branch = "AUTOMATION", -- (owner 6 Nov: Supernova 16, ~min 48; 400 = one Supernova's shards there)
 		desc = "buys Asteroid and Moon levels for you (switch it off on INFO)", effect = { kind = "flag" } },
 	{ id = "OfflineTime", name = "LONG NIGHT", icon = "gear", costs = { 600 }, novas = 17, branch = "AUTOMATION",
 		desc = "offline earnings for up to 6 h (was 4 h)", effect = { kind = "flag" } },
@@ -239,6 +239,19 @@ function Econ.NeedFor(novas: number): number
 	return list[#list] * Econ.NeedGrowthAfter ^ (n - #list)
 end
 Econ.ShardFirst, Econ.ShardGrowth = 14, 1.25
+-- 3.1 the BLACK HOLE (Phase 3, 6 Nov; design "Full game design" §1 + §4, checklist #58 #26 #417): 100K shards earned since the
+-- last Black Hole opens it; it pays DARK MATTER = floor(sqrt(those shards / 1,000)) (100K = 10 DM), each +25% shards for
+-- good. It resets stardust, bodies, ring 1, shards and ring 2 (its AUTOMATION branch stays) and the Supernova LADDER (the
+-- run count the needs + shard growth use: Supernovas since the Black Hole); it keeps your Supernova count, rank, Cosmic
+-- Level + perks, pads, Ignition, the Forge, Essence and Dark Matter. AUTO-SUPERNOVA opens at Black Hole 1.
+Econ.BlackHole = { Need = 100000, DMPer = 1000, DMBonus = 0.25 }
+function Econ.DarkMatterFor(shardsHole: number): number
+	if shardsHole < Econ.BlackHole.Need then return 0 end
+	return math.floor(math.sqrt(shardsHole / Econ.BlackHole.DMPer) + 1e-9)
+end
+function Econ.DarkMatterMult(dm: number): number
+	return 1 + Econ.BlackHole.DMBonus * (dm or 0)
+end
 function Econ.ShardsFor(earned: number, nodes, novas: number?, perks): number
 	local need = Econ.NeedFor(novas or 0)
 	if earned < need then return 0 end
@@ -394,6 +407,13 @@ Econ.Sectors = {
 }
 Econ.IgnitionEssence = 10 -- (Ignition 1's reward: Essence = the Forge's currency, so the Forge starts with rolls)
 Econ.SupernovaEssence = 1 -- (every Supernova gives 1 Essence: the Forge's slow fixed rate, design "one job per currency")
+-- (owner 6 Nov, "c1": more Essence AFTER IGNITION 1, so new cores keep coming (#420): a Supernova +1 more, and +1 for every 5
+-- Supernovas you have; +1 Essence for every 25 comets caught. PROPOSED: the bot's first 90 min decides)
+Econ.ForgeFeed = { NovaBonus = 1, PerNovas = 5, CometsPer = 25 }
+function Econ.SupernovaEssenceAfter(ignition: number, novas: number): number
+	if ignition < 1 then return 0 end
+	return Econ.ForgeFeed.NovaBonus + novas // Econ.ForgeFeed.PerNovas
+end
 -- the 2 PATHS picked at Ignition 1 (switch later for PathSwitchShards shards)
 Econ.Paths = {
 	{ id = "Comet", name = "COMET PATH", icon = "comet", desc = "Comets pay x2 and come 20% sooner" },

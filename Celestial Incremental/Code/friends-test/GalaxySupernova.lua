@@ -157,10 +157,12 @@ local function cardText()
 	local earned = player:GetAttribute("EarnedRun") or 0
 	local nodes = {}
 	for _, n in ipairs(Econ.Ring1) do nodes[n.id] = player:GetAttribute("Node_" .. n.id) == true end
-	local novas = player:GetAttribute("Supernovas") or 0
+	-- (3.1: the ladder = Supernovas since the last Black Hole; Dark Matter x; the server's own count is the truth: SupernovaShards)
+	local novas = player:GetAttribute("NovaRun") or player:GetAttribute("Supernovas") or 0
 	local perks = Econ.PerksOf(player)
-	local got = Econ.ShardsFor(earned, nodes, novas, perks)
-	local later = Econ.ShardsFor(earned * 2, nodes, novas, perks)
+	local dm = Econ.DarkMatterMult(player:GetAttribute("DarkMatter") or 0)
+	local got = math.floor(Econ.ShardsFor(earned, nodes, novas, perks) * dm)
+	local later = math.floor(Econ.ShardsFor(earned * 2, nodes, novas, perks) * dm)
 	Kit.setText(card.got, got .. " SHARDS")
 	Kit.setText(card.wait, "Wait to earn 2x first: " .. later .. " shards (+" .. math.floor((later / math.max(got, 1) - 1) * 100 + 0.5) .. "%)")
 	return got

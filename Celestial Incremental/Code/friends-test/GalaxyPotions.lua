@@ -115,15 +115,21 @@ local friendsChip, friendsText = socialChip("Friends", hex("#7dff7a"))
 local groupChip, groupText = socialChip("Group", hex("#ffd84a"))
 local function refreshSocial()
 	local n = math.min(player:GetAttribute("FriendsHere") or 0, Econ.Social.FriendMax)
-	friendsChip:SetAttribute("Show", n > 0)
-	Kit.setText(friendsText, "FRIENDS +" .. math.floor(n * Econ.Social.FriendPer * 100 + 0.5) .. "%")
+	-- (owner 6 Nov: shown at 0 too, greyed, as the invite hint: "+10% PER FRIEND (0/3)")
+	friendsChip:SetAttribute("Show", true)
+	local per = math.floor(Econ.Social.FriendPer * 100 + 0.5)
+	if n > 0 then
+		Kit.setText(friendsText, "FRIENDS +" .. math.floor(n * Econ.Social.FriendPer * 100 + 0.5) .. "% (" .. n .. "/" .. Econ.Social.FriendMax .. ")")
+		friendsText.TextColor3 = hex("#7dff7a")
+	else
+		Kit.setText(friendsText, "+" .. per .. "% PER FRIEND (0/" .. Econ.Social.FriendMax .. ")")
+		friendsText.TextColor3 = hex("#8f889c")
+	end
 	local inGroup = player:GetAttribute("InGroup") == true
 	Kit.setText(groupText, if inGroup then "GROUP +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%" else "JOIN GROUP FOR +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%")
 	groupChip.Active = not inGroup
 end
-groupChip.MouseButton1Click:Connect(function()
-	if player:GetAttribute("InGroup") == true then return end
-	Kit.sound("click")
+local function promptGroup()
 	local ok, status = pcall(function() return game:GetService("GroupService"):PromptJoinAsync(Econ.Social.GroupId) end)
 	if ok and (status == Enum.GroupMembershipStatus.Joined or status == Enum.GroupMembershipStatus.AlreadyMember) then
 		if request:InvokeServer("CheckGroup") then
@@ -131,6 +137,29 @@ groupChip.MouseButton1Click:Connect(function()
 			if shared.GalaxyToast then shared.GalaxyToast("GROUP BOOST ON: +10% STARDUST", hex("#ffd84a")) end
 		end
 	end
+end
+groupChip.MouseButton1Click:Connect(function()
+	if player:GetAttribute("InGroup") == true then return end
+	Kit.sound("click")
+	promptGroup()
+end)
+-- (owner 6 Nov: the JOIN GROUP prompt comes by itself ONCE, after the first Supernova of this session's player (never on
+-- join), when the cinematic is over; whatever the answer, it never comes by itself again (the save remembers). The chip
+-- still opens it on a tap)
+local novasSeen = player:GetAttribute("Supernovas") or 0
+player:GetAttributeChangedSignal("Supernovas"):Connect(function()
+	local now = player:GetAttribute("Supernovas") or 0
+	local up = now > novasSeen
+	novasSeen = now
+	if not up or player:GetAttribute("GroupPrompted") == true or player:GetAttribute("InGroup") == true then return end
+	task.spawn(function()
+		task.wait(1)
+		while shared.GalaxyCinematic do task.wait(0.5) end
+		task.wait(2.5)
+		if player:GetAttribute("GroupPrompted") == true or player:GetAttribute("InGroup") == true then return end
+		request:InvokeServer("Settings", { groupPrompt = true })
+		promptGroup()
+	end)
 end)
 
 local function layout()

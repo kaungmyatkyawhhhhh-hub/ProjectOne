@@ -500,6 +500,7 @@ function Builder.Build()
 	local B = MapConfig.BlackHole
 	local hole = Instance.new("Model")
 	hole.Name = "BlackHoleGate"
+	hole:SetAttribute("Window", "BlackHole") -- (3.1: its prompt opens the BLACK HOLE window, GalaxyMapService)
 	hole.Parent = centre
 	local zh = zoneCf(Z.BlackHole.angle, Z.BlackHole.dist, true)
 	local daisH = Kit.Fit("Dais", "X", B.Dais).Y
@@ -548,7 +549,7 @@ function Builder.Build()
 	gl.Color, gl.Range, gl.Brightness, gl.Shadows = Color3.fromRGB(190, 110, 255), 20, 1.4, false
 	gl.Parent = pull
 	hole:SetAttribute("RingCF", ringCf)
-	sign(hole, "Sign", zh * CFrame.new(0, 0, B.Sign.Dist), B.Sign.Width, B.Sign.Height, B.Sign.Bottom, { "BLACK HOLE", "LOCKED" }, Color3.fromRGB(200, 150, 255), true)
+	sign(hole, "Sign", zh * CFrame.new(0, 0, B.Sign.Dist), B.Sign.Width, B.Sign.Height, B.Sign.Bottom, { "BLACK HOLE", "100K SHARDS" }, Color3.fromRGB(200, 150, 255), true)
 
 	Builder.Leaderboards(centre)
 
