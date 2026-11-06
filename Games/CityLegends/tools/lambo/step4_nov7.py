@@ -114,4 +114,6 @@ if what == "gls":
     ])
     edit("shared/Config.lua", [('\t"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",\n', '\t"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",\n\t"Tri-Star Silber X167 Royale model by Black Snow (CC BY)",\n')])
     no_marks("bentz_gls")
+    rect('	bentz_gls = { at = Vector3.new(-0.0073, 0.0551, -0.1773), face = Vector3.new(-0.007, 0.109, 0.994), w = 0.335, h = 0.1336 },
+')
 print("ok")

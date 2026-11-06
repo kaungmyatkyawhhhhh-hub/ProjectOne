@@ -136,6 +136,7 @@ CarSkin.CLUSTER_RECT = {
 	-- the third import job (2026-11-07): the owner's cluster photos, over the model's own ring
 	lexis_lfa = { at = Vector3.new(-0.003, 0.0411, -0.1761), face = Vector3.new(0, 0.14, 0.99), w = 0.267, h = 0.175 },
 	lexis_lfa_circuit = { at = Vector3.new(-0.003, 0.0411, -0.1761), face = Vector3.new(0, 0.14, 0.99), w = 0.267, h = 0.175 },
+	bentz_gls = { at = Vector3.new(-0.0073, 0.0551, -0.1773), face = Vector3.new(-0.007, 0.109, 0.994), w = 0.335, h = 0.1336 },
 	bentz_s680 = { at = Vector3.new(-0.0003, 0.049, -0.1883), face = Vector3.new(0, 0.14, 0.99), w = 0.366, h = 0.146 },
 	-- the second import job (2026-11-06): the screens behind each model's frame (tools/lambo/panel_preview.py)
 	lambrini_lp640 = { at = Vector3.new(0.0065, -0.0464, -0.3043), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
@@ -284,6 +285,8 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "digits", unit = "kmh", at = Vector3.new(-0.0041, 0.0646, -0.2678), face = Vector3.new(0.0007, 0.174, 0.9848), length = 0.0131, scale = "" },
 	},
 } :: { [string]: { DialSpec } }
+
+CarSkin.LOW_ARMS = { lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -2607,10 +2610,12 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			if eyeRoot then
 				local r = steer.radius
 				model:SetAttribute("SteerRadius", r)
-				for side, ang in { L = math.rad(160), R = math.rad(20) } do
+				-- (owner's rule: hands at 9 and 3, never over the cluster: these cars' arms sit lower)
+				local low = CarSkin.LOW_ARMS[id] == true
+				for side, ang in { L = math.rad(if low then 186 else 160), R = math.rad(if low then -6 else 20) } do
 					local sx = if side == "L" then -1 else 1
 					model:SetAttribute("Grip" .. side, Vector3.new(r * 0.9 * math.cos(ang), r * 0.9 * math.sin(ang), 0.24))
-					model:SetAttribute("Shoulder" .. side, eyeRoot + Vector3.new(sx * 0.62, -0.7, 0.43))
+					model:SetAttribute("Shoulder" .. side, eyeRoot + Vector3.new(sx * (if low then 0.72 else 0.62), if low then -1 else -0.7, 0.43))
 				end
 				model:SetAttribute("ArmsFitted", true)
 			end

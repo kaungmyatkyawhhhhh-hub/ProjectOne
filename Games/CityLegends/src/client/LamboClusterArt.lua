@@ -891,7 +891,7 @@ return {
 	},
 	lfa = {
 		W = 452, H = 296, A = 3, split = 226, idle = 0.9, redline = 9,
-		bg = { "rbxassetid://80871117024825", "rbxassetid://137911992876006" },
+		bg = { "rbxassetid://77656088033786", "rbxassetid://94769168751604" },
 		sheets = { "rbxassetid://127996493774998", "rbxassetid://116612841660301", "rbxassetid://97025730330834" },
 		blocks = {
 			{ 1, 0, 0, 66, 60, 14, 82, 6.5 },

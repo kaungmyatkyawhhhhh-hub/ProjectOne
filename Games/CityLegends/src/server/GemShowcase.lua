@@ -465,7 +465,7 @@ function GemShowcase.dress(kit: any, model: Model, inside: Instance, at: (number
 	-- a spot over every case
 	local floorY = at(0, FLOOR, 0).Position.Y
 	for _, c in cases do
-		local g = c.glass.Position
+		local g = c.glass.CFrame.Position
 		local lamp = deco(inside, Vector3.new(0.8, 0.6, 0.8), CFrame.new(g.X, floorY + H - 3, g.Z), BLACK, Enum.Material.Metal)
 		kit.addLight("SpotLight", lamp, Color3.fromRGB(255, 246, 236), H, 1.8, Enum.NormalId.Bottom, 34)
 	end

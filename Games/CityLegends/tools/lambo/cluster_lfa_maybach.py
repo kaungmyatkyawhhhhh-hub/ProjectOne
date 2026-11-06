@@ -109,7 +109,7 @@ def lfa(Spec, needle_sprite, add_needle):
     r, th = field(A, C)
     # the face: black in the middle, deep blue out to the ticks
     t = smooth(60, 104, r)
-    face = np.stack([6 + 54 * t, 8 + 76 * t, 14 + 112 * t], axis=-1)
+    face = np.stack([6 + 42 * t, 8 + 56 * t, 14 + 80 * t], axis=-1)
     blend(A, face, band_mask(r, -10, 117, 0.3))
     # the black track with the fine marks
     blend(A, np.full(face.shape, (5.0, 7.0, 11.0)), band_mask(r, 117, 127, 0.3))
