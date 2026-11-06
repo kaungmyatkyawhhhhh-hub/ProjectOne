@@ -640,6 +640,15 @@ task.spawn(function()
 	forge.Parent = nextS
 	-- (6 Nov: no crystal in front of the Forge's sign or any other sign: the island's crystals were placed before the Forge)
 	Builder.ClearDecor(root)
+	-- (7 Nov, "black boxes": the emitters / beams / trails SAVED in the place (built before the VFX pass) get their _alpha
+	-- texture too: an _add id, or the old mote upload on the Black Hole's Pull)
+	local VT = require(game:GetService("ReplicatedStorage"):WaitForChild("Galaxy"):WaitForChild("VfxTextures"))
+	for _, d in ipairs(root:GetDescendants()) do
+		if (d:IsA("ParticleEmitter") or d:IsA("Beam") or d:IsA("Trail")) and d.Texture ~= "" then
+			local a = VT.alphaOf(d.Texture)
+			if a then d.Texture = a end
+		end
+	end
 	-- (7 Nov, MapAudit v3 (real shapes; the crystals are CanQuery off, so rays never saw them):
 	--  * Sector 2's random crystals stood inside the Forge's platform: any crystal on its footprint moves out to its side;
 	--  * ClearDecor pushed a plaza crystal sideways off PLAYERS NEAR YOU's face into its neighbour: two clusters closer than

@@ -98,6 +98,23 @@ T.alpha = {
 	supernova_flash = "rbxassetid://126825831045463", -- C/vfx_supernova_flash_flipbook4x4_1024_alpha.png
 	tierup_crown_burst = "rbxassetid://136986321978447", -- G/vfx_tierup_crown_burst_512_alpha.png
 }
+-- (7 Nov: the _alpha twin of any id (an _add id, or an old upload of the mote); nil = unknown. Used by MapService to fix
+-- emitters saved in the place, and by Tools/VfxTextureAudit)
+T.oldIds = { ["rbxassetid://107591336585756"] = "stardust_mote" } -- (an early upload of the mote, on the Black Hole's Pull)
+-- (7 Nov: these 3 _alpha uploads FAIL to load on Roblox (AssetFetchStatus.Failure; the _add ones load): until the owner
+-- re-uploads them, effects use the _add file with LightEmission 1 (fully additive: the black adds nothing, no box))
+T.brokenAlpha = { comet_head = true, forge_sparks = true, gold_coin_sparkle = true }
+-- the texture an EFFECT (emitter / beam / trail) should use, and whether it must be LightEmission 1
+function T.fx(name: string): (string, boolean)
+	if T.brokenAlpha[name] then return T.add[name], true end
+	return T.alpha[name], false
+end
+function T.alphaOf(id: string): string?
+	for _, v in pairs(T.alpha) do if v == id then return v end end
+	for k, v in pairs(T.add) do if v == id then return (T.fx(k)) end end
+	local old = T.oldIds[id]
+	return if old then T.alpha[old] else nil
+end
 T.flipbooks = { explosion_burst = "OneShot", supernova_flash = "OneShot", anvil_impact = "OneShot", confetti_burst = "OneShot",
 	smoke_puff = "OneShot", electric_arc = "Loop", forge_sparks = "Loop", portal_swirl = "Loop" }
 return T

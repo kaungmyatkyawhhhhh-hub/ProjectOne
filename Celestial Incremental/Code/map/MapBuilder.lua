@@ -534,7 +534,7 @@ function Builder.Build()
 	glow:SetAttribute("Swirl", 1.2)
 	local pull = part({ Name = "Pull", Size = Vector3.new(voidD - 1, 0.2, voidD - 1), CFrame = ringCf, Transparency = 1, CanCollide = false, CanQuery = false, Parent = hole })
 	local pe = Instance.new("ParticleEmitter")
-	pe.Texture = require(Galaxy:WaitForChild("VfxTextures")).add.stardust_mote -- (the VFX pass: our stardust mote, #281)
+	pe.Texture = require(Galaxy:WaitForChild("VfxTextures")).alpha.stardust_mote -- (the VFX pass: our stardust mote, #281; 7 Nov: _alpha)
 	pe.Shape, pe.ShapeInOut, pe.ShapeStyle = Enum.ParticleEmitterShape.Disc, Enum.ParticleEmitterShapeInOut.Inward, Enum.ParticleEmitterShapeStyle.Surface
 	pe.Color = ColorSequence.new(Color3.fromRGB(255, 170, 240), Color3.fromRGB(150, 90, 255))
 	pe.LightEmission = 1

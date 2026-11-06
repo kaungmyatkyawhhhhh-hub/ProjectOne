@@ -210,7 +210,7 @@ local function buildSystem(island)
 	local ready = island:GetAttribute("Ready") == true
 	beam.Color = ColorSequence.new(if ready then Color3.fromRGB(255, 205, 90) else Color3.fromRGB(175, 120, 255))
 	beam.LightEmission = 1
-	beam.Texture = VT.add.light_streak
+	beam.Texture = VT.alpha.light_streak
 	beam.TextureMode = Enum.TextureMode.Stretch
 	beam.Width0, beam.Width1 = if ready then 1.6 else 0.7, if ready then 1.6 else 0.7
 	beam.FaceCamera = true
@@ -329,7 +329,7 @@ local function buildSystem(island)
 			a0.Parent, a1.Parent = p0, p0
 			local tr = Instance.new("Trail")
 			tr.Attachment0, tr.Attachment1 = a0, a1
-			tr.Texture = VT.add.light_streak
+			tr.Texture = VT.alpha.light_streak
 			tr.TextureMode = Enum.TextureMode.Stretch
 			tr.LightEmission, tr.LightInfluence = 1, 0
 			tr.Lifetime = 0.35
@@ -392,7 +392,9 @@ local function buildSystem(island)
 	moteHost.CFrame = CFrame.new(c + Vector3.new(0, SY.BeamFrom, 0))
 	moteHost.Parent = folder
 	local e = Instance.new("ParticleEmitter")
-	e.Texture = VT.add.stardust_mote
+	-- (7 Nov, owner: "black boxes again": every particle / beam / trail texture is the _alpha file now (transparent background),
+	-- so no LightEmission value can show the _add file's black square. Tools/VfxTextureAudit checks it)
+	e.Texture = VT.alpha.stardust_mote
 	e.Color = ColorSequence.new(C.Mote)
 	e.LightEmission = 0.7
 	e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.2, 0.55), NumberSequenceKeypoint.new(1, 0) })
@@ -406,7 +408,7 @@ local function buildSystem(island)
 	-- sparkles when the Supernova is ready
 	if island:GetAttribute("Ready") then
 		local r2 = e:Clone()
-		r2.Texture = VT.add.starburst_twinkle -- (warm: the white-cored star takes the tint; sparkle_star is cyan)
+		r2.Texture = VT.alpha.starburst_twinkle -- (warm: the white-cored star takes the tint; sparkle_star is cyan)
 		r2.Color = ColorSequence.new(Color3.fromRGB(255, 240, 200))
 		r2.Speed = NumberRange.new(1, 3)
 		r2.SpreadAngle = Vector2.new(180, 180)
@@ -481,28 +483,41 @@ local function padLabel(island, pad: Model)
 	local disc = pad:WaitForChild("Disc", 5)
 	if not disc then return end
 	local mine = island:GetAttribute("Owner") == player.UserId
+	-- (7 Nov, owner: "the STAR DAIS arrow points at empty floor, beside the dais". The disc is a cylinder turned 90 deg on Z
+	-- to lie flat, and a BillboardGui's offset follows its adornee's rotation: "+4.2 up" was 4.2 studs SIDEWAYS, at floor
+	-- height. Now: an upright attachment on the pad is the adornee; the label's BOTTOM (the arrow's tip) sits the pad's
+	-- half height + 3 studs straight above it (SizeOffset lifts the label by half its size), a 0.5-stud bob)
+	local anchor = Instance.new("Attachment")
+	anchor.Name = "LabelAnchor"
+	anchor.Parent = disc
+	anchor.WorldCFrame = CFrame.new(disc.Position)
+	local lift = math.min(disc.Size.X, disc.Size.Y, disc.Size.Z) / 2 + 3
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "PadLabel"
-	bb.Adornee = disc
-	bb.Size = UDim2.fromOffset(220, 120)
-	bb.StudsOffsetWorldSpace = Vector3.new(0, 4.2, 0)
+	bb.Adornee = anchor
+	bb.Size = UDim2.fromOffset(220, 124)
+	bb.SizeOffset = Vector2.new(0, 0.5)
+	bb.StudsOffsetWorldSpace = Vector3.new(0, lift, 0)
 	bb.MaxDistance = 90
 	bb.LightInfluence = 0
+	-- (not AlwaysOnTop: the prompt asked for it, but Studio's capture can't show always-on-top billboards, so it couldn't
+	-- be checked before the launch; 3 studs over open floor nothing hides it)
 	bb.AlwaysOnTop = false
 	bb.Parent = playerGui
-	local holder = UIKit.box(bb, 0, 0, 220, 120, {})
-	local name = UIKit.text(holder, 0, 38, 220, 30, pad:GetAttribute("PadName") or "", 24, { TextXAlignment = Enum.TextXAlignment.Center, FontFace = UIKit.FONT_HEAVY, stroke = 2.4 })
-	local priceIcon = UIKit.icon(holder, "stardust", 58, 70, 30, nil, { ZIndex = 3 })
-	local price = UIKit.text(holder, 90, 72, 120, 28, Econ.Format(pad:GetAttribute("Price") or 0), 24, { FontFace = UIKit.FONT_HEAVY, stroke = 2.2 })
-	local bonus = if pad:GetAttribute("Bonus") then UIKit.text(holder, 0, 100, 220, 20, "x1.15 STARDUST", 15, { TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = Color3.fromRGB(255, 216, 74), stroke = 1.6 }) else nil
+	-- (top to bottom: the name, the price, the bonus, then the arrow pointing DOWN at the pad)
+	local holder = UIKit.box(bb, 0, 0, 220, 124, {})
+	local name = UIKit.text(holder, 0, 0, 220, 30, pad:GetAttribute("PadName") or "", 24, { TextXAlignment = Enum.TextXAlignment.Center, FontFace = UIKit.FONT_HEAVY, stroke = 2.4 })
+	local priceIcon = UIKit.icon(holder, "stardust", 58, 32, 30, nil, { ZIndex = 3 })
+	local price = UIKit.text(holder, 90, 34, 120, 28, Econ.Format(pad:GetAttribute("Price") or 0), 24, { FontFace = UIKit.FONT_HEAVY, stroke = 2.2 })
+	local bonus = if pad:GetAttribute("Bonus") then UIKit.text(holder, 0, 62, 220, 20, "x1.15 STARDUST", 15, { TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = Color3.fromRGB(255, 216, 74), stroke = 1.6 }) else nil
 	local arrow = Instance.new("ImageLabel")
 	arrow.BackgroundTransparency = 1
 	arrow.Image = UIAssets.arrow
 	arrow.Size = UDim2.fromOffset(40, 40)
-	arrow.Position = UDim2.fromOffset(90, 0)
+	arrow.Position = UDim2.fromOffset(90, 84)
 	arrow.Visible = false
 	arrow.Parent = holder
-	local ui = { pad = pad, gui = bb, name = name, price = price, priceIcon = priceIcon, arrow = arrow, disc = disc, mine = mine, bonus = bonus }
+	local ui = { pad = pad, gui = bb, name = name, price = price, priceIcon = priceIcon, arrow = arrow, disc = disc, mine = mine, bonus = bonus, lift = lift }
 	padUI[island] = ui
 	if mine then
 		local click = disc:FindFirstChildOfClass("ClickDetector")
@@ -535,9 +550,16 @@ task.spawn(function()
 				ui.disc.Color = if can then Color3.fromRGB(90, 255, 140) elseif ui.mine then Color3.fromRGB(130, 215, 255) else Color3.fromRGB(120, 112, 140)
 				ui.price.TextColor3 = if can or not ui.mine then Color3.new(1, 1, 1) else Color3.fromRGB(255, 107, 107)
 				ui.arrow.Visible = can
-				if can and not calm() then ui.arrow.Position = UDim2.fromOffset(90, 2 + math.sin(os.clock() * 5) * 4) end
 			end
 		end
+	end
+end)
+
+-- (the pad label bobs 0.5 studs, smoothly; Reduced Motion: still)
+RunService.RenderStepped:Connect(function()
+	local bob = if calm() then 0 else (math.sin(os.clock() * 3) + 1) * 0.25
+	for _, ui in pairs(padUI) do
+		if ui.gui and ui.gui.Parent then ui.gui.StudsOffsetWorldSpace = Vector3.new(0, ui.lift + bob, 0) end
 	end
 end)
 
@@ -703,7 +725,7 @@ function spawnComet(id: number, seed: number, tutorial: boolean?, golden: boolea
 	trail.Attachment0, trail.Attachment1 = a0, a1
 	trail.Color = if golden then ColorSequence.new(Color3.fromRGB(255, 230, 140), Color3.fromRGB(255, 150, 40)) else ColorSequence.new(Color3.fromRGB(170, 235, 255), Color3.fromRGB(120, 140, 255))
 	trail.LightEmission = 1
-	trail.Texture = VT.add.comet_tail
+	trail.Texture = VT.alpha.comet_tail
 	trail.TextureMode = Enum.TextureMode.Stretch
 	trail.Lifetime = 1.1
 	trail.Transparency = NumberSequence.new(0, 1)
@@ -773,7 +795,7 @@ local function removeComet(comet, caught: boolean)
 					tr.Attachment0, tr.Attachment1 = a0, a1
 					tr.Lifetime = 0.25
 					tr.LightEmission = 1
-					tr.Texture = VT.add.light_streak
+					tr.Texture = VT.alpha.light_streak
 					tr.TextureMode = Enum.TextureMode.Stretch
 					tr.Color = ColorSequence.new(Color3.fromRGB(170, 235, 255))
 					tr.Parent = p

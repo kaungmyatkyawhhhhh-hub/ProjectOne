@@ -80,7 +80,7 @@ fxFolder.Name = "GalaxyBoardFx"
 fxFolder.Parent = workspace
 local TITLE_FONT = Font.fromEnum(Enum.Font.FredokaOne)
 -- (the VFX pass, #281: was Roblox's stock fire_main.dds; now our forge_sparks flipbook, looping)
-local FIRE = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("VfxTextures")).add.forge_sparks
+local FIRE = require(ReplicatedStorage:WaitForChild("Galaxy"):WaitForChild("VfxTextures")).fx("forge_sparks") -- (7 Nov: VfxTextures.fx; the flames are LightEmission 1)
 local function fxPart(name: string, size: Vector3, cf: CFrame): Part
 	local p = Instance.new("Part")
 	p.Name = name

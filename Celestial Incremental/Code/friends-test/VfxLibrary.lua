@@ -108,11 +108,14 @@ V.far = far
 local function dress(e, o)
 	local em: ParticleEmitter = e.em
 	local add = not o.alpha
-	em.Texture = (if add then T.add[o.tex] else T.alpha[o.tex]) or T.add.sparkle_star
+	-- (7 Nov, owner: "black boxes again": every particle / beam / trail texture is the _alpha file now (transparent background),
+	-- so no LightEmission value can show the _add file's black square. Tools/VfxTextureAudit checks it)
+	local tex, mustAdd = T.fx(o.tex)
+	em.Texture = tex or T.alpha.sparkle_star
 	-- (the textures are coloured art: a tint multiplies it, so an _add texture keeps 35% white to stay bright)
 	local c = o.color or WHITE
 	em.Color = if typeof(c) == "ColorSequence" then c else cseq(if add then (c :: Color3):Lerp(WHITE, 0.35) else c)
-	em.LightEmission = o.light or (if add then 1 else 0)
+	em.LightEmission = if mustAdd then 1 else o.light or (if add then 1 else 0)
 	em.LightInfluence = 0
 	em.Brightness = o.brightness or 1
 	local sz = o.size or 1
@@ -323,7 +326,7 @@ function V.StreakTrail(part: BasePart, colour: Color3, width: number?, life: num
 	a0.Parent, a1.Parent = part, part
 	local tr = Instance.new("Trail")
 	tr.Attachment0, tr.Attachment1 = a0, a1
-	tr.Texture = T.add[tex or "light_streak"]
+	tr.Texture = T.alpha[tex or "light_streak"]
 	tr.TextureMode = Enum.TextureMode.Stretch
 	tr.LightEmission, tr.LightInfluence = 1, 0
 	tr.Lifetime = life or 0.35
@@ -703,7 +706,7 @@ function V.RingNebula(a: Vector3, b: Vector3, colour: Color3?)
 	local function beam(tex: string, w: number, tr: number, speed: number)
 		local bm = Instance.new("Beam")
 		bm.Attachment0, bm.Attachment1 = a0, a1
-		bm.Texture = T.add[tex]
+		bm.Texture = T.alpha[tex]
 		-- (stretched along the whole bridge: tiled, the panel image's padding left gaps)
 		bm.TextureMode = Enum.TextureMode.Stretch
 		bm.TextureLength = 1

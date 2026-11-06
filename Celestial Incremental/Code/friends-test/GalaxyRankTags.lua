@@ -196,7 +196,7 @@ local function auraOn(model: Model, level: number)
 	local att = Instance.new("Attachment")
 	att.Name = "RankAura"
 	local em = Instance.new("ParticleEmitter")
-	em.Texture = VT.add.starburst_twinkle -- (white-cored: takes the band colour)
+	em.Texture = VT.alpha.starburst_twinkle -- (white-cored: takes the band colour; 7 Nov: _alpha, no black boxes)
 	em.Color = ColorSequence.new(colour:Lerp(Color3.new(1, 1, 1), 0.45), colour)
 	em.LightEmission = 1
 	em.Brightness = def.bright
