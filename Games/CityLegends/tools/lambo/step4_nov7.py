@@ -107,4 +107,11 @@ if what == "s680":
     edit("shared/Config.lua", [('\t"Enfurecido Classico 5000 model by Ddiaz Design (CC BY)",\n', '\t"Enfurecido Classico 5000 model by Ddiaz Design (CC BY)",\n\t"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",\n')])
     finish("bentz_s680")
     no_marks("bentz_s680")
+if what == "gls":
+    edit("client/CarSkin.lua", [
+        ('\tbentz_gls = "W213", -- Maybach GLS 600: wide glass screen\n', '\tbentz_gls = "LiveMaybach", -- from the owner\'s photo\n'),
+        ('bentz_gls = "MercLuxury",', ''),
+    ])
+    edit("shared/Config.lua", [('\t"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",\n', '\t"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",\n\t"Tri-Star Silber X167 Royale model by Black Snow (CC BY)",\n')])
+    no_marks("bentz_gls")
 print("ok")

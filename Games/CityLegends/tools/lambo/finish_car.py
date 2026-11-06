@@ -169,6 +169,42 @@ for c in spec.get("cut_box", []):
             report["cut"] += len(kill)
         bm.free()
 
+for c in spec.get("cut_islands", []):
+    # whole loose pieces of a material inside a box (a chrome star among other chrome), each under "limit" m long
+    x0, y0, z0, x1, y1, z1 = c["box"]
+    for o in meshes():
+        slots = {i for i, m in enumerate(o.data.materials) if m and c["mat"].lower() in m.name.lower()}
+        if not slots:
+            continue
+        M = o.matrix_world
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bm.faces.ensure_lookup_table()
+        seen, kill = set(), []
+        for f in bm.faces:
+            if f.index in seen or f.material_index not in slots:
+                continue
+            st, comp = [f], []
+            seen.add(f.index)
+            while st:
+                g = st.pop()
+                comp.append(g)
+                for e in g.edges:
+                    for h in e.link_faces:
+                        if h.index not in seen:
+                            seen.add(h.index)
+                            st.append(h)
+            pts = [M @ v.co for g in comp for v in g.verts]
+            lo = [min(p[i] for p in pts) for i in range(3)]
+            hi = [max(p[i] for p in pts) for i in range(3)]
+            if lo[0] >= x0 and lo[1] >= y0 and lo[2] >= z0 and hi[0] <= x1 and hi[1] <= y1 and hi[2] <= z1 and max(hi[i] - lo[i] for i in range(3)) < c.get("limit", 9):
+                kill += comp
+        if kill:
+            bmesh.ops.delete(bm, geom=kill, context="FACES")
+            bm.to_mesh(o.data)
+            report["cut"] += len(kill)
+        bm.free()
+
 for c in spec.get("img_fill", []):
     # a logo pressed into a normal map: flat there
     img = bpy.data.images[c["image"]]
@@ -490,6 +526,18 @@ for word, k in spec.get("thin", {}).items():
             d.ratio = k
             bpy.ops.object.modifier_apply(modifier="thin")
             report.setdefault("thinned", []).append([o.name, tris(o)])
+
+
+for word, deg in spec.get("dissolve", {}).items():
+    # flat areas only: the shape stays (a collapse left lumps on the GLS's chrome)
+    for o in meshes():
+        if o.name.startswith("Body_" + word) or o.name[:3] in ("FL_", "FR_", "RL_", "RR_") and o.name[3:].startswith(word):
+            bpy.context.view_layer.objects.active = o
+            d = o.modifiers.new("flat", "DECIMATE")
+            d.decimate_type = "DISSOLVE"
+            d.angle_limit = np.radians(deg)
+            bpy.ops.object.modifier_apply(modifier="flat")
+            report.setdefault("dissolved", []).append([o.name, tris(o)])
 
 
 def split_big(o):

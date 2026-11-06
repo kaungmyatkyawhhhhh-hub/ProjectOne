@@ -1,1 +1,1 @@
-{"id": "lambrini_countach", "roles": {"body4bcoloured": ["Trim", 0.3, 0.0], "body4bpaint": ["Paint", 0.1, 0.0]}}
+{"id": "lambrini_countach", "roles": {"body4bcoloured": ["Trim", 0.3, 0.0], "body4bpaint": ["Paint", 0.1, 0.0]}, "lens": [["body4bglass", "Lens_Red"], ["glassinsidesg3", "Lens_Orange"]]}

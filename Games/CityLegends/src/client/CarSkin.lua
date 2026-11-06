@@ -90,7 +90,7 @@ CarSkin.CLUSTER_STYLE = {
 	byt_seal = "U8", -- wide electric screen
 	bentz_s680 = "LiveMaybach", -- from the owner's photo
 	bentz_e400 = "W213", -- the E63 S W213 model: its wide glass screen
-	bentz_gls = "W213", -- Maybach GLS 600: wide glass screen
+	bentz_gls = "LiveMaybach", -- from the owner's photo
 	bnw_750li = "BMWLiveCockpit", -- the 750Li G12 (2026-10-18 model)
 	bentz_gle53 = "AMG", -- in the C63 coupe's cabin, like the CLA 45
 	-- the cars of 2026-10-18 (looks from the real cars)
@@ -136,7 +136,7 @@ CarSkin.CLUSTER_RECT = {
 	-- the third import job (2026-11-07): the owner's cluster photos, over the model's own ring
 	lexis_lfa = { at = Vector3.new(-0.003, 0.0411, -0.1761), face = Vector3.new(0, 0.14, 0.99), w = 0.267, h = 0.175 },
 	lexis_lfa_circuit = { at = Vector3.new(-0.003, 0.0411, -0.1761), face = Vector3.new(0, 0.14, 0.99), w = 0.267, h = 0.175 },
-	bentz_s680 = { at = Vector3.new(0.0005, 0.0508, -0.203), face = Vector3.new(0, 0.14, 0.99), w = 0.366, h = 0.146 },
+	bentz_s680 = { at = Vector3.new(-0.0003, 0.049, -0.1883), face = Vector3.new(0, 0.14, 0.99), w = 0.366, h = 0.146 },
 	-- the second import job (2026-11-06): the screens behind each model's frame (tools/lambo/panel_preview.py)
 	lambrini_lp640 = { at = Vector3.new(0.0065, -0.0464, -0.3043), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
 	lambrini_lp670 = { at = Vector3.new(0.0065, -0.0464, -0.3041), face = Vector3.new(0, 0.245, 0.97), w = 0.3578, h = 0.1519 },
@@ -215,8 +215,8 @@ CarSkin.DIAL_NEEDLES = {
 	},
 
 	lambrini_countach = { -- the 5000's own two big dials, redrawn sharp (tools/lambo/countach_art.py)
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0922, 0.0258, -0.2031), face = Vector3.new(-0.0086, 0.1833, 0.983), length = 0.0356, scale = "0:-135,40:-101.3,80:-67.5,120:-33.8,160:0,200:33.8,240:67.5,280:101.3,320:135" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0907, 0.0258, -0.2031), face = Vector3.new(-0.0086, 0.1833, 0.983), length = 0.0359, scale = "0:-114.1,1000:-90,2000:-61,3000:-35.4,4000:-14,5000:10.4,6000:34,7000:58,8000:90,9000:118" },
+		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0922, 0.0258, -0.1875), face = Vector3.new(-0.0086, 0.1833, 0.983), length = 0.0356, scale = "0:-135,40:-101.3,80:-67.5,120:-33.8,160:0,200:33.8,240:67.5,280:101.3,320:135" },
+		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0908, 0.0258, -0.1875), face = Vector3.new(-0.0086, 0.1833, 0.983), length = 0.0359, scale = "0:-114.1,1000:-90,2000:-61,3000:-35.4,4000:-14,5000:10.4,6000:34,7000:58,8000:90,9000:118" },
 	},
 	astin_vantage = { -- V12 Vantage
 		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0517, 0.0515, -0.2403), face = Vector3.new(-0.0001, 0.3108, 0.9505), length = 0.0495, scale = "0:162,200:377" },
@@ -297,7 +297,7 @@ CarSkin.FACELESS_DIALS = {
 	lambrini_lp560 = GALLARDO_DIALS,
 	lambrini_countach = {
 		{ faceless = true, image = "rbxassetid://90634108999362", faceR = 124, needle = Color3.fromRGB(240, 160, 30), needleW = 6, hubRing = Color3.fromRGB(46, 48, 54), hubR = 16 },
-		{ faceless = true, image = "rbxassetid://81321173656948", faceR = 120, needle = Color3.fromRGB(240, 160, 30), needleW = 6, hubRing = Color3.fromRGB(46, 48, 54), hubR = 16 },
+		{ faceless = true, image = "rbxassetid://81321173656948", faceR = 124, needle = Color3.fromRGB(240, 160, 30), needleW = 6, hubRing = Color3.fromRGB(46, 48, 54), hubR = 16 },
 	},
 	bugotti_chiron = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
 	bugotti_chiron_pursport = { { faceless = true, needle = Color3.fromRGB(225, 240, 255), needleW = 5 } },
@@ -406,7 +406,7 @@ CarSkin.STEER_MODEL = {
 	-- Mercedes
 	bentz_cla45 = "AMGFlat", bentz_cls63s = "AMGFlat", bentz_gle53 = "AMGFlat", bentz_g63 = "AMGFlat", brabos_g63 = "AMGFlat",
 	bentz_sl65bs = "AMGFlat", bentz_sls = "AMGFlat", bentz_e63s = "AMGFlat", bentz_e400 = "AMGFlat",
-	bentz_e300 = "MercLuxury", bentz_s63 = "MercLuxury", bentz_gls = "MercLuxury",
+	bentz_e300 = "MercLuxury", bentz_s63 = "MercLuxury", 
 	bentz_190e = "Merc90s", bentz_s65_w221 = "Merc90s",
 	-- luxury
 	rolls_wraith = "Rolls", rolls_cullinan = "Rolls", bentlee_contgt = "Bentley", bentlee_bentayga = "Bentley",
@@ -2599,7 +2599,9 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 					table.insert(clones, p)
 					mountPart(p, i, t.offset)
 				end
-				restyleSteer(clones)
+				if not CarFinish.CARS[id] then -- (the new models keep their own wheel)
+					restyleSteer(clones)
+				end
 			end
 			-- where Driving's arms grip (10 and 2) and where the shoulders sit
 			if eyeRoot then

@@ -270,6 +270,7 @@ Config.Credits = {
 	"Stealth-Apex V10 Halo and Halo Circuit models by Ddiaz Design",
 	"Enfurecido Classico 5000 model by Ddiaz Design (CC BY)",
 	"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",
+	"Tri-Star Silber X167 Royale model by Black Snow (CC BY)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
 

@@ -177,22 +177,6 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0017, -0.009, 0.0281), face = Vector3.new(-0.0359, 0.2107, 0.9769), r = 0.033, color = Color3.fromRGB(71, 73, 71) },
 	},
-	bentz_gls = {
-		wb = 3.135,
-		brand = "Mercer",
-		hide = { { name = "Body_etk800_lettering_001" } },
-		covers = {
-			{ emblem = true, disc = true, at = Vector3.new(-0.0025, 0.6657, -2.4406), face = Vector3.new(0, -0.0407, -0.9992), w = 0.0713, h = 0.0713, color = Color3.fromRGB(214, 214, 214) },
-			{ emblem = true, disc = true, at = Vector3.new(-0.0094, 0.864, 2.628), face = Vector3.new(0.0733, 0.5525, 0.8303), w = 0.1203, h = 0.1043, color = Color3.fromRGB(214, 214, 214) },
-		},
-		caps = {
-			FL = { r = 0.043, surface = 0.1654, color = Color3.fromRGB(231, 231, 231) },
-			FR = { r = 0.043, surface = 0.1605, color = Color3.fromRGB(231, 231, 231) },
-			RL = { r = 0.043, surface = 0.134, color = Color3.fromRGB(231, 231, 231) },
-			RR = { r = 0.043, surface = 0.129, color = Color3.fromRGB(231, 231, 231) },
-		},
-		hub = { at = Vector3.new(-0.0016, 0.0108, 0.1172), face = Vector3.new(-0.0257, 0.0851, 0.996), r = 0.038, color = Color3.fromRGB(10, 10, 10) },
-	},
 	bentz_gt63s = {
 		wb = 3.052,
 		hide = {},

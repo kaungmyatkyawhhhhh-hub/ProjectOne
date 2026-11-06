@@ -1,0 +1,214 @@
+{
+"colours": {
+"gls_interior1": [
+206,
+184,
+150
+],
+"gls_leather_brown": [
+86,
+44,
+30
+],
+"gls_leather_black": [
+58,
+32,
+24
+],
+"gls_leather_niz": [
+28,
+20,
+18
+],
+"gls_interior": [
+24,
+20,
+20
+],
+"gls_torpedka1": [
+30,
+24,
+22
+],
+"gls_din": [
+16,
+16,
+18
+],
+"gls_wood_black1": [
+52,
+30,
+20
+],
+"gls_wood_black": [
+58,
+32,
+20
+],
+"gls_dvd": [
+12,
+12,
+14
+],
+"black_chrome.066": [
+14,
+14,
+16
+],
+"vehicle_detail2": [
+30,
+30,
+32
+],
+"vehicle_paint1": [
+24,
+24,
+26
+],
+"vehicle_basic": [
+34,
+34,
+36
+],
+"interior.473": [
+24,
+24,
+24
+],
+"gls_paint_two": [
+16,
+16,
+18
+],
+"gls_palitra": [
+22,
+22,
+24
+],
+"gls_seatbelt": [
+40,
+36,
+34
+],
+"gls_grille": [
+14,
+14,
+16
+],
+"gls_jetblackk": [
+12,
+12,
+14
+],
+"gls_jetblack": [
+12,
+12,
+14
+],
+"gls_black_chrome.078": [
+28,
+28,
+30
+],
+"gls_carbonn": [
+20,
+20,
+24
+],
+"scene_-_root": [
+18,
+18,
+20
+],
+"gavril_v8": [
+40,
+40,
+42
+],
+"etk800_interior": [
+60,
+60,
+64
+],
+"gls_rear": [
+120,
+14,
+18
+],
+"reardoor": [
+100,
+12,
+16
+],
+"gls_stop": [
+180,
+16,
+20
+],
+"gls_run": [
+170,
+14,
+18
+],
+"gls_ras_on": [
+20,
+20,
+22
+],
+"gls_sigl": [
+200,
+150,
+50
+],
+"gls_sigr": [
+200,
+150,
+50
+],
+"gls_fara": [
+60,
+62,
+66
+],
+"gls_svet": [
+70,
+72,
+76
+],
+"amdb11_caliper": [
+180,
+170,
+150
+],
+"amdb11_misc_chrome": [
+60,
+62,
+66
+],
+"amdb11_misc": [
+20,
+20,
+22
+],
+"amdb11_brake": [
+70,
+70,
+74
+],
+"wheel_42a": [
+120,
+122,
+126
+],
+"etk800.009": [
+18,
+18,
+20
+],
+"etk800_glass": [
+60,
+8,
+10
+]
+}
+}
