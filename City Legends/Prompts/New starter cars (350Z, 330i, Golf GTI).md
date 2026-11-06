@@ -1,5 +1,7 @@
 # Prompt: new starter car pick: 350Z, 330i and Golf GTI Clubsport Mk7
 
+> **Merged (2026-11-06):** this is now Part 2 of `Better upgrade area and part shop.md`. Do it from there, not twice.
+
 _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras._
 
 ## What the owner wants (2026-11-06)
