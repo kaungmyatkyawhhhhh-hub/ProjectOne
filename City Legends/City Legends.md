@@ -1,6 +1,6 @@
 # City Legends
 
-> **LICENCE WARNING (owner, read this):** these car models are **NC (non-commercial)** and the game sells Robux items, so they are risky: Dearborn C346 (Focus RS, CC-BY-NC-SA, Ddiaz Design), plus the Lamborghini / Ferrari ones listed further down. The Focus's part names (`Rs:SK_...`, `MI_...`) look ripped from a racing game. The call is yours. The game still works if one model is swapped later.
+> **LICENCE WARNING (owner, read this):** these car models are **NC (non-commercial)** and the game sells Robux items, so they are risky: Dearborn C346 (Focus RS), Stealth-Apex V10 Halo and Halo Circuit (LFAs), Z223 Royale V12 (Maybach S-Class), all Ddiaz Design, plus the Lamborghini / Ferrari ones listed further down. Their part names (`Rs:SK_...`, `MI_...`, `Geo_lodA`) look ripped from a racing game. The X167 Royale and Classico 5000 are CC-BY (OK with credit, in the credits), though the X167's parts are from a game mod. The call is yours. The game still works if one model is swapped later.
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
@@ -12,11 +12,11 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 
 | Car | Price, level, class | Triangles |
 |---|---|---|
-| Stealth-Apex V10 Halo (`lexis_lfa`, same id, price) | $3,000,000, PI 737 | 215k |
-| Stealth-Apex V10 Halo Circuit (`lexis_lfa_circuit`, **new**, suggested) | $3,600,000, S2 758; 202 mph, 0-60 3.5, 563 hp, 1450 kg, wheelbase 2.605 | 229k |
+| Stealth-Apex V10 Halo (`lexis_lfa`, same id, price) | $3,000,000, S1 737 | 215k |
+| Stealth-Apex V10 Halo Circuit (`lexis_lfa_circuit`, **new**, suggested) | $3,600,000 (suggested), S2 758; 202 mph, 0-60 3.5, 563 hp, 1450 kg, wheelbase 2.605 | 229k |
 | Tri-Star Silber Z223 Royale V12 (`bentz_s680`) | $1,600,000, B 502 | 219k |
 | Tri-Star Silber X167 Royale (`bentz_gls`) | $1,200,000, C 431 | 384k (from 474k) |
-| Enfurecido Classico 5000 (`lambrini_countach`, renamed from 400) | $2,500,000, PI 563 | 196k |
+| Enfurecido Classico 5000 (`lambrini_countach`, renamed from 400) | $2,500,000, B 563 | 196k |
 
 - **Clusters:** `tools/lambo/cluster_lfa_maybach.py` (styles `LiveLFA`, `LiveMaybach`), `tools/lambo/countach_art.py` (two big dials at 800 px on panels, needles live). The photos are only 480 and 596 px wide, so everything is drawn fresh and placed by them, no pieces cut from the photos. Maybach: mark left out of both dials, "Media" for the Russian word.
 - **Moves:** LFA: rev needle, speed, gear (N lights beside it), oil pressure bar with the revs, water bar when worked hard, trip lines, clock. Maybachs: both needles, digital speed, gear letters (R N D with the big letter), parked P, range, clock; the speedometer's numbers follow km/h or mph. Temperatures, fuel bars don't move.
@@ -25,7 +25,7 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - **Colours:** the GLS file has no pictures at all (a game mod's export, grey placeholders): every material got a plain colour by hand (`tools/lambo/recolour.py`, `tools/logo_paint/bentz_gls.colours.json`): saddle and macchiato leather, walnut, dark trim. LFA: black cabin with red seat centres (`tools/lambo/seat_two_tone.py`), red kept from its own palette. S-Class: the model's own quilted cream cabin.
 - **Fixes on the way:** the importer gave a part yaw of 0.15 degrees: `ServerStorage.ClaudeTools.CarApply` zeroes it. Steering pieces are told apart by their longest side (the box in Blender is tilted). `CarLookCopy` swaps a rebuilt pack in and keeps the surfaces. A GLS collapse thinning left lumps on the chrome, so only hidden parts are thinned; 474k -> 384k. `LOW_ARMS` in `CarSkin`: on these five cars the hands sit at 9 and 3 and the arms lower, because the old line covered the cluster (owner's rule; other cars unchanged). `LoadAsset` works when `insert_asset` says "Failed to load package asset" (a just-uploaded big pack).
 - **Backups:** `ServerStorage.OldCarModels`: `lexis_lfa_old_2026-11-07`, `bentz_s680_old_2026-11-07`, `bentz_gls_old_2026-11-07`, `lambrini_countach_old_2026-11-07`.
-- **Checked in Play (PC size):** all five spawn, no script errors; outside day and night; driver's seat, cluster moving (speed, revs, gear) on the Circuit, GLS and Countach; LFA and S680 parked and spawned; Customs paint on 4 (blue metallic GLS, red gloss Countach, matte black Circuit, green over cream S680 by the look attribute, not through the shop); brake lamps on the GLS and Circuit. **Not checked:** the Countach's lamps closely, phone size, a real phone, 2 players, buying the Circuit at the dealer. One small thing left: a dim red strip inside the S-Class's rear pillars, seen through the windscreen. Temperature and fuel gauges don't move, except the LFA's water bar.
+- **Checked in Play (PC size):** all five spawn, no script errors; outside day and night; driver's seat, cluster moving (speed, revs, gear) on the Circuit, GLS and Countach; LFA and S680 parked and spawned; Customs paint on 4 (blue metallic GLS, red gloss Countach, matte black Circuit, green over cream S680 by the look attribute, not through the shop); brake lamps on the GLS and Circuit. Lune tests all OK (world, graph, carlevels, goals, market; the market test's `stash capped` line failed once in 5 runs, it depends on chance), `luau-lsp` no errors. **Not checked:** the Countach's lamps closely, phone size, a real phone, 2 players, buying the Circuit at the dealer. One small thing left: a dim red strip inside the S-Class's rear pillars, seen through the windscreen. Temperature and fuel gauges don't move, except the LFA's water bar.
 - **Pictures:** [[LFA and Circuit - in the game.jpg]], [[Z223 Royale - in the game.jpg]], [[X167 Royale - in the game.jpg]], [[Classico 5000 - in the game.jpg]], [[LFA cluster - photo and redraw.jpg]], [[LFA cluster - in the game next to the photo.jpg]], [[Maybach cluster - photo and redraw.jpg]], [[Maybach cluster - in the game next to the photo.jpg]], [[Countach dials - redrawn sharp.jpg]].
 
 ## Workshop and Part Shop (2026-11-06, `Prompts/Better upgrade area and part shop.md`)
