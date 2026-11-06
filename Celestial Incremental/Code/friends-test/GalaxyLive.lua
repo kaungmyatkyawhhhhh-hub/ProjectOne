@@ -198,6 +198,7 @@ local function tick()
 	local ends = Galaxy:GetAttribute("EventEnds") or 0
 	local on = ends > now and (Galaxy:GetAttribute("EventId") or "") ~= ""
 	eventBar.Visible = on and not busy
+	Kit.musicEvent(on) -- (7 Nov: the event's own, higher-energy track while it runs)
 	if on then Kit.setText(eventText, tostring(Galaxy:GetAttribute("EventTitle")) .. "  ·  " .. mmss(ends - now) .. " LEFT") end
 	-- update banner
 	updateBar.Visible = updateUntil > 0 and not busy

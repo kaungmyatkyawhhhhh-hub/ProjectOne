@@ -477,6 +477,7 @@ local pool, poolI = {}, 0
 function Kit.sound(name: string, opts): Sound?
 	local spec = SoundCfg.List[ALIAS[name] or name]
 	if not spec then return nil end
+	if SoundCfg.StingerDuck and SoundCfg.StingerDuck.names[ALIAS[name] or name] then Kit.musicStinger() end
 	local s: Sound
 	if opts and opts.at then
 		-- 3D: heard near where it happens (an attachment in the terrain, gone when the sound ends)
@@ -533,6 +534,9 @@ local musicNext = nil -- the next deck, loaded in the background
 local musicOrder, musicI, musicLast = {}, 0, nil
 local musicBad = {} -- [id] = true: didn't load, left out
 local musicPaused, musicSwitching = false, false
+local musicEventOn = false -- (7 Nov: the 2x event's track plays instead of the playlist while an event runs)
+local musicStingerV = Instance.new("NumberValue")
+musicStingerV.Value = 1
 local function musicReshuffle()
 	local list = {}
 	for _, spec in ipairs(SoundCfg.Playlist) do
@@ -547,6 +551,8 @@ local function musicReshuffle()
 	musicOrder, musicI = list, 0
 end
 local function musicNextSpec()
+	local ev = SoundCfg.EventTrack
+	if musicEventOn and ev and not musicBad[ev.id] then return ev end
 	if musicI >= #musicOrder then musicReshuffle() end
 	if #musicOrder == 0 then return nil end
 	musicI += 1
@@ -603,6 +609,11 @@ local function musicSwitch()
 	local t = os.clock()
 	while not musicNext and os.clock() - t < 12 do task.wait(0.2) end -- (still loading: wait, the old one plays on)
 	local nextDeck = musicNext
+	-- (the event started / ended while the next one was loading: load the right one)
+	if nextDeck and (nextDeck.spec == SoundCfg.EventTrack) ~= musicEventOn then
+		nextDeck.sound:Destroy()
+		nextDeck = nil
+	end
 	if not nextDeck then nextDeck = musicLoad() end
 	if nextDeck then
 		musicPlay(nextDeck, SoundCfg.MusicCrossfade)
@@ -620,7 +631,7 @@ function Kit.music()
 	end)
 	game:GetService("RunService").Heartbeat:Connect(function()
 		for _, d in ipairs(musicDecks) do
-			d.sound.Volume = SoundCfg.MusicBus * (d.spec.volume or 1) * d.env.Value * musicFadeV.Value * musicDuckV.Value
+			d.sound.Volume = SoundCfg.MusicBus * (d.spec.volume or 1) * d.env.Value * musicFadeV.Value * musicDuckV.Value * musicStingerV.Value
 		end
 		local now = musicNow
 		if now and not musicPaused and not musicSwitching and now.sound.Parent
@@ -659,7 +670,23 @@ local musicDucked = false
 function Kit.musicDuck(on: boolean)
 	if on == musicDucked then return end
 	musicDucked = on
-	TweenService:Create(musicDuckV, TweenInfo.new(0.4, Enum.EasingStyle.Quad), { Value = if on then 0.5 else 1 }):Play()
+	TweenService:Create(musicDuckV, TweenInfo.new(0.4, Enum.EasingStyle.Quad), { Value = if on then (SoundCfg.WindowDuck or 0.5) else 1 }):Play()
+end
+-- (7 Nov) a 2x event is running (GalaxyLive): its track crossfades in now, and back to the playlist when it ends
+function Kit.musicEvent(on: boolean)
+	if on == musicEventOn then return end
+	musicEventOn = on
+	if musicStarted and not musicSwitching and not musicPaused then task.spawn(musicSwitch) end
+end
+-- (7 Nov) a big stinger: the music dips (StingerDuck) and comes back
+function Kit.musicStinger()
+	local d = SoundCfg.StingerDuck
+	if not d then return end
+	local down = TweenService:Create(musicStingerV, TweenInfo.new(d.attack, Enum.EasingStyle.Linear), { Value = d.k })
+	down:Play()
+	down.Completed:Once(function()
+		TweenService:Create(musicStingerV, TweenInfo.new(d.release, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Value = 1 }):Play()
+	end)
 end
 -- the Settings sliders (0..1)
 function Kit.setVolumes(musicVol: number?, sfxVol: number?)

@@ -103,3 +103,40 @@ Screens: `Progress/screens/2026-11-07-launch-day/`.
 - **Shots** (from the island spawn at eye height, a board, the Black Hole gate; PC and phone at graphics quality 1):
   - `light-before-*` and `light-after-*`.
   - Phone before: spawn only (taken before the change); phone after: all 3.
+
+## 4. Hype music
+**How the tracks were judged (I can't listen from here):**
+- In Studio, each track's PlaybackLoudness was sampled at 60 Hz for 25 s from 0:30.
+- **energy** = average loudness. **beat** = how regular the loudness hits are (autocorrelation of the onsets at 100-160 BPM, 0 to 1). **~BPM** = the tempo it found. Doubles / halves are possible.
+- Only APM Music (APMOfficial, licensed to Roblox) with upbeat library notes / titles. No Monstercat: the ones in the store have vocals.
+
+| | track | id | beat | ~BPM | where |
+|---|---|---|---|---|---|
+| OLD | Final Frontier | 1844631856 | 0.06 | ~152 | playlist |
+| OLD | Into the Sun (b) | 1840016117 | 0.19 | ~102 | playlist |
+| OLD | Go! | 1840300465 | 0.33 | ~160 | playlist |
+| OLD | Future Plans (A) | 1840772819 | 0.15 | ~102 | playlist |
+| OLD | Full Contact (a) | 1841008234 | 0.07 | ~160 | playlist |
+| NEW | Get Going B | 1847078335 | **0.43** | ~137 | playlist (starts 0:02) |
+| NEW | Back to the Scoreboard (Juice Music "PUMPED UP", Club/Electronica) | 1839889971 | 0.21 | ~125 | playlist |
+| NEW | Uplighter | 1836702723 | 0.21 | ~125 | playlist |
+| NEW | Saturday Special | 1844486984 | 0.26 | ~119 | playlist (starts 0:03) |
+| NEW | Turbo Trance B | 1846696220 | 0.22 | ~137 | **the 2x STARDUST EVENT track** (crossfades in while an event runs, loops, back after) |
+
+**The mix:**
+- Music bus 0.4 × each track's loudness match (as before; the old setup kept: shuffle, never twice in a row, 2 s crossfade, the silent tails cut, never restarts on respawn: it's a client sound in SoundService).
+- **0.25** while a shop / window is open (WindowDuck 0.625).
+- **-6 dB** under the big stingers (milestone, new body): 80 ms in, 1 s back.
+- The Supernova cuts the music for its riser and brings it back after (as before).
+- **Settings > MUSIC** slider: the same GalaxyMusic SoundGroup (unchanged).
+- **Measured** (your saved sliders: music 0.61, SFX 0.80):
+  - music average 53, peak 122;
+  - click 134, error 131, comet catch 107, milestone 234 (peaks);
+  - new body 56, with the music ducked to ~26 under it.
+  - The effects sit clearly on top; nothing near clipping.
+
+**Not done / for after the launch:**
+- **A real listen** (5 min on headphones + a phone speaker): I can't hear. The picks are by measured beat + tempo + APM's notes. Their KEY (major / minor) can't be measured that way.
+- **UI sounds vs the tracks' keys:** not checked (same reason).
+- **Black Hole darker track:** not added (the prompt said "may").
+- **UI bus 0.8 / Ambience bus 0.3:** the game has 2 buses (Music, SFX = every effect incl. UI); kept, no ambience loops exist.

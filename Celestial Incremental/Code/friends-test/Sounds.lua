@@ -38,13 +38,26 @@ Sounds.List = {
 -- stop = where the track's silent tail starts (PlaybackRegion; the intros are all under 0.5 s, so they play from 0)
 Sounds.MusicBus = 0.4
 Sounds.MusicCrossfade = 2
+-- (7 Nov, launch day, owner: "music should have more hype, rn it feels depressing". Measured in Studio (PlaybackLoudness at
+-- 60 Hz, 25 s from 0:30; beat = the autocorrelation of the loudness onsets at 100-160 BPM, ~ = the tempo it found): the
+-- old 5 had a weak beat (0.06-0.19) except Go! (0.33), two at ~102 BPM. The new 4: all APM Music (APMOfficial, licensed to
+-- Roblox), instrumental, a clear beat at 119-137 BPM, upbeat titles / library notes. volume = the loudness match (as before);
+-- start = where the beat comes in (LoopRegion skips the intro), stop = where the silent tail starts)
+--   OLD: Final Frontier 1844631856 (beat 0.06, ~152), Into the Sun (b) 1840016117 (0.19, ~102), Go! 1840300465 (0.33, ~160),
+--        Future Plans (A) 1840772819 (0.15, ~102), Full Contact (a) 1841008234 (0.07, ~160)
 Sounds.Playlist = {
-	{ id = 1844631856, name = "Final Frontier", volume = 1.1, stop = 172.2 },
-	{ id = 1840016117, name = "Into the Sun (b)", volume = 0.95, stop = 196 },
-	{ id = 1840300465, name = "Go!", volume = 0.9, stop = 171 },
-	{ id = 1840772819, name = "Future Plans (A)", volume = 0.7, stop = 188.8 },
-	{ id = 1841008234, name = "Full Contact (a)", volume = 0.4, stop = 106.5 },
+	{ id = 1847078335, name = "Get Going B", volume = 0.55, start = 2, stop = 101 },              -- beat 0.43, ~137 BPM
+	{ id = 1839889971, name = "Back to the Scoreboard", volume = 0.55, start = 0, stop = 137 },   -- 0.21, ~125 (Juice Music "PUMPED UP", Club/Electronica)
+	{ id = 1836702723, name = "Uplighter", volume = 0.43, start = 0, stop = 154 },                -- 0.21, ~125
+	{ id = 1844486984, name = "Saturday Special", volume = 1.3, start = 3, stop = 88 },           -- 0.26, ~119
 }
+-- the 2x STARDUST EVENT's track: crossfades in while an event runs (GalaxyLive -> Kit.musicEvent), loops, then back to the
+-- playlist
+Sounds.EventTrack = { id = 1846696220, name = "Turbo Trance B", volume = 0.67, start = 0, stop = 149 } -- 0.22, ~137
+-- the mix: the music is 0.25 (MusicBus x WindowDuck) while a shop / window is open; a big stinger ducks it -6 dB (x0.5),
+-- 80 ms in, 1 s back (Kit.sound plays these names). The Supernova cuts it for its riser and brings it back after (as before)
+Sounds.WindowDuck = 0.625
+Sounds.StingerDuck = { k = 0.5, attack = 0.08, release = 1, names = { milestone = true, buyBody = true } }
 
 -- the Settings sliders start here (0..1)
 Sounds.Default = { music = 0.6, sfx = 0.8 }
