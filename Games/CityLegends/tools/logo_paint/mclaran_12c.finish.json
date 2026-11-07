@@ -1,0 +1,65 @@
+{
+ "id": "mclaran_12c",
+ "drop": [
+  "fphong1sg1"
+ ],
+ "roles": {
+  "fphong5sg1": "Paint",
+  "fphong6sg1": [
+   "Trim",
+   0.42,
+   0.0
+  ],
+  "fphong4sg1": "Carbon",
+  "finitialshadinggroup1": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "fphong10sg1": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "fphong3sg1": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "fphong8sg1": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "fphong9sg1": [
+   "Mirror",
+   0.06,
+   1.0
+  ],
+  "fphong12sg1": [
+   "Tyre",
+   0.8,
+   0.0
+  ],
+  "fphong7sg1": [
+   "Rim",
+   0.3,
+   0.8
+  ],
+  "fphong11sg1": [
+   "Brake",
+   0.28,
+   0.2
+  ]
+ },
+ "lens": [
+  [
+   "fphong14",
+   "Lens_Red"
+  ],
+  [
+   "fphong13",
+   "Lens_Orange"
+  ]
+ ]
+}

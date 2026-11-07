@@ -35,6 +35,8 @@ CarFinish.CARS = {
 	lambrini_countach = true,
 	bentz_s680 = true,
 	bentz_gls = true,
+	mclaran_12c = true,
+	bentz_sls = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

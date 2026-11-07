@@ -54,7 +54,8 @@ CarSkin.CLUSTER_STYLE = {
 	ferrara_458 = "Ferrari458",
 	ferrara_f430 = "F430", -- was the 599's (owner); now the F430's own
 	audy_r8 = "R8",
-	mclaran_12c = "MP412C",
+	mclaran_12c = "Live12C", -- from the owner's photo
+	bentz_sls = "LiveSLS", -- from the owner's photo
 	porsha_gt3 = "Porsche991GT3", -- the 991.2 GT3's five dials, sized into the 718 cabin's hood
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "SupraTRD",
@@ -135,6 +136,8 @@ CarSkin.CLUSTER_RECT = {
 	lambrini_lp700 = { at = Vector3.new(0.0027, 0.0379, -0.2421), face = Vector3.new(0, 0.108, 0.9942), w = 0.3328, h = 0.1367 },
 	-- the third import job (2026-11-07): the owner's cluster photos, over the model's own ring
 	lexis_lfa = { at = Vector3.new(-0.01, 0.0338, -0.1424), face = Vector3.new(0, 0.14, 0.99), w = 0.25, h = 0.1637 }, -- (down in the hood: tools/lambo/frame_probe.py)
+	bentz_sls = { at = Vector3.new(0.0021, 0.0377, -0.2165), face = Vector3.new(0, 0.2, 0.98), w = 0.3163, h = 0.1342 }, -- in the model's hood, in front of its dials
+	mclaran_12c = { at = Vector3.new(-0.0045, 0.0679, -0.1712), face = Vector3.new(0, 0.2, 0.98), w = 0.34, h = 0.12 }, -- in the model's own hood (tools/lambo/frame_probe.py)
 	lexis_lfa_circuit = { at = Vector3.new(-0.01, 0.0338, -0.1424), face = Vector3.new(0, 0.14, 0.99), w = 0.25, h = 0.1637 },
 	bentz_gls = { at = Vector3.new(-0.0073, 0.0551, -0.1773), face = Vector3.new(-0.007, 0.109, 0.994), w = 0.335, h = 0.1336 },
 	bentz_s680 = { at = Vector3.new(-0.0003, 0.049, -0.1883), face = Vector3.new(0, 0.14, 0.99), w = 0.366, h = 0.146 },
@@ -250,10 +253,6 @@ CarSkin.DIAL_NEEDLES = {
 	bentz_sl65bs = { -- SL65
 		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0388, 0.0642, -0.2453), face = Vector3.new(0.0004, 0.2209, 0.9753), length = 0.0427, scale = "0:-116.6,220:141.9" },
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0909, 0.0704, -0.2466), face = Vector3.new(0.0014, 0.2203, 0.9754), length = 0.041, scale = "0:-113.3,8000:120.9" },
-	},
-	bentz_sls = { -- SLS
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0958, 0.0054, -0.2386), face = Vector3.new(0.0192, 0.2122, 0.977), length = 0.038, scale = "0:-178.8,30:-157.6,360:89.7" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.101, 0.0052, -0.2396), face = Vector3.new(-0.0196, 0.2122, 0.977), length = 0.0336, scale = "0:177.3,1000:206.2,9000:446.0" },
 	},
 	brabos_g63 = { -- Brabus G63 (screen dials)
 		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0921, 0.0647, -0.2335), face = Vector3.new(-0.0011, 0.2758, 0.9612), length = 0.0435, scale = "0:-125.2,150:5.8,300:122.8" },
@@ -399,7 +398,7 @@ CarSkin.STEER_MODEL = {
 	ferrara_f430 = "FerrariF430", ferrara_599 = "FerrariF430",
 	ferrara_458 = "Ferrari458",
 	-- the other supercars and hypercars
-	mclaran_12c = "McLaren", audy_r8 = "AudiR8", lexis_lc500 = "LexusSport",
+	audy_r8 = "AudiR8", lexis_lc500 = "LexusSport",
 	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
 	nisun_gtr = "GTR",
 	-- BMW
@@ -408,7 +407,7 @@ CarSkin.STEER_MODEL = {
 	bnw_m5_f10 = "BMWM", bnw_m5_f90 = "BMWM",
 	-- Mercedes
 	bentz_cla45 = "AMGFlat", bentz_cls63s = "AMGFlat", bentz_gle53 = "AMGFlat", bentz_g63 = "AMGFlat", brabos_g63 = "AMGFlat",
-	bentz_sl65bs = "AMGFlat", bentz_sls = "AMGFlat", bentz_e63s = "AMGFlat", bentz_e400 = "AMGFlat",
+	bentz_sl65bs = "AMGFlat", bentz_e63s = "AMGFlat", bentz_e400 = "AMGFlat",
 	bentz_e300 = "MercLuxury", bentz_s63 = "MercLuxury", 
 	bentz_190e = "Merc90s", bentz_s65_w221 = "Merc90s",
 	-- luxury
@@ -429,7 +428,6 @@ CarSkin.STEER_MODEL = {
 
 CarSkin.CLUSTER_SHIFT = {
 	audy_r8 = { -0.08, 0.26, 0, 0.84 }, -- up into the twin-dial hood, over its own dials
-	mclaran_12c = { 0, 0.13, -0.12, 0.78 }, -- the dial in the round pod, the screens in the wings
 } :: { [string]: { number } }
 
 -- steering wheels (owner, 2026-10-24: "fix all of the steering wheels bad color and if it doesnt
@@ -1184,7 +1182,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	-- tail lamps: parts named as tail / brake lights, the converted cars' measured lamp parts
 	-- (TailLights), and A-Chassis brake-light glow meshes (a "Brake" group, invisible when off)
 	-- (LampFx_Tail: a lens cut from the model's own lamp, tools/lamps, in place of measured spots)
-	local tails = if CarFinish.CARS[src.Name] or src:FindFirstChild("LampFx_TailL") then nil else TailLights[src.Name]
+	local tails = if src:FindFirstChild("LampFx_TailL") then nil else TailLights[src.Name]
 	local function isTail(d: BasePart): boolean
 		if tails then
 			for _, sh in tails.shells do

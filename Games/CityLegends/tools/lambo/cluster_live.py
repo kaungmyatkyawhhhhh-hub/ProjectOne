@@ -43,6 +43,7 @@ class Spec:
         self.ox, self.oy = ox, oy  # design (0, 0) in photo pixels
         self.bg = None
         self.blocks, self.fills, self.shows, self.readouts, self.labels = [], [], [], [], []
+        self.fuels = []  # bars that follow the fuel tank
         self.needles = []
         self.marker = None
         self.gear = None
@@ -177,6 +178,7 @@ def values(st):
         "unit": "km/h" if kmh else "mph",
         "altUnit": "mph" if kmh else "km/h",
         "distUnit": "km" if kmh else "mi",
+        "driveMode": "SPORT" if manual else "NORMAL",
         "mode": "CORSA" if manual else "SPORT",
         "gearLeft": "".join(order[:i]),
         "gearRight": "".join(order[i + 1 :]) + ("" if manual else "A"),
@@ -236,11 +238,14 @@ def compose(spec, st, scale=2):
         frac = interp(f["pts"], v + f.get("lead", 0))
         w = max(1, round(f["im"].width * frac))
         paste(f["im"].crop((0, 0, w, f["im"].height)), f["left"], f["top"])
+    for f in spec.fuels:
+        w = max(1, round(f["im"].width * 0.62))
+        paste(f["im"].crop((0, 0, w, f["im"].height)), f["left"], f["top"])
     for s in spec.shows:
         if active(s["when"], st):
             paste(s["im"], s["left"], s["top"])
     for n in spec.needles:
-        val = {"rpm": v, "kmh": st["mph"] * 1.609, "mph": st["mph"], "dial": st["mph"] * 1.609 if st.get("kmh", True) else st["mph"]}[n["bind"]]
+        val = {"rpm": v, "fuel": st.get("fuel", 0.75), "kmh": st["mph"] * 1.609, "mph": st["mph"], "dial": st["mph"] * 1.609 if st.get("kmh", True) else st["mph"]}[n["bind"]]
         pts = n["alt"] if n["bind"] == "dial" and not st.get("kmh", True) else n["pts"]
         im = n["im"].rotate(-interp(pts, val), resample=Image.BICUBIC, expand=True)
         paste(im, n["x"] - im.width / spec.A / 2, n["y"] - im.height / spec.A / 2)
@@ -1912,8 +1917,22 @@ def maybach():
     return m.maybach(Spec, needle_sprite, add_needle, glyph)
 
 
-BUILDERS = {"revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
+def mc12c():
+    import cluster_imports as m
+
+    return m.mc12c(Spec, needle_sprite, add_needle, glyph)
+
+
+def sls():
+    import cluster_imports as m
+
+    return m.sls(Spec, needle_sprite, add_needle)
+
+
+BUILDERS = {"mc12c": mc12c, "sls": sls, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "sls": ("sls_sl65_cluster_owner.png", (71, 60, 677, 317), None, dict(v=0.8, gear="N", mph=0, manual=False, clock="2:40", odo="003274", distUnit="mi", kmh=False)),
+    "mc12c": ("mclaren_12c_cluster_owner.webp", (14, 131, 974, 494), (14, 131, 974, 494), dict(v=1.0, gear="N", mph=0, manual=False, clock="10:47", odo="003274", distUnit="mi", kmh=False)),
     "lfa": ("lfa_cluster_owner.png", (14, 26, 466, 322), None, dict(v=7.0, gear="4", mph=99.4, manual=False, clock="12:56", odo="000364", range="36")),
     "maybach": ("maybach_gls_s680_cluster_owner.png", (2, 34, 594, 270), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="12:06", odo="009857", range="190")),
     "murcielago": ("murcielago_model_dials.png", (190, 170, 1250, 620), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="20:26", odo="009857", sv=True)),
@@ -1973,6 +1992,7 @@ def spec_lua(sp, ids):
         for v, x in f["pts"]:
             pts += [v, x]
         fills.append(rect(f["im"]) + [f["left"], f["top"], f.get("lead", 0), lua_list(pts)])
+    fuels = [rect(x["im"]) + [x["left"], x["top"]] for x in sp.fuels]
     shows = [rect(x["im"]) + [x["left"], x["top"], x["when"] or "always"] for x in sp.shows]
     needles = []
     for n in sp.needles:
@@ -2016,6 +2036,10 @@ def spec_lua(sp, ids):
             pts += list(q)
         c = sp.marker["color"]
         w("\t\tmarker = { color = { %d, %d, %d }, w = %s, glow = %s, pts = %s }," % (c[0], c[1], c[2], num(sp.marker["w"]), num(sp.marker.get("glow", 0)), lua_list(pts)))
+    w("\t\tfuels = {")
+    for b in fuels:
+        w("\t\t\t" + lua_list(b) + ",")
+    w("\t\t},")
     w("\t\tshows = {")
     for b in shows:
         w("\t\t\t" + lua_list(b) + ",")

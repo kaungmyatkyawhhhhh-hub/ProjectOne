@@ -3363,6 +3363,12 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 		l.Visible = true
 		table.insert(fills, { l = l, e = e })
 	end
+	local fuels: { any } = {}
+	for _, e in Art.fuels or {} do
+		local l = sprite(e, e[6], e[7], 2)
+		l.Visible = true
+		table.insert(fuels, { l = l, e = e })
+	end
 	local shows: { { l: ImageLabel, when: string } } = {}
 	for _, e in Art.shows do
 		table.insert(shows, { l = sprite(e, e[6], e[7], 3), when = e[8] })
@@ -3484,12 +3490,18 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 			f.l.ImageRectSize = Vector2.new(e[4] * frac, e[5])
 			f.l.Size = UDim2.fromScale(e[4] * frac / A / W, e[5] / A / H)
 		end
+		for _, f in fuels do
+			local e = f.e
+			local frac = math.clamp(DashGauges.fuelShare or 0.8, 0, 1)
+			f.l.ImageRectSize = Vector2.new(e[4] * frac, e[5])
+			f.l.Size = UDim2.fromScale(e[4] * frac / A / W, e[5] / A / H)
+		end
 		for _, s in shows do
 			s.l.Visible = state[s.when] == true
 		end
 		for _, n in needles do
 			-- ("dial": a speedometer whose numbers follow the player's units, with a table for each)
-			local value = if n.bind == "rpm" then v elseif n.bind == "kmh" or (n.bind == "dial" and KMH) then mph * 1.609 else mph
+			local value = if n.bind == "rpm" then v elseif n.bind == "fuel" then (DashGauges.fuelShare or 0.8) elseif n.bind == "kmh" or (n.bind == "dial" and KMH) then mph * 1.609 else mph
 			n.l.Rotation = pointOn(if n.bind == "dial" and not KMH then n.alt else n.pts, value)
 		end
 		if mark and marker then
@@ -3520,6 +3532,7 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 		vals.rpm = tostring(math.floor(v * 100) * 10)
 		vals.unit, vals.altUnit, vals.distUnit = unit(), altUnit(), if KMH then "km" else "mi"
 		vals.mode = if corsa then "CORSA" else "SPORT"
+		vals.driveMode = if corsa then "SPORT" else "NORMAL"
 		vals.gearLeft = table.concat(ORDER, "", 1, i - 1)
 		vals.gearRight = table.concat(ORDER, "", i + 1, #ORDER) .. (if corsa then "" else "A")
 		vals.gearLeft4 = table.concat(ORDER, "", math.max(i - 4, 1), i - 1)
@@ -3590,6 +3603,12 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	end,
 	LiveLFA = function(gui)
 		return liveCluster(gui, "lfa")
+	end,
+	LiveSLS = function(gui)
+		return liveCluster(gui, "sls")
+	end,
+	Live12C = function(gui)
+		return liveCluster(gui, "mc12c")
 	end,
 	LiveMaybach = function(gui)
 		return liveCluster(gui, "maybach")

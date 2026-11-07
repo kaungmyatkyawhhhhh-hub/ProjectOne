@@ -1,0 +1,136 @@
+{
+ "id": "bentz_sls",
+ "roles": {
+  "blackseries_base": "Paint",
+  "blackseries_carbon": "Carbon",
+  "details_mat": [
+   "Trim",
+   0.28,
+   0.0
+  ],
+  "details_ext": [
+   "Trim",
+   0.3,
+   0.0
+  ],
+  "details_chassis": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "details_int": [
+   "CabinTrim",
+   0.45,
+   0.0
+  ],
+  "details_grid": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "slsbinterior": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "mat_lights": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "tire_brake": [
+   "Brake",
+   0.28,
+   0.2
+  ],
+  "tire_disk": [
+   "Disc",
+   0.35,
+   0.85
+  ],
+  "tire_hub": [
+   "Rim",
+   0.28,
+   0.85
+  ],
+  "^tire": [
+   "Tyre",
+   0.8,
+   0.0
+  ]
+ },
+ "cut_islands": [
+  {
+   "mat": "details_mat",
+   "box": [
+    -0.115,
+    -2.3,
+    0.32,
+    0.115,
+    -2.205,
+    0.56
+   ]
+  },
+  {
+   "mat": "details_ext",
+   "box": [
+    -0.05,
+    -2.23,
+    0.6,
+    0.05,
+    -2.15,
+    0.66
+   ]
+  },
+  {
+   "mat": "details_mat",
+   "box": [
+    -0.52,
+    2.1,
+    0.75,
+    -0.27,
+    2.2,
+    0.815
+   ]
+  },
+  {
+   "mat": "details_ext",
+   "box": [
+    -0.52,
+    2.1,
+    0.75,
+    -0.27,
+    2.2,
+    0.815
+   ]
+  },
+  {
+   "mat": "details_mat",
+   "box": [
+    0.37,
+    2.1,
+    0.75,
+    0.5,
+    2.2,
+    0.815
+   ]
+  },
+  {
+   "mat": "details_mat",
+   "box": [
+    -0.07,
+    2.18,
+    0.71,
+    0.07,
+    2.28,
+    0.83
+   ]
+  }
+ ],
+ "cover": [
+  0,
+  -2.19,
+  0.633,
+  0.042
+ ]
+}

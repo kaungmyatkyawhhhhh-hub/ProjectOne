@@ -88,14 +88,6 @@ return {
 		shells = { { name = "SeeThrough_red_glass" } },
 		spots = {},
 	},
-	bentz_sls = {
-		shells = {},
-		wb = 2.68,
-		spots = {
-			{ at = Vector3.new(-0.6781, 0.4316, 2.1329), face = Vector3.new(-0.3461, 0.5151, 0.7841), w = 0.3082, h = 0.058 },
-			{ at = Vector3.new(0.6794, 0.4319, 2.1235), face = Vector3.new(0.2358, 0.6463, 0.7258), w = 0.3089, h = 0.0582 },
-		},
-	},
 	bnw_330i_g20 = {
 		shells = {},
 		wb = 2.8511,
@@ -271,8 +263,12 @@ return {
 		shells = { { name = "SeeThrough_RX8phong13SG1" } },
 		spots = {},
 	},
+	bentz_sls = {
+		shells = { { name = "Body_TailLens" } },
+		spots = {},
+	},
 	mclaran_12c = {
-		shells = { { name = "SeeThrough_Mphong7SG1" } },
+		shells = { { name = "SeeThrough_Lens_Red" } },
 		spots = {},
 	},
 	nisun_gtr = {

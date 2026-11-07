@@ -7,6 +7,25 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
+## New imports, night of 2026-11-08 (`Prompts/New imports - 12C, SLS, SL65, 599, DBX, Continental, 350Z, 330i, trailer.md`)
+**Licences:** NC (non-commercial, risky in a game that sells Robux): C197 Wingdoor (SLS, CC-BY-NC-SA), and when they go in: R230 V12 Track, Highland, Sovereign Grand Tourer, Horizon Z33, G20 Sport. OK with credit: Speedmark P11 Spider (CC-BY, Ddiaz Design, in `Config.Credits`), F141 and the trailer. Ddiaz files may be ripped from a racing game (part names like `F:car_mclaren_mp412cspyder_2013_Mesh_lod0M_...`).
+
+| # | Car | State |
+|---|---|---|
+| 1 | Speedmark P11 Spider (`mclaran_12c`) | **Done:** model, logos out, cluster live in the model's own hood, paint, lamps. Name changed to Spider, same id, price, level, class. |
+| 2 | Tri-Star Silber C197 Wingdoor (`bentz_sls`) | **Done:** same. Doors: the file has no separate gullwing doors in a form the game can use, and the game has no door system, so they stay shut. |
+| 3-8 | R230, F141, Highland, Sovereign, Z33, G20 | Converted in Blender only, not in the game yet. |
+| 9 | Trailer | Done, in the game since 2026-11-07. |
+
+- **Roof on the P11 Spider:** up. The file only has the roof-up shape.
+- **Clusters:** `tools/lambo/cluster_imports.py`, drawn fresh and placed by the photos, no pieces cut from them, no names on the dials. P11: revs, speed, gear, oil and fuel bars, odometer, trip, range, clock, modes live; water bar still. C197: both needles, fuel needle, shift lights, P R N D, speed in both units, clock live; oil temperature still; indicator arrows don't light (the clusters don't know the indicators yet). New in `DashGauges`: bars and a needle that follow the real fuel.
+- **Under the hood, not over it:** each panel lies inside the model's own hood, cut by `tools/lambo/window_mask.py` from `frame_probe.py`'s depth, so the model's ring and frame stay in front (the owner's rule from the LFA).
+- **Tail lamps:** the P11's own red lens lights up. The C197 keeps its lamps in one mesh, so `tools/lambo/tail_split.py` takes the lens strips out as `Body_TailLens`.
+- **Trap found:** `make_sync.py` updates its list when it builds, so a build that isn't uploaded is lost: the next one leaves those files out. Upload after every build.
+- **Backups:** `ServerStorage.OldCarModels`: `mclaran_12c_old_2026-11-08`, `bentz_sls_old_2026-11-08`. Tool: `ServerStorage.ClaudeTools.CarSwap`.
+- **Checked in Play (PC):** outside, rear, cluster from the driver's side parked. **Not checked yet:** the two cars at speed, night, Customs paint, phone size.
+- Pictures: [[P11 Spider - in the game.jpg]], [[P11 Spider - cluster in the hood.jpg]], [[P11 Spider cluster - photo and redraw.jpg]], [[C197 Wingdoor - in the game.jpg]], [[C197 Wingdoor - rear.jpg]], [[C197 Wingdoor - cluster in the hood.jpg]], [[C197 cluster - photo and redraw.jpg]].
+
 ## Cruise control, mileage, wear, fuel, damage, Legends Service, Riviera Fuel (2026-11-07, `Prompts/Cruise control, mileage, check engine and repair shop.md`)
 Pictures: [[Care - Legends Service day.jpg]], [[Care - Legends Service night.jpg]], [[Care - service screen.jpg]], [[Care - workshop and HUD.jpg]], [[Care - Riviera Fuel station.jpg]], [[Care - fuel screen.jpg]], [[Care - scrape and dent.jpg]], [[Care - cracked windscreen and lamp.jpg]].
 

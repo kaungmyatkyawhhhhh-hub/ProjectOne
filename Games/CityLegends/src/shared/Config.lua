@@ -271,6 +271,8 @@ Config.Credits = {
 	"Enfurecido Classico 5000 model by Ddiaz Design (CC BY)",
 	"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",
 	"Tri-Star Silber X167 Royale model by Black Snow (CC BY)",
+	"Speedmark P11 Spider model by Ddiaz Design (CC BY)",
+	"Tri-Star Silber C197 Wingdoor model by Ddiaz Design",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
