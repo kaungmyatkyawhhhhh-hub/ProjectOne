@@ -538,11 +538,46 @@ local function spawnCFrame(slot: number): CFrame
 	local boards = at(island, MapConfig.Boards.Pair.At.X, MapConfig.Boards.Pair.At.Z)
 	return CFrame.lookAt(pos, Vector3.new(boards.X, pos.Y, boards.Z))
 end
-local function toIsland(player: Player)
+-- (7 Nov HOTFIX, live: a player on a slow connection fell through his own island again and again) StreamingEnabled is on:
+-- the character was put on an island his client hadn't loaded yet, fell into the void, respawned, was put there again.
+-- Now the server asks for the area around the spot FIRST (it waits until it's loaded or 5 s), and the character is held
+-- still (anchored) while it waits, so nothing can fall in the meantime.
+local moving = {} -- [Player] = true while a move is waiting for the stream
+local function toIsland(player: Player, why: string?)
 	local slot = slotOf[player]
 	local char = player.Character
-	if not slot or not char then return end
-	char:PivotTo(spawnCFrame(slot))
+	if not slot or not char or moving[player] then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	moving[player] = true
+	local cf = spawnCFrame(slot)
+	if hrp then
+		hrp.AssemblyLinearVelocity = Vector3.zero
+		hrp.Anchored = true
+	end
+	pcall(function() player:RequestStreamAroundAsync(cf.Position, 5) end)
+	if player.Character == char and slotOf[player] == slot and char.Parent then
+		char:PivotTo(cf)
+		if hrp then hrp.AssemblyLinearVelocity = Vector3.zero end
+	end
+	if hrp then hrp.Anchored = false end
+	moving[player] = nil
+	if why then
+		pcall(function() game:GetService("AnalyticsService"):LogCustomEvent(player, why, 1) end)
+	end
+end
+
+-- (HOTFIX) your OWN island is always loaded for you: PersistentPerPlayer + you as its persistent player (an empty island
+-- streams Atomic as before)
+local function keepLoaded(slot: number, player: Player?)
+	local island = islandOf(slot)
+	if not island then return end
+	if player then
+		island.ModelStreamingMode = Enum.ModelStreamingMode.PersistentPerPlayer
+		pcall(function() island:AddPersistentPlayer(player) end)
+	else
+		for _, p in ipairs(Players:GetPlayers()) do pcall(function() island:RemovePersistentPlayer(p) end) end
+		island.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+	end
 end
 
 local function claim(player: Player)
@@ -551,6 +586,7 @@ local function claim(player: Player)
 			owners[slot] = player
 			slotOf[player] = slot
 			player:SetAttribute("Island", slot)
+			keepLoaded(slot, player)
 			refresh(slot, false)
 			return slot
 		end
@@ -579,7 +615,7 @@ local function onPlayer(player: Player)
 		task.wait()
 		toIsland(player)
 	end)
-	if player.Character then toIsland(player) end
+	if player.Character then task.spawn(toIsland, player) end
 	local _ = slot
 end
 Players.PlayerAdded:Connect(onPlayer)
@@ -587,19 +623,27 @@ for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
 Players.PlayerRemoving:Connect(function(player)
 	local slot = slotOf[player]
 	slotOf[player] = nil
+	moving[player] = nil
 	if slot and owners[slot] == player then
 		owners[slot] = nil
+		keepLoaded(slot, nil)
 		refresh(slot, false)
 	end
 end)
 
--- fell into the void: back to your island
+-- fell into the void: back to your island (HOTFIX: checked 4x a second, from 40 studs under the lowest floor (the plaza's
+-- or your island's), the area streamed in first (toIsland); logged as "void_rescue")
 task.spawn(function()
 	while true do
-		task.wait(1)
-		for player, _ in pairs(slotOf) do
+		task.wait(0.25)
+		for player, slot in pairs(slotOf) do
 			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-			if root and root.Position.Y < O.Y + MapConfig.VoidY then toIsland(player) end
+			if root and not moving[player] then
+				local floor = math.min(O.Y, spawnCFrame(slot).Position.Y - 3.5)
+				if root.Position.Y < floor - 40 or root.Position.Y < O.Y + MapConfig.VoidY then
+					task.spawn(toIsland, player, "void_rescue")
+				end
+			end
 		end
 	end
 end)

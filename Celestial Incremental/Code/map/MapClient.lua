@@ -559,7 +559,8 @@ task.spawn(function()
 		task.wait(0.25)
 		local sd = player:GetAttribute("Stardust") or 0
 		for island, ui in pairs(padUI) do
-			if ui.pad.Parent then
+			-- (7 Nov hotfix: with streaming, an island's pad label can go away under us: skip it, never stop the loop)
+			if ui.pad.Parent and ui.price.Parent and ui.disc.Parent then
 				local cost = ui.pad:GetAttribute("Price") or math.huge
 				local can = ui.mine and sd >= cost
 				local denied = os.clock() < ui.deniedUntil
