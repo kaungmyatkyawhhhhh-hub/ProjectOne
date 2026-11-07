@@ -342,7 +342,7 @@ function Builder.PlazaLamps(centre: Instance)
 end
 
 -- (7 Nov, owner "Plaza boards") a place built before: the star-chart inlay goes, the plaza's lamps are rebuilt on the rim with
--- matte heads, every other lamp head on the plaza goes matte, and FREE REWARDS is rebuilt if it isn't at its layout spot
+-- matte heads, every other lamp head on the plaza goes matte, and FREE REWARDS is built if it's missing
 function Builder.PlazaCleanup(root: Instance)
 	local centre = root:FindFirstChild("Centre")
 	if not centre then return end
@@ -364,14 +364,9 @@ function Builder.PlazaCleanup(root: Instance)
 			d.Color = C.LampHead
 		end
 	end
-	local FB = MapConfig.FreeBoard
-	local fb = centre:FindFirstChild("FreeBoard")
-	if fb and fb:IsA("Model") then
-		local want = O + MapConfig.ZoneDir(FB.angle) * FB.dist
-		local at = fb:GetBoundingBox().Position
-		if Vector3.new(at.X - want.X, 0, at.Z - want.Z).Magnitude > 2 then fb:Destroy() end
-	end
-	Builder.FreeBoard(centre) -- (builds it only when it's missing)
+	-- (7 Nov, owner: "the free reward board keeps moving to the front": a FREE REWARDS that's already in the place is never
+	-- moved or rebuilt (the owner places it in Studio); it's only built when it's missing)
+	Builder.FreeBoard(centre)
 end
 
 function Builder.Build()

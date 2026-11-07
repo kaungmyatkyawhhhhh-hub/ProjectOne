@@ -170,3 +170,9 @@ Decorations that break out on purpose (sparkles, glows) are marked AllowOverlap.
 - **Fix:** a second door across the start of the Sector 2 bridge (between its rails). MapClient opens every part named Barrier, not just the first.
 
 **Studio:** the Test switches (`TestDevice`, `TestFreshSave`, `TestEventIn`) are cleared from Workspace.
+
+**Owner correction (7 Nov):** "the free reward board keeps moving to the front".
+- The owner moved FREE REWARDS by hand in Studio to angle 0, **60** studs out.
+- PlazaCleanup rebuilt it at 44 on every server start.
+- **Now:** PlazaCleanup never moves or rebuilds a FREE REWARDS that's already in the place; it only builds one when it's missing. `MapConfig.FreeBoard.dist = 60` (his spot), so a full rebuild agrees.
+- **Tested in Play:** it stays at (60, 40, 0) facing the Core, buttons drawn, MapAudit CLEAN.

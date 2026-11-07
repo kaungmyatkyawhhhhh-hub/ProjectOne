@@ -72,8 +72,8 @@ MapConfig.Leaderboard = { Width = 24, Height = 12, Bottom = 3, Rows = 10 } -- (T
 -- the FREE REWARDS board (Phase 2.4, 6 Nov; Depth's lobby board): on the plaza between the Star Surge (45) and PLAYERS NEAR YOU
 -- (110), facing the Core; its screen is drawn by GalaxyDaily
 -- (7 Nov: at 80 / 46 it stood between the spawn and PLAYERS NEAR YOU (its post + lamp over that board's corner): moved to
--- the open gap at 0, where the star chart was, in front of the benches)
-MapConfig.FreeBoard = { angle = 0, dist = 44, Width = 11, Height = 7.5, Bottom = 3 }
+-- the open gap at 0, where the star chart was. (7 Nov, the owner moved it by hand to 60 out: this is his spot)
+MapConfig.FreeBoard = { angle = 0, dist = 60, Width = 11, Height = 7.5, Bottom = 3 }
 MapConfig.NearBoard = { angle = 110, dist = 46, Width = 13, Height = 15, Bottom = 3, Rows = 11 }
 MapConfig.Sector2 = {
 	-- the arch scaled uniformly so the 10-wide bridge fits through it (the kit arch's opening is 74% of its width): 14.2 wide,
