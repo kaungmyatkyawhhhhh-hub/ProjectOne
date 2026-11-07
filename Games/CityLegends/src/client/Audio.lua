@@ -322,6 +322,15 @@ function Audio.crash(severity: number)
 	Audio.play("thud", 0.6 + 0.4 * k, 0.8)
 end
 
+-- (2026-11-07) grinding a wall: the crash sound, short, quiet and high
+function Audio.scrape(k: number)
+	if custom.Crash then
+		Audio.play("Crash", 0.1 + 0.16 * k, 1.5 + math.random() * 0.3)
+	else
+		Audio.play("thud", 0.15 * k, 1.8)
+	end
+end
+
 function Audio.backfire(parent: Instance?)
 	local s = Audio.play("boom", 0.18, 2.3 + math.random() * 0.4, parent)
 	effect("EqualizerSoundEffect", s, { LowGain = -4, MidGain = 4, HighGain = -6 })

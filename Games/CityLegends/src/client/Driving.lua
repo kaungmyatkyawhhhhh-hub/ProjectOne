@@ -108,6 +108,23 @@ type State = {
 	towPull: number,
 	towTurn: number,
 	applyTune: () -> (),
+	-- (2026-11-07) cruise control: the set speed, the pedal taps, the regulator; what the car's health does to it;
+	-- out of fuel; what the driver's game tells the server next (Driving.takeReport)
+	cruise: number?,
+	cruiseUp: number,
+	cruiseDown: number,
+	cruiseI: number,
+	cruiseGapT: number,
+	care: { power: number, grip: number, brake: number, handling: number, limp: boolean, misfire: boolean, empty: boolean }?,
+	capTop: number?,
+	gripK: number,
+	sputter: number,
+	misT: number,
+	report: { red: number, launch: number, drift: number, burn: number, hard: number, thr: number, n: number, hits: { any }, rash: number? },
+	redHold: number,
+	scrapeT: { [number]: number },
+	scrapeU: { [number]: number },
+	rashT: number,
 	model: Model,
 	root: BasePart,
 	spec: Cars.CarSpec,
@@ -908,6 +925,157 @@ function Driving.getModel(): Model?
 	return if state then state.model else nil
 end
 
+-- (2026-11-07) cruise control -----------------------------------------------------------------------
+Driving.noCruise = nil :: (() -> boolean)? -- set by CareClient: true in a race, a time trial or on a job
+Driving.onMisfire = nil :: (() -> ())? -- set by CareClient: the puff of smoke
+
+local function showCruise(s: State)
+	local mph = if s.cruise then Config.spsToMph(s.cruise) else nil
+	UI.setCruise(mph, Driving.units == "kmh")
+	DashGauges.cruiseMph = mph
+end
+
+local function cruiseOff(s: State, beep: boolean?)
+	if s.cruise then
+		s.cruise = nil
+		showCruise(s)
+		if beep then
+			Audio.tick(false)
+		end
+	end
+end
+
+function Driving.toggleCruise()
+	local s = state
+	if not s then
+		return
+	end
+	if s.cruise then
+		cruiseOff(s, true)
+		return
+	end
+	local C = Config.Cruise
+	local v = s.vel:Dot(forwardFromYaw(s.yaw))
+	if not s.engineOn then
+		return
+	end
+	if Driving.noCruise and Driving.noCruise() then
+		UI.toast("No cruise control in a race or on a job", Config.Theme.Warning)
+		return
+	end
+	if Config.spsToMph(v) < C.MinMph then
+		UI.toast("Cruise control works from " .. C.MinMph .. " mph")
+		return
+	end
+	s.cruise = v
+	s.cruiseI = 0
+	s.cruiseUp = 0
+	s.cruiseDown = 0
+	s.cruiseGapT = 0.5
+	showCruise(s)
+	Audio.tick(true)
+end
+
+-- the phone's + and - (steps of 5, in mph or km/h)
+function Driving.cruiseStep(dir: number)
+	local s = state
+	if not s or not s.cruise then
+		return
+	end
+	local C = Config.Cruise
+	local step = Config.mphToSps(if Driving.units == "kmh" then C.Step / 1.609 else C.Step)
+	s.cruise = math.clamp(s.cruise + dir * step, Config.mphToSps(C.MinMph), math.min(s.topSpeed, s.capTop or s.topSpeed))
+	showCruise(s)
+end
+
+-- the pedals while it's on: a tap changes the set speed, the brake held switches it off, then the regulator
+local function cruisePedals(s: State, throttle: number, brake: number, dt: number): (number, number)
+	local set = s.cruise
+	if not set then
+		return throttle, brake
+	end
+	local C = Config.Cruise
+	if not s.engineOn or (Driving.noCruise and Driving.noCruise()) then
+		cruiseOff(s, true)
+		return throttle, brake
+	end
+	if throttle > 0.3 then
+		if s.cruiseUp <= 0 then
+			Driving.cruiseStep(1)
+			s.cruiseUp = 0.45
+		end
+		s.cruiseUp -= dt
+	else
+		s.cruiseUp = 0
+	end
+	if brake > 0.3 then
+		s.cruiseDown += dt
+		if s.cruiseDown > C.HoldBrake then
+			cruiseOff(s, true)
+			return 0, brake
+		end
+	else
+		if s.cruiseDown > 0 then
+			Driving.cruiseStep(-1)
+		end
+		s.cruiseDown = 0
+	end
+	local fwd = forwardFromYaw(s.yaw)
+	local v = s.vel:Dot(fwd)
+	-- traffic right ahead: it lets go with a short beep
+	s.cruiseGapT -= dt
+	if s.cruiseGapT <= 0 then
+		s.cruiseGapT = 0.2
+		local gap = math.max(C.GapMin, v * C.GapSeconds)
+		local right = fwd:Cross(Vector3.yAxis)
+		local at = Vector3.new(s.root.Position.X, 0, s.root.Position.Z)
+		for _, npc in Traffic.near(s.root.Position, gap + 24) do
+			local rel = Vector3.new(npc.pos.X, 0, npc.pos.Z) - at
+			local f = rel:Dot(fwd)
+			if f > 0 and f < gap + s.wheelbase * 0.7 and math.abs(rel:Dot(right)) < (s.width + npc.width) / 2 + 1 and npc.fwd:Dot(fwd) * npc.speed < v - 3 then
+				cruiseOff(s, true)
+				UI.toast("Cruise off: traffic ahead", Config.Theme.Warning)
+				return 0, brake
+			end
+		end
+	end
+	local err = (s.cruise :: number) - v
+	s.cruiseI = math.clamp(s.cruiseI + err * dt, -40, 40)
+	local want = 0.1 * err + 0.03 * s.cruiseI + 0.22
+	if err < -9 then
+		return 0, math.max(brake, 0.2)
+	end
+	return math.clamp(want, 0, 1), brake
+end
+
+-- what the car's health does (CareClient, when it changes)
+function Driving.setCare(care: { [string]: any }?)
+	local s = state
+	if not s then
+		return
+	end
+	s.care = care :: any
+	s.applyTune()
+end
+
+-- what happened since the last call, for the server (CareClient, every couple of seconds)
+function Driving.takeReport(): { [string]: any }?
+	local s = state
+	if not s then
+		return nil
+	end
+	local r = s.report
+	s.report = { red = 0, launch = 0, drift = 0, burn = 0, hard = 0, thr = 0, n = 0, hits = {} }
+	return { red = r.red, launch = r.launch, drift = r.drift, burn = r.burn, hard = r.hard, thr = if r.n > 0 then r.thr / r.n else 0, on = s.engineOn, wet = Driving.wet > 0.5, hits = r.hits, rash = r.rash }
+end
+
+-- a mark for the server: k "s" scrape, "t" scratch, "d" dent; f the side; u along it, v up it; n its size
+local function hitMark(s: State, k: string, f: string, u: number, v: number, n: number, speed: number)
+	if #s.report.hits < 4 then
+		table.insert(s.report.hits, { k = k, f = f, u = u, v = v, n = n, sp = speed })
+	end
+end
+
 -- (2026-11-07) the weight on the hitch, nil with no trailer on (TrailerClient, every frame)
 function Driving.setTow(kg: number?)
 	local s = state
@@ -1273,6 +1441,8 @@ local function carKey(s: State, key: Enum.KeyCode)
 			if Driving.onExitKey then
 				Driving.onExitKey()
 			end
+		elseif s.care and s.care.empty then
+			UI.toast(if s.electric then "Battery empty" else "Out of fuel", Config.Theme.Warning)
 		elseif s.cranking <= 0 then
 			if s.electric then
 				s.cranking = 0.3 -- an electric car is just ready, silently
@@ -1322,6 +1492,9 @@ local function carKey(s: State, key: Enum.KeyCode)
 		-- (Shift + P is the free camera, PhotoMode)
 		s.parkBrake = not s.parkBrake
 		UI.toast(if s.parkBrake then "Handbrake on" else "Handbrake off")
+	elseif key == Config.Cruise.Key then
+		Driving.toggleCruise()
+		return
 	elseif key == Enum.KeyCode.T then
 		s.tc = not s.tc
 		DashGauges.tcOff = not s.tc
@@ -1973,6 +2146,18 @@ function Driving.attach(model: Model)
 		towPull = 0,
 		towTurn = 0,
 		applyTune = function() end, -- (set by attach)
+		cruiseUp = 0,
+		cruiseDown = 0,
+		cruiseI = 0,
+		cruiseGapT = 0,
+		gripK = 1,
+		sputter = 0,
+		misT = 2,
+		report = { red = 0, launch = 0, drift = 0, burn = 0, hard = 0, thr = 0, n = 0, hits = {} },
+		redHold = 0,
+		scrapeT = { [1] = 0, [-1] = 0 },
+		scrapeU = { [1] = 0.5, [-1] = 0.5 },
+		rashT = 0,
 		camSwing = 0, -- immersive camera: looks into the turn
 		camSide = 0,
 		camRoll = 0,
@@ -2157,6 +2342,7 @@ function Driving.attach(model: Model)
 		s.engine:setMods(tune)
 		-- (2026-11-07) a trailer on: slower off the line, longer stops, wider turns, a top speed
 		s.towTop = nil
+		s.capTop = nil
 		if s.towKg then
 			local W = Config.Towing
 			local carShare = kg / (kg + s.towKg)
@@ -2164,6 +2350,20 @@ function Driving.attach(model: Model)
 			s.brakeK *= carShare ^ W.BrakePow
 			s.steerK *= W.SteerK
 			s.towTop = Config.mphToSps(W.TopMph)
+			s.capTop = s.towTop
+		end
+		-- (2026-11-07) the car's health: a tired engine, worn tyres and brakes (small, never game-breaking)
+		s.gripK = 1
+		local care = s.care
+		if care then
+			s.accel *= care.power
+			s.powerK *= care.power
+			s.brakeK *= care.brake
+			s.gripK = care.grip * care.handling
+			if care.limp then
+				local limp = Config.mphToSps(Config.Wear.LimpMph)
+				s.capTop = math.min(s.capTop or limp, limp)
+			end
 		end
 	end
 	s.applyTune = applyTune
@@ -2307,7 +2507,57 @@ function Driving.step(dt: number)
 			UI.setIndicators(indicatorState(s))
 		end
 	end
+	-- (2026-11-07) out of fuel: it sputters, then the engine stops and the car coasts
+	local careNow = s.care
+	if careNow and careNow.empty and s.engineOn then
+		if s.sputter <= 0 then
+			s.sputter = 1.4
+			UI.toast(if s.electric then "Battery empty" else "Out of fuel", Config.Theme.Warning)
+		end
+		s.sputter -= dt
+		throttleKey = if math.sin(os.clock() * 19) > 0 then throttleKey else 0
+		if s.sputter <= 0.02 then
+			s.sputter = 0
+			s.engineOn = false
+			s.engine:setRunning(false)
+			setCarPower(s, false)
+			cruiseOff(s, true)
+			UI.setIndicators(indicatorState(s))
+		end
+	elseif careNow and careNow.misfire and s.engineOn and not s.electric then
+		-- under 30%: it stumbles now and then, a pop and a puff of smoke
+		s.misT -= dt
+		if s.misT <= 0.14 then
+			throttleKey = 0
+		end
+		if s.misT <= 0 then
+			s.misT = 1.2 + math.random() * 2.5
+			Audio.backfire(s.root)
+			if Driving.onMisfire then
+				Driving.onMisfire()
+			end
+		end
+	end
+	throttleKey, brake = cruisePedals(s, throttleKey, brake, dt)
 	local throttle = if s.engineOn then throttleKey else 0
+	-- (the wear the server can't see)
+	local rep = s.report
+	rep.thr += throttle
+	rep.n += 1
+	if s.rpm >= 0.97 and throttle > 0.5 and not s.electric then
+		s.redHold += dt
+		if s.redHold > Config.Wear.Engine.RedlineAfter then
+			rep.red += dt
+		end
+	else
+		s.redHold = 0
+	end
+	if s.drifting then
+		rep.drift += dt
+	end
+	if brake > 0.8 and s.vel.Magnitude > 30 then
+		rep.hard += dt
+	end
 	local braking = s.engineOn and brake > 0.05
 	if braking ~= (s.tailBrake == true) then
 		s.tailBrake = braking
@@ -2339,6 +2589,7 @@ function Driving.step(dt: number)
 	end
 	if s.launchReady and not holding and throttle > 0.5 and brake <= 0.3 then
 		s.launch = 0.8
+		s.report.launch += 1
 	end
 	if holding and not s.launchReady then
 		UI.toast("Launch control: let go of the brake")
@@ -2517,6 +2768,19 @@ function Driving.step(dt: number)
 	if s.grounded and s.lastCommand.Magnitude > 25 then
 		local loss = (s.lastCommand - actualFlat).Magnitude
 		if loss > math.max(22, s.lastCommand.Magnitude * 0.35) then
+			-- (2026-11-07) where it hit: from the way the speed went, on the side that took it
+			local push = s.lastCommand - actualFlat
+			local fwdNow = forwardFromYaw(s.yaw)
+			local sideNow = fwdNow:Cross(Vector3.yAxis)
+			local along, across = push:Dot(fwdNow), push:Dot(sideNow)
+			local kind = if loss > 34 then "d" else "t"
+			local sizeK = math.clamp(loss / 45, 0.5, 1.6)
+			if math.abs(along) >= math.abs(across) then
+				hitMark(s, kind, if along > 0 then "F" else "B", 0.5 + math.clamp(across / math.max(math.abs(along), 1), -1, 1) * 0.38, 0.35 + math.random() * 0.15, sizeK, loss)
+			else
+				hitMark(s, kind, if across > 0 then "R" else "L", 0.5 + (math.random() - 0.5) * 0.7, 0.3 + math.random() * 0.25, sizeK, loss)
+			end
+			cruiseOff(s, true)
 			s.vel = actualFlat
 			reportCrash(s, loss)
 			-- the jolt: the body and the driver's head are thrown
@@ -2559,7 +2823,7 @@ function Driving.step(dt: number)
 		local engaged = s.engineOn and not s.clutch and s.shiftT <= 0 and gearNow ~= 0
 		if engaged and gearNow > 0 and fwdSpeed > -2 then
 			local rev = if s.electric then math.max(speedFrac, 0) else math.max(speedFrac, 0) / gearHi(gearNow)
-			if throttle > 0 and speedFrac < 1 and not (s.towTop and fwdSpeed >= s.towTop) then -- at top speed the limiter holds it there
+			if throttle > 0 and speedFrac < 1 and not (s.capTop and fwdSpeed >= s.capTop) then -- at top speed the limiter holds it there
 				local pull = if s.electric then evPull(math.max(speedFrac, 0)) else torqueCurve(math.max(rev, 0.3)) * gearMul(gearNow)
 				a += s.accel * s.powerK * throttle * pull * (if s.launch > 0 then s.launchK else 1)
 			elseif throttle == 0 and fwdSpeed > 2 then
@@ -2624,8 +2888,8 @@ function Driving.step(dt: number)
 		end
 		-- nitro: extra pull, and past the car's own top speed up to NitroTop of it
 		s.boosting = nitroHeld() and s.nitro > 0 and engaged and gearNow > 0 and throttle > 0.3 and fwdSpeed > 5 and not s.towTop
-		if s.towTop and fwdSpeed > s.towTop then
-			a -= math.min(50, 6 + (fwdSpeed - s.towTop) * 2) -- (downhill, or just hitched at speed)
+		if s.capTop and fwdSpeed > s.capTop then
+			a -= math.min(50, 6 + (fwdSpeed - s.capTop) * 2) -- (downhill, or just hitched at speed)
 		end
 		if s.boosting then
 			if speedFrac < 1 then
@@ -2650,7 +2914,7 @@ function Driving.step(dt: number)
 		-- (2026-11-03, realistic physics) real tyre grip in g (the car's handling, a little help from
 		-- GameGrip), lower for a heavy car, lower in the wet; aero downforce grows with speed squared
 		-- (a lot on supercars, a little on the others), so a fast car is planted at speed
-		local gripG = (DF.GripBase + DF.GripHandling * handling) * DF.GameGrip * s.weightK ^ -DF.WeightGrip
+		local gripG = (DF.GripBase + DF.GripHandling * handling) * DF.GameGrip * s.weightK ^ -DF.WeightGrip * s.gripK
 		gripG *= 1 + ((DF.Downforce[s.spec.Class] or 0) + s.downK) * math.clamp(speedAbs / s.topSpeed, 0, 1.1) ^ 2
 		gripG *= 1 - DF.WetGripLoss * Driving.wet
 		local latA = gripG * DF.G -- the sideways pull the tyres have (studs/s^2)
@@ -2768,6 +3032,9 @@ function Driving.step(dt: number)
 			s.yawRate *= math.exp(-DF.StabilityAssist * 0.5 * Driving.assist * dt)
 		end
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
+		if throttle > 0.8 and math.abs(fwdSpeed) < 14 and brake > 0.3 then
+			s.report.burn += dt
+		end
 		if s.drifting then
 			s.slip += 30 * math.clamp(math.abs(driftAngle) / 0.5, 0, 1)
 		end
@@ -2848,6 +3115,26 @@ function Driving.step(dt: number)
 				s.vel *= 1 - DF.ScrapeDrag * dt
 				s.shake = math.max(s.shake, 0.15)
 				sparks(w.Position, w.Normal, 3 + math.floor(Config.spsToMph(s.vel.Magnitude) / 25))
+				-- (2026-11-07) a mark every half second of grinding, moving along the side; a metal grind
+				s.scrapeT[sd] += dt
+				if s.scrapeT[sd] > 0.5 then
+					s.scrapeT[sd] = 0
+					s.scrapeU[sd] = (s.scrapeU[sd] + 0.17) % 1
+					hitMark(s, "s", if sd > 0 then "R" else "L", 0.12 + s.scrapeU[sd] * 0.76, 0.32 + math.random() * 0.16, 1, 0)
+					Audio.scrape(math.clamp(s.vel.Magnitude / 80, 0.3, 1))
+				end
+			end
+		end
+	end
+	-- a kerb under a wheel at speed: curb rash on that rim (a low ray at each front corner, a few times a second)
+	s.rashT -= dt
+	if s.rashT <= 0 and s.grounded and Config.spsToMph(s.vel.Magnitude) > 8 then
+		s.rashT = 0.2
+		for i, sd in { -1, 1 } do
+			local at = root.Position + Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw)) * sd * (s.width / 2 + 0.2) + forwardFromYaw(s.yaw) * s.wheelbase * 0.5
+			local d = workspace:Raycast(at, Vector3.new(0, -8, 0), rayParams)
+			if d and string.find(d.Instance.Name, "Kerb", 1, true) then
+				s.report.rash = i
 			end
 		end
 	end

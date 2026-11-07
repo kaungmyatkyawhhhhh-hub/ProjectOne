@@ -16,6 +16,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local PartData = require(Shared:WaitForChild("PartData"))
+local CarCare = require(Shared:WaitForChild("CarCare"))
 
 export type Profile = {
 	Cash: number,
@@ -32,6 +33,10 @@ export type Profile = {
 	Home: string, -- penthouse id set as home ("" = none)
 	Showcase: { [string]: string }, -- per penthouse / suite: the car its turntable shows
 	Trailers: { [string]: boolean }, -- (2026-11-07) trailers owned
+	CarCare: { [string]: any }, -- (2026-11-07) per car id: mileage, health, fuel, service book, damage (shared/CarCare.lua)
+	DriveSeconds: number, -- time at the wheel: new players have no wear for the first hour
+	FreeFill: boolean?, -- false once the free first fill-up is used
+	FreeService: boolean?, -- false once the free first service is used
 	Houses: { [string]: boolean }, -- owned house blueprints (Config.Houses.Designs ids)
 	HouseBays: { [string]: { string } }, -- per design: the car in each garage bay, then each driveway spot ("" = empty)
 	HousePlots: { [string]: string }, -- (old: per house type, the plot it stood on; read once to move old saves)
@@ -219,6 +224,8 @@ local function defaultProfile(): Profile
 		Home = "",
 		Showcase = {},
 		Trailers = {},
+		CarCare = {},
+		DriveSeconds = 0,
 		Houses = {},
 		HouseBays = {},
 		HousePlots = {},
@@ -297,7 +304,7 @@ local function swapCars(profile: Profile)
 				spare(partId, loser)
 			end
 		end
-		for _, key in { "CarLevels", "CarXP", "CarCP", "CarParts", "CarSetup", "CarBuilds", "Customs" } do
+		for _, key in { "CarLevels", "CarXP", "CarCP", "CarParts", "CarSetup", "CarBuilds", "Customs", "CarCare" } do
 			if oldWins then
 				p[key][new] = p[key][old]
 			end
@@ -545,6 +552,25 @@ function PlayerData.load(player: Player): Profile?
 					end
 				end
 			end
+			-- (2026-11-07) a car's care record; old saves have none, Care makes them from the car's XP
+			if type(saved.CarCare) == "table" then
+				for id, rec in saved.CarCare do
+					if type(id) == "string" and Cars.ById[id] then
+						profile.CarCare[id] = CarCare.clean(rec, id)
+					end
+				end
+			end
+			if type(saved.DriveSeconds) == "number" and saved.DriveSeconds == saved.DriveSeconds then
+				profile.DriveSeconds = math.max(saved.DriveSeconds, 0)
+			elseif (profile.Level or 1) > 5 then
+				profile.DriveSeconds = Config.Wear.ProtectSeconds -- (an old save isn't a new player)
+			end
+			if saved.FreeFill == false then
+				profile.FreeFill = false
+			end
+			if saved.FreeService == false then
+				profile.FreeService = false
+			end
 			if type(saved.Showcase) == "table" then
 				for id, car in saved.Showcase do
 					if type(id) == "string" and towerIds[id] and type(car) == "string" and Cars.ById[car] then
@@ -695,6 +721,10 @@ local function payloadOf(profile: Profile, session: { [string]: any }?): { [stri
 		Home = profile.Home,
 		Showcase = profile.Showcase,
 		Trailers = profile.Trailers,
+		CarCare = profile.CarCare,
+		DriveSeconds = profile.DriveSeconds,
+		FreeFill = profile.FreeFill,
+		FreeService = profile.FreeService,
 		Houses = houses,
 		HouseBays = profile.HouseBays,
 		HomeLot = profile.HomeLot,

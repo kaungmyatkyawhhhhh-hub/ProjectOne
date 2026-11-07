@@ -2856,7 +2856,7 @@ local function porsche991gt3(gui: SurfaceGui): Update
 		warm = math.min(warm + 0.002, 1)
 		setOilT(170 + 60 * warm)
 		setOilP(1 + 3.5 * r)
-		setFuel(0.72)
+		setFuel(DashGauges.fuelShare)
 		setWater(150 + 50 * warm)
 		trip += mph / 3600 / 60
 		tripText.Text = string.format("%.1f", if KMH then trip * 1.609 else trip)
@@ -3290,8 +3290,9 @@ local function aventadorSVJ(gui: SurfaceGui): Update
 			last = os.clock()
 			clockText(clock())
 			dateText(os.date("%d.%m.%Y") :: string)
-			odo(if KMH then "000685 km" else "000426 mi")
-			fuelLeft = math.max(0.15, fuelLeft - 0.0005)
+			local miles = DashGauges.odoMiles or 426
+			odo(if KMH then string.format("%06d km", math.floor(miles * 1.609)) else string.format("%06d mi", math.floor(miles)))
+			fuelLeft = DashGauges.fuelShare
 			range(tostring(math.floor((if KMH then 560 else 348) * fuelLeft)))
 		end
 	end
@@ -3300,6 +3301,11 @@ end
 -- what the car is doing that the screens show (Driving sets these)
 DashGauges.lightsOn = false
 DashGauges.tcOff = false
+-- (2026-11-07) CareClient sets these: the real odometer and fuel, the check engine light; Driving the cruise speed
+DashGauges.odoMiles = nil :: number?
+DashGauges.fuelShare = 0.8
+DashGauges.checkEngine = 0
+DashGauges.cruiseMph = nil :: number?
 
 -- the Revuelto, Aventador SV and Huracan screens (owner, 2026-11-04: redrawn 1:1 from the owner's
 -- photos and made to work). tools/lambo/cluster_live.py draws the picture and the pieces over it
@@ -3526,9 +3532,10 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 			slow = now
 			vals.clock = clock()
 			vals.date = os.date("%d.%m.%Y") :: string
-			vals.odo = string.format("%06d", math.floor(if KMH then odo * 1.609 else odo))
-			vals.odoTrim = tostring(math.floor(if KMH then odo * 1.609 else odo))
-			fuelLeft = math.max(0.15, fuelLeft - 0.0005)
+			local miles = DashGauges.odoMiles or odo
+			vals.odo = string.format("%06d", math.floor(if KMH then miles * 1.609 else miles))
+			vals.odoTrim = tostring(math.floor(if KMH then miles * 1.609 else miles))
+			fuelLeft = DashGauges.fuelShare
 			vals.range = tostring(math.floor((if KMH then 500 else 310) * fuelLeft))
 			if not audio then
 				local ok, m = pcall(function()
@@ -3644,6 +3651,40 @@ function DashGauges.build(panel: BasePart): Update
 	local style = panel:GetAttribute("Style")
 	local own = if type(style) == "string" then STYLES[style] else nil
 	local update = if own then own(gui) elseif style == "BMWLive" then bmwLive(gui) elseif style == "BMWClassic" then bmwClassic(gui) elseif style == "BMWClassicGrey" then bmwClassic(gui, true) elseif style == "AMG" then amg(gui) elseif style == "AMGBiturbo" then amg(gui, true) elseif style == "G63" then g63(gui) elseif style == "AMGSls" then amg(gui, false, 220) elseif style == "Aston" then aston(gui) elseif style == "Urus" then urus(gui) elseif style == "Murcielago" then twinWithSmalls(gui, true, 9, 8, Color3.fromRGB(255, 90, 20), Color3.fromRGB(176, 182, 192), { { "OIL °C", "50", "150" }, { "OIL bar", "0", "10" }, { "FUEL", "0", "1" }, { "°C", "50", "130" } }) elseif style == "C6" then twinWithSmalls(gui, false, 7, 6.5, Color3.fromRGB(255, 110, 30), Color3.fromRGB(150, 156, 166), { { "FUEL", "E", "F" }, { "OIL", "0", "80" }, { "TEMP", "100", "280" }, { "VOLTS", "8", "18" } }) elseif style == "C7" then c7(gui) elseif style == "W212" then w212(gui) elseif style == "W213" then w213(gui) elseif style == "Gallardo" then gallardo(gui) elseif style == "SupraTRD" then supraTrd(gui) elseif style == "Toyota" then toyota(gui) elseif style == "Aventador" then aventador(gui, true) elseif style == "Lambo" then lambo(gui) elseif style == "Ferrari" then ferrari(gui) elseif style == "Ferrari599" then ferrari599(gui) else modern(gui)
+	-- (2026-11-07) the numbers printed on a screen as an odometer ("52918 mi", "TOTAL 51063 mi", "ODO 99137km"):
+	-- the car's real miles from now on
+	local odos: { { l: TextLabel, pre: string, unit: string, wide: number } } = {}
+	for _, d in gui:GetDescendants() do
+		if d:IsA("TextLabel") then
+			local pre, num, unit = string.match(d.Text, "^(%u*%s?)([%d%.,]+)%s?(%a+)$")
+			if num and (unit == "mi" or unit == "km") and #string.gsub(num, "[%.,]", "") >= 4 and not string.find(pre, "TRIP", 1, true) then
+				table.insert(odos, { l = d, pre = pre, unit = unit, wide = #(string.match(num, "^%d+") :: string) })
+			end
+		end
+	end
+	-- the check engine light and the cruise speed, small, in the panel's top corner, on every cluster
+	local check = Instance.new("TextLabel")
+	check.Name = "CheckEngine"
+	check.BackgroundTransparency = 1
+	check.AnchorPoint = Vector2.new(0, 0)
+	check.Position = UDim2.fromScale(0.02, 0.02)
+	check.Size = UDim2.fromScale(0.3, 0.09)
+	check.Font = Enum.Font.GothamBold
+	check.Text = "CHECK ENGINE"
+	check.TextColor3 = Color3.fromRGB(255, 176, 32)
+	check.TextScaled = true
+	check.TextXAlignment = Enum.TextXAlignment.Left
+	check.Visible = false
+	check.ZIndex = 20
+	check.Parent = gui
+	local cruise = check:Clone()
+	cruise.Name = "CruiseSet"
+	cruise.AnchorPoint = Vector2.new(1, 0)
+	cruise.Position = UDim2.fromScale(0.98, 0.02)
+	cruise.TextXAlignment = Enum.TextXAlignment.Right
+	cruise.TextColor3 = Color3.fromRGB(70, 230, 110)
+	cruise.Parent = gui
+	local odoT = 0
 	-- start-up: the screens fade up and the needles sweep to the end and back, like a real car
 	local started = os.clock()
 	local SWEEP = 1.6
@@ -3656,6 +3697,21 @@ function DashGauges.build(panel: BasePart): Update
 		else
 			gui.Brightness = BRIGHT
 			update(mph, g, rpm)
+		end
+		local level = DashGauges.checkEngine
+		check.Visible = level == 1 or (level == 2 and os.clock() % 0.7 < 0.35)
+		local set = DashGauges.cruiseMph
+		cruise.Visible = set ~= nil
+		if set then
+			cruise.Text = "CRUISE " .. math.floor((if KMH then set * 1.609 else set) + 0.5)
+		end
+		local miles = DashGauges.odoMiles
+		if miles and t > odoT then
+			odoT = t + 2
+			for _, o in odos do
+				local n = if o.unit == "km" then miles * 1.609 else miles
+				o.l.Text = o.pre .. string.format("%0" .. o.wide .. "d", math.floor(n)) .. " " .. o.unit
+			end
 		end
 	end
 end

@@ -368,6 +368,7 @@ local ctx = {
 		return CarLevels.rollDrop(player, source)
 	end,
 	goals = Goals,
+	care = nil :: any, -- (Care, set below)
 }
 Goals.init(ctx)
 CarLevels.init(ctx)
@@ -454,12 +455,17 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 	end
 	model.Name = player.Name
 	model:SetAttribute("Owner", player.UserId)
+	model:SetAttribute("Electric", spec.Electric == true)
 	if stolen then
 		model:SetAttribute("Stolen", true)
 	end
 	if test then
 		-- (server time, so the client's countdown matches)
 		model:SetAttribute("TestEnds", workspace:GetServerTimeNow() + Config.Dealership.TestSeconds)
+	end
+
+	if ctx.care then
+		ctx.care.applyTo(player, model, carId)
 	end
 
 	local root = model.PrimaryPart :: BasePart
@@ -592,6 +598,7 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any, colour: any)
 	buying[player] = true
 	PlayerData.addCash(player, -price)
 	profile.Owned[carId] = true
+	ctx.care.onBought(player, carId)
 	local swatch = if type(colour) == "number" then Config.Customs.Palette[math.floor(colour)] else nil
 	if swatch then
 		local all = profile.Customs
@@ -654,7 +661,12 @@ ctx.despawn = despawn
 ctx.isRacing = Activities.isRacing
 local Trailers = require(script.Parent:WaitForChild("Trailers"))
 ctx.isTowing = Trailers.isTowing
+ctx.isBusy = Activities.isBusy
 Trailers.init(ctx)
+-- (2026-11-07) mileage, wear, fuel, the service book
+local Care = require(script.Parent:WaitForChild("Care"))
+ctx.care = Care
+Care.init(ctx)
 require(script.Parent:WaitForChild("Parking")).init(ctx, Police, Towers)
 
 SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)

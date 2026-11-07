@@ -36,6 +36,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
+local CarCare = require(Shared:WaitForChild("CarCare"))
 local TravelSpots = require(Shared:WaitForChild("TravelSpots"))
 local IsleLayout = require(Shared:WaitForChild("IsleLayout"))
 
@@ -50,6 +51,7 @@ local DayCycle = require(script.Parent:WaitForChild("DayCycle"))
 local MenuArt = require(script.Parent:WaitForChild("MenuArt"))
 local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
 local TrailerClient = require(script.Parent:WaitForChild("TrailerClient"))
+local CareClient = require(script.Parent:WaitForChild("CareClient"))
 local CarUpgrades = require(script.Parent:WaitForChild("CarUpgrades"))
 
 local MainMenu = {}
@@ -1784,6 +1786,14 @@ local function buildCars(page: Frame)
 		local info = if UI.carInfo then UI.carInfo(spec.Id) else nil
 		text({ Text = (if info then "CAR LV " .. info.level .. "  ·  " .. info.cp .. " CP  ·  " else "") .. string.upper(Cars.ClassLabels[spec.Class] or spec.Class), FontFace = BOLD, TextSize = 14, TextColor3 = SUB, Position = UDim2.fromOffset(74, 58), Size = UDim2.new(1, -74, 0, 22), TextTruncate = Enum.TextTruncate.AtEnd, Parent = body })
 		carStats(body, 92, spec)
+		-- (2026-11-07) miles and worth, from the server's book
+		local worth = text({ Text = "", FontFace = BOLD, TextSize = 13, TextColor3 = SUB, Position = UDim2.fromOffset(0, 192), Size = UDim2.new(1, 0, 0, 16), TextTruncate = Enum.TextTruncate.AtEnd, Parent = body })
+		CareClient.info(spec.Id, function(st: any)
+			if st and st.ok and worth.Parent then
+				local alert = if st.check == 2 then "  ·  ENGINE NEEDS REPAIR" elseif st.check == 1 or st.due < 0 then "  ·  SERVICE DUE" else ""
+				worth.Text = CarCare.milesText(st.miles) .. "  ·  WORTH " .. CarCare.money(st.value) .. alert
+			end
+		end)
 		-- (2026-11-07) a car with a hitch
 		local towKg = CarStats.towKg(spec.Id)
 		if towKg > 0 then

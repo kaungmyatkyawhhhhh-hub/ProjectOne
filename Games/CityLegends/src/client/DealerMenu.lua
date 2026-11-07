@@ -38,6 +38,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local TrailerBuilder = require(Shared:WaitForChild("TrailerBuilder"))
+local CarCare = require(Shared:WaitForChild("CarCare"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 
 local UI = require(script.Parent:WaitForChild("UI"))
@@ -46,6 +47,7 @@ local Audio = require(script.Parent:WaitForChild("Audio"))
 local CustomsClient = require(script.Parent:WaitForChild("CustomsClient"))
 local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
 local TrailerClient = require(script.Parent:WaitForChild("TrailerClient"))
+local CareClient = require(script.Parent:WaitForChild("CareClient"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
 
 local DealerMenu = {}
@@ -611,6 +613,9 @@ local function build(root: Frame)
 	local pad = math.floor((L.topH - bh) / 2)
 	local exitBtn = button("secondary", if compact then "" else "EXIT", "exit", { Position = UDim2.fromOffset(pad, pad), Size = UDim2.fromOffset(if compact then bh else 118, bh), Parent = top })
 	local buyBtn = button("primary", "BUY", "tag", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -pad, 0, pad), Size = UDim2.fromOffset(if compact then 132 else 172, bh), Parent = top })
+	-- (2026-11-07) selling an owned car here, with its value worked out
+	local sellBtn = button("secondary", "SELL", nil, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -pad - (if compact then 132 else 172) - 8, 0, pad), Size = UDim2.fromOffset(if compact then 70 else 92, bh), Parent = top })
+	sellBtn.b.Visible = false
 	local testBtn = button("secondary", if compact then "" else "TEST DRIVE", "wheel", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -pad - (if compact then 132 else 172) - 10, 0, pad), Size = UDim2.fromOffset(if compact then bh else 166, bh), Parent = top })
 	-- the name block
 	local nameX = pad + (if compact then bh else 118) + (if compact then 12 else 20)
@@ -1035,11 +1040,16 @@ local function build(root: Frame)
 			priceText.Text = "OWNED"
 			priceText.TextColor3 = BLUE
 			priceNote.Text = towTag(id)
+			sellBtn.b.Visible = true
 			buyBtn.set("DRIVE", "blue", "key")
 		else
-			-- (2026-11-07) real prices: what kind of price it is
+			-- (2026-11-07) real prices: what kind of price it is; a used or collector car shows its miles
 			local kind = spec.PriceSource
 			priceCap.Text = if kind then "PRICE  ·  " .. string.upper(kind) else "PRICE"
+			if kind == "used" or kind == "collector" then
+				priceCap.Text ..= "  ·  " .. CarCare.milesText(CarCare.dealerMiles(id))
+			end
+			sellBtn.b.Visible = false
 			priceText.Text = money(priceOf(id))
 			priceText.TextColor3 = if (s.data.Cash or 0) >= priceOf(id) then GREEN else WHITE
 			priceNote.Text = if off > 0 then string.format("-%d%% BRAND BONUS", math.floor(off * 100 + 0.5)) else towTag(id)
@@ -1305,6 +1315,59 @@ local function build(root: Frame)
 			end
 		end
 	end
+
+	-- (2026-11-07) Price · Mileage · Condition → worth, and what Legends Motors pays
+	local function confirmSell(id: string)
+		local spec = Cars.get(id)
+		local over, card = modal(if compact then 470 else 540, if compact then 220 else 246, 90)
+		caption("SELL THIS CAR", { TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(0, 20), Size = UDim2.new(1, 0, 0, fs(14)), ZIndex = 92, Parent = card })
+		text({ Text = spec.Name, FontFace = HEAVY, TextSize = 22, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(20, 40), Size = UDim2.new(1, -40, 0, fs(28)), ZIndex = 92, Parent = card })
+		local line = text({ Text = "...", FontFace = MEDIUM, TextSize = 14, TextColor3 = GREY, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(16, 40 + fs(30)), Size = UDim2.new(1, -32, 0, fs(36)), ZIndex = 92, Parent = card })
+		local offer = text({ Text = "", FontFace = HEAVY, TextSize = 18, TextColor3 = GREEN, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(20, 40 + fs(66)), Size = UDim2.new(1, -40, 0, fs(24)), ZIndex = 92, Parent = card })
+		local cancel = button("secondary", "CANCEL", nil, { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 22, 1, -20), Size = UDim2.new(0.5, -28, 0, L.btnH), ZIndex = 92, Parent = card })
+		local yes = button("primary", "SELL", "tag", { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -22, 1, -20), Size = UDim2.new(0.5, -28, 0, L.btnH), ZIndex = 92, Parent = card })
+		for _, d in card:GetDescendants() do
+			if d:IsA("GuiObject") then
+				d.ZIndex = math.max(d.ZIndex, 92)
+			end
+		end
+		cancel.b.Activated:Connect(function()
+			over:Destroy()
+		end)
+		local pays = 0
+		CareClient.info(id, function(st: any)
+			if st and st.ok and line.Parent then
+				line.Text = st.breakdown
+				pays = st.sell
+				offer.Text = "Legends Motors pays " .. money(pays)
+			end
+		end)
+		yes.b.Activated:Connect(function()
+			if s.busy or pays <= 0 then
+				return
+			end
+			s.busy = true
+			yes.set("...")
+			CareClient.sell(id, function(res: any)
+				s.busy = false
+				over:Destroy()
+				if res and res.ok then
+					if res.data then
+						s.data = res.data
+					end
+					s.owned[id] = nil
+					refreshAll()
+					showMsg("Sold for " .. money(res.paid), GREEN, "tag")
+				else
+					showMsg((res and res.message) or "Couldn't sell it", RED, "lock")
+				end
+			end)
+		end)
+	end
+	sellBtn.b.Activated:Connect(function()
+		Audio.click()
+		confirmSell(s.id)
+	end)
 
 	local function confirmBuy(id: string)
 		local spec = Cars.get(id)

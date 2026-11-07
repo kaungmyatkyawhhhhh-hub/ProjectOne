@@ -1968,4 +1968,93 @@ Config.Towing = {
 	Camera = { Back = 19, Up = 5, Turn = 3 }, -- pulled back to see the trailer; reversing it turns round
 }
 
+---------------------------------------------------------------------
+-- Cruise control, mileage, wear, value, service, fuel
+-- (owner, 2026-11-07: "the more mileage you have for the car, the cheaper the car value drops ...
+-- a repair shop ... when the car's redlining for a long time or driving too long without maintenance")
+-- Keep it fun: wear is slow, warnings are clear, repairs are cheap against an hour's pay (about $11,000), a
+-- car never strands anyone. shared/CarCare.lua does the sums, server/Care.lua keeps the books.
+---------------------------------------------------------------------
+Config.Cruise = {
+	Key = Enum.KeyCode.K, -- (free while the market is off: J is the leaderboard)
+	MinMph = 15,
+	Step = 5, -- a tap on the throttle or brake changes the set speed by this (mph or km/h)
+	HoldBrake = 0.28, -- seconds: the brake held longer than a tap switches it off
+	GapSeconds = 0.9, -- traffic right ahead closer than this many seconds: it switches off
+	GapMin = 20, -- studs
+}
+
+Config.Wear = {
+	-- the map is small: each mile on the road shows as this many on the odometer, about 240 in an hour's drive
+	OdoScale = 4,
+	ServiceEvery = 600, -- miles between oil services (about 2.5 hours' driving)
+	ServiceWarn = 50, -- "Service due in 50 mi"
+	ServiceBack = 4, -- an oil service gives the engine this much back, so on-time cars stay healthy
+	ProtectSeconds = 3600, -- new players: no wear for the first hour of driving
+	XpToMiles = 0.045, -- old saves: a car's miles from its car XP (1.5 XP a second at about 60 mph, x OdoScale)
+	OldSaveDueIn = 400, -- old saves: the first service is due this many miles on
+	-- percent lost
+	Engine = { PerMile = 0.002, Overdue = 4, RedlineAfter = 3, RedlinePerSecond = 0.1, Launch = 0.03, Crash = 0.5 },
+	Tyres = { PerMile = 0.03, DriftPerSecond = 0.2, BurnPerSecond = 0.5 },
+	Brakes = { PerMile = 0.015, HardPerSecond = 0.04 },
+	Tow = 1.25, -- a trailer on: wear and fuel times this (fuel: Config.Fuel.Tow)
+	-- what it does to the car
+	EngineWarn = 60, -- check engine, steady
+	EngineFlash = 30, -- check engine, flashing: misfires
+	EngineLimp = 10, -- limp mode
+	PowerAtWarn = 0.08, -- power lost by EngineFlash, from EngineWarn down
+	PowerAtFlash = 0.15, -- power lost by 0, from EngineFlash down
+	LimpMph = 45,
+	GripLoss = 0.1, -- at 0% tyres
+	BrakeLoss = 0.1, -- at 0% brakes
+	BodyLoss = 0.03, -- at 0% body (only under 40%)
+}
+
+Config.Value = {
+	-- a car's value by miles it has done with you: { miles, share of its price }
+	Mileage = { { 0, 1 }, { 1000, 0.9 }, { 5000, 0.75 }, { 20000, 0.6 }, { 80000, 0.45 } },
+	Floor = 0.45,
+	CollectorFloor = 0.8,
+	ConditionMax = 0.1, -- up to this much off for low health or an overdue service
+	HistoryBonus = 0.03, -- every service on time
+	SellShare = 0.6, -- what Legends Motors pays of a car's value
+}
+
+Config.Service = {
+	Name = "LEGENDS SERVICE",
+	Bay = Vector3.new(15262, 3, 1062), -- the middle of the workshop bay (set by the build: tools/riviera/LegendsService.luau)
+	BayRadius = 22,
+	LiftSeconds = 4,
+	-- real-world prices; times Economy.PartPriceMult, times PriceK of the car (1 to MaxCarK)
+	Oil = { 100, 300 },
+	Tyres = { 400, 2500 },
+	Brakes = { 400, 1500 },
+	Engine = 1000, -- a full rebuild from 0%
+	Body = 1500, -- a full body repair from 0%
+	CarKFrom = 50000, -- a car under this price pays the low end
+	CarKTo = 1500000, -- at this price and up, the high end
+	MaxCarK = 1.5,
+	FullDiscount = 0.1,
+	Wash = 40,
+}
+
+Config.Fuel = {
+	Minutes = { 45, 30 }, -- a full tank: small engines, big engines (normal driving)
+	PowerFrom = 200, -- horsepower at Minutes[1]
+	PowerTo = 1100,
+	Idle = 0.15, -- burn at a standstill, of normal
+	Tow = 1.35,
+	Low = 0.15,
+	PauseAt = 0.01, -- races, jobs and heists never run dry
+	PricePerLitre = 2.6, -- a real Monaco price (about $2.2) times a small multiplier: a tank is 1-3% of an hour's pay
+	PricePerKwh = 0.7,
+	FillSeconds = 3,
+	ChargeSeconds = 6,
+	CanShare = 0.12, -- roadside help: the can gives this much of a tank
+	CanPrice = 90,
+	TowPrice = 250,
+	PumpRange = 16,
+	Stations = {} :: { { id: string, name: string, pumps: { Vector3 }, arrive: CFrame } },
+}
+
 return Config

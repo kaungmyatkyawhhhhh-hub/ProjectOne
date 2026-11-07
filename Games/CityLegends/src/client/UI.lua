@@ -218,6 +218,12 @@ local parkLamp: TextLabel
 local tcLamp: TextLabel
 local lightsLamp: TextLabel
 local towLamp: TextLabel? = nil
+local cruiseLamp: TextLabel? = nil
+local checkLamp: TextLabel? = nil
+local lowFuelLamp: TextLabel? = nil
+local fuelFill: Frame? = nil
+local fuelBack: Frame? = nil
+local fuelText: TextLabel? = nil
 local lampButton: TextButton? = nil
 local BEAM_BLUE = Color3.fromRGB(80, 160, 255)
 local settingsPanel: Frame
@@ -446,6 +452,28 @@ function UI.buildTouchControls()
 	end)
 	;(lampButton :: TextButton).TextSize = 16
 	;(lampButton :: TextButton).Visible = false
+	-- (2026-11-07) cruise control: on / off, and + / - while it's on
+	local noop = function() end
+	local cruiseBtn = touchButton("CRUISE", UDim2.new(1, -314, 1, -130), UDim2.fromOffset(90, 44), Color3.fromRGB(70, 230, 110), function()
+		if UI.onCruise then
+			UI.onCruise()
+		end
+	end, noop)
+	cruiseBtn.TextSize = 14
+	local plus = touchButton("+", UDim2.new(1, -314, 1, -178), UDim2.fromOffset(42, 42), Color3.fromRGB(70, 230, 110), function()
+		if UI.onCruiseStep then
+			UI.onCruiseStep(1)
+		end
+	end, noop)
+	local minus = touchButton("−", UDim2.new(1, -266, 1, -178), UDim2.fromOffset(42, 42), Color3.fromRGB(70, 230, 110), function()
+		if UI.onCruiseStep then
+			UI.onCruiseStep(-1)
+		end
+	end, noop)
+	plus.Visible, minus.Visible = false, false
+	UI.showCruiseSteps = function(on: boolean)
+		plus.Visible, minus.Visible = on, on
+	end
 end
 
 ---------------------------------------------------------------------
@@ -607,7 +635,19 @@ local function buildSpeedometer()
 	tcLamp = lamp("TC OFF", Theme.Warning, 4)
 	lightsLamp = lamp("LIGHTS", GREEN, 5)
 	towLamp = lamp("TOWING", Theme.Warning, 6)
-	blinkR = lamp("▶", GREEN, 7)
+	cruiseLamp = lamp("CRUISE", GREEN, 7)
+	checkLamp = lamp("CHECK ENGINE", Theme.Warning, 8)
+	lowFuelLamp = lamp("LOW FUEL", Theme.Warning, 9)
+	blinkR = lamp("▶", GREEN, 10)
+	-- (2026-11-07) the fuel gauge: a thin bar under the speedometer's warning lights
+	do
+		local w = math.floor(size * 0.46)
+		local holder = new("Frame", { Name = "FuelGauge", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 1, 2), Size = UDim2.fromOffset(w, 14), BackgroundTransparency = 1, Visible = false, ZIndex = 3, Parent = gauge })
+		fuelText = label({ Text = "FUEL", TextSize = 10, Font = Enum.Font.GothamBold, TextStrokeTransparency = 0.6, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.fromOffset(38, 14), ZIndex = 3, Parent = holder })
+		local back = new("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 40, 0.5, 0), Size = UDim2.new(1, -40, 0, 5), BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.45, BorderSizePixel = 0, ZIndex = 3, Parent = holder }, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
+		fuelFill = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = GREEN, BorderSizePixel = 0, ZIndex = 3, Parent = back }, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
+		fuelBack = holder
+	end
 	-- (2026-11-03, car levels) the car's class badge, its car level and XP bar, above the lights
 	local h = if UI.isTouch then 18 else 22
 	local strip = new("Frame", {
@@ -2404,6 +2444,61 @@ function UI.setTowing(on: boolean)
 	end
 end
 
+-- (2026-11-07) cruise control: the set speed (mph), nil when it's off. The phone's buttons show with it
+UI.onCruise = nil :: (() -> ())?
+UI.onCruiseStep = nil :: ((number) -> ())?
+function UI.setCruise(mph: number?, kmh: boolean?)
+	if cruiseLamp then
+		cruiseLamp.Visible = mph ~= nil
+		if mph then
+			cruiseLamp.Text = "CRUISE " .. math.floor((if kmh then mph * 1.609 else mph) + 0.5)
+		end
+	end
+	if UI.showCruiseSteps then
+		UI.showCruiseSteps(mph ~= nil)
+	end
+end
+
+-- the check engine light: 0 off, 1 steady, 2 flashing
+local checkState = 0
+function UI.setCheckEngine(level: number)
+	checkState = level
+	if checkLamp then
+		checkLamp.Visible = level > 0
+	end
+end
+task.spawn(function()
+	while true do
+		task.wait(0.35)
+		if checkLamp and checkState == 2 then
+			checkLamp.Visible = not checkLamp.Visible
+		end
+	end
+end)
+
+-- the fuel gauge: 0..1, nil hides it
+function UI.setFuel(share: number?, electric: boolean?)
+	if not fuelBack then
+		return
+	end
+;
+	(fuelBack :: Frame).Visible = share ~= nil
+	if not share then
+		if lowFuelLamp then
+			lowFuelLamp.Visible = false
+		end
+		return
+	end
+	local low = share <= Config.Fuel.Low;
+	(fuelFill :: Frame).Size = UDim2.fromScale(math.clamp(share, 0, 1), 1);
+	(fuelFill :: Frame).BackgroundColor3 = if low then Theme.Warning else Color3.fromRGB(70, 230, 110);
+	(fuelText :: TextLabel).Text = if electric then "BATT" else "FUEL"
+	if lowFuelLamp then
+		lowFuelLamp.Visible = low
+		lowFuelLamp.Text = if electric then "LOW BATTERY" else "LOW FUEL"
+	end
+end
+
 function UI.setLampMode(mode: string?)
 	if lampButton then
 		lampButton.Visible = mode ~= nil
@@ -2459,6 +2554,7 @@ end
 -- clicking or tapping it does the same as the key (UI.onAction)
 UI.onAction = nil :: (() -> ())?
 UI.onTowAction = nil :: (() -> ())? -- (2026-11-07) the trailer's own pill, above that one
+UI.showCruiseSteps = nil :: ((boolean) -> ())?
 type Pill = { b: TextButton, key: TextLabel, text: TextLabel }
 local actionPill: Pill? = nil
 local towPill: Pill? = nil

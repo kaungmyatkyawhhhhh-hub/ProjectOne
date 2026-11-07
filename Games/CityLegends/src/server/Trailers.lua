@@ -96,6 +96,9 @@ local function setLoad(player: Player, st: State, carId: string?)
 		local ok, car = pcall(CarBuilder.build, Cars.get(carId), { interior = false, lights = false, anchored = false })
 		if ok and car then
 			pcall(Customs.applyTo, player, car, carId)
+			if ctx.care then
+				pcall(ctx.care.applyTo, player, car, carId)
+			end
 			car.Name = "LoadedCar"
 			car:SetAttribute("CarId", carId)
 			local r = car.PrimaryPart :: BasePart
