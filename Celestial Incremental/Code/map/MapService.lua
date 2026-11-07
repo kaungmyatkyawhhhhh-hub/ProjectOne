@@ -36,6 +36,7 @@ if not root or (root:GetAttribute("StandIns") == true and Kit.AllImported()) the
 end
 local islandsFolder = root:WaitForChild("Islands")
 if root:FindFirstChild("Centre") then Builder.FreeBoard(root.Centre) end -- (Phase 2.4: a place built before the board)
+Builder.PlazaCleanup(root) -- (7 Nov: no star chart, the lamps on the rim with matte heads, FREE REWARDS at its new spot)
 Builder.ClearDecor(root) -- (no crystal in front of a sign, 6 Nov)
 -- (7 Nov, rule 8 ONE FRAME) a place built before it: the leaderboard wall + PLAYERS NEAR YOU lose their brass edge and the
 -- screen part goes see-through (the plaque art is the frame; MapBuilder builds them this way now)
@@ -63,9 +64,6 @@ do
 	if centre then
 		for _, n in ipairs({ "Leaderboard", "NearBoard", "StarForge", "BlackHoleGate", "StarSurge", "FreeBoard" }) do tag(centre:FindFirstChild(n), { FaceTarget = CORE }) end
 		tag(centre:FindFirstChild("Core"), { Animated = true }) -- (the landmark: it hovers, tilts and spins on purpose)
-		-- (the posts stand on the plaza's raised rim ring; the ground ray from their middle misses the ring and lands on the
-		-- floor's bevelled edge 0.8-1.5 below: Floating, with that reason)
-		for _, c in ipairs(centre:GetChildren()) do if c.Name == "LampPost" then tag(c, { Floating = true }) end end
 		-- (MapAudit: the plaza's raised rim ring is floor: the lamps, the Black Hole gate and the boards' feet stand on it)
 		local plazaRim = centre:FindFirstChild("Rim")
 		if plazaRim then plazaRim:SetAttribute("Ground", true) end
@@ -96,7 +94,7 @@ do
 		tag(ns:FindFirstChild("ArchSign"), { FaceTarget = CORE, Floating = true }) -- (on its post, over the arch)
 		-- (the Barrier is the arch's door, not floor; the sector-2 Forge sign faces its own island)
 		local bar = ns:FindFirstChild("Barrier")
-		if bar then bar:SetAttribute("NotGround", true) end
+		if bar then bar:SetAttribute("NotGround", true) bar:SetAttribute("Door", true) end -- (Door: the client opens it after Ignition)
 		-- (a sign's brass edge is its own frame: part of that sign, for the audit)
 		for _, n in ipairs({ "ArchSign", "IgnitionSign" }) do
 			local e = ns:FindFirstChild(n .. "Edge")

@@ -29,6 +29,8 @@ Attributes you can put on any object (Model or Part):
   Board       (any)    a board whose screen UI is drawn by the client (no SurfaceGui in the map): still checked as a board
   Island      (string) the island (by name) a board stands on (BoardPlacer sets it)
   NotGround   (bool)   on a PART that isn't floor (a door inside an arch): the ground ray goes through it
+  Door        (bool)   on a PART that is a locked door the CLIENT opens (a sector gate's barrier, solid on the server):
+                       UNREACHABLE treats it as open
   Animated    (bool)   spins / hovers on purpose (a landmark): FLOAT, TILT and ROT are skipped
   Ring        (bool)   on a PART that is a ring / halo / torus mesh (also guessed: a flat round part named *Ring* / Halo /
                        Gyro / Rim / Orbit): measured as a ring (centre line + tube), never as its solid bounding disc
@@ -53,6 +55,10 @@ v3 (7 Nov, launch day: "the gold ring cuts through the boards" and the audit sai
     every visible part in the map, part by part, with real shapes: a ring = points along its centre line (tube radius),
     a ball = a sphere, anything else = its oriented box. Spatial queries skip CanQuery-off parts, so this walks the parts.
   - new FACECLEAR (see above), with the same geometry (so CanQuery-off parts and rings count).
+
+v4 (7 Nov, Galaxy plaza clean-up): a locked door that only the client opens (Galaxy's Sector 2 Barrier) is solid on the
+  server, so UNREACHABLE found a path only through a gap AROUND the gate (a real way to sneak past it). When a lamp post
+  closed that gap, the audit called the sector unreachable. Door parts are now opened for the path check only.
 ]]
 
 local PFS = game:GetService("PathfindingService")
@@ -410,6 +416,14 @@ return function(opts)
 		end
 	end
 	if spawnLoc then
+		-- (v4) locked doors the client opens count as open for this check only
+		local doors = {}
+		for _, d in ipairs(MAP:GetDescendants()) do
+			if d:IsA("BasePart") and d:GetAttribute("Door") and d.CanCollide then
+				d.CanCollide = false
+				table.insert(doors, d)
+			end
+		end
 		for _, it in ipairs(inter) do
 			local cf, size = bbox(it)
 			local front = cf.Position + cf.LookVector * (size.Z / 2 + 4) -- a spot just in front of it
@@ -419,6 +433,7 @@ return function(opts)
 				add("UNREACHABLE", it, "no walking path from spawn to its front (" .. (ok and tostring(path.Status) or "error") .. ")")
 			end
 		end
+		for _, d in ipairs(doors) do d.CanCollide = true end
 	else
 		table.insert(out, "[INFO] no SpawnLocation found: FACING defaults and UNREACHABLE skipped")
 	end

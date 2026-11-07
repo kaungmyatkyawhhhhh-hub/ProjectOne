@@ -113,7 +113,7 @@ Decorations that break out on purpose (sparkles, glows) are marked AllowOverlap.
 
 ## Left / flags
 1. **2-player tests:** a real 2-client test (the pad, the tags) was not possible in Studio here. Please try Test > Clients and Servers with 2 players.
-2. **Art:** the U4 / U5 art isn't in yet (the layout is ready for it).
+2. **Art:** in (section 6), except GROUP's image, which still fails to load.
 3. **Phone windows** (UPGRADES, TREE...) weren't re-checked in this job; they were fixed on 7 Nov (UI corners).
 4. **Other islands' plates:** the island plate over each island (owner name + rank, read from the plaza) is still pixel-sized (that's for reading it from far away).
 
@@ -131,3 +131,42 @@ Decorations that break out on purpose (sparkles, glows) are marked AllowOverlap.
 - **The chips are cut through the pill's middle**, so the pill grows with its text. At the art's fixed size the pill only fitted ~4 characters.
 
 **UIAudit with the art:** Android, SE, 14 Pro, iPad, PC all **CLEAN** (`11-` to `15-art-*.jpg`).
+
+## 7. Plaza clean-up (owner: "what is this??")
+**Layout table** (plaza; angle 0 = +X, r = studs from the Core; all face the Core):
+
+| zone | object | position | ground y | facing | size | why here |
+|---|---|---|---|---|---|---|
+| gap 0 / 90 / 270 | star-chart inlay (ring + 7 neon dots + lines) | was r 40 | floor | - | 14 across | **removed**: it glowed like a button that does nothing (glow = pressable, #292) |
+| each bridge landing (8) + Sector 2 | lamp post pair | **r 68.5**, ±6.5 studs from the landing's centre line (was r 66, ±5.8) | rim top 41.5 | - | 7.4 + 1.6 head | ON the rim's flat top (r 67.5-69.5): at r 66 the landing's post hid 10/25 of TOP SUPERNOVAS / STAR SURGE from the landings |
+| gap 0 | FREE REWARDS | **angle 0, r 44** (was 80 / 46) | floor 40 | the Core | 11 x 7.5 + posts | at 80 / 46 it stood between the spawn and PLAYERS NEAR YOU (its post + lamp over that board's corner); gap 0 was the star chart's free spot, 12 studs in front of the benches |
+
+**Changed:**
+- **Lamp heads on the plaza:** matte warm cream (SmoothPlastic, no Neon, no light). That's all 18 rim lamps plus the posts on TOP SUPERNOVAS, PLAYERS NEAR YOU, FREE REWARDS and STAR SURGE.
+  - No PointLight added: the plaza is lit by the bright lighting pass.
+  - **Island LAMP PILLARS (a bought tycoon item) keep their glow:** never weaken what a player owns.
+- **FREE REWARDS is placed with BoardPlacer:** on the plaza's rim disc, from `MapConfig.FreeBoard` (angle, dist), pivot bottom-centre, front to the Core.
+- **Code:**
+  - `MapConfig`: Lamps, FreeBoard, Details, `Colors.LampHead`.
+  - `MapBuilder`: new `Builder.PlazaLamps`; `Builder.PlazaCleanup` for a place built before; the chart code is gone.
+  - `MapService`: calls PlazaCleanup at start.
+  - The place's own map was cleaned with the same function (so the saved place = the code).
+
+**MapAudit** (v4, Play, server): **CLEAN**. New in v4: `Door` (a locked door the client opens counts as open for UNREACHABLE).
+
+**Sight lines** (rays from eye height, 5 studs, to a 5x5 grid on each plaza board's face):
+- **From the spawn:** all clear. Before: PLAYERS NEAR YOU 8/25 blocked by FREE REWARDS.
+- **From each landing on the plaza (r 62-69):** no lamp in front of any board.
+- **Left, all small and at sharp side angles:**
+  - the boards' own side posts: PLAYERS NEAR YOU's post hides 5/25 of TOP SUPERNOVAS / STAR SURGE from the rim at bridge 67.5 / 112.5;
+  - standing ON a bridge (r 72), a lamp post hides 5/25 of a far board;
+  - from bridge 292.5, the Star Forge hides FREE REWARDS until you take a few steps in.
+
+**Shots** (`20-` to `27-plaza-*.jpg`): before / after from the plaza spawn (turned to PLAYERS NEAR YOU), by FREE REWARDS, by STAR SURGE, plus top-down.
+
+**Found (not changed, owner's call):** players can **walk round the locked Sector 2 gate**.
+- The Barrier only fills the arch. A path runs along the rim behind the arch onto the Sector 2 bridge.
+- The new lamp post narrows it (agents of radius 1.5-2 no longer get through), but a radius-1 agent (player size) still does.
+- **Fix:** a second door across the start of the Sector 2 bridge (between its rails). MapClient opens every part named Barrier, not just the first.
+
+**Studio:** the Test switches (`TestDevice`, `TestFreshSave`, `TestEventIn`) are cleared from Workspace.

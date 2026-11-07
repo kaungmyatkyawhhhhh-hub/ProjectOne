@@ -26,7 +26,9 @@ MapConfig.Centre = {
 	Rim = { Fit = 141.5, Top = 1.5 },               -- the brass rim round the edge: sticks up 1.5 (a ledge, not a wall)
 	Inlay = { Radius = 18, Top = 0.12 },            -- the brass ring round the Core's plaza
 	TileCount = 40,                                 -- wedge tiles in the second stone tone, inlay -> rim
-	Lamps = { Ring = 66, Spread = 5, Pillar = 7.4, Orb = 1.6 }, -- a pair at each bridge landing; 9 tall in all
+	-- a pair at each bridge landing; 9 tall in all. (7 Nov, owner "Plaza boards": they stood 4 studs INSIDE the rim and hid
+	-- the TOP SUPERNOVAS / STAR SURGE boards from the landings: now ON the rim's flat top (r 67.5-69.5), 6.5 studs each side)
+	Lamps = { Ring = 68.5, Spread = 5.4, Pillar = 7.4, Orb = 1.6 },
 	-- the Core: the star 10 across with its top ~20 up, 3 gyroscope rings 18-22 across, a stepped altar; footprint ~26
 	Core = {
 		Height = 15, Star = 10, Spikes = 12, Spike = 2.4,
@@ -43,8 +45,9 @@ MapConfig.Centre = {
 		Sector2 = { angle = 180, dist = 65 },       -- BACK-LEFT: the Sector 2 gate arch + IGNITION sign + its bridge
 		Leaderboard = { angle = 135, dist = 50 },   -- LEFT: top Supernovas + players near you, facing the Core
 	},
-	Gaps = { 0, 90, 270 },                          -- the open gaps: star-chart inlay, benches, crystals
-	Details = { Chart = 40, ChartRadius = 7, Benches = 56, BenchSpread = 6, RimCrystals = 63 },
+	Gaps = { 0, 90, 270 },                          -- the open gaps: benches, crystals (gap 0: FREE REWARDS in front)
+	-- (7 Nov, owner "what is this??": the glowing star-chart floor inlay looked like a button that does nothing: gone)
+	Details = { Benches = 56, BenchSpread = 6, RimCrystals = 63 },
 }
 
 -- the plaza's pieces (all sizes in studs; "bottom" = its lowest edge above the floor)
@@ -68,7 +71,9 @@ MapConfig.Leaderboard = { Width = 24, Height = 12, Bottom = 3, Rows = 10 } -- (T
 -- small to read on a phone): 5 above you, you (gold), 5 below; on the floor between the wall's end and the star-chart gap
 -- the FREE REWARDS board (Phase 2.4, 6 Nov; Depth's lobby board): on the plaza between the Star Surge (45) and PLAYERS NEAR YOU
 -- (110), facing the Core; its screen is drawn by GalaxyDaily
-MapConfig.FreeBoard = { angle = 80, dist = 46, Width = 11, Height = 7.5, Bottom = 3 }
+-- (7 Nov: at 80 / 46 it stood between the spawn and PLAYERS NEAR YOU (its post + lamp over that board's corner): moved to
+-- the open gap at 0, where the star chart was, in front of the benches)
+MapConfig.FreeBoard = { angle = 0, dist = 44, Width = 11, Height = 7.5, Bottom = 3 }
 MapConfig.NearBoard = { angle = 110, dist = 46, Width = 13, Height = 15, Bottom = 3, Rows = 11 }
 MapConfig.Sector2 = {
 	-- the arch scaled uniformly so the 10-wide bridge fits through it (the kit arch's opening is 74% of its width): 14.2 wide,
@@ -338,6 +343,7 @@ MapConfig.Colors = {
 	-- under the islands)
 	Stone = Color3.fromRGB(232, 220, 200), Stone2 = Color3.fromRGB(204, 188, 162), Rock = Color3.fromRGB(128, 104, 150),
 	BareRock = Color3.fromRGB(150, 142, 150), Brass = Color3.fromRGB(217, 164, 65), Lamp = Color3.fromRGB(255, 196, 110),
+	LampHead = Color3.fromRGB(255, 238, 210), -- (7 Nov: the plaza's lamp heads: matte warm cream, no glow (glow = pressable))
 	Crystal = Color3.fromRGB(150, 85, 255), Grass = Color3.fromRGB(90, 200, 140), Ice = Color3.fromRGB(130, 215, 255),
 	Bridge = Color3.fromRGB(125, 100, 215), BridgeDim = Color3.fromRGB(70, 60, 105), Void = Color3.fromRGB(6, 2, 14),
 	VoidGlow = Color3.fromRGB(150, 80, 255), Core = Color3.fromRGB(235, 158, 70), Spike = Color3.fromRGB(205, 96, 34),

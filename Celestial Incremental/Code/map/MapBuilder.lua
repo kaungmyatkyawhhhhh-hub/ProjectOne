@@ -190,7 +190,7 @@ function Builder.Leaderboards(centre: Instance)
 	for _, sx in ipairs({ -1, 1 }) do
 		local h = LB.Bottom + LB.Height + 1
 		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zl * CFrame.new(sx * (LB.Width / 2 + 0.9), h / 2, 0), Parent = lb }))
-		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zl * CFrame.new(sx * (LB.Width / 2 + 0.9), h + 0.8, 0), Color = C.Lamp, Material = Enum.Material.Neon, Parent = lb })
+		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zl * CFrame.new(sx * (LB.Width / 2 + 0.9), h + 0.8, 0), Color = C.LampHead, Material = Enum.Material.SmoothPlastic, Parent = lb })
 	end
 	for _, face in ipairs({ Enum.NormalId.Back, Enum.NormalId.Front }) do
 		local gui = surface(wall, face)
@@ -228,7 +228,7 @@ function Builder.Leaderboards(centre: Instance)
 	for _, sx in ipairs({ -1, 1 }) do
 		local h = NB.Bottom + NB.Height + 1
 		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zn * CFrame.new(sx * (NB.Width / 2 + 0.9), h / 2, 0), Parent = nb }))
-		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zn * CFrame.new(sx * (NB.Width / 2 + 0.9), h + 0.8, 0), Color = C.Lamp, Material = Enum.Material.Neon, Parent = nb })
+		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zn * CFrame.new(sx * (NB.Width / 2 + 0.9), h + 0.8, 0), Color = C.LampHead, Material = Enum.Material.SmoothPlastic, Parent = nb })
 	end
 	local ngui = surface(board, Enum.NormalId.Back)
 	ngui.Name = "Board_Back"
@@ -310,9 +310,68 @@ function Builder.FreeBoard(centre: Instance)
 	for _, sx in ipairs({ -1, 1 }) do
 		local h = FB.Bottom + FB.Height + 1
 		part(brass({ Name = "Post", Size = Vector3.new(1, h, 1), CFrame = zn * CFrame.new(sx * (FB.Width / 2 + 0.9), h / 2, 0), Parent = m }))
-		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zn * CFrame.new(sx * (FB.Width / 2 + 0.9), h + 0.8, 0), Color = C.Lamp, Material = Enum.Material.Neon, Parent = m })
+		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zn * CFrame.new(sx * (FB.Width / 2 + 0.9), h + 0.8, 0), Color = C.LampHead, Material = Enum.Material.SmoothPlastic, Parent = m })
 	end
+	-- (7 Nov, rule: boards are placed with BoardPlacer) pivot = bottom-centre, LookVector = its front (to the Core); placed from
+	-- the layout table (MapConfig.FreeBoard angle + dist) on the plaza's rim disc (r 70.75, centre = the Core), flat on the floor
+	m.WorldPivot = zn * CFrame.Angles(0, math.pi, 0)
 	m.Parent = centre
+	local tools = game:GetService("ServerStorage"):FindFirstChild("Tools")
+	local placer = tools and tools:FindFirstChild("BoardPlacer")
+	local rim = centre:FindFirstChild("Rim")
+	if placer and rim and rim:IsA("BasePart") then
+		require(placer).place(m, rim, FB.angle, { margin = rim.Size.X / 2 - FB.dist, tiltBack = 0, groundY = O.Y })
+	end
+end
+
+-- the plaza's lamp posts (9 tall): a pair at every bridge landing, and at the Sector 2 path, on the rim's flat top. Matte heads.
+function Builder.PlazaLamps(centre: Instance)
+	local CR, I, Z = MapConfig.Centre, MapConfig.Islands, MapConfig.Centre.Zones
+	local landings = {}
+	for slot = 1, I.Count do table.insert(landings, I.StartAngle + (slot - 1) * 360 / I.Count) end
+	table.insert(landings, Z.Sector2.angle)
+	local L = CR.Lamps
+	for _, landing in ipairs(landings) do
+		local spread = if landing == Z.Sector2.angle then L.Spread * 1.4 else L.Spread
+		for _, side in ipairs({ -1, 1 }) do
+			local p = O + MapConfig.ZoneDir(landing + side * spread) * L.Ring + UP * CR.Rim.Top
+			Kit.Make("Pillar", brass({ Name = "LampPost", Fit = { "Y", L.Pillar }, CFrame = CFrame.new(p + UP * (L.Pillar / 2)), Collide = true, Parent = centre }))
+			Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", L.Orb }, CFrame = CFrame.new(p + UP * (L.Pillar + L.Orb / 2)), Color = C.LampHead, Material = Enum.Material.SmoothPlastic, Parent = centre })
+		end
+	end
+end
+
+-- (7 Nov, owner "Plaza boards") a place built before: the star-chart inlay goes, the plaza's lamps are rebuilt on the rim with
+-- matte heads, every other lamp head on the plaza goes matte, and FREE REWARDS is rebuilt if it isn't at its layout spot
+function Builder.PlazaCleanup(root: Instance)
+	local centre = root:FindFirstChild("Centre")
+	if not centre then return end
+	local det = centre:FindFirstChild("Details")
+	for _, d in ipairs(det and det:GetChildren() or {}) do
+		if d.Name == "ChartRing" or d.Name == "ChartStar" or d.Name == "ChartLine" then d:Destroy() end
+	end
+	local L = MapConfig.Centre.Lamps
+	local post = centre:FindFirstChild("LampPost")
+	if post and post:IsA("BasePart") and math.abs(Vector3.new(post.Position.X - O.X, 0, post.Position.Z - O.Z).Magnitude - L.Ring) > 0.2 then
+		for _, c in ipairs(centre:GetChildren()) do
+			if c.Name == "LampPost" or c.Name == "Lamp" then c:Destroy() end
+		end
+		Builder.PlazaLamps(centre)
+	end
+	for _, d in ipairs(centre:GetDescendants()) do
+		if d.Name == "Lamp" and d:IsA("BasePart") and d.Material == Enum.Material.Neon then
+			d.Material = Enum.Material.SmoothPlastic
+			d.Color = C.LampHead
+		end
+	end
+	local FB = MapConfig.FreeBoard
+	local fb = centre:FindFirstChild("FreeBoard")
+	if fb and fb:IsA("Model") then
+		local want = O + MapConfig.ZoneDir(FB.angle) * FB.dist
+		local at = fb:GetBoundingBox().Position
+		if Vector3.new(at.X - want.X, 0, at.Z - want.Z).Magnitude > 2 then fb:Destroy() end
+	end
+	Builder.FreeBoard(centre) -- (builds it only when it's missing)
 end
 
 function Builder.Build()
@@ -356,19 +415,7 @@ function Builder.Build()
 	tiles.Name = "Tiles"
 	tiles.Parent = centre
 	Kit.TileRing(tiles, O, CR.Inlay.Radius + 0.8, CR.Radius - 3, CR.TileCount, C.Stone2, math.rad(I.StartAngle))
-	-- lamp posts (9 tall): a pair at every bridge landing, and at the Sector 2 path
-	local landings = {}
-	for slot = 1, I.Count do table.insert(landings, I.StartAngle + (slot - 1) * 360 / I.Count) end
-	table.insert(landings, Z.Sector2.angle)
-	local L = CR.Lamps
-	for _, landing in ipairs(landings) do
-		local spread = if landing == Z.Sector2.angle then L.Spread * 1.4 else L.Spread
-		for _, side in ipairs({ -1, 1 }) do
-			local p = O + MapConfig.ZoneDir(landing + side * spread) * L.Ring
-			Kit.Make("Pillar", brass({ Name = "LampPost", Fit = { "Y", L.Pillar }, CFrame = CFrame.new(p + UP * (L.Pillar / 2)), Collide = true, Parent = centre }))
-			Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", L.Orb }, CFrame = CFrame.new(p + UP * (L.Pillar + L.Orb / 2)), Color = C.Lamp, Material = Enum.Material.Neon, Parent = centre })
-		end
-	end
+	Builder.PlazaLamps(centre)
 	-- the stone thresholds over the rim where the bridges land
 	local T = CR.Threshold
 	local bridgeStart = {}
@@ -441,7 +488,7 @@ function Builder.Build()
 	for _, sx in ipairs({ -1, 1 }) do
 		local h = S.Bottom + S.Height + S.Frame
 		part(brass({ Name = "Post", Size = Vector3.new(0.9, h, 0.9), CFrame = zs * CFrame.new(sx * (S.Width / 2 + S.Frame / 2), h / 2, -S.Depth / 2), Parent = surge }))
-		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zs * CFrame.new(sx * (S.Width / 2 + S.Frame / 2), h + 0.8, -S.Depth / 2), Color = C.Lamp, Material = Enum.Material.Neon, Parent = surge })
+		Kit.Make("LampOrb", { Name = "Lamp", Fit = { "Y", 1.6 }, CFrame = zs * CFrame.new(sx * (S.Width / 2 + S.Frame / 2), h + 0.8, -S.Depth / 2), Color = C.LampHead, Material = Enum.Material.SmoothPlastic, Parent = surge })
 	end
 	local sg = surface(screen, Enum.NormalId.Back)
 	sg.Name = "Surge"
@@ -552,29 +599,13 @@ function Builder.Build()
 
 	Builder.Leaderboards(centre)
 
-	------------------------------------------------------------------ the gaps: star-chart inlay, benches, crystals
+	------------------------------------------------------------------ the gaps: benches, crystals (7 Nov: no star-chart inlay)
 	local D = CR.Details
 	local details = Instance.new("Model")
 	details.Name = "Details"
 	details.Parent = centre
-	local CHART = { { -4, -2 }, { -2, -0.8 }, { 0, -1.5 }, { 2, 0 }, { 3.6, 2.2 }, { 1.4, 3.2 }, { -0.6, 2.4 } }
-	local cs = D.ChartRadius / 5
-	for gi, angle in ipairs(CR.Gaps) do
+	for _, angle in ipairs(CR.Gaps) do
 		local out = MapConfig.ZoneDir(angle)
-		local frame = CFrame.lookAt(O + out * D.Chart, O + out * D.Chart - out)
-		local chartTube = Kit.Fit("RimRing", "X", D.ChartRadius * 2).Y
-		Kit.Make("RimRing", brass({ Name = "ChartRing", Fit = { "X", D.ChartRadius * 2 }, CFrame = frame * CFrame.new(0, 0.12 - chartTube / 2, 0), Parent = details }))
-		local pts = {}
-		local flip = if gi % 2 == 0 then -1 else 1
-		for i, pt in ipairs(CHART) do
-			pts[i] = (frame * CFrame.new(pt[1] * flip * cs, 0, pt[2] * cs)).Position
-			part({ Name = "ChartStar", Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.14, 1.4, 1.4) * (if i == 4 then 1.4 else 1),
-				CFrame = CFrame.new(pts[i] + UP * 0.12) * CFrame.Angles(0, 0, math.rad(90)), Color = C.Lamp, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = details })
-			if i > 1 then
-				local a, b = pts[i - 1], pts[i]
-				part(brass({ Name = "ChartLine", Size = Vector3.new(0.3, 0.08, (b - a).Magnitude), CFrame = CFrame.lookAt((a + b) / 2, b) + UP * 0.12, CanCollide = false, CanQuery = false, Parent = details }))
-			end
-		end
 		for _, side in ipairs({ -1, 1 }) do
 			local bf = faceTo(O + out * D.Benches + MapConfig.ZoneDir(angle + 90) * side * D.BenchSpread, O)
 			part({ Name = "BenchSeat", Size = Vector3.new(5, 0.5, 1.6), CFrame = bf * CFrame.new(0, 1.6, 0), Color = C.Stone2, Parent = details })
