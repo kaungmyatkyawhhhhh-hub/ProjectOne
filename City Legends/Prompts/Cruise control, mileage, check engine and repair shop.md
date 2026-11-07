@@ -39,7 +39,7 @@ Each car has a few simple health numbers (0–100%), saved per car:
   - big crashes take a little too.
 - **Service (oil):** every car has a **service interval** in miles (e.g. every 600 game miles; Config). Overdue = engine wear speeds up.
 - **Tyres** and **brakes:** wear with distance, drifting, burnouts and hard braking (drifting / burnouts wear tyres much faster).
-- **Body:** small dents / scratches from crashes if the game has damage visuals; otherwise skip body.
+- **Body:** scrapes, scratches and dents from crashes: see **4b** below.
 
 **Effects (small, never game-breaking):**
 - **Check engine light** (amber engine icon) on the HUD and on the car's **live cluster**, in its real spot when the cluster has one:
@@ -50,6 +50,24 @@ Each car has a few simple health numbers (0–100%), saved per car:
 - Worn tyres: less grip (up to −10%); worn brakes: longer stopping (up to −10%), a squeal sound.
 - **New players are protected:** no wear for the first hour of play, and the first service is free.
 - **Races / time trials:** wear still counts, but no car's health drops during a race enough to change the result (only after it).
+
+## 4b. Visible damage: scrapes, scratches, dents and more (owner, 2026-11-07: "add car scrapes and etc")
+Cosmetic damage that shows where the car was hit, stays until repaired, and is seen by every player. It's a gameplay system, so it works on **every car** (old and new models), placed on the car's own body.
+- **Scrapes and scratches:** grinding along a wall, barrier, kerb or another car leaves **scrape marks** on that side (thin silver / primer lines along the panel, darker on dark paint), more and longer the longer you grind. Light taps leave small scratches.
+- **Dents:** harder hits leave a **dent** look on that corner / panel (a darker, crumpled-looking patch with a slight shading, or a gentle mesh push-in only if it looks clean; never holes or broken shapes).
+- **Bumpers:** front / rear bumper scuffs and, after big crashes, a slightly hanging or cracked bumper look.
+- **Lights and glass:** a big front or rear hit can **crack a headlight or tail light** (cracked lens look; on new models the light still works but dimmer, one side) and **crack the windscreen** (a crack decal on the glass; you can still see through it from the driver's seat).
+- **Wheels:** hitting kerbs leaves **curb rash** on the rim lip.
+- **Mirrors:** a side hit can knock a mirror loose (hangs at an angle) on cars with separate mirrors.
+- **Dirt:** cars slowly get **dusty / dirty** with miles (a light dirt layer, more on the lower body and wheels; rain washes a little off).
+- **While it happens:** **sparks** and a **metal scrape sound** while grinding a wall or rail; a crunch sound and a few small bits on hard hits.
+- **Effects:** looks only, plus a small value drop (the condition factor) and a small aero / handling loss only with heavy damage (up to −3%); never a broken, undrivable car.
+- **Body health** (0–100%) goes down with damage; the garage shows it.
+- **Repairs:** the repair shop's **Body repair** fixes scrapes, dents, bumpers, lights, glass, mirrors and rims (priced by how bad it is, real-style × `PartPriceMult`); a cheap **car wash** at the gas stations (a short wash animation) removes dirt.
+- **Customs paint:** repainting doesn't hide damage; damage shows on top of any colour and finish.
+- **Performance:** a limit of damage decals per car (pool and reuse them), merged when many; simple for traffic cars (or none). No FPS drop with many damaged cars around.
+- **Races:** damage from other players in races counts, but no cheap griefing payouts: hitting someone else's car never gives you cash.
+- Saved per car (server-side), so the car stays damaged after rejoining until repaired.
 
 ## 5. Repair shop: "Legends Service"
 - A new **repair shop** venue on the map, near Legends Customs (realistic building in the Monaco style: workshop doors, a lift, tyre racks, a sign "LEGENDS SERVICE", lit at night; cleaned Toolbox props allowed: scripts removed, no logos). On the minimap and the fast-travel list. If space is tight, a separate service bay at Legends Customs with its own entrance is fine.
@@ -113,8 +131,9 @@ Each car has a few simple health numbers (0–100%), saved per car:
   - holding the redline wears the engine; overdue service lights the check engine light; misfires below 30%; limp mode below 10%;
   - the repair shop fixes everything and the light goes off;
   - an old save loads with fair mileage;
+  - scrape along a wall (sparks, sound, scrape marks on that side), a big front crash (dent, cracked headlight, cracked windscreen), a kerb hit (curb rash), dirt after a long drive; body repair and the car wash fix them; another player sees the damage; rejoin and it's still there;
   - fuel goes down while driving and shows on the HUD and the clusters; the low-fuel light; running out, then roadside help; refuelling at a station; an EV charging; fuel never runs out in a race.
-- Screenshots: each gas station next to a real photo of the same spot, the fuel gauge and low-fuel light, refuelling; the cruise icon, the check engine light (HUD and a cluster), the repair shop outside day / night and its screen, the sell breakdown.
+- Screenshots: a damaged car (scrapes, dent, cracked light and glass) before / after the repair shop; each gas station next to a real photo of the same spot, the fuel gauge and low-fuel light, refuelling; the cruise icon, the check engine light (HUD and a cluster), the repair shop outside day / night and its screen, the sell breakdown.
 - Lune tests and `luau-lsp analyze` clean; no errors; FPS fine. Save the place, commit, push; note it in `City Legends/City Legends.md`.
 
 ## When done, tell the owner (short)
