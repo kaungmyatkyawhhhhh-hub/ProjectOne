@@ -330,6 +330,8 @@ env.require = function(x)
 		return PartData
 	elseif x.name == "PlayerData" then
 		return PlayerData
+	elseif x.name == "CarCare" then
+		return load("src/shared/CarCare.lua", env)
 	end
 	error("require " .. tostring(x.name))
 end

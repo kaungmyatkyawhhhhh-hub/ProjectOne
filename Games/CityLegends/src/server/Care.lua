@@ -222,6 +222,8 @@ local function step(player: Player, dt: number)
 				end
 			end
 			publish(car, c)
+			car:SetAttribute("Dmg", damageJson(c))
+			task.spawn(PlayerData.save, player)
 		end
 	end
 	local v = car.PrimaryPart.AssemblyLinearVelocity
