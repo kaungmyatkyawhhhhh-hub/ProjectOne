@@ -2559,7 +2559,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		-- a soft red glow on the road and bumper behind the tail lamps (brighter when braking)
 		local att = Instance.new("Attachment")
 		att.Name = "RearGlow"
-		att.Position = root.CFrame:PointToObjectSpace((groundCF * CFrame.new(imported.tailGlow)).Position)
+		-- (the Z223's long cabin: the glow reached the rear seats through the body and showed red in the pillars)
+		att.Position = root.CFrame:PointToObjectSpace((groundCF * CFrame.new(imported.tailGlow)).Position) + Vector3.new(0, 0, if id == "bentz_s680" then 4 else 0)
 		att.Parent = root
 		local glow = Instance.new("PointLight")
 		glow.Name = "RearGlow"
