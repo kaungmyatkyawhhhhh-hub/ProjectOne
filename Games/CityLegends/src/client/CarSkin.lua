@@ -39,7 +39,7 @@ local CarSkin = {}
 CarSkin.CLUSTER_STYLE = {
 	-- owner's photos (2026-10-13): BMW Live Cockpit for the G-series BMWs, the F80 M3 cluster for the
 	-- M3 / M4 (all three in the M3 E92 cabin), and the LX700h's digital meter
-	bnw_330i_g20 = "BMWLiveCockpit",
+	bnw_330i_g20 = "LiveG20", -- the model's own screen, redrawn sharp and live (2026-11-08)
 	bnw_530i = "BMWLiveCockpit",
 	bnw_540i = "BMWLiveCockpit",
 	bnw_x6 = "BMWLiveCockpit",
@@ -125,7 +125,7 @@ CarSkin.CLUSTER_RECT = {
 	-- LC200's sat too high, above the dash; "bring it down and match it exactly")
 	toyoka_lc200 = { at = Vector3.new(0, 0.02, -0.247), face = Vector3.new(0, 0.12, 0.993), w = 0.267, h = 0.112 },
 	toyoka_alfard = { at = Vector3.new(0.008, 0.053, -0.262), face = Vector3.new(0, 0.18, 0.984), w = 0.3, h = 0.12 },
-	bnw_330i_g20 = { at = Vector3.new(0.0138, 0.0203, -0.2368), face = Vector3.new(-0, 0.321, 0.9471), w = 0.3191, h = 0.1134 },
+	bnw_330i_g20 = { at = Vector3.new(-0.0009, 0.0168, -0.2387), face = Vector3.new(0.005, 0.326, 0.945), w = 0.337, h = 0.125 }, -- on the model's own screen (2026-11-08)
 	bnw_530i = { at = Vector3.new(-0.003, 0.0057, -0.2492), face = Vector3.new(-0.007, 0.3171, 0.9484), w = 0.3461, h = 0.1269 },
 	bnw_540i = { at = Vector3.new(0.0025, 0.0094, -0.2389), face = Vector3.new(0.006, 0.3482, 0.9374), w = 0.3791, h = 0.136 },
 	bnw_m8gc = { at = Vector3.new(0.0106, 0.0113, -0.2609), face = Vector3.new(0, 0.5269, 0.8499), w = 0.3273, h = 0.1128 },
@@ -286,7 +286,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -403,7 +403,7 @@ CarSkin.STEER_MODEL = {
 	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
 	nisun_gtr = "GTR",
 	-- BMW
-	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_330i_g20 = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", bnw_m4_f82 = "BMWM",
+	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", bnw_m4_f82 = "BMWM",
 	bnw_m5_e60 = "BMWM", bnw_m6_v10 = "BMWM", bnw_m8gc = "BMWM", bnw_x6 = "BMWM", bnw_x7 = "BMWM", bnw_750li = "BMWM",
 	bnw_m5_f10 = "BMWM", bnw_m5_f90 = "BMWM",
 	-- Mercedes

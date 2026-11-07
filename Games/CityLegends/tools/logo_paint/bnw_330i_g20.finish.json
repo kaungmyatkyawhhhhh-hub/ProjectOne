@@ -1,0 +1,43 @@
+{
+ "id": "bnw_330i_g20",
+ "drop": [
+  "mi_logo"
+ ],
+ "cut_islands": [
+  {
+   "mat": "mi_exhaust",
+   "box": [
+    -0.52,
+    2.32,
+    0.9,
+    -0.345,
+    2.39,
+    0.95
+   ]
+  }
+ ],
+ "roles": {
+  "carpaint": "Paint",
+  "mi_exhaust": [
+   "Trim",
+   0.25,
+   0.7
+  ],
+  "phong2": [
+   "Trim",
+   0.3,
+   0.0
+  ],
+  "mi_cabin_a": [
+   "Cabin",
+   0.45,
+   0.0
+  ]
+ },
+ "cover": [
+  0,
+  -2.088,
+  0.758,
+  0.052
+ ]
+}

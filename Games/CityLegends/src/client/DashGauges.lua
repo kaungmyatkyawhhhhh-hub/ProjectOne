@@ -3353,9 +3353,9 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 			ZIndex = z,
 		}, area)
 	end
-	local blocks: { { l: ImageLabel, v: number } } = {}
+	local blocks: { { l: ImageLabel, v: number, mph: boolean } } = {}
 	for _, e in Art.blocks do
-		table.insert(blocks, { l = sprite(e, e[6], e[7], 2), v = e[8] })
+		table.insert(blocks, { l = sprite(e, e[6], e[7], 2), v = e[8], mph = e[9] == "mph" }) -- (e[9] "mph": lit by the speed)
 	end
 	local fills: { any } = {}
 	for _, e in Art.fills do
@@ -3483,7 +3483,7 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 			state[flag] = true -- (a car's own touch on a shared screen: the SV's mark)
 		end
 		for _, b in blocks do
-			b.l.Visible = b.v < v
+			b.l.Visible = b.v < (if b.mph then mph else v)
 		end
 		for _, f in fills do
 			local e = f.e
@@ -3621,6 +3621,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	end,
 	LiveZ33 = function(gui)
 		return liveCluster(gui, "z33")
+	end,
+	LiveG20 = function(gui)
+		return liveCluster(gui, "g20")
 	end,
 	LiveSLS = function(gui)
 		return liveCluster(gui, "sls")

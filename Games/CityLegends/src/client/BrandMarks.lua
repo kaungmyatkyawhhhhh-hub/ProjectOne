@@ -221,23 +221,6 @@ return {
 		},
 		hub = { at = Vector3.new(-0.059, -0.0113, 0.1027), face = Vector3.new(-0.0403, 0.0998, 0.9942), r = 0.03, color = Color3.fromRGB(33, 34, 33) },
 	},
-	bnw_330i_g20 = {
-		wb = 2.8511,
-		brand = "BNW",
-		hide = { { name = "Body_MI_Logo" } },
-		covers = {
-			{ emblem = false, disc = false, at = Vector3.new(0.4371, 0.5967, 2.3834), face = Vector3.new(0.1991, -0.1128, 0.9735), w = 0.2339, h = 0.0567, color = Color3.fromRGB(160, 160, 160) },
-			{ emblem = true, disc = true, at = Vector3.new(-0.0003, 0.4329, -2.0881), face = Vector3.new(-0.0171, 0.7985, -0.6017), w = 0.0734, h = 0.0734, color = Color3.fromRGB(160, 160, 160) },
-			{ emblem = true, disc = true, at = Vector3.new(-0.0003, 0.613, 2.4044), face = Vector3.new(-0.008, -0.1325, 0.9912), w = 0.0662, h = 0.0662, color = Color3.fromRGB(160, 160, 160) },
-		},
-		caps = {
-			FL = { r = 0.018, surface = 0.2062, color = Color3.fromRGB(0, 0, 0) },
-			FR = { r = 0.018, surface = 0.2061, color = Color3.fromRGB(0, 0, 0) },
-			RL = { r = 0.028, surface = 0.134, color = Color3.fromRGB(20, 20, 20) },
-			RR = { r = 0.028, surface = 0.134, color = Color3.fromRGB(20, 20, 20) },
-		},
-		hub = { at = Vector3.new(-0.0011, -0.0109, 0.0465), face = Vector3.new(0.0029, 0.0779, 0.997), r = 0.03, color = Color3.fromRGB(41, 42, 41) },
-	},
 	bnw_530i = {
 		wb = 2.975,
 		brand = "BNW",

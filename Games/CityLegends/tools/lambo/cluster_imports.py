@@ -751,3 +751,223 @@ def z33(Spec, needle_sprite, add_needle, glyph):
     return pods(Spec, needle_sprite, add_needle, glyph, "z33", 760, 280, items,
                 ([], [((136, 136), 110), ((384, 88), 112), ((632, 136), 110)]),
                 [{"x0": 340, "y0": 132, "x1": 428, "y1": 176, "col": (10, 10, 12), "ox": 384, "oy": 166, "gear": 22, "gx": 384, "gy": 146}])
+
+
+def g20(Spec, needle_sprite, add_needle, glyph):
+    """the G20 Sport's own screen (the model's picture, imports/refs/g20_model_cluster.png, 0.4 mm a pixel): two
+    six-sided arcs that light up as the speed and the revs climb, the big speed in the left one, the gear in the
+    right one's rings, fuel and temperature arcs outside, mileage and drive mode along the bottom. No names."""
+    W, H = 834, 310
+    box = (0, 0, W, H)
+    REF = "g20_model_cluster.png"
+    A = Art(REF, box, S=4, bg=(3, 3, 5))
+    sp = Spec("g20", W, H, 2.0, 2.0, 0, 0)
+    sp.redline, sp.idle = 7.0, 0.8
+    WHT = (240, 240, 242)
+    DIM = (150, 152, 158)
+    MID = 848  # the screen's middle line, doubled: the right arc is the left one mirrored
+
+    O = [(230, 258), (150, 258), (132, 246), (98, 190), (80, 142), (86, 126), (114, 84), (160, 48), (232, 25), (338, 14)]
+    CEN = (235, 150)
+
+    def offset(poly, d):
+        out = []
+        for i, p in enumerate(poly):
+            ns = []
+            for a, b in ((poly[i - 1], p) if i > 0 else (None, None), (p, poly[i + 1]) if i + 1 < len(poly) else (None, None)):
+                if a is None:
+                    continue
+                dx, dy = b[0] - a[0], b[1] - a[1]
+                L = math.hypot(dx, dy)
+                n = (-dy / L, dx / L)
+                m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+                if (CEN[0] - m[0]) * n[0] + (CEN[1] - m[1]) * n[1] < 0:
+                    n = (-n[0], -n[1])
+                ns.append(n)
+            nx, ny = sum(n[0] for n in ns), sum(n[1] for n in ns)
+            L = math.hypot(nx, ny)
+            nx, ny = nx / L, ny / L
+            k = 1 / max(0.5, nx * ns[0][0] + ny * ns[0][1])
+            out.append((p[0] + nx * d * k, p[1] + ny * d * k))
+        return out
+
+    I = offset(O, 24)
+    seg = [math.hypot(O[i + 1][0] - O[i][0], O[i + 1][1] - O[i][1]) for i in range(len(O) - 1)]
+    total = sum(seg)
+
+    def at(poly, s):
+        # the point a length s along (the outer line's lengths)
+        for i, L in enumerate(seg):
+            if s <= L or i == len(seg) - 1:
+                f = min(1.0, s / L)
+                a, b = poly[i], poly[i + 1]
+                return (a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f)
+            s -= L
+
+    def s_of(pt):
+        # length along the outer line of the point nearest pt
+        best, bs, run = 1e9, 0.0, 0.0
+        for i, L in enumerate(seg):
+            a, b = O[i], O[i + 1]
+            dx, dy = b[0] - a[0], b[1] - a[1]
+            f = max(0.0, min(1.0, ((pt[0] - a[0]) * dx + (pt[1] - a[1]) * dy) / (L * L)))
+            q = (a[0] + dx * f, a[1] + dy * f)
+            d = math.hypot(pt[0] - q[0], pt[1] - q[1])
+            if d < best:
+                best, bs = d, run + L * f
+            run += L
+        return bs
+
+    NUMS = [(196, 234), (152, 221), (130, 187), (117, 138), (143, 99), (190, 67), (257, 50), (326, 44)]
+    stops = [s_of(p) for p in NUMS]
+    stops[0] = 0.0  # the band starts at nought
+    MPH = [0, 10, 20, 40, 60, 80, 120, 160]
+    REV = [0, 1, 2, 3, 4, 5, 6, 7]
+
+    def val(s, scale):
+        if s <= stops[0]:
+            return scale[0]
+        for (s0, v0), (s1, v1) in zip(zip(stops, scale), zip(stops[1:], scale[1:])):
+            if s <= s1:
+                return v0 + (v1 - v0) * (s - s0) / (s1 - s0)
+        return scale[-1] + (scale[-1] - scale[-2]) * (s - stops[-1]) / (stops[-1] - stops[-2])
+
+    def flip(pts, right):
+        return [(MID / 2 * 2 - x, y) for x, y in pts] if right else pts
+
+    def band(s0, s1, n=6):
+        outer = [at(O, s0 + (s1 - s0) * k / n) for k in range(n + 1)]
+        inner = [at(I, s0 + (s1 - s0) * k / n) for k in range(n + 1)]
+        return outer + inner[::-1]
+
+    s_end = total
+    s_red = None
+    for k in range(400):
+        s = stops[0] + (s_end - stops[0]) * k / 400
+        if val(s, REV) >= 6.5:
+            s_red = s
+            break
+
+    # the unlit bands, the red end of the rev scale
+    for right in (False, True):
+        A.poly(flip(band(0, s_end, 40), right), (52, 11, 8))
+        A.poly(flip(band(0, s_end, 40), right), (52, 11, 8))
+        if right and s_red:
+            A.poly(flip(band(s_red, s_end, 10), right), (116, 16, 12))
+        # a soft dark edge along the inner side
+        A.line(flip([at(I, stops[0] + (s_end - stops[0]) * k / 40) for k in range(41)], right), (96, 26, 18), 1.0)
+        # the white frame: the bottom line, the notch, the six sides, the end
+        bottom = [(376, 245), (238, 245), (230, 258)]
+        A.line(flip(bottom + O[1:] + [(338, 28)], right), WHT, 2.4)
+        # white teeth on the frame at each number
+        for s in stops:
+            p = at(O, s)
+            q = at(I, s)
+            dx, dy = q[0] - p[0], q[1] - p[1]
+            L = math.hypot(dx, dy)
+            ux, uy = dx / L, dy / L
+            tri = [(p[0] - uy * 4.5, p[1] + ux * 4.5), (p[0] + uy * 4.5, p[1] - ux * 4.5), (p[0] + ux * 7, p[1] + uy * 7)]
+            A.poly(flip(tri, right), WHT)
+        scale = REV if right else MPH
+        for p, v in zip(NUMS, scale):
+            x, y = flip([p], right)[0]
+            A.text(x, y, str(v), ARIAL_B, 17, WHT)
+
+    A.text(238, 235, "mph", ARIAL, 10, WHT, anchor="lm")
+    A.text(612, 226, "1/min", ARIAL, 8, WHT, anchor="rm")
+    A.text(612, 236, "x1000", ARIAL, 8, WHT, anchor="rm")
+    # under the big speed
+    A.line([(193, 166), (318, 166)], (120, 122, 128), 1.2)
+    A.line([(193, 166), (232, 166)], (222, 224, 230), 1.4)
+
+    # the right arc's rings (the model's g-meter) round the gear
+    G = (608, 143)
+    for r, col, w_ in ((66, (70, 72, 78), 3.0), (46, (96, 98, 104), 2.2), (26, (60, 62, 68), 1.6)):
+        A.circle(G[0], G[1], r, None, outline=col, w=w_)
+    A.line([(G[0] - 70, G[1]), (G[0] - 30, G[1])], (54, 56, 60), 0.8)
+    A.line([(G[0] + 30, G[1]), (G[0] + 70, G[1])], (54, 56, 60), 0.8)
+    for x0 in range(540, 678, 8):
+        A.line([(x0, 75), (x0 + 4, 75)], (110, 112, 118), 0.8)
+        A.line([(x0, 213), (x0 + 4, 213)], (110, 112, 118), 0.8)
+    for y0 in range(75, 213, 8):
+        A.line([(540, y0), (540, y0 + 4)], (110, 112, 118), 0.8)
+        A.line([(678, y0), (678, y0 + 4)], (110, 112, 118), 0.8)
+
+    # fuel (left) and temperature (right) arcs outside the big ones
+    C = (110, 196)
+    for right in (False, True):
+        c = (MID - C[0], C[1]) if right else C
+        sgn = -1 if right else 1
+        r, th = field(A, c)
+        a0, a1 = (190, 285) if not right else (75, 170)
+        thn = np.mod(th, 360)
+        inarc = ((thn >= a0) & (thn <= a1)).astype(float)
+        shade = 44 + 46 * np.clip((r - 58) / 10, 0, 1)
+        blend(A, np.stack([shade, shade, shade * 1.04], axis=-1), band_mask(r, 58, 68, 0.5) * inarc)
+        arc_o = [polar(c, 69, a0 + (a1 - a0) * k / 24) for k in range(25)]
+        A.line(arc_o, WHT, 1.4)
+        for k in range(0, 5):
+            a = a0 + (a1 - a0) * k / 4
+            A.line([polar(c, 58, a), polar(c, 68, a)], (200, 200, 204), 1.0)
+        if right:
+            A.line([polar(c, 58, 162), polar(c, 68, 162)], (60, 130, 240), 3.0)
+            A.line([polar(c, 52, 120), polar(c, 70, 120)], WHT, 1.6)  # the engine is warm
+        else:
+            A.line([polar(c, 58, 197), polar(c, 68, 197)], (230, 40, 30), 3.0)
+            for a, s in ((198, "0"), (238, "1/2"), (279, "1")):
+                p = polar(c, 47, a)
+                A.text(p[0], p[1], s, ARIAL_B, 10, WHT)
+    # the fuel pump
+    A.round_rect(12, 232, 22, 248, 1.5, (210, 210, 214))
+    A.rect(14, 235, 20, 239, (20, 20, 22))
+    A.line([(22, 236), (26, 238), (26, 246)], (210, 210, 214), 1.2)
+
+    A.final = A.finish(A.S, blur=1.0, strength=0.2)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    # the lit cells: each a piece of the band, on when the speed (left) or the revs (right) pass its start
+    B = Art(REF, box, S=4, bg=(0, 0, 0))
+    for right in (False, True):
+        B.poly(flip(band(0, s_end, 40), right), (240, 88, 24))
+        B.line(flip([at(O, s_end * k / 40) for k in range(41)], right), (255, 150, 72), 3.0)
+        if right and s_red:
+            B.poly(flip(band(s_red, s_end, 10), right), (238, 34, 24))
+        # the numbers stay on top of the lit band
+        for p, v in zip(NUMS, REV if right else MPH):
+            x, y = flip([p], right)[0]
+            B.text(x, y, str(v), ARIAL_B, 17, WHT)
+    B.final = B.finish(B.S, blur=1, strength=0)
+    N = 44
+    for right in (False, True):
+        for k in range(N):
+            s0 = stops[0] + (s_end - stops[0]) * k / N
+            s1 = stops[0] + (s_end - stops[0]) * (k + 1) / N + 0.4
+            pts = flip(band(s0, s1, 2), right)
+            xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+            bx = (math.floor(min(xs)) - 1, math.floor(min(ys)) - 1, math.ceil(max(xs)) + 1, math.ceil(max(ys)) + 1)
+            v = val(s0, REV if right else MPH)
+            sp.add_block(B, bx, pts, v)
+            if not right:
+                sp.blocks[-1]["bind"] = "mph"
+
+    # the fuel mark
+    add_needle(sp, needle_sprite(sp, 72, 2, [(55, 71, 1.4, 1.4, (250, 130, 50))]), C[0], C[1], "fuel", [(0, 196), (1, 281)])
+
+    sprites = {}
+    f = {"path": ARIAL_B, "size": 40, "chars": "", "stroke": 0.1, "shear": 0, "track": 0}
+    for ch in "RN1234567":
+        im, ox, oy, adv = glyph(ch, f, sp.A)
+        c2 = Image.new("RGBA", im.size, (244, 244, 246, 0))
+        c2.putalpha(im.getchannel("A"))
+        sprites[ch] = {"im": c2}
+    sp.gear = {"x": G[0], "y": G[1], "sprites": sprites}
+    sp.font("speed", ARIAL_B, 40, "0123456789", shear=0, track=0.1)
+    sp.readout("speed", 272, 137, "r", 3, "speed", WHT)
+    sp.font("unit", ARIAL_B, 11, "kmhpi/", shear=0)
+    sp.readout("unit", 279, 151, "l", 4, "unit", WHT)
+    sp.font("odo", ARIAL_B, 13, "0123456789:kmiSPORTNMAL", shear=0, track=0.15)
+    sp.readout("odo", 350, 266, "r", 7, "odoTrim", WHT)
+    sp.readout("odo", 356, 266, "l", 2, "distUnit", DIM)
+    sp.readout("odo", 478, 266, "l", 6, "driveMode", WHT)
+    sp.readout("odo", 424, 22, "m", 5, "clock", WHT)
+    return sp

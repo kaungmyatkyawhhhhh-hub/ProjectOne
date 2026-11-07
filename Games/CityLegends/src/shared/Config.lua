@@ -276,6 +276,7 @@ Config.Credits = {
 	"British Vanguard Highland model by Ddiaz Design",
 	"Sovereign Grand Tourer model by Ddiaz Design",
 	"Horizon Z33 model by Ddiaz Design",
+	"Bavarica Werkz G20 Sport model by Ddiaz Design",
 	"Rosso Rampante F141 model by Ddiaz Design (CC BY)",
 	"Tri-Star Silber R230 V12 Track model by Ddiaz Design",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",

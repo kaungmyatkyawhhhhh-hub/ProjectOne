@@ -233,7 +233,7 @@ def compose(spec, st, scale=2):
 
     v = st["v"]
     for b in spec.blocks:
-        if b["v"] < v:
+        if b["v"] < (st["mph"] if b.get("bind") == "mph" else v):
             paste(b["im"], b["left"], b["top"])
     for f in spec.fills:
         frac = interp(f["pts"], v + f.get("lead", 0))
@@ -1960,8 +1960,15 @@ def z33():
     return m.z33(Spec, needle_sprite, add_needle, glyph)
 
 
-BUILDERS = {"mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
+def g20():
+    import cluster_imports as m
+
+    return m.g20(Spec, needle_sprite, add_needle, glyph)
+
+
+BUILDERS = {"mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "g20": ("g20_model_cluster.png", (0, 0, 834, 310), None, dict(v=3.4, gear="3", mph=58, manual=True, clock="2:40", odo="003274", distUnit="mi", kmh=False, fuel=0.6)),
     "sovereign": ("sls_sl65_cluster_owner.png", (0, 0, 740, 280), None, dict(v=3.0, gear="3", mph=70, manual=False, clock="2:40", odo="003274", distUnit="mi", kmh=False)),
     "z33": ("sls_sl65_cluster_owner.png", (0, 0, 750, 280), None, dict(v=3.0, gear="3", mph=70, manual=False, clock="2:40", odo="003274", distUnit="mi", kmh=False)),
     "dbx": ("dbx_cluster_owner.png", (60, 128, 748, 390), None, dict(v=0.8, gear="N", mph=0, manual=False, clock="10:57", odo="002434", date="08.08.2024", distUnit="mi", kmh=False, trip="69.1")),
@@ -2021,7 +2028,7 @@ def spec_lua(sp, ids):
     def rect(im):
         return list(pk.put(im))
 
-    blocks = [rect(b["im"]) + [b["left"], b["top"], b["v"]] for b in sp.blocks]
+    blocks = [rect(b["im"]) + [b["left"], b["top"], b["v"]] + (['"%s"' % b["bind"]] if b.get("bind") else []) for b in sp.blocks]
     fills = []
     for f in sp.fills:
         pts = []

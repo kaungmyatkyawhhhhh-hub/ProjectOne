@@ -80,14 +80,6 @@ return {
 		shells = { { name = "Body_Mphong19SG1" }, { name = "SeeThrough_Mphong3SG1" } },
 		spots = {},
 	},
-	bnw_330i_g20 = {
-		shells = {},
-		wb = 2.8511,
-		spots = {
-			{ at = Vector3.new(-0.5262, 0.5205, 2.3811), face = Vector3.new(-0.0744, 0.0452, 0.9962), w = 0.4972, h = 0.0923 },
-			{ at = Vector3.new(0.5262, 0.5205, 2.381), face = Vector3.new(0.0744, 0.0452, 0.9962), w = 0.4972, h = 0.0923 },
-		},
-	},
 	bnw_530i = {
 		shells = { { name = "Body_Meshesuntitledmesh271Mtl" } },
 		spots = {},
@@ -272,6 +264,10 @@ return {
 		spots = {},
 	},
 	nisun_350z = {
+		shells = { { name = "SeeThrough_Lens_Red" } },
+		spots = {},
+	},
+	bnw_330i_g20 = {
 		shells = { { name = "SeeThrough_Lens_Red" } },
 		spots = {},
 	},
