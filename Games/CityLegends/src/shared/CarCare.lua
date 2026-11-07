@@ -125,7 +125,7 @@ end
 
 -- visible damage: a mark is { k = "s" scrape | "t" scratch | "d" dent, f = "L" | "R" | "F" | "B", u = along the side, v = up, n = size }
 CarCare.MaxMarks = 14
-CarCare.CrackKeys = { "glass", "headL", "headR", "tailL", "tailR" }
+CarCare.CrackKeys = { "glass", "headL", "headR", "tailL", "tailR", "bumperF", "bumperB", "mirrorL", "mirrorR" }
 local FACES = { L = true, R = true, F = true, B = true }
 local KINDS = { s = true, t = true, d = true }
 function CarCare.cleanMark(raw: any): { [string]: any }?

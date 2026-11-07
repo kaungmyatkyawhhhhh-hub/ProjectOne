@@ -2022,11 +2022,12 @@ Config.Value = {
 
 Config.Service = {
 	Name = "LEGENDS SERVICE",
-	Bay = Vector3.new(15262, 3, 1062), -- the middle of the workshop bay (set by the build: tools/riviera/LegendsService.luau)
+	Bay = Vector3.new(15244.7, 3.7, 1082.7), -- the middle of the workshop's middle bay (tools/riviera/CareVenues.luau)
+	Arrive = CFrame.lookAt(Vector3.new(15240, 4.7, 1036), Vector3.new(15244.7, 4.7, 1082.7)), -- fast travel: on the forecourt, facing the bay
 	BayRadius = 22,
 	LiftSeconds = 4,
 	-- real-world prices; times Economy.PartPriceMult, times PriceK of the car (1 to MaxCarK)
-	Oil = { 100, 300 },
+	Oil = { 100, 220 },
 	Tyres = { 400, 2500 },
 	Brakes = { 400, 1500 },
 	Engine = 1000, -- a full rebuild from 0%
@@ -2054,7 +2055,15 @@ Config.Fuel = {
 	CanPrice = 90,
 	TowPrice = 250,
 	PumpRange = 16,
-	Stations = {} :: { { id: string, name: string, pumps: { Vector3 }, arrive: CFrame } },
+	-- built by tools/riviera/CareVenues.luau on the plot nearest each real station (see City Legends.md for kept and skipped)
+	Stations = {
+		{ id = "fuel_highway", name = "Riviera Fuel Highway", pumps = { Vector3.new(10296.6, 100.0, 12.0), Vector3.new(10284.6, 100.0, 4.8), Vector3.new(10305.3, 100.0, -2.5), Vector3.new(10293.3, 100.0, -9.7) }, chargers = { Vector3.new(10262.2, 100.0, -7.4), Vector3.new(10266.8, 100.0, -15.2), Vector3.new(10271.5, 100.0, -22.9) }, arrive = CFrame.new(10300.9, 102.6, 4.8, 0.5150, 0.0000, 0.8572, 0.0000, 1.0000, 0.0000, -0.8572, 0.0000, 0.5150) },
+		{ id = "fuel_west", name = "Riviera Fuel West", pumps = { Vector3.new(11571.0, 19.8, 768.5), Vector3.new(11584.1, 19.8, 763.6), Vector3.new(11576.9, 19.8, 784.4), Vector3.new(11590.0, 19.8, 779.6) }, chargers = { Vector3.new(11607.7, 19.8, 753.9), Vector3.new(11610.8, 19.8, 762.3), Vector3.new(11613.9, 19.8, 770.8) }, arrive = CFrame.new(11573.9, 22.4, 776.5, 0.3465, 0.0000, -0.9380, 0.0000, 1.0000, 0.0000, 0.9380, 0.0000, 0.3465) },
+		{ id = "fuel_town", name = "Riviera Fuel Town", pumps = { Vector3.new(13234.2, 74.1, 218.2), Vector3.new(13247.9, 74.1, 215.3), Vector3.new(13237.7, 74.1, 234.8), Vector3.new(13251.4, 74.1, 231.9) }, chargers = { Vector3.new(13272.6, 74.1, 209.0), Vector3.new(13274.5, 74.1, 217.8), Vector3.new(13276.3, 74.1, 226.6) }, arrive = CFrame.new(13235.9, 76.7, 226.5, 0.2078, 0.0000, -0.9782, 0.0000, 1.0000, 0.0000, 0.9782, 0.0000, 0.2078) },
+		{ id = "fuel_east", name = "Riviera Fuel East", pumps = { Vector3.new(16760.2, 19.9, 774.1), Vector3.new(16774.1, 19.9, 774.6), Vector3.new(16759.4, 19.9, 791.0), Vector3.new(16773.4, 19.9, 791.6) }, chargers = { Vector3.new(16799.7, 19.9, 774.7), Vector3.new(16799.3, 19.9, 783.7), Vector3.new(16798.9, 19.9, 792.7) }, arrive = CFrame.new(16759.8, 22.5, 782.5, -0.0424, 0.0000, -0.9991, 0.0000, 1.0000, 0.0000, 0.9991, 0.0000, -0.0424) },
+		{ id = "fuel_mountain", name = "Riviera Fuel Mountain", pumps = { Vector3.new(16195.3, 167.2, -671.1), Vector3.new(16209.2, 167.2, -669.3), Vector3.new(16193.2, 167.2, -654.2), Vector3.new(16207.1, 167.2, -652.5) }, chargers = { Vector3.new(16234.6, 167.2, -667.2), Vector3.new(16233.5, 167.2, -658.3), Vector3.new(16232.4, 167.2, -649.4) }, arrive = CFrame.new(16194.2, 169.8, -662.6, -0.1222, 0.0000, -0.9925, 0.0000, 1.0000, 0.0000, 0.9925, 0.0000, -0.1222) },
+		{ id = "fuel_corniche", name = "Riviera Fuel Corniche", pumps = { Vector3.new(14337.4, 448.6, -1681.8), Vector3.new(14351.3, 448.6, -1680.2), Vector3.new(14335.5, 448.6, -1664.9), Vector3.new(14349.4, 448.6, -1663.3) }, chargers = { Vector3.new(14376.8, 448.6, -1678.3), Vector3.new(14375.7, 448.6, -1669.3), Vector3.new(14374.7, 448.6, -1660.4) }, arrive = CFrame.new(14336.4, 451.2, -1673.3, -0.1130, 0.0000, -0.9936, 0.0000, 1.0000, 0.0000, 0.9936, 0.0000, -0.1130) },
+	} :: { { id: string, name: string, pumps: { Vector3 }, chargers: { Vector3 }, arrive: CFrame } },
 }
 
 return Config

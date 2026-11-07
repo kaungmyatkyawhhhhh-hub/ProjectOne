@@ -105,6 +105,15 @@ local function sheet(w: number, h: number, titleText: string, subText: string): 
 	local sub = label({ Text = subText, Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(20, 40), Size = UDim2.new(1, -90, 0, 18), TextTruncate = Enum.TextTruncate.AtEnd, Parent = card })
 	local x = button("X", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0, 12), Size = UDim2.fromOffset(40, 40), Parent = card })
 	x.Activated:Connect(close)
+	local keys: RBXScriptConnection
+	keys = game:GetService("UserInputService").InputBegan:Connect(function(input)
+		if sg ~= gui then
+			keys:Disconnect()
+		elseif input.KeyCode == Enum.KeyCode.Escape or input.KeyCode == Enum.KeyCode.Backspace or input.KeyCode == Enum.KeyCode.ButtonB then
+			keys:Disconnect()
+			close()
+		end
+	end)
 	return card, sub
 end
 
@@ -318,10 +327,11 @@ local function pill()
 					task.spawn(openService)
 				end
 			end
+			local electric = car:GetAttribute("Electric") == true
 			for _, st in F.Stations do
-				for _, pump in st.pumps do
+				for _, pump in if electric then st.chargers else st.pumps do
 					if (p - pump).Magnitude <= F.PumpRange then
-						return if car:GetAttribute("Electric") == true then "CHARGE" else "FUEL", function()
+						return if electric then "CHARGE" else "FUEL", function()
 							task.spawn(function()
 								local s2 = ask("state")
 								if s2 and s2.ok then

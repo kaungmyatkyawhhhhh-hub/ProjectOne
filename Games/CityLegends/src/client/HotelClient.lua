@@ -154,10 +154,14 @@ local function wordSuites()
 end
 
 function HotelClient.init(requestDrive: (string) -> ())
+	local prev = OnFoot.driveAction
 	OnFoot.driveAction = function(): (string?, (() -> ())?)
 		local car = Driving.getModel()
 		if car and bayNear(car) then
 			return "VALET", handOver
+		end
+		if prev then
+			return prev()
 		end
 		return nil, nil
 	end

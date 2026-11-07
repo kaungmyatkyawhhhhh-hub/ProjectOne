@@ -38,6 +38,8 @@ local INFO = {
 	highway = "Mountain bends and long straights",
 	lookout = "A view over the whole bay",
 	home = "Your house",
+	service = "Oil, tyres, brakes, engine and body repair",
+	fuel = "Fuel, fast chargers and a car wash",
 }
 
 local function iconFor(id: string): string
@@ -86,6 +88,11 @@ function TravelSpots.list(): { Spot }
 	end
 	-- (2026-11-06) all the races start from the Racing Hub
 	table.insert(list, { id = "racing_hub", name = Config.Activities.Hub.Name, icon = "race", info = INFO.race, cf = Config.Activities.Hub.Spot })
+	-- (2026-11-07) Legends Service and the Riviera Fuel stations
+	table.insert(list, { id = "service", name = "Legends Service", icon = "service", info = INFO.service, cf = (Config :: any).Service.Arrive })
+	for _, st in (Config :: any).Fuel.Stations do
+		table.insert(list, { id = st.id, name = st.name, icon = "fuel", info = INFO.fuel, cf = st.arrive })
+	end
 	-- (the dispatch's own spot on the pavement: CityLayout's lane search only knows the old city)
 	for k, dsp in ActivityData.dispatch do
 		table.insert(list, { id = "job_" .. k, name = dsp.name, icon = "delivery", info = INFO.delivery, cf = CFrame.new(dsp.pos) })

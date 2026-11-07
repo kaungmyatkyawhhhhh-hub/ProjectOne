@@ -453,6 +453,11 @@ function Minimap.start()
 			table.insert(fixed, { frame = makeBlip(layer, style.glyph, style.color, 14, 21), pos = pl.cf.Position, edge = false })
 		end
 	end
+	-- Legends Service and the Riviera Fuel stations
+	table.insert(fixed, { frame = makeBlip(layer, "R", Color3.fromRGB(255, 170, 90), 13, 21), pos = (Config :: any).Service.Bay, edge = false })
+	for _, st in (Config :: any).Fuel.Stations do
+		table.insert(fixed, { frame = makeBlip(layer, "F", Color3.fromRGB(120, 200, 255), 13, 21), pos = st.pumps[1], edge = false })
+	end
 	-- chauffeur stands (city corners, as Chauffeur.lua places them)
 	local CH = (Config :: any).Chauffeur
 	if CH and CH.Stands then

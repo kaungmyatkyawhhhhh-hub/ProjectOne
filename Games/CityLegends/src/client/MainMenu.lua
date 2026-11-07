@@ -705,9 +705,12 @@ local ICON_COLOR: { [string]: Color3 } = {
 	palace = Color3.fromRGB(214, 196, 255),
 	harbour = Color3.fromRGB(110, 186, 255),
 	lookout = Color3.fromRGB(190, 210, 170),
+	fuel = Color3.fromRGB(120, 200, 255),
+	service = Color3.fromRGB(255, 170, 90),
 }
 local function venueIcon(parent: Instance, kind: string, size: number): ImageButton
-	local k = table.find(MenuArt.venues, kind) or 1
+	local k2 = table.find(MenuArt.venues2, kind)
+	local k = k2 or table.find(MenuArt.venues, kind) or 1
 	local b: ImageButton = new("ImageButton", {
 		AutoButtonColor = false,
 		BackgroundColor3 = ICON_COLOR[kind] or BLUE,
@@ -718,7 +721,7 @@ local function venueIcon(parent: Instance, kind: string, size: number): ImageBut
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), new("UIStroke", { Color = NAVY0, Thickness = 2 }) })
 	new("ImageLabel", {
 		BackgroundTransparency = 1,
-		Image = MenuArt.menu_venues,
+		Image = if k2 then MenuArt.menu_venues2 else MenuArt.menu_venues,
 		ImageRectOffset = Vector2.new((k - 1) * 64, 0),
 		ImageRectSize = Vector2.new(64, 64),
 		ImageColor3 = NAVY0,
@@ -746,7 +749,7 @@ local function district(): string
 	local p = here()
 	local best, bestD = "Riviera Bay", math.huge
 	for _, s in TravelSpots.list() do
-		if s.icon ~= "race" and s.icon ~= "delivery" then
+		if s.icon ~= "race" and s.icon ~= "delivery" and s.icon ~= "fuel" and s.icon ~= "service" then
 			local d = (Vector3.new(s.cf.Position.X, 0, s.cf.Position.Z) - Vector3.new(p.X, 0, p.Z)).Magnitude
 			if d < bestD then
 				best, bestD = s.name, d

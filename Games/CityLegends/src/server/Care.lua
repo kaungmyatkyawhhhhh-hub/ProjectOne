@@ -207,6 +207,23 @@ local function step(player: Player, dt: number)
 		return
 	end
 	local profile = PlayerData.get(player) :: any
+	-- Studio test hook: the player attribute TestCare, JSON of record fields ("drive" = profile.DriveSeconds)
+	if RunService:IsStudio() and type(player:GetAttribute("TestCare")) == "string" then
+		local ok, data = pcall(function()
+			return HttpService:JSONDecode(player:GetAttribute("TestCare") :: string)
+		end)
+		player:SetAttribute("TestCare", nil)
+		if ok and type(data) == "table" then
+			for k, value in data do
+				if k == "drive" then
+					profile.DriveSeconds = value
+				else
+					(c :: any)[k] = value
+				end
+			end
+			publish(car, c)
+		end
+	end
 	local v = car.PrimaryPart.AssemblyLinearVelocity
 	local spec = Cars.get(id)
 	local mph = math.min(Config.spsToMph(Vector3.new(v.X, 0, v.Z).Magnitude), spec.TopSpeed * 1.25)
@@ -294,9 +311,15 @@ local function onReport(player: Player, raw: any)
 					if speed > 55 then
 						if mark.f == "F" then
 							c.cracks[if mark.u < 0.5 then "headL" else "headR"] = true
+							c.cracks.bumperF = true
 						elseif mark.f == "B" then
 							c.cracks[if mark.u < 0.5 then "tailL" else "tailR"] = true
+							c.cracks.bumperB = true
 						end
+					end
+					-- a hard hit on a side knocks that mirror loose
+					if speed > 40 and (mark.f == "L" or mark.f == "R") then
+						c.cracks[if mark.f == "L" then "mirrorL" else "mirrorR"] = true
 					end
 					if speed > 80 and mark.f == "F" then
 						c.cracks.glass = true
@@ -336,7 +359,7 @@ local function atPump(car: Model?): boolean
 	end
 	local p = car:GetPivot().Position
 	for _, st in Config.Fuel.Stations do
-		for _, pump in st.pumps do
+		for _, pump in if car:GetAttribute("Electric") == true then st.chargers else st.pumps do
 			if (p - pump).Magnitude <= F.PumpRange + 6 then
 				return true
 			end
@@ -457,13 +480,18 @@ handlers.service = function(player, job)
 	end
 	local id = car:GetAttribute("CarId") :: string
 	local c = Care.record(player, id) :: CarCare.Care
-	local price = CarCare.prices(id, c)[job]
+	local prices = CarCare.prices(id, c)
+	local price = prices[job]
 	if not price or price <= 0 then
 		return { ok = false, message = "Nothing to do there" }
 	end
-	local free = job == "oil" and profile.FreeService ~= false
-	if free then
-		price = 0
+	-- the first oil service is free, on its own or as part of a full service
+	if profile.FreeService ~= false then
+		if job == "oil" then
+			price = 0
+		elseif job == "full" then
+			price = math.max(price - prices.oil, 0)
+		end
 	end
 	if profile.Cash < price then
 		return { ok = false, message = "Not enough cash" }

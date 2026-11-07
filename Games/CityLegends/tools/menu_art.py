@@ -351,6 +351,30 @@ def venue_sheet():
     return done(im, w, h)
 
 
+# (2026-11-07) the first sheet is full: a second one for the fuel stations and Legends Service
+VENUES2 = ["fuel", "service"]
+
+
+def venue2_sheet():
+    w, h = 128, 64
+    im, d = canvas(w, h)
+    c = WHITE + (255,)
+    # a fuel pump
+    rrect(d, 10, 10, 38, 56, 3, fill=c)
+    rrect(d, 15, 15, 33, 28, 2, fill=INK + (255,))
+    rrect(d, 6, 52, 42, 58, 2, fill=c)
+    d.line(S(38, 22, 48, 28), fill=c, width=4 * Q)
+    d.line(S(48, 28, 48, 46), fill=c, width=4 * Q)
+    d.line(S(48, 46, 42, 46), fill=c, width=4 * Q)
+    # a spanner
+    ox = 64
+    poly(d, [(ox + 16, 54), (ox + 10, 48), (ox + 36, 22), (ox + 42, 28)], fill=c)
+    circle(d, ox + 42, 20, 12, fill=c)
+    poly(d, [(ox + 42, 20), (ox + 44, 4), (ox + 58, 18)], fill=INK + (255,))
+    circle(d, ox + 13, 51, 6, fill=c)
+    return done(im, w, h)
+
+
 ART = {
     "menu_pattern": pattern,
     "menu_play": play_art,
@@ -362,6 +386,7 @@ ART = {
     "store_bundle": lambda: store_icon("bundle"),
     "store_garage": lambda: store_icon("garage"),
     "menu_venues": venue_sheet,
+    "menu_venues2": venue2_sheet,
 }
 
 
@@ -375,6 +400,7 @@ def write_lua(path, ids):
         L.append(f'{T}{k} = "{ids.get(k, "")}",')
     L.append(f"{T}-- the venue symbols' order in menu_venues (64 px each, left to right)")
     L.append(f"{T}venues = {{ " + ", ".join(f'"{v}"' for v in VENUES) + " },")
+    L.append(f"{T}venues2 = {{ " + ", ".join(f'"{v}"' for v in VENUES2) + " },")
     L.append("}")
     open(path, "w", encoding="utf-8", newline="\r\n").write("\n".join(L) + "\n")
 
