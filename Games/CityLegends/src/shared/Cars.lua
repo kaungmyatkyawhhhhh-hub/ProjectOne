@@ -31,8 +31,9 @@ export type CarSpec = {
 	BaseId: string?, -- a SPORT / TOP trim: the car it is built on
 	Retired: boolean?, -- no longer sold (owners keep it, it still drives; not in the dealer, market, traffic)
 	Pending: boolean?, -- not sold yet: waits for its 3D model (no blocky placeholder in the dealer)
-	-- (owner, 2026-11-07: class R's cheapest four went up on purpose, over their real price: LB724 VTZ,
-	-- LB834 ZV, LB834 ZVX, LB744, so the fastest cars aren't cheap)
+	-- (owner, 2026-11-07: the cheapest class S2 and R cars went up on purpose, over their real price, so
+	-- the fast cars aren't cheap: S2 from $350,000, R from $850,000. Trims: Cars.TrimPrices;
+	-- tools/carlevels_test.luau checks both)
 	PriceSource: string?, -- what Price is (2026-11-07, real prices, table in City Legends.md): "new" the US dealer
 	-- price, "used" the US used market, "collector" the market value
 	StatPrice: number?, -- the old game price: the show numbers worked from it stay the same (CarStats)
@@ -128,9 +129,9 @@ local list: { CarSpec } = {
 	{ Id = "astin_vantage", Name = "British Vanguard Vela V12", Class = "Coupe", Tier = "Mid", TopSpeed = 195, ZeroToSixty = 3.5, Handling = 0.82, Price = 125000, PriceSource = "used", StatPrice = 500000, Color = Color3.fromRGB(36, 70, 52), Order = 45 },
 	{ Id = "ferrara_f430", Name = "Rosso Rampante F131", Class = "Supercar", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 3.6, Handling = 0.86, Price = 130000, PriceSource = "used", StatPrice = 600000, Color = Color3.fromRGB(200, 10, 20), Order = 46 },
 	{ Id = "bentz_sl65bs", Name = "Tri-Star Silber R230 V12 Track", Class = "Coupe", Tier = "High", TopSpeed = 199, ZeroToSixty = 3.8, Handling = 0.82, Price = 350000, PriceSource = "collector", StatPrice = 700000, Color = Color3.fromRGB(18, 18, 20), Order = 47 },
-	{ Id = "lambrini_lp570", Name = "Enfurecido L140 Leggera", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.3, Handling = 0.88, Price = 170000, PriceSource = "collector", StatPrice = 750000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 48 },
+	{ Id = "lambrini_lp570", Name = "Enfurecido L140 Leggera", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.3, Handling = 0.88, Price = 350000, PriceSource = "collector", StatPrice = 750000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 48 },
 	{ Id = "audy_r8", Name = "Precision Type 42 V10", Class = "Supercar", Tier = "Mid", TopSpeed = 188, ZeroToSixty = 4.4, Handling = 0.86, Price = 110000, PriceSource = "used", StatPrice = 550000, Color = Color3.fromRGB(165, 168, 172), Accent = Color3.fromRGB(16, 16, 18), Order = 49 },
-	{ Id = "mclaran_12c", Name = "Speedmark P11", Class = "Supercar", Tier = "Mid", TopSpeed = 207, ZeroToSixty = 3.1, Handling = 0.9, Price = 95000, PriceSource = "used", StatPrice = 800000, Color = Color3.fromRGB(226, 84, 8), Order = 50 },
+	{ Id = "mclaran_12c", Name = "Speedmark P11", Class = "Supercar", Tier = "High", TopSpeed = 207, ZeroToSixty = 3.1, Handling = 0.9, Price = 350000, PriceSource = "used", StatPrice = 800000, Color = Color3.fromRGB(226, 84, 8), Order = 50 },
 	{ Id = "ferrara_599", Name = "Rosso Rampante F141", Class = "Supercar", Tier = "High", TopSpeed = 205, ZeroToSixty = 3.5, Handling = 0.84, Price = 165000, PriceSource = "used", StatPrice = 850000, Color = Color3.fromRGB(20, 21, 24), Order = 51 },
 	{ Id = "ferrara_458", Name = "Rosso Rampante F142", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.3, Handling = 0.9, Price = 900000, Color = Color3.fromRGB(200, 10, 20), Order = 52 },
 	{ Id = "bentz_sls", Name = "Tri-Star Silber C197 Wingdoor", Class = "Supercar", Tier = "High", TopSpeed = 197, ZeroToSixty = 3.7, Handling = 0.86, Price = 250000, PriceSource = "collector", StatPrice = 950000, Color = Color3.fromRGB(235, 236, 238), Order = 53 },
@@ -141,14 +142,14 @@ local list: { CarSpec } = {
 	{ Id = "brabos_g63", Name = "Rocket W463 800", Class = "SUV", Tier = "High", TopSpeed = 149, ZeroToSixty = 3.9, Handling = 0.55, Price = 390000, PriceSource = "new", StatPrice = 1600000, Color = Color3.fromRGB(12, 12, 14), Accent = Color3.fromRGB(255, 140, 0), Order = 58 },
 	{ Id = "rolls_wraith", Name = "Ecstasy Nocturne", Class = "Coupe", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.66, Price = 175000, PriceSource = "used", StatPrice = 2000000, Color = Color3.fromRGB(20, 21, 24), Accent = Color3.fromRGB(165, 168, 172), Order = 59 },
 	{ Id = "rolls_cullinan", Name = "Ecstasy Grandeur", Class = "Sedan", Tier = "High", TopSpeed = 155, ZeroToSixty = 5.1, Handling = 0.55, Price = 432000, PriceSource = "new", StatPrice = 2500000, Color = Color3.fromRGB(235, 236, 238), Order = 60 },
-	{ Id = "lambrini_lp700", Name = "Enfurecido LB834", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.9, Handling = 0.88, Price = 290000, PriceSource = "used", StatPrice = 2200000, Color = Color3.fromRGB(235, 236, 238), Order = 61 },
+	{ Id = "lambrini_lp700", Name = "Enfurecido LB834", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.9, Handling = 0.88, Price = 550000, PriceSource = "used", StatPrice = 2200000, Color = Color3.fromRGB(235, 236, 238), Order = 61 },
 	{ Id = "lexis_lfa", Name = "Stealth-Apex V10 Halo", Class = "Hypercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.6, Handling = 0.92, Price = 900000, PriceSource = "collector", StatPrice = 3000000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 62 },
 	{ Id = "lexis_lfa_circuit", Name = "Stealth-Apex V10 Halo Circuit", Class = "Hypercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.5, Handling = 0.95, Price = 1700000, PriceSource = "collector", StatPrice = 3600000, Color = Color3.fromRGB(240, 110, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 62.5 },
 	{ Id = "lambrini_lp750", Name = "Enfurecido LB834 ZV", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.8, Handling = 0.92, Price = 900000, PriceSource = "used", StatPrice = 3500000, Color = Color3.fromRGB(120, 200, 20), Accent = Color3.fromRGB(16, 16, 18), Order = 63 },
 	-- the Lamborghini imports (2026-11-04): the Gallardo Spyder, the Huracan line, the Revuelto
 	{ Id = "lambrini_lp560", Name = "Enfurecido L140 Spyder", Class = "Supercar", Tier = "Mid", TopSpeed = 201, ZeroToSixty = 3.9, Handling = 0.85, Price = 120000, PriceSource = "used", StatPrice = 680000, Color = Color3.fromRGB(236, 214, 40), Accent = Color3.fromRGB(16, 16, 18), Order = 47.5 },
-	{ Id = "lambrini_huracan", Name = "Enfurecido LB724", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 2.9, Handling = 0.92, Price = 280000, PriceSource = "used", StatPrice = 1300000, Color = Color3.fromRGB(226, 74, 24), Accent = Color3.fromRGB(16, 16, 18), Order = 85 },
-	{ Id = "lambrini_performante", Name = "Enfurecido LB724 Aero Spyder", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.1, Handling = 0.93, Price = 330000, PriceSource = "used", StatPrice = 1550000, Color = Color3.fromRGB(196, 18, 28), Accent = Color3.fromRGB(16, 16, 18), Order = 86 },
+	{ Id = "lambrini_huracan", Name = "Enfurecido LB724", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 2.9, Handling = 0.92, Price = 550000, PriceSource = "used", StatPrice = 1300000, Color = Color3.fromRGB(226, 74, 24), Accent = Color3.fromRGB(16, 16, 18), Order = 85 },
+	{ Id = "lambrini_performante", Name = "Enfurecido LB724 Aero Spyder", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.1, Handling = 0.93, Price = 600000, PriceSource = "used", StatPrice = 1550000, Color = Color3.fromRGB(196, 18, 28), Accent = Color3.fromRGB(16, 16, 18), Order = 86 },
 	{ Id = "lambrini_sto", Name = "Enfurecido LB724 VTZ", Class = "Supercar", Tier = "High", TopSpeed = 193, ZeroToSixty = 3.0, Handling = 0.95, Price = 850000, PriceSource = "used", StatPrice = 1800000, Color = Color3.fromRGB(190, 26, 16), Accent = Color3.fromRGB(16, 16, 18), Order = 87 },
 	{ Id = "lambrini_sterrato", Name = "Enfurecido LB724 Rally", Class = "Supercar", Tier = "High", TopSpeed = 162, ZeroToSixty = 3.4, Handling = 0.8, Price = 320000, PriceSource = "used", StatPrice = 1450000, Color = Color3.fromRGB(84, 118, 62), Accent = Color3.fromRGB(16, 16, 18), Order = 88 },
 	{ Id = "lambrini_revuelto", Name = "Enfurecido LB744", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.5, Handling = 0.96, Price = 1200000, PriceSource = "new", StatPrice = 6000000, Color = Color3.fromRGB(232, 234, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 89 },
@@ -381,6 +382,16 @@ for _, series in allSeries do
 		Cars.ById[spec.Id] = spec
 		table.insert(series.Ids, spec.Id)
 	end
+end
+
+-- trims that land in class S2 or R on a cheap base car (owner, 2026-11-07, see PriceSource above)
+Cars.TrimPrices = {
+	mclaran_12c_sport = 850000, mclaran_12c_top = 950000,
+	porsha_gt3_sport = 350000, porsha_gt3_top = 850000,
+	ferrara_599_top = 350000, ferrara_f430_top = 350000,
+} :: { [string]: number }
+for id, price in Cars.TrimPrices do
+	Cars.ById[id].Price = price
 end
 
 -- the Origine's trims got their own models (owner, 2026-11-03: the 2010 Super Sport and the 2013

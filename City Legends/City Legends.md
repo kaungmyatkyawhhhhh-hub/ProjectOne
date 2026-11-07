@@ -13,7 +13,28 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 2. **Houses, penthouses, hotel suites, gems and VIP cards keep their prices.** The top ones are long-term dreams (400 to 900 hours).
 3. **The car market is off for now:** `Config.Market.Enabled = false`. No MARKET button, no SELL / MARKET in the CARS menu, no K key, nothing runs on the server. Saved stashes are left alone: what players hold can't be sold meanwhile and comes back if it's turned on. The CAR STOCKS channel on the penthouse TVs stays: it's only decoration. Checked in Play: no button, K does nothing, no script errors.
 
-**Class R priced up (owner, 2026-11-07: "make them a little more expensive like from 470k to like 850k or 950k"):** real prices left the four cheapest class R cars too cheap for how fast they are, so these four sit over their real price: LB724 VTZ $365,000 -> $850,000, LB834 ZV $470,000 -> $900,000, LB744 $640,000 -> $1,200,000, LB834 ZVX $680,000 -> $1,200,000. The ZVX 63 ($1,250,000) and the Origine ($2,100,000) stay. The dealer's tag still says their kind (USED or NEW). S2 and lower are as researched.
+**Class R priced up (owner, 2026-11-07: "make them a little more expensive like from 470k to like 850k or 950k"):** real prices left the four cheapest class R cars too cheap for how fast they are, so these four sit over their real price: LB724 VTZ $365,000 -> $850,000, LB834 ZV $470,000 -> $900,000, LB744 $640,000 -> $1,200,000, LB834 ZVX $680,000 -> $1,200,000. The ZVX 63 ($1,250,000) and the Origine ($2,100,000) stay. The dealer's tag still says their kind (USED or NEW).
+
+**Class S2 priced up too (owner, 2026-11-07: "ok make them a little more expensive"):** S2 now starts at $350,000, R at $850,000; `tools/carlevels_test.luau` fails if a car falls under either.
+| Car | Class | Real price | Now |
+|---|---|---|---|
+| Speedmark P11 | S2 | $95,000 | $350,000 (back to High tier) |
+| Enfurecido L140 Leggera | S2 | $170,000 | $350,000 |
+| Enfurecido LB724 | S2 | $280,000 | $550,000 |
+| Enfurecido LB834 | S2 | $290,000 | $550,000 |
+| Enfurecido LB724 Aero Spyder | S2 | $330,000 | $600,000 |
+
+Trims got the same floors (`Cars.TrimPrices`), because a trim on a cheap base was class R or S2 for very little:
+| Trim | Class | Before | Now |
+|---|---|---|---|
+| Speedmark P11 Sport | R | $124,000 | $850,000 |
+| Speedmark P11 Top | R | $162,000 | $950,000 |
+| Stuttgart 991.2 Track Top | R | $323,000 | $850,000 |
+| Stuttgart 991.2 Track Sport | S2 | $247,000 | $350,000 |
+| Rosso Rampante F141 Top | S2 | $281,000 | $350,000 |
+| Rosso Rampante F131 Top | S2 | $221,000 | $350,000 |
+
+Left at their real price: F142 Speciale, L147 ZV, Halo Circuit. Class S1 and below are as researched.
 
 **Top 10 changes (real prices, before the class R step):**
 - Velocité Noir Éclair Super Sport: $13,000,000 -> $4,450,000
@@ -80,7 +101,7 @@ Back to back, jobs paid about 10 times anything else, so they dropped most. Gift
 | $3M | 100-150 h | 104.5 h |
 All within 25% of the range. Three run a little quick on purpose: better to tighten later than lose players.
 
-**Tiers moved High -> Mid (the price is under $150K):** Horizon R35, British Vanguard Vanta V12, British Vanguard Vela V12, Rosso Rampante F131, Precision Type 42 V10, Speedmark P11, Enfurecido L140 Spyder, Rosso Rampante F149 Riviera. The Tier sets Customs prices, rewards and traffic. The W177 Turbo S ($86,000, a Starter) stays: not on sale yet.
+**Tiers moved High -> Mid (the price is under $150K):** Horizon R35, British Vanguard Vanta V12, British Vanguard Vela V12, Rosso Rampante F131, Precision Type 42 V10, Enfurecido L140 Spyder, Rosso Rampante F149 Riviera. The Tier sets Customs prices, rewards and traffic. The W177 Turbo S ($86,000, a Starter) stays: not on sale yet.
 
 **Other changes:**
 - `Cars.lua`: `Price`, `PriceSource`, and `StatPrice` (the old price: a car's fallback weight came from its price, so stats and PI don't move). Trims still cost x 1.3 and x 1.7 of the base.
@@ -119,11 +140,11 @@ All within 25% of the range. Three run a little quick on purpose: better to tigh
 | Enfurecido LB724 VTZ (`lambrini_sto`) | Lamborghini Huracan STO (used) | used | $1,800,000 | $850,000 (real $365,000, owner) | [Classic.com / CarGurus / TrueCar](https://www.truecar.com/used-cars-for-sale/listings/lamborghini/huracan/?trim=sto) |
 | Tri-Star Silber R230 V12 Track (`bentz_sl65bs`) | Mercedes-Benz SL65 AMG Black Series (collector) | collector | $700,000 | $350,000 | [Classic.com / Bring a Trailer](https://classic.com/veh/2009-mercedes-benz-sl65-amg-black-series-wdbsk79f9-vnK3Nvn) |
 | Sovereign Grand Tourer (`bentlee_contgt`) | Bentley Continental GT Speed (2026) | new (rough) | $1,100,000 | $345,000 | [KBB listings / CarsFrenzy guide (no official MSRP found)](https://www.kbb.com/cars-for-sale/all/2026/bentley/continental) |
-| Enfurecido LB724 Aero Spyder (`lambrini_performante`) | Lamborghini Huracan Performante Spyder (used) | used | $1,550,000 | $330,000 | [Classic.com](https://www.classic.com/veh/2019-lamborghini-huracan-performante-spyder-zhwus4-nKvzZD4) |
+| Enfurecido LB724 Aero Spyder (`lambrini_performante`) | Lamborghini Huracan Performante Spyder (used) | used | $1,550,000 | $600,000 (real $330,000, owner) | [Classic.com](https://www.classic.com/veh/2019-lamborghini-huracan-performante-spyder-zhwus4-nKvzZD4) |
 | Enfurecido LB724 Rally (`lambrini_sterrato`) | Lamborghini Huracan Sterrato (used) | used | $1,450,000 | $320,000 | [Classic.com](https://www.classic.com/m/lamborghini/huracan/sterrato) |
-| Enfurecido LB834 (`lambrini_lp700`) | Lamborghini Aventador LP700-4 (used) | used | $2,200,000 | $290,000 | [Classic.com](https://www.classic.com/m/lamborghini/aventador/lp700-4/?page=1) |
+| Enfurecido LB834 (`lambrini_lp700`) | Lamborghini Aventador LP700-4 (used) | used | $2,200,000 | $550,000 (real $290,000, owner) | [Classic.com](https://www.classic.com/m/lamborghini/aventador/lp700-4/?page=1) |
 | Enfurecido Brava (`lambrini_urusp`) | Lamborghini Urus Performante (used, replaced by Urus SE) | used | $1,900,000 | $285,000 | [Classic.com / Autotrader / TrueCar](https://classics.autotrader.com/classic-cars-for-sale/exotics-lamborghini-urus-performante-for-sale) |
-| Enfurecido LB724 (`lambrini_huracan`) | Lamborghini Huracan EVO (used) | used | $1,300,000 | $280,000 | [TrueCar / iSeeCars / KBB listings](https://truecar.com/used-cars-for-sale/listings/lamborghini/huracan/?trim=evo) |
+| Enfurecido LB724 (`lambrini_huracan`) | Lamborghini Huracan EVO (used) | used | $1,300,000 | $550,000 (real $280,000, owner) | [TrueCar / iSeeCars / KBB listings](https://truecar.com/used-cars-for-sale/listings/lamborghini/huracan/?trim=evo) |
 | Tri-Star Silber W201 Evo II (`bentz_190e`) | Mercedes-Benz 190E 2.5-16 Evolution II (collector) | collector | $80,000 | $280,000 | [Classic.com](https://www.classic.com/m/mercedes-benz/190/190-e-25-16-evolution-ii) |
 | British Vanguard Highland (`astin_dbx`) | Aston Martin DBX 707 (2026) | new | $450,000 | $257,000 | [iSeeCars](https://www.iseecars.com/car/aston-martin-dbx-price) |
 | Tri-Star Silber C197 Wingdoor (`bentz_sls`) | Mercedes-Benz SLS AMG (used, collector end) | collector | $950,000 | $250,000 | [Classic.com / The Classic Valuer](https://www.classic.com/m/mercedes-benz/sls/coupe) |
@@ -135,7 +156,7 @@ All within 25% of the range. Three run a little quick on purpose: better to tigh
 | Stuttgart 991.2 Track (`porsha_gt3`) | Porsche 911 GT3 991.2 (used) | used | $1,000,000 | $190,000 | [Classic.com](https://www.classic.com/m/porsche/911/991/9912/gt3/) |
 | Tri-Star Silber X167 Royale (`bentz_gls`) | Mercedes-Maybach GLS 600 (2026) | new | $1,200,000 | $180,000 | [Cars.com / iSeeCars](https://www.cars.com/research/mercedes-benz-maybach-gls-600-2026/) |
 | Ecstasy Nocturne (`rolls_wraith`) | Rolls-Royce Wraith (used) | used | $2,000,000 | $175,000 | [CarGurus / Car & Classic](https://cargurus.com/research/price-trends/Rolls-Royce-Wraith-d2213) |
-| Enfurecido L140 Leggera (`lambrini_lp570`) | Lamborghini Gallardo LP570-4 Superleggera (collector) | collector | $750,000 | $170,000 | [Classic.com / Exotic Car Trader](https://www.exoticcartrader.com/blog/lamborghini-gallardo-lp570-4-superleggera-review) |
+| Enfurecido L140 Leggera (`lambrini_lp570`) | Lamborghini Gallardo LP570-4 Superleggera (collector) | collector | $750,000 | $350,000 (real $170,000, owner) | [Classic.com / Exotic Car Trader](https://www.exoticcartrader.com/blog/lamborghini-gallardo-lp570-4-superleggera-review) |
 | Horizon BNR34 (`nisun_r34`) | Nissan Skyline GT-R R34 (collector) | collector | $180,000 | $165,000 | [Classic.com / Bring a Trailer](https://www.classic.com/veh/1999-nissan-skyline-gt-r-v-spec-bnr34000761-WLxdgDW) |
 | Rosso Rampante F141 (`ferrara_599`) | Ferrari 599 GTB Fiorano (used) | used | $850,000 | $165,000 | [Classic.com / ConceptCarz](https://www.conceptcarz.com/valuation/17383/Ferrari-599-GTB-Fiorano.aspx) |
 | Dream-Build Volt Titan (`byt_u8`) | BYD Yangwang U8 (China new price in USD) | new | $290,000 | $148,000 | [CarNewsChina](https://data.carnewschina.com/database/yangwang/yangwang-u8/2026) |
@@ -149,7 +170,7 @@ All within 25% of the range. Three run a little quick on purpose: better to tigh
 | Horizon R35 (`nisun_gtr`) | Nissan GT-R R35 (used, base Premium) | used | $420,000 | $105,000 | [Classic.com](https://www.classic.com/m/nissan/gt-r/dba-r35/premium) |
 | Stealth-Apex Z100 V8 (`lexis_lc500`) | Lexus LC 500 coupe (2026) | new | $240,000 | $101,000 | [Cars.com / Autofinder / iSeeCars](https://www.cars.com/research/lexus-lc_500-2026/specs/) |
 | Apex JZA80 (`toyoka_supra_mk4`) | Toyota Supra MK4 Turbo JZA80 (collector) | collector | $140,000 | $100,000 | [Classic.com / Bring a Trailer](https://classic.com/veh/1993-toyota-supra-turbo-hardtop-6-speed-jt2ja82l2p-WjZ1dgW) |
-| Speedmark P11 (`mclaran_12c`) | McLaren MP4-12C (used) | used | $800,000 | $95,000 | [Classic.com](https://www.classic.com/m/mclaren/mp4-12c?page=2) |
+| Speedmark P11 (`mclaran_12c`) | McLaren MP4-12C (used) | used | $800,000 | $350,000 (real $95,000, owner) | [Classic.com](https://www.classic.com/m/mclaren/mp4-12c?page=2) |
 | Tri-Star Silber C167 3.0 (`bentz_gle53`) | Mercedes-AMG GLE 53 Coupe (2026) | new | $250,000 | $93,500 | [KBB / Edmunds / dealer guide](https://www.kbb.com/mercedes-benz/mercedes-amg-gle-coupe/) |
 | Bavarica Werkz G07 (`bnw_x7`) | BMW X7 xDrive40i G07 (2026) | new | $175,000 | $86,500 | [Edmunds](https://www.edmunds.com/bmw/x7/2026/features-specs/) |
 | Tri-Star Silber W177 Turbo S (`bentz_a45s`) | Mercedes-AMG A 45 S W177 (Europe new price in USD; not sold in the US) | new (rough) | $38,000 | $86,000 | [automobile.at / Autotijd](https://www.automobile.at/neuwagen/mercedes-benz/a-45-amg.html) |

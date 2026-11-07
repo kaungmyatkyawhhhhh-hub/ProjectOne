@@ -592,6 +592,16 @@ for _, spec in Cars.List do
 end
 check(Config.Chauffeur.Fleet.lambrini_urus == nil and Config.Chauffeur.Fleet.lambrini_urusp == 285000 and table.find(Config.Chauffeur.Order, "lambrini_urusp") ~= nil and table.find(Config.Chauffeur.Order, "lambrini_urus") == nil, "the chauffeur fleet uses the new Urus")
 
+for _, spec in Cars.List do
+	local letter = CarStats.classOf(spec.Id)
+	if letter == "S2" and spec.Price < 350000 then
+		check(false, "class S2 from $350,000: " .. spec.Id)
+	elseif letter == "R" and spec.Price < 850000 then
+		check(false, "class R from $850,000: " .. spec.Id)
+	end
+end
+check(Cars.get("mclaran_12c_top").Price == 950000 and Cars.get("mclaran_12c_sport").Price == 850000, "the fast trims have their own prices")
+
 saved = {
 	Claimed = true,
 	Owned = { "kio_ev6", "lambrini_urus", "ferrara_458" },
