@@ -37,6 +37,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
+local TrailerBuilder = require(Shared:WaitForChild("TrailerBuilder"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 
 local UI = require(script.Parent:WaitForChild("UI"))
@@ -44,6 +45,7 @@ local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
 local CustomsClient = require(script.Parent:WaitForChild("CustomsClient"))
 local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
+local TrailerClient = require(script.Parent:WaitForChild("TrailerClient"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
 
 local DealerMenu = {}
@@ -622,6 +624,11 @@ local function build(root: Frame)
 	local nameText = text({ Text = "", FontFace = HEAVY, TextSize = if compact then 20 else 26, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(nameX, if compact then 25 else 34), Size = UDim2.new(1, -nameX - priceRight - (if compact then 120 else 200), 0, fs(if compact then 24 else 32)), Parent = top })
 	local priceCap = caption("PRICE", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -priceRight, 0, if compact then 8 else 13), Size = UDim2.fromOffset(200, fs(14)), TextXAlignment = Enum.TextXAlignment.Right, Parent = top })
 	local priceText = text({ Text = "", FontFace = HEAVY, TextSize = if compact then 20 else 26, TextColor3 = GREEN, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -priceRight, 0, if compact then 24 else 32), Size = UDim2.fromOffset(240, fs(if compact then 24 else 30)), TextXAlignment = Enum.TextXAlignment.Right, Parent = top })
+	-- (2026-11-07) a car with a hitch
+	local function towTag(id: string): string
+		local kg = CarStats.towKg(id)
+		return if kg > 0 then "TOWS " .. string.format("%d,%03d", kg // 1000, kg % 1000) .. " KG" else ""
+	end
 	local priceNote = text({ Text = "", FontFace = BOLD, TextSize = 12, TextColor3 = GOLD, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -priceRight - 120, 0, if compact then 8 else 13), Size = UDim2.fromOffset(160, fs(14)), TextXAlignment = Enum.TextXAlignment.Right, Parent = top })
 
 	-----------------------------------------------------------------
@@ -839,6 +846,18 @@ local function build(root: Frame)
 		end)
 		tileByBrand[b] = { b = t, t = lab, e = e }
 	end
+	-- (2026-11-07) trailers: not a brand, a tile of its own at the end of the row
+	local buyTrailer: () -> ()
+	do
+		local t: TextButton = new("TextButton", { Name = "TrailersTile", Text = "", AutoButtonColor = false, LayoutOrder = #s.brands + 1, BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.94, Size = UDim2.fromOffset(tileW, tileH), Parent = tiles }, { corner(10) })
+		new("UIStroke", { Color = GOLD, Transparency = 0.45, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = t })
+		text({ Text = "TRAILERS", FontFace = HEAVY, TextSize = 14, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = GOLD, Position = UDim2.fromOffset(8, 0), Size = UDim2.new(1, -16, 1, 0), Parent = t })
+		alive(t)
+		t.Activated:Connect(function()
+			Audio.click()
+			buyTrailer()
+		end)
+	end
 	local function stepBrand(d: number)
 		local idx = table.find(s.brands, s.brand) or 1
 		pickBrand(s.brands[(idx - 1 + d) % #s.brands + 1])
@@ -1015,7 +1034,7 @@ local function build(root: Frame)
 			priceCap.Text = "IN YOUR GARAGE"
 			priceText.Text = "OWNED"
 			priceText.TextColor3 = BLUE
-			priceNote.Text = ""
+			priceNote.Text = towTag(id)
 			buyBtn.set("DRIVE", "blue", "key")
 		else
 			-- (2026-11-07) real prices: what kind of price it is
@@ -1023,7 +1042,7 @@ local function build(root: Frame)
 			priceCap.Text = if kind then "PRICE  ·  " .. string.upper(kind) else "PRICE"
 			priceText.Text = money(priceOf(id))
 			priceText.TextColor3 = if (s.data.Cash or 0) >= priceOf(id) then GREEN else WHITE
-			priceNote.Text = if off > 0 then string.format("-%d%% BRAND BONUS", math.floor(off * 100 + 0.5)) else ""
+			priceNote.Text = if off > 0 then string.format("-%d%% BRAND BONUS", math.floor(off * 100 + 0.5)) else towTag(id)
 			if locked then
 				buyBtn.set("LEVEL " .. need, "off", "lock")
 			else
@@ -1228,6 +1247,63 @@ local function build(root: Frame)
 				over:Destroy()
 			end
 		end)
+	end
+
+	-- (2026-11-07) the trailer: a card with a picture of it; it goes in the garage list
+	buyTrailer = function()
+		local T = Config.Towing.Trailer
+		local over, card = modal(if compact then 440 else 500, if compact then 300 else 340, 90)
+		caption("TRAILERS", { TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(0, 16), Size = UDim2.new(1, 0, 0, fs(14)), ZIndex = 92, Parent = card })
+		text({ Text = T.Name, FontFace = HEAVY, TextSize = 22, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(20, 32), Size = UDim2.new(1, -40, 0, fs(26)), ZIndex = 92, Parent = card })
+		local photoH = if compact then 110 else 140
+		local vp: ViewportFrame = new("ViewportFrame", { BackgroundTransparency = 1, Ambient = Color3.fromRGB(170, 172, 178), LightColor = Color3.new(1, 1, 1), LightDirection = Vector3.new(-1, -2, -0.6), AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 58), Size = UDim2.new(1, -40, 0, photoH), ZIndex = 92, Parent = card })
+		local world = Instance.new("WorldModel")
+		world.Parent = vp
+		local model = TrailerBuilder.build()
+		model.Parent = world
+		local cam = Instance.new("Camera")
+		cam.FieldOfView = 26
+		cam.CFrame = CFrame.lookAt(Vector3.new(-30, 15, 38), Vector3.new(0, 1.4, -2.4))
+		cam.Parent = vp
+		vp.CurrentCamera = cam
+		local tail = 58 + photoH + 2
+		local have = TrailerClient.owned == true
+		text({ Text = if have then "IN YOUR GARAGE" else money(T.Price), FontFace = HEAVY, TextSize = 20, TextColor3 = if have then BLUE else GREEN, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(20, tail), Size = UDim2.new(1, -40, 0, fs(24)), ZIndex = 92, Parent = card })
+		text({ Text = "Weighs " .. T.Kg .. " kg. Only cars tagged TOWS can pull it. Take it out from CARS.", FontFace = MEDIUM, TextSize = 13, TextColor3 = GREY, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(20, tail + fs(25)), Size = UDim2.new(1, -40, 0, fs(16)), ZIndex = 92, Parent = card })
+		local cancel = button("secondary", if have then "CLOSE" else "CANCEL", nil, { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 22, 1, -18), Size = if have then UDim2.new(1, -44, 0, L.btnH) else UDim2.new(0.5, -28, 0, L.btnH), ZIndex = 92, Parent = card })
+		cancel.b.Activated:Connect(function()
+			over:Destroy()
+		end)
+		if not have then
+			local yes = button("primary", "BUY", "tag", { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -22, 1, -18), Size = UDim2.new(0.5, -28, 0, L.btnH), ZIndex = 92, Parent = card })
+			yes.b.Activated:Connect(function()
+				if s.busy then
+					return
+				end
+				if (s.data.Cash or 0) < T.Price then
+					showMsg("Not enough cash: " .. money(T.Price - (s.data.Cash or 0)) .. " more", RED, "tag")
+					return
+				end
+				s.busy = true
+				yes.set("...")
+				TrailerClient.call("buy", nil, function(res: any)
+					s.busy = false
+					over:Destroy()
+					if res and res.ok then
+						s.data.Cash = (s.data.Cash or 0) - T.Price
+						refreshAll()
+						showMsg(T.Name .. " is yours: CARS > TRAILER", GREEN, "tag")
+					else
+						showMsg((res and res.message) or "Couldn't buy it", RED, "lock")
+					end
+				end)
+			end)
+		end
+		for _, d in card:GetDescendants() do
+			if d:IsA("GuiObject") then
+				d.ZIndex = math.max(d.ZIndex, 92)
+			end
+		end
 	end
 
 	local function confirmBuy(id: string)

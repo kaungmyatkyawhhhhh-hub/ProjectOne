@@ -544,6 +544,12 @@ function CarStats.pi(id: string, parts: Parts?): number
 end
 
 -- the class letter and colour of a car (with parts, or stock)
+-- what this car can tow, in kg (0: no hitch); a trim tows what its base car tows
+function CarStats.towKg(id: string): number
+	local spec = Cars.ById[id]
+	return Config.Towing.Cars[id] or (spec and spec.BaseId and Config.Towing.Cars[spec.BaseId]) or 0
+end
+
 function CarStats.classOf(id: string, parts: Parts?): (string, Color3, number)
 	local pi = CarStats.pi(id, parts)
 	local letter, color = Config.carClass(pi)

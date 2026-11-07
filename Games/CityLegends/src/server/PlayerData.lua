@@ -31,6 +31,7 @@ export type Profile = {
 	Rent: { [string]: number }, -- os.time() each penthouse's safe was last emptied
 	Home: string, -- penthouse id set as home ("" = none)
 	Showcase: { [string]: string }, -- per penthouse / suite: the car its turntable shows
+	Trailers: { [string]: boolean }, -- (2026-11-07) trailers owned
 	Houses: { [string]: boolean }, -- owned house blueprints (Config.Houses.Designs ids)
 	HouseBays: { [string]: { string } }, -- per design: the car in each garage bay, then each driveway spot ("" = empty)
 	HousePlots: { [string]: string }, -- (old: per house type, the plot it stood on; read once to move old saves)
@@ -217,6 +218,7 @@ local function defaultProfile(): Profile
 		Rent = {},
 		Home = "",
 		Showcase = {},
+		Trailers = {},
 		Houses = {},
 		HouseBays = {},
 		HousePlots = {},
@@ -536,6 +538,13 @@ function PlayerData.load(player: Player): Profile?
 			if type(saved.Home) == "string" and profile.Penthouses[saved.Home] then
 				profile.Home = saved.Home
 			end
+			if type(saved.Trailers) == "table" then
+				for id, yes in saved.Trailers do
+					if type(id) == "string" and yes == true then
+						profile.Trailers[id] = true
+					end
+				end
+			end
 			if type(saved.Showcase) == "table" then
 				for id, car in saved.Showcase do
 					if type(id) == "string" and towerIds[id] and type(car) == "string" and Cars.ById[car] then
@@ -685,6 +694,7 @@ local function payloadOf(profile: Profile, session: { [string]: any }?): { [stri
 		Rent = profile.Rent,
 		Home = profile.Home,
 		Showcase = profile.Showcase,
+		Trailers = profile.Trailers,
 		Houses = houses,
 		HouseBays = profile.HouseBays,
 		HomeLot = profile.HomeLot,

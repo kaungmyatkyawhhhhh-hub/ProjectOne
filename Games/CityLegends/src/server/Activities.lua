@@ -105,6 +105,9 @@ handlers.raceStart = function(player, id)
 	if not race or not car or player.Character then
 		return { ok = false }
 	end
+	if ctx.isTowing(player) then
+		return { ok = false, message = "Unhitch the trailer first" }
+	end
 	local pos = car.PrimaryPart and car.PrimaryPart.Position
 	if not pos or flatDist(pos, race.start) > 45 then
 		return { ok = false, message = "Drive to the start line" }
@@ -230,6 +233,9 @@ handlers.raceJoin = function(player, id)
 	local car = ctx.getCar(player)
 	if not race or not car or player.Character or runs[player] then
 		return { ok = false }
+	end
+	if ctx.isTowing(player) then
+		return { ok = false, message = "Unhitch the trailer first" }
 	end
 	local pos = car.PrimaryPart and car.PrimaryPart.Position
 	if not pos or flatDist(pos, race.ring) > 45 then
@@ -368,6 +374,9 @@ handlers.duelAsk = function(player, uid)
 	if not target or target == player then
 		return { ok = false }
 	end
+	if ctx.isTowing(player) or ctx.isTowing(target) then
+		return { ok = false, message = "No duels with a trailer on" }
+	end
 	if lastAsk[player] and now - lastAsk[player] < 8 then
 		return { ok = false, message = "Wait a moment before challenging again" }
 	end
@@ -397,6 +406,9 @@ handlers.duelAnswer = function(player, yes)
 		return { ok = false, message = "The challenge ran out" }
 	end
 	local from = p.from
+	if yes == true and (ctx.isTowing(player) or ctx.isTowing(from)) then
+		yes = false
+	end
 	if yes ~= true then
 		if Push and from.Parent then
 			Push:FireClient(from, { kind = "duelNo", name = player.DisplayName })
@@ -534,6 +546,12 @@ end
 -- in a race, a delivery or a duel (the menu's fast travel waits until it's over)
 function Activities.isBusy(player: Player): boolean
 	return runs[player] ~= nil or duels[player] ~= nil
+end
+
+-- in a race or a duel: no trailer then (jobs are fine)
+function Activities.isRacing(player: Player): boolean
+	local run = runs[player]
+	return (run ~= nil and run.kind ~= "job") or duels[player] ~= nil
 end
 
 function Activities.init(c: any)

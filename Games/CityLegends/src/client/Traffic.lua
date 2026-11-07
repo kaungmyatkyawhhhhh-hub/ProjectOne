@@ -437,6 +437,27 @@ local function refreshPlayerCars()
 			})
 		end
 	end
+	-- (2026-11-07) trailers: parked or towed, traffic waits for them or goes round. Anchored, so their
+	-- speed comes from TrailerClient
+	local trailers = workspace:FindFirstChild("Trailers")
+	if trailers then
+		for _, model in trailers:GetChildren() do
+			local root = if model:IsA("Model") then model.PrimaryPart else nil
+			if root then
+				local look = root.CFrame.LookVector
+				local flatLook = Vector3.new(look.X, 0, look.Z)
+				local fwd = if flatLook.Magnitude > 0.01 then flatLook.Unit else Vector3.zAxis
+				local T = Config.Towing.Trailer
+				table.insert(playerCarCache, {
+					pos = root.Position + fwd * ((T.AxleToHitch - T.DeckBack) / 2),
+					fwd = fwd,
+					speed = (model:GetAttribute("LiveSpeed") :: number?) or 0,
+					halfLen = ((model:GetAttribute("Length") :: number?) or 22) / 2,
+					width = (model:GetAttribute("Width") :: number?) or 8,
+				})
+			end
+		end
+	end
 end
 
 function Traffic.start(count: number?, focus: (() -> Vector3?)?)

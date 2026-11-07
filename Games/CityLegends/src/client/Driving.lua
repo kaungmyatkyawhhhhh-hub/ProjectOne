@@ -100,6 +100,14 @@ type LocalArm = {
 type ArmRig = { upper: Motor6D, fore: Motor6D, shoulder: Vector3, grip: Vector3, pole: Vector3 }
 
 type State = {
+	-- (2026-11-07) towing: the weight on the hitch, the top speed with it, what the trailer's lamps were last told, the camera's pull and turn
+	towKg: number?,
+	towTop: number?,
+	towBrake: boolean?,
+	towRev: boolean?,
+	towPull: number,
+	towTurn: number,
+	applyTune: () -> (),
 	model: Model,
 	root: BasePart,
 	spec: Cars.CarSpec,
@@ -898,6 +906,21 @@ end
 
 function Driving.getModel(): Model?
 	return if state then state.model else nil
+end
+
+-- (2026-11-07) the weight on the hitch, nil with no trailer on (TrailerClient, every frame)
+function Driving.setTow(kg: number?)
+	local s = state
+	if not s or s.towKg == kg then
+		return
+	end
+	s.towKg = kg
+	s.applyTune()
+	UI.setTowing(kg ~= nil)
+	if not kg then
+		remote("CarSignals"):FireServer({ brake = false, rev = false })
+		s.towBrake, s.towRev = false, false
+	end
 end
 
 -- ground speed in studs per second (0 when not driving)
@@ -1949,6 +1972,9 @@ function Driving.attach(model: Model)
 		camPos = root.Position + Vector3.new(0, 8, 20),
 		camLook = root.Position,
 		camLag = 0, -- immersive camera: pulled back on hard acceleration, pushed in braking
+		towPull = 0,
+		towTurn = 0,
+		applyTune = function() end, -- (set by attach)
 		camSwing = 0, -- immersive camera: looks into the turn
 		camSide = 0,
 		camRoll = 0,
@@ -2131,7 +2157,18 @@ function Driving.attach(model: Model)
 		end
 		s.engine:setRedline(CarStats.redlineOf(id, parts) * 1000)
 		s.engine:setMods(tune)
+		-- (2026-11-07) a trailer on: slower off the line, longer stops, wider turns, a top speed
+		s.towTop = nil
+		if s.towKg then
+			local W = Config.Towing
+			local carShare = kg / (kg + s.towKg)
+			s.accel *= carShare ^ W.AccelPow
+			s.brakeK *= carShare ^ W.BrakePow
+			s.steerK *= W.SteerK
+			s.towTop = Config.mphToSps(W.TopMph)
+		end
 	end
+	s.applyTune = applyTune
 	applyTune()
 	table.insert(s.connections, model:GetAttributeChangedSignal("Parts"):Connect(applyTune))
 	table.insert(s.connections, model:GetAttributeChangedSignal("Setup"):Connect(applyTune))
@@ -2524,7 +2561,7 @@ function Driving.step(dt: number)
 		local engaged = s.engineOn and not s.clutch and s.shiftT <= 0 and gearNow ~= 0
 		if engaged and gearNow > 0 and fwdSpeed > -2 then
 			local rev = if s.electric then math.max(speedFrac, 0) else math.max(speedFrac, 0) / gearHi(gearNow)
-			if throttle > 0 and speedFrac < 1 then -- at top speed the limiter holds it there
+			if throttle > 0 and speedFrac < 1 and not (s.towTop and fwdSpeed >= s.towTop) then -- at top speed the limiter holds it there
 				local pull = if s.electric then evPull(math.max(speedFrac, 0)) else torqueCurve(math.max(rev, 0.3)) * gearMul(gearNow)
 				a += s.accel * s.powerK * throttle * pull * (if s.launch > 0 then s.launchK else 1)
 			elseif throttle == 0 and fwdSpeed > 2 then
@@ -2588,7 +2625,10 @@ function Driving.step(dt: number)
 			fwdSpeed = 0
 		end
 		-- nitro: extra pull, and past the car's own top speed up to NitroTop of it
-		s.boosting = nitroHeld() and s.nitro > 0 and engaged and gearNow > 0 and throttle > 0.3 and fwdSpeed > 5
+		s.boosting = nitroHeld() and s.nitro > 0 and engaged and gearNow > 0 and throttle > 0.3 and fwdSpeed > 5 and not s.towTop
+		if s.towTop and fwdSpeed > s.towTop then
+			a -= math.min(50, 6 + (fwdSpeed - s.towTop) * 2) -- (downhill, or just hitched at speed)
+		end
 		if s.boosting then
 			if speedFrac < 1 then
 				a += DF.NitroAccel
@@ -3235,6 +3275,20 @@ function Driving.render(dt: number)
 		CarLamps.wet = Driving.wet
 	end
 
+	-- (2026-11-07) towing: the trailer's brake and reverse lamps, told to everyone when they change;
+	-- the camera turns round while reversing
+	local towReverse = false
+	if s.towTop then
+		towReverse = s.engineOn and (fwdSpeed < -1.5 or (s.manual and s.mgear < 0))
+		local braking = s.brakeIn > 0.2
+		if braking ~= s.towBrake or towReverse ~= s.towRev then
+			s.towBrake, s.towRev = braking, towReverse
+			remote("CarSignals"):FireServer({ brake = braking, rev = towReverse })
+		end
+	end
+	s.towTurn += ((if towReverse then math.pi else 0) - s.towTurn) * math.min(1, dt * Config.Towing.Camera.Turn)
+	s.towPull += ((if s.towTop then 1 else 0) - s.towPull) * math.min(1, dt * 2)
+
 	-- the rush: how fast it feels, by real speed (so a quick car at 150 feels it whatever its top)
 	local mphNow = Config.spsToMph(math.abs(fwdSpeed))
 	local rush = math.clamp((mphNow - DF.RushFrom) / (DF.RushTo - DF.RushFrom), 0, 1) ^ 1.2
@@ -3454,16 +3508,18 @@ function Driving.render(dt: number)
 		targetFov = cfx.fov + (if low then (LC.Fov - IC.Fov) + LC.FovBoost * fx ^ 1.25 else IC.FovBoost * fx ^ 1.25)
 		local back = if low then LC.Distance + s.camLag * 0.6 + fx * LC.SpeedPull else IC.Distance + s.camLag + fx * IC.SpeedPull
 		local up = if low then LC.Height else IC.Height - fx * 0.5
+		back += s.towPull * Config.Towing.Camera.Back
+		up += s.towPull * Config.Towing.Camera.Up
 		local side = if low then -LC.Side + s.camSide * 0.5 else s.camSide
 		local base = CFrame.new(root.Position) * CFrame.Angles(0, s.yaw, 0) -- level with the road, not the body roll
-		local camPos = (base * CFrame.Angles(0, s.camSwing, 0) * CFrame.new(side, up, back)).Position
+		local camPos = (base * CFrame.Angles(0, s.camSwing + s.towTurn, 0) * CFrame.new(side, up, back)).Position
 		-- road buzz: fine fast shake that grows with speed, plus a slow float
 		s.camBob += dt * (4 + fx * 8)
 		local buzz = (0.01 + fx ^ 2 * IC.Buzz + s.shake * 0.4) * cfx.shake
 		local shake = Vector3.new(math.noise(t * 9, 0, 3), math.noise(0, t * 8, 4), 0) * buzz
 			+ Vector3.new(0, math.sin(s.camBob) * 0.012 * fx * cfx.shake, 0)
 		local ahead = if low then CFrame.new(-LC.Side * 0.3, LC.LookHeight, -LC.LookAhead) else CFrame.new(0, IC.LookHeight, -IC.LookAhead)
-		local lookAt = (base * CFrame.Angles(0, -s.camSwing * 0.6, 0) * ahead).Position
+		local lookAt = (base * CFrame.Angles(0, -s.camSwing * 0.6 + s.towTurn, 0) * ahead).Position
 		s.camPos = camPos
 		s.camLook = lookAt
 		camera.CFrame = CFrame.lookAt(camPos + shake, lookAt + shake * 0.5) * CFrame.Angles(s.camPitch, 0, s.camRoll)
@@ -3478,7 +3534,7 @@ function Driving.render(dt: number)
 			velDir = fwd
 		end
 		local camDir = (fwd * 0.75 + velDir * 0.25).Unit
-		local dist = C.ChaseDistance + speedFrac * 4 + s.camLag * 0.6
+		local dist = C.ChaseDistance + speedFrac * 4 + s.camLag * 0.6 + s.towPull * Config.Towing.Camera.Back
 		local right = camDir:Cross(Vector3.yAxis)
 		local desired = root.Position - camDir * dist + right * s.camSide + Vector3.new(0, C.ChaseHeight - speedFrac * 0.8, 0)
 		local alpha = 1 - math.exp(-dt * 10)

@@ -134,8 +134,8 @@ CarSkin.CLUSTER_RECT = {
 	lambrini_lp750 = { at = Vector3.new(0.0043, 0.0403, -0.2442), face = Vector3.new(-0.002, 0.107, 0.994), w = 0.37, h = 0.1486 },
 	lambrini_lp700 = { at = Vector3.new(0.0027, 0.0379, -0.2421), face = Vector3.new(0, 0.108, 0.9942), w = 0.3328, h = 0.1367 },
 	-- the third import job (2026-11-07): the owner's cluster photos, over the model's own ring
-	lexis_lfa = { at = Vector3.new(-0.003, 0.0411, -0.1761), face = Vector3.new(0, 0.14, 0.99), w = 0.267, h = 0.175 },
-	lexis_lfa_circuit = { at = Vector3.new(-0.003, 0.0411, -0.1761), face = Vector3.new(0, 0.14, 0.99), w = 0.267, h = 0.175 },
+	lexis_lfa = { at = Vector3.new(-0.01, 0.0277, -0.1853), face = Vector3.new(0, 0.14, 0.99), w = 0.25, h = 0.1637 }, -- (down in the hood: tools/lambo/frame_probe.py)
+	lexis_lfa_circuit = { at = Vector3.new(-0.01, 0.0277, -0.1853), face = Vector3.new(0, 0.14, 0.99), w = 0.25, h = 0.1637 },
 	bentz_gls = { at = Vector3.new(-0.0073, 0.0551, -0.1773), face = Vector3.new(-0.007, 0.109, 0.994), w = 0.335, h = 0.1336 },
 	bentz_s680 = { at = Vector3.new(-0.0003, 0.049, -0.1883), face = Vector3.new(0, 0.14, 0.99), w = 0.366, h = 0.146 },
 	-- the second import job (2026-11-06): the screens behind each model's frame (tools/lambo/panel_preview.py)

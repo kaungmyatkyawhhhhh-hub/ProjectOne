@@ -49,6 +49,7 @@ local LookFx = require(script.Parent:WaitForChild("LookFx"))
 local DayCycle = require(script.Parent:WaitForChild("DayCycle"))
 local MenuArt = require(script.Parent:WaitForChild("MenuArt"))
 local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
+local TrailerClient = require(script.Parent:WaitForChild("TrailerClient"))
 local CarUpgrades = require(script.Parent:WaitForChild("CarUpgrades"))
 
 local MainMenu = {}
@@ -1758,6 +1759,7 @@ local function buildCars(page: Frame)
 	local side = new("Frame", { BackgroundColor3 = PANEL, BackgroundTransparency = 0.05, Position = UDim2.fromOffset(listW + 16, 0), Size = UDim2.new(1, -listW - 16, 1, 0), Parent = page }, { corner(10) })
 
 	local fillSide: () -> ()
+	local trailerSide: (spec: any) -> ()
 	local rebuild: () -> ()
 
 	fillSide = function()
@@ -1782,6 +1784,11 @@ local function buildCars(page: Frame)
 		local info = if UI.carInfo then UI.carInfo(spec.Id) else nil
 		text({ Text = (if info then "CAR LV " .. info.level .. "  ·  " .. info.cp .. " CP  ·  " else "") .. string.upper(Cars.ClassLabels[spec.Class] or spec.Class), FontFace = BOLD, TextSize = 14, TextColor3 = SUB, Position = UDim2.fromOffset(74, 58), Size = UDim2.new(1, -74, 0, 22), TextTruncate = Enum.TextTruncate.AtEnd, Parent = body })
 		carStats(body, 92, spec)
+		-- (2026-11-07) a car with a hitch
+		local towKg = CarStats.towKg(spec.Id)
+		if towKg > 0 then
+			text({ Text = "TOWS " .. string.format("%d,%03d", towKg // 1000, towKg % 1000) .. " KG", FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -38, 0, 0), Size = UDim2.fromOffset(120, 16), Parent = body })
+		end
 		local by = 210
 		local driving = Driving.getModel()
 		local spawn = button(if driving and driving:GetAttribute("CarId") == spec.Id then "DRIVING ✓" else "SPAWN", MINT, { Position = UDim2.fromOffset(0, by), Size = UDim2.new(1, 0, 0, 48), TextSize = 22, Parent = body })
@@ -1844,9 +1851,82 @@ local function buildCars(page: Frame)
 					end
 				end)
 			end)
-		else
-			custom.Size = UDim2.new(1, 0, 0, 40)
 		end
+		-- (2026-11-07) the trailer (the market's slot while the market is off; under it when it's on)
+		local trailerBtn = button("TRAILER", BLUE, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, by + (if Config.Market.Enabled then 152 else 104)), Size = half, TextSize = 16, Parent = body })
+		focusable(trailerBtn, function()
+			trailerSide(spec)
+		end)
+	end
+
+	-- what you can do with the trailer, with the car picked in the list
+	trailerSide = function(spec: any)
+		TrailerClient.state(function(st: any)
+			if not side.Parent or selected ~= spec.Id then
+				return
+			end
+			for _, c in side:GetChildren() do
+				if not c:IsA("UICorner") then
+					c:Destroy()
+				end
+			end
+			local T = Config.Towing.Trailer
+			local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 1, -32), Parent = side })
+			text({ Text = "TRAILER", FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Size = UDim2.new(1, 0, 0, 16), Parent = body })
+			text({ Text = T.Name, FontFace = HEAVY, TextSize = 26, TextScaled = true, Position = UDim2.fromOffset(0, 18), Size = UDim2.new(1, 0, 0, 34), Parent = body })
+			local line = if not st.owned then "Buy one at Legends Motors: TRAILERS."
+				elseif st.load then "On it: " .. (if Cars.ById[st.load] then Cars.ById[st.load].Name else st.load)
+				elseif st.hitched then "Hitched to your car."
+				elseif st.out then "Parked out on the road."
+				else "In your garage."
+			text({ Text = line, FontFace = BOLD, TextSize = 15, TextColor3 = SUB, TextWrapped = true, Position = UDim2.fromOffset(0, 58), Size = UDim2.new(1, 0, 0, 40), Parent = body })
+			local y = 104
+			local function row(label: string, color: Color3, fn: () -> ())
+				local b = button(label, color, { Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, 44), TextSize = 17, Parent = body })
+				focusable(b, fn, color)
+				y += 52
+			end
+			local driving = Driving.getModel()
+			local inThis = driving ~= nil and driving:GetAttribute("CarId") == spec.Id
+			if st.owned and not st.hitched then
+				if CarStats.towKg(spec.Id) > 0 then
+					row("TOW WITH THIS CAR", MINT, function()
+						closeMenu()
+						if inThis then
+							TrailerClient.call("take")
+						elseif api then
+							api.drive(spec.Id)
+							TrailerClient.takeWhenIn(spec.Id)
+						end
+					end)
+				else
+					text({ Text = "This car can't tow. Pick one with the TOWS tag.", FontFace = MEDIUM, TextSize = 14, TextColor3 = SUB, TextWrapped = true, Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, 40), Parent = body })
+					y += 44
+				end
+				if not st.out then
+					row("PARK IT HERE", BLUE, function()
+						outOfMenu(function()
+							TrailerClient.call("park")
+						end)
+					end)
+				end
+			end
+			if st.out and not st.load and not inThis then
+				row("LOAD THIS CAR", GOLD, function()
+					outOfMenu(function()
+						TrailerClient.call("load", spec.Id)
+					end)
+				end)
+			end
+			if st.out then
+				row("PUT TRAILER AWAY", BLUE, function()
+					outOfMenu(function()
+						TrailerClient.call("stow")
+					end)
+				end)
+			end
+			row("BACK", BLUE, fillSide)
+		end)
 	end
 
 	local function card(parent: Instance, x: number, y: number, w: number, h: number, id: string)

@@ -650,6 +650,11 @@ end)
 -- the luxury towers' garages: parked cars to steal, paid VIP bays (after spawnFor, which a theft uses)
 ctx.spawnCar = spawnFor
 ctx.despawn = despawn
+-- (2026-11-07) trailers
+ctx.isRacing = Activities.isRacing
+local Trailers = require(script.Parent:WaitForChild("Trailers"))
+ctx.isTowing = Trailers.isTowing
+Trailers.init(ctx)
 require(script.Parent:WaitForChild("Parking")).init(ctx, Police, Towers)
 
 SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)
@@ -674,6 +679,13 @@ CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
 	-- (2026-11-07) the new models' beam (CarLamps)
 	if raw.beam == "off" or raw.beam == "drl" or raw.beam == "low" or raw.beam == "high" then
 		car:SetAttribute("Beam", raw.beam)
+	end
+	-- (2026-11-07) a towing car's brake and reverse: the trailer's lamps show them
+	if type(raw.brake) == "boolean" then
+		car:SetAttribute("Brake", raw.brake)
+	end
+	if type(raw.rev) == "boolean" then
+		car:SetAttribute("Rev", raw.rev)
 	end
 	-- (2026-11-03) tyre smoke for the other players: 0 / 1 / 2
 	if raw.smoke == 0 or raw.smoke == 1 or raw.smoke == 2 then
@@ -1080,6 +1092,7 @@ local function watchConsoleEverything(player: Player)
 		for id in Config.Chauffeur.Fleet do
 			profile.Chauffeur[id] = true
 		end
+		profile.Trailers[Config.Towing.Trailer.Id] = true
 		if profile.Home == "" or profile.Home == nil then
 			profile.Home = Config.Towers.List[1].id
 		end

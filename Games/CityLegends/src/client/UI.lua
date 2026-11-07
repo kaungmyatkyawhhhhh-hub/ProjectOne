@@ -217,6 +217,7 @@ local engineLamp: TextLabel
 local parkLamp: TextLabel
 local tcLamp: TextLabel
 local lightsLamp: TextLabel
+local towLamp: TextLabel? = nil
 local lampButton: TextButton? = nil
 local BEAM_BLUE = Color3.fromRGB(80, 160, 255)
 local settingsPanel: Frame
@@ -605,7 +606,8 @@ local function buildSpeedometer()
 	parkLamp = lamp("(P)", Theme.Danger, 3)
 	tcLamp = lamp("TC OFF", Theme.Warning, 4)
 	lightsLamp = lamp("LIGHTS", GREEN, 5)
-	blinkR = lamp("▶", GREEN, 6)
+	towLamp = lamp("TOWING", Theme.Warning, 6)
+	blinkR = lamp("▶", GREEN, 7)
 	-- (2026-11-03, car levels) the car's class badge, its car level and XP bar, above the lights
 	local h = if UI.isTouch then 18 else 22
 	local strip = new("Frame", {
@@ -2396,6 +2398,12 @@ function UI.setGearboxLabel(mode: string)
 end
 
 -- the new models' headlight button (phones) and its mode: nil hides it
+function UI.setTowing(on: boolean)
+	if towLamp then
+		towLamp.Visible = on
+	end
+end
+
 function UI.setLampMode(mode: string?)
 	if lampButton then
 		lampButton.Visible = mode ~= nil
@@ -2450,16 +2458,14 @@ end
 -- the context action pill (bottom right): "[Y] GET OUT", "[Y] GET IN", "[E] ROB THE VAULT" ...
 -- clicking or tapping it does the same as the key (UI.onAction)
 UI.onAction = nil :: (() -> ())?
-local actionPill: TextButton? = nil
-local actionKey: TextLabel? = nil
-local actionText: TextLabel? = nil
-function UI.setAction(text: string?, key: string?)
-	if not gui then
-		return
-	end
-	if not actionPill then
+UI.onTowAction = nil :: (() -> ())? -- (2026-11-07) the trailer's own pill, above that one
+type Pill = { b: TextButton, key: TextLabel, text: TextLabel }
+local actionPill: Pill? = nil
+local towPill: Pill? = nil
+local function makePill(name: string, liftY: number, tap: () -> ()): Pill
+	do
 		local b: TextButton = new("TextButton", {
-			Name = "ActionPill",
+			Name = name,
 			AutoButtonColor = false,
 			Text = "",
 			AnchorPoint = Vector2.new(1, 1),
@@ -2467,7 +2473,7 @@ function UI.setAction(text: string?, key: string?)
 			-- above the speedometer and its warning lights, under the minimap's cards; on phones above
 			-- the steering buttons on the right, clear of the speedometer in the middle. (2026-11-04) PC:
 			-- 28 higher, over the car strip (class badge + car level) that sits above the analogue dial
-			Position = if UI.isTouch then UDim2.new(1, -14, 1, -232) else UDim2.new(1, -24, 1, -24 - 224 - 34 - 28),
+			Position = if UI.isTouch then UDim2.new(1, -14, 1, -232 - liftY) else UDim2.new(1, -24, 1, -24 - 224 - 34 - 28 - liftY),
 			Size = UDim2.fromOffset(if UI.isTouch then 132 else 168, if UI.isTouch then 36 else 40),
 			BackgroundColor3 = Theme.Panel,
 			BackgroundTransparency = 0.15,
@@ -2476,7 +2482,7 @@ function UI.setAction(text: string?, key: string?)
 			Parent = gui,
 		}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Stroke, 1.2, 0.2) })
 		local kh = if UI.isTouch then 26 else 28
-		actionKey = label({
+		local keyLabel = label({
 			Text = "F",
 			TextSize = 16,
 			Font = Enum.Font.GothamBlack,
@@ -2489,8 +2495,8 @@ function UI.setAction(text: string?, key: string?)
 			ZIndex = 9,
 			Parent = b,
 		})
-		corner(8).Parent = actionKey
-		actionText = label({
+		corner(8).Parent = keyLabel
+		local textLabel = label({
 			Text = "",
 			TextSize = if UI.isTouch then 13 else 14,
 			Font = Enum.Font.GothamBlack,
@@ -2502,20 +2508,48 @@ function UI.setAction(text: string?, key: string?)
 		})
 		b.Activated:Connect(function()
 			Audio.click()
+			tap()
+		end)
+		return { b = b, key = keyLabel, text = textLabel }
+	end
+end
+
+local function showPill(pill: Pill, text: string?, key: string?)
+	if not text then
+		pill.b.Visible = false
+		return
+	end
+	pill.b.Visible = true
+	pill.text.Text = text
+	pill.key.Text = if UI.isTouch then "▶" else (key or "F")
+end
+
+function UI.setAction(text: string?, key: string?)
+	if not gui then
+		return
+	end
+	if not actionPill then
+		actionPill = makePill("ActionPill", 0, function()
 			if UI.onAction then
 				UI.onAction()
 			end
 		end)
-		actionPill = b
 	end
-	local pill = actionPill :: TextButton
-	if not text then
-		pill.Visible = false
+	showPill(actionPill :: Pill, text, key)
+end
+
+function UI.setTowAction(text: string?, key: string?)
+	if not gui then
 		return
 	end
-	pill.Visible = true;
-	(actionText :: TextLabel).Text = text;
-	(actionKey :: TextLabel).Text = if UI.isTouch then "▶" else (key or "F")
+	if not towPill then
+		towPill = makePill("TowPill", if UI.isTouch then 42 else 46, function()
+			if UI.onTowAction then
+				UI.onTowAction()
+			end
+		end)
+	end
+	showPill(towPill :: Pill, text, key)
 end
 
 -- speed lines: thin streaks rushing in from the screen edges at speed (0 = off .. 1 = flat out)

@@ -1917,4 +1917,53 @@ do
 	end
 end
 
+---------------------------------------------------------------------
+-- Towing (owner, 2026-11-07: "Only SUVs or cars that have a trailer hitch can carry trailers")
+---------------------------------------------------------------------
+Config.Towing = {
+	-- the real braked tow rating of each car with a hitch, in kg. A trim tows what its base car tows.
+	-- Trailer + the car on it must be within this.
+	Cars = {
+		toyoka_lc200 = 3500, toyoka_lc300 = 3500, lexis_lx700 = 3600,
+		bentz_g63 = 3500, brabos_g63 = 3500, bentz_gle53 = 3500, bentz_gls = 3500,
+		bnw_x6 = 3200, bnw_x7 = 3400,
+		bentlee_bentayga = 3500, rolls_cullinan = 2700, lambrini_urusp = 3500,
+		byt_u8 = 3500, astin_dbx = 2700, maseroti_levante = 2700,
+	} :: { [string]: number },
+	-- a 7 x 20 ft 7,000 lb steel car hauler: new ones are about $3,900 to $5,600 (aluminium about $9,500)
+	Trailer = {
+		Id = "hauler",
+		Name = "Legends Car Hauler",
+		Price = 5500,
+		Kg = 950, -- empty
+		-- its shape, in studs (3 to the metre): the origin is on the ground between the axles, -Z to the coupler
+		DeckHeight = 2.2,
+		Width = 6.6,
+		DeckFront = -9.6,
+		DeckBack = 8.7,
+		LoadZ = -0.45, -- the middle of the car on it
+		AxleToHitch = 13.6,
+		CouplerHeight = 1.35,
+		WheelRadius = 1.05,
+		WheelWidth = 0.7,
+		RampLength = 7.5,
+	},
+	TopMph = 80, -- about 130 km/h
+	AccelPow = 0.8, -- acceleration x (car / (car + trailer + load)) ^ this
+	BrakePow = 0.5, -- the same for the brakes: the trailer's own brakes help, so less
+	SteerK = 0.82, -- turns wider
+	Jackknife = 72, -- degrees: it never folds further than this
+	ClimbRate = 34, -- studs a second, the fastest the trailer rises or drops with the road
+	MaxRoll = 0.14, -- radians of lean over a bump
+	SwayFromMph = 50,
+	SwayStuds = 0.28, -- at the axle, at most
+	SwayRate = 2.6, -- radians a second
+	HitchRange = 5, -- studs from the hitch to the coupler
+	UnloadRange = 34, -- studs from the trailer's axle
+	ActionMph = 6, -- HITCH, UNHITCH and STRAP only below this
+	Key = Enum.KeyCode.I, -- (the last free letter: J is the leaderboard, K the market)
+	HitchReach = {} :: { [string]: number }, -- a car's hitch further out (+) or in (-), in studs
+	Camera = { Back = 19, Up = 5, Turn = 3 }, -- pulled back to see the trailer; reversing it turns round
+}
+
 return Config
