@@ -2,7 +2,7 @@ import glob,json,re,struct,pickle
 from lamp_load import *
 def parse():
     geo={}
-    for f in sorted(glob.glob(SP+'/lampscan/geo_*')):
+    for f in [f for f in sorted(glob.glob(SP+'/lampscan/geo*')) if not f.endswith('.pkl')]:
         s=open(f,encoding='utf-8').read()
         if f.endswith('.json'):
             s=json.loads(s)[0]['text']
@@ -22,7 +22,7 @@ if __name__=='__main__':
     g=parse()
     pickle.dump(g,open(SP+'/lampscan/geo.pkl','wb'))
     from lamp_pick import picks
-    for id in IDS:
+    for id in IDS2:
         d,o=picks(id)
         got=sum((r['k'],r['root']) in g.get(id,{}) for r in o)
         print(id,len(g.get(id,{})),'of',len(o),got,sum(len(x[1]) for x in g.get(id,{}).values()))

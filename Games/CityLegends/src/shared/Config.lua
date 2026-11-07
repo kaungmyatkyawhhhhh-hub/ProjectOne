@@ -1562,6 +1562,7 @@ Config.Lamps = {
 	AutoOn = 0.3, -- Auto: low beam from this much night (DayCycle.night), off again under AutoOff
 	AutoOff = 0.15,
 	DrlCore = 0.35, -- how see-through the strips are in each state
+	DrlGlass = 0.72,
 	LowGlass = 0.62,
 	HighGlass = 0.5, -- (x the low beam number)
 	Glass = { bugotti_chiron = 0.86, bugotti_chiron_pursport = 0.86, bugotti_chiron_supersport = 0.86 }, -- covers over four lamps

@@ -13,7 +13,9 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 2. **Houses, penthouses, hotel suites, gems and VIP cards keep their prices.** The top ones are long-term dreams (400 to 900 hours).
 3. **The car market is off for now:** `Config.Market.Enabled = false`. No MARKET button, no SELL / MARKET in the CARS menu, no K key, nothing runs on the server. Saved stashes are left alone: what players hold can't be sold meanwhile and comes back if it's turned on. The CAR STOCKS channel on the penthouse TVs stays: it's only decoration. Checked in Play: no button, K does nothing, no script errors.
 
-**Top 10 changes:**
+**Class R priced up (owner, 2026-11-07: "make them a little more expensive like from 470k to like 850k or 950k"):** real prices left the four cheapest class R cars too cheap for how fast they are, so these four sit over their real price: LB724 VTZ $365,000 -> $850,000, LB834 ZV $470,000 -> $900,000, LB744 $640,000 -> $1,200,000, LB834 ZVX $680,000 -> $1,200,000. The ZVX 63 ($1,250,000) and the Origine ($2,100,000) stay. The dealer's tag still says their kind (USED or NEW). S2 and lower are as researched.
+
+**Top 10 changes (real prices, before the class R step):**
 - Velocité Noir Éclair Super Sport: $13,000,000 -> $4,450,000
 - Velocité Noir Éclair Pure: $11,000,000 -> $4,000,000
 - Velocité Noir Éclair: $9,500,000 -> $3,250,000
@@ -106,15 +108,15 @@ All within 25% of the range. Three run a little quick on purpose: better to tigh
 | Enfurecido LB834 ZVX 63 (`lambrini_svj63`) | Lamborghini Aventador SVJ 63 Roadster (collector) | collector (rough) | $5,500,000 | $1,250,000 | [Classic.com](https://www.classic.com/veh/2021-lamborghini-aventador-lp770-4-svj-63-roadster-nOjDE54) |
 | Stealth-Apex V10 Halo (`lexis_lfa`) | Lexus LFA (collector) | collector | $3,000,000 | $900,000 | [Classic.com / Bring a Trailer](https://www.classic.com/veh/2012-lexus-lfa-jthhx8bh9c1000396-n35yQRp) |
 | Enfurecido L147 ZV (`lambrini_lp670`) | Lamborghini Murcielago LP670-4 SV (collector) | collector | $2,400,000 | $700,000 | [Classic.com](https://www.classic.com/veh/2010-lamborghini-murcielago-lp670-4-sv-zhwbu8ah3al-n2rO1on) |
-| Enfurecido LB834 ZVX (`lambrini_svj`) | Lamborghini Aventador SVJ (used) | used | $4,200,000 | $680,000 | [Classic.com](https://www.classic.com/veh/2019-lamborghini-aventador-lp770-4-svj-zhwcm6zd3kl-n3xgMBW) |
-| Enfurecido LB744 (`lambrini_revuelto`) | Lamborghini Revuelto (2026) | new (rough) | $6,000,000 | $640,000 | [KBB / Autofinder / TrueCar](https://www.kbb.com/lamborghini/revuelto/2026/) |
+| Enfurecido LB834 ZVX (`lambrini_svj`) | Lamborghini Aventador SVJ (used) | used | $4,200,000 | $1,200,000 (real $680,000, owner) | [Classic.com](https://www.classic.com/veh/2019-lamborghini-aventador-lp770-4-svj-zhwcm6zd3kl-n3xgMBW) |
+| Enfurecido LB744 (`lambrini_revuelto`) | Lamborghini Revuelto (2026) | new (rough) | $6,000,000 | $1,200,000 (real $640,000, owner) | [KBB / Autofinder / TrueCar](https://www.kbb.com/lamborghini/revuelto/2026/) |
 | Enfurecido Classico 5000 (`lambrini_countach`) | Lamborghini Countach 5000 QV (collector) | collector | $2,500,000 | $600,000 | [Classic.com](https://www.classic.com/m/lamborghini/countach/?page=1) |
 | Rosso Rampante F142 Speciale (`ferrara_458speciale`) | Ferrari 458 Speciale (collector) | collector | $1,250,000 | $520,000 | [Classic.com / The Classic Valuer](https://www.theclassicvaluer.com/buyers-guide/ferrari/458-speciale) |
 | Enfurecido L147 Roadster (`lambrini_lp640`) | Lamborghini Murcielago LP650-4 Roadster (collector) | collector (rough) | $1,800,000 | $500,000 | [Broad Arrow estimate / duPont Registry](https://www.motorious.com/articles/handpicked/factory-press-lamborghini-murcielago-broad-arrow) |
-| Enfurecido LB834 ZV (`lambrini_lp750`) | Lamborghini Aventador SV LP750-4 (used) | used | $3,500,000 | $470,000 | [Classic.com](https://www.classic.com/m/lamborghini/aventador/lp750-4-sv) |
+| Enfurecido LB834 ZV (`lambrini_lp750`) | Lamborghini Aventador SV LP750-4 (used) | used | $3,500,000 | $900,000 (real $470,000, owner) | [Classic.com](https://www.classic.com/m/lamborghini/aventador/lp750-4-sv) |
 | Ecstasy Grandeur (`rolls_cullinan`) | Rolls-Royce Cullinan (2026) | new | $2,500,000 | $432,000 | [KBB / Cars.com](https://www.kbb.com/rolls-royce/cullinan/2026/series-ii/) |
 | Rocket W463 800 (`brabos_g63`) | Brabus 800 G63 (new or nearly new) | new (rough) | $1,600,000 | $390,000 | [Dubicars / AutoScout24 listings](https://www.dubicars.com/uae/new/brabus/800-mercedes-amg-g-63) |
-| Enfurecido LB724 VTZ (`lambrini_sto`) | Lamborghini Huracan STO (used) | used | $1,800,000 | $365,000 | [Classic.com / CarGurus / TrueCar](https://www.truecar.com/used-cars-for-sale/listings/lamborghini/huracan/?trim=sto) |
+| Enfurecido LB724 VTZ (`lambrini_sto`) | Lamborghini Huracan STO (used) | used | $1,800,000 | $850,000 (real $365,000, owner) | [Classic.com / CarGurus / TrueCar](https://www.truecar.com/used-cars-for-sale/listings/lamborghini/huracan/?trim=sto) |
 | Tri-Star Silber R230 V12 Track (`bentz_sl65bs`) | Mercedes-Benz SL65 AMG Black Series (collector) | collector | $700,000 | $350,000 | [Classic.com / Bring a Trailer](https://classic.com/veh/2009-mercedes-benz-sl65-amg-black-series-wdbsk79f9-vnK3Nvn) |
 | Sovereign Grand Tourer (`bentlee_contgt`) | Bentley Continental GT Speed (2026) | new (rough) | $1,100,000 | $345,000 | [KBB listings / CarsFrenzy guide (no official MSRP found)](https://www.kbb.com/cars-for-sale/all/2026/bentley/continental) |
 | Enfurecido LB724 Aero Spyder (`lambrini_performante`) | Lamborghini Huracan Performante Spyder (used) | used | $1,550,000 | $330,000 | [Classic.com](https://www.classic.com/veh/2019-lamborghini-huracan-performante-spyder-zhwus4-nKvzZD4) |
@@ -332,13 +334,14 @@ All within 25% of the range. Three run a little quick on purpose: better to tigh
 | wing | Ducktail Spoiler | Rare | $3,000 | $30,000 | $5,630 | $8,440 |
 | wing | GT Rear Wing | Epic | $11,000 | $110,000 | $8,250 | $12,380 |
 
-## Working lamps on the hypercars (2026-11-07, `Prompts/Proper working headlights.md`)
-**Hypercars only for now (owner, 2026-11-07).** The other 16 new models keep their old lights until the owner says.
+## Working lamps on all 29 new models (2026-11-07, `Prompts/Proper working headlights.md`)
+The 13 hypercars first, then the other 16 (owner: "yes do them").
 Pictures: [[Lamps - LFA low beam.jpg]], [[Lamps - LFA high beam.jpg]], [[Lamps - LB834 rear, all lamps.jpg]], [[Lamps - LB744 rear, all lamps.jpg]], [[Lamps - ZVX rear, all lamps.jpg]], [[Lamps - Eclair Super Sport rear, all lamps.jpg]], [[Lamps - Origine rear and phone button.jpg]], [[Lamps - Origine by day, DRL.jpg]], [[Lamps - rain at night, a car facing you.jpg]]. In the "all lamps" shots the indicators and reverse lamps were forced on to check where they sit.
 - **Controls:** L = next mode: Auto, Low, High, Off. Hold L = high beam while held. Two quick taps = a short flash. Phones: a button by GAS (hidden on other cars). The LIGHTS word on the HUD is green on low, blue on high.
 - **Auto:** the strips glow with the engine on; low beam at dusk and in tunnels.
 - **How:** `client/CarLamps.lua`, numbers in `Config.Lamps`, shells `LampFx_...` in `CarModels` cut from each model's own lamp pieces (`tools/lamps`). Right side mirrored from the left. Real lights on your car and the nearest 6 (3 on Medium, none on Low, 12 on Ultra), none behind the camera; shadows on your own low beam from High graphics.
 - **Limits:** a SpotLight stops at 60 studs, so high beam adds a third light 48 studs up the road. The beams start just ahead of the nose, level with the lamps: from the lamp itself they lit the bonnet. A separate DRL strip isn't split out: DRL is the bright lamp pieces at a lower glow.
+- **Seen, not fixed:** the F142 Speciale's `Body_Trim2` picture (96358451417093) is refused by Roblox ("not approved"), so that part shows without it. It isn't from this job.
 - **Traffic, police, parked cars:** no change. None use these models, and traffic has no lights (owner, 2026-11-02).
 
 | Car | Headlights | Tail and brake | Reverse | Indicators | Note |
@@ -355,9 +358,25 @@ Pictures: [[Lamps - LFA low beam.jpg]], [[Lamps - LFA high beam.jpg]], [[Lamps -
 | Eclair | ok | ok | ok | ok | own amber piece at the back |
 | Eclair Pure, Eclair Super Sport | ok | ok | ok | ok | |
 
+
+| The other 16 | Headlights | Tail and brake | Reverse | Indicators | Note |
+|---|---|---|---|---|---|
+| L140 Leggera, L140 Spyder | ok | ok, new shell | ok | ok | |
+| LB724, LB724 Rally | ok | ok | ok | ok | small inner block for reverse |
+| LB724 Aero Spyder, LB724 VTZ | ok | ok, new shell | ok | ok | |
+| L147 Roadster, L147 ZV | ok | ok, new shell | ok | ok | the models' own white lamp for reverse |
+| Brava | ok | ok, new shell | ok | ok | bumper reflector left dark |
+| F149 Riviera, F142 Speciale | ok | ok | ok | ok | |
+| F142 Spider | ok, the cover glows | ok, new shell | ok | ok | no separate lamp pieces in front |
+| C346 Rallye | ok | ok | ok | ok | model's own white strip for reverse |
+| Classico 5000 | ok | ok | ok | ok | own amber lens at the back; the pop-ups don't rise: the panels on the bonnet and the nose lamps glow |
+| Z223 Royale V12 | ok | ok | ok | ok | headlamp pieces found by hand: they were in the trim and window parts |
+| X167 Royale | ok | ok | ok | ok | |
+
+- **Checked on the 16 at night, PC size, from the front and back, indicators and reverse forced on to see where they sit:** all but three fronts in one pass; right blinker on the X167 (front and rear flash, left stays off). A clean straight cut on the indicator and reverse slices (`cslice` in `lamp_second.py`).
 - **Where reverse and rear indicators sit is partly my pick:** on models with no separate piece they use a slice of the tail lens (inner for reverse, outer for indicators), from the look of the model, not a photo of the real lamp.
-- **Old cars:** the M5 F90 checked: L toggles as before, no Beam attribute, no phone button. The code only runs on the 13.
-- **Checked in Play at night, PC size (forced touch HUD for the button's place):** modes, hold L, blinkers left, reverse, day DRL, rain haze, another car's lights and glare on a test copy. FPS on the highway at night with one test car: 56 (day 58). **Not tested:** flash by double tap, a real phone, 2 real players, a tunnel, the 3 usual FPS spots, Customs headlight colour.
+- **Old cars:** the M5 F90 checked: L toggles as before, no Beam attribute, no phone button. The code only runs on the 29.
+- **Checked in Play at night, PC size (forced touch HUD for the button's place):** modes, hold L, blinkers left, reverse, day DRL, rain haze, another car's lights and glare on a test copy. FPS on the highway at night with one test car: 56 (day 58); with the X167, the heaviest: 55. **Not tested:** flash by double tap, a real phone, 2 real players, a tunnel, the 3 usual FPS spots, Customs headlight colour.
 
 ## One Urus, two 458s (2026-11-07, `Prompts/One Urus and only two 458s.md`)
 Pictures: [[Dealer - one Brava.jpg]], [[Dealer - F142 line.jpg]].
@@ -386,7 +405,7 @@ Pictures: [[Dealer - one Brava.jpg]], [[Dealer - F142 line.jpg]].
 - **Colours:** the GLS file has no pictures at all (a game mod's export, grey placeholders): every material got a plain colour by hand (`tools/lambo/recolour.py`, `tools/logo_paint/bentz_gls.colours.json`): saddle and macchiato leather, walnut, dark trim. LFA: black cabin with red seat centres (`tools/lambo/seat_two_tone.py`), red kept from its own palette. S-Class: the model's own quilted cream cabin.
 - **Fixes on the way:** the importer gave a part yaw of 0.15 degrees: `ServerStorage.ClaudeTools.CarApply` zeroes it. Steering pieces are told apart by their longest side (the box in Blender is tilted). `CarLookCopy` swaps a rebuilt pack in and keeps the surfaces. A GLS collapse thinning left lumps on the chrome, so only hidden parts are thinned; 474k -> 384k. `LOW_ARMS` in `CarSkin`: on these five cars the hands sit at 9 and 3 and the arms lower, because the old line covered the cluster (owner's rule; other cars unchanged). `LoadAsset` works when `insert_asset` says "Failed to load package asset" (a just-uploaded big pack).
 - **Backups:** `ServerStorage.OldCarModels`: `lexis_lfa_old_2026-11-07`, `bentz_s680_old_2026-11-07`, `bentz_gls_old_2026-11-07`, `lambrini_countach_old_2026-11-07`.
-- **Checked in Play (PC size):** all five spawn, no script errors; outside day and night; driver's seat, cluster moving (speed, revs, gear) on the Circuit, GLS and Countach; LFA and S680 parked and spawned; Customs paint on 4 (blue metallic GLS, red gloss Countach, matte black Circuit, green over cream S680 by the look attribute, not through the shop); brake lamps on the GLS and Circuit. Lune tests all OK (world, graph, carlevels, goals, market; the market test's `stash capped` line failed once in 5 runs, it depends on chance), `luau-lsp` no errors. Buying the Circuit at the dealer: works (2026-11-07). **Not checked:** phone size, a real phone, 2 players. The dim red strip inside the S-Class's rear pillars was the rear glow light reaching through the body: moved 4 studs back on that car (2026-11-07). **The Countach (2026-11-07, night):** tail lamps in the right place. Its pop-up headlights stay closed and never glow, and a thin shield outline is left on the nose where the badge was. Temperature and fuel gauges don't move, except the LFA's water bar.
+- **Checked in Play (PC size):** all five spawn, no script errors; outside day and night; driver's seat, cluster moving (speed, revs, gear) on the Circuit, GLS and Countach; LFA and S680 parked and spawned; Customs paint on 4 (blue metallic GLS, red gloss Countach, matte black Circuit, green over cream S680 by the look attribute, not through the shop); brake lamps on the GLS and Circuit. Lune tests all OK (world, graph, carlevels, goals, market; the market test's `stash capped` line failed once in 5 runs, it depends on chance), `luau-lsp` no errors. Buying the Circuit at the dealer: works (2026-11-07). **Not checked:** phone size, a real phone, 2 players. The dim red strip inside the S-Class's rear pillars was the rear glow light reaching through the body: moved 4 studs back on that car (2026-11-07). **The Countach (2026-11-07, night):** tail lamps in the right place. The pop-up headlights stay closed (the bonnet panels glow with the lights on since the lamp job), and a thin shield outline is left on the nose where the badge was. Temperature and fuel gauges don't move, except the LFA's water bar.
 - **Pictures:** [[LFA and Circuit - in the game.jpg]], [[Z223 Royale - in the game.jpg]], [[X167 Royale - in the game.jpg]], [[Classico 5000 - in the game.jpg]], [[LFA cluster - photo and redraw.jpg]], [[LFA cluster - in the game next to the photo.jpg]], [[Maybach cluster - photo and redraw.jpg]], [[Maybach cluster - in the game next to the photo.jpg]], [[Countach dials - redrawn sharp.jpg]].
 
 ## Workshop and Part Shop (2026-11-06, `Prompts/Better upgrade area and part shop.md`)

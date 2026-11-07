@@ -33,6 +33,10 @@ CarLamps.wet = 0 -- how wet it is (Driving.wet, set by Weather; Driving passes i
 -- the models with shells (a trim on another car's model counts through Cars.modelOf)
 CarLamps.CARS = {
 	lexis_lfa = true, lexis_lfa_circuit = true,
+	lambrini_lp570 = true, lambrini_lp560 = true, lambrini_huracan = true, lambrini_performante = true, lambrini_sto = true,
+	lambrini_sterrato = true, lambrini_lp640 = true, lambrini_lp670 = true, lambrini_urusp = true, lambrini_countach = true,
+	ferrara_california = true, ferrara_458spider = true, ferrara_458speciale = true,
+	dearb_focus_rs = true, bentz_s680 = true, bentz_gls = true,
 	lambrini_lp700 = true, lambrini_lp750 = true, lambrini_revuelto = true, lambrini_svj = true, lambrini_svj63 = true,
 	bugotti_veyron = true, bugotti_veyron_sport = true, bugotti_veyron_top = true,
 	bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true,
@@ -93,7 +97,7 @@ local function build(model: Model): Car?
 			source = source or d
 		end
 	end
-	if not parts.HeadCoreL then
+	if not (parts.HeadCoreL or parts.HeadGlassL) then
 		return nil
 	end
 	return {
@@ -232,7 +236,8 @@ local function applyBeam(c: Car, beam: string)
 		set(c, "HeadGlass", 1)
 	elseif beam == "drl" then
 		set(c, "HeadCore", L.DrlCore, colour)
-		set(c, "HeadGlass", 1)
+		-- (a model with no separate lamp pieces: the cover glows softly instead)
+		set(c, "HeadGlass", if c.parts.HeadCoreL then 1 else L.DrlGlass, colour)
 	elseif beam == "low" then
 		set(c, "HeadCore", 0, colour)
 		set(c, "HeadGlass", c.glass, colour)

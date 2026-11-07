@@ -27,6 +27,6 @@ for b in range(0,len(items),BATCH):
         ob=bpy.data.objects.new(name,me)
         bpy.context.collection.objects.link(ob)
     for ob in bpy.context.scene.objects: ob.select_set(True)
-    path=os.path.join(out,'lamps_fix_%d.fbx'%(b//BATCH))
+    path=os.path.join(out,'lamps_s680_%d.fbx'%(b//BATCH))
     bpy.ops.export_scene.fbx(filepath=path,use_selection=True,object_types={'MESH'},global_scale=1.0,apply_unit_scale=True,bake_space_transform=False,add_leaf_bones=False,bake_anim=False,axis_forward="-Z",axis_up="Y",mesh_smooth_type="FACE",use_mesh_modifiers=False)
     print('FILE',path,len(items[b:b+BATCH]),os.path.getsize(path)//1024,'KB')

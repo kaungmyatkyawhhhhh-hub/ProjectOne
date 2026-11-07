@@ -17,3 +17,5 @@ def load(id):
         r['sz']=[b-a for a,b in zip(r['mn'],r['mx'])]
     return dict(x0=xs,id=id,names=names,rows=rows,zmin=float(z.group(1)),zmax=float(z.group(2)),end='@END@' in s)
 IDS="lexis_lfa lexis_lfa_circuit lambrini_lp700 lambrini_lp750 lambrini_revuelto lambrini_svj lambrini_svj63 bugotti_veyron bugotti_veyron_sport bugotti_veyron_top bugotti_chiron bugotti_chiron_pursport bugotti_chiron_supersport".split()
+
+IDS2="lambrini_lp570 lambrini_lp560 lambrini_huracan lambrini_performante lambrini_sto lambrini_sterrato lambrini_lp640 lambrini_lp670 lambrini_urusp ferrara_california ferrara_458spider ferrara_458speciale dearb_focus_rs lambrini_countach bentz_s680 bentz_gls".split()
