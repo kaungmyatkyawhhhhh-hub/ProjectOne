@@ -20,6 +20,7 @@ Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongm
 - **5 Nov (Claude Code, Studio, not published):** Plate Forge booth rebuilt + new PLATE FORGE window with a buy moment. See [[GYM ARC/Progress/2026-11-05 GYM ARC Plate Forge booth and forge window]].
 - **6 Nov (Claude Code, Studio, not published):** alter skins 1-20 + the 6 skins, alter VFX and all 13 auras on the ChatGPT art (uploaded to Myanmar Builders Club, ids in `Config/ArtIds`; skins re-tiled so facets are hand-sized, gem facets, flat aura rings). Phones still get no alter particles (4 Nov rule). FPS needs a real phone check. See [[GYM ARC/Progress/2026-11-06 GYM ARC Alter skins, alter VFX and auras on the new art]].
 - **7 Nov (Claude Code, Studio, not published):** posing show / runway results only for the people on stage (compact card; others get a small right-column toast only when a real player wins; Settings "Posing Announcements"; judges' star cards hidden after the show). Out-of-stamina card fixed (recovering never started). See [[GYM ARC/Progress/2026-11-07 GYM ARC Posing show results quiet + stamina card fixed]].
+- **7 Nov (Claude Code, Studio, not published):** daily calendar: day 2 BEAST FORMULA, day 4 MONSTER MIX, day 7 TITAN SERUM; coins grow with total EXP, day 7 up to 25,000 (from 2B EXP). See [[GYM ARC/Progress/2026-11-07 GYM ARC Daily rewards - serums and EXP coins]].
 - **Last updated:** 2026-11-07
 
 ## SPEED ARC (Roblox running simulator): PAUSED (29 Oct)
