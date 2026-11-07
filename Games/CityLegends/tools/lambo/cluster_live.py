@@ -1935,8 +1935,15 @@ def sl65():
     return m.sls(Spec, needle_sprite, add_needle, twin=True)
 
 
-BUILDERS = {"mc12c": mc12c, "sls": sls, "sl65": sl65, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
+def f599():
+    import cluster_imports as m
+
+    return m.f599(Spec, needle_sprite, add_needle, glyph)
+
+
+BUILDERS = {"mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "f599": ("ferrari_599_cluster_owner.webp", (0, 208, 1600, 812), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="23:36", odo="011972", distUnit="km", kmh=False, fuel=0.5)),
     "sl65": ("sls_sl65_cluster_owner.png", (71, 60, 677, 317), None, dict(v=0.8, gear="N", mph=0, manual=False, clock="2:40", odo="003274", distUnit="mi", kmh=False)),
     "sls": ("sls_sl65_cluster_owner.png", (71, 60, 677, 317), None, dict(v=0.8, gear="N", mph=0, manual=False, clock="2:40", odo="003274", distUnit="mi", kmh=False)),
     "mc12c": ("mclaren_12c_cluster_owner.webp", (14, 131, 974, 494), (14, 131, 974, 494), dict(v=1.0, gear="N", mph=0, manual=False, clock="10:47", odo="003274", distUnit="mi", kmh=False)),

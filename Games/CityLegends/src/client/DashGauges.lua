@@ -3607,6 +3607,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	LiveSL65 = function(gui)
 		return liveCluster(gui, "sl65")
 	end,
+	LiveF141 = function(gui)
+		return liveCluster(gui, "f599")
+	end,
 	LiveSLS = function(gui)
 		return liveCluster(gui, "sls")
 	end,

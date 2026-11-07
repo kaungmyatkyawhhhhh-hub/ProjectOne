@@ -8,7 +8,7 @@ import os
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
-from cluster_art import ARIAL, ARIAL_B, REG, ROBO_B, TECH, Art, font
+from cluster_art import ARIAL, ARIAL_B, ARIAL_BI, REG, ROBO_B, TECH, Art, font
 from cluster_lfa_maybach import band_mask, blend, field, polar, smooth
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -369,4 +369,156 @@ def sls(Spec, needle_sprite, add_needle, twin=False):
     sp.readout("small", 322, 246.5, "l", 5, "clock", (226, 228, 230))
     sp.readout("small", 412, 246.5, "r", 3, "alt", (226, 228, 230))
     sp.readout("smallu", 415, 247, "l", 4, "altUnit", (226, 228, 230))
+    return sp
+
+
+def f599(Spec, needle_sprite, add_needle, glyph):
+    """the F141: the white screen on the left, the big yellow rev dial, a black speedometer on the right. No horse.
+    Coordinates below are the photo at 1400 wide; K puts them on the 1600 px photo."""
+    K = 8 / 7
+    box = (0, 208, 1600, 812)
+    REF = "ferrari_599_cluster_owner.webp"
+    A = Art(REF, box, S=2, bg=(12, 12, 14))
+    sp = Spec("f599", box[2] - box[0], box[3] - box[1], 1.2, 1.2, box[0], box[1])
+    sp.redline, sp.idle = 9.5, 0.9
+
+    def P(x, y):
+        return (x * K, y * K)
+
+    def T(x, y, s, f, size, col, **kw):
+        A.text(x * K, y * K, s, f, size * K, col, **kw)
+
+    def L(pts, col, w):
+        A.line([P(*p) for p in pts], col, w * K)
+
+    C1 = P(703, 432)
+    C2 = P(1097, 474)
+    INK = (20, 34, 18)
+    YEL = (238, 208, 40)
+    PALE = (206, 224, 214)
+    ORG = (246, 150, 40)
+    RED = (232, 34, 26)
+
+    def rev(v):
+        return 180 + 25.7 * v
+
+    def kph(v):
+        return 180 + 0.8 * v
+
+    r1, th1 = field(A, C1)
+    r2, th2 = field(A, C2)
+    h, w = r1.shape
+
+    # the speedometer, under the yellow dial's edge
+    blend(A, np.full((h, w, 3), (5.0, 5.0, 6.0)), band_mask(r2, -10, 190 * K, 0.6))
+    s = 26 + 20 * smooth(180 * K, 190 * K, r2)
+    blend(A, np.stack([s, s, s], axis=-1), band_mask(r2, 182 * K, 196 * K, 0.6))
+    for v in range(0, 361, 10):
+        big = v % 30 == 0 or v in (20, 50, 80, 110, 140, 170, 200, 230, 260, 290, 320, 360)
+        a, b = polar(C2, (150 if big else 158) * K, kph(v)), polar(C2, 170 * K, kph(v))
+        A.line([a, b], (226, 234, 228), (4 if big else 2) * K * 0.7)
+    for v, f in ((20, 17), (50, 25), (80, 19), (110, 27), (140, 19), (170, 27), (200, 19), (230, 27), (260, 17), (290, 27), (320, 17), (360, 27)):
+        p = polar(C2, 122 * K, kph(v))
+        A.text(p[0], p[1], str(v), ARIAL_B, f * K, PALE)
+    T(1026, 518, "km/h", ARIAL_B, 15, PALE)
+
+    # the yellow dial
+    blend(A, np.full((h, w, 3), (6.0, 6.0, 8.0)), band_mask(r1, 222 * K, 248 * K, 0.6))
+    blend(A, np.full((h, w, 3), (196.0, 198.0, 200.0)), band_mask(r1, 222 * K, 229 * K, 0.6))
+    t = smooth(0, 222 * K, r1)
+    face = np.stack([242 - 8 * t, 214 - 8 * t, 44 + 0 * t], axis=-1)
+    blend(A, face, band_mask(r1, -10, 222 * K, 0.6))
+    for i in range(0, 101):
+        v = i / 10
+        d = rev(v)
+        big = i % 10 == 0
+        mid = i % 5 == 0
+        col = (170, 30, 24) if v >= 9 else INK
+        if big:
+            A.line([polar(C1, 188 * K, d), polar(C1, 222 * K, d)], col, 7 * K * 0.8)
+        else:
+            A.line([polar(C1, (203 if mid else 208) * K, d), polar(C1, 214 * K, d)], col, 1.6 * K)
+    A.line([polar(C1, 212 * K, rev(0) + 0.1 * i) for i in range(0, 2571, 30)], INK, 1.2 * K)
+    for v in range(0, 11):
+        p = polar(C1, 158 * K, rev(v))
+        A.text(p[0], p[1], str(v), ARIAL_BI, 45 * K, INK)
+    T(622, 470, "rpm x 1000", ARIAL_BI, 16, INK)
+    A.round_rect(780 * K, 475 * K, 838 * K, 549 * K, 7 * K, (58, 36, 12))
+    T(808, 542, "auto", ARIAL_B, 11, ORG)
+
+    # the white screen
+    W = [(66, 340), (440, 340), (440, 520), (490, 585), (490, 652), (50, 652)]
+    A.poly([P(x - 6, y - 6) for x, y in W[:1]] + [P(446, 334), P(446, 518), P(496, 583), P(496, 658), P(44, 658), P(60, 334)], (34, 34, 38))
+    A.poly([P(*p) for p in W], (232, 232, 228))
+    L([(66, 377), (440, 377)], (24, 24, 26), 2)
+    L([(66, 583), (486, 583)], (120, 120, 120), 1.6)
+    T(275, 358, "26 °C", ARIAL_B, 27, (20, 20, 22))
+    T(388, 364, "SPORT", ARIAL, 20, (20, 20, 22))
+
+    def gauge(c, low, top, high):
+        for a in range(-135, 92, 3):
+            A.line([polar(c, 66 * K, a), polar(c, 66 * K, a + 3)], (16, 16, 18), 8 * K)
+        for a in range(92, 136, 3):
+            A.line([polar(c, 66 * K, a), polar(c, 66 * K, a + 3)], (206, 30, 24), 8 * K)
+        for a in (-90, -45, 0, 45, 90):
+            A.line([polar(c, 58 * K, a), polar(c, 70 * K, a)], (232, 232, 228), 1.6 * K)
+        T(c[0] / K, c[1] / K - 50, top, ARIAL, 18, (24, 24, 26))
+        T(c[0] / K - 38, c[1] / K + 36, low, ARIAL, 18, (24, 24, 26))
+        T(c[0] / K + 30, c[1] / K + 34, high, ARIAL, 18, (24, 24, 26))
+        T(c[0] / K - 5, c[1] / K - 26, "°C", ARIAL, 14, (24, 24, 26))
+        A.circle(c[0], c[1], 12 * K, None, outline=(150, 150, 154), w=3 * K)
+        A.line([polar(c, 12 * K, -98), polar(c, 60 * K, -98)], (226, 40, 30), 2.2 * K)
+
+    gauge(P(165, 456), "60", "100", "140")
+    gauge(P(335, 456), "50", "110", "170")
+    A.round_rect(70 * K, 535 * K, 116 * K, 581 * K, 3 * K, (30, 30, 30))
+    A.round_rect(82 * K, 543 * K, 98 * K, 573 * K, 2 * K, ORG)
+    for x in range(105, 236, 26):
+        L([(x, 594), (x, 612)], (150, 150, 150), 1.4)
+    L([(105, 594), (235, 594), (235, 612), (105, 612), (105, 594)], (120, 120, 120), 1.6)
+    T(106, 642, "0", ARIAL, 17, (24, 24, 26))
+    T(172, 640, "1/2", ARIAL, 17, (24, 24, 26))
+    T(230, 642, "1", ARIAL, 17, (24, 24, 26))
+    A.round_rect(62 * K, 603 * K, 82 * K, 638 * K, 2 * K, (30, 30, 34))
+    A.round_rect(242 * K, 590 * K, 302 * K, 613 * K, 3 * K, (240, 170, 80))
+    T(272, 601, "auto", ARIAL_B, 22, (24, 24, 26))
+
+    A.final = A.finish(A.S, blur=1.2, strength=0.15)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    add_fuel(sp, REF, box, 106 * K, 595 * K, 234 * K, 611 * K, (244, 168, 70), S=2)
+
+    # warning lamps, parked as in the photo
+    B = Art(REF, box, S=2, bg=(0, 0, 0))
+    for x, y, col in ((850, 250, (240, 130, 30)), (900, 303, (226, 44, 30)), (955, 317, (226, 44, 30)), (905, 560, (240, 170, 40)), (875, 598, (226, 44, 30))):
+        B.round_rect((x - 13) * K, (y - 9) * K, (x + 13) * K, (y + 9) * K, 3 * K, None, outline=col, w=2.4 * K)
+    B.final = B.finish(B.S, blur=1, strength=0)
+    sp.add_show(sp.box(B, (820 * K, 232 * K, 990 * K, 620 * K), black=True), "parked")
+
+    # needles
+    parts = [(-46, 0, 4.4, 4.4, RED), (0, 190, 5.0, 1.4, RED)]
+    add_needle(sp, needle_sprite(sp, 190, 46, parts, hub=34, hub_col=(204, 206, 210), hub_line=(120, 122, 126)), C1[0], C1[1], "rpm", [(0, rev(0)), (10.5, rev(10.5))])
+    parts2 = [(-40, 0, 3.6, 3.6, RED), (0, 155, 5.0, 1.2, (236, 40, 90))]
+    add_needle(sp, needle_sprite(sp, 158, 40, parts2, hub=32, hub_col=(240, 240, 240), hub_line=(120, 122, 126)), C2[0], C2[1], "kmh", [(0, kph(0)), (360, kph(360))])
+
+    # gear box: orange, the way the photo has it
+    sprites = {}
+    f = {"path": ARIAL_B, "size": 52, "chars": "", "stroke": 0.1, "shear": 0, "track": 0}
+    for ch in "RN1234567":
+        g, ox, oy, adv = glyph(ch, f, sp.A)
+        c = Image.new("RGBA", g.size, ORG + (0,))
+        c.putalpha(g.getchannel("A"))
+        sprites[ch] = {"im": c}
+    sp.gear = {"x": 808 * K - sp.ox, "y": 505 * K - sp.oy, "sprites": sprites}
+
+    dark = (20, 20, 22)
+    sp.font("clock", ARIAL_B, 36, "0123456789:", shear=0, track=1.5)
+    sp.readout("clock", 118 * K, 359 * K, "m", 5, "clock", dark)
+    sp.font("odo", ARIAL, 32, "0123456789", shear=0, track=0.8)
+    sp.readout("odo", 368 * K, 634 * K, "r", 7, "odoTrim", dark)
+    sp.font("spd", ARIAL, 44, "0123456789", shear=0, track=0.5)
+    sp.readout("spd", 466 * K, 630 * K, "r", 3, "speed", dark)
+    sp.font("unit", ARIAL, 21, "kmhpi/", shear=0)
+    sp.readout("unit", 440 * K, 598 * K, "m", 4, "unit", dark)
+    sp.readout("unit", 349 * K, 598 * K, "m", 2, "distUnit", dark)
     return sp

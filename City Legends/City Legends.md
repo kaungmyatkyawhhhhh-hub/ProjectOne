@@ -33,13 +33,15 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 | 1 | Speedmark P11 Spider (`mclaran_12c`) | **Done:** model, logos out, cluster live in the model's own hood, paint, lamps. Name changed to Spider, same id, price, level, class. |
 | 2 | Tri-Star Silber C197 Wingdoor (`bentz_sls`) | **Done:** same. Doors: the file has no separate gullwing doors in a form the game can use, and the game has no door system, so they stay shut. |
 | 3 | Tri-Star Silber R230 V12 Track (`bentz_sl65bs`) | **Done:** model, logos out, our Trio 6 rims and tyres (the file's tyres had the maker's name on them). Its hood is two round bowls with no room for the plate, so it gets the C197's dials side by side, with small windows for speed and P R N D. The model's two small side dials stay as they are: they don't move. |
-| 4-8 | F141, Highland, Sovereign, Z33, G20 | Converted in Blender only, not in the game yet. **Next: car 4.** |
+| 4 | Rosso Rampante F141 (`ferrara_599`) | **Done:** model, every horse and name out, our Corsa 10 rims. Cluster fills the model's whole hood: a little bigger than the model's own small dials, so it can be read. Temperature gauges don't move. Pictures: [[F141 - driver's seat.jpg]], [[F141 cluster - photo and redraw.jpg]]. |
+| 5-8 | Highland, Sovereign, Z33, G20 | Converted in Blender only, not in the game yet. **Next: car 5.** |
 | 9 | Trailer | Done, in the game since 2026-11-07. |
 
 - **Roof on the P11 Spider:** up. The file only has the roof-up shape.
 - **Clusters:** `tools/lambo/cluster_imports.py`, drawn fresh and placed by the photos, no pieces cut from them, no names on the dials. P11: revs, speed, gear, oil and fuel bars, odometer, trip, range, clock, modes live; water bar still. C197: both needles, fuel needle, shift lights, P R N D, speed in both units, clock live; oil temperature still; indicator arrows don't light (the clusters don't know the indicators yet). New in `DashGauges`: bars and a needle that follow the real fuel.
 - **Under the hood, not over it:** each panel lies inside the model's own hood, cut by `tools/lambo/window_mask.py` from `frame_probe.py`'s depth, so the model's ring and frame stay in front (the owner's rule from the LFA).
 - **Tail lamps:** the P11's own red lens lights up. The C197 keeps its lamps in one mesh, so `tools/lambo/tail_split.py` takes the lens strips out as `Body_TailLens`.
+- **Trap found:** a new small plain-colour picture can fail to load for a long time (F141's tyres and grilles came out white): swap in one that's known good (78370881509044, dark grey).
 - **Trap found:** `make_sync.py` updates its list when it builds, so a build that isn't uploaded is lost: the next one leaves those files out. Upload after every build.
 - **Backups:** `ServerStorage.OldCarModels`: `mclaran_12c_old_2026-11-08`, `bentz_sls_old_2026-11-08`. Tool: `ServerStorage.ClaudeTools.CarSwap`.
 - **Checked in Play (PC):** outside, rear, cluster from the driver's side parked. **Not checked yet:** the two cars at speed, night, Customs paint, phone size.

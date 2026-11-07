@@ -1,0 +1,101 @@
+{
+ "id": "ferrara_599",
+ "drop": [
+  "fphong16sg1"
+ ],
+ "roles": {
+  "fphong4sg1": "Paint",
+  "fphong5sg1": [
+   "Trim",
+   0.3,
+   0.0
+  ],
+  "fphong12sg1": [
+   "Trim",
+   0.42,
+   0.0
+  ],
+  "fphong8sg1": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "fphong10sg1": "Carbon",
+  "fphong13sg1": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "fphong14sg1": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "fphong11sg1": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "fphong6sg1": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "fphong9sg1": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "fphong7sg1": [
+   "Mirror",
+   0.06,
+   1.0
+  ],
+  "fphong15sg1": [
+   "Tyre",
+   0.8,
+   0.0
+  ],
+  "fphong19sg1": [
+   "Rim",
+   0.28,
+   0.85
+  ],
+  "fphong17sg1": [
+   "Brake",
+   0.28,
+   0.2
+  ],
+  "fphong18sg1": [
+   "Disc",
+   0.35,
+   0.85
+  ],
+  "fphong21sg1": [
+   "Trim",
+   0.3,
+   0.9
+  ],
+  "fphong20sg1": [
+   "Trim",
+   0.3,
+   0.0
+  ]
+ },
+ "lens": [
+  [
+   "fphong2sg1",
+   "Lens_Red"
+  ],
+  [
+   "fphong3sg1",
+   "Lens_Orange"
+  ]
+ ],
+ "cover": [
+  0,
+  -2.105,
+  0.574,
+  0.03
+ ]
+}

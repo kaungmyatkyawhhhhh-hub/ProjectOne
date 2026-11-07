@@ -56,6 +56,7 @@ CarSkin.CLUSTER_STYLE = {
 	audy_r8 = "R8",
 	mclaran_12c = "Live12C", -- from the owner's photo
 	bentz_sls = "LiveSLS", -- from the owner's photo
+	ferrara_599 = "LiveF141", -- from the owner's photo
 	bentz_sl65bs = "LiveSL65", -- the same dials, in the model's two bowls
 	porsha_gt3 = "Porsche991GT3", -- the 991.2 GT3's five dials, sized into the 718 cabin's hood
 	bentz_cla45 = "AMG",
@@ -137,6 +138,7 @@ CarSkin.CLUSTER_RECT = {
 	lambrini_lp700 = { at = Vector3.new(0.0027, 0.0379, -0.2421), face = Vector3.new(0, 0.108, 0.9942), w = 0.3328, h = 0.1367 },
 	-- the third import job (2026-11-07): the owner's cluster photos, over the model's own ring
 	lexis_lfa = { at = Vector3.new(-0.01, 0.0338, -0.1424), face = Vector3.new(0, 0.14, 0.99), w = 0.25, h = 0.1637 }, -- (down in the hood: tools/lambo/frame_probe.py)
+	ferrara_599 = { at = Vector3.new(-0.002, 0.042, -0.2676), face = Vector3.new(0, 0.407, 0.913), w = 0.3616, h = 0.1365 }, -- the whole hood, a little bigger than the model's dials
 	bentz_sl65bs = { at = Vector3.new(0.022, 0.0715, -0.2433), face = Vector3.new(0, 0.2, 0.98), w = 0.234, h = 0.106 }, -- in the two bowls
 	bentz_sls = { at = Vector3.new(0.0021, 0.0377, -0.2165), face = Vector3.new(0, 0.2, 0.98), w = 0.3163, h = 0.1342 }, -- in the model's hood, in front of its dials
 	mclaran_12c = { at = Vector3.new(-0.0045, 0.0679, -0.1712), face = Vector3.new(0, 0.2, 0.98), w = 0.34, h = 0.12 }, -- in the model's own hood (tools/lambo/frame_probe.py)
@@ -256,10 +258,6 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0921, 0.0647, -0.2335), face = Vector3.new(-0.0011, 0.2758, 0.9612), length = 0.0435, scale = "0:-125.2,150:5.8,300:122.8" },
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0698, 0.0673, -0.2341), face = Vector3.new(-0.0012, 0.2757, 0.9613), length = 0.0422, scale = "0:-127.7,4000:-0.9,8000:124.6" },
 	},
-	ferrara_599 = { -- 599 (its own cluster, like the owner's photo)
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0093, 0.0332, -0.2044), face = Vector3.new(-0, 0.3732, 0.9278), length = 0.0362, scale = "0:-179.4,5000:-46.3,10000:74.1" },
-		{ kind = "speed", unit = "kmh", at = Vector3.new(0.1007, 0.0333, -0.2044), face = Vector3.new(-0, 0.3734, 0.9277), length = 0.0333, scale = "0:176.2,170:316.2,350:470.8" },
-	},
 	mazdo_rx8 = { -- RX-8 (rev counter and the speed read-out)
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0021, 0.0463, -0.2049), face = Vector3.new(0, 0.18, 0.9837), length = 0.043, scale = "0:178.5,1000:201.4,4000:269.9,7000:347.7,10000:424.0" },
 		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0286, 0.0321, -0.2023), face = Vector3.new(0, 0.18, 0.9837), length = 0.0242, scale = "" },
@@ -283,7 +281,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -393,7 +391,7 @@ CarSkin.STEER_MODEL = {
 	-- (the LP700 and the SV keep their models' own wheels: owner, 2026-11-04)
 	lambrini_urus = "AventadorFlat",
 	-- Ferrari
-	ferrara_f430 = "FerrariF430", ferrara_599 = "FerrariF430",
+	ferrara_f430 = "FerrariF430",
 	ferrara_458 = "Ferrari458",
 	-- the other supercars and hypercars
 	audy_r8 = "AudiR8", lexis_lc500 = "LexusSport",
@@ -502,7 +500,6 @@ end
 
 -- cars that take only another model's steering wheel, put where their own one sits
 CarSkin.STEER_DONOR = {
-	ferrara_599 = "ferrara_f430", -- owner: the F430's wheel in the 599
 	bnw_x6 = "bnw_750li", -- owner (2026-10-22): the X6's own wheel looked bad; the 7 Series' one
 	toyoka_alfard = "toyoka_lc300", -- its own wheel has the maker's logo printed on (owner: no logos)
 } :: { [string]: string }

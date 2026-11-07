@@ -267,6 +267,10 @@ return {
 		shells = { { name = "SeeThrough_Lens_Red" } },
 		spots = {},
 	},
+	ferrara_599 = {
+		shells = { { name = "SeeThrough_Lens_Red" } },
+		spots = {},
+	},
 	mclaran_12c = {
 		shells = { { name = "SeeThrough_Lens_Red" } },
 		spots = {},
