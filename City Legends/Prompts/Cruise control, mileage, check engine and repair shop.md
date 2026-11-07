@@ -82,6 +82,7 @@ Each car has a few simple health numbers (0–100%), saved per car:
 - **Find the real fuel stations in Monaco** and put ours where they really are on our map:
   - get them from **OpenStreetMap** (Overpass API: `amenity=fuel` inside Monaco; the map already uses OSM data; credit "© OpenStreetMap contributors");
   - you may **look** at Google Maps / Street View to check each one's position, layout and look, but don't copy Google's map data or images into the game;
+  - **don't put stations close to each other** (owner, 2026-11-07: some real ones are very close together on Google Maps). If two real stations are near each other (e.g. within about 400 m in real life, or so close on our map that both are visible from one), **keep only one of them** (the one on the bigger road / easier to reach) and skip the other. Spread the stations so every part of the map has one within a fair drive. Note which ones were kept and skipped.
   - place each station on our map at the matching spot (the map is built from OSM, so convert with the same transform). If a real spot doesn't fit our roads, put it on the nearest sensible plot and note it.
 - **Each station:**
   - a canopy with lights;
