@@ -916,9 +916,7 @@ function Driving.setTow(kg: number?)
 	end
 	s.towKg = kg
 	s.applyTune()
-	UI.setTowing(kg ~= nil)
 	if not kg then
-		remote("CarSignals"):FireServer({ brake = false, rev = false })
 		s.towBrake, s.towRev = false, false
 	end
 end

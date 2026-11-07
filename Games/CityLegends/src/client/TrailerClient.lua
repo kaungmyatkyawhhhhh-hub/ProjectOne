@@ -217,7 +217,8 @@ local function follow(r: Rec, car: Model, dt: number)
 	ahead = if ahead.Magnitude > 0.05 then ahead.Unit else Vector3.new(0, 0, -1)
 	local flat = Vector3.new(hw.X, 0, hw.Z)
 	-- the axle is dragged along the line to the hitch
-	local axle = r.axle or (flat - ahead * L)
+	local rootPos = r.root.Position
+	local axle = r.axle or Vector3.new(rootPos.X, 0, rootPos.Z) -- (hitching on: it stays as it stands)
 	local jumped = (flat - axle).Magnitude > L * 1.6 -- (fast travel: straight behind it again)
 	if jumped then
 		axle = flat - ahead * L
@@ -301,6 +302,7 @@ end
 
 local poseT = 0
 local mine: Rec? = nil
+local towLamp = false
 local remotes: Instance
 
 local function step(dt: number)
@@ -342,6 +344,17 @@ local function step(dt: number)
 	local m = mine
 	local towing = m ~= nil and m.model:GetAttribute("Hitched") == true and Driving.isDriving()
 	Driving.setTow(if m and towing then m.model:GetAttribute("TotalKg") :: number else nil)
+	if towing ~= towLamp then
+		towLamp = towing
+		UI.setTowing(towing)
+		if not towing then
+			-- (out of the car or unhitched: the trailer's brake and reverse lamps go off)
+			local signals = remotes:FindFirstChild("CarSignals")
+			if signals then
+				(signals :: RemoteEvent):FireServer({ brake = false, rev = false })
+			end
+		end
+	end
 	if m and towing then
 		poseT -= dt
 		if poseT <= 0 then
