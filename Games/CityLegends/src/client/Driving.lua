@@ -44,6 +44,7 @@ local UI = require(script.Parent:WaitForChild("UI"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
 local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
+local CarLamps = require(script.Parent:WaitForChild("CarLamps"))
 
 local camera = workspace.CurrentCamera
 
@@ -194,6 +195,8 @@ type State = {
 	blinker: string, -- "" | "L" | "R" | "H"
 	blinkT: number,
 	blinkLights: { L: { PointLight }, R: { PointLight } },
+	lamps: boolean, -- a model with its own working lamps (CarLamps): no box-car lights on it
+	beam: string, -- "off" | "drl" | "low" | "high" (lamps only)
 	tails: { BasePart }, -- tail lamps (TailLight parts): dim with the lights on, bright when braking
 	rearGlow: { PointLight },
 	tailBrake: boolean?,
@@ -799,6 +802,11 @@ function Driving.detach()
 	for _, f in s.flameParts do
 		f:Destroy()
 	end
+	if s.lamps then
+		CarLamps.drive(nil, "off", "", false, false)
+		CarLamps.reset()
+		UI.setLampMode(nil)
+	end
 	s.engine:destroy()
 	if s.roar then
 		s.roar:Destroy()
@@ -1147,6 +1155,7 @@ local function indicatorState(s: State): { [string]: any }
 		park = s.parkBrake,
 		tc = s.tc,
 		lights = s.lightsOn,
+		beam = s.beam,
 		blinker = s.blinker,
 	}
 end
@@ -1176,6 +1185,9 @@ local function setLights(s: State, on: boolean)
 	s.lightsOn = on
 	DashGauges.lightsOn = on
 	setTails(s)
+	if s.lamps then
+		return
+	end
 	for _, d in s.model:GetDescendants() do
 		if d:IsA("SpotLight") or (d:IsA("SurfaceLight") and d.Parent and d.Parent.Name:lower():find("head")) then
 			d.Enabled = on
@@ -1225,6 +1237,9 @@ end
 
 local function setCarPower(s: State, on: boolean)
 	setClusterPower(s, on)
+	if s.lamps then
+		return -- (CarLamps decides: the update loop sends the change)
+	end
 	setLights(s, on)
 	remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn })
 end
@@ -1291,6 +1306,10 @@ local function carKey(s: State, key: Enum.KeyCode)
 		DashGauges.tcOff = not s.tc
 		UI.toast(if s.tc then "Traction control on" else "Traction control off", if s.tc then nil else Config.Theme.Warning)
 	elseif key == Enum.KeyCode.L then
+		if s.lamps then
+			CarLamps.press() -- (the mode changes on release, Driving.lampRelease)
+			return
+		end
 		setLights(s, not s.lightsOn)
 		UI.toast(if s.lightsOn then "Lights on" else "Lights off")
 	elseif key == Enum.KeyCode.Z or key == Enum.KeyCode.X or key == Enum.KeyCode.C then
@@ -1302,7 +1321,21 @@ local function carKey(s: State, key: Enum.KeyCode)
 	end
 	UI.setIndicators(indicatorState(s))
 	if key == Enum.KeyCode.L or key == Enum.KeyCode.Z or key == Enum.KeyCode.X or key == Enum.KeyCode.C then
-		remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn })
+		remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn, beam = if s.lamps then s.beam else nil })
+	end
+end
+
+local LAMP_MODES = { auto = "AUTO", low = "LOW BEAM", high = "HIGH BEAM", off = "LIGHTS OFF" }
+function Driving.lampPress()
+	if state and state.lamps then
+		CarLamps.press()
+	end
+end
+function Driving.lampRelease()
+	local mode = CarLamps.release()
+	if mode and state and state.lamps then
+		UI.setLampMode(mode)
+		UI.toast("Lights: " .. LAMP_MODES[mode])
 	end
 end
 
@@ -1379,8 +1412,9 @@ local function updateOthers()
 		if not o then
 			continue
 		end
+		local lamps = CarLamps.hasModel(model) -- (their lamps blink themselves)
 		for side, list in { L = o.L, R = o.R } do
-			local on = lit and (blinker == "H" or blinker == side)
+			local on = lit and (blinker == "H" or blinker == side) and not lamps
 			for _, l in list do
 				l.Enabled = on
 			end
@@ -1389,7 +1423,7 @@ local function updateOthers()
 		for _, e in o.smoke do
 			e.Rate = (if smokeLevel >= 2 then 70 elseif smokeLevel >= 1 then 25 else 0) * fxQuality() * Driving.smoke
 		end
-		if lights ~= nil and lights ~= o.lights then
+		if lights ~= nil and lights ~= o.lights and not lamps then
 			o.lights = lights :: boolean
 			for _, d in model:GetDescendants() do
 				if d:IsA("SpotLight") then
@@ -1950,6 +1984,8 @@ function Driving.attach(model: Model)
 		blinker = "",
 		blinkT = 0,
 		blinkLights = blinkLights,
+		lamps = CarLamps.has(spec.Id),
+		beam = "off",
 		tails = {},
 		rearGlow = {},
 		dashPanel = if dashPanel and dashPanel:IsA("BasePart") then dashPanel else nil,
@@ -2016,6 +2052,10 @@ function Driving.attach(model: Model)
 		table.insert(s.flameColors, e.Color)
 	end
 	state = s
+	if s.lamps then
+		CarLamps.reset()
+		UI.setLampMode(CarLamps.mode)
+	end
 	-- road roar: the tyres on the tarmac and the air round the car, rising with speed
 	do
 		local roar = Instance.new("Sound")
@@ -3162,7 +3202,7 @@ function Driving.render(dt: number)
 		s.blinkT += dt
 		local lit = (s.blinkT % 0.8) < 0.4
 		for side, lights in s.blinkLights do
-			local on = lit and (s.blinker == "H" or s.blinker == side)
+			local on = lit and (s.blinker == "H" or s.blinker == side) and not s.lamps
 			for _, l in lights do
 				l.Enabled = on
 			end
@@ -3179,6 +3219,20 @@ function Driving.render(dt: number)
 			end
 		end
 		UI.setBlink(false, false)
+	end
+
+	-- the new models' lamps (CarLamps): the beam it should be now, told to everyone when it changes
+	if s.lamps then
+		local beam = CarLamps.beamFor(s.engineOn, s.inTunnel == true)
+		if beam ~= s.beam then
+			s.beam = beam
+			setLights(s, beam == "low" or beam == "high")
+			UI.setIndicators(indicatorState(s))
+			remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn, beam = beam })
+		end
+		local reversing = s.engineOn and (fwdSpeed < -1 or (s.manual and s.mgear < 0))
+		CarLamps.drive(s.model, beam, s.blinker, s.blinker ~= "" and (s.blinkT % 0.8) < 0.4, reversing)
+		CarLamps.wet = Driving.wet
 	end
 
 	-- the rush: how fast it feels, by real speed (so a quick car at 150 feels it whatever its top)
@@ -3535,6 +3589,13 @@ function Driving.init()
 			carKey(state, input.KeyCode)
 		end
 	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.L then
+			Driving.lampRelease()
+		end
+	end)
+	UI.onLampPress = Driving.lampPress
+	UI.onLampRelease = Driving.lampRelease
 
 	remote("Earned").OnClientEvent:Connect(function(info)
 		if type(info) ~= "table" then

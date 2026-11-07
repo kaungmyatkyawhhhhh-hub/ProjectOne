@@ -290,7 +290,8 @@ local function swapCars(profile: Profile)
 		if hadOld and hadNew then
 			local loser = if oldWins then new else old
 			cpBack = math.max(((profile.CarLevels[loser] or 1) - 1) * Config.CarLevels.CpPerLevel, profile.CarCP[loser] or 0)
-			for _, partId in profile.CarParts[loser] or {} do
+			local parts: { [string]: string } = profile.CarParts[loser] or {}
+			for _, partId in parts do
 				spare(partId, loser)
 			end
 		end
@@ -306,9 +307,10 @@ local function swapCars(profile: Profile)
 			if cpBack > 0 then
 				profile.CarCP[new] = (profile.CarCP[new] or 0) + cpBack
 			end
-			for slot, partId in profile.CarParts[new] or {} do
+			local parts: { [string]: string } = profile.CarParts[new] or {}
+			for slot, partId in parts do
 				if not CarStats.partAllowed(new, partId) then
-					profile.CarParts[new][slot] = nil
+					parts[slot] = nil
 					spare(partId, old)
 				end
 			end

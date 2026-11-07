@@ -669,6 +669,10 @@ CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
 	if type(raw.lights) == "boolean" then
 		car:SetAttribute("Lights", raw.lights)
 	end
+	-- (2026-11-07) the new models' beam (CarLamps)
+	if raw.beam == "off" or raw.beam == "drl" or raw.beam == "low" or raw.beam == "high" then
+		car:SetAttribute("Beam", raw.beam)
+	end
 	-- (2026-11-03) tyre smoke for the other players: 0 / 1 / 2
 	if raw.smoke == 0 or raw.smoke == 1 or raw.smoke == 2 then
 		car:SetAttribute("Smoke", raw.smoke)

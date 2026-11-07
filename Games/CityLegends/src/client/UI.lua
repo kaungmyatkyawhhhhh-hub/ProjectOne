@@ -29,6 +29,8 @@ local player = Players.LocalPlayer
 
 local UI = {}
 UI.touch = { throttle = 0, brake = 0, steer = 0, handbrake = false }
+UI.onLampPress = nil :: (() -> ())? -- the phone's headlight button (Driving sets these)
+UI.onLampRelease = nil :: (() -> ())?
 UI.isTouch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
 -- Callbacks assigned by Main
@@ -215,6 +217,8 @@ local engineLamp: TextLabel
 local parkLamp: TextLabel
 local tcLamp: TextLabel
 local lightsLamp: TextLabel
+local lampButton: TextButton? = nil
+local BEAM_BLUE = Color3.fromRGB(80, 160, 255)
 local settingsPanel: Frame
 local camFxPanel: Frame
 local camFx = { shake = 1, head = 1, blur = true, fov = Config.Camera.Immersive.Fov }
@@ -364,7 +368,7 @@ local touchHolder: Frame? = nil
 function UI.buildTouchControls()
 	local holder = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = hud })
 	touchHolder = holder
-	local function touchButton(text: string, pos: UDim2, size: UDim2, color: Color3, onDown: () -> (), onUp: () -> ())
+	local function touchButton(text: string, pos: UDim2, size: UDim2, color: Color3, onDown: () -> (), onUp: () -> ()): TextButton
 		local b: TextButton = new("TextButton", {
 			AutoButtonColor = false,
 			Text = text,
@@ -394,6 +398,7 @@ function UI.buildTouchControls()
 				onUp()
 			end
 		end)
+		return b
 	end
 	local left, right = false, false
 	local function updSteer()
@@ -428,6 +433,18 @@ function UI.buildTouchControls()
 	end, function()
 		UI.touch.handbrake = false
 	end)
+	-- (2026-11-07) the new models' headlights: tap = next mode, hold = flash (Driving.lampPress / lampRelease)
+	lampButton = touchButton("AUTO", UDim2.new(1, -114, 1, -230), UDim2.fromOffset(90, 60), Color3.fromRGB(70, 230, 110), function()
+		if UI.onLampPress then
+			UI.onLampPress()
+		end
+	end, function()
+		if UI.onLampRelease then
+			UI.onLampRelease()
+		end
+	end)
+	;(lampButton :: TextButton).TextSize = 16
+	;(lampButton :: TextButton).Visible = false
 end
 
 ---------------------------------------------------------------------
@@ -2369,6 +2386,18 @@ function UI.setGearboxLabel(mode: string)
 	manualBox = mode == "Manual"
 end
 
+-- the new models' headlight button (phones) and its mode: nil hides it
+function UI.setLampMode(mode: string?)
+	if lampButton then
+		lampButton.Visible = mode ~= nil
+		lampButton.Text = if mode then string.upper(mode) else ""
+		local stroke = lampButton:FindFirstChildWhichIsA("UIStroke")
+		if stroke then
+			stroke.Color = if mode == "high" then BEAM_BLUE elseif mode == "off" then Theme.Danger else Color3.fromRGB(70, 230, 110)
+		end
+	end
+end
+
 -- the car's warning lights: { ignition, engine, manual, park, tc, lights, blinker }
 function UI.setIndicators(t: { [string]: any })
 	if not engineLamp then
@@ -2378,6 +2407,7 @@ function UI.setIndicators(t: { [string]: any })
 	parkLamp.Visible = t.park == true
 	tcLamp.Visible = t.tc == false
 	lightsLamp.Visible = t.lights == true and t.ignition == true
+	lightsLamp.TextColor3 = if t.beam == "high" then BEAM_BLUE else Color3.fromRGB(70, 230, 110)
 	UI.setGearboxLabel(if t.manual then "Manual" else "Auto")
 end
 

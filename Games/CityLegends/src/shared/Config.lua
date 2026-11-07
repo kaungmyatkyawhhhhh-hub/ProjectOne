@@ -1532,6 +1532,33 @@ Config.Customs = {
 	},
 }
 
+-- the working lamps of the newest models (client/CarLamps.lua; owner, 2026-11-06). A SpotLight's range
+-- stops at 60 studs, so high beam adds a light further up the road (ReachAhead)
+Config.Lamps = {
+	HoldFlash = 0.35, -- hold L this long: high beam while held
+	DoubleTap = 0.3, -- two taps inside this: a short flash
+	FlashTime = 0.4,
+	AutoOn = 0.3, -- Auto: low beam from this much night (DayCycle.night), off again under AutoOff
+	AutoOff = 0.15,
+	DrlCore = 0.35, -- how see-through the strips are in each state
+	LowGlass = 0.62,
+	HighGlass = 0.5, -- (x the low beam number)
+	Glass = { bugotti_chiron = 0.86, bugotti_chiron_pursport = 0.86, bugotti_chiron_supersport = 0.86 }, -- covers over four lamps
+	NoseGap = 0.4, -- the beams start this far ahead of the nose
+	LowRange = 60, LowAngle = 96, LowBrightness = 9, LowTilt = -9, LowOut = 2,
+	HighRange = 60, HighAngle = 76, HighBrightness = 15, HighTilt = -3.5, HighOut = 1,
+	ReachAhead = 48, ReachUp = 5, ReachRange = 60, ReachAngle = 74, ReachBrightness = 8, ReachTilt = -6,
+	ShadowQuality = 1, -- WorldFx.qualityScale() from which your own low beam casts shadows
+	NearCars = 6, -- other cars with real lights (half on Medium, none on Low, double on Ultra)
+	NearDistance = 260,
+	HazeTexture = "rbxassetid://123351176849967", -- the fog band's soft sheet
+	HazeLength = 44,
+	HazeWidth = 16,
+	GlareImage = "rbxassetid://106509623755056", -- tools/lamps/glare.png
+	GlareSize = 120,
+	GlareDistance = 320,
+}
+
 -- riding along in another player's car (owner, 2026-10-29): Y beside it takes the free seat
 -- nearest you. Every car has a front passenger seat; sedans, SUVs and coupes have two rear seats
 -- too, except the two-seat coupes below (supercars and hypercars are all two-seaters)

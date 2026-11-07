@@ -1183,7 +1183,8 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 	-- tail lamps: parts named as tail / brake lights, the converted cars' measured lamp parts
 	-- (TailLights), and A-Chassis brake-light glow meshes (a "Brake" group, invisible when off)
-	local tails = if CarFinish.CARS[src.Name] then nil else TailLights[src.Name]
+	-- (LampFx_Tail: a lens cut from the model's own lamp, tools/lamps, in place of measured spots)
+	local tails = if CarFinish.CARS[src.Name] or src:FindFirstChild("LampFx_TailL") then nil else TailLights[src.Name]
 	local function isTail(d: BasePart): boolean
 		if tails then
 			for _, sh in tails.shells do
@@ -1910,6 +1911,14 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			k += 1
 			local t = tmpl(d, Vector3.zero)
 			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
+			-- the lamp shells (CarLamps): dark until CarLamps lights them; the tail ones work like any tail lamp
+			if d.Name:sub(1, 7) == "LampFx_" then
+				if d.Name:sub(8, 11) == "Tail" then
+					tailShell(t.part, 1, 0.3)
+				else
+					t.part.Transparency = 1
+				end
+			end
 			cabinMaterial(d, t.part)
 			if isWindow(d) then
 				clearGlass(t.part)
