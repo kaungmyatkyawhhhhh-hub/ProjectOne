@@ -1270,102 +1270,50 @@ end)
 Shared.publish = publish
 Shared.save = save
 
------------------------------------------------------------------------- STEP-ON PADS (7 Nov, owner: "players should be able
--- to step on the buttons"). MapService puts 3 pads in front of each island's BODIES board (MapConfig.Boards.StepPads):
--- UPGRADE = a level of your newest body, +BODY = a copy of it, UNLOCK = the next body. Every 0.6 s: if the island's OWNER
--- stands on one (their HumanoidRootPart over it, feet on it), it buys through the same request handler as the boards
--- (the server checks the price, the money, the rate); standing there repeats it (hold to buy). Only your own island's pads
--- are ever checked for you, so nobody can buy on someone else's island. A click is the backup. The pad's attributes tell
--- the client what to draw: Body, Price (-1 = none), State (ok / locked / max / none), Pressed / Denied (counters).
-local STEP_EVERY = 0.6
-local function stepPadAction(s, id: string): (string?, number?, number?, string, string)
-	local d = s.d
-	local top = -1
-	for k = 0, #Econ.Tiers - 1 do
-		if d.owned[k + 1] >= 1 then top = k end
-	end
-	if id == "Upgrade" then
-		if top < 0 then return nil, nil, nil, "", "none" end
-		return "BuyBody", top, Econ.Cost(top, d.owned[top + 1], d.perks), Econ.Tiers[top + 1].name, "ok"
-	elseif id == "Copy" then
-		if top < 0 then return nil, nil, nil, "", "none" end
-		if d.copies[top + 1] >= Econ.MaxCopies then return nil, nil, nil, Econ.Tiers[top + 1].name, "max" end
-		return "BuyCopy", top, Econ.CopyCost(top, d.copies[top + 1], d.perks), Econ.Tiers[top + 1].name, "ok"
-	elseif id == "Unlock" then
-		local nxt = top + 1
-		if nxt >= #Econ.Tiers then return nil, nil, nil, "", "max" end
-		local name = Econ.Tiers[nxt + 1].name
-		if not unlocked(s, nxt) then return nil, nil, nil, name, "locked" end
-		return "BuyBody", nxt, Econ.Cost(nxt, d.owned[nxt + 1], d.perks), name, "ok"
-	end
-	return nil, nil, nil, "", "none"
-end
-local function stepPadsOf(player: Player): Instance?
-	local slot = player:GetAttribute("Island")
-	local g = workspace:FindFirstChild("Galaxy")
-	local island = g and slot and g.Islands:FindFirstChild("Island_" .. slot)
-	if not island or island:GetAttribute("Owner") ~= player.UserId then return nil end
-	return island:FindFirstChild("StepPads")
-end
-local function stepRefresh(s, pads: Instance)
-	for _, m in ipairs(pads:GetChildren()) do
-		local _, _, price, name, state = stepPadAction(s, m:GetAttribute("StepPad") or "")
-		m:SetAttribute("Body", name)
-		m:SetAttribute("Price", price or -1)
-		m:SetAttribute("State", state)
-	end
-end
-local stepDeny = setmetatable({}, { __mode = "k" }) -- [pad] = when it last flashed red (once a second at most)
-local function stepBuy(player: Player, s, m: Instance)
-	local act, arg = stepPadAction(s, m:GetAttribute("StepPad") or "")
-	local ok = false
-	if act then ok = handleRequest(player, act, arg, nil) == true end
-	if ok then
-		m:SetAttribute("Pressed", (m:GetAttribute("Pressed") or 0) + 1)
-	elseif os.clock() - (stepDeny[m] or 0) >= 1 then
-		stepDeny[m] = os.clock()
-		m:SetAttribute("Denied", (m:GetAttribute("Denied") or 0) + 1)
-	end
-	if m.Parent then stepRefresh(s, m.Parent) end
-end
-local stepHooked = setmetatable({}, { __mode = "k" })
-local function stepHook(m: Instance)
-	local base = m:FindFirstChild("Base")
-	local click = base and base:FindFirstChildOfClass("ClickDetector")
-	if not click or stepHooked[click] then return end
-	stepHooked[click] = true
-	click.MouseClick:Connect(function(who: Player)
-		local s = sessions[who]
-		-- (the backup click: only the island's owner, on their own island)
-		if s and not s.readOnly and m.Parent and stepPadsOf(who) == m.Parent then stepBuy(who, s, m) end
-	end)
-end
+------------------------------------------------------------------------ THE TYCOON BUTTON (7 Nov, owner: the island's buy pad
+-- "is supposed to be pressable and not just clickable"). Every 0.25 s: if the island's OWNER stands on their own NextPad disc
+-- (their root over it, feet on it), it is PRESSED once: the pad's Press counter goes up (the client sinks the disc + a
+-- click), then 0.12 s later the SAME "BuyPad" the click uses (the server checks the price + that it's your island). One buy
+-- per step-on: the next pad can appear under you, and needs you to step OFF and ON again (no chain-buying). Can't pay: the
+-- pad's Denied counter goes up once per step-on (the client: a soft no + a red flash + "NEED x"). The click stays.
+local onPad = {} -- [player] = true while standing on a NextPad disc (any one)
 task.spawn(function()
 	while true do
-		task.wait(STEP_EVERY)
+		task.wait(0.25)
 		for player, s in pairs(sessions) do
-			if s.readOnly then continue end
-			local pads = stepPadsOf(player)
-			if not pads then continue end
-			stepRefresh(s, pads)
+			local slot = player:GetAttribute("Island")
+			local g = workspace:FindFirstChild("Galaxy")
+			local island = g and slot and g.Islands:FindFirstChild("Island_" .. slot)
+			local pad = island and island:GetAttribute("Owner") == player.UserId and island:FindFirstChild("NextPad")
+			local disc = pad and pad:FindFirstChild("Disc") :: BasePart?
 			local char = player.Character
 			local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 			local hum = char and char:FindFirstChildOfClass("Humanoid")
-			for _, m in ipairs(pads:GetChildren()) do
-				stepHook(m)
-				local base = m:FindFirstChild("Base") :: BasePart?
-				if base and root and hum and hum.Health > 0 then
-					-- (the pad is a cylinder lying flat: its radius = Size.Y / 2, its top = Position.Y + Size.X / 2)
-					local flat = Vector3.new(root.Position.X - base.Position.X, 0, root.Position.Z - base.Position.Z).Magnitude
-					local feet = root.Position.Y - hum.HipHeight - root.Size.Y / 2
-					if flat <= base.Size.Y / 2 and math.abs(feet - (base.Position.Y + base.Size.X / 2)) < 1.5 then
-						task.spawn(stepBuy, player, s, m)
-					end
+			local on = false
+			if disc and root and hum and hum.Health > 0 then
+				-- (the disc is a cylinder lying flat: radius = Size.Y / 2, top = Position.Y + Size.X / 2)
+				local flat = Vector3.new(root.Position.X - disc.Position.X, 0, root.Position.Z - disc.Position.Z).Magnitude
+				local feet = root.Position.Y - hum.HipHeight - root.Size.Y / 2
+				on = flat <= disc.Size.Y / 2 and math.abs(feet - (disc.Position.Y + disc.Size.X / 2)) < 1.5
+			end
+			if on and not onPad[player] and not s.readOnly then
+				local p = pad :: Instance
+				local price = p:GetAttribute("Price") or math.huge
+				if s.d.stardust >= price then
+					p:SetAttribute("Press", (p:GetAttribute("Press") or 0) + 1)
+					task.delay(0.12, function()
+						if p.Parent then handleRequest(player, "BuyPad", nil, slot) end
+					end)
+				else
+					p:SetAttribute("Denied", (p:GetAttribute("Denied") or 0) + 1)
 				end
 			end
+			onPad[player] = on
 		end
 	end
 end)
+Players.PlayerRemoving:Connect(function(p) onPad[p] = nil end)
+
 -- DAILY QUESTS: what a quest counts (the save's own counters), and today's 3 (picked from the ones you can do, the same
 -- 3 all day: seeded by the day and your id)
 Shared.questValue = function(s, id: string): number

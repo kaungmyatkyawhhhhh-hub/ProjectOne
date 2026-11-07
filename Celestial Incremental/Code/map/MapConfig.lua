@@ -211,15 +211,6 @@ MapConfig.Boards = {
 	-- top corners Wide out and High up (wider at the top, like Regrowth's Machines board)
 	Angular = { Low = 0.4, Wide = 1.6, High = 0.7 },
 	BuyRange = 40,  -- (from the island's centre: the island is 60 across, so anywhere on it)
-	-- (7 Nov, owner: "players should be able to step on the buttons": STEP-ON PADS (tycoon pads) in front of a board.
-	-- fwd = studs from the board toward the island's centre, x = studs sideways across that line. MapService places them, checks
-	-- them clear of every piece, board and the island's buy pad; EconService buys while the island's OWNER stands on one)
-	StepPads = {
-		Board = "Bodies", Size = 6, Thick = 0.4,
-		{ id = "Upgrade", label = "UPGRADE", x = -7, fwd = 9, colour = Color3.fromRGB(255, 205, 70) },
-		{ id = "Copy", label = "+BODY", x = 0, fwd = 9, colour = Color3.fromRGB(170, 120, 255) },
-		{ id = "Unlock", label = "UNLOCK", x = 7, fwd = 9, colour = Color3.fromRGB(110, 230, 120) },
-	},
 	DrawRange = 160,
 }
 MapConfig.Boards.ById = {}

@@ -97,7 +97,7 @@ Config.Badges = {
 	-- (owner created 5 of them 6 Nov; Mythic + Celestial: PLACEHOLDERS, the owner sends the ids)
 	CollectionCommon = 3711833782304936, CollectionUncommon = 20592640022331, CollectionRare = 2311076528381815,
 	CollectionEpic = 3492227656070750, CollectionLegendary = 4059818233250995,
-	CollectionMythic = 0, CollectionCelestial = 0,
+	CollectionMythic = 4149417802252565, CollectionCelestial = 825619155411608, -- (created 7 Nov 00:05 GMT: Myth Maker, Celestial Archivist)
 }
 
 return Config

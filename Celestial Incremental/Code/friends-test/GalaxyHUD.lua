@@ -51,25 +51,10 @@ gui.Parent = playerGui
 
 -- Studio phone check (Workspace attribute TestPhone = true, Studio only): the whole HUD laid out inside a 667x375 frame in
 -- the middle of the screen, exactly as on a 667x375 phone (the 3D view around it is the normal one)
-local PHONE_TEST = RunService:IsStudio() and workspace:GetAttribute("TestPhone") == true
-local root: GuiObject | ScreenGui = gui
-if PHONE_TEST then
-	local f = Instance.new("Frame")
-	f.Name = "PhoneTest"
-	f.AnchorPoint = Vector2.new(0.5, 0.5)
-	f.Position = UDim2.fromScale(0.5, 0.5)
-	f.Size = UDim2.fromOffset(667, 375)
-	f.BackgroundTransparency = 1
-	f.ClipsDescendants = true
-	local st = Instance.new("UIStroke")
-	st.Color = Color3.new(1, 1, 1)
-	st.Thickness = 2
-	st.Parent = f
-	f.Parent = gui
-	root = f
-end
+local PHONE_TEST = Kit.testDevice() ~= nil -- (Studio: Workspace TestDevice / TestPhone, UIKit)
+local root: GuiObject | ScreenGui = Kit.testRoot(gui) -- (7 Nov: the safe area; Studio: the emulated device)
 local function viewport(): Vector2
-	return if PHONE_TEST then Vector2.new(667, 375) else workspace.CurrentCamera.ViewportSize
+	return Kit.viewport(root)
 end
 
 ------------------------------------------------------------------------ state from the server's attributes
@@ -88,11 +73,28 @@ local function stardust(): number return player:GetAttribute("Stardust") or 0 en
 ------------------------------------------------------------------------ screen scale (v12 is 1280x720; phones get a bit
 -- bigger so the small text stays readable)
 local small = false
+-- (7 Nov, live: the phone HUD overlapped everywhere: the PC HUD shrunk to 0.67 put text at 3-12 px and chips over each other
+-- and under Roblox's buttons. A PHONE (short side < 500 logical px) gets its own arrangement (layout(), PH below): the
+-- counter + shards + NEXT at the top centre; LVL then IGNITION at the top left UNDER Roblox's buttons (Kit.topbar); the chip
+-- column under them (GalaxyPotions); the event pill under NEXT (GalaxyLive); LUMI's compact card above the hotbar; text >= 14)
+local PH = Kit.phone()
 local function screenScale(): number
 	local vp = viewport()
 	small = vp.Y < 500
 	if small then return math.min(vp.X / 1000, vp.Y / 540) end
-	return math.clamp(math.min(vp.X / 1280, vp.Y / 720), 0.6, 1.4)
+	-- (7 Nov, phone HUD: a TABLET (touch, short side >= 500) never under 1: at 0.92 an iPad drew texts under 14 px. A PC
+	-- window keeps 0.6: at 1 a small window's HUD ran into itself)
+	return math.clamp(math.min(vp.X / 1280, vp.Y / 720), if Kit.touch() then 1 else 0.6, 1.4)
+end
+-- (7 Nov, phone HUD) the phone's scale for its HUD pieces (they're drawn ~0.85 so the text stays >= 14 px) and LUMI's card
+local function phoneScale(): number
+	return math.clamp(viewport().Y / 375, 0.9, 1.05) * 0.85
+end
+function cardScaleNow(): number
+	return if PH then phoneScale() else screenScale()
+end
+local function chipScale(): number
+	return if PH then phoneScale() else screenScale()
 end
 local scaled = {} -- { frame, UIScale, baseOffsetFn }
 local function scaledRoot(name, anchor: Vector2, w, h)
@@ -157,18 +159,18 @@ do
 	Kit.sparkle(top, 76, 10, 8, 1.3)
 end
 local counterText = Kit.text(top, 96, 26, 100, 30, "0", 24, { ZIndex = 9 })
-local rateText = Kit.text(top, 186, Kit.ps(35, 33), 90, 20, "+0/s", Kit.ps(12, 18), { ZIndex = 9, TextColor3 = hex("#ffc35a"), stroke = 1.2 })
+local rateText = Kit.text(top, 186, Kit.ps(33, 33), 90, 20, "+0/s", Kit.ps(15, 18), { ZIndex = 9, TextColor3 = hex("#ffc35a"), stroke = 1.2 })
 counterText.ZIndex = 9
 rateText.ZIndex = 9
 
 -- the SUPERNOVA goal bar under the counter (design step 5: "SUPERNOVA 0% -> 100%"): shown from tutorial step 5 on; full = gold
-local goal = Kit.box(top, 56, 64, 204, 16, { BackgroundTransparency = 0, BackgroundColor3 = hex("#16131b"), ZIndex = 4, Visible = false })
+local goal = Kit.box(top, 56, 64, 204, if PH then 20 else 16, { BackgroundTransparency = 0, BackgroundColor3 = hex("#16131b"), ZIndex = 4, Visible = false })
 Kit.corner(goal, 8)
 Kit.stroke(goal, Kit.INK, 2)
-local goalFill = Kit.box(goal, 0, 0, 0, 16, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
+local goalFill = Kit.box(goal, 0, 0, 0, if PH then 20 else 16, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5 })
 Kit.corner(goalFill, 8)
 local goalGrad = Kit.grad(goalFill, hex("#ffe08a"), hex("#ff9a1a"), 90)
-local goalText = Kit.text(goal, 0, 1, 204, 14, "", 11, { ZIndex = 7, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.3 })
+local goalText = Kit.text(goal, 0, 1, 204, if PH then 18 else 14, "", if PH then 17 else 11, { ZIndex = 7, TextXAlignment = Enum.TextXAlignment.Center, stroke = 1.3 })
 local _g = goalGrad
 
 -- the NEXT line (#223, Tutorial 2 C): always under the counter, the cheapest next NAMED thing ("NEXT: MOON · 80", "NEXT: PAD
@@ -228,7 +230,8 @@ do
 	Kit.stroke(d2, hex("#a77bff"), 2)
 	local _2 = d1
 	Kit.icon(shardsRoot, "shard", -2, 3, 58, Color3.fromRGB(170, 110, 255), { ZIndex = 8 })
-	Kit.text(shardsRoot, 74, 3, 80, 14, "SHARDS", 10, { ZIndex = 9, TextColor3 = hex("#d9c2ff"), stroke = 1 })
+	local cap = Kit.text(shardsRoot, 74, 0, 84, 16, "SHARDS", 14, { ZIndex = 9, TextColor3 = hex("#d9c2ff"), stroke = 1 })
+	if PH then cap.Parent.Visible = false end -- (phone: the shard icon says it; 10 px was unreadable)
 end
 local shardsText = Kit.text(shardsRoot, 66, 17, 96, 28, "0", 22, { ZIndex = 9 })
 
@@ -248,7 +251,8 @@ do
 	Kit.stroke(d2, hex("#5ad1ff"), 2)
 	local _2 = d1
 	Kit.icon(levelRoot, "sun", -2, 3, 58, Color3.fromRGB(90, 200, 255), { ZIndex = 8 })
-	levelXpText = Kit.text(levelRoot, 74, 3, 84, 14, "0/8", 10, { ZIndex = 9, TextColor3 = hex("#bfe9ff"), stroke = 1 })
+	levelXpText = Kit.text(levelRoot, 74, 0, 84, 16, "0/8", 14, { ZIndex = 9, TextColor3 = hex("#bfe9ff"), stroke = 1 })
+	if PH then levelXpText.Parent.Visible = false end -- (phone: the bar under LVL shows it; 10 px was unreadable)
 end
 levelText = Kit.text(levelRoot, 66, 17, 96, 28, "LVL 1", 22, { ZIndex = 9 })
 local ignRoot, ignScale = scaledRoot("Ignition", Vector2.new(1, 0), 170, 34)
@@ -287,7 +291,7 @@ player:GetAttributeChangedSignal("CosmicLevel"):Connect(function()
 	if now > lastLevel then
 		Kit.sound("milestone")
 		Kit.tween(levelScale, { Scale = levelScale.Scale * 1.2 }, 0.08)
-		task.delay(0.08, function() Kit.tween(levelScale, { Scale = screenScale() }, 0.25, Enum.EasingStyle.Back) end)
+		task.delay(0.08, function() Kit.tween(levelScale, { Scale = chipScale() }, 0.25, Enum.EasingStyle.Back) end)
 	end
 	lastLevel = now
 	onLevel()
@@ -298,7 +302,7 @@ shared.GalaxyShardsTarget = function(): Vector2
 end
 shared.GalaxyShardsPop = function()
 	Kit.tween(shardsScale, { Scale = shardsScale.Scale * 1.15 }, 0.06)
-	task.delay(0.06, function() Kit.tween(shardsScale, { Scale = screenScale() }, 0.18, Enum.EasingStyle.Back) end)
+	task.delay(0.06, function() Kit.tween(shardsScale, { Scale = chipScale() }, 0.18, Enum.EasingStyle.Back) end)
 end
 
 ------------------------------------------------------------------------ toasts + floating numbers (one at a time)
@@ -404,7 +408,8 @@ for i, k in ipairs(KEYS) do
 	Kit.stroke(d, hex("#0a070d"), 2)
 	local ring = Kit.box(d, 2, 2, 42, 42, { ZIndex = 3 })
 	local ringStroke = Kit.stroke(ring, if k.note then Color3.fromRGB(110, 104, 120) else k.colour, 2)
-	local img = Kit.icon(hot, k.icon, x - 4, y - 6, if k.icon == "forge" then 54 else 52, nil, { ZIndex = 5 })
+	-- (7 Nov, phone HUD: the grey gear on the dark tile read as an EMPTY slot: it gets a soft light glow behind it)
+	local img = Kit.icon(hot, k.icon, x - 4, y - 6, if k.icon == "forge" then 54 else 52, if k.icon == "gear" then Color3.fromRGB(215, 210, 235) else nil, { ZIndex = 5 })
 	local lockImg
 	if k.note then img.ImageTransparency = 0.45 end
 	if k.note then lockImg = Kit.icon(hot, "lock", x + 30, y + 26, 22, nil, { ZIndex = 7 }) end
@@ -420,7 +425,7 @@ for i, k in ipairs(KEYS) do
 		unlock()
 	end
 	-- (the key letter: only with a keyboard; phones have none)
-	if not Kit.phone() then Kit.text(hot, x - 8, y - 18, 20, 16, k.key, 12, { ZIndex = 8, stroke = 1.5 }) end
+	if not Kit.touch() then Kit.text(hot, x - 10, y - 20, 22, 18, k.key, 14, { ZIndex = 8, stroke = 1.5 }) end
 	local label = Kit.text(hot, x - 24, y - 38, 96, 18, k.name, 15, { ZIndex = 8, TextColor3 = k.colour, TextXAlignment = Enum.TextXAlignment.Center })
 	local line = Kit.box(hot, x - 24, y - 19, 96, 2, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 8 })
 	label.Parent.Visible = false
@@ -492,7 +497,7 @@ local function afterBuy(_, incomeBefore: number)
 		if now > incomeBefore then floatText(top, 186, 52, "+" .. fmt(now - incomeBefore) .. "/s", hex("#7dff6b"), 14) end
 	end)
 	Kit.tween(topScale, { Scale = topScale.Scale * 1.08 }, 0.08)
-	task.delay(0.08, function() Kit.tween(topScale, { Scale = screenScale() }, 0.2, Enum.EasingStyle.Back) end)
+	task.delay(0.08, function() Kit.tween(topScale, { Scale = chipScale() }, 0.2, Enum.EasingStyle.Back) end)
 end
 -- (7 Nov, item 4: on a PHONE the window is as wide as the screen allows (~0.94, so every caption is >= 14 px) and it
 -- scrolls up / down inside the room between the counter and the bottom, like the TREE. The scroll frame is always
@@ -821,13 +826,54 @@ function layout()
 	-- (6 Nov overlap check: 64 put its sun icon on the LVL badge's, 82 put NEXT on the SUPERNOVA bar)
 	ignRoot.Position = UDim2.new(0.5, -math.floor(144 * s), 0, math.floor((82 + LIT_H) * s))
 	nextRoot.Position = UDim2.new(0.5, 0, 0, math.floor((92 + LIT_H) * s))
-	-- (LUMI's card: above the hotbar; on phones a bit smaller so it leaves the middle of the screen free)
+	-- (LUMI's card: above the hotbar)
 	if cardRoot then
-		cardRoot.Position = UDim2.new(0.5, 0, 1, -math.floor((if small then 80 else 110) * s))
+		cardRoot.Position = UDim2.new(0.5, 0, 1, -math.floor(110 * s))
 		local us = cardRoot:FindFirstChildOfClass("UIScale")
-		if us then us.Scale = s * (if small then 0.8 else 1) end
+		if us then us.Scale = s end
+	end
+	if PH then
+		-- THE PHONE ARRANGEMENT (7 Nov): nothing under Roblox's buttons (Kit.topbar), nothing over anything else, text >= 14
+		local P = phoneScale()
+		local tb = Kit.topbar(root)
+		litRoot.Visible = false -- (the GALAXY LIT bar: the IGNITION / GALAXY chip says it on phones)
+		topScale.Scale = P
+		top.Position = UDim2.new(0.5, 0, 0, 4)
+		shardsScale.Scale = P
+		shardsRoot.Position = UDim2.new(0.5, math.floor(140 * P + 4), 0, 4 + math.floor(8 * P))
+		-- LVL, then IGNITION under it, at the left, below Roblox's buttons (side by side they ran into the counter on 667 px)
+		levelScale.Scale = P
+		levelRoot.AnchorPoint = Vector2.zero
+		levelRoot.Position = UDim2.fromOffset(6, tb.height + 2)
+		ignScale.Scale = P
+		ignRoot.AnchorPoint = Vector2.zero
+		ignRoot.Position = UDim2.fromOffset(6, tb.height + 2 + math.floor(76 * P))
+		local nextScale = nextRoot:FindFirstChildOfClass("UIScale")
+		if nextScale then nextScale.Scale = P end
+		local below = 8 + math.floor(86 * P) -- (under the counter + its SUPERNOVA bar, with room for the counter's tick pop)
+		nextRoot.Position = UDim2.new(0.5, 0, 0, below)
+		local bScale = bannerRoot:FindFirstChildOfClass("UIScale")
+		if bScale then bScale.Scale = P end
+		bannerRoot.Position = UDim2.new(0.5, 0, 0, below + 22)
+		local tScale = toastRoot:FindFirstChildOfClass("UIScale")
+		if tScale then tScale.Scale = 1 end
+		toastRoot.Position = UDim2.new(0.5, 0, 0, below + 22 + 32)
+		-- the hotbar at the bottom; LUMI's card right above its keys (the keys' tops are 21 design px into the 110 bar)
+		local hs = P * 0.95
+		hotScale.Scale = hs
+		hot.Position = UDim2.new(0.5, 0, 1, -2)
+		if cardRoot then
+			local cs = cardRoot:FindFirstChildOfClass("UIScale")
+			if cs then cs.Scale = cardScaleNow() end
+			cardRoot.Position = UDim2.new(0.5, 0, 1, -math.floor((110 - 21) * hs) - 8)
+		end
+		-- (GalaxyPotions hangs its column under IGNITION; GalaxyLive puts the event pill under NEXT)
+		shared.GalaxyColumnTop = function(): number return tb.height + 2 + math.floor((76 + 34) * P) + 8 end
+		shared.GalaxyBannerTop = function(): number return below + 22 end
+		if shared.GalaxyColumnLayout then shared.GalaxyColumnLayout() end
 	end
 end
+GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(function() layout() end)
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
 layout()
 
@@ -870,7 +916,7 @@ local function onGoal()
 	goal.Visible = tutStep >= 8 or novas >= 1
 	local need = player:GetAttribute("SupernovaNeed") or Econ.NeedFor(novas)
 	local k = math.clamp((player:GetAttribute("EarnedRun") or 0) / need, 0, 1)
-	goalFill.Size = UDim2.fromOffset(math.floor(204 * k), 16)
+	goalFill.Size = UDim2.fromOffset(math.floor(204 * k), if PH then 20 else 16)
 	goalFill.Visible = k > 0
 	Kit.setText(goalText, if k >= 1 then "SUPERNOVA READY!" else "SUPERNOVA " .. math.floor(k * 100) .. "%")
 end
@@ -902,8 +948,8 @@ task.spawn(function()
 			local pitch = PENTA[step % 10 + 1] * (if step >= 10 then 2 else 1) * 0.5
 			Kit.sound("click", { volume = 0.16, pitch = math.min(pitch, 2.2) })
 			if not Kit.calm() then
-				Kit.tween(topScale, { Scale = screenScale() * 1.035 }, 0.06)
-				task.delay(0.06, function() Kit.tween(topScale, { Scale = screenScale() }, 0.16) end)
+				Kit.tween(topScale, { Scale = chipScale() * 1.035 }, 0.06)
+				task.delay(0.06, function() Kit.tween(topScale, { Scale = chipScale() }, 0.16) end)
 			end
 		end
 	end
@@ -992,74 +1038,118 @@ layout()
 -- name, "STEP 4/20", the goal, a segmented bar with the live counter ("3/5"), the reward (+Essence, +~20 s of stardust);
 -- HIDE (shrinks it to the goal line) and SKIP (red, "not recommended": a second tap skips the whole tutorial)
 local cardScale
-cardRoot, cardScale = scaledRoot("TutCard", Vector2.new(0.5, 1), 540, 100)
+-- (7 Nov, phone HUD + owner "the LUMI panel looks like a placeholder"; its art (U5) is coming): the card is laid out by
+-- UIListLayouts, not hand-placed offsets: [portrait ring] [STEP / name row, the goal line, the segmented bar + counter]
+-- [reward (PC)] [HIDE / SKIP]. Its plate follows the content's size. Phone: compact (no name / STEP chip / reward), two small
+-- icon buttons (- and >>), above the hotbar, never over it
+local CW0, CH0 = if PH then 440 else 540, if PH then 60 else 100
+cardRoot, cardScale = scaledRoot("TutCard", Vector2.new(0.5, 1), CW0, CH0)
 local card = {}
 do
-	local panelF = Kit.panel(cardRoot, 0, 0, 540, 100, 20)
+	local panelF = Kit.panel(cardRoot, 0, 0, CW0, CH0, if PH then 14 else 20)
 	Kit.stroke(panelF, hex("#ffd84a"), 2, 0.15)
 	card.panel = panelF
-	local ring = Kit.box(cardRoot, 8, 8, 84, 84, { BackgroundTransparency = 0, BackgroundColor3 = hex("#1c1430"), ZIndex = 21 })
-	Kit.corner(ring, 42)
-	Kit.stroke(ring, hex("#ffd84a"), 3)
+	local content = Kit.new("Frame", { Name = "Content", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), ZIndex = 21 }, cardRoot)
+	Kit.new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, if PH then 8 else 10) }, content)
+	Kit.new("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), PaddingTop = UDim.new(0, if PH then 6 else 8), PaddingBottom = UDim.new(0, if PH then 6 else 8) }, content)
+	card.content = content
+	-- the portrait (its own slot; on PC the ring grows out above the card on small scales: sizePortrait)
+	local PS = if PH then 48 else 84
+	local slot = Kit.new("Frame", { Name = "Portrait", BackgroundTransparency = 1, Size = UDim2.fromOffset(PS, PS), LayoutOrder = 1 }, content)
+	local ring = Kit.box(slot, 0, 0, PS, PS, { BackgroundTransparency = 0, BackgroundColor3 = hex("#1c1430"), ZIndex = 21 })
+	Kit.corner(ring, PS / 2)
+	Kit.stroke(ring, hex("#ffd84a"), if PH then 2.5 else 3)
 	-- (6 Nov, #114: LUMI's 6 EXPRESSIONS (ArtIds.lumi) + her HALO behind the portrait, slowly breathing, 2.6 s)
 	card.halo = Kit.new("ImageLabel", { Name = "LumiHalo", BackgroundTransparency = 1, Image = Art.lumiFx.halo, AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1.55, 1.55), ImageTransparency = 0.15, ZIndex = 20 }, ring)
+	card.halo:SetAttribute("AllowOverlap", true)
 	if not Kit.calm() then
 		Kit.tween(card.halo, { Size = UDim2.fromScale(1.75, 1.75), ImageTransparency = 0.4 }, 1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
 	end
 	card.portrait = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Art.lumi.talking, AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromScale(1.12, 1.12), ZIndex = 22 }, ring)
 	card.ring = ring
-	card.name = Kit.text(cardRoot, 102, 6, 120, 20, Econ.TutorialSpirit.name, Kit.ps(16, 19), { ZIndex = 23, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#ffd84a"), stroke = 1.5 })
-	local chip = Kit.box(cardRoot, 168, 6, 92, 22, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 22 })
+	card.slot = slot
+	-- the middle: (PC: LUMI + STEP), the goal line, the bar + counter
+	local body = Kit.new("Frame", { Name = "Body", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), LayoutOrder = 2 }, content)
+	Kit.new("UIListLayout", { FillDirection = Enum.FillDirection.Vertical, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, if PH then 4 else 4) }, body)
+	local head = Kit.new("Frame", { Name = "Head", BackgroundTransparency = 1, Size = UDim2.fromOffset(200, 22), LayoutOrder = 1, Visible = not PH }, body)
+	card.name = Kit.text(head, 0, 0, 70, 20, Econ.TutorialSpirit.name, 16, { ZIndex = 23, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#ffd84a"), stroke = 1.5 })
+	local chip = Kit.box(head, 70, 0, 92, 22, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 22 })
 	Kit.corner(chip, 4)
 	Kit.stroke(chip, Kit.INK, 2)
 	Kit.grad(chip, hex("#ffd84a"), hex("#c79a0a"), 90)
 	card.chip = chip
-	card.step = Kit.text(chip, 0, Kit.ps(2, 1), 92, 20, "STEP 1/20", Kit.ps(13, 15), { ZIndex = 23, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
-	card.line = Kit.text(cardRoot, 102, 30, 330, 28, "", Kit.ps(20, 22), { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.8 })
-	-- the segmented bar (up to 10 segments) + the counter
+	card.step = Kit.text(chip, 0, 2, 92, 20, "STEP 1/20", 14, { ZIndex = 23, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
+	card.head = head
+	local LW = if PH then 250 else 300
+	local _, _, lineHolder = Kit.text(body, 0, 0, LW, if PH then 22 else 26, "", if PH then 20 else 21, { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.8, TextScaled = true })
+	lineHolder.LayoutOrder = 2
+	for _, l in ipairs(lineHolder:GetChildren()) do
+		if l:IsA("TextLabel") then Kit.new("UITextSizeConstraint", { MaxTextSize = if PH then 20 else 21, MinTextSize = 14 }, l) end
+	end
+	card.line = lineHolder:FindFirstChildWhichIsA("TextLabel")
+	for _, l in ipairs(lineHolder:GetChildren()) do if l:IsA("TextLabel") then card.line = l end end
+	local barRow = Kit.new("Frame", { Name = "Bar", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), LayoutOrder = 3 }, body)
+	Kit.new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8) }, barRow)
+	card.SEG_W = if PH then 190 else 270
+	local segsF = Kit.new("Frame", { Name = "Segs", BackgroundTransparency = 1, Size = UDim2.fromOffset(card.SEG_W, 14), LayoutOrder = 1 }, barRow)
 	card.segs = {}
 	for i = 1, 10 do
-		local seg = Kit.box(cardRoot, 102 + (i - 1) * 27, 66, 24, 14, { BackgroundTransparency = 0, BackgroundColor3 = hex("#2a2433"), ZIndex = 22 })
+		local seg = Kit.box(segsF, (i - 1) * 27, 0, 24, 14, { BackgroundTransparency = 0, BackgroundColor3 = hex("#2a2433"), ZIndex = 22 })
 		Kit.corner(seg, 4)
 		Kit.stroke(seg, Kit.INK, 1.5)
 		card.segs[i] = seg
 	end
-	card.count = Kit.text(cardRoot, 376, 62, 70, 22, "0/1", Kit.ps(15, 18), { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
-	-- the reward
-	Kit.icon(cardRoot, "essence", 440, 30, 34, Color3.fromRGB(60, 230, 210), { ZIndex = 23 })
-	card.ess = Kit.text(cardRoot, 474, 36, 60, 22, "+1", Kit.ps(16, 19), { ZIndex = 23, TextColor3 = hex("#7dffe9"), FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
-	Kit.icon(cardRoot, "stardust", 440, 62, 30, Color3.fromRGB(255, 170, 60), { ZIndex = 23 })
-	Kit.text(cardRoot, 472, 66, 66, 20, "+BONUS", Kit.ps(11, 14), { ZIndex = 23, TextColor3 = hex("#ffc35a"), FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
-	-- HIDE + SKIP
-	local hideB, hideI = Kit.button(cardRoot, 330, 4, 64, 24, hex("#5ad1ff"), hex("#1f6fd1"), { ZIndex = 24 })
-	card.hideText = Kit.text(hideI, 0, Kit.ps(3, 2), 64, 18, "HIDE", Kit.ps(12, 14), { ZIndex = hideI.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
-	local skipB, skipI = Kit.button(cardRoot, 400, 4, 132, 24, hex("#ff7d8e"), hex("#e2334c"), { ZIndex = 24 })
-	card.skipText = Kit.text(skipI, 0, Kit.ps(3, 2), 132, 18, "SKIP (not advised)", Kit.ps(11, 13), { ZIndex = skipI.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
-	card.hideB, card.skipB = hideB, skipB
-	for _, c in ipairs(cardRoot:GetChildren()) do
-		if c ~= hideB and c:IsA("Frame") and c.Position == hideB.Position + UDim2.fromOffset(0, 2) then card.hideShadow = c end
+	card.segsF = segsF
+	local _, _, countHolder = Kit.text(barRow, 0, 0, 56, 20, "0/1", 18, { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
+	countHolder.LayoutOrder = 2
+	for _, l in ipairs(countHolder:GetChildren()) do if l:IsA("TextLabel") then card.count = l end end
+	-- the reward (PC only)
+	local reward = Kit.new("Frame", { Name = "Reward", BackgroundTransparency = 1, Size = UDim2.fromOffset(92, 64), LayoutOrder = 3, Visible = not PH }, content)
+	Kit.icon(reward, "essence", 0, 0, 34, Color3.fromRGB(60, 230, 210), { ZIndex = 23 })
+	card.ess = Kit.text(reward, 34, 6, 56, 22, "+1", 18, { ZIndex = 23, TextColor3 = hex("#7dffe9"), FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
+	Kit.icon(reward, "stardust", 0, 32, 30, Color3.fromRGB(255, 170, 60), { ZIndex = 23 })
+	Kit.text(reward, 30, 36, 64, 20, "+BONUS", 14, { ZIndex = 23, TextColor3 = hex("#ffc35a"), FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
+	card.reward = reward
+	-- HIDE + SKIP (phone: two small icon buttons, - and >>)
+	local btns = Kit.new("Frame", { Name = "Buttons", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), LayoutOrder = 4 }, content)
+	Kit.new("UIListLayout", { FillDirection = if PH then Enum.FillDirection.Horizontal else Enum.FillDirection.Vertical, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 6) }, btns)
+	local BW, BH = if PH then 30 else 132, if PH then 28 else 26
+	local function holderBtn(order: number, w: number, c1, c2)
+		local h = Kit.new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(w, BH + 3), LayoutOrder = order }, btns)
+		local b, inner = Kit.button(h, 0, 0, w, BH, c1, c2, { ZIndex = 24 })
+		return h, b, inner
 	end
+	local hideH, hideB, hideI = holderBtn(1, if PH then BW else 64, hex("#5ad1ff"), hex("#1f6fd1"))
+	card.hideText = Kit.text(hideI, 0, if PH then 1 else 3, if PH then BW else 64, 22, if PH then "–" else "HIDE", if PH then 20 else 14, { ZIndex = hideI.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
+	local skipH, skipB, skipI = holderBtn(2, BW, hex("#ff7d8e"), hex("#e2334c"))
+	card.skipText = Kit.text(skipI, 0, if PH then 1 else 3, BW, 22, if PH then "»" else "SKIP (not advised)", if PH then 20 else 14, { ZIndex = skipI.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
+	card.hideB, card.skipB, card.hideH, card.skipH = hideB, skipB, hideH, skipH
+	-- the plate follows the content
+	local function fitPanel()
+		-- (the real pixels per design unit: every scale above the card counts, not only its own)
+		local k = cardRoot.AbsoluteSize.X / math.max(1, cardRoot.Size.X.Offset)
+		if k <= 0 then return end
+		local sz = content.AbsoluteSize / k
+		panelF.Size = UDim2.fromOffset(math.ceil(sz.X), math.ceil(sz.Y))
+		cardRoot.Size = UDim2.fromOffset(math.ceil(sz.X), math.ceil(sz.Y))
+	end
+	content:GetPropertyChangedSignal("AbsoluteSize"):Connect(fitPanel)
+	cardScale:GetPropertyChangedSignal("Scale"):Connect(fitPanel)
+	card.fitPanel = fitPanel
 end
 local cardHidden, skipArmed = false, false
-local cardFull = {}
-for _, c in ipairs(cardRoot:GetChildren()) do table.insert(cardFull, c) end
 local function setCardHidden(h: boolean)
 	cardHidden = h
-	-- (hidden: a slim strip at the bottom with only the goal line, the counter and SHOW)
-	local keep = { [card.panel] = true, [card.line.Parent] = true, [card.count.Parent] = true, [card.hideB] = true, [card.hideShadow or card.panel] = true }
-	for _, c in ipairs(cardFull) do
-		if c:IsA("GuiObject") and not keep[c] then c.Visible = not h end
-	end
-	local hx, hy = if h then 460 else 330, if h then 68 else 4
-	card.panel.Position = UDim2.fromOffset(0, if h then 62 else 0)
-	card.panel.Size = UDim2.fromOffset(540, if h then 38 else 100)
-	card.line.Parent.Position = UDim2.fromOffset(if h then 12 else 102, if h then 66 else 30)
-	card.count.Parent.Position = UDim2.fromOffset(376, if h then 68 else 62)
-	card.hideB.Position = UDim2.fromOffset(hx, hy)
-	if card.hideShadow then card.hideShadow.Position = UDim2.fromOffset(hx, hy + 2) end
-	Kit.setText(card.hideText, if h then "SHOW" else "HIDE")
+	-- (hidden: a slim strip with only the goal line, the counter and SHOW)
+	card.slot.Visible = not h
+	card.head.Visible = not h and not PH
+	card.segsF.Visible = not h
+	card.reward.Visible = not h and not PH
+	card.skipH.Visible = not h
+	Kit.setText(card.hideText, if h then (if PH then "+" else "SHOW") else (if PH then "–" else "HIDE"))
 end
 card.hideB.MouseButton1Click:Connect(function()
 	Kit.sound("tab")
@@ -1068,9 +1158,13 @@ end)
 card.skipB.MouseButton1Click:Connect(function()
 	if not skipArmed then
 		skipArmed = true
-		Kit.setText(card.skipText, "TAP AGAIN TO SKIP")
+		if PH then
+			if shared.GalaxyToast then shared.GalaxyToast("TAP » AGAIN TO SKIP THE TUTORIAL", hex("#ff7d8e")) end
+		else
+			Kit.setText(card.skipText, "TAP AGAIN TO SKIP")
+		end
 		Kit.sound("error")
-		task.delay(3, function() if skipArmed then skipArmed = false Kit.setText(card.skipText, "SKIP (not advised)") end end)
+		task.delay(3, function() if skipArmed then skipArmed = false if not PH then Kit.setText(card.skipText, "SKIP (not advised)") end end end)
 		return
 	end
 	skipArmed = false
@@ -1091,6 +1185,7 @@ local function lumiFace(step: number): string
 end
 -- phones: the card is 0.8x, so the portrait grows inside it to stay at least 72 px on screen (it pops out above the card)
 local function sizePortrait()
+	if PH then return end -- (phone: the compact card's 48 ring stays in its slot)
 	local s = cardScale.Scale
 	local p = if s > 0 then math.max(84, math.ceil(74 / s)) else 84
 	card.ring.Size = UDim2.fromOffset(p, p)
@@ -1164,11 +1259,11 @@ local function showHint(step: number)
 		Kit.setText(card.line, def.hint)
 		Kit.setText(card.ess, "+" .. def.essence)
 		if not Kit.calm() then
-			local cs = screenScale() * (if small then 0.8 else 1)
+			local cs = cardScaleNow()
 			cardScale.Scale = cs * 0.9
 			Kit.tween(cardScale, { Scale = cs }, 0.25, Enum.EasingStyle.Back)
 			-- (the first frame's viewport can be 1x1: settle on the real scale after the pop)
-			task.delay(0.3, function() cardScale.Scale = screenScale() * (if small then 0.8 else 1) sizePortrait() end)
+			task.delay(0.3, function() cardScale.Scale = cardScaleNow() sizePortrait() end)
 		end
 	end
 	-- the live counter + the segments
@@ -1179,8 +1274,8 @@ local function showHint(step: number)
 	for i, seg in ipairs(card.segs) do
 		seg.Visible = i <= n and not cardHidden
 		seg.BackgroundColor3 = if i <= lit then hex("#7dff6b") else hex("#2a2433")
-		seg.Size = UDim2.fromOffset(math.floor(270 / n) - 3, 14)
-		seg.Position = UDim2.fromOffset(102 + (i - 1) * math.floor(270 / n), 66)
+		seg.Size = UDim2.fromOffset(math.floor(card.SEG_W / n) - 3, 14)
+		seg.Position = UDim2.fromOffset((i - 1) * math.floor(card.SEG_W / n), 0)
 	end
 end
 local arrow = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = A.arrow, Size = UDim2.fromOffset(44, 44), AnchorPoint = Vector2.new(0.5, 1), Visible = false, ZIndex = 60 }, gui)
@@ -1366,12 +1461,15 @@ for i = 1, 6 do
 	decal.Parent = pt
 	trail[i] = pt
 end
-local function showTrail(to: Vector3?)
+-- (7 Nov, owner: "the arrow that points to the board's button points to the board's feet". `to` = where the trail ENDS
+-- (a board: the free spot in front of its face, not under it); stopShort = studs short of it it stops; hideWithin = no
+-- trail closer than this (at the board the arrow + ring sit on the button itself))
+local function showTrail(to: Vector3?, stopShort: number?, hideWithin: number?)
 	local char = player.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
 	local flat = if to and root then Vector3.new(to.X - root.Position.X, 0, to.Z - root.Position.Z) else Vector3.zero
-	if not root or not hum or flat.Magnitude < 9 then
+	if not root or not hum or flat.Magnitude < (hideWithin or 9) then
 		for _, pt in ipairs(trail) do pt.Parent = nil end
 		return
 	end
@@ -1380,7 +1478,7 @@ local function showTrail(to: Vector3?)
 	local drift = if Kit.calm() then 0 else (os.clock() * 3) % 3.6 -- (the arrows creep toward the board)
 	for i, pt in ipairs(trail) do
 		local s = 3 + (i - 1) * 3.6 + drift
-		if s > flat.Magnitude - 5 then
+		if s > flat.Magnitude - (stopShort or 5) then
 			pt.Parent = nil
 		else
 			local at = floor + d * s
@@ -1430,10 +1528,22 @@ RunService.Heartbeat:Connect(function()
 	-- arrow + ring when the button is on screen, the floor trail while you're away from it. With a window open (or no
 	-- island) the windows' own targets are used.
 	local boardAt, boardTop, boardAspect, boardWorld
+	local trailTo, trailShort, trailHide
 	local boardKey = boardKeyFor(Econ.Tutorial[step + 1].id)
 	if boardKey and not open and not treeOpen and (shared.GalaxyBoardTarget or boardKey == "PAD") then
-		local c, t, aspect
-		if boardKey == "PAD" then c, t, aspect = padTarget() else c, t, aspect = shared.GalaxyBoardTarget(boardKey) end
+		local c, t, aspect, normal
+		if boardKey == "PAD" then c, t, aspect = padTarget() else c, t, aspect, normal = shared.GalaxyBoardTarget(boardKey) end
+		-- (a board button: the trail ends at the free spot 6 studs out in front of the face, and stops showing within 12 studs
+		-- of the button: there the arrow + ring on the button guide you)
+		local nf = if normal then Vector3.new(normal.X, 0, normal.Z) else nil
+		if c and nf and nf.Magnitude > 0.01 then
+			local char = player.Character
+			local hrp = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+			local near = hrp ~= nil and Vector3.new(hrp.Position.X - c.X, 0, hrp.Position.Z - c.Z).Magnitude < 12
+			trailTo, trailShort, trailHide = if near then nil else c + nf.Unit * 6, 0.5, 3
+		else
+			trailTo = c
+		end
 		local cam = workspace.CurrentCamera
 		if c and cam then
 			boardWorld = c
@@ -1442,7 +1552,7 @@ RunService.Heartbeat:Connect(function()
 			if on and sc.Z > 0 then boardAt, boardTop, boardAspect = Vector2.new(sc.X, sc.Y), Vector2.new(st.X, st.Y), aspect end
 		end
 	end
-	showTrail(boardWorld)
+	showTrail(if boardWorld then trailTo else nil, trailShort, trailHide)
 	if Econ.Tutorial[step + 1].face == "pointing" then
 		local at = boardAt
 		if not at and not boardWorld and target and target.Parent and target.AbsoluteSize.X > 0 then

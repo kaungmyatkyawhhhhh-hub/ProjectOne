@@ -49,26 +49,18 @@ local function makeGui(name: string, order: number)
 end
 local gui = makeGui("GalaxyLive", 1)
 local winGui = makeGui("GalaxyWhatsNew", 4)
-local PHONE_TEST = RunService:IsStudio() and workspace:GetAttribute("TestPhone") == true
+local PHONE_TEST = Kit.testDevice() ~= nil -- (Studio: Workspace TestDevice / TestPhone, UIKit)
 local function rootOf(g: ScreenGui): GuiObject | ScreenGui
-	if not PHONE_TEST then return g end
-	local f = Instance.new("Frame")
-	f.AnchorPoint = Vector2.new(0.5, 0.5)
-	f.Position = UDim2.fromScale(0.5, 0.5)
-	f.Size = UDim2.fromOffset(667, 375)
-	f.BackgroundTransparency = 1
-	f.ClipsDescendants = true
-	f.Parent = g
-	return f
+	return Kit.testRoot(g) -- (7 Nov: the safe area; Studio: the emulated device)
 end
 local root, winRoot = rootOf(gui), rootOf(winGui)
 local function viewport(): Vector2
-	return if PHONE_TEST then Vector2.new(667, 375) else workspace.CurrentCamera.ViewportSize
+	return Kit.viewport(root)
 end
 local function screenScale(): number
 	local vp = viewport()
 	if vp.Y < 500 then return math.min(vp.X / 1000, vp.Y / 540) end
-	return math.clamp(math.min(vp.X / 1280, vp.Y / 720), 0.6, 1.4)
+	return math.clamp(math.min(vp.X / 1280, vp.Y / 720), if Kit.touch() then 1 else 0.6, 1.4) -- (7 Nov: a TABLET never under 1, like GalaxyHUD)
 end
 local function mmss(t: number): string
 	t = math.max(0, math.floor(t))
@@ -99,10 +91,14 @@ end
 ------------------------------------------------------------------------ the GIFT chip (left column, above INVITE)
 -- (owner 7 Nov: "move the gift ready button above the invite button": it joins the boosts column (GalaxyPotions), in the
 -- slot right above the FRIENDS / INVITE chip, at the column's width. If the column never shows up it stays on the right)
-local giftRoot = Kit.box(root, 0, 0, 214, 40, { Name = "GiftChip", AnchorPoint = Vector2.new(1, 0.5) })
+-- (7 Nov, phone HUD: the kit's HUD chip (Kit.hudChip, like the column's others), sized to its text; phones: "READY!" / "4:49")
+local PH = Kit.phone()
+local giftRoot = Kit.box(root, 0, 0, 0, 0, { Name = "GiftChip", AnchorPoint = Vector2.new(1, 0.5), AutomaticSize = Enum.AutomaticSize.XY, LayoutOrder = 20 })
 local giftScale = Instance.new("UIScale")
 giftScale.Parent = giftRoot
-local giftBtn, giftText, giftEdge = chip(giftRoot, 214, 40, hex("#ffd84a"), "playtimeGift")
+local giftChip = Kit.hudChip(giftRoot, { name = "Gift", colour = hex("#ffd84a"), icon = "playtimeGift", height = if PH then 34 else 40, textSize = if PH then 17 else 18 })
+local giftBtn, giftText = giftChip.button, giftChip.text
+local giftEdge = giftChip.pill:FindFirstChildOfClass("UIStroke") :: UIStroke
 local inColumn = false
 task.spawn(function()
 	local t0 = os.clock()
@@ -136,19 +132,26 @@ giftBtn.MouseButton1Click:Connect(function()
 end)
 
 ------------------------------------------------------------------------ the EVENT banner (top) + "UPDATE INCOMING!"
+-- (7 Nov, phone HUD: on a phone a compact 28 px pill under the NEXT line, never in the middle of the screen)
 local function banner(colour1: string, colour2: string, icon: string)
-	local b = Kit.box(root, 0, 0, 420, 44, { AnchorPoint = Vector2.new(0.5, 0), Visible = false })
+	local W, H = if PH then 300 else 420, if PH then 28 else 44
+	local b = Kit.box(root, 0, 0, W, H, { AnchorPoint = Vector2.new(0.5, 0), Visible = false })
 	local sc = Instance.new("UIScale")
 	sc.Parent = b
-	local sh = Kit.box(b, 0, 4, 420, 44, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 1 })
-	Kit.corner(sh, 10)
-	local plate = Kit.box(b, 0, 0, 420, 44, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 2 })
-	Kit.corner(plate, 10)
-	Kit.stroke(plate, Kit.INK, 2.5)
+	local sh = Kit.box(b, 0, if PH then 3 else 4, W, H, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 1 })
+	Kit.corner(sh, math.floor(H / 2))
+	local plate = Kit.box(b, 0, 0, W, H, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 2 })
+	Kit.corner(plate, math.floor(H / 2))
+	Kit.stroke(plate, Kit.INK, if PH then 2 else 2.5)
 	Kit.grad(plate, hex(colour1), hex(colour2), 90)
-	Kit.box(b, 10, 4, 400, 3, { BackgroundTransparency = 0.5, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
-	Kit.icon(b, icon, -10, -10, 62, nil, { ZIndex = 5 })
-	local t = Kit.text(b, 50, Kit.ps(10, 9), 360, 26, "", Kit.ps(20, 21), { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 2, TextXAlignment = CENTRE })
+	Kit.box(b, 10, 3, W - 20, if PH then 2 else 3, { BackgroundTransparency = 0.5, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
+	if PH then
+		Kit.icon(b, icon, -6, -5, 38, nil, { ZIndex = 5 })
+	else
+		Kit.icon(b, icon, -10, -10, 62, nil, { ZIndex = 5 })
+	end
+	local t = if PH then Kit.text(b, 30, 4, W - 36, 22, "", 17, { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextXAlignment = CENTRE })
+		else Kit.text(b, 50, 10, 360, 26, "", 20, { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 2, TextXAlignment = CENTRE })
 	return b, t, sc
 end
 local eventBar, eventText, eventScale = banner("#ffb02a", "#a8380a", "stardust")
@@ -163,14 +166,23 @@ local function layout()
 		giftScale.Scale = s
 		giftRoot.Position = UDim2.fromOffset(vp.X - math.floor(10 * s), math.floor(vp.Y * 0.42))
 	end
-	eventScale.Scale, updateScale.Scale = s, s
-	-- (under the counter's SUPERNOVA bar + NEXT line)
-	eventBar.Position = UDim2.fromOffset(vp.X / 2, math.floor(152 * s))
-	updateBar.Position = UDim2.fromOffset(vp.X / 2, math.floor((152 + 52) * s))
+	if PH then
+		-- (phone: full size (the pill is made for it), under GalaxyHUD's NEXT line)
+		eventScale.Scale, updateScale.Scale = 1, 1
+		local top = if shared.GalaxyBannerTop then shared.GalaxyBannerTop() else 100
+		eventBar.Position = UDim2.fromOffset(vp.X / 2, top)
+		updateBar.Position = UDim2.fromOffset(vp.X / 2, top + (if eventBar.Visible then 32 else 0))
+	else
+		eventScale.Scale, updateScale.Scale = s, s
+		-- (under the counter's SUPERNOVA bar + NEXT line)
+		eventBar.Position = UDim2.fromOffset(vp.X / 2, math.floor(160 * s)) -- (152 touched the IGNITION chip)
+		updateBar.Position = UDim2.fromOffset(vp.X / 2, math.floor((160 + 52) * s))
+	end
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
 layout()
 local function tick()
+	if PH then layout() end -- (phone: the pills follow GalaxyHUD's NEXT line)
 	local busy = WM.anyOpen() or shared.GalaxyCinematic == true
 	-- gift chip
 	local state, left = giftState()
@@ -185,11 +197,11 @@ local function tick()
 		giftRoot.Visible = state ~= "done" and not busy
 	end
 	if state == "ready" then
-		Kit.setText(giftText, "GIFT READY!")
+		Kit.setText(giftText, if PH then "READY!" else "GIFT READY!")
 		giftText.TextColor3 = hex("#7dff7a")
 		giftEdge.Color = hex("#7dff7a")
 	elseif state == "wait" and left then
-		Kit.setText(giftText, "NEXT GIFT " .. mmss(left))
+		Kit.setText(giftText, if PH then mmss(left) else "NEXT GIFT " .. mmss(left))
 		giftText.TextColor3 = hex("#ffd84a")
 		giftEdge.Color = hex("#ffd84a")
 	end

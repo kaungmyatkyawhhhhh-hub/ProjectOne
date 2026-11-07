@@ -30,7 +30,7 @@ local function calm(): boolean return GuiService.ReducedMotionEnabled end
 V.calm = calm
 -- a phone: touch, no keyboard (the Studio test frame too)
 local function phone(): boolean
-	if RunService:IsStudio() and workspace:GetAttribute("TestPhone") == true then return true end
+	if RunService:IsStudio() and (workspace:GetAttribute("TestPhone") == true or (workspace:GetAttribute("TestDevice") ~= nil and workspace:GetAttribute("TestDevice") ~= "pc")) then return true end
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 end
 V.phone = phone

@@ -59,7 +59,7 @@ end
 -- TOUCH (owner 5 Nov): on a phone / tablet the boards' small buttons are hard to hit from the spawn camera, so a TAP on any
 -- of YOUR boards opens its 2D window instead (TREE / INFO -> the T window, BODIES -> U on BODIES, PERKS -> U on PERKS).
 -- Studio: Workspace TestPhone = true makes a mouse click a tap.
-local TOUCH = UserInputService.TouchEnabled or (RunService:IsStudio() and workspace:GetAttribute("TestPhone") == true)
+local TOUCH = UserInputService.TouchEnabled or (RunService:IsStudio() and (workspace:GetAttribute("TestPhone") == true or (workspace:GetAttribute("TestDevice") ~= nil and workspace:GetAttribute("TestDevice") ~= "pc")))
 
 local boards = {} -- [island] = { guis = { [id] = SurfaceGui }, panels = { [id] = board }, conns, ctx, fx = { { parts, step } } }
 
@@ -420,7 +420,8 @@ end)
 -- the tutorial: the world position of a button on one of YOUR boards (scrolls it into view first), the top of it, its
 -- width / height. key: "Body<k>" (BODIES), "Perk_<id>" (PERKS), "R2_<id>" (TREE; once that node is selected:
 -- INFO's BUY)
-shared.GalaxyBoardTarget = function(key: string): (Vector3?, Vector3?, number?)
+-- (7 Nov: + the face's outward normal, so the guide's floor trail can end at the spot IN FRONT of the board)
+shared.GalaxyBoardTarget = function(key: string): (Vector3?, Vector3?, number?, Vector3?)
 	for island, b in pairs(boards) do
 		if island:GetAttribute("Owner") == player.UserId then
 			local boardId = if key:sub(1, 5) == "Perk_" then "Stars" elseif key:sub(1, 3) == "R2_" then "Tree" else "Bodies"
@@ -439,7 +440,7 @@ shared.GalaxyBoardTarget = function(key: string): (Vector3?, Vector3?, number?)
 			local face = screen.Size.Z / 2 + 0.05
 			return (screen.CFrame * CFrame.new((u - 0.5) * screen.Size.X, (0.5 - v) * screen.Size.Y, face)).Position,
 				(screen.CFrame * CFrame.new((u - 0.5) * screen.Size.X, (0.5 - topV) * screen.Size.Y, face)).Position,
-				btn.AbsoluteSize.X / math.max(1, btn.AbsoluteSize.Y)
+				btn.AbsoluteSize.X / math.max(1, btn.AbsoluteSize.Y), screen.CFrame.ZVector
 		end
 	end
 	return nil

@@ -19,7 +19,7 @@ local MapConfig = require(Galaxy:WaitForChild("MapConfig"))
 local Kit = require(Galaxy:WaitForChild("UIKit"))
 
 local RunService = game:GetService("RunService")
-local REST = Vector3.new(0, 2.4, 0)
+local REST = Vector3.new(0, 2.5, 0) -- (7 Nov: the tag's centre, 2.5 studs over the head's)
 local tags = {} -- [Player] = BillboardGui
 
 -- (feel pass, 5 Nov: the rank = the COSMIC LEVEL's name + the Supernovas, "FLARE III · ✦12", for everyone from the start;
@@ -33,7 +33,7 @@ local Vfx = require(Galaxy:WaitForChild("VfxLibrary"))
 local FAR = 140
 local tagParts = {} -- [BillboardGui] = { full, far, head }
 local function plateH(): number
-	return if Vfx.phone() then 26 else 30
+	return if Vfx.phone() then 20 else 30 -- (7 Nov, phone HUD: smaller over the heads on a phone)
 end
 local function build(p: Player)
 	if tags[p] then tagParts[tags[p]] = nil tags[p]:Destroy() tags[p] = nil end
@@ -45,53 +45,43 @@ local function build(p: Player)
 	local base, novas = string.match(text, "^(.-)%s*·%s*✦(%d+)$")
 	base = base or text
 	local key = RankPlate.keyOf(base)
-	local h = plateH()
+	-- (7 Nov, owner: "it becomes big when i zoom out and when i zoom in its tiny"; three loose pieces; "✦3" meant nothing;
+	-- no name; too low. Now ONE compact tag: the DisplayName, then one row: the rank plate with the Supernova count INSIDE it
+	-- ("FLARE IV  x3") and the VIP chip attached to its right end. Sized in STUDS (Kit.studsBillboard: it stays the avatar's
+	-- size at any zoom, ~4.5 studs wide), centred 2.5 studs over the head, seen to 60 studs, fading out closer than 6)
+	local h = 30 -- (design px; the billboard turns them into studs)
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "Rank_" .. p.Name
 	bb.Adornee = head
 	bb.StudsOffsetWorldSpace = REST
 	bb.LightInfluence = 0
-	bb.MaxDistance = 400
+	bb.MaxDistance = 60
 	bb.ResetOnSpawn = false
-	local full = Instance.new("Frame")
+	local full = Instance.new("CanvasGroup")
 	full.Name = "Full"
 	full.BackgroundTransparency = 1
-	full.Parent = bb
-	local plate = RankPlate.build(full, base, key, h)
+	local nameH = math.floor(h * 0.62)
+	local nameL = Instance.new("TextLabel")
+	nameL.Name = "PlayerName"
+	nameL.BackgroundTransparency = 1
+	nameL.FontFace = RankPlate.FONT
+	nameL.Text = p.DisplayName
+	nameL.TextColor3 = Color3.new(1, 1, 1)
+	nameL.TextSize = math.floor(nameH * 0.9)
+	local ns = Instance.new("UIStroke")
+	ns.Color, ns.Thickness = RankPlate.INK, 2
+	ns.Parent = nameL
+	nameL.Parent = full
+	local plate = RankPlate.build(full, base .. (if novas then "  x" .. novas else ""), key, h)
+	plate.Position = UDim2.fromOffset(0, nameH + 2)
 	local w = plate:GetAttribute("W")
-	-- (your Supernovas: our sparkle + the count, right of the plate)
-	if novas then
-		local star = Instance.new("ImageLabel")
-		star.Name = "NovaStar"
-		star.BackgroundTransparency = 1
-		star.Image = Kit.A.sparkle
-		star.ImageColor3 = Color3.fromRGB(255, 216, 74)
-		star.Position = UDim2.fromOffset(w + 1, h * 0.2)
-		star.Size = UDim2.fromOffset(h * 0.6, h * 0.6)
-		star.Parent = full
-		local n = Instance.new("TextLabel")
-		n.Name = "Novas"
-		n.BackgroundTransparency = 1
-		n.FontFace = RankPlate.FONT
-		n.Text = novas
-		n.TextColor3 = Color3.new(1, 1, 1)
-		n.TextSize = math.floor(h * 0.5)
-		n.TextXAlignment = Enum.TextXAlignment.Left
-		n.Position = UDim2.fromOffset(w + h * 0.62, h * 0.24)
-		n.Size = UDim2.fromOffset(h * 0.4 * #novas + 4, h * 0.52)
-		local st = Instance.new("UIStroke")
-		st.Color, st.Thickness = RankPlate.INK, 2
-		st.Parent = n
-		n.Parent = full
-		w += h * 0.62 + h * 0.4 * #novas + 4
-	end
-	-- (7 Nov: the VIP pass: a gold VIP pill after the plate (the kit's gold chip: gradient, ink outline, heavy text))
+	-- (7 Nov: the VIP pass: a gold VIP chip ATTACHED to the plate's right end (the kit's gold chip: gradient, ink outline))
 	if p:GetAttribute("Pass_VIP") == true then
 		local pill = Instance.new("Frame")
 		pill.Name = "VIP"
 		pill.BackgroundColor3 = Color3.new(1, 1, 1)
-		pill.Position = UDim2.fromOffset(w + 4, h * 0.17)
-		pill.Size = UDim2.fromOffset(h * 1.25, h * 0.66)
+		pill.Position = UDim2.fromOffset(w - 3, nameH + 2 + h * 0.18)
+		pill.Size = UDim2.fromOffset(h * 1.25, h * 0.64)
 		local c = Instance.new("UICorner")
 		c.CornerRadius = UDim.new(0.35, 0)
 		c.Parent = pill
@@ -114,17 +104,16 @@ local function build(p: Player)
 		ts.Parent = t
 		t.Parent = pill
 		pill.Parent = full
-		w += h * 1.25 + 6
+		w += h * 1.25 - 3
 	end
+	local total = nameH + 2 + h
 	-- (Phase 2.5: a Forge COLLECTOR title, when you have one, in a smaller line under the plate)
 	local title = p:GetAttribute("CollectorTitle")
-	local hasTitle = type(title) == "string" and title ~= ""
-	local total = h
-	if hasTitle then
+	if type(title) == "string" and title ~= "" then
 		local t = Instance.new("TextLabel")
 		t.Name = "Collector"
 		t.BackgroundTransparency = 1
-		t.Position = UDim2.fromOffset(0, h + 1)
+		t.Position = UDim2.fromOffset(0, total + 1)
 		t.Size = UDim2.fromOffset(w, math.floor(h * 0.5))
 		t.FontFace = RankPlate.FONT
 		t.TextSize = math.floor(h * 0.46)
@@ -136,18 +125,36 @@ local function build(p: Player)
 		t.Parent = full
 		total += math.floor(h * 0.5) + 1
 	end
-	full.Size = UDim2.fromOffset(w, total)
-	-- the far view: the emblem only (the plate's emblem pokes out of the plate: room for it above / left)
-	local far = RankPlate.emblem(bb, key, h * 1.1)
+	nameL.Size = UDim2.fromOffset(w, nameH)
+	-- (the plate's emblem pokes out of its left end: a margin all round)
+	local pad = math.floor(h * 0.25)
+	local designW, designH = w + pad * 2, total + pad * 2
+	full.Position = UDim2.fromOffset(pad, pad)
+	full.Size = UDim2.fromOffset(w + pad, total + pad)
+	local inner = Kit.studsBillboard(bb, designW, designH, math.min(designW * 0.024, 5.5))
+	full.Parent = inner
+	local far = RankPlate.emblem(inner, key, h * 1.1) -- (kept for the far check; MaxDistance 60 is inside it now)
 	far.Name = "Far"
 	far.Position = UDim2.new(0.5, 0, 0, h * 0.55)
 	far.Visible = false
-	bb.Size = UDim2.fromOffset(w + h * 0.2, total + h * 0.2)
-	full.Position = UDim2.fromOffset(h * 0.1, h * 0.1)
+	-- (7 Nov, owner: your OWN tag covered the island buy pad's label in front of you: you don't see your own, everyone
+	-- else still sees it over your head)
+	bb.Enabled = p ~= player
 	bb.Parent = playerGui
 	tags[p] = bb
 	tagParts[bb] = { full = full, far = far, head = head, plate = plate }
 end
+-- (7 Nov: a tag fades out closer than 6 studs to the camera (gone at 4), every frame)
+RunService.RenderStepped:Connect(function()
+	local cam = workspace.CurrentCamera
+	if not cam then return end
+	for bb, t in pairs(tagParts) do
+		if bb.Parent and t.head.Parent and t.full:IsA("CanvasGroup") then
+			local d = (t.head.Position - cam.CFrame.Position).Magnitude
+			t.full.GroupTransparency = math.clamp((6 - d) / 2, 0, 1)
+		end
+	end
+end)
 -- (every 0.5 s: past FAR studs a tag shows the emblem only)
 local farCheck = 0
 RunService.Heartbeat:Connect(function(dt)
@@ -158,7 +165,8 @@ RunService.Heartbeat:Connect(function(dt)
 	if not cam then return end
 	for bb, t in pairs(tagParts) do
 		if not bb.Parent or not t.head.Parent then continue end
-		local isFar = (t.head.Position - cam.CFrame.Position).Magnitude > FAR
+		local d = (t.head.Position - cam.CFrame.Position).Magnitude
+		local isFar = d > FAR
 		t.full.Visible = not isFar
 		t.far.Visible = isFar
 	end

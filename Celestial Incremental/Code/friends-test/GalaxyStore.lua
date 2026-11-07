@@ -29,20 +29,10 @@ gui.IgnoreGuiInset = true
 gui.DisplayOrder = 3
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = playerGui
-local PHONE_TEST = RunService:IsStudio() and workspace:GetAttribute("TestPhone") == true
-local root: GuiObject | ScreenGui = gui
-if PHONE_TEST then
-	local f = Instance.new("Frame")
-	f.AnchorPoint = Vector2.new(0.5, 0.5)
-	f.Position = UDim2.fromScale(0.5, 0.5)
-	f.Size = UDim2.fromOffset(667, 375)
-	f.BackgroundTransparency = 1
-	f.ClipsDescendants = true
-	f.Parent = gui
-	root = f
-end
+local PHONE_TEST = Kit.testDevice() ~= nil -- (Studio: Workspace TestDevice / TestPhone, UIKit)
+local root: GuiObject | ScreenGui = Kit.testRoot(gui) -- (7 Nov: the safe area; Studio: the emulated device)
 local function viewport(): Vector2
-	return if PHONE_TEST then Vector2.new(667, 375) else workspace.CurrentCamera.ViewportSize
+	return Kit.viewport(root)
 end
 local function screenScale(): number
 	local vp = viewport()

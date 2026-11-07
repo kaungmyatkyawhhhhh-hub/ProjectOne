@@ -25,11 +25,7 @@ function Kit.calm(): boolean
 end
 -- a phone-size screen (overnight part 5): the windows' small texts get their phone sizes so they read at >= 12 px
 -- (Studio: the Workspace attribute TestPhone = the 667x375 phone frame)
-function Kit.phone(): boolean
-	if game:GetService("RunService"):IsStudio() and workspace:GetAttribute("TestPhone") == true then return true end
-	local cam = workspace.CurrentCamera
-	return cam ~= nil and cam.ViewportSize.Y > 10 and cam.ViewportSize.Y < 500
-end
+
 -- size `desktop`, or `phone` on a phone-size screen
 function Kit.ps(desktop: number, phone: number): number
 	return if Kit.phone() then phone else desktop
@@ -45,6 +41,100 @@ local function new(class: string, props, parent)
 	return o
 end
 Kit.new = new
+-- DEVICES (7 Nov, live: "the phone HUD overlaps everywhere"). Studio only: Workspace TestDevice = "android" / "se" /
+-- "pro14" / "ipad" / "pc" lays every HUD out inside that device's screen (logical px, landscape) in the middle of the
+-- window: its safe area (the notch, the home bar), and a mock of Roblox's own top-left buttons (the topbar). A device
+-- bigger than the window is drawn smaller (a UIScale); the layout still uses its real size. TestPhone = true = "se".
+-- (topbar.left = where the free top row starts, from the device's left edge; safe = { left, right, bottom } insets)
+Kit.Devices = {
+	android = { size = Vector2.new(800, 360), topbar = { left = 200, height = 44 }, safe = { 0, 0, 0 } },
+	se = { size = Vector2.new(667, 375), topbar = { left = 200, height = 44 }, safe = { 0, 0, 0 } },
+	pro14 = { size = Vector2.new(852, 393), topbar = { left = 259, height = 44 }, safe = { 59, 59, 21 } },
+	ipad = { size = Vector2.new(1180, 820), topbar = { left = 220, height = 58 }, safe = { 0, 0, 20 } },
+	pc = { size = Vector2.new(1920, 1080), topbar = { left = 220, height = 58 }, safe = { 0, 0, 0 } },
+}
+function Kit.testDevice()
+	if not game:GetService("RunService"):IsStudio() then return nil, nil end
+	local d = workspace:GetAttribute("TestDevice")
+	if type(d) == "string" and Kit.Devices[d] then return Kit.Devices[d], d end
+	if workspace:GetAttribute("TestPhone") == true then return Kit.Devices.se, "se" end
+	return nil, nil
+end
+-- the HUD's root in this ScreenGui: the gui itself (real devices: the safe area, Roblox puts it there with
+-- DeviceSafeInsets), or in Studio the emulated device's safe area
+function Kit.testRoot(gui: ScreenGui): GuiObject | ScreenGui
+	gui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
+	local dev = Kit.testDevice()
+	if not dev then return gui end
+	gui.ScreenInsets = Enum.ScreenInsets.None
+	local outer = new("Frame", { Name = "TestDevice", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromOffset(dev.size.X, dev.size.Y), BackgroundTransparency = 1 }, gui)
+	-- (drawn to fit the window; the camera has no size yet when the scripts start: refit when it does)
+	local cam = workspace.CurrentCamera
+	local us = new("UIScale", { Scale = 1 }, outer)
+	local function refit()
+		local vp = cam.ViewportSize
+		if vp.X > 100 then us.Scale = math.min(1, (vp.X - 16) / dev.size.X, (vp.Y - 16) / dev.size.Y) end
+	end
+	refit()
+	cam:GetPropertyChangedSignal("ViewportSize"):Connect(refit)
+	if gui.Name == "GalaxyHUD" then
+		new("UIStroke", { Color = Color3.new(1, 1, 1), Thickness = 2 }, outer)
+		-- (the notch / the home-bar strip, and Roblox's top-left buttons, drawn so the screenshots show them)
+		if dev.safe[1] > 0 then new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.3, Size = UDim2.fromOffset(dev.safe[1], dev.size.Y), ZIndex = 99 }, outer) end
+		local tb = new("Frame", { Name = "MockTopbar", BackgroundColor3 = Color3.fromRGB(20, 20, 24), BackgroundTransparency = 0.25,
+			Position = UDim2.fromOffset(dev.safe[1] + 6, 4), Size = UDim2.fromOffset(dev.topbar.left - dev.safe[1] - 12, dev.topbar.height - 8), ZIndex = 99 }, outer)
+		new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, tb)
+		new("TextLabel", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Text = "ROBLOX BUTTONS", TextColor3 = Color3.new(1, 1, 1),
+			TextSize = 12, Font = Enum.Font.GothamBold, ZIndex = 99 }, tb)
+	end
+	local safe = new("Frame", { Name = "SafeArea", Position = UDim2.fromOffset(dev.safe[1], 0),
+		Size = UDim2.fromOffset(dev.size.X - dev.safe[1] - dev.safe[2], dev.size.Y - dev.safe[3]), BackgroundTransparency = 1, ClipsDescendants = true }, outer)
+	return safe
+end
+-- the room the HUD has (logical px): the emulated safe area, or the gui's (the safe area on a phone with a notch)
+function Kit.viewport(root): Vector2
+	local dev = Kit.testDevice()
+	if dev then return Vector2.new(dev.size.X - dev.safe[1] - dev.safe[2], dev.size.Y - dev.safe[3]) end
+	if root and root.AbsoluteSize.X > 10 then return root.AbsoluteSize end
+	return workspace.CurrentCamera.ViewportSize
+end
+-- Roblox's top-left buttons, in the root's coordinates: { left = where the free top row starts, height = their row }
+function Kit.topbar(root): { left: number, height: number }
+	local dev = Kit.testDevice()
+	if dev then return { left = dev.topbar.left - dev.safe[1], height = dev.topbar.height } end
+	local r = GuiService.TopbarInset
+	local ap = if root then root.AbsolutePosition else Vector2.zero
+	return { left = math.max(0, r.Min.X - ap.X), height = math.max(0, r.Max.Y - ap.Y) }
+end
+-- (7 Nov, phone HUD) a BillboardGui sized in STUDS, so it shrinks with distance like the world (a pixel-sized one is the
+-- same size on a 360-px phone as on a 1080-px PC: on phones they covered the screen). Its content is drawn at design pixels
+-- (designW x designH) in the returned frame and scaled to the billboard's real size
+function Kit.studsBillboard(bb: BillboardGui, designW: number, designH: number, studsW: number): Frame
+	bb.Size = UDim2.fromScale(studsW, studsW * designH / designW)
+	local inner = new("Frame", { Name = "Design", BackgroundTransparency = 1, Size = UDim2.fromOffset(designW, designH) }, bb)
+	local us = new("UIScale", {}, inner)
+	local function fit()
+		if bb.AbsoluteSize.X > 0 then us.Scale = bb.AbsoluteSize.X / designW end
+	end
+	bb:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+	fit()
+	return inner
+end
+-- a touch screen with no keyboard (Studio: an emulated phone / iPad)
+function Kit.touch(): boolean
+	local _, name = Kit.testDevice()
+	if name then return name ~= "pc" end
+	local UIS = game:GetService("UserInputService")
+	return UIS.TouchEnabled and not UIS.KeyboardEnabled
+end
+-- a phone: the short side under 500 logical px
+function Kit.phone(): boolean
+	local dev = Kit.testDevice()
+	if dev then return math.min(dev.size.X, dev.size.Y - dev.safe[3]) < 500 end
+	local cam = workspace.CurrentCamera
+	return cam ~= nil and cam.ViewportSize.Y > 10 and math.min(cam.ViewportSize.X, cam.ViewportSize.Y) < 500
+end
 
 function Kit.tween(o, goal, t, style, dir, rep, rev, delay)
 	local tw = TweenService:Create(o, TweenInfo.new(t, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out, rep or 0, rev or false, delay or 0), goal)
@@ -131,6 +221,7 @@ function Kit.sparkle(parent, x, y, size, delay)
 	size = size or 12
 	local img = new("ImageLabel", { BackgroundTransparency = 1, Image = A.sparkle, AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromOffset(x + size / 2, y + size / 2), Size = UDim2.fromOffset(size, size), ImageTransparency = 1, ZIndex = 20 }, parent)
+	img:SetAttribute("AllowOverlap", true) -- (decoration that breaks out on purpose: UIAudit leaves it out)
 	local scale = new("UIScale", { Scale = 0.2 }, img)
 	task.spawn(function()
 		task.wait(delay or 0)
@@ -213,11 +304,45 @@ end
 
 -- a rendered icon with its own soft glow pulsing behind it (v12 'iglow', 2.2 s; the icon itself never moves)
 local glowN = 0
+-- (7 Nov, owner: the left-column chips "look like placeholders"; their art (U4) is coming) THE HUD CHIP: a DIAMOND icon tile in
+-- the hotbar's look (dark navy inside, a coloured rim, a thick ink outline, the icon breaking out) overlapping a text PILL
+-- that grows with its text (AutomaticSize). The art drops in HERE only (the tile + pill images). opts: name, colour, icon,
+-- height (the chip's height: 34 on phones, 40 on PC), textSize, order (LayoutOrder in a UIListLayout).
+-- Returns { button, text (Kit.setText works on it), tile, pill }
+function Kit.hudChip(parent: Instance, opts)
+	local H = opts.height or 40
+	local colour = opts.colour or Color3.new(1, 1, 1)
+	local btn = new("TextButton", { Name = opts.name or "Chip", Text = "", AutoButtonColor = false, BackgroundTransparency = 1,
+		AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(H, H), LayoutOrder = opts.order or 0, ZIndex = 5 }, parent)
+	local pillH = math.floor(H * 0.78)
+	local pillY = math.floor((H - pillH) / 2)
+	-- the pill: an ink drop shadow, a dark glossy plate with the chip's colour as its rim; the text pads past the tile's half
+	local pill = new("Frame", { Name = "Pill", BackgroundColor3 = Color3.new(1, 1, 1), AutomaticSize = Enum.AutomaticSize.X,
+		Position = UDim2.fromOffset(math.floor(H * 0.5), pillY), Size = UDim2.fromOffset(0, pillH), ZIndex = 5 }, btn)
+	Kit.corner(pill, math.floor(pillH / 2))
+	Kit.stroke(pill, colour, 2.5, 0.05)
+	Kit.grad(pill, Kit.hex("#2a2240"), Kit.hex("#0f0b18"), 90)
+	new("UIPadding", { PaddingLeft = UDim.new(0, math.floor(H * 0.58)), PaddingRight = UDim.new(0, 12) }, pill)
+	local text = new("TextLabel", { Name = "Text", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, pillH),
+		Text = "", FontFace = Kit.FONT_HEAVY, TextSize = opts.textSize or 18, TextColor3 = opts.textColour or colour, ZIndex = 6 }, pill)
+	new("UIStroke", { Color = INK, Thickness = 1.8, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual, LineJoinMode = Enum.LineJoinMode.Round }, text)
+	-- the diamond tile (the hotbar key's look), the icon breaking out of it
+	local side = math.floor(H * 0.7)
+	local tile = new("Frame", { Name = "Tile", BackgroundColor3 = Color3.new(1, 1, 1), AnchorPoint = Vector2.new(0.5, 0.5), Rotation = 45,
+		Position = UDim2.fromOffset(math.floor(H / 2), math.floor(H / 2)), Size = UDim2.fromOffset(side, side), ZIndex = 7 }, btn)
+	Kit.grad(tile, Kit.hex("#2c2735"), Kit.hex("#121016"), 90)
+	Kit.stroke(tile, INK, 2)
+	local ring = new("Frame", { Name = "Rim", BackgroundTransparency = 1, Position = UDim2.fromOffset(2, 2), Size = UDim2.fromOffset(side - 4, side - 4), ZIndex = 8 }, tile)
+	Kit.stroke(ring, colour, 2)
+	if opts.icon then Kit.icon(btn, opts.icon, math.floor(H * 0.06), math.floor(H * 0.02), math.floor(H * 0.9), nil, { ZIndex = 9 }) end
+	return { button = btn, text = text, tile = tile, pill = pill }
+end
 function Kit.icon(parent, name, x, y, w, glowColor: Color3?, props)
 	local holder = Kit.box(parent, x, y, w, w, { ZIndex = (props and props.ZIndex) or 8 })
 	if glowColor then
-		local g = new("ImageLabel", { BackgroundTransparency = 1, Image = A.softglow, ImageColor3 = glowColor, AnchorPoint = Vector2.new(0.5, 0.5),
+		local g = new("ImageLabel", { Name = "Glow", BackgroundTransparency = 1, Image = A.softglow, ImageColor3 = glowColor, AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.52), Size = UDim2.fromScale(1.05, 1.05), ImageTransparency = 0.45, ZIndex = holder.ZIndex }, holder)
+		g:SetAttribute("AllowOverlap", true) -- (a breathing glow: decoration, UIAudit leaves it out)
 		glowN += 1
 		local d = (glowN % 7) * 0.37
 		task.spawn(function()

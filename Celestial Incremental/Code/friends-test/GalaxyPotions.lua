@@ -27,38 +27,35 @@ gui.IgnoreGuiInset = true
 gui.DisplayOrder = 1
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = playerGui
-local PHONE_TEST = RunService:IsStudio() and workspace:GetAttribute("TestPhone") == true
-local root: GuiObject | ScreenGui = gui
-if PHONE_TEST then
-	local f = Instance.new("Frame")
-	f.AnchorPoint = Vector2.new(0.5, 0.5)
-	f.Position = UDim2.fromScale(0.5, 0.5)
-	f.Size = UDim2.fromOffset(667, 375)
-	f.BackgroundTransparency = 1
-	f.ClipsDescendants = true
-	f.Parent = gui
-	root = f
-end
+local PHONE_TEST = Kit.testDevice() ~= nil -- (Studio: Workspace TestDevice / TestPhone, UIKit)
+local root: GuiObject | ScreenGui = Kit.testRoot(gui) -- (7 Nov: the safe area; Studio: the emulated device)
 local function viewport(): Vector2
-	return if PHONE_TEST then Vector2.new(667, 375) else workspace.CurrentCamera.ViewportSize
+	return Kit.viewport(root)
 end
 local function screenScale(): number
 	local vp = viewport()
 	if vp.Y < 500 then return math.min(vp.X / 1000, vp.Y / 540) end
-	return math.clamp(math.min(vp.X / 1280, vp.Y / 720), 0.6, 1.4)
+	return math.clamp(math.min(vp.X / 1280, vp.Y / 720), if Kit.touch() then 1 else 0.6, 1.4) -- (7 Nov: a TABLET never under 1, like GalaxyHUD)
 end
 
-local CW, CH, GAP = 214, 74, 10
-local SH = 40 -- (the social chips' height)
--- (7 Nov, owner: the boost chips go to the MIDDLE-BOTTOM LEFT, out of the way on PC and phone: one column, its bottom
--- fixed (BOOSTS at the bottom, the social chips + potions stacked above it, growing upward). See layoutBoosts)
-local strip = Kit.box(root, 0, 0, CW, (CH + GAP) * #Econ.Potions + (SH + GAP) * 2, { Name = "Potions", AnchorPoint = Vector2.new(0, 1) })
+local CW, CH, GAP = 214, 74, 8
+-- (7 Nov, live: the phone HUD overlapped + the owner: the left column "looks like placeholders". ONE column, laid out by a
+-- UIListLayout: the potions, the GIFT chip (GalaxyLive), FRIENDS / INVITE, GROUP, PREMIUM, BOOSTS; each social chip is the
+-- kit's HUD chip (Kit.hudChip: a hotbar-style diamond icon tile + a text pill; the new art drops in there). PC: its bottom at
+-- 80% of the screen, it grows upward. Phone: it hangs under the LVL / IGNITION row (GalaxyHUD shared.GalaxyColumnTop), short
+-- labels, drawn at full size so the text is >= 14 px)
+local PH = Kit.phone()
+local strip = Kit.new("Frame", { Name = "Potions", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0),
+	AnchorPoint = if PH then Vector2.new(0, 0) else Vector2.new(0, 1) }, root)
+strip:SetAttribute("UIAuditGroup", true)
+Kit.new("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, GAP), FillDirection = Enum.FillDirection.Vertical,
+	VerticalAlignment = if PH then Enum.VerticalAlignment.Top else Enum.VerticalAlignment.Bottom }, strip)
 local scale = Instance.new("UIScale")
 scale.Parent = strip
 
 local cards = {}
 for i, p in ipairs(Econ.Potions) do
-	local c = Kit.box(strip, 0, (i - 1) * (CH + GAP), CW, CH, { Name = p.id, Visible = false })
+	local c = Kit.box(strip, 0, 0, CW, CH, { Name = p.id, Visible = false, LayoutOrder = i })
 	local shadow = Kit.box(c, 0, 3, CW, CH, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 1 })
 	Kit.corner(shadow, 8)
 	local plate = Kit.box(c, 0, 0, CW, CH, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 2 })
@@ -70,17 +67,17 @@ for i, p in ipairs(Econ.Potions) do
 	Kit.stroke(edge, p.colour, 1.5, 0.3)
 	Kit.box(c, 8, 4, CW - 16, 2, { BackgroundTransparency = 0.55, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
 	Kit.icon(c, p.icon, -10, -6, 78, p.colour, { ZIndex = 5 })
-	Kit.text(c, 66, Kit.ps(8, 6), 146, 24, p.name, Kit.ps(17, 19), { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
+	Kit.text(c, 66, 6, 146, 24, p.name, 19, { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
 	-- how many you have: a small count chip on the icon
 	local chip = Kit.box(c, 44, 46, 30, 22, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 7 })
 	Kit.corner(chip, 5)
 	Kit.stroke(chip, Kit.INK, 2)
 	Kit.grad(chip, hex("#ffd84a"), hex("#c79a0a"), 90)
-	local count = Kit.text(chip, 0, 1, 30, 20, "1", Kit.ps(15, 18), { ZIndex = 8, TextXAlignment = CENTRE, stroke = 1.3 })
+	local count = Kit.text(chip, 0, 1, 30, 20, "1", 18, { ZIndex = 8, TextXAlignment = CENTRE, stroke = 1.3 })
 	-- the timer while it runs
 	local timer = Kit.text(c, 66, 38, 80, 26, "", 21, { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextColor3 = hex("#ffd84a") })
 	local use, useInner, _, useShadow = Kit.button(c, 146, 36, 58, 30, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 6 })
-	Kit.text(useInner, 0, Kit.ps(5, 4), 58, 22, "USE", Kit.ps(17, 19), { ZIndex = useInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
+	Kit.text(useInner, 0, 4, 58, 22, "USE", 19, { ZIndex = useInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.6 })
 	use.MouseButton1Click:Connect(function()
 		Kit.sound("click")
 		local ok = request:InvokeServer("UsePotion", p.id)
@@ -94,47 +91,30 @@ for i, p in ipairs(Econ.Potions) do
 	cards[p.id] = { frame = c, count = count, chip = chip, timer = timer, use = use, useShadow = useShadow }
 end
 
--- the social chips: the potion card's look at chip height (shadow, dark plate, coloured edge, shine, icon, heavy text)
-local function socialChip(name: string, colour: Color3)
-	local c = Kit.new("TextButton", { Name = name, Text = "", AutoButtonColor = false, BackgroundTransparency = 1, Size = UDim2.fromOffset(CW, SH), Visible = false }, strip)
-	local shadow = Kit.box(c, 0, 3, CW, SH, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 1 })
-	Kit.corner(shadow, 8)
-	local plate = Kit.box(c, 0, 0, CW, SH, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 2 })
-	Kit.corner(plate, 8)
-	Kit.stroke(plate, Kit.INK, 2)
-	Kit.grad(plate, hex("#2a2433"), hex("#121016"), 90)
-	local edge = Kit.box(c, 3, 3, CW - 6, SH - 6, { ZIndex = 3 })
-	Kit.corner(edge, 6)
-	Kit.stroke(edge, colour, 1.5, 0.3)
-	Kit.box(c, 8, 4, CW - 16, 2, { BackgroundTransparency = 0.55, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3 })
-	Kit.icon(c, "stardust", -4, -4, 48, colour, { ZIndex = 5 })
-	local label, _, holder = Kit.text(c, 44, Kit.ps(9, 8), CW - 52, 22, "", 16, { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextColor3 = colour, TextScaled = true })
-	-- ("JOIN GROUP FOR +10%" is long: the text shrinks to fit, never over 17)
-	for _, l in ipairs(holder:GetChildren()) do Kit.new("UITextSizeConstraint", { MaxTextSize = Kit.ps(16, 17) }, l) end
-	return c, label
+-- the social chips + BOOSTS: the kit's HUD chip (order in the column: potions 1-9, GIFT 20, then these)
+local CHIP_H, CHIP_TEXT = if PH then 34 else 40, if PH then 17 else 18
+local function hudChip(name: string, colour: Color3, icon: string, order: number)
+	local c = Kit.hudChip(strip, { name = name, colour = colour, icon = icon, height = CHIP_H, textSize = CHIP_TEXT, order = order })
+	return c.button, c.text
 end
-local friendsChip, friendsText = socialChip("Friends", hex("#7dff7a"))
-local groupChip, groupText = socialChip("Group", hex("#ffd84a"))
+shared.GalaxyHudChip = hudChip -- (GalaxyLive's GIFT chip: the same chip, in this column)
+local friendsChip, friendsText = hudChip("Friends", hex("#7dff7a"), "stardust", 30)
+local groupChip, groupText = hudChip("Group", hex("#ffd84a"), "stardust", 40)
 -- (7 Nov: PREMIUM: Roblox Premium players get +10% stardust; others see it grey, a tap opens Roblox's Premium page (once a
 -- session at most))
-local premiumChip, premiumText = socialChip("Premium", hex("#ffb02a"))
--- (7 Nov: INVITE on the FRIENDS chip: Roblox's invite prompt (SocialService), only where the player can send invites)
-local inviteBtn, inviteInner, _, inviteShadow = Kit.button(friendsChip, CW - 76, 6, 70, 28, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 7, Visible = false })
-Kit.text(inviteInner, 0, Kit.ps(5, 4), 70, 20, "INVITE", Kit.ps(14, 16), { ZIndex = inviteInner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.4 })
-inviteShadow.Visible = false
+local premiumChip, premiumText = hudChip("Premium", hex("#ffb02a"), "stardust", 50)
+-- (the FRIENDS chip IS the invite button now: a tap opens Roblox's invite prompt (SocialService) where you can send one;
+-- the separate INVITE button was clipped on phones)
 local SocialService = game:GetService("SocialService")
 local canInvite = false
 local refreshLater: (() -> ())? = nil -- (= refresh, once it exists below)
 task.spawn(function()
 	local ok, yes = pcall(function() return SocialService:CanSendGameInviteAsync(player) end)
 	canInvite = ok and yes == true
-	inviteBtn.Visible = canInvite
-	inviteShadow.Visible = canInvite
-	-- (the label makes room for the button)
-	if canInvite then (friendsText.Parent :: GuiObject).Size = UDim2.fromOffset(CW - 52 - 78, 22) end
 	if refreshLater then refreshLater() end
 end)
-inviteBtn.MouseButton1Click:Connect(function()
+friendsChip.MouseButton1Click:Connect(function()
+	if not canInvite then return end
 	Kit.sound("click")
 	local opts = Instance.new("ExperienceInviteOptions")
 	opts.LaunchData = "invite:" .. player.UserId -- (who invited: the analytics can count invites that came back)
@@ -142,22 +122,28 @@ inviteBtn.MouseButton1Click:Connect(function()
 end)
 local function refreshSocial()
 	local n = math.min(player:GetAttribute("FriendsHere") or 0, Econ.Social.FriendMax)
-	-- (owner 6 Nov: shown at 0 too, greyed, as the invite hint: "+10% PER FRIEND (0/3)")
+	-- (owner 6 Nov: shown at 0 too, greyed, as the invite hint)
 	friendsChip:SetAttribute("Show", true)
 	local per = math.floor(Econ.Social.FriendPer * 100 + 0.5)
+	local max = Econ.Social.FriendMax
 	if n > 0 then
-		Kit.setText(friendsText, "FRIENDS +" .. math.floor(n * Econ.Social.FriendPer * 100 + 0.5) .. "% (" .. n .. "/" .. Econ.Social.FriendMax .. ")")
+		local pct = math.floor(n * Econ.Social.FriendPer * 100 + 0.5)
+		Kit.setText(friendsText, if PH then "+" .. pct .. "% " .. n .. "/" .. max else "FRIENDS +" .. pct .. "% (" .. n .. "/" .. max .. ")")
+		friendsText.TextColor3 = hex("#7dff7a")
+	elseif canInvite then
+		Kit.setText(friendsText, if PH then "INVITE" else "INVITE  +" .. per .. "% EACH")
 		friendsText.TextColor3 = hex("#7dff7a")
 	else
-		-- (with the INVITE button beside it the hint is shorter)
-		Kit.setText(friendsText, "+" .. per .. (if canInvite then "% EACH (0/" else "% PER FRIEND (0/") .. Econ.Social.FriendMax .. ")")
+		Kit.setText(friendsText, if PH then "0/" .. max else "+" .. per .. "% PER FRIEND (0/" .. max .. ")")
 		friendsText.TextColor3 = hex("#8f889c")
 	end
 	local inGroup = player:GetAttribute("InGroup") == true
-	Kit.setText(groupText, if inGroup then "GROUP +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%" else "JOIN GROUP FOR +" .. math.floor(Econ.Social.Group * 100 + 0.5) .. "%")
+	local gp = math.floor(Econ.Social.Group * 100 + 0.5)
+	Kit.setText(groupText, if inGroup then (if PH then "+" .. gp .. "%" else "GROUP +" .. gp .. "%") else (if PH then "JOIN +" .. gp .. "%" else "JOIN GROUP FOR +" .. gp .. "%"))
 	groupChip.Active = not inGroup
 	local prem = player:GetAttribute("Premium") == true
-	Kit.setText(premiumText, if prem then "PREMIUM +" .. math.floor(Econ.Premium * 100 + 0.5) .. "%" else "PREMIUM: +" .. math.floor(Econ.Premium * 100 + 0.5) .. "% STARDUST")
+	local pp = math.floor(Econ.Premium * 100 + 0.5)
+	Kit.setText(premiumText, if prem then (if PH then "+" .. pp .. "%" else "PREMIUM +" .. pp .. "%") else (if PH then "PREMIUM" else "PREMIUM: +" .. pp .. "% STARDUST"))
 	premiumText.TextColor3 = if prem then hex("#ffb02a") else hex("#8f889c")
 	premiumChip.Active = not prem
 end
@@ -201,41 +187,19 @@ player:GetAttributeChangedSignal("Supernovas"):Connect(function()
 	end)
 end)
 
-local function layout()
-	local s = screenScale()
-	local vp = viewport()
-	-- (phones: the column is a bit smaller, so a running potion doesn't push it up into the top HUD)
-	scale.Scale = if vp.Y < 500 then s * 0.82 else s
-end
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
------------------------------------------------------------------------- #144 the BOOSTS chip + #229 the ACTIVE BOOSTS list (Phase 2.7): on the
--- right, "BOOSTS x2.30" = every boost of yours added together (#69: same kind adds); a tap opens the list of each one with its
--- timer (the pass, the potions, the Star Surge, friends, group)
+------------------------------------------------------------------------ #144 the BOOSTS chip + #229 the ACTIVE BOOSTS list (Phase 2.7): the
+-- column's last chip, "BOOSTS x2.30" (phone: "x2.30") = every boost of yours added together (#69: same kind adds); a tap
+-- opens the list of each one with its timer, beside the column
 local Galaxy2 = ReplicatedStorage:WaitForChild("Galaxy")
-local boostRoot = Kit.box(root, 0, 0, 230, 40, { Name = "Boosts", AnchorPoint = Vector2.new(0, 1) })
-local bScale = Instance.new("UIScale")
-bScale.Parent = boostRoot
-local bChip = Kit.new("TextButton", { Text = "", AutoButtonColor = false, BackgroundTransparency = 1, Size = UDim2.fromOffset(230, 40), ZIndex = 9 }, boostRoot)
-do
-	local sh = Kit.box(boostRoot, 0, 3, 230, 40, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 1 })
-	Kit.corner(sh, 8)
-	local plate = Kit.box(boostRoot, 0, 0, 230, 40, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 2 })
-	Kit.corner(plate, 8)
-	Kit.stroke(plate, Kit.INK, 2)
-	Kit.grad(plate, hex("#2a2433"), hex("#121016"), 90)
-	local edge = Kit.box(boostRoot, 3, 3, 224, 34, { ZIndex = 3 })
-	Kit.corner(edge, 6)
-	Kit.stroke(edge, hex("#ffb02a"), 1.5, 0.3)
-	Kit.icon(boostRoot, "boosts", -4, -4, 48, Color3.fromRGB(255, 170, 60), { ZIndex = 5 })
-end
-local bText = Kit.text(boostRoot, 44, Kit.ps(9, 8), 180, 22, "BOOSTS x1", Kit.ps(16, 17), { ZIndex = 6, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextColor3 = hex("#ffd84a") })
-local list = Kit.box(boostRoot, 0, 48, 230, 10, { ZIndex = 10, Visible = false })
-local listBg = Kit.box(list, 0, 0, 230, 10, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 10 })
+local bChip, bText = hudChip("Boosts", hex("#ffb02a"), "boosts", 60)
+bText.TextColor3 = hex("#ffd84a")
+local list = Kit.box(root, 0, 0, 250, 10, { Name = "BoostList", ZIndex = 10, Visible = false })
+local listBg = Kit.box(list, 0, 0, 250, 10, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 10 })
 Kit.corner(listBg, 8)
 Kit.stroke(listBg, hex("#ffb02a"), 2, 0.2)
 local listLines = {}
 for i = 1, 9 do
-	listLines[i] = Kit.text(list, 12, 8 + (i - 1) * 24, 210, 22, "", Kit.ps(14, 16), { ZIndex = 11, FontFace = Kit.FONT_BOLD, stroke = 1.2 })
+	listLines[i] = Kit.text(list, 12, 8 + (i - 1) * 24, 230, 22, "", 16, { ZIndex = 11, FontFace = Kit.FONT_BOLD, stroke = 1.2 })
 end
 local function boostLines(): { string }
 	local out = {}
@@ -262,12 +226,18 @@ local function boostLines(): { string }
 end
 local function refreshBoosts()
 	local total = player:GetAttribute("BoostTotal") or 1
-	Kit.setText(bText, "BOOSTS x" .. (string.format("%.2f", total):gsub("0+$", ""):gsub("%.$", "")))
+	local x = "x" .. (string.format("%.2f", total):gsub("0+$", ""):gsub("%.$", ""))
+	Kit.setText(bText, if PH then x else "BOOSTS " .. x)
 	if list.Visible then
 		local lines = boostLines()
 		for i, l in ipairs(listLines) do Kit.setText(l, lines[i] or "") end
-		listBg.Size = UDim2.fromOffset(230, 12 + #lines * 24)
-		list.Position = UDim2.fromOffset(0, -(12 + #lines * 24) - 8) -- (it opens UPWARD: the chip is at the bottom of the column)
+		listBg.Size = UDim2.fromOffset(250, 12 + #lines * 24)
+		-- (beside the BOOSTS chip, right of the column, in the root's own units)
+		local vp = viewport()
+		local k = if root.AbsoluteSize.X > 0 then root.AbsoluteSize.X / vp.X else 1
+		local at = (bChip.AbsolutePosition - root.AbsolutePosition) / k
+		local w = bChip.AbsoluteSize.X / k
+		list.Position = UDim2.fromOffset(math.floor(at.X + w + 8), math.floor(math.min(at.Y, vp.Y - (12 + #lines * 24) - 6)))
 	end
 end
 bChip.MouseButton1Click:Connect(function()
@@ -285,30 +255,30 @@ end)
 local function layoutBoosts()
 	local s = screenScale()
 	local vp = viewport()
-	local cs = if vp.Y < 500 then s * 0.82 else s
-	bScale.Scale = cs
-	scale.Scale = cs
-	-- the column's bottom: 80% down the screen on PC, 74% on a phone (above the move thumbstick's corner); BOOSTS there,
-	-- the potions + social chips right above it
-	local bottom = math.floor(vp.Y * (if vp.Y < 500 then 0.74 else 0.8))
-	boostRoot.Position = UDim2.fromOffset(math.floor(10 * s), bottom)
-	strip.Position = UDim2.fromOffset(math.floor(10 * s), bottom - math.floor((40 + GAP) * cs))
+	if PH then
+		-- (phone: full size (the chips are made for it), under GalaxyHUD's LVL / IGNITION row)
+		scale.Scale = math.clamp(vp.Y / 375, 0.9, 1.1)
+		local top = if shared.GalaxyColumnTop then shared.GalaxyColumnTop() else 96
+		strip.Position = UDim2.fromOffset(8, top)
+	else
+		scale.Scale = s
+		-- the column's bottom: 80% down the screen
+		strip.Position = UDim2.fromOffset(math.floor(10 * s), math.floor(vp.Y * 0.8))
+	end
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layoutBoosts)
+shared.GalaxyColumnLayout = layoutBoosts
 layoutBoosts()
 refreshBoosts()
 
 -- (6 Nov overlap check: the strip covered the TREE window's left column; it hides while a window is open: GalaxyHUD calls this)
 shared.GalaxyPotionsShow = function(on: boolean)
 	strip.Visible = on
-	boostRoot.Visible = on
 	if not on then list.Visible = false end
 end
-layout()
 
--- shown / hidden, counts, and the order (only the visible cards, packed from the top)
+-- shown / hidden, counts (the column's UIListLayout places them)
 local function refresh()
-	local y = 0
 	for _, p in ipairs(Econ.Potions) do
 		local c = cards[p.id]
 		local n = player:GetAttribute("Potion_" .. p.id) or 0
@@ -318,31 +288,10 @@ local function refresh()
 		Kit.setText(c.count, tostring(n))
 		c.use.Visible = n > 0
 		c.useShadow.Visible = n > 0
-		if c.frame.Visible then
-			c.frame.Position = UDim2.fromOffset(0, y)
-			y += CH + GAP
-		end
 	end
 	refreshSocial()
-	-- (owner 7 Nov: the GIFT chip sits in this column, right ABOVE the FRIENDS / INVITE chip; GalaxyLive moves it in here and
-	-- sets "Want" while there is a gift to count down to)
 	local gift = strip:FindFirstChild("GiftChip")
-	if gift then
-		gift.Visible = gift:GetAttribute("Want") == true
-		if gift.Visible then
-			gift.Position = UDim2.fromOffset(0, y)
-			y += SH + GAP
-		end
-	end
-	for _, chip in ipairs({ friendsChip, groupChip, premiumChip }) do
-		chip.Visible = chip ~= friendsChip or chip:GetAttribute("Show") == true
-		if chip.Visible then
-			chip.Position = UDim2.fromOffset(0, y)
-			y += SH + GAP
-		end
-	end
-	-- (the column's bottom is fixed: its height = what's in it, so it grows upward)
-	strip.Size = UDim2.fromOffset(CW, math.max(1, y - GAP))
+	if gift then gift.Visible = gift:GetAttribute("Want") == true end
 end
 player:GetAttributeChangedSignal("FriendsHere"):Connect(function() refresh() end)
 player:GetAttributeChangedSignal("InGroup"):Connect(function() refresh() end)
