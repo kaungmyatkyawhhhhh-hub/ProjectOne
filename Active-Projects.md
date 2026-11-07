@@ -19,7 +19,8 @@ Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongm
 - **5 Nov (Claude Code, Studio, not published):** supplements GAINS + STAMINA for Robux built (HUD + slot, See boost moments, analytics); alter tints removed for good with coin refund (only the owner's save had one). 4 Robux products created 5 Nov. Next: publish + private-server check. See [[GYM ARC/Progress/2026-11-05 GYM ARC Supplements Gains + Stamina, alter tints removed]].
 - **5 Nov (Claude Code, Studio, not published):** Plate Forge booth rebuilt + new PLATE FORGE window with a buy moment. See [[GYM ARC/Progress/2026-11-05 GYM ARC Plate Forge booth and forge window]].
 - **6 Nov (Claude Code, Studio, not published):** alter skins 1-20 + the 6 skins, alter VFX and all 13 auras on the ChatGPT art (uploaded to Myanmar Builders Club, ids in `Config/ArtIds`; skins re-tiled so facets are hand-sized, gem facets, flat aura rings). Phones still get no alter particles (4 Nov rule). FPS needs a real phone check. See [[GYM ARC/Progress/2026-11-06 GYM ARC Alter skins, alter VFX and auras on the new art]].
-- **Last updated:** 2026-11-06
+- **7 Nov (Claude Code, Studio, not published):** posing show / runway results only for the people on stage (compact card; others get a small right-column toast only when a real player wins; Settings "Posing Announcements"; judges' star cards hidden after the show). Out-of-stamina card fixed (recovering never started). See [[GYM ARC/Progress/2026-11-07 GYM ARC Posing show results quiet + stamina card fixed]].
+- **Last updated:** 2026-11-07
 
 ## SPEED ARC (Roblox running simulator): PAUSED (29 Oct)
 "+1 SPEED every step": run, smash walls for coins, the last wall = Go Pro to the next world, races every 3 min, shoes / coaches / trails.
