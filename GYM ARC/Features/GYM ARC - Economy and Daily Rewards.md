@@ -59,3 +59,7 @@ Day 7 of the login calendar no longer gives a DNA token (only coins and, the fir
 ## Re-racking pays by LVL (27 Oct, prompt 69; [[2026-10-27 GYM ARC Tires, NPC waists, rerack coins, plates, court]])
 - Owner: "make reracking plate coins scale with level and then stop scaling at some point like the coin packs".
 - `Economy.RerackCoins(data)` = 5 + 1 per LVL, counting LVL only up to 400 (about 7'0"): LVL 0 = 5, LVL 26 (after the tutorial) = 31, LVL 100 = 105, LVL 400+ = 405 (the most). `Config/Economy.Rerack` Coins / PerLvl / MaxLvl. It used to be 0.1 min of coins by Growth Spurt (5 to 33).
+
+## Serums + coins by total EXP (owner, 7 Nov)
+- Day 2 BEAST FORMULA (was Coconut Water), day 4 MONSTER MIX, day 7 TITAN SERUM (days 4 and 7 keep the DNA token, day 5 the Creatine).
+- Coins grow with the player's lifetime EXP: the base up to 50K EXP, then a log scale to 2B EXP where day 7 pays 25,000 (the most any day pays; days 1-6 keep their share). Table and tests: [[2026-11-07 GYM ARC Daily rewards - serums and EXP coins]].

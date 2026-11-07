@@ -55,3 +55,6 @@ Player pictures here are the real Roblox avatar headshot in a plain dark circle 
 
 ![[GYM ARC/Screenshots/posing_show/timer_join_phone.jpg]]
 ![[GYM ARC/Screenshots/posing_show/judges_panel.jpg]]
+
+## Results only for the people on stage (owner, 7 Nov)
+Nobody who isn't on stage gets anything in the middle of the screen: no banner, results, vote or judges' panel, and no judges' score cards. A real player's win shows a 3 s toast in the right column (within 150 studs or friends; Settings "Posing Announcements"), an NPC win shows nothing. Contestants get one compact card (place, score, prize, top 3; 5 s, tap to close). See [[2026-11-07 GYM ARC Posing show results quiet + stamina card fixed]].

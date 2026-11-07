@@ -68,3 +68,6 @@ All lifting stamina numbers are in `Config/Stamina.Pacing` (by Growth Spurt):
 ## Out-of-stamina card (owner, 3 Nov)
 - When stamina runs out (not in the tutorial, not with Endless Stamina running), ONE small bottom card shows: "Out of stamina!" with two buttons, **Refill R$ 5** (Instant Stamina Refill) and **Endless 15m** (Endless Stamina). At most once every 2 minutes. If only one product is for sale, the card shows that one alone. (OfferClient; Studio test: Workspace attribute TestOffer = "StaminaOut".)
 - New players get no pop-ups during the quiet start (their first minutes); the card shows after that.
+
+## Recovering starts on the last rep (7 Nov, bug fix)
+The out-of-stamina card and "RECOVERING" never came, because the client never sent the empty rep that started them. Now the server starts recovering when a rep leaves too little stamina for the next one. See [[2026-11-07 GYM ARC Posing show results quiet + stamina card fixed]].
