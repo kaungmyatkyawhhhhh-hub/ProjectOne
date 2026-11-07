@@ -917,9 +917,11 @@ UI.onCameraButton = function()
 end
 
 -- the car stock market (K or the MARKET button)
-local MarketUI = require(script.Parent:WaitForChild("MarketUI"))
-MarketUI.init()
-UI.onMarketButton = MarketUI.toggle
+if Config.Market.Enabled then
+	local MarketUI = require(script.Parent:WaitForChild("MarketUI"))
+	MarketUI.init()
+	UI.onMarketButton = MarketUI.toggle
+end
 
 -- put your car away (owner, 2026-10-23: "add a function to despawn car"): out of it first if
 -- you're in it, then the server removes it; G brings one back from the garage

@@ -829,6 +829,14 @@ local function buildCashTab()
 		{ "K", "Car stock market" },
 		{ "M", "Automatic / sequential (in a car) · music on foot" },
 	}
+	if not Config.Market.Enabled then
+		for i, row in rows do
+			if row[1] == "K" then
+				table.remove(rows, i)
+				break
+			end
+		end
+	end
 	local panel = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -56),
@@ -961,6 +969,7 @@ local function buildSideButtons()
 	-- (owner, 2026-10-30: GIFTS became GOALS: Legends Path, daily tasks and the daily streak)
 	local giftBtn = sideButton("flag", "GOALS", 3)
 	local marketBtn = sideButton("chart", "MARKET", 4)
+	marketBtn.Visible = Config.Market.Enabled == true
 	marketBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onMarketButton then

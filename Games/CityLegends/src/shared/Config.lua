@@ -953,6 +953,9 @@ Config.Theme = {
 -- be taken delivery of). Prices are the server's: a random walk round each car's base value.
 ---------------------------------------------------------------------
 Config.Market = {
+	-- owner (2026-11-07): "remove the car market for now". false: no MARKET button, no K key, nothing
+	-- runs on the server, and saved stashes are left alone. true brings it all back
+	Enabled = false,
 	TickSeconds = 15, -- prices move this often
 	History = 40, -- price points kept per car (sparklines)
 	BaseK = 0.75, -- a Clean unit's base value, as a share of the car's dealer price

@@ -1835,14 +1835,18 @@ local function buildCars(page: Frame)
 			end
 			outOfMenu()
 		end)
-		local market = button("SELL / MARKET", BLUE, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, by + 104), Size = half, TextSize = 16, Parent = body })
-		focusable(market, function()
-			outOfMenu(function()
-				if api then
-					api.openMarket()
-				end
+		if Config.Market.Enabled then
+			local market = button("SELL / MARKET", BLUE, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, by + 104), Size = half, TextSize = 16, Parent = body })
+			focusable(market, function()
+				outOfMenu(function()
+					if api then
+						api.openMarket()
+					end
+				end)
 			end)
-		end)
+		else
+			custom.Size = UDim2.new(1, 0, 0, 40)
+		end
 	end
 
 	local function card(parent: Instance, x: number, y: number, w: number, h: number, id: string)

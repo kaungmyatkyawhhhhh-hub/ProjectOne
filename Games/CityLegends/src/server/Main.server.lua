@@ -70,7 +70,9 @@ local TestDrive: RemoteFunction = remote("RemoteFunction", "TestDrive") -- a dea
 remotes.Parent = ReplicatedStorage
 
 -- the car stock market (its own remotes, MarketCall / MarketPush)
-require(script.Parent:WaitForChild("Market")).start(remotes)
+if Config.Market.Enabled then
+	require(script.Parent:WaitForChild("Market")).start(remotes)
+end
 
 local playerCars = Instance.new("Folder")
 playerCars.Name = "PlayerCars"

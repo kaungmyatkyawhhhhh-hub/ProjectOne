@@ -8,10 +8,10 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
 ## Real car prices, real part prices, harder cash (2026-11-07, `Prompts/Real car prices and harder cash.md`)
-**Owner, your calls:** the 3 below.
-1. **Robux items:** Starter Pack ($50,000), Cash $25,000 and Cash $100,000 are now worth about 2, 1 and 4 hours of play (they were worth about 20 minutes to an hour). Nothing changed: they have no ids yet.
-2. **Houses, penthouses, hotel suites, gems, VIP cards:** prices not changed. At about $28K an hour the first house ($150,000) takes 6 hours, the first penthouse ($750,000) 27 hours, the $12M and $25M ones 400 to 900 hours. Keep them as long-term dreams, or cut them?
-3. **The car market:** it works in percentages of the car, so a good flip on a dear car now pays more than an hour of play. Not in the simulation, not changed.
+**Owner's decisions (2026-11-07):**
+1. **Robux items stay as they are:** Starter Pack ($50,000), Cash $25,000 and Cash $100,000 (about 2, 1 and 4 hours of play).
+2. **Houses, penthouses, hotel suites, gems and VIP cards keep their prices.** The top ones are long-term dreams (400 to 900 hours).
+3. **The car market is off for now:** `Config.Market.Enabled = false`. No MARKET button, no SELL / MARKET in the CARS menu, no K key, nothing runs on the server. Saved stashes are left alone: what players hold can't be sold meanwhile and comes back if it's turned on. The CAR STOCKS channel on the penthouse TVs stays: it's only decoration. Checked in Play: no button, K does nothing, no script errors.
 
 **Top 10 changes:**
 - Velocité Noir Éclair Super Sport: $13,000,000 -> $4,450,000
