@@ -85,7 +85,19 @@ Every part on both icon sheets has a slot here (68 parts). Effects stay small pe
   - **Decat:** more power, louder crackles.
   - Use the sound system's existing **Pops / Crackle / ShiftPop** pieces (`Config` audio, e.g. `Exhaust_*_Pops`), with louder volume and more distortion for loud exhausts. No new engine sound IDs: the owner sends those. Where a car has no pops sound yet, use the shared one.
   - Small **exhaust flames** for the loud tunes (pop / crackle + straight pipe / decat), at night too.
-- Prices go up with the car's price (`Config.partCash`) and with rarity.
+- **Part prices: about real aftermarket prices** (owner, 2026-11-07: "make the part shop cheaper, a B58 is like over a million"): a part costs roughly what it costs in real life, in US dollars, **not** scaled up by the car's price. Rough guide (research real prices and adjust):
+  - intake / air filter / spark plugs / short shifter: $100–800;
+  - ECU tunes (Stage 1, Pop, Crackle, Burble): $500–1,500; anti-lag map / rev limiter: $1,000–3,000;
+  - downpipe / decat / muffler delete / straight pipe / tips: $200–2,000; full exhaust: $1,500–6,000;
+  - intercooler / BOV / wastegate / boost controller / fuel pump / injectors / coils: $200–2,500;
+  - camshafts / ported head / forged internals / stroker: $1,000–12,000;
+  - turbo upgrades / twin-turbo kits / superchargers: $3,000–20,000;
+  - clutch / flywheel / LSD / final drive / driveshaft: $500–4,000; sequential or dual-clutch gearbox: $10,000–40,000;
+  - tyres: $600–2,500 a set; forged wheels: $3,000–8,000; big brake kit: $2,500–8,000;
+  - springs / coilovers / air suspension / camber / bushings / strut brace / angle kit: $150–6,000;
+  - carbon bonnet / wing / seats / cage / battery / weight reduction: $300–6,000.
+- Rarity still matters: a Legendary part is a stronger, pricier version, but within these real ranges. A small car-price factor is allowed (at most **×1.5** for the most expensive cars, for big parts only), never ×10.
+- **CP** still works as the other way to pay (keep `Config.partCp`).
 - The **class rules stay**:
   - parts change PI and can move a car up a class;
   - stock S2 / R / X cars only take tyres, gearbox, suspension and exhaust (exhaust **sound** parts are fine on them);
@@ -116,7 +128,12 @@ An **ENGINE SWAP** slot (Engine category). A swap replaces the car's engine: its
 - **Names:** engine codes only (like chassis codes), never the maker's or trademark words (no "VTEC", "EcoBoost", "Coyote", "Hemi", "Hellcat", "TFSI"). Add a short layout name, e.g. "2JZ 3.0 I6 Twin-Turbo".
 - **Fits:** every petrol car except stock S2 / R / X cars (class rule) and EVs. Drive type stays the car's own. The engine bay doesn't change visually (no new engine meshes needed); the workshop shows the engine icon and the dyno.
 - **PI and class** move with the swap. The shop shows the new class before buying ("B 562 → A 648").
-- Price by rarity (times the car price factor as usual). Rough start: Uncommon $150K, Rare $350K, Epic $800K, Legendary $2M–3M. Tune these after play-testing.
+- **Price = about the real cost of the swap** (engine + install), not millions (owner, 2026-11-07): roughly
+  - small I4s (B18, CA18, EA888, 1.8T, K20, F20): $5,000–15,000;
+  - turbo I4s / flat-4s (SR20, 3S, 4G63, 4B11, EJ25, M139, 2.5 I5): $8,000–25,000;
+  - I6s (M52, N55, N54, B58, S54, S55, S58, 1JZ, 2JZ, RB26, Barra): $8,000–40,000 (e.g. **B58 about $15,000–20,000**, 2JZ about $25,000–40,000);
+  - V8s / V10s / big engines (350, LS3, LS7, 454, 5.0 V8, 6.2 SC V8, S65, S63, S85, M156, M177, Audi 4.0 V8 TT, 5.2 V10, VR38, Porsche flat-6s, rotaries): $10,000–60,000.
+  - Research real prices for each and note them. No car-price multiplier on swaps.
 
 | # | In-game name | Real engine (for reference only, never shown) | Stock hp | Tuned max hp | Rarity |
 |---|---|---|---|---|---|
