@@ -197,7 +197,7 @@ Rewards.buildWorld(kit, world)
 GemShowcase.buildWorld(kit, world)
 
 -- every part of each building stays inside its lot (a little slack for signs on the edge)
-local function check(name: string, site: string)
+local function check(name: string, site: string, reach: number?)
 	local model = world:FindFirstChild(name)
 	assert(model, "missing " .. name)
 	local frame, lot = WestLayout.site(site)
@@ -210,9 +210,9 @@ local function check(name: string, site: string)
 		end
 	end
 	print(string.format("%s: %d parts, furthest %.1f from the middle (lot half %.1f)", name, count, worst, lot / 2))
-	assert(worst <= lot / 2 + 6, name .. " spills out of its lot")
+	assert(worst <= (reach or lot / 2 + 6), name .. " spills out of its lot")
 end
-check("LegendsRewards", "rewards")
+check("LegendsRewards", "rewards", 160) -- (its courts reach out over the square on purpose, 2026-11-04)
 check("LegendsGemShowcase", "gems")
 for tag, list in tags do
 	print("tag", tag, #list)

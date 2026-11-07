@@ -1927,7 +1927,7 @@ Config.Towing = {
 		toyoka_lc200 = 3500, toyoka_lc300 = 3500, lexis_lx700 = 3600,
 		bentz_g63 = 3500, brabos_g63 = 3500, bentz_gle53 = 3500, bentz_gls = 3500,
 		bnw_x6 = 3200, bnw_x7 = 3400,
-		bentlee_bentayga = 3500, rolls_cullinan = 2700, lambrini_urusp = 3500,
+		bentlee_bentayga = 3500, lambrini_urusp = 3500,
 		byt_u8 = 3500, astin_dbx = 2700, maseroti_levante = 2700,
 	} :: { [string]: number },
 	-- a 7 x 20 ft 7,000 lb steel car hauler: new ones are about $3,900 to $5,600 (aluminium about $9,500)

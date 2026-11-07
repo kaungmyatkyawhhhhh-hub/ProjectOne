@@ -602,6 +602,20 @@ for _, spec in Cars.List do
 end
 check(Cars.get("mclaran_12c_top").Price == 950000 and Cars.get("mclaran_12c_sport").Price == 850000, "the fast trims have their own prices")
 
+-- towing (2026-11-07)
+for id, kg in Config.Towing.Cars do
+	check(Cars.ById[id] ~= nil and kg >= 2500, "a car that tows exists and pulls a car on a trailer: " .. id)
+end
+check(CarStats.towKg("bentz_gls") == 3500, "the X167 tows 3,500 kg")
+check(CarStats.towKg("lambrini_urusp") == 3500, "the Brava tows")
+check(CarStats.towKg("kio_ev6") == 0 and CarStats.towKg("toyoka_alfard") == 0, "the Voltra and the Grand Lounge have no hitch")
+check(CarStats.towKg("lambrini_lp700") == 0 and CarStats.towKg("rolls_cullinan") == 0, "supercars have no hitch, nor the Grandeur (its model is a long sedan)")
+for _, spec in Cars.List do
+	if spec.BaseId and Config.Towing.Cars[spec.BaseId] then
+		check(CarStats.towKg(spec.Id) == Config.Towing.Cars[spec.BaseId], "a trim tows what its base car tows: " .. spec.Id)
+	end
+end
+
 saved = {
 	Claimed = true,
 	Owned = { "kio_ev6", "lambrini_urus", "ferrara_458" },

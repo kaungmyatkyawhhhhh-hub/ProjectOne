@@ -2462,7 +2462,7 @@ UI.onTowAction = nil :: (() -> ())? -- (2026-11-07) the trailer's own pill, abov
 type Pill = { b: TextButton, key: TextLabel, text: TextLabel }
 local actionPill: Pill? = nil
 local towPill: Pill? = nil
-local function makePill(name: string, liftY: number, tap: () -> ()): Pill
+local function makePill(name: string, liftY: number, leftX: number, tap: () -> ()): Pill
 	do
 		local b: TextButton = new("TextButton", {
 			Name = name,
@@ -2473,7 +2473,7 @@ local function makePill(name: string, liftY: number, tap: () -> ()): Pill
 			-- above the speedometer and its warning lights, under the minimap's cards; on phones above
 			-- the steering buttons on the right, clear of the speedometer in the middle. (2026-11-04) PC:
 			-- 28 higher, over the car strip (class badge + car level) that sits above the analogue dial
-			Position = if UI.isTouch then UDim2.new(1, -14, 1, -232 - liftY) else UDim2.new(1, -24, 1, -24 - 224 - 34 - 28 - liftY),
+			Position = if UI.isTouch then UDim2.new(1, -14 - leftX, 1, -232) else UDim2.new(1, -24, 1, -24 - 224 - 34 - 28 - liftY),
 			Size = UDim2.fromOffset(if UI.isTouch then 132 else 168, if UI.isTouch then 36 else 40),
 			BackgroundColor3 = Theme.Panel,
 			BackgroundTransparency = 0.15,
@@ -2529,7 +2529,7 @@ function UI.setAction(text: string?, key: string?)
 		return
 	end
 	if not actionPill then
-		actionPill = makePill("ActionPill", 0, function()
+		actionPill = makePill("ActionPill", 0, 0, function()
 			if UI.onAction then
 				UI.onAction()
 			end
@@ -2543,7 +2543,8 @@ function UI.setTowAction(text: string?, key: string?)
 		return
 	end
 	if not towPill then
-		towPill = makePill("TowPill", if UI.isTouch then 42 else 46, function()
+		-- (on a phone beside the other one: above it is the minimap)
+		towPill = makePill("TowPill", 46, 140, function()
 			if UI.onTowAction then
 				UI.onTowAction()
 			end

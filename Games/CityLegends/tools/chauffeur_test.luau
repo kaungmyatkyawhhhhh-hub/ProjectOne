@@ -20,7 +20,12 @@ local CFrameFixed = setmetatable({
 		return roblox.CFrame.fromMatrix(at, right, realUp, -look)
 	end,
 }, { __index = roblox.CFrame })
-local env = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, CFrame = CFrameFixed, Enum = roblox.Enum }
+-- (ChauffeurRoute asks workspace for the Riviera map: there is none here, so it routes over the old lanes)
+local fakeWorkspace = {}
+function fakeWorkspace:FindFirstChild(_name: string): any
+	return nil
+end
+local env = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, CFrame = CFrameFixed, Enum = roblox.Enum, workspace = fakeWorkspace }
 local loaded = {}
 local function load(name: string): any
 	if loaded[name] then
