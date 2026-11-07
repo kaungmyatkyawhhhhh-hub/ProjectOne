@@ -53,3 +53,33 @@ Report in 5 lines with what you tested. Then I publish right away.
 | `void_rescue` | event fired |
 
 **Not tested:** a real 2-client run (the Studio tools here start one player only).
+
+## Pre-publish check + 2-client test (7 Nov)
+**Half-done work:** none.
+- HUD art, the phone layout, the plaza and the NextPad step-on are finished.
+- The scripts in Studio are the same as the vault.
+- All HUD images load. While Roblox is still processing an image, the left chips fall back to the drawn chip.
+
+**Fixed (found in the 2-client test):** the GIFT chip stayed on the right edge on a slow connection.
+- GalaxyLive gave up waiting for the left column after 20 s; the column preloads its chip art first.
+- It now waits as long as it takes.
+
+**2 clients + server** (`StudioTestService:ExecuteMultiplayerTestAsync`, Incoming Replication Lag 1.5 s on both clients; Player1 = Island_1, Player2 = Island_2):
+
+| test | result |
+|---|---|
+| both dropped into the void on the far side at once | both back on their own island, 0 deaths |
+| both respawned | both on their own island, 0 deaths |
+| Supernova refresh on Player1's island | no fall for either player |
+| Player2 standing on Player1's NextPad | nothing (pads, Denied, Press unchanged) |
+| rank tags | each sees the other's tag, not their own |
+| `void_rescue` | events fired |
+| errors | none |
+
+**Screens:** `30-2clients-player2.jpg`, `31-2clients-player1.jpg`.
+
+**Known, not blocking:**
+- In a small PC window (871x620), UIAudit flags text under 14 px (the PC minimum scale, 0.6). A full PC screen and all phones are clean.
+- LUMI's pointer arrows are flagged as overlaps (they point at a board on purpose).
+- The Sector 2 gate walk-around (see the plaza note) is still open.
+- The owner sets `Workspace.StreamingIntegrityMode = PauseOutsideLoadedArea` by hand.

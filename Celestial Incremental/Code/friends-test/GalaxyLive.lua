@@ -102,9 +102,9 @@ local giftBtn, giftText = giftChip.button, giftChip.text
 local giftEdge = giftChip.pill:FindFirstChildOfClass("UIStroke") -- (the drawn chip only; the art has its own rim)
 local inColumn = false
 task.spawn(function()
-	local t0 = os.clock()
-	while not shared.GalaxyColumn and os.clock() - t0 < 20 do task.wait(0.2) end
-	if not shared.GalaxyColumn then return end
+	-- (7 Nov hotfix: no time limit. The column preloads its chip art first; on a slow connection that took over 20 s and the
+	-- gift chip stayed on the right edge for good)
+	while not shared.GalaxyColumn do task.wait(0.2) end
 	inColumn = true
 	giftScale.Scale = 1 -- (the column has its own UIScale)
 	giftRoot.AnchorPoint = Vector2.new(0, 0)
