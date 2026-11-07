@@ -268,9 +268,9 @@ local function crackGlass(car: Model, rec: Rec, rootCF: CFrame)
 		c = mid + Vector3.new(side * width * 0.22, spec[2] * wb, -spec[1] * wb) + n * 0.06
 	else
 		local e = eye :: Vector3
-		size = 2.4
+		size = 2
 		n = Vector3.new(0, 0.87, -0.5).Unit
-		c = Vector3.new(side * 1.1, e.Y + 0.4, e.Z - 3.3)
+		c = Vector3.new(side * 0.8, e.Y + 0.5, e.Z - 3.1)
 	end
 	local p = Instance.new("Part")
 	p.Name = "CrackPlate"
