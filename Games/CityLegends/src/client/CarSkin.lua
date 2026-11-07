@@ -105,6 +105,8 @@ CarSkin.CLUSTER_STYLE = {
 	toyoka_chaser = "Toyota",
 	lexis_lc500 = "LFA", -- the LC takes the LFA's moving-ring screen
 	astin_dbx = "LiveDBX", -- from the owner's photo
+	bentlee_contgt = "LiveSovereign", -- the model's own dials, redrawn sharp and live
+	nisun_350z = "LiveZ33", -- the model's own three pods, redrawn sharp and live
 	lambrini_lp640 = "LiveMurcielago", -- the SV's dials, drawn sharp, without the SV mark (owner, 2026-11-05)
 	lambrini_lp670 = "LiveMurcielagoSV",
 	maseroti_levante = "Modern",
@@ -139,6 +141,8 @@ CarSkin.CLUSTER_RECT = {
 	-- the third import job (2026-11-07): the owner's cluster photos, over the model's own ring
 	lexis_lfa = { at = Vector3.new(-0.01, 0.0338, -0.1424), face = Vector3.new(0, 0.14, 0.99), w = 0.25, h = 0.1637 }, -- (down in the hood: tools/lambo/frame_probe.py)
 	ferrara_599 = { at = Vector3.new(-0.002, 0.042, -0.2676), face = Vector3.new(0, 0.407, 0.913), w = 0.3616, h = 0.1365 }, -- the whole hood, a little bigger than the model's dials
+	bentlee_contgt = { at = Vector3.new(0.0257, 0.0392, -0.1906), face = Vector3.new(-0.0362, 0.2718, 0.9617), w = 0.37, h = 0.14 }, -- in the model's bowls
+	nisun_350z = { at = Vector3.new(0.0007, 0.0335, -0.1705), face = Vector3.new(0, 0.2843, 0.9587), w = 0.38, h = 0.14 }, -- in the model's pods
 	astin_dbx = { at = Vector3.new(-0.0027, 0.0326, -0.2737), face = Vector3.new(0, 0.3076, 0.9515), w = 0.294, h = 0.112 }, -- on the model's screen
 	bentz_sl65bs = { at = Vector3.new(0.022, 0.0715, -0.2433), face = Vector3.new(0, 0.2, 0.98), w = 0.234, h = 0.106 }, -- in the two bowls
 	bentz_sls = { at = Vector3.new(0.0021, 0.0377, -0.2165), face = Vector3.new(0, 0.2, 0.98), w = 0.3163, h = 0.1342 }, -- in the model's hood, in front of its dials
@@ -282,7 +286,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -408,12 +412,12 @@ CarSkin.STEER_MODEL = {
 	bentz_e300 = "MercLuxury", bentz_s63 = "MercLuxury", 
 	bentz_190e = "Merc90s", bentz_s65_w221 = "Merc90s",
 	-- luxury
-	rolls_wraith = "Rolls", rolls_cullinan = "Rolls", bentlee_contgt = "Bentley", bentlee_bentayga = "Bentley",
+	rolls_wraith = "Rolls", rolls_cullinan = "Rolls", bentlee_bentayga = "Bentley",
 	astin_db9 = "Aston", astin_vantage = "Aston",
 	-- American
 	chevo_c6 = "AmericanFlat", chevo_c7 = "AmericanFlat", chevo_camaro = "AmericanFlat", dodger_challenger = "Dodge", bentz_gt63s = "Dodge",
 	-- Japanese and the rest
-	toyoka_supra_mk4 = "JDM90s", toyoka_chaser = "JDM90s", nisun_r34 = "JDM90s", mazdo_rx7 = "JDM90s", nisun_350z = "JDM90s",
+	toyoka_supra_mk4 = "JDM90s", toyoka_chaser = "JDM90s", nisun_r34 = "JDM90s", mazdo_rx7 = "JDM90s",
 	mazdo_rx8 = "RX8",
 	-- (bugotti_veyron had the generated "Veyron" wheel; the new Veyrun models of 2026-11-03 keep their
 	-- own, owner: "use the steering wheel which came from the model")

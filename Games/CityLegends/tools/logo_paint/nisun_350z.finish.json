@@ -1,0 +1,82 @@
+{
+ "id": "nisun_350z",
+ "roles": {
+  "mm_ext1": "Paint",
+  "mm_lights1": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "mm_misc1": [
+   "Trim",
+   0.32,
+   0.0
+  ],
+  "mm_chassis1": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "mm_cab1": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "mm_rotor": [
+   "Disc",
+   0.35,
+   0.85
+  ],
+  "mm_tyre": [
+   "Tyre",
+   0.8,
+   0.0
+  ],
+  "mm_wheel": [
+   "Rim",
+   0.28,
+   0.85
+  ],
+  "interior": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "mat_01": [
+   "Leather",
+   0.5,
+   0.0
+  ],
+  "mat_03": [
+   "Leather",
+   0.5,
+   0.0
+  ],
+  "mat_05": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "^material": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "mirros": [
+   "Mirror",
+   0.06,
+   1.0
+  ],
+  "black_glass": [
+   "Trim",
+   0.2,
+   0.0
+  ]
+ },
+ "lens": [
+  [
+   "red_glass",
+   "Lens_Red"
+  ]
+ ]
+}

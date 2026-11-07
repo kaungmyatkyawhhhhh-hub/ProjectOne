@@ -1,0 +1,113 @@
+{
+ "id": "bentlee_contgt",
+ "roles": {
+  "mm_ext1": "Paint",
+  "mm_lights1": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "mm_misc1": [
+   "Trim",
+   0.32,
+   0.0
+  ],
+  "mm_chassis1": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "mm_cab1": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "mm_rotor": [
+   "Disc",
+   0.35,
+   0.85
+  ],
+  "mm_tyre": [
+   "Tyre",
+   0.8,
+   0.0
+  ],
+  "mm_wheel": [
+   "Rim",
+   0.28,
+   0.85
+  ],
+  "emiss_light": [
+   "LampGlow",
+   0.3,
+   0.0
+  ],
+  "mm_int1": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "leather_b": [
+   "Leather",
+   0.5,
+   0.0
+  ],
+  "mm_mat02": [
+   "Leather",
+   0.5,
+   0.0
+  ],
+  "mm_mat04": [
+   "Belt",
+   0.7,
+   0.0
+  ],
+  "mm_mat06": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "mm_mat07": "Carbon",
+  "mm_mat09": [
+   "Cabin",
+   0.7,
+   0.0
+  ],
+  "mm_mat11": [
+   "Cabin",
+   0.7,
+   0.0
+  ],
+  "mm_mat13": [
+   "Trim",
+   0.4,
+   0.8
+  ],
+  "mm_sw1": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "glass_surr": [
+   "Trim",
+   0.3,
+   0.0
+  ]
+ },
+ "lens": [
+  [
+   "red_glass",
+   "Lens_Red"
+  ],
+  [
+   "glass_light",
+   "Lens_Clear"
+  ]
+ ],
+ "cover": [
+  0,
+  -2.235,
+  0.626,
+  0.02
+ ]
+}

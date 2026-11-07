@@ -35,7 +35,9 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 | 3 | Tri-Star Silber R230 V12 Track (`bentz_sl65bs`) | **Done:** model, logos out, our Trio 6 rims and tyres (the file's tyres had the maker's name on them). Its hood is two round bowls with no room for the plate, so it gets the C197's dials side by side, with small windows for speed and P R N D. The model's two small side dials stay as they are: they don't move. |
 | 4 | Rosso Rampante F141 (`ferrara_599`) | **Done:** model, every horse and name out, our Corsa 10 rims. Cluster fills the model's whole hood: a little bigger than the model's own small dials, so it can be read. Temperature gauges don't move. Pictures: [[F141 - driver's seat.jpg]], [[F141 cluster - photo and redraw.jpg]]. |
 | 5 | British Vanguard Highland (`astin_dbx`) | **Done:** model, wings and names out, our Trio 6 rims and tyres. Cluster on the model's wide screen: both dials, mileage with the real odometer, a trip for this drive, date, clock, the fuel mark on an arc. Still tows (the hitch is worked out from the model, not re-tested on this one). Pictures: [[Highland - in the game.jpg]], [[Highland cluster - photo and redraw.jpg]]. |
-| 6-8 | Sovereign, Z33, G20 | Converted in Blender only, not in the game yet. **Next: car 6.** |
+| 6 | Sovereign Grand Tourer (`bentlee_contgt`) | **Done:** model, wings and names out, our Corsa 10 rims and tyres. Cluster: the model's own dials redrawn sharp and live (revs, mph, digital screen with speed, gear, odometer, real fuel gauge) in the model's carbon face. |
+| 7 | Horizon Z33 (`nisun_350z`) | **Done:** model, names out, our Saetta Y5 rims and tyres. Cluster: the model's three pods redrawn sharp and live (fuel, revs, mph, gear, odometer). Driven to 55 mph: needles, gear and hand all follow. Stays in the new-player pick. |
+| 8 | Bavarica Werkz G20 Sport (`bnw_330i_g20`) | Converted in Blender only, not in the game yet. **Next: car 8.** |
 | 9 | Trailer | Done, in the game since 2026-11-07. |
 
 - **Roof on the P11 Spider:** up. The file only has the roof-up shape.
@@ -44,8 +46,9 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - **Tail lamps:** the P11's own red lens lights up. The C197 keeps its lamps in one mesh, so `tools/lambo/tail_split.py` takes the lens strips out as `Body_TailLens`.
 - **Trap found:** a new small plain-colour picture can fail to load for a long time (F141's tyres and grilles came out white): swap in one that's known good (78370881509044, dark grey).
 - **Trap found:** `make_sync.py` updates its list when it builds, so a build that isn't uploaded is lost: the next one leaves those files out. Upload after every build.
-- **Backups:** `ServerStorage.OldCarModels`: `mclaran_12c_old_2026-11-08`, `bentz_sls_old_2026-11-08`. Tool: `ServerStorage.ClaudeTools.CarSwap`.
+- **Backups:** `ServerStorage.OldCarModels`: one `<id>_old_2026-11-08` for each car swapped. Tool: `ServerStorage.ClaudeTools.CarSwap`.
 - **Checked in Play (PC):** outside, rear, cluster from the driver's side parked. **Not checked yet:** the two cars at speed, night, Customs paint, phone size.
+- Sovereign and Z33 pictures: [[Sovereign - in the game.jpg]], [[Sovereign - cluster in the bowls.jpg]], [[Horizon Z33 - in the game.jpg]], [[Horizon Z33 - cluster at speed.jpg]]. Their small lower dials on the Sovereign are the model's own (oil and temperature), not live: only fuel is a real system, and it has its own dial.
 - Pictures: [[P11 Spider - in the game.jpg]], [[P11 Spider - cluster in the hood.jpg]], [[P11 Spider cluster - photo and redraw.jpg]], [[C197 Wingdoor - in the game.jpg]], [[C197 Wingdoor - rear.jpg]], [[C197 Wingdoor - cluster in the hood.jpg]], [[C197 cluster - photo and redraw.jpg]].
 
 ## Cruise control, mileage, wear, fuel, damage, Legends Service, Riviera Fuel (2026-11-07, `Prompts/Cruise control, mileage, check engine and repair shop.md`)

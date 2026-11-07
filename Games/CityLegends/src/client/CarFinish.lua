@@ -40,6 +40,8 @@ CarFinish.CARS = {
 	astin_dbx = true,
 	ferrara_599 = true,
 	bentz_sl65bs = true,
+	bentlee_contgt = true,
+	nisun_350z = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

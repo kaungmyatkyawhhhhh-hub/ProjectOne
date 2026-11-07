@@ -267,6 +267,14 @@ return {
 		shells = { { name = "SeeThrough_Lens_Red" } },
 		spots = {},
 	},
+	bentlee_contgt = {
+		shells = { { name = "SeeThrough_Lens_Red" } },
+		spots = {},
+	},
+	nisun_350z = {
+		shells = { { name = "SeeThrough_Lens_Red" } },
+		spots = {},
+	},
 	mclaran_12c = {
 		shells = { { name = "SeeThrough_Lens_Red" } },
 		spots = {},

@@ -653,3 +653,101 @@ def dbx(Spec, needle_sprite, add_needle, glyph):
     sp.readout("top", 360 * K, 236 * K, "m", 10, "date", WHT)
     sp.readout("top", 452 * K, 238 * K, "m", 5, "clock", WHT)
     return sp
+
+
+def pods(Spec, needle_sprite, add_needle, glyph, name, W, H, items, windows, boxes=()):
+    """round dials redrawn sharp from a model's own dial picture, for a car with no photo: live needles, plus the digital bits
+    in the boxes. Coordinates are design pixels (0.5 mm each); the panel is cut to the model's bowls (window_<name>.png)."""
+    box = (0, 0, W, H)
+    REF = "sls_sl65_cluster_owner.png"
+    A = Art(REF, box, S=4, bg=(6, 6, 8))
+    sp = Spec(name, W, H, 2.0, 2.0, 0, 0)
+    sp.redline, sp.idle = 7.5, 0.8
+    window(name, box, windows[0], windows[1], S=2)
+    h, w = A.H * A.S, A.W * A.S
+    for it in items:
+        C, R, kind = it["c"], it["r"], it["kind"]
+        a0, a1, vmax = it["a0"], it["a1"], it["vmax"]
+
+        def ang(v, a0=a0, a1=a1, vmax=vmax):
+            return a0 + (a1 - a0) * v / vmax
+
+        r, th = field(A, C)
+        blend(A, np.full((h, w, 3), it.get("face", (8.0, 8.0, 10.0))), band_mask(r, -5, R * 0.96, 0.5))
+        s = 150 + 50 * np.cos(np.radians(th - 320))
+        ring = it.get("ring", 1.0)
+        blend(A, np.stack([s * ring, s * ring, s * ring * 0.98], axis=-1), band_mask(r, R * 0.96, R, 0.5))
+        num, tick = it["num"], it["tick"]
+        minor = it.get("minor", 5)
+        n = round(vmax / it["step"]) * minor
+        for i in range(0, n + 1):
+            v = vmax * i / n
+            big = i % minor == 0
+            col = (214, 40, 30) if it.get("red") is not None and v >= it["red"] else tick
+            A.line([polar(C, R * (0.78 if big else 0.84), ang(v)), polar(C, R * 0.92, ang(v))], col, 2.4 if big else 1.0)
+        for i in range(0, round(vmax / it["step"]) + 1):
+            v = it["step"] * i
+            if v == 0 and it.get("skip0"):
+                continue
+            p = polar(C, R * 0.62, ang(v))
+            lab = str(int(v / it.get("div", 1)))
+            A.text(p[0], p[1], it.get("labels", {}).get(i, lab), ARIAL_B, R * it.get("fs", 0.2), num)
+        if it.get("word"):
+            A.text(C[0], C[1] + R * 0.42, it["word"], ARIAL_B, R * 0.11, num)
+    for b in boxes:
+        A.round_rect(b["x0"], b["y0"], b["x1"], b["y1"], 6, b.get("col", (16, 18, 22)), outline=(70, 70, 74), w=1.2)
+    A.final = A.finish(A.S, blur=1.0, strength=0.2)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    for it in items:
+        C, R, kind = it["c"], it["r"], it["kind"]
+        a0, a1, vmax = it["a0"], it["a1"], it["vmax"]
+        red = it.get("needle", (232, 44, 28))
+        parts = [(-R * 0.16, 0, 1.6, 2.0, red), (0, R * 0.88, 2.6, 0.9, red)]
+        im = needle_sprite(sp, R * 0.9, R * 0.17, parts, hub=R * 0.09, hub_col=(30, 30, 34), hub_line=(120, 120, 124))
+        add_needle(sp, im, C[0], C[1], kind, [(0, a0), (vmax, a1)])
+
+    sprites = {}
+    g = next((b for b in boxes if b.get("gear")), None)
+    f = {"path": ARIAL_B, "size": (g or {}).get("gear", 30), "chars": "", "stroke": 0.1, "shear": 0, "track": 0}
+    for ch in "RN1234567":
+        im, ox, oy, adv = glyph(ch, f, sp.A)
+        c = Image.new("RGBA", im.size, (246, 200, 120, 0))
+        c.putalpha(im.getchannel("A"))
+        sprites[ch] = {"im": c}
+    sp.gear = {"x": g["gx"] if g else -100, "y": g["gy"] if g else -100, "sprites": sprites}
+    sp.font("speed", ARIAL_B, 30, "0123456789", shear=0, track=0.2)
+    sp.font("unit", ARIAL_B, 12, "kmhpi/", shear=0)
+    sp.font("odo", ARIAL_B, 14, "0123456789:", shear=0, track=0.2)
+    for b in boxes:
+        col = (240, 236, 226)
+        if b.get("sx") is not None:
+            sp.readout("speed", b["sx"], b["sy"], "m", 3, "speed", col)
+            sp.readout("unit", b["sx"], b["sy"] + 24, "m", 4, "unit", col)
+        if b.get("ox") is not None:
+            sp.readout("odo", b["ox"], b["oy"], "m", 7, "odoTrim", col)
+    return sp
+
+
+def sovereign(Spec, needle_sprite, add_needle, glyph):
+    GOLD = (222, 184, 104)
+    items = [
+        {"c": (160, 138), "r": 104, "kind": "rpm", "a0": -130, "a1": 130, "vmax": 8, "step": 1, "red": 6.5, "num": GOLD, "tick": GOLD, "word": "x1000 rpm", "skip0": True},
+        {"c": (584, 150), "r": 104, "kind": "mph", "a0": -130, "a1": 130, "vmax": 200, "step": 20, "num": GOLD, "tick": GOLD, "word": "mph", "fs": 0.17, "skip0": True},
+        {"c": (312, 206), "r": 38, "kind": "fuel", "a0": -110, "a1": 110, "vmax": 1, "step": 0.5, "minor": 2, "num": GOLD, "tick": GOLD, "fs": 0.26, "labels": {0: "E", 1: "", 2: "F"}, "needle": (232, 232, 236)},
+    ]
+    return pods(Spec, needle_sprite, add_needle, glyph, "sovereign", 740, 280, items,
+                ([[(290, 14), (450, 14), (450, 150), (290, 150)]], [((160, 138), 104), ((584, 150), 104), ((312, 206), 38)]),
+                [{"x0": 292, "y0": 16, "x1": 448, "y1": 148, "sx": 370, "sy": 64, "ox": 370, "oy": 132, "gear": 24, "gx": 424, "gy": 40}])
+
+
+def z33(Spec, needle_sprite, add_needle, glyph):
+    ORG = (248, 150, 40)
+    items = [
+        {"c": (136, 136), "r": 110, "kind": "fuel", "a0": -100, "a1": 100, "vmax": 1, "step": 0.5, "minor": 2, "num": ORG, "tick": ORG, "fs": 0.18, "labels": {0: "E", 1: "", 2: "F"}, "word": "FUEL", "needle": (240, 240, 244)},
+        {"c": (384, 88), "r": 112, "kind": "rpm", "a0": -150, "a1": 120, "vmax": 8, "step": 1, "red": 6.5, "num": ORG, "tick": ORG, "word": "x1000 rpm"},
+        {"c": (632, 136), "r": 110, "kind": "mph", "a0": -130, "a1": 130, "vmax": 160, "step": 20, "num": ORG, "tick": ORG, "word": "mph", "fs": 0.17, "skip0": True},
+    ]
+    return pods(Spec, needle_sprite, add_needle, glyph, "z33", 760, 280, items,
+                ([], [((136, 136), 110), ((384, 88), 112), ((632, 136), 110)]),
+                [{"x0": 340, "y0": 132, "x1": 428, "y1": 176, "col": (10, 10, 12), "ox": 384, "oy": 166, "gear": 22, "gx": 384, "gy": 146}])
