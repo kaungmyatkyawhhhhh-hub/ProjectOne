@@ -36,22 +36,6 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0021, -0.0179, 0.0432), face = Vector3.new(0, -0.0561, 0.9984), r = 0.03, color = Color3.fromRGB(43, 43, 43) },
 	},
-	astin_dbx = {
-		wb = 3.06,
-		hide = {},
-		covers = {
-			{ emblem = false, disc = false, at = Vector3.new(0, 0.4758, -2.4012), face = Vector3.new(-0.0264, 0.8145, -0.5796), w = 0.2089, h = 0.0522, color = Color3.fromRGB(91, 93, 105) },
-			{ emblem = false, disc = false, at = Vector3.new(0, 0.6871, 2.5706), face = Vector3.new(0.0217, -0.4416, 0.8969), w = 0.1555, h = 0.0518, color = Color3.fromRGB(91, 93, 105) },
-			{ emblem = false, disc = false, at = Vector3.new(0, 0.604, 2.5661), face = Vector3.new(0.0115, 0.4363, 0.8997), w = 0.5629, h = 0.0519, color = Color3.fromRGB(91, 93, 105) },
-		},
-		caps = {
-			FL = { r = 0.033, surface = 0.1082, color = Color3.fromRGB(24, 24, 24) },
-			FR = { r = 0.033, surface = 0.1082, color = Color3.fromRGB(24, 24, 24) },
-			RL = { r = 0.033, surface = 0.1082, color = Color3.fromRGB(24, 24, 24) },
-			RR = { r = 0.033, surface = 0.1082, color = Color3.fromRGB(24, 24, 24) },
-		},
-		hub = { at = Vector3.new(0.0003, -0.0083, 0.047), face = Vector3.new(0.048, -0.4324, 0.9004), r = 0.03, color = Color3.fromRGB(85, 31, 31) },
-	},
 	astin_vantage = {
 		wb = 2.6,
 		hide = {},

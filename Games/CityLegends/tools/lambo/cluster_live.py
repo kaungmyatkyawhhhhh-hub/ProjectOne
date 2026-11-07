@@ -179,6 +179,7 @@ def values(st):
         "altUnit": "mph" if kmh else "km/h",
         "distUnit": "km" if kmh else "mi",
         "driveMode": "SPORT" if manual else "NORMAL",
+        "trip": st.get("trip", "0.0"),
         "mode": "CORSA" if manual else "SPORT",
         "gearLeft": "".join(order[:i]),
         "gearRight": "".join(order[i + 1 :]) + ("" if manual else "A"),
@@ -1941,8 +1942,15 @@ def f599():
     return m.f599(Spec, needle_sprite, add_needle, glyph)
 
 
-BUILDERS = {"mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
+def dbx():
+    import cluster_imports as m
+
+    return m.dbx(Spec, needle_sprite, add_needle, glyph)
+
+
+BUILDERS = {"mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "dbx": ("dbx_cluster_owner.png", (60, 128, 748, 390), None, dict(v=0.8, gear="N", mph=0, manual=False, clock="10:57", odo="002434", date="08.08.2024", distUnit="mi", kmh=False, trip="69.1")),
     "f599": ("ferrari_599_cluster_owner.webp", (0, 208, 1600, 812), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="23:36", odo="011972", distUnit="km", kmh=False, fuel=0.5)),
     "sl65": ("sls_sl65_cluster_owner.png", (71, 60, 677, 317), None, dict(v=0.8, gear="N", mph=0, manual=False, clock="2:40", odo="003274", distUnit="mi", kmh=False)),
     "sls": ("sls_sl65_cluster_owner.png", (71, 60, 677, 317), None, dict(v=0.8, gear="N", mph=0, manual=False, clock="2:40", odo="003274", distUnit="mi", kmh=False)),

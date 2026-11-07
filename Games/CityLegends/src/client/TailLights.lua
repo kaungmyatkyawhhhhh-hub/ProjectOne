@@ -20,10 +20,6 @@ return {
 		shells = { { name = "SeeThrough_red_glass" } },
 		spots = {},
 	},
-	astin_dbx = {
-		shells = { { name = "Body_LightsBrakes1Mtl" }, { name = "Body_LightsBrakes2Mtl" }, { name = "Body_LightsRearRls1Mtl" }, { name = "Body_LightsRearRls2Mtl" } },
-		spots = {},
-	},
 	astin_vantage = {
 		shells = {},
 		wb = 2.6,

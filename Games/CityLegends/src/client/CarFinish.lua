@@ -37,6 +37,7 @@ CarFinish.CARS = {
 	bentz_gls = true,
 	mclaran_12c = true,
 	bentz_sls = true,
+	astin_dbx = true,
 	ferrara_599 = true,
 	bentz_sl65bs = true,
 } :: { [string]: boolean }

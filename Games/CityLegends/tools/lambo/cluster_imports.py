@@ -522,3 +522,134 @@ def f599(Spec, needle_sprite, add_needle, glyph):
     sp.readout("unit", 440 * K, 598 * K, "m", 4, "unit", dark)
     sp.readout("unit", 349 * K, 598 * K, "m", 2, "distUnit", dark)
     return sp
+
+
+def dbx(Spec, needle_sprite, add_needle, glyph):
+    """the Highland's wide screen: two round dials with red faces and white rings, the mileage panel between them. No wings
+    on the dial. Coordinates below are the photo at 1400 wide; K puts them on the 800 px photo."""
+    K = 4 / 7
+    box = (60, 128, 748, 390)
+    REF = "dbx_cluster_owner.png"
+    A = Art(REF, box, S=6, bg=(7, 7, 9))
+    sp = Spec("dbx", box[2] - box[0], box[3] - box[1], 2.6, 2.6, box[0], box[1])
+    sp.redline, sp.idle = 7.0, 0.8
+
+    def P(x, y):
+        return (x * K, y * K)
+
+    def T(x, y, s, f, size, col, **kw):
+        A.text(x * K, y * K, s, f, size * K, col, **kw)
+
+    C1 = P(350, 435)
+    C2 = P(1040, 455)
+    WHT = (238, 238, 240)
+    DIM = (168, 170, 176)
+    RED = (214, 36, 26)
+    ORG = (246, 96, 30)
+    MPH = [(0, 180), (20, 211), (60, 272), (120, 364), (180, 420), (220, 451)]
+
+    def mph(v):
+        for (a, x), (b, y) in zip(MPH, MPH[1:]):
+            if v <= b:
+                return x + (y - x) * (v - a) / (b - a)
+        return MPH[-1][1]
+
+    def rev(v):
+        return 180 + 34 * v
+
+    h, w = A.H * A.S, A.W * A.S
+    yy, xx = np.mgrid[0:h, 0:w]
+    px = (xx + 0.5) / A.S + A.ox
+    py = (yy + 0.5) / A.S + A.oy
+    # the red glow along the top, and the strip of dots along the bottom
+    glow = np.exp(-(((py / K - 275) / 42) ** 2)) * np.exp(-(((px / K - 700) / 330) ** 2))
+    blend(A, np.full((h, w, 3), (150.0, 12.0, 8.0)), glow * 0.8)
+    for row in range(0, 6):
+        for col in range(0, 40):
+            x = 470 + col * 19 + (row % 2) * 9
+            y = 590 + row * 15
+            A.round_rect((x - 6) * K, (y - 3) * K, (x + 6) * K, (y + 3) * K, 1.2, (24, 24, 26))
+
+    def dial(C, scale, nums, step_small):
+        r, th = field(A, C)
+        for s in (172, 176):
+            A.circle(C[0], C[1], s * K, None, outline=(150, 152, 156), w=1.0)
+        # the red face and rays
+        rays = 0.9 + 0.1 * np.cos(np.radians(th * 90))
+        t = smooth(58 * K, 118 * K, r)
+        face = np.stack([(30 + 120 * (1 - t) + 70 * t) * rays, 6 + 8 * t, 6 + 8 * t], axis=-1)
+        blend(A, face, band_mask(r, 58 * K, 120 * K, 0.5))
+        blend(A, np.full((h, w, 3), (238.0, 238.0, 240.0)), band_mask(r, 120 * K, 150 * K, 0.5))
+        blend(A, np.full((h, w, 3), (14.0, 14.0, 16.0)), band_mask(r, 150 * K, 172 * K, 0.5))
+        for v, s in nums:
+            p = polar(C, 135 * K, scale(v))
+            A.text(p[0], p[1], s, ARIAL, 19 * K, (20, 20, 24))
+            A.line([polar(C, 152 * K, scale(v)), polar(C, 172 * K, scale(v))], WHT, 1.3)
+        for v in step_small:
+            A.line([polar(C, 160 * K, scale(v)), polar(C, 172 * K, scale(v))], DIM, 0.7)
+        return r, th
+
+    dial(C1, mph, [(v, str(v)) for v in (0, 20, 40, 60, 80, 100, 120, 150, 180, 220)], [v for v in range(5, 220, 10)])
+    r2, th2 = dial(C2, rev, [(v, str(v)) for v in range(0, 9)], [v / 2 for v in range(1, 16, 2)])
+    # the red line on the rev scale
+    for v in (7, 7.5, 8):
+        A.line([polar(C2, 150 * K, rev(v)), polar(C2, 172 * K, rev(v))], ORG, 1.6)
+    # the middle discs
+    for C in (C1, C2):
+        r, th = field(A, C)
+        s = 34 + 60 * smooth(-1, 1, np.cos(np.radians(th - 20)))
+        blend(A, np.stack([s, s, s * 1.03], axis=-1), band_mask(r, -5, 58 * K, 0.5))
+        A.circle(C[0], C[1], 60 * K, None, outline=(226, 226, 230), w=1.2)
+    r1, th1 = field(A, C1)
+    blend(A, np.full((h, w, 3), (20.0, 20.0, 24.0)), band_mask(r1, -5, 58 * K, 0.5))
+    A.circle(C1[0], C1[1], 60 * K, None, outline=(226, 226, 230), w=1.2)
+    T(1042, 575, "x1000 RPM", ARIAL, 12, DIM)
+
+    # the panel between the dials
+    panel = [P(500, 300), P(520, 288), P(880, 288), P(905, 305), P(880, 330), P(855, 565), P(545, 565), P(525, 330)]
+    A.poly(panel, (17, 18, 22))
+    A.line([P(500, 300), P(520, 288), P(880, 288), P(905, 305)], (214, 60, 50), 1.4)
+    T(700, 357, "Mileage", ARIAL_B, 19, WHT)
+    A.line([P(618, 476), P(668, 476)], DIM, 0.8)
+    A.line([P(730, 476), P(780, 476)], DIM, 0.8)
+    T(699, 478, "miles", ARIAL, 15, WHT)
+
+    # far sides: the temperature bar, the fuel pump
+    for k in range(0, 8):
+        y = 395 + k * 15
+        col = (64, 150, 230) if k > 4 else (214, 214, 218)
+        A.rect(1238 * K, y * K, 1245 * K, (y + 12) * K, col)
+    A.round_rect(132 * K, 484 * K, 143 * K, 500 * K, 1, WHT)
+    # the top line
+    T(928, 250, "P", ARIAL_B, 20, WHT)
+    T(974, 250, "S+", ARIAL_B, 20, WHT)
+    T(1025, 253, "64°F", ARIAL_B, 13, WHT)
+    A.final = A.finish(A.S, blur=1.0, strength=0.2)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    B = Art(REF, box, S=4, bg=(0, 0, 0))
+    B.text(815 * K, 645 * K, "(!)", ARIAL_B, 15 * K, (246, 96, 30))
+    B.text(925 * K, 647 * K, "PARK", ARIAL_B, 11 * K, (226, 44, 30))
+    B.final = B.finish(B.S, blur=1, strength=0)
+    sp.add_show(sp.box(B, (795 * K, 630 * K, 955 * K, 660 * K), black=True), "parked")
+
+    parts = [(60, 118, 2.0, 1.2, (250, 240, 240)), (118, 170, 1.2, 0.6, (250, 90, 60))]
+    add_needle(sp, needle_sprite(sp, 172 * K + 4, 2, [(a * K, b * K, c, d, e) for a, b, c, d, e in parts]), C1[0], C1[1], "mph", MPH)
+    add_needle(sp, needle_sprite(sp, 172 * K + 4, 2, [(a * K, b * K, c, d, e) for a, b, c, d, e in parts]), C2[0], C2[1], "rpm", [(0, rev(0)), (8.5, rev(8.5))])
+    # the fuel mark on an arc left of the speedometer
+    add_needle(sp, needle_sprite(sp, 208 * K, 2, [(190 * K, 206 * K, 1.0, 1.0, WHT)]), C1[0], C1[1], "fuel", [(0, 245), (1, 295)])
+
+    sprites = {ch: {"im": Image.new("RGBA", (4, 4), (0, 0, 0, 0))} for ch in "RNP1234567"}
+    sp.gear = {"x": 0, "y": 0, "sprites": sprites}
+    sp.font("speed", ARIAL, 27, "0123456789", shear=0, track=0.2)
+    sp.readout("speed", 355 * K, 434 * K, "m", 3, "speed", WHT)
+    sp.font("unit", ARIAL_B, 7, "kmhpi/", shear=0)
+    sp.readout("unit", 355 * K, 471 * K, "m", 4, "unit", WHT)
+    sp.font("trip", ARIAL_B, 19, "0123456789.", shear=0, track=0.2)
+    sp.readout("trip", 698 * K, 433 * K, "m", 7, "trip", WHT)
+    sp.font("odo", ARIAL_B, 11, "0123456789", shear=0, track=0.2)
+    sp.readout("odo", 696 * K, 513 * K, "m", 7, "odoTrim", WHT)
+    sp.font("top", ARIAL_B, 7.6, "0123456789:./", shear=0, track=0.1)
+    sp.readout("top", 360 * K, 236 * K, "m", 10, "date", WHT)
+    sp.readout("top", 452 * K, 238 * K, "m", 5, "clock", WHT)
+    return sp

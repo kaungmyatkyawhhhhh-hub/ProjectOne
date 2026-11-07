@@ -34,7 +34,8 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 | 2 | Tri-Star Silber C197 Wingdoor (`bentz_sls`) | **Done:** same. Doors: the file has no separate gullwing doors in a form the game can use, and the game has no door system, so they stay shut. |
 | 3 | Tri-Star Silber R230 V12 Track (`bentz_sl65bs`) | **Done:** model, logos out, our Trio 6 rims and tyres (the file's tyres had the maker's name on them). Its hood is two round bowls with no room for the plate, so it gets the C197's dials side by side, with small windows for speed and P R N D. The model's two small side dials stay as they are: they don't move. |
 | 4 | Rosso Rampante F141 (`ferrara_599`) | **Done:** model, every horse and name out, our Corsa 10 rims. Cluster fills the model's whole hood: a little bigger than the model's own small dials, so it can be read. Temperature gauges don't move. Pictures: [[F141 - driver's seat.jpg]], [[F141 cluster - photo and redraw.jpg]]. |
-| 5-8 | Highland, Sovereign, Z33, G20 | Converted in Blender only, not in the game yet. **Next: car 5.** |
+| 5 | British Vanguard Highland (`astin_dbx`) | **Done:** model, wings and names out, our Trio 6 rims and tyres. Cluster on the model's wide screen: both dials, mileage with the real odometer, a trip for this drive, date, clock, the fuel mark on an arc. Still tows (the hitch is worked out from the model, not re-tested on this one). Pictures: [[Highland - in the game.jpg]], [[Highland cluster - photo and redraw.jpg]]. |
+| 6-8 | Sovereign, Z33, G20 | Converted in Blender only, not in the game yet. **Next: car 6.** |
 | 9 | Trailer | Done, in the game since 2026-11-07. |
 
 - **Roof on the P11 Spider:** up. The file only has the roof-up shape.

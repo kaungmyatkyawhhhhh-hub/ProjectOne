@@ -3451,6 +3451,7 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 	local lastMph, lastT, accel = 0, os.clock(), 0
 	local odo = (Art.odo or 350) + 0.0
 	local fuelLeft = 0.8
+	local tripFrom: number? = nil -- (this drive: the trip line of a screen)
 	local audio: any = nil
 	return function(mph: number, g: string, rpm: number)
 		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
@@ -3548,6 +3549,8 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 			local miles = DashGauges.odoMiles or odo
 			vals.odo = string.format("%06d", math.floor(if KMH then miles * 1.609 else miles))
 			vals.odoTrim = tostring(math.floor(if KMH then miles * 1.609 else miles))
+			tripFrom = tripFrom or miles
+			vals.trip = string.format("%.1f", (miles - tripFrom) * (if KMH then 1.609 else 1))
 			fuelLeft = DashGauges.fuelShare
 			vals.range = tostring(math.floor((if KMH then 500 else 310) * fuelLeft))
 			if not audio then
@@ -3609,6 +3612,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	end,
 	LiveF141 = function(gui)
 		return liveCluster(gui, "f599")
+	end,
+	LiveDBX = function(gui)
+		return liveCluster(gui, "dbx")
 	end,
 	LiveSLS = function(gui)
 		return liveCluster(gui, "sls")
