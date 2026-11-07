@@ -1,4 +1,4 @@
-# Prompt (overnight): import the new McLaren, Mercedes, Ferrari, Aston, Bentley, 350Z, 330i and the trailer: clusters like the photos, super realistic, no errors
+# Prompt (overnight): finish all open prompts, then (last) import the new McLaren, Mercedes, Ferrari, Aston, Bentley, 350Z, 330i and the trailer: clusters like the photos, super realistic, no errors
 
 _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/Users/USER/tools/blender-4.5.9-windows-x64`). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras. Works like `New imports - LFA, Maybachs, Countach.md` and the Lamborghini / Ferrari import prompts (done): reuse their tools, routine and notes._
 
@@ -8,7 +8,21 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
 - Before each car: pull from git. After each car: save the place, commit and push, and note it (with screenshots).
 - Backups: the old model of each replaced car goes to a dated folder in `ServerStorage` before it's swapped.
 - The Toolbox is allowed for small props / materials (scripts removed, no logos, credited).
-- If the usage limit hits: finish the current car cleanly, save, push, and write **"Next: car N"** at the top of the notes.
+- If the usage limit hits: finish the current step / car cleanly, save, push, and write **"Next: …"** (the prompt step or car number) at the top of the notes.
+
+## Order: everything else FIRST, these cars LAST (owner, 2026-11-07: "only do the cars after it's done with everything else, because last for best")
+1. First finish **every other open prompt**, in this order (check the notes; skip what's fully done, after a quick check):
+   1. `Rename car models (fake model names).md` (anything still missing)
+   2. `New imports - LFA, Maybachs, Countach.md` (anything still missing)
+   3. `One Urus and only two 458s.md`
+   4. `Better upgrade area and part shop.md` (Part 1 and Part 2)
+   5. `Real car prices and harder cash.md`
+   6. `Cruise control, mileage, check engine and repair shop.md` (with fuel, gas stations, damage)
+   7. `Car trailers (SUVs with a tow hitch).md` (anything still missing; the trailer model swap is in step 2 below)
+   8. `Lighting and car look like the Ghost Driver videos.md`
+   9. `Small design changes on famous new cars.md`
+   10. `Proper working headlights.md`
+2. **Then, last**, the 9 imports below, one car at a time, with all the care described here (and the new-model rules from the prompts above already in place, so each car gets them as it's added).
 
 ## The new files (owner, 2026-11-07), in `Games/CityLegends/imports/importing cars/`
 | # | File | In the game | Cluster | Licence (from the file) |
