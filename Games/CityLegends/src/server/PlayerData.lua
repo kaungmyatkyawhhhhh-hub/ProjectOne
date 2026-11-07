@@ -478,8 +478,9 @@ function PlayerData.load(player: Player): Profile?
 					if type(partId) == "string" and PartData.Parts[partId] and type(list) == "table" then
 						local clean = {}
 						for _, k in list do
-							if type(k) == "number" and k == k and k >= 1 and k <= Config.CarParts.CashMax and #clean < 99 then
-								table.insert(clean, k)
+							-- (2026-11-07) a spare from when a factor went up to 10 stays, at today's top
+							if type(k) == "number" and k == k and k >= 1 and k <= 10 and #clean < 99 then
+								table.insert(clean, math.min(k, Config.CarParts.CashMax))
 							end
 						end
 						if #clean > 0 then

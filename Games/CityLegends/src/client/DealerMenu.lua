@@ -1018,7 +1018,9 @@ local function build(root: Frame)
 			priceNote.Text = ""
 			buyBtn.set("DRIVE", "blue", "key")
 		else
-			priceCap.Text = "PRICE"
+			-- (2026-11-07) real prices: what kind of price it is
+			local kind = spec.PriceSource
+			priceCap.Text = if kind then "PRICE  ·  " .. string.upper(kind) else "PRICE"
 			priceText.Text = money(priceOf(id))
 			priceText.TextColor3 = if (s.data.Cash or 0) >= priceOf(id) then GREEN else WHITE
 			priceNote.Text = if off > 0 then string.format("-%d%% BRAND BONUS", math.floor(off * 100 + 0.5)) else ""

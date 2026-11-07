@@ -7,6 +7,358 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
+## Real car prices, real part prices, harder cash (2026-11-07, `Prompts/Real car prices and harder cash.md`)
+**Owner, your calls:** the 3 below.
+1. **Robux items:** Starter Pack ($50,000), Cash $25,000 and Cash $100,000 are now worth about 2, 1 and 4 hours of play (they were worth about 20 minutes to an hour). Nothing changed: they have no ids yet.
+2. **Houses, penthouses, hotel suites, gems, VIP cards:** prices not changed. At about $28K an hour the first house ($150,000) takes 6 hours, the first penthouse ($750,000) 27 hours, the $12M and $25M ones 400 to 900 hours. Keep them as long-term dreams, or cut them?
+3. **The car market:** it works in percentages of the car, so a good flip on a dear car now pays more than an hour of play. Not in the simulation, not changed.
+
+**Top 10 changes:**
+- Velocité Noir Éclair Super Sport: $13,000,000 -> $4,450,000
+- Velocité Noir Éclair Pure: $11,000,000 -> $4,000,000
+- Velocité Noir Éclair: $9,500,000 -> $3,250,000
+- Enfurecido LB744: $6,000,000 -> $640,000
+- Enfurecido LB834 ZVX 63: $5,500,000 -> $1,250,000
+- Enfurecido LB834 ZVX: $4,200,000 -> $680,000
+- Enfurecido LB834 ZV: $3,500,000 -> $470,000
+- Velocité Noir Origine: $5,000,000 -> $2,100,000
+- Stealth-Apex V10 Halo: $3,000,000 -> $900,000
+- Ecstasy Grandeur: $2,500,000 -> $432,000
+
+**The money (old -> new, all in `Config.Economy` and the block at the end of `Config.lua`):**
+| What | Old | New |
+|---|---|---|
+| Cut-up base | $120 | $18 |
+| Driving at 90 mph | $5.00/s | $0.75/s |
+| Race gold / silver / bronze / finish | $9,000 / 5,000 / 2,500 / 1,000 | $1,350 / 750 / 375 / 150 |
+| Delivery job per stud, per second left | $7, $40 | $0.60, $5 |
+| Drift per point, most | $0.20, $25,000 | $0.03, $3,750 |
+| Jump per second, per stud, most | $900, $4, $12,000 | $135, $0.60, $1,800 |
+| Chip, all chips | $2,500, $100,000 | $375, $15,000 |
+| Bank most, Showcase most | $60,000, $180,000 | $6,000, $9,000 |
+| Duel win, second | $10,000, $1,500 | $1,500, $225 |
+| Playtime gifts 5 / 15 / 30 / 60 min | $6K / 12K / 24K / 60K | $500 / 1,000 / 1,500 / 3,000 |
+| Daily streak days 1-6 | $5K to 35K | $750 to 5,250 |
+| Daily tasks | $5-8K | $500-800 (x1 to x3 by level) |
+| Weekly gift | $150,000 | $22,500 |
+| Level-up cash | $500 + 250 a level | $50 + 25 a level |
+| Level gift, chest (x level) | $2,000, $8,000 | $40, $160 |
+| SPIN price, value of a free one | $50,000, $17,500 | $5,000, about $1,900 |
+| SUPER SPIN price, value of a free one | $1,000,000, about $950,000 | $30,000, about $14,000 |
+| Legends Path up to $8,000, above | as they were | x 0.4, x 0.15 |
+| Hotel suite income, tower rent | $2,000-30,000 a minute, $12-160K a day | $300-4,500 a minute, $1,800-24,000 a day |
+| Fines, escape bounties, meet bonus, flip-off prize | | x 0.15 (the 10% busted fine stays) |
+| Day-7 streak car, Mid at or under | $120,000 | $50,000 |
+| Chauffeur contracts | old car prices | the cars' new prices |
+XP is unchanged: a cut-up's XP used to come from its cash, so that number moved the other way.
+
+**A normal hour, before -> after (worked out from the numbers in the code, not played; only driving was measured in Play: $0.39 a second at 41 mph, as the sum says):**
+| Way to earn | Mix | Before | After |
+|---|---|---|---|
+| Driving | 30 min at 80 mph | $8,000 | $1,200 |
+| Cut-ups | 150 | $21,600 | $3,240 |
+| Races | 2 silver | $10,000 | $1,500 |
+| Delivery jobs | 2 | $22,600 | $1,985 |
+| Drift | 4 | $2,000 | $300 |
+| Jumps | 4 | $9,600 | $1,440 |
+| Bank heist | 0.4 | $16,800 | $1,680 |
+| Police escapes | 0.5 | $400 | $60 |
+| **All of it** | | **about $91,000** | **about $11,400** |
+Back to back, jobs paid about 10 times anything else, so they dropped most. Gifts, tasks, spins, levels and goals add about $14,000 an hour at 1.5 hours a day.
+
+**Simulated progress (`tools/progression_test.luau`, a normal player, 1.5 hours a day, spending nothing):**
+| Goal | Target | Here |
+|---|---|---|
+| First part ($750) | under 10 min | minute 1 (the $5,000 you start with) |
+| First car, $30K | 30-60 min | 30 min |
+| Good Mid, $100K | 3-5 h | 2.5 h |
+| Top Mid, $250K | 8-12 h | 8 h |
+| First High, $500K | 15-25 h | 17 h |
+| $1M | 35-60 h | 31.5 h |
+| $3M | 100-150 h | 104.5 h |
+All within 25% of the range. Three run a little quick on purpose: better to tighten later than lose players.
+
+**Tiers moved High -> Mid (the price is under $150K):** Horizon R35, British Vanguard Vanta V12, British Vanguard Vela V12, Rosso Rampante F131, Precision Type 42 V10, Speedmark P11, Enfurecido L140 Spyder, Rosso Rampante F149 Riviera. The Tier sets Customs prices, rewards and traffic. The W177 Turbo S ($86,000, a Starter) stays: not on sale yet.
+
+**Other changes:**
+- `Cars.lua`: `Price`, `PriceSource`, and `StatPrice` (the old price: a car's fallback weight came from its price, so stats and PI don't move). Trims still cost x 1.3 and x 1.7 of the base.
+- The free Orient Voltra now shows its real price ($38,000) at the dealer. Whoever has it keeps it; the three starter picks stay free.
+- Retired cars keep their old prices: not on sale.
+- The dealer shows PRICE · NEW, USED or COLLECTOR. A trim shows its base car's tag.
+- Old saves: all cars and cash stay. A spare part saved with a price factor over 1.5 is kept, at 1.5.
+- Market: `HighFromPrice` $600K -> $300K (real prices are lower).
+
+**Part prices:** real aftermarket price x 2.5 (`PartPriceMult`). Real ranges per slot: `PartData.Real`. Rarity sets the place in the range: Common the bottom, Legendary the top. Parts of $2,000 and more (real price) cost up to x 1.5 on cars from $500K, reaching it at $1.1M; smaller parts cost the same on every car. CP prices unchanged. The full list is below.
+
+**Checked:** in Play on a test save (a fresh save, then put back): the first-car claim, buying the Halo Circuit at the dealer ($1,700,000 charged), a part on the 350Z and on the Circuit, the dealer's tag. Lune: carlevels, goals, market, world, graph, progression ALL OK; `luau-lsp` clean. `chauffeur_test` stops on a `workspace` error in `ChauffeurRoute`: not from this job (it needs a fake `workspace` in the test). **Not checked in Play:** Customs and the wheels with the new prices (a spin needs the desk), the market, a real old save.
+
+**Rough prices (one source or asking prices only):** Sovereign Grand Tourer, Tri-Star Silber W177 Turbo S, Rocket W463 800, Velocité Noir Éclair, Enfurecido L147 Roadster, Enfurecido LB744, Enfurecido LB834 ZVX 63, Stuttgart 982, Apex JZX100 Tourer, Apex J300.
+
+**All car prices:**
+
+| Car (`id`) | Real car | Kind | Old | New | Source (Nov 2026) |
+|---|---|---|---|---|---|
+| Velocité Noir Éclair Super Sport (`bugotti_chiron_supersport`) | Bugatti Chiron Super Sport (market value) | collector | $13,000,000 | $4,450,000 | [Classic.com / Bonhams results](https://www.classic.com/m/bugatti/chiron/super-sport) |
+| Velocité Noir Éclair Pure (`bugotti_chiron_pursport`) | Bugatti Chiron Pur Sport (market value) | collector | $11,000,000 | $4,000,000 | [Classic.com](https://classic.com/m/bugatti/chiron/pur-sport) |
+| Velocité Noir Éclair (`bugotti_chiron`) | Bugatti Chiron (market value) | collector (rough) | $9,500,000 | $3,250,000 | [Classic Valuer / RM Sotheby's estimate](https://www.theclassicvaluer.com/vehicle-details/rm-sotheby-s-2026-07-10-bugatti-chiron-04a6c1) |
+| Velocité Noir Origine (`bugotti_veyron`) | Bugatti Veyron 16.4 (market value) | collector | $5,000,000 | $2,100,000 | [Classic.com / Broad Arrow results](https://www.motorious.com/articles/news/record-setting-2-2m-bugatti-veyron-sets-the-pace-at-broad-arrows-inaugural-las-vegas-auction) |
+| Stealth-Apex V10 Halo Circuit (`lexis_lfa_circuit`) | Lexus LFA Nurburgring Package (collector) | collector | $3,600,000 | $1,700,000 | [Classic.com / RM Sotheby's](https://www.classic.com/m/lexus?page=221) |
+| Enfurecido LB834 ZVX 63 (`lambrini_svj63`) | Lamborghini Aventador SVJ 63 Roadster (collector) | collector (rough) | $5,500,000 | $1,250,000 | [Classic.com](https://www.classic.com/veh/2021-lamborghini-aventador-lp770-4-svj-63-roadster-nOjDE54) |
+| Stealth-Apex V10 Halo (`lexis_lfa`) | Lexus LFA (collector) | collector | $3,000,000 | $900,000 | [Classic.com / Bring a Trailer](https://www.classic.com/veh/2012-lexus-lfa-jthhx8bh9c1000396-n35yQRp) |
+| Enfurecido L147 ZV (`lambrini_lp670`) | Lamborghini Murcielago LP670-4 SV (collector) | collector | $2,400,000 | $700,000 | [Classic.com](https://www.classic.com/veh/2010-lamborghini-murcielago-lp670-4-sv-zhwbu8ah3al-n2rO1on) |
+| Enfurecido LB834 ZVX (`lambrini_svj`) | Lamborghini Aventador SVJ (used) | used | $4,200,000 | $680,000 | [Classic.com](https://www.classic.com/veh/2019-lamborghini-aventador-lp770-4-svj-zhwcm6zd3kl-n3xgMBW) |
+| Enfurecido LB744 (`lambrini_revuelto`) | Lamborghini Revuelto (2026) | new (rough) | $6,000,000 | $640,000 | [KBB / Autofinder / TrueCar](https://www.kbb.com/lamborghini/revuelto/2026/) |
+| Enfurecido Classico 5000 (`lambrini_countach`) | Lamborghini Countach 5000 QV (collector) | collector | $2,500,000 | $600,000 | [Classic.com](https://www.classic.com/m/lamborghini/countach/?page=1) |
+| Rosso Rampante F142 Speciale (`ferrara_458speciale`) | Ferrari 458 Speciale (collector) | collector | $1,250,000 | $520,000 | [Classic.com / The Classic Valuer](https://www.theclassicvaluer.com/buyers-guide/ferrari/458-speciale) |
+| Enfurecido L147 Roadster (`lambrini_lp640`) | Lamborghini Murcielago LP650-4 Roadster (collector) | collector (rough) | $1,800,000 | $500,000 | [Broad Arrow estimate / duPont Registry](https://www.motorious.com/articles/handpicked/factory-press-lamborghini-murcielago-broad-arrow) |
+| Enfurecido LB834 ZV (`lambrini_lp750`) | Lamborghini Aventador SV LP750-4 (used) | used | $3,500,000 | $470,000 | [Classic.com](https://www.classic.com/m/lamborghini/aventador/lp750-4-sv) |
+| Ecstasy Grandeur (`rolls_cullinan`) | Rolls-Royce Cullinan (2026) | new | $2,500,000 | $432,000 | [KBB / Cars.com](https://www.kbb.com/rolls-royce/cullinan/2026/series-ii/) |
+| Rocket W463 800 (`brabos_g63`) | Brabus 800 G63 (new or nearly new) | new (rough) | $1,600,000 | $390,000 | [Dubicars / AutoScout24 listings](https://www.dubicars.com/uae/new/brabus/800-mercedes-amg-g-63) |
+| Enfurecido LB724 VTZ (`lambrini_sto`) | Lamborghini Huracan STO (used) | used | $1,800,000 | $365,000 | [Classic.com / CarGurus / TrueCar](https://www.truecar.com/used-cars-for-sale/listings/lamborghini/huracan/?trim=sto) |
+| Tri-Star Silber R230 V12 Track (`bentz_sl65bs`) | Mercedes-Benz SL65 AMG Black Series (collector) | collector | $700,000 | $350,000 | [Classic.com / Bring a Trailer](https://classic.com/veh/2009-mercedes-benz-sl65-amg-black-series-wdbsk79f9-vnK3Nvn) |
+| Sovereign Grand Tourer (`bentlee_contgt`) | Bentley Continental GT Speed (2026) | new (rough) | $1,100,000 | $345,000 | [KBB listings / CarsFrenzy guide (no official MSRP found)](https://www.kbb.com/cars-for-sale/all/2026/bentley/continental) |
+| Enfurecido LB724 Aero Spyder (`lambrini_performante`) | Lamborghini Huracan Performante Spyder (used) | used | $1,550,000 | $330,000 | [Classic.com](https://www.classic.com/veh/2019-lamborghini-huracan-performante-spyder-zhwus4-nKvzZD4) |
+| Enfurecido LB724 Rally (`lambrini_sterrato`) | Lamborghini Huracan Sterrato (used) | used | $1,450,000 | $320,000 | [Classic.com](https://www.classic.com/m/lamborghini/huracan/sterrato) |
+| Enfurecido LB834 (`lambrini_lp700`) | Lamborghini Aventador LP700-4 (used) | used | $2,200,000 | $290,000 | [Classic.com](https://www.classic.com/m/lamborghini/aventador/lp700-4/?page=1) |
+| Enfurecido Brava (`lambrini_urusp`) | Lamborghini Urus Performante (used, replaced by Urus SE) | used | $1,900,000 | $285,000 | [Classic.com / Autotrader / TrueCar](https://classics.autotrader.com/classic-cars-for-sale/exotics-lamborghini-urus-performante-for-sale) |
+| Enfurecido LB724 (`lambrini_huracan`) | Lamborghini Huracan EVO (used) | used | $1,300,000 | $280,000 | [TrueCar / iSeeCars / KBB listings](https://truecar.com/used-cars-for-sale/listings/lamborghini/huracan/?trim=evo) |
+| Tri-Star Silber W201 Evo II (`bentz_190e`) | Mercedes-Benz 190E 2.5-16 Evolution II (collector) | collector | $80,000 | $280,000 | [Classic.com](https://www.classic.com/m/mercedes-benz/190/190-e-25-16-evolution-ii) |
+| British Vanguard Highland (`astin_dbx`) | Aston Martin DBX 707 (2026) | new | $450,000 | $257,000 | [iSeeCars](https://www.iseecars.com/car/aston-martin-dbx-price) |
+| Tri-Star Silber C197 Wingdoor (`bentz_sls`) | Mercedes-Benz SLS AMG (used, collector end) | collector | $950,000 | $250,000 | [Classic.com / The Classic Valuer](https://www.classic.com/m/mercedes-benz/sls/coupe) |
+| Rosso Rampante F142 Spider (`ferrara_458spider`) | Ferrari 458 Spider (used) | used | $1,000,000 | $250,000 | [Classic.com](https://www.classic.com/m/ferrari/458/spider/year-2013) |
+| Stuttgart 971 Turbo S (`porsha_panamera`) | Porsche Panamera Turbo S (2026) | new | $300,000 | $245,000 | [Cars.com / Porsche configurator](https://www.cars.com/research/porsche-panamera-2026/specs/475768) |
+| Tri-Star Silber Z223 Royale V12 (`bentz_s680`) | Mercedes-Maybach S 680 (2026) | new | $1,600,000 | $245,000 | [KBB](https://www.kbb.com/mercedes-benz/mercedes-maybach-s-class/2026) |
+| Sovereign Highlands (`bentlee_bentayga`) | Bentley Bentayga V8 (2026) | new | $1,200,000 | $227,000 | [Autofinder](https://autofinder.com/cars/bentley/bentayga/2026) |
+| Tri-Star Silber W463 V8 (`bentz_g63`) | Mercedes-AMG G 63 W463A (2026) | new | $260,000 | $197,000 | [KBB](https://www.kbb.com/mercedes-benz/mercedes-amg-g-class/2026/specs) |
+| Stuttgart 991.2 Track (`porsha_gt3`) | Porsche 911 GT3 991.2 (used) | used | $1,000,000 | $190,000 | [Classic.com](https://www.classic.com/m/porsche/911/991/9912/gt3/) |
+| Tri-Star Silber X167 Royale (`bentz_gls`) | Mercedes-Maybach GLS 600 (2026) | new | $1,200,000 | $180,000 | [Cars.com / iSeeCars](https://www.cars.com/research/mercedes-benz-maybach-gls-600-2026/) |
+| Ecstasy Nocturne (`rolls_wraith`) | Rolls-Royce Wraith (used) | used | $2,000,000 | $175,000 | [CarGurus / Car & Classic](https://cargurus.com/research/price-trends/Rolls-Royce-Wraith-d2213) |
+| Enfurecido L140 Leggera (`lambrini_lp570`) | Lamborghini Gallardo LP570-4 Superleggera (collector) | collector | $750,000 | $170,000 | [Classic.com / Exotic Car Trader](https://www.exoticcartrader.com/blog/lamborghini-gallardo-lp570-4-superleggera-review) |
+| Horizon BNR34 (`nisun_r34`) | Nissan Skyline GT-R R34 (collector) | collector | $180,000 | $165,000 | [Classic.com / Bring a Trailer](https://www.classic.com/veh/1999-nissan-skyline-gt-r-v-spec-bnr34000761-WLxdgDW) |
+| Rosso Rampante F141 (`ferrara_599`) | Ferrari 599 GTB Fiorano (used) | used | $850,000 | $165,000 | [Classic.com / ConceptCarz](https://www.conceptcarz.com/valuation/17383/Ferrari-599-GTB-Fiorano.aspx) |
+| Dream-Build Volt Titan (`byt_u8`) | BYD Yangwang U8 (China new price in USD) | new | $290,000 | $148,000 | [CarNewsChina](https://data.carnewschina.com/database/yangwang/yangwang-u8/2026) |
+| Bavarica Werkz F93 Fastback (`bnw_m8gc`) | BMW M8 Competition Gran Coupe F93 (2025/2026) | new | $210,000 | $140,000 | [CarGurus](https://www.cargurus.com/Cars/articles/2026-bmw-8-series-pricing-specs-release-date) |
+| Rosso Rampante F131 (`ferrara_f430`) | Ferrari F430 (used) | used | $600,000 | $130,000 | [Classic.com / Old Cars Data](https://classic.com/m/ferrari/f430/coupe/f1/) |
+| British Vanguard Vela V12 (`astin_vantage`) | Aston Martin V12 Vantage (2010-2016 used) | used | $500,000 | $125,000 | [Classic.com / Hypercars.io](https://classic.com/m/aston-martin/vantage/2nd-gen/v12) |
+| Enfurecido L140 Spyder (`lambrini_lp560`) | Lamborghini Gallardo LP560-4 Spyder (used) | used | $680,000 | $120,000 | [Classic.com](https://www.classic.com/m/lamborghini/gallardo/lp560-4-spyder/) |
+| Stealth-Apex J310 (`lexis_lx700`) | Lexus LX 700h (2026) | new | $245,000 | $117,000 | [Cars.com / iSeeCars / Autofinder](https://www.cars.com/research/lexus-lx_700h-2026/trims) |
+| Precision Type 42 V10 (`audy_r8`) | Audi R8 V10 (first generation, used) | used | $550,000 | $110,000 | [Classic.com](https://www.classic.com/m/audi/r8/type-42/v10) |
+| Rosso Rampante F149 Riviera (`ferrara_california`) | Ferrari California (used) | used | $650,000 | $110,000 | [CARFAX via SlashGear / OldCarsData / ConceptCarz](https://www.slashgear.com/2141859/ferrari-california-how-much-cost-in-2026) |
+| Horizon R35 (`nisun_gtr`) | Nissan GT-R R35 (used, base Premium) | used | $420,000 | $105,000 | [Classic.com](https://www.classic.com/m/nissan/gt-r/dba-r35/premium) |
+| Stealth-Apex Z100 V8 (`lexis_lc500`) | Lexus LC 500 coupe (2026) | new | $240,000 | $101,000 | [Cars.com / Autofinder / iSeeCars](https://www.cars.com/research/lexus-lc_500-2026/specs/) |
+| Apex JZA80 (`toyoka_supra_mk4`) | Toyota Supra MK4 Turbo JZA80 (collector) | collector | $140,000 | $100,000 | [Classic.com / Bring a Trailer](https://classic.com/veh/1993-toyota-supra-turbo-hardtop-6-speed-jt2ja82l2p-WjZ1dgW) |
+| Speedmark P11 (`mclaran_12c`) | McLaren MP4-12C (used) | used | $800,000 | $95,000 | [Classic.com](https://www.classic.com/m/mclaren/mp4-12c?page=2) |
+| Tri-Star Silber C167 3.0 (`bentz_gle53`) | Mercedes-AMG GLE 53 Coupe (2026) | new | $250,000 | $93,500 | [KBB / Edmunds / dealer guide](https://www.kbb.com/mercedes-benz/mercedes-amg-gle-coupe/) |
+| Bavarica Werkz G07 (`bnw_x7`) | BMW X7 xDrive40i G07 (2026) | new | $175,000 | $86,500 | [Edmunds](https://www.edmunds.com/bmw/x7/2026/features-specs/) |
+| Tri-Star Silber W177 Turbo S (`bentz_a45s`) | Mercedes-AMG A 45 S W177 (Europe new price in USD; not sold in the US) | new (rough) | $38,000 | $86,000 | [automobile.at / Autotijd](https://www.automobile.at/neuwagen/mercedes-benz/a-45-amg.html) |
+| Tri-Star Silber W222 V12 (`bentz_s63`) | Mercedes-AMG S 65 W222 V12 (used) | used | $280,000 | $85,000 | [Classic.com](https://www.classic.com/m/mercedes-benz/s/w222/sedan/s-65-amg) |
+| Apex J300 (`toyoka_lc300`) | Toyota Land Cruiser 300 VX (export; the US sells the 250, so use Lexus-free export price in USD or US-import listings) | new (rough) | $150,000 | $79,000 | [Dubicars export listings / CarSwitch](https://www.dubicars.com/uae/new/toyota/land-cruiser/5) |
+| Bavarica Werkz G06 Sport (`bnw_x6`) | BMW X6 xDrive40i G06 (2026) | new | $130,000 | $77,500 | [Cars.com / iSeeCars](https://www.cars.com/research/bmw-x6-2026/specs/470987) |
+| Stuttgart 982 (`porsha_boxster`) | Porsche 718 Boxster (982, 2025/2026) | new (rough) | $92,000 | $76,500 | [Edmunds / Cars.com / Porsche configurator](https://edmunds.com/porsche/718-boxster/2025/st-402048195/features-specs) |
+| Apex J200 (`toyoka_lc200`) | Toyota Land Cruiser 200 (used, US) | used | $35,000 | $75,000 | [Classic.com / Old Cars Data](https://classic.com/m/toyota/land-cruiser/200-series/post-facelift) |
+| Ironclad Supercharged (`bentz_gt63s`) | Dodge Charger SRT Hellcat Redeye (last model 2023, used) | used | $320,000 | $72,500 | [Classic.com / KBB / CarGurus](https://www.classic.com/m/dodge/charger/7th-gen/srt-hellcat-redeye) |
+| Golden Sting 7 (`chevo_c7`) | Chevrolet Corvette C7 Z06 (used) | used | $112,000 | $67,500 | [Classic.com / TrueCar](https://www.classic.com/m/chevrolet/corvette/c7/z06/base-model/?page=25) |
+| Tri-Star Silber W213 V8 S (`bentz_e63s`) | Mercedes-AMG E 63 S W213 (used) | used | $175,000 | $67,500 | [Classic.com / KBB listings](https://www.classic.com/m/mercedes-benz/e/w213/sedan/amg-e-63-s-4matic) |
+| Bavarica Werkz F90 (`bnw_m5_f90`) | BMW M5 F90 (used) | used | $165,000 | $67,000 | [Classic.com](https://www.classic.com/m/bmw/5-series/g30/m5/base-model) |
+| British Vanguard Vanta V12 (`astin_db9`) | Aston Martin DB9 (used) | used | $450,000 | $50,000 | [OldCarsData / ConceptCarz](https://oldcarsdata.com/aston-martin/db9/price-history) |
+| Bavarica Werkz G20 Sport (`bnw_330i_g20`) | BMW 330i sedan (2026) | new | $40,000 | $47,500 | [Cars.com](https://www.cars.com/research/bmw-330-2026/specs) |
+| Golden Six Supercharged (`chevo_camaro`) | Chevrolet Camaro ZL1 (used, 6th gen) | used | $36,000 | $45,000 | [CarGurus / TrueCar](https://cargurus.com/Cars/t-Used-Chevrolet-Camaro-ZL1-Coupe-RWD-t39186) |
+| Ironclad LC V8 (`dodger_challenger`) | Dodge Challenger R/T Scat Pack 392 (used, last model 2023) | used | $115,000 | $44,500 | [CarGurus](https://cargurus.com/Cars/l-Used-2023-Dodge-Challenger-R-T-Scat-Pack-RWD-t105752) |
+| Ahura FD Rotary (`mazdo_rx7`) | Mazda RX-7 FD (used, enthusiast market) | used | $42,000 | $42,500 | [Classic.com / hypercars.io (BaT sales)](https://www.classic.com/m/mazda/rx-7/3rd-gen/r1-r2/) |
+| Bavarica Werkz F80 (`bnw_m3_f80`) | BMW M3 F80 (used) | used | $110,000 | $42,500 | [Classic.com](https://www.classic.com/m/bmw/3-series/f30/m3/base-model/) |
+| Bavarica Werkz F82 (`bnw_m4_f82`) | BMW M4 F82 (used) | used | $100,000 | $42,500 | [CarGurus / Classic.com](https://www.cargurus.com/Cars/l-Used-2018-BMW-M4-c26661) |
+| Tri-Star Silber C218 V8 S (`bentz_cls63s`) | Mercedes-AMG CLS 63 S C218 (used) | used | $160,000 | $42,500 | [Classic.com / KBB](https://www.classic.com/m/mercedes-benz/cls/c218/cls-63-amg-s-4matic) |
+| Trident Motors Maestrale GTS (`maseroti_levante`) | Maserati Levante GTS (V8, used) | used | $190,000 | $42,000 | [CarGurus / TrueCar](https://www.cargurus.com/Cars/t-Used-Maserati-Levante-GTS-3.8L-AWD-t83372) |
+| Apex Grand Lounge (`toyoka_alfard`) | Toyota Alphard 2.5 hybrid (Japan new price, in USD; not sold new in the US; cross-check US-import used listings) | new | $28,000 | $40,500 | [Carview (Yahoo Japan), cross-checked with tc-v.com export listings](https://carview.yahoo.co.jp/ncar/catalog/toyota/alphard/FMC003-MC003/grade/) |
+| Orient Voltra (`kio_ev6`) | Kia EV6 Light RWD (base, 2026) | new | $0 | $38,000 | [Cars.com / KBB](https://www.kbb.com/car-news/2026-kia-ev6-price-cut-by-thousands/) |
+| Bavarica Werkz F10 (`bnw_m5_f10`) | BMW M5 F10 (used) | used | $145,000 | $35,000 | [Classic.com](https://www.classic.com/m/bmw/5-series/f10/m5/year-2013) |
+| Bavarica Werkz E92 V8 (`bnw_m3_e92`) | BMW M3 E92 (used) | used | $90,000 | $34,000 | [Classic.com](https://www.classic.com/m/bmw/3-series/e90/m3/e92/) |
+| HyperSpeed Tech S7 (`xiaomo_su7`) | Xiaomi SU7 (China new price in USD) | new | $120,000 | $32,500 | [CarNewsChina / CnEVPost](https://carnewschina.com/2026/03/19/xiaomi-su7-new-gen-launched-with-up-to-680-hp-starts-at-31870-usd-in-china/) |
+| Dearborn C346 Rallye (`dearb_focus_rs`) | Ford Focus RS Mk3 (used, US) | used | $42,000 | $30,000 | [Classic.com / iSeeCars](https://www.classic.com/m/ford/focus/mk3/rs) |
+| Apex Cambria (`toyoka_camri`) | Toyota Camry LE (2026) | new | $16,000 | $29,500 | [Cars.com / Autofinder](https://www.cars.com/research/toyota-camry-2026/specs/476764/) |
+| Bavarica Werkz G12 Long (`bnw_750li`) | BMW 750Li G12 (used) | used | $150,000 | $27,500 | [KBB / TrueCar](https://www.kbb.com/bmw/7series/2019/750i-xdrive-sedan-4d) |
+| Apex JZX100 Tourer (`toyoka_chaser`) | Toyota Chaser Tourer V JZX100 (used, Japan import) | used (rough) | $30,000 | $27,500 | [JDM Buy Sell market median (asking prices)](https://www.jdmbuysell.com/ad/toyota-chaser-jzx100-tourer-v-jzx100-november-1996/) |
+| Bavarica Werkz G30 3.0 (`bnw_540i`) | BMW 540i G30 (used) | used | $42,000 | $26,500 | [KBB / CarGurus](https://www.kbb.com/bmw/5-series/2020/540i-sedan-4d) |
+| Bavarica Werkz E63 V10 (`bnw_m6_v10`) | BMW M6 E63 V10 (used) | used | $135,000 | $25,000 | [Classic.com](https://www.classic.com/m/bmw/6-series/e63/m6/coupe/) |
+| Bavarica Werkz E60 V10 (`bnw_m5_e60`) | BMW M5 E60 V10 (used) | used | $125,000 | $23,000 | [Classic.com](https://www.classic.com/m/bmw/5-series/e60/m5/sedan-smg/year-2005) |
+| Tri-Star Silber W213 3.0 (`bentz_e400`) | Mercedes-Benz E 400 W213 (used) | used | $85,000 | $20,000 | [CarGurus](https://www.cargurus.com/Cars/l-Used-2017-Mercedes-Benz-E-Class-E-400-Cabriolet-t68044) |
+| Tri-Star Silber W221 V8 (`bentz_s65_w221`) | Mercedes-AMG S 63 W221 V8 (used) | used | $140,000 | $20,000 | [Classic.com](https://www.classic.com/m/mercedes-benz/s/w221/s-63-amg) |
+| Horizon Z33 (`nisun_350z`) | Nissan 350Z Z33 (used) | used | $38,000 | $12,000 | [CarGurus](https://www.cargurus.com/research/price-trends/Nissan-350Z-d236) |
+
+**Engine swaps:**
+
+| Rarity | Old | New real price | In the game (x 2.5) |
+|---|---|---|---|
+| Uncommon | $150,000 | $10,000 | $25,000 |
+| Rare | $350,000 | $14,000 | $35,000 |
+| Epic (B58) | $800,000 | $20,000 | $50,000 |
+| Legendary 800 hp | $2,000,000 | $28,000 | $70,000 |
+| Legendary 900 hp (2JZ) | $2,500,000 | $40,000 | $100,000 |
+| Legendary 1,000 hp | $3,000,000 | $52,000 | $130,000 |
+
+**All parts, old -> new:**
+
+| Slot | Part | Rarity | Old (cheapest car) | Old (dearest car) | New | New on the dearest cars |
+|---|---|---|---|---|---|---|
+| intake | Panel Intake Kit | Common | $300 | $3,000 | $250 | $250 |
+| intake | Cold Air Intake | Uncommon | $1,250 | $12,500 | $600 | $600 |
+| intake | Short Ram Intake | Rare | $4,000 | $40,000 | $1,130 | $1,130 |
+| intake | Carbon Ram Intake | Epic | $10,000 | $100,000 | $1,650 | $1,650 |
+| intake | Velocity Stack Intake | Legendary | $60,000 | $600,000 | $2,000 | $2,000 |
+| airfilter | Race Air Filter | Common | $400 | $4,000 | $250 | $250 |
+| airfilter | Cotton Air Filter | Uncommon | $900 | $9,000 | $400 | $400 |
+| airfilter | Foam Air Filter | Rare | $2,400 | $24,000 | $630 | $630 |
+| airfilter | Carbon Air Box | Epic | $7,000 | $70,000 | $850 | $850 |
+| cams | Mild Camshaft | Common | $350 | $3,500 | $2,500 | $2,500 |
+| cams | Stage 1 Camshaft | Uncommon | $1,200 | $12,000 | $4,000 | $4,000 |
+| cams | Stage 2 Camshaft | Rare | $3,800 | $38,000 | $6,250 | $9,380 |
+| cams | Stage 3 Camshaft | Epic | $11,000 | $110,000 | $8,500 | $12,750 |
+| cams | Billet Race Camshaft | Legendary | $70,000 | $700,000 | $10,000 | $15,000 |
+| head | Street Ported Head | Uncommon | $3,000 | $30,000 | $8,000 | $12,000 |
+| head | Big-Valve Head | Rare | $6,000 | $60,000 | $12,500 | $18,750 |
+| head | Ported Cylinder Head | Epic | $12,000 | $120,000 | $17,000 | $25,500 |
+| head | CNC Race Head | Legendary | $80,000 | $800,000 | $20,000 | $30,000 |
+| injectors | Street Injectors | Common | $250 | $2,500 | $750 | $750 |
+| injectors | Uprated Injectors | Uncommon | $700 | $7,000 | $1,850 | $1,850 |
+| injectors | High-Flow Injectors | Rare | $2,600 | $26,000 | $3,500 | $3,500 |
+| injectors | Race Injectors | Epic | $8,000 | $80,000 | $5,150 | $7,730 |
+| fuelpump | Uprated Fuel Pump | Uncommon | $700 | $7,000 | $1,400 | $1,400 |
+| fuelpump | High-Flow Fuel Pump | Rare | $2,100 | $21,000 | $2,750 | $2,750 |
+| fuelpump | Twin Fuel Pumps | Epic | $6,000 | $60,000 | $4,100 | $4,100 |
+| internals | Uprated Rods | Uncommon | $2,200 | $22,000 | $12,000 | $18,000 |
+| internals | Hypereutectic Pistons | Rare | $5,500 | $55,000 | $18,750 | $28,130 |
+| internals | Forged Pistons | Epic | $14,000 | $140,000 | $25,500 | $38,250 |
+| internals | Billet Internals | Legendary | $90,000 | $900,000 | $30,000 | $45,000 |
+| block | Bored Block | Uncommon | $3,000 | $30,000 | $14,000 | $21,000 |
+| block | Stroked Crank | Rare | $8,000 | $80,000 | $20,000 | $30,000 |
+| block | Big-Bore Block | Epic | $20,000 | $200,000 | $26,000 | $39,000 |
+| block | Stroker Block | Legendary | $90,000 | $900,000 | $30,000 | $45,000 |
+| ignition | Iridium Spark Plugs | Common | $200 | $2,000 | $500 | $500 |
+| ignition | Performance Coils | Uncommon | $850 | $8,500 | $1,150 | $1,150 |
+| ignition | Race Coil Packs | Rare | $2,200 | $22,000 | $2,130 | $2,130 |
+| ecu | Stage 1 ECU | Uncommon | $1,500 | $15,000 | $2,500 | $2,500 |
+| ecu | Burble Tune ECU | Uncommon | $2,000 | $20,000 | $2,500 | $2,500 |
+| ecu | Pop Tune ECU | Rare | $4,500 | $45,000 | $4,380 | $4,380 |
+| ecu | Stage 2 ECU | Rare | $6,000 | $60,000 | $4,380 | $4,380 |
+| ecu | Rev Limiter Raise | Rare | $3,000 | $30,000 | $4,380 | $4,380 |
+| ecu | Crackle Tune ECU | Epic | $9,500 | $95,000 | $6,250 | $9,380 |
+| ecu | Stage 3 ECU | Epic | $15,000 | $150,000 | $6,250 | $9,380 |
+| ecu | Anti-Lag Map | Legendary | $70,000 | $700,000 | $7,500 | $11,250 |
+| oilcooler | Oil Cooler | Uncommon | $950 | $9,500 | $1,350 | $1,350 |
+| oilcooler | Race Oil Cooler | Rare | $2,600 | $26,000 | $2,250 | $2,250 |
+| radiator | Alloy Radiator | Uncommon | $800 | $8,000 | $1,350 | $1,350 |
+| radiator | Race Radiator | Rare | $1,800 | $18,000 | $2,250 | $2,250 |
+| induction | Street Turbo Kit | Uncommon | $2,500 | $25,000 | $16,000 | $24,000 |
+| induction | Ball-Bearing Turbo | Rare | $9,000 | $90,000 | $28,750 | $43,130 |
+| induction | Twin-Scroll Turbo | Epic | $22,000 | $220,000 | $41,500 | $62,250 |
+| induction | Twin-Turbo Kit | Epic | $38,000 | $380,000 | $41,500 | $62,250 |
+| induction | Centrifugal Supercharger | Epic | $31,000 | $310,000 | $41,500 | $62,250 |
+| induction | Big Single Turbo | Legendary | $95,000 | $950,000 | $50,000 | $75,000 |
+| induction | Twin-Screw Supercharger | Legendary | $120,000 | $1,200,000 | $50,000 | $75,000 |
+| intercooler | Side-Mount Intercooler | Uncommon | $1,200 | $12,000 | $1,850 | $1,850 |
+| intercooler | Front-Mount Intercooler | Rare | $3,200 | $32,000 | $3,500 | $3,500 |
+| intercooler | Water-Air Intercooler | Epic | $9,000 | $90,000 | $5,150 | $7,730 |
+| bov | Blow-Off Valve | Uncommon | $900 | $9,000 | $800 | $800 |
+| bov | Race Blow-Off Valve | Rare | $2,500 | $25,000 | $1,250 | $1,250 |
+| wastegate | External Wastegate | Uncommon | $1,100 | $11,000 | $900 | $900 |
+| wastegate | Race Wastegate | Rare | $3,000 | $30,000 | $1,500 | $1,500 |
+| boostctl | Smaller Pulley | Uncommon | $1,200 | $12,000 | $850 | $850 |
+| boostctl | Boost Controller | Rare | $2,400 | $24,000 | $1,380 | $1,380 |
+| nitrous | Small Nitrous Bottle | Rare | $18,000 | $180,000 | $3,750 | $3,750 |
+| nitrous | Nitrous Kit | Legendary | $65,000 | $650,000 | $6,250 | $9,380 |
+| downpipe | Sport Downpipe | Uncommon | $1,400 | $14,000 | $1,150 | $1,150 |
+| downpipe | Catless Downpipe | Rare | $4,000 | $40,000 | $2,130 | $2,130 |
+| catalyst | High-Flow Catalyst | Common | $600 | $6,000 | $500 | $500 |
+| catalyst | Decat Pipe | Epic | $7,000 | $70,000 | $3,100 | $3,100 |
+| midpipe | Sport Mid-Pipe | Uncommon | $1,500 | $15,000 | $1,600 | $1,600 |
+| midpipe | Race Mid-Pipe | Rare | $4,000 | $40,000 | $2,880 | $2,880 |
+| midpipe | Titanium Mid-Pipe | Epic | $10,000 | $100,000 | $4,150 | $4,150 |
+| muffler | Sport Muffler | Common | $500 | $5,000 | $750 | $750 |
+| muffler | Muffler Delete | Uncommon | $800 | $8,000 | $3,600 | $3,600 |
+| muffler | Straight Pipe | Rare | $3,000 | $30,000 | $7,880 | $11,810 |
+| tips | Quad Burnt Tips | Common | $350 | $3,500 | $250 | $250 |
+| tips | Titanium Tips | Uncommon | $900 | $9,000 | $450 | $450 |
+| gearbox | Street Gear Set | Uncommon | $1,500 | $15,000 | $24,000 | $36,000 |
+| gearbox | Sport Gear Set | Rare | $4,000 | $40,000 | $52,500 | $78,750 |
+| gearbox | Close-Ratio Gearbox | Epic | $18,000 | $180,000 | $81,000 | $121,500 |
+| gearbox | Dual-Clutch Gearbox | Epic | $26,000 | $260,000 | $81,000 | $121,500 |
+| gearbox | Sequential Gearbox | Legendary | $110,000 | $1,100,000 | $100,000 | $150,000 |
+| shifter | Short Shifter | Common | $350 | $3,500 | $250 | $250 |
+| clutch | Sport Clutch | Uncommon | $1,000 | $10,000 | $2,500 | $2,500 |
+| clutch | Twin-Plate Clutch | Rare | $2,800 | $28,000 | $4,380 | $4,380 |
+| flywheel | Lightweight Flywheel | Uncommon | $1,100 | $11,000 | $1,550 | $1,550 |
+| flywheel | Chromoly Flywheel | Rare | $3,000 | $30,000 | $2,380 | $2,380 |
+| flywheel | Alloy Flywheel | Epic | $7,000 | $70,000 | $3,200 | $3,200 |
+| diff | Clutch-Type LSD | Uncommon | $1,300 | $13,000 | $3,600 | $3,600 |
+| diff | Plated LSD | Rare | $3,600 | $36,000 | $6,000 | $9,000 |
+| diff | Active Diff | Epic | $11,000 | $110,000 | $8,400 | $12,600 |
+| final | Short Final Drive | Uncommon | $1,000 | $10,000 | $2,000 | $2,000 |
+| final | Tall Final Drive | Uncommon | $1,000 | $10,000 | $2,000 | $2,000 |
+| shaft | Carbon Driveshaft | Rare | $2,900 | $29,000 | $4,380 | $4,380 |
+| tyres | Street Tyres | Common | $400 | $4,000 | $1,500 | $1,500 |
+| tyres | Fast Road Tyres | Uncommon | $1,200 | $12,000 | $2,450 | $2,450 |
+| tyres | Drift Tyres | Uncommon | $800 | $8,000 | $2,450 | $2,450 |
+| tyres | Sport Tyres | Rare | $2,600 | $26,000 | $3,880 | $3,880 |
+| tyres | Rally Tyres | Rare | $2,200 | $22,000 | $3,880 | $3,880 |
+| tyres | Semi-Slick Tyres | Epic | $9,000 | $90,000 | $5,300 | $7,950 |
+| tyres | Drag Radials | Epic | $7,500 | $75,000 | $5,300 | $7,950 |
+| tyres | Full Slicks | Legendary | $75,000 | $750,000 | $6,250 | $9,380 |
+| wheels | Flow-Formed Wheels | Uncommon | $1,800 | $18,000 | $7,000 | $10,500 |
+| wheels | Forged Light Wheels | Epic | $9,500 | $95,000 | $16,750 | $25,130 |
+| brakes | Braided Lines | Common | $300 | $3,000 | $1,250 | $1,250 |
+| brakes | Sport Pads | Uncommon | $1,500 | $15,000 | $5,000 | $7,500 |
+| brakes | Big Brake Kit | Rare | $4,800 | $48,000 | $10,630 | $15,940 |
+| brakes | Carbon-Ceramic Kit | Epic | $12,000 | $120,000 | $16,250 | $24,380 |
+| brakes | Race Brake Kit | Legendary | $80,000 | $800,000 | $20,000 | $30,000 |
+| springs | Lowering Springs | Uncommon | $900 | $9,000 | $1,550 | $1,550 |
+| springs | Adjustable Coilovers | Rare | $4,200 | $42,000 | $3,330 | $3,330 |
+| springs | Race Coilovers | Epic | $12,000 | $120,000 | $5,080 | $7,610 |
+| springs | Air Suspension | Epic | $13,000 | $130,000 | $5,080 | $7,610 |
+| arb | Stiff Anti-Roll Bars | Common | $500 | $5,000 | $500 | $500 |
+| arb | Race Anti-Roll Bars | Rare | $2,500 | $25,000 | $1,500 | $1,500 |
+| camber | Camber Kit | Uncommon | $750 | $7,500 | $700 | $700 |
+| strut | Carbon Strut Brace | Common | $300 | $3,000 | $380 | $380 |
+| bushings | Poly Bushings | Common | $250 | $2,500 | $380 | $380 |
+| steering | Drift Angle Kit | Rare | $3,400 | $34,000 | $7,880 | $11,810 |
+| weight | Weight Reduction I | Uncommon | $1,200 | $12,000 | $3,600 | $3,600 |
+| weight | Weight Reduction II | Rare | $4,000 | $40,000 | $7,880 | $11,810 |
+| weight | Weight Reduction III | Epic | $8,500 | $85,000 | $12,150 | $18,230 |
+| weight | Race Shell | Legendary | $70,000 | $700,000 | $15,000 | $22,500 |
+| bonnet | Carbon Bonnet | Rare | $3,500 | $35,000 | $5,380 | $8,060 |
+| roof | Carbon Roof | Rare | $4,500 | $45,000 | $9,380 | $14,060 |
+| battery | Lightweight Battery | Common | $300 | $3,000 | $750 | $750 |
+| seats | Bucket Seats | Uncommon | $1,400 | $14,000 | $4,100 | $4,100 |
+| cage | Roll Cage | Epic | $7,000 | $70,000 | $8,500 | $12,750 |
+| wing | Ducktail Spoiler | Rare | $3,000 | $30,000 | $5,630 | $8,440 |
+| wing | GT Rear Wing | Epic | $11,000 | $110,000 | $8,250 | $12,380 |
+
+## Working lamps on the hypercars (2026-11-07, `Prompts/Proper working headlights.md`)
+**Hypercars only for now (owner, 2026-11-07).** The other 16 new models keep their old lights until the owner says.
+Pictures: [[Lamps - LFA low beam.jpg]], [[Lamps - LFA high beam.jpg]], [[Lamps - LB834 rear, all lamps.jpg]], [[Lamps - LB744 rear, all lamps.jpg]], [[Lamps - ZVX rear, all lamps.jpg]], [[Lamps - Eclair Super Sport rear, all lamps.jpg]], [[Lamps - Origine rear and phone button.jpg]], [[Lamps - Origine by day, DRL.jpg]], [[Lamps - rain at night, a car facing you.jpg]]. In the "all lamps" shots the indicators and reverse lamps were forced on to check where they sit.
+- **Controls:** L = next mode: Auto, Low, High, Off. Hold L = high beam while held. Two quick taps = a short flash. Phones: a button by GAS (hidden on other cars). The LIGHTS word on the HUD is green on low, blue on high.
+- **Auto:** the strips glow with the engine on; low beam at dusk and in tunnels.
+- **How:** `client/CarLamps.lua`, numbers in `Config.Lamps`, shells `LampFx_...` in `CarModels` cut from each model's own lamp pieces (`tools/lamps`). Right side mirrored from the left. Real lights on your car and the nearest 6 (3 on Medium, none on Low, 12 on Ultra), none behind the camera; shadows on your own low beam from High graphics.
+- **Limits:** a SpotLight stops at 60 studs, so high beam adds a third light 48 studs up the road. The beams start just ahead of the nose, level with the lamps: from the lamp itself they lit the bonnet. A separate DRL strip isn't split out: DRL is the bright lamp pieces at a lower glow.
+- **Traffic, police, parked cars:** no change. None use these models, and traffic has no lights (owner, 2026-11-02).
+
+| Car | Headlights | Tail and brake | Reverse | Indicators | Note |
+|---|---|---|---|---|---|
+| Stealth-Apex V10 Halo | ok | ok | ok | ok | the lens's inner part and outer part |
+| V10 Halo Circuit | ok | ok | ok | ok | as the Halo |
+| Enfurecido LB834 | ok | ok | ok | ok | own amber segments, inner red chip for reverse |
+| LB834 ZV | ok | ok | ok | ok | as the LB834 |
+| LB834 ZVX | ok | ok, new shell | ok | ok | was flat rectangles; lamps from the ZVX 63 |
+| LB834 ZVX 63 | ok | ok | ok | ok | |
+| Enfurecido LB744 | ok | ok, new shell | ok | ok | only a small low lens glowed before |
+| Velocite Noir Origine | ok | ok | ok | ok | rear rings from the Super Sport model, moved to fit |
+| Origine Sport, Origine Top | ok | ok | ok | ok | outer ring amber, inner ring white |
+| Eclair | ok | ok | ok | ok | own amber piece at the back |
+| Eclair Pure, Eclair Super Sport | ok | ok | ok | ok | |
+
+- **Where reverse and rear indicators sit is partly my pick:** on models with no separate piece they use a slice of the tail lens (inner for reverse, outer for indicators), from the look of the model, not a photo of the real lamp.
+- **Old cars:** the M5 F90 checked: L toggles as before, no Beam attribute, no phone button. The code only runs on the 13.
+- **Checked in Play at night, PC size (forced touch HUD for the button's place):** modes, hold not tested by hand, blinkers left, reverse, day DRL, rain haze, another car's lights and glare on a test copy. FPS on the highway at night with one test car: 56 (day 58). **Not tested:** flash by double tap, a real phone, 2 real players, a tunnel, the 3 usual FPS spots, Customs headlight colour.
+
 ## One Urus, two 458s (2026-11-07, `Prompts/One Urus and only two 458s.md`)
 Pictures: [[Dealer - one Brava.jpg]], [[Dealer - F142 line.jpg]].
 - **Urus:** `lambrini_urusp` is now "Enfurecido Brava" (the Performante model, same stats, $1.9M), one car in its line, no trims. The old `lambrini_urus` is retired, named "Enfurecido Brava (old)", model kept in `CarModels`.

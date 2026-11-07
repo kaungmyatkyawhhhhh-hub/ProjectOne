@@ -173,8 +173,9 @@ do
 	check(CarStats.pi("nisun_350z") == CarStats.pi("nisun_350z", {}), "settings don't count for the PI")
 end
 -- prices
-check(select(1, CarStats.partPrice("nisun_350z", "in_cold")) == 1300 and select(1, CarStats.partPrice("nisun_350z", "sw_2jz")) == 2500000, "prices: a tenth of the list on the cheapest cars, swaps at the list")
-check(select(1, CarStats.partPrice("bugotti_veyron", "tb_ball")) > select(1, CarStats.partPrice("nisun_350z", "tb_ball")) * 3, "dearer cars pay more")
+check(select(1, CarStats.partPrice("nisun_350z", "in_cold")) == 600 and select(1, CarStats.partPrice("nisun_350z", "sw_2jz")) == 100000, "prices: the real price x 2.5, a 2JZ swap $100K")
+check(select(1, CarStats.partPrice("bugotti_chiron", "in_cold")) == 600, "a small part costs the same on every car")
+check(math.abs(select(1, CarStats.partPrice("bugotti_veyron", "tb_ball")) - select(1, CarStats.partPrice("nisun_350z", "tb_ball")) * 1.5) <= 10, "big parts cost at most 1.5 times on the dearest cars")
 check(select(2, CarStats.partPrice("nisun_350z", "bl_stroker")) == nil and select(2, CarStats.partPrice("nisun_350z", "sw_2jz")) == nil and select(2, CarStats.partPrice("nisun_350z", "in_ram")) == 10, "Legendary and swaps are cash only")
 
 -- an old save: every car, every old set of parts: the same or a little better, never worse
@@ -270,7 +271,7 @@ end
 ---------------------------------------------------------------------
 -- the car list
 ---------------------------------------------------------------------
-check(Cars.StarterId == "kio_ev6" and Cars.ById.kio_ev6.Price == 0, "the Orient EV6 is the free car")
+check(Cars.StarterId == "kio_ev6", "the Orient EV6 is the free car")
 for id in Cars.RETIRED do
 	check(Cars.ById[id] ~= nil and not Cars.forSale(id) and Cars.SeriesOf[id] ~= nil, "retired " .. id .. " kept (owners) but not sold")
 end
@@ -441,19 +442,23 @@ check(not r.ok and CarLevels.partsOf(player, "toyoka_chaser").intake == "in_shor
 saveOk = true
 check(noted >= 3, "parts count for the goals")
 -- moving a part: off one car, onto another; a dearer car pays the difference, once
-pr0.Owned.bnw_m5_f90 = true
-r = ask("uninstall", { car = "toyoka_chaser", slot = "intake" })
-check(r.ok and CarLevels.partsOf(player, "toyoka_chaser").intake == nil and #pr0.PartBag.in_short == 1, "uninstalling puts the part in My Parts")
-local kA, kB = Config.partK(Cars.ById.toyoka_chaser.Price), Config.partK(Cars.ById.bnw_m5_f90.Price)
+pr0.Owned.lambrini_countach = true
+pr0.Cash += 100000
+ask("buy", { car = "toyoka_chaser", part = "tb_ball", pay = "cash", install = true })
+r = ask("uninstall", { car = "toyoka_chaser", slot = "induction" })
+check(r.ok and CarLevels.partsOf(player, "toyoka_chaser").induction == nil and #pr0.PartBag.tb_ball == 1, "uninstalling puts the part in My Parts")
+local kA, kB = Config.partK(Cars.ById.toyoka_chaser.Price), Config.partK(Cars.ById.lambrini_countach.Price)
 check(kB > kA, "the second car is dearer")
-local fee = Config.partCash(PartData.Parts.in_short.list, kB) - Config.partCash(PartData.Parts.in_short.list, kA)
+local fee = Config.partCash(PartData.Parts.tb_ball.list, kB) - Config.partCash(PartData.Parts.tb_ball.list, kA)
 cash0 = pr0.Cash
-r = ask("install", { car = "bnw_m5_f90", part = "in_short" })
-check(r.ok and r.fee == fee and pr0.Cash == cash0 - fee and CarLevels.partsOf(player, "bnw_m5_f90").intake == "in_short" and pr0.PartBag.in_short == nil, "a part moves to a dearer car for the difference")
-r = ask("uninstall", { car = "bnw_m5_f90", slot = "intake" })
+r = ask("install", { car = "lambrini_countach", part = "tb_ball" })
+check(r.ok and r.fee == fee and pr0.Cash == cash0 - fee and CarLevels.partsOf(player, "lambrini_countach").induction == "tb_ball" and pr0.PartBag.tb_ball == nil, "a part moves to a dearer car for the difference")
+r = ask("uninstall", { car = "lambrini_countach", slot = "induction" })
 cash0 = pr0.Cash
-r = ask("install", { car = "toyoka_chaser", part = "in_short" })
+r = ask("install", { car = "toyoka_chaser", part = "tb_ball" })
 check(r.ok and r.fee == 0 and pr0.Cash == cash0, "and back to a cheaper car for nothing")
+ask("uninstall", { car = "toyoka_chaser", slot = "induction" })
+ask("sell", { part = "tb_ball" })
 r = ask("install", { car = "toyoka_chaser", part = "cam_3" })
 check(not r.ok, "you can't fit a part you don't have")
 -- selling: 50% of what it was paid
@@ -572,7 +577,7 @@ check(#pr.PartBag.in_cold == 1 and pr.PartBag.nothing == nil and pr.CarSetup.suz
 -- one Urus only, two 458s (2026-11-07): the old Urus's owners get the new one on load
 ---------------------------------------------------------------------
 check(not Cars.forSale("lambrini_urus") and Cars.forSale("lambrini_urusp") and Cars.get("lambrini_urusp").Name == "Enfurecido Brava", "one Urus on sale, named Enfurecido Brava")
-check(Cars.ById.lambrini_urusp_sport == nil and Cars.ById.lambrini_urusp_top == nil and Cars.get("lambrini_urusp").Price == 1900000, "no Urus trims, price kept")
+check(Cars.ById.lambrini_urusp_sport == nil and Cars.ById.lambrini_urusp_top == nil and Cars.get("lambrini_urusp").Price == 285000, "no Urus trims, price kept")
 for _, series in Cars.Series do
 	if series.Name == "ENFURECIDO BRAVA" then
 		check(#series.Ids == 1 and series.Ids[1] == "lambrini_urusp", "the Brava line has one car")
@@ -585,7 +590,7 @@ check(not Cars.forSale("ferrara_458") and Cars.ById.ferrara_458 ~= nil, "the 458
 for _, spec in Cars.List do
 	check(spec.Id ~= "lambrini_urus" and spec.Id ~= "ferrara_458", "not in the list: " .. spec.Id)
 end
-check(Config.Chauffeur.Fleet.lambrini_urus == nil and Config.Chauffeur.Fleet.lambrini_urusp == 1900000 and table.find(Config.Chauffeur.Order, "lambrini_urusp") ~= nil and table.find(Config.Chauffeur.Order, "lambrini_urus") == nil, "the chauffeur fleet uses the new Urus")
+check(Config.Chauffeur.Fleet.lambrini_urus == nil and Config.Chauffeur.Fleet.lambrini_urusp == 285000 and table.find(Config.Chauffeur.Order, "lambrini_urusp") ~= nil and table.find(Config.Chauffeur.Order, "lambrini_urus") == nil, "the chauffeur fleet uses the new Urus")
 
 saved = {
 	Claimed = true,

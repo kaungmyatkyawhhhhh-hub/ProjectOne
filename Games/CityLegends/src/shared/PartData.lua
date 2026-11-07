@@ -14,7 +14,9 @@
 	Sound and feel: pop ("pop", "crackle", "burble", "antilag"), loud (0-3), decat, bov, downpipe,
 	spool (a turbo's whistle), nitro (the bottle: 0.6 small, 1 big), air (lowers when parked).
 	needs: "turbo", "super" or "forced" (a part that only works on one).
-	list: the price on the dearest cars. A car pays list * ListShare * its price factor (Config.partK).
+	list: the real aftermarket price in dollars (PartData.Real, by slot and rarity; the old sheet's numbers
+	are in the tables below and no longer used). A car pays list * Config.Economy.PartPriceMult, and big
+	parts on the dearest cars a little more (Config.partCash).
 	Rarity: Common a little over stock, Uncommon today's Street, Rare Sport, Epic Race, Legendary a
 	little over Race with a perk (`perk`, a real effect in fx).
 ]]
@@ -137,6 +139,23 @@ export type Engine = {
 PartData.Parts = {} :: { [string]: Part }
 PartData.BySlot = {} :: { [string]: { Part } }
 
+-- real aftermarket prices (owner, 2026-11-07: "make the part shop cheaper since a B58 is like over a
+-- million"): each slot's cheapest and dearest in US dollars; a rarity sits at this share of the way
+PartData.Real = {
+	intake = { 100, 800 }, airfilter = { 100, 400 }, cams = { 1000, 4000 }, head = { 2000, 8000 },
+	injectors = { 300, 2500 }, fuelpump = { 200, 2000 }, internals = { 3000, 12000 }, block = { 4000, 12000 },
+	ignition = { 200, 1500 }, ecu = { 500, 3000 }, oilcooler = { 300, 1500 }, radiator = { 300, 1500 },
+	induction = { 3000, 20000 }, intercooler = { 300, 2500 }, bov = { 200, 800 }, wastegate = { 200, 1000 },
+	boostctl = { 200, 900 }, nitrous = { 500, 2500 },
+	downpipe = { 200, 1500 }, catalyst = { 200, 1500 }, midpipe = { 300, 2000 }, muffler = { 300, 6000 }, tips = { 100, 500 },
+	gearbox = { 2000, 40000 }, shifter = { 100, 800 }, clutch = { 500, 3000 }, flywheel = { 400, 1500 },
+	diff = { 800, 4000 }, final = { 500, 2000 }, shaft = { 500, 3000 },
+	tyres = { 600, 2500 }, wheels = { 1500, 8000 }, brakes = { 500, 8000 },
+	springs = { 150, 2500 }, arb = { 200, 1000 }, camber = { 150, 800 }, strut = { 150, 800 }, bushings = { 150, 900 }, steering = { 300, 6000 },
+	weight = { 300, 6000 }, bonnet = { 800, 3500 }, roof = { 1500, 6000 }, battery = { 300, 1200 }, seats = { 800, 5000 }, cage = { 1000, 4000 }, wing = { 500, 4000 },
+} :: { [string]: { number } }
+PartData.RealShare = { Common = 0, Uncommon = 0.2, Rare = 0.5, Epic = 0.8, Legendary = 1 }
+
 local function add(slot: string, brand: string, rows: { { any } })
 	for _, r in rows do
 		local extra = r[7]
@@ -150,6 +169,11 @@ local function add(slot: string, brand: string, rows: { { any } })
 			list = r[5],
 			fx = r[6] or {},
 		}
+		local real = PartData.Real[slot]
+		if real then
+			local rough = real[1] + (real[2] - real[1]) * PartData.RealShare[part.rarity]
+			part.list = math.floor(rough / 10 + 0.5) * 10
+		end
 		if extra then
 			for k, v in extra do
 				(part :: any)[k] = v
@@ -448,11 +472,12 @@ local SWAPS = {
 }
 PartData.SwapGroups = { "All", "Japanese", "American", "BMW", "German", "Other" }
 PartData.SwapList = {} :: { Part }
-PartData.SwapPrice = { U = 150000, R = 350000, E = 800000 }
+-- (real engine + fitting, US dollars: a B58 about $20K, a 2JZ about $40K, the biggest about $50K)
+PartData.SwapPrice = { U = 10000, R = 14000, E = 20000 }
 for _, s in SWAPS do
 	local tuned: number = s[7]
-	-- (Legendary: $2M at 800 hp tuned, $3M at 1,000)
-	local price = PartData.SwapPrice[s[8]] or (2000000 + (tuned - 800) * 5000)
+	-- (Legendary: $28K at 800 hp tuned, $52K at 1,000)
+	local price = PartData.SwapPrice[s[8]] or (28000 + (tuned - 800) * 120)
 	add("swap", "Corvin Motorsport", {
 		{ s[8], "sw_" .. s[1], s[2], "swap_" .. s[4], price, {}, {
 			cp = 0,

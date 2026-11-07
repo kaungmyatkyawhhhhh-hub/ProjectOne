@@ -114,7 +114,7 @@ function CarStats.of(id: string): Stats
 	local base = baseOf(spec)
 	local zts = math.max(spec.ZeroToSixty, 2)
 	-- heavier as it gets dearer (luxury, more kit)
-	local weight = (WEIGHT[spec.Class] or 1600) + math.clamp(math.log10(math.max(spec.Price, 10000)) - 4, 0, 2.7) * 90
+	local weight = (WEIGHT[spec.Class] or 1600) + math.clamp(math.log10(math.max(spec.StatPrice or spec.Price, 10000)) - 4, 0, 2.7) * 90
 	if spec.Electric then
 		weight += 280
 	end

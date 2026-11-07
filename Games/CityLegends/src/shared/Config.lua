@@ -277,7 +277,25 @@ Config.Credits = {
 ---------------------------------------------------------------------
 -- Economy
 ---------------------------------------------------------------------
+-- Harder cash (owner, 2026-11-07: "make the cash harder to get since the car prices change, but not
+-- too hard to the point players quit"). The earn numbers all over this file are the old ones; the
+-- block at the very end of this file scales them by these, so one number tunes each kind of money:
 Config.Economy = {
+	ActiveMult = 0.15, -- driving, cut-ups, races, drift, jumps, speed traps, chips, duels, property income
+	JobMult = 0.085, -- delivery jobs (back to back they paid far more than anything else)
+	HeistMult = 0.1, -- the bank
+	ShowcaseMult = 0.05, -- the Gem Showcase
+	GiftMult = 0.15, -- daily streak, weekly and welcome gifts
+	TaskMult = 0.1, -- daily tasks
+	PlaytimeCash = { 500, 1000, 1500, 3000 }, -- the 5 / 15 / 30 / 60 minute gifts (were 6K, 12K, 24K, 60K)
+	LevelUpMult = 0.1, -- the cash on every level-up
+	LevelGiftMult = 0.02, -- Legends Rewards' level gifts and chests
+	WheelMult = 0.1, -- SPIN's cash prizes and price
+	SuperWheelMult = 0.03, -- SUPER SPIN's
+	GoalSmallMult = 0.4, -- Legends Path goals up to GoalSmallUpTo: the first hours stay rewarding
+	GoalBigMult = 0.15,
+	GoalSmallUpTo = 8000,
+	PartPriceMult = 2.5, -- parts cost their real aftermarket price (PartData.Real) times this
 	StartingCash = 5000,
 	DriveMinMph = 40, -- passive income only above this speed
 	DrivePerSecond = 1 / 18, -- $ per mph per second ( 90mph -> $5/s )
@@ -988,7 +1006,7 @@ Config.Market = {
 	-- listings, rarely in Showroom condition (the only one that can be delivered), mostly over value
 	UnlockListingChance = 0.08,
 	UnlockShowroomChance = 0.15,
-	HighFromPrice = 600000, -- high-end cars (the dealer sells them too since 2026-10-30; rare here)
+	HighFromPrice = 300000, -- high-end cars (the dealer sells them too since 2026-10-30; rare here)
 	HighShowroomKeep = 0.2, -- of the Showroom rolls a high-end car gets, this share stays Showroom
 	HighListingSpread = { 0.95, 1.6 },
 }
@@ -1179,15 +1197,15 @@ Config.Hotel = {
 Config.Chauffeur = {
 	-- car id -> contract price (the owner's fleet list; the prices match the cars' own)
 	Fleet = {
-		astin_dbx = 450000,
-		bentlee_contgt = 1100000,
-		bentlee_bentayga = 1200000,
-		bentz_gls = 1200000,
-		lambrini_urusp = 1900000,
-		brabos_g63 = 1600000,
-		bentz_s680 = 1600000,
-		rolls_wraith = 2000000,
-		rolls_cullinan = 2500000,
+		astin_dbx = 257000,
+		bentlee_contgt = 345000,
+		bentlee_bentayga = 227000,
+		bentz_gls = 180000,
+		lambrini_urusp = 285000,
+		brabos_g63 = 390000,
+		bentz_s680 = 245000,
+		rolls_wraith = 175000,
+		rolls_cullinan = 432000,
 	},
 	-- the order the phone lists them in
 	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urusp", "brabos_g63", "bentz_s680", "rolls_wraith", "rolls_cullinan" },
@@ -1627,7 +1645,7 @@ Config.Goals = {
 	},
 	-- the daily streak: day 1..6 cash, day 7 a free Mid car you don't own (or StreakCarCash)
 	Streak = { 5000, 8000, 12000, 18000, 25000, 35000 },
-	StreakCarMaxPrice = 120000, -- the day-7 car: a Mid car at or under this price
+	StreakCarMaxPrice = 50000, -- the day-7 car: a Mid car at or under this price
 	StreakCarCash = 60000, -- ...or this, when you own them all
 	StreakCooldown = 20 * 60 * 60, -- a claim opens this long after the last one
 	StreakGrace = 48 * 60 * 60, -- more than this since the last claim: back to day 1
@@ -1738,12 +1756,11 @@ Config.CarParts = {
 	-- overpowered"; PartData.Slots `top`; sound parts are fine on them, looks at Legends Customs aren't
 	-- limited)
 	TopClasses = { S2 = true, R = true, X = true }, -- by the car's stock class
-	-- a part's price: its list price * ListShare * the car's price factor. The factor is
-	-- (car price / CashRef) ^ 0.5, from 1 to CashMax, so the list price is what the dearest cars pay.
-	-- An engine swap pays its list price * the factor (the prompt's $150K-3M are for the cheapest cars)
-	ListShare = 0.1,
-	CashRef = 50000,
-	CashMax = 10,
+	-- a part's price: its real price * Economy.PartPriceMult. Big parts (BigFrom and up) cost a little more
+	-- on dear cars: the factor (car price / CashRef) ^ 0.5, from 1 to CashMax
+	BigFrom = 2000,
+	CashRef = 500000,
+	CashMax = 1.5,
 	SellShare = 0.5, -- selling a spare part back: this share of what it was paid for
 	-- rare drops: the chance of a free part (it comes fully paid: it fits any car with no fee) and
 	-- how the rarity is picked (no engine swaps). Shown in the wheels' ODDS
@@ -1759,10 +1776,10 @@ function Config.partK(carPrice: number): number
 	return math.clamp((math.max(carPrice, 1) / P.CashRef) ^ 0.5, 1, P.CashMax)
 end
 
--- a part's price at a price factor (rounded to $100); `swap`: an engine swap
-function Config.partCash(list: number, k: number, swap: boolean?): number
-	local share = if swap then 1 else Config.CarParts.ListShare
-	return math.floor(list * share * k / 100 + 0.5) * 100
+-- a part's price at a price factor (rounded to $10)
+function Config.partCash(list: number, k: number, _swap: boolean?): number
+	local factor = if list >= Config.CarParts.BigFrom then math.min(k, Config.CarParts.CashMax) else 1
+	return math.floor(list * Config.Economy.PartPriceMult * factor / 10 + 0.5) * 10
 end
 
 -- Brand levels (owner, 2026-10-30, from the research: Midnight Racing's manufacturer levels):
@@ -1799,6 +1816,101 @@ end
 function Config.taskCash(base: number, level: number): number
 	local k = math.min(3, 1 + Config.Goals.TaskLevelBoost * (math.max(1, level) - 1))
 	return math.floor(base * k / 100 + 0.5) * 100
+end
+
+---------------------------------------------------------------------
+-- Harder cash: scales the old earn numbers above by the multipliers in Config.Economy (2026-11-07).
+-- The old values are in the tables above, the new ones are in City Legends/City Legends.md
+---------------------------------------------------------------------
+do
+	local E = Config.Economy
+	local function cash(v: number, k: number): number
+		return math.max(5, math.floor(v * k / 5 + 0.5) * 5)
+	end
+	local A = E.ActiveMult
+	-- XP stays what it was: a cut-up's XP is worked out from its cash
+	Config.Progression.CutXpPerCash /= A
+	E.DrivePerSecond *= A
+	E.CutBase = E.CutBase * A
+	Config.Progression.LevelUpCashBase = cash(Config.Progression.LevelUpCashBase, E.LevelUpMult)
+	Config.Progression.LevelUpCashPerLevel = cash(Config.Progression.LevelUpCashPerLevel, E.LevelUpMult)
+	local Act = Config.Activities
+	for k, v in Act.RaceRewards do
+		Act.RaceRewards[k] = cash(v, A)
+	end
+	Act.ChipCash = cash(Act.ChipCash, A)
+	Act.ChipAllBonus = cash(Act.ChipAllBonus, A)
+	Act.PotPerRacer = cash(Act.PotPerRacer, A)
+	Act.DuelPot = cash(Act.DuelPot, A)
+	Act.DuelSecondCash = cash(Act.DuelSecondCash, A)
+	Act.JobPayPerStud *= E.JobMult
+	Act.JobTimeBonus = cash(Act.JobTimeBonus, E.JobMult)
+	local Ch = Config.Challenges
+	Ch.DriftCashPerPoint *= A
+	Ch.DriftCashMax = cash(Ch.DriftCashMax, A)
+	Ch.StuntCashPerSecond = cash(Ch.StuntCashPerSecond, A)
+	Ch.StuntCashPerStud *= A
+	Ch.StuntCashMax = cash(Ch.StuntCashMax, A)
+	for _, m in Ch.TrapMedals do
+		m.cash = cash(m.cash, A)
+	end
+	Config.Dealership.MeetBonusPerCar = cash(Config.Dealership.MeetBonusPerCar, A)
+	for k, v in Config.Police.EscapeBounty do
+		Config.Police.EscapeBounty[k] = cash(v, A)
+	end
+	Config.Police.CameraFine = cash(Config.Police.CameraFine, A)
+	Config.Police.FinePerKmh = math.max(1, math.floor(Config.Police.FinePerKmh * A + 0.5))
+	Config.Parking.VipFee = cash(Config.Parking.VipFee, A)
+	for _, t in Config.Towers.List do
+		t.rent = cash(t.rent, A)
+	end
+	for _, t in Config.Hotel.Suites do
+		t.perMinute = cash(t.perMinute, A)
+	end
+	local B = Config.Bank
+	B.GrabMin, B.GrabMax, B.MaxLoot = cash(B.GrabMin, E.HeistMult), cash(B.GrabMax, E.HeistMult), cash(B.MaxLoot, E.HeistMult)
+	local S = Config.Luxe.Showcase
+	S.CaseMin, S.CaseMax = cash(S.CaseMin, E.ShowcaseMult), cash(S.CaseMax, E.ShowcaseMult)
+	S.ShowpieceLoot, S.MaxLoot = cash(S.ShowpieceLoot, E.ShowcaseMult), cash(S.MaxLoot, E.ShowcaseMult)
+	local M = Config.Market
+	M.FlipOffPrize = cash(M.FlipOffPrize, A)
+	M.FlipOffPrizeCap = cash(M.FlipOffPrizeCap, A)
+	local G = E.GiftMult
+	local R = Config.Rewards
+	for i, p in R.Playtime do
+		p.cash = E.PlaytimeCash[i] or cash(p.cash, G)
+	end
+	for _, key in { "Weekly", "Return", "FriendDaily", "Invite", "Group" } do
+		(R :: any)[key] = cash((R :: any)[key], G)
+	end
+	R.LevelCash = cash(R.LevelCash, E.LevelGiftMult)
+	R.ChestCash = cash(R.ChestCash, E.LevelGiftMult)
+	for name, wheel in R.Wheels do
+		local k = if name == "super" then E.SuperWheelMult else E.WheelMult
+		wheel.cashPrice = cash(wheel.cashPrice, k)
+		for _, prize in wheel.prizes do
+			if prize.cash then
+				prize.cash = cash(prize.cash, k)
+			end
+			if prize.flexCash then
+				prize.flexCash = cash(prize.flexCash, k)
+			end
+			if prize.carCash then
+				prize.carCash = cash(prize.carCash, k)
+			end
+		end
+	end
+	local Go = Config.Goals
+	for _, g in Go.Path do
+		g.cash = cash(g.cash, if g.cash <= E.GoalSmallUpTo then E.GoalSmallMult else E.GoalBigMult)
+	end
+	for i, v in Go.Streak do
+		Go.Streak[i] = cash(v, G)
+	end
+	Go.StreakCarCash = cash(Go.StreakCarCash, G)
+	for _, t in Go.Tasks do
+		t.cash = cash(t.cash, E.TaskMult)
+	end
 end
 
 return Config
