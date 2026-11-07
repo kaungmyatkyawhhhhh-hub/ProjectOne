@@ -96,6 +96,7 @@ Every part on both icon sheets has a slot here (68 parts). Effects stay small pe
   - tyres: $600–2,500 a set; forged wheels: $3,000–8,000; big brake kit: $2,500–8,000;
   - springs / coilovers / air suspension / camber / bushings / strut brace / angle kit: $150–6,000;
   - carbon bonnet / wing / seats / cage / battery / weight reduction: $300–6,000.
+- **Then make them a little more expensive** (owner, 2026-11-07): the game price = the real price × **1.75** (`Config.Economy.PartPriceMult = 1.75`, one number to tune). E.g. an ECU tune about $900–2,600, a straight pipe about $350–3,500.
 - Rarity still matters: a Legendary part is a stronger, pricier version, but within these real ranges. A small car-price factor is allowed (at most **×1.5** for the most expensive cars, for big parts only), never ×10.
 - **CP** still works as the other way to pay (keep `Config.partCp`).
 - The **class rules stay**:
@@ -133,7 +134,7 @@ An **ENGINE SWAP** slot (Engine category). A swap replaces the car's engine: its
   - turbo I4s / flat-4s (SR20, 3S, 4G63, 4B11, EJ25, M139, 2.5 I5): $8,000–25,000;
   - I6s (M52, N55, N54, B58, S54, S55, S58, 1JZ, 2JZ, RB26, Barra): $8,000–40,000 (e.g. **B58 about $15,000–20,000**, 2JZ about $25,000–40,000);
   - V8s / V10s / big engines (350, LS3, LS7, 454, 5.0 V8, 6.2 SC V8, S65, S63, S85, M156, M177, Audi 4.0 V8 TT, 5.2 V10, VR38, Porsche flat-6s, rotaries): $10,000–60,000.
-  - Research real prices for each and note them. No car-price multiplier on swaps.
+  - Research real prices for each and note them. No car-price multiplier on swaps, but the same **× 1.75** (`PartPriceMult`) applies: e.g. a **B58 swap about $26,000–35,000**, a 2JZ about $45,000–70,000, the big V8s / V10s up to about $105,000.
 
 | # | In-game name | Real engine (for reference only, never shown) | Stock hp | Tuned max hp | Rarity |
 |---|---|---|---|---|---|
