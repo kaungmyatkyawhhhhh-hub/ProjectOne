@@ -309,9 +309,64 @@ local glowN = 0
 -- that grows with its text (AutomaticSize). The art drops in HERE only (the tile + pill images). opts: name, colour, icon,
 -- height (the chip's height: 34 on phones, 40 on PC), textSize, order (LayoutOrder in a UIListLayout).
 -- Returns { button, text (Kit.setText works on it), tile, pill }
+-- (7 Nov: THE HUD ART (owner, U4): Kit.HudArt = the image ids. opts.art = a chip image ({ id, w }, 194 px high, the diamond
+-- icon baked in at the left, a dark pill at the right). It's 9-sliced through the pill's middle so the diamond keeps its
+-- look and the pill grows with its text (at the art's fixed size the pill only fitted ~4 characters); the text sits in the
+-- pill's dark inside (x from 56% of the art, y 28-72%), white, black stroke)
+Kit.HudArt = {
+	chipGift = { id = 106148395751692, w = 311 }, chipInvite = { id = 111001668126320, w = 307 }, chipGroup = { id = 116787686626945, w = 302 },
+	chipPremium = { id = 83690963323861, w = 303 }, chipBoosts = { id = 92894565203951, w = 310 },
+	lumiPanel = 126958034325257, barTrack = 136600884639828, barFill = 111345712527230, btnClose = 80656129796820, btnSkip = 132028182309118,
+	tagStep = 72150251114770, slotReward = 106310280299667, btnGreen = 107063255385368, btnBlue = 92410784484864, btnRed = 78194072121960,
+	tagGold = 135937216600796, pillViolet = 91919107705618,
+}
+-- (7 Nov) a HORIZONTAL 3-slice drawn by hand: the image's left part (0..x0) and right part (x1..imgW) at their own
+-- proportions, the middle (x0..x1) stretched; all at the height h. (Roblox's SliceScale drew the art chips' corners almost
+-- full size at small heights, squeezing the diamond: this never depends on it.) Returns the frame and resize(w)
+function Kit.slice3(parent: Instance, id: number, imgW: number, imgH: number, x0: number, x1: number, x: number, y: number, w: number, h: number, z: number?)
+	local f = new("Frame", { Name = "Art", BackgroundTransparency = 1, Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(w, h), ZIndex = z or 1 }, parent)
+	local k = h / imgH
+	local L, R = x0 * k, (imgW - x1) * k
+	local function piece(ox, ow)
+		return new("ImageLabel", { BackgroundTransparency = 1, Image = "rbxassetid://" .. id, ImageRectOffset = Vector2.new(ox, 0), ImageRectSize = Vector2.new(ow, imgH),
+			ScaleType = Enum.ScaleType.Stretch, ZIndex = z or 1 }, f)
+	end
+	local left, mid, right = piece(0, x0), piece(x0, x1 - x0), piece(x1, imgW - x1)
+	local function resize(newW: number)
+		newW = math.max(newW, L + R)
+		f.Size = UDim2.fromOffset(newW, h)
+		left.Position, left.Size = UDim2.fromOffset(0, 0), UDim2.fromOffset(math.floor(L + 0.5), h)
+		mid.Position, mid.Size = UDim2.fromOffset(math.floor(L + 0.5), 0), UDim2.fromOffset(math.max(0, math.ceil(newW - L - R)), h)
+		right.Position, right.Size = UDim2.fromOffset(math.floor(newW - R), 0), UDim2.fromOffset(math.ceil(R), h)
+	end
+	resize(w)
+	return f, resize
+end
 function Kit.hudChip(parent: Instance, opts)
 	local H = opts.height or 40
 	local colour = opts.colour or Color3.new(1, 1, 1)
+	local art = opts.art
+	if art then
+		local k = H / 194
+		local btn = new("TextButton", { Name = opts.name or "Chip", Text = "", BackgroundTransparency = 1, AutoButtonColor = false,
+			Size = UDim2.fromOffset(math.floor(art.w * k), H), LayoutOrder = opts.order or 0, ZIndex = 5 }, parent)
+		local _, resizeArt = Kit.slice3(btn, art.id, art.w, 194, math.floor(art.w * 0.64), math.floor(art.w * 0.8), 0, 0, math.floor(art.w * k), H, 5)
+		local x0, capR = art.w * 0.56 * k, art.w * 0.07 * k
+		local text = new("TextLabel", { Name = "Text", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.X,
+			Position = UDim2.fromOffset(math.floor(x0), math.floor(H * 0.28)), Size = UDim2.fromOffset(0, math.floor(H * 0.44)),
+			Text = "", FontFace = Kit.FONT_HEAVY, TextSize = opts.textSize or 18, TextColor3 = Color3.new(1, 1, 1), ZIndex = 6 }, btn)
+		new("UIStroke", { Color = INK, Thickness = 1.8, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual, LineJoinMode = Enum.LineJoinMode.Round }, text)
+		-- (the chip's width = the art's left part + the text + the art's right cap; never narrower than the art itself)
+		local function fit()
+			local per = if btn.AbsoluteSize.Y > 0 then btn.AbsoluteSize.Y / H else 1
+			local tw = text.AbsoluteSize.X / per
+			local w = math.max(math.floor(art.w * k), math.ceil(x0 + tw + capR + 4))
+			btn.Size = UDim2.fromOffset(w, H)
+			resizeArt(w)
+		end
+		text:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+		return { button = btn, text = text, tile = nil, pill = btn }
+	end
 	local btn = new("TextButton", { Name = opts.name or "Chip", Text = "", AutoButtonColor = false, BackgroundTransparency = 1,
 		AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(H, H), LayoutOrder = opts.order or 0, ZIndex = 5 }, parent)
 	local pillH = math.floor(H * 0.78)

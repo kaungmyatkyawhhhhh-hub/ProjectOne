@@ -50,6 +50,7 @@ local strip = Kit.new("Frame", { Name = "Potions", BackgroundTransparency = 1, A
 strip:SetAttribute("UIAuditGroup", true)
 Kit.new("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, GAP), FillDirection = Enum.FillDirection.Vertical,
 	VerticalAlignment = if PH then Enum.VerticalAlignment.Top else Enum.VerticalAlignment.Bottom }, strip)
+strip:FindFirstChildOfClass("UIListLayout").Padding = UDim.new(0, if PH then 2 else 4) -- (7 Nov: the art chips' diamonds need less gap)
 local scale = Instance.new("UIScale")
 scale.Parent = strip
 
@@ -92,17 +93,38 @@ for i, p in ipairs(Econ.Potions) do
 end
 
 -- the social chips + BOOSTS: the kit's HUD chip (order in the column: potions 1-9, GIFT 20, then these)
-local CHIP_H, CHIP_TEXT = if PH then 34 else 40, if PH then 17 else 18
-local function hudChip(name: string, colour: Color3, icon: string, order: number)
-	local c = Kit.hudChip(strip, { name = name, colour = colour, icon = icon, height = CHIP_H, textSize = CHIP_TEXT, order = order })
+-- (7 Nov: the owner's ART chips (Kit.HudArt, U4); an art image that doesn't load yet (moderation) keeps the drawn chip)
+local CHIP_H, CHIP_TEXT = if PH then 36 else 46, if PH then 15 else 18
+local ContentProvider = game:GetService("ContentProvider")
+local function artLoads(id: number): boolean
+	local ok = false
+	local d = Instance.new("Decal")
+	d.Texture = "rbxassetid://" .. id
+	pcall(function() ContentProvider:PreloadAsync({ d }, function(_, st) ok = st == Enum.AssetFetchStatus.Success end) end)
+	return ok
+end
+local function hudChip(name: string, colour: Color3, icon: string, order: number, art, parent: Instance?)
+	local c = Kit.hudChip(parent or strip, { name = name, colour = colour, icon = icon, height = CHIP_H, textSize = CHIP_TEXT, order = order,
+		art = if art and artLoads(art.id) then art else nil })
 	return c.button, c.text
 end
 shared.GalaxyHudChip = hudChip -- (GalaxyLive's GIFT chip: the same chip, in this column)
-local friendsChip, friendsText = hudChip("Friends", hex("#7dff7a"), "stardust", 30)
-local groupChip, groupText = hudChip("Group", hex("#ffd84a"), "stardust", 40)
+-- the FRIENDS row: the friends chip + the green INVITE button (hud_btn_green) beside it
+local friendsRow = Kit.new("Frame", { Name = "FriendsRow", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), LayoutOrder = 30 }, strip)
+friendsRow:SetAttribute("UIAuditGroup", true)
+Kit.new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 2) }, friendsRow)
+local friendsChip, friendsText = hudChip("Friends", hex("#7dff7a"), "stardust", 1, Kit.HudArt.chipInvite, friendsRow)
+local IB_H = math.floor(CHIP_H * 0.72)
+local inviteBtn = Kit.new("TextButton", { Name = "Invite", Text = "", BackgroundTransparency = 1, AutoButtonColor = false, Size = UDim2.fromOffset(math.floor(IB_H * 2.4), IB_H),
+	LayoutOrder = 2, Visible = false, ZIndex = 5 }, friendsRow)
+Kit.slice3(inviteBtn, Kit.HudArt.btnGreen, 277, 139, 70, 207, 0, 0, math.floor(IB_H * 2.4), IB_H, 5) -- (hud_btn_green)
+local inviteText = Kit.new("TextLabel", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Text = "INVITE", FontFace = Kit.FONT_HEAVY,
+	TextSize = CHIP_TEXT, TextColor3 = Color3.new(1, 1, 1), ZIndex = 6 }, inviteBtn)
+Kit.new("UIStroke", { Color = Kit.INK, Thickness = 1.6 }, inviteText)
+local groupChip, groupText = hudChip("Group", hex("#ffd84a"), "stardust", 40, Kit.HudArt.chipGroup)
 -- (7 Nov: PREMIUM: Roblox Premium players get +10% stardust; others see it grey, a tap opens Roblox's Premium page (once a
 -- session at most))
-local premiumChip, premiumText = hudChip("Premium", hex("#ffb02a"), "stardust", 50)
+local premiumChip, premiumText = hudChip("Premium", hex("#ffb02a"), "stardust", 50, Kit.HudArt.chipPremium)
 -- (the FRIENDS chip IS the invite button now: a tap opens Roblox's invite prompt (SocialService) where you can send one;
 -- the separate INVITE button was clipped on phones)
 local SocialService = game:GetService("SocialService")
@@ -111,15 +133,18 @@ local refreshLater: (() -> ())? = nil -- (= refresh, once it exists below)
 task.spawn(function()
 	local ok, yes = pcall(function() return SocialService:CanSendGameInviteAsync(player) end)
 	canInvite = ok and yes == true
+	inviteBtn.Visible = canInvite
 	if refreshLater then refreshLater() end
 end)
-friendsChip.MouseButton1Click:Connect(function()
+local function invite()
 	if not canInvite then return end
 	Kit.sound("click")
 	local opts = Instance.new("ExperienceInviteOptions")
 	opts.LaunchData = "invite:" .. player.UserId -- (who invited: the analytics can count invites that came back)
 	pcall(function() SocialService:PromptGameInvite(player, opts) end)
-end)
+end
+friendsChip.MouseButton1Click:Connect(invite)
+inviteBtn.MouseButton1Click:Connect(invite)
 local function refreshSocial()
 	local n = math.min(player:GetAttribute("FriendsHere") or 0, Econ.Social.FriendMax)
 	-- (owner 6 Nov: shown at 0 too, greyed, as the invite hint)
@@ -131,7 +156,8 @@ local function refreshSocial()
 		Kit.setText(friendsText, if PH then "+" .. pct .. "% " .. n .. "/" .. max else "FRIENDS +" .. pct .. "% (" .. n .. "/" .. max .. ")")
 		friendsText.TextColor3 = hex("#7dff7a")
 	elseif canInvite then
-		Kit.setText(friendsText, if PH then "INVITE" else "INVITE  +" .. per .. "% EACH")
+		-- (the green INVITE button beside it says the rest)
+		Kit.setText(friendsText, if PH then "0/" .. max else "+" .. per .. "% EACH (0/" .. max .. ")")
 		friendsText.TextColor3 = hex("#7dff7a")
 	else
 		Kit.setText(friendsText, if PH then "0/" .. max else "+" .. per .. "% PER FRIEND (0/" .. max .. ")")
@@ -191,7 +217,7 @@ end)
 -- column's last chip, "BOOSTS x2.30" (phone: "x2.30") = every boost of yours added together (#69: same kind adds); a tap
 -- opens the list of each one with its timer, beside the column
 local Galaxy2 = ReplicatedStorage:WaitForChild("Galaxy")
-local bChip, bText = hudChip("Boosts", hex("#ffb02a"), "boosts", 60)
+local bChip, bText = hudChip("Boosts", hex("#ffb02a"), "boosts", 60, Kit.HudArt.chipBoosts)
 bText.TextColor3 = hex("#ffd84a")
 local list = Kit.box(root, 0, 0, 250, 10, { Name = "BoostList", ZIndex = 10, Visible = false })
 local listBg = Kit.box(list, 0, 0, 250, 10, { BackgroundTransparency = 0, BackgroundColor3 = hex("#0b090e"), ZIndex = 10 })

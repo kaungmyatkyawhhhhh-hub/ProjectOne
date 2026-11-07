@@ -96,9 +96,10 @@ local PH = Kit.phone()
 local giftRoot = Kit.box(root, 0, 0, 0, 0, { Name = "GiftChip", AnchorPoint = Vector2.new(1, 0.5), AutomaticSize = Enum.AutomaticSize.XY, LayoutOrder = 20 })
 local giftScale = Instance.new("UIScale")
 giftScale.Parent = giftRoot
-local giftChip = Kit.hudChip(giftRoot, { name = "Gift", colour = hex("#ffd84a"), icon = "playtimeGift", height = if PH then 34 else 40, textSize = if PH then 17 else 18 })
+local giftChip = Kit.hudChip(giftRoot, { name = "Gift", colour = hex("#ffd84a"), icon = "playtimeGift", height = if PH then 36 else 46, textSize = if PH then 15 else 18,
+	art = Kit.HudArt.chipGift }) -- (7 Nov: the owner's art chip)
 local giftBtn, giftText = giftChip.button, giftChip.text
-local giftEdge = giftChip.pill:FindFirstChildOfClass("UIStroke") :: UIStroke
+local giftEdge = giftChip.pill:FindFirstChildOfClass("UIStroke") -- (the drawn chip only; the art has its own rim)
 local inColumn = false
 task.spawn(function()
 	local t0 = os.clock()
@@ -199,11 +200,11 @@ local function tick()
 	if state == "ready" then
 		Kit.setText(giftText, if PH then "READY!" else "GIFT READY!")
 		giftText.TextColor3 = hex("#7dff7a")
-		giftEdge.Color = hex("#7dff7a")
+		if giftEdge then giftEdge.Color = hex("#7dff7a") end
 	elseif state == "wait" and left then
 		Kit.setText(giftText, if PH then mmss(left) else "NEXT GIFT " .. mmss(left))
-		giftText.TextColor3 = hex("#ffd84a")
-		giftEdge.Color = hex("#ffd84a")
+		giftText.TextColor3 = if giftEdge then hex("#ffd84a") else Color3.new(1, 1, 1)
+		if giftEdge then giftEdge.Color = hex("#ffd84a") end
 	end
 	-- event banner (the real time left)
 	local now = workspace:GetServerTimeNow()

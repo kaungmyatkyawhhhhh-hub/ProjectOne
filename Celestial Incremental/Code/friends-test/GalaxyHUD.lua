@@ -91,7 +91,7 @@ local function phoneScale(): number
 	return math.clamp(viewport().Y / 375, 0.9, 1.05) * 0.85
 end
 function cardScaleNow(): number
-	return if PH then phoneScale() else screenScale()
+	return if PH then 1 else screenScale() -- (phone: the art panel is made at phone size (72 px high): drawn 1:1, its text stays >= 14)
 end
 local function chipScale(): number
 	return if PH then phoneScale() else screenScale()
@@ -1038,118 +1038,114 @@ layout()
 -- name, "STEP 4/20", the goal, a segmented bar with the live counter ("3/5"), the reward (+Essence, +~20 s of stardust);
 -- HIDE (shrinks it to the goal line) and SKIP (red, "not recommended": a second tap skips the whole tutorial)
 local cardScale
--- (7 Nov, phone HUD + owner "the LUMI panel looks like a placeholder"; its art (U5) is coming): the card is laid out by
--- UIListLayouts, not hand-placed offsets: [portrait ring] [STEP / name row, the goal line, the segmented bar + counter]
--- [reward (PC)] [HIDE / SKIP]. Its plate follows the content's size. Phone: compact (no name / STEP chip / reward), two small
--- icon buttons (- and >>), above the hotbar, never over it
-local CW0, CH0 = if PH then 440 else 540, if PH then 60 else 100
+-- (7 Nov, the owner's ART (U5, Kit.HudArt): LUMI's panel = hud_lumi_panel, 9-sliced (SliceCenter 311,89 - 962,200 of the
+-- 1024x284 image) so its portrait RING (the left 30%) is never stretched; LUMI's portrait sits inside the ring. In the bar:
+-- the goal line, then hud_bar_track + hud_bar_fill (the progress) and the counter. PC: hud_tag_step ("STEP 1/20") and
+-- hud_slot_reward (+1 / +BONUS); both: hud_btn_close (hide) + hud_btn_skip as small round buttons on the top-right rim.
+-- Phone: shorter, no STEP tag / reward)
+local ART = Kit.HudArt
+local PH_ = PH
+local CH0 = if PH_ then 72 else 112 -- (the panel's height; the art is 284 high)
+local K = CH0 / 284
+local CW0 = if PH_ then 390 else 600
 cardRoot, cardScale = scaledRoot("TutCard", Vector2.new(0.5, 1), CW0, CH0)
 local card = {}
 do
-	local panelF = Kit.panel(cardRoot, 0, 0, CW0, CH0, if PH then 14 else 20)
-	Kit.stroke(panelF, hex("#ffd84a"), 2, 0.15)
+	local function img(parent, id, x, y, w, h, z, props)
+		local i = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = "rbxassetid://" .. id, Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(w, h), ZIndex = z }, parent)
+		if props then for k, v in pairs(props) do i[k] = v end end
+		return i
+	end
+	-- (the stored art is 1022x283; cut by hand (Kit.slice3): the ring part (0..311) and the right cap at their own shape)
+	local panelF = Kit.slice3(cardRoot, ART.lumiPanel, 1022, 283, 311, 960, 0, 0, CW0, CH0, 20)
 	card.panel = panelF
-	local content = Kit.new("Frame", { Name = "Content", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), ZIndex = 21 }, cardRoot)
-	Kit.new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, if PH then 8 else 10) }, content)
-	Kit.new("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), PaddingTop = UDim.new(0, if PH then 6 else 8), PaddingBottom = UDim.new(0, if PH then 6 else 8) }, content)
-	card.content = content
-	-- the portrait (its own slot; on PC the ring grows out above the card on small scales: sizePortrait)
-	local PS = if PH then 48 else 84
-	local slot = Kit.new("Frame", { Name = "Portrait", BackgroundTransparency = 1, Size = UDim2.fromOffset(PS, PS), LayoutOrder = 1 }, content)
-	local ring = Kit.box(slot, 0, 0, PS, PS, { BackgroundTransparency = 0, BackgroundColor3 = hex("#1c1430"), ZIndex = 21 })
-	Kit.corner(ring, PS / 2)
-	Kit.stroke(ring, hex("#ffd84a"), if PH then 2.5 else 3)
-	-- (6 Nov, #114: LUMI's 6 EXPRESSIONS (ArtIds.lumi) + her HALO behind the portrait, slowly breathing, 2.6 s)
+	-- the portrait inside the ring (the ring's inside: centre 137,148, ~190 across in the art)
+	local PS = math.floor(176 * K)
+	local ring = Kit.box(cardRoot, math.floor(137 * K - PS / 2), math.floor(148 * K - PS / 2), PS, PS, { ZIndex = 21 })
 	card.halo = Kit.new("ImageLabel", { Name = "LumiHalo", BackgroundTransparency = 1, Image = Art.lumiFx.halo, AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1.55, 1.55), ImageTransparency = 0.15, ZIndex = 20 }, ring)
+		Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1.3, 1.3), ImageTransparency = 0.35, ZIndex = 20 }, ring)
 	card.halo:SetAttribute("AllowOverlap", true)
 	if not Kit.calm() then
-		Kit.tween(card.halo, { Size = UDim2.fromScale(1.75, 1.75), ImageTransparency = 0.4 }, 1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+		Kit.tween(card.halo, { Size = UDim2.fromScale(1.45, 1.45), ImageTransparency = 0.55 }, 1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
 	end
 	card.portrait = Kit.new("ImageLabel", { BackgroundTransparency = 1, Image = Art.lumi.talking, AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.46), Size = UDim2.fromScale(1.12, 1.12), ZIndex = 22 }, ring)
+		Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1.08, 1.08), ZIndex = 22 }, ring)
 	card.ring = ring
-	card.slot = slot
-	-- the middle: (PC: LUMI + STEP), the goal line, the bar + counter
-	local body = Kit.new("Frame", { Name = "Body", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), LayoutOrder = 2 }, content)
-	Kit.new("UIListLayout", { FillDirection = Enum.FillDirection.Vertical, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, if PH then 4 else 4) }, body)
-	local head = Kit.new("Frame", { Name = "Head", BackgroundTransparency = 1, Size = UDim2.fromOffset(200, 22), LayoutOrder = 1, Visible = not PH }, body)
-	card.name = Kit.text(head, 0, 0, 70, 20, Econ.TutorialSpirit.name, 16, { ZIndex = 23, FontFace = Kit.FONT_HEAVY, TextColor3 = hex("#ffd84a"), stroke = 1.5 })
-	local chip = Kit.box(head, 70, 0, 92, 22, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 22 })
-	Kit.corner(chip, 4)
-	Kit.stroke(chip, Kit.INK, 2)
-	Kit.grad(chip, hex("#ffd84a"), hex("#c79a0a"), 90)
-	card.chip = chip
-	card.step = Kit.text(chip, 0, 2, 92, 20, "STEP 1/20", 14, { ZIndex = 23, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.3 })
-	card.head = head
-	local LW = if PH then 250 else 300
-	local _, _, lineHolder = Kit.text(body, 0, 0, LW, if PH then 22 else 26, "", if PH then 20 else 21, { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.8, TextScaled = true })
-	lineHolder.LayoutOrder = 2
+	card.slot = ring
+	-- the bar's inside: from just past the ring to the right cap; the art's dark band is y 68-227 of 284
+	local X0 = math.floor(330 * K)
+	local X1 = CW0 - math.floor(70 * K) - (if PH_ then 0 else math.floor(CH0 * 0.62))
+	local Y0, Y1 = math.floor(68 * K), math.floor(227 * K)
+	local lineH = math.floor((Y1 - Y0) * 0.5)
+	local _, _, lineHolder = Kit.text(cardRoot, X0, Y0 + 1, X1 - X0, lineH, "", if PH_ then 17 else 22, { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.8, TextScaled = true })
 	for _, l in ipairs(lineHolder:GetChildren()) do
-		if l:IsA("TextLabel") then Kit.new("UITextSizeConstraint", { MaxTextSize = if PH then 20 else 21, MinTextSize = 14 }, l) end
+		if l:IsA("TextLabel") then
+			Kit.new("UITextSizeConstraint", { MaxTextSize = if PH_ then 17 else 22, MinTextSize = 14 }, l)
+			card.line = l
+		end
 	end
-	card.line = lineHolder:FindFirstChildWhichIsA("TextLabel")
-	for _, l in ipairs(lineHolder:GetChildren()) do if l:IsA("TextLabel") then card.line = l end end
-	local barRow = Kit.new("Frame", { Name = "Bar", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), LayoutOrder = 3 }, body)
-	Kit.new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8) }, barRow)
-	card.SEG_W = if PH then 190 else 270
-	local segsF = Kit.new("Frame", { Name = "Segs", BackgroundTransparency = 1, Size = UDim2.fromOffset(card.SEG_W, 14), LayoutOrder = 1 }, barRow)
+	-- the progress: hud_bar_track + hud_bar_fill (5% inside), the counter right of it
+	local countW = if PH_ then 44 else 56
+	local barH = math.max(12, math.floor((Y1 - Y0) * 0.36))
+	local barY = Y1 - barH - 1
+	local barW = X1 - X0 - countW - 6
+	local track = Kit.slice3(cardRoot, ART.barTrack, 584, 120, 60, 524, X0, barY, barW, barH, 22)
+	-- (the fill is drawn full length inside a clipping frame; the progress = that frame's width)
+	local fillHolder = Kit.box(track, math.floor(barW * 0.03), math.floor(barH * 0.18), math.floor(barW * 0.94), math.floor(barH * 0.64), { ZIndex = 23, ClipsDescendants = true })
+	Kit.slice3(fillHolder, ART.barFill, 465, 92, 46, 419, 0, 0, math.floor(barW * 0.94), math.floor(barH * 0.64), 23)
+	card.fill = fillHolder
+	card.fillW = math.floor(barW * 0.94)
+	card.segsF = track
 	card.segs = {}
-	for i = 1, 10 do
-		local seg = Kit.box(segsF, (i - 1) * 27, 0, 24, 14, { BackgroundTransparency = 0, BackgroundColor3 = hex("#2a2433"), ZIndex = 22 })
-		Kit.corner(seg, 4)
-		Kit.stroke(seg, Kit.INK, 1.5)
-		card.segs[i] = seg
-	end
-	card.segsF = segsF
-	local _, _, countHolder = Kit.text(barRow, 0, 0, 56, 20, "0/1", 18, { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
-	countHolder.LayoutOrder = 2
+	local _, _, countHolder = Kit.text(cardRoot, X0 + barW + 6, barY + math.floor((barH - 20) / 2), countW, 20, "0/1", if PH_ then 16 else 18, { ZIndex = 23, FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
 	for _, l in ipairs(countHolder:GetChildren()) do if l:IsA("TextLabel") then card.count = l end end
-	-- the reward (PC only)
-	local reward = Kit.new("Frame", { Name = "Reward", BackgroundTransparency = 1, Size = UDim2.fromOffset(92, 64), LayoutOrder = 3, Visible = not PH }, content)
-	Kit.icon(reward, "essence", 0, 0, 34, Color3.fromRGB(60, 230, 210), { ZIndex = 23 })
-	card.ess = Kit.text(reward, 34, 6, 56, 22, "+1", 18, { ZIndex = 23, TextColor3 = hex("#7dffe9"), FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
-	Kit.icon(reward, "stardust", 0, 32, 30, Color3.fromRGB(255, 170, 60), { ZIndex = 23 })
-	Kit.text(reward, 30, 36, 64, 20, "+BONUS", 14, { ZIndex = 23, TextColor3 = hex("#ffc35a"), FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
+	-- STEP tag (PC): on the top rim, over the bar's start
+	local head = Kit.new("Frame", { Name = "Head", BackgroundTransparency = 1, Position = UDim2.fromOffset(X0, -math.floor(CH0 * 0.08)), Size = UDim2.fromOffset(96, 28), Visible = not PH_, ZIndex = 24 }, cardRoot)
+	Kit.slice3(head, ART.tagStep, 437, 164, 82, 355, 0, 0, 96, 28, 24)
+	card.step = Kit.text(head, 0, 5, 96, 18, "STEP 1/20", 14, { ZIndex = 25, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 0, TextColor3 = hex("#3a2205") })
+	card.name = card.step
+	card.chip = head
+	card.head = head
+	-- the reward slot (PC): right end of the bar
+	local RS = math.floor(CH0 * 0.56)
+	local reward = Kit.new("Frame", { Name = "Reward", BackgroundTransparency = 1, Position = UDim2.fromOffset(X1 + 6, math.floor((CH0 - RS) / 2)), Size = UDim2.fromOffset(RS, RS), Visible = not PH_, ZIndex = 22 }, cardRoot)
+	img(reward, ART.slotReward, 0, 0, RS, RS, 22)
+	Kit.icon(reward, "essence", math.floor(RS * 0.1), math.floor(RS * 0.04), math.floor(RS * 0.46), nil, { ZIndex = 23 })
+	card.ess = Kit.text(reward, math.floor(RS * 0.5), math.floor(RS * 0.1), math.floor(RS * 0.46), 18, "+1", 16, { ZIndex = 24, TextColor3 = hex("#7dffe9"), FontFace = Kit.FONT_HEAVY, stroke = 1.5 })
+	Kit.text(reward, 0, math.floor(RS * 0.58), RS, 16, "+BONUS", 14, { ZIndex = 24, TextColor3 = hex("#ffc35a"), FontFace = Kit.FONT_HEAVY, stroke = 1.2, TextXAlignment = Enum.TextXAlignment.Center })
 	card.reward = reward
-	-- HIDE + SKIP (phone: two small icon buttons, - and >>)
-	local btns = Kit.new("Frame", { Name = "Buttons", BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), LayoutOrder = 4 }, content)
-	Kit.new("UIListLayout", { FillDirection = if PH then Enum.FillDirection.Horizontal else Enum.FillDirection.Vertical, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 6) }, btns)
-	local BW, BH = if PH then 30 else 132, if PH then 28 else 26
-	local function holderBtn(order: number, w: number, c1, c2)
-		local h = Kit.new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(w, BH + 3), LayoutOrder = order }, btns)
-		local b, inner = Kit.button(h, 0, 0, w, BH, c1, c2, { ZIndex = 24 })
-		return h, b, inner
+	-- HIDE + SKIP: small round buttons on the top-right rim
+	local BS = if PH_ then 26 else 32
+	local function roundBtn(id, x)
+		local b = Kit.new("ImageButton", { BackgroundTransparency = 1, Image = "rbxassetid://" .. id, AutoButtonColor = false, Position = UDim2.fromOffset(x, -math.floor(BS * 0.35)),
+			Size = UDim2.fromOffset(BS, BS), ZIndex = 26 }, cardRoot)
+		return b
 	end
-	local hideH, hideB, hideI = holderBtn(1, if PH then BW else 64, hex("#5ad1ff"), hex("#1f6fd1"))
-	card.hideText = Kit.text(hideI, 0, if PH then 1 else 3, if PH then BW else 64, 22, if PH then "–" else "HIDE", if PH then 20 else 14, { ZIndex = hideI.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
-	local skipH, skipB, skipI = holderBtn(2, BW, hex("#ff7d8e"), hex("#e2334c"))
-	card.skipText = Kit.text(skipI, 0, if PH then 1 else 3, BW, 22, if PH then "»" else "SKIP (not advised)", if PH then 20 else 14, { ZIndex = skipI.ZIndex, TextXAlignment = Enum.TextXAlignment.Center, FontFace = Kit.FONT_HEAVY, stroke = 1.2 })
-	card.hideB, card.skipB, card.hideH, card.skipH = hideB, skipB, hideH, skipH
-	-- the plate follows the content
-	local function fitPanel()
-		-- (the real pixels per design unit: every scale above the card counts, not only its own)
-		local k = cardRoot.AbsoluteSize.X / math.max(1, cardRoot.Size.X.Offset)
-		if k <= 0 then return end
-		local sz = content.AbsoluteSize / k
-		panelF.Size = UDim2.fromOffset(math.ceil(sz.X), math.ceil(sz.Y))
-		cardRoot.Size = UDim2.fromOffset(math.ceil(sz.X), math.ceil(sz.Y))
-	end
-	content:GetPropertyChangedSignal("AbsoluteSize"):Connect(fitPanel)
-	cardScale:GetPropertyChangedSignal("Scale"):Connect(fitPanel)
-	card.fitPanel = fitPanel
+	local skipB = roundBtn(ART.btnSkip, CW0 - BS - math.floor(28 * K))
+	local hideB = roundBtn(ART.btnClose, CW0 - BS * 2 - 4 - math.floor(28 * K))
+	card.hideB, card.skipB, card.hideH, card.skipH = hideB, skipB, hideB, skipB
+	-- (the old text labels on these buttons: kept as hidden labels so the rest of the code can set them)
+	card.hideText = Kit.text(hideB, 0, 0, BS, BS, "", 14, { ZIndex = 27, Visible = false })
+	card.skipText = Kit.text(skipB, 0, 0, BS, BS, "", 14, { ZIndex = 27, Visible = false })
+	card.fitPanel = function() end
 end
 local cardHidden, skipArmed = false, false
+local cardKeep = { [card.hideB] = true }
 local function setCardHidden(h: boolean)
 	cardHidden = h
-	-- (hidden: a slim strip with only the goal line, the counter and SHOW)
-	card.slot.Visible = not h
-	card.head.Visible = not h and not PH
-	card.segsF.Visible = not h
-	card.reward.Visible = not h and not PH
-	card.skipH.Visible = not h
-	Kit.setText(card.hideText, if h then (if PH then "+" else "SHOW") else (if PH then "–" else "HIDE"))
+	-- (hidden: only the round button stays, turned over (its chevron points up = show))
+	for _, c in ipairs(cardRoot:GetChildren()) do
+		if c:IsA("GuiObject") and not cardKeep[c] then
+			if h then
+				c:SetAttribute("WasVisible", c.Visible)
+				c.Visible = false
+			elseif c:GetAttribute("WasVisible") ~= nil then
+				c.Visible = c:GetAttribute("WasVisible")
+				c:SetAttribute("WasVisible", nil)
+			end
+		end
+	end
+	card.hideB.Rotation = if h then 180 else 0
 end
 card.hideB.MouseButton1Click:Connect(function()
 	Kit.sound("tab")
@@ -1158,13 +1154,9 @@ end)
 card.skipB.MouseButton1Click:Connect(function()
 	if not skipArmed then
 		skipArmed = true
-		if PH then
-			if shared.GalaxyToast then shared.GalaxyToast("TAP » AGAIN TO SKIP THE TUTORIAL", hex("#ff7d8e")) end
-		else
-			Kit.setText(card.skipText, "TAP AGAIN TO SKIP")
-		end
+		if shared.GalaxyToast then shared.GalaxyToast("TAP » AGAIN TO SKIP THE TUTORIAL (not advised)", hex("#ff7d8e")) end
 		Kit.sound("error")
-		task.delay(3, function() if skipArmed then skipArmed = false if not PH then Kit.setText(card.skipText, "SKIP (not advised)") end end end)
+		task.delay(3, function() skipArmed = false end)
 		return
 	end
 	skipArmed = false
@@ -1185,7 +1177,7 @@ local function lumiFace(step: number): string
 end
 -- phones: the card is 0.8x, so the portrait grows inside it to stay at least 72 px on screen (it pops out above the card)
 local function sizePortrait()
-	if PH then return end -- (phone: the compact card's 48 ring stays in its slot)
+	do return end -- (7 Nov: the art's ring holds the portrait at a fixed size)
 	local s = cardScale.Scale
 	local p = if s > 0 then math.max(84, math.ceil(74 / s)) else 84
 	card.ring.Size = UDim2.fromOffset(p, p)
@@ -1269,6 +1261,9 @@ local function showHint(step: number)
 	-- the live counter + the segments
 	local v = math.min(tonumber(player:GetAttribute(def.attr)) or 0, def.need)
 	Kit.setText(card.count, (if def.attr == "SupernovaPct" then v .. "%" else v .. "/" .. def.need))
+	if card.fill then
+		card.fill.Size = UDim2.fromOffset(math.max(0, math.floor(card.fillW * math.clamp(v / def.need, 0, 1))), card.fill.Size.Y.Offset)
+	end
 	local n = math.min(def.need, 10)
 	local lit = math.floor(v / def.need * n + 1e-6)
 	for i, seg in ipairs(card.segs) do

@@ -116,3 +116,18 @@ Decorations that break out on purpose (sparkles, glows) are marked AllowOverlap.
 2. **Art:** the U4 / U5 art isn't in yet (the layout is ready for it).
 3. **Phone windows** (UPGRADES, TREE...) weren't re-checked in this job; they were fixed on 7 Nov (UI corners).
 4. **Other islands' plates:** the island plate over each island (owner name + rank, read from the plaza) is still pixel-sized (that's for reading it from far away).
+
+## 6. HUD ART in (owner's U4 + U5, `Kit.HudArt`)
+**Left column:**
+- GIFT, FRIENDS, PREMIUM and BOOSTS use the chip images; the friends chip has the green INVITE button (hud_btn_green) beside it.
+- Text sits in the pill's dark inside: white with a black stroke; phones get short values.
+- **GROUP** (116787686626945) still FAILS to load (moderation?): it keeps the drawn chip until its art loads (the column checks at start).
+
+**LUMI panel:** hud_lumi_panel with LUMI in the ring; the goal line; hud_bar_track + hud_bar_fill (the progress); the counter; hud_btn_close (hide) + hud_btn_skip on the top-right rim. PC also has hud_tag_step (STEP x/20) on the rim and hud_slot_reward (+1 / +BONUS).
+
+**9-slicing is done by hand** (`Kit.slice3`: left / middle / right cut with ImageRectOffset).
+- Roblox's own Slice with a small SliceScale drew the art's corners almost full size and squeezed the chip's diamond and the panel's ring.
+- The SliceCenters from the table are used as the cut lines. The stored sizes were checked: the same as the files, except the panel (1022x283).
+- **The chips are cut through the pill's middle**, so the pill grows with its text. At the art's fixed size the pill only fitted ~4 characters.
+
+**UIAudit with the art:** Android, SE, 14 Pro, iPad, PC all **CLEAN** (`11-` to `15-art-*.jpg`).
