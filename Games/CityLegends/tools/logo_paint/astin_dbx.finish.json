@@ -2,17 +2,75 @@
  "id": "astin_dbx",
  "roles": {
   "paint_material": "Paint",
-  "base_material": ["Base", 0.7, 0.0],
+  "base_material": [
+   "Base",
+   0.7,
+   0.0
+  ],
   "carbon1": "Carbon",
-  "coloured_material": ["Trim", 0.3, 0.0],
-  "lightb_material": ["Lamp", 0.16, 0.5],
-  "interiortilling": ["CabinTile", 0.6, 0.0],
-  "interiorb_material": ["Cabin", 0.5, 0.0],
-  "interiorb_emmesive": ["Screen", 0.35, 0.0],
-  "manufacturerplate": ["Plate", 0.5, 0.0],
-  "enginea": ["Engine", 0.4, 0.3],
-  "grille": ["Grille", 0.5, 0.2],
-  "wheel1a_3d": ["Rim", 0.28, 0.85],
-  "calliper": ["Brake", 0.28, 0.2]
- }
+  "coloured_material": [
+   "Trim",
+   0.3,
+   0.0
+  ],
+  "lightb_material": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "interiortilling": [
+   "CabinTile",
+   0.6,
+   0.0
+  ],
+  "interiorb_material": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "interiorb_emmesive": [
+   "Screen",
+   0.35,
+   0.0
+  ],
+  "manufacturerplate": [
+   "Plate",
+   0.5,
+   0.0
+  ],
+  "enginea": [
+   "Engine",
+   0.4,
+   0.3
+  ],
+  "grille": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "wheel1a_3d": [
+   "Rim",
+   0.28,
+   0.85
+  ],
+  "calliper": [
+   "Brake",
+   0.28,
+   0.2
+  ]
+ },
+ "cut_islands": [
+  {
+   "mat": "2023int",
+   "box": [
+    0.355,
+    -0.29,
+    1.078,
+    0.43,
+    -0.265,
+    1.108
+   ],
+   "limit": 0.08
+  }
+ ]
 }

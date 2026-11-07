@@ -1,6 +1,8 @@
 # City Legends
 
-> **LICENCE WARNING (owner, read this):** these car models are **NC (non-commercial)** and the game sells Robux items, so they are risky: Dearborn C346 (Focus RS), Stealth-Apex V10 Halo and Halo Circuit (LFAs), Z223 Royale V12 (Maybach S-Class), all Ddiaz Design, plus the Lamborghini / Ferrari ones listed further down. Their part names (`Rs:SK_...`, `MI_...`, `Geo_lodA`) look ripped from a racing game. The X167 Royale and Classico 5000 are CC-BY (OK with credit, in the credits), though the X167's parts are from a game mod. The call is yours. The game still works if one model is swapped later.
+> **LICENCE WARNING (owner, read this):** these car models are **NC (non-commercial)** and the game sells Robux items, so they are risky: Dearborn C346 (Focus RS), Stealth-Apex V10 Halo and Halo Circuit (LFAs), Z223 Royale V12 (Maybach S-Class), all Ddiaz Design, plus the Lamborghini / Ferrari ones listed further down. Their part names (`Rs:SK_...`, `MI_...`, `Geo_lodA`) look ripped from a racing game. The X167 Royale and Classico 5000 are CC-BY (OK with credit, in the credits), though the X167's parts are from a game mod. The call is yours. The game still works if one model is swapped later. **The 2026-11-08 imports are NC too:** C197 Wingdoor, R230 V12 Track, Highland, Sovereign Grand Tourer, Horizon Z33, G20 Sport (all Ddiaz Design, CC-BY-NC-SA).
+
+> **Night of 2026-11-08, report:** all 8 new imports are in the game and checked in Play: P11 Spider, C197 Wingdoor, R230 V12 Track, F141, Highland, Sovereign Grand Tourer, Horizon Z33, G20 Sport (details and pictures: section "New imports, night of 2026-11-08"). Nothing left from the imports list. Not tested: Customs paint on each new car, phone size, a second player.
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
@@ -26,7 +28,7 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - Pictures: [[Our rims - the six designs.jpg]], [[Our rims - LB834 Furia 7.jpg]], [[Our rims - Eclair Turbine 14.jpg]], [[Our rims - LB724 VTZ Saetta Y5.jpg]].
 
 ## New imports, night of 2026-11-08 (`Prompts/New imports - 12C, SLS, SL65, 599, DBX, Continental, 350Z, 330i, trailer.md`)
-**Licences:** NC (non-commercial, risky in a game that sells Robux): C197 Wingdoor (SLS, CC-BY-NC-SA), and when they go in: R230 V12 Track, Highland, Sovereign Grand Tourer, Horizon Z33, G20 Sport. OK with credit: Speedmark P11 Spider (CC-BY, Ddiaz Design, in `Config.Credits`), F141 and the trailer. Ddiaz files may be ripped from a racing game (part names like `F:car_mclaren_mp412cspyder_2013_Mesh_lod0M_...`).
+**Licences:** NC (non-commercial, risky in a game that sells Robux): C197 Wingdoor (SLS), R230 V12 Track, Highland, Sovereign Grand Tourer, Horizon Z33, G20 Sport (all CC-BY-NC-SA). OK with credit: Speedmark P11 Spider (CC-BY, Ddiaz Design, in `Config.Credits`), F141 and the trailer. Ddiaz files may be ripped from a racing game (part names like `F:car_mclaren_mp412cspyder_2013_Mesh_lod0M_...`).
 
 | # | Car | State |
 |---|---|---|
@@ -47,7 +49,10 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 - **Trap found:** a new small plain-colour picture can fail to load for a long time (F141's tyres and grilles came out white): swap in one that's known good (78370881509044, dark grey).
 - **Trap found:** `make_sync.py` updates its list when it builds, so a build that isn't uploaded is lost: the next one leaves those files out. Upload after every build.
 - **Backups:** `ServerStorage.OldCarModels`: one `<id>_old_2026-11-08` for each car swapped. Tool: `ServerStorage.ClaudeTools.CarSwap`.
-- **Checked in Play (PC):** outside, rear, cluster from the driver's side parked. **Not checked yet:** the two cars at speed, night, Customs paint, phone size.
+- **Checked in Play (PC), all 8:** each spawns, outside and rear, the cluster from the driver's seat. Driven with the cluster: Z33, G20 (needles, arcs, gear and speed follow; the dials are in mph, the digital speed follows the player's units). Night: G20 ([[G20 Sport - night.jpg]]). Highland: trailer hitches after the swap ([[Highland - trailer hitched.jpg]]). F141: tyres black after the picture swap.
+- **Found and fixed in the last checks:** the Highland's steering wheel still had the maker's wings moulded on the hub: cut out (`cut_islands` in `tools/logo_paint/astin_dbx.finish.json`), the car re-imported, rims put back ([[Highland - wheel without the wings.jpg]]).
+- **Not tested:** Customs paint on the new cars (they are in `CarFinish.CARS`, paint parts named `Body_Paint` as on the others), phone size, a second player. The windscreen crack spot (`client/Windscreens.lua`) for the Sovereign and Z33 comes from the driver's eye (no measured entry); the other six keep the entries measured on their old models of the same car.
+- **Trailer:** the orange square on the body picture is painted out (`TrailerModels.hauler` body picture 90129291237207).
 - G20 pictures: [[G20 Sport - in the game.jpg]], [[G20 Sport - driver's seat.jpg]], [[G20 Sport - cluster at speed.jpg]], [[G20 cluster - model and redraw.jpg]] (top: the model's own blurry screen; bottom: ours). The model's button labels came as a see-through layer plus a glow picture; both baked into one picture so the buttons stay dark with lit labels.
 - **Trap found (G20):** a model whose cabin picture keeps a colour row at its very top edge: far away Roblox uses a small copy of the picture, which blends the top row with the bottom row, and the black steering wheel came out white. Fix: the picture's bottom rows under that row painted the same colour (`Image_1b`, 118320135321944).
 - Sovereign and Z33 pictures: [[Sovereign - in the game.jpg]], [[Sovereign - cluster in the bowls.jpg]], [[Horizon Z33 - in the game.jpg]], [[Horizon Z33 - cluster at speed.jpg]]. Their small lower dials on the Sovereign are the model's own (oil and temperature), not live: only fuel is a real system, and it has its own dial.
