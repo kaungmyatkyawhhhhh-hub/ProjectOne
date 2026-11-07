@@ -7,6 +7,24 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
+## Our own rims (2026-11-08, `Prompts/Small design changes on famous new cars.md`)
+**Done: the wheels part.** Six designs of our own, from `tools/wheels/wheel_library.py`: no real rim copied, no logos, blank caps. **Not done: the other small changes** (vents, side details, tail graphics, exhaust tips, 4-6 per car on 22 cars): each needs modelling by hand on each car, and I went on to the new cars instead of starting that.
+
+| Rim | Style | Cars |
+|---|---|---|
+| Furia 7 | twin spokes | LB834 family (black), L147 family (silver) |
+| Corsa 10 | ten forged spokes | LB744 (black), F142 and F149 (silver) |
+| Saetta Y5 | five Y spokes | LB724 family (gunmetal) |
+| Centro 6 | six spokes, centre nut | L140 family (gunmetal) |
+| Turbine 14 | aero blades | Veyrun Sport and Top (silver), the three Eclairs (gunmetal) |
+| Trio 6 | six split spokes | Brava Sport (black) |
+
+- **Tyres:** on most models the tyre and rim were one mesh, so those cars got our tyre (three grooves, plain sidewall) and our disc too; the rim is 76% of the tyre. Calipers stay the model's. Size, width and stance are each car's own.
+- **Left as it was:** the base Veyrun (`bugotti_veyron`): its wheel parts don't fit the tool. Customs has no wheel choice yet, so the designs aren't offered there.
+- **How:** `ServerStorage.RimKit`, `tools/wheels/RimSwap.luau` (`apply`, `undo`). Old parts: `ServerStorage.OldCarModels/<id>_rims_2026-11-08`.
+- **Checked in Play:** LB834, Eclair, LB724 VTZ, both sides. The other 17 were done by the same script and not looked at one by one.
+- Pictures: [[Our rims - the six designs.jpg]], [[Our rims - LB834 Furia 7.jpg]], [[Our rims - Eclair Turbine 14.jpg]], [[Our rims - LB724 VTZ Saetta Y5.jpg]].
+
 ## New imports, night of 2026-11-08 (`Prompts/New imports - 12C, SLS, SL65, 599, DBX, Continental, 350Z, 330i, trailer.md`)
 **Licences:** NC (non-commercial, risky in a game that sells Robux): C197 Wingdoor (SLS, CC-BY-NC-SA), and when they go in: R230 V12 Track, Highland, Sovereign Grand Tourer, Horizon Z33, G20 Sport. OK with credit: Speedmark P11 Spider (CC-BY, Ddiaz Design, in `Config.Credits`), F141 and the trailer. Ddiaz files may be ripped from a racing game (part names like `F:car_mclaren_mp412cspyder_2013_Mesh_lod0M_...`).
 
