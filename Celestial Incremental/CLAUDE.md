@@ -10,6 +10,7 @@ Every map change follows the process below: a layout table first, placed by code
 Galaxy specifics:
 - The map is built by code (MapBuilder / MapService from MapConfig): never hand-place parts.
 - The island boards' layout table is `MapConfig.Boards.Layout`.
+- **See the boards' design in Edit (no Play):** Command Bar `require(game.ServerStorage.Tools.BoardPreview)()` (again = off). It draws the plaza boards + Island_1's boards in `Workspace.GalaxyPreview` (never saved or published). The boards' look lives in `PlazaBoardsUI`, `IslandBoardsUI` and `BoardsFx` (shared by the game and the preview): change it there.
 - Run the audit in Play, on the server: `require(game.ServerStorage.Tools.MapAudit)({ root = workspace.Galaxy })`. The island boards exist only on owned islands.
 
 ### The rules

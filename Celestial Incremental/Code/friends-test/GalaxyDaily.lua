@@ -16,6 +16,7 @@ local Vfx = require(Galaxy:WaitForChild("VfxLibrary"))
 local Art = require(Galaxy:WaitForChild("ArtIds")) -- (7 Nov: the stopwatch)
 local Econ = require(Galaxy:WaitForChild("EconConfig"))
 local Config = require(Galaxy:WaitForChild("GameConfig"))
+local PlazaBoardsUI = require(Galaxy:WaitForChild("PlazaBoardsUI"))
 local request = Galaxy:WaitForChild("EconRequest") :: RemoteFunction
 local event = Galaxy:WaitForChild("EconEvent") :: RemoteEvent
 local hex = Kit.hex
@@ -363,36 +364,11 @@ task.spawn(function()
 	local board = workspace:WaitForChild("Galaxy"):WaitForChild("Centre"):WaitForChild("FreeBoard", 60)
 	local screen = board and board:WaitForChild("Screen", 10)
 	if not screen then return end
-	local sg = Instance.new("SurfaceGui")
-	sg.Name = "FreeRewardsBoard"
-	sg.Adornee = screen
-	sg.Face = Enum.NormalId.Back
-	sg.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
-	sg.CanvasSize = Vector2.new(440, 300)
-	sg.LightInfluence = 0
-	sg.Brightness = 1.8
-	sg.MaxDistance = 140
-	sg.ResetOnSpawn = false
-	sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	sg.Parent = playerGui
-	local bg = Kit.box(sg, 0, 0, 440, 300, { BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 1 })
-	Kit.grad(bg, hex("#1d1a2a"), hex("#0e0c14"), 90)
-	Kit.text(sg, 0, 14, 440, 40, "FREE REWARDS", 34, { ZIndex = 5, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 2.4,
-		gradient = ColorSequence.new(hex("#fff1c0"), hex("#ffb02a")) })
-	-- (6 Nov: the board's own icon either side of the title)
-	Kit.icon(sg, "freeRewards", 34, 6, 54, nil, { ZIndex = 5 })
-	Kit.icon(sg, "freeRewards", 440 - 34 - 54, 6, 54, nil, { ZIndex = 5 })
-	local rows = {}
-	for i, f in ipairs(Econ.FreeRewards) do
-		local y = 70 + (i - 1) * 92
-		local p = Kit.panel(sg, 20, y, 400, 80, 2)
-		Kit.text(sg, 34, y + 10, 230, 30, f.text, 24, { ZIndex = 5, FontFace = Kit.FONT_HEAVY, stroke = 1.8 })
-		Kit.icon(sg, "essence", 30, y + 40, 34, nil, { ZIndex = 5 })
-		Kit.text(sg, 66, y + 46, 200, 26, "+" .. f.essence .. " ESSENCE", 20, { ZIndex = 5, FontFace = Kit.FONT_HEAVY, stroke = 1.6, TextColor3 = hex("#7dffe9") })
-		local b, inner = Kit.button(sg, 280, y + 16, 128, 48, hex("#7dff7a"), hex("#1fa83a"), { ZIndex = 4 })
-		local bt = Kit.text(inner, 0, 11, 128, 26, "CLAIM", 22, { ZIndex = inner.ZIndex, TextXAlignment = CENTRE, FontFace = Kit.FONT_HEAVY, stroke = 1.8 })
-		rows[f.id] = { button = b, label = bt, panel = p }
-		b.MouseButton1Click:Connect(function()
+	-- (7 Nov: the look lives in PlazaBoardsUI, shared with Tools/BoardPreview; the claims stay here)
+	local sg, rows = PlazaBoardsUI.freeBoard(screen, playerGui)
+	for _, f in ipairs(Econ.FreeRewards) do
+		local r = rows[f.id]
+		r.button.MouseButton1Click:Connect(function()
 			Kit.sound("click")
 			local ok, why = request:InvokeServer("FreeClaim", f.id)
 			if ok then
@@ -405,7 +381,6 @@ task.spawn(function()
 			end
 		end)
 	end
-	Kit.text(sg, 20, 258, 400, 30, "Likes can't be checked by a game: we trust you!", 15, { ZIndex = 5, TextXAlignment = CENTRE, TextColor3 = hex("#a99fb8"), stroke = 1.1 })
 	local function refresh()
 		local got = "," .. (player:GetAttribute("FreeGot") or "") .. ","
 		for id, r in pairs(rows) do

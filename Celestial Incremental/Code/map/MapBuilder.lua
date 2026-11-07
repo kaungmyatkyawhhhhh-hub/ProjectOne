@@ -902,6 +902,81 @@ function Builder.BoardFrame(parent: Instance, cf: CFrame, spec, floorY: number, 
 		legs(parent, cf, w, h, D / 2 + 0.55, floorY, 1.1)
 	end
 end
+
+-- the island's BOARDS (moved from GalaxyMapService, 7 Nov, so Tools/BoardPreview builds the same ones in Edit): + its AREA
+-- (BoardPlacer's disc) with the ISLANDSPAWN. `into` = where they go (default: the island; the preview: its own folder)
+local function centerOf(island: Model): (Vector3, Vector3, number)
+	local c = island:GetAttribute("Center") :: Vector3
+	local a = island:GetAttribute("Angle") :: number
+	return c, Vector3.new(math.cos(a), 0, math.sin(a)), a
+end
+local function at(island: Model, x: number, z: number, y: number?): Vector3
+	local c, dir = centerOf(island)
+	return Builder.IslandPoint(c, dir, Vector3.new(x, y or 0, z))
+end
+local function islandArea(island: Model, holder: Instance): BasePart
+	local name = island.Name .. "_Area"
+	local area = island:FindFirstChild(name) or holder:FindFirstChild(name)
+	if area then return area end
+	local c = centerOf(island)
+	area = Builder.part({ Name = name, Size = Vector3.new(2 * MapConfig.Islands.Radius, 1, 2 * MapConfig.Islands.Radius), CFrame = CFrame.new(c - Vector3.new(0, 0.5, 0)), Transparency = 1,
+		CanCollide = false, CanQuery = false, Parent = holder })
+	Builder.part({ Name = "IslandSpawn", Size = Vector3.new(4, 1, 4), CFrame = CFrame.new(at(island, -(MapConfig.Islands.Radius - 6), 0, 0.5)), Transparency = 1,
+		CanCollide = false, CanQuery = false, Parent = area })
+	return area
+end
+-- the boards: built where the old geometry put them (so each frame is whole), given a bottom-centre pivot that looks at the
+-- player (front = LookVector), then PLACED BY BoardPlacer from MapConfig.Boards.Layout. (The pair's old gap ledge is gone:
+-- the pair now stands 30 deg apart round the rim.)
+function Builder.IslandBoards(island: Model, into: Instance?)
+	local holder = into or island
+	local old = holder:FindFirstChild("Boards")
+	if old then return old end
+	local c, dir = centerOf(island)
+	local area = islandArea(island, holder)
+	local cfs = Builder.BoardCFrames(c, dir)
+	local L = MapConfig.Boards.Layout
+	local BoardPlacer = require(ServerStorage:WaitForChild("Tools"):WaitForChild("BoardPlacer"))
+	local model = Instance.new("Model")
+	model.Name = "Boards"
+	model.Parent = holder
+	local placed = {}
+	for _, spec in ipairs(MapConfig.Boards.List) do
+		local panel = Instance.new("Model")
+		panel.Name = "Board_" .. spec.id
+		panel:SetAttribute("Board", spec.id)
+		Builder.BoardFrame(panel, cfs[spec.id], spec, c.Y, island:GetAttribute("OwnerName"))
+		local screen = panel.Screen
+		screen:SetAttribute("Board", spec.id)
+		-- (the screen's visible side is its Back face: -LookVector)
+		local front = -screen.CFrame.LookVector
+		front = Vector3.new(front.X, 0, front.Z).Unit
+		local bottom = Vector3.new(screen.Position.X, c.Y, screen.Position.Z)
+		panel.WorldPivot = CFrame.lookAt(bottom, bottom + front)
+		panel.Parent = model
+		local row = L[spec.id]
+		if row then
+			-- the rim angle in WORLD degrees (BoardPlacer: 0 = +X): the island's far side turned by the row's angle
+			local a = math.rad(row.angle)
+			local w = at(island, math.cos(a), math.sin(a)) - at(island, 0, 0)
+			local worldDeg = math.deg(math.atan2(w.Z, w.X))
+			BoardPlacer.place(panel, area, worldDeg, { margin = L.Margin, tiltBack = 0, groundY = c.Y })
+			placed[spec.id] = { panel = panel, row = row, deg = worldDeg }
+		end
+		panel:SetAttribute("Placeable", true)
+	end
+	-- the pair turns `spread` deg toward each other (the side is worked out from where the other board stands)
+	for _, pair in ipairs({ { "Tree", "Info" }, { "Info", "Tree" } }) do
+		local me, other = placed[pair[1]], placed[pair[2]]
+		if me and other and (me.row.spread or 0) ~= 0 then
+			local look = me.panel:GetPivot().LookVector
+			local to = other.panel:GetPivot().Position - me.panel:GetPivot().Position
+			local side = if look:Cross(to).Y >= 0 then 1 else -1
+			BoardPlacer.place(me.panel, area, me.deg, { margin = L.Margin, tiltBack = 0, groundY = c.Y, pairSpread = side * me.row.spread })
+		end
+	end
+	return model
+end
 -- the back of a board (pass 3: "no blank slab"): a lavender stone panel (cf = its middle, facing the board's front) with a
 -- brass trim inset round it and a gold emblem on its back face: the big four-point star on the Tree, the island owner's
 -- name plate (under a smaller star) on Info, a star on the others
