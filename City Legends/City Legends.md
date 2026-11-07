@@ -32,7 +32,8 @@ Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]]
 |---|---|---|
 | 1 | Speedmark P11 Spider (`mclaran_12c`) | **Done:** model, logos out, cluster live in the model's own hood, paint, lamps. Name changed to Spider, same id, price, level, class. |
 | 2 | Tri-Star Silber C197 Wingdoor (`bentz_sls`) | **Done:** same. Doors: the file has no separate gullwing doors in a form the game can use, and the game has no door system, so they stay shut. |
-| 3-8 | R230, F141, Highland, Sovereign, Z33, G20 | Converted in Blender only, not in the game yet. |
+| 3 | Tri-Star Silber R230 V12 Track (`bentz_sl65bs`) | **Done:** model, logos out, our Trio 6 rims and tyres (the file's tyres had the maker's name on them). Its hood is two round bowls with no room for the plate, so it gets the C197's dials side by side, with small windows for speed and P R N D. The model's two small side dials stay as they are: they don't move. |
+| 4-8 | F141, Highland, Sovereign, Z33, G20 | Converted in Blender only, not in the game yet. **Next: car 4.** |
 | 9 | Trailer | Done, in the game since 2026-11-07. |
 
 - **Roof on the P11 Spider:** up. The file only has the roof-up shape.

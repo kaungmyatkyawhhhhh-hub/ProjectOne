@@ -84,10 +84,6 @@ return {
 		shells = { { name = "Body_Mphong19SG1" }, { name = "SeeThrough_Mphong3SG1" } },
 		spots = {},
 	},
-	bentz_sl65bs = {
-		shells = { { name = "SeeThrough_red_glass" } },
-		spots = {},
-	},
 	bnw_330i_g20 = {
 		shells = {},
 		wb = 2.8511,
@@ -265,6 +261,10 @@ return {
 	},
 	bentz_sls = {
 		shells = { { name = "Body_TailLens" } },
+		spots = {},
+	},
+	bentz_sl65bs = {
+		shells = { { name = "SeeThrough_Lens_Red" } },
 		spots = {},
 	},
 	mclaran_12c = {

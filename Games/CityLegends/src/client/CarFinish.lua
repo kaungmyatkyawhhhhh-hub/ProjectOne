@@ -37,6 +37,7 @@ CarFinish.CARS = {
 	bentz_gls = true,
 	mclaran_12c = true,
 	bentz_sls = true,
+	bentz_sl65bs = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

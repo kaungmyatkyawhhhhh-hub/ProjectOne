@@ -237,25 +237,6 @@ return {
 		},
 		hub = { at = Vector3.new(-0.059, -0.0113, 0.1027), face = Vector3.new(-0.0403, 0.0998, 0.9942), r = 0.03, color = Color3.fromRGB(33, 34, 33) },
 	},
-	bentz_sl65bs = {
-		wb = 2.5601,
-		brand = "Mercer",
-		hide = { { name = "Body_mMercedesBenz_SL65AMGBla", size = Vector3.new(1.8105, 0.531, 4.3372) } },
-		covers = {
-			{ emblem = true, disc = true, at = Vector3.new(0, 0.2425, -2.2374), face = Vector3.new(0.0594, -0.0777, -0.9952), w = 0.2252, h = 0.2252, color = Color3.fromRGB(196, 196, 196) },
-			{ emblem = true, disc = true, at = Vector3.new(-0.0094, 0.5927, 2.2939), face = Vector3.new(0.007, -0.8286, 0.5598), w = 0.0939, h = 0.0939, color = Color3.fromRGB(196, 196, 196) },
-			{ emblem = false, disc = false, at = Vector3.new(0, 0.3738, 2.2483), face = Vector3.new(0, 0.2955, 0.9553), w = 0.304, h = 0.1276, color = Color3.fromRGB(232, 232, 232) },
-			{ emblem = true, disc = true, at = Vector3.new(0, 0.3678, -2.0829), face = Vector3.new(0.0037, 0.9404, -0.3401), w = 0.0465, h = 0.0465, color = Color3.fromRGB(196, 196, 196) },
-			{ emblem = true, disc = true, at = Vector3.new(0, 0.4384, -1.4076), face = Vector3.new(0, 0.4472, -0.8944), w = 0.0691, h = 0.0691, color = Color3.fromRGB(196, 196, 196) },
-		},
-		caps = {
-			FL = { r = 0.038, surface = 0.0924, color = Color3.fromRGB(243, 243, 243) },
-			FR = { r = 0.038, surface = 0.0924, color = Color3.fromRGB(243, 243, 243) },
-			RL = { r = 0.038, surface = 0.1163, color = Color3.fromRGB(243, 243, 243) },
-			RR = { r = 0.038, surface = 0.1163, color = Color3.fromRGB(243, 243, 243) },
-		},
-		hub = { at = Vector3.new(0.024, -0.014, 0.0536), face = Vector3.new(-0.3594, 0.0532, 0.9317), r = 0.035, color = Color3.fromRGB(37, 37, 36) },
-	},
 	bnw_330i_g20 = {
 		wb = 2.8511,
 		brand = "BNW",

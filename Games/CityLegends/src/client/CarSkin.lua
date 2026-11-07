@@ -56,6 +56,7 @@ CarSkin.CLUSTER_STYLE = {
 	audy_r8 = "R8",
 	mclaran_12c = "Live12C", -- from the owner's photo
 	bentz_sls = "LiveSLS", -- from the owner's photo
+	bentz_sl65bs = "LiveSL65", -- the same dials, in the model's two bowls
 	porsha_gt3 = "Porsche991GT3", -- the 991.2 GT3's five dials, sized into the 718 cabin's hood
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "SupraTRD",
@@ -136,6 +137,7 @@ CarSkin.CLUSTER_RECT = {
 	lambrini_lp700 = { at = Vector3.new(0.0027, 0.0379, -0.2421), face = Vector3.new(0, 0.108, 0.9942), w = 0.3328, h = 0.1367 },
 	-- the third import job (2026-11-07): the owner's cluster photos, over the model's own ring
 	lexis_lfa = { at = Vector3.new(-0.01, 0.0338, -0.1424), face = Vector3.new(0, 0.14, 0.99), w = 0.25, h = 0.1637 }, -- (down in the hood: tools/lambo/frame_probe.py)
+	bentz_sl65bs = { at = Vector3.new(0.022, 0.0715, -0.2433), face = Vector3.new(0, 0.2, 0.98), w = 0.234, h = 0.106 }, -- in the two bowls
 	bentz_sls = { at = Vector3.new(0.0021, 0.0377, -0.2165), face = Vector3.new(0, 0.2, 0.98), w = 0.3163, h = 0.1342 }, -- in the model's hood, in front of its dials
 	mclaran_12c = { at = Vector3.new(-0.0045, 0.0679, -0.1712), face = Vector3.new(0, 0.2, 0.98), w = 0.34, h = 0.12 }, -- in the model's own hood (tools/lambo/frame_probe.py)
 	lexis_lfa_circuit = { at = Vector3.new(-0.01, 0.0338, -0.1424), face = Vector3.new(0, 0.14, 0.99), w = 0.25, h = 0.1637 },
@@ -250,10 +252,6 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0959, 0.004, -0.2664), face = Vector3.new(-0.0179, 0.2773, 0.9606), length = 0.0439, scale = "0:-127.1,4000:20.1,7000:125.1" },
 		{ kind = "speed", unit = "mph", at = Vector3.new(0.1096, 0.0033, -0.2624), face = Vector3.new(-0.0179, 0.2773, 0.9606), length = 0.0447, scale = "0:-122.2,200:123.0" },
 	},
-	bentz_sl65bs = { -- SL65
-		{ kind = "speed", unit = "mph", at = Vector3.new(-0.0388, 0.0642, -0.2453), face = Vector3.new(0.0004, 0.2209, 0.9753), length = 0.0427, scale = "0:-116.6,220:141.9" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0909, 0.0704, -0.2466), face = Vector3.new(0.0014, 0.2203, 0.9754), length = 0.041, scale = "0:-113.3,8000:120.9" },
-	},
 	brabos_g63 = { -- Brabus G63 (screen dials)
 		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0921, 0.0647, -0.2335), face = Vector3.new(-0.0011, 0.2758, 0.9612), length = 0.0435, scale = "0:-125.2,150:5.8,300:122.8" },
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0698, 0.0673, -0.2341), face = Vector3.new(-0.0012, 0.2757, 0.9613), length = 0.0422, scale = "0:-127.7,4000:-0.9,8000:124.6" },
@@ -285,7 +283,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -407,7 +405,7 @@ CarSkin.STEER_MODEL = {
 	bnw_m5_f10 = "BMWM", bnw_m5_f90 = "BMWM",
 	-- Mercedes
 	bentz_cla45 = "AMGFlat", bentz_cls63s = "AMGFlat", bentz_gle53 = "AMGFlat", bentz_g63 = "AMGFlat", brabos_g63 = "AMGFlat",
-	bentz_sl65bs = "AMGFlat", bentz_e63s = "AMGFlat", bentz_e400 = "AMGFlat",
+	bentz_e63s = "AMGFlat", bentz_e400 = "AMGFlat",
 	bentz_e300 = "MercLuxury", bentz_s63 = "MercLuxury", 
 	bentz_190e = "Merc90s", bentz_s65_w221 = "Merc90s",
 	-- luxury

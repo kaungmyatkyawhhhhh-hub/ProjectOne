@@ -184,14 +184,19 @@ def mc12c(Spec, needle_sprite, add_needle, glyph):
     return sp
 
 
-def sls(Spec, needle_sprite, add_needle):
-    """the SLS and SL65: two deep dials, a brushed plate between them with the screen. No maker's lettering on the plate."""
-    box = (71, 60, 677, 317)
+def sls(Spec, needle_sprite, add_needle, twin=False):
+    """the SLS and SL65: two deep dials, a brushed plate between them with the screen. No maker's lettering on the plate.
+    twin: the SL65's hood has two bowls side by side and no room for the plate, so the same dials sit close together, and
+    the screen's speed and P R N D go in small windows in the dials."""
+    box = (74, 80, 595, 316) if twin else (71, 60, 677, 317)
     REF = "sls_sl65_cluster_owner.png"
     A = Art(REF, box, S=5, bg=(5, 5, 6))
-    sp = Spec("sls", box[2] - box[0], box[3] - box[1], 3.0, 3.0, box[0], box[1])
+    sp = Spec("sl65" if twin else "sls", box[2] - box[0], box[3] - box[1], 3.0, 3.0, box[0], box[1])
     sp.redline, sp.idle = 9.0, 0.8
-    C1, C2 = (192.0, 198.0), (556.0, 198.0)
+    C1, C2 = (192.0, 198.0), (477.0 if twin else 556.0, 198.0)
+    dx = C2[0] - 556.0
+    if twin:
+        window("sl65", box, [], [(C1, 113), (C2, 113)])
     NUM = (232, 224, 206)
     DIM = (150, 146, 134)
     RED = (226, 30, 34)
@@ -210,34 +215,35 @@ def sls(Spec, needle_sprite, add_needle):
     py = (yy + 0.5) / A.S + A.oy
 
     # the brushed plate between the dials, lit from above
-    plate = (px > 248) & (px < 500)
+    plate = (px > 248) & (px < 500) & (not twin)
     noise = np.random.default_rng(3).normal(0, 1, (h, 1)).repeat(w, axis=1)
     noise = np.asarray(Image.fromarray(((noise + 3) * 40).clip(0, 255).astype("uint8")).filter(ImageFilter.GaussianBlur(1.2))).astype(float) / 40 - 3
-    tone = 124 - 66 * smooth(52, 150, py) - 16 * smooth(150, 290, py) + noise * 2.4
+    tone = 100 - 56 * smooth(52, 150, py) - 16 * smooth(150, 290, py) + noise * 2.4
     blend(A, np.stack([tone, tone * 0.985, tone * 0.95], axis=-1), plate * 1.0)
     top = np.clip((py - 104) / 1, 0, 1) * np.clip((110 - py) / 1, 0, 1) * plate
     blend(A, np.full((h, w, 3), (196.0, 192.0, 182.0)), top * 0.5)
 
-    # the arrows and the shift bar in the plate
-    for s, x in ((-1, 284), (1, 465)):
-        A.poly([(x + s * 11, 79), (x + s * 1, 69), (x + s * 1, 75), (x - s * 10, 75), (x - s * 10, 83), (x + s * 1, 83), (x + s * 1, 89)], (14, 14, 16))
-    A.rect(327, 72, 421, 88, (10, 10, 12))
-    for i in range(7):
-        x0 = 330 + i * 12.9
-        A.rect(x0, 74, x0 + 10.4, 86, (54, 52, 50))
+    if not twin:
+        # the arrows and the shift bar in the plate
+        for s, x in ((-1, 284), (1, 465)):
+            A.poly([(x + s * 11, 79), (x + s * 1, 69), (x + s * 1, 75), (x - s * 10, 75), (x - s * 10, 83), (x + s * 1, 83), (x + s * 1, 89)], (14, 14, 16))
+        A.rect(327, 72, 421, 88, (10, 10, 12))
+        for i in range(7):
+            x0 = 330 + i * 12.9
+            A.rect(x0, 74, x0 + 10.4, 86, (54, 52, 50))
 
-    # the screen
-    A.rect(304, 140, 446, 267, (150, 150, 150))
-    A.rect(306, 142, 444, 265, (29, 31, 38))
-    A.line([(308, 161), (442, 161)], (222, 224, 226), 1.2)
-    A.line([(308, 239), (442, 239)], (222, 224, 226), 1.2)
-    for ch, x in (("P", 342), ("R", 356), ("N", 369), ("D", 383)):
-        A.text(x, 152, ch, ARIAL_B, 12, (232, 234, 236))
-    A.rect(400, 145, 414, 159, (232, 234, 236))
-    A.rect(401.2, 146.2, 412.8, 157.8, (29, 31, 38))
-    A.text(406.6, 152, "S", ARIAL_B, 10.5, (232, 234, 236))
-    A.circle(313, 246, 4.4, None, outline=(226, 228, 230), w=0.9)
-    A.line([(313, 243), (313, 246), (315.5, 247)], (226, 228, 230), 0.9)
+        # the screen
+        A.rect(304, 140, 446, 267, (150, 150, 150))
+        A.rect(306, 142, 444, 265, (29, 31, 38))
+        A.line([(308, 161), (442, 161)], (222, 224, 226), 1.2)
+        A.line([(308, 239), (442, 239)], (222, 224, 226), 1.2)
+        for ch, x in (("P", 342), ("R", 356), ("N", 369), ("D", 383)):
+            A.text(x, 152, ch, ARIAL_B, 12, (232, 234, 236))
+        A.rect(400, 145, 414, 159, (232, 234, 236))
+        A.rect(401.2, 146.2, 412.8, 157.8, (29, 31, 38))
+        A.text(406.6, 152, "S", ARIAL_B, 10.5, (232, 234, 236))
+        A.circle(313, 246, 4.4, None, outline=(226, 228, 230), w=0.9)
+        A.line([(313, 243), (313, 246), (315.5, 247)], (226, 228, 230), 0.9)
 
     # the dials
     for r, th, C, t2 in ((r1, th1, C1, mph), (r2, th2, C2, rpm)):
@@ -246,7 +252,7 @@ def sls(Spec, needle_sprite, add_needle):
         d = 16 + 26 * smooth(96, 108, r)
         blend(A, np.stack([d, d, d * 1.03], axis=-1), band_mask(r, 96, 116, 0.5))
         # the brushed silver middle
-        s = 168 + 34 * np.cos(np.radians(th * 2 - 70)) + 12 * np.cos(np.radians(th * 6))
+        s = 128 + 26 * np.cos(np.radians(th * 2 - 70)) + 8 * np.cos(np.radians(th * 6))
         blend(A, np.stack([s, s * 0.975, s * 0.91], axis=-1), band_mask(r, -10, 49, 0.5))
         blend(A, np.full((h, w, 3), (54.0, 52.0, 48.0)), band_mask(r, 49, 51, 0.5))
 
@@ -288,22 +294,29 @@ def sls(Spec, needle_sprite, add_needle):
     for v in range(0, 10):
         p = polar(C2, 73, rpm(v))
         A.text(p[0], p[1], str(v), ARIAL_B, 14, NUM)
-    A.text(619, 206, "x1000", ARIAL_B, 5.6, NUM)
-    A.text(619, 212, "/min", ARIAL_B, 5.6, NUM)
+    A.text(619 + dx, 206, "x1000", ARIAL_B, 5.6, NUM)
+    A.text(619 + dx, 212, "/min", ARIAL_B, 5.6, NUM)
 
     # the oil temperature in the right dial
     for t, deg in ((50, 156), (100, 134), (140, 112)):
         tick(C2, 80, 88, deg, 1.3, NUM)
-    A.text(570, 258, "50", ARIAL_B, 8, NUM)
-    A.text(598, 243, "100", ARIAL_B, 8, NUM)
-    A.text(607, 226, "140", ARIAL_B, 8, NUM)
+    A.text(570 + dx, 258, "50", ARIAL_B, 8, NUM)
+    A.text(598 + dx, 243, "100", ARIAL_B, 8, NUM)
+    A.text(607 + dx, 226, "140", ARIAL_B, 8, NUM)
     A.line([polar(C2, 54, 140), polar(C2, 78, 140)], RED, 1.8)
+    px_x = (C2[0] - 21, C2[0] - 7, C2[0] + 7, C2[0] + 21)
+    if twin:
+        # the small windows, low in the silver middles
+        for c in (C1, C2):
+            A.round_rect(c[0] - 33, 216, c[0] + 33, 240, 2.0, (22, 24, 30), outline=(70, 70, 72), w=0.8)
+        for ch, x in zip("PRND", px_x):
+            A.text(x, 228, ch, ARIAL_B, 11, (232, 234, 236))
 
     A.final = A.finish(A.S, blur=1.2, strength=0.25)
     sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
 
     # the shift lights light up to the limit
-    for i in range(7):
+    for i in range(0 if twin else 7):
         L = Art(REF, box, S=4, bg=(0, 0, 0))
         x0 = 330 + i * 12.9
         L.rect(x0, 74, x0 + 10.4, 86, (246, 210, 90) if i < 4 else (246, 120, 30) if i < 6 else (240, 40, 30))
@@ -312,11 +325,12 @@ def sls(Spec, needle_sprite, add_needle):
         sp.blocks.append({"im": im, "left": left, "top": top_, "v": 6.2 + i * 0.36})
 
     # which of P R N D
-    for when, ch, x in (("gearN", "P", 342), ("gearR", "R", 356), ("gearD", "D", 383)):
+    for when, ch, x in (("gearN", "P", px_x[0] if twin else 342), ("gearR", "R", px_x[1] if twin else 356), ("gearD", "D", px_x[3] if twin else 383)):
         L = Art(REF, box, S=4, bg=(0, 0, 0))
-        L.rect(x - 6.4, 145, x + 6.4, 159, (232, 234, 236))
+        y0 = 221 if twin else 145
+        L.rect(x - 6.4, y0, x + 6.4, y0 + 14, (232, 234, 236))
         L.final = L.finish(L.S, blur=1, strength=0)
-        im, left, top_ = sp.box(L, (x - 6.4, 145, x + 6.4, 159), black=False)
+        im, left, top_ = sp.box(L, (x - 6.4, y0, x + 6.4, y0 + 14), black=False)
         # the letter stays in the box: dark
         d = ImageDraw.Draw(im)
         f = font(ARIAL_B, round(12 * sp.A))
@@ -344,6 +358,10 @@ def sls(Spec, needle_sprite, add_needle):
 
     sp.font("speed", ARIAL_B, 14, "0123456789", shear=0, track=0.4)
     sp.font("unit", ARIAL_B, 10.5, "kmhp/", shear=0)
+    if twin:
+        sp.readout("speed", C1[0] + 8, 221, "r", 3, "speed", (232, 234, 236))
+        sp.readout("unit", C1[0] + 12, 222, "l", 4, "unit", (232, 234, 236))
+        return sp
     sp.readout("speed", 372, 203, "r", 3, "speed", (232, 234, 236))
     sp.readout("unit", 378, 204, "l", 4, "unit", (232, 234, 236))
     sp.font("small", ARIAL_B, 9.6, "0123456789:", shear=0, track=0.2)
