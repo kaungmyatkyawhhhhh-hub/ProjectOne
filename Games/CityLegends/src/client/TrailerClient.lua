@@ -179,8 +179,8 @@ local function setLamp(r: Rec, p: BasePart, level: number)
 	end
 	r.lit[p] = level
 	local c = p:GetAttribute("Lit") :: Color3
-	p.Color = if level >= 2 then c elseif level == 1 then c:Lerp(Color3.new(0, 0, 0), 0.3) else c:Lerp(Color3.new(0, 0, 0), 0.72)
-	p.Material = if level >= 1 then Enum.Material.Neon else Enum.Material.SmoothPlastic
+	p.Color = if level >= 2 then c else c:Lerp(Color3.new(0, 0, 0), 0.35)
+	p.Transparency = if level >= 1 then 0 else 1 -- (off, the model's own lens shows)
 end
 
 local function lamps(r: Rec, car: Model?)
@@ -293,7 +293,7 @@ local function drawRamps(r: Rec, dt: number)
 	local a = r.ramp
 	local slide = math.clamp(a / 0.7, 0, 1)
 	local tip = math.clamp((a - 0.7) / 0.3, 0, 1)
-	local t = CFrame.new(0, -0.45 * (1 - slide), -(TR.RampLength - 0.3) * (1 - slide)) * CFrame.Angles(RAMP_TILT * tip, 0, 0)
+	local t = CFrame.new(0, -0.4 * (1 - slide), -TR.RampLength * (1 - slide)) * CFrame.Angles(RAMP_TILT * tip, 0, 0)
 	for _, m in r.hinges do
 		m.Transform = t
 	end

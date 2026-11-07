@@ -271,6 +271,7 @@ Config.Credits = {
 	"Enfurecido Classico 5000 model by Ddiaz Design (CC BY)",
 	"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",
 	"Tri-Star Silber X167 Royale model by Black Snow (CC BY)",
+	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
 
@@ -1936,17 +1937,18 @@ Config.Towing = {
 		Name = "Legends Car Hauler",
 		Price = 5500,
 		Kg = 950, -- empty
-		-- its shape, in studs (3 to the metre): the origin is on the ground between the axles, -Z to the coupler
-		DeckHeight = 2.2,
-		Width = 6.6,
-		DeckFront = -9.6,
-		DeckBack = 8.7,
-		LoadZ = -0.45, -- the middle of the car on it
-		AxleToHitch = 13.6,
+		-- its shape, in studs: the owner's model (ReplicatedStorage.TrailerModels.hauler, "Flatbed Baked") with
+		-- a drawbar and ramps added. The origin is on the ground between the axles, -Z to the coupler
+		DeckHeight = 3.48,
+		Width = 7.2,
+		DeckFront = -14.8,
+		DeckBack = 3.5,
+		LoadZ = -5.6, -- the middle of the car on it
+		AxleToHitch = 19.4,
 		CouplerHeight = 1.35,
-		WheelRadius = 1.05,
-		WheelWidth = 0.7,
-		RampLength = 7.5,
+		WheelRadius = 1.25,
+		WheelWidth = 1,
+		RampLength = 12,
 	},
 	TopMph = 80, -- about 130 km/h
 	AccelPow = 0.8, -- acceleration x (car / (car + trailer + load)) ^ this
@@ -1959,7 +1961,7 @@ Config.Towing = {
 	SwayStuds = 0.28, -- at the axle, at most
 	SwayRate = 2.6, -- radians a second
 	HitchRange = 5, -- studs from the hitch to the coupler
-	UnloadRange = 34, -- studs from the trailer's axle
+	UnloadRange = 38, -- studs from the trailer's axle
 	ActionMph = 6, -- HITCH, UNHITCH and STRAP only below this
 	Key = Enum.KeyCode.I, -- (the last free letter: J is the leaderboard, K the market)
 	HitchReach = {} :: { [string]: number }, -- a car's hitch further out (+) or in (-), in studs

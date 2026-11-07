@@ -1263,7 +1263,7 @@ local function build(root: Frame)
 		model.Parent = world
 		local cam = Instance.new("Camera")
 		cam.FieldOfView = 26
-		cam.CFrame = CFrame.lookAt(Vector3.new(-23, 12, 29), Vector3.new(0, 0.6, -1.6))
+		cam.CFrame = CFrame.lookAt(Vector3.new(-32, 16, 34), Vector3.new(0, 1.6, -7))
 		cam.Parent = vp
 		vp.CurrentCamera = cam
 		local tail = 58 + photoH + 2
