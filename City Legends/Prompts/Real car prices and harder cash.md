@@ -1,4 +1,4 @@
-# Prompt: real car prices (new = dealer price, old = used-market price) and harder (but fair) cash
+# Prompt: real car prices, real upgrade prices (× 2.5) and harder (but fair) cash
 
 _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this first. Owner: talk short and simple (caveman mode, see `Preferences.md`). Don't add your own extras. Read the Roblox Playbook rules first (`Roblox Playbook/Roblox Playbook - Rules for every game.md`), especially the money and retention rules._
 
@@ -24,6 +24,26 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
 - **Trims, the Customs price multipliers, the part prices (`Config.partCash` / `CashRef`), the brand discount, the Legends spin's car prizes (`carMax` / `carCash`), the car stock market, the garage sell-back value, the hotel / tower / house prices that are tied to car prices**: check every place that reads a car's price and make sure they still make sense (**part and engine-swap prices follow real aftermarket prices, not the car's price**: see `Better upgrade area and part shop.md` ("Part prices"); the owner, 2026-11-07: "make the part shop cheaper since a B58 is like over a million". Set `CashMax` to about 1.5 at most; then all part and swap prices × 2.5, `Config.Economy.PartPriceMult`).
 - The **Tier** (Starter / Mid / High) stays as it is (it drives traffic, rewards and Customs), unless a car's new price makes it clearly wrong: list those, move them, and note it.
 - **Old saves:** players keep every car and all their cash. Nothing is taken away. Sell-back values use the new prices.
+
+## Part 1b: upgrade prices (owner, 2026-11-07)
+Do this **now, on the parts system the game has today** (`Config.CarParts`, `Config.partCash`, `Config.partCp`, the Street / Sport / Race stages and the engine group). If the new Part Shop from `Better upgrade area and part shop.md` is already built, price its parts the same way.
+- **Price = about the real aftermarket price in US dollars × 2.5** (`Config.Economy.PartPriceMult = 2.5`, one number to tune). The owner asked for "a little more expensive" twice after real prices.
+- **Not scaled by the car's price** any more: at most × 1.5 for the most expensive cars, big parts only (`CashMax` about 1.5). Before this, a part could cost 10× on a dear car (e.g. an engine swap over $1M): that must not happen.
+- Real price guide (research and adjust; then × 2.5):
+  - intake / air filter / spark plugs / short shifter: $100–800;
+  - ECU tunes: $500–1,500 (anti-lag / rev limiter $1,000–3,000);
+  - downpipe / decat / muffler delete / straight pipe / tips: $200–2,000; full exhaust $1,500–6,000;
+  - intercooler / BOV / wastegate / boost controller / fuel pump / injectors / coils: $200–2,500;
+  - camshafts / ported head / forged internals / stroker / displacement: $1,000–12,000;
+  - turbo / twin-turbo kits / superchargers: $3,000–20,000;
+  - clutch / flywheel / LSD / final drive / driveshaft: $500–4,000; gearbox upgrades $2,000–10,000 (sequential / dual-clutch $10,000–40,000);
+  - tyres: $600–2,500 a set; brakes $500–8,000 (big brake kit $2,500–8,000);
+  - springs / coilovers / anti-roll bars / suspension parts: $150–6,000;
+  - weight reduction / carbon parts: $300–6,000.
+  - Engine swaps (if built): about the real engine + install cost, e.g. B58 about $15–20K, 2JZ $25–40K, big V8s / V10s up to $60K (all × 2.5 in the game).
+- **Today's Street / Sport / Race stages:** Street ≈ the cheap end of each range, Sport ≈ the middle, Race ≈ the top end (× 2.5). E.g. Exhaust Street about $1,000, Sport about $3,500, Race about $10,000.
+- **CP** prices stay as they are (`Config.partCp`).
+- Write the old → new price of every part and stage in the notes.
 
 ## Part 2: harder cash, but fair (don't make players quit)
 ### First, measure (before changing anything)
@@ -58,5 +78,6 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
 
 ## When done, tell the owner (short)
 - the price list (top 10 biggest changes) and where the full table is;
+- the new part prices (a short table: each part, Street / Sport / Race);
 - the new time-to-car targets and how they were met;
 - anything the owner should decide (Robux pack values, tier moves).
