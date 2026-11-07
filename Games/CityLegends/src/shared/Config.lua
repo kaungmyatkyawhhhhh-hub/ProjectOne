@@ -265,7 +265,7 @@ Config.Traffic = {
 Config.Credits = {
 	"Traffic cars: \"Low Poly cars pack\" by matisosanimation (CC BY 4.0)",
 	"Enfurecido L140, LB724, LB834 and LB834 ZV, LB744 models by Ddiaz Design",
-	"Enfurecido L147, Brava Sport, Rosso Rampante F149 Riviera and F142 models by Ddiaz Design",
+	"Enfurecido L147, Brava, Rosso Rampante F149 Riviera and F142 models by Ddiaz Design",
 	"Dearborn C346 model by Ddiaz Design",
 	"Stealth-Apex V10 Halo and Halo Circuit models by Ddiaz Design",
 	"Enfurecido Classico 5000 model by Ddiaz Design (CC BY)",
@@ -1183,14 +1183,14 @@ Config.Chauffeur = {
 		bentlee_contgt = 1100000,
 		bentlee_bentayga = 1200000,
 		bentz_gls = 1200000,
-		lambrini_urus = 1500000,
+		lambrini_urusp = 1900000,
 		brabos_g63 = 1600000,
 		bentz_s680 = 1600000,
 		rolls_wraith = 2000000,
 		rolls_cullinan = 2500000,
 	},
 	-- the order the phone lists them in
-	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urus", "brabos_g63", "bentz_s680", "rolls_wraith", "rolls_cullinan" },
+	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urusp", "brabos_g63", "bentz_s680", "rolls_wraith", "rolls_cullinan" },
 	CityMph = 62, -- how fast the driver goes in town (owner, 2026-10-23: "drive faster"; was 44)
 	HighwayMph = 125, -- on the highway and the loop (was 92)
 	TurnMph = 22, -- round corners (highway ramps use their own speed; was 15)

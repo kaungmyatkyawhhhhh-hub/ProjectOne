@@ -132,7 +132,7 @@ local list: { CarSpec } = {
 	{ Id = "porsha_gt3", Name = "Stuttgart 991.2 Track", Class = "Supercar", Tier = "High", TopSpeed = 198, ZeroToSixty = 3.2, Handling = 0.95, Price = 1000000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 54 },
 	{ Id = "bentlee_contgt", Name = "Sovereign Grand Tourer", Class = "Coupe", Tier = "High", TopSpeed = 198, ZeroToSixty = 3.6, Handling = 0.74, Price = 1100000, Color = Color3.fromRGB(26, 44, 82), Order = 55 },
 	{ Id = "bentlee_bentayga", Name = "Sovereign Highlands", Class = "SUV", Tier = "High", TopSpeed = 187, ZeroToSixty = 4.0, Handling = 0.6, Price = 1200000, Color = Color3.fromRGB(20, 21, 24), Order = 56 },
-	{ Id = "lambrini_urus", Name = "Enfurecido Brava", Class = "SUV", Tier = "High", TopSpeed = 190, ZeroToSixty = 3.5, Handling = 0.7, Price = 1500000, Color = Color3.fromRGB(220, 170, 30), Order = 57 },
+	{ Id = "lambrini_urus", Name = "Enfurecido Brava (old)", Class = "SUV", Tier = "High", TopSpeed = 190, ZeroToSixty = 3.5, Handling = 0.7, Price = 1500000, Color = Color3.fromRGB(220, 170, 30), Order = 57 },
 	{ Id = "brabos_g63", Name = "Rocket W463 800", Class = "SUV", Tier = "High", TopSpeed = 149, ZeroToSixty = 3.9, Handling = 0.55, Price = 1600000, Color = Color3.fromRGB(12, 12, 14), Accent = Color3.fromRGB(255, 140, 0), Order = 58 },
 	{ Id = "rolls_wraith", Name = "Ecstasy Nocturne", Class = "Coupe", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.4, Handling = 0.66, Price = 2000000, Color = Color3.fromRGB(20, 21, 24), Accent = Color3.fromRGB(165, 168, 172), Order = 59 },
 	{ Id = "rolls_cullinan", Name = "Ecstasy Grandeur", Class = "Sedan", Tier = "High", TopSpeed = 155, ZeroToSixty = 5.1, Handling = 0.55, Price = 2500000, Color = Color3.fromRGB(235, 236, 238), Order = 60 },
@@ -149,7 +149,7 @@ local list: { CarSpec } = {
 	{ Id = "lambrini_revuelto", Name = "Enfurecido LB744", Class = "Hypercar", Tier = "High", TopSpeed = 217, ZeroToSixty = 2.5, Handling = 0.96, Price = 6000000, Color = Color3.fromRGB(232, 234, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 89 },
 	-- the second import job (2026-11-06): the LP670-4 SV, the Urus Performante, the 458 Spider and Speciale
 	{ Id = "lambrini_lp670", Name = "Enfurecido L147 ZV", Class = "Supercar", Tier = "High", TopSpeed = 212, ZeroToSixty = 3.2, Handling = 0.9, Price = 2400000, Color = Color3.fromRGB(236, 74, 16), Accent = Color3.fromRGB(16, 16, 18), Order = 64.5 },
-	{ Id = "lambrini_urusp", Name = "Enfurecido Brava Sport", Class = "SUV", Tier = "High", TopSpeed = 190, ZeroToSixty = 3.2, Handling = 0.74, Price = 1900000, Color = Color3.fromRGB(226, 190, 96), Accent = Color3.fromRGB(16, 16, 18), Order = 57.5 },
+	{ Id = "lambrini_urusp", Name = "Enfurecido Brava", Class = "SUV", Tier = "High", TopSpeed = 190, ZeroToSixty = 3.2, Handling = 0.74, Price = 1900000, Color = Color3.fromRGB(226, 190, 96), Accent = Color3.fromRGB(16, 16, 18), Order = 57.5 },
 	{ Id = "ferrara_458spider", Name = "Rosso Rampante F142 Spider", Class = "Supercar", Tier = "High", TopSpeed = 199, ZeroToSixty = 3.3, Handling = 0.89, Price = 1000000, Color = Color3.fromRGB(232, 196, 60), Accent = Color3.fromRGB(16, 16, 18), Order = 52.2 },
 	{ Id = "ferrara_458speciale", Name = "Rosso Rampante F142 Speciale", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.0, Handling = 0.94, Price = 1250000, Color = Color3.fromRGB(226, 40, 22), Accent = Color3.fromRGB(16, 16, 18), Order = 52.5 },
 	-- owner (2026-11-02): the SVJ and the SVJ 63 roadster, the top of the Aventador line, on their own new models
@@ -193,7 +193,14 @@ Cars.RETIRED = {
 	suzaki_swift = true, toyoka_belta = true, toyoka_crown = true, byt_seal = true, mazdo_rx8 = true,
 	bentz_e300 = true, bnw_530i = true, bentz_cla45 = true, chevo_c6 = true, -- (2026-11-06: the G20 is back, a starter pick)
 	ferrara_458 = true, -- owner (2026-11-05): "remove 458 italia"
+	lambrini_urus = true, -- owner (2026-11-06): one Urus only, see Cars.Swapped
 } :: { [string]: boolean }
+
+-- a retired car whose owners get another car instead (owner, 2026-11-06: "the one and only Urus"):
+-- PlayerData moves everything saved on the old id to the new one on load, so nobody owns the old car
+Cars.Swapped = {
+	lambrini_urus = "lambrini_urusp",
+} :: { [string]: string }
 for _, spec in list do
 	if Cars.RETIRED[spec.Id] then
 		spec.Retired = true
@@ -286,7 +293,7 @@ Cars.Series = {
 	{ Name = "ENFURECIDO L147", Ids = { "lambrini_lp640", "lambrini_lp670" } },
 	{ Name = "ENFURECIDO LB834", Ids = { "lambrini_lp700", "lambrini_lp750", "lambrini_svj", "lambrini_svj63" } },
 	{ Name = "ENFURECIDO LB744", Ids = { "lambrini_revuelto" } },
-	{ Name = "ENFURECIDO BRAVA", Ids = { "lambrini_urus", "lambrini_urusp" } },
+	{ Name = "ENFURECIDO BRAVA", Ids = { "lambrini_urusp" }, NoTrims = true },
 	{ Name = "ENFURECIDO CLASSICO", Ids = { "lambrini_countach" } },
 	{ Name = "SPEEDMARK P11", Ids = { "mclaran_12c" } },
 	{ Name = "SOVEREIGN GRAND TOURER", Ids = { "bentlee_contgt" } },
@@ -310,6 +317,7 @@ local RETIRED_SERIES = {
 	{ Name = "TRI-STAR SILBER W213 2.0", Ids = { "bentz_e300" }, NoTrims = true },
 	{ Name = "GOLDEN STING 6", Ids = { "chevo_c6" }, NoTrims = true },
 	{ Name = "ROSSO RAMPANTE F142 COUPE", Ids = { "ferrara_458" } },
+	{ Name = "ENFURECIDO BRAVA OLD", Ids = { "lambrini_urus" }, NoTrims = true },
 }
 
 -- every line, the retired ones too (Cars.Series is cut down to the ones on sale further on)

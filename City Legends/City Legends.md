@@ -7,6 +7,15 @@ A Roblox night-city driving game. The code is in this vault, folder `Games/CityL
 Lessons from the top 10 driving games (2026-10-30): [[Research - Driving games]] (read before planning features).
 - Owner picked (2026-10-30) improvements 1, 2, 4-10 from the research list (not 3, performance tuning, yet): Legends Path milestones, 7-day streak with a car on day 7 (replaces the flat daily gift), race lobbies and duels, 3 daily tasks, live map markers, meet spot + photo mode, radio stations, brand levels, 5-minute test drive. **All 9 built (2026-10-30):** GOALS button (Path, Daily, Streak), race lobbies at the race rings + duels (U next to a driver), live bank/casino/race markers on the minimap, LEGENDS MEET car park behind Legends Motors ($300/min per other car parked there, up to 5) + photo mode (O or Settings), 4 radio stations (Settings > Radio), brand levels (garage shows BRAND LV; cheaper Customs, trims sooner), TEST DRIVE button at Legends Motors (5 min, quarter pay). Duel/pot still need a 2-player test.
 
+## One Urus, two 458s (2026-11-07, `Prompts/One Urus and only two 458s.md`)
+Pictures: [[Dealer - one Brava.jpg]], [[Dealer - F142 line.jpg]].
+- **Urus:** `lambrini_urusp` is now "Enfurecido Brava" (the Performante model, same stats, $1.9M), one car in its line, no trims. The old `lambrini_urus` is retired, named "Enfurecido Brava (old)", model kept in `CarModels`.
+- **Save swap:** `Cars.Swapped` + `swapCars` in `PlayerData`: on load everything on the old id moves to the new one (level, XP, CP, parts, tune, builds, look, selected car, house bays, showcase, favourites, market stash, chauffeur contract). A part the new car can't take goes to My Parts.
+- **Owns both:** keeps the car with the higher level. The other car's parts go to My Parts, and the CP its levels earned are added. No cash back for the second car (the prompt didn't ask for it).
+- **Chauffeur:** the fleet's Urus is now `lambrini_urusp`, contract $1.9M (the fleet's prices match the cars').
+- **458:** the Italia was already retired and stays in owners' garages. The F142 line is the Spider and Speciale, in that order.
+- **Checked:** dealer in Play (one Brava, F142 with 2), `carlevels_test` with 3 fake saves (old only, both with each one the better), market and goals tests. How many owners moved is unknown: nothing is published, and the count needs a live run.
+
 ## New imports: LFA, LFA Circuit, Maybachs, Countach 5000 (2026-11-07, `Prompts/New imports - LFA, Maybachs, Countach.md`)
 **Licences:** NC (non-commercial, risky in a game that sells Robux): Stealth-Apex V10 Halo, Halo Circuit (CC-BY-NC-SA), Z223 Royale V12 (CC-BY-NC), all Ddiaz Design, and the Dearborn C346 above. Their part names (`Kit0_Badge_Geo_lodA`, `_lodA`, `Lexus_LFAGold...`) look ripped from a racing game. OK with credit (CC-BY): X167 Royale (Black Snow), Enfurecido Classico 5000 (Ddiaz Design); both in `Config.Credits`. The GLS file is a game mod's export (BeamNG names, `etk800`, `amdb11`): the licence says CC-BY but its parts may not be the uploader's to give.
 

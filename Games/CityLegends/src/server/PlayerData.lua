@@ -269,6 +269,88 @@ local function setStat(player: Player, name: string, v: number)
 	end
 end
 
+-- (2026-11-07, owner: "the one and only Urus") a car swapped for another (Cars.Swapped): everything
+-- saved on the old id moves to the new one, so nobody ends up with both. A save with both keeps the
+-- car with the higher level (its XP, CP, parts, tune, builds and look); the other one's parts go to My
+-- Parts and the CP its levels earned are added. A part the new car can't take goes to My Parts too.
+local function swapCars(profile: Profile)
+	local p = profile :: any
+	local function spare(partId: string, id: string)
+		local list = profile.PartBag[partId] or {}
+		table.insert(list, Config.partK(Cars.ById[id].Price))
+		profile.PartBag[partId] = list
+	end
+	for old, new in Cars.Swapped do
+		local hadOld, hadNew = profile.Owned[old] == true, profile.Owned[new] == true
+		local function rank(id: string): number
+			return (profile.CarLevels[id] or 1) * 1000000 + (profile.CarXP[id] or 0)
+		end
+		local oldWins = hadOld and (not hadNew or rank(old) > rank(new))
+		local cpBack = 0
+		if hadOld and hadNew then
+			local loser = if oldWins then new else old
+			cpBack = math.max(((profile.CarLevels[loser] or 1) - 1) * Config.CarLevels.CpPerLevel, profile.CarCP[loser] or 0)
+			for _, partId in profile.CarParts[loser] or {} do
+				spare(partId, loser)
+			end
+		end
+		for _, key in { "CarLevels", "CarXP", "CarCP", "CarParts", "CarSetup", "CarBuilds", "Customs" } do
+			if oldWins then
+				p[key][new] = p[key][old]
+			end
+			p[key][old] = nil
+		end
+		if hadOld then
+			profile.Owned[old] = nil
+			profile.Owned[new] = true
+			if cpBack > 0 then
+				profile.CarCP[new] = (profile.CarCP[new] or 0) + cpBack
+			end
+			for slot, partId in profile.CarParts[new] or {} do
+				if not CarStats.partAllowed(new, partId) then
+					profile.CarParts[new][slot] = nil
+					spare(partId, old)
+				end
+			end
+		end
+		if profile.Selected == old then
+			profile.Selected = new
+		end
+		local placed = false
+		for _, bays in profile.HouseBays do
+			for k, carId in bays do
+				if carId == old or carId == new then
+					bays[k] = if placed then "" else new
+					placed = true
+				end
+			end
+		end
+		for id, carId in profile.Showcase do
+			if carId == old then
+				profile.Showcase[id] = new
+			end
+		end
+		local favs = profile.Settings.Favs
+		local at = favs and table.find(favs, old)
+		if favs and at then
+			if table.find(favs, new) then
+				table.remove(favs, at)
+			else
+				favs[at] = new
+			end
+		end
+		if type(profile.Market) == "table" then
+			for _, key in { "Stash", "Req" } do
+				for _, it in (profile.Market :: any)[key] or {} do
+					if type(it) == "table" and it.c == old then
+						it.c = new
+					end
+				end
+			end
+		end
+	end
+end
+
 function PlayerData.load(player: Player): Profile?
 	local profile = defaultProfile()
 	if store then
@@ -329,8 +411,9 @@ function PlayerData.load(player: Player): Profile?
 			-- chauffeur contracts (absent in older saves): only cars still in the fleet
 			if type(saved.Chauffeur) == "table" then
 				for id, on in saved.Chauffeur do
-					if on == true and type(id) == "string" and Config.Chauffeur.Fleet[id] then
-						profile.Chauffeur[id] = true
+					local car = if type(id) == "string" then Cars.Swapped[id] or id else nil
+					if on == true and car and Config.Chauffeur.Fleet[car] then
+						profile.Chauffeur[car] = true
 					end
 				end
 			end
@@ -558,6 +641,7 @@ function PlayerData.load(player: Player): Profile?
 			end
 		end
 	end
+	swapCars(profile)
 	-- (2026-11-04) they left while it loaded: nothing changed, so just hand the lock back
 	if not player.Parent then
 		unlock(player)

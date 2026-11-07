@@ -567,6 +567,76 @@ check(pr.CarParts.bugotti_chiron.block == nil and pr.CarParts.bugotti_chiron.tyr
 
 check(#pr.PartBag.in_cold == 1 and pr.PartBag.nothing == nil and pr.CarSetup.suzaki_swift.final == 1 and pr.CarSetup.suzaki_swift.bad == nil, "spare parts and settings cleaned on load")
 
+
+---------------------------------------------------------------------
+-- one Urus only, two 458s (2026-11-07): the old Urus's owners get the new one on load
+---------------------------------------------------------------------
+check(not Cars.forSale("lambrini_urus") and Cars.forSale("lambrini_urusp") and Cars.get("lambrini_urusp").Name == "Enfurecido Brava", "one Urus on sale, named Enfurecido Brava")
+check(Cars.ById.lambrini_urusp_sport == nil and Cars.ById.lambrini_urusp_top == nil and Cars.get("lambrini_urusp").Price == 1900000, "no Urus trims, price kept")
+for _, series in Cars.Series do
+	if series.Name == "ENFURECIDO BRAVA" then
+		check(#series.Ids == 1 and series.Ids[1] == "lambrini_urusp", "the Brava line has one car")
+	elseif series.Name == "ROSSO RAMPANTE F142" then
+		check(#series.Ids == 2 and series.Ids[1] == "ferrara_458spider" and series.Ids[2] == "ferrara_458speciale", "the F142 line is the Spider and the Speciale")
+	end
+	check(series.Name ~= "ROSSO RAMPANTE F142 COUPE" and series.Name ~= "ENFURECIDO BRAVA OLD", "no retired line on sale: " .. series.Name)
+end
+check(not Cars.forSale("ferrara_458") and Cars.ById.ferrara_458 ~= nil, "the 458 Italia is off sale, owners keep it")
+for _, spec in Cars.List do
+	check(spec.Id ~= "lambrini_urus" and spec.Id ~= "ferrara_458", "not in the list: " .. spec.Id)
+end
+check(Config.Chauffeur.Fleet.lambrini_urus == nil and Config.Chauffeur.Fleet.lambrini_urusp == 1900000 and table.find(Config.Chauffeur.Order, "lambrini_urusp") ~= nil and table.find(Config.Chauffeur.Order, "lambrini_urus") == nil, "the chauffeur fleet uses the new Urus")
+
+saved = {
+	Claimed = true,
+	Owned = { "kio_ev6", "lambrini_urus", "ferrara_458" },
+	Selected = "lambrini_urus",
+	CarLevels = { lambrini_urus = 20 },
+	CarXP = { lambrini_urus = 33 },
+	CarCP = { lambrini_urus = 5 },
+	CarParts = { lambrini_urus = { tyres = "ty_road" } },
+	CarSetup = { lambrini_urus = { final = 1 } },
+	Customs = { lambrini_urus = { paint = "red" } },
+	Chauffeur = { lambrini_urus = true },
+	Market = { Stash = { { u = "a", c = "lambrini_urus", k = "Clean", p = 10 } } },
+	Settings = { Favs = { "lambrini_urus", "kio_ev6" } },
+}
+local one = RealPlayerData.load({ UserId = 43, Name = "OneUrus", Parent = {} })
+check(one.Owned.lambrini_urusp and not one.Owned.lambrini_urus and one.Owned.ferrara_458, "the old Urus becomes the new one, the 458 Italia stays")
+check(one.Selected == "lambrini_urusp", "selected moves too")
+check(one.CarLevels.lambrini_urusp == 20 and one.CarXP.lambrini_urusp == 33 and one.CarCP.lambrini_urusp == 5, "level, XP and CP move")
+check(one.CarParts.lambrini_urusp and one.CarParts.lambrini_urusp.tyres == "ty_road" and one.CarSetup.lambrini_urusp.final == 1 and one.Customs.lambrini_urusp.paint == "red", "parts, tune and look move")
+check(one.CarLevels.lambrini_urus == nil and one.CarParts.lambrini_urus == nil and one.Customs.lambrini_urus == nil, "nothing left on the old id")
+check(one.Chauffeur.lambrini_urusp == true and one.Chauffeur.lambrini_urus == nil, "a chauffeur contract moves")
+check(table.find(one.Settings.Favs, "lambrini_urusp") ~= nil and table.find(one.Settings.Favs, "lambrini_urus") == nil, "favourites move")
+check(one.Market.Stash[1].c == "lambrini_urusp", "a market stash unit moves")
+
+saved = {
+	Claimed = true,
+	Owned = { "lambrini_urus", "lambrini_urusp" },
+	Selected = "lambrini_urusp",
+	CarLevels = { lambrini_urus = 30, lambrini_urusp = 11 },
+	CarXP = { lambrini_urus = 7, lambrini_urusp = 90 },
+	CarCP = { lambrini_urus = 4, lambrini_urusp = 2 },
+	CarParts = { lambrini_urus = { tyres = "ty_road" }, lambrini_urusp = { tyres = "ty_road" } },
+	Customs = { lambrini_urus = { paint = "red" }, lambrini_urusp = { paint = "blue" } },
+}
+local both = RealPlayerData.load({ UserId = 44, Name = "BothUrus", Parent = {} })
+check(both.Owned.lambrini_urusp and not both.Owned.lambrini_urus, "owning both ends up with one")
+check(both.CarLevels.lambrini_urusp == 30 and both.CarXP.lambrini_urusp == 7 and both.Customs.lambrini_urusp.paint == "red", "the better car's progress stays")
+check(both.CarCP.lambrini_urusp == 4 + 10, "the other car's level CP is added")
+check(both.PartBag.ty_road ~= nil and #both.PartBag.ty_road == 1, "the other car's parts go to My Parts")
+
+saved = {
+	Claimed = true,
+	Owned = { "lambrini_urus", "lambrini_urusp" },
+	Selected = "lambrini_urus",
+	CarLevels = { lambrini_urus = 3, lambrini_urusp = 9 },
+	CarCP = { lambrini_urusp = 1 },
+}
+local both2 = RealPlayerData.load({ UserId = 45, Name = "BothUrus2", Parent = {} })
+check(both2.CarLevels.lambrini_urusp == 9 and both2.CarCP.lambrini_urusp == 3 and both2.Selected == "lambrini_urusp", "the new one kept when it's the better one")
+
 print(if fails == 0 then "ALL OK" else fails .. " FAILED")
 if fails > 0 then
 	process.exit(1)
