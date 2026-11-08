@@ -2,6 +2,15 @@
 
 > **LICENCE WARNING (owner, read this):** these car models are **NC (non-commercial)** and the game sells Robux items, so they are risky: Dearborn C346 (Focus RS), Stealth-Apex V10 Halo and Halo Circuit (LFAs), Z223 Royale V12 (Maybach S-Class), all Ddiaz Design, plus the Lamborghini / Ferrari ones listed further down. Their part names (`Rs:SK_...`, `MI_...`, `Geo_lodA`) look ripped from a racing game. The X167 Royale and Classico 5000 are CC-BY (OK with credit, in the credits), though the X167's parts are from a game mod. The call is yours. The game still works if one model is swapped later. **The 2026-11-08 imports are NC too:** C197 Wingdoor, R230 V12 Track, Highland, Sovereign Grand Tourer, Horizon Z33, G20 Sport (all Ddiaz Design, CC-BY-NC-SA).
 
+> **Night of 2026-11-08 to 9: wheels, driving, RWD slides (in Studio, not published).** Sections "Wheel kit v2", "Driving v2 (two-axle tyre model)" and "RWD slides". **Sacrifices (what was left out, why, what it would take):**
+> - **Tyre size code** ("275/35 R20") on the sidewalls: left out. One sidewall picture is shared by every car, so a per-car size would need a picture per size. The sidewall shows our maker VELODROME and the tread's name.
+> - **Forged carbon rim finish:** not made (needs a carbon-weave picture on the rims). Finishes: gloss / satin black, gunmetal, dark grey, silver, polished.
+> - **Wheel-arch liners:** not added. The arches of the new models are already closed and dark (checked on all 37); a dark plate behind each brake stops any see-through between the spokes.
+> - **Our own far / traffic LODs:** not made. Roblox's automatic mesh detail (RenderFidelity Automatic) thins the wheels with distance; traffic cars have their own low-poly wheels anyway.
+> - **Customs caliper colours:** Customs has none, so calipers are each car's real colour (CarPhysicsData).
+> - **Front wheels turn 30 degrees at most on screen** (the physics turns up to 36 at parking speed): past 30 a tyre could poke through its arch.
+> - **Not tested:** a second real player (others' wheels now spin, steer and blur), a real phone (the new shift paddles were checked by layout only), rain in Play (wet grip is in the physics; checked in the Lune test numbers only).
+
 > **Day of 2026-11-08: small design changes finished on all 23 cars of the prompt** (section "Small design changes, the rest"). Owner: look at the before / after pictures there, then publish when happy. Nothing else is waiting from the overnight list.
 
 > **Afternoon of 2026-11-08: the loop link is in** (section "Loop link"): from the top junction the East Switchbacks go straight across their first loop and join the second leg, with a wide bend (owner: "make the corner less sharp"). In Studio, not published.
@@ -11,6 +20,48 @@
 > **Evening of 2026-11-08: scissor doors** on the ZVX, ZVX 63, LP700 and SV, with the see-through spots covered (section "Scissor doors"). In Studio, not published. **To undo:** set that car's switch in `Config.Doors` to `false`.
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
+
+## Wheel kit v2 on every new model (2026-11-08, night, `Prompts/A million times better wheels (new models).md` Part 1)
+All 37 cars of `CarFinish.NEW` (and the 4 scissor-door twins) have new wheels; old models are untouched. In Studio, not published.
+- **What's new on each wheel:** concave face (deeper on the rear wheels of supercars and hypercars), spokes with thickness and soft bevelled edges, a darker barrel behind them with soft shade baked in (AO), lug nuts (a centre-lock nut on the Centro 6), a blank centre cap, a valve stem, a polished lip with fine machined rings. Tyre: a real profile in three sidewall heights picked from the car's real size, rounded shoulders, a bulge, our own lettering (VELODROME + the tread's name, never a real brand), tread from a normal map, lighter worn rubber where it meets the road. Brakes: drilled, slotted, plain or carbon-ceramic discs with a dark hat and a faint heat tint, our own calipers in each car's real colour (red, yellow, blue, black, grey...), a dark backing plate.
+- **Designs:** the six of before (Furia 7, Saetta Y5, Corsa 10, Centro 6, Turbine 14, Trio 6) rebuilt to this standard, plus Disco 5 (the Classico 5000's dish with five round holes) and Royale 20 (twenty slim spokes, the two Royales). The cars that kept their models' own wheels until now got one: Focus RS Saetta Y5 black, LFA Corsa 10 gunmetal, LFA Circuit Corsa 10 satin black, Classico 5000 Disco 5 silver, Z223 / X167 Royale Royale 20, P11 Spider Furia 7 dark grey, C197 Furia 7 silver, base Origine Turbine 14 silver.
+- **Real sizes:** each tyre is the real car's width; its diameter is what the model's own axle and ground give (that's what its arch was made for). Staggered cars now have bigger, wider rear tyres where the model had them too small: e.g. the LB834 rear was 0.62 m and 19 cm wide, now 0.71 m and 33.5 cm (it floated 4 cm before). The physics wheels of these cars take each axle's own radius (`CarBuilder` `wheelRF / wheelRR`, only for models marked `WheelKit = 2`), so no tyre floats or sinks.
+- **At speed:** from about 10 mph the spokes fade into a blurred spinning disc (a camera's motion blur, no wagon-wheel strobe). Each wheel spins at its own radius; driven wheels spin faster when they spin up, locked ones stop. Hot brakes glow faintly orange after a hard stop from high speed, then cool. Other players see the wheels spin, the fronts turn and the blur (the steering goes to the server a few times a second).
+- **Old calipers taken out:** 8 models kept their own calipers and discs as one body piece (`Body_Brake`...): with the new open spokes the Éclair showed two calipers on one wheel, so those pieces went to the backups too.
+- **Curb rash** now goes on the polished lip; **Customs rim colour** tints only the painted face (the lip, barrel, brakes and tyre keep theirs).
+- **Undo one car:** `require(ServerStorage.ClaudeTools.RimSwap2).undo("<car id>")` (old parts in `ServerStorage.OldCarModels/<id>_wheels2`). Kit: `ServerStorage.RimKit2` (model 72582541821952), plan per car: `ClaudeTools.WheelPlan`, picture ids `tools/wheels/kit2_ids.json`.
+- **Checked:** every car side-on in Studio (no floating, sinking or clipping wheel, sizes right), in Play on the LP700 at 200 mph (blur) and parked (glow test), 0 script errors.
+- Pictures: [[Wheels v2 - LP700 front, before and after.jpg]], [[Wheels v2 - Z223 Royale before (own wheel) and after.jpg]], [[Wheels v2 - LP700 rear (real size 335 tyre).jpg]], [[Wheels v2 - Origine (Turbine 14).jpg]], [[Wheels v2 - LB744 close.jpg]], [[Wheels v2 - ZVX at dusk under a street lamp.jpg]], [[Wheels v2 - blurred spinning wheels at 200 mph.jpg]], [[Wheels v2 - hot brake glow (test at full glow).jpg]], [[Wheels v2 - every new model 1 of 3.jpg]], [[Wheels v2 - every new model 2 of 3.jpg]], [[Wheels v2 - every new model 3 of 3.jpg]].
+
+## Driving v2: the two-axle tyre model (2026-11-08, night, same prompt, Part 2; every car)
+- **How it drives now:** each axle has its own grip from its own load, so braking into a corner tucks the nose in, lifting mid-corner turns the car a little, power in a rear-drive car can step the rear out. Grip builds with slip, peaks and falls off smoothly (no sudden ice). Drive and brakes share each tyre's grip with cornering. Kerbs, paint lines, cobbles grip a little less, grass / sand / gravel much less, rain 25% less.
+- **Each car its own:** real weight on the front, drive (FWD / RWD / AWD and its split), gears (4 to 10) and gearbox (dual-clutch quick, old automatics slow), tyre widths and kind, real stopping distance, centre of gravity, downforce: `src/shared/CarPhysicsData.lua` (97 cars, from the real ones; SPORT / TOP trims get the next grade of tyre).
+- **Settings > DRIVING:** Traction control OFF / SPORT / ON, Stability control OFF / SPORT / ON, ABS OFF / ON, Countersteer help OFF (PRO) / ON. New players: all on. An old save's "Driving assists" picks them (Off / Low / Normal). The Gearbox setting is on phones too now, with up / down shift paddles on the screen.
+- **Other feel:** keyboard throttle eases in (full in about a sixth of a second); engine braking stops under hard braking; the revs bounce off the limiter; ABS off locks the front wheels under a hard pedal (longer stops, no steering); a phone buzzes on hard hits, kerbs and shifts; tyre smoke and marks come from each tyre's own contact patch, as wide as that tyre.
+- **Electric cars** now reach 60 mph in their spec time (they were at 70% of it) and pull with a real motor's curve (they all reach their top speed now; the EV6 and Seal didn't).
+- **Measured in Play** (flat test track, traction control on; the "before" is the old model, switched back for one run):
+
+| Car | 0-60 mph real | 0-60 now (before) | Top mph now / spec | 100-0 km/h real | now | before |
+|---|---|---|---|---|---|---|
+| C346 (Focus RS) | 4.6 | 4.50 (4.50) | 165 / 165 | 34 m | 33.2 m | 26.3 m |
+| G20 Sport | 5.3 | 5.35 (5.30) | 154 at 40 s / 155 | 34 | 32.9 | 26.1 |
+| Highland (DBX) | 4.3 | 4.32 (4.30) | 176 at 40 s / 181 | 37 | 35.8 | 30.3 |
+| LB724 (Huracán EVO) | 2.9 | 2.90 (2.90) | 202 / 202 | 32 | 30.9 | 23.5 |
+| Éclair (Chiron) | 2.4 | 2.41 (2.40) | 261 / 261 | 31 | 30.0 | 23.6 |
+| BNR34 | 4.9 | 4.91 (4.92) | 165 / 165 | 36 | 35.1 | 25.3 |
+
+  0-60 and top speed were already on spec; braking was 20-25% too short (the brakes were made "20% stronger" on 2026-11-03), now within 5% of the real car. Corner grip with stability control on: about 1.6-1.8 g on a supercar (before about 2.0), more with it off. The Lune test (`tools/physics_test.luau`) checks all 201 cars and trims: 0-60, top speed, 100-0 within 5%, no gear hunting, stability control keeps the corner grip, no spin at 100 mph or in a high-speed lane change, slides caught with the help, ABS off stops later.
+- **To tune** (`Config.DrivingFeel.Axle`): `GameGrip` 1.5 (lower = slides sooner, heavier), `BrakeK` 1 (stopping distance), `EscTol` / `EscBeta` (how early stability control steps in), `HelpK` / `HelpYaw` (countersteer help). `Enabled = false` brings the old model back.
+- **Not done from the prompt:** clips of the 6 cars on the real roads (measured on a flat test track instead; no video capture here), FPS at the 3 usual spots (not measured this run), a re-check of PI (unchanged: it reads the cars' spec numbers, which didn't change).
+
+## RWD slides (2026-11-08, night, `Prompts/RWD cars slide more (and more with TCS off).md`)
+Rear-wheel-drive cars only; AWD and FWD unchanged. In Studio, not published.
+- **Traction control ON:** flooring it out of a slow corner lets the rear step out a few degrees, then it's caught (F80: 7 degrees; Huracán, AWD: 4). Never a donut.
+- **SPORT:** a clear slide (F80: 11 degrees), held with countersteer; **donuts** from a standstill with full lock and full throttle (F80: 315 degrees round, 57 degree slide, 30 mph). Stability control only steps in above 33 mph.
+- **OFF:** the rear breaks loose in the low gears: power slides, long drifts, donuts (F80: two full turns in 6 s, 91 degree slide, 26 mph); a heavy luxury car slides lazily (Ecstasy Nocturne). With the countersteer help on (weaker with TC off) slides are caught when you lift; with it off ("Pro") a car can spin. No slide at a steady cruise. Stability control follows traction control on rear-drive cars (Sport at most in Sport, off when off), so the T key (TC off) frees the car.
+- **TC light:** flashes "TC" on the HUD and the car's live cluster while traction / stability control works; "TC OFF" stays on when it's off.
+- **Numbers** (`Config.DrivingFeel.Axle`, all new): `RwdSlideOn` 1.12 (On: how far past the grip), `RwdSlideSport` 1.8, `RwdReservePer` 180 / `RwdReserveMax` 2.8 (how hard a powerful car's engine overpowers its rear tyres in the low gears: more = slides more), `RwdSpinSide` 0.6 (side grip a spinning rear loses), `DonutBelow` 45, `HelpTcOff` 0.7, `EscSportFrom` 42. **Too much slide:** lower `RwdReserveMax` (e.g. 2.2) or `RwdSpinSide` (0.4). **Too little:** raise them. The old model's `PowerOversteer` (0.6) is unchanged (only used with `Axle.Enabled = false`).
+- Picture: [[RWD slide - donut with traction control off (F80).jpg]]. Checked in Play: F80 TC On / Sport / Off corner exits and donuts, Huracán TC On / Off. Not tested: a real phone, 2 players, rain.
 
 ## Scissor doors (2026-11-08, `Prompts/Scissor doors on the SVJ and SVJ 63 (cut properly).md`)
 Cars: Enfurecido LB834 ZVX (`lambrini_svj`), ZVX 63 (`lambrini_svj63`), and (owner, same day: "because I like it") the LP700 (`lambrini_lp700`) and the SV (`lambrini_lp750`).
