@@ -21,7 +21,10 @@ spec.json:
               {"clear": true},                     # the whole image see-through
               {"replace": "path.png"} ]            # the image swapped for another (any size)
     },
-    "drop": ["Badge_Geo_lodA"]                     # nodes whose meshes go (badge geometry)
+    "drop": ["Badge_Geo_lodA"],                    # nodes whose meshes go (badge geometry)
+    "rename_material": {"badge_INt": "gauge_INt"}  # a material renamed (finish_car.py drops every
+                                                   # part whose material says "badge": the R8 GT's
+                                                   # seats and dials wear one called badge_INt)
   }
 Pixel coordinates are in the image's own size (top left 0, 0).
 """
@@ -172,6 +175,9 @@ def main():
         for s in j["scenes"]:
             for r in s["nodes"]:
                 walk(r, False)
+    for m in j.get("materials", []):
+        if m.get("name") in spec.get("rename_material", {}):
+            m["name"] = spec["rename_material"][m["name"]]
     write_glb(out, j, bytes(new))
     print(f"{len(chunks)} images painted, {dropped} meshes dropped -> {out}")
 

@@ -55,6 +55,7 @@ CarSkin.CLUSTER_STYLE = {
 	ferrara_458 = "Ferrari458",
 	ferrara_f430 = "F430", -- was the 599's (owner); now the F430's own
 	audy_r8 = "LiveR8", -- the 2010 model (2026-11-09), from the owner's photo
+	audy_r8_lw = "LiveR8GT", -- the owner's photo with the real 2011 GT's white dials (2026-11-09)
 	mclaran_12c = "Live12C", -- from the owner's photo
 	bentz_sls = "LiveSLS", -- from the owner's photo
 	ferrara_599 = "LiveF141", -- from the owner's photo
@@ -146,6 +147,7 @@ CarSkin.CLUSTER_RECT = {
 	nisun_350z = { at = Vector3.new(0.0007, 0.0335, -0.1705), face = Vector3.new(0, 0.2843, 0.9587), w = 0.38, h = 0.14 }, -- in the model's pods
 	astin_dbx = { at = Vector3.new(-0.0027, 0.0326, -0.2737), face = Vector3.new(0, 0.3076, 0.9515), w = 0.294, h = 0.112 }, -- on the model's screen
 	audy_r8 = { at = Vector3.new(-0.012, 0.034, -0.2315), face = Vector3.new(0, 0.32, 0.9474), w = 0.3921, h = 0.1456 }, -- in the model's two pods and hood (tools/lambo/window_r8g1.png)
+	audy_r8_lw = { at = Vector3.new(-0.0053, 0.0373, -0.2128), face = Vector3.new(0, 0.32, 0.9474), w = 0.3921, h = 0.1456 }, -- the same pods (its steering pieces' box sits 2 cm deeper: dials found by their picture in both models)
 	bentz_sl65bs = { at = Vector3.new(0.022, 0.0715, -0.2433), face = Vector3.new(0, 0.2, 0.98), w = 0.234, h = 0.106 }, -- in the two bowls
 	bentz_sls = { at = Vector3.new(0.0021, 0.0377, -0.2165), face = Vector3.new(0, 0.2, 0.98), w = 0.3163, h = 0.1342 }, -- in the model's hood, in front of its dials
 	mclaran_12c = { at = Vector3.new(-0.0045, 0.0679, -0.1712), face = Vector3.new(0, 0.2, 0.98), w = 0.34, h = 0.12 }, -- in the model's own hood (tools/lambo/frame_probe.py)
@@ -288,7 +290,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -2692,8 +2694,9 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		-- a soft red glow on the road and bumper behind the tail lamps (brighter when braking)
 		local att = Instance.new("Attachment")
 		att.Name = "RearGlow"
-		-- (the Z223's long cabin: the glow reached the rear seats through the body and showed red in the pillars)
-		att.Position = root.CFrame:PointToObjectSpace((groundCF * CFrame.new(imported.tailGlow)).Position) + Vector3.new(0, 0, if id == "bentz_s680" then 4 else 0)
+		-- (the Z223's long cabin: the glow reached the rear seats through the body and showed red in the pillars;
+		-- the Lightweight's engine and red roll cage under the rear glass turned red when braking)
+		att.Position = root.CFrame:PointToObjectSpace((groundCF * CFrame.new(imported.tailGlow)).Position) + Vector3.new(0, 0, if id == "bentz_s680" then 4 elseif id == "audy_r8_lw" then 3 else 0)
 		att.Parent = root
 		local glow = Instance.new("PointLight")
 		glow.Name = "RearGlow"

@@ -75,7 +75,7 @@ local REAL_WB: { [string]: number } = {
 	bentz_cls63s = 2.874, toyoka_supra_mk4 = 2.55,
 	dodger_challenger = 2.946, bnw_x6 = 2.975, toyoka_lc300 = 2.85, lexis_lx700 = 2.85, bentz_gle53 = 2.915, byt_u8 = 3.05, bentz_g63 = 2.89,
 	porsha_panamera = 2.95, nisun_gtr = 2.78, nisun_r34 = 2.665, bentz_sl65bs = 2.56, astin_db9 = 2.74, bnw_750li = 3.21, bentz_gls = 3.135, bentz_s680 = 3.396, lambrini_countach = 2.45, astin_vantage = 2.6, ferrara_f430 = 2.6,
-	lambrini_lp570 = 2.56, lambrini_lp560 = 2.56, lambrini_huracan = 2.62, lambrini_performante = 2.62, lambrini_sto = 2.62, lambrini_sterrato = 2.63, lambrini_revuelto = 2.78, audy_r8 = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
+	lambrini_lp570 = 2.56, lambrini_lp560 = 2.56, lambrini_huracan = 2.62, lambrini_performante = 2.62, lambrini_sto = 2.62, lambrini_sterrato = 2.63, lambrini_revuelto = 2.78, audy_r8 = 2.65, audy_r8_lw = 2.65, mclaran_12c = 2.67, ferrara_599 = 2.75,
 	ferrara_458 = 2.65, ferrara_458spider = 2.65, ferrara_458speciale = 2.65, lambrini_lp670 = 2.665, lambrini_urusp = 3.003, bentz_sls = 2.68, porsha_gt3 = 2.457, bentlee_contgt = 2.746, bentlee_bentayga = 2.995,
 	lambrini_urus = 3.003, brabos_g63 = 2.89, rolls_wraith = 3.112, rolls_cullinan = 3.772,
 	lambrini_lp700 = 2.7, lexis_lfa = 2.605, lexis_lfa_circuit = 2.605, lambrini_lp750 = 2.7, lambrini_svj = 2.7, lambrini_svj63 = 2.7,

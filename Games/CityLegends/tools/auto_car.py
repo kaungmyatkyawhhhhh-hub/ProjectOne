@@ -17,8 +17,9 @@ baked into the first layer, solid alpha in opaque textures, no metal / roughness
 
     python tools/auto_car.py imports/car.glb <real wheelbase in metres> out.blend ['{"tilt": 20}']
 Hints: "front", "tilt", "steer" (see main), "wheel_depth" (how far inwards a wheel piece may reach,
-in wheel radii, default 0.6), "wheel_reach" (out from the axle, default 1.04) and "budget" (triangles for the whole car, default
-160,000: more for a detailed cabin that would crumple when thinned).
+in wheel radii, default 0.6), "wheel_reach" (out from the axle, default 1.04), "wheel_only" (words of the tyre
+materials' names: only those parts find the wheels, when a round arch liner pulls a wheel's middle up; the R8 GT)
+and "budget" (triangles for the whole car, default 160,000: more for a detailed cabin that would crumple when thinned).
 Writes a .blend (for checking renders) and a JSON report; tools/pack_cars.py puts several
 .blend cars into one .fbx, one group per car id, for a single Import 3D in Studio.
 """
@@ -329,11 +330,13 @@ def parts_index(weld):
     return out
 
 
-def find_wheels(parts, up, length_axis, side_axis, lo, hi):
+def find_wheels(parts, up, length_axis, side_axis, lo, hi, only=None):
     """Round parts low at the four corners: tyres / rims. Returns 4 (centre, radius)."""
     L = hi[length_axis] - lo[length_axis]
     cands = []
     for o, idx, a, b, co in parts:
+        if only and not any(w.lower() in (m.name.lower() if m else "") for m in o.data.materials for w in only):
+            continue
         d = b - a
         dl, du, ds = d[length_axis], d[up], d[side_axis]
         diam = max(dl, du)
@@ -555,7 +558,7 @@ def main():
     side_axis = 1 - length_axis
     # wheels from welded parts (whole tyres); the steering wheel from the parts as they are (a rim
     # welded to its column would be too big to pass)
-    wheels = find_wheels(parts_index(size.max() * 1e-6), up, length_axis, side_axis, lo, hi)
+    wheels = find_wheels(parts_index(size.max() * 1e-6), up, length_axis, side_axis, lo, hi, hint.get("wheel_only"))
     parts = parts_index(None)
     if not wheels:
         report["error"] = "wheels not found"

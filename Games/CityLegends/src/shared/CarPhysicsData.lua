@@ -129,6 +129,9 @@ local Data: { [string]: Phys } = {
 	lambrini_lp570 = { front = 0.43, drive = "AWD", rear = 0.7, gears = 6, box = "amt", shift = 0.12, tyreF = 235, tyreR = 295, aspectF = 35, aspectR = 30, rimF = 19, rimR = 19, tyre = "sport", brakes = "ceramic", pistons = 8, caliper = "black", lugs = 5, stop = 32, z60 = 3.4, top = 202, hp = 562, nm = 540, redline = 8.5, cg = 0.42, downforce = 40 },
 	-- Audi R8 V10 5.2 FSI quattro (1st gen, 2010, 6-speed manual; 525 PS = 518 hp)
 	audy_r8 = { front = 0.44, drive = "AWD", rear = 0.85, gears = 6, box = "manual", shift = 0.45, tyreF = 235, tyreR = 295, aspectF = 35, aspectR = 30, rimF = 19, rimR = 19, tyre = "sport", brakes = "drilled", pistons = 8, caliper = "red", lugs = 5, stop = 34, z60 = 3.9, top = 196, hp = 518, nm = 530, redline = 8.7, cg = 0.43, downforce = 0 },
+	-- Audi R8 GT (1st gen, 2011, 5.2 V10, 6-speed R tronic single-clutch with slow shifts, 560 PS = 552 hp, 1,525 kg,
+	-- carbon-ceramic brakes with red calipers; 100-0 km/h 31.1 m, AutoBild; fixed carbon rear wing)
+	audy_r8_lw = { front = 0.44, drive = "AWD", rear = 0.85, gears = 6, box = "amt", shift = 0.25, tyreF = 235, tyreR = 295, aspectF = 35, aspectR = 30, rimF = 19, rimR = 19, tyre = "sport", brakes = "ceramic", pistons = 6, caliper = "red", lugs = 5, stop = 31, z60 = 3.5, top = 199, hp = 552, nm = 540, redline = 8.7, cg = 0.42, downforce = 60 },
 	-- McLaren MP4-12C Spider (3.8 V8 twin-turbo, 7-speed SSG)
 	mclaran_12c = { front = 0.42, drive = "RWD", gears = 7, box = "dct", shift = 0.1, tyreF = 235, tyreR = 305, aspectF = 35, aspectR = 30, rimF = 19, rimR = 20, tyre = "sport", brakes = "drilled", pistons = 4, caliper = "silver", lugs = 5, stop = 31, z60 = 3, top = 204, hp = 616, nm = 600, redline = 8.5, cg = 0.42, downforce = 70 },
 	-- Ferrari 599 GTB Fiorano (6.0 V12, 6-speed F1)

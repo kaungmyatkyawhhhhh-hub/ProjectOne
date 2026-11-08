@@ -131,6 +131,8 @@ local list: { CarSpec } = {
 	{ Id = "bentz_sl65bs", Name = "Tri-Star Silber R230 V12 Track", Class = "Coupe", Tier = "High", TopSpeed = 199, ZeroToSixty = 3.8, Handling = 0.82, Price = 350000, PriceSource = "collector", StatPrice = 700000, Color = Color3.fromRGB(18, 18, 20), Order = 47 },
 	{ Id = "lambrini_lp570", Name = "Enfurecido L140 Leggera", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.3, Handling = 0.88, Price = 350000, PriceSource = "collector", StatPrice = 750000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 48 },
 	{ Id = "audy_r8", Name = "Precision Type 42 V10", Class = "Supercar", Tier = "Mid", TopSpeed = 188, ZeroToSixty = 4.4, Handling = 0.86, Price = 110000, PriceSource = "used", StatPrice = 550000, Color = Color3.fromRGB(165, 168, 172), Accent = Color3.fromRGB(16, 16, 18), Order = 49 },
+	-- (2026-11-09) the lighter track version of the first Type 42, its own model (the 2011 car, 333 built)
+	{ Id = "audy_r8_lw", Name = "Precision Type 42 V10 Lightweight", Class = "Supercar", Tier = "Mid", TopSpeed = 199, ZeroToSixty = 3.5, Handling = 0.9, Price = 120000, PriceSource = "collector", StatPrice = 600000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 49.5 },
 	{ Id = "mclaran_12c", Name = "Speedmark P11 Spider", Class = "Supercar", Tier = "High", TopSpeed = 207, ZeroToSixty = 3.1, Handling = 0.9, Price = 350000, PriceSource = "used", StatPrice = 800000, Color = Color3.fromRGB(226, 84, 8), Order = 50 },
 	{ Id = "ferrara_599", Name = "Rosso Rampante F141", Class = "Supercar", Tier = "High", TopSpeed = 205, ZeroToSixty = 3.5, Handling = 0.84, Price = 165000, PriceSource = "used", StatPrice = 850000, Color = Color3.fromRGB(20, 21, 24), Order = 51 },
 	{ Id = "ferrara_458", Name = "Rosso Rampante F142", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.3, Handling = 0.9, Price = 900000, Color = Color3.fromRGB(200, 10, 20), Order = 52 },
@@ -237,7 +239,9 @@ end
 --   * a line with one car gets a SPORT and a TOP trim (owner: "add extra trims"): the same body,
 --     a little faster and dearer
 ---------------------------------------------------------------------
-export type Series = { Name: string, Ids: { string }, Brand: string?, Hidden: boolean?, NoTrims: boolean? }
+-- (TrimBase: a line of several cars whose first car keeps the SPORT / TOP trims it had as a one-car
+-- line, so their owners keep them: the Type 42 V10 when the Lightweight joined, 2026-11-09)
+export type Series = { Name: string, Ids: { string }, Brand: string?, Hidden: boolean?, NoTrims: boolean?, TrimBase: string? }
 
 Cars.TrimSteps = {
 	{ Key = "sport", Trim = "SPORT", Label = "Sport", Price = 1.3, Speed = 1.05, Accel = 0.92, Grip = 0.03, FreePrice = 8000 },
@@ -289,7 +293,7 @@ Cars.Series = {
 	{ Name = "BRITISH VANGUARD HIGHLAND", Ids = { "astin_dbx" } },
 	{ Name = "BRITISH VANGUARD VANTA", Ids = { "astin_db9" } },
 	{ Name = "BRITISH VANGUARD VELA", Ids = { "astin_vantage" } },
-	{ Name = "PRECISION TYPE 42", Ids = { "audy_r8" } },
+	{ Name = "PRECISION TYPE 42", Ids = { "audy_r8", "audy_r8_lw" }, TrimBase = "audy_r8" },
 	{ Name = "ROSSO RAMPANTE F131", Ids = { "ferrara_f430" } },
 	{ Name = "ROSSO RAMPANTE F149", Ids = { "ferrara_california" } },
 	{ Name = "ROSSO RAMPANTE F141", Ids = { "ferrara_599" } },
@@ -351,10 +355,11 @@ local function round(n: number, step: number): number
 	return math.floor(n / step + 0.5) * step
 end
 for _, series in allSeries do
-	if #series.Ids ~= 1 or series.NoTrims then
+	if (#series.Ids ~= 1 and not series.TrimBase) or series.NoTrims then
 		continue
 	end
-	local base = Cars.ById[series.Ids[1]]
+	local base = Cars.ById[series.TrimBase or series.Ids[1]]
+	local at = table.find(series.Ids, base.Id) :: number -- (the trims go right after their base car)
 	base.Trim = "BASE"
 	for i, step in Cars.TrimSteps do
 		local spec: CarSpec = {
@@ -380,7 +385,7 @@ for _, series in allSeries do
 		}
 		table.insert(list, spec)
 		Cars.ById[spec.Id] = spec
-		table.insert(series.Ids, spec.Id)
+		table.insert(series.Ids, at + i, spec.Id)
 	end
 end
 

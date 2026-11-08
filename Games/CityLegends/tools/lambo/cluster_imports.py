@@ -974,24 +974,31 @@ def g20(Spec, needle_sprite, add_needle, glyph):
 
 
 
-def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear):
+def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear, gt=False):
     """the first Precision Type 42 (owner's photo imports/refs/audi_r8_gen1_cluster_owner.png): two deep round dials with
     silver rings and a red inner ring, revs 0-10 on the left (red from 9), 0-350 km/h on the right, a dark screen low in
     each dial, water and fuel gauges in their little hood at the top, the screen in the middle, oil and volts at the far
     ends of the pods. The dial's names are left out. Coordinates are photo pixels (0.46 mm each on the model); the box
-    reaches past the photo to the ends of the model's pods."""
+    reaches past the photo to the ends of the model's pods.
+    gt: the Lightweight (2011 R8 GT, 2026-11-09): the same cluster with the real GT's white dial faces (all five round
+    gauges, the red outline kept), dark numbers and red needles; its unlit warning lamps don't show on the white."""
     from cluster_art import FONTDIR
 
     DIG = FONTDIR + "BuilderExtended-SemiBold.otf"
     box = (-85, 60, 763, 375)
     REF = "audi_r8_gen1_cluster_owner.png"
     A = Art(REF, box, S=4, bg=(7, 7, 8))
-    sp = Spec("r8g1", box[2] - box[0], box[3] - box[1], 2.35, 2.35, box[0], box[1])
+    sp = Spec("r8gt" if gt else "r8g1", box[2] - box[0], box[3] - box[1], 2.35, 2.35, box[0], box[1])
     sp.redline, sp.idle = 8.7, 0.9
     C1, C2 = (153.0, 233.0), (525.0, 233.0)
     NUM = (236, 236, 238)
     DIM = (176, 178, 182)
     RED = (214, 30, 34)
+    # the dials' own print: light on the photo's black faces, dark on the GT's white ones
+    FACE = (229.0, 229.0, 231.0)
+    INK = (22, 22, 24) if gt else NUM
+    INK_DIM = (98, 100, 104) if gt else DIM
+    NEEDLE = (206, 28, 30) if gt else (238, 238, 240)
     SPD = [(0, -131), (20, -114), (40, -97), (60, -79), (80, -61), (100, -43), (120, -25), (140, -7), (170, 13), (200, 33),
            (230, 52.5), (260, 72), (290, 92), (320, 111.5), (350, 131)]
 
@@ -1025,8 +1032,11 @@ def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear):
     # the two dials
     for C in (C1, C2):
         r, th = field(A, C)
-        face = 9 + 7 * (1 - smooth(10, 100, r))
-        blend(A, np.stack([face, face, face * 1.08], axis=-1), band_mask(r, -5, 101, 0.6))
+        if gt:
+            blend(A, np.full((h, w, 3), FACE), band_mask(r, -5, 101, 0.6))
+        else:
+            face = 9 + 7 * (1 - smooth(10, 100, r))
+            blend(A, np.stack([face, face, face * 1.08], axis=-1), band_mask(r, -5, 101, 0.6))
         blend(A, np.full((h, w, 3), (196.0, 20.0, 28.0)), band_mask(r, 101.8, 104.6, 0.6))
         blend(A, np.full((h, w, 3), (8.0, 8.0, 9.0)), band_mask(r, 104.4, 108, 0.6))
         # the silver ring: bright where the light catches it, grey elsewhere
@@ -1041,18 +1051,18 @@ def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear):
     for i in range(0, 41):
         v = i / 4
         big = i % 4 == 0
-        col = (206, 34, 34) if v >= 9 else (NUM if big else DIM)
+        col = (206, 34, 34) if v >= 9 else (INK if big else INK_DIM)
         tick(C1, 87 if big else 91, 100, rev(v), 2.4 if big else 1.6, col)
     for v in range(0, 11):
         p = polar(C1, 77 if v < 10 else 74, rev(v))
-        A.text(p[0], p[1], str(v), DIG, 15.5, (222, 36, 36) if v >= 9 else NUM)
-    A.text(C1[0], 173.5, "1/min x 1000", ARIAL_B, 7.6, NUM)
+        A.text(p[0], p[1], str(v), DIG, 15.5, (222, 36, 36) if v >= 9 else INK)
+    A.text(C1[0], 173.5, "1/min x 1000", ARIAL_B, 7.6, INK)
 
     # km/h: a tick every 10, the numbers as on the photo (two sizes)
     LABELS = (0, 20, 40, 60, 80, 100, 120, 140, 170, 200, 230, 260, 290, 320, 350)
     for v in range(0, 351, 10):
         big = v in LABELS
-        tick(C2, 89 if big else 93, 100, kph(v), 2.4 if big else 1.4, NUM if big else DIM)
+        tick(C2, 89 if big else 93, 100, kph(v), 2.4 if big else 1.4, INK if big else INK_DIM)
     for v in (30, 50):
         tick(C2, 84, 88, kph(v), 1.6, RED)
     for v in LABELS:
@@ -1061,8 +1071,8 @@ def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear):
         hw, hh = len(str(v)) * size * 0.36, size * 0.36  # (half the label's width and height)
         th = math.radians(kph(v))
         p = polar(C2, 85 - hw * abs(math.sin(th)) - hh * abs(math.cos(th)), kph(v))
-        A.text(p[0], p[1], str(v), DIG, size, NUM)
-    A.text(C2[0] - 6, 174.5, "km/h", ARIAL_B, 8.4, NUM)
+        A.text(p[0], p[1], str(v), DIG, size, INK)
+    A.text(C2[0] - 6, 174.5, "km/h", ARIAL_B, 8.4, INK)
 
     # the dark screens low in each dial
     for C in (C1, C2):
@@ -1070,49 +1080,52 @@ def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear):
         top = np.clip((py - 289) / 3, 0, 1) * np.clip((293 - py) / 3, 0, 1) * (np.abs(px - C[0]) < 33)
         blend(A, np.full((h, w, 3), (30.0, 32.0, 36.0)), top)
 
-    # the warning lamps, dark until they light (the owner's photo is the bulb check)
+    # the warning lamps, dark until they light (the owner's photo is the bulb check); on the GT's white faces an
+    # unlit lamp doesn't show at all
     k = 0.13
-    amber = tuple(int(c * k) for c in (246, 140, 20))
-    red = tuple(int(c * k) for c in (230, 30, 30))
-    A.text(122, 207, "EPC", ARIAL_B, 8.2, amber)
-    A.round_rect(186, 200, 199, 210, 1.5, None, outline=amber, w=1.2)
-    A.line([(183, 205), (186, 205)], amber, 1.2)
-    A.circle(133, 253, 3.4, None, outline=amber, w=1.1)
-    A.line([(133, 245), (133, 249.6)], amber, 1.2)
-    A.round_rect(173, 249, 184, 255, 2, None, outline=amber, w=1.1)
-    A.line([(170, 259), (175, 257), (180, 259), (185, 257)], amber, 1.0)
-    A.circle(479, 205, 2.4, red)
-    A.line([(479, 208), (477, 214)], red, 2.0)
-    A.line([(483, 208), (488, 212)], red, 1.6)
-    A.round_rect(498, 190, 515, 199, 1.0, None, outline=red, w=1.1)
-    A.circle(533, 186, 2.6, red)
-    A.line([(533, 189), (533, 197)], red, 2.6)
-    A.line([(529, 191), (538, 196)], red, 1.0)
-    A.circle(565, 230, 6.2, None, outline=amber, w=1.2)
-    A.text(565, 230.5, "ABS", ARIAL_B, 3.9, amber)
-    A.circle(553, 206, 6.0, None, outline=red, w=1.2)
-    A.round_rect(165, 186, 178, 193, 2, None, outline=amber, w=1.1)
+    if not gt:
+        amber = tuple(int(c * k) for c in (246, 140, 20))
+        red = tuple(int(c * k) for c in (230, 30, 30))
+        A.text(122, 207, "EPC", ARIAL_B, 8.2, amber)
+        A.round_rect(186, 200, 199, 210, 1.5, None, outline=amber, w=1.2)
+        A.line([(183, 205), (186, 205)], amber, 1.2)
+        A.circle(133, 253, 3.4, None, outline=amber, w=1.1)
+        A.line([(133, 245), (133, 249.6)], amber, 1.2)
+        A.round_rect(173, 249, 184, 255, 2, None, outline=amber, w=1.1)
+        A.line([(170, 259), (175, 257), (180, 259), (185, 257)], amber, 1.0)
+        A.circle(479, 205, 2.4, red)
+        A.line([(479, 208), (477, 214)], red, 2.0)
+        A.line([(483, 208), (488, 212)], red, 1.6)
+        A.round_rect(498, 190, 515, 199, 1.0, None, outline=red, w=1.1)
+        A.circle(533, 186, 2.6, red)
+        A.line([(533, 189), (533, 197)], red, 2.6)
+        A.line([(529, 191), (538, 196)], red, 1.0)
+        A.circle(565, 230, 6.2, None, outline=amber, w=1.2)
+        A.text(565, 230.5, "ABS", ARIAL_B, 3.9, amber)
+        A.circle(553, 206, 6.0, None, outline=red, w=1.2)
+        A.round_rect(165, 186, 178, 193, 2, None, outline=amber, w=1.1)
 
     # the little hood at the top: water and fuel
     A.round_rect(250, 90, 430, 157, 14, (22, 22, 24), outline=(130, 132, 136), w=1.4)
     A.line([(262, 91.5), (418, 91.5)], (200, 202, 206), 1.0)
     T1, T2 = (291.3, 143.8), (390.0, 144.5)
+    SMALL = (229, 229, 231) if gt else (12, 12, 13)  # the small gauges' faces
     for C in (T1, T2):
-        A.circle(C[0], C[1], 30, (12, 12, 13))
+        A.circle(C[0], C[1], 30, SMALL)
     for i, deg in enumerate((-55, -28, 0, 28, 57)):
-        tick(T1, 22, 30, deg, 1.6 if i % 2 == 0 else 1.0, (214, 30, 30) if i == 4 else NUM)
-        tick(T2, 22, 30, deg, 1.6 if i % 2 == 0 else 1.0, (214, 30, 30) if i == 0 else NUM)
-    A.text(272, 132, "50", ARIAL_B, 6.4, NUM)
-    A.text(291.5, 119.5, "90", ARIAL_B, 7.2, NUM)
+        tick(T1, 22, 30, deg, 1.6 if i % 2 == 0 else 1.0, (214, 30, 30) if i == 4 else INK)
+        tick(T2, 22, 30, deg, 1.6 if i % 2 == 0 else 1.0, (214, 30, 30) if i == 0 else INK)
+    A.text(272, 132, "50", ARIAL_B, 6.4, INK)
+    A.text(291.5, 119.5, "90", ARIAL_B, 7.2, INK)
     A.text(310.5, 131.5, "130", ARIAL_B, 6.4, (220, 40, 40))
-    A.text(270, 145, "°C", ARIAL_B, 6.0, NUM)
-    A.text(390, 119.5, "1/2", ARIAL_B, 7.0, NUM)
-    A.text(408.5, 132, "1/1", ARIAL_B, 6.4, NUM)
-    A.round_rect(364, 138, 370, 147, 0.8, None, outline=NUM, w=0.9)
-    A.line([(313, 139), (313, 146)], NUM, 1.0)
-    A.line([(309, 147), (317, 147)], NUM, 1.0)
+    A.text(270, 145, "°C", ARIAL_B, 6.0, INK)
+    A.text(390, 119.5, "1/2", ARIAL_B, 7.0, INK)
+    A.text(408.5, 132, "1/1", ARIAL_B, 6.4, INK)
+    A.round_rect(364, 138, 370, 147, 0.8, None, outline=INK, w=0.9)
+    A.line([(313, 139), (313, 146)], INK, 1.0)
+    A.line([(309, 147), (317, 147)], INK, 1.0)
     # the water needle stays at 90 (the engine is always warm here)
-    A.line([T1, polar(T1, 27, 2)], (238, 238, 240), 1.6)
+    A.line([T1, polar(T1, 27, 2)], NEEDLE, 1.6)
     A.circle(T1[0], T1[1], 9.0, (34, 34, 36), outline=(196, 198, 202), w=1.4)
 
     # the screen in the middle
@@ -1127,40 +1140,41 @@ def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear):
     # oil (far left) and volts (far right), small round gauges at the ends of the pods
     O1, O2 = (6.0, 268.0), (672.0, 268.0)
     for C, s, word in ((O1, 1, "°C"), (O2, -1, "Volt")):
-        A.circle(C[0], C[1], 27, (12, 12, 13))
+        A.circle(C[0], C[1], 27, SMALL)
         for j, deg in enumerate((40, 70, 100, 130)):
-            tick(C, 19, 26, deg * s, 1.4 if j % 3 == 0 else 1.0, NUM)
-        A.text(C[0] - 4 * s, C[1] - 21, word, ARIAL_B, 6.2, NUM)
-        A.line([C, polar(C, 23, 85 * s)], (238, 238, 240), 1.6)
+            tick(C, 19, 26, deg * s, 1.4 if j % 3 == 0 else 1.0, INK)
+        A.text(C[0] - 4 * s, C[1] - 21, word, ARIAL_B, 6.2, INK)
+        A.line([C, polar(C, 23, 85 * s)], NEEDLE, 1.6)
         A.circle(C[0], C[1], 7.5, (34, 34, 36), outline=(196, 198, 202), w=1.2)
-    A.text(O1[0] + 18, O1[1] - 13, "150", ARIAL_B, 5.4, NUM)
-    A.text(O1[0] + 18, O1[1] + 14, "50", ARIAL_B, 5.4, NUM)
-    A.text(O2[0] - 18, O2[1] - 13, "16", ARIAL_B, 5.4, NUM)
-    A.text(O2[0] - 18, O2[1] + 14, "8", ARIAL_B, 5.4, NUM)
-    A.round_rect(O2[0] - 12, O2[1] + 20, O2[0] + 0, O2[1] + 27, 0.8, None, outline=NUM, w=0.8)
+    A.text(O1[0] + 18, O1[1] - 13, "150", ARIAL_B, 5.4, INK)
+    A.text(O1[0] + 18, O1[1] + 14, "50", ARIAL_B, 5.4, INK)
+    A.text(O2[0] - 18, O2[1] - 13, "16", ARIAL_B, 5.4, INK)
+    A.text(O2[0] - 18, O2[1] + 14, "8", ARIAL_B, 5.4, INK)
+    A.round_rect(O2[0] - 12, O2[1] + 20, O2[0] + 0, O2[1] + 27, 0.8, None, outline=INK, w=0.8)
 
     A.final = A.finish(A.S, blur=1.0, strength=0.25)
     sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
 
     # the lamps that light: traction control off (the skid car), the brake lamp when standing
     AMB = (246, 140, 20)
-    L = Art(REF, box, S=4, bg=(0, 0, 0))
+    LBG = (229, 229, 231) if gt else (0, 0, 0)  # (on a white face the lit lamp is a piece of that face)
+    L = Art(REF, box, S=4, bg=LBG)
     L.round_rect(165, 186, 178, 193, 2, None, outline=AMB, w=1.1)
     L.line([(163, 197), (168, 195), (173, 197), (178, 195)], AMB, 1.0)
     L.text(171.5, 201, "OFF", ARIAL_B, 4.2, AMB)
     L.final = L.finish(L.S, blur=1, strength=0.3)
-    sp.add_show(sp.box(L, (158, 180, 186, 206), black=True), "tcoff")
+    sp.add_show(sp.box(L, (158, 180, 186, 206), black=not gt), "tcoff")
     RD = (230, 30, 30)
-    B = Art(REF, box, S=4, bg=(0, 0, 0))
+    B = Art(REF, box, S=4, bg=LBG)
     B.circle(553, 206, 6.0, None, outline=RD, w=1.2)
     B.text(553, 206.5, "!", ARIAL_B, 8, RD)
     B.line([(545, 199), (543, 206), (545, 213)], RD, 1.0)
     B.line([(561, 199), (563, 206), (561, 213)], RD, 1.0)
     B.final = B.finish(B.S, blur=1, strength=0.3)
-    sp.add_show(sp.box(B, (538, 195, 568, 217), black=True), "parked")
+    sp.add_show(sp.box(B, (538, 195, 568, 217), black=not gt), "parked")
 
     # needles: long and white-silver, a dark hub with a bright rim
-    WN = (238, 238, 240)
+    WN = NEEDLE
     parts = [(-14, 0, 1.6, 1.9, WN), (0, 95, 1.9, 0.8, WN)]
     add_needle(sp, needle_sprite(sp, 96, 15, parts, hub=16.5, hub_col=(38, 38, 40), hub_line=(206, 208, 212)), C1[0], C1[1], "rpm", [(0, rev(0)), (10.5, rev(10.5))])
     add_needle(sp, needle_sprite(sp, 96, 15, parts, hub=16.5, hub_col=(38, 38, 40), hub_line=(206, 208, 212)), C2[0], C2[1], "kmh", SPD)
@@ -1181,3 +1195,8 @@ def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear):
     sp.readout("odo", C2[0] - 4, 306, "m", 6, "trip", NUM)
     sp.readout("du", C2[0] + 24, 306.5, "m", 2, "distUnit", DIM)
     return sp
+
+
+def r8gt(Spec, needle_sprite, add_needle, glyph, solid_gear):
+    """the Precision Type 42 V10 Lightweight (2011 R8 GT): the r8g1 cluster with the GT's white dials"""
+    return r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear, gt=True)

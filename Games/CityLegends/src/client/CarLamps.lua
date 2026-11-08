@@ -41,6 +41,7 @@ CarLamps.CARS = {
 	bugotti_veyron = true, bugotti_veyron_sport = true, bugotti_veyron_top = true,
 	bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true,
 	audy_r8 = true, -- (its shells cut from the 2010 model's own lamps, 2026-11-09)
+	audy_r8_lw = true, -- (the 2011 model's own lamps, 2026-11-09)
 } :: { [string]: boolean }
 
 function CarLamps.has(id: string?): boolean

@@ -1,0 +1,8 @@
+{
+ "HeadCore": [{"node": "headlight{S}_xenonhead", "off": 0.004}, {"node": "headlight{S}_drlwhite", "off": 0.004}],
+ "HeadGlass": [{"node": "glass{S}HL_glass", "absx": [0.62, 9], "off": 0.006}],
+ "TurnF": [{"node": "glass{S}HL_glass", "absx": [0, 0.62], "off": 0.006}, {"node": "mirror{S}_indicator", "off": 0.004}],
+ "Tail": [{"node": "taillight{S}_tail_light", "off": 0.005}, {"node": "taillight{S}_taillight2S", "off": 0.005}],
+ "Rev": [{"node": "taillight{S}_reverse", "off": 0.005}],
+ "TurnR": [{"node": "taillight{S}_indicator", "off": 0.005}]
+}

@@ -1,0 +1,145 @@
+{
+ "id": "audy_r8_lw",
+ "roles": {
+  "^paint($|[.])": "Paint",
+  "^non_damage": [
+   "Trim",
+   0.45,
+   0.0
+  ],
+  "^carbon": "Carbon",
+  "^light_mat": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "^grilla_1": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "^matte_mat": [
+   "Trim",
+   0.8,
+   0.0
+  ],
+  "^rubber": [
+   "Trim",
+   0.8,
+   0.0
+  ],
+  "^black_mat": [
+   "Trim",
+   0.45,
+   0.0
+  ],
+  "^plastic_2": [
+   "Trim",
+   0.5,
+   0.0
+  ],
+  "^plastic_1": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "^chassis": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "^chorme": [
+   "Trim",
+   0.12,
+   1.0
+  ],
+  "^black_glass": [
+   "Trim",
+   0.1,
+   0.0
+  ],
+  "^mirror": [
+   "Mirror",
+   0.06,
+   1.0
+  ],
+  "^metal_int": [
+   "Cabin",
+   0.45,
+   0.0
+  ],
+  "^jeather_interior": [
+   "Leather",
+   0.55,
+   0.0
+  ],
+  "^tela_int": [
+   "Suede",
+   0.85,
+   0.0
+  ],
+  "^gauge_int": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "^missing_texture": [
+   "Screen",
+   0.35,
+   0.0
+  ],
+  "^standardsurface1": [
+   "Rim",
+   0.3,
+   0.6
+  ],
+  "^raudi": [
+   "Rim",
+   0.28,
+   0.85
+  ]
+ },
+ "cut_islands": [
+  {
+   "mat": "CHORME",
+   "box": [
+    0.31,
+    -0.45,
+    0.72,
+    0.4,
+    -0.425,
+    0.76
+   ],
+   "limit": 0.03
+  },
+  {
+   "mat": "CHORME",
+   "box": [
+    -0.14,
+    0.78,
+    0.78,
+    0.19,
+    0.89,
+    0.83
+   ],
+   "limit": 0.04
+  },
+  {
+   "mat": "CHORME",
+   "box": [
+    -0.03,
+    1.18,
+    0.815,
+    0.09,
+    1.225,
+    0.85
+   ],
+   "limit": 0.03
+  }
+ ],
+ "hub_px": [
+  234.6,
+  164.2,
+  58
+ ]
+}
