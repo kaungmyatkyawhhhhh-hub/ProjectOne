@@ -1,0 +1,9 @@
+{
+ "source": "C:/Users/USER/ProjectOne/Games/CityLegends/build/svj/lambrini_svj63_cut.blend",
+ "note": "2026-11-08: the hole where the maker's shield was on the nose closed in the paint's own mesh",
+ "ops": [
+  {"op": "fill", "part": "Body_MAIN_PAINT", "boxes": [[-0.06, -2.5, 0.36, 0.06, -2.34, 0.49]], "max_span": 0.12}
+ ],
+ "export": ["Body_MAIN_PAINT"],
+ "out": "imports/retext/lambrini_svj63_nose.fbx"
+}

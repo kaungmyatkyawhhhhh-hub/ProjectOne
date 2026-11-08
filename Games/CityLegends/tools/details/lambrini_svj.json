@@ -1,0 +1,17 @@
+{"source": "build/svj/lambrini_svj_cut.blend",
+ "note": "Enfurecido LB834 ZVX: tail chevrons with blunt points, the maker's script on the back panel out (the nose shield: tools/logo_paint/retext/lambrini_svj.json); grille pictures diamond",
+ "samples": 20, "auto": true, "auto_names": ["far_rear", "far_front", "lamp"],
+ "ops": [
+  {"op": "drop", "part": "Body_A_PLAS_BLACK", "boxes": [[-0.11, 2.19, 0.73, 0.11, 2.225, 0.78]]},
+  {"op": "clip", "part": "Body_A_LIGHTS", "boxes": [[0.5, 1.85, 0.6, 0.88, 2.16, 0.8]], "max": 0.16, "n": [-1, 0, 0], "frac": 0.86, "group": 0.035, "mirror": true}
+ ],
+ "tiles": {
+  "Body_MAT_Details_Grid_01_014": {"colour": "tiles/lambrini_svj_Grid_01_014_colour.png", "normal": "tiles/lambrini_svj_Grid_01_014_normal.png", "pattern": "diamond"},
+  "Body_MAT_Details_Grid_02_005": {"colour": "tiles/lambrini_svj_Grid_02_005_colour.png", "normal": "tiles/lambrini_svj_Grid_02_005_normal.png", "pattern": "diamond"}
+ },
+ "out": "imports/details/lambrini_svj.fbx",
+ "shots": [{"name": "script", "eye": [0.1, 3.0, 0.85], "look": [0, 2.2, 0.75], "lens": 60},
+           {"name": "lampc", "eye": [0.8, 3.5, 0.95], "look": [0.62, 2.2, 0.75], "lens": 70},
+           {"name": "grid", "eye": [0.45, 3.0, 0.6], "look": [0.15, 2.15, 0.55], "lens": 60},
+           {"name": "side", "eye": [2.2, 0.6, 0.7], "look": [0.97, 0.55, 0.55], "lens": 45}]
+}

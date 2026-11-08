@@ -1,0 +1,174 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/547a11d1-4da6-41a3-806e-0115399e346d/scratchpad/lambo/final/done/sv.blend",
+ "overlay": [
+  "imports/retext/lambrini_lp750.fbx"
+ ],
+ "note": "Enfurecido LB834 ZV: exhaust ring's two rounded ends cut straight, tail chevrons with blunt points, side blade's lower end shorter; grille tiles diamond",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front",
+  "lamp",
+  "side"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Trim",
+   "boxes": [
+    [
+     -0.25,
+     2.0,
+     0.2,
+     0.25,
+     2.12,
+     0.33
+    ]
+   ],
+   "min": 0.4,
+   "frac": 0.975,
+   "n": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "op": "clip",
+   "part": "Body_Trim",
+   "boxes": [
+    [
+     -0.25,
+     2.0,
+     0.2,
+     0.25,
+     2.12,
+     0.33
+    ]
+   ],
+   "min": 0.4,
+   "frac": 0.975,
+   "n": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_Lens_Red",
+   "boxes": [
+    [
+     0.5,
+     1.85,
+     0.64,
+     0.88,
+     2.16,
+     0.8
+    ]
+   ],
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.86,
+   "mirror": true
+  },
+  {
+   "op": "clip",
+   "part": "Body_Trim",
+   "boxes": [
+    [
+     0.92,
+     0.3,
+     0.3,
+     1.04,
+     0.85,
+     0.85
+    ]
+   ],
+   "n": [
+    0,
+    -1,
+    -0.25
+   ],
+   "frac": 0.9,
+   "mirror": true
+  }
+ ],
+ "out": "imports/details/lambrini_lp750.fbx",
+ "shots": [
+  {
+   "name": "exhaust",
+   "eye": [
+    0.25,
+    2.75,
+    0.27
+   ],
+   "look": [
+    0,
+    2.05,
+    0.27
+   ],
+   "lens": 45,
+   "light": [
+    0.1,
+    2.6,
+    0.32
+   ],
+   "power": 15
+  },
+  {
+   "name": "rvent",
+   "eye": [
+    1.0,
+    3.3,
+    0.55
+   ],
+   "look": [
+    0.6,
+    2.05,
+    0.5
+   ],
+   "lens": 60
+  },
+  {
+   "name": "intake",
+   "eye": [
+    0.9,
+    -3.4,
+    0.45
+   ],
+   "look": [
+    0.6,
+    -2.3,
+    0.3
+   ],
+   "lens": 60
+  }
+ ],
+ "tiles": {
+  "Body_Grille": {
+   "colour": "tiles/lambrini_lp750_grille_colour.png",
+   "normal": "tiles/lambrini_lp750_grille_normal.png",
+   "pattern": "diamond"
+  },
+  "Body_Grille2": {
+   "colour": "tiles/lambrini_lp750_grille2_colour.png",
+   "normal": "tiles/lambrini_lp750_grille2_normal.png",
+   "pattern": "diamond"
+  },
+  "Body_Grille3": {
+   "colour": "tiles/lambrini_lp750_grille3_colour.png",
+   "normal": "tiles/lambrini_lp750_grille3_normal.png",
+   "pattern": "diamond"
+  },
+  "Body_Grille4": {
+   "colour": "tiles/lambrini_lp750_grille4_colour.png",
+   "normal": "tiles/lambrini_lp750_grille4_normal.png",
+   "pattern": "diamond"
+  }
+ }
+}

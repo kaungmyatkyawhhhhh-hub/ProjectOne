@@ -1,0 +1,256 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/547a11d1-4da6-41a3-806e-0115399e346d/scratchpad/lambo/final/done/lp700.blend",
+ "note": "Enfurecido LB834: exhaust surround's two points cut flat, tail chevrons with blunt points, side blade's lower end cut square; grille tiles diamond (details_tiles.py)",
+ "samples": 20,
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Trim",
+   "boxes": [
+    [
+     -0.25,
+     1.85,
+     0.2,
+     0.25,
+     2.3,
+     0.42
+    ]
+   ],
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.965,
+   "min": 0.4
+  },
+  {
+   "op": "clip",
+   "part": "Body_Trim",
+   "boxes": [
+    [
+     -0.25,
+     1.85,
+     0.2,
+     0.25,
+     2.3,
+     0.42
+    ]
+   ],
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.965,
+   "min": 0.4
+  },
+  {
+   "op": "clip",
+   "part": "Body_Base",
+   "boxes": [
+    [
+     -0.25,
+     1.85,
+     0.15,
+     0.25,
+     2.3,
+     0.42
+    ]
+   ],
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.965,
+   "min": 0.4
+  },
+  {
+   "op": "clip",
+   "part": "Body_Base",
+   "boxes": [
+    [
+     -0.25,
+     1.85,
+     0.15,
+     0.25,
+     2.3,
+     0.42
+    ]
+   ],
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.965,
+   "min": 0.4
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_Lens_Red",
+   "boxes": [
+    [
+     0.5,
+     1.9,
+     0.69,
+     0.87,
+     2.16,
+     0.83
+    ]
+   ],
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.86,
+   "mirror": true
+  },
+  {
+   "op": "clip",
+   "part": "Body_Trim",
+   "boxes": [
+    [
+     0.92,
+     0.3,
+     0.3,
+     1.03,
+     0.8,
+     0.8
+    ]
+   ],
+   "n": [
+    0,
+    -1,
+    -0.25
+   ],
+   "frac": 0.9,
+   "mirror": true
+  }
+ ],
+ "out": "imports/details/lambrini_lp700.fbx",
+ "shots": [
+  {
+   "name": "far_rear",
+   "eye": [
+    2.6,
+    8.0,
+    2.3
+   ],
+   "look": [
+    0,
+    0.8,
+    0.5
+   ],
+   "lens": 40
+  },
+  {
+   "name": "far_front",
+   "eye": [
+    -3.2,
+    -6.5,
+    1.6
+   ],
+   "look": [
+    0,
+    -0.5,
+    0.5
+   ],
+   "lens": 40
+  },
+  {
+   "name": "exhaust",
+   "eye": [
+    0.25,
+    3.3,
+    0.5
+   ],
+   "look": [
+    0,
+    2.35,
+    0.32
+   ],
+   "lens": 60
+  },
+  {
+   "name": "lamp",
+   "eye": [
+    0.75,
+    3.5,
+    0.9
+   ],
+   "look": [
+    0.6,
+    2.2,
+    0.8
+   ],
+   "lens": 70
+  },
+  {
+   "name": "side",
+   "eye": [
+    2.2,
+    0.6,
+    0.7
+   ],
+   "look": [
+    0.97,
+    0.55,
+    0.55
+   ],
+   "lens": 45
+  },
+  {
+   "name": "intake",
+   "eye": [
+    0.9,
+    -3.3,
+    0.5
+   ],
+   "look": [
+    0.55,
+    -2.25,
+    0.36
+   ],
+   "lens": 70
+  },
+  {
+   "name": "rvent",
+   "eye": [
+    1.0,
+    3.3,
+    0.6
+   ],
+   "look": [
+    0.6,
+    2.05,
+    0.57
+   ],
+   "lens": 70
+  }
+ ],
+ "tiles": {
+  "Body_Grille": {
+   "colour": "tiles/lambrini_lp700_grille_colour.png",
+   "normal": "tiles/lambrini_lp700_grille_normal.png",
+   "pattern": "diamond"
+  },
+  "Body_Grille2": {
+   "colour": "tiles/lambrini_lp700_grille2_colour.png",
+   "normal": "tiles/lambrini_lp700_grille2_normal.png",
+   "pattern": "diamond"
+  },
+  "Body_Grille3": {
+   "colour": "tiles/lambrini_lp700_grille3_colour.png",
+   "normal": "tiles/lambrini_lp700_grille3_normal.png",
+   "pattern": "hex"
+  },
+  "Body_Grille4": {
+   "colour": "tiles/lambrini_lp700_grille4_colour.png",
+   "normal": "tiles/lambrini_lp700_grille4_normal.png",
+   "pattern": "diamond"
+  }
+ }
+}

@@ -1,0 +1,62 @@
+{
+ "lambrini_lp700": {
+  "Body_Grille": {
+   "colour": "rbxassetid://85529493439698",
+   "normal": "rbxassetid://117136735262511"
+  },
+  "Body_Grille2": {
+   "colour": "rbxassetid://80565829220568",
+   "normal": "rbxassetid://118540448628230"
+  },
+  "Body_Grille3": {
+   "colour": "rbxassetid://106270886343848",
+   "normal": "rbxassetid://132345541749040"
+  },
+  "Body_Grille4": {
+   "normal": "rbxassetid://123158052490006",
+   "colour": "rbxassetid://113024292173661"
+  }
+ },
+ "lambrini_lp750": {
+  "Body_Grille": {
+   "normal": "rbxassetid://136311507060933",
+   "colour": "rbxassetid://93228352032792"
+  },
+  "Body_Grille2": {
+   "normal": "rbxassetid://133778245015121",
+   "colour": "rbxassetid://118413955616676"
+  },
+  "Body_Grille3": {
+   "colour": "rbxassetid://97496182510482",
+   "normal": "rbxassetid://70449022777756"
+  },
+  "Body_Grille4": {
+   "colour": "rbxassetid://116900576729034",
+   "normal": "rbxassetid://98711219473276"
+  }
+ },
+ "lambrini_svj": {
+  "Body_MAT_Details_Grid_01_014": {
+   "colour": "rbxassetid://129396859357942",
+   "normal": "rbxassetid://122579665091614"
+  },
+  "Body_MAT_Details_Grid_02_005": {
+   "colour": "rbxassetid://109757652460336",
+   "normal": "rbxassetid://98960156022157"
+  }
+ },
+ "lambrini_svj63": {
+  "Body_Grille1A_Mat": {
+   "normal": "rbxassetid://109925474542307",
+   "colour": "rbxassetid://97078710665305"
+  },
+  "Body_Grille2A_Mat": {
+   "colour": "rbxassetid://103889096688985",
+   "normal": "rbxassetid://81210956768689"
+  },
+  "Body_Grille3A_Mat": {
+   "normal": "rbxassetid://130317982016032",
+   "colour": "rbxassetid://98173933966655"
+  }
+ }
+}

@@ -1,0 +1,10 @@
+{
+ "source": "C:/Users/USER/ProjectOne/Games/CityLegends/build/svj/lambrini_svj_cut.blend",
+ "note": "2026-11-08: the maker's shield on the nose taken into the paint (body colour, no picture): a sheet over its hole showed edges on the nose's crease",
+ "ops": [
+  {"op": "move", "part": "Body_MAT_Details_EXT_129", "to": "Body_Paint_Fill", "like": "Body_A_CAR_PAINT", "boxes": [[-0.05, -2.47, 0.39, 0.05, -2.37, 0.46]]}
+ ],
+ "export": ["Body_MAT_Details_EXT_129", "Body_Paint_Fill"],
+ "out": "imports/retext/lambrini_svj.fbx",
+ "like": {"Body_Paint_Fill": "Body_A_CAR_PAINT"}
+}
