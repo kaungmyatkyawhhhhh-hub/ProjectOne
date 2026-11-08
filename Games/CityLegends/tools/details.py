@@ -139,6 +139,14 @@ for path in job.get("overlay", []):
             CAR.append(o)
             continue
         tgt = lst[0]
+        bef = rep.get(key, {}).get("before")
+        if len(lst) > 1 and bef:
+            # (parts of one name: the one whose box matches the job's "before" box)
+            want = np.array(bef[1]) - np.array(bef[0])
+            def gap(c):
+                b = box_of(c)
+                return np.abs((np.array(b[1]) - np.array(b[0])) - want).sum() if b else 1e9
+            tgt = min(lst, key=gap)
         mats = list(tgt.data.materials)
         me = o.data.copy()
         me.transform(tgt.matrix_world.inverted() @ o.matrix_world)
@@ -297,6 +305,7 @@ def put(o, faces, fresh=False):
         me.normals_split_custom_set([tuple((Ni @ Vector(n)).normalized()) for n in nor[: len(me.loops)]])
     ob = bpy.data.objects.new(o.name + "_add", me)
     sc.collection.objects.link(ob)
+    ob.matrix_world = o.matrix_world.copy()  # (its points are in o's space: a pack's parts sit under a scaled, turned group)
     with bpy.context.temp_override(active_object=o, object=o, selected_objects=[o, ob], selected_editable_objects=[o, ob]):
         bpy.ops.object.join()
 
@@ -687,17 +696,26 @@ before = {}
 
 
 def touch(o):
-    n = base(o.name)
-    if n not in before:
-        before[n] = box_of(o)
-        touched.append(n)
+    if o.name not in before:
+        before[o.name] = box_of(o)
+        touched.append(o)
+
+
+def parts_named(name):
+    """every object of that name (some cars have many parts of one name); "Name#faces" picks one"""
+    if "#" in name:
+        return [part(name)]
+    lst = [o for o in CAR if base(o.name) == name]
+    if not lst:
+        part(name)  # (prints the names there are and stops)
+    return lst
 
 
 def run_ops(view):
     for op in job.get("ops", []):
         kind = op["op"]
-        o = part(op["part"])
         if kind == "fin":
+            o = part(op["part"])
             fs = op_fin(op, o)
             if op.get("mirror"):
                 fs += op_fin(op, o, mirror=True)
@@ -707,40 +725,44 @@ def run_ops(view):
                 touch(o)
                 put(o, fs, fresh=True)
             continue
-        comps, _ = pieces_in(o, boxes_of(op), op)
-        print("DETAILS", kind, base(o.name), len(comps), "pieces")
-        if not comps:
+        found = 0
+        for o in parts_named(op["part"]):
+            comps, _ = pieces_in(o, boxes_of(op), op)
+            if not comps:
+                continue
+            found += len(comps)
+            print("DETAILS", kind, base(o.name), len(comps), "pieces")
+            if view:
+                show_mark(take(o, comps, remove=False))
+                continue
+            touch(o)
+            faces = take(o, comps)
+            fresh = kind in ("shape", "clip", "scale")
+            if kind == "drop":
+                continue
+            if kind == "shape":
+                faces = op_shape(op, faces)
+            elif kind == "clip":
+                pt, nn = list(op.get("p", (0, 0, 0))), list(op["n"])
+                pt = [pt[0] + OFF.x, pt[1] + OFF.y, pt[2] + OFF.z]
+                if op.get("mirror"):
+                    left = [f for f in faces if np.mean([c[0][0] for c in f[1]]) - OFF.x < 0]
+                    right = [f for f in faces if np.mean([c[0][0] for c in f[1]]) - OFF.x >= 0]
+                    side_l = (pt[0] - OFF.x) < 0
+                    a, b = (left, right) if side_l else (right, left)
+                    op_clip(op, a, pt, nn)
+                    op_clip(op, b, [2 * OFF.x - pt[0], pt[1], pt[2]], [-nn[0], nn[1], nn[2]])
+                else:
+                    op_clip(op, faces, pt, nn)
+            elif kind == "respace":
+                faces = op_respace(op, faces)
+            elif kind == "scale":
+                faces = op_scale(op, faces)
+            elif kind == "move":
+                faces = op_move(op, faces)
+            put(o, faces, fresh=fresh)
+        if not found:
             print("DETAILS warning: no pieces for", json.dumps(op)[:200])
-            continue
-        if view:
-            show_mark(take(o, comps, remove=False))
-            continue
-        touch(o)
-        faces = take(o, comps)
-        fresh = kind in ("shape", "clip", "scale")
-        if kind == "drop":
-            continue
-        if kind == "shape":
-            faces = op_shape(op, faces)
-        elif kind == "clip":
-            pt, nn = list(op.get("p", (0, 0, 0))), list(op["n"])
-            pt = [pt[0] + OFF.x, pt[1] + OFF.y, pt[2] + OFF.z]
-            if op.get("mirror"):
-                left = [f for f in faces if np.mean([c[0][0] for c in f[1]]) - OFF.x < 0]
-                right = [f for f in faces if np.mean([c[0][0] for c in f[1]]) - OFF.x >= 0]
-                side_l = (pt[0] - OFF.x) < 0
-                a, b = (left, right) if side_l else (right, left)
-                op_clip(op, a, pt, nn)
-                op_clip(op, b, [2 * OFF.x - pt[0], pt[1], pt[2]], [-nn[0], nn[1], nn[2]])
-            else:
-                op_clip(op, faces, pt, nn)
-        elif kind == "respace":
-            faces = op_respace(op, faces)
-        elif kind == "scale":
-            faces = op_scale(op, faces)
-        elif kind == "move":
-            faces = op_move(op, faces)
-        put(o, faces, fresh=fresh)
 
 
 _lo = np.min([b[0] for b in (box_of(o) for o in CAR) if b], 0)
@@ -787,10 +809,14 @@ if job.get("dump_tiles"):
                 if not key:
                     continue
                 path = "%s_tile_%s_%s.png" % (PREFIX, base(o.name), key)
-                im = n.image.copy()
-                im.filepath_raw = path
-                im.file_format = "PNG"
-                im.save()
+                try:
+                    im = n.image.copy()
+                    im.filepath_raw = path
+                    im.file_format = "PNG"
+                    im.save()
+                except RuntimeError as e:
+                    print("DETAILS tile skipped", base(o.name), key, str(e)[:80])
+                    continue
                 print("DETAILS tile", base(o.name), key, n.image.size[:], path)
 CAM = setup_render()
 listing()
@@ -828,18 +854,23 @@ run_ops(view=False)
 swap_tiles()
 render("after")
 
-export = job.get("export", touched)
+export = [part(n) for n in job["export"]] if "export" in job else touched
 if not export:
     # (pictures only: nothing to upload as a model)
     print("DETAILS no mesh changes, pictures only")
     sys.exit(0)
 report = {}
 obs = []
-for n in export:
-    o = part(n)
+keys = {}
+for o in export:
     name = base(o.name)
     lo, hi = box_of(o)
-    report[name] = {"before": before.get(name), "after": [lo, hi], "faces": len(o.data.polygons), "part": name}
+    b = before.get(o.name)
+    # (parts of one name get a name each in the file: name__<faces before>; "part" keeps the real one for DetailsApply)
+    same = [x for x in export if base(x.name) == name]
+    key = name if len(same) == 1 else "%s__%d" % (name, len(o.data.polygons))
+    report[key] = {"before": b, "after": [lo, hi], "faces": len(o.data.polygons), "part": name}
+    keys[o] = key
     obs.append(o)
 report["__like"] = {}
 for o in obs:
@@ -851,7 +882,7 @@ for o in list(bpy.data.objects):
     if o not in obs:
         bpy.data.objects.remove(o)
 for o in obs:
-    o.name = base(o.name)
+    o.name = keys[o]
 bpy.ops.object.select_all(action="DESELECT")
 for o in obs:
     o.select_set(True)

@@ -1,0 +1,190 @@
+{
+ "source": "imports/new_cars/cars_26.fbx",
+ "root": "bugotti_veyron",
+ "overlay": [
+  "imports/retext/bugotti_veyron.fbx"
+ ],
+ "note": "Velocit\u00e9 Noir Origine: the third brake light shorter at both ends, the exhaust surround's sides straighter; the diamond grille mesh -> hexagons",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_detail_glass_red",
+   "boxes": [
+    [
+     -0.3,
+     2.06,
+     0.87,
+     0.3,
+     2.12,
+     0.91
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_detail_glass_red",
+   "boxes": [
+    [
+     -0.3,
+     2.06,
+     0.87,
+     0.3,
+     2.12,
+     0.91
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_lights_chrome",
+   "boxes": [
+    [
+     -0.3,
+     2.06,
+     0.87,
+     0.3,
+     2.12,
+     0.91
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_lights_chrome",
+   "boxes": [
+    [
+     -0.3,
+     2.06,
+     0.87,
+     0.3,
+     2.12,
+     0.91
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_misc",
+   "boxes": [
+    [
+     -0.15,
+     2.13,
+     0.31,
+     0.15,
+     2.21,
+     0.5
+    ]
+   ],
+   "min": 0.2,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.97,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_misc",
+   "boxes": [
+    [
+     -0.15,
+     2.13,
+     0.31,
+     0.15,
+     2.21,
+     0.5
+    ]
+   ],
+   "min": 0.2,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.97,
+   "group": 0.05
+  }
+ ],
+ "tiles": {
+  "Body_grille1": {
+   "colour": "tiles/bugotti_veyron__grille1_colour.png"
+  }
+ },
+ "out": "imports/details/bugotti_veyron.fbx",
+ "shots": [
+  {
+   "name": "brake",
+   "eye": [
+    0.4,
+    3.19,
+    1.2429999999999999
+   ],
+   "look": [
+    0.0,
+    2.09,
+    0.893
+   ],
+   "lens": 70
+  },
+  {
+   "name": "exhaust",
+   "eye": [
+    0.35,
+    3.17,
+    0.52
+   ],
+   "look": [
+    0.0,
+    2.17,
+    0.4
+   ],
+   "lens": 55,
+   "light": [
+    0.1,
+    2.9699999999999998,
+    0.6000000000000001
+   ],
+   "power": 15
+  }
+ ]
+}

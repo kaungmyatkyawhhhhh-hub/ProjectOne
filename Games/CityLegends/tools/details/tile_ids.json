@@ -178,5 +178,20 @@
    "colour": "rbxassetid://88896478723779",
    "normal": "rbxassetid://129508325957236"
   }
+ },
+ "bugotti_chiron": {
+  "Body_ChironMI_Grid_A1": {
+   "colour": "rbxassetid://99464595736250"
+  }
+ },
+ "bugotti_chiron_pursport": {
+  "Body_Bugatti_ChironRMS_2020Gr": {
+   "colour": "rbxassetid://123402712309531"
+  }
+ },
+ "bugotti_veyron": {
+  "Body_grille1": {
+   "colour": "rbxassetid://103798603397541"
+  }
  }
 }

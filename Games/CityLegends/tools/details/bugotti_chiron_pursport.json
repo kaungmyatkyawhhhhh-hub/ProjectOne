@@ -1,0 +1,146 @@
+{
+ "source": "imports/new_cars/bugatti_cluster_fix.fbx",
+ "root": "bugotti_chiron_pursport",
+ "overlay": [
+  "imports/retext/bugotti_chiron_pursport.fbx"
+ ],
+ "note": "Velocit\u00e9 Noir \u00c9clair Pure: the middle of the tail light shorter at both ends, the exhaust grille's ends cut; its grille mesh -> diamonds",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Bugatti_ChironRMS_2020Li",
+   "boxes": [
+    [
+     -0.3,
+     2.15,
+     0.76,
+     0.3,
+     2.2,
+     0.79
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Bugatti_ChironRMS_2020Li",
+   "boxes": [
+    [
+     -0.3,
+     2.15,
+     0.76,
+     0.3,
+     2.2,
+     0.79
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Bugatti_ChironRMS_2020Gr",
+   "boxes": [
+    [
+     -0.3,
+     2.13,
+     0.2,
+     0.3,
+     2.22,
+     0.37
+    ]
+   ],
+   "min": 0.45,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.98,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Bugatti_ChironRMS_2020Gr",
+   "boxes": [
+    [
+     -0.3,
+     2.13,
+     0.2,
+     0.3,
+     2.22,
+     0.37
+    ]
+   ],
+   "min": 0.45,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.98,
+   "group": 0.05
+  }
+ ],
+ "tiles": {
+  "Body_Bugatti_ChironRMS_2020Gr": {
+   "colour": "tiles/bugotti_chiron_pursport__gr_colour.png"
+  }
+ },
+ "out": "imports/details/bugotti_chiron_pursport.fbx",
+ "shots": [
+  {
+   "name": "brake",
+   "eye": [
+    0.4,
+    3.275,
+    1.123
+   ],
+   "look": [
+    0.0,
+    2.175,
+    0.773
+   ],
+   "lens": 70
+  },
+  {
+   "name": "exhaust",
+   "eye": [
+    0.35,
+    3.18,
+    0.41
+   ],
+   "look": [
+    0.0,
+    2.18,
+    0.29
+   ],
+   "lens": 55,
+   "light": [
+    0.1,
+    2.9800000000000004,
+    0.49
+   ],
+   "power": 15
+  }
+ ]
+}

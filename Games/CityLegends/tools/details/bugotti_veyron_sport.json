@@ -1,0 +1,165 @@
+{
+ "source": "imports/new_cars/bugatti_cluster_fix.fbx",
+ "root": "bugotti_veyron_sport",
+ "overlay": [
+  "imports/retext/bugotti_veyron_sport.fbx"
+ ],
+ "note": "Velocit\u00e9 Noir Origine Super Sport: the third brake light shorter at both ends, the two exhaust surrounds' outer ends cut",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Bugatti_VeyronSuperSport",
+   "boxes": [
+    [
+     -0.3,
+     2.06,
+     0.79,
+     0.3,
+     2.12,
+     0.83
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Bugatti_VeyronSuperSport",
+   "boxes": [
+    [
+     -0.3,
+     2.06,
+     0.79,
+     0.3,
+     2.12,
+     0.83
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_RED_L",
+   "boxes": [
+    [
+     -0.3,
+     2.06,
+     0.79,
+     0.3,
+     2.12,
+     0.83
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_RED_L",
+   "boxes": [
+    [
+     -0.3,
+     2.06,
+     0.79,
+     0.3,
+     2.12,
+     0.83
+    ]
+   ],
+   "min": 0.35,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_CHROME",
+   "boxes": [
+    [
+     0.0,
+     2.1,
+     0.25,
+     0.3,
+     2.23,
+     0.37
+    ]
+   ],
+   "min": 0.2,
+   "max": 0.3,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.96,
+   "mirror": true
+  }
+ ],
+ "tiles": {},
+ "out": "imports/details/bugotti_veyron_sport.fbx",
+ "shots": [
+  {
+   "name": "brake",
+   "eye": [
+    0.4,
+    3.188,
+    1.162
+   ],
+   "look": [
+    0.0,
+    2.088,
+    0.812
+   ],
+   "lens": 70
+  },
+  {
+   "name": "exhaust",
+   "eye": [
+    0.35,
+    3.17,
+    0.43
+   ],
+   "look": [
+    0.0,
+    2.17,
+    0.31
+   ],
+   "lens": 55,
+   "light": [
+    0.1,
+    2.9699999999999998,
+    0.51
+   ],
+   "power": 15
+  }
+ ]
+}

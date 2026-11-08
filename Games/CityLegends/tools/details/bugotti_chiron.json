@@ -1,0 +1,187 @@
+{
+ "source": "imports/details/src/bugatti_chirons.fbx",
+ "root": "bugotti_chiron",
+ "note": "Velocit\u00e9 Noir \u00c9clair: the middle of the tail light shorter at both ends, the exhaust frame's ends cut; the grille mesh -> diamonds",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_ChironMI_Light1",
+   "boxes": [
+    [
+     -0.4,
+     2.14,
+     0.78,
+     0.4,
+     2.19,
+     0.81
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_ChironMI_Light1",
+   "boxes": [
+    [
+     -0.4,
+     2.14,
+     0.78,
+     0.4,
+     2.19,
+     0.81
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_ChironMI_Glass1",
+   "boxes": [
+    [
+     -0.4,
+     2.14,
+     0.78,
+     0.4,
+     2.19,
+     0.81
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_ChironMI_Glass1",
+   "boxes": [
+    [
+     -0.4,
+     2.14,
+     0.78,
+     0.4,
+     2.19,
+     0.81
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_ChironMI_Exhaust1",
+   "boxes": [
+    [
+     -0.35,
+     2.05,
+     0.2,
+     0.35,
+     2.28,
+     0.42
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.98,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_ChironMI_Exhaust1",
+   "boxes": [
+    [
+     -0.35,
+     2.05,
+     0.2,
+     0.35,
+     2.28,
+     0.42
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.98,
+   "group": 0.05
+  }
+ ],
+ "tiles": {
+  "Body_ChironMI_Grid_A1": {
+   "colour": "tiles/bugotti_chiron__chironmi_grid_a1_colour.png"
+  }
+ },
+ "out": "imports/details/bugotti_chiron.fbx",
+ "shots": [
+  {
+   "name": "brake",
+   "eye": [
+    0.4,
+    3.266,
+    1.143
+   ],
+   "look": [
+    0.0,
+    2.166,
+    0.793
+   ],
+   "lens": 70
+  },
+  {
+   "name": "exhaust",
+   "eye": [
+    0.35,
+    3.17,
+    0.43
+   ],
+   "look": [
+    0.0,
+    2.17,
+    0.31
+   ],
+   "lens": 55,
+   "light": [
+    0.1,
+    2.9699999999999998,
+    0.51
+   ],
+   "power": 15
+  }
+ ]
+}

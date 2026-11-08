@@ -1,0 +1,119 @@
+{
+ "source": "imports/new_cars/bugatti_cluster_fix.fbx",
+ "root": "bugotti_chiron_supersport",
+ "note": "Velocit\u00e9 Noir \u00c9clair Super Sport: the middle of the tail light shorter at both ends (its silver mesh is one big picture, not a small repeating one)",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_csBugatti_ChironSuperSpo",
+   "boxes": [
+    [
+     -0.4,
+     2.25,
+     0.76,
+     0.4,
+     2.3,
+     0.8
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_csBugatti_ChironSuperSpo",
+   "boxes": [
+    [
+     -0.4,
+     2.25,
+     0.76,
+     0.4,
+     2.3,
+     0.8
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_red_glass",
+   "boxes": [
+    [
+     -0.4,
+     2.25,
+     0.76,
+     0.4,
+     2.3,
+     0.8
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_red_glass",
+   "boxes": [
+    [
+     -0.4,
+     2.25,
+     0.76,
+     0.4,
+     2.3,
+     0.8
+    ]
+   ],
+   "min": 0.5,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  }
+ ],
+ "tiles": {},
+ "out": "imports/details/bugotti_chiron_supersport.fbx",
+ "shots": [
+  {
+   "name": "brake",
+   "eye": [
+    0.4,
+    3.378,
+    1.129
+   ],
+   "look": [
+    0.0,
+    2.278,
+    0.779
+   ],
+   "lens": 70
+  }
+ ]
+}
