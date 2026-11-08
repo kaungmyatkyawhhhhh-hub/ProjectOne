@@ -596,7 +596,7 @@ Config.DrivingFeel = {
 		-- grip in g = the tyre kind (cup 1.08, sport 1.0, touring 0.9, all-season 0.85) x GameGrip x
 		-- (HandlingBase + HandlingK x the car's Handling) x (tyre width / 245 mm) ^ WidthPow. Lower GameGrip = slides
 		-- sooner and feels heavier; higher = more grip
-		GameGrip = 1.6,
+		GameGrip = 1.5,
 		HandlingBase = 0.75,
 		HandlingK = 0.35,
 		PartsGrip = 1.6, -- grip parts (tyres): each 0.01 of Handling they add gives this x 1% more grip
@@ -605,18 +605,22 @@ Config.DrivingFeel = {
 		FrontPeakK = 1.12, -- ...the fronts a little later (a touch of understeer: stable at speed)
 		SlideGrip = 0.72, -- grip left well past the peak (falls off smoothly, never ice)
 		LoadSens = 0.12, -- a tyre with more load grips a little less per kg (weight transfer matters)
-		LongGrip = 1.05, -- drive and braking grip over cornering grip
+		LongGrip = 1.15, -- drive and braking grip over cornering grip (a tyre grips a little more straight ahead)
 		SpinGrip = 0.8, -- spinning tyres (no traction control): the push left...
 		LockGrip = 0.8, -- ...and locked ones (no ABS, handbrake)
 		SlideSide = 0.65, -- a spinning or locked axle loses this share of its cornering grip
 		BrakeK = 1, -- the brakes stop each car in its real distance (from 100 km/h, CarPhysicsData.stop) x this
 		DownforceK = 2, -- each car's real downforce (kg at 250 km/h) counts this much (planted at speed)...
 		ClassDownforce = { Supercar = 0.06, Hypercar = 0.1 } :: { [string]: number }, -- ...plus this (g at 250 km/h)
+		AbsOffSqueeze = 1.6, -- ABS off: a full pedal asks this much more than the brakes need (the wheels lock)...
+		LockStop = 0.72, -- ...and locked front wheels stop the car this share as well as the anti-lock does (longer stops)
+		ReserveMax = 2.2, -- the most a powerful car's engine can overpower its tyres in the low gears (traction off)
 		KinFrom = 3, -- slower than this (studs/s) the car just goes where its wheels point...
 		KinTo = 12, -- ...blended in up to here
 		-- countersteer help (Settings, on for everyone but "Pro"): the front wheels follow the slide
-		HelpK = 0.9,
-		HelpMax = 0.35, -- radians at most (20 degrees)
+		HelpK = 1,
+		HelpMax = 0.45, -- radians at most (26 degrees)
+		HelpYaw = 3, -- ...and a car turning further into its slide is slowed in its turn (per second)
 		-- stability control: On / Sport
 		EscUnder = 0.00006, -- how much the asked-for turn shrinks with speed (understeer gradient)
 		EscTol = 0.06, -- yaw-rate error allowed (radians/s): On...

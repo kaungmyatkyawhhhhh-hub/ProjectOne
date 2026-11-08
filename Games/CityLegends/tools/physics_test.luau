@@ -115,8 +115,11 @@ local function frame(c, inp, dt)
 		if rev >= c.up and c.g < p.gears and inp.throttle > 0.5 then
 			c.g += 1
 			c.cut = p.shift
-		elseif c.g > 1 and rev < 0.28 then
+		elseif c.g > 1 and rev < (if inp.throttle > 0.8 then 0.55 else 0.28) and frac / CarPhysics.gearHi(p, c.g - 1) < 0.82 then
+			-- (Driving's kick-down)
 			c.g -= 1
+			c.cut = 0.12
+			c.downs = (c.downs or 0) + 1
 		end
 		if inp.throttle > 0 and frac < 1 then
 			drive = c.accel * c.k * CarPhysics.torqueCurve(math.max(rev, 0.3)) * CarPhysics.gearMul(p, c.g) * inp.throttle
@@ -125,7 +128,7 @@ local function frame(c, inp, dt)
 		end
 	end
 	c.brakeIn = (c.brakeIn or 0) + (inp.brake - (c.brakeIn or 0)) * math.min(1, dt * 7)
-	local brake = c.brake * c.brakeIn
+	local brake = c.brake * c.brakeIn * (c.brakeMul or 1)
 	if c.brakeIn > 0.8 and inp.abs and Config.spsToMph(vx) > 12 then
 		c.absT += dt
 		brake *= 1 - DF.AbsPulse * (0.5 + 0.5 * math.sin(c.absT * math.pi * 2 * DF.AbsHz))
@@ -137,7 +140,7 @@ local function frame(c, inp, dt)
 		vy = c.vy,
 		r = c.r,
 		delta = inp.steer * maxAngle,
-		drive = drive,
+		drive = if drive > 0 then drive * CarPhysics.reserve(p, vx, c.top, inp.tc or 2) else drive,
 		brake = brake,
 		handbrake = inp.handbrake == true,
 		ax = c.ax,
@@ -147,6 +150,7 @@ local function frame(c, inp, dt)
 		esc = inp.esc or 2,
 		abs = inp.abs ~= false,
 		help = inp.help or 1,
+		pedal = c.brakeIn,
 	}, dt)
 	c.ax = out.ax
 	local dragA = (2 + c.drag * vx * vx) * (if vx > 0.5 then 1 elseif vx < -0.5 then -1 else 0)
@@ -194,6 +198,7 @@ for _, spec in list do
 		end
 	end
 	local topMph = Config.spsToMph(c.vx)
+	check((c.downs or 0) == 0, string.format("%s: flat out the automatic never shifts back down (%d)", id, c.downs or 0))
 	local want60 = spec.ZeroToSixty * (if spec.Electric then CarPhysics.EV_LAUNCH else 1)
 	check(t60 and math.abs(t60 / want60 - 1) <= 0.05, string.format("%s 0-60 %.2f s (spec %.2f)", id, t60 or -1, want60))
 	check(math.abs(topMph / spec.TopSpeed - 1) <= 0.05, string.format("%s top %.0f mph (spec %d)", id, topMph, spec.TopSpeed))
@@ -206,6 +211,14 @@ for _, spec in list do
 	end
 	local stopM = b.x * 0.35
 	check(math.abs(stopM / d.stop - 1) <= 0.05, string.format("%s 100-0 %.1f m (real %.1f)", id, stopM, d.stop))
+	-- ABS off: the wheels lock and it stops later
+	local bo = newCar(spec)
+	bo.vx = 100 / 3.6 / 0.35
+	bo.brakeMul = mods.Config.DrivingFeel.Axle.AbsOffSqueeze
+	while bo.vx > 0.05 and bo.t < 20 do
+		frame(bo, { throttle = 0, brake = 1, steer = 0, abs = false }, DT)
+	end
+	check(bo.x * 0.35 > stopM * 1.05, string.format("%s: ABS off stops later (%.1f m vs %.1f)", id, bo.x * 0.35, stopM))
 	-- 60-0 mph
 	local b6 = newCar(spec)
 	b6.vx = Config.mphToSps(60)
@@ -223,6 +236,22 @@ for _, spec in list do
 		frame(s, { throttle = thr, brake = 0, steer = steer, esc = 0, help = 0 }, DT)
 		latMax = math.max(latMax, math.abs(s.vx * s.r) / G)
 	end
+	-- stability control doesn't take away cornering grip: a steady corner at 50 mph, 60% lock, on vs off
+	local function steady(esc)
+		local q = newCar(spec)
+		q.vx = Config.mphToSps(50)
+		local gmax = 0
+		for i = 1, 240 do
+			local thr = math.clamp((Config.mphToSps(50) - q.vx) * 0.1 + 0.15, 0, 1)
+			frame(q, { throttle = thr, brake = 0, steer = 0.6, esc = esc, help = 1 }, DT)
+			if i > 120 then
+				gmax = math.max(gmax, math.abs(q.vx * q.r) / G)
+			end
+		end
+		return gmax
+	end
+	local gOn, gOff = steady(2), steady(0)
+	check(gOn >= gOff * 0.85, string.format("%s: stability control keeps the corner grip (%.2f g on, %.2f off)", id, gOn, gOff))
 	-- a step of steering at 100 mph with stability control on: no spin, settles
 	local st = newCar(spec)
 	st.vx = math.min(Config.mphToSps(100), st.top * 0.8)
@@ -266,6 +295,10 @@ for _, spec in list do
 			frame(o, { throttle = 0.2, brake = 0, steer = 0, esc = 0, tc = 0, help = 1 }, DT)
 		end
 		caught = math.abs(math.atan2(o.vy, math.max(o.vx, 1))) < math.rad(12) and math.abs(o.r) < 0.6
+		-- and a powerful rear-drive car really does step out (traction and stability off)
+		if d.drive == "RWD" and c.p.reserve > 1.6 then
+			check(o.maxBeta > math.rad(6), string.format("%s: power oversteer with the aids off (%.1f deg)", id, math.deg(o.maxBeta)))
+		end
 	end
 	check(caught, id .. " a power slide is caught with the countersteer help")
 	table.insert(rows, string.format("| %s | %.2f / %.2f | %.0f / %d | %.1f / %.1f | %.0f | %.2f |", id, t60 or -1, want60, topMph, spec.TopSpeed, stopM, d.stop, stop60ft, latMax))

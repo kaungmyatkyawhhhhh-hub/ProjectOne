@@ -401,7 +401,7 @@ local function readInput(): (number, number, number, boolean, boolean)
 	-- Studio test drives (Claude's road checks): a test script drives through player attributes
 	local tester = Players.LocalPlayer
 	if RunService:IsStudio() and tester:GetAttribute("TestDrive") then
-		return tester:GetAttribute("TestThrottle") or 0, tester:GetAttribute("TestBrake") or 0, tester:GetAttribute("TestSteer") or 0, false, false
+		return tester:GetAttribute("TestThrottle") or 0, tester:GetAttribute("TestBrake") or 0, tester:GetAttribute("TestSteer") or 0, tester:GetAttribute("TestHandbrake") == true, false
 	end
 	if UserInputService:GetFocusedTextBox() == nil then
 		clutch = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
@@ -3061,7 +3061,7 @@ function Driving.step(dt: number)
 					-- (each car's own gearbox with the two-axle model: dual-clutch quick, old automatics slow)
 					local shiftTime = if curP then curP.shift else s.cls.shiftTime
 					s.shiftT = (if throttle > 0.5 then shiftTime else shiftTime * 1.6) * s.shiftK
-				elseif s.agear > 1 and rev < (if throttle > 0.8 then 0.55 else 0.28) and speedFrac / gearHi(s.agear - 1) < 0.9 then
+				elseif s.agear > 1 and rev < (if throttle > 0.8 then 0.55 else 0.28) and speedFrac / gearHi(s.agear - 1) < (if curP then 0.82 else 0.9) then
 					s.nextGear = s.agear - 1
 					s.shiftT = 0.12
 				end
@@ -3101,8 +3101,9 @@ function Driving.step(dt: number)
 		-- BrakeBoost), a heavier car stops later, a wet road too
 		local brakeForce = s.cls.brake * s.brakeK * s.brakeIn * s.weightK ^ -DF.WeightBrake * (1 - DF.WetBrakeLoss * Driving.wet)
 		if axleOn then
-			-- each car's own brakes, for its real stopping distance (CarPhysics.brakeFor)
-			brakeForce = s.brakeAxle * s.brakeK * s.brakeIn * (1 - DF.WetBrakeLoss * Driving.wet)
+			-- each car's own brakes, for its real stopping distance (CarPhysics.brakeFor); with ABS off a full pedal
+			-- squeezes harder than the tyres can take, and they lock
+			brakeForce = s.brakeAxle * s.brakeK * s.brakeIn * (1 - DF.WetBrakeLoss * Driving.wet) * (if Driving.abs then 1 else DF.Axle.AbsOffSqueeze)
 		end
 		local abs = s.brakeIn > 0.8 and Config.spsToMph(math.abs(fwdSpeed)) > 12 and (Driving.abs or not axleOn)
 		if abs then
@@ -3224,7 +3225,7 @@ function Driving.step(dt: number)
 				vy = latSpeed,
 				r = s.yawRate,
 				delta = angle,
-				drive = if s.launchReady then 0 else aEng,
+				drive = if s.launchReady then 0 elseif aEng > 0 then aEng * CarPhysics.reserve(P, fwdSpeed, s.topSpeed, if s.tc then Driving.tcMode else 0) else aEng,
 				brake = aBrk,
 				handbrake = handbrake,
 				ax = s.axAxle,
@@ -3234,6 +3235,7 @@ function Driving.step(dt: number)
 				esc = Driving.escMode,
 				abs = Driving.abs,
 				help = Driving.help,
+				pedal = s.brakeIn,
 			}, dt)
 			s.axleOut = out
 			s.axAxle = out.ax

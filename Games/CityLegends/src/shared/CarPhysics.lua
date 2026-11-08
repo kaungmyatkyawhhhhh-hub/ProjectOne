@@ -48,6 +48,7 @@ export type Params = {
 	tyreF: number, -- tyre widths (mm), for the marks
 	tyreR: number,
 	kg: number,
+	reserve: number, -- the engine's pull in the low gears over what the tyres can use (traction control keeps it in)
 }
 
 -- the car's own numbers: its own entry, its base car's (a SPORT / TOP trim), the model it uses, or the nearest kind
@@ -74,8 +75,10 @@ function CarPhysics.ratios(n: number): { number }
 		return { 1 }
 	end
 	local r1 = FIRST[n]
+	-- (evenly spread in speed: each upshift lands at about two thirds of the revs or more, so the automatic never
+	-- falls back into the gear it just left)
 	for i = 1, n do
-		out[i] = r1 + (1 - r1) * ((i - 1) / (n - 1)) ^ 0.8
+		out[i] = r1 + (1 - r1) * (i - 1) / (n - 1)
 	end
 	return out
 end
@@ -132,6 +135,11 @@ function CarPhysics.params(spec: Cars.CarSpec, wb: number, kg: number, handling:
 	local P = DF.Axle
 	local d = CarPhysics.dataOf(spec)
 	local front = math.clamp(d.front or 0.5, 0.3, 0.7)
+	-- a SPORT / TOP trim comes on the next grade of tyre (all-season -> touring -> sport -> cup)
+	local tyreKind = d.tyre
+	if spec.Trim == "SPORT" or spec.Trim == "TOP" then
+		tyreKind = ({ allseason = "touring", offroad = "allseason", touring = "sport", sport = "cup" } :: any)[tyreKind] or tyreKind
+	end
 	local L = wb
 	local a = L * (1 - front)
 	local b = L * front
@@ -142,7 +150,7 @@ function CarPhysics.params(spec: Cars.CarSpec, wb: number, kg: number, handling:
 	local hBase = base.Handling or 0.7
 	local hNow = handling or spec.Handling or hBase
 	-- grip: the tyre kind and width, the car's own handling (the game's grading), parts on top
-	local mu = (TYRE_MU[d.tyre] or 0.95) * P.GameGrip * (P.HandlingBase + P.HandlingK * hBase) * (1 + (hNow - hBase) * P.PartsGrip)
+	local mu = (TYRE_MU[tyreKind] or 0.95) * P.GameGrip * (P.HandlingBase + P.HandlingK * hBase) * (1 + (hNow - hBase) * P.PartsGrip)
 	local wF, wR = d.tyreF or 245, d.tyreR or 245
 	local muF = mu * (wF / 245) ^ P.WidthPow
 	local muR = mu * (wR / 245) ^ P.WidthPow
@@ -183,7 +191,19 @@ function CarPhysics.params(spec: Cars.CarSpec, wb: number, kg: number, handling:
 		tyreF = wF,
 		tyreR = wR,
 		kg = kg,
+		-- a powerful car's engine can overpower its tyres in the low gears (hp per tonne over 250: more): with
+		-- traction control off or in Sport the rear can spin up and step out, as a real one does
+		reserve = math.clamp((d.hp or 300) / math.max(kg, 600) * 1000 / 250, 1, P.ReserveMax),
 	}
+end
+
+-- the extra pull the engine has over the calibrated one (0-60 is with traction control on, which holds it to the
+-- tyres): only without full traction control, and only at low speed (the low gears)
+function CarPhysics.reserve(p: Params, speed: number, top: number, tc: number): number
+	if tc >= 2 or p.reserve <= 1 then
+		return 1
+	end
+	return 1 + (p.reserve - 1) * math.clamp(1 - math.abs(speed) / (0.4 * top), 0, 1)
 end
 
 ---------------------------------------------------------------------
@@ -225,6 +245,7 @@ export type StepIn = {
 	esc: number, -- stability control: 0 off, 1 sport, 2 on
 	abs: boolean,
 	help: number, -- countersteer help 0..1
+	pedal: number?, -- the brake pedal 0..1 (with ABS off a hard one locks the fronts)
 }
 export type StepOut = {
 	vy: number,
@@ -298,18 +319,21 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 	-- the brakes at each axle; ABS keeps each axle just under locking
 	local bF, bR = s.brake * p.bias, s.brake * (1 - p.bias)
 	local lockF, lockR = 0, 0
-	local function limitBrake(f: number, c: number): (number, number)
+	local function limitBrake(f: number, c: number, front: boolean): (number, number)
 		local lim = c * longK
-		if f <= lim then
-			return f, 0
-		end
 		if s.abs then
-			return lim * 0.97, 0
+			return math.min(f, lim * 0.97), 0
 		end
-		return lim * P.LockGrip, 1
+		-- ABS off: a hard pedal locks the front wheels (the brakes are biased to the front, as on a real car): the
+		-- tyres slide, the car stops later and can't steer; a light pedal brakes as normal
+		local normal = f / P.AbsOffSqueeze
+		if front and (s.pedal or 0) > 0.85 and speed > 8 then
+			return math.min(lim * P.LockGrip, normal * P.LockStop), 1
+		end
+		return math.min(normal, lim * 0.97), 0
 	end
-	bF, lockF = limitBrake(bF, capF)
-	bR, lockR = limitBrake(bR, capR)
+	bF, lockF = limitBrake(bF, capF, true)
+	bR, lockR = limitBrake(bR, capR, false)
 	if s.handbrake and speed > 1 then
 		bR = math.max(bR, capR * longK * P.LockGrip)
 		lockR = 1
@@ -342,11 +366,20 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 		local fyR = -sign(aR) * cR * CarPhysics.curve(xR, p.slide)
 		local ay = fyF * cosd + fyR
 		local yawAcc = (p.a * fyF * cosd - p.b * fyR) / p.iz
+		-- countersteer help, the second half: a car spinning into its slide (the rear past its peak) is slowed in its
+		-- turn a little, so a keyboard or a thumb can catch it ("Pro" off)
+		if s.help > 0 and vx > 3 then
+			local b = math.atan2(vy, ux)
+			if r * b < 0 and math.abs(b) > p.peakR * 0.8 then
+				yawAcc -= r * P.HelpYaw * s.help * math.clamp((math.abs(b) - p.peakR * 0.8) / p.peakR, 0, 1)
+			end
+		end
 		-- stability control: the yaw the driver asks for (within the tyres' grip); it brakes a wheel to hold it, and
 		-- holds the body's slip angle
 		if s.esc > 0 and speed > 8 then
 			local ref = vx * math.tan(delta) / (p.L * (1 + P.EscUnder * vx * vx))
-			local lim = math.min(capF, capR) / math.max(speed, 1)
+			-- (what the tyres can turn the car with: both axles together)
+			local lim = (capF + capR) * 1.05 / math.max(speed, 1)
 			ref = math.clamp(ref, -lim, lim)
 			local tol = if s.esc == 2 then P.EscTol else P.EscTolSport
 			local err = r - ref
@@ -453,7 +486,8 @@ function CarPhysics.powerFor(p: Params, spec: Cars.CarSpec, upshift: number): (n
 	end
 	local electric = spec.Electric == true
 	local want = spec.ZeroToSixty * (if electric then CarPhysics.EV_LAUNCH else 1)
-	local lo, hi = 0.3, 10
+	-- (at most 4x: a car whose tyres can't give its 0-60 keeps a sane engine, so it still reaches its top speed)
+	local lo, hi = 0.3, 4
 	for _ = 1, 20 do
 		local mid = (lo + hi) / 2
 		if CarPhysics.timeTo(p, spec, mid, Config.mphToSps(60), upshift) > want then
