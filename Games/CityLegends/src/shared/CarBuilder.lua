@@ -45,6 +45,8 @@ type Dims = {
 	slope: number,
 	nose: number,
 	doors: number,
+	wheelRF: number?, -- (kit-v2 cars) each axle's own wheel radius
+	wheelRR: number?,
 }
 
 local DIMS: { [string]: Dims } = {
@@ -112,7 +114,7 @@ local function partsBounds(inst: Instance): (Vector3?, Vector3?)
 	end
 	return mn, mx
 end
-function CarBuilder.modelWheels(id: string): (number?, number?)
+function CarBuilder.modelWheels(id: string): (number?, number?, { [string]: number }?)
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local folder = ReplicatedStorage:FindFirstChild("CarModels", true)
 	local src = if folder then folder:FindFirstChild(id) or folder:FindFirstChild(CarBuilder.MODEL_ALIAS[id] or "") else nil
@@ -121,6 +123,7 @@ function CarBuilder.modelWheels(id: string): (number?, number?)
 		return nil, nil
 	end
 	local c: { [string]: Vector3 } = {}
+	local radii: { [string]: number } = {}
 	local radius = 0
 	for _, k in wheels:GetChildren() do
 		local mn, mx = partsBounds(k)
@@ -128,13 +131,16 @@ function CarBuilder.modelWheels(id: string): (number?, number?)
 			c[k.Name:upper()] = (mn + mx) / 2
 			local e = mx - mn
 			radius = math.max(radius, e.Y / 2)
+			radii[k.Name:upper()] = e.Y / 2
 		end
 	end
 	if not (c.FL and c.RL and c.FR and c.RR) or radius <= 0 then
-		return nil, nil
+		return nil, nil, nil
 	end
 	local wb = ((c.FL + c.FR) / 2 - (c.RL + c.RR) / 2).Magnitude
-	return wb, radius
+	-- (2026-11-08) the wheel kit v2 (tools/wheels/RimSwap2.luau) sizes each axle's tyres to the real car: those
+	-- cars' physics wheels take each axle's own radius (the other models keep the one radius, as before)
+	return wb, radius, if (src :: Instance):GetAttribute("WheelKit") == 2 then radii else nil
 end
 
 local mergedDims: { [string]: Dims } = {}
@@ -163,9 +169,13 @@ function CarBuilder.getDims(class: string, id: string?): Dims
 		d.wb = wb
 	end
 	-- an imported model's wheels at the real scale (its body is sized to the same wheelbase)
-	local mwb, mr = CarBuilder.modelWheels(id)
+	local mwb, mr, radii = CarBuilder.modelWheels(id)
 	if mwb and mr and mwb > 0 then
 		d.wheelR = math.clamp(mr * d.wb / mwb, 0.7, 1.8)
+		if radii and radii.FL and radii.FR and radii.RL and radii.RR then
+			d.wheelRF = math.clamp((radii.FL + radii.FR) / 2 * d.wb / mwb, 0.7, 1.8)
+			d.wheelRR = math.clamp((radii.RL + radii.RR) / 2 * d.wb / mwb, 0.7, 1.8)
+		end
 	end
 	-- don't cache before the car models have loaded
 	if game:GetService("ReplicatedStorage"):FindFirstChild("CarModels", true) or not real then
@@ -566,7 +576,8 @@ function CarBuilder.build(spec: Cars.CarSpec, options: BuildOptions?): Model
 	local R = d.wheelR
 	for _, info in { { "FL", -1, true }, { "FR", 1, true }, { "RL", -1, false }, { "RR", 1, false } } do
 		local wname, sx, isFront = info[1] :: string, info[2] :: number, info[3] :: boolean
-		local rr = if isSuper and not isFront then R * 1.04 else R
+		-- (a kit-v2 car: each axle its own real tyre)
+		local rr = if d.wheelRF and d.wheelRR then (if isFront then d.wheelRF else d.wheelRR) :: number elseif isSuper and not isFront then R * 1.04 else R
 		local wz = if isFront then -d.wb / 2 else d.wb / 2
 		local wx = sx * (hw - d.wheelW / 2 - 0.06)
 		local tireCF = CFrame.new(wx, rr, wz)

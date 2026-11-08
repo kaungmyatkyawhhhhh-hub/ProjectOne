@@ -294,8 +294,29 @@ local function paintCar(model: Model, look: Look)
 				d.Color = o.color:Lerp(Color3.fromRGB(8, 10, 12), tint)
 				d.Transparency = math.clamp(o.transparency - tint * 0.5, 0.08, 1)
 			elseif kind == "rim" and rim then
-				solid(d, rim)
-				d.Reflectance = 0.25
+				-- (2026-11-08) wheel kit v2: only the painted face (spokes, cap, its blur) takes the colour, as a tint on
+				-- its own surface (the lip, barrel, nuts, brakes and tyre keep theirs)
+				local role = d:GetAttribute("WheelRole")
+				if role then
+					if role == "Face" or role == "Cap" or role == "Blur" then
+						local s = d:FindFirstChildOfClass("SurfaceAppearance")
+						if s then
+							if s:GetAttribute("StockTint") == nil then
+								s:SetAttribute("StockTint", s.Color)
+							end
+							s.Color = rim
+						end
+					end
+				else
+					solid(d, rim)
+					d.Reflectance = 0.25
+				end
+			elseif kind == "rim" and not rim and d:GetAttribute("WheelRole") then
+				local s = d:FindFirstChildOfClass("SurfaceAppearance")
+				local stock = if s then s:GetAttribute("StockTint") else nil
+				if s and typeof(stock) == "Color3" then
+					s.Color = stock
+				end
 			end
 		end
 	end

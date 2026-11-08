@@ -587,6 +587,76 @@ Config.DrivingFeel = {
 	-- skid marks (scaled down on phones)
 	SkidMax = 200, -- the newest this many strips (2026-11-03: was 140)
 	SkidLife = 45, -- seconds before a mark has faded away (was 7)
+
+	-- (2026-11-08, Prompts/A million times better wheels (new models).md, Part 2) the two-axle tyre model
+	-- (shared/CarPhysics.lua) with each car's real numbers (shared/CarPhysicsData.lua). Enabled = false goes back to
+	-- the old single-grip model above
+	Axle = {
+		Enabled = true,
+		-- grip in g = the tyre kind (cup 1.08, sport 1.0, touring 0.9, all-season 0.85) x GameGrip x
+		-- (HandlingBase + HandlingK x the car's Handling) x (tyre width / 245 mm) ^ WidthPow. Lower GameGrip = slides
+		-- sooner and feels heavier; higher = more grip
+		GameGrip = 1.6,
+		HandlingBase = 0.75,
+		HandlingK = 0.35,
+		PartsGrip = 1.6, -- grip parts (tyres): each 0.01 of Handling they add gives this x 1% more grip
+		WidthPow = 0.12,
+		SlipPeak = 0.12, -- slip angle (radians, ~7 degrees) where the rear tyres grip hardest...
+		FrontPeakK = 1.12, -- ...the fronts a little later (a touch of understeer: stable at speed)
+		SlideGrip = 0.72, -- grip left well past the peak (falls off smoothly, never ice)
+		LoadSens = 0.12, -- a tyre with more load grips a little less per kg (weight transfer matters)
+		LongGrip = 1.05, -- drive and braking grip over cornering grip
+		SpinGrip = 0.8, -- spinning tyres (no traction control): the push left...
+		LockGrip = 0.8, -- ...and locked ones (no ABS, handbrake)
+		SlideSide = 0.65, -- a spinning or locked axle loses this share of its cornering grip
+		BrakeK = 1, -- the brakes stop each car in its real distance (from 100 km/h, CarPhysicsData.stop) x this
+		DownforceK = 2, -- each car's real downforce (kg at 250 km/h) counts this much (planted at speed)...
+		ClassDownforce = { Supercar = 0.06, Hypercar = 0.1 } :: { [string]: number }, -- ...plus this (g at 250 km/h)
+		KinFrom = 3, -- slower than this (studs/s) the car just goes where its wheels point...
+		KinTo = 12, -- ...blended in up to here
+		-- countersteer help (Settings, on for everyone but "Pro"): the front wheels follow the slide
+		HelpK = 0.9,
+		HelpMax = 0.35, -- radians at most (20 degrees)
+		-- stability control: On / Sport
+		EscUnder = 0.00006, -- how much the asked-for turn shrinks with speed (understeer gradient)
+		EscTol = 0.06, -- yaw-rate error allowed (radians/s): On...
+		EscTolSport = 0.25, -- ...Sport (small slides)
+		EscGain = 9,
+		EscBeta = 0.14, -- the body's slip angle it holds (radians): On (8 degrees)...
+		EscBetaSport = 0.38, -- ...Sport (22 degrees)
+		-- grip by the surface under each axle (Roblox material names; 1 = dry asphalt). Kerbs and painted lines
+		-- by part name. Rally tyres (parts) lift the loose ones
+		Surface = {
+			Asphalt = 1,
+			Concrete = 0.98,
+			Pavement = 0.97,
+			Slate = 0.95,
+			Basalt = 0.95,
+			Limestone = 0.94,
+			Brick = 0.92,
+			Cobblestone = 0.9,
+			CrackedLava = 0.9,
+			Wood = 0.85,
+			WoodPlanks = 0.85,
+			Grass = 0.55,
+			LeafyGrass = 0.55,
+			Ground = 0.6,
+			Mud = 0.5,
+			Sand = 0.5,
+			Sandstone = 0.85,
+			Rock = 0.8,
+			Pebble = 0.62,
+			Snow = 0.4,
+			Glacier = 0.25,
+			Ice = 0.2,
+		} :: { [string]: number },
+		KerbGrip = 0.88,
+		PaintGrip = 0.94,
+		-- feel
+		KeyThrottleRamp = 6, -- keyboard throttle: 0 -> full in about a sixth of a second (per second)
+		RevBounce = 0.06, -- the rev limiter: the cut's depth (share of the revs)
+		TorqueSteer = 0.012, -- front-drive: a gentle pull (radians) on a hard launch
+	},
 }
 
 ---------------------------------------------------------------------

@@ -36,6 +36,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
+local CarPhysics = require(Shared:WaitForChild("CarPhysics"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 
@@ -75,15 +76,48 @@ Driving.wet = 0 -- how wet the road is, 0..1 (Weather sets it): less grip, longe
 Driving.assist = 1 -- driving assists (Settings): 0 off, 0.5 low, 1 normal
 Driving.smoke = 1 -- tyre smoke (Settings): 0 off, 0.5 low, 1 high
 Driving.marks = true -- tyre marks (Settings)
+-- (2026-11-08) driver aids (Settings > DRIVING): traction control and stability control 0 off / 1 sport / 2 on, ABS on or
+-- off, the countersteer help (0 = "Pro"). New players: all on
+Driving.tcMode = 2
+Driving.escMode = 2
+Driving.abs = true
+Driving.help = 1
 Driving.loadHold = false -- the map round the car is still loading (Main.client's waitForMap): held too
 Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
 Driving.workshopOpen = false -- the workshop has the camera (over Legends Customs too)
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings or M; Q / E shift only in manual)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
 Driving.onGearboxChanged = nil :: ((string) -> ())? -- Q / E or M changed the gearbox
-local GEARS = 7
+local GEARS = 7 -- (the old model's gearbox: with the two-axle model each car has its own, CarPhysics)
+local curP: any = nil -- the driven car's CarPhysics numbers (nil: the old model)
+local function gearsNow(): number
+	return if curP then curP.gears else GEARS
+end
+-- a short buzz on phones (hard hits, kerbs, gear shifts), where the device can
+local HapticService = game:GetService("HapticService")
+local buzzUntil = 0
+local function buzz(k: number, t: number)
+	if not UI.isTouch then
+		return
+	end
+	pcall(function()
+		if HapticService:IsVibrationSupported(Enum.UserInputType.Touch) and HapticService:IsMotorSupported(Enum.UserInputType.Touch, Enum.VibrationMotor.Large) then
+			HapticService:SetMotor(Enum.UserInputType.Touch, Enum.VibrationMotor.Large, math.clamp(k, 0, 1))
+			buzzUntil = os.clock() + t
+			task.delay(t, function()
+				if os.clock() >= buzzUntil - 0.01 then
+					pcall(function()
+						HapticService:SetMotor(Enum.UserInputType.Touch, Enum.VibrationMotor.Large, 0)
+					end)
+				end
+			end)
+		end
+	end)
+end
+-- keyboard throttle (on / off keys): eased in, so the car isn't kicked from nothing to full
+local keyThrottle = false
 
-type Corner = { motor: Motor6D, knuckle: Motor6D?, at: Vector3, rest: number, front: boolean, left: boolean, gap: number, travel: number, hit: Vector3? }
+type Corner = { motor: Motor6D, knuckle: Motor6D?, at: Vector3, rest: number, front: boolean, left: boolean, gap: number, travel: number, hit: Vector3?, radius: number, spin: number, mat: Enum.Material?, partName: string?, nrm: Vector3?, skid: Vector3? }
 
 type LocalArm = {
 	upper: BasePart, -- the whole arm when fore is nil (R6)
@@ -108,6 +142,24 @@ type State = {
 	towPull: number,
 	towTurn: number,
 	applyTune: () -> (),
+	-- (2026-11-08) the two-axle model (CarPhysics): the car's numbers, its brakes, last step's acceleration and result,
+	-- each axle's grip under it; the keyboard throttle's ease; the kit-v2 wheels (blur, spokes, brake discs) and the
+	-- brakes' heat; the steering sent to the other players; the rev limiter
+	axle: any?,
+	brakeAxle: number,
+	axAxle: number,
+	axleOut: any?,
+	gripF: number,
+	gripR: number,
+	thrRamp: number,
+	kit: { [Corner]: { blur: { BasePart }, spokes: { BasePart }, discs: { SurfaceAppearance }, shown: number } },
+	brakeHeat: number,
+	glowShown: number,
+	steerSent: number,
+	steerSendT: number,
+	limitT: number,
+	smokeF: number,
+	smokeR: number,
 	-- (2026-11-07) cruise control: the set speed, the pedal taps, the regulator; what the car's health does to it;
 	-- out of fuel; what the driver's game tells the server next (Driving.takeReport)
 	cruise: number?,
@@ -356,6 +408,7 @@ local function readInput(): (number, number, number, boolean, boolean)
 		if UserInputService:IsKeyDown(Enum.KeyCode.W) or UserInputService:IsKeyDown(Enum.KeyCode.Up) then
 			throttle = 1
 		end
+		keyThrottle = throttle > 0
 		if UserInputService:IsKeyDown(Enum.KeyCode.S) or UserInputService:IsKeyDown(Enum.KeyCode.Down) then
 			brake = 1
 		end
@@ -821,6 +874,8 @@ function Driving.detach()
 	if not s then
 		return
 	end
+	curP = nil
+	UI.showShiftPaddles(false)
 	for _, c in s.connections do
 		c:Disconnect()
 	end
@@ -1216,6 +1271,9 @@ end
 -- gear pulls less (the ratio), so the revs climb slower in the upper gears, like a real gearbox
 local RATIOS = { 0.30, 0.45, 0.58, 0.69, 0.79, 0.89, 1.0 }
 local function gearHi(g: number): number
+	if curP then
+		return CarPhysics.gearHi(curP, g)
+	end
 	return RATIOS[math.clamp(g, 1, GEARS)] / 0.88
 end
 
@@ -1228,6 +1286,9 @@ end
 -- pull up to a quarter of top speed, then it fades away fast, so the last stretch to top speed takes
 -- a long time (no shifts, no limiter)
 local function evPull(frac: number): number
+	if curP then
+		return CarPhysics.evPull(frac)
+	end
 	return math.min(1, (0.25 / math.max(frac, 1e-3)) ^ 2)
 end
 local EV_LAUNCH = 0.7 -- electric cars reach 60 mph in 70% of their listed time
@@ -1472,7 +1533,7 @@ local function carKey(s: State, key: Enum.KeyCode)
 		local fwdSpeed = s.vel:Dot(forwardFromYaw(s.yaw))
 		local before = s.mgear
 		if key == Enum.KeyCode.E then
-			s.mgear = math.min(s.mgear + 1, GEARS)
+			s.mgear = math.min(s.mgear + 1, gearsNow())
 		else
 			-- into reverse only when (nearly) stopped
 			s.mgear = math.max(s.mgear - 1, if fwdSpeed > 4 then 0 else -1)
@@ -1542,7 +1603,8 @@ function Driving.lampRelease()
 end
 
 -- other players' cars: their blinkers and lights, from the attributes the server sets on them
-type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter } }
+type OtherWheel = { motor: Motor6D, knuckle: Motor6D?, front: boolean, radius: number, spin: number, blur: { BasePart }, spokes: { BasePart }, shown: number }
+type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter }, wheels: { OtherWheel }, kitBy: { [BasePart]: OtherWheel }, skinN: number }
 local others: { [Model]: OtherCar } = {}
 local function otherCar(model: Model): OtherCar?
 	local found = others[model]
@@ -1554,12 +1616,43 @@ local function otherCar(model: Model): OtherCar?
 		return nil
 	end
 	local _, size = model:GetBoundingBox()
-	local o: OtherCar = { model = model, L = {}, R = {}, smoke = {} }
-	-- tyre smoke at the rear wheels (the driver's game sends how much: the Smoke attribute)
-	for _, x in { -size.X * 0.38, size.X * 0.38 } do
+	local o: OtherCar = { model = model, L = {}, R = {}, smoke = {}, wheels = {}, kitBy = {}, skinN = -1 }
+	-- (2026-11-08) its wheels: they spin with its speed and the fronts turn with its steering (the Steer attribute);
+	-- the kit-v2 wheels blur at speed as ours do
+	local kitBy = o.kitBy
+	for _, j in root:GetChildren() do
+		if j:IsA("Motor6D") and j.Name:sub(1, 6) == "Wheel_" then
+			local kn = root:FindFirstChild("Knuckle" .. j.Name:sub(6))
+			local w: OtherWheel = {
+				motor = j,
+				knuckle = if kn and kn:IsA("Motor6D") then kn else nil,
+				front = j:GetAttribute("Front") == true,
+				radius = (j:GetAttribute("Radius") :: number?) or 1.1,
+				spin = 0,
+				blur = {},
+				spokes = {},
+				shown = 0,
+			}
+			table.insert(o.wheels, w)
+			if j.Part1 then
+				kitBy[j.Part1 :: BasePart] = w
+			end
+		end
+	end
+	-- tyre smoke at the rear wheels' contact patches (the driver's game sends how much: the Smoke attribute)
+	local spots: { Vector3 } = {}
+	for _, w in o.wheels do
+		if not w.front then
+			table.insert(spots, w.motor.C0.Position - Vector3.new(0, w.radius * 0.85, 0))
+		end
+	end
+	if #spots ~= 2 then
+		spots = { Vector3.new(-size.X * 0.38, -size.Y * 0.45, size.Z * 0.32), Vector3.new(size.X * 0.38, -size.Y * 0.45, size.Z * 0.32) }
+	end
+	for _, at in spots do
 		local att = Instance.new("Attachment")
 		att.Name = "OtherSmoke"
-		att.Position = Vector3.new(x, -size.Y * 0.45, size.Z * 0.32)
+		att.Position = at
 		att.Parent = root
 		local e = Instance.new("ParticleEmitter")
 		e.Rate = 0
@@ -1598,11 +1691,13 @@ local function otherCar(model: Model): OtherCar?
 	return o
 end
 
-local function updateOthers()
+local function updateOthers(dt: number?)
 	local folder = workspace:FindFirstChild("PlayerCars")
 	if not folder then
 		return
 	end
+	local step = math.min(dt or 1 / 60, 0.1)
+	local camPos = workspace.CurrentCamera.CFrame.Position
 	local lit = (os.clock() % 0.8) < 0.4
 	for _, model in folder:GetChildren() do
 		if not model:IsA("Model") or model:GetAttribute("Owner") == player.UserId then
@@ -1610,9 +1705,61 @@ local function updateOthers()
 		end
 		local blinker = (model:GetAttribute("Blinker") :: string?) or ""
 		local lights = model:GetAttribute("Lights")
-		local o = others[model] or (if blinker ~= "" or lights ~= nil or model:GetAttribute("Smoke") ~= nil then otherCar(model) else nil)
+		local o = others[model] or otherCar(model)
 		if not o then
 			continue
+		end
+		-- its kit-v2 wheel pieces (the skin can come after the car)
+		local skin = model:FindFirstChild("Skin")
+		if skin and #skin:GetChildren() ~= o.skinN then
+			o.skinN = #skin:GetChildren()
+			for _, w in o.wheels do
+				w.blur, w.spokes = {}, {}
+			end
+			for _, d in skin:GetChildren() do
+				local role = d:GetAttribute("WheelRole")
+				if role and d:IsA("BasePart") then
+					local wc = d:FindFirstChildOfClass("WeldConstraint")
+					local w = if wc and wc.Part0 then o.kitBy[wc.Part0 :: BasePart] else nil
+					if w then
+						if role == "Blur" then
+							table.insert(w.blur, d)
+						elseif role == "Face" or role == "Nuts" or role == "Cap" then
+							table.insert(w.spokes, d)
+						end
+					end
+				end
+			end
+		end
+		-- (2026-11-08) its wheels turn and spin as the driver's do (close by only)
+		local root = model.PrimaryPart
+		if root and (root.Position - camPos).Magnitude < 260 then
+			local v = root.AssemblyLinearVelocity:Dot(root.CFrame.LookVector)
+			local steer = (model:GetAttribute("Steer") :: number?) or 0
+			local angle = -steer * math.rad(28) / (1 + math.abs(v) / 90)
+			for _, w in o.wheels do
+				w.spin = (w.spin - v * step / math.max(w.radius, 0.3)) % (math.pi * 2)
+				if w.front then
+					w.motor.Transform = CFrame.Angles(0, angle, 0) * CFrame.Angles(w.spin, 0, 0)
+					if w.knuckle then
+						w.knuckle.Transform = CFrame.Angles(0, angle, 0)
+					end
+				else
+					w.motor.Transform = CFrame.Angles(w.spin, 0, 0)
+				end
+				if #w.blur > 0 then
+					local f = math.clamp((math.abs(v) / math.max(w.radius, 0.3) - 12) / 18, 0, 1)
+					if math.abs(f - w.shown) > 0.03 or (f == 0 and w.shown ~= 0) or (f == 1 and w.shown ~= 1) then
+						w.shown = f
+						for _, b in w.blur do
+							b.Transparency = 1 - f
+						end
+						for _, p in w.spokes do
+							p.Transparency = f * f
+						end
+					end
+				end
+			end
 		end
 		local lamps = CarLamps.hasModel(model) -- (their lamps blink themselves)
 		for side, list in { L = o.L, R = o.R } do
@@ -1711,6 +1858,8 @@ function Driving.attach(model: Model)
 			gap = 0,
 			travel = 0,
 			hit = nil,
+			radius = (j:GetAttribute("Radius") :: number?) or 1.1,
+			spin = 0,
 		})
 	end
 	local steerMotor = root:FindFirstChild("SteerMotor") :: Motor6D?
@@ -2093,6 +2242,21 @@ function Driving.attach(model: Model)
 	end
 
 	local s: State = {
+		axle = nil,
+		brakeAxle = 0,
+		axAxle = 0,
+		axleOut = nil,
+		gripF = 1,
+		gripR = 1,
+		thrRamp = 0,
+		kit = {},
+		brakeHeat = 0,
+		glowShown = 0,
+		steerSent = 0,
+		steerSendT = 0,
+		limitT = 0,
+		smokeF = 0,
+		smokeR = 0,
 		model = model,
 		root = root,
 		spec = spec,
@@ -2268,6 +2432,42 @@ function Driving.attach(model: Model)
 		table.insert(s.flameColors, e.Color)
 	end
 	state = s
+	UI.showShiftPaddles(UI.isTouch and s.manual)
+	-- (2026-11-08) the kit-v2 wheels' pieces by corner (CarSkin welds each wheel piece to its tyre part): the blurred
+	-- face, the spokes it stands in for, the brake discs (they glow after a hard stop)
+	do
+		local byTire: { [BasePart]: Corner } = {}
+		for _, c in s.corners do
+			local t = c.motor.Part1
+			if t then
+				byTire[t] = c
+			end
+		end
+		local skin = model:FindFirstChild("Skin")
+		if skin then
+			for _, d in skin:GetChildren() do
+				local role = d:GetAttribute("WheelRole")
+				if role and d:IsA("BasePart") then
+					local w = d:FindFirstChildOfClass("WeldConstraint")
+					local c = if w and w.Part0 then byTire[w.Part0 :: BasePart] else nil
+					if c then
+						local k = s.kit[c] or { blur = {}, spokes = {}, discs = {}, shown = 0 }
+						s.kit[c] = k
+						if role == "Blur" then
+							table.insert(k.blur, d)
+						elseif role == "Face" or role == "Nuts" or role == "Cap" then
+							table.insert(k.spokes, d)
+						elseif role == "Disc" then
+							local sa = d:FindFirstChildOfClass("SurfaceAppearance")
+							if sa then
+								table.insert(k.discs, sa)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
 	if s.lamps then
 		CarLamps.reset()
 		UI.setLampMode(CarLamps.mode)
@@ -2307,8 +2507,22 @@ function Driving.attach(model: Model)
 		s.spec = tuned
 		s.topSpeed = Config.mphToSps(tuned.TopSpeed)
 		s.accel = Config.mphToSps(60) / tuned.ZeroToSixty
-		s.powerK, s.dragC = powerFor(tuned)
 		local _, kg = CarStats.powerOf(id, parts)
+		-- (2026-11-08) the two-axle model: this car's own numbers (CarPhysicsData), the engine and brakes worked out for
+		-- its 0-60 and its real stopping distance with its own gears and gearbox
+		if DFeel.Axle.Enabled then
+			local P = CarPhysics.params(tuned, s.wheelbase, kg, tuned.Handling)
+			s.axle = P
+			curP = P
+			s.powerK, s.dragC = CarPhysics.powerFor(P, tuned, s.cls.upshift)
+			s.brakeAxle = CarPhysics.brakeFor(P, s.dragC)
+			s.agear = math.min(s.agear, gearsNow())
+			s.mgear = math.min(s.mgear, gearsNow())
+		else
+			s.axle = nil
+			curP = nil
+			s.powerK, s.dragC = powerFor(tuned)
+		end
 		s.weightK = kg / DFeel.WeightRef
 		-- (brake bias: a little off at either end)
 		s.brakeK = (1 + tune.brake) * (1 - 0.5 * math.abs((setup.bias or 0.6) - 0.6))
@@ -2426,6 +2640,7 @@ local function reportCrash(s: State, severity: number)
 	end
 	s.lastCrash = now
 	s.shake = math.max(s.shake, math.clamp(severity / 80, 0.3, 1.5))
+	buzz(math.clamp(severity / 60, 0.4, 1), 0.18)
 	UI.flash(Config.Theme.Danger)
 	UI.setCombo(0)
 	remote("Crash"):FireServer()
@@ -2496,6 +2711,20 @@ function Driving.step(dt: number)
 		if (gb == "Auto" or gb == "Manual") and (gb == "Manual") ~= s.manual and not s.electric then
 			Driving.setGearbox(gb)
 		end
+		-- (2026-11-08) the driver aids for a test: TestTC / TestESC 0..2, TestABS, TestHelp 0..1
+		local tc, esc, ab, hp = tester:GetAttribute("TestTC"), tester:GetAttribute("TestESC"), tester:GetAttribute("TestABS"), tester:GetAttribute("TestHelp")
+		if type(tc) == "number" then
+			Driving.tcMode = tc
+		end
+		if type(esc) == "number" then
+			Driving.escMode = esc
+		end
+		if type(ab) == "boolean" then
+			Driving.abs = ab
+		end
+		if type(hp) == "number" then
+			Driving.help = hp
+		end
 	end
 	-- steering help on phones (driving assists): a little less lock at speed, so a thumb can't flick
 	-- the car round at 200 km/h
@@ -2546,6 +2775,13 @@ function Driving.step(dt: number)
 		end
 	end
 	throttleKey, brake = cruisePedals(s, throttleKey, brake, dt)
+	-- (2026-11-08) a keyboard's on / off throttle eases in (full in about a sixth of a second) and drops quickly
+	if keyThrottle and s.axle then
+		s.thrRamp += math.clamp(throttleKey - s.thrRamp, -dt * 12, dt * Config.DrivingFeel.Axle.KeyThrottleRamp)
+		throttleKey = s.thrRamp
+	else
+		s.thrRamp = throttleKey
+	end
 	local throttle = if s.engineOn then throttleKey else 0
 	-- (the wear the server can't see)
 	local rep = s.report
@@ -2659,6 +2895,7 @@ function Driving.step(dt: number)
 				local k = math.clamp(math.abs(jump) - 0.45, 0, 1.5) * math.sign(jump)
 				s.pitchVel += k * DF.BumpKick * 20 * s.weightK ^ -DF.WeightBump * s.bumpK
 				s.shake = math.max(s.shake, math.min(math.abs(k) * 0.3 * s.bumpK, 0.35))
+				buzz(0.25 + 0.3 * math.abs(k), 0.06)
 			end
 		end
 		s.groundDist = hit.Distance
@@ -2677,11 +2914,15 @@ function Driving.step(dt: number)
 		if r and r.Normal.Y > 0.6 then
 			c.gap = (r.Distance - 1) - (c.rest - s.rideDrop) -- above zero: the road is lower than the wheel's rest
 			c.hit = r.Position
+			c.mat = r.Material
+			c.partName = r.Instance.Name
+			c.nrm = r.Normal
 			sum += c.gap
 			nOn += 1
 		else
 			c.gap = sp.droop
 			c.hit = nil
+			c.mat = nil
 		end
 	end
 	-- The springs act as a vertical speed for the body, which the physics holds every physics step
@@ -2815,9 +3056,11 @@ function Driving.step(dt: number)
 		if not s.manual and s.shiftT <= 0 and not s.electric then
 			if fwdSpeed > 1 and s.engineOn then
 				local rev = speedFrac / gearHi(s.agear)
-				if s.agear < GEARS and rev >= 0.5 + (s.cls.upshift - 0.5) * throttle then
+				if s.agear < gearsNow() and rev >= 0.5 + (s.cls.upshift - 0.5) * throttle then
 					s.nextGear = s.agear + 1
-					s.shiftT = (if throttle > 0.5 then s.cls.shiftTime else s.cls.shiftTime * 1.6) * s.shiftK
+					-- (each car's own gearbox with the two-axle model: dual-clutch quick, old automatics slow)
+					local shiftTime = if curP then curP.shift else s.cls.shiftTime
+					s.shiftT = (if throttle > 0.5 then shiftTime else shiftTime * 1.6) * s.shiftK
 				elseif s.agear > 1 and rev < (if throttle > 0.8 then 0.55 else 0.28) and speedFrac / gearHi(s.agear - 1) < 0.9 then
 					s.nextGear = s.agear - 1
 					s.shiftT = 0.12
@@ -2828,16 +3071,25 @@ function Driving.step(dt: number)
 		end
 		local gearNow = if s.manual then s.mgear else s.agear
 		local engaged = s.engineOn and not s.clutch and s.shiftT <= 0 and gearNow ~= 0
+		-- (2026-11-08) the two-axle model takes the engine's push and the brakes apart (each through its tyres' grip)
+		local axleOn = s.axle ~= nil
+		local aEng, aBrk = 0, 0
 		if engaged and gearNow > 0 and fwdSpeed > -2 then
 			local rev = if s.electric then math.max(speedFrac, 0) else math.max(speedFrac, 0) / gearHi(gearNow)
 			if throttle > 0 and speedFrac < 1 and not (s.capTop and fwdSpeed >= s.capTop) then -- at top speed the limiter holds it there
 				local pull = if s.electric then evPull(math.max(speedFrac, 0)) else torqueCurve(math.max(rev, 0.3)) * gearMul(gearNow)
-				a += s.accel * s.powerK * throttle * pull * (if s.launch > 0 then s.launchK else 1)
-			elseif throttle == 0 and fwdSpeed > 2 then
-				a -= 3 + 6 * math.min(rev, 1) -- engine braking (regen on an electric car)
+				local push = s.accel * s.powerK * throttle * pull * (if s.launch > 0 then s.launchK else 1)
+				a += push
+				aEng += push
+			elseif throttle == 0 and fwdSpeed > 2 and not (axleOn and brake > 0.3) then
+				-- engine braking (regen on an electric car); not under hard braking (the clutch is out)
+				local eb = 3 + 6 * math.min(rev, 1)
+				a -= eb
+				aEng -= eb
 			end
 			if rev > 1.02 then
 				a -= 30 * (rev - 1) -- shifted down too early: the engine holds the car back
+				aEng -= 30 * (rev - 1)
 			end
 		elseif throttle > 0 and fwdSpeed < -2 and not (s.manual and gearNow < 0) then
 			-- braking out of reverse (not in a manual's R gear: there the throttle drives it backwards;
@@ -2848,7 +3100,11 @@ function Driving.step(dt: number)
 		-- (2026-11-03, realistic physics) real stopping power: the class's brake (about g x 28 x
 		-- BrakeBoost), a heavier car stops later, a wet road too
 		local brakeForce = s.cls.brake * s.brakeK * s.brakeIn * s.weightK ^ -DF.WeightBrake * (1 - DF.WetBrakeLoss * Driving.wet)
-		local abs = s.brakeIn > 0.8 and Config.spsToMph(math.abs(fwdSpeed)) > 12
+		if axleOn then
+			-- each car's own brakes, for its real stopping distance (CarPhysics.brakeFor)
+			brakeForce = s.brakeAxle * s.brakeK * s.brakeIn * (1 - DF.WetBrakeLoss * Driving.wet)
+		end
+		local abs = s.brakeIn > 0.8 and Config.spsToMph(math.abs(fwdSpeed)) > 12 and (Driving.abs or not axleOn)
 		if abs then
 			s.absT += dt
 			brakeForce *= 1 - DF.AbsPulse * (0.5 + 0.5 * math.sin(s.absT * math.pi * 2 * DF.AbsHz))
@@ -2864,11 +3120,14 @@ function Driving.step(dt: number)
 			end
 			if fwdSpeed > 2 then
 				a -= brakeForce
+				aBrk += brakeForce
 			elseif fwdSpeed < -2 then
 				a += brakeForce
+				aBrk += brakeForce
 			end
 		elseif fwdSpeed > 2 then
 			a -= brakeForce
+			aBrk += brakeForce
 		elseif brake > 0 and throttle == 0 and fwdSpeed > -reverseTop and s.engineOn and not s.launchReady and s.stopT > 0.12 then
 			-- automatic: hold the brake at a stop to reverse (not with the throttle down too). It waits
 			-- a moment after stopping, so a hard stop doesn't bounce straight into reverse
@@ -2885,8 +3144,8 @@ function Driving.step(dt: number)
 		end
 		-- rolling resistance + aero drag (each car's own, so it tops out at its real top speed)
 		local drag = 2 + s.dragC * fwdSpeed * fwdSpeed
-		if handbrake then
-			drag += 40
+		if handbrake and not axleOn then
+			drag += 40 -- (the two-axle model locks the rear wheels instead)
 		end
 		if math.abs(fwdSpeed) > 0.5 then
 			a -= math.sign(fwdSpeed) * drag
@@ -2908,7 +3167,12 @@ function Driving.step(dt: number)
 		elseif s.nitroOn then
 			s.nitro = math.min(1, s.nitro + DF.NitroFillIdle * dt) -- (a fitted bottle refills slowly)
 		end
-		fwdSpeed += a * dt
+		-- (the two-axle model moves the speed with its tyres below; the rest of the pull (drag, reverse, a limiter) is
+		-- the same)
+		local aOther = a - aEng + aBrk * (if fwdSpeed >= 0 then 1 else -1)
+		if not axleOn then
+			fwdSpeed += a * dt
+		end
 
 		-- steering: speed-sensitive wheel angle, capped by lateral grip; the wheel turns slower and
 		-- finer at speed
@@ -2918,6 +3182,78 @@ function Driving.step(dt: number)
 		local maxAngle = math.rad(36) * s.steerK / (1 + (speedAbs / 70) ^ 1.3)
 		local angle = s.steer * maxAngle
 		local yawRate = fwdSpeed * math.tan(angle) / s.wheelbase
+		local out: any = nil
+		if axleOn then
+			-- (2026-11-08) the two-axle tyre model (CarPhysics.step): each axle's grip from its own load, surface and the
+			-- rain; drive and brakes share it with cornering; the driver aids from Settings
+			local AX = DF.Axle
+			local P = s.axle :: any
+			-- front drive: a gentle pull on a hard launch
+			if s.drive == "FWD" and throttle > 0.8 and speedAbs < 40 then
+				angle += AX.TorqueSteer * throttle * (1 - speedAbs / 40)
+			end
+			-- the surface under each axle (kerbs, paint, cobbles a little less; grass, sand, gravel much less)
+			local gF, gR, nF, nR = 0, 0, 0, 0
+			for _, c in s.corners do
+				local g = 1
+				if c.mat then
+					g = AX.Surface[c.mat.Name] or 1
+					local nm = c.partName or ""
+					if string.find(nm, "Kerb", 1, true) then
+						g = math.min(g, AX.KerbGrip)
+					elseif string.find(nm, "Line", 1, true) or string.find(nm, "Dash", 1, true) or string.find(nm, "Paint", 1, true) then
+						g = math.min(g, AX.PaintGrip)
+					end
+					if g < 0.8 then
+						g = math.min(1, g * (1 + s.rallyK)) -- rally tyres
+					end
+				end
+				if c.front then
+					gF += g
+					nF += 1
+				else
+					gR += g
+					nR += 1
+				end
+			end
+			local wetK = (1 - DF.WetGripLoss * Driving.wet) * s.gripK * (1 - math.min(s.driftK, 0.6) * 0.3)
+			s.gripF = (if nF > 0 then gF / nF else 1) * wetK
+			s.gripR = (if nR > 0 then gR / nR else 1) * wetK
+			out = CarPhysics.step(P, {
+				vx = fwdSpeed,
+				vy = latSpeed,
+				r = s.yawRate,
+				delta = angle,
+				drive = if s.launchReady then 0 else aEng,
+				brake = aBrk,
+				handbrake = handbrake,
+				ax = s.axAxle,
+				gripF = s.gripF,
+				gripR = s.gripR,
+				tc = if s.tc then Driving.tcMode else 0,
+				esc = Driving.escMode,
+				abs = Driving.abs,
+				help = Driving.help,
+			}, dt)
+			s.axleOut = out
+			s.axAxle = out.ax
+			-- the speed: what the tyres put down plus the rest, then the car's frame turns with it
+			fwdSpeed += (out.ax + aOther) * dt
+			if s.launchReady then
+				fwdSpeed = 0
+			end
+			latSpeed = out.vy
+			s.yawRate = out.r
+			yawRate = out.r
+			fwdSpeed += latSpeed * out.r * dt
+			s.yaw -= out.r * dt
+			fwd = forwardFromYaw(s.yaw)
+			right = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
+			-- (Studio driving tests: what the tyres and the engine are doing, on the car's root)
+			if RunService:IsStudio() and Players.LocalPlayer:GetAttribute("TestDrive") then
+				root:SetAttribute("Dbg", string.format("eng %.1f brk %.1f ax %.1f oth %.1f gF %.2f gR %.2f spin %.2f lock %.2f tc %.2f hb %s g %s wet %.2f k %.2f acc %.1f", aEng, aBrk, out.ax, aOther, s.gripF, s.gripR, out.spin, out.lock, out.tcCut, tostring(handbrake), tostring(s.gear), Driving.wet, s.powerK, s.accel))
+			end
+		end
 		-- (2026-11-03, realistic physics) real tyre grip in g (the car's handling, a little help from
 		-- GameGrip), lower for a heavy car, lower in the wet; aero downforce grows with speed squared
 		-- (a lot on supercars, a little on the others), so a fast car is planted at speed
@@ -2957,15 +3293,17 @@ function Driving.step(dt: number)
 		elseif not s.tc then
 			cap *= 1 + DF.PowerOversteer * loss / 0.4 -- the rear steps out under power
 		end
-		yawRate = math.clamp(yawRate, -cap, cap)
-		-- the car's turn follows the wheel with its weight: quick when parking, heavier at speed
-		local response = (DF.YawResponse + DF.YawResponseHandling * handling) * (1 + 3 * math.max(0, 1 - speedAbs / 40)) / s.cls.inertia
-		-- (2026-11-03) momentum: a heavy car's turn builds slower, and every car resists sudden
-		-- direction changes at speed (no snapping at 250 km/h)
-		response /= s.weightK ^ DF.WeightInertia * (1 + speedAbs / DF.HighSpeedYaw)
-		s.yawRate += (yawRate - s.yawRate) * math.min(1, dt * response)
-		yawRate = s.yawRate
-		s.yaw -= yawRate * dt
+		if not axleOn then
+			yawRate = math.clamp(yawRate, -cap, cap)
+			-- the car's turn follows the wheel with its weight: quick when parking, heavier at speed
+			local response = (DF.YawResponse + DF.YawResponseHandling * handling) * (1 + 3 * math.max(0, 1 - speedAbs / 40)) / s.cls.inertia
+			-- (2026-11-03) momentum: a heavy car's turn builds slower, and every car resists sudden
+			-- direction changes at speed (no snapping at 250 km/h)
+			response /= s.weightK ^ DF.WeightInertia * (1 + speedAbs / DF.HighSpeedYaw)
+			s.yawRate += (yawRate - s.yawRate) * math.min(1, dt * response)
+			yawRate = s.yawRate
+			s.yaw -= yawRate * dt
+		end
 
 		-- drifting: a slide past DriftEnter at speed (or the handbrake thrown into a corner) is a
 		-- drift; the nose is eased towards where the car is going (countersteer help), gently while
@@ -2987,16 +3325,28 @@ function Driving.step(dt: number)
 		if s.drifting and speedAbs > 1 then
 			local velYaw = yawFromLook((fwd * fwdSpeed + right * latSpeed).Unit)
 			local d = (velYaw - s.yaw + math.pi) % (2 * math.pi) - math.pi
-			s.yaw += d * DF.DriftAssist * (0.4 + 0.6 * Driving.assist) * (1 - 0.6 * math.abs(steerIn)) * dt
-			if math.abs(d) > DF.DriftMaxAngle then
-				s.yaw += (math.abs(d) - DF.DriftMaxAngle) * math.sign(d) * math.min(1, dt * 12)
+			if not axleOn then
+				s.yaw += d * DF.DriftAssist * (0.4 + 0.6 * Driving.assist) * (1 - 0.6 * math.abs(steerIn)) * dt
+				if math.abs(d) > DF.DriftMaxAngle then
+					s.yaw += (math.abs(d) - DF.DriftMaxAngle) * math.sign(d) * math.min(1, dt * 12)
+				end
+			elseif Driving.help > 0 and math.abs(d) > DF.DriftMaxAngle then
+				-- (the two-axle model) past the spin limit the countersteer help turns the car back towards where it's
+				-- going (off for "Pro"); its speed stays, seen from the new heading
+				local wv = fwd * fwdSpeed + right * latSpeed
+				s.yaw += (math.abs(d) - DF.DriftMaxAngle) * math.sign(d) * math.min(1, dt * 8)
+				s.yawRate *= math.exp(-dt * 4)
+				fwd = forwardFromYaw(s.yaw)
+				right = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
+				fwdSpeed, latSpeed = wv:Dot(fwd), wv:Dot(right)
 			end
 			s.nitro = math.min(1, s.nitro + DF.NitroFillDrift * dt)
 		end
 
 		-- the car turns, its momentum doesn't: the velocity stays where it was and the tyres pull
 		-- it round as far as their grip allows (below), which is what lets a car slide and drift
-		do
+		-- (the two-axle model did all of this in CarPhysics.step)
+		if not axleOn then
 			local nf = forwardFromYaw(s.yaw)
 			local nr = Vector3.new(math.cos(s.yaw), 0, -math.sin(s.yaw))
 			local wv = fwd * fwdSpeed + right * latSpeed
@@ -3007,6 +3357,8 @@ function Driving.step(dt: number)
 		-- lateral grip (low with handbrake -> drift). Past the tyres' peak slip angle the grip falls
 		-- away, so a slide keeps going until you catch it
 		local grip = if handbrake then 1.4 else 4.5 + 5 * handling
+		local slipAngle = math.atan2(math.abs(latSpeed), math.max(math.abs(fwdSpeed), 6))
+		if not axleOn then
 		grip *= 1 - loss
 		grip *= 1 - math.min(s.driftK, 0.6) * 0.4 -- (drift tyres, a drift kit, high pressures)
 		if s.surface == "loose" then
@@ -3015,7 +3367,6 @@ function Driving.step(dt: number)
 		-- braking hard mid-corner: the rear goes light and can step out
 		grip *= 1 - DF.TrailBrakeLoose * brakeLoad * math.abs(s.steer)
 		grip *= 1 - DF.WetGripLoss * Driving.wet
-		local slipAngle = math.atan2(math.abs(latSpeed), math.max(math.abs(fwdSpeed), 6))
 		if slipAngle > DF.SlipPeak then
 			grip *= 1 - (1 - DF.SlideGrip) * math.clamp((slipAngle - DF.SlipPeak) / DF.SlipPeak, 0, 1)
 		end
@@ -3038,7 +3389,21 @@ function Driving.step(dt: number)
 			latSpeed *= math.exp(-DF.StabilityAssist * Driving.assist * dt)
 			s.yawRate *= math.exp(-DF.StabilityAssist * 0.5 * Driving.assist * dt)
 		end
+		end -- (the old model)
 		s.slip = math.abs(latSpeed) + (if handbrake and math.abs(fwdSpeed) > 20 then 25 else 0)
+		if out then
+			-- (the two-axle model) tyre noise from the real slip: a soft squeal near the limit, louder in a slide, a
+			-- screech when locking or spinning; smoke per axle
+			local x = math.max(out.slipF / 1.1, out.slipR)
+			s.slip = 40 * math.clamp((x - 0.82) / 1.2, 0, 1) + 38 * out.spin + 38 * out.lock + (if handbrake and math.abs(fwdSpeed) > 20 then 20 else 0)
+			if math.abs(fwdSpeed) < 4 and out.spin < 0.1 then
+				s.slip = 0
+			end
+			local frontSpin = if s.drive ~= "RWD" then out.spin else 0
+			local rearSpin = if s.drive ~= "FWD" then out.spin else 0
+			s.smokeF = math.clamp(math.max(frontSpin, (out.slipF - 1.4) / 1.5, if s.brakeIn > 0.8 and not Driving.abs then out.lock else 0), 0, 1)
+			s.smokeR = math.clamp(math.max(rearSpin, (out.slipR - 1.3) / 1.4, if handbrake then out.lock * 0.6 else 0), 0, 1)
+		end
 		if throttle > 0.8 and math.abs(fwdSpeed) < 14 and brake > 0.3 then
 			s.report.burn += dt
 		end
@@ -3048,16 +3413,17 @@ function Driving.step(dt: number)
 		-- tyre noise and smoke: a real launch (traction control off, flooring it from a stop, or a
 		-- clutch drop) for a moment only, a hard stop at speed, and turning hard when fast
 		local sf = math.abs(fwdSpeed) / s.topSpeed
-		if not s.tc and throttle > 0.8 and fwdSpeed >= -1 and sf < 0.06 then
+		-- (the two-axle model hears the real slip, above; these are the old model's guesses)
+		if not axleOn and not s.tc and throttle > 0.8 and fwdSpeed >= -1 and sf < 0.06 then
 			s.slip += 30 * throttle * (1 - sf / 0.06)
 		end
-		if s.launch > 0 then
+		if s.launch > 0 and not axleOn then
 			s.slip += 25 * s.launch / 0.8
 		end
 		if s.brakeIn > 0.85 and fwdSpeed > 70 then
-			s.slip += 14 * s.brakeIn
+			s.slip += (if axleOn then 8 else 14) * s.brakeIn
 		end
-		if math.abs(s.steer) > 0.35 and sf > 0.4 then
+		if not axleOn and math.abs(s.steer) > 0.35 and sf > 0.4 then
 			s.slip += 60 * math.abs(s.steer) * (sf - 0.4)
 		end
 		-- a loud tyre cry pulling away hard and on a launch (sound only: no smoke unless they slip)
@@ -3156,8 +3522,32 @@ function Driving.step(dt: number)
 	if hit then
 		s.surface = if HARD_SURFACE[hit.Material] then "hard" elseif LOOSE_SURFACE[hit.Material] then "loose" else "hard"
 	end
+	-- (2026-11-08, the two-axle model) marks from each tyre's own contact patch, as wide as that tyre, darker the
+	-- harder it slides, spins or locks; only on hard ground
+	if s.axleOut and s.axle then
+		s.skidT += dt
+		if s.skidT > 0.05 then
+			s.skidT = 0
+			local AX = DF.Axle
+			local P = s.axle :: any
+			for _, c in s.corners do
+				local amount = if c.front then s.smokeF else math.max(s.smokeR, if s.drifting then 0.6 else 0)
+				local hard = c.mat ~= nil and (AX.Surface[(c.mat :: Enum.Material).Name] or 1) >= 0.85
+				if s.grounded and c.hit and hard and amount > 0.15 and mphNow > 6 then
+					local p = root.CFrame:PointToWorldSpace(c.at)
+					p = Vector3.new(p.X, (c.hit :: Vector3).Y + 0.03, p.Z)
+					local w = math.clamp((if c.front then P.tyreF else P.tyreR) / 1000 * 3 * 0.9, 0.5, 1.3)
+					if c.skid then
+						skidMark(c.skid :: Vector3, p, w, math.clamp(amount, 0.25, 1), c.nrm)
+					end
+					c.skid = p
+				else
+					c.skid = nil
+				end
+			end
+		end
 	-- skid marks under the rear tyres while they slide (only on a hard road surface)
-	if s.grounded and hit and s.surface == "hard" and (s.slip > 28 or s.drifting) and mphNow > 8 then
+	elseif s.grounded and hit and s.surface == "hard" and (s.slip > 28 or s.drifting) and mphNow > 8 then
 		s.skidT += dt
 		if s.skidT > 0.05 then
 			s.skidT = 0
@@ -3237,6 +3627,9 @@ function Driving.step(dt: number)
 			end
 			s.pitchVel += math.rad(16) * throttle
 			s.headVel += Vector3.new(0, 0, 1.6 * throttle)
+			if throttle > 0.5 then
+				buzz(0.15 + 0.15 * throttle, 0.04) -- a little kick on phones
+			end
 			-- flat out near the limiter: the view punches wider for a moment
 			if throttle > 0.8 and s.rpm > 0.8 then
 				s.fovPunch += Config.DrivingFeel.ShiftPunchFov
@@ -3285,6 +3678,14 @@ function Driving.step(dt: number)
 				target = math.max(target, 0.2 + 0.25 * throttle) -- pulling away: the clutch slips
 			end
 			target = math.clamp(target, 0.12, 1.02)
+			-- (2026-11-08) on the limiter the revs bounce off it (the cut and the catch), heard and on the dials
+			if s.axle and throttle > 0.6 and rev >= 0.985 then
+				s.limitT += dt
+				target = 1 - Config.DrivingFeel.Axle.RevBounce * (0.5 + 0.5 * math.sin(s.limitT * math.pi * 2 * 9))
+				s.rpm = target
+			else
+				s.limitT = 0
+			end
 		end
 		s.rpm += (target - s.rpm) * math.min(1, dt * s.cls.revRate)
 		if not free then
@@ -3330,6 +3731,68 @@ function Driving.render(dt: number)
 	-- wheels
 	s.wheelSpin = (s.wheelSpin - fwdSpeed * dt / 1.1) % (math.pi * 2)
 	local wheelAngle = -s.steer * math.rad(28) / (1 + (math.abs(fwdSpeed) / 90))
+	-- (2026-11-08) each wheel spins at its own radius: driven wheels faster when they spin up, locked ones stop;
+	-- the front wheels at the angle the tyres really have (two-axle model)
+	local ao = s.axleOut
+	if ao then
+		wheelAngle = -math.clamp(ao.delta, -math.rad(30), math.rad(30)) -- (30 degrees at most: the tyre stays in its arch)
+	end
+	for _, c in s.corners do
+		local v = fwdSpeed
+		if ao then
+			local driven = if s.drive == "AWD" then true elseif s.drive == "FWD" then c.front else not c.front
+			if driven and ao.spin > 0 then
+				v += (if fwdSpeed >= 0 then 1 else -1) * ao.spin * 45
+			end
+			if ao.lock > 0.5 and (not c.front or not Driving.abs) and (not c.front or s.brakeIn > 0.8) then
+				v = 0
+			end
+		end
+		c.spin = (c.spin - v * dt / math.max(c.radius, 0.3)) % (math.pi * 2)
+		-- the kit-v2 wheels: at speed the spokes give way to a blurred spinning face (no strobe), as a camera sees it
+		local k = s.kit[c]
+		if k then
+			local w = math.abs(v) / math.max(c.radius, 0.3)
+			local f = math.clamp((w - 12) / 18, 0, 1)
+			if math.abs(f - k.shown) > 0.03 or (f == 0 and k.shown ~= 0) or (f == 1 and k.shown ~= 1) then
+				k.shown = f
+				for _, b in k.blur do
+					b.Transparency = 1 - f
+				end
+				for _, p in k.spokes do
+					p.Transparency = f * f
+				end
+			end
+		end
+	end
+	-- hot brakes after a hard stop from high speed: the discs glow a faint orange, then cool
+	do
+		local sf = math.abs(fwdSpeed) / s.topSpeed
+		if s.brakeIn > 0.7 and sf > 0.35 then
+			s.brakeHeat = math.min(1, s.brakeHeat + s.brakeIn * sf * sf * dt * 0.9)
+		else
+			s.brakeHeat = math.max(0, s.brakeHeat - dt * 0.09)
+		end
+		local glow = math.clamp((s.brakeHeat - 0.35) / 0.65, 0, 1)
+		if math.abs(glow - s.glowShown) > 0.02 or (glow == 0 and s.glowShown ~= 0) then
+			s.glowShown = glow
+			for _, k in s.kit do
+				for _, sa in k.discs do
+					pcall(function()
+						sa.EmissiveStrength = glow * 1.6
+					end)
+				end
+			end
+		end
+	end
+	-- the other players see the front wheels turn (a steering value on the car, a few times a second)
+	s.steerSendT -= dt
+	local steerQ = math.floor(s.steer * 10 + 0.5) / 10
+	if s.steerSendT <= 0 and math.abs(steerQ - s.steerSent) >= 0.1 then
+		s.steerSent = steerQ
+		s.steerSendT = 0.15
+		remote("CarSignals"):FireServer({ steer = steerQ })
+	end
 	-- each wheel moves up and down on its spring to stay on the road (its travel smoothed a touch)
 	local sp = s.susp
 	for _, c in s.corners do
@@ -3339,13 +3802,13 @@ function Driving.render(dt: number)
 		local lift = CFrame.new(m.C0.Rotation:Inverse() * Vector3.new(0, c.travel, 0))
 		local klift = if c.knuckle then CFrame.new(c.knuckle.C0.Rotation:Inverse() * Vector3.new(0, c.travel, 0)) else CFrame.new()
 		if m:GetAttribute("Front") then
-			m.Transform = lift * CFrame.Angles(0, wheelAngle, 0) * CFrame.Angles(s.wheelSpin, 0, 0)
+			m.Transform = lift * CFrame.Angles(0, wheelAngle, 0) * CFrame.Angles(c.spin, 0, 0)
 			-- brake caliper rides on a knuckle that steers but doesn't spin
 			if c.knuckle then
 				c.knuckle.Transform = klift * CFrame.Angles(0, wheelAngle, 0)
 			end
 		else
-			m.Transform = lift * CFrame.Angles(s.wheelSpin, 0, 0)
+			m.Transform = lift * CFrame.Angles(c.spin, 0, 0)
 			if c.knuckle then
 				c.knuckle.Transform = klift
 			end
@@ -3621,6 +4084,10 @@ function Driving.render(dt: number)
 	for _, sm in s.smoke do
 		local driven = if s.drive == "FWD" then not sm.rear elseif s.drive == "AWD" then true else sm.rear
 		local rate = if squeal > 0.05 then squeal * (if driven then 70 else 35) else 0
+		if s.axleOut then
+			-- (the two-axle model) each axle smokes from its own tyres' slide, spin or lock
+			rate = 75 * (if sm.rear then s.smokeR else s.smokeF)
+		end
 		-- a drift smokes the rear tyres hard
 		if s.drifting and sm.rear then
 			rate = math.max(rate, 55 * math.clamp(math.abs(s.driftAngle) / 0.4, 0.4, 1))
@@ -3884,8 +4351,9 @@ end
 
 -- Settings: "Auto" | "Manual" gearbox
 function Driving.setGearbox(mode: string)
-	-- (2026-11-04) no Q / E on a phone or a gamepad: a Manual saved on a PC left the car stuck in neutral
-	local canShift = not UI.isTouch and UserInputService.KeyboardEnabled
+	-- (2026-11-04) no Q / E on a gamepad: a Manual saved on a PC left the car stuck in neutral. (2026-11-08) phones
+	-- shift with the paddles on the screen
+	local canShift = UI.isTouch or UserInputService.KeyboardEnabled
 	Driving.gearbox = if mode == "Manual" and canShift then "Manual" else "Auto"
 	DashGauges.gearbox = Driving.gearbox
 	local s = state
@@ -3894,12 +4362,20 @@ function Driving.setGearbox(mode: string)
 		s.mgear = if s.manual then (tonumber(s.gear) or 0) else 0
 		UI.setIndicators(indicatorState(s))
 	end
+	UI.showShiftPaddles(UI.isTouch and Driving.gearbox == "Manual" and s ~= nil and not s.electric)
 end
 
 ---------------------------------------------------------------------
 -- One-time setup
 ---------------------------------------------------------------------
 function Driving.init()
+	-- (2026-11-08) the phone's shift paddles
+	UI.onShift = function(dir: number)
+		local s = state
+		if s and s.manual then
+			carKey(s, if dir > 0 then Enum.KeyCode.E else Enum.KeyCode.Q)
+		end
+	end
 	local b = Instance.new("BlurEffect")
 	b.Size = 0
 	b.Parent = Lighting

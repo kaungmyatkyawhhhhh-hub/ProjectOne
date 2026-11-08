@@ -10,3 +10,8 @@ imports/details/src/
 imports/road_mesh_patch/
 # local copies of the door sources before the scissor doors (2026-11-08); big .blend files, kept on the PC only
 imports/backups/
+# wheel kit v2 (2026-11-08): the meshes, pictures and previews are made again by tools/wheels/wheel_library_v2.py and
+# wheel_textures.py; the uploaded ids are in tools/wheels/kit2_ids.json
+imports/wheels2/tex/
+imports/wheels2/preview/
+imports/wheels2/wheels2.fbx

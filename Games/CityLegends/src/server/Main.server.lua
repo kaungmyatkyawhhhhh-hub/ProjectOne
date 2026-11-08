@@ -678,6 +678,7 @@ SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)
 end)
 
 -- the driver's blinkers and lights go on their car as attributes, so every player sees them
+local steerSentAt: { [Player]: number } = {}
 CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
 	local car = getSession(player).car
 	if not car or not car.Parent or type(raw) ~= "table" then
@@ -704,6 +705,19 @@ CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
 	if raw.smoke == 0 or raw.smoke == 1 or raw.smoke == 2 then
 		car:SetAttribute("Smoke", raw.smoke)
 	end
+	-- (2026-11-08) the steering, so the other players see the front wheels turn (tenths, a few a second at most)
+	local st = raw.steer
+	if type(st) == "number" and st == st then
+		local now = os.clock()
+		local last = steerSentAt[player] or 0
+		if now - last >= 0.1 then
+			steerSentAt[player] = now
+			car:SetAttribute("Steer", math.clamp(math.floor(st * 10 + 0.5) / 10, -1, 1))
+		end
+	end
+end)
+Players.PlayerRemoving:Connect(function(player: Player)
+	steerSentAt[player] = nil
 end)
 
 -- a street light, tree or traffic pole knocked down: the other games drop it too (only from a

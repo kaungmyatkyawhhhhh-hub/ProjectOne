@@ -1,0 +1,214 @@
+{
+ "designs": {
+  "Furia7": {
+   "F": {
+    "hubX": 0.27,
+    "spokes": 7,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.3423548267760768
+   },
+   "D": {
+    "hubX": 0.14,
+    "spokes": 7,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.3423548267760768
+   }
+  },
+  "SaettaY5": {
+   "F": {
+    "hubX": 0.27,
+    "spokes": 5,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.3164457519257524
+   },
+   "D": {
+    "hubX": 0.14,
+    "spokes": 5,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.3164457519257524
+   }
+  },
+  "Corsa10": {
+   "F": {
+    "hubX": 0.27,
+    "spokes": 10,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.3979359146968564
+   },
+   "D": {
+    "hubX": 0.14,
+    "spokes": 10,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.3979359146968564
+   }
+  },
+  "Centro6": {
+   "F": {
+    "hubX": 0.27,
+    "spokes": 6,
+    "lugs": 0,
+    "centreLock": true,
+    "cover": 0.5180542921310741
+   },
+   "D": {
+    "hubX": 0.14,
+    "spokes": 6,
+    "lugs": 0,
+    "centreLock": true,
+    "cover": 0.5180542921310741
+   }
+  },
+  "Turbine14": {
+   "F": {
+    "hubX": 0.27,
+    "spokes": 14,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.7640392700337633
+   },
+   "D": {
+    "hubX": 0.14,
+    "spokes": 14,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.7640392700337633
+   }
+  },
+  "Trio6": {
+   "F": {
+    "hubX": 0.27,
+    "spokes": 6,
+    "lugs": 6,
+    "centreLock": false,
+    "cover": 0.4616987983466347
+   },
+   "D": {
+    "hubX": 0.14,
+    "spokes": 6,
+    "lugs": 6,
+    "centreLock": false,
+    "cover": 0.4616987983466347
+   }
+  },
+  "Royale20": {
+   "F": {
+    "hubX": 0.27,
+    "spokes": 20,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.3247824275918546
+   },
+   "D": {
+    "hubX": 0.14,
+    "spokes": 20,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.3247824275918546
+   }
+  },
+  "Disco5": {
+   "F": {
+    "hubX": 0.27,
+    "spokes": 5,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.8099129380239759
+   },
+   "D": {
+    "hubX": 0.14,
+    "spokes": 5,
+    "lugs": 5,
+    "centreLock": false,
+    "cover": 0.8099129380239759
+   }
+  }
+ },
+ "rimFrame": {
+  "RX": 0.48,
+  "discR": 0.74
+ },
+ "tyres": {
+  "66": 0.66,
+  "71": 0.71,
+  "75": 0.75
+ },
+ "tris": {
+  "R2_Lip": 1344,
+  "R2_Barrel": 2112,
+  "R2_Disc": 1440,
+  "R2_CaliperA": 376,
+  "R2_CaliperB": 376,
+  "R2_Shield": 576,
+  "R2_Tyre66": 5376,
+  "R2_Tyre71": 5376,
+  "R2_Tyre75": 5376,
+  "R2_Furia7_Face": 3600,
+  "R2_Furia7_Nuts": 320,
+  "R2_Furia7_Cap": 672,
+  "R2_Furia7_Blur": 2048,
+  "R2_Furia7_FaceD": 3600,
+  "R2_Furia7_NutsD": 320,
+  "R2_Furia7_CapD": 672,
+  "R2_Furia7_BlurD": 2048,
+  "R2_SaettaY5_Face": 3032,
+  "R2_SaettaY5_Nuts": 320,
+  "R2_SaettaY5_Cap": 672,
+  "R2_SaettaY5_Blur": 2048,
+  "R2_SaettaY5_FaceD": 3032,
+  "R2_SaettaY5_NutsD": 320,
+  "R2_SaettaY5_CapD": 672,
+  "R2_SaettaY5_BlurD": 2048,
+  "R2_Corsa10_Face": 4272,
+  "R2_Corsa10_Nuts": 320,
+  "R2_Corsa10_Cap": 672,
+  "R2_Corsa10_Blur": 2048,
+  "R2_Corsa10_FaceD": 4272,
+  "R2_Corsa10_NutsD": 320,
+  "R2_Corsa10_CapD": 672,
+  "R2_Corsa10_BlurD": 2048,
+  "R2_Centro6_Face": 3008,
+  "R2_Centro6_Nuts": 180,
+  "R2_Centro6_Blur": 2048,
+  "R2_Centro6_FaceD": 3008,
+  "R2_Centro6_NutsD": 180,
+  "R2_Centro6_BlurD": 2048,
+  "R2_Turbine14_Face": 3936,
+  "R2_Turbine14_Nuts": 320,
+  "R2_Turbine14_Cap": 672,
+  "R2_Turbine14_Blur": 2048,
+  "R2_Turbine14_FaceD": 3936,
+  "R2_Turbine14_NutsD": 320,
+  "R2_Turbine14_CapD": 672,
+  "R2_Turbine14_BlurD": 2048,
+  "R2_Trio6_Face": 3296,
+  "R2_Trio6_Nuts": 368,
+  "R2_Trio6_Cap": 672,
+  "R2_Trio6_Blur": 2048,
+  "R2_Trio6_FaceD": 3296,
+  "R2_Trio6_NutsD": 368,
+  "R2_Trio6_CapD": 672,
+  "R2_Trio6_BlurD": 2048,
+  "R2_Royale20_Face": 4032,
+  "R2_Royale20_Nuts": 320,
+  "R2_Royale20_Cap": 672,
+  "R2_Royale20_Blur": 2048,
+  "R2_Royale20_FaceD": 4032,
+  "R2_Royale20_NutsD": 320,
+  "R2_Royale20_CapD": 672,
+  "R2_Royale20_BlurD": 2048,
+  "R2_Disco5_Face": 8396,
+  "R2_Disco5_Nuts": 320,
+  "R2_Disco5_Cap": 672,
+  "R2_Disco5_Blur": 2048,
+  "R2_Disco5_FaceD": 8396,
+  "R2_Disco5_NutsD": 320,
+  "R2_Disco5_CapD": 672,
+  "R2_Disco5_BlurD": 2048
+ }
+}

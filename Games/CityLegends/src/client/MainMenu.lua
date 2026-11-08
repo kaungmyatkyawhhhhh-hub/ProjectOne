@@ -1398,8 +1398,8 @@ local function openSettings()
 			UI.onUnitsChanged(u)
 		end
 	end)
-	-- (2026-11-04) not on a phone: shifting is Q / E only, so MANUAL left the car stuck in neutral
-	if not UI.isTouch then
+	-- (2026-11-04) Q / E shift on a PC; (2026-11-08) phones get shift paddles on the screen
+	do
 		choices(row("Gearbox"), { "AUTO", "MANUAL" }, function()
 			return if st.Gearbox == "Manual" then "MANUAL" else "AUTO"
 		end, function(v)
@@ -1418,13 +1418,36 @@ local function openSettings()
 		st.Speedo = if v == "DIGITAL" then "Digital" else "Analogue"
 		UI.setSpeedoStyle(st.Speedo)
 	end)
-	-- (2026-11-03, realistic physics) how much help: a slide is caught, the phone's steering calmed at
-	-- speed, drifts held; tyre smoke and tyre marks
-	choices(row("Driving assists"), { "OFF", "LOW", "NORMAL" }, function()
-		return if st.Assist == "Off" then "OFF" elseif st.Assist == "Low" then "LOW" else "NORMAL"
+	-- (2026-11-08, a million times better driving) the driver aids, each on its own: traction control and
+	-- stability control (SPORT allows small slides), ABS, and the countersteer help (OFF = "Pro")
+	local aids = MainMenu.aidsOf(st)
+	choices(row("Traction control"), { "OFF", "SPORT", "ON" }, function()
+		return string.upper(aids.TC)
 	end, function(v)
-		st.Assist = if v == "OFF" then "Off" elseif v == "LOW" then "Low" else "Normal"
-		Driving.assist = if v == "OFF" then 0 elseif v == "LOW" then 0.5 else 1
+		aids.TC = if v == "OFF" then "Off" elseif v == "SPORT" then "Sport" else "On"
+		st.TC = aids.TC
+		MainMenu.applyAids(st)
+	end)
+	choices(row("Stability control"), { "OFF", "SPORT", "ON" }, function()
+		return string.upper(aids.ESC)
+	end, function(v)
+		aids.ESC = if v == "OFF" then "Off" elseif v == "SPORT" then "Sport" else "On"
+		st.ESC = aids.ESC
+		MainMenu.applyAids(st)
+	end)
+	choices(row("ABS"), { "OFF", "ON" }, function()
+		return string.upper(aids.ABS)
+	end, function(v)
+		aids.ABS = if v == "OFF" then "Off" else "On"
+		st.ABS = aids.ABS
+		MainMenu.applyAids(st)
+	end)
+	choices(row("Countersteer help"), { "OFF (PRO)", "ON" }, function()
+		return if aids.Help == "Off" then "OFF (PRO)" else "ON"
+	end, function(v)
+		aids.Help = if v == "ON" then "On" else "Off"
+		st.Help = aids.Help
+		MainMenu.applyAids(st)
 	end)
 	choices(row("Tyre smoke"), { "OFF", "LOW", "HIGH" }, function()
 		return if st.Smoke == "Off" then "OFF" elseif st.Smoke == "Low" then "LOW" else "HIGH"
@@ -2584,6 +2607,34 @@ function MainMenu.show(what: string)
 	end
 end
 
+-- (2026-11-08) the driver aids from the saved settings; an old save's "Driving assists" picks them (Off: all
+-- the helps off but ABS, Low: Sport, Normal: all on)
+function MainMenu.aidsOf(st: { [string]: any }): { TC: string, ESC: string, ABS: string, Help: string }
+	local function ok(v: any): boolean
+		return v == "Off" or v == "Sport" or v == "On"
+	end
+	local base = if st.Assist == "Off" then "Off" elseif st.Assist == "Low" then "Sport" else "On"
+	return {
+		TC = if ok(st.TC) then st.TC else base,
+		ESC = if ok(st.ESC) then st.ESC else base,
+		ABS = if st.ABS == "Off" then "Off" else "On",
+		Help = if st.Help == "Off" or st.Help == "On" then st.Help else (if base == "Off" then "Off" else "On"),
+	}
+end
+
+function MainMenu.applyAids(st: { [string]: any })
+	local a = MainMenu.aidsOf(st)
+	local function n(v: string): number
+		return if v == "Off" then 0 elseif v == "Sport" then 1 else 2
+	end
+	Driving.tcMode = n(a.TC)
+	Driving.escMode = n(a.ESC)
+	Driving.abs = a.ABS ~= "Off"
+	Driving.help = if a.Help == "Off" then 0 else 1
+	-- (the old "assist" scale still calms phone steering at speed and the old model's drift help)
+	Driving.assist = if a.ESC == "Off" then 0 elseif a.ESC == "Sport" then 0.5 else 1
+end
+
 -- the saved settings at start (minimap, graphics, sound)
 function MainMenu.applySettings(st: { [string]: any })
 	if type(st.Minimap) == "table" then
@@ -2593,7 +2644,7 @@ function MainMenu.applySettings(st: { [string]: any })
 	WorldFx.setQuality(if type(st.Graphics) == "string" then st.Graphics else WorldFx.defaultQuality())
 	LookFx.load(st.Look)
 	UI.setSpeedoStyle(if st.Speedo == "Digital" then "Digital" else "Analogue")
-	Driving.assist = if st.Assist == "Off" then 0 elseif st.Assist == "Low" then 0.5 else 1
+	MainMenu.applyAids(st)
 	Driving.smoke = if st.Smoke == "Off" then 0 elseif st.Smoke == "Low" then 0.5 else 1
 	Driving.marks = st.Marks ~= false
 	if type(st.Music) == "number" then

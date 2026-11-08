@@ -85,6 +85,10 @@ export type Settings = {
 	HideKeys: boolean?, -- the on-screen controls hidden
 	Speedo: string?, -- the HUD speedometer: "Analogue" (default) | "Digital"
 	Assist: string?, -- driving assists: "Off" | "Low" | "Normal" (default)
+	TC: string?, -- (2026-11-08) traction control "Off" | "Sport" | "On"
+	ESC: string?, -- stability control "Off" | "Sport" | "On"
+	ABS: string?, -- "Off" | "On"
+	Help: string?, -- countersteer help "Off" (Pro) | "On"
 	Smoke: string?, -- tyre smoke: "Off" | "Low" | "High" (default)
 	Marks: boolean?, -- tyre marks (default on)
 }
@@ -920,6 +924,19 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 	if raw.Assist == "Off" or raw.Assist == "Low" or raw.Assist == "Normal" then
 		profile.Settings.Assist = raw.Assist -- driving assists (2026-11-03)
+	end
+	-- (2026-11-08) the driver aids, each on its own
+	for _, k in { "TC", "ESC" } do
+		local v = raw[k]
+		if v == "Off" or v == "Sport" or v == "On" then
+			profile.Settings[k] = v
+		end
+	end
+	for _, k in { "ABS", "Help" } do
+		local v = raw[k]
+		if v == "Off" or v == "On" then
+			profile.Settings[k] = v
+		end
 	end
 	if raw.Smoke == "Off" or raw.Smoke == "Low" or raw.Smoke == "High" then
 		profile.Settings.Smoke = raw.Smoke -- tyre smoke

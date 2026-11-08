@@ -487,6 +487,21 @@ function UI.buildTouchControls()
 			doorsBtn.Visible = on
 		end
 	end
+	-- (2026-11-08) the manual gearbox on a phone: shift paddles, up and down (shown while the gearbox is manual)
+	local shiftUp = touchButton("▲", UDim2.new(1, -314, 1, -246), UDim2.fromOffset(42, 58), Color3.fromRGB(110, 170, 255), function()
+		if UI.onShift then
+			UI.onShift(1)
+		end
+	end, noop)
+	local shiftDown = touchButton("▼", UDim2.new(1, -266, 1, -246), UDim2.fromOffset(42, 58), Color3.fromRGB(110, 170, 255), function()
+		if UI.onShift then
+			UI.onShift(-1)
+		end
+	end, noop)
+	shiftUp.Visible, shiftDown.Visible = false, false
+	UI.showShiftPaddles = function(on: boolean)
+		shiftUp.Visible, shiftDown.Visible = on, on
+	end
 end
 
 ---------------------------------------------------------------------
@@ -2570,6 +2585,8 @@ UI.onAction = nil :: (() -> ())?
 UI.onTowAction = nil :: (() -> ())? -- (2026-11-07) the trailer's own pill, above that one
 UI.showCruiseSteps = nil :: ((boolean) -> ())?
 UI.onDoors = nil :: (() -> ())? -- (2026-11-08) the phone's DOORS button (client/CarDoors)
+UI.onShift = nil :: ((number) -> ())? -- (2026-11-08) the phone's shift paddles (client/Driving): +1 up, -1 down
+UI.showShiftPaddles = function(_on: boolean) end -- (set when the touch controls are built)
 UI.showDoorsButton = nil :: ((boolean) -> ())?
 type Pill = { b: TextButton, key: TextLabel, text: TextLabel }
 local actionPill: Pill? = nil

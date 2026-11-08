@@ -177,6 +177,18 @@ local function collect(car: Model, rec: Rec, rootCF: CFrame)
 		end)
 		local tyre = list[1].Size.Y
 		local n = 0
+		-- (2026-11-08) wheel kit v2: the rash goes on the polished lip (every piece of that wheel has the same box)
+		local lip: BasePart? = nil
+		for _, p in list do
+			if p:GetAttribute("WheelRole") == "Lip" then
+				lip = p
+			end
+		end
+		if lip then
+			lip:SetAttribute("RimCorner", key)
+			table.insert(rec.rims, lip)
+			continue
+		end
 		for _, p in list do
 			if p.Size.Y < tyre * 0.95 and p.Size.Y > tyre * 0.6 and n < 2 then
 				n += 1

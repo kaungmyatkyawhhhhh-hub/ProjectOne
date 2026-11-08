@@ -1389,6 +1389,24 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	end
 	-- ground frame: its wheel centres land at our wheel height
 	local origin = Vector3.new(mid.X, mid.Y - modelR, mid.Z)
+	-- (2026-11-08) a kit-v2 model (each axle its own real tyre, CarBuilder gives each its own radius): the ground is
+	-- under its tyres, so a bigger rear tyre doesn't lift the body
+	if src:GetAttribute("WheelKit") == 2 then
+		local sum, n = 0, 0
+		for _, g in groups do
+			local low = math.huge
+			for _, d in g.parts do
+				low = math.min(low, d.Position.Y - d.Size.Y / 2)
+			end
+			if low < math.huge then
+				sum += low
+				n += 1
+			end
+		end
+		if n == 4 then
+			origin = Vector3.new(mid.X, sum / n, mid.Z)
+		end
+	end
 	local frame = CFrame.lookAt(origin, origin + f)
 	local function tmpl(d: BasePart, about: Vector3): Template
 		local rel = frame:ToObjectSpace(d.CFrame)
@@ -2036,7 +2054,15 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			table.insert(if d.Name:lower():find("_static_", 1, true) then fixed else parts, tmpl(d, c))
 		end
 		-- the maker's logo on the wheel's centre cap: covered (our emblem for the brands with one)
-		local cap = marks and marks.caps[key]
+		-- (2026-11-08) our wheel kit v2 has a blank cap of its own: no cover over where the model's cap was
+		local kit2 = false
+		for _, d in g.parts do
+			if d:GetAttribute("WheelRole") then
+				kit2 = true
+				break
+			end
+		end
+		local cap = if kit2 then nil else marks and marks.caps[key]
 		if marks and cap then
 			local spm = dims.wb / marks.wb
 			local side = if c.X < 0 then -1 else 1
@@ -3021,6 +3047,10 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 					local p = t.part:Clone()
 					p.Name = "SkinWheel" .. i
 					p.CFrame = base * t.offset
+					-- (2026-11-08, wheel kit v2) the blurred spinning face starts hidden: Driving fades it in at speed
+					if p:GetAttribute("WheelRole") == "Blur" then
+						p.Transparency = 1
+					end
 					p.Parent = skin
 					local w = Instance.new("WeldConstraint")
 					w.Part0 = tire
