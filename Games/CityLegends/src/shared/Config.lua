@@ -2052,6 +2052,7 @@ Config.Service = {
 -- before (the one with doors is ReplicatedStorage.CarModels.<car id>@doors; the old one was never changed).
 Config.Doors = {
 	lambrini_svj = true,
+	lambrini_svj63 = true,
 } :: { [string]: boolean }
 Config.DoorFeel = {
 	Seconds = 0.7, -- to open or close
