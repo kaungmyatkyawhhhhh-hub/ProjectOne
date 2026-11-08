@@ -2546,10 +2546,26 @@ function UI.setIndicators(t: { [string]: any })
 	end
 	engineLamp.Visible = t.ignition == true and t.engine ~= true
 	parkLamp.Visible = t.park == true
+	tcLamp:SetAttribute("Off", t.tc == false)
+	tcLamp.Text = "TC OFF"
 	tcLamp.Visible = t.tc == false
 	lightsLamp.Visible = t.lights == true and t.ignition == true
 	lightsLamp.TextColor3 = if t.beam == "high" then BEAM_BLUE else Color3.fromRGB(70, 230, 110)
 	UI.setGearboxLabel(if t.manual then "Manual" else "Auto")
+end
+
+-- (2026-11-08) traction / stability control working: the TC lamp flashes "TC" (it stays "TC OFF" when it's off)
+function UI.setTcWorking(on: boolean)
+	if not tcLamp or tcLamp:GetAttribute("Off") then
+		return
+	end
+	if on then
+		tcLamp.Text = "TC"
+		tcLamp.Visible = (os.clock() % 0.24) < 0.12
+	elseif tcLamp.Text == "TC" then
+		tcLamp.Text = "TC OFF"
+		tcLamp.Visible = false
+	end
 end
 
 function UI.setBlink(left: boolean, right: boolean)

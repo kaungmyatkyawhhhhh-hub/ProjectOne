@@ -612,6 +612,21 @@ Config.DrivingFeel = {
 		BrakeK = 1, -- the brakes stop each car in its real distance (from 100 km/h, CarPhysicsData.stop) x this
 		DownforceK = 2, -- each car's real downforce (kg at 250 km/h) counts this much (planted at speed)...
 		ClassDownforce = { Supercar = 0.06, Hypercar = 0.1 } :: { [string]: number }, -- ...plus this (g at 250 km/h)
+		-- (2026-11-08, Prompts/RWD cars slide more (and more with TCS off).md) rear-wheel drive only: how far past its
+		-- grip the engine may push the rear before traction control cuts in (On / Sport), and how much it spins (0..1:
+		-- more = less side grip left, more slide). Off: no limit. More = slides more
+		RwdReservePer = 180, -- floored in a low gear (traction control Sport / off) a rear-drive car's engine asks its
+		-- rear tyres for 1 + (hp per tonne / this - 1) x their grip...
+		RwdReserveMax = 2.8, -- ...up to this much (more = spins up easier: donuts, power slides)
+		RwdSlideOn = 1.12, -- On: a few degrees, then caught
+		RwdSpinOn = 0.35,
+		RwdSlideSport = 1.8, -- Sport: a clear slide, donuts
+		RwdSpinSport = 1,
+		RwdSpinOff = 1, -- Off: spins up freely (power oversteer, drifts, donuts)
+		RwdSpinSide = 0.6, -- the side grip a fully spinning rear loses on top (Sport / Off; more = slides further)
+		DonutBelow = 45, -- studs/s (35 mph): under this a spinning rear may swing round (the countersteer help stays out)
+		HelpTcOff = 0.7, -- the countersteer help with traction control off (rear-drive)
+		EscSportFrom = 42, -- studs/s (33 mph): Sport stability control only above this (rear-drive: donuts)
 		AbsOffSqueeze = 1.6, -- ABS off: a full pedal asks this much more than the brakes need (the wheels lock)...
 		LockStop = 0.72, -- ...and locked front wheels stop the car this share as well as the anti-lock does (longer stops)
 		ReserveMax = 2.2, -- the most a powerful car's engine can overpower its tyres in the low gears (traction off)

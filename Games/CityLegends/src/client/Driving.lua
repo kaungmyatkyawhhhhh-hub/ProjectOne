@@ -160,6 +160,7 @@ type State = {
 	limitT: number,
 	smokeF: number,
 	smokeR: number,
+	tcFlashT: number, -- the TC light flashes while traction / stability control is working
 	-- (2026-11-07) cruise control: the set speed, the pedal taps, the regulator; what the car's health does to it;
 	-- out of fuel; what the driver's game tells the server next (Driving.takeReport)
 	cruise: number?,
@@ -2257,6 +2258,7 @@ function Driving.attach(model: Model)
 		limitT = 0,
 		smokeF = 0,
 		smokeR = 0,
+		tcFlashT = 0,
 		model = model,
 		root = root,
 		spec = spec,
@@ -3236,9 +3238,19 @@ function Driving.step(dt: number)
 				abs = Driving.abs,
 				help = Driving.help,
 				pedal = s.brakeIn,
+				throttle = if engaged and gearNow > 0 then throttle else 0,
+				top = s.topSpeed,
 			}, dt)
 			s.axleOut = out
 			s.axAxle = out.ax
+			-- the TC light: flashes while the aids are working (steady when TC is off), HUD and the live cluster
+			if s.tc and out.tcCut > 0.12 then
+				s.tcFlashT = 0.35
+			end
+			s.tcFlashT = math.max(0, s.tcFlashT - dt)
+			local flick = s.tcFlashT > 0 and (os.clock() % 0.24) < 0.12
+			DashGauges.tcOff = (not s.tc) or flick
+			UI.setTcWorking(s.tcFlashT > 0)
 			-- the speed: what the tyres put down plus the rest, then the car's frame turns with it
 			fwdSpeed += (out.ax + aOther) * dt
 			if s.launchReady then

@@ -193,14 +193,17 @@ function CarPhysics.params(spec: Cars.CarSpec, wb: number, kg: number, handling:
 		kg = kg,
 		-- a powerful car's engine can overpower its tyres in the low gears (hp per tonne over 250: more): with
 		-- traction control off or in Sport the rear can spin up and step out, as a real one does
-		reserve = math.clamp((d.hp or 300) / math.max(kg, 600) * 1000 / 250, 1, P.ReserveMax),
+		reserve = if drive == "RWD"
+			then math.clamp((d.hp or 300) / math.max(kg, 600) * 1000 / P.RwdReservePer, 1, P.RwdReserveMax)
+			else math.clamp((d.hp or 300) / math.max(kg, 600) * 1000 / 250, 1, P.ReserveMax),
 	}
 end
 
 -- the extra pull the engine has over the calibrated one (0-60 is with traction control on, which holds it to the
 -- tyres): only without full traction control, and only at low speed (the low gears)
 function CarPhysics.reserve(p: Params, speed: number, top: number, tc: number): number
-	if tc >= 2 or p.reserve <= 1 then
+	-- (a rear-drive car's overpowering is in CarPhysics.step: it is measured against its tyres)
+	if p.reserve <= 1 or tc >= 2 or p.drive == "RWD" then
 		return 1
 	end
 	return 1 + (p.reserve - 1) * math.clamp(1 - math.abs(speed) / (0.4 * top), 0, 1)
@@ -246,6 +249,8 @@ export type StepIn = {
 	abs: boolean,
 	help: number, -- countersteer help 0..1
 	pedal: number?, -- the brake pedal 0..1 (with ABS off a hard one locks the fronts)
+	throttle: number?, -- the throttle 0..1, and the car's top speed (studs/s): a rear-drive car's power slides
+	top: number?,
 }
 export type StepOut = {
 	vy: number,
@@ -269,15 +274,8 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 	local P = DF.Axle
 	local vx, vy, r = s.vx, s.vy, s.r
 	local speed = math.abs(vx)
-	-- countersteer help: the front wheels follow the car's slide (the way it's really going)
 	local delta = s.delta
 	local beta = math.atan2(vy, math.max(speed, 1))
-	if s.help > 0 and vx > 3 then
-		local want = math.clamp(beta * P.HelpK, -P.HelpMax, P.HelpMax)
-		-- only while the slide is past the tyres' peak at the rear, and it never fights the player's own countersteer
-		local over = math.clamp((math.abs(beta) - p.peakR * 0.6) / (p.peakR * 1.4), 0, 1)
-		delta += (want - math.clamp(delta, -math.abs(want), math.abs(want))) * over * s.help
-	end
 	-- loads (last step's acceleration), each axle's grip
 	local zf, zr = CarPhysics.loads(p, s.ax, speed)
 	local z0f, z0r = p.b / p.L, p.a / p.L
@@ -288,11 +286,44 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 	local fDrive = s.drive
 	local spin, lock, tcCut = 0, 0, 0
 	local dF, dR = fDrive * (1 - p.rear), fDrive * p.rear
-	local function limitDrive(f: number, c: number): (number, number)
+	local rwd = p.drive == "RWD"
+	local function limitDrive(f: number, c: number, rear: boolean): (number, number)
 		if f <= 0 then
 			return f, 0
 		end
 		local lim = c * longK
+		-- a powerful rear-drive car floored in a low gear asks more of its rear tyres than they have (its engine's
+		-- real pull, hp per tonne: Params.reserve); traction control On never lets it
+		if rwd and rear and s.tc < 2 and (s.throttle or 0) > 0.4 and p.reserve > 1 then
+			local low = math.clamp(1 - speed / (0.45 * math.max(s.top or 200, 1)), 0, 1)
+			f = math.max(f, lim * (1 + (p.reserve - 1) * low) * (s.throttle or 0))
+		end
+		-- (2026-11-08, Prompts/RWD cars slide more (and more with TCS off).md) a rear-drive car's rear lets go more on
+		-- power: with traction control on a few degrees, then it's caught; in Sport a clear slide; off, it spins up
+		if rwd and rear then
+			if s.tc == 2 then
+				local top = lim * P.RwdSlideOn
+				if f > top then
+					tcCut = math.max(tcCut, 1 - top / f)
+				end
+				local fx = math.min(f, top)
+				return math.min(fx, lim), math.clamp((fx / lim - 1) / math.max(P.RwdSlideOn - 1, 0.01), 0, 1) * P.RwdSpinOn
+			elseif s.tc == 1 then
+				local top = lim * P.RwdSlideSport
+				if f > top then
+					tcCut = math.max(tcCut, 1 - top / f)
+				end
+				local fx = math.min(f, top)
+				if fx > lim then
+					return lim * P.SpinGrip, math.clamp((fx / lim - 1) / math.max(P.RwdSlideSport - 1, 0.01), 0.4, 1) * P.RwdSpinSport
+				end
+				return fx, 0
+			end
+			if f > lim then
+				return lim * P.SpinGrip, math.clamp((f / lim - 1) * 2, 0.35, 1) * P.RwdSpinOff
+			end
+			return f, 0
+		end
 		if s.tc == 2 then
 			if f > lim * 0.97 then
 				tcCut = math.max(tcCut, 1 - lim * 0.97 / f)
@@ -313,8 +344,8 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 		return f, 0
 	end
 	local spF, spR
-	dF, spF = limitDrive(dF, capF)
-	dR, spR = limitDrive(dR, capR)
+	dF, spF = limitDrive(dF, capF, false)
+	dR, spR = limitDrive(dR, capR, true)
 	spin = math.max(spF, spR)
 	-- the brakes at each axle; ABS keeps each axle just under locking
 	local bF, bR = s.brake * p.bias, s.brake * (1 - p.bias)
@@ -345,17 +376,42 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 	local fxR = dR - bR * sv
 	-- what's left of each tyre's grip for cornering (a spinning or locked axle has little)
 	local function sideCap(c: number, fx: number, slid: number): number
-		local left = math.sqrt(math.max(c * c - fx * fx, (c * 0.08) ^ 2))
+		-- (a friction ellipse: the tyre grips LongGrip more straight ahead than sideways)
+		local u = fx / (c * longK)
+		local left = c * math.sqrt(math.max(1 - u * u, 0.08 ^ 2))
 		return left * (1 - slid * (1 - P.SlideSide))
 	end
 	local cF = sideCap(capF, fxF, math.max(lockF, spF))
 	local cR = sideCap(capR, fxR, math.max(lockR, spR))
+	-- a rear-drive car's rear tyres spinning up (traction control Sport / off) hold almost nothing sideways: it swings
+	-- round (power slides, donuts)
+	if rwd and s.tc < 2 and spR > 0 then
+		cR *= 1 - spR * P.RwdSpinSide
+	end
 	-- the yaw and side speed, in small steps (stiff at low speed)
 	local n = math.clamp(math.ceil(dt * 240), 1, 16)
 	local h = dt / n
 	local slipF, slipR = 0, 0
 	local cosd = math.cos(delta)
 	local blend = math.clamp((speed - P.KinFrom) / (P.KinTo - P.KinFrom), 0, 1)
+	if rwd and spR > 0.25 then
+		blend = math.max(blend, math.clamp(spR * 1.5, 0, 1)) -- (donuts: the spinning rear swings round)
+	end
+	-- the countersteer help stays out of a slow donut, and is a little weaker with traction control off
+	local slowSpin = rwd and spR > 0.25 and speed < P.DonutBelow
+	local help = if slowSpin then 0 elseif rwd and s.tc == 0 then s.help * P.HelpTcOff else s.help
+	-- countersteer help: the front wheels follow the car's slide (the way it's really going)
+	if help > 0 and vx > 3 then
+		local want = math.clamp(beta * P.HelpK, -P.HelpMax, P.HelpMax)
+		-- only while the slide is past the tyres' peak at the rear, and it never fights the player's own countersteer
+		local over = math.clamp((math.abs(beta) - p.peakR * 0.6) / (p.peakR * 1.4), 0, 1)
+		delta += (want - math.clamp(delta, -math.abs(want), math.abs(want))) * over * help
+		cosd = math.cos(delta)
+	end
+	-- stability control: a rear-drive car's goes with its traction control (Sport: Sport at most, off: off), and Sport
+	-- only steps in at speed (so donuts work)
+	local esc = if rwd then math.min(s.esc, s.tc) else s.esc
+	local escFrom = if esc == 1 and rwd then P.EscSportFrom else 8
 	for _ = 1, n do
 		local ux = math.max(speed, 0.5)
 		local aF = math.atan2(vy + p.a * r, ux) - delta * sv
@@ -368,27 +424,27 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 		local yawAcc = (p.a * fyF * cosd - p.b * fyR) / p.iz
 		-- countersteer help, the second half: a car spinning into its slide (the rear past its peak) is slowed in its
 		-- turn a little, so a keyboard or a thumb can catch it ("Pro" off)
-		if s.help > 0 and vx > 3 then
+		if help > 0 and vx > 3 then
 			local b = math.atan2(vy, ux)
 			if r * b < 0 and math.abs(b) > p.peakR * 0.8 then
-				yawAcc -= r * P.HelpYaw * s.help * math.clamp((math.abs(b) - p.peakR * 0.8) / p.peakR, 0, 1)
+				yawAcc -= r * P.HelpYaw * help * math.clamp((math.abs(b) - p.peakR * 0.8) / p.peakR, 0, 1)
 			end
 		end
 		-- stability control: the yaw the driver asks for (within the tyres' grip); it brakes a wheel to hold it, and
 		-- holds the body's slip angle
-		if s.esc > 0 and speed > 8 then
+		if esc > 0 and speed > escFrom then
 			local ref = vx * math.tan(delta) / (p.L * (1 + P.EscUnder * vx * vx))
 			-- (what the tyres can turn the car with: both axles together)
 			local lim = (capF + capR) * 1.05 / math.max(speed, 1)
 			ref = math.clamp(ref, -lim, lim)
-			local tol = if s.esc == 2 then P.EscTol else P.EscTolSport
+			local tol = if esc == 2 then P.EscTol else P.EscTolSport
 			local err = r - ref
 			if math.abs(err) > tol then
-				local k = if s.esc == 2 then P.EscGain else P.EscGain * 0.5
+				local k = if esc == 2 then P.EscGain else P.EscGain * 0.5
 				yawAcc -= (err - sign(err) * tol) * k
 				tcCut = math.max(tcCut, math.clamp(math.abs(err) / 0.6, 0, 1))
 			end
-			local bmax = if s.esc == 2 then P.EscBeta else P.EscBetaSport
+			local bmax = if esc == 2 then P.EscBeta else P.EscBetaSport
 			local bnow = math.atan2(vy, ux)
 			if math.abs(bnow) > bmax then
 				vy -= sign(vy) * (math.abs(bnow) - bmax) * ux * math.min(1, h * 6)
