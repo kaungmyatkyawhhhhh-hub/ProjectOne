@@ -971,3 +971,213 @@ def g20(Spec, needle_sprite, add_needle, glyph):
     sp.readout("odo", 478, 266, "l", 6, "driveMode", WHT)
     sp.readout("odo", 424, 22, "m", 5, "clock", WHT)
     return sp
+
+
+
+def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear):
+    """the first Precision Type 42 (owner's photo imports/refs/audi_r8_gen1_cluster_owner.png): two deep round dials with
+    silver rings and a red inner ring, revs 0-10 on the left (red from 9), 0-350 km/h on the right, a dark screen low in
+    each dial, water and fuel gauges in their little hood at the top, the screen in the middle, oil and volts at the far
+    ends of the pods. The dial's names are left out. Coordinates are photo pixels (0.46 mm each on the model); the box
+    reaches past the photo to the ends of the model's pods."""
+    from cluster_art import FONTDIR
+
+    DIG = FONTDIR + "BuilderExtended-SemiBold.otf"
+    box = (-85, 60, 763, 375)
+    REF = "audi_r8_gen1_cluster_owner.png"
+    A = Art(REF, box, S=4, bg=(7, 7, 8))
+    sp = Spec("r8g1", box[2] - box[0], box[3] - box[1], 2.35, 2.35, box[0], box[1])
+    sp.redline, sp.idle = 8.7, 0.9
+    C1, C2 = (153.0, 233.0), (525.0, 233.0)
+    NUM = (236, 236, 238)
+    DIM = (176, 178, 182)
+    RED = (214, 30, 34)
+    SPD = [(0, -131), (20, -114), (40, -97), (60, -79), (80, -61), (100, -43), (120, -25), (140, -7), (170, 13), (200, 33),
+           (230, 52.5), (260, 72), (290, 92), (320, 111.5), (350, 131)]
+
+    def kph(v):
+        for (a, x), (b, y) in zip(SPD, SPD[1:]):
+            if v <= b:
+                return x + (y - x) * (v - a) / (b - a)
+        return SPD[-1][1]
+
+    def rev(v):
+        return -131 + 26.2 * v
+
+    h, w = A.H * A.S, A.W * A.S
+    yy, xx = np.mgrid[0:h, 0:w]
+    px = (xx + 0.5) / A.S + A.ox
+    py = (yy + 0.5) / A.S + A.oy
+
+    # the pods round the dials: dark grey, lighter low down
+    for C, side in ((C1, -1), (C2, 1)):
+        far = (C[0] + side * 150, C[1] + 34)
+        pod = np.zeros((h, w))
+        for c, rad in ((C, 128.0), (far, 46.0)):
+            pod = np.maximum(pod, np.clip((rad - np.hypot(px - c[0], py - c[1])) / 1.0, 0, 1))
+        t = np.clip((px - C[0]) * side / 150.0, 0, 1)
+        half = 128 + (46 - 128) * t
+        inside = ((px - C[0]) * side > 0) & ((px - C[0]) * side < 160)
+        pod = np.maximum(pod, np.clip((half - np.abs(py - (C[1] + 34 * t))) / 1.0, 0, 1) * inside)
+        tone = 18 + 16 * smooth(180, 340, py)
+        blend(A, np.stack([tone, tone, tone * 1.04], axis=-1), pod)
+
+    # the two dials
+    for C in (C1, C2):
+        r, th = field(A, C)
+        face = 9 + 7 * (1 - smooth(10, 100, r))
+        blend(A, np.stack([face, face, face * 1.08], axis=-1), band_mask(r, -5, 101, 0.6))
+        blend(A, np.full((h, w, 3), (196.0, 20.0, 28.0)), band_mask(r, 101.8, 104.6, 0.6))
+        blend(A, np.full((h, w, 3), (8.0, 8.0, 9.0)), band_mask(r, 104.4, 108, 0.6))
+        # the silver ring: bright where the light catches it, grey elsewhere
+        s = 150 + 70 * np.cos(np.radians(th - 315)) ** 2 + 30 * np.cos(np.radians(th * 3))
+        s = s * (0.78 + 0.22 * smooth(108, 113, r)) * (1 - 0.25 * smooth(113, 118, r))
+        blend(A, np.stack([s, s, s * 1.02], axis=-1), band_mask(r, 108, 118, 0.7))
+
+    def tick(C, r0, r1, deg, wd, col):
+        A.line([polar(C, r0, deg), polar(C, r1, deg)], col, wd)
+
+    # revs: 0-10, a tick every 250, red from 9
+    for i in range(0, 41):
+        v = i / 4
+        big = i % 4 == 0
+        col = (206, 34, 34) if v >= 9 else (NUM if big else DIM)
+        tick(C1, 87 if big else 91, 100, rev(v), 2.4 if big else 1.6, col)
+    for v in range(0, 11):
+        p = polar(C1, 77 if v < 10 else 74, rev(v))
+        A.text(p[0], p[1], str(v), DIG, 15.5, (222, 36, 36) if v >= 9 else NUM)
+    A.text(C1[0], 173.5, "1/min x 1000", ARIAL_B, 7.6, NUM)
+
+    # km/h: a tick every 10, the numbers as on the photo (two sizes)
+    LABELS = (0, 20, 40, 60, 80, 100, 120, 140, 170, 200, 230, 260, 290, 320, 350)
+    for v in range(0, 351, 10):
+        big = v in LABELS
+        tick(C2, 89 if big else 93, 100, kph(v), 2.4 if big else 1.4, NUM if big else DIM)
+    for v in (30, 50):
+        tick(C2, 84, 88, kph(v), 1.6, RED)
+    for v in LABELS:
+        small = v in (0, 40, 80, 120, 170, 230, 290, 350)
+        size = 10.5 if small else 14
+        hw, hh = len(str(v)) * size * 0.36, size * 0.36  # (half the label's width and height)
+        th = math.radians(kph(v))
+        p = polar(C2, 85 - hw * abs(math.sin(th)) - hh * abs(math.cos(th)), kph(v))
+        A.text(p[0], p[1], str(v), DIG, size, NUM)
+    A.text(C2[0] - 6, 174.5, "km/h", ARIAL_B, 8.4, NUM)
+
+    # the dark screens low in each dial
+    for C in (C1, C2):
+        A.round_rect(C[0] - 34, 289, C[0] + 34, 323, 4, (13, 14, 16), outline=(46, 46, 50), w=0.8)
+        top = np.clip((py - 289) / 3, 0, 1) * np.clip((293 - py) / 3, 0, 1) * (np.abs(px - C[0]) < 33)
+        blend(A, np.full((h, w, 3), (30.0, 32.0, 36.0)), top)
+
+    # the warning lamps, dark until they light (the owner's photo is the bulb check)
+    k = 0.13
+    amber = tuple(int(c * k) for c in (246, 140, 20))
+    red = tuple(int(c * k) for c in (230, 30, 30))
+    A.text(122, 207, "EPC", ARIAL_B, 8.2, amber)
+    A.round_rect(186, 200, 199, 210, 1.5, None, outline=amber, w=1.2)
+    A.line([(183, 205), (186, 205)], amber, 1.2)
+    A.circle(133, 253, 3.4, None, outline=amber, w=1.1)
+    A.line([(133, 245), (133, 249.6)], amber, 1.2)
+    A.round_rect(173, 249, 184, 255, 2, None, outline=amber, w=1.1)
+    A.line([(170, 259), (175, 257), (180, 259), (185, 257)], amber, 1.0)
+    A.circle(479, 205, 2.4, red)
+    A.line([(479, 208), (477, 214)], red, 2.0)
+    A.line([(483, 208), (488, 212)], red, 1.6)
+    A.round_rect(498, 190, 515, 199, 1.0, None, outline=red, w=1.1)
+    A.circle(533, 186, 2.6, red)
+    A.line([(533, 189), (533, 197)], red, 2.6)
+    A.line([(529, 191), (538, 196)], red, 1.0)
+    A.circle(565, 230, 6.2, None, outline=amber, w=1.2)
+    A.text(565, 230.5, "ABS", ARIAL_B, 3.9, amber)
+    A.circle(553, 206, 6.0, None, outline=red, w=1.2)
+    A.round_rect(165, 186, 178, 193, 2, None, outline=amber, w=1.1)
+
+    # the little hood at the top: water and fuel
+    A.round_rect(250, 90, 430, 157, 14, (22, 22, 24), outline=(130, 132, 136), w=1.4)
+    A.line([(262, 91.5), (418, 91.5)], (200, 202, 206), 1.0)
+    T1, T2 = (291.3, 143.8), (390.0, 144.5)
+    for C in (T1, T2):
+        A.circle(C[0], C[1], 30, (12, 12, 13))
+    for i, deg in enumerate((-55, -28, 0, 28, 57)):
+        tick(T1, 22, 30, deg, 1.6 if i % 2 == 0 else 1.0, (214, 30, 30) if i == 4 else NUM)
+        tick(T2, 22, 30, deg, 1.6 if i % 2 == 0 else 1.0, (214, 30, 30) if i == 0 else NUM)
+    A.text(272, 132, "50", ARIAL_B, 6.4, NUM)
+    A.text(291.5, 119.5, "90", ARIAL_B, 7.2, NUM)
+    A.text(310.5, 131.5, "130", ARIAL_B, 6.4, (220, 40, 40))
+    A.text(270, 145, "°C", ARIAL_B, 6.0, NUM)
+    A.text(390, 119.5, "1/2", ARIAL_B, 7.0, NUM)
+    A.text(408.5, 132, "1/1", ARIAL_B, 6.4, NUM)
+    A.round_rect(364, 138, 370, 147, 0.8, None, outline=NUM, w=0.9)
+    A.line([(313, 139), (313, 146)], NUM, 1.0)
+    A.line([(309, 147), (317, 147)], NUM, 1.0)
+    # the water needle stays at 90 (the engine is always warm here)
+    A.line([T1, polar(T1, 27, 2)], (238, 238, 240), 1.6)
+    A.circle(T1[0], T1[1], 9.0, (34, 34, 36), outline=(196, 198, 202), w=1.4)
+
+    # the screen in the middle
+    A.round_rect(294.5, 185, 388, 315, 7, (34, 34, 36), outline=(70, 70, 74), w=1.0)
+    A.round_rect(301, 195, 382.5, 310, 4, (14, 13, 12))
+    glare = np.clip((py - 195) / 2, 0, 1) * np.clip((205 - py) / 10, 0, 1) * (px > 302) * (px < 381)
+    blend(A, np.full((h, w, 3), (40.0, 36.0, 32.0)), glare)
+    A.line([(306, 246), (377, 246)], (60, 58, 56), 0.8)
+    A.line([(306, 285), (377, 285)], (60, 58, 56), 0.8)
+    A.round_rect(232, 315, 450, 330, 4, (54, 54, 56))
+
+    # oil (far left) and volts (far right), small round gauges at the ends of the pods
+    O1, O2 = (6.0, 268.0), (672.0, 268.0)
+    for C, s, word in ((O1, 1, "°C"), (O2, -1, "Volt")):
+        A.circle(C[0], C[1], 27, (12, 12, 13))
+        for j, deg in enumerate((40, 70, 100, 130)):
+            tick(C, 19, 26, deg * s, 1.4 if j % 3 == 0 else 1.0, NUM)
+        A.text(C[0] - 4 * s, C[1] - 21, word, ARIAL_B, 6.2, NUM)
+        A.line([C, polar(C, 23, 85 * s)], (238, 238, 240), 1.6)
+        A.circle(C[0], C[1], 7.5, (34, 34, 36), outline=(196, 198, 202), w=1.2)
+    A.text(O1[0] + 18, O1[1] - 13, "150", ARIAL_B, 5.4, NUM)
+    A.text(O1[0] + 18, O1[1] + 14, "50", ARIAL_B, 5.4, NUM)
+    A.text(O2[0] - 18, O2[1] - 13, "16", ARIAL_B, 5.4, NUM)
+    A.text(O2[0] - 18, O2[1] + 14, "8", ARIAL_B, 5.4, NUM)
+    A.round_rect(O2[0] - 12, O2[1] + 20, O2[0] + 0, O2[1] + 27, 0.8, None, outline=NUM, w=0.8)
+
+    A.final = A.finish(A.S, blur=1.0, strength=0.25)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    # the lamps that light: traction control off (the skid car), the brake lamp when standing
+    AMB = (246, 140, 20)
+    L = Art(REF, box, S=4, bg=(0, 0, 0))
+    L.round_rect(165, 186, 178, 193, 2, None, outline=AMB, w=1.1)
+    L.line([(163, 197), (168, 195), (173, 197), (178, 195)], AMB, 1.0)
+    L.text(171.5, 201, "OFF", ARIAL_B, 4.2, AMB)
+    L.final = L.finish(L.S, blur=1, strength=0.3)
+    sp.add_show(sp.box(L, (158, 180, 186, 206), black=True), "tcoff")
+    RD = (230, 30, 30)
+    B = Art(REF, box, S=4, bg=(0, 0, 0))
+    B.circle(553, 206, 6.0, None, outline=RD, w=1.2)
+    B.text(553, 206.5, "!", ARIAL_B, 8, RD)
+    B.line([(545, 199), (543, 206), (545, 213)], RD, 1.0)
+    B.line([(561, 199), (563, 206), (561, 213)], RD, 1.0)
+    B.final = B.finish(B.S, blur=1, strength=0.3)
+    sp.add_show(sp.box(B, (538, 195, 568, 217), black=True), "parked")
+
+    # needles: long and white-silver, a dark hub with a bright rim
+    WN = (238, 238, 240)
+    parts = [(-14, 0, 1.6, 1.9, WN), (0, 95, 1.9, 0.8, WN)]
+    add_needle(sp, needle_sprite(sp, 96, 15, parts, hub=16.5, hub_col=(38, 38, 40), hub_line=(206, 208, 212)), C1[0], C1[1], "rpm", [(0, rev(0)), (10.5, rev(10.5))])
+    add_needle(sp, needle_sprite(sp, 96, 15, parts, hub=16.5, hub_col=(38, 38, 40), hub_line=(206, 208, 212)), C2[0], C2[1], "kmh", SPD)
+    fp = [(-4, 0, 1.0, 1.2, WN), (0, 27, 1.3, 0.6, WN)]
+    add_needle(sp, needle_sprite(sp, 28, 5, fp, hub=9.0, hub_col=(34, 34, 36), hub_line=(196, 198, 202)), T2[0], T2[1], "fuel", [(0, -55), (1, 57)])
+
+    # the middle screen: the gear, the speed, the mileage; the dial screens: the clock and the trip
+    solid_gear(sp, DIG, 24, (236, 236, 238), 341.5, 224)
+    sp.font("speed", DIG, 15, "0123456789", shear=0, track=0.4)
+    sp.readout("speed", 341.5, 263, "m", 3, "speed", NUM)
+    sp.font("unit", ARIAL_B, 7, "kmhpi/", shear=0)
+    sp.readout("unit", 341.5, 277, "m", 4, "unit", DIM)
+    sp.font("odo", DIG, 8.2, "0123456789.:", shear=0, track=0.3)
+    sp.readout("odo", 336, 298, "m", 7, "odoTrim", NUM)
+    sp.font("du", ARIAL_B, 6.2, "kmi", shear=0)
+    sp.readout("du", 366, 298.5, "m", 2, "distUnit", DIM)
+    sp.readout("odo", C1[0], 306, "m", 5, "clock", NUM)
+    sp.readout("odo", C2[0] - 4, 306, "m", 6, "trip", NUM)
+    sp.readout("du", C2[0] + 24, 306.5, "m", 2, "distUnit", DIM)
+    return sp

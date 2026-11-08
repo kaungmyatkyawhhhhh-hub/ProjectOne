@@ -54,7 +54,7 @@ CarSkin.CLUSTER_STYLE = {
 	-- replica of the real one"; photos and video frames in imports/refs)
 	ferrara_458 = "Ferrari458",
 	ferrara_f430 = "F430", -- was the 599's (owner); now the F430's own
-	audy_r8 = "R8",
+	audy_r8 = "LiveR8", -- the 2010 model (2026-11-09), from the owner's photo
 	mclaran_12c = "Live12C", -- from the owner's photo
 	bentz_sls = "LiveSLS", -- from the owner's photo
 	ferrara_599 = "LiveF141", -- from the owner's photo
@@ -145,6 +145,7 @@ CarSkin.CLUSTER_RECT = {
 	bentlee_contgt = { at = Vector3.new(0.0257, 0.0392, -0.1906), face = Vector3.new(-0.0362, 0.2718, 0.9617), w = 0.37, h = 0.14 }, -- in the model's bowls
 	nisun_350z = { at = Vector3.new(0.0007, 0.0335, -0.1705), face = Vector3.new(0, 0.2843, 0.9587), w = 0.38, h = 0.14 }, -- in the model's pods
 	astin_dbx = { at = Vector3.new(-0.0027, 0.0326, -0.2737), face = Vector3.new(0, 0.3076, 0.9515), w = 0.294, h = 0.112 }, -- on the model's screen
+	audy_r8 = { at = Vector3.new(-0.012, 0.034, -0.2315), face = Vector3.new(0, 0.32, 0.9474), w = 0.3921, h = 0.1456 }, -- in the model's two pods and hood (tools/lambo/window_r8g1.png)
 	bentz_sl65bs = { at = Vector3.new(0.022, 0.0715, -0.2433), face = Vector3.new(0, 0.2, 0.98), w = 0.234, h = 0.106 }, -- in the two bowls
 	bentz_sls = { at = Vector3.new(0.0021, 0.0377, -0.2165), face = Vector3.new(0, 0.2, 0.98), w = 0.3163, h = 0.1342 }, -- in the model's hood, in front of its dials
 	mclaran_12c = { at = Vector3.new(-0.0045, 0.0679, -0.1712), face = Vector3.new(0, 0.2, 0.98), w = 0.34, h = 0.12 }, -- in the model's own hood (tools/lambo/frame_probe.py)
@@ -287,7 +288,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -400,7 +401,7 @@ CarSkin.STEER_MODEL = {
 	ferrara_f430 = "FerrariF430",
 	ferrara_458 = "Ferrari458",
 	-- the other supercars and hypercars
-	audy_r8 = "AudiR8", lexis_lc500 = "LexusSport",
+	lexis_lc500 = "LexusSport", -- (audy_r8 keeps its 2010 model's own wheel)
 	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
 	nisun_gtr = "GTR",
 	-- BMW
@@ -428,9 +429,7 @@ CarSkin.STEER_MODEL = {
 	suzaki_swift = "Compact", toyoka_belta = "Compact",
 } :: { [string]: string }
 
-CarSkin.CLUSTER_SHIFT = {
-	audy_r8 = { -0.08, 0.26, 0, 0.84 }, -- up into the twin-dial hood, over its own dials
-} :: { [string]: { number } }
+CarSkin.CLUSTER_SHIFT = {} :: { [string]: { number } }
 
 -- steering wheels (owner, 2026-10-24: "fix all of the steering wheels bad color and if it doesnt
 -- match the actual real one fix it", then "the steering wheels looks too rough make it better like

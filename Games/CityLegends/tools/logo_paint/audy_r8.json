@@ -1,0 +1,223 @@
+{
+ "src": "imports/importing cars/2010_audi_r8_v10_5.2_fsi_quattro.glb",
+ "images": {
+  "0": [
+   {
+    "solid": [
+     1956,
+     250,
+     2047,
+     490,
+     25,
+     24,
+     25
+    ]
+   },
+   {
+    "solid": [
+     1950,
+     1280,
+     2003,
+     1645,
+     117,
+     122,
+     117
+    ]
+   },
+   {
+    "solid": [
+     1915,
+     1682,
+     2040,
+     2030,
+     255,
+     255,
+     255
+    ]
+   },
+   {
+    "solid": [
+     322,
+     1100,
+     428,
+     1492,
+     255,
+     255,
+     255
+    ]
+   },
+   {
+    "solid": [
+     1012,
+     1508,
+     1342,
+     1603,
+     255,
+     255,
+     255
+    ]
+   }
+  ],
+  "13": [
+   {
+    "solid": [
+     1956,
+     250,
+     2047,
+     490,
+     25,
+     24,
+     25
+    ]
+   },
+   {
+    "rect": [
+     1940,
+     1270,
+     2012,
+     1655
+    ]
+   },
+   {
+    "rect": [
+     1915,
+     1682,
+     2040,
+     2030
+    ]
+   },
+   {
+    "rect": [
+     322,
+     1100,
+     428,
+     1492
+    ]
+   },
+   {
+    "rect": [
+     1012,
+     1508,
+     1342,
+     1603
+    ]
+   }
+  ],
+  "3": [
+   {
+    "rect": [
+     255,
+     8,
+     420,
+     66
+    ]
+   }
+  ],
+  "4": [
+   {
+    "rect": [
+     255,
+     8,
+     420,
+     66
+    ]
+   }
+  ],
+  "15": [
+   {
+    "solid": [
+     388,
+     19,
+     413,
+     43,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "solid": [
+     343,
+     179,
+     510,
+     190,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "solid": [
+     404,
+     191,
+     510,
+     216,
+     43,
+     42,
+     43
+    ]
+   },
+   {
+    "solid": [
+     72,
+     358,
+     122,
+     374,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "solid": [
+     266,
+     370,
+     316,
+     387,
+     0,
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "drop": [
+  "aud_r8v10_10_caliperlf_lod0:aud_r8v10_10_caliperlf_lod0_caliperLF_caliper_996vertices1298faces_phong2_0",
+  "aud_r8v10_10_caliperlr_lod0:aud_r8v10_10_caliperlr_lod0_caliperLR_caliper_1428vertices1709faces_phong2_0",
+  "aud_r8v10_10_caliperlr_lod0_caliperLR_caliper_1428vertices1709faces_phong2_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_max_gauge_needle_8vertices10faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_max_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_max_plastic_112vertices101faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_mid_gauge_needle_8vertices10faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_mid_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_mid_plastic_112vertices101faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_min_gauge_needle_8vertices10faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_min_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_fuel_min_plastic_112vertices101faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_hooda_chrome_1114vertices2188faces_chrome_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_max_gauge_needle_10vertices8faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_max_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_max_plastic_108vertices102faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_mid_gauge_needle_10vertices8faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_mid_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_mid_plastic_108vertices102faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_min_gauge_needle_10vertices8faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_min_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_speed_min_plastic_108vertices102faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_steering_wheel_badge_39vertices27faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_max_gauge_needle_10vertices8faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_max_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_max_plastic_108vertices102faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_mid_gauge_needle_10vertices8faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_mid_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_mid_plastic_108vertices102faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_min_gauge_needle_10vertices8faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_min_metal_60vertices60faces_phong10_0",
+  "aud_r8v10_10_cockpit:aud_r8v10_10_cockpit_tach_min_plastic_108vertices102faces_phong10_0",
+  "aud_r8v10_10_lod0:aud_r8v10_10_lod0_bumperFa_emblem_4vertices2faces_phong2_0",
+  "aud_r8v10_10_lod0:aud_r8v10_10_lod0_bumperRa_chrome_1000vertices1792faces_chrome_0",
+  "aud_r8v10_10_lod0:aud_r8v10_10_lod0_headlightL_badge_12vertices17faces_phong2_0",
+  "aud_r8v10_10_lod0:aud_r8v10_10_lod0_headlightR_badge_12vertices16faces_phong2_0",
+  "aud_r8v10_10_lod0:aud_r8v10_10_lod0_trunk_defrost_lines_131vertices256faces_phong11_0"
+ ]
+}

@@ -10,3 +10,5 @@ The glowing lamps of the newest cars (`client/CarLamps.lua`), cut from each mode
 The 16 non-hypercars: `lamp_second.py` (roles per car in `TAIL`, clean slices in `cslice`); their boxes are in `lamp_pick.py`. Check a car from the front at night straight away: the Z223 pick first lit its bumper chrome.
 
 Add a car: a `HEAD` box, run it, add the id to `CarLamps.CARS`.
+
+A car whose .glb names its lamp pieces (2026-11-09, the first Precision Type 42): `lampfx_glb.py` cuts the shells straight from the .glb into the finished .blend before the pack (job `jobs/<car id>.json`, steps in its header), so no Studio scan is needed.

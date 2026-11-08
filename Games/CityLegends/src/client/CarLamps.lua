@@ -40,6 +40,7 @@ CarLamps.CARS = {
 	lambrini_lp700 = true, lambrini_lp750 = true, lambrini_revuelto = true, lambrini_svj = true, lambrini_svj63 = true,
 	bugotti_veyron = true, bugotti_veyron_sport = true, bugotti_veyron_top = true,
 	bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true,
+	audy_r8 = true, -- (its shells cut from the 2010 model's own lamps, 2026-11-09)
 } :: { [string]: boolean }
 
 function CarLamps.has(id: string?): boolean

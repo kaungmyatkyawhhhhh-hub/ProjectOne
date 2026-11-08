@@ -3616,6 +3616,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	LiveDBX = function(gui)
 		return liveCluster(gui, "dbx")
 	end,
+	LiveR8 = function(gui)
+		return liveCluster(gui, "r8g1")
+	end,
 	LiveSovereign = function(gui)
 		return liveCluster(gui, "sovereign")
 	end,

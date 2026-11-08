@@ -1,0 +1,8 @@
+{
+ "HeadCore": [{"node": "headlight{S}_head_light", "off": 0.004}, {"node": "headlight{S}_textured_reflec", "uv": [192, 320, 960, 1024]}],
+ "HeadGlass": [{"node": "glass{S}HL_glass", "off": 0.006}],
+ "TurnF": [{"node": "bumperFa_detail_glass_a", "split": true, "off": 0.004}],
+ "Tail": [{"node": "glass{S}TL_detail_glass_r", "off": 0.008}],
+ "Rev": [{"node": "glass{S}TL_glass", "absx": [0.77, 9], "off": 0.005}],
+ "TurnR": [{"node": "glass{S}TL_glass", "absx": [0, 0.77], "off": 0.005}]
+}

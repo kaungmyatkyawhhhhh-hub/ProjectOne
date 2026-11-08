@@ -43,6 +43,7 @@ CarFinish.CARS = {
 	bentlee_contgt = true,
 	nisun_350z = true,
 	bnw_330i_g20 = true,
+	audy_r8 = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars
