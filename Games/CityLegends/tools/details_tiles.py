@@ -6,7 +6,7 @@ strength and direction read off the model's own.
 
     python tools/details_tiles.py colour.png [normal.png] <pattern> out_prefix [--check]
 
-pattern: "diamond" (each hole a diamond: a hex mesh becomes a diamond mesh), "hex" (each hole a hexagon, same area:
+pattern: "auto" (big cells -> diamond, small holes -> hex), "diamond" (each hole a diamond: a hex mesh becomes a diamond mesh), "hex" (each hole a hexagon, same area:
 round perforations become hexagon ones), "slot" (each hole a rounded slot across), "square" (rounded squares).
 Writes <out_prefix>_colour.png (and _normal.png); --check also <out_prefix>_check.png (old | new, small tiles 8 x 8 repeats).
 """
@@ -27,9 +27,17 @@ mode = src.mode
 C = np.asarray(src.convert("RGBA"), float)
 H, W = C.shape[:2]
 L = C[..., :3] @ np.array([0.299, 0.587, 0.114])
+if np.percentile(L, 95) - np.percentile(L, 5) < 6:
+    # (a plain picture: its pattern, if any, is in the normal picture only; nothing to redraw)
+    print("TILES flat, nothing to do")
+    sys.exit(2)
 thr = (np.percentile(L, 5) + np.percentile(L, 95)) / 2
 dark = L < thr
 fd = dark.mean()
+if pattern == "auto":
+    # a mesh of big cells (a hex mesh) becomes diamonds, small holes in a plate (perforations) become hexagons
+    pattern = "diamond" if fd > 0.33 else "hex"
+    print("TILES auto ->", pattern)
 hole = np.median(C[dark], 0)
 frame = np.median(C[~dark], 0)
 
@@ -171,7 +179,12 @@ def grads(h):
 REP = 8 if max(W, H) <= 128 else 1
 check = [np.tile(C[..., :3], (REP, REP, 1)), np.tile(newC[..., :3], (REP, REP, 1))]
 if nrm_path:
-    Nm = np.asarray(Image.open(nrm_path).convert("RGB"), float) / 255 * 2 - 1
+    nimg = Image.open(nrm_path).convert("RGB")
+    NSIZE = nimg.size
+    if NSIZE != (W, H):
+        # (a normal picture bigger than its colour picture: read at the colour's size, written back at its own)
+        nimg = nimg.resize((W, H), Image.BILINEAR)
+    Nm = np.asarray(nimg, float) / 255 * 2 - 1
     h_old = blur((~dark).astype(float), 1)
     gx, gy = grads(h_old)
     m = (np.abs(gx) + np.abs(gy)) > 0.05
@@ -182,7 +195,10 @@ if nrm_path:
     gx, gy = grads(h_new)
     n = np.dstack([-gx * sx * 1.6, -gy * sy * 1.6, np.ones_like(gx)])  # the old bevels are sharper than a blur
     n /= np.linalg.norm(n, axis=2, keepdims=True)
-    Image.fromarray(((n * 0.5 + 0.5) * 255).round().astype(np.uint8), "RGB").save(out + "_normal.png")
+    nout = Image.fromarray(((n * 0.5 + 0.5) * 255).round().astype(np.uint8), "RGB")
+    if NSIZE != (W, H):
+        nout = nout.resize(NSIZE, Image.BICUBIC)
+    nout.save(out + "_normal.png")
     check += [np.tile((Nm * 0.5 + 0.5) * 255, (REP, REP, 1)), np.tile((n * 0.5 + 0.5) * 255, (REP, REP, 1))]
 if CHECK:
     sheet = np.concatenate(check, 1)

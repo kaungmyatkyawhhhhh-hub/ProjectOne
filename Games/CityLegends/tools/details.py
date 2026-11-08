@@ -16,7 +16,8 @@ job: {
   "auto": true                   adds the standard shots from the car's box (far_rear, far_front, tail, lamp, exhaust, side, front,
                                  nose; "auto_names" picks some); "info": true lists the parts with their pictures; "dump_tiles": true saves
                                  the small repeating pictures (<prefix>_tile_<part>_colour / _normal.png)
-  "list": [{"part": "Body_Grille" or "*", "box": [x0, y0, z0, x1, y1, z1]}]       pieces wholly in the box
+  "list": [{"part": "Body_Grille" or "*", "box": [x0, y0, z0, x1, y1, z1]}]       pieces wholly in the box ("count" rows,
+                                                                                   "min" / "max" their longest side)
   "probe": [{"shot": "tail", "px": [[x, y], ...]}]                                 what each pixel shows
   "tiles": {"Body_Grille": {"colour": png, "normal": png, "pattern": "diamond"}}    new grille pictures for the after shots
                                                                                    (tools/details_tiles.py; uploaded on their own)
@@ -96,7 +97,8 @@ def part(name):
     if faces:
         lst = [o for o in lst if len(o.data.polygons) == int(faces)]
     if not lst:
-        raise SystemExit("DETAILS no part " + name + " in " + str(sorted({base(o.name) for o in CAR})))
+        print("DETAILS no part " + name + " in " + str(sorted({base(o.name) for o in CAR})))
+        raise SystemExit(1)
     return lst[0]
 
 
@@ -630,17 +632,20 @@ def probe():
 def listing():
     for it in job.get("list", []):
         b = np.array(it["box"], float) + np.array(tuple(OFF) * 2)
+        if it["part"] != "*" and not any(base(o.name) == it["part"].split("#")[0] for o in CAR):
+            print("DETAILS list: no part", it["part"])
+            continue
         names = [o for o in CAR] if it["part"] == "*" else [part(it["part"])]
         rows = []
         for o in names:
-            comps, co = pieces_in(o, [b])
+            comps, co = pieces_in(o, [b], it)
             for c in comps:
                 p = co[c] - np.array(tuple(OFF))
                 lo, hi = p.min(0), p.max(0)
                 rows.append(((hi - lo).max(), base(o.name), (lo + hi) / 2, hi - lo, len(c)))
         rows.sort(key=lambda r: -r[0])
         print("DETAILS list", it["part"], it["box"], len(rows), "pieces")
-        for r in rows[: it.get("max", 40)]:
+        for r in rows[: int(it.get("count", 40))]:
             print("   ", r[1], "mid", [round(x, 3) for x in r[2]], "size", [round(x, 3) for x in r[3]], "verts", r[4])
 
 
@@ -850,6 +855,15 @@ bpy.context.view_layer.objects.active = obs[0]
 out = os.path.join(ROOT, job["out"])
 os.makedirs(os.path.dirname(out), exist_ok=True)
 bpy.ops.export_scene.fbx(filepath=out, use_selection=True, object_types={"MESH"}, global_scale=1.0, apply_unit_scale=True,
-                         bake_space_transform=False, axis_forward="-Z", axis_up="Y", mesh_smooth_type="FACE", use_mesh_modifiers=False)
+                         bake_space_transform=False, axis_forward="-Z", axis_up="Y", mesh_smooth_type="FACE", use_mesh_modifiers=False,
+                         path_mode="STRIP")  # (no picture paths: a broken one made Open Cloud refuse the STO file; looks come from the parts in Studio)
+# (read back and written again: Open Cloud refused some first exports, the STO's, with "Failed to parse the uploaded
+# file"; the same parts read back and written again by Blender go through)
+bpy.ops.wm.read_factory_settings(use_empty=True)
+bpy.ops.import_scene.fbx(filepath=out, axis_forward="-Z", axis_up="Y")
+for o in bpy.data.objects:
+    o.select_set(o.type == "MESH")
+bpy.ops.export_scene.fbx(filepath=out, use_selection=True, object_types={"MESH"}, axis_forward="-Z", axis_up="Y",
+                         mesh_smooth_type="FACE", path_mode="STRIP")
 json.dump(report, open(out + ".json", "w"), indent=0)
 print("DETAILS wrote", out, os.path.getsize(out) // 1024, "KB", {k: v.get("faces") for k, v in report.items() if k != "__like"})

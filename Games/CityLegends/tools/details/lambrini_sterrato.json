@@ -1,0 +1,220 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/547a11d1-4da6-41a3-806e-0115399e346d/scratchpad/lambo/final/done/sterrato.blend",
+ "note": "Enfurecido LB724 Rally: third brake light shorter at both ends, the side intake's front point cut; grille meshes diamond, exhaust perforation hexagons",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.3,
+     1.99,
+     0.86,
+     0.3,
+     2.04,
+     0.91
+    ]
+   ],
+   "min": 0.28,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.96,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.3,
+     1.99,
+     0.86,
+     0.3,
+     2.04,
+     0.91
+    ]
+   ],
+   "min": 0.28,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.96,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_Lens_Red",
+   "boxes": [
+    [
+     -0.3,
+     1.99,
+     0.86,
+     0.3,
+     2.04,
+     0.91
+    ]
+   ],
+   "min": 0.28,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.96,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_Lens_Red",
+   "boxes": [
+    [
+     -0.3,
+     1.99,
+     0.86,
+     0.3,
+     2.04,
+     0.91
+    ]
+   ],
+   "min": 0.28,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.96,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Trim_p4",
+   "boxes": [
+    [
+     0.88,
+     0.4,
+     0.2,
+     1.0,
+     0.75,
+     0.42
+    ]
+   ],
+   "min": 0.1,
+   "max": 0.3,
+   "n": [
+    0,
+    -1,
+    0
+   ],
+   "frac": 0.92,
+   "group": 0.12,
+   "mirror": true
+  },
+  {
+   "op": "clip",
+   "part": "Body_Trim_p3",
+   "boxes": [
+    [
+     0.88,
+     0.4,
+     0.2,
+     1.0,
+     0.75,
+     0.42
+    ]
+   ],
+   "min": 0.1,
+   "max": 0.3,
+   "n": [
+    0,
+    -1,
+    0
+   ],
+   "frac": 0.92,
+   "group": 0.12,
+   "mirror": true
+  }
+ ],
+ "tiles": {
+  "Body_Grille3": {
+   "colour": "tiles/lambrini_sterrato_grille3_colour.png",
+   "normal": "tiles/lambrini_sterrato_grille3_normal.png",
+   "pattern": "diamond or hex"
+  },
+  "Body_Grille4": {
+   "colour": "tiles/lambrini_sterrato_grille4_colour.png",
+   "pattern": "diamond or hex"
+  },
+  "Body_Grille7": {
+   "colour": "tiles/lambrini_sterrato_grille7_colour.png",
+   "normal": "tiles/lambrini_sterrato_grille7_normal.png",
+   "pattern": "diamond or hex"
+  },
+  "Body_Grille8": {
+   "colour": "tiles/lambrini_sterrato_grille8_colour.png",
+   "normal": "tiles/lambrini_sterrato_grille8_normal.png",
+   "pattern": "diamond or hex"
+  }
+ },
+ "out": "imports/details/lambrini_sterrato.fbx",
+ "shots": [
+  {
+   "name": "brake",
+   "eye": [
+    0.4,
+    3.2,
+    1.25
+   ],
+   "look": [
+    0.0,
+    2.0,
+    0.86
+   ],
+   "lens": 70
+  },
+  {
+   "name": "side",
+   "eye": [
+    2.2,
+    0.9,
+    0.5
+   ],
+   "look": [
+    1.0,
+    0.8,
+    0.38
+   ],
+   "lens": 45
+  },
+  {
+   "name": "grille",
+   "eye": [
+    0.5,
+    3.2,
+    0.7
+   ],
+   "look": [
+    0.2,
+    2.0,
+    0.5
+   ],
+   "lens": 50,
+   "light": [
+    0.3,
+    2.9,
+    0.7
+   ],
+   "power": 20
+  }
+ ]
+}

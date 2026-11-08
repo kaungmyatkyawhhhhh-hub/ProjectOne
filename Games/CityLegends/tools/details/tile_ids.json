@@ -58,5 +58,78 @@
    "normal": "rbxassetid://130317982016032",
    "colour": "rbxassetid://98173933966655"
   }
+ },
+ "lambrini_huracan": {
+  "Body_Grille3": {
+   "colour": "rbxassetid://82516728505544",
+   "normal": "rbxassetid://94225005712982"
+  },
+  "Body_Grille4": {
+   "colour": "rbxassetid://86984857784222",
+   "normal": "rbxassetid://90610022334279"
+  },
+  "Body_Grille5": {
+   "colour": "rbxassetid://112670259293714",
+   "normal": "rbxassetid://83269413061621"
+  }
+ },
+ "lambrini_performante": {
+  "Body_Grille2": {
+   "colour": "rbxassetid://118042352008606",
+   "normal": "rbxassetid://99173504297085"
+  },
+  "Body_Grille5": {
+   "colour": "rbxassetid://132038947906802",
+   "normal": "rbxassetid://100032237786114"
+  }
+ },
+ "lambrini_revuelto": {
+  "Body_Grille": {
+   "colour": "rbxassetid://94575141757146",
+   "normal": "rbxassetid://89396353522210"
+  }
+ },
+ "lambrini_sterrato": {
+  "Body_Grille3": {
+   "colour": "rbxassetid://96091689016071",
+   "normal": "rbxassetid://91035431269118"
+  },
+  "Body_Grille4": {
+   "colour": "rbxassetid://106532246577184"
+  },
+  "Body_Grille7": {
+   "colour": "rbxassetid://125963937094391",
+   "normal": "rbxassetid://87478319215843"
+  },
+  "Body_Grille8": {
+   "colour": "rbxassetid://72205819763454",
+   "normal": "rbxassetid://132428984510049"
+  }
+ },
+ "lambrini_sto": {
+  "Body_Grille2": {
+   "colour": "rbxassetid://140405229628910",
+   "normal": "rbxassetid://114898713613847"
+  },
+  "Body_Grille3": {
+   "colour": "rbxassetid://101194787180941",
+   "normal": "rbxassetid://99416155468534"
+  },
+  "Body_Grille4": {
+   "colour": "rbxassetid://132173968928932",
+   "normal": "rbxassetid://113809601255023"
+  },
+  "Body_Grille5": {
+   "colour": "rbxassetid://111959289883768",
+   "normal": "rbxassetid://119538473007066"
+  },
+  "Body_Grille6": {
+   "colour": "rbxassetid://94830722804771",
+   "normal": "rbxassetid://95159577174003"
+  },
+  "Body_Grille": {
+   "colour": "rbxassetid://137460440165269",
+   "normal": "rbxassetid://88215015876107"
+  }
  }
 }
