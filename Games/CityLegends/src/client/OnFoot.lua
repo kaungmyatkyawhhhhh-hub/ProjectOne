@@ -195,6 +195,11 @@ function OnFoot.init()
 		end
 		if input.KeyCode == Enum.KeyCode.Y or input.KeyCode == Enum.KeyCode.DPadUp then
 			OnFoot.toggle()
+		elseif input.KeyCode == Enum.KeyCode.F and not Driving.isDriving() and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+			-- (2026-11-08) Shift + F beside your car: its scissor doors (client/CarDoors)
+			if Driving.onDoorKey then
+				Driving.onDoorKey()
+			end
 		elseif input.KeyCode == Enum.KeyCode.F and not Driving.isDriving() then
 			-- F gets you in too (in a car, Driving's F starts it, then gets you out: onExitKey)
 			OnFoot.toggle()

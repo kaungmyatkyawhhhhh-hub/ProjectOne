@@ -474,6 +474,19 @@ function UI.buildTouchControls()
 	UI.showCruiseSteps = function(on: boolean)
 		plus.Visible, minus.Visible = on, on
 	end
+	-- (2026-11-08) scissor doors up / down while parked (client/CarDoors shows it on a car that has them)
+	local doorsBtn = touchButton("DOORS", UDim2.new(1, -414, 1, -130), UDim2.fromOffset(90, 44), Color3.fromRGB(70, 230, 110), function()
+		if UI.onDoors then
+			UI.onDoors()
+		end
+	end, noop)
+	doorsBtn.TextSize = 14
+	doorsBtn.Visible = false
+	UI.showDoorsButton = function(on: boolean)
+		if doorsBtn.Visible ~= on then
+			doorsBtn.Visible = on
+		end
+	end
 end
 
 ---------------------------------------------------------------------
@@ -856,6 +869,7 @@ local function buildCashTab()
 		{ "W / S", "Throttle  ·  brake / reverse" },
 		{ "A / D", "Steer" },
 		{ "F", "Start the car · get out / get in" },
+		{ "SHIFT + F", "Scissor doors up / down (when parked)" },
 		{ "Q / E", "Shift down / up (manual)" },
 		{ "L SHIFT", "Clutch" },
 		{ "P", "Handbrake on / off" },
@@ -2555,6 +2569,8 @@ end
 UI.onAction = nil :: (() -> ())?
 UI.onTowAction = nil :: (() -> ())? -- (2026-11-07) the trailer's own pill, above that one
 UI.showCruiseSteps = nil :: ((boolean) -> ())?
+UI.onDoors = nil :: (() -> ())? -- (2026-11-08) the phone's DOORS button (client/CarDoors)
+UI.showDoorsButton = nil :: ((boolean) -> ())?
 type Pill = { b: TextButton, key: TextLabel, text: TextLabel }
 local actionPill: Pill? = nil
 local towPill: Pill? = nil

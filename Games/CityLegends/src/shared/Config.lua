@@ -2047,6 +2047,23 @@ Config.Service = {
 	Wash = 40,
 }
 
+-- Scissor doors cut from the cars' own models (owner, 2026-11-08, `Prompts/Scissor doors on the SVJ and SVJ 63 (cut
+-- properly).md`). To go back: set a car's switch to false and the game uses its old model with no doors, exactly as
+-- before (the one with doors is ReplicatedStorage.CarModels.<car id>@doors; the old one was never changed).
+Config.Doors = {
+	lambrini_svj = true,
+} :: { [string]: boolean }
+Config.DoorFeel = {
+	Seconds = 0.7, -- to open or close
+	MaxSpeed = 2, -- studs/s: they open only when (nearly) stopped
+	CloseSpeed = 4, -- studs/s: they close as soon as the car drives off
+	Reach = 16, -- studs: on foot, how near your car you can open them
+	-- ProSoundEffects (Roblox's official SFX partner, public domain): "Audi Car Door Movement Opening Closing 1 / 5"
+	OpenSound = "rbxassetid://9113204879",
+	CloseSound = "rbxassetid://9113205539",
+	Volume = 0.45,
+}
+
 Config.Fuel = {
 	Minutes = { 45, 30 }, -- a full tank: small engines, big engines (normal driving)
 	PowerFrom = 200, -- horsepower at Minutes[1]

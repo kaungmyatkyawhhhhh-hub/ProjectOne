@@ -373,6 +373,7 @@ local ctx = {
 Goals.init(ctx)
 CarLevels.init(ctx)
 OnFoot.init(ctx)
+require(script.Parent:WaitForChild("Doors")).init(ctx) -- (2026-11-08) scissor doors (Config.Doors)
 Police.init(ctx)
 Bank.init(ctx, Police)
 Activities.init(ctx)

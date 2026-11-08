@@ -12,6 +12,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Doors = require(script.Parent:WaitForChild("Doors")) -- (2026-11-08) scissor doors open for getting in and out
 
 local OnFoot = {}
 
@@ -187,6 +188,14 @@ local function ride(player: Player, car: any): boolean
 		return false
 	end
 	local seat = rideSeat(car, root, bestI, best)
+	-- (2026-11-08) a car with scissor doors: the passenger's door goes up first
+	if Doors.has(car) then
+		Doors.open(car, if best.Position.X >= 0 then "R" else "L", 1.3)
+		task.wait(0.45)
+		if not (car.Parent and player.Character == character and humanoid.Health > 0) or seat.Occupant then
+			return false
+		end
+	end
 	setMassless(character, true)
 	seat:Sit(humanoid)
 	-- getting out (Y, jump, or the car going away): weight back, stood beside that door
@@ -202,6 +211,7 @@ local function ride(player: Player, car: any): boolean
 		end
 		setMassless(character, false)
 		if car.Parent then
+			Doors.open(car, if sx > 0 then "R" else "L", 1.3)
 			character:PivotTo(doorSpot(car, sx, z))
 		end
 	end)
@@ -255,6 +265,14 @@ function OnFoot.init(c: Ctx)
 			return true
 		end
 		park(car)
+		-- (2026-11-08) a car with scissor doors: the driver's door goes up, then you step out
+		if Doors.has(car) then
+			Doors.open(car, "L", 1.6)
+			task.wait(0.45)
+			if not car.Parent or player.Character then
+				return false
+			end
+		end
 		standUp(player)
 		return true
 	end
@@ -269,6 +287,14 @@ function OnFoot.init(c: Ctx)
 		end
 		if (hrp.Position - root.Position).Magnitude > ENTER_RANGE then
 			return false
+		end
+		-- (2026-11-08) a car with scissor doors: the driver's door goes up, you get in, it comes down
+		if Doors.has(car) then
+			Doors.open(car, "L", 1.1)
+			task.wait(0.5)
+			if not car.Parent or player.Character ~= character then
+				return false
+			end
 		end
 		OnFoot.removeCharacter(player)
 		car:SetAttribute("Parked", nil)

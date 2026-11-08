@@ -1,0 +1,262 @@
+{
+ "source": "build/svj/lambrini_svj_cut.blend",
+ "overlay": [
+  "imports/details/lambrini_svj.fbx",
+  "imports/retext/lambrini_svj.fbx"
+ ],
+ "box": [
+  0.55,
+  -1.0,
+  0.17,
+  1.2,
+  0.37,
+  1.03
+ ],
+ "xmin": 0.655,
+ "glass": [
+  "SeeThrough_A_GLASS"
+ ],
+ "keep": [],
+ "take": [],
+ "keep_box": [
+  [
+   "Body_A_PLAS_BLACK",
+   0.66,
+   -1.0,
+   0.62,
+   0.75,
+   -0.85,
+   0.75
+  ],
+  [
+   "Body_MAT_Details_INT_023",
+   0.66,
+   -1.0,
+   0.62,
+   0.75,
+   -0.85,
+   0.75
+  ]
+ ],
+ "cut_faces": [
+  [
+   "Body_A_PLAS_BLACK",
+   0.66,
+   -0.7,
+   0.69,
+   0.95,
+   0.1,
+   0.8
+  ],
+  [
+   "Body_A_PLAS_BLACK",
+   0.8,
+   -0.78,
+   0.66,
+   0.9,
+   -0.5,
+   0.73
+  ]
+ ],
+ "repaint": [
+  [
+   "Body_A_CARBON",
+   0.821,
+   -0.4245,
+   0.5015,
+   0.31,
+   "Body_A_CAR_PAINT"
+  ]
+ ],
+ "cover": {
+  "box": [
+   0.3,
+   -1.35,
+   0.0,
+   1.2,
+   0.62,
+   1.05
+  ],
+  "skip": [
+   "SeeThrough",
+   "Body_Rim"
+  ],
+  "doors": true,
+  "out_max": 1.1
+ },
+ "hinge": [
+  0.94,
+  -0.96,
+  0.76
+ ],
+ "axis": [
+  0.9397,
+  0.0,
+  -0.342
+ ],
+ "open": 72,
+ "cull": true,
+ "samples": 24,
+ "lamps": [
+  [
+   0.3,
+   -0.3,
+   0.8,
+   40
+  ],
+  [
+   2.5,
+   -0.3,
+   0.8,
+   300
+  ],
+  [
+   -2.5,
+   -0.3,
+   0.8,
+   300
+  ],
+  [
+   0.3,
+   0.6,
+   0.9,
+   30
+  ]
+ ],
+ "shots": [
+  {
+   "name": "1_closed",
+   "eye": [
+    3.6,
+    -1.9,
+    1.15
+   ],
+   "look": [
+    0.6,
+    -0.3,
+    0.55
+   ],
+   "lens": 32
+  },
+  {
+   "name": "2_half",
+   "eye": [
+    3.6,
+    -1.9,
+    1.15
+   ],
+   "look": [
+    0.6,
+    -0.3,
+    0.7
+   ],
+   "lens": 32,
+   "angle": 36
+  },
+  {
+   "name": "3_open",
+   "eye": [
+    3.6,
+    -1.9,
+    1.15
+   ],
+   "look": [
+    0.6,
+    -0.3,
+    0.8
+   ],
+   "lens": 32,
+   "angle": 72
+  },
+  {
+   "name": "4_open_rear",
+   "eye": [
+    3.2,
+    2.4,
+    1.2
+   ],
+   "look": [
+    0.9,
+    -0.5,
+    0.9
+   ],
+   "lens": 32,
+   "angle": 72
+  },
+  {
+   "name": "5_jamb_front",
+   "eye": [
+    1.55,
+    -0.35,
+    0.8
+   ],
+   "look": [
+    0.85,
+    -0.9,
+    0.6
+   ],
+   "lens": 30,
+   "angle": 72
+  },
+  {
+   "name": "6_jamb_rear",
+   "eye": [
+    1.5,
+    -0.6,
+    0.8
+   ],
+   "look": [
+    0.85,
+    0.25,
+    0.5
+   ],
+   "lens": 30,
+   "angle": 72
+  },
+  {
+   "name": "7_inner_panel",
+   "eye": [
+    1.3,
+    1.2,
+    0.6
+   ],
+   "look": [
+    1.0,
+    -0.6,
+    1.1
+   ],
+   "lens": 30,
+   "angle": 72
+  },
+  {
+   "name": "8_both_front",
+   "eye": [
+    0.0,
+    -4.8,
+    1.6
+   ],
+   "look": [
+    0.0,
+    -0.3,
+    0.8
+   ],
+   "lens": 32,
+   "angle": 72
+  },
+  {
+   "name": "9_closed_inside",
+   "eye": [
+    -0.2,
+    -0.2,
+    0.85
+   ],
+   "look": [
+    0.9,
+    -0.5,
+    0.6
+   ],
+   "lens": 24
+  }
+ ],
+ "out": "imports/doors/lambrini_svj.fbx"
+}

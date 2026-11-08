@@ -27,6 +27,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CarMesh = require(Shared:WaitForChild("CarMesh"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local Config = require(Shared:WaitForChild("Config"))
 local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 local BrandMarks = require(script.Parent:WaitForChild("BrandMarks"))
 local TailLights = require(script.Parent:WaitForChild("TailLights"))
@@ -531,6 +532,10 @@ type Imported = {
 	clusterSize: Vector2?,
 	-- where the red glow behind the tail lamps goes (ground space)
 	tailGlow: Vector3?,
+	-- (2026-11-08) scissor doors cut from the model (CarModels.<id>@doors): each door's hinge (ground space, its X axis
+	-- the turning axis), its parts round the hinge and how far it opens (degrees). The same parts also sit in body,
+	-- closed (attribute DoorSide), for the lite bodies.
+	doors: { [string]: { hinge: CFrame, parts: { Template }, open: number } }?,
 }
 type Look = { material: Enum.Material, color: Color3?, reflectance: number, transparency: number, shadow: boolean }
 
@@ -1902,6 +1907,27 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 		end
 	end
 
+	-- (2026-11-08) scissor doors: Doors/Door_L and Door_R (tools/doors.py, tools/riviera/DoorsApply.luau): their parts
+	-- turn on the door's Hinge (its X axis); they also stay in body, closed (DoorSide), for the lite bodies
+	local doorOf: { [BasePart]: string } = {}
+	local doorHinges: { [string]: BasePart } = {}
+	local doorParts: { [string]: { Template } } = {}
+	local doorsNode = src:FindFirstChild("Doors")
+	if doorsNode then
+		for _, dm in doorsNode:GetChildren() do
+			local side = dm.Name:match("^Door_(%a)$")
+			local hinge = dm:FindFirstChild("Hinge")
+			if side and hinge and hinge:IsA("BasePart") then
+				doorHinges[side] = hinge
+				for _, d in dm:GetDescendants() do
+					if d:IsA("BasePart") and d ~= hinge then
+						doorOf[d] = side
+					end
+				end
+			end
+		end
+	end
+
 	local k = 0
 	local redParts: { { d: BasePart, t: Template } } = {}
 	for _, d in visible do
@@ -1909,6 +1935,12 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			k += 1
 			local t = tmpl(d, Vector3.zero)
 			t.part:SetAttribute("SrcName", d.Name) -- on-screen gauges are found by these names
+			local doorSide = doorOf[d]
+			if doorSide then
+				t.part:SetAttribute("DoorSide", doorSide)
+				doorParts[doorSide] = doorParts[doorSide] or {}
+				table.insert(doorParts[doorSide], t)
+			end
 			-- the lamp shells (CarLamps): dark until CarLamps lights them; the tail ones work like any tail lamp
 			if d.Name:sub(1, 7) == "LampFx_" then
 				if d.Name:sub(8, 11) == "Tail" then
@@ -2053,8 +2085,32 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 			decal.Face = Enum.NormalId.Front
 			decal.Texture = lettering.image
 			decal.Parent = part
-			out.body["Lettering" .. side] = { part = part, offset = CFrame.lookAt(pos, pos + face, Vector3.yAxis) * CFrame.new(0, 0, thick / 2) } :: any
+			local t = { part = part, offset = CFrame.lookAt(pos, pos + face, Vector3.yAxis) * CFrame.new(0, 0, thick / 2) } :: any
+			out.body["Lettering" .. side] = t
+			-- (on the door: it goes up with it; +X is the car's right)
+			local doorSide = if side > 0 then "R" else "L"
+			if doorHinges[doorSide] then
+				part:SetAttribute("DoorSide", doorSide)
+				doorParts[doorSide] = doorParts[doorSide] or {}
+				table.insert(doorParts[doorSide], t)
+			end
 		end
+	end
+	if next(doorHinges) then
+		local doors = {}
+		for side, hinge in doorHinges do
+			local rel = frame:ToObjectSpace(hinge.CFrame)
+			local hingeT = CFrame.new(rel.Position * scale) * rel.Rotation
+			local parts = {}
+			local list = doorParts[side]
+			if list then
+				for _, t in list do
+					table.insert(parts, { part = t.part, offset = hingeT:Inverse() * t.offset })
+				end
+			end
+			doors[side] = { hinge = hingeT, parts = parts, open = (hinge:GetAttribute("Open") :: number?) or 70 }
+		end
+		out.doors = doors
 	end
 	return out
 end
@@ -2166,6 +2222,15 @@ local function importedFor(id: string): Imported?
 	local folder = ReplicatedStorage:FindFirstChild("CarModels", true) -- anywhere in ReplicatedStorage
 	local alias = CarBuilder.MODEL_ALIAS[id]
 	local src = if folder then folder:FindFirstChild(id, true) or (if alias then folder:FindFirstChild(alias, true) else nil) else nil
+	-- (2026-11-08) scissor doors: with the car's switch on, its model with doors (CarModels.<id>@doors), read under
+	-- the car's own name (every table here is keyed by it); with it off, the old model, exactly as before
+	local doorsOn = (Config :: any).Doors and (Config :: any).Doors[id] == true
+	local withDoors = if doorsOn and folder then folder:FindFirstChild(id .. "@doors", true) else nil
+	if withDoors then
+		local copy = withDoors:Clone()
+		copy.Name = id
+		src = copy
+	end
 	local result: Imported? = nil
 	if src then
 		local ok, res = pcall(readImported, src)
@@ -2530,8 +2595,12 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	skin.Parent = model
 	local drl = if design.drl then Color3.fromRGB(design.drl[1], design.drl[2], design.drl[3]) else Color3.new(1, 1, 1)
 	local generic = if imported then imported.generic else nil
+	local doors = if imported and generic and not liteMode then imported.doors else nil
 	for name, t in body do
 		if generic then
+			if doors and t.part:GetAttribute("DoorSide") then
+				continue -- (on its hinge below)
+			end
 			local p = t.part:Clone()
 			p.Name = "Skin" .. name
 			p.CFrame = groundCF * t.offset
@@ -2552,6 +2621,47 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	end
 
 	addPatches(id, skin, root)
+
+	-- (2026-11-08) scissor doors: each door's parts are welded to an invisible part on a Motor6D at the hinge (its X
+	-- axis the turning axis); client/CarDoors turns it from the car's DoorOpenL / DoorOpenR attributes
+	if doors then
+		for side, door in doors do
+			local hingeCF = groundCF * door.hinge
+			local holder = Instance.new("Part")
+			holder.Name = "SkinDoor" .. side
+			holder.Size = Vector3.one * 0.2
+			holder.Transparency = 1
+			holder.CanCollide = false
+			holder.CanQuery = false
+			holder.CanTouch = false
+			holder.Massless = true
+			holder.CastShadow = false
+			holder.CFrame = hingeCF
+			holder.Parent = skin
+			local motor = Instance.new("Motor6D")
+			motor.Name = "SkinDoor" .. side
+			motor.Part0 = root
+			motor.Part1 = holder
+			motor.C0 = root.CFrame:Inverse() * hingeCF
+			motor:SetAttribute("Open", door.open)
+			motor.Parent = root
+			for i, t in door.parts do
+				local p = t.part:Clone()
+				p.Name = "SkinDoor" .. side .. "_" .. i
+				p.CanCollide = false
+				p.CanQuery = false
+				p.CanTouch = false
+				p.Massless = true
+				p.CFrame = hingeCF * t.offset
+				p.Parent = skin
+				local w = Instance.new("WeldConstraint")
+				w.Part0 = holder
+				w.Part1 = p
+				w.Parent = p
+			end
+		end
+		model:SetAttribute("HasDoors", true)
+	end
 
 	if generic and imported and imported.tailGlow and not liteMode then
 		-- a soft red glow on the road and bumper behind the tail lamps (brighter when braking)

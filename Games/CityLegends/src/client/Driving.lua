@@ -1126,6 +1126,7 @@ end
 
 -- set by OnFoot: what F does in a running car (get out when slow enough)
 Driving.onExitKey = nil :: (() -> ())?
+Driving.onDoorKey = nil :: (() -> ())? -- (2026-11-08) Shift + F: the scissor doors (client/CarDoors)
 
 local applyCamera: () -> ()
 function Driving.toggleCamera()
@@ -1436,6 +1437,13 @@ end
 -- F / Q / E / M / P / T / L / Z / X / C (owner, 2026-10-31: the keys of Driving Empire; F starts
 -- the car, and once it's running F gets you out, like Y)
 local function carKey(s: State, key: Enum.KeyCode)
+	if key == Enum.KeyCode.F and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+		-- (2026-11-08) Shift + F: the scissor doors up / down, on the cars that have them (no free letter was left)
+		if Driving.onDoorKey then
+			Driving.onDoorKey()
+		end
+		return
+	end
 	if key == Enum.KeyCode.F then
 		if s.engineOn then
 			if Driving.onExitKey then

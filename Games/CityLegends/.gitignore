@@ -8,3 +8,5 @@ __pycache__/
 imports/sync/
 imports/details/src/
 imports/road_mesh_patch/
+# local copies of the door sources before the scissor doors (2026-11-08); big .blend files, kept on the PC only
+imports/backups/
