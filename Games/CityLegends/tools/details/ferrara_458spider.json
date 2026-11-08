@@ -1,0 +1,118 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/ad48bdea-27ee-408d-b145-a8999ee26bce/scratchpad/imp/done/f458spider.blend",
+ "note": "Rosso Rampante F142 Spider: the third brake light shorter at both ends",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.3,
+     1.94,
+     0.86,
+     0.3,
+     2.0,
+     0.9
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.3,
+     1.94,
+     0.86,
+     0.3,
+     2.0,
+     0.9
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_Window",
+   "boxes": [
+    [
+     -0.3,
+     1.94,
+     0.86,
+     0.3,
+     2.0,
+     0.9
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_Window",
+   "boxes": [
+    [
+     -0.3,
+     1.94,
+     0.86,
+     0.3,
+     2.0,
+     0.9
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  }
+ ],
+ "tiles": {},
+ "out": "imports/details/ferrara_458spider.fbx",
+ "shots": [
+  {
+   "name": "brake",
+   "eye": [
+    0.4,
+    3.0700000000000003,
+    1.23
+   ],
+   "look": [
+    0.0,
+    1.97,
+    0.88
+   ],
+   "lens": 70
+  }
+ ]
+}

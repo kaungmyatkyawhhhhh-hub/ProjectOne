@@ -1,0 +1,228 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/547a11d1-4da6-41a3-806e-0115399e346d/scratchpad/lambo/final/done/sl.blend",
+ "overlay": [
+  "imports/retext/lambrini_lp570.fbx"
+ ],
+ "note": "Enfurecido L140 Leggera: tail lamp arrows with blunt points, the rear fog light and the third brake light shorter at both ends; the hex mesh between the lamps diamond",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     0.44,
+     1.78,
+     0.75,
+     0.76,
+     1.92,
+     0.85
+    ]
+   ],
+   "min": 0.075,
+   "max": 0.095,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.86,
+   "group": 0.03,
+   "mirror": true
+  },
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.25,
+     1.98,
+     0.29,
+     0.25,
+     2.04,
+     0.34
+    ]
+   ],
+   "min": 0.28,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.25,
+     1.98,
+     0.29,
+     0.25,
+     2.04,
+     0.34
+    ]
+   ],
+   "min": 0.28,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.25,
+     1.95,
+     1.02,
+     0.25,
+     2.0,
+     1.06
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.25,
+     1.95,
+     1.02,
+     0.25,
+     2.0,
+     1.06
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_Lens_Clear",
+   "boxes": [
+    [
+     -0.25,
+     1.95,
+     1.02,
+     0.25,
+     2.0,
+     1.06
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "SeeThrough_Lens_Clear",
+   "boxes": [
+    [
+     -0.25,
+     1.95,
+     1.02,
+     0.25,
+     2.0,
+     1.06
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  }
+ ],
+ "tiles": {
+  "Body_Grille": {
+   "colour": "tiles/lambrini_lp570_grille_colour.png",
+   "normal": "tiles/lambrini_lp570_grille_normal.png"
+  }
+ },
+ "out": "imports/details/lambrini_lp570.fbx",
+ "shots": [
+  {
+   "name": "lamp",
+   "eye": [
+    1.0,
+    3.3,
+    0.95
+   ],
+   "look": [
+    0.62,
+    1.9,
+    0.75
+   ],
+   "lens": 60
+  },
+  {
+   "name": "exh",
+   "eye": [
+    0.6,
+    3.4,
+    0.5
+   ],
+   "look": [
+    0.2,
+    2.0,
+    0.3
+   ],
+   "lens": 45,
+   "light": [
+    0.3,
+    3.0,
+    0.5
+   ],
+   "power": 20
+  },
+  {
+   "name": "brake",
+   "eye": [
+    0.4,
+    3.0,
+    1.35
+   ],
+   "look": [
+    0.0,
+    1.95,
+    1.0
+   ],
+   "lens": 70
+  }
+ ]
+}

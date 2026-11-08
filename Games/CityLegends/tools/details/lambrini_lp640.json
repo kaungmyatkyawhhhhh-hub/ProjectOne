@@ -1,0 +1,101 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/ad48bdea-27ee-408d-b145-a8999ee26bce/scratchpad/imp/done/lp650r.blend",
+ "note": "Enfurecido L147 Roadster: the exhaust surround's two ends cut straight; the hex mesh diamond, the fine perforation round holes",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Trim2",
+   "boxes": [
+    [
+     -0.3,
+     1.7,
+     0.1,
+     0.3,
+     2.2,
+     0.35
+    ]
+   ],
+   "min": 0.4,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Trim2",
+   "boxes": [
+    [
+     -0.3,
+     1.7,
+     0.1,
+     0.3,
+     2.2,
+     0.35
+    ]
+   ],
+   "min": 0.4,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  }
+ ],
+ "tiles": {
+  "Body_Grille2": {
+   "colour": "tiles/lambrini_lp640_grille2_colour.png"
+  },
+  "Body_Grille": {
+   "colour": "tiles/lambrini_lp640_grille_colour.png"
+  }
+ },
+ "out": "imports/details/lambrini_lp640.fbx",
+ "shots": [
+  {
+   "name": "lamp",
+   "eye": [
+    1.0,
+    3.3,
+    0.95
+   ],
+   "look": [
+    0.62,
+    1.9,
+    0.75
+   ],
+   "lens": 60
+  },
+  {
+   "name": "exh",
+   "eye": [
+    0.6,
+    3.4,
+    0.5
+   ],
+   "look": [
+    0.2,
+    2.0,
+    0.3
+   ],
+   "lens": 45,
+   "light": [
+    0.3,
+    3.0,
+    0.5
+   ],
+   "power": 20
+  }
+ ]
+}

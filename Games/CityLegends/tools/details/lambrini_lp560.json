@@ -1,0 +1,118 @@
+{
+ "source": "C:/Users/USER/AppData/Local/Temp/claude/7a3e934f062f0b7d/547a11d1-4da6-41a3-806e-0115399e346d/scratchpad/lambo/final/done/spyder560.blend",
+ "note": "Enfurecido L140 Spyder: tail lamp arrows with blunt points, the rear fog light shorter at both ends",
+ "samples": 20,
+ "auto": true,
+ "auto_names": [
+  "far_rear",
+  "far_front"
+ ],
+ "ops": [
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     0.46,
+     1.82,
+     0.7,
+     0.74,
+     1.92,
+     0.8
+    ]
+   ],
+   "min": 0.07,
+   "max": 0.09,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.86,
+   "group": 0.03,
+   "mirror": true
+  },
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.25,
+     1.97,
+     0.23,
+     0.25,
+     2.03,
+     0.29
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  },
+  {
+   "op": "clip",
+   "part": "Body_Lamp",
+   "boxes": [
+    [
+     -0.25,
+     1.97,
+     0.23,
+     0.25,
+     2.03,
+     0.29
+    ]
+   ],
+   "min": 0.3,
+   "n": [
+    -1,
+    0,
+    0
+   ],
+   "frac": 0.95,
+   "group": 0.05
+  }
+ ],
+ "tiles": {},
+ "out": "imports/details/lambrini_lp560.fbx",
+ "shots": [
+  {
+   "name": "lamp",
+   "eye": [
+    1.0,
+    3.3,
+    0.95
+   ],
+   "look": [
+    0.62,
+    1.9,
+    0.75
+   ],
+   "lens": 60
+  },
+  {
+   "name": "exh",
+   "eye": [
+    0.6,
+    3.4,
+    0.5
+   ],
+   "look": [
+    0.2,
+    2.0,
+    0.3
+   ],
+   "lens": 45,
+   "light": [
+    0.3,
+    3.0,
+    0.5
+   ],
+   "power": 20
+  }
+ ]
+}

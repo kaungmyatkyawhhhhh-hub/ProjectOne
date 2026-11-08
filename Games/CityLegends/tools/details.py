@@ -829,6 +829,10 @@ swap_tiles()
 render("after")
 
 export = job.get("export", touched)
+if not export:
+    # (pictures only: nothing to upload as a model)
+    print("DETAILS no mesh changes, pictures only")
+    sys.exit(0)
 report = {}
 obs = []
 for n in export:

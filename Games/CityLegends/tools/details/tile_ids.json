@@ -131,5 +131,52 @@
    "colour": "rbxassetid://137460440165269",
    "normal": "rbxassetid://88215015876107"
   }
+ },
+ "lambrini_lp570": {
+  "Body_Grille": {
+   "colour": "rbxassetid://135391505210824",
+   "normal": "rbxassetid://131022100449976"
+  }
+ },
+ "lambrini_lp640": {
+  "Body_Grille2": {
+   "colour": "rbxassetid://78608502524520"
+  },
+  "Body_Grille": {
+   "colour": "rbxassetid://137808790299074"
+  }
+ },
+ "lambrini_lp670": {
+  "Body_Grille2": {
+   "colour": "rbxassetid://79116379059883",
+   "normal": "rbxassetid://128274871579967"
+  },
+  "Body_Grille": {
+   "colour": "rbxassetid://90463233315957"
+  }
+ },
+ "ferrara_california": {
+  "Body_Grille3": {
+   "colour": "rbxassetid://139859999381241",
+   "normal": "rbxassetid://71018134347235"
+  },
+  "Body_Grille4": {
+   "colour": "rbxassetid://85529047891076",
+   "normal": "rbxassetid://82895042375152"
+  },
+  "Body_Grille": {
+   "colour": "rbxassetid://127034642708878",
+   "normal": "rbxassetid://140155459740375"
+  }
+ },
+ "lambrini_urusp": {
+  "Body_Grille8": {
+   "colour": "rbxassetid://100805983646642",
+   "normal": "rbxassetid://96381691710338"
+  },
+  "Body_Grille": {
+   "colour": "rbxassetid://88896478723779",
+   "normal": "rbxassetid://129508325957236"
+  }
  }
 }
