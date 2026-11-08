@@ -2050,9 +2050,11 @@ Config.Service = {
 -- Scissor doors cut from the cars' own models (owner, 2026-11-08, `Prompts/Scissor doors on the SVJ and SVJ 63 (cut
 -- properly).md`). To go back: set a car's switch to false and the game uses its old model with no doors, exactly as
 -- before (the one with doors is ReplicatedStorage.CarModels.<car id>@doors; the old one was never changed).
+-- The Aventador LP700 and the SV (lambrini_lp750) open the same way (owner, same day: "because I like it").
 Config.Doors = {
 	lambrini_svj = true,
 	lambrini_svj63 = true,
+	lambrini_lp700 = true,
 } :: { [string]: boolean }
 Config.DoorFeel = {
 	Seconds = 0.7, -- to open or close
