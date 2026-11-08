@@ -7,6 +7,11 @@ _For Claude Code on the PC, with Blender (`C:/Users/USER/tools/blender-4.5.9-win
 
 **Two parts, in this order:** Part 1 the wheels (new models only), Part 2 the driving and feel (every car). Read `Realistic car physics.md` and `Camera and car movement like the video.md` and their notes first: build on what's there, don't start over.
 
+## No errors: sacrifice a feature instead (owner, 2026-11-08: "I don't want any errors, but if it has to sacrifice, it's fine")
+- **The result must have no errors:** no console errors or warnings, no physics glitches (flips, jitter, sinking, flinging), no visual errors (holes, grey parts, floating / clipping wheels, z-fighting), no broken saves, no FPS drop.
+- **If something can't be done without errors, sacrifice it:** drop or simplify that feature or detail (e.g. skip the brake glow, use a simpler tyre tread, leave a car on its old wheels, keep the old camera bit, turn an option off) rather than ship anything broken.
+- Write every sacrifice at the **top of the notes**: what was dropped, why, and what it would take to add it later.
+
 # PART 1: the wheels
 
 ## Which cars
