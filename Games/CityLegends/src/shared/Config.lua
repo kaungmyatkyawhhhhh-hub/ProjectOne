@@ -2055,6 +2055,7 @@ Config.Doors = {
 	lambrini_svj = true,
 	lambrini_svj63 = true,
 	lambrini_lp700 = true,
+	lambrini_lp750 = true,
 } :: { [string]: boolean }
 Config.DoorFeel = {
 	Seconds = 0.7, -- to open or close
