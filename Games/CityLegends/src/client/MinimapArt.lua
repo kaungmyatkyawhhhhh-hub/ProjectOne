@@ -20,7 +20,7 @@ return {
 		{ col = 2, row = 4, image = "rbxassetid://119631049012481" },
 		{ col = 3, row = 0, image = "rbxassetid://76896666987363" },
 		{ col = 3, row = 1, image = "rbxassetid://81915084313040" },
-		{ col = 3, row = 2, image = "rbxassetid://129929718606320" },
+		{ col = 3, row = 2, image = "rbxassetid://100492342076599" },
 		{ col = 3, row = 3, image = "rbxassetid://113706855724181" },
 		{ col = 3, row = 4, image = "rbxassetid://103902354784364" },
 	},

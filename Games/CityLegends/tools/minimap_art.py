@@ -197,6 +197,15 @@ def roads_layer(draw):
             k = max(i for i, q in enumerate(s) if 10900 < q[0] < 10925 and q[2] < -170)
             q = s[k]
             r["s"] = s[:k + 1] + [[x, q[1], -176 + 1.9 * (x - 10905) / 245] + q[3:] for x in range(int(q[0]) + 8, 11130, 8)]
+    # the loop link (owner, 2026-11-08; tools/riviera/LoopLink.luau): from the top junction the East Switchbacks
+    # cut straight across their first loop to the second leg (tools/riviera/looplink.json)
+    link = json.load(open(os.path.join(HERE, "riviera", "looplink.json")))
+    lq = link["old_path"][-1]
+    for r in data["roads"]:
+        if r["name"] == "East Switchbacks":
+            s = r["s"]
+            k = min(range(len(s)), key=lambda i: math.hypot(s[i][0] - lq[0], s[i][2] - lq[2]))
+            r["s"] = s[:k] + [[p[0], p[1], p[2], -p[3], -p[4], 0, 32.0, 32.0] for p in reversed(link["pts"])]
     roads = sorted(data["roads"], key=lambda r: 0 if r["kind"] != "route" else 1)
 
     def stroke(pts, width, color):

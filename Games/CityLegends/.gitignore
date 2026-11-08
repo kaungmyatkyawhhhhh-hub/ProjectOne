@@ -7,3 +7,4 @@ globalTypes.d.luau
 __pycache__/
 imports/sync/
 imports/details/src/
+imports/road_mesh_patch/
