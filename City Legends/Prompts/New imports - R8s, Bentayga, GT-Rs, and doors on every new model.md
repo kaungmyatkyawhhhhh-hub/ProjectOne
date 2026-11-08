@@ -79,9 +79,9 @@ Do this for **every car in `CarFinish.NEW`** (all newly imported models, includi
 - **If not:** cut them out along the real panel gaps, build the **painted door frame** (jamb) and sill behind the opening, give the door **thickness** and an **inner door panel**, and keep the window (and the mirror where it's on the door) with it. **No holes, no see-through, no grey.**
 - **The right door type and hinge for each car:**
   - **scissor** (up, hinged at the front): the Aventador family, Murcielagos, Countach, Revuelto;
-  - **butterfly** (up and out, slanted hinge): the LFAs, the 12C Spider;
+  - **butterfly / dihedral** (up and out, slanted hinge): the 12C Spider;
   - **gullwing** (hinged at the roof): the SLS;
-  - **normal** (outwards, hinged at the front): everything else (Huracans, Gallardos, Urus, Ferraris, Bugattis, Maybachs, Bentleys, the DBX, R8s, GT-Rs, 350Z, 330i, Focus RS, SL65, 599, California, 458s...);
+  - **normal** (outwards, hinged at the front): everything else, **including both LFAs** (owner, 2026-11-08: the LFA has normal doors, not butterfly) (Huracans, Gallardos, Urus, Ferraris, Bugattis, Maybachs, Bentleys, the DBX, R8s, GT-Rs, 350Z, 330i, Focus RS, SL65, 599, California, 458s...);
   - **rear doors** on 4-door cars and SUVs too (normal, hinged at the front); **boot / bonnet** only if they're already separate parts (otherwise leave them).
 - **In the game:** smooth open / close (about 0.6–0.8 s), opening when getting in / out and with the door key / phone button when parked, closing when driving off, collisions off while moving, synced to other players, a door sound, Customs paint on the door and the frame.
 - **Revert switch per car:** `Config.Doors[carId]`, off = the old model exactly as before; backups first.
