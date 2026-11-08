@@ -7,6 +7,14 @@ Working **scissor doors** on the **Enfurecido LB834 ZVX** (`lambrini_svj`) and *
 
 The notes say both models have **no separate doors** (`City Legends/City Legends.md`, "Aventador SVJ and SVJ 63"). Start from the **converted** files the game uses now (the ones made by `paint_glb.py` / `auto_car.py`, with logos already removed), so nothing else changes.
 
+## ZERO errors (owner, 2026-11-08: "I don't want any errors")
+The result must have **no errors of any kind**. Don't say done until every one of these is true, checked in Play and in close-up renders:
+- **Model:** no holes, no see-through faces, no flipped / missing faces, no grey or untextured parts, no z-fighting or flicker, no stretched textures, no gaps or overlaps at the door lines when closed, nothing floating or clipping (open, half open or closed).
+- **Movement:** the doors open and close smoothly on the right hinge every time; never through the body, roof, mirror, ground, a wall or a player; never stuck half open; never open while driving.
+- **Game:** **no console errors or warnings** (server and client, 2 players, PC and phone size), no physics glitches (the car doesn't jump, slide or get pushed by its doors), getting in / out works every time, Customs paint, lights, cluster and lettering all still work, FPS not worse.
+- **Saves:** rejoining works, owners still have both cars.
+- If anything can't be made error-free, **don't ship it**: keep the switch off for that car, write exactly what's wrong at the top of the notes, and leave the old model in use.
+
 ## 0. Make reverting one step (do this first)
 - **Backups:** copy both current car models in Studio to `ServerStorage/Backups/2026-11-08 SVJ before doors` and keep the current Blender / `.glb` / packed files next to them (e.g. `imports/backups/svj_before_doors/`).
 - **A switch:** `Config.Doors = { lambrini_svj = true, lambrini_svj63 = true }`. If a car's switch is off, the game uses the **old model with no doors**, exactly as before. Write in the notes: "To revert: set `Config.Doors.lambrini_svj = false` (and `_svj63`), or put back the backup models."
