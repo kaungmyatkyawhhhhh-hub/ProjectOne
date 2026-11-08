@@ -133,6 +133,8 @@ local list: { CarSpec } = {
 	{ Id = "audy_r8", Name = "Precision Type 42 V10", Class = "Supercar", Tier = "Mid", TopSpeed = 188, ZeroToSixty = 4.4, Handling = 0.86, Price = 110000, PriceSource = "used", StatPrice = 550000, Color = Color3.fromRGB(165, 168, 172), Accent = Color3.fromRGB(16, 16, 18), Order = 49 },
 	-- (2026-11-09) the lighter track version of the first Type 42, its own model (the 2011 car, 333 built)
 	{ Id = "audy_r8_lw", Name = "Precision Type 42 V10 Lightweight", Class = "Supercar", Tier = "Mid", TopSpeed = 199, ZeroToSixty = 3.5, Handling = 0.9, Price = 120000, PriceSource = "collector", StatPrice = 600000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 49.5 },
+	-- (2026-11-09) the second-generation Type 42 (the 2016 car), its own line; class S2, so the S2 floor price
+	{ Id = "audy_r8_4s", Name = "Precision 4S V10", Class = "Supercar", Tier = "High", TopSpeed = 205, ZeroToSixty = 2.9, Handling = 0.9, Price = 350000, PriceSource = "used", StatPrice = 700000, Color = Color3.fromRGB(200, 28, 24), Accent = Color3.fromRGB(16, 16, 18), Order = 49.7 },
 	{ Id = "mclaran_12c", Name = "Speedmark P11 Spider", Class = "Supercar", Tier = "High", TopSpeed = 207, ZeroToSixty = 3.1, Handling = 0.9, Price = 350000, PriceSource = "used", StatPrice = 800000, Color = Color3.fromRGB(226, 84, 8), Order = 50 },
 	{ Id = "ferrara_599", Name = "Rosso Rampante F141", Class = "Supercar", Tier = "High", TopSpeed = 205, ZeroToSixty = 3.5, Handling = 0.84, Price = 165000, PriceSource = "used", StatPrice = 850000, Color = Color3.fromRGB(20, 21, 24), Order = 51 },
 	{ Id = "ferrara_458", Name = "Rosso Rampante F142", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.3, Handling = 0.9, Price = 900000, Color = Color3.fromRGB(200, 10, 20), Order = 52 },
@@ -294,6 +296,8 @@ Cars.Series = {
 	{ Name = "BRITISH VANGUARD VANTA", Ids = { "astin_db9" } },
 	{ Name = "BRITISH VANGUARD VELA", Ids = { "astin_vantage" } },
 	{ Name = "PRECISION TYPE 42", Ids = { "audy_r8", "audy_r8_lw" }, TrimBase = "audy_r8" },
+	-- (2026-11-09: a two-car line once the Finale RWD joins, so no SPORT / TOP trims meanwhile)
+	{ Name = "PRECISION 4S", Ids = { "audy_r8_4s" }, NoTrims = true },
 	{ Name = "ROSSO RAMPANTE F131", Ids = { "ferrara_f430" } },
 	{ Name = "ROSSO RAMPANTE F149", Ids = { "ferrara_california" } },
 	{ Name = "ROSSO RAMPANTE F141", Ids = { "ferrara_599" } },

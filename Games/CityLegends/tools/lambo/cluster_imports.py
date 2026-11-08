@@ -1200,3 +1200,209 @@ def r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear, gt=False):
 def r8gt(Spec, needle_sprite, add_needle, glyph, solid_gear):
     """the Precision Type 42 V10 Lightweight (2011 R8 GT): the r8g1 cluster with the GT's white dials"""
     return r8g1(Spec, needle_sprite, add_needle, glyph, solid_gear, gt=True)
+
+
+def r8g2(Spec, needle_sprite, add_needle, glyph, solid_gear):
+    """the second Precision 4S (owner's photo imports/refs/audi_r8_gen2_cluster_owner.png); both 4S cars share it"""
+    import math
+
+    import numpy as np
+    from PIL import Image
+
+    from cluster_art import ARIAL_B, FONTDIR, Art
+    from cluster_lfa_maybach import band_mask, blend, field, polar, smooth
+
+    EXT = FONTDIR + "BuilderExtended-Bold.otf"  # the dial's numbers (wide, like the real screen's)
+    EXT_R = FONTDIR + "BuilderExtended-Regular.otf"  # the big speed
+    SANS_B = FONTDIR + "BuilderSans-Bold.otf"
+    SANS = FONTDIR + "BuilderSans-Medium.otf"
+    TXT = FONTDIR + "Arimo-Regular.ttf"
+    TXT_B = FONTDIR + "Arimo-Bold.ttf"
+    box = (35, 103, 631, 319)
+    REF = "audi_r8_gen2_cluster_owner.png"
+    A = Art(REF, box, S=4, bg=(5, 5, 7))
+    sp = Spec("r8g2", box[2] - box[0], box[3] - box[1], 3.0, 3.3, box[0], box[1])
+    sp.redline, sp.idle = 8.7, 0.9
+    C = (333.0, 211.0)
+    WHT = (238, 238, 240)
+    GRY = (150, 152, 156)
+    DIM = (88, 90, 94)
+    RED = (226, 30, 38)
+    ORANGE = (236, 150, 44)
+
+    def rev(v):
+        return -112.5 + 22.5 * v  # 1 at the left, 5 at the top, 9 at the right
+
+    h, w = A.H * A.S, A.W * A.S
+    yy, xx = np.mgrid[0:h, 0:w]
+    px = (xx + 0.5) / A.S + A.ox
+    py = (yy + 0.5) / A.S + A.oy
+
+    # the screen: black, a faint lift towards the middle
+    lift = 7 * np.exp(-(((px - C[0]) / 260) ** 2 + ((py - C[1]) / 120) ** 2))
+    blend(A, np.stack([5 + lift, 5 + lift, 7 + lift], axis=-1), np.ones((h, w)))
+
+    # thin frame lines: under the top line of each side panel, over the bottom line
+    for x0, x1 in ((148, 262), (404, 520)):
+        A.line([(x0, 147.5), (x1, 147.5)], (52, 52, 56), 0.9)
+
+    # the rev counter: a dark grey ring band, a thin light outer ring, the black middle with its thin ring
+    r, th = field(A, C)
+    shade = 22 + 14 * (1 - smooth(130, 300, py)) + 8 * np.cos(np.radians(th)) ** 2
+    blend(A, np.stack([shade, shade, shade * 1.05], axis=-1), band_mask(r, 41.5, 76.0, 0.6))
+    ring = 150 + 50 * np.cos(np.radians(th - 330)) ** 2
+    blend(A, np.stack([ring, ring, ring * 1.02], axis=-1), band_mask(r, 76.3, 77.7, 0.5))
+    blend(A, np.full((h, w, 3), (3.0, 3.0, 5.0)), band_mask(r, -5, 40.6, 0.6))
+    blend(A, np.full((h, w, 3), (96.0, 96.0, 100.0)), band_mask(r, 40.6, 41.6, 0.5))
+    # the red zone: a red block behind 9 and 10, a bright red line round its outside
+    a0, a1 = rev(8.6), rev(10.35)
+    inz = ((th - a0) % 360 <= (a1 - a0)).astype(float)
+    tone = 120 + 40 * smooth(52, 66, r)
+    blend(A, np.stack([tone, tone * 0.1, tone * 0.14], axis=-1), band_mask(r, 50.5, 67.5, 0.6) * inz)
+    a0b, a1b = rev(8.5), rev(10.7)
+    inz2 = ((th - a0b) % 360 <= (a1b - a0b)).astype(float)
+    blend(A, np.full((h, w, 3), (232.0, 34.0, 42.0)), band_mask(r, 68.6, 71.0, 0.5) * inz2)
+
+    # ticks: every 250 a short grey one, every 1000 a longer white one
+    for i in range(0, 43):
+        v = i / 4
+        big = i % 4 == 0
+        col = (238, 60, 64) if v >= 9 else (WHT if big else (120, 122, 126))
+        A.line([polar(C, 66.0 if big else 69.5, rev(v)), polar(C, 74.0, rev(v))], col, 1.5 if big else 0.9)
+    for v in range(1, 11):
+        p = polar(C, 57.0 if v < 10 else 55.5, rev(v))
+        A.text(p[0] + (1.5 if v == 10 else 0), p[1], str(v), EXT, 18.5 if v < 10 else 16.5, WHT)
+    A.text(C[0], 169.5, "1/min x 1000", TXT, 4.4, (110, 112, 116))
+    # the dial is cut off at the bottom line: the info row runs under it on black
+    A.rect(box[0], 262.6, box[2], box[3], (5, 5, 7))
+    A.line([(118, 263), (548, 263)], (46, 46, 50), 0.9)
+
+    # inside the middle: READY low on the left of the ring, the drive mode in red under the gear
+    A.text(271, 240, "READY", TXT_B, 5.0, (190, 192, 196))
+    A.text(C[0], 242.5, "DYNAMIC", TXT_B, 5.6, RED, track=0.4)
+
+    # ---- the media panel (left): our own text
+    def antenna(x, y, col):
+        A.circle(x, y - 2.6, 1.6, None, outline=col, w=0.7)
+        A.line([(x, y - 1.0), (x, y + 3.6)], col, 0.8)
+        A.line([(x - 1.8, y + 3.6), (x + 1.8, y + 3.6)], col, 0.7)
+
+    antenna(157, 138, GRY)
+    A.text(163, 138, "001: Midnight", TXT, 7.0, (196, 198, 202), anchor="lm")
+    A.circle(214, 138, 3.0, None, outline=GRY, w=0.7)  # the compass
+    A.poly([(214, 135.0), (215.4, 138.6), (214, 138.0), (212.6, 138.6)], GRY)
+    A.text(220, 138, "NE", TXT, 6.4, (196, 198, 202), anchor="lm")
+    A.text(146, 153, "Radio", TXT_B, 8.6, ORANGE, anchor="lm")
+    A.text(110, 177, "001", TXT_B, 9.0, WHT, anchor="lm")
+    A.text(130, 177, "MIDNIGHT FM", TXT_B, 8.4, WHT, anchor="lm")
+    A.text(110, 191, "Synthwave", TXT, 7.0, (176, 178, 182), anchor="lm")
+    # mic and note icons, then the made-up artist and song
+    A.round_rect(114.6, 200.5, 117.4, 205.5, 1.3, (150, 152, 156))
+    A.line([(113.3, 204.5), (113.6, 206.4), (116, 207.4), (118.4, 206.4), (118.7, 204.5)], (150, 152, 156), 0.6)
+    A.line([(116, 207.4), (116, 209.0)], (150, 152, 156), 0.6)
+    A.text(126, 204.5, "The Hairpin Club", TXT, 7.0, (150, 152, 156), anchor="lm")
+    A.circle(114.3, 218.2, 1.5, (190, 192, 196))
+    A.circle(118.7, 217.2, 1.5, (190, 192, 196))
+    A.line([(115.6, 218.0), (115.6, 211.6), (120.0, 210.6), (120.0, 217.0)], (190, 192, 196), 0.8)
+    A.text(126, 215, "Midnight on the Corniche", TXT, 7.0, (190, 192, 196), anchor="lm")
+    for x in (199, 211):  # the two small icons at the panel's right
+        A.round_rect(x, 186, x + 8, 195, 1.2, None, outline=(110, 112, 116), w=0.7)
+    A.line([(202, 189.5), (204.5, 189.5)], (110, 112, 116), 0.6)
+    A.line([(214, 189.0), (216, 189.0), (216, 192.5)], (110, 112, 116), 0.6)
+
+    # ---- the g-force circle (right)
+    G = (485.0, 202.0)
+    rg, _ = field(A, G)
+    blend(A, np.full((h, w, 3), (12.0, 12.0, 14.0)), band_mask(rg, -5, 31.5, 0.6))
+    for rad, col, wd in ((32.0, (206, 206, 210), 1.3), (21.5, (44, 44, 48), 0.8), (11.0, (40, 40, 44), 0.7)):
+        A.circle(G[0], G[1], rad, None, outline=col, w=wd)
+    A.line([(G[0] - 31, G[1]), (G[0] + 31, G[1])], (34, 34, 38), 0.6)
+    A.line([(G[0], G[1] - 31), (G[0], G[1] + 31)], (34, 34, 38), 0.6)
+    A.circle(G[0], G[1], 3.0, (232, 232, 236))
+    for x, y in ((487, 161), (440, 203), (530, 203), (484.5, 244)):
+        A.text(x, y, "0.0", TXT, 7.6, (204, 34, 42))
+
+    # ---- the range (top right): fuel pump, the number (live), the unit (live), the small range icon
+    def pump(x, y, col):
+        A.round_rect(x - 2.4, y - 4.0, x + 1.6, y + 4.0, 0.6, None, outline=col, w=0.7)
+        A.rect(x - 1.6, y - 3.0, x + 0.8, y - 0.8, col)
+        A.line([(x + 1.6, y - 1.5), (x + 3.2, y - 0.5), (x + 3.2, y + 3.0)], col, 0.6)
+
+    pump(434, 138, GRY)
+    A.line([(474, 134), (478, 134), (473, 142), (477, 142)], (130, 132, 136), 0.8)
+
+    # ---- far left: the water temperature bar (always warm here), far right: the fuel bar
+    def bar(xs, ys, lit, col_on, col_off):
+        n = len(ys) - 1
+        for k in range(n):
+            x0, x1 = xs[k], xs[k + 1]
+            y0, y1 = ys[k] + 0.9, ys[k + 1] - 0.9
+            A.line([(x0, y0), (x1, y1)], col_on if k >= n - lit else col_off, 2.0)
+
+    ys = [200 + 4.8 * k for k in range(12)]
+    bar([70.5 - 0.11 * (y - 200) for y in ys], ys, 6, (226, 226, 230), (44, 44, 48))
+    A.line([(63.5, 200.5), (66.5, 200.5)], (200, 36, 40), 1.2)
+    A.text(52, 214, "°C", TXT, 6.2, (196, 198, 202))
+    A.text(58.5, 229, "90", TXT, 6.2, (196, 198, 202))
+    A.text(56, 254.5, "50", TXT, 6.2, (196, 198, 202))
+    A.line([(47, 238.5), (47, 245)], (170, 172, 176), 0.8)  # the thermometer
+    A.circle(47, 246.2, 1.4, (170, 172, 176))
+    A.line([(44, 247.5), (50, 247.5)], (170, 172, 176), 0.6)
+    bar([586.0 + 0.11 * (y - 200) for y in ys], ys, 7, (226, 226, 230), (44, 44, 48))
+    A.line([(591.5, 254.5), (595.0, 254.5)], (200, 36, 40), 1.2)
+    A.text(589, 200.5, "1/1", TXT, 6.0, (196, 198, 202))
+    A.text(595.5, 227.5, "1/2", TXT, 6.0, (196, 198, 202))
+    pump(604, 243, (170, 172, 176))
+
+    # ---- the bottom line: oil temperature, a small key, (the clock, live), the outside temperature, a ---
+    A.line([(116, 265.5), (124, 265.5)], (220, 220, 224), 1.0)
+    A.text(171, 273.5, "62°C", TXT_B, 7.4, (214, 216, 220), anchor="rm")
+    A.line([(189.5, 272.5), (196, 276), (189.5, 278.5)], (150, 152, 156), 0.7)  # oil can (simple)
+    A.round_rect(186, 274, 193, 279, 0.8, None, outline=(150, 152, 156), w=0.7)
+    A.round_rect(269.5, 268.5, 274.5, 277.5, 1.2, None, outline=(170, 172, 176), w=0.7)  # the key
+    A.line([(272, 271), (272, 274)], (170, 172, 176), 0.6)
+    A.text(355, 273.5, "+16.5", TXT_B, 7.6, (214, 216, 220), anchor="lm")
+    A.text(376, 273.5, "°C", TXT, 6.0, (190, 192, 196), anchor="lm")
+    A.circle(472.5, 276, 3.6, None, outline=(196, 198, 202), w=0.8)
+    A.line([(472.5, 273.6), (472.5, 276.6)], (196, 198, 202), 0.8)
+    A.circle(472.5, 278.1, 0.45, (196, 198, 202))
+    A.text(488, 274.5, "---", TXT_B, 7.0, (196, 198, 202), anchor="lm")
+    A.text(500.5, 273.5, "°C", TXT, 6.0, (190, 192, 196), anchor="lm")
+
+    A.final = A.finish(A.S, blur=1.0, strength=0.25)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    # lamps: traction control off (amber, bottom left of the dial), the seat-belt lamp when standing (red)
+    AMB = (246, 150, 30)
+    L = Art(REF, box, S=4, bg=(0, 0, 0))
+    L.round_rect(243, 268.5, 254, 274.5, 1.8, None, outline=AMB, w=0.9)
+    L.line([(242, 277.6), (246, 276.4), (250, 277.6), (254, 276.4)], AMB, 0.8)
+    L.text(248.5, 281.5, "OFF", ARIAL_B, 3.6, AMB)
+    L.final = L.finish(L.S, blur=1, strength=0.3)
+    sp.add_show(sp.box(L, (238, 264, 259, 285), black=True), "tcoff")
+    B = Art(REF, box, S=4, bg=(0, 0, 0))
+    B.circle(315.5, 266.8, 1.5, RED)
+    B.line([(315.5, 268.6), (315.0, 273.5)], RED, 1.6)
+    B.line([(313.2, 269.0), (317.6, 274.0)], RED, 0.9)
+    B.line([(313.0, 274.6), (318.5, 274.6)], RED, 1.0)
+    B.final = B.finish(B.S, blur=1, strength=0.3)
+    sp.add_show(sp.box(B, (309, 262, 322, 278), black=True), "parked")
+
+    # the rev needle: a red line across the ring band, the pivot in the middle of the dial
+    parts = [(40.5, 75.5, 1.25, 1.0, (236, 40, 46))]
+    add_needle(sp, needle_sprite(sp, 76, 2, parts), C[0], C[1], "rpm", [(0, rev(0)), (10.7, rev(10.7))])
+
+    # the middle: km/h (live unit), the big speed (live), the gear (P standing, live)
+    sp.font("unit", TXT, 6.2, "kmhpi/", shear=0)
+    sp.readout("unit", C[0], 197.5, "m", 4, "unit", (200, 202, 206))
+    sp.font("speed", EXT_R, 33, "0123456789", shear=0, track=0.8)
+    sp.readout("speed", C[0], 212.5, "m", 3, "speed", WHT)
+    solid_gear(sp, SANS, 15.0, (236, 236, 238), C[0], 232.5, stroke=0.1)
+    # the range (live, with its unit) and the clock (live)
+    sp.font("small", TXT_B, 7.6, "0123456789:", shear=0, track=0.15)
+    sp.readout("small", 458, 138.5, "r", 3, "range", (200, 202, 206))
+    sp.font("du", TXT, 5.6, "kmi", shear=0)
+    sp.readout("du", 460, 139.5, "l", 2, "distUnit", (170, 172, 176))
+    sp.font("clock", TXT_B, 8.6, "0123456789:", shear=0, track=0.2)
+    sp.readout("clock", 295.5, 273.5, "m", 5, "clock", (220, 222, 226))
+    return sp

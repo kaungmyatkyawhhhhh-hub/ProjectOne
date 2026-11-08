@@ -10,7 +10,13 @@ shift are printed, the same from the low and the high corner when it fits). Job 
   {"<role>": [{"node": "headlight{S}_head_light", "off": 0.004,
                "uv": [u0, u1, v0, v1],      (only faces whose middle is in this part of the picture, in 0-1024 pixels)
                "absx": [lo, hi],            (only faces this far out from the middle, metres)
-               "split": true}]}             (one node holds both sides: each side takes its own half)
+               "split": true,               (one node holds both sides: each side takes its own half)
+               "box": [x0, y0, z0, x1, y1, z1],  (2026-11-09, the second Precision 4S: only faces whose middle is in this box,
+                                             car metres, x as distance out from the middle, so one box serves
+                                             both sides; for a node that holds the front and the rear lamps)
+               "mat": "red_glass"}]}        (2026-11-09: in place of "node", every mesh of the .glb wearing a
+                                             material with this in its name; for nodes whose names are cut
+                                             to the same 63 characters)
 {S} is L or R (Blender object names stop at 63 characters: give a piece of the node's name that fits). Roles:
 HeadCore, HeadGlass, TurnF, TurnR, Rev, Tail. Each shell stands "off" metres proud of its piece along the normals.
 After the insert, set each LampFx part to Neon, white, Transparency 0.9, no collisions or shadow (LampApply does
@@ -57,6 +63,18 @@ def node(word):
     m = [o for o in rawm if word in o.name]
     assert len(m) == 1, (word, [o.name for o in m])
     return m[0]
+
+
+def nodes_for(pc):
+    """the raw meshes for a piece: one node by a piece of its name, or all meshes wearing a material"""
+    if "mat" in pc:
+        m = [o for o in rawm if any(mt and pc["mat"] in mt.name for mt in o.data.materials)]
+        assert m, ("no mesh wears", pc["mat"])
+        return m
+    return [node(pc["node"].replace("{S}", SIDE[0]))]
+
+
+SIDE = ["L"]
 
 
 def faces(o, keep=None):
@@ -121,16 +139,20 @@ for side, sx in (("L", 1), ("R", -1)):
         tris, off = [], 0.004
         for pc in pieces:
             off = pc.get("off", off)
-            uvr, absx, split = pc.get("uv"), pc.get("absx"), pc.get("split")
+            uvr, absx, split, bx = pc.get("uv"), pc.get("absx"), pc.get("split"), pc.get("box")
 
-            def keep(c, u, v, uvr=uvr, absx=absx, split=split):
+            def keep(c, u, v, uvr=uvr, absx=absx, split=split, bx=bx):
                 if uvr and not (uvr[0] <= u < uvr[1] and uvr[2] <= v < uvr[3]):
                     return False
                 if absx and not (absx[0] <= abs(c.x) <= absx[1]):
                     return False
-                return not split or c.x * sx > 0
+                if bx and not (bx[0] <= abs(c.x) <= bx[3] and bx[1] <= c.y <= bx[4] and bx[2] <= c.z <= bx[5]):
+                    return False
+                return not (split or bx) or c.x * sx > 0
 
-            tris += faces(node(pc["node"].replace("{S}", side)), keep if (uvr or absx or split) else None)
+            SIDE[0] = side
+            for nd in nodes_for(pc):
+                tris += faces(nd, keep if (uvr or absx or split or bx) else None)
         shell("LampFx_%s%s" % (role, side), tris, off)
 
 for o in raw:

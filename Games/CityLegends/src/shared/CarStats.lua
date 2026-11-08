@@ -34,7 +34,7 @@ local SEATS = { Sedan = 5, Coupe = 4, SUV = 5, Supercar = 2, Hypercar = 2 }
 
 -- the drive of each car line (by the base car's id); the rest is RWD
 local AWD = {
-	nisun_gtr = true, audy_r8 = true, audy_r8_lw = true, lambrini_lp560 = true, lambrini_huracan = true, lambrini_performante = true, lambrini_sterrato = true, lambrini_revuelto = true, lambrini_lp640 = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_svj = true, lambrini_svj63 = true,
+	nisun_gtr = true, audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, lambrini_lp560 = true, lambrini_huracan = true, lambrini_performante = true, lambrini_sterrato = true, lambrini_revuelto = true, lambrini_lp640 = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_svj = true, lambrini_svj63 = true,
 	lambrini_urus = true, lambrini_urusp = true, lambrini_lp670 = true, bugotti_veyron = true, bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true,
 	porsha_panamera = true, bentlee_contgt = true,
 	bentlee_bentayga = true, bentz_gle53 = true, bentz_g63 = true, brabos_g63 = true, bentz_gls = true,
@@ -60,7 +60,7 @@ local KERB: { [string]: number } = {
 	xiaomo_su7 = 2200, bnw_x6 = 2250, bnw_x7 = 2450, bentz_gle53 = 2300, bentz_g63 = 2560, byt_u8 = 3460,
 	porsha_panamera = 2050, chevo_camaro = 1700, chevo_c6 = 1480, porsha_boxster = 1400, chevo_c7 = 1500,
 	bentz_s63 = 2070, bentz_gt63s = 2120, nisun_gtr = 1750, astin_db9 = 1800, astin_vantage = 1630, ferrara_f430 = 1450,
-	bentz_sl65bs = 1870, lambrini_lp570 = 1340, lambrini_lp560 = 1550, lambrini_huracan = 1422, lambrini_performante = 1507, lambrini_sto = 1339, lambrini_sterrato = 1470, lambrini_revuelto = 1772, audy_r8 = 1600, audy_r8_lw = 1525, mclaran_12c = 1430, ferrara_599 = 1690, ferrara_458 = 1485,
+	bentz_sl65bs = 1870, lambrini_lp570 = 1340, lambrini_lp560 = 1550, lambrini_huracan = 1422, lambrini_performante = 1507, lambrini_sto = 1339, lambrini_sterrato = 1470, lambrini_revuelto = 1772, audy_r8 = 1600, audy_r8_lw = 1525, audy_r8_4s = 1620, mclaran_12c = 1430, ferrara_599 = 1690, ferrara_458 = 1485,
 	bentz_sls = 1620, porsha_gt3 = 1430, bentlee_contgt = 2250, bentlee_bentayga = 2420, lambrini_urus = 2200, lambrini_urusp = 2150, lambrini_lp670 = 1565, ferrara_458spider = 1505, ferrara_458speciale = 1395,
 	brabos_g63 = 2560, rolls_wraith = 2360, rolls_cullinan = 2660, lambrini_lp700 = 1575, lexis_lfa = 1480, lexis_lfa_circuit = 1450,
 	lambrini_lp750 = 1525, lambrini_svj = 1525, lambrini_svj63 = 1575, lambrini_lp640 = 1665, bnw_750li = 2050,
@@ -82,7 +82,7 @@ local POWER: { [string]: number } = {
 	porsha_panamera = 621, chevo_camaro = 650, porsha_boxster = 394, chevo_c7 = 460, bentz_s63 = 621,
 	bentz_gt63s = 630, bnw_750li = 445, toyoka_chaser = 280, bentz_190e = 235, bentz_s65_w221 = 518,
 	maseroti_levante = 550, lexis_lc500 = 471, astin_dbx = 542, nisun_gtr = 565, astin_db9 = 568,
-	astin_vantage = 503, ferrara_f430 = 483, bentz_sl65bs = 661, lambrini_lp570 = 562, lambrini_lp560 = 552, lambrini_huracan = 631, lambrini_performante = 631, lambrini_sto = 631, lambrini_sterrato = 602, lambrini_revuelto = 1001, audy_r8 = 420, audy_r8_lw = 552,
+	astin_vantage = 503, ferrara_f430 = 483, bentz_sl65bs = 661, lambrini_lp570 = 562, lambrini_lp560 = 552, lambrini_huracan = 631, lambrini_performante = 631, lambrini_sto = 631, lambrini_sterrato = 602, lambrini_revuelto = 1001, audy_r8 = 420, audy_r8_lw = 552, audy_r8_4s = 602,
 	mclaran_12c = 592, ferrara_599 = 611, ferrara_458 = 562, bentz_sls = 563, porsha_gt3 = 500,
 	bentlee_contgt = 626, bentlee_bentayga = 600, lambrini_urus = 641, lambrini_urusp = 666, lambrini_lp670 = 670, ferrara_458spider = 562, ferrara_458speciale = 597, brabos_g63 = 789, rolls_wraith = 624,
 	rolls_cullinan = 563, lambrini_lp700 = 700, lexis_lfa = 553, lexis_lfa_circuit = 563, lambrini_lp750 = 750, lambrini_svj = 770,
@@ -192,7 +192,7 @@ local REDLINE_CAR: { [string]: number } = {
 	dodger_challenger = 6.4, chevo_camaro = 6.5, chevo_c6 = 7.0, chevo_c7 = 6.6,
 	porsha_boxster = 7.8, porsha_gt3 = 9.0, porsha_panamera = 6.8,
 	ferrara_f430 = 8.5, ferrara_458 = 9.0, ferrara_599 = 8.4, ferrara_california = 7.5,
-	audy_r8 = 8.7, audy_r8_lw = 8.7, mclaran_12c = 8.5, lexis_lfa = 9.0, lexis_lfa_circuit = 9.0, lexis_lc500 = 7.1,
+	audy_r8 = 8.7, audy_r8_lw = 8.7, audy_r8_4s = 8.7, mclaran_12c = 8.5, lexis_lfa = 9.0, lexis_lfa_circuit = 9.0, lexis_lc500 = 7.1,
 	lambrini_lp570 = 8.5, lambrini_lp560 = 8.0, lambrini_huracan = 8.0, lambrini_performante = 8.0, lambrini_sto = 8.0, lambrini_sterrato = 8.0, lambrini_revuelto = 9.5, lambrini_lp640 = 8.0, lambrini_lp700 = 8.5, lambrini_lp750 = 8.5, lambrini_svj = 8.7,
 	lambrini_svj63 = 8.7, lambrini_countach = 7.0, lambrini_urus = 6.8, lambrini_urusp = 6.8, lambrini_lp670 = 8.0, ferrara_458spider = 9.0, ferrara_458speciale = 9.0,
 	astin_db9 = 7.0, astin_vantage = 7.3, astin_dbx = 6.5, bentlee_contgt = 6.5, bentlee_bentayga = 6.0,

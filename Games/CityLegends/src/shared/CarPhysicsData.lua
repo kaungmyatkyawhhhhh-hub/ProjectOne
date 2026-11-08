@@ -132,6 +132,9 @@ local Data: { [string]: Phys } = {
 	-- Audi R8 GT (1st gen, 2011, 5.2 V10, 6-speed R tronic single-clutch with slow shifts, 560 PS = 552 hp, 1,525 kg,
 	-- carbon-ceramic brakes with red calipers; 100-0 km/h 31.1 m, AutoBild; fixed carbon rear wing)
 	audy_r8_lw = { front = 0.44, drive = "AWD", rear = 0.85, gears = 6, box = "amt", shift = 0.25, tyreF = 235, tyreR = 295, aspectF = 35, aspectR = 30, rimF = 19, rimR = 19, tyre = "sport", brakes = "ceramic", pistons = 6, caliper = "red", lugs = 5, stop = 31, z60 = 3.5, top = 199, hp = 552, nm = 540, redline = 8.7, cg = 0.42, downforce = 60 },
+	-- Audi R8 V10 plus (2nd gen, Type 4S, 2016; 5.2 V10, 610 PS = 602 hp, 7-speed S tronic dual clutch, quattro,
+	-- 1,620 kg; carbon-ceramic brakes with anthracite calipers; 100-0 km/h 32.6 m, auto motor und sport; fixed wing)
+	audy_r8_4s = { front = 0.42, drive = "AWD", rear = 0.7, gears = 7, box = "dct", shift = 0.1, tyreF = 245, tyreR = 305, aspectF = 30, aspectR = 30, rimF = 20, rimR = 20, tyre = "sport", brakes = "ceramic", pistons = 6, caliper = "grey", lugs = 5, stop = 32.6, z60 = 2.9, top = 205, hp = 602, nm = 560, redline = 8.7, cg = 0.42, downforce = 60 },
 	-- McLaren MP4-12C Spider (3.8 V8 twin-turbo, 7-speed SSG)
 	mclaran_12c = { front = 0.42, drive = "RWD", gears = 7, box = "dct", shift = 0.1, tyreF = 235, tyreR = 305, aspectF = 35, aspectR = 30, rimF = 19, rimR = 20, tyre = "sport", brakes = "drilled", pistons = 4, caliper = "silver", lugs = 5, stop = 31, z60 = 3, top = 204, hp = 616, nm = 600, redline = 8.5, cg = 0.42, downforce = 70 },
 	-- Ferrari 599 GTB Fiorano (6.0 V12, 6-speed F1)

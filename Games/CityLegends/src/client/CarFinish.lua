@@ -45,6 +45,7 @@ CarFinish.CARS = {
 	bnw_330i_g20 = true,
 	audy_r8 = true,
 	audy_r8_lw = true,
+	audy_r8_4s = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

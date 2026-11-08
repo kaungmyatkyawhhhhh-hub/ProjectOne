@@ -281,6 +281,7 @@ Config.Credits = {
 	"Tri-Star Silber R230 V12 Track model by Ddiaz Design",
 	"Precision Type 42 V10 model by Ddiaz Design",
 	"Precision Type 42 V10 Lightweight model by Ddiaz Design",
+	"Precision 4S V10 model by Ddiaz Design",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
@@ -549,7 +550,7 @@ Config.DrivingFeel = {
 	AllDrive = {
 		toyoka_crown = true, kio_ev6 = true, toyoka_lc200 = true, toyoka_lc300 = true, lexis_lx700 = true, bnw_x6 = true, bnw_x7 = true,
 		bentz_gle53 = true, bentz_g63 = true, brabos_g63 = true, bentz_gls = true, bentz_cla45 = true, bentz_e63s = true, bnw_m5_f90 = true,
-		bentz_s680 = true, byt_u8 = true, xiaomo_su7 = true, porsha_panamera = true, nisun_r34 = true, nisun_gtr = true, audy_r8 = true, audy_r8_lw = true,
+		bentz_s680 = true, byt_u8 = true, xiaomo_su7 = true, porsha_panamera = true, nisun_r34 = true, nisun_gtr = true, audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true,
 		lambrini_lp570 = true, lambrini_lp560 = true, lambrini_huracan = true, lambrini_performante = true, lambrini_sterrato = true, lambrini_revuelto = true, lambrini_lp640 = true, lambrini_lp670 = true, lambrini_urusp = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_svj = true, lambrini_svj63 = true, lambrini_urus = true,
 		bentlee_contgt = true, bentlee_bentayga = true, rolls_cullinan = true, astin_dbx = true, maseroti_levante = true, bugotti_veyron = true,
 		bugotti_veyron_sport = true, bugotti_veyron_top = true, bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true,

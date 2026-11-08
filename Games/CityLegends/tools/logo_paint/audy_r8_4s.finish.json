@@ -1,0 +1,82 @@
+{
+ "id": "audy_r8_4s",
+ "roles": {
+  "coloured_material": [
+   "Trim",
+   0.3,
+   0.0
+  ],
+  "base_material": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "carbon1": "Carbon",
+  "lighta_material": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "interiortilling": [
+   "CabinTile",
+   0.6,
+   0.0
+  ],
+  "interiorcolourzone": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "interiora_material": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "manufacturerplate": [
+   "Plate",
+   0.5,
+   0.0
+  ],
+  "enginea": [
+   "Engine",
+   0.4,
+   0.3
+  ],
+  "grille": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "wheel1a_3d": [
+   "Rim",
+   0.28,
+   0.85
+  ]
+ },
+ "cut_islands": [
+  {
+   "mat": "coloured",
+   "box": [
+    -0.11,
+    -2.24,
+    0.55,
+    0.11,
+    -2.17,
+    0.61
+   ],
+   "limit": 0.07
+  },
+  {
+   "mat": "coloured",
+   "box": [
+    -0.11,
+    1.995,
+    0.67,
+    0.11,
+    2.05,
+    0.745
+   ],
+   "limit": 0.075
+  }
+ ]
+}
