@@ -208,3 +208,60 @@ Then: icons alpha from a black-border flood fill; QA on light + dark; upload to 
   - ServerScriptService: GalaxyEconService, GalaxyStarSurgeService.
   - StarterPlayerScripts: GalaxyForge, GalaxyHUD, GalaxySettings, GalaxyPotions, GalaxySocial, GalaxyRankTags, GalaxySupernova.
 - **Vault:** `Calc/kidsim.py` (gift_roll), `Calc/variants.py` (variant G).
+
+# Later on 9 Nov: phone layout for every window, art wired, balance applied
+Owner: "do phone layout for everything ... ask chatgpt for art ... calculate the balancing ... physics and how long it takes the player to think" + "the ui are so compact in mobile screen".
+
+## Phone layout (live code: not behind a flag)
+- **The rule (WindowManager `WM.fit`):**
+  - on a phone, every window is drawn at the screen's WIDTH (95% of the safe width), not shrunk to fit the height;
+  - when a window is taller than the screen, it scrolls up and down (`PhoneScroll`);
+  - TEXT FLOOR: no text under 14 px. A text that then doesn't fit its box shrinks to fit, but never under 14. The fit check now waits 2 frames: read straight away, TextFits was stale and texts got clipped on Android.
+- **Two cards now count as windows:** SUPERNOVA and PICK YOUR PATH. On phones, the HUD steps back, they fit the safe area, and their text is 14 px or more. On PC too, Esc or a tap outside closes them.
+  - The SUPERNOVA card may use 94% of the safe height (windows use 86%), so on a 360-px-tall Android its rows fit 14 px text.
+  - Short phone lines: "Supernovas + rank", "Essence + CREATURES", "Shards + tree ring 2", "Bodies (asteroid stays)", "Star system: a rock". The shard amount shrinks to fit its box.
+- **Fixes found by the check:**
+  - STAR FORGE: the mutation odds are now 3 gems + % (the words didn't fit); the pity line is short on phones; the level labels are taller.
+  - BLACK HOLE: shorter heading on phones.
+  - TREE: the AUTOMATION heading is wider and shrinks to fit.
+  - JETPACK: label 15 px; moved 30 px left so it's off the SUPERNOVA button on a 14 Pro.
+- **UIAudit result (all clean):**
+
+| Screen | SE 667x375 | Android | 14 Pro |
+|---|---|---|---|
+| HUD | clean | clean | clean |
+| 12 windows (Galaxy, Codes, BH, Stats, New, Crew, Guide, Forge, Store, Settings, Daily, Like) | clean | clean | clean (Crew: the SUPERNOVA button hid ~0.2 s late, then hidden) |
+| TREE | clean | clean | n/a |
+| PICK YOUR PATH card | clean | clean | clean |
+| SUPERNOVA card | clean | clean | clean |
+
+- **PC:** at Studio's small 976x584 window, the HUD shows SMALL text and 3 windows are flagged: the BH heading, the Guide/Daily windows under the top-left buttons, and the Daily "+5 +1H +TRAIL". All of these were there before today, at a window smaller than any real PC. The premise line in GALAXY now shrinks to fit.
+- **UIAudit tool:**
+  - it now cuts report text on whole characters. A cut through "·" (2 bytes) made invalid UTF-8, and the Studio tool call hung for minutes;
+  - it yields every 50 ms (the Forge has 1,800 parts).
+  - Copies are in `Roblox Playbook/Tools/UIAudit.lua` and `Code/tools/UIAudit.lua`.
+
+## Art (ChatGPT art pipeline: see [[2026-11-09 Galaxy Incremental - Sat 21 art (creatures + icons)]])
+- **Creature art:** all 7 kinds in `GameConfig.Creatures.Kinds[*].art`.
+- **New icons in UIAssets:** jetpack, crew, heistComet, crewCore, portal, graphics, mutGolden, mutRainbow, mutVoid.
+- **Where the icons are used:** JETPACK button, CREW button / window / invite, Forge MUTATIONS headers + the odds row, loose heist comet (billboard), Crew Core (billboard).
+- **Creatures in game:** they look great, but the NOVA FOX floated between the camera and the avatar and hid it. Your own creatures now float at your SIDES as the camera sees them (left, right, then further out). Other players' creatures still circle them.
+
+## Balance applied (sim: [[2026-11-09 Galaxy Incremental - Sat 21 balance sim (physics + human timing)]], `Calc/balance_sat21.py`)
+| Setting | Was | Now |
+|---|---|---|
+| Loose comet rate | 60 s per server | 600 s ÷ islands with 1+ Supernova, 60-180 s |
+| Where loose comets land | any owned island | only owners with 1+ Supernova |
+| CarryLimit | 45 s, restarted on re-grab | 40 s, one timer per comet |
+| TackleImmunity (tackler) | 1.5 s | 1.0 s |
+| RegrabAfterTackle (tackled carrier) | none | 3 s |
+| Gather | 30 s, the whole crew | 45 s, whoever is in the ring (min 2); a fail keeps the Core full |
+| Portal while carrying a comet | allowed | blocked |
+| Secret RollsPerHour | 8 | 50 |
+| LUMI gift roll | could give SECRET / VOID | never SECRET, never VOID |
+Kept: Value 120, OwnerGrabBonus x2, TackleRange 3.5, CarrySpeed 0.7, Core 10 points, mutation odds / powers, Secret x30, CometsPerNext 10, every jetpack number.
+Not done (the sim's own idea, owner's call): a "CHASE!" arrow on the steal toast for phone owners (thieves bank 88% → 71%).
+
+## Owner
+- **File > Save in Studio.**
+- The 4 update flags are still OFF until 21 Nov. The phone layout and the creature art fixes are live code and go out with the next publish.

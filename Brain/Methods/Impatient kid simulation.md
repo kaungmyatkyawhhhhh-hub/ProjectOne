@@ -22,7 +22,12 @@ created: 2026-11-09
 ## Used on
 - 2026-11-09 Galaxy: live 80% stay 60 s → 100% (5 changes) → [[Celestial Incremental/2026-11-09 Galaxy Incremental - Impatient kid simulation + first 60 seconds fix]]
 
+- 2026-11-09 MEGA BITE map (design stage, planned numbers): 5-min stay 0% (DEVOUR-like map) → 83% (11 versions; empty swims were the killer) → [[2026-11-09 MEGA BITE - Map plan + kid simulations]]
+
+- 2026-11-09 Galaxy Sat 21 update (crew heists, jetpack, Forge rolls): physics + human timing (reaction, Hick's-law choice, Fitts' aiming, thumbstick speed, AFK odds) for 3 kid types → 9 config changes (tackle loop 5.9 → 0.5 per duel, gather 50% → 99%) → [[2026-11-09 Galaxy Incremental - Sat 21 balance sim (physics + human timing)]]
+
 ## Learned
+- 9 Nov (balance sim): simulate the KID, not only the maths: reaction time and phones' slower thumbs decided the tackle race (PC re-grab 1 s beat the 1.5 s wait), and AFK kids, not seconds, made the gather fail.
 - Read the server code, not just the config: the "no comets in tutorial steps 1-5" gate was the hidden cause.
 - It's a model: confirm with the real onboarding funnel after publishing.
 - 9 Nov, after building F in Studio: `py variants.py` (run from the Calc folder, not `-I`: it imports kidsim) reproduced 100% stay 60 s / 95% at 5 min.

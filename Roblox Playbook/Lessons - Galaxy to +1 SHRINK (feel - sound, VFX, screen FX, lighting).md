@@ -257,3 +257,20 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - any test that forces items, currency or rare results runs on a throwaway save (`TestFreshSave` = a new save that never saves);
   - every game has that switch from day one;
   - every counter that is global (serials, community goals) uses a separate `_Studio` store in Studio.
+
+## 3D MODELS WITHOUT A REFERENCE STUDY (9 Nov, owner on the first Reef Shark: "it's really bad ... the one rn is REALLY really bad")
+- **What felt bad:** a round blob "toy" shark: a fat body, big round goofy eyes with brows, a smile line, small fins: nothing like the sharks kids know from shark games.
+- **Cause:** modelled straight from my own style guide ("chunky toy, big eyes, round fins") with NO reference study; I read "cartoon" as "round and cute" for every shark.
+- **Fix:** looked at SharkBite 2 / Be a Shark / Hungry Shark World: rebuilt sleek (cone snout, crescent tail, swept fins, dark fin tips), small beady eyes + brow, a wide toothy grin with a real jaw bone. Owner research request → [[2026-11-09 MEGA BITE - Shark art research (models, animation, assets)]].
+- **Rule (every game, every model):** the [[Reference study]] comes BEFORE the first polygon: 4-6 references of the real thing AND of top games that stylise it, written down as "what makes it read". Keep the real silhouette; put the cartoon into the face, teeth, colour and size. Show the owner a render early (v1), never after polishing.
+
+## COMPACT ON PHONES (9 Nov, owner: "the ui are so compact in mobile screen")
+- **What felt bad:** on a phone every window was shrunk to fit the screen's HEIGHT (x0.6), so the STAR FORGE drew 7.7 px text. It was readable on PC and tiny on a phone.
+- **Cause:** a single fit rule, "the whole window must be visible", picked a scale from the height, and nobody measured the text after scaling.
+- **Fix:** the phone layout. Windows are drawn at the screen's WIDTH and scroll up and down; a text floor of 14 px (a text that doesn't fit shrinks, never under 14); short phone versions of long lines; pop-up cards count as windows (the HUD steps back). Checked with UIAudit on SE, Android and 14 Pro: all clean.
+- **Rule (every game):**
+  - on a phone, never scale a window to its height: fit the width, scroll the rest;
+  - no text under 14 px on the smallest phone (SE 667x375 and a 360-px-tall Android), measured after every scale;
+  - every pop-up goes through the window manager (HUD steps back, Esc closes it);
+  - run UIAudit on all 3 test devices before saying "the phone works".
+- **Tool:** never cut a UTF-8 string with `sub()` in a report (a cut through "·" made the Studio tool call hang). TextFits is only right a frame or two after a TextSize change.

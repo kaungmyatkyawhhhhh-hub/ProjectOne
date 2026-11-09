@@ -17,12 +17,31 @@ Attribute AllowOverlap (on any element or its ancestor): left out (a glow, a sha
 local Players = game:GetService("Players")
 local GuiService = game:GetService("GuiService")
 
+-- (9 Nov: cut a text for the report on WHOLE characters: "·" is 2 bytes, and a cut through it made the report invalid
+-- UTF-8, which the Studio tool bridge couldn't send back: the call just hung)
+local function cut(s: string, n: number): string
+	local ok, len = pcall(utf8.len, s)
+	if not ok or not len then return (s:gsub("[\128-\255]", "?")):sub(1, n) end
+	if len <= n then return s end
+	local stop = utf8.offset(s, n + 1)
+	return if stop then s:sub(1, stop - 1) else s
+end
 local MIN_TEXT = 14
 
 return function()
 	local player = Players.LocalPlayer
 	local pg = player:WaitForChild("PlayerGui")
 	local out, counts = {}, {}
+	-- (9 Nov: a big window (the STAR FORGE, ~1,800 parts) kept Studio busy for minutes: the audit yields every 50 ms now and
+	-- keeps its progress on _G.UIAuditProgress)
+	local lastYield = os.clock()
+	local function breathe(stage: string)
+		if os.clock() - lastYield > 0.05 then
+			_G.UIAuditProgress = stage
+			task.wait()
+			lastYield = os.clock()
+		end
+	end
 	local function add(kind, msg)
 		counts[kind] = (counts[kind] or 0) + 1
 		table.insert(out, string.format("[%s] %s", kind, msg))
@@ -134,6 +153,7 @@ return function()
 		local lo, hi
 		local texts = {}
 		for _, d in ipairs({ c, table.unpack(c:GetDescendants()) }) do
+			breathe("rects " .. c.Name)
 			if d:IsA("GuiObject") and shown(d) then
 				local p, s = rectOf(d)
 				if p and s.X > 1 and s.Y > 1 then
@@ -161,21 +181,22 @@ return function()
 	local said = {}
 	for _, e in ipairs(info) do
 		for i = 1, #e.texts do
+			breathe("texts " .. e.c.Name .. " " .. i .. "/" .. #e.texts)
 			local t = e.texts[i]
 			local o = t.o
 			local key = tostring(o.Parent) .. "|" .. o.Text
 			local first = not said[o.Parent] or said[o.Parent] ~= o.Text
 			said[o.Parent] = o.Text
 			local real = (if o.TextScaled then t.s.Y else o.TextSize * scaleOf(o) * fit) / fit
-			if first and real < MIN_TEXT - 0.5 then add("SMALL", string.format("%s '%s' %.1f px", name(o), o.Text:sub(1, 24), real)) end
+			if first and real < MIN_TEXT - 0.5 then add("SMALL", string.format("%s '%s' %.1f px", name(o), cut(o.Text, 24), real)) end
 			-- (a label that grows with its text (AutomaticSize X) can't be cut sideways; TextFits lags a frame as it changes)
 			local grows = o.AutomaticSize == Enum.AutomaticSize.X or o.AutomaticSize == Enum.AutomaticSize.XY
-			if first and not grows and not o.TextFits and not o.TextScaled then add("CLIPPED", string.format("%s '%s'", name(o), o.Text:sub(1, 24))) end
+			if first and not grows and not o.TextFits and not o.TextScaled then add("CLIPPED", string.format("%s '%s'", name(o), cut(o.Text, 24))) end
 			for j = i + 1, #e.texts do
 				local u = e.texts[j]
 				-- (a Kit text's stroke / shadow copy: same text, same holder)
 				if u.o.Parent == o.Parent and u.o.Text == o.Text then continue end
-				if t.cp and u.cp and hit(t.cp, t.cs, u.cp, u.cs, 2) then add("TEXTHIT", string.format("'%s' x '%s' in %s", o.Text:sub(1, 20), u.o.Text:sub(1, 20), name(e.c))) end
+				if t.cp and u.cp and hit(t.cp, t.cs, u.cp, u.cs, 2) then add("TEXTHIT", string.format("'%s' x '%s' in %s", cut(o.Text, 20), cut(u.o.Text, 20), name(e.c))) end
 			end
 		end
 	end
