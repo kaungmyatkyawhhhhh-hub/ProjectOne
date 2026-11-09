@@ -57,6 +57,17 @@ Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, 
 - **6 Nov, PHASE 2 done (Claude Code, Studio, not published):** GALAXY LIT bar, ring 2 complete (COMETS / FORGE / AUTOMATION + capstone, BUY ALL), offline earnings + RETURN screen, daily streak / quests / gifts + FREE REWARDS board, Forge collection book, STATS / NUMBERS / BOOSTS, beacons, 0 UI overlaps. Bot 90 min: Ignition 26.5, something new every <3 min until min 38, then 8-9 min gaps; AUTO-BUY at min 81. See [[Celestial Incremental/Progress/2026-11-06 Galaxy Incremental phase 2 - REPORT]]. Phase 3 waits for the owner's OK.
 - **6 Nov, VFX pass + LUMI/rank titles (Claude Code, Studio, not published):** every effect on our own textures (VfxTextures, VfxLibrary: Supernova, Forge anvil ladder, pad build, tier-up, Ignition gate, Black Hole / Quasar / Ring Nebula modules), 60 fps PC + phone emulator; LUMI 6 expressions + effects; rank plates over heads, island plates, leaderboard emblems. Art ids now the P&L Studios XP group's (owner's import 6 Nov); the Phase 2 features use their own galaxy_icon_* icons. See [[Celestial Incremental/Progress/2026-11-06 Galaxy Incremental VFX pass - our own textures]] and [[Celestial Incremental/Progress/2026-11-06 Galaxy Incremental LUMI expressions and rank title art]].
 - **6 Nov, owner answers + Phase 3.1 (Claude Code, Studio, not published):** AUTO-BUY at Supernova 16, Forge c1 (new kind first, more Essence after Ignition, NEW CORE! pop), JOIN GROUP prompt once after a Supernova, FRIENDS chip greyed at 0, Mythic+ rolls in chat, OFFLINE x2 product + 5 badge ids live. Bot run 4: no gap over 5 min to minute 41, then 6-12 min gaps; Rare/Epic rows came too fast (fix ideas waiting). 3.1 BLACK HOLE built (100K shards -> Dark Matter, save v5, AUTO-SUPERNOVA, WOAH moment). See [[Celestial Incremental/Progress/2026-11-06 Galaxy Incremental phase 3.1 - Black Hole]].
+- **9 Nov (Claude Code, Studio, not tested, not published):**
+  - Phone tap fix: buttons worked only when held. A tap's finger wobble counted as a list scroll.
+  - Every window fits the phone (WindowManager rule; the jump button hides while a window is open). UPGRADES has its own phone layout. Boards scroll with the mouse wheel only.
+  - 3-minute quit:
+    - the NEXT goal showed a 10-min target while cheap buys were affordable; now it shows something within 60 s;
+    - the tutorial now goes Planet → Gas Giant → Rock;
+    - faster first 5 levels, a 2:30 x2 gift, the Supernova bar from minute 1, a 10-step funnel.
+    - Bot: first Supernova 4:33-4:52 real.
+  - Space movement: walk 24, low-gravity jump (~12 studs), invisible edge rails, void fade.
+  - See [[Celestial Incremental/Progress/2026-11-08 Galaxy Incremental - Windows fit phone, boards wheel-only, tap fix]] and [[Celestial Incremental/Progress/2026-11-09 Galaxy Incremental - Fix the 3-minute quit + space movement]].
+  - Owner: test on phone; decide whether to lower run-1 comet value.
 - **STANDING RULE (Galaxy):** before any Galaxy task, read the master checklist and the source notes for that area. Every Progress note lists the checklist rows it built (#) and updates their status in the checklist.
 - **Last updated:** 2026-11-06
 

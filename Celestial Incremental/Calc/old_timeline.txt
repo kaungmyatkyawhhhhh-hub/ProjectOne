@@ -1,0 +1,109 @@
+
+=== OLD game, guided player (comets caught 25%): SUPERNOVA 8:39 ===
+  purchases in 10 min: 17, longest gap between buys: 385 s
+  NEW things in 5 min: 15, longest gap: 58 s
+  every 30 s: time  income/s  stardust  NEXT-goal cost (s to reach)
+     0:00       1.0          1         15 (  14 s)
+     0:30       2.0         26         80 (  27 s)
+     1:00      14.0       1696       4390 ( 192 s)
+     1:30      32.0       1013       1984 (  30 s)
+     2:00      32.0       1973       1984 (   0 s)
+     2:30     247.2      16839      35525 (  76 s)
+     3:00     247.2      24257      35525 (  46 s)
+     3:30     247.2      42396     284197 ( 978 s)
+     4:00     247.2      64242     284197 ( 890 s)
+     4:30     247.2      79266     284197 ( 829 s)
+     5:00     247.2      86683     284197 ( 799 s)
+     5:30     247.2     157509     284197 ( 512 s)
+     6:00     247.2     174057     284197 ( 445 s)
+     6:30     247.2     181474     284197 ( 415 s)
+     7:00     247.2     202522     284197 ( 330 s)
+     7:30     247.2     224719     284197 ( 241 s)
+     8:00     247.2     242022     284197 ( 171 s)
+     8:30     247.2     249439     284197 ( 141 s)
+  timeline (named things):
+     0:35  TUTORIAL 1 Asteroid3
+     0:36  PERK FirstLight Lv1
+     0:36  TUTORIAL 2 FirstLight
+     0:36  PAD 1
+     0:36  TUTORIAL 3 Pad1
+     0:36  NEW BODY: MOON
+     0:36  TUTORIAL 4 Moon
+     0:36  +BODY ASTEROID x2
+     0:36  TUTORIAL 5 Copy
+     1:08  COSMIC LEVEL 2
+     1:09  TUTORIAL 6 Comets
+     1:54  COSMIC LEVEL 3
+     2:02  ROCK ASTEROID Lv10
+     2:02  TUTORIAL 7 Rock
+     2:02  NEW BODY: PLANET
+     2:02  TUTORIAL 8 Planet
+     2:02  PAD 2
+     2:02  PAD 3
+     2:02  PAD 4
+     2:02  TUTORIAL 9 Pads4
+     2:02  TUTORIAL 10 Level3
+     2:14  NEW BODY: GAS GIANT
+     2:14  TUTORIAL 11 Giant
+     2:31  COSMIC LEVEL 4
+     3:10  COSMIC LEVEL 5
+     4:02  COSMIC LEVEL 6
+     5:09  COSMIC LEVEL 7
+     6:35  COSMIC LEVEL 8
+     8:28  COSMIC LEVEL 9
+     8:39  SUPERNOVA READY (250,111)
+
+=== OLD game, best player (comets caught 100%): SUPERNOVA 1:46 ===
+  purchases in 10 min: 46, longest gap between buys: 17 s
+  NEW things in 5 min: 33, longest gap: 23 s
+  every 30 s: time  income/s  stardust  NEXT-goal cost (s to reach)
+     0:00       1.5          2         15 (   9 s)
+     0:30       3.0         27         60 (  11 s)
+     1:00     115.1        385       1200 (   7 s)
+     1:30     761.8       5959      20000 (  18 s)
+  timeline (named things):
+     0:00  PERK FirstLight Lv1
+     0:10  PAD 1
+     0:33  TUTORIAL 1 Asteroid3
+     0:33  TUTORIAL 2 FirstLight
+     0:33  TUTORIAL 3 Pad1
+     0:33  PAD 2
+     0:38  +BODY ASTEROID x2
+     0:41  PERK Stardust Lv1
+     0:47  NEW BODY: MOON
+     0:47  TUTORIAL 4 Moon
+     0:47  TUTORIAL 5 Copy
+     0:47  PAD 3
+     0:50  PAD 4
+     0:50  NEW BODY: PLANET
+     0:50  +BODY ASTEROID x3
+     0:55  +BODY MOON x2
+     0:58  COSMIC LEVEL 2
+     0:59  PERK FirstLight Lv2
+     1:05  TUTORIAL 6 Comets
+     1:05  PAD 5
+     1:05  PAD 6
+     1:05  +BODY ASTEROID x4
+     1:09  PERK Stardust Lv2
+     1:22  NEW BODY: GAS GIANT
+     1:23  PERK FirstLight Lv3
+     1:23  COSMIC LEVEL 3
+     1:26  PAD 7
+     1:26  +BODY PLANET x2
+     1:26  +BODY MOON x3
+     1:33  PERK Stardust Lv3
+     1:40  ROCK ASTEROID Lv10
+     1:40  TUTORIAL 7 Rock
+     1:40  TUTORIAL 8 Planet
+     1:40  TUTORIAL 9 Pads4
+     1:40  TUTORIAL 10 Level3
+     1:40  TUTORIAL 11 Giant
+     1:40  PAD 8
+     1:40  +BODY ASTEROID x5
+     1:45  COSMIC LEVEL 4
+     1:46  TUTORIAL 12 Ready
+     1:46  PAD 9
+     1:46  +BODY GAS GIANT x2
+     1:46  +BODY PLANET x3
+     1:46  +BODY MOON x4
+     1:46  SUPERNOVA READY (274,552)
