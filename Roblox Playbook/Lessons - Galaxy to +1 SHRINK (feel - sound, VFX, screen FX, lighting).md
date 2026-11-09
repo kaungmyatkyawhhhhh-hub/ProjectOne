@@ -175,3 +175,12 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **What went wrong:** the first test counted a save's 35 existing Supernovas as 35 new points.
 - **Cause:** it watched the player's Supernovas attribute, which jumps from 0 to the saved total when the save loads.
 - **Rule:** count events where they happen (the server function that does the Supernova), never by watching an attribute change. Size shared goals to the real player count (the owner set 25 / 75 / 150 / 300 / 500 for ~25 DAU).
+
+## PHONE CHECK = 3 PHONES + EVERY WINDOW (9 Nov, the 14 Nov launch gate)
+- **What went wrong:** windows that passed on one phone failed on another (the 360-px Android shrank UPGRADES to 13.4 px; the notched 14 Pro pushed a HUD icon into the shards counter). Old windows that were never re-checked (DAILY) had 45 texts under 14 px. A new row made DAILY smaller still.
+- **Rule for SHRINK:**
+  - run UIAudit on SE 667x375, Android 800x360 and 14 Pro 852x393;
+  - open EVERY window, not only the HUD (Studio `TestOpenWindow`);
+  - when a row is added to a window, re-check it on the smallest phone;
+  - a window that's tall on PC fits the width and scrolls on phones;
+  - decorations (glows, shine bands) are marked AllowOverlap so the audit only reports real problems.

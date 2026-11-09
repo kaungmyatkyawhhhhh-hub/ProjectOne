@@ -94,3 +94,42 @@ Prompts:
 3. **No plaza party board**: the PARTY chip + window already show the quests; a new board would need a map pass for little gain.
 4. **STAR ISLAND badge: created 9 Nov (id 219812428263214, in GameConfig).** The +3 Essence reward already works without it; saves that earned it get the Roblox badge on their next join once the id is in GameConfig.
 5. Checked: no Test switches are on in Workspace (safe to publish).
+
+# C. LAUNCH GATE PASS for Sat 14 Nov (9 Nov, Claude Code; owner: "do all the things we need to do")
+Phone UI audit with `Tools/UIAudit` on 3 emulated phones (Studio TestDevice):
+- SE 667x375;
+- Android 800x360;
+- iPhone 14 Pro 852x393 (notch).
+
+Checked: the HUD, the RETURN screen, STORE, SETTINGS, DAILY, PARTY (test party on), the like panel, UPGRADES (BODIES / PERKS / BLACK HOLE).
+**Result: CLEAN on all 3** (no overlap, nothing past the safe area or under Roblox's buttons, no text under 14 px, nothing clipped). Short toasts and the cutscene frame are brief pop-ups and were left out.
+
+**Fixed to get there:**
+- **SUPERNOVA button:** it sat on top of every open window on phones; it now steps aside while a window is open. Its "+294K SHARDS" line was 12 px and clipped; now ~15 px and it shrinks to fit.
+- **DAILY window:** 45 texts were 8-13 px (it never had a phone layout; the new WEEKLY GOAL row made it smaller still). On phones it now fits the width and scrolls, like STORE / STATS, with 17+ design px texts. Day 7 reads "+5 +TRAIL" on phones (the 1 h warp is in the line under the tiles).
+- **PARTY window:** texts 12 px → 20 design px.
+- **SETTINGS:** button labels 13 px → 21 design px.
+- **STORE:**
+  - short card lines on phones (`short` in GameConfig.Products);
+  - the offer shows "46:15:13 LEFT".
+- **UPGRADES phone layout:** 272 tall (was 284), so it's drawn 1:1 on the 360-px Android too (it was 0.96 → 13.4 px).
+- **Windows:** centred 8 px lower in the safe area, so the title icon clears Roblox's buttons.
+- **Glows and shine bands** are marked as decoration (`AllowOverlap`).
+- **The Supernova bar's star:** smaller (24 px, x0.6-1.0), inside the counter: on the 14 Pro it reached into the shards counter / NEXT.
+- **UIAudit itself:** it now only judges the part of a thing that can SHOW (scrolling lists and clipping frames cut the rest). Before, a long list's off-screen rows counted as "past the safe area". Text checks still cover every row. Updated in the place, `Roblox Playbook/Tools/UIAudit.lua` and `Celestial Incremental/Code/tools/UIAudit.lua`.
+- **Studio-only test switch:** `Workspace.TestOpenWindow` = "E" / "Q" / "J" / "Y" / "L" opens that window (for these audits).
+
+After the tests: Workspace has no attributes left; Studio's replication lag is 0.
+
+**Launch gate status:**
+
+| check | status |
+|---|---|
+| Impatient kid sim 100% past 60 s | ✅ |
+| Something every ~3 s in the first 30 s | ✅ (sim) |
+| Phone UI audit (3 phones) | ✅ CLEAN |
+| Like prompt only after the first big moment, no reward | ✅ |
+| No Test switches; StreamingIntegrityMode = PauseOutsideLoadedArea | ✅ |
+| Someone else plays 10 min on a real phone, fresh account | ❌ **owner** |
+| 2-player test (Test > Clients and Servers, 2 players): stars, LUMI, party visits, pads | ❌ **owner** (my Studio tool runs 1 player) |
+| File > Save, title without [ALPHA] | ❌ **owner**, before publishing |

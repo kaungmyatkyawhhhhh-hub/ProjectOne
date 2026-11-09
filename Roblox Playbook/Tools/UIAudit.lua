@@ -77,6 +77,21 @@ return function()
 		if o:IsA("Frame") and o.BackgroundTransparency < 0.6 then return o.AbsolutePosition, o.AbsoluteSize end
 		return nil
 	end
+	-- (9 Nov: only the part a thing can SHOW: a scrolling list or a clipping frame cuts what's outside it. Without this, a
+	-- long list's off-screen rows were reported as "past the safe area")
+	local function clip(o: Instance, p: Vector2, s: Vector2): (Vector2?, Vector2?)
+		local lo, hi = p, p + s
+		local c = o.Parent
+		while c and not c:IsA("LayerCollector") do
+			if c:IsA("GuiObject") and (c:IsA("ScrollingFrame") or c.ClipsDescendants) then
+				lo = lo:Max(c.AbsolutePosition)
+				hi = hi:Min(c.AbsolutePosition + c.AbsoluteSize)
+				if hi.X - lo.X <= 1 or hi.Y - lo.Y <= 1 then return nil, nil end
+			end
+			c = c.Parent
+		end
+		return lo, hi - lo
+	end
 	local function hit(ap, as, bp, bs, pad): boolean
 		pad = pad or 1
 		return ap.X + pad < bp.X + bs.X and bp.X + pad < ap.X + as.X and ap.Y + pad < bp.Y + bs.Y and bp.Y + pad < ap.Y + as.Y
@@ -120,9 +135,13 @@ return function()
 			if d:IsA("GuiObject") and shown(d) then
 				local p, s = rectOf(d)
 				if p and s.X > 1 and s.Y > 1 then
-					lo = if lo then lo:Min(p) else p
-					hi = if hi then hi:Max(p + s) else p + s
+					-- (texts are all checked, also a list's rows scrolled out of view; the component's bounds use what can show)
 					if d:IsA("TextLabel") or d:IsA("TextButton") then table.insert(texts, { o = d, p = p, s = s }) end
+					local cp, cs = clip(d, p, s)
+					if cp and cs.X > 1 and cs.Y > 1 then
+						lo = if lo then lo:Min(cp) else cp
+						hi = if hi then hi:Max(cp + cs) else cp + cs
+					end
 				end
 			end
 		end
