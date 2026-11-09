@@ -224,3 +224,7 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - every pop-up and toast uses the kit plate, never a plain box;
   - decor parts get a material + an emblem, never a bare coloured block;
   - the left-side buttons are a vertical column; small icons sit on the hotbar-key diamond (owner).
+
+## SIDE BUTTONS = THE MAIN BUTTON'S STYLE (9 Nov, owner: "make the left buttons like the supernova button style but in a different format")
+- **What the owner wanted:** the side buttons should look like the game's best button (SUPERNOVA), not a new look (hotbar diamonds with a name under them weren't it).
+- **Rule for SHRINK:** side / HUD action buttons reuse the main CTA button's parts (plate, lip, outline, heavy text + a state line) in their own compact shape, coloured by meaning (claim gold, buy green, info blue, event pink). Only the main CTA keeps the moving shine / glow.

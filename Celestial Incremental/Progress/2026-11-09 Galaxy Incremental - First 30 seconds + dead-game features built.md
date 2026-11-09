@@ -268,3 +268,11 @@ UIAudit CLEAN on SE and PC.
 - DAILY quests show the count twice (bar + button).
 - The FRIENDS / GROUP / PREMIUM icons are the owner's art diamonds, so on the new diamond they're a diamond in a diamond.
 - Not re-checked after these fixes: Android / 14 Pro phone sizes.
+
+# I. LEFT BUTTONS IN THE SUPERNOVA BUTTON'S STYLE (9 Nov, owner: "like the supernova button style but in a different format")
+`Kit.sideButton` is now the SUPERNOVA button's parts in a compact wide format:
+- **Look:** the kit's glossy button (gradient plate, lip, ink outline, stripes, top line); the icon on its left end; the NAME heavy and outlined; under it the STATE line: "23h left", "44h left", "FREE!", "x4.3".
+- **Colours mean what the kit says:** REWARDS gold (claim), STARTER green (buy), BOOSTS blue (info), PARTY pink (the event).
+- **Calm:** no moving shine or pulsing glow (those stay on the SUPERNOVA button only).
+- **Size:** PC 176x52; phone 142x40. One vertical column; the small diamond icons beside it on phones, under it on PC.
+- **Checked:** UIAudit CLEAN on SE (all 4 buttons, party on) and PC. Studio test settings cleared.
