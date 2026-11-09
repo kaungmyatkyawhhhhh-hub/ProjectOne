@@ -68,6 +68,7 @@ Light up the galaxy: stardust bodies on your island, comets, SUPERNOVA (shards, 
   - Space movement: walk 24, low-gravity jump (~12 studs), invisible edge rails, void fade.
   - See [[Celestial Incremental/Progress/2026-11-08 Galaxy Incremental - Windows fit phone, boards wheel-only, tap fix]] and [[Celestial Incremental/Progress/2026-11-09 Galaxy Incremental - Fix the 3-minute quit + space movement]].
   - Owner: test on phone; decide whether to lower run-1 comet value.
+  - Growth plan (owner 'do this', all in-game items; Essence packs + VIP Essence yes, PolicyService-checked) built 9 Nov: Starter Pack 49, Auto Upgrade 199, time skips 15/39/99, Essence 29/79/199 (ids 0 = hidden until you create them), 12 badges, trails, weekly goal, stuck helper, comeback, quiet server, live Configs, weekend 2x (off), price tests, like panel, code SPACEJUMP, What's New v2, music loader fix, Sector 2 door. See [[Celestial Incremental/Progress/2026-11-09 Galaxy Incremental - Growth plan built (in-game items)]].
 - **STANDING RULE (Galaxy):** before any Galaxy task, read the master checklist and the source notes for that area. Every Progress note lists the checklist rows it built (#) and updates their status in the checklist.
 - **Last updated:** 2026-11-06
 
