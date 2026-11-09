@@ -8,7 +8,7 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP). Read all of this
 This **replaces the old rule** "no new sounds until the owner sends IDs": for this job the owner asks you to find the sounds yourself.
 
 ## Where the sounds come from (safe sources only)
-- **Roblox's Creator Store audio** (Toolbox → Audio, or `apis.roblox.com/toolbox-service/v1/marketplace/...` search, which the environment allows): sounds that are **public and usable in any experience**. Search by engine type and car (e.g. "V12 exhaust", "flat plane V8", "V10 rev", "W16", "flat six", "supercar exhaust").
+- **Roblox's Creator Store audio** (Toolbox → Audio, or `apis.roblox.com/toolbox-service/v1/marketplace/...` search, which the environment allows): sounds that are **public and usable in any experience**. Search by engine type and car (e.g. "V12 exhaust", "flat plane V8", "V10 rev", "flat six", "supercar exhaust").
 - **Never** sounds ripped from other games (Forza, Gran Turismo, Assetto Corsa, GTA...) or copyrighted videos: check the title, description and uploader; skip anything that names a game or looks ripped.
 - Keep a **credit list** (asset id, name, creator) in the notes.
 - Each candidate: listen in Studio, measure it (`AudioPlayer:GetWaveformAsync`, FFT: the firing note must match the engine; a V12 fires at rpm / 10 Hz, a V8 at rpm / 15, a V10 at rpm / 12, a flat-6 at rpm / 20), and check it loops cleanly. Pick the best for each engine type.
