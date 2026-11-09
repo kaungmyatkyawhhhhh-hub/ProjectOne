@@ -159,3 +159,24 @@ After the tests: Workspace has no attributes left; Studio's replication lag is 0
 **Audit (BOOSTS panel open, scrolled to the top and to the bottom):** CLEAN on SE 667x375, Android 800x360 and 14 Pro. PC: no overlap or clipping. Studio is clean: no Workspace test attributes, replication lag 0.
 
 Note: the stardust jumps in the test save between runs are AUTO-BUY (on in the save) spending it, not a bug.
+
+# E. JUMP, THE STORE SCROLLS, THE LEFT CHIPS (9 Nov, owner)
+**Jump** (owner: "lower the jump power by a bit and decrease the gravity too"):
+- `GameConfig.Movement`: GravityCut 115 → **95**, new **JumpHeight 5.3** (was 7.2).
+- GalaxyMapService sets the jump height on every spawn; StarterPlayer.CharacterJumpHeight = 5.3.
+- Measured in Play: **11.2 studs high, 0.98 s in the air** (was ~12.3 / 0.92). Lower and floatier.
+
+**STORE** (owner: "shop UIs are supposed to be scrollable, not a long one that fits in the screen"):
+- **Cause:** the 7 new product cards made the window ~1300 tall, and the fit rule drew all of it at **x0.30**. The tiny scale also broke the product cards' text (titles over prices).
+- **Now:** a fixed window like the others (PC 620x480, phones 620x272 like UPGRADES); the cards + CODES scroll inside it (Kit.scroller: wheel, drag, gold thumb, taps work on phones). PC draws it at the HUD's scale (x0.76 in Studio's small window), SE at x0.96.
+
+**Left chips** (owner: "the labels on the left side of the screen are so ugly"):
+- **Kit.hudChip** is redrawn in the top HUD's style (LVL / SHARDS / counter): the slanted plate (A.plate) with an ink outline and a dark inside, a thin line in the chip's colour under the text, the LVL chip's diamond tile with a coloured rim behind the icon, white text with an ink outline. The plate grows with its text.
+- The stretched art chips (Kit.HudArt chip*) aren't used any more. One change in the kit, so every chip changed: PARTY, STARTER, GIFT, FRIENDS, GROUP, PREMIUM, BOOSTS.
+- PC labels are shorter: "FRIENDS +10% EACH", "PREMIUM +10%".
+
+**LUMI's line bubble:** it was 9 x 1.6 studs, so close to the camera it covered the whole top HUD. Now it's a fixed 290x34 px kit plate (gold rim, 14-18 px text).
+
+**Audit (SE):** HUD, BOOSTS panel, STORE top and bottom: all CLEAN. Studio is clean: no Workspace test attributes, replication lag 0.
+
+**Not changed:** STATS (560x620) is the other tall window. On a normal PC screen it fits at full size; only a small window shrinks it a little.

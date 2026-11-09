@@ -136,7 +136,8 @@ The owner's screenshot matches them exactly: Asteroid Lv5, 1 copy, First Light, 
 | setting | value |
 |---|---|
 | WalkSpeed | 24 |
-| GravityCut | 115 |
+| GravityCut | ~~115~~ **95** (owner 9 Nov: "decrease the gravity") |
+| JumpHeight | ~~7.2~~ **5.3** (owner 9 Nov: "lower the jump power by a bit"; StarterPlayer + set on every spawn) |
 | VoidDepth | 40 |
 | RailHeight | 7 |
 
@@ -149,7 +150,7 @@ The owner's screenshot matches them exactly: Asteroid Lv5, 1 copy, First Light, 
 - A VectorForce on your root (world space, centre of mass) = mass x (196.2 - 115). You feel 115 instead of 196.2.
 - The mass is re-read when the avatar's parts change and once a second.
 - Workspace.Gravity is untouched.
-- The jump is unchanged (JumpHeight 7.2, the same as JumpPower 50), so it goes **~12 studs high and stays in the air ~1.7x as long**.
+- ~~The jump is unchanged (JumpHeight 7.2), ~12 studs high.~~ **9 Nov, owner:** jump 5.3 + felt gravity 95 = **11.2 studs high, 0.98 s in the air** (measured in Play; was ~12.3 / 0.92 s): a lower, slower, floatier jump.
 - Pads use Touched as before.
 
 **The feel:**

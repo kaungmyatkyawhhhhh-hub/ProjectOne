@@ -195,3 +195,14 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - every pop-up uses the kit's look (dark plate, ink outline, coloured edge, shine line, icon, value pill), never plain text lines;
   - when a chip joins a column, re-check the column's bottom on the smallest phone. If it doesn't fit, move the less-used chips into a panel (on phones FRIENDS / GROUP / PREMIUM now live in the BOOSTS panel, as cards with their own button);
   - a scrolled-out row isn't "covering" anything: UIAudit's TEXTHIT now only counts the parts that show.
+
+## LONG WINDOWS + ONE CHIP STYLE (9 Nov, owner: "shop UIs are supposed to be scrollable" + "the labels on the left are so ugly")
+- **What went wrong:**
+  - new STORE cards made the window grow to ~1300 tall, and the fit rule shrank all of it to x0.3 instead of scrolling;
+  - the left chips (stretched art + coloured pills, each a different colour) didn't match the top HUD the owner likes;
+  - LUMI's line bubble was sized in studs, so next to the camera it covered the HUD.
+- **Rule for SHRINK:**
+  - a window has a FIXED size; content that grows (cards, rows) scrolls inside it, never makes the window taller;
+  - the fit rule is only for a fixed-size window on a small screen;
+  - all HUD chips use ONE style, copied from the HUD part the owner likes (here the LVL plate);
+  - a 3D text bubble near the player is a fixed pixel size (offset), never studs.
