@@ -276,3 +276,12 @@ UIAudit CLEAN on SE and PC.
 - **Calm:** no moving shine or pulsing glow (those stay on the SUPERNOVA button only).
 - **Size:** PC 176x52; phone 142x40. One vertical column; the small diamond icons beside it on phones, under it on PC.
 - **Checked:** UIAudit CLEAN on SE (all 4 buttons, party on) and PC. Studio test settings cleared.
+
+# J. STARTER UNDER SUPERNOVA + PHONE ICONS BOTTOM-LEFT (9 Nov, owner)
+Owner: "put starter under supernova, also in mobile view the icons are on the right side of the buttons, it's supposed to be the bottom left of the screen".
+- **STARTER:** in a new slot right under the SUPERNOVA button, right-aligned with it (GalaxySupernova `shared.GalaxyUnderSupernova`).
+  - It stays when SUPERNOVA isn't ready, and hides while a window is open.
+  - PC: the HUD's scale; phone: full size.
+- **Phones:** the small icons (potions / invite / group / Premium, then the active boosts) are their own group in the screen's bottom-left corner. The buttons stay under LVL.
+  - Note: that corner is also where Roblox's thumbstick starts. A thumb that lands exactly on an icon taps it instead of moving.
+- **Checked:** UIAudit CLEAN on SE and PC. Studio test settings cleared.
