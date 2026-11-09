@@ -184,3 +184,14 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - when a row is added to a window, re-check it on the smallest phone;
   - a window that's tall on PC fits the width and scrolls on phones;
   - decorations (glows, shine bands) are marked AllowOverlap so the audit only reports real problems.
+
+## POP-UPS AND GROWING COLUMNS (9 Nov, owner: "the boosts labels need to be better" + "the bottom wasn't showing")
+- **What went wrong:**
+  - the BOOSTS list was a plain black box of text lines: the only placeholder left next to the designed HUD;
+  - the launch gate's phone audit never opened it (it opens on a tap, not as a window);
+  - on phones the left chip column ran off the bottom of the screen once PARTY and STARTER joined it, so the BOOSTS chip wasn't on screen at all.
+- **Rule for SHRINK:**
+  - the phone check also opens every pop-up that opens on a tap (lists, tooltips, menus), not only the windows;
+  - every pop-up uses the kit's look (dark plate, ink outline, coloured edge, shine line, icon, value pill), never plain text lines;
+  - when a chip joins a column, re-check the column's bottom on the smallest phone. If it doesn't fit, move the less-used chips into a panel (on phones FRIENDS / GROUP / PREMIUM now live in the BOOSTS panel, as cards with their own button);
+  - a scrolled-out row isn't "covering" anything: UIAudit's TEXTHIT now only counts the parts that show.

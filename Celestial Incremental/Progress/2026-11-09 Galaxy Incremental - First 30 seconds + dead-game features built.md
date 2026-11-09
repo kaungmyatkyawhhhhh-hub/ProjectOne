@@ -133,3 +133,29 @@ After the tests: Workspace has no attributes left; Studio's replication lag is 0
 | Someone else plays 10 min on a real phone, fresh account | ❌ **owner** |
 | 2-player test (Test > Clients and Servers, 2 players): stars, LUMI, party visits, pads | ❌ **owner** (my Studio tool runs 1 player) |
 | File > Save, title without [ALPHA] | ❌ **owner**, before publishing |
+
+# D. BOOSTS PANEL + PHONE COLUMN (9 Nov, owner: "the boosts labels need to be better" + "is the mobile screen fixed")
+**The "bottom not showing" windows:** fixed on 8-9 Nov (the fit rule + phone layouts drawn 1:1). UPGRADES is 600x272 on phones, so it fits even the 360-px-tall Android. Section C's audit was CLEAN on 3 phones.
+
+**Found today:**
+- On phones the left chip column ran off the bottom once PARTY + STARTER joined it: the BOOSTS chip was off screen.
+- The BOOSTS list (it opens on a tap) was never audited. It was a plain black box of text lines.
+
+**Fixed (GalaxyPotions, GalaxyGrowth, GalaxySocial):**
+1. **The BOOSTS panel** is a kit panel now:
+   - a header: the BOOSTS icon + title + the total in a gold pill;
+   - one card per boost, like the potion cards: dark plate, ink outline, an edge in the boost's colour, a shine line, its icon, its name, a line under it (real time left / "forever" / why) and a value pill in its colour;
+   - it lists every boost: event, Great Star, Star Surge, x2 STARDUST (any source), x2 COMETS, x2 PASS, VIP, Premium, friends, group, island stars.
+2. **Placement:** right of the whole chip column, its bottom level with the BOOSTS chip. It never covers the counter / NEXT line or the hotbar. It shows whole cards only and scrolls the rest. Full size on phones; scaled like the HUD on PC.
+3. **Phones:** FRIENDS / GROUP / PREMIUM left the column and are cards in the BOOSTS panel with their own green button (INVITE / JOIN / GET), only while you can still get them. The column now fits: PARTY, STARTER, GIFT, BOOSTS.
+4. **Chip labels say what they are on phones too:** "BOOSTS x2.35", "STARTER 45:56:02", "PARTY 1d 0h" (they were just "x2.35" / a bare timer).
+5. **UIAudit:**
+   - TEXTHIT only counts the parts of texts that show (scrolled-out rows gave false hits);
+   - the emulator's device frame no longer counts as clipping.
+
+   Vault copies updated.
+6. **Studio test switch:** `TestOpenWindow = "close"` closes the open window.
+
+**Audit (BOOSTS panel open, scrolled to the top and to the bottom):** CLEAN on SE 667x375, Android 800x360 and 14 Pro. PC: no overlap or clipping. Studio is clean: no Workspace test attributes, replication lag 0.
+
+Note: the stardust jumps in the test save between runs are AUTO-BUY (on in the save) spending it, not a bug.

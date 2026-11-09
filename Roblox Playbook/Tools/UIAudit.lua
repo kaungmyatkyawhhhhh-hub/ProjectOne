@@ -83,7 +83,9 @@ return function()
 		local lo, hi = p, p + s
 		local c = o.Parent
 		while c and not c:IsA("LayerCollector") do
-			if c:IsA("GuiObject") and (c:IsA("ScrollingFrame") or c.ClipsDescendants) then
+			-- (not the Studio emulator's own device frame: on a real phone nothing clips at the screen's edge, a thing there is
+			-- simply off screen, and that must be reported)
+			if c:IsA("GuiObject") and (c:IsA("ScrollingFrame") or c.ClipsDescendants) and c.Name ~= "SafeArea" and c.Name ~= "TestDevice" then
 				lo = lo:Max(c.AbsolutePosition)
 				hi = hi:Min(c.AbsolutePosition + c.AbsoluteSize)
 				if hi.X - lo.X <= 1 or hi.Y - lo.Y <= 1 then return nil, nil end
@@ -136,8 +138,9 @@ return function()
 				local p, s = rectOf(d)
 				if p and s.X > 1 and s.Y > 1 then
 					-- (texts are all checked, also a list's rows scrolled out of view; the component's bounds use what can show)
-					if d:IsA("TextLabel") or d:IsA("TextButton") then table.insert(texts, { o = d, p = p, s = s }) end
 					local cp, cs = clip(d, p, s)
+					-- (cp / cs = the part that shows: two texts only cover each other where they show)
+					if d:IsA("TextLabel") or d:IsA("TextButton") then table.insert(texts, { o = d, p = p, s = s, cp = cp, cs = cs }) end
 					if cp and cs.X > 1 and cs.Y > 1 then
 						lo = if lo then lo:Min(cp) else cp
 						hi = if hi then hi:Max(cp + cs) else cp + cs
@@ -172,7 +175,7 @@ return function()
 				local u = e.texts[j]
 				-- (a Kit text's stroke / shadow copy: same text, same holder)
 				if u.o.Parent == o.Parent and u.o.Text == o.Text then continue end
-				if hit(t.p, t.s, u.p, u.s, 2) then add("TEXTHIT", string.format("'%s' x '%s' in %s", o.Text:sub(1, 20), u.o.Text:sub(1, 20), name(e.c))) end
+				if t.cp and u.cp and hit(t.cp, t.cs, u.cp, u.cs, 2) then add("TEXTHIT", string.format("'%s' x '%s' in %s", o.Text:sub(1, 20), u.o.Text:sub(1, 20), name(e.c))) end
 			end
 		end
 	end
