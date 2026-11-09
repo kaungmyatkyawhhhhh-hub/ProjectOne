@@ -265,3 +265,6 @@ Not done (the sim's own idea, owner's call): a "CHASE!" arrow on the steal toast
 ## Owner
 - **File > Save in Studio.**
 - The 4 update flags are still OFF until 21 Nov. The phone layout and the creature art fixes are live code and go out with the next publish.
+
+## Switches ON (9 Nov, owner: "turn the switches on")
+`GameConfig.NextUpdate = { Creatures = true, PhoneMode = true, Jetpack = true, Heists = true }`. Play check: all 4 on, CREW button + JETPACK + creatures show, no errors (only the usual ConfigService "not found" lines). The update goes live with the owner's next publish (not 21 Nov).
