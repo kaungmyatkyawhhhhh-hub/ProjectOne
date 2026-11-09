@@ -11,7 +11,7 @@ This **replaces the old rule** "no new sounds until the owner sends IDs": for th
 - **Roblox's Creator Store audio** (Toolbox → Audio, or `apis.roblox.com/toolbox-service/v1/marketplace/...` search, which the environment allows): sounds that are **public and usable in any experience**. Search by engine type and car (e.g. "V12 exhaust", "flat plane V8", "V10 rev", "W16", "flat six", "supercar exhaust").
 - **Never** sounds ripped from other games (Forza, Gran Turismo, Assetto Corsa, GTA...) or copyrighted videos: check the title, description and uploader; skip anything that names a game or looks ripped.
 - Keep a **credit list** (asset id, name, creator) in the notes.
-- Each candidate: listen in Studio, measure it (`AudioPlayer:GetWaveformAsync`, FFT: the firing note must match the engine; a V12 fires at rpm / 10 Hz, a V8 at rpm / 15, a V10 at rpm / 12, a flat-6 at rpm / 20, a W16 at rpm / 7.5), and check it loops cleanly. Pick the best for each engine type.
+- Each candidate: listen in Studio, measure it (`AudioPlayer:GetWaveformAsync`, FFT: the firing note must match the engine; a V12 fires at rpm / 10 Hz, a V8 at rpm / 15, a V10 at rpm / 12, a flat-6 at rpm / 20), and check it loops cleanly. Pick the best for each engine type.
 
 ## The cars and their real engines
 Sound each car **by its real engine** (all names here are reference only, never shown in the game). Cars with the **same engine family share a sound set**, with small pitch / filter / volume differences per car.
@@ -34,9 +34,8 @@ Sound each car **by its real engine** (all names here are reference only, never 
 | Tri-Star Silber C197 Wingdoor (`bentz_sls`) | Mercedes SLS AMG (Black Series model) | 6.2 **V8 NA, cross-plane crank** | ~622 hp | 8,000 | deep muscle-car thunder, loud crackles |
 | Stuttgart 991.2 Track (`porsha_gt3`) | Porsche 911 GT3 RS (991.2) | 4.0 **flat-6 NA** | ~513 hp | 9,000 | metallic, rising flat-six howl to 9,000 |
 | Stealth-Apex V10 Halo / Circuit (`lexis_lfa`, `_lfa_circuit`) | Lexus LFA / LFA Nürburgring | 4.8 **V10 NA** | ~553 / 562 hp | 9,000 | the famous high "F1-like" scream, very fast revs |
-| Velocité Noir Origine (+ trims) (`bugotti_veyron` ...) | Bugatti Veyron 16.4 / Super Sport / GS Vitesse | 8.0 **W16, quad-turbo** | 1,001–1,184 hp | ~6,400 | deep, heavy rumble with huge turbo whoosh and wastegate chuffs |
-| Velocité Noir Éclair / Pure / Super Sport (`bugotti_chiron`, `_pursport`, `_supersport`) | Bugatti Chiron / Pur Sport / Super Sport | 8.0 **W16, quad-turbo** | 1,479–1,578 hp | ~7,100 | like the Veyron, deeper and stronger |
 
+- **Bugattis (owner, 2026-11-09):** **don't add or change** sounds for the Veyron and Chiron families (Velocité Noir Origine and its trims, Éclair, Éclair Pure, Éclair Super Sport): they already have their sounds.
 - **Aventador family (owner, 2026-11-09):** only the **LP700-4** (`lambrini_lp700`) gets a new sound. **Don't change** the ZV, ZVX or ZVX 63 (`lambrini_lp750`, `lambrini_svj`, `lambrini_svj63`): they keep their current sounds.
 - Check each line against a reliable source before using it (engine, power, redline), and fix any mistake.
 - Also give every car its **real redline and rev limiter**, real **power** and **gear count** in the driving data if they're off (and note it), so the sound and the revs match.
@@ -44,10 +43,10 @@ Sound each car **by its real engine** (all names here are reference only, never 
 
 ## How each sound must work
 Use the game's existing sound system (the layers in `Config`: Start, Idle, Low, Mid, High, Launch, Crackle, Redline, Shift, Downshift, ShiftPop, Pops; `Config.ExhaustBands`: `reachDown`, `coast`, `shiftCut`, `loopRpm`, `idleReach`, `idleTop`, `noPops`; `Config.ExhaustStart`):
-- **Start-up:** the real car's start (a bark and settle for V10 / V12, a quieter turbo start for the 12C / Bugattis).
+- **Start-up:** the real car's start (a bark and settle for V10 / V12, a quieter turbo start for the 12C).
 - **Idle** steady and right for the engine.
 - **On throttle:** smooth from idle to redline, pitch following the real revs, louder and harsher under load, no gaps or jumps between layers, no robotic looping.
-- **Off throttle:** quieter overrun, **pops and crackles** where the real car has them (Lambos, Huracán STO, SLS, Aventador shifts), turbo flutter / blow-off on the 12C and Bugattis.
+- **Off throttle:** quieter overrun, **pops and crackles** where the real car has them (Lambos, Huracán STO, SLS, Aventador shifts), turbo flutter / blow-off on the 12C.
 - **Shifts:** the cut and bang right for the gearbox (the Aventador's hard single-clutch shift, smooth dual-clutch on the 458 / Huracán / R8 / 12C / GT3 RS, a PDK-style blip on downshifts).
 - **Redline / limiter:** a bounce at the real limiter.
 - **Distance and position:** quieter and duller far away; louder outside behind the car, softer inside the cabin (first person), with tunnels / walls making it louder (reverb), if the system supports it.
@@ -61,7 +60,7 @@ Use the game's existing sound system (the layers in `Config`: Start, Idle, Low, 
 
 ## Check before you say done
 - In Play, for every car: start, idle, rev in neutral, launch, full acceleration through the gears, lift-off, braking with downshifts, the limiter, from outside (chase cam) and inside; another player listening; a short recording or a description per car.
-- Each engine family sounds clearly different (V8 flat-plane vs cross-plane, V10, V12, flat-6, W16).
+- Each engine family sounds clearly different (V8 flat-plane vs cross-plane, V10, V12, flat-6).
 - No console errors; Lune tests and `luau-lsp analyze` clean; FPS fine.
 - Save the place, commit, push; note it (with the credit list).
 
