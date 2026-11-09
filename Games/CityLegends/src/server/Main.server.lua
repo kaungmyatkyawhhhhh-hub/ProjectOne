@@ -679,6 +679,7 @@ end)
 
 -- the driver's blinkers and lights go on their car as attributes, so every player sees them
 local steerSentAt: { [Player]: number } = {}
+local engSentAt: { [Player]: number } = {}
 CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
 	local car = getSession(player).car
 	if not car or not car.Parent or type(raw) ~= "table" then
@@ -715,9 +716,24 @@ CarSignals.OnServerEvent:Connect(function(player: Player, raw: any)
 			car:SetAttribute("Steer", math.clamp(math.floor(st * 10 + 0.5) / 10, -1, 1))
 		end
 	end
+	-- (2026-11-09) the engine's revs (0..1.1 of the redline), throttle, gear and on / off, so the other
+	-- players hear the car (rounded, a few a second at most)
+	local eng = raw.eng
+	if type(eng) == "table" then
+		local r, t, g, on = eng[1], eng[2], eng[3], eng[4]
+		local now = os.clock()
+		if type(r) == "number" and math.abs(r) < 10 and type(t) == "number" and math.abs(t) < 10 and type(g) == "number" and math.abs(g) < 20 and type(on) == "boolean" and now - (engSentAt[player] or 0) >= 0.1 then
+			engSentAt[player] = now
+			car:SetAttribute("EngRpm", math.floor(math.clamp(r, 0, 1.1) * 40 + 0.5) / 40)
+			car:SetAttribute("EngThr", math.floor(math.clamp(t, 0, 1) * 4 + 0.5) / 4)
+			car:SetAttribute("EngGear", math.clamp(math.floor(g + 0.5), -1, 10))
+			car:SetAttribute("EngOn", on)
+		end
+	end
 end)
 Players.PlayerRemoving:Connect(function(player: Player)
 	steerSentAt[player] = nil
+	engSentAt[player] = nil
 end)
 
 -- a street light, tree or traffic pole knocked down: the other games drop it too (only from a

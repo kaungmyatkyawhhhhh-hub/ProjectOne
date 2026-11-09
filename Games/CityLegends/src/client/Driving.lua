@@ -157,6 +157,10 @@ type State = {
 	glowShown: number,
 	steerSent: number,
 	steerSendT: number,
+	engSent: number, -- (2026-11-09) the engine state last sent to the other players
+	thrSent: number,
+	gearSent: number,
+	onSent: boolean,
 	limitT: number,
 	smokeF: number,
 	smokeR: number,
@@ -824,10 +828,30 @@ local function exhaustPop(s: State, strength: number)
 	s.flameGlow = math.max(s.flameGlow, 4 * strength)
 end
 
+-- a car's exhaust settings (Config.ExhaustBands; a SPORT / TOP trim has its base car's)
+local function exhaustCfg(s: State): any
+	local cfg = Config.ExhaustBands[s.spec.Id]
+	if cfg == nil then
+		local spec = Cars.get(s.spec.Id) :: any
+		cfg = if spec and spec.BaseId then Config.ExhaustBands[spec.BaseId] else nil
+	end
+	return cfg
+end
+
 -- a car with no pops or bangs (Config.ExhaustBands: `noPops`)
 local function noPops(s: State): boolean
-	local cfg = Config.ExhaustBands[s.spec.Id]
+	local cfg = exhaustCfg(s)
 	return cfg ~= nil and cfg.noPops == true
+end
+-- (2026-11-09, the supercars' real engines) no pops lifting off (`liftPops = false`), no bang or flame on
+-- a hard upshift (`shiftPops = false`: a smooth dual-clutch car)
+local function noLiftPops(s: State): boolean
+	local cfg = exhaustCfg(s)
+	return cfg ~= nil and cfg.liftPops == false
+end
+local function noShiftPops(s: State): boolean
+	local cfg = exhaustCfg(s)
+	return cfg ~= nil and cfg.shiftPops == false
 end
 
 -- darkened screen edges at speed (a tunnel-vision rush; Roblox has no real motion blur)
@@ -1605,8 +1629,10 @@ end
 
 -- other players' cars: their blinkers and lights, from the attributes the server sets on them
 type OtherWheel = { motor: Motor6D, knuckle: Motor6D?, front: boolean, radius: number, spin: number, blur: { BasePart }, spokes: { BasePart }, shown: number }
-type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter }, wheels: { OtherWheel }, kitBy: { [BasePart]: OtherWheel }, skinN: number }
+type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter }, wheels: { OtherWheel }, kitBy: { [BasePart]: OtherWheel }, skinN: number, engine: Audio.Engine?, eRpm: number, eThr: number, eGear: number, eOn: boolean?, eDistT: number }
 local others: { [Model]: OtherCar } = {}
+-- (2026-11-09) the other players' engines heard at once, and how far (studs)
+local OTHER_ENGINE_MAX, OTHER_ENGINE_RANGE = 3, 220
 local function otherCar(model: Model): OtherCar?
 	local found = others[model]
 	if found then
@@ -1617,7 +1643,7 @@ local function otherCar(model: Model): OtherCar?
 		return nil
 	end
 	local _, size = model:GetBoundingBox()
-	local o: OtherCar = { model = model, L = {}, R = {}, smoke = {}, wheels = {}, kitBy = {}, skinN = -1 }
+	local o: OtherCar = { model = model, L = {}, R = {}, smoke = {}, wheels = {}, kitBy = {}, skinN = -1, eRpm = 0.12, eThr = 0, eGear = 0, eDistT = 0 }
 	-- (2026-11-08) its wheels: they spin with its speed and the fronts turn with its steering (the Steer attribute);
 	-- the kit-v2 wheels blur at speed as ours do
 	local kitBy = o.kitBy
@@ -1782,8 +1808,89 @@ local function updateOthers(dt: number?)
 			end
 		end
 	end
-	for model in others do
+	-- (2026-11-09) the other players' engines: the nearest few within earshot play their car's own sound
+	-- from the car, driven by the revs, throttle and gear their driver sends (EngRpm / EngThr / EngGear /
+	-- EngOn); further away, none
+	local near: { { o: OtherCar, d: number } } = {}
+	for model, o in others do
+		local root = model.PrimaryPart
+		if root and model.Parent then
+			local d = (root.Position - camPos).Magnitude
+			if d < OTHER_ENGINE_RANGE then
+				table.insert(near, { o = o, d = d })
+			end
+		end
+	end
+	table.sort(near, function(a, b)
+		return a.d < b.d
+	end)
+	local keep: { [OtherCar]: number } = {}
+	for i = 1, math.min(#near, OTHER_ENGINE_MAX) do
+		keep[near[i].o] = near[i].d
+	end
+	for model, o in others do
+		local d = keep[o]
+		local root = model.PrimaryPart
+		if d and root and not o.engine then
+			local carId = model:GetAttribute("CarId")
+			local spec = if type(carId) == "string" then Cars.get(carId) else nil
+			if spec then
+				local ok, eng = pcall(function()
+					local parts = CarStats.decodeParts(model:GetAttribute("Parts"))
+					local tune = CarStats.tuneOf(CarStats.cleanParts(spec.Id, parts))
+					local e = Audio.engine(spec.Class, root, spec.Id, if tune.engine then tune.engine.layout else nil)
+					e:setRedline(CarStats.redlineOf(spec.Id, parts) * 1000)
+					e:setMods(tune)
+					return e
+				end)
+				if ok and eng then
+					o.engine = eng
+					o.eOn = nil
+					o.eGear = 0
+					o.eRpm = (model:GetAttribute("EngRpm") :: number?) or 0.12
+				end
+			end
+		elseif not d and o.engine then
+			o.engine:destroy()
+			o.engine = nil
+		end
+		local eng = o.engine
+		if eng and d and root then
+			local carId = model:GetAttribute("CarId")
+			local spec = if type(carId) == "string" then Cars.get(carId) else nil
+			local rpmT = (model:GetAttribute("EngRpm") :: number?) or 0.12
+			local thrT = (model:GetAttribute("EngThr") :: number?) or 0
+			local gear = (model:GetAttribute("EngGear") :: number?) or 0
+			local on = model:GetAttribute("EngOn") ~= false and not (spec and spec.Electric)
+			o.eRpm += (rpmT - o.eRpm) * math.min(1, step * 8)
+			o.eThr += (thrT - o.eThr) * math.min(1, step * 10)
+			if on ~= o.eOn then
+				o.eOn = on
+				eng:setRunning(on)
+			end
+			if gear ~= o.eGear then
+				if o.eGear > 0 and gear > 0 and on then
+					eng:shift(gear > o.eGear, rpmT)
+				end
+				o.eGear = gear
+			end
+			local top = Config.mphToSps(if spec then spec.TopSpeed else 150)
+			local speedFrac = math.clamp(root.AssemblyLinearVelocity.Magnitude / math.max(top, 1), 0, 1)
+			local smokeLevel = (model:GetAttribute("Smoke") :: number?) or 0
+			eng:update(o.eRpm, o.eThr, speedFrac, if smokeLevel >= 2 then 40 elseif smokeLevel >= 1 then 22 else 0, nil, nil)
+			o.eDistT -= step
+			if o.eDistT <= 0 then
+				o.eDistT = 0.25
+				eng:setDistance(d)
+			end
+		end
+	end
+	for model, o in others do
 		if not model.Parent then
+			if o.engine then
+				o.engine:destroy()
+				o.engine = nil
+			end
 			others[model] = nil
 		end
 	end
@@ -2255,6 +2362,10 @@ function Driving.attach(model: Model)
 		glowShown = 0,
 		steerSent = 0,
 		steerSendT = 0,
+		engSent = -1,
+		thrSent = -1,
+		gearSent = -1,
+		onSent = false,
 		limitT = 0,
 		smokeF = 0,
 		smokeR = 0,
@@ -2868,7 +2979,7 @@ function Driving.step(dt: number)
 				s.pops = math.random(3, 5)
 				s.popTimer = 0.08
 			end
-		elseif s.rpm > 0.6 and liftMph > 30 and not noPops(s) then
+		elseif s.rpm > 0.6 and liftMph > 30 and not noPops(s) and not noLiftPops(s) then
 			s.pops = math.random(2, 4)
 			s.popTimer = 0.04
 		end
@@ -3714,7 +3825,7 @@ function Driving.step(dt: number)
 	if effGear and s.soundGear and effGear ~= s.soundGear and math.abs(fs) > 2 and s.engineOn then
 		local isUp = effGear > s.soundGear
 		s.engine:shift(isUp, math.clamp(0.12 + 0.88 * frac / gearHi(effGear), 0.12, 1.02))
-		if isUp and throttle > 0.5 and (s.popTune or not noPops(s)) then
+		if isUp and throttle > 0.5 and (s.popTune or (not noPops(s) and not noShiftPops(s))) then
 			exhaustPop(s, if s.popLoud then 1.4 else 1)
 		end
 		-- the crackle map also crackles on the way down the gears
@@ -3802,10 +3913,16 @@ function Driving.render(dt: number)
 	-- the other players see the front wheels turn (a steering value on the car, a few times a second)
 	s.steerSendT -= dt
 	local steerQ = math.floor(s.steer * 10 + 0.5) / 10
-	if s.steerSendT <= 0 and math.abs(steerQ - s.steerSent) >= 0.1 then
-		s.steerSent = steerQ
+	-- (2026-11-09) the engine's revs, throttle, gear and on / off go with it, so the other players hear the
+	-- car (rounded, a few times a second at most)
+	local engQ = math.floor(math.clamp(s.rpm, 0, 1.1) * 40 + 0.5) / 40
+	local thrQ = math.floor(math.clamp(s.throttle, 0, 1) * 4 + 0.5) / 4
+	local gearQ = s.soundGear or 0
+	local onQ = s.engineOn == true
+	if s.steerSendT <= 0 and (math.abs(steerQ - s.steerSent) >= 0.1 or engQ ~= s.engSent or thrQ ~= s.thrSent or gearQ ~= s.gearSent or onQ ~= s.onSent) then
+		s.steerSent, s.engSent, s.thrSent, s.gearSent, s.onSent = steerQ, engQ, thrQ, gearQ, onQ
 		s.steerSendT = 0.15
-		remote("CarSignals"):FireServer({ steer = steerQ })
+		remote("CarSignals"):FireServer({ steer = steerQ, eng = { engQ, thrQ, gearQ, onQ } })
 	end
 	-- each wheel moves up and down on its spring to stay on the road (its travel smoothed a touch)
 	local sp = s.susp
@@ -4076,6 +4193,7 @@ function Driving.render(dt: number)
 			SoundService.AmbientReverb = if inside then Enum.ReverbType.StoneCorridor else Enum.ReverbType.City
 		end
 	end
+	s.engine:setCabin(Driving.cameraMode == "Interior")
 	s.engine:update(s.rpm, s.throttle, fx, s.slip, nil, s.screech)
 	if s.roar then
 		local k = if s.grounded then math.clamp(mphNow / 180, 0, 1) ^ 1.3 else 0

@@ -32,6 +32,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
+local Cars = require(Shared:WaitForChild("Cars"))
 
 local Audio = {}
 
@@ -416,6 +417,10 @@ export type Engine = {
 	setMods: (self: Engine, mods: any) -> (), -- the fitted parts' sound (CarStats.tuneOf)
 	setRedline: (self: Engine, rpm: number) -> (),
 	pop: (self: Engine, strength: number) -> (), -- one pop or crackle of the ECU's map
+	-- (2026-11-09) heard from the driver's seat: softer and darker than outside
+	setCabin: (self: Engine, inside: boolean) -> (),
+	-- (2026-11-09) another player's car: duller the further away it is (studs)
+	setDistance: (self: Engine, studs: number) -> (),
 	destroy: (self: Engine) -> (),
 }
 
@@ -424,7 +429,8 @@ export type Engine = {
 -- ShiftPop on a hard upshift, Pops on lifting off; Crackle stands in for both pops when missing)
 -- (2026-11-03, the Bugattis: coast bands LowOff / MidOff / HighOff, the turbo whine loops Turbo and
 -- Turbo2, and BlowOff; with Config.ExhaustBands each band is pitched from its recorded rpm)
-local EXHAUST_PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops", "LowOff", "MidOff", "HighOff", "Turbo", "Turbo2", "BlowOff" }
+-- (2026-11-09, the Revuelto: EWhine, the electric motors' whine pulling away)
+local EXHAUST_PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops", "LowOff", "MidOff", "HighOff", "Turbo", "Turbo2", "BlowOff", "EWhine" }
 local function exhaustSet(carId: string?): { [string]: string }?
 	if not carId then
 		return nil
@@ -531,12 +537,38 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 
 	-- the car's own exhaust: idle / mid / high loops crossfaded by rpm, plus launch control, the
 	-- rev limiter and crackles on lift-off
-	local ex = exhaustSet(carId)
+	-- (2026-11-09) a SPORT / TOP trim plays its base car's set (a set of its own wins)
+	local soundId = carId
+	if carId and not exhaustSet(carId) then
+		local spec = Cars.get(carId) :: any
+		local baseId = spec and spec.BaseId
+		if baseId and exhaustSet(baseId) then
+			soundId = baseId
+		end
+	end
+	local ex = exhaustSet(soundId)
 	local layers: { [string]: Sound } = {}
 	-- recorded-rpm bands (Config.ExhaustBands): sorted by rpm, and the car's redline in rpm
-	local bandCfg = if carId then Config.ExhaustBands[carId] else nil
-	local carVol = if carId then (Config.ExhaustVolume[carId] or 1) else 1 -- (the SV: half, owner)
-	local startCfg = if carId then Config.ExhaustStart[carId] else nil -- a start-up clip's own timing
+	local bandCfg = if soundId then Config.ExhaustBands[soundId] else nil
+	local carVol = if soundId then (Config.ExhaustVolume[soundId] or 1) else 1 -- (the SV: half, owner)
+	local startCfg = if soundId then Config.ExhaustStart[soundId] else nil -- a start-up clip's own timing
+	local startGain = (startCfg and startCfg.gain) or 1
+	-- (2026-11-09, the supercars' sets by real engine) the car's own tone on top of its family's set, each
+	-- one-shot's loudness, the cabin (first person: softer, darker) and distance (another player's car:
+	-- duller far away)
+	local newSet = soundId ~= nil and Config.SupercarExhaust.Cars[soundId] == true
+	local tone = if soundId then Config.ExhaustTone[soundId] else nil
+	local tonePitch = (tone and tone.pitch) or 1
+	local useTone = ex ~= nil and (newSet or positional)
+	local toneEq: { EqualizerSoundEffect } = {}
+	local cabinWant, cabinK, distK = 0, 0, 0
+	local midShown, highShown = 1e9, 1e9
+	local shots = bandCfg and bandCfg.shots
+	local function shotK(kind: string): number
+		return (shots and shots[kind]) or 1
+	end
+	local whineSnd: Sound? = nil
+	local whineAt, whineCool = -1e9, 0
 	local startSnd: Sound? = nil
 	local startLive, startWaiting = false, false
 	local loopRpm = bandCfg and bandCfg.loopRpm
@@ -592,6 +624,24 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				end
 			end
 		end
+		if useTone then
+			local list: { Sound } = {}
+			for _, snd in layers do
+				table.insert(list, snd)
+			end
+			if startSnd then
+				table.insert(list, startSnd)
+			end
+			for _, snd in list do
+				local eq = effect("EqualizerSoundEffect", snd, { LowGain = (tone and tone.low) or 0, MidGain = 0, HighGain = 0 }) :: EqualizerSoundEffect
+				eq.Name = "ToneEq"
+				table.insert(toneEq, eq)
+				if tone and (tone.drive or 0) > 0 then
+					local fx = effect("DistortionSoundEffect", snd, { Level = math.clamp(tone.drive :: number, 0, 0.3) })
+					fx.Name = "ToneFx"
+				end
+			end
+		end
 	end
 	-- a one-shot from the car's set (pitch varied a little each time)
 	local function oneShot(id: string, volume: number, pitch: number?)
@@ -633,7 +683,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 			return
 		end
 		local vol = if kind == "burble" then 0.32 elseif kind == "pop" then 0.7 elseif kind == "antilag" then 0.95 else 0.8
-		vol *= strength * (1 + 0.12 * (mods.loud or 0)) * (if mods.decat then 1.15 else 1)
+		vol *= strength * (1 + 0.12 * (mods.loud or 0)) * (if mods.decat then 1.15 else 1) * shotK("Pops")
 		local snd = newSound(id, holder, vol * (1 + tunnelK) * carVol)
 		snd.PlaybackSpeed = (if kind == "burble" then 0.78 else 1) * (0.94 + math.random() * 0.12)
 		local level = 0.1 * (mods.loud or 0) + (if mods.decat then 0.1 else 0)
@@ -737,7 +787,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 					startLive = false
 					startSnd:Stop()
 				else
-					startSnd.Volume = 0.95 * carVol * math.clamp((startCfg.ends - sinceStart) / (startCfg.ends - startCfg.out), 0, 1)
+					startSnd.Volume = 0.95 * carVol * startGain * math.clamp((startCfg.ends - sinceStart) / (startCfg.ends - startCfg.out), 0, 1)
 				end
 			end
 			local fadeIn = if not ex.Start
@@ -784,7 +834,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				local snd = layers[k]
 				if snd then
 					snd.Volume = 0.95 * w * load * duck * fadeIn * power * (if layers.Low then (BAND_GAIN[k] or 1) else 1)
-					snd.PlaybackSpeed = pitch * ts
+					snd.PlaybackSpeed = pitch * ts * tonePitch
 				end
 			end
 			if #bandList > 0 then
@@ -828,7 +878,8 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 					local pitch = math.clamp(rpmNow / band.rpm, 0.45, if band.name == "Idle" then ((bandCfg and bandCfg.idleTop) or 1.45) else 1.8) * ts
 					if band.name == "Idle" and startCfg and startCfg.settleFrom then
 						-- just started: the idle takes over from the clip's revs and settles down
-						pitch *= 1 + (startCfg.settleFrom / band.rpm - 1) * math.clamp(1 - (sinceStart - startCfg.idleAt) / (startCfg.settle or 2), 0, 1)
+						-- (2026-11-09: it starts at the clip's own revs, then follows the engine's)
+						pitch += (startCfg.settleFrom / band.rpm * ts - pitch) * math.clamp(1 - (sinceStart - startCfg.idleAt) / (startCfg.settle or 2), 0, 1)
 					end
 					local main = layers[band.name]
 					local coast = layers[band.name .. "Off"]
@@ -841,11 +892,11 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 					elseif coast then
 						main.Volume = g * (0.15 + 0.85 * on)
 						coast.Volume = g * 0.9 * (1 - on)
-						coast.PlaybackSpeed = pitch
+						coast.PlaybackSpeed = pitch * tonePitch
 					else
 						main.Volume = g * (0.45 + 0.55 * on)
 					end
-					main.PlaybackSpeed = pitch * (if coast or band.name == "Idle" or on > 0.3 then 1 else 0.97)
+					main.PlaybackSpeed = pitch * tonePitch * (if coast or band.name == "Idle" or on > 0.3 then 1 else 0.97)
 				end
 				if coastCfg and math.abs((1 - on) - coastShown) > 0.02 then
 					coastShown = 1 - on
@@ -860,7 +911,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				boost += (target - boost) * (if target > boost then 0.035 else 0.14)
 				if layers.Turbo then
 					local whine = (bandCfg and bandCfg.whine) or 0.65
-					layers.Turbo.Volume = 0.6 * boost ^ 1.3 * power * fadeIn
+					layers.Turbo.Volume = 0.6 * ((bandCfg and bandCfg.turbo) or 1) * boost ^ 1.3 * power * fadeIn
 					layers.Turbo.PlaybackSpeed = whine * (0.55 + 0.45 * boost) * (0.8 + 0.3 * math.clamp(rpmNow / redlineRpm, 0, 1)) * ts
 				end
 				if layers.Turbo2 then
@@ -868,7 +919,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 					local seq = (bandCfg and bandCfg.seq) or 0
 					seqK += ((if seq > 0 and rpmNow > seq then 1 else 0) - seqK) * 0.05
 					local whine = (bandCfg and bandCfg.whine) or 0.65
-					layers.Turbo2.Volume = 0.45 * boost ^ 1.3 * seqK * power * fadeIn
+					layers.Turbo2.Volume = 0.45 * ((bandCfg and bandCfg.turbo) or 1) * boost ^ 1.3 * seqK * power * fadeIn
 					layers.Turbo2.PlaybackSpeed = whine * 1.14 * (0.55 + 0.45 * boost) * (0.8 + 0.3 * math.clamp(rpmNow / redlineRpm, 0, 1)) * ts
 				end
 				-- the blow-off: lifting off under boost lets the pressure out
@@ -877,7 +928,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 					boostAtHigh = boost
 				end
 				if ex and ex.BlowOff and running and throttle < 0.3 and os.clock() - highAt < 0.4 and not liftDone and boostAtHigh > 0.3 and bovCool <= 0 then
-					oneShot(ex.BlowOff, ((bandCfg and bandCfg.bov) or 1) * (0.45 + 0.65 * boostAtHigh))
+					oneShot(ex.BlowOff, ((bandCfg and bandCfg.bov) or 1) * shotK("BlowOff") * (0.45 + 0.65 * boostAtHigh))
 					bovCool = 0.9
 					boost *= 0.2
 				end
@@ -896,16 +947,18 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				set("High", wHigh, math.clamp(0.55 + r * 0.53, 0.85, 1.22))
 			end
 			if layers.Redline then
-				layers.Redline.Volume = if limiter then 0.95 * power else 0
-				layers.Redline.PlaybackSpeed = ts * (if loopRpm and loopRpm.Redline then math.clamp(r * redlineRpm / loopRpm.Redline, 0.9, 1.1) else 1)
+				layers.Redline.Volume = if limiter then 0.95 * power * ((bandCfg and bandCfg.gains and bandCfg.gains.Redline) or 1) else 0
+				layers.Redline.PlaybackSpeed = ts * tonePitch * (if loopRpm and loopRpm.Redline then math.clamp(r * redlineRpm / loopRpm.Redline, 0.9, 1.1) else 1)
 			end
 			if layers.Launch then
 				layers.Launch.Volume = if launching then 0.95 * power * fadeIn else 0
-				layers.Launch.PlaybackSpeed = ts * (if loopRpm and loopRpm.Launch then math.clamp(r * redlineRpm / loopRpm.Launch, 0.9, 1.1) else 1)
+				layers.Launch.PlaybackSpeed = ts * tonePitch * (if loopRpm and loopRpm.Launch then math.clamp(r * redlineRpm / loopRpm.Launch, 0.9, 1.1) else 1)
 			end
 			-- lift off at high revs: pops and crackles
 			if running and throttle < 0.3 and os.clock() - highAt < 0.4 and not liftDone and r > 0.45 then
-				crackle(0.85)
+				if not (bandCfg and (bandCfg.noPops or bandCfg.liftPops == false)) then
+					crackle(0.85 * shotK("Pops"))
+				end
 			end
 			if throttle < 0.3 then
 				liftDone = true
@@ -961,6 +1014,52 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				snd.Volume *= g
 			end
 		end
+		-- (2026-11-09) from the driver's seat the exhaust is softer and darker; another player's car gets
+		-- duller with distance (its volume already falls off with distance)
+		cabinK += (cabinWant - cabinK) * 0.15
+		if cabinK > 0.005 then
+			local c = 1 - 0.3 * cabinK
+			for _, snd in layers do
+				snd.Volume *= c
+			end
+		end
+		if useTone then
+			local mid = ((tone and tone.mid) or 0) - 2 * cabinK - 3 * distK
+			local high = ((tone and tone.high) or 0) - 7 * cabinK - 12 * distK
+			if math.abs(mid - midShown) > 0.15 or math.abs(high - highShown) > 0.15 then
+				midShown, highShown = mid, high
+				for _, eq in toneEq do
+					eq.MidGain = mid
+					eq.HighGain = high
+				end
+			end
+		end
+		-- (2026-11-09, the Revuelto) the electric motors' whine as it pulls away, fading as the speed builds
+		if ex and ex.EWhine then
+			whineCool = math.max(0, whineCool - 1 / 60)
+			if running and not whineSnd and whineCool <= 0 and speedFrac < 0.02 and throttle > 0.25 then
+				local snd = newSound(ex.EWhine, holder, 0)
+				snd.Name = "ExhaustEWhine"
+				if positional then
+					snd.RollOffMode = Enum.RollOffMode.InverseTapered
+					snd.RollOffMinDistance = 14
+					snd.RollOffMaxDistance = 300
+				end
+				snd:Play()
+				Debris:AddItem(snd, 4)
+				whineSnd, whineAt, whineCool = snd, os.clock(), 4
+			end
+			local w = whineSnd
+			if w then
+				if not w.Parent or os.clock() - whineAt > 2.8 then
+					whineSnd = nil
+				else
+					local k = math.clamp(speedFrac / 0.25, 0, 1)
+					w.Volume = 0.35 * shotK("EWhine") * (1 - k) * power * carVol * (1 - 0.3 * cabinK)
+					w.PlaybackSpeed = (0.75 + 0.9 * k) * ts
+				end
+			end
+		end
 		wind.PlaybackSpeed = (0.85 + speedFrac * 0.6) * ts
 		-- the driver's own car: wind rushes in from walking pace and roars at speed
 		wind.Volume = if positional then 0.55 * speedFrac ^ 1.8 else (if speedFrac > 0.02 then 0.12 + 1.0 * speedFrac ^ 1.3 else 0)
@@ -986,11 +1085,11 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				cutUntil = os.clock() + bandCfg.shiftCut
 			end
 			if ex and ex.Shift then
-				oneShot(ex.Shift, 0.8)
+				oneShot(ex.Shift, 0.8 * shotK("Shift"))
 			end
 			-- under boost the blow-off sighs on each upshift too (quieter than a lift-off)
 			if ex and ex.BlowOff and boost > 0.5 and bovCool <= 0 then
-				oneShot(ex.BlowOff, 0.4 + 0.3 * boost)
+				oneShot(ex.BlowOff, (0.4 + 0.3 * boost) * shotK("BlowOff"))
 				bovCool = 0.5
 				boost *= 0.6
 			end
@@ -1002,9 +1101,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				end
 				spoolK *= 0.5
 			end
-			if smoothRpm > 0.8 and math.random() < 0.6 and not (bandCfg and bandCfg.noPops) and not mods.pop then
+			if smoothRpm > 0.8 and math.random() < 0.6 and not (bandCfg and (bandCfg.noPops or bandCfg.shiftPops == false)) and not mods.pop then
 				if ex and (ex.ShiftPop or ex.Crackle) then
-					crackle(0.9, "ShiftPop")
+					crackle(0.9 * shotK("Pops"), "ShiftPop")
 				else
 					Audio.backfire(if positional then parent else nil)
 				end
@@ -1014,7 +1113,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 			-- downshift sound doesn't match the actual downshift")
 			local at = Config.ExhaustShotRpm[ex.Downshift]
 			local pitch = if at and rpmAfter then math.clamp(rpmAfter * redlineRpm / at, 0.7, 1.45) else nil
-			oneShot(ex.Downshift, 0.85, pitch)
+			oneShot(ex.Downshift, 0.85 * shotK("Downshift"), pitch)
 			downCool = 0.18
 		end
 	end
@@ -1026,7 +1125,7 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 	function self.crank(_)
 		startedAt = os.clock()
 		if startSnd then
-			startSnd.Volume = 0.95 * carVol
+			startSnd.Volume = 0.95 * carVol * startGain
 			startSnd.TimePosition = 0
 			startSnd:Play()
 			startLive, startWaiting = true, not startSnd.IsLoaded
@@ -1047,6 +1146,14 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 		tunnelWant = if inside then 1 else 0
 	end
 
+	function self.setCabin(_, inside: boolean)
+		cabinWant = if inside and newSet then 1 else 0
+	end
+
+	function self.setDistance(_, studs: number)
+		distK = math.clamp((studs - 40) / 360, 0, 1)
+	end
+
 	function self.destroy(_)
 		for _, s in { rumble, growl, wind, tyres } do
 			s:Destroy()
@@ -1059,6 +1166,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 		end
 		if spoolSnd then
 			spoolSnd:Destroy()
+		end
+		if whineSnd then
+			whineSnd:Destroy()
 		end
 	end
 

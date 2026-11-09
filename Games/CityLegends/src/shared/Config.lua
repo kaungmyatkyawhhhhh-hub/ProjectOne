@@ -825,9 +825,10 @@ Config.ExhaustVolume = { lambrini_lp750 = 0.5, lambrini_lp700 = 0.5 / 1.6 } :: {
 -- `out` to `ends` the clip fades away (touching the throttle jumps to `out`), `settleFrom` the rpm the
 -- clip ends on: the idle starts there and falls to its own rpm over `settle`. The LP700's clip: starter
 -- to 0.8 s (when the engine catches in Driving), flare 4,700 rpm, 2,800 by 1.3 s, 1,340 at its end
+-- (`gain`: the clip's loudness, 2026-11-09)
 Config.ExhaustStart = {
 	lambrini_lp700 = { idleAt = 1.9, fade = 0.5, out = 2.2, ends = 2.6, settleFrom = 1340, settle = 2.5 },
-} :: { [string]: { idleAt: number, fade: number, out: number, ends: number, settleFrom: number?, settle: number? } }
+} :: { [string]: { idleAt: number, fade: number, out: number, ends: number, settleFrom: number?, settle: number?, gain: number? } }
 
 -- the engine speed a one-shot was recorded at (by asset), so it's pitched to the revs it plays at: the
 -- SVJ's downshift blip settles at ~4,200 rpm (its firing note)
@@ -843,7 +844,11 @@ Config.ExhaustShotRpm = { ["rbxassetid://109515735710638"] = 4200 } :: { [string
 -- `loopRpm` the rpm the Launch and Redline loops were recorded at, `idleReach` / `idleTop` how far above
 -- its rpm the idle loop lasts (default 0.28) and the highest it's pitched (default 1.45), `noPops` no
 -- pops or bangs: none of the sounds and none of the exhaust flames that go with them (nitro keeps its own)
-Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number?, gain: number?, gains: { [string]: number }?, width: number?, reachDown: { [string]: number }?, coast: { mid: number, high: number }?, shiftCut: number?, loopRpm: { [string]: number }?, idleReach: number?, idleTop: number?, noPops: boolean? } }
+-- (2026-11-09) `gains.Redline` the limiter loop's loudness, `shots` each one-shot's loudness (Shift,
+-- Downshift, Pops, BlowOff, EWhine), `turbo` the turbo whine's loudness, `liftPops = false` no pops when
+-- you lift off (the car's own engine; a pop / crackle tune from the Part Shop still pops), `shiftPops =
+-- false` no bang or flame on a hard upshift (a smooth dual-clutch car)
+Config.ExhaustBands = {} :: { [string]: { bands: { [string]: number }, whine: number?, seq: number?, bov: number?, gain: number?, gains: { [string]: number }?, width: number?, reachDown: { [string]: number }?, coast: { mid: number, high: number }?, shiftCut: number?, loopRpm: { [string]: number }?, idleReach: number?, idleTop: number?, noPops: boolean?, shots: { [string]: number }?, turbo: number?, liftPops: boolean?, shiftPops: boolean? } }
 do
 	local chiron = { bands = { Idle = 950, Low = 3500, High = 6500 }, whine = 0.62, seq = 3800, bov = 1.0 }
 	local veyron = { bands = { Idle = 950, Low = 3500 }, whine = 0.7, bov = 1.0 }
@@ -869,6 +874,325 @@ do
 		noPops = true,
 	}
 end
+
+---------------------------------------------------------------------
+-- Supercar exhaust sounds by real engine (owner, 2026-11-09, Prompts/Realistic exhaust sounds for the
+-- supercars (real engines).md: "find their actual engine; for example the Ferrari 458 will be a
+-- flat-plane crank V8, naturally aspirated"). One sound set per engine family; each car on it gets small
+-- changes (`volume`, `tone`: `pitch`, EQ `low` / `mid` / `high` in dB, `drive` = rawness). The Bugattis and
+-- the ZV / ZVX / ZVX 63 keep their sounds (owner). A trim (SPORT / TOP) plays its base car's set.
+--
+-- Every id is public Creator Store audio (uploader in the comment; credits in City Legends.md). Each loop
+-- was measured in Studio (AudioPlayer:GetWaveformAsync): its engine speed from the spacing of its
+-- half-order lines (rpm / 120 Hz; checked on loops whose rpm is in their name: right to within 1%), its
+-- loudness (the `gains` level each loop to the same step from idle to redline) and its loop point (no
+-- click or jump in level). Clips that name a game, or look cut from one (on / off + rpm banks, "ext_on",
+-- "[31]"), were left out.
+--
+-- To put a car back on its old sound: Config.SupercarExhaust.Off.<car id> = true (the LP700-4 then plays
+-- the SV's loops again, the others the shared engine sound).
+-- (`Cars` is filled below: the cars now on these sets)
+Config.SupercarExhaust = { Enabled = true, Off = {} :: { [string]: boolean }, Cars = {} :: { [string]: boolean } }
+-- per-car tone on top of its set: `pitch`, EQ `low` / `mid` / `high` (dB), `drive` (0..0.3 distortion)
+Config.ExhaustTone = {} :: { [string]: { pitch: number?, low: number?, mid: number?, high: number?, drive: number? } }
+-- (in a function of its own: its many constants in the main chunk crashed Lune's Luau)
+local function supercarExhaust()
+	local function id(n: number): string
+		return "rbxassetid://" .. tostring(n)
+	end
+	local SVJ_POPS, SVJ_CRACKLE = Config.Sounds.SharedPops, Config.Sounds.SharedCrackle
+	local V12_BLIP = "rbxassetid://109515735710638" -- the SVJ's downshift blip (in the game since 2026-11-03)
+	local COAST = { mid = -3, high = -10 }
+	local FAMILY: { [string]: any } = {
+		-- Ferrari F136 V8, NA, flat-plane crank (458 4.5, F430 / California 4.3): high, sharp, to 9,000
+		V8_FLATPLANE = {
+			sounds = {
+				Start = id(117250121821594), -- "458 startup" (SuperJMTABO): catches at once, flare ~2,500, settles ~720
+				Idle = id(84053009150735), -- "458 idle" (xVlbez), 735 rpm
+				Low = id(133285489196557), -- "458 Rev A_01" (xVlbez), 3,025 rpm
+				Mid = id(100105615776941), -- "458 Rev B" (xVlbez), 5,090 rpm
+				High = id(131194279941747), -- "458 Rev C" (xVlbez), 9,060 rpm
+			},
+			bands = {
+				bands = { Idle = 735, Low = 3025, Mid = 5090, High = 9060 },
+				gains = { Idle = 2.65, Low = 1.0, Mid = 1.31, High = 1.36 },
+				width = 0.38, reachDown = { Low = 0.5 }, idleReach = 0.35, idleTop = 1.7,
+				coast = COAST, shiftCut = 0.05, liftPops = false, shiftPops = false,
+			},
+			start = { idleAt = 2.6, fade = 0.8, out = 3.0, ends = 4.2, settleFrom = 720, settle = 1.0, gain = 1.5 },
+		},
+		-- Ferrari F140 V12, 6.0 NA (599 GTO; the Enzo has the same engine family): a smooth, rising wail
+		V12_F140 = {
+			sounds = {
+				Start = id(126951297346788), -- "Ferrari 599 GTO startup" (Noobsttkill): catches at 1.35 s, ~1,400 at its end
+				Idle = id(132538972175033), -- "Ferrari Enzo Idle" (Tyudogg5), 1,240 rpm
+				Low = id(106444431622928), -- "Ferrari 599 GTB Revloop" (e92nic), 4,690 rpm
+				Mid = id(110907563356979), -- "599ex" (zonda_collector), 5,600 rpm
+				High = id(77826592795280), -- "Ferrari Enzo Revloop" (Tyudogg5), 6,850 rpm
+				Downshift = V12_BLIP,
+			},
+			bands = {
+				bands = { Idle = 1240, Low = 4690, Mid = 5600, High = 6850 },
+				gains = { Idle = 0.34, Low = 2.12, Mid = 0.47, High = 0.92 },
+				width = 0.32, -- (close bands: one recording at a time)
+				coast = COAST, shiftCut = 0.08, liftPops = false, shiftPops = false,
+				shots = { Downshift = 2.0 },
+			},
+			start = { idleAt = 4.4, fade = 0.8, out = 4.8, ends = 6.0, settleFrom = 1400, settle = 1.5, gain = 1.64 },
+		},
+		-- Lamborghini 6.5 V12, NA (Murcielago LP650-4 / LP670-4 SV): deep, raw, old-school
+		V12_MURCIELAGO = {
+			sounds = {
+				Start = id(120002975599821), -- "Lamborghini Murcielago Startup" (Tyudogg5)
+				Idle = id(132862605780028), -- "Lamborghini Murcielago Idle" (Tyudogg5), 1,185 rpm
+				Low = id(135017534787316), -- "Lamborghini Murcielago Revloop" (Tyudogg5), 3,740 rpm
+				Mid = id(95944505132247), -- "LAMBORGHINI MURCIELAGO REV 55" (alakatz), 5,500 rpm
+				High = id(71771238598620), -- "Lamborghini Murcielago Revloop" (Tyudogg5), 7,450 rpm
+				Downshift = V12_BLIP,
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 1185, Low = 3740, Mid = 5500, High = 7450 },
+				gains = { Idle = 0.29, Low = 0.79, Mid = 0.38, High = 0.45 },
+				coast = COAST, shiftCut = 0.12,
+				shots = { Downshift = 2.0, Pops = 1.3 },
+			},
+			start = { idleAt = 2.2, fade = 0.4, out = 2.4, ends = 2.74, settleFrom = 1530, settle = 2.0, gain = 0.66 },
+		},
+		-- Lamborghini L539 6.5 V12, NA (Aventador LP700-4): a screaming V12; the single-clutch ISR gearbox
+		-- cracks on every upshift
+		V12_AVENTADOR = {
+			sounds = {
+				Start = id(103478790721598), -- "Lamborghini Aventador Startup" (Tyudogg5): flare ~4,900, ~1,740 at its end
+				Idle = id(91209556236511), -- "Lamborghini Aventador Idle" (Tyudogg5), 850 rpm
+				Low = id(10006383812), -- "Aventador S Revloop fixed" (AmikkuHedgehog), 3,905 rpm
+				High = id(80757676040270), -- "Lamborghini Aventador Rev" (Tyudogg5), 7,880 rpm
+				Redline = id(137849905001581), -- "Limiter (Red) Aventador (1)" (KVERTH): the limiter, ~8,300
+				Shift = id(97354969724257), -- "Aventador SVJ Crackle1" (Adhamkhedrhuman): the ISR crack
+				Downshift = V12_BLIP,
+			},
+			bands = {
+				bands = { Idle = 850, Low = 3905, High = 7880 },
+				gains = { Idle = 0.62, Low = 0.43, High = 0.81, Redline = 0.69 },
+				width = 0.42, reachDown = { Low = 0.55 }, idleReach = 0.4, idleTop = 1.8,
+				loopRpm = { Redline = 8300 },
+				coast = COAST, shiftCut = 0.12,
+				-- (owner, 2026-11-05: no pops and bangs on the LP700 when you lift; the shift crack is the gearbox)
+				noPops = true,
+				shots = { Shift = 3.6, Downshift = 2.0 },
+			},
+			start = { idleAt = 4.4, fade = 0.6, out = 4.8, ends = 5.3, settleFrom = 1740, settle = 2.5, gain = 1.56 },
+		},
+		-- Lamborghini L545 6.5 V12 + 3 electric motors (Revuelto): V12 to 9,500, a soft electric whine pulling away
+		V12_REVUELTO = {
+			sounds = {
+				Start = id(80946715098566), -- "Revuelto Startup" (noobsttkillsounds), ~1,550 at its end
+				Idle = id(91209556236511), -- the Aventador's idle (same V12 family; no clean Revuelto idle loop)
+				Low = id(10006383812), -- "Aventador S Revloop fixed" (AmikkuHedgehog), 3,905 rpm
+				High = id(138122265243234), -- "Revuelto Rev" (Cotten_Hill), 7,970 rpm
+				Downshift = V12_BLIP,
+				EWhine = id(9116980190), -- "Motor Whine Electric Whirring Buzzing 8 (SFX)" (ProSoundEffects)
+			},
+			bands = {
+				bands = { Idle = 850, Low = 3905, High = 7970 },
+				gains = { Idle = 0.62, Low = 0.43, High = 0.40 },
+				width = 0.42, reachDown = { Low = 0.55 }, idleReach = 0.4, idleTop = 1.8,
+				coast = COAST, shiftCut = 0.05, shiftPops = false,
+				shots = { Downshift = 2.0, EWhine = 1.0 },
+			},
+			start = { idleAt = 3.0, fade = 0.5, out = 3.2, ends = 3.76, settleFrom = 1550, settle = 2.0, gain = 0.94 },
+		},
+		-- Lamborghini 5.2 V12 with carburettors (Countach 5000 QV): intake roar, lots of character
+		V12_COUNTACH = {
+			sounds = {
+				Start = id(88964621513263), -- "countach startup" (RSSUPER56), ~1,040 at its end
+				Idle = id(18326228444), -- "Countach_idle" (ProGamersCh2), 1,030 rpm
+				Low = id(135017534787316), -- the Murcielago's 3,740 rpm loop (the same Lamborghini V12 line)
+				High = id(82845556133822), -- "LAMBORGHINI_COUNTACH_REVLOOP_22" (Chxvrxlet), 7,720 rpm
+				Downshift = V12_BLIP,
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 1030, Low = 3740, High = 7720 },
+				gains = { Idle = 0.77, Low = 0.79, High = 3.22 },
+				width = 0.42, coast = COAST, shiftCut = 0.15,
+				shots = { Downshift = 1.6, Pops = 1.2 },
+			},
+			start = { idleAt = 3.3, fade = 0.6, out = 3.6, ends = 4.6, settleFrom = 1040, settle = 0.5, gain = 0.88 },
+		},
+		-- Lamborghini / Audi 5.2 V10, NA (Gallardo, Huracan, R8): a hard-edged howl
+		V10 = {
+			sounds = {
+				Start = id(120452275990108), -- "Lamborghini Huracan Startup" (Tyudogg5), ~1,470 at its end
+				Idle = id(87192192605296), -- "r8 idle" (TBWK128), 1,166 rpm
+				Low = id(967630175), -- "Huracan Rev" (imawsome220), 4,080 rpm
+				High = id(107508835832190), -- "2023 Lamborghini Huracan Tecnica_REDLINE" (w3xoq), 7,780 rpm
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 1166, Low = 4080, High = 7780 },
+				gains = { Idle = 0.53, Low = 0.39, High = 1.39 },
+				width = 0.36, reachDown = { Low = 0.5 },
+				coast = COAST, shiftCut = 0.06, shiftPops = false,
+			},
+			start = { idleAt = 2.2, fade = 0.5, out = 2.4, ends = 2.85, settleFrom = 1470, settle = 1.5, gain = 0.61 },
+		},
+		-- Toyota 1LR-GUE 4.8 V10, NA (LFA): the high, very fast F1-like scream
+		LFA = {
+			sounds = {
+				Start = id(113328555788876), -- "lfa startup" (HaruHado), ~1,150 at its end
+				Idle = id(105486944192315), -- "LFA Idle" (zonda_collector), 1,156 rpm
+				Low = id(6927392752), -- "LFA Exhaust" (Basic42), 3,760 rpm
+				Mid = id(6486544609), -- "Lexus LFA Revloop1" (Basic42), 7,990 rpm
+				High = id(6486438800), -- "Lexus V10" (Basic42), 9,470 rpm
+			},
+			bands = {
+				bands = { Idle = 1156, Low = 3760, Mid = 7990, High = 9470 },
+				gains = { Idle = 0.50, Low = 1.97, Mid = 0.45, High = 0.66 },
+				reachDown = { Low = 0.5 },
+				coast = COAST, shiftCut = 0.1, liftPops = false, shiftPops = false,
+			},
+			start = { idleAt = 3.6, fade = 0.6, out = 4.0, ends = 5.0, settleFrom = 1150, settle = 0.6, gain = 0.55 },
+		},
+		-- McLaren 3.8 twin-turbo V8, flat-plane (12C): a rasp with the turbos' whoosh and flutter. No clean
+		-- 12C loops: these are the 720S's (its 4.0 is the same engine grown)
+		V8_TWINTURBO = {
+			sounds = {
+				Start = id(136200211585476), -- "Startup 720S" (KVERTH), ~1,450 at its end
+				Idle = id(78621869530140), -- "Idle 720s" (KVERTH), 1,430 rpm
+				Low = id(102329538428291), -- "mclaren_720s_spider_middle" (ieu1713), 4,960 rpm
+				High = id(74484380782795), -- "RevA 720s" (KVERTH), 8,070 rpm
+				Turbo = Config.Sounds.SharedTurbo,
+				BlowOff = id(117842945197592), -- "sfx_super-car-turbo-flutter-01" (AmikkuHedgehog)
+				Downshift = id(114401892748128), -- "MCLARENV8DOWNSHIFT1" (YaBoyZenvo)
+			},
+			bands = {
+				bands = { Idle = 1430, Low = 4960, High = 8070 },
+				gains = { Idle = 0.47, Low = 0.39, High = 0.39 },
+				width = 0.42, whine = 0.55, bov = 0.8, turbo = 0.6,
+				coast = COAST, shiftCut = 0.06, liftPops = false, shiftPops = false,
+				shots = { Downshift = 0.85 },
+			},
+			start = { idleAt = 1.45, fade = 0.4, out = 1.6, ends = 2.03, settleFrom = 1450, settle = 0.3, gain = 1.04 },
+		},
+		-- Mercedes-AMG M159 6.2 V8, NA, cross-plane crank (SLS): deep muscle-car thunder, loud crackles
+		V8_CROSSPLANE = {
+			sounds = {
+				Start = id(122484115722819), -- "SLS start" (B0tzep), ~1,150 at its end
+				Idle = id(86966846628695), -- "Idle SLS" (B0tzep), 1,121 rpm
+				Low = id(82458196515450), -- "SLS Engine RPM3" (lontanyl), 3,260 rpm
+				High = id(124254451477176), -- "SLS Engine RPM10" (lontanyl), 5,415 rpm
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 1121, Low = 3260, High = 5415 },
+				gains = { Idle = 0.24, Low = 1.96, High = 2.90 },
+				coast = COAST, shiftCut = 0.08,
+				shots = { Pops = 1.6 },
+			},
+			start = { idleAt = 3.0, fade = 0.5, out = 3.3, ends = 4.0, settleFrom = 1150, settle = 0.5, gain = 0.81 },
+		},
+		-- Porsche 4.0 flat-6, NA (911 GT3): metallic, rising howl to 9,000, PDK blips on the way down
+		FLAT6 = {
+			sounds = {
+				Start = id(131868759155566), -- "Porsche 911 GT3 Startup" (Tyudogg5), ~1,300 at its end
+				Idle = id(90645713888895), -- "Idle GT3RS" (KVERTH), 1,302 rpm
+				Low = id(123035578761975), -- "Porsche 911 GT3 Rev" (Tyudogg5), 4,610 rpm
+				Mid = id(83330624942853), -- "Porsche 911 GT3 Rev" (Tyudogg5), 6,610 rpm
+				High = id(107579237097468), -- "Porsche 911 GT3 Revloop" (Tyudogg5), 7,780 rpm
+				Redline = id(91195272918788), -- "Porsche 911 GT3 Redline Rev-Limiter" (Tyudogg5), ~8,650
+				Downshift = id(17552549922), -- "downshift flat six redo" (Thirty3Works): the blip, settles ~5,150
+			},
+			bands = {
+				bands = { Idle = 1302, Low = 4610, Mid = 6610, High = 7780 },
+				gains = { Idle = 0.40, Low = 0.48, Mid = 0.67, High = 1.22, Redline = 0.82 },
+				loopRpm = { Redline = 8645 },
+				coast = COAST, shiftCut = 0.05, liftPops = false, shiftPops = false,
+				shots = { Downshift = 0.48 },
+			},
+			start = { idleAt = 2.6, fade = 0.6, out = 3.0, ends = 4.0, settleFrom = 1330, settle = 0.5, gain = 0.89 },
+		},
+	}
+	local GALLARDO = {
+		sounds = {
+			Start = id(104916533556412), -- "GallardoStartup" (YaBoyZenvo), ~1,490 at its end
+			Idle = id(118435710042398), -- "GallardoEngineIdle" (YaBoyZenvo), 1,030 rpm
+		},
+		bands = { bands = { Idle = 1030 }, gains = { Idle = 0.27 }, shiftCut = 0.12 },
+		start = { idleAt = 3.9, fade = 0.6, out = 4.2, ends = 4.98, settleFrom = 1490, settle = 2.0, gain = 0.55 },
+	}
+	local R8_START = {
+		sounds = { Start = id(94856442609554) }, -- "V10R8Startup" (Teslaprodriv), ~1,400 at its end
+		start = { idleAt = 3.6, fade = 0.5, out = 3.9, ends = 4.7, settleFrom = 1400, settle = 1.5, gain = 1.08 },
+	}
+	local F430_START = {
+		sounds = { Start = id(133124486022122) }, -- "F430ScudStart" (FreeIsaacbolarini), ~1,750 at its end
+		start = { idleAt = 2.9, fade = 0.6, out = 3.2, ends = 3.8, settleFrom = 1750, settle = 2.0, gain = 0.62 },
+	}
+	-- each car: its family, then its own changes (`with`: shared extra parts, `volume`, `tone`, `bands`)
+	local CARS: { [string]: any } = {
+		ferrara_458 = { family = "V8_FLATPLANE" },
+		ferrara_458spider = { family = "V8_FLATPLANE", volume = 1.05, tone = { high = 1 } },
+		ferrara_458speciale = { family = "V8_FLATPLANE", volume = 1.15, tone = { drive = 0.1, high = 2 } }, -- rawer
+		ferrara_f430 = { family = "V8_FLATPLANE", with = F430_START, tone = { high = 2 }, bands = { shiftCut = 0.1 } }, -- F1 gearbox
+		ferrara_california = { family = "V8_FLATPLANE", volume = 0.72, tone = { high = -3 }, bands = { coast = { mid = -5, high = -14 } } }, -- smoother, quieter
+		ferrara_599 = { family = "V12_F140" },
+		lambrini_lp640 = { family = "V12_MURCIELAGO" },
+		lambrini_lp670 = { family = "V12_MURCIELAGO", volume = 1.15, tone = { drive = 0.1, high = 1.5 } }, -- the SV: rawer
+		-- (owner, 2026-11-05: the LP700 quieter than the SV: about as loud as it was)
+		lambrini_lp700 = { family = "V12_AVENTADOR", volume = 0.47 },
+		lambrini_revuelto = { family = "V12_REVUELTO" },
+		lambrini_countach = { family = "V12_COUNTACH", tone = { low = 3, drive = 0.06 } }, -- the carburettors' roar
+		lambrini_lp570 = { family = "V10", with = GALLARDO, volume = 1.05, tone = { drive = 0.08, high = 1 } },
+		lambrini_lp560 = { family = "V10", with = GALLARDO, tone = { drive = 0.05 } },
+		lambrini_huracan = { family = "V10" },
+		lambrini_performante = { family = "V10", volume = 1.2, tone = { drive = 0.08, high = 1 }, bands = { shots = { Pops = 1.5 } } },
+		lambrini_sto = { family = "V10", volume = 1.25, tone = { drive = 0.1, high = 1.5 }, bands = { shots = { Pops = 1.6 } } },
+		lambrini_sterrato = { family = "V10", volume = 0.95, tone = { low = 1 } },
+		-- the Audis: a bit more muffled than the Lamborghinis (1st generation), the 2nd generation sharper
+		audy_r8 = { family = "V10", with = R8_START, volume = 0.9, tone = { high = -4 }, bands = { shiftCut = 0.15, shots = { Pops = 0.7 } } },
+		audy_r8_lw = { family = "V10", with = R8_START, volume = 0.95, tone = { high = -3 }, bands = { shiftCut = 0.12, shots = { Pops = 0.7 } } },
+		audy_r8_4s = { family = "V10", with = R8_START, tone = { high = 1.5 }, bands = { shots = { Pops = 0.8 } } },
+		audy_r8_4s_rwd = { family = "V10", with = R8_START, tone = { high = 1.5 }, bands = { shots = { Pops = 0.8 } } }, -- (not in the game yet)
+		lexis_lfa = { family = "LFA" },
+		lexis_lfa_circuit = { family = "LFA", volume = 1.1, tone = { high = 1 } },
+		mclaran_12c = { family = "V8_TWINTURBO" },
+		bentz_sls = { family = "V8_CROSSPLANE" },
+		porsha_gt3 = { family = "FLAT6" },
+	}
+	local PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops", "LowOff", "MidOff", "HighOff", "Turbo", "Turbo2", "BlowOff", "EWhine" }
+	local function merged(a: any, b: any): any
+		local out = table.clone(a or {})
+		for k, v in b or {} do
+			out[k] = if type(v) == "table" and type(out[k]) == "table" then merged(out[k], v) else v
+		end
+		return out
+	end
+	for carId, car in CARS do
+		if not Config.SupercarExhaust.Enabled or Config.SupercarExhaust.Off[carId] then
+			continue
+		end
+		local fam = FAMILY[car.family]
+		local with = car.with or {}
+		local sounds = merged(fam.sounds, with.sounds)
+		local bands = merged(merged(fam.bands, with.bands), car.bands)
+		for _, part in PARTS do
+			Config.Sounds["Exhaust_" .. carId .. "_" .. part] = sounds[part] -- (clears the old set's parts)
+		end
+		Config.ExhaustBands[carId] = bands
+		Config.ExhaustStart[carId] = merged(fam.start, with.start)
+		Config.ExhaustVolume[carId] = car.volume or 1
+		Config.ExhaustTone[carId] = car.tone
+		Config.SupercarExhaust.Cars[carId] = true
+	end
+	-- the downshift blips' engine speed (their pitch follows the gear they land in)
+	Config.ExhaustShotRpm["rbxassetid://17552549922"] = 5150
+end
+supercarExhaust()
 
 -- Radio stations (owner, 2026-10-30, from the research: Midnight Racing's stations by genre). The
 -- first plays Sounds.Music; the others are Roblox's licensed music library (DistroKid / APM).

@@ -187,18 +187,21 @@ local REDLINE_CAR: { [string]: number } = {
 	nisun_350z = 7.0, nisun_r34 = 8.0, nisun_gtr = 7.0, mazdo_rx7 = 8.0, mazdo_rx8 = 9.0,
 	bnw_m3_e92 = 8.3, bnw_m3_f80 = 7.3, bnw_m4_f82 = 7.3, bnw_m5_e60 = 8.25, bnw_m6_v10 = 8.25,
 	bnw_m5_f10 = 7.2, bnw_m5_f90 = 7.2, bnw_m8gc = 7.2, bnw_x6 = 6.5, bnw_x7 = 6.5, bnw_750li = 6.5,
-	bentz_190e = 6.5, bentz_e63s = 7.0, bentz_cla45 = 7.2, bentz_cls63s = 7.0, bentz_sls = 7.2,
+	bentz_190e = 6.5, bentz_e63s = 7.0, bentz_cla45 = 7.2, bentz_cls63s = 7.0, bentz_sls = 8.0,
 	bentz_sl65bs = 6.0, bentz_s65_w221 = 6.0, bentz_g63 = 6.5, brabos_g63 = 6.5, bentz_gt63s = 7.0,
 	dodger_challenger = 6.4, chevo_camaro = 6.5, chevo_c6 = 7.0, chevo_c7 = 6.6,
 	porsha_boxster = 7.8, porsha_gt3 = 9.0, porsha_panamera = 6.8,
-	ferrara_f430 = 8.5, ferrara_458 = 9.0, ferrara_599 = 8.4, ferrara_california = 7.5,
+	ferrara_f430 = 8.5, ferrara_458 = 9.0, ferrara_599 = 8.4, ferrara_california = 8.0,
 	audy_r8 = 8.7, audy_r8_lw = 8.7, audy_r8_4s = 8.7, mclaran_12c = 8.5, lexis_lfa = 9.0, lexis_lfa_circuit = 9.0, lexis_lc500 = 7.1,
-	lambrini_lp570 = 8.5, lambrini_lp560 = 8.0, lambrini_huracan = 8.0, lambrini_performante = 8.0, lambrini_sto = 8.0, lambrini_sterrato = 8.0, lambrini_revuelto = 9.5, lambrini_lp640 = 8.0, lambrini_lp700 = 8.5, lambrini_lp750 = 8.5, lambrini_svj = 8.7,
-	lambrini_svj63 = 8.7, lambrini_countach = 7.0, lambrini_urus = 6.8, lambrini_urusp = 6.8, lambrini_lp670 = 8.0, ferrara_458spider = 9.0, ferrara_458speciale = 9.0,
+	lambrini_lp570 = 8.5, lambrini_lp560 = 8.5, lambrini_huracan = 8.5, lambrini_performante = 8.5, lambrini_sto = 8.5, lambrini_sterrato = 8.5, lambrini_revuelto = 9.5, lambrini_lp640 = 8.0, lambrini_lp700 = 8.5, lambrini_lp750 = 8.5, lambrini_svj = 8.7,
+	lambrini_svj63 = 8.7, lambrini_countach = 7.3, lambrini_urus = 6.8, lambrini_urusp = 6.8, lambrini_lp670 = 8.0, ferrara_458spider = 9.0, ferrara_458speciale = 9.0,
 	astin_db9 = 7.0, astin_vantage = 7.3, astin_dbx = 6.5, bentlee_contgt = 6.5, bentlee_bentayga = 6.0,
 	rolls_wraith = 5.5, rolls_cullinan = 5.0, bugotti_veyron = 6.4, maseroti_levante = 6.5,
 	bugotti_chiron = 6.7, bugotti_chiron_pursport = 6.9, bugotti_chiron_supersport = 6.9,
 	bentz_a45s = 7.2, dearb_focus_rs = 6.8,
+	-- (2026-11-09, the supercars' real engines; was: SLS 7.2 = the plain SLS, California 7.5, LP560 / Huracans
+	-- 8.0, Countach 7.0) the SLS Black Series 8,000, California 8,000, Gallardo LP560-4 and Huracan 8,500,
+	-- Countach 5000 QV 7,300 (its power peaks at 7,000)
 }
 function CarStats.redline(id: string): number
 	local spec = Cars.get(id)
