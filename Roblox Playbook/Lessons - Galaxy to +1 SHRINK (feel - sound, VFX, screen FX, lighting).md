@@ -274,3 +274,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - every pop-up goes through the window manager (HUD steps back, Esc closes it);
   - run UIAudit on all 3 test devices before saying "the phone works".
 - **Tool:** never cut a UTF-8 string with `sub()` in a report (a cut through "·" made the Studio tool call hang). TextFits is only right a frame or two after a TextSize change.
+
+## A BUTTON FOR WHAT A HELD KEY CAN DO (9 Nov, owner on the JETPACK button: "they don't need a button, it should just be when the jetpack activates from holding jump")
+- **What felt bad:** a big JETPACK button with a fuel ring, on a phone screen that's already full, for a move kids already know (hold jump = fly higher).
+- **Cause:** I built "a new feature = a new button" instead of reusing the input kids already press.
+- **Fix:** hold jump for 0.3 s = the jetpack (a tap stays a normal jump). The fuel is a thin bar above the hotbar, shown only while it's in use.
+- **Rule (every game):** a movement extra (double jump, glide, jetpack, sprint) goes on the input kids already use (hold or double-tap jump, hold run), not a new button. Its meter shows only while it's in use, in the lower middle, and in the kit's bar style.

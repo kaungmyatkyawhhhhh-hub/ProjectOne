@@ -268,3 +268,13 @@ Not done (the sim's own idea, owner's call): a "CHASE!" arrow on the steal toast
 
 ## Switches ON (9 Nov, owner: "turn the switches on")
 `GameConfig.NextUpdate = { Creatures = true, PhoneMode = true, Jetpack = true, Heists = true }`. Play check: all 4 on, CREW button + JETPACK + creatures show, no errors (only the usual ConfigService "not found" lines). The update goes live with the owner's next publish (not 21 Nov).
+
+## Jetpack: no button, hold jump (9 Nov, owner: "they don't need a button, it should just be when the jetpack activates from holding jump and a fillbar will show the fuel in the lower middle above the shortcut buttons")
+- **The button and its fuel ring are gone.** Hold jump (the phone's jump button, Space, or gamepad A) for `Jetpack.HoldDelay` = 0.3 s and the jetpack takes over. A tap is still a normal jump. The held state is read from Roblox's PlayerModule controls (touch jump + keyboard).
+- **Fuel bar:** in the GALAXY LIT bar's style (dark plate, ink outline, blue gradient fill, shine, heavy text, the jetpack icon on its left).
+  - It sits in the lower middle, 6 px above the hotbar's top edge (measured).
+  - It shows only while the fuel isn't full, and hides while a window is open.
+  - The fill turns orange under 25%. The text reads "JETPACK", then "REFILLING", or "EMPTY · LAND TO REFILL".
+  - Sizes: 250x26 (x0.8 on phones; text 18, so ~14 px on an SE).
+- **Checked:** Space-hold flies on PC and SE; UIAudit on SE while flying is clean.
+- **Also fixed:** with 4 boosts on, the 4th bottom-left icon touched the hotbar on SE. Phones now use a 6 px gap between icons and 4 a row. The SE HUD is clean.
