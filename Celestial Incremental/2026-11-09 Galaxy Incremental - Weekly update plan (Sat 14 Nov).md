@@ -18,7 +18,7 @@ The first-30-seconds fix matters most, so it doesn't wait a week. Island stars, 
 | Growth plan: Starter Pack, Auto Upgrade, time skips, Essence packs, badges, trails, weekly goal, stuck helper, comeback, live Configs, code SPACEJUMP, What's New v2, music loader fix, Sector 2 door | [[2026-11-09 Galaxy Incremental - Growth plan built (in-game items)]] |
 | First 30 seconds fix + party (27 Nov), island stars, Great Star (25/75/150/300/500), LUMI pet | [[2026-11-09 Galaxy Incremental - First 30 seconds + dead-game features built]] |
 
-Before publishing: File > Save in Studio, StreamingIntegrityMode = PauseOutsideLoadedArea, title without [ALPHA], the STAR ISLAND badge id in GameConfig (owner making it 9 Nov).
+Before publishing: File > Save in Studio, StreamingIntegrityMode = PauseOutsideLoadedArea, title without [ALPHA]. (STAR ISLAND badge id is in GameConfig.)
 
 ## What goes in (the original plan)
 | part | what | source |

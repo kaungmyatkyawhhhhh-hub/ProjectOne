@@ -45,7 +45,7 @@ Prompts:
   - The owner gets a toast, and **+1% stardust per star today (max +10%)**.
   - The island's name tag shows "★ n" (all-time stars).
 - **TOP ISLANDS THIS WEEK:** an OrderedDataStore per week (Mon 00:00 UTC). It's the leaderboard wall's 2nd page: 12 s each with TOP SUPERNOVAS, skipped while empty.
-- **Badge** "STAR ISLAND" at 50 stars (id 0 until you create it; +3 Essence in game).
+- **Badge** "STAR ISLAND" at 50 stars (id 219812428263214; +3 Essence in game).
 
 ## 3. THE GREAT STAR (`GameConfig.GreatStar`)
 - **The count:**
@@ -85,12 +85,12 @@ Prompts:
 1. **Test on a new save:** gift at 1.5 s, pad 1 for 5, a comet at ~8 s with the arrow.
 2. **Test with 2 players:** star an island; check the TOP ISLANDS page; see each other's LUMI.
 3. ~~Tune the Great Star stages~~ done: 25 / 75 / 150 / 300 / 500 (below).
-4. STAR ISLAND badge: the owner is making it (9 Nov). Put its id in `GameConfig.Badges.StarIsland`.
+4. STAR ISLAND badge: created 9 Nov, id 219812428263214, in `GameConfig.Badges.StarIsland`.
 5. File > Save; **publish Sat 14 Nov** with everything else (the party starts by itself 27 Nov).
 
 ## Decisions (owner, 9 Nov)
 1. **Great Star stages = 25 / 75 / 150 / 300 / 500** (set in Studio's GameConfig). At ~25 DAU, 500 would never be reached and a goal nobody hits feels dead. Raise roughly x10 per x10 players (back to 500 / 1.5K / 3K / 6K / 10K at ~500 DAU). The night shift checks the weekly points on Mondays and suggests the next numbers.
 2. **Publish everything together on Sat 14 Nov** (after the owner's test): the first-30-seconds fix is the most important change and shouldn't wait a week. Island stars, LUMI and the Great Star arrive a week early; the party starts by itself on 27 Nov.
 3. **No plaza party board**: the PARTY chip + window already show the quests; a new board would need a map pass for little gain.
-4. **STAR ISLAND badge: the owner is making it now** (9 Nov). The +3 Essence reward already works without it; saves that earned it get the Roblox badge on their next join once the id is in GameConfig.
+4. **STAR ISLAND badge: created 9 Nov (id 219812428263214, in GameConfig).** The +3 Essence reward already works without it; saves that earned it get the Roblox badge on their next join once the id is in GameConfig.
 5. Checked: no Test switches are on in Workspace (safe to publish).
