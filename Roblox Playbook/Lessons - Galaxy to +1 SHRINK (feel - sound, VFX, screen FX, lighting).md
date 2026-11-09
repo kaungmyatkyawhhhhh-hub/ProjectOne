@@ -206,3 +206,11 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - the fit rule is only for a fixed-size window on a small screen;
   - all HUD chips use ONE style, copied from the HUD part the owner likes (here the LVL plate);
   - a 3D text bubble near the player is a fixed pixel size (offset), never studs.
+
+## BUTTONS vs ICONS on the HUD (9 Nov, owner: "simple like Pet Sim 99" + "boosts and rewards like buttons, players need to see them")
+- **What went wrong:** first every left item became the same small framed tile with a label (too compact: "kids won't bother reading it"); then everything was an icon, so the things to PRESS (rewards, boosts) got lost.
+- **Rule for SHRINK:**
+  - something a player must PRESS (rewards, boosts, offers, events) is a BUTTON in the hotbar's look, with its name always shown and one small state badge;
+  - something that's just INFO (active boosts) is a small plain icon, no frame, a label only for a timer, details on hover / tap;
+  - calm: no flashing or bouncing on the side; only a badge changes (impatient kid: one clear thing to tap, nothing nagging);
+  - make the size big enough for the longest name at 14 px, and never let labels spill into neighbours.

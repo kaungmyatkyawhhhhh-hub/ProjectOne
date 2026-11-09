@@ -198,3 +198,32 @@ Note: the stardust jumps in the test save between runs are AUTO-BUY (on in the s
 - PC, Play: 4 tiles show (x2.35, x2 PASS, VIP, GROUP). A real mouse hover shows the tooltip.
 - UIAudit on PC: no overlap or clipping. The small text sizes come from Studio's small window; the whole HUD shrinks the same way there.
 - **Phone audit NOT run yet:** Studio's Play start hung (stuck "start play", no dialog seen in the viewport). Run the SE / Android / 14 Pro check once Play starts again.
+
+# G. THE LEFT SIDE, FINAL SHAPE (9 Nov, owner, 4 rounds)
+Owner, in order:
+1. "Put the starter and the stuff like the bottom left icons too, and shrink all the icons a bit."
+2. "The icons are too big; like Pet Sim 99's, which don't disturb the player."
+3. "Simple like Pet Sim 99; right now it's too compact, kids won't bother reading it."
+4. "Boosts and rewards like BUTTONS on the left, not icons (players need to see them), but don't make it bother the impatient kid."
+
+**Now (from the top, left side):**
+- **Side buttons** (`Kit.sideButton`, the hotbar key's look): the dark diamond with a ring in its colour, the icon over it, its NAME always under it, and a small badge top-right for its state. Calm: no flashing or bouncing; only the badge changes.
+  - **PARTY** (badge "1d" / "23h"), **STARTER** ("45h"), **REWARDS** (the playtime gift: a green "FREE" badge when ready, otherwise the time to the next one), **BOOSTS** ("x2.3"; click / tap = the full BOOSTS list).
+  - PARTY / STARTER show only while they're on.
+- **Small plain icons** (`Kit.hudTile`, no frame: just the icon, Pet Sim style):
+  - first row: the potions you own ("x2"), INVITE FRIENDS, JOIN THE GROUP, ROBLOX PREMIUM. Each shows only while you can still get that boost; a click does it.
+  - second row: the **active boosts**. Only timed ones have a label ("2:47", "23h"); lasting ones (x2 PASS, VIP, GROUP, PREMIUM, friends, island stars) are just the icon.
+- **Hover (PC) / tap on a boost (phone)** = the tooltip: name, effect in green ("+25% stardust, +10% shards"), why / how long.
+- **Sizes:** icons 32 (PC) / 30 (phone); side buttons 76x70 / 70x62 (wide enough for "REWARDS" at 14 px).
+- **Placement:** PC: the bottom-left corner. Phone: under the LVL / GALAXY row (the thumbstick owns the bottom-left).
+- **Code:**
+  - Kit.hudChip now builds a side button (STARTER / PARTY / GIFT call it). Its `text` is a hidden full line; the badge shows its short form (`Kit.shortLabel`: "STARTER 45:46:02" → "45h", "READY!" → "FREE").
+  - The BOOSTS panel no longer has the phone INVITE / JOIN / GET cards (they're icons now).
+
+**Also:**
+- LUMI's bubble sits UNDER LUMI and is smaller on phones (220x26): above LUMI it sat on the counter.
+- The tooltip's text limits are lower on PC (screen px vs the HUD's scale), so long lines stay inside it.
+
+**Checked (Studio Play):** UIAudit CLEAN on SE, Android (360 tall) and PC. iPhone 14 Pro CLEAN on the version before the side buttons, not re-run. Hover tooltip checked with the real mouse.
+
+**Studio note:** my Play start hung twice ("start play hasn't finished yet"). It cleared once Studio was restarted and the owner pressed Play once.
