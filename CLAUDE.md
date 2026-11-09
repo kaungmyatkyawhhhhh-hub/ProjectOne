@@ -3,6 +3,7 @@
 This repo is my Obsidian vault. It syncs to my PC with the Obsidian Git plugin (branch `master`).
 
 - **Every session, before replying:** read `00-START-HERE.md`, then `Identity.md`, `Work.md`, `Preferences.md` and `Active-Projects.md`. Then read the CLAUDE.md / Quick Rules inside the game folder you're working on. Read any other note only if it's relevant.
+- **The BRAIN (every game):** before planning, building or judging any game work, read `Brain/00 BRAIN.md` and follow the method that fits. After any correction from me, add a Lessons entry. When I teach a new way of thinking (in chat or in `Brain/Training inbox.md`), file it as a method/lesson/gate the same day.
 - **Use what you find:**
   - Never ask who I am, what I do or what my businesses are.
   - If I mention something you don't know, check the vault before asking.
