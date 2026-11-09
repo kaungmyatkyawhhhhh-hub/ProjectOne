@@ -21,7 +21,8 @@ Train muscles, grow taller (Growth Spurts), Body Alters, trainers, gyms, Strongm
 - **6 Nov (Claude Code, Studio, not published):** alter skins 1-20 + the 6 skins, alter VFX and all 13 auras on the ChatGPT art (uploaded to Myanmar Builders Club, ids in `Config/ArtIds`; skins re-tiled so facets are hand-sized, gem facets, flat aura rings). Phones still get no alter particles (4 Nov rule). FPS needs a real phone check. See [[GYM ARC/Progress/2026-11-06 GYM ARC Alter skins, alter VFX and auras on the new art]].
 - **7 Nov (Claude Code, Studio, not published):** posing show / runway results only for the people on stage (compact card; others get a small right-column toast only when a real player wins; Settings "Posing Announcements"; judges' star cards hidden after the show). Out-of-stamina card fixed (recovering never started). See [[GYM ARC/Progress/2026-11-07 GYM ARC Posing show results quiet + stamina card fixed]].
 - **7 Nov (Claude Code, Studio, not published):** daily calendar: day 2 BEAST FORMULA, day 4 MONSTER MIX, day 7 TITAN SERUM; coins grow with total EXP, day 7 up to 25,000 (from 2B EXP). See [[GYM ARC/Progress/2026-11-07 GYM ARC Daily rewards - serums and EXP coins]].
-- **Last updated:** 2026-11-07
+- **9 Nov (Claude Code, read-only):** the ★84 player (andycolt12 "theGoated one", now ★86) checked: no exploit found in the code. Cause = the star snowball (star EXP has no cap after ★10, Alter 20 gives 2 stars, skip to 20). Saves not read (no access). Recommendation: keep his stars. See [[GYM ARC/Progress/2026-11-09 GYM ARC ★84 player investigated - no exploit, star snowball]].
+- **Last updated:** 2026-11-09
 
 ## SPEED ARC (Roblox running simulator): PAUSED (29 Oct)
 "+1 SPEED every step": run, smash walls for coins, the last wall = Go Pro to the next world, races every 3 min, shoes / coaches / trails.
