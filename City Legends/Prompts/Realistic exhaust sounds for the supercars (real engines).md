@@ -27,7 +27,7 @@ Sound each car **by its real engine** (all names here are reference only, never 
 | Precision Type 42 V10 / Lightweight (`audy_r8`, `audy_r8_lw`) | Audi R8 V10 / R8 GT (1st gen) | 5.2 **V10 NA** (same family as the Gallardo) | ~525 / 552 hp | 8,700 | V10 howl, a bit more muffled than the Lambo |
 | Precision 4S V10 (+ the RWD one) (`audy_r8_4s` and the new 4S RWD id) | Audi R8 V10 plus / GT RWD (2nd gen) | 5.2 **V10 NA** | ~602–611 hp | 8,700 | sharper V10 |
 | Enfurecido L147 Roadster / ZV (`lambrini_lp640`, `_lp670`) | Murciélago LP650-4 / LP670-4 SV | 6.5 **V12 NA** | ~631 / 661 hp | 8,000 | deep, raw old-school V12 |
-| Enfurecido LB834 / ZV / ZVX / ZVX 63 (`lambrini_lp700`, `_lp750`, `_svj`, `_svj63`) | Aventador LP700-4 / SV / SVJ / SVJ 63 | 6.5 **V12 NA** | 690–759 hp | 8,500 | screaming V12 with big shift cracks (single-clutch ISR gearbox: a hard bang on each shift) |
+| Enfurecido LB834 (`lambrini_lp700`) **only** | Aventador LP700-4 | 6.5 **V12 NA** | ~690 hp | 8,500 | screaming V12 with big shift cracks (single-clutch ISR gearbox: a hard bang on each shift) |
 | Enfurecido LB744 (`lambrini_revuelto`) | Revuelto | 6.5 **V12 NA + 3 electric motors** (hybrid) | ~1,001 hp | 9,500 | V12 scream to 9,500 plus a soft electric whine at low speed |
 | Enfurecido Classico 5000 (`lambrini_countach`) | Countach 5000 QV | 5.2 **V12 NA, carburettors** | ~449 hp | 7,000 | old-school V12 with intake roar, lots of character |
 | Speedmark P11 Spider (`mclaran_12c`) | McLaren 12C Spider | 3.8 **V8 twin-turbo, flat-plane** | ~616 hp | 8,500 | rasp with turbo whoosh / flutter, less melodic |
@@ -37,6 +37,7 @@ Sound each car **by its real engine** (all names here are reference only, never 
 | Velocité Noir Origine (+ trims) (`bugotti_veyron` ...) | Bugatti Veyron 16.4 / Super Sport / GS Vitesse | 8.0 **W16, quad-turbo** | 1,001–1,184 hp | ~6,400 | deep, heavy rumble with huge turbo whoosh and wastegate chuffs |
 | Velocité Noir Éclair / Pure / Super Sport (`bugotti_chiron`, `_pursport`, `_supersport`) | Bugatti Chiron / Pur Sport / Super Sport | 8.0 **W16, quad-turbo** | 1,479–1,578 hp | ~7,100 | like the Veyron, deeper and stronger |
 
+- **Aventador family (owner, 2026-11-09):** only the **LP700-4** (`lambrini_lp700`) gets a new sound. **Don't change** the ZV, ZVX or ZVX 63 (`lambrini_lp750`, `lambrini_svj`, `lambrini_svj63`): they keep their current sounds.
 - Check each line against a reliable source before using it (engine, power, redline), and fix any mistake.
 - Also give every car its **real redline and rev limiter**, real **power** and **gear count** in the driving data if they're off (and note it), so the sound and the revs match.
 - Add any other supercar / hypercar in the game later the same way.
