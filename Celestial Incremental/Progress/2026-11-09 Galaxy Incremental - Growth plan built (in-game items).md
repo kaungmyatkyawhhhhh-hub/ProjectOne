@@ -55,7 +55,24 @@ Plan: [[2026-11-09 Galaxy Incremental - Growth plan to 1k CCU (marketing, econom
 - Content depth (the next sector): a design task first.
 - Badges on the overhead tag: the plan says "shows on the island or tag". Only the toast + reward for now.
 
-## OWNER: Creator Hub to-do
+## Created in Creator Hub (9 Nov, Claude, at the owner's request), ids in GameConfig
+- **Pass:** AUTO UPGRADE 2075026506, 199 R$, on sale.
+- **Products:**
+
+| product | id | price |
+|---|---|---|
+| Starter Pack | 3729883086 | 49 |
+| +1 Hour | 3729883365 | 15 |
+| +4 Hours | 3729883410 | 39 |
+| +12 Hours | 3729883426 | 99 |
+| 5 Essence | 3729883449 | 29 |
+| 15 Essence | 3729883463 | 79 |
+| 45 Essence | 3729883472 | 199 |
+
+- **Managed pricing:** off on all (like Offline x2 and the other passes).
+- **No images yet:** they show Roblox's default picture. Add icons in Creator Hub (each item > edit) if you want.
+
+## OWNER: Creator Hub to-do (steps 1-2 below are DONE, see above)
 **1. Game pass** (Monetization > Passes), then put the id in GameConfig.Passes:
 
 | pass | price | GameConfig key |
