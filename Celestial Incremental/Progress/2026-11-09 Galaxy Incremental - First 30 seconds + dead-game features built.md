@@ -21,7 +21,7 @@ Prompts:
 | The 2nd Asteroid | The Asteroid's first +BODY costs **25** (was 50); later copies as before. `FirstSession.FirstCopy` |
 | Checked | FIRST LIGHT can be pressed at once (start XP 2 = its cost). NEXT shows the tutorial's buy, all under 10 s away in the sim. |
 
-# B. THE 4 DEAD-GAME FEATURES (target: Sat 21 Nov update)
+# B. THE 4 DEAD-GAME FEATURES (ship with the Sat 14 Nov update, owner 9 Nov)
 ## 1. Monthly PARTY (`GameConfig.Parties`)
 - **First party:** `Starfall2026`, "STARFALL PARTY", 27 Nov 12:00 UTC, 10 days. Add next month's party to the same table.
 - **Quests:** catch 15 comets, go Supernova 3 times, visit 3 islands (stand on another player's island). Counted from when the party starts for you.
@@ -52,7 +52,7 @@ Prompts:
   - Every Supernova in any server = 1 point.
   - Each server adds its points with **one UpdateAsync every 30 s** (DataStore `GalaxyGreatStar`, key `w<week>`). With nothing to add, it reads with GetAsync instead. That's about 2 requests a minute a server, far under the limits.
   - A closing server writes its last points.
-- **Stages:** 500 / 1,500 / 3,000 / 6,000 / 10,000 (**tune to the real player count**).
+- **Stages:** **25 / 75 / 150 / 300 / 500** (owner 9 Nov, for ~25 DAU; the night shift suggests new numbers every Monday).
 - **A new stage, in every server within 30 s:**
   - fireworks round the Core, a sound and a toast;
   - **x2 STARDUST for everyone online for 10 min**;
@@ -84,6 +84,13 @@ Prompts:
 ## Owner
 1. **Test on a new save:** gift at 1.5 s, pad 1 for 5, a comet at ~8 s with the arrow.
 2. **Test with 2 players:** star an island; check the TOP ISLANDS page; see each other's LUMI.
-3. **Tune** the Great Star stages to your player count before 21 Nov.
-4. **Optional:** create the STAR ISLAND badge.
-5. File > Save; publish when ready (the party starts by itself 27 Nov).
+3. ~~Tune the Great Star stages~~ done: 25 / 75 / 150 / 300 / 500 (below).
+4. STAR ISLAND badge: the owner is making it (9 Nov). Put its id in `GameConfig.Badges.StarIsland`.
+5. File > Save; **publish Sat 14 Nov** with everything else (the party starts by itself 27 Nov).
+
+## Decisions (owner, 9 Nov)
+1. **Great Star stages = 25 / 75 / 150 / 300 / 500** (set in Studio's GameConfig). At ~25 DAU, 500 would never be reached and a goal nobody hits feels dead. Raise roughly x10 per x10 players (back to 500 / 1.5K / 3K / 6K / 10K at ~500 DAU). The night shift checks the weekly points on Mondays and suggests the next numbers.
+2. **Publish everything together on Sat 14 Nov** (after the owner's test): the first-30-seconds fix is the most important change and shouldn't wait a week. Island stars, LUMI and the Great Star arrive a week early; the party starts by itself on 27 Nov.
+3. **No plaza party board**: the PARTY chip + window already show the quests; a new board would need a map pass for little gain.
+4. **STAR ISLAND badge: the owner is making it now** (9 Nov). The +3 Essence reward already works without it; saves that earned it get the Roblox badge on their next join once the id is in GameConfig.
+5. Checked: no Test switches are on in Workspace (safe to publish).

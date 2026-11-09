@@ -1,14 +1,26 @@
 ---
 date: 2026-11-09
 tags: [galaxy, update, plan, night-shift]
-status: draft for the owner
+status: all built in Studio 9 Nov; owner tests, publishes Sat 14 Nov
 ---
 # Galaxy Incremental: first weekly update, Sat 14 Nov (plan)
 
 Built only from what you already asked for (no new ideas). Status: [[2026-11-09 Galaxy Incremental - Night shift status (what is open)]].
 Weekly beat (from [[2026-11-07 Galaxy Incremental - Release + hype plan]]): update + clip + group shout + a code, every Saturday 21:30 MMT (15:00 UTC).
 
-## What goes in
+## Owner decision (9 Nov): publish EVERYTHING together on Sat 14 Nov
+The first-30-seconds fix matters most, so it doesn't wait a week. Island stars, LUMI and the Great Star arrive a week early; the party starts by itself on 27 Nov. No plaza party board (the PARTY chip + window show the quests).
+
+| part | built (Progress note) |
+|---|---|
+| Phone tap fix, windows fit phones, boards wheel-only | [[2026-11-08 Galaxy Incremental - Windows fit phone, boards wheel-only, tap fix]] |
+| 3-minute quit fix + SPACE MOVEMENT | [[2026-11-09 Galaxy Incremental - Fix the 3-minute quit + space movement]] |
+| Growth plan: Starter Pack, Auto Upgrade, time skips, Essence packs, badges, trails, weekly goal, stuck helper, comeback, live Configs, code SPACEJUMP, What's New v2, music loader fix, Sector 2 door | [[2026-11-09 Galaxy Incremental - Growth plan built (in-game items)]] |
+| First 30 seconds fix + party (27 Nov), island stars, Great Star (25/75/150/300/500), LUMI pet | [[2026-11-09 Galaxy Incremental - First 30 seconds + dead-game features built]] |
+
+Before publishing: File > Save in Studio, StreamingIntegrityMode = PauseOutsideLoadedArea, title without [ALPHA], the STAR ISLAND badge id in GameConfig (owner making it 9 Nov).
+
+## What goes in (the original plan)
 | part | what | source |
 |---|---|---|
 | **The new feature** | SPACE MOVEMENT: walk 24, floaty low-gravity jump, jump puff + landing ring | [[2026-11-09 Galaxy Incremental - Prompt - Space movement (speed + low-gravity jump)]] |
