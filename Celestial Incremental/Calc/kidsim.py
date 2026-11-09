@@ -196,6 +196,8 @@ def run_kid(P, rng, T=300, dt=0.25, log=False):
             g.tut += 1
             if not paid: g.sd += max(P['tut_pay_min'], g.income(t) * P['tut_pay_sec'])
             paid = True; reward(4, f'TUT STEP {g.tut}')
+            # (9 Nov, Sat 21 update A: LUMI's GIFT = a free Star Forge roll the moment the tutorial is done)
+            if P.get('gift_roll') and g.tut >= len(TUT): reward(P['gift_roll'], 'GIFT ROLL (creature)')
             if g.tut == 6 and P.get('comet_early') is None: next_comet = t + P['comet_first']
         # boredom
         opts_now = [o for o in g.options()]

@@ -228,3 +228,32 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 ## SIDE BUTTONS = THE MAIN BUTTON'S STYLE (9 Nov, owner: "make the left buttons like the supernova button style but in a different format")
 - **What the owner wanted:** the side buttons should look like the game's best button (SUPERNOVA), not a new look (hotbar diamonds with a name under them weren't it).
 - **Rule for SHRINK:** side / HUD action buttons reuse the main CTA button's parts (plate, lip, outline, heavy text + a state line) in their own compact shape, coloured by meaning (claim gold, buy green, info blue, event pink). Only the main CTA keeps the moving shine / glow.
+
+## UI FAMILIES THAT DON'T MATCH + COLOURS (9 Nov, owner screenshot of Galaxy's HUD: "the ui's dont match and some are really good, some are really bad"; also "UI, colors that dont match, game physics, and lighting")
+- **What the screenshot shows:** 7+ UI styles on one screen:
+  - **good:** REWARDS / BOOSTS (chunky glossy gradient buttons with a big icon + a state line), the stardust counter (navy slanted plate, gold edge, big number), the LUMI portrait (gold ring), the in-world BLACK HOLE / STAR FORGE plaques;
+  - **bad:** the tiny diamond tiles under BOOSTS (unreadable, a 3rd shape), the plain thin "EMBER BELT · GALAXY LIT 0%" pill, the floating "NEXT: ..." text with no plate, the orange IGNITION bar (a different colour language from the navy plates), the default-looking round chevron / red buttons on the LUMI panel, the tiny STEP 3/20 tag, the giant flat comic lightning arrow (a 4th art style, covers the corner), the hotbar's dark diamonds (another shape again);
+  - **colours:** navy, purple, orange, blue, gold, green and pink all at full strength with no shared palette, so nothing reads as one game; the Core's bloom/glare runs behind the top HUD.
+- **Cause:** the HUD was built piece by piece over ~10 prompts and art batches (HUD art, 9 weak UIs, side chips, LUMI panel, rank tag...). Each piece got its own look; "one UI kit per game" was a rule but never a FILE: no palette tokens, no fixed set of component shapes, no check. New pieces copied the nearest piece, not the best one.
+- **Rule for every game (MEGA BITE first):**
+  1. **Design the whole HUD once, before features:** one full-screen mockup on a phone frame (every counter, button, tile, the tutorial panel, a toast) → the owner approves it → only then build. New features add pieces FROM that mockup.
+  2. **Palette tokens in code** (`UIKit.Colors`): 8-10 named colours shared by UI AND world (signs, VFX, zone accents). Meaning colours (buy, claim, danger, locked, info) at ONE saturation/brightness. Nothing else allowed.
+  3. **Max 3 component families:** COUNTER (plate + icon + big number), BUTTON (the best button's parts: plate, lip, ink outline, big icon, heavy text + a state line), TILE (square icon tile for hotbar / abilities / small HUD items, always with a label or a number). Every new piece is one of the three; no new shapes.
+  4. **No floating text and no bare slabs:** every text sits on a kit plate.
+  5. **Guide arrows live in the world** (adorned to the target), never a giant flat arrow on the screen.
+  6. **A UIAudit script fails** any colour not in the tokens, any 4th shape, any text under 14 px, any plain-text label, any overlap, on 3 phone sizes.
+
+## PHYSICS (9 Nov, owner: "game physics" was one of Galaxy's bad things)
+- **What went wrong (known):** players fell through their island into the void on slow connections (teleport before streaming); the default Roblox walk/jump felt like any other game (the space movement prompt came after launch).
+- **Rule for every game:** movement is designed and tested like a feature, before content: a movement spec (speeds, acceleration, turn rate, jump/swim feel) in config, a feel pass on a phone in the first build, streaming-safe teleports (RequestStreamAroundAsync + PauseOutsideLoadedArea + a void/out-of-bounds rescue), no clipping through walls or floors, server checks on speed. Ask the owner what felt wrong when a physics complaint isn't specific.
+
+## LIGHTING (9 Nov, 2nd time: owner listed lighting again)
+- **Seen in the screenshot:** the floor is near-white and flat, the sky near-black, the Core's bloom/glare blows out the top of the screen behind the HUD, the character is a dark shape: too much contrast, no mid-tones, no shape on the ground.
+- **Rule (adds to the 7 Nov rule):** a lighting preset per zone in config, designed with the art style (key light direction, fill, Ambient ≥ ~110, a tinted shadow colour, Bloom threshold high so only real light sources glow); nothing bright sits behind the HUD; the ground has mid-tones (pattern, AO, colour variation), never a flat white slab; check on a phone at minimum AND maximum graphics with the HUD on.
+
+## STUDIO TESTS WRITE THE REAL SAVE (9 Nov, Sat 21 update A, found by Claude)
+- **What went wrong:** forced test pulls (a VOID core, a GOLDEN NEBULA WHALE x44 stardust) landed in the owner's real save. Studio Play with API access saves to the live DataStore (`GalaxySave1`). Removed with a cleanup switch and re-saved.
+- **Rule (every game):**
+  - any test that forces items, currency or rare results runs on a throwaway save (`TestFreshSave` = a new save that never saves);
+  - every game has that switch from day one;
+  - every counter that is global (serials, community goals) uses a separate `_Studio` store in Studio.
