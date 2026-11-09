@@ -214,3 +214,13 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - something that's just INFO (active boosts) is a small plain icon, no frame, a label only for a timer, details on hover / tap;
   - calm: no flashing or bouncing on the side; only a badge changes (impatient kid: one clear thing to tap, nothing nagging);
   - make the size big enough for the longest name at 14 px, and never let labels spill into neighbours.
+
+## QUALITY SCAN TELLS (9 Nov, owner: "scan the entire game ... the unappealing stuff and UIs, and fix them")
+- **What we found:** a 1-px bright line at every window's edge (backdrop strips on half pixels); STAR FORGE icons empty the first time it opens; flat and glossy icons mixed; plain-box toasts; a bare coloured banner slab.
+- **Rule for SHRINK:**
+  - backdrops / strips are placed on whole pixels (or one full-screen frame);
+  - preload every UI image at join;
+  - one icon style (pick one set; replace the odd ones);
+  - every pop-up and toast uses the kit plate, never a plain box;
+  - decor parts get a material + an emblem, never a bare coloured block;
+  - the left-side buttons are a vertical column; small icons sit on the hotbar-key diamond (owner).

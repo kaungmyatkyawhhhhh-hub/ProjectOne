@@ -227,3 +227,44 @@ Owner, in order:
 **Checked (Studio Play):** UIAudit CLEAN on SE, Android (360 tall) and PC. iPhone 14 Pro CLEAN on the version before the side buttons, not re-run. Hover tooltip checked with the real mouse.
 
 **Studio note:** my Play start hung twice ("start play hasn't finished yet"). It cleared once Studio was restarted and the owner pressed Play once.
+
+# H. QUALITY SCAN OF THE WHOLE GAME (9 Nov, owner: "scan the entire game, check for things in ur brain ... and fix them")
+Method: **Quality-nerd kid simulation** (by eye) + the K06 rules + the Lessons, plus automated checks.
+- Fonts in every gui.
+- Default text / emoji / Roblox's default grey.
+- VfxTextureAudit.
+- Lighting at runtime.
+- Screenshots of every window and of the world.
+
+**Already fine:**
+
+| check | result |
+|---|---|
+| Lighting in Play | Ambient 120 / Outdoor 140 (Brightness 2), within the K06 rule |
+| VFX textures | VfxTextureAudit CLEAN, 64 effects |
+| Text | no emoji, placeholder words or default-grey buttons; every Arial label is an empty click area |
+| Windows by eye | UPGRADES, TREE, DAILY, GUIDE, SETTINGS, GALAXY, STORE: designed, one kit |
+
+**Found and fixed:**
+
+| tell | cause | fix |
+|---|---|---|
+| A thin bright line right across the screen at the bottom of every open window | the 4 dark backdrop strips around a window met on half pixels | WindowManager snaps them to whole pixels |
+| STAR FORGE opened with 3 of 6 core icons empty (equipped cards and 3 BOOK rows blank) | the gas giant / comet / essence icons only load on first sight, slow | `Kit.preloadImages()`: every UI icon loads in the background at join |
+| Two icon styles side by side (flat Blender comet / essence next to the glossy UI icons) | old icons kept | UIAssets comet + essence → the glossy ArtIds.uiIcon ones (old ids in a comment). The gas giant stays flat (it matches the 3D planets) |
+| Toasts ("+2.4T STARDUST") were a plain dark box with a thin outline | first version never redone | kit plate like the server banner: shadow, gradient, ink outline, coloured edge, shine, heavy outlined text |
+| "YOUR BANNER" on the island was a bare coloured slab | a stand-in cloth | Fabric material + the gold star emblem on both sides (GalaxyMapService) |
+
+**Owner during the scan:** "put the left side buttons vertically and the icons have some background like the shortcut buttons":
+- the side buttons are one vertical column;
+- every small icon sits on a small hotbar-key diamond (dark, ink outline, ring in its colour);
+- on phones the icons sit right of the button column, since 4 buttons + 2 icon rows are taller than a phone.
+
+UIAudit CLEAN on SE and PC.
+
+**Left as is (small, or the owner's call):**
+- 2 display fonts in the world (LuckiestGuy name plates / leaderboard, FredokaOne board titles) next to Montserrat in the UI.
+- GALAXY window: the left panel is a bit empty.
+- DAILY quests show the count twice (bar + button).
+- The FRIENDS / GROUP / PREMIUM icons are the owner's art diamonds, so on the new diamond they're a diamond in a diamond.
+- Not re-checked after these fixes: Android / 14 Pro phone sizes.
