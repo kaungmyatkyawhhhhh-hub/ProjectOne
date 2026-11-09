@@ -180,3 +180,21 @@ Note: the stardust jumps in the test save between runs are AUTO-BUY (on in the s
 **Audit (SE):** HUD, BOOSTS panel, STORE top and bottom: all CLEAN. Studio is clean: no Workspace test attributes, replication lag 0.
 
 **Not changed:** STATS (560x620) is the other tall window. On a normal PC screen it fits at full size; only a small window shrinks it a little.
+
+# F. BOOST TILES, LIKE PET SIM 99 (9 Nov, owner: "boosts bottom left with little icons, hover shows the effect like GROUP +23%")
+**Built (GalaxyPotions):**
+- The BOOSTS chip became a **row of small boost tiles**: the last row of the left column.
+  - **PC:** the column now ends near the bottom-left corner (was 80% down).
+  - **Phones:** the column's end, under the chips (the thumbstick owns the bottom-left corner).
+- **Each tile:** the hotbar's dark rounded plate, a rim in the boost's colour, its icon, and under it the **time left** ("4:59", "1h05") or its **value** ("+10%"). Up to 6 a row, 2 rows.
+- **The first tile is the TOTAL** ("x4.35"). Click / tap it = the full BOOSTS list (the panel from section D, with the INVITE / JOIN / GET cards on phones).
+- **Tooltip:** hover (PC), or tap (phones, 3 s), shows a plate above the tile:
+  - the name ("GROUP");
+  - the effect in green ("+10% stardust"; VIP "+25% stardust, +10% shards"; x2 COMETS "x2 comets");
+  - why / how long ("P&L Studios XP", "4:59 left", "forever").
+- **Also:** LUMI's bubble text was invisible (the plate's gradient darkened the text too). The plate is now its own frame under the text.
+
+**Checked:**
+- PC, Play: 4 tiles show (x2.35, x2 PASS, VIP, GROUP). A real mouse hover shows the tooltip.
+- UIAudit on PC: no overlap or clipping. The small text sizes come from Studio's small window; the whole HUD shrinks the same way there.
+- **Phone audit NOT run yet:** Studio's Play start hung (stuck "start play", no dialog seen in the viewport). Run the SE / Android / 14 Pro check once Play starts again.
