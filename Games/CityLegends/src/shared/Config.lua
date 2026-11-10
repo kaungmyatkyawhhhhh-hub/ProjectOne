@@ -1147,6 +1147,133 @@ local function supercarExhaust()
 			},
 			start = { idleAt = 2.6, fade = 0.6, out = 3.0, ends = 4.0, settleFrom = 1330, settle = 0.5, gain = 0.89 },
 		},
+		-- (owner, 2026-11-10: "don't forget to add exhaust sounds for them if they don't have": the six
+		-- imports of Prompts/Finish the 7 waiting imports that had no set; found, measured and levelled the
+		-- same way as the sets above. Not heard by ear.)
+		-- BMW S85 5.0 V10, NA (E60 M5): odd-firing, so a strong 2.5 order under the 5th; to 8,250
+		V10_S85 = {
+			sounds = {
+				Start = id(92477496018635), -- "e60 m5 start" (313Dday): catches at 1.05 s, ~930 at its end
+				Idle = id(91710929912172), -- "e60_m5_exh_idle" (imziIo), 905 rpm
+				Low = id(81767984377994), -- "RevB & RelB M5 E60 New" (KVERTH), 5,617 rpm
+				High = id(72998982295293), -- "RevA & RelA M5 E60 New" (KVERTH), 8,287 rpm
+			},
+			bands = {
+				bands = { Idle = 905, Low = 5617, High = 8287 },
+				gains = { Idle = 0.34, Low = 0.43, High = 0.57 },
+				-- (nothing is recorded between 905 and 5,617 rpm: Low reaches down and the idle reaches up)
+				width = 0.42, reachDown = { Low = 0.6 }, idleReach = 0.45, idleTop = 2.2,
+				coast = COAST, shiftCut = 0.12, liftPops = false, shiftPops = false, -- (the SMG's cut)
+			},
+			start = { idleAt = 1.7, fade = 0.5, out = 2.0, ends = 2.5, settleFrom = 930, settle = 0.5, gain = 0.77 },
+		},
+		-- BMW S65 4.0 / 4.4 V8, NA, cross-plane (E92 M3 / GTS): to 8,300
+		V8_S65 = {
+			sounds = {
+				Start = id(18527193586), -- "M3 E92 STRAIGHTPIPE IGNITION" (r3_vl): catches at 0.75 s, ~1,180 at its end
+				Idle = id(73671901945692), -- "M3 E92 idle crossplaned" (metius311), 1,430 rpm
+				Low = id(100211620676087), -- "RevB E92 Gintani" (omega123058), 5,239 rpm
+				High = id(123715831140370), -- "RevA and RelA E92 Gintani" (omega123058), 8,109 rpm
+			},
+			bands = {
+				-- (tried and dropped: metius311's 2,019 rpm loop 111331460009411 as a band right above the idle:
+				-- coasting down through 1,700 rpm the note went 2 times quieter between the two)
+				bands = { Idle = 1430, Low = 5239, High = 8109 },
+				gains = { Idle = 0.78, Low = 0.74, High = 0.61 },
+				reachDown = { Low = 0.5 },
+				coast = COAST, shiftCut = 0.05, liftPops = false, shiftPops = false,
+			},
+			start = { idleAt = 3.3, fade = 0.5, out = 3.6, ends = 4.3, settleFrom = 1180, settle = 1.0, gain = 0.81 },
+		},
+		-- BMW S55 3.0 twin-turbo straight-6 (F82 M4): firing at the 3rd order with the 1.5 / 4.5 of its two
+		-- turbos; whine, a blow-off on the lift, a few burbles
+		I6_TWINTURBO = {
+			sounds = {
+				Start = id(94137111764818), -- "S55Startup" (YaBoyZenvo), ~1,210 at its end
+				Idle = id(81564166436366), -- "S55 idle crossfade" (metius311), 1,190 rpm
+				Low = id(111740167050459), -- "s55.low" (ObIiveracy), 4,101 rpm
+				Mid = id(85381791243117), -- "RevB S55" (KVERTH), 5,773 rpm
+				High = id(127910564907665), -- "RevA S55" (KVERTH), 7,129 rpm
+				Redline = id(92088361930636), -- "Red S55" (KVERTH): the limiter, ~7,430
+				Turbo = Config.Sounds.SharedTurbo,
+				BlowOff = id(108432076069136), -- "turbo bov s58" (RedfieldBSAA): the S55's successor
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 1190, Low = 4101, Mid = 5773, High = 7129 },
+				gains = { Idle = 1.10, Low = 0.39, Mid = 0.42, High = 0.48, Redline = 0.61 },
+				loopRpm = { Redline = 7432 },
+				reachDown = { Low = 0.5 }, whine = 0.55, bov = 1.1, turbo = 0.6,
+				coast = COAST, shiftCut = 0.05, shiftPops = false,
+				shots = { Pops = 0.7 },
+			},
+			start = { idleAt = 1.5, fade = 0.4, out = 1.8, ends = 2.38, settleFrom = 1210, settle = 0.5, gain = 0.86 },
+		},
+		-- BMW S63 4.4 twin-turbo V8, cross-plane, turbos in the V (F90 M5 / M5 CS): a strong 2nd order
+		V8_S63 = {
+			sounds = {
+				Start = id(103612899870303), -- "Startup M5" (KVERTH): catches at 0.6 s, ~1,460 at its end
+				Idle = id(92369296738404), -- "F90CSIDLE2" (Rezixtxc), 900 rpm
+				Low = id(86560702684802), -- "F90CSMID_012" (Rezixtxc), 4,602 rpm
+				High = id(123277157456191), -- "F90CSHIGH_012" (Rezixtxc), 6,402 rpm
+				Redline = id(112552469972463), -- "F90CSLIMITER_012" (Rezixtxc): the limiter, ~6,610
+				Turbo = Config.Sounds.SharedTurbo,
+				BlowOff = id(108749717618927), -- "TURBO FLUTTER M5 F90" (ThisIsGrandee)
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 900, Low = 4602, High = 6402 },
+				gains = { Idle = 0.83, Low = 0.57, High = 0.58, Redline = 1.43 },
+				loopRpm = { Redline = 6608 },
+				width = 0.42, reachDown = { Low = 0.55 }, idleReach = 0.4, idleTop = 1.8,
+				whine = 0.55, bov = 1.1, turbo = 0.6,
+				coast = COAST, shiftCut = 0.08, shiftPops = false,
+				shots = { Pops = 0.7 },
+			},
+			start = { idleAt = 1.2, fade = 0.5, out = 1.5, ends = 2.4, settleFrom = 1460, settle = 1.5, gain = 0.67 },
+		},
+		-- VW group 4.0 twin-turbo V8 (Bentayga V8). No clean Bentayga V8 loops (the "bentayga" idle and
+		-- start-up in the store are the W12): these are an Audi RS7's, the same engine, their rpm given by
+		-- the uploader and measured the same
+		V8_VW40 = {
+			sounds = {
+				Start = id(114174944994309), -- "Audi RS7 MNSRY Startup" (FinanceTrend): catches at 1.05 s, ~1,470 at its end
+				Idle = id(100620796837132), -- "Audi RS7 MNSRY Idle" (FinanceTrend), ~1,050 rpm
+				Low = id(107993163342852), -- "Audi RS7 MNSRY RevA" (FinanceTrend), 2,999 rpm
+				High = id(135208328060016), -- "Audi RS7 MNSRY RevB" (FinanceTrend), 5,494 rpm
+				Redline = id(105083828781421), -- "Audi RS7 MNSRY Redline" (FinanceTrend): the limiter, 6,994
+				Turbo = Config.Sounds.SharedTurbo,
+			},
+			bands = {
+				bands = { Idle = 1050, Low = 2999, High = 5494 },
+				gains = { Idle = 0.25, Low = 0.41, High = 0.56, Redline = 0.64 },
+				loopRpm = { Redline = 6994 },
+				width = 0.42, reachDown = { Low = 0.5 }, whine = 0.5, turbo = 0.3,
+				coast = COAST, shiftCut = 0.1, liftPops = false, shiftPops = false,
+			},
+			start = { idleAt = 2.4, fade = 0.6, out = 2.8, ends = 3.9, settleFrom = 1470, settle = 1.5, gain = 0.96 },
+		},
+		-- Nissan VR38DETT 3.8 twin-turbo V6 (R35 GT-R): firing at the 3rd order, the turbos' whoosh and flutter
+		V6_TWINTURBO = {
+			sounds = {
+				Start = id(8393134777), -- "Nissan GTR R35 (VR38DETT) Startup" (EfiniRX): catches at 0.75 s, ~1,290 at its end
+				Idle = id(119747324235535), -- "nissan gtr idle" (jeemuzujamin), 1,255 rpm
+				Low = id(86018842069517), -- "r35 low rev" (imkn32), 3,320 rpm
+				Mid = id(130132947354022), -- "nissan gtr high" (jeemuzujamin), 5,862 rpm
+				High = id(106611475215254), -- "GTR R35" (vamytran78965), 6,907 rpm
+				Turbo = Config.Sounds.SharedTurbo,
+				BlowOff = id(130283408353912), -- "VR38 Pop Off Flutter" (cezuuya)
+			},
+			bands = {
+				bands = { Idle = 1255, Low = 3320, Mid = 5862, High = 6907 },
+				gains = { Idle = 0.48, Low = 0.69, Mid = 0.74, High = 0.57 },
+				reachDown = { Low = 0.5 }, whine = 0.6, bov = 0.5, turbo = 0.7,
+				coast = COAST, shiftCut = 0.06, liftPops = false, shiftPops = false,
+			},
+			start = { idleAt = 1.9, fade = 0.5, out = 2.2, ends = 2.9, settleFrom = 1290, settle = 0.5, gain = 1.2 },
+		},
 	}
 	local GALLARDO = {
 		sounds = {
@@ -1194,6 +1321,13 @@ local function supercarExhaust()
 		mclaran_12c = { family = "V8_TWINTURBO" },
 		bentz_sls = { family = "V8_CROSSPLANE" },
 		porsha_gt3 = { family = "FLAT6" },
+		-- (2026-11-10) the imports that had no set
+		bnw_m5_e60 = { family = "V10_S85" },
+		bnw_m3_e92 = { family = "V8_S65" },
+		bnw_m4_f82 = { family = "I6_TWINTURBO" },
+		bnw_m5_f90 = { family = "V8_S63" },
+		bentlee_bentayga = { family = "V8_VW40", volume = 0.8, tone = { high = -4 } }, -- quieter and softer than the tuned RS7
+		nisun_gtr = { family = "V6_TWINTURBO" },
 	}
 	local PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops", "LowOff", "MidOff", "HighOff", "Turbo", "Turbo2", "BlowOff", "EWhine" }
 	local function merged(a: any, b: any): any

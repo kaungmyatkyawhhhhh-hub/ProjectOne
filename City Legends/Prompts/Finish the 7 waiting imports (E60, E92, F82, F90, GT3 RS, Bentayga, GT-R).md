@@ -55,7 +55,7 @@ For each of cars 1–5 (and 7), render the cluster close up (and the steering wh
 ### Exhaust sounds (owner, 2026-11-10: "don't forget to add exhaust sounds for them if they don't have")
 - Each of the 7 gets its real-engine exhaust set (`Config.lua`, "Supercar exhaust sounds", the `CARS` table), the same way as the supercars, if it has none yet.
 - State on 2026-11-10: only `porsha_gt3` has one (FLAT6). Missing: `bnw_m5_e60` (V10), `bnw_m3_e92` (V8), `bnw_m4_f82` (twin-turbo straight-6), `bnw_m5_f90` (twin-turbo V8), `bentlee_bentayga` (twin-turbo V8), `nisun_gtr` (twin-turbo V6).
-- Done as one job after the GT-R is in (it edits `Config.lua` too).
+- **Done 2026-11-10:** all six have their set now (`V10_S85`, `V8_S65`, `I6_TWINTURBO`, `V8_S63`, `V8_VW40` = an RS7's loops for the Bentayga, `V6_TWINTURBO`). Notes: section "Exhaust sounds for the 7 imports" in `City Legends.md`. Not heard by ear: owner to listen.
 
 ## No errors
 - No console errors or warnings, no physics glitches, no visual errors. If something can't be done cleanly, **leave it out** (or keep that car on its old model) and write it at the top of the notes.
