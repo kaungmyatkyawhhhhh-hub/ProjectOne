@@ -116,7 +116,7 @@ local Data: { [string]: Phys } = {
 	-- Mercedes-AMG GT 63 S 4MATIC+ 4-Door Coupe (X290, 4.0 V8 biturbo, 9-speed MCT)
 	bentz_gt63s = { front = 0.56, drive = "AWD", rear = 0.65, gears = 9, box = "auto", shift = 0.15, tyreF = 265, tyreR = 295, aspectF = 35, aspectR = 30, rimF = 21, rimR = 21, tyre = "sport", brakes = "drilled", pistons = 6, caliper = "red", lugs = 5, stop = 34, z60 = 3.1, top = 196, hp = 630, nm = 900, redline = 7, cg = 0.5, downforce = 0 },
 	-- Nissan GT-R (R35, 2017+, 3.8 V6 twin-turbo, 6-speed DCT)
-	nisun_gtr = { front = 0.54, drive = "AWD", rear = 0.75, gears = 6, box = "dct", shift = 0.15, tyreF = 255, tyreR = 285, aspectF = 40, aspectR = 35, rimF = 20, rimR = 20, tyre = "sport", brakes = "drilled", pistons = 6, caliper = "grey", lugs = 5, stop = 33, z60 = 2.9, top = 196, hp = 565, nm = 633, redline = 7.1, cg = 0.48, downforce = 20 },
+	nisun_gtr = { front = 0.53, drive = "AWD", rear = 0.75, gears = 6, box = "dct", shift = 0.15, tyreF = 255, tyreR = 285, aspectF = 40, aspectR = 35, rimF = 20, rimR = 20, tyre = "sport", brakes = "drilled", pistons = 6, caliper = "gold", lugs = 5, stop = 34, z60 = 2.9, top = 196, hp = 545, nm = 628, redline = 7.1, cg = 0.48, downforce = 20 },
 	-- Aston Martin DB9 GT (2016, 6.0 V12, 6-speed Touchtronic II auto)
 	astin_db9 = { front = 0.51, drive = "RWD", gears = 6, box = "auto", shift = 0.4, tyreF = 245, tyreR = 295, aspectF = 35, aspectR = 30, rimF = 20, rimR = 20, tyre = "sport", brakes = "ceramic", pistons = 6, caliper = "black", lugs = 5, stop = 34, z60 = 4.4, top = 183, hp = 540, nm = 620, redline = 6.8, cg = 0.46, downforce = 0 },
 	-- Aston Martin V12 Vantage S (2014, 6.0 V12, 7-speed Sportshift III)

@@ -1839,3 +1839,179 @@ def bentayga(Spec, needle_sprite, add_needle, glyph, solid_gear):
     sp.readout("du", 888, 766, "l", 2, "distUnit", WHT)
     solid_gear(sp, NUMB, 30, WHT, 982, 762, stroke=0.1)
     return sp
+
+
+def gtr(Spec, needle_sprite, add_needle, glyph, solid_gear, nismo=False, ref=None, box=(0, 0, 694, 321)):
+    """the Horizon R35 (2013 model's own cluster); nismo: the Track Edition (red rev counter band, grey rings).
+    box: the panel in the reference picture's pixels (the 2017 model's cluster quad is a little taller and sits 5 px
+    higher: (2, -5, 696, 308), registered on the five dials' middles, 0.6 px rms); outside the picture is its background"""
+    import math
+    import os
+
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFilter
+
+    from cluster_art import FONTDIR, REFS
+
+    TIT = FONTDIR + "TitilliumWeb-Regular.ttf"
+    TIT_B = FONTDIR + "TitilliumWeb-Bold.ttf"
+    REF = ref or os.path.join(REFS, "gtr_model_cluster.png")
+    BX0, BY0, BX1, BY1 = box
+    W, H, K = BX1 - BX0, BY1 - BY0, 4
+    A, BG = 2.0, 2.6  # px a design px: the sprites (a needle sprite is twice its length tall and must fit a 1024 x 512
+    # sheet: the rev needle is 2 x 126 x 2.0 = 504 px) and the background (1804 x 835, two halves of 902)
+    sp = Spec("gtrte" if nismo else "gtr", W, H, A, BG, BX0, BY0)
+    sp.redline, sp.idle = 7.1, 0.9
+
+    FACE = np.array([25.0, 26.0, 25.0])
+    HUB = np.array([18.0, 18.0, 18.0])
+    WHITE = (247, 243, 247)
+    KRED = (156, 24, 25)  # the km/h scale
+    RED = (230, 40, 41)  # the needles
+    AMBER = (255, 176, 64)  # the displays
+
+    # the model's dials (measured on the picture: ring circles, needle hubs, printed needles)
+    SC, TC, FC, WC = (118.1, 159.4), (341.36, 152.21), (551.46, 218.75), (656.18, 157.65)  # hubs
+    TACH_C, TACH_R = (341.51, 151.33), 126.35  # the rev counter's face (inside its ring)
+    TOP_C, TOP_R = (531.49, 97.54), 45.38  # the empty display top right
+    SPD = [(0, 133.92), (20, 154.2), (40, 178.65), (60, 203.36), (80, 228.36), (100, 253.32), (120, 278.08), (140, 303.94),
+           (160, 328.26), (180, 352.76), (200, 377.41), (220, 402.37)]  # mph -> degrees from up, as seen from the hub
+
+    def rev(v):
+        return 226.28 + 25.92 * v
+
+    src0 = Image.open(REF).convert("RGB")
+    assert src0.size == (694, 321), src0.size
+    s0 = np.asarray(src0).astype(float)  # (glyphs are cut from it in its own pixels)
+    src = Image.new("RGB", (W, H), tuple(int(v) for v in FACE))
+    src.paste(src0, (-BX0, -BY0))
+    # 1. the printed needles out, on the picture's own pixels (a strip a little wider than each needle, face colour)
+    #    before it is enlarged, so no edge of them is left by the sharpening
+    clean = np.asarray(src).astype(float).copy()
+    ny, nx = np.mgrid[0:H, 0:W]
+    nx, ny = nx + BX0, ny + BY0
+    for c, deg, r0, r1, hw in ((SC, 324.27, -22, 103, 6.0), (TC, 22.53, -22, 126, 6.0), (FC, 277.98, -20, 60, 5.6)):
+        t = math.radians(deg)
+        ux, uy = math.sin(t), -math.cos(t)
+        al = (nx + 0.5 - c[0]) * ux + (ny + 0.5 - c[1]) * uy
+        ac = np.abs(-(nx + 0.5 - c[0]) * uy + (ny + 0.5 - c[1]) * ux)
+        clean[(al >= r0) & (al <= r1) & (ac <= hw)] = FACE
+    src = Image.fromarray(clean.astype("uint8"))
+    big = src.resize((W * K, H * K), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=2, percent=70, threshold=2))
+    a = np.asarray(big).astype(float)
+    yy, xx = np.mgrid[0 : H * K, 0 : W * K]
+    px = (xx + 0.5) / K + BX0
+    py = (yy + 0.5) / K + BY0
+
+    def cover(mask, col, soft=None):
+        nonlocal a
+        m = mask.astype(float)[..., None] if soft is None else soft[..., None]
+        a = a * (1 - m) + np.array(col, float) * m
+
+    def disc(c, r):
+        return np.clip(r - np.hypot(px - c[0], py - c[1]), 0, 1)  # (anti-aliased by a pixel of the 4x canvas / 4)
+
+    def strip(c, deg, r0, r1, hw):
+        t = math.radians(deg)
+        ux, uy = math.sin(t), -math.cos(t)
+        along = (px - c[0]) * ux + (py - c[1]) * uy
+        across = np.abs(-(px - c[0]) * uy + (py - c[1]) * ux)
+        return (along >= r0) & (along <= r1) & (across <= hw)
+
+    # (the hubs back on top)
+    for c in (SC, TC, FC):
+        cover(None, HUB, soft=np.clip((16.2 - np.hypot(px - c[0], py - c[1])) * K / 2, 0, 1))
+
+    # 2. what they covered, put back: copies of the model's own glyphs (upright, same print) and plain bars / dots
+    def paste_glyph(box, at, scale=1.0, red=False):
+        """a glyph cut from the source picture (box, design px) laid with its top-left at `at` (design px), as white
+        (or, red: the km/h scale's red) coverage over what is there"""
+        nonlocal a
+        x0, y0, x1, y1 = box
+        g = s0[y0:y1, x0:x1]
+        if red:
+            cov = np.clip((g[..., 0] - g[..., 1]) / (KRED[0] - KRED[1]), 0, 1)
+        else:
+            cov = np.clip((g.mean(axis=2) - FACE.mean()) / (np.mean(WHITE) - FACE.mean()), 0, 1)
+        gi = Image.fromarray((cov * 255).astype("uint8")).resize((round((x1 - x0) * scale * K), round((y1 - y0) * scale * K)), Image.LANCZOS)
+        gm = np.asarray(gi).astype(float) / 255
+        X, Y = round((at[0] - BX0) * K), round((at[1] - BY0) * K)
+        h, w = gm.shape
+        sub = a[Y : Y + h, X : X + w]
+        a[Y : Y + h, X : X + w] = sub * (1 - gm[..., None]) + np.array(KRED if red else WHITE, float) * gm[..., None]
+
+    def bar(c, deg, r0, r1, w, col):
+        cover(None, col, soft=strip(c, deg, r0, r1, w / 2).astype(float))
+
+    # speedometer: the "160" (a "1" and a "0" from "100", a "6" from "60"), its tick, the "0" of the km/h "250" (from
+    # "310"), the km/h dots
+    cover((px > 61.5) & (px < 90.5) & (py > 92.5) & (py < 105.5), FACE)
+    paste_glyph((34, 176, 40, 188), (64.0, 93.0))
+    paste_glyph((78, 222, 88, 234), (70.0, 93.0))
+    paste_glyph((41, 176, 50, 188), (80.0, 93.0))
+    cover((px > 85.0) & (px < 91.0) & (py > 118.5) & (py < 127.0), FACE)
+    paste_glyph((125, 108, 132, 116), (85.0, 119.0), red=True)
+    bar(SC, 328.26, 89.5, 103.2, 4.0, WHITE)
+    RC = (116.83, 159.67)  # (the dotted km/h ring: a dot every 8 degrees round the ring's middle)
+    for deg in (315.6, 323.7, 331.8):
+        cover(None, KRED, soft=disc((RC[0] + 37.25 * math.sin(math.radians(deg)), RC[1] - 37.25 * math.cos(math.radians(deg))), 1.05))
+    # rev counter: the "6" (the speedometer's "6", 1.45x: the same print, bigger) and the 6000 tick
+    paste_glyph((78, 222, 88, 234), (367.0, 61.0), 1.45)
+    bar(TACH_C, rev(6), 108.0, 125.0, 4.1, WHITE)
+    # fuel: the half tick and the pump sign by the hub
+    bar(FC, 270.7, 52.5, 66.5, 3.2, WHITE)
+    d = Image.new("L", (W * K, H * K), 0)
+    dr = ImageDraw.Draw(d)
+    q = lambda x, y: (x * K, y * K)  # noqa: E731
+    dr.rectangle([q(508.6, 214.6), q(514.0, 222.6)], fill=255)
+    dr.rectangle([q(509.6, 215.6), q(513.0, 218.0)], fill=0)
+    dr.line([q(514.0, 216.4), q(516.6, 217.6), q(516.6, 221.4), q(517.8, 221.4)], fill=255, width=K)
+    cover(None, WHITE, soft=np.asarray(d.filter(ImageFilter.GaussianBlur(K * 0.3))).astype(float) / 255)
+
+    # 3. the Track Edition: grey rings (its model's own), the red band on the rev counter round its display corner
+    if nismo:
+        lum = a.mean(axis=2)
+        pale = (a[..., 2] - a[..., 0] > 6) & (lum > 60)
+        k = np.clip((lum - FACE.mean()) / (205 - FACE.mean()), 0, 1)[..., None]
+        grey = FACE + (np.array([103.0, 103.0, 103.0]) - FACE) * k
+        a = np.where(pale[..., None], grey, a)
+        r = np.hypot(px - TACH_C[0], py - TACH_C[1])
+        th = np.degrees(np.arctan2(px - TACH_C[0], -(py - TACH_C[1]))) % 360
+        band = (np.clip(r - 74.2, 0, 1) * np.clip(118.4 - r, 0, 1)) > 0
+        corner = (py > TACH_C[1] + 16.5) & (th > 90) & (th < 206.0)  # the display corner stays dark
+        band &= ~corner
+        soft = np.asarray(Image.fromarray((band * 255).astype("uint8")).filter(ImageFilter.GaussianBlur(K * 0.35))).astype(float) / 255
+        # the print over the face (white ticks and numbers) stays on top of the band: a = face + white * cov
+        cov = np.clip((a.mean(axis=2) - FACE.mean()) / (np.mean(WHITE) - FACE.mean()), 0, 1)
+        whiteish = (np.abs(a[..., 0] - a[..., 1]) < 30)  # (the red 7-8 ticks lie outside the band)
+        cov = np.where(whiteish, cov, 0.0)[..., None]
+        BAND = np.array([190.0, 22.0, 22.0])
+        on = BAND * (1 - cov) + np.array(WHITE, float) * cov
+        a = a * (1 - soft[..., None]) + on * soft[..., None]
+
+    img = Image.fromarray(np.clip(a, 0, 255).astype("uint8"))
+    sp.bg = img.resize((round(W * BG), round(H * BG)), Image.LANCZOS)
+
+    # 4. live: needles (thin red bars through the hub, as printed), the gear, the speed, the mileage
+    def needle(length, tail, w0, w1):
+        return needle_sprite(sp, length, tail, [(-tail, 0, w0, w0, RED), (0, length, w0, w1, RED)])
+
+    add_needle(sp, needle(99.5, 17.0, 2.3, 1.6), SC[0], SC[1], "mph", SPD)
+    add_needle(sp, needle(124.0, 17.0, 2.4, 1.6), TC[0], TC[1], "rpm", [(0, rev(0)), (8.6, rev(8.6))])
+    add_needle(sp, needle(56.0, 15.0, 2.3, 1.7), FC[0], FC[1], "fuel", [(0, 238.5), (0.5, 270.7), (1, 306.8)])
+    solid_gear(sp, TIT_B, 34, AMBER, 409.0, 207.0, stroke=0.2)
+    sp.font("speed", TIT_B, 27, "0123456789", shear=0, track=0.3)
+    sp.readout("speed", TOP_C[0], TOP_C[1] - 5.0, "m", 3, "speed", AMBER)
+    sp.font("unit", TIT_B, 9.5, "kmhpi/", shear=0)
+    sp.readout("unit", TOP_C[0], TOP_C[1] + 18.5, "m", 4, "unit", AMBER)
+    sp.font("odo", TIT_B, 10, "0123456789", shear=0, track=0.4)
+    sp.readout("odo", 404.0, 244.0, "m", 7, "odoTrim", AMBER)
+    sp.font("du", TIT_B, 9, "kmi", shear=0)
+    sp.readout("du", 435.0, 244.5, "m", 2, "distUnit", AMBER)
+    return sp
+
+
+def gtrte(Spec, needle_sprite, add_needle, glyph, solid_gear, ref=None):
+    """the Horizon R35 Track Edition (2017 track model): the same cluster, its red rev counter band and grey rings, on
+    its own model's quad (a little taller)"""
+    return gtr(Spec, needle_sprite, add_needle, glyph, solid_gear, nismo=True, ref=ref, box=(2, -5, 696, 308))

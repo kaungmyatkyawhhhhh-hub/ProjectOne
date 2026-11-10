@@ -1,0 +1,55 @@
+{
+ "src": "imports/importing cars/2013_nissan_gt-r_black_edition_coupe.glb",
+ "images": {
+  "14": [
+   {
+    "solid": [
+     60,
+     385,
+     380,
+     511,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "15": [
+   {
+    "ring": [
+     512,
+     512,
+     416,
+     505
+    ]
+   }
+  ],
+  "18": [
+   {
+    "replace": "tools/logo_paint/nisun_gtr_cabin_a.png"
+   }
+  ],
+  "19": [
+   {
+    "solid": [
+     408,
+     498,
+     612,
+     694,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "8": [
+   {
+    "replace": "tools/logo_paint/nisun_gtr_grille.png"
+   }
+  ]
+ },
+ "drop": [
+  "grt_B:lod2_badges_0",
+  "grt_B:lod3_calipers_0"
+ ]
+}

@@ -1,0 +1,103 @@
+{
+ "id": "nisun_gtr",
+ "roles": {
+  "^carpaint": "Paint",
+  "^phong5": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "^material($|[.])": [
+   "Rim",
+   0.28,
+   0.85
+  ],
+  "^plastic": [
+   "Trim",
+   0.45,
+   0.0
+  ],
+  "^metal($|[.])": [
+   "Trim",
+   0.3,
+   0.5
+  ],
+  "^rubber": [
+   "Trim",
+   0.8,
+   0.0
+  ],
+  "^chrome": [
+   "Trim",
+   0.12,
+   1.0
+  ],
+  "^chassis": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "^grille": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "^plate": [
+   "Plate",
+   0.5,
+   0.0
+  ],
+  "^internal": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "^glass_surr": [
+   "Trim",
+   0.1,
+   0.0
+  ],
+  "^mirrors": [
+   "Mirror",
+   0.06,
+   1.0
+  ]
+ },
+ "lens": [
+  [
+   "light_glass",
+   "Lens_Clear"
+  ]
+ ],
+ "cut_islands": [
+  {
+   "mat": "chrome",
+   "box": [
+    -0.06,
+    2.22,
+    0.9,
+    0.06,
+    2.28,
+    1.0
+   ],
+   "limit": 0.11
+  },
+  {
+   "mat": "plastic",
+   "box": [
+    -0.05,
+    -2.18,
+    0.6,
+    0.05,
+    -2.13,
+    0.67
+   ],
+   "limit": 0.08
+  }
+ ],
+ "hub_px": [
+  243.3,
+  183.1,
+  57
+ ]
+}

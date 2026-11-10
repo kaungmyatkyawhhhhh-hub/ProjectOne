@@ -284,6 +284,7 @@ Config.Credits = {
 	"Precision 4S V10 model by Ddiaz Design",
 	"Bavarica Werkz E60 V10 model by Galaxy Car Showroom (CC BY 4.0)",
 	"Sovereign Highlands model by Ddiaz Design (CC BY-NC-SA 4.0)",
+	"Horizon R35 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
