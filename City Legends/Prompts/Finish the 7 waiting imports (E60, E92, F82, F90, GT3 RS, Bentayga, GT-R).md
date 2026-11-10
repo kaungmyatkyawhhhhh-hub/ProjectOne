@@ -52,6 +52,11 @@ For each of cars 1–5 (and 7), render the cluster close up (and the steering wh
 ### Doors
 - Working doors like the others (`tools/doors.py`, the SVJ method): normal doors on all 7, **rear doors too** on the 4-door E60 M5, F90 M5 and the Bentayga; painted jambs, door thickness and inner panels, **no holes** (check with `cull` and mode `holes`); a `Config.Doors` switch per car. If a car's doors can't be perfect, leave its switch off and note it.
 
+### Exhaust sounds (owner, 2026-11-10: "don't forget to add exhaust sounds for them if they don't have")
+- Each of the 7 gets its real-engine exhaust set (`Config.lua`, "Supercar exhaust sounds", the `CARS` table), the same way as the supercars, if it has none yet.
+- State on 2026-11-10: only `porsha_gt3` has one (FLAT6). Missing: `bnw_m5_e60` (V10), `bnw_m3_e92` (V8), `bnw_m4_f82` (twin-turbo straight-6), `bnw_m5_f90` (twin-turbo V8), `bentlee_bentayga` (twin-turbo V8), `nisun_gtr` (twin-turbo V6).
+- Done as one job after the GT-R is in (it edits `Config.lua` too).
+
 ## No errors
 - No console errors or warnings, no physics glitches, no visual errors. If something can't be done cleanly, **leave it out** (or keep that car on its old model) and write it at the top of the notes.
 
