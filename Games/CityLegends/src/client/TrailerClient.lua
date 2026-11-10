@@ -149,6 +149,16 @@ local function showHitch(r: Rec, car: Model?)
 		return
 	end
 	r.hitch = at
+	-- (2026-11-10) a model with its own tow bar (Body_TowHitch: the Sovereign Highlands' 2018 model) keeps it, with no
+	-- second ball and bar of ours over it (HitchReach puts the hitch point on its ball)
+	local skin = car:FindFirstChild("Skin")
+	if skin then
+		for _, d in skin:GetDescendants() do
+			if d:IsA("BasePart") and d:GetAttribute("SrcName") == "Body_TowHitch" then
+				return
+			end
+		end
+	end
 	local function bit(size: Vector3, offset: Vector3, shape: Enum.PartType, color: Color3)
 		local p = Instance.new("Part")
 		p.Name = "TowHitch"

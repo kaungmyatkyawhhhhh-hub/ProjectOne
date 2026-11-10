@@ -47,7 +47,7 @@ def bbox(objs):
     return lo, hi
 
 
-car = [o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith("LampFx_")]
+car = [o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith(("LampFx_", "Body_TowHitch"))]  # (2026-11-10, the Bentayga: a tow bar added after the finish is not in the .glb)
 dlo, dhi = bbox(car)
 before = set(bpy.data.objects)
 bpy.ops.import_scene.gltf(filepath=glb)

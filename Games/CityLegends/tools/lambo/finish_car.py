@@ -411,9 +411,10 @@ def cover_hub():
 
     x, y, rpx = spec["hub_px"]
     hits = []
+    rings = spec.get("hub_rings", (1.15, 1.35))  # (2026-11-10, the Bentayga: a shield as wide as the hub's face needs them inside)
     for k in range(16):
         a = k / 16 * 2 * np.pi
-        for ring in (1.15, 1.35):
+        for ring in rings:
             w, _ = ray(x + ring * rpx * np.cos(a), y + ring * rpx * np.sin(a))
             if w is not None:
                 hits.append(tuple(w))

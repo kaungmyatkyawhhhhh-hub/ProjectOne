@@ -283,6 +283,7 @@ Config.Credits = {
 	"Precision Type 42 V10 Lightweight model by Ddiaz Design",
 	"Precision 4S V10 model by Ddiaz Design",
 	"Bavarica Werkz E60 V10 model by Galaxy Car Showroom (CC BY 4.0)",
+	"Sovereign Highlands model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
@@ -2417,7 +2418,9 @@ Config.Towing = {
 	UnloadRange = 38, -- studs from the trailer's axle
 	ActionMph = 6, -- HITCH, UNHITCH and STRAP only below this
 	Key = Enum.KeyCode.I, -- (the last free letter: J is the leaderboard, K the market)
-	HitchReach = {} :: { [string]: number }, -- a car's hitch further out (+) or in (-), in studs
+	HitchReach = { -- a car's hitch further out (+) or in (-), in studs
+		bentlee_bentayga = -0.57, -- (2026-11-10) the 2018 model's own tow bar: its ball 3.63 studs behind the rear axle, 1.35 up
+	} :: { [string]: number },
 	Camera = { Back = 19, Up = 5, Turn = 3 }, -- pulled back to see the trailer; reversing it turns round
 }
 

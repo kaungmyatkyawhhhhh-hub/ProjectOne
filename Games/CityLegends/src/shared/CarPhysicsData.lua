@@ -148,7 +148,7 @@ local Data: { [string]: Phys } = {
 	-- Bentley Continental GT W12 (3rd gen, 6.0 W12 twin-turbo, 8-speed DCT)
 	bentlee_contgt = { front = 0.55, drive = "AWD", rear = 0.8, gears = 8, box = "dct", shift = 0.15, tyreF = 275, tyreR = 315, aspectF = 40, aspectR = 35, rimF = 21, rimR = 21, tyre = "sport", brakes = "drilled", pistons = 10, caliper = "grey", lugs = 5, stop = 35, z60 = 3.6, top = 207, hp = 626, nm = 900, redline = 6.5, cg = 0.5, downforce = 0 },
 	-- Bentley Bentayga W12 (1st gen, 6.0 W12 twin-turbo, 8-speed auto)
-	bentlee_bentayga = { front = 0.57, drive = "AWD", rear = 0.6, gears = 8, box = "auto", shift = 0.3, tyreF = 285, tyreR = 285, aspectF = 45, aspectR = 45, rimF = 21, rimR = 21, tyre = "touring", brakes = "drilled", pistons = 10, caliper = "grey", lugs = 5, stop = 38, z60 = 3.9, top = 187, hp = 600, nm = 900, redline = 6.5, cg = 0.68, downforce = 0 },
+	bentlee_bentayga = { front = 0.57, drive = "AWD", rear = 0.6, gears = 8, box = "auto", shift = 0.3, tyreF = 285, tyreR = 285, aspectF = 45, aspectR = 45, rimF = 21, rimR = 21, tyre = "touring", brakes = "drilled", pistons = 10, caliper = "black", lugs = 5, stop = 38, z60 = 3.9, top = 187, hp = 600, nm = 900, redline = 6.5, cg = 0.68, downforce = 0 },
 	-- Lamborghini Urus (2018, 4.0 V8 twin-turbo, 8-speed auto)
 	lambrini_urus = { front = 0.57, drive = "AWD", rear = 0.6, gears = 8, box = "auto", shift = 0.2, tyreF = 285, tyreR = 325, aspectF = 40, aspectR = 35, rimF = 22, rimR = 22, tyre = "sport", brakes = "ceramic", pistons = 10, caliper = "black", lugs = 5, stop = 34, z60 = 3.5, top = 190, hp = 641, nm = 850, redline = 6.8, cg = 0.65, downforce = 0 },
 	-- Brabus 800 (W463A G 63, 4.0 V8 biturbo, 9-speed auto)

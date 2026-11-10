@@ -1593,3 +1593,249 @@ def e60(Spec, needle_sprite, add_needle, glyph, solid_gear):
         sprites[ch] = {"im": comp}
     sp.gear = {"x": 715 - sp.ox, "y": 512 - sp.oy, "sprites": sprites}
     return sp
+
+
+def bentayga(Spec, needle_sprite, add_needle, glyph, solid_gear):
+    """the Sovereign Highlands (owner's photo imports/refs/bentayga_cluster_owner.webp)"""
+    import math
+
+    import numpy as np
+    from PIL import Image
+
+    from cluster_art import FONTDIR, Art
+    from cluster_lfa_maybach import band_mask, blend, field, polar, smooth
+
+    NUMF = FONTDIR + "Montserrat-Medium.ttf"  # the dials' numbers and the big speed (round, like the real screen's)
+    NUMB = FONTDIR + "Montserrat-Bold.ttf"
+    TXT = FONTDIR + "SourceSansPro-Regular.ttf"
+    TXT_S = FONTDIR + "SourceSansPro-Semibold.ttf"
+    TXT_B = FONTDIR + "SourceSansPro-Bold.ttf"
+    box = (196, 292, 1796, 962)
+    REF = "bentayga_cluster_owner.webp"
+    A = Art(REF, box, S=2, bg=(7, 7, 9))
+    sp = Spec("bentayga", box[2] - box[0], box[3] - box[1], 1.0, 1.25, box[0], box[1])
+    sp.redline, sp.idle = 6.5, 0.75
+    C1, C2 = (489.0, 668.0), (1501.0, 669.0)  # rev counter, speedometer
+    T1, F1 = (480.0, 836.0), (1502.0, 822.0)  # coolant, fuel
+    WHT = (240, 240, 242)
+    GRY = (176, 178, 182)
+    DIM = (120, 122, 126)
+    ORG = (240, 112, 34)
+    RED = (224, 36, 40)
+
+    def rev(v):
+        return -135 + 33.75 * v  # 0 at the lower left, 4 at the top, 8 at the lower right
+
+    def kph(v):
+        return -136 + 0.853 * v  # 0 at the lower left, 300 at the lower right
+
+    def coolant(t):
+        return (t - 90) * 2.33
+
+    def fuel(f):
+        return -137 + 274 * f
+
+    h, w = A.H * A.S, A.W * A.S
+    yy, xx = np.mgrid[0:h, 0:w]
+    px = (xx + 0.5) / A.S + A.ox
+    py = (yy + 0.5) / A.S + A.oy
+
+    # ---- the black glass, the middle screen a shade lighter, its info band lighter still
+    lift = 5 * np.exp(-(((px - 996) / 380) ** 2 + ((py - 560) / 200) ** 2))
+    blend(A, np.stack([7 + lift, 8 + lift, 11 + lift * 1.3], axis=-1), np.ones((h, w)))
+    A.round_rect(668, 352, 1324, 800, 26, (13, 15, 19))
+    A.round_rect(760, 706, 1232, 796, 6, (22, 24, 28))
+    A.line([(764, 705), (1228, 705)], (40, 42, 47), 1.0)
+
+    def tick(C, r0, r1, deg, wd, col):
+        A.line([polar(C, r0, deg), polar(C, r1, deg)], col, wd)
+
+    def arc(C, r, a0, a1, col, wd, gaps=()):
+        n = max(8, int(abs(a1 - a0) / 1.0))
+        pts = []
+        for i in range(n + 1):
+            t = a0 + (a1 - a0) * i / n
+            if any(g0 <= t <= g1 for g0, g1 in gaps):
+                if len(pts) > 1:
+                    A.line(pts, col, wd)
+                pts = []
+                continue
+            pts.append(polar(C, r, t))
+        if len(pts) > 1:
+            A.line(pts, col, wd)
+
+    # ---- the two dials: black faces, the chrome rings (bright where the light catches them)
+    for C in (C1, C2):
+        r, th = field(A, C)
+        blend(A, np.full((h, w, 3), (5.0, 5.0, 6.0)), band_mask(r, -5, 266, 0.7))
+        s = 150 + 80 * np.cos(np.radians(th - 320)) ** 2 + 25 * np.cos(np.radians(th * 2 + 40))
+        s = s * (0.8 + 0.2 * smooth(268, 274, r)) * (1 - 0.3 * smooth(278, 285, r))
+        blend(A, np.stack([s, s, s * 1.02], axis=-1), band_mask(r, 267.5, 285, 0.7))
+        blend(A, np.full((h, w, 3), (20.0, 20.0, 22.0)), band_mask(r, 264, 267.5, 0.6))
+
+    # ---- the rev counter: two scale lines, ticks, numbers 0-70, the orange top end, the inner arc
+    rmaj = [rev(v) for v in range(0, 9)]
+    arc(C1, 251, rev(0), rev(8), WHT, 2.2)
+    arc(C1, 240, rev(0), rev(6.8), WHT, 1.6, gaps=[(t - 4.0, t + 4.0) for t in rmaj])
+    arc(C1, 228, rev(6.8), rev(8.0), ORG, 2.6)
+    A.line([polar(C1, 228, rev(6.8)), polar(C1, 240, rev(6.8))], ORG, 2.4)
+    for i in range(0, 41):
+        v = i / 5
+        if i % 5 == 0:
+            tick(C1, 231, 251, rev(v), 3.0, WHT)
+        else:
+            tick(C1, 230, 236, rev(v), 1.8, ORG if v > 6.8 else WHT)
+    tick(C1, 226, 251, rev(8), 2.4, WHT)  # the end cap
+    for v in range(0, 8):
+        p = polar(C1, 212 if v not in (0, 7) else 206, rev(v))
+        A.text(p[0], p[1], str(v * 10) if v else "0", NUMF, 41, WHT)
+    arc(C1, 160, -129, 133, WHT, 2.0)
+    A.text(639, 815, "rpm", TXT_S, 19, WHT)
+    A.text(637, 833, "x100", TXT_S, 19, WHT)
+
+    # ---- the speedometer: the same lines, numbers every 30 km/h, km/h, the inner arc
+    arc(C2, 251, kph(0), kph(300) + 1.5, WHT, 2.2)
+    smaj = [kph(v) for v in range(0, 301, 30)]
+    arc(C2, 240, kph(0), kph(300) + 1.5, WHT, 1.6, gaps=[(t - 4.0, t + 4.0) for t in smaj])
+    for v in range(0, 301, 10):
+        if v % 30 == 0:
+            tick(C2, 231, 251, kph(v), 3.0, WHT)
+        else:
+            tick(C2, 230, 236, kph(v), 1.8, WHT)
+    tick(C2, 226, 251, kph(300) + 1.5, 2.4, WHT)
+    for v in range(30, 301, 30):
+        p = polar(C2, 208 if v < 270 else 204, kph(v))
+        A.text(p[0], p[1], str(v), NUMF, 38, WHT)
+    arc(C2, 160, -129, 133, WHT, 2.0)
+    A.text(1656, 838, "km/h", TXT_S, 21, WHT)
+
+    # ---- the coolant gauge (inside the rev counter, low): 30-150 C, the orange top, the needle at 90
+    arc(T1, 80, coolant(30), coolant(150), WHT, 2.0)
+    arc(T1, 73, coolant(132), coolant(150), ORG, 2.8)
+    for t in range(30, 151, 10):
+        big = t % 30 == 0
+        tick(T1, 70 if big else 74, 80, coolant(t), 2.4 if big else 1.4, WHT)
+    for t, s_ in ((60, "60"), (120, "120")):
+        p = polar(T1, 55, coolant(t))
+        A.text(p[0], p[1], s_, NUMF, 17, WHT)
+    p = polar(T1, 92, coolant(90) + 9)
+    A.text(p[0] + 4, p[1] + 14, "90", NUMF, 17, WHT)
+    A.text(T1[0] - 35, T1[1] + 43, "30°C", NUMF, 16, WHT)
+    A.text(T1[0] + 44, T1[1] + 40, "150", NUMF, 16, WHT)
+    tx, ty = T1[0], T1[1] + 68  # the thermometer
+    A.line([(tx, ty - 14), (tx, ty + 2)], WHT, 2.2)
+    A.line([(tx - 9, ty + 6), (tx + 9, ty + 6)], WHT, 1.6)
+    A.line([(tx - 7, ty + 10), (tx - 3, ty + 8), (tx + 1, ty + 10), (tx + 5, ty + 8), (tx + 8, ty + 10)], WHT, 1.2)
+    A.line([(tx + 1, ty - 11), (tx + 6, ty - 11)], WHT, 1.2)
+    A.line([(tx + 1, ty - 6), (tx + 6, ty - 6)], WHT, 1.2)
+    # its needle (the engine is always warm here): orange with a white edge, the hub over it
+    A.line([polar(T1, -12, coolant(88)), polar(T1, 76, coolant(88))], (250, 236, 226), 4.0)
+    A.line([polar(T1, -10, coolant(88)), polar(T1, 74, coolant(88))], ORG, 2.2)
+    A.circle(T1[0], T1[1], 14, (36, 36, 38), outline=(120, 122, 126), w=1.6)
+
+    # ---- the fuel gauge (inside the speedometer, low): 0, 1/4, 1/2, 3/4, 1, the orange low end, the pump
+    arc(F1, 80, fuel(0), fuel(1), WHT, 2.0)
+    arc(F1, 73, fuel(0), fuel(0.1), ORG, 2.8)
+    for i in range(0, 9):
+        f = i / 8
+        big = i % 2 == 0
+        tick(F1, 70 if big else 74, 80, fuel(f), 2.4 if big else 1.4, WHT)
+    for f, s_ in ((0.25, "1/4"), (0.75, "3/4")):
+        p = polar(F1, 54, fuel(f))
+        A.text(p[0], p[1], s_, NUMF, 16, WHT)
+    p = polar(F1, 58, 0)
+    A.text(p[0], p[1] + 2, "1/2", NUMF, 16, WHT)
+    A.text(F1[0] - 40, F1[1] + 53, "0", NUMF, 16, WHT)
+    A.text(F1[0] + 47, F1[1] + 53, "1", NUMF, 16, WHT)
+    fx, fy = F1[0] - 4, F1[1] + 70  # the pump and its arrow
+    A.round_rect(fx - 8, fy - 11, fx + 5, fy + 11, 2, None, outline=WHT, w=1.6)
+    A.rect(fx - 5, fy - 8, fx + 2, fy - 2, WHT)
+    A.line([(fx + 5, fy - 4), (fx + 9, fy - 1), (fx + 9, fy + 7)], WHT, 1.4)
+    A.poly([(fx + 14, fy - 4), (fx + 20, fy), (fx + 14, fy + 4)], WHT)
+
+    # ---- the middle screen's top row: the car (with its orange arc), the selected car tab, media, phone, globe, drive
+    def car_side(x, y, s, col, wd=1.6):
+        A.line([(x - 22 * s, y + 6 * s), (x - 21 * s, y - 1 * s), (x - 12 * s, y - 3 * s), (x - 6 * s, y - 9 * s), (x + 8 * s, y - 9 * s),
+                (x + 16 * s, y - 3 * s), (x + 22 * s, y - 1 * s), (x + 22 * s, y + 6 * s), (x - 22 * s, y + 6 * s)], col, wd)
+        for dx in (-12, 12):
+            A.circle(x + dx * s, y + 6 * s, 3.6 * s, (13, 15, 19), outline=col, w=wd)
+
+    arc((693, 426), 20, -160, -20, ORG, 2.4)
+    car_side(707, 427, 1.0, WHT)
+    A.round_rect(865, 403, 902, 440, 11, (226, 112, 32))
+    A.round_rect(873, 417, 895, 430, 3, None, outline=(20, 14, 10), w=2.2)  # the front of a car, dark on orange
+    A.line([(876, 417), (880, 410), (888, 410), (892, 417)], (20, 14, 10), 2.0)
+    A.circle(878, 426, 1.8, (20, 14, 10))
+    A.circle(890, 426, 1.8, (20, 14, 10))
+    for x in (938, 993, 1048, 1103):
+        A.circle(x, 422, 18, (30, 32, 36))
+    A.circle(938, 422, 13, None, outline=WHT, w=2.0)
+    A.poly([(933, 415), (945, 422), (933, 429)], WHT)
+    A.line([(985, 428), (988, 431), (992, 430), (999, 423), (999, 419), (996, 416), (993, 418), (991, 422), (988, 422)], WHT, 2.0)  # the phone
+    A.line([(998, 427), (1004, 433)], WHT, 1.6)
+    A.line([(1004, 427), (998, 433)], WHT, 1.6)
+    A.circle(1048, 422, 12, None, outline=WHT, w=1.6)  # the globe
+    A.line([(1036, 422), (1060, 422)], WHT, 1.2)
+    A.line([(1048, 410), (1048, 434)], WHT, 1.2)
+    A.circle(1048, 422, 6, None, outline=WHT, w=1.2)
+    for x0, x1 in ((1094, 1112),):  # the drive diagram: two axles and a shaft
+        A.line([(x0, 410), (x1, 410)], WHT, 2.0)
+        A.line([(x0, 434), (x1, 434)], WHT, 2.0)
+        A.line([((x0 + x1) / 2, 410), ((x0 + x1) / 2, 434)], WHT, 2.0)
+        for x in (x0, x1):
+            A.rect(x - 3, 405, x + 3, 415, WHT)
+            A.rect(x - 3, 429, x + 3, 439, WHT)
+    A.text(990, 467, "Current speed", TXT, 27, WHT)
+    A.rect(1178, 508, 1182, 692, (52, 54, 58))  # the list's scroll bar: a dim track, the bright thumb at its top
+    A.round_rect(1177, 508, 1183, 548, 2, (246, 246, 248))
+
+    # ---- the bottom lines: the pump (range), the start-stop-off mark, the outside temperature
+    def pump(x, y, col):
+        A.round_rect(x - 9, y - 12, x + 6, y + 12, 2, None, outline=col, w=1.8)
+        A.rect(x - 6, y - 9, x + 3, y - 3, col)
+        A.line([(x + 6, y - 6), (x + 11, y - 2), (x + 11, y + 8), (x + 8, y + 10)], col, 1.6)
+
+    pump(811, 762, WHT)
+    A.circle(1013, 762, 12, None, outline=GRY, w=2.0)  # start-stop off: an A in a ring, struck through
+    A.text(1013, 763, "A", TXT_B, 18, GRY)
+    A.line([(1001, 777), (1027, 747)], GRY, 2.0)
+    A.text(1160, 763, "+31.5", NUMF, 30, WHT, anchor="rm")
+    A.text(1177, 755, "°C", TXT_S, 18, WHT, anchor="mm")
+
+    A.final = A.finish(A.S, blur=1.0, strength=0.2)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    # the seat-belt lamp (red) while standing
+    B = Art(REF, box, S=2, bg=(0, 0, 0))
+    bx, by = 940, 762
+    B.circle(bx, by - 13, 4.5, RED)
+    B.poly([(bx - 7, by - 6), (bx + 7, by - 6), (bx + 9, by + 10), (bx + 3, by + 10), (bx, by + 4), (bx - 3, by + 10), (bx - 9, by + 10)], RED)
+    B.line([(bx - 8, by - 6), (bx + 6, by + 9)], (90, 10, 12), 2.0)
+    B.line([(bx - 12, by + 13), (bx + 12, by + 13)], RED, 2.0)
+    B.final = B.finish(B.S, blur=1, strength=0.3)
+    sp.add_show(sp.box(B, (924, 742, 956, 780), black=True), "parked")
+
+    # needles: long, orange with a bright white edge, over a dark hub with a silver rim
+    WN, ON = (252, 240, 230), (232, 96, 36)
+    parts = [(-34, 0, 4.0, 4.4, WN), (0, 250, 4.4, 1.6, WN), (-32, 0, 2.4, 2.8, ON), (0, 246, 2.8, 0.8, ON)]
+    hub = dict(hub=24, hub_col=(30, 30, 32), hub_line=(150, 152, 156))
+    add_needle(sp, needle_sprite(sp, 252, 36, parts, **hub), C1[0], C1[1], "rpm", [(0, rev(0)), (8.0, rev(8.0))])
+    add_needle(sp, needle_sprite(sp, 252, 36, parts, **hub), C2[0], C2[1], "kmh", [(0, kph(0)), (300, kph(300)), (310, kph(300) + 6)])
+    fparts = [(-14, 0, 2.6, 3.0, WN), (0, 76, 3.0, 1.2, WN), (-12, 0, 1.5, 1.8, ON), (0, 73, 1.8, 0.6, ON)]
+    add_needle(sp, needle_sprite(sp, 78, 16, fparts, hub=13, hub_col=(36, 36, 38), hub_line=(120, 122, 126)), F1[0], F1[1], "fuel", [(0, fuel(0)), (1, fuel(1))])
+
+    # the middle: the big speed and its unit (live), the odometer, trip and range with their units, the gear
+    sp.font("speed", NUMF, 86, "0123456789", shear=0, track=1.0)
+    sp.readout("speed", 1037, 573, "r", 3, "speed", WHT)
+    sp.font("unit", TXT, 25, "kmhpi/", shear=0)
+    sp.readout("unit", 1043, 593, "l", 4, "unit", WHT)
+    sp.font("small", NUMF, 27, "0123456789.", shear=0, track=0.3)
+    sp.font("du", TXT_S, 18, "kmi", shear=0)
+    sp.readout("small", 906, 727, "r", 7, "odoTrim", WHT)
+    sp.readout("du", 910, 731, "l", 2, "distUnit", WHT)
+    sp.readout("small", 1163, 727, "r", 7, "trip", WHT)
+    sp.readout("du", 1167, 731, "l", 2, "distUnit", WHT)
+    sp.readout("small", 884, 762, "r", 4, "range", WHT)
+    sp.readout("du", 888, 766, "l", 2, "distUnit", WHT)
+    solid_gear(sp, NUMB, 30, WHT, 982, 762, stroke=0.1)
+    return sp

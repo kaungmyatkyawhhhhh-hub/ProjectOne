@@ -1,0 +1,85 @@
+{
+ "id": "bentlee_bentayga",
+ "roles": {
+  "kit1_coloured": [
+   "Trim",
+   0.3,
+   0.0
+  ],
+  "kit1_base": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "kit1_light": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "kit1_interior": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "^manuf": [
+   "Plate",
+   0.5,
+   0.0
+  ],
+  "engine": [
+   "Engine",
+   0.4,
+   0.3
+  ],
+  "grille": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "grille7": [
+   "Wood",
+   0.18,
+   0.0
+  ],
+  "^wheel": [
+   "Rim",
+   0.28,
+   0.85
+  ]
+ },
+ "hub_px": [
+  241,
+  205,
+  62
+ ],
+ "hub_rings": [
+  0.92,
+  1.08
+ ],
+ "cut_islands": [
+  {
+   "mat": "kit1_light",
+   "box": [
+    0.612,
+    -2.231,
+    0.776,
+    0.678,
+    -2.217,
+    0.789
+   ],
+   "limit": 0.01
+  },
+  {
+   "mat": "kit1_light",
+   "box": [
+    -0.678,
+    -2.231,
+    0.776,
+    -0.612,
+    -2.217,
+    0.789
+   ],
+   "limit": 0.01
+  }
+ ]
+}
