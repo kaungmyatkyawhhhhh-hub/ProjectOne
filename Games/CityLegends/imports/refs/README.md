@@ -42,3 +42,9 @@ Photos from Wikimedia Commons (licence in brackets), frames from YouTube videos 
 - `aventador_lp700_cluster_owner.png`: Aventador LP700-4 cluster, STRADA, gear N.
 - `aventador_sv_cluster_owner_2.png`: a second SV photo, the owner's reference for the gear N.
 - `aventador_sv_cluster_driving_owner.png`, `huracan_cluster_driving_owner.png`, `revuelto_cluster_driving_owner.png`, `revuelto_cluster_driving_owner_2.png` (the sharp one), `revuelto_cluster_owner_2.png`: the owner's driving photos. `revuelto_cluster_owner.png` shows the door-open warning, not the normal screen.
+
+## Owner's photos, 2026-11-10 (for "Finish the 7 waiting imports": rebuild each 1:1, no logos)
+- `e92_m3_cluster_owner.png` (1920 x 1280): E9x M3 cluster, km/h, gear P, odometer 067528, trip 200.2; for the E92 V8 (`bnw_m3_e92`).
+- `f82_m4_cluster_owner.png` (627 x 279): F8x M4 cluster, lit, READY, gear D, 0 km/h, date 02.05.14, odometer 03230, range 525.3; for the F82 (`bnw_m4_f82`).
+- `gt3rs_9912_cluster_owner.png` (1920 x 1280): 991.2 GT3 RS cluster, lit, 0 km/h, odometer 14848, trip 182.3, clock 09:58 on the right screen with the car picture; for the Stuttgart 991.2 Track (`porsha_gt3`).
+- F90 (`bnw_m5_f90`): no photo; owner: it gets the same cluster as the G20 Sport (`bnw_330i_g20`, `g20()` in `tools/lambo/cluster_imports.py`).
