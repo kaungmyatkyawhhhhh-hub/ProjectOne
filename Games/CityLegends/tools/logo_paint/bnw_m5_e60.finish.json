@@ -1,0 +1,95 @@
+{
+ "id": "bnw_m5_e60",
+ "roles": {
+  "^black_parts": [
+   "Trim",
+   0.5,
+   0.0
+  ],
+  "^gloss_black": [
+   "Trim",
+   0.08,
+   0.0
+  ],
+  "^metal($|[.])": [
+   "Alu",
+   0.32,
+   0.85
+  ],
+  "^chrome": [
+   "Chrome",
+   0.06,
+   1.0
+  ],
+  "^darkest_black": [
+   "Trim",
+   0.6,
+   0.0
+  ],
+  "^brakes2": [
+   "Disc",
+   0.35,
+   0.85
+  ],
+  "^material($|[.])": [
+   "LampGlow",
+   0.3,
+   0.0
+  ],
+  "^new_material_2_37": [
+   "Lamp",
+   0.3,
+   0.0
+  ],
+  "^new_material_2($|[.])": [
+   "Trim",
+   0.4,
+   0.0
+  ],
+  "^new_material($|_0|_1)": [
+   "Engine",
+   0.4,
+   0.2
+  ],
+  "stitching": [
+   "Cabin",
+   0.7,
+   0.0
+  ],
+  "^buttonlabels": [
+   "Cabin",
+   0.45,
+   0.0
+  ],
+  "^gauges1": [
+   "Screen",
+   0.35,
+   0.0
+  ],
+  "^meshpart49": [
+   "Screen",
+   0.2,
+   0.0
+  ],
+  "^taillamp1": [
+   "Lamp",
+   0.25,
+   0.0
+  ],
+  "^leather[12]": [
+   "Leather",
+   0.5,
+   0.0
+  ],
+  "^carpaint": [
+   "Paint",
+   0.1,
+   0.0
+  ],
+  "^tyre1": [
+   "Tyre",
+   0.8,
+   0.0
+  ]
+ }
+}

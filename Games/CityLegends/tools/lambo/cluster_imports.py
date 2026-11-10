@@ -1406,3 +1406,190 @@ def r8g2(Spec, needle_sprite, add_needle, glyph, solid_gear):
     sp.font("clock", TXT_B, 8.6, "0123456789:", shear=0, track=0.2)
     sp.readout("clock", 295.5, 273.5, "m", 5, "clock", (220, 222, 226))
     return sp
+
+
+def e60(Spec, needle_sprite, add_needle, glyph, solid_gear):
+    """the Bavarica Werkz E60 V10 (the 2009 M5 model, 2026-11-09): KEEP, the model's own dial faces
+    (tools/logo_paint/bnw_m5_e60_dials.png = its picture turned upright, the M logo painted out) made live, with what the
+    model lacks drawn from the real photos (imports/refs/1_e60_m5_cluster_real.jpg, 6_e64_m6_cluster_real.jpg and the E64
+    model's own photo): the two red segment screens between the dials (range above; the gear, odometer and trip below), the
+    warm-up lights in the rev counter, the warning lamps and the turn arrows. Speedometer as modelled (US/UK print: mph
+    outside, km/h inside, so it is right in either unit setting; the needle follows mph), rev counter 0-9 (red from 8,250),
+    fuel (live) and oil in F (US print, drawn warm at 215 F). No maker's marks.
+    Design pixels are 0.2 mm on the panel (1430 x 610 = the hood's opening, 286 x 122 mm, tools/lambo/window_e60.png)."""
+    from cluster_art import FONTDIR
+
+    DIG = FONTDIR + "zekton_rg.ttf"
+    box = (0, 0, 1430, 610)
+    REF = "model_clusters/1_e60_m5_img15_Gauges1_diff.png"
+    A = Art(REF, box, S=3, bg=(18, 18, 20))
+    sp = Spec("e60", 1430, 610, 1.0, 1.0, 0, 0)
+    sp.redline, sp.idle = 8.25, 0.9
+    # the dial centres measured on the model (UV-to-3D fit of its dial faces), and its picture's own centres and scales
+    C1, C2 = (364.5, 333.5), (1066.0, 325.5)  # speedometer (driver's left), rev counter
+    P1, P2 = (294.5, 291.4), (718.7, 713.8)
+    K1, K2 = 0.796, 0.7795  # design px per picture px (0.1592 / 0.1559 mm a picture px)
+    FUEL = (C1[0] + 0.5 * K1, C1[1] + 118.9 * K1)
+    OIL = (C2[0] - 2.7 * K2, C2[1] + 139.6 * K2)
+    RED = (226, 30, 24)
+    LCD = (255, 70, 28)
+    pic = Image.open(os.path.join(HERE, "..", "logo_paint", "bnw_m5_e60_dials.png")).convert("RGB")
+
+    S = A.S
+    h, w = A.H * S, A.W * S
+    yy, xx = np.mgrid[0:h, 0:w]
+    px = (xx + 0.5) / S
+    py = (yy + 0.5) / S
+
+    # the panel round the dials: near black, a touch lighter at the top
+    tone = 22 - 8 * smooth(0, 610, py)
+    blend(A, np.stack([tone, tone, tone * 1.06], axis=-1), np.ones((h, w)))
+
+    def silver(th):
+        return 150 + 60 * np.cos(np.radians(th - 320)) ** 2 + 25 * np.cos(np.radians(th * 3))
+
+    # the dials: dark faces, the model's own print over them, its outer stripe as the ring's satin lip
+    for C, P, k in ((C1, P1, K1), (C2, P2, K2)):
+        r, th = field(A, C)
+        face = 38 - 11 * smooth(40, 215, r)
+        blend(A, np.stack([face, face, face * 1.05], axis=-1), band_mask(r, -5, 214, 0.8))
+        # the chrome ring under the model's own (it stands proud in front of the panel): drawn too, in case an edge shows
+        s = silver(th) * (1 - 0.3 * smooth(238, 252, r))
+        blend(A, np.stack([s, s, s * 1.02], axis=-1), band_mask(r, 229, 252, 0.8))
+        blend(A, np.full((h, w, 3), 10.0), band_mask(r, 252, 258, 0.8))
+        # the picture, scaled onto the art
+        half = 300
+        crop = pic.crop((int(P[0] - half), int(P[1] - half), int(P[0] + half), int(P[1] + half)))
+        size = round(2 * half * k * S)
+        lay = np.asarray(crop.resize((size, size), Image.LANCZOS)).astype(float)
+        x0 = round((C[0] - half * k) * S)
+        y0 = round((C[1] - half * k) * S)
+        ys, xs = slice(max(0, y0), min(h, y0 + size)), slice(max(0, x0), min(w, x0 + size))
+        lay = lay[ys.start - y0: ys.stop - y0, xs.start - x0: xs.stop - x0]
+        base = np.asarray(A.im).astype(float)
+        reg = base[ys, xs]
+        rr = r[ys, xs] / k  # radius in picture px
+        tt = th[ys, xs]
+        lum = lay.max(axis=2)
+        sat = lay.max(axis=2) - lay.min(axis=2)
+        inner = rr < 262
+        printed = np.clip((lum - 30) / 200, 0, 1)[..., None] * inner[..., None]
+        ink = np.where(sat[..., None] > 60, lay, np.array([238.0, 238.0, 240.0]))
+        reg = reg * (1 - printed) + ink * printed
+        band = (rr >= 262) & (rr < 294)
+        col = sat > 60
+        a = np.clip((lum - 40) / 160, 0, 1) * band
+        sv = silver(tt) * 0.92
+        lip = np.where(col[..., None], lay * 0.92, np.stack([sv, sv, sv * 1.02], axis=-1))
+        reg = reg * (1 - a[..., None]) + lip * a[..., None]
+        base[ys, xs] = reg
+        A.im.paste(Image.fromarray(np.clip(base, 0, 255).astype("uint8")))
+
+    def rev(v):
+        return -132.35 + 29.31 * v
+
+    # warm-up lights in the rev counter's scale (6,500-8,000, dark; they light while the car stands, a cold engine's limit)
+    for i in range(6):
+        a0, a1 = rev(6.5 + i * 0.25) + 0.9, rev(6.75 + i * 0.25) - 0.9
+        pts = [polar(C2, 207, a0 + (a1 - a0) * t / 8) for t in range(9)] + [polar(C2, 213, a1 - (a1 - a0) * t / 8) for t in range(9)]
+        A.poly(pts, (40, 26, 18))
+
+    # the oil gauge's needle (drawn: the engine is always warm here) and the small caps
+    A.line([OIL, polar(OIL, 104, 176.7)], RED, 3.4)
+    A.line([OIL, polar(OIL, -14, 176.7)], RED, 3.4)
+    A.circle(OIL[0], OIL[1], 21, (16, 16, 17), outline=(62, 62, 66), w=1.5)
+
+    # the two segment screens between the dials (dark red glass)
+    def lcd(x0, y0, x1, y1, rad):
+        A.round_rect(x0 - 3, y0 - 3, x1 + 3, y1 + 3, rad + 2, (8, 8, 9))
+        A.round_rect(x0, y0, x1, y1, rad, (40, 7, 5), outline=(70, 16, 10), w=1.4)
+        m = np.clip((py - y0) / 3, 0, 1) * np.clip((y0 + 12 - py) / 9, 0, 1) * (px > x0 + 4) * (px < x1 - 4)
+        blend(A, np.full((h, w, 3), (70.0, 22.0, 16.0)), m * 0.6)
+
+    lcd(653, 352, 777, 437, 8)
+    lcd(623, 452, 807, 582, 10)
+    # the range screen's arrow and pump (lit, as on the photos)
+    A.line([(668, 371), (690, 371)], LCD, 2.4)
+    A.poly([(690, 364), (700, 371), (690, 378)], LCD)
+    A.round_rect(708, 361, 721, 382, 1.5, None, outline=LCD, w=2.0)
+    A.rect(710, 363, 719, 369, LCD)
+    A.line([(721, 366), (727, 370), (727, 380), (724, 382)], LCD, 1.6)
+
+    # warning lamps up the middle, dark until they light; the turn arrows at the ends, dark
+    dim = lambda c, k=0.14: tuple(int(v * k) for v in c)  # noqa: E731
+    AMB, RD = (246, 150, 20), (230, 36, 30)
+    A.circle(715, 150, 15, None, outline=dim(RD), w=2.2)
+    A.text(715, 151, "!", ARIAL_B, 20, dim(RD))
+    A.line([(694, 136), (690, 150), (694, 164)], dim(RD), 2.0)
+    A.line([(736, 136), (740, 150), (736, 164)], dim(RD), 2.0)
+    A.round_rect(700, 196, 730, 214, 2, None, outline=dim(RD), w=2.0)
+    A.text(708, 205, "-", ARIAL_B, 14, dim(RD))
+    A.text(722, 205, "+", ARIAL_B, 14, dim(RD))
+    A.circle(690, 252, 13, None, outline=dim(AMB), w=2.0)
+    A.text(690, 252.5, "ABS", ARIAL_B, 9, dim(AMB))
+    A.circle(740, 252, 13, None, outline=dim(AMB), w=2.0)
+    A.text(740, 252.5, "!", ARIAL_B, 15, dim(AMB))
+    A.round_rect(700, 290, 730, 310, 4, None, outline=dim(AMB), w=2.0)
+    for x, s in ((42, 1), (1388, -1)):
+        A.poly([(x - 16 * s, 330), (x - 2 * s, 316), (x - 2 * s, 324), (x + 16 * s, 324), (x + 16 * s, 336), (x - 2 * s, 336), (x - 2 * s, 344)], (52, 52, 55))
+
+    A.final = A.finish(A.S, blur=1.2, strength=0.3)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    # the lamps that light: the parking brake while standing; the warm-up lights while standing (the cold start look)
+    L = Art(REF, box, S=3, bg=(0, 0, 0))
+    L.circle(715, 150, 15, None, outline=RD, w=2.2)
+    L.text(715, 151, "!", ARIAL_B, 20, RD)
+    L.line([(694, 136), (690, 150), (694, 164)], RD, 2.0)
+    L.line([(736, 136), (740, 150), (736, 164)], RD, 2.0)
+    L.final = L.finish(L.S, blur=1.2, strength=0.5)
+    sp.add_show(sp.box(L, (680, 128, 750, 172), black=True), "parked")
+    W2 = Art(REF, box, S=3, bg=(0, 0, 0))
+    for i in range(6):
+        a0, a1 = rev(6.5 + i * 0.25) + 0.9, rev(6.75 + i * 0.25) - 0.9
+        pts = [polar(C2, 207, a0 + (a1 - a0) * t / 8) for t in range(9)] + [polar(C2, 213, a1 - (a1 - a0) * t / 8) for t in range(9)]
+        W2.gd.polygon([W2.q(*p) for p in pts], fill=(255, 120, 10))
+        W2.poly(pts, (255, 150, 30))
+    W2.final = W2.finish(W2.S, blur=1.5, strength=0.6)
+    xs_ = [polar(C2, r_, rev(v))[0] for r_ in (200, 220) for v in (6.4, 8.1)]
+    ys_ = [polar(C2, r_, rev(v))[1] for r_ in (200, 220) for v in (6.4, 8.1)]
+    sp.add_show(sp.box(W2, (int(min(xs_)) - 6, int(min(ys_)) - 6, int(max(xs_)) + 6, int(max(ys_)) + 6), black=True), "parked")
+
+    # needles: red, long, with the big black caps (the photos)
+    big = [(-40, 0, 3.4, 3.8, RED), (0, 192, 3.8, 1.5, RED), (0, 150, 1.0, 0.5, (255, 120, 110))]
+    SPD = [(0, -128.9), (10, -112.9), (20, -96.9), (30, -80.8), (40, -64.65), (50, -48.65), (60, -32.35), (70, -16.35), (80, 0.1),
+           (90, 11.1), (100, 22.1), (110, 33.1), (120, 44.1), (130, 55.1), (140, 66.1), (150, 77.1), (160, 88.1), (170, 98.9),
+           (180, 109.9), (190, 120.9), (200, 131.65), (215, 148.0)]
+    add_needle(sp, needle_sprite(sp, 192, 40, big, hub=42, hub_col=(16, 16, 17), hub_line=(62, 62, 66)), C1[0], C1[1], "mph", SPD)
+    add_needle(sp, needle_sprite(sp, 192, 40, big, hub=42, hub_col=(16, 16, 17), hub_line=(62, 62, 66)), C2[0], C2[1], "rpm", [(0, rev(0)), (9.3, rev(9.3))])
+    small = [(-14, 0, 2.0, 2.2, RED), (0, 104, 2.2, 1.0, RED)]
+    add_needle(sp, needle_sprite(sp, 104, 14, small, hub=21, hub_col=(16, 16, 17), hub_line=(62, 62, 66)), FUEL[0], FUEL[1], "fuel", [(0, 231), (0.5, 180), (1, 129)])
+
+    # the screens' live text: range + unit above; the gear (N / R, or the gear with D as on the SMG), the odometer, the trip
+    sp.font("lcd", DIG, 34, "0123456789", shear=0, track=1.0)
+    sp.readout("lcd", 752, 404, "r", 3, "range", LCD)
+    sp.font("lcds", DIG, 15, "0123456789.kmi", shear=0, track=0.6)
+    sp.readout("lcds", 715, 426, "m", 2, "distUnit", LCD)
+    sp.readout("lcds", 637, 566, "l", 6, "odo", LCD)
+    sp.readout("lcds", 795, 566, "r", 5, "trip", LCD)
+    sprites = {}
+    fb = {"path": ARIAL_B, "size": 74, "chars": "", "stroke": 0.4, "shear": 0, "track": 0}
+    fs = {"path": ARIAL_B, "size": 34, "chars": "", "stroke": 0.3, "shear": 0, "track": 0}
+
+    def tint(im):
+        c = Image.new("RGBA", im.size, LCD + (0,))
+        c.putalpha(im.getchannel("A"))
+        return c
+
+    for ch in "RNP":
+        sprites[ch] = {"im": tint(glyph(ch, fb, sp.A)[0])}
+    D = tint(glyph("D", fb, sp.A)[0])
+    for ch in "1234567":
+        g = tint(glyph(ch, fs, sp.A)[0])
+        Wc = 2 * (D.width + g.width)
+        comp = Image.new("RGBA", (Wc, D.height), (0, 0, 0, 0))
+        comp.alpha_composite(D, (Wc // 2 - D.width // 4, 0))
+        comp.alpha_composite(g, (Wc // 2 - D.width // 4 - g.width - 2, D.height - g.height - round(D.height * 0.12)))
+        sprites[ch] = {"im": comp}
+    sp.gear = {"x": 715 - sp.ox, "y": 512 - sp.oy, "sprites": sprites}
+    return sp

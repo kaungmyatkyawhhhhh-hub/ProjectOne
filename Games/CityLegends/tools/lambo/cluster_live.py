@@ -1984,8 +1984,15 @@ def r8g2():
     return m.r8g2(Spec, needle_sprite, add_needle, glyph, solid_gear)
 
 
-BUILDERS = {"r8g1": r8g1, "r8gt": r8gt, "r8g2": r8g2, "mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
+def e60():
+    import cluster_imports as m
+
+    return m.e60(Spec, needle_sprite, add_needle, glyph, solid_gear)
+
+
+BUILDERS = {"e60": e60, "r8g1": r8g1, "r8gt": r8gt, "r8g2": r8g2, "mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "e60": ("model_clusters/1_e60_m5_img15_Gauges1_diff.png", (0, 0, 1024, 1024), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="10:57", odo="091962", distUnit="mi", kmh=False, trip="22.5", range="287", fuel=0.78)),
     "r8g1": ("audi_r8_gen1_cluster_owner.png", (0, 80, 679, 340), (0, 80, 679, 340), dict(v=0.0, gear="N", mph=0, manual=False, clock="10:57", odo="011972", distUnit="km", kmh=True, trip="69.1", fuel=0.05)),
     "r8gt": ("audi_r8_gen1_cluster_owner.png", (0, 80, 679, 340), (0, 80, 679, 340), dict(v=3.2, gear="3", mph=43, manual=False, clock="1:20", odo="001972", distUnit="km", kmh=True, trip="12.4", fuel=0.6)),
     "r8g2": ("audi_r8_gen2_cluster_owner.png", (35, 103, 631, 319), None, dict(v=0.95, gear="N", mph=0, manual=False, clock="11:18", odo="011972", distUnit="km", kmh=True, range="230")),

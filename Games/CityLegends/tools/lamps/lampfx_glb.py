@@ -14,9 +14,11 @@ shift are printed, the same from the low and the high corner when it fits). Job 
                "box": [x0, y0, z0, x1, y1, z1],  (2026-11-09, the second Precision 4S: only faces whose middle is in this box,
                                              car metres, x as distance out from the middle, so one box serves
                                              both sides; for a node that holds the front and the rear lamps)
-               "mat": "red_glass"}]}        (2026-11-09: in place of "node", every mesh of the .glb wearing a
+               "mat": "red_glass"}],        (2026-11-09: in place of "node", every mesh of the .glb wearing a
                                              material with this in its name; for nodes whose names are cut
                                              to the same 63 characters)
+   "_turn": 180}                            (2026-11-10, the E60: the .glb turned about the vertical first, for a car
+                                             that auto_car turned round, report "front_sign": 1)
 {S} is L or R (Blender object names stop at 63 characters: give a piece of the node's name that fits). Roles:
 HeadCore, HeadGlass, TurnF, TurnR, Rev, Tail. Each shell stands "off" metres proud of its piece along the normals.
 After the insert, set each LampFx part to Neon, white, Transparency 0.9, no collisions or shadow (LampApply does
@@ -50,6 +52,14 @@ dlo, dhi = bbox(car)
 before = set(bpy.data.objects)
 bpy.ops.import_scene.gltf(filepath=glb)
 raw = [o for o in bpy.data.objects if o not in before]
+TURN = job.pop("_turn", 0)  # (2026-11-10, the E60: auto_car turned this car round, front_sign 1: the .glb turned the same way first)
+if TURN:
+    from mathutils import Matrix
+    Rz = Matrix.Rotation(np.radians(TURN), 4, "Z")
+    for o in raw:
+        if o.parent is None:
+            o.matrix_world = Rz @ o.matrix_world
+    bpy.context.view_layer.update()
 rawm = [o for o in raw if o.type == "MESH" and not o.name.startswith("Icosphere") and len(o.data.polygons)]
 rlo, rhi = bbox(rawm)
 s3 = [(dhi[i] - dlo[i]) / (rhi[i] - rlo[i]) for i in range(3)]

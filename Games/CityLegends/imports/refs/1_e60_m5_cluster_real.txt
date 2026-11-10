@@ -1,0 +1,8 @@
+Car: BMW M5 E60 (2006, UK car: mph outer scale, km/h inner)
+Picture: whole photo, 1600 x 1200, unchanged. Angled from the left of the wheel, very sharp, unlit cluster (only the centre LCDs on).
+Source page: https://commons.wikimedia.org/wiki/File:2006_BMW_M5_-_Flickr_-_The_Car_Spy_(6).jpg
+Image URL: https://upload.wikimedia.org/wikipedia/commons/4/45/2006_BMW_M5_-_Flickr_-_The_Car_Spy_%286%29.jpg
+Author: The Car Spy (Flickr), via Wikimedia Commons
+Licence: CC BY 2.0 (https://creativecommons.org/licenses/by/2.0/) - credit the author if shown anywhere
+Taken: 2010-06-21. Found: 2026-11-09.
+Use: design reference only (we redraw the cluster; the photo never goes in the game).

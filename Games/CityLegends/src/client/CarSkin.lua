@@ -57,6 +57,7 @@ CarSkin.CLUSTER_STYLE = {
 	audy_r8 = "LiveR8", -- the 2010 model (2026-11-09), from the owner's photo
 	audy_r8_lw = "LiveR8GT", -- the owner's photo with the real 2011 GT's white dials (2026-11-09)
 	audy_r8_4s = "LiveR8G2", -- the 2016 model (2026-11-09), from the owner's gen-2 photo
+	bnw_m5_e60 = "LiveE60", -- the 2009 model's own dials, live (2026-11-10)
 	mclaran_12c = "Live12C", -- from the owner's photo
 	bentz_sls = "LiveSLS", -- from the owner's photo
 	ferrara_599 = "LiveF141", -- from the owner's photo
@@ -149,6 +150,7 @@ CarSkin.CLUSTER_RECT = {
 	astin_dbx = { at = Vector3.new(-0.0027, 0.0326, -0.2737), face = Vector3.new(0, 0.3076, 0.9515), w = 0.294, h = 0.112 }, -- on the model's screen
 	audy_r8 = { at = Vector3.new(-0.012, 0.034, -0.2315), face = Vector3.new(0, 0.32, 0.9474), w = 0.3921, h = 0.1456 }, -- in the model's two pods and hood (tools/lambo/window_r8g1.png)
 	audy_r8_4s = { at = Vector3.new(-0.0003, 0.0296, -0.2202), face = Vector3.new(-0.0007, 0.1175, 0.9931), w = 0.29, h = 0.1051 }, -- on the model's own screen (tools/lambo/window_r8g2.png)
+	bnw_m5_e60 = { at = Vector3.new(-0.0034, 0.0360, -0.2591), face = Vector3.new(0, 0.1369, 0.9906), w = 0.286, h = 0.122 }, -- the model's hood opening (tools/lambo/window_e60.png)
 	audy_r8_lw = { at = Vector3.new(-0.0053, 0.0373, -0.2128), face = Vector3.new(0, 0.32, 0.9474), w = 0.3921, h = 0.1456 }, -- the same pods (its steering pieces' box sits 2 cm deeper: dials found by their picture in both models)
 	bentz_sl65bs = { at = Vector3.new(0.022, 0.0715, -0.2433), face = Vector3.new(0, 0.2, 0.98), w = 0.234, h = 0.106 }, -- in the two bowls
 	bentz_sls = { at = Vector3.new(0.0021, 0.0377, -0.2165), face = Vector3.new(0, 0.2, 0.98), w = 0.3163, h = 0.1342 }, -- in the model's hood, in front of its dials
@@ -292,7 +294,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -405,12 +407,12 @@ CarSkin.STEER_MODEL = {
 	ferrara_f430 = "FerrariF430",
 	ferrara_458 = "Ferrari458",
 	-- the other supercars and hypercars
-	lexis_lc500 = "LexusSport", -- (audy_r8 keeps its 2010 model's own wheel)
+	lexis_lc500 = "LexusSport", -- (audy_r8 keeps its 2010 model's own wheel, bnw_m5_e60 its 2009 model's)
 	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
 	nisun_gtr = "GTR",
 	-- BMW
 	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", bnw_m4_f82 = "BMWM",
-	bnw_m5_e60 = "BMWM", bnw_m6_v10 = "BMWM", bnw_m8gc = "BMWM", bnw_x6 = "BMWM", bnw_x7 = "BMWM", bnw_750li = "BMWM",
+	bnw_m6_v10 = "BMWM", bnw_m8gc = "BMWM", bnw_x6 = "BMWM", bnw_x7 = "BMWM", bnw_750li = "BMWM",
 	bnw_m5_f10 = "BMWM", bnw_m5_f90 = "BMWM",
 	-- Mercedes
 	bentz_cla45 = "AMGFlat", bentz_cls63s = "AMGFlat", bentz_gle53 = "AMGFlat", bentz_g63 = "AMGFlat", brabos_g63 = "AMGFlat",

@@ -282,6 +282,7 @@ Config.Credits = {
 	"Precision Type 42 V10 model by Ddiaz Design",
 	"Precision Type 42 V10 Lightweight model by Ddiaz Design",
 	"Precision 4S V10 model by Ddiaz Design",
+	"Bavarica Werkz E60 V10 model by Galaxy Car Showroom (CC BY 4.0)",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }

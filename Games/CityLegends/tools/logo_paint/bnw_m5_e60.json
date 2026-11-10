@@ -1,0 +1,145 @@
+{
+ "src": "imports/importing cars/2009_bmw_m5_e60.glb",
+ "images": {
+  "0": [
+   {
+    "replace": "tools/logo_paint/bnw_m5_e60_screen.png"
+   }
+  ],
+  "1": [
+   {
+    "ellipse": [
+     552,
+     362,
+     196,
+     196,
+     46,
+     46,
+     48
+    ]
+   },
+   {
+    "solid": [
+     360,
+     18,
+     572,
+     136,
+     214,
+     214,
+     214
+    ]
+   }
+  ],
+  "3": [
+   {
+    "replace": "tools/logo_paint/bnw_m5_e60_leather.png"
+   }
+  ],
+  "4": [
+   {
+    "replace": "tools/logo_paint/bnw_m5_e60_leather_n.png"
+   }
+  ],
+  "5": [
+   {
+    "solid": [
+     2,
+     478,
+     68,
+     508,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "solid": [
+     116,
+     327,
+     146,
+     351,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "solid": [
+     2,
+     394,
+     36,
+     428,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "15": [
+   {
+    "rect": [
+     664,
+     366,
+     772,
+     414
+    ]
+   }
+  ],
+  "18": [
+   {
+    "replace": "tools/logo_paint/bnw_m5_e60_leather.png"
+   }
+  ],
+  "19": [
+   {
+    "replace": "tools/logo_paint/bnw_m5_e60_leather_n.png"
+   }
+  ],
+  "21": [
+   {
+    "ring": [
+     512,
+     512,
+     390,
+     509
+    ]
+   }
+  ]
+ },
+ "drop": [
+  "M51_215",
+  "EngineBadges1_71",
+  "HoodBadge1_127",
+  "TrunkBadge1_325",
+  "SteeringWheelBadge1_312",
+  "SteeringWheelM5Badge1_315",
+  "FendersBadges1_92",
+  "DoorSillsBadges1_52",
+  "HoodBadges1_128",
+  "DoorSillInfo1_47",
+  "EngineBayBadges1_87",
+  "DashboardBadge1_40",
+  "SteeringWheelBadges1_313",
+  "LeftRearDoorBadge1_192",
+  "RightRearDoorBadge1_279",
+  "Brakes1_13",
+  "Brakes4_16",
+  "Brakes5_17",
+  "Brakes8_20",
+  "RpmGaugeArrow1_302",
+  "RpmGaugeArrow2_303",
+  "SpeedGaugeArrow1_308",
+  "SpeedGaugeArrow2_309",
+  "GaugeArrows1_104",
+  "GaugeArrows2_105"
+ ],
+ "rename_material": {
+  "RightSeatBadges1_diff": "ButtonLabels1_diff",
+  "M5_E60_Paint": "CarPaint1",
+  "M5_E60_Taillights": "TailLamp1",
+  "BmwWheels1_diff": "Wheels1_diff",
+  "GR86_Leather": "Leather1",
+  "GR86_Leather_0": "Leather2",
+  "Meshesuntitled5511_diff": "Tyre1_diff"
+ }
+}
