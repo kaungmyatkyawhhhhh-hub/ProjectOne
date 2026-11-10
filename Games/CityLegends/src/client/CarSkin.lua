@@ -3081,10 +3081,14 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 					km.Part1 = knuckle
 					km.C0 = j.C0
 					km.Parent = root
+					-- (2026-11-10) from the wheel's rest pose: the tyre's own CFrame carries the joint's spin, steering and
+					-- spring travel when the skin goes on while the car moves (another player's car), and the caliper
+					-- kept that offset on its knuckle for good
+					local restBase = root.CFrame * j.C0 * j.C1:Inverse() * CFrame.new(gw.x - j.C0.Position.X, 0, 0)
 					for i, t in fixed do
 						local p = t.part:Clone()
 						p.Name = "SkinCaliper" .. i
-						p.CFrame = base * t.offset
+						p.CFrame = restBase * t.offset
 						p.Parent = skin
 						local w = Instance.new("WeldConstraint")
 						w.Part0 = knuckle

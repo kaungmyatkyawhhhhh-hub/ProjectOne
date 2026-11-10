@@ -251,6 +251,7 @@ export type StepIn = {
 	pedal: number?, -- the brake pedal 0..1 (with ABS off a hard one locks the fronts)
 	throttle: number?, -- the throttle 0..1, and the car's top speed (studs/s): a rear-drive car's power slides
 	top: number?,
+	drift: boolean?, -- drift tyres fitted: only on these does traction control off let the driven tyres spin freely
 }
 export type StepOut = {
 	vy: number,
@@ -319,6 +320,15 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 				end
 				return fx, 0
 			end
+			-- (owner, 2026-11-10) off on ordinary tyres: the rear steps out, but it isn't let go as freely as on drift tyres
+			if not s.drift then
+				local top = lim * P.RwdSlideOffGrip
+				local fx = math.min(f, top)
+				if fx > lim then
+					return lim * P.SpinGrip, math.clamp((fx / lim - 1) / math.max(P.RwdSlideOffGrip - 1, 0.01), 0.3, 1) * P.RwdSpinOffGrip
+				end
+				return fx, 0
+			end
 			if f > lim then
 				return lim * P.SpinGrip, math.clamp((f / lim - 1) * 2, 0.35, 1) * P.RwdSpinOff
 			end
@@ -334,6 +344,13 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 			if f > lim * 1.06 then
 				tcCut = math.max(tcCut, 1 - lim * 1.06 / f)
 				return lim * 1.0, 0.25
+			end
+			return math.min(f, lim), if f > lim then 0.15 else 0
+		end
+		-- (2026-11-10) off on ordinary tyres (front and all-wheel drive): a chirp of wheelspin, as Sport
+		if not s.drift then
+			if f > lim * 1.06 then
+				return lim, 0.25
 			end
 			return math.min(f, lim), if f > lim then 0.15 else 0
 		end
@@ -399,7 +416,7 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 	end
 	-- the countersteer help stays out of a slow donut, and is a little weaker with traction control off
 	local slowSpin = rwd and spR > 0.25 and speed < P.DonutBelow
-	local help = if slowSpin then 0 elseif rwd and s.tc == 0 then s.help * P.HelpTcOff else s.help
+	local help = if slowSpin then 0 elseif rwd and s.tc == 0 and s.drift then s.help * P.HelpTcOff else s.help
 	-- countersteer help: the front wheels follow the car's slide (the way it's really going)
 	if help > 0 and vx > 3 then
 		local want = math.clamp(beta * P.HelpK, -P.HelpMax, P.HelpMax)
@@ -410,7 +427,8 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 	end
 	-- stability control: a rear-drive car's goes with its traction control (Sport: Sport at most, off: off), and Sport
 	-- only steps in at speed (so donuts work)
-	local esc = if rwd then math.min(s.esc, s.tc) else s.esc
+	-- (2026-11-10: off on ordinary tyres keeps Sport stability control; off on drift tyres frees the car)
+	local esc = if rwd then math.min(s.esc, if s.tc == 0 and not s.drift then 1 else s.tc) else s.esc
 	local escFrom = if esc == 1 and rwd then P.EscSportFrom else 8
 	for _ = 1, n do
 		local ux = math.max(speed, 0.5)

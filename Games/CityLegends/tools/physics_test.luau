@@ -153,6 +153,7 @@ local function frame(c, inp, dt)
 		pedal = c.brakeIn,
 		throttle = if c.cut > 0 then 0 else inp.throttle,
 		top = c.top,
+		drift = inp.drift,
 	}, dt)
 	c.ax = out.ax
 	local dragA = (2 + c.drag * vx * vx) * (if vx > 0.5 then 1 elseif vx < -0.5 then -1 else 0)
@@ -176,6 +177,7 @@ end
 
 local DT = 1 / 60
 local rows = {}
+local slides = {}
 local list = {}
 for _, spec in Cars.All do
 	table.insert(list, spec)
@@ -288,13 +290,13 @@ for _, spec in list do
 		local o = newCar(spec)
 		o.vx = Config.mphToSps(35)
 		for i = 1, 90 do
-			frame(o, { throttle = 0.3, brake = 0, steer = 0.7, esc = 0, tc = 0, help = 1 }, DT)
+			frame(o, { throttle = 0.3, brake = 0, steer = 0.7, esc = 0, tc = 0, help = 1, drift = true }, DT)
 		end
 		for i = 1, 60 do
-			frame(o, { throttle = 1, brake = 0, steer = 0.7, esc = 0, tc = 0, help = 1 }, DT)
+			frame(o, { throttle = 1, brake = 0, steer = 0.7, esc = 0, tc = 0, help = 1, drift = true }, DT)
 		end
 		for i = 1, 180 do
-			frame(o, { throttle = 0.2, brake = 0, steer = 0, esc = 0, tc = 0, help = 1 }, DT)
+			frame(o, { throttle = 0.2, brake = 0, steer = 0, esc = 0, tc = 0, help = 1, drift = true }, DT)
 		end
 		caught = math.abs(math.atan2(o.vy, math.max(o.vx, 1))) < math.rad(12) and math.abs(o.r) < 0.6
 		-- and a powerful rear-drive car really does step out (traction and stability off)
@@ -306,34 +308,37 @@ for _, spec in list do
 	-- (2026-11-08, RWD slides) rear-drive cars with the power for it: a little slide with traction control on, a clear
 	-- one in Sport, a big one off (caught with the help), donuts in Sport and off, never at a steady cruise
 	if d.drive == "RWD" and c.p.reserve > 1.4 then
-		local function exitSlide(tc)
+		-- (2026-11-10) traction control off lets the rear go freely only on drift tyres (`drift`); on any other tyres less
+		local function exitSlide(tc, drift)
 			local o = newCar(spec)
 			o.vx = Config.mphToSps(30)
 			for i = 1, 70 do
-				frame(o, { throttle = 0.3, brake = 0, steer = 0.75, esc = 2, tc = tc, help = 1 }, DT)
+				frame(o, { throttle = 0.3, brake = 0, steer = 0.75, esc = 2, tc = tc, help = 1, drift = drift }, DT)
 			end
 			o.maxBeta = 0
 			for i = 1, 75 do
-				frame(o, { throttle = 1, brake = 0, steer = 0.75, esc = 2, tc = tc, help = 1 }, DT)
+				frame(o, { throttle = 1, brake = 0, steer = 0.75, esc = 2, tc = tc, help = 1, drift = drift }, DT)
 			end
 			local peak = math.deg(o.maxBeta)
 			for i = 1, 180 do
-				frame(o, { throttle = 0.15, brake = 0, steer = 0, esc = 2, tc = tc, help = 1 }, DT)
+				frame(o, { throttle = 0.15, brake = 0, steer = 0, esc = 2, tc = tc, help = 1, drift = drift }, DT)
 			end
 			return peak, math.deg(math.abs(math.atan2(o.vy, math.max(o.vx, 1)))), o.r
 		end
 		local onP, onEnd = exitSlide(2)
 		local spP, spEnd = exitSlide(1)
-		local offP, offEnd, offR = exitSlide(0)
+		local offP, offEnd, offR = exitSlide(0, true)
+		local stP, stEnd, stR = exitSlide(0, false)
 		check(onP >= 1 and onP <= 12, string.format("%s: TC on, a few degrees on power (%.1f)", id, onP))
 		check(spP >= onP - 1.5 and spP <= 35, string.format("%s: TC Sport, a clear slide (%.1f)", id, spP))
 		check(offP >= spP - 1.5, string.format("%s: TC off, at least as much slide (%.1f vs %.1f)", id, offP, spP))
 		check(onEnd < 6 and spEnd < 12 and offEnd < 15 and math.abs(offR) < 0.7, string.format("%s: every slide caught (%.0f / %.0f / %.0f deg)", id, onEnd, spEnd, offEnd))
-		local function donut(tc)
+		check(stP <= offP - 2 and stEnd < 12 and math.abs(stR) < 0.7, string.format("%s: TC off on ordinary tyres, less slide than on drift tyres, caught (%.1f vs %.1f, ends %.0f deg)", id, stP, offP, stEnd))
+		local function donut(tc, drift)
 			local o = newCar(spec)
 			local turned, bmax = 0, 0
 			for i = 1, 420 do
-				frame(o, { throttle = 1, brake = 0, steer = 1, esc = 2, tc = tc, help = 1 }, DT)
+				frame(o, { throttle = 1, brake = 0, steer = 1, esc = 2, tc = tc, help = 1, drift = drift }, DT)
 				turned += math.abs(o.r) * DT
 				if i > 120 then
 					bmax = math.max(bmax, math.abs(math.atan2(o.vy, math.max(math.abs(o.vx), 0.5))))
@@ -343,7 +348,9 @@ for _, spec in list do
 		end
 		local dOnT, dOnB = donut(2)
 		local dSpT, dSpB, dSpV = donut(1)
-		local dOffT, dOffB, dOffV = donut(0)
+		local dOffT, dOffB, dOffV = donut(0, true)
+		local dStT, dStB, dStV = donut(0, false)
+		table.insert(slides, string.format("| %s | %.1f | %.1f | %.1f | %.1f | %.0f / %.0f | %.0f / %.0f | %.0f / %.0f |", id, onP, spP, stP, offP, dSpT, dSpB, dStT, dStB, dOffT, dOffB))
 		check(dOnB < 20, string.format("%s: no donut with TC on (slide %.0f)", id, dOnB))
 		check(dSpB > 35 and dSpT > 300 and dSpV < 90, string.format("%s: donut in Sport (%.0f deg turned, slide %.0f, %.0f mph)", id, dSpT, dSpB, dSpV))
 		check(dOffB > 35 and dOffT > 300 and dOffV < 90, string.format("%s: donut with TC off (%.0f deg turned, slide %.0f, %.0f mph)", id, dOffT, dOffB, dOffV))
@@ -361,6 +368,13 @@ if showTable then
 	print("| Car | 0-60 s (game / target) | Top mph (game / spec) | 100-0 m (game / real) | 60-0 ft | Max side g at 60 mph |")
 	print("|---|---|---|---|---|---|")
 	for _, r in rows do
+		print(r)
+	end
+end
+if showTable then
+	print("| RWD car | exit slide deg: TC on | Sport | off, ordinary tyres | off, drift tyres | donut deg turned / slide: Sport | off, ordinary | off, drift |")
+	print("|---|---|---|---|---|---|---|---|")
+	for _, r in slides do
 		print(r)
 	end
 end

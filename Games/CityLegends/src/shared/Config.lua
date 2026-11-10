@@ -529,6 +529,10 @@ Config.DrivingFeel = {
 	ShiftBlur = 1,
 	LaunchKickFov = 7, -- a hard launch
 	LaunchBlur = 2,
+	-- (owner, 2026-11-10) a launch-control start makes no tyre smoke for this long (seconds, or until you lift); press the
+	-- brake again with the throttle still down (under BurnArmMph) and it's a burnout: the tyres spin and smoke on the spot
+	LaunchClean = 3,
+	BurnArmMph = 30,
 	NearMissFov = 2.5, -- a close pass on traffic
 	RoadRoar = 0.45, -- tyre and road roar at full rush (volume)
 	CabinBuzz = 0.025, -- the driver's head buzzes with the road at speed (studs)
@@ -625,7 +629,13 @@ Config.DrivingFeel = {
 		RwdSpinOn = 0.35,
 		RwdSlideSport = 1.8, -- Sport: a clear slide, donuts
 		RwdSpinSport = 1,
-		RwdSpinOff = 1, -- Off: spins up freely (power oversteer, drifts, donuts)
+		RwdSpinOff = 1, -- Off: spins up freely (power oversteer, drifts, donuts)...
+		-- ...but only on drift tyres (owner, 2026-11-10: "the cars are slipping too much when tcs is off and just make it
+		-- slip like that when drift tires are installed"). Off on any other tyres: the rear may go this far past its grip
+		-- (Sport's room, with no traction control cutting in), stability control stays in at Sport, and the countersteer
+		-- help stays full. More = slides more
+		RwdSlideOffGrip = 1.5,
+		RwdSpinOffGrip = 0.75,
 		RwdSpinSide = 0.6, -- the side grip a fully spinning rear loses on top (Sport / Off; more = slides further)
 		DonutBelow = 45, -- studs/s (35 mph): under this a spinning rear may swing round (the countersteer help stays out)
 		HelpTcOff = 0.7, -- the countersteer help with traction control off (rear-drive)
@@ -1040,6 +1050,24 @@ local function supercarExhaust()
 			},
 			start = { idleAt = 2.2, fade = 0.5, out = 2.4, ends = 2.85, settleFrom = 1470, settle = 1.5, gain = 0.61 },
 		},
+		-- (owner, 2026-11-10: "Change all the R8 and hurcan rev loop to this: 77659121594090") the Huracans and the
+		-- R8s: the V10 set with that one rev loop in place of the two Huracan loops (the Gallardos keep V10)
+		V10_REV = {
+			sounds = {
+				Start = id(120452275990108), -- "Lamborghini Huracan Startup" (Tyudogg5), ~1,470 at its end
+				Idle = id(87192192605296), -- "r8 idle" (TBWK128), 1,166 rpm
+				High = id(77659121594090), -- "V10_rev" (Simonko9955), 6,920 rpm (steady over its 7.2 s, no jump at the seam)
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 1166, High = 6920 },
+				gains = { Idle = 0.53, High = 0.27 }, -- (a loud clip: rms 0.61, the old 7,780 loop's 0.12 at 1.39)
+				width = 0.42, reachDown = { High = 0.6 }, idleReach = 0.4, idleTop = 1.8,
+				coast = COAST, shiftCut = 0.06, shiftPops = false,
+			},
+			start = { idleAt = 2.2, fade = 0.5, out = 2.4, ends = 2.85, settleFrom = 1470, settle = 1.5, gain = 0.61 },
+		},
 		-- Toyota 1LR-GUE 4.8 V10, NA (LFA): the high, very fast F1-like scream
 		LFA = {
 			sounds = {
@@ -1149,15 +1177,15 @@ local function supercarExhaust()
 		lambrini_countach = { family = "V12_COUNTACH", tone = { low = 3, drive = 0.06 } }, -- the carburettors' roar
 		lambrini_lp570 = { family = "V10", with = GALLARDO, volume = 1.05, tone = { drive = 0.08, high = 1 } },
 		lambrini_lp560 = { family = "V10", with = GALLARDO, tone = { drive = 0.05 } },
-		lambrini_huracan = { family = "V10" },
-		lambrini_performante = { family = "V10", volume = 1.2, tone = { drive = 0.08, high = 1 }, bands = { shots = { Pops = 1.5 } } },
-		lambrini_sto = { family = "V10", volume = 1.25, tone = { drive = 0.1, high = 1.5 }, bands = { shots = { Pops = 1.6 } } },
-		lambrini_sterrato = { family = "V10", volume = 0.95, tone = { low = 1 } },
+		lambrini_huracan = { family = "V10_REV" },
+		lambrini_performante = { family = "V10_REV", volume = 1.2, tone = { drive = 0.08, high = 1 }, bands = { shots = { Pops = 1.5 } } },
+		lambrini_sto = { family = "V10_REV", volume = 1.25, tone = { drive = 0.1, high = 1.5 }, bands = { shots = { Pops = 1.6 } } },
+		lambrini_sterrato = { family = "V10_REV", volume = 0.95, tone = { low = 1 } },
 		-- the Audis: a bit more muffled than the Lamborghinis (1st generation), the 2nd generation sharper
-		audy_r8 = { family = "V10", with = R8_START, volume = 0.9, tone = { high = -4 }, bands = { shiftCut = 0.15, shots = { Pops = 0.7 } } },
-		audy_r8_lw = { family = "V10", with = R8_START, volume = 0.95, tone = { high = -3 }, bands = { shiftCut = 0.12, shots = { Pops = 0.7 } } },
-		audy_r8_4s = { family = "V10", with = R8_START, tone = { high = 1.5 }, bands = { shots = { Pops = 0.8 } } },
-		audy_r8_4s_rwd = { family = "V10", with = R8_START, tone = { high = 1.5 }, bands = { shots = { Pops = 0.8 } } }, -- (not in the game yet)
+		audy_r8 = { family = "V10_REV", with = R8_START, volume = 0.9, tone = { high = -4 }, bands = { shiftCut = 0.15, shots = { Pops = 0.7 } } },
+		audy_r8_lw = { family = "V10_REV", with = R8_START, volume = 0.95, tone = { high = -3 }, bands = { shiftCut = 0.12, shots = { Pops = 0.7 } } },
+		audy_r8_4s = { family = "V10_REV", with = R8_START, tone = { high = 1.5 }, bands = { shots = { Pops = 0.8 } } },
+		audy_r8_4s_rwd = { family = "V10_REV", with = R8_START, tone = { high = 1.5 }, bands = { shots = { Pops = 0.8 } } }, -- (not in the game yet)
 		lexis_lfa = { family = "LFA" },
 		lexis_lfa_circuit = { family = "LFA", volume = 1.1, tone = { high = 1 } },
 		mclaran_12c = { family = "V8_TWINTURBO" },

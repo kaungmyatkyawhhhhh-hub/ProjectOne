@@ -311,6 +311,10 @@ type State = {
 	screech: number, -- tyre cry on hard launches (sound only)
 	chirp: number, -- seconds left of a tyre chirp after a hard low-gear shift
 	launchReady: boolean, -- launch control: brake + throttle held at a stop
+	launchClean: number, -- (2026-11-10) seconds left of a launch-control start with no tyre smoke
+	burnArmed: boolean, -- a launch-control start with the throttle still held: the brake now makes a burnout
+	burnout: boolean, -- brake + throttle after a launch-control start: the driven tyres spin and smoke on the spot
+	driftTyres: boolean, -- drift tyres fitted (with traction control off the rear lets go freely only on these)
 	weightK: number, -- the car's kerb weight over Config.DrivingFeel.WeightRef (CarStats)
 	brakeK: number, -- the brake parts' extra braking force (1 = stock; CarStats.tuneOf)
 	-- (2026-11-06, the workshop) what the parts and the TUNE tab's settings do to the feel
@@ -2501,6 +2505,10 @@ function Driving.attach(model: Model)
 		screech = 0,
 		chirp = 0,
 		launchReady = false,
+		launchClean = 0,
+		burnArmed = false,
+		burnout = false,
+		driftTyres = false,
 		weightK = 1,
 		brakeK = 1,
 		shiftK = 1,
@@ -2615,8 +2623,11 @@ function Driving.attach(model: Model)
 		local parts = CarStats.decodeParts(model:GetAttribute("Parts"))
 		local setup = CarStats.decodeSetup(model:GetAttribute("Setup"))
 		local tuned = CarStats.tunedSpec(id, parts, setup)
-		local tune = CarStats.tuneOf(CarStats.cleanParts(id, parts))
+		local clean = CarStats.cleanParts(id, parts)
+		local tune = CarStats.tuneOf(clean)
 		local DFeel = Config.DrivingFeel
+		-- (owner, 2026-11-10: with traction control off a car slides like that only on drift tyres)
+		s.driftTyres = clean ~= nil and clean.tyres == "ty_drift"
 		s.spec = tuned
 		s.topSpeed = Config.mphToSps(tuned.TopSpeed)
 		s.accel = Config.mphToSps(60) / tuned.ZeroToSixty
@@ -2943,9 +2954,25 @@ function Driving.step(dt: number)
 	else
 		holding = s.engineOn and standing and brake > 0.5 and throttle > 0.5 and (not s.manual or (s.mgear >= 1 and not s.clutch))
 	end
-	if s.launchReady and not holding and throttle > 0.5 and brake <= 0.3 then
+	-- (owner, 2026-11-10: "to actually bring smoke on tire is when using launch control then release and then press S")
+	-- a burnout: after a launch-control start, with the throttle still down, press the brake again: the brakes hold
+	-- the car and the driven tyres spin and smoke on the spot. Lift the throttle (or get past BurnArmMph) and it's over
+	if s.burnArmed and not s.burnout and (throttle < 0.3 or not s.engineOn or Config.spsToMph(s.vel.Magnitude) > DF.BurnArmMph) then
+		s.burnArmed = false
+	end
+	s.burnout = s.burnArmed and s.engineOn and throttle > 0.5 and brake > 0.3 and not s.electric and (not s.manual or (s.mgear >= 1 and not s.clutch))
+	if s.burnout then
+		holding = false -- (the pedals are the burnout's, not launch control's)
+	end
+	if s.launchReady and not holding and not s.burnout and throttle > 0.5 and brake <= 0.3 then
 		s.launch = 0.8
 		s.report.launch += 1
+		-- (owner, 2026-11-10: "when doing launch control there is tire smoke ... remove that") the start itself is clean
+		s.launchClean = DF.LaunchClean
+		s.burnArmed = true
+	end
+	if s.launchClean > 0 then
+		s.launchClean = if throttle < 0.3 or s.burnout then 0 else math.max(0, s.launchClean - dt)
 	end
 	if holding and not s.launchReady then
 		UI.toast("Launch control: let go of the brake")
@@ -3338,7 +3365,7 @@ function Driving.step(dt: number)
 				vy = latSpeed,
 				r = s.yawRate,
 				delta = angle,
-				drive = if s.launchReady then 0 elseif aEng > 0 then aEng * CarPhysics.reserve(P, fwdSpeed, s.topSpeed, if s.tc then Driving.tcMode else 0) else aEng,
+				drive = if s.launchReady or s.burnout then 0 elseif aEng > 0 then aEng * CarPhysics.reserve(P, fwdSpeed, s.topSpeed, if s.tc then Driving.tcMode else 0) else aEng,
 				brake = aBrk,
 				handbrake = handbrake,
 				ax = s.axAxle,
@@ -3351,7 +3378,12 @@ function Driving.step(dt: number)
 				pedal = s.brakeIn,
 				throttle = if engaged and gearNow > 0 then throttle else 0,
 				top = s.topSpeed,
+				drift = s.driftTyres,
 			}, dt)
+			-- a burnout: the driven tyres spin flat out on the spot (the wheels, the smoke and the squeal follow `spin`)
+			if s.burnout then
+				out.spin = 1
+			end
 			s.axleOut = out
 			s.axAxle = out.ax
 			-- the TC light: flashes while the aids are working (steady when TC is off), HUD and the live cluster
@@ -3364,7 +3396,7 @@ function Driving.step(dt: number)
 			UI.setTcWorking(s.tcFlashT > 0)
 			-- the speed: what the tyres put down plus the rest, then the car's frame turns with it
 			fwdSpeed += (out.ax + aOther) * dt
-			if s.launchReady then
+			if s.launchReady or (s.burnout and math.abs(fwdSpeed) < 2) then
 				fwdSpeed = 0
 			end
 			latSpeed = out.vy
@@ -3526,8 +3558,14 @@ function Driving.step(dt: number)
 			end
 			local frontSpin = if s.drive ~= "RWD" then out.spin else 0
 			local rearSpin = if s.drive ~= "FWD" then out.spin else 0
-			s.smokeF = math.clamp(math.max(frontSpin, (out.slipF - 1.4) / 1.5, if s.brakeIn > 0.8 and not Driving.abs then out.lock else 0), 0, 1)
-			s.smokeR = math.clamp(math.max(rearSpin, (out.slipR - 1.3) / 1.4, if handbrake then out.lock * 0.6 else 0), 0, 1)
+			-- (owner, 2026-11-10: "fix tire smoke coming out for no reason when idle") at a crawl the slip angle is no
+			-- measure of a slide (a few cm/s of side creep read as a big angle): it smokes only once the car really moves
+			local moving = math.clamp((math.abs(fwdSpeed) - 4) / 8, 0, 1)
+			s.smokeF = math.clamp(math.max(frontSpin, (out.slipF - 1.4) / 1.5 * moving, if s.brakeIn > 0.8 and not Driving.abs then out.lock else 0), 0, 1)
+			s.smokeR = math.clamp(math.max(rearSpin, (out.slipR - 1.3) / 1.4 * moving, if handbrake then out.lock * 0.6 else 0), 0, 1)
+			if s.launchClean > 0 then
+				s.smokeF, s.smokeR = 0, 0
+			end
 		end
 		if throttle > 0.8 and math.abs(fwdSpeed) < 14 and brake > 0.3 then
 			s.report.burn += dt
@@ -3792,6 +3830,8 @@ function Driving.step(dt: number)
 		elseif s.launchReady then
 			target = s.launchRev -- launch control holds the revs, steady
 			s.rpm = target
+		elseif s.burnout then
+			target = math.min(0.6 + 0.37 * throttle, 0.97) -- the tyres spinning free: the revs high
 		elseif s.gear == "N" then
 			target = 0.12
 		else
@@ -4219,6 +4259,9 @@ function Driving.render(dt: number)
 		if s.axleOut then
 			-- (the two-axle model) each axle smokes from its own tyres' slide, spin or lock
 			rate = 75 * (if sm.rear then s.smokeR else s.smokeF)
+		end
+		if s.launchClean > 0 then
+			rate = 0 -- (a launch-control start: no smoke)
 		end
 		-- a drift smokes the rear tyres hard
 		if s.drifting and sm.rear then

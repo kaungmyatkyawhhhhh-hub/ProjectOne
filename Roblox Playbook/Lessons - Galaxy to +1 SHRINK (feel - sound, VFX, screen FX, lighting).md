@@ -280,3 +280,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Cause:** I built "a new feature = a new button" instead of reusing the input kids already press.
 - **Fix:** hold jump for 0.3 s = the jetpack (a tap stays a normal jump). The fuel is a thin bar above the hotbar, shown only while it's in use.
 - **Rule (every game):** a movement extra (double jump, glide, jetpack, sprint) goes on the input kids already use (hold or double-tap jump, hold run), not a new button. Its meter shows only while it's in use, in the lower middle, and in the kit's bar style.
+
+## SMOKE AND SLIDES ONLY WHEN THEY'RE EARNED (10 Nov, City Legends, owner: "the cars are slipping too much when tcs is off", "tire smoke coming out for no reason when idle", "when doing launch control there is tire smoke")
+- **What felt bad:** with traction control off every rear-drive car went sideways like a drift car; tyres smoked standing still; a clean launch-control start smoked.
+- **Cause:** the tyre model measured slide from the slip angle, and at a crawl a few cm/s of side creep reads as a huge angle (smoke at idle). "TC off" was tuned as a drift mode for every car. Smoke followed the physics' wheelspin even on a launch the player meant to be clean.
+- **Fix:** smoke from the slip angle only once the car really moves; TC off lets the rear go freely only on drift tyres (ordinary tyres: about Sport's slide, stability control stays at Sport); a launch-control start makes no smoke; smoke on the spot is a deliberate burnout (launch control, let go, press the brake again with the throttle down).
+- **Rule (every game):** a big effect (smoke, sparks, a slide) must come from something the player chose (a part, a mode, a button combo), never from noise at rest. Check every effect at a standstill and at a crawl. The wildest physics belongs to the part that sells it (drift tyres), not to a settings switch.
