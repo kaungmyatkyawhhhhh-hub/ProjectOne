@@ -26,8 +26,9 @@ def ramp(px,stops,mask=None):
 def over(base,col,a): return base*(1-a[...,None])+np.array(col,np.float32)*a[...,None]
 def orb(top_,bot_,lid_col,socket=(14,30,58)):
     yy,xx=np.mgrid[0:E,0:E]; cx=cy=(E-1)/2; r=np.hypot(xx-cx,yy-cy)/(E/2); OR_=C.get('orb_r',0.84)
-    if C.get('sclera'):   # cartoon eye (white ball, coloured iris, pupil, glints): the skin colours the iris and the lid
-        ey=np.zeros((E,E,3),np.float32)+np.array((42,34,51),np.float32); ey=np.where((r<0.9)[...,None],np.array((246,246,246),np.float32),ey); ir=0.62
+    if C.get('sclera') or C.get('eye_style') is None:   # cartoon eye (iris, pupil, glints; white ball if sclera): the skin colours the iris and the lid
+        ey=np.zeros((E,E,3),np.float32)+np.array((42,34,51),np.float32); ir=0.88
+        if C.get('sclera'): ey=np.where((r<0.9)[...,None],np.array((246,246,246),np.float32),ey); ir=0.62
         t=np.clip((yy/E-0.12)/0.8,0,1)[...,None]; iris=np.array(top_,np.float32)*(1-t)+np.array(bot_,np.float32)*t
         LF=C.get('look_fwd',0.0)*E/2; ri=np.hypot(xx-(cx+LF),yy-cy)/(E/2)
         ey=np.where(((ri<ir)&(r<0.9))[...,None],iris,ey); ey=np.where(((ri<ir)&(ri>ir-0.12)&(r<0.9))[...,None],ey*0.82,ey)
