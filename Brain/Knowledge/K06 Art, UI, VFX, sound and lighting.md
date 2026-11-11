@@ -64,3 +64,11 @@ The reference's Pets window = a flat panel on the left + ONE real 3D card on the
 - **Room:** a yaw toward the screen centre makes the outer edge grow (about 45 px at 12°), so leave a margin; keep card text at 14 px or more as seen on the phone.
 - **When the owner names a reference effect, find it in the recording first.** I first built a flat hover tilt and cursor sparkles; the owner meant this card.
 - **Never put a frame inside a button that has its own layout or AutomaticSize** (a shine frame made the Shop's tabs grow without end), and wait past every timed rescan before judging a window.
+
+## Models and skins from a sheet (12 Nov 2026, [[2026-11-12 MEGA BITE - HSE rebuild (Reef Shark model, designed skins, FishKit v3)]])
+- **Judge a model with a flat, bright render at the sheet's exact pixel scale, side by side with the sheet,** then four 3D views. A dark studio render hides the faults.
+- **Keep the sheet's painted face** (brow, eye socket, lip shading) in the texture and put the 3D eye exactly on the painted one. 3D brow tubes and "ignore circles" around the eye left streaks.
+- **Body outline:** the true silhouette, bridged straight across each fin base. Pectorals come from the top view.
+- **Mouth:** lip curves traced from the sheet, a red membrane between the lips so nobody sees through, no edge-line shell inside the mouth.
+- **A skin is a design, not a tint:** own colours per zone, own pattern (spots, glowing dots, ribs, lava cracks), own eye, fin colour, fin tips and edge line. Shop pictures are renders of the real model.
+- **Button anatomy:** tall lip, outline in the button's own dark colour, gloss on the top half, text with a drop shadow. A flat pill with a thin stroke reads as a placeholder. List tiles show the picture, not a name bar.
