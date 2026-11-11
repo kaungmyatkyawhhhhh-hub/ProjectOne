@@ -1,6 +1,6 @@
 ---
 tags: [brain, knowledge, art, ui, vfx, sound, lighting]
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 # K06 Art, UI, VFX, sound and lighting
 Back to [[00 BRAIN]] · Lessons: [[Lessons - Galaxy to +1 SHRINK (feel - sound, VFX, screen FX, lighting)]] · Sources: [[Playbook notes - UI deep dive]], [[Playbook notes - Visual effects]], [[Playbook notes - Sound and music]], [[Playbook notes - Lighting, cameras and cutscenes]], [[Playbook notes - Top games art study (Oct 2026)]], [[Map placement rules (every game)]], [[Prompt for a friend's Claude - ChatGPT art pipeline for Roblox]]
@@ -55,3 +55,12 @@ The tells to avoid:
 - **UI motion (starting values):** press 0.06–0.08 s to UIScale 0.92 (Quad Out) → release 0.18–0.25 s Back Out; window open 0.25–0.35 s Back Out from 0.85, close 0.15–0.2 s Quad In; toast in 0.25–0.3 / hold 1.5–2.5 / out 0.2 s; coin fly burst 0.5 s Quad Out, wait 0.25, fly 0.8 s Quad In, counter +30 % for 0.1 s then 0.15–0.25 s Back settle; shine = UIGradient.Offset −1→1 in 1 s Circular Out ×2, rest 2.5 s; idle breathing 1.5–3 s at 1.03–1.05 with a random phase. Max 1–2 idle movers per region, one loud at a time; springs (`spr`) for interruptible motion; honour Reduce Motion.
 - **SFX recipe:** transient (>1 kHz, 0–30 ms) + body (~200 Hz–5 kHz identity) + sub sine 30–60 Hz falling over 200–400 ms + dark reverb tail; risers curve up and PEAK exactly on the impact; phones −16 to −18 LUFS, peaks ≤ −1 dBTP; identity in 1–5 kHz (phone speakers lose bass); underwater = low-pass world sounds + a bright clean layer for rewards. **Owner 11 Nov: no Fish Audio, make SFX ourselves in Python synthesis** (the bible's Fish Audio section is obsolete). Mixing: SoundGroups are discouraged → Audio API faders + sidechain compressor.
 - **Never:** a spiky sunburst anywhere (use a soft radial glow, light shafts or a bubble ring).
+
+## 3D hero card (12 Nov, built in MEGA BITE as `MegaBite.HeroCard`; study: [[2026-11-12 Watch study - 3D pet card and egg hatch screen (owner recording 11 Nov)]])
+The reference's Pets window = a flat panel on the left + ONE real 3D card on the right. Use it for the one selected item of a window (shark, skin, fish, armour set), never for a list.
+- **Build:** the card is opaque Parts held in front of the camera, PARALLEL to the screen (facing the eye stretches it off-centre); SurfaceGuis at ~200 px per stud with LightInfluence 0; the real model about 0.6 studs in front (slide it toward the screen centre by offset x depth / distance); a soft round glow plate behind; a dark tint PLANE behind that (a ScreenGui veil darkens the card too); the world blurred with DepthOfField focused on the card (restore the old values on close).
+- **Motion:** tilt toward the mouse on a spring (12° yaw, 8° pitch); phones sway ±5°; a full 0.5 s spin on change with the swap at the back; Reduce Motion = neither.
+- **Input:** press the card's button through an invisible 2D proxy button placed over it each frame.
+- **Room:** a yaw toward the screen centre makes the outer edge grow (about 45 px at 12°), so leave a margin; keep card text at 14 px or more as seen on the phone.
+- **When the owner names a reference effect, find it in the recording first.** I first built a flat hover tilt and cursor sparkles; the owner meant this card.
+- **Never put a frame inside a button that has its own layout or AutomaticSize** (a shine frame made the Shop's tabs grow without end), and wait past every timed rescan before judging a window.
