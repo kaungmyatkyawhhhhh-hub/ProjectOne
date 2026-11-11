@@ -1,0 +1,13 @@
+C=dict(dir='pirh', length=2.7196, open_r=4, open_r_top=4, env_px=150, body_x0_px=505, top_x0_px=240, front_box=(1040,600,1385,948),
+  bridge_top=[(540,676,4),(672,928,14)], bridge_bot=[(518,702,6)], stalk_env=False, cap_px=40, lip_pad=6, mouth_wall=1, jaw_FN=2.1,
+  tw_fill=1, tw_interp_ranges=[(517,632),(718,948),(1012,1104)], tw_bulge=0.03, HS=1.0, WY=0.88, FN=2.1, taper_start=0.5, taper=0.0, back_amt=0.04, fin_step=9, fin_grid=10,
+  palette=dict(back=(120,140,165), flank=(245,90,35), belly=(250,150,40)), belly_class='belly', colour_mode='sample', sample_blur=1.5, sample_mix=0.97,
+  ignore=dict(fin=(210,45,35)), ignore_tol=45, ignore_boxes=[(640,100,725,178)], ignore_top=dict(fin=(205,40,30),fin2=(235,70,50)), ignore_top_tol=38, ignore_top_rule='R>B+22', tail_t=17, fin_atlas=1, fin_follow_exact=1, cap_clamp_px=8, ignore_circles=[], eye_ignore_k=0, fill_blur=12, top_w=0.75, front_w=0.0, bot_w=0.0, edge_px=8, top_inset_px=20, bot_inset_px=14, exact_place=1,
+  ignore_polys=[[(652,352),(688,320),(797,323),(888,380),(864,454),(802,478),(728,474),(676,436)]], pect_polys=[[(672,350),(702,336),(790,341),(866,386),(842,440),(790,459),(740,455),(698,422)]], pect_splay=32,
+  back_tint=(40,50,75), fin_edge=(196,36,26), fin_root=(244,96,62), fin_t=8, mouth_col=(118,24,26), brow_col=(222,62,46), tooth_col=(242,228,208),
+  look_fwd=0.3, lid=(-0.92,-0.12), lid_col=(214,56,42), eye_dome=0.10, eye=dict(x_px=983, y_px=262, r_px=53, fwd_deg=12), sclera=True, iris_top=(16,96,196), iris_bot=(96,206,250),
+  brows=[],
+  mouth=dict(corner_px=928, corner_row=380, front_px=1110, front_up_row=276, front_lo_row=372, jaw_front_px=1141, lo_front_px=1142, blend_px=60, jaw_w=0.97, n_up=4, n_lo=5, tooth_px=44, lo_tooth_k=1.0, tooth_fit=0.62, tooth_start=0.4, tooth_inset=0.82, tooth_inset_lo=0.8, tooth_w=0.5, wall_front_px=1110,
+     up_pts=[(928,380),(953,347),(990,324),(1025,311),(1053,301),(1087,283),(1110,276)], lo_pts=[(928,380),(950,368),(980,371),(1060,373),(1141,372)],
+     jaw_back_px=70, round_k=1.8, snout_frac=0.12, snout_cap_px=18, round_from=0.8, wall_back_px=8, inner_fwd_px=-6),
+  fin_min_px=500, scale_px=12, NR=44, NA=32)

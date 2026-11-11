@@ -3,7 +3,7 @@ C=dict(dir='reefh', length=4.4195, open_r=4, open_r_top=4, env_px=150, body_x0_p
   tw_fill=1, tw_interp_ranges=[(478,612),(740,1100)], tw_bulge=0.03, HS=1.0, WY=0.9, FN=2.1, taper_start=0.5, taper=0.0, back_amt=0.05, fin_step=10, fin_grid=10,
   palette=dict(back=(85,133,179), belly=(223,226,228)), belly_class='belly', colour_mode='sample', sample_blur=1.5, sample_mix=0.97,
   ignore=dict(tooth=(248,248,250), mouth=(93,22,34), mouth2=(175,74,92), mouth3=(129,36,53), gum=(185,119,142)), ignore_tol=25,
-  ignore_circles=[], eye_ignore_k=0, fill_blur=7, ignore_polys=[[(992,283),(800,281),(772,366),(1004,369)]], ignore_circles_front=[(1143,746,38),(1288,746,38)], ignore_boxes=[(1185,280,1365,385)], ignore_boxes_front=[(1090,770,1350,880)], top_w=0.0, front_w=0.0, edge_px=8, top_inset_px=24, exact_place=1, fin_tips=1,
+  ignore_circles=[], eye_ignore_k=0, fill_blur=7, ignore_polys=[[(992,283),(800,281),(772,366),(1004,369)]], ignore_circles_front=[(1143,746,38),(1288,746,38)], ignore_boxes=[(1185,280,1365,385)], ignore_boxes_front=[(1090,770,1350,880)], top_w=0.0, front_w=0.0, edge_px=8, top_inset_px=24, exact_place=1, fin_tips=1, fin_atlas=1, fin_follow_exact=1,
   back_tint=(20,40,75), fin_edge=(52,92,136), fin_root=(84,132,178), fin_t=8, mouth_col=(132,36,52), brow_col=(70,112,158),
   look_fwd=0.25, lid=(-0.98,-0.5), lid_col=(48,84,124), eye_dome=0.07, eye=dict(x_px=1260, y_px=243, r_px=28, fwd_deg=12), orb_r=0.8, tip_blur=5, eye_style='orb', iris_top=(0,170,235), iris_bot=(70,232,255),
   brows=[],

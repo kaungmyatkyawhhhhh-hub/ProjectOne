@@ -107,7 +107,8 @@ if G.get('px'):
     cam.type='ORTHO'; cam.ortho_scale=P['W']*P['S']; co.location=((P['W']/2-P['nose'])*P['S'],-12,(P['basez']-P['H']/2)*P['S']); co.rotation_euler=(math.radians(90),0,0)
     sc.render.filepath=OUT+'/'+PRE+'f_sheet.png'; bpy.ops.render.render(write_still=True)
     sc.render.resolution_x=1280; sc.render.resolution_y=800
-    for nm,pp,tt_ in (('f_hero',Vector((L*0.3,-L*1.0,L*0.28)),Vector((-L*0.45,0,0.0))),('f_front',Vector((L*0.75,-L*0.5,L*0.1)),Vector((-L*0.25,0,0.0))),('f_low',Vector((L*0.1,-L*0.9,-L*0.4)),Vector((-L*0.45,0,0.0))),('f_top',Vector((-L*0.5,-L*0.02,L*1.25)),Vector((-L*0.5,0,0.0)))):
-        cam.type='PERSP'; cam.lens=50; co.location=pp; co.rotation_euler=(tt_-pp).to_track_quat('-Z','Y').to_euler()
+    VK=R.get('view_k',1.0)
+    for nm,pp,tt_ in (('f_hero',Vector((L*0.3,-L*1.0,L*0.28)),Vector((-L*0.45,0,0.0))),('f_front',Vector((L*0.75,-L*0.5,L*0.1)),Vector((-L*0.25,0,0.0))),('f_low',Vector((L*0.1,-L*0.9,-L*0.4)),Vector((-L*0.45,0,0.0))),('f_top',Vector((-L*0.5,-L*0.02,L*1.25)),Vector((-L*0.5,0,0.0))),('f_shop',Vector((L*0.42,-L*0.62,L*0.2)),Vector((-L*0.42,0,-L*0.02)))):
+        cam.type='PERSP'; cam.lens=50; pp=tt_+(pp-tt_)*VK; co.location=pp; co.rotation_euler=(tt_-pp).to_track_quat('-Z','Y').to_euler()
         sc.render.filepath=OUT+'/'+PRE+nm+'.png'; bpy.ops.render.render(write_still=True)
 print('done')

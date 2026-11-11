@@ -211,13 +211,16 @@ def run(C):
         # sheet space (undo the less-toy squeeze)
         cz=np.interp(np.clip(p[...,0],XM[0],XM[-1]),XM,Z((zt+zb)/2)); tp=TP(np.clip(p[...,0],XM[0],XM[-1]))
         ps=p.copy(); ps[...,1]=p[...,1]/(WY*tp); ps[...,2]=cz+(p[...,2]-cz)/(HS*tp)
-        ws=np.abs(nrm[...,1]); wt=np.maximum(nrm[...,2],0)*C.get('top_w',0.95); wf=np.maximum(nrm[...,0],0)*C.get('front_w',1.1); wb=np.maximum(-nrm[...,2],0)
+        ws=np.abs(nrm[...,1]); wt=np.maximum(nrm[...,2],0)*C.get('top_w',0.95); wf=np.maximum(nrm[...,0],0)*C.get('front_w',1.1); wb=np.maximum(-nrm[...,2],0)*C.get('bot_w',1.0)
         if which=='jaw': wt=wt*0
         view=np.argmax(np.stack([ws,wt,wf,wb],-1),-1)
         sxp,syp=PXs(ps[...,0]),PYs(ps[...,2])
+        if C.get('cap_clamp_px') is not None and which=='upper': sxp=np.maximum(sxp,X0P+C['cap_clamp_px'])
         if C.get('top_inset_px'):   # the sheet's rim light / outline along the back and belly: sample from inside the body instead
             zt_x=np.interp(sxp,xs_,zt); zb_x=np.interp(sxp,xs_,zb); hh_=np.maximum(zb_x-zt_x,1)
-            syp=np.maximum(syp,zt_x+np.minimum(C['top_inset_px'],0.35*hh_)); syp=np.minimum(syp,zb_x-np.minimum(C.get('bot_inset_px',6),0.2*hh_))
+            ins_=np.minimum(C['top_inset_px'],0.35*hh_); d_=np.maximum(syp-zt_x,0)
+            syp=np.where(d_<2*ins_,zt_x+ins_+d_*d_/(4*ins_),syp)      # soft: no hard edge where the inset starts
+            syp=np.minimum(syp,zb_x-np.minimum(C.get('bot_inset_px',6),0.2*hh_))
         cs=bil(SH,sxp,syp)
         ct=bil(SH,TX(PXs(ps[...,0])),TCEN-ps[...,1]/(S*WSC)*TSC)
         cf=bil(SH,FCX+ps[...,1]/S*(FW/(tw.max()*WSC)),FCY-(ps[...,2]-Z(BASEZ))/S)
@@ -236,6 +239,10 @@ def run(C):
             bad|=zone&(np.linalg.norm(src-np.array(v,np.float32),axis=-1)<C.get('ignore_tol',40))
         if M and which=='jaw': bad|=(view==0)&(syp<np.interp(sxp,xs_,lo)+C.get('lip_pad',6))
         if M and which=='upper' and C.get('lip_pad') is not None: bad|=(view==0)&(sxp>M['corner_px']-5)&(syp>np.interp(sxp,xs_,up)-C['lip_pad'])
+        if C.get('ignore_top'):
+            ctq=bil(SH,TX(sxp),TCEN-ps[...,1]/(S*WSC)*TSC)
+            for k,v in C['ignore_top'].items(): bad|=(view==1)&(np.linalg.norm(ctq-np.array(v,np.float32),axis=-1)<C.get('ignore_top_tol',40))
+            if C.get('ignore_top_rule'): bad|=(view==1)&eval(C['ignore_top_rule'],{'np':np,'R':ctq[...,0],'G':ctq[...,1],'B':ctq[...,2]})
         if C.get('edge_px'):   # the sheet's black outline: never sample closer than edge_px to the silhouette edge
             bad|=(view==0)&(bil(SIDE_IN,sxp,syp)[...,0]<0.5)
             bad|=(view==1)&(bil(TOP_IN,TX(sxp),TCEN-ps[...,1]/(S*WSC)*TSC)[...,0]<0.5)
@@ -352,7 +359,6 @@ def run(C):
     for (c0_,c1_,r0_,r1_) in C.get('tex_seams',[]):   # inpaint thin seam lines left by the view stitching
         A8=np.clip(A,0,255).astype(np.uint8); mk=np.zeros(A8.shape[:2],np.uint8); mk[r0_:r1_,c0_:c1_]=255
         A=cv2.inpaint(np.ascontiguousarray(A8[...,:3]),mk,5,cv2.INPAINT_TELEA).astype(A.dtype) if A8.shape[2]==3 else A
-    Image.fromarray(np.clip(A,0,255).astype(np.uint8)).save(D+'/out/tex.png')
     UVT=dict(dark=(544/TEX,1-32/TEX),tooth=(608/TEX,1-32/TEX),mouth=(672/TEX,1-32/TEX),brow=(544/TEX,1-96/TEX))
     EUV=E/TEX
     # ------------------------------------------------ geometry
@@ -436,7 +442,7 @@ def run(C):
     # teeth (biters): cones on the upper lip (pointing down) and the lower lip (pointing up, Jaw bone)
     if M:
         for row,(n_t,z_side,dirz,kind) in {'up':(M['n_up'],'upper',-1,'tooth_up'),'lo':(M['n_lo'],'jaw',1,'tooth_lo')}.items():
-            xe_t=X(M['front_px'])-0.03*C['length']/3.4
+            xe_t=X(M['front_px'] if z_side=='upper' else M.get('lo_front_px',M['front_px']))-0.03*C['length']/3.4
             if z_side=='upper' and XEND_U is not None: xe_t=min(xe_t,XEND_U-M.get('snout_cap_px',26)*S*0.6)
             xs_t=np.linspace(X(M['corner_px'])+M.get('tooth_start',0.12)*(X(M['front_px'])-X(M['corner_px'])),xe_t,n_t)
             for sgn in (1,-1):
@@ -459,7 +465,7 @@ def run(C):
                     F_.append(tuple(ring if dirz<0 else ring[::-1])); UV_.append([UVT['tooth']]*6); K_.append(kind)
     JAWV=[]
     if M and C.get('mouth_wall'):
-        xw=np.linspace(M['corner_px']-6,M['jaw_front_px']-M.get('wall_back_px',4),14); rows=[]
+        xw=np.linspace(M['corner_px']-6,min(M['jaw_front_px'],M.get('wall_front_px',1e9))-M.get('wall_back_px',4),14); rows=[]
         for xp in xw:
             zu=Z(float(np.interp(xp,xs_,up))-5); zl=Z(float(np.interp(xp,xs_,lo))+5)
             a_=addv((X(xp),0.0,zu)); b_=addv((X(xp),0.0,zl)); rows.append((a_,b_)); JAWV.append(b_)
@@ -479,6 +485,8 @@ def run(C):
         if any(bx0<=cx_<=bx1 and by0<=cy_<=by1 for (bx0,by0,bx1,by1) in C.get('skip_comp_boxes',[])): continue
         m=m|(ndi.binary_dilation(m,iterations=C.get('root_px',22))&sbody)
         fins.append((kind,ndi.binary_fill_holes(m)))
+    for poly in C.get('pect_polys',[]):
+        pm=np.zeros((Hh,Ww),np.uint8); cv2.fillPoly(pm,[np.array(poly,np.int32)],1); fins.append(('pect',pm>0))
     for (bx0,by0,bx1,by1,rule) in C.get('pect_boxes',[]):
         sub=np.zeros_like(side); R_,G_,B_=SH[...,0],SH[...,1],SH[...,2]
         sel=eval(rule,{"np":np,"R":R_,"G":G_,"B":B_}); sub[by0:by1,bx0:bx1]=sel[by0:by1,bx0:bx1]
@@ -486,7 +494,8 @@ def run(C):
         ll,nn_=ndi.label(sub); ss_=ndi.sum(sub,ll,range(1,nn_+1)); sub=ll==(np.argmax(ss_)+1)
         fins.append(('pect',sub))
     print('fins',[(k,int(m.sum())) for k,m in fins])
-    def pillow(mask,place,tmax,two):
+    PILLOWS=[]
+    def pillow(mask,place,tmax,two,rect=None):
         dt=ndi.distance_transform_edt(mask); dmax=dt.max()
         cs_,_=cv2.findContours(mask.astype(np.uint8),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
         c=max(cs_,key=len)[:,0,:].astype(float)
@@ -509,6 +518,8 @@ def run(C):
                 a,b,c_=t
                 for arr,flip in ((topv,False),(botv,True)):
                     tri_=(arr[a],arr[b],arr[c_]); uv=[((256+256*tt[a])/TEX,1-float(tv[a])*EUV),((256+256*tt[b])/TEX,1-float(tv[b])*EUV),((256+256*tt[c_])/TEX,1-float(tv[c_])*EUV)]
+                    if rect is not None:
+                        ax_,ay_,sc_,x0e,y0e=rect; uv=[(float(ax_+(allp[i_,0]-x0e)*sc_)/TEX,1-float(ay_+(allp[i_,1]-y0e)*sc_)/TEX) for i_ in (a,b,c_)]
                     if flip: tri_=tri_[::-1]; uv=uv[::-1]
                     F_.append(tri_); UV_.append(uv); K_.append('fin')
     cz_line=lambda x:float(np.interp(np.clip(x,XM[0],XM[-1]),XM,Z((zt+zb)/2)))
@@ -524,17 +535,22 @@ def run(C):
                 dz=z-hz2
                 y=float(w)*0.86+(-dz)*math.sin(SPL)+o*math.cos(SPL); zz=hz2+dz*math.cos(SPL)+o*math.sin(SPL)
                 return (x,s*y,zz)
-            pillow(m,place,C['fin_t']*0.85,True)
+            PILLOWS.append((m,place,C['fin_t']*0.85,True))
         else:
             def place(x,z,o,s,kind=kind):
                 xc=float(np.clip(x,XM[0],XM[-1])); cz=cz_line(x)
                 zc,h,w=prof(np.array(xc)); zc,h=float(zc),float(h)
                 tp=float(TP(xc)); hs=h/(HS*tp) if tp>0 else h
-                if kind=='top': dz=(zc+h)-(cz+hs)
+                if C.get('fin_follow_exact'):   # follow the body's real top / bottom line (the old formula lifted fins in the mouth zone)
+                    hs_t=float(np.interp(PXs(xc),xs_,(zb-zt)/2))*S
+                    if kind=='top': dz=(cz+hs_t*HS*tp)-(cz+hs_t)
+                    elif kind=='bottom': dz=(cz-hs_t*HS*tp)-(cz-hs_t)
+                    else: dz=(z-cz)*(HS-1)
+                elif kind=='top': dz=(zc+h)-(cz+hs)
                 elif kind=='bottom': dz=(zc-h)-(cz-hs)
                 else: dz=(z-cz)*(HS-1)
                 return (x,o,z+dz)
-            pillow(m,place,C['fin_t'],False)
+            PILLOWS.append((m,place,C.get('tail_t',C['fin_t']) if kind=='tail' else C['fin_t'],False))
     PT=C.get('pect_top')
     if PT:   # pectorals traced from the TOP view (their true outline), hinged on the flank and drooped
         bx0,by0,bx1,by1=PT['box']; yy_,xx_=np.mgrid[0:Hh,0:Ww]
@@ -552,7 +568,43 @@ def run(C):
             y0=float(prof(np.array(np.clip(xm,XM[0],XM[-1])))[2])*PT.get('hinge_in',0.8)
             d=max(yl-y0,-0.05)
             return (xm,s*(y0+d*math.cos(DR)+o*math.sin(DR)),zh-d*math.sin(DR)+o*math.cos(DR))
-        pillow(mk,place,C['fin_t']*PT.get('thick',0.9),True)
+        PILLOWS.append((mk,place,C['fin_t']*PT.get('thick',0.9),True))
+    # fin atlas: every fin is textured with its own piece of the sheet (rays, shading, black tips), packed into the free tiles
+    RECTS=[None]*len(PILLOWS); FINRECTS=[]
+    if C.get('fin_atlas'):
+        REG=[(704,0,1024,E),(512,128,704,E)]; PADP=3; EP=C.get('fin_edge_px',6)
+        boxes=[]
+        for (m,_,_,_) in PILLOWS:
+            ys_,xs__=np.where(m); boxes.append((max(xs__.min()-PADP,0),max(ys_.min()-PADP,0),min(xs__.max()+PADP,Ww-1),min(ys_.max()+PADP,Hh-1)))
+        def pack(sc):
+            order=sorted(range(len(boxes)),key=lambda i:-(boxes[i][3]-boxes[i][1])); out={}; cur=[[r[0],r[1],0] for r in REG]
+            for i in order:
+                w=int(math.ceil((boxes[i][2]-boxes[i][0]+1)*sc)); h=int(math.ceil((boxes[i][3]-boxes[i][1]+1)*sc)); ok=False
+                for ri,(rx0,ry0,rx1,ry1) in enumerate(REG):
+                    cx_,cy_,sh=cur[ri]
+                    if cx_+w>rx1: cx_=rx0; cy_=cy_+sh; sh=0
+                    if cx_+w<=rx1 and cy_+h<=ry1:
+                        out[i]=(cx_,cy_,w,h); cur[ri]=[cx_+w,cy_,max(sh,h)]; ok=True; break
+                if not ok: return None
+            return out
+        sc=C.get('fin_atlas_scale',0.9); pk=None
+        while sc>0.25:
+            pk=pack(sc)
+            if pk: break
+            sc-=0.04
+        print('fin atlas scale',round(sc,2),'ok' if pk else 'FAILED')
+        if pk:
+            for i,(m,_,_,_) in enumerate(PILLOWS):
+                x0e,y0e,x1e,y1e=boxes[i]; ax_,ay_,w,h=pk[i]
+                crop=SH[y0e:y1e+1,x0e:x1e+1].copy(); mc=ndi.binary_erosion(m[y0e:y1e+1,x0e:x1e+1],iterations=EP)
+                if mc.sum()<20: mc=m[y0e:y1e+1,x0e:x1e+1]
+                _,(iy_,ix_)=ndi.distance_transform_edt(~mc,return_indices=True); crop=crop[iy_,ix_]
+                A[ay_:ay_+h,ax_:ax_+w]=cv2.resize(crop,(w,h),interpolation=cv2.INTER_AREA)
+                RECTS[i]=(ax_,ay_,sc,x0e,y0e); FINRECTS.append([int(ax_),int(ay_),int(w),int(h)])
+    for i,(m,pl_,tm_,tw_) in enumerate(PILLOWS): pillow(m,pl_,tm_,tw_,RECTS[i])
+    Image.fromarray(np.clip(A,0,255).astype(np.uint8)).save(D+'/out/tex.png')
+    json.dump(FINRECTS,open(D+'/out/fin_atlas.json','w'))
+    json.dump(dict(sx=float((XR['upper'][1]-XR['upper'][0])/S/TEX),sy=float(np.median(np.pi*np.sqrt((((zb-zt)/2*HS)**2+(tw*WSC*WY)**2)/2))/NV)),open(D+'/out/meta.json','w'))
     json.dump(dict(V=V_,F=F_,UV=UV_,K=K_,S=S,jaw_verts=JAWV,px=dict(nose=int(NOSE),basez=float(BASEZ),S=float(S),W=int(Ww),H=int(Hh)),axis=dict(x=list(map(float,XM)),zc=list(map(float,PROF['upper'][0]))),
                    jaw=dict(axis=dict(x=list(map(float,XM)),zc=list(map(float,PROF['jaw'][0]))),head=[X(M['corner_px']),0,float(prof(np.array(X(M['corner_px'])),'jaw')[0])+float(prof(np.array(X(M['corner_px'])),'jaw')[1])],
                             tail=[X(M['jaw_front_px']),0,float(prof(np.array(X(M['jaw_front_px'])-0.02),'jaw')[0])]) if M else None),
