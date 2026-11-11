@@ -2,7 +2,7 @@
 tags: [mega-bite, art, models, skins, ui]
 created: 2026-11-12
 ---
-# MEGA BITE - HSE rebuild: five sharks and eight food fish from their sheets, designed skins, FishKit v3 (12 Nov 2026, night)
+# MEGA BITE - HSE rebuild: all seven sharks and eight food fish from their sheets, designed skins, FishKit v3 (12 Nov 2026, night)
 
 Owner, 01:29: "these equip buttons look like placeholder uis and these index fish labels too".
 Owner, 01:36: "the skins in shop also look so bad and also the fish in index".
@@ -90,6 +90,16 @@ All 7 sharks x 5 looks were lined up in Studio (Edit) with the ids from `GameCon
 - The Shop's 3D card was looked at with the Reef Shark in Classic, Coral, Lantern, Ghost and Ember. The Minnow row shows what is left: it is still the tap-style model with plain colour swaps.
 - Seen, not changed (not asked for): on the Shop card the shark is small (about two thirds of the card's width) and sits left of centre; the skins grid leaves an empty column on the right; Ghost is see-through on the card, so its ribs barely show.
 
+## 2i. Minnow, rebuilt from a new sheet (06:00): all seven sharks are now HSE style
+The starter fish every new player sees first. Files: `Art\Minnow_hse\`, sheet `Art\HSE_sheets\mb_hse_minnow.png`. Pictures: `Art\Minnow_hse\MEGA_BITE_Minnow_HSE_ingame_12Nov.jpg`, `minnowh_sheet_vs_model_and_skins.jpg`.
+- **Sheet:** same ChatGPT conversation and layout as the food fish, with the hero wording: "ONE small fish (the HERO the player starts as) ... a cute, brave, happy little hero fish: a small closed smiling mouth, no teeth, friendly confident eyes" + "a tiny MINNOW ... chubby teardrop body about twice as long as it is tall ... bright golden-yellow back ... clean white belly ... big round blue eye ... small rounded orange dorsal fin, short orange forked tail, one small orange pectoral fin on each side, tiny orange pelvic and anal fins. No stripes, no spots, no whiskers." It keeps the old Minnow's identity (yellow back, white belly, orange fins, big blue eye).
+- **Build:** the food-fish template (`fish_cfg`, no jaw: the old Minnow has no Jaw bone either) with 8 spine bones (Root, Spine0-7) so `GreatWhiteClips` keeps driving it. Length 3.4 units so the installer's old scale gives 7.05 studs (old 7.01).
+- **Mesh asset 121931149682608, texture 138826562785702.** Installed with `MB_InstallV2`; the old model is `ServerStorage.MB_Minnow_preHSE_backup_12Nov` (mesh 85362769018588, texture 117511556444133).
+- **Designed skins** (`SkinTex.Minnow`): Coral 98330915575478, Lantern 121641562437329, Ghost 118511739365601, Ember 97532198634759 (old colour swaps: Coral 127808637648152, Lantern 78169849724657, Ghost 71727769545270, Ember 101176833047095).
+- **New in the kit for this:** `pect_w_k` (a chubby body buried the top of the pectoral fin at the default 0.86; 1.1 here), `cap_clamp_px=None` with `cap_px=60` (the rounded tail end samples the sheet instead of smearing one column), and in `skins2.py` `skin_eye=1`: a fish with a painted eye gets its own pupil, iris and eyeball colours per skin and no spots or cracks cross the eye (Lantern: glowing yellow ring on a dark ball; Ember: molten orange).
+- The pectoral fin outline was traced by colour (orange component + 5 px) instead of by eye: the first hand-drawn polygon was 25 px too low and left the fin cut.
+- Checked in Play at evolution 1 (swimming) and on the Shop card with Lantern. Evolution was put back to 4 afterwards.
+
 ## 3. Designed skins (not colour swaps)
 Script: `Art\FishKit_v3_hse\skins2.py`. Each skin has its own colours per body zone (back and belly keep the sheet's shading, gills and brow), its own PATTERN painted on the texture, and its own eye, fin colour, fin tips and edge line.
 | Skin | Design | Texture |
@@ -143,7 +153,7 @@ Reference: frame 17.0 s of the owner's recording (`Ref\modern_ui_frames\pets_017
 - Button anatomy rule: lip + own-colour outline + top gloss + shadowed text. A flat pill with a thin stroke reads as a placeholder.
 
 ## 7. Still to do (in this order, one at a time, quality first)
-1. Minnow: no HSE sheet yet (it is still the tap-style model with colour-swap skins, and it is the first shark every new player sees). Needs a sheet, then the model and four designed skins.
-2. See the Squid, Mackerel and Tuna swimming (open sea / trench) and the Index with all eight found.
-3. Check on a phone: Index tile camera distance (2.05), the 3D card's blur cost, frame rate with 80+ lite fish on screen (they add about 340,000 triangles; the scene without fish is already about 1.2 million at the top quality level, worth a look on its own).
-4. Owner to judge: Shop card shark size and position, the empty column in the skins grid, Ghost on the card, the purple Squid and the orange Golden Fish.
+1. See the Squid, Mackerel and Tuna swimming (open sea / trench) and the Index with all eight found.
+2. Check on a phone: Index tile camera distance (2.05), the 3D card's blur cost, frame rate with 80+ lite fish on screen (they add about 340,000 triangles; the scene without fish is already about 1.2 million at the top quality level, worth a look on its own).
+3. Owner to judge: Shop card shark size and position, the empty column in the skins grid, Ghost on the card, the purple Squid and the orange Golden Fish, the new Minnow.
+4. The Megalodon is still the earlier-kit build (only its mouth was redone).

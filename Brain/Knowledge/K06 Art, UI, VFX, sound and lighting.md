@@ -77,4 +77,5 @@ The reference's Pets window = a flat panel on the left + ONE real 3D card on the
 - **Checking in Play without computer use:** Studio's `screen_capture` works during Play and shows the UI; a small Client snippet holds the camera on the thing to check.
 - **Use a new image id only after the upload poll says Approved** (set while "Reviewing", the Studio session keeps the failed fetch: grey part). After installing textures, line every variant up in Studio and look.
 - **Anything held in front of the camera (3D card, reveal) needs the world cleared in front of it:** food fish swam between the camera and the Shop card; `MB_FishClient` parks near fish while the Shop or Index is open.
+- **Trace fin outlines by colour, not by eye** (largest fin-coloured component + 5 px for the outline); a hand-drawn polygon 25 px off leaves the painted fin showing or the 3D fin cut. Chubby bodies need `pect_w_k` about 1.1.
 - **An uploaded FBX also uploads its embedded texture** (`InsertService:LoadAsset(id)` shows the id). Use it when a separately uploaded image is Approved but stays grey.
