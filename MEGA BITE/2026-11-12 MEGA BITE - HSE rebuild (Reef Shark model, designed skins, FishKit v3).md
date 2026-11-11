@@ -2,7 +2,7 @@
 tags: [mega-bite, art, models, skins, ui]
 created: 2026-11-12
 ---
-# MEGA BITE - HSE rebuild: five sharks from their sheets, designed skins, FishKit v3 (12 Nov 2026, night)
+# MEGA BITE - HSE rebuild: five sharks and eight food fish from their sheets, designed skins, FishKit v3 (12 Nov 2026, night)
 
 Owner, 01:29: "these equip buttons look like placeholder uis and these index fish labels too".
 Owner, 01:36: "the skins in shop also look so bad and also the fish in index".
@@ -37,9 +37,9 @@ Sheet: `Art\HSE_sheets\mb_hse_barracuda.png`. Files: `Art\Barracuda_hse\`.
 
 ## 2d. Great White, rebuilt from its sheet (same night)
 Sheet: `Art\HSE_sheets\mb_hse_gw.png`. Files: `Art\GreatWhite_hse\`.
-- Mesh asset **104294360894563** (17,936 triangles, old rig). Texture **119815389239301**. Old model: `ServerStorage.MB_GreatWhite_preHSE_backup_12Nov` (texture 123779637227645; old skins Lantern 116180395917717, Ghost 110860918253244, Ember 100758550219966, Coral 131743586366072).
-- Skins (`SkinTex.GreatWhite`): Coral 104240527129123, Lantern 135814123327973, Ghost 116608199300292, Ember 91288417893235.
-- Installed. In Play at evolution 6 the shape was right but the TEXTURE HAD NOT ARRIVED from Roblox yet (grey shark, ContentProvider said Failure although the asset is Approved; the other new sharks did the same for a few minutes after upload). Look again. Picture: `Art\GreatWhite_hse\gwh_sheet_vs_model_and_skins.jpg`.
+- Mesh asset **104294360894563** (17,936 triangles, old rig). Texture **127933567656242**. Old model: `ServerStorage.MB_GreatWhite_preHSE_backup_12Nov` (texture 123779637227645; old skins Lantern 116180395917717, Ghost 110860918253244, Ember 100758550219966, Coral 131743586366072).
+- Skins (`SkinTex.GreatWhite`): Coral 105388820384482, Lantern 104153893470480, Ghost 104950270297759, Ember 94974455850597.
+- The FIRST texture upload (119815389239301 and its four skins) was Approved but Roblox never delivered it: the shark stayed grey for 20 minutes. Uploaded again as new files: texture **127933567656242**, skins as listed above are the second upload. Checked in Play at evolution 6: textured, glowing eye, white belly. Picture: `Art\GreatWhite_hse\gwh_sheet_vs_model_and_skins.jpg`.
 - Two cfg mistakes cost a build each: the dorsal bridge started under the fin's leaning tip (the body swallowed the fin: dark block), and the top-view pectoral range started inside the fin (step in the body width). Start both BEHIND the fin, and print `debug_tw` when unsure.
 
 ## 2e. Hammerhead, rebuilt from its sheet v2 (same night)
@@ -48,6 +48,39 @@ Sheet: `Art\HSE_sheets\mb_hse_hammer_v2.png`. Files: `Art\Hammerhead_hse\`.
 - Skins (`SkinTex.Hammerhead`): Coral 119994987779350, Lantern 75046283039163, Ghost 97687589261479, Ember 82424062834911.
 - Checked in Play at evolution 5 (teal, wide hammer, cartoon eye on each end).
 - Hammer-specific kit options: the head's width comes straight from the top view (never bridge it); `FN_ranges=[(1150,1215,6.0)]` makes the head's section boxy so the hammer ends are blunt faces the eyes can sit on (with the normal round section the end was a knife edge and the eye mesh tore); `WSC=0.95` set by hand (the automatic value shrank the whole body because the hammer is so wide); `round_k=99`; the jaw, the teeth and the red mouth roof are capped to the neck's width (`jaw_w_max_px`, `tooth_w_max_px`, `inner_w_max_px`); the painted eye is ignored in the side view (`eye_ignore_k=1.3`) because it smeared along the hammer's front edge; the top view paints the hammer's top (`top_w=0.75` + `ignore_top_rule`).
+
+## 2f. Megalodon: mouth fixed + designed skins (same night)
+The approved HSE Megalodon is kept; only its mouth changed and it got the designed skins. Files: `Art\Megalodon_hse2\`.
+- Mesh asset **72355298655356**, texture **133904156674521**. The model before: `ServerStorage.MB_Megalodon_hse1_backup_12Nov` (mesh 129523145131004, texture 112060002089793; skins Lantern 97727459396843, Ghost 120208811147821, Ember 86963046128567, Coral 102260208167114).
+- What changed: the inside of the mouth is red (it showed the dark edge colour), a membrane closes the see-through gap, and the flat teeth pictures that were pasted on the jaw's rim are gone (the 3D teeth stay).
+- Skins (`SkinTex.Megalodon`): Coral 109512957309582, Lantern 101730202707828, Ghost 139590085493622, Ember 125156176984685. Its 3D brow ridges and its pupil eye take each skin's colours.
+- Checked in Play at evolution 7.
+
+## 2g. The eight food fish (the "fish in index" half of the 01:36 complaint)
+All eight species were redrawn as Hungry-Shark-style sheets and rebuilt with FishKit v3. Installed in Studio, checked in Play (in the water, in the Index tiles and on the Index 3D card). Picture: `Art\Fish_hse\MEGA_BITE_fish_HSE_ingame_12Nov.jpg` (before / after rows + game shots).
+- **Sheets:** `Art\HSE_sheets\fish\mb_fish_<name>.png` (+ `MEGA_BITE_fish_HSE_sheets.jpg`). One ChatGPT conversation ("Create Sardine Turnaround Sheet"); the approved Piranha sheet was attached ONCE as the style image, each later fish was a follow-up message with only its own description.
+- **Prompt (common part, then "THE CREATURE: ..." per fish):** "Create ONE image, 1536x1024. Flat solid MAGENTA #FF00FF background, no gradient, no shadow on it, no magenta or pink-purple anywhere in the art. A character turnaround sheet of ONE small sea creature (FOOD for sharks) for a kids' mobile game, orthographic views, in EXACTLY the same layout as the attached image: TOP ROW the side view (nose pointing right, body straight and horizontal, the whole body, mouth CLOSED); BOTTOM LEFT the top view seen from directly above, the same length, nose pointing right; BOTTOM RIGHT the front view facing the viewer, mouth closed. Wide empty magenta space around each view; no view touches another view or the image edge. STYLE: match the attached image exactly: glossy 3D cartoon render like a premium mobile shark game, fine scales, soft shading with highlights, a clean dark outline around every shape, one big round cartoon eye with a black pupil and a white highlight on each side. It is a cute, slightly worried prey animal, NOT a predator: no teeth, no angry brows. NO text, NO numbers, NO letters, NO bubbles, NO extra objects, NOT a photo."
+- **Build:** `fishtpl.py` (`fish_cfg`): no jaw, painted eye, fins carry the sheet's own art (fin atlas), 4 spine bones (Root, Spine0-3) like the old fish so the tail wag in `MB_FishClient`, `MB_ReefLife` and `MB_Reveal3D` keeps working. Each fish's numbers: `Art\Fish_hse\f_<name>_cfg.py`. Special cases: Damsel and Golden use their own top-view ignore rule; Tuna has one bridge per finlet; Golden `cap_px=75, tail_t=20`; Shrimp `fin_min_t=2.5` (thin antennae and legs), no pectoral; Squid keys with `no_magenta_rule` and builds its side fins flat from the top view.
+- **Install:** `ServerStorage.MB_InstallFish` (`require(game.ServerStorage.MB_InstallFish:Clone())(Key, meshAssetId, textureId)`): loads the asset, scales it so its length equals the old fish's, keeps the model name, the `MB_Species` attribute and the pivot, sets one-sided SmoothPlastic. The uploaded FBX arrives Y-up with the nose at -X, the same as the old fish, so no turn is needed.
+- **Old fish:** `ServerStorage.MB_Fish_<Name>_preHSE_backup_12Nov` (put one back by copying it over `ReplicatedStorage.MegaBite.Fish.<Name>`).
+
+| Fish | Mesh in the game (lite) | Texture in the game | Triangles (lite / first build) | First build (kept as a spare): mesh, texture | Length (studs, unchanged) |
+|---|---|---|---|---|---|
+| Shrimp | 72205177149907 | 104609036473062 | 3,928 / 11,736 | 122786646807151, 104609036473062 | 2.74 |
+| Sardine | 122577379358413 | 88756923293511 | 3,074 / 8,348 | 89774571688127, 106073018635100 | 3.50 |
+| Damsel | 109882106489288 | 78107839145491 | 3,790 / 11,396 | 124914645206344, 77694633757794 | 4.01 |
+| Puffer | 97437479857172 | 95166568666083 | 3,176 / 8,960 | 95223727586758, 72751219666074 | 4.18 |
+| GoldenFish | 104771165167125 | 77169663757440 | 5,582 / 15,788 | 122479609684693, 128008047111723 | 4.89 |
+| Squid | 95190917833815 | 87714498265958 | 3,092 / 8,952 | 82266418911192, 123385893973905 | 5.57 |
+| Mackerel | 107891080441044 | 127379855068097 | 3,784 / 11,444 | 120147563420329, 131441328566748 | 8.51 |
+| Tuna | 138362789802464 | 73328349443824 | 4,010 / 12,428 | 75096258238205, 80383532980597 | 11.69 |
+
+- **Why there is a lite build:** the first build was 8-16 thousand triangles a fish. Measured in Play (`Stats.SceneTriangleCount`, fish shown vs hidden): 71 fish added about 790,000 triangles to a scene of 1.16 million. Too much for phones. The lite build (`run_lite.sh <dir>`: body rings 26 x 18 instead of 36 x 28, fin outline step 16 px and fin grid 24 px instead of 9 and 11; Golden Fish 12 and 22) uses the same sheet and the same texture layout and looks the same next to the first build, even close up (`fishsheets\lite_cmp.jpg`). Measured again: 85 fish add about 340,000 triangles (about 4,000 a fish instead of 11,000). Files: `Art\Fish_hse\Fish_<Name>_lite.fbx`.
+- The textures in the game are the copies that Roblox made from inside each FBX (the installer keeps them when no texture id is passed). The Shrimp's separate texture upload (119127327647136) was Approved but never arrived, which is how this was found.
+
+- **Two looks changed with the new sheets, for the owner to judge:** the Squid is now magenta-purple (it was blue), and the Golden Fish is an orange-gold goldfish with a fan tail (it was yellow with a pale blue tail). It still gets its light and sparkles in the game.
+- **Not seen in the game yet:** Squid, Mackerel and Tuna swimming (they live outside the Safe Reef; seen only in the Edit line-up), and the six locked Index tiles in colour (the owner's save has 2 of 8 found; the silhouettes fit their tiles).
+- Known small flaw: the Golden Fish has a faint ring where the body meets the tail.
 
 ## 3. Designed skins (not colour swaps)
 Script: `Art\FishKit_v3_hse\skins2.py`. Each skin has its own colours per body zone (back and belly keep the sheet's shading, gills and brow), its own PATTERN painted on the texture, and its own eye, fin colour, fin tips and edge line.
@@ -86,7 +119,10 @@ Files: `Art\FishKit_v3_hse\` (fishkit.py, fishbuild.py, skins2.py, run.sh, skinv
 - **A painted brow and socket from the sheet beat a 3D tube** at game size, and they match the sheet exactly.
 - **A skin needs its own pattern, eye and fin colours.** A colour ramp alone reads as the same shark tinted.
 - **Do not click on the screen where the Claude window sits** (right side of Studio): the click lands on Claude. Use the Studio tool's mouse click with the button's path instead.
-- While testing, the Hammerhead ate one Coral Shrimp in the owner's Studio save (+1 EXP, one Index entry found). Evolution was put back to the Reef Shark (4) after every test.
+- While testing, the sharks ate a few fish in the owner's Studio save (about +19 EXP, one Index entry found, the first quest finished). Evolution was put back to the Reef Shark (4) after every test.
+- **Studio's `screen_capture` also works during Play and shows the UI**, so the game can be checked without computer use (which needs the owner to approve again after 30 idle minutes).
+- **An uploaded FBX also uploads its embedded texture.** `LoadAsset` shows that id on the MeshPart; it is a spare when a separately uploaded image is Approved but never delivered (the Shrimp).
+- **Count triangles before installing anything that appears many times.** The kit's defaults are sized for one hero shark, not for 80 food fish. `Stats.SceneTriangleCount` with the models shown, then hidden, gives the real cost in 20 seconds.
 - Evolution order in the build: Minnow, Piranha, Barracuda, Reef Shark, Hammerhead, Great White, Megalodon (`]` and `[` step through them in Studio).
 
 ## 6. Buttons, Index tiles and the 3D card (01:29 complaint)
@@ -97,7 +133,8 @@ Reference: frame 17.0 s of the owner's recording (`Ref\modern_ui_frames\pets_017
 - Button anatomy rule: lip + own-colour outline + top gloss + shadowed text. A flat pill with a thin stroke reads as a placeholder.
 
 ## 7. Still to do (in this order, one at a time, quality first)
-1. Look at the Great White in Play once its texture arrives. All five sheet sharks are rebuilt (Piranha, Barracuda, Reef Shark, Hammerhead, Great White). The Minnow has no HSE sheet yet.
-2. Megalodon: designed skins on the approved model; fix its mouth inside (same bug as above).
-3. New fish for the Index (8 species): HSE-style sheets in ChatGPT, then models.
-4. Check on a phone: Index tile camera distance (2.05), the 3D card's blur cost.
+1. Minnow: no HSE sheet yet (it is still the tap-style model with colour-swap skins). Needs a sheet, then the model and four designed skins.
+2. Look at each skin on each shark in the Shop's 3D card (only the Reef Shark's Lantern was looked at in the game; the others were checked in renders).
+3. See the Squid, Mackerel and Tuna swimming (open sea / trench) and the Index with all eight found.
+4. Check on a phone: Index tile camera distance (2.05), the 3D card's blur cost, frame rate with 80+ lite fish on screen (they add about 340,000 triangles; the scene without fish is already about 1.2 million at the top quality level, worth a look on its own).
+5. If a new upload stays grey for more than a few minutes, use the FBX's own embedded texture id (`InsertService:LoadAsset(id)` shows it) or upload the file again.
