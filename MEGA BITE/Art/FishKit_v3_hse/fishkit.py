@@ -545,7 +545,7 @@ def run(C):
                 if C.get('pect_hinge_flank'):
                     hzf=zc-float(prof(np.array(hx))[1])*C['pect_hinge_flank']; z=z+(hzf-hz2); hz2=hzf
                 dz=z-hz2
-                y=float(w)*0.86+(-dz)*math.sin(SPL)+o*math.cos(SPL); zz=hz2+dz*math.cos(SPL)+o*math.sin(SPL)
+                y=float(w)*C.get('pect_w_k',0.86)+(-dz)*math.sin(SPL)+o*math.cos(SPL); zz=hz2+dz*math.cos(SPL)+o*math.sin(SPL)      # pect_w_k: a chubby body buries the fin's top at 0.86; use ~1.0
                 return (x,s*y,zz)
             PILLOWS.append((m,place,C['fin_t']*0.85,True))
         else:

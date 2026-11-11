@@ -115,6 +115,30 @@ b=over(b,(255,96,10),np.clip(1-f/9.0,0,1)**1.5*0.8*fade); b=over(b,(255,150,30),
 SK['Ember']=dict(body=b,jaw=j,eye=orb((255,92,6),(255,238,130),(26,16,16),socket=(8,4,4)),fin=finstrip((255,150,30),(30,20,20),(255,176,44),0.15),line=(14,7,7),brow=(26,16,16),mouth=(214,84,20),finramp=[(24,14,14),(92,40,22),(255,170,50)])
 import os
 FR=json.load(open(D+'/out/fin_atlas.json')) if os.path.exists(D+'/out/fin_atlas.json') else []
+# ---- painted eye (fish template: no eye mesh). Each skin gets its own pupil / iris / eyeball and no pattern crosses the eye.
+if C.get('skin_eye'):
+    Lb=lum(body); sat=body.max(-1)-body.min(-1)
+    iris=(body[...,2]>body[...,0]+50)&(body[...,2]>120)
+    lab_,n_=ndi.label(iris)
+    if n_:
+        im=lab_==(np.argmax(ndi.sum(iris,lab_,range(1,n_+1)))+1)
+        mx,my=MX[im].mean(),MY[im].mean(); ri=np.sqrt(im.sum()*SX*SY/np.pi); d=np.hypot(MX-mx,MY-my)
+        core=ndi.binary_fill_holes(ndi.binary_dilation(im,iterations=3))
+        eye=core|((Lb>0.78)&(sat<45)&(d<ri*C.get('skin_eye_k',2.4)))
+        lab2,_=ndi.label(eye); eye=ndi.binary_fill_holes(lab2==lab2[im][0]); eye=ndi.binary_opening(eye,iterations=2)|core
+        em=cv2.GaussianBlur(eye.astype(np.float32),(0,0),1.5)[...,None]; cm=cv2.GaussianBlur(core.astype(np.float32),(0,0),1.2)[...,None]
+        def r3(t,stops,mid):
+            r=[np.array(c,np.float32) for c in stops]; t=t[...,None]
+            return np.where(t<mid,r[0]+(r[1]-r[0])*np.clip(t/mid,0,1),r[1]+(r[2]-r[1])*np.clip((t-mid)/(1-mid),0,1))
+        EYES=dict(Coral=([(60,14,34),(0,176,170),(255,255,255)],[(150,40,66),(255,226,214),(255,250,244)]),
+                  Lantern=([(4,6,16),(255,206,40),(255,255,214)],[(4,6,16),(16,28,64),(52,84,150)]),
+                  Ghost=([(84,124,196),(150,205,255),(255,255,255)],[(104,134,182),(226,238,252),(255,255,255)]),
+                  Ember=([(20,8,6),(255,116,16),(255,240,150)],[(14,7,7),(46,24,18),(120,56,26)]))
+        for name_,(ist,sst) in EYES.items():
+            if name_ not in SK: continue
+            ec=r3(Lb,sst,0.62)*(1-cm)+r3(Lb,ist,0.42)*cm
+            SK[name_]['body']=SK[name_]['body']*(1-em)+ec*em
+        print('skin eye: iris r',round(float(ri),1),'eye px',int(eye.sum()))
 out={}
 for name,s in SK.items():
     B=A.copy(); B[R0:]=s['body']; B[J0:R0]=s['jaw']; B[0:E,0:E]=s['eye']; B[0:E,256:512]=s['fin']; B[0:64,512:576]=s['line']
