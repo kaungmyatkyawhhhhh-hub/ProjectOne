@@ -383,14 +383,14 @@ def body():
     shoulders and keeps the limbs about one stud wide. Chest wide, waist narrow, hips flare, slim upper arms, big gauntlets."""
     HW = 92.0 + HIPW
     loft("UpperTorso", "suit", 1, [(522, 0, 37, -42, 30, 9), (487, 0, 62, -54, 40, 12)], 2.0)                                  # neck
-    loft("UpperTorso", "suit", 1, [(488, 0, 116, -58, 46, 14), (472, 0, 128, -66, 67, 12), (430, 0, 124, -66, 67, 12), (372, 0, 98, -64, 64, 12), (338, 0, 88, -60, 60, 12)], 2.5)
+    loft("UpperTorso", "suit", 1, [(492, 0, 128, -58, 46, 16), (476, 0, 146, -66, 67, 16), (432, 0, 142, -66, 67, 15), (380, 0, 108, -64, 64, 13), (338, 0, 88, -60, 60, 12)], 2.5)
     loft("LowerTorso", "suit", 1, [(340, 0, 88, -60, 60, 12), (322, 0, 90, -62, 60, 12), (302, 0, HW, -68.6, 61, 14), (262, 0, HW, -68.6, 61, 14), (249, 0, HW - 12, -62, 55, 14)], 2.5)
 
 # body sizes at this scale (cm): chest X +-115, front f 68, back f -66 (z 340..470); hips X +-104.5, f 61 / -68.6 (z 251..326);
 # legs: centre X +-50 (thigh 0..97.6, shin 7.4..97.6), f -56..51, foot to f 99.5; arms: shoulder (+-127.5, -22.8, 470.2), 281 long, 17 deg out, 12 deg forward.
 def torso():
     G = "UpperTorso"; F = FR("F", 0, 67, 0)
-    O = [(-80, 472), (80, 472), (120, 420), (74, 346), (-74, 346), (-120, 420)]
+    O = [(-88, 474), (88, 474), (132, 420), (78, 346), (-78, 346), (-132, 420)]
     I = [(-24, 451), (24, 451), (42, 413), (24, 375), (-24, 375), (-42, 413)]
     for i in range(6):                                                                    # six stone wedges round a framed gem
         j = (i + 1) % 6; q = [O[i], O[j], I[j], I[i]]
@@ -525,11 +525,11 @@ def arm(s):
                 x2 = x * math.cos(tilt) - zz * math.sin(tilt); z2 = x * math.sin(tilt) + zz * math.cos(tilt)
                 pts.append(V(ax + s * (cu + x2), af + cf_ + y, cz + z2))
         return hull(G, m, pts, 3.0, keep=keep)
-    t = cap(18, 0, jz + 6, 74, 70, 46, -6, "stone", tilt=math.radians(-24), keep=True)                  # top lame
-    t = carve(t, FR(out, ax + s * 86.0, af, 0), [spiral(0, jz + 10, 14, flip=-s if out == "L" else s)], 5.0, 3.6); keepfin(t, G)
-    cap(34, 0, jz - 22, 72, 68, 34, -4, "stone2", tilt=math.radians(-40))                               # middle lame
-    cap(46, 0, jz - 46, 64, 62, 26, -3, "stone", tilt=math.radians(-55))                                 # lower lame
-    for fo in (-40.0, 40.0): rivet(G, FR("F" if fo > 0 else "B", ax + s * 40, af + fo * 1.55, 0), 0, jz + 4, 5.0, 3.5)
+    t = cap(6, 0, jz + 8, 78, 70, 46, -6, "stone", tilt=math.radians(-24), keep=True)                  # top lame
+    t = carve(t, FR(out, ax + s * 78.0, af, 0), [spiral(0, jz + 10, 14, flip=-s if out == "L" else s)], 5.0, 3.6); keepfin(t, G)
+    cap(22, 0, jz - 20, 74, 68, 34, -4, "stone2", tilt=math.radians(-40))                               # middle lame
+    cap(36, 0, jz - 44, 66, 62, 26, -3, "stone", tilt=math.radians(-55))                                 # lower lame
+    for fo in (-40.0, 40.0): rivet(G, FR("F" if fo > 0 else "B", ax + s * 30, af + fo * 1.55, 0), 0, jz + 6, 5.0, 3.5)
     moss(G, (ax + s * 6, af + 12, jz + 48), 20, 12, 5, 95 + (1 if s > 0 else 0), strands=3, slen=22, sdir=(0, 1, 0), size=(6, 10))
     # ---- the fist: 4 fingers on the FRONT only, smooth stone on the outer side and the back, the thumb on the inner side ----
     G = side + "Hand"; fz = 252.0; ff = af + 6
