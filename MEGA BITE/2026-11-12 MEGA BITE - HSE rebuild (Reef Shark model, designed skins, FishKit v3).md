@@ -2,7 +2,7 @@
 tags: [mega-bite, art, models, skins, ui]
 created: 2026-11-12
 ---
-# MEGA BITE - HSE rebuild: Reef Shark, Piranha and Barracuda models, designed skins, FishKit v3 (12 Nov 2026, night)
+# MEGA BITE - HSE rebuild: Reef Shark, Piranha, Barracuda and Great White models, designed skins, FishKit v3 (12 Nov 2026, night)
 
 Owner, 01:29: "these equip buttons look like placeholder uis and these index fish labels too".
 Owner, 01:36: "the skins in shop also look so bad and also the fish in index".
@@ -34,6 +34,13 @@ Sheet: `Art\HSE_sheets\mb_hse_barracuda.png`. Files: `Art\Barracuda_hse\`.
 - Skins (`SkinTex.Barracuda`): Coral 140004424991904, Lantern 130050441866633, Ghost 132008592213930, Ember 111242387192931.
 - Checked in Play at evolution 3: blue stripes, yellow eye under the brow, long jaws with needle teeth. Picture: `Art\Barracuda_hse\barh_sheet_vs_model_and_skins.jpg`.
 - Came out right on the first build with the v3 kit (yellow pupil eye = the kit's default eye; pectorals from the top view).
+
+## 2d. Great White, rebuilt from its sheet (same night)
+Sheet: `Art\HSE_sheets\mb_hse_gw.png`. Files: `Art\GreatWhite_hse\`.
+- Mesh asset **104294360894563** (17,936 triangles, old rig). Texture **119815389239301**. Old model: `ServerStorage.MB_GreatWhite_preHSE_backup_12Nov` (texture 123779637227645; old skins Lantern 116180395917717, Ghost 110860918253244, Ember 100758550219966, Coral 131743586366072).
+- Skins (`SkinTex.GreatWhite`): Coral 104240527129123, Lantern 135814123327973, Ghost 116608199300292, Ember 91288417893235.
+- Installed; NOT yet looked at in Play (evolution 6). Picture: `Art\GreatWhite_hse\gwh_sheet_vs_model_and_skins.jpg`.
+- Two cfg mistakes cost a build each: the dorsal bridge started under the fin's leaning tip (the body swallowed the fin: dark block), and the top-view pectoral range started inside the fin (step in the body width). Start both BEHIND the fin, and print `debug_tw` when unsure.
 
 ## 3. Designed skins (not colour swaps)
 Script: `Art\FishKit_v3_hse\skins2.py`. Each skin has its own colours per body zone (back and belly keep the sheet's shading, gills and brow), its own PATTERN painted on the texture, and its own eye, fin colour, fin tips and edge line.
@@ -82,7 +89,7 @@ Reference: frame 17.0 s of the owner's recording (`Ref\modern_ui_frames\pets_017
 - Button anatomy rule: lip + own-colour outline + top gloss + shadowed text. A flat pill with a thin stroke reads as a placeholder.
 
 ## 7. Still to do (in this order, one at a time, quality first)
-1. Hammerhead (sheet v2) and Great White from their HSE sheets with FishKit v3, each with the four designed skins. (Reef Shark, Piranha and Barracuda are done.) The Minnow has no HSE sheet yet.
+1. Hammerhead (sheet v2) from its HSE sheet with FishKit v3, with the four designed skins. (Reef Shark, Piranha, Barracuda and Great White are done.) The Minnow has no HSE sheet yet. Look at the Great White in Play.
 2. Megalodon: designed skins on the approved model; fix its mouth inside (same bug as above).
 3. New fish for the Index (8 species): HSE-style sheets in ChatGPT, then models.
 4. Check on a phone: Index tile camera distance (2.05), the 3D card's blur cost.
