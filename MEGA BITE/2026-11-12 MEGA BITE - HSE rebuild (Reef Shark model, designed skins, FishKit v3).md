@@ -2,7 +2,7 @@
 tags: [mega-bite, art, models, skins, ui]
 created: 2026-11-12
 ---
-# MEGA BITE - HSE rebuild: Reef Shark, Piranha, Barracuda and Great White models, designed skins, FishKit v3 (12 Nov 2026, night)
+# MEGA BITE - HSE rebuild: five sharks from their sheets, designed skins, FishKit v3 (12 Nov 2026, night)
 
 Owner, 01:29: "these equip buttons look like placeholder uis and these index fish labels too".
 Owner, 01:36: "the skins in shop also look so bad and also the fish in index".
@@ -39,8 +39,15 @@ Sheet: `Art\HSE_sheets\mb_hse_barracuda.png`. Files: `Art\Barracuda_hse\`.
 Sheet: `Art\HSE_sheets\mb_hse_gw.png`. Files: `Art\GreatWhite_hse\`.
 - Mesh asset **104294360894563** (17,936 triangles, old rig). Texture **119815389239301**. Old model: `ServerStorage.MB_GreatWhite_preHSE_backup_12Nov` (texture 123779637227645; old skins Lantern 116180395917717, Ghost 110860918253244, Ember 100758550219966, Coral 131743586366072).
 - Skins (`SkinTex.GreatWhite`): Coral 104240527129123, Lantern 135814123327973, Ghost 116608199300292, Ember 91288417893235.
-- Installed; NOT yet looked at in Play (evolution 6). Picture: `Art\GreatWhite_hse\gwh_sheet_vs_model_and_skins.jpg`.
+- Installed. In Play at evolution 6 the shape was right but the TEXTURE HAD NOT ARRIVED from Roblox yet (grey shark, ContentProvider said Failure although the asset is Approved; the other new sharks did the same for a few minutes after upload). Look again. Picture: `Art\GreatWhite_hse\gwh_sheet_vs_model_and_skins.jpg`.
 - Two cfg mistakes cost a build each: the dorsal bridge started under the fin's leaning tip (the body swallowed the fin: dark block), and the top-view pectoral range started inside the fin (step in the body width). Start both BEHIND the fin, and print `debug_tw` when unsure.
+
+## 2e. Hammerhead, rebuilt from its sheet v2 (same night)
+Sheet: `Art\HSE_sheets\mb_hse_hammer_v2.png`. Files: `Art\Hammerhead_hse\`.
+- Mesh asset **75262537480298** (17,738 triangles, old rig). Texture **109491942198991**. Old model: `ServerStorage.MB_Hammerhead_preHSE_backup_12Nov` (texture 96271691606416; old skins Lantern 122874066528250, Ghost 118121349872854, Ember 105853167465322, Coral 133262297052679).
+- Skins (`SkinTex.Hammerhead`): Coral 119994987779350, Lantern 75046283039163, Ghost 97687589261479, Ember 82424062834911.
+- Checked in Play at evolution 5 (teal, wide hammer, cartoon eye on each end).
+- Hammer-specific kit options: the head's width comes straight from the top view (never bridge it); `FN_ranges=[(1150,1215,6.0)]` makes the head's section boxy so the hammer ends are blunt faces the eyes can sit on (with the normal round section the end was a knife edge and the eye mesh tore); `WSC=0.95` set by hand (the automatic value shrank the whole body because the hammer is so wide); `round_k=99`; the jaw, the teeth and the red mouth roof are capped to the neck's width (`jaw_w_max_px`, `tooth_w_max_px`, `inner_w_max_px`); the painted eye is ignored in the side view (`eye_ignore_k=1.3`) because it smeared along the hammer's front edge; the top view paints the hammer's top (`top_w=0.75` + `ignore_top_rule`).
 
 ## 3. Designed skins (not colour swaps)
 Script: `Art\FishKit_v3_hse\skins2.py`. Each skin has its own colours per body zone (back and belly keep the sheet's shading, gills and brow), its own PATTERN painted on the texture, and its own eye, fin colour, fin tips and edge line.
@@ -79,6 +86,7 @@ Files: `Art\FishKit_v3_hse\` (fishkit.py, fishbuild.py, skins2.py, run.sh, skinv
 - **A painted brow and socket from the sheet beat a 3D tube** at game size, and they match the sheet exactly.
 - **A skin needs its own pattern, eye and fin colours.** A colour ramp alone reads as the same shark tinted.
 - **Do not click on the screen where the Claude window sits** (right side of Studio): the click lands on Claude. Use the Studio tool's mouse click with the button's path instead.
+- While testing, the Hammerhead ate one Coral Shrimp in the owner's Studio save (+1 EXP, one Index entry found). Evolution was put back to the Reef Shark (4) after every test.
 - Evolution order in the build: Minnow, Piranha, Barracuda, Reef Shark, Hammerhead, Great White, Megalodon (`]` and `[` step through them in Studio).
 
 ## 6. Buttons, Index tiles and the 3D card (01:29 complaint)
@@ -89,7 +97,7 @@ Reference: frame 17.0 s of the owner's recording (`Ref\modern_ui_frames\pets_017
 - Button anatomy rule: lip + own-colour outline + top gloss + shadowed text. A flat pill with a thin stroke reads as a placeholder.
 
 ## 7. Still to do (in this order, one at a time, quality first)
-1. Hammerhead (sheet v2) from its HSE sheet with FishKit v3, with the four designed skins. (Reef Shark, Piranha, Barracuda and Great White are done.) The Minnow has no HSE sheet yet. Look at the Great White in Play.
+1. Look at the Great White in Play once its texture arrives. All five sheet sharks are rebuilt (Piranha, Barracuda, Reef Shark, Hammerhead, Great White). The Minnow has no HSE sheet yet.
 2. Megalodon: designed skins on the approved model; fix its mouth inside (same bug as above).
 3. New fish for the Index (8 species): HSE-style sheets in ChatGPT, then models.
 4. Check on a phone: Index tile camera distance (2.05), the 3D card's blur cost.
