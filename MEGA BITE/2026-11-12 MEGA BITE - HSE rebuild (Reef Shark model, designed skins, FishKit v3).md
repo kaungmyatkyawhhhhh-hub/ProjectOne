@@ -82,6 +82,14 @@ All eight species were redrawn as Hungry-Shark-style sheets and rebuilt with Fis
 - **Not seen in the game yet:** Squid, Mackerel and Tuna swimming (they live outside the Safe Reef; seen only in the Edit line-up), and the six locked Index tiles in colour (the owner's save has 2 of 8 found; the silhouettes fit their tiles).
 - Known small flaw: the Golden Fish has a faint ring where the body meets the tail.
 
+## 2h. Check of every skin on every shark, and two fixes (05:30)
+All 7 sharks x 5 looks were lined up in Studio (Edit) with the ids from `GameConfig.Store.SkinTex`. Picture: `Art\MEGA_BITE_all_sharks_all_skins_in_Studio_12Nov.jpg`.
+- **Six skins were grey** (the picture was Approved but Studio never showed it): Piranha Coral and Ember, Hammerhead Coral and Lantern, Megalodon Coral and Ember. Uploaded again as new files (`*_b.png`, Megalodon Ember `*_c.png`: the same picture with a few pixels changed by one level) and `SkinTex` now points at the new ids: Piranha Coral 114397878131575, Ember 128192424150257; Hammerhead Coral 123230472721700, Lantern 104352751905725; Megalodon Coral 132700272885302, Ember 83777401405668. The old ids are in a comment above the table.
+- **Likely cause:** the id was put on a part while the image was still "Reviewing". This Studio session then keeps the failed fetch for that id even after approval (the Megalodon Ember `_b` was tried while Reviewing and stayed grey; `_c` was set only after "Approved" and showed at once). Rule: poll the upload until Approved, THEN use the id.
+- **Fish swam between the camera and the 3D card** in the Shop and the Index (a giant shrimp over the Ember skin). `MB_FishClient` now parks any fish closer than 6 studs + its length to the camera while the Shop or Index window is open (backup: `ServerStorage.MB_FishClient_preMenuHide_12Nov`). Checked in Play: the card stays clear.
+- The Shop's 3D card was looked at with the Reef Shark in Classic, Coral, Lantern, Ghost and Ember. The Minnow row shows what is left: it is still the tap-style model with plain colour swaps.
+- Seen, not changed (not asked for): on the Shop card the shark is small (about two thirds of the card's width) and sits left of centre; the skins grid leaves an empty column on the right; Ghost is see-through on the card, so its ribs barely show.
+
 ## 3. Designed skins (not colour swaps)
 Script: `Art\FishKit_v3_hse\skins2.py`. Each skin has its own colours per body zone (back and belly keep the sheet's shading, gills and brow), its own PATTERN painted on the texture, and its own eye, fin colour, fin tips and edge line.
 | Skin | Design | Texture |
@@ -123,6 +131,8 @@ Files: `Art\FishKit_v3_hse\` (fishkit.py, fishbuild.py, skins2.py, run.sh, skinv
 - **Studio's `screen_capture` also works during Play and shows the UI**, so the game can be checked without computer use (which needs the owner to approve again after 30 idle minutes).
 - **An uploaded FBX also uploads its embedded texture.** `LoadAsset` shows that id on the MeshPart; it is a spare when a separately uploaded image is Approved but never delivered (the Shrimp).
 - **Count triangles before installing anything that appears many times.** The kit's defaults are sized for one hero shark, not for 80 food fish. `Stats.SceneTriangleCount` with the models shown, then hidden, gives the real cost in 20 seconds.
+- **Use a new image id only after its upload says Approved.** Set earlier, the Studio session keeps the failed fetch and the part stays grey (six skins, one fish texture).
+- **After installing textures, line every variant up in Studio and look.** The six grey skins were found only by the 7 x 5 line-up, not by testing one skin in the game.
 - Evolution order in the build: Minnow, Piranha, Barracuda, Reef Shark, Hammerhead, Great White, Megalodon (`]` and `[` step through them in Studio).
 
 ## 6. Buttons, Index tiles and the 3D card (01:29 complaint)
@@ -133,8 +143,7 @@ Reference: frame 17.0 s of the owner's recording (`Ref\modern_ui_frames\pets_017
 - Button anatomy rule: lip + own-colour outline + top gloss + shadowed text. A flat pill with a thin stroke reads as a placeholder.
 
 ## 7. Still to do (in this order, one at a time, quality first)
-1. Minnow: no HSE sheet yet (it is still the tap-style model with colour-swap skins). Needs a sheet, then the model and four designed skins.
-2. Look at each skin on each shark in the Shop's 3D card (only the Reef Shark's Lantern was looked at in the game; the others were checked in renders).
-3. See the Squid, Mackerel and Tuna swimming (open sea / trench) and the Index with all eight found.
-4. Check on a phone: Index tile camera distance (2.05), the 3D card's blur cost, frame rate with 80+ lite fish on screen (they add about 340,000 triangles; the scene without fish is already about 1.2 million at the top quality level, worth a look on its own).
-5. If a new upload stays grey for more than a few minutes, use the FBX's own embedded texture id (`InsertService:LoadAsset(id)` shows it) or upload the file again.
+1. Minnow: no HSE sheet yet (it is still the tap-style model with colour-swap skins, and it is the first shark every new player sees). Needs a sheet, then the model and four designed skins.
+2. See the Squid, Mackerel and Tuna swimming (open sea / trench) and the Index with all eight found.
+3. Check on a phone: Index tile camera distance (2.05), the 3D card's blur cost, frame rate with 80+ lite fish on screen (they add about 340,000 triangles; the scene without fish is already about 1.2 million at the top quality level, worth a look on its own).
+4. Owner to judge: Shop card shark size and position, the empty column in the skins grid, Ghost on the card, the purple Squid and the orange Golden Fish.
