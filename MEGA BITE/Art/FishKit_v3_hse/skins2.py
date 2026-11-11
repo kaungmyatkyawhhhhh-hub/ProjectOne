@@ -44,6 +44,9 @@ def orb(top_,bot_,lid_col,socket=(14,30,58)):
     ci=np.array(bot_,np.float32); co=np.array(top_,np.float32); t=np.clip(r/OR_,0,1)[...,None]; o=ci*(1-t**2.2)+co*t**2.2
     hr=np.hypot(xx-(cx+0.10*E/2),yy-(cy-0.14*E/2))/(E/2); k_=np.clip(1-hr/0.42,0,1)[...,None]**1.5
     o=o*(1-k_)+255*k_; ey=np.where((r<OR_)[...,None],o,ey)
+    if C.get('eye_style')=='glow':   # the Megalodon's approved eye keeps its small round pupil looking forward
+        LF=C.get('look_fwd',0.0)*E/2; pr=np.hypot(xx-(cx+LF*1.3),yy-cy)/(E/2); ey=np.where(((pr<C.get('pupil_r',0.26))&(r<OR_))[...,None],np.array((10,30,55),np.float32),ey)
+        crr=np.hypot(xx-(cx+0.32*E/2),yy-(cy-0.3*E/2))/(E/2); ey=np.where((crr<0.1)[...,None],np.array((255,255,255),np.float32),ey)
     if C.get('lid'):
         tp,fr=C['lid']; u=(xx-cx)/(E/2); edge=cy+(tp+(fr-tp)*(u+1)/2)*E/2
         ey=np.where(((yy<edge)&(r<1.0))[...,None],np.array(lid_col,np.float32),ey)
@@ -78,7 +81,7 @@ SK={}
 b,j=recolour([(120,28,58),(250,104,112),(255,196,170)],[(214,150,140),(255,236,222),(255,252,246)])
 a,ring=spots(120,5,12,0.52,0.80,3); bk=(1-wb[...,0])
 b=over(b,(170,40,70),ring*bk*0.75); b=over(b,(255,236,214),a*bk*0.92)
-SK['Coral']=dict(body=b,jaw=j,eye=orb((0,170,165),(120,255,232),(150,40,66)),fin=finstrip((235,92,104),(255,150,140),(20,176,170)),line=(96,24,52),finramp=[(16,150,150),(236,96,108),(255,190,176)])
+SK['Coral']=dict(body=b,jaw=j,eye=orb((0,170,165),(120,255,232),(150,40,66)),fin=finstrip((235,92,104),(255,150,140),(20,176,170)),line=(96,24,52),brow=(150,40,66),finramp=[(16,150,150),(236,96,108),(255,190,176)])
 # ---- LANTERN: deep-sea navy, rows of glowing photophores, glowing fin rims, yellow lantern eye
 b,j=recolour([(6,9,24),(20,32,70),(58,92,150)],[(14,26,52),(36,70,108),(92,152,178)])
 glow=np.zeros((NV,TEX),np.float32); core=np.zeros((NV,TEX),np.float32)
@@ -87,7 +90,7 @@ for (v0,step,rad,u0,u1,ph) in ((0.50,30,4.6,0.05,0.80,0),(0.70,24,3.2,0.08,0.74,
         y=(v0+0.035*np.sin(x/90.0))*NV*SY; d=np.hypot(MX-x,MY-y)
         core=np.maximum(core,np.clip((rad-d)/1.6,0,1)); glow=np.maximum(glow,np.clip(1-d/(rad*3.2),0,1)**1.6)
 b=over(b,(80,220,140),glow*0.7); b=over(b,(240,255,170),core)
-SK['Lantern']=dict(body=b,jaw=j,eye=orb((240,160,10),(255,248,150),(10,16,40),socket=(4,6,16)),fin=finstrip((225,255,150),(14,24,56),(8,12,30),0.2),line=(3,5,14),finramp=[(6,10,26),(22,40,84),(214,250,150)])
+SK['Lantern']=dict(body=b,jaw=j,eye=orb((240,160,10),(255,248,150),(10,16,40),socket=(4,6,16)),fin=finstrip((225,255,150),(14,24,56),(8,12,30),0.2),line=(3,5,14),brow=(10,16,40),finramp=[(6,10,26),(22,40,84),(214,250,150)])
 # ---- GHOST: spectral white-blue, a faint glowing spine and ribs showing through, icy fins (in game it is also see-through)
 b,j=recolour([(96,128,186),(206,226,248),(255,255,255)],[(176,206,238),(236,246,255),(255,255,255)],mouth=(104,120,180))
 rib=np.zeros((NV,TEX),np.float32)
@@ -102,14 +105,14 @@ for x in np.arange(0.07*TEX*SX,0.84*TEX*SX,13):                 # vertebrae
     rib=np.maximum(rib,np.clip(1-np.hypot(MX-x,(MY-spine_y)*1.0)/3.6,0,1))
 rib=cv2.GaussianBlur(rib,(0,0),0.7)
 b=over(b,(150,214,255),cv2.GaussianBlur(rib,(0,0),4)*0.55); b=over(b,(70,150,225),rib*0.8)
-SK['Ghost']=dict(body=b,jaw=j,eye=orb((120,200,255),(255,255,255),(150,180,225),socket=(60,96,150)),fin=finstrip((246,252,255),(170,208,244),(110,190,246)),line=(104,134,182),mouth=(104,120,180),finramp=[(96,170,236),(196,224,250),(255,255,255)])
+SK['Ghost']=dict(body=b,jaw=j,eye=orb((120,200,255),(255,255,255),(150,180,225),socket=(60,96,150)),fin=finstrip((246,252,255),(170,208,244),(110,190,246)),line=(104,134,182),brow=(150,180,225),mouth=(104,120,180),finramp=[(96,170,236),(196,224,250),(255,255,255)])
 # ---- EMBER: charcoal rock with glowing lava cracks, embers under the belly, molten fin rims and eye
 b,j=recolour([(10,8,10),(46,34,34),(104,78,66)],[(34,12,8),(104,34,16),(204,96,34)],mouth=(214,84,20))
 NP_=int(np.clip(230*(SX*SY)/(1.08*0.5)*0.8,110,300)); pts=np.stack([rng.uniform(0,TEX*SX,NP_),rng.uniform(0,NV*SY,NP_)],1)
 dd,_=cKDTree(pts).query(np.stack([MX.ravel(),MY.ravel()],1),k=2); f=(dd[:,1]-dd[:,0]).reshape(NV,TEX)
 fade=np.clip((0.90-U)/0.10,0,1)                                      # keep the face clean
 b=over(b,(255,96,10),np.clip(1-f/9.0,0,1)**1.5*0.8*fade); b=over(b,(255,150,30),np.clip(1-f/4.2,0,1)*fade); b=over(b,(255,236,150),np.clip(1-f/1.6,0,1)*fade)
-SK['Ember']=dict(body=b,jaw=j,eye=orb((255,92,6),(255,238,130),(26,16,16),socket=(8,4,4)),fin=finstrip((255,150,30),(30,20,20),(255,176,44),0.15),line=(14,7,7),mouth=(214,84,20),finramp=[(24,14,14),(92,40,22),(255,170,50)])
+SK['Ember']=dict(body=b,jaw=j,eye=orb((255,92,6),(255,238,130),(26,16,16),socket=(8,4,4)),fin=finstrip((255,150,30),(30,20,20),(255,176,44),0.15),line=(14,7,7),brow=(26,16,16),mouth=(214,84,20),finramp=[(24,14,14),(92,40,22),(255,170,50)])
 import os
 FR=json.load(open(D+'/out/fin_atlas.json')) if os.path.exists(D+'/out/fin_atlas.json') else []
 out={}
@@ -118,5 +121,6 @@ for name,s in SK.items():
     for (fx,fy,fw,fh) in FR:   # the fins' own pieces of the sheet: dark parts (tips, shadows) -> the skin's tip colour, mid -> fin colour, light rays -> highlight
         B[fy:fy+fh,fx:fx+fw]=ramp(A[fy:fy+fh,fx:fx+fw],s['finramp'])
     if s.get('mouth'): B[0:64,640:704]=s['mouth']
+    if s.get('brow'): B[64:128,512:576]=s['brow']      # 3D brow ridges (Megalodon) take the skin's lid colour
     Image.fromarray(np.clip(B,0,255).astype(np.uint8)).save(f'{D}/out/skin_{name}.png'); out[name]=f'{D}/out/skin_{name}.png'
 print(json.dumps(out))
