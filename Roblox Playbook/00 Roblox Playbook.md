@@ -44,6 +44,7 @@ How to make Roblox games better in every way, researched 28 Oct 2026 for GYM ARC
 - [[Playbook notes - Thumbnails]]
 - [[Playbook notes - Icons and titles]]
 - [[Playbook notes - Whole-game research (Oct 2026)]]: 2025-26 platform rules (Kids & Select, discovery windows, notifications, ads, subscriptions), retention benchmarks, gym genre today, ads maths, economy maths, UI/world/art, sound/VFX/calendar, tech/data/DevEx
+- [[Playbook notes - Loading, auras, trainers, retention (29 Oct 2026)]]: top-game retention benchmarks + ranked plan, loading screen design, Sol's RNG-style aura VFX with phone culling, trainer/pet inventory UX (fair for kids, paid random item rules), the gym unlock cutscene
 - [[Playbook notes - Top games art study (Oct 2026)]]: real icons/thumbnails of the 32 biggest games + 9 gym games, the 4 styles, rules, GYM ARC art direction and prompts
 - [[Playbook notes - Names and descriptions]]
 - [[Playbook notes - Logos]]

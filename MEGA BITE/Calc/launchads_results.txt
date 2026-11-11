@@ -1,0 +1,6 @@
+$100 of ads, one day                       plays   avg CCU  peak CCU  tile  agree  1st pick  (week after: agree)
+best case: official cost per play           12500      139      222      4    100%    88%     (60%)
+good page: 25% of clickers press Play        2273       25       40      2     60%    64%     (60%)
+Galaxy-like page: 6% press Play               545        6       10      1     60%    63%     (60%)
+
+at tile 2/10 the objections are: [('crowd: "nobody plays it, it\'s dead"', 1207)]

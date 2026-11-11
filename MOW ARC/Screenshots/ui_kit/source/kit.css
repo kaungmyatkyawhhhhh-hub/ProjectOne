@@ -1,0 +1,45 @@
+@font-face { font-family: Fredoka; font-weight: 700; src: url(node_modules/@fontsource/fredoka/files/fredoka-latin-700-normal.woff2); }
+@font-face { font-family: Fredoka; font-weight: 600; src: url(node_modules/@fontsource/fredoka/files/fredoka-latin-600-normal.woff2); }
+@font-face { font-family: Luckiest; src: url(node_modules/@fontsource/luckiest-guy/files/luckiest-guy-latin-400-normal.woff2); }
+:root {
+  --navy: #0F1E4A; --white: #FFFFFF;
+  --green: #3DDB52; --green-d: #1E9E36; --green-l: #9BF7A4;
+  --blue: #2F9BFF; --blue-d: #1C5FD1; --blue-l: #A8D8FF;
+  --yellow: #FFD21F; --yellow-d: #E39400; --yellow-l: #FFF2A6;
+  --red: #FF4A4A; --red-d: #C21F2C; --red-l: #FFB2AE;
+  --grey: #A9B1C2; --grey-d: #6E7790; --grey-l: #E3E7EF;
+  --orange: #FF7A1A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Fredoka, sans-serif; color: var(--white); }
+.stroke { -webkit-text-stroke: 0; text-shadow:
+  -2px -2px 0 var(--navy), 2px -2px 0 var(--navy), -2px 2px 0 var(--navy), 2px 2px 0 var(--navy),
+  0 -2px 0 var(--navy), 0 2px 0 var(--navy), -2px 0 0 var(--navy), 2px 0 0 var(--navy), 0 3px 0 var(--navy); }
+.title { font-family: Luckiest, Fredoka, sans-serif; letter-spacing: 0.5px; }
+
+/* chunky glossy button: navy outline, colour body, darker 3D lip, inner top highlight, soft shadow */
+.btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 3px solid var(--navy); border-radius: 14px; padding: 0 14px; height: 40px;
+  font-weight: 700; font-size: 16px; color: #fff;
+  background: linear-gradient(180deg, var(--c-l) 0%, var(--c) 38%, var(--c) 100%);
+  box-shadow: inset 0 -6px 0 var(--c-d), inset 0 2px 0 rgba(255,255,255,.55), 0 4px 0 rgba(15,30,74,.35), 0 6px 10px rgba(0,0,0,.25); }
+.btn::after { content: ""; position: absolute; left: 6px; right: 6px; top: 4px; height: 34%; border-radius: 9px;
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0)); pointer-events: none; }
+.btn.pressed { transform: translateY(3px); box-shadow: inset 0 -2px 0 var(--c-d), inset 0 2px 0 rgba(255,255,255,.45), 0 1px 0 rgba(15,30,74,.35); }
+.green { --c: var(--green); --c-d: var(--green-d); --c-l: var(--green-l); }
+.blue { --c: var(--blue); --c-d: var(--blue-d); --c-l: var(--blue-l); }
+.yellow { --c: var(--yellow); --c-d: var(--yellow-d); --c-l: var(--yellow-l); color: var(--navy); }
+.red { --c: var(--red); --c-d: var(--red-d); --c-l: var(--red-l); }
+.grey { --c: var(--grey); --c-d: var(--grey-d); --c-l: var(--grey-l); }
+.btn.yellow .stroke-n { color: #fff; }
+
+/* panel: white-blue card with a navy outline and a lip */
+.panel { border: 3px solid var(--navy); border-radius: 18px; background: linear-gradient(180deg, #EAF6FF, #C9E6FF);
+  box-shadow: inset 0 -6px 0 #9CC8F0, inset 0 3px 0 #fff, 0 6px 0 rgba(15,30,74,.35), 0 10px 18px rgba(0,0,0,.3); }
+.card { border: 3px solid var(--navy); border-radius: 14px; background: linear-gradient(180deg, #ffffff, #E4F1FF);
+  box-shadow: inset 0 -5px 0 #B9D7F5, 0 3px 0 rgba(15,30,74,.25); }
+.pill { display: inline-flex; align-items: center; gap: 6px; border: 3px solid var(--navy); border-radius: 999px;
+  background: linear-gradient(180deg, #2B4AA8, #17306F); box-shadow: inset 0 2px 0 rgba(255,255,255,.35), inset 0 -4px 0 #0B1A40, 0 4px 0 rgba(15,30,74,.35); padding: 0 14px 0 6px; }
+.badge { position: absolute; top: -8px; right: -8px; min-width: 22px; height: 22px; border-radius: 11px; border: 2.5px solid var(--navy);
+  background: var(--red); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 -3px 0 var(--red-d); }
+.icon { width: 22px; height: 22px; flex: none; }

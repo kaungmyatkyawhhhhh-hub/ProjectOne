@@ -7,6 +7,7 @@ This vault is my personal context for Claude: who I am, what I'm working on and 
 - [[Work]]: what I do
 - [[Preferences]]: how to talk to me (follow exactly)
 - [[Active-Projects]]: what's in progress right now
+- [[Brain/00 BRAIN]]: HOW to think for every game (methods, lessons, gates). Read before planning or judging any game work.
 
 ## Games (each has its own folder, its own home note and its own rules)
 | Game | Status | Home |
@@ -16,6 +17,7 @@ This vault is my personal context for Claude: who I am, what I'm working on and 
 | City Legends | active | [[City Legends/City Legends]] |
 | Galaxy Incremental | active, alpha 14 Nov | [[Celestial Incremental/Progress/2026-11-03 Galaxy Incremental - Overnight summary]] |
 | MOW ARC | on hold, idea only (incremental) | [[MOW ARC/00 MOW ARC Home]] |
+| MM Shop Bot (Telegram shop, Myanmar) | active, new 5 Nov | [[MM Shop Bot/00 MM Shop Bot Home]] |
 | Break A Bed | archived 28 Oct | [[Archive/Break A Bed/Project Overview]] |
 
 ## Other notes

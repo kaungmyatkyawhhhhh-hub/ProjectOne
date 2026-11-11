@@ -1,0 +1,102 @@
+<html><head><style>
+@font-face{font-family:M;font-weight:800;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-800-italic.woff2)}
+@font-face{font-family:M;font-weight:700;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-700-italic.woff2)}
+@font-face{font-family:M;font-weight:900;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-900-italic.woff2)}
+*{box-sizing:border-box}
+body{margin:0;width:1280px;height:720px;overflow:hidden;font-family:M;font-style:italic;font-weight:800;color:#fff;background:#1b1622;position:relative}
+.a{position:absolute}
+.t{paint-order:stroke fill;-webkit-text-stroke:2px #08060c;text-shadow:0 2px 0 #000}
+.bg{position:absolute;inset:-60px;filter:blur(30px)} .bg div{position:absolute;border-radius:40%}
+.stripes{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.13) 0 7px,transparent 7px 18px)}
+.btn{position:absolute;border:2px solid #08060c;border-radius:5px;overflow:hidden;box-shadow:0 2px 0 #000}
+.btn .f{position:absolute;inset:0;box-shadow:inset 0 2px 0 rgba(255,255,255,.45)}
+/* VFX */
+@keyframes sweep{0%{left:-50%}40%,100%{left:120%}}
+.shine{position:absolute;top:-10%;bottom:-10%;width:30%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-15deg);animation:sweep 2.4s ease-in-out infinite}
+@keyframes spark{0%,100%{opacity:0;transform:scale(.2) rotate(0)}45%{opacity:1;transform:scale(1) rotate(45deg)}70%{opacity:0;transform:scale(.6) rotate(90deg)}}
+.sp{position:absolute;width:12px;height:12px;background:#fff;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:spark 1.6s ease-in-out infinite;pointer-events:none}
+@keyframes rise{0%{opacity:0;transform:translateY(0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1)}}
+.mote{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff6c0;box-shadow:0 0 4px #ffd25a;animation:rise 1.8s ease-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 2px #08060c,0 0 22px 2px rgba(255,100,20,.75),0 0 60px 8px rgba(255,90,20,.28)}50%{box-shadow:0 0 0 2px #08060c,0 0 34px 6px rgba(255,120,30,1),0 0 90px 16px rgba(255,90,20,.5)}}
+@keyframes iglow{0%,100%{filter:drop-shadow(0 0 4px var(--c)) drop-shadow(0 3px 0 rgba(0,0,0,.6))}50%{filter:drop-shadow(0 0 14px var(--c)) drop-shadow(0 3px 0 rgba(0,0,0,.6))}}
+@keyframes ember{0%{opacity:0;transform:translate(0,0)}15%{opacity:1}100%{opacity:0;transform:translate(30px,-46px)}}
+.ember{position:absolute;width:4px;height:4px;border-radius:50%;background:#ffd08a;box-shadow:0 0 5px #ff8a2a;animation:ember 3s linear infinite}
+@keyframes ring{0%,100%{outline-color:rgba(255,255,255,1)}50%{outline-color:rgba(255,255,255,.35)}}
+</style></head><body>
+<div class="bg">
+ <div style="left:-80px;top:380px;width:700px;height:420px;background:#4a3a5c"></div>
+ <div style="left:700px;top:430px;width:700px;height:400px;background:#5a4436"></div>
+ <div style="left:880px;top:40px;width:520px;height:300px;background:#3a4a5e"></div>
+ <div style="left:-60px;top:20px;width:520px;height:330px;background:#433a52"></div>
+</div>
+<div class="a" style="inset:0;background:rgba(10,8,14,.25)"></div>
+<div id="root"></div>
+<script>
+let H='';let k=0;
+const ic=(src,x,y,w,c)=>`<img src="${src}.png" style="position:absolute;left:${x}px;top:${y}px;width:${w}px;--c:${c};animation:iglow 2.2s ease-in-out infinite;animation-delay:-${(k++%7)*.37}s">`;
+const sp=(x,y,d,s=12)=>`<div class="sp" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;animation-delay:${d}s"></div>`;
+const btn=(x,y,w,h,c1,c2,inner,vfx='')=>`<div class="btn" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><div class="f" style="background:linear-gradient(${c1},${c2})"></div><div class="stripes"></div>${vfx}${inner}</div>`;
+// top counter (v4 style plate)
+H+=`<div class="a" style="left:548px;top:36px;width:230px;height:40px;clip-path:polygon(0 0,95% 0,100% 50%,95% 100%,0 100%);background:#08060c"></div>
+<div class="a" style="left:550px;top:38px;width:224px;height:36px;clip-path:polygon(0 0,95% 0,100% 50%,95% 100%,0 100%);background:linear-gradient(#2a2433,#121016)"></div>
+<div class="a" style="left:556px;top:70px;width:208px;height:2.5px;background:#ff9a2a"></div>
+<div class="a t" style="left:600px;top:40px;font-size:24px">1.24M</div><div class="a t" style="left:690px;top:49px;font-size:12px;color:#ffc35a;-webkit-text-stroke:1.2px #08060c">+38.5K/s</div>`;
+H+=`<svg class="a" style="left:504px;top:18px" width="74" height="74" viewBox="0 0 70 70"><path d="M35 2 L68 35 L35 68 L2 35Z" fill="#08060c"/><path d="M35 6 L64 35 L35 64 L6 35Z" fill="#241a14" stroke="#ff9a2a" stroke-width="2"/></svg>`;
+H+=ic('stardust',506,17,72,'rgba(255,170,60,.9)')+sp(500,20,.2)+sp(570,72,.9,9)+sp(580,24,1.3,8);
+// window
+const WX=300,WY=120;
+H+=`<div class="a" style="left:${WX}px;top:${WY}px;width:700px;height:470px;border-radius:10px;background:#08060c;animation:breathe 2.6s ease-in-out infinite"></div>
+<div class="a" style="left:${WX+3}px;top:${WY+3}px;width:694px;height:464px;border-radius:8px;background:linear-gradient(#1a1620,#0f0d13);border:1.5px solid rgba(255,106,26,.55)"></div>
+<div class="a" style="left:${WX+3}px;top:${WY+3}px;width:694px;height:56px;border-radius:8px 8px 0 0;background:url(hdr_orange.png) 0 50%/900px 80px;overflow:hidden;box-shadow:inset 0 2px 0 rgba(255,208,160,.6)">
+ <div class="shine" style="width:16%;animation-duration:4.5s;background:linear-gradient(100deg,transparent,rgba(255,230,190,.35),transparent)"></div>
+ ${[20,90,170,260,350,430,520,610,660].map((x,i)=>`<div class="ember" style="left:${x}px;top:${44+(i%3)*4}px;animation-delay:${(i*0.41)%3}s"></div>`).join('')}
+</div>
+<div class="a" style="left:${WX+3}px;top:${WY+59}px;width:694px;height:2px;background:#08060c"></div>`;
+H+=ic('stardust',WX-22,WY-30,92,'rgba(255,170,60,.9)')+sp(WX-26,WY-24,.5)+sp(WX+60,WY+34,1.1,9);
+H+=`<div class="a t" style="left:${WX+80}px;top:${WY+13}px;font-size:28px;-webkit-text-stroke:1.8px #08060c">UPGRADES</div>`;
+// shards chip
+H+=`<div class="a" style="left:${WX+438}px;top:${WY+13}px;width:150px;height:34px;border-radius:4px;border:2px solid #08060c;background:linear-gradient(90deg,#3a1f7a,#7a4cff)"></div>
+<div class="a t" style="left:${WX+520}px;top:${WY+12}px;font-size:20px;-webkit-text-stroke:1.5px #08060c">12</div><div class="a t" style="left:${WX+497}px;top:${WY+33}px;font-size:9px;color:#e6dcff;-webkit-text-stroke:1px #08060c">SHARDS</div>`;
+H+=ic('shard',WX+548,WY+2,50,'rgba(170,110,255,.9)');
+H+=`<div class="a" style="left:${WX+648}px;top:${WY+13}px;width:34px;height:34px;border-radius:6px;background:linear-gradient(#ff7d8e,#e2334c);border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 0 #000"><svg width="30" height="30" viewBox="0 0 34 34"><path d="M11 11 L23 23 M23 11 L11 23" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div>`;
+// category list
+H+=`<div class="a" style="left:${WX+16}px;top:${WY+74}px;width:190px;height:380px;border-radius:6px;background:#0b090e;border:1.5px solid #2a2433"></div>`;
+const cats=[['STARDUST','#ff9a3a','#c2410c','stardust','rgba(255,170,60,.9)',1],['COMETS','#5ad1ff','#1f6fd1','comet','rgba(90,200,255,.9)'],['PLANETS','#b49bff','#5a3ad8','planet','rgba(170,130,255,.9)'],['FORGE','#ffd84a','#c79a0a','forge','rgba(255,210,80,.9)'],['BLACK HOLE','#5a5562','#38343f','gear','rgba(200,200,220,.4)']];
+cats.forEach((c,i)=>{const x=WX+28,y=WY+88+i*58;
+ H+=btn(x,y,166,46,c[1],c[2],`<div class="a t" style="left:30px;right:0;top:12px;text-align:center;font-size:17px;-webkit-text-stroke:1.6px #08060c">${c[0]}</div>`,c[5]?'<div class="shine" style="animation-duration:3s"></div>':'');
+ if(c[5])H+=`<div class="a" style="left:${x-4}px;top:${y-4}px;width:174px;height:54px;border-radius:7px;outline:2px solid #fff;outline-offset:-2px;animation:ring 1.4s ease-in-out infinite"></div>`;
+ H+=ic(c[3],x-12,y-8,c[3]=='forge'?56:54,c[4]);
+});
+H+=sp(WX+30,WY+82,.4,10)+sp(WX+180,WY+128,1.2,8);
+// rows panel
+H+=`<div class="a" style="left:${WX+218}px;top:${WY+74}px;width:466px;height:380px;border-radius:6px;background:#0b090e;border:1.5px solid #2a2433"></div>`;
+const rows=[
+ {n:'STAR FURNACE',d:'+12% stardust per level',lv:'LV 12',from:'1.26x',to:'1.38x',ic:'sun',gc:'rgba(255,120,30,.9)',b:'#ff9a3a',tc:'linear-gradient(#fff1c0,#ffb02a)',st:'buy',price:'48.2K'},
+ {n:'COMET MAGNET',d:'comets come 5% more often',lv:'LV 4',from:'1.10x',to:'1.15x',ic:'comet',gc:'rgba(90,200,255,.9)',b:'#3a8acc',tc:'linear-gradient(#ffffff,#bfe9ff)',st:'no',price:'2.10M'},
+ {n:'ORBIT SPEED',d:'planets orbit faster',lv:'LV 25',from:'2.50x',to:null,ic:'planet',gc:'rgba(170,130,255,.9)',b:'#8a6cff',tc:'linear-gradient(#efe8ff,#b49bff)',st:'max'}];
+rows.forEach((o,i)=>{const x=WX+228,y=WY+86+i*120;
+ H+=`<div class="a" style="left:${x}px;top:${y}px;width:446px;height:110px;border-radius:5px;border:2px solid ${o.b};background:linear-gradient(#17141c,#0e0c12);box-shadow:0 0 10px ${o.b}40"></div>`;
+ H+=ic(o.ic,x-8,y+2,o.ic=='comet'?96:90,o.gc);
+ H+=`<div class="a t" style="left:${x+16}px;top:${y+82}px;width:60px;text-align:center;font-size:12px;color:#cfc6dd;-webkit-text-stroke:1.2px #08060c">${o.lv}</div>`;
+ H+=`<div class="a" style="left:${x+86}px;top:${y+10}px;font-size:22px"><span class="t" style="-webkit-text-stroke:2px #08060c;color:transparent;position:absolute;white-space:nowrap">${o.n}</span><span style="background:${o.tc};-webkit-background-clip:text;color:transparent;position:relative;white-space:nowrap">${o.n}</span></div>`;
+ H+=`<div class="a t" style="left:${x+88}px;top:${y+38}px;font-size:11px;font-weight:700;color:#a99fb8;-webkit-text-stroke:1px #08060c;text-shadow:0 1px 0 #000">${o.d}</div>`;
+ const cw=o.to?160:80;
+ H+=`<div class="a" style="left:${x+86}px;top:${y+60}px;width:${cw}px;height:32px;border-radius:4px;background:#221d2a;border:1.5px solid #3a3346"></div>
+ <div class="a t" style="left:${x+96}px;top:${y+65}px;font-size:17px;-webkit-text-stroke:1.5px #08060c">${o.from}</div>`;
+ if(o.to)H+=`<div class="a t" style="left:${x+154}px;top:${y+63}px;font-size:20px;color:#9a90a8">›</div><div class="a t" style="left:${x+170}px;top:${y+65}px;font-size:17px;color:#7dff6b;-webkit-text-stroke:1.5px #08060c">${o.to}</div>`;
+ const bx=x+288,by=y+30;
+ if(o.st=='buy'){H+=btn(bx,by,146,52,'#7dff7a','#1fa83a',`<img src="stardust.png" style="position:absolute;left:14px;top:12px;width:26px;filter:drop-shadow(0 2px 0 #000)"><div class="a t" style="left:40px;right:0;top:10px;text-align:center;font-size:24px">${o.price}</div>`,'<div class="shine"></div>'+[[20,40,0],[60,44,.6],[100,42,1.2],[124,40,.3]].map(([mx,my,d])=>`<div class="mote" style="left:${mx}px;top:${my}px;animation-delay:${d}s"></div>`).join(''));
+  H+=sp(bx+128,by-6,0)+sp(bx-6,by+40,.8,10)+sp(bx+70,by-8,1.3,8);}
+ else if(o.st=='no'){H+=btn(bx,by,146,52,'#6a6474','#3f3a48',`<img src="stardust.png" style="position:absolute;left:14px;top:12px;width:26px;opacity:.7;filter:drop-shadow(0 2px 0 #000)"><div class="a t" style="left:40px;right:0;top:10px;text-align:center;font-size:24px;color:#ff6b6b">${o.price}</div>`);}
+ else {H+=btn(bx,by,146,52,'#b49bff','#5a3ad8',`<div class="a t" style="left:0;right:0;top:8px;text-align:center;font-size:27px;font-weight:900">MAX</div>`,'<div class="shine" style="animation-duration:3.6s"></div>');H+=sp(bx+134,by-4,.5,10)+sp(bx-4,by+44,1.5,8);}
+});
+// hotbar (v6)
+const bar=[['U','#ff9a3a','stardust','UPGRADES',1],['F','#ffd84a','forge'],['T','#7dff8a','planet'],['E','#ff5a6a','shard'],['Q','#c9c4d2','gear']];
+bar.forEach((b,i)=>{const x=480+i*70,y=650;
+ H+=`<div class="a" style="left:${x}px;top:${y}px;width:46px;height:46px;transform:rotate(45deg);background:linear-gradient(#2c2735,#121016);border:2px solid #0a070d;box-shadow:0 0 0 2px ${b[1]} inset,0 3px 0 #000"></div>`;
+ H+=`<img src="${b[2]}.png" style="position:absolute;left:${x-4}px;top:${y-6}px;width:${b[2]=='forge'?54:52}px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.6))">`;
+ H+=`<div class="a t" style="left:${x-8}px;top:${y-18}px;font-size:12px;-webkit-text-stroke:1.5px #0a070d">${b[0]}</div>`;
+ if(b[3])H+=`<div class="a t" style="left:${x-24}px;top:${y-38}px;width:96px;text-align:center;font-size:15px;color:${b[1]}">${b[3]}</div><div class="a" style="left:${x-24}px;top:${y-19}px;width:96px;height:2px;background:#fff"></div>`+sp(x-6,y-4,.7,9)+sp(x+44,y+40,1.4,8);
+});
+document.getElementById('root').outerHTML=H;
+</script></body></html>

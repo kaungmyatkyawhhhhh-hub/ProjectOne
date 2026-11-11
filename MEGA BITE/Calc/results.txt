@@ -1,0 +1,29 @@
+IMPATIENT KID (2,000 kids, patience median 11 s)
+version                                                            30s   60s  2min  5min  1st evolve
+A  DEVOUR-like: big map, sparse food, 1 bank, few landmarks          94%   86%   63%    0%     89 s
+B  + compact map (~2,000 studs), food 2x denser on the route        100%   99%   73%    5%     68 s
+C  + a landmark / set piece every ~15 s of swimming + guide current   99%   98%   74%   13%     68 s
+D  + bank vents every ~30 s of swimming                             100%   99%   75%   25%     68 s
+E  + ambient life (schools scatter, kelp, bubbles) + 14-mesh kit    100%  100%   82%   39%     68 s
+F  + zone identity, natural borders, streaming tuned                100%  100%   82%   39%     68 s
+G  + new players drop nothing below Reef Shark (keep 25% after)     100%  100%   88%   58%     68 s
+H  + red outline warns of predators, DART dodges them               100%  100%   91%   63%     68 s
+I  + a food current along the routes to the vents (eat on the way)  100%  100%   92%   67%     68 s
+J  + a BAIT BALL event every ~60 s in the Open Sea (8 quick bites)  100%  100%   92%   73%     68 s
+K  + FRENZY unlocks at Piranha + shiny fish (~1 a minute)           100%  100%   96%   83%     68 s
+  sensitivity patience  7 s: A stay 5 min 0%  ->  last 48%
+  sensitivity patience 16 s: A stay 5 min 2%  ->  last 96%
+
+QUALITY-NERD KID (2,000 kids, 10 min swim, like ratio among voters)
+version                                                            likes  tells/10min wows/10min  top tells
+A  DEVOUR-like: big map, sparse food, 1 bank, few landmarks           0%  104.0       21.1     same prop again 71.7, fish don't react 15.0, pop-in 9.5
+B  + compact map (~2,000 studs), food 2x denser on the route          0%  104.0       21.1     same prop again 71.7, fish don't react 15.0, pop-in 9.5
+C  + a landmark / set piece every ~15 s of swimming + guide current    0%  111.9       39.1     same prop again 72.3, pop-in 17.5, fish don't react 15.0
+D  + bank vents every ~30 s of swimming                               0%  111.9       39.1     same prop again 72.3, pop-in 17.5, fish don't react 15.0
+E  + ambient life (schools scatter, kelp, bubbles) + 14-mesh kit     40%   24.6       39.2     pop-in 17.6, zones look the same 3.2, invisible wall 2.0
+F  + zone identity, natural borders, streaming tuned                 99%    1.8       42.5     same prop again 1.8
+G  + new players drop nothing below Reef Shark (keep 25% after)      99%    1.8       42.5     same prop again 1.8
+H  + red outline warns of predators, DART dodges them                99%    1.8       42.5     same prop again 1.8
+I  + a food current along the routes to the vents (eat on the way)   99%    1.8       42.5     same prop again 1.8
+J  + a BAIT BALL event every ~60 s in the Open Sea (8 quick bites)   99%    1.8       42.5     same prop again 1.8
+K  + FRENZY unlocks at Piranha + shiny fish (~1 a minute)            99%    1.8       42.5     same prop again 1.8

@@ -1,0 +1,68 @@
+<html><head><style>
+@font-face{font-family:M;font-weight:900;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-900-italic.woff2)}
+@font-face{font-family:M;font-weight:800;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-800-italic.woff2)}
+*{box-sizing:border-box}body{margin:0;font-family:M;font-style:italic;font-weight:900;color:#fff}
+.s{position:relative;overflow:hidden;background:#05030a}
+.bg{position:absolute;inset:0;background:url(galaxybg.png) center/cover}
+.neb{position:absolute;border-radius:50%;filter:blur(60px)}
+img{position:absolute}
+.title{position:absolute;paint-order:stroke fill;-webkit-text-stroke:14px #0a0612;text-shadow:0 10px 0 #0a0612;letter-spacing:1px}
+.gold{background:linear-gradient(#fff6c8,#ffd23f 45%,#ff8a1a);-webkit-background-clip:text;color:transparent}
+.wrap{position:absolute}
+.wrap .o{position:absolute;left:0;top:0;white-space:nowrap;-webkit-text-stroke:14px #0a0612;text-shadow:0 10px 0 #0a0612;color:#0a0612}
+.wrap .i{position:relative;white-space:nowrap}
+.arrow{position:absolute;width:0;height:0;border-top:34px solid transparent;border-bottom:34px solid transparent;border-left:52px solid #fff;filter:drop-shadow(0 6px 0 #0a0612)}
+</style></head><body>
+<!-- ICON 1024 -->
+<div class="s" id="icon" style="width:1024px;height:1024px">
+ <div class="bg" style="background-size:2400px;background-position:center 46%"></div>
+ <div class="neb" style="left:120px;top:160px;width:800px;height:700px;background:rgba(150,70,255,.35)"></div>
+ <img src="supernova.png" style="left:92px;top:110px;width:840px">
+ <img src="planet.png" style="left:640px;top:80px;width:330px">
+ <img src="stardust.png" style="left:40px;top:60px;width:260px">
+ <img src="comet.png" style="left:30px;top:520px;width:300px">
+ <div class="wrap" style="left:60px;top:735px;transform:rotate(-6deg);font-size:200px"><span class="o">GALAXY</span><span class="i gold">GALAXY</span></div>
+ <div style="position:absolute;left:180px;top:910px;width:680px;height:86px;transform:rotate(-6deg);background:#7a3cff;border:8px solid #0a0612;border-radius:14px;box-shadow:0 8px 0 #0a0612"></div>
+ <div class="wrap" style="left:222px;top:908px;transform:rotate(-6deg);font-size:64px"><span class="o" style="-webkit-text-stroke:10px #0a0612;text-shadow:none">INCREMENTAL</span><span class="i">INCREMENTAL</span></div>
+</div>
+<!-- THUMB 1: progression chain -->
+<div class="s" id="t1" style="width:1920px;height:1080px">
+ <div class="bg"></div>
+ <div class="neb" style="left:600px;top:250px;width:800px;height:600px;background:rgba(255,120,40,.25)"></div>
+ <img src="rock.png" style="left:20px;top:440px;width:330px">
+ <div class="arrow" style="left:330px;top:600px"></div>
+ <img src="system.png" style="left:360px;top:380px;width:470px">
+ <div class="arrow" style="left:800px;top:600px"></div>
+ <img src="supernova.png" style="left:780px;top:210px;width:720px">
+ <div class="arrow" style="left:1460px;top:600px"></div>
+ <img src="blackhole.png" style="left:1470px;top:430px;width:430px">
+ <div class="wrap" style="left:1735px;top:300px;font-size:120px;transform:rotate(8deg)"><span class="o">?</span><span class="i" style="color:#c9b0ff">?</span></div>
+ <div class="wrap" style="left:240px;top:40px;transform:rotate(-3deg);font-size:150px"><span class="o">LIGHT UP THE</span><span class="i">LIGHT UP THE</span></div>
+ <div class="wrap" style="left:520px;top:850px;transform:rotate(-3deg);font-size:190px"><span class="o">GALAXY!</span><span class="i gold">GALAXY!</span></div>
+</div>
+<!-- THUMB 2: before / after -->
+<div class="s" id="t2" style="width:1920px;height:1080px">
+ <div class="bg"></div>
+ <div style="position:absolute;left:0;top:0;width:820px;height:1080px;background:#06040a;clip-path:polygon(0 0,100% 0,82% 100%,0 100%)"></div>
+ <div style="position:absolute;left:0;top:0;width:836px;height:1080px;background:#fff;clip-path:polygon(98% 0,100% 0,84% 100%,82% 100%)"></div>
+ <img src="rock.png" style="left:150px;top:330px;width:420px;filter:saturate(.4) brightness(.8)">
+ <img src="system.png" style="left:820px;top:170px;width:1100px">
+ <img src="stardust.png" style="left:1580px;top:60px;width:260px">
+ <div class="wrap" style="left:120px;top:110px;font-size:110px;transform:rotate(-4deg)"><span class="o">START</span><span class="i" style="color:#bdb3c9">START</span></div>
+ <div class="wrap" style="left:1250px;top:40px;font-size:110px;transform:rotate(-4deg)"><span class="o">LATER</span><span class="i gold">LATER</span></div>
+ <div class="wrap" style="left:110px;top:800px;font-size:120px;transform:rotate(-3deg)"><span class="o">1 STARDUST</span><span class="i" style="color:#bdb3c9">1 STARDUST</span></div>
+ <div class="wrap" style="left:1000px;top:820px;font-size:140px;transform:rotate(-3deg)"><span class="o">5.8 Qd/s</span><span class="i gold">5.8 Qd/s</span></div>
+</div>
+<!-- THUMB 3: supernova blast -->
+<div class="s" id="t3" style="width:1920px;height:1080px">
+ <div class="bg" style="background-size:2600px;background-position:center"></div>
+ <div class="neb" style="left:460px;top:120px;width:1000px;height:850px;background:rgba(255,140,40,.4)"></div>
+ <img src="supernova.png" style="left:420px;top:40px;width:1080px">
+ <img src="planet.png" style="left:60px;top:560px;width:380px;transform:rotate(-14deg)">
+ <img src="comet.png" style="left:1500px;top:80px;width:360px;transform:scaleX(-1)">
+ <img src="stardust.png" style="left:1520px;top:620px;width:300px">
+ <div class="wrap" style="left:80px;top:70px;font-size:150px;transform:rotate(-5deg)"><span class="o">GO</span><span class="i">GO</span></div>
+ <div class="wrap" style="left:370px;top:820px;font-size:200px;transform:rotate(-3deg)"><span class="o">SUPERNOVA!</span><span class="i gold">SUPERNOVA!</span></div>
+ <div class="wrap" style="left:1300px;top:470px;font-size:84px;transform:rotate(6deg)"><span class="o">+5.8B</span><span class="i" style="color:#7dff6b">+5.8B</span></div>
+</div>
+</body></html>

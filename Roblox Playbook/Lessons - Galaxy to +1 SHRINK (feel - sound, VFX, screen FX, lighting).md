@@ -300,3 +300,12 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - one short line per step; a tap anywhere on the box advances; never two help boxes at once;
   - a boss / PvP fight lasts 3-5 s with the bar swinging both ways, and always ends on a result card (title, reward, confetti, sound).
 - **Testing (Roblox Studio MCP):** click UI by its instance path (screenshot pixels don't match the real viewport); `require` in execute_luau gives a separate copy of a module, so firing a UI bus from there proves nothing; test server logic through the real RemoteEvents.
+
+
+## 11 Nov 2026 - 3D models: "its suppose to be 3d and not just pictures on a block" (Stomp Evolution, Stone set)
+- **What felt bad:** the first Stone model was rounded boxes with the design sheet projected on as a picture; fists, body, legs and shoulders all looked flat. The next try wrapped thick blocks round the body: "they look fat cuz the bellys pushing outwards and the legs look like sticks when theyre blocky".
+- **Cause:** used the sheet as the texture instead of as a reference, and built the armour on a made-up block body.
+- **Fix:** rebuilt on the real avatar mesh from Studio (Bacon Hair), with every detail as geometry and the textures painted on the model. Note: [[2026-11-11 Stomp Evolution - Stone set model v3 (real 3D, on the Bacon Hair avatar)]].
+- **Rule:** (1) a design sheet is never projected onto simple shapes as the final look: everything the player can see is modelled. (2) Armour and clothes are fitted on the real avatar mesh, thin and close to the body; the waist stays flat, nothing sticks out further than the chest plate. (3) Work in the owner's Blender so he can watch.
+
+- **Added 17:18 (same model):** "the leg look fat now, why cant u just do like the models from roblox catalog". Cause: plates on a box leg, then a wider box. **Rule:** armour sets are built like Roblox catalog bundles: each body part is its own sculpted mesh whose width changes along its length (slim thigh, knee, greave that widens to the boot, a gap between the legs). Never fix a proportion by scaling a box; reshape the part. Look at the catalog references before changing a body shape.

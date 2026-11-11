@@ -254,3 +254,46 @@ Not changed: fixed coin packs stay fixed (owner's rule); if they feel small late
 ## Progress 29 Oct (later)
 - Prompt 95 done in Studio by Claude (not published): [[2026-10-29 GYM ARC Prompt 95 done - Hall of Fame fixes]]. Starter Pack is 49 R$ on Roblox now.
 - Playtest of the first 6 minutes: [[2026-10-29 GYM ARC Playtest - first 6 minutes]] (21 problems; the fixes are added to prompt 106).
+
+## Status check in Studio (30 Oct, checked item by item)
+What already exists, so each prompt only builds what's missing.
+
+- **Done:**
+  - 95 Hall of Fame fixes; 103 fixed coin values; 104 cuts (court KEPT by the owner).
+  - 91 item 10: white tank top is the default.
+  - Gains math replaced by the owner's rules: boosts add, only the 2x passes + genetics multiply, coins capped at x4 before the pass, no EXP cap. The soft line is dropped.
+- **106 First 3 minutes, mostly done:**
+  - Done: 3-step tutorial, Spurt 1 at ~75 s, welcome bonus ~13%, quiet start + one-by-one queue, bar on the machine, body camera, one TAP TO GROW, clean transformation, own tag hidden, menu line, FirstMinutes funnel, FastStart switch.
+  - The step line already repeats while a player hasn't done the step.
+  - Left: 10 s idle pulse + Dex line, Hint_Shown, Onboarding_v2 funnel name, a 20% "WELCOME BONUS" label, a timed re-test.
+- **107 Come-back hooks, partly exists:**
+  - Exists: friend boost (friends in the server); invite launch data + invite boost; daily-reward notification (Open Cloud, needs the API secret); 7-day streak calendar with DNA on days 4 and 7; come-back gift + Dex promise.
+  - Left: Power Hour, rested gains, day 3/7 celebration, spawn next to the inviter, parties, the "WITH FRIEND" chip, the 2 new notification messages, break reminder.
+- **108 Safety pass:**
+  - Exists: odds on trainer rolls (Agency board) and DNA rerolls ("View odds"); Guard rate limits + distance checks on remotes/prompts; ad-hoc trainer/shop migrations; TextChatService is in use.
+  - Left: PolicyService paid-random restriction (NOT built); one dataVersion + migration list; erase command; a full remote audit; analytics-name list; backup steps in the Home note.
+- **96 Alters, partly done:**
+  - Done: +0.8" per alter; half-mass-monster look; never look smaller.
+  - Left: flat goals inside a tier, something every alter, "X in 2 alters" teaser, "fully grown, now TRANSFORM" moment, coins +5% per alter / +10% per star (not built), stone skin check.
+- **91 Future You / Road / unlock map / GAINS number:** not built. Today's "NEXT: <alter>" card and the unlock guides exist.
+- **92 Champion Ladder:** the parts exist (rivals Benny/Coral/Dante, 8 legends, Strength leaderstat). Left: the one ladder, board, menu, visible rewards.
+- **93 Feats (the abilities):** not built. Unlocks per the prompt:
+  - Power Jump: Spurt 2.
+  - Ground Stomp: Spurt 4.
+  - Iron Grip Throw: Spurt 5.
+  - Sprint Charge: Alter 1.
+  - Hype Roar: Alter 4.
+  - Flex Shockwave: Alter 6.
+  - Also: strength objects, rooftop gym (Alter 7), server crown.
+- **94 Skill tree:** CANCELLED. Prompt 102 says the equip preview moved into 102.
+- **97 Boosts into 3:** not built.
+- **98 Golden Era Gym:** not built. The Elite (25,000) and Champion (70,000) belts and wraps already exist, with meshes and icons, but are off sale.
+- **99 Store pass:**
+  - Left: Legend gear, store front of 6, gym trainer pools, duplicates, PolicyService, VIP lounge.
+  - The dead entries (Iron Lungs, Fast Recovery, Shake Fridge, Gene Lock, Server Boost) are still in Config/Monetization.
+- **100 Sound polish:** not built (old SoundGroups, no Audio API).
+- **101 Star track:** star perks and Hall pedestals exist. Left: the track screen, per-star visuals, Legacy cards (needs 105), fastest-run board.
+- **102 Auras:**
+  - Already exists: 19 auras with rarities.
+  - Left: walking power (still 0.15, not 50%), rarity looks, Aura Altar spins + pity, coin stats, equip preview.
+- **105 Run Cards:** not built.

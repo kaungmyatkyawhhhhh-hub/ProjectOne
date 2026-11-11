@@ -23,7 +23,7 @@ Every Claude (Cowork, Claude Code, the night shift) reads this note before plann
 | Incremental design, pacing | [[K03 Incremental design and pacing]] |
 | Money | [[K04 Monetization and economy]] |
 | Ads, storefront, video | [[K05 Marketing, ads and storefront]] |
-| Art, UI, VFX, sound, lighting | [[K06 Art, UI, VFX, sound and lighting]] |
+| Art, UI, VFX, sound, lighting | [[K06 Art, UI, VFX, sound and lighting]] (+ the 11 Nov studio polish rules; full research: [[2026-11-11 Research - Shark game world and polish bible (deep research report)]]) |
 | Tech, performance, tools | [[K07 Tech, performance and tools]] |
 | Updates, LiveOps, analytics | [[K08 LiveOps, updates and analytics]] |
 | Ideas, trends | [[K09 Game ideas and trends]] |
@@ -34,6 +34,9 @@ Use the method when its trigger fits. Each one lists its steps, its tools and an
 | Method | Use when | Note |
 |---|---|---|
 | **Impatient kid simulation** | checking or fixing a game's first minutes, "players quit early", before any launch | [[Brain/Methods/Impatient kid simulation]] |
+| **Quality-nerd kid simulation** | a map, world or UI judged by eye; "does it look cheap / AI-made?"; before any launch | [[Brain/Methods/Quality-nerd kid simulation]] |
+| **Debate kids simulation** | "would a group of friends pick ours over X?"; finding kids' objections; before the launch scope / ads | [[Brain/Methods/Debate kids simulation]] |
+| **Kid focus group (ChatGPT)** | what goes in an update / new game; "would kids pick ours over X?"; before ads | [[Brain/Methods/Kid focus group (ChatGPT)]] |
 | **Dead game method** | new game ideas, new features, "what would make this fun" | [[Brain/Methods/Dead game method]] |
 | **Launch gate** | before ANY public launch or big update | [[Brain/Methods/Launch gate]] |
 | **Reference study** | before making a video, UI, icon or anything the owner will judge by eye | [[Brain/Methods/Reference study]] |

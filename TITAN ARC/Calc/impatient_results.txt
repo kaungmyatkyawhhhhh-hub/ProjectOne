@@ -1,0 +1,16 @@
+IMPATIENT KID on the PLAN (2,000 kids per version, patience median 11 s)
+version                                                                    15s  30s  60s  2min 3min 5min | 5min@7s | 1st buy 1st evolve | no-NEW gap: min1  5min | evolves by 5min | boss (bot)
+A  the plan v0 (first evolve at 2.2 m, flowers only until then)            100% 100% 100% 100%  95%  74% |   32%   |  3.2 s   97.0 s   |      23.8 s  87.8 s |       1        |  9.9 min
+B  + evolution-first: 7 evolves before the boss, the first at 1.9 m        100% 100% 100%  99%  98%  92% |   60%   |  3.2 s   39.8 s   |      23.7 s  59.5 s |       4        |  9.9 min
+C  + 3 prop kinds on the first street (flower, mailbox, bin)               100% 100% 100% 100%  99%  96% |   72%   |  3.2 s   39.5 s   |      19.7 s  59.4 s |       3        |  9.9 min
+D  + step-on upgrade pads along the street (no detour)                     100% 100% 100% 100% 100% 100% |   98%   |  3.0 s   36.6 s   |      22.0 s  53.5 s |       4        |  9.9 min
+E  + a golden prop for every new player at ~25 s, first Ground Pound at stomp 6 100% 100% 100% 100% 100% 100% |   98%   |  3.0 s   27.9 s   |      28.4 s  47.5 s |       4        |  9.7 min
+F  + 3 visible growth stages inside each form                              100% 100% 100% 100% 100% 100% |   99%   |  3.0 s   27.9 s   |      28.2 s  40.2 s |       4        |  9.7 min
+G  + a small street event every ~70 s after minute 2.5                     100% 100% 100% 100% 100% 100% |   99%   |  3.0 s   27.9 s   |      28.3 s  40.0 s |       4        |  9.7 min
+H  + fill the 30-60 s hole: bikes at 2.05 m, second evolve at 2.4 m        100% 100% 100% 100% 100% 100% |   99%   |  3.0 s   27.8 s   |      14.4 s  34.2 s |       6        |  9.5 min
+
+sensitivity, patience  7 s: A stays 60 s 98% / 5 min 32%   ->   last version 60 s 100% / 5 min 99%
+sensitivity, patience 16 s: A stays 60 s 100% / 5 min 94%   ->   last version 60 s 100% / 5 min 100%
+
+last version, one median kid, NEW things in the first 60 s:
+  0s gift  2s new upgrade  8s newprop  12s giant seen  15s ground pound  15s stage  15s stage  17s newprop  24s new upgrade  26s golden  26s evolve  28s newprop  29s stage  45s stage  48s evolve  58s new upgrade  64s stage

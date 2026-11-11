@@ -1,0 +1,11 @@
+C=dict(dir='mega', length=4.8831, open_r=4, open_r_top=4, env_px=150, body_x0_px=330, top_x0_px=190, front_box=(1065,630,1375,915),
+  env_top=[(480,620),(740,1020)], env_bot=[(380,500),(520,670),(730,1090)],
+  tw_mode='min', tw_win=121, HS=1.0, WY=0.86, FN=2.1, taper_start=0.5, taper=0.0, back_amt=0.05, fin_step=10, fin_grid=15,
+  palette=dict(back=(45,71,112), belly=(190,205,225)), belly_class='belly', colour_mode='sample', sample_blur=2.0, sample_mix=0.97,
+  ignore=dict(tooth=(245,240,235),mouth=(150,40,45)), ignore_tol=30,
+  back_tint=(10,20,45), fin_edge=(25,38,65), fin_root=(48,70,112), fin_t=8, mouth_col=(125,30,38), brow_col=(45,68,110),
+  eye=dict(x_px=1262, y_px=247, r_px=42, fwd_deg=16), sclera=True, iris_top=(10,130,185), iris_bot=(90,235,255),
+  brows=[dict(pts=[(1195,202),(1230,193),(1265,201),(1298,220),(1318,243)], r_px=11)],
+  mouth=dict(corner_px=1182, corner_row=301, front_px=1408, front_up_row=316, front_lo_row=330, jaw_front_px=1412, blend_px=80,
+             jaw_w=1.0, n_up=8, n_lo=7, tooth_px=28, jaw_back_px=110, round_k=1.8, snout_frac=0.12, snout_cap_px=30, round_from=0.8),
+  pect_comp_boxes=[(720,330,1070,540)], pect_splay=35, pect_hinge_flank=0.6, fin_min_px=1500, scale_px=12, NR=44, NA=32)

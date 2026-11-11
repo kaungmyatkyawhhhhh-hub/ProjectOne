@@ -1,0 +1,7 @@
+frac  first form  boss (min)  taps that pay  longest wait for a reward in minute 1
+0.00     57.1 s       9.8        42%        1.9 s
+0.05     51.9 s       9.7       100%        0.5 s
+0.10     47.8 s       9.5       100%        0.5 s
+0.15     44.3 s       9.5       100%        0.5 s
+0.25     41.2 s       9.3       100%        0.5 s
+0.50     32.1 s       8.8       100%        0.5 s

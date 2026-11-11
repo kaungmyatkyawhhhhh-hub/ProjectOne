@@ -1,12 +1,132 @@
 {
   "collapse-filter": true,
-  "search": "",
+  "search": "-path:Prompts -path:Progress -path:Bugs -path:Screenshots -path:\"Morning reports\" -path:Archive -path:\"Research graph/wiki\" -path:\"Research graph/topics\" -path:Assets -path:Calc -path:Playtests",
   "showTags": false,
   "showAttachments": false,
-  "hideUnresolved": false,
-  "showOrphans": true,
+  "hideUnresolved": true,
+  "showOrphans": false,
   "collapse-color-groups": true,
-  "colorGroups": [],
+  "colorGroups": [
+    {
+      "query": "tag:#graph-area/platform-discovery-and-rules",
+      "color": {
+        "a": 1,
+        "rgb": 3900150
+      }
+    },
+    {
+      "query": "tag:#graph-area/retention-and-onboarding",
+      "color": {
+        "a": 1,
+        "rgb": 2278750
+      }
+    },
+    {
+      "query": "tag:#graph-area/incremental-design-and-core-loop",
+      "color": {
+        "a": 1,
+        "rgb": 11032055
+      }
+    },
+    {
+      "query": "tag:#graph-area/money",
+      "color": {
+        "a": 1,
+        "rgb": 15381256
+      }
+    },
+    {
+      "query": "tag:#graph-area/storefront-and-marketing",
+      "color": {
+        "a": 1,
+        "rgb": 16347926
+      }
+    },
+    {
+      "query": "tag:#graph-area/art-ui-vfx-sound-and-lighting",
+      "color": {
+        "a": 1,
+        "rgb": 15485081
+      }
+    },
+    {
+      "query": "tag:#graph-area/tech-performance-and-qa",
+      "color": {
+        "a": 1,
+        "rgb": 1357990
+      }
+    },
+    {
+      "query": "tag:#graph-area/liveops-and-analytics",
+      "color": {
+        "a": 1,
+        "rgb": 15680580
+      }
+    },
+    {
+      "query": "tag:#graph-area/ideas-and-trends",
+      "color": {
+        "a": 1,
+        "rgb": 9133302
+      }
+    },
+    {
+      "query": "path:\"Brain\"",
+      "color": {
+        "a": 1,
+        "rgb": 16639626
+      }
+    },
+    {
+      "query": "path:\"Roblox Playbook\"",
+      "color": {
+        "a": 1,
+        "rgb": 9684477
+      }
+    },
+    {
+      "query": "path:\"GYM ARC\"",
+      "color": {
+        "a": 1,
+        "rgb": 16557477
+      }
+    },
+    {
+      "query": "path:\"Celestial Incremental\"",
+      "color": {
+        "a": 1,
+        "rgb": 12891645
+      }
+    },
+    {
+      "query": "path:\"SPEED ARC\"",
+      "color": {
+        "a": 1,
+        "rgb": 8843180
+      }
+    },
+    {
+      "query": "path:\"City Legends\"",
+      "color": {
+        "a": 1,
+        "rgb": 16628340
+      }
+    },
+    {
+      "query": "path:\"MM Shop Bot\"",
+      "color": {
+        "a": 1,
+        "rgb": 6220500
+      }
+    },
+    {
+      "query": "path:\"MOW ARC\"",
+      "color": {
+        "a": 1,
+        "rgb": 13751771
+      }
+    }
+  ],
   "collapse-display": true,
   "showArrow": false,
   "textFadeMultiplier": 0,
@@ -17,6 +137,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 0.11660891579457043,
+  "scale": 0.16348370567220086,
   "close": true
 }

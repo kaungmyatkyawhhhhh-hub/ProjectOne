@@ -14,6 +14,9 @@ created: 2026-11-09
 - [ ] Phone UI audit: no overlaps, nothing off screen, text ≥ 14 px, safe insets, the jump button never over a button.
 - [ ] Lighting: the play space is bright; music is upbeat.
 - [ ] No placeholder-looking UI.
+- [ ] UIAudit clean: only palette-token colours, max 3 component families (counter / button / tile), no floating text, no screen-space giant arrows, on 3 phone sizes.
+- [ ] Movement feel pass on a phone (speed, turning, jump/swim); no falling through or clipping; streaming-safe teleports.
+- [ ] Lighting per zone checked on a phone at min AND max graphics with the HUD on: nothing blown out behind the HUD, the ground has mid-tones.
 - [ ] Like prompt only after the first big moment, no reward.
 - [ ] No Test switches on in Workspace; File > Save done.
 - [ ] Title without [ALPHA]-style tags unless it's a real limited test.

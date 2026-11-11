@@ -1,0 +1,113 @@
+<html><head><style>
+@font-face{font-family:M;font-weight:800;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-800-italic.woff2)}
+@font-face{font-family:M;font-weight:700;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-700-italic.woff2)}
+@font-face{font-family:M;font-weight:900;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-900-italic.woff2)}
+*{box-sizing:border-box}
+body{margin:0;width:1280px;height:720px;overflow:hidden;font-family:M;font-style:italic;font-weight:800;color:#fff;background:#1b1622;position:relative}
+.t{paint-order:stroke fill;-webkit-text-stroke:3px #0a070d;text-shadow:0 2px 0 #000}
+.bg{position:absolute;inset:-60px;filter:blur(28px)}
+.bg div{position:absolute;border-radius:40%}
+.abs{position:absolute}
+img{position:absolute;filter:drop-shadow(0 0 6px rgba(255,180,90,.25))}
+/* window */
+.win{position:absolute;left:310px;top:150px;width:660px;height:400px;background:#09070c;border-radius:8px;
+ box-shadow:0 0 0 2px #ff7a2a,0 0 22px 4px rgba(255,110,30,.85),0 0 60px 10px rgba(255,90,20,.45)}
+.inner{position:absolute;inset:3px;border-radius:6px;background:url(body.png);background-size:cover;overflow:hidden}
+.hdr{position:absolute;left:0;top:0;right:0;height:50px;background:url(hdr_orange.png) center/cover;border-bottom:3px solid #09070c}
+.hdr:after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,210,160,.25),transparent 30%,rgba(0,0,0,.35))}
+.title{position:absolute;left:62px;top:9px;font-size:26px;letter-spacing:.3px}
+.close{position:absolute;right:12px;top:9px;width:32px;height:32px;border-radius:6px;background:linear-gradient(#ff8796,#e1314a);border:2px solid #fff;box-shadow:0 2px 0 #000}
+.close:before,.close:after{content:"";position:absolute;left:5px;top:12px;width:18px;height:4px;background:#fff;border-radius:2px;transform:rotate(45deg)}
+.close:after{transform:rotate(-45deg)}
+.panel{position:absolute;background:rgba(6,5,8,.78);border:1.5px solid #2a2330;border-radius:5px}
+.btn{position:absolute;height:38px;border-radius:4px;border:2px solid #0a070d;overflow:hidden;box-shadow:0 2px 0 #000}
+.btn .f{position:absolute;inset:0}
+.btn .s{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.13) 0 6px,transparent 6px 16px)}
+.btn .l{position:absolute;left:0;right:0;top:0;height:2px;background:rgba(255,255,255,.5)}
+.btn .tx{position:absolute;left:30px;right:0;top:8px;text-align:center;font-size:16px}
+.sel{outline:2px solid #fff;outline-offset:2px}
+.small{position:absolute;height:28px;border-radius:3px;border:2px solid #0a070d;overflow:hidden}
+.small .tx{position:absolute;left:22px;right:30px;top:6px;text-align:center;font-size:10.5px;white-space:nowrap}
+.small .n{position:absolute;right:4px;top:7px;font-size:9px;color:#ffe9b0}
+.dia{position:absolute;width:56px;height:56px;transform:rotate(45deg);background:linear-gradient(#2c2735,#121016);border:2px solid #0a070d;box-shadow:0 0 0 2px var(--c) inset,0 3px 0 #000}
+.key{position:absolute;font-size:13px}
+</style></head><body>
+<div class="bg">
+ <div style="left:-80px;top:380px;width:700px;height:420px;background:#4a3a5c"></div>
+ <div style="left:700px;top:430px;width:700px;height:400px;background:#5a4436"></div>
+ <div style="left:880px;top:40px;width:520px;height:300px;background:#3a4a5e"></div>
+ <div style="left:-60px;top:20px;width:520px;height:330px;background:#433a52"></div>
+ <div style="left:480px;top:250px;width:380px;height:200px;background:#ff8a3a;opacity:.25"></div>
+</div>
+<div class="abs" style="inset:0;background:rgba(10,8,14,.25)"></div>
+
+<!-- top centre: diamond + plate (like the name badge) -->
+<div class="dia" style="--c:#ff9a3a;left:520px;top:18px;width:52px;height:52px"></div>
+<img src="stardust.png" style="left:516px;top:13px;width:62px">
+<div class="abs" style="left:575px;top:22px;width:190px;height:22px;background:linear-gradient(90deg,rgba(10,8,14,.85),rgba(10,8,14,0));"></div>
+<div class="abs t" style="left:584px;top:20px;font-size:17px">STARDUST</div>
+<div class="abs" style="left:575px;top:46px;width:170px;height:24px;clip-path:polygon(0 0,92% 0,100% 50%,92% 100%,0 100%);background:linear-gradient(#2a2433,#121016)"></div>
+<img src="stardust.png" style="left:582px;top:47px;width:20px;filter:none">
+<div class="abs t" style="left:606px;top:47px;font-size:17px">1.24M</div>
+<div class="abs t" style="left:668px;top:51px;font-size:11px;color:#ffc35a;-webkit-text-stroke:2px #0a070d">+38.5K/s</div>
+
+<!-- top right readout -->
+<div class="abs t" style="right:46px;top:24px;font-size:18px">12</div>
+<img src="shard.png" style="right:16px;top:16px;width:28px">
+<div class="abs t" style="right:46px;top:46px;font-size:10px;color:#cdb8ff;-webkit-text-stroke:2px #0a070d">SHARDS</div>
+
+<!-- window -->
+<div class="win"><div class="inner">
+ <div class="hdr"></div>
+ <div class="title t">UPGRADES</div>
+ <div class="close"></div>
+ <!-- left list -->
+ <div class="panel" style="left:12px;top:64px;width:176px;height:318px"></div>
+ <div id="cats"></div>
+ <!-- right detail -->
+ <div class="panel" style="left:198px;top:64px;width:444px;height:318px"></div>
+ <div class="abs t" style="left:276px;top:76px;font-size:26px">STAR FURNACE</div>
+ <img src="stardust.png" style="left:278px;top:108px;width:20px;filter:none">
+ <div class="abs t" style="left:302px;top:108px;font-size:17px;color:#fff">48.2K</div>
+ <div class="abs t" style="left:358px;top:111px;font-size:12px;color:#ffc35a;-webkit-text-stroke:2px #0a070d">LV 12</div>
+ <div class="panel" style="left:210px;top:140px;width:160px;height:232px;background:rgba(2,2,3,.6)"></div>
+ <div class="abs t" style="left:262px;top:144px;font-size:17px">LIST</div>
+ <div id="list"></div>
+ <div class="abs t" style="left:470px;top:144px;font-size:17px">INFO</div>
+ <div class="abs t" style="left:392px;top:168px;font-size:15px">STAR FURNACE <span style="color:#ffc35a">[LV 12]</span></div>
+ <div class="abs t" style="left:392px;top:190px;font-size:12px;color:#c9bfd6;-webkit-text-stroke:2px #0a070d">+12% stardust per level</div>
+ <div class="abs t" style="left:392px;top:212px;font-size:20px">1.26x <span style="color:#9a90a8">›</span> <span style="color:#7dff6b">1.38x</span></div>
+ <div class="abs" style="left:470px;top:226px;width:150px;height:100px;border-radius:50%;background:radial-gradient(rgba(255,140,40,.55),transparent 65%)"></div>
+ <img src="sun.png" style="left:500px;top:216px;width:110px;filter:drop-shadow(0 0 10px rgba(255,140,40,.7))">
+ <img src="stardust.png" style="left:470px;top:250px;width:22px;opacity:.9;filter:none">
+ <img src="stardust.png" style="left:604px;top:220px;width:16px;opacity:.8;filter:none">
+ <div class="btn" style="left:392px;top:326px;width:240px;height:44px">
+  <div class="f" style="background:linear-gradient(#86ff7e,#1ea53a)"></div><div class="s"></div><div class="l"></div>
+  <div class="tx t" style="left:0;top:9px;font-size:20px">BUY &nbsp;<img src="stardust.png" style="position:relative;display:inline-block;width:24px;vertical-align:-5px;filter:none"> 48.2K</div>
+ </div>
+</div></div>
+<img src="sun.png" style="left:314px;top:140px;width:58px;filter:drop-shadow(0 0 8px rgba(255,140,40,.7))">
+<img src="sun.png" style="left:516px;top:218px;width:62px;filter:drop-shadow(0 0 8px rgba(255,140,40,.6))">
+
+<!-- bottom bar -->
+<div id="bar"></div>
+<script>
+const W={x:0,y:0};
+const cats=[['STARDUST','#ff9d3e','#c2410c','stardust',1],['COMETS','#5ad1ff','#1f6fd1','comet'],['PLANETS','#b49bff','#5a3ad8','planet'],['FORGE','#ffd84a','#c79a0a','forge'],['BLACK HOLE','#76707f','#3c3844','shard']];
+let h='';cats.forEach((c,i)=>{const x=W.x+22,y=W.y+76+i*48;
+ h+=`<div class="btn ${c[4]?'sel':''}" style="left:${x}px;top:${y}px;width:156px"><div class="f" style="background:linear-gradient(${c[1]},${c[2]})"></div><div class="s"></div><div class="l"></div><div class="tx t">${c[0]}</div></div>`;
+ h+=`<img src="${c[3]}.png" style="left:${x-10}px;top:${y-6}px;width:46px">`});
+document.getElementById('cats').outerHTML=h;
+const list=[['STAR FURNACE','#ff9d3e','#c2410c','LV 12',1],['SOLAR WIND','#ffc76a','#d0730f','LV 7'],['CORE HEAT','#ff7a5a','#b82a1a','LV 3'],['FLARE BURST','#ffd84a','#b88a0a','LV 0'],['NOVA SPARK','#8a8494','#4a4552','—']];
+h='';list.forEach((c,i)=>{const x=W.x+222,y=W.y+176+i*38;
+ h+=`<div class="small" style="left:${x}px;top:${y}px;width:142px;${c[4]?'outline:2px solid #fff;outline-offset:1px':''}"><div class="f" style="position:absolute;inset:0;background:linear-gradient(${c[1]},${c[2]})"></div><div class="s" style="position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.13) 0 5px,transparent 5px 13px)"></div><div class="tx t" style="-webkit-text-stroke:2.5px #0a070d">${c[0]}</div><div class="n t" style="-webkit-text-stroke:2px #0a070d">${c[3]}</div></div>`;
+ h+=`<img src="${i<4?'sun':'shard'}.png" style="left:${x-6}px;top:${y-3}px;width:30px">`});
+document.getElementById('list').outerHTML=h;
+const bar=[['U','#ff9a3a','stardust','UPGRADES',1],['F','#ffd84a','forge'],['T','#7dff8a','planet'],['E','#ff5a6a','shard'],['Q','#c9c4d2','gear']];
+h='';bar.forEach((b,i)=>{const x=480+i*70,y=640;
+ h+=`<div class="dia" style="--c:${b[1]};left:${x}px;top:${y}px;width:46px;height:46px;opacity:${b[4]?1:.92}"></div><img src="${b[2]}.png" style="left:${x-4}px;top:${y-6}px;width:${b[2]=='forge'?54:52}px">`;
+ h+=`<div class="key t" style="left:${x-8}px;top:${y-18}px;font-size:12px;-webkit-text-stroke:2px #0a070d">${b[0]}</div>`;
+ if(b[3])h+=`<div class="abs t" style="left:${x-24}px;top:${y-36}px;width:96px;text-align:center;font-size:15px;color:${b[1]}">${b[3]}</div><div class="abs" style="left:${x-24}px;top:${y-17}px;width:96px;height:2px;background:#fff"></div>`;
+});
+document.getElementById('bar').outerHTML=h;
+</script></body></html>

@@ -1,0 +1,6 @@
+version                                          Piranha  Barracuda  ReefShark | stay 1m  5m  10m  15m
+K   map plan, EXP 25 / 90 / 260 (too fast)          68 s    2.7 min    6.1 min |  100%   82%   47%    8%
+T1  EXP 25 / 200 / 620 (research timings)           68 s    4.8 min   12.8 min |  100%   84%   56%   13%
+T2  T1 + a small quest about every 45 s             68 s    4.7 min   12.1 min |  100%   86%   63%   22%
+T3  T2 + Fish Index page every 3 new species        68 s    4.7 min   12.1 min |  100%   87%   64%   22%
+T4  T3 + predators chase small fish, ESCAPED! pop    68 s    4.6 min   12.0 min |  100%   89%   67%   21%

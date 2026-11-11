@@ -146,3 +146,9 @@ The recurring failures are pacing errors (unlocks too fast or too slow, linear c
 
 ### Gaps
 - No r/incremental_games consolidated "mistakes" thread was fetched; the community consensus is summarised only through the Tuts+ article and the postmortem.
+
+## Bigger gaps between prestige goals, same time (researched 31 Oct 2026, GYM ARC alters)
+- Why big jumps feel good: players enjoy a number going up even with no real meaning ("weak number sense"), and a clear next goal gives a sense of moving forward — [Tuts+, Numbers Getting Bigger: what are incremental games](https://code.tutsplus.com/numbers-getting-bigger-what-are-incremental-games-and-why-are-they-fun--cms-23925a)
+- Limit: when numbers jump by e10 per click they stop meaning anything (see "Avoiding hyperinflation boredom" above). So grow goals by a readable factor per prestige (x2 to x3), not by powers of ten.
+- Rule for making gaps bigger without making the game slower: scale the goal AND the gain multiplier together. With GYM ARC's diminishing (gain ~ 1/(1+L/50)) the time to a goal ~ (goal level^3 - kept level^3) / multiplier, and EXP ~ level^2, so x F EXP per step needs about x F^1.5 multiplier per step.
+- GYM ARC choice (31 Oct): x2.5 EXP per alter (2.3T per muscle at Alter 15), multipliers up to x8.9M; times per alter unchanged (solved per alter).

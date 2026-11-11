@@ -1,0 +1,250 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Lucky;src:url(node_modules/@fontsource/luckiest-guy/files/luckiest-guy-latin-400-normal.woff2)}
+@font-face{font-family:Nunito;font-weight:800;src:url(node_modules/@fontsource/nunito/files/nunito-latin-800-normal.woff2)}
+@font-face{font-family:Nunito;font-weight:900;src:url(node_modules/@fontsource/nunito/files/nunito-latin-900-normal.woff2)}
+:root{
+ --ink:#140F2E; --panelA:#232861; --panelB:#161940; --gold:#D9AE52; --goldHi:#F7D98A; --goldLo:#8C5E1E;
+ --cream:#F6EEDA; --cyan:#8FE6FF; --violet:#A58BFF; --red:#FF4F63; --green:#56D687; --greenLo:#1E7A47;
+}
+*{box-sizing:border-box;margin:0}
+body{background:#000;font-family:Nunito,sans-serif;color:var(--cream)}
+.board{position:relative;width:1280px;height:720px;overflow:hidden;margin-bottom:20px}
+/* scene */
+.sky{position:absolute;inset:0;background:
+ radial-gradient(ellipse 520px 260px at 300px 170px, rgba(176,90,200,.35), transparent 70%),
+ radial-gradient(ellipse 600px 300px at 1000px 120px, rgba(70,90,220,.35), transparent 70%),
+ linear-gradient(#0A0A22,#1B1240 55%,#2B1B4E)}
+.ground{position:absolute;left:-200px;right:-200px;top:420px;height:600px;border-radius:50%;
+ background:radial-gradient(ellipse at 50% 18%,#D9C8A6,#A89071 45%,#6F5B47 75%)}
+.chart{position:absolute;left:390px;top:440px;width:500px;height:140px;border-radius:50%;border:2px solid rgba(140,94,30,.55)}
+.chart.b{left:470px;top:462px;width:340px;height:96px}
+.label-zone{position:absolute;border:1.5px dashed rgba(255,255,255,.28);border-radius:10px;color:rgba(255,255,255,.4);font:800 11px Nunito;display:flex;align-items:center;justify-content:center;text-align:center}
+/* panel style: ink-blue + thin gold chart line + corner stars */
+.panel{position:absolute;background:linear-gradient(var(--panelA),var(--panelB));border:3px solid var(--ink);border-radius:14px;
+ box-shadow:inset 0 0 0 1.5px rgba(217,174,82,.85), inset 0 2px 0 3px rgba(255,255,255,.06), 0 5px 0 var(--ink)}
+.cs{position:absolute;width:9px;height:9px;background:var(--goldHi);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)}
+.num{font-family:Lucky;letter-spacing:.5px;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill}
+.btn{position:absolute;border:3px solid var(--ink);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ background:linear-gradient(#2B3170,#1A1D48);box-shadow:inset 0 0 0 1.5px rgba(217,174,82,.9), 0 5px 0 var(--ink)}
+.btn .t{font-family:Lucky;font-size:13px;letter-spacing:.5px;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;margin-top:-2px}
+.dot{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:var(--red);border:2.5px solid #fff;font:900 12px Nunito;color:#fff;display:flex;align-items:center;justify-content:center}
+.brass{background:linear-gradient(var(--goldHi),var(--gold) 55%,#C08F3A);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 5px 0 var(--goldLo),0 5px 0 3px var(--ink);border:3px solid var(--ink)}
+.green{background:linear-gradient(#8AF0AE,var(--green) 55%,#36B56A);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 var(--greenLo);border:3px solid var(--ink)}
+.cap{position:absolute;font:800 12px Nunito;color:rgba(255,255,255,.55)}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute">
+<defs>
+ <!-- STARDUST: 4-point star + 2 sparkles, flat cyan steps -->
+ <symbol id="i-dust" viewBox="0 0 64 64">
+  <path d="M30 6 L36 25 L55 31 L36 37 L30 56 L24 37 L5 31 L24 25 Z" fill="#6FD6F5" stroke="#140F2E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M30 6 L36 25 L55 31 L36 37 L30 31 Z" fill="#B9EEFF"/>
+  <path d="M30 31 L36 37 L30 56 L24 37 Z" fill="#3FA2D2"/>
+  <path d="M30 6 L36 25 L55 31 L36 37 L30 56 L24 37 L5 31 L24 25 Z" fill="none" stroke="#140F2E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M51 6 L53 12 L59 14 L53 16 L51 22 L49 16 L43 14 L49 12 Z" fill="#F7D98A" stroke="#140F2E" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="52" cy="50" r="4" fill="#F7D98A" stroke="#140F2E" stroke-width="3"/>
+ </symbol>
+ <!-- SYSTEM: planet + gold ring -->
+ <symbol id="i-sys" viewBox="0 0 64 64">
+  <path d="M8 40 C4 30 60 14 58 24" fill="none" stroke="#140F2E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M8 40 C4 30 60 14 58 24" fill="none" stroke="#C08F3A" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="18" fill="#8E6BFF" stroke="#140F2E" stroke-width="4"/>
+  <path d="M32 14 A18 18 0 0 1 50 32 L42 32 A10 10 0 0 0 32 22 Z" fill="#B9A6FF"/>
+  <path d="M14 32 A18 18 0 0 0 32 50 A18 18 0 0 0 46 43 C34 47 20 42 14 32Z" fill="#5B41C4"/>
+  <circle cx="32" cy="32" r="18" fill="none" stroke="#140F2E" stroke-width="4"/>
+  <path d="M10 44 C14 52 60 34 58 24" fill="none" stroke="#140F2E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M10 44 C14 52 60 34 58 24" fill="none" stroke="#F7D98A" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="25" cy="24" r="3" fill="#EDE6FF"/>
+ </symbol>
+ <!-- TREE: constellation of 4 stars -->
+ <symbol id="i-tree" viewBox="0 0 64 64">
+  <path d="M14 46 L28 20 L46 28 L50 50 L28 20" fill="none" stroke="#140F2E" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M14 46 L28 20 L46 28 L50 50 L28 20" fill="none" stroke="#F7D98A" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="14" cy="46" r="6" fill="#F7D98A" stroke="#140F2E" stroke-width="3.5"/>
+  <circle cx="46" cy="28" r="6" fill="#F7D98A" stroke="#140F2E" stroke-width="3.5"/>
+  <circle cx="50" cy="50" r="5" fill="#8FE6FF" stroke="#140F2E" stroke-width="3.5"/>
+  <path d="M28 9 L31 17 L39 20 L31 23 L28 31 L25 23 L17 20 L25 17 Z" fill="#FFF3C8" stroke="#140F2E" stroke-width="3.5" stroke-linejoin="round"/>
+ </symbol>
+ <!-- FORGE: anvil + star -->
+ <symbol id="i-forge" viewBox="0 0 64 64">
+  <path d="M8 26 H48 C48 32 42 36 36 36 V42 H44 V52 H16 V42 H24 V36 C16 36 8 32 8 26 Z" fill="#7B7F9E" stroke="#140F2E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M10 27 H46 C45 30 42 32 38 32 H18 C14 32 11 30 10 27Z" fill="#B7BAD3"/>
+  <rect x="16" y="46" width="28" height="4" fill="#4D5072"/>
+  <path d="M8 26 H48 C48 32 42 36 36 36 V42 H44 V52 H16 V42 H24 V36 C16 36 8 32 8 26 Z" fill="none" stroke="#140F2E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M50 4 L53 12 L61 15 L53 18 L50 26 L47 18 L39 15 L47 12 Z" fill="#FF9D4D" stroke="#140F2E" stroke-width="3.5" stroke-linejoin="round"/>
+ </symbol>
+ <!-- QUESTS: scroll with check -->
+ <symbol id="i-quest" viewBox="0 0 64 64">
+  <rect x="14" y="10" width="36" height="44" rx="6" fill="#F6EEDA" stroke="#140F2E" stroke-width="4"/>
+  <rect x="14" y="44" width="36" height="10" rx="5" fill="#D9C8A6"/>
+  <rect x="14" y="10" width="36" height="44" rx="6" fill="none" stroke="#140F2E" stroke-width="4"/>
+  <path d="M22 30 L29 37 L43 21" fill="none" stroke="#140F2E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 30 L29 37 L43 21" fill="none" stroke="#56D687" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+ </symbol>
+ <!-- SHOP: bag with star -->
+ <symbol id="i-shop" viewBox="0 0 64 64">
+  <path d="M22 22 V17 A10 10 0 0 1 42 17 V22" fill="none" stroke="#140F2E" stroke-width="5" stroke-linecap="round"/>
+  <path d="M12 22 H52 L48 56 H16 Z" fill="#FF7A8A" stroke="#140F2E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M14 24 H50 L49 31 H15 Z" fill="#FFB3BD"/>
+  <path d="M12 22 H52 L48 56 H16 Z" fill="none" stroke="#140F2E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M32 31 L35 38 L42 39 L37 44 L38 51 L32 47 L26 51 L27 44 L22 39 L29 38 Z" fill="#F7D98A" stroke="#140F2E" stroke-width="3" stroke-linejoin="round"/>
+ </symbol>
+ <!-- SHARD -->
+ <symbol id="i-shard" viewBox="0 0 64 64">
+  <path d="M32 4 L50 24 L32 60 L14 24 Z" fill="#A58BFF" stroke="#140F2E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M32 4 L50 24 L32 24 Z" fill="#D6CAFF"/><path d="M14 24 L32 24 L32 60 Z" fill="#6A4FD8"/>
+  <path d="M32 4 L50 24 L32 60 L14 24 Z" fill="none" stroke="#140F2E" stroke-width="4" stroke-linejoin="round"/>
+ </symbol>
+ <!-- BOOST -->
+ <symbol id="i-boost" viewBox="0 0 64 64">
+  <path d="M12 40 L32 20 L52 40" fill="none" stroke="#140F2E" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12 40 L32 20 L52 40" fill="none" stroke="#56D687" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 54 L32 40 L46 54" fill="none" stroke="#140F2E" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 54 L32 40 L46 54" fill="none" stroke="#9BF2BC" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+ </symbol>
+ <!-- METEOR -->
+ <symbol id="i-meteor" viewBox="0 0 64 64">
+  <path d="M6 10 L34 34 M14 6 L38 28 M4 22 L28 40" stroke="#140F2E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M6 10 L34 34 M14 6 L38 28 M4 22 L28 40" stroke="#FFB15C" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="42" cy="42" r="14" fill="#FF8A3D" stroke="#140F2E" stroke-width="4"/>
+  <circle cx="37" cy="37" r="4" fill="#FFD3A1"/>
+ </symbol>
+ <radialGradient id="core"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".35" stop-color="#FFE7A0"/><stop offset=".7" stop-color="#FFB347" stop-opacity=".8"/><stop offset="1" stop-color="#FF7A2A" stop-opacity="0"/></radialGradient>
+</defs></svg>
+
+<!-- ================= BOARD 1: HUD ================= -->
+<div class="board">
+ <div class="sky"></div>
+ <svg style="position:absolute;inset:0" width="1280" height="720">
+  <g fill="#fff" opacity=".7"><circle cx="90" cy="300" r="1.2"/><circle cx="210" cy="250" r="1"/><circle cx="380" cy="120" r="1.4"/><circle cx="520" cy="300" r="1"/><circle cx="760" cy="240" r="1.3"/><circle cx="930" cy="330" r="1"/><circle cx="1180" cy="270" r="1.2"/><circle cx="660" cy="90" r="1"/><circle cx="1090" cy="200" r="1"/></g>
+ </svg>
+ <div class="ground"></div><div class="chart"></div><div class="chart b"></div>
+ <!-- the Core on its brass altar -->
+ <svg style="position:absolute;left:520px;top:250px" width="240" height="260">
+  <circle cx="120" cy="105" r="95" fill="url(#core)"/>
+  <circle cx="120" cy="105" r="38" fill="#FFF6D8" stroke="#140F2E" stroke-width="3"/><circle cx="120" cy="105" r="27" fill="#FFE29A"/><circle cx="110" cy="95" r="9" fill="#FFFFFF"/><ellipse cx="120" cy="105" rx="62" ry="14" fill="none" stroke="#140F2E" stroke-width="6" transform="rotate(-18 120 105)"/><ellipse cx="120" cy="105" rx="62" ry="14" fill="none" stroke="#F7D98A" stroke-width="2.5" transform="rotate(-18 120 105)"/>
+  <ellipse cx="120" cy="220" rx="90" ry="22" fill="#B98A3C" stroke="#140F2E" stroke-width="3"/>
+  <ellipse cx="120" cy="214" rx="78" ry="16" fill="#E2B866"/>
+  <path d="M60 214 L84 150 M180 214 L156 150" stroke="#140F2E" stroke-width="7"/><path d="M60 214 L84 150 M180 214 L156 150" stroke="#D9AE52" stroke-width="3"/>
+ </svg>
+ <!-- player pads with small systems -->
+ <svg style="position:absolute;left:0;top:0" width="1280" height="720">
+  <g>
+   <ellipse cx="300" cy="560" rx="70" ry="16" fill="#B98A3C" stroke="#140F2E" stroke-width="3"/><ellipse cx="300" cy="556" rx="60" ry="11" fill="#E2B866"/>
+   <ellipse cx="300" cy="500" rx="58" ry="14" fill="none" stroke="rgba(247,217,138,.5)" stroke-width="1.5"/>
+   <circle cx="300" cy="500" r="13" fill="#FFD36B" stroke="#140F2E" stroke-width="3"/><circle cx="250" cy="496" r="6" fill="#8E6BFF" stroke="#140F2E" stroke-width="2.5"/><circle cx="345" cy="507" r="5" fill="#9CA3B8" stroke="#140F2E" stroke-width="2.5"/>
+  </g>
+  <g>
+   <ellipse cx="985" cy="560" rx="70" ry="16" fill="#B98A3C" stroke="#140F2E" stroke-width="3"/><ellipse cx="985" cy="556" rx="60" ry="11" fill="#E2B866"/>
+   <ellipse cx="985" cy="500" rx="58" ry="14" fill="none" stroke="rgba(247,217,138,.5)" stroke-width="1.5"/>
+   <circle cx="985" cy="500" r="9" fill="#9CA3B8" stroke="#140F2E" stroke-width="2.5"/><circle cx="1035" cy="505" r="5" fill="#8FE6FF" stroke="#140F2E" stroke-width="2.5"/>
+  </g>
+ </svg>
+
+ <!-- Roblox's own areas (we keep out) -->
+ <div class="label-zone" style="left:10px;top:8px;width:150px;height:40px">Roblox buttons</div>
+ <div class="label-zone" style="left:1060px;top:8px;width:210px;height:96px">Roblox player list<br>Supernovas · Power</div>
+
+ <!-- TOP-LEFT: currencies -->
+ <div class="panel" style="left:14px;top:60px;width:262px;height:56px;border-radius:28px">
+  <svg style="position:absolute;left:6px;top:4px" width="44" height="44"><use href="#i-dust"/></svg>
+  <div class="num" style="position:absolute;left:54px;top:9px;font-size:28px;color:#fff">1.24M</div>
+  <div style="position:absolute;left:154px;top:17px;font:900 14px Nunito;color:var(--cyan)">+3.4K/s</div>
+  <div class="brass" style="position:absolute;right:6px;top:7px;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center"><span class="num" style="font-size:24px;color:#fff;margin-top:3px">+</span></div>
+ </div>
+ <div class="panel" style="left:14px;top:124px;width:150px;height:42px;border-radius:21px">
+  <svg style="position:absolute;left:6px;top:4px" width="30" height="30"><use href="#i-shard"/></svg>
+  <div class="num" style="position:absolute;left:40px;top:7px;font-size:21px;color:#fff">12</div>
+  <div style="position:absolute;left:72px;top:12px;font:800 12px Nunito;color:var(--violet)">SHARDS</div>
+ </div>
+
+ <!-- TOP-CENTRE: the one goal -->
+ <div class="panel" style="left:430px;top:12px;width:420px;height:40px;border-radius:20px;overflow:hidden">
+  <div style="position:absolute;left:4px;top:4px;bottom:4px;width:calc(100% - 8px);border-radius:16px;background:linear-gradient(#FFE6A0,#E8B24E);box-shadow:inset 0 -3px 0 rgba(140,94,30,.5)"></div>
+  <div class="num" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:19px;color:#fff">SUPERNOVA READY!</div>
+ </div>
+ <div class="cs" style="left:425px;top:8px"></div><div class="cs" style="left:846px;top:8px"></div>
+
+ <!-- TOP-RIGHT: event pill (only while it runs) -->
+ <div class="panel" style="left:1062px;top:114px;width:206px;height:42px;border-radius:21px">
+  <svg style="position:absolute;left:6px;top:4px" width="32" height="32"><use href="#i-meteor"/></svg>
+  <div class="num" style="position:absolute;left:42px;top:11px;font-size:14px;color:#FFB15C">METEOR SHOWER</div>
+  <div style="position:absolute;right:12px;top:12px;font:900 13px Nunito">1:23</div>
+ </div>
+
+ <!-- BOTTOM-LEFT: boost chip -->
+ <div class="panel" style="left:14px;top:648px;width:128px;height:52px;border-radius:26px">
+  <svg style="position:absolute;left:6px;top:6px" width="36" height="36"><use href="#i-boost"/></svg>
+  <div class="num" style="position:absolute;left:46px;top:6px;font-size:22px;color:#9BF2BC">x2.4</div>
+  <div style="position:absolute;left:47px;top:31px;font:800 10px Nunito;opacity:.75">BOOSTS</div>
+ </div>
+
+ <!-- SUPERNOVA ready button (replaces the hint line when ready) -->
+ <div class="brass" style="position:absolute;left:510px;top:536px;width:260px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 5px 0 var(--goldLo),0 5px 0 3px var(--ink),0 0 34px 6px rgba(255,200,90,.55)">
+  <span class="num" style="font-size:27px;color:#fff;margin-top:4px">GO SUPERNOVA!</span>
+ </div>
+
+ <!-- BOTTOM-CENTRE: one row of buttons -->
+ <div class="btn" style="left:420px;top:622px;width:76px;height:76px"><svg width="44" height="44"><use href="#i-tree"/></svg><div class="t">TREE</div></div>
+ <div class="btn brassbtn" style="left:506px;top:604px;width:96px;height:94px;background:linear-gradient(#323A86,#1D2152);box-shadow:inset 0 0 0 2px var(--goldHi),0 5px 0 var(--ink)"><svg width="58" height="58"><use href="#i-sys"/></svg><div class="t" style="font-size:15px">SYSTEM</div></div>
+ <div class="btn" style="left:612px;top:622px;width:76px;height:76px"><svg width="44" height="44"><use href="#i-forge"/></svg><div class="t">FORGE</div></div>
+ <div class="btn" style="left:698px;top:622px;width:76px;height:76px"><svg width="44" height="44"><use href="#i-quest"/></svg><div class="t">QUESTS</div><div class="dot">2</div></div>
+ <div class="btn" style="left:784px;top:622px;width:76px;height:76px"><svg width="44" height="44"><use href="#i-shop"/></svg><div class="t">SHOP</div></div>
+</div>
+
+<!-- ================= BOARD 2: SYSTEM window ================= -->
+<div class="board">
+ <div class="sky"></div><div class="ground"></div>
+ <div style="position:absolute;inset:0;background:rgba(8,6,24,.6)"></div>
+ <div class="panel" style="left:250px;top:70px;width:780px;height:560px;border-radius:22px">
+  <div class="cs" style="left:10px;top:10px"></div><div class="cs" style="right:10px;top:10px"></div><div class="cs" style="left:10px;bottom:10px"></div><div class="cs" style="right:10px;bottom:10px"></div>
+  <svg style="position:absolute;left:24px;top:14px" width="52" height="52"><use href="#i-sys"/></svg>
+  <div class="num" style="position:absolute;left:84px;top:22px;font-size:34px;color:#fff">SYSTEM</div>
+  <div style="position:absolute;left:236px;top:34px;font:800 14px Nunito;opacity:.7">your star system earns for you</div>
+  <div style="position:absolute;right:20px;top:16px;width:48px;height:48px;border-radius:14px;background:linear-gradient(#FF8A97,#E8384C);border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 4px 0 #8C1C2A;display:flex;align-items:center;justify-content:center"><span class="num" style="font-size:24px;color:#fff;margin-top:3px">X</span></div>
+  <!-- buy amount -->
+  <div style="position:absolute;right:84px;top:24px;display:flex;gap:6px">
+   <div style="padding:6px 10px;border-radius:10px;border:2px solid var(--ink);background:#E2B866;color:var(--ink);font:900 13px Nunito">x1</div>
+   <div style="padding:6px 10px;border-radius:10px;border:2px solid rgba(217,174,82,.7);font:900 13px Nunito">x10</div>
+   <div style="padding:6px 10px;border-radius:10px;border:2px solid rgba(217,174,82,.7);font:900 13px Nunito">MAX</div>
+  </div>
+  <div style="position:absolute;left:24px;right:24px;top:78px;height:2px;background:linear-gradient(90deg,transparent,rgba(217,174,82,.8),transparent)"></div>
+
+  <!-- rows -->
+  <div id="rows" style="position:absolute;left:24px;right:24px;top:92px"></div>
+ </div>
+</div>
+
+<script>
+const rows=[
+ {n:"ASTEROID",c:"#9CA3B8",own:48,inc:"+96/s",next:"48/50",x:"x2",cost:"1.2K"},
+ {n:"MOON",c:"#D9D3C2",own:31,inc:"+620/s",next:"31/50",x:"x2",cost:"8.4K"},
+ {n:"PLANET",c:"#8E6BFF",own:22,inc:"+2.2K/s",next:"22/25",x:"x2",cost:"41K"},
+ {n:"GAS GIANT",c:"#FF9D4D",own:9,inc:"+560/s",next:"9/25",x:"x2",cost:"210K",dim:true},
+ {n:"STAR",c:"#FFD36B",own:2,inc:"+1.4K/s",next:"2/25",x:"x2",cost:"1.1M",dim:true},
+ {n:"? ? ?",lock:"SUPERNOVA 3"},
+];
+const box=document.getElementById('rows');
+rows.forEach((r,i)=>{
+ const d=document.createElement('div');
+ d.style.cssText=`position:relative;height:66px;margin-bottom:10px;border-radius:14px;border:2px solid rgba(20,15,46,.9);background:${r.lock?'rgba(10,10,30,.45)':'rgba(255,255,255,.05)'};box-shadow:inset 0 0 0 1px rgba(217,174,82,${r.lock?.25:.45})`;
+ if(r.lock){
+  d.innerHTML=`<svg style="position:absolute;left:12px;top:9px" width="46" height="46"><circle cx="23" cy="23" r="17" fill="#2A2C55" stroke="#140F2E" stroke-width="3.5"/><text x="23" y="30" text-anchor="middle" font-family="Lucky" font-size="20" fill="#7D80B5">?</text></svg>
+  <div class="num" style="position:absolute;left:70px;top:20px;font-size:22px;color:#7D80B5">${r.n}</div>
+  <div style="position:absolute;right:18px;top:22px;font:900 14px Nunito;color:#9C9FD1">UNLOCKS AT ${r.lock}</div>`;
+ } else {
+  const pct=parseInt(r.next)/parseInt(r.next.split('/')[1])*100;
+  d.innerHTML=`<svg style="position:absolute;left:12px;top:9px" width="46" height="46"><circle cx="23" cy="23" r="17" fill="${r.c}" stroke="#140F2E" stroke-width="3.5"/><path d="M23 6 A17 17 0 0 1 40 23 L33 23 A10 10 0 0 0 23 13Z" fill="#fff" opacity=".45"/><circle cx="23" cy="23" r="17" fill="none" stroke="#140F2E" stroke-width="3.5"/></svg>
+  <div class="num" style="position:absolute;left:70px;top:9px;font-size:22px;color:#fff">${r.n}</div>
+  <div style="position:absolute;left:70px;top:38px;font:900 13px Nunito;color:var(--cyan)">${r.inc}</div>
+  <div class="num" style="position:absolute;left:262px;top:18px;font-size:22px;color:var(--goldHi)">x${r.own}</div>
+  <div style="position:absolute;left:340px;top:16px;width:150px;height:14px;border-radius:7px;background:#0F1030;border:2px solid #140F2E"><div style="width:${pct}%;height:100%;border-radius:6px;background:linear-gradient(#FFE6A0,#E8B24E)"></div></div>
+  <div style="position:absolute;left:340px;top:36px;font:800 12px Nunito;opacity:.75">${r.next} &rarr; ${r.x} income</div>
+  <div class="${r.dim?'':'green'}" style="position:absolute;right:12px;top:10px;width:150px;height:44px;border-radius:13px;${r.dim?'background:#3A3D63;border:3px solid #140F2E;':''}display:flex;align-items:center;justify-content:center;gap:6px">
+   <svg width="22" height="22"><use href="#i-dust"/></svg><span class="num" style="font-size:20px;color:${r.dim?'#9C9FD1':'#fff'};margin-top:3px">${r.cost}</span></div>`;
+ }
+ box.appendChild(d);
+});
+</script>
+</body></html>

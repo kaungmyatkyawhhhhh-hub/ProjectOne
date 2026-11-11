@@ -279,3 +279,17 @@ Third-party estimates put winter break and summer at +30-50% over baseline, Hall
 - No official Roblox numbers for size of the seasonal swings (the 10-K gives direction only).
 - Dates and traffic effects of The Hunt in 2026, if it ran, were not verified.
 - No measured data on whether games that are not participating lose traffic during platform events.
+
+## Update-time clashes with the big games (researched 29 Oct 2026)
+Owner: "we dont clash times with other popular games in update because people will join the popular games more than our game".
+Saturday slots seen in Oct 2026 (UTC, US summer time; after US clocks change on Sun 1 Nov the US-anchored ones move 1 h LATER):
+| UTC (Sat) | Game | Note | Source |
+|---|---|---|---|
+| 14:00 | Many small games (Steal A Verity, Bunker vs Verity, Capybaras VS Plants...) | admin abuse / update, Sat 31 Oct | abusetime.dev/events |
+| 16:00 | Pet Simulator 99 | 12 PM ET; admin abuse 30-60 min after | eldorado.gg PS99 schedule (Sep 2026) |
+| 17:00 | 99 Nights in the Forest | weekly, Saturdays 17:00 UTC | abusetime.dev |
+| 18:00 | Grow a Garden | admin abuse 2 PM ET, update ~1 h later (24 Oct 2026, projected) | rosenberryrooms.com |
+| 19:00 | Steal a Brainrot | 3 PM ET, admin abuse after | theclick.gg (Aug 2026) |
+Mid-week admin abuses also exist (Wed 13:00-22:00 UTC, Thu 14:00-15:00) for smaller games.
+**Rule for GYM ARC:** release on Saturday at **15:00 UTC** (9:30 PM Myanmar, 11 AM ET, 4 PM UK; 10 AM ET after 1 Nov): after the 14:00 small-game rush, before PS99 (16:00, 17:00 from Nov), 99 Nights (17:00), Grow a Garden (18:00+) and Steal a Brainrot (19:00+). The warm-up hour 14:00-15:00 overlaps only small games. Never 16:00-21:00 UTC Saturday. If a big game announces a special event at 15:00, move ours to Friday ~22:00 UTC or Saturday 13:00 UTC. Re-check this list before every update (schedules drift).
+Sources: https://abusetime.dev/events , https://abusetime.dev/games/99-nights-in-the-forest/events/weekly-update , https://www.eldorado.gg/blog/roblox-en/pet-simulator-99-update-schedule/ , https://www.rosenberryrooms.com/grow-a-garden-admin-abuse-event-when-it-october-24-2026/ , https://www.theclick.gg/steal-a-brainrot-saturday-update-time/

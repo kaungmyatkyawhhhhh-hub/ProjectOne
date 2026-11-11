@@ -1,0 +1,44 @@
+CALIBRATION (each rival as 'our game' against the others): everyone agrees / 1st pick
+  Steal An Egg (613K)               17%   27%
+  Murder Mystery 2 (603K)           34%   23%
+  Brookhaven RP (349K)              34%   28%
+  Blox Fruits (267K)                18%   25%
+  Throw Food For Animals (184K)     34%   52%
+  Steal a Brainrot (114K)           17%   18%
+  99 Nights (103K)                  35%   23%
+  +1 Venom Evolution (24K)          33%   43%
+  Depth Incremental (21K)           17%   22%
+  Bug Evolution (14K)               16%   12%
+  Muscle Legends (2.5K)             33%   26%
+  Grow And Build Giants (2.5K)      33%   36%
+  +1 Titan Evolution (1.7K)          4%    7%
+  Titanus Simulator (2, dying)       1%    2%
+
+version                                                                              agree  1st pick  top objections (groups out of 3,000)
+S0  the plan v0 (before the other two sims' fixes)                                      9%    16%    first_min: "it's boring at the start" 1266; crowd: "nobody plays it, it's dead" 1239; looks: "it looks like AI slop" 1177
+S1  + first-minute fixes (impatient sim H: evolve at ~28 s, pads on the street)        18%    27%    crowd: "nobody plays it, it's dead" 1239; looks: "it looks like AI slop" 1177; pvp_thrill: "there's no real fighting" 1160
+S2  + hand-made look (nerd sim H: variants, set pieces, life, crumbles, form kits)     34%    42%    crowd: "nobody plays it, it's dead" 1239; pvp_thrill: "there's no real fighting" 1160
+S3  + SUMO RING at launch (size brackets) + Rampage = the crown holder vs the server   59%    57%    crowd: "nobody plays it, it's dead" 1239
+S4  + funny and cute: squeaky toy city, silly props, a pet-size first form             59%    59%    crowd: "nobody plays it, it's dead" 1239
+S5  + full servers: fill the fullest first, 10 slots, NPC stompers in the city        100%    82%    none
+S6  + the difference up front: city + crown + Rampage in minute 1 and on the icon     100%    85%    none
+S7  + depth at launch: 8 forms, 3 districts, Smash Index, AWAKEN                      100%    89%    none
+S8  + visible weekly updates: board in the plaza, countdown, a code                   100%    92%    none
+S9  + launch push (marketing, not design): ads + code + Saturday event                100%    93%    none
+
+robustness (every score of ours +-1, 60 tries): agree median 100% (worst 100%), 1st pick median 92%
+  objections that came back (tries out of 60): none
+if the launch crowd is only 2/10: agree 59%, 1st pick 68%, top: [('crowd: "nobody plays it, it\'s dead"', 1239)]
+if the launch crowd is only 3/10: agree 59%, 1st pick 70%, top: [('crowd: "nobody plays it, it\'s dead"', 1239)]
+
+GROUP 1: Quality nerd, Bored-fast kid, Social kid  |  on the table: STOMP EVOLUTION, Grow And Build Giants (2.5K), Blox Fruits (267K), Titanus Simulator (2, dying)
+   BEFORE  Quality nerd: "it looks like AI slop"; Bored-fast kid: "it's boring at the start"  -> they play Grow And Build Giants (2.5K)
+   AFTER   nobody says no to STOMP EVOLUTION  -> they play STOMP EVOLUTION
+
+GROUP 2: Little sister (7), Giant fan (8), Cheap-phone kid, Quality nerd, Grinder  |  on the table: STOMP EVOLUTION, +1 Titan Evolution (1.7K), Bug Evolution (14K), Muscle Legends (2.5K)
+   BEFORE  Quality nerd: "it looks like AI slop"  -> they play Bug Evolution (14K)
+   AFTER   nobody says no to STOMP EVOLUTION  -> they play STOMP EVOLUTION
+
+GROUP 3: PvP sweat, Little sister (7), Cheap-phone kid, Bored-fast kid  |  on the table: STOMP EVOLUTION, Steal a Brainrot (114K), +1 Titan Evolution (1.7K), Depth Incremental (21K)
+   BEFORE  PvP sweat: "there's no real fighting"; Bored-fast kid: "it's boring at the start"  -> they play Steal a Brainrot (114K)
+   AFTER   nobody says no to STOMP EVOLUTION  -> they play STOMP EVOLUTION

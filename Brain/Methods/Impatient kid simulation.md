@@ -31,3 +31,5 @@ created: 2026-11-09
 - Read the server code, not just the config: the "no comets in tutorial steps 1-5" gate was the hidden cause.
 - It's a model: confirm with the real onboarding funnel after publishing.
 - 9 Nov, after building F in Studio: `py variants.py` (run from the Calc folder, not `-I`: it imports kidsim) reproduced 100% stay 60 s / 95% at 5 min.
+- 2026-11-11 Stomp Evolution, at DESIGN stage on plan numbers (no build): 74% → 100% stay 5 min; the fix was more NEW things (8 evolves, pads on the street), not a faster first second → [[TITAN ARC/2026-11-11 Stomp Evolution - Three kid simulations (impatient, quality nerd, debate)]]
+- Learned 11 Nov: a pacing bot's times are too fast for kids (first evolve 57 s for the bot, 97 s for a kid at 1.25-1.7x). And when the core action is instant (a stomp every 2 s), measure the longest stretch with nothing NEW, not the gap between actions.

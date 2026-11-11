@@ -189,3 +189,7 @@ Screenshots 17-21 (runes, settings x2, extra machine, fast extractor).
 ### SFX (needs a listen)
 I can't hear the game (screenshots only), so nothing here is confirmed. To fill in: the sound on a pad buy, the energy tick, the store opening, the tutorial step done, the background music, the crystal's hum.
 
+
+
+## Correction (owner, 2 Nov): "actually in regrowth incremental, u could walk over the button too"
+Tycoon pads are bought BOTH ways: walk over the pad (touch) or click it. Our session thought walking did nothing (probably we hadn't stepped fully on the pad). No ProximityPrompts were seen.

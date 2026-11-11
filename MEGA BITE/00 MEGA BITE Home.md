@@ -1,0 +1,85 @@
+---
+tags: [megabite, home, index]
+created: 2026-11-09
+status: design stage (no build yet). Galaxy Incremental comes first; the slice is built after Galaxy's Sat 14 Nov update.
+---
+# MEGA BITE 🦈 Eat & Evolve: home
+
+**Any Claude starting MEGA BITE work: read this note first, then [[Brain/00 BRAIN]] and the notes linked below.**
+
+## The game in one line
+A Roblox shark eat-and-evolve game for kids on phones (friend Zev's idea): start as a tiny fish, eat your way up the food chain to the MEGALODON. The best food is in dangerous water, and you only keep the EXP you bring home.
+
+## Decided so far (9 Nov 2026)
+- **Name:** MEGA BITE, title `MEGA BITE 🦈 Eat & Evolve` (APEX SHARK rejected: "too nerdy"). Never "Hungry Shark" / "Shark Evolution" (Ubisoft trademark, copycat flag).
+- **Zones:** Safe Reef (spawn, bank, no PvP, x1) · Open Sea (NPC predators, x2) · Red Trench (opt-in PvP, x4, rare food, crown shark).
+- **Twist:** EXP from danger zones is carried and banked at vents; nothing lost below Reef Shark, keep ~25% after.
+- **7 evolutions + one ability each:** Minnow DART · Piranha FRENZY · Barracuda TORPEDO · Reef Shark SHARK SENSE · Hammerhead HAMMER RAM · Great White BREACH · Megalodon TIDAL ROAR. Earned mutations (never sold).
+- **Launch scope:** 7 evolutions + abilities, SIZE number + crown, Fish Index, shiny fish, squid boss, Fossilize rebirth tier 1, **SCHOOLS (crews of 4, join a friend) moved to launch** (debate-kids sim). Weekly updates after.
+- **From the debate-kids sim:** cartoon look (big eyes, round fins, funny gulp; scary only in the Trench); 16-slot servers filled fullest-first; a weekly-update board in the reef; the carry-home twist shown in the first minute + thumbnail; Red Trench crown bounty + APEX HOUR + weekly board; **launch = $200 of Roblox ads, no YouTubers (owner 9 Nov):** $100 on the launch Saturday, the second $100 the next Saturday ONLY if D1 ≥ ~10% and playtime ≥ ~15 min; fix the game page first ($100 = ~545 players with a Galaxy-like page vs ~2,300 fixed); 10-slot servers at launch; a bring-a-friend reward; one Myanmar Builders Club announcement (owner's call). With a small 'playing' number the trend-chaser kid still says "it's dead" (60% of friend groups agree): only retention → Roblox Home fixes that.
+- **Rules:** like ratio 90%+ target; PvP fairness (no camping, no reward for farming the same player, nothing bought helps in fights); everything ≤ 449 R$, no paid random items; cartoon eating, no blood or scars (Mild rating); never looks like AI slop (own models, one UI kit, ambient life).
+- **Map:** ~2,000 studs, set pieces every ~15 s of swimming, bank vents every ~30 s with food currents, natural borders.
+- **EXP:** Piranha 25 · Barracuda 200 · Reef Shark 620 (sim: 68 s / 4.6 min / 12 min).
+- **Roblox Kids/Select gate:** launches 16+ first; needs an age-checked owner account with 2-Step + Premium 2 months, and 250 engaged 16+ plays in 60 days.
+
+## Notes (read in this order)
+1. [[2026-11-09 Research - Shark eat-and-evolve idea (Zev)]]: the concept, abilities, release scope, no-AI-slop rules (Roblox Playbook/Research notes).
+2. [[2026-11-09 MEGA BITE - Full research report]]: market, core design, map, PvP + Roblox rules, dead games, money + marketing (Roblox Playbook/Research notes/MEGA BITE, with 6 notes behind it).
+3. [[2026-11-09 MEGA BITE - Map plan + kid simulations]]: the map and the impatient-kid + quality-nerd-kid results.
+4. [[2026-11-09 MEGA BITE - EXP curve tuning + slice prompt]]: the EXP table and the **Claude Code prompt for the first playable slice**.
+5. [[2026-11-09 MEGA BITE - Debate kids simulation]]: friend groups arguing MEGA BITE vs top games; 18% → 100% agree, the 8 fixes.
+6. [[2026-11-09 MEGA BITE - Art style guide]]: the look (cute when small, epic when big), UI, effects, sound, and the STYLE BLOCK for every ChatGPT art prompt.
+7. [[2026-11-09 MEGA BITE - Path to 10K CCU]]: what 10K needs (~350-580K players a day), the stages and gates, the 6 levers.
+8. [[2026-11-09 MEGA BITE - Shark art research (models, animation, assets)]]: how every shark/fish must look and swim, Roblox import rules, budgets, the full asset list. READ BEFORE ANY MODEL.
+- Code: `MEGA BITE/Calc` (mapsim.py, exptune.py, debatekids.py).
+- Methods used: [[Impatient kid simulation]], [[Quality-nerd kid simulation]], [[Dead game method]], [[Debate kids simulation]].
+
+## Next
+After Galaxy's 14 Nov update: the owner creates a new place in P&L Studios XP and runs the slice prompt in Claude Code, then tests on a phone. Then re-run both kid sims on the real numbers and read the onboarding funnel.
+
+
+## APPROVED (owner 10 Nov 2026, 10:57): all 7 evolution models
+Minnow v3 (92025541189783), Piranha v3 (132061081715168), Barracuda v3 (125387928832726), Reef Shark v11, Hammerhead v4 (98736216781401), Great White v2 (103084709887697), Megalodon v2 (127860224846802). All in the Mega Bite place at `workspace.MB_ImportTest` (tag MBShark, E prompt + keys), each with its ability clip, sounds and VFX. Check 6 (owner approval) passed. Fix history in [[2026-11-10 MEGA BITE - Night shift log (map, kit, VFX, sounds, Hammerhead)]].
+**Next (Claude's proposal 10 Nov):** gameplay is not built yet. Order: swim controller + HUD (show the owner) → food fish (~6 species for the slice, same sheet method) → eat / EXP / size / evolve (model swap + Evolve VFX) → carry + bank at vents → predators + DART/FRENZY → quests, Fish Index, golden fish, funnel. The slice prompt in the EXP note still says Terrain Water: rewrite it for the TikTok fog look before use.
+
+## RULE (owner 9 Nov, 17:37): ALL models must be HIGH QUALITY
+No placeholder or "good enough" model ever ships. A model is done only when ALL of these pass:
+1. **Design first:** a full ChatGPT design sheet (side, top, front) plus a head close-up sheet. Never shapes invented in code.
+2. **Matches the design:** the side outline matches 90% or more with real proportions kept (never stretched to fit). The face is checked feature by feature (eye, brow, lip band, mouth, every tooth row, gills) from the side AND the front. Fins match.
+3. **Looks pro at game distance:** compared side by side with Fisch-level Roblox models from the game camera. Flat facets read clearly, the colours follow the palette, and there are no floating, stretched or clipping parts.
+4. **Moves well:** smooth animations (curve-driven, every frame keyed, eased one-shots), checked frame by frame. Plus its sounds (code + CC0 recordings, best quality).
+5. **Works in Roblox:** checked in Studio lighting and on a phone-size view before it counts as done.
+6. **The owner approves it** before the next model starts. If he says it's bad, fix the cause, not the symptom.
+
+**Roblox import test (9 Nov):** Reef Shark v4 is in the Mega Bite place (asset 110833713362358, group-owned). Checks 3 and 5 pass, with 7 fixes to make before the next export: upright axis, normals, jaw tear, jaw sign, clips as Animation assets, eye glow, contrast with the water. Check 6 (owner approval) is pending. See [[2026-11-09 MEGA BITE - Reef Shark Roblox import test]].
+
+## Still open (9 Nov)
+**Needs the owner:** (1) Zev's role: credit only, tester, or a share? (write it down before money comes in, K10); (2) start the Kids/Select prerequisites now (age check, 2-Step, Premium 2 months); (3) when the build starts after Galaxy's 14 Nov update, and a deadline that isn't a rush; (4) approve the HUD mockup when it's made.
+**Decided 9 Nov:** 3D models are made by code in the owner's Blender, never Creator Store models. Pipeline proven on the Reef Shark: [[2026-11-09 MEGA BITE - 3D pipeline test (Reef Shark)]] (files in `MEGA BITE/Art/ReefShark`).
+
+**Model method (9 Nov, after v1/v2 were rejected):** ChatGPT draws a model SHEET first (side + top + front, low-poly Fisch style, magenta background), then Claude traces it in Blender. Current = **Reef Shark v4** `Art/ReefShark/reef_shark_v4.py`: body traced from `ReefShark_sheet_chatgpt.png`, head traced from the close-up `ReefShark_head_sheet_chatgpt.png` (mouth, lip band, every tooth tip, eye, socket, brow, gills measured as landmarks). Side outline 93% (aspect kept), 3,522 tris, 8 spine bones + jaw, Swim action. Check renders: `ReefShark_v4_compare_*.png`. Every new shark/fish: full sheet + head close-up sheet first, never shapes invented in code. Skill: roblox-3d-model-from-sheet; toolkit in `Tools/cc-blender-skill`. **Animations (in the script, 24 fps, Root bone at the origin):** Idle 2 s, Swim 1 s (carangiform), Dart 0.75 s, Bite 0.5 s (jaw snap + lunge), SharkSense 1.5 s (head scan; glow trails are VFX in code), Hurt 0.5 s (cartoon flinch). Turning = spine bend in code, not a clip. Every shark: Idle, Swim, Dart, Bite, Hurt + its own ability clip. Preview: `Art/ReefShark/ReefShark_v4_animation_clips.png`. Prompt: [[2026-11-09 MEGA BITE - Prompt - Reef Shark concept turnaround (ChatGPT)]].
+**Blocks the first build:** (5) the other 6 sharks, ~18 NPC fish and the ~14-mesh kit from the same pipeline; (6) the swim controller spec numbers.
+**Before launch (Claude can decide from research + sims):** combat (health, bite damage, 2+ bites for big sharks, combat tag), Red Trench numbers (bounty, APEX HOUR, crown), sea bombs, the squid boss fight, EXP from Hammerhead to Megalodon, mutations list + odds, shiny rates, the full Fish Index, Fossilize numbers, the tutorial script (first 60 s), monetization (exact items + prices ≤ 449), daily streak / offline growth, save data + anti-exploit, report/block + quick chat, sounds + music list, icon + thumbnails + page video, the first 8 weekly updates.
+
+
+## BUILD STEP 1 DONE (10 Nov, 11:40): swim controller + HUD
+In the Mega Bite place: custom swim controller (auto-forward, thumbstick, DART, chase camera, bank + spine bend, rock bounce, border current, server speed checks), the UI kit (COUNTER/BUTTON/TILE + 16 own icons) and the full HUD. UIAudit clean on 3 phone sizes. Waiting for the owner's phone test + approval. See [[2026-11-10 MEGA BITE - Swim controller + HUD (build step 1)]].
+
+## BUILD STEP 2 DONE (10 Nov, 13:10): phone test + food fish + eating loop
+Phone emulator test (iPhone 17 Pro, Galaxy S25 Ultra) passed after 2 fixes; 4 own food fish (Sardine, Sunny Damsel, Puffer, Mackerel) from a new generic sheet-to-model generator; server fish schools, eat on contact, EXP / CARRYING / bank / evolve all working. See [[2026-11-10 MEGA BITE - Phone test + food fish + eating loop (build step 2)]].
+- **BUILD STEP 3 DONE (10 Nov 16:40):** Open Sea predators (Hunter Barracuda, Reef Prowler, Big Jaws from the approved models): red glow before the lunge, DART dodges, ESCAPED!/CHOMPED! pops, carry kept below Reef Shark. [[2026-11-10 MEGA BITE - Open Sea predators (build step 3)]]
+- **BUILD STEP 4 DONE (10 Nov 17:20):** 4 new fish (Coral Shrimp, Lavender Squid with ink, Yellowfin Tuna, Golden Treasure Fish event) + the FISH INDEX (INDEX button, silhouettes, +10 EXP per 3 new species). [[2026-11-10 MEGA BITE - New fish + Fish Index (build step 4)]]
+- **UI v2 (10 Nov 18:30):** drawn ocean UI kit from ChatGPT sheets (pills, sea-bubble buttons, sea-glass windows, ribbon titles, rarity cards). [[2026-11-10 MEGA BITE - UI v2 (drawn ocean UI kit)]]
+- **UX PASS 1 (10 Nov 19:40):** deep research on game UI/UX + placeholder tells, then: STORE/INDEX out of the thumbstick zone, contextual CARRYING, padlock/"=" badges on fish (not colour only), directional predator arrow, one-window rule + auto-close on attack, toast/pop rules, STORE rebuilt in UI v2 (old emoji mock-up with fake sale removed), FishSnap payload bug fixed. [[2026-11-10 MEGA BITE - UX pass 1 (HUD, popups, Store v2)]] · report: [[2026-11-10 MEGA BITE - UX research report (HUD, popups, placeholder UI)]]
+- **TITAN SIMULATOR RESEARCH (11 Nov 00:40):** dead-game pass on Roblox's Titan Simulator (2017, 91.7M visits). Studio check found: SizeMult changes only the HUD number (the body never grows), a full-grown Hammerhead (7.2 m) evolves into a smaller Great White (6.0 m), and there is no size tag or crown. Prompt ready, NOT sent: [[2026-11-11 MEGA BITE - Prompt - Titan Simulator steals (body growth, size tag, crown)]]. Gate added: Fossilize tier 1 before a public launch (the HUD says MAX at Megalodon).
+- **FREE OCEAN HUD v3 (11 Nov, autopilot):** owner felt the boxed HUD was "a trap, not freedom". Now no dark boxes, floating SIZE/EXP, NEXT + CARRYING fade in only when they change, small round minimap, quiet quest chip, small STORE/INDEX, abilities hidden until earned, toasts = floating rewards (no orders), windows slide in with the sea visible. [[2026-11-11 MEGA BITE - Free ocean HUD (v3)]]
+- **TITAN STEALS BUILT (11 Nov):** the body really grows, evolve never shrinks you, size tags over other sharks, the crown. [[2026-11-11 MEGA BITE - Titan steals built (growth, size tags, crown)]]
+- **STEPS 4-5 BUILT (11 Nov, 02:30):** Settings window, saving, quests, Fossilize tier 1, the REAL store (7 game passes ≤ 449 R$, made via Open Cloud while the place is Private), 4 Abyss skins for every shark (palette remaps), x2 EXP / VIP / Shark Radar wired. [[2026-11-11 MEGA BITE - Settings, real Store, skins + UI v4 neon sign (build steps 4-5)]]
+- **UI DIRECTION (owner, 11 Nov 02:38) - READ BEFORE ANY UI WORK:** "stone-age ui... match up to modern ui where everything is INSANE", use ALL the TikTok UIs, the Shark Shop TikTok UI SUCKS (map style only), no ViewportFrame in the store (ChatGPT art images). [[2026-11-11 Research - Modern UI direction (owner feedback + all TikTok UIs)]]
+- **UI v5 ILLUSTRATED SHOP (11 Nov 03:40):** every window rebuilt from the AI-shop TikTok reference; Store = ChatGPT skin cards + floating-object pass banners (no 3D viewport). [[2026-11-11 MEGA BITE - UI v5 illustrated shop (TikTok reference)]]
+- **STEP 6 RED TRENCH (11 Nov 04:50):** the PvP zone through a gate in the north wall, x4 food, the full fairness kit from the research, crown bounty shared by everyone who bit it in the last 10 s, dark reveal card. Studio-tested with bots; needs a 2-player test. [[2026-11-11 MEGA BITE - Red Trench + PvP + crown bounty (build step 6)]]
+- **WATCH-STUDY CHECK (11 Nov 04:20):** Titan Simulator clips + Venom's sound measured; the build was checked read-only against it. Most is already right. Six small changes, prompt READY, NOT sent: first quest = eat (not the vent walk), a welcome school in front of new players, the evolve sting only for evolve + Fossilize, a second hit on every evolve, size = pitch wired, predator "Big Jaws" renamed. [[2026-11-11 MEGA BITE - Prompt - Watch-study changes (first quest, welcome school, evolve sounds)]]
+- **WATCH-STUDY CHANGES BUILT (11 Nov 04:40):** the six from the line above are in the build: first quest "Eat 5 fish to GROW" (quests now saved by id), welcome school for new players, Evolve sting only for evolve/Fossilize, a second hit with the ability name on every evolve, size = pitch, "Big Chomper". Compile-checked, not playtested. [[2026-11-11 MEGA BITE - Watch-study changes built (first quest, welcome school, evolve sounds)]]
+- **QUALITY PASS (11 Nov, autopilot after the owner's "still dont match the TikTok quality"):** brighter cyan water + strong warm god rays + contrast, marine snow round the camera, stronger caustics, a key light on your shark; a 2.5 s EVOLVE CUTSCENE (dark + orbit camera + light burst + white flash + clean name card, Fossilize too); reef colour families (3 new coral palettes) + 26 new coral gardens; a GENTLE GIANT manta ray (our own sheet-method model) gliding over the reef with beating wings. Not published. [[2026-11-11 MEGA BITE - Quality pass (light, evolve cutscene, reef density)]]
+- **BANK REMOVED (owner 11 Nov 09:41):** every bite goes straight to EXP (Reef x1 / Open Sea x2 / Trench x4), no CARRYING bag, no bank vent; being caught or eaten costs nothing; quests "Find the BANK VENT" / "Bank 20 EXP" replaced by "Eat 15 fish in the OPEN SEA". Older lines that mention the bank or the bag are history. [[2026-11-11 MEGA BITE - Bank removed (EXP straight in, quests updated)]]
+- **UI v6 MODERN (owner 11 Nov 09:54, from the owner's screen recording):** full-screen Shop (tabs, featured carousel, colour cards, lime price pills), white slab windows (Settings, Fish Index, Fossilize), NEXT UP quest card, labelled Shop/Index squares, a padlocked COMING NEXT column; open/close motion copied 1:1 from the recording at 30 fps. [[2026-11-11 MEGA BITE - UI v6 modern (shop, windows, HUD, motion 1to1)]]

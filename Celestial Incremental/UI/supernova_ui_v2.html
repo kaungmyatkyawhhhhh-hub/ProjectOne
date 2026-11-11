@@ -1,0 +1,88 @@
+<html><head><style>
+@font-face{font-family:F;src:url(node_modules/@fontsource/fredoka-one/files/fredoka-one-latin-400-normal.woff2)}
+@font-face{font-family:M;font-weight:900;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-900-italic.woff2)}
+body{margin:0;width:1280px;height:720px;overflow:hidden;font-family:F;color:#fff;
+background:radial-gradient(ellipse at 70% 120%,#3b1a4a 0%,#130c26 45%,#070512 100%)}
+#stars{position:absolute;inset:0}
+.t{paint-order:stroke fill;-webkit-text-stroke:5px #120a1f;text-shadow:0 3px 0 #120a1f}
+.chamf{clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)}
+/* pill */
+.pill{position:absolute;left:470px;top:28px;height:74px;width:340px}
+.pill .o{position:absolute;inset:0;background:#120a1f}
+.pill .b{position:absolute;inset:4px;background:linear-gradient(#2c1d4c,#1a1131 55%,#140d27);}
+.pill .b:before{content:"";position:absolute;left:14px;right:14px;top:3px;height:3px;background:#4a3678;border-radius:2px}
+.pill .edge{position:absolute;left:4px;right:4px;bottom:4px;height:6px;background:linear-gradient(90deg,#ff7a1a,#ffd23f 60%,#ff9a2a)}
+.pill .num{position:absolute;left:96px;top:6px;font-size:38px;letter-spacing:.5px}
+.pill .rate{position:absolute;left:99px;top:46px;font-size:17px;color:#ffd23f;-webkit-text-stroke:4px #120a1f;paint-order:stroke fill}
+.badge{position:absolute;left:-26px;top:-14px;width:110px;height:110px}
+/* cards */
+.card{position:absolute;width:300px;height:370px}
+.card .clip{position:absolute;inset:4px;overflow:hidden}
+.card .o{position:absolute;inset:0;background:#120a1f}
+.card .b{position:absolute;inset:4px;background:linear-gradient(170deg,#2b1c4a,#170f2c 60%)}
+.card .hd{position:absolute;left:0;right:0;top:0;height:58px;background:linear-gradient(#ff8a2a,#e0531a);}
+.card .hd:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.10) 0 2px,transparent 2px 14px)}
+.card .title{position:absolute;left:0;right:0;text-align:center;top:12px;font-size:27px;z-index:2}
+.card .lv{position:absolute;left:50%;transform:translateX(-50%);top:62px;font-size:18px;color:#ffe9a8;z-index:3;background:#120a1f;padding:2px 14px 4px;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,8px 100%,0 50%)}
+.card .mult{position:absolute;left:0;right:0;top:212px;text-align:center;font-size:34px}
+.card .mult span{color:#7dff8a}
+.card .sub{position:absolute;left:0;right:0;top:256px;text-align:center;font-size:16px;color:#b7a6dd;-webkit-text-stroke:3px #120a1f;paint-order:stroke fill}
+.btn{position:absolute;left:22px;right:22px;bottom:22px;height:62px}
+.btn .o{position:absolute;inset:0;background:#120a1f}
+.btn .b{position:absolute;inset:4px 4px 4px 4px}
+.btn .sh{position:absolute;left:4px;right:4px;bottom:4px;height:10px}
+.btn .hl{position:absolute;left:16px;right:16px;top:8px;height:5px;border-radius:3px;background:rgba(255,255,255,.45)}
+.btn .lbl{position:absolute;left:0;right:0;top:10px;text-align:center;font-size:30px}
+.buy .b{background:linear-gradient(#ffe05a,#ffb21f)} .buy .sh{background:#d36a0c}
+.buy .lbl{color:#fff}
+.no .b{background:linear-gradient(#5b4f72,#463b5c)} .no .sh{background:#2e2540}
+.max .b{background:linear-gradient(#8a6cff,#6143e6)} .max .sh{background:#3b23a8}
+.cost{display:inline-flex;align-items:center;gap:6px}
+.red{color:#ff6b6b}
+.ic{position:absolute;left:50%;top:96px;transform:translateX(-50%);width:110px;height:110px}
+.label{position:absolute;font-family:M;font-weight:900;font-style:italic;font-size:15px;color:#8f7fb8;letter-spacing:1px}
+</style></head><body>
+<svg id="stars" width="1280" height="720"></svg>
+<svg width="0" height="0"><defs>
+ <symbol id="spark" viewBox="-50 -50 100 100"><path d="M0-46C5-14 14-5 46 0 14 5 5 14 0 46-5 14-14 5-46 0-14-5-5-14 0-46Z"/></symbol>
+ <symbol id="dust" viewBox="0 0 100 100">
+  <g stroke="#120a1f" stroke-width="7" stroke-linejoin="round">
+   <use href="#spark" x="8" y="12" width="62" height="62" fill="#ffd23f"/>
+   <use href="#spark" x="52" y="44" width="40" height="40" fill="#ff9a2a"/>
+   <use href="#spark" x="50" y="6" width="28" height="28" fill="#fff3b0"/>
+  </g>
+  <use href="#spark" x="24" y="24" width="20" height="20" fill="#fff"/>
+ </symbol>
+</defs></svg>
+
+<div class="label" style="left:470px;top:8px">STARDUST PILL (HUD, TOP CENTRE)</div>
+<div class="pill"><div class="o chamf"></div><div class="b chamf"></div><div class="edge"></div>
+ <svg class="badge" viewBox="-60 -60 120 120">
+  <path d="M0-56L14-14 56 0 14 14 0 56-14 14-56 0-14-14Z" fill="#120a1f"/>
+  <path d="M0-48L12-12 48 0 12 12 0 48-12 12-48 0-12-12Z" fill="#ffb21f"/><path d="M0-38L10-10 38 0 10 10 0 38-10 10-38 0-10-10Z" fill="url(#bg1)"/>
+  <defs><linearGradient id="bg1" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="#3a2766"/><stop offset="1" stop-color="#1b1233"/></linearGradient></defs>
+  <use href="#dust" x="-27" y="-27" width="54" height="54"/>
+ </svg>
+ <div class="num t">1.24M</div><div class="rate">+38.5K/s</div>
+</div>
+
+<div class="label" style="left:140px;top:170px">CAN BUY</div>
+<div class="label" style="left:490px;top:170px">CAN'T AFFORD</div>
+<div class="label" style="left:840px;top:170px">MAXED</div>
+
+<script>
+const s=document.getElementById('stars');let h='';let r=7;function rnd(){r=(r*9301+49297)%233280;return r/233280}
+for(let i=0;i<160;i++){const x=rnd()*1280,y=rnd()*720,z=rnd()*1.6+.3;h+=`<circle cx="${x}" cy="${y}" r="${z}" fill="#fff" opacity="${.25+rnd()*.6}"/>`}
+s.innerHTML=h;
+const ICONS=[`<g stroke="#120a1f" stroke-width="6" stroke-linejoin="round"><path d="M50 6 58 24 76 14 72 34 92 36 78 50 92 64 72 66 76 86 58 76 50 94 42 76 24 86 28 66 8 64 22 50 8 36 28 34 24 14 42 24Z" fill="#ff7a1a"/><circle cx="50" cy="50" r="22" fill="#ffd23f"/></g><circle cx="43" cy="43" r="7" fill="#fff8d0"/>`,`<g stroke="#120a1f" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"><path d="M14 30 Q30 46 58 50" stroke="#5ad1ff" stroke-width="10" fill="none"/><path d="M10 52 Q26 60 50 58" stroke="#b9ecff" stroke-width="7" fill="none"/><path d="M60 22h14v36a12 12 0 0 0 0 0 12 12 0 0 0 0 0" fill="none"/><path d="M58 20h12v34a8 8 0 0 0 16 0V20h12v34a20 20 0 0 1-40 0Z" fill="#ff4d5e"/><path d="M58 20h12v10H58zM86 20h12v10H86z" fill="#e8e8f0"/></g><circle cx="58" cy="50" r="9" fill="#e9fbff" stroke="#120a1f" stroke-width="5"/>`,`<g stroke="#120a1f" stroke-width="6" stroke-linejoin="round"><ellipse cx="50" cy="54" rx="42" ry="14" fill="none" stroke-width="12"/><ellipse cx="50" cy="54" rx="42" ry="14" fill="none" stroke="#d9ccff" stroke-width="5"/><circle cx="50" cy="50" r="24" fill="#a68bff"/><path d="M28 44a24 24 0 0 1 44 0" fill="none" stroke="#7a5cf0" stroke-width="5"/><path d="M26 58 Q50 72 74 58" fill="none" stroke="#120a1f" stroke-width="0"/></g><path d="M8 54a42 14 0 0 0 84 0" fill="none" stroke="#120a1f" stroke-width="12"/><path d="M8 54a42 14 0 0 0 84 0" fill="none" stroke="#d9ccff" stroke-width="5"/><circle cx="42" cy="42" r="6" fill="#efe9ff"/>`];
+const cards=[["STAR FURNACE","LV 12","x1.26","x1.38","+12% stardust per level","buy","BUY &nbsp;<span class='cost'><svg width=30 height=30><use href='#dust'/></svg>48.2K</span>"],
+["COMET MAGNET","LV 4","x1.10","x1.15","comets come 5% more often","no","<span class='cost'><svg width=30 height=30><use href='#dust'/></svg><span class='red'>2.10M</span></span>"],
+["ORBIT SPEED","LV 25","x2.50","","planets orbit faster","max","MAX"]];
+cards.forEach((c,i)=>{const d=document.createElement('div');d.className='card';d.style.left=(130+i*350)+'px';d.style.top='200px';
+d.innerHTML=`<div class="o chamf"></div><div class="b chamf"></div><div class="clip chamf"><div class="hd" style="${c[5]=='max'?'background:linear-gradient(#9b80ff,#6143e6)':c[5]=='no'?'background:linear-gradient(#6b5f86,#4d4266)':''}"></div></div>
+<div class="title t">${c[0]}</div><div class="lv t">${c[1]}</div>
+<svg class="ic" viewBox="0 0 100 100">${ICONS[i]}</svg>
+<div class="mult t">${c[2]}${c[3]?' <span>&#8594; '+c[3]+'</span>':''}</div><div class="sub">${c[4]}</div>
+<div class="btn ${c[5]}"><div class="o chamf"></div><div class="b chamf"></div><div class="sh"></div><div class="hl"></div><div class="lbl t">${c[6]}</div></div>`;
+document.body.appendChild(d)});
+</script></body></html>

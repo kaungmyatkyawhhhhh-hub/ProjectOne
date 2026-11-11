@@ -1,0 +1,368 @@
+{
+ "PillGreen": {
+  "size": [
+   500,
+   236
+  ],
+  "slice": [
+   150,
+   112,
+   350,
+   124
+  ],
+  "note": "pill: ends fixed, middle stretches; SliceScale = height / image height"
+ },
+ "PillGold": {
+  "size": [
+   499,
+   236
+  ],
+  "slice": [
+   150,
+   112,
+   349,
+   124
+  ],
+  "note": "pill: ends fixed, middle stretches; SliceScale = height / image height"
+ },
+ "PillRed": {
+  "size": [
+   500,
+   236
+  ],
+  "slice": [
+   150,
+   112,
+   350,
+   124
+  ],
+  "note": "pill: ends fixed, middle stretches; SliceScale = height / image height"
+ },
+ "PillBlue": {
+  "size": [
+   499,
+   237
+  ],
+  "slice": [
+   150,
+   112,
+   349,
+   124
+  ],
+  "note": "pill: ends fixed, middle stretches; SliceScale = height / image height"
+ },
+ "PillPurple": {
+  "size": [
+   499,
+   237
+  ],
+  "slice": [
+   150,
+   112,
+   349,
+   124
+  ],
+  "note": "pill: ends fixed, middle stretches; SliceScale = height / image height"
+ },
+ "PillGrey": {
+  "size": [
+   500,
+   237
+  ],
+  "slice": [
+   150,
+   112,
+   350,
+   124
+  ],
+  "note": "pill: ends fixed, middle stretches; SliceScale = height / image height"
+ },
+ "RoundTurquoise": {
+  "size": [
+   342,
+   328
+  ],
+  "slice": null,
+  "note": "round icon-button base (fixed)"
+ },
+ "RoundGold": {
+  "size": [
+   342,
+   328
+  ],
+  "slice": null,
+  "note": "round icon-button base (fixed)"
+ },
+ "RoundCoral": {
+  "size": [
+   343,
+   328
+  ],
+  "slice": null,
+  "note": "round icon-button base (fixed)"
+ },
+ "RoundBlue": {
+  "size": [
+   343,
+   328
+  ],
+  "slice": null,
+  "note": "round icon-button base (fixed)"
+ },
+ "Close": {
+  "size": [
+   233,
+   234
+  ],
+  "slice": null,
+  "note": "red round X (fixed)"
+ },
+ "Plus": {
+  "size": [
+   200,
+   202
+  ],
+  "slice": null,
+  "note": "green round plus (fixed)"
+ },
+ "Capsule": {
+  "size": [
+   675,
+   190
+  ],
+  "slice": [
+   120,
+   91,
+   555,
+   99
+  ],
+  "note": "counter/toast capsule"
+ },
+ "Panel": {
+  "size": [
+   281,
+   275
+  ],
+  "slice": [
+   86,
+   86,
+   195,
+   189
+  ],
+  "note": "window / panel 9-slice (corner studs kept)"
+ },
+ "Trough": {
+  "size": [
+   414,
+   111
+  ],
+  "slice": [
+   64,
+   52,
+   350,
+   58
+  ],
+  "note": "progress bar trough"
+ },
+ "Ribbon": {
+  "size": [
+   556,
+   158
+  ],
+  "slice": [
+   166,
+   0,
+   389,
+   158
+  ],
+  "note": "title ribbon: middle stretches horizontally"
+ },
+ "Coral": {
+  "size": [
+   144,
+   157
+  ],
+  "slice": null,
+  "note": "corner ornament for big windows (top-left)"
+ },
+ "CardCommon": {
+  "size": [
+   370,
+   407
+  ],
+  "slice": [
+   80,
+   80,
+   290,
+   287
+  ],
+  "note": "rarity card: name strip in the fixed bottom part"
+ },
+ "CardUncommon": {
+  "size": [
+   370,
+   407
+  ],
+  "slice": [
+   80,
+   80,
+   290,
+   287
+  ],
+  "note": "rarity card: name strip in the fixed bottom part"
+ },
+ "CardRare": {
+  "size": [
+   370,
+   407
+  ],
+  "slice": [
+   80,
+   80,
+   290,
+   287
+  ],
+  "note": "rarity card: name strip in the fixed bottom part"
+ },
+ "CardEpic": {
+  "size": [
+   370,
+   407
+  ],
+  "slice": [
+   80,
+   80,
+   290,
+   287
+  ],
+  "note": "rarity card: name strip in the fixed bottom part"
+ },
+ "CardLegendary": {
+  "size": [
+   370,
+   409
+  ],
+  "slice": [
+   80,
+   80,
+   290,
+   289
+  ],
+  "note": "rarity card: name strip in the fixed bottom part"
+ },
+ "CardMythic": {
+  "size": [
+   370,
+   409
+  ],
+  "slice": [
+   80,
+   80,
+   290,
+   289
+  ],
+  "note": "rarity card: name strip in the fixed bottom part"
+ },
+ "CardSecret": {
+  "size": [
+   370,
+   409
+  ],
+  "slice": [
+   80,
+   80,
+   290,
+   289
+  ],
+  "note": "rarity card: name strip in the fixed bottom part"
+ },
+ "CardLocked": {
+  "size": [
+   371,
+   409
+  ],
+  "slice": [
+   80,
+   80,
+   291,
+   289
+  ],
+  "note": "rarity card: name strip in the fixed bottom part"
+ },
+ "BannerGreen": {
+  "size": [
+   975,
+   188
+  ],
+  "slice": [
+   175,
+   0,
+   800,
+   188
+  ],
+  "note": "straight title banner: tails+caps fixed, middle stretches; SliceScale = height / image height"
+ },
+ "BannerBlue": {
+  "size": [
+   975,
+   188
+  ],
+  "slice": [
+   175,
+   0,
+   800,
+   188
+  ],
+  "note": "straight title banner: tails+caps fixed, middle stretches; SliceScale = height / image height"
+ },
+ "BannerGold": {
+  "size": [
+   975,
+   188
+  ],
+  "slice": [
+   175,
+   0,
+   800,
+   188
+  ],
+  "note": "straight title banner: tails+caps fixed, middle stretches; SliceScale = height / image height"
+ },
+ "BannerRed": {
+  "size": [
+   975,
+   189
+  ],
+  "slice": [
+   175,
+   0,
+   800,
+   189
+  ],
+  "note": "straight title banner: tails+caps fixed, middle stretches; SliceScale = height / image height"
+ },
+ "Sunburst": {
+  "size": [
+   525,
+   529
+  ],
+  "slice": null,
+  "note": "reward pop background (rotate it)"
+ },
+ "Badge": {
+  "size": [
+   222,
+   225
+  ],
+  "slice": null,
+  "note": "red notification badge"
+ },
+ "Pearl": {
+  "size": [
+   221,
+   225
+  ],
+  "slice": null,
+  "note": "pearl"
+ }
+}

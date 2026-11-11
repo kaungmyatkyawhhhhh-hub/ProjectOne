@@ -1,0 +1,87 @@
+<html><head><style>
+@font-face{font-family:M;font-weight:800;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-800-italic.woff2)}
+@font-face{font-family:M;font-weight:700;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-700-italic.woff2)}
+@font-face{font-family:M;font-weight:900;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-900-italic.woff2)}
+*{box-sizing:border-box}
+body{margin:0;width:1280px;height:720px;overflow:hidden;font-family:M;font-style:italic;font-weight:800;color:#fff;background:#1b1622;position:relative}
+.t{paint-order:stroke fill;-webkit-text-stroke:3px #0a070d;text-shadow:0 2px 0 #000}
+.a{position:absolute}
+.bg{position:absolute;inset:-60px;filter:blur(30px)} .bg div{position:absolute;border-radius:40%}
+.ic{position:absolute}
+/* bevelled frame: outer = border gradient, .in = body */
+.fr{position:absolute;border-radius:7px;padding:3px;box-shadow:0 0 12px var(--g),0 3px 0 rgba(0,0,0,.8)}
+.fr>.in{position:relative;width:100%;height:100%;border-radius:5px;overflow:hidden;
+ box-shadow:inset 0 2px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.45),inset 0 0 26px rgba(0,0,0,.85)}
+.sheen{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.10) 0 7px,transparent 7px 18px)}
+.top{position:absolute;left:0;right:0;top:0;height:45%;background:linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,0))}
+</style></head><body>
+<div class="bg">
+ <div style="left:-80px;top:380px;width:700px;height:420px;background:#4a3a5c"></div>
+ <div style="left:700px;top:430px;width:700px;height:400px;background:#5a4436"></div>
+ <div style="left:880px;top:40px;width:520px;height:300px;background:#3a4a5e"></div>
+ <div style="left:-60px;top:20px;width:520px;height:330px;background:#433a52"></div>
+</div>
+<div class="a" style="inset:0;background:rgba(10,8,14,.3)"></div>
+<div id="root"></div>
+<script>
+const R=document.getElementById('root');let H='';
+const glowImg=(src,x,y,w,c,blur=10)=>`<img class="ic" src="${src}" style="left:${x}px;top:${y}px;width:${w}px;filter:drop-shadow(0 0 ${blur}px ${c}) drop-shadow(0 3px 0 rgba(0,0,0,.6))">`;
+const frame=(x,y,w,h,border,body,glow,inner='',r=7)=>`<div class="fr" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;--g:${glow};border-radius:${r}px;background:${border}"><div class="in" style="background:${body};border-radius:${r-2}px">${inner}</div></div>`;
+// ===== top counter =====
+H+=`<div class="a" style="left:540px;top:30px;width:230px;height:40px;clip-path:polygon(0 0,94% 0,100% 50%,94% 100%,0 100%);background:linear-gradient(#ffb04a,#c2410c)"></div>
+<div class="a" style="left:543px;top:33px;width:222px;height:34px;clip-path:polygon(0 0,94% 0,100% 50%,94% 100%,0 100%);background:linear-gradient(#2a2028,#120c10);box-shadow:inset 0 0 14px #000"></div>
+<div class="a t" style="left:600px;top:35px;font-size:24px">1.24M</div><div class="a t" style="left:690px;top:43px;font-size:12px;color:#ffc35a;-webkit-text-stroke:2px #0a070d">+38.5K/s</div>`;
+H+=glowImg('stardust.png',506,8,84,'rgba(255,170,60,.9)',12);
+// ===== window =====
+const WX=280,WY=118,WW=720,WH=490;
+H+=`<div class="a" style="left:${WX}px;top:${WY}px;width:${WW}px;height:${WH}px;border-radius:9px;padding:3px;background:linear-gradient(#ff9a4a,#b2380a 30%,#5a1608);box-shadow:0 0 26px 3px rgba(255,100,20,.85),0 0 70px 10px rgba(255,90,20,.35)">
+<div style="position:relative;width:100%;height:100%;border-radius:7px;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,#2a120c,#0f0a0d 60%,#09070a);box-shadow:inset 0 0 40px #000">
+ <div style="position:absolute;left:0;right:0;top:0;height:58px;background:url(hdr_orange.png) center/cover;box-shadow:inset 0 2px 0 rgba(255,220,180,.45),inset 0 -12px 18px rgba(0,0,0,.45)"></div>
+ <div style="position:absolute;left:0;right:0;top:58px;height:3px;background:#0a070d"></div>
+</div></div>`;
+H+=`<div class="a t" style="left:${WX+92}px;top:${WY+12}px;font-size:30px">UPGRADES</div>`;
+H+=glowImg('stardust.png',WX-26,WY-28,104,'rgba(255,170,60,.9)',12);
+// shards chip
+H+=frame(WX+452,WY+13,150,38,'linear-gradient(#c9b0ff,#5a2fd0)','linear-gradient(90deg,#3a1f7a,#7a4cff)','rgba(140,90,255,.6)',`<div class="top"></div><div class="a t" style="right:44px;top:1px;font-size:20px">12</div><div class="a t" style="right:44px;top:21px;font-size:9px;-webkit-text-stroke:2px #0a070d">SHARDS</div>`,6);
+H+=glowImg('shard.png',WX+562,WY+2,50,'rgba(170,110,255,.9)',8);
+// close
+H+=`<div class="a" style="left:${WX+WW-52}px;top:${WY+13}px;width:38px;height:38px;border-radius:7px;background:linear-gradient(#ff8b9a,#d82c46);border:3px solid #fff;box-shadow:0 0 0 2px #0a070d,0 3px 0 #000,inset 0 -4px 0 rgba(0,0,0,.25)">
+<div style="position:absolute;left:6px;top:13px;width:20px;height:5px;background:#fff;border-radius:3px;transform:rotate(45deg);box-shadow:0 0 0 1.5px #0a070d"></div><div style="position:absolute;left:6px;top:13px;width:20px;height:5px;background:#fff;border-radius:3px;transform:rotate(-45deg)"></div></div>`;
+// left category list (panel)
+H+=frame(WX+16,WY+76,188,396,'linear-gradient(#3a3040,#16121a)','#0a080c','rgba(0,0,0,0)','',6);
+const cats=[['STARDUST','#ffb55a','#e06a1a','#a8380c','stardust','rgba(255,150,50,.9)',1],['COMETS','#8fe2ff','#3aa8f0','#1658b8','comet','rgba(90,200,255,.9)'],['PLANETS','#cdbaff','#8a6af0','#4a2ab8','planet','rgba(170,130,255,.9)'],['FORGE','#ffe680','#e6b81f','#a37808','forge','rgba(255,210,80,.9)'],['BLACK HOLE','#9a94a4','#5e5868','#34303c','gear','rgba(200,200,220,.5)']];
+cats.forEach((c,i)=>{const x=WX+30,y=WY+92+i*60;
+ H+=frame(x,y,162,46,`linear-gradient(${c[1]},${c[3]})`,`linear-gradient(${c[2]},${c[3]})`,c[6]?c[5]:'rgba(0,0,0,0)',`<div class="sheen"></div><div class="top"></div><div class="a t" style="left:34px;right:0;top:10px;text-align:center;font-size:16px">${c[0]}</div>`,6);
+ if(c[6])H+=`<div class="a" style="left:${x-5}px;top:${y-5}px;width:172px;height:56px;border:2px solid #fff;border-radius:9px"></div>`;
+ H+=glowImg(c[4]+'.png',x-16,y-10,c[4]=='forge'?58:54,c[5],7);
+});
+// rows
+const rows=[
+ {n:'STAR FURNACE',d:'+12% stardust per level',lv:'LV 12',from:'1.26x',to:'1.38x',ic:'sun',gc:'rgba(255,120,30,.9)',b1:'#ffc06a',b2:'#a8380c',body:'linear-gradient(#2a140c,#120a0c)',glow:'rgba(255,120,40,.55)',tc:'linear-gradient(#fff2c4,#ffab2a)',state:'buy',price:'48.2K'},
+ {n:'COMET MAGNET',d:'comets come 5% more often',lv:'LV 4',from:'1.10x',to:'1.15x',ic:'comet',gc:'rgba(90,200,255,.9)',b1:'#8fe2ff',b2:'#1658b8',body:'linear-gradient(#0c1a2a,#0a0c14)',glow:'rgba(60,160,255,.45)',tc:'linear-gradient(#ffffff,#a8e6ff)',state:'no',price:'2.10M'},
+ {n:'ORBIT SPEED',d:'planets orbit faster',lv:'LV 25',from:'2.50x',to:null,ic:'planet',gc:'rgba(170,130,255,.9)',b1:'#cdbaff',b2:'#4a2ab8',body:'linear-gradient(#1a1230,#0c0a14)',glow:'rgba(140,100,255,.45)',tc:'linear-gradient(#ffffff,#cbb8ff)',state:'max'}];
+rows.forEach((o,i)=>{const x=WX+222,y=WY+88+i*128,w=480,h=112;
+ H+=frame(x,y,w,h,`linear-gradient(${o.b1},${o.b2})`,o.body,o.glow,`<div class="sheen" style="opacity:.35"></div>`,7);
+ // title sitting ON the top border (like FACTORY MASTER)
+ H+=`<div class="a t" style="left:${x+108}px;top:${y-12}px;font-size:25px;-webkit-text-stroke:3.5px #0a070d"><span style="background:${o.tc};-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:0;text-shadow:none;position:absolute;left:0;top:0;white-space:nowrap">${o.n}</span><span style="white-space:nowrap">${o.n}</span></div>`;
+ H+=`<div class="a t" style="left:${x+110}px;top:${y+22}px;font-size:12px;color:#d0c6dc;-webkit-text-stroke:2px #0a070d">- ${o.d}</div>`;
+ // multiplier chips
+ const chip=(cx,txt,col)=>frame(cx,y+48,84,36,'linear-gradient(#5a5068,#24202c)','linear-gradient(#1e1a26,#141018)','rgba(0,0,0,0)',`<div class="a t" style="left:0;right:0;top:5px;text-align:center;font-size:18px;color:${col}">${txt}</div>`,5);
+ H+=chip(x+108,o.from,'#ffffff'); if(o.to){H+=`<div class="a t" style="left:${x+196}px;top:${y+52}px;font-size:22px;color:#bdb3c9">›</div>`;H+=chip(x+212,o.to,'#7dff6b')}
+ H+=`<div class="a t" style="left:${x+20}px;top:${y+88}px;width:70px;text-align:center;font-size:12px;color:#ffe9b0;-webkit-text-stroke:2px #0a070d">${o.lv}</div>`;
+ H+=glowImg(o.ic+'.png',x-14,y-4,o.ic=='comet'?112:104,o.gc,11);
+ // button
+ const bc=o.state=='buy'?['#c4ffb0','#5fe05a','#17922e','rgba(90,255,90,.55)']:o.state=='no'?['#a49cae','#6a6474','#3a3542','rgba(0,0,0,0)']:['#e2d6ff','#9a7cff','#4a2ab8','rgba(150,110,255,.55)'];
+ const label=o.state=='max'?`<div class="a t" style="left:0;right:0;top:9px;text-align:center;font-size:26px;font-weight:900">MAX</div>`:`<div class="a t" style="left:0;right:0;top:10px;text-align:center;font-size:24px;color:${o.state=='no'?'#ff7272':'#fff'}"><img src="stardust.png" style="width:26px;vertical-align:-5px;filter:drop-shadow(0 2px 0 #000)"> ${o.price}</div>`;
+ H+=frame(x+w-176,y+28,158,56,`linear-gradient(${bc[0]},${bc[2]})`,`linear-gradient(${bc[1]},${bc[2]})`,bc[3],`<div class="sheen"></div><div class="top"></div>${label}`,7);
+});
+// bottom bar diamonds
+const bar=[['U','#ff9a3a','stardust','UPGRADES','rgba(255,170,60,.9)',1],['F','#ffd84a','forge','','rgba(255,210,80,.8)'],['T','#7dff8a','planet','','rgba(170,130,255,.8)'],['Q','#c9c4d2','gear','','rgba(220,220,240,.5)']];
+bar.forEach((b,i)=>{const x=488+i*80,y=664;
+ H+=`<div class="a" style="left:${x}px;top:${y}px;width:46px;height:46px;transform:rotate(45deg);border-radius:6px;padding:3px;background:linear-gradient(${b[1]},#2a2433);box-shadow:0 0 10px ${b[5]?b[4]:'transparent'},0 3px 0 #000"><div style="width:100%;height:100%;border-radius:4px;background:linear-gradient(#2c2735,#100e14);box-shadow:inset 0 0 12px #000"></div></div>`;
+ H+=glowImg(b[2]+'.png',x-8,y-12,62,b[4],7);
+ H+=`<div class="a t" style="left:${x-12}px;top:${y-20}px;font-size:13px;-webkit-text-stroke:2px #0a070d">${b[0]}</div>`;
+ if(b[3])H+=`<div class="a t" style="left:${x-26}px;top:${y-44}px;width:100px;text-align:center;font-size:15px;color:${b[1]}">${b[3]}</div><div class="a" style="left:${x-26}px;top:${y-24}px;width:100px;height:2px;background:#fff"></div>`;
+});
+R.outerHTML=H;
+</script></body></html>

@@ -1,0 +1,51 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css">
+<style>
+html,body{width:667px;height:375px;overflow:hidden;background:linear-gradient(180deg,#1A3A8C,#0F1E4A)}
+.wrap{padding:12px 16px}
+h2{font-family:Luckiest;font-size:14px;color:#FFD21F;margin:6px 0 6px;letter-spacing:.5px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{width:96px;height:40px;font-size:15px}
+.col{display:flex;flex-direction:column;gap:8px;align-items:center}
+.cap{font-size:10px;color:#A8D8FF;font-weight:600}
+.icons .ic{width:44px;height:44px;border-radius:12px;background:#ffffff18;border:2px solid #ffffff22;display:flex;align-items:center;justify-content:center}
+.icons .ic svg{width:32px;height:32px}
+.mini .btn{width:44px;height:44px;padding:0}
+.mini .btn .icon{width:26px;height:26px}
+</style></head><body>
+<!--ICONS-->
+<div class="wrap">
+ <h2>BUTTONS (normal / pressed) · colour = meaning</h2>
+ <div class="row">
+  <div class="col"><div class="btn green stroke">BUY</div><div class="btn green stroke pressed">BUY</div><div class="cap">green: buy / go</div></div>
+  <div class="col"><div class="btn blue stroke">OPEN</div><div class="btn blue stroke pressed">OPEN</div><div class="cap">blue: normal</div></div>
+  <div class="col"><div class="btn yellow"><span class="stroke" style="color:#fff">CLAIM</span></div><div class="btn yellow pressed"><span class="stroke" style="color:#fff">CLAIM</span></div><div class="cap">yellow: reward / claim</div></div>
+  <div class="col"><div class="btn red stroke">CLOSE</div><div class="btn red stroke pressed">CLOSE</div><div class="cap">red: close / danger</div></div>
+  <div class="col"><div class="btn grey stroke">LOCKED</div><div class="btn grey stroke pressed">LOCKED</div><div class="cap">grey: locked / can't afford</div></div>
+ </div>
+ <div class="row" style="margin-top:10px;gap:14px">
+  <div>
+   <h2>PILLS + BADGE</h2>
+   <div class="row">
+    <div class="pill stroke" style="height:34px;font-size:18px;padding-right:14px"><svg class="icon" style="width:28px;height:28px"><use href="#i-grass"/></svg>184.7M</div>
+    <div class="pill stroke" style="height:30px;font-size:15px;padding-right:12px"><svg class="icon"><use href="#i-sun"/></svg>12</div>
+    <div class="mini row"><div class="btn blue" style="position:relative"><svg class="icon"><use href="#i-list"/></svg><div class="badge stroke">3</div></div><div class="btn red"><svg class="icon"><use href="#i-x"/></svg></div><div class="btn yellow"><svg class="icon"><use href="#i-cart"/></svg></div></div>
+   </div>
+  </div>
+  <div>
+   <h2>PANEL / TAB / CARD</h2>
+   <div class="panel" style="width:200px;height:64px;position:relative;padding:22px 10px 8px">
+    <div style="position:absolute;left:50%;top:-12px;transform:translateX(-50%);height:28px;padding:0 14px;border-radius:10px;border:3px solid #0F1E4A;background:linear-gradient(180deg,#9BF7A4,#3DDB52 40%);box-shadow:inset 0 -4px 0 #1E9E36;font-size:14px;display:flex;align-items:center" class="title stroke">REGROW</div>
+    <div class="card" style="height:30px;display:flex;align-items:center;padding:0 8px;color:#0F1E4A;font-weight:700;font-size:12px;gap:6px"><svg class="icon" style="width:18px;height:18px"><use href="#i-seed"/></svg>YOU GET +38 SEEDS</div>
+   </div>
+  </div>
+ </div>
+ <h2 style="margin-top:10px">ICONS</h2>
+ <div class="row icons">
+  <div class="ic"><svg><use href="#i-grass"/></svg></div><div class="ic"><svg><use href="#i-seed"/></svg></div><div class="ic"><svg><use href="#i-sun"/></svg></div>
+  <div class="ic"><svg><use href="#i-mower"/></svg></div><div class="ic"><svg><use href="#i-up"/></svg></div><div class="ic"><svg><use href="#i-regrow"/></svg></div>
+  <div class="ic"><svg><use href="#i-boot"/></svg></div><div class="ic"><svg><use href="#i-bolt"/></svg></div><div class="ic"><svg><use href="#i-gift"/></svg></div>
+  <div class="ic"><svg><use href="#i-list"/></svg></div><div class="ic"><svg><use href="#i-cart"/></svg></div><div class="ic"><svg><use href="#i-gear"/></svg></div>
+  <div class="ic"><svg><use href="#i-lock"/></svg></div><div class="ic"><svg><use href="#i-x"/></svg></div>
+ </div>
+</div>
+</body></html>

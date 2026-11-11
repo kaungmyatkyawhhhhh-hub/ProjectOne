@@ -1,0 +1,93 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css">
+<style>
+html,body{width:667px;height:375px;overflow:hidden}
+.scene{position:absolute;inset:0;overflow:hidden;
+ background:linear-gradient(180deg,#5EC8FF 0%,#9EE3FF 22%,#9EE3FF 23%);}
+.trees{position:absolute;left:-20px;right:-20px;top:30px;height:50px;background:radial-gradient(circle at 20px 30px,#2E9A28 0 22px,transparent 23px) 0 0/60px 50px repeat-x;filter:drop-shadow(0 3px 0 #0F1E4A55)}
+.shed{position:absolute;left:470px;top:70px;width:96px;height:52px;background:linear-gradient(180deg,#FF7A1A,#E35A0A);border:3px solid #0F1E4A;border-radius:6px;z-index:1}
+.shed .roof{position:absolute;left:-10px;right:-10px;top:-16px;height:18px;background:#2152D9;border:3px solid #0F1E4A;border-radius:6px}
+.shed .board{position:absolute;left:8px;right:8px;top:12px;height:22px;background:#3DDB52;border:3px solid #0F1E4A;border-radius:6px;font-size:13px;display:flex;align-items:center;justify-content:center}
+.fence{position:absolute;left:0;right:0;top:58px;height:34px;
+ background:repeating-linear-gradient(90deg,#fff 0 14px,#DCE6F2 14px 16px,transparent 16px 22px);
+ border-bottom:4px solid #0F1E4A33}
+.fence::before{content:"";position:absolute;left:0;right:0;top:9px;height:6px;background:#fff;box-shadow:0 12px 0 #fff}
+.field{position:absolute;left:-60px;right:-60px;top:92px;bottom:0;
+ background:repeating-linear-gradient(90deg,#4FCB3C 0 70px,#3FB531 70px 140px);transform:perspective(380px) rotateX(38deg);transform-origin:top}
+.tufts{position:absolute;inset:92px 0 0 0;
+ background-image:radial-gradient(circle at 50% 100%,#2E9A28 0 3px,transparent 4px);background-size:22px 18px;opacity:.7}
+.cut{position:absolute;left:300px;top:150px;width:300px;height:120px;background:#8FE07A;opacity:.85;border-radius:60px;transform:rotate(-12deg)}
+.ring{position:absolute;left:300px;top:215px;width:120px;height:46px;border-radius:50%;border:4px solid #FFFFFFcc;box-shadow:0 0 0 3px #1E90FF66 inset}
+.mower{position:absolute;left:327px;top:180px;width:64px;height:64px;filter:drop-shadow(0 4px 0 rgba(15,30,74,.35))}
+.pop{position:absolute;font-weight:700;font-size:18px}
+.clip{position:absolute;width:7px;height:4px;background:#3DDB52;border:1.5px solid #0F1E4A;border-radius:2px}
+/* HUD */
+.top{position:absolute;left:0;right:0;top:8px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.counter{height:44px;font-size:26px;padding-right:18px}
+.counter .icon{width:40px;height:40px;margin-left:-4px}
+.rate{font-size:13px;font-weight:700;color:#fff}
+.goal{width:220px;height:22px;border:3px solid #0F1E4A;border-radius:11px;background:#17306F;position:relative;overflow:hidden;box-shadow:0 3px 0 rgba(15,30,74,.35)}
+.goal .fill{position:absolute;left:0;top:0;bottom:0;width:64%;background:linear-gradient(180deg,#9BF7A4,#3DDB52 50%,#1E9E36)}
+.goal span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.left{position:absolute;left:10px;top:66px;display:flex;flex-direction:column;gap:9px}
+.left .btn{width:56px;height:56px;padding:0;flex-direction:column;gap:0;border-radius:16px}
+.left .btn .icon{width:28px;height:28px}
+.left .btn small{font-size:10px;line-height:11px;margin-top:-1px}
+.right{position:absolute;right:10px;top:8px;display:flex;gap:8px}
+.right .btn{width:40px;height:40px;padding:0}
+.right .btn .icon{width:24px;height:24px}
+.seeds{position:absolute;right:104px;top:13px;height:30px;font-size:16px;padding-right:12px}
+.seeds .icon{width:26px;height:26px}
+/* window */
+.win{position:absolute;left:150px;top:64px;width:420px;height:290px;padding:44px 14px 12px}
+.tab{position:absolute;left:50%;top:-16px;transform:translateX(-50%);height:42px;padding:0 26px;font-size:22px;border-radius:14px;border:3px solid #0F1E4A;
+ background:linear-gradient(180deg,#9BF7A4,#3DDB52 40%);box-shadow:inset 0 -6px 0 #1E9E36,inset 0 2px 0 rgba(255,255,255,.6),0 4px 0 rgba(15,30,74,.35);display:flex;align-items:center;gap:8px}
+.tab .icon{width:28px;height:28px}
+.close{position:absolute;right:-12px;top:-12px;width:38px;height:38px;padding:0;border-radius:12px}
+.close .icon{width:22px;height:22px}
+.cards{display:flex;flex-direction:column;gap:9px}
+.card{height:70px;display:flex;align-items:center;gap:10px;padding:0 10px;color:#0F1E4A}
+.ico{width:52px;height:52px;border-radius:12px;border:3px solid #0F1E4A;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.ico .icon{width:36px;height:36px}
+.info{flex:1;min-width:0}
+.name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px}
+.lv{font-size:11px;background:#0F1E4A;color:#fff;border-radius:6px;padding:1px 6px}
+.eff{font-size:12px;font-weight:600;color:#2C4B8C}
+.eff b{color:#1E9E36}
+.buy{display:flex;gap:6px;align-items:center}
+.buy .btn{height:44px;font-size:15px;padding:0 10px;flex-direction:column;gap:0;line-height:15px}
+.buy .btn small{font-size:12px;display:flex;align-items:center;gap:3px}
+.buy .btn small .icon{width:14px;height:14px}
+.card.locked{background:linear-gradient(180deg,#EEF0F5,#D6DBE6);box-shadow:inset 0 -5px 0 #B5BCCB,0 3px 0 rgba(15,30,74,.25);color:#5D6680}
+.card.locked .eff{color:#6E7790}
+</style></head><body>
+<!--ICONS-->
+<div class="scene" style="z-index:0"><div class="trees"></div><div class="fence"></div><div class="shed"><div class="roof"></div><div class="board title stroke">UPGRADES</div></div>
+ 
+ <div class="field"></div><div class="tufts"></div>
+ <div class="cut"></div>
+ <div class="ring"></div>
+ <svg class="mower"><use href="#i-mower"/></svg>
+ <div class="pop stroke" style="left:410px;top:160px">+1.2K</div>
+ <div class="pop stroke" style="left:440px;top:190px;font-size:22px;color:#FFD21F">+60K</div>
+ <div class="clip" style="left:395px;top:205px;transform:rotate(30deg)"></div>
+ <div class="clip" style="left:405px;top:215px;transform:rotate(-20deg)"></div>
+ <div class="clip" style="left:300px;top:210px;transform:rotate(70deg)"></div>
+</div>
+<div class="top">
+ <div class="pill counter stroke"><svg class="icon"><use href="#i-grass"/></svg>184.7M</div>
+ <div class="rate stroke">+2.4M / s</div>
+ <div class="goal"><div class="fill"></div><span class="stroke">NEXT: MOWER SIZE 12 · 64%</span></div>
+</div>
+<div class="left">
+ <div class="btn green stroke"><svg class="icon"><use href="#i-up"/></svg><small>UPGRADE</small></div>
+ <div class="btn yellow"><svg class="icon"><use href="#i-regrow"/></svg><small class="stroke" style="color:#fff">REGROW</small></div>
+ <div class="btn blue stroke"><svg class="icon"><use href="#i-list"/></svg><small>QUESTS</small><div class="badge">2</div></div>
+ <div class="btn blue stroke"><svg class="icon"><use href="#i-gift"/></svg><small>DAILY</small></div>
+</div>
+<div class="right">
+ <div class="btn yellow"><svg class="icon"><use href="#i-cart"/></svg></div>
+ <div class="btn blue"><svg class="icon"><use href="#i-gear"/></svg></div>
+</div>
+<div class="pill seeds stroke"><svg class="icon"><use href="#i-seed"/></svg>1,240</div>
+
+</body></html>

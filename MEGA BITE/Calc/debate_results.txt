@@ -1,0 +1,16 @@
+version                                                                agree  1st pick  top objections (groups out of 3,000)
+M0  the concept today (after the map + EXP sims)                         18%    27%    social: "we can't even play TOGETHER" 1232; crowd: "nobody plays it, it's dead" 1207; scary: "it's too scary" 1165
+M1  + SCHOOLS at launch: join a friend, crews of 4, shared FRENZY, co-op squid   34%    35%    crowd: "nobody plays it, it's dead" 1207; scary: "it's too scary" 1165; cute_funny: "it's not cute" 1165
+M2  + cartoon look (big eyes, round fins, funny gulp), scary only in the Trench   60%    49%    crowd: "nobody plays it, it's dead" 1207
+M3  + full servers: fill the fullest first, 16 slots, NPC life, creator launch  100%    71%    none
+M4  + visible weekly updates: countdown, roadmap board, Saturday event  100%    74%    none
+M5  + the twist up front: carry-home + abilities in the 1st minute + thumbnail  100%    80%    none
+M6  + first-minute fixes from the sims, auto-swim + green/red outlines  100%    86%    none
+M7  + Red Trench made for sweats: crown bounty, APEX HOUR, weekly Trench board  100%    88%    none
+M8  + launch push (marketing, not design): creators + code + Saturday event  100%    90%    none
+
+robustness (scores +-1): agree median 100% (worst 100%), 1st pick median 89%
+if launch crowd is only 2/10: agree 60%, 1st pick 64%, top: [('crowd: "nobody plays it, it\'s dead"', 1207)]
+if launch crowd is only 3/10: agree 60%, 1st pick 66%, top: [('crowd: "nobody plays it, it\'s dead"', 1207)]
+seed 5: agree 100%  1st pick 90%
+seed 6: agree 100%  1st pick 90%

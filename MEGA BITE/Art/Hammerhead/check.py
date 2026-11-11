@@ -1,0 +1,5 @@
+exec(open('hammerhead_v3.py').read())
+exec(open('render_cmp.py').read())
+render_side('/home/claude/megabite_art/hammer/r_side.png',S,NOSE,BASEZ)
+render_top('/home/claude/megabite_art/hammer/r_top.png',S,NOSE,K,TX0,TY0)
+render_front('/home/claude/megabite_art/hammer/r_front.png',S,FK,FX0,FY0)

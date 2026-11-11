@@ -1,0 +1,112 @@
+<html><head><style>
+@font-face{font-family:M;font-weight:800;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-800-italic.woff2)}
+@font-face{font-family:M;font-weight:700;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-700-italic.woff2)}
+@font-face{font-family:M;font-weight:900;font-style:italic;src:url(node_modules/@fontsource/montserrat/files/montserrat-latin-900-italic.woff2)}
+*{box-sizing:border-box}
+body{margin:0;width:1280px;height:720px;overflow:hidden;font-family:M;font-style:italic;font-weight:800;color:#fff;background:#1b1622;position:relative}
+.a{position:absolute}
+.t{paint-order:stroke fill;-webkit-text-stroke:2px #08060c;text-shadow:0 2px 0 #000}
+.bg{position:absolute;inset:-60px;filter:blur(30px)} .bg div{position:absolute;border-radius:40%}
+.stripes{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.13) 0 7px,transparent 7px 18px)}
+.btn{position:absolute;border:2px solid #08060c;border-radius:5px;overflow:hidden;box-shadow:0 2px 0 #000}
+.btn .f{position:absolute;inset:0;box-shadow:inset 0 2px 0 rgba(255,255,255,.45)}
+/* VFX */
+@keyframes sweep{0%{left:-50%}40%,100%{left:120%}}
+.shine{position:absolute;top:-10%;bottom:-10%;width:30%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-15deg);animation:sweep 2.4s ease-in-out infinite}
+@keyframes spark{0%,100%{opacity:0;transform:scale(.2) rotate(0)}45%{opacity:1;transform:scale(1) rotate(45deg)}70%{opacity:0;transform:scale(.6) rotate(90deg)}}
+.sp{position:absolute;width:12px;height:12px;background:#fff;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:spark 1.6s ease-in-out infinite;pointer-events:none}
+@keyframes rise{0%{opacity:0;transform:translateY(0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1)}}
+.mote{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff6c0;box-shadow:0 0 4px #ffd25a;animation:rise 1.8s ease-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 2px #08060c,0 0 22px 2px rgba(255,100,20,.75),0 0 60px 8px rgba(255,90,20,.28)}50%{box-shadow:0 0 0 2px #08060c,0 0 34px 6px rgba(255,120,30,1),0 0 90px 16px rgba(255,90,20,.5)}}
+@keyframes iglow{0%,100%{filter:drop-shadow(0 0 4px var(--c)) drop-shadow(0 3px 0 rgba(0,0,0,.6))}50%{filter:drop-shadow(0 0 14px var(--c)) drop-shadow(0 3px 0 rgba(0,0,0,.6))}}
+@keyframes ember{0%{opacity:0;transform:translate(0,0)}15%{opacity:1}100%{opacity:0;transform:translate(30px,-46px)}}
+.ember{position:absolute;width:4px;height:4px;border-radius:50%;background:#ffd08a;box-shadow:0 0 5px #ff8a2a;animation:ember 3s linear infinite}
+@keyframes ring{0%,100%{outline-color:rgba(255,255,255,1)}50%{outline-color:rgba(255,255,255,.35)}}
+</style></head><body>
+<div class="bg">
+ <div style="left:-80px;top:380px;width:700px;height:420px;background:#4a3a5c"></div>
+ <div style="left:700px;top:430px;width:700px;height:400px;background:#5a4436"></div>
+ <div style="left:880px;top:40px;width:520px;height:300px;background:#3a4a5e"></div>
+ <div style="left:-60px;top:20px;width:520px;height:330px;background:#433a52"></div>
+</div>
+<div class="a" style="inset:0;background:rgba(10,8,14,.25)"></div>
+<div id="root"></div>
+<script>
+let H='';let k=0;
+const ic=(src,x,y,w,c)=>`<img src="${src}.png" style="position:absolute;left:${x}px;top:${y}px;width:${w}px;--c:${c};animation:iglow 2.2s ease-in-out infinite;animation-delay:-${(k++%7)*.37}s">`;
+const sp=(x,y,d,s=12)=>`<div class="sp" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;animation-delay:${d}s"></div>`;
+const btn=(x,y,w,h,c1,c2,inner,vfx='')=>`<div class="btn" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><div class="f" style="background:linear-gradient(${c1},${c2})"></div><div class="stripes"></div>${vfx}${inner}</div>`;
+const T=(x,y,s,txt,col='#fff',extra='')=>`<div class="a t" style="left:${x}px;top:${y}px;font-size:${s}px;color:${col};-webkit-text-stroke:${Math.max(1.2,s*.07)}px #08060c;${extra}">${txt}</div>`;
+const panel=(x,y,w,h)=>`<div class="a" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:6px;background:#0b090e;border:1.5px solid #2a2433"></div>`;
+const row=(x,y,w,h,b)=>`<div class="a" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:5px;border:2px solid ${b};background:linear-gradient(#17141c,#0e0c12);box-shadow:0 0 10px ${b}40"></div>`;
+function hud(){let h='';
+ h+=`<div class="a" style="left:548px;top:36px;width:230px;height:40px;clip-path:polygon(0 0,95% 0,100% 50%,95% 100%,0 100%);background:#08060c"></div><div class="a" style="left:550px;top:38px;width:224px;height:36px;clip-path:polygon(0 0,95% 0,100% 50%,95% 100%,0 100%);background:linear-gradient(#2a2433,#121016)"></div><div class="a" style="left:556px;top:70px;width:208px;height:2.5px;background:#ff9a2a"></div>`+T(600,40,24,'1.24M')+T(690,49,12,'+38.5K/s','#ffc35a');
+ h+=`<svg class="a" style="left:504px;top:18px" width="74" height="74" viewBox="0 0 70 70"><path d="M35 2 L68 35 L35 68 L2 35Z" fill="#08060c"/><path d="M35 6 L64 35 L35 64 L6 35Z" fill="#241a14" stroke="#ff9a2a" stroke-width="2"/></svg>`+ic('stardust',506,17,72,'rgba(255,170,60,.9)');
+ return h}
+function bar(sel){let h='';const bar=[['U','#ff9a3a','stardust','UPGRADES'],['F','#5ad1ff','forge','FORGE'],['T','#7dff8a','planet','TREE'],['E','#ff5a6a','shard','STORE'],['Q','#c9c4d2','gear','SETTINGS']];
+ bar.forEach((b,i)=>{const x=480+i*70,y=650;
+ h+=`<div class="a" style="left:${x}px;top:${y}px;width:46px;height:46px;transform:rotate(45deg);background:linear-gradient(#2c2735,#121016);border:2px solid #0a070d;box-shadow:0 0 0 2px ${b[1]} inset,0 3px 0 #000"></div><img src="${b[2]}.png" style="position:absolute;left:${x-4}px;top:${y-6}px;width:${b[2]=='forge'?54:52}px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.6))">`+T(x-8,y-18,12,b[0]);
+ if(i==sel)h+=`<div class="a t" style="left:${x-24}px;top:${y-38}px;width:96px;text-align:center;font-size:15px;color:${b[1]};-webkit-text-stroke:1.5px #08060c">${b[3]}</div><div class="a" style="left:${x-24}px;top:${y-19}px;width:96px;height:2px;background:#fff"></div>`;});return h}
+function win(title,icon,iconC,theme,glow,hue){const WX=300,WY=120;let h=`<style>@keyframes br${hue}{0%,100%{box-shadow:0 0 0 2px #08060c,0 0 22px 2px ${glow}bf,0 0 60px 8px ${glow}48}50%{box-shadow:0 0 0 2px #08060c,0 0 34px 6px ${glow},0 0 90px 16px ${glow}80}}</style>`;
+ h+=`<div class="a" style="left:${WX}px;top:${WY}px;width:700px;height:470px;border-radius:10px;background:#08060c;animation:br${hue} 2.6s ease-in-out infinite"></div><div class="a" style="left:${WX+3}px;top:${WY+3}px;width:694px;height:464px;border-radius:8px;background:linear-gradient(#1a1620,#0f0d13);border:1.5px solid ${glow}8c"></div>
+ <div class="a" style="left:${WX+3}px;top:${WY+3}px;width:694px;height:56px;border-radius:8px 8px 0 0;background:url(hdr_orange.png) 0 50%/900px 80px;filter:hue-rotate(${hue}deg);box-shadow:inset 0 2px 0 rgba(255,255,255,.4)"></div><div class="a" style="left:${WX+3}px;top:${WY+59}px;width:694px;height:2px;background:#08060c"></div>`;
+ h+=ic(icon,WX-22,WY-30,92,iconC)+T(WX+80,WY+13,28,title);
+ h+=`<div class="a" style="left:${WX+648}px;top:${WY+13}px;width:34px;height:34px;border-radius:6px;background:linear-gradient(#ff7d8e,#e2334c);border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 0 #000"><svg width="30" height="30" viewBox="0 0 34 34"><path d="M11 11 L23 23 M23 11 L11 23" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div>`;return h}
+const chip=(x,y,label,val,c1,c2,icon,iconC)=>`<div class="a" style="left:${x}px;top:${y}px;width:150px;height:34px;border-radius:4px;border:2px solid #08060c;background:linear-gradient(90deg,${c1},${c2})"></div>`+T(x+82,y-1,20,val)+T(x+60,y+20,9,label,'#eee')+ic(icon,x+110,y-11,50,iconC);
+const WX=300,WY=120,shine='<div class="shine"></div>';
+const S={};
+// FORGE
+S.forge=()=>{let h=hud()+win('STAR FORGE','forge','rgba(255,210,80,.9)','#5ad1ff','#3aa8ff',180);
+ h+=chip(WX+438,WY+13,'ESSENCE','24','#0f4a7a','#2a9ae6','shard','rgba(90,200,255,.9)');
+ h+=panel(WX+16,WY+74,300,380);
+ h+=`<div class="a" style="left:${WX+40}px;top:${WY+100}px;width:250px;height:200px;border-radius:50%;background:radial-gradient(rgba(90,190,255,.35),transparent 65%)"></div>`;
+ h+=ic('forge',WX+58,WY+110,210,'rgba(90,200,255,.9)')+sp(WX+70,WY+120,.3)+sp(WX+250,WY+150,1,10)+sp(WX+150,WY+96,1.5,9);
+ h+=T(WX+60,WY+300,14,'PITY: LEGENDARY IN','#bfe9ff')+T(WX+230,WY+298,17,'162','#ffd23f');
+ h+=`<div class="a" style="left:${WX+40}px;top:${WY+322}px;width:250px;height:12px;border-radius:6px;background:#221d2a;border:1.5px solid #08060c"><div style="width:19%;height:100%;border-radius:6px;background:linear-gradient(#ffe46a,#ff9a1a)"></div></div>`;
+ h+=btn(WX+32,WY+346,128,52,'#7dff7a','#1fa83a',T(0,6,20,'ROLL','#fff','left:0;right:0;text-align:center')+T(0,30,11,'1 ESSENCE','#eaffe6','left:0;right:0;text-align:center'),shine);
+ h+=btn(WX+170,WY+346,128,52,'#5ad1ff','#1f6fd1',T(0,6,20,'ROLL x3','#fff','left:0;right:0;text-align:center')+T(0,30,11,'3 ESSENCE','#e6f6ff','left:0;right:0;text-align:center'),'<div class="shine" style="animation-duration:3.4s"></div>');
+ h+=panel(WX+326,WY+74,358,380)+T(WX+470,WY+82,17,'ODDS');
+ const odds=[['COMMON','60%','#b9b4c2','#6a6474'],['UNCOMMON','25%','#7dff8a','#1f9a3a'],['RARE','10%','#5ad1ff','#1f6fd1'],['EPIC','4%','#c79bff','#6a2fd8'],['LEGENDARY','0.9%','#ffd84a','#c78a0a'],['MYTHIC','0.09%','#ff6b8a','#b8183e'],['CELESTIAL','0.01%','#ffffff','#8ad8ff']];
+ odds.forEach((o,i)=>{h+=btn(WX+340,WY+110+i*48,330,40,o[2],o[3],T(14,8,17,o[0])+T(0,8,17,o[1],'#fff','right:14px;left:auto'),i>=4?'<div class="shine" style="animation-duration:'+(2.6+i*.4)+'s"></div>':'')});
+ h+=sp(WX+660,WY+300,.6,10)+sp(WX+664,WY+398,1.2,9);
+ return h+bar(1)};
+// TREE
+S.tree=()=>{let h=hud()+win('CONSTELLATION TREE','planet','rgba(170,130,255,.9)','#7dff8a','#3fd06a',95);
+ h+=chip(WX+438,WY+13,'SHARDS','12','#3a1f7a','#7a4cff','shard','rgba(170,110,255,.9)');
+ h+=panel(WX+16,WY+74,668,300);
+ const N=[[90,150,'FIRST LIGHT','stardust',1],[230,110,'LUNAR PULL','comet',1],[230,200,'PLANET SEED','planet',1],[380,150,'ORBIT SPEED','sun',2],[520,100,'COMET LURE','comet',0],[520,210,'?','',0],[630,150,'?','',0]];
+ let lines='';[[0,1],[0,2],[1,3],[2,3],[3,4],[3,5],[4,6],[5,6]].forEach(([a,b])=>{const A=N[a],B=N[b];const lit=A[4]&&B[4];lines+=`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="${lit?'#9dffb0':'#3a3346'}" stroke-width="${lit?5:3}" stroke-dasharray="${lit?'':'8 7'}"/>`});
+ h+=`<svg class="a" style="left:${WX+16}px;top:${WY+74}px" width="668" height="300">${lines}</svg>`;
+ N.forEach(([x,y,n,icn,st])=>{const X=WX+16+x,Y=WY+74+y;const c=st==1?'#7dff8a':st==2?'#ffd23f':'#5a5562';
+  h+=`<div class="a" style="left:${X-30}px;top:${Y-30}px;width:60px;height:60px;transform:rotate(45deg);background:linear-gradient(#2c2735,#121016);border:2px solid #08060c;box-shadow:0 0 0 2.5px ${c} inset,0 3px 0 #000"></div>`;
+  if(icn)h+=`<img src="${icn}.png" style="position:absolute;left:${X-30}px;top:${Y-32}px;width:60px;${st?'':'filter:grayscale(1) brightness(.5)'}">`;else h+=T(X-8,Y-14,24,'?','#8a8494');
+  h+=T(X-50,Y+34,11,n,st?'#fff':'#8a8494','width:100px;text-align:center');
+  if(st==2)h+=sp(X+22,Y-36,.2,11)+sp(X-34,Y+20,1,9);});
+ h+=row(WX+16,WY+384,668,72,'#ffd23f');
+ h+=ic('sun',WX+26,WY+386,66,'rgba(255,120,30,.9)')+T(WX+100,WY+392,20,'ORBIT SPEED','#ffe9a8')+T(WX+100,WY+420,12,'all bodies orbit 1.5x faster','#a99fb8');
+ h+=`<div class="a" style="left:${WX+330}px;top:${WY+402}px;width:90px;height:32px;border-radius:4px;background:#221d2a;border:1.5px solid #3a3346"></div>`+T(WX+345,WY+406,17,'x1.5','#7dff6b');
+ h+=btn(WX+520,WY+394,152,52,'#7dff7a','#1fa83a',`<img src="shard.png" style="position:absolute;left:12px;top:6px;width:36px;filter:drop-shadow(0 2px 0 #000)">`+T(44,10,24,'3','#fff','right:0;text-align:center'),shine)+sp(WX+664,WY+388,.4,10);
+ return h+bar(2)};
+// STORE
+S.store=()=>{let h=hud()+win('STORE','shard','rgba(255,90,110,.9)','#ff5a6a','#ff3a5a',-25);
+ h+=panel(WX+16,WY+74,668,380);
+ const items=[['x2 STARDUST','All stardust x2 forever','stardust','rgba(255,170,60,.9)','249','#ff9a3a'],['VIP','+25% stardust, +1 Essence per Supernova, VIP trim','sun','rgba(255,120,30,.9)','399','#ffd23f'],['+1 CORE SLOT','Equip 4 Star Cores','shard','rgba(170,110,255,.9)','349','#8a6cff'],['AUTO ROLL','The Forge rolls by itself while you have Essence','forge','rgba(90,200,255,.9)','199','#3a8acc']];
+ items.forEach((o,i)=>{const x=WX+28,y=WY+88+i*90;h+=row(x,y,644,80,o[5]);h+=ic(o[2],x+6,y+4,72,o[3]);h+=T(x+92,y+10,22,o[0]);h+=T(x+94,y+42,11.5,o[1],'#a99fb8');
+  h+=btn(x+488,y+14,144,52,'#7dff7a','#1fa83a',`<svg style="position:absolute;left:16px;top:12px" width="26" height="26" viewBox="0 0 26 26"><path d="M13 2 L23 7.5 V18.5 L13 24 L3 18.5 V7.5Z" fill="none" stroke="#fff" stroke-width="3.5" stroke-linejoin="round"/><rect x="9.5" y="9.5" width="7" height="7" fill="none" stroke="#fff" stroke-width="3"/></svg>`+T(44,10,24,o[4],'#fff','right:0;text-align:center'),i==0?shine:'')});
+ h+=sp(WX+650,WY+92,.3,10);
+ return h+bar(3)};
+// BLACK HOLE
+S.blackhole=()=>{let h=hud()+win('BLACK HOLE','blackhole','rgba(170,110,255,.9)','#8a6cff','#9a5aff',230);
+ h+=chip(WX+438,WY+13,'DARK MATTER','3','#1a0f30','#5a3ad8','blackhole','rgba(170,110,255,.9)');
+ h+=panel(WX+16,WY+74,668,380);
+ h+=`<div class="a" style="left:${WX+40}px;top:${WY+90}px;width:300px;height:300px;border-radius:50%;background:radial-gradient(rgba(150,90,255,.35),transparent 65%)"></div>`;
+ h+=ic('blackhole',WX+28,WY+100,320,'rgba(170,110,255,.9)')+sp(WX+60,WY+120,.2)+sp(WX+300,WY+340,1.1,10);
+ h+=T(WX+370,WY+92,22,'YOU GET','#d9ccff')+T(WX+370,WY+124,32,'+4 DARK MATTER','#c9b0ff');
+ h+=T(WX+370,WY+182,15,'KEEP','#7dff8a')+T(WX+370,WY+204,12,'Star Cores, Essence, Supernova count, Dark Matter','#c9c4d2','width:300px;white-space:normal;line-height:16px');
+ h+=T(WX+370,WY+250,15,'RESET','#ff7272')+T(WX+370,WY+272,12,'Stardust, Shards, Tree ring 2','#c9c4d2');
+ h+=`<div class="a" style="left:${WX+370}px;top:${WY+306}px;width:290px;height:32px;border-radius:4px;background:#221d2a;border:1.5px solid #3a3346"></div>`+T(WX+384,WY+311,15,'NEXT: +6 at 12.4M shards','#e6dcff');
+ h+=btn(WX+370,WY+352,290,72,'#c4a8ff','#5a2ad8',T(0,9,30,'COLLAPSE','#fff','left:0;right:0;text-align:center;font-weight:900')+T(0,46,12,'into a Black Hole','#efe8ff','left:0;right:0;text-align:center'),shine+[[40,52,0],[120,58,.7],[200,54,1.3],[250,56,.4]].map(([mx,my,d])=>`<div class="mote" style="left:${mx}px;top:${my}px;animation-delay:${d}s;background:#e6d6ff;box-shadow:0 0 4px #a77bff"></div>`).join(''));
+ h+=sp(WX+650,WY+346,.5,11)+sp(WX+362,WY+412,1.2,9);
+ return h+bar(-1)};
+document.getElementById('root').outerHTML=S[location.hash.slice(1)]();
+</script></body></html>
