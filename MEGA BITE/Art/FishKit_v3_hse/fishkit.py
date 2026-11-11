@@ -137,6 +137,7 @@ def run(C):
         w=tw*WSC*S*WY*TPX
         if which=='jaw':
             w=w*M.get('jaw_w',0.86)
+            if M.get('jaw_w_max_px'): w=np.minimum(w,M['jaw_w_max_px']*S*WSC*WY)
             jb=M['corner_px']-M.get('jaw_back_px',10)
             f=np.clip((xs_-jb)/max(M.get('jaw_back_px',10),1),0,1); f=np.sqrt(f*(2-f))     # rounded back end, hidden in the body
             h=h*f; w=w*f
@@ -164,13 +165,19 @@ def run(C):
             h=np.where(x>x0c,hh,h); w=np.where(x>x0c,ww,w); zc=np.where(x>x0c,zz,zc)
         return zc,h*f,w*f
     def sp(c,n): return np.sign(c)*np.abs(c)**(2.0/n)
+    FNR=C.get('FN_ranges',[])     # (px0, px1, fn): the section gets boxier from px0 to px1 and stays so (a hammer head needs a blunt end, not an edge)
+    def FNX(x):
+        f_=np.zeros(np.shape(x))+FN
+        for (a_,b_,fn_) in FNR:
+            t_=np.clip((PXs(np.asarray(x,float))-a_)/max(b_-a_,1),0,1); t_=t_*t_*(3-2*t_); f_=f_+(fn_-FN)*t_
+        return f_
     def pt(x,th,which='upper'):
         zc,h,w=prof(x,which)
-        fn=C.get('jaw_FN',3.0) if which=='jaw' else FN
+        fn=C.get('jaw_FN',3.0) if which=='jaw' else (FNX(x) if FNR else FN)
         return np.stack([np.broadcast_to(x,np.shape(th)), w*sp(np.sin(th),fn), zc+h*sp(np.cos(th),fn)],-1)
     def inside(p,which='upper'):
         zc,h,w=prof(p[...,0],which)
-        fn=C.get('jaw_FN',3.0) if which=='jaw' else FN
+        fn=C.get('jaw_FN',3.0) if which=='jaw' else (FNX(p[...,0]) if FNR else FN)
         return (np.abs(p[...,1])/np.maximum(w,1e-6))**fn+(np.abs(p[...,2]-zc)/np.maximum(h,1e-6))**fn
     def surf_along(p0,d,lo_=-0.05,hi_=1.2,which='upper'):
         lo_,hi_=lo_*C['length']/3.4,hi_*C['length']/3.4
@@ -239,7 +246,7 @@ def run(C):
             bad|=zone&(np.linalg.norm(src-np.array(v,np.float32),axis=-1)<C.get('ignore_tol',40))
         if M and which=='jaw': bad|=(view==0)&(syp<np.interp(sxp,xs_,lo)+C.get('lip_pad',6))
         if M and which=='upper' and C.get('lip_pad') is not None: bad|=(view==0)&(sxp>M['corner_px']-5)&(syp>np.interp(sxp,xs_,up)-C['lip_pad'])
-        if C.get('ignore_top'):
+        if C.get('ignore_top') is not None:
             ctq=bil(SH,TX(sxp),TCEN-ps[...,1]/(S*WSC)*TSC)
             for k,v in C['ignore_top'].items(): bad|=(view==1)&(np.linalg.norm(ctq-np.array(v,np.float32),axis=-1)<C.get('ignore_top_tol',40))
             if C.get('ignore_top_rule'): bad|=(view==1)&eval(C['ignore_top_rule'],{'np':np,'R':ctq[...,0],'G':ctq[...,1],'B':ctq[...,2]})
@@ -288,6 +295,7 @@ def run(C):
             inner=np.zeros(cl.shape,bool)
             if which=='upper': inner=(p[...,0]>X(M['corner_px'])+0.0)&(p[...,0]<X(M['front_px']+M.get('inner_fwd_px',1000)))&(nrm[...,2]<-0.7)&(ps[...,2]<Z(np.interp(PXs(p[...,0]),xs_,up))+8*S)
             if which=='jaw': inner=(nrm[...,2]>0.7)&(p[...,2]>prof(p[...,0],'jaw')[0])&(np.abs(p[...,1])<0.7*prof(p[...,0],'jaw')[2])
+            if M.get('inner_w_max_px'): inner&=np.abs(p[...,1])<M['inner_w_max_px']*S*WSC*WY
             col[inner]=np.array(C['mouth_col'],np.float32); cl=np.where(inner,len(keys),cl)
         # countershading + scales
         hgt=np.clip((p[...,2]-zc0)/np.maximum(prof(p[...,0],which)[1],1e-6),-1,1)
@@ -449,6 +457,7 @@ def run(C):
                 for k,xt in enumerate(xs_t):
                     if sgn<0 and k==len(xs_t)-1 and n_t%2==1: continue
                     zc,h,w=prof(np.array(xt),z_side); zc,h,w=float(zc),float(h),float(w)
+                    if M.get('tooth_w_max_px'): w=min(w,M['tooth_w_max_px']*S*WSC*WY)
                     zl=(zc-h*0.93) if dirz<0 else (zc+h*0.93)   # lip edge: bottom of the upper head / top of the jaw
                     frac=(xt-xs_t[0])/max(xs_t[-1]-xs_t[0],1e-6)
                     yl=sgn*w*(M.get('tooth_inset',0.92) if dirz<0 else M.get('tooth_inset_lo',M.get('tooth_inset',0.92)))*math.cos(frac*math.pi/2*0.95)
