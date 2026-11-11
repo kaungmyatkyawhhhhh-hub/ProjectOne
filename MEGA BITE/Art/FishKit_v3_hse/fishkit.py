@@ -47,7 +47,9 @@ def run(C):
     if C.get('env_px'):
         # sharks: fins have the body colour, so the body is the silhouette's ENVELOPE without fin bumps: the lowest top edge
         # and the highest bottom edge in a sliding window, from the tail stalk (body_x0_px) to the snout
-        X0P=C['body_x0_px']; keep=xs_>=X0P; xs_,zt,zb=xs_[keep],zt[keep],zb[keep]
+        X0P=C['body_x0_px']; keep=xs_>=X0P
+        if C.get('body_x1_px'): X1P=C['body_x1_px']; keep&=xs_<=X1P      # the body ends before things that stick out in front (a shrimp's antennae)
+        xs_,zt,zb=xs_[keep],zt[keep],zb[keep]
         wv=C['env_px']; zt=ndi.maximum_filter1d(zt,wv,mode='nearest'); zb=ndi.minimum_filter1d(zb,wv,mode='nearest')
         zt=ndi.gaussian_filter1d(zt,wv/6,mode='nearest'); zb=ndi.gaussian_filter1d(zb,wv/6,mode='nearest')
         # use the envelope ONLY where fins attach (env_top / env_bot x-ranges); elsewhere the true silhouette
@@ -65,7 +67,8 @@ def run(C):
                 for r_ in rngs:
                     a_,b_=r_[0],r_[1]; bg_=r_[2] if len(r_)>2 else 0.0
                     ia,ib=np.searchsorted(xs_,a_),np.searchsorted(xs_,b_); ia=max(ia,0); ib=min(ib,len(xs_)-1); t_=np.linspace(0,1,ib-ia+1)
-                    z[ia:ib+1]=z[ia]+(z[ib]-z[ia])*t_+sgn_*bg_*np.sin(np.pi*t_)
+                    za_,zb_=(r_[3],r_[4]) if len(r_)>=5 else (z[ia],z[ib])      # optional explicit rows at both ends (fins that overlap each other)
+                    z[ia:ib+1]=za_+(zb_-za_)*t_+sgn_*bg_*np.sin(np.pi*t_)
                 return ndi.gaussian_filter1d(z,C.get('bridge_blur',5),mode='nearest')
             zt=bridged(zt0s,C['bridge_top'],-1); zb=bridged(zb0s,C.get('bridge_bot',[]),1)
         elif C.get('stalk_env',True):   # the tail stalk: envelope too (tail lobes)
@@ -73,7 +76,7 @@ def run(C):
         sbody=np.zeros_like(side)
         for k,x in enumerate(xs_): sbody[int(zt[k]):int(zb[k])+1,x]=True
         sbody&=side
-    tys,txs=np.where(tbody); TN=txs.max(); T0=C.get('top_x0_px',txs.min())
+    tys,txs=np.where(tbody); TN=C.get('top_x1_px',txs.max()); T0=C.get('top_x0_px',txs.min())
     TSC=(TN-T0)/max(X1P-X0P,1) if C.get('top_rescale',True) else 1.0   # ChatGPT often draws the top view shorter: map body ends onto body ends
     def TX(xside): return TN-(X1P-xside)*TSC
     TCEN=np.median([(np.where(tbody[:,x])[0].min()+np.where(tbody[:,x])[0].max())/2 for x in np.where(tbody.any(0))[0]])
@@ -253,8 +256,8 @@ def run(C):
         if C.get('edge_px'):   # the sheet's black outline: never sample closer than edge_px to the silhouette edge
             bad|=(view==0)&(bil(SIDE_IN,sxp,syp)[...,0]<0.5)
             bad|=(view==1)&(bil(TOP_IN,TX(sxp),TCEN-ps[...,1]/(S*WSC)*TSC)[...,0]<0.5)
-        bad|=np.linalg.norm(src-np.array([255,0,255]),axis=-1)<120
-        bad|=(src[...,2]>src[...,1]+35)&(src[...,0]>src[...,1]+35)      # magenta-tinted edge pixels
+        bad|=np.linalg.norm(src-np.array([255,0,255]),axis=-1)<C.get('magenta_tol',120)
+        if not C.get('no_magenta_rule'): bad|=(src[...,2]>src[...,1]+35)&(src[...,0]>src[...,1]+35)      # magenta-tinted edge pixels (off for pink / purple creatures)
         if C.get('fin_rule'):   # fins painted over the flank in the side view (the 3D fins cover them anyway)
             fs=bil(finc.astype(np.float32)[...,None],sxp,syp)[...,0]; bad|=(view==0)&(fs>0.3)
             ft=bil(finc.astype(np.float32)[...,None],TX(sxp),TCEN-ps[...,1]/(S*WSC)*TSC)[...,0]; bad|=(view==1)&(ft>0.3)
@@ -392,7 +395,7 @@ def run(C):
     EC=C['eye']; ER=EC['r_px']*S
     cz_e=float(np.interp(X(EC['x_px']),XM,Z((zt+zb)/2))); ez=cz_e+(Z(EC['y_px'])-cz_e)*HS
     eyes=[]
-    for sgn in (1,-1):
+    for sgn in ([] if C.get('no_eye_geo') else (1,-1)):
         ed=math.radians(EC.get('fwd_deg',16))
         sx0=X(EC['x_px'])-0.15*C['length']/3.4
         q=surf_along(np.array([sx0,0,ez]),np.array([math.sin(ed),sgn*math.cos(ed),0.0]))
@@ -517,7 +520,7 @@ def run(C):
         inner=np.stack([gx.ravel(),gy.ravel()],1).astype(float); inner=inner[dt[inner[:,1].astype(int),inner[:,0].astype(int)]>5]
         allp=np.concatenate([edge,inner]); ne=len(edge); tri=Delaunay(allp)
         keep=[t for t in tri.simplices if mask[int(allp[t,1].mean()),int(allp[t,0].mean())]]
-        dd=np.array([0.0]*ne+[dt[int(y),int(x)] for x,y in inner]); ht=tmax*(dd/dmax)**0.55*S; tt=np.clip(dd/dmax,0,1)
+        dd=np.array([0.0]*ne+[dt[int(y),int(x)] for x,y in inner]); ht=np.maximum(tmax*(dd/dmax)**0.55*S,C.get('fin_min_t',0)*S); tt=np.clip(dd/dmax,0,1)      # fin_min_t: thin strips (antennae) need some thickness or their two sides z-fight
         tv=np.array([0.5+0.45*float(TIPMAP[int(np.clip(y,0,Hh-1)),int(np.clip(x,0,Ww-1))] if C.get('fin_tips') else 0.0) for x,y in allp])
         for sgn_side in ([1,-1] if two else [0]):
             topv=[];botv=[]
@@ -605,7 +608,9 @@ def run(C):
         if pk:
             for i,(m,_,_,_) in enumerate(PILLOWS):
                 x0e,y0e,x1e,y1e=boxes[i]; ax_,ay_,w,h=pk[i]
-                crop=SH[y0e:y1e+1,x0e:x1e+1].copy(); mc=ndi.binary_erosion(m[y0e:y1e+1,x0e:x1e+1],iterations=EP)
+                mm_=m[y0e:y1e+1,x0e:x1e+1]; lb_,nl_=ndi.label(mm_); dtm_=ndi.distance_transform_edt(mm_)
+                # thin parts (antennae, legs) get a gentler erosion than broad fins: erode each pixel by at most 40% of its part's half-width
+                crop=SH[y0e:y1e+1,x0e:x1e+1].copy(); mc=dtm_>np.minimum(EP,np.maximum(1.5,0.45*ndi.maximum_filter(dtm_,size=31)))
                 if mc.sum()<20: mc=m[y0e:y1e+1,x0e:x1e+1]
                 _,(iy_,ix_)=ndi.distance_transform_edt(~mc,return_indices=True); crop=crop[iy_,ix_]
                 A[ay_:ay_+h,ax_:ax_+w]=cv2.resize(crop,(w,h),interpolation=cv2.INTER_AREA)

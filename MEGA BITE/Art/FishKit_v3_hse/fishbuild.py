@@ -59,7 +59,7 @@ print('tris',sum(len(p.vertices)-2 for p in me.polygons))
 # rig (old species rig)
 arm=bpy.data.armatures.new(R['name']+'Rig'); rig=bpy.data.objects.new(R['name']+'Rig',arm); sc.collection.objects.link(rig)
 bpy.context.view_layer.objects.active=rig; bpy.ops.object.mode_set(mode='EDIT')
-x0,x1,NB=R['x0'],R['x1'],8; xs=[x0-i*(x0-x1)/NB for i in range(NB+1)]
+x0,x1,NB=R['x0'],R['x1'],R.get('nb',8); xs=[x0-i*(x0-x1)/NB for i in range(NB+1)]
 rx=R.get('root_x',0.0); rb=arm.edit_bones.new('Root'); rb.head=(rx,0,0); rb.tail=(rx+0.4,0,0); prev=rb
 for i in range(NB):
     b=arm.edit_bones.new(f'Spine{i}'); b.head=(xs[i],0,0); b.tail=(xs[i+1],0,0); b.parent=prev; b.use_connect=i>0; prev=b
