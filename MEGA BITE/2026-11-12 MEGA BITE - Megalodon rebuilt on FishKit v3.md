@@ -29,3 +29,29 @@ Owner: "ok next step" / "continue". Open item 4 of [[2026-11-12 MEGA BITE - HSE 
 - World (Studio side camera): swims with Ember, no errors.
 - Shop skin cards: framing loosened to 1.0 (0.94 clipped the long Megalodon's nose on Ghost / Ember).
 - **Owner to judge** against the approved HSE2 (`megah3_sheet_old_new.jpg`, `megah3_views.jpg`, `megah3_skins.jpg`). To go back: put `MB_Megalodon_hse2_backup_12Nov` back as `MegaBite.Sharks.Megalodon` and restore the HSE2 SkinTex line.
+
+## 12 Nov, later: the mouth now rests CLOSED (HSE5)
+Owner: "close megalodon mouth when its not eating", then on the first try (bone turned the jaw 35 deg shut): "jaw look bad and it looks like theyre not connected".
+- Why the bone version looked wrong: the jaw is skinned 100% to the Jaw bone, so turning it shut swung the whole pale lower jaw as one stiff cup; it stuck out wider than the upper lip and left a step at the mouth corner.
+- Tried and dropped: warping the sheet's jaw shut and rebuilding (megah4). The re-traced head came out blocky. Not shippable.
+- What shipped: the closed mouth is BAKED into the mesh (fishbuild.py `jaw_close`, rig.json `{ang:32, sy:0.86, dx:-0.05, dz:0.01, blend:0.6}`). The jaw turns 32 deg up about its rear hinge; from 0.35 m in front of the hinge it narrows to 86% and tucks back under the upper lip, so the upper lip overhangs it like a real shark's; the throat just behind the hinge follows part of the turn so the corner stays joined. Same UVs, so all 4 skins and their texture ids are unchanged.
+- Asset: Megalodon_hse5 model **136943327304974** (Approved), mesh 98754068662069, texture still 80910390031550. Files: `Art\Megalodon_hse5\` (FBX, closed_check.jpg, the before/after comparison, the build script, rig.json).
+- Model attributes: `JawClosedRest = true`, `JawPivot`/`JawHinge` kept (mouth corner + side axis), `JawRest` removed.
+- BonePlayer: for a JawClosedRest model, EVERY clip's jaw turn is applied about JawPivot on JawHinge (not the bone origin, whose X axis is tilted), so the bite opens joined at the corner.
+- MegalodonClips: Bite now opens from shut to 0.86 rad (49 deg) at 0.23 s and snaps shut by 0.33 s; TidalRoar opens from shut (+0.5 rad ramped in and out); SharkSense no longer clenches below the new rest. Idle/Swim keep their small breathing (up to 0.09 rad).
+- Checked in Play (Megalodon, side close-up): closed at rest; one bite measured on the bone opens to 0.84 rad and shuts at 0.26 s; held fully open it stays joined at the corner.
+- Backups (ServerStorage): MB_Megalodon_hse3_backup_12Nov, MegalodonClips_preClosedRest_12Nov, BonePlayer_preClosedRest_12Nov.
+
+## 12 Nov, 19:50: HSE6, a closed GRIN instead of shut
+Owner on HSE5: "now he look like hes biting his lips". At 32 deg the upper teeth landed ON the pale lower lip. Compared 32/24/20/16 deg (`Art\Megalodon_hse6\lip_bite_angles.jpg`): at about 20 deg the upper and lower teeth interlock over a thin dark mouth line, the usual closed cartoon shark grin.
+- HSE6: jaw_close `{ang:21, sy:0.9, dx:-0.02, dz:0}`; model **85790119744307** (Approved), mesh 112441266317839, texture 80910390031550 (skins unchanged).
+- Clips retuned from the original backup: Bite peaks at 0.68 rad (about the same wide open as before, from the less-shut rest) and snaps shut; TidalRoar +0.31 rad ramped.
+- Backup of HSE5: ServerStorage.MB_Megalodon_hse5_backup_12Nov.
+- Owner asked to check the web for a megalodon with its mouth closed: the image search showed a few megalodon pictures, but the jaw article I read (elasmo-research.org, white shark muscles and jaw) only covers the bite in motion, not how the mouth sits at rest. Not confirmed; the grin angle was chosen by eye from the comparison renders.
+
+## 12 Nov, 20:15: HSE7, matched to the owner's reference picture
+Owner sent a realistic megalodon with its mouth shut (`Art\Megalodon_hse7\owner_reference_megalodon.png`): lips together in one long curve, the lower jaw under the upper, only small tooth tips peeking along the line.
+- HSE7: jaw_close `{ang:28, sy:0.92, dx:-0.03, dz:0, tooth_k:0.6}`. New `tooth_k` in fishbuild: every tooth (25 islands) is scaled to 60% toward its root, so the teeth peek past the lips instead of hanging over the lower lip. Options compared in `teeth_options.jpg` (28/26/30 deg).
+- Model **113636716257390** (Approved), mesh 109940051624810, texture 80910390031550 (skins unchanged). Clips: Bite peaks 0.8 rad, TidalRoar +0.43 rad ramped.
+- Checked in Play (side close-up): shut, small teeth along the mouth line, bite still opens. Backup of HSE6: ServerStorage.MB_Megalodon_hse6_backup_12Nov.
+- Trade-off: the teeth are also 60% size when the mouth opens.
