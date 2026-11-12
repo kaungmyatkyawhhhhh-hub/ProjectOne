@@ -316,6 +316,26 @@ def paint_stone(sel, base, lightc, darkc, crack_amt, moss_amt, wear=1.0, glyphs=
 
 # ---- IRON: painted metal (Korblox-style hand-painted look, not PBR): sky/ground reflection on the plate, brushed streaks,
 #      dark outline + crisp light bevel on every edge, a few light scratches, grime in the gaps, engraved border line ----
+def paint_padded(sel, base, lightc, darkc, **k):
+    """BRAWLER / STARTER: padded leather (not hard armour): puffy panels lighter in the middle, dark seams at every edge,
+    a stitched thread line just inside the seam, quilted stitch lines across big panels, soft painted light, a little wear."""
+    P = pos[sel]
+    b = np.tile(base, (sel.sum(), 1)) * (1.0 + 0.08 * (big[sel] - 0.5) + 0.05 * (fine[sel] - 0.5) + 0.04 * ct[sel, 0])[:, None]
+    puff = sstep(0.5, 9.0, d_cvx[sel]); b = b * (0.80 + 0.30 * puff)[:, None]
+    b = b * (0.46 + 0.80 * shade_dir[sel] ** 1.2)[:, None] * (0.76 + 0.40 * loc[sel, 2])[:, None]
+    occ = np.clip(ao[sel], 0, 1) ** 1.4; b = mix(b * (0.36 + 0.64 * occ)[:, None], darkc, (1 - occ) * 0.5)
+    b = mix(b, darkc, sstep(1.6, 0.2, d_cvx[sel]) * 0.65)                                           # dark seam
+    b = mix(b, darkc * 0.8, sstep(4.0, 0.0, d_ccv[sel]) * 0.8)
+    dash = (np.sin((P @ np.array([1.0, 1.0, 1.0], np.float32)) * 1.5) > 0.15)
+    st = sstep(4.6, 3.8, d_cvx[sel]) * sstep(2.6, 3.4, d_cvx[sel]) * dash
+    b = mix(b, lightc * 1.04, st * 0.85)                                                               # stitched thread
+    ax_ = np.argmax(np.abs(nor[sel]), 1); u = np.where(ax_ == 0, P[:, 1], P[:, 0]); v = np.where(ax_ == 2, P[:, 1], P[:, 2])
+    q = np.abs(((u + v) / 26.0) % 1.0 - 0.5); q2 = np.abs(((u - v) / 26.0) % 1.0 - 0.5)
+    quilt = (sstep(0.06, 0.0, np.minimum(q, q2))) * (span[sel].max(1) > 90.0) * sstep(8.0, 12.0, d_cvx[sel])
+    b = mix(b, darkc, quilt * 0.45)                                                                    # quilted panel lines
+    scuff = sstep(0.66, 0.8, fbm(P, 16.0, 2, 221)); b = mix(b, lightc, scuff * 0.12)
+    return b
+
 def paint_metal(sel, base, lightc, darkc, wear=1.0, engrave=0.0, glyphs=0.0):
     """IRON v2 (owner 15:04 "u still did the same mistakes"): forged, MATTE dark iron painted like Korblox:
     no bright rims, no shiny sky reflection (it turned the boots pale and plastic), dark values, hammered mottling,
@@ -367,13 +387,31 @@ T = {
  "storm":  dict(pm="metal", S=((86, 64, 140), (206, 186, 252), (10, 6, 22)), S2=((48, 36, 84), (162, 140, 220), (6, 4, 14)),
                 G=((170, 100, 255), (240, 232, 255)), GR=(120, 60, 220), C=((60, 10, 150), (200, 150, 255), (120, 200, 255), (20, 4, 60), (245, 235, 255)),
                 SP=(170, 110, 255), TR=((190, 190, 214), (250, 250, 255), (40, 34, 60)), SOLE=None, MOSS="cloud", LEA=(56, 40, 70)),
+ "starter":dict(pm="padded", S=((236, 222, 192), (255, 250, 236), (84, 66, 44)), S2=((92, 168, 60), (186, 232, 120), (22, 54, 12)),
+                G=((140, 230, 80), (240, 255, 210)), GR=(90, 170, 50), C=((40, 120, 30), (170, 240, 110), (230, 255, 160), (14, 50, 10), (245, 255, 230)),
+                SP=(140, 230, 80), TR=((92, 168, 60), (200, 240, 150), (20, 50, 12)), SOLE=None, MOSS=None, LEA=(120, 82, 50)),
+ "brawler":dict(pm="padded", S=((246, 196, 40), (255, 244, 156), (112, 60, 8)), S2=((214, 142, 22), (255, 214, 110), (90, 44, 4)),
+                G=((210, 230, 255), (255, 255, 255)), GR=(200, 210, 230), C=((150, 160, 190), (240, 248, 255), (255, 255, 255), (60, 64, 90), (255, 255, 255)),
+                SP=(230, 240, 255), TR=((226, 226, 230), (255, 255, 255), (70, 70, 80)), SOLE=None, MOSS=None, LEA=(70, 42, 26)),
+ "star":   dict(pm="metal", S=((38, 50, 108), (150, 180, 250), (6, 8, 26)), S2=((26, 32, 74), (120, 140, 210), (4, 5, 16)),
+                G=((255, 206, 80), (255, 250, 220)), GR=(220, 160, 40), C=((150, 96, 10), (255, 222, 100), (255, 255, 200), (60, 30, 0), (255, 250, 230)),
+                SP=(255, 210, 90), TR=((196, 140, 30), (255, 238, 160), (72, 44, 8)), SOLE=None, MOSS=None, LEA=(46, 34, 70)),
  "crystal":dict(pm="metal", S=((150, 186, 204), (244, 252, 255), (24, 36, 56)), S2=((54, 92, 120), (170, 210, 230), (10, 18, 30)),
                 G=((40, 220, 255), (235, 255, 255)), GR=(30, 160, 200), C=((10, 90, 150), (110, 230, 255), (255, 140, 220), (6, 30, 60), (235, 252, 255)),
                 SP=(60, 220, 255), TR=((230, 140, 200), (255, 220, 245), (60, 20, 50)), SOLE=None, MOSS=None, LEA=(70, 50, 70)),
 }[THEME]
 def C3(t): return c255(*t)
-P_ = paint_metal if T["pm"] == "metal" else (lambda sel, b_, l_, d_, **k: paint_stone(sel, b_, l_, d_, 1.0, 0.10 if THEME == "stone" else 0.0, glyphs=k.get("glyphs", 0.0)))
-S_ = mat == MI["stone"]; col[S_] = P_(S_, C3(T["S"][0]), C3(T["S"][1]), C3(T["S"][2]), engrave=1.0, glyphs=1.0) if T["pm"] == "metal" else P_(S_, C3(T["S"][0]), C3(T["S"][1]), C3(T["S"][2]), glyphs=1.0)
+P_ = paint_metal if T["pm"] == "metal" else paint_padded if T["pm"] == "padded" else (lambda sel, b_, l_, d_, **k: paint_stone(sel, b_, l_, d_, 1.0, 0.10 if THEME == "stone" else 0.0, glyphs=k.get("glyphs", 0.0)))
+S_ = mat == MI["stone"]; col[S_] = P_(S_, C3(T["S"][0]), C3(T["S"][1]), C3(T["S"][2]), engrave=1.0, glyphs=(0.0 if THEME == "star" else 1.0)) if T["pm"] == "metal" else P_(S_, C3(T["S"][0]), C3(T["S"][1]), C3(T["S"][2]), glyphs=1.0)
+if THEME == "star" and S_.any():                  # STARRY plates: tiny gold-white stars + a few bigger four-point sparkles
+    Pq = pos[S_]; n1 = fbm(Pq, 3.0, 1, 301); n2 = fbm(Pq, 7.0, 1, 303)
+    dots = sstep(0.80, 0.86, n1) * sstep(0.45, 0.6, n2)
+    col[S_] = mix(col[S_], c255(255, 244, 200), dots * 0.9)
+    ax_ = np.argmax(np.abs(nor[S_]), 1); u = np.where(ax_ == 0, Pq[:, 1], Pq[:, 0]); v = np.where(ax_ == 2, Pq[:, 1], Pq[:, 2])
+    cu = np.floor(u / 34.0); cv = np.floor(v / 34.0); on = hsh(cu.astype(np.int64), cv.astype(np.int64), ax_.astype(np.int64), 307) > 0.78
+    fu = (u / 34.0 - cu) - 0.5; fv = (v / 34.0 - cv) - 0.5
+    spark = np.exp(-(np.abs(fu) * 40 + np.abs(fv) * 6)) + np.exp(-(np.abs(fv) * 40 + np.abs(fu) * 6))
+    col[S_] = mix(col[S_], c255(255, 236, 170), np.clip(spark * on * sstep(6.0, 10.0, d_cvx[S_]), 0, 1) * 0.95)
 S2 = mat == MI["stone2"]; col[S2] = P_(S2, C3(T["S2"][0]), C3(T["S2"][1]), C3(T["S2"][2]))
 SL = mat == MI["slate"]
 if THEME == "crystal" and SL.any():               # second crystal colour: PINK faceted crystal
@@ -418,7 +456,15 @@ if C_.any():
     b = mix(b, C3(T["C"][4]), sstep(0.68, 0.8, streak) * sstep(0.55, 0.9, fac) * 0.6)               # specular streaks
     col[C_] = b; emi[C_] = b * (0.2 + 0.35 * h)[:, None]
 MO = mat == MI["moss"]
-if MO.any() and T["MOSS"] == "cloud":            # STORM: soft puffy cloud collar, lavender-white, painted soft light
+if MO.any() and THEME in ("iron", "star"):         # CAPE cloth: iron = royal blue, star = navy with tiny gold stars; soft folds
+    base_, lt_ = ((34, 66, 160), (120, 170, 245)) if THEME == "iron" else ((24, 30, 80), (90, 110, 200))
+    sh_ = np.clip(0.2 + 0.8 * shade_dir[MO], 0, 1)
+    b = mix(np.tile(C3(base_), (MO.sum(), 1)), C3(lt_), sh_ ** 1.3) * (0.55 + 0.45 * ao[MO])[:, None]
+    b = b * (1.0 + 0.06 * (fine[MO] - 0.5))[:, None]
+    if THEME == "star":
+        dots = sstep(0.80, 0.86, fbm(pos[MO], 3.0, 1, 311)) * sstep(0.45, 0.6, fbm(pos[MO], 7.0, 1, 313)); b = mix(b, c255(255, 240, 190), dots * 0.9)
+    col[MO] = b
+elif MO.any() and T["MOSS"] == "cloud":            # STORM: soft puffy cloud collar, lavender-white, painted soft light
     sh_ = np.clip(0.25 + 0.75 * shade_dir[MO] + 0.3 * loc[MO, 2], 0, 1)
     b = mix(np.tile(c255(120, 100, 170), (MO.sum(), 1)), c255(246, 242, 255), sh_ ** 0.8)
     b = b * (0.65 + 0.35 * ao[MO])[:, None]; col[MO] = b; emi[MO] = b * 0.12
