@@ -350,3 +350,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Audio owned by the group is private to group experiences.** A user-owned place needs each sound granted to its universe (asset-permissions API, PATCH `subjectType = Universe`, action `Use`) or it stays silent.
 - **Studio's `screen_capture` can lag the client by a second or two:** to check a short timed effect (a cutscene), sample its state from a client script, don't trust a single capture.
 - **A welcome patch must be inside reach from the spawn point,** measured (spawn 2 studs too far = the first click did nothing).
+
+## Stomp Evolution feel pass (13 Nov 2026, night)
+- **A new module's local name can be shadowed further down the same script.** `local FX = require(StompFX)` near the top, but the client already had `local FX = Folder("ClientFx")` lower down, so every effect call hit the folder ("aura is not a valid member of Folder"). Rule: before adding a require, search the script for the name; give modules a unique name (`SFX`).
+- **One bad effect call broke the evolve cutscene** (NumberRange with min > max). Rule: effects inside a cutscene or any flow that hides the HUD / disables controls run in `pcall`. An effect must never block a flow.
+- **Music can be "listened to" by measurement** when nobody can hear it: fetch the track in the browser (assetdelivery), decode it with WebAudio, and measure tempo, major/minor, brightness and whether the energy stays up. This filters a store search down to tracks that fit the hype rule. The owner still has the final say by ear.
+- **A power-up and an evolve arrive almost together:** a window that waits for "no cutscene" must also wait a moment for the cutscene to START, and the window's ScreenGui hides while the cutscene runs.
