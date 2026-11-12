@@ -62,3 +62,12 @@ Owner (screenshot from the front): "its so bad from the front". With HSE7 the fr
 - Model **89834626735584** (Approved), mesh 125486509754060. Clips: Bite peaks 0.74 rad, TidalRoar +0.37 rad ramped. Backup of HSE7: ServerStorage.MB_Megalodon_hse7_backup_12Nov.
 - Same evening: TidalRoar sound vol 1.0 -> 5.0 (owner: "megalodon roar should be 5x louder"). Backup MB_Sounds_preRoarLoud_12Nov.
 - Note: ScriptEditorService:UpdateSourceAsync hung twice on MB_Sounds tonight (80 s timeouts, then the MCP link dropped). Setting `.Source` directly from the MCP worked.
+
+## 12-13 Nov midnight: HSE9, REMODELLED with the mouth closed (replaces HSE5-HSE8)
+Owner: "u need to remodel him, not reposition his jaw". HSE5-8 only turned the old open-mouth jaw shut, so the jaw still read as a separate pale cup, especially from the front.
+- New design: ChatGPT edited the approved HSE sheet (attached as the reference) with ONE prompt: everything identical, only the mouth closed (lips in one smooth line, upper jaw overhanging, small upper tooth tips peeking, chin flowing into the throat; front view a closed grin with a row of tooth tips). Result `Art\Megalodon_hse9\megalodon_sheet_closed.png`: same body, glow lines, scars, eyes.
+- Built with FishKit v3 from the new sheet (`Art\Megalodon_hse9\cfg.py`): mouth lip line traced from the sheet (corner 1225,249 -> front 1426,276), lips meet (lo = up + 1-3 px), `lip_pad 2`, `tooth_fit 0` (otherwise the teeth shrink to the lip gap), `tooth_inset 0.97` + `jaw_w 0.84` (the lower jaw sits inside the upper so the upper teeth hang OUTSIDE it, like the sheet), `tooth_px 24`, `tooth_w 0.45` (sharper), dark mouth colour (55,14,28). No jaw_close bake.
+- Assets (all Approved): model **119649357387079** (mesh 129430248847864, tex 137084886312176); skins Lantern 74808944075858, Ghost 100601008138484, Ember 91559941152808, Coral 83040825982336 (GameConfig SkinTex.Megalodon; HSE3 skin ids kept in a comment). JawClosedRest + JawPivot/JawHinge kept; clips as for HSE8 (Bite opens to 0.74 rad from shut).
+- Checked in Play: side = one connected head, closed, upper/lower teeth interlocked; front = closed grin with a row of teeth; held open at 0.74 rad the bite looks right and stays joined.
+- Backups: ServerStorage.MB_Megalodon_hse8_backup_12Nov, GameConfig_preMegaH9_12Nov.
+- Lesson (K06): when the owner asks for a different pose of the mouth (open/closed), get a NEW sheet with that mouth and rebuild; turning bones or baking a rotation into the old mesh never reads as the same character.
