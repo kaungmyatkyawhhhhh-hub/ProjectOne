@@ -52,3 +52,25 @@
 - Measured first (owner's recording, Pets window 14-25 s, 4 fps, `/tmp` card sheet): their inspect card spins edge-on to swap (ours already does) and at rest keeps ROCKING in the screen plane, about +-3 deg over ~3 s, plus a slight yaw. Ours (since 11 Nov) only tilted toward the mouse (yaw/pitch) and on PC stood almost still when the mouse did.
 - `MegaBite.HeroCard` (Shop + Index; old copy `HeroCard_preRock_12Nov`): a roll on the same spring as the tilt: sin(2.1 t) x 2.6 deg + sin(0.8 t) x 0.8 deg, minus a small lean into fast turns; on PC the idle yaw/pitch sway fades back in after the mouse has been still for 1.2 s. Off under Reduced Motion. The 3D model and the card's button proxy ride the same CFrame.
 - Checked in Play: roll swings +2.4 / -1.9 deg over ~3 s; two Shop shots show it; no errors.
+
+## 9. Offer pop-up (owner 15:27 "next") - research + build
+**Research (12 Nov):**
+- Reference: owner's Tap Reborn recording at 81 s, the "Auto Clicker" card: small cyan card, green rim, outlined title on the top edge, one plain question ("Unlock the Auto Clicker? It taps for you, even while you explore!"), a green price pill + a red "No" pill, the world blurred.
+- Univ. of Sydney study (May 2026), 15 popular Roblox games, 14 with deceptive purchase design. Patterns named: misleading prices / fake discounts, unclear purchase prompts, loot boxes, near-miss visuals, **pressure after losses**, **false urgency (countdowns, limited-time)**, pay-to-progress, hidden consequences. Source: https://www.sydney.edu.au/news-opinion/news/2026/05/17/inside-the-pay-to-play-world-of-roblox-targeting-children-.html
+- Timing guidance (ContextSDK): offer right after a win, when the player has attention to spare; never mid-task, never with fake urgency. No numeric frequency cap given. Source: https://contextsdk.com/blogposts/ethical-monetization-without-compromising-ux-why-timing-and-context-is-everything
+- Context: Roblox banned "games that reward ongoing media feed consumption" in Roblox Kids/Select after Steal an Egg (Aug 2026), a sign the platform is tightening on manipulative design. Source: https://egamers.io/roblox-bans-games-that-pay-kids-to-keep-scrolling-in-wake-of-steal-an-egg-uproar/
+
+**Built: `StarterPlayerScripts.MB_Offer`** (new):
+- The x2 EXP pass only (useful at every stage, nothing for PvP). Card: cyan gradient + lime rim + navy slab, "x2 EXP!" title on the edge, the pass art (V5.Obj.X2EXP) tilted and gently rocking, two lines "Every fish counts TWICE" / "Forever, on every shark!", a lime "R$ 349" (price read from Roblox) and a red "No thanks". Pops like the reference windows (0.94 -> 1 in 0.12 s), blurs the world, hides the HUD.
+- Rules: at most once per session; not in the first 5 min of play; never if owned; only 6 s after an evolve or 3.5 s after a finished quest, then within 15 s of calm (no window/cutscene, not in the Red Trench, not in a fight); never within 2 min of being eaten (and being eaten closes it); a predator hunting you closes it (Bus.CloseWindows); no timer, no "sale".
+- Buy = `StoreAction:FireServer("Buy","X2EXP")` -> Roblox's own purchase prompt (the server skips it if owned). Owning it closes the card.
+- Studio only: player attribute `MB_TestOffer = true` shows it now; workspace attribute `MB_OfferFast` (test only, removed after) shortens the 5 min to 5 s and ignores a Studio-owned pass.
+- Checked in Play: shows 6.2 s after an evolve, not again on a second evolve; No closes it (HUD back, blur off); Buy closes it and calls the server; text fits two clean lines; no errors.
+
+## 10. Shop skin pictures show YOUR shark (owner 18:45 "ok next step"; the oldest open item)
+- Before: the 5 skin cards + the 2 featured minis used fixed pictures of a Reef Shark (V6.SkinReal.*), whatever shark you were (only the 3D hero card showed your shark). Planned fix was 35 renders (7 sharks x 5 skins); done live instead.
+- `MB_StoreUI` (old copy `MB_StoreUI_preSkinViews_12Nov`): `skinView(art, skinKey)` puts a ViewportFrame (+ WorldModel) INSIDE each old picture (so the card's bob still applies; the picture stays as a fallback until the model is in): a clone of `MegaBite.Sharks[<your evo>]`, the skin's texture (`C.Store.SkinTex[evo][skin]`) on every MeshPart, Ghost at >= 0.22 transparency (same as the hero card), nose to screen-right in a slight 3/4 (camera in front of the head and a little above), framed to the length but never cutting a tall body (piranha), x0.94 tighter. Ambient 200.
+- Rebuilt on every Evo change. Static (no swim clip): 7 small views, rendered only while the Shop is open.
+- Bug found + fixed: a static ViewportFrame does NOT redraw when a texture finishes loading (Piranha Classic / Coral / Ghost showed grey). Now: ContentProvider:PreloadAsync on the meshes, then a tiny camera nudge to force a redraw, plus nudges at 1.5 s and 4 s and every time the Shop opens.
+- Checked in Play: Megalodon (owner) and Piranha (client-only Evo 2) in all 5 skins + both minis; no errors.
+- K06 lesson: ViewportFrames only redraw when something in them changes; after textures load, nudge the camera.
