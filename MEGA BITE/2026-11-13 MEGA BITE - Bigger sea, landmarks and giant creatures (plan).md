@@ -59,3 +59,16 @@ Landmarks: statue head, galleon, whale skeleton, lighthouse, crystal arch. Creat
   3. The tower flares more in the front view (radius 30.2 at z=40) than in the side view (25.8). The model uses the average.
 - Not modelled (2D paint detail): chipped paint edges, wood grain, the soft shading. Flat colours per part instead (no texture, cheaper for phones).
 - Lessons: (a) IoU alone is not enough (hull and row-loft passed IoU and looked bad); (b) register each view by a MEASURED anchor (tower axis column, floor row, px per stud), never by the bbox centre (was 5 px off); (c) geometry below the floor silently costs IoU; (d) outline meshes need a constrained triangulation (plain Delaunay + centroid test dropped a third of the kelp); (e) keep one shell + colour by face instead of one solid per band (-1,300 triangles).
+
+## 13 Nov 02:20 - owner: "i approve it but should have some texture ( the decal texture )" -> Lighthouse v4 (textured)
+`Art\Expansion\Lighthouse\lighthouse_v4.py` (same geometry as v3; adds UVs and one atlas).
+- **Owner approved the lighthouse shape (v3).** v4 only adds the texture.
+- **Atlas:** one 1024 px image cut from the design sheet itself (`MB_LM_Lighthouse_atlas.png`): hill top from the top view (decor and warm pixels painted out), tower front strip (door, hole, chips, barnacles kept), tower back strip (same strip with the door, hole, starfish and barnacles painted out), the side and front views for the kelp, corals, sponges, clams and starfish, and 3 flat swatches (dark inside, rock top, rock side).
+- **UVs:** each kelp/coral/sponge carries its own sheet pixels; the tower front half uses the front strip, the back half the clean strip mirrored; deck, rail, lantern, dome, ball, door blocks and steps project from the front view; the hill projects from the top view.
+- **Gates unchanged:** side 0.914, front 0.916, open edges 0, backfaces 0, 7,208 triangles, 17 parts.
+- **Roblox:** texture image **74025654703706** (Approved), model **127619845187965** (Approved). Set up as `ServerStorage.MB_LM_Lighthouse_v4`: every part white + the atlas as TextureID, SmoothPlastic; the lamp glass stays Neon (255,226,120) with no texture; anchored; collisions on Stone, StoneTop, StoneSide, Red, Cream, BaseStone, Dark, Deck, DoorStone. `MB_LM_Lighthouse_v3` kept as the flat-colour backup. Not placed in the map yet.
+- Checked in Studio with the game lighting (preview removed after): the paint chips, barnacles, starfish and band edges show on the tower; kelp and corals carry the sheet's shading. Check image: `Art\Expansion\Lighthouse\MEGA BITE - Lighthouse v4 check.jpg`.
+- Known differences that stay: the hill has an open channel in front of the door (top view is not a gate, see contradiction 1); the game's blue lighting makes the dark slate hill read as bright blue.
+- Atlas lessons: fill the background from masks eroded 3 px (magenta fringe); only tower pixels may be a source for the tower strip (wavy strip otherwise); paint out every warm pixel on the hill top (red/cream smears).
+- Next model (after the owner's OK on v4): the Ocean King statue from `mb_sheet_lm_statue_v2.png`, same method, with a texture atlas from the start.
+
