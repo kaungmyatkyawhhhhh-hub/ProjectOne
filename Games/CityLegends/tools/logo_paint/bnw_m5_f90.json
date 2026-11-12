@@ -1,0 +1,215 @@
+{
+ "src": "imports/importing cars/2022_bmw_m5_cs.glb",
+ "images": {
+  "5": [
+   {
+    "solid": [
+     3,
+     25,
+     191,
+     113,
+     12,
+     13,
+     16
+    ]
+   }
+  ],
+  "25": [
+   {
+    "solid": [
+     336,
+     81,
+     355,
+     100,
+     205,
+     30,
+     34
+    ]
+   },
+   {
+    "solid": [
+     491,
+     77,
+     510,
+     95,
+     205,
+     30,
+     34
+    ]
+   }
+  ],
+  "27": [
+   {
+    "solid": [
+     325,
+     0,
+     511,
+     38,
+     33,
+     33,
+     33
+    ]
+   },
+   {
+    "solid": [
+     326,
+     39,
+     438,
+     76,
+     50,
+     50,
+     50
+    ]
+   },
+   {
+    "rect": [
+     436,
+     114,
+     511,
+     132
+    ]
+   }
+  ],
+  "28": [
+   {
+    "rect": [
+     322,
+     36,
+     442,
+     78
+    ]
+   }
+  ],
+  "29": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     255,
+     20,
+     20,
+     22
+    ]
+   }
+  ],
+  "31": [
+   {
+    "solid": [
+     0,
+     0,
+     171,
+     150,
+     20,
+     20,
+     20
+    ]
+   },
+   {
+    "solid": [
+     4,
+     330,
+     100,
+     511,
+     14,
+     14,
+     14
+    ]
+   },
+   {
+    "solid": [
+     130,
+     484,
+     205,
+     511,
+     14,
+     14,
+     14
+    ]
+   },
+   {
+    "ring": [
+     256,
+     256,
+     133,
+     196
+    ]
+   }
+  ],
+  "32": [
+   {
+    "solid": [
+     0,
+     0,
+     171,
+     150,
+     128,
+     128,
+     255
+    ]
+   },
+   {
+    "solid": [
+     4,
+     330,
+     100,
+     511,
+     128,
+     128,
+     255
+    ]
+   },
+   {
+    "solid": [
+     130,
+     484,
+     205,
+     511,
+     128,
+     128,
+     255
+    ]
+   },
+   {
+    "ring": [
+     256,
+     256,
+     133,
+     196
+    ]
+   }
+  ]
+ },
+ "drop": [
+  "Badge_Geo_lodA"
+ ],
+ "drop_material": [
+  "Calliper"
+ ],
+ "rename_material": {
+  "BMW_M5CSRewardRecycled_2022BadgeA_Material": "BadgeA_Material",
+  "BMW_M5CSRewardRecycled_2022Base_Material": "Base_Material",
+  "BMW_M5CSRewardRecycled_2022Carbon1M_Material": "Carbon1M_Material",
+  "BMW_M5CSRewardRecycled_2022SeatBelt_Material": "Coloured_Material",
+  "BMW_M5CSRewardRecycled_2022EngineA_Material": "EngineA_Material",
+  "BMW_M5CSRewardRecycled_2022Grille1A_Material": "Grille1A_Material",
+  "BMW_M5CSRewardRecycled_2022Grille2A_Material": "Grille2A_Material",
+  "BMW_M5CSRewardRecycled_2022Grille3A_Material": "Grille3A_Material",
+  "BMW_M5CSRewardRecycled_2022Grille4A_Material": "Grille4A_Material",
+  "BMW_M5CSRewardRecycled_2022Grille5A_Material": "Grille5A_Material",
+  "BMW_M5CSRewardRecycled_2022Grille6A_Material": "Grille6A_Material",
+  "BMW_M5CSRewardRecycled_2022Grille7A_Material": "Grille7A_Material",
+  "BMW_M5CSRewardRecycled_2022Grille8A_Material": "Grille8A_Material",
+  "BMW_M5CSRewardRecycled_2022InteriorTillingA_Material": "InteriorTillingA_Material",
+  "BMW_M5CSRewardRecycled_2022InteriorA_Material": "InteriorA_Material",
+  "BMW_M5CSRewardRecycled_2022LightA_Material": "LightA_Material",
+  "BMW_M5CSRewardRecycled_2022ManufacturerPlateA_Material": "ManufacturerPlateA_Material",
+  "BMW_M5CSRewardRecycled_2022TexturedA_Material": "TexturedA_Material",
+  "BMW_M5CSRewardRecycled_2022Window_Material": "Window_Material",
+  "BMW_M5CSRewardRecycled_2022Paint_Material": "Paint_Material",
+  "BMW_M5CSRewardRecycled_2022_Wheel1A_3D_3DWheel1A_Material": "Wheel1A_3D_3DWheel1A_Material",
+  "BMW_M5CSRewardRecycled_2022_CallipersCalliperBadgeA_Material": "CallipersCalliperBadgeA_Material",
+  "BMW_M5CSRewardRecycled_2022_CallipersCalliperA_Zone_Material": "CallipersCalliperA_Zone_Material",
+  "BMW_M5CSRewardRecycled_2022SpecularTintA_Material": "SpecularTintA_Material"
+ }
+}

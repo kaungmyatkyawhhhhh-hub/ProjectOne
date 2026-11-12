@@ -1,0 +1,168 @@
+{
+ "id": "bnw_m5_f90",
+ "drop": [
+  "grille7a"
+ ],
+ "roles": {
+  "^paint_material": "Paint",
+  "coloured_material": [
+   "Trim",
+   0.3,
+   0.0
+  ],
+  "base_material": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "carbon1": "Carbon",
+  "lighta_material": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "interiortilling": [
+   "CabinTile",
+   0.6,
+   0.0
+  ],
+  "interiora_material": [
+   "Cabin",
+   0.5,
+   0.0
+  ],
+  "manufacturerplate": [
+   "Plate",
+   0.5,
+   0.0
+  ],
+  "enginea": [
+   "CabinTrim",
+   0.6,
+   0.0
+  ],
+  "grille": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "wheel1a_3d": [
+   "Rim",
+   0.28,
+   0.85
+  ],
+  "textureda": [
+   "Trim",
+   0.55,
+   0.0
+  ],
+  "speculartint": [
+   "Trim",
+   0.3,
+   0.9
+  ]
+ },
+ "cut_islands": [
+  {
+   "mat": "speculartint",
+   "box": [
+    -0.54,
+    2.47,
+    0.915,
+    -0.3,
+    2.535,
+    0.965
+   ],
+   "limit": 0.09
+  },
+  {
+   "mat": "speculartint",
+   "box": [
+    0.912,
+    -1.125,
+    0.72,
+    0.92,
+    -1.06,
+    0.745
+   ],
+   "limit": 0.02
+  },
+  {
+   "mat": "speculartint",
+   "box": [
+    -0.92,
+    -1.125,
+    0.72,
+    -0.912,
+    -1.06,
+    0.745
+   ],
+   "limit": 0.02
+  },
+  {
+   "mat": "speculartint",
+   "box": [
+    0.32,
+    -2.31,
+    0.61,
+    0.41,
+    -2.28,
+    0.63
+   ],
+   "limit": 0.03
+  },
+  {
+   "mat": "interiora",
+   "box": [
+    -0.33,
+    -0.41,
+    0.82,
+    -0.24,
+    -0.38,
+    0.85
+   ],
+   "limit": 0.05
+  },
+  {
+   "mat": "interiora",
+   "box": [
+    -0.43,
+    0.3,
+    0.985,
+    -0.36,
+    0.35,
+    1.005
+   ],
+   "limit": 0.02
+  },
+  {
+   "mat": "interiora",
+   "box": [
+    0.36,
+    0.44,
+    0.985,
+    0.43,
+    0.47,
+    1.005
+   ],
+   "limit": 0.02
+  },
+  {
+   "mat": "interiora",
+   "box": [
+    0.0,
+    -0.215,
+    0.668,
+    0.025,
+    -0.205,
+    0.68
+   ],
+   "limit": 0.01
+  }
+ ],
+ "hub_px": [
+  240,
+  182,
+  34
+ ]
+}
