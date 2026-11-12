@@ -1,0 +1,8 @@
+QUALITY-NERD KID on the LIVE city v2 (2,000 kids, 10-minute walk; trust tells per 10 min)
+version                                                                                likes  tells/10min  wows/10min  worst kind  top tells
+L1 live 13 Nov 02:00: grid city, 4 landmarks (~450 studs apart), walls behind hills      66%    10.3        22.0       6.3     pop-in 6.3, districts look the same 2.0, invisible wall 1.9
+L2 city v2 step 1: hill ring + sea edge (no visible end)                                 91%     8.4        22.0       6.3     pop-in 6.3, districts look the same 2.0, same prop again 0.0
+L3 + 8 landmarks (one per district) + 4 old set pieces (~270 studs apart)                91%    11.9        30.3      10.0     pop-in 10.0, districts look the same 2.0, same prop again 0.0
+L4 + landmarks persistent + streaming mesh LOD (no pop-in)                               98%     2.0        30.3       2.0     districts look the same 2.0, same prop again 0.0
+L5 + 6 district prop kinds (containers, tanks, warehouses, glass/neon towers, palaces)   99%     2.0        30.3       2.0     districts look the same 2.0, same prop again 0.0
+L6 (next) + per-district light + music change                                            99%     0.0        32.4       0.0     same prop again 0.0
