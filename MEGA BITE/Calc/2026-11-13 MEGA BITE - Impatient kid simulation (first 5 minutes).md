@@ -86,3 +86,36 @@ Built (in Studio, not published):
 | 16 s | now | 98.7% | 95.4% | 90.3% | 80.3% | 59.5% | 93.4% |
 
 **Why not 100 %:** in this model no game reaches 100 % for every kid: a 7-second-patience kid quits before most games load, and the model has no exploring, friends, PvP or skins, so its 3-5 minute numbers are low by design. Real Roblox simulators keep about a third of new players to the next day (vault: Simulator D1 ~32 % in promoted games). The aim is "no kid quits because the GAME left them stuck" - the remaining quit points are long grinds (repeat "eat N" quests as a Barracuda/Reef Shark) and the first trek out, both of which need NEW things to do (next round), not more arrows.
+
+## 13 Nov - owner: "ok do those" -> round 3 (new things to do in the grind)
+Built (in Studio, not published), all in `GameConfig.Fish.Grind`:
+- **Shiny fish**: 1 in 40 fish is shiny (x5 EXP, its own toast and sound, counted in the saved `Shinies`).
+- **Combo**: bites within 2.5 s chain; every 5th bite pops a COMBO x5/x10... popup.
+- **Feeding Frenzy**: every 60 s (first at 45 s) a bait ball of 14 fish appears near players for 15 s with x2 EXP and a FRENZY chip. Spawn distance adds half the shark's length (they spawned inside big sharks at first).
+- Client: `MB_GrindFx` (toasts, combo popup, x2 chip).
+
+| Patience | Version | 30 s | 60 s | 2 min | 3 min | 5 min | Barracuda in 5 min |
+|---|---|---|---|---|---|---|---|
+| 7 s | round 3 | 75.5% | 52.6% | 42.6% | 35.0% | 19.4% | 50.2% |
+| 11 s | **round 3** | **94.2%** | **82.8%** | **75.1%** | **67.8%** | **51.1%** | **80.8%** |
+| 16 s | round 3 | 99.0% | 95.2% | 91.8% | 88.1% | 78.0% | 94.3% |
+
+Top quit points left: the trek out to the Open Sea (nothing happens on the way) and the repeat "eat N fish" quests (the same goal again and again).
+
+## 13 Nov - owner: "ok do them rn" -> round 4 (bubble rings + quick quests)
+Built (in Studio, not published):
+- **Bubble rings on the current** - `StarterPlayerScripts.MB_CurrentRings` (new): during "Swim out to the OPEN SEA", glowing neon rings (14 segments, radius 6.5) every 34 studs along the current to the reef edge. They spin and pulse; swimming through one plays a ting that climbs a scale, pops the ring and gives **+1 EXP** (server `MB_SwimServer` "Ring": only during that quest, max 1 per 0.8 s, max 40). Rings rebuild if you leave the line by 70+ studs.
+- **Quick quests** - `MB_QuestServer`: on every other repeat cycle the "eat N fish" quest is swapped for a short different goal from `C.QuickQuests`: **Get a COMBO x10**, **Eat a SHINY fish** (shiny chance x6 while on it), **Eat 5 fish in a FEEDING FRENZY**. New stats `Combo10s` and `FrenzyBites` (MB_FishServer).
+- Bug found in Play and fixed: the ring script waited on a remote called "Action" (the real one is `SwimAction`), so no rings showed.
+- Checked in Play (fresh player, Piranha, open quest): 8 rings on the line, swam through them with W, EXP 0 -> 5 (Pass x2 on), rings cleared on arrival, no errors.
+- Backups: `MB_SwimServer_preRings_13Nov`, `MB_QuestServer_preQuick_13Nov`, `MB_FishServer_preQuick_13Nov`. `MB_FreshPlayer` set back to false.
+
+Sim (`r4.py`, 2,000 kids each). The round-3 script was lost when the chat was compacted, so round 3 was rebuilt from the live config; the rebuild scores a bit lower than the recorded round 3 (81.5% / 39.9% vs 82.8% / 51.1% at 11 s), so read the **change**, not the absolute numbers:
+
+| Patience | Change | 60 s | 2 min | 5 min |
+|---|---|---|---|---|
+| 7 s | round 3 -> + rings -> + quick quests | 51.3 -> 61.0 -> 61.0% | 36.2 -> 40.0 -> 40.0% | 12.9 -> 13.1 -> 15.6% |
+| 11 s | round 3 -> + rings -> + quick quests | 81.5 -> 86.0 -> 86.0% | 70.6 -> 73.2 -> 73.2% | 39.9 -> 40.2 -> 45.4% |
+| 16 s | round 3 -> + rings -> + quick quests | 94.7 -> 95.7 -> 95.7% | 89.2 -> 89.8 -> 89.8% | 68.1 -> 68.1 -> 73.6% |
+
+Applied to the recorded round 3, the median kid is now about **87% at 1 min and about 56% at 5 min** (was 83% / 51%). Rings help the first trek (minute 1-2); quick quests help the grind (minute 3-5). The biggest quit point left is still the repeat "eat N" quest as a Barracuda in the Open Sea. The real check is the onboarding funnel (`MB_Funnel`) after the owner's playtest.
