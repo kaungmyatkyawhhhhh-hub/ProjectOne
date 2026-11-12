@@ -1,0 +1,23 @@
+# 12 Nov 23:40: HSE9 = the same Megalodon re-drawn by ChatGPT with the mouth CLOSED (owner: 'u need to remodel him, not reposition his jaw').
+# Megalodon on FishKit v3 (12 Nov evening): the approved HSE Megalodon sheet, rebuilt with every v3 fix (bridged outline,
+# exact eye/brow placement, fin atlas + crisp tips, mouth wall + lip curves from the sheet, pectorals from the top view,
+# no stalk ring). Keeps the intimidating look: angry lid, glowing cyan eye, scars and glow lines are the sheet's own paint.
+C=dict(dir='megah9', length=4.8831, open_r=4, open_r_top=4, env_px=150, body_x0_px=330, top_x0_px=240, front_box=(1056,605,1400,840),
+  bridge_top=[(435,515,2),(600,690,2),(770,1215,4)], bridge_bot=[(420,545,2),(725,1005,3)], cap_px=70, stalk_env=False, lip_pad=2, mouth_wall=1, jaw_FN=2.1,
+  env_top=[(435,515),(600,690),(770,1215)], env_bot=[(420,545),(725,1005)],
+  tw_fill=1, tw_interp_ranges=[(420,545),(760,1140)], tw_bulge=0.04, HS=1.0, WY=0.9, FN=2.1, taper_start=0.5, taper=0.0, back_amt=0.05, fin_step=10, fin_grid=10,
+  palette=dict(back=(35,70,115), belly=(185,205,230)), belly_class='belly', colour_mode='sample', sample_blur=1.5, sample_mix=0.97,
+  ignore=dict(tooth=(228,230,238),mouth=(95,24,44),mouth2=(131,60,100),mouth3=(42,10,21),gum=(205,120,140)), ignore_tol=25,
+  ignore_circles=[], eye_ignore_k=0, fill_blur=7, ignore_polys=[[(1000,296),(830,300),(752,398),(748,442),(1000,440)]],
+  ignore_circles_front=[(1156,705,34),(1301,705,34)], ignore_boxes=[], ignore_boxes_front=[],
+  top_w=0.9, front_w=0.0, edge_px=8, top_inset_px=24, exact_place=1, fin_tips=1, fin_atlas=1, fin_follow_exact=1,
+  back_tint=(10,20,45), fin_edge=(20,35,60), fin_root=(40,75,120), fin_t=8, mouth_col=(55,14,28), brow_col=(30,60,100),
+  look_fwd=0.25, lid=(-0.6,0.15), lid_col=(28,55,95), eye_dome=0.07, eye=dict(x_px=1316, y_px=215, r_px=27, fwd_deg=12), orb_r=0.8, tip_blur=5, eye_style='orb',
+  iris_top=(0,150,205), iris_bot=(190,255,255),
+  brows=[],
+  mouth=dict(corner_px=1225, corner_row=249, front_px=1428, front_up_row=276, front_lo_row=277, jaw_front_px=1420,
+    up_pts=[(1225,249),(1245,253),(1265,258),(1300,266),(1340,274),(1380,278),(1405,278),(1426,276)],
+    lo_pts=[(1225,249),(1245,254),(1265,259),(1300,267),(1340,275),(1380,279),(1405,279),(1424,277)],
+    wall_back_px=10, blend_px=80, jaw_w=0.84, inner_fwd_px=-10, n_up=8, n_lo=6, tooth_px=24, lo_tooth_k=0.7, tooth_fit=0, tooth_inset=0.97, tooth_w=0.45, tooth_start=0.12, tooth_inset_lo=0.9,
+    jaw_back_px=110, round_k=1.8, snout_frac=0.12, snout_cap_px=30, round_from=0.8),
+  skip_comp_boxes=[(730,300,1010,505)], pect_top=dict(box=(515,518,725,665), droop=50, z_frac=0.55), fin_min_px=500, scale_px=12, NR=44, NA=32)
