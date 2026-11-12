@@ -119,3 +119,22 @@ Sim (`r4.py`, 2,000 kids each). The round-3 script was lost when the chat was co
 | 16 s | round 3 -> + rings -> + quick quests | 94.7 -> 95.7 -> 95.7% | 89.2 -> 89.8 -> 89.8% | 68.1 -> 68.1 -> 73.6% |
 
 Applied to the recorded round 3, the median kid is now about **87% at 1 min and about 56% at 5 min** (was 83% / 51%). Rings help the first trek (minute 1-2); quick quests help the grind (minute 3-5). The biggest quit point left is still the repeat "eat N" quest as a Barracuda in the Open Sea. The real check is the onboarding funnel (`MB_Funnel`) after the owner's playtest.
+
+## 13 Nov 00:40 - owner: "do all 3 of them" -> round 5 (Gold Rush, quick quests sooner, sims re-run)
+Built (in Studio, not published):
+- **GOLD RUSH** (research: Hungry Shark World's Gold Rush, vault "Notes - Core design and pacing": the genre's most proven "feel powerful" moment). From the Piranha up every bite fills a meter at the bottom centre (an Open Sea bite counts 2, a golden fish fills it). 30 = full -> 8 s of **x3 EXP**, fish up to **35 % bigger** turn green and can be eaten, and **predators can't catch you** (NPC predators only; PvP unchanged). Config `Fish.Grind.Rush*`. Server `MB_FishServer` (meter, x3, reach), `MB_PredatorServer` (canEat false while rushing), client `MB_FishClient` (reach), `MB_GrindFx` (meter UI with star icon, gold fill, shine sweep when 75 % full; on rush: toast, gold sea tint, gold outline on your shark, draining bar). Own sound `GoldRush` = 108750862318882 (our synth, vault `MEGA BITE\Audio\goldrush\rush.py`, Approved).
+- **Quick quests sooner**: a new chain quest **"Get a COMBO x5"** right after "Eat 10 fish" (stat `Combo5s`), a chain quest **"Fill the meter: start a GOLD RUSH"** after "Grow into a BARRACUDA", and EVERY repeat cycle's eat slot is now a quick quest (rotating COMBO x10 / SHINY / FRENZY / GOLD RUSH). Checked in Play: Eat 5 -> Eat 10 -> COMBO x5 -> Find 3 kinds; repeats r1..r7 rotate correctly. Gold Rush checked in Play: meter fills from bites, rush started, x3 chip and toast showed (gold outline only: a gold fill over the blue shark read as green).
+- Backups: `GameConfig_preRush_13Nov`, `MB_FishServer_preRush_13Nov`, `MB_PredatorServer_preRush_13Nov`, `MB_FishClient_preRush_13Nov`, `MB_QuestServer_preRush_13Nov`, `MB_GrindFx_preRush_13Nov`, `MB_Sounds_preRush_13Nov`. `MB_FreshPlayer` back to false.
+
+Impatient-kid sim (`r5.py`, rebuilt baseline as in round 4, so read the change):
+
+| Patience | Version | 60 s | 2 min | 3 min | 5 min |
+|---|---|---|---|---|---|
+| 11 s | round 4 | 86.0% | 73.2% | 63.4% | 45.4% |
+| 11 s | + GOLD RUSH | 86.0% | 75.7% | 66.6% | 51.0% |
+| 11 s | + quick quest every other cycle from the 1st | 86.0% | 78.5% | 69.2% | 49.2% |
+| 11 s | **live: + COMBO x5 / GOLD RUSH in the chain + quick quest EVERY cycle** | **85.5%** | **78.4%** | **71.1%** | **55.9%** |
+| 7 s | live | 60.6% | 48.2% | 38.4% | 23.7% |
+| 16 s | live | 95.5% | 92.8% | 88.9% | 80.2% |
+
+(The last rows use 3,000 kids and another seed, so 60 s moves by noise.) Applied to the recorded numbers: the median kid is about **87 % at 1 min and about 65 % at 5 min** (round 4: 56 %). The biggest quit point left is the very first "Eat 5 fish" for the most impatient kids (7 s), and the repeat "Eat N fish in the OPEN SEA" as a Reef Shark.

@@ -21,7 +21,7 @@ LIVE = dict(
     open_pointer=False,                      # an arrow toward the Open Sea during the "Swim out to the OPEN SEA" quest
     quest_reward_mult=1.0, first_evo_exp=25, welcome_school_size=6, piranha_arrows=False,
     open_arrows=False, predator_rate=1/45, practice_predator=False, openeat_goal=15,
-    shiny_rate=0.0, shiny_mult=5, frenzy_every=0, frenzy_len=15, frenzy_fish=14, combo_every=0,
+    shiny_rate=0.0, shiny_mult=5, trek_rings=False, quest_variety=False, frenzy_every=0, frenzy_len=15, frenzy_fish=14, combo_every=0,
 )
 
 def lognorm(rng, med, s): return med * math.exp(rng.gauss(0, s))
@@ -38,7 +38,8 @@ class Kid:
         k.frenzy_next = P['frenzy_every'] if P['frenzy_every'] else 1e9
         k.in_open = False
         k.escaped = 0
-        q = list(P['quests']); q[5] = ('openeat', P['openeat_goal'], q[5][2]); k.P = dict(P, quests=q)
+        q = list(P['quests']); oi = [x[0] for x in q].index('openeat'); q[oi] = ('openeat', P['openeat_goal'], q[oi][2]); k.P = dict(P, quests=q)
+        k.rush_meter = 0; k.rush_until = -1; k.rushes = 0; k.combo5 = 0
 
     def reward(k, kind, amt):
         k.bored = max(0.0, k.bored - amt)
@@ -54,6 +55,8 @@ class Kid:
         prev = k.P['evo_exp'][k.evo - 1]
         if k.evo < len(k.P['evo_exp']) and (k.exp - prev) / max(1, nxt - prev) > 0.7: f *= 0.7
         if k.t - k.last_new > 25: f *= 1.3
+        if k.P.get('gold_rush') and k.evo >= 2 and k.rush_meter >= 0.75 * k.P['rush_need']: f *= 0.8
+        if getattr(k, 'quick_done', None) and k.t >= k.quick_done and k.quit is None: self_q = k.check_quest()
         k.bored += f * dt
         k.dead += dt; k.max_dead = max(k.max_dead, k.dead) if k.t < 60 else k.max_dead
         # golden fish announcement
@@ -79,14 +82,19 @@ class Kid:
             if k.q < len(P['quests']): kind, goal, rew = P['quests'][k.q]
             else:
                 e = k.evo; i = (k.q - len(P['quests'])) % 3
-                kind, goal, rew = [('eat', P.get('rep_eat_base', 15) + P.get('rep_eat_step', 5) * e, 6 * e * e), ('openeat', P.get('rep_open_base', 10) + P.get('rep_eat_step', 5) * e, 5 * e * e), ('escape', 2, 10 * e * e)][i]
+                if P.get('quest_variety') and i == 0 and (P.get('quick_all') or ((k.q - len(P['quests'])) // 3) % 2 == (0 if P.get('quick_first') else 1)):
+                    kind, goal, rew = ('quick', 1, 6 * e * e)
+                else:
+                  kind, goal, rew = [('eat', P.get('rep_eat_base', 15) + P.get('rep_eat_step', 5) * e, 6 * e * e), ('openeat', P.get('rep_open_base', 10) + P.get('rep_eat_step', 5) * e, 5 * e * e), ('escape', 2, 10 * e * e)][i]
             done = (kind == 'eat' and k.eaten - k.qbase >= goal) or (kind == 'index' and len(k.species) >= goal) or \
-                   (kind == 'evo' and k.evo >= goal) or (kind == 'open' and k.in_open) or (kind == 'openeat' and k.openeaten - k.qbase >= goal) or (kind == 'escape' and k.escaped >= goal)
+                   (kind == 'evo' and k.evo >= goal) or (kind == 'open' and k.in_open) or (kind == 'openeat' and k.openeaten - k.qbase >= goal) or (kind == 'escape' and k.escaped >= goal) or (kind == 'quick' and k.t >= getattr(k, 'quick_done', 1e9)) or (kind == 'combo5' and k.combo5 >= 1) or (kind == 'rush' and k.rushes >= 1)
             if not done: return
             k.q += 1
             nk = P['quests'][k.q][0] if k.q < len(P['quests']) else ['eat', 'openeat', 'escape'][(k.q - len(P['quests'])) % 3]
             k.qbase = k.eaten if nk == 'eat' else (k.openeaten if nk == 'openeat' else k.qbase)
             if nk == 'escape': k.escaped = 0
+            if P.get('quest_variety') and k.q >= len(P['quests']) and (k.q - len(P['quests'])) % 3 == 0 and (P.get('quick_all') or ((k.q - len(P['quests'])) // 3) % 2 == (0 if P.get('quick_first') else 1)):
+                k.quick_done = k.t + k.rng.uniform(12, 30)
             k.reward('quest', 6)
             k.exp += int(rew * P['quest_reward_mult'])
             while k.evo < len(P['evo_exp']) and k.exp >= P['evo_exp'][k.evo]:
@@ -115,9 +123,16 @@ class Kid:
                 if len(k.species) % k.P['index_page_every'] == 0:
                     k.reward('index page', 5); k.exp += k.P['index_page_reward']
             mult = (k.P['open_mult'] if open_ else 1) * (2 if k.t < getattr(k, 'frenzy_until', -1) else 1)
+            if k.P.get('gold_rush') and k.evo >= 2:
+                if k.t < k.rush_until: mult *= k.P['rush_mult']
+                else:
+                    k.rush_meter += 2 if open_ else 1
+                    if k.rush_meter >= k.P['rush_need']:
+                        k.rush_meter = 0; k.rush_until = k.t + k.P['rush_time']; k.rushes += 1; k.reward('GOLD RUSH', 8)
             if k.P['shiny_rate'] and k.rng.random() < k.P['shiny_rate']:
                 k.reward('SHINY!', 7); mult *= k.P['shiny_mult']
             combo += 1
+            if combo % 5 == 0: k.combo5 += 1
             if k.P['combo_every'] and combo % k.P['combo_every'] == 0: k.reward('combo', 3); k.exp += combo // k.P['combo_every']
             k.gain(exp * mult)
         return True
@@ -156,7 +171,14 @@ class Kid:
             if quest == 'open' and not k.in_open:
                 d = rng.uniform(*P['open_travel'])
                 eff = 0.85 if P['open_pointer'] else rng.uniform(0.35, 0.7)   # no pointer: wanders by the minimap
-                if not k.wait(d / (P['speed'] * k.skill * eff), 'guided' if P['open_pointer'] else 'lost'): break
+                tt = d / (P['speed'] * k.skill * eff)
+                if P.get('trek_rings'):   # bubble rings along the current: one every ~1.5 s, each a ting + 1 EXP
+                    ok = True
+                    while tt > 0 and ok:
+                        st = min(1.5, tt); ok = k.wait(st, 'chase'); tt -= st
+                        if ok: k.reward('ring', 1.6); k.exp += 1
+                    if not ok: break
+                elif not k.wait(tt, 'guided' if P['open_pointer'] else 'lost'): break
                 k.in_open = True; k.check_quest(); k.reward('zone', 6)
                 continue
             if k.in_open:
