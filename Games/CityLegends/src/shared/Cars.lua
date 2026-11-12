@@ -187,7 +187,7 @@ local list: { CarSpec } = {
 	-- owner (2026-10-22): the 5 Series and E Series ladders; no models of their own yet (the M5s
 	-- share the G30 5 Series body, the E63 S the E-Class body, which is an E63 S model)
 	{ Id = "bnw_m5_f10", Name = "Bavarica Werkz F10", Class = "Sedan", Tier = "Mid", TopSpeed = 190, ZeroToSixty = 4.2, Handling = 0.74, Price = 35000, PriceSource = "used", StatPrice = 145000, Color = Color3.fromRGB(26, 44, 82), Order = 80, Model = "bnw_540i" },
-	{ Id = "bnw_m5_f90", Name = "Bavarica Werkz F90", Class = "Sedan", Tier = "Mid", TopSpeed = 190, ZeroToSixty = 3.1, Handling = 0.79, Price = 67000, PriceSource = "used", StatPrice = 165000, Color = Color3.fromRGB(88, 92, 98), Order = 81, Model = "bnw_540i" },
+	{ Id = "bnw_m5_f90", Name = "Bavarica Werkz F90", Class = "Sedan", Tier = "Mid", TopSpeed = 190, ZeroToSixty = 2.9, Handling = 0.79, Price = 67000, PriceSource = "used", StatPrice = 165000, Color = Color3.fromRGB(88, 92, 98), Order = 81 }, -- (its own model since 2026-11-10: the 2022 one; it used bnw_540i's)
 	{ Id = "bentz_e63s", Name = "Tri-Star Silber W213 V8 S", Class = "Sedan", Tier = "Mid", TopSpeed = 186, ZeroToSixty = 3.3, Handling = 0.76, Price = 67500, PriceSource = "used", StatPrice = 175000, Color = Color3.fromRGB(20, 21, 24), Order = 82, Model = "bentz_e400" },
 	-- owner (2026-11-03): the A45 S hot hatch, the small fast Tri-Star Silber in place of the CLA 45; a
 	-- starter-pick car. Pending until the owner imports its model (then take Pending off)

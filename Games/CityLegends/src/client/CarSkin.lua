@@ -60,6 +60,7 @@ CarSkin.CLUSTER_STYLE = {
 	bnw_m5_e60 = "LiveE60", -- the 2009 model's own dials, live (2026-11-10)
 	bentlee_bentayga = "LiveBentayga", -- the 2018 V8 model (2026-11-10), from the owner's photo
 	nisun_gtr = "LiveGTR", -- the 2013 model's own cluster, live (2026-11-10)
+	bnw_m5_f90 = "LiveG20", -- the 2022 model has no cluster picture: the G20 Sport's live cluster (owner, 2026-11-10)
 	mclaran_12c = "Live12C", -- from the owner's photo
 	bentz_sls = "LiveSLS", -- from the owner's photo
 	ferrara_599 = "LiveF141", -- from the owner's photo
@@ -154,6 +155,7 @@ CarSkin.CLUSTER_RECT = {
 	audy_r8_4s = { at = Vector3.new(-0.0003, 0.0296, -0.2202), face = Vector3.new(-0.0007, 0.1175, 0.9931), w = 0.29, h = 0.1051 }, -- on the model's own screen (tools/lambo/window_r8g2.png)
 	bnw_m5_e60 = { at = Vector3.new(-0.0034, 0.0360, -0.2591), face = Vector3.new(0, 0.1369, 0.9906), w = 0.286, h = 0.122 }, -- the model's hood opening (tools/lambo/window_e60.png)
 	bentlee_bentayga = { at = Vector3.new(-0.0001, -0.0091, -0.2632), face = Vector3.new(0, 0.4672, 0.8841), w = 0.3168, h = 0.1327 }, -- in the model's wood hood, over both dials (tools/lambo/window_bentayga.png)
+	bnw_m5_f90 = { at = Vector3.new(0.0006, 0.0059, -0.2445), face = Vector3.new(0, 0.349, 0.9371), w = 0.3409, h = 0.1267 }, -- on the 2022 model's own screen (341 x 132 mm, the hood hides the corners; the G20 picture's shape, 4 mm up)
 	nisun_gtr = { at = Vector3.new(0.0017, 0.0253, -0.2084), face = Vector3.new(-0.002, 0.2507, 0.9681), w = 0.2597, h = 0.1202 }, -- on the model's own cluster quad (the 2013 model, 2026-11-10)
 	audy_r8_lw = { at = Vector3.new(-0.0053, 0.0373, -0.2128), face = Vector3.new(0, 0.32, 0.9474), w = 0.3921, h = 0.1456 }, -- the same pods (its steering pieces' box sits 2 cm deeper: dials found by their picture in both models)
 	bentz_sl65bs = { at = Vector3.new(0.022, 0.0715, -0.2433), face = Vector3.new(0, 0.2, 0.98), w = 0.234, h = 0.106 }, -- in the two bowls
@@ -294,7 +296,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -413,7 +415,7 @@ CarSkin.STEER_MODEL = {
 	-- BMW
 	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", bnw_m4_f82 = "BMWM",
 	bnw_m6_v10 = "BMWM", bnw_m8gc = "BMWM", bnw_x6 = "BMWM", bnw_x7 = "BMWM", bnw_750li = "BMWM",
-	bnw_m5_f10 = "BMWM", bnw_m5_f90 = "BMWM",
+	bnw_m5_f10 = "BMWM", -- (bnw_m5_f90 keeps its 2022 model's own wheel)
 	-- Mercedes
 	bentz_cla45 = "AMGFlat", bentz_cls63s = "AMGFlat", bentz_gle53 = "AMGFlat", bentz_g63 = "AMGFlat", brabos_g63 = "AMGFlat",
 	bentz_e63s = "AMGFlat", bentz_e400 = "AMGFlat",

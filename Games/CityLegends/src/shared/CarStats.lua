@@ -67,7 +67,7 @@ local KERB: { [string]: number } = {
 	bentz_gls = 2500, bentz_s680 = 2250, lambrini_countach = 1450, toyoka_chaser = 1450, bentz_190e = 1230,
 	bentz_s65_w221 = 2250, maseroti_levante = 2100, lexis_lc500 = 1970, astin_dbx = 2250, ferrara_california = 1735,
 	bugotti_veyron = 1890, bugotti_veyron_sport = 1838, bugotti_veyron_top = 1990, bugotti_chiron = 1995, bugotti_chiron_pursport = 1945,
-	bugotti_chiron_supersport = 1990, bnw_m5_f10 = 1870, bnw_m5_f90 = 1855, bentz_e63s = 1880,
+	bugotti_chiron_supersport = 1990, bnw_m5_f10 = 1870, bnw_m5_f90 = 1825, bentz_e63s = 1880,
 	bentz_a45s = 1635, dearb_focus_rs = 1530,
 }
 -- (2026-11-03, the classes: the PI reads power-to-weight, owner: "from real performance") the real
@@ -89,7 +89,7 @@ local POWER: { [string]: number } = {
 	lambrini_svj63 = 770, lambrini_lp640 = 640, bentz_gls = 550, bentz_s680 = 621, lambrini_countach = 375,
 	ferrara_california = 453, bugotti_veyron = 1001, bugotti_veyron_sport = 1200, bugotti_veyron_top = 1200,
 	bugotti_chiron = 1500, bugotti_chiron_pursport = 1500, bugotti_chiron_supersport = 1600,
-	bnw_m5_f10 = 560, bnw_m5_f90 = 600, bentz_e63s = 603, bentz_a45s = 416, dearb_focus_rs = 350,
+	bnw_m5_f10 = 560, bnw_m5_f90 = 627, bentz_e63s = 603, bentz_a45s = 416, dearb_focus_rs = 350,
 	-- the retired cars
 	suzaki_swift = 90, toyoka_belta = 106, toyoka_crown = 226, byt_seal = 201, mazdo_rx8 = 231,
 	bentz_e300 = 255, bnw_530i = 248, bnw_330i_g20 = 255, bentz_cla45 = 416, chevo_c6 = 430,
