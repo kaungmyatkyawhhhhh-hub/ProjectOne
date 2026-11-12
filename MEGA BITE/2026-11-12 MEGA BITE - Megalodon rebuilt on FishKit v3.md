@@ -55,3 +55,10 @@ Owner sent a realistic megalodon with its mouth shut (`Art\Megalodon_hse7\owner_
 - Model **113636716257390** (Approved), mesh 109940051624810, texture 80910390031550 (skins unchanged). Clips: Bite peaks 0.8 rad, TidalRoar +0.43 rad ramped.
 - Checked in Play (side close-up): shut, small teeth along the mouth line, bite still opens. Backup of HSE6: ServerStorage.MB_Megalodon_hse6_backup_12Nov.
 - Trade-off: the teeth are also 60% size when the mouth opens.
+
+## 12 Nov, 23:15: HSE8, readable from the FRONT
+Owner (screenshot from the front): "its so bad from the front". With HSE7 the front showed only a pale bowl: the lower jaw closed IN FRONT of the upper teeth, so no teeth showed head-on (`Art\Megalodon_hse8\front_hse3_vs_hse7.jpg`).
+- HSE8: jaw_close `{ang:24, sy:0.78, dx:-0.18, tooth_k:0.75}`: the lower jaw narrows more and tucks BEHIND the upper teeth, so from the front a full row of teeth runs across the mouth (a closed grin), and the side view still shows teeth peeking along the lip line. Options compared in `front_options.jpg`.
+- Model **89834626735584** (Approved), mesh 125486509754060. Clips: Bite peaks 0.74 rad, TidalRoar +0.37 rad ramped. Backup of HSE7: ServerStorage.MB_Megalodon_hse7_backup_12Nov.
+- Same evening: TidalRoar sound vol 1.0 -> 5.0 (owner: "megalodon roar should be 5x louder"). Backup MB_Sounds_preRoarLoud_12Nov.
+- Note: ScriptEditorService:UpdateSourceAsync hung twice on MB_Sounds tonight (80 s timeouts, then the MCP link dropped). Setting `.Source` directly from the MCP worked.
