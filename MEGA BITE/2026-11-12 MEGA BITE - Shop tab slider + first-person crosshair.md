@@ -19,3 +19,8 @@
 - `Bus.State.firstPerson` is now published for other scripts.
 - Checked in Play: zoomed in -> LockCenter, icon hidden, "+" and hint shown; scrolled out -> Default, icon back, "+" hidden. No script errors. Not checked: ALT held, opening a window from first person, a phone.
 - Old: `ServerStorage.MB_Swim_preCrosshair_12Nov`.
+
+## 3. Fix: "when i click play i dont spawn in" (owner 14:31)
+- Not a script error. `MB_Data.Load` (session lock) found a lock left by an EARLIER Studio test that never released it (a Play session froze and was force-stopped). It waits up to 25 s for the "other server", and every retry is an UpdateAsync on the same key (about one write per 6 s per key), so in practice the shark appeared only after ~60-70 s.
+- Fix (`ServerStorage.MB_Data`, old copy `MB_Data_preStudioLock_12Nov`): in Studio, a lock whose job starts with "studio-" is taken at once. Live servers' locks (real JobIds) keep the full wait, and live servers still wait on any lock as before.
+- Checked: Play right after a stop spawns the shark in 0.7 s at the saved Evo 7 / EXP. The save was never at risk (Evo 7, EXP 7,636 in the record).
