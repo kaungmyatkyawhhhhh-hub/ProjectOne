@@ -342,3 +342,11 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - What felt bad: references for an advent calendar came from a web image search, which turned up physical calendars, AI-looking "event app" website mockups and a Coin Master grid. Owner: "those designs are old", "they look like ai generated website interfaces", "in roblox, other games cant match top modern roblox ui's", "tap reborn ui's are insane".
 - Cause: we judged modern UI from generic web images instead of from the top Roblox games in motion. We also missed that VFX, motion and sound are most of what makes those UIs feel "insane".
 - Rule: for any UI, menu, pass, calendar or reveal, the reference is the top Roblox games, watched as video (frames + sound measured), with Tap Simulator REBORN as the current bar. Never use a web image search for UI references. Always study the motion and the sound, not just the static layout. A plain grid with "CLAIMED" text (Fisch 2025) is the dated look to avoid.
+
+## Stomp Evolution v2 pass (12 Nov 2026, evening): new lessons while applying MEGA BITE's
+- **Swapping body parts mid-step tips the character over.** Anchor the HumanoidRootPart during `ReplaceBodyPartR15` + `ScaleTo`, then unanchor and `ChangeState(GettingUp)`.
+- **An armour swap takes ~2 s while meshes load.** Start the evolve cutscene first and time its flash to the swap finishing (a `FormId` attribute), not to a fixed delay.
+- **`workspace.CurrentCamera.ViewportSize` is 1x1 for a moment when a LocalScript starts.** Wait for a real size before picking a phone/PC size class (the PC HUD came up in the small-phone layout).
+- **Audio owned by the group is private to group experiences.** A user-owned place needs each sound granted to its universe (asset-permissions API, PATCH `subjectType = Universe`, action `Use`) or it stays silent.
+- **Studio's `screen_capture` can lag the client by a second or two:** to check a short timed effect (a cutscene), sample its state from a client script, don't trust a single capture.
+- **A welcome patch must be inside reach from the spawn point,** measured (spawn 2 studs too far = the first click did nothing).
