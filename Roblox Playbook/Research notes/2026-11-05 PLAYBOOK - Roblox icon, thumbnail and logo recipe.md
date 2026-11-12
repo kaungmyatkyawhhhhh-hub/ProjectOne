@@ -95,3 +95,9 @@ Saturation itself isn't the problem; too many hues is.
   - painted, cinematic details: cracks, glowing eye, energy that wraps the hero.
 - **Composition:** the hero is big and centred, with one clear shape against the background. The background supports the hero (glow, moon, silhouette) instead of competing with objects of its own.
 - **The test:** if it could pass as a raw Studio screenshot with effects stickered on, it fails. Redo the art direction, not just the colours.
+
+## Lessons 12 Nov (GYM ARC ELEMENTS storm icon + thumbnail)
+- "Copy image 2's composition EXACTLY, only the element changes" + the winner icon attached = a faithful element swap of a proven icon in ONE try. Use it for every update variant (A/B against the live winner).
+- ChatGPT comes back too bright for our grade (icon mean 0.39, corners 0.11). Fix in code, keeping the face: protect bright low-saturation pixels (face mask, blurred), then gamma ~1.2 + a radial vignette to ~0.12 at the corners on everything else. Result: mean 0.32, corners 0.02, 48% black / 12% white at 64 px, face 30x the corners.
+- The "clip > 0.97" metric counts saturated glow too: the 23x winner also measures 23%, so compare against the winner rather than a fixed 20%.
+- Logo on a cyan thumbnail: a cyan-recoloured logo melts into the lightning; the brand PINK logo pops (cyan's opposite). Keep the brand logo; darken a pocket top-left (radial, -70%) under it.
