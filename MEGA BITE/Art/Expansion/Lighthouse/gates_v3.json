@@ -1,0 +1,23 @@
+{
+ "side_iou": 0.914,
+ "top_iou": 0.601,
+ "front_iou": 0.916,
+ "open_edges": 0,
+ "tris": 7208,
+ "size_studs": [
+  212.1,
+  161.4,
+  150.1
+ ],
+ "px_per_stud": {
+  "side": 3.34,
+  "top": 3.06,
+  "front": 3.08
+ },
+ "contract_views": [
+  "side",
+  "front"
+ ],
+ "pass": true,
+ "backface_frac": 0.0
+}
