@@ -23,3 +23,13 @@ Thumbnail: bacon render + lunge thumb as style ref only; lunge with storm-skin f
 ## Upload (owner)
 - Icon: Creator Dashboard > Experience Icon **experiment** (storm vs current winner). Don't replace the winner.
 - Thumbnail: add to Thumbnails with the ELEMENTS publish (Saturday); keep the lunge thumb 2-3 days as the baseline.
+
+## Live thumbnail stats (checked 12 Nov 23:10, Home page, Nov 5-12, personalization on)
+| Thumbnail | Impressions | Qualified plays | QPTR | Session |
+|---|---|---|---|---|
+| Old bright cartoon (big vs small, "70") | 553,795 (93%) | 11,948 | **2.16%** | 9.7 min |
+| Pink lift "1,735" | 39,658 | 811 | 2.04% | 9.9 min |
+| Pink "+1" (new Nov) | 1,086 | 6 | 0.55% | 6.4 min |
+| Red/blue split (new Nov) | 681 | 3 | 0.44% | 3.7 min |
+- The two new Nov thumbs are really losing, not just unlucky: at 2.16% they'd expect ~23 and ~15 plays, they got 6 and 3.
+- Lesson: the old bright, clear "small vs huge" story still beats the dark GFX thumbs for clicks-to-play. The storm thumb is dark GFX too, so treat it as a test: swap it in for the two losers, keep the cartoon + "1,735" running.
