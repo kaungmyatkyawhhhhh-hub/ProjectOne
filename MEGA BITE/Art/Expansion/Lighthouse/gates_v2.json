@@ -1,0 +1,19 @@
+{
+ "side_iou": 0.846,
+ "top_iou": 0.794,
+ "front_iou": 0.847,
+ "open_edges": 0,
+ "tris": 18752,
+ "size_studs": [
+  214.0,
+  144.7,
+  150.6
+ ],
+ "px_per_stud": {
+  "side": 3.34,
+  "top": 3.06,
+  "front": 3.08
+ },
+ "pass": false,
+ "backface_frac": 0.0
+}
