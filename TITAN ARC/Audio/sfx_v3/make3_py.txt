@@ -1,0 +1,47 @@
+"""Stomp Evolution UI sound set v3 (13 Nov 2026, owner: "super satisfying sounds effects"). Code-made, same glass/toy family."""
+import sys; sys.argv=['x','out3']
+from kit import *
+from scipy import signal
+import numpy as np
+def lp(x,f): return signal.sosfilt(signal.butter(4,f,'lp',fs=SR,output='sos'),x).astype(np.float32)
+def bp(x,lo,hi): return signal.sosfilt(signal.butter(2,[lo,hi],'bp',fs=SR,output='sos'),x).astype(np.float32)
+def noise(L): return rng.standard_normal(T(L)).astype(np.float32)
+def env(L,a,d): t=tt(L); return (np.minimum(t/max(a,1e-4),1)*np.exp(-t/d)).astype(np.float32)
+def thud(f0,f1,L,dec,drop=0.03):
+    t=tt(L); f=f1+(f0-f1)*np.exp(-t/drop); return (np.sin(2*np.pi*np.cumsum(f)/SR)*np.exp(-t/dec)*np.minimum(t/0.002,1)).astype(np.float32)
+def bell(m,L,dec,partials=(1,2.0,3.01,4.2,5.43),seed=0):
+    t=tt(L); f0=N(m); y=np.zeros(len(t),np.float32)
+    for i,p in enumerate(partials): y+=np.sin(2*np.pi*f0*p*t+i*0.7)*np.exp(-t/(dec/(1+i*0.5)))/(1+i*0.8)
+    return (y*np.minimum(t/0.001,1)).astype(np.float32)
+def coins(L,n,seed):
+    r=np.random.default_rng(seed); y=np.zeros(T(L),np.float32)
+    for k in range(n):
+        at=r.uniform(0,L*0.6); c=bell(r.choice([96,98,100,103]),0.25,0.05)*r.uniform(0.3,0.8)
+        i=T(at); y[i:i+len(c)]+=c[:len(y)-i]
+    return y/(np.abs(y).max()+1e-9)
+# bubbly pop for presses / panels appearing
+out('UI_Pop',mix(0.25,(bubble(380,1300,0.09,0.035),0,1.0),(pluck(84,0.15,0.04,bloop=0.35),0.015,0.55),(tick(0.012,3500,9000,0.002),0,0.25)),lufs=-19,hp=250,verb=0.03)
+# soft tick for hover / number roll (played with rising pitch)
+out('UI_Tick',mix(0.06,(pluck(96,0.05,0.012,bloop=0.05,fm=0.3,bright=0.6),0,1.0)),lufs=-27,hp=800,verb=0.0,peak=-16)
+# coin count-up blip
+out('Coin_Tick',mix(0.12,(bell(100,0.12,0.03),0,1.0),(tick(0.01,6000,11000,0.002),0,0.2)),lufs=-24,hp=1500,verb=0.02,peak=-14)
+# CHA-CHING: buying an upgrade
+cash=mix(1.0,(thud(220,120,0.12,0.03),0,0.5),(tick(0.03,2500,8000,0.006),0,0.6),(coins(0.5,10,7),0.02,0.6),(bell(96,0.8,0.35),0.09,0.8),(bell(103,0.8,0.32),0.13,0.7),(sparkle(0.6,14,6000,10500,0.04,seed=8),0.12,0.35))
+out('Cash',cash,lufs=-15,hp=180,verb=0.14,room=0.35)
+# quest done fanfare
+fan=mix(1.6,(pluck(72,0.4,0.12),0,0.7),(pluck(76,0.4,0.12),0.08,0.72),(pluck(79,0.4,0.12),0.16,0.75),(pluck(84,0.5,0.15),0.24,0.8),
+    (bell(84,1.2,0.5),0.34,0.6),(bell(88,1.2,0.5),0.34,0.5),(bell(91,1.2,0.5),0.34,0.5),(sparkle(1.0,26,5000,10500,0.05,seed=21),0.32,0.45),(thud(170,90,0.2,0.06),0.33,0.5),
+    (swish(0.5,600,5000,peak=0.8,q=1.4),0.0,0.3))
+out('QuestDone',fan,lufs=-14,hp=140,verb=0.2,room=0.5)
+# progress bar step (short rising pluck)
+out('BarStep',mix(0.2,(pluck(88,0.18,0.05,bloop=0.45),0,1.0),(bubble(700,1600,0.06,0.025),0,0.35)),lufs=-23,hp=400,verb=0.04,peak=-12)
+# unlock shing (a COMING NEXT tile goes / something new opens)
+shing=mix(1.2,(swish(0.5,1500,9000,peak=0.85,q=1.8),0,0.6),(bell(91,1.0,0.45),0.12,0.8),(bell(98,1.0,0.4),0.15,0.6),(sparkle(0.8,20,6000,11000,0.05,seed=31),0.12,0.5))
+out('Unlock',shing,lufs=-15,hp=300,verb=0.2,room=0.45)
+# toast slide in
+out('ToastIn',mix(0.35,(swish(0.25,700,3200,peak=0.5,q=1.6),0,0.6),(pluck(88,0.2,0.06,bloop=0.25),0.09,0.6)),lufs=-22,hp=300,verb=0.05)
+# level up (upgrade level / growth step): whoosh up + chord
+lv=mix(1.0,(swish(0.45,400,6000,peak=0.85,q=1.5),0,0.55),(pluck(79,0.3,0.08),0.12,0.6),(pluck(84,0.3,0.08),0.18,0.65),(bell(91,0.7,0.3),0.25,0.7),(sparkle(0.6,16,5000,10000,0.045,seed=41),0.25,0.4))
+out('LevelUp',lv,lufs=-16,hp=200,verb=0.16,room=0.4)
+# window whoosh open / close
+out('Whoosh2',mix(0.4,(swish(0.35,500,4200,peak=0.6,q=1.3),0,0.9),(bubble(300,700,0.1,0.05),0.05,0.3)),lufs=-21,hp=200,verb=0.05)
