@@ -42,3 +42,13 @@
   4. the column's next tile pops in (Back 0.4 s).
 - Waits for the evolve cutscene (camOverride) and any open window (cap 20 s), queues several unlocks (6 -> 7 = Tidal Roar, then Fossilize), never plays while the save loads in (Loaded) or on evolution going down (Fossilize, Studio [ ), off with Reduced Motion.
 - Checked in Play with client-only Evo changes (server/save untouched): 1->2 Frenzy, 2->3 Torpedo (flight logged into the ability button), 3->4 Shark Sense, 4->7 two celebrations in a row; screenshot of the "UNLOCKED!" pop. No script errors.
+
+## 7. "SHARK 4 / 7" on the evolve card (owner 15:07 "ok do that"; Tap Reborn's "1 in 10" under a hatched pet)
+- `MB_HUD` celebrate(): `opts.collect = {n, total}` (passed by the evolve handler only, not Fossilize/crown cards) adds a row under "You evolved!": "SHARK n / 7" + 7 glossy pips (navy outline, gold gradient, a white catch-light). The pips appear one by one (45 ms apart, from 0.28 s), the reached ones gold; the NEW pip pops in last (1.9x -> 1, Back) with a star glint and a StarLand ting on the pentatonic ladder (higher each evolution). Megalodon: "ALL 7 SHARKS!" in gold with a text glint. The "NEW ABILITY" line moves down to make room.
+- Also fixed: the COMING NEXT tile labels (REEF SHARK, HAMMERHEAD, GREAT WHITE) were wider than the tile and ran under the padlock (looked like "I REEF SHARK0"): now TextScaled 7-11 px.
+- Checked in Play (client-only Evo): 3->4 "SHARK 4 / 7", 5->6 "SHARK 6 / 7", 6->7 "ALL 7 SHARKS!"; no errors. Old: `MB_HUD_preSharkCount_12Nov`.
+
+## 8. The 3D card keeps rocking (owner 15:22 "ok next")
+- Measured first (owner's recording, Pets window 14-25 s, 4 fps, `/tmp` card sheet): their inspect card spins edge-on to swap (ours already does) and at rest keeps ROCKING in the screen plane, about +-3 deg over ~3 s, plus a slight yaw. Ours (since 11 Nov) only tilted toward the mouse (yaw/pitch) and on PC stood almost still when the mouse did.
+- `MegaBite.HeroCard` (Shop + Index; old copy `HeroCard_preRock_12Nov`): a roll on the same spring as the tilt: sin(2.1 t) x 2.6 deg + sin(0.8 t) x 0.8 deg, minus a small lean into fast turns; on PC the idle yaw/pitch sway fades back in after the mouse has been still for 1.2 s. Off under Reduced Motion. The 3D model and the card's button proxy ride the same CFrame.
+- Checked in Play: roll swings +2.4 / -1.9 deg over ~3 s; two Shop shots show it; no errors.
