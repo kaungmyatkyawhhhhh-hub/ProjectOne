@@ -1,0 +1,32 @@
+CALIBRATION: % of friend groups with no veto on each rival
+  Arm Wrestle Sim         59.9%
+  RIVALS                  59.2%
+  Gym Star Simulator      34.8%
+  99 Nights               34.5%
+  Power Lifters           34.5%
+  Brookhaven RP           33.8%
+  DONT SPLASH             33.8%
+  Murder Mystery 2        33.2%
+  Steal a Brainrot        17.9%
+  Gym League              17.3%
+  Muscle Legends          17.2%
+  +1 Break Walls           8.5%
+  Project: Iron            1.2%
+
+version                                                                                                      agree  1st   top objections (groups of 3,000)
+G0  build v1882 today (ELEMENTS, Ruby fix, critic fixes, short intro)                                           4%   11%  fair_money 1241; phone 1223; crowd 1202
+G1  + LAG PASS: auto low-end mode on phones, stream out the far town, fewer parts/triangles, particle caps      8%   18%  fair_money 1241; crowd 1202; social 1192
+G2  + FAIR MONEY: no full-screen pack before Spurt 2, no 'worth/save %/30 min only', free daily boost, no pay-only walls   18%   33%  crowd 1202; social 1192; pvp_thrill 1160
+G3  + PLAY TOGETHER: JOIN FRIEND button, SPOT ME duo lifts (+EXP both), crew gym sessions                      35%   46%  crowd 1202; pvp_thrill 1160
+G4  + REAL PVP: arm wrestle any player (ranked, weekly board), posing show voted by players                    60%   63%  crowd 1202
+G5  + full-feeling servers: fill the fullest first, 12 slots, gym NPC regulars; Saturday launch event          60%   66%  crowd 1202
+G6  + margin on the edges: intro ~15 s / first rep in 10 s; goofy bully + funny poses                          60%   70%  crowd 1202
+G7  + launch push (MARKETING, not design): ads + creators + ELEMENTS event + code                             100%   93%  none
+final, groups that want a gym game: agree 100%  1st pick 99%
+final, groups picking from the big hits: agree 100%  1st pick 86%
+robustness (+-1): agree median 100% (worst 100%), 1st median 91%; objections that came back: []
+if the crowd stays 2/10: agree 60%, 1st 68%, top: [('crowd: "nobody plays it, it\'s dead"', 1202)]
+if the crowd stays 3/10: agree 60%, 1st 70%, top: [('crowd: "nobody plays it, it\'s dead"', 1202)]
+if the crowd stays 4/10: agree 100%, 1st 90%, top: []
+seed 5: agree 100%  1st 93%
+seed 6: agree 100%  1st 93%

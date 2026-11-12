@@ -26,8 +26,11 @@ created: 2026-11-09
 ## Used on
 - 2026-11-09 MEGA BITE: 18% → 100% agree (robust), 90% 1st pick, 8 fixes; the risk left: a small launch crowd (60%) → [[2026-11-09 MEGA BITE - Debate kids simulation]]
 
+- 2026-11-13 GYM ARC (live game, build v1882): 4% → 100% agree (robust), 93% 1st pick with 6 design fixes + a launch push; five objections tied (pay to win, lag, dead, play together, no PvP); the crowd (56 players) is the one design can't fix → [[GYM ARC/2026-11-13 GYM ARC - Debate kids simulation]]
+
 ## Learned
 - First calibration was wrong: old hit games were vetoed as "copies". Keep "original" (not a copy) apart from "new".
 - The robustness check found two fragile scores the first 100% hid (PvP thrill, players online).
 - 2026-11-11 Stomp Evolution: 9% → 100% agree (robust), 93% 1st pick; biggest fixes: first minute, hand-made look, fighting at launch; small launch crowd still 59% → [[TITAN ARC/2026-11-11 Stomp Evolution - Three kid simulations (impatient, quality nerd, debate)]]
 - Learned 11 Nov: feed the other two sims' version-A results into our starting scores (first_min, looks), so the debate starts from the plan as it really is. A score sitting exactly on a deal-breaker shows no veto but is fragile: lift it anyway.
+- Learned 13 Nov (live game): give half the groups a gym-only slate (kids who already want the genre) and half the big hits; report both. For a LIVE game, take the starting scores from real evidence (critic review, funnel, owner's like/dislike reports) and check live player counts of rivals first.
