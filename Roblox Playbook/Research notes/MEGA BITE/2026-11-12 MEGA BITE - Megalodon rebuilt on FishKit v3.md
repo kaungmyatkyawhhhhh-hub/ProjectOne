@@ -47,4 +47,4 @@ Owner on HSE5: "now he look like hes biting his lips". At 32 deg the upper teeth
 - HSE6: jaw_close `{ang:21, sy:0.9, dx:-0.02, dz:0}`; model **85790119744307** (Approved), mesh 112441266317839, texture 80910390031550 (skins unchanged).
 - Clips retuned from the original backup: Bite peaks at 0.68 rad (about the same wide open as before, from the less-shut rest) and snaps shut; TidalRoar +0.31 rad ramped.
 - Backup of HSE5: ServerStorage.MB_Megalodon_hse5_backup_12Nov.
-- Owner asked to check the web for a megalodon with its mouth closed: real white sharks rest with the mouth a little open and the upper teeth showing over the lower jaw, which is why the fully shut version read as lip-biting.
+- Owner asked to check the web for a megalodon with its mouth closed: the image search showed a few megalodon pictures, but the jaw article I read (elasmo-research.org, white shark muscles and jaw) only covers the bite in motion, not how the mouth sits at rest. Not confirmed; the grin angle was chosen by eye from the comparison renders.
