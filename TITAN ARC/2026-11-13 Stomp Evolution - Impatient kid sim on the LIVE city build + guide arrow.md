@@ -82,3 +82,13 @@ The design doc v0 already planned this ("Every stomp pays, even on bare ground";
 | + events / pads / golden + spam | **94%** | 72% |
 
 Spam alone doesn't fix the city search problem, but on top of the arrow it adds about 10 points, and with the events it's close to the goal.
+
+## Upgrades on the screen, not pads (02:33, owner: "it shouldnt be buttons but instead it should be on ur screen?")
+- The 9 step-on pads (3 trios on the main road) are out of the world, kept in `ServerStorage.OldPads_13Nov`.
+- New `StarterPlayerScripts.SE_UpgradesHUD`: three rows on the left under TALENTS (Stomp Power / Shockwave / Speed). Each row has:
+  - an icon chip and the level;
+  - a price button: the lime plate when you can afford it (it bumps once when it becomes affordable), the white plate when you can't, MAX when done.
+- New RemoteEvent `Remotes.Upgrade` (server: the same checks as the old pads + a 0.15 s debounce; the quest and toasts are unchanged).
+- Quest 3 now says "Buy an UPGRADE".
+- In the sim this is the same as "pads near wherever you are" (version F) and better: zero walking.
+- Checked in Play: buying Stomp Power took 8 coins and gave Lv 1 with the toast. Saved as v85.
