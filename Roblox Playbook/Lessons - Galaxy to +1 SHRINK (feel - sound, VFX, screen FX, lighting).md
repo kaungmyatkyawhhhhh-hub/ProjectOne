@@ -337,3 +337,8 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - No straight drums with flat horizontal rims: taper limbs and angle the rims (elbow guard up at the back, knee guard peaked at the front, plates sweeping down on the outside).
 - Never let the under-suit show at joints; plates overlap the joint.
 - Spikes and crystals sweep back and out, never straight up.
+
+## UI references = top Roblox games, watched (12 Nov, GYM ARC Advent calendar)
+- What felt bad: references for an advent calendar came from a web image search, which turned up physical calendars, AI-looking "event app" website mockups and a Coin Master grid. Owner: "those designs are old", "they look like ai generated website interfaces", "in roblox, other games cant match top modern roblox ui's", "tap reborn ui's are insane".
+- Cause: we judged modern UI from generic web images instead of from the top Roblox games in motion. We also missed that VFX, motion and sound are most of what makes those UIs feel "insane".
+- Rule: for any UI, menu, pass, calendar or reveal, the reference is the top Roblox games, watched as video (frames + sound measured), with Tap Simulator REBORN as the current bar. Never use a web image search for UI references. Always study the motion and the sound, not just the static layout. A plain grid with "CLAIMED" text (Fisch 2025) is the dated look to avoid.
