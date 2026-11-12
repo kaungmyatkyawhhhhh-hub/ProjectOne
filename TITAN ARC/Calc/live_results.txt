@@ -1,0 +1,13 @@
+IMPATIENT KID on the LIVE build 13 Nov (2,000 kids per version; the body grows in visible 4% steps)
+version                                                                                        60s  2min 3min 5min | 5m@7s 5m@16s | 1st buy 1st evo | gap min1  gap 5min | forms cards
+A  LIVE 13 Nov (city + calm pass + kid cards)                                                   90%  68%  47%  11% |   1%   36%  |  17.9s  19.7s |  17.6s   70.3s |   4   12
+B  + guide arrow: always points to the nearest NEW/bigger prop or the pad you can afford       100% 100%  97%  67% |  29%   91%  |   7.6s  18.5s |  14.8s   59.8s |   5   15
+C  + 'NEW!' smash index popup the first time each prop kind is smashed (9 kinds)               100% 100%  97%  67% |  28%   90%  |   7.5s  18.6s |  12.3s   59.0s |   5   15
+D  + playtime gifts at 1, 3, 5 min (a gift box ticks down on the HUD)                          100% 100%  97%  70% |  32%   90%  |   7.8s  18.4s |  12.3s   54.3s |   5   15
+E  + city event every ~3 min: a giant toy robot walks in, everyone stomps it (x5 mass for 20 s) 100% 100%  97%  67% |  32%   89%  |   7.5s  18.5s |  12.4s   53.7s |   5   16
+F  + upgrade pads at every crossing                                                            100% 100% 100%  73% |  36%   93%  |   5.8s  17.9s |  12.1s   51.7s |   5   16
+G  + golden props 1 in 80 (was 1 in 200)                                                       100% 100%  99%  74% |  38%   93%  |   5.8s  17.6s |  12.2s   51.4s |   5   17
+H  + a city event every ~90 s instead of 3 min                                                 100% 100%  99%  79% |  44%   94%  |   6.0s  17.6s |  12.1s   48.0s |   6   18
+
+A (live), one median kid, NEW things: 0s gift  11s new upgrade  16s card  18s quest  19s ground pound  22s evolve  22s quest  27s card  32s card  37s card  37s golden  40s evolve  54s quest  54s new upgrade  54s giant seen  78s quest  95s new upgrade  114s evolve  114s quest
+H (best), same kid: 0s gift  1s NEW smash  4s new upgrade  11s card  11s giant seen  13s quest  14s ground pound  17s evolve  17s quest  22s card  25s card  30s card  30s golden  33s evolve  41s NEW smash  46s quest  46s new upgrade  53s NEW smash  54s quest  58s NEW smash  61s playtime gift  70s evolve  70s quest  79s new upgrade  80s golden  80s event  88s quest  88s NEW smash  127s evolve  127s quest  170s event  172s quest  172s NEW smash  182s playtime gift  192s evolve  192s quest  225s quest  225s NEW smash  255s golden  258s evolve  262s event  293s golden
