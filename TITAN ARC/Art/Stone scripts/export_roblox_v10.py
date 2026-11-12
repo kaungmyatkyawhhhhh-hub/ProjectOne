@@ -21,8 +21,10 @@ for o in objs:  # apply the 0.01 scale
     o.data.transform(Matrix.Diagonal((0.01, 0.01, 0.01, 1))); o.scale = (1, 1, 1)
 # v4b: NO glow split. Each body part is ONE mesh (like a catalog bundle); the glow is an emissive mask.
 # ---- 2) three region atlases (1024 each), baked from the 2048 paint ----
-REG = {"Torso": ["UpperTorso", "LowerTorso"], "Arms": [p + n for p in ("Left", "Right") for n in ("UpperArm", "LowerArm", "Hand")],
-       "Legs": [p + n for p in ("Left", "Right") for n in ("UpperLeg", "LowerLeg", "Foot")]}
+REG = {"Torso": ["UpperTorso", "LowerTorso"]}                     # v10c: one map per limb like Korblox (5 maps, each 1024)
+for sd in ("Left", "Right"):
+    REG[sd + "Arm"] = [sd + n for n in ("UpperArm", "LowerArm")]          # hands = ROBLOX Boy meshes in game, no texels for ours
+    REG[sd + "Leg"] = [sd + n for n in ("UpperLeg", "LowerLeg", "Foot")]
 src_mat = bpy.data.materials.new("bake_src"); src_mat.use_nodes = True; nt = src_mat.node_tree; nt.nodes.clear()
 uvn = nt.nodes.new("ShaderNodeUVMap"); uvn.uv_map = "atlas"
 tc = nt.nodes.new("ShaderNodeTexImage"); tc.image = col_img; te = nt.nodes.new("ShaderNodeTexImage"); te.image = glo_img

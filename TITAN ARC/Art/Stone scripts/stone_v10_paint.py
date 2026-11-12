@@ -3,7 +3,9 @@
 # 1) build the model (stone_v3.py: the Bacon Hair avatar wearing the armour)  2) unwrap every part into one atlas  3) for every texel work out where it sits on the model
 # 4) paint it in 3D: stone colour per block, top-light, worn edges, dirt in the gaps, cracks, speckle, moss tint, glow spill
 # 5) save the colour map + glow map next to this script and put them on the model
-import bpy, bmesh, sys, os, math, time
+import bpy
+import bmesh, sys, os, math, time
+from mathutils import Vector
 import numpy as np
 HERE = os.environ.get("STONE_DIR") or r"C:\ObsidianOne\Claude+Obsidian\TITAN ARC\Art\Stone"
 LIBS = os.environ.get("STONE_LIBS") or r"C:\ObsidianOne\Claude+Obsidian\Tools\blender_pylibs"     # scipy lives here (Blender ships without it)
@@ -48,6 +50,64 @@ def _unwrap():
     bpy.ops.object.mode_set(mode='OBJECT')
 in_view3d(_unwrap)
 print("unwrapped %.1fs" % (time.time() - t0))
+
+# v10c: give the VISIBLE surfaces the texels (Korblox spends almost its whole map on what you see).
+# Each UV island is scaled by how exposed its faces are (rays cast outwards hit other armour = hidden), then everything is re-packed.
+if os.environ.get("STONE_VISPACK", "1") == "1":
+    import bmesh as _bm
+    from mathutils.bvhtree import BVHTree as _BVH
+    _allv, _allf, _off = [], [], 0
+    for o in objs:
+        mw = o.matrix_world; me = o.data
+        _allv += [mw @ v.co for v in me.vertices]; _allf += [[i + _off for i in p_.vertices] for p_ in me.polygons]; _off += len(me.vertices)
+    _tree = _BVH.FromPolygons(_allv, _allf, all_triangles=False, epsilon=0.0)
+    _dirs = [Vector((0, 0, 1)), Vector((0.6, 0, 0.8)), Vector((-0.6, 0, 0.8)), Vector((0, 0.6, 0.8)), Vector((0, -0.6, 0.8))]
+    _nis, _vsum = 0, []
+    for o in objs:
+        mw = o.matrix_world; nm = mw.to_3x3().inverted().transposed()
+        bm = _bm.new(); bm.from_mesh(o.data); bm.faces.ensure_lookup_table(); uvl = bm.loops.layers.uv.active
+        # visibility per face
+        vis = {}
+        for f in bm.faces:
+            c = mw @ f.calc_center_median(); n = (nm @ f.normal).normalized()
+            q = n.to_track_quat('Z', 'Y'); hits = 0
+            for d in _dirs:
+                dd = (q @ d).normalized(); loc, _, _, dist = _tree.ray_cast(c + n * 0.6, dd, 60.0)
+                if loc is not None: hits += 1
+            vis[f.index] = 1.0 - hits / len(_dirs)
+        # UV islands (faces joined where the shared edge has the same UVs on both sides)
+        par = list(range(len(bm.faces)))
+        def fnd(a):
+            while par[a] != a: par[a] = par[par[a]]; a = par[a]
+            return a
+        for e in bm.edges:
+            lf = e.link_faces
+            if len(lf) != 2: continue
+            f1, f2 = lf
+            def uvs(f):
+                return {l.vert.index: l[uvl].uv.copy() for l in f.loops if l.vert in e.verts}
+            u1, u2 = uvs(f1), uvs(f2)
+            if all((u1[k] - u2[k]).length < 1e-5 for k in u1): par[fnd(f1.index)] = fnd(f2.index)
+        isl = {}
+        for f in bm.faces: isl.setdefault(fnd(f.index), []).append(f)
+        for fs in isl.values():
+            ar = sum(f.calc_area() for f in fs) or 1.0
+            v = sum(vis[f.index] * f.calc_area() for f in fs) / ar
+            sc_ = 0.22 + 0.78 * v                                   # hidden islands shrink to ~1/20 of the area
+            us = [l[uvl].uv for f in fs for l in f.loops]
+            cu = sum((u.x for u in us)) / len(us); cv = sum((u.y for u in us)) / len(us)
+            for f in fs:
+                for l in f.loops:
+                    l[uvl].uv.x = cu + (l[uvl].uv.x - cu) * sc_; l[uvl].uv.y = cv + (l[uvl].uv.y - cv) * sc_
+            _nis += 1; _vsum.append(v)
+        bm.to_mesh(o.data); bm.free()
+    def _pack():
+        bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.select_all(action='SELECT')
+        try: bpy.ops.uv.pack_islands(udim_source='CLOSEST_UDIM', rotate=True, margin=0.0015, shape_method='CONCAVE')
+        except TypeError: bpy.ops.uv.pack_islands(rotate=True, margin=0.0015)
+        bpy.ops.object.mode_set(mode='OBJECT')
+    in_view3d(_pack)
+    print("vis-pack: %d islands, mean visibility %.2f, %.1fs" % (_nis, sum(_vsum) / max(len(_vsum), 1), time.time() - t0))
 
 # ---------------- gather triangles ----------------
 P, UVc, N, MATI, COMP, OBJ, NC, SM = [], [], [], [], [], [], [], []
