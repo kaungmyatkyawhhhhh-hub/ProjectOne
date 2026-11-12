@@ -32,3 +32,13 @@
 ## 5. Ability cancelled by a bite (owner 14:40: "when ability and the shark bite at the same time, the ability dont work")
 - Abilities are their clip: animation, VFX and the one sound all run from markers in it. A bite (BiteAt) restarted the body on the Bite clip (only Dart was protected) and cut the ability off, and shortened its busy time to 0.45 s.
 - `MB_Swim`: while the ability clip is still the playing clip, bites and darts leave the animation alone (eating, EatPop/Gulp and the dart's push still happen). Checked: Megalodon Tidal Roar with bites at 0.2 / 0.45 / 0.75 s still spawned its VFX at 0.4-0.7 s. Old: `MB_Swim_preAbilityGuard_12Nov`.
+
+## 6. Unlock celebration for the COMING NEXT column (owner 14:46 "tap reborn ui's are insane" -> 14:52 "ok start")
+- Correction: the reference's padlocked teaser column ALREADY existed (UI v6, 11 Nov, `MB_HUD` "COMING NEXT": next ability with its shark, Fossilize at Megalodon, the PVP Red Trench door). The owner is a Megalodon, so only the PVP tile shows for them.
+- The real gap vs Tap Reborn: reaching a feature made its tile silently vanish. Now (`MB_HUD`, old copy `MB_HUD_preUnlockFx_12Nov`) a frozen copy of the tile plays the moment:
+  1. padlock rattles (5 swings, 0.37 s);
+  2. it pops off (rises, spins, fades) with a glint ring (UIFx.BurstAt) + UIEquip chime; the grey icon fills with colour; the tile pops to 1.45x then settles at 1.2x; label "UNLOCKED!" in lime; a sheen;
+  3. after 1 s it flies (0.42 s Quad In) into the button it unlocked (Ability / Fossilize), shrinking to 0.45x; UIPop + small glint ring; that button bumps 1.3x;
+  4. the column's next tile pops in (Back 0.4 s).
+- Waits for the evolve cutscene (camOverride) and any open window (cap 20 s), queues several unlocks (6 -> 7 = Tidal Roar, then Fossilize), never plays while the save loads in (Loaded) or on evolution going down (Fossilize, Studio [ ), off with Reduced Motion.
+- Checked in Play with client-only Evo changes (server/save untouched): 1->2 Frenzy, 2->3 Torpedo (flight logged into the ability button), 3->4 Shark Sense, 4->7 two celebrations in a row; screenshot of the "UNLOCKED!" pop. No script errors.
