@@ -21,6 +21,7 @@ LIVE = dict(
     open_pointer=False,                      # an arrow toward the Open Sea during the "Swim out to the OPEN SEA" quest
     quest_reward_mult=1.0, first_evo_exp=25, welcome_school_size=6, piranha_arrows=False,
     open_arrows=False, predator_rate=1/45, practice_predator=False, openeat_goal=15,
+    shiny_rate=0.0, shiny_mult=5, frenzy_every=0, frenzy_len=15, frenzy_fish=14, combo_every=0,
 )
 
 def lognorm(rng, med, s): return med * math.exp(rng.gauss(0, s))
@@ -34,6 +35,7 @@ class Kid:
         k.skill = rng.uniform(0.75, 1.3)
         k.knows = rng.random() < 0.55          # already knows how to swim (other Roblox swim / shark games)
         k.golden_next = P['golden_first']
+        k.frenzy_next = P['frenzy_every'] if P['frenzy_every'] else 1e9
         k.in_open = False
         k.escaped = 0
         q = list(P['quests']); q[5] = ('openeat', P['openeat_goal'], q[5][2]); k.P = dict(P, quests=q)
@@ -99,6 +101,7 @@ class Kid:
 
     def eat_group(k, sp, school, exp, open_=False):
         caught = max(1, round(school * k.rng.uniform(0.55, 0.9)))
+        combo = 0
         for _ in range(caught):
             if not k.wait(k.rng.uniform(0.6, 1.5) / k.skill, 'chase'): return False
             k.eaten += 1
@@ -111,7 +114,12 @@ class Kid:
                 k.species.add(sp); k.reward('NEW fish', 7)
                 if len(k.species) % k.P['index_page_every'] == 0:
                     k.reward('index page', 5); k.exp += k.P['index_page_reward']
-            k.gain(exp * (k.P['open_mult'] if open_ else 1))
+            mult = (k.P['open_mult'] if open_ else 1) * (2 if k.t < getattr(k, 'frenzy_until', -1) else 1)
+            if k.P['shiny_rate'] and k.rng.random() < k.P['shiny_rate']:
+                k.reward('SHINY!', 7); mult *= k.P['shiny_mult']
+            combo += 1
+            if k.P['combo_every'] and combo % k.P['combo_every'] == 0: k.reward('combo', 3); k.exp += combo // k.P['combo_every']
+            k.gain(exp * mult)
         return True
 
     def pick(k, groups):
@@ -138,6 +146,12 @@ class Kid:
             if not k.eat_group('Shrimp', P['welcome_school_size'], 1): return k
         # 2) the reef loop until the Open Sea quest, then the open sea
         while k.t < 300 and k.quit is None:
+            if k.t >= k.frenzy_next:
+                k.frenzy_next = k.t + P['frenzy_every']; k.frenzy_until = k.t + P['frenzy_len']
+                k.reward('FEEDING FRENZY', 6)
+                if not k.wait(k.rng.uniform(1, 3), 'chase'): break
+                if not k.eat_group('Sardine', P['frenzy_fish'], 1, open_=k.in_open): break
+                continue
             quest = P['quests'][k.q][0] if k.q < len(P['quests']) else ['eat', 'openeat', 'escape'][(k.q - len(P['quests'])) % 3]
             if quest == 'open' and not k.in_open:
                 d = rng.uniform(*P['open_travel'])

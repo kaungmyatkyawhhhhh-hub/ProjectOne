@@ -62,3 +62,27 @@ Sensitivity (A vs B+C+D): patience 7 s: 60 s stay 5.7 % -> 27.9 %; 11 s: 18.9 % 
 | 16 s | A -> ALL | 38.2% -> 91.5% | 1.7% -> 44.6% | 1.1% -> 57.9% | |
 
 **New top quit points (median kid):** lost in the Open Sea while eating 15 there (37 %) and waiting for a predator for "DART away from a predator" (31 %). Next ideas: a predator that comes to you during that quest (a "practice" Barracuda that lunges slowly), arrows to Open Sea fish for that quest, the Eat 15 goal lowered to 10.
+
+## 13 Nov 00:45 - owner: "we need it to be 100% for all" -> round 2
+The sim now also models the repeatable quests after the chain (QuestRepeat, scaled by evolution), Reef Shark at 620 EXP, predators passing by (1 per ~45 s in the Open Sea) for the DART quest, and the golden fish.
+Built (in Studio, not published):
+- **G** `MB_GuideArrows`: a Barracuda is still guided to food while out in the Open Sea; quest "Eat 15 fish in the OPEN SEA" -> **10**.
+- **H** `MB_PredatorServer`: a player on "DART away from a predator" is sensed from **4x** as far (and chased up to 4.5x), so a predator comes to them. Backup `MB_PredatorServer_preSim_13Nov`.
+- **I** welcome: a **second** nearby school (any Minnow-size) joins the welcome school a little to the side. Checked: shrimp 6 + damsel 2 within 35 studs at 3 s.
+- **J** denser reef: Shrimp schools 10 -> **14**, Damsel 14 -> **18**.
+- **K** repeat quests shorter: eat 15+5e -> **10+3e**, Open Sea eat 10+5e -> **6+3e** (rewards unchanged).
+- **L** golden fish every **60 s** (was 120), first at **30 s** (was 40), spawning **40-70 studs from a random player** (`Golden.NearPlayer`). Checked: appeared 60 studs away at ~29 s.
+- Not built: Barracuda 200 -> 150 (the sim showed no gain).
+- Backups: `GameConfig_preSimAll_13Nov`, `MB_FishServer_preSimAll2_13Nov`, `MB_PredatorServer_preSim_13Nov`.
+
+| Patience | Version | 30 s | 60 s | 2 min | 3 min | 5 min | Barracuda in 5 min |
+|---|---|---|---|---|---|---|---|
+| 7 s | before the sim | 64.0% | 5.7% | 0% | 0% | 0% | 0% |
+| 7 s | now | 75.0% | 50.8% | 38.0% | 25.6% | 10.0% | 46.5% |
+| 11 s | before the sim | 88.3% | 18.3% | 0.3% | 0% | 0% | 0.3% |
+| 11 s | round 1 | 91.4% | 74.0% | 22.6% | 2.4% | 0.1% | 35.7% |
+| 11 s | **now** | **94.1%** | **82.3%** | **72.5%** | **57.5%** | **32.1%** | **78.9%** |
+| 16 s | before the sim | 97.2% | 38.2% | 1.8% | 0.3% | 0% | 1.3% |
+| 16 s | now | 98.7% | 95.4% | 90.3% | 80.3% | 59.5% | 93.4% |
+
+**Why not 100 %:** in this model no game reaches 100 % for every kid: a 7-second-patience kid quits before most games load, and the model has no exploring, friends, PvP or skins, so its 3-5 minute numbers are low by design. Real Roblox simulators keep about a third of new players to the next day (vault: Simulator D1 ~32 % in promoted games). The aim is "no kid quits because the GAME left them stuck" - the remaining quit points are long grinds (repeat "eat N" quests as a Barracuda/Reef Shark) and the first trek out, both of which need NEW things to do (next round), not more arrows.
