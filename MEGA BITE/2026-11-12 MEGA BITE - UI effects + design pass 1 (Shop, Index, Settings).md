@@ -61,6 +61,25 @@ Picture: `UI\MEGA_BITE_UI_pass2_12Nov.jpg`. Old scripts: `ServerStorage.MB_<name
 - Checked in Play: Settings layout and pills, the Index bar (7/8, fill 0.875), the new glint in a burst on the Shop. No script errors. Not checked: a real new fish filling the bar, a phone.
 - Note: `ContentProvider:PreloadAsync` reported "Failure" for the new glint while an ImageLabel with it loaded fine (the same unreliable result as on 12 Nov morning).
 
+## Pass 3 (12 Nov, afternoon, owner: "do the featured side banners and phone test" + "turn on the top bar ... the ui is going over the top bar, next to the roblox menu")
+Old scripts: `ServerStorage.MB_StoreUI_preSideMinis_12Nov`, `MB_StoreUI_preTopFit_12Nov`, `HeroCard_preTopFit_12Nov`, `MB_Index_prePhoneFit_12Nov`.
+- **Featured side banners:** on a narrow list (W < 760 units, which is every phone) the Lantern and Ember minis sit side by side UNDER the big banner (was: hidden). Wide screens keep them stacked on the right of the banner.
+- **Under Roblox's top bar:** the Shop now starts below Roblox's own buttons (GuiService.TopbarInset): the height is fitted to the screen minus that bar, and the title/tabs/Collection/X row and the list start just under it. The open animation now uses the same offset (it had reset the list 30 px up, under the tabs). The Index and Settings already did this.
+- **3D card fits the gap:** `HeroCard` takes `below = <top bar>`; the card is sized and centred between the bottom of the top bar and the bottom of the list (was: 70% of the screen height at 55%, which on a phone rose into the Collection bar and the X).
+- **Index line:** "Index complete! ..." ran under the FOUND bar on phones. It now stops before the bar, shrinks to fit (10-15 px) and reads "Index complete! More fish coming soon."
+- **Phone test (Studio device emulator, Play):**
+  - iPhone 17 Pro (750 x 381 pt view): HUD, Shop, Index, Settings fit; nothing under Roblox's buttons; card clear of the top bar. All fixed issues above found here.
+  - Galaxy S25 Ultra (the narrowest listed, 780 x 360): Shop fits, card clear.
+  - iPad Air (1180 x 820): Shop fits; the card is sized by the free column, so it is smaller with space around it.
+  - Desktop after the changes: card lines up with the list.
+  - Small text on phones: the mini/stat lines are about 9-10 pt at the 0.7 phone scale; readable, and Settings > UI size > Big makes it larger.
+  - The emulator was put back to "Current device".
+- Not checked: a real device, portrait, Reduced Motion.
+
+## Still open after pass 3
+1. Shop: the skin pictures always show the Reef Shark; showing the player's CURRENT shark needs 7 x 5 renders (35 images).
+2. A test on a real phone (the emulator does not show touch feel or real text sharpness).
+
 ## Still open after pass 2
 1. Shop: the skin pictures always show the Reef Shark; showing the player's CURRENT shark in each skin needs 7 x 5 renders (35 images).
 2. Shop: the featured side minis are hidden at phone width.
