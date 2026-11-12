@@ -24,3 +24,11 @@
 - Not a script error. `MB_Data.Load` (session lock) found a lock left by an EARLIER Studio test that never released it (a Play session froze and was force-stopped). It waits up to 25 s for the "other server", and every retry is an UpdateAsync on the same key (about one write per 6 s per key), so in practice the shark appeared only after ~60-70 s.
 - Fix (`ServerStorage.MB_Data`, old copy `MB_Data_preStudioLock_12Nov`): in Studio, a lock whose job starts with "studio-" is taken at once. Live servers' locks (real JobIds) keep the full wait, and live servers still wait on any lock as before.
 - Checked: Play right after a stop spawns the shark in 0.7 s at the saved Evo 7 / EXP. The save was never at risk (Evo 7, EXP 7,636 in the record).
+
+## 4. Fish outlines sometimes missing (owner 14:40)
+- `MB_FishClient` gave the outlines (F.Outlines = 18) to the nearest fish INCLUDING ones behind you, re-dealt them every 0.2 s by distance (outlines jumped between fish and blinked), and Roblox draws only ~31 Highlights at once (each pooled predator has one, PvP shields too).
+- Now: only fish on screen compete, nearest first; a fish keeps its outline while it stays chosen; up to 24 outlines, never more than 30 minus the other enabled Highlights (tracked live). Lock / "=" tags follow the same slots. Checked in Play: 13 outlined, all on screen, no errors. Old: `MB_FishClient_preOutlines_12Nov`.
+
+## 5. Ability cancelled by a bite (owner 14:40: "when ability and the shark bite at the same time, the ability dont work")
+- Abilities are their clip: animation, VFX and the one sound all run from markers in it. A bite (BiteAt) restarted the body on the Bite clip (only Dart was protected) and cut the ability off, and shortened its busy time to 0.45 s.
+- `MB_Swim`: while the ability clip is still the playing clip, bites and darts leave the animation alone (eating, EatPop/Gulp and the dart's push still happen). Checked: Megalodon Tidal Roar with bites at 0.2 / 0.45 / 0.75 s still spawned its VFX at 0.4-0.7 s. Old: `MB_Swim_preAbilityGuard_12Nov`.
