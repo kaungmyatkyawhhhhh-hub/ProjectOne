@@ -325,3 +325,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - Boots like Korblox: a shin greave that tapers into a tall ankle cup, overlapping plates down the instep, a rounded toe, and a thin sole with a stone rim. No bucket cuff and no glowing sole slab.
 - Before showing the owner a screenshot, make sure it is OUR model (place it alone or check its texture IDs). The v8 screenshot showed Korblox by mistake.
 - A texture that fails its first fetch stays failed for the Studio session: re-upload a fresh copy.
+
+## Textures that don't look plastic (12 Nov, Stone v10)
+- Korblox textures are small (about 300 px); the look is painted: cloudy mottling, a fine crack web, dark plate outlines, carved glyph rows on borders, streaked crystals. Avoid smooth fills and bright edge rims.
+- Give visible plates the texels: one map per limb and shrink hidden UV islands. Studio shows textures below 1024, so detail must be big enough to survive about 256 px.
+- Patterns projected on the dominant axis must stay off curved faces (they turn into scribbles).
+- Re-exports change the UVs: always ship the mesh and its maps together.
