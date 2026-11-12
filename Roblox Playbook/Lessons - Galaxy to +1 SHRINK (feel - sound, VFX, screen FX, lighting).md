@@ -313,3 +313,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 ## Stomp Evolution armour sets (12 Nov 2026)
 - **Felt bad:** one big signature piece on one shoulder only (boulder, blade fin, chimneys, bolt, crystal cluster): "assymmetrical", "huge". **Cause:** my design kit asked for "one big signature shoulder + one smaller". **Rule:** every armour set is symmetric; both shoulders wear the same modest pauldron; the theme goes on chest, back, forearms, belt, knees and boots. See [[2026-11-12 Stomp Evolution - Stone set v4 in Studio + corrected sheets]].
 - **Felt bad:** "9 fingers": finger columns on the front, the outer side and the back of each fist. **Rule:** a fist shows four knuckles on the front only; the sides and back are one plate; thumb on the inner side.
+
+## Hands = Roblox's own bundle hands (12 Nov, Stone v8)
+- Don't model hands. Use the ROBLOX Boy hand meshes (bundle 109: left 8650495301, right 8650495280), cloned from CreateHumanoidModelFromDescription of the bundle outfit so attachments and OriginalSize come with them. Colour them with a flat TextureID on a white part (BodyColors repaints plain colours).
+- Painted material beats noisy realism: smooth, top-lit, crisp light edge trim, few cracks.
+- TextureID on Plastic for every piece; set every BodyColors field to white.
+- InsertService:LoadAsset of a model asset returns Model > Model > parts: go one level down.
