@@ -350,3 +350,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Audio owned by the group is private to group experiences.** A user-owned place needs each sound granted to its universe (asset-permissions API, PATCH `subjectType = Universe`, action `Use`) or it stays silent.
 - **Studio's `screen_capture` can lag the client by a second or two:** to check a short timed effect (a cutscene), sample its state from a client script, don't trust a single capture.
 - **A welcome patch must be inside reach from the spawn point,** measured (spawn 2 studs too far = the first click did nothing).
+
+## An icon must show what the game IS (13 Nov, Galaxy icon v2)
+- What felt bad: the split-face icon (bacon half turned into a living galaxy). Owner: "the first icon doesnt make sense".
+- Cause: we copied the GYM ARC winner's transformation layout without checking that the transformation exists in Galaxy. In GYM ARC the player really does grow into a titan; in Galaxy he never becomes a galaxy. The grade passed, the meaning failed.
+- Fix: bacon (white, amazed) looking up at what he grew: his little rock island with a huge blazing star system rising from it (`galaxy_icon_v2_C_starsystem`).
+- Rule: before borrowing a winning composition, write the game's core loop in one line ("tiny rock → huge star system → supernova"). The icon's story must be THAT loop. A layout from another game is only a template for framing, light and contrast, never for the story.
